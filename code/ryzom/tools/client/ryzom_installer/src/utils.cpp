@@ -16,6 +16,13 @@
 
 #include "stdpch.h"
 #include "utils.h"
+#include "configfile.h"
+
+#include "nel/misc/path.h"
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 QString qBytesToHumanReadable(qint64 bytes)
 {
@@ -31,10 +38,59 @@ QString qBytesToHumanReadable(qint64 bytes)
 		units.push_back(QObject::tr("PiB").toUtf8().constData());
 	}
 
-	return QString::fromUtf8(NLMISC::bytesToHumanReadable(bytes).c_str());
+	return QString::fromUtf8(NLMISC::bytesToHumanReadableUnits(bytes, units).c_str());
 }
 
-qint64 getDirectorySize(const QString &directory)
+bool isDirectoryEmpty(const QString &directory, bool recursize)
+{
+	bool res = true;
+
+	if (!directory.isEmpty())
+	{
+		QDir dir(directory);
+
+		if (dir.exists())
+		{
+			// process all files and directories excepted parent and current ones
+			QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+
+			for (int i = 0, len = list.size(); i < len; ++i)
+			{
+				QFileInfo fileInfo = list.at(i);
+
+				if (fileInfo.isDir())
+				{
+					// don't consider empty directories as files, but process it recursively if required
+					if (recursize) if (!isDirectoryEmpty(fileInfo.absoluteFilePath(), true)) return false;
+				}
+				else
+				{
+					// we found a file, directory is not empty
+					return false;
+				}
+			}
+		}
+	}
+
+	return res;
+}
+
+bool isDirectoryWritable(const QString &directory)
+{
+	// check if directory is writable by current user
+	QFile file(directory + "/writable_test_for_ryzom_installer.txt");
+
+	if (!file.open(QFile::WriteOnly)) return false;
+
+	file.close();
+
+	// remove it
+	file.remove();
+
+	return true;
+}
+
+qint64 getDirectorySize(const QString &directory, bool recursize)
 {
 	qint64 size = 0;
 
@@ -44,6 +100,7 @@ qint64 getDirectorySize(const QString &directory)
 
 		if (dir.exists())
 		{
+			// process all files and directories excepted parent and current ones
 			QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
 
 			for (int i = 0; i < list.size(); ++i)
@@ -52,7 +109,7 @@ qint64 getDirectorySize(const QString &directory)
 
 				if (fileInfo.isDir())
 				{
-					size += getDirectorySize(fileInfo.absoluteFilePath());
+					if (recursize) size += getDirectorySize(fileInfo.absoluteFilePath(), true);
 				}
 				else
 				{
@@ -95,18 +152,26 @@ wchar_t* qToWide(const QString &str)
 	return (wchar_t*)str.utf16();
 }
 
+bool shortcutExists(const QString &shortcut)
+{
+	return !shortcut.isEmpty() && NLMISC::CFile::isExists(qToUtf8(appendShortcutExtension(shortcut)));
+}
+
 #ifdef Q_OS_WIN32
 
-bool createLink(const QString &link, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir)
+bool createShortcut(const QString &shortcut, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir)
 {
+	CCOMHelper comHelper;
+
 	IShellLinkW* psl;
 
 	// Get a pointer to the IShellLink interface. It is assumed that CoInitialize
 	// has already been called.
 	HRESULT hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (LPVOID*)&psl);
+
 	if (SUCCEEDED(hres))
 	{
-		IPersistFile* ppf;
+		IPersistFile* ppf = NULL;
 
 		// Set the path to the shortcut target and add the description.
 		psl->SetPath(qToWide(QDir::toNativeSeparators(executable)));
@@ -115,26 +180,34 @@ bool createLink(const QString &link, const QString &name, const QString &executa
 		psl->SetArguments(qToWide(arguments));
 		psl->SetWorkingDirectory(qToWide(QDir::toNativeSeparators(workingDir)));
 
-		// Query IShellLink for the IPersistFile interface, used for saving the
-		// shortcut in persistent storage.
+		// Query IShellLink for the IPersistFile interface, used for saving the shortcut in persistent storage.
 		hres = psl->QueryInterface(IID_IPersistFile, (LPVOID*)&ppf);
 
 		if (SUCCEEDED(hres))
 		{
-			// Add code here to check return value from MultiByteWideChar
-			// for success.
+			QString path(shortcut + ".lnk");
 
 			// Save the link by calling IPersistFile::Save.
-			hres = ppf->Save(qToWide(QDir::toNativeSeparators(link)), TRUE);
+			hres = ppf->Save(qToWide(QDir::toNativeSeparators(path)), TRUE);
+
+			if (FAILED(hres))
+			{
+				nlwarning("Unable to create shortcut %s", Q2C(path));
+			}
+
 			ppf->Release();
 		}
+
 		psl->Release();
 	}
+
 	return SUCCEEDED(hres);
 }
 
-bool resolveLink(const QWidget &window, const QString &linkFile, QString &path)
+bool resolveShortcut(const QWidget &window, const QString &shortcut, QString &path)
 {
+	CCOMHelper comHelper;
+
 	IShellLinkW* psl;
 	WIN32_FIND_DATAW wfd;
 
@@ -156,7 +229,7 @@ bool resolveLink(const QWidget &window, const QString &linkFile, QString &path)
 			// for success.
 
 			// Load the shortcut.
-			hres = ppf->Load(qToWide(QDir::toNativeSeparators(linkFile)), STGM_READ);
+			hres = ppf->Load(qToWide(QDir::toNativeSeparators(shortcut)), STGM_READ);
 
 			if (SUCCEEDED(hres))
 			{
@@ -182,9 +255,6 @@ bool resolveLink(const QWidget &window, const QString &linkFile, QString &path)
 							// Handle success
 							path = QDir::fromNativeSeparators(qFromWide(szGotPath));
 						}
-						else
-						{
-						}
 					}
 				}
 			}
@@ -200,42 +270,363 @@ bool resolveLink(const QWidget &window, const QString &linkFile, QString &path)
 	return SUCCEEDED(hres);
 }
 
+#elif defined(NL_OS_MAC)
+
+bool createShortcut(const QString &shortcut, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir)
+{
+	QString appPath(shortcut + ".app");
+
+	// directories
+	QString contentsPath(appPath + "/Contents");
+	QString binaryPath(contentsPath + "/MacOS");
+	QString dataPath(contentsPath + "/Resources");
+
+	// files
+	QString binaryFile(binaryPath + "/shortcut.sh");
+	QString iconFile(dataPath + "/ryzom.icns");
+	QString pkgInfoFile(contentsPath + "/PkgInfo");
+	QString plistFile(contentsPath + "/Info.plist");
+
+	// silently create directories
+	QDir().mkpath(binaryPath);
+	QDir().mkpath(dataPath);
+
+	if (!isDirectoryWritable(binaryPath) || !isDirectoryWritable(dataPath)) return false;
+
+	// write icon
+	if (!writeResource(":/icons/ryzom.icns", iconFile)) return false;
+
+	// write PkgInfo
+	if (!writeResource(":/templates/PkgInfo", pkgInfoFile)) return false;
+
+	// variables
+	QMap<QString, QString> strings;
+
+	// build command
+	QString command = QString("exec \"%1\"").arg(executable);
+	if (!arguments.isEmpty()) command += " " + arguments;
+
+	strings.clear();
+	strings["COMMAND"] = command;
+
+	// write shortcut.sh
+	if (!writeResourceWithTemplates(":/templates/shortcut.sh", binaryFile, strings)) return false;
+
+	// set executable flags to .sh
+	QFile::setPermissions(binaryFile, QFile::permissions(binaryFile) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
+
+	CConfigFile *config = CConfigFile::getInstance();
+
+	// HTML escape values because they'll be in a XML file
+	strings.clear();
+	strings["NAME"] = name.toHtmlEscaped();
+	strings["COPYRIGHT"] = config->getProductPublisher().toHtmlEscaped();
+	strings["VERSION"] = QApplication::applicationVersion();
+
+	// write Info.plist
+	if (!writeResourceWithTemplates(":/templates/Info.plist", plistFile, strings)) return false;
+
+	return true;
+}
+
+bool resolveShortcut(const QWidget &window, const QString &pathLink, QString &pathObj)
+{
+	return false;
+}
+
 #else
 
-bool createLink(const QString &link, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir)
+bool createShortcut(const QString &shortcut, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir)
 {
-	// open template
-	QFile file(":/templates/template.desktop");
-
-	if (!file.open(QFile::ReadOnly)) return false;
-
-	QString data = QString::fromUtf8(file.readAll());
-
-	file.close();
-
 	// build command
 	QString command = executable;
 	if (!arguments.isEmpty()) command += " " + arguments;
 
+	// variables
+	QMap<QString, QString> strings;
+	strings["NAME"] = name;
+	strings["COMMAND"] = command;
+	strings["ICON"] = icon;
+
+	// destination file
+	QString path(shortcut + ".desktop");
+
 	// replace strings
-	data.replace("$NAME", name);
-	data.replace("$COMMAND", command);
-	data.replace("$ICON", icon);
+	if (!writeResourceWithTemplates(":/templates/template.desktop", path, strings)) return false;
+
+	// set executable flags to .desktop
+	QFile::setPermissions(path, QFile::permissions(path) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
+
+	return true;
+}
+
+bool resolveShortcut(const QWidget &window, const QString &pathLink, QString &pathObj)
+{
+	return false;
+}
+
+#endif
+
+bool removeShortcut(const QString &shortcut)
+{
+	// empty links are invalid
+	if (shortcut.isEmpty()) return false;
+
+	// append extension if missing
+	QString fullPath = appendShortcutExtension(shortcut);
+
+	// link doesn't exist
+	if (!NLMISC::CFile::isExists(qToUtf8(fullPath))) return false;
+
+	// remove it
+#if defined(Q_OS_MAC)
+	// under OS X, it's a directory
+	return QDir(fullPath).removeRecursively();
+#else
+	// a file under other platforms
+	return QFile::remove(fullPath);
+#endif
+}
+
+QString appendShortcutExtension(const QString &shortcut)
+{
+	QString extension;
+
+#if defined(Q_OS_WIN32)
+	extension = ".lnk";
+#elif defined(Q_OS_MAC)
+	extension = ".app";
+#else
+	extension = ".desktop";
+#endif
+
+	// already the good extension
+	if (shortcut.indexOf(extension) > -1) return shortcut;
+
+	return shortcut + extension;
+}
+
+QString getVersionFromExecutable(const QString &path, const QString &workingDirectory)
+{
+	// check if file exists
+	if (!QFile::exists(path))
+	{
+		nlwarning("Unable to find %s", Q2C(path));
+		return "";
+	}
+
+#ifndef Q_OS_WIN32
+	// fix executable permissions under UNIX
+	if (!QFile::setPermissions(path, QFile::permissions(path) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther))
+	{
+		nlwarning("Unable to set executable permissions to %s", Q2C(path));
+	}
+#endif
+
+	// launch executable with --version argument
+	QProcess process;
+	process.setProcessChannelMode(QProcess::MergedChannels);
+	process.setWorkingDirectory(workingDirectory);
+	process.start(path, QStringList() << "--version", QIODevice::ReadOnly);
+
+	if (!process.waitForStarted())
+	{
+		nlwarning("Unable to start %s", Q2C(path));
+		return "";
+	}
+
+	QByteArray data;
+
+	// read all output
+	while (process.waitForReadyRead(1000)) data.append(process.readAll());
+
+	if (data.isEmpty())
+	{
+		nlwarning("%s --version didn't return any data", Q2C(path));
+	}
+	else
+	{
+		QString versionString = QString::fromUtf8(data);
+
+		// parse version from output (client)
+		QRegExp reg("([A-Za-z0-1_.]+) ((DEV|FV) ([0-9.]+))");
+		if (reg.indexIn(versionString) > -1) return reg.cap(2);
+
+		// parse version from output (other tools)
+		reg.setPattern("([A-Za-z_ ]+) ([0-9.]+)");
+		if (reg.indexIn(versionString) > -1) return reg.cap(2);
+	}
+
+#ifdef Q_OS_WIN
+	// try to parse version of executable in resources
+	DWORD verHandle = NULL;
+	uint size = 0;
+	VS_FIXEDFILEINFO *verInfo = NULL;
+
+	// get size to be allocated
+	uint32_t verSize = GetFileVersionInfoSizeW(qToWide(path), &verHandle);
+	if (!verSize) return "";
+
+	// allocate buffer
+	QScopedArrayPointer<char> verData(new char[verSize]);
+
+	// get pointer on version structure
+	if (!GetFileVersionInfoW(qToWide(path), verHandle, verSize, &verData[0])) return "";
+
+	// get pointer on version
+	if (!VerQueryValueA(&verData[0], "\\", (void**)&verInfo, &size)) return "";
+
+	// check if version is right
+	if (size && verInfo && verInfo->dwSignature == 0xfeef04bd)
+	{
+		// Doesn't matter if you are on 32 bit or 64 bit,
+		// DWORD is always 32 bits, so first two revision numbers
+		// come from dwFileVersionMS, last two come from dwFileVersionLS
+		return QString("%1.%2.%3.%4")
+			.arg((verInfo->dwFileVersionMS >> 16) & 0xffff)
+			.arg((verInfo->dwFileVersionMS >> 0) & 0xffff)
+			.arg((verInfo->dwFileVersionLS >> 16) & 0xffff)
+			.arg((verInfo->dwFileVersionLS >> 0) & 0xffff);
+	}
+#endif
+
+	return "";
+}
+
+bool writeResource(const QString &resource, const QString &path)
+{
+	// all resources start with :/
+	if (!resource.startsWith(":/")) return false;
+
+	// open resource
+	QFile file(resource);
+
+	// unable to open it
+	if (!file.open(QFile::ReadOnly)) return false;
+
+	QByteArray data(file.readAll());
+
+	file.close();
 
 	// write file
-	file.setFileName(link);
+	file.setFileName(path);
 
+	// unable to write it
 	if (!file.open(QFile::WriteOnly)) return false;
 
+	// problem writting
+	if (file.write(data) != data.length()) return false;
+
+	file.close();
+
+	return true;
+}
+
+bool writeResourceWithTemplates(const QString &resource, const QString &path, const QMap<QString, QString> &strings)
+{
+	// all resources start with :/
+	if (!resource.startsWith(":/")) return false;
+
+	// open resource
+	QFile file(resource);
+
+	// unable to open it
+	if (!file.open(QFile::ReadOnly)) return false;
+
+	// data are UTF-8 text
+	QString data = QString::fromUtf8(file.readAll());
+
+	file.close();
+
+	// write file
+	file.setFileName(path);
+
+	// unable to write it
+	if (!file.open(QFile::WriteOnly)) return false;
+
+	// replace strings
+	QMap<QString, QString>::ConstIterator it = strings.begin(), iend = strings.end();
+
+	while (it != iend)
+	{
+		// replace variables with their value
+		data.replace("$" + it.key(), it.value());
+
+		++it;
+	}
+
+	// write
 	file.write(data.toUtf8());
 	file.close();
 
 	return true;
 }
 
-bool resolveLink(const QWidget &window, const QString &pathLink, QString &pathObj)
+CCOMHelper::CCOMHelper()
 {
-	return false;
+#ifdef Q_OS_WIN
+	// to fix the bug with QFileDialog::getExistingDirectory hanging under Windows
+	m_mustUninit = SUCCEEDED(CoInitialize(NULL));
+#else
+	m_mustUninit = false;
+#endif
 }
 
+CCOMHelper::~CCOMHelper()
+{
+#ifdef Q_OS_WIN
+	// only call CoUninitialize if CoInitialize succeeded
+	if (m_mustUninit) CoUninitialize();
 #endif
+}
+
+CLogHelper::CLogHelper(const QString &logPath)
+{
+	// disable nldebug messages in logs in Release
+#ifdef NL_RELEASE
+	NLMISC::DisableNLDebug = true;
+#endif
+
+	// define process name before enabling log
+	NLMISC::CLog::setProcessName("ryzom_installer");
+
+	// don't create a file for the moment, we'll create it manually
+	NLMISC::createDebug(NULL, false);
+
+	// ryzom_installer.Log displayer
+	NLMISC::CFileDisplayer *LogDisplayer = new NLMISC::CFileDisplayer(qToUtf8(logPath) + "/ryzom_installer.log", true, "DEFAULT_FD");
+	NLMISC::DebugLog->addDisplayer(LogDisplayer);
+	NLMISC::InfoLog->addDisplayer(LogDisplayer);
+	NLMISC::WarningLog->addDisplayer(LogDisplayer);
+	NLMISC::ErrorLog->addDisplayer(LogDisplayer);
+	NLMISC::AssertLog->addDisplayer(LogDisplayer);
+
+	std::string type;
+
+#ifdef NL_RELEASE
+	type = "RELEASE";
+#else
+	type = "DEBUG";
+#endif
+
+	// Display installer version
+	nlinfo("RYZOM INSTALLER VERSION: %s (%s)", Q2C(QApplication::applicationVersion()), type.c_str());
+	nlinfo("Memory: %s/%s", NLMISC::bytesToHumanReadable(NLMISC::CSystemInfo::availablePhysicalMemory()).c_str(), NLMISC::bytesToHumanReadable(NLMISC::CSystemInfo::totalPhysicalMemory()).c_str());
+	nlinfo("OS: %s", NLMISC::CSystemInfo::getOS().c_str());
+	nlinfo("Processor: %s", NLMISC::CSystemInfo::getProc().c_str());
+}
+
+CLogHelper::~CLogHelper()
+{
+	NLMISC::IDisplayer *LogDisplayer = NLMISC::ErrorLog->getDisplayer("DEFAULT_FD");
+
+	if (LogDisplayer)
+	{
+		NLMISC::DebugLog->removeDisplayer(LogDisplayer);
+		NLMISC::InfoLog->removeDisplayer(LogDisplayer);
+		NLMISC::WarningLog->removeDisplayer(LogDisplayer);
+		NLMISC::ErrorLog->removeDisplayer(LogDisplayer);
+		NLMISC::AssertLog->removeDisplayer(LogDisplayer);
+		delete LogDisplayer;
+	}
+}

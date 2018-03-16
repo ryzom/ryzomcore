@@ -25,6 +25,10 @@
 
 #include <zlib.h>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace R2
 {
 
@@ -520,7 +524,7 @@ bool CObject::getShortestName(std::string &instanceId, std::string &attrName, si
 	if (isTable() && getAttr("InstanceId"))
 	{
 		instanceId = getAttr("InstanceId")->toString();
-		attrName = "";
+		attrName.clear();
 		position = -1;
 		return true;
 	}
@@ -647,7 +651,7 @@ bool CObjectString::set(const std::string& key,  const std::string & value)
 {
 	//H_AUTO(R2_CObjectString_set)
 
-	BOMB_IF( key != "", "Try to set the a sub value of an object that does not allowed it", return false);
+	BOMB_IF(!key.empty(), "Try to set the a sub value of an object that does not allowed it", return false);
 	_Value = value;
 	return true;
 }
@@ -808,7 +812,7 @@ bool CObjectNumber::set(const std::string& key,  double value)
 {
 	//H_AUTO(R2_CObjectNumber_set)
 
-	BOMB_IF(key != "", "Try to set an element of a table on an object that is not a table", return false);
+	BOMB_IF(!key.empty(), "Try to set an element of a table on an object that is not a table", return false);
 
 	_Value = value;
 	return true;
@@ -819,7 +823,7 @@ bool CObjectNumber::set(const std::string& key,  const std::string & value)
 {
 	//H_AUTO(R2_CObjectNumber_set)
 	//XXX
-	BOMB_IF(key != "", "Try to set an element of a table on an object that is not a table", return false);
+	BOMB_IF(!key.empty(), "Try to set an element of a table on an object that is not a table", return false);
 	NLMISC::fromString(value, _Value);
 	return true;
 }
@@ -894,7 +898,7 @@ void CObjectInteger::inPlaceCopy(const CObjectInteger &src)
 }
 
 
-std::string CObjectInteger::doToString() const { return NLMISC::toString("%" NL_I64 "d", _Value); }
+std::string CObjectInteger::doToString() const { return NLMISC::toString(_Value); }
 
 void CObjectInteger::doSerialize(std::string& out,  CSerializeContext& /* context */) const
 {
@@ -907,7 +911,7 @@ bool CObjectInteger::set(const std::string& key,  sint64 value)
 {
 	//H_AUTO(R2_CObjectInteger_set)
 
-	BOMB_IF(key != "", "Try to set an element of a table on an object that is not a table", return false);
+	BOMB_IF(!key.empty(), "Try to set an element of a table on an object that is not a table", return false);
 
 	_Value = value;
 	return true;
@@ -918,7 +922,7 @@ bool CObjectInteger::set(const std::string& key,  const std::string & value)
 {
 	//H_AUTO(R2_CObjectInteger_set)
 	//XXX
-	BOMB_IF(key != "", "Try to set an element of a table on an object that is not a table", return false);
+	BOMB_IF(!key.empty(), "Try to set an element of a table on an object that is not a table", return false);
 	NLMISC::fromString(value, _Value);
 	return true;
 }

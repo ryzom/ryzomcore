@@ -530,8 +530,9 @@ void CZoneManager::release()
 void CZoneManager::initInstance()
 {
 	_NextDepositIndexUpdated = 0;
+	_NextDepositSave =  CTickEventHandler::getGameCycle() + DepositSaveInterval;
 	_SpreadUpdateLoopBeginTick = CTickEventHandler::getGameCycle();
-	
+
 	// get the loaded primitives
 	const CPrimitivesParser::TPrimitivesList & primsList = CPrimitivesParser::getInstance().getPrimitives();	
 
@@ -589,6 +590,8 @@ void CZoneManager::initInstance()
 			nlwarning("<CZoneManager constructor> Error while building the zones");
 		}
 	}
+	// Ask Bsi for saved deposit states
+	Bsi.requestFile(DepositStateFileName, new CDepositCallback());
 
 	// Don't keep ecotypes in memory, the information is already in the deposits
 	CDeposit::clearEcotypes();
@@ -1418,6 +1421,59 @@ bool CZoneManager::parsePVPSafeZones( const NLLIGO::IPrimitive * prim )
 } // CZoneManager parsePVPSafeZones
 
 //-----------------------------------------------
+// CZoneManager receivedDepositState
+//-----------------------------------------------
+void CZoneManager::receivedDepositState(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+{
+	if(fileDescription.FileName.empty())
+	{
+		nlwarning("Got no deposit state file from backup service, probably because no deposit need to be saved");
+		return;
+	}
+	NLMISC::CMemStream&	memStream = dynamic_cast<NLMISC::CMemStream&>(dataStream);
+	if (&memStream != NULL)
+	{
+		try
+		{
+			std::vector<CDepositState> states;
+			if(DepositStateUseXml)
+			{
+				CIXml xml;
+				xml.init(memStream);
+				xml.serialCont(states);
+			}
+			else
+			{
+				memStream.serialCont(states);
+			}
+			nldebug("Got %d CDepositState from backup service", states.size());
+			//If we don't want to use state, stop here
+			if(RefillDepositOnStartup) return;
+			for(int i=0; i < states.size(); i++)
+			{
+				//Find the matching deposit
+				for(int j = 0 ; j < _Deposits.size(); j++)
+				{
+					CDeposit* dep = _Deposits[j];
+					if(dep->getAlias() == states[i].alias)
+					{
+						dep->setCurrentQuantity(states[i].currentQuantity);
+						dep->setNextRespawnDay(states[i].nextRespawnDay);
+					}
+				}
+				nldebug("CDepositState for alias %d : currentQuantity=%f, nextRespawn=%d", states[i].alias, states[i].currentQuantity, states[i].nextRespawnDay);
+			}
+
+		}
+		catch (const Exception& e)
+		{
+			nlwarning("Could not parse deposit state file, reason : %s", e.what());
+		}
+	}
+}// CZoneManager receivedDepositState
+
+
+//-----------------------------------------------
 // CZoneManager getContinent
 //-----------------------------------------------
 CContinent * CZoneManager::getContinent( sint32 x, sint32 y )
@@ -2021,8 +2077,62 @@ void CZoneManager::tickUpdate()
 		_DepositNeedingAutoSpawnUpdate.erase(itDeposit);
 		itDeposit= itNext;
 	}
+	// Save the deposits
+	if(_NextDepositSave < CTickEventHandler::getGameCycle())
+	{
+		_NextDepositSave = CTickEventHandler::getGameCycle() + DepositSaveInterval;
+		saveDeposits();
+	}
 
 }// CZoneManager tickUpdate
+
+
+//-----------------------------------------------
+// CZoneManager saveDeposits
+//-----------------------------------------------
+void CZoneManager::saveDeposits()
+{
+	std::vector<CDepositState> toSave;
+	for(int i=0; i < _Deposits.size(); i++)
+	{
+		if (!_Deposits[i]->needSave()) continue;
+		CDepositState tmp = _Deposits[i]->currentState();
+		//Don't save if for some reason we couldn't get an alias for the deposit
+		if(tmp.alias == 0) continue;
+		toSave.push_back(tmp);
+	}
+	// No need to save if we have 0 states
+	if(toSave.size() == 0) return;
+	CMemStream stream;
+	try
+	{
+		if(DepositStateUseXml)
+		{
+			COXml output;
+			if (!output.init(&stream))
+			{
+				nlwarning("<CZoneManager::saveDeposits> cannot init XML output for file %s", DepositStateFileName.c_str());
+				return;
+			}
+			output.serialCont(toSave);
+			output.flush();
+		}
+		else
+		{
+			stream.serialCont(toSave);
+		}
+	}
+	catch (const Exception & e)
+	{
+		nlwarning("<CZoneManager::saveDeposits> cannot save file %s : %s", DepositStateFileName.c_str(), e.what());
+	}
+
+	nldebug("<CZoneManager::saveDeposits>: sending %d states to BIS (total of %d deposits available).", toSave.size(), _Deposits.size());
+	CBackupMsgSaveFile msg( DepositStateFileName, CBackupMsgSaveFile::SaveFile, Bsi );
+	msg.DataMsg.serialBuffer((uint8*)stream.buffer(), stream.length());
+	Bsi.sendFile( msg );
+
+}// CZoneManager saveDeposits
 
 //-----------------------------------------------
 // CZoneManager dumpWorld

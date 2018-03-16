@@ -40,6 +40,9 @@
 // Game Share
 #include "game_share/visual_slot_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ///////////
 // USING //
@@ -785,7 +788,7 @@ void CSheetManager::computeVS()
 						if(it == ProcessedItem.end())
 						{
 							uint itemNumber;
-							if(vs[visualSlot].Element.size() == 0)
+							if(vs[visualSlot].Element.empty())
 								itemNumber = 1;
 							else
 								itemNumber = vs[visualSlot].Element[vs[visualSlot].Element.size()-1].Index+1;

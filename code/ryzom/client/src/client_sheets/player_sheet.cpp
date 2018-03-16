@@ -181,7 +181,7 @@ void CPlayerSheet::buildCharac(const NLGEORGES::UFormElm &item)
 // serial :
 // Serialize player sheet into binary data file.
 //-----------------------------------------------
-void CPlayerSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPlayerSheet::serial(NLMISC::IStream &f)
 {
 	// Serialize class components.
 	f.serial(SkelFilename);

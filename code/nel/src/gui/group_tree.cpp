@@ -33,6 +33,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -265,6 +269,14 @@ namespace NLGUI
 		}
 		Children.insert(Children.begin() + index,  pNode);
 		pNode->setFather(this);
+	}
+
+	// ----------------------------------------------------------------------------
+	void CGroupTree::SNode::openAll()
+	{
+		Opened = true;
+		for (uint i = 0; i < Children.size(); ++i)
+			Children[i]->openAll();
 	}
 
 	// ----------------------------------------------------------------------------
@@ -765,7 +777,7 @@ namespace NLGUI
 			rVR.getTextureSizeFromId(id,  _XExtend,  dummy);
 		else
 			// if not found,  reset,  to avoid errors
-			_ArboXExtend= "";
+			_ArboXExtend.clear();
 	}
 
 	// ----------------------------------------------------------------------------
@@ -1078,7 +1090,9 @@ namespace NLGUI
 				}
 			}
 
-			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
+			bool toggleOne = (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown);
+			bool toggleAll = (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown);
+			if (toggleOne || toggleAll)
 			{
 				// line selection
 				if (bText)
@@ -1114,6 +1128,13 @@ namespace NLGUI
 						{
 							// open/close the node
 							changedNode->Opened = !changedNode->Opened;
+							if (toggleAll)
+							{
+								if (changedNode->Opened)
+									changedNode->openAll();
+								else
+									changedNode->closeAll();
+							}
 						}
 						// else must close all necessary nodes.
 						else

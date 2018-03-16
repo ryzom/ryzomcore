@@ -31,6 +31,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 NLMISC_REGISTER_OBJECT(CViewBase, CCtrlLink, std::string, "button_link");
 
 namespace NLGUI
@@ -55,7 +59,6 @@ namespace NLGUI
 		_TopSpace = 0;
 		_Indent = 0;
 		_FirstViewIndentView = false;
-		_BrowseGroup = NULL;
 		_TextId = 0;
 	}
 
@@ -337,7 +340,7 @@ namespace NLGUI
 			if( fromString( value, i ) )
 			{
 				_TextId = i;
-				_HardText = "";
+				_HardText.clear();
 			}
 			onTextChanged();
 			return;
@@ -864,11 +867,8 @@ namespace NLGUI
 								ctrl->setParentPosRef (Hotspot_TL);
 								ctrl->setPosRef (Hotspot_TL);
 								ctrl->setActive(true);
-								if (_BrowseGroup)
-								{
-									ctrl->setActionOnLeftClick("browse");
-									ctrl->setParamsOnLeftClick("name="+_BrowseGroup->getId()+"|url="+link.Link->Link);
-								}
+								ctrl->setActionOnLeftClick(link.Link->getActionOnLeftClick());
+								ctrl->setParamsOnLeftClick(link.Link->getParamsOnLeftClick());
 								ctrl->setScale(true);
 								addCtrl(ctrl);
 							}
@@ -1208,7 +1208,7 @@ namespace NLGUI
 		{
 			// update the list size
 			sint32 newH = _H + child->getH();
-			if (_Elements.size() > 0)
+			if (!_Elements.empty())
 				newH += _Space;
 			_H = newH;
 
@@ -1222,7 +1222,7 @@ namespace NLGUI
 		{
 			// Update the list coords
 			sint32 newW = _W + child->getW();
-			if (_Elements.size() > 0)
+			if (!_Elements.empty())
 				newW += _Space;
 			_W = newW;
 
@@ -1452,7 +1452,7 @@ namespace NLGUI
 
 	void CGroupParagraph::onTextChanged()
 	{
-		if( _Elements.size() == 0 )
+		if( _Elements.empty() )
 			return;
 
 		CElementInfo &e = _Elements[ 0 ];

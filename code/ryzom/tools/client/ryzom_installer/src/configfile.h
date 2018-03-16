@@ -18,73 +18,8 @@
 #define CONFIGFILE_H
 
 #include "operation.h"
-
-class CServer
-{
-public:
-	CServer()
-	{
-		dataCompressedSize = 0;
-		dataUncompressedSize = 0;
-	}
-
-	QString id;
-	QString name;
-	QString displayUrl;
-	QString dataDownloadUrl;
-	QString dataDownloadFilename;
-	qint64 dataCompressedSize;
-	qint64 dataUncompressedSize;
-	QString clientDownloadUrl;
-	QString clientDownloadFilename;
-	QString clientFilename;
-	QString clientFilenameOld;
-	QString configurationFilename;
-	QString installerFilename;
-	QString comments;
-
-	// helpers
-	QString getDirectory() const;
-	QString getClientFullPath() const;
-	QString getConfigurationFullPath() const;
-};
-
-extern const CServer NoServer;
-
-typedef QVector<CServer> CServers;
-
-class CProfile
-{
-public:
-	CProfile()
-	{
-		desktopShortcut = false;
-		menuShortcut = false;
-	}
-
-	QString id;
-	QString name;
-	QString server;
-	QString executable;
-	QString arguments;
-	QString comments;
-	bool desktopShortcut;
-	bool menuShortcut;
-
-	// helpers
-	QString getDirectory() const;
-	QString getClientFullPath() const;
-	QString getClientDesktopShortcutFullPath() const;
-	QString getClientMenuShortcutFullPath() const;
-
-	void createShortcuts() const;
-	void deleteShortcuts() const;
-	void updateShortcuts() const;
-};
-
-extern const CProfile NoProfile;
-
-typedef QVector<CProfile> CProfiles;
+#include "server.h"
+#include "profile.h"
 
 /**
  * Config file management and other stuff related to location of files/directories.
@@ -103,6 +38,7 @@ public:
 	bool load();
 	bool load(const QString &filename);
 	bool save() const;
+	bool remove();
 
 	static CConfigFile* getInstance();
 
@@ -118,6 +54,11 @@ public:
 
 	CProfiles getBackupProfiles() const { return m_backupProfiles; }
 	void backupProfiles();
+
+	QString getLanguage() const { return m_language; }
+
+	bool getInstallerCopied() const { return m_installerCopied; }
+	void setInstallerCopied(bool copied) { m_installerCopied = copied; }
 
 	int getProfilesCount() const;
 	CProfile getProfile(int i = -1) const;
@@ -152,10 +93,7 @@ public:
 	// default directories
 	static QString getCurrentDirectory();
 	static QString getParentDirectory();
-	static QString getApplicationDirectory();
-	static QString getOldInstallationDirectory();
 	static QString getNewInstallationDirectory();
-	static QString getOldInstallationLanguage();
 	static QString getNewInstallationLanguage();
 
 	// status of installation
@@ -166,6 +104,7 @@ public:
 	bool foundTemporaryFiles(const QString &directory) const;
 	bool shouldCreateDesktopShortcut() const;
 	bool shouldCreateMenuShortcut() const;
+	int compareInstallersVersion() const;
 
 	// installation choices
 	bool use64BitsClient() const;
@@ -174,12 +113,25 @@ public:
 	bool shouldUninstallOldClient() const;
 	void setShouldUninstallOldClient(bool on);
 
+	bool ignoreFreeDiskSpaceChecks() const;
+	void setIgnoreFreeDiskSpaceChecks(bool on);
+
+	bool uninstallingOldClient() const;
+	void setUninstallingOldClient(bool on) const;
+
+	QString getInstallerFilename() const { return m_installerFilename; }
+
 	QString expandVariables(const QString &str) const;
 
 	QString getClientArch() const;
 
-	QString getInstallerFullPath() const;
-	QString getInstallerMenuLinkFullPath() const;
+	QString getInstallerCurrentFilePath() const;
+	QString getInstallerCurrentDirPath() const;
+	QString getInstallerInstalledFilePath() const;
+	QString getInstallerInstalledDirPath() const;
+
+	QString getInstallerMenuShortcutFullPath() const;
+	QString getInstallerDesktopShortcutFullPath() const;
 
 	QStringList getInstallerRequiredFiles() const;
 
@@ -199,6 +151,7 @@ private:
 	int m_version;
 	int m_defaultServerIndex;
 	int m_defaultProfileIndex;
+	bool m_installerCopied;
 
 	CServers m_servers;
 	CProfiles m_profiles;
@@ -208,6 +161,8 @@ private:
 	QString m_srcDirectory;
 	bool m_use64BitsClient;
 	bool m_shouldUninstallOldClient;
+	bool m_ignoreFreeDiskSpaceChecks;
+	QString m_installerFilename;
 	QString m_language;
 
 	QString m_defaultConfigPath;

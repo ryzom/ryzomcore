@@ -84,7 +84,7 @@ uint ImpactSchemes [6][3] = { { 0, 1, 2 }, { 0, 2, 1 }, { 1, 0, 2 }, { 1, 2, 0 }
 // Observed impact on E (/10):     6            3            1            1            3           10
 // Note: if modifying this schemes, please change FORAGE_SOURCE_IMPACT_MODE in phrase_en.txt.
 uint SpecialNewbieImpactSchemeD = 10;
-uint16 LowDangerMappings [2] = { SpecialNewbieImpactSchemeD+1, SpecialNewbieImpactSchemeD+4 };
+uint16 LowDangerMappings [2] = {(uint16)(SpecialNewbieImpactSchemeD+1), (uint16)(SpecialNewbieImpactSchemeD+4)};
 
 sint8 ExplosionResetPeriod = 50; // 5 s
 

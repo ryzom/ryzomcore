@@ -47,6 +47,10 @@
 #define RYZOM_CLIENT_ICON "ryzom_client"
 #endif
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 std::string getUserAgent()
 {
 	return getUserAgentName() + "/" + getUserAgentVersion();

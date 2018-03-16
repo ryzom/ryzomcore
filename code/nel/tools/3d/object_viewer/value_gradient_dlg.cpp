@@ -100,7 +100,7 @@ void CValueGradientDlg::OnAddValue()
 	UpdateData();
 	++_Size;
 	_ClientInterface->modifyGradient(IValueGradientDlgClient::Add, 0);
-	m_GradientList.AddString("value");		
+	m_GradientList.AddString(_T("value"));
 	m_RemoveCtrl.EnableWindow(TRUE);
 
 	m_GradientList.SetCurSel(_Size - 1);
@@ -116,7 +116,7 @@ void CValueGradientDlg::OnInsertValue()
 	uint oldIndex = m_GradientList.GetCurSel();
 	++_Size;
 	_ClientInterface->modifyGradient(IValueGradientDlgClient::Insert, m_GradientList.GetCurSel());
-	m_GradientList.InsertString(m_GradientList.GetCurSel(), "value");		
+	m_GradientList.InsertString(m_GradientList.GetCurSel(), _T("value"));
 	m_GradientList.Invalidate();
 	m_GradientList.SetCurSel(oldIndex);
 	OnSelchangeGradientList();
@@ -185,7 +185,7 @@ BOOL CValueGradientDlg::OnInitDialog()
 	m_GradientList.InitStorage(_Size, 16);
 	for (uint k = 0; k < _Size; ++k)
 	{
-		m_GradientList.AddString("value");
+		m_GradientList.AddString(_T("value"));
 	}
 	m_RemoveCtrl.EnableWindow(_Size > _MinSize ? TRUE : FALSE);
 	m_GradientList.SetCurSel(0);

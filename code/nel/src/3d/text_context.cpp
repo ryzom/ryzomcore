@@ -19,6 +19,10 @@
 #include "nel/3d/text_context.h"
 #include "nel/3d/font_generator.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 // ------------------------------------------------------------------------------------------------
@@ -74,7 +78,7 @@ uint32 CTextContext::textPush (const char *format, ...)
 		CComputedString csTmp;
 
 		_CacheStrings.push_back (csTmp);
-		if (_CacheFreePlaces.size() == 0)
+		if (_CacheFreePlaces.empty())
 			_CacheFreePlaces.resize (1);
 		_CacheFreePlaces[0] = (uint32)_CacheStrings.size()-1;
 		_CacheNbFreePlaces = 1;
@@ -100,7 +104,7 @@ uint32 CTextContext::textPush (const ucstring &str)
 		CComputedString csTmp;
 
 		_CacheStrings.push_back (csTmp);
-		if (_CacheFreePlaces.size() == 0)
+		if (_CacheFreePlaces.empty())
 			_CacheFreePlaces.resize (1);
 		_CacheFreePlaces[0] = (uint32)_CacheStrings.size()-1;
 		_CacheNbFreePlaces = 1;

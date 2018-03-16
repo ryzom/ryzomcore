@@ -34,6 +34,14 @@ using namespace NL3D;
 
 extern UDriver	*Driver;
 
+// xml element ids
+#define MP3_PLAYER_PLAYLIST_LIST "ui:interface:playlist:content:songs:list"
+#define TEMPLATE_PLAYLIST_SONG "playlist_song"
+#define TEMPLATE_PLAYLIST_SONG_TITLE "title"
+#define TEMPLATE_PLAYLIST_SONG_DURATION "duration"
+
+static const std::string MediaPlayerDirectory("music/");
+
 CMusicPlayer MusicPlayer;
 
 // ***************************************************************************
@@ -46,26 +54,75 @@ CMusicPlayer::CMusicPlayer ()
 
 
 // ***************************************************************************
-
 void CMusicPlayer::playSongs (const std::vector<CSongs> &songs)
 {
 	_Songs = songs;
-	_CurrentSong = 0;
+
+	// reset song index if out of bounds
+	if (_CurrentSong > _Songs.size())
+		_CurrentSong = 0;
+
+	CGroupList *pList = dynamic_cast<CGroupList *>(CWidgetManager::getInstance()->getElementFromId(MP3_PLAYER_PLAYLIST_LIST));
+	if (pList)
+	{
+		pList->clearGroups();
+		pList->setDynamicDisplaySize(true);
+		for (uint i=0; i < _Songs.size(); ++i)
+		{
+			uint min = (sint32)(_Songs[i].Length / 60) % 60;
+			uint sec = (sint32)(_Songs[i].Length) % 60;
+			uint hour = _Songs[i].Length / 3600;
+			std::string duration(toString("%02d:%02d", min, sec));
+			if (hour > 0)
+				duration = toString("%02d:", hour) + duration;
+
+			vector< pair<string, string> > vParams;
+			vParams.push_back(pair<string, string>("id", "s" + toString(i)));
+			vParams.push_back(pair<string, string>("index", toString(i)));
+			CInterfaceGroup *pNew = CWidgetManager::getInstance()->getParser()->createGroupInstance(TEMPLATE_PLAYLIST_SONG, pList->getId(), vParams);
+			if (pNew)
+			{
+				CViewText *pVT = dynamic_cast<CViewText *>(pNew->getView(TEMPLATE_PLAYLIST_SONG_TITLE));
+				if (pVT)
+				{
+					ucstring title;
+					title.fromUtf8(_Songs[i].Title);
+					pVT->setText(title);
+				}
+
+				pVT = dynamic_cast<CViewText *>(pNew->getView(TEMPLATE_PLAYLIST_SONG_DURATION));
+				if (pVT)
+				{
+					pVT->setText(duration);
+				}
+
+				pNew->setParent(pList);
+				pList->addChild(pNew);
+			}
+		}
+		pList->invalidateCoords();
+	}
 
 	// If pause, stop, else play will resume
 	if (_State == Paused)
 		_State = Stopped;
-
-	play ();
 }
 
 
 // ***************************************************************************
 
-void CMusicPlayer::play ()
+void CMusicPlayer::play (sint index)
 {
 	if(!SoundMngr)
 		return;
+
+	if (index >= 0 && index < (sint)_Songs.size())
+	{
+		if (_State == Paused)
+			stop();
+
+		_CurrentSong = index;
+	}
 
 	if (!_Songs.empty())
 	{
@@ -170,7 +227,47 @@ void CMusicPlayer::update ()
 }
 
 // ***************************************************************************
+static void addFromPlaylist(const std::string &playlist, std::vector<std::string> &filenames)
+{
+	static uint8 utf8Header[] = { 0xefu, 0xbbu, 0xbfu };
 
+	// Add playlist
+	uint i;
+	// Get the path of the playlist
+	string basePlaylist = CFile::getPath (playlist);
+	FILE *file = nlfopen (playlist, "r");
+
+	bool useUtf8 = CFile::getExtension(playlist) == "m3u8";
+	if (file)
+	{
+		char line[512];
+		while (fgets (line, 512, file))
+		{
+			string lineStr = trim(std::string(line));
+
+			// id a UTF-8 BOM header is present, parse as UTF-8
+			if (!useUtf8 && lineStr.length() >= 3 && memcmp(line, utf8Header, 3) == 0)
+				useUtf8 = true;
+
+			if (!useUtf8)
+			{
+				lineStr = ucstring(line).toUtf8();
+				lineStr = trim(lineStr);
+			}
+
+			// Not a comment line
+			if (lineStr[0] != '#')
+			{
+				std::string filepath = CFile::getPath(lineStr);
+				std::string filename = CFile::getFilename(lineStr);
+				filenames.push_back (CPath::makePathAbsolute(filepath, basePlaylist)+filename);
+			}
+		}
+		fclose (file);
+	}
+}
+
+// ***************************************************************************
 class CMusicPlayerPlaySongs: public IActionHandler
 {
 public:
@@ -187,192 +284,87 @@ public:
 			// no format supported
 			if (extensions.empty()) return;
 
-#ifdef NL_OS_WINDOWS
-			// Backup the current directory
-			string currentPath = CPath::getCurrentPath ();
-
-			// Hardware mouse
-			bool wasHardware = IsMouseCursorHardware ();
-			InitMouseWithCursor (true);
-			Driver->showCursor (true);
-
 			bool oggSupported = false;
 			bool mp3Supported = false;
 
+			std::string message;
 			for(uint i = 0; i < extensions.size(); ++i)
 			{
 				if (extensions[i] == "ogg")
 				{
 					oggSupported = true;
+					message += " ogg";
 				}
 				else if (extensions[i] == "mp3")
 				{
 					mp3Supported = true;
+					message += " mp3";
 				}
 			}
+			message += " m3u m3u8";
+			nlinfo("Media player supports: '%s'", message.substr(1).c_str());
 
-			std::vector<std::string> filters;
+			// Recursive scan for files from media directory
+			vector<string> filesToProcess;
+			string newPath = CPath::standardizePath(MediaPlayerDirectory);
+			CPath::getPathContent (newPath, true, false, true, filesToProcess);
 
-			// supported formats
-			filters.push_back("All Supported Files"); // TODO: translate
+			uint i;
+			std::vector<std::string> filenames;
+			std::vector<std::string> playlists;
 
-			std::string filter;
-			if (mp3Supported) filter += "*.mp3;*.mp2;*.mp1;";
-			if (oggSupported) filter += "*.ogg;";
-			filter += "*.m3u;*.m3u8";
-
-			filters.push_back(filter);
-
-			// mp3 format
-			if (mp3Supported)
+			for (i = 0; i < filesToProcess.size(); ++i)
 			{
-				filters.push_back("MPEG Audio Files (*.mp3;*.mp2;*.mp1)");
-				filters.push_back("*.mp3;*.mp2;*.mp1");
+				std::string ext = toLower(CFile::getExtension(filesToProcess[i]));
+				if (ext == "ogg")
+				{
+					if (oggSupported)
+						filenames.push_back(filesToProcess[i]);
+				}
+				else if (ext == "mp3" || ext == "mp2" || ext == "mp1")
+				{
+					if (mp3Supported)
+						filenames.push_back(filesToProcess[i]);
+				}
+				else if (ext == "m3u" || ext == "m3u8")
+				{
+					playlists.push_back(filesToProcess[i]);
+				}
 			}
 
-			// ogg format
-			if (oggSupported)
+			// Sort songs by filename
+			sort (filenames.begin(), filenames.end());
+
+			// Add songs from playlists
+			for (i = 0; i < playlists.size(); ++i)
 			{
-				filters.push_back("Vorbis Files (*.ogg)");
-				filters.push_back("*.ogg");
+				addFromPlaylist(playlists[i], filenames);
 			}
 
-			// playlist
-			filters.push_back("Playlist Files (*.m3u;*.m3u8)");
-			filters.push_back("*.m3u;*.m3u8");
-
-			// all files
-			filters.push_back("All Files (*.*)");
-			filters.push_back("*.*");
-
-			filters.push_back("");
-
-			static wchar_t szFilter[1024] = { '\0' };
-
-			uint offset = 0;
-
-			for(uint i = 0; i < filters.size(); ++i)
+			// Build the songs array
+			std::vector<CMusicPlayer::CSongs> songs;
+			for (i=0; i<filenames.size(); i++)
 			{
-				wcscpy(szFilter + offset, utf8ToWide(filters[i]));
+				// '@' in filenames are reserved for .bnp files
+				// and sound system fails to open such file
+				if (filenames[i].find("@") != string::npos)
+				{
+					nlwarning("Ignore media file containing '@' in name: '%s'", filenames[i].c_str());
+					continue;
+				}
 
-				// move offset to string length + 1 for \0
-				offset += filters[i].length() + 1;
+				if (!CFile::fileExists(filenames[i])) {
+					nlwarning("Ignore non-existing file '%s'", filenames[i].c_str());
+					continue;
+				}
+
+				CMusicPlayer::CSongs song;
+				song.Filename = filenames[i];
+				SoundMngr->getMixer()->getSongTitle(filenames[i], song.Title, song.Length);
+				songs.push_back (song);
 			}
 
-			// Filename buffer
-			wchar_t buffer[1024];
-			buffer[0]=0;
-
-			OPENFILENAMEW ofn;
-			memset (&ofn, 0, sizeof(OPENFILENAME));
-			ofn.lStructSize = sizeof(OPENFILENAME);
-			ofn.hwndOwner = Driver ? Driver->getDisplay():NULL;
-			ofn.hInstance = HInstance;
-			ofn.lpstrFilter = szFilter;
-			ofn.nFilterIndex = 0;
-			ofn.lpstrFile = buffer;
-			ofn.nMaxFile = sizeof(buffer);
-			ofn.lpstrTitle = (wchar_t*)NLMISC::CI18N::get("uiPlaySongs").c_str();
-			ofn.Flags = OFN_OVERWRITEPROMPT|OFN_ALLOWMULTISELECT|OFN_ENABLESIZING|OFN_EXPLORER;
-
-			if (Driver)
-				Driver->beginDialogMode();
-
-			if (GetOpenFileNameW (&ofn))
-			{
-				bool useUtf8 = false;
-
-				// Skip the directory name
-				const wchar_t *bufferPtr = buffer;
-
-				// Multi filename ?
-				string path;
-				if (ofn.nFileOffset>wcslen(buffer))
-				{
-					// Backup the path and point to the next filename
-					path = wideToUtf8(buffer);
-					path += "\\";
-					bufferPtr += wcslen(bufferPtr)+1;
-				}
-
-				// Get selected files and playlists
-				std::vector<std::string> filenames;
-				std::vector<std::string> playlists;
-				while (*bufferPtr)
-				{
-					// Concat the directory name with the filename
-					std::string ext = toLower(CFile::getExtension(wideToUtf8(bufferPtr)));
-					if (ext == "m3u" || ext == "m3u8")
-					{
-						playlists.push_back (path + wideToUtf8(bufferPtr));
-					}
-					else
-					{
-						filenames.push_back (path + wideToUtf8(bufferPtr));
-					}
-
-					bufferPtr += wcslen(bufferPtr) + 1;
-				}
-
-				// Sort songs by filename
-				sort (filenames.begin(), filenames.end());
-
-				static uint8 utf8Header[] = { 0xefu, 0xbbu, 0xbfu };
-
-				// Add playlist
-				uint i;
-				for (i=0; i<playlists.size(); i++)
-				{
-					// Get the path of the playlist
-					string basePlaylist = CFile::getPath (playlists[i]);
-					FILE *file = nlfopen (playlists[i], "r");
-
-					bool useUtf8 = CFile::getExtension(playlists[i]) == "m3u8";
-
-					if (file)
-					{
-						char line[512];
-						while (fgets (line, 512, file))
-						{
-							// Not a comment line
-							string lineStr = trim(std::string(line));
-
-							// id a UTF-8 BOM header is present, parse as UTF-8
-							if (!useUtf8 && lineStr.length() >= 3 && memcmp(line, utf8Header, 3) == 0)
-								useUtf8 = true;
-
-							if (!useUtf8) lineStr = ucstring(line).toUtf8();
-
-							if (lineStr[0] != '#')
-								filenames.push_back (CPath::makePathAbsolute(lineStr, basePlaylist));
-						}
-						fclose (file);
-					}
-				}
-
-				// Build the songs array
-				std::vector<CMusicPlayer::CSongs> songs;
-				for (i=0; i<filenames.size(); i++)
-				{
-					CMusicPlayer::CSongs song;
-					song.Filename = filenames[i];
-					SoundMngr->getMixer()->getSongTitle(filenames[i], song.Title);
-					songs.push_back (song);
-				}
-
-				MusicPlayer.playSongs(songs);
-			}
-
-			if (Driver)
-				Driver->endDialogMode();
-
-			// Restore mouse
-			InitMouseWithCursor (wasHardware);
-			Driver->showCursor (wasHardware);
-
-			// Restore current path
-			CPath::setCurrentPath (currentPath.c_str());
-#endif // NL_OS_WINDOWS
+			MusicPlayer.playSongs(songs);
 		}
 		else if (Params == "previous")
 			MusicPlayer.previous();
@@ -397,6 +389,14 @@ public:
 						SoundMngr->setUserMusicVolume (value);
 					}
 				}
+			}
+
+			string song = getParam(Params, "song");
+			if (!song.empty())
+			{
+				sint index=0;
+				fromString(song, index);
+				MusicPlayer.play(index);
 			}
 		}
 	}

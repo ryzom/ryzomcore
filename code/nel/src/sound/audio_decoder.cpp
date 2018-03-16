@@ -94,7 +94,7 @@ IAudioDecoder *IAudioDecoder::createAudioDecoder(const std::string &type, NLMISC
 	}
 }
 
-bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, std::string &title)
+bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, std::string &title, float &length)
 {
 	std::string lookup = CPath::lookup(filepath, false);
 	if (lookup.empty())
@@ -111,7 +111,7 @@ bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, st
 		ifile.setCacheFileOnOpen(false); 
 		ifile.allowBNPCacheFileOnOpen(false);
 		if (ifile.open(lookup))
-			return CAudioDecoderVorbis::getInfo(&ifile, artist, title);
+			return CAudioDecoderVorbis::getInfo(&ifile, artist, title, length);
 
 		nlwarning("Unable to open: '%s'", filepath.c_str());
 	}

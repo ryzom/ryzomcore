@@ -49,7 +49,7 @@ using namespace std;
 
 NLMISC_COMMAND( forceMissionProgress,"debug command used to trigger debug commands","<user>" )
 {
-	if (args.empty() || args.size() > 3)
+	if (args.size() != 1)
 		return false;
 	CEntityId id;
 	id.fromString( args[0].c_str() );
@@ -530,7 +530,7 @@ NLMISC_COMMAND(removeMission,"Remove mission of character","<character_id> <miss
 }
 
 //-----------------------------------------------
-// removeMission
+// addMission
 //-----------------------------------------------
 NLMISC_COMMAND(addMission,"Add mission to character","<character_id> <Mission giver Alias> <mission alias>")
 {
@@ -1011,7 +1011,7 @@ NLMISC_COMMAND(getMoney, "get money of player", "<uid>")
 {
 	GET_ACTIVE_CHARACTER
 
-	string value = toString("%"NL_I64"u", c->getMoney());
+	string value = toString(c->getMoney());
 
 	log.displayNL(value.c_str());
 

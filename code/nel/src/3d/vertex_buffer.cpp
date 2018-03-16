@@ -20,8 +20,12 @@
 #include "nel/misc/vector.h"
 #include "nel/misc/fast_mem.h"
 #include "nel/3d/driver.h"
+
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -885,7 +889,7 @@ void		CVertexBuffer::serialHeader(NLMISC::IStream &f)
 		if(f.isReading())
 		{
 			_PreferredMemory = RAMPreferred;
-			_Name = "";
+			_Name.clear();
 		}
 	}
 }

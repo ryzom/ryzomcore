@@ -43,6 +43,7 @@
 #include "interface_v3/people_interraction.h"
 #include "interface_v3/bar_manager.h"
 #include "interface_v3/group_compas.h"
+#include "misc.h"
 // 3D
 #include "nel/3d/quad_tree.h"
 // Interface 3D
@@ -65,13 +66,18 @@
 #include "player_r2_cl.h"
 #include "r2/editor.h"
 
+
 ///////////
 // USING //
 ///////////
 using namespace NLMISC;
 using namespace NL3D;
+using namespace NLPACS;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ////////////
 // EXTERN //
@@ -400,6 +406,7 @@ CEntityManager::CEntityManager()
 	_NbPlayer			= 0;
 	_NbChar				= 0;
 	_LastEntityUnderPos= NULL;
+	_LastRemovedInstance = -1;
 }// CEntityManager //
 
 //-----------------------------------------------
@@ -522,20 +529,230 @@ void CEntityManager::reinit()
 	initialize(_NbMaxEntity);
 }
 
-CShapeInstanceReference CEntityManager::createInstance(const string& shape, const CVector &pos, const string& text, const string& url, bool bbox_active)
+CShapeInstanceReference CEntityManager::createInstance(const string& shape, const CVector &pos, const string& text, const string& url, bool haveCollisions, sint32& idx)
 {
+	idx = -1;
 	CShapeInstanceReference nullinstref(UInstance(), string(""), string(""));
 	if (!Scene) return nullinstref;
 
 	UInstance instance = Scene->createInstance(shape);
-	if (text.empty())
-		bbox_active = false;
-	CShapeInstanceReference instref = CShapeInstanceReference(instance, text, url, bbox_active);
+
 	if(!instance.empty())
 	{
-		_ShapeInstances.push_back(instref);
+		UMovePrimitive *primitive = NULL;
+
+		if (PACS && haveCollisions)
+		{
+			primitive = PACS->addCollisionablePrimitive(dynamicWI, 1);
+			primitive->setDontSnapToGround(false);
+		}
+	
+		// Put instance in last deleted position if found
+		if (_LastRemovedInstance != -1)
+		{
+			idx = _LastRemovedInstance;
+			_ShapeInstances[idx].Instance = instance;
+			_ShapeInstances[idx].Primitive = primitive;
+			_ShapeInstances[idx].ContextText = text;
+			_ShapeInstances[idx].ContextURL = url;
+			_ShapeInstances[idx].BboxActive = !text.empty() || !url.empty();
+			_ShapeInstances[idx].Deleted = false;
+			
+			_LastRemovedInstance = _ShapeInstances[idx].LastDeleted;
+			_ShapeInstances[idx].LastDeleted = -1;
+			return _ShapeInstances[idx];
+		}
+		else
+		{
+			CShapeInstanceReference instref = CShapeInstanceReference(instance, text, url, !text.empty() || !url.empty());
+			instref.Primitive = primitive;
+			idx = _ShapeInstances.size();
+			_ShapeInstances.push_back(instref);
+			return instref;
+		}
 	}
-	return instref;
+	return nullinstref;
+}
+
+bool CEntityManager::deleteInstance(uint32 idx)
+{
+	if (!Scene || idx >= _ShapeInstances.size())
+		return false;
+
+	if (!_ShapeInstances[idx].Instance.empty())
+		Scene->deleteInstance(_ShapeInstances[idx].Instance);
+	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
+	if (primitive)
+	{
+		PACS->removePrimitive(primitive);
+	}
+	
+	if (!_ShapeInstances[idx].Deleted)
+	{
+		_ShapeInstances[idx].Primitive = NULL;
+		_ShapeInstances[idx].Deleted = true;
+		_ShapeInstances[idx].LastDeleted = _LastRemovedInstance;
+		_LastRemovedInstance = idx;
+	}
+
+	return true;
+}
+
+CVector CEntityManager::getInstancePos(uint32 idx)
+{
+	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
+		return CVector(0,0,0);
+
+	UInstance instance = _ShapeInstances[idx].Instance;
+	if(instance.empty())
+		return  CVector(0,0,0);
+	
+	return instance.getPos();
+}
+
+bool CEntityManager::setInstancePos(uint32 idx, CVector pos)
+{
+	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
+		return false;
+	
+	UInstance instance = _ShapeInstances[idx].Instance;
+	if(instance.empty())
+		return false;
+	
+	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
+	if (primitive)
+	{
+		primitive->setGlobalPosition(_ShapeInstances[idx].PrimRelativePos + pos, dynamicWI);
+	}
+		
+	instance.setPos(pos);
+	return true;
+}
+
+CVector CEntityManager::getInstanceRot(uint32 idx)
+{
+	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
+		return CVector(0,0,0);
+	
+	UInstance instance = _ShapeInstances[idx].Instance;
+	if(instance.empty())
+		return  CVector(0,0,0);
+		
+	return instance.getRotEuler();
+}
+
+bool CEntityManager::setInstanceRot(uint32 idx, CVector rot)
+{
+	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
+		return false;
+	
+	UInstance instance = _ShapeInstances[idx].Instance;
+	if(instance.empty())
+		return false;
+	
+	instance.setRotEuler(rot);
+	
+	return true;
+}
+
+CVector CEntityManager::getInstanceScale(uint32 idx)
+{
+	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
+		return CVector(0,0,0);
+
+	UInstance instance = _ShapeInstances[idx].Instance;
+	if(instance.empty())
+		return  CVector(0,0,0);
+	
+	return instance.getScale();
+}
+
+CVector CEntityManager::getInstanceColPos(uint32 idx)
+{
+	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
+		return CVector(0,0,0);
+	
+	return _ShapeInstances[idx].PrimRelativePos;
+}
+
+CVector CEntityManager::getInstanceColScale(uint32 idx)
+{
+	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
+		return CVector(0,0,0);
+
+	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
+	if (!primitive)
+		return CVector(0,0,0);
+	
+	float width, depth;
+	primitive->getSize(width, depth);
+	float height = primitive->getHeight();
+	
+	return CVector(width, depth, height);
+}
+
+double CEntityManager::getInstanceColOrient(uint32 idx)
+{
+	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
+		return 0.f;
+	
+	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
+	if (!primitive)
+		return 0.f;
+	
+	return primitive->getOrientation(dynamicWI);
+}
+
+CVector CEntityManager::getInstanceBBoxMin(uint32 idx)
+{
+	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
+		return CVector(0,0,0);
+
+	UInstance instance = _ShapeInstances[idx].Instance;
+	if (instance.empty())
+		return  CVector(0,0,0);
+		
+	NLMISC::CAABBox bbox;
+	_ShapeInstances[idx].Instance.getShapeAABBox(bbox);
+	
+	CVector bbox_min;
+	
+	if (bbox.getCenter() == CVector::Null)
+		bbox_min = CVector(-0.5f, -0.5f, -0.5f);
+	else
+		bbox_min = bbox.getMin();
+	
+	bbox_min.x *= _ShapeInstances[idx].Instance.getScale().x;
+	bbox_min.y *= _ShapeInstances[idx].Instance.getScale().y;
+	bbox_min.z *= _ShapeInstances[idx].Instance.getScale().z;
+	
+	return bbox_min+_ShapeInstances[idx].Instance.getPos();
+}
+
+CVector CEntityManager::getInstanceBBoxMax(uint32 idx)
+{
+	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
+		return CVector(0,0,0);
+
+	UInstance instance = _ShapeInstances[idx].Instance;
+	if(instance.empty())
+		return  CVector(0,0,0);
+	
+	NLMISC::CAABBox bbox;
+	_ShapeInstances[idx].Instance.getShapeAABBox(bbox);
+	
+	CVector bbox_max;
+	
+	if (bbox.getCenter() == CVector::Null)
+		bbox_max = CVector(-0.5f, -0.5f, -0.5f);
+	else
+		bbox_max = bbox.getMax();
+	
+	bbox_max.x *= _ShapeInstances[idx].Instance.getScale().x;
+	bbox_max.y *= _ShapeInstances[idx].Instance.getScale().y;
+	bbox_max.z *= _ShapeInstances[idx].Instance.getScale().z;
+	
+	return bbox_max+_ShapeInstances[idx].Instance.getPos();
 }
 
 bool CEntityManager::removeInstances()
@@ -546,9 +763,16 @@ bool CEntityManager::removeInstances()
 	{
 		if (!_ShapeInstances[i].Instance.empty())
 			Scene->deleteInstance(_ShapeInstances[i].Instance);
+		
+		UMovePrimitive *primitive = _ShapeInstances[i].Primitive;
+		if (primitive)
+		{
+			PACS->removePrimitive(primitive);
+		}
 	}
 	_ShapeInstances.clear();
 	_InstancesRemoved = true;
+	_LastRemovedInstance = -1;
 	return true;
 }
 
@@ -559,11 +783,236 @@ bool CEntityManager::instancesRemoved()
 	return instRemoved;
 }
 
-CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float y)
+bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const vector<string> &values)
+{
+	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
+		return false;
+	
+	UInstance instance = _ShapeInstances[idx].Instance;
+	if(instance.empty())
+		return false;
+	
+	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
+	
+	for (uint32 i=0; i < keys.size(); i++)
+	{
+		string param = keys[i];
+		if (param == "transparency")
+		{
+			uint t;
+			if (fromString(values[i], t))
+			{
+				t = max(0, min((int)t, 255));
+				makeInstanceTransparent(instance, t, t == 255);
+			}
+		}
+		else if (param == "colorize")
+		{
+			if (values[i] == "0")
+			{
+				for(uint j=0;j<instance.getNumMaterials();j++)
+				{
+					instance.getMaterial(j).setShininess( 10.0f );
+					instance.getMaterial(j).setEmissive(CRGBA(255,255,255,255));
+					instance.getMaterial(j).setAmbient(CRGBA(0,0,0,255));
+					instance.getMaterial(j).setDiffuse(CRGBA(255,255,255,255));
+				}
+			}
+			else
+			{
+				CRGBA c;
+				if( fromString( values[i], c ) )
+				{
+					for(uint j=0;j<instance.getNumMaterials();j++)
+					{
+						instance.getMaterial(j).setShininess( 1000.0f );
+						instance.getMaterial(j).setEmissive(c);
+						instance.getMaterial(j).setAmbient(c);
+						instance.getMaterial(j).setDiffuse(c);
+					}
+				}
+			}
+		}
+		else if (param == "texture")
+		{
+			if (!values[i].empty())
+			{
+				for(uint j=0;j<instance.getNumMaterials();j++)
+				{
+					sint numStages = instance.getMaterial(j).getLastTextureStage() + 1;
+					for(sint l = 0; l < numStages; l++)
+					{
+						if (instance.getMaterial(j).isTextureFile((uint) l))
+							instance.getMaterial(j).setTextureFileName(values[i], (uint) l);
+					}
+				}
+			}
+		}
+		else if (param == "skeleton")
+		{
+			// TODO
+		}
+		else if (param == "context")
+		{
+			_ShapeInstances[idx].ContextText = values[i];
+		}
+		else if (param == "url")
+		{
+			_ShapeInstances[idx].ContextURL = values[i];
+		}
+		else if (param == "move x" || param == "move y" || param == "move z")
+		{
+			float v;
+			CVector pos = getInstancePos(idx);
+			
+			if (getRelativeFloatFromString(values[i], v))
+			{
+				updateVector(param, pos, v, true);
+			}
+			else
+			{
+				updateVector(param, pos, v, false);
+			}
+			setInstancePos(idx, pos);
+		}
+		else if (param == "rot x" || param == "rot y" || param == "rot z")
+		{
+			
+			float v;
+			CVector rot = getInstanceRot(idx);
+			
+			if (getRelativeFloatFromString(values[i], v))
+			{
+				updateVector(param, rot, v, true);
+			}
+			else
+			{
+				updateVector(param, rot, v, false);
+			}
+			setInstanceRot(idx, rot);
+		}
+		else if (param == "scale x" || param == "scale y" || param == "scale z")
+		{
+			float v;
+			CVector scale = instance.getScale();
+			
+			if (getRelativeFloatFromString(values[i], v))
+			{
+				updateVector(param, scale, v, true);
+			}
+			else
+			{
+				updateVector(param, scale, v, false);
+			}
+			instance.setScale(scale);
+		}
+		
+		// Primitive colissions setups
+		
+		if (!primitive) continue;
+		
+		if (param == "col size x" || param == "col size y" || param == "col size z")
+		{
+			float width, depth;
+			primitive->getSize(width, depth);
+			float height = primitive->getHeight();
+			
+			CVector size = CVector(width, depth, height);
+			float v;
+			if (getRelativeFloatFromString(values[i], v))
+			{
+				updateVector(param, size, v, true);
+			}
+			else
+			{
+				updateVector(param, size, v, false);
+			}
+			primitive->setSize(size.x, size.y);
+			primitive->setHeight(size.z);
+		}
+		else if (param == "col pos x" || param == "col pos y" || param == "col pos z")
+		{
+			CVector pos = instance.getPos();
+			float v;
+			
+			if (getRelativeFloatFromString(values[i], v))
+			{
+				updateVector(param, _ShapeInstances[idx].PrimRelativePos, v, false);
+			}
+			else
+			{
+				if (param == "col pos x")
+					_ShapeInstances[idx].PrimRelativePos.x = v - pos.x;
+				if (param == "col pos y")
+					_ShapeInstances[idx].PrimRelativePos.y = v - pos.y;
+				if (param == "col pos z")
+					_ShapeInstances[idx].PrimRelativePos.z = v - pos.z;
+			}
+			primitive->setGlobalPosition(pos + _ShapeInstances[idx].PrimRelativePos, dynamicWI);
+		}
+		else if (param == "col orientation")
+		{
+			double orient = primitive->getOrientation(dynamicWI);
+			double v = 0.f;
+			
+			if (values[i].empty())
+				continue;
+			
+			if (values[i][0] == '+')
+			{
+				fromString(values[i].substr(1), v);
+				orient += v;
+			}
+			else
+			{
+				fromString(values[i], v);
+				orient = v;
+			}
+			
+			primitive->setOrientation(orient, dynamicWI);
+		}
+		else if (param == "col mask player")
+		{
+			bool active;
+			fromString(values[i], active);
+			UMovePrimitive::TCollisionMask	mask=primitive->getCollisionMask();
+			if (active)
+				primitive->setCollisionMask(mask|MaskColPlayer);
+			else
+				primitive->setCollisionMask(mask&~MaskColPlayer);
+		}
+		else if (param == "col mask door")
+		{
+			bool active;
+			fromString(values[i], active);
+			UMovePrimitive::TCollisionMask	mask=primitive->getCollisionMask();
+			if (active)
+				primitive->setCollisionMask(mask|MaskColDoor);
+			else
+				primitive->setCollisionMask(mask&~MaskColDoor);
+		}
+		else if (param == "col obstacle")
+		{
+			bool active;
+			fromString(values[i], active);
+			primitive->setObstacle(active);
+		}
+		else if (param == "col obstacle")
+		{
+			
+		}
+	}
+
+	return true;
+}
+
+
+CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float y, sint32 &idx)
 {
 	CShapeInstanceReference selectedInstance(UInstance(), string(""), string(""));
 	_LastInstanceUnderPos= NULL;
-
+	idx = -1;
+	
 	// If not initialised, return
 	if (_ShapeInstances.empty())
 		return selectedInstance;
@@ -583,29 +1032,50 @@ CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float 
 	float bestDist = 255;
 	for(uint i=0; i<_ShapeInstances.size(); i++)
 	{
-		if (_ShapeInstances[i].BboxActive)
+		if (!_ShapeInstances[i].Deleted && _ShapeInstances[i].BboxActive)
 		{
 			H_AUTO(RZ_Client_GEUP_box_intersect)
 
 			// if intersect the bbox
 			NLMISC::CAABBox bbox;
 			//= _ShapeInstances[i].SelectionBox;
-			_ShapeInstances[i].Instance.getShapeAABBox(bbox);
-			if (bbox.getCenter() == CVector::Null)
+			if(!_ShapeInstances[i].Instance.empty())
 			{
-				bbox.setMinMax(CVector(-0.3f, -0.3f, -0.3f)+_ShapeInstances[i].Instance.getPos(), CVector(0.3f, 0.3f, 0.3f)+_ShapeInstances[i].Instance.getPos());
-			}
-			else
-			{
-				bbox.setMinMax((bbox.getMin()*_ShapeInstances[i].Instance.getScale().x)+_ShapeInstances[i].Instance.getPos(), (bbox.getMax()*_ShapeInstances[i].Instance.getScale().x)+_ShapeInstances[i].Instance.getPos());
-			}
-			if(bbox.intersect(pos, pos+dir*15.0f))
-			{
-				float dist = (bbox.getCenter()-pos).norm();
-				if (dist < bestDist)
+				_ShapeInstances[i].Instance.getShapeAABBox(bbox);
+				CVector bbox_min;
+				CVector bbox_max;
+
+				if (bbox.getCenter() == CVector::Null)
 				{
-					selectedInstance = _ShapeInstances[i];
-					bestDist = dist;
+					bbox_min = CVector(-0.5f, -0.5f, -0.5f);
+					bbox_max = CVector(-0.5f, -0.5f, -0.5f);
+				}
+				else
+				{
+					bbox_min = bbox.getMin();
+					bbox_max = bbox.getMax();
+				}
+
+				bbox_min.x *= _ShapeInstances[i].Instance.getScale().x;
+				bbox_min.y *= _ShapeInstances[i].Instance.getScale().y;
+				bbox_min.z *= _ShapeInstances[i].Instance.getScale().z;
+
+				bbox_max.x *= _ShapeInstances[i].Instance.getScale().x;
+				bbox_max.y *= _ShapeInstances[i].Instance.getScale().y;
+				bbox_max.z *= _ShapeInstances[i].Instance.getScale().z;
+
+
+				bbox.setMinMax(bbox_min+_ShapeInstances[i].Instance.getPos(), bbox_max+_ShapeInstances[i].Instance.getPos());
+
+				if(bbox.intersect(pos, pos+dir*100.0f))
+				{
+					float dist = (bbox.getCenter()-pos).norm();
+					if (dist < bestDist)
+					{
+						selectedInstance = _ShapeInstances[i];
+						bestDist = dist;
+						idx = (sint32)i;
+					}
 				}
 			}
 		}
@@ -1695,7 +2165,7 @@ void CEntityManager::writeEntities()
 // serial
 // Serialize entities.
 //-----------------------------------------------
-void CEntityManager::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CEntityManager::serial(NLMISC::IStream &f)
 {
 	// Get nb max entities possible.
 	f.serial(_NbMaxEntity);
@@ -1763,7 +2233,7 @@ void CEntityManager::dumpXML(class NLMISC::IStream &f)
 			// Add a comment
 //			f.xmlComment();//toString("Describ the entity in the slot %d.", i).c_str());
 			// Start the opening of a new node named Identity
-			f.xmlPush(toString("Entity%d", i).c_str());
+			f.xmlPush(toString("Entity%d", i));
 
 				if(_Entities[i])
 				{
@@ -1949,7 +2419,26 @@ CEntityCL *CEntityManager::getEntityByCompressedIndex(TDataSetIndex compressedIn
 	}
 	return NULL;
 }
-
+//-----------------------------------------------
+// getEntityBySheetName :
+// Return an entity based on its sheet name
+//-----------------------------------------------
+CEntityCL *CEntityManager::getEntityBySheetName (const std::string &sheet) const
+{
+	if (!sheet.empty())
+	{
+		uint i;
+		const CSheetId& sheetRef = NLMISC::CSheetId(sheet);
+		const uint count = (uint)_Entities.size();
+		for (i=0; i<count; i++)
+		{
+			if(_Entities[i])
+				if(_Entities[i]->sheetId() == sheetRef)
+					return _Entities[i];
+		}
+	}
+	return NULL;
+}
 //-----------------------------------------------
 // managePACSTriggers :
 // Manage PACS Triggers.
@@ -2227,8 +2716,10 @@ void	CEntityManager::logPropertyChange(CLFECOMMON::TCLEntityId who, const CStage
 			// Orientation
 			else if(propLoged[i]==CLFECOMMON::PROPERTY_ORIENTATION)
 			{
-				float	rot= *(float*)(&value);
-				valStr= toString("%d", sint32(rot*180/Pi));
+				C64BitsParts rot;
+				rot.i64[0] = value;
+
+				valStr= toString(sint32(rot.f[0]*180/Pi));
 			}
 
 

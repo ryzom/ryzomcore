@@ -31,7 +31,7 @@ public:
 	std::vector<uint8>			BricksIndexInSentence;
 	
 	/// Serialisation
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial( Name );
 		f.serialCont( BricksIds );

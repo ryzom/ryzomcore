@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>402</width>
-    <height>435</height>
+    <height>331</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,9 +28,9 @@
      <property name="text">
       <string>Welcome to Ryzom Installer!
 
-This program will allow you to download, install, configure or manage Ryzom on your computer.
+This program will allow you to download, install, configure and manage Ryzom on your computer.
 
-Just follow the different steps and make your choice between the different propositions.</string>
+Just follow the  different steps and make your choice between the options presented.</string>
      </property>
      <property name="textFormat">
       <enum>Qt::PlainText</enum>
@@ -69,12 +69,6 @@ Just follow the different steps and make your choice between the different propo
    </item>
    <item>
     <widget class="QFrame" name="advancedFrame">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
      <layout class="QVBoxLayout" name="advancedMainLayout">
       <property name="spacing">
        <number>6</number>
@@ -92,65 +86,22 @@ Just follow the different steps and make your choice between the different propo
        <number>0</number>
       </property>
       <item>
-       <widget class="QGroupBox" name="sourceGroupBox">
-        <property name="title">
-         <string>Files will be installed from:</string>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QRadioButton" name="oldDirectoryRadioButton">
-           <property name="text">
-            <string>Old installation: %1</string>
-           </property>
-           <property name="autoExclusive">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="anotherLocationLayout" stretch="1,0">
-           <property name="spacing">
-            <number>6</number>
-           </property>
-           <item>
-            <widget class="QRadioButton" name="anotherLocationRadioButton">
-             <property name="text">
-              <string>Another location: %1</string>
-             </property>
-             <property name="autoExclusive">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="anotherLocationBrowseButton">
-             <property name="text">
-              <string>Browse...</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="internetRadioButton">
-           <property name="text">
-            <string>Internet (%1 GiB to download)</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
        <widget class="QGroupBox" name="destinationGroupBox">
         <property name="title">
-         <string>Files will be installed to (requires 10 GiB):</string>
+         <string notr="true">Files will be installed to (requires %1):</string>
         </property>
-        <layout class="QHBoxLayout" name="destinationLayout" stretch="1,0">
+        <layout class="QHBoxLayout" name="destinationLayout" stretch="1,0,0">
          <item>
           <widget class="QLabel" name="destinationLabel">
            <property name="text">
-            <string>c:\</string>
+            <string notr="true">c:\</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="destinationDefaultButton">
+           <property name="text">
+            <string>Default</string>
            </property>
           </widget>
          </item>
@@ -167,13 +118,13 @@ Just follow the different steps and make your choice between the different propo
       <item>
        <widget class="QGroupBox" name="clientArchGroupBox">
         <property name="title">
-         <string>Do you prefer to use a 64 or 32 bits client?</string>
+         <string>Do you prefer to use a 64 or 32 bit client?</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <widget class="QRadioButton" name="clientArch64RadioButton">
            <property name="text">
-            <string>64 bits (recommended)</string>
+            <string>64 bit (recommended)</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -183,7 +134,7 @@ Just follow the different steps and make your choice between the different propo
          <item>
           <widget class="QRadioButton" name="clientArch32RadioButton">
            <property name="text">
-            <string>32 bits</string>
+            <string>32 bit</string>
            </property>
           </widget>
          </item>
@@ -206,10 +157,8 @@ Just follow the different steps and make your choice between the different propo
   </layout>
  </widget>
  <tabstops>
-  <tabstop>oldDirectoryRadioButton</tabstop>
-  <tabstop>anotherLocationRadioButton</tabstop>
-  <tabstop>anotherLocationBrowseButton</tabstop>
-  <tabstop>internetRadioButton</tabstop>
+  <tabstop>advancedCheckBox</tabstop>
+  <tabstop>destinationDefaultButton</tabstop>
   <tabstop>destinationBrowseButton</tabstop>
   <tabstop>clientArch64RadioButton</tabstop>
   <tabstop>clientArch32RadioButton</tabstop>

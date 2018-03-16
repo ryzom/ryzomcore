@@ -168,6 +168,9 @@ std::string getStringCategory(const ucstring &src, ucstring &dest, bool alwaysAd
 // Get the category from the string (src="&SYS&Who are you?" and dest="Who are you?" and return "SYS"), if no category, return ""
 std::string getStringCategoryIfAny(const ucstring &src, ucstring &dest);
 
+bool getRelativeFloatFromString(const std::string src, float &dst);
+void updateVector(const std::string part, NLMISC::CVector &dst, float value, bool add = false);
+
 // Number of shortcut
 #define RYZOM_MAX_SHORTCUT 20
 

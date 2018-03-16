@@ -913,7 +913,7 @@ void updateBGDownloaderUI()
 	}
 	if (prevSuccess != LuaBGDSuccessFlag)
 	{
-		nlwarning("Some scipt error occured");
+		nlwarning("Some scipt error occurred");
 	}
 }
 
@@ -1987,7 +1987,7 @@ public:
 					}
 				}
 
-				NewKeysCharNameValidated = "";
+				NewKeysCharNameValidated.clear();
 
 				NetMngr.push(out);
 				NetMngr.send(NetMngr.getCurrentServerTick());
@@ -2315,8 +2315,8 @@ public:
 
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		NewKeysCharNameWanted = "";
-		NewKeysCharNameValidated = "";
+		NewKeysCharNameWanted.clear();
+		NewKeysCharNameValidated.clear();
 		GameKeySet = "keys.xml";
 		RingEditorKeySet = "keys_r2ed.xml";
 		First = true;
@@ -2809,7 +2809,7 @@ class CAHScenarioControl : public IActionHandler
 
 				// description
 				string description = sessionBrowser._LastDescription;
-				if(description!="")
+				if(!description.empty())
 				{
 					result = scenarioWnd->findFromShortId(string("edit_small_description"));
 					if(result)
@@ -3132,10 +3132,10 @@ class CAHLoadScenario : public IActionHandler
 			launchScenarioFromRingAccessPoint = true;
 		}
 
-		string rules="", level="", title="";
-		string initialIsland="", initialEntryPoint="", initialSeason = "";
-		std::string lang="", scenarioType="";
-		std::string otherCharAccess="";
+		string rules, level, title;
+		string initialIsland, initialEntryPoint, initialSeason;
+		std::string lang, scenarioType;
+		std::string otherCharAccess;
 		std::string nevraxScenario = "0";
 		std::string trialAllowed = "0";
 		for(uint i=0; i<values.size(); i++)

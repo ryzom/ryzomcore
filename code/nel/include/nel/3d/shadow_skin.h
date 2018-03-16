@@ -33,9 +33,9 @@ namespace NL3D
 class		CShadowVertex
 {
 public:
-	CVector		Vertex;
-	uint32		MatrixId;
-	void		serial(NLMISC::IStream &f)
+	NLMISC::CVector		Vertex;
+	uint32				MatrixId;
+	void				serial(NLMISC::IStream &f)
 	{
 		(void)f.serialVersion(0);
 
@@ -82,7 +82,7 @@ public:
 	 *	if don't intersect, dist2D="nearest distance to the ray", and distZ=0
 	 *	\param computeDist2D if false and don't intersect, then return dist2D=FLT_MAX, and distZ=0
 	 */
-	bool		getRayIntersection(const CMatrix &toRaySpace, class CSkeletonModel &skeleton,
+	bool		getRayIntersection(const NLMISC::CMatrix &toRaySpace, class CSkeletonModel &skeleton,
 		const std::vector<uint32> &matrixInfluences, float &dist2D, float &distZ, bool computeDist2D);
 
 private:

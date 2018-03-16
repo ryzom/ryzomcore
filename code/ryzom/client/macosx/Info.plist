@@ -43,7 +43,7 @@
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.role-playing-games</string>
 	<key>LSFileQuarantineEnabled</key>
-	<true/>
+	<false/>
 	<key>LSMinimumSystemVersion</key>
 	<string>${CMAKE_OSX_DEPLOYMENT_TARGET}</string>
 	<key>LSRequiresCarbon</key>

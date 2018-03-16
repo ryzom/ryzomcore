@@ -47,7 +47,6 @@
 #include "editor.h"
 //
 #include "nel/gui/lua_helper.h"
-using namespace NLGUI;
 #include "nel/gui/group_tree.h"
 #include "../interface_v3/interface_manager.h"
 #include "../contextual_cursor.h"
@@ -115,11 +114,14 @@ using namespace NLGUI;
 #include "../far_tp.h"
 #include "nel/gui/lua_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLMISC;
 using namespace NLNET;
 using namespace NL3D;
-
+using namespace NLGUI;
 
 extern CEventsListener EventsListener;
 extern CLog	g_log;
@@ -168,7 +170,7 @@ bool ReloadUIFlag = true; // by default, CEditor loads its own UI
 bool ResetScenarioWanted = false;
 bool ReloadScenarioWanted = false;
 bool ConnectionWanted = false;
-std::string CEditor::_ScenarioToLoadWhenEntreringIntoAnimation="";
+std::string CEditor::_ScenarioToLoadWhenEntreringIntoAnimation;
 bool CEditor::_IsStartingScenario=false;
 
 // *********************************************************************************************************
@@ -1628,7 +1630,16 @@ int CEditor::luaEnumInstances(CLuaState &ls)
 	mt.setValue("__gc", CLuaObject(ls));
 	//
 	void *newIter = ls.newUserData(sizeof(CInstanceEnumerator));
+
+#ifdef new
+#undef new
+#endif
+
 	CInstanceEnumerator *ie = new (newIter) CInstanceEnumerator;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 	ie->InstMap = &getEditor()._InstancesByDispName[classIndex];
 	ie->Current = ie->InstMap->begin();
@@ -2081,10 +2092,6 @@ void CEditor::registerLuaFunc()
 	registerEnvMethod("teleportToCharacter", luaTeleportToCharacter);
 	registerEnvMethod("enumInstances", luaEnumInstances);
 	registerEnvMethod("isClearingContent", luaIsClearingContent);
-
-
-
-
 }
 
 /*
@@ -2425,7 +2432,7 @@ void CEditor::setMode(TMode mode)
 			// set new mode in lua
 			_Env.setValue("Mode", "GoingToDM");
 			setUIMode(3);
-			connexionMsg(_ConnexionMsg); // update connexion window
+			connectionMsg(_ConnectionMsg); // update connection window
 			::IgnoreEntityDbUpdates = false;
 			::initContextualCursor();
 			nlassert(CDisplayerBase::ObjCount == 0);
@@ -2437,7 +2444,7 @@ void CEditor::setMode(TMode mode)
 			// set new mode in lua
 			_Env.setValue("Mode", "BackToEditing");
 			setUIMode(3);
-			connexionMsg(_ConnexionMsg); // update connexion window
+			connectionMsg(_ConnectionMsg); // update connection window
 			::IgnoreEntityDbUpdates = true;
 			::initContextualCursor();
 			resetPlotItems();
@@ -2449,7 +2456,7 @@ void CEditor::setMode(TMode mode)
 			// set new mode in lua
 			_Env.setValue("Mode", "AnimationModeLoading");
 			setUIMode(3);
-			connexionMsg(_ConnexionMsg); // update connexion window
+			connectionMsg(_ConnectionMsg); // update connection window
 //			::IgnoreEntityDbUpdates = true;
 			::initContextualCursor();
 			resetPlotItems();
@@ -2461,7 +2468,7 @@ void CEditor::setMode(TMode mode)
 			// set new mode in lua
 			_Env.setValue("Mode", "AnimationModeWaitingForLoading");
 			setUIMode(3);
-			connexionMsg(_ConnexionMsg); // update connexion window
+			connectionMsg(_ConnectionMsg); // update connection window
 //			::IgnoreEntityDbUpdates = true;
 			::initContextualCursor();
 			resetPlotItems();
@@ -2513,7 +2520,7 @@ void CEditor::setMode(TMode mode)
 			//set new mode in lua
 			_Env.setValue("Mode", "AnimationModeGoingToDM");
 			setUIMode(3);
-			connexionMsg(_ConnexionMsg); // update connexion window
+			connectionMsg(_ConnectionMsg); // update connection window
 			::IgnoreEntityDbUpdates = false;
 			::initContextualCursor();
 			resetPlotItems();
@@ -4893,23 +4900,19 @@ CEntityCL *CEditor::createEntity(uint slot, const NLMISC::CSheetId &sheetId, con
 	node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_ORIENTATION), false);
 	if(node)
 	{
-		union
-		{
-			uint64 heading64;
-			float  headingFloat;
-		};
-		headingFloat = heading;
-		node->setValue64(heading64);
+		C64BitsParts parts;
+		parts.f[0] = heading;
+		parts.f[1] = 0.f;
+		node->setValue64(parts.i64[0]);
 	}
 	// Set Mode
 	node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_MODE), false);
 	if(node)
 	{
-		MBEHAV::EMode m = MBEHAV::NORMAL;
-		prop = (sint64 *)&m;
-		node->setValue64(*prop);
+		node->setValue64((sint64)MBEHAV::NORMAL);
 		EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_MODE);
 	}
+
 	// Set Visual Properties
 	SPropVisualA visualA;
 	//visualA.PropertySubData.LTrail = 1;
@@ -6408,11 +6411,11 @@ NLMISC::CAABBox CEditor::getSelectBox(CEntityCL &entity) const
 }
 
 // *********************************************************************************************************
-void CEditor::connexionMsg(const std::string &stringId)
+void CEditor::connectionMsg(const std::string &stringId)
 {
-	//H_AUTO(R2_CEditor_connexionMsg)
+	//H_AUTO(R2_CEditor_connectionMsg)
 	CHECK_EDITOR
-	getEditor()._ConnexionMsg = stringId;
+	getEditor()._ConnectionMsg = stringId;
 	// ignore if current ui desktop is not the third
 	if (getUI().getMode() != 3) return;
 	// show the connection window
@@ -6489,7 +6492,7 @@ void CEditor::connect()
 			{
 				R2::getEditor().setMode(CEditor::GoingToEditionMode);
 			}
-			CEditor::connexionMsg("uimR2EDGoToEditingMode");
+			CEditor::connectionMsg("uimR2EDGoToEditingMode");
 		}
 		catch (const std::exception& e)
 		{

@@ -46,6 +46,10 @@
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 
 ////////////
 // GLOBAL //
@@ -55,8 +59,8 @@ CContextualCursor		ContextCur;
 CLFECOMMON::TCLEntityId	SlotUnderCursor;
 uint32 MissionId = 0;
 uint32 MissionRingId = 0;
-UInstance selectedInstance;
-const UInstance noSelectedInstance;
+sint32 InstanceId = 0;
+sint32 selectedInstance = -1;
 string selectedInstanceURL;
 static NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> s_UserCharFade;
 
@@ -85,6 +89,7 @@ void contextExtractRM		(bool rightClick, bool dblClick);
 void contextMission			(bool rightClick, bool dblClick);
 void contextWebPage			(bool rightClick, bool dblClick);
 void contextWebIG			(bool rightClick, bool dblClick);
+void contextARKitect		(bool rightClick, bool dblClick);
 void contextRingMission		(bool rightClick, bool dblClick);
 void contextOutpost			(bool rightClick, bool dblClick);
 void contextBuildTotem		(bool rightClick, bool dblClick);
@@ -123,6 +128,7 @@ void initContextualCursor()
 	ContextCur.add(true,	"MISSION",			string(""),							0.0f,	checkUnderCursor,	contextMission);
 	ContextCur.add(true,	"WEB PAGE",			string(""),							0.0f,	checkUnderCursor,	contextWebPage);
 	ContextCur.add(true,	"WEBIG",			string(""),							0.0f,	checkUnderCursor,	contextWebIG);
+	ContextCur.add(false,	"ARKITECT",			string("curs_create.tga"),			0.0f,	checkUnderCursor,	contextARKitect);
 	ContextCur.add(true,	"OUTPOST",			string(""),							0.0f,	checkUnderCursor,	contextOutpost);
 	ContextCur.add(true,	"RING MISSION",		string(""),							0.0f,	checkUnderCursor,	contextRingMission);
 	ContextCur.add(true,	"BUILD_TOTEM",		string("uimGcmChooseBuilding"),		0.0f,	checkUnderCursor,	contextBuildTotem);
@@ -339,7 +345,6 @@ void checkUnderCursor()
 			// Entity Under the cursor is the entity selected.
 			else
 			{
-
 				// Wait for the target is up to date. Do not display context cursor if the user is mounted.
 				if( (UserEntity->selection() == UserEntity->targetSlot()) &&
 					(! UserEntity->isRiding()) )
@@ -526,55 +531,52 @@ void checkUnderCursor()
 		}
 		else
 		{
-			CShapeInstanceReference instref = EntitiesMngr.getShapeInstanceUnderPos(cursX, cursY);
+			sint32 instance_idx;
+			CShapeInstanceReference instref = EntitiesMngr.getShapeInstanceUnderPos(cursX, cursY, instance_idx);
 			
-			bool cleanSelectedInstance = EntitiesMngr.instancesRemoved();
-			if (cleanSelectedInstance)
-				selectedInstance = noSelectedInstance;
-
+			std::vector<string> keys;
+			keys.push_back("colorize");
+			
+			if (instance_idx != selectedInstance && selectedInstance != -1) {
+				std::vector<string> values;
+				values.push_back("0");
+				EntitiesMngr.setupInstance((uint32)selectedInstance, keys, values);
+			}
+			
 			UInstance instance = instref.Instance;
-			if (!instance.empty())
+			if (!instance.empty() && !instref.ContextURL.empty())
 			{
-				if (instance.getObjectPtr() != selectedInstance.getObjectPtr())
+				
+				selectedInstanceURL = instref.ContextURL;
+				if (instref.ContextText.empty())
 				{
-					for(uint j=0;j<selectedInstance.getNumMaterials();j++)
-					{
-						// unhighlight
-						selectedInstance.getMaterial(j).setEmissive(CRGBA(255,255,255,255));
-						selectedInstance.getMaterial(j).setShininess( 10.0f );
+					if (instance_idx != -1) {
+						std::vector<string> values;
+						values.push_back("#FF0000FF");
+						EntitiesMngr.setupInstance((uint32)instance_idx, keys, values);
+						selectedInstance = instance_idx;
 					}
-					selectedInstance = instance;
-					// For all materials
-					for(uint j=0;j<selectedInstance.getNumMaterials();j++)
-					{
-						// highlight
-						selectedInstance.getMaterial(j).setEmissive(CRGBA(255,0,0,255));
-						selectedInstance.getMaterial(j).setShininess( 1000.0f );
-					}
-				}
-				if (!instref.ContextText.empty())
-				{
-					selectedInstanceURL = instref.ContextURL;
-					ucstring contextText;
-					contextText.fromUtf8(instref.ContextText);
-					if(ContextCur.context("WEBIG", 0.f, contextText))
+					
+					cursor->setCursor("r2ed_tool_select_move_over.tga");
+					InstanceId = instance_idx;
+					if (ContextCur.context("ARKITECT", 0.f, ucstring("Edit")))
 						return;
 				}
-			}
-			else
-			{
-				if (!selectedInstance.empty())
+				else
 				{
-					for(uint j=0;j<selectedInstance.getNumMaterials();j++)
-					{
-						//unhighlight
-						selectedInstance.getMaterial(j).setEmissive(CRGBA(255,255,255,255));
-						selectedInstance.getMaterial(j).setShininess( 10.0f );
-					}
-					selectedInstance = noSelectedInstance;
+					cursor->setCursor("curs_pick.tga");
+					ucstring contextText;
+					contextText.fromUtf8(instref.ContextText);
+					if (ContextCur.context("WEBIG", 0.f, contextText))
+						return;
+				}
+			} else {
+				if (!selectedInstanceURL.empty()) {
+					cursor->setCursor("curs_default.tga");
 					selectedInstanceURL.clear();
 				}
 			}
+
 			SlotUnderCursor = CLFECOMMON::INVALID_SLOT;
 		}
 	}
@@ -875,12 +877,15 @@ void contextWebPage(bool rightClick, bool dblClick)
 //-----------------------------------------------
 void contextWebIG(bool rightClick, bool dblClick)
 {
+	if(rightClick)
+		return;
 	CInterfaceManager *IM = CInterfaceManager::getInstance();
 	CInterfaceElement *pGC = CWidgetManager::getInstance()->getElementFromId("ui:interface:bot_chat_object");
 	CInterface3DShape *el= dynamic_cast<CInterface3DShape*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:bot_chat_object:scene3d:object_1"));
 	if (el != NULL)
 	{
-		el->setName(selectedInstance.getShapeName());
+		//TODO: Fix that
+		//el->setName(selectedInstance.getShapeName());
 		el->setPosX(0.0f);
 	}
 	if (selectedInstanceURL.empty())
@@ -895,6 +900,24 @@ void contextWebIG(bool rightClick, bool dblClick)
 		CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:webig:content:html|url="+selectedInstanceURL);
 	}
 }// contextWebIG //
+
+//-----------------------------------------------
+// contextARKitect :
+//-----------------------------------------------
+void contextARKitect(bool rightClick, bool dblClick)
+{
+	string header;
+	if (rightClick)
+	{
+		header = toString("rightClick = true\nSelectedInstanceId = %u\n", InstanceId);
+	} else {
+		header = toString("rightClick = false\nSelectedInstanceId = %u\n", InstanceId);
+	}
+
+	CLuaManager::getInstance().executeLuaScript(string(header)+selectedInstanceURL, true);
+	
+}// contextARKitect //
+
 
 //-----------------------------------------------
 // contextOutpost

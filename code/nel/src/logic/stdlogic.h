@@ -14,8 +14,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef NL_STDMISC_H
-#define NL_STDMISC_H
+#ifndef NL_STDLOGIC_H
+#define NL_STDLOGIC_H
+
+#if defined(_MSC_VER) && defined(_DEBUG)
+	#define _CRTDBG_MAP_ALLOC
+	#include <stdlib.h>
+	#include <crtdbg.h>
+	#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
 
 #include <vector>
 #include <map>
@@ -23,6 +30,12 @@
 #include <limits>
 
 #include <libxml/parser.h>
+
+#include "nel/misc/types_nl.h"
+#include "nel/misc/entity_id.h"
+#include "nel/misc/i_xml.h"
+#include "nel/misc/o_xml.h"
+#include "nel/misc/stream.h"
 
 #ifdef NL_OS_WINDOWS
 #	define WIN32_LEAN_AND_MEAN

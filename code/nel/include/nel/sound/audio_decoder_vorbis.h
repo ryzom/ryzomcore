@@ -77,7 +77,7 @@ public:
 	inline sint32 getStreamOffset() { return _StreamOffset; }
 
 	/// Get information on a music file (only artist and title at the moment).
-	static bool getInfo(NLMISC::IStream *stream, std::string &artist, std::string &title);
+	static bool getInfo(NLMISC::IStream *stream, std::string &artist, std::string &title, float &length);
 
 	/// Get how many bytes the music buffer requires for output minimum.
 	virtual uint32 getRequiredBytes();

@@ -58,7 +58,7 @@ struct TCommandTicket
 	NL_INSTANCE_COUNTER_DECL(TCommandTicket);
 public:
 	
-	virtual void serial(class NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		f.serial( Command );
 		f.serial( Priviledge );
@@ -108,7 +108,7 @@ struct CGuildOption
 	NL_INSTANCE_COUNTER_DECL(CGuildOption);
 public:
 
-	virtual void serial(class NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f)
 	{
 //		f.serial( XpCost );
 		f.serial( MoneyCost );
@@ -142,7 +142,7 @@ public:
 
 	CConsumable() : Family(0), LoopTimer(0), MaxNbLoops(1), OverdoseTimer(0), Data(0), ConsumptionTime(0) {}
 
-	virtual void serial(class NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f);
 
 	uint16		Family; // consumable family, this is NOT PERSISTENT, use FAMILY AS A STRING
 
@@ -209,7 +209,7 @@ public:
 
 	CXpCatalyser() : IsRingCatalyser(false), XpBonus(100) {}
 
-	virtual void serial(class NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f);
 
 	// true if this catalyser comes from ring session
 	bool IsRingCatalyser;
@@ -223,7 +223,7 @@ struct CCosmetics
 	NL_INSTANCE_COUNTER_DECL(CCosmetics);
 public:
 
-	virtual void serial(class NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f);
 	uint32				VPValue;
 };
 
@@ -238,7 +238,7 @@ struct SItemSpecialEffect
 	SItemSpecialEffect() { }
 	// return false if the effect cannot be built. + warning inside
 	bool	build(std::string const& str);
-	virtual void serial(class NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f);
 };
 
 struct SItemSpecialEffects
@@ -247,7 +247,7 @@ struct SItemSpecialEffects
 public:
 	
 	std::vector<SItemSpecialEffect>	Effects;
-	virtual void serial(class NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f);
 };
 
 struct SWeapon
@@ -270,7 +270,7 @@ struct SWeapon
 	// damage factor (if fixed)
 	float					DamageFactor;
 
-	virtual void serial(class NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		f.serialEnum( WeaponType );
 		f.serialEnum( DamageType );
@@ -301,7 +301,7 @@ public:
 	/// 'length' value of the weapon (french 'allonge')
 	uint8	ReachValue;
 
-	virtual void serial(class NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		SWeapon::serial( f );
 		f.serial( RateOfFire );
@@ -317,7 +317,7 @@ public:
 
 	virtual ~SRangeWeapon() {}
 
-	virtual void serial(class NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		SWeapon::serial( f );
 		f.serialEnum(AreaType);
@@ -389,7 +389,7 @@ public:
 	// ammo type (1 or 2)
 	uint8	AmmoType;
 
-	virtual void serial(class NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		SWeapon::serial( f );
 		f.serial( ShortRangeLimit );
@@ -410,7 +410,7 @@ public:
 	inline SArmor() : ArmorType( ARMORTYPE::UNKNOWN ),Protections(DMGTYPE::NBTYPES){}
 
 	// serial
-	virtual void serial(class NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		f.serialEnum( ArmorType );
 		f.serialCont( Protections );
@@ -431,7 +431,7 @@ public:
 
 	inline SShield() : SArmor(),ShieldType(SHIELDTYPE::NONE),Unbreakable(false){}
 	
-	virtual void serial(class NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		SArmor::serial(f);
 		f.serialEnum( ShieldType );
@@ -580,7 +580,7 @@ public:
 			FocusBuff = 0;
 		}
 
-		inline void serial(class NLMISC::IStream &f)
+		inline void serial(NLMISC::IStream &f)
 		{
 			f.serial( Durability );
 			f.serial( Weight );
@@ -647,7 +647,7 @@ public:
 		};
 	};
 
-	inline void serial(class NLMISC::IStream &f)
+	inline void serial(NLMISC::IStream &f)
 	{
 		f.serial( (uint32&)Family ); // The number never changes
 		f.serialEnum( Ecosystem );				
@@ -755,7 +755,7 @@ public:
 		MaxDonkeys = 0;
 	}
 	
-	inline void serial(class NLMISC::IStream &f)
+	inline void serial(NLMISC::IStream &f)
 	{
 		f.serialEnum( Type );
 		f.serial( CommandRange );
@@ -824,7 +824,7 @@ public:
 	virtual ~CStaticItem();
 
 	/// Serialisation
-	void serial(class NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f);
 
 	/// read georges sheet
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);

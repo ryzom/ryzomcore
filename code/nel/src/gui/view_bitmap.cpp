@@ -26,6 +26,9 @@ using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 NLMISC_REGISTER_OBJECT(CViewBase, CViewBitmap, std::string, "bitmap");
 REGISTER_UI_CLASS(CViewBitmap)
@@ -508,6 +511,9 @@ namespace NLGUI
 	// ***************************************************************************
 	sint32	CViewBitmap::getMaxUsedW() const
 	{
+		if (_Scale)
+			return _WReal;
+
 		sint32 txw, txh;
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		rVR.getTextureSizeFromId (_TextureId, txw, txh);

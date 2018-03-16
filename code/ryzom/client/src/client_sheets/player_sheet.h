@@ -66,7 +66,7 @@ public:
 		/// Build the sheet from an external script.
 		virtual void build(const std::string &key, const NLGEORGES::UFormElm &item);
 		/// Serialize
-		virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+		virtual void serial(NLMISC::IStream &f)
 		{
 			f.serial(Item, Color);
 		}
@@ -132,7 +132,7 @@ public:
 	virtual void build(const NLGEORGES::UFormElm &item);
 
 	/// Serialize character sheet into binary data file.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 
 private:

@@ -733,8 +733,12 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 
 		// Invalidate instances cache
 		for (uint i = 0; i < _Instances.size(); ++i)
-			_Instances[i].CurrentName = _Instances[i].LoadingName = "";
-		_Face.CurrentName = _Face.LoadingName = "";
+		{
+			_Instances[i].CurrentName.clear();
+			_Instances[i].LoadingName.clear();
+		}
+		_Face.CurrentName.clear();
+		_Face.LoadingName.clear();
 	}
 	// Check the skeleton.
 	if(skeleton() && !ClientCfg.Light)
@@ -859,11 +863,11 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 			if (!_Face.Loading.empty())
 				Scene->deleteInstance(_Face.Loading);
 			_Face.Loading = NULL;
-			_Face.LoadingName = "";
+			_Face.LoadingName.clear();
 			if (!_Face.Current.empty())
 				Scene->deleteInstance(_Face.Current);
 			_Face.Current = NULL;
-			_Face.CurrentName = "";
+			_Face.CurrentName.clear();
 		}
 		// Now we have a skeleton, we can update VpB and VpC.
 		sint64 vB, vC;
@@ -1242,7 +1246,7 @@ void CPlayerCL::displayDebug(float x, float &y, float lineStep)	// virtual
 // readWrite :
 // Read/Write Variables from/to the stream.
 //---------------------------------------------------
-void CPlayerCL::readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPlayerCL::readWrite(NLMISC::IStream &f)
 {
 	CCharacterCL::readWrite(f);
 

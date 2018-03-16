@@ -233,6 +233,26 @@ char		toLower ( const char ch );	// convert only one character
 std::string	toUpper ( const std::string &str);
 void		toUpper ( char *str);
 
+
+/**
+ *  Convert to an hexadecimal std::string
+ */
+std::string toHexa(const uint8 &b);
+std::string toHexa(const uint8 *data, uint size);
+std::string toHexa(const std::string &str);
+std::string toHexa(const char *str);
+
+/**
+*  Convert from an hexadecimal std::string
+*/
+bool fromHexa(const std::string &hexa, uint8 &b);
+bool fromHexa(const std::string &hexa, uint8 *data);
+bool fromHexa(const std::string &hexa, std::string &str);
+bool fromHexa(const char *hexa, uint8 &b);
+bool fromHexa(const char *hexa, uint8 *data);
+bool fromHexa(const char *hexa, std::string &str);
+bool fromHexa(const char hexa, uint8 &b);
+
 // Remove all the characters <= 32 (tab, space, new line, return, vertical tab etc..) at the beginning and at the end of a string
 template <class T> T trim (const T &str)
 {
@@ -285,6 +305,15 @@ inline sint nlstricmp(const char *lhs, const std::string &rhs) { return stricmp(
 // macros helper to convert UTF-8 std::string and wchar_t*
 #define wideToUtf8(str) (ucstring((ucchar*)str).toUtf8())
 #define utf8ToWide(str) ((wchar_t*)ucstring::makeFromUtf8(str).c_str())
+
+// macros helper to convert UTF-8 std::string and TCHAR*
+#ifdef _UNICODE
+#define tStrToUtf8(str) (ucstring((ucchar*)(LPCWSTR)str).toUtf8())
+#define utf8ToTStr(str) ((wchar_t*)ucstring::makeFromUtf8(str).c_str())
+#else
+#define tStrToUtf8(str) (std::string((LPCSTR)str))
+#define utf8ToTStr(str) (str.c_str())
+#endif
 
 // wrapper for fopen to be able to open files with an UTF-8 filename
 FILE* nlfopen(const std::string &filename, const std::string &mode);
@@ -385,6 +414,9 @@ std::string expandEnvironmentVariables(const std::string &s);
 bool explodeArguments(const std::string &str, std::vector<std::string> &args);
 std::string joinArguments(const std::vector<std::string> &args);
 
+/// Escape an argument to not evaluate environment variables or special cases
+std::string escapeArgument(const std::string &arg);
+
 /// This function kills a program using his pid (on unix, it uses the kill() POSIX function)
 bool killProgram(uint32 pid);
 
@@ -469,6 +501,22 @@ template <class T> void explode (const T &src, const T &sep, std::vector<T> &res
 	while(pos != std::string::npos);
 }
 
+/** Join a string (or ucstring) from a vector of strings with *sep* as separator. If sep can be more than 1 char, in this case,
+* we find the entire sep to separator (it s not a set of possible separator)
+*/
+template <class T, class U> void join(const std::vector<T>& strings, const U& separator, T &res)
+{
+	res.clear();
+
+	for (uint i = 0, len = strings.size(); i<len; ++i)
+	{
+		// add in separators before all but the first string
+		if (!res.empty()) res += separator;
+
+		// append next string
+		res += strings[i];
+	}
+}
 
 /* All the code above is used to add our types (uint8, ...) in the stringstream (used by the toString() function).
  * So we can use stringstream operator << and >> with all NeL simple types (except for ucchar and ucstring)
@@ -665,10 +713,10 @@ inline int nlisprint(int c)
 #endif
 
 // Open an url in a browser
-bool openURL (const char *url);
+bool openURL (const std::string &url);
 
 // Open a document
-bool openDoc (const char *document);
+bool openDoc (const std::string &document);
 
 // AntiBug method that return an epsilon if x==0, else x
 inline float	favoid0(float x)
@@ -689,6 +737,25 @@ inline T		iavoid0(T x)
 	return x;
 }
 
+// Helper to convert in memory between types of different sizes
+union C64BitsParts
+{
+	// unsigned
+	uint64 u64[1];
+	uint32 u32[2];
+	uint16 u16[4];
+	uint8 u8[8];
+
+	// signed
+	sint64 i64[1];
+	sint32 i32[2];
+	sint16 i16[4];
+	sint8 i8[8];
+
+	// floats
+	double d[1];
+	float f[2];
+};
 
 } // NLMISC
 

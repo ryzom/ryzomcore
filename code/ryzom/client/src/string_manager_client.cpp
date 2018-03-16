@@ -27,6 +27,10 @@
 #include "misc.h"
 #include "entity_cl.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 
@@ -1612,7 +1616,7 @@ const ucchar *CStringManagerClient::getTitleLocalizedName(const ucstring &titleI
 {
 	vector<ucstring> listInfos = getTitleInfos(titleId, women);
 
-	if (listInfos.size() > 0)
+	if (!listInfos.empty())
 	{
 		_TitleWords.push_back(listInfos[0]);
 		return _TitleWords.back().c_str();
@@ -1629,7 +1633,7 @@ vector<ucstring> CStringManagerClient::getTitleInfos(const ucstring &titleId, bo
 	vector<ucstring> listInfos;
 	splitUCString(titleId, ucstring("#"), listInfos);
 
-	if (listInfos.size() > 0)
+	if (!listInfos.empty())
 	{
 		if (titleId[0] != '#')
 		{

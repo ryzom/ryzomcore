@@ -183,7 +183,7 @@ bool CEntityCL::SInstanceCL::createLoading(const string &strShapeName, const str
 	if(!Loading.empty())
 	{
 		Scene->deleteInstance(Loading);
-		LoadingName = "";
+		LoadingName.clear();
 	}
 
 	// if the new instance is NULL, then clean ALL
@@ -193,7 +193,7 @@ bool CEntityCL::SInstanceCL::createLoading(const string &strShapeName, const str
 		{
 			releaseStaticFXs();
 			Scene->deleteInstance(Current);
-			CurrentName = "";
+			CurrentName.clear();
 		}
 	}
 	// else setup into loading
@@ -347,7 +347,7 @@ void CEntityCL::SInstanceCL::updateCurrentFromLoading(NL3D::USkeleton Skeleton)
 	if (!Current.empty())
 	{
 		Scene->deleteInstance(Current);
-		CurrentName = "";
+		CurrentName.clear();
 	}
 
 
@@ -355,7 +355,7 @@ void CEntityCL::SInstanceCL::updateCurrentFromLoading(NL3D::USkeleton Skeleton)
 	Current = Loading;
 	CurrentName = LoadingName;
 	Loading = NULL;
-	LoadingName = "";
+	LoadingName.clear();
 
 
 	// If there is a skeleton, bind the skin to the skeleton.
@@ -533,7 +533,6 @@ CEntityCL::CEntityCL()
 	_SelectionFX = NULL;
 	_MouseOverFX = NULL;
 	_StateFX = NULL;
-	_StateFXName = "";
 	_GMTitle = _InvalidGMTitleCode;
 	_LastLocalSelectBoxComputeTime = 0;
 	_InSceneInterfaceEnabled = true;
@@ -603,7 +602,7 @@ CEntityCL::~CEntityCL()
 	if (!_StateFX.empty() && Scene)
 	{
 		Scene->deleteInstance(_StateFX);
-		_StateFXName = "";
+		_StateFXName.clear();
 	}
 	if (!_SelectionFX.empty() && Scene)
 	{
@@ -751,7 +750,7 @@ void CEntityCL::init()
 	_GroundTypeCache= 0;
 
 	_StateFX = NULL;
-	_StateFXName = "";
+	_StateFXName.clear();
 	_SelectionFX = NULL;
 	_MouseOverFX = NULL;
 
@@ -2177,7 +2176,7 @@ void CEntityCL::displayDebugPropertyStages(float /* x */, float &y, float /* lin
 // serial :
 // Serialize entity.
 //-----------------------------------------------
-void CEntityCL::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CEntityCL::serial(NLMISC::IStream &f)
 {
 	readWrite(f);
 	if(f.isReading())
@@ -2188,7 +2187,7 @@ void CEntityCL::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 // readWrite :
 // Read/Write Variables from/to the stream.
 //-----------------------------------------------
-void CEntityCL::readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream)	// virtual
+void CEntityCL::readWrite(NLMISC::IStream &f)	// virtual
 {
 	f.serialVersion(4);
 
@@ -3599,7 +3598,7 @@ void CEntityCL::removeStateFx()
 	if (!_StateFX.empty() && Scene)
 	{
 		Scene->deleteInstance(_StateFX);
-		_StateFXName = "";
+		_StateFXName.clear();
 	}
 }
 

@@ -269,13 +269,26 @@
             posparent="slot_force"
             x="-1"
             y="6"
-			scale="true"
-			h="16"
-			w="32"
+            scale="true"
+            h="16"
+            w="32"
             color="255 255 255 255"
             texture="consider_impossible.tga"
             global_color="false"
             render_layer="1"
+            active="true" />
+      <view type="bitmap"
+            id="lock"
+            posref="BR BR"
+            posparent="slot_force"
+            x="-5"
+            y="-3"
+            h="14"
+            w="14"
+            color="255 255 255 255"
+            texture="w_win_lock.tga"
+            global_color="false"
+            render_layer="3"
             active="true" />
       <ctrl type="tooltip"
             id="target_tooltip"
@@ -3127,4 +3140,19 @@
     <action handler="set"
             params="dblink=UI:SAVE:ISDETACHED:DYNAMIC_CHAT@0|value=0" />
   </proc>
+
+  <!-- there seems to be no way to pass url to menu, use lua script for middleman -->
+  <group type="menu"
+         id="chat_uri_action_menu"
+         extends="base_menu">
+    <action id="copy"
+	    name="uiCopy"
+	    handler="lua"
+	    params="game:chatUrlCopy()" />
+    <action id="openig"
+            name="uiBrowse"
+            handler="lua"
+            params="game:chatUrlBrowse()" />
+  </group>
+
 </interface_config>

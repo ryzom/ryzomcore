@@ -26,6 +26,10 @@ using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 NLMISC_REGISTER_OBJECT(CViewBase, CCtrlButton, std::string, "button");
 
 namespace NLGUI
@@ -442,6 +446,9 @@ namespace NLGUI
 	// ***************************************************************************
 	sint32	CCtrlButton::getMaxUsedW() const
 	{
+		if (_Scale)
+			return _WReal;
+
 		sint32 txw, txh;
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		rVR.getTextureSizeFromId (_TextureIdNormal, txw, txh);

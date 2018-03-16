@@ -203,6 +203,7 @@ struct CClientConfig
 	uint			FreeLookAcceleration;
 	float			FreeLookSmoothingPeriod;
 	bool			FreeLookInverted;
+	bool			FreeLookTablet;
 	// true if camera is centered when user casts a spell
 	bool			AutomaticCamera;
 	bool			DblClickMode;
@@ -574,6 +575,9 @@ struct CClientConfig
 	/// Makes entities transparent if they are under cursor
 	bool			TransparentUnderCursor;
 
+	/// Allow item group to move from / to guild room
+	bool			ItemGroupAllowGuild;
+
 
 	/////////////////
 	// PREFERENCES //
@@ -831,7 +835,7 @@ public:
 	static void setValuesOnFileChange ();	// called when cfg modified
 
 	/// Serialize CFG.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 	/// End process
 	void release ();

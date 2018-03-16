@@ -95,7 +95,7 @@ namespace NLGUI
 		void setMultiLineSpace (sint nMultiLineSpace);
 		void setMultiLineMaxWOnly (bool state);
 		void setMultiLineClipEndSpace (bool state);	// use it for multiline edit box for instance
-		void setFirstLineX (uint firstLineX);
+		void setFirstLineX (sint firstLineX);
 		void setMultiMaxLine(uint l) { _MultiMaxLine = l; }
 		void setMultiMinLine(uint l) { _MultiMinLine = l; }
 
@@ -404,7 +404,7 @@ namespace NLGUI
 		uint	_TextSelectionEnd;
 
 		// First line X coordinate
-		uint	_FirstLineX;
+		sint	_FirstLineX;
 
 		/// Dynamic tooltips
 		std::vector<CCtrlToolTip*>	_Tooltips;

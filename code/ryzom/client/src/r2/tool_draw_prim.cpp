@@ -34,6 +34,9 @@
 // tmp tmp
 #include "nel/gui/ctrl_quad.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLMISC;
 

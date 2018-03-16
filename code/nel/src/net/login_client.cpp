@@ -127,7 +127,7 @@ string CLoginClient::authenticate(const string &loginServiceAddr, const ucstring
 
 string CLoginClient::authenticateBegin(const string &loginServiceAddr, const ucstring &login, const string &cpassword, const string &application)
 {
-	VerifyLoginPasswordReason = "";
+	VerifyLoginPasswordReason.clear();
 	VerifyLoginPassword = false;
 
 	// S01: connect to the LS
@@ -355,7 +355,7 @@ string CLoginClient::selectShardBegin(sint32 shardId)
 {
 	nlassert(_LSCallbackClient != 0 && _LSCallbackClient->connected());
 	
-	ShardChooseShardReason = "";
+	ShardChooseShardReason.clear();
 	ShardChooseShard = false;
 
 	if (ShardList.empty())

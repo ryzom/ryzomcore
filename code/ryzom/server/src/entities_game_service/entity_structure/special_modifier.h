@@ -123,7 +123,7 @@ struct CSpecialModifiers
 	/**
 	 * Serial
 	 */
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	/**
 	 * init all the special modifiers

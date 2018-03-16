@@ -209,7 +209,7 @@ public:
 	 * \param relativePath is the path to make relative to basePath.
 	 * return true if relativePath as been done relative to basePath, false is relativePath has not been changed.
 	 */
-	bool makePathRelative (const char *basePath, std::string &relativePath);
+	bool makePathRelative (const std::string &basePath, std::string &relativePath);
 
 	/** If File in this list is added more than one in an addSearchPath, it doesn't launch a warning.
 	 */
@@ -505,7 +505,7 @@ public:
 	 * \param relativePath is the path to make relative to basePath.
 	 * return true if relativePath as been done relative to basePath, false is relativePath has not been changed.
 	 */
-	static bool makePathRelative (const char *basePath, std::string &relativePath);
+	static bool makePathRelative(const std::string &basePath, std::string &relativePath);
 
 	/** Make path absolute
 	 * \param relativePath - The relative path

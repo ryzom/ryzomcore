@@ -258,7 +258,7 @@ void AISHEETS::CCreature::calcFightAndVisualValues(std::string* left, std::strin
 void AISHEETS::CCreature::parseFightConfig(NLGEORGES::UForm const* form, std::string const& fightConfigString, uint32 actionListIndex, NLMISC::CDbgPtr<CActionList>& fightConfig)
 {
 	NLGEORGES::UFormElm const* actionListNode = NULL;
-	const_cast<NLGEORGES::UFormElm&>(form->getRootNode()).getNodeByName(&actionListNode, fightConfigString.c_str());
+	const_cast<NLGEORGES::UFormElm&>(form->getRootNode()).getNodeByName(&actionListNode, fightConfigString);
 	
 	if (actionListNode)
 	{

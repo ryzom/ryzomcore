@@ -92,9 +92,9 @@ public:
 	void setWorldMatrix (const NLMISC::CMatrix &WM);
 
 
-	void setName (std::string &name) { _Name = name; }
+	void setName (const std::string &name) { _Name = name; }
 
-	std::string getName () { return _Name; }
+	std::string getName () const { return _Name; }
 
 	void open (bool opened) { _Opened = opened; }
 	bool isOpened () { return _Opened; }

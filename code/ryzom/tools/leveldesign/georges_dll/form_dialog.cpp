@@ -548,7 +548,7 @@ void CFormDialog::setToDocument (uint widget)
 			bool parentVDfnArray;
 			CForm *form=doc->getFormPtr ();
 			CFormElm *elm = doc->getRootNode (Widgets[widget]->getSlot ());
-			nlverify ( elm->getNodeByName (Widgets[widget]->getFormName ().c_str (), &parentDfn, indexDfn, 
+			nlverify ( elm->getNodeByName (Widgets[widget]->getFormName (), &parentDfn, indexDfn, 
 				&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 			// Must create array or virtual dfn ?
@@ -770,7 +770,7 @@ BOOL CFormDialog::OnCommand(WPARAM wParam, LPARAM lParam)
 					colorEdit->Edit.GetWindowText (str);
 
 					sint r, g, b;
-					if (sscanf (str, "%d,%d,%d", &r, &g, &b) == 3)
+					if (_stscanf (str, _T("%d,%d,%d"), &r, &g, &b) == 3)
 					{
 						clamp (r, 0, 255);
 						clamp (g, 0, 255);
@@ -811,7 +811,7 @@ BOOL CFormDialog::OnCommand(WPARAM wParam, LPARAM lParam)
 							bool parentVDfnArray;
 							CForm *form=doc->getFormPtr ();
 							CFormElm *elm = doc->getRootNode (Widgets[widgetId]->getSlot ());
-							nlverify ( elm->getNodeByName (Widgets[widgetId]->getFormName ().c_str (), &parentDfn, indexDfn, 
+							nlverify ( elm->getNodeByName (Widgets[widgetId]->getFormName (), &parentDfn, indexDfn, 
 								&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 							nlassert (parentDfn);
 
@@ -864,12 +864,8 @@ BOOL CFormDialog::OnCommand(WPARAM wParam, LPARAM lParam)
 						CGeorgesEditDoc *doc = View->GetDocument ();
 						if (doc)
 						{
-							// Build the filter string
-							char filter[512];
-							smprintf (filter, 512, "Dfn Files (*.dfn)|*.dfn|All Files(*.*)|*.*|");
-
 							// Open the dialog
-							CFileDialog dlgFile (TRUE, "*.dfn", "*.dfn", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter, theApp.m_pMainWnd);
+							CFileDialog dlgFile (TRUE, _T("*.dfn"), _T("*.dfn"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("Dfn Files (*.dfn)|*.dfn|All Files(*.*)|*.*|"), theApp.m_pMainWnd);
 							if (dlgFile.DoModal () == IDOK)
 							{
 								combo->Combo.UpdateData ();
@@ -947,7 +943,7 @@ BOOL CFormDialog::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 
 							// Search for the node
 							nlverify ((const CFormElm*)(doc->getRootNode (Widgets[i]->getSlot ()))->getNodeByName 
-								(Widgets[i]->getFormName ().c_str (), &parentDfn, lastElement, &nodeDfn, &nodeType, 
+								(Widgets[i]->getFormName (), &parentDfn, lastElement, &nodeDfn, &nodeType, 
 								&node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 
 							// Todo: multiply here by the spinner precision
@@ -958,8 +954,8 @@ BOOL CFormDialog::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 							value -= (float)(lpnmud->iDelta) * increment;
 
 							// Print the result
-							char result[512];
-							sprintf (result, "%g", value);
+							TCHAR result[512];
+							_stprintf (result, _T("%g"), value);
 							
 							// Set the windnow text
 							combo->Combo.SetWindowText (result);
@@ -1101,7 +1097,7 @@ void CFormDialog::getFromDocument ()
 		UFormDfn::TEntryType type;
 
 		// Search for the node
-		nlverify (((const CFormElm*)(doc->getRootNode (subObject->getSlot ())))->getNodeByName (subObject->getFormName ().c_str (), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
+		nlverify (((const CFormElm*)(doc->getRootNode (subObject->getSlot ())))->getNodeByName (subObject->getFormName (), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 
 		// Should have a parent DFN, else it is the root element
 		if (parentDfn)
@@ -1177,12 +1173,10 @@ void CFormDialog::getDfnName (string &result) const
 	{
 		// Get the DFN filename
 		CString str = doc->GetPathName ();
-		char extension[512];
-		_splitpath (str, NULL, NULL, NULL, extension);
-		result = (*extension == '.') ? extension+1 : extension;
+		result NLMISC::CFile::getExtension(tStrToUtf8(str));
 	}
 	else
-		result = "";
+		result.clear();
 }
 
 // ***************************************************************************
@@ -1298,14 +1292,14 @@ void IFormWidget::updateLabel ()
 					UFormElm::TWhereIsValue where;
 					CForm *form=doc->getFormPtr ();
 					CFormElm *elm = doc->getRootNode (getSlot ());
-					nlverify (elm->getValueByName (result, FormName.c_str (), UFormElm::NoEval, &where));
+					nlverify (elm->getValueByName (result, FormName, UFormElm::NoEval, &where));
 
 					// Get the value evaluated
 					std::string resultEvaluated;
 #ifdef TEST_EVAL_FORMULA
-					bool error = !elm->getValueByName (resultEvaluated, FormName.c_str (), UFormElm::Formula, &where);
+					bool error = !elm->getValueByName (resultEvaluated, FormName, UFormElm::Formula, &where);
 #else // TEST_EVAL_FORMULA
-					bool error = !elm->getValueByName (resultEvaluated, FormName.c_str (), UFormElm::Eval, &where);
+					bool error = !elm->getValueByName (resultEvaluated, FormName, UFormElm::Eval, &where);
 #endif // TEST_EVAL_FORMULA
 
 					// Complete the array ?
@@ -1348,7 +1342,7 @@ void IFormWidget::updateLabel ()
 					bool parentVDfnArray;
 					CForm *form=doc->getFormPtr ();
 					CFormElm *elm = doc->getRootNode (getSlot ());
-					nlverify ( elm->getNodeByName (FormName.c_str (), &parentDfn, indexDfn, 
+					nlverify ( elm->getNodeByName (FormName, &parentDfn, indexDfn, 
 						&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 					// Does the node exist ?
@@ -1358,18 +1352,18 @@ void IFormWidget::updateLabel ()
 						if (node->getForm () == doc->getFormPtr ())
 						{
 							// The node exist
-							Label.SetWindowText (SavedLabel.c_str());
+							Label.SetWindowText (utf8ToTStr(SavedLabel));
 						}
 						else
 						{
 							// The node exist in the parent form
-							Label.SetWindowText ((SavedLabel+" (in parent form)").c_str());
+							Label.SetWindowText (utf8ToTStr(SavedLabel + " (in parent form)"));
 						}
 					}	
 					else
 					{
 						// The node is empty
-						Label.SetWindowText ((SavedLabel+" (undefined)").c_str());
+						Label.SetWindowText (utf8ToTStr(SavedLabel + " (undefined)"));
 					}
 				}
 
@@ -1407,7 +1401,7 @@ bool IFormWidget::getNode (const CFormDfn **parentDfn, uint &lastElement, const 
 		bool parentVDfnArray;
 		CForm *form=doc->getFormPtr ();
 		CFormElm *elm = doc->getRootNode (getSlot ());
-		return (elm->getNodeByName (FormName.c_str (), parentDfn, 
+		return (elm->getNodeByName (FormName, parentDfn, 
 			lastElement, nodeDfn, nodeType, node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 	}
 	return false;
@@ -1515,10 +1509,10 @@ void IFormWidget::onOpenSelected ()
 	string str;
 	getValue (str);
 
-	std::string str2=CPath::lookup (str.c_str (), false, false);
+	std::string str2 = CPath::lookup (str, false, false);
 	if (str2.empty())
-		str2 = str.c_str ();
-	theApp.OpenDocumentFile (str2.c_str ());
+		str2 = str;
+	theApp.OpenDocumentFile (utf8ToTStr(str2));
 }
 
 // ***************************************************************************
@@ -1564,7 +1558,7 @@ void CFormMemCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent,
 	bool parentVDfnArray;
 	CForm *form=doc->getFormPtr ();
 	CFormElm *elm = doc->getRootNode (getSlot ());
-	nlverify ( elm->getNodeByName (FormName.c_str (), &parentDfn, indexDfn, 
+	nlverify ( elm->getNodeByName (FormName, &parentDfn, indexDfn, 
 		&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 	FirstId = dialog_index;
@@ -1694,10 +1688,10 @@ void CFormMemCombo::getFromDocument (CForm &form)
 	if ((SrcType == TypeForm) || (SrcType == TypeType))
 	{
 		string result;
-		if (doc->getRootNode(getSlot ())->getValueByName (result, FormName.c_str(), UFormElm::NoEval, NULL))
+		if (doc->getRootNode(getSlot ())->getValueByName (result, FormName, UFormElm::NoEval, NULL))
 		{
 			Combo.UpdateData ();
-			Combo.SetWindowText (result.c_str());
+			Combo.SetWindowText (utf8ToTStr(result));
 			Combo.UpdateData (FALSE);
 			updateLabel ();
 		}
@@ -1716,7 +1710,7 @@ void CFormMemCombo::getFromDocument (CForm &form)
 		UFormDfn::TEntryType type;
 		bool array;
 		bool parentVDfnArray;
-		nlverify (((const CFormElm*)doc->getRootNode(getSlot ()))->getNodeByName (FormName.c_str(), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
+		nlverify (((const CFormElm*)doc->getRootNode(getSlot ()))->getNodeByName (FormName, &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 		nlassert (array);
 
 		// Node exist ?
@@ -1729,13 +1723,13 @@ void CFormMemCombo::getFromDocument (CForm &form)
 			Combo.SetWindowText (label);
 
 			if (arrayNode->getForm () == &form)
-				Label.SetWindowText ("Array size:");
+				Label.SetWindowText (_T("Array size:"));
 			else
-				Label.SetWindowText ("Array size: (in parent form)");
+				Label.SetWindowText (_T("Array size: (in parent form)"));
 		}
 		else
 		{
-			Combo.SetWindowText ("0");
+			Combo.SetWindowText (_T("0"));
 		}
 		Combo.UpdateData (FALSE);
 	}
@@ -1749,7 +1743,7 @@ void CFormMemCombo::getFromDocument (CForm &form)
 		UFormDfn::TEntryType type;
 		bool array;
 		bool parentVDfnArray;
-		nlverify (((const CFormElm*)doc->getRootNode (getSlot ()))->getNodeByName (FormName.c_str(), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
+		nlverify (((const CFormElm*)doc->getRootNode (getSlot ()))->getNodeByName (FormName, &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 		nlassert (!array);
 
 		// Node exist ?
@@ -1757,11 +1751,11 @@ void CFormMemCombo::getFromDocument (CForm &form)
 		if (node)
 		{
 			CFormElmVirtualStruct *virtualNode = safe_cast<CFormElmVirtualStruct*> (node);
-			Combo.SetWindowText (virtualNode->DfnFilename.c_str());
+			Combo.SetWindowText (utf8ToTStr(virtualNode->DfnFilename));
 		}
 		else
 		{
-			Combo.SetWindowText ("");
+			Combo.SetWindowText (_T(""));
 		}
 		Combo.UpdateData (FALSE);
 	}
@@ -2350,7 +2344,7 @@ void CColorEdit::getValue (std::string &result)
 	}
 	else
 	{
-		result = "";
+		result.clear();
 	}
 }
 
@@ -2807,7 +2801,7 @@ void CIconWidget::onOk ()
 
 void CIconWidget::getValue (std::string &result)
 {
-	result = "";
+	result.clear();
 }
 
 // ***************************************************************************

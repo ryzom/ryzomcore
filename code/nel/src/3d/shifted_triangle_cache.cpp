@@ -17,6 +17,9 @@
 #include "std3d.h"
 #include "nel/3d/shifted_triangle_cache.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

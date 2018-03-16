@@ -54,6 +54,10 @@ extern "C" {
 using namespace std;
 // using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 extern const char *g_StereoOVR_fp40; //TODO: what?

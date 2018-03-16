@@ -22,6 +22,10 @@
 // define it For Debug purpose only. Normal use is to hide this line
 //#define		NL3D_GLSTATE_DISABLE_CACHE
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 #ifdef NL_STATIC

@@ -115,7 +115,7 @@ public:
 		return _val>other._val;
 	}
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial(_val);
 	}
@@ -151,7 +151,7 @@ public:
 	// serial()
 	// note serial should serialise: <Type> <uint16 sizeof(EventClass)> <event_parameters>
 	// the 'read' version of the serial should test the <sizeof> to ensure version robustness
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream) = 0;
+	virtual void serial(NLMISC::IStream &f) = 0;
 };
 
 
@@ -173,7 +173,7 @@ public:
 	// serial()
 	// note serial should serialise: <Type> <uint16 sizeof(EventClass)> <event_parameters>
 	// the 'read' version of the serial should test the <sizeof> to ensure version robustness
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 public:
 	/// the stunned creature id
@@ -199,7 +199,7 @@ public:
 	// serial()
 	// note serial should serialise: <Type> <uint16 sizeof(EventClass)> <event_parameters>
 	// the 'read' version of the serial should test the <sizeof> to ensure version robustness
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 public:
 	/// the waked creature id
@@ -227,7 +227,7 @@ public:
 	// serial()
 	// note serial should serialise: <Type> <uint16 sizeof(EventClass)> <event_parameters>
 	// the 'read' version of the serial should test the <sizeof> to ensure version robustness
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 public:
 	/// the creature Id
@@ -259,7 +259,7 @@ public:
 	// serial()
 	// note serial should serialise: <Type> <uint16 sizeof(EventClass)> <event_parameters>
 	// the 'read' version of the serial should test the <sizeof> to ensure version robustness
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 public:
 	/// the affected creature id
@@ -291,7 +291,7 @@ public:
 	// serial()
 	// note serial should serialise: <Type> <uint16 sizeof(EventClass)> <event_parameters>
 	// the 'read' version of the serial should test the <sizeof> to ensure version robustness
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 public:
 	/// the creature id
@@ -317,7 +317,7 @@ public:
 	// serial()
 	// note serial should serialise: <Type> <uint16 sizeof(EventClass)> <event_parameters>
 	// the 'read' version of the serial should test the <sizeof> to ensure version robustness
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 public:
 	/// the creature id
@@ -342,7 +342,7 @@ public:
 	// serial()
 	// note serial should serialise: <Type> <uint16 sizeof(EventClass)> <event_parameters>
 	// the 'read' version of the serial should test the <sizeof> to ensure version robustness
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 public:
 	/// the affected creature id

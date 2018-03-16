@@ -85,7 +85,7 @@
 #include "teleport.h"
 #include "movie_shooter.h"
 #include "interface_v3/input_handler_manager.h"
-
+#include "item_group_manager.h"
 #include "time_client.h"
 #include "auto_anim.h"
 #include "release.h"
@@ -692,7 +692,7 @@ void initMainLoop()
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		//nlinfo("****** InGame Interface Parsing and Init START ******");
 		pIM->initInGame(); // must be called after waitForUserCharReceived() because Ring information is used by initInGame()
-
+		CItemGroupManager::getInstance()->init(); // Init at the same time keys.xml is loaded
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
 		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing ingame", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
@@ -1191,7 +1191,7 @@ void initMainLoop()
 	}
 	else
 	{
-		nmsg = "";
+		nmsg.clear();
 		ProgressBar.newMessage (nmsg);
 		ProgressBar.newMessage (nmsg);
 	}
@@ -1464,8 +1464,8 @@ void loadBackgroundBitmap (TBackground background)
 	case EndBackground:
 		filename = ClientCfg.End_BG;
 		break;
-	case IntroNevrax:
-		filename = ClientCfg.IntroNevrax_BG;
+	case CustomBackground: // SpecialCase
+		filename = LoadingBackgroundBG;
 		break;
 	case IntroNVidia:
 		filename = ClientCfg.IntroNVidia_BG;
@@ -1535,7 +1535,15 @@ void loadBackgroundBitmap (TBackground background)
 void beginLoading (TBackground background)
 {
 	LoadingContinent = NULL;
-	loadBackgroundBitmap (background);
+	if (!LoadingBackgroundBG.empty())
+	{
+		loadBackgroundBitmap(CustomBackground);
+		LoadingBackgroundBG = "";
+	}
+	else
+	{
+		loadBackgroundBitmap (background);
+	}
 }
 
 // ***************************************************************************
@@ -1619,6 +1627,7 @@ void initBloomConfigUI()
 	bool supportBloom = Driver->supportBloomEffect();
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
 	CCtrlBaseButton* button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:bloom:c"));
 	if(button)
 	{
@@ -1627,6 +1636,12 @@ void initBloomConfigUI()
 
 	button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:square_bloom:c"));
 	if(button)
+	{
+		button->setFrozen(!supportBloom);
+	}
+
+	button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:fxaa:c"));
+	if (button)
 	{
 		button->setFrozen(!supportBloom);
 	}

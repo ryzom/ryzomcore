@@ -84,6 +84,7 @@ namespace NLGUI
 				FontOblique=false;
 				Underlined=false;
 				StrikeThrough=false;
+				GlobalColor=false;
 				Width=-1;
 				Height=-1;
 				MaxWidth=-1;
@@ -94,6 +95,7 @@ namespace NLGUI
 			bool FontOblique;
 			std::string FontFamily;
 			NLMISC::CRGBA TextColor;
+			bool GlobalColor;
 			bool Underlined;
 			bool StrikeThrough;
 			sint32 Width;
@@ -253,6 +255,7 @@ namespace NLGUI
 		int luaEndElement(CLuaState &ls);
 		int luaShowDiv(CLuaState &ls);
 		int luaParseHtml(CLuaState &ls);
+		int luaRenderHtml(CLuaState &ls);
 
 		REFLECT_EXPORT_START(CGroupHTML, CGroupScrollText)
 			REFLECT_LUA_METHOD("browse", luaBrowse)
@@ -265,6 +268,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("endElement", luaEndElement)
 			REFLECT_LUA_METHOD("showDiv", luaShowDiv)
 			REFLECT_LUA_METHOD("parseHtml", luaParseHtml)
+			REFLECT_LUA_METHOD("renderHtml", luaRenderHtml)
 			REFLECT_STRING("url", getURL, setURL)
 			REFLECT_FLOAT("timeout", getTimeout, setTimeout)
 		REFLECT_EXPORT_END
@@ -319,7 +323,7 @@ namespace NLGUI
 		// \name internal methods
 
 		// Add a group in the current parent group
-		void addGroup (CInterfaceGroup *group, uint beginSpace);
+		void addHtmlGroup (CInterfaceGroup *group, uint beginSpace);
 
 		// Get the current parent group
 		CInterfaceGroup *getCurrentGroup();
@@ -337,7 +341,7 @@ namespace NLGUI
 		void addString(const ucstring &str);
 
 		// Add an image in the current paragraph
-		void addImage(const char *image, bool globalColor, bool reloadImg=false, const CStyleParams &style = CStyleParams());
+		void addImage(const char *image, bool reloadImg=false, const CStyleParams &style = CStyleParams());
 
 		// Add a text area in the current paragraph
 		CInterfaceGroup *addTextArea (const std::string &templateName, const char *name, uint rows, uint cols, bool multiLine, const ucstring &content, uint maxlength);
@@ -348,7 +352,7 @@ namespace NLGUI
 
 		// Add a button in the current paragraph. actionHandler, actionHandlerParams and tooltip can be NULL.
 		CCtrlButton *addButton(CCtrlButton::EType type, const std::string &name, const std::string &normalBitmap, const std::string &pushedBitmap,
-			const std::string &overBitmap, bool useGlobalColor, const char *actionHandler, const char *actionHandlerParams, const char *tooltip,
+			const std::string &overBitmap, const char *actionHandler, const char *actionHandlerParams, const char *tooltip,
 			const CStyleParams &style = CStyleParams());
 
 		// Set the background color
@@ -710,7 +714,12 @@ namespace NLGUI
 		std::vector<CCellParams>	_CellParams;
 
 		// Indentation
-		uint	_Indent;
+		std::vector<uint>	_Indent;
+		inline uint getIndent() const {
+			if (_Indent.empty())
+				return 0;
+			return _Indent.back();
+		}
 
 		// Current node is a title
 		bool			_Title;
@@ -789,7 +798,7 @@ namespace NLGUI
 		void doBrowseLocalFile(const std::string &filename);
 
 		// load remote content using either GET or POST
-		void doBrowseRemoteUrl(const std::string &url, const std::string &referer, bool doPost = false, const SFormFields &formfields = SFormFields());
+		void doBrowseRemoteUrl(std::string url, const std::string &referer, bool doPost = false, const SFormFields &formfields = SFormFields());
 
 		// render html string as new browser page
 		bool renderHtmlString(const std::string &html);
@@ -803,33 +812,37 @@ namespace NLGUI
 
 		// ImageDownload system
 		enum TDataType {ImgType= 0, BnpType};
+		enum TImageType {NormalImage=0, OverImage};
 		
 		struct CDataImageDownload
 		{
 		public:
-			CDataImageDownload(CViewBase *img, CStyleParams style): Image(img), Style(style)
+			CDataImageDownload(CViewBase *img, CStyleParams style, TImageType type): Image(img), Style(style), Type(type)
 			{
 			}
 		public:
 			CViewBase * Image;
 			CStyleParams Style;
+			TImageType Type;
 		};
 
 		struct CDataDownload
 		{
 		public:
-			CDataDownload(CURL *c, const std::string &u, const std::string &d, FILE *f, TDataType t, CViewBase *i, const std::string &s, const std::string &m, const CStyleParams &style = CStyleParams()) : curl(c), url(u), dest(d), luaScript(s), md5sum(m), type(t), fp(f)
+			CDataDownload(const std::string &u, const std::string &d, TDataType t, CViewBase *i, const std::string &s, const std::string &m, const CStyleParams &style = CStyleParams(), const TImageType imagetype = NormalImage)
+				: data(NULL), fp(NULL), url(u), dest(d), type(t), luaScript(s), md5sum(m), redirects(0)
 			{
-				if (t == ImgType) imgs.push_back(CDataImageDownload(i, style));
+				if (t == ImgType) imgs.push_back(CDataImageDownload(i, style, imagetype));
 			}
 
 		public:
-			CURL *curl;
+			CCurlWWWData *data;
 			std::string url;
 			std::string dest;
 			std::string luaScript;
 			std::string md5sum;
 			TDataType type;
+			uint32 redirects;
 			FILE *fp;
 			std::vector<CDataImageDownload> imgs;
 		};
@@ -838,20 +851,22 @@ namespace NLGUI
 		CURLM *MultiCurl;
 		int RunningCurls;
 
+		bool startCurlDownload(CDataDownload &download);
+
 		void initImageDownload();
 		void checkImageDownload();
-		void addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams());
+		void addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams(), const TImageType type = NormalImage);
 		std::string localImageName(const std::string &url);
 		std::string getAbsoluteUrl(const std::string &url);
 
 		bool isTrustedDomain(const std::string &domain);
-		void setImage(CViewBase *view, const std::string &file);
+		void setImage(CViewBase *view, const std::string &file, const TImageType type);
 		void setImageSize(CViewBase *view, const CStyleParams &style = CStyleParams());
 
 		// BnpDownload system
 		void initBnpDownload();
 		void checkBnpDownload();
-		bool addBnpDownload(const std::string &url, const std::string &action, const std::string &script, const std::string &md5sum);
+		bool addBnpDownload(std::string url, const std::string &action, const std::string &script, const std::string &md5sum);
 		std::string localBnpName(const std::string &url);
 
 		void releaseDownloads();

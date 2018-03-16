@@ -61,6 +61,9 @@ void (*nglGetProcAddress(const char *procName))()
 }
 #endif	// NL_OS_WINDOWS
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 // ***************************************************************************
 // The exported function names
@@ -783,7 +786,13 @@ static bool	setupNVTextureEnvCombine4(const char	*glext)
 {
 	H_AUTO_OGL(setupNVTextureEnvCombine4);
 	CHECK_EXT("GL_NV_texture_env_combine4");
+#ifdef DEBUG_OGL_COMBINE43_DISABLE
+	// issue 310: disable extension to debug bug around CDriverGL::setupSpecularPass()
+	nlwarning("GL_NV_texture_env_combine4 disabled by request (DEBUG_OGL_COMBINE43_DISABLE)");
+	return false;
+#else
 	return true;
+#endif
 }
 
 // *********************************
@@ -799,7 +808,13 @@ static bool	setupATITextureEnvCombine3(const char	*glext)
 // #endif
 
 	CHECK_EXT("GL_ATI_texture_env_combine3");
+#ifdef DEBUG_OGL_COMBINE43_DISABLE
+	// issue 310: disable extension to debug bug around CDriverGL::setupSpecularPass()
+	nlwarning("GL_ATI_texture_env_combine3 disabled by request (DEBUG_OGL_COMBINE43_DISABLE)");
+	return false;
+#else
 	return true;
+#endif
 }
 
 // *********************************
@@ -1676,7 +1691,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// Check pixel program
 	// Disable feature ???
 	if (!ext.DisableHardwarePixelProgram)
-	{		
+	{
 		ext.ARBFragmentProgram = setupARBFragmentProgram(glext);	
 		ext.NVFragmentProgram2 = setupNVFragmentProgram2(glext);
 		ext.ARBFragmentShader = setupARBFragmentShader(glext);
@@ -1685,6 +1700,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 	{
 		ext.ARBFragmentProgram = false;
 		ext.NVFragmentProgram2 = false;
+		ext.ARBFragmentShader = false;
 	}
 
 	ext.OESDrawTexture = setupOESDrawTexture(glext);

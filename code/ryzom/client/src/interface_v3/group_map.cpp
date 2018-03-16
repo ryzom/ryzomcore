@@ -61,6 +61,10 @@
 
 #include <list>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 extern CContinentManager ContinentMngr;
 extern NL3D::UDriver *Driver;
 extern NL3D::UScene *Scene;
@@ -774,7 +778,7 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		{
 			SMap island;
 			island.Name = completeIslands[k].Island;
-			island.ContinentName = ""; // no access to world map for now ...
+			island.ContinentName.clear(); // no access to world map for now ...
 			island.MinX = (float) completeIslands[k].XMin;
 			island.MinY = (float) completeIslands[k].YMin;
 			island.MaxX = (float) completeIslands[k].XMax;
@@ -840,13 +844,13 @@ bool CGroupMap::getCtrlsUnder (sint32 x, sint32 y, sint32 clipX, sint32 clipY, s
 		(y < (clipY + clipH))))
 		return false;
 
-	bool bFound = false;
+//	bool bFound = false;
 	for (uint32 i = 0; i < _PolyButtons.size(); ++i)
 	{
 		if (_PolyButtons[i]->contains(CVector2f((float)x,(float)y)))
 		{
 			vICL.push_back(_PolyButtons[i]);
-			bFound = true;
+//			bFound = true;
 		}
 	}
 	return CInterfaceGroup::getCtrlsUnder(x, y, clipX, clipY, clipW, clipH, vICL);
@@ -1231,13 +1235,13 @@ void CGroupMap::checkCoords()
 				NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:RESPAWN_PT")->setValue32(_RespawnSelected);
 			else if (_MapMode == MapMode_SpawnSquad)
 				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT")->setValue32(_RespawnSelected);
-			if (_RespawnLM.size() > 0)
+			if (!_RespawnLM.empty())
 				_RespawnSelectedBitmap->setParentPos(_RespawnLM[_RespawnSelected]);
 		}
 		else
 		{
 			_RespawnSelected = getRespawnSelected();
-			if (_RespawnLM.size() > 0)
+			if (!_RespawnLM.empty())
 				_RespawnSelectedBitmap->setParentPos(_RespawnLM[_RespawnSelected]);
 		}
 	}
@@ -2391,9 +2395,8 @@ void CGroupMap::createContinentLandMarks()
 
 	// Continent Landmarks
 	createLMWidgets(_CurContinent->ContLandMarks);
-	uint nbUserLandMarks = std::min( uint(_CurContinent->UserLandMarks.size()), CContinent::getMaxNbUserLandMarks());
 	// User Landmarks
-	for(k = 0; k < nbUserLandMarks; ++k)
+	for(k = 0; k < _CurContinent->UserLandMarks.size(); ++k)
 	{
 		NLMISC::CVector2f mapPos;
 		worldToMap(mapPos, _CurContinent->UserLandMarks[k].Pos);
@@ -2431,8 +2434,7 @@ void CGroupMap::updateUserLandMarks()
 	removeLandMarks(_UserLM);
 
 	// Re create User Landmarks
-	uint nbUserLandMarks = std::min( uint(_CurContinent->UserLandMarks.size()), CContinent::getMaxNbUserLandMarks());
-	for(k = 0; k < nbUserLandMarks; ++k)
+	for(k = 0; k < _CurContinent->UserLandMarks.size(); ++k)
 	{
 		NLMISC::CVector2f mapPos;
 		worldToMap(mapPos, _CurContinent->UserLandMarks[k].Pos);
@@ -3030,7 +3032,7 @@ void CGroupMap::addRespawnPoints(const CRespawnPointsMsg &rpm)
 
 	// Choose the good map ! (select the first respawn point and check for first matching bounding box map
 	if (_MapMode != MapMode_Death) return;
-	if (_RespawnPos.size() == 0) return;
+	if (_RespawnPos.empty()) return;
 
 	CWorldSheet *pWS = dynamic_cast<CWorldSheet*>(SheetMngr.get(CSheetId("ryzom.world")));
 	if (pWS == NULL) return;
@@ -3113,7 +3115,7 @@ sint32 CGroupMap::getRespawnSelected() const
 //=========================================================================================================
 void CGroupMap::setRespawnSelected(sint32 nSpawnPointIndex)
 {
-	if (_RespawnPos.size() == 0) return;
+	if (_RespawnPos.empty()) return;
 	if (nSpawnPointIndex < 0) return;
 	if ((uint32)nSpawnPointIndex >= _RespawnPos.size()) return;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -3263,12 +3265,6 @@ void createUserLandMark(CCtrlBase * /* pCaller */, const string &/* params */)
 	// pop the rename dialog
 	LastClickedMap = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 	if (LastClickedMap->isInDeathMode()) return;
-	if (LastClickedMap->getNumUserLandMarks() >= CContinent::getMaxNbUserLandMarks() )
-	{
-		// too many landmark, can't create
-		im->displaySystemInfo(CI18N::get("uiNoMoreLandMarks"), "CHK");
-		return;
-	}
 	LastSelectedLandMark = NULL;
 	popupLandMarkNameDialog();
 }

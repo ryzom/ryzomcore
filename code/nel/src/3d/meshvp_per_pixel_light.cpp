@@ -29,6 +29,9 @@
 #include <string>
 
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -570,7 +573,7 @@ void	CMeshVPPerPixelLight::end(IDriver *drv)
 
 
 //=================================================================================
-void	CMeshVPPerPixelLight::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMeshVPPerPixelLight::serial(NLMISC::IStream &f)
 {
 	(void)f.serialVersion(0);
 	f.serial(SpecularLighting);

@@ -220,6 +220,22 @@
 		</parameter>
 	</action>
 	<action name="phrase_cancel_cast"		hardtext="uiCancelCast" contexts="game, r2ed_anim_test"/>
+	<action name="item_group_equip"	hardtext="uiMacroItemGroupEquip" contexts="game, r2ed_anim_test">
+		<parameter hardtext="uiMacroItemGroupName" type="%action_param_user_name" name="name" />
+	</action>
+	<action name="item_group_move"	hardtext="uiMacroItemGroupMove" contexts="game, r2ed_anim_test">
+		<parameter hardtext="uiMacroItemGroupName" type="%action_param_user_name" name="name" />
+		<parameter hardtext="uiMacroItemGroupDestination" type="%action_param_constant" name="destination" value="bag">
+			<value value="bag" hardtext="uimMtBag" />
+			<value value="pet_animal1" hardtext="uimMtPaPacker0" />
+			<value value="pet_animal2" hardtext="uimMtPaPacker1" />
+			<value value="pet_animal3" hardtext="uimMtPaPacker2" />
+			<value value="pet_animal4" hardtext="uimMtPaPacker3" />
+			<value value="player_room" hardtext="uimMtRoom" />
+			<value value="guild"	   hardtext="uimMtGuild" />
+		</parameter>
+	</action>
+	<action name="inv_temp_all" hardtext="uittTakeAll" contexts="game" />
 </action_category>
 
 <action_category name="chat" hardtext="uiChat" contexts="game, r2ed, r2ed_anim_test"> <!-- not available in r2ed for now -->

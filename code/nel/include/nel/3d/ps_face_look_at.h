@@ -40,7 +40,7 @@ public:
 	 */
 	CPSFaceLookAt(CSmartPtr<ITexture> tex = NULL);
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	NLMISC_DECLARE_CLASS(CPSFaceLookAt);
 

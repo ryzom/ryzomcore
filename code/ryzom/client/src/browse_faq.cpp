@@ -17,6 +17,10 @@
 #include "stdpch.h"
 #include "browse_faq.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLMISC;
 
 void browseFAQ(NLMISC::CConfigFile &cf)
@@ -60,6 +64,6 @@ void browseFAQ(NLMISC::CConfigFile &cf)
 	}
 	else
 	{
-		openURL(url.c_str());
+		openURL(url);
 	}
 }

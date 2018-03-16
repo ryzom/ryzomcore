@@ -21,6 +21,10 @@
 
 #include <libxml/parser.h>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 //=======================================
 void CXMLAutoPtr::destroy()
 {

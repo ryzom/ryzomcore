@@ -376,6 +376,12 @@ public:
 
 
 	/**
+	* Make fully transparent pixels (alpha 0) black.
+	*/
+	void	makeTransparentPixelsBlack();
+
+
+	/**
 	 * Return if the bitmap has uniform alpha values for all pixels.
 	 * \param alpha return the uniform value if return is true
 	 * \return uniform or not
@@ -609,7 +615,7 @@ public:
 	/**
 	 * Extended version of blit. The destinaion of the blit is 'this' bitmap
 	 * Source and dest rect are clamped as necessary.
-	 * For now, only RGBA is uspported (an asertion occurs otherwise)
+	 * For now, only RGBA is supported (an asertion occurs otherwise)
 	 * mipmap are not updated.
 	 * IMPORTANT : copy to self is not handled correctly
 	 */
@@ -630,11 +636,17 @@ public:
 
 
 
-	/** Get the pixel at the given coorrdinate.
+	/** Get the pixel at the given coordinate.
 	  * Works in RGBA and DXTC modes.
 	  * Outside of the bitmap it returns Black (or if mipmap is not found)
 	  */
 	CRGBA  getPixelColor(sint x, sint y, uint32 numMipMap = 0) const;
+
+	/** Set the pixel at the given coordinate.
+	* Works in RGBA mode only.
+	*/
+	void  setPixelColor(sint x, sint y, CRGBA c, uint32 numMipMap = 0);
+
 	/**
 	 * Horizontal flip (all the columns are flipped)
 	 * Works only with RGBA, and DXTC formats (only if w/h is a power of 2)

@@ -23,6 +23,10 @@
 
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLMISC
 {
 
@@ -61,7 +65,7 @@ static int readGIFData(GifFileType *gif, GifByteType *data, int length)
 	}
 	catch(...)
 	{
-		nlwarning("error while reading JPEG image");
+		nlwarning("error while reading GIF image");
 
 		return 0;
 	}
@@ -211,9 +215,6 @@ uint8 CBitmap::readGIF( NLMISC::IStream &f )
 
 					for (uint32 x = 0; x < width; x++)
 					{
-						srcOffset++;
-						dstOffset+= dstChannels;
-
 						uint32 index = curFrame->RasterBits[srcOffset];
 
 						if ((sint32)index != transparency)
@@ -246,6 +247,9 @@ uint8 CBitmap::readGIF( NLMISC::IStream &f )
 						_Data[0][dstOffset+1] = g;
 						_Data[0][dstOffset+2] = b;
 						_Data[0][dstOffset+3] = a;
+
+						srcOffset++;
+						dstOffset+= dstChannels;
 					} // x loop
 				} // y loop
 			} // pass loop
@@ -258,9 +262,6 @@ uint8 CBitmap::readGIF( NLMISC::IStream &f )
 			uint32 dstOffset = (y + offset_y)*gif->SWidth*dstChannels + offset_x*dstChannels;
 			for (uint32 x = 0; x < width; x++)
 			{
-				srcOffset++;
-				dstOffset+= dstChannels;
-
 				uint32 index = curFrame->RasterBits[srcOffset];
 
 				if ((sint32)index != transparency)
@@ -293,6 +294,9 @@ uint8 CBitmap::readGIF( NLMISC::IStream &f )
 				_Data[0][dstOffset+1] = g;
 				_Data[0][dstOffset+2] = b;
 				_Data[0][dstOffset+3] = a;
+
+				srcOffset++;
+				dstOffset+= dstChannels;
 			} // x loop
 		} // y loop
 	}

@@ -88,7 +88,7 @@ private:
 	public:
 		std::string MeshName;
 	public:
-		CMeshLoad (const std::string &meshName, IShape **ppShp, IDriver *pDriver, const CVector &position, uint selectedTexture);
+		CMeshLoad (const std::string &meshName, IShape **ppShp, IDriver *pDriver, const NLMISC::CVector &position, uint selectedTexture);
 		void run (void);
 		void getName (std::string &result) const;
 	};
@@ -122,7 +122,7 @@ private:
 		CTextureFile	*TextureFile;
 		bool			*Signal;
 	public:
-		CTextureLoad(CTextureFile *textureFile, bool *psgn, const CVector &position)
+		CTextureLoad(CTextureFile *textureFile, bool *psgn, const NLMISC::CVector &position)
 			: TextureFile(textureFile), Signal(psgn)
 		{
 			Position = position;

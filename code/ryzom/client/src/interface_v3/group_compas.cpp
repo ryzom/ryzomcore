@@ -851,14 +851,13 @@ void CGroupCompasMenu::setActive (bool state)
 				{
 					landMarkSubMenu->addSeparatorAtIndex(contLandMarkIndex++);
 				}
-				// User landmarks
-				uint nbUserLandMarks = std::min( uint(currCont->UserLandMarks.size()), CContinent::getMaxNbUserLandMarks() );
 
+				// User landmarks
 				// Sort the landmarks
 				std::vector<CUserLandMark> sortedLandmarks(currCont->UserLandMarks);
 				std::sort(sortedLandmarks.begin(), sortedLandmarks.end(), UserLandMarksSortPredicate);
 
-				for(k = 0; k < nbUserLandMarks; ++k)
+				for(k = 0; k < sortedLandmarks.size(); ++k)
 				{
 					if (sortedLandmarks[k].Type < CUserLandMark::UserLandMarkTypeCount)
 					{

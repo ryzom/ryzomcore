@@ -20,6 +20,7 @@
 #include "stdpch.h"
 
 #include <sstream>
+#include <locale>
 
 // Interface includes
 #include "interface_manager.h"
@@ -2418,6 +2419,7 @@ class CAHTarget : public IActionHandler
 		ucstring entityName;
 		entityName.fromUtf8 (getParam (Params, "entity"));
 		bool preferCompleteMatch = (getParam (Params, "prefer_complete_match") != "0");
+		bool quiet = (getParam (Params, "quiet") == "true");
 
 		if (!entityName.empty())
 		{
@@ -2432,6 +2434,12 @@ class CAHTarget : public IActionHandler
 			{
 				// Get the entity with a partial match
 				entity = EntitiesMngr.getEntityByName (entityName, false, false);
+			}
+
+			if (entity == NULL)
+			{
+				//Get the entity with a sheetName
+				entity = EntitiesMngr.getEntityBySheetName(entityName.toUtf8());
 			}
 			
 			if (entity)
@@ -2457,7 +2465,8 @@ class CAHTarget : public IActionHandler
 					// to avoid campfire selection exploit #316
 					nldebug("is not prop selectable");
 					CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-					pIM->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
+					if(!quiet)
+						pIM->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
 					return;
 				}
 
@@ -2467,7 +2476,8 @@ class CAHTarget : public IActionHandler
 			else
 			{
 				CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-				pIM->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
+				if(!quiet)
+					pIM->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
 			}
 		}
 	}
@@ -2481,14 +2491,22 @@ class CAHAddShape : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		string sShape = getParam(Params, "shape");
-		if(sShape.empty())
+
+		if (sShape.empty())
 		{
 			nlwarning("Command 'add_shape': need at least the parameter shape.");
 			return;
 		}
+
 		if (!Scene)
 		{
 			nlwarning("No scene available");
+			return;
+		}
+
+		if (!UserEntity)
+		{
+			nlwarning("UserEntity not yet defined, possibly called runAH from Lua");
 			return;
 		}
 
@@ -2520,7 +2538,6 @@ class CAHAddShape : public IActionHandler
 		}
 
 		bool have_shapes = true;
-		bool first_shape = true;
 		while(have_shapes)
 		{
 			string shape;
@@ -2537,8 +2554,8 @@ class CAHAddShape : public IActionHandler
 				have_shapes = false;
 			}
 
-
-			CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector((float)x, (float)y, (float)z), c, u, first_shape);
+			sint32 idx;
+			CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector((float)x, (float)y, (float)z), c, u, false, idx);
 			UInstance instance = instref.Instance;
 
 			if(!instance.empty())
@@ -2558,7 +2575,7 @@ class CAHAddShape : public IActionHandler
 						instance.getMaterial(j).setShininess( 1000.0f );
 					}
 
-					if (!texture_name.empty() && first_shape)
+					if (!texture_name.empty())
 					{
 						sint numStages = instance.getMaterial(j).getLastTextureStage() + 1;
 						for(sint l = 0; l < numStages; l++)
@@ -2570,8 +2587,6 @@ class CAHAddShape : public IActionHandler
 						}
 					}
 				}
-
-				first_shape = false;
 
 				if (transparency.empty())
 					::makeInstanceTransparent(instance, 255, false);
@@ -2605,6 +2620,9 @@ class CAHAddShape : public IActionHandler
 					instance.setPos(CVector((float)x, (float)y, (float)z));
 					instance.setRotQuat(dir.getRot());
 				}
+				
+				instance.setTransformMode(UTransformable::RotEuler);
+				
 				// if the shape is a particle system, additionnal parameters are user params
 				UParticleSystemInstance psi;
 				psi.cast (instance);
@@ -3187,17 +3205,20 @@ class CHandlerGameConfigMode : public IActionHandler
 				bool bFound = false;
 				string tmp = toString(VideoModes[i].Frequency);
 				for (j = 0; j < (sint)stringFreqList.size(); ++j)
+				{
 					if (stringFreqList[j] == tmp)
 					{
 						bFound = true;
 						break;
 					}
-					if (!bFound)
-					{
-						stringFreqList.push_back(tmp);
-						if (ClientCfg.Frequency == VideoModes[i].Frequency)
-							nFoundFreq = j;
-					}
+				}
+
+				if (!bFound)
+				{
+					stringFreqList.push_back(tmp);
+					if (ClientCfg.Frequency == VideoModes[i].Frequency)
+						nFoundFreq = j;
+				}
 			}
 		}
 		if (nFoundFreq == -1) nFoundFreq = 0;
@@ -4491,3 +4512,63 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerEmote, "emote");
+
+//=================================================================================================================
+class CHandlerSortTribeFame : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	{
+		CGroupList * list = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:fame:content:tribes:list"));
+		if (list && list->getNumChildren() > 1)
+		{
+			uint nbChilds = list->getNumChildren();
+
+			// std::collate does not work with ucchar
+			std::vector<string> names;
+
+			for (uint i = 0; i < nbChilds; ++i)
+			{
+				CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(list->getChild(i));
+				if (!pIG) break;
+
+				CViewText *pVT = dynamic_cast<CViewText *>(pIG->getView("t"));
+				if (!pVT) break;
+
+				names.push_back(toUpper(pVT->getText().toUtf8()));
+			}
+
+			if (names.size() != nbChilds)
+			{
+				nlwarning("Failed to sort tribe fame list");
+				return;
+			}
+
+			std::locale loc("");
+			const std::collate<char>& coll = std::use_facet<std::collate<char> >(loc);
+
+			for(uint i = 0; i < nbChilds - 1; ++i)
+			{
+				uint imin = i;
+				for(uint j = i; j < nbChilds; j++)
+				{
+					// simple comparison fails with accented letters
+					if (coll.compare(names[j].c_str(), names[j].c_str() + names[j].size(),
+							names[imin].c_str(), names[imin].c_str() + names[imin].size()) < 0)
+					{
+						imin = j;
+					}
+				}
+				if (imin != i)
+				{
+					list->swapChildren(i, imin);
+					std::swap(names[i], names[imin]);
+				}
+			}
+
+			list->invalidateCoords();
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerSortTribeFame, "sort_tribefame");
+

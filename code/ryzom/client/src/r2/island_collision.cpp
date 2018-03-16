@@ -33,6 +33,10 @@
 //
 #include "nel/3d/texture_file.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 extern CContinentManager ContinentMngr;
 
 using namespace NL3D;

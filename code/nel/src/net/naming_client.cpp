@@ -128,7 +128,7 @@ void cbRegisterBroadcast (CMessage &msgin, TSockId /* from */, CCallbackNetBase 
 		std::vector<CInetAddress> addrs;
 		CNamingClient::find (sid, addrs);
 
-		if (addrs.size() == 0)
+		if (addrs.empty())
 		{
 			CNamingClient::RegisteredServicesMutex.enter ();
 			CNamingClient::RegisteredServices.push_back (CNamingClient::CServiceEntry (name, sid, addr));

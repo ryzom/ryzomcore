@@ -120,7 +120,7 @@ public:
 
 	void setWorldMatrix (const NLMISC::CMatrix &WM);
 
-	bool isRoot() { return _LocalVolume.size() == 0; }
+	bool isRoot() { return _LocalVolume.empty(); }
 
 	//\name Sound related.
 	//@{

@@ -45,6 +45,9 @@
 #include <assert.h>
 
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLNET;
 using namespace NLMISC;
@@ -724,7 +727,7 @@ void CDynamicMapClient::onEditionModeConnected( uint32 userSlotId, uint32 /* adv
 	_EditionModule->getCurrentScenario()->setSessionType(st_edit);
 	scenarioUpdated(highLevel, willTP, initialActIndex); // handle by CEditor.cpp that call _EditionModule->updateScenario(highLevel);
 
-	CEditor::connexionMsg("");
+	CEditor::connectionMsg("");
 	//_EditionModule->requestSetPioneerRight( TPioneerRight::DM);
 }
 
@@ -778,13 +781,13 @@ void CDynamicMapClient::onResetEditionMode()
 void CDynamicMapClient::onTestModeConnected()
 {
 	//H_AUTO(R2_CDynamicMapClient_onTestModeConnected)
-	CEditor::connexionMsg("");
+	CEditor::connectionMsg("");
 }
 
 void CDynamicMapClient::onTestModeDisconnected(TSessionId /* sessionId */, uint32 /* lasAct */, TScenarioSessionType /* sessionType */)
 {
 	//H_AUTO(R2_CDynamicMapClient_onTestModeDisconnected)
-	CEditor::connexionMsg("uimR2EDGoToEditingMode");
+	CEditor::connectionMsg("uimR2EDGoToEditingMode");
 }
 
 CObject* CDynamicMapClient::getCurrentScenarioHighLevel()

@@ -365,7 +365,6 @@ void CMacroCmdManager::addActionManagerEntries()
 
 	CBaseAction::CParameter p;
 	p.Type = CBaseAction::CParameter::Constant;
-	p.Name = "";
 	p.LocalizedName = "uiMacroName";
 
 	uint i;
@@ -917,7 +916,7 @@ public:
 		CAHManager::getInstance()->runActionHandler("new_macro_enter_name",NULL);
 
 		// Check if macro has more than one command
-		if (pMCM->CurrentEditMacro.Commands.size() == 0) return;
+		if (pMCM->CurrentEditMacro.Commands.empty()) return;
 
 		// Add a macro
 		if (pMCM->CurrentEditMacroNb != -1)

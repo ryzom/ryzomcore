@@ -359,7 +359,7 @@ void PERSISTENT_CLASS::store(CPersistentDataRecord &pdr _PERSISTENT_STORE_ARGS) 
 			// this class has been configured to use a specific token family. This means that it is not possible
 			// to store the class to a pdr that is not using the same token family.
 			BOMB_IF(pdr.getTokenFamily()!=NL_MACRO_TO_STR(PERSISTENT_TOKEN_FAMILY),
-				NL_MACRO_TO_STR(PERSISTENT_CLASS)"::store() requires token family '"NL_MACRO_TO_STR(PERSISTENT_TOKEN_FAMILY)"'"
+				NL_MACRO_TO_STR(PERSISTENT_CLASS) "::store() requires token family '" NL_MACRO_TO_STR(PERSISTENT_TOKEN_FAMILY) "'"
 				" but pdr is using token family '"+pdr.getTokenFamily()+"'",
 				return);
 		#endif

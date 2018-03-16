@@ -37,6 +37,10 @@
 #include "nel/misc/events.h"
 #include "nel/gui/root_group.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	void LinkHack();
@@ -442,7 +446,7 @@ namespace NLGUI
 			if (sZeStart[sZeStart.size()-1] == ':')
 				sZeStart = sZeStart.substr(0, sZeStart.size()-1);
 
-			while (sZeStart != "")
+			while (!sZeStart.empty())
 			{
 				if (sEltId[0] == ':')
 					sTmp = sZeStart	+ sEltId;
@@ -462,7 +466,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	CInterfaceElement* CWidgetManager::getElementFromDefine( const std::string &defineId )
 	{
-		return getElementFromId( parser->getDefine( defineId ) );
+		return getElementFromId( _Parser->getDefine( defineId ) );
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -1758,16 +1762,12 @@ namespace NLGUI
 
 		// *** According to best matching hotspot, and new screen resolution, move the window
 		// x
-		if(bestXHotSpot==Hotspot_xL)
-			x= x;
-		else if(bestXHotSpot==Hotspot_xM)
+		if(bestXHotSpot==Hotspot_xM)
 			x= newScreenW/2 + posXToMiddle - w/2;
 		else if(bestXHotSpot==Hotspot_xR)
 			x= newScreenW - posXToRight - w;
 		// y
-		if(bestYHotSpot==Hotspot_Bx)
-			y= y;
-		else if(bestYHotSpot==Hotspot_Mx)
+		if(bestYHotSpot==Hotspot_Mx)
 			y= newScreenH/2 + posYToMiddle + h/2;
 		else if(bestYHotSpot==Hotspot_Tx)
 			y= newScreenH - posYToTop;
@@ -2115,8 +2115,6 @@ namespace NLGUI
 				return false;
 
 		bool handled = false;
-
-		CViewPointer *_Pointer = static_cast< CViewPointer* >( getPointer() );
 
 		if( evnt.getType() == CEventDescriptor::system )
 		{
@@ -3279,7 +3277,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	void CWidgetManager::startAnim( const std::string &animId )
 	{
-		CInterfaceAnim *pIT = parser->getAnim( animId );
+		CInterfaceAnim *pIT = _Parser->getAnim( animId );
 		if( pIT == NULL )
 			return;
 
@@ -3305,7 +3303,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	void CWidgetManager::stopAnim( const std::string &animId )
 	{
-		CInterfaceAnim *pIT = parser->getAnim( animId );
+		CInterfaceAnim *pIT = _Parser->getAnim( animId );
 
 		for( uint i = 0; i < activeAnims.size(); ++i )
 			if( activeAnims[ i ] == pIT )
@@ -3328,7 +3326,7 @@ namespace NLGUI
 	void CWidgetManager::runProcedure( const std::string &procName, CCtrlBase *pCaller,
 		const std::vector< std::string> &paramList )
 	{
-		CProcedure *procp = parser->getProc( procName );
+		CProcedure *procp = _Parser->getProc( procName );
 		if( procp == NULL )
 			return;
 
@@ -3339,7 +3337,7 @@ namespace NLGUI
 		{
 			const CProcAction &action = proc.Actions[i];
 			// test if the condition for the action is valid
-			if( action.CondBlocks.size() > 0 )
+			if (!action.CondBlocks.empty())
 			{
 				CInterfaceExprValue result;
 				result.setBool( false );
@@ -3364,7 +3362,7 @@ namespace NLGUI
 	void CWidgetManager::setProcedureAction( const std::string &procName, uint actionIndex,
 		const std::string &ah, const std::string &params )
 	{
-		CProcedure *procp = parser->getProc( procName );
+		CProcedure *procp = _Parser->getProc( procName );
 		if( procp == NULL )
 			return;
 
@@ -3740,7 +3738,7 @@ namespace NLGUI
 
 		CReflectableRegister::registerClasses();
 
-		parser = IParser::createParser();
+		_Parser = IParser::createParser();
 
 		_Pointer = NULL;
 		curContextHelp = NULL;
@@ -3782,6 +3780,9 @@ namespace NLGUI
 		{
 			delete _MasterGroups[i].Group;
 		}
+
+		delete _Parser;
+		_Parser = NULL;
 
 		_Pointer = NULL;
 		curContextHelp = NULL;

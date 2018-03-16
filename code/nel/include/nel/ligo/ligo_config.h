@@ -49,13 +49,13 @@ public:
 	  * This file will try to open the file ligo class description file (XML) using the LigoClass as file name.
 	  * It will try first to load directly the file and then to lookup the file in NLMISC::CPath.
 	  */
-	bool readConfigFile (const char *fileName, bool parsePrimitiveComboContent);
+	bool readConfigFile (const std::string &fileName, bool parsePrimitiveComboContent);
 
 	/**
 	  * This file will read the file ligo class description file (XML) using the LigoClass as file name.
 	  * It will try first to load directly the file and then to lookup the file in NLMISC::CPath.
 	  */
-	bool readPrimitiveClass (const char *fileName, bool parsePrimitiveComboContent);
+	bool readPrimitiveClass (const std::string &fileName, bool parsePrimitiveComboContent);
 
 	bool reloadIndexFile(const std::string &indexFileName = std::string());
 
@@ -100,14 +100,14 @@ public:
 	/// Build a standard human readable alias string
 	std::string			aliasToString(uint32 fullAlias);
 	/// Read a standard human readable alias string
-	uint32				aliasFromString(std::string fullAlias);
+	uint32				aliasFromString(const std::string &fullAlias);
 
 
 	// Get a primitive class
 	const CPrimitiveClass		*getPrimitiveClass (const NLLIGO::IPrimitive &primitive) const;
 
 	// Get a primitive class
-	const CPrimitiveClass		*getPrimitiveClass (const char *className) const;
+	const CPrimitiveClass		*getPrimitiveClass (const std::string &className) const;
 
 	// Get the primitive color
 	NLMISC::CRGBA				getPrimitiveColor (const NLLIGO::IPrimitive &primitive);
@@ -134,10 +134,10 @@ public:
 	bool canBeRoot (const NLLIGO::IPrimitive &primitive);
 
 	// Read a property from an XML file
-	bool getPropertyString (std::string &result, const char *filename, xmlNodePtr xmlNode, const char *propName);
+	bool getPropertyString (std::string &result, const std::string &filename, xmlNodePtr xmlNode, const std::string &propName);
 
 	// Output error message
-	void syntaxError (const char *filename, xmlNodePtr xmlNode, const char *format, ...);
+	void syntaxError (const std::string &filename, xmlNodePtr xmlNode, const char *format, ...);
 	virtual void errorMessage (const char *format, ... );
 
 	// Access to the config string
@@ -157,7 +157,7 @@ public:
 private:
 
 	// Init primitive class manager
-	bool		initPrimitiveClass (const char *filename);
+	bool		initPrimitiveClass (const std::string &ilename);
 
 	// The primitive class manager
 	std::map<std::string, CPrimitiveClass>	_PrimitiveClasses;

@@ -61,6 +61,10 @@ public:
 		sint32 Top;			// Distance between origin and top of the texture
 		sint32 Left;		// Distance between origin and left of the texture
 		sint32 AdvX;		// Advance to the next caracter
+
+		SLetterInfo():Char(0), FontGenerator(NULL), Size(0), Embolden(false), Oblique(false), Next(NULL), Prev(NULL), Cat(0), CharWidth(0), CharHeight(0), GlyphIndex(0), Top(0), Left(0), AdvX(0)
+		{
+		}
 	};
 
 	struct SLetterKey
@@ -74,6 +78,10 @@ public:
 		uint32 getVal();
 		//bool operator < (const SLetterKey&k) const;
 		//bool operator == (const SLetterKey&k) const;
+
+		SLetterKey():Char(0), FontGenerator(NULL), Size(0), Embolden(false), Oblique(false)
+		{
+		}
 	};
 
 public:
@@ -104,7 +112,7 @@ private:
 
 	/// Todo: serialize a font texture.
 public:
-	virtual void	serial(NLMISC::IStream &/* f */) throw(NLMISC::EStream) {nlstop;}
+	virtual void	serial(NLMISC::IStream &/* f */) {nlstop;}
 	NLMISC_DECLARE_CLASS(CTextureFont);
 
 };

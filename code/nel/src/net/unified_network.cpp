@@ -828,17 +828,17 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 	for (uint i = 0; i < addr.size(); i++)
 	{
 		// first we have to look if we have a network that can established the connection
-		
 		uint j = 0;
 
+		// it's loopback ip address, it's ok
 		if (!addr[i].isLoopbackIPAddress())
 		{
-			// it's loopback ip address, it's ok
 			for (j = 0; j < laddr.size (); j++)
 			{
 				if (laddr[j].internalNetAddress () == addr[i].internalNetAddress ())
 				{
-					break; // it's ok, we can try
+					// it's ok, we can try
+					break;
 				}
 			}
 
@@ -1272,7 +1272,8 @@ uint8 CUnifiedNetwork::findConnectionId (TServiceId sid, uint8 nid)
 	uint8 connectionId = _IdCnx[sid.get()].DefaultNetwork;
 
 	if (nid == 0xFF)
-	{	// default network
+	{
+		// default network
 		//nldebug ("HNETL5: nid %hu, will use the default connection %hu", (uint16)nid, (uint16)connectionId);
 	}
 	else if (nid >= _IdCnx[sid.get()].NetworkConnectionAssociations.size())
@@ -1293,7 +1294,6 @@ uint8 CUnifiedNetwork::findConnectionId (TServiceId sid, uint8 nid)
 
 	if (connectionId >= _IdCnx[sid.get()].Connections.size() || !_IdCnx[sid.get()].Connections[connectionId].valid() || !_IdCnx[sid.get()].Connections[connectionId].CbNetBase->connected())
 	{
-		
 		if (nid != 0xFF)
 		{
 			// not a default network. There's a problem with the selected connectionID, so try to find a valid one

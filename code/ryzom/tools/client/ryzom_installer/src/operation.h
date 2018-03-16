@@ -17,6 +17,8 @@
 #ifndef OPERATION_H
 #define OPERATION_H
 
+#include <QtCore/QtCore>
+
 class IOperationProgressListener
 {
 public:
@@ -29,6 +31,7 @@ public:
 	virtual void operationProgress(qint64 current, const QString &filename) =0;
 	virtual void operationSuccess(qint64 total) =0;
 	virtual void operationFail(const QString &error) =0;
+	virtual void operationContinue() = 0;
 
 	virtual bool operationShouldStop() =0;
 };
@@ -62,12 +65,15 @@ enum OperationStep
 	CleanFiles,
 	ExtractBnpClient,
 	CopyInstaller,
+	LaunchInstalledInstaller,
 	UninstallOldClient,
 	CreateProfile,
 	CreateProfileShortcuts,
 	CreateAddRemoveEntry,
 	Done
 };
+
+QString stepToString(OperationStep);
 
 enum OperationType
 {

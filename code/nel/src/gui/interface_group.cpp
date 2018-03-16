@@ -32,6 +32,10 @@
 using namespace std;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 #define IG_UNIQUE_ID(this) ((void*)&((this)->_GroupSizeRef)) // NB nico : use some pointer *inside* CInterfaceGroup as a unique id for lua registry (any field but
 														     // the first), instead of using 'this'. 'this' is already used by
 		                                                     //  CLuaIHM::pushReflectableOnStack as unique id to CInterfaceElement's ref pointers
@@ -999,7 +1003,7 @@ namespace NLGUI
 	{
 		string idTmp = id, lidTmp = lid;
 	//	bool isFound = true;
-		while (idTmp.size() > 0)
+		while (!idTmp.empty())
 		{
 			string tokid, toklid;
 
@@ -1031,12 +1035,12 @@ namespace NLGUI
 			if (posid > 0)
 				idTmp = idTmp.substr (0, posid);
 			else
-				idTmp = "";
+				idTmp.clear();
 
 			if (poslid > 0)
 				lidTmp = lidTmp.substr (0, poslid);
 			else
-				lidTmp = "";
+				lidTmp.clear();
 		}
 		return true;
 	}
@@ -1453,7 +1457,7 @@ namespace NLGUI
 		}
 
 		CViewBase::updateCoords();
-		_XReal += _OffsetX;
+		_XReal += _OffsetX + _MarginLeft;
 		_YReal += _OffsetY;
 
 		//update all children elements
@@ -1464,7 +1468,7 @@ namespace NLGUI
 			pIE->updateCoords();
 		}
 
-		_XReal -= _OffsetX;
+		_XReal -= _OffsetX - _MarginLeft;
 		_YReal -= _OffsetY;
 	}
 
@@ -1778,7 +1782,7 @@ namespace NLGUI
 			{
 	//		bool bUnder = 
 				pChild->getViewsUnder (x, y, clipX, clipY, clipW, clipH, vVB);
-	//			if (bUnder && (vICL.size() > 0))
+	//			if (bUnder && !vICL.empty())
 	//				return true;
 			}
 		}
@@ -1833,7 +1837,7 @@ namespace NLGUI
 			{
 	//		bool bUnder = 
 				pChild->getCtrlsUnder (x, y, clipX, clipY, clipW, clipH, vICL);
-	//			if (bUnder && (vICL.size() > 0))
+	//			if (bUnder && !vICL.empty())
 	//				return true;
 			}
 		}
@@ -1889,7 +1893,7 @@ namespace NLGUI
 			{
 	//		bool bUnder = 
 				pChild->getGroupsUnder (x, y, clipX, clipY, clipW, clipH, vIGL);
-	//			if (bUnder && (vICL.size() > 0))
+	//			if (bUnder && !vICL.empty())
 	//				return true;
 			}
 		}
@@ -1954,9 +1958,9 @@ namespace NLGUI
 			newSciH = newSciH - ((newSciY+newSciH)-(oldSciY+oldSciH));
 		}
 
-		newSciXDest = newSciX;
+		newSciXDest = newSciX - _MarginLeft;
 		newSciYDest = newSciY;
-		newSciWDest = newSciW;
+		newSciWDest = newSciW + _MarginLeft;
 		newSciHDest = newSciH;
 
 	}

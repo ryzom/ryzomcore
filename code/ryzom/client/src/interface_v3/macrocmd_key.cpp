@@ -39,6 +39,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // ***************************************************************************
 // ***************************************************************************
 // ***************************************************************************
@@ -451,8 +455,8 @@ void CModalContainerEditCmd::setTitle(const std::string &uistr)
 void CModalContainerEditCmd::activate()
 {
 	CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
-	CurrentEditCmdLine.ActionName.Name = "";
-	CurrentEditCmdLine.ActionName.Argu = "";
+	CurrentEditCmdLine.ActionName.Name.clear();
+	CurrentEditCmdLine.ActionName.Argu.clear();
 	CurrentEditCmdNb = -1;
 	Win->setActive(true);
 	Win->launch();
@@ -618,7 +622,7 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 			(((noParam == nbRealParam-1) && (rP.Type != CBaseAction::CParameter::Hidden)) && (i == (pBA->Parameters.size()-1))))
 		{
 			sTmp = curStr;
-			curStr = "";
+			curStr.clear();
 		}
 		else
 		{
@@ -807,7 +811,7 @@ void CModalContainerEditCmd::validCurrentCommand()
 
 	// Build couple (name,param) that define a command
 	CurrentEditCmdLine.ActionName.Name = rBA.Name;
-	CurrentEditCmdLine.ActionName.Argu = "";
+	CurrentEditCmdLine.ActionName.Argu.clear();
 	uint noParam = 0;
 	for (uint i = 0; i < rBA.Parameters.size(); ++i)
 	{
@@ -1303,12 +1307,12 @@ public:
 			if (pMCM->EditCmd->CurrentEditCmdNb != -1) // Edit mode ?
 			{
 				pMCM->CurrentEditMacro.delCommand(pMCM->EditCmd->CurrentEditCmdNb);
-				pMCM->CurrentEditMacro.addCommand (pMCM->EditCmd->CurrentEditCmdLine.ActionName.Name.c_str(),pMCM->EditCmd->CurrentEditCmdLine.ActionName.Argu.c_str(),
+				pMCM->CurrentEditMacro.addCommand (pMCM->EditCmd->CurrentEditCmdLine.ActionName.Name, pMCM->EditCmd->CurrentEditCmdLine.ActionName.Argu,
 													pMCM->EditCmd->CurrentEditCmdNb);
 			}
 			else
 			{
-				pMCM->CurrentEditMacro.addCommand(pMCM->EditCmd->CurrentEditCmdLine.ActionName.Name.c_str(),pMCM->EditCmd->CurrentEditCmdLine.ActionName.Argu.c_str());
+				pMCM->CurrentEditMacro.addCommand(pMCM->EditCmd->CurrentEditCmdLine.ActionName.Name, pMCM->EditCmd->CurrentEditCmdLine.ActionName.Argu);
 			}
 			CAHManager::getInstance()->runActionHandler("new_macro_open", pCaller);
 			pMCM->EditCmd->deactivate();

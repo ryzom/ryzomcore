@@ -29,11 +29,14 @@
 #include "nel/3d/particle_system_shape.h"
 #include "nel/3d/particle_system_model.h"
 #include "nel/3d/ps_iterator.h"
+#include "nel/3d/debug_vb.h"
+
 #include "nel/misc/stream.h"
 #include "nel/misc/path.h"
 
-
-
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -155,7 +158,7 @@ static CMesh *CreateDummyMesh(void)
 
 
 //====================================================================================
-void CPSMesh::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSMesh::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSMesh_IStream )
 	(void)f.serialVersion(3);
@@ -1113,10 +1116,12 @@ void	CPSConstraintMesh::getShapesNames(std::string *shapesNames) const
 	{
 		const_cast<CPSConstraintMesh *>(this)->update();
 	}
+#ifdef NL_COMP_VC14
+	std::copy(_MeshShapeFileName.begin(), _MeshShapeFileName.end(), stdext::make_unchecked_array_iterator(shapesNames));
+#else
 	std::copy(_MeshShapeFileName.begin(), _MeshShapeFileName.end(), shapesNames);
+#endif
 }
-
-
 
 //====================================================================================
 void		CPSConstraintMesh::setShape(uint index, const std::string &shapeName)
@@ -1127,7 +1132,6 @@ void		CPSConstraintMesh::setShape(uint index, const std::string &shapeName)
 	_Touched = 1;
 	_ValidBuild = 0;
 }
-
 
 //====================================================================================
 const std::string          &CPSConstraintMesh::getShape(uint index) const
@@ -1230,7 +1234,7 @@ bool CPSConstraintMesh::update(std::vector<sint> *numVertsVect /*= NULL*/)
 	uint   numVerts = 0;
 	uint8  uvRouting[CVertexBuffer::MaxStage];
 
-	if (_MeshShapeFileName.size() == 0)
+	if (_MeshShapeFileName.empty())
 	{
 		_MeshShapeFileName.resize(1);
 		_MeshShapeFileName[0] = DummyShapeName;
@@ -1382,7 +1386,7 @@ bool CPSConstraintMesh::update(std::vector<sint> *numVertsVect /*= NULL*/)
 	_GlobalAnimDate = _Owner->getOwner()->getSystemDate();
 	_Touched = 0;
 	_ValidBuild = ok ? 1 : 0;
-	nlassert(_Meshes.size() > 0);
+	nlassert(!_Meshes.empty());
 
 	return ok;
 
@@ -1444,7 +1448,7 @@ void CPSConstraintMesh::fillIndexesInPrecompBasis(void)
 
 //====================================================================================
 /// serialisation. Derivers must override this, and call their parent version
-void CPSConstraintMesh::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSConstraintMesh::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSConstraintMesh_IStream )
 
@@ -1487,7 +1491,7 @@ void CPSConstraintMesh::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	{
 		if (!f.isReading())
 		{
-			if (_MeshShapeFileName.size() > 0)
+			if (!_MeshShapeFileName.empty())
 			{
 				f.serial(_MeshShapeFileName[0]);
 			}
@@ -1533,7 +1537,7 @@ void CPSConstraintMesh::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 			{
 				PGlobalTexAnims newPtr(new CGlobalTexAnims); // create new
 				//std::swap(_GlobalTexAnims, newPtr);			 // replace old
-				_GlobalTexAnims = newPtr;
+				_GlobalTexAnims = CUniquePtrMove(newPtr);
 				f.serial(*_GlobalTexAnims);
 			}
 
@@ -1747,7 +1751,7 @@ void CPSConstraintMesh::draw(bool opaque)
 	_Owner->incrementNbDrawnParticles(numToProcess); // for benchmark purpose
 
 
-	if (_PrecompBasis.size() == 0) /// do we deal with prerotated meshs ?
+	if (_PrecompBasis.empty()) /// do we deal with prerotated meshs ?
 	{
 		if (step == (1 << 16))
 		{
@@ -2263,7 +2267,7 @@ CPSConstraintMesh::CGlobalTexAnim::CGlobalTexAnim() : TransOffset(NLMISC::CVecto
 }
 
 //=====================================================================================
-void	CPSConstraintMesh::CGlobalTexAnim::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CPSConstraintMesh::CGlobalTexAnim::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CGlobalTexAnim_IStream )
 	// version 1 : added offset
@@ -2352,7 +2356,7 @@ void  CPSConstraintMesh::setTexAnimType(TTexAnimType type)
 		{
 			PGlobalTexAnims newPtr(new CGlobalTexAnims);
 			//std::swap(_GlobalTexAnims, newPtr);
-			_GlobalTexAnims = newPtr;
+			_GlobalTexAnims = CUniquePtrMove(newPtr);
 			_GlobalAnimationEnabled = 1;
 		}
 		break;
@@ -2361,7 +2365,7 @@ void  CPSConstraintMesh::setTexAnimType(TTexAnimType type)
 }
 
 //=====================================================================================
-void	CPSConstraintMesh::CGlobalTexAnims::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CPSConstraintMesh::CGlobalTexAnims::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CGlobalTexAnims_IStream )
 	f.serialVersion(0);

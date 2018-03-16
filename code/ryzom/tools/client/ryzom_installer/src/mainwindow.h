@@ -61,6 +61,7 @@ protected:
 	void closeEvent(QCloseEvent *e);
 
 	void updateProfiles();
+	void updateButtons();
 
 	QWinTaskbarButton *m_button;
 	CDownloader *m_downloader;

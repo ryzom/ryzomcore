@@ -201,7 +201,7 @@ public:
 	IShape*						getShapePointer () const;
 
 	/// serial the shape.
-	virtual void				serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void				serial(NLMISC::IStream &f);
 private:
 	IShape*			_Shape;
 };

@@ -29,6 +29,9 @@
 //
 #include <utility>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 H_AUTO_DECL(RZ_AttackList)
 

@@ -45,6 +45,9 @@
 #include "server_edition_module.h"
 #include "server_animation_module.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace R2;
 using namespace NLNET;
@@ -200,7 +203,7 @@ namespace R2
 			clientEid.setType(RYZOMID::player);
 
 			userPriv =":DEV:";
-			extendedPriv = "";
+			extendedPriv.clear();
 			return true;
 		}
 

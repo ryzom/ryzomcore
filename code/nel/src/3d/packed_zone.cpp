@@ -35,6 +35,10 @@
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
@@ -586,7 +590,7 @@ CPackedZone32::CPackedZone32()
 }
 
 // ***************************************************************************************
-void CPackedZone32::serial(NLMISC::IStream &f) throw (NLMISC::EStream)
+void CPackedZone32::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(0);
 	f.serial(Box);
@@ -1082,7 +1086,7 @@ CSmartPtr<CPackedZone16> CPackedZone32::buildPackedZone16()
 }
 
 // ***************************************************************************************
-void CPackedZone16::serial(NLMISC::IStream &f) throw (NLMISC::EStream)
+void CPackedZone16::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(0);
 	f.serial(Box);

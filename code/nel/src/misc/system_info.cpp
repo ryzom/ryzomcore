@@ -23,6 +23,156 @@
 #	include <tchar.h>
 #	include <intrin.h>
 #	define nlcpuid(regs, idx) __cpuid(regs, idx)
+
+// define them here to not rely on Windows 10 SDKs
+#	define NL_PRODUCT_UNDEFINED                           0x00000000
+#	define NL_PRODUCT_ULTIMATE                            0x00000001
+#	define NL_PRODUCT_HOME_BASIC                          0x00000002
+#	define NL_PRODUCT_HOME_PREMIUM                        0x00000003
+#	define NL_PRODUCT_ENTERPRISE                          0x00000004
+#	define NL_PRODUCT_HOME_BASIC_N                        0x00000005
+#	define NL_PRODUCT_BUSINESS                            0x00000006
+#	define NL_PRODUCT_STANDARD_SERVER                     0x00000007
+#	define NL_PRODUCT_DATACENTER_SERVER                   0x00000008
+#	define NL_PRODUCT_SMALLBUSINESS_SERVER                0x00000009
+#	define NL_PRODUCT_ENTERPRISE_SERVER                   0x0000000A
+#	define NL_PRODUCT_STARTER                             0x0000000B
+#	define NL_PRODUCT_DATACENTER_SERVER_CORE              0x0000000C
+#	define NL_PRODUCT_STANDARD_SERVER_CORE                0x0000000D
+#	define NL_PRODUCT_ENTERPRISE_SERVER_CORE              0x0000000E
+#	define NL_PRODUCT_ENTERPRISE_SERVER_IA64              0x0000000F
+#	define NL_PRODUCT_BUSINESS_N                          0x00000010
+#	define NL_PRODUCT_WEB_SERVER                          0x00000011
+#	define NL_PRODUCT_CLUSTER_SERVER                      0x00000012
+#	define NL_PRODUCT_HOME_SERVER                         0x00000013
+#	define NL_PRODUCT_STORAGE_EXPRESS_SERVER              0x00000014
+#	define NL_PRODUCT_STORAGE_STANDARD_SERVER             0x00000015
+#	define NL_PRODUCT_STORAGE_WORKGROUP_SERVER            0x00000016
+#	define NL_PRODUCT_STORAGE_ENTERPRISE_SERVER           0x00000017
+#	define NL_PRODUCT_SERVER_FOR_SMALLBUSINESS            0x00000018
+#	define NL_PRODUCT_SMALLBUSINESS_SERVER_PREMIUM        0x00000019
+#	define NL_PRODUCT_HOME_PREMIUM_N                      0x0000001A
+#	define NL_PRODUCT_ENTERPRISE_N                        0x0000001B
+#	define NL_PRODUCT_ULTIMATE_N                          0x0000001C
+#	define NL_PRODUCT_WEB_SERVER_CORE                     0x0000001D
+#	define NL_PRODUCT_MEDIUMBUSINESS_SERVER_MANAGEMENT    0x0000001E
+#	define NL_PRODUCT_MEDIUMBUSINESS_SERVER_SECURITY      0x0000001F
+#	define NL_PRODUCT_MEDIUMBUSINESS_SERVER_MESSAGING     0x00000020
+#	define NL_PRODUCT_SERVER_FOUNDATION                   0x00000021
+#	define NL_PRODUCT_HOME_PREMIUM_SERVER                 0x00000022
+#	define NL_PRODUCT_SERVER_FOR_SMALLBUSINESS_V          0x00000023
+#	define NL_PRODUCT_STANDARD_SERVER_V                   0x00000024
+#	define NL_PRODUCT_DATACENTER_SERVER_V                 0x00000025
+#	define NL_PRODUCT_ENTERPRISE_SERVER_V                 0x00000026
+#	define NL_PRODUCT_DATACENTER_SERVER_CORE_V            0x00000027
+#	define NL_PRODUCT_STANDARD_SERVER_CORE_V              0x00000028
+#	define NL_PRODUCT_ENTERPRISE_SERVER_CORE_V            0x00000029
+#	define NL_PRODUCT_HYPERV                              0x0000002A
+#	define NL_PRODUCT_STORAGE_EXPRESS_SERVER_CORE         0x0000002B
+#	define NL_PRODUCT_STORAGE_STANDARD_SERVER_CORE        0x0000002C
+#	define NL_PRODUCT_STORAGE_WORKGROUP_SERVER_CORE       0x0000002D
+#	define NL_PRODUCT_STORAGE_ENTERPRISE_SERVER_CORE      0x0000002E
+#	define NL_PRODUCT_STARTER_N                           0x0000002F
+#	define NL_PRODUCT_PROFESSIONAL                        0x00000030
+#	define NL_PRODUCT_PROFESSIONAL_N                      0x00000031
+#	define NL_PRODUCT_SB_SOLUTION_SERVER                  0x00000032
+#	define NL_PRODUCT_SERVER_FOR_SB_SOLUTIONS             0x00000033
+#	define NL_PRODUCT_STANDARD_SERVER_SOLUTIONS           0x00000034
+#	define NL_PRODUCT_STANDARD_SERVER_SOLUTIONS_CORE      0x00000035
+#	define NL_PRODUCT_SB_SOLUTION_SERVER_EM               0x00000036
+#	define NL_PRODUCT_SERVER_FOR_SB_SOLUTIONS_EM          0x00000037
+#	define NL_PRODUCT_SOLUTION_EMBEDDEDSERVER             0x00000038
+#	define NL_PRODUCT_SOLUTION_EMBEDDEDSERVER_CORE        0x00000039
+#	define NL_PRODUCT_PROFESSIONAL_EMBEDDED               0x0000003A
+#	define NL_PRODUCT_ESSENTIALBUSINESS_SERVER_MGMT       0x0000003B
+#	define NL_PRODUCT_ESSENTIALBUSINESS_SERVER_ADDL       0x0000003C
+#	define NL_PRODUCT_ESSENTIALBUSINESS_SERVER_MGMTSVC    0x0000003D
+#	define NL_PRODUCT_ESSENTIALBUSINESS_SERVER_ADDLSVC    0x0000003E
+#	define NL_PRODUCT_SMALLBUSINESS_SERVER_PREMIUM_CORE   0x0000003F
+#	define NL_PRODUCT_CLUSTER_SERVER_V                    0x00000040
+#	define NL_PRODUCT_EMBEDDED                            0x00000041
+#	define NL_PRODUCT_STARTER_E                           0x00000042
+#	define NL_PRODUCT_HOME_BASIC_E                        0x00000043
+#	define NL_PRODUCT_HOME_PREMIUM_E                      0x00000044
+#	define NL_PRODUCT_PROFESSIONAL_E                      0x00000045
+#	define NL_PRODUCT_ENTERPRISE_E                        0x00000046
+#	define NL_PRODUCT_ULTIMATE_E                          0x00000047
+#	define NL_PRODUCT_ENTERPRISE_EVALUATION               0x00000048
+#	define NL_PRODUCT_MULTIPOINT_STANDARD_SERVER          0x0000004C
+#	define NL_PRODUCT_MULTIPOINT_PREMIUM_SERVER           0x0000004D
+#	define NL_PRODUCT_STANDARD_EVALUATION_SERVER          0x0000004F
+#	define NL_PRODUCT_DATACENTER_EVALUATION_SERVER        0x00000050
+#	define NL_PRODUCT_ENTERPRISE_N_EVALUATION             0x00000054
+#	define NL_PRODUCT_EMBEDDED_AUTOMOTIVE                 0x00000055
+#	define NL_PRODUCT_EMBEDDED_INDUSTRY_A                 0x00000056
+#	define NL_PRODUCT_THINPC                              0x00000057
+#	define NL_PRODUCT_EMBEDDED_A                          0x00000058
+#	define NL_PRODUCT_EMBEDDED_INDUSTRY                   0x00000059
+#	define NL_PRODUCT_EMBEDDED_E                          0x0000005A
+#	define NL_PRODUCT_EMBEDDED_INDUSTRY_E                 0x0000005B
+#	define NL_PRODUCT_EMBEDDED_INDUSTRY_A_E               0x0000005C
+#	define NL_PRODUCT_STORAGE_WORKGROUP_EVALUATION_SERVER 0x0000005F
+#	define NL_PRODUCT_STORAGE_STANDARD_EVALUATION_SERVER  0x00000060
+#	define NL_PRODUCT_CORE_ARM                            0x00000061
+#	define NL_PRODUCT_CORE_N                              0x00000062
+#	define NL_PRODUCT_CORE_COUNTRYSPECIFIC                0x00000063
+#	define NL_PRODUCT_CORE_SINGLELANGUAGE                 0x00000064
+#	define NL_PRODUCT_CORE                                0x00000065
+#	define NL_PRODUCT_PROFESSIONAL_WMC                    0x00000067
+#	define NL_PRODUCT_MOBILE_CORE                         0x00000068
+#	define NL_PRODUCT_EMBEDDED_INDUSTRY_EVAL              0x00000069
+#	define NL_PRODUCT_EMBEDDED_INDUSTRY_E_EVAL            0x0000006A
+#	define NL_PRODUCT_EMBEDDED_EVAL                       0x0000006B
+#	define NL_PRODUCT_EMBEDDED_E_EVAL                     0x0000006C
+#	define NL_PRODUCT_CORE_SERVER                         0x0000006D
+#	define NL_PRODUCT_CLOUD_STORAGE_SERVER                0x0000006E
+#	define NL_PRODUCT_CORE_CONNECTED                      0x0000006F
+#	define NL_PRODUCT_PROFESSIONAL_STUDENT                0x00000070
+#	define NL_PRODUCT_CORE_CONNECTED_N                    0x00000071
+#	define NL_PRODUCT_PROFESSIONAL_STUDENT_N              0x00000072
+#	define NL_PRODUCT_CORE_CONNECTED_SINGLELANGUAGE       0x00000073
+#	define NL_PRODUCT_CORE_CONNECTED_COUNTRYSPECIFIC      0x00000074
+#	define NL_PRODUCT_CONNECTED_CAR                       0x00000075
+#	define NL_PRODUCT_INDUSTRY_HANDHELD                   0x00000076
+#	define NL_PRODUCT_PPI_PRO                             0x00000077
+#	define NL_PRODUCT_ARM64_SERVER                        0x00000078
+#	define NL_PRODUCT_EDUCATION                           0x00000079
+#	define NL_PRODUCT_EDUCATION_N                         0x0000007A
+#	define NL_PRODUCT_IOTUAP                              0x0000007B
+#	define NL_PRODUCT_CLOUD_HOST_INFRASTRUCTURE_SERVER    0x0000007C
+#	define NL_PRODUCT_ENTERPRISE_S                        0x0000007D
+#	define NL_PRODUCT_ENTERPRISE_S_N                      0x0000007E
+#	define NL_PRODUCT_PROFESSIONAL_S                      0x0000007F
+#	define NL_PRODUCT_PROFESSIONAL_S_N                    0x00000080
+#	define NL_PRODUCT_ENTERPRISE_S_EVALUATION             0x00000081
+#	define NL_PRODUCT_ENTERPRISE_S_N_EVALUATION           0x00000082
+#	define NL_PRODUCT_HOLOGRAPHIC                         0x00000087
+#	define NL_PRODUCT_PRO_SINGLE_LANGUAGE                 0x0000008A
+#	define NL_PRODUCT_PRO_CHINA                           0x0000008B
+#	define NL_PRODUCT_ENTERPRISE_SUBSCRIPTION             0x0000008C
+#	define NL_PRODUCT_ENTERPRISE_SUBSCRIPTION_N           0x0000008D
+#	define NL_PRODUCT_DATACENTER_NANO_SERVER              0x0000008F
+#	define NL_PRODUCT_STANDARD_NANO_SERVER                0x00000090
+#	define NL_PRODUCT_DATACENTER_A_SERVER_CORE            0x00000091
+#	define NL_PRODUCT_STANDARD_A_SERVER_CORE              0x00000092
+#	define NL_PRODUCT_DATACENTER_WS_SERVER_CORE           0x00000093
+#	define NL_PRODUCT_STANDARD_WS_SERVER_CORE             0x00000094
+#	define NL_PRODUCT_UTILITY_VM                          0x00000095
+#	define NL_PRODUCT_DATACENTER_EVALUATION_SERVER_CORE   0x0000009F
+#	define NL_PRODUCT_STANDARD_EVALUATION_SERVER_CORE     0x000000A0
+#	define NL_PRODUCT_PRO_WORKSTATION                     0x000000A1
+#	define NL_PRODUCT_PRO_WORKSTATION_N                   0x000000A2
+#	define NL_PRODUCT_PRO_FOR_EDUCATION                   0x000000A4
+#	define NL_PRODUCT_PRO_FOR_EDUCATION_N                 0x000000A5
+#	define NL_PRODUCT_AZURE_SERVER_CORE                   0x000000A8
+#	define NL_PRODUCT_AZURE_NANO_SERVER                   0x000000A9
+#	define NL_PRODUCT_ENTERPRISEG                         0x000000AB
+#	define NL_PRODUCT_ENTERPRISEGN                        0x000000AC
+#	define NL_PRODUCT_SERVERRDSH                          0x000000AF
+#	define NL_PRODUCT_CLOUD                               0x000000B2
+#	define NL_PRODUCT_CLOUDN                              0x000000B3
+#	define NL_PRODUCT_UNLICENSED						  0xABCDABCD
+
 #else
 #	include <sys/types.h>
 #	include <sys/stat.h>
@@ -443,544 +593,461 @@ string CSystemInfo::getOS()
 		if (pGetProductInfo && pGetProductInfo(osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.wServicePackMajor, osvi.wServicePackMinor, &dwType))
 		{
 			// Test for the specific product family.
+			// see https://msdn.microsoft.com/fr-fr/library/windows/desktop/ms724358(v=vs.85).aspx
 			switch (dwType)
 			{
-#ifdef PRODUCT_UNLICENSED
-			case PRODUCT_UNLICENSED:
+			case NL_PRODUCT_UNLICENSED:
 				OSString += " Unlicensed";
 				break;
-#endif
-#ifdef PRODUCT_ULTIMATE
-			case PRODUCT_ULTIMATE:
+			case NL_PRODUCT_ULTIMATE:
 				OSString += " Ultimate";
 				break;
-#endif
-#ifdef PRODUCT_HOME_BASIC
-			case PRODUCT_HOME_BASIC:
+			case NL_PRODUCT_HOME_BASIC:
 				OSString += " Home Basic";
 				break;
-#endif
-#ifdef PRODUCT_HOME_PREMIUM
-			case PRODUCT_HOME_PREMIUM:
+			case NL_PRODUCT_HOME_PREMIUM:
 				OSString += " Home Premium";
 				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE
-			case PRODUCT_ENTERPRISE:
+			case NL_PRODUCT_ENTERPRISE:
 				OSString += " Enterprise";
 				break;
-#endif
-#ifdef PRODUCT_HOME_BASIC_N
-			case PRODUCT_HOME_BASIC_N:
+			case NL_PRODUCT_HOME_BASIC_N:
 				OSString += " Home Basic N";
 				break;
-#endif
-#ifdef PRODUCT_BUSINESS
-			case PRODUCT_BUSINESS:
+			case NL_PRODUCT_BUSINESS:
 				OSString += " Business";
 				break;
-#endif
-#ifdef PRODUCT_STANDARD_SERVER
-			case PRODUCT_STANDARD_SERVER:
+			case NL_PRODUCT_STANDARD_SERVER:
 				OSString += " Server Standard";
 				break;
-#endif
-#ifdef PRODUCT_DATACENTER_SERVER
-			case PRODUCT_DATACENTER_SERVER:
+			case NL_PRODUCT_DATACENTER_SERVER:
 				OSString += " Server Datacenter (full installation)";
 				break;
-#endif
-#ifdef PRODUCT_SMALLBUSINESS_SERVER
-			case PRODUCT_SMALLBUSINESS_SERVER:
+			case NL_PRODUCT_SMALLBUSINESS_SERVER:
 				OSString += " Small Business Server";
 				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE_SERVER
-			case PRODUCT_ENTERPRISE_SERVER:
+			case NL_PRODUCT_ENTERPRISE_SERVER:
 				OSString += " Server Enterprise (full installation)";
 				break;
-#endif
-#ifdef PRODUCT_STARTER
-			case PRODUCT_STARTER:
+			case NL_PRODUCT_STARTER:
 				OSString += " Starter";
 				break;
-#endif
-#ifdef PRODUCT_DATACENTER_SERVER_CORE
-			case PRODUCT_DATACENTER_SERVER_CORE:
+			case NL_PRODUCT_DATACENTER_SERVER_CORE:
 				OSString += " Server Datacenter (core installation)";
 				break;
-#endif
-#ifdef PRODUCT_STANDARD_SERVER_CORE
-			case PRODUCT_STANDARD_SERVER_CORE:
+			case NL_PRODUCT_STANDARD_SERVER_CORE:
 				OSString += " Server Standard (core installation)";
 				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE_SERVER_CORE
-			case PRODUCT_ENTERPRISE_SERVER_CORE:
+			case NL_PRODUCT_ENTERPRISE_SERVER_CORE:
 				OSString += " Server Enterprise (core installation)";
 				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE_SERVER_IA64
-			case PRODUCT_ENTERPRISE_SERVER_IA64:
+			case NL_PRODUCT_ENTERPRISE_SERVER_IA64:
 				OSString += " Server Enterprise for Itanium-based Systems";
 				break;
-#endif
-#ifdef PRODUCT_BUSINESS_N
-			case PRODUCT_BUSINESS_N:
+			case NL_PRODUCT_BUSINESS_N:
 				OSString += " Business N";
 				break;
-#endif
-#ifdef PRODUCT_WEB_SERVER
-			case PRODUCT_WEB_SERVER:
+			case NL_PRODUCT_WEB_SERVER:
 				OSString += " Web Server (full installation)";
 				break;
-#endif
-#ifdef PRODUCT_CLUSTER_SERVER
-			case PRODUCT_CLUSTER_SERVER:
+			case NL_PRODUCT_CLUSTER_SERVER:
 				OSString += " Server Hyper Core";
 				break;
-#endif
-#ifdef PRODUCT_HOME_SERVER
-			case PRODUCT_HOME_SERVER:
+			case NL_PRODUCT_HOME_SERVER:
 				OSString += " Home Server";
 				break;
-#endif
-#ifdef PRODUCT_STORAGE_EXPRESS_SERVER
-			case PRODUCT_STORAGE_EXPRESS_SERVER:
+			case NL_PRODUCT_STORAGE_EXPRESS_SERVER:
 				OSString += " Storage Server Express";
 				break;
-#endif
-#ifdef PRODUCT_STORAGE_STANDARD_SERVER
-			case PRODUCT_STORAGE_STANDARD_SERVER:
+			case NL_PRODUCT_STORAGE_STANDARD_SERVER:
 				OSString += " Storage Server Standard";
 				break;
-#endif
-#ifdef PRODUCT_STORAGE_WORKGROUP_SERVER
-			case PRODUCT_STORAGE_WORKGROUP_SERVER:
+			case NL_PRODUCT_STORAGE_WORKGROUP_SERVER:
 				OSString += " Storage Server Workgroup";
 				break;
-#endif
-#ifdef PRODUCT_STORAGE_ENTERPRISE_SERVER
-			case PRODUCT_STORAGE_ENTERPRISE_SERVER:
+			case NL_PRODUCT_STORAGE_ENTERPRISE_SERVER:
 				OSString += " Storage Server Enterprise";
 				break;
-#endif
-#ifdef PRODUCT_SERVER_FOR_SMALLBUSINESS
-			case PRODUCT_SERVER_FOR_SMALLBUSINESS:
+			case NL_PRODUCT_SERVER_FOR_SMALLBUSINESS:
 				OSString += " Essential Server Solutions";
 				break;
-#endif
-#ifdef PRODUCT_SMALLBUSINESS_SERVER_PREMIUM
-			case PRODUCT_SMALLBUSINESS_SERVER_PREMIUM:
+			case NL_PRODUCT_SMALLBUSINESS_SERVER_PREMIUM:
 				OSString += " Small Business Server Premium";
 				break;
-#endif
-#ifdef PRODUCT_HOME_PREMIUM_N
-			case PRODUCT_HOME_PREMIUM_N:
+			case NL_PRODUCT_HOME_PREMIUM_N:
 				OSString += " Home Premium N";
 				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE_N
-			case PRODUCT_ENTERPRISE_N:
+			case NL_PRODUCT_ENTERPRISE_N:
 				OSString += " Enterprise N";
 				break;
-#endif
-#ifdef PRODUCT_ULTIMATE_N
-			case PRODUCT_ULTIMATE_N:
+			case NL_PRODUCT_ULTIMATE_N:
 				OSString += " Ultimate N";
 				break;
-#endif
-#ifdef PRODUCT_WEB_SERVER_CORE
-			case PRODUCT_WEB_SERVER_CORE:
+			case NL_PRODUCT_WEB_SERVER_CORE:
 				OSString += " Web Server (core installation)";
 				break;
-#endif
-#ifdef PRODUCT_MEDIUMBUSINESS_SERVER_MANAGEMENT
-			case PRODUCT_MEDIUMBUSINESS_SERVER_MANAGEMENT:
+			case NL_PRODUCT_MEDIUMBUSINESS_SERVER_MANAGEMENT:
 				OSString += " Essential Business Server Management Server";
 				break;
-#endif
-#ifdef PRODUCT_MEDIUMBUSINESS_SERVER_SECURITY
-			case PRODUCT_MEDIUMBUSINESS_SERVER_SECURITY:
+			case NL_PRODUCT_MEDIUMBUSINESS_SERVER_SECURITY:
 				OSString += " Essential Business Server Security Server";
 				break;
-#endif
-#ifdef PRODUCT_MEDIUMBUSINESS_SERVER_MESSAGING
-			case PRODUCT_MEDIUMBUSINESS_SERVER_MESSAGING:
+			case NL_PRODUCT_MEDIUMBUSINESS_SERVER_MESSAGING:
 				OSString += " Essential Business Server Messaging Server";
 				break;
-#endif
-#ifdef PRODUCT_SERVER_FOUNDATION
-			case PRODUCT_SERVER_FOUNDATION:
+			case NL_PRODUCT_SERVER_FOUNDATION:
 				OSString += " Server Foundation";
 				break;
-#endif
-#ifdef PRODUCT_HOME_PREMIUM_SERVER
-			case PRODUCT_HOME_PREMIUM_SERVER:
+			case NL_PRODUCT_HOME_PREMIUM_SERVER:
 				OSString += " Home Server";
 				break;
-#endif
-#ifdef PRODUCT_SERVER_FOR_SMALLBUSINESS_V
-			case PRODUCT_SERVER_FOR_SMALLBUSINESS_V:
+			case NL_PRODUCT_SERVER_FOR_SMALLBUSINESS_V:
 				OSString += " Server without Hyper-V for Windows Essential Server Solutions";
 				break;
-#endif
-#ifdef PRODUCT_STANDARD_SERVER_V
-			case PRODUCT_STANDARD_SERVER_V:
+			case NL_PRODUCT_STANDARD_SERVER_V:
 				OSString += " Server Standard without Hyper-V";
 				break;
-#endif
-#ifdef PRODUCT_DATACENTER_SERVER_V
-			case PRODUCT_DATACENTER_SERVER_V:
+			case NL_PRODUCT_DATACENTER_SERVER_V:
 				OSString += " Server Datacenter without Hyper-V (full installation)";
 				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE_SERVER_V
-			case PRODUCT_ENTERPRISE_SERVER_V:
+			case NL_PRODUCT_ENTERPRISE_SERVER_V:
 				OSString += " Enterprise without Hyper-V (full installation)";
 				break;
-#endif
-#ifdef PRODUCT_DATACENTER_SERVER_CORE_V
-			case PRODUCT_DATACENTER_SERVER_CORE_V:
+			case NL_PRODUCT_DATACENTER_SERVER_CORE_V:
 				OSString += " Datacenter without Hyper-V (core installation)";
 				break;
-#endif
-#ifdef PRODUCT_STANDARD_SERVER_CORE_V
-			case PRODUCT_STANDARD_SERVER_CORE_V:
+			case NL_PRODUCT_STANDARD_SERVER_CORE_V:
 				OSString += " Standard without Hyper-V (core installation)";
 				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE_SERVER_CORE_V
-			case PRODUCT_ENTERPRISE_SERVER_CORE_V:
+			case NL_PRODUCT_ENTERPRISE_SERVER_CORE_V:
 				OSString += " Enterprise without Hyper-V (core installation)";
 				break;
-#endif
-#ifdef PRODUCT_HYPERV
-			case PRODUCT_HYPERV:
+			case NL_PRODUCT_HYPERV:
 				OSString += " Hyper-V Server";
 				break;
-#endif
-#ifdef PRODUCT_STORAGE_EXPRESS_SERVER_CORE
-			case PRODUCT_STORAGE_EXPRESS_SERVER_CORE:
+			case NL_PRODUCT_STORAGE_EXPRESS_SERVER_CORE:
 				OSString += " Storage Server Express (core installation)";
 				break;
-#endif
-#ifdef PRODUCT_STORAGE_STANDARD_SERVER_CORE
-			case PRODUCT_STORAGE_STANDARD_SERVER_CORE:
+			case NL_PRODUCT_STORAGE_STANDARD_SERVER_CORE:
 				OSString += " Storage Server Standard (core installation)";
 				break;
-#endif
-#ifdef PRODUCT_STORAGE_WORKGROUP_SERVER_CORE
-			case PRODUCT_STORAGE_WORKGROUP_SERVER_CORE:
+			case NL_PRODUCT_STORAGE_WORKGROUP_SERVER_CORE:
 				OSString += " Storage Server Workgroup (core installation)";
 				break;
-#endif
-#ifdef PRODUCT_STORAGE_ENTERPRISE_SERVER_CORE
-			case PRODUCT_STORAGE_ENTERPRISE_SERVER_CORE:
+			case NL_PRODUCT_STORAGE_ENTERPRISE_SERVER_CORE:
 				OSString += " Storage Server Enterprise (core installation)";
 				break;
-#endif
-#ifdef PRODUCT_STARTER_N
-			case PRODUCT_STARTER_N:
+			case NL_PRODUCT_STARTER_N:
 				OSString += " Starter N Edition";
 				break;
-#endif
-#ifdef PRODUCT_PROFESSIONAL
-			case PRODUCT_PROFESSIONAL:
+			case NL_PRODUCT_PROFESSIONAL:
 				OSString += " Professional";
 				break;
-#endif
-#ifdef PRODUCT_PROFESSIONAL_N
-			case PRODUCT_PROFESSIONAL_N:
+			case NL_PRODUCT_PROFESSIONAL_N:
 				OSString += " Professional N";
 				break;
-#endif
-#ifdef PRODUCT_SB_SOLUTION_SERVER
-			case PRODUCT_SB_SOLUTION_SERVER:
+			case NL_PRODUCT_SB_SOLUTION_SERVER:
 				OSString += " Small Business Server";
 				break;
-#endif
-#ifdef PRODUCT_SERVER_FOR_SB_SOLUTIONS
-			case PRODUCT_SERVER_FOR_SB_SOLUTIONS:
+			case NL_PRODUCT_SERVER_FOR_SB_SOLUTIONS:
 				OSString += " Server For Small Business Solutions";
 				break;
-#endif
-#ifdef PRODUCT_STANDARD_SERVER_SOLUTIONS
-			case PRODUCT_STANDARD_SERVER_SOLUTIONS:
+			case NL_PRODUCT_STANDARD_SERVER_SOLUTIONS:
 				OSString += " Server Solutions Premium";
 				break;
-#endif
-#ifdef PRODUCT_STANDARD_SERVER_SOLUTIONS_CORE
-			case PRODUCT_STANDARD_SERVER_SOLUTIONS_CORE:
+			case NL_PRODUCT_STANDARD_SERVER_SOLUTIONS_CORE:
 				OSString += " Server Solutions Premium (core installation)";
 				break;
-#endif
-#ifdef PRODUCT_SB_SOLUTION_SERVER_EM
-			case PRODUCT_SB_SOLUTION_SERVER_EM:
+			case NL_PRODUCT_SB_SOLUTION_SERVER_EM:
 				OSString += " Server For Small Business Solutions EM";
 				break;
-#endif
-#ifdef PRODUCT_SERVER_FOR_SB_SOLUTIONS_EM
-			case PRODUCT_SERVER_FOR_SB_SOLUTIONS_EM:
+			case NL_PRODUCT_SERVER_FOR_SB_SOLUTIONS_EM:
 				OSString += " Server For Small Business Solutions EM";
 				break;
-#endif
-
-#ifdef PRODUCT_SOLUTION_EMBEDDEDSERVER
-			case PRODUCT_SOLUTION_EMBEDDEDSERVER:
+			case NL_PRODUCT_SOLUTION_EMBEDDEDSERVER:
 				OSString += " Solution Embedded Server (full installation)";
 				break;
-#endif
-#ifdef PRODUCT_SOLUTION_EMBEDDEDSERVER_CORE
-			case PRODUCT_SOLUTION_EMBEDDEDSERVER_CORE:
+			case NL_PRODUCT_SOLUTION_EMBEDDEDSERVER_CORE:
 				OSString += " Solution Embedded Server (core installation)";
 				break;
-#endif
-#ifdef PRODUCT_PROFESSIONAL_EMBEDDED
-			case PRODUCT_PROFESSIONAL_EMBEDDED:
+			case NL_PRODUCT_PROFESSIONAL_EMBEDDED:
 				OSString += " Professional Embedded";
 				break;
-#endif
-#ifdef PRODUCT_ESSENTIALBUSINESS_SERVER_MGMT
-			case PRODUCT_ESSENTIALBUSINESS_SERVER_MGMT:
+			case NL_PRODUCT_ESSENTIALBUSINESS_SERVER_MGMT:
 				OSString += " Essential Server Solution Management";
 				break;
-#endif
-#ifdef PRODUCT_ESSENTIALBUSINESS_SERVER_ADDL
-			case PRODUCT_ESSENTIALBUSINESS_SERVER_ADDL:
+			case NL_PRODUCT_ESSENTIALBUSINESS_SERVER_ADDL:
 				OSString += " Essential Server Solution Additional";
 				break;
-#endif
-#ifdef PRODUCT_ESSENTIALBUSINESS_SERVER_MGMTSVC
-			case PRODUCT_ESSENTIALBUSINESS_SERVER_MGMTSVC:
+			case NL_PRODUCT_ESSENTIALBUSINESS_SERVER_MGMTSVC:
 				OSString += " Essential Server Solution Management SVC";
 				break;
-#endif
-#ifdef PRODUCT_ESSENTIALBUSINESS_SERVER_ADDLSVC
-			case PRODUCT_ESSENTIALBUSINESS_SERVER_ADDLSVC:
+			case NL_PRODUCT_ESSENTIALBUSINESS_SERVER_ADDLSVC:
 				OSString += " Essential Server Solution Additional SVC";
 				break;
-#endif
-#ifdef PRODUCT_SMALLBUSINESS_SERVER_PREMIUM_CORE
-			case PRODUCT_SMALLBUSINESS_SERVER_PREMIUM_CORE:
+			case NL_PRODUCT_SMALLBUSINESS_SERVER_PREMIUM_CORE:
 				OSString += " Small Business Server Premium (core installation)";
 				break;
-#endif
-#ifdef PRODUCT_CLUSTER_SERVER_V
-			case PRODUCT_CLUSTER_SERVER_V:
+			case NL_PRODUCT_CLUSTER_SERVER_V:
 				OSString += " Server Hyper Core V";
 				break;
-#endif
-#ifdef PRODUCT_EMBEDDED
-			case PRODUCT_EMBEDDED:
+			case NL_PRODUCT_EMBEDDED:
 				OSString += " Embedded";
 				break;
-#endif
-#ifdef PRODUCT_STARTER_E
-			case PRODUCT_STARTER_E:
+			case NL_PRODUCT_STARTER_E:
 				OSString += " Starter E";
 				break;
-#endif
-#ifdef PRODUCT_HOME_BASIC_E
-			case PRODUCT_HOME_BASIC_E:
+			case NL_PRODUCT_HOME_BASIC_E:
 				OSString += " Home Basic E";
 				break;
-#endif
-#ifdef PRODUCT_HOME_PREMIUM_E
-			case PRODUCT_HOME_PREMIUM_E:
+			case NL_PRODUCT_HOME_PREMIUM_E:
 				OSString += " Home Premium E";
 				break;
-#endif
-#ifdef PRODUCT_PROFESSIONAL_E
-			case PRODUCT_PROFESSIONAL_E:
+			case NL_PRODUCT_PROFESSIONAL_E:
 				OSString += " Professional E";
 				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE_E
-			case PRODUCT_ENTERPRISE_E:
+			case NL_PRODUCT_ENTERPRISE_E:
 				OSString += " Enterprise E";
 				break;
-#endif
-#ifdef PRODUCT_ULTIMATE_E
-			case PRODUCT_ULTIMATE_E:
+			case NL_PRODUCT_ULTIMATE_E:
 				OSString += " Ultimate E";
 				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE_EVALUATION
-			case PRODUCT_ENTERPRISE_EVALUATION:
+			case NL_PRODUCT_ENTERPRISE_EVALUATION:
 				OSString += " Enterprise Evaluation";
 				break;
-#endif
-#ifdef PRODUCT_MULTIPOINT_STANDARD_SERVER
-			case PRODUCT_MULTIPOINT_STANDARD_SERVER:
+			// nothing from 0x49 to 0x4b
+			case NL_PRODUCT_MULTIPOINT_STANDARD_SERVER:
 				OSString += " MultiPoint Server Standard (full installation)";
 				break;
-#endif
-#ifdef PRODUCT_MULTIPOINT_PREMIUM_SERVER
-			case PRODUCT_MULTIPOINT_PREMIUM_SERVER:
+			case NL_PRODUCT_MULTIPOINT_PREMIUM_SERVER:
 				OSString += " MultiPoint Server Premium (full installation)";
 				break;
-#endif
-#ifdef PRODUCT_STANDARD_EVALUATION_SERVER
-			case PRODUCT_STANDARD_EVALUATION_SERVER:
+			case NL_PRODUCT_STANDARD_EVALUATION_SERVER:
 				OSString += " Server Standard (evaluation installation)";
 				break;
-#endif
-#ifdef PRODUCT_DATACENTER_EVALUATION_SERVER
-			case PRODUCT_DATACENTER_EVALUATION_SERVER:
+			case NL_PRODUCT_DATACENTER_EVALUATION_SERVER:
 				OSString += " Server Datacenter (evaluation installation)";
 				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE_N_EVALUATION
-			case PRODUCT_ENTERPRISE_N_EVALUATION:
+			// nothing from 0x51 to 0x53
+			case NL_PRODUCT_ENTERPRISE_N_EVALUATION:
 				OSString += " Enterprise N (evaluation installation)";
 				break;
-#endif
-#ifdef PRODUCT_EMBEDDED_AUTOMOTIVE
-			case PRODUCT_EMBEDDED_AUTOMOTIVE:
+			case NL_PRODUCT_EMBEDDED_AUTOMOTIVE:
 				OSString += " Embedded Automotive";
 				break;
-#endif
-#ifdef PRODUCT_EMBEDDED_INDUSTRY_A
-			case PRODUCT_EMBEDDED_INDUSTRY_A:
+			case NL_PRODUCT_EMBEDDED_INDUSTRY_A:
 				OSString += " Embedded Industry A";
 				break;
-#endif
-#ifdef PRODUCT_THINPC
-			case PRODUCT_THINPC:
+			case NL_PRODUCT_THINPC:
 				OSString += " Thin PC";
 				break;
-#endif
-#ifdef PRODUCT_EMBEDDED_A
-			case PRODUCT_EMBEDDED_A:
+			case NL_PRODUCT_EMBEDDED_A:
 				OSString += " Embedded A";
 				break;
-#endif
-#ifdef PRODUCT_EMBEDDED_INDUSTRY
-			case PRODUCT_EMBEDDED_INDUSTRY:
+			case NL_PRODUCT_EMBEDDED_INDUSTRY:
 				OSString += " Embedded Industry";
 				break;
-#endif
-#ifdef PRODUCT_EMBEDDED_E
-			case PRODUCT_EMBEDDED_E:
+			case NL_PRODUCT_EMBEDDED_E:
 				OSString += " Embedded E";
 				break;
-#endif
-#ifdef PRODUCT_EMBEDDED_INDUSTRY_E
-			case PRODUCT_EMBEDDED_INDUSTRY_E:
+			case NL_PRODUCT_EMBEDDED_INDUSTRY_E:
 				OSString += " Embedded Industry E";
 				break;
-#endif
-#ifdef PRODUCT_EMBEDDED_INDUSTRY_A_E
-			case PRODUCT_EMBEDDED_INDUSTRY_A_E:
+			case NL_PRODUCT_EMBEDDED_INDUSTRY_A_E:
 				OSString += " Embedded Industry A E";
 				break;
-#endif
-#ifdef PRODUCT_STORAGE_WORKGROUP_EVALUATION_SERVER
-			case PRODUCT_STORAGE_WORKGROUP_EVALUATION_SERVER:
+			// nothing from 0x5d to 0x5e
+			case NL_PRODUCT_STORAGE_WORKGROUP_EVALUATION_SERVER:
 				OSString += " Storage Server Workgroup (evaluation installation)";
 				break;
-#endif
-#ifdef PRODUCT_STORAGE_STANDARD_EVALUATION_SERVER
-			case PRODUCT_STORAGE_STANDARD_EVALUATION_SERVER:
+			case NL_PRODUCT_STORAGE_STANDARD_EVALUATION_SERVER:
 				OSString += " Storage Server Standard (evaluation installation)";
 				break;
-#endif
-#ifdef PRODUCT_CORE_ARM
-			case PRODUCT_CORE_ARM:
+			case NL_PRODUCT_CORE_ARM:
 				OSString += " RT";
 				break;
-#endif
-#ifdef PRODUCT_CORE_N
-			case PRODUCT_CORE_N:
+			case NL_PRODUCT_CORE_N:
 				OSString += " Home N";
 				break;
-#endif
-#ifdef PRODUCT_CORE_COUNTRYSPECIFIC
-			case PRODUCT_CORE_COUNTRYSPECIFIC:
+			case NL_PRODUCT_CORE_COUNTRYSPECIFIC:
 				OSString += " Home China";
 				break;
-#endif
-#ifdef PRODUCT_CORE_SINGLELANGUAGE
-			case PRODUCT_CORE_SINGLELANGUAGE:
+			case NL_PRODUCT_CORE_SINGLELANGUAGE:
 				OSString += " Home Single Language";
 				break;
-#endif
-#ifdef PRODUCT_CORE
-			case PRODUCT_CORE:
+			case NL_PRODUCT_CORE:
 				OSString += " Home";
 				break;
-#endif
-#ifdef PRODUCT_PROFESSIONAL_WMC
-			case PRODUCT_PROFESSIONAL_WMC:
+			// nothing at 0x66
+			case NL_PRODUCT_PROFESSIONAL_WMC:
 				OSString += " Professional with Media Center";
 				break;
-#endif
-#ifdef PRODUCT_MOBILE_CORE
-			case PRODUCT_MOBILE_CORE:
+			case NL_PRODUCT_MOBILE_CORE:
 				OSString += " Mobile";
 				break;
-#endif
-#ifdef PRODUCT_EMBEDDED_INDUSTRY_EVAL
-			case PRODUCT_EMBEDDED_INDUSTRY_EVAL:
+			case NL_PRODUCT_EMBEDDED_INDUSTRY_EVAL:
 				OSString += " Embedded Industry (evaluation installation)";
 				break;
-#endif
-#ifdef PRODUCT_EMBEDDED_INDUSTRY_E_EVAL
-			case PRODUCT_EMBEDDED_INDUSTRY_E_EVAL:
+			case NL_PRODUCT_EMBEDDED_INDUSTRY_E_EVAL:
 				OSString += " Embedded Industry E (evaluation installation)";
 				break;
-#endif
-#ifdef PRODUCT_EMBEDDED_EVAL
-			case PRODUCT_EMBEDDED_EVAL:
+			case NL_PRODUCT_EMBEDDED_EVAL:
 				OSString += " Embedded (evaluation installation)";
 				break;
-#endif
-#ifdef PRODUCT_EMBEDDED_E_EVAL
-			case PRODUCT_EMBEDDED_E_EVAL:
+			case NL_PRODUCT_EMBEDDED_E_EVAL:
 				OSString += " Embedded E (evaluation installation)";
 				break;
-#endif
-#ifdef PRODUCT_CORE_SERVER
-			case PRODUCT_CORE_SERVER:
+			case NL_PRODUCT_CORE_SERVER:
 				OSString += " Server";
 				break;
-#endif
-#ifdef PRODUCT_CLOUD_STORAGE_SERVER
-			case PRODUCT_CLOUD_STORAGE_SERVER:
+			case NL_PRODUCT_CLOUD_STORAGE_SERVER:
 				OSString += " Server Could Storage";
 				break;
-#endif
-#ifdef PRODUCT_CORE_CONNECTED
-			case PRODUCT_CORE_CONNECTED:
+			case NL_PRODUCT_CORE_CONNECTED:
 				OSString += " Home Connected";
 				break;
-#endif
-#ifdef PRODUCT_PROFESSIONAL_STUDENT
-			case PRODUCT_PROFESSIONAL_STUDENT:
+			case NL_PRODUCT_PROFESSIONAL_STUDENT:
 				OSString += " Professional Student";
 				break;
-#endif
-#ifdef PRODUCT_CORE_CONNECTED_N
-			case PRODUCT_CORE_CONNECTED_N:
+			case NL_PRODUCT_CORE_CONNECTED_N:
 				OSString += " Home N Connected";
 				break;
-#endif
-#ifdef PRODUCT_PROFESSIONAL_STUDENT_N
-			case PRODUCT_PROFESSIONAL_STUDENT_N:
+			case NL_PRODUCT_PROFESSIONAL_STUDENT_N:
 				OSString += " Professional Student N";
 				break;
-#endif
-#ifdef PRODUCT_CORE_CONNECTED_SINGLELANGUAGE
-			case PRODUCT_CORE_CONNECTED_SINGLELANGUAGE:
+			case NL_PRODUCT_CORE_CONNECTED_SINGLELANGUAGE:
 				OSString += " Home Single Language Connected";
 				break;
-#endif
-#ifdef PRODUCT_CORE_CONNECTED_COUNTRYSPECIFIC
-			case PRODUCT_CORE_CONNECTED_COUNTRYSPECIFIC:
+			case NL_PRODUCT_CORE_CONNECTED_COUNTRYSPECIFIC:
 				OSString += " Home China Connected";
 				break;
-#endif
+			case NL_PRODUCT_CONNECTED_CAR:
+				OSString += " Connected Car";
+				break;
+			case NL_PRODUCT_INDUSTRY_HANDHELD:
+				OSString += " Industry Handheld";
+				break;
+			case NL_PRODUCT_PPI_PRO:
+				OSString += " PPI Pro";
+				break;
+			case NL_PRODUCT_ARM64_SERVER:
+				OSString += " ARM64 Server";
+				break;
+			case NL_PRODUCT_EDUCATION:
+				OSString += " Education";
+				break;
+			case NL_PRODUCT_EDUCATION_N:
+				OSString += " Education N";
+				break;
+			case NL_PRODUCT_IOTUAP:
+				OSString += " IoT Core";
+				break;
+			case NL_PRODUCT_CLOUD_HOST_INFRASTRUCTURE_SERVER:
+				OSString += " Cloud Host Infrastructure Server";
+				break;
+			case NL_PRODUCT_ENTERPRISE_S:
+				OSString += " Product Enterprise S";
+				break;
+			case NL_PRODUCT_ENTERPRISE_S_N:
+				OSString += " Enterprise S N";
+				break;
+			case NL_PRODUCT_PROFESSIONAL_S:
+				OSString += " Professional S";
+				break;
+			case NL_PRODUCT_PROFESSIONAL_S_N:
+				OSString += " Professional S N";
+				break;
+			case NL_PRODUCT_ENTERPRISE_S_EVALUATION:
+				OSString += " Enterprise S Evaluation";
+				break;
+			case NL_PRODUCT_ENTERPRISE_S_N_EVALUATION:
+				OSString += " Enterprise S N Evaluation";
+				break;
+			// nothing from x83 to 0x86
+			case NL_PRODUCT_HOLOGRAPHIC:
+				OSString += " Holographic";
+				break;
+			// nothing from x88 to 0x89
+			case NL_PRODUCT_PRO_SINGLE_LANGUAGE:
+				OSString += " Pro Single Language";
+				break;
+			case NL_PRODUCT_PRO_CHINA:
+				OSString += " Pro China";
+				break;
+			case NL_PRODUCT_ENTERPRISE_SUBSCRIPTION:
+				OSString += " Enterprise Subscription";
+				break;
+			case NL_PRODUCT_ENTERPRISE_SUBSCRIPTION_N:
+				OSString += " Enterprise Subscription N";
+				break;
+			// nothing at 0x8e
+			case NL_PRODUCT_DATACENTER_NANO_SERVER:
+				OSString += " Datacenter Nano Server";
+				break;
+			case NL_PRODUCT_STANDARD_NANO_SERVER:
+				OSString += " Standard Nano Server";
+				break;
+			case NL_PRODUCT_DATACENTER_A_SERVER_CORE:
+				OSString += " Datacenter A Server Core";
+				break;
+			case NL_PRODUCT_STANDARD_A_SERVER_CORE:
+				OSString += " Standard A Server Core";
+				break;
+			case NL_PRODUCT_DATACENTER_WS_SERVER_CORE:
+				OSString += " Datacenter WS Server Core";
+				break;
+			case NL_PRODUCT_STANDARD_WS_SERVER_CORE:
+				OSString += " Standard WS Server Core";
+				break;
+			case NL_PRODUCT_UTILITY_VM:
+				OSString += " Utility VM";
+				break;
+			// nothing from 0x96 to 0x9e
+			case NL_PRODUCT_DATACENTER_EVALUATION_SERVER_CORE:
+				OSString += " Datacenter_evaluation_server_core";
+				break;
+			case NL_PRODUCT_STANDARD_EVALUATION_SERVER_CORE:
+				OSString += " Standard Evaluation Server Core";
+				break;
+			case NL_PRODUCT_PRO_WORKSTATION:
+				OSString += " Pro Workstation";
+				break;
+			case NL_PRODUCT_PRO_WORKSTATION_N:
+				OSString += " Pro Workstation N";
+				break;
+			// nothing at 0xa3
+			case NL_PRODUCT_PRO_FOR_EDUCATION:
+				OSString += " Pro for Education";
+				break;
+			case NL_PRODUCT_PRO_FOR_EDUCATION_N:
+				OSString += " Pro for Education N";
+				break;
+			// nothing from 0xa6 to 0xa7
+			case NL_PRODUCT_AZURE_SERVER_CORE:
+				OSString += " Azure Server Core";
+				break;
+			case NL_PRODUCT_AZURE_NANO_SERVER:
+				OSString += " Azure Nano Server";
+				break;
+			// nothing at 0xaa
+			case NL_PRODUCT_ENTERPRISEG:
+				OSString += " Enterprise G";
+				break;
+			case NL_PRODUCT_ENTERPRISEGN:
+				OSString += " Enterprise GN";
+				break;
+			// nothing from 0xad to 0xae
+			case NL_PRODUCT_SERVERRDSH:
+				OSString += " Server RDSH";
+				break;
+			// nothing from 0xb0 to 0xb1
+			case NL_PRODUCT_CLOUD:
+				OSString += " Cloud";
+				break;
+			case NL_PRODUCT_CLOUDN:
+				OSString += " Cloud N";
+				break;
+
 			default:
 				OSString += toString(" Unknown Edition (0x%04x)", dwType);
 			}
@@ -1387,13 +1454,10 @@ uint64 CSystemInfo::availableHDSpace (const string &filename)
 	std::string path = CFile::getPath(filename);
 
 #ifdef NL_OS_UNIX
-	struct stat stst;
 	struct statfs stfs;
+	if (::statfs(path.c_str(), &stfs) != 0) return 0;
 
-	if (::stat(path.c_str(), &stst) == -1) return 0;
-	if (::statfs(path.c_str(), &stfs) == -1) return 0;
-
-	return (uint64)(stfs.f_bavail * stst.st_blksize);
+	return (uint64)stfs.f_bavail * (uint64)stfs.f_bsize;
 #else
 	ULARGE_INTEGER freeSpace = {0};
 	BOOL bRes = ::GetDiskFreeSpaceExW(utf8ToWide(path), &freeSpace, NULL, NULL);
@@ -1525,7 +1589,7 @@ NLMISC_CATEGORISED_DYNVARIABLE(nel, string, AvailableHDSpace, "Hard drive space 
 	if (get)
 	{
 		*pointer = (CSystemInfo::availableHDSpace(location));
-		location = "";
+		location.clear();
 	}
 	else
 	{

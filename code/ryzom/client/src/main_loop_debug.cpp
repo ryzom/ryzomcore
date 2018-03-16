@@ -748,6 +748,7 @@ void displayHelp()
 //	DISP_TEXT(0.0f, "SHIFT + F11 : Test");
 	DISP_TEXT(0.0f, getActionKey("enter_modal", "group=ui:interface:quit_dialog") + " : Quit");
 	DISP_TEXT(0.0f, getActionKey("toggle_camera") + " : First/Third Person View");
+	DISP_TEXT(0.0f, getActionKey("force_camera_fp") + " : Force Camera to First Person View");
 
 	line = 1.f;
 	TextContext->setHotSpot(UTextContext::TopRight);

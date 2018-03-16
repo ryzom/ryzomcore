@@ -36,7 +36,7 @@ class CStaticXpFactorTable
 {
 public:	
 	/// Serialisation
-	virtual void serial(class NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f);
 	
 	/// read georges sheet
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);

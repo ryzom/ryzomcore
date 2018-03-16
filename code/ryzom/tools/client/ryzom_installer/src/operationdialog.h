@@ -40,6 +40,7 @@ public:
 
 	void setOperation(OperationType operation);
 	void setUninstallComponents(const SComponents &components);
+	void setCurrentServerId(const QString &serverId) { m_currentServerId = serverId; }
 
 public slots:
 	void onAbortClicked();
@@ -79,7 +80,7 @@ signals:
 	void fail(const QString &error);
 
 	// emitted when done and should process next step
-	void done();
+	void operationDone();
 
 protected:
 	void showEvent(QShowEvent *e);
@@ -128,21 +129,28 @@ protected:
 	virtual void operationProgress(qint64 current, const QString &filename);
 	virtual void operationSuccess(qint64 total);
 	virtual void operationFail(const QString &error);
+	virtual void operationContinue();
 
 	virtual bool operationShouldStop();
 
 	void renamePartFile();
+	void launchUpgradeScript(const QString &directory, const QString &executable);
+
+	// hacks to prevent an infinite loop
+	void acceptDelayed();
+	void rejectDelayed();
 
 	QWinTaskbarButton *m_button;
 	CDownloader *m_downloader;
 
 	QString m_currentOperation;
-	QString m_currentOperationProgressFormat;
 
 	QMutex m_abortingMutex;
 	bool m_aborting;
 
 	OperationType m_operation;
+	OperationStep m_operationStep;
+	int m_operationStepCounter;
 	SComponents m_addComponents;
 	SComponents m_removeComponents;
 	QString m_currentServerId;

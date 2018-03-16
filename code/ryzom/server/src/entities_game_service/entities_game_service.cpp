@@ -1618,7 +1618,7 @@ nlassert(nodeLeaf->getType() == ICDBStructNode::TEXT);
 // {
 // 	if( args.size() == 0 )
 // 		return false;
-// 
+//
 // 	NLMEMORY::StatisticsReport( args[0].c_str(), args.size() > 1 );
 // 	return true;
 //}
@@ -1898,7 +1898,7 @@ void CPlayerService::release()
 //---------------------------------------------------
 void cbConnection( const std::string &serviceName, NLNET::TServiceId serviceId, void *arg )
 {
-	// inform player about the service event that occured
+	// inform player about the service event that occurred
 #if !FINAL_VERSION
 	PlayerManager.broadcastMessage( 1, 0, 0, string("System event : Service UP : ")+serviceName);
 #endif
@@ -3864,7 +3864,7 @@ NLMISC_COMMAND(displayDatabaseEntry," display a database entry value","<entity i
 			try
 			{
 				sint64 value = e->_PropertyDatabase.x_getProp(entry);
-				log.displayNL("For player %s, buffer %s : value %"NL_I64"d", id.toString().c_str(), entry.c_str(), value );
+				log.displayNL("For player %s, buffer %s : value %" NL_I64 "d", id.toString().c_str(), entry.c_str(), value );
 			}
 			catch (const CCDBSynchronised::ECDBNotFound &)
 			{
@@ -3873,7 +3873,7 @@ NLMISC_COMMAND(displayDatabaseEntry," display a database entry value","<entity i
 		}
 		else
 		{
-			log.displayNL("Unknown entity %s ",id.toString().c_str());
+			log.displayNL("Unknown entity %s ", id.toString().c_str());
 		}
 		return true;
 	}
@@ -3904,7 +3904,7 @@ NLMISC_COMMAND( db, "Display or set the value of a property in the database", "<
 			try
 			{
 				sint64 value = e->_PropertyDatabase.x_getProp( entry );
-				log.displayNL( "%"NL_I64"d", value );
+				log.displayNL( "%" NL_I64 "d", value );
 				res = true;
 			}
 			catch (const CCDBSynchronised::ECDBNotFound& )
@@ -3916,7 +3916,8 @@ NLMISC_COMMAND( db, "Display or set the value of a property in the database", "<
 		{
 			// Set
 			sint64 value;
-			sscanf( args[2].c_str(), "%"NL_I64"d", &value );
+			fromString(args[2], value);
+
 			if ( (args.size() > 3) && (args[3]!="0") )
 			{
 				res = e->_PropertyDatabase.x_setPropButDontSend( entry, value );
@@ -4005,7 +4006,7 @@ NLMISC_COMMAND(displayMoney," display_seed","<entity id(id:type:crea:dyn)>")
 		CCharacter *e = PlayerManager.getChar(id);
 		if( e )
 		{
-			log.displayNL("displayMoney: %"NL_I64"%u", e->getMoney() );
+			log.displayNL("displayMoney: %" NL_I64 "%u", e->getMoney() );
 		}
 		else
 		{

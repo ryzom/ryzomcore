@@ -735,7 +735,7 @@ public:
 				return UserCodes[i].UserCode;
 		// then look for a default code
 		for (i=0; i<UserCodes.size(); ++i)
-			if (UserCodes[i].Event == name && UserCodes[i].CodeSpecializer == "")
+			if (UserCodes[i].Event == name && UserCodes[i].CodeSpecializer.empty())
 				return UserCodes[i].UserCode;
 		return "";
 	}

@@ -27,7 +27,8 @@
 
 #ifndef NL3D_GPU_PROGRAM_PARAMS_H
 #define NL3D_GPU_PROGRAM_PARAMS_H
-#include <nel/misc/types_nl.h>
+
+#include "nel/misc/types_nl.h"
 
 // STL includes
 #include <map>
@@ -167,7 +168,7 @@ private:
 	std::map<std::string, size_t> m_MapName; // map from name to offset
 	size_t m_First;
 	size_t m_Last;
-	static const size_t s_End = -1;
+	static const size_t s_End;
 
 }; /* class CGPUProgramParams */
 

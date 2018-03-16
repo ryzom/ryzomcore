@@ -572,7 +572,7 @@ void	CWorldPositionManager::processPacsTriggers(UMoveContainer *moveContainer)
 		uint64			trigger = info.Object0;
 		uint64			entity = info.Object1;
 
-		//nldebug("In processPacsTriggers: %"NL_I64"d versus %"NL_I64"d", entity, trigger);
+		//nldebug("In processPacsTriggers: %" NL_I64 "d versus %" NL_I64 "d", entity, trigger);
 
 		if ((entity&0xffff) != 0)
 			swap(trigger, entity);

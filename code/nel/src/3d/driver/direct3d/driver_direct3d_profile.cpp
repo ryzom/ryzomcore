@@ -19,6 +19,10 @@
 #include "driver_direct3d.h"
 #include "nel/misc/hierarchical_timer.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 

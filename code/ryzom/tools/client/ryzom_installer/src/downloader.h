@@ -17,6 +17,9 @@
 #ifndef DOWNLOADER_H
 #define DOWNLOADER_H
 
+#include <QtCore/QtCore>
+#include <QtNetwork/QtNetwork>
+
 class IOperationProgressListener;
 
 /**
@@ -73,7 +76,6 @@ protected:
 	bool checkDownloadedFile();
 
 	QNetworkAccessManager *m_manager;
-	QNetworkReply *m_reply;
 	QTimer *m_timer;
 
 	QString m_url;

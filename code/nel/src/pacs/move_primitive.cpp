@@ -379,7 +379,7 @@ uint8 CMovePrimitive::getFirstWorldImageV () const
 
 uint8 CMovePrimitive::getNumWorldImageV () const
 {
-	return getNumWorldImageV ();
+	return getNumWorldImage ();
 }
 
 // ***************************************************************************

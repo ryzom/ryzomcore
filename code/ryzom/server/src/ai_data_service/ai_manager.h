@@ -56,7 +56,7 @@ public:
 		}
 		SMgrDfnElm(const SMgrDfnElm &other): Action(other.Action), Args(other.Args) {}
 
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			//f.xmlPushBegin("CMD");
 				std::string s=getAction();
@@ -106,7 +106,7 @@ public:
 				Child(other.Child) 
 		{}
 
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serial(Name);
 			f.serialCont(Data);

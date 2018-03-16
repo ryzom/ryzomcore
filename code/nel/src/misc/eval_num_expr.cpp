@@ -632,6 +632,9 @@ CEvalNumExpr::TReturnState CEvalNumExpr::evalExpression (double &finalResult, TT
 		TOperator resultUnaryOp[InternalOperator];
 		vector<TOperator> resultUnaryOpSup;
 
+		// init table
+		for (uint i = 0; i < (uint)InternalOperator; ++i) resultUnaryOp[i] = NotOperator;
+
 		// Current value
 		double value;
 

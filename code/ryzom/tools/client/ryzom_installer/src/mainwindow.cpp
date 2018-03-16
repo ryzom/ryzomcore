@@ -41,6 +41,13 @@ CMainWindow::CMainWindow():QMainWindow()
 	connect(m_downloader, SIGNAL(htmlPageContent(QString)), SLOT(onHtmlPageContent(QString)));
 
 	connect(actionProfiles, SIGNAL(triggered()), SLOT(onProfiles()));
+
+	// remove debug options
+#ifndef _DEBUG
+	actionSettings->setVisible(false);
+	actionUninstall->setVisible(false);
+#endif
+
 	connect(actionSettings, SIGNAL(triggered()), SLOT(onSettings()));
 	connect(actionUninstall, SIGNAL(triggered()), SLOT(onUninstall()));
 	connect(actionQuit, SIGNAL(triggered()), SLOT(onQuit()));
@@ -60,6 +67,9 @@ CMainWindow::CMainWindow():QMainWindow()
 	setFixedHeight(height());
 
 	updateProfiles();
+	updateButtons();
+
+	raise();
 }
 
 CMainWindow::~CMainWindow()
@@ -81,6 +91,29 @@ void CMainWindow::closeEvent(QCloseEvent *e)
 void CMainWindow::updateProfiles()
 {
 	profilesComboBox->setModel(new CProfilesModel(this));
+	profilesComboBox->setCurrentIndex(CConfigFile::getInstance()->getDefaultProfileIndex());
+}
+
+void CMainWindow::updateButtons()
+{
+	int profileIndex = profilesComboBox->currentIndex();
+
+	if (profileIndex < 0) return;
+
+	CConfigFile *config = CConfigFile::getInstance();
+
+	const CProfile &profile = config->getProfile(profileIndex);
+	const CServer &server = config->getServer(profile.server);
+
+	// get full path of client executable
+	QString executable = profile.getClientFullPath();
+
+	playButton->setEnabled(!executable.isEmpty() && QFile::exists(executable));
+
+	// get full path of configuration executable
+	executable = server.getConfigurationFullPath();
+
+	configureButton->setEnabled(!executable.isEmpty() && QFile::exists(executable));
 }
 
 void CMainWindow::onPlayClicked()
@@ -105,11 +138,19 @@ void CMainWindow::onPlayClicked()
 	arguments << profile.id;
 	arguments << profile.arguments.split(' ');
 
+#ifndef Q_OS_WIN32
+	QFile::setPermissions(executable, QFile::permissions(executable) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
+#endif
+
 	// launch the game with all arguments and from server root directory (to use right data)
 	bool started = QProcess::startDetached(executable, arguments, server.getDirectory());
 
 	// define this profile as default one
-	CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
+	if (started)
+	{
+		CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
+		CConfigFile::getInstance()->save();
+	}
 }
 
 void CMainWindow::onConfigureClicked()
@@ -123,6 +164,7 @@ void CMainWindow::onConfigureClicked()
 	const CProfile &profile = config->getProfile(profileIndex);
 	const CServer &server = config->getServer(profile.server);
 
+	// get full path of configuration executable
 	QString executable = server.getConfigurationFullPath();
 
 	if (executable.isEmpty() || !QFile::exists(executable)) return;
@@ -131,9 +173,17 @@ void CMainWindow::onConfigureClicked()
 	arguments << "-p";
 	arguments << profile.id;
 
+#ifndef Q_OS_WIN32
+	QFile::setPermissions(executable, QFile::permissions(executable) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
+#endif
+
 	bool started = QProcess::startDetached(executable, arguments);
 
-	CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
+	if (started)
+	{
+		CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
+		CConfigFile::getInstance()->save();
+	}
 }
 
 void CMainWindow::onProfiles()
@@ -212,13 +262,15 @@ void CMainWindow::onUninstall()
 		components = dialog.getSelectedCompenents();
 	}
 
-	COperationDialog dialog;
-
-	dialog.setOperation(OperationUninstall);
-	dialog.setUninstallComponents(components);
-
-	if (dialog.exec())
 	{
+		COperationDialog dialog(this);
+
+		dialog.setOperation(OperationUninstall);
+		dialog.setUninstallComponents(components);
+
+		if (dialog.exec())
+		{
+		}
 	}
 }
 
@@ -262,4 +314,6 @@ void CMainWindow::onProfileChanged(int profileIndex)
 
 	// load changelog
 	m_downloader->getHtmlPageContent(config->expandVariables(server.displayUrl));
+
+	updateButtons();
 }

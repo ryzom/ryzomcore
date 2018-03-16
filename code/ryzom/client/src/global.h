@@ -62,7 +62,7 @@ enum TBackground
 	ResurectKamiBackground,
 	ResurectKaravanBackground,
 	EndBackground,
-	IntroNevrax,
+	CustomBackground,
 	IntroNVidia,
 	LoadBackground,
 };
@@ -119,6 +119,7 @@ extern bool							InitCloudScape; // tells that the cloud scape must be reinitia
 extern CEntityAnimationManager		*EAM;
 extern CProgress					ProgressBar;
 extern TBackground					LoadingBackground;
+extern std::string					LoadingBackgroundBG;
 extern std::string					LoadingMusic;
 extern CContinent					*LoadingContinent;
 extern bool							ConnectionReadySent;

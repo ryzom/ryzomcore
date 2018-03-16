@@ -33,6 +33,9 @@ using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NLGUI
 {
@@ -74,6 +77,7 @@ namespace NLGUI
 									_ResetFocusOnHide(false),
 									_BackupFatherContainerPos(false),
 									_WantReturn(false),
+									_ClearOnEscape(false),
 									_Savable(true),
 									_DefaultInputString(false),
 									_Frozen(false),
@@ -234,6 +238,11 @@ namespace NLGUI
 		if( name == "want_return" )
 		{
 			return toString( _WantReturn );
+		}
+		else
+		if( name == "clear_on_escape" )
+		{
+			return toString( _ClearOnEscape );
 		}
 		else
 		if( name == "savable" )
@@ -410,6 +419,14 @@ namespace NLGUI
 			return;
 		}
 		else
+		if( name == "clear_on_escape" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_ClearOnEscape = b;
+			return;
+		}
+		else
 		if( name == "savable" )
 		{
 			bool b;
@@ -511,6 +528,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "backup_father_container_pos",
 			BAD_CAST toString( _BackupFatherContainerPos ).c_str() );
 		xmlSetProp( node, BAD_CAST "want_return", BAD_CAST toString( _WantReturn ).c_str() );
+		xmlSetProp( node, BAD_CAST "clear_on_escape", BAD_CAST toString( _ClearOnEscape ).c_str() );
 		xmlSetProp( node, BAD_CAST "savable", BAD_CAST toString( _Savable ).c_str() );
 		xmlSetProp( node, BAD_CAST "max_float_prec", BAD_CAST toString( _MaxFloatPrec ).c_str() );
 
@@ -616,6 +634,9 @@ namespace NLGUI
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"want_return" );
 		if (prop) _WantReturn = convertBool(prop);
+
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"clear_on_escape" );
+		if (prop) _ClearOnEscape = convertBool(prop);
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"savable" );
 		if (prop) _Savable = convertBool(prop);
@@ -988,6 +1009,11 @@ namespace NLGUI
 				// stop selection
 				_CurrSelection = NULL;
 				_CursorAtPreviousLineEnd = false;
+				if (_ClearOnEscape)
+				{
+					setInputString(ucstring(""));
+					triggerOnChangeAH();
+				}
 			break;
 			case KeyTAB:
 				makeTopWindow();
@@ -1768,7 +1794,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupEditBox::clearAllEditBox()
 	{
-		_InputString = "";
+		_InputString.clear();
 		_CursorPos = 0;
 		_CursorAtPreviousLineEnd = false;
 		if (!_ViewText) return;

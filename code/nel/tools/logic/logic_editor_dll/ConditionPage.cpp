@@ -272,7 +272,7 @@ void CConditionPage::addCondition( CLogic_editorDoc *pDoc, CCondition * conditio
 	CCondition *pCondition;
 	if (pDoc->m_conditions.Lookup( condition->m_sName, (void*&)pCondition))
 	{
-		AfxMessageBox("A condition with this name already exist...");
+		AfxMessageBox(_T("A condition with this name already exist..."));
 		return;
 	}
 	
@@ -296,7 +296,7 @@ void CConditionPage::OnButtonAddCondition()
 
 	if (m_sConditionName.IsEmpty())
 	{
-		AfxMessageBox("Condition Name cannot be empty, please choose a name");
+		AfxMessageBox(_T("Condition Name cannot be empty, please choose a name"));
 		return;
 	}
 
@@ -326,7 +326,7 @@ void CConditionPage::OnButtonAddNode()
 	// check that data are valid
 	if ( checkNodeValidity() == FALSE)
 	{
-		AfxMessageBox("Invalid node datas - cannot add node");
+		AfxMessageBox(_T("Invalid node datas - cannot add node"));
 		return;
 	}
 
@@ -426,7 +426,7 @@ void CConditionPage::OnButtonCondApply()
 
 		if (m_sConditionName.IsEmpty())
 		{
-			AfxMessageBox("Condition Name cannot be empty, please choose a name");
+			AfxMessageBox(_T("Condition Name cannot be empty, please choose a name"));
 			return;
 		}
 
@@ -442,7 +442,7 @@ void CConditionPage::OnButtonCondApply()
 	}
 	else
 	{
-		AfxMessageBox( "No condition selected ! Choose a condition first" );
+		AfxMessageBox(_T("No condition selected ! Choose a condition first"));
 	}
 		
 }
@@ -466,7 +466,7 @@ void CConditionPage::OnButtonDeleteCondition()
 	}
 	else
 	{
-		AfxMessageBox( "No condition selected ! Choose a condition first" );
+		AfxMessageBox(_T("No condition selected ! Choose a condition first"));
 	}	
 }
 
@@ -477,7 +477,7 @@ void CConditionPage::OnButtonNodeApply()
 		// check that data are valid
 		if ( checkNodeValidity() == FALSE)
 		{
-			AfxMessageBox("Invalid node datas - cancel node modification");
+			AfxMessageBox(_T("Invalid node datas - cancel node modification"));
 			return;
 		}
 
@@ -517,7 +517,7 @@ void CConditionPage::OnButtonNodeApply()
 	}
 	else
 	{
-		AfxMessageBox( "No condition node selected ! Choose a node first" );
+		AfxMessageBox(_T("No condition node selected ! Choose a node first"));
 	}	
 }
 
@@ -553,6 +553,6 @@ void CConditionPage::OnButtonDeleteNode()
 	}
 	else
 	{
-		AfxMessageBox( "No condition node selected ! Choose a node first" );
+		AfxMessageBox(_T("No condition node selected ! Choose a node first"));
 	}		
 }

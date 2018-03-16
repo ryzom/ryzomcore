@@ -100,13 +100,16 @@
 #include "zone_util.h"
 #include "nel/gui/lua_manager.h"
 #include "user_agent.h"
-
+#include "item_group_manager.h"
 
 //
 // Only the define FINAL_VERSION can be defined on the project, not in this file
 // to desactive some commands
 //
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 ////////////////
@@ -171,7 +174,7 @@ NLMISC_COMMAND(follow, "Follow the target", "")
 NLMISC_COMMAND(where, "Ask information on the position", "")
 {
 	// Check parameters.
-	if(args.size() == 0)
+	if(args.empty())
 	{	// Create the message and send.
 		const string msgName = "COMMAND:WHERE";
 		CBitMemStream out;
@@ -209,10 +212,182 @@ NLMISC_COMMAND(who, "Display all players currently in region","[<options (GM, ch
 	return true;
 }
 
+/***********************************************************************
+GROUP COMMANDS
+***********************************************************************/
+
+
+NLMISC_COMMAND(listGroup, "list all available group", "")
+{
+	CItemGroupManager::getInstance()->listGroup();
+	return true;
+}
+
+NLMISC_COMMAND(equipGroup, "equip group <name>", "name")
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
+	if(args.empty())
+	{
+		pIM->displaySystemInfo(CI18N::get("cmdEquipGroupUsage1"));
+		pIM->displaySystemInfo(CI18N::get("cmdEquipGroupUsage2"));
+		return false;
+	}
+	if(CItemGroupManager::getInstance()->equipGroup(args[0]))
+	{
+		ucstring msg = CI18N::get("cmdEquipGroupSuccess");
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
+		pIM->displaySystemInfo(msg);
+		return true;
+	}
+	else
+	{
+		ucstring msg = CI18N::get("cmdEquipGroupError");
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
+		pIM->displaySystemInfo(msg);
+		return false;
+	}
+}
+
+NLMISC_COMMAND(moveGroup, "move group <name> to <dst>", "name dst")
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
+	if(args.empty() || args.size() < 2)
+	{
+		pIM->displaySystemInfo(CI18N::get("cmdMoveGroupUsage1"));
+		pIM->displaySystemInfo(CI18N::get("cmdMoveGroupUsage2"));
+		pIM->displaySystemInfo(CI18N::get("cmdMoveGroupUsage3"));
+		return false;
+	}
+
+	if(CItemGroupManager::getInstance()->moveGroup(args[0], INVENTORIES::toInventory(args[1])))
+	{
+		ucstring msg = CI18N::get("cmdMoveGroupSuccess");
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
+		strFindReplace(msg, "%inventory", args[1]);
+		pIM->displaySystemInfo(msg);
+		return true;
+	}
+	else
+	{
+		ucstring msg = CI18N::get("cmdMoveGroupError");
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
+		strFindReplace(msg, "%inventory", args[1]);
+		pIM->displaySystemInfo(msg);
+		return false;
+	}
+}
+
+
+NLMISC_COMMAND(createGroup, "create group <name> [true](create a <remove> for every unequiped item)", "name [removeUnequiped]")
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	if(args.empty())
+	{
+		pIM->displaySystemInfo(CI18N::get("cmdCreateGroupUsage1"));
+		pIM->displaySystemInfo(CI18N::get("cmdCreateGroupUsage2"));
+		pIM->displaySystemInfo(CI18N::get("cmdCreateGroupUsage3"));
+		return false;
+	}
+	bool removeUnequiped = false;
+	if(args.size() > 1)
+		removeUnequiped = !args[1].empty();
+	if(CItemGroupManager::getInstance()->createGroup(args[0], removeUnequiped))
+	{
+		ucstring msg;
+		if(removeUnequiped)
+			msg = CI18N::get("cmdCreateGroupSuccess2");
+		else
+			msg = CI18N::get("cmdCreateGroupSuccess1");
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
+		pIM->displaySystemInfo(msg);
+		return true;
+	}
+	else
+	{
+		ucstring msg = CI18N::get("cmdCreateGroupError");
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
+		pIM->displaySystemInfo(msg);
+		return false;
+	}
+
+}
+
+
+
+NLMISC_COMMAND(deleteGroup, "delete group <name>", "name")
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	if(args.empty())
+	{
+		pIM->displaySystemInfo(CI18N::get("cmdDeleteGroupUsage1"));
+		pIM->displaySystemInfo(CI18N::get("cmdDeleteGroupUsage2"));
+		return false;
+	}
+	if(CItemGroupManager::getInstance()->deleteGroup(args[0]))
+	{
+		ucstring msg = CI18N::get("cmdDeleteGroupSuccess");
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
+		pIM->displaySystemInfo(msg);
+		return true;
+	}
+	else
+	{
+		ucstring msg = CI18N::get("cmdDeleteGroupError");
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
+		pIM->displaySystemInfo(msg);
+		return false;
+	}
+}
+
+NLMISC_COMMAND(naked, "get naked !", "")
+{
+	std::string handPath = "LOCAL:INVENTORY:HAND:";
+	std::string equipPath = "LOCAL:INVENTORY:EQUIP:";
+	uint32 i;
+	for (i = 0; i < MAX_HANDINV_ENTRIES; ++i)
+	{
+		CInventoryManager::getInstance()->unequip(handPath + NLMISC::toString(i));
+	}
+
+
+	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
+	{
+		CInventoryManager::getInstance()->unequip(equipPath + NLMISC::toString(i));
+
+	}
+	return true;
+}
+
 NLMISC_COMMAND(afk, "Set the player as 'away from keyboard'","[<custom text>]")
 {
 	string customText;
-	if( args.size() > 0 )
+	if (!args.empty())
 	{
 		customText = args[0];
 	}
@@ -738,7 +913,7 @@ NLMISC_COMMAND(bugReport, "Call the bug report tool with dump", "<AddScreenshot>
 
 NLMISC_COMMAND(a, "Execute an admin command on you","<cmd> <arg>")
 {
-	if(args.size() == 0)
+	if(args.empty())
 		return false;
 
 	CBitMemStream out;
@@ -782,7 +957,7 @@ NLMISC_COMMAND(a, "Execute an admin command on you","<cmd> <arg>")
 
 NLMISC_COMMAND(b, "Execute an admin command on your target","<cmd> <arg>")
 {
-	if(args.size() == 0)
+	if(args.empty())
 		return false;
 
 	CBitMemStream out;
@@ -873,7 +1048,7 @@ NLMISC_COMMAND(boxes, "Show/Hide selection boxes", "[<state> : 0 to Hide, anythi
 #endif // FINAL_VERSION
 
 	// Invert Current State
-	if(args.size() == 0)
+	if(args.empty())
 	{
 		// Invert the current value.
 		ClientCfg.DrawBoxes = !ClientCfg.DrawBoxes;
@@ -1198,77 +1373,6 @@ NLMISC_COMMAND(db, "Modify Database","<Property> <Value>")
 	return true;
 }
 
-static bool talkInChan(uint32 nb,std::vector<std::string>args)
-{
-	uint32 maxChans = CChatGroup::MaxDynChanPerPlayer;
-	if (nb>=maxChans)
-	{
-		return false;
-	}
-	if(!args.empty())
-	{
-		std::string tmp;
-		std::vector<std::string>::const_iterator first(args.begin()),last(args.end());
-
-		for(;first!=last;++first)
-		{
-			tmp = tmp + (*first);
-			tmp = tmp+" ";
-		}
-
-		ucstring uctmp;
-		uctmp.fromUtf8(tmp);
-		PeopleInterraction.talkInDynamicChannel(nb, uctmp);
-		return true;
-	}
-	else
-	{
-		ChatMngr.updateChatModeAndButton(CChatGroup::dyn_chat, nb);
-	}
-	return false;
-}
-
-NLMISC_COMMAND(0,"talk in 0th dynamic chat channel","<channel_nb> <sentence>")
-{
-	return talkInChan(0,args);
-}
-
-NLMISC_COMMAND(1,"talk in first dynamic chat channel","<channel_nb> <sentence>")
-{
-	return talkInChan(1,args);
-}
-
-NLMISC_COMMAND(2,"talk in 2nd dynamic chat channel","<channel_nb> <sentence>")
-{
-	return talkInChan(2,args);
-}
-
-NLMISC_COMMAND(3,"talk in 3rd dynamic chat channel","<channel_nb> <sentence>")
-{
-	return talkInChan(3,args);
-}
-
-NLMISC_COMMAND(4,"talk in 4th dynamic chat channel","<channel_nb> <sentence>")
-{
-	return talkInChan(4,args);
-}
-
-NLMISC_COMMAND(5,"talk in 5th dynamic chat channel","<channel_nb> <sentence>")
-{
-	return talkInChan(5,args);
-}
-
-NLMISC_COMMAND(6,"talk in 6th dynamic chat channel","<channel_nb> <sentence>")
-{
-	return talkInChan(6,args);
-}
-
-NLMISC_COMMAND(7,"talk in 7th dynamic chat channel","<channel_nb> <sentence>")
-{
-	return talkInChan(7,args);
-}
-
-
 NLMISC_COMMAND(setItemName, "set name of items, sbrick, etc..","<sheet_id> <name> <desc> <desc2>")
 {
 	if (args.size() < 2) return false;
@@ -1323,7 +1427,7 @@ NLMISC_COMMAND(setMissingDynstringText, "set text of missing dynamic string"," <
 
 NLMISC_COMMAND(ah, "Launch an action handler", "<ActionHandler> <AHparam>")
 {
-	if (args.size() == 0)
+	if (args.empty())
 		return false;
 
 	if (!ClientCfg.AllowDebugLua && toLower(args[0]) == "lua")
@@ -2041,17 +2145,16 @@ NLMISC_COMMAND(entity, "Create an entity on the user or just remove it if Form n
 		node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_ORIENTATION), false);
 		if(node)
 		{
-			float dir = (float)atan2(UserEntity->front().y, UserEntity->front().x);
-			prop = (sint64 *)(&dir);
-			node->setValue64(*prop);
+			C64BitsParts rot;
+			rot.f[0] = (float)atan2(UserEntity->front().y, UserEntity->front().x);
+			rot.f[1] = 0.f; // to be sure 64 bits value is initialized
+			node->setValue64(rot.i64[0]);
 		}
 		// Set Mode
 		node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_MODE), false);
 		if(node)
 		{
-			MBEHAV::EMode m = MBEHAV::NORMAL;
-			prop = (sint64 *)&m;
-			node->setValue64(*prop);
+			node->setValue64((sint64)MBEHAV::NORMAL);
 			EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_MODE);
 		}
 		// Set Visual Properties
@@ -2716,7 +2819,7 @@ NLMISC_COMMAND(particle, "Create a particule at the user position (play FireWork
 	string fn;
 
 	// Check parameters.
-	if(args.size() == 0)
+	if(args.empty())
 	{
 		fn = "FireWorkA_with_sound.ps";
 	}
@@ -2842,8 +2945,12 @@ NLMISC_COMMAND(orient, "Orient an entity", "Slot: [1-254] orient(degree) [dt(tic
 			fromString(args[2], dt);
 		// Write the position in the DB.
 		float	fRot= (float)(rot*Pi/180.f);
-		uint64	val= *(uint32*)(&fRot);
-		IngameDbMngr.setProp("Entities:E" + toString(slot) + ":P"+toString(CLFECOMMON::PROPERTY_ORIENTATION), val);
+
+		C64BitsParts r;
+		r.f[0] = fRot;
+		r.f[1] = 0.f; // to be sure 64 bits value is initialized
+
+		IngameDbMngr.setProp("Entities:E" + toString(slot) + ":P"+toString(CLFECOMMON::PROPERTY_ORIENTATION), r.u32[0]);
 		// Update the position.
 		EntitiesMngr.updateVisualProperty(NetMngr.getCurrentServerTick()+dt, slot, CLFECOMMON::PROPERTY_ORIENTATION);
 	}
@@ -3749,6 +3856,23 @@ NLMISC_COMMAND(test, "", "")
 	return true;
 }
 
+NLMISC_COMMAND(testLongBubble, "To display a bubble with a long text", "<entity>")
+{
+	if (args.size() != 1) return false;
+	uint entityId;
+	fromString(args[0], entityId);
+
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	ucstring text("test\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\n");
+	uint duration = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutBubbles).getValSInt32();
+
+	CEntityCL *entity = EntitiesMngr.entity(entityId);
+	if (entity)
+		InSceneBubbleManager.chatOpen(entity->dataSetId(), text, duration);
+
+	return true;
+}
+
 
 //-----------------------------------------------
 /// Macro to set the new dist to front(back or side) for a given sheet.
@@ -3910,7 +4034,7 @@ NLMISC_COMMAND (url, "launch a browser to the specified url", "<url>")
 	if (args.size () != 1)
 		return false;
 
-	return openURL(args[0].c_str());
+	return openURL(args[0]);
 }
 
 NLMISC_COMMAND( reconnect, "Reconnect to the same shard (self Far TP)", "")
@@ -5236,7 +5360,7 @@ bool CUserCommand::execute(const std::string &/* rawCommandString */, const std:
 	{
 		// Build the final string
 		static string finalArgs;
-		finalArgs = "";
+		finalArgs.clear();
 		uint i;
 		uint index = 0;
 		const vector<string> &keywords = mode->Keywords;
@@ -5737,7 +5861,7 @@ NLMISC_COMMAND(em, "emote command", "<emote phrase>")
 	if( pIM )
 	{
 		string emotePhrase;
-		if( args.size() > 0 )
+		if (!args.empty())
 		{
 			emotePhrase = args[0];
 		}
@@ -5762,7 +5886,7 @@ NLMISC_COMMAND(guildmotd, "Set or see the guild message of the day","<msg of the
 		return false;
 
 	string gmotd;
-	if( args.size() > 0 )
+	if (!args.empty())
 	{
 		gmotd = args[0];
 	}

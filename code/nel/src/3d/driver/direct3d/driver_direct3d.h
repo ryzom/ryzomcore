@@ -480,11 +480,20 @@ public:
 	virtual ~CStateRecord() {}
 	// use STL allocator for fast alloc. this works because objects are small ( < 128 bytes)
 	void *operator new(size_t size) { return CStateRecord::Allocator.allocate(size); }
+	void *operator new(size_t size, int /* blockUse */, char const * /* fileName */, int /* lineNumber */)
+	{
+		// TODO: add memory leaks detector
+		return CStateRecord::Allocator.allocate(size);
+	}
 	void operator delete(void *block) { CStateRecord::Allocator.deallocate((uint8 *) block, 1); }
+	void operator delete(void *block, int /* blockUse */, char const* /* fileName */, int /* lineNumber */)
+	{
+		// TODO: add memory leaks detector
+		CStateRecord::Allocator.deallocate((uint8 *)block, 1);
+	}
 
 	static std::allocator<uint8> Allocator;
 };
-
 
 // record of a single .fx pass
 class CFXPassRecord

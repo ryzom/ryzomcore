@@ -28,15 +28,11 @@ IF(COMMAND cmake_policy)
   # have absolute paths (e.g. -lpthread)
   cmake_policy(SET CMP0003 NEW)
 
-  # Works around warnings about escaped quotes in ADD_DEFINITIONS
-  # statements
-  cmake_policy(SET CMP0005 OLD)
-
   # allow to link to qtmain automatically under Windows
   IF(POLICY CMP0020)
     CMAKE_POLICY(SET CMP0020 NEW)
   ENDIF()
-ENDIF(COMMAND cmake_policy)
+ENDIF()
 
 INCLUDE(nel)
 INCLUDE(ConfigureChecks)
@@ -71,15 +67,15 @@ SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # DLL should be in the same directory as EXE under Windows
 IF(WIN32)
   SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-ELSE(WIN32)
+ELSE()
   SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-ENDIF(WIN32)
+ENDIF()
 
 IF(WIN32)
   IF(WITH_MFC)
     FIND_PACKAGE(MFC QUIET)
-  ENDIF(WITH_MFC)
-ENDIF(WIN32)
+  ENDIF()
+ENDIF()
 
 #-----------------------------------------------------------------------------
 # Set default config options
@@ -92,8 +88,6 @@ NL_SETUP_SNOWBALLS_DEFAULT_OPTIONS()
 
 NL_SETUP_PREFIX_PATHS()
 RYZOM_SETUP_PREFIX_PATHS()
-
-NL_CONFIGURE_CHECKS()
 
 NL_SETUP_BUILD()
 NL_SETUP_BUILD_FLAGS()
@@ -108,8 +102,8 @@ IF(WIN32)
 
   IF(WITH_MFC)
     FIND_PACKAGE(CustomMFC REQUIRED)
-  ENDIF(WITH_MFC)
-ENDIF(WIN32)
+  ENDIF()
+ENDIF()
 
 FIND_PACKAGE(ZLIB REQUIRED)
 FIND_PACKAGE(LibXml2 REQUIRED)
@@ -118,15 +112,29 @@ FIND_PACKAGE(OpenSSL REQUIRED)
 FIND_PACKAGE(GIF)
 FIND_PACKAGE(Jpeg)
 
+IF(WIN32)
+  SET(OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} Crypt32.lib)
+ENDIF()
+
+IF(WITH_LIBOVR)
+  FIND_PACKAGE(LibOVR)
+ENDIF()
+
+IF(WITH_LIBVR)
+  FIND_PACKAGE(LibVR)
+ENDIF()
+
+NL_CONFIGURE_CHECKS()
+
 IF(WITH_STATIC_LIBXML2)
   SET(LIBXML2_DEFINITIONS ${LIBXML2_DEFINITIONS} -DLIBXML_STATIC)
-ENDIF(WITH_STATIC_LIBXML2)
+ENDIF()
 
 IF(WITH_LIBXML2_ICONV)
   FIND_PACKAGE(Iconv REQUIRED)
   INCLUDE_DIRECTORIES(${ICONV_INCLUDE_DIR})
   SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${ICONV_LIBRARIES})
-ENDIF(WITH_LIBXML2_ICONV)
+ENDIF()
 
 IF(WITH_STATIC)
   # libxml2 could need winsock2 library
@@ -141,40 +149,45 @@ IF(WITH_STATIC)
       SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${LIBLZMA_LIBRARIES})
     ENDIF()
   ENDIF()
-ENDIF(WITH_STATIC)
+ENDIF()
 
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/PCHSupport.cmake)
 
 IF(FINAL_VERSION)
   ADD_DEFINITIONS(-DFINAL_VERSION=1)
-ENDIF(FINAL_VERSION)
+ENDIF()
 
 IF(WITH_SSE2)
   ADD_DEFINITIONS(-DNL_HAS_SSE2)
   IF(WITH_SSE3)
     ADD_DEFINITIONS(-DNL_HAS_SSE3)
-  ENDIF(WITH_SSE3)
-ENDIF(WITH_SSE2)
-
-IF(APPLE_CERTIFICATE)
-  # Find codesign_allocate
-
-  # Xcode 7.0 and later versions
-  SET(CODESIGN_ALLOCATE ${OSX_DEVELOPER_ROOT}/Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate)
-
-  IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
-    # Xcode 6.4 and previous versions
-    SET(CODESIGN_ALLOCATE ${CMAKE_OSX_SYSROOT}/usr/bin/codesign_allocate)
   ENDIF()
+ENDIF()
 
-  IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
-    # System path
-    SET(CODESIGN_ALLOCATE /usr/bin/codesign_allocate)
-  ENDIF()
+IF(APPLE)
+  FIND_LIBRARY(CARBON_FRAMEWORK Carbon)
+  FIND_LIBRARY(FOUNDATION_FRAMEWORK Foundation)
 
-  IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
-    MESSAGE(WARNING "Unable to find codesign_allocate in standard directories")
-    SET(CODESIGN_ALLOCATE)
+  IF(APPLE_CERTIFICATE)
+    # Find codesign_allocate
+
+    # Xcode 7.0 and later versions
+    SET(CODESIGN_ALLOCATE ${OSX_DEVELOPER_ROOT}/Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate)
+
+    IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
+      # Xcode 6.4 and previous versions
+      SET(CODESIGN_ALLOCATE ${CMAKE_OSX_SYSROOT}/usr/bin/codesign_allocate)
+    ENDIF()
+
+    IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
+      # System path
+      SET(CODESIGN_ALLOCATE /usr/bin/codesign_allocate)
+    ENDIF()
+
+    IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
+      MESSAGE(WARNING "Unable to find codesign_allocate in standard directories")
+      SET(CODESIGN_ALLOCATE)
+    ENDIF()
   ENDIF()
 ENDIF()
 
@@ -300,7 +313,7 @@ IF(WITH_QT5)
 
         ADD_QT_LIBRARY(XcbQpa)
         ADD_QT_LIBRARY(PlatformSupport)
-        SET(QT_LIBRARIES ${QT_LIBRARIES} -lX11-xcb -lXi -lSM -lICE -lxcb -lGL)
+        SET(QT_LIBRARIES ${QT_LIBRARIES} -lX11-xcb -lXi -lSM -lICE -lxcb -lGL -lxcb-glx)
         IF(EXISTS "${QT_LIBRARY_DIR}/libxcb-static.a")
           SET(QT_LIBRARIES ${QT_LIBRARIES} "${QT_LIBRARY_DIR}/libxcb-static.a")
         ENDIF()
@@ -324,7 +337,7 @@ IF(WITH_QT5)
       ENDIF()
 
       # freetype is needed since Qt 5.5
-      FIND_PACKAGE(FreeType)
+      FIND_PACKAGE(Freetype)
 
       IF(FREETYPE_FOUND)
         SET(QT_LIBRARIES ${QT_LIBRARIES} ${FREETYPE_LIBRARIES})
@@ -370,8 +383,6 @@ IF(WITH_QT5)
       IF(APPLE)
         FIND_LIBRARY(PCRE_LIBRARY pcre16 pcre)
 
-        FIND_LIBRARY(FOUNDATION_FRAMEWORK Foundation)
-        FIND_LIBRARY(CARBON_FRAMEWORK Carbon)
         FIND_LIBRARY(SECURITY_FRAMEWORK Security)
 
         SET(QT_LIBRARIES ${QT_LIBRARIES}
@@ -395,16 +406,16 @@ IF(WITH_QT)
 
   # Use Qt 4
   FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtXml QtOpenGL REQUIRED)
-ENDIF(WITH_QT)
+ENDIF()
 
 IF(WITH_ASSIMP)
   FIND_PACKAGE(assimp REQUIRED)
-ENDIF(WITH_ASSIMP)
+ENDIF()
 
 IF(WITH_NEL)
   IF(WITH_NEL_TESTS)
     FIND_PACKAGE(CppTest)
-  ENDIF(WITH_NEL_TESTS)
+  ENDIF()
 
   IF(WITH_GUI)
     FIND_PACKAGE(Luabind REQUIRED)
@@ -442,19 +453,19 @@ IF(WITH_NEL)
 
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/nel/include)
   ADD_SUBDIRECTORY(nel)
-ENDIF(WITH_NEL)
+ENDIF()
 
 IF(WITH_RYZOM)
   ADD_SUBDIRECTORY(ryzom)
-ENDIF(WITH_RYZOM)
+ENDIF()
 
 IF(WITH_NELNS)
   ADD_SUBDIRECTORY(nelns)
-ENDIF(WITH_NELNS)
+ENDIF()
 
 IF(WITH_SNOWBALLS)
   ADD_SUBDIRECTORY(snowballs2)
-ENDIF(WITH_SNOWBALLS)
+ENDIF()
 
 IF(WITH_TOOLS)
   ADD_SUBDIRECTORY(tool)
@@ -462,22 +473,22 @@ ENDIF()
 
 IF(WITH_STUDIO)
   ADD_SUBDIRECTORY(studio)
-ENDIF(WITH_STUDIO)
+ENDIF()
 
 # To build the documention, you will have to enable it
 # and then do the equivalent of "make DoxygenDoc".
 IF(BUILD_DOCUMENTATION)
     IF(DOT)
         SET(HAVE_DOT YES)
-    ELSE(DOT)
+    ELSE()
         SET(HAVE_DOT NO)
-    ENDIF(DOT)
+    ENDIF()
     # This processes our Doxyfile.in and substitutes paths to generate
     # a final Doxyfile
     CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/doc/Doxyfile.cmake.in ${CMAKE_BINARY_DIR}/doc/Doxyfile)
 
     ADD_CUSTOM_TARGET(DoxygenDoc ${DOXYGEN} ${CMAKE_BINARY_DIR}/doc/Doxyfile)
-ENDIF(BUILD_DOCUMENTATION)
+ENDIF()
 
 IF(WITH_NEL_TESTS)
   ENABLE_TESTING()
@@ -487,8 +498,8 @@ IF(WITH_NEL_TESTS)
     SET(SVNCOMMAND svn)
     SET(SVNSOURCEDIR http://dev.ryzom.com/svn/trunk/nel)
     SET(GENERATELOGS svn2cl)
-  ENDIF(BUILD_DASHBOARD)
-ENDIF(WITH_NEL_TESTS)
+  ENDIF()
+ENDIF()
 
 # packaging information
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Ryzom Core MMORPG Framework")
@@ -520,10 +531,10 @@ IF(WIN32)
   #SET(CPACK_GENERATOR "NSIS")
   SET(CPACK_GENERATOR "NSIS;ZIP")
   SET(CPACK_SOURCE_GENERATOR "ZIP")
-ELSE(WIN32)
+ELSE()
   SET(CPACK_GENERATOR "TGZ")
   SET(CPACK_SOURCE_GENERATOR "TGZ")
-ENDIF(WIN32)
+ENDIF()
 set(CPACK_SOURCE_IGNORE_FILES
 	"~$"
 	"\\\\.cvsignore$"
@@ -541,8 +552,8 @@ IF(WIN32)
         "${QT_LIBRARY_DIR}/../bin/QtXmld4.dll"
         "${QT_LIBRARY_DIR}/../bin/QtCored4.dll"
         DESTINATION ${NL_BIN_PREFIX})
-    ENDIF(WITH_QT)
-  ELSE(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+    ENDIF()
+  ELSE()
     IF(WITH_QT)
       INCLUDE(${QT_USE_FILE})
       INSTALL(FILES
@@ -550,8 +561,8 @@ IF(WIN32)
         "${QT_LIBRARY_DIR}/../bin/QtXml4.dll"
         "${QT_LIBRARY_DIR}/../bin/QtCore4.dll"
         DESTINATION ${NL_BIN_PREFIX})
-    ENDIF(WITH_QT)
-  ENDIF(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+    ENDIF()
+  ENDIF()
 
   # Install CEGUI and its dependencies.
   IF(WITH_NEL_CEGUI)
@@ -561,14 +572,14 @@ IF(WIN32)
     INSTALL(FILES "${CEGUI_LIB_DIR}/CEGUIFalagardWRBase.dll" DESTINATION ${NL_BIN_PREFIX})
     INSTALL(FILES "${CEGUI_LIB_DIR}/Devil.dll" DESTINATION ${NL_BIN_PREFIX})
     INSTALL(FILES "${CEGUI_LIB_DIR}/ILU.dll" DESTINATION ${NL_BIN_PREFIX})
-  ENDIF(WITH_NEL_CEGUI)
+  ENDIF()
 
   # Only the tools require MFC.
   IF(WITH_TOOLS)
     SET(CMAKE_INSTALL_MFC_LIBRARIES TRUE)
-  ENDIF(WITH_TOOLS)
+  ENDIF()
   #INCLUDE(InstallRequiredSystemLibraries)
-ENDIF(WIN32)
+ENDIF()
 
 INCLUDE(CPack)
 
@@ -578,4 +589,4 @@ INCLUDE(CMakePackaging.txt)
 #INCLUDE(UseDebian)
 #IF(DEBIAN_FOUND)
 #  ADD_DEBIAN_TARGETS(nel)
-#ENDIF(DEBIAN_FOUND)
+#ENDIF()

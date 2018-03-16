@@ -18,8 +18,13 @@
 
 #include "nel/3d/zone_tgt_smoother.h"
 #include "nel/misc/plane.h"
+
 using namespace std;
 using namespace NLMISC;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

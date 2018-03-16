@@ -27,6 +27,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
@@ -585,10 +589,7 @@ void CShapeBank::cancelLoadAsync (const std::string &shapeNameNotLwr)
 
 bool CShapeBank::isShapeWaiting ()
 {
-	if (WaitingShapes.size() == 0)
-		return false;
-	else
-		return true;
+	return !WaitingShapes.empty();
 }
 
 // ***************************************************************************

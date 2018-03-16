@@ -68,6 +68,8 @@
 
 #include "interface_v3/sbrick_manager.h"
 #include "nel/gui/widget_manager.h"
+#include "nel/gui/http_cache.h"
+#include "nel/gui/http_hsts.h"
 //
 #include "gabarit.h"
 #include "hair_set.h"
@@ -111,6 +113,10 @@ extern HWND SlashScreen;
 #include "app_bundle_utils.h"
 
 #include <new>
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ///////////
 // USING //
@@ -257,7 +263,10 @@ static INT_PTR CALLBACK ExitClientErrorDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 		{
 			if (CI18N::hasTranslation("TheSagaOfRyzom"))
 			{
-				SetWindowTextW(hwndDlg, (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str ());
+				if (!SetWindowTextW(hwndDlg, (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str ()))
+				{
+					nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+				}
 			}
 			SetDlgItemTextW(hwndDlg, IDC_ERROR_MSG_TEXT, (WCHAR*) CurrentErrorMessage.c_str ());
 			if (CI18N::hasTranslation("uiRyzomErrorMsgBoxExit"))
@@ -367,7 +376,7 @@ void selectTipsOfTheDay (uint /* tips */)
 	TipsOfTheDay = title+CI18N::get ("uiTips"+toString (tips));*/
 	// todo tips of the day remove
 	//trap TipsOfTheDay = CI18N::get ("uiMessageOfTheDay");
-	TipsOfTheDay = ""; //trap
+	TipsOfTheDay.clear(); //trap
 }
 
 // ***************************************************************************
@@ -1148,6 +1157,7 @@ void prelogInit()
 			Driver->setSwapVBLInterval(0);
 
 		// initialize system utils class
+		CSystemUtils::init();
 		CSystemUtils::setWindow(Driver->getDisplay());
 
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_VideoModeSetupHighColor, "login_step_video_mode_setup_high_color"));
@@ -1209,6 +1219,12 @@ void prelogInit()
 				// if found, skip other directories for this icon size
 				if (addRyzomIconBitmap(directory, bitmaps)) break;
 			}
+		}
+
+		if (bitmaps.empty())
+		{
+			// check if an icon is present in same directory as executable
+			addRyzomIconBitmap(Args.getProgramPath(), bitmaps);
 		}
 
 		if (bitmaps.empty())
@@ -1356,6 +1372,12 @@ void prelogInit()
 			}
 			//nlinfo ("PROFILE: %d seconds for Add search paths Data", (uint32)(ryzomGetLocalTime ()-initPaths)/1000);
 		}
+
+		// Initialize HTTP cache
+		CHttpCache::getInstance()->setCacheIndex("cache/cache.index");
+		CHttpCache::getInstance()->init();
+
+		CStrictTransportSecurity::getInstance()->init("save/hsts-list.save");
 
 		// Register the reflected classes
 		registerInterfaceElements();
@@ -1640,7 +1662,7 @@ void postlogInit()
 		else
 		{
 			// To have the same number of newMessage in client light
-			nmsg = "";
+			nmsg.clear();
 			ProgressBar.newMessage (nmsg);
 			ProgressBar.newMessage (nmsg);
 			ProgressBar.newMessage (nmsg);

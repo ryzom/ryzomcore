@@ -20,6 +20,10 @@
 #include "nel/gui/lua_ihm.h"
 #include "nel/gui/lua_helper.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -422,7 +426,7 @@ namespace NLGUI
 	{
 		nlassert(key);
 		nlassert(isValid());
-		if (!isTable()) throw ELuaNotATable(NLMISC::toString("Trying to set a value '%d" NL_I64 "' at key %s on object '%s' of type %s (not a table).", value, key, getId().c_str(), getTypename()));
+		if (!isTable()) throw ELuaNotATable(NLMISC::toString("Trying to set a value '%" NL_I64 "d' at key %s on object '%s' of type %s (not a table).", value, key, getId().c_str(), getTypename()));
 		CLuaStackChecker lsc(_LuaState);
 		push();
 		_LuaState->push(key);

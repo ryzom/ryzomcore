@@ -21,6 +21,10 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 std::string getAppBundlePath()
 {
 	static std::string s_cachedPathToBundle;

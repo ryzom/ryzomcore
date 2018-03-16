@@ -28,6 +28,10 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
@@ -319,7 +323,7 @@ void CCluster::serial (NLMISC::IStream&f)
 			// write the env fx name
 			std::string envFxName = CStringMapper::unmap(_EnvironmentFxId);
 			if (envFxName == "no fx")
-				envFxName = "";
+				envFxName.clear();
 			f.serial(envFxName);
 		}
 

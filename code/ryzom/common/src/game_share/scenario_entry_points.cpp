@@ -385,7 +385,7 @@ void CScenarioEntryPoints::loadFromXMLFile()
 					shortEntryPoint.Y = entryPoint.Y;
 					entryPoints.push_back(shortEntryPoint);
 
-					if(package=="")
+					if(package.empty())
 						package=entryPoint.Package;
 					else if(package!=entryPoint.Package)
 						nlinfo("Different packages for island '%s' in file %s", island, _EntryPointsFilename.c_str());

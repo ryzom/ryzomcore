@@ -45,6 +45,9 @@
 	#define CHECK_INTEGRITY
 #endif
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 
@@ -317,7 +320,7 @@ void CParticleSystem::setViewMat(const NLMISC::CMatrix &m)
 }
 
 ///=======================================================================================
-bool CParticleSystem::hasEmitters(void) const
+bool CParticleSystem::hasEmitters() const
 {
 	NL_PS_FUNC_MAIN(CParticleSystem_hasEmitters)
 	for (TProcessVect::const_iterator it = _ProcessVect.begin(); it != _ProcessVect.end(); ++it)
@@ -749,7 +752,7 @@ void CParticleSystem::step(TPass pass, TAnimationTime ellapsedTime, CParticleSys
 
 
 ///=======================================================================================
-void CParticleSystem::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CParticleSystem::serial(NLMISC::IStream &f)
 {
 	CHECK_INTEGRITY
 	NL_PS_FUNC_MAIN(CParticleSystem_serial)

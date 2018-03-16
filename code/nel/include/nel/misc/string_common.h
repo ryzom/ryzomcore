@@ -28,8 +28,8 @@ namespace NLMISC
 {
 
 // get a string and add \r before \n if necessary
-std::string addSlashR (std::string str);
-std::string removeSlashR (std::string str);
+std::string addSlashR (const std::string &str);
+std::string removeSlashR (const std::string &str);
 
 /**
  * \def MaxCStringSize

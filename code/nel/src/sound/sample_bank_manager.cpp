@@ -81,7 +81,7 @@ void CSampleBankManager::init(NLGEORGES::UFormElm *mixerConfig)
 				{
 					TFilteredBank fb;
 					std::string	bankName;
-					NLGEORGES::UFormElm	*realBank;
+					NLGEORGES::UFormElm	*realBank = NULL;
 					realBank->getArrayNode(&realBank, j);
 
 					realBank->getValueByName(bankName, ".SampleBank");

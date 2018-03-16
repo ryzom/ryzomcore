@@ -206,12 +206,6 @@ namespace NLGUI
 			invalidateContent();
 		}
 
-		// Set the HTML group used for links
-		void	setBrowseGroup (CInterfaceElement	*group)
-		{
-			_BrowseGroup = group;
-		}
-
 		/// \from CInterfaceElement
 		void onInvalidateContent();
 		sint32	getMaxUsedW() const;
@@ -292,9 +286,6 @@ namespace NLGUI
 
 		// The links
 		std::vector<CLink>	_Links;
-
-		// The HTML group used
-		CInterfaceElement	*_BrowseGroup;
 
 	private:
 		std::string _HardText;

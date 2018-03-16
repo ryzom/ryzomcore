@@ -80,7 +80,7 @@ public:
 			return getNpcFullName();
 		else if (subPart == "function")
 			return _NpcFunction;
-		else if (subPart == "")
+		else if (subPart.empty())
 			return _NpcLabel;
 
 		throw EParseException(NULL, toString("var_npc don't have a subpart '%s'", subPart.c_str()).c_str());
@@ -137,7 +137,7 @@ public:
 	
 	string evalVar(const string &subPart)
 	{
-		if (subPart == "")
+		if (subPart.empty())
 			return string("\"")+_NpcLabel+"\"";
 
 		throw EParseException(NULL, toString("var_npc_name don't have a subpart '%s'", subPart.c_str()).c_str());

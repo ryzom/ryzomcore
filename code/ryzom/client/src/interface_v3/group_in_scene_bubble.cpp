@@ -312,6 +312,18 @@ void CGroupInSceneBubbleManager::release ()
 
 	_CurrentBubble = 0;
 	_PopupCount = 0;
+
+	//
+	for (i=0; i<_DynBubbles.size(); i++)
+	{
+		CWidgetManager::getInstance()->unMakeWindow(_DynBubbles[i].Bubble);
+		if (_DynBubbles[i].Bubble->getParent())
+			_DynBubbles[i].Bubble->getParent()->delGroup(_DynBubbles[i].Bubble);
+		else
+			delete _DynBubbles[i].Bubble;
+	}
+	_DynBubbles.clear();
+	_GroupToDelete.clear();
 }
 
 // ***************************************************************************
@@ -473,7 +485,7 @@ void CGroupInSceneBubbleManager::update ()
 
 CGroupInSceneBubble *CGroupInSceneBubbleManager::newBubble (const ucstring &text)
 {
-	if (!text.empty() && _Bubbles.size ())
+	if (!text.empty() && !_Bubbles.empty())
 	{
 		// Get a bubble
 		CGroupInSceneBubble *bubble = _Bubbles[_CurrentBubble];

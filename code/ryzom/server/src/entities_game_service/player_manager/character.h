@@ -183,7 +183,7 @@ struct SGameCoordinate
 	sint32	Cell;
 	uint8 Continent;
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial( X );
 		f.serial( Y );
@@ -304,7 +304,7 @@ struct CPetAnimal
 	CPetAnimal();
 
 	void clear();
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	// init found ticket item pointer with slot
 	uint32 initLinkAnimalToTicket( CCharacter * c, uint8 index);
@@ -600,7 +600,7 @@ public:
 	 *	Set the value of a var
 	 * \param var is the name of the variable
 	 * \param value is the new value for the variable
-	 * \return true if the value has been set, false if an error occured
+	 * \return true if the value has been set, false if an error occurred
 	 */
 	bool setValue( std::string var, std::string value );
 
@@ -608,7 +608,7 @@ public:
 	 *	Modify the value of a var
 	 * \param var is the name of the variable
 	 * \param value is the modification value
-	 * \return true if the value has been changed, false if an error occured
+	 * \return true if the value has been changed, false if an error occurred
 	 */
 	bool modifyValue( std::string var, std::string value );
 	
@@ -660,7 +660,7 @@ public:
 	/**
 	 * Serial: reading off-mirror, writing from mirror
 	 */
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	// set player position to default respawn point of continent
 	void setPositionToDefaultRespawnPoint();
@@ -2913,7 +2913,7 @@ private:
 	 * \param phraseId the phrase sheet id
 	 * \param knownPhraseIndex index of the phrase in phrase book
 	 * \param testRestrictions if true then test if player match phrase requirements
-	 * \return true if the phrase has been bought, false if an error occured
+	 * \return true if the phrase has been bought, false if an error occurred
 	 */
 	bool buyRolemasterPhrase( const NLMISC::CSheetId &phraseId, uint16 knownPhraseIndex, bool testRestrictions );
 
@@ -3839,7 +3839,7 @@ public:
 	/// Test the character against mission prerequisits for the specified list of mission giver NPCs
 	void			sendNpcMissionGiverIconDesc( const std::vector<uint32>& npcKeys );
 
-	/// Inform the client that an event that might change mission availability just occured
+	/// Inform the client that an event that might change mission availability just occurred
 	void			sendEventForMissionAvailabilityCheck();
 
 	/// Send the current timer period if is different from the default or force is true

@@ -519,17 +519,29 @@ struct SBagOptions
 	bool LastDbFilterMP;
 	bool LastDbFilterMissMP;
 	bool LastDbFilterTP;
+
+	bool SearchFilterChanged;
+	uint16 SearchQualityMin;
+	uint16 SearchQualityMax;
+	std::vector<ucstring> SearchFilter;
+
 	// -----------------------
 	SBagOptions()
 	{
 		InvType = CInventoryManager::InvUnknown;
 		DbFilterArmor = DbFilterWeapon = DbFilterTool = DbFilterMP = DbFilterMissMP = DbFilterTP = NULL;
 		LastDbFilterArmor = LastDbFilterWeapon = LastDbFilterTool = LastDbFilterMP = LastDbFilterMissMP = LastDbFilterTP = false;
+		SearchFilterChanged = false;
+		SearchQualityMin = 0;
+		SearchQualityMax = 999;
 	}
 
 	bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 	bool isSomethingChanged(); // From last call ?
+
+	bool isSearchFilterChanged() const { return SearchFilterChanged; }
+	void setSearchFilter(const ucstring &s);
 
 	bool getFilterArmor() const
 	{
@@ -621,6 +633,8 @@ public:
 	// Return true if the sheet can be displayed due to filters
 	bool canDisplay(CDBCtrlSheet *pCS) { return _BO.canDisplay(pCS); }
 
+	void setSearchFilter(const ucstring &s) { _BO.setSearchFilter(s); }
+
 private:
 
 	SBagOptions	_BO;
@@ -651,6 +665,8 @@ public:
 
 	// Return true if the sheet can be displayed due to filters
 	bool canDisplay(CDBCtrlSheet *pCS) const { return _BO.canDisplay(pCS); }
+
+	void setSearchFilter(const ucstring &s) { _BO.setSearchFilter(s); }
 
 	//////////////////////////////////////////////////////////////////////////
 

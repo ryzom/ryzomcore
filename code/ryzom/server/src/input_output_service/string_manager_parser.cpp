@@ -620,7 +620,7 @@ bool CStringManager::parseBlock(const ucstring &block, CPhrase &phrase)
 					TParamId *pparamId;
 					if (!findParam(phrase, rep[k].ParamName, pparamId))
 					{
-						nlwarning("Text in clause %d use parameter [%s] that is unkown in block", count, rep[k].ParamName.c_str());
+						nlwarning("Text in clause %d use parameter [%s] that is unknown in block", count, rep[k].ParamName.c_str());
 						return false;
 					}
 				}
@@ -1864,7 +1864,6 @@ void CStringManager::init(NLMISC::CLog *log)
 	
 	if (_SheetInfo.empty())
 	{
-		// std::map<std::string, TSheetInfo> container;
 		// Load the sheet
 		std::vector<std::string> exts;
 		exts.push_back("creature");

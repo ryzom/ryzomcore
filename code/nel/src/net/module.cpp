@@ -24,6 +24,10 @@
 #include "nel/net/module_gateway.h"
 #include "nel/net/module_socket.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
@@ -879,7 +883,7 @@ namespace NLNET
 			throw EModuleNotReachable();
 		}
 
-		_Gateway->sendModuleMessage(senderProx, this, message);
+		_Gateway->sendModuleProxyMessage(senderProx, this, message);
 	}
 
 	const TSecurityData *CModuleProxy::findSecurityData(uint8 dataTag) const

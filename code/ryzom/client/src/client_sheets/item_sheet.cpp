@@ -611,7 +611,7 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 // serial :
 // Serialize character sheet into binary data file.
 //-----------------------------------------------
-void CItemSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CItemSheet::serial(NLMISC::IStream &f)
 {
 	ClientSheetsStrings.serial(f, IdShape);
 	ClientSheetsStrings.serial(f, IdShapeFemale);

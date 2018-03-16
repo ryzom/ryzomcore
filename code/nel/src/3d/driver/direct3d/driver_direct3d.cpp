@@ -32,6 +32,10 @@
 
 #include "driver_direct3d.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 
@@ -1265,7 +1269,7 @@ bool CDriverD3D::init (uintptr_t windowIcon, emptyProc exitFunc)
 		if (error != ERROR_CLASS_ALREADY_EXISTS)
 		{
 			nlwarning("CDriverD3D::init: Can't register window class %s (error code %i)", _WindowClass.c_str(), (sint)error);
-			_WindowClass = "";
+			_WindowClass.clear();
 			return false;
 		}
 	}
@@ -2267,7 +2271,10 @@ bool CDriverD3D::getCurrentScreenMode(GfxMode &gfxMode)
 // ***************************************************************************
 void CDriverD3D::setWindowTitle(const ucstring &title)
 {
-	SetWindowTextW(_HWnd,(WCHAR*)title.c_str());
+	if (!SetWindowTextW(_HWnd, (WCHAR*)title.c_str()))
+	{
+		nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+	}
 }
 
 // ***************************************************************************

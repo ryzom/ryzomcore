@@ -1420,7 +1420,7 @@ void	NLPACS::CZoneTessellation::compile()
 
 				bool	force = false;
 
-				if (surf.Area < 30.0f && surf.Elements.size() > 0)
+				if (surf.Area < 30.0f && !surf.Elements.empty())
 				{
 					uint		i;
 					CAABBox		aabbox;
@@ -1688,7 +1688,7 @@ CAABBox	NLPACS::CZoneTessellation::computeBBox() const
 	bool		set = false;
 	uint		i;
 
-	if (_Vertices.size() == 0)
+	if (_Vertices.empty())
 		return zbox;
 
 	zbox.setCenter(_Vertices[0]);

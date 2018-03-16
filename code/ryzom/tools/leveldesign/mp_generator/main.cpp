@@ -206,7 +206,7 @@ void InitCreatureMP()
 				{
 					code = ligneN.firstWord();
 					nom = ligneM.firstWord();
-					ligneN = "";
+					ligneN.clear();
 				}
 
 				// save items to generate for each new creature name found
@@ -1069,7 +1069,7 @@ void GenerateSpecialItem( int numMP, const CSString& nomMP, const MPCraftStats& 
 void	parseSpecialAttributes(const CSString &specialAttributes, MPCraftStats &craftStats, CExtraInfo &extraInfo)
 {
 	// evaluate DropOrSell according to CraftStats: can DropOrSell if it is a MP Craft
-	extraInfo.DropOrSell= craftStats.Craft != "";
+	extraInfo.DropOrSell= !craftStats.Craft.empty();
 
 	// parse attributes
 	vector<string> strArray;
@@ -1166,7 +1166,7 @@ void NewMP( CSString& ligne )
 			special = ligne;
 			if ( !special.firstWord().empty() )
 				specialNames.insert( special );
-			ligne = "";
+			ligne.clear();
 		}
 		else
 		{
@@ -1279,15 +1279,23 @@ void ItemNamesSave()
 	printf( "-- SAVING ITEM NAMES --\n");
 	CSString data, output;
 
-	FILE* file;
-	file = nlfopen( ITEM_WORDS_WK, "rb" );
+	FILE *file = nlfopen( ITEM_WORDS_WK, "rb" );
 
 	char c;
-	fread( &c, 1, 1, file );
+	if (fread(&c, 1, 1, file) != 1)
+	{
+		nlwarning("Unable to read 1 byte from %s", ITEM_WORDS_WK.c_str());
+		return;
+	}
+
 	while ( !feof( file ) )
 	{
 		data += toString( "%c", c );
-		fread( &c, 1, 1, file );
+		if (fread(&c, 1, 1, file) != 1)
+		{
+			nlwarning("Unable to read 1 byte from %s", ITEM_WORDS_WK.c_str());
+			return;
+		}
 	}
 
 	fclose( file );

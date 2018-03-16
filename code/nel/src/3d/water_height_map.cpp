@@ -24,6 +24,9 @@
 #include <cmath>
 
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -73,7 +76,7 @@ void CWaterHeightMap::updateUserPos()
 
 	nlassert(_Size != 0);
 	if ((uint) x == _X && (uint) y == _Y) return;
-	if ((uint) abs((long int)(x - _X)) < _Size && (uint) abs((long int)(y - _Y)) < _Size) // are there common pixels with the previous location?
+	if ((uint) std::abs((sint)(x - _X)) < _Size && (uint) std::abs((sint)(y - _Y)) < _Size) // are there common pixels with the previous location?
 	{
 		// compute zone
 
@@ -305,7 +308,11 @@ void		CWaterHeightMap::makeCpy(uint buffer, uint dX, uint dY, uint sX, uint sY, 
 	{
 		if (dest < src)
 		{
+#ifdef NL_COMP_VC14
+			std::copy(src, src + width, stdext::make_unchecked_array_iterator(dest));
+#else
 			std::copy(src, src + width, dest);
+#endif
 		}
 		else
 		{
@@ -667,7 +674,7 @@ void CWaterHeightMap::setWaves(float intensity, float period, uint radius, bool 
 
 //===========================================================================================
 
-void CWaterHeightMap::serial(NLMISC::IStream &f)  throw(NLMISC::EStream)
+void CWaterHeightMap::serial(NLMISC::IStream &f)
 {
 	f.xmlPushBegin("WaterHeightMap");
 		f.xmlSetAttrib ("NAME")					;

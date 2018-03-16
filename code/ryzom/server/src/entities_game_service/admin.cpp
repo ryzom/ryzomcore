@@ -1002,7 +1002,7 @@ ENTITY_VARIABLE(Money, "Money")
 
 	if (get)
 	{
-		value = toString("%"NL_I64"u", c->getMoney());
+		value = toString(c->getMoney());
 	}
 	else
 	{
@@ -1037,7 +1037,7 @@ ENTITY_VARIABLE(Money, "Money")
 				c->spendMoney(val);
 		}
 
-		nlinfo ("Player %s money is %"NL_I64"u", entity.toString().c_str(),c->getMoney());
+		nlinfo ("Player %s money is %" NL_I64 "u", entity.toString().c_str(),c->getMoney());
 	}
 }
 
@@ -1054,7 +1054,7 @@ ENTITY_VARIABLE(MoneyGuild, "MoneyGuild")
 
 	if (get)
 	{
-		value = toString("%"NL_I64"u", guild->getMoney());
+		value = toString(guild->getMoney());
 	}
 	else
 	{
@@ -1090,7 +1090,7 @@ ENTITY_VARIABLE(MoneyGuild, "MoneyGuild")
 				guild->spendMoney(val);
 		}
 
-		nlinfo ("Player %s guild money is %"NL_I64"u", entity.toString().c_str(),guild->getMoney());
+		nlinfo ("Player %s guild money is %" NL_I64 "u", entity.toString().c_str(),guild->getMoney());
 	}
 }
 
@@ -4350,7 +4350,7 @@ ENTITY_VARIABLE(Invisible, "Invisibility of a player")
 		msgout.serial( ignore );
 		CUnifiedNetwork::getInstance()->send("IOS", msgout);
 
-		nlinfo ("%s has now '%"NL_I64"X' in invisibility", entity.toString().c_str(), e->getWhoSeesMe());
+		nlinfo ("%s has now '%" NL_I64 "X' in invisibility", entity.toString().c_str(), e->getWhoSeesMe());
 	}
 }
 
@@ -5489,7 +5489,7 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 		if (command_args.size() > 8)
 		{
 			if (command_args[8] != "*") {
-				NLMISC::fromString(command_args[7], z);
+				NLMISC::fromString(command_args[8], z);
 			}
 		}
 

@@ -14,6 +14,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef STDGEORGES_H
+#define STDGEORGES_H
+
+#if defined(_MSC_VER) && defined(_DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
+
 #include "nel/misc/types_nl.h"
 #include <cmath>
 #include <list>
@@ -27,3 +37,5 @@
 
 // Include from libxml2
 #include <libxml/parser.h>
+
+#endif

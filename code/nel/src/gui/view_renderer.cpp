@@ -26,6 +26,10 @@ using namespace NLMISC;
 using namespace std;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -287,7 +291,7 @@ namespace NLGUI
 	// ***************************************************************************
 	NL3D::UTextContext* CViewRenderer::getTextContext(const std::string &name)
 	{
-		if (name.size() > 0 && fonts.count(name) > 0)
+		if (!name.empty() && fonts.count(name) > 0)
 			return fonts[name];
 
 		return textcontext;
@@ -303,7 +307,7 @@ namespace NLGUI
 			driver->deleteTextContext(fonts[name]);
 
 		std::string fontFile = CPath::lookup(font, false);
-		if (fontFile.size() == 0)
+		if (fontFile.empty())
 		{
 			nlwarning("Font file '%s' not found", font.c_str());
 			return false;

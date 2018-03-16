@@ -21,6 +21,10 @@
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -146,6 +150,8 @@ namespace NLGUI
 			HTML_ATTR(IMG,USEMAP),
 			HTML_ATTR(IMG,VSPACE),
 			HTML_ATTR(IMG,WIDTH),
+			// not sorted to keep enum values
+			HTML_ATTR(IMG,DATA-OVER-SRC),
 			{ 0 }
 	};
 

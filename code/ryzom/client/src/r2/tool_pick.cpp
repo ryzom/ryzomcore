@@ -21,6 +21,9 @@
 //
 #include "nel/gui/lua_ihm.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLMISC;
 
@@ -48,7 +51,7 @@ void CToolPick::setIgnoreInstances(const std::string & ignoreInstances)
 {
 	//H_AUTO(R2_CToolPick_setIgnoreInstances)
 	string allKind = ignoreInstances;
-	while (allKind.size() > 0)
+	while (!allKind.empty())
 	{
 		std::string::size_type e = allKind.find(',');
 		string tmp;
@@ -73,7 +76,7 @@ void CToolPick::setIgnoreInstances(const std::string & ignoreInstances)
 		while(!tmp.empty() && tmp[tmp.size()]==' ')
 		{
 			if(tmp.size()==1)
-				tmp="";
+				tmp.clear();
 			else
 				tmp = tmp.substr(0,tmp.size()-1);
 		}

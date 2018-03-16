@@ -255,7 +255,7 @@ void CLibrary::freeLibrary()
 		_PureNelLibrary = NULL;
 		_LibHandle = NULL;
 		_Ownership = false;
-		_LibFileName = "";
+		_LibFileName.clear();
 	}
 }
 

@@ -29,6 +29,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -336,7 +340,7 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
-	bool CGroupCell::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup, uint columnIndex, uint rowIndex)
+	bool CGroupCell::parseCell(xmlNodePtr cur, CInterfaceGroup * parentGroup, uint columnIndex, uint rowIndex)
 	{
 		CXMLAutoPtr ptr;
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"id");
@@ -1205,6 +1209,13 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	sint32	CGroupTable::getMaxUsedW() const
 	{
+		// Return table width if its requested by user.
+		// Need to do this because width of long line of text in here is calculated
+		// differently than final cell width in updateCoords()
+		// This will break tables with too narrow width set by user.
+		if (ForceWidthMin > 0)
+			return ForceWidthMin;
+
 		uint i;
 		uint column = 0;
 		vector<sint32> columns;
@@ -1558,7 +1569,7 @@ namespace NLGUI
 					if (strcmp((char*)currCol->name,"TD") == 0)
 					{
 						CGroupCell *cell = new CGroupCell(CViewBase::TCtorParam());
-						if (cell->parse(currCol, this, column, row))
+						if (cell->parseCell(currCol, this, column, row))
 						{
 							cell->NewLine = newLine;
 							newLine = false;

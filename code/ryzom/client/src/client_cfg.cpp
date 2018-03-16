@@ -357,6 +357,7 @@ CClientConfig::CClientConfig()
 	FreeLookAcceleration    = 0;					// Default FreeLookAcceleration
 	FreeLookSmoothingPeriod = 0.f;                  // when in absolute mode, free look factor is used instead of speed, the mouse gives the absolute angle
 	FreeLookInverted		= false;
+	FreeLookTablet			= false;                // Mouse reports absolute coordinates, so avoid mouse recentering
 	AutomaticCamera			= true;
 	DblClickMode			= true;					// when in dbl click mode, a double click is needed to execute default contextual action
 	AutoEquipTool			= true;					// when true player will auto-equip last used weapon or forage tool when doing an action
@@ -591,7 +592,7 @@ CClientConfig::CClientConfig()
 	FollowOnAtk			= true;
 	AtkOnSelect			= false;
 	TransparentUnderCursor = false;
-
+	ItemGroupAllowGuild = false;
 	// PREFERENCES
 	FPV					= false;
 	CameraHeight		= 2.5f;
@@ -867,6 +868,7 @@ void CClientConfig::setValues()
 	READ_INT_FV(FreeLookAcceleration)
 	READ_FLOAT_FV(FreeLookSmoothingPeriod)
 	READ_BOOL_FV(FreeLookInverted)
+	READ_BOOL_FV(FreeLookTablet)
 	READ_BOOL_FV(AutomaticCamera)
 	READ_BOOL_FV(DblClickMode)
 	READ_BOOL_FV(AutoEquipTool)
@@ -1064,7 +1066,7 @@ void CClientConfig::setValues()
 
 	/////////////////////////
 	// NEW PATCHING SYSTEM //
-	READ_BOOL_DEV(PatchWanted)
+	READ_BOOL_FV(PatchWanted)
 
 #ifdef RZ_USE_CUSTOM_PATCH_SERVER
 	READ_STRING_FV(PatchUrl)
@@ -1446,6 +1448,8 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(FollowOnAtk);
 	READ_BOOL_FV(AtkOnSelect);
 	READ_BOOL_DEV(TransparentUnderCursor);
+	//
+	READ_BOOL_FV(ItemGroupAllowGuild);
 
 
 	/////////////////
@@ -1869,7 +1873,7 @@ void CClientConfig::setValues()
 // serial :
 // Serialize CFG.
 //-----------------------------------------------
-void CClientConfig::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CClientConfig::serial(NLMISC::IStream &f)
 {
 	// Start the opening of a new node named ClientCFG.
 	f.xmlPush("ClientCFG");
@@ -2049,13 +2053,9 @@ void CClientConfig::release ()
 				// Are we in window mode ?
 				if (ClientCfg.Windowed /* && !isWindowMaximized() */)
 				{
-					// Save windows position
+					// Save windows position. width/height are saved when leaving ingame.
 					writeInt("PositionX", x);
 					writeInt("PositionY", y);
-
-					// Save windows size
-					writeInt("Width", std::max((sint)width, 800));
-					writeInt("Height", std::max((sint)height, 600));
 				}
 			}
 

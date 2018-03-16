@@ -83,9 +83,8 @@ class CPropertyString : public IProperty
 {
 public:
 	CPropertyString () {}
-	CPropertyString (const char *str);
 	CPropertyString (const std::string &str);
-	CPropertyString (const char *str, bool _default);
+	CPropertyString (const std::string &str, bool _default);
 	virtual ~CPropertyString () {}
 	std::string			String;
 
@@ -287,42 +286,42 @@ public:
 	  * If the property already exist, the method does nothing and returns false.
 	  * The pointer will be deleted by the primitive using the ::delete operator.
 	  **/
-	bool				addPropertyByName (const char *property_name, IProperty *result);
+	bool				addPropertyByName (const std::string &property_name, IProperty *result);
 
 	/**
 	  * Get a property with its name
 	  **/
-	bool				getPropertyByName (const char *property_name, const IProperty *&result) const;
+	bool				getPropertyByName (const std::string &property_name, const IProperty *&result) const;
 
 	/**
 	  * Get a property with its name
 	  **/
-	bool				getPropertyByName (const char *property_name, IProperty *&result) const;
+	bool				getPropertyByName (const std::string &property_name, IProperty *&result) const;
 
 	/**
 	  * Get a string property with its name. Return false if the property is not found or is not a string property.
 	  **/
-	bool				getPropertyByName (const char *property_name, std::string *&result) const;
+	bool				getPropertyByName (const std::string &property_name, std::string *&result) const;
 
 	/**
 	  * Get a string array property with its name. Return false if the property is not found or is not a string array property.
 	  **/
-	bool				getPropertyByName (const char *property_name, std::vector<std::string> *&result) const;
+	bool				getPropertyByName (const std::string &property_name, std::vector<std::string> *&result) const;
 
 	/**
 	  * Get a string property with its name. Return false if the property is not found or is not a string property.
 	  **/
-	bool				getPropertyByName (const char *property_name, std::string &result) const;
+	bool				getPropertyByName (const std::string &property_name, std::string &result) const;
 
 	/**
 	  * Get a string array property with its name. Return false if the property is not found or is not a string array property.
 	  **/
-	bool				getPropertyByName (const char *property_name, const std::vector<std::string> *&result) const;
+	bool				getPropertyByName (const std::string &property_name, const std::vector<std::string> *&result) const;
 
 	/**
 	  * Get a color property with its name. Return false if the property is not found or is not a string array property.
 	  **/
-	bool				getPropertyByName (const char *property_name, NLMISC::CRGBA &result) const;
+	bool				getPropertyByName (const std::string &property_name, NLMISC::CRGBA &result) const;
 
 	/**
 	  * Remove a property
@@ -333,7 +332,7 @@ public:
 	/**
 	  * Remove a property by its name
 	  **/
-	bool				removePropertyByName (const char *property_name);
+	bool				removePropertyByName (const std::string &property_name);
 
 	/**
 	  * Remove all the properties
@@ -347,10 +346,10 @@ public:
 	void				initDefaultValues (CLigoConfig &config);
 
 	// Read the primitive, calls initDefaultValue (CLigoConfig &config)
-	virtual bool read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &property_name, uint version, CLigoConfig &config);
 
 	// Write the primitive
-	virtual void write (xmlNodePtr xmlNode, const char *filename) const;
+	virtual void write (xmlNodePtr xmlNode, const std::string &property_name) const;
 
 	// Get the vertices
 	virtual uint				getNumVector () const = 0;
@@ -435,7 +434,7 @@ protected:
 	virtual CPrimVector			*getPrimVector ();
 
 	// Read the primitive
-	virtual bool read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config);
 
 	// \name From IPrimitive
 	virtual IPrimitive *copy () const;
@@ -474,10 +473,10 @@ protected:
 	virtual CPrimVector			*getPrimVector ();
 
 	// Read the primitive
-	virtual bool read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config);
 
 	// Write the primitive
-	virtual void write (xmlNodePtr xmlNode, const char *filename) const;
+	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const;
 
 	// \name From IPrimitive
 	virtual IPrimitive *copy () const;
@@ -509,10 +508,10 @@ protected:
 	virtual CPrimVector			*getPrimVector ();
 
 	// Read the primitive
-	virtual bool read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config);
 
 	// Write the primitive
-	virtual void write (xmlNodePtr xmlNode, const char *filename) const;
+	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const;
 
 	// \name From IPrimitive
 	virtual IPrimitive *copy () const;
@@ -568,10 +567,10 @@ protected:
 	virtual CPrimVector			*getPrimVector ();
 
 	// Read the primitive
-	virtual bool read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config);
 
 	// Write the primitive
-	virtual void write (xmlNodePtr xmlNode, const char *filename) const;
+	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const;
 
 	// \name From IPrimitive
 	virtual IPrimitive *copy () const;
@@ -632,9 +631,9 @@ public:
 	uint32	getFullAlias() const;
 
 	// Read the primitive
-	virtual bool read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config);
 	// Write the primitive
-	virtual void write (xmlNodePtr xmlNode, const char *filename) const;
+	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const;
 	// Create a copy of this primitive
 	virtual IPrimitive *copy () const;
 	// serial for binary save
@@ -686,13 +685,13 @@ public:
 	void			convert (const CPrimRegion &region);
 
 	// Read the primitive
-	bool			read (xmlNodePtr xmlNode, const char *filename, CLigoConfig &config);
+	bool			read (xmlNodePtr xmlNode, const std::string &filename, CLigoConfig &config);
 
 	// Write the primitive
-	void			write (xmlDocPtr xmlNode, const char *filename) const;
+	void			write (xmlDocPtr xmlNode, const std::string &filename) const;
 
 	// Write the primitive
-	void			write (xmlNodePtr root, const char *filename) const;
+	void			write (xmlNodePtr root, const std::string &filename) const;
 
 	// serial the primitive. Used for binary files.
 	void			serial(NLMISC::IStream &f);

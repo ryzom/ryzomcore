@@ -65,7 +65,7 @@ public:
 	virtual void build(const NLGEORGES::UFormElm &root);
 
 	/// serialize
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		f.serialCont(SuccessTable);
 	}

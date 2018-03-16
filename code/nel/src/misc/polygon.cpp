@@ -113,7 +113,7 @@ void			CPolygon::clip(const std::vector<CPlane> &planes)
 
 
 // ***************************************************************************
-void CPolygon::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPolygon::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(0);
 	f.serialCont(Vertices);
@@ -1011,7 +1011,7 @@ void		CPolygon2D::buildConvexHull(CPolygon2D &dest) const
 // ***************************************************************************
 
 
-void CPolygon2D::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPolygon2D::serial(NLMISC::IStream &f)
 {
 	(void)f.serialVersion(0);
 	f.serialCont(Vertices);
@@ -1999,7 +1999,7 @@ float		CPolygon2D::sumDPAgainstLine(float a, float b, float c) const
 // *******************************************************************************
 bool  CPolygon2D::getNonNullSeg(uint &index) const
 {
-	nlassert(Vertices.size() > 0);
+	nlassert(!Vertices.empty());
 	float bestLength = 0.f;
 	sint  bestIndex = -1;
 	for (uint k = 0; k < Vertices.size() - 1; ++k)
@@ -2046,7 +2046,7 @@ void  CPolygon2D::getLineEquation(uint index, float &a, float &b, float &c) cons
 // *******************************************************************************
 bool        CPolygon2D::intersect(const CPolygon2D &other) const
 {
-	nlassert(other.Vertices.size() > 0);
+	nlassert(!other.Vertices.empty());
 	uint nonNullSegIndex;
 	/// get the orientation of this poly
 	if (getNonNullSeg(nonNullSegIndex))

@@ -36,6 +36,9 @@ using namespace NLMISC;
 
 
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -538,7 +541,7 @@ void	CMeshGeom::render(IDriver *drv, CTransformShape *trans, float polygonCount,
 	skeleton= mi->getSkeletonModel();
 	// The mesh must not be skinned for render()
 	nlassert(!(_Skinned && mi->isSkinned() && skeleton));
-	bool bMorphApplied = _MeshMorpher->BlendShapes.size() > 0;
+	bool bMorphApplied = !_MeshMorpher->BlendShapes.empty();
 	bool useTangentSpace = _MeshVertexProgram && _MeshVertexProgram->needTangentSpace();
 
 
@@ -730,7 +733,7 @@ void	CMeshGeom::renderSkin(CTransformShape *trans, float alphaMRM)
 	skeleton= mi->getSkeletonModel();
 	// must be skinned for renderSkin()
 	nlassert(_Skinned && mi->isSkinned() && skeleton);
-	bool bMorphApplied = _MeshMorpher->BlendShapes.size() > 0;
+	bool bMorphApplied = !_MeshMorpher->BlendShapes.empty();
 	bool useTangentSpace = _MeshVertexProgram && _MeshVertexProgram->needTangentSpace();
 
 
@@ -858,7 +861,7 @@ void	CMeshGeom::renderSimpleWithMaterial(IDriver *drv, const CMatrix &worldMatri
 
 
 // ***************************************************************************
-void	CMeshGeom::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMeshGeom::serial(NLMISC::IStream &f)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance
@@ -1101,7 +1104,11 @@ bool	CMeshGeom::retrieveTriangles(std::vector<uint32> &indices) const
 			else
 			{
 				// std::copy will convert from 16 bits index to 32 bit index
-				std::copy((uint16 *) iba.getPtr(), ((uint16 *) iba.getPtr()) +  pb.getNumIndexes(), &indices[triIdx*3]);
+#ifdef NL_COMP_VC14
+				std::copy((uint16 *)iba.getPtr(), ((uint16 *)iba.getPtr()) + pb.getNumIndexes(), stdext::make_checked_array_iterator(&indices[triIdx * 3], indices.size() - triIdx * 3));
+#else
+				std::copy((uint16 *)iba.getPtr(), ((uint16 *)iba.getPtr()) + pb.getNumIndexes(), &indices[triIdx * 3]);
+#endif
 			}
 			// next
 			triIdx+= pb.getNumIndexes()/3;
@@ -2382,7 +2389,7 @@ CMesh::CCorner::CCorner()
 
 
 // ***************************************************************************
-void CMesh::CCorner::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CMesh::CCorner::serial(NLMISC::IStream &f)
 {
 	nlassert(0); // not used
 	f.serial(Vertex);
@@ -2393,7 +2400,7 @@ void CMesh::CCorner::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 }
 
 // ***************************************************************************
-void CMesh::CFace::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CMesh::CFace::serial(NLMISC::IStream &f)
 {
 	for(int i=0;i<3;++i)
 		f.serial(Corner[i]);
@@ -2402,7 +2409,7 @@ void CMesh::CFace::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 }
 
 // ***************************************************************************
-void CMesh::CSkinWeight::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CMesh::CSkinWeight::serial(NLMISC::IStream &f)
 {
 	for(int i=0;i<NL3D_MESH_SKINNING_MAX_MATRIX;++i)
 	{
@@ -2413,7 +2420,7 @@ void CMesh::CSkinWeight::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 
 // ***************************************************************************
 /* Serialization is not used.
-void CMesh::CMeshBuild::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CMesh::CMeshBuild::serial(NLMISC::IStream &f)
 {
 	sint	ver= f.serialVersion(0);
 
@@ -2597,7 +2604,7 @@ void	CMesh::render(IDriver *drv, CTransformShape *trans, bool passOpaque)
 
 
 // ***************************************************************************
-void	CMesh::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMesh::serial(NLMISC::IStream &f)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance

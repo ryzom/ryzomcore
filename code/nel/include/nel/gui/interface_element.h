@@ -104,6 +104,7 @@ namespace NLGUI
 			_XReal = _YReal = _WReal = _HReal = 0;
 			_X = _Y = _W = _H = 0;
 			//_Snap = 1;
+			_MarginLeft = 0;
 
 			_PosRef = Hotspot_BL;
 			_ParentPosRef = Hotspot_BL;
@@ -187,6 +188,9 @@ namespace NLGUI
 
 		sint32 getH() const { return (_Active?_H:0); }
 		sint32 getH(bool bTestActive) const { return (bTestActive?(_Active?_H:0):_H); }
+
+		void   setMarginLeft(sint32 m) { _MarginLeft = m; }
+		sint32 getMarginLeft() const { return _MarginLeft; }
 
 		/**
 		  * Get the max width used by the window.
@@ -581,6 +585,8 @@ namespace NLGUI
 		sint32 _Y;
 		sint32 _W;
 		sint32 _H;
+
+		sint32 _MarginLeft;
 
 		//sint32 _Snap;
 

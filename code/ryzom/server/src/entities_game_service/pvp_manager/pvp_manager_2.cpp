@@ -1418,7 +1418,7 @@ void CPVPManager2::askForDuel( const NLMISC::CEntityId & userId )
 			++it;
 		}
 	}
-	// problem occured : bail out
+	// problem occurred : bail out
 	if ( problem )
 		return;
 	

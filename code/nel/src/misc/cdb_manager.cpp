@@ -17,6 +17,10 @@
 #include "stdmisc.h"
 #include "nel/misc/cdb_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLMISC{
 
 	CCDBManager::CCDBManager( const char *rootNodeName, uint maxBanks ) : bankHandler( maxBanks )

@@ -70,8 +70,8 @@ class RGBAdd: public Texmap {
 
 		Class_ID ClassID() {	return RGBAddClassID; }
 		SClass_ID SuperClassID() { return TEXMAP_CLASS_ID; }
-		void GetClassName(TSTR& s) { s= "RGB Additive"; }  
-		void DeleteThis() { delete this; }	
+		void GetClassName(TSTR& s) { s= _T("RGB Additive"); }
+		void DeleteThis() { delete this; }
 
 		int NumSubs() { return NSUBTEX+1; }  
 		Animatable* SubAnim(int i);
@@ -85,8 +85,7 @@ class RGBAdd: public Texmap {
 		int RemapRefOnLoad(int iref); 
 
 		RefTargetHandle Clone(RemapDir &remap = DefaultRemapDir());
-		RefResult NotifyRefChanged( Interval changeInt, RefTargetHandle hTarget, 
-		   PartID& partID, RefMessage message );
+		RefResult NotifyRefChanged(const Interval &changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate);
 
 		// IO
 		IOResult Save(ISave *isave);
@@ -107,10 +106,10 @@ class RGBAddClassDesc:public ClassDesc2 {
 	const TCHAR *	ClassName() { return GetString(IDS_DS_RGBMULT_CDESC); } // mjm - 2.3.99
 	SClass_ID		SuperClassID() { return TEXMAP_CLASS_ID; }
 	Class_ID 		ClassID() { return RGBAddClassID; }
-	const TCHAR* 	Category() { return TEXMAP_CAT_COMP;  }
+	const MCHAR* 	Category() { return TEXMAP_CAT_COMP;  }
 // JBW: new descriptor data accessors added.  Note that the 
 //      internal name is hardwired since it must not be localized.
-	const TCHAR*	InternalName() { return _T("RGBAdd"); }	// returns fixed parsable name (scripter-visible name)
+	const MCHAR*	InternalName() { return _M("RGBAdd"); }	// returns fixed parsable name (scripter-visible name)
 	HINSTANCE		HInstance() { return hInstance; }			// returns owning module handle
 	};
 
@@ -136,36 +135,36 @@ static ParamBlockDesc2 RGBAdd_param_blk ( RGBAdd_params, _T("parameters"),  0, &
 	RGBAdd_color1,	 _T("color1"),	TYPE_RGBA,				P_ANIMATABLE,	IDS_DS_COLOR1,
 		p_default,		Color(0,0,0), 
 		p_ui,			TYPE_COLORSWATCH, IDC_MULT_COL1, 
-		end,
+		p_end,
 	RGBAdd_color2,	 _T("color2"),	TYPE_RGBA,				P_ANIMATABLE,	IDS_DS_COLOR2,	
 		p_default,		Color(0.5,0.5,0.5), 
 		p_ui,			TYPE_COLORSWATCH, IDC_MULT_COL2, 
-		end,
+		p_end,
 	RGBAdd_map1,		_T("map1"),		TYPE_TEXMAP,			P_OWNERS_REF,	IDS_JW_MAP1,
 		p_refno,		1,
 		p_subtexno,		0,		
 		p_ui,			TYPE_TEXMAPBUTTON, IDC_MULT_TEX1,
-		end,
+		p_end,
 	RGBAdd_map2,		_T("map2"),		TYPE_TEXMAP,			P_OWNERS_REF,	IDS_JW_MAP2,
 		p_refno,		2,
 		p_subtexno,		1,		
 		p_ui,			TYPE_TEXMAPBUTTON, IDC_MULT_TEX2,
-		end,
+		p_end,
 	RGBAdd_map1_on,	_T("map1Enabled"), TYPE_BOOL,			0,				IDS_JW_MAP1ENABLE,
 		p_default,		TRUE,
 		p_ui,			TYPE_SINGLECHEKBOX, IDC_MAPON1,
-		end,
+		p_end,
 	RGBAdd_map2_on,	_T("map2Enabled"), TYPE_BOOL,			0,				IDS_JW_MAP2ENABLE,
 		p_default,		TRUE,
 		p_ui,			TYPE_SINGLECHEKBOX, IDC_MAPON2,
-		end,
+		p_end,
 	RGBAdd_type, _T("alphaFrom"), TYPE_INT,				0,				IDS_PW_ALPHAFROM,
 		p_default,		2,
 		p_range,		0,	2,
 		p_ui,			TYPE_RADIO, 3, IDC_MULT_ALPHA1, IDC_MULT_ALPHA2, IDC_MULT_ALPHA3,
-		end,
+		p_end,
 
-	end
+	p_end
 );
 
 
@@ -365,25 +364,26 @@ TSTR RGBAdd::SubAnimName(int i) {
 		}
 	}
 
-RefResult RGBAdd::NotifyRefChanged(Interval changeInt, RefTargetHandle hTarget, 
-   PartID& partID, RefMessage message ) {
-	switch (message) {
+RefResult RGBAdd::NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate)
+{
+	switch (message)
+	{
 		case REFMSG_CHANGE:
 			ivalid.SetEmpty();
 			if (hTarget == pblock) 
-				{
-			// see if this message came from a changing parameter in the pblock,
-			// if so, limit rollout update to the changing item and update any active viewport texture
+			{
+				// see if this message came from a changing parameter in the pblock,
+				// if so, limit rollout update to the changing item and update any active viewport texture
 				ParamID changing_param = pblock->LastNotifyParamID();
 				RGBAdd_param_blk.InvalidateUI(changing_param);
-			// notify our dependents that we've changed
+				// notify our dependents that we've changed
 				// NotifyChanged();  //DS this is redundant
-				}
+			}
 
 			break;
-		}
-	return(REF_SUCCEED);
 	}
+	return(REF_SUCCEED);
+}
 
 
 #define MTL_HDR_CHUNK 0x4000

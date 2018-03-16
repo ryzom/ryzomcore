@@ -396,7 +396,7 @@ void CContinentManager::select(const CVectorD &pos, NLMISC::IProgressCallback &p
 	{
 		CContinent *pCont = it->second;
 		nlinfo("Looking into %s", pCont->SheetName.c_str());
-		if (pCont->Zone.VPoints.size() > 0) // Patch because some continent have not been done yet
+		if (!pCont->Zone.VPoints.empty()) // Patch because some continent have not been done yet
 		{
 			if (pCont->Zone.contains(fPos))
 			{

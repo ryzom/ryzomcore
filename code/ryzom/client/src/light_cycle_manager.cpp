@@ -346,7 +346,7 @@ void CLightCycleManager::setHour(float hour, const CWeatherManagerClient &wm, NL
 
 
 	// Set the Sun color only if not indoor
-	if (ContinentMngr.cur()->Indoor)
+	if (ContinentMngr.cur() && ContinentMngr.cur()->Indoor)
 	{
 		Scene->setSunAmbient(CRGBA(150, 150, 150, 255));
 	}

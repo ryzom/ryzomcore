@@ -337,7 +337,7 @@ bool CLogicConditionNode::testLogic()
 	}
 
 	// if there's no subtree we assess the subtree is true
-	if( _Nodes.size() == 0 )
+	if( _Nodes.empty() )
 	{
 		return true;
 	}

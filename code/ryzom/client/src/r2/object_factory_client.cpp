@@ -21,6 +21,10 @@
 #include "nel/gui/lua_ihm.h"
 #include "../interface_v3/lua_ihm_ryzom.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace R2
 {
 
@@ -319,7 +323,17 @@ void CObjectTableClient::pushOnLuaStack(CLuaState &state, CLuaObject &metatable)
 		nlassert(metatable.isValid());
 		// return a new refptr on the sub table
 		void *block = state.newUserData(sizeof(TRefPtrConst));
+
+#ifdef new
+#undef new
+#endif
+
 		new (block) CObjectTable::TRefPtrConst(this); // create in place
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 		metatable.push();
 		state.setMetaTable(-2);
 		_Ref.pop(state);

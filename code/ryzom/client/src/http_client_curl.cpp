@@ -26,6 +26,10 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 #define _Curl (CURL *)_CurlStruct
 
 
@@ -113,6 +117,25 @@ static CURLcode sslctx_function(CURL * /* curl */, void *sslctx, void * /* parm 
 
 				if (itmp && itmp->x509)
 				{
+					X509_NAME *subject = X509_get_subject_name(itmp->x509);
+
+					std::string name;
+					unsigned char *tmp = NULL;
+
+					// construct a multiline string with name
+					for (int i = 0, ilen = X509_NAME_entry_count(subject); i < ilen; ++i)
+					{
+						X509_NAME_ENTRY *e = X509_NAME_get_entry(subject, i);
+						ASN1_STRING *d = X509_NAME_ENTRY_get_data(e);
+
+						if (ASN1_STRING_to_UTF8(&tmp, d) > 0)
+						{
+							name += NLMISC::toString("%s\n", tmp);
+
+							OPENSSL_free(tmp);
+						}
+					}
+
 					// add our certificate to this store
 					if (X509_STORE_add_cert(store, itmp->x509) == 0)
 					{
@@ -122,13 +145,13 @@ static CURLcode sslctx_function(CURL * /* curl */, void *sslctx, void * /* parm 
 						if (ERR_GET_LIB(errCode) != ERR_LIB_X509 || ERR_GET_REASON(errCode) != X509_R_CERT_ALREADY_IN_HASH_TABLE)
 						{
 							ERR_error_string_n(errCode, errorBuffer, 1024);
-							nlwarning("Error adding certificate %s: %s", itmp->x509->name, errorBuffer);
+							nlwarning("Error adding certificate %s: %s", name.c_str(), errorBuffer);
 							res = CURLE_SSL_CACERT;
 						}
 					}
 					else
 					{
-						nlinfo("Added certificate %s", itmp->x509->name);
+						nlinfo("Added certificate %s", name.c_str());
 					}
 				}
 			}
@@ -166,8 +189,9 @@ bool CCurlHttpClient::verifyServer(bool verify)
 	{
 		nlwarning("Unable to support CURLOPT_SSL_CTX_FUNCTION, curl not compiled with OpenSSL ?");
 	}
-	// don't use that anymore, because CA can't be loaded from BNP and doesn't support UTF-8 under Windows
-	// curl_easy_setopt(_Curl, CURLOPT_CAINFO, path.c_str());
+
+	// set both CURLOPT_CAINFO and CURLOPT_CAPATH to NULL to be sure we won't use default values (these files can be missing and generate errors)
+	curl_easy_setopt(_Curl, CURLOPT_CAINFO, NULL);
 	curl_easy_setopt(_Curl, CURLOPT_CAPATH, NULL);
 	return true;
 }

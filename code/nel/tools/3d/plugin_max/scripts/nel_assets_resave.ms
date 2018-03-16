@@ -46,7 +46,7 @@ rollout assets_resave_rollout "Properties"
 	-- To use this script
 	--	Include it in your script into the rollout at the beginning.
 	--	Implement a do_it function to do the job in your rollout.
-	--	The function should retun -1 if an arror occured, else the count of modification done
+	--	The function should retun -1 if an arror occurred, else the count of modification done
 	--	It the function returns <1, the project will not be overwritten
 
 	Group "Running properties"

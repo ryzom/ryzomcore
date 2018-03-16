@@ -1,3 +1,6 @@
+IF(APPLE)
+	add_definitions("-ftemplate-depth=100")
+ENDIF()
 FILE(GLOB SRC *.cpp *.h)
 
 LIST(REMOVE_ITEM SRC
@@ -32,7 +35,7 @@ NL_ADD_RUNTIME_FLAGS(ryzom_ai_service)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(ryzom_ai_service ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
-ENDIF(WITH_PCH)
+ENDIF()
 
 INSTALL(TARGETS ryzom_ai_service RUNTIME DESTINATION sbin COMPONENT services)
 

@@ -631,7 +631,7 @@ bool	computeRetriever(CCollisionMeshBuild &cmb, CLocalRetriever &lr, CVector &tr
 	{
 		nlwarning("Edge issues reported !!");
 		uint	i;
-		error = "";
+		error.clear();
 		for (i=0; i<errors.size(); ++i)
 			error += errors[i]+"\n";
 		return false;

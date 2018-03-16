@@ -529,10 +529,8 @@
            posref="TL TL"
            group_onclick_r="active_menu"
            group_params_r="menu=ui:interface:base_menu_with_color">
-      <!--
                 <view type="text_number" id="fps" posref="MR MR" x="-20" y="-2" color="255 255 255 255" shadow="true" fontsize="10" value="UI:VARIABLES:FPS" global_color="false" positive="true"/>
                 <view type="text" id="fpstext" posref="MR MR" x="-40" y="-2" color="255 255 255 255" shadow="true" fontsize="10" global_color="false" positive="true" hardtext="uiFPS" />
-                -->
     </group>
     <group id="content"
            x="0"
@@ -2679,9 +2677,9 @@
         <instance template="tgcw_checkbox"
                   id="hard"
                   text="uiMouseHardware"
-                  posref="TR TR"
-                  x="-55"
-                  y="-20" />
+                  posref="TM TL"
+                  x="0"
+                  y="-35" />
         <instance template="tgcw_checkbox"
                   id="inverted"
                   text="uiMouseInverted"
@@ -2693,6 +2691,13 @@
                   id="dbl"
                   text="uiMouseDblClickMode"
                   posparent="inverted"
+                  posref="BL TL"
+                  x="0"
+                  y="-2" />
+        <instance template="tgcw_checkbox"
+                  id="tablet"
+                  text="uiMouseTablet"
+                  posparent="dbl"
                   posref="BL TL"
                   x="0"
                   y="-2" />
@@ -3846,6 +3851,11 @@
                type="cfg"
                widget="boolbut"
                link="DblClickMode"
+               realtime="true" />
+        <param ui="mouse:tablet:c"
+               type="cfg"
+               widget="boolbut"
+               link="FreeLookTablet"
                realtime="true" />
         <param ui="mouse:dcspeed:c"
                type="db"

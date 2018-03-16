@@ -26,7 +26,7 @@ struct CUTLigo : public Test::Suite
 {
 	CUTLigo()
 	{
-		add(auto_ptr<Test::Suite>(new CUTLigoPrimitive));
+		add(std::auto_ptr<Test::Suite>(new CUTLigoPrimitive));
 		// Add a line here when adding a new test CLASS
 	}
 };

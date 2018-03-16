@@ -65,7 +65,7 @@ bool CPositionFlagManager::flagExists(const std::string & flagName) const
 	return (_FlagPositions.find(flagName) != _FlagPositions.end());
 }
 
-void CPositionFlagManager::serial(NLMISC::IStream & f) throw(NLMISC::EStream)
+void CPositionFlagManager::serial(NLMISC::IStream & f)
 {
 	H_AUTO(CPositionFlagManagerSerial);
 

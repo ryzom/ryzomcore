@@ -493,7 +493,7 @@ NL3D::UPlayList *CEntityAnimationManager::createPlayList() const
 // serial :
 // Serialize a CEntityAnimationManager.
 //-----------------------------------------------
-void CEntityAnimationManager::serial(class NLMISC::IStream &/* f */) throw(NLMISC::EStream)
+void CEntityAnimationManager::serial(NLMISC::IStream &/* f */)
 {
 }// serial //
 

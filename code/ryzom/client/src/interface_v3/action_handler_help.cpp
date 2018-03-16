@@ -284,7 +284,6 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 
 	// If some free window possible, search which to take
 	sint	newIndexWindow= -1;
-	bool	mustPlace= true;
 	bool	mustAddToActiveWindows= true;
 	// if an active window is not in KeepMode, get it.
 	for(i=0;i<_ActiveWindows.size();i++)
@@ -293,7 +292,6 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 		if(!_InfoWindows[_ActiveWindows[i]].KeepMode && forceKeepWindow!=(sint)_ActiveWindows[i])
 		{
 			newIndexWindow= _ActiveWindows[i];
-			mustPlace= false;
 			mustAddToActiveWindows= false;
 			break;
 		}
@@ -782,7 +780,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 		if (pTU != NULL)
 		{
 			sSkillsNeeded = CI18N::get("uiTitleSkillHeader");
-			if (pTU->SkillsNeeded.size() == 0 || reservedTitle)
+			if (pTU->SkillsNeeded.empty() || reservedTitle)
 			{
 				sSkillsNeeded += CI18N::get("uiTitleSkillNoNeed");
 			}
@@ -823,7 +821,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 		if (pTU != NULL)
 		{
 			sBricksNeeded = CI18N::get("uiTitleBrickHeader");
-			if (pTU->BricksNeeded.size() == 0 || reservedTitle)
+			if (pTU->BricksNeeded.empty() || reservedTitle)
 			{
 				sBricksNeeded += CI18N::get("uiTitleBrickNoNeed");
 			}

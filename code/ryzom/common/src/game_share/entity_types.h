@@ -560,17 +560,6 @@ inline CLFECOMMON::TCoord getAbsoluteCoordinateFrom64( uint64 posvalue )
 }*/
 
 
-inline std::string toHexaString(const std::vector<uint8> &v)
-{
-	std::string res;
-	for (uint i = 0; i < v.size(); i++)
-	{
-		res += NLMISC::toString("%x",v[i]);
-	}
-	return res;
-}
-
-
 #endif // NL_ENTITY_TYPES_H
 
 /* End of entity_types.h */

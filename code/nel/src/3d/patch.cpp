@@ -38,6 +38,10 @@ using	namespace	NLMISC;
 // Define this to remove user color (debug)
 // #define NEL_FORCE_NO_USER_COLOR
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 

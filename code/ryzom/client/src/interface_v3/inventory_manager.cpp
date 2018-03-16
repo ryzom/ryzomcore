@@ -39,6 +39,7 @@
 
 // For handlers
 #include "nel/gui/action_handler.h"
+#include "nel/gui/group_editbox.h"
 #include "dbctrl_sheet.h"
 
 #include "../sheet_manager.h"
@@ -49,6 +50,10 @@
 #include "../client_cfg.h"
 
 #include "../misc.h"
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace std;
 using namespace NLMISC;
@@ -2011,6 +2016,44 @@ bool SBagOptions::parse(xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 }
 
 // ***************************************************************************
+void SBagOptions::setSearchFilter(const ucstring &s)
+{
+	SearchQualityMin = 0;
+	SearchQualityMax = 999;
+	SearchFilter.clear();
+	SearchFilterChanged = true;
+
+	if (!s.empty())
+	{
+		std::vector<ucstring> words;
+		splitUCString(toLower(s), ucstring(" "), words);
+
+		size_t pos;
+		for(int i = 0; i<words.size(); ++i)
+		{
+			std::string kw = words[i].toUtf8();
+
+			pos = kw.find("-");
+			if (pos != std::string::npos)
+			{
+				uint16 first;
+				uint16 last;
+				if (fromString(kw.substr(0, pos), first))
+					SearchQualityMin = first;
+
+				if (fromString(kw.substr(pos+1), last))
+					SearchQualityMax = last;
+
+				if (first == 0 && last == 0)
+					SearchFilter.push_back(words[i]);
+			}
+			else
+				SearchFilter.push_back(words[i]);
+		}
+	}
+}
+
+// ***************************************************************************
 bool SBagOptions::isSomethingChanged()
 {
 	bool bRet = false;
@@ -2057,6 +2100,12 @@ bool SBagOptions::isSomethingChanged()
 			LastDbFilterTP = (DbFilterTP->getValue8() != 0);
 		}
 
+	if (SearchFilterChanged)
+	{
+		bRet = true;
+		SearchFilterChanged = false;
+	}
+
 	return bRet;
 }
 
@@ -2075,6 +2124,30 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 	const CItemSheet *pIS = pCS->asItemSheet();
 	if (pIS != NULL)
 	{
+		if (SearchFilter.size() > 0)
+		{
+			bool match = true;
+			ucstring lcName = toLower(pCS->getItemActualName());
+
+			// add item quality as a keyword to match
+			if (pCS->getQuality() > 1)
+			{
+				lcName += ucstring(" " + toString(pCS->getQuality()));
+			}
+
+			for (uint i = 0; i< SearchFilter.size(); ++i)
+			{
+				if (lcName.find(SearchFilter[i]) == ucstring::npos)
+				{
+					return false;
+				}
+			}
+		}
+
+		// Quality range
+		if (SearchQualityMin > pCS->getQuality() || SearchQualityMax < pCS->getQuality())
+			return false;
+
 		// Armor
 		if ((pIS->Family == ITEMFAMILY::ARMOR) || 
 			(pIS->Family == ITEMFAMILY::JEWELRY))
@@ -2455,6 +2528,30 @@ class CHandlerInvDrag : public IActionHandler
 };
 REGISTER_ACTION_HANDLER( CHandlerInvDrag, "inv_drag" );
 
+// **********************************************************************************************************
+class CHandlerInvSetSearch : public IActionHandler
+{
+	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	{
+		if (!pCaller) return;
+
+		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(pCaller);
+		if (!eb) return;
+
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
+		// ui:interface:inventory:content:bag:iil:inv_query_eb:eb
+		string invId = pCaller->getParent()->getParent()->getId();
+
+		CDBGroupListSheetBag *pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(invId + ":bag_list"));
+		if (pList != NULL) pList->setSearchFilter(eb->getInputString());
+
+		CDBGroupIconListBag *pIcons = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(invId + ":bag_icons"));
+		if (pIcons != NULL) pIcons->setSearchFilter(eb->getInputString());
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerInvSetSearch, "inv_set_search" );
+
 // ***************************************************************************
 // COMMON INVENTORIES Test if we can drop an item to a slot or a list
 class CHandlerInvCanDropTo : public IActionHandler
@@ -2504,13 +2601,13 @@ class CHandlerInvCanDropTo : public IActionHandler
 		if (pCSDst != NULL)
 		{
 			// If we want to drop something on a reference slot (hand or equip)
-			if (pInv->getDBIndexPath(pCSDst) != "")
+			if (!pInv->getDBIndexPath(pCSDst).empty())
 			{
 				// We must drag'n'drop an item
 				if (pCSSrc && pCSSrc->getType() == CCtrlSheetInfo::SheetType_Item)
 				if (pCSDst && pCSDst->getType() == CCtrlSheetInfo::SheetType_Item)
 				{
-					if (pInv->getDBIndexPath(pCSSrc) != "")
+					if (!pInv->getDBIndexPath(pCSSrc).empty())
 					{
 						// The item dragged comes from a slot check if this is the good type
 						if (pCSDst->canDropItem(pCSSrc))
@@ -2896,6 +2993,9 @@ class CHandlerInvTempAll : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
+		if (!CTempInvManager::getInstance()->isOpened()) return;
+		if (NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP_INV:ALL_EMPTY")->getValue32() != 0) return;
+
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInventoryManager *pInv = CInventoryManager::getInstance();
 

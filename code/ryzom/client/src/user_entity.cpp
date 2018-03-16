@@ -80,6 +80,10 @@
 // r2
 #include "r2/editor.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 ///////////
 // USING //
 ///////////
@@ -144,6 +148,8 @@ CUserEntity::CUserEntity()
 	_FrontVelocity		= 0.0f;
 	_LateralVelocity	= 0.0f;
 
+	_SpeedServerAdjust  = 1.0f;
+	
 	// \todo GUIGUI : do it more generic.
 	_First_Pos = false;
 
@@ -789,10 +795,12 @@ bool CUserEntity::mode(MBEHAV::EMode m)
 	case MBEHAV::COMBAT:
 	case MBEHAV::COMBAT_FLOAT:
 	{
+		C64BitsParts rot;
+
 		// Compute the angle
 		const string propName = toString("SERVER:Entities:E%d:P%d", _Slot, CLFECOMMON::PROPERTY_ORIENTATION);
-		sint64 ang = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
-		_TargetAngle = *(float *)(&ang);
+		rot.i64[0] = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
+		_TargetAngle = rot.f[0];
 
 		// Initialize controls for the combat.
 		UserControls.startCombat();
@@ -1203,7 +1211,11 @@ void CUserEntity::applyMotion(CEntityCL *target)
 			speed = CVectorD::Null;
 	}
 	else
+	{
 		speed = getVelocity()*_SpeedFactor.getValue();
+		_SpeedFactor.addFactorValue(0.005f);
+	}
+	
 	// SPEED VECTOR NULL -> NO MOVE
 	if(speed == CVectorD::Null)
 		return;
@@ -1225,6 +1237,9 @@ void CUserEntity::applyMotion(CEntityCL *target)
 	// Third Person View
 	else
 	{
+		double modif = (100.0f/(float)NetMngr.getMsPerTick());
+		clamp(modif, 0.0, 1.0);
+		speed *= modif;
 		speed += pos();
 		sint64 x = (sint64)((sint32)(speed.x * 1000.0));
 		sint64 y = (sint64)((sint32)(speed.y * 1000.0));
@@ -3211,6 +3226,24 @@ void CUserEntity::toggleCamera()
 	}
 }// toggleCamera //
 
+//-----------------------------------------------
+// forceCameraFirstPerson :
+// Force Camera to First Person View
+//-----------------------------------------------
+void CUserEntity::forceCameraFirstPerson()
+{
+	// You cannot change the camera view when dead.
+	if(isDead())
+		return;
+	// Only if not inside a building.
+	if(!UserEntity->forceIndoorFPV())
+	{
+		if (UserEntity->viewMode() != CUserEntity::FirstPV)
+			//Enter the 1st Person View Mode
+			UserEntity->viewMode(CUserEntity::FirstPV);
+	}
+}// forceCameraFirstPerson //
+
 //---------------------------------------------------
 // getScale :
 // Return the entity scale. (return 1.0 if there is any problem).
@@ -3459,6 +3492,7 @@ void CUserEntity::light()
 void CUserEntity::CSpeedFactor::init()
 {
 	_Value = 1.0f; // Default speed factor is 1.
+	_ServerFactor = 1.0f;
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();
 	CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:SPEED_FACTOR", false);
 	if(pNodeLeaf)
@@ -3676,7 +3710,7 @@ bool CUserEntity::isVisible() const	// virtual
 // readWrite :
 // Read/Write Variables from/to the stream.
 //---------------------------------------------------
-void CUserEntity::readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CUserEntity::readWrite(NLMISC::IStream &f)
 {
 	CPlayerCL::readWrite(f);
 

@@ -8,7 +8,7 @@ IF(WITH_MFC)
   ADD_SUBDIRECTORY(world_editor_primitive_plugin)
   ADD_SUBDIRECTORY(world_editor_shard_monitor_plugin)
   ADD_SUBDIRECTORY(world_editor_sound_plugin)
-ENDIF(WITH_MFC)
+ENDIF()
 
 # This is an old plugin and is deprecated. It doesn't even compile anymore.
 #ADD_SUBDIRECTORY(world_editor_plugin)

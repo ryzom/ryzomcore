@@ -121,7 +121,7 @@
 #include "bg_downloader_access.h"
 #include "login_progress_post_thread.h"
 #include "npc_icon.h"
-
+#include "item_group_manager.h"
 // R2ED
 #include "r2/editor.h"
 
@@ -159,6 +159,9 @@ using namespace NLPACS;
 using namespace NLNET;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 
@@ -271,6 +274,7 @@ CTimedFXManager::TDebugDisplayMode	ShowTimedFXMode = CTimedFXManager::NoText;
 
 // DEBUG
 bool				PACSBorders = false;
+bool				ARKPACSBorders = false;
 bool				DebugClusters = false;
 CVector				LastDebugClusterCameraThirdPersonStart= CVector::Null;
 CVector				LastDebugClusterCameraThirdPersonEnd= CVector::Null;
@@ -828,7 +832,7 @@ void	updateGameQuitting()
 	// if want quiting, and if server stalled, quit now
 	if(game_exit_request)
 	{
-		// abort until 10 seconds if connexion lost
+		// abort until 10 seconds if connection lost
 		if(!NetMngr.getConnectionQuality())
 		{
 			if(!firstTimeLostConnection)
@@ -839,7 +843,7 @@ void	updateGameQuitting()
 			firstTimeLostConnection= 0;
 		}
 
-		// if connexion lost until 10 seconds
+		// if connection lost until 10 seconds
 		if(firstTimeLostConnection && T1-firstTimeLostConnection > 10000)
 		{
 			game_exit= true;
@@ -1793,6 +1797,12 @@ bool mainLoop()
 						displayPACSPrimitive();
 					}
 
+					// Display PACS borders only (for ARK).
+					if (ARKPACSBorders)
+					{
+						displayPACSPrimitive();
+					}
+					
 					// display Sound box
 					if (SoundBox)
 					{
@@ -2503,6 +2513,10 @@ bool mainLoop()
 			// R2ED enabled ?
 			R2::getEditor().autoConfigInit(IsInRingSession);
 
+//			TODO: temporary commented, CEditor must be initialized before to call next lines
+//			if (!IsInRingSession)
+//				R2::getEditor().registerLuaFunc();
+
 			CurrSeason = computeCurrSeason();
 
 			// Get the Connection State (must be done after any Far TP to prevent the uiDisconnected box to be displayed)
@@ -2552,6 +2566,7 @@ bool mainLoop()
 
 		// Interface saving
 		CInterfaceManager::getInstance()->uninitInGame0();
+		CItemGroupManager::getInstance()->uninit();
 
 		/////////////////////////////////
 		// Display the end background. //

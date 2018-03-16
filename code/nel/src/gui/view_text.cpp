@@ -32,6 +32,10 @@ using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 typedef std::string::size_type TCharPos; // index of a chracter in a string
 
 REGISTER_UI_CLASS(CViewText)
@@ -903,7 +907,7 @@ namespace NLGUI
 		if ((_MultiLine)&&(_Parent != NULL))
 		{
 			// If never setuped, and if text is not empty
-			if (_Lines.size() == 0 && !_Text.empty())
+			if (_Lines.empty() && !_Text.empty())
 				invalidateContent ();
 
 			sint	currentMaxW= getCurrentMultiLineMaxW();
@@ -989,7 +993,7 @@ namespace NLGUI
 		// *** Draw multiline
 		if ((_MultiLine)&&(_Parent != NULL))
 		{
-			if (_Lines.size() == 0) return;
+			if (_Lines.empty()) return;
 
 			TextContext->setHotSpot (UTextContext::BottomLeft);
 			TextContext->setShaded (_Shadow);
@@ -1432,7 +1436,7 @@ namespace NLGUI
 		// Append to the last line
 		_Lines.back()->addWord(ucCurrentWord, 0, wordFormat, _FontWidth, *TextContext, _Scale);
 		// reset the word
-		ucCurrentWord = ucstring("");
+		ucCurrentWord.clear();
 	}
 
 
@@ -1667,7 +1671,7 @@ namespace NLGUI
 				{
 					if (expandSpaces)
 					{
-						nlassert(_Lines.size() > 0);
+						nlassert(!_Lines.empty());
 						nlassert(_Lines.back()->getNumWords() > 0);
 
 						// Yoyo: if the line has tab, then don't justify
@@ -1874,7 +1878,7 @@ namespace NLGUI
 			}
 
 			// Special case for multiline limited in number of lines
-			if ((_Lines.size() > 0) && (_MultiMaxLine > 0) && (_Lines.size() > _MultiMaxLine))
+			if (!_Lines.empty() && (_MultiMaxLine > 0) && (_Lines.size() > _MultiMaxLine))
 			{
 				while (_Lines.size() > _MultiMaxLine)
 				{
@@ -1906,7 +1910,7 @@ namespace NLGUI
 				_H = std::max(_H, sint(_FontHeight * _MultiMinLine + (_MultiMinLine - 1) * _MultiLineSpace));
 
 			// Compute tooltips size
-			if (_Tooltips.size() > 0)
+			if (!_Tooltips.empty())
 			for (uint i=0 ; i<_Lines.size() ; ++i)
 			{
 				for (uint j=0 ; j<_Lines[i]->getNumWords() ; ++j)
@@ -2515,7 +2519,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::setFirstLineX(uint firstLineX)
+	void CViewText::setFirstLineX(sint firstLineX)
 	{
 		_FirstLineX = firstLineX;
 	}

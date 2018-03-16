@@ -31,6 +31,10 @@
 #include "sound_manager.h"
 #include "client_cfg.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 H_AUTO_DECL(RZ_WeatherManagerClient)
 
 using namespace NLMISC;
@@ -144,6 +148,13 @@ void CWeatherManagerClient::update(uint64 day, float hour, const CWeatherContext
 	// get the weather value for the current date
 	nlassert(wc.WFP);
 	float weatherValue = ::getBlendedWeather(day, hour, *(wc.WFP), wc.WF);
+
+	// calculate next weather cycle and ingame hour for it
+	uint64 cycle = ((day * wc.WFP->DayLength) + (uint) hour) / wc.WFP->CycleLength;
+	uint64 cycleDay = ((cycle + 1) * wc.WFP->CycleLength) / wc.WFP->DayLength;
+	_NextWeatherHour = ((cycle + 1) * wc.WFP->CycleLength) % wc.WFP->DayLength;
+	_NextWeatherValue = ::getBlendedWeather(cycleDay, _NextWeatherHour, *(wc.WFP), wc.WF);
+
 	// build current weather state
 	EGSPD::CSeason::TSeason season = CRyzomTime::getSeasonByDay((uint32)day);
 	//

@@ -18,6 +18,10 @@
 #include "nel/3d/particle_system_process.h"
 #include "nel/3d/ps_allocator.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 	#ifdef PS_FAST_ALLOC

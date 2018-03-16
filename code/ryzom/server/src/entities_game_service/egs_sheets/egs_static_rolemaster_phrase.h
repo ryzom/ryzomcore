@@ -43,7 +43,7 @@ public:
 	inline static uint getVersion () { return 4; }
 
 	/// Serial
-	void serial(class NLMISC::IStream &f)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serialCont( Bricks );
 		std::vector<NLMISC::CSheetId>::const_iterator ib;

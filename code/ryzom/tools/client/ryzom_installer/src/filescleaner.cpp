@@ -46,24 +46,35 @@ bool CFilesCleaner::exec()
 	// directory doesn't exist
 	if (!dir.exists()) return false;
 
-	if (!dir.cd("data") && dir.exists()) return false;
+	if (!dir.cd("data")) return false;
 
 	QStringList filter;
 	filter << "*.string_cache";
 
-	if (dir.exists("packed_sheets.bnp"))
+	// certificate should be in gamedev.bnp now
+	filter << "*.pem";
+
+	if (dir.exists("packedsheets.bnp"))
 	{
 		filter << "*.packed_sheets";
 		filter << "*.packed";
-		filter << "*.pem";
 	}
+
+	// only .ref files should be there
+	filter << "exedll*.bnp";
 
 	// temporary files
 	QStringList files = dir.entryList(filter, QDir::Files);
 
+	// temporary directories
+	QStringList dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+
+	// fonts directory is not needed anymore if fonts.bnp exists
+	if (!dir.exists("fonts.bnp")) dirs.removeAll("fonts");
+
 	if (m_listener)
 	{
-		m_listener->operationInit(0, files.size());
+		m_listener->operationInit(0, files.size() + dirs.size());
 		m_listener->operationStart();
 	}
 
@@ -78,13 +89,20 @@ bool CFilesCleaner::exec()
 		++filesCount;
 	}
 
-	// fonts directory is not needed anymore if fonts.bnp exists
-	if (dir.exists("fonts.bnp") && dir.cd("fonts") && dir.exists())
+	foreach(const QString &d, dirs)
 	{
-		dir.removeRecursively();
+		if (dir.cd(d))
+		{
+			dir.removeRecursively();
+			dir.cdUp();
+		}
+
+		if (m_listener) m_listener->operationProgress(filesCount, d);
+
+		++filesCount;
 	}
 
-	if (m_listener) m_listener->operationSuccess(files.size());
+	if (m_listener) m_listener->operationSuccess(files.size() + dirs.size());
 
 	return true;
 }

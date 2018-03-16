@@ -2071,7 +2071,7 @@ public:
 
 		_WorldMap.clear();
 		string	ext = CFile::getExtension(name);
-		if (ext == "")
+		if (ext.empty())
 			ext = "cwmap2";
 		CIFile	f(OutputPath+CFile::getFilenameWithoutExtension(name)+"."+ext);
 		f.serial(_WorldMap);
@@ -2213,7 +2213,7 @@ public:
 
 		_WorldMap.clear();
 		string	ext = CFile::getExtension(name);
-		if (ext == "")
+		if (ext.empty())
 			ext = "cw_map2";
 		
 		CIFile	f(CFile::getPath(name) +  CFile::getFilenameWithoutExtension(name)+"."+ext);

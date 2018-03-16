@@ -19,6 +19,10 @@
 #include "sky.h"
 #include "client_sheets/sky_sheet.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NL3D;
 using namespace NLMISC;
 
@@ -294,7 +298,7 @@ CBitmap *buildSharedBitmap(const std::string &filename,
 		// load the bitmap
 		std::string path = CPath::lookup(filename, false);
 		if (path.empty()) return NULL;
-		std::auto_ptr<CBitmap> bm(new CBitmap);
+		CUniquePtr<CBitmap> bm(new CBitmap);
 		try
 		{
 			CIFile f;

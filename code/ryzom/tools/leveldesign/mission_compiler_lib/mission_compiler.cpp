@@ -278,7 +278,7 @@ bool GenderExtractor::parseMarkup(const std::string& literal, const std::string 
 	bool changed = false;
 	std::string oldPhrase = literal;
 	
-	newPhrase = "";
+	newPhrase.clear();
 	do 
 	{
 		std::string before;
@@ -875,17 +875,26 @@ bool CMissionCompiler::publishFiles(const std::string &serverPathPrim, const std
 	return true;
 }
 
-bool CMissionCompiler::includeText(const std::string filename, const std::string text)
+bool CMissionCompiler::includeText(const std::string &filename, const std::string &text)
 {
 	FILE *f = nlfopen(filename, "r+");
 	if (f == NULL)
+	{
+		nlwarning("Unable to open %s", filename.c_str());
 		return false;
+	}
 
 	bool isIn = false;
 	char buffer[1024];
 
 	// Check for UTF8 format
-	fread(buffer, 1, 3, f);
+	if (fread(buffer, 1, 3, f) != 3)
+	{
+		fclose(f);
+		nlwarning("Unable to read 3 bytes from %s", filename.c_str());
+		return false;
+	}
+
 	if (buffer[0] != -17 || buffer[1] != -69 || buffer[2] != -65)
 		fseek(f, 0, SEEK_SET);
 
@@ -1349,7 +1358,7 @@ retry:
 		vector<string> parts;
 		NLMISC::explode(*first, string("@"), parts, false);
 		
-		if (parts.size() > 0)
+		if (!parts.empty())
 			name = parts[0];
 		if (parts.size() > 1)
 			param = parts[1];

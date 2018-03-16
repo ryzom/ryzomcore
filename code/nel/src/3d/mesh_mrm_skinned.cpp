@@ -39,6 +39,9 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -301,7 +304,7 @@ void			CMeshMRMSkinnedGeom::build(CMesh::CMeshBuild &m,
 
 	// No Blend Shapes
 	//================================================
-	nlassert (meshBuildMRM.BlendShapes.size() == 0);
+	nlassert (meshBuildMRM.BlendShapes.empty());
 
 	// Compact bone id and build a bone id names
 	//================================================

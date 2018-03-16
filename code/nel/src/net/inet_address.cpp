@@ -121,6 +121,10 @@ BOOLEAN IN6_IS_ADDR_UNSPECIFIED(CONST IN6_ADDR *a)
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 #ifndef NI_MAXHOST
 #	define NI_MAXHOST 1025
 #endif

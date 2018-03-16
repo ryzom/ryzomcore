@@ -70,7 +70,7 @@ public:
 	virtual void		show() = 0;
 
 	/// Serial the force definition. MUST be called by deriver during their serialisation
-	virtual void		serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void		serial(NLMISC::IStream &f);
 
 	/// check whether this force is integrable over time. The default is false
 	virtual bool		isIntegrable(void) const { return false; }
@@ -175,7 +175,7 @@ public:
 	/// get the attribute maker for a non constant intensity
 	CPSAttribMaker<float> *getIntensityScheme(void) { return _IntensityScheme; }
 	const CPSAttribMaker<float> *getIntensityScheme(void) const { return _IntensityScheme; }
-	void serialForceIntensity(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serialForceIntensity(NLMISC::IStream &f);
 
 protected:
 
@@ -209,7 +209,7 @@ protected:
 class CPSForceIntensityHelper : public CPSForce, public CPSForceIntensity
 {
 public:
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream) ;
+	void serial(NLMISC::IStream &f);
 
 protected:
 	virtual CPSLocated *getForceIntensityOwner(void) { return _Owner; }
@@ -241,7 +241,7 @@ protected:
  *
  *      // you can provide a serialization method. Note that that if the functor parameters are set before each use,
  *      // it useless to serial something ...
- *		void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+ *		void serial(NLMISC::IStream &f)
  *
  *    protected:
  *      ...
@@ -275,7 +275,7 @@ public:
 
 
 	/// serialization
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		f.serialVersion(1);
 		CPSForce::serial(f);
@@ -354,7 +354,7 @@ class CPSDirectionnalForce : public CPSForceIntensityHelper, public CPSDirection
 	}
 
 	/// serialization
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 
 	NLMISC_DECLARE_CLASS(CPSDirectionnalForce);
@@ -397,7 +397,7 @@ public:
 	}
 
 	/// serialization
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 	NLMISC_DECLARE_CLASS(CPSGravity);
 
@@ -443,7 +443,7 @@ public:
 	}
 
 	/// serialization
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 
 	NLMISC_DECLARE_CLASS(CPSCentralGravity);
@@ -464,7 +464,7 @@ public:
 
 
 	/// serialization
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 
 	/// Compute the force on the targets
@@ -498,7 +498,7 @@ public:
 		speed -= (CParticleSystem::EllapsedTime * _K * invMass * speed);
 	}
 
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		f.serialVersion(1);
 		// we don't save intensity info : it is saved by the owning object (and set before each use of this functor)
@@ -539,7 +539,7 @@ public:
 	NLMISC_DECLARE_CLASS(CPSFluidFriction)
 
 
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		f.serialVersion(1);
 		CIsotropicForceT<CPSFluidFrictionFunctor>::serial(f);
@@ -571,7 +571,7 @@ public:
 
 	NLMISC_DECLARE_CLASS(CPSBrownianForce)
 
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 	/// We provide a kind of integration on a predefined sequence
 	virtual bool		 isIntegrable(void) const;
@@ -648,7 +648,7 @@ struct CPSTurbulForceFunc
 						 */
 	}
 
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	virtual void serial(NLMISC::IStream &f)
 	 {
 		f.serialVersion(1);
 		f.serial(_Scale, _NumOctaves);
@@ -686,7 +686,7 @@ public:
 
 	NLMISC_DECLARE_CLASS(CPSTurbul)
 
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		f.serialVersion(1);
 		CIsotropicForceT<CPSTurbulForceFunc>::serial(f);
@@ -758,7 +758,7 @@ public:
 
 
 	// serialization
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 
 
@@ -801,7 +801,7 @@ class CPSMagneticForce : public CPSDirectionnalForce
 	}
 	virtual void computeForces(CPSLocated &target);
 	/// serialization
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 	NLMISC_DECLARE_CLASS(CPSMagneticForce);
 };
 

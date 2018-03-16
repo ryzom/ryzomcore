@@ -31,6 +31,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	bool CInterfaceElement::editorMode = false;
@@ -505,7 +509,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	void CInterfaceElement::updateCoords()
 	{
-		_XReal = _X;
+		_XReal = _X + _MarginLeft;
 		_YReal = _Y;
 		_WReal = getW();
 		_HReal = getH();
@@ -522,7 +526,7 @@ namespace NLGUI
 		if (el == NULL)
 			return;
 
-		_XReal += el->_XReal;
+		_XReal += el->_XReal - el->_MarginLeft;
 		_YReal += el->_YReal;
 
 		THotSpot hsParent = _ParentPosRef;

@@ -1816,8 +1816,7 @@ void CDBCtrlSheet::draw()
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
-	CRGBA color = CRGBA(255,255,255,255);
-
+	
 	if (_Type != SheetType_Macro)
 	{
 		if (_LastSheetId != _SheetId.getSInt32())
@@ -2961,6 +2960,8 @@ void	CDBCtrlSheet::swapSheet(CDBCtrlSheet *other)
 		swapDBProps(getItemRMClassTypePtr(), other->getItemRMClassTypePtr());
 		swapDBProps(getItemRMFaberStatTypePtr(), other->getItemRMFaberStatTypePtr());
 		swapDBProps(getItemPrerequisitValidPtr(), other->getItemPrerequisitValidPtr());
+		swapDBProps(getItemSerialPtr(), other->getItemSerialPtr());
+		swapDBProps(getItemCreateTimePtr(), other->getItemCreateTimePtr());
 	}
 }
 
@@ -3540,6 +3541,10 @@ void CDBCtrlSheet::copyAspect(CDBCtrlSheet *dest)
 		dest->setItemRMFaberStatType(getItemRMFaberStatType());
 		// copy prerequisit valid flag
 		dest->setItemPrerequisitValid(getItemPrerequisitValid());
+		// copy item serial
+		dest->setItemSerial(getItemSerial());
+		// copy item create time
+		dest->setItemCreateTime(getItemCreateTime());
 	}
 	// if brick, sphrase or sphraseId
 	if(isSBrick() || isSPhrase() || isSPhraseId())
@@ -4047,7 +4052,6 @@ void CDBCtrlSheet::setItemPrice(sint32 price)
 	node->setValue32(price);
 }
 
-
 // ***************************************************************************
 sint32 CDBCtrlSheet::getItemResaleFlag() const
 {
@@ -4068,6 +4072,54 @@ CCDBNodeLeaf *CDBCtrlSheet::getItemResaleFlagPtr() const
 void CDBCtrlSheet::setItemResaleFlag(sint32 rf)
 {
 	CCDBNodeLeaf *node = getItemResaleFlagPtr();
+	if (!node) return;
+	node->setValue32(rf);
+}
+
+// ***************************************************************************
+sint32 CDBCtrlSheet::getItemCreateTime() const
+{
+	CCDBNodeLeaf *node = getItemCreateTimePtr();
+	if (!node) return 0;
+	return node->getValue32();
+}
+
+// ***************************************************************************
+CCDBNodeLeaf *CDBCtrlSheet::getItemCreateTimePtr() const
+{
+	CCDBNodeBranch *root = getRootBranch();
+	if (!root) return NULL;
+	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("CREATE_TIME"), false));
+}
+
+// ***************************************************************************
+void CDBCtrlSheet::setItemCreateTime(sint32 ct)
+{
+	CCDBNodeLeaf *node = getItemCreateTimePtr();
+	if (!node) return;
+	node->setValue32(ct);
+}
+
+// ***************************************************************************
+sint32 CDBCtrlSheet::getItemSerial() const
+{
+	CCDBNodeLeaf *node = getItemSerialPtr();
+	if (!node) return 0;
+	return node->getValue32();
+}
+
+// ***************************************************************************
+CCDBNodeLeaf *CDBCtrlSheet::getItemSerialPtr() const
+{
+	CCDBNodeBranch *root = getRootBranch();
+	if (!root) return NULL;
+	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("SERIAL"), false));
+}
+
+// ***************************************************************************
+void CDBCtrlSheet::setItemSerial(sint32 rf)
+{
+	CCDBNodeLeaf *node = getItemSerialPtr();
 	if (!node) return;
 	node->setValue32(rf);
 }

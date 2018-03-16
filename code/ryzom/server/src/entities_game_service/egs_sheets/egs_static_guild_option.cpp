@@ -56,7 +56,7 @@ void CStaticGuildOption::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> 
 	}
 }
 
-void CStaticGuildOption::serial(class NLMISC::IStream &f)
+void CStaticGuildOption::serial(NLMISC::IStream &f)
 {
 	f.serial(Price);
 	if ( f.isReading() )

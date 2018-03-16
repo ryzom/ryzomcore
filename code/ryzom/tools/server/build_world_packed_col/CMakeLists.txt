@@ -16,6 +16,6 @@ NL_ADD_RUNTIME_FLAGS(build_world_packed_col)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(build_world_packed_col ${CMAKE_CURRENT_SOURCE_DIR}/std_header.h ${CMAKE_CURRENT_SOURCE_DIR}/std_header.cpp)
-ENDIF(WITH_PCH)
+ENDIF()
 
 INSTALL(TARGETS build_world_packed_col RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)

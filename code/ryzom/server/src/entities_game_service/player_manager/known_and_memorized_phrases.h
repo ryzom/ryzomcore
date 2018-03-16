@@ -46,7 +46,7 @@ struct CKnownPhrase
 
 	bool empty() const;
 	void clear();
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };
 
 
@@ -70,7 +70,7 @@ public:
 	explicit CMemorizedPhrase(const std::vector<NLMISC::CSheetId> &bricks, uint16 id);
 
 	void clear();
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	std::vector<NLMISC::CSheetId>	Bricks;
 	uint16							PhraseId;
@@ -119,7 +119,7 @@ public:
 	
 	const std::vector<CMemorizedPhrase*>	&getMemorizedPhrases() const { return Phrases; }
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 private:
 	std::vector<CMemorizedPhrase*>	Phrases;
@@ -174,7 +174,7 @@ struct CPlayerPhraseMemory
 
 	const std::vector<CMemorizationSet*>	&getMemorizationSets() const { return _MemSets; }
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 private:
 	CMemorizationSet* getMemSet(uint32 idx);

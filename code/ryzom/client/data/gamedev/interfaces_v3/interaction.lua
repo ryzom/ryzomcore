@@ -10,7 +10,7 @@ end
 ------------------------------------------------------------------------------------------------------------
 -- called when server send an invitaion we receive a text id containing the string to display (invitor name)
 function game:onTeamInvation(textID)
-	
+
 	local ui = getUI('ui:interface:join_team_proposal');
 	ui.content.inside.invitor_name.textid = textID;
 	ui.active = true;
@@ -20,7 +20,7 @@ function game:onTeamInvation(textID)
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:teamInvitationAccept()
 
 	local ui = getUI('ui:interface:join_team_proposal');
@@ -29,7 +29,7 @@ function game:teamInvitationAccept()
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:teamInvitationRefuse()
 
 	local ui = getUI('ui:interface:join_team_proposal');
@@ -38,7 +38,7 @@ function game:teamInvitationRefuse()
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:switchChatTab(dbEntry)
 	local	db= 'UI:SAVE:ISENABLED:' .. dbEntry;
 	local	val= getDbProp(db);
@@ -51,13 +51,13 @@ function game:switchChatTab(dbEntry)
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:updateEmoteMenu(prop, tooltip, tooltip_pushed, name, param)
 	for i=0,9 do
 		-- Get key shortcut
 		local text = i18n.get('uiTalkMemMsg0' .. i);
 		local key = runExpr( "getKey('talk_message','0" .. i .. "',1)" );
-		
+
 		if (key ~= nil and key  ~= '') then
 			key = ' @{T25}@{2F2F}(' .. key .. ')';
 			text = concatUCString(text, key);
@@ -67,11 +67,11 @@ function game:updateEmoteMenu(prop, tooltip, tooltip_pushed, name, param)
 		local	uiQC= getUI("ui:interface:user_chat_emote_menu:quick_chat:" .. "qc" .. i);
 		uiQC.uc_hardtext_format= text;
 	end
-	
+
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 if (ui_free_chat_h == nil) then
 	ui_free_chat_h = {}
 end
@@ -81,14 +81,14 @@ if (ui_free_chat_w == nil) then
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:closeTellHeader(uiID)
 	local ui = getUI('ui:interface:' .. uiID);
-	
+
 	-- save size
 	ui_free_chat_h[uiID] = ui.h;
 	ui_free_chat_w[uiID] = ui.w;
-	
+
 	-- reduce window size
 	ui.pop_min_h = 32;
 	ui.h = 0;
@@ -96,7 +96,7 @@ function game:closeTellHeader(uiID)
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:openTellHeader(uiID)
 	local ui = getUI('ui:interface:' .. uiID);
 	ui.pop_min_h = 96;
@@ -105,7 +105,7 @@ function game:openTellHeader(uiID)
 	if (ui_free_chat_h[uiID] ~= nil) then
 		ui.h = ui_free_chat_h[uiID];
 	end
-	
+
 	 if (ui_free_chat_w[uiID] ~= nil) then
 		ui.w = ui_free_chat_w[uiID];
 	end
@@ -127,12 +127,12 @@ local function levelToForceRegion(level)
 		return 6
 	else
 		return math.floor(level / 50) + 2
-	end	
-end 
+	end
+end
 
 local function levelToLevelForce(level)
-	return math.floor(math.fmod(level, 50) * 5 / 50) + 1	
-end 
+	return math.floor(math.fmod(level, 50) * 5 / 50) + 1
+end
 
 
 
@@ -186,7 +186,7 @@ end
 local function twIsTargetPlayer()
 	if config.Local == 1 then
 		return 	twTargetPlayer
-	else 
+	else
 		return isTargetPlayer()
 	end
 end
@@ -195,7 +195,7 @@ end
 local function twIsPlayerInPVPMode()
 	if config.Local == 1 then
 		return 	twPlayerInPVPMode
-	else 
+	else
 		return isPlayerInPVPMode()
 	end
 end
@@ -204,7 +204,7 @@ end
 local function twIsTargetInPVPMode()
 	if config.Local == 1 then
 		return 	twTargetInPVPMode
-	else 
+	else
 		return isTargetInPVPMode()
 	end
 end
@@ -217,27 +217,29 @@ end
 -- Is its level known (not too high ...)
 -- Boss/Mini-bosses/Names colored ring
 function game:updateTargetConsiderUI()
-	--debugInfo("Updating consider widget")
+	-- debugInfo("Updating consider widget")
 
-	local targetWindow = getUI("ui:interface:target")	
-	-- 	
+	local targetWindow = getUI("ui:interface:target")
+	--
 	local wgTargetSlotForce = targetWindow:find("slot_force")
 	local wgTargetLevel = targetWindow:find("target_level")
 	local wgImpossible  = targetWindow:find("impossible")
 	local wgSlotRing    = targetWindow:find("slot_ring")
 	local wgToolTip     = targetWindow:find("target_tooltip")
-	local wgPvPTag     = targetWindow:find("pvp_tags")
-	local wgHeader     = targetWindow:find("header_opened")
+	local wgPvPTag      = targetWindow:find("pvp_tags")
+	local wgHeader      = targetWindow:find("header_opened")
+	local wgLock        = targetWindow:find("lock")
 
 	wgTargetSlotForce.active = true
 	wgImpossible.active = true
 
 	-- no selection ?
 	if twGetTargetLevel() == -1 then
+		wgLock.active = false
 		wgTargetSlotForce.active = false
 		wgTargetLevel.active = false
 		wgImpossible.active = false
-		wgSlotRing.active  = false	
+		wgSlotRing.active  = false
 		if (isTargetUser() and twIsPlayerInPVPMode()) then
 			wgToolTip.tooltip = ""
 			wgPvPTag.active = true
@@ -254,20 +256,36 @@ function game:updateTargetConsiderUI()
 	wgPvPTag.active = false
 	wgHeader.h = 34;
 
+
+-- /luaScript getUI("ui:interface:target:header_opened:lock").active=true
+
 	-- if the selection is a player, then both the local & targeted player must be in PVP mode for the level to be displayed
 	if (twIsTargetPlayer()) then
 		-- don't display anything ...
+		wgLock.active = false
 		wgTargetSlotForce.active = false
 		wgTargetLevel.active = false
 		wgImpossible.active = false
 		wgSlotRing.active  = false
 		wgToolTip.tooltip = ""
 		if twIsTargetInPVPMode() then
-			debugInfo("target in pvp")
 			wgPvPTag.active = true
 			wgHeader.h = 56;
 		end
 		return
+	else
+		wgLock.active = false
+		local level = getDbProp(getDefine("target_player_level"))
+
+		if level == 2 then -- Locked by team of player
+			wgLock.active = true
+			wgLock.color = "50 250 250 255"
+		else
+			if level == 1 then -- Locked by another team
+				wgLock.active = true
+				wgLock.color = "250 50 50 255"
+			end
+		end
 	end
 
 	-- depending on the number of people in the group, set the max diff for visibility between player level
@@ -288,14 +306,14 @@ function game:updateTargetConsiderUI()
 	local impossible = (twGetTargetLevel() - twGetPlayerLevel() > maxDiffLevel)
 
 	wgSlotRing.active = false
-	
+
 	if impossible then
 		-- targeted object is too hard too beat, display a skull
 		wgTargetLevel.active = false
 		wgImpossible.y = -5
 		wgImpossible.color = "255 50 50 255"
 	else
-		-- player can see the level of the targeted creature		
+		-- player can see the level of the targeted creature
 		wgTargetLevel.active = true
 		wgImpossible.y = 6
 		wgTargetLevel.hardtext = tostring(twGetTargetLevel())
@@ -309,7 +327,7 @@ function game:updateTargetConsiderUI()
 
 	wgImpossible.texture = getDefine("force_level_" .. tostring(levelForce))
 	wgImpossible.active = true
-	if levelForce < 6 then 
+	if levelForce < 6 then
 		wgToolTip.tooltip = i18n.get("uittConsiderTargetLevel")
 	elseif levelForce == 6 then
 		-- Named creature
@@ -342,7 +360,6 @@ function game:updateTargetConsiderUI()
 	if impossible then
 		wgToolTip.tooltip = concatUCString(wgToolTip.tooltip, ucstring("\n"), i18n.get("uittConsiderUnknownLevel"))
 	end
-
 end
 
 ----------------------
@@ -505,18 +522,18 @@ function twGroup(groupSize)
 		else
 			setDbProp("SERVER:GROUP:" .. tostring(gm) .. ":PRESENT", 0)
 		end
-	end	
+	end
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:closeWebIGBrowserHeader()
 	local ui = getUI('ui:interface:webig');
-	
+
 	-- save size
 	ui_webig_browser_h = ui.h;
 	ui_webig_browser_w = ui.w;
-	
+
 	-- reduce window size
 	ui.pop_min_h = 32;
 	ui.h = 0;
@@ -524,7 +541,7 @@ function game:closeWebIGBrowserHeader()
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:openWebIGBrowserHeader()
 	local ui = getUI('ui:interface:webig');
 	ui.pop_min_h = 96;
@@ -533,8 +550,22 @@ function game:openWebIGBrowserHeader()
 	if (ui_webig_browser_h ~= nil) then
 		ui.h = ui_webig_browser_h;
 	end
-	
+
 	 if (ui_webig_browser_w ~= nil) then
 		ui.w = ui_webig_browser_w;
 	end
 end
+
+------------------------------------------------------------------------------------------------------------
+local SavedUrl = "";
+function game:chatUrl(url)
+	SavedUrl = url
+	runAH(nil, "active_menu", "menu=ui:interface:chat_uri_action_menu");
+end
+function game:chatUrlCopy()
+	runAH(nil, "copy_to_clipboard", SavedUrl)
+end
+function game:chatUrlBrowse()
+	runAH(nil, "browse", "name=ui:interface:webig:content:html|url=" .. SavedUrl)
+end
+

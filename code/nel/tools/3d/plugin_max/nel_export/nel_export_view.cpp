@@ -102,24 +102,22 @@ void regsiterOVPath ()
 //#ifdef NL_DEBUG_FAST
 //	HMODULE hModule = GetModuleHandle("object_viewer_dll_df.dll");
 #if defined (NL_DEBUG)
-	HMODULE hModule = GetModuleHandle("object_viewer_dll_d.dll");
+	HMODULE hModule = GetModuleHandle(_T("object_viewer_dll_d.dll"));
 //#elif defined (NL_RELEASE_DEBUG)
 //	HMODULE hModule = GetModuleHandle("object_viewer_dll_rd.dll");
 #else
-	HMODULE hModule = GetModuleHandle("object_viewer_dll_r.dll");
+	HMODULE hModule = GetModuleHandle(_T("object_viewer_dll_r.dll"));
 #endif
-	if (!hModule) { ::MessageBox(NULL, "'hModule' failed at '" __FUNCTION__ "' in file '" __FILE__ " on line " NL_MACRO_TO_STR(__LINE__), "NeL Export", MB_OK | MB_ICONERROR); return; }
-	char sModulePath[256];
+	if (!hModule) { ::MessageBox(NULL, _T("'hModule' failed at '") __FUNCTION__ _T("' in file '") __FILE__ _T(" on line ") NL_MACRO_TO_STR(__LINE__), _T("NeL Export"), MB_OK | MB_ICONERROR); return; }
+	TCHAR sModulePath[256];
 	int res = GetModuleFileName(hModule, sModulePath, 256);
-	if (!res) { ::MessageBox(NULL, "'res' failed at '" __FUNCTION__ "' in file '" __FILE__ " on line " NL_MACRO_TO_STR(__LINE__), "NeL Export", MB_OK | MB_ICONERROR); return; }
-	char SDrive[512];
-	char SDir[512];
-	_splitpath (sModulePath, SDrive, SDir, NULL, NULL);
-	_makepath (sModulePath, SDrive, SDir, "object_viewer", ".cfg");
+	if (!res) { ::MessageBox(NULL, _T("'res' failed at '") __FUNCTION__ _T("' in file '") __FILE__ _T(" on line ") NL_MACRO_TO_STR(__LINE__), _T("NeL Export"), MB_OK | MB_ICONERROR); return; }
+
+	std::string modulePath = NLMISC::CFile::getPath(tStrToUtf8(sModulePath)) + "object_viewer.cfg";
 
 	// Load the config file
 	CConfigFile cf;
-	cf.load (sModulePath);
+	cf.load (modulePath);
 
 	try
 	{
@@ -128,7 +126,7 @@ void regsiterOVPath ()
 		for (uint i=0; i<(uint)search_pathes.size(); i++)
 			CPath::addSearchPath (search_pathes.asString(i));
 	}
-	catch(EUnknownVar &)
+	catch(const EUnknownVar &)
 	{}
 
 	try
@@ -138,7 +136,7 @@ void regsiterOVPath ()
 		for (uint i=0; i<(uint)recursive_search_pathes.size(); i++)
 			CPath::addSearchPath (recursive_search_pathes.asString(i), true, false);
 	}
-	catch(EUnknownVar &)
+	catch(const EUnknownVar &)
 	{}
 
 	// Add extension remapping
@@ -155,7 +153,7 @@ void regsiterOVPath ()
 				CPath::remapExtension(extensions_remapping.asString(i), extensions_remapping.asString(i+1), true);
 		}
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 	}
 }
@@ -176,7 +174,7 @@ void CNelExport::viewMesh (TimeValue time)
 	// Check wether there's not an instance currently running
 	if (view->isInstanceRunning())
 	{
-		::MessageBox(NULL, "An instance of the viewer is currently running, please close it :)", "NeL Export", MB_OK|MB_ICONEXCLAMATION);
+		::MessageBox(NULL, _T("An instance of the viewer is currently running, please close it :)"), _T("NeL Export"), MB_OK|MB_ICONEXCLAMATION);
 		return;
 	}
 
@@ -193,7 +191,7 @@ void CNelExport::viewMesh (TimeValue time)
 		// Init it
 		if (!view->initUI())
 		{
-			::MessageBox(NULL, "Failed to initialize object viewer ui, this may be a driver init issue, check your log.log files", "NeL Export", MB_OK|MB_ICONEXCLAMATION);
+			::MessageBox(NULL, _T("Failed to initialize object viewer ui, this may be a driver init issue, check your log.log files"), _T("NeL Export"), MB_OK|MB_ICONEXCLAMATION);
 			IObjectViewer::releaseInterface(view);
 			return;
 		}
@@ -302,7 +300,7 @@ void CNelExport::viewMesh (TimeValue time)
 							_ExportNel->buildSkeletonShape (*skelShape, *skeletonRoot, &(iteSkeleton->second), mapId, time);
 
 							// Add the shape in the view
-							uint instance = view->addSkel (skelShape, skeletonRoot->GetName());
+							uint instance = view->addSkel (skelShape, tStrToUtf8(skeletonRoot->GetName()));
 
 							// Add tracks
 							CAnimation *anim=new CAnimation;
@@ -367,9 +365,9 @@ void CNelExport::viewMesh (TimeValue time)
 			INode* pNode=_Ip->GetSelNode (nNode);
 
 			string sTmp = "Object Name: ";
-			sTmp += pNode->GetName();
+			sTmp += tStrToUtf8(pNode->GetName());
 			ProgBar.setLine (0, sTmp);
-			sTmp = "";
+			sTmp.clear();
 			for (uint32 i = 1; i < 10; ++i) 
 				ProgBar.setLine (i, sTmp);
 			sTmp = "Last Error";
@@ -412,7 +410,7 @@ void CNelExport::viewMesh (TimeValue time)
 						if (pShape)
 						{
 							// Add the shape in the view
-							uint instance = view->addMesh (pShape, pNode->GetName(), iteSkelShape->second.SkeletonInstance);
+							uint instance = view->addMesh (pShape, tStrToUtf8(pNode->GetName()).c_str(), iteSkelShape->second.SkeletonInstance);
 
 							// Add tracks
 							CAnimation *anim=new CAnimation;
@@ -582,8 +580,8 @@ void CNelExport::viewMesh (TimeValue time)
 					NLMISC::clamp(slInfo.CellSurfaceLightSize, 0.001f, 1000000.f);
 					slInfo.CellRaytraceDeltaZ= theExportSceneStruct.SurfaceLightingDeltaZ;
 					// no more add any prefix to the colision identifier.
-					slInfo.ColIdentifierPrefix= "";
-					slInfo.ColIdentifierSuffix= "";
+					slInfo.ColIdentifierPrefix.clear();
+					slInfo.ColIdentifierSuffix.clear();
 					// Build RetrieverBank and GlobalRetriever from collisions in scene
 					_ExportNel->computeCollisionRetrieverFromScene(time, slInfo.RetrieverBank, slInfo.GlobalRetriever, 
 						slInfo.ColIdentifierPrefix.c_str(), slInfo.ColIdentifierSuffix.c_str(), slInfo.IgFileName);

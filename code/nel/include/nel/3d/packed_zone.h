@@ -52,7 +52,7 @@ class CPackedVertex
 public:
 	uint16 X, Y, Z;
 public:
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial(X, Y, Z);
 	}
@@ -68,7 +68,7 @@ class CPackedTri
 public:
 	uint32 V0, V1, V2;
 public:
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial(V0, V1, V2);
 	}
@@ -79,7 +79,7 @@ class CPackedTri16
 public:
 	uint16 V0, V1, V2;
 public:
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial(V0, V1, V2);
 	}
@@ -101,7 +101,7 @@ public:
 	sint32					    ZoneY;
 public:
 	virtual ~CPackedZoneBase() {}
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream) = 0;
+	virtual void serial(NLMISC::IStream &f) = 0;
 	// TMP For debug : render position covered by a frustum
 	virtual void render(CVertexBuffer &vb, IDriver &drv, CMaterial &mat, CMaterial &wiredMaterial, const NLMISC::CMatrix &camMat, uint batchSize, const NLMISC::CVector localFrustCorners[8]) = 0;
 	// raytracing test
@@ -138,7 +138,7 @@ public:
 			   sint32	zoneX,
 			   sint32	zoneY
 			  );
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 	// TMP For debug : render porition covered by a frustum
 	void render(CVertexBuffer &vb, IDriver &drv, CMaterial &mat, CMaterial &wiredMaterial, const NLMISC::CMatrix &camMat, uint batchSize, const NLMISC::CVector localFrustCorners[8]);
 	// try to build a 16 bit version of this packed zone to save some more place
@@ -183,7 +183,7 @@ public:
 	NLMISC_DECLARE_CLASS(CPackedZone16)
 	CPackedZone16();
 	//
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 	// TMP For debug : render position covered by a frustum
 	void render(CVertexBuffer &vb, IDriver &drv, CMaterial &mat, CMaterial &wiredMaterial, const NLMISC::CMatrix &camMat, uint batchSize, const NLMISC::CVector localFrustCorners[8]);
 		// raytracing test

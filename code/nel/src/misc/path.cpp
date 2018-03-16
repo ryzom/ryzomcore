@@ -2148,7 +2148,7 @@ bool	CFile::setFileModificationDate(const std::string &filename, uint32 modTime)
 	FILETIME accessFileTime;
 	FILETIME modFileTime;
 
-	// read the current the files times
+	// read the current file time
 	if (GetFileTime(h, &creationFileTime, &accessFileTime, &modFileTime) == 0)
 	{
 		nlwarning("Can't set modification date on file '%s' : %s", fn.c_str(), formatErrorMessage(getLastError()).c_str());
@@ -2523,7 +2523,7 @@ bool CFile::createDirectoryTree(const std::string &filename)
 	return lastResult;
 }
 
-bool CPath::makePathRelative (const char *basePath, std::string &relativePath)
+bool CPath::makePathRelative (const std::string &basePath, std::string &relativePath)
 {
 	// Standard path with final slash
 	string tmp = standardizePath (basePath, true);

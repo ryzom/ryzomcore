@@ -38,7 +38,7 @@ void CWeatherFunctionParamsSheet::build(const NLGEORGES::UFormElm &item)
 }
 
 //=======================================================================
-void CWeatherFunctionParamsSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CWeatherFunctionParamsSheet::serial(NLMISC::IStream &f)
 {
 	CWeatherFunctionParamsSheetBase::serial(f);
 }

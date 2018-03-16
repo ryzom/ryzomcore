@@ -377,11 +377,11 @@ void CLog::displayRawString (const char *str)
 		{
 			localargs.Date = 0;
 			localargs.LogType = CLog::LOG_NO;
-			localargs.ProcessName = "";
+			localargs.ProcessName.clear();
 			localargs.ThreadId = 0;
 			localargs.FileName = NULL;
 			localargs.Line = -1;
-			localargs.CallstackAndLog = "";
+			localargs.CallstackAndLog.clear();
 
 			TempString = str;
 		}
@@ -397,11 +397,11 @@ void CLog::displayRawString (const char *str)
 		{
 			localargs.Date = 0;
 			localargs.LogType = CLog::LOG_NO;
-			localargs.ProcessName = "";
+			localargs.ProcessName.clear();
 			localargs.ThreadId = 0;
 			localargs.FileName = NULL;
 			localargs.Line = -1;
-			localargs.CallstackAndLog = "";
+			localargs.CallstackAndLog.clear();
 
 			disp = str;
 			args = &localargs;
@@ -615,8 +615,12 @@ void CLog::releaseProcessName()
 	{
 		INelContext::getInstance().releaseSingletonPointer("NLMISC::CLog::_ProcessName", _ProcessName);
 	}
-	delete _ProcessName;
-	_ProcessName = NULL;
+
+	if (_ProcessName)
+	{
+		delete _ProcessName;
+		_ProcessName = NULL;
+	}
 }
 
 } // NLMISC

@@ -21,10 +21,10 @@
 *	I work with two different file format :
 *		- phrase file witch contain a complex grammar description
 *		- string file withc contain only pair of identifier / string value.
-*	
+*
 *	This tool can do 6 different work :
 *		- make diff string file file for each language from a reference string file.
-*		
+*
 *		- merge the translated diff string file into there respective string file after
 *			translation
 *
@@ -43,10 +43,10 @@
 *
 *	Before invocation, you must be in the translation repository (see localisation_system_in_ryzom.doc)
 *	Invocation should be as folow :
-*		trans_tool make_string_diff 
-*		trans_tool merge_string_diff 
+*		trans_tool make_string_diff
+*		trans_tool merge_string_diff
 *		trans_tool make_words_diff
-*		trans_tool merge_words_diff 
+*		trans_tool merge_words_diff
 *		trans_tool make_phrase_diff
 *		trans_tool merge_phrase_diff
 *		trans_tool make_clause_diff
@@ -151,24 +151,22 @@ void showUsage(char *exeName)
 	LOG("Reference language is always the first language in languages.txt\n");
 }
 
-
-
 void verifyVersion(ucstring& doc, int versionId)
 {
-	ucstring version1("// DIFF_VERSION 1\r\n");
+	ucstring version1("// DIFF_VERSION 1\n");
 	ucstring::size_type version1Size = version1.size();
-	ucstring version2("// DIFF_VERSION 2\r\n");
+	ucstring version2("// DIFF_VERSION 2\n");
 	ucstring::size_type version2Size = version2.size();
 
 	switch (versionId)
 	{
-		case 1: 
+		case 1:
 			if (doc.size() < version1Size|| doc.substr(0, version1Size) != version1 )
 			{
 				nlerror("Loading wrong diff version");
 				nlassert(0);
-			}			
-			doc = doc.substr(version1Size);			
+			}
+			doc = doc.substr(version1Size);
 			break;
 
 		case 2:
@@ -176,7 +174,7 @@ void verifyVersion(ucstring& doc, int versionId)
 			{
 				nlerror("Loading wrong diff version");
 				nlassert(0);
-			}			
+			}
 			doc = doc.substr(version2Size);
 			break;
 
@@ -190,7 +188,7 @@ bool readPhraseFile1(const std::string &filename, vector<TPhrase> &phrases, bool
 {
 	ucstring doc;
 
-	CI18N::readTextFile(filename, doc, false, false, false, CI18N::LINE_FMT_CRLF);	
+	CI18N::readTextFile(filename, doc, false, false, CI18N::LINE_FMT_LF);
 	verifyVersion(doc, 1);
 	return readPhraseFileFromString(doc, filename, phrases, forceRehash);
 }
@@ -199,7 +197,7 @@ bool readPhraseFile2(const std::string &filename, vector<TPhrase> &phrases, bool
 {
 	ucstring doc;
 
-	CI18N::readTextFile(filename, doc, false, false, false, CI18N::LINE_FMT_CRLF);
+	CI18N::readTextFile(filename, doc, false, false, CI18N::LINE_FMT_LF);
 	verifyVersion(doc, 2);
 	return readPhraseFileFromString(doc, filename, phrases, forceRehash);
 }
@@ -251,7 +249,7 @@ bool parseDiffCommandFromComment(const ucstring &comments, TDiffInfo &diffInfo)
 		diffInfo.Command = diff_none;
 		return false;
 	}
-	
+
 	CI18N::skipWhiteSpace(it, last);
 	// ok, parse the index.
 	string indexStr;
@@ -352,7 +350,7 @@ bool mergeStringDiff(vector<TStringInfo> &strings, const string &language, const
 		{
 			// Check if the diff is translated
 			ucstring text;
-			CI18N::readTextFile(diffs[i], text, false, false, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(diffs[i], text, false, false, CI18N::LINE_FMT_LF);
 			if (text.find(ucstring("DIFF NOT TRANSLATED")) != ucstring::npos)
 			{
 				LOG("Diff file [%s] is not translated, merging it later.\n", CFile::getFilename(diffs[i]).c_str());
@@ -385,7 +383,7 @@ bool mergeStringDiff(vector<TStringInfo> &strings, const string &language, const
 				nlassertex(diffInfo.Index2 < strings.size(), ("Index %u out of max Range %u", diffInfo.Index2, strings.size()));
 				swap(strings[diffInfo.Index1], strings[diffInfo.Index2]);
 				// remove the swap from the comments
-				diff[j].Comments = diff[j].Comments.substr(diff[j].Comments.find(nl)+2);
+				diff[j].Comments = diff[j].Comments.substr(diff[j].Comments.find(nl)+nl.length());
 				if (!diff[j].Comments.empty())
 					j--;
 				break;
@@ -423,7 +421,7 @@ public:
 	void run(const vector<TStringInfo> &addition, vector<TStringInfo> &reference, vector<TStringInfo> &diff)
 	{
 		TStringDiffContext context(addition, reference, diff);
-		
+
 		CMakeDiff<TStringInfo, TStringDiffContext> differ;
 		differ.makeDiff(this, context);
 	}
@@ -432,6 +430,7 @@ public:
 	{
 		// nothing to do
 	}
+
 	void onAdd(uint addIndex, uint refIndex, TStringDiffContext &context)
 	{
 			TStringInfo si = context.Addition[addIndex];
@@ -442,6 +441,7 @@ public:
 			nlinfo("Added %s at %u", si.Identifier.c_str(), addIndex);
 			context.Diff.push_back(si);
 	}
+
 	void onRemove(uint addIndex, uint refIndex, TStringDiffContext &context)
 	{
 		TStringInfo si = context.Reference[refIndex];
@@ -453,6 +453,7 @@ public:
 		nlinfo("Removed %s at %u", si.Identifier.c_str(), addIndex);
 		context.Diff.push_back(si);
 	}
+
 	void onChanged(uint addIndex, uint refIndex, TStringDiffContext &context)
 	{
 		TStringInfo si = context.Addition[addIndex];
@@ -471,12 +472,10 @@ public:
 		char temp[1024];
 		sprintf(temp, "// DIFF SWAP %u %u   (swaping %s and %s)", newIndex, refIndex, context.Reference[newIndex].Identifier.c_str(), context.Reference[refIndex].Identifier.c_str());
 //		sprintf(temp, "// DIFF SWAP %u %u", newIndex, refIndex);
-		
-		si.Comments = ucstring(temp) + nl +nl;
+
+		si.Comments = ucstring(temp) + nl + nl;
 		context.Diff.push_back(si);
 	}
-
-
 };
 
 
@@ -501,7 +500,7 @@ void makeStringDiff(const vector<TStringInfo> &addition, vector<TStringInfo> &re
 		vector<TStringInfo>::iterator it;
 
 		if (addCount == addition.size()
-			|| 
+			||
 				(
 					!equal
 //				&&	find_if(addition.begin()+addCount, addition.end(), TFindStringInfo(reference[refCount].Identifier)) == addition.end()
@@ -521,7 +520,7 @@ void makeStringDiff(const vector<TStringInfo> &addition, vector<TStringInfo> &re
 			++refCount;
 		}
 		else if (refCount == reference.size()
-			|| 
+			||
 				(
 					!equal
 //				&&	find_if(reference.begin()+refCount, reference.end(), TFindStringInfo(addition[addCount].Identifier)) == reference.end()
@@ -564,7 +563,7 @@ void makeStringDiff(const vector<TStringInfo> &addition, vector<TStringInfo> &re
 				TStringInfo si;
 				char temp[1024];
 				sprintf(temp, "// DIFF SWAP %u %u", it - reference.begin(), refCount);
-				
+
 				si.Comments = ucstring(temp) + nl;
 				diff.push_back(si);
 			}
@@ -596,7 +595,7 @@ void makeStringDiff(const vector<TStringInfo> &addition, vector<TStringInfo> &re
 
 int makeStringDiff(int argc, char *argv[])
 {
-	// this will generate diff from 'addition' directory 
+	// this will generate diff from 'addition' directory
 	// for the reference <lang>.uxt file
 	// with the same file in the 'translated' directory.
 
@@ -617,7 +616,7 @@ int makeStringDiff(int argc, char *argv[])
 	for (uint l=0; l<Languages.size(); ++l)
 	{
 		LOG("Diffing with language %s...\n", Languages[l].c_str());
-		
+
 		if (l != 0)
 		{
 			addition.clear();
@@ -660,11 +659,11 @@ int makeStringDiff(int argc, char *argv[])
 			ucstring str = prepareStringFile(diff, false);
 
 			// add the tag for non translation
-			str += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE")+nl+ucstring("// DIFF NOT TRANSLATED")+nl;
+			str += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE") + nl + ucstring("// DIFF NOT TRANSLATED") + nl;
 
 			std::string diffName(diffDir+Languages[l]+"_diff_"+diffVersion+".uxt");
 			CI18N::writeTextFile(diffName, str);
-			
+
 		}
 	}
 
@@ -679,7 +678,7 @@ void cleanComment(const std::string & filename)
 	ucstring text;
 	uint nbOldValue=0;
 
-	CI18N::readTextFile(filename, text, false, false, false, CI18N::LINE_FMT_CRLF);
+	CI18N::readTextFile(filename, text, false, false, CI18N::LINE_FMT_LF);
 
 	ucstring newText;
 	ucstring::size_type last = 0;
@@ -687,36 +686,36 @@ void cleanComment(const std::string & filename)
 	{
 		ucstring::size_type commentBegin = text.find(ucstring("/* OLD VALUE :"), last);
 		if (commentBegin == ucstring::npos)
-		{					
-			newText += text.substr(last);
-			last = ucstring::npos;
-		}
-		else
 		{
-			ucstring::size_type size = commentBegin - last;												
-			ucstring toAdd = text.substr(last, size);
-			newText += toAdd;
-			ucstring::size_type commentEnd = text.find(ucstring("*/"), commentBegin);
-			if (commentEnd != ucstring::npos) { commentEnd += 4; }
-			last = commentEnd;
-			++nbOldValue;
-		}				
-	}
-	text = newText;
-	newText = ucstring("");
-	last = 0;
-	while ( last != ucstring::npos)
-	{
-		ucstring::size_type commentBegin = text.find(ucstring("//"), last);
-		if (commentBegin == ucstring::npos)
-		{					
 			newText += text.substr(last);
 			last = ucstring::npos;
 		}
 		else
 		{
 			ucstring::size_type size = commentBegin - last;
-			ucstring toAdd =  text.substr(last, size); 
+			ucstring toAdd = text.substr(last, size);
+			newText += toAdd;
+			ucstring::size_type commentEnd = text.find(ucstring("*/"), commentBegin);
+			if (commentEnd != ucstring::npos) { commentEnd += 2 + nl.size(); }
+			last = commentEnd;
+			++nbOldValue;
+		}
+	}
+	text = newText;
+	newText.clear();
+	last = 0;
+	while ( last != ucstring::npos)
+	{
+		ucstring::size_type commentBegin = text.find(ucstring("//"), last);
+		if (commentBegin == ucstring::npos)
+		{
+			newText += text.substr(last);
+			last = ucstring::npos;
+		}
+		else
+		{
+			ucstring::size_type size = commentBegin - last;
+			ucstring toAdd =  text.substr(last, size);
 			newText += toAdd;
 			// case where // is the part of an url and isn't a comment
 			if (commentBegin > 4 && text.substr(commentBegin-1, 1) == ucstring(":"))
@@ -738,12 +737,12 @@ void cleanComment(const std::string & filename)
 						)
 					{
 						newText += comment;
-					}	
+					}
 				}
 				last = commentEnd;
 				++nbOldValue;
 			}
-		}				
+		}
 	}
 	nlinfo("cleaning : %s, (%d comments deleted)...\n", filename.c_str(), nbOldValue);
 	CI18N::writeTextFile(filename , newText);
@@ -754,14 +753,14 @@ REMOVE OLDVALUE: from a diff string file
 */
 int cleanStringDiff(int argc, char *argv[])
 {
-	
+
 	LOG("Cleaning string diffs\n");
 
 	uint i,l;
 
 	for (l=0; l<Languages.size(); ++l)
 	{
-		
+
 		vector<string>	diffs;
 
 		getPathContentFiltered(diffDir+Languages[l]+"_diff_", ".uxt", diffs);
@@ -800,7 +799,7 @@ int mergeStringDiff(int argc, char *argv[])
 		{
 			// backup the original file
 			ucstring old;
-			CI18N::readTextFile(filename, old, false, true, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(filename, old, true, false, CI18N::LINE_FMT_LF);
 			if (old != str)
 				CFile::moveFile(historyDir+CFile::getFilenameWithoutExtension(filename)+"_"+diffVersion+"."+CFile::getExtension(filename), filename);
 		}
@@ -840,7 +839,7 @@ bool mergePhraseDiff(vector<TPhrase> &phrases, const string &language, bool only
 		{
 			// Check if the diff is translated
 			ucstring text;
-			CI18N::readTextFile(diffs[i], text, false, false, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(diffs[i], text, false, false, CI18N::LINE_FMT_LF);
 			verifyVersion(text, 1);
 			if (text.find(ucstring("DIFF NOT TRANSLATED")) != ucstring::npos)
 			{
@@ -878,9 +877,9 @@ bool mergePhraseDiff(vector<TPhrase> &phrases, const string &language, bool only
 			switch(diffInfo.Command)
 			{
 			case diff_swap:
-				nlassertex(diffInfo.Index1 <= phrases.size(), 
+				nlassertex(diffInfo.Index1 <= phrases.size(),
 					("In SWAP, Index1 (%u) is not less than number of phrase (%u)", diffInfo.Index1, phrases.size()));
-				nlassertex(diffInfo.Index2 <= phrases.size(), 
+				nlassertex(diffInfo.Index2 <= phrases.size(),
 					("In SWAP Index2 (%u) is not less than number of phrase (%u)", diffInfo.Index2, phrases.size()));
 				swap(phrases[diffInfo.Index1], phrases[diffInfo.Index2]);
 				// remove the swap from the comments
@@ -888,7 +887,7 @@ bool mergePhraseDiff(vector<TPhrase> &phrases, const string &language, bool only
 				j--;
 				break;
 			case diff_add:
-				nlassertex(diffInfo.Index1 <= phrases.size(), 
+				nlassertex(diffInfo.Index1 <= phrases.size(),
 					("In ADD, Index1 (%u) is not less than number of phrase (%u)", diffInfo.Index1, phrases.size()));
 				phrases.insert(phrases.begin()+diffInfo.Index1, diff[j]);
 				break;
@@ -925,7 +924,7 @@ public:
 	void run(const vector<TPhrase> &addition, vector<TPhrase> &reference, vector<TPhrase> &diff)
 	{
 		TPhraseDiffContext context(addition, reference, diff);
-		
+
 		CMakeDiff<TPhrase, TPhraseDiffContext> differ;
 		differ.makeDiff(this, context);
 	}
@@ -972,9 +971,9 @@ public:
 				if (context.Addition[addIndex].Clauses[i].Identifier != context.Reference[refIndex].Clauses[i].Identifier)
 					chg += ucstring("// Clause ") + toString(i) + " : identifier changed." + nl;
 				else if (context.Addition[addIndex].Clauses[i].Conditions != context.Reference[refIndex].Clauses[i].Conditions)
-					chg += ucstring("// Clause ") + toString(i) + " : condition changed." + nl;	
+					chg += ucstring("// Clause ") + toString(i) + " : condition changed." + nl;
 				else if (context.Addition[addIndex].Clauses[i].Text != context.Reference[refIndex].Clauses[i].Text)
-					chg += ucstring("// Clause ") + toString(i) + " : text changed." + nl;	
+					chg += ucstring("// Clause ") + toString(i) + " : text changed." + nl;
 			}
 		}
 
@@ -983,15 +982,15 @@ public:
 			chg = ucstring("// WARNING : Hash code changed ! check translation workflow.") + nl;
 		}
 		nldebug("Changed detected : %s", chg.toString().c_str());
-		
+
 		// changed element
 		TPhrase phrase = context.Addition[addIndex];
 		vector<TPhrase>	tempV;
 		tempV.push_back(context.Reference[refIndex]);
-		ucstring tempT = preparePhraseFile(tempV, false); 
+		ucstring tempT = preparePhraseFile(tempV, false);
 		CI18N::removeCComment(tempT);
 		phrase.Comments = ucstring("// DIFF CHANGED ") + toString(addIndex) + nl + phrase.Comments;
-		phrase.Comments = phrase.Comments + ucstring("/* OLD VALUE : ["+nl) + tabLines(1, tempT) +nl + "] */" + nl;
+		phrase.Comments = phrase.Comments + ucstring("/* OLD VALUE : [" + nl) + tabLines(1, tempT) + nl + "] */" + nl;
 		phrase.Comments = phrase.Comments + chg;
 
 		nlinfo("Changed %s at %u", phrase.Identifier.c_str(), addIndex);
@@ -1003,7 +1002,7 @@ public:
 		TPhrase phrase;
 		char temp[1024];
 		sprintf(temp, "// DIFF SWAP %u %u   (swaping %s and %s)", newIndex, refIndex, context.Reference[newIndex].Identifier.c_str(), context.Reference[refIndex].Identifier.c_str());
-		
+
 		nldebug("Swap for %u %u", newIndex, refIndex);
 		phrase.Comments = ucstring(temp) + nl;
 		context.Diff.push_back(phrase);
@@ -1017,7 +1016,7 @@ int makePhraseDiff(int argc, char *argv[])
 {
 	// Generate the diff file from phrase_<lang>.txt compared to the same file in translated.
 	// The diff is generated only from the reference language for and all the languages
-	
+
 	LOG("Generating phrase diffs\nLoading the working file for language %s\n", Languages[0].c_str());
 
 
@@ -1071,11 +1070,11 @@ int makePhraseDiff(int argc, char *argv[])
 		else
 		{
 			LOG("Writing difference file for language %s\n", Languages[l].c_str());
-			ucstring text; 
-			text += "// DIFF_VERSION 1\r\n";
+			ucstring text;
+			text += "// DIFF_VERSION 1\n";
 			text += preparePhraseFile(diff, false);
 			// add the tag for non translation
-			text += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE")+nl+ucstring("// DIFF NOT TRANSLATED")+nl;
+			text += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE") + nl + ucstring("// DIFF NOT TRANSLATED") + nl;
 			CI18N::writeTextFile(diffDir+"phrase_"+Languages[l]+"_diff_"+diffVersion+".txt", text);
 		}
 	}
@@ -1088,22 +1087,22 @@ int makePhraseDiff(int argc, char *argv[])
 REMOVE OLDVALUE: from a diff clause file
 */
 int cleanPhraseDiff(int argc, char *argv[])
-{	
-	
+{
+
 	LOG("Cleaning phrase diffs\n");
-	
+
 	uint i,l;
 
 	for (l=0; l<Languages.size(); ++l)
 	{
-		
+
 		vector<string>	diffs;
 
 		getPathContentFiltered(diffDir+"phrase_"+Languages[l]+"_diff_", ".txt", diffs);
 		for (i=0; i<diffs.size(); ++i)
 		{
 			cleanComment(diffs[i]);
-				
+
 		}
 	}
 	return 0;
@@ -1137,7 +1136,7 @@ int mergePhraseDiff(int argc, char *argv[], int version)
 
 		switch(version)
 		{
-			case 1:				
+			case 1:
 				if (!mergePhraseDiff(reference, Languages[l], true, true))
 				{
 					LOG("Error will merging phrase diff");
@@ -1146,7 +1145,7 @@ int mergePhraseDiff(int argc, char *argv[], int version)
 				break;
 
 			case 2:
-				
+
 				if (!mergePhraseDiff2(reference, Languages[l], true, true))
 				{
 					LOG("Error will merging phrase diff");
@@ -1155,16 +1154,16 @@ int mergePhraseDiff(int argc, char *argv[], int version)
 				break;
 
 			default:
-				nlassert(0);				
+				nlassert(0);
 
 		}
-		
+
 		ucstring str = preparePhraseFile(reference, true);
 
 		{
 			// backup the original file
 			ucstring old;
-			CI18N::readTextFile(filename, old, false, true, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(filename, old, true, false, CI18N::LINE_FMT_LF);
 			if (old != str)
 				CFile::moveFile(historyDir+CFile::getFilenameWithoutExtension(filename)+"_"+diffVersion+"."+CFile::getExtension(filename), filename);
 		}
@@ -1179,7 +1178,7 @@ int mergePhraseDiff(int argc, char *argv[], int version)
 
 int makeClauseDiff(int argc, char *argv[])
 {
-	// this will generate diff from 'addition' directory 
+	// this will generate diff from 'addition' directory
 	// for all the clause_<lang>.txt file
 	// with the same file in the 'translated' directory.
 
@@ -1229,19 +1228,19 @@ int makeClauseDiff(int argc, char *argv[])
 
 
 				if (!si.Identifier.empty())
-				{				
+				{
 					vector<TStringInfo>::const_iterator first2 = addition.begin();
 					vector<TStringInfo>::const_iterator last2 = addition.end();
 					for ( ;first2!=last2 && first2->Identifier != si.Identifier; ++first2) {}
 					bool isAllreadyThere = first2 != last2;
 					if (isAllreadyThere)
 					{
-						warnings.push_back("The clause " +si.Identifier +" in the phrase " +  p.Identifier +" exists more than once.");						
+						warnings.push_back("The clause " +si.Identifier +" in the phrase " +  p.Identifier +" exists more than once.");
 					}
 					else
 					{
 						addition.push_back(si);
-					}								
+					}
 				}
 			}
 		}
@@ -1254,7 +1253,7 @@ int makeClauseDiff(int argc, char *argv[])
 			return -1;
 		}
 		mergeStringDiff(reference, Languages[l], "clause_", ".txt", false);
-	
+
 		vector<TStringInfo>	diff;
 
 		makeStringDiff(addition, reference, diff);
@@ -1270,7 +1269,7 @@ int makeClauseDiff(int argc, char *argv[])
 			ucstring str = prepareStringFile(diff, false);
 
 			// add the tag for non translation
-			str += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE")+nl+ucstring("// DIFF NOT TRANSLATED")+nl;
+			str += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE") + nl + ucstring("// DIFF NOT TRANSLATED") + nl;
 
 			std::string diffName(diffDir+"clause_"+Languages[l]+"_diff_"+diffVersion+".txt");
 			CI18N::writeTextFile(diffName, str);
@@ -1286,16 +1285,16 @@ REMOVE OLDVALUE: from a diff clause file
 */
 int cleanClauseDiff(int argc, char *argv[])
 {
-	
+
 	LOG("Cleaning clause diffs\n");
 
 	uint i,l;
 
 	for (l=0; l<Languages.size(); ++l)
 	{
-		
+
 		std::string basename("clause_"+Languages[l]);
-		
+
 		vector<string>	diffs;
 
 		getPathContentFiltered(diffDir+"clause_"+Languages[l]+"_diff_", ".txt", diffs);
@@ -1333,7 +1332,7 @@ int mergeClauseDiff(int argc, char *argv[])
 		{
 			// backup the original file
 			ucstring old;
-			CI18N::readTextFile(filename, old, false, true, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(filename, old, true, false, CI18N::LINE_FMT_LF);
 			if (old != str)
 				CFile::moveFile(historyDir+CFile::getFilenameWithoutExtension(filename)+"_"+diffVersion+"."+CFile::getExtension(filename), filename);
 		}
@@ -1358,7 +1357,7 @@ bool mergeWorksheetDiff(const std::string filename, TWorksheet &sheet, bool only
 		if (onlyTranslated)
 		{
 			ucstring text;
-			CI18N::readTextFile(fileList[i], text, false, false, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(fileList[i], text, false, false, CI18N::LINE_FMT_LF);
 			if (text.find(ucstring("DIFF NOT TRANSLATED")) != ucstring::npos)
 			{
 				LOG("Diff file [%s] is not translated, merging it later.\n", CFile::getFilename(fileList[i]).c_str());
@@ -1471,7 +1470,7 @@ public:
 	void run(const TWorksheet &addition, TWorksheet &reference, TWorksheet &diff)
 	{
 		TWordsDiffContext context(addition, reference, diff);
-		
+
 		TWorkSheetDiff	differ;
 		differ.makeDiff(this, context, true);
 	}
@@ -1560,14 +1559,14 @@ REMOVE OLDVALUE: from a diff words file
 */
 int cleanWordsDiff(int argc, char *argv[])
 {
-	
+
 	LOG("Cleaning words diffs\n");
 
 	uint i,l;
 
 	for (l=0; l<Languages.size(); ++l)
 	{
-		
+
 		vector<string>	diffs;
 
 		getPathContentFiltered(diffDir+"clause_"+Languages[l]+"_diff_", ".txt", diffs);
@@ -1662,12 +1661,12 @@ int makeWorksheetDiff(int argc, char *argv[], const std::string &additionFilenam
 		ucstring str = prepareExcelSheet(diff);
 
 		// add the tag for non translation
-		str += ucstring ("REMOVE THE FOLOWING TWO LINE WHEN TRANSLATION IS DONE")+nl+ucstring("DIFF NOT TRANSLATED")+nl;
+		str += ucstring ("REMOVE THE FOLOWING TWO LINE WHEN TRANSLATION IS DONE") + nl + ucstring("DIFF NOT TRANSLATED") + nl;
 
 		string fn(CFile::getFilenameWithoutExtension(referenceFilename)), ext(CFile::getExtension(referenceFilename));
 		std::string diffName(diffDir+fn+"_diff_"+diffVersion+"."+ext);
-		CI18N::writeTextFile(diffName, str, false);
-		
+		CI18N::writeTextFile(diffName, str);
+
 	}
 
 	return 0;
@@ -1691,9 +1690,9 @@ int mergeWorksheetDiff(int argc, char *argv[], const std::string &filename, cons
 		// there is no translated file yet, build one from the working file.
 		ucstring str;
 		string addfn = addDir+additionFile;
-		CI18N::readTextFile(addfn, str, false, false, false, CI18N::LINE_FMT_CRLF);
+		CI18N::readTextFile(addfn, str, false, false, CI18N::LINE_FMT_LF);
 		str = str.substr(0, str.find(nl)+2);
-		CI18N::writeTextFile(transDir+filename, str, false);
+		CI18N::writeTextFile(transDir+filename, str);
 		// reread the file.
 		bool res = loadExcelSheet(transDir+filename, translated);
 		nlassert(res);
@@ -1711,7 +1710,7 @@ int mergeWorksheetDiff(int argc, char *argv[], const std::string &filename, cons
 	{
 		// backup the original file
 		ucstring old;
-		CI18N::readTextFile(transDir+filename, old, false, true, false, CI18N::LINE_FMT_CRLF);
+		CI18N::readTextFile(transDir+filename, old, true, false, CI18N::LINE_FMT_LF);
 		if (old != str)
 		{
 			string fn(CFile::getFilenameWithoutExtension(filename)), ext(CFile::getExtension(filename));
@@ -1720,7 +1719,7 @@ int mergeWorksheetDiff(int argc, char *argv[], const std::string &filename, cons
 	}
 
 	if (translated.size() > 0)
-		CI18N::writeTextFile(transDir+filename, str, false);
+		CI18N::writeTextFile(transDir+filename, str);
 
 	return 0;
 }
@@ -1784,7 +1783,7 @@ int mergeWordsDiff(int argc, char *argv[])
 			--i;
 		}
 	}
-	
+
 	// for each language
 	for (uint l=0; l<Languages.size(); ++l)
 	{
@@ -1865,7 +1864,7 @@ void cropLines(const std::string &filename, uint32 nbLines)
 
 	LOG("Cropping %u lines from file '%s'\n", nbLines, filename.c_str());
 
-	CI18N::readTextFile(filename, utext, false, false, false, CI18N::LINE_FMT_CRLF);
+	CI18N::readTextFile(filename, utext, false, false, CI18N::LINE_FMT_LF);
 
 	string text = utext.toUtf8();
 
@@ -1881,7 +1880,7 @@ void cropLines(const std::string &filename, uint32 nbLines)
 
 	utext.fromUtf8(text);
 
-	CI18N::writeTextFile(filename, utext, true);
+	CI18N::writeTextFile(filename, utext);
 }
 
 
@@ -1910,7 +1909,7 @@ int	makeWork()
 			// change #include "*_en.txt" into #include "*_wk.txt"
 			ucstring	utext;
 
-			CI18N::readTextFile(filename, utext, false, false, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(filename, utext, false, false, CI18N::LINE_FMT_LF);
 			string text = utext.toUtf8();
 
 			bool	changedFile = false;
@@ -1943,7 +1942,7 @@ int	makeWork()
 			if (changedFile)
 			{
 				utext.fromUtf8(text);
-				CI18N::writeTextFile(filename, utext, true);
+				CI18N::writeTextFile(filename, utext);
 			}
 
 			// change filename
@@ -2020,7 +2019,7 @@ void assertUniq(const vector<TPhrase>& reference)
 			}
 		}
 	}
-	
+
 }
 
 
@@ -2052,7 +2051,7 @@ void mergePhraseDiff2Impl(vector<TPhrase>& reference, const vector<TPhrase>& add
 			{
 				nlassert( phrases.find(first->Identifier) != phrases.end() );
 				phrases[first->Identifier] = *first;
-			}			
+			}
 			else if ( first->Comments.find(ucstring("DIFF ADD")) != ucstring::npos)
 			{
 				nlassert( phrases.find(first->Identifier) == phrases.end() );
@@ -2067,13 +2066,13 @@ void mergePhraseDiff2Impl(vector<TPhrase>& reference, const vector<TPhrase>& add
 			else
 			{
 			//	nlassert(0 && "INVALID DIFF COMMAND");
-			}	
+			}
 		}
 	}
 
 	{
 		reference.clear();
-		reference.reserve(phrases.size());		
+		reference.reserve(phrases.size());
 		TMap::const_iterator first( phrases.begin() );
 		TMap::const_iterator last(  phrases.end() );
 		for( ; first != last; ++first) {	reference.push_back(first->second); }
@@ -2089,11 +2088,11 @@ void removeHashValueComment(ucstring & comments)
 	if (first != ucstring::npos)
 	{
 		last = comments.find(ucstring("\n"), first);
-		if (last != ucstring::npos) 
-		{ 
+		if (last != ucstring::npos)
+		{
 			last += 1;
 			ucstring tmp1 = comments.substr(0, first);
-			ucstring tmp2 =	last !=comments.size() 
+			ucstring tmp2 =	last !=comments.size()
 					? comments.substr(last)
 					: ucstring("");
 			comments = tmp1 + tmp2;
@@ -2112,10 +2111,10 @@ void removeHashValueComment(ucstring & comments)
 
 bool updateClauseHashValue(const std::map<std::string, std::pair<uint64, uint64> >& validValues, const std::string & dirPath = "")
 {
-	
+
 	for (uint l=0; l<Languages.size() ; ++l)
 	{
-				
+
 		std::string basename("clause_"+Languages[l]);
 		vector<TStringInfo>	clauses;
 		std::string refFile(basename+".txt");
@@ -2137,7 +2136,7 @@ bool updateClauseHashValue(const std::map<std::string, std::pair<uint64, uint64>
 					clauses[i].HashValue = validValues.find(Identifier)->second.first;
 					removeHashValueComment(clauses[i].Comments);
 					changed = true;
-				}				
+				}
 			}
 		}
 
@@ -2150,7 +2149,7 @@ bool updateClauseHashValue(const std::map<std::string, std::pair<uint64, uint64>
 			nlinfo("Updating hashcode of clause file for %s.\n", Languages[l].c_str());
 			// build the diff file for each language.
 			ucstring str = prepareStringFile(clauses, false);
-			std::string clauseName(dirPath+ transDir + basename +".txt");						
+			std::string clauseName(dirPath+ transDir + basename +".txt");
 			CFile::createDirectoryTree( CFile::getPath(clauseName) );
 			CI18N::writeTextFile(clauseName, str);
 		}
@@ -2217,7 +2216,6 @@ ucstring preparePhraseFile2(const vector<TPhrase> &phrases, bool removeDiffComme
 					ret += cond + nl;
 				}
 				ret += '\t';
-//				ucstring text = CI18N::makeMarkedString('[', ']', c.Text);
 
 				ucstring text = CI18N::makeMarkedString('[', ']', c.Text);;
 				ucstring text2;
@@ -2230,9 +2228,9 @@ ucstring preparePhraseFile2(const vector<TPhrase> &phrases, bool removeDiffComme
 					text = text.substr(pos+2);
 				}
 				text2 += text;//.substr(0, pos+2);
-				
+
 				text.swap(text2);
-				
+
 				text = tabLines(3, text);
 				// remove begin tabs
 				text = text.substr(3);
@@ -2248,10 +2246,10 @@ ucstring preparePhraseFile2(const vector<TPhrase> &phrases, bool removeDiffComme
 
 bool updatePhraseHashValue(const std::map<std::string, std::pair<uint64, uint64> > & validValues, const std::string & dirPath = "")
 {
-	
+
 	for (uint l=0; l<Languages.size() ; ++l)
 	{
-				
+
 		std::string basename("phrase_"+Languages[l]);
 		vector<TPhrase>	phrases;
 		std::string refFile(basename+".txt");
@@ -2269,7 +2267,7 @@ bool updatePhraseHashValue(const std::map<std::string, std::pair<uint64, uint64>
 			{
 				if (!validValues.find(Identifier)->second.second || phrases[i].HashValue == validValues.find(Identifier)->second.second )
 				{
-				
+
 					phrases[i].HashValue = validValues.find(Identifier)->second.first;
 					removeHashValueComment(phrases[i].Comments);
 					changed = true;
@@ -2286,7 +2284,7 @@ bool updatePhraseHashValue(const std::map<std::string, std::pair<uint64, uint64>
 			nlinfo("Updating hashcode of phrase file for %s.\n", Languages[l].c_str());
 			// build the diff file for each language.
 			ucstring str = preparePhraseFile(phrases, false);
-			std::string pharseName(dirPath+ transDir + basename +".txt");						
+			std::string pharseName(dirPath+ transDir + basename +".txt");
 			CFile::createDirectoryTree( CFile::getPath(pharseName) );
 			CI18N::writeTextFile(pharseName, str);
 		}
@@ -2298,10 +2296,10 @@ bool updatePhraseHashValue(const std::map<std::string, std::pair<uint64, uint64>
 
 bool sortTransPhrase()
 {
-	
+
 	for (uint l=0; l<Languages.size() ; ++l)
 	{
-				
+
 		std::string basename("phrase_"+Languages[l]);
 		vector<TPhrase>	phrases;
 		vector<TPhrase>	phrases2;
@@ -2312,9 +2310,9 @@ bool sortTransPhrase()
 			LOG("Error will loading file %s", (transDir+refFile).c_str());
 			return false;
 		}
-		
-		{		
-		
+
+		{
+
 			std::vector<TPhrase>::const_iterator first(phrases.begin());
 			std::vector<TPhrase>::const_iterator last(phrases.end());
 			for ( ; first != last; ++first)
@@ -2331,14 +2329,14 @@ bool sortTransPhrase()
 			}
 		}
 
-
-		nlinfo("Updating hashcode of phrase file for %s.\n", Languages[l].c_str());
+		nlinfo("Updating hashcode of phrase file for %s.", Languages[l].c_str());
 		// build the diff file for each language.
 		ucstring str = preparePhraseFile(phrases2, false);
-		std::string pharseName(transDir+refFile);						
+		std::string pharseName(transDir+refFile);
 		CFile::createDirectoryTree( CFile::getPath(pharseName) );
 		CI18N::writeTextFile(pharseName, str);
 	}
+
 	return true;
 }
 
@@ -2348,12 +2346,12 @@ void patchWorkFile(vector<TPhrase> &updatedPhrase, const std::string & filename)
 {
 	ucstring text;
 	if ( updatedPhrase.empty() ) { return; }
-	CI18N::readTextFile(filename, text, false, false, false, CI18N::LINE_FMT_CRLF);
+	CI18N::readTextFile(filename, text, false, false, CI18N::LINE_FMT_LF);
 	vector<TPhrase>::const_iterator first(updatedPhrase.begin());
 	vector<TPhrase>::const_iterator last(updatedPhrase.end());
 	for (; first != last; ++first)
 	{
-		
+
 		ucstring::size_type firstFun = text.find( ucstring(first->Identifier));
 		if (firstFun == ucstring::npos)
 		{
@@ -2370,26 +2368,26 @@ void patchWorkFile(vector<TPhrase> &updatedPhrase, const std::string & filename)
 			{
 				std::vector<TPhrase> param;
 				param.push_back(*first);
-		
+
 				ucstring before = text.substr(0,firstFun);
 				ucstring str = preparePhraseFile2(param, false);
-				ucstring after = text.substr(lastFun+1);				
-				text = "";								
+				ucstring after = text.substr(lastFun+1);
+				text = "";
 				text += before;
 				text += str;
 				text += after;
-			}			
+			}
 		}
 	}
 	CI18N::writeTextFile( filename, text);
-			
+
 }
 
 int updatePhraseWork()
 {
 	std::string saveDir = diffDir + "update_"+ diffVersion + "/";
 	vector<TPhrase>	transPhrase;
-	std::map<std::string, TPhrase> transPhraseMap;	
+	std::map<std::string, TPhrase> transPhraseMap;
 	std::map<std::string, std::pair<uint64,uint64> > validClauseHashValue;
 	std::map<std::string, std::pair<uint64, uint64> > validPhraseHashValue;
 	std::vector< std::pair<ucstring, std::string> > outputResult;
@@ -2408,16 +2406,15 @@ int updatePhraseWork()
 			transPhraseMap[first->Identifier] = *first;
 		}
 	}
-	
+
 	preprocessTextFile(addDir+"phrase_wk.txt", outputResult);
 
 	uint firstFile = 0;
 	uint lastFile = (uint)outputResult.size();
 	for (; firstFile != lastFile ; ++firstFile)
 	{
-
 		ucstring doc = outputResult[firstFile].first;
-		std::vector<TPhrase> phrases;		
+		std::vector<TPhrase> phrases;
 		readPhraseFileFromString(outputResult[firstFile].first,  outputResult[firstFile].second, phrases, true);
 
 		std::vector<TPhrase>::iterator first(phrases.begin());
@@ -2442,35 +2439,35 @@ int updatePhraseWork()
 						for (; firstClause != lastClause; ++firstClause)
 						{
 							uint64 clauseHashValue = CI18N::makeHash(firstClause->Text);
-								
+
 							validClauseHashValue[firstClause->Identifier] = std::pair<uint64, uint64>(clauseHashValue, firstClause->HashValue);
 							firstClause->HashValue = clauseHashValue;
 						}
 						updatedPhrases.push_back(transPhrase);
-						updatedPhrases.back().Comments= ucstring("");
-					}						
+						updatedPhrases.back().Comments.clear();
+					}
 				}
 			}
 		}
 
-		
+
 		std::string newFile = saveDir + outputResult[firstFile].second;
 		std::string oldFile = outputResult[firstFile].second;
 		CFile::createDirectoryTree(CFile::getPath(newFile));
 		if (  CFile::copyFile(newFile, oldFile) )
 		{
-			
+
 			patchWorkFile(updatedPhrases,  newFile);
 		}
 		else
 		{
 			nlwarning("Can't copy %s", newFile.c_str());
 		}
-		
-	}	
+
+	}
 
 	updatePhraseHashValue(validPhraseHashValue, saveDir);
-	updateClauseHashValue(validClauseHashValue,  saveDir);
+	updateClauseHashValue(validClauseHashValue, saveDir);
 	return 0;
 }
 
@@ -2484,12 +2481,12 @@ bool mergePhraseDiff2(vector<TPhrase> &phrases, const string &language, bool onl
 	getPathContentFiltered(diffDir+"phrase_"+language+"_diff_", ".txt", diffs);
 
 	for (uint i=0; i<diffs.size(); ++i)
-	{		
+	{
 		if (onlyTranslated)
 		{
 			// Check if the diff is translated
 			ucstring text;
-			CI18N::readTextFile(diffs[i], text, false, false, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(diffs[i], text, false, false, CI18N::LINE_FMT_LF);
 			verifyVersion(text, 2);
 			if (text.find(ucstring("DIFF NOT TRANSLATED")) != ucstring::npos)
 			{
@@ -2500,7 +2497,7 @@ bool mergePhraseDiff2(vector<TPhrase> &phrases, const string &language, bool onl
 			}
 		}
 
-	
+
 
 		// we found a diff file for the addition file.
 		LOG("Adding %s diff as reference\n", diffs[i].c_str());
@@ -2508,9 +2505,9 @@ bool mergePhraseDiff2(vector<TPhrase> &phrases, const string &language, bool onl
 		if (!readPhraseFile2(diffs[i], diff, false))
 			return false;
 
-	
+
 		mergePhraseDiff2Impl(phrases, diff);
-	
+
 
 		if (archiveDiff)
 		{
@@ -2541,13 +2538,13 @@ public:
 //		bool clauseEqual(const TClause& left, const TClause& right) const;
 
 	};
-	
+
 	void run(const vector<TPhrase> &addition, vector<TPhrase> &reference, vector<TPhrase> &diff);
 
 	void onEquivalent(uint addIndex, uint refIndex, TPhraseDiffContext &context);
 
 	void onAdd(uint addIndex, uint refIndex, TPhraseDiffContext &context);
-	
+
 	void onRemove(uint addIndex, uint refIndex, TPhraseDiffContext &context);
 
 	void onChanged(uint addIndex, uint refIndex, TPhraseDiffContext &context);
@@ -2562,12 +2559,12 @@ public:
 
 void CMakePhraseDiff2::run(const vector<TPhrase> &addition, vector<TPhrase> &reference, vector<TPhrase> &diff)
 {
-	
+
 	TPhraseDiffContext context(addition, reference, diff);
 
 	std::set<std::string> phraseIdentifier;
 	std::map<std::string, uint> mapAdd;
-	std::map<std::string, uint> mapRef;		
+	std::map<std::string, uint> mapRef;
 
 	{
 		uint first = 0;
@@ -2597,19 +2594,19 @@ void CMakePhraseDiff2::run(const vector<TPhrase> &addition, vector<TPhrase> &ref
 	{
 		nlwarning("Phrases are defined more than once in works directory");
 	}
-	
+
 	if (mapAdd.size() != addition.size())
 	{
 		nlwarning("Phrases are defined more than once in translation directory");
 	}
-	
-	
+
+
 	std::set<std::string>::iterator first(phraseIdentifier.begin());
 	std::set<std::string>::iterator last(phraseIdentifier.end());
 
 	for (; first != last; ++first)
 	{
-		if ( mapAdd.find(*first) != mapAdd.end() 
+		if ( mapAdd.find(*first) != mapAdd.end()
 			&& mapRef.find(*first) != mapRef.end())
 		{
 
@@ -2622,17 +2619,17 @@ void CMakePhraseDiff2::run(const vector<TPhrase> &addition, vector<TPhrase> &ref
 				onChanged(mapAdd[*first], mapRef[*first], context);
 			}
 		}
-		else if ( mapAdd.find(*first) != mapAdd.end() 
+		else if ( mapAdd.find(*first) != mapAdd.end()
 			&& mapRef.find(*first) == mapRef.end())
 		{
 			onAdd(mapAdd[*first], 0, context);
 		}
-		else if ( mapAdd.find(*first) == mapAdd.end() 
+		else if ( mapAdd.find(*first) == mapAdd.end()
 			&& mapRef.find(*first) != mapRef.end())
 		{
 			onRemove(0, mapRef[*first], context);
 		}
-		
+
 	}
 
 }
@@ -2682,9 +2679,9 @@ void CMakePhraseDiff2::onChanged(uint addIndex, uint refIndex, TPhraseDiffContex
 			if (context.Addition[addIndex].Clauses[i].Identifier != context.Reference[refIndex].Clauses[i].Identifier)
 				chg += ucstring("// Clause ") + toString(i) + " : identifier changed." + nl;
 			else if (context.Addition[addIndex].Clauses[i].Conditions != context.Reference[refIndex].Clauses[i].Conditions)
-				chg += ucstring("// Clause ") + toString(i) + " : condition changed." + nl;	
+				chg += ucstring("// Clause ") + toString(i) + " : condition changed." + nl;
 			else if (context.Addition[addIndex].Clauses[i].Text != context.Reference[refIndex].Clauses[i].Text)
-				chg += ucstring("// Clause ") + toString(i) + " : text changed." + nl;	
+				chg += ucstring("// Clause ") + toString(i) + " : text changed." + nl;
 		}
 	}
 
@@ -2693,15 +2690,15 @@ void CMakePhraseDiff2::onChanged(uint addIndex, uint refIndex, TPhraseDiffContex
 		chg = ucstring("// WARNING : Hash code changed ! check translation workflow.") + nl;
 	}
 	nldebug("Changed detected : %s", chg.toString().c_str());
-	
+
 	// changed element
 	TPhrase phrase = context.Addition[addIndex];
 	vector<TPhrase>	tempV;
 	tempV.push_back(context.Reference[refIndex]);
-	ucstring tempT = preparePhraseFile(tempV, false); 
+	ucstring tempT = preparePhraseFile(tempV, false);
 	CI18N::removeCComment(tempT);
 	phrase.Comments = ucstring("// DIFF CHANGED ") + toString(addIndex) + nl + phrase.Comments;
-	phrase.Comments = phrase.Comments + ucstring("/* OLD VALUE : ["+nl) + tabLines(1, tempT) +nl + "] */" + nl;
+	phrase.Comments = phrase.Comments + ucstring("/* OLD VALUE : [" + nl) + tabLines(1, tempT) + nl + "] */" + nl;
 	phrase.Comments = phrase.Comments + chg;
 
 	nlinfo("Changed %s at %u", phrase.Identifier.c_str(), addIndex);
@@ -2717,8 +2714,8 @@ bool CMakePhraseDiff2::CPhraseEqual::operator()( const TPhrase& left, const TPhr
 //	bool clausesOk = clausesEqual(left.Clauses, right.Clauses);
 	bool hashOk = left.HashValue== right.HashValue;
 
-	return identifierOk	&& hashOk;// && parameterOk && clausesOk;	
-	
+	return identifierOk	&& hashOk;// && parameterOk && clausesOk;
+
 }
 /*
 bool CMakePhraseDiff2::CPhraseEqual::clausesEqual( const std::vector<TClause>& left, const std::vector<TClause>& right) const
@@ -2728,9 +2725,9 @@ bool CMakePhraseDiff2::CPhraseEqual::clausesEqual( const std::vector<TClause>& l
 	std::vector<TClause>::const_iterator first2(right.begin());
 
 	if (left.size() != right.size()) return false;
-	
+
 	for ( ; first1 != last1 && !clauseEqual(*first1, *first2); ++first1, ++first2){}
-	
+
 	return first1 == last1;
 }
 
@@ -2740,7 +2737,7 @@ bool CMakePhraseDiff2::CPhraseEqual::clauseEqual(const TClause& left, const TCla
 	&& left.Conditions != right.Conditions
 	&& left.Text != right.Text
 	&& left.Comments != right.Comments
-	&& left.HashValue != right.HashValue;	
+	&& left.HashValue != right.HashValue;
 }
 
 */
@@ -2751,7 +2748,7 @@ int makePhraseDiff2(int argc, char *argv[])
 {
 	// Generate the diff file from phrase_<lang>.txt compared to the same file in translated.
 	// The diff is generated only from the reference language for and all the languages
-	
+
 	LOG("Generating phrase diffs\nLoading the working file for language %s\n", Languages[0].c_str());
 
 
@@ -2806,10 +2803,10 @@ int makePhraseDiff2(int argc, char *argv[])
 		{
 			LOG("Writing difference file for language %s\n", Languages[l].c_str());
 			ucstring text;
-			text += "// DIFF_VERSION 2\r\n";
+			text += "// DIFF_VERSION 2\n";
 			text += preparePhraseFile(diff, false);
 			// add the tag for non translation
-			text += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE")+nl+ucstring("// DIFF NOT TRANSLATED")+nl;
+			text += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE") + nl + ucstring("// DIFF NOT TRANSLATED") + nl;
 			CI18N::writeTextFile(diffDir+"phrase_"+Languages[l]+"_diff_"+diffVersion+".txt", text);
 		}
 	}
@@ -2851,7 +2848,7 @@ int forgetPhraseDiff(int argc, char *argv[])
 		std::copy (subDiff.begin (), subDiff.end (), std::back_inserter (newPhrase));
 	}
 
-	// a optimiser par une map	
+	// a optimiser par une map
 	std::map<std::string, std::pair<uint64, uint64> > validClauseHashValue;
 	std::map<std::string, std::pair<uint64, uint64> > validPhraseHashValue;
 	for (uint i=0; i < newPhrase.size() ; ++i)
@@ -2859,17 +2856,17 @@ int forgetPhraseDiff(int argc, char *argv[])
 		for (uint j=0; j < reference.size() ; ++j)
 		{
 			if (newPhrase[i].Identifier == reference[j].Identifier)
-			{		
-				
+			{
+
 
 				uint64 newPhraseHash = STRING_MANAGER::makePhraseHash( newPhrase[i] );
 				uint64 oldPhraseHash = reference[j].HashValue;
 				validPhraseHashValue[newPhrase[i].Identifier] = std::pair<uint64, uint64>(newPhraseHash, oldPhraseHash);
-				
+
 				for (uint k=0; k < newPhrase[i].Clauses.size() ; ++k)
 				{
 					if (reference[j] .Clauses.size() != newPhrase[i].Clauses.size())
-					{						
+					{
 						nlwarning("Want to forget minor update but phrase %s changes too much. The number of clauses has changed.", newPhrase[i].Identifier.c_str() );
 						exit(-1);
 					}
@@ -2879,7 +2876,7 @@ int forgetPhraseDiff(int argc, char *argv[])
 					if (!newClause.Identifier.empty() )
 					{
 						if (newClause.Identifier != oldClause.Identifier)
-						{						
+						{
 							nlwarning("Want to forget minor update but phrase %s changes too much. Clauses order or clause identifier changed (%s).", newPhrase[i].Identifier.c_str(), newClause.Identifier.c_str());
 							exit(-1);
 						}
@@ -2891,7 +2888,7 @@ int forgetPhraseDiff(int argc, char *argv[])
 			}
 		}
 	}
-			
+
 
 	if (!mergePhraseDiff2(reference, Languages[0], true, false))
 	{
@@ -2901,13 +2898,13 @@ int forgetPhraseDiff(int argc, char *argv[])
 	ucstring str = preparePhraseFile(reference, true);
 	CI18N::writeTextFile(transDir+basename+".txt", str);
 
-		
+
 	updatePhraseHashValue(validPhraseHashValue);
 //	updateClauseHashValue(validClauseHashValue);
-	
+
 
 	for (uint i=0; i<diffs.size(); ++i)
-	{	
+	{
 		std::string diffHistory = historyDir + CFile::getFilename(diffs[i]);
 		CFile::moveFile(diffHistory.c_str(),  diffs[i].c_str());
 	}
@@ -2916,9 +2913,9 @@ int forgetPhraseDiff(int argc, char *argv[])
 
 
 void preprocessTextFile(const std::string &filename,
-						std::vector< std::pair<ucstring, std::string> > & outputResult						 
+						std::vector< std::pair<ucstring, std::string> > & outputResult
 						)
-						 
+
 {
 	//nlinfo("preprocessing %s",	filename.c_str());
 	ucstring result;
@@ -2947,9 +2944,9 @@ void preprocessTextFile(const std::string &filename,
 
 	// Transform the string in ucstring according to format header
 	if (!text.empty())
-		CI18N::readTextBuffer((uint8*)&text[0], (uint)text.size(), result, false);
+		CI18N::readTextBuffer((uint8*)&text[0], (uint)text.size(), result);
 
-	
+
 
 	ucstring final;
 	// parse the file, looking for preprocessor command.
@@ -2962,9 +2959,9 @@ void preprocessTextFile(const std::string &filename,
 	{
 		pos = result.find(ucstring("\n"), pos);
 		if (pos != ucstring::npos) { ++pos; }
-		
+
 		ucstring line( result.substr(lastPos, pos - lastPos) );
-		
+
 
 		if ( line.find(includeCmd) != ucstring::npos)
 		{
@@ -2972,15 +2969,20 @@ void preprocessTextFile(const std::string &filename,
 			ucstring::size_type lastFilename = line.find(ucstring("\""), firstFilename+1);
 
 			ucstring name = line.substr(firstFilename +1, lastFilename - firstFilename  -1);
-			string subFilename = name.toString();			
+			string subFilename = name.toString();
+
+			if (!CFile::fileExists(subFilename))
 			{
-				CIFile testFile;
-				if (!testFile.open(subFilename))
-				{
 				// try to open the include file relative to current file
-					subFilename = CFile::getPath(filename)+subFilename;
+				subFilename = CFile::getPath(filename)+subFilename;
+
+				if (!CFile::fileExists(subFilename))
+				{
+					nlwarning("Unable to open %s", subFilename.c_str());
+					subFilename.clear();
 				}
 			}
+
 			preprocessTextFile(subFilename, outputResult);
 		}
 		else
@@ -2988,10 +2990,8 @@ void preprocessTextFile(const std::string &filename,
 			current += line;
 		}
 		lastPos = pos;
-			
+
 	}
-
-
 
 	outputResult.push_back( std::pair<ucstring, std::string> ( current, fullName ) );
 }
@@ -3029,7 +3029,7 @@ int mergePhraseDiff(int argc, char *argv[])
 		{
 			// backup the original file
 			ucstring old;
-			CI18N::readTextFile(filename, old, false, true, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(filename, old, true, false, CI18N::LINE_FMT_LF);
 			if (old != str)
 				CFile::moveFile((historyDir+CFile::getFilenameWithoutExtension(filename)+"_"+diffVersion+"."+CFile::getExtension(filename)).c_str(), filename.c_str());
 		}
@@ -3055,7 +3055,7 @@ int injectClause()
 		vector<TStringInfo>	clauses;
 		vector<TPhrase>		phrases;
 
-		// load the clause file			
+		// load the clause file
 		std::string clausePath( transDir+"clause_"+Languages[l]+".txt" );
 		if (!loadStringFile(clausePath, clauses, false))
 		{
@@ -3063,7 +3063,7 @@ int injectClause()
 			return 1;
 		}
 
-		// load the phrase file		
+		// load the phrase file
 		std::string phrasePath( transDir+"phrase_"+Languages[l]+".txt" );
 		if (!readPhraseFile(phrasePath, phrases, false))
 		{
@@ -3073,31 +3073,29 @@ int injectClause()
 
 		vector<TPhrase>::iterator first(phrases.begin());
 		vector<TPhrase>::iterator last(phrases.end());
+
 		for ( ; first != last; ++first)
 		{
-			
 			vector<TClause>::iterator firstClause( first->Clauses.begin());
 			vector<TClause>::iterator lastClause( first->Clauses.end());
 			for ( ; firstClause != lastClause; ++firstClause)
 			{
-				uint64 hashValue = CI18N::makeHash(firstClause->Text);
 				vector<TStringInfo>::iterator firstRefClause(clauses.begin());
 				vector<TStringInfo>::iterator lastRefClause(clauses.end());
 				for ( ; firstRefClause != lastRefClause ; ++firstRefClause)
 				{
-					if (hashValue == firstRefClause->HashValue && firstClause->Text != firstRefClause->Text)
+					if (firstClause->Identifier == firstRefClause->Identifier && firstClause->Text != firstRefClause->Text)
 					{
 						firstClause->Text = firstRefClause->Text;
 						firstClause->HashValue = CI18N::makeHash(firstClause->Text);
 						firstRefClause->HashValue = firstClause->HashValue;
 
-
 						nlinfo("update clause %s from clause file %s.", firstClause->Identifier.c_str(), clausePath.c_str());
-					}					
-				}				
-			}	
+					}
+				}
+			}
 		}
-		
+
 		std::string desDir(diffDir + "inject_clause_" + diffVersion + "/");
 		CFile::createDirectoryTree(desDir+ CFile::getPath(phrasePath));
 		ucstring str = preparePhraseFile(phrases, true);
@@ -3106,7 +3104,6 @@ int injectClause()
 		str = prepareStringFile(clauses, true);
 		CI18N::writeTextFile(desDir + clausePath, str);
 	}
-
 
 	return 0;
 }
@@ -3138,7 +3135,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	std::string argv1(argv[1]);
-	
+
 	// create the diff version.
 	char temp[16];
 	sprintf(temp, "%8.8X", (uint) ::time(NULL));
@@ -3189,7 +3186,7 @@ int main(int argc, char *argv[])
 		return extractBotNames(argc, argv);
 	else if (strcmp(argv[1], "extract_new_sheet_names") == 0)
 		return extractNewSheetNames(argc, argv);
-	
+
 
 
 
@@ -3220,35 +3217,35 @@ int main(int argc, char *argv[])
 	else if (strcmp(argv[1], "clean_string_diff") == 0)
 		return cleanStringDiff(argc, argv);
 
-	else if (argv1 == "make_phrase_diff_old") 
+	else if (argv1 == "make_phrase_diff_old")
 		return makePhraseDiff(argc, argv);
 	else if (argv1 == "merge_phrase_diff_old")
 		return mergePhraseDiff(argc, argv, 1);
-	
 
-	else if (argv1 == "make_phrase_diff") 
+
+	else if (argv1 == "make_phrase_diff")
 		return makePhraseDiff2(argc, argv);
 	else if (argv1 == "merge_phrase_diff")
 		return mergePhraseDiff(argc, argv, 2);
 	else if (argv1 == "forget_phrase_diff")
-		return forgetPhraseDiff(argc, argv);	
+		return forgetPhraseDiff(argc, argv);
 	else if (argv1 == "update_phrase_work")
 		return updatePhraseWork();
 	else if (argv1 == "clean_phrase_diff")
-		return cleanPhraseDiff(argc, argv);	
+		return cleanPhraseDiff(argc, argv);
 
 	else if (argv1 == "inject_clause")
 		return injectClause();
-	
+
 	else if (argv1 == "sort_trans_phrase")
 		return sortTransPhrase();
-	
+
 	else if (strcmp(argv[1], "make_clause_diff") == 0)
 		return makeClauseDiff(argc, argv);
 	else if (strcmp(argv[1], "merge_clause_diff") == 0)
 		return mergeClauseDiff(argc, argv);
 	else if (argv1 == "clean_clause_diff")
-		return cleanClauseDiff(argc, argv);	
+		return cleanClauseDiff(argc, argv);
 
 	else if (strcmp(argv[1], "make_words_diff") == 0)
 		return makeWordsDiff(argc, argv);

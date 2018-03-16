@@ -297,6 +297,8 @@ public:
 	// get the velocity vector of the entity
 	NLMISC::CVector getVelocity() const;
 
+	inline void setSpeedServerAdjust(float speed) {_SpeedFactor.addFactorValue(speed);}
+
 	/// Check if the mount is able to run, and force walking mode if not
 	void checkMountAbleToRun();
 
@@ -369,6 +371,8 @@ public:
 	TView viewMode() const {return _ViewMode;}
 	/// Toggle Camera (First/Third Person)
 	void toggleCamera();
+	/// Force Camera First Person View
+	void forceCameraFirstPerson();
 	//@}
 
 	/// Return the entity scale. (return 1.0 if there is any problem).
@@ -421,6 +425,7 @@ public:
 	void tp(const NLMISC::CVectorD &dest);
 	/// Teleport the player to correct his position.
 	void correctPos(const NLMISC::CVectorD &dest);
+
 	/// Skill Up
 	void skillUp();
 	/// get the level of the player (max of all skills)
@@ -494,13 +499,23 @@ protected:
 		/// Release
 		void release();
 		/// Return the speed factor.
-		float getValue() const {return _Value;}
-		virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream) {f.serial(_Value);}
+		float getValue() const 	{ return _Value * _ServerFactor; }
+		void setFactorValue(float value) {_ServerFactor = value;}
+		void addFactorValue(float value) {
+			_ServerFactor += value;
+			if (_ServerFactor > 1.0)
+				_ServerFactor = 1.0;
+			if (_ServerFactor < 0.1)
+				_ServerFactor = 0.1;
+		}
+
+		virtual void serial(NLMISC::IStream &f) {f.serial(_Value);}
 	protected:
 		/// Method called when the ping message is back.
 		virtual void update(NLMISC::ICDBNode* leaf);
 	private:
 		float _Value;
+		float _ServerFactor;
 	};
 
 	class CMountHunger
@@ -512,7 +527,7 @@ protected:
 		void release();
 		/// Return true if the mount can run. Precondition: UserEntity->isRiding().
 		bool canRun() const;
-		virtual void serial(class NLMISC::IStream &/* f */) throw(NLMISC::EStream) {}
+		virtual void serial(NLMISC::IStream &/* f */) {}
 	};
 
 	class CMountSpeeds : public NLMISC::ICDBNode::IPropertyObserver
@@ -543,6 +558,8 @@ protected:
 	/// Velocity : Front and Lateral
 	float						_FrontVelocity;
 	float						_LateralVelocity;
+	/// Speed adjustement from gpms
+	float						_SpeedServerAdjust;
 	/// Head Pitch
 	double						_HeadPitch;
 	/// Height of the eyes (camera).
@@ -669,7 +686,7 @@ protected:
 	virtual double getMaxSpeed() const;
 
 	/// Read/Write Variables from/to the stream.
-	virtual void readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void readWrite(NLMISC::IStream &f);
 	/// To call after a read from a stream to re-initialize the entity.
 	virtual void load();
 

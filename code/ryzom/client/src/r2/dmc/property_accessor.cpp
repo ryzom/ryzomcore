@@ -21,6 +21,11 @@
 #include "game_share/object.h"
 
 #include <assert.h>
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace R2;
 
 
@@ -125,7 +130,7 @@ const CObject *CPropertyAccessor::getPropertyValue(const CObject* componentParam
 			std::string str = propClass->toString();
 
 
-			while (!toRet && str != "")
+			while (!toRet && !str.empty())
 			{
 				CObjectGenerator* generator = _Factory->getGenerator(str);
 
@@ -141,7 +146,7 @@ const CObject *CPropertyAccessor::getPropertyValue(const CObject* componentParam
 				}
 				else
 				{
-					str ="";
+					str.clear();
 				}
 
 			}

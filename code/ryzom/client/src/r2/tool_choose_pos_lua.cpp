@@ -21,6 +21,10 @@
 //
 #include "nel/misc/vectord.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLPACS;
 using namespace NLMISC;
 

@@ -502,25 +502,39 @@ void CI18N::skipWhiteSpace(ucstring::const_iterator &it, ucstring::const_iterato
 		if (storeComments && *it == '/' && it+1 != last && *(it+1) == '/')
 		{
 			// found a one line C comment. Store it until end of line.
-			while (it != last && *it != '\n')
+			while (it != last && (*it != '\n' && *it != '\r'))
 				storeComments->push_back(*it++);
+
 			// store the final '\n'
 			if (it != last)
-				storeComments->push_back(*it++);
+				storeComments->push_back('\n');
 		}
 		else if (storeComments && *it == '/' && it+1 != last && *(it+1) == '*')
 		{
 			// found a multi line C++ comment. store until we found the closing '*/'
-			while (it != last && !(*it == '*' && it+1 != last && *(it+1) == '/'))
-				storeComments->push_back(*it++);
+			while (it != last && !(*it == '*' && it + 1 != last && *(it + 1) == '/'))
+			{
+				// don't put \r
+				if (*it == '\r')
+				{
+					// skip it
+					++it;
+				}
+				else
+				{
+					storeComments->push_back(*it++);
+				}
+			}
+
 			// store the final '*'
 			if (it != last)
 				storeComments->push_back(*it++);
+
 			// store the final '/'
 			if (it != last)
 				storeComments->push_back(*it++);
+
 			// and a new line.
-			storeComments->push_back('\r');
 			storeComments->push_back('\n');
 		}
 		else
@@ -656,7 +670,6 @@ bool CI18N::parseMarkedString(ucchar openMark, ucchar closeMark, ucstring::const
 
 void CI18N::readTextFile(const string &filename,
 						 ucstring &result,
-						 bool forceUtf8,
 						 bool fileLookup,
 						 bool preprocess,
 						 TLineFormat lineFmt,
@@ -666,7 +679,7 @@ void CI18N::readTextFile(const string &filename,
 	TReadContext readContext;
 
 	// call the inner function
-	_readTextFile(filename, result, forceUtf8, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
+	_readTextFile(filename, result, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
 
 	if (!readContext.IfStack.empty())
 	{
@@ -709,7 +722,6 @@ void CI18N::skipLine(ucstring::const_iterator &it, ucstring::const_iterator end,
 
 void CI18N::_readTextFile(const string &filename,
 						 ucstring &result,
-						 bool forceUtf8,
 						 bool fileLookup,
 						 bool preprocess,
 						 TLineFormat lineFmt,
@@ -743,7 +755,7 @@ void CI18N::_readTextFile(const string &filename,
 
 	// Transform the string in ucstring according to format header
 	if (!text.empty())
-		readTextBuffer((uint8*)&text[0], (uint)text.size(), result, forceUtf8);
+		readTextBuffer((uint8*)&text[0], (uint)text.size(), result);
 
 	if (preprocess)
 	{
@@ -819,7 +831,7 @@ void CI18N::_readTextFile(const string &filename,
 									subFilename.c_str());
 
 								ucstring inserted;
-								_readTextFile(subFilename, inserted, forceUtf8, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
+								_readTextFile(subFilename, inserted, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
 								final += inserted;
 							}
 						}
@@ -873,7 +885,7 @@ void CI18N::_readTextFile(const string &filename,
 									subFilename.c_str());
 
 								ucstring inserted;
-								_readTextFile(subFilename, inserted, forceUtf8, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
+								_readTextFile(subFilename, inserted, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
 								final += inserted;
 							}
 						}
@@ -1109,7 +1121,7 @@ void CI18N::_readTextFile(const string &filename,
 			temp.append(result.begin()+lastPos, result.end());
 			result.swap(temp);
 
-			temp = "";
+			temp.clear();
 
 			// second loop with the '\n'
 			pos = 0;
@@ -1137,28 +1149,13 @@ void CI18N::_readTextFile(const string &filename,
 	}
 }
 
-void CI18N::readTextBuffer(uint8 *buffer, uint size, ucstring &result, bool forceUtf8)
+void CI18N::readTextBuffer(uint8 *buffer, uint size, ucstring &result)
 {
 	static uint8 utf16Header[] = { 0xffu, 0xfeu };
 	static uint8 utf16RevHeader[] = { 0xfeu, 0xffu };
 	static uint8 utf8Header[] = { 0xefu, 0xbbu, 0xbfu };
 
-	if (forceUtf8)
-	{
-		if (size>=3 &&
-			buffer[0]==utf8Header[0] &&
-			buffer[1]==utf8Header[1] &&
-			buffer[2]==utf8Header[2]
-			)
-		{
-			// remove utf8 header
-			buffer+= 3;
-			size-=3;
-		}
-		string text((char*)buffer, size);
-		result.fromUtf8(text);
-	}
-	else if (size>=3 &&
+	if (size>=3 &&
 			 buffer[0]==utf8Header[0] &&
 			 buffer[1]==utf8Header[1] &&
 			 buffer[2]==utf8Header[2]
@@ -1211,10 +1208,9 @@ void CI18N::readTextBuffer(uint8 *buffer, uint size, ucstring &result, bool forc
 	}
 	else
 	{
-		// hum.. ascii read ?
-		// so, just do a direct conversion
+		// all text files without BOM are now parsed as UTF-8 by default
 		string text((char*)buffer, size);
-		result = text;
+		result.fromUtf8(text);
 	}
 }
 

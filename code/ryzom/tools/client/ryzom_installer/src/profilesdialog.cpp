@@ -19,6 +19,7 @@
 #include "profilesmodel.h"
 #include "serversmodel.h"
 #include "operationdialog.h"
+#include "utils.h"
 
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
@@ -55,6 +56,21 @@ void CProfilesDialog::accept()
 {
 	saveProfile(m_currentProfileIndex);
 
+	const CProfiles &profiles = m_model->getProfiles();
+
+	// check if profiles are valid
+	foreach(const CProfile &profile, profiles)
+	{
+		QString error;
+
+		if (!profile.isValid(error))
+		{
+			// display an error message
+			QMessageBox::critical(this, tr("Error"), error);
+			return;
+		}
+	}
+
 	m_model->save();
 
 	QDialog::accept();
@@ -67,7 +83,7 @@ void CProfilesDialog::onAddProfile()
 
 void CProfilesDialog::onDeleteProfile()
 {
-	QMessageBox::StandardButton res = QMessageBox::question(this, tr("Confirmation"), tr("You're going to delete a profile, files won't be deleted and you'll have to do that manually.\nAre you sure to delete this profile?"));
+	QMessageBox::StandardButton res = QMessageBox::question(this, tr("Confirmation"), tr("You're going to delete a profile, all files that belong to it (configuration, saves, logs, screenshots, etc...) will be deleted.\nAre you sure to delete this profile?"));
 
 	if (res != QMessageBox::Yes) return;
 
@@ -78,7 +94,7 @@ void CProfilesDialog::onDeleteProfile()
 
 void CProfilesDialog::onProfileClicked(const QModelIndex &index)
 {
-	qDebug() << "clicked on" << index;
+	nlwarning("Clicked on profile %d", index.row());
 
 	displayProfile(index.row());
 }
@@ -210,39 +226,25 @@ void CProfilesDialog::updateExecutableVersion(int index)
 	if (index < 0) return;
 
 	const CProfile &profile = m_model->getProfiles()[index];
+	const CServer &server = CConfigFile::getInstance()->getServer(profile.server);
 
 	QString executable = profile.executable;
 
 	// file empty, use default one
 	if (executable.isEmpty())
 	{
-		executable += CConfigFile::getInstance()->getServer(profile.server).getClientFullPath();
+		executable = server.getClientFullPath();
 	}
 
 	// file doesn't exist
 	if (executable.isEmpty() || !QFile::exists(executable)) return;
 
-	// launch executable with --version argument
-	QProcess process;
-	process.setProcessChannelMode(QProcess::MergedChannels);
-	process.start(executable, QStringList() << "--version", QIODevice::ReadWrite);
-
-	if (!process.waitForStarted()) return;
-
-	QByteArray data;
-
-	// read all output
-	while (process.waitForReadyRead()) data.append(process.readAll());
-
 	// convert output to string
-	QString versionString = QString::fromUtf8(data);
+	QString versionString = getVersionFromExecutable(executable, server.getDirectory());
 
-	// parse version from output
-	QRegExp reg("([A-Za-z0-1_.]+) ((DEV|FV) ([0-9.]+))");
-
-	if (reg.indexIn(versionString) > -1)
+	if (!versionString.isEmpty())
 	{
-		executablePathLabel->setText(QString("%1 (%2)").arg(QFileInfo(executable).fileName()).arg(reg.cap(2)));
+		executablePathLabel->setText(QString("%1 (%2)").arg(QFileInfo(executable).fileName()).arg(versionString));
 	}
 }
 
@@ -268,7 +270,18 @@ void CProfilesDialog::onExecutableBrowseClicked()
 
 	if (executable.isEmpty()) executable = defaultExecutable;
 
-	executable = QFileDialog::getOpenFileName(this, tr("Please choose Ryzom client executable to launch"), executable, tr("Executables (*.exe)"));
+	QString filter;
+
+#ifdef Q_OS_WIN32
+	filter = tr("Executables (*.exe)");
+#else
+	filter = tr("Executables (*)");
+#endif
+
+	QFileDialog open;
+	open.setFilter(QDir::Executable | QDir::NoDotAndDotDot | QDir::Files);
+
+	executable = open.getOpenFileName(this, tr("Please choose Ryzom client executable to launch"), executable, filter);
 
 	if (executable.isEmpty()) return;
 

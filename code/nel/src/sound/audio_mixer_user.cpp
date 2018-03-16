@@ -56,6 +56,10 @@
 #include "nel/sound/containers.h"
 #include "nel/sound/audio_decoder.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 
@@ -1770,7 +1774,7 @@ void				CAudioMixerUser::update()
 			str += tmp;
 		}
 		nldebug((string("Status1: ")+str).c_str());
-		str = "";
+		str.clear();
 		for (i=_NbTracks/2; i<_NbTracks; ++i)
 		{
 			sprintf(tmp, "[%2u]%8p ", i, _Tracks[i]->getSource());
@@ -1797,7 +1801,7 @@ void				CAudioMixerUser::addSource( CSourceCommon *source )
 	_Sources.insert( source );
 
 //	_profile(( "AM: ADDSOURCE, SOUND: %d, TRACK: %p, NAME=%s", source->getSound(), source->getTrack(),
-//			source->getSound() && (source->getSound()->getName()!="") ? source->getSound()->getName().c_str() : "" ));
+//			source->getSound() && (!source->getSound()->getName().empty()) ? source->getSound()->getName().c_str() : "" ));
 
 }
 
@@ -2559,7 +2563,7 @@ void CAudioMixerUser::changeMaxTrack(uint maxTrack)
 	else
 	{
 		vector<CTrack *> non_erasable;
-		while (_Tracks.size() + non_erasable.size() > maxTrack && _Tracks.size() > 0)
+		while (_Tracks.size() + non_erasable.size() > maxTrack && !_Tracks.empty())
 		{
 			CTrack *track = _Tracks.back();
 			_Tracks.pop_back();
@@ -2588,7 +2592,7 @@ void CAudioMixerUser::changeMaxTrack(uint maxTrack)
 				non_erasable.push_back(track);
 			}
 		}
-		while (non_erasable.size() > 0)
+		while (!non_erasable.empty())
 		{
 			// put non erasable back into track list
 			_Tracks.push_back(non_erasable.back());
@@ -2684,17 +2688,17 @@ float	CAudioMixerUser::getMusicLength()
 }
 
 // ***************************************************************************
-bool	CAudioMixerUser::getSongTitle(const std::string &filename, std::string &result)
+bool	CAudioMixerUser::getSongTitle(const std::string &filename, std::string &result, float &length)
 {
 	if (_SoundDriver)
 	{
 		std::string artist;
 		std::string title;
 
-		if (!_SoundDriver->getMusicInfo(filename, artist, title))
+		if (!_SoundDriver->getMusicInfo(filename, artist, title, length))
 		{
 			// use 3rd party libraries supported formats
-			IAudioDecoder::getInfo(filename, artist, title);
+			IAudioDecoder::getInfo(filename, artist, title, length);
 		}
 
 		if (!title.empty())
@@ -2715,6 +2719,7 @@ bool	CAudioMixerUser::getSongTitle(const std::string &filename, std::string &res
 	}
 
 	result = "???";
+	length = 0;
 	return false;
 }
 

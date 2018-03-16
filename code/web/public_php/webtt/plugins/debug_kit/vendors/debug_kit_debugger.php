@@ -377,8 +377,8 @@ class DebugKitDebugger extends Debugger {
  * @param string $error Name of error
  * @param string $code  Code of error
  * @param string $description Description of error
- * @param string $file File error occured in
- * @param string $line Line error occured on
+ * @param string $file File error occurred in
+ * @param string $line Line error occurred on
  * @param string $trace Stack trace at time of error
  * @param string $context context of error
  * @return void

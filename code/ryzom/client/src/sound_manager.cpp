@@ -53,6 +53,10 @@
 # include "view.h"
 #endif
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 extern CLightCycleManager	LightCycleManager;
 extern NL3D::UDriver		*Driver;
 extern NL3D::UCamera		MainCam;

@@ -64,7 +64,7 @@ namespace NLGUI
 		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
 
 		// to be called by CGroupTable
-		bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup, uint columnIndex, uint rowIndex);
+		bool parseCell (xmlNodePtr cur, CInterfaceGroup * parentGroup, uint columnIndex, uint rowIndex);
 
 		// If the cell is a new line. This is the first <td> after a <tr>
 		bool	NewLine;

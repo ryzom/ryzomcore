@@ -33,8 +33,7 @@ CStringMapper	CStringMapper::_GlobalMapper;
 // ****************************************************************************
 CStringMapper::CStringMapper()
 {
-	_EmptyId = new string;
-	*_EmptyId = "";
+	_EmptyId = new string();
 }
 
 // ****************************************************************************
@@ -46,7 +45,7 @@ CStringMapper *CStringMapper::createLocalMapper()
 // ****************************************************************************
 TStringId CStringMapper::localMap(const std::string &str)
 {
-	if (str.size() == 0)
+	if (str.empty())
 		return 0;
 
 	CAutoFastMutex	automutex(&_Mutex);

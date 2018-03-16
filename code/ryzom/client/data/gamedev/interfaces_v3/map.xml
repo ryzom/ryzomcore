@@ -194,6 +194,7 @@
 
 			<view type="text" id="time" x="12" y="0" posparent="center" posref="MR ML" color="255 255 255 255" fontsize="12" shadow="true" hardtext="" />
 			<view type="text" id="weather" x="8" y="-16" posref="TL TL" color="255 255 255 255" fontsize="12" shadow="true" hardtext="" />
+			<ctrl type="tooltip" id="weather_tt" posparent="weather" sizeref="wh" w="0" h="0" tooltip="" tooltip_parent="ctrl" tooltip_posref="BL TL" />
 			
 			<instance template="box_widget" id="back" posref="TL TL" sizeref="wh" w="-2" h="-32" x="1" y="-32" render_layer="0" />
 			

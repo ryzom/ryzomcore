@@ -24,11 +24,17 @@
 #include "nel/3d/landscape.h"
 #include "nel/3d/landscape_profile.h"
 #include "nel/3d/patchdlm_context.h"
+#include "nel/3d/debug_vb.h"
+
 #include "nel/misc/vector.h"
 #include "nel/misc/common.h"
+
 using	namespace	std;
 using	namespace	NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

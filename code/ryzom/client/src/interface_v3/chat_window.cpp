@@ -896,11 +896,8 @@ bool CChatGroupWindow::removeFreeTeller(const std::string &containerID)
 	if (i == _FreeTellers.size())
 		return false;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	// Create the free teller in all the desktops images
-	for (uint m = 0; m < MAX_NUM_MODES; ++m)
-	{
-		pIM->removeGroupContainerImage(_FreeTellers[i]->getId(), m);
-	}
+	pIM->removeGroupContainerImageFromDesktops(_FreeTellers[i]->getId());
+
 	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 	CWidgetManager::getInstance()->unMakeWindow(_FreeTellers[i]);
 	pRoot->delGroup (_FreeTellers[i]);
@@ -1265,7 +1262,7 @@ public:
 		if (pEB == NULL) return;
 		ucstring text = pEB->getInputString();
 		// If the line is empty, do nothing
-		if(text.size() == 0)
+		if(text.empty())
 			return;
 
 

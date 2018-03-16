@@ -133,7 +133,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	if (chat)
 	{
 		CChatWindowDesc chatDesc = *chat;
-		chatDesc.FatherContainer = "";
+		chatDesc.FatherContainer.clear();
 		_ChatWindow = getChatWndMgr().createChatWindow(chatDesc);
 		if (!_ChatWindow)
 		{
@@ -871,7 +871,7 @@ class CHandlerContactEntry : public IActionHandler
 		if (pEB == NULL) return;
 		ucstring text = pEB->getInputString();
 		// If the line is empty, do nothing
-		if(text.size() == 0)
+		if(text.empty())
 			return;
 
 		// Parse any tokens in the text
