@@ -248,9 +248,9 @@
   </proc>
   <group type="container"
          id="universe_chanel_warning"
-         w="320"
-         pop_min_w="320"
-         pop_max_w="320"
+         w="360"
+         pop_min_w="360"
+         pop_max_w="360"
          h="200"
          pop_min_h="200"
          pop_max_h="200"
