@@ -711,9 +711,11 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	}
 
 	//
+	_ScaleMax = ClientCfg.MaxMapScale;
 	ptr = (char*) xmlGetProp( cur, (xmlChar*)"scale_max" );
 	if (ptr) fromString((const char *) ptr, _ScaleMax);
 	//
+	_ScaleMaxR2 = ClientCfg.R2EDMaxMapScale;
 	ptr = (char*) xmlGetProp( cur, (xmlChar*)"scale_max_r2" );
 	if (ptr) fromString((const char *) ptr, _ScaleMaxR2);
 	//

@@ -316,9 +316,7 @@
 			 selection_axis_color = "0 0 0 127"
 			 
 			 compass="ui:interface:compass"			 
-			 scale_max="2"
-			 scale_max_r2="8"
-			/>			
+			/>
 			<!-- border around the map -->			
 			
 		</group>		
@@ -409,8 +407,7 @@
 
 			 player_pos_tex="player_pos.tga"
 
-			 scale_max="2"
-			/>			
+			/>
 			<!-- border around the map -->			
 			
 		</group>

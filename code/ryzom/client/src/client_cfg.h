@@ -591,6 +591,10 @@ struct CClientConfig
 	float			CameraSpeedMax;
 	float			CameraResetSpeed;
 
+	// Default values for CGroupMap
+	float			MaxMapScale;
+	float			R2EDMaxMapScale;
+
 	//////////////
 	// VERBOSES //
 	bool			VerboseVP;
