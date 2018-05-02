@@ -45,13 +45,13 @@
     text_ref="BM BM" text_y="0"
     reset_focus_on_hide="false"  max_historic="0"
     onenter="set_keyboard_focus" params="target=ui:login:checkpass:content:submit_gr:eb_password:eb|select_all=false"
-    prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="12" color="135 243 28 255" />
+    prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
 
     <instance template="edit_box_log" id="eb_password" posparent="txt_pas" posref="BM TM" w="240" h="26" fontsize="12" x="0" y="-4"
     text_ref="BM BM" text_y="0"
     reset_focus_on_hide="false"  max_historic="0" entry_type="password"
     onenter="on_login" params=""
-    prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
+    prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="60" color="135 243 28 255" />
 
     <ctrl style="log_std_but" id="but_log" posparent="eb_password" posref="TM TM" y="-32" onclick_l="on_login" hardtext="uiOnConnect" />
 
@@ -651,7 +651,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 		text_ref="BM BM" text_y="0"
 		on_focus="create_account_rules" on_focus_params="rules_login" reset_focus_on_hide="false"  max_historic="0"
 		onenter="set_keyboard_focus" params="target=ui:login:create_account:content:submit_gr:eb_password:eb|select_all=false"
-		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="12" color="135 243 28 255" />
+		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
 
 		<!-- password -->
 		<view type="text" id="txt_pas" posparent="txt_log" posref="BL TL" hardtext="uiPassword" fontsize="12" x="0" y="-30" color="255 255 255 255" />
@@ -660,7 +660,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 		text_ref="BM BM" text_y="-2"
 		on_focus="create_account_rules" on_focus_params="rules_password" reset_focus_on_hide="false"  max_historic="0" entry_type="password"
 		onenter="set_keyboard_focus" params="target=ui:login:create_account:content:submit_gr:eb_confirm_password:eb|select_all=false"
-		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
+		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="60" color="135 243 28 255" />
 
 		<!-- confirm password -->
 		<view type="text" id="txt_confirm_pas" posparent="txt_pas" posref="BL TL" hardtext="uiConfirmPassword" fontsize="12" x="0" y="-30" color="255 255 255 255" />
@@ -669,7 +669,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 		text_ref="BM BM" text_y="-2"
 		on_focus="create_account_rules" on_focus_params="rules_password_conf" reset_focus_on_hide="false"  max_historic="0" entry_type="password"
 		onenter="set_keyboard_focus" params="target=ui:login:create_account:content:submit_gr:eb_email:eb|select_all=false"
-		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
+		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="60" color="135 243 28 255" />
 
 		<!-- email -->
 		<view type="text" id="txt_email" posparent="txt_confirm_pas" posref="BL TL" hardtext="uiEmail" fontsize="12" x="0" y="-30" color="255 255 255 255" />
