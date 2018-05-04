@@ -2493,6 +2493,33 @@ class CAHTarget : public IActionHandler
 };
 REGISTER_ACTION_HANDLER (CAHTarget, "target");
 
+// ***************************************************************************
+class CAHTargetLandmark : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	{
+		string search = getParam(Params, "search");
+		if (search.empty()) return;
+
+		bool startsWith = false;
+		if (search.size() > 0 && (search[0] == '\'' || search[0] == '"') && search[0] == search[search.size()-1])
+		{
+			startsWith = true;
+			search = trimQuotes(search);
+		}
+
+		const std::string mapid = "ui:interface:map:content:map_content:actual_map";
+		CGroupMap* cgMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(mapid));
+		if (cgMap)
+		{
+			if (!cgMap->targetLandmarkByName(search, startsWith))
+			{
+				CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
+			}
+		}
+	}
+};
+REGISTER_ACTION_HANDLER (CAHTargetLandmark, "target_landmark");
 
 
 class CAHAddShape : public IActionHandler
