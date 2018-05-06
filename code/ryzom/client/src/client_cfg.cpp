@@ -599,6 +599,9 @@ CClientConfig::CClientConfig()
 	CameraSpeedMax		= 1.0f;
 	CameraResetSpeed	= 2.0f;
 
+	MaxMapScale			= 2.0f;
+	R2EDMaxMapScale		= 8.0f;
+
 	// VERBOSES
 	VerboseVP				= false;
 	VerboseAnimUser			= false;
@@ -1456,6 +1459,9 @@ void CClientConfig::setValues()
 		READ_FLOAT_FV(CameraDistance)
 	}
 
+	// Default values for CGroupMap
+	READ_FLOAT_FV(MaxMapScale);
+	READ_FLOAT_FV(R2EDMaxMapScale);
 
 	/////////////
 	// SHADOWS //

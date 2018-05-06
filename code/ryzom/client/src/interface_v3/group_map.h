@@ -202,6 +202,9 @@ public:
 	void delArkPoints();
 	
 
+	// set landmarks visibility based text query
+	void setLandmarkFilter(const std::string &s);
+
 	// set the selection axis pos & visibility
 	void				setSelectionAxis(bool active, const NLMISC::CVector2f &worldPos = NLMISC::CVector2f::Null);
 
@@ -297,6 +300,7 @@ private:
 				NLMISC::CVector2f Pos;
 				CContLandMark::TContLMType Type;
 				bool					   HandleEvents;
+				bool					   SearchMatch;
 			public:
 				virtual bool handleEvent (const NLGUI::CEventDescriptor& event)
 				{
@@ -314,6 +318,7 @@ private:
 					Type = CContLandMark::Unknown;
 					Pos.set(0.f, 0.f);
 					HandleEvents = true;
+					SearchMatch = false;
 				}
 		};
 		typedef std::vector<CLandMarkButton*> TLandMarkButtonVect;
@@ -324,12 +329,14 @@ private:
 			public:
 				NLMISC::CVector2f Pos;
 				CContLandMark::TContLMType Type;
+				bool SearchMatch;
 
 				CLandMarkText(const TCtorParam &param)
 					: CViewText(param)
 				{
 					Type = CContLandMark::Unknown;
 					Pos.set(0.f, 0.f);
+					SearchMatch = false;
 				}
 		};
 		typedef std::vector<CLandMarkText*> TLandMarkTextVect;
@@ -485,6 +492,10 @@ private:
 		typedef std::set<IDeco *> TDecos;
 		TDecos _Decos;
 
+		// filter keywords
+		std::vector<ucstring> _LandmarkFilter;
+		uint32				  _MatchedLandmarkCount;
+
 	//////////////////////
 	// Respawn handling //
 	// //////////////// //
@@ -541,6 +552,9 @@ private:
 	
 	// update a landmark button
 	void updateLandMarkButton(CLandMarkButton *lmb, const CLandMarkOptions &options);
+
+	// Test title against landmark filter
+	bool filterLandmark(const ucstring &title) const;
 
 	// update the scale depending on the window size and the user scale
 	void updateScale();
