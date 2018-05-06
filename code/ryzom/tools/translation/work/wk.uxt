@@ -13540,3 +13540,8 @@ uiMacroItemGroupEquip [Equip an item group]
 uiMacroItemGroupName  [Item group name]
 uiMacroItemGroupMove  [Move an item group]
 uiMacroItemGroupDestination [Item group destination]
+
+//map search
+uiMapSearch [Map search]
+uittMapSearch [Map search]
+
