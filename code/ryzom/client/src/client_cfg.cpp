@@ -426,6 +426,7 @@ CClientConfig::CClientConfig()
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
 
 	CurlMaxConnections = 2;
+	CurlCABundle.clear();
 
 	RingReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes_ring/index.php";
 	ReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes/index.php";
@@ -1076,6 +1077,8 @@ void CClientConfig::setValues()
 	READ_INT_FV(CurlMaxConnections);
 	if (ClientCfg.CurlMaxConnections < 0)
 		ClientCfg.CurlMaxConnections = 2;
+
+	READ_STRING_FV(CurlCABundle);
 
 	///////////////
 	// ANIMATION //

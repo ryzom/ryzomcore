@@ -471,6 +471,16 @@ CInterfaceManager::CInterfaceManager()
 	CGroupHTML::options.appName = getUserAgentName();
 	CGroupHTML::options.appVersion = getUserAgentVersion();
 	CGroupHTML::options.curlMaxConnections = ClientCfg.CurlMaxConnections;
+	if (!ClientCfg.CurlCABundle.empty())
+	{
+		string filename = CPath::lookup(ClientCfg.CurlCABundle, false);
+		if (!filename.empty())
+		{
+			filename = CPath::getFullPath(filename, false);
+			CGroupHTML::options.curlCABundle = filename;
+			nlinfo("curl ca bundle '%s'", filename.c_str());
+		}
+	}
 
 	NLGUI::CDBManager::getInstance()->resizeBanks( NB_CDB_BANKS );
 	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
