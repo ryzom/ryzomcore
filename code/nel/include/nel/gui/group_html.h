@@ -66,6 +66,8 @@ namespace NLGUI
 			std::vector< std::string > trustedDomains;
 			/// Maximum concurrent MultiCurl connections per CGroupHTML instance
 			sint32 curlMaxConnections;
+			/// cacert.pem location
+			std::string curlCABundle;
 
 			SWebOptions(): curlMaxConnections(2)
 			{

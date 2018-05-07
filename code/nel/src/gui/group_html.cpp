@@ -395,13 +395,18 @@ namespace NLGUI
 			return false;
 		}
 
-#if defined(NL_OS_WINDOWS)
 		// https://
 		if (toLower(download.url.substr(0, 8)) == "https://")
 		{
+#if defined(NL_OS_WINDOWS)
 			curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, &CCurlCertificates::sslCtxFunction);
-		}
+#else
+			if (!options.curlCABundle.empty())
+			{
+				curl_easy_setopt(curl, CURLOPT_CAINFO, options.curlCABundle.c_str());
+			}
 #endif
+		}
 
 		download.data = new CCurlWWWData(curl, download.url);
 		download.fp = fp;
@@ -5354,13 +5359,18 @@ namespace NLGUI
 			return;
 		}
 
-#if defined(NL_OS_WINDOWS)
 		// https://
 		if (toLower(url.substr(0, 8)) == "https://")
 		{
+#if defined(NL_OS_WINDOWS)
 			curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, &CCurlCertificates::sslCtxFunction);
-		}
+#else
+			if (!options.curlCABundle.empty())
+			{
+				curl_easy_setopt(curl, CURLOPT_CAINFO, options.curlCABundle.c_str());
+			}
 #endif
+		}
 
 		// do not follow redirects, we have own handler
 		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0);
