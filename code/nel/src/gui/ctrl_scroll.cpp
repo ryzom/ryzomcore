@@ -885,7 +885,7 @@ namespace NLGUI
 			}
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel && _Vertical)
 			{
-				moveTrackY (eventDesc.getWheel() * 12);
+				moveTargetY (-(eventDesc.getWheel() * 12));
 				return true;
 			}
 		}
