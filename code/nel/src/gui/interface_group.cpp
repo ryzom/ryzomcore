@@ -1305,7 +1305,7 @@ namespace NLGUI
 					CInterfaceGroup *currParent = _Parent;
 					while (currParent)
 					{
-						if (currParent->moveSBTrackY (this, eventDesc.getWheel()*12))
+						if (currParent->moveSBTargetY (this, -(eventDesc.getWheel()*12)))
 							return true;
 						currParent = currParent->getParent();
 					}
