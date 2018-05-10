@@ -204,6 +204,31 @@
 
 <define	id="map_min_size"	value="256" />
 
+<!-- used to override onclick handler -->
+<proc id="dummy_proc" />
+
+<template name="lm_search_result" keep="true" active="true" id="" x="0" y="0" w="0" h="17" posparent="parent" posref="TL TL"
+ hardtext="" fontsize="10" y_text="-2" onclick_l="lua" params_l="" tooltip="" index="0">
+
+	<group id="#id" active="#active" x="#x" y="#y" w="#w" h="#h" posparent="#posparent" posref="#posref" sizeref="w">
+
+		<ctrl type="button" id="over" sizeref="wh" w="0" h="0" posref="MM MM"
+			scale="true" tx_normal="blank.tga" tx_over="blank.tga" color="0 0 0 0" col_over="255 255 255 127"
+			onclick_l="land_mark_result_selected" params_l="map=ui:interface:map:content:map_content:actual_map|index=#index"
+			onclick_r="proc" params_r="dummy_proc"
+			tooltip="#tooltip" />
+
+		<view type="bitmap" id="icon" posref="ML ML" w="16" h="16"
+			scale="true" color="255 255 255 255" global_color="false" texture="blank.tga" />
+
+		<view type="text" id="title" posref="TL TL" x="16" y="#y_text"
+			color="255 255 255 255" global_color="true" fontsize="#fontsize" shadow="true" hardtext="#hardtext"
+			auto_clamp="true" over_extend_view_text="false" over_extend_parent_rect="false" />
+
+	</group>
+
+</template>
+
 <group id="map" type="container" posref="BL TL" min_w="%map_min_size" max_w="16384" w="256" h="256" x="352" y="200" min_h="%map_min_size" max_h="16384"
  resizer="true" pop_max_h="16384" pop_min_h="%map_min_size" pop_max_w="16384" pop_min_w="%map_min_size"
  openable="false" opened="true"
@@ -369,10 +394,15 @@
 			<group id="lm_search"
 					posparent="back"
 					posref="TR TR"
+					sizeref="h"
 					x="-2"
 					y="-2"
-					child_resize_w="true"
-					child_resize_h="true">
+					h="-4"
+					child_resize_w="true">
+
+				<view type="bitmap" id="bg" posref="ML ML" sizeref="wh" h="25"
+					scale="true" color="100 100 100 120" global_color="false" texture="blank.tga" />
+
 				<instance template="edit_box_widget"
 						id="search"
 						posref="TR TR"
@@ -382,6 +412,7 @@
 						on_focus_lost="proc" on_focus_lost_params="map_search_focuslost"
 						onenter=""
 						onchange="proc" onchange_params="map_search_onchange|ui:interface:map:content:map_content:lm_search:search:eb" />
+
 				<ctrl type="button"
 					id="reset"
 					button_type="push_button"
@@ -394,6 +425,13 @@
 					onclick_l="proc" params_l="map_search_toggle"
 					tooltip="" />
 				<view type="text" id="lm_count" posparent="search" posref="BR TR" x="-2" color="200 200 200 255" fontsize="10" shadow="true" hardtext="0" />
+
+				<group id="result" posref="TR TR" x="0" y="-25" w="0" h="-20" over="true" sizeref="wh">
+					<group id="rows" x="10" w="-10" y="0" sizeref="w" posref="TL TL" child_resize_h="true" child_resize_hmargin="4" max_h="0" max_sizeref="h" max_sizeparent="parent">
+						<group id="lm_result" type="list" x="0" y="0" posref="TL TL" sizeref="w" dynamic_display_size="true" />
+					</group>
+					<ctrl style="skin_scroll" id="sv" posref="TL TL" x="0" y="0" target="rows" />
+				</group>
 			</group>
 			<link expr="@UI:VARIABLES:ISACTIVE:MAP_SEARCH" target="lm_search:active" />
 

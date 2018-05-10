@@ -139,6 +139,9 @@ public:
 
 	// center the map on the player
 	void centerOnPlayer();
+	// center current map on world coords (if not out of map bounds)
+	void centerOnWorldPos(const NLMISC::CVector2f &worldPos);
+
 	void setPlayerPos(const NLMISC::CVector2f &p) { _PlayerPos = p; }
 	NLMISC::CVector2f getPlayerPos() const { return _PlayerPos; }
 	// test if player is currently panning the map
@@ -169,6 +172,7 @@ public:
 	CLandMarkOptions		getUserLandMarkOptions(uint32 lmindex) const;
 	// target the given landmark
 	void				targetLandmark(CCtrlButton *lm);
+	void				targetLandmarkResult(uint32 index);
 	// get the world position of a landmark or return vector Null if not found
 	void				getLandmarkPosition(const CCtrlButton *lm, NLMISC::CVector2f &worldPos);
 
@@ -457,7 +461,17 @@ private:
 
 		// filter keywords
 		std::vector<ucstring> _LandmarkFilter;
-		uint32				  _MatchedLandmarkCount;
+		struct SMatchedLandmark
+		{
+			SMatchedLandmark(const NLMISC::CVector2f pos, const ucstring &title, CLandMarkOptions opts)
+				: Pos(pos), Title(title), Options(opts)
+			{}
+			NLMISC::CVector2f Pos;
+			ucstring Title;
+
+			CLandMarkOptions Options;
+		};
+		std::vector<SMatchedLandmark> _MatchedLandmarks;
 
 	//////////////////////
 	// Respawn handling //
@@ -497,6 +511,7 @@ private:
 	  */
 	void updateLandMarkList(TLandMarkButtonVect &lm);
 	void updateLandMarkTextList(TLandMarkTextVect &lm);
+	void updateMatchedLandmarks();
 	//
 	void removeLandMarks(TLandMarkButtonVect &lm);
 	/** create landmarks from the continent (and remove previous ones)

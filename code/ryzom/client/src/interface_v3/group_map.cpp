@@ -427,7 +427,7 @@ CGroupMap::CGroupMap(const TCtorParam &param)
 	_TargetLM = NULL;
 	_HomeLM = NULL;
 	_LandmarkFilter.clear();
-	_MatchedLandmarkCount = 0;
+	_MatchedLandmarks.clear();
 	//
 	_ScaleMax = 8.f;
 	_ScaleMaxR2 = 8.f;
@@ -2249,6 +2249,31 @@ void CGroupMap::centerOnPlayer()
 	computeOffsets();
 	invalidateCoords();
 }
+//============================================================================================================
+void CGroupMap::centerOnWorldPos(const CVector2f &worldPos)
+{
+	CVector2f mapPos;
+	worldToMap(mapPos, worldPos);
+
+	sint32 sx, sy;
+	mapToScreen(sx, sy, mapPos);
+
+	sint32 x, y, w, h;
+	computeMapRectInsideGroup(x, y, w, h);
+
+	sint32 dx, dy;
+	if (sx < getXReal())
+		dx = -(getXReal() - sx + w/2);
+	else
+		dx = sx - getXReal() - w/2;
+
+	if (sy < getYReal())
+		dy = -(getYReal() - sy + h/2);
+	else
+		dy = sy - getYReal() - h/2;
+
+	pan(dx, dy);
+}
 
 //============================================================================================================
 void CGroupMap::setScale(float newUserScale, const NLMISC::CVector2f &/* center */)
@@ -2270,7 +2295,6 @@ void CGroupMap::setScale(float newScale)
 	screenToMap(mapCoords, centerX, centerY);
 	setScale(newScale, mapCoords);
 }
-
 
 //============================================================================================================
 void CGroupMap::updateLandMarkList(TLandMarkButtonVect &lmVect)
@@ -2304,6 +2328,63 @@ void CGroupMap::updateLandMarkTextList(TLandMarkTextVect &lmVect)
 }
 
 //============================================================================================================
+void CGroupMap::updateMatchedLandmarks()
+{
+	CInterfaceGroup *gc = getParentContainer();
+	if (!gc) return;
+
+	// visible landmark count
+	CViewText *pVT = dynamic_cast<CViewText *>(gc->getView("lm_count"));
+	if (pVT)
+	{
+		// show total landmark count if search filter has not been set
+		uint c = _MatchedLandmarks.size();
+		if (c == 0 && _LandmarkFilter.size() == 0)
+			c = _UserLM.size();
+
+		pVT->setText(toString(c));
+	}
+
+	// list of matched landmarks
+	CGroupList *pL = dynamic_cast<CGroupList *>(gc->getGroup("lm_result"));
+	if (!pL) return;
+
+	pL->clearGroups();
+
+	if (_LandmarkFilter.size() == 0) return;
+
+	// create result list
+	for(uint k = 0; k < _MatchedLandmarks.size(); ++k)
+	{
+		std::vector<std::pair<string,string> > params;
+		params.clear();
+		params.push_back(std::pair<string,string>("id", toString("lm%d", k)));
+		params.push_back(std::pair<string,string>("tooltip", _MatchedLandmarks[k].Title.toUtf8()));
+		params.push_back(std::pair<string,string>("index", toString(k)));
+
+		CInterfaceGroup *g = CWidgetManager::getInstance()->getParser()->createGroupInstance("lm_search_result", pL->getId(), params);
+		if (g)
+		{
+			pL->addChild(g);
+
+			CViewText* t = dynamic_cast<CViewText *>(g->getView("title"));
+			if (t)
+			{
+				t->setSingleLineTextFormatTaged(_MatchedLandmarks[k].Title);
+			}
+
+			CViewBitmap* b = dynamic_cast<CViewBitmap *>(g->getView("icon"));
+			if (b)
+			{
+				b->setTexture(_MatchedLandmarks[k].Options.LandMarkTexNormal);
+				b->setColor(_MatchedLandmarks[k].Options.ColorNormal);
+			}
+		}
+	}
+	pL->invalidateCoords();
+}
+
+//============================================================================================================
 void CGroupMap::removeLandMarks(TLandMarkButtonVect &lm)
 {
 	uint numLM = (uint)lm.size();
@@ -2320,6 +2401,9 @@ void CGroupMap::removeLandMarks(TLandMarkButtonVect &lm)
 //============================================================================================================
 void CGroupMap::createLMWidgets(const std::vector<CContLandMark> &lms)
 {
+	// disable any match in "world" mode
+	bool notWorldMode = _CurMap->Name != "world";
+
 	for (uint32 k = 0; k < lms.size(); ++k)
 	{
 		const CContLandMark &rCLM =lms[k];
@@ -2330,9 +2414,9 @@ void CGroupMap::createLMWidgets(const std::vector<CContLandMark> &lms)
 		const ucstring ucsTmp(CStringManagerClient::getPlaceLocalizedName(rCLM.TitleTextID));
 		const ucstring lcTitle = toLower(ucsTmp);
 
-		bool searchMatch = _LandmarkFilter.size() > 0 && filterLandmark(lcTitle);
+		bool searchMatch = notWorldMode && _LandmarkFilter.size() > 0 && filterLandmark(lcTitle);
 		if (searchMatch)
-			_MatchedLandmarkCount++;
+			_MatchedLandmarks.push_back(SMatchedLandmark(rCLM.Pos, ucsTmp, _ContinentLMOptions));
 
 		// Add button if not a region nor a place
 		if ((rCLM.Type != CContLandMark::Region) && (rCLM.Type != CContLandMark::Place) &&
@@ -2391,8 +2475,7 @@ void CGroupMap::createLMWidgets(const std::vector<CContLandMark> &lms)
 void CGroupMap::createContinentLandMarks()
 {
 	uint32 k;
-
-	_MatchedLandmarkCount = 0;
+	_MatchedLandmarks.clear();
 
 	if (_MapMode != MapMode_Normal) return;
 	if (_CurMap == NULL) return;
@@ -2411,38 +2494,35 @@ void CGroupMap::createContinentLandMarks()
 	if (_CurMap->Name == "world")
 	{
 		createLMWidgets(ContinentMngr.WorldMap);
-		invalidateCoords();
-		return;
 	}
-
-	if (_CurContinent == NULL) return;
-
-	// Continent Landmarks
-	createLMWidgets(_CurContinent->ContLandMarks);
-	// User Landmarks
-	for(k = 0; k < _CurContinent->UserLandMarks.size(); ++k)
+	else if (_CurContinent)
 	{
-		NLMISC::CVector2f mapPos;
-		worldToMap(mapPos, _CurContinent->UserLandMarks[k].Pos);
-
-		if (filterLandmark(_CurContinent->UserLandMarks[k].Title))
+		// Continent Landmarks
+		createLMWidgets(_CurContinent->ContLandMarks);
+		// User Landmarks
+		for(k = 0; k < _CurContinent->UserLandMarks.size(); ++k)
 		{
-			addLandMark(_UserLM, mapPos, _CurContinent->UserLandMarks[k].Title, getUserLandMarkOptions(k));
-			_MatchedLandmarkCount++;
+			NLMISC::CVector2f mapPos;
+			worldToMap(mapPos, _CurContinent->UserLandMarks[k].Pos);
+
+			CLandMarkOptions options = getUserLandMarkOptions(k);
+			addLandMark(_UserLM, mapPos, _CurContinent->UserLandMarks[k].Title, options);
+
+			if (_LandmarkFilter.size() > 0)
+			{
+				if (filterLandmark(_CurContinent->UserLandMarks[k].Title))
+				{
+					_MatchedLandmarks.push_back(SMatchedLandmark(_CurContinent->UserLandMarks[k].Pos, _CurContinent->UserLandMarks[k].Title, options));
+				}
+				else
+				{
+					_UserLM.back()->setActive(false);
+				}
+			}
 		}
 	}
 
-	// update visible landmark count
-	CInterfaceGroup *gc = getParentContainer();
-	if (gc)
-	{
-		CViewText *pVT = dynamic_cast<CViewText *>(gc->getView("lm_count"));
-		if (pVT)
-		{
-			pVT->setText(toString(_MatchedLandmarkCount));
-		}
-	}
-
+	updateMatchedLandmarks();
 	invalidateCoords();
 }
 
@@ -3036,6 +3116,30 @@ void CGroupMap::targetLandmark(CCtrlButton *lm)
 }
 
 //=========================================================================================================
+void CGroupMap::targetLandmarkResult(uint32 index)
+{
+	if (index > _MatchedLandmarks.size()) return;
+
+	CCompassTarget ct;
+	ct.Pos = _MatchedLandmarks[index].Pos;
+	ct.Name = _MatchedLandmarks[index].Title;
+	// type sets compass arrow color
+	ct.setType(CCompassTarget::UserLandMark);
+
+	centerOnWorldPos(ct.Pos);
+
+	CInterfaceManager *im = CInterfaceManager::getInstance();
+	CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId(_CompassId));
+	if (gc)
+	{
+		gc->setActive(true);
+		gc->setTarget(ct);
+		gc->blink();
+		CWidgetManager::getInstance()->setTopWindow(gc);
+	}
+}
+
+//=========================================================================================================
 void CGroupMap::getLandmarkPosition(const CCtrlButton *lm, NLMISC::CVector2f &worldPos)
 {
 	if (!lm) return;
@@ -3254,6 +3358,25 @@ class CAHLandMarkFilter : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER(CAHLandMarkFilter, "land_mark_filter");
+
+//=========================================================================================================
+// Landmark selected from result list
+class CAHLandMarkResultSelected : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	{
+		string id = getParam(params, "map");
+		CGroupMap* map = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(id));
+		if (!map) return;
+
+		sint index;
+		string nr = getParam(params, "index");
+		if (!fromString(nr, index)) return;
+
+		map->targetLandmarkResult(index);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHLandMarkResultSelected, "land_mark_result_selected");
 
 //=========================================================================================================
 // A land mark button has been pushed
