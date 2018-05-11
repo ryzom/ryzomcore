@@ -779,6 +779,25 @@ REGISTER_ACTION_HANDLER( CHandlerNewMacroCmdEdit, "new_macro_cmd_edit");
 
 // ***************************************************************************
 // Called from context menu when we right click on a command of the new_macro container
+class	CHandlerNewMacroCmdCopy: public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
+	{
+		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
+		sint nCmdNb = getCmdNbFromId(pCaller->getId());
+		pMCM->CurrentEditMacro.addCommand(pMCM->CurrentEditMacro.Commands[nCmdNb].Name,
+									pMCM->CurrentEditMacro.Commands[nCmdNb].Params,
+									nCmdNb);
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		CMacroCmdManager::getInstance()->EditCmd->deactivate();
+		CAHManager::getInstance()->runActionHandler("new_macro_open",NULL);
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerNewMacroCmdCopy, "new_macro_cmd_copy");
+
+// ***************************************************************************
+// Called from context menu when we right click on a command of the new_macro container
 class	CHandlerNewMacroCmdDelete: public IActionHandler
 {
 public:
@@ -1086,6 +1105,29 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerMacrosEdit, "macros_edit");
+
+// ***************************************************************************
+// Called from context menu on a macro
+class	CHandlerMacrosCopy : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
+	{
+		sint nMacNb = getMacroFromId(pCaller->getId());
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
+
+		// duplicate selected macro
+		CMacroCmd m = pMCM->getMacros()[nMacNb];
+		m.ID = -1;
+		m.Combo.Key = KeyCount;
+		m.Combo.KeyButtons = noKeyButton;
+		pMCM->addMacro(m, nMacNb+1);
+
+		CAHManager::getInstance()->runActionHandler("macros_open",NULL);
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerMacrosCopy, "macros_copy");
 
 // ***************************************************************************
 // Called from context menu on a macro

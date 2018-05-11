@@ -234,6 +234,8 @@
 <group type="menu" id="options_macro" exit_click_b="true" extends="base_menu" >
 	<action name="uimMacroExec" handler="macros_exec" />
 	<action name="uimMacroEdit" handler="macros_edit" />
+	<action name="uimMacroCopy" handler="macros_copy" />
+	<separator/>
 	<action name="uimMacroDel"	handler="macros_del" />
 </group>
 
@@ -324,6 +326,8 @@
 	<action name="uimMCMoveUp"		handler="new_macro_cmd_move_up" />
 	<action name="uimMCMoveDown"	handler="new_macro_cmd_move_down" />
 	<action name="uimMCEdit"		handler="new_macro_cmd_edit" />
+	<action name="uimMCCopy"		handler="new_macro_cmd_copy" />
+	<separator/>
 	<action name="uimMCDel"			handler="new_macro_cmd_delete" />
 </group>
 
