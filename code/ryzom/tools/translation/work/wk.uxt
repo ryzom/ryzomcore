@@ -13544,4 +13544,6 @@ uiMacroItemGroupDestination [Item group destination]
 //map search
 uiMapSearch [Map search]
 uittMapSearch [Map search]
+uimMacroCopy [COPY]
+uimMCCopy [COPY]
 
