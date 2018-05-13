@@ -1226,6 +1226,12 @@ namespace NLGUI
 		if(hReal <= maxHReal)
 			return;
 
+		if (_TargetStepY > 1)
+		{
+			sint sign = (0 < dy) - (dy < 0);
+			dy = sign * max(1, (dy / _TargetStepY)) * _TargetStepY;
+		}
+
 		// compute the new ofsY.
 		sint32	ofsY= _Target->getOfsY();
 		ofsY+= dy;
