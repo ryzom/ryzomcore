@@ -2574,6 +2574,10 @@ void CGroupMap::updateUserLandMarks()
 		worldToMap(mapPos, _CurContinent->UserLandMarks[k].Pos);
 
 		addLandMark(_UserLM, mapPos, _CurContinent->UserLandMarks[k].Title, getUserLandMarkOptions(k));
+
+		// hide landmark if not matching filter
+		if (!filterLandmark(_CurContinent->UserLandMarks[k].Title))
+			_UserLM.back()->setActive(false);
 	}
 	invalidateCoords();
 
