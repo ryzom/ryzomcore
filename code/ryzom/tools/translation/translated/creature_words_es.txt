@@ -4172,3 +4172,7 @@ _B9CF0D05CEE7989D	object_pr_s3_cokamool_c	Cokamool Pequeno
 _A07A2D256EA4A79B	object_pr_s2_toopetz_a	Toopetz de Gret					
 _A07A0D212F74AB9B	object_pr_s2_toopetz_b	Toopetz Doble					
 _A07A5C396E75AF9B	object_pr_s2_toopetz_c	Prueba de Toopetz					
+_D86550A834171298	chidb2_xmas	Mektoub de Montar	un	el	Mektoubs de Montar		los
+_D86550A834171298	chifb2_xmas	Mektoub de Montar	un	el	Mektoubs de Montar		los
+_DA6550A834171298	chijb2_xmas	Mektoub de Montar	un	el	Mektoubs de Montar		los
+_DC6550A834171298	chilb2_xmas	Mektoub de Montar	un	el	Mektoubs de Montar		los

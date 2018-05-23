@@ -1903,3 +1903,10 @@ gn_kami_altar_nexus	Nexus Kami Altar
 gn_karavan_altar_nexus	Nexus Karavan Altar	
 gn_gravats	Rubble
 gn_room_access	Access Terminal
+gn_karavan_altar_silan_ranger_camp	Ranger Camp Karavan Altar	
+gn_kami_altar_silan_ranger_camp	Ranger Camp Kami Altar	
+gn_karavan_altar_silan_shattered_ruins	Shattered Ruins Karavan Altar	
+gn_kami_altar_silan_shining_lake	Shining Lake Kami Altar	
+fct_ranger_instructor	Ranger Instructor
+fct_ranger_assistant	Assistant Instructor
+fct_ranger_veteran	Veteran Ranger

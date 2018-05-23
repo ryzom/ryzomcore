@@ -867,11 +867,11 @@ place_arrival_from_fyros_sources	<GEN>place_arrival_from_fyros_sources
 place_arrival_from_zorai_sources	<GEN>place_arrival_from_zorai_sources					
 place_arrival_from_zorai_terre	<GEN>place_arrival_from_zorai_terre					
 place_arrival_from_nexus_terre	<GEN>place_arrival_from_nexus_terre					
-continent_r2_roots	<GEN>continent_r2_roots					
-continent_r2_desert	<GEN>continent_r2_desert					
-continent_r2_lakes	<GEN>continent_r2_lakes					
+continent_r2_roots	Unexplored Prims	the	in	the		
+continent_r2_desert	Unexplored Desert	the	in	the		
+continent_r2_lakes	Unexplored Lakes	the	in	the		
 continent_r2_forest	Leewind Lands	the	in	the		
-continent_r2_jungle	<GEN>continent_r2_jungle					
+continent_r2_jungle	Unexplored Jungle	the	in	the		
 fyros_island	<GEN>fyros_island					
 tp_fyros_island_ep2	<GEN>tp_fyros_island_ep2					
 tryker_island_episode2	<GEN>tryker_island_episode2					
@@ -881,4 +881,201 @@ boss_tryker_light_start_spawn_place	<GEN>boss_tryker_light_start_spawn_place
 episode2_temple_kami_tryker	<GEN>episode2_temple_kami_tryker					
 episode2_temple_karavan_tryker	<GEN>episode2_temple_karavan_tryker					
 episode2_temple_kami_zorai	<GEN>episode2_temple_kami_zorai					
-episode2_temple_karavan_zorai	<GEN>episode2_temple_karavan_zorai					
+episode2_temple_karavan_zorai	<GEN>episode2_temple_karavan_zorai
+region_zorai_islands	Oflovak Road -- Jungle	the	in	the		
+uiR2_Jungle30	Great Dale the	in	the		
+uiR2_Jungle47	Range of the Brave the	in	the		
+uiR2_Jungle36	The Forgotten Lagoon the	in	the		
+uiR2_Jungle33	The Cave the	in	the		
+uiR2_Jungle39	Wombaï`s passage the	in	the		
+uiR2_Jungle23	Mountain Bamboos the	in	the		
+uiR2_Jungle16	High-Plateau the	in	the		
+uiR2_Jungle01	Forest of Waves the	in	the		
+uiR2_Jungle50	Spoiled Spring the	in	the		
+uiR2_Jungle02	Lakes the	in	the		
+uiR2_Jungle45	Homin`s Plain the	in	the		
+uiR2_Jungle15	Soiled Plain the	in	the		
+uiR2_Jungle44	Rock of Tears the	in	the		
+uiR2_Jungle19	Aquatic Jungle the	in	the		
+uiR2_Jungle07	Hand the	in	the		
+uiR2_Jungle27	Empty Valley the	in	the		
+uiR2_Jungle21	Uneven and Variety the	in	the		
+uiR2_Jungle03	Goo and Bamboos the	in	the		
+uiR2_Jungle38	Twin Ponds the	in	the		
+uiR2_Jungle48	Rock of Flowers the	in	the		
+uiR2_Jungle34	Plateau of Goo the	in	the		
+uiR2_Jungle31	Small Circle the	in	the		
+uiR2_Jungle52	The Tears of Atys the	in	the		
+uiR2_Jungle32	Goo Patches the	in	the		
+uiR2_Jungle49	The Chain the	in	the		
+uiR2_Jungle28	Small Spring the	in	the		
+uiR2_Jungle42	The Enclave the	in	the		
+uiR2_Jungle13	Mirror of Goo the	in	the		
+uiR2_Jungle51	Green Spirit the	in	the		
+uiR2_Jungle18	Heart of the Jungle the	in	the		
+uiR2_Jungle29	Waterside the	in	the		
+uiR2_Jungle06	Steepsided Valley the	in	the		
+uiR2_Jungle17	Promontories and Ridges the	in	the		
+uiR2_Jungle26	Further Goes the Goo the	in	the		
+uiR2_Jungle11	Bald Plateau the	in	the		
+uiR2_Jungle35	Plain of Desolation the	in	the		
+uiR2_Jungle22	Tropical Corridor the	in	the		
+uiR2_Jungle14	Vegetable Diversity the	in	the		
+uiR2_Jungle53	Mask of the Zoraï the	in	the		
+uiR2_Jungle43	The Mysterious Forest the	in	the		
+uiR2_Jungle08	Mound of Spirits the	in	the		
+uiR2_Jungle24	Mountainside the	in	the		
+uiR2_Jungle25	The Circle the	in	the		
+uiR2_Jungle05	Taste of Paradise the	in	the		
+uiR2_Jungle12	Ways of the Maze the	in	the		
+uiR2_Jungle46	The Fall the	in	the		
+uiR2_Jungle41	Great Kami Plain the	in	the		
+uiR2_Jungle04	Mini-Goo the	in	the		
+uiR2_Jungle09	Underground Pathways the	in	the		
+uiR2_Forest38	Garden of Reward the	in	the		
+uiR2_Forest35	Wall of Bark the	in	the		
+uiR2_Forest44	Grove of Jen-Mawk the	in	the		
+uiR2_Forest28	Cliff of Clouds the	in	the		
+uiR2_Forest30	Crag of chaos the	in	the		
+uiR2_Forest39	Three Clearings the	in	the		
+uiR2_Forest33	Chasm of the Kincher the	in	the		
+uiR2_Forest46	The Wild Ravine the	in	the		
+uiR2_Forest06	Four-Waterfalls the	in	the		
+uiR2_Forest32	Dried-up Springs the	in	the		
+uiR2_Forest14	Great Arena the	in	the		
+uiR2_Forest10	Roots of Memory the	in	the		
+uiR2_Forest09	The White Hills the	in	the		
+uiR2_Forest20	Darkpass the	in	the		
+uiR2_Forest23	Empty Passage the	in	the		
+uiR2_Forest17	Bawaab Ridge the	in	the		
+uiR2_Forest18	Plain of Spines the	in	the		
+uiR2_Forest12	Confined Clearing the	in	the		
+uiR2_Forest07	Well of Secrets the	in	the		
+uiR2_Forest31	Mere of dreams the	in	the		
+uiR2_Forest03	Remnants of Verdure the	in	the		
+uiR2_Forest08	Raspals Ridge the	in	the		
+uiR2_Forest15	Kitins Ridge the	in	the		
+uiR2_Forest16	Whirlmount the	in	the		
+uiR2_Forest42	Lush Forest the	in	the		
+uiR2_Forest11	Madakam Ridge the	in	the		
+uiR2_Forest24	Northern Island the	in	the		
+uiR2_Forest41	Mage Tower the	in	the		
+uiR2_Forest29	Woods of wonder the	in	the		
+uiR2_Forest21	Passage of the Pit the	in	the		
+uiR2_Forest01	Matis Balcony the	in	the		
+uiR2_Forest36	The Last Well the	in	the		
+uiR2_Forest43	Serene Forest the	in	the		
+uiR2_Forest27	Forgotten Plateau the	in	the		
+uiR2_Forest05	Severed-Stump the	in	the		
+uiR2_Forest37	Beyond the Jungle the	in	the		
+uiR2_Forest40	Madakam Track the	in	the		
+uiR2_Forest19	Haunted Corridor the	in	the		
+uiR2_Forest34	Jaws of the Tobak the	in	the		
+uiR2_Forest25	Gorge of the Dance the	in	the		
+uiR2_Forest26	Long-Island the	in	the		
+uiR2_Forest04	Cynical Marshes the	in	the		
+uiR2_Forest45	Barkcleft the	in	the		
+uiR2_Forest22	Fang-Island the	in	the		
+uiR2_Forest13	The Winter Pier the	in	the		
+uiR2_Forest02	Cliff of Conflict the	in	the		
+uiR2_Deserts27	Hidden Reserves the	in	the		
+uiR2_Deserts25	The Great Circuit the	in	the		
+uiR2_Deserts12	Dragon Valley the	in	the		
+uiR2_Deserts10	Ancient Hollow the	in	the		
+uiR2_Deserts20	The Labyrinth the	in	the		
+uiR2_Deserts30	The Two Halls the	in	the		
+uiR2_Deserts14	Wooded Canyon the	in	the		
+uiR2_Deserts04	Windy Loop the	in	the		
+uiR2_Deserts01	The Botoga`s Drop the	in	the		
+uiR2_Deserts29	The Dark Pathway the	in	the		
+uiR2_Deserts24	Height of Serenity the	in	the		
+uiR2_Deserts18	The Crown the	in	the		
+uiR2_Deserts23	Connected Paths the	in	the		
+uiR2_Deserts11	Blue Oasis the	in	the		
+uiR2_Deserts26	The Hive the	in	the		
+uiR2_Deserts05	The Baking Cliffs the	in	the		
+uiR2_Deserts22	Sands of Solitude the	in	the		
+uiR2_Deserts06	Valley of Fire the	in	the		
+uiR2_Deserts31	The Furrow the	in	the		
+uiR2_Deserts28	Treacherous Passage the	in	the		
+uiR2_Deserts15	The Trail of Initiation the	in	the		
+uiR2_Deserts32	Shalah Footprints the	in	the		
+uiR2_Deserts17	Three Branches the	in	the		
+uiR2_Deserts19	Struggle for Power the	in	the		
+uiR2_Deserts09	Twin Lakes the	in	the		
+uiR2_Deserts13	Dunes of Temperance the	in	the		
+uiR2_Deserts33	Meditations of the Mace Master the	in	the		
+uiR2_Deserts07	Dunes of forgetfulness the	in	the		
+uiR2_Deserts03	The Sleeping Bodoc the	in	the		
+uiR2_Deserts16	Lair in the Heights the	in	the		
+uiR2_Deserts21	The Ambush the	in	the		
+uiR2_Deserts02	Mektoub Passage the	in	the		
+uiR2_Deserts08	Arid Pass the	in	the		
+uiR2_Lakes40	The High Plains the	in	the		
+uiR2_Lakes34	The winding maze the	in	the		
+uiR2_Lakes06	Twilight Pass the	in	the		
+uiR2_Lakes01	Green Lagoon the	in	the		
+uiR2_Lakes25	Gorges of Sitra the	in	the		
+uiR2_Lakes20	Hundred Ways the	in	the		
+uiR2_Lakes23	The Yubo Cave the	in	the		
+uiR2_Lakes17	Through the Cliff the	in	the		
+uiR2_Lakes24	The Neck the	in	the		
+uiR2_Lakes39	The Bolas the	in	the		
+uiR2_Lakes30	The K the	in	the		
+uiR2_Lakes32	Sunny Path the	in	the		
+uiR2_Lakes15	The Inland Sea the	in	the		
+uiR2_Lakes28	Tears of Sky the	in	the		
+uiR2_Lakes35	The Two Caches the	in	the		
+uiR2_Lakes10	Mystic Mere the	in	the		
+uiR2_Lakes08	Messab Triangle the	in	the		
+uiR2_Lakes12	Vale of Ponds the	in	the		
+uiR2_Lakes16	Reclaimed Dunes the	in	the		
+uiR2_Lakes33	The Narrow staircase the	in	the		
+uiR2_Lakes27	Dacoco Beach the	in	the		
+uiR2_Lakes22	Hidden crannies the	in	the		
+uiR2_Lakes02	Hidden Archipelago the	in	the		
+uiR2_Lakes19	Hidden Valley the	in	the		
+uiR2_Lakes36	Raskous Corner the	in	the		
+uiR2_Lakes26	The Hike the	in	the		
+uiR2_Lakes11	The Trident the	in	the		
+uiR2_Lakes03	Two-Isles the	in	the		
+uiR2_Lakes05	Three Peaks Valley the	in	the		
+uiR2_Lakes29	Clopper`s claw the	in	the		
+uiR2_Lakes31	The Clash the	in	the		
+uiR2_Lakes37	The Excavations the	in	the		
+uiR2_Lakes04	Clopper Bath the	in	the		
+uiR2_Lakes14	The Archway the	in	the		
+uiR2_Lakes09	Waterdell Lake the	in	the		
+uiR2_Lakes07	Dunes of Dawn the	in	the		
+uiR2_Lakes21	Voyage of Dreams the	in	the		
+uiR2_Lakes18	Liberty Land the	in	the		
+uiR2_Lakes38	The Niches the	in	the		
+uiR2_Primes30	An Ancient Hide the	in	the		
+uiR2_Primes22	Mount of Curses the	in	the		
+uiR2_Primes21	Springs of Life the	in	the		
+uiR2_Primes23	Unknown Mound the	in	the		
+uiR2_Primes15	Stalagmites of Quietude the	in	the		
+uiR2_Primes05	The Bath of Sap the	in	the		
+uiR2_Primes29	The Shining Cave the	in	the		
+uiR2_Primes20	Valley of Death the	in	the		
+uiR2_Primes01	Hall of Destiny the	in	the		
+uiR2_Primes19	Tunnels of Oblvion the	in	the		
+uiR2_Primes09	River of Doubts the	in	the		
+uiR2_Primes14	Sanctuary the	in	the		
+uiR2_Primes16	Eye of Ma-Duk the	in	the		
+uiR2_Primes25	Maro`s Steps the	in	the		
+uiR2_Primes28	Forest of Light the	in	the		
+uiR2_Primes27	Fallen Stump the	in	the		
+uiR2_Primes18	To the End of the Nightmare the	in	the		
+uiR2_Primes10	Kitins Lair the	in	the		
+uiR2_Primes08	The Nest the	in	the		
+uiR2_Primes26	Neverending Walk the	in	the		
+uiR2_Primes03	Green-cave the	in	the		
+uiR2_Primes13	The Arena the	in	the		
+uiR2_Primes17	Abandoned Cave the	in	the		
+uiR2_Primes06	The Pillars the	in	the		
+uiR2_Primes04	Plain of Torments the	in	the		
+uiR2_Primes24	Kitin Desolation the	in	the		
+uiR2_Primes07	Ruins of the Past the	in	the		
+uiR2_Primes11	Valley of Spores the	in	the		
+uiR2_Primes12	The Hive the	in	the		

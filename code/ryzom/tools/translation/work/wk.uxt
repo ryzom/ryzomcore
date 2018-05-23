@@ -7288,6 +7288,11 @@ uiGuildDescription	[Description]
 
 uiGuildBlasonDesign	[Flag Design]
 
+uiGuildNameWarning [The name should be no longer than 32 characters. No symbols or numbers.]
+
+uiGuildDescWarning [The description should be no more than 200 characters. No symbols or numbers.]
+
+uiGuildCostInfo [The Cost of creating a guild is 100,000 dappers.]
 
 uiGuildBlasonBack	[Back]
 
@@ -13427,6 +13432,7 @@ uiPvpPoints [PVP POINTS]
 uiPvpTotal [Total]
 uiOrganization [FACTION]
 uiOrganization_5 [Marauders]
+uiOrganization_7 [Ranger]
 uiOrganization_0 [ifUNDEFINED]
 uiPoints [Points:]
 uiOrganizationStatus [Rank:]
@@ -13503,8 +13509,8 @@ uiBrowse [Browse]
 
 //createGroup
 cmdCreateGroupUsage1 [createGroup command usage :]
-cmdCreateGroupUsage2 [/createGroup group_name : create a group named group_nam with all your equipped items]
-cmdCreateGroupUsage3 [/createGroup group_name true : create a group named group_nam with all your equipped items, and create a remove command for every empty slot]
+cmdCreateGroupUsage2 [/createGroup group_name : create a group named group_name with all your equipped items]
+cmdCreateGroupUsage3 [/createGroup group_name true : create a group named group_name with all your equipped items, and create a remove command for every empty slot]
 cmdCreateGroupError [A group named %name already exist, cannot create one with the same name.]
 cmdCreateGroupSuccess1 [Group %name successfully created.]
 cmdCreateGroupSuccess2 [Group %name successfully created with removal for all unequiped items.]
@@ -13544,6 +13550,7 @@ uiMacroItemGroupDestination [Item group destination]
 //map search
 uiMapSearch [Map search]
 uittMapSearch [Map search]
+
+//macro copy
 uimMacroCopy [COPY]
 uimMCCopy [COPY]
-

@@ -6888,3 +6888,15 @@ _29B958CBA68A90A0	web_transaction	Transacción
 _2015701C2C98F49B	rpjobloot_casket	Cofre/ataúd Misterioso						
 _2E488BD22789DCAB	rpjobloot_event	Bolso Misterioso						
 _02C0AA7F32FA1A42	marauder_teleport_crystal	Cristal de Teletransporte Merodeador	un	el	Cristales de Teletransporte Merodeadores	unos	los	
+_30284704CC2117ED	xmas_gingeryubo	yubo de jengibre	un	el	yubos de jengibre		los	
+_992D57D25430CAB2	xmas_gingerbread	Homincito de jengibre	un	el	Homincitos de jengibre		los	
+_E558E5FDAECBB8AB	event_sheet_music	Hoja	una	la	Hojas		las	
+_822ED5F858D9899F	ic_ice_stick	Pico para el hielo	un	el	Picos para el hielo		los	
+_7DAC507AA992B127	ic_star_stick	cayado estrellado	un	el	cayados estrellados		los	
+_AD64ADF3C56C8440	tp_kami_ranger_camp	Pacto Kami / Teleportador hacia el Campamiento Ranger	un	el	Pactos Kami / Teleportadores hacia el Campamiento Ranger		los	
+_85BA00F2EAE1B540	tp_kami_shining_lake	Pacto Kami / Teleportador hacia el Lago reluciente	un	el	Pactes Kami / Teleportadores hacia le Lago étincelant		los	
+_1BB4E021DB5BE209	tp_karavan_ranger_camp	Pacto Karavan / Teleportador hacia el Campement Ranger	un	el	Pactos Karavan / Teleportadores hacia le Campamiento Ranger		los	
+_79A8C0CE2A3D11EA	tp_karavan_shattered_ruins	Pacto Karavan / Teleportador hacia las Ruinas devastadas	un	el	Pactos Karavan / Teleportadores hacia las Ruinas devastadas		los	
+_5DBA9814E46B947A	rite_ranger_map_book	Plano	un	el	Planos		los	
+_3869B7E1D7D0813A	ranger_rite_leader_tool	maestro de heramientas	un	el	maestros de heramientas		los	
+_16FED261B53DAA77	ranger_rite_flare_gun	pistola de bengalas	una	la	pistolas de bengalas		las	

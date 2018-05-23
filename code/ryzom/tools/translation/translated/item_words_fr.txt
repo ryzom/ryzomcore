@@ -6890,3 +6890,13 @@ _2E488BD22789DCAB	rpjobloot_event	Mysterieux sac	un	le	Mysterieux sacs	des	les
 _02C0AA7F32FA1A42	marauder_teleport_crystal	Cristal de téléportation Maraudeur	un	le	Cristaux de téléportation Maraudeur	des	les			
 _30284704CC2117ED	xmas_gingeryubo	Yubo de pain d'épice	un	le	Yubos de pain d'épice	des	les			
 _992D57D25430CAB2	xmas_gingerbread	Bonhomme de pain d'épice	un	le	Bonshommes de pain d'épice	des	les			
+_E558E5FDAECBB8AB	event_sheet_music	Partition	une	la	Partitions	des	les			
+_822ED5F858D9899F	ic_ice_stick	Férule Glaciale	une	la	Férules Glaciales		les			
+_7DAC507AA992B127	ic_star_stick	Bâton étoilé	un	le	Bâtons étoilés	des	les			
+_AD64ADF3C56C8440	tp_kami_ranger_camp	Pacte Kami / Téléporteur vers le Campement Ranger	un	le	Pactes Kami / Téléporteurs vers le Campement Ranger	des	les			
+_85BA00F2EAE1B540	tp_kami_shining_lake	Pacte Kami / Téléporteur vers le Lac étincelant	un	le	Pactes Kami / Téléporteurs vers le Lac étincelant	des	les			
+_1BB4E021DB5BE209	tp_karavan_ranger_camp	Pacte Karavan / Téléporteur vers le Campement ranger	un	le	Pactes Karavan / Téléporteurs vers le Campement ranger	des	les			
+_79A8C0CE2A3D11EA	tp_karavan_shattered_ruins	Pacte Karavan / Téléporteur vers les Ruines dévastées	un	le	Pactes Karavan / Téléporteurs vers les Ruines dévastées	des	les			
+_5DBA9814E46B947A	rite_ranger_map_book	Carte	une	la	Cartes	des	les			
+_3869B7E1D7D0813A	ranger_rite_leader_tool	Éditeur de Liste	un	l’	Éditeurs de Liste	des	les			
+_16FED261B53DAA77	ranger_rite_flare_gun	Lance-fusée	un	le	Lance-fusées	des	les			

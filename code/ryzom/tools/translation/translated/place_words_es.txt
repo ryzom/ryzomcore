@@ -648,7 +648,7 @@ _0F1086393F8B083C	r_01_27_place_libertylake_2	Playa de Clopper
 _53F9A97830AA1FE7	r_12_04	"Si ves este texto, es un error: r_12_04"	
 _D8EE237CA3C73181	r_01_28_mission_tp_1	Cueva del Torbellino o Vórtice cerca de los Vientos de la Musa	la
 _321059AE9A1F0970	r_01_28_mission_tp_2	Pasaje cerca de los Vientos de la Musa	el
-_2C7D7F0D60A5B869	continent_zorai_island	<isletas zoraï>	
+_2C7D7F0D60A5B869	continent_zorai_island	Camino de Oflovak	
 _DB798FE7FE88087C	region_zorai_island1	<isleta zoraï 1>	
 _1B798FE8FE88087C	region_zorai_island2	<isleta zoraï 2>	
 _5B798FE9FE88087C	region_zorai_island3	<isleta zoraï 3>	
@@ -820,3 +820,5 @@ _5193CA370C64AE7D	mission_ff60_emplacement_message	Ubicación del Mensaje
 _4C9B80A7A9B7946E	place_marauder_camp	Campamento Merodeador	el
 _3FEFB69CBBDF4DAB	place_lieudit_marauder_arena	Arena Merodeadora	la
 _A59A81E8140A6CA7	marauder_stable	Establos Merodeadores	los
+_29AC391EC68F71FC	continent_r2_forest	Cumbres Borrascosas	las
+_BAA17AACA3D42E1E	region_zorai_islands	Camino de Oflovak -- Jungla	el

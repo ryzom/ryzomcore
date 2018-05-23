@@ -5974,3 +5974,7 @@ ckjad2	<GEN>ckjad2
 ckcpf7	<GEN>ckcpf7							
 ckfpc0	<GEN>ckfpc0							
 ckqpf7	<GEN>ckqpf7							
+chidb2_xmas	Mektoub Mount							
+chifb2_xmas	Mektoub Mount							
+chijb2_xmas	Mektoub Mount							
+chilb2_xmas	Mektoub Mount							

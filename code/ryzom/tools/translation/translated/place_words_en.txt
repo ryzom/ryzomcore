@@ -648,7 +648,7 @@ _0F1086393F8B083C	r_01_27_place_libertylake_2	Clopper beach	\d
 _53F9A97830AA1FE7	r_12_04	If you see this text, it's a bug: r_12_04	\d
 _D8EE237CA3C73181	r_01_28_mission_tp_1	Vortex Cave near the Winds of Muse	the
 _321059AE9A1F0970	r_01_28_mission_tp_2	Passage near the Winds of Muse	the
-_2C7D7F0D60A5B869	continent_zorai_island	<zoraï islets>	\d
+_2C7D7F0D60A5B869	continent_zorai_island	Oflovak Road	\d
 _DB798FE7FE88087C	region_zorai_island1	<zoraï islet 1>	\d
 _1B798FE8FE88087C	region_zorai_island2	<zoraï islet 2>	\d
 _5B798FE9FE88087C	region_zorai_island3	<zoraï islet 3>	\d
@@ -821,3 +821,204 @@ _4C9B80A7A9B7946E	place_marauder_camp	Marauder Camp	the
 _3FEFB69CBBDF4DAB	place_lieudit_marauder_arena	Marauder Arena	the
 _A59A81E8140A6CA7	marauder_stable	Marauder Stables	the
 _29AC391EC68F71FC	continent_r2_forest	Leewind Lands	the
+_77FF328F086049B2	continent_r2_roots	Unexplored Prims	the
+_CD28268946CD000E	continent_r2_desert	Unexplored Desert	the
+_77FF3278876F21B2	continent_r2_lakes	Unexplored Lakes	the
+_09D61686092E180E	continent_r2_jungle	Unexplored Jungle	the
+_BAA17AACA3D42E1E	region_zorai_islands	Oflovak Road -- Jungle	the
+_C3D3C8B1555AC85E	uiR2_Jungle30	Great Dale	the
+_6AF70C1CB1909CCB	uiR2_Jungle47	Range of the Brave	the
+_21BA3D37090079C2	uiR2_Jungle36	The Forgotten Lagoon	the
+_12770861687B8F5F	uiR2_Jungle33	The Cave	the
+_66754D16689B1BD8	uiR2_Jungle39	Wombaï`s passage	the
+_6A6D551C6AB8F3DB	uiR2_Jungle23	Mountain Bamboos	the
+_0DC71F21E929C05B	uiR2_Jungle16	High-Plateau	the
+_965FB50B65D5AC84	uiR2_Jungle01	Forest of Waves	the
+_53CD911C6CBB6423	uiR2_Jungle50	Spoiled Spring	the
+_12D3C4B5E7263862	uiR2_Jungle02	Lakes	the
+_92D96922E9A9201C	uiR2_Jungle45	Homin`s Plain	the
+_FA08001E6C49CC49	uiR2_Jungle15	Soiled Plain	the
+_4FC9442D6639581B	uiR2_Jungle44	Rock of Tears	the
+_11EDA912ED1BF82C	uiR2_Jungle19	Aquatic Jungle	the
+_0C196BA8E548B74D	uiR2_Jungle07	Hand	the
+_C7C450312DD9945C	uiR2_Jungle27	Empty Valley	the
+_D4DE111C5DA0D9C4	uiR2_Jungle21	Uneven and Variety	the
+_A79E51C72AE92037	uiR2_Jungle03	Goo and Bamboos	the
+_8DD677BE568BDC73	uiR2_Jungle38	Twin Ponds	the
+_28DF2427A7995C3C	uiR2_Jungle48	Rock of Flowers	the
+_160D790555D9C827	uiR2_Jungle34	Plateau of Goo	the
+_42C41C152B49E45E	uiR2_Jungle31	Small Circle	the
+_E97BBCCAEC37B5F0	uiR2_Jungle52	The Tears of Atys	the
+_CE1768816CEAA05D	uiR2_Jungle32	Goo Patches	the
+_8C97F8646E35D475	uiR2_Jungle49	The Chain	the
+_06C41C17ABA9E46C	uiR2_Jungle28	Small Spring	the
+_CAE73C81678BB866	uiR2_Jungle42	The Enclave	the
+_FDFA7131A3858C69	uiR2_Jungle13	Mirror of Goo	the
+_C7C4241D6B8B9065	uiR2_Jungle51	Green Spirit	the
+_69A77838800120D4	uiR2_Jungle18	Heart of the Jungle	the
+_0D48B4A932C5BC70	uiR2_Jungle29	Waterside	the
+_A80E31FF193C91D2	uiR2_Jungle06	Steepsided Valley	the
+_8614E98982BF84EE	uiR2_Jungle17	Promontories and Ridges	the
+_E85F8C9A88FE847F	uiR2_Jungle26	Further Goes the Goo	the
+_0DC7EB1D2BA9A856	uiR2_Jungle11	Bald Plateau	the
+_E4C99D3D019E48D7	uiR2_Jungle35	Plain of Desolation	the
+_24DD59266E0A64E0	uiR2_Jungle22	Tropical Corridor	the
+_656DD12FFD3D75DB	uiR2_Jungle14	Vegetable Diversity	the
+_A9FDD4CFED4B8F87	uiR2_Jungle53	Mask of the Zoraï	the
+_9AA1D25242C161B4	uiR2_Jungle43	The Mysterious Forest	the
+_ADF955182EC9F3D8	uiR2_Jungle08	Mound of Spirits	the
+_8CD83C172EC9D066	uiR2_Jungle24	Mountainside	the
+_0E67047055B9FC65	uiR2_Jungle25	The Circle	the
+_6859052AECCA30E1	uiR2_Jungle05	Taste of Paradise	the
+_2C6DB0D46C3A6C7E	uiR2_Jungle12	Ways of the Maze	the
+_D1771461687B8F69	uiR2_Jungle46	The Fall	the
+_E2797DF2165B10C7	uiR2_Jungle41	Great Kami Plain	the
+_90D5AFAAAA8B736A	uiR2_Jungle04	Mini-Goo	the
+_6B4E753C481FD5D4	uiR2_Jungle09	Underground Pathways	the
+_194E8908E655E4D2	uiR2_Forest38	Garden of Reward	the
+_0BA9071970082419	uiR2_Forest35	Wall of Bark	the
+_67D85026ED1904E4	uiR2_Forest44	Grove of Jen-Mawk	the
+_E9FB99186A767782	uiR2_Forest28	Cliff of Clouds	the
+_0EBA6024E7394817	uiR2_Forest30	Crag of chaos	the
+_1E2B79112D18D089	uiR2_Forest39	Three Clearings	the
+_A769BC8C842FD8CB	uiR2_Forest33	Chasm of the Kincher	the
+_272F2DD9A627BB7E	uiR2_Forest46	The Wild Ravine	the
+_E6EE9016EB99988E	uiR2_Forest06	Four-Waterfalls	the
+_AB0A4D162C99BFDC	uiR2_Forest32	Dried-up Springs	the
+_81F414C0674A846E	uiR2_Forest14	Great Arena	the
+_2BDCB5242946B37A	uiR2_Forest10	Roots of Memory	the
+_E8FF39CC6004D091	uiR2_Forest09	The White Hills	the
+_1168D8AAACAA3F6A	uiR2_Forest20	Darkpass	the
+_49C68D29AB99905B	uiR2_Forest23	Empty Passage	the
+_FAD90C086F386C4D	uiR2_Forest17	Bawaab Ridge	the
+_A90B9D156977AB82	uiR2_Forest18	Plain of Spines	the
+_260F310D6F78E4D7	uiR2_Forest12	Confined Clearing	the
+_27F04021E828943B	uiR2_Forest07	Well of Secrets	the
+_521F780EEBC98024	uiR2_Forest31	Mere of dreams	the
+_AA2E21ED03B070D2	uiR2_Forest03	Remnants of Verdure	the
+_918A2D252C38401F	uiR2_Forest08	Raspals Ridge	the
+_FAEA4010AFB8904B	uiR2_Forest15	Kitins Ridge	the
+_0D98C4C057490078	uiR2_Forest16	Whirlmount	the
+_CD56C3C7AFCB986C	uiR2_Forest42	Lush Forest	the
+_50DA551669382C18	uiR2_Forest11	Madakam Ridge	the
+_E7EF51236D06A386	uiR2_Forest24	Northern Island	the
+_CE0793B3D6B9B475	uiR2_Forest41	Mage Tower	the
+_A90B8915ABE9C783	uiR2_Forest29	Woods of wonder	the
+_D38E3935E13F8D6E	uiR2_Forest21	Passage of the Pit	the
+_45C6C5252FD89459	uiR2_Forest01	Matis Balcony	the
+_51DAF5DAE9877F71	uiR2_Forest36	The Last Well	the
+_BE1A9D262C09B840	uiR2_Forest43	Serene Forest	the
+_29904915694661D0	uiR2_Forest27	Forgotten Plateau	the
+_CE1A9D2031294829	uiR2_Forest05	Severed-Stump	the
+_D42E95FB1FFAF9EA	uiR2_Forest37	Beyond the Jungle	the
+_11DA6D12A8C93417	uiR2_Forest40	Madakam Track	the
+_E9EE8D1FAF495C92	uiR2_Forest19	Haunted Corridor	the
+_24EED8D5EFEA6188	uiR2_Forest34	Jaws of the Tobak	the
+_A508281AB30F14D6	uiR2_Forest25	Gorge of the Dance	the
+_4D86F7C66A19886A	uiR2_Forest26	Long-Island	the
+_A91F591F2C292C38	uiR2_Forest04	Cynical Marshes	the
+_8DC894ADB264946E	uiR2_Forest45	Barkcleft	the
+_4D86F7C66A397066	uiR2_Forest22	Fang-Island	the
+_299F2DB35629D08B	uiR2_Forest13	The Winter Pier	the
+_68CA3916EE4818CE	uiR2_Forest02	Cliff of Conflict	the
+_790F6D082C774B8C	uiR2_Deserts27	Hidden Reserves	the
+_365D34F65FAFE0D9	uiR2_Deserts25	The Great Circuit	the
+_647F7115ED06D324	uiR2_Deserts12	Dragon Valley	the
+_FAFF7D12AB742289	uiR2_Deserts10	Ancient Hollow	the
+_213C901BAA185767	uiR2_Deserts20	The Labyrinth	the
+_A66E7019A875F275	uiR2_Deserts30	The Two Halls	the
+_E22E8D30AC378F24	uiR2_Deserts14	Wooded Canyon	the
+_C989D0CD6C085744	uiR2_Deserts04	Windy Loop	the
+_AEE85C13AF9E20E3	uiR2_Deserts01	The Botoga`s Drop	the
+_38CC540827F528D8	uiR2_Deserts29	The Dark Pathway	the
+_379F711BB5CEFC88	uiR2_Deserts24	Height of Serenity	the
+_5EF68FB357079F6D	uiR2_Deserts18	The Crown	the
+_77EF51FDD91787E0	uiR2_Deserts23	Connected Paths	the
+_94F4D4D4ED575B5A	uiR2_Deserts11	Blue Oasis	the
+_5D8683A770F31F7B	uiR2_Deserts26	The Hive	the
+_74AC9CD3303EF4CE	uiR2_Deserts05	The Baking Cliffs	the
+_E78F512B6969D4E3	uiR2_Deserts22	Sands of Solitude	the
+_39307DF595A77734	uiR2_Deserts06	Valley of Fire	the
+_1E56BFC4EDD8576D	uiR2_Deserts31	The Furrow	the
+_F4EE887FCB8D2CCE	uiR2_Deserts28	Treacherous Passage	the
+_4E2FFD7472EF4435	uiR2_Deserts15	The Trail of Initiation	the
+_36FF8123323E948E	uiR2_Deserts32	Shalah Footprints	the
+_665F5D18EA378757	uiR2_Deserts17	Three Branches	the
+_AE6ADD40482A20D4	uiR2_Deserts19	Struggle for Power	the
+_D4F4F8C8AF385B59	uiR2_Deserts09	Twin Lakes	the
+_E3F1CD7A4368A0D6	uiR2_Deserts13	Dunes of Temperance	the
+_E75C52ADDA00A410	uiR2_Deserts33	Meditations of the Mace Master	the
+_BF971A8E4679F0F7	uiR2_Deserts07	Dunes of forgetfulness	the
+_6C295C3242DFBCCC	uiR2_Deserts03	The Sleeping Bodoc	the
+_3539CC8388CDABCC	uiR2_Deserts16	Lair in the Heights	the
+_1C06BFC42A19635C	uiR2_Deserts21	The Ambush	the
+_BB5EB11DA7766EBE	uiR2_Deserts02	Mektoub Passage	the
+_D6C4A0B7D9278F5E	uiR2_Deserts08	Arid Pass	the
+_139BA1F99488B447	uiR2_Lakes40	The High Plains	the
+_252C552743685CA1	uiR2_Lakes34	The winding maze	the
+_50F5241EEEA8F438	uiR2_Lakes06	Twilight Pass	the
+_8972C3CDE8A97076	uiR2_Lakes01	Green Lagoon	the
+_15E6D92167C80F80	uiR2_Lakes25	Gorges of Sitra	the
+_F914D8D1E9DA4467	uiR2_Lakes20	Hundred Ways	the
+_4DB55C009C688438	uiR2_Lakes23	The Yubo Cave	the
+_173A65F7D7DA88F5	uiR2_Lakes17	Through the Cliff	the
+_8DC5C091CF887838	uiR2_Lakes24	The Neck	the
+_4F04D481560AE78E	uiR2_Lakes39	The Bolas	the
+_0CF6878D12473F6A	uiR2_Lakes30	The K	the
+_0BF387BBEF54489A	uiR2_Lakes32	Sunny Path	the
+_4E5651FC5104F889	uiR2_Lakes15	The Inland Sea	the
+_8CC4C3D2EE29CC3C	uiR2_Lakes28	Tears of Sky	the
+_FEA6BD079738EC5E	uiR2_Lakes35	The Two Caches	the
+_4590A0B75829B07F	uiR2_Lakes10	Mystic Mere	the
+_10067D10ABB90C92	uiR2_Lakes08	Messab Triangle	the
+_3AE544D569A8186A	uiR2_Lakes12	Vale of Ponds	the
+_D3CB7D17ACE6E789	uiR2_Lakes16	Reclaimed Dunes	the
+_E99B4D2131ECEDEE	uiR2_Lakes33	The Narrow staircase	the
+_42D000C2E9C9F471	uiR2_Lakes27	Dacoco Beach	the
+_51079116E898FC8D	uiR2_Lakes22	Hidden crannies	the
+_5B8655176A3AC1F4	uiR2_Lakes02	Hidden Archipelago	the
+_8981402069082C6D	uiR2_Lakes19	Hidden Valley	the
+_3EE7B122EA0A085C	uiR2_Lakes36	Raskous Corner	the
+_8C45D08BCF887838	uiR2_Lakes26	The Hike	the
+_4B24DCA243395C86	uiR2_Lakes11	The Trident	the
+_CED4E48899AA238E	uiR2_Lakes03	Two-Isles	the
+_E8890CFD58CC05ED	uiR2_Lakes05	Three Peaks Valley	the
+_0FC7851FACD8F77D	uiR2_Lakes29	Clopper`s claw	the
+_D154C882560AE783	uiR2_Lakes31	The Clash	the
+_124BDDFC9609F89D	uiR2_Lakes37	The Excavations	the
+_FAD5D8CF2A9A204D	uiR2_Lakes04	Clopper Bath	the
+_0DC4DC8F43892898	uiR2_Lakes14	The Archway	the
+_12D6392B26B7CB8A	uiR2_Lakes09	Waterdell Lake	the
+_0C6507232DF8BC28	uiR2_Lakes07	Dunes of Dawn	the
+_A967450F27773FA0	uiR2_Lakes21	Voyage of Dreams	the
+_FB5514D166691460	uiR2_Lakes18	Liberty Land	the
+_4F24AC905CC4408C	uiR2_Lakes38	The Niches	the
+_251F51D4C3DAD079	uiR2_Primes30	An Ancient Hide	the
+_E9FB912B6DD7C77C	uiR2_Primes22	Mount of Curses	the
+_677F5100571A1C35	uiR2_Primes21	Springs of Life	the
+_D02B29322C99601A	uiR2_Primes23	Unknown Mound	the
+_AEC50A4B40E005D3	uiR2_Primes15	Stalagmites of Quietude	the
+_EBCF498BA529E381	uiR2_Primes05	The Bath of Sap	the
+_2CDE3987A6DA4CD3	uiR2_Primes29	The Shining Cave	the
+_54810D1CDFC50483	uiR2_Primes20	Valley of Death	the
+_A97F182BAA194435	uiR2_Primes01	Hall of Destiny	the
+_AB3EF9135E50DD8F	uiR2_Primes19	Tunnels of Oblvion	the
+_69EC45252B87DB83	uiR2_Primes09	River of Doubts	the
+_CB49A0AD6F951479	uiR2_Primes14	Sanctuary	the
+_FD1A45EB5F26704A	uiR2_Primes16	Eye of Ma-Duk	the
+_3ADAD02C2F79EC4C	uiR2_Primes25	Maro`s Steps	the
+_57705D1962A5C48B	uiR2_Primes28	Forest of Light	the
+_3A89E426ED7AD04E	uiR2_Primes27	Fallen Stump	the
+_73C0E2B370D31E1A	uiR2_Primes18	To the End of the Nightmare	the
+_3919C4D02D9AAC44	uiR2_Primes10	Kitins Lair	the
+_91981867274BA773	uiR2_Primes08	The Nest	the
+_EBAE05CCEAAA34CC	uiR2_Primes26	Neverending Walk	the
+_CA8494BB142A0861	uiR2_Primes03	Green-cave	the
+_CC19D46A2D05B874	uiR2_Primes13	The Arena	the
+_D42E751FDCA5786F	uiR2_Primes17	Abandoned Cave	the
+_0C784C87A91BD06A	uiR2_Primes06	The Pillars	the
+_A94A3D25AA8A70E1	uiR2_Primes04	Plain of Torments	the
+_21DA6911ACFA50CE	uiR2_Primes24	Kitin Desolation	the
+_66F91C1DEB1D7CE3	uiR2_Primes07	Ruins of the Past	the
+_56003123638648DA	uiR2_Primes11	Valley of Spores	the
+_92D80067274BA75E	uiR2_Primes12	The Hive	the

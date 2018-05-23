@@ -1903,3 +1903,10 @@ _20B0F1D427E793A1	gn_kami_altar_nexus	Autel kamiste du Nexus
 _605D8587427E9DCE	gn_karavan_altar_nexus	Autel karavan du Nexus		
 _6C340CB6625A1CA8	gn_gravats	Gravats		
 _294880982226786E	gn_room_access	Terminal d'accès		
+_B1BFD0FB3C756DEC	gn_karavan_altar_silan_ranger_camp	Autel Karavan du Campement Ranger		
+_64D6E3A8FE84A1EB	gn_kami_altar_silan_ranger_camp	Autel Kami du Campement ranger		
+_10893D87C3BA7E54	gn_karavan_altar_silan_shattered_ruins	Autel Karavan des Ruines dévastées		
+_EFF84EA588CCC3AF	gn_kami_altar_silan_shining_lake	Autel Kami du Lac étincelant		
+_31E04D192D7A1D0A	fct_ranger_instructor	Instructeur Ranger	Instructrice Ranger		
+_445F7D25463D70FD	fct_ranger_assistant	Instructeur Assistant	Instructrice Assistante		
+_25C68F9A69B988B9	fct_ranger_veteran	Vétéran Ranger	Vétérane Ranger		

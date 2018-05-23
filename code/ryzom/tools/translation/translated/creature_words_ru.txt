@@ -4172,3 +4172,7 @@ _B9CF0D05CEE7989D	object_pr_s3_cokamool_c	Cokamool Tiny
 _A07A2D256EA4A79B	object_pr_s2_toopetz_a	Toopetz Gret			
 _A07A0D212F74AB9B	object_pr_s2_toopetz_b	Toopetz Dual			
 _A07A5C396E75AF9B	object_pr_s2_toopetz_c	Toopetz Try			
+_D86550A834171298	chidb2_xmas	Ездовой мектуб	Ездовые мектубы	Ездовых мектубов	Ездового мектуба
+_D86550A834171298	chifb2_xmas	Ездовой мектуб	Ездовые мектубы	Ездовых мектубов	Ездового мектуба
+_DA6550A834171298	chijb2_xmas	Ездовой мектуб	Ездовые мектубы	Ездовых мектубов	Ездового мектуба
+_DC6550A834171298	chilb2_xmas	Ездовой мектуб	Ездовые мектубы	Ездовых мектубов	Ездового мектуба
