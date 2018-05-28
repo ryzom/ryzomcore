@@ -242,6 +242,9 @@ external_stlport
 nel_tools*
 ryzom_tools*
 
+#personal projects
+personal/
+
 #Dumps
 *.dmp
 
