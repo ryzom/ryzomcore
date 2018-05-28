@@ -479,6 +479,10 @@ IF(WITH_STUDIO)
   ADD_SUBDIRECTORY(studio)
 ENDIF()
 
+IF(WITH_PERSONAL)
+  ADD_SUBDIRECTORY(personal)
+ENDIF()
+
 # To build the documention, you will have to enable it
 # and then do the equivalent of "make DoxygenDoc".
 IF(BUILD_DOCUMENTATION)
