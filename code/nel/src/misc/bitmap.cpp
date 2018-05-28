@@ -1356,10 +1356,14 @@ bool CBitmap::decompressDXT1(bool alpha)
 			{
 				for(k=0; k<4; k++)
 				{
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k]= c[bits&3].R;
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k+1]= c[bits&3].G;
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k+2]= c[bits&3].B;
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k+3]= c[bits&3].A;
+					uint32 index = pixelsCount + (j*wtmp+k)*4;
+					// incase input image does not have proper width/height
+					if (index+3 > mipMapSz) break;
+
+					dataTmp[m][index+0]= c[bits&3].R;
+					dataTmp[m][index+1]= c[bits&3].G;
+					dataTmp[m][index+2]= c[bits&3].B;
+					dataTmp[m][index+3]= c[bits&3].A;
 					bits>>=2;
 				}
 			}
@@ -1466,10 +1470,14 @@ bool CBitmap::decompressDXT3()
 			{
 				for(k=0; k<4; k++)
 				{
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k]= c[bits&3].R;
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k+1]= c[bits&3].G;
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k+2]= c[bits&3].B;
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k+3]= alpha[4*j+k];
+					uint32 index = pixelsCount + (j*wtmp+k)*4;
+					// incase input image does not have proper width/height
+					if (index+3 > mipMapSz) break;
+
+					dataTmp[m][index+0]= c[bits&3].R;
+					dataTmp[m][index+1]= c[bits&3].G;
+					dataTmp[m][index+2]= c[bits&3].B;
+					dataTmp[m][index+3]= alpha[4*j+k];
 					bits>>=2;
 				}
 			}
@@ -1602,10 +1610,14 @@ bool CBitmap::decompressDXT5()
 			{
 				for(k=0; k<4; k++)
 				{
-					dataTmp[m][pixelsCount + (j*wtmp+k)*4 +0]= c[bits&3].R;
-					dataTmp[m][pixelsCount + (j*wtmp+k)*4 +1]= c[bits&3].G;
-					dataTmp[m][pixelsCount + (j*wtmp+k)*4 +2]= c[bits&3].B;
-					dataTmp[m][pixelsCount + (j*wtmp+k)*4 +3]= (uint8) alpha[codeAlpha[4*j+k]];
+					uint32 index = pixelsCount + (j*wtmp+k)*4;
+					// incase input image does not have proper width/height
+					if (index+3 > mipMapSz) break;
+
+					dataTmp[m][index+0]= c[bits&3].R;
+					dataTmp[m][index+1]= c[bits&3].G;
+					dataTmp[m][index+2]= c[bits&3].B;
+					dataTmp[m][index+3]= (uint8) alpha[codeAlpha[4*j+k]];
 					bits>>=2;
 				}
 			}
