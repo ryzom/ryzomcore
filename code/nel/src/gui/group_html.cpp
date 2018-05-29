@@ -4027,13 +4027,6 @@ namespace NLGUI
 
 	void CGroupHTML::endParagraph()
 	{
-		// Remove previous paragraph if empty
-		if (_Paragraph && (_Paragraph->getNumChildren() == 0))
-		{
-			_Paragraph->getParent ()->delGroup(_Paragraph);
-			_Paragraph = NULL;
-		}
-
 		_Paragraph = NULL;
 
 		paragraphChange ();
@@ -4043,13 +4036,6 @@ namespace NLGUI
 
 	void CGroupHTML::newParagraph(uint beginSpace)
 	{
-		// Remove previous paragraph if empty
-		if (_Paragraph && (_Paragraph->getNumChildren() == 0))
-		{
-			_Paragraph->getParent ()->delGroup(_Paragraph);
-			_Paragraph = NULL;
-		}
-
 		// Add a new paragraph
 		CGroupParagraph *newParagraph = new CGroupParagraph(CViewBase::TCtorParam());
 		newParagraph->setResizeFromChildH(true);
@@ -4890,13 +4876,6 @@ namespace NLGUI
 	{
 		if (!group)
 			return;
-
-		// Remove previous paragraph if empty
-		if (_Paragraph && (_Paragraph->getNumChildren() == 0))
-		{
-			_Paragraph->getParent ()->delGroup(_Paragraph);
-			_Paragraph = NULL;
-		}
 
 		registerAnchor(group);
 
