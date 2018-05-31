@@ -5832,6 +5832,8 @@ namespace NLGUI
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 		std::string html = ls.toString(1);
 
+		// Always trust domain if rendered from lua
+		_TrustedDomain = true;
 		renderHtmlString(html);
 
 		return 0;
