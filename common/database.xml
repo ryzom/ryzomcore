@@ -1625,7 +1625,7 @@
           type="S8" />
     <!-- value where the guards kill you on sight -->
     <branch name="PLAYER"
-            count="6">
+            count="7">
       <!-- from fame.h & cpp -->
       <leaf name="VALUE"
             type="S8" />
