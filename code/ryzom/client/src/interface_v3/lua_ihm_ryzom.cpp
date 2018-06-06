@@ -491,6 +491,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	luabind::module(L)
 	[
 		LUABIND_FUNC(getDbProp),
+		LUABIND_FUNC(getDbProp64),
 		LUABIND_FUNC(setDbProp),
 		LUABIND_FUNC(addDbProp),
 		LUABIND_FUNC(delDbProp),
@@ -2569,6 +2570,22 @@ sint32	CLuaIHMRyzom::getDbProp(const std::string &dbProp)
 		return 0;
 	}
 }
+
+sint64	CLuaIHMRyzom::getDbProp64(const std::string &dbProp)
+{
+	//H_AUTO(Lua_CLuaIHM_getDbProp)
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbProp,    false);
+
+	if (node)
+		return node->getValue64();
+	else
+	{
+		debugInfo(toString("getDbProp(): '%s' dbProp Not found",    dbProp.c_str()));
+		return 0;
+	}
+}
+
 
 void	CLuaIHMRyzom::setDbProp(const std::string &dbProp,    sint32 value)
 {
