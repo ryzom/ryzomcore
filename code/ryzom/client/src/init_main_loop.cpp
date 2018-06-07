@@ -593,6 +593,8 @@ void initMainLoop()
 		Scene->setGroupLoadMaxPolygon("Skin", ClientCfg.SkinNbMaxPoly);
 		Scene->setGroupLoadMaxPolygon("Fx", ClientCfg.FxNbMaxPoly);
 		Scene->setMaxSkeletonsInNotCLodForm(ClientCfg.NbMaxSkeletonNotCLod);
+		// separate group for mouse/target selection reticle
+		Scene->setGroupLoadMaxPolygon("SelectionFx", 10000);
 		// enable Scene Lighting
 		Scene->enableLightingSystem(true);
 		Scene->setAmbientGlobal(CRGBA::Black);

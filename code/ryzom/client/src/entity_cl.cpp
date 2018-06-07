@@ -3059,6 +3059,7 @@ void	CEntityCL::updateVisiblePostPos(const NLMISC::TTime &/* currentTimeInMs */,
 			if (!instance.empty())
 			{
 				_SelectionFX.cast (instance);
+				_SelectionFX.setLoadBalancingGroup("SelectionFx");
 				if (_SelectionFX.empty())
 				{
 					// shape found, but not a particle system
@@ -3087,6 +3088,7 @@ void	CEntityCL::updateVisiblePostPos(const NLMISC::TTime &/* currentTimeInMs */,
 			if (!instance.empty())
 			{
 				_MouseOverFX.cast (instance);
+				_MouseOverFX.setLoadBalancingGroup("SelectionFx");
 				if (_MouseOverFX.empty())
 				{
 					// shape found, but not a particle system
