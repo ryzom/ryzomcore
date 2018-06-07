@@ -1,3 +1,7 @@
+
+
+#ifndef INCLUDED_database_PLR_H
+#define INCLUDED_database_PLR_H
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -14,11 +18,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-#ifndef INCLUDED_DATABASE_PLR_H
-#define INCLUDED_DATABASE_PLR_H
 /////////////////////////////////////////////////////////////////
-// WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//		WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//
 /////////////////////////////////////////////////////////////////
 
 #include "nel/misc/string_common.h"
@@ -493,7 +505,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_IS_INVISIBLE;
 		ICDBStructNode	*_COUNTER;
 		TSKILL_POINTS_ _SKILL_POINTS_[4];
-		TFACTION_POINTS_ _FACTION_POINTS_[6];
+		TFACTION_POINTS_ _FACTION_POINTS_[7];
 		TRRPS_LEVELS _RRPS_LEVELS[6];
 		TNPC_CONTROL	_NPC_CONTROL;
 		
@@ -1003,7 +1015,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		}
 		TFACTION_POINTS_ &getFACTION_POINTS_(uint32 index)
 		{
-			nlassert(index < 6);
+			nlassert(index < 7);
 			return _FACTION_POINTS_[index];
 		}
 		TRRPS_LEVELS &getRRPS_LEVELS(uint32 index)
@@ -9978,7 +9990,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_CIV_ALLEGIANCE;
 		ICDBStructNode	*_THRESHOLD_TRADE;
 		ICDBStructNode	*_THRESHOLD_KOS;
-		TPLAYER _PLAYER[6];
+		TPLAYER _PLAYER[7];
 		TTRIBE _TRIBE[53];
 		
 
@@ -10079,7 +10091,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		}
 	TPLAYER &getPLAYER(uint32 index)
 		{
-			nlassert(index < 6);
+			nlassert(index < 7);
 			return _PLAYER[index];
 		}
 		TTRIBE &getTRIBE(uint32 index)
@@ -10714,4 +10726,4 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 	
 
-#endif // INCLUDED_DATABASE_PLR_H
+#endif // INCLUDED_database_PLR_H

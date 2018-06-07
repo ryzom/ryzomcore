@@ -1,3 +1,4 @@
+
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -15,8 +16,20 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /////////////////////////////////////////////////////////////////
-// WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//		WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//
 /////////////////////////////////////////////////////////////////
+
 #include "stdpch.h"
 #include "database_guild.h"
 
@@ -138,7 +151,7 @@ void CBankAccessor_GUILD::TGUILD::TFAME::init(ICDBStructNode *parent)
 
 	// branch init
 	
-	for (uint i=0; i<6; ++i)
+	for (uint i=0; i<7; ++i)
 	{
 		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("%u", i)), false );
 		nlassert(node != NULL);
@@ -509,7 +522,7 @@ void CBankAccessor_GUILD::TGUILD::TOUTPOST::TO::TSQUADS::init(ICDBStructNode *pa
 	{
 		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("SP%u", i)), false );
 		nlassert(node != NULL);
-		__SP[i].init(node, i);
+		_SP[i].init(node, i);
 	}
 	
 	for (uint i=0; i<24; ++i)

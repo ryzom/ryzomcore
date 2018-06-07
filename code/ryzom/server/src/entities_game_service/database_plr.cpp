@@ -1,3 +1,4 @@
+
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -15,8 +16,20 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /////////////////////////////////////////////////////////////////
-// WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//		WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//
 /////////////////////////////////////////////////////////////////
+
 #include "stdpch.h"
 #include "database_plr.h"
 
@@ -377,7 +390,7 @@ void CBankAccessor_PLR::TUSER::init(ICDBStructNode *parent)
 		_SKILL_POINTS_[i].init(node, i);
 	}
 	
-	for (uint i=0; i<6; ++i)
+	for (uint i=0; i<7; ++i)
 	{
 		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("FACTION_POINTS_%u", i)), false );
 		nlassert(node != NULL);
@@ -3180,7 +3193,7 @@ void CBankAccessor_PLR::TPACK_ANIMAL::TBEAST::init(ICDBStructNode *parent, uint 
 	nlassert(node != NULL);
 	_DESPAWN = node;
 	
-	node  = parent->getNode( ICDBStructNode::CTextId("NAME"), true );
+	node  = parent->getNode( ICDBStructNode::CTextId("NAME"), false );
 	nlassert(node != NULL);
 	_NAME = node;
 	
@@ -3363,7 +3376,7 @@ void CBankAccessor_PLR::TFAME::init(ICDBStructNode *parent)
 
 	// branch init
 	
-	for (uint i=0; i<6; ++i)
+	for (uint i=0; i<7; ++i)
 	{
 		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("PLAYER%u", i)), false );
 		nlassert(node != NULL);
