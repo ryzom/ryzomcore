@@ -90,7 +90,7 @@
             type="I32" />
     </branch>
     <branch name="FACTION_POINTS_"
-            count="6">
+            count="7">
       <!-- game_share/pvp_clan.h (0 is BeginClans and size is EndClans-BeginClans+1 -->
       <leaf name="VALUE"
             type="I32" />
@@ -1117,7 +1117,7 @@
             type="I3" />
       <!-- Guild civilization allegiance (CF TPVPClan enum (pvp_clan.h) -->
       <branch name=""
-              count="6">
+              count="7">
         <!-- from fame.h & cpp -->
         <leaf name="VALUE"
               type="S8" />
