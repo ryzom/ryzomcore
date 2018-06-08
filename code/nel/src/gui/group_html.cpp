@@ -482,6 +482,7 @@ namespace NLGUI
 		if (Curls.size() < options.curlMaxConnections) {
 			if (!startCurlDownload(Curls.back()))
 			{
+				CLuaManager::getInstance().executeLuaScript("downloadedImage('"+this->_Id+"', '"+url+"', '"+dest+"')", true);
 				Curls.pop_back();
 				return;
 			}
@@ -778,6 +779,8 @@ namespace NLGUI
 										obj.LastModified = it->data->getLastModified();
 
 										CHttpCache::getInstance()->store(it->dest, obj);
+										
+										CLuaManager::getInstance().executeLuaScript("downloadedImage('"+this->_Id+"', '"+it->url+"', '"+it->dest+"')", true);
 									}
 								}
 							}
@@ -812,6 +815,7 @@ namespace NLGUI
 												{
 													setImage(it->imgs[i].Image, it->dest, it->imgs[i].Type);
 													setImageSize(it->imgs[i].Image, it->imgs[i].Style);
+													CLuaManager::getInstance().executeLuaScript("downloadedImage('"+this->_Id+"', '"+it->url+"', '"+it->dest+"')", true);
 												}
 											}
 										}
@@ -4456,6 +4460,7 @@ namespace NLGUI
 		{
 			newImage->setRenderLayer(getRenderLayer()+1);
 			image = finalUrl;
+			CLuaManager::getInstance().executeLuaScript("downloadedImage('"+this->_Id+"', '"+image+"', '"+finalUrl+"')", true);
 		}
 		else
 		{
