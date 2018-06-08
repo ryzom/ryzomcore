@@ -499,7 +499,6 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	[
 		LUABIND_FUNC(getDbProp),
 		LUABIND_FUNC(getDbProp64),
-		LUABIND_FUNC(md5),
 		LUABIND_FUNC(setDbProp),
 		LUABIND_FUNC(addDbProp),
 		LUABIND_FUNC(delDbProp),
@@ -2592,11 +2591,6 @@ sint64	CLuaIHMRyzom::getDbProp64(const std::string &dbProp)
 		debugInfo(toString("getDbProp(): '%s' dbProp Not found",    dbProp.c_str()));
 		return 0;
 	}
-}
-
-string	CLuaIHMRyzom::md5(const std::string &text)
-{
-	return getMD5((uint8*)text.c_str(), text.size()).toString();
 }
 
 

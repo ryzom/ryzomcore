@@ -8,25 +8,6 @@ if (webig.sheetLists==nil) then
 	webig.sheetLists = {}
 end
 
-if (webig.downloadedImageCallbacks==nil) then
-	webig.downloadedImageCallbacks = {}
-end
-
-function webig:addDownloadedImageCallbacks(ui, nbr_images, callback)
-	webig.downloadedImageCallbacks[ui] = {nbr_images, callback}
-end
-
-function downloadedImage(ui, src, dest)
-	if webig.downloadedImageCallbacks[ui] ~= nil then
-		local cb = webig.downloadedImageCallbacks[ui]
-		cb[1] = cb[1] - 1
-		if cb[1] <= 0 then
-			local c = cb[2]
-			_G[c]()
-			webig.downloadedImageCallbacks[ui] = nil
-		end
-	end
-end
 
 function webig:addSheet(dst, sheet, quality, quantity, worned, user_color, rm_class_type, rm_faber_stat_type)
 	if quality == nil then quality=0 end
