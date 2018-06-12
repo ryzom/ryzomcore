@@ -106,6 +106,10 @@ namespace NLGUI
 			sint32 MaxHeight;
 		};
 
+		// ImageDownload system
+		enum TDataType {ImgType= 0, BnpType};
+		enum TImageType {NormalImage=0, OverImage};
+		
 		// Constructor
 		CGroupHTML(const TCtorParam &param);
 		~CGroupHTML();
@@ -151,6 +155,10 @@ namespace NLGUI
 
 		// End of the paragraph
 		void endParagraph();
+		
+		// add image download (used by view_bitmap.cpp to load web images)
+		void addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams(), const TImageType type = NormalImage);
+		std::string localImageName(const std::string &url);
 
 		// Timeout
 		void	setTimeout(float tm) {_TimeoutValue= std::max(0.f, tm);}
@@ -729,6 +737,8 @@ namespace NLGUI
 				return 0;
 			return _Indent.back();
 		}
+		
+
 
 		// Current node is a title
 		bool			_Title;
@@ -818,10 +828,6 @@ namespace NLGUI
 	private:
 		// decode all HTML entities
 		static ucstring decodeHTMLEntities(const ucstring &str);
-
-		// ImageDownload system
-		enum TDataType {ImgType= 0, BnpType};
-		enum TImageType {NormalImage=0, OverImage};
 		
 		struct CDataImageDownload
 		{
@@ -864,8 +870,6 @@ namespace NLGUI
 
 		void initImageDownload();
 		void checkImageDownload();
-		void addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams(), const TImageType type = NormalImage);
-		std::string localImageName(const std::string &url);
 		std::string getAbsoluteUrl(const std::string &url);
 
 		bool isTrustedDomain(const std::string &domain);
