@@ -1570,6 +1570,8 @@ namespace NLGUI
 						{
 							if ((*it).first == "template")
 								templateName = (*it).second;
+							else if ((*it).first == "display" && (*it).second == "inline-block")
+								_BlockLevelElement.back() = false;
 							else
 								tmplParams.push_back(TTmplParam((*it).first, (*it).second));
 						}
