@@ -25,6 +25,8 @@
 	<action id="teleport" name="uiTeleport" handler="map_teleport" params=""/>
 	<action id="create_at_user_pos" name="uiCreateUserLMAtUserPos" handler="create_user_landmark_at_user_pos" params=""/>
 	<separator/>
+	<action id="search" name="uiMapSearch" handler="proc" params="map_search_show"/>
+	<separator/>
 	<action id="center" name="uiMenuCenter" handler="map_center" params="map=ui:interface:map:content:map_content:actual_map"/>
 </group>
 
@@ -144,6 +146,7 @@
 <!-- *								USER MAP							* -->
 <!-- ******************************************************************** -->
 
+<variable entry="UI:VARIABLES:ISACTIVE:MAP_SEARCH" type="sint32" value="0" />
 
 <proc id="map_proc_active">
 	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:MAP|value=1" />
@@ -155,9 +158,76 @@
 	<action handler="lua" params="if (r2 and r2.Mode == 'Edit') then r2.ToolUI:updateToggleWindowButtons() end" />
 </proc>
 
+<proc id="map_search_toggle">
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:MAP_SEARCH|value=not(@UI:VARIABLES:ISACTIVE:MAP_SEARCH)"/>
+	<action handler="proc" params="map_search_focus" cond="@UI:VARIABLES:ISACTIVE:MAP_SEARCH"/>
+	<action handler="proc" params="map_search_reset" cond="not(@UI:VARIABLES:ISACTIVE:MAP_SEARCH)"/>
+</proc>
 
+<proc id="map_search_focus">
+	<action handler="set_keyboard_focus" params="target=ui:interface:map:content:map_content:lm_search:search:eb|select_all=true" />
+</proc>
+
+<proc id="map_search_reset">
+	<action handler="proc" params="map_search_setfilter" />
+</proc>
+
+<proc id="map_search_show">
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:MAP_SEARCH|value=1" />
+	<action handler="proc" params="map_search_focus" />
+</proc>
+
+<proc id="map_search_hide">
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:MAP_SEARCH|value=0" />
+</proc>
+
+<proc id="map_search_setfilter">
+	<action handler="set" params="target_property=ui:interface:map:content:map_content:lm_search:search:eb:input_string|value='@0'" />
+	<action handler="land_mark_filter" params="map=ui:interface:map:content:map_content:actual_map|text=@0" />
+</proc>
+
+<!-- set search string from /mapsearch command -->
+<proc id="map_search_show_set">
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:MAP_SEARCH|value=1" />
+	<action handler="proc" params="map_search_setfilter|@0" />
+</proc>
+
+<!-- hide search if focus was lost and input is empty (esc key) -->
+<proc id="map_search_focuslost">
+	<action handler="proc" params="map_search_hide"
+			cond="eq(getprop('ui:interface:map:content:map_content:lm_search:search:eb:input_string'),'')" />
+</proc>
+
+<proc id="map_search_onchange">
+	<action handler="land_mark_filter" params="map=ui:interface:map:content:map_content:actual_map|group=@0" />
+</proc>
 
 <define	id="map_min_size"	value="256" />
+
+<!-- used to override onclick handler -->
+<proc id="dummy_proc" />
+
+<template name="lm_search_result" keep="true" active="true" id="" x="0" y="0" w="0" h="17" posparent="parent" posref="TL TL"
+ hardtext="" fontsize="10" y_text="-2" onclick_l="lua" params_l="" tooltip="" index="0">
+
+	<group id="#id" active="#active" x="#x" y="#y" w="#w" h="#h" posparent="#posparent" posref="#posref" sizeref="w">
+
+		<ctrl type="button" id="over" sizeref="wh" w="0" h="0" posref="MM MM"
+			scale="true" tx_normal="blank.tga" tx_over="blank.tga" color="0 0 0 0" col_over="255 255 255 127"
+			onclick_l="land_mark_result_selected" params_l="map=ui:interface:map:content:map_content:actual_map|index=#index"
+			onclick_r="proc" params_r="dummy_proc"
+			tooltip="#tooltip" />
+
+		<view type="bitmap" id="icon" posref="ML ML" w="16" h="16"
+			scale="true" color="255 255 255 255" global_color="false" texture="blank.tga" />
+
+		<view type="text" id="title" posref="TL TL" x="16" y="#y_text"
+			color="255 255 255 255" global_color="true" fontsize="#fontsize" shadow="true" hardtext="#hardtext"
+			auto_clamp="true" over_extend_view_text="false" over_extend_parent_rect="false" />
+
+	</group>
+
+</template>
 
 <group id="map" type="container" posref="BL TL" min_w="%map_min_size" max_w="16384" w="256" h="256" x="352" y="200" min_h="%map_min_size" max_h="16384"
  resizer="true" pop_max_h="16384" pop_min_h="%map_min_size" pop_max_w="16384" pop_min_w="%map_min_size"
@@ -191,8 +261,10 @@
 			<!-- center on player -->			
 			<ctrl type="button" id="center" button_type="push_button" posparent="zoom_out" posref="TR TL" y="0"  x="4" tx_normal="w_center_map.tga" tx_pushed="W_button_16_over.tga" tx_over="W_button_16_over.tga"
 				onclick_l="map_center" params_l="map=ui:interface:map:content:map_content:actual_map" tooltip="uittCenter" />						
+			<ctrl type="button" id="lm_search_btn" button_type="push_button" posparent="center" posref="TR TL" y="0" x="4" tx_normal="w_help_1.tga" tx_pushed="W_button_16_over.tga" tx_over="W_button_16_over.tga"
+				onclick_l="proc" params_l="map_search_toggle" tooltip="uittMapSearch" />
 
-			<view type="text" id="time" x="12" y="0" posparent="center" posref="MR ML" color="255 255 255 255" fontsize="12" shadow="true" hardtext="" />
+			<view type="text" id="time" x="12" y="0" posparent="lm_search_btn" posref="MR ML" color="255 255 255 255" fontsize="12" shadow="true" hardtext="" />
 			<view type="text" id="weather" x="8" y="-16" posref="TL TL" color="255 255 255 255" fontsize="12" shadow="true" hardtext="" />
 			<ctrl type="tooltip" id="weather_tt" posparent="weather" sizeref="wh" w="0" h="0" tooltip="" tooltip_parent="ctrl" tooltip_posref="BL TL" />
 			
@@ -316,11 +388,53 @@
 			 selection_axis_color = "0 0 0 127"
 			 
 			 compass="ui:interface:compass"			 
-			 scale_max="2"
-			 scale_max_r2="8"
-			/>			
-			<!-- border around the map -->			
-			
+			/>
+			<!-- border around the map -->
+
+			<group id="lm_search"
+					posparent="back"
+					posref="TR TR"
+					sizeref="h"
+					x="-2"
+					y="-2"
+					h="-4"
+					child_resize_w="true">
+
+				<view type="bitmap" id="bg" posref="ML ML" sizeref="wh" h="25"
+					scale="true" color="100 100 100 120" global_color="false" texture="blank.tga" />
+
+				<instance template="edit_box_widget"
+						id="search"
+						posref="TR TR"
+						w="150"
+						clear_on_escape="true"
+						enter_recover_focus="false"
+						on_focus_lost="proc" on_focus_lost_params="map_search_focuslost"
+						onenter=""
+						onchange="proc" onchange_params="map_search_onchange|ui:interface:map:content:map_content:lm_search:search:eb" />
+
+				<ctrl type="button"
+					id="reset"
+					button_type="push_button"
+					posparent="search"
+					posref="ML MR"
+					x="-2"
+					tx_normal="w_close_0.tga"
+					tx_pushed="w_close_0.tga"
+					tx_over="W_button_16_over"
+					onclick_l="proc" params_l="map_search_toggle"
+					tooltip="" />
+				<view type="text" id="lm_count" posparent="search" posref="BR TR" x="-2" color="200 200 200 255" fontsize="10" shadow="true" hardtext="0" />
+
+				<group id="result" posref="TR TR" x="0" y="-25" w="0" h="-20" over="true" sizeref="wh">
+					<group id="rows" x="10" w="-10" y="0" sizeref="w" posref="TL TL" child_resize_h="true" child_resize_hmargin="4" max_h="0" max_sizeref="h" max_sizeparent="parent">
+						<group id="lm_result" type="list" x="0" y="0" posref="TL TL" sizeref="w" dynamic_display_size="true" />
+					</group>
+					<ctrl style="skin_scroll" id="sv" posref="TL TL" x="0" y="0" target="rows" />
+				</group>
+			</group>
+			<link expr="@UI:VARIABLES:ISACTIVE:MAP_SEARCH" target="lm_search:active" />
+
 		</group>		
 	</group>
 </group>	
@@ -409,8 +523,7 @@
 
 			 player_pos_tex="player_pos.tga"
 
-			 scale_max="2"
-			/>			
+			/>
 			<!-- border around the map -->			
 			
 		</group>

@@ -895,8 +895,8 @@ namespace NLGUI
 			return maxw;
 		else
 		{
-			sint parentWidth = std::min(_Parent->getMaxWReal(), _Parent->getWReal());
-			return std::min(parentWidth-(sint)(_XReal-_Parent->getXReal()), maxw);
+			sint parentWidth = std::min(_Parent->getMaxWReal(), _Parent->getWReal() - _Parent->getMarginLeft());
+			return std::min(parentWidth-(sint)(_XReal-(_Parent->getXReal()-_Parent->getMarginLeft())), (sint)_LineMaxW);
 		}
 	}
 

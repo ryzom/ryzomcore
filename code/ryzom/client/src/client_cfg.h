@@ -315,6 +315,7 @@ struct CClientConfig
 	std::vector<string>	WebIgTrustedDomains;
 
 	sint32			CurlMaxConnections;
+	string			CurlCABundle;
 
 	///////////////
 	// ANIMATION //
@@ -597,6 +598,10 @@ struct CClientConfig
 	float			CameraSpeedMin;
 	float			CameraSpeedMax;
 	float			CameraResetSpeed;
+
+	// Default values for CGroupMap
+	float			MaxMapScale;
+	float			R2EDMaxMapScale;
 
 	//////////////
 	// VERBOSES //

@@ -433,6 +433,7 @@ CClientConfig::CClientConfig()
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
 
 	CurlMaxConnections = 2;
+	CurlCABundle.clear();
 
 	RingReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes_ring/index.php";
 	ReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes/index.php";
@@ -605,6 +606,9 @@ CClientConfig::CClientConfig()
 	CameraSpeedMin		= 0.2f;
 	CameraSpeedMax		= 1.0f;
 	CameraResetSpeed	= 2.0f;
+
+	MaxMapScale			= 2.0f;
+	R2EDMaxMapScale		= 8.0f;
 
 	// VERBOSES
 	VerboseVP				= false;
@@ -1091,6 +1095,8 @@ void CClientConfig::setValues()
 	if (ClientCfg.CurlMaxConnections < 0)
 		ClientCfg.CurlMaxConnections = 2;
 
+	READ_STRING_FV(CurlCABundle);
+
 	///////////////
 	// ANIMATION //
 	// AnimatedAngleThreshold
@@ -1473,6 +1479,9 @@ void CClientConfig::setValues()
 		READ_FLOAT_FV(CameraDistance)
 	}
 
+	// Default values for CGroupMap
+	READ_FLOAT_FV(MaxMapScale);
+	READ_FLOAT_FV(R2EDMaxMapScale);
 
 	/////////////
 	// SHADOWS //

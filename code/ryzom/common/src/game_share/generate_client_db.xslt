@@ -58,9 +58,37 @@
 	<!-- #####         Root template matcher  (cpp-server) ####### -->
 	<!-- ######################################################### -->
 	<xsl:template match="database_description" mode="cpp-server">
+// Ryzom - MMORPG Framework &lt;http://dev.ryzom.com/projects/ryzom/&gt;
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+
 /////////////////////////////////////////////////////////////////
-// WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//		WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//
 /////////////////////////////////////////////////////////////////
+
 #include "stdpch.h"
 #include "database_<xsl:value-of select="translate($bank, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"/>.h"
 
@@ -125,8 +153,35 @@ void CBankAccessor_<xsl:value-of select="@name"/>::init()
 
 #ifndef INCLUDED_<xsl:value-of select="concat($filename, '_', $bank)"/>_H
 #define INCLUDED_<xsl:value-of select="concat($filename, '_', $bank)"/>_H
+// Ryzom - MMORPG Framework &lt;http://dev.ryzom.com/projects/ryzom/&gt;
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+
 /////////////////////////////////////////////////////////////////
-// WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//		WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//
 /////////////////////////////////////////////////////////////////
 
 #include "nel/misc/string_common.h"

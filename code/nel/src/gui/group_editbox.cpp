@@ -1005,7 +1005,6 @@ namespace NLGUI
 		{
 			case KeyESCAPE:
 				_CurrentHistoricIndex= -1;
-				CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
 				// stop selection
 				_CurrSelection = NULL;
 				_CursorAtPreviousLineEnd = false;
@@ -1014,6 +1013,7 @@ namespace NLGUI
 					setInputString(ucstring(""));
 					triggerOnChangeAH();
 				}
+				CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
 			break;
 			case KeyTAB:
 				makeTopWindow();

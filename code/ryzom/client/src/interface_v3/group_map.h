@@ -139,6 +139,9 @@ public:
 
 	// center the map on the player
 	void centerOnPlayer();
+	// center current map on world coords (if not out of map bounds)
+	void centerOnWorldPos(const NLMISC::CVector2f &worldPos);
+
 	void setPlayerPos(const NLMISC::CVector2f &p) { _PlayerPos = p; }
 	NLMISC::CVector2f getPlayerPos() const { return _PlayerPos; }
 	// test if player is currently panning the map
@@ -169,11 +172,15 @@ public:
 	CLandMarkOptions		getUserLandMarkOptions(uint32 lmindex) const;
 	// target the given landmark
 	void				targetLandmark(CCtrlButton *lm);
+	void				targetLandmarkResult(uint32 index);
 	// get the world position of a landmark or return vector Null if not found
 	void				getLandmarkPosition(const CCtrlButton *lm, NLMISC::CVector2f &worldPos);
 
 	//Remove and re-create UserLandMarks
 	void updateUserLandMarks();
+
+	// set landmarks visibility based text query
+	void setLandmarkFilter(const std::string &s);
 
 	// set the selection axis pos & visibility
 	void				setSelectionAxis(bool active, const NLMISC::CVector2f &worldPos = NLMISC::CVector2f::Null);
@@ -262,6 +269,7 @@ private:
 				NLMISC::CVector2f Pos;
 				CContLandMark::TContLMType Type;
 				bool					   HandleEvents;
+				bool					   SearchMatch;
 			public:
 				virtual bool handleEvent (const NLGUI::CEventDescriptor& event)
 				{
@@ -279,6 +287,7 @@ private:
 					Type = CContLandMark::Unknown;
 					Pos.set(0.f, 0.f);
 					HandleEvents = true;
+					SearchMatch = false;
 				}
 		};
 		typedef std::vector<CLandMarkButton*> TLandMarkButtonVect;
@@ -289,12 +298,14 @@ private:
 			public:
 				NLMISC::CVector2f Pos;
 				CContLandMark::TContLMType Type;
+				bool SearchMatch;
 
 				CLandMarkText(const TCtorParam &param)
 					: CViewText(param)
 				{
 					Type = CContLandMark::Unknown;
 					Pos.set(0.f, 0.f);
+					SearchMatch = false;
 				}
 		};
 		typedef std::vector<CLandMarkText*> TLandMarkTextVect;
@@ -448,6 +459,20 @@ private:
 		typedef std::set<IDeco *> TDecos;
 		TDecos _Decos;
 
+		// filter keywords
+		std::vector<ucstring> _LandmarkFilter;
+		struct SMatchedLandmark
+		{
+			SMatchedLandmark(const NLMISC::CVector2f pos, const ucstring &title, CLandMarkOptions opts)
+				: Pos(pos), Title(title), Options(opts)
+			{}
+			NLMISC::CVector2f Pos;
+			ucstring Title;
+
+			CLandMarkOptions Options;
+		};
+		std::vector<SMatchedLandmark> _MatchedLandmarks;
+
 	//////////////////////
 	// Respawn handling //
 	// //////////////// //
@@ -486,6 +511,7 @@ private:
 	  */
 	void updateLandMarkList(TLandMarkButtonVect &lm);
 	void updateLandMarkTextList(TLandMarkTextVect &lm);
+	void updateMatchedLandmarks();
 	//
 	void removeLandMarks(TLandMarkButtonVect &lm);
 	/** create landmarks from the continent (and remove previous ones)
@@ -500,6 +526,9 @@ private:
 	CLandMarkButton *createLandMarkButton(const CLandMarkOptions &options);
 	// update a landmark button
 	void updateLandMarkButton(CLandMarkButton *lmb, const CLandMarkOptions &options);
+
+	// Test title against landmark filter
+	bool filterLandmark(const ucstring &title) const;
 
 	// update the scale depending on the window size and the user scale
 	void updateScale();

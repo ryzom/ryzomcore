@@ -395,13 +395,18 @@ namespace NLGUI
 			return false;
 		}
 
-#if defined(NL_OS_WINDOWS)
 		// https://
 		if (toLower(download.url.substr(0, 8)) == "https://")
 		{
+#if defined(NL_OS_WINDOWS)
 			curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, &CCurlCertificates::sslCtxFunction);
-		}
+#else
+			if (!options.curlCABundle.empty())
+			{
+				curl_easy_setopt(curl, CURLOPT_CAINFO, options.curlCABundle.c_str());
+			}
 #endif
+		}
 
 		download.data = new CCurlWWWData(curl, download.url);
 		download.fp = fp;
@@ -1565,6 +1570,8 @@ namespace NLGUI
 						{
 							if ((*it).first == "template")
 								templateName = (*it).second;
+							else if ((*it).first == "display" && (*it).second == "inline-block")
+								_BlockLevelElement.back() = false;
 							else
 								tmplParams.push_back(TTmplParam((*it).first, (*it).second));
 						}
@@ -4022,13 +4029,6 @@ namespace NLGUI
 
 	void CGroupHTML::endParagraph()
 	{
-		// Remove previous paragraph if empty
-		if (_Paragraph && (_Paragraph->getNumChildren() == 0))
-		{
-			_Paragraph->getParent ()->delGroup(_Paragraph);
-			_Paragraph = NULL;
-		}
-
 		_Paragraph = NULL;
 
 		paragraphChange ();
@@ -4038,13 +4038,6 @@ namespace NLGUI
 
 	void CGroupHTML::newParagraph(uint beginSpace)
 	{
-		// Remove previous paragraph if empty
-		if (_Paragraph && (_Paragraph->getNumChildren() == 0))
-		{
-			_Paragraph->getParent ()->delGroup(_Paragraph);
-			_Paragraph = NULL;
-		}
-
 		// Add a new paragraph
 		CGroupParagraph *newParagraph = new CGroupParagraph(CViewBase::TCtorParam());
 		newParagraph->setResizeFromChildH(true);
@@ -4884,13 +4877,6 @@ namespace NLGUI
 		if (!group)
 			return;
 
-		// Remove previous paragraph if empty
-		if (_Paragraph && (_Paragraph->getNumChildren() == 0))
-		{
-			_Paragraph->getParent ()->delGroup(_Paragraph);
-			_Paragraph = NULL;
-		}
-
 		registerAnchor(group);
 
 		if (!_DivName.empty())
@@ -5354,13 +5340,18 @@ namespace NLGUI
 			return;
 		}
 
-#if defined(NL_OS_WINDOWS)
 		// https://
 		if (toLower(url.substr(0, 8)) == "https://")
 		{
+#if defined(NL_OS_WINDOWS)
 			curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, &CCurlCertificates::sslCtxFunction);
-		}
+#else
+			if (!options.curlCABundle.empty())
+			{
+				curl_easy_setopt(curl, CURLOPT_CAINFO, options.curlCABundle.c_str());
+			}
 #endif
+		}
 
 		// do not follow redirects, we have own handler
 		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0);
@@ -5841,6 +5832,8 @@ namespace NLGUI
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 		std::string html = ls.toString(1);
 
+		// Always trust domain if rendered from lua
+		_TrustedDomain = true;
 		renderHtmlString(html);
 
 		return 0;

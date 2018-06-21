@@ -1548,10 +1548,46 @@ void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bri
 
 	// Get the best SBrick to display.
 	CSheetId	rootBrickSheetId= bricks[0];
-
 	{
 		CSheetId	bestBrickSheetId= pBM->getSabrinaCom().getPhraseBestDisplayBrick(bricks);
 		setupDisplayAsSBrick (rootBrickSheetId.asInt(), bestBrickSheetId.asInt() );
+	}
+
+	// Override background if type is forace extraction/prospection and ecosystem brick is used
+	{
+		BRICK_FAMILIES::TBrickFamily family = pBM->getSabrinaCom().getPhraseForageFamily(bricks);
+		std::string icon;
+		switch(family)
+		{
+			case BRICK_FAMILIES::BHFEMA:
+			case BRICK_FAMILIES::BHFPMA:
+				icon = "bk_matis_brick.tga";
+				break;
+			case BRICK_FAMILIES::BHFEMB:
+			case BRICK_FAMILIES::BHFPMB:
+				icon = "bk_fyros_brick.tga";
+				break;
+			case BRICK_FAMILIES::BHFEMC:
+			case BRICK_FAMILIES::BHFPMC:
+				icon = "bk_zorai_brick.tga";
+				break;
+			case BRICK_FAMILIES::BHFEMD:
+			case BRICK_FAMILIES::BHFPMD:
+				icon = "bk_tryker_brick.tga";
+				break;
+			case BRICK_FAMILIES::BHFEME:
+			case BRICK_FAMILIES::BHFPME:
+				icon = "bk_generic_brick.tga";
+				break;
+			default:
+				icon = "";
+				break;
+		}
+		if (!icon.empty())
+		{
+			CViewRenderer &rVR = *CViewRenderer::getInstance();
+			_DispBackBmpId = rVR.getTextureIdFromName(icon);
+		}
 	}
 
 	// not so beautiful to display .sphrase name in progression, and in botchat
