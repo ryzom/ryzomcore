@@ -129,6 +129,8 @@ namespace NLGUI
 		uint            getFontHeight() const;
 		// get current font leg height, in pixels
 		uint            getFontLegHeight() const;
+		// get current line height, in pixels
+		float           getLineHeight() const;
 		// Set the display mode (supported with multiline only for now)
 		void			setTextMode(TTextMode mode);
 		TTextMode		getTextMode() const	{ return _TextMode; }
@@ -149,11 +151,11 @@ namespace NLGUI
 		  *  When looking at standard edit box, we see that if a line is split accross to line with no
 		  * This also returns the height of the line
 		  */
-		void getCharacterPositionFromIndex(sint index, bool lineEnd, sint &x, sint &y, sint &height) const;
+		void getCharacterPositionFromIndex(sint index, bool lineEnd, float &x, float &y, float &height) const;
 		/** From a coordinate relative to the BR BR corner of the text, return the index of a character.
 		  * If no character is found at the given position, the closest character is returned (first or last character, for the line or the whole text)
 		  */
-		void getCharacterIndexFromPosition(sint x, sint y, uint &index, bool &lineEnd) const;
+		void getCharacterIndexFromPosition(float x, float y, uint &index, bool &lineEnd) const;
 		/** From a character index, get the index of the line it belongs to, or -1 if the index is invalid
 		  * \param cursorDisplayedAtEndOfPreviousLine true if the cursor is displayed at the end of the previous line that match its index
 		  */
@@ -330,7 +332,7 @@ namespace NLGUI
 				CFormatInfo							Format;
 			public:
 				// build from a string, using the current text context
-				void build(const ucstring &text, NL3D::UTextContext &textContext, float scale, uint numSpaces= 0);
+				void build(const ucstring &text, NL3D::UTextContext &textContext, uint numSpaces= 0);
 		};
 		typedef std::vector<CWord> TWordVect;
 
@@ -343,7 +345,7 @@ namespace NLGUI
 				// Clear the line & remove text contexts
 				void clear(NL3D::UTextContext &textContext);
 				// Add a new word (and its context) in the line + a number of spaces to append at the end of the line
-				void	addWord(const ucstring &word, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext, float scale);
+				void	addWord(const ucstring &word, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext);
 				void    addWord(const CWord &word, float fontWidth);
 				uint	getNumWords() const { return (uint)_Words.size(); }
 				CWord   &getWord(uint index) { return _Words[index]; }
@@ -404,7 +406,7 @@ namespace NLGUI
 		uint	_TextSelectionEnd;
 
 		// First line X coordinate
-		sint	_FirstLineX;
+		float	_FirstLineX;
 
 		/// Dynamic tooltips
 		std::vector<CCtrlToolTip*>	_Tooltips;
