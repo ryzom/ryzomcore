@@ -1108,7 +1108,7 @@ namespace NLGUI
 
 					// Draw a line
 					if (_Underlined)
-						rVR.drawRotFlipBitmap (_RenderLayer, fx, fy - _FontLegHeight*0.3f / _Scale, line_width / _Scale, 1.0f / _Scale, 0, false, rVR.getBlankTextureId(), col);
+						rVR.drawRotFlipBitmap (_RenderLayer, fx, fy - _FontLegHeight*0.6f / _Scale, line_width / _Scale, 1.0f / _Scale, 0, false, rVR.getBlankTextureId(), col);
 
 					if (_StrikeThrough)
 						rVR.drawRotFlipBitmap (_RenderLayer, fx, fy + _FontHeight*0.2f / _Scale, line_width / _Scale, 1.0f / _Scale, 0, false, rVR.getBlankTextureId(), col);
