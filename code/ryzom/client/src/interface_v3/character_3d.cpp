@@ -436,9 +436,45 @@ void SCharacter3DSetup::setupFromCS_ModelCol (SLOTTYPE::EVisualSlot s, sint32 mo
 
 		Parts[part].Quality = item->MapVariant;
 		if (Male)
-			Parts[part].Name = item->getShape();
+		{
+			switch(People)
+			{
+				case EGSPD::CPeople::Fyros:
+					Parts[part].Name = item->getShapeFyros();
+					break;
+				case EGSPD::CPeople::Matis:
+					Parts[part].Name = item->getShapeMatis();
+					break;
+				case EGSPD::CPeople::Tryker:
+					Parts[part].Name = item->getShapeTryker();
+					break;
+				case EGSPD::CPeople::Zorai:
+					Parts[part].Name = item->getShapeZorai();
+					break;
+			}
+			if (Parts[part].Name.empty())
+				Parts[part].Name = item->getShape();
+		}
 		else
-			Parts[part].Name = item->getShapeFemale();
+		{
+			switch(People)
+			{
+				case EGSPD::CPeople::Fyros:
+					Parts[part].Name = item->getShapeFyrosFemale();
+					break;
+				case EGSPD::CPeople::Matis:
+					Parts[part].Name = item->getShapeMatisFemale();
+					break;
+				case EGSPD::CPeople::Tryker:
+					Parts[part].Name = item->getShapeTrykerFemale();
+					break;
+				case EGSPD::CPeople::Zorai:
+					Parts[part].Name = item->getShapeZoraiFemale();
+					break;
+			}
+			if (Parts[part].Name.empty())
+				Parts[part].Name = item->getShapeFemale();
+		}
 
 		// use the right type of boots if wearing a caster dress
 		if ((s == SLOTTYPE::FEET_SLOT) && (item->ItemType == ITEM_TYPE::LIGHT_BOOTS || item->ItemType == ITEM_TYPE::MEDIUM_BOOTS || item->ItemType == ITEM_TYPE::HEAVY_BOOTS))

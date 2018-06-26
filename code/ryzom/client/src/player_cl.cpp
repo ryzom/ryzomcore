@@ -540,7 +540,48 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, uint index, uint color)
 	{
 		const CItemSheet *item = _Items[slot].Sheet;
 
-		std::string shapeName = _Gender == GSGENDER::female ? item->getShapeFemale():item->getShape();
+		std::string shapeName = "";
+		if(_Gender == GSGENDER::male)
+		{
+			switch(_PlayerSheet->People)
+			{
+				case EGSPD::CPeople::Fyros:
+					shapeName = item->getShapeFyros();
+					break;
+				case EGSPD::CPeople::Matis:
+					shapeName = item->getShapeMatis();
+					break;
+				case EGSPD::CPeople::Tryker:
+					shapeName = item->getShapeTryker();
+					break;
+				case EGSPD::CPeople::Zorai:
+					shapeName = item->getShapeZorai();
+					break;
+			}
+		}
+		else
+		{
+			switch(_PlayerSheet->People)
+			{
+				case EGSPD::CPeople::Fyros:
+					shapeName = item->getShapeFyrosFemale();
+					break;
+				case EGSPD::CPeople::Matis:
+					shapeName = item->getShapeMatisFemale();
+					break;
+				case EGSPD::CPeople::Tryker:
+					shapeName = item->getShapeTrykerFemale();
+					break;
+				case EGSPD::CPeople::Zorai:
+					shapeName = item->getShapeZoraiFemale();
+					break;
+			}
+			if (shapeName.empty())
+				shapeName = item->getShapeFemale();
+		}
+		if (shapeName.empty())
+			shapeName = item->getShape();
+
 
 		// use the right type of boots if wearing a caster dress
 		if ((slot == SLOTTYPE::FEET_SLOT) && (item->ItemType == ITEM_TYPE::LIGHT_BOOTS || item->ItemType == ITEM_TYPE::MEDIUM_BOOTS || item->ItemType == ITEM_TYPE::HEAVY_BOOTS))
