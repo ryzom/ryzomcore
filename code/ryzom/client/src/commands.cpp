@@ -1386,7 +1386,7 @@ NLMISC_COMMAND(setItemName, "set name of items, sbrick, etc..","<sheet_id> <name
 	ucstring desc2;
 	if (args.size() > 2)
 		desc.fromUtf8(args[2]);
-	if (args.size() > 2)
+	if (args.size() > 3)
 		desc2.fromUtf8(args[3]);
 
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
