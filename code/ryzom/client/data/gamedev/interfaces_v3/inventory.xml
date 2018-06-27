@@ -643,6 +643,36 @@
         <ctrl style="tab_button_new"
               id="tab6"
               posparent="tab5"
+              group="content:pa4"
+              hardtext="uitabInvPAZig1"
+              tooltip="uiTabInfo"
+              onclick_r="show"
+              params_r="inv_pa4"
+              onclick_l=""
+              params_l="" />
+        <ctrl style="tab_button_new"
+              id="tab7"
+              posparent="tab6"
+              group="content:pa5"
+              hardtext="uitabInvPAZig2"
+              tooltip="uiTabInfo"
+              onclick_r="show"
+              params_r="inv_pa5"
+              onclick_l=""
+              params_l="" />
+        <ctrl style="tab_button_new"
+              id="tab8"
+              posparent="tab7"
+              group="content:pa6"
+              hardtext="uitabInvPAZig3"
+              tooltip="uiTabInfo"
+              onclick_r="show"
+              params_r="inv_pa6"
+              onclick_l=""
+              params_l="" />
+        <ctrl style="tab_button_new"
+              id="tab9"
+              posparent="tab8"
               group="content:guild"
               hardtext="uitabInvGuild"
               tooltip="uiTabInfo"
@@ -651,8 +681,8 @@
               onclick_l=""
               params_l="" />
         <ctrl style="tab_button_new"
-              id="tab7"
-              posparent="tab6"
+              id="tab10"
+              posparent="tab9"
               group="content:room"
               hardtext="uitabInvRoom"
               tooltip="uiTabInfo"
@@ -673,6 +703,12 @@
               target="tab4:active" />
         <link expr="and(not(@UI:VARIABLES:ISACTIVE:INV_PA3), isAnimalStatusPresent(@%pa_beast3:STATUS))"
               target="tab5:active" />
+        <link expr="and(not(@UI:VARIABLES:ISACTIVE:INV_PA4), isAnimalStatusPresent(@%pa_beast4:STATUS))"
+              target="tab6:active" />
+        <link expr="and(not(@UI:VARIABLES:ISACTIVE:INV_PA5), isAnimalStatusPresent(@%pa_beast5:STATUS))"
+              target="tab7:active" />
+        <link expr="and(not(@UI:VARIABLES:ISACTIVE:INV_PA6), isAnimalStatusPresent(@%pa_beast6:STATUS))"
+              target="tab8:active" />
         <!-- MAX_INVENTORY_ANIMAL -->
         <link expr="switch(@%pa_beast0:TYPE, 'uitabInvPAMount0', 'uitabInvPAMount0', 'uitabInvPAPacker0', 'uitabInvPADemon0')"
               target="tab2:hardtext" />
@@ -683,9 +719,9 @@
         <link expr="switch(@%pa_beast3:TYPE, 'uitabInvPAMount3', 'uitabInvPAMount3', 'uitabInvPAPacker3', 'uitabInvPADemon3')"
               target="tab5:hardtext" />
         <link expr="and(%is_guild_present, not(@UI:SAVE:INVENTORY_GUILD_WANT_POPUP), @UI:TEMP:INVENTORY_GUILD_OPENED)"
-              target="tab6:active" />
+              target="tab9:active" />
         <link expr="and(not(@UI:VARIABLES:ISACTIVE:INV_ROOM), @UI:TEMP:INVENTORY_ROOM_OPENED)"
-              target="tab7:active" />
+              target="tab10:active" />
       </group>
       <view type="bitmap"
             id="sep"
@@ -851,6 +887,24 @@
                 info_entry="%pa_beast3"
                 bag_entry="%pa_bag3"
                 icon_db="INV_PA3" />
+      <!-- pa4 -->
+      <instance template="tinv_animal"
+                id="pa4"
+                info_entry="%pa_beast4"
+                bag_entry="%pa_bag4"
+                icon_db="INV_PA4" />
+      <!-- pa5 -->
+      <instance template="tinv_animal"
+                id="pa5"
+                info_entry="%pa_beast5"
+                bag_entry="%pa_bag5"
+                icon_db="INV_PA5" />
+      <!-- pa6 -->
+      <instance template="tinv_animal"
+                id="pa6"
+                info_entry="%pa_beast6"
+                bag_entry="%pa_bag6"
+                icon_db="INV_PA6" />
       <!-- guild -->
       <group id="guild"
              posref="TL TL"

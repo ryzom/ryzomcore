@@ -1074,8 +1074,11 @@
     <!-- MAX_INVENTORY_ANIMAL -->
     <action cond="and(eq(@0,0), or( isAnimalStatusPresent(@%pa_beast0:STATUS), 
                                                                         isAnimalStatusPresent(@%pa_beast1:STATUS), 
-                                                                        isAnimalStatusPresent(@%pa_beast2:STATUS), 
-                                                                        isAnimalStatusPresent(@%pa_beast3:STATUS) ) )"
+                                                                        isAnimalStatusPresent(@%pa_beast2:STATUS),
+                                                                        isAnimalStatusPresent(@%pa_beast3:STATUS),
+                                                                        isAnimalStatusPresent(@%pa_beast4:STATUS),
+                                                                        isAnimalStatusPresent(@%pa_beast5:STATUS), 
+                                                                        isAnimalStatusPresent(@%pa_beast6:STATUS) ) )"
             handler="active_menu"
             params="menu=ui:interface:animal_menu_all" />
     <!-- If SINGLE MENU, display the menu -->
@@ -1305,6 +1308,21 @@
             bars_entry="UI:VARIABLES:BARS:ANIMAL:3"
             beast_db_entry="%pa_beast3"
             bag_path="%pa_bag3" />
+  <instance template="pa_template"
+            index="5"
+            bars_entry="UI:VARIABLES:BARS:ANIMAL:4"
+            beast_db_entry="%pa_beast4"
+            bag_path="%pa_bag3" />
+  <instance template="pa_template"
+            index="6"
+            bars_entry="UI:VARIABLES:BARS:ANIMAL:5"
+            beast_db_entry="%pa_beast5"
+            bag_path="%pa_bag3" />
+  <instance template="pa_template"
+            index="7"
+            bars_entry="UI:VARIABLES:BARS:ANIMAL:6"
+            beast_db_entry="%pa_beast6"
+            bag_path="%pa_bag3" />
   <!-- ***************************** -->
   <!-- *   ANIMAL(S) DEAD WINDOW   * -->
   <!-- ***************************** -->
@@ -1456,11 +1474,32 @@
             info_entry="%pa_beast3"
             bag_entry="%pa_bag3"
             icon_db="INV_PA3" />
+  <instance template="animal_inventory_template"
+            id="inv_pa4"
+            title="4"
+            info_entry="%pa_beast4"
+            bag_entry="%pa_bag4"
+            icon_db="INV_PA4" />
+  <instance template="animal_inventory_template"
+            id="inv_pa5"
+            title="5"
+            info_entry="%pa_beast5"
+            bag_entry="%pa_bag5"
+            icon_db="INV_PA5" />
+  <instance template="animal_inventory_template"
+            id="inv_pa6"
+            title="6"
+            info_entry="%pa_beast6"
+            bag_entry="%pa_bag6"
+            icon_db="INV_PA6" />
   <tree node="animal_global">
     <!-- MAX_INVENTORY_ANIMAL -->
     <tree node="userpa1" />
     <tree node="userpa2" />
     <tree node="userpa3" />
     <tree node="userpa4" />
+    <tree node="userpa5" />
+    <tree node="userpa6" />
+    <tree node="userpa7" />
   </tree>
 </interface_config>

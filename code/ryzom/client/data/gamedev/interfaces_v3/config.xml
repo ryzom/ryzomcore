@@ -2374,6 +2374,12 @@ This MUST follow the Enum MISSION_DESC::TIconId
           value="%pa:BEAST2" />
   <define id="pa_beast3"
           value="%pa:BEAST3" />
+  <define id="pa_beast4"
+          value="%pa:BEAST4" />
+  <define id="pa_beast5"
+          value="%pa:BEAST5" />
+  <define id="pa_beast6"
+          value="%pa:BEAST6" />
   <!-- MAX_INVENTORY_ANIMAL -->
   <define id="pa_bag0"
           value="%set_base:PACK_ANIMAL0" />
@@ -2383,6 +2389,12 @@ This MUST follow the Enum MISSION_DESC::TIconId
           value="%set_base:PACK_ANIMAL2" />
   <define id="pa_bag3"
           value="%set_base:PACK_ANIMAL3" />
+  <define id="pa_bag4"
+          value="%set_base:PACK_ANIMAL4" />
+  <define id="pa_bag5"
+          value="%set_base:PACK_ANIMAL5" />
+  <define id="pa_bag6"
+          value="%set_base:PACK_ANIMAL6" />
   <define id="money"
           value="%set_base:MONEY" />
   <define id="skill_points_0"
@@ -3051,6 +3063,15 @@ This MUST follow the Enum MISSION_DESC::TIconId
             type="sint32"
             value="0" />
   <variable entry="UI:VARIABLES:ISACTIVE:INV_PA3"
+            type="sint32"
+            value="0" />
+  <variable entry="UI:VARIABLES:ISACTIVE:INV_PA4"
+            type="sint32"
+            value="0" />
+  <variable entry="UI:VARIABLES:ISACTIVE:INV_PA5"
+            type="sint32"
+            value="0" />
+  <variable entry="UI:VARIABLES:ISACTIVE:INV_PA6"
             type="sint32"
             value="0" />
   <variable entry="UI:VARIABLES:ISACTIVE:INV_ROOM"

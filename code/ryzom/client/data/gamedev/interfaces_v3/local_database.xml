@@ -73,7 +73,7 @@
     </branch>
     <!-- MAX_INVENTORY_ANIMAL -->
     <branch name="PACK_ANIMAL"
-            count="4">
+            count="7">
       <branch name=""
               count="500">
         <!-- Common Item Data -->
