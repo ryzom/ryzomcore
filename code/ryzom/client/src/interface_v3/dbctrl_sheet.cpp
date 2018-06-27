@@ -902,7 +902,7 @@ uint CDBCtrlSheet::getInventorySlot( const string &dbBranchId )
 				return INVENTORIES::bag;
 			break;
 		case 'P':
-			nlctassert(MAX_INVENTORY_ANIMAL==4);
+			nlctassert(MAX_INVENTORY_ANIMAL==7);
 			if( strncmp( "PACK_ANIMAL", szName2, 11 ) )
 				break;
 			switch( szName2[11] )
@@ -915,6 +915,12 @@ uint CDBCtrlSheet::getInventorySlot( const string &dbBranchId )
 				return INVENTORIES::pet_animal3;
 			case '3':
 				return INVENTORIES::pet_animal4;
+			case '4':
+				return INVENTORIES::pet_animal5;
+			case '5':
+				return INVENTORIES::pet_animal6;
+			case '6':
+				return INVENTORIES::pet_animal7;
 			default:
 				break;
 			}

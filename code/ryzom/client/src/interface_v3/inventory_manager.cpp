@@ -80,6 +80,9 @@ const std::string CInventoryManager::InventoryDBs[]=
 	"INVENTORY:PACK_ANIMAL1",
 	"INVENTORY:PACK_ANIMAL2",
 	"INVENTORY:PACK_ANIMAL3",
+	"INVENTORY:PACK_ANIMAL4",
+	"INVENTORY:PACK_ANIMAL5",
+	"INVENTORY:PACK_ANIMAL6",
 	"INVENTORY:TEMP",
 	"EXCHANGE:GIVE",
 	"EXCHANGE:RECEIVE",
@@ -92,7 +95,7 @@ const std::string CInventoryManager::InventoryDBs[]=
 static void dummyCheck()
 {
 	// if this raise, correct the 2 tables above and below
-	nlctassert(MAX_INVENTORY_ANIMAL==4);
+	nlctassert(MAX_INVENTORY_ANIMAL==7);
 }
 
 const uint CInventoryManager::InventoryIndexes[]=
@@ -103,6 +106,9 @@ const uint CInventoryManager::InventoryIndexes[]=
 	INVENTORIES::pet_animal2,
 	INVENTORIES::pet_animal3,
 	INVENTORIES::pet_animal4,
+	INVENTORIES::pet_animal5,
+	INVENTORIES::pet_animal6,
+	INVENTORIES::pet_animal7,
 	INVENTORIES::temporary,
 	INVENTORIES::exchange,
 	INVENTORIES::exchange_proposition,
@@ -1511,7 +1517,7 @@ void CInventoryManager::getBranchSlotCounts(const std::string &basePath, uint& n
 // ***************************************************************************
 double CInventoryManager::getBagBulk(uint32 inventoryIndex)
 {
-	nlctassert(MAX_INVENTORY_ANIMAL==4);
+	nlctassert(MAX_INVENTORY_ANIMAL==7);
 	if (inventoryIndex == 0)
 		return getBranchBulk(LOCAL_INVENTORY ":BAG", 0, MAX_BAGINV_ENTRIES);
 	else if (inventoryIndex == 1)
@@ -1523,10 +1529,16 @@ double CInventoryManager::getBagBulk(uint32 inventoryIndex)
 	else if (inventoryIndex == 4)
 		return getBranchBulk(LOCAL_INVENTORY ":PACK_ANIMAL3", 0, MAX_ANIMALINV_ENTRIES);
 	else if (inventoryIndex == 5)
-		return 0;
+		return getBranchBulk(LOCAL_INVENTORY ":PACK_ANIMAL4", 0, MAX_ANIMALINV_ENTRIES);
 	else if (inventoryIndex == 6)
-		return 0;
+		return getBranchBulk(LOCAL_INVENTORY ":PACK_ANIMAL5", 0, MAX_ANIMALINV_ENTRIES);
 	else if (inventoryIndex == 7)
+		return getBranchBulk(LOCAL_INVENTORY ":PACK_ANIMAL6", 0, MAX_ANIMALINV_ENTRIES);
+	else if (inventoryIndex == 8)
+		return 0;
+	else if (inventoryIndex == 9)
+		return 0;
+	else if (inventoryIndex == 10)
 		return getBranchBulk(LOCAL_INVENTORY ":TEMP", 0, MAX_TEMPINV_ENTRIES);
 	return 0;
 }
@@ -1543,7 +1555,7 @@ double CInventoryManager::getItemBulk(uint32 sheetID)
 // ***************************************************************************
 double CInventoryManager::getMaxBagBulk(uint32 inventoryIndex)
 {
-	nlctassert(MAX_INVENTORY_ANIMAL==4);
+	nlctassert(MAX_INVENTORY_ANIMAL==7);
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CCDBNodeLeaf *pNL=NULL;
 	if (inventoryIndex == 0)
@@ -1556,6 +1568,12 @@ double CInventoryManager::getMaxBagBulk(uint32 inventoryIndex)
 		pNL = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:PACK_ANIMAL:BEAST2:BULK_MAX");
 	else if (inventoryIndex == 4)
 		pNL = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:PACK_ANIMAL:BEAST3:BULK_MAX");
+	else if (inventoryIndex == 5)
+		pNL = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:PACK_ANIMAL:BEAST4:BULK_MAX");
+	else if (inventoryIndex == 6)
+		pNL = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:PACK_ANIMAL:BEAST5:BULK_MAX");
+	else if (inventoryIndex == 7)
+		pNL = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:PACK_ANIMAL:BEAST6:BULK_MAX");
 	if (pNL != NULL)
 		return pNL->getValue32();
 	return 0;
@@ -2675,7 +2693,10 @@ class CHandlerInvCanDropTo : public IActionHandler
 				if ((pListDstIcon->getInvType() == CInventoryManager::InvPA0) ||
 					(pListDstIcon->getInvType() == CInventoryManager::InvPA1) ||
 					(pListDstIcon->getInvType() == CInventoryManager::InvPA2) ||
-					(pListDstIcon->getInvType() == CInventoryManager::InvPA3))
+					(pListDstIcon->getInvType() == CInventoryManager::InvPA3) ||
+					(pListDstIcon->getInvType() == CInventoryManager::InvPA4) ||
+					(pListDstIcon->getInvType() == CInventoryManager::InvPA5) ||
+					(pListDstIcon->getInvType() == CInventoryManager::InvPA6))
 				{
 					INVENTORIES::TInventory e = (INVENTORIES::TInventory)(INVENTORIES::pet_animal1 + (pListDstIcon->getInvType()-CInventoryManager::InvPA0));
 					if (!pInv->isInventoryAvailable(e))
@@ -2687,7 +2708,10 @@ class CHandlerInvCanDropTo : public IActionHandler
 				if ((pListDstText->getInvType() == CInventoryManager::InvPA0) ||
 					(pListDstText->getInvType() == CInventoryManager::InvPA1) ||
 					(pListDstText->getInvType() == CInventoryManager::InvPA2) ||
-					(pListDstText->getInvType() == CInventoryManager::InvPA3))
+					(pListDstText->getInvType() == CInventoryManager::InvPA3) ||
+					(pListDstText->getInvType() == CInventoryManager::InvPA4) ||
+					(pListDstText->getInvType() == CInventoryManager::InvPA5) ||
+					(pListDstText->getInvType() == CInventoryManager::InvPA6))
 				{
 					INVENTORIES::TInventory e = (INVENTORIES::TInventory)(INVENTORIES::pet_animal1 + (pListDstText->getInvType()-CInventoryManager::InvPA0));
 					if (!pInv->isInventoryAvailable(e))
@@ -2810,17 +2834,24 @@ class CHandlerInvDropTo : public IActionHandler
 					else if (((pListDstText != NULL) && ((pListDstText->getInvType() == CInventoryManager::InvPA0) ||
 														 (pListDstText->getInvType() == CInventoryManager::InvPA1) ||
 														 (pListDstText->getInvType() == CInventoryManager::InvPA2) ||
-														 (pListDstText->getInvType() == CInventoryManager::InvPA3)
+														 (pListDstText->getInvType() == CInventoryManager::InvPA3) ||
+														 (pListDstText->getInvType() == CInventoryManager::InvPA4) ||
+														 (pListDstText->getInvType() == CInventoryManager::InvPA5) ||
+														 (pListDstText->getInvType() == CInventoryManager::InvPA6)
 														)) ||
 							((pListDstIcon != NULL) && ((pListDstIcon->getInvType() == CInventoryManager::InvPA0) ||
 														(pListDstIcon->getInvType() == CInventoryManager::InvPA1) ||
 														(pListDstIcon->getInvType() == CInventoryManager::InvPA2) ||
-														(pListDstIcon->getInvType() == CInventoryManager::InvPA3)
+														(pListDstIcon->getInvType() == CInventoryManager::InvPA3) ||
+														(pListDstIcon->getInvType() == CInventoryManager::InvPA4) ||
+														(pListDstIcon->getInvType() == CInventoryManager::InvPA5) ||
+														(pListDstIcon->getInvType() == CInventoryManager::InvPA6)
 														)))
 					{
 						string sTmp;
 						if (pListDstText != NULL) sTmp = toString("%d",pListDstText->getInvType()-CInventoryManager::InvPA0);
 						if (pListDstIcon != NULL) sTmp = toString("%d",pListDstIcon->getInvType()-CInventoryManager::InvPA0);
+							nlinfo("ici :%s", sTmp.c_str());
 						CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_pa|"+sTmp);
 					}
 					else if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvGuild)) ||
@@ -3003,7 +3034,7 @@ class CHandlerInvTempAll : public IActionHandler
 		vector <pair <double, double> > BagsBulk;
 		BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(0), pInv->getMaxBagBulk(0)));
 
-		nlctassert(MAX_INVENTORY_ANIMAL==4);
+		nlctassert(MAX_INVENTORY_ANIMAL==7);
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal1))
 			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(1), pInv->getMaxBagBulk(1)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal2))
@@ -3012,6 +3043,12 @@ class CHandlerInvTempAll : public IActionHandler
 			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(3), pInv->getMaxBagBulk(3)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal4))
 			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(4), pInv->getMaxBagBulk(4)));
+		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal5))
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(5), pInv->getMaxBagBulk(4)));
+		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal6))
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(6), pInv->getMaxBagBulk(4)));
+		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal7))
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(7), pInv->getMaxBagBulk(4)));
 
 		bool bPlaceFound = true;
 
@@ -3594,6 +3631,9 @@ CInventoryManager::TInvType CInventoryManager::invTypeFromString(const string &s
 	if (sTmp == "inv_pa1")		return InvPA1;
 	if (sTmp == "inv_pa2")		return InvPA2;
 	if (sTmp == "inv_pa3")		return InvPA3;
+	if (sTmp == "inv_pa4")		return InvPA4;
+	if (sTmp == "inv_pa5")		return InvPA5;
+	if (sTmp == "inv_pa6")		return InvPA6;
 	if (sTmp == "inv_guild")	return InvGuild;
 	if (sTmp == "inv_room")		return InvRoom;
 	return InvUnknown;
