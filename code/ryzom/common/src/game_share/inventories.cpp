@@ -38,6 +38,9 @@ namespace INVENTORIES
 		NL_STRING_CONVERSION_TABLE_ENTRY(pet_animal2)
 		NL_STRING_CONVERSION_TABLE_ENTRY(pet_animal3)
 		NL_STRING_CONVERSION_TABLE_ENTRY(pet_animal4)
+		NL_STRING_CONVERSION_TABLE_ENTRY(pet_animal5)
+		NL_STRING_CONVERSION_TABLE_ENTRY(pet_animal6)
+		NL_STRING_CONVERSION_TABLE_ENTRY(pet_animal7)
 		//		NL_STRING_CONVERSION_TABLE_ENTRY(bot_gift)
 		NL_STRING_CONVERSION_TABLE_ENTRY(UNDEFINED)
 		NL_STRING_CONVERSION_TABLE_ENTRY(exchange)
@@ -52,7 +55,7 @@ namespace INVENTORIES
 		const std::string& toString( TInventory inv )
 	{
 		// if this raise, correct the table above
-		nlctassert(MAX_INVENTORY_ANIMAL==4);
+		nlctassert(MAX_INVENTORY_ANIMAL==7);
 		return InventoryToString.toString(inv);
 	}
 
@@ -72,6 +75,12 @@ namespace INVENTORIES
 				inv = pet_animal3;
 			else if (str == "pack_animal4")
 				inv = pet_animal4;
+			else if (str == "pack_animal5")
+				inv = pet_animal5;
+			else if (str == "pack_animal6")
+				inv = pet_animal6;
+			else if (str == "pack_animal7")
+				inv = pet_animal7;
 		}
 
 		return inv;
@@ -90,6 +99,9 @@ namespace INVENTORIES
 			"",				// pack_animal2
 			"",				// pack_animal3
 			"",				// pack_animal4
+			"",				// pack_animal5
+			"",				// pack_animal6
+			"",				// pack_animal7
 			"",				// harvest
 			//	"",				// bot_gift
 			"",				// exchange
@@ -102,9 +114,9 @@ namespace INVENTORIES
 
 	//
 	const char *CInventoryCategoryForCharacter::InventoryStr [CInventoryCategoryForCharacter::NbInventoryIds] =
-	{ "BAG",		"PACK_ANIMAL0",	"PACK_ANIMAL1",	"PACK_ANIMAL2",	"PACK_ANIMAL3",	"ROOM" };
+	{ "BAG",		"PACK_ANIMAL0",	"PACK_ANIMAL1",	"PACK_ANIMAL2",	"PACK_ANIMAL3", "PACK_ANIMAL4", "PACK_ANIMAL5", "PACK_ANIMAL6",	"ROOM" };
 	const uint CInventoryCategoryForCharacter::InventoryNbSlots [CInventoryCategoryForCharacter::NbInventoryIds] =
-	{ NbBagSlots,	NbPackerSlots,	NbPackerSlots,	NbPackerSlots,	NbPackerSlots,	NbRoomSlots };
+	{ NbBagSlots,	NbPackerSlots,	NbPackerSlots,	NbPackerSlots,	NbPackerSlots, NbPackerSlots, NbPackerSlots, NbPackerSlots,	NbRoomSlots };
 	// Other values to change according to these InventoryNbSlots:
 	// - game_share.h/inventories.h: CInventoryCategoryForCharacter::SlotBitSize
 	// - data_common/database.xml: INVENTORY:BAG count

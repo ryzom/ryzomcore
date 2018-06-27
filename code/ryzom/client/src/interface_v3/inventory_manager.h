@@ -291,7 +291,7 @@ public:
 		bool				isInventoryEmpty (INVENTORIES::TInventory invId);
 
 
-		enum TInvType { InvBag, InvPA0, InvPA1, InvPA2, InvPA3, InvGuild, InvRoom, InvUnknown };
+		enum TInvType { InvBag, InvPA0, InvPA1, InvPA2, InvPA3, InvPA4, InvPA5, InvPA6, InvGuild, InvRoom, InvUnknown };
 		static TInvType invTypeFromString(const std::string &str);
 
 
