@@ -276,6 +276,19 @@ template <class T> T trimRightWhiteSpaces (const T &str)
 	return str.substr (0, end);
 }
 
+// remove spaces and tabs at the begin and end of the string
+template <class T> T trimSeparators (const T &str)
+{
+	typename T::size_type start = 0;
+	typename T::size_type size = str.size();
+	while (start < size && str[start] == ' ' && str[start] == '\t')
+		start++;
+	typename T::size_type end = size;
+	while (end > start && str[end-1] == ' ' && str[end-1] == '\t')
+		end--;
+	return str.substr (start, end-start);
+}
+
 // if both first and last char are quotes (' or "), then remove them
 template <class T> T trimQuotes (const T &str)
 {
