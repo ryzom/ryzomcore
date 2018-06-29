@@ -948,7 +948,7 @@ namespace NLGUI
 				string fullstyle = style[1];
 				for (uint j=2; j < style.size(); j++)
 					fullstyle += ":"+style[j];
-				styles[trim(style[0])] = trim(fullstyle);
+				styles[trim(style[0])] = trimSeparators(fullstyle);
 			}
 		}
 
