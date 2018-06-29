@@ -993,7 +993,10 @@ namespace NLGUI
 
 			if (_MultiLine)
 			{
-				setTextFormatTaged(CI18N::get(propPtr));
+				if (strlen(propPtr) > 2 && propPtr[0] == 'u' && propPtr[1] == ':')
+					setTextFormatTaged(ucstring::makeFromUtf8(std::string(propPtr).substr(2)));
+				else
+					setTextFormatTaged(CI18N::get(propPtr));
 			}
 			else
 			{
