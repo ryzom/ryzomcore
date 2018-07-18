@@ -231,6 +231,28 @@ MACRO(ADD_QT_PLUGIN _TYPE _NAME)
   ENDIF()
 ENDMACRO()
 
+MACRO(ADD_QT_SYSTEM_LIBRARY _NAME)
+  # Save default suffixes
+  SET(_OLD_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+
+  # Define specific suffixes
+  SET(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_SHARED_LIBRARY_SUFFIX})
+
+  # Find the library with specified suffixes
+  FIND_LIBRARY(${_NAME}_LIBRARY NAMES ${_NAME})
+
+  # Restore default suffixes
+  SET(CMAKE_FIND_LIBRARY_SUFFIXES ${_OLD_SUFFIXES})
+
+  IF(${_NAME}_LIBRARY)
+    MESSAGE(STATUS "Found ${${_NAME}_LIBRARY} ${_NAME}")
+
+    LIST(APPEND QT_LIBRARIES ${${_NAME}_LIBRARY})
+  ELSE()
+    MESSAGE(STATUS "Didn't find ${_NAME}")
+  ENDIF()
+ENDMACRO()
+
 IF(WITH_QT5)
   CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11 FATAL_ERROR)
 
@@ -324,12 +346,24 @@ IF(WITH_QT5)
         ADD_QT_LIBRARY(EventDispatcherSupport)
         ADD_QT_LIBRARY(PlatformSupport)
 
-        SET(QT_LIBRARIES ${QT_LIBRARIES} -lX11-xcb -lSM -lICE -lxcb -lGL -lxcb-glx)
+        ADD_QT_LIBRARY(DBus)
+
         IF(EXISTS "${QT_LIBRARY_DIR}/libxcb-static.a")
           SET(QT_LIBRARIES ${QT_LIBRARIES} "${QT_LIBRARY_DIR}/libxcb-static.a")
         ENDIF()
-        SET(QT_LIBRARIES ${QT_LIBRARIES} -lfontconfig -lX11 -lXrender)
-        ADD_QT_LIBRARY(DBus)
+
+        # always link these in dynamic, API never changes
+        ADD_QT_SYSTEM_LIBRARY(X11)
+        ADD_QT_SYSTEM_LIBRARY(Xmu)
+        ADD_QT_SYSTEM_LIBRARY(X11-xcb)
+        ADD_QT_SYSTEM_LIBRARY(Xi)
+        ADD_QT_SYSTEM_LIBRARY(SM)
+        ADD_QT_SYSTEM_LIBRARY(ICE)
+        ADD_QT_SYSTEM_LIBRARY(xcb)
+        ADD_QT_SYSTEM_LIBRARY(GL)
+        ADD_QT_SYSTEM_LIBRARY(xcb-glx)
+        ADD_QT_SYSTEM_LIBRARY(fontconfig)
+        ADD_QT_SYSTEM_LIBRARY(Xrender)
       ENDIF()
 
       ADD_QT_PLUGIN(imageformats qgif)
