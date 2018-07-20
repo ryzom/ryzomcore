@@ -500,6 +500,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(getDbProp),
 		LUABIND_FUNC(getDbProp64),
 		LUABIND_FUNC(setDbProp),
+		LUABIND_FUNC(setDbProp64),
 		LUABIND_FUNC(addDbProp),
 		LUABIND_FUNC(delDbProp),
 		LUABIND_FUNC(debugInfo),
@@ -2622,6 +2623,36 @@ void	CLuaIHMRyzom::setDbProp(const std::string &dbProp,    sint32 value)
 	else
 		debugInfo(toString("setDbProp(): '%s' dbProp Not found",    dbProp.c_str()));
 }
+
+void	CLuaIHMRyzom::setDbProp64(const std::string &dbProp,    sint64 value)
+{
+	//H_AUTO(Lua_CLuaIHM_setDbProp)
+	// Do not allow Write on SERVER: or LOCAL:
+	static const std::string	dbServer = "SERVER:";
+	static const std::string	dbLocal = "LOCAL:";
+	static const std::string	dbLocalR2 = "LOCAL:R2";
+
+	if ((dbProp.compare(0,    dbServer.size(),    dbServer) == 0) ||
+		(dbProp.compare(0,    dbLocal.size(),    dbLocal) == 0)
+		)
+	{
+		if (dbProp.compare(0,    dbLocalR2.size(),    dbLocalR2) != 0)
+		{
+			nlstop;
+			throw ELuaIHMException("setDbProp(): You are not allowed to write on 'SERVER:...' or 'LOCAL:...' database");
+		}
+	}
+
+	// Write to the DB if found
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbProp,    false);
+
+	if (node)
+		node->setValue64(value);
+	else
+		debugInfo(toString("setDbProp(): '%s' dbProp Not found",    dbProp.c_str()));
+}
+
 
 void	CLuaIHMRyzom::delDbProp(const string &dbProp)
 {
