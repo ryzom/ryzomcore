@@ -274,10 +274,13 @@ namespace NLGUI
 		// Lua exports
 		int luaBlink(CLuaState &ls);
 		int luaSetHeaderColor(CLuaState &ls);
+		int luaSetModalParentList(CLuaState &ls);
 
 		REFLECT_EXPORT_START(CGroupContainer, CGroupContainerBase)
 			REFLECT_LUA_METHOD("blink", luaBlink);
 			REFLECT_LUA_METHOD("setHeaderColor", luaSetHeaderColor);
+			REFLECT_LUA_METHOD("setModalParentList", luaSetModalParentList);
+			
 			REFLECT_STRING("title", getTitle, setTitle);
 			REFLECT_STRING("title_opened", getTitleOpened, setTitleOpened);
 			REFLECT_STRING("title_closed", getTitleClosed, setTitleClosed);
