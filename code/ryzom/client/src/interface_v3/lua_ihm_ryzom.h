@@ -122,6 +122,7 @@ private:
 	static sint32 getDbProp(const std::string &dbProp); // return 0 if not found.
 	static sint64 getDbProp64(const std::string &dbProp); // return 0 if not found.
 	static void	setDbProp(const std::string &dbProp, sint32 value);		// Nb: the db prop is not created if not present.
+	static void	setDbProp64(const std::string &dbProp, sint64 value);		// Nb: the db prop is not created if not present.
 	static void	addDbProp(const std::string &dbProp, sint32 value);		// Nb: the db prop is created if not present.
 	static void	delDbProp(const std::string &dbProp);
 
