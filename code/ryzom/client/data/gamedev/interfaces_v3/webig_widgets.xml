@@ -151,7 +151,7 @@
 	</template>
 
 <!-- //////////// TEMPLATE : webig_bot_chat_buy_item /////////// -->
- <template name="webig_bot_chat_buy_item" id="" money_icon="money_seve.tga" onclick="" ok_text="uiBuy" tooltip_ok="" keep="true" x="0" y="0">
+ <template name="webig_bot_chat_buy_item" id="" money_tooltip="uiDappers" money_icon="money_seve.tga" onclick="" ok_text="uiBuy" tooltip_ok="" keep="true" x="0" y="0">
 	<group id="#id" type="container" posref="TL TL" min_w="240" max_w="408" w="408" x="#x" y="#y" pop_min_h="320" pop_max_h="420" min_h="320" max_h="420" active="true" openable="false" opened="true" movable="true" resizer="false" savable="false" title="uiBotChatMissions" escapable="true" header_color="UI:SAVE:WIN:COLORS:BOT" global_color="false">
 		<group id="header_opened" h="390" sizeref="w" x="0" y="0" posref="TL TL">
 			<group id="top">
@@ -163,9 +163,9 @@
 				</group>
 				
 				<group id="standard_price" posparent="buy_sell_slot" posref="TR TL" x="0" y="-2" w="340" h="50">
-					<instance template="money_tmpl" id="item_price" tooltip="Tokens" icon="#money_icon" posref="ML ML" x="0" w="130" h="32" value="UI:TEMP:ARK_MONEY_PRICE" />
+					<instance template="money_tmpl" id="item_price" tooltip="#money_tooltip" icon="#money_icon" posref="ML ML" x="0" w="130" h="32" value="UI:TEMP:ARK_MONEY_PRICE" />
 					<instance template="edit_box_widget" id="edit" posref="MM MM" x="0" text_x="0" text_ref="BR BR" w="36" backup_father_container_pos="true" prompt="" value="1" enter_loose_focus="true" multi_line="false" max_num_chars="4" onenter="lua" params="arkNpcShop:CheckMoney()" onchange="lua" onchange_params="arkNpcShop:CheckMoney()" enter_recover_focus="true" reset_focus_on_hide="true" max_historic="0" entry_type="positive_integer" />
-					<instance template="money_tmpl" id="item_total_price" posref="MR MR" x="0" w="130" h="32" value="UI:TEMP:ARK_MONEY_TOTAL" />
+					<instance template="money_tmpl" id="item_total_price" tooltip="#money_tooltip" icon="#money_icon" posref="MR MR" x="0" w="130" h="32" value="UI:TEMP:ARK_MONEY_TOTAL" />
 					<view type="text" id="cross" posref="ML MR" posparent="edit" color="255 255 255 255" fontsize="10" x="-4" y="0" shadow="true" hardtext="X" />
 					<view type="text" id="equal" posref="MR ML" posparent="edit" color="255 255 255 255" x="2" y="0" fontsize="16" shadow="true" hardtext="=" />
 					<view type="text" id="unit_price_header" posparent="item_price" posref="TR BR" color="255 255 255 255" fontsize="10" x="0" y="-5" shadow="true" hardtext="uiUnitValue" />
