@@ -672,7 +672,7 @@ MACRO(NL_SETUP_BUILD)
 
     IF(APPLE)
       SET(OBJC_FLAGS -fobjc-abi-version=2 -fobjc-legacy-dispatch -fobjc-weak)
-    
+
       IF(NOT XCODE)
         IF(CMAKE_OSX_ARCHITECTURES)
           SET(TARGETS_COUNT 0)
@@ -958,8 +958,6 @@ MACRO(NL_SETUP_BUILD)
     IF(NOT MINGW)
       ADD_PLATFORM_FLAGS("-fPIC")
     ENDIF()
-
-    SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} -ftemplate-depth-48")
 
     # hardening
     ADD_PLATFORM_FLAGS("-fstack-protector --param=ssp-buffer-size=4")
