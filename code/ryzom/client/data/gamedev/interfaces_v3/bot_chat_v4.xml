@@ -117,74 +117,7 @@
           texture="W_line_hor.tga"
           y="-1" />
   </template>
-  <!-- a text with border -->
-  <template name="bc_border_text"
-            posref="TM TM"
-            posparent="parent"
-            x="0"
-            y="-20"
-            w="-4">
-    <group id="#id"
-           posref="#posref"
-           x="#x"
-           y="#y"
-           posparent="#posparent"
-           child_resize_h="true"
-           sizeref="w"
-           w="#w">
-      <!--
-                <group id="text" posref="TL TL" x="4" y="-4" child_resize_h="true" sizeref="w" w="-8">
-                        <view type="bitmap" id="bg" sizeref="hw" h="0" w="0" scale="true" texture="W_box_blank.tga"/>
-                        <view type="text_id_formated" format="$t" id="text" textid="#text_id" multi_line="true" fontsize="12" shadow="true" global_color="false"/>
-                </group>
-        -->
-      <!-- the border -->
-      <!--
-                <instance template="thin_bc_border" posparent="text"/>
-                -->
-    </group>
-  </template>
-  <template name="bc_border_text2"
-            posref="TM TM"
-            posparent="parent"
-            x="0"
-            y="0"
-            w="-4">
-    <group id="#id"
-           posref="#posref"
-           x="#x"
-           y="#y"
-           posparent="#posparent"
-           child_resize_h="true"
-           w="#w">
-      <group id="text"
-             posref="TL TL"
-             x="4"
-             y="-4"
-             child_resize_h="true"
-             sizeref="w"
-             w="-8">
-        <view type="bitmap"
-              id="bg"
-              sizeref="hw"
-              h="0"
-              w="0"
-              scale="true"
-              texture="W_box_blank.tga" />
-        <view type="text_id_formated"
-              format="$t"
-              id="text"
-              textid="#text_id"
-              multi_line="true"
-              fontsize="12"
-              shadow="true"
-              global_color="false" />
-      </group>
-      <!-- the border -->
-      <instance template="thin_bc_border"
-                posparent="text" />
-    </group>
-  </template>
+
   <!-- EXCHANGE slot -->
   <style style="xchg_slot"
          type="sheet"
