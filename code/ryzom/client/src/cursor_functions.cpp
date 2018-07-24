@@ -897,8 +897,18 @@ void contextWebIG(bool rightClick, bool dblClick)
 	{
 		if (pGC != NULL)
 			pGC->setActive(false);
-		CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:webig:content:html|url="+selectedInstanceURL);
+
+		if (selectedInstanceURL.substr(0, 5) == "@LUA ") 
+		{
+			string header = toString("doubleClick = %s\nrightClick = %s\nSelectedInstanceId = %u\n", dblClick?"true":"false", rightClick?"true":"false", InstanceId);
+			CLuaManager::getInstance().executeLuaScript(header+selectedInstanceURL.substr(5), true);
+		}
+		else
+		{
+			CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:webig:content:html|url="+selectedInstanceURL);
+		}
 	}
+	
 }// contextWebIG //
 
 //-----------------------------------------------
@@ -906,15 +916,9 @@ void contextWebIG(bool rightClick, bool dblClick)
 //-----------------------------------------------
 void contextARKitect(bool rightClick, bool dblClick)
 {
-	string header;
-	if (rightClick)
-	{
-		header = toString("rightClick = true\nSelectedInstanceId = %u\n", InstanceId);
-	} else {
-		header = toString("rightClick = false\nSelectedInstanceId = %u\n", InstanceId);
-	}
+	string header = toString("doubleClick = %s\nrightClick = %s\nSelectedInstanceId = %u\n", dblClick?"true":"false", rightClick?"true":"false", InstanceId);
 
-	CLuaManager::getInstance().executeLuaScript(string(header)+selectedInstanceURL, true);
+	CLuaManager::getInstance().executeLuaScript(header+selectedInstanceURL, true);
 	
 }// contextARKitect //
 

@@ -2586,10 +2586,13 @@ sint64	CLuaIHMRyzom::getDbProp64(const std::string &dbProp)
 	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbProp,    false);
 
 	if (node)
-		return node->getValue64();
+	{
+		sint64 prop = node->getValue64();
+		return prop;
+	}
 	else
 	{
-		debugInfo(toString("getDbProp(): '%s' dbProp Not found",    dbProp.c_str()));
+		debugInfo(toString("getDbProp64(): '%s' dbProp Not found",    dbProp.c_str()));
 		return 0;
 	}
 }
