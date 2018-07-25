@@ -527,6 +527,8 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(getPlayerSelectedSlot),
 		LUABIND_FUNC(isInGame),
 		LUABIND_FUNC(isPlayerSlotNewbieLand),
+		LUABIND_FUNC(getSheetLocalizedName),
+		LUABIND_FUNC(getSheetLocalizedDesc),
 		LUABIND_FUNC(getSkillIdFromName),
 		LUABIND_FUNC(getSkillLocalizedName),
 		LUABIND_FUNC(getMaxSkillValue),
@@ -3112,6 +3114,20 @@ bool CLuaIHMRyzom::isPlayerSlotNewbieLand(uint32 slot)
 
 	return CharacterSummaries[slot].InNewbieland;
 }
+
+// ***************************************************************************
+ucstring	CLuaIHMRyzom::getSheetLocalizedName(const std::string &sheet)
+{
+	return ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedName(CSheetId(sheet)));
+}
+
+// ***************************************************************************
+ucstring	CLuaIHMRyzom::getSheetLocalizedDesc(const std::string &sheet)
+{
+	return ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(CSheetId(sheet)));
+}
+
+
 
 // ***************************************************************************
 sint32	CLuaIHMRyzom::getSkillIdFromName(const std::string &def)
