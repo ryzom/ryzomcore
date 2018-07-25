@@ -1591,10 +1591,10 @@ namespace NLGUI
 							parentId = _Paragraph->getId();
 						}
 
-						CInterfaceGroup *inst = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, parentId+":"+id, tmplParams);
+						CInterfaceGroup *inst = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, this->_Id+":"+id, tmplParams);
 						if (inst)
 						{
-							inst->setId(parentId+":"+id);
+							inst->setId(this->_Id+":"+id);
 							inst->updateCoords();
 							if (haveParentDiv)
 							{
