@@ -80,6 +80,7 @@
 #include "world_database_manager.h"
 #include "continent_manager.h"
 #include "ig_callback.h"
+#include "release.h"
 //#include "fog_map.h"
 #include "movie_shooter.h"
 #include "sound_manager.h"
@@ -2555,6 +2556,9 @@ bool mainLoop()
 
 	if ( ! FarTP.isReselectingChar() ) // skip some parts if the user wants to quit in the middle of a char reselect
 	{
+		// Saving ingame resolution when in windowed mode
+		saveIngameResolution();
+
 		// Release the structure for the ping.
 		Ping.release ();
 

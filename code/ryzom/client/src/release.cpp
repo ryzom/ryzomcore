@@ -136,7 +136,7 @@ extern void selectTipsOfTheDay (uint tips);
 
 // ***************************************************************************
 // Saving ingame resolution when in windowed mode
-static void saveIngameResolution()
+void saveIngameResolution()
 {
 	if (ClientCfg.Windowed)
 	{
@@ -381,8 +381,6 @@ void	releaseMainLoopReselect()
 void releaseMainLoop(bool closeConnection)
 {
 	ProgressBar.release();
-
-	saveIngameResolution();
 
 	// Release R2 editor if applicable
 	R2::getEditor().autoConfigRelease(IsInRingSession);
