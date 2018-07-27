@@ -541,6 +541,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(isDynStringAvailable),
 		LUABIND_FUNC(isFullyPatched),
 		LUABIND_FUNC(getSheetType),
+		LUABIND_FUNC(getSheetFamily),
 		LUABIND_FUNC(getSheetName),
 		LUABIND_FUNC(getFameIndex),
 		LUABIND_FUNC(getFameName),
@@ -3320,6 +3321,19 @@ std::string CLuaIHMRyzom::getSheetType(const std::string &sheet)
 	return CEntitySheet::typeToString(sheetPtr->Type);
 }
 
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::getSheetFamily(const std::string &sheet)
+{
+	CEntitySheet *pES = SheetMngr.get ( CSheetId(sheet) );
+	if ((pES != NULL) && (pES->type() == CEntitySheet::ITEM))
+	{
+		CItemSheet *pIS = (CItemSheet*)pES;
+
+		if (pIS)
+			return ITEMFAMILY::toString(pIS->Family);
+	}
+}
 
 // ***************************************************************************
 std::string CLuaIHMRyzom::getSheetName(uint32 sheetId)
