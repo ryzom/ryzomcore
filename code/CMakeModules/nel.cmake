@@ -382,7 +382,6 @@ MACRO(CONVERT_VERSION_NUMBER _VERSION_NUMBER _BASE)
 ENDMACRO()
 
 MACRO(NL_SETUP_BUILD)
-
   #-----------------------------------------------------------------------------
   # Setup the buildmode variables.
   #
@@ -1238,4 +1237,4 @@ MACRO(SETUP_EXTERNAL)
     FIND_PACKAGE(MSVC REQUIRED)
     FIND_PACKAGE(WindowsSDK REQUIRED)
   ENDIF()
-ENDMACRO(SETUP_EXTERNAL)
+ENDMACRO()
