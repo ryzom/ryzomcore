@@ -1108,7 +1108,13 @@ void CClientConfig::setValues()
 		ClientCfg.CurlMaxConnections = 2;
 
 	READ_STRING_FV(CurlCABundle);
-
+	if (ClientCfg.CurlCABundle[0] == '%') // Path is relative to client_default.cfg path (used by ryzom patch)
+	{
+		string defaultConfigFileName;
+		if (ClientCfg.getDefaultConfigLocation(defaultConfigFileName))
+			ClientCfg.CurlCABundle = CFile::getPath(defaultConfigFileName)+ClientCfg.CurlCABundle.substr(1);
+	}
+		
 	///////////////
 	// ANIMATION //
 	// AnimatedAngleThreshold
