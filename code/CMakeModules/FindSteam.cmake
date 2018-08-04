@@ -1,8 +1,8 @@
 # - Locate Steam API
 # This module defines
 #  STEAM_LIBRARY, the library to link against
-#  VORBIS_FOUND, if false, do not try to link to VORBIS
-#  VORBIS_INCLUDE_DIR, where to find headers.
+#  STEAM_FOUND, if false, do not try to link to STEAM
+#  STEAM_INCLUDE_DIR, where to find headers.
 
 IF(STEAM_LIBRARY AND STEAM_INCLUDE_DIR)
   # in cache already
