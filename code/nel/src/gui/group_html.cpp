@@ -398,14 +398,21 @@ namespace NLGUI
 		// https://
 		if (toLower(download.url.substr(0, 8)) == "https://")
 		{
-#if defined(NL_OS_WINDOWS)
-			curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, &CCurlCertificates::sslCtxFunction);
-#else
-			if (!options.curlCABundle.empty())
+			// check if compiled with OpenSSL backend
+			CCurlCertificates::init(curl);
+
+			// specify custom CA certs
+			CCurlCertificates::addCertificateFile(options.curlCABundle);
+
+			// would allow to provide the CA in memory instead of using CURLOPT_CAINFO, but needs to include and link OpenSSL
+			if (curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, &CCurlCertificates::sslCtxFunction) != CURLE_OK)
 			{
-				curl_easy_setopt(curl, CURLOPT_CAINFO, options.curlCABundle.c_str());
+				nlwarning("Unable to support CURLOPT_SSL_CTX_FUNCTION, curl not compiled with OpenSSL ?");
 			}
-#endif
+
+			// set both CURLOPT_CAINFO and CURLOPT_CAPATH to NULL to be sure we won't use default values (these files can be missing and generate errors)
+			curl_easy_setopt(curl, CURLOPT_CAINFO, NULL);
+			curl_easy_setopt(curl, CURLOPT_CAPATH, NULL);
 		}
 
 		download.data = new CCurlWWWData(curl, download.url);

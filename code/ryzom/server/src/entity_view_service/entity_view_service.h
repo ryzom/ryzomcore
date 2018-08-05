@@ -179,7 +179,7 @@ public:
 	{
 		nlinfo("Create entity %s", id.toString().c_str());
 
-		std::pair<TEntityMap::iterator,bool>	res = _Entities.insert(std::make_pair<NLMISC::CEntityId,CEntity>(id, CEntity()));
+		std::pair<TEntityMap::iterator,bool>	res = _Entities.insert(std::make_pair(id, CEntity()));
 		TEntityMap::iterator	ite = res.first;
 		nlassert(ite != _Entities.end() && res.second);
 

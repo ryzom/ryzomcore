@@ -671,7 +671,7 @@ bool	NLPACS::CComputableSurface::checkConsistency()
 		CComputableSurfaceBorder&	border = (*BorderKeeper)[BorderIds[i]];
 		
 		for (j=0; j+1<border.Vertices.size(); ++j)
-			edges.push_back(std::make_pair<NLMISC::CVectorD, NLMISC::CVectorD>(border.Vertices[j], border.Vertices[j+1]));
+			edges.push_back(std::make_pair(border.Vertices[j], border.Vertices[j+1]));
 	}
 
 	for (i=0; i+1<edges.size(); ++i)
