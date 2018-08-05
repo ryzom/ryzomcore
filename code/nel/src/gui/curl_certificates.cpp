@@ -86,7 +86,7 @@ namespace NLGUI
 			}
 			else
 			{
-				// if CURL is using SSPI under Windows or SecureChannel under OS X, we'll use native system CA Certs
+				// if CURL is using SSPI or SChannel under Windows or DarwinSSL under OS X, we'll use native system CA Certs
 				isUsingOpenSSLBackend = false;
 			}
 
@@ -122,13 +122,13 @@ namespace NLGUI
 
 		void addCertificatesFromFile(const std::string &cert)
 		{
+			if (!isUsingOpenSSLBackend) return;
+
 			if (!isInitialized)
 			{
 				nlwarning("You MUST call NLGUI::CCurlCertificates::init before adding new certificates");
 				return;
 			}
-
-			if (!isUsingOpenSSLBackend) return;
 
 			// this file was already loaded
 			if (std::find(FilesList.begin(), FilesList.end(), cert) != FilesList.end()) return;
