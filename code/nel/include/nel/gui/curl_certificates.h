@@ -17,19 +17,24 @@
 #ifndef CL_CURL_CERTIFICATES_HTML_H
 #define CL_CURL_CERTIFICATES_HTML_H
 
-#include <curl/curl.h>
-
 #include "nel/misc/types_nl.h"
+
+#include <curl/curl.h>
 
 namespace NLGUI
 {
-#if defined(NL_OS_WINDOWS)
-	class CCurlCertificates {
+	class CCurlCertificates
+	{
 	public:
+		// check if compiled with OpenSSL backend
+		static void init(CURL *curl);
+
+		// allow to use custom PEM certificates
+		static void addCertificateFile(const std::string &cert);
+
 		// cURL SSL certificate loading
 		static CURLcode sslCtxFunction(CURL *curl, void *sslctx, void *parm);
 	};
-#endif // NL_OS_WINDOWS
 
 } // namespace
 #endif
