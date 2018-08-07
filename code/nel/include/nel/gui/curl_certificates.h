@@ -19,7 +19,8 @@
 
 #include "nel/misc/types_nl.h"
 
-#include <curl/curl.h>
+// forward declaration to avoid curl.h inclusion everywhere
+typedef void CURL;
 
 namespace NLGUI
 {
@@ -32,8 +33,8 @@ namespace NLGUI
 		// allow to use custom PEM certificates
 		static void addCertificateFile(const std::string &cert);
 
-		// cURL SSL certificate loading
-		static CURLcode sslCtxFunction(CURL *curl, void *sslctx, void *parm);
+		// set all CURL options to use custom SSL context function
+		static void useCertificates(CURL *curl);
 	};
 
 } // namespace

@@ -171,6 +171,7 @@ ENDIF()
 IF(APPLE)
   FIND_LIBRARY(CARBON_FRAMEWORK Carbon)
   FIND_LIBRARY(FOUNDATION_FRAMEWORK Foundation)
+  FIND_LIBRARY(SECURITY_FRAMEWORK Security)
 
   IF(APPLE_CERTIFICATE)
     # Find codesign_allocate
@@ -230,22 +231,41 @@ IF(WITH_NEL)
     IF(CURL_STATIC)
       SET(CURL_DEFINITIONS -DCURL_STATICLIB)
 
-      SET(CURL_INCLUDE_DIRS ${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
-      SET(CURL_LIBRARIES ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES})
+      LIST(APPEND CURL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})
+      LIST(APPEND CURL_LIBRARIES ${OPENSSL_LIBRARIES})
 
-      IF(UNIX)
+      IF(WIN32)
+        LIST(APPEND CURL_LIBRARIES Crypt32 Cryptui)
+      ELSE()
         # CURL depends on libidn
         FIND_LIBRARY(IDN_LIBRARY idn)
         IF(IDN_LIBRARY)
-          SET(CURL_LIBRARIES ${CURL_LIBRARIES} ${IDN_LIBRARY})
+          LIST(APPEND CURL_LIBRARIES ${IDN_LIBRARY})
         ENDIF()
 
-        # CURL Macports version depends on libidn, libintl and libiconv too
+        # CURL Macports version can depend on libidn, libidn2, libintl, libpsl and libiconv too
         IF(APPLE)
           FIND_LIBRARY(INTL_LIBRARY intl)
           IF(INTL_LIBRARY)
-            SET(CURL_LIBRARIES ${CURL_LIBRARIES} ${INTL_LIBRARY})
+            LIST(APPEND CURL_LIBRARIES ${INTL_LIBRARY})
           ENDIF()
+
+          FIND_LIBRARY(IDN2_LIBRARY idn2)
+          IF(IDN2_LIBRARY)
+            LIST(APPEND CURL_LIBRARIES ${IDN2_LIBRARY})
+          ENDIF()
+
+          FIND_LIBRARY(PSL_LIBRARY psl)
+          IF(PSL_LIBRARY)
+            LIST(APPEND CURL_LIBRARIES ${PSL_LIBRARY})
+          ENDIF()
+
+          FIND_LIBRARY(UNISTRING_LIBRARY unistring)
+          IF(UNISTRING_LIBRARY)
+            LIST(APPEND CURL_LIBRARIES ${UNISTRING_LIBRARY})
+          ENDIF()
+
+          LIST(APPEND CURL_LIBRARIES ${SECURITY_FRAMEWORK})
         ENDIF()
       ENDIF()
     ENDIF()
