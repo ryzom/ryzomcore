@@ -69,7 +69,16 @@ namespace NLGUI
 
 			// get more information on CURL session
 			curl_tlssessioninfo *sessionInfo;
-			CURLcode res = curl_easy_getinfo(curl, CURLINFO_TLS_SSL_PTR, &sessionInfo);
+
+			CURLINFO info;
+
+#if CURL_AT_LEAST_VERSION(7, 48, 0)
+			info = CURLINFO_TLS_SSL_PTR;
+#else
+			info = CURLINFO_TLS_SESSION;
+#endif
+
+			CURLcode res = curl_easy_getinfo(curl, info, &sessionInfo);
 
 			// only use OpenSSL callback if not using Windows SSPI and using OpenSSL backend
 			if (!res && sessionInfo && sessionInfo->backend == CURLSSLBACKEND_OPENSSL && !(data && data->features & CURL_VERSION_SSPI))
