@@ -243,11 +243,21 @@ IF(WITH_NEL)
           LIST(APPEND CURL_LIBRARIES ${IDN_LIBRARY})
         ENDIF()
 
-        # CURL Macports version depends on libidn, libintl and libiconv too
+        # CURL Macports version can depend on libidn, libidn2, libintl, libpsl and libiconv too
         IF(APPLE)
           FIND_LIBRARY(INTL_LIBRARY intl)
           IF(INTL_LIBRARY)
             LIST(APPEND CURL_LIBRARIES ${INTL_LIBRARY})
+          ENDIF()
+
+          FIND_LIBRARY(IDN2_LIBRARY idn2)
+          IF(IDN2_LIBRARY)
+            LIST(APPEND CURL_LIBRARIES ${IDN2_LIBRARY})
+          ENDIF()
+
+          FIND_LIBRARY(PSL_LIBRARY psl)
+          IF(PSL_LIBRARY)
+            LIST(APPEND CURL_LIBRARIES ${PSL_LIBRARY})
           ENDIF()
 
           LIST(APPEND CURL_LIBRARIES ${SECURITY_FRAMEWORK})
