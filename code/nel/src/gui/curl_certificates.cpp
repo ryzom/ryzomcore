@@ -297,7 +297,7 @@ namespace NLGUI
 	void CCurlCertificates::useCertificates(CURL *curl)
 	{
 		// CURL must be valid, using OpenSSL backend and certificates must be loaded, else return
-		if (!curl || !isUsingOpenSSLBackend || x509CertListManager.CertList.empty()) return;
+		if (!curl || !x509CertListManager.isUsingOpenSSLBackend || x509CertListManager.CertList.empty()) return;
 
 		curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
 
