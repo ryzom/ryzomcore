@@ -70,7 +70,6 @@ bool CCurlHttpClient::verifyServer(bool verify)
 {
 	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYHOST, verify ? 2 : 0);
 	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYPEER, verify ? 1 : 0);
-	curl_easy_setopt(_Curl, CURLOPT_SSLCERTTYPE, "PEM");
 
 	// check if compiled with OpenSSL backend
 	NLGUI::CCurlCertificates::init(_Curl);
@@ -78,15 +77,9 @@ bool CCurlHttpClient::verifyServer(bool verify)
 	// specify custom CA certs
 	NLGUI::CCurlCertificates::addCertificateFile(CAFilename);
 
-	// would allow to provide the CA in memory instead of using CURLOPT_CAINFO, but needs to include and link OpenSSL
-	if (curl_easy_setopt(_Curl, CURLOPT_SSL_CTX_FUNCTION, &NLGUI::CCurlCertificates::sslCtxFunction) != CURLE_OK)
-	{
-		nlwarning("Unable to support CURLOPT_SSL_CTX_FUNCTION, curl not compiled with OpenSSL ?");
-	}
+	// if supported, use custom SSL context function to load certificates
+	NLGUI::CCurlCertificates::useCertificates(_Curl);
 
-	// set both CURLOPT_CAINFO and CURLOPT_CAPATH to NULL to be sure we won't use default values (these files can be missing and generate errors)
-	curl_easy_setopt(_Curl, CURLOPT_CAINFO, NULL);
-	curl_easy_setopt(_Curl, CURLOPT_CAPATH, NULL);
 	return true;
 }
 
