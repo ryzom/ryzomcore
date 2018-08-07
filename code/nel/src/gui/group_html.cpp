@@ -404,15 +404,8 @@ namespace NLGUI
 			// specify custom CA certs
 			CCurlCertificates::addCertificateFile(options.curlCABundle);
 
-			// would allow to provide the CA in memory instead of using CURLOPT_CAINFO, but needs to include and link OpenSSL
-			if (curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, &CCurlCertificates::sslCtxFunction) != CURLE_OK)
-			{
-				nlwarning("Unable to support CURLOPT_SSL_CTX_FUNCTION, curl not compiled with OpenSSL ?");
-			}
-
-			// set both CURLOPT_CAINFO and CURLOPT_CAPATH to NULL to be sure we won't use default values (these files can be missing and generate errors)
-			curl_easy_setopt(curl, CURLOPT_CAINFO, NULL);
-			curl_easy_setopt(curl, CURLOPT_CAPATH, NULL);
+			// if supported, use custom SSL context function to load certificates
+			CCurlCertificates::useCertificates(curl);
 		}
 
 		download.data = new CCurlWWWData(curl, download.url);
@@ -5352,14 +5345,14 @@ namespace NLGUI
 		// https://
 		if (toLower(url.substr(0, 8)) == "https://")
 		{
-#if defined(NL_OS_WINDOWS)
-			curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, &CCurlCertificates::sslCtxFunction);
-#else
-			if (!options.curlCABundle.empty())
-			{
-				curl_easy_setopt(curl, CURLOPT_CAINFO, options.curlCABundle.c_str());
-			}
-#endif
+			// check if compiled with OpenSSL backend
+			CCurlCertificates::init(curl);
+
+			// specify custom CA certs
+			CCurlCertificates::addCertificateFile(options.curlCABundle);
+
+			// if supported, use custom SSL context function to load certificates
+			CCurlCertificates::useCertificates(curl);
 		}
 
 		// do not follow redirects, we have own handler

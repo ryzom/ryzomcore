@@ -23,6 +23,8 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
+#include <curl/curl.h>
+
 using namespace std;
 using namespace NLMISC;
 
@@ -67,7 +69,16 @@ namespace NLGUI
 
 			// get more information on CURL session
 			curl_tlssessioninfo *sessionInfo;
-			CURLcode res = curl_easy_getinfo(curl, CURLINFO_TLS_SSL_PTR, &sessionInfo);
+
+			CURLINFO info;
+
+#if CURL_AT_LEAST_VERSION(7, 48, 0)
+			info = CURLINFO_TLS_SSL_PTR;
+#else
+			info = CURLINFO_TLS_SESSION;
+#endif
+
+			CURLcode res = curl_easy_getinfo(curl, info, &sessionInfo);
 
 			// only use OpenSSL callback if not using Windows SSPI and using OpenSSL backend
 			if (!res && sessionInfo && sessionInfo->backend == CURLSSLBACKEND_OPENSSL && !(data && data->features & CURL_VERSION_SSPI))
@@ -201,23 +212,8 @@ namespace NLGUI
 	/// this will be initialized on startup and cleared on exit
 	static SX509Certificates x509CertListManager;
 
-	// ***************************************************************************
-	// static
-	void CCurlCertificates::init(CURL *curl)
-	{
-		x509CertListManager.init(curl);
-	}
-
-	// ***************************************************************************
-	// static
-	void CCurlCertificates::addCertificateFile(const std::string &cert)
-	{
-		x509CertListManager.addCertificatesFromFile(cert);
-	}
-
-	// ***************************************************************************
-	// static
-	CURLcode CCurlCertificates::sslCtxFunction(CURL *curl, void *sslctx, void *parm)
+	// cURL SSL certificate loading
+	static CURLcode sslCtxFunction(CURL *curl, void *sslctx, void *parm)
 	{
 		CURLcode res = CURLE_OK;
 
@@ -280,6 +276,40 @@ namespace NLGUI
 		}
 
 		return res;
+	}
+
+	// ***************************************************************************
+	// static
+	void CCurlCertificates::init(CURL *curl)
+	{
+		x509CertListManager.init(curl);
+	}
+
+	// ***************************************************************************
+	// static
+	void CCurlCertificates::addCertificateFile(const std::string &cert)
+	{
+		x509CertListManager.addCertificatesFromFile(cert);
+	}
+
+	// ***************************************************************************
+	// static
+	void CCurlCertificates::useCertificates(CURL *curl)
+	{
+		// CURL must be valid, using OpenSSL backend and certificates must be loaded, else return
+		if (!curl || !isUsingOpenSSLBackend || x509CertListManager.CertList.empty()) return;
+
+		curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
+
+		// would allow to provide the CA in memory instead of using CURLOPT_CAINFO, but needs to include and link OpenSSL
+		if (curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, &sslCtxFunction) != CURLE_OK)
+		{
+			nlwarning("Unable to support CURLOPT_SSL_CTX_FUNCTION, curl not compiled with OpenSSL ?");
+		}
+
+		// set both CURLOPT_CAINFO and CURLOPT_CAPATH to NULL to be sure we won't use default values (these files can be missing and generate errors)
+		curl_easy_setopt(curl, CURLOPT_CAINFO, NULL);
+		curl_easy_setopt(curl, CURLOPT_CAPATH, NULL);
 	}
 
 }// namespace
