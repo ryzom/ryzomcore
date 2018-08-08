@@ -218,13 +218,13 @@ namespace NLNET
 			}
 		}
 
-		void onCommand(const CMessage &/* command */) throw (EInvalidCommand)
+		void onCommand(const CMessage &/* command */)
 		{
 			// nothing done for now
 			throw EInvalidCommand();
 		}
 		/// The gateway send a textual command to the transport
-		bool onCommand(const TParsedCommandLine &command) throw (EInvalidCommand)
+		bool onCommand(const TParsedCommandLine &command)
 		{
 			if (command.SubParams.size() < 1)
 				throw  EInvalidCommand();
@@ -255,7 +255,7 @@ namespace NLNET
 
 
 		/// Open the server by establishing route with all known services
-		void open(const std::string &subNetName) throw (ETransportError)
+		void open(const std::string &subNetName)
 		{
 			H_AUTO(L5_open);
 

@@ -1066,7 +1066,7 @@ void	CFightScript::add(CFightScriptCompReader	*reader)
 }
 
 
-CFightScriptCompReader	*CFightScriptCompReader::getScriptReader	(const string &str) throw (ReadFightActionException)
+CFightScriptCompReader	*CFightScriptCompReader::getScriptReader	(const string &str)
 {
 	CFightScript::TFightScriptMap::iterator	it=CFightScript::_ScriptCompList.find(str);
 	if	(it==CFightScript::_ScriptCompList.end())

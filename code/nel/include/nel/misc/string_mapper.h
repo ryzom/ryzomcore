@@ -177,10 +177,10 @@ public:
 	uint32 getCount() { return _IdCounter; }
 
 	// helper serialize a string id as a string
-	void				serial(NLMISC::IStream &f, TSStringId &strId) throw(EStream);
+	void				serial(NLMISC::IStream &f, TSStringId &strId);
 
 	// helper serialize a string id vector
-	void				serial(NLMISC::IStream &f, std::vector<TSStringId> &strIdVect) throw(EStream);
+	void				serial(NLMISC::IStream &f, std::vector<TSStringId> &strIdVect);
 
 };
 

@@ -216,13 +216,13 @@ public:
 		}
 	}
 
-	void onCommand(const CMessage &/* command */) throw (IGatewayTransport::EInvalidCommand)
+	void onCommand(const CMessage &/* command */)
 	{
 		// nothing done for now
 		throw EInvalidCommand();
 	}
 	/// The gateway send a textual command to the transport
-	bool onCommand(const TParsedCommandLine &command) throw (IGatewayTransport::EInvalidCommand)
+	bool onCommand(const TParsedCommandLine &command)
 	{
 		if (command.SubParams.size() < 1)
 			throw  EInvalidCommand();
@@ -256,7 +256,7 @@ public:
 	}
 
 	/// Open the connection by intercepting client gateway message
-	void open() throw (ETransportError)
+	void open()
 	{
 		if (_Open)
 		{

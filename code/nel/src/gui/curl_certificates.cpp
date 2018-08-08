@@ -88,12 +88,9 @@ namespace NLGUI
 				addCertificatesFrom("CA");
 				addCertificatesFrom("AuthRoot");
 				addCertificatesFrom("ROOT");
-
-				// we manually loaded native CA Certs, don't need to use custom certificates
-				isUsingOpenSSLBackend = false;
-#else
-				isUsingOpenSSLBackend = true;
 #endif
+
+				isUsingOpenSSLBackend = true;
 			}
 			else
 			{
@@ -147,7 +144,7 @@ namespace NLGUI
 			FilesList.push_back(cert);
 
 			// look for certificate in search paths
-			string path = CPath::lookup(cert);
+			string path = CPath::lookup(cert, false);
 			nlinfo("Cert path '%s'", path.c_str());
 
 			if (path.empty())

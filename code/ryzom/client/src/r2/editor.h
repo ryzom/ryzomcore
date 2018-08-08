@@ -421,7 +421,7 @@ public:
 	// get table for registry in lua environment
 	CLuaObject       &getRegistry()       { return _Registry; }
 	// get lua classes (the r2.Classes table)
-	CLuaObject		 getClasses() throw(ELuaError);
+	CLuaObject		 getClasses();
 	// get R2 environment (the 'r2' table into lua global environment)
 	CLuaObject       &getEnv();
 	// get the config table (that is the 'r2.Config' table)

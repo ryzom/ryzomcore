@@ -401,7 +401,7 @@ bool		CIFile::eof ()
 }
 
 // ======================================================================================================
-void		CIFile::serialBuffer(uint8 *buf, uint len) throw(EReadError)
+void		CIFile::serialBuffer(uint8 *buf, uint len)
 {
 	if (len == 0)
 		return;
@@ -444,7 +444,7 @@ void		CIFile::serialBuffer(uint8 *buf, uint len) throw(EReadError)
 }
 
 // ======================================================================================================
-void		CIFile::serialBit(bool &bit) throw(EReadError)
+void		CIFile::serialBit(bool &bit)
 {
 	// Simple for now.
 	uint8	v=bit;
@@ -453,7 +453,7 @@ void		CIFile::serialBit(bool &bit) throw(EReadError)
 }
 
 // ======================================================================================================
-bool		CIFile::seek (sint32 offset, IStream::TSeekOrigin origin) const throw(EStream)
+bool		CIFile::seek (sint32 offset, IStream::TSeekOrigin origin) const
 {
 	if ((_CacheFileOnOpen) && (_Cache == NULL))
 		return false;
@@ -485,7 +485,7 @@ bool		CIFile::seek (sint32 offset, IStream::TSeekOrigin origin) const throw(EStr
 }
 
 // ======================================================================================================
-sint32		CIFile::getPos () const throw(EStream)
+sint32		CIFile::getPos () const
 {
 	return _ReadPos;
 }
@@ -652,7 +652,7 @@ void	COFile::flush()
 
 
 // ======================================================================================================
-void		COFile::serialBuffer(uint8 *buf, uint len) throw(EWriteError)
+void		COFile::serialBuffer(uint8 *buf, uint len)
 {
 	if(!_F)
 		throw	EFileNotOpened(_FileName);
@@ -667,14 +667,14 @@ void		COFile::serialBuffer(uint8 *buf, uint len) throw(EWriteError)
 	}
 }
 // ======================================================================================================
-void		COFile::serialBit(bool &bit) throw(EWriteError)
+void		COFile::serialBit(bool &bit)
 {
 	// Simple for now.
 	uint8	v=bit;
 	serialBuffer(&v, 1);
 }
 // ======================================================================================================
-bool		COFile::seek (sint32 offset, IStream::TSeekOrigin origin) const throw(EStream)
+bool		COFile::seek (sint32 offset, IStream::TSeekOrigin origin) const
 {
 	if (_F)
 	{
@@ -701,7 +701,7 @@ bool		COFile::seek (sint32 offset, IStream::TSeekOrigin origin) const throw(EStr
 	return false;
 }
 // ======================================================================================================
-sint32		COFile::getPos () const throw(EStream)
+sint32		COFile::getPos () const
 {
 	if (_F)
 	{
