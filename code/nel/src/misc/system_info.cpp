@@ -1470,9 +1470,9 @@ uint64 CSystemInfo::availableHDSpace (const string &filename)
 uint64 CSystemInfo::availablePhysicalMemory ()
 {
 #ifdef NL_OS_WINDOWS
-	MEMORYSTATUS ms;
-	GlobalMemoryStatus (&ms);
-	return uint64(ms.dwAvailPhys);
+	MEMORYSTATUSEX ms;
+	GlobalMemoryStatusEx(&ms);
+	return ms.ullAvailPhys;
 #elif defined NL_OS_MAC
 	return uint64(getsysctlnum64("hw.usermem"));
 #elif defined NL_OS_UNIX
@@ -1485,9 +1485,9 @@ uint64 CSystemInfo::availablePhysicalMemory ()
 uint64 CSystemInfo::totalPhysicalMemory ()
 {
 #ifdef NL_OS_WINDOWS
-	MEMORYSTATUS ms;
-	GlobalMemoryStatus (&ms);
-	return uint64(ms.dwTotalPhys);
+	MEMORYSTATUSEX ms;
+	GlobalMemoryStatusEx(&ms);
+	return ms.ullTotalPhys;
 #elif defined NL_OS_MAC
 	return uint64(getsysctlnum64("hw.physmem"));
 #elif defined NL_OS_UNIX
@@ -1867,9 +1867,9 @@ bool CSystemInfo::getVideoInfo (std::string &deviceName, uint64 &driverVersion)
 uint64 CSystemInfo::virtualMemory ()
 {
 #ifdef NL_OS_WINDOWS
-	MEMORYSTATUS ms;
-	GlobalMemoryStatus (&ms);
-	return uint64(ms.dwTotalVirtual - ms.dwAvailVirtual);
+	MEMORYSTATUSEX ms;
+	GlobalMemoryStatusEx(&ms);
+	return ms.ullTotalVirtual - ms.ullAvailVirtual;
 #else
 	return 0;
 #endif
