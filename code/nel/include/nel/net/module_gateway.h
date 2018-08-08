@@ -346,9 +346,9 @@ namespace NLNET
 		virtual const std::string &getClassName() const =0;
 
 		/// The gateway send a command message to the transport
-		virtual void onCommand(const CMessage &command) throw (EInvalidCommand) = 0;
+		virtual void onCommand(const CMessage &command) = 0;
 		/// The gateway send a textual command to the transport
-		virtual bool onCommand(const TParsedCommandLine &command) throw (EInvalidCommand) = 0;
+		virtual bool onCommand(const TParsedCommandLine &command) = 0;
 
 		/// The gateway update the transport regularly
 		virtual void update() =0;

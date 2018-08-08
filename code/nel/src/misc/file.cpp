@@ -453,7 +453,7 @@ void		CIFile::serialBit(bool &bit) throw(EReadError)
 }
 
 // ======================================================================================================
-bool		CIFile::seek (sint32 offset, IStream::TSeekOrigin origin) const throw(EStream)
+bool		CIFile::seek (sint32 offset, IStream::TSeekOrigin origin) const
 {
 	if ((_CacheFileOnOpen) && (_Cache == NULL))
 		return false;

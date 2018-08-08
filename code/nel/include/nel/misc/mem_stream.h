@@ -197,7 +197,7 @@ public:
 	 * \return true if seek sucessfull.
 	 * \see ESeekNotSupported SeekOrigin getPos
 	 */
-	virtual bool	seek (sint32 offset, TSeekOrigin origin) const throw(EStream);
+	virtual bool	seek (sint32 offset, TSeekOrigin origin) const;
 
 	/**
 	 * Get the location of the stream pointer.
