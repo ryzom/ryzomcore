@@ -144,7 +144,7 @@ namespace NLGUI
 			FilesList.push_back(cert);
 
 			// look for certificate in search paths
-			string path = CPath::lookup(cert);
+			string path = CPath::lookup(cert, false);
 			nlinfo("Cert path '%s'", path.c_str());
 
 			if (path.empty())
