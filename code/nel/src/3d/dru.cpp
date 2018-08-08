@@ -77,7 +77,7 @@ extern IDriver* createGlEsDriverInstance ();
 #endif
 
 // ***************************************************************************
-IDriver		*CDRU::createGlDriver() throw (EDru)
+IDriver		*CDRU::createGlDriver()
 {
 #ifdef NL_STATIC
 
@@ -131,7 +131,7 @@ IDriver		*CDRU::createGlDriver() throw (EDru)
 }
 
 // ***************************************************************************
-IDriver		*CDRU::createGlEsDriver() throw (EDru)
+IDriver		*CDRU::createGlEsDriver()
 {
 #ifdef NL_STATIC
 
@@ -188,7 +188,7 @@ IDriver		*CDRU::createGlEsDriver() throw (EDru)
 
 #ifdef NL_OS_WINDOWS
 
-IDriver		*CDRU::createD3DDriver() throw (EDru)
+IDriver		*CDRU::createD3DDriver()
 {
 #ifdef NL_STATIC
 

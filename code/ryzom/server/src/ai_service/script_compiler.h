@@ -298,7 +298,7 @@ public:
 	
 	static CToken*							getToken			(std::string const& tokenName);
 	static NLMISC::CSmartPtr<CRule>			getRule				(std::string const& ruleName);
-	static bool								getNextToken		(std::string const& text, size_t& index, std::string& tokenName, std::string& textValue) throw (EScriptError);
+	static bool								getNextToken		(std::string const& text, size_t& index, std::string& tokenName, std::string& textValue);
 	static std::string const&				getOpcodeName		(AIVM::CScriptVM::EOpcode const& op);
 	static AIVM::CScriptVM::EOpcode			getOpcodeAndValue	(std::string const& str, std::string& value);
 	static CScriptNativeFuncParams*			getNativeFunc		(std::string const& funcName, std::string const& inparams, std::string const& outparams);

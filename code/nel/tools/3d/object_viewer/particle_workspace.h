@@ -186,7 +186,7 @@ public:
 	  * 
 	  * \return pointer to new node, or NULL if already inserted	  
 	  */
-	CNode		*addNode(const std::string &filenameWithFullPath) throw( NLMISC::Exception);	
+	CNode		*addNode(const std::string &filenameWithFullPath);	
 	// remove a node by its index
 	void		removeNode(uint index);
 	// remove a node by its pointer

@@ -1279,7 +1279,7 @@ static void displayErrorLinesForIndex(const string &text, size_t &index)
 }
 
 
-bool CCompiler::getNextToken(const string &text, size_t &index, string &tokenName, string &textValue) throw (EScriptError)
+bool CCompiler::getNextToken(const string &text, size_t &index, string &tokenName, string &textValue)
 {
 	char c=text.at(index);
 	while (c==' '||c=='\n'||c=='\r'||c=='\t') // to avoid blanks, returns and Tabs.
