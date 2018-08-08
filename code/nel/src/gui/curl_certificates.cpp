@@ -88,12 +88,9 @@ namespace NLGUI
 				addCertificatesFrom("CA");
 				addCertificatesFrom("AuthRoot");
 				addCertificatesFrom("ROOT");
-
-				// we manually loaded native CA Certs, don't need to use custom certificates
-				isUsingOpenSSLBackend = false;
-#else
-				isUsingOpenSSLBackend = true;
 #endif
+
+				isUsingOpenSSLBackend = true;
 			}
 			else
 			{
