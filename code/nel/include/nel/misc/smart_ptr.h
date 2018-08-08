@@ -226,7 +226,7 @@ public:
 	std::string toString() { if(Ptr) return toString(*Ptr); else return "<null>"; }
 
 	// serial using serialPtr
-	void serialPtr(NLMISC::IStream &f) throw(NLMISC::EStream )
+	void serialPtr(NLMISC::IStream &f)
 	{
 		T*	obj= NULL;
 		if(f.isReading())
@@ -242,7 +242,7 @@ public:
 		}
 	}
 	// serial using serialPloyPtr
-	void serialPolyPtr(NLMISC::IStream &f) throw(NLMISC::EStream )
+	void serialPolyPtr(NLMISC::IStream &f)
 	{
 		T*	obj= NULL;
 		if(f.isReading())
@@ -337,7 +337,7 @@ public:
 	void	kill();
 
 	// serial using serialPloyPtr
-	void serialPolyPtr(NLMISC::IStream &f) throw(NLMISC::EStream )
+	void serialPolyPtr(NLMISC::IStream &f)
 	{
 		T*	obj= NULL;
 		if(f.isReading())

@@ -222,7 +222,7 @@ namespace NLGUI
 	}
 
 	// *************************************************
-	CLuaEnumeration CLuaObject::enumerate() throw(ELuaNotATable)
+	CLuaEnumeration CLuaObject::enumerate()
 	{
 		if (!isEnumerable())
 		{
@@ -317,7 +317,7 @@ namespace NLGUI
 	}
 
 	// *************************************************
-	void CLuaObject::setNil(const char *key) throw(ELuaNotATable)
+	void CLuaObject::setNil(const char *key)
 	{
 		nlassert(key);
 		nlassert(isValid());

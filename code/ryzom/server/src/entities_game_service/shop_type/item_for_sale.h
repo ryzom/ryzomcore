@@ -312,7 +312,7 @@ public:
 	void setContinent( CONTINENT::TContinent ) {}
 	
 	// serial
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream ) {}
+	void serial(NLMISC::IStream &f) {}
 
 	// set item for sale
 	void itemForSale( uint32 price, uint32 retirePrice, CGameItemPtr item, uint32 quantity, const NLMISC::CEntityId& id, CONTINENT::TContinent continent, uint32 identifier ) {}

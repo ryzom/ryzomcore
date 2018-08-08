@@ -211,7 +211,7 @@ void CStaticStringMapper::clear()
 }
 
 // ****************************************************************************
-void CStaticStringMapper::serial(IStream &f, TSStringId &strId) throw(EStream)
+void CStaticStringMapper::serial(IStream &f, TSStringId &strId)
 {
 	std::string tmp;
 	if (f.isReading())
@@ -227,7 +227,7 @@ void CStaticStringMapper::serial(IStream &f, TSStringId &strId) throw(EStream)
 }
 
 // ****************************************************************************
-void CStaticStringMapper::serial(IStream &f, std::vector<TSStringId> &strIdVect) throw(EStream)
+void CStaticStringMapper::serial(IStream &f, std::vector<TSStringId> &strIdVect)
 {
 	std::vector<std::string> vsTmp;
 	std::string sTmp;
