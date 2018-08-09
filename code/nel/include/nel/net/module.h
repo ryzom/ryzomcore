@@ -213,18 +213,14 @@ namespace NLNET
 		 *	Note that a module can be plugged in several socket at the same
 		 *	time, but not twice in the same socket.
 		 */
-		virtual void				plugModule(IModuleSocket *moduleSocket)
-			throw (EModuleAlreadyPluggedHere)
-			=0;
+		virtual void				plugModule(IModuleSocket *moduleSocket)	=0;
 		/** Unplug this module from the specified socket.
 		 *	Note that a module can be plugged in several socket at the same
 		 *	time, but not twice in the same socket.
 		 *	Throw an exception if the socket is not currently plug into
 		 *	the specified socket.
 		 */
-		virtual void				unplugModule(IModuleSocket *moduleSocket)
-			throw (EModuleNotPluggedHere)
-			=0;
+		virtual void				unplugModule(IModuleSocket *moduleSocket) =0;
 		/** Fill resultList vector with the list of socket into
 		 *	witch this module is currently plugged.
 		 *	This method don't clear the result vector before filling it.
@@ -448,9 +444,7 @@ namespace NLNET
 		 *	This method do the job of finding a valid socket to effectively send
 		 *	the message.
 		 */
-		virtual void		sendModuleMessage(IModule *senderModule, const NLNET::CMessage &message)
-			throw (EModuleNotReachable)
-			=0;
+		virtual void		sendModuleMessage(IModule *senderModule, const NLNET::CMessage &message) =0;
 
 		/** Return the first item of the security item list
 		 *	If no security data are available, the method
@@ -879,8 +873,7 @@ namespace NLNET
 
 		/** Send a message to the module.
 		 */
-		virtual void		sendModuleMessage(IModule *senderModule, const NLNET::CMessage &message)
-			throw (EModuleNotReachable);
+		virtual void		sendModuleMessage(IModule *senderModule, const NLNET::CMessage &message);
 
 		virtual const TSecurityData *getFirstSecurityData() const
 		{
