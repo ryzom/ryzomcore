@@ -261,9 +261,7 @@ namespace NLNET
 		 *	The call is blocking until receptions of the operation
 		 *	result message (or detection of the dest module module is down)
 		 */
-		virtual void		invokeModuleOperation(IModuleProxy *destModule, const NLNET::CMessage &opMsg, NLNET::CMessage &resultMsg)
-			throw (EInvokeFailed)
-			=0;
+		virtual void		invokeModuleOperation(IModuleProxy *destModule, const NLNET::CMessage &opMsg, NLNET::CMessage &resultMsg) =0;
 
 		//@}
 
