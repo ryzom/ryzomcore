@@ -3327,6 +3327,8 @@ std::string CLuaIHMRyzom::getSheetFamily(const std::string &sheet)
 		if (pIS)
 			return ITEMFAMILY::toString(pIS->Family);
 	}
+	
+	return "";
 }
 
 // ***************************************************************************
