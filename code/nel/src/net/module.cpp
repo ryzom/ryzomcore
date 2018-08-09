@@ -867,7 +867,6 @@ namespace NLNET
 	}
 
 	void		CModuleProxy::sendModuleMessage(IModule *senderModule, const NLNET::CMessage &message)
-		throw (EModuleNotReachable)
 	{
 		H_AUTO(CModuleProxy_sendModuleMessage);
 

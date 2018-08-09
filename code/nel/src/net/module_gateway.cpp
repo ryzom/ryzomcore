@@ -1560,8 +1560,7 @@ namespace NLNET
 			return getModuleName();
 		}
 
-		void _sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message )
-			throw (EModuleNotReachable, EModuleNotPluggedHere)
+		void _sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message)
 		{
 			// the socket implementation already checked that the module is plugged here
 			// just check that the destination module effectively from here
