@@ -412,8 +412,16 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 #define NL_DEFAULT_MEMORY_ALIGNMENT 16
 #define NL_ALIGN_SSE2 NL_ALIGN(NL_DEFAULT_MEMORY_ALIGNMENT)
 
-#ifndef NL_CPU_X86_64
+#ifdef NL_CPU_X86_64
 // on x86_64, new and delete are already aligned on 16 bytes
+#elif (defined(NL_COMP_VC) && defined(NL_DEBUG))
+// don't use aligned memory if debugging with VC++ in 32 bits
+#else
+// use aligned memory in all other cases
+#define NL_USE_ALIGNED_MEMORY_OPERATORS
+#endif
+
+#ifdef NL_USE_ALIGNED_MEMORY_OPERATORS
 
 #ifdef NL_NO_EXCEPTION_SPECS
 extern void *operator new(size_t size);
@@ -425,9 +433,9 @@ extern void *operator new(size_t size) throw(std::bad_alloc);
 extern void *operator new[](size_t size) throw(std::bad_alloc);
 extern void operator delete(void *p) throw();
 extern void operator delete[](void *p) throw();
-#endif
+#endif /* NL_NO_EXCEPTION_SPECS */
 
-#endif
+#endif /* NL_USE_ALIGNED_MEMORY_OPERATORS */
 
 #else /* NL_HAS_SSE2 */
 
