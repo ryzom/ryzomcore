@@ -459,7 +459,7 @@ namespace NLGUI
 	#endif
 
 		// Display cached image while downloading new
-		if (type != TImageType::OverImage && CFile::fileExists(dest))
+		if (type != OverImage && CFile::fileExists(dest))
 		{
 			setImage(img, dest, type);
 			setImageSize(img, style);
@@ -4713,7 +4713,7 @@ namespace NLGUI
 			if (overBitmap != normalBitmap)
 			{
 				over = localImageName(overBitmap);
-				addImageDownload(overBitmap, ctrlButton, style, TImageType::OverImage);
+				addImageDownload(overBitmap, ctrlButton, style, OverImage);
 			}
 		}
 

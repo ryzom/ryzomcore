@@ -780,7 +780,7 @@ namespace NLNET
 		bool				initModule(const TParsedCommandLine &initInfo);
 
 		void				plugModule(IModuleSocket *moduleSocket);
-		void				unplugModule(IModuleSocket *moduleSocket)  throw (EModuleNotPluggedHere);
+		void				unplugModule(IModuleSocket *moduleSocket);
 		void				getPluggedSocketList(std::vector<IModuleSocket*> &resultList);
 		void				invokeModuleOperation(IModuleProxy *destModule, const NLNET::CMessage &opMsg, NLNET::CMessage &resultMsg);
 		void				_onModuleUp(IModuleProxy *removedProxy);

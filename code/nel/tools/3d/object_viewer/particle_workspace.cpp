@@ -357,7 +357,7 @@ void CParticleWorkspace::setName(const std::string &name)
 
 
 //***********************************************************************************************
-CParticleWorkspace::CNode *CParticleWorkspace::addNode(const std::string &filenameWithFullPath)  throw( NLMISC::EStream)
+CParticleWorkspace::CNode *CParticleWorkspace::addNode(const std::string &filenameWithFullPath)
 {	
 	nlassert(_OV);				
 	// Check that file is not already inserted 	

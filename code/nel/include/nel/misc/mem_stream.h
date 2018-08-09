@@ -210,7 +210,7 @@ public:
 	 * \return the new offset regarding from the origin.
 	 * \see ESeekNotSupported SeekOrigin seek
 	 */
-	virtual sint32	getPos () const throw(EStream)
+	virtual sint32	getPos () const
 	{
 		return sint32(_Buffer.Pos);
 	}
