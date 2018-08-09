@@ -79,6 +79,9 @@
 #		elif _MSC_VER >= 1600
 #			define NL_COMP_VC10
 #			define NL_COMP_VC_VERSION 100
+#			ifdef _HAS_CPP0X
+#				undef _HAS_CPP0X	// VC++ 2010 doesn't implement C++11 stuff we need
+#			endif
 #		elif _MSC_VER >= 1500
 #			define NL_COMP_VC9
 #			define NL_COMP_VC_VERSION 90

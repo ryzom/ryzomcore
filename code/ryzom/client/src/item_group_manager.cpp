@@ -547,6 +547,7 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 
 	uint32 maxEquipTime = 0;
 
+#ifdef NL_ISO_CPP0X_AVAILABLE
 	std::map<ITEM_TYPE::TItemType, bool> possiblyDual =
 	{
 		{ITEM_TYPE::ANKLET, false},
@@ -554,6 +555,15 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 		{ITEM_TYPE::EARING, false},
 		{ITEM_TYPE::RING, false},
 	};
+#else
+	std::map<ITEM_TYPE::TItemType, bool> possiblyDual;
+	
+	possiblyDual[ITEM_TYPE::ANKLET] = false;
+	possiblyDual[ITEM_TYPE::BRACELET] = false;
+	possiblyDual[ITEM_TYPE::EARING] = false;
+	possiblyDual[ITEM_TYPE::RING] = false;
+#endif
+
 	std::vector<CInventoryItem> duals;
 	std::vector<CInventoryItem> items = matchingItems(group, INVENTORIES::bag);
 	for(int i=0; i < items.size(); i++)
