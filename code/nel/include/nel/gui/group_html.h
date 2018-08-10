@@ -75,11 +75,26 @@ namespace NLGUI
 		};
 
 		static SWebOptions options;
-		
+
+		// text-shadow
+		struct STextShadow
+		{
+		public:
+			STextShadow(bool enabled = false, bool outline = false, sint32 x=1, sint32 y=1, NLMISC::CRGBA color=NLMISC::CRGBA::Black)
+				: Enabled(enabled), Outline(outline), X(x), Y(y), Color(color)
+			{ }
+
+			bool Enabled;
+			bool Outline;
+			sint32 X;
+			sint32 Y;
+			NLMISC::CRGBA Color;
+		};
+
 		class CStyleParams
 		{
 		public:
-			CStyleParams () : FontFamily(""), TextColor(255,255,255,255)
+			CStyleParams () : FontFamily(""), TextColor(255,255,255,255), TextShadow()
 			{
 				FontSize=10;
 				FontWeight=400;
@@ -97,6 +112,7 @@ namespace NLGUI
 			bool FontOblique;
 			std::string FontFamily;
 			NLMISC::CRGBA TextColor;
+			STextShadow TextShadow;
 			bool GlobalColor;
 			bool Underlined;
 			bool StrikeThrough;
@@ -593,6 +609,14 @@ namespace NLGUI
 			if (_TR.empty())
 				return false;
 			return _TR.back();
+		}
+
+		std::vector<STextShadow> _TextShadow;
+		inline STextShadow getTextShadow() const
+		{
+			if (_TextShadow.empty())
+				return STextShadow();
+			return _TextShadow.back();
 		}
 
 		// Forms

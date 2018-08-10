@@ -88,6 +88,7 @@ namespace NLGUI
 		void setShadow (bool bShadow);
 		void setShadowOutline (bool bShadowOutline);
 		void setShadowColor (const NLMISC::CRGBA &color);
+		void setShadowOffset (sint x, sint y);
 		void setLineMaxW (sint nMaxW, bool invalidate=true);
 		void setMultiLine (bool bMultiLine);
 		void setMultiLineSpace (sint nMultiLineSpace);
@@ -112,6 +113,7 @@ namespace NLGUI
 		bool			getShadow()			{ return _Shadow; }
 		bool			getShadowOutline()	{ return _ShadowOutline; }
 		NLMISC::CRGBA	getShadowColor()	{ return _ShadowColor; }
+		void			getShadowOffset(sint &x, sint &y) { x = _ShadowX; y = _ShadowY; }
 		sint			getLineMaxW()		const { return _LineMaxW; }
 		bool			getMultiLine() const		{ return _MultiLine; }
 		sint			getMultiLineSpace()	const	{ return _MultiLineSpace; }
@@ -247,6 +249,8 @@ namespace NLGUI
 		/// the shadow mode
 		bool	_Shadow;
 		bool	_ShadowOutline;
+		sint32	_ShadowX;
+		sint32	_ShadowY;
 		/// the case mode
 		TCaseMode	_CaseMode;
 		/// the text shadow color

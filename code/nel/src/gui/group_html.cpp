@@ -1057,6 +1057,29 @@ namespace NLGUI
 		_CellParams.push_back (cellParams); \
 	}
 
+	static bool scanCssLength(const std::string& str, uint32 &px)
+	{
+		if (fromString(str, px))
+			return true;
+
+		if (str == "thin")
+		{
+			px = 1;
+			return true;
+		}
+		if (str == "medium")
+		{
+			px = 3;
+			return true;
+		}
+		if (str == "thick")
+		{
+			px = 5;
+			return true;
+		}
+
+		return false;
+	}
 
 	static bool isHexa(char c)
 	{
@@ -2378,6 +2401,7 @@ namespace NLGUI
 				_Style.FontWeight = FONT_WEIGHT_NORMAL;
 				_Style.FontOblique = false;
 				_Style.FontSize = TextFontSize;
+				_Style.TextShadow = STextShadow(true);
 
 				if (present[MY_HTML_TEXTAREA_STYLE] && value[MY_HTML_TEXTAREA_STYLE])
 					getStyleParams(value[MY_HTML_TEXTAREA_STYLE], _Style);
@@ -4351,8 +4375,17 @@ namespace NLGUI
 			if (_CurrentViewLink)
 			{
 				bool skipLine = !_CurrentViewLink->getText().empty() && *(_CurrentViewLink->getText().rbegin()) == (ucchar) '\n';
+				bool sameShadow = _Style.TextShadow.Enabled && _CurrentViewLink->getShadow();
+				if (sameShadow && _Style.TextShadow.Enabled)
+				{
+					sint sx, sy;
+					_CurrentViewLink->getShadowOffset(sx, sy);
+					sameShadow = (_Style.TextShadow.Color == _CurrentViewLink->getShadowColor());
+					sameShadow = sameShadow && (_Style.TextShadow.Outline == _CurrentViewLink->getShadowOutline());
+					sameShadow = sameShadow && (_Style.TextShadow.X == sx) && (_Style.TextShadow.Y == sy);
+				}
 				// Compatible with current parameters ?
-				if (!skipLine &&
+				if (!skipLine && sameShadow &&
 					(_Style.TextColor == _CurrentViewLink->getColor()) &&
 					(_Style.FontFamily == _CurrentViewLink->getFontName()) &&
 					(_Style.FontSize == (uint)_CurrentViewLink->getFontSize()) &&
@@ -4431,6 +4464,13 @@ namespace NLGUI
 					newLink->setMultiLineSpace((uint)((float)(_Style.FontSize)*LineSpaceFontFactor));
 					newLink->setMultiLine(true);
 					newLink->setModulateGlobalColor(_Style.GlobalColor);
+					if (_Style.TextShadow.Enabled)
+					{
+						newLink->setShadow(true);
+						newLink->setShadowColor(_Style.TextShadow.Color);
+						newLink->setShadowOutline(_Style.TextShadow.Outline);
+						newLink->setShadowOffset(_Style.TextShadow.X, _Style.TextShadow.Y);
+					}
 					// newLink->setLineAtBottom (true);
 
 					registerAnchor(newLink);
@@ -4553,6 +4593,14 @@ namespace NLGUI
 			templateParams.push_back (std::pair<std::string,std::string> ("enter_recover_focus", "false"));
 			if (maxlength > 0)
 				templateParams.push_back (std::pair<std::string,std::string> ("max_num_chars", toString(maxlength)));
+			templateParams.push_back (std::pair<std::string,std::string> ("shadow", toString(_Style.TextShadow.Enabled)));
+			if (_Style.TextShadow.Enabled)
+			{
+				templateParams.push_back (std::pair<std::string,std::string> ("shadow_x", toString(_Style.TextShadow.X)));
+				templateParams.push_back (std::pair<std::string,std::string> ("shadow_y", toString(_Style.TextShadow.Y)));
+				templateParams.push_back (std::pair<std::string,std::string> ("shadow_color", _Style.TextShadow.Color.toString()));
+				templateParams.push_back (std::pair<std::string,std::string> ("shadow_outline", toString(_Style.TextShadow.Outline)));
+			}
 
 			CInterfaceGroup *textArea = CWidgetManager::getInstance()->getParser()->createGroupInstance (templateName.c_str(),
 				getParagraph()->getId(), templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
@@ -6227,6 +6275,115 @@ namespace NLGUI
 				std::string prop(toLower(it->second));
 				style.Underlined = (prop.find("underline") != std::string::npos);
 				style.StrikeThrough = (prop.find("line-through") != std::string::npos);
+			}
+			else
+			if (it->first == "text-stroke" || it->first == "-webkit-text-stroke")
+			{
+				// text-stroke: length || color
+				bool success = false;
+				uint px = 0;
+				CRGBA color;
+				std::vector<std::string> parts;
+				NLMISC::splitString(it->second, " ", parts);
+				if (parts.size() == 1)
+				{
+					success = scanCssLength(parts[0], px);
+					if (!success)
+						success = scanHTMLColor(parts[0].c_str(), color);
+				}
+				else if (parts.size() == 2)
+				{
+					success = scanCssLength(parts[0], px);
+					if (success)
+						success = scanHTMLColor(parts[1].c_str(), color);
+					else
+					{
+						success = scanHTMLColor(parts[0].c_str(), color);
+						success = success && scanCssLength(parts[1], px);
+					}
+				}
+
+				// do not disable shadow if one is already set
+				if (success)
+				{
+					style.TextShadow.Enabled = (px > 0);
+					style.TextShadow.Color = color;
+					style.TextShadow.X = px;
+					style.TextShadow.Y = px;
+					style.TextShadow.Outline = true;
+				}
+			}
+			else
+			if (it->first == "text-shadow")
+			{
+				if (it->second == "none")
+					style.TextShadow = STextShadow(false);
+				else
+				if (it->second == "inherit")
+					style.TextShadow = current.TextShadow;
+				else
+				{
+					// text-shadow: offset-x offset-y | blur | #color
+					// text-shadow: #color | offset-x offset-y
+					bool success = true;
+					std::string prop(it->second);
+					size_t pos;
+					pos = prop.find_first_of(",\n\r");
+					if (pos != std::string::npos)
+						prop = prop.substr(0, pos);
+
+					std::vector<std::string> parts;
+					NLMISC::splitString(prop, " ", parts);
+					switch(parts.size())
+					{
+						case 1:
+						{
+							success = scanHTMLColor(it->second.c_str(), style.TextShadow.Color);
+							break;
+						}
+						// no case 2:
+						case 3:
+						{
+							if (!fromString(parts[0], style.TextShadow.X))
+							{
+								success = scanHTMLColor(parts[0].c_str(), style.TextShadow.Color);
+								success = success && fromString(parts[1], style.TextShadow.X);
+								success = success && fromString(parts[2], style.TextShadow.Y);
+							}
+							else
+							{
+								success = fromString(parts[1], style.TextShadow.Y);
+								success = success && scanHTMLColor(parts[2].c_str(), style.TextShadow.Color);
+							}
+							break;
+						}
+						case 4:
+						{
+							if (!fromString(parts[0], style.TextShadow.X))
+							{
+								success = scanHTMLColor(parts[0].c_str(), style.TextShadow.Color);
+								success = success && fromString(parts[1], style.TextShadow.X);
+								success = success && fromString(parts[2], style.TextShadow.Y);
+								// ignore blur [3]
+							}
+							else
+							{
+								success = fromString(parts[0], style.TextShadow.X);
+								success = success && fromString(parts[1], style.TextShadow.Y);
+								// ignore blur [2]
+								success = success && scanHTMLColor(parts[3].c_str(), style.TextShadow.Color);
+							}
+							break;
+						}
+						default:
+						{
+							// unsupported rule
+							break;
+						}
+					}
+
+					style.TextShadow.Enabled = success;
+				}
 			}
 			else
 			if (it->first == "width")

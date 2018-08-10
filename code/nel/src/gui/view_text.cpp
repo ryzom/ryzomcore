@@ -72,6 +72,8 @@ namespace NLGUI
 		_Shadow = false;
 		_ShadowOutline = false;
 		_ShadowColor = CRGBA(0,0,0,255);
+		_ShadowX = 1;
+		_ShadowY = 1;
 
 		_MultiLine = false;
 		_TextMode = DontClipWord;
@@ -955,6 +957,19 @@ namespace NLGUI
 			((_YReal) > (ClipY+ClipH)) || ((_YReal+_HReal) < ClipY))
 			return;
 
+		// hack: allow shadow to overflow outside parent box.
+		//       In CGroupHTML context, clip is set for row
+		if (std::abs(_ShadowX) > 0)
+		{
+			ClipX -= 3;
+			ClipW += 3;
+		}
+		if (std::abs(_ShadowY) > 0)
+		{
+			ClipY -= 3;
+			ClipH += 3;
+		}
+
 		// *** Screen Minimized?
 		uint32	w, h;
 		float	oow, ooh;
@@ -992,6 +1007,7 @@ namespace NLGUI
 			TextContext->setShaded (_Shadow);
 			TextContext->setShadeOutline (_ShadowOutline);
 			TextContext->setShadeColor (shcol);
+			TextContext->setShadeExtent (_ShadowX*oow, _ShadowY*ooh);
 			TextContext->setFontSize (_FontSize);
 			TextContext->setEmbolden (_Embolden);
 			TextContext->setOblique (_Oblique);
@@ -1119,6 +1135,7 @@ namespace NLGUI
 			TextContext->setShaded (_Shadow);
 			TextContext->setShadeOutline (_ShadowOutline);
 			TextContext->setShadeColor (shcol);
+			TextContext->setShadeExtent (_ShadowX*oow, _ShadowY*ooh);
 			TextContext->setFontSize (_FontSize);
 			TextContext->setEmbolden (_Embolden);
 			TextContext->setOblique (_Oblique);
@@ -1337,6 +1354,13 @@ namespace NLGUI
 	void CViewText::setShadowColor(const NLMISC::CRGBA & color)
 	{
 		_ShadowColor = color;
+	}
+
+	// ***************************************************************************
+	void CViewText::setShadowOffset(sint32 x, sint32 y)
+	{
+		_ShadowX = x;
+		_ShadowY = y;
 	}
 
 	// ***************************************************************************
