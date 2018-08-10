@@ -1485,23 +1485,14 @@ namespace NLGUI
 			{
 				registerAnchorName(MY_HTML_A);
 
-				CStyleParams style;
-				style.FontFamily = getFontFamily();
-				style.FontSize = getFontSize();
-				style.TextColor = LinkColor;
-				style.Underlined = true;
-				style.StrikeThrough = getFontStrikeThrough();
-				style.GlobalColor = LinkColorGlobalColor;
+				pushStyle();
+				_Style.TextColor = LinkColor;
+				_Style.Underlined = true;
+				_Style.GlobalColor = LinkColorGlobalColor;
 
 				if (present[HTML_A_STYLE] && value[HTML_A_STYLE])
-					getStyleParams(value[HTML_A_STYLE], style);
+					getStyleParams(value[HTML_A_STYLE], _Style);
 
-				_FontFamily.push_back(style.FontFamily);
-				_FontSize.push_back(style.FontSize);
-				_TextColor.push_back(style.TextColor);
-				_FontUnderlined.push_back(style.Underlined);
-				_FontStrikeThrough.push_back(style.StrikeThrough);
-				_GlobalColor.push_back(style.GlobalColor);
 				_A.push_back(true);
 				_Link.push_back ("");
 				_LinkTitle.push_back("");
@@ -1625,30 +1616,19 @@ namespace NLGUI
 				break;
 			case HTML_FONT:
 			{
-				bool found = false;
+				pushStyle();
 				if (present[HTML_FONT_COLOR] && value[HTML_FONT_COLOR])
 				{
 					CRGBA color;
 					if (scanHTMLColor(value[HTML_FONT_COLOR], color))
-					{
-						_TextColor.push_back(color);
-						found = true;
-					}
-				}
-				if (!found)
-				{
-					_TextColor.push_back(_TextColor.empty() ? CRGBA::White : _TextColor.back());
+						_Style.TextColor = color;
 				}
 
 				if (present[HTML_FONT_SIZE] && value[HTML_FONT_SIZE])
 				{
 					uint fontsize;
 					fromString(value[HTML_FONT_SIZE], fontsize);
-					_FontSize.push_back(fontsize);
-				}
-				else
-				{
-					_FontSize.push_back(_FontSize.empty() ? TextFontSize : _FontSize.back());
+					_Style.FontSize = fontsize;
 				}
 			}
 				break;
@@ -1720,46 +1700,64 @@ namespace NLGUI
 				}
 				break;
 			case HTML_H1:
-				registerAnchorName(MY_HTML_H1);
-				newParagraph(PBeginSpace);
-				_FontSize.push_back(H1FontSize);
-				_TextColor.push_back(H1Color);
-				_GlobalColor.push_back(H1ColorGlobalColor);
+				{
+					registerAnchorName(MY_HTML_H1);
+					newParagraph(PBeginSpace);
+					pushStyle();
+					_Style.FontSize = H1FontSize;
+					_Style.TextColor = H1Color;
+					_Style.GlobalColor = H1ColorGlobalColor;
+				}
 				break;
 			case HTML_H2:
-				registerAnchorName(MY_HTML_H2);
-				newParagraph(PBeginSpace);
-				_FontSize.push_back(H2FontSize);
-				_TextColor.push_back(H2Color);
-				_GlobalColor.push_back(H2ColorGlobalColor);
+				{
+					registerAnchorName(MY_HTML_H2);
+					newParagraph(PBeginSpace);
+					pushStyle();
+					_Style.FontSize = H2FontSize;
+					_Style.TextColor = H2Color;
+					_Style.GlobalColor = H2ColorGlobalColor;
+				}
 				break;
 			case HTML_H3:
-				registerAnchorName(MY_HTML_H3);
-				newParagraph(PBeginSpace);
-				_FontSize.push_back(H3FontSize);
-				_TextColor.push_back(H3Color);
-				_GlobalColor.push_back(H3ColorGlobalColor);
+				{
+					registerAnchorName(MY_HTML_H3);
+					newParagraph(PBeginSpace);
+					pushStyle();
+					_Style.FontSize = H3FontSize;
+					_Style.TextColor = H3Color;
+					_Style.GlobalColor = H3ColorGlobalColor;
+				}
 				break;
 			case HTML_H4:
-				registerAnchorName(MY_HTML_H4);
-				newParagraph(PBeginSpace);
-				_FontSize.push_back(H4FontSize);
-				_TextColor.push_back(H4Color);
-				_GlobalColor.push_back(H4ColorGlobalColor);
+				{
+					registerAnchorName(MY_HTML_H4);
+					newParagraph(PBeginSpace);
+					pushStyle();
+					_Style.FontSize = H4FontSize;
+					_Style.TextColor = H4Color;
+					_Style.GlobalColor = H4ColorGlobalColor;
+				}
 				break;
 			case HTML_H5:
-				registerAnchorName(MY_HTML_H5);
-				newParagraph(PBeginSpace);
-				_FontSize.push_back(H5FontSize);
-				_TextColor.push_back(H5Color);
-				_GlobalColor.push_back(H5ColorGlobalColor);
+				{
+					registerAnchorName(MY_HTML_H5);
+					newParagraph(PBeginSpace);
+					pushStyle();
+					_Style.FontSize = H5FontSize;
+					_Style.TextColor = H5Color;
+					_Style.GlobalColor = H5ColorGlobalColor;
+				}
 				break;
 			case HTML_H6:
-				registerAnchorName(MY_HTML_H6);
-				newParagraph(PBeginSpace);
-				_FontSize.push_back(H6FontSize);
-				_TextColor.push_back(H6Color);
-				_GlobalColor.push_back(H6ColorGlobalColor);
+				{
+					registerAnchorName(MY_HTML_H6);
+					newParagraph(PBeginSpace);
+					pushStyle();
+					_Style.FontSize = H6FontSize;
+					_Style.TextColor = H6Color;
+					_Style.GlobalColor = H6ColorGlobalColor;
+				}
 				break;
 			case HTML_IMG:
 				{
@@ -1857,15 +1855,15 @@ namespace NLGUI
 					if (present[MY_HTML_INPUT_TYPE] && value[MY_HTML_INPUT_TYPE])
 					{
 						// by default not inherited, font family defaults to system font
-						CStyleParams style;
-						style.TextColor = TextColor;
-						style.FontSize = TextFontSize;
-						style.FontWeight = FONT_WEIGHT_NORMAL;
-						style.FontOblique = false;
+						pushStyle();
+						_Style.TextColor = TextColor;
+						_Style.FontSize = TextFontSize;
+						_Style.FontWeight = FONT_WEIGHT_NORMAL;
+						_Style.FontOblique = false;
 
 						// Global color flag
 						if (present[MY_HTML_INPUT_GLOBAL_COLOR])
-							style.GlobalColor = true;
+							_Style.GlobalColor = true;
 
 						// Tooltip
 						const char *tooltip = NULL;
@@ -1873,13 +1871,7 @@ namespace NLGUI
 							tooltip = value[MY_HTML_INPUT_ALT];
 
 						if (present[MY_HTML_INPUT_STYLE] && value[MY_HTML_INPUT_STYLE])
-							getStyleParams(value[MY_HTML_INPUT_STYLE], style);
-
-						_TextColor.push_back(style.TextColor);
-						_FontFamily.push_back(style.FontFamily);
-						_FontSize.push_back(style.FontSize);
-						_FontWeight.push_back(style.FontWeight);
-						_FontOblique.push_back(style.FontOblique);
+							getStyleParams(value[MY_HTML_INPUT_STYLE], _Style);
 
 						string type = toLower(value[MY_HTML_INPUT_TYPE]);
 						if (type == "image")
@@ -1899,7 +1891,7 @@ namespace NLGUI
 
 							// Add the ctrl button
 							addButton (CCtrlButton::PushButton, name, normal, pushed.empty()?normal:pushed, over,
-								"html_submit_form", param.c_str(), tooltip, style);
+								"html_submit_form", param.c_str(), tooltip, _Style);
 						}
 						if (type == "button" || type == "submit")
 						{
@@ -1954,7 +1946,7 @@ namespace NLGUI
 								if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
 								if (ctrlButton)
 								{
-									ctrlButton->setModulateGlobalColorAll (style.GlobalColor);
+									ctrlButton->setModulateGlobalColorAll (_Style.GlobalColor);
 
 									// Translate the tooltip
 									if (tooltip)
@@ -2037,7 +2029,7 @@ namespace NLGUI
 							checked = (present[MY_HTML_INPUT_CHECKED] && value[MY_HTML_INPUT_CHECKED]);
 
 							// Add the ctrl button
-							CCtrlButton *checkbox = addButton (btnType, name, normal, pushed, over, "", "", tooltip, style);
+							CCtrlButton *checkbox = addButton (btnType, name, normal, pushed, over, "", "", tooltip, _Style);
 							if (checkbox)
 							{
 								if (btnType == CCtrlButton::RadioButton)
@@ -2091,11 +2083,7 @@ namespace NLGUI
 							}
 						}
 
-						popIfNotEmpty(_FontFamily);
-						popIfNotEmpty(_FontSize);
-						popIfNotEmpty(_TextColor);
-						popIfNotEmpty(_FontWeight);
-						popIfNotEmpty(_FontOblique);
+						popStyle();
 					}
 				}
 				break;
@@ -2210,25 +2198,12 @@ namespace NLGUI
 				break;
 			case HTML_PRE:
 				{
-					CStyleParams style;
-					style.TextColor = getTextColor();
-					style.FontFamily = "monospace";
-					style.FontSize = getFontSize();
-					style.FontWeight = getFontWeight();
-					style.FontOblique = getFontOblique();
-					style.Underlined = getFontUnderlined();
-					style.StrikeThrough = getFontStrikeThrough();
+					pushStyle();
+					_Style.FontFamily = "monospace";
 
 					if (present[HTML_PRE_STYLE] && value[HTML_PRE_STYLE])
-						getStyleParams(value[HTML_PRE_STYLE], style);
+						getStyleParams(value[HTML_PRE_STYLE], _Style);
 
-					_TextColor.push_back(style.TextColor);
-					_FontFamily.push_back(style.FontFamily);
-					_FontSize.push_back(style.FontSize);
-					_FontWeight.push_back(style.FontWeight);
-					_FontOblique.push_back(style.FontOblique);
-					_FontUnderlined.push_back(style.Underlined);
-					_FontStrikeThrough.push_back(style.StrikeThrough);
 
 					_PRE.push_back(true);
 				}
@@ -2274,7 +2249,8 @@ namespace NLGUI
 
 					if (element_number == HTML_TH)
 					{
-						_FontWeight.push_back(FONT_WEIGHT_BOLD);
+						pushStyle();
+						_Style.FontWeight = FONT_WEIGHT_BOLD;
 						// center if not specified otherwise. TD/TH present/value arrays have same indices
 						if (!(present[MY_HTML_TD_ALIGN] && value[MY_HTML_TD_ALIGN]))
 							_CellParams.back().Align = CGroupCell::Center;
@@ -2365,20 +2341,14 @@ namespace NLGUI
 				if (!(_Forms.empty()))
 				{
 					// not inherited by default, font family defaults to system font
-					CStyleParams style;
-					style.TextColor = TextColor;
-					style.FontWeight = FONT_WEIGHT_NORMAL;
-					style.FontOblique = false;
-					style.FontSize = TextFontSize;
+					pushStyle();
+					_Style.TextColor = TextColor;
+					_Style.FontWeight = FONT_WEIGHT_NORMAL;
+					_Style.FontOblique = false;
+					_Style.FontSize = TextFontSize;
 
 					if (present[MY_HTML_TEXTAREA_STYLE] && value[MY_HTML_TEXTAREA_STYLE])
-						getStyleParams(value[MY_HTML_TEXTAREA_STYLE], style);
-
-					_TextColor.push_back(style.TextColor);
-					_FontFamily.push_back(style.FontFamily);
-					_FontSize.push_back(style.FontSize);
-					_FontWeight.push_back(style.FontWeight);
-					_FontOblique.push_back(style.FontOblique);
+						getStyleParams(value[MY_HTML_TEXTAREA_STYLE], _Style);
 
 					// read general property
 					string templateName;
@@ -2460,43 +2430,41 @@ namespace NLGUI
 				break;
 			case HTML_SPAN:
 				{
-					CStyleParams style;
-					style.TextColor = getTextColor();
-					style.FontFamily = getFontFamily();
-					style.FontSize = getFontSize();
-					style.FontWeight = getFontWeight();
-					style.FontOblique = getFontOblique();
-					style.Underlined = getFontUnderlined();
-					style.StrikeThrough = getFontStrikeThrough();
-					style.GlobalColor = getGlobalColor();
+					pushStyle();
 
 					if (present[MY_HTML_SPAN_STYLE] && value[MY_HTML_SPAN_STYLE])
-						getStyleParams(value[MY_HTML_SPAN_STYLE], style);
-
-					_TextColor.push_back(style.TextColor);
-					_FontFamily.push_back(style.FontFamily);
-					_FontSize.push_back(style.FontSize);
-					_FontWeight.push_back(style.FontWeight);
-					_FontOblique.push_back(style.FontOblique);
-					_FontUnderlined.push_back(style.Underlined);
-					_FontStrikeThrough.push_back(style.StrikeThrough);
-					_GlobalColor.push_back(style.GlobalColor);
+						getStyleParams(value[MY_HTML_SPAN_STYLE], _Style);
 				}
 				break;
 			case HTML_DEL:
-				_FontStrikeThrough.push_back(true);
+				{
+					pushStyle();
+					_Style.StrikeThrough = true;
+				}
 				break;
 			case HTML_U:
-				_FontUnderlined.push_back(true);
+				{
+					pushStyle();
+					_Style.Underlined = true;
+				}
 				break;
 			case HTML_EM:
-				_FontOblique.push_back(true);
+				{
+					pushStyle();
+					_Style.FontOblique = true;
+				}
 				break;
 			case HTML_STRONG:
-				_FontWeight.push_back(FONT_WEIGHT_BOLD);
+				{
+					pushStyle();
+					_Style.FontWeight = FONT_WEIGHT_BOLD;
+				}
 				break;
 			case HTML_SMALL:
-				_FontSize.push_back(getFontSizeSmaller());
+				{
+					pushStyle();
+					_Style.FontSize = getFontSizeSmaller();
+				}
 				break;
 			case HTML_STYLE:
 			case HTML_SCRIPT:
@@ -2521,7 +2489,8 @@ namespace NLGUI
 					if (!_DL.back().DT)
 					{
 						_DL.back().DT = true;
-						_FontWeight.push_back(FONT_WEIGHT_BOLD);
+						pushStyle();
+						_Style.FontWeight = FONT_WEIGHT_BOLD;
 					}
 
 					if (!_LI)
@@ -2542,7 +2511,7 @@ namespace NLGUI
 					if (_DL.back().DT)
 					{
 						_DL.back().DT = false;
-						popIfNotEmpty (_FontWeight);
+						popStyle();
 					}
 
 					if (!_DL.back().DD)
@@ -2633,16 +2602,10 @@ namespace NLGUI
 				_ReadingHeadTag = false;
 				break;
 			case HTML_FONT:
-				popIfNotEmpty (_TextColor);
-				popIfNotEmpty (_FontSize);
+				popStyle();
 			break;
 			case HTML_A:
-				popIfNotEmpty (_FontFamily);
-				popIfNotEmpty (_FontSize);
-				popIfNotEmpty (_TextColor);
-				popIfNotEmpty (_FontUnderlined);
-				popIfNotEmpty (_FontStrikeThrough);
-				popIfNotEmpty (_GlobalColor);
+				popStyle();
 				popIfNotEmpty (_A);
 				popIfNotEmpty (_Link);
 				popIfNotEmpty (_LinkTitle);
@@ -2654,22 +2617,14 @@ namespace NLGUI
 			case HTML_H4:
 			case HTML_H5:
 			case HTML_H6:
-				popIfNotEmpty (_FontSize);
-				popIfNotEmpty (_TextColor);
-				popIfNotEmpty (_GlobalColor);
+				popStyle();
 				endParagraph();
 				break;
 			case HTML_P:
 				endParagraph();
 				break;
 			case HTML_PRE:
-				popIfNotEmpty (_FontFamily);
-				popIfNotEmpty (_FontSize);
-				popIfNotEmpty (_FontWeight);
-				popIfNotEmpty (_FontOblique);
-				popIfNotEmpty (_TextColor);
-				popIfNotEmpty (_FontUnderlined);
-				popIfNotEmpty (_FontStrikeThrough);
+				popStyle();
 				popIfNotEmpty (_PRE);
 				break;
 			case HTML_DIV:
@@ -2692,7 +2647,7 @@ namespace NLGUI
 				// Add a cell
 				break;
 			case HTML_TH:
-				popIfNotEmpty (_FontWeight);
+				popStyle();
 				// no break;
 			case HTML_TD:
 				popIfNotEmpty (_CellParams);
@@ -2717,11 +2672,7 @@ namespace NLGUI
 							_Forms.back().Entries.push_back (entry);
 						}
 
-						popIfNotEmpty (_FontFamily);
-						popIfNotEmpty (_FontSize);
-						popIfNotEmpty (_FontWeight);
-						popIfNotEmpty (_FontOblique);
-						popIfNotEmpty (_TextColor);
+						popStyle();
 					}
 
 					popIfNotEmpty (_PRE);
@@ -2843,7 +2794,7 @@ namespace NLGUI
 					// unclosed DT
 					if (_DL.back().DT)
 					{
-						popIfNotEmpty (_FontWeight);
+						popStyle();
 					}
 
 					// unclosed DD
@@ -2859,7 +2810,7 @@ namespace NLGUI
 				if (!_DL.empty())
 				{
 					_DL.back().DT = false;
-					popIfNotEmpty (_FontWeight);
+					popStyle();
 				}
 				break;
 			case HTML_DD:
@@ -2874,29 +2825,22 @@ namespace NLGUI
 				}
 				break;
 			case HTML_SPAN:
-				popIfNotEmpty (_FontFamily);
-				popIfNotEmpty (_FontSize);
-				popIfNotEmpty (_FontWeight);
-				popIfNotEmpty (_FontOblique);
-				popIfNotEmpty (_TextColor);
-				popIfNotEmpty (_FontUnderlined);
-				popIfNotEmpty (_FontStrikeThrough);
-				popIfNotEmpty (_GlobalColor);
+				popStyle();
 				break;
 			case HTML_DEL:
-				popIfNotEmpty (_FontStrikeThrough);
+				popStyle();
 				break;
 			case HTML_U:
-				popIfNotEmpty (_FontUnderlined);
+				popStyle();
 				break;
 			case HTML_EM:
-				popIfNotEmpty (_FontOblique);
+				popStyle();
 				break;
 			case HTML_STRONG:
-				popIfNotEmpty (_FontWeight);
+				popStyle();
 				break;
 			case HTML_SMALL:
-				popIfNotEmpty (_FontSize);
+				popStyle();
 				break;
 			case HTML_STYLE:
 			case HTML_SCRIPT:
@@ -4325,7 +4269,7 @@ namespace NLGUI
 
 			// Text added ?
 			bool added = false;
-			bool embolden = getFontWeight() >= FONT_WEIGHT_BOLD;
+			bool embolden = _Style.FontWeight >= FONT_WEIGHT_BOLD;
 
 			// Number of child in this paragraph
 			if (_CurrentViewLink)
@@ -4333,15 +4277,15 @@ namespace NLGUI
 				bool skipLine = !_CurrentViewLink->getText().empty() && *(_CurrentViewLink->getText().rbegin()) == (ucchar) '\n';
 				// Compatible with current parameters ?
 				if (!skipLine &&
-					(getTextColor() == _CurrentViewLink->getColor()) &&
-					(getFontFamily() == _CurrentViewLink->getFontName()) &&
-					(getFontSize() == (uint)_CurrentViewLink->getFontSize()) &&
-					(getFontUnderlined() == _CurrentViewLink->getUnderlined()) &&
-					(getFontStrikeThrough() == _CurrentViewLink->getStrikeThrough()) &&
+					(_Style.TextColor == _CurrentViewLink->getColor()) &&
+					(_Style.FontFamily == _CurrentViewLink->getFontName()) &&
+					(_Style.FontSize == (uint)_CurrentViewLink->getFontSize()) &&
+					(_Style.Underlined == _CurrentViewLink->getUnderlined()) &&
+					(_Style.StrikeThrough == _CurrentViewLink->getStrikeThrough()) &&
 					(embolden == _CurrentViewLink->getEmbolden()) &&
-					(getFontOblique() == _CurrentViewLink->getOblique()) &&
+					(_Style.FontOblique == _CurrentViewLink->getOblique()) &&
 					(getLink() == _CurrentViewLink->Link) &&
-					(getGlobalColor() == _CurrentViewLink->getModulateGlobalColor()))
+					(_Style.GlobalColor == _CurrentViewLink->getModulateGlobalColor()))
 				{
 					// Concat the text
 					_CurrentViewLink->setText(_CurrentViewLink->getText()+tmpStr);
@@ -4401,16 +4345,16 @@ namespace NLGUI
 						}
 					}
 					newLink->setText(tmpStr);
-					newLink->setColor(getTextColor());
-					newLink->setFontName(getFontFamily());
-					newLink->setFontSize(getFontSize());
+					newLink->setColor(_Style.TextColor);
+					newLink->setFontName(_Style.FontFamily);
+					newLink->setFontSize(_Style.FontSize);
 					newLink->setEmbolden(embolden);
-					newLink->setOblique(getFontOblique());
-					newLink->setUnderlined(getFontUnderlined());
-					newLink->setStrikeThrough(getFontStrikeThrough());
-					newLink->setMultiLineSpace((uint)((float)getFontSize()*LineSpaceFontFactor));
+					newLink->setOblique(_Style.FontOblique);
+					newLink->setUnderlined(_Style.Underlined);
+					newLink->setStrikeThrough(_Style.StrikeThrough);
+					newLink->setMultiLineSpace((uint)((float)(_Style.FontSize)*LineSpaceFontFactor));
 					newLink->setMultiLine(true);
-					newLink->setModulateGlobalColor(getGlobalColor());
+					newLink->setModulateGlobalColor(_Style.GlobalColor);
 					// newLink->setLineAtBottom (true);
 
 					registerAnchor(newLink);
@@ -4517,15 +4461,15 @@ namespace NLGUI
 		{
 			// Not added ?
 			std::vector<std::pair<std::string,std::string> > templateParams;
-			templateParams.push_back (std::pair<std::string,std::string> ("w", toString (cols*getFontSize())));
+			templateParams.push_back (std::pair<std::string,std::string> ("w", toString (cols*_Style.FontSize)));
 			templateParams.push_back (std::pair<std::string,std::string> ("id", name));
 			templateParams.push_back (std::pair<std::string,std::string> ("prompt", ""));
 			templateParams.push_back (std::pair<std::string,std::string> ("multiline", multiLine?"true":"false"));
-			templateParams.push_back (std::pair<std::string,std::string> ("fontsize", toString (getFontSize())));
-			templateParams.push_back (std::pair<std::string,std::string> ("color", getTextColor().toString()));
-			if (getFontWeight() >= FONT_WEIGHT_BOLD)
+			templateParams.push_back (std::pair<std::string,std::string> ("fontsize", toString (_Style.FontSize)));
+			templateParams.push_back (std::pair<std::string,std::string> ("color", _Style.TextColor.toString()));
+			if (_Style.FontWeight >= FONT_WEIGHT_BOLD)
 				templateParams.push_back (std::pair<std::string,std::string> ("fontweight", "bold"));
-			if (getFontOblique())
+			if (_Style.FontOblique)
 				templateParams.push_back (std::pair<std::string,std::string> ("fontstyle", "oblique"));
 			if (multiLine)
 				templateParams.push_back (std::pair<std::string,std::string> ("multi_min_line", toString(rows)));
@@ -4767,13 +4711,6 @@ namespace NLGUI
 	{
 		_Paragraph = NULL;
 		_PRE.clear();
-		_TextColor.clear();
-		_GlobalColor.clear();
-		_FontSize.clear();
-		_FontWeight.clear();
-		_FontOblique.clear();
-		_FontUnderlined.clear();
-		_FontStrikeThrough.clear();
 		_Indent.clear();
 		_LI = false;
 		_UL.clear();
@@ -4796,6 +4733,11 @@ namespace NLGUI
 		_ReadingHeadTag = false;
 		_IgnoreHeadTag = false;
 		_IgnoreBaseUrlTag = false;
+
+		// reset style
+		_StyleDefault = CStyleParams();
+		_Style = _StyleDefault;
+		_StyleParams.clear();
 
 		// TR
 
@@ -6118,6 +6060,8 @@ namespace NLGUI
 	// style.StrikeThrough; // text-decoration: line-through;  text-decoration-line: line-through;
 	void CGroupHTML::getStyleParams(const std::string &styleString, CStyleParams &style, bool inherit)
 	{
+		const CStyleParams current = _Style;
+
 		float tmpf;
 		TStyle styles = parseStyle(styleString);
 		TStyle::iterator it;
@@ -6126,7 +6070,7 @@ namespace NLGUI
 			if (it->first == "font-size")
 			{
 				if (it->second == "inherit")
-					style.FontSize = getFontSize();
+					style.FontSize = current.FontSize;
 				else
 				{
 					float tmp;
@@ -6140,7 +6084,7 @@ namespace NLGUI
 			if (it->first == "font-style")
 			{
 				if (it->second == "inherit")
-					style.FontOblique = getFontOblique();
+					style.FontOblique = current.FontOblique;
 				else
 				if (it->second == "italic" || it->second == "oblique")
 					style.FontOblique = true;
@@ -6149,7 +6093,7 @@ namespace NLGUI
 			if (it->first == "font-family")
 			{
 				if (it->second == "inherit")
-					style.FontFamily = getFontFamily();
+					style.FontFamily = current.FontFamily;
 				else
 				if (it->second == "monospace")
 					style.FontFamily = "monospace";
@@ -6162,7 +6106,7 @@ namespace NLGUI
 				// https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight
 				uint weight = 400;
 				if (it->second == "inherit")
-					weight = getFontWeight();
+					weight = current.FontWeight;
 				else
 				if (it->second == "normal")
 					weight = 400;
@@ -6173,7 +6117,7 @@ namespace NLGUI
 				if (it->second == "lighter")
 				{
 					const uint lighter[] = {100, 100, 100, 100, 100, 400, 400, 700, 700};
-					uint index = getFontWeight() / 100 - 1;
+					uint index = current.FontWeight / 100 - 1;
 					clamp(index, 1u, 9u);
 					weight = lighter[index-1];
 				}
@@ -6181,7 +6125,7 @@ namespace NLGUI
 				if (it->second == "bolder")
 				{
 					const uint bolder[] =  {400, 400, 400, 700, 700, 900, 900, 900, 900};
-					uint index = getFontWeight() / 100 + 1;
+					uint index = current.FontWeight / 100 + 1;
 					clamp(index, 1u, 9u);
 					weight = bolder[index-1];
 				}
@@ -6197,7 +6141,7 @@ namespace NLGUI
 			else
 			if (it->first == "color")
 				if (it->second == "inherit")
-					style.TextColor = getTextColor();
+					style.TextColor = current.TextColor;
 				else
 					scanHTMLColor(it->second.c_str(), style.TextColor);
 			else
@@ -6224,7 +6168,7 @@ namespace NLGUI
 			{
 				bool b;
 				if (it->second == "inherit")
-					style.GlobalColor = getGlobalColor();
+					style.GlobalColor = current.GlobalColor;
 				else
 				if (fromString(it->second, b))
 					style.GlobalColor = b;
@@ -6232,8 +6176,8 @@ namespace NLGUI
 		}
 		if (inherit)
 		{
-			style.Underlined = getFontUnderlined() || style.Underlined;
-			style.StrikeThrough = getFontStrikeThrough() || style.StrikeThrough;
+			style.Underlined = current.Underlined || style.Underlined;
+			style.StrikeThrough = current.StrikeThrough || style.StrikeThrough;
 		}
 	}
 

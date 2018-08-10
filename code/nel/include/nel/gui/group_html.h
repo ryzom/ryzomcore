@@ -505,78 +505,32 @@ namespace NLGUI
 		// IL mode
 		bool _LI;
 
-		// Current text color
-		std::vector<NLMISC::CRGBA>	_TextColor;
-		inline const NLMISC::CRGBA &getTextColor() const
+		// Current active style
+		CStyleParams _Style;
+		// Default style
+		CStyleParams _StyleDefault;
+		// Nested style stack
+		std::vector<CStyleParams> _StyleParams;
+		inline void pushStyle()
 		{
-			if (_TextColor.empty())
-				return TextColor;
-			return _TextColor.back();
+			_StyleParams.push_back(_Style);
+		}
+		inline void popStyle()
+		{
+			if (_StyleParams.empty())
+				_Style = _StyleDefault;
+			else
+			{
+				_Style = _StyleParams.back();
+				_StyleParams.pop_back();
+			}
 		}
 
-		// Current global color flag
-		std::vector<bool>	_GlobalColor;
-		inline bool getGlobalColor() const
-		{
-			if (_GlobalColor.empty())
-				return false;
-			return _GlobalColor.back();
-		}
-
-		// Current font name
-		std::vector<std::string>	_FontFamily;
-		inline const char* getFontFamily() const
-		{
-			if (_FontFamily.empty())
-				return "";
-			return _FontFamily.back().c_str();
-		}
-
-		// Current font size
-		std::vector<uint>			_FontSize;
-		inline uint getFontSize() const
-		{
-			if (_FontSize.empty())
-				return TextFontSize;
-			return _FontSize.back();
-		}
 		inline uint getFontSizeSmaller() const
 		{
-			if (getFontSize() < 5)
+			if (_Style.FontSize < 5)
 				return 3;
-			return getFontSize()-2;
-		}
-
-		std::vector<uint>			_FontWeight;
-		inline uint getFontWeight() const
-		{
-			if (_FontWeight.empty())
-				return 400;
-			return _FontWeight.back();
-		}
-
-		std::vector<bool>			_FontOblique;
-		inline bool getFontOblique() const
-		{
-			if (_FontOblique.empty())
-				return false;
-			return _FontOblique.back();
-		}
-
-		std::vector<bool>			_FontUnderlined;
-		inline bool getFontUnderlined() const
-		{
-			if (_FontUnderlined.empty())
-				return false;
-			return _FontUnderlined.back();
-		}
-
-		std::vector<bool>			_FontStrikeThrough;
-		inline bool getFontStrikeThrough() const
-		{
-			if (_FontStrikeThrough.empty())
-				return false;
-			return _FontStrikeThrough.back();
+			return _Style.FontSize-2;
 		}
 
 		// Current link
