@@ -40,29 +40,43 @@ namespace NLGUI
 	class SX509Certificates
 	{
 	public:
-		std::vector<X509 *> CertList;
-		std::vector<std::string> FilesList;
+		struct CertEntry
+		{
+			X509 *cert;
+			std::string name;
+			std::string file;
+
+			bool operator == (const std::string &str)
+			{
+				return file == str;
+			}
+		};
+
+		std::vector<CertEntry> CertList;
 
 		bool isUsingOpenSSLBackend;
 		bool isInitialized;
 
 		SX509Certificates():isUsingOpenSSLBackend(false), isInitialized(false)
 		{
+			init();
 		}
 
 		~SX509Certificates()
 		{
 			for (uint i = 0; i < CertList.size(); ++i)
 			{
-				X509_free(CertList[i]);
+				X509_free(CertList[i].cert);
 			}
 
 			CertList.clear();
 		}
 
-		void init(CURL *curl)
+		void init()
 		{
-			if (isInitialized) return;
+			// init CURL
+			CURL *curl = curl_easy_init();
+			if (!curl) return;
 
 			// get information on CURL
 			curl_version_info_data *data = curl_version_info(CURLVERSION_NOW);
@@ -98,7 +112,37 @@ namespace NLGUI
 				isUsingOpenSSLBackend = false;
 			}
 
+			// clean up CURL
+			curl_easy_cleanup(curl);
+
 			isInitialized = true;
+		}
+
+		static std::string getCertName(X509 *cert)
+		{
+			// NULL certificate
+			if (!cert) return "";
+
+			X509_NAME *subject = X509_get_subject_name(cert);
+
+			std::string name;
+			unsigned char *tmp = NULL;
+
+			// construct a multiline string with name
+			for (int j = 0, jlen = X509_NAME_entry_count(subject); j < jlen; ++j)
+			{
+				X509_NAME_ENTRY *e = X509_NAME_get_entry(subject, j);
+				ASN1_STRING *d = X509_NAME_ENTRY_get_data(e);
+
+				if (ASN1_STRING_to_UTF8(&tmp, d) > 0)
+				{
+					name += NLMISC::toString("%s\n", tmp);
+
+					OPENSSL_free(tmp);
+				}
+			}
+
+			return name;
 		}
 
 #ifdef NL_OS_WINDOWS
@@ -114,44 +158,44 @@ namespace NLGUI
 				{
 					x509 = NULL;
 					x509 = d2i_X509(NULL, (const unsigned char **)&pContext->pbCertEncoded, pContext->cbCertEncoded);
+
 					if (x509)
 					{
-						CertList.push_back(x509);
+						CertEntry entry;
+						entry.cert = x509;
+						entry.file = root;
+						entry.name = getCertName(x509);
+
+						CertList.push_back(entry);
 					}
 				}
+
 				CertFreeCertificateContext(pContext);
 				CertCloseStore(hStore, 0);
 			}
 
 			// this is called before debug context is set and log ends up in log.log
-			nlinfo("Loaded %d certificates from '%s' certificate store", (int)CertList.size(), root);
+			//nlinfo("Loaded %d certificates from '%s' certificate store", (int)CertList.size(), root);
 		}
 #endif
 
 		void addCertificatesFromFile(const std::string &cert)
 		{
-			if (!isUsingOpenSSLBackend) return;
-
-			if (!isInitialized)
-			{
-				nlwarning("You MUST call NLGUI::CCurlCertificates::init before adding new certificates");
-				return;
-			}
+			if (!isInitialized || !isUsingOpenSSLBackend) return;
 
 			// this file was already loaded
-			if (std::find(FilesList.begin(), FilesList.end(), cert) != FilesList.end()) return;
-
-			FilesList.push_back(cert);
+			if (std::find(CertList.begin(), CertList.end(), cert) != CertList.end()) return;
 
 			// look for certificate in search paths
 			string path = CPath::lookup(cert, false);
-			nlinfo("Cert path '%s'", path.c_str());
 
 			if (path.empty())
 			{
 				nlwarning("Unable to find %s", cert.c_str());
 				return;
 			}
+
+			nlinfo("CURL CA bundle '%s'", path.c_str());
 
 			CIFile file;
 
@@ -184,7 +228,12 @@ namespace NLGUI
 
 						if (itmp && itmp->x509)
 						{
-							CertList.push_back(X509_dup(itmp->x509));
+							CertEntry entry;
+							entry.cert = X509_dup(itmp->x509);
+							entry.file = cert;
+							entry.name = getCertName(entry.cert);
+
+							CertList.push_back(entry);
 						}
 					}
 
@@ -224,27 +273,10 @@ namespace NLGUI
 
 				for (uint i = 0, ilen = x509CertListManager.CertList.size(); i < ilen; ++i)
 				{
-					X509_NAME *subject = X509_get_subject_name(x509CertListManager.CertList[i]);
-
-					std::string name;
-					unsigned char *tmp = NULL;
-
-					// construct a multiline string with name
-					for (int j = 0, jlen = X509_NAME_entry_count(subject); j < jlen; ++j)
-					{
-						X509_NAME_ENTRY *e = X509_NAME_get_entry(subject, j);
-						ASN1_STRING *d = X509_NAME_ENTRY_get_data(e);
-
-						if (ASN1_STRING_to_UTF8(&tmp, d) > 0)
-						{
-							name += NLMISC::toString("%s\n", tmp);
-
-							OPENSSL_free(tmp);
-						}
-					}
+					SX509Certificates::CertEntry entry = x509CertListManager.CertList[i];
 
 					// add our certificate to this store
-					if (X509_STORE_add_cert(x509store, x509CertListManager.CertList[i]) == 0)
+					if (X509_STORE_add_cert(x509store, entry.cert) == 0)
 					{
 						uint errCode = ERR_get_error();
 
@@ -252,13 +284,13 @@ namespace NLGUI
 						if (ERR_GET_LIB(errCode) != ERR_LIB_X509 || ERR_GET_REASON(errCode) != X509_R_CERT_ALREADY_IN_HASH_TABLE)
 						{
 							ERR_error_string_n(errCode, errorBuffer, 1024);
-							nlwarning("Error adding certificate %s: %s", name.c_str(), errorBuffer);
+							nlwarning("Error adding certificate %s: %s", entry.name.c_str(), errorBuffer);
 							res = CURLE_SSL_CACERT;
 						}
 					}
 					else
 					{
-						nldebug("Added certificate %s", name.c_str());
+						nldebug("Added certificate %s", entry.name.c_str());
 					}
 				}
 			}
@@ -277,13 +309,6 @@ namespace NLGUI
 
 	// ***************************************************************************
 	// static
-	void CCurlCertificates::init(CURL *curl)
-	{
-		x509CertListManager.init(curl);
-	}
-
-	// ***************************************************************************
-	// static
 	void CCurlCertificates::addCertificateFile(const std::string &cert)
 	{
 		x509CertListManager.addCertificatesFromFile(cert);
@@ -294,7 +319,7 @@ namespace NLGUI
 	void CCurlCertificates::useCertificates(CURL *curl)
 	{
 		// CURL must be valid, using OpenSSL backend and certificates must be loaded, else return
-		if (!curl || !x509CertListManager.isUsingOpenSSLBackend || x509CertListManager.CertList.empty()) return;
+		if (!curl || !x509CertListManager.isInitialized || !x509CertListManager.isUsingOpenSSLBackend || x509CertListManager.CertList.empty()) return;
 
 		curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
 

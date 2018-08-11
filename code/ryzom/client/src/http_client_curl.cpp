@@ -71,9 +71,6 @@ bool CCurlHttpClient::verifyServer(bool verify)
 	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYHOST, verify ? 2 : 0);
 	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYPEER, verify ? 1 : 0);
 
-	// check if compiled with OpenSSL backend
-	NLGUI::CCurlCertificates::init(_Curl);
-
 	// specify custom CA certs
 	NLGUI::CCurlCertificates::addCertificateFile(CAFilename);
 
