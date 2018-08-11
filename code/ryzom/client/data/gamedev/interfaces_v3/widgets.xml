@@ -492,32 +492,40 @@
     <!-- *   FACTION POINTS  * -->
     <!-- ********************* -->
     <template name="faction_points_widget" id="" posref="TL TL" posparent="parent" x="0" y="0" sizeref="w" sizeparent="parent" w="0">
-        <group id="#id" posref="#posref" posparent="#posparent" x="#x" y="#y" sizeref="#sizeref" sizeparent="#sizeparent" w="#w" h="74">
+        <group id="#id" posref="#posref" posparent="#posparent" x="#x" y="#y" sizeref="#sizeref" sizeparent="#sizeparent" w="#w" h="98">
             <!-- the title -->
             <view type="text" id="factionpt_t" posref="TL TL" x="0" y="0" hardtext="uiFactionPointTable" shadow="true" color="255 255 255 255" global_color="false" fontsize="12" />
             <instance template="text_tt" tooltip="uittIdentityFaction" posparent="factionpt_t" />
             <!-- left part : kami fyros zorai -->
-            <group id="left" posref="TL TL" x="0" y="-14" sizeref="w5" w="0" h="60" inherit_gc_alpha="true">
+            <group id="left" posref="TL TL" x="0" y="-14" sizeref="w5" w="0" h="84" inherit_gc_alpha="true">
+                <!-- icons -->
+                <view type="bitmap" id="ikami" posref="TL TL" x="8" y="-8" inherit_gc_alpha="true" texture="points_kami_24.tga" global_color="false" />
+                <view type="bitmap" id="ifyro" posref="TL TL" x="8" y="-32" inherit_gc_alpha="true" texture="points_fyros_24.tga" global_color="false" />
+                <view type="bitmap" id="izora" posref="TL TL" x="8" y="-56" inherit_gc_alpha="true" texture="points_zorai_24.tga" global_color="false" />
                 <!-- texts -->
-                <view type="text" id="tkami" posref="TL TL" x="8" y="-8" w="-16" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiFactionPoint_Kami" />
-                <view type="text" id="tfyro" posref="TL TL" x="8" y="-24" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiFactionPoint_Fyros" />
-                <view type="text" id="tzora" posref="TL TL" x="8" y="-40" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiFactionPoint_Zorai" />
+                <view type="text" id="tkami" posref="TL TL" x="34" y="-12" w="-16" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiFactionPoint_Kami" />
+                <view type="text" id="tfyro" posref="TL TL" x="34" y="-36" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiFactionPoint_Fyros" />
+                <view type="text" id="tzora" posref="TL TL" x="34" y="-60" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiFactionPoint_Zorai" />
                 <!-- numbers -->
-                <view type="text_number" id="vkami" posref="TR TR" x="-8" y="-8" w="-16" color="255 255 255 255" shadow="true" fontsize="12" value="%faction_points_kami" positive="true" />
-                <view type="text_number" id="vfyro" posref="TR TR" x="-8" y="-24" color="255 255 255 255" shadow="true" fontsize="12" value="%faction_points_fyros" positive="true" />
-                <view type="text_number" id="vzora" posref="TR TR" x="-8" y="-40" color="255 255 255 255" shadow="true" fontsize="12" value="%faction_points_zorai" positive="true" />
+                <view type="text_number" id="vkami" posref="TR TR" x="-8" y="-12" w="-16" color="255 255 255 255" shadow="true" fontsize="12" value="%faction_points_kami" positive="true" />
+                <view type="text_number" id="vfyro" posref="TR TR" x="-8" y="-36" color="255 255 255 255" shadow="true" fontsize="12" value="%faction_points_fyros" positive="true" />
+                <view type="text_number" id="vzora" posref="TR TR" x="-8" y="-60" color="255 255 255 255" shadow="true" fontsize="12" value="%faction_points_zorai" positive="true" />
                 <instance template="inner_thin_border" posparent="parent" inherit_gc_alpha="true" />
             </group>
             <!-- right part : karavan matis tryker -->
-            <group id="right" posref="TR TR" x="0" y="-14" sizeref="w5" w="0" h="60" inherit_gc_alpha="true">
+            <group id="right" posref="TR TR" x="0" y="-14" sizeref="w5" w="0" h="84" inherit_gc_alpha="true">
+                <!-- icons -->
+                <view type="bitmap" id="ikara" posref="TL TL" x="8" y="-8" inherit_gc_alpha="true" texture="points_karavan_24.tga" global_color="false" />
+                <view type="bitmap" id="imati" posref="TL TL" x="8" y="-32" inherit_gc_alpha="true" texture="points_matis_24.tga" global_color="false" />
+                <view type="bitmap" id="itryk" posref="TL TL" x="8" y="-56" inherit_gc_alpha="true" texture="points_tryker_24.tga" global_color="false" />
                 <!-- texts -->
-                <view type="text" id="tkara" posref="TL TL" x="8" y="-8" w="-16" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiFactionPoint_Karavan" />
-                <view type="text" id="tmati" posref="TL TL" x="8" y="-24" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiFactionPoint_Matis" />
-                <view type="text" id="ttryk" posref="TL TL" x="8" y="-40" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiFactionPoint_Tryker" />
+                <view type="text" id="tkara" posref="TL TL" x="34" y="-12" w="-16" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiFactionPoint_Karavan" />
+                <view type="text" id="tmati" posref="TL TL" x="34" y="-36" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiFactionPoint_Matis" />
+                <view type="text" id="ttryk" posref="TL TL" x="34" y="-60" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiFactionPoint_Tryker" />
                 <!-- numbers -->
-                <view type="text_number" id="vkara" posref="TR TR" x="-8" y="-8" color="255 255 255 255" shadow="true" fontsize="12" value="%faction_points_karavan" positive="true" />
-                <view type="text_number" id="vmati" posref="TR TR" x="-8" y="-24" color="255 255 255 255" shadow="true" fontsize="12" value="%faction_points_matis" positive="true" />
-                <view type="text_number" id="vtryk" posref="TR TR" x="-8" y="-40" color="255 255 255 255" shadow="true" fontsize="12" value="%faction_points_tryker" positive="true" />
+                <view type="text_number" id="vkara" posref="TR TR" x="-8" y="-12" color="255 255 255 255" shadow="true" fontsize="12" value="%faction_points_karavan" positive="true" />
+                <view type="text_number" id="vmati" posref="TR TR" x="-8" y="-36" color="255 255 255 255" shadow="true" fontsize="12" value="%faction_points_matis" positive="true" />
+                <view type="text_number" id="vtryk" posref="TR TR" x="-8" y="-60" color="255 255 255 255" shadow="true" fontsize="12" value="%faction_points_tryker" positive="true" />
                 <instance template="inner_thin_border" posparent="parent" inherit_gc_alpha="true" />
             </group>
         </group>

@@ -257,11 +257,24 @@
                 </group>
                 <view type="text" id="ecosystem_points_title" posparent="ecosystem_points" posref="TL BL" x="0" y="0" hardtext="uiR2EDEcosystemPointsTitle" shadow="true" color="255 255 255 255" global_color="false" fontsize="12" />
                 <instance template="faction_points_widget" id="fp" posparent="ecosystem_points" posref="BL TL" x="0" y="-10" />
-                <group id="pvp_points" posparent="fp" posref="BL TL" sizeref="wh" w="-1" h="40" y="-10">
+                <group id="pvp_points" posparent="fp" posref="BL TL" sizeref="w" w="-1" h="50" y="-10">
                     <view type="text" id="pvppoints_t" posref="TL TL" x="0" y="0" hardtext="uiPvpPoints" shadow="true" color="255 255 255 255" global_color="false" fontsize="12" />
-                    <group id="black" posref="TL TL" x="0" sizeref="w" y="-16" w="0" h="26" inherit_gc_alpha="true">
-                        <view type="text" id="total" posref="ML ML" x="8" y="0" hardtext="uiPvpTotal" shadow="true" color="255 255 255 255" global_color="true" fontsize="12" />
+                    <group id="black" posref="TL TL" x="0" sizeref="w" y="-18" w="0" h="30" inherit_gc_alpha="true">
+                        <view type="bitmap" id="icon" posref="ML ML" x="8" y="0" inherit_gc_alpha="true" texture="points_pvp_24.tga" global_color="false" />
+                        <view type="text" id="total" posref="ML ML" x="34" y="0" hardtext="uiPvpTotal" shadow="true" color="255 255 255 255" global_color="true" fontsize="12" />
                         <view type="text_number" id="val" posref="MR MR" x="-8" y="0" color="255 255 255 255" global_color="true" fontsize="12" value="SERVER:USER:RRPS_LEVELS0:VALUE" shadow="true" />
+                    </group>
+                    <instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true" />
+                </group>
+                <group id="ark_points" posparent="pvp_points" posref="BL TL" sizeref="wh" h="210" w="0" y="-5">
+                    <view type="text" id="arkpoints_t" posref="TL TL" x="0" y="0" hardtext="uiR2EDRrpsLevelTitle" shadow="true" color="255 255 255 255" global_color="false" fontsize="12" />
+                    <group id="black" posref="TL TL" x="0" sizeref="w" y="-16" w="0" h="205" inherit_gc_alpha="true">
+                        <group type="webig_html" id="html" posref="TL TL" url="https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&amp;script_name=DisplayPoints&amp;no_html_header=1" title_prefix="" sizeref="wh" x="-5" y="5" w="0" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="100 255 100 255" text_font_size="10" h1_font_size="20" h2_font_size="18" h3_font_size="16" h4_font_size="14" h5_font_size="12" h6_font_size="10" paragraph_begin_space="1" multi_line_space_factor="0.25" td_begin_space="16" li_begin_space="4" ul_begin_space="12" li_indent="0" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="black2" home="https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&amp;script_name=DisplayPoints&amp;no_html_header=1" browse_next_time="true" form_text_area_group="edit_box_widget_multiline">
+                            <group id="black" posref="BR BR" sizeref="hw" w="-12" h="-12" inherit_gc_alpha="true" />
+                            <view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false" />
+                            <group active="1" type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000" />
+                            <ctrl style="skin_scroll" id="scroll_bar" />
+                        </group>
                     </group>
                     <instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true" />
                 </group>
