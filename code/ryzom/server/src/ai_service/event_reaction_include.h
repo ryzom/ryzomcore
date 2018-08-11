@@ -28,7 +28,7 @@
 #include "continent.h"*/
 
 template <class TState>
-bool CAIEventReaction::testCompatibility(const CStateInstance *stateInstance, const TState *state) const
+bool	CAIEventReaction::testCompatibility(CStateInstance	*const	stateInstance, const	TState	*const	state) const
 {
 	if	(!stateInstance)
 		return false;
