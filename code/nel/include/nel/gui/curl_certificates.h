@@ -27,9 +27,6 @@ namespace NLGUI
 	class CCurlCertificates
 	{
 	public:
-		// check if compiled with OpenSSL backend
-		static void init(CURL *curl);
-
 		// allow to use custom PEM certificates
 		static void addCertificateFile(const std::string &cert);
 

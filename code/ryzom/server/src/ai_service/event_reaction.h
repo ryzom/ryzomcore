@@ -90,7 +90,7 @@ public:
 	// the following routine shouldn't be needed it should be superceded by a better alternative
 	// in the event manager
 	template <class TState>
-	bool testCompatibility(const CStateInstance *stateInstance, const TState *state) const
+	bool testCompatibility(CStateInstance	*const	stateInstance, const	TState	*const	state) const;
 
 protected:
 	// protected data ---------------------------------------------------

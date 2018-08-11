@@ -398,12 +398,6 @@ namespace NLGUI
 		// https://
 		if (toLower(download.url.substr(0, 8)) == "https://")
 		{
-			// check if compiled with OpenSSL backend
-			CCurlCertificates::init(curl);
-
-			// specify custom CA certs
-			CCurlCertificates::addCertificateFile(options.curlCABundle);
-
 			// if supported, use custom SSL context function to load certificates
 			CCurlCertificates::useCertificates(curl);
 		}
@@ -5412,12 +5406,6 @@ namespace NLGUI
 		// https://
 		if (toLower(url.substr(0, 8)) == "https://")
 		{
-			// check if compiled with OpenSSL backend
-			CCurlCertificates::init(curl);
-
-			// specify custom CA certs
-			CCurlCertificates::addCertificateFile(options.curlCABundle);
-
 			// if supported, use custom SSL context function to load certificates
 			CCurlCertificates::useCertificates(curl);
 		}

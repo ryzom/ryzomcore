@@ -88,7 +88,6 @@ void CSpawnBot::setVisualPropertiesName()
 			return;
 		// the npc name is displayed as a fauna
 	}
-
 	
 	CVisualPropertiesInterface::setName(dataSetRow(), name);
 }

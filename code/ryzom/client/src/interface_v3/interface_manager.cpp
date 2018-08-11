@@ -113,6 +113,8 @@
 #include "nel/gui/lua_helper.h"
 using namespace NLGUI;
 #include "nel/gui/lua_ihm.h"
+#include "nel/gui/curl_certificates.h"
+
 #include "lua_ihm_ryzom.h"
 
 #include "add_on_manager.h"
@@ -471,15 +473,11 @@ CInterfaceManager::CInterfaceManager()
 	CGroupHTML::options.appName = getUserAgentName();
 	CGroupHTML::options.appVersion = getUserAgentVersion();
 	CGroupHTML::options.curlMaxConnections = ClientCfg.CurlMaxConnections;
+
 	if (!ClientCfg.CurlCABundle.empty())
 	{
-		string filename = CPath::lookup(ClientCfg.CurlCABundle, false);
-		if (!filename.empty())
-		{
-			filename = CPath::getFullPath(filename, false);
-			CGroupHTML::options.curlCABundle = filename;
-			nlinfo("curl ca bundle '%s'", filename.c_str());
-		}
+		// specify custom CA certs, lookup will be made in this function
+		NLGUI::CCurlCertificates::addCertificateFile(ClientCfg.CurlCABundle);
 	}
 
 	NLGUI::CDBManager::getInstance()->resizeBanks( NB_CDB_BANKS );
