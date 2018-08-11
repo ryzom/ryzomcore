@@ -1530,6 +1530,7 @@ namespace NLGUI
 			{
 				_BlockLevelElement.push_back(true);
 				registerAnchorName(MY_HTML_DIV);
+				pushStyle();
 
 				if (present[MY_HTML_DIV_NAME] && value[MY_HTML_DIV_NAME])
 					_DivName = value[MY_HTML_DIV_NAME];
@@ -1538,16 +1539,19 @@ namespace NLGUI
 				if (present[MY_HTML_DIV_CLASS] && value[MY_HTML_DIV_CLASS])
 					instClass = value[MY_HTML_DIV_CLASS];
 
+				string style;
+				if (present[MY_HTML_DIV_STYLE] && value[MY_HTML_DIV_STYLE])
+					style = value[MY_HTML_DIV_STYLE];
+
+				if (!style.empty())
+					getStyleParams(style, _Style);
+
 				// use generic template system
 				if (_TrustedDomain && !instClass.empty() && instClass == "ryzom-ui-grouptemplate")
 				{
 					string id;
 					if (present[MY_HTML_DIV_ID] && value[MY_HTML_DIV_ID])
 						id = value[MY_HTML_DIV_ID];
-
-					string style;
-					if (present[MY_HTML_DIV_STYLE] && value[MY_HTML_DIV_STYLE])
-						style = value[MY_HTML_DIV_STYLE];
 
 					typedef pair<string, string> TTmplParam;
 					vector<TTmplParam> tmplParams;
@@ -1679,6 +1683,10 @@ namespace NLGUI
 								image = image.substr(4, image.size()-5);
 							setBackground (image, scale, repeat);
 						}
+
+						// set default text style from <body>
+						getStyleParams(style, _StyleDefault);
+						_Style = _StyleDefault;
 					}
 				}
 				break;
@@ -1707,6 +1715,8 @@ namespace NLGUI
 					_Style.FontSize = H1FontSize;
 					_Style.TextColor = H1Color;
 					_Style.GlobalColor = H1ColorGlobalColor;
+					if (present[MY_HTML_H1_STYLE] && value[MY_HTML_H1_STYLE])
+						getStyleParams(value[MY_HTML_H1_STYLE], _Style);
 				}
 				break;
 			case HTML_H2:
@@ -1717,6 +1727,8 @@ namespace NLGUI
 					_Style.FontSize = H2FontSize;
 					_Style.TextColor = H2Color;
 					_Style.GlobalColor = H2ColorGlobalColor;
+					if (present[MY_HTML_H2_STYLE] && value[MY_HTML_H2_STYLE])
+						getStyleParams(value[MY_HTML_H2_STYLE], _Style);
 				}
 				break;
 			case HTML_H3:
@@ -1727,6 +1739,8 @@ namespace NLGUI
 					_Style.FontSize = H3FontSize;
 					_Style.TextColor = H3Color;
 					_Style.GlobalColor = H3ColorGlobalColor;
+					if (present[MY_HTML_H3_STYLE] && value[MY_HTML_H3_STYLE])
+						getStyleParams(value[MY_HTML_H3_STYLE], _Style);
 				}
 				break;
 			case HTML_H4:
@@ -1737,6 +1751,8 @@ namespace NLGUI
 					_Style.FontSize = H4FontSize;
 					_Style.TextColor = H4Color;
 					_Style.GlobalColor = H4ColorGlobalColor;
+					if (present[MY_HTML_H4_STYLE] && value[MY_HTML_H4_STYLE])
+						getStyleParams(value[MY_HTML_H4_STYLE], _Style);
 				}
 				break;
 			case HTML_H5:
@@ -1747,6 +1763,8 @@ namespace NLGUI
 					_Style.FontSize = H5FontSize;
 					_Style.TextColor = H5Color;
 					_Style.GlobalColor = H5ColorGlobalColor;
+					if (present[MY_HTML_H5_STYLE] && value[MY_HTML_H5_STYLE])
+						getStyleParams(value[MY_HTML_H5_STYLE], _Style);
 				}
 				break;
 			case HTML_H6:
@@ -1757,6 +1775,8 @@ namespace NLGUI
 					_Style.FontSize = H6FontSize;
 					_Style.TextColor = H6Color;
 					_Style.GlobalColor = H6ColorGlobalColor;
+					if (present[MY_HTML_H6_STYLE] && value[MY_HTML_H6_STYLE])
+						getStyleParams(value[MY_HTML_H6_STYLE], _Style);
 				}
 				break;
 			case HTML_IMG:
@@ -2177,6 +2197,10 @@ namespace NLGUI
 					if (present[HTML_LI_VALUE] && value[HTML_LI_VALUE])
 						fromString(value[HTML_LI_VALUE], _UL.back().Value);
 
+					pushStyle();
+					if (present[HTML_LI_STYLE] && value[HTML_LI_STYLE])
+						getStyleParams(value[HTML_LI_STYLE], _Style);
+
 					ucstring str;
 					str.fromUtf8(_UL.back().getListMarkerText());
 					addString (str);
@@ -2194,7 +2218,12 @@ namespace NLGUI
 				}
 				break;
 			case HTML_P:
-				newParagraph(PBeginSpace);
+				{
+					newParagraph(PBeginSpace);
+					pushStyle();
+					if (present[HTML_BLOCK_STYLE] && value[HTML_BLOCK_STYLE])
+						getStyleParams(value[HTML_BLOCK_STYLE], _Style);
+				}
 				break;
 			case HTML_PRE:
 				{
@@ -2210,6 +2239,7 @@ namespace NLGUI
 				break;
 			case HTML_TABLE:
 				{
+					pushStyle();
 					registerAnchorName(MY_HTML_TABLE);
 
 					// Get cells parameters
@@ -2228,6 +2258,8 @@ namespace NLGUI
 						fromString(value[MY_HTML_TABLE_CELLSPACING], table->CellSpacing);
 					if (present[MY_HTML_TABLE_CELLPADDING] && value[MY_HTML_TABLE_CELLPADDING])
 						fromString(value[MY_HTML_TABLE_CELLPADDING], table->CellPadding);
+					if (present[MY_HTML_TABLE_STYLE] && value[MY_HTML_TABLE_STYLE])
+						getStyleParams(value[MY_HTML_TABLE_STYLE], _Style);
 
 					table->setMarginLeft(getIndent());
 					addHtmlGroup (table, 0);
@@ -2247,14 +2279,17 @@ namespace NLGUI
 					// Get cells parameters
 					getCellsParameters (MY_HTML_TD, true);
 
+					pushStyle();
 					if (element_number == HTML_TH)
 					{
-						pushStyle();
 						_Style.FontWeight = FONT_WEIGHT_BOLD;
 						// center if not specified otherwise. TD/TH present/value arrays have same indices
 						if (!(present[MY_HTML_TD_ALIGN] && value[MY_HTML_TD_ALIGN]))
 							_CellParams.back().Align = CGroupCell::Center;
 					}
+
+					if (present[MY_HTML_TD_STYLE] && value[MY_HTML_TD_STYLE])
+						getStyleParams(value[MY_HTML_TD_STYLE], _Style);
 
 					CGroupTable *table = getTable();
 					if (table)
@@ -2335,21 +2370,21 @@ namespace NLGUI
 				}
 				break;
 			case HTML_TEXTAREA:
+				pushStyle();
 				_PRE.push_back(true);
+
+				// not inherited by default, font family defaults to system font
+				_Style.TextColor = TextColor;
+				_Style.FontWeight = FONT_WEIGHT_NORMAL;
+				_Style.FontOblique = false;
+				_Style.FontSize = TextFontSize;
+
+				if (present[MY_HTML_TEXTAREA_STYLE] && value[MY_HTML_TEXTAREA_STYLE])
+					getStyleParams(value[MY_HTML_TEXTAREA_STYLE], _Style);
 
 				// Got one form ?
 				if (!(_Forms.empty()))
 				{
-					// not inherited by default, font family defaults to system font
-					pushStyle();
-					_Style.TextColor = TextColor;
-					_Style.FontWeight = FONT_WEIGHT_NORMAL;
-					_Style.FontOblique = false;
-					_Style.FontSize = TextFontSize;
-
-					if (present[MY_HTML_TEXTAREA_STYLE] && value[MY_HTML_TEXTAREA_STYLE])
-						getStyleParams(value[MY_HTML_TEXTAREA_STYLE], _Style);
-
 					// read general property
 					string templateName;
 
@@ -2398,6 +2433,10 @@ namespace NLGUI
 					// Set TR flag
 					if (!_TR.empty())
 						_TR.back() = true;
+
+					pushStyle();
+					if (present[MY_HTML_TR_STYLE] && value[MY_HTML_TR_STYLE])
+						getStyleParams(value[MY_HTML_TR_STYLE], _Style);
 				}
 				break;
 			case HTML_UL:
@@ -2411,6 +2450,10 @@ namespace NLGUI
 				_LI = _UL.size() > 1 || _DL.size() > 1;
 				_Indent.push_back(getIndent() + ULIndent);
 				endParagraph();
+
+				pushStyle();
+				if (present[HTML_UL_STYLE] && value[HTML_UL_STYLE])
+					getStyleParams(value[HTML_UL_STYLE], _Style);
 				break;
 			case HTML_OBJECT:
 				_ObjectType.clear();
@@ -2471,27 +2514,36 @@ namespace NLGUI
 				_IgnoreText = true;
 				break;
 			case HTML_DL:
-				_DL.push_back(HTMLDListElement());
-				_LI = _DL.size() > 1 || !_UL.empty();
-				endParagraph();
+				{
+					_DL.push_back(HTMLDListElement());
+					_LI = _DL.size() > 1 || !_UL.empty();
+					endParagraph();
+					pushStyle();
+					if (present[HTML_GEN_STYLE] && value[HTML_GEN_STYLE])
+						getStyleParams(value[HTML_GEN_STYLE], _Style);
+				}
 				break;
 			case HTML_DT:
 				if (!_DL.empty())
 				{
-					// close DT if still open
+					// close if still open
 					if (_DL.back().DD)
 					{
 						_DL.back().DD = false;
 						popIfNotEmpty(_Indent);
+						popStyle();
 					}
 
-					// see if this is the first <dt>, closing tag not required
-					if (!_DL.back().DT)
-					{
-						_DL.back().DT = true;
-						pushStyle();
-						_Style.FontWeight = FONT_WEIGHT_BOLD;
-					}
+					// close if still open
+					if (_DL.back().DT)
+						popStyle();
+
+					_DL.back().DT = true;
+
+					pushStyle();
+					_Style.FontWeight = FONT_WEIGHT_BOLD;
+					if (present[HTML_GEN_STYLE] && value[HTML_GEN_STYLE])
+						getStyleParams(value[HTML_GEN_STYLE], _Style);
 
 					if (!_LI)
 					{
@@ -2514,11 +2566,19 @@ namespace NLGUI
 						popStyle();
 					}
 
-					if (!_DL.back().DD)
+					if (_DL.back().DD)
 					{
-						_DL.back().DD = true;
-						_Indent.push_back(getIndent() + ULIndent);
+						_DL.back().DD = false;
+						popStyle();
+						popIfNotEmpty(_Indent);
 					}
+
+					_DL.back().DD = true;
+					_Indent.push_back(getIndent() + ULIndent);
+
+					pushStyle();
+					if (present[HTML_GEN_STYLE] && value[HTML_GEN_STYLE])
+						getStyleParams(value[HTML_GEN_STYLE], _Style);
 
 					if (!_LI)
 					{
@@ -2533,6 +2593,7 @@ namespace NLGUI
 				break;
 			case HTML_OL:
 				{
+					pushStyle();
 					sint32 start = 1;
 					std::string type("1");
 
@@ -2540,6 +2601,8 @@ namespace NLGUI
 						fromString(value[HTML_OL_START], start);
 					if (present[HTML_OL_TYPE] && value[HTML_OL_TYPE])
 						type = value[HTML_OL_TYPE];
+					if (present[HTML_OL_STYLE] && value[HTML_OL_STYLE])
+						getStyleParams(value[HTML_OL_STYLE], _Style);
 
 					_UL.push_back(HTMLOListElement(start, type));
 					// if LI is already present
@@ -2621,6 +2684,7 @@ namespace NLGUI
 				endParagraph();
 				break;
 			case HTML_P:
+				popStyle();
 				endParagraph();
 				break;
 			case HTML_PRE:
@@ -2628,6 +2692,7 @@ namespace NLGUI
 				popIfNotEmpty (_PRE);
 				break;
 			case HTML_DIV:
+				popStyle();
 				if (isBlockLevelElement())
 				{
 					endParagraph();
@@ -2638,6 +2703,7 @@ namespace NLGUI
 				break;
 
 			case HTML_TABLE:
+				popStyle();
 				popIfNotEmpty (_CellParams);
 				popIfNotEmpty (_TR);
 				popIfNotEmpty (_Cells);
@@ -2647,14 +2713,15 @@ namespace NLGUI
 				// Add a cell
 				break;
 			case HTML_TH:
-				popStyle();
 				// no break;
 			case HTML_TD:
+				popStyle();
 				popIfNotEmpty (_CellParams);
 				if (!_Cells.empty())
 					_Cells.back() = NULL;
 				break;
 			case HTML_TR:
+				popStyle();
 				popIfNotEmpty (_CellParams);
 				break;
 			case HTML_TEXTAREA:
@@ -2671,10 +2738,9 @@ namespace NLGUI
 							entry.TextArea = textArea;
 							_Forms.back().Entries.push_back (entry);
 						}
-
-						popStyle();
 					}
 
+					popStyle();
 					popIfNotEmpty (_PRE);
 				}
 				break;
@@ -2782,8 +2848,14 @@ namespace NLGUI
 				if (!_UL.empty())
 				{
 					endParagraph();
+					popStyle();
 					popIfNotEmpty(_UL);
 					popIfNotEmpty(_Indent);
+				}
+				break;
+			case HTML_LI:
+				{
+					popStyle();
 				}
 				break;
 			case HTML_DL:
@@ -2801,16 +2873,19 @@ namespace NLGUI
 					if (_DL.back().DD)
 					{
 						popIfNotEmpty(_Indent);
+						popStyle();
 					}
 
 					popIfNotEmpty (_DL);
+					popStyle();
 				}
 				break;
 			case HTML_DT:
 				if (!_DL.empty())
 				{
+					if (_DL.back().DT)
+						popStyle();
 					_DL.back().DT = false;
-					popStyle();
 				}
 				break;
 			case HTML_DD:
@@ -2821,6 +2896,7 @@ namespace NLGUI
 					{
 						_DL.back().DD = false;
 						popIfNotEmpty(_Indent);
+						popStyle();
 					}
 				}
 				break;
@@ -4477,6 +4553,7 @@ namespace NLGUI
 			templateParams.push_back (std::pair<std::string,std::string> ("enter_recover_focus", "false"));
 			if (maxlength > 0)
 				templateParams.push_back (std::pair<std::string,std::string> ("max_num_chars", toString(maxlength)));
+
 			CInterfaceGroup *textArea = CWidgetManager::getInstance()->getParser()->createGroupInstance (templateName.c_str(),
 				getParagraph()->getId(), templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 

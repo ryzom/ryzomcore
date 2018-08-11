@@ -102,6 +102,7 @@ namespace NLGUI
 			HTML_ATTR(TR,L_MARGIN),
 			HTML_ATTR(TR,NOWRAP),
 			HTML_ATTR(TR,VALIGN),
+			HTML_ATTR(TR,STYLE),
 	};
 
 	enum
