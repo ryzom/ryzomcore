@@ -438,6 +438,22 @@ namespace NLGUI
 			return true;
 		}
 		else
+		if( name == "shadow_x" )
+		{
+			sint sx;
+			if( fromString( value, sx ) )
+				_ShadowX = sx;
+			return true;
+		}
+		else
+		if( name == "shadow_y" )
+		{
+			sint sy;
+			if( fromString( value, sy ) )
+				_ShadowY = sy;
+			return true;
+		}
+		else
 		if( name == "multi_line" )
 		{
 			bool b;
@@ -618,6 +634,8 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "shadow", BAD_CAST toString( _Shadow ).c_str() );
 		xmlSetProp( node, BAD_CAST "shadow_outline", BAD_CAST toString( _ShadowOutline ).c_str() );
 		xmlSetProp( node, BAD_CAST "shadow_color", BAD_CAST toString( _ShadowColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "shadow_x", BAD_CAST toString( _ShadowX ).c_str() );
+		xmlSetProp( node, BAD_CAST "shadow_y", BAD_CAST toString( _ShadowY ).c_str() );
 		xmlSetProp( node, BAD_CAST "multi_line", BAD_CAST toString( _MultiLine ).c_str() );
 
 		std::string just;
@@ -728,6 +746,16 @@ namespace NLGUI
 		_ShadowColor = CRGBA(0,0,0,255);
 		if (prop)
 			_ShadowColor = convertColor(prop);
+
+		prop= (char*) xmlGetProp( cur, (xmlChar*)"shadow_x" );
+		_ShadowX = 1;
+		if (prop)
+			fromString( (const char *)prop, _ShadowX);
+
+		prop= (char*) xmlGetProp( cur, (xmlChar*)"shadow_y" );
+		_ShadowY = 1;
+		if (prop)
+			fromString( (const char *)prop, _ShadowY);
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"multi_line" );
 		_MultiLine = false;
