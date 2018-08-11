@@ -56,9 +56,7 @@ public:
 
 	static	CFightScriptCompReader	*getScriptReader	(const std::string &str);
 	
-	static	CFightScriptComp	*createScriptComp	(const std::string &str)
-protected:
-private:
+	static	CFightScriptComp	*createScriptComp(const std::string &str);
 };
 
 
@@ -74,8 +72,6 @@ public:
 	typedef	CHashMap<std::string, NLMISC::CSmartPtr<CFightScriptCompReader> >	TFightScriptMap;
 
 	static	TFightScriptMap	_ScriptCompList;
-protected:	
-private:
 };
 
 
@@ -116,7 +112,7 @@ public:
 	CFightSelectFilterReader()			{}
 	virtual ~CFightSelectFilterReader()	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)
+	CFightScriptComp	*create(const	std::string	&inStr);
 	std::string	getName	()	const
 	{
 		return	std::string("SELECT");
