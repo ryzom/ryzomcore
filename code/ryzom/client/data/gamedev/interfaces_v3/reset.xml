@@ -275,6 +275,7 @@
 	<action handler="set" params="dblink=UI:SAVE:INV_PA0:FILTER_TOOL|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA0:FILTER_MP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA0:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA0:FILTER_TP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA1:SORT_TYPE|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA1:ICON_LIST|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA1:FILTER_ARMOR|value=1" />
@@ -299,6 +300,30 @@
 	<action handler="set" params="dblink=UI:SAVE:INV_PA3:FILTER_MP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA3:FILTER_MISSMP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA3:FILTER_TP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA4:SORT_TYPE|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA4:ICON_LIST|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA4:FILTER_ARMOR|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA4:FILTER_WEAPON|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA4:FILTER_TOOL|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA4:FILTER_MP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA4:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA4:FILTER_TP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA5:SORT_TYPE|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA5:ICON_LIST|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA5:FILTER_ARMOR|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA5:FILTER_WEAPON|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA5:FILTER_TOOL|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA5:FILTER_MP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA5:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA5:FILTER_TP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA6:SORT_TYPE|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA6:ICON_LIST|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA6:FILTER_ARMOR|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA6:FILTER_WEAPON|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA6:FILTER_TOOL|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA6:FILTER_MP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA6:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA6:FILTER_TP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:SORT_TYPE|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:ICON_LIST|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:FILTER_ARMOR|value=1" />
@@ -457,7 +482,7 @@
 	<action handler="lua:game:updateMissionJournalMode()"/>
 	<action handler="lua" params="local animals = getUI('ui:interface:animal_global');
 		if animals then 
-			animals.content.no_available_animals.active = false; 			
+			animals.content.no_available_animals.active = false;
 			animals.header_opened.active = true; 
 			animals.header_closed.active = false; 
 			if animals.list then 

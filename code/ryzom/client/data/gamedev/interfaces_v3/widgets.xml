@@ -371,6 +371,9 @@
             <action id="pa1" name="uimMtPaMount1" handler="proc" params="move_to_pa|1" />
             <action id="pa2" name="uimMtPaMount2" handler="proc" params="move_to_pa|2" />
             <action id="pa3" name="uimMtPaMount3" handler="proc" params="move_to_pa|3" />
+            <action id="pa4" name="uiPABagTitleMount4" handler="proc" params="move_to_pa|4" />
+            <action id="pa5" name="uiPABagTitleMount5" handler="proc" params="move_to_pa|5" />
+            <action id="pa6" name="uiPABagTitleMount6" handler="proc" params="move_to_pa|6" />
             <action id="guild" name="uimMtGuild" handler="proc" params="move_to_guild" />
             <action id="room" name="uimMtRoom" handler="proc" params="move_to_room" />
         </action>
