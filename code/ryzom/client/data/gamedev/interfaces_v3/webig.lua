@@ -8,6 +8,12 @@ if (webig.sheetLists==nil) then
 	webig.sheetLists = {}
 end
 
+function getUCtf8(text)
+	local uctext = ucstring()
+	uctext:fromUtf8(text)
+	return uctext
+end
+
 
 function webig:addSheet(dst, sheet, quality, quantity, worned, user_color, rm_class_type, rm_faber_stat_type)
 	if quality == nil then quality=0 end
