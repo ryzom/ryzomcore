@@ -3150,12 +3150,16 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 					getInventory().addItemInfoWaiter(&ControlSheetTooltipUpdater);
 				}
 
-				help = ControlSheetTooltipUpdater.infoValidated(ctrlSheet, luaMethodName);
-
+				if (!_ContextHelp.empty())
+					help= _ContextHelp;
+				else
+					help = ControlSheetTooltipUpdater.infoValidated(ctrlSheet, luaMethodName);
 			}
 			else
-				help= getItemActualName();
-
+				if (!_ContextHelp.empty())
+					help= _ContextHelp;
+				else
+					help= getItemActualName();
 		}
 		else
 			help= _ContextHelp;
