@@ -116,7 +116,7 @@ namespace NLGUI
 			// CURL using OpenSSL backend
 			// With OpenSSL compiled without any engine, engines will too return NULL
 			// Fortunately, if OpenSSL isn't compiled with engines means we compiled it ourself and CURL is a recent version
-			if ((res == CURLE_OK) && engine)
+			if ((res == CURLE_OK) && engines)
 			{
 				// free engines
 				curl_slist_free_all(engines);
