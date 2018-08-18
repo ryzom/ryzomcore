@@ -28,6 +28,8 @@
 #include "../net_manager.h"
 #include "../connection.h"
 
+#include <curl/curl.h>
+
 using namespace std;
 using namespace NLMISC;
 

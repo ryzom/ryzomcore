@@ -19,6 +19,8 @@
 #include "nel/gui/libwww.h"
 #include "nel/gui/group_html.h"
 
+#include <curl/curl.h>
+
 using namespace NLMISC;
 
 #ifdef DEBUG_NEW
