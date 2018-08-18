@@ -4629,6 +4629,7 @@ namespace NLGUI
 			if (multiLine)
 				templateParams.push_back (std::pair<std::string,std::string> ("multi_min_line", toString(rows)));
 			templateParams.push_back (std::pair<std::string,std::string> ("want_return", multiLine?"true":"false"));
+			templateParams.push_back (std::pair<std::string,std::string> ("onenter", ""));
 			templateParams.push_back (std::pair<std::string,std::string> ("enter_recover_focus", "false"));
 			if (maxlength > 0)
 				templateParams.push_back (std::pair<std::string,std::string> ("max_num_chars", toString(maxlength)));
