@@ -4448,7 +4448,7 @@ namespace NLGUI
 					string buttonTemplate = DefaultButtonGroup;
 					// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
 					string param = "name=" + this->_Id + "|url=" + getLink();
-					string name = "";
+					string name;
 					if (!_AnchorName.empty())
 						name = _AnchorName.back();
 					typedef pair<string, string> TTmplParam;

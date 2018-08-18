@@ -97,7 +97,7 @@ namespace NLGUI
 
 			CURLINFO info;
 
-#if defined(CURL_AT_LEAST_VERSION) && CURL_AT_LEAST_VERSION(7, 48, 0)
+#if CURL_AT_LEAST_VERSION(7, 48, 0)
 			info = CURLINFO_TLS_SSL_PTR;
 #else
 			info = CURLINFO_TLS_SESSION;
