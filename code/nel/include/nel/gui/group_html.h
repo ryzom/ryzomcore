@@ -17,8 +17,6 @@
 #ifndef CL_GROUP_HTML_H
 #define CL_GROUP_HTML_H
 
-#include <curl/curl.h>
-
 #include "nel/misc/types_nl.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/group_scrolltext.h"
@@ -26,6 +24,9 @@
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/group_table.h"
 #include "nel/gui/libwww_types.h"
+
+// forward declaration
+typedef void CURLM;
 
 typedef std::map<std::string, std::string>	TStyle;
 
@@ -856,11 +857,6 @@ namespace NLGUI
 
 		// HtmlType download finished
 		void htmlDownloadFinished(const std::string &content, const std::string &type, long code);
-
-		// cURL transfer callbacks
-		static size_t curlHeaderCallback(char *buffer, size_t size, size_t nmemb, void *pCCurlWWWData);
-		static size_t curlDataCallback(char *buffer, size_t size, size_t nmemb, void *pCCurlWWWData);
-		static size_t curlProgressCallback(void *pCCurlWWWData, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow);
 	};
 
 	// adapter group that store y offset for inputs inside an html form
