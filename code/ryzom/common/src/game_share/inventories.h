@@ -167,17 +167,17 @@ namespace INVENTORIES
 			pet_animal5,
 			pet_animal6,
 			pet_animal7,
-			max_pet_animal,					// 10
-			NUM_INVENTORY = max_pet_animal,	// 10
-			UNDEFINED = NUM_INVENTORY,		// 10
+			max_pet_animal,					// 11
+			NUM_INVENTORY = max_pet_animal,	// 11
+			UNDEFINED = NUM_INVENTORY,		// 11
 
-			exchange,						// 11  This is not a bug : exchange is a fake inventory
-			exchange_proposition,			// 12  and should not count in the number of inventory
+			exchange,						// 12  This is not a bug : exchange is a fake inventory
+			exchange_proposition,			// 13  and should not count in the number of inventory
 			// same for botChat trading.
-			trading,						// 13
-			reward_sharing,					// 14 fake inventory, not in database.xml. Used by the item info protocol only
-			guild,							// 15 (warning: number stored in guild saved file)
-			player_room,					// 16
+			trading,						// 14
+			reward_sharing,					// 15 fake inventory, not in database.xml. Used by the item info protocol only
+			guild,							// 16 (warning: number stored in guild saved file)
+			player_room,					// 17
 			NUM_ALL_INVENTORY				// warning: distinct from NUM_INVENTORY
 	};
 
