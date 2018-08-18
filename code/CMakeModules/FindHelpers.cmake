@@ -38,6 +38,21 @@ MACRO(PARSE_VERSION_OTHER FILENAME)
   ENDIF()
 ENDMACRO()
 
+# macro to define FIND_PACKAGE options with a different package name
+MACRO(FIX_PACKAGE_OPTIONS OLDNAME NEWNAME)
+  # append other options if needed
+  SET(_OPTIONS COMPONENTS REQUIRED QUIETLY)
+
+  # process each options
+  FOREACH(_OPTION ${_OPTIONS})
+    SET(OLD_OPTION ${OLDNAME}_FIND_${_OPTION})
+    IF(DEFINED )
+      SET(NEW_OPTION ${NEWNAME}_FIND_${_OPTION})
+      SET(${NEW_OPTION} ${OLD_OPTION})
+    ENDIF()
+  ENDFOREACH()
+ENDMACRO()
+
 MACRO(FIND_PACKAGE_HELPER NAME INCLUDE)
   # Looks for a directory containing NAME.
   #
