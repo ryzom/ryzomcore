@@ -6200,6 +6200,12 @@ namespace NLGUI
 	{
 		const CStyleParams current = _Style;
 
+		if (inherit)
+		{
+			style.Underlined = current.Underlined;
+			style.StrikeThrough = current.StrikeThrough;
+		}
+
 		float tmpf;
 		TStyle styles = parseStyle(styleString);
 		TStyle::iterator it;
@@ -6420,11 +6426,6 @@ namespace NLGUI
 				if (fromString(it->second, b))
 					style.GlobalColor = b;
 			}
-		}
-		if (inherit)
-		{
-			style.Underlined = current.Underlined || style.Underlined;
-			style.StrikeThrough = current.StrikeThrough || style.StrikeThrough;
 		}
 	}
 
