@@ -2,7 +2,7 @@
 # This module defines
 #  STEAM_LIBRARY, the library to link against
 #  STEAM_FOUND, if false, do not try to link to STEAM
-#  STEA%_INCLUDE_DIR, where to find headers.
+#  STEAM_INCLUDE_DIR, where to find headers.
 
 IF(STEAM_LIBRARY AND STEAM_INCLUDE_DIR)
   # in cache already

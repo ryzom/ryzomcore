@@ -692,11 +692,11 @@ MACRO(ADD_QT_LIBRARY _NAME)
   ENDIF()
   SET(_LIB "${QT_LIBRARY_DIR}/${_PREFIX}${_NAME}.${_EXT}")
   IF(EXISTS ${_LIB})
-    SET(QT_LIBRARIES ${QT_LIBRARIES} optimized ${_LIB})
+    LIST(APPEND QT_LIBRARIES optimized ${_LIB})
   ENDIF()
   SET(_LIB "${QT_LIBRARY_DIR}/${_PREFIX}${_NAME}d.${_EXT}")
   IF(EXISTS ${_LIB})
-    SET(QT_LIBRARIES ${QT_LIBRARIES} debug ${_LIB})
+    LIST(APPEND QT_LIBRARIES debug ${_LIB})
   ENDIF()
 ENDMACRO()
 
@@ -710,11 +710,11 @@ MACRO(ADD_QT_PLUGIN _TYPE _NAME)
   ENDIF()
   SET(_LIB "${QT_PLUGINS_DIR}/${_TYPE}/${_PREFIX}${_NAME}.${_EXT}")
   IF(EXISTS ${_LIB})
-    SET(QT_LIBRARIES ${QT_LIBRARIES} optimized ${_LIB})
+    LIST(APPEND QT_LIBRARIES optimized ${_LIB})
   ENDIF()
   SET(_LIB "${QT_PLUGINS_DIR}/${_TYPE}/${_PREFIX}${_NAME}d.${_EXT}")
   IF(EXISTS ${_LIB})
-    SET(QT_LIBRARIES ${QT_LIBRARIES} debug ${_LIB})
+    LIST(APPEND QT_LIBRARIES debug ${_LIB})
   ENDIF()
 ENDMACRO()
 
@@ -789,12 +789,12 @@ MACRO(FIND_QT5)
       SET(QT_LIBRARIES Qt5::Widgets)
 
       # Gui
-      SET(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Gui Qt5::OpenGL)
+      LIST(APPEND QT_LIBRARIES Qt5::Gui Qt5::OpenGL)
 
       ADD_QT_LIBRARY(PrintSupport)
 
       IF(WIN32)
-        SET(QT_LIBRARIES ${QT_LIBRARIES}
+        LIST(APPEND QT_LIBRARIES
           ${WINSDK_LIBRARY_DIR}/Imm32.lib
           ${WINSDK_LIBRARY_DIR}/OpenGL32.lib
           ${WINSDK_LIBRARY_DIR}/WinMM.Lib)
@@ -812,7 +812,7 @@ MACRO(FIND_QT5)
         FIND_LIBRARY(SYSTEMCONFIGURATION_FRAMEWORK SystemConfiguration)
         FIND_LIBRARY(OPENGL_FRAMEWORK NAMES OpenGL)
 
-        SET(QT_LIBRARIES ${QT_LIBRARIES}
+        LIST(APPEND QT_LIBRARIES
           ${CUPS_LIBRARY}
           ${COCOA_FRAMEWORK}
           ${SYSTEMCONFIGURATION_FRAMEWORK}
@@ -839,7 +839,7 @@ MACRO(FIND_QT5)
         ADD_QT_LIBRARY(DBus)
 
         IF(EXISTS "${QT_LIBRARY_DIR}/libxcb-static.a")
-          SET(QT_LIBRARIES ${QT_LIBRARIES} "${QT_LIBRARY_DIR}/libxcb-static.a")
+          LIST(APPEND QT_LIBRARIES "${QT_LIBRARY_DIR}/libxcb-static.a")
         ENDIF()
 
         # always link these in dynamic, API never changes
@@ -871,14 +871,14 @@ MACRO(FIND_QT5)
         SET(HB_LIB "${QT_LIBRARY_DIR}/qtharfbuzzng.lib")
       ENDIF()
       IF(EXISTS ${HB_LIB})
-        SET(QT_LIBRARIES ${QT_LIBRARIES} ${HB_LIB})
+        LIST(APPEND QT_LIBRARIES ${HB_LIB})
       ENDIF()
 
       # freetype is needed since Qt 5.5
       FIND_PACKAGE(Freetype)
 
       IF(FREETYPE_FOUND)
-        SET(QT_LIBRARIES ${QT_LIBRARIES} ${FREETYPE_LIBRARIES})
+        LIST(APPEND QT_LIBRARIES ${FREETYPE_LIBRARIES})
       ELSE()
         IF(UNIX)
           SET(FREETYPE_LIB "${QT_LIBRARY_DIR}/libqtfreetype.a")
@@ -886,27 +886,27 @@ MACRO(FIND_QT5)
           SET(FREETYPE_LIB "${QT_LIBRARY_DIR}/qtfreetype.lib")
         ENDIF()
         IF(EXISTS ${FREETYPE_LIB})
-          SET(QT_LIBRARIES ${QT_LIBRARIES} ${FREETYPE_LIB})
+          LIST(APPEND QT_LIBRARIES ${FREETYPE_LIB})
         ENDIF()
       ENDIF()
 
       ADD_QT_PLUGIN(accessible qtaccessiblewidgets)
 
-      SET(QT_LIBRARIES ${QT_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARY})
+      LIST(APPEND QT_LIBRARIES ${PNG_LIBRARIES} ${JPEG_LIBRARY})
 
       # Network
-      SET(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Network Qt5::Xml)
-      SET(QT_LIBRARIES ${QT_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES})
+      LIST(APPEND QT_LIBRARIES Qt5::Network Qt5::Xml)
+      LIST(APPEND QT_LIBRARIES ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES})
 
       IF(WIN32)
-        SET(QT_LIBRARIES ${QT_LIBRARIES}
+        LIST(APPEND QT_LIBRARIES
           ${WINSDK_LIBRARY_DIR}/Crypt32.lib
           ${WINSDK_LIBRARY_DIR}/WS2_32.Lib
           ${WINSDK_LIBRARY_DIR}/IPHlpApi.Lib)
       ENDIF()
 
       # Core
-      SET(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Core)
+      LIST(APPEND QT_LIBRARIES Qt5::Core)
 
       # pcre is needed since Qt 5.5
       IF(UNIX)
@@ -918,7 +918,7 @@ MACRO(FIND_QT5)
         SET(PCRE_LIB "${QT_LIBRARY_DIR}/qtpcre.lib")
       ENDIF()
       IF(EXISTS ${PCRE_LIB})
-        SET(QT_LIBRARIES ${QT_LIBRARIES} ${PCRE_LIB})
+        LIST(APPEND QT_LIBRARIES ${PCRE_LIB})
       ENDIF()
 
       IF(APPLE)
@@ -926,7 +926,7 @@ MACRO(FIND_QT5)
 
         FIND_LIBRARY(SECURITY_FRAMEWORK Security)
 
-        SET(QT_LIBRARIES ${QT_LIBRARIES}
+        LIST(APPEND QT_LIBRARIES
           ${PCRE_LIBRARY}
           ${FOUNDATION_FRAMEWORK}
           ${CARBON_FRAMEWORK}

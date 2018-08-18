@@ -101,7 +101,7 @@ struct EPatchDownloadException : public Exception
 {
 	EPatchDownloadException() : Exception( "Download Error" ) {}
 	EPatchDownloadException( const std::string& str ) : Exception( str ) {}
-	virtual ~EPatchDownloadException() {}
+	virtual ~EPatchDownloadException() throw(){}
 };
 
 
