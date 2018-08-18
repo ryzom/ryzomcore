@@ -25,6 +25,14 @@
 
 #include <curl/curl.h>
 
+// for compatibility with older versions
+#ifndef CURL_AT_LEAST_VERSION
+#define CURL_VERSION_BITS(x,y,z) ((x)<<16|(y)<<8|z)
+#define CURL_AT_LEAST_VERSION(x,y,z) \
+  (LIBCURL_VERSION_NUM >= CURL_VERSION_BITS(x, y, z))
+#endif
+
+
 using namespace std;
 using namespace NLMISC;
 
@@ -81,6 +89,9 @@ namespace NLGUI
 			// get information on CURL
 			curl_version_info_data *data = curl_version_info(CURLVERSION_NOW);
 
+			bool useOpenSSLBackend = false;
+
+#if CURL_AT_LEAST_VERSION(7, 34, 0)
 			// get more information on CURL session
 			curl_tlssessioninfo *sessionInfo;
 
@@ -94,8 +105,30 @@ namespace NLGUI
 
 			CURLcode res = curl_easy_getinfo(curl, info, &sessionInfo);
 
+			// CURL using OpenSSL backend
+			if ((res == CURLE_OK) && sessionInfo && sessionInfo->backend == CURLSSLBACKEND_OPENSSL) useOpenSSLBackend = true;
+#elif CURL_AT_LEAST_VERSION(7, 12, 3)
+			// get a list of OpenSSL engines
+			struct curl_slist *engines;
+
+			CURLcode res = curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, &engines);
+
+			// CURL using OpenSSL backend
+			// With OpenSSL compiled without any engine, engines will too return NULL
+			// Fortunately, if OpenSSL isn't compiled with engines means we compiled it ourself and CURL is a recent version
+			if ((res == CURLE_OK) && engine)
+			{
+				// free engines
+				curl_slist_free_all(engines);
+
+				useOpenSSLBackend = true;
+			}
+#else
+			// TODO: implement an equivalent, but CURL 7.12 was released in 2004
+#endif
+
 			// only use OpenSSL callback if not using Windows SSPI and using OpenSSL backend
-			if (!res && sessionInfo && sessionInfo->backend == CURLSSLBACKEND_OPENSSL && !(data && data->features & CURL_VERSION_SSPI))
+			if (useOpenSSLBackend && !(data && data->features & CURL_VERSION_SSPI))
 			{
 #ifdef NL_OS_WINDOWS
 				// load native Windows CA Certs
@@ -181,7 +214,21 @@ namespace NLGUI
 
 		void addCertificatesFromFile(const std::string &cert)
 		{
-			if (!isInitialized || !isUsingOpenSSLBackend) return;
+			if (!isInitialized)
+			{
+				nlwarning("CURL not initialized! Check if there are another errors");
+				return;
+			}
+
+			if (!isUsingOpenSSLBackend)
+			{
+				nlinfo("CURL not using OpenSSL backend! Unable to use custom certificates");
+				return;
+			}
+			else
+			{
+				nlinfo("CURL using OpenSSL backend!");
+			}
 
 			// this file was already loaded
 			if (std::find(CertList.begin(), CertList.end(), cert) != CertList.end()) return;
