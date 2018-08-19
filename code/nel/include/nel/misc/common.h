@@ -281,10 +281,10 @@ template <class T> T trimSeparators (const T &str)
 {
 	typename T::size_type start = 0;
 	typename T::size_type size = str.size();
-	while (start < size && str[start] == ' ' && str[start] == '\t')
+	while (start < size && (str[start] == ' ' || str[start] == '\t'))
 		start++;
 	typename T::size_type end = size;
-	while (end > start && str[end-1] == ' ' && str[end-1] == '\t')
+	while (end > start && (str[end-1] == ' ' || str[end-1] == '\t'))
 		end--;
 	return str.substr (start, end-start);
 }
