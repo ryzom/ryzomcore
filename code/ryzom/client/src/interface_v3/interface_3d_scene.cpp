@@ -661,24 +661,25 @@ CInterfaceElement* CInterface3DScene::getElement (const string &id)
 		return this;
 
 	string sTmp = id.substr(0, getId().size());
-	if (sTmp != getId()) return NULL;
+	//if (sTmp != getId()) return NULL;
 
 	uint i;
 
 	for (i = 0; i < _Characters.size(); ++i)
-		if (id == _Characters[i]->getId())
+		if (id == _Characters[i]->getId() || id == toString("character#%d", i))
 			return _Characters[i];
 
 	for (i = 0; i < _IGs.size(); ++i)
 		if (id == _IGs[i]->getId())
 			return _IGs[i];
 
-	for (i = 0; i < _Shapes.size(); ++i)
-		if (id == _Shapes[i]->getId())
+	for (i = 0; i < _Shapes.size(); ++i) {
+		if (id == _Shapes[i]->getId() || id == toString("shape#%d", i))
 			return _Shapes[i];
+	}
 
 	for (i = 0; i < _Cameras.size(); ++i)
-		if (id == _Cameras[i]->getId())
+		if (id == _Cameras[i]->getId() || id == toString("camera#%d", i))
 			return _Cameras[i];
 
 	for (i = 0; i < _Lights.size(); ++i)
@@ -691,6 +692,24 @@ CInterfaceElement* CInterface3DScene::getElement (const string &id)
 
 	return NULL;
 }
+
+int CInterface3DScene::luaGetElement(CLuaState &ls)
+{
+	CLuaIHM::checkArgCount(ls, "CInterfaceGroup::find", 1);
+	CLuaIHM::checkArgType(ls, "CInterfaceGroup::find", 1, LUA_TSTRING);
+	std::string id = ls.toString(1);
+	CInterfaceElement* element = getElement(id);
+	if (!element)
+	{
+		ls.pushNil();
+	}
+	else
+	{
+		CLuaIHM::pushUIOnStack(ls, element);
+	}
+	return 1;
+}
+	
 // ----------------------------------------------------------------------------
 string CInterface3DScene::getCurrentCamera() const
 {
@@ -1237,6 +1256,7 @@ CInterface3DShape::~CInterface3DShape()
 // ----------------------------------------------------------------------------
 bool CInterface3DShape::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 {
+	nlinfo("SHAPE ID PARENT = %s", parentGroup->getId().c_str());
 	if (!CInterfaceElement::parse(cur, parentGroup))
 		return false;
 
@@ -1258,6 +1278,39 @@ bool CInterface3DShape::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	_Instance.setRotEuler (_Rot.x, _Rot.y, _Rot.z);
 
 	return true;
+}
+
+float CInterface3DShape::getBBoxSizeX () const
+{
+	CAABBox bbox;
+	_Instance.getShapeAABBox(bbox);
+		
+	if (bbox.getCenter() == CVector::Null)
+		return -0.5f;
+
+	return  bbox.getMax().x - bbox.getMin().x;
+}
+
+float CInterface3DShape::getBBoxSizeY () const
+{
+	CAABBox bbox;
+	_Instance.getShapeAABBox(bbox);
+	
+	if (bbox.getCenter() == CVector::Null)
+		return -0.5f;
+
+	return bbox.getMax().y - bbox.getMin().y;
+}
+
+float CInterface3DShape::getBBoxSizeZ () const
+{
+	CAABBox bbox;
+	_Instance.getShapeAABBox(bbox);
+	
+	if (bbox.getCenter() == CVector::Null)
+		return -0.5f;
+
+	return bbox.getMax().z - bbox.getMin().z;
 }
 
 // ----------------------------------------------------------------------------
