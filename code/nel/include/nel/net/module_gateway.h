@@ -171,8 +171,7 @@ namespace NLNET
 		virtual void	setTransportPeerInvisible(const std::string &transportInstanceName, bool peerInvisible) =0;
 
 		/// Activate/stop firewalling mode on a transport
-		virtual void	setTransportFirewallMode(const std::string &transportInstanceName, bool firewalled)
-			throw (EGatewayFirewallBreak) =0;
+		virtual void	setTransportFirewallMode(const std::string &transportInstanceName, bool firewalled) =0;
 
 		/// Send a command to a transport
 		virtual void	transportCommand(const TParsedCommandLine &commandLine) =0;
@@ -233,9 +232,7 @@ namespace NLNET
 		/** Disclose module information to a connected gateway.
 		 *	This can also be this gateway itself.
 		 */
-		virtual void discloseModule(IModuleProxy *moduleProxy)
-			throw (EGatewayNotConnected)
-			=0;
+		virtual void discloseModule(IModuleProxy *moduleProxy) =0;
 
 		/** Retrieve the proxy for a locally plugged module.
 		 *	Each local module plugged in a gateway has an associated

@@ -340,7 +340,7 @@ std::string CParticleWorkspace::getFilename() const
 	return CFile::getFilename(_Filename);
 }
 
-CWorkspaceNode *CParticleWorkspace::addNode(const std::string &filenameWithFullPath)  throw( NLMISC::Exception)
+CWorkspaceNode *CParticleWorkspace::addNode(const std::string &filenameWithFullPath)
 {
 	// Check that file is not already inserted
 	std::string fileName = NLMISC::CFile::getFilename(filenameWithFullPath);

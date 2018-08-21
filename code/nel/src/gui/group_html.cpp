@@ -49,6 +49,8 @@
 #include "nel/gui/http_hsts.h"
 #include "nel/gui/curl_certificates.h"
 
+#include <curl/curl.h>
+
 using namespace std;
 using namespace NLMISC;
 
@@ -204,6 +206,47 @@ namespace NLGUI
 			// headers received from curl transfer
 			std::map<std::string, std::string> HeadersRecv;
 	};
+
+	// cURL transfer callbacks
+	// ***************************************************************************
+	static size_t curlHeaderCallback(char *buffer, size_t size, size_t nmemb, void *pCCurlWWWData)
+	{
+		CCurlWWWData * me = static_cast<CCurlWWWData *>(pCCurlWWWData);
+		if (me)
+		{
+			std::string header;
+			header.append(buffer, size * nmemb);
+			me->setRecvHeader(header.substr(0, header.find_first_of("\n\r")));
+		}
+
+		return size * nmemb;
+	}
+
+	// ***************************************************************************
+	static size_t curlDataCallback(char *buffer, size_t size, size_t nmemb, void *pCCurlWWWData)
+	{
+		CCurlWWWData * me = static_cast<CCurlWWWData *>(pCCurlWWWData);
+		if (me)
+			me->Content.append(buffer, size * nmemb);
+
+		return size * nmemb;
+	}
+
+	// ***************************************************************************
+	static size_t curlProgressCallback(void *pCCurlWWWData, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
+	{
+		CCurlWWWData * me = static_cast<CCurlWWWData *>(pCCurlWWWData);
+		if (me)
+		{
+			if (dltotal > 0 || dlnow > 0 || ultotal > 0 || ulnow > 0)
+			{
+				nlwarning("> dltotal %d, dlnow %d, ultotal %d, ulnow %d, url '%s'", dltotal, dlnow, ultotal, ulnow, me->Url.c_str());
+			}
+		}
+
+		// return 1 to cancel download
+		return 0;
+	}
 
 	// Check if domain is on TrustedDomain
 	bool CGroupHTML::isTrustedDomain(const string &domain)
@@ -423,7 +466,7 @@ namespace NLGUI
 			download.data->sendHeaders(headers);
 
 		// catch headers
-		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curlHeaderCallback);
+		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, NLGUI::curlHeaderCallback);
 		curl_easy_setopt(curl, CURLOPT_WRITEHEADER, download.data);
 
 		std::string userAgent = options.appName + "/" + options.appVersion;
@@ -4405,7 +4448,7 @@ namespace NLGUI
 					string buttonTemplate = DefaultButtonGroup;
 					// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
 					string param = "name=" + this->_Id + "|url=" + getLink();
-					string name = "";
+					string name;
 					if (!_AnchorName.empty())
 						name = _AnchorName.back();
 					typedef pair<string, string> TTmplParam;
@@ -4586,6 +4629,7 @@ namespace NLGUI
 			if (multiLine)
 				templateParams.push_back (std::pair<std::string,std::string> ("multi_min_line", toString(rows)));
 			templateParams.push_back (std::pair<std::string,std::string> ("want_return", multiLine?"true":"false"));
+			templateParams.push_back (std::pair<std::string,std::string> ("onenter", ""));
 			templateParams.push_back (std::pair<std::string,std::string> ("enter_recover_focus", "false"));
 			if (maxlength > 0)
 				templateParams.push_back (std::pair<std::string,std::string> ("max_num_chars", toString(maxlength)));
@@ -5478,17 +5522,17 @@ namespace NLGUI
 		_CurlWWW->sendHeaders(headers);
 
 		// catch headers for redirect
-		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curlHeaderCallback);
+		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, NLGUI::curlHeaderCallback);
 		curl_easy_setopt(curl, CURLOPT_WRITEHEADER, _CurlWWW);
 
 		// catch body
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlDataCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NLGUI::curlDataCallback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, _CurlWWW);
 
 	#if LOG_DL
 		// progress callback
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
-		curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curlProgressCallback);
+		curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, NLGUI::curlProgressCallback);
 		curl_easy_setopt(curl, CURLOPT_XFERINFODATA, _CurlWWW);
 	#else
 		// progress off
@@ -6200,6 +6244,12 @@ namespace NLGUI
 	{
 		const CStyleParams current = _Style;
 
+		if (inherit)
+		{
+			style.Underlined = current.Underlined;
+			style.StrikeThrough = current.StrikeThrough;
+		}
+
 		float tmpf;
 		TStyle styles = parseStyle(styleString);
 		TStyle::iterator it;
@@ -6421,11 +6471,6 @@ namespace NLGUI
 					style.GlobalColor = b;
 			}
 		}
-		if (inherit)
-		{
-			style.Underlined = current.Underlined || style.Underlined;
-			style.StrikeThrough = current.StrikeThrough || style.StrikeThrough;
-		}
 	}
 
 	// ***************************************************************************
@@ -6496,46 +6541,6 @@ namespace NLGUI
 		}
 	}
 	
-	// ***************************************************************************
-	size_t CGroupHTML::curlHeaderCallback(char *buffer, size_t size, size_t nmemb, void *pCCurlWWWData)
-	{
-		CCurlWWWData * me = static_cast<CCurlWWWData *>(pCCurlWWWData);
-		if (me)
-		{
-			std::string header;
-			header.append(buffer, size * nmemb);
-			me->setRecvHeader(header.substr(0, header.find_first_of("\n\r")));
-		}
-
-		return size * nmemb;
-	}
-
-	// ***************************************************************************
-	size_t CGroupHTML::curlDataCallback(char *buffer, size_t size, size_t nmemb, void *pCCurlWWWData)
-	{
-		CCurlWWWData * me = static_cast<CCurlWWWData *>(pCCurlWWWData);
-		if (me)
-			me->Content.append(buffer, size * nmemb);
-
-		return size * nmemb;
-	}
-
-	// ***************************************************************************
-	size_t CGroupHTML::curlProgressCallback(void *pCCurlWWWData, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
-	{
-		CCurlWWWData * me = static_cast<CCurlWWWData *>(pCCurlWWWData);
-		if (me)
-		{
-			if (dltotal > 0 || dlnow > 0 || ultotal > 0 || ulnow > 0)
-			{
-				nlwarning("> dltotal %d, dlnow %d, ultotal %d, ulnow %d, url '%s'", dltotal, dlnow, ultotal, ulnow, me->Url.c_str());
-			}
-		}
-
-		// return 1 to cancel download
-		return 0;
-	}
-
 	// ***************************************************************************
 	std::string CGroupHTML::HTMLOListElement::getListMarkerText() const
 	{

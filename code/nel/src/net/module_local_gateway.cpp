@@ -102,7 +102,6 @@ namespace NLNET
 
 		/// Activate/stop firewalling mode on a transport
 		virtual void	setTransportFirewallMode(const std::string &/* transportInstanceName */, bool /* firewalled */)
-			throw (EGatewayFirewallBreak)
 		{
 			// unsupported
 			nlstop;
@@ -174,12 +173,10 @@ namespace NLNET
 //			return;
 //		}
 //		virtual void openGatewayServer(uint16 listeningPort)
-//			throw (EGatewayAlreadyOpen, EGatewayPortInUse)
 //		{
 //			nlstop;
 //		}
 //		virtual void closeGatewayServer()
-//			throw (EGatewayNotOpen)
 //		{
 //			nlstop;
 //		}
@@ -233,7 +230,6 @@ namespace NLNET
 		{
 		}
 		virtual void discloseModule(IModuleProxy *moduleProxy)
-			throw (EGatewayNotConnected)
 		{
 			// check that the module is plugged here
 			nlassert(_ModuleProxies.getB(moduleProxy) != NULL);
