@@ -83,7 +83,10 @@ public:
 	float getDistLimitMax() const { return _DistLimitMax;}
 	void  setDistLimitMax(float limitMax) { _DistLimitMax = limitMax;}
 
+	int luaGetElement(CLuaState &ls);
+	
 	REFLECT_EXPORT_START(CInterface3DScene, CInterfaceGroup)
+		REFLECT_LUA_METHOD ("getElement", luaGetElement);
 		REFLECT_STRING ("curcam", getCurrentCamera, setCurrentCamera);
 		REFLECT_STRING ("curcs", getCurrentClusterSystem, setCurrentClusterSystem);
 		REFLECT_FLOAT ("rotzfactor", getRotFactor, setRotFactor);
@@ -259,7 +262,15 @@ public:
 	std::string getName() const;
 	void        setName (const std::string &ht);
 
+	float getBBoxSizeX () const;
+	float getBBoxSizeY () const;
+	float getBBoxSizeZ () const;
+
+
 	REFLECT_EXPORT_START(CInterface3DShape, CInterfaceElement)
+		REFLECT_FLOAT("getBBoxSizeX", getBBoxSizeX, setPosX);
+		REFLECT_FLOAT("getBBoxSizeY", getBBoxSizeY, setPosX);
+		REFLECT_FLOAT("getBBoxSizeZ", getBBoxSizeZ, setPosX);
 		REFLECT_FLOAT ("posx", getPosX, setPosX);
 		REFLECT_FLOAT ("posy", getPosY, setPosY);
 		REFLECT_FLOAT ("posz", getPosZ, setPosZ);
