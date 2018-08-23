@@ -504,7 +504,7 @@
     </branch>
     <!-- MAX_INVENTORY_ANIMAL -->
     <branch name="PACK_ANIMAL"
-            count="4"
+            count="7"
             clientonly="1">
       <branch name=""
               count="500">
@@ -602,7 +602,7 @@
             type="I1" />
       <!-- Used only in forage -->
     </branch>
-    <!-- used to share items between team members (up to 8 players) 
+    <!-- used to share items between team members (up to 8 players)
                         DO NOT FORGET if you modify this to do the the same modification in local database file -->
     <branch name="SHARE">
       <leaf name="SESSION"
@@ -810,8 +810,8 @@
     <!-- are there pages left ? -->
     <branch name=""
             count="8">
-      <!-- 
-                        if high order bit == 0 : guild icon : 58 low order bits - back:3 bits, symbol:6 bits, Invert:1 bit, color1&2:24 bits each 
+      <!--
+                        if high order bit == 0 : guild icon : 58 low order bits - back:3 bits, symbol:6 bits, Invert:1 bit, color1&2:24 bits each
                         if high order bit == 1 : low order bits = entry in the LIFT_ICONS::TLiftIcon enum
                         -->
       <leaf name="ICON"
@@ -1292,7 +1292,7 @@
         </branch>
         <branch name="SQUADS">
           <!-- Squad -->
-          <!-- 24 max squads: The First 12th are the squads that spawn at start 
+          <!-- 24 max squads: The First 12th are the squads that spawn at start
                                                 The second 12th are the one that spawn after
                                         -->
           <branch name="SP"
@@ -1527,7 +1527,7 @@
     <!-- beasts -->
     <!-- MAX_INVENTORY_ANIMAL -->
     <branch name="BEAST"
-            count="4"
+            count="7"
             atomic="1">
       <!-- Atomic, for correct Bar Management on client -->
       <leaf name="UID"
