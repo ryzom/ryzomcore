@@ -1566,3 +1566,5 @@ NLMISC_COMMAND(simulateMsgDespawnEasterEgg, "", "<service_id> <ai_instance> <eas
 
 	return true;
 }
+
+#include "event_reaction_include.h"
