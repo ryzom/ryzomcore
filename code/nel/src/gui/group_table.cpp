@@ -703,7 +703,7 @@ namespace NLGUI
 		{
 			if (ContinuousUpdate)
 			{
-				sint parentWidth = std::min(_Parent->getMaxWReal(), _Parent->getWReal());
+				sint parentWidth = _Parent->getInnerWidth();
 				if (_LastParentW != (sint) parentWidth)
 				{
 					_LastParentW = parentWidth;
@@ -1163,7 +1163,7 @@ namespace NLGUI
 	{
 		if (_Parent != NULL)
 		{
-			sint parentWidth = std::min(_Parent->getMaxWReal(), _Parent->getWReal());
+			sint parentWidth = _Parent->getInnerWidth();
 			if (_LastParentW != (sint) parentWidth)
 			{
 				if (ContinuousUpdate)
@@ -1311,6 +1311,9 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupTable::draw ()
 	{
+		// move X for clip and borders
+		_XReal += _MarginLeft;
+
 		// search a parent container
 		CInterfaceGroup *gr = getParent();
 		while (gr)
@@ -1391,6 +1394,9 @@ namespace NLGUI
 		}
 
 		CInterfaceGroup::draw ();
+
+		// restore
+		_XReal -= _MarginLeft;
 	}
 
 	std::string CGroupTable::getProperties( const std::string &name ) const

@@ -1410,7 +1410,7 @@ namespace NLGUI
 			// Get the child width
 			maxWidth += _Elements[k].Element->getMaxUsedW();
 		}
-		return maxWidth;
+		return maxWidth + _MarginLeft;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -1425,7 +1425,7 @@ namespace NLGUI
 			if (width > minWidth)
 				minWidth = width;
 		}
-		return minWidth;
+		return minWidth + _MarginLeft;
 	}
 
 
