@@ -182,6 +182,9 @@ namespace NLGUI
 		void   setMarginLeft(sint32 m) { _MarginLeft = m; }
 		sint32 getMarginLeft() const { return _MarginLeft; }
 
+		// Return inner width for child elements
+		virtual sint32 getInnerWidth() const;
+
 		/**
 		  * Get the max width used by the window.
 		  *

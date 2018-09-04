@@ -507,9 +507,15 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	sint32 CInterfaceElement::getInnerWidth() const
+	{
+		return _WReal - _MarginLeft;
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	void CInterfaceElement::updateCoords()
 	{
-		_XReal = _X + _MarginLeft;
+		_XReal = _X;
 		_YReal = _Y;
 		_WReal = getW();
 		_HReal = getH();
@@ -526,7 +532,7 @@ namespace NLGUI
 		if (el == NULL)
 			return;
 
-		_XReal += el->_XReal - el->_MarginLeft;
+		_XReal += el->_XReal;
 		_YReal += el->_YReal;
 
 		THotSpot hsParent = _ParentPosRef;
