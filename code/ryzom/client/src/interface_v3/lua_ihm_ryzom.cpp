@@ -3202,7 +3202,7 @@ void	CLuaIHMRyzom::browseNpcWebPage(const std::string &htmlId, const std::string
 	if (groupHtml)
 	{
 		// if true, it means that we want to display a web page that use webig auth
-		bool webig = urlIn.find("http://") == 0;
+		bool webig = urlIn.find("http://") == 0 || urlIn.find("https://") == 0;
 
 		string	url;
 
