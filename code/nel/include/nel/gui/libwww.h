@@ -20,10 +20,11 @@
 #ifndef CL_LIB_WWW_H
 #define CL_LIB_WWW_H
 
-#include <curl/curl.h>
-
 #include "nel/misc/rgba.h"
 #include "nel/gui/libwww_types.h"
+
+// forward declaration to avoid curl.h inclusion everywhere
+typedef void CURL;
 
 namespace NLGUI
 {
@@ -102,6 +103,7 @@ namespace NLGUI
 			HTML_ATTR(TR,L_MARGIN),
 			HTML_ATTR(TR,NOWRAP),
 			HTML_ATTR(TR,VALIGN),
+			HTML_ATTR(TR,STYLE),
 	};
 
 	enum

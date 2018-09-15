@@ -93,7 +93,7 @@ void CItemForSale::setAvailable( bool a )
 }
 
 //-----------------------------------------------------------------------------
-//void CItemForSale::serial(NLMISC::IStream &f) throw(NLMISC::EStream )
+//void CItemForSale::serial(NLMISC::IStream &f)
 //{
 //	f.serial( _PriceInfo );
 //	f.serial( _RetirePrice );

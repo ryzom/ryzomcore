@@ -83,8 +83,8 @@ void CItemGroup::addItem(sint32 createTime, sint32 serial, SLOT_EQUIPMENT::TSlot
 			nldebug("Not adding duplicate item, createTime: %d, serial: %d", createTime, serial);
 			//In this case, we are adding the duplicate item for a 2 hands item
 			//If it's saved as a left hand item, save it as a right hand item instead (so we have only 1 correct item)
-			if(Items[i].slot == SLOT_EQUIPMENT::TSlotEquipment::HANDL && slot == SLOT_EQUIPMENT::TSlotEquipment::HANDR)
-				Items[i].slot = SLOT_EQUIPMENT::TSlotEquipment::HANDR;
+			if(Items[i].slot == SLOT_EQUIPMENT::HANDL && slot == SLOT_EQUIPMENT::HANDR)
+				Items[i].slot = SLOT_EQUIPMENT::HANDR;
 			return;
 		}
 	}
@@ -389,7 +389,7 @@ CItemGroup CItemGroupManager::migrateGroup(CItemGroup group)
 	//Get all matching items from all inventory
 	CItemGroup out;
 	out.name = group.name;
-	for (int i=0; i < INVENTORIES::TInventory::NUM_ALL_INVENTORY; i++)
+	for (int i=0; i < INVENTORIES::NUM_ALL_INVENTORY; i++)
 	{
 		INVENTORIES::TInventory inventory = (INVENTORIES::TInventory)i;
 		std::vector<CInventoryItem> items = matchingItems(&group, inventory);
@@ -501,7 +501,7 @@ bool CItemGroupManager::moveGroup(std::string name, INVENTORIES::TInventory dst)
 
 	std::string moveParams = "to=lists|nblist=1|listsheet0=" + toDbPath(dst);
 	// Grab all matching item from all available inventory and put it in dst
-	for (int i=0; i< INVENTORIES::TInventory::NUM_ALL_INVENTORY; i ++)
+	for (int i=0; i< INVENTORIES::NUM_ALL_INVENTORY; i ++)
 	{
 		INVENTORIES::TInventory inventory = (INVENTORIES::TInventory)i;
 		if (inventory != dst && pIM->isInventoryAvailable(inventory))
@@ -531,7 +531,7 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 		return false;
 	}
 
-	if(pullBefore) moveGroup(name, INVENTORIES::TInventory::bag);
+	if(pullBefore) moveGroup(name, INVENTORIES::bag);
 	//Start by unequipping all slot that user wants to unequip
 	for(int i=0; i < group->removeBeforeEquip.size(); i++)
 	{
@@ -547,6 +547,7 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 
 	uint32 maxEquipTime = 0;
 
+#ifdef NL_ISO_CPP0X_AVAILABLE
 	std::map<ITEM_TYPE::TItemType, bool> possiblyDual =
 	{
 		{ITEM_TYPE::ANKLET, false},
@@ -554,8 +555,17 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 		{ITEM_TYPE::EARING, false},
 		{ITEM_TYPE::RING, false},
 	};
+#else
+	std::map<ITEM_TYPE::TItemType, bool> possiblyDual;
+	
+	possiblyDual[ITEM_TYPE::ANKLET] = false;
+	possiblyDual[ITEM_TYPE::BRACELET] = false;
+	possiblyDual[ITEM_TYPE::EARING] = false;
+	possiblyDual[ITEM_TYPE::RING] = false;
+#endif
+
 	std::vector<CInventoryItem> duals;
-	std::vector<CInventoryItem> items = matchingItems(group, INVENTORIES::TInventory::bag);
+	std::vector<CInventoryItem> items = matchingItems(group, INVENTORIES::bag);
 	for(int i=0; i < items.size(); i++)
 	{
 		CInventoryItem item = items[i];
@@ -713,19 +723,19 @@ std::string CItemGroupManager::toDbPath(INVENTORIES::TInventory inventory)
 {
 	switch(inventory)
 	{
-	case INVENTORIES::TInventory::bag:
+	case INVENTORIES::bag:
 		return LIST_BAG_TEXT; break;
-	case INVENTORIES::TInventory::pet_animal1:
+	case INVENTORIES::pet_animal1:
 		return LIST_PA0_TEXT; break;
-	case INVENTORIES::TInventory::pet_animal2:
+	case INVENTORIES::pet_animal2:
 		return LIST_PA1_TEXT; break;
-	case INVENTORIES::TInventory::pet_animal3:
+	case INVENTORIES::pet_animal3:
 		return LIST_PA2_TEXT; break;
-	case INVENTORIES::TInventory::pet_animal4:
+	case INVENTORIES::pet_animal4:
 		return LIST_PA3_TEXT; break;
-	case INVENTORIES::TInventory::player_room:
+	case INVENTORIES::player_room:
 		return LIST_ROOM_TEXT;break;
-	case INVENTORIES::TInventory::guild:
+	case INVENTORIES::guild:
 		return ClientCfg.ItemGroupAllowGuild ? LIST_GUILD_TEXT : ""; break;
 	default:
 		return "";

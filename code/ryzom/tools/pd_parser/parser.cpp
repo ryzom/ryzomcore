@@ -4512,11 +4512,11 @@ void	CDeclarationNode::generateSetContent(CCallContext *context)
 	if (useReference)
 	{
 		FetchId.add(Type+"*\t"+objectVariable+" = static_cast<"+Type+"*>("+pdslibFunc("create")+"(tableIndex));");
-		FetchId.add(cppName()+".insert(std::make_pair<"+keyType->getName()+","+Type+"*>("+keyVariable+", "+objectVariable+"));");
+		FetchId.add(cppName()+".insert(std::make_pair("+keyVariable+", "+objectVariable+"));");
 	}
 	else
 	{
-		FetchId.add(cppName()+".insert(std::make_pair<"+keyType->getName()+","+Type+">("+keyVariable+", "+Type+"()));");
+		FetchId.add(cppName()+".insert(std::make_pair("+keyVariable+", "+Type+"()));");
 		FetchId.add(Type+"*\t"+objectVariable+" = &("+cppName()+"["+keyVariable+"]);");
 	}
 	FetchId.add(pdslibFunc("setRowIndex")+"(rowIndex, "+objectVariable+");");

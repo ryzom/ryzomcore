@@ -187,11 +187,11 @@ bool CTextContextUser::getShadeOutline() const
 
 	return _TextContext.getShadeOutline();
 }
-void CTextContextUser::setShadeExtent(float shext)
+void CTextContextUser::setShadeExtent(float x, float y)
 {
 	H_AUTO2;
 
-	_TextContext.setShadeExtent(shext);
+	_TextContext.setShadeExtent(x, y);
 }
 void CTextContextUser::setShadeColor (NLMISC::CRGBA sc)
 {

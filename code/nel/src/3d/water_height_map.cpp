@@ -677,7 +677,7 @@ void CWaterHeightMap::setWaves(float intensity, float period, uint radius, bool 
 void CWaterHeightMap::serial(NLMISC::IStream &f)
 {
 	f.xmlPushBegin("WaterHeightMap");
-		f.xmlSetAttrib ("NAME")					;
+		f.xmlSetAttrib ("NAME");
 		f.serial (_Name);
 	f.xmlPushEnd();
 	(void)f.serialVersion(0);

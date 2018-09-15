@@ -87,9 +87,12 @@ namespace NLGUI {
 		if (domain.empty() || _Domains.empty())
 			return false;
 
-		if (_Domains.count(domain) > 0)
+		THSTSObjectMap::const_iterator itHsts;
+		
+		itHsts = _Domains.find(domain);
+		if (itHsts != _Domains.end())
 		{
-			hsts = _Domains.at(domain);
+			hsts = itHsts->second;
 			return true;
 		}
 
@@ -99,11 +102,12 @@ namespace NLGUI {
 		{
 			std::string tmp;
 			tmp = domain.substr(firstOf+1);
-			if (_Domains.count(tmp))
+			itHsts = _Domains.find(tmp);
+			if (itHsts != _Domains.end())
 			{
-				if (_Domains.at(tmp).IncludeSubDomains)
+				if (itHsts->second.IncludeSubDomains)
 				{
-					hsts = _Domains.at(tmp);
+					hsts = itHsts->second;
 					return true;
 				}
 
@@ -182,7 +186,7 @@ namespace NLGUI {
 			{
 				uint32 nbItems = _Domains.size();
 				f.serial(nbItems);
-				for (THSTSObject::iterator it = _Domains.begin(); it != _Domains.end(); ++it)
+				for (THSTSObjectMap::iterator it = _Domains.begin(); it != _Domains.end(); ++it)
 				{
 					std::string domain(it->first);
 					f.serial(domain);

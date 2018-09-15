@@ -4370,7 +4370,7 @@ void CEditor::setCurrentTool(CTool *tool)
 }
 
 // *********************************************************************************************************
-CLuaObject CEditor::getClasses() throw(ELuaError)
+CLuaObject CEditor::getClasses()
 {
 	//H_AUTO(R2_getClasses_throw)
 	CHECK_EDITOR

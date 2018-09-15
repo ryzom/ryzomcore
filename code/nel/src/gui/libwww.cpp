@@ -19,6 +19,8 @@
 #include "nel/gui/libwww.h"
 #include "nel/gui/group_html.h"
 
+#include <curl/curl.h>
+
 using namespace NLMISC;
 
 #ifdef DEBUG_NEW
@@ -101,6 +103,7 @@ namespace NLGUI
 			HTML_ATTR(TR,L_MARGIN),
 			HTML_ATTR(TR,NOWRAP),
 			HTML_ATTR(TR,VALIGN),
+			HTML_ATTR(TR,STYLE),
 		{ 0 }
 	};
 

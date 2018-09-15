@@ -190,7 +190,7 @@ public:
 	uint32 getAggroDist() { return _AggroDist; }
 	
 	uint32& despawnTime() { return _DespawnTime; }
-	uint32& respawnTime() { return _RespawnTime; }		
+	uint32& respawnTime() { return _RespawnTime; }
 	
 	AITYPES::CPropertySetWithExtraList<TAllianceId>& faction() { return _faction; }
 	AITYPES::CPropertySetWithExtraList<TAllianceId>& ennemyFaction() { return _ennemyFaction; }

@@ -55,7 +55,7 @@ public:
 	const std::vector< TItemTradePtr >& getContent() const { return _ItemsForSale; }
 
 	// serial
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream );
+	void serial(NLMISC::IStream &f);
 
 	// check coherency between CDynamicItems and CItemsForSale of character, assume CItemsForSale is a reference
 	void checkSellStore( NLMISC::CEntityId charId );

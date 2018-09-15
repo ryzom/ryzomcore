@@ -448,7 +448,6 @@ namespace NLNET
 
 		/// Activate/stop firewalling mode on a transport
 		virtual void	setTransportFirewallMode(const std::string &transportInstanceName, bool firewalled)
-			throw (EGatewayFirewallBreak)
 		{
 			TTransportList::iterator it(_Transports.find(transportInstanceName));
 			if (it == _Transports.end())
@@ -1246,7 +1245,6 @@ namespace NLNET
 		}
 
 		virtual void discloseModule(IModuleProxy *moduleProxy)
-			throw (EGatewayNotConnected)
 		{
 			nlassert(moduleProxy->getModuleGateway() == this);
 
@@ -1560,8 +1558,7 @@ namespace NLNET
 			return getModuleName();
 		}
 
-		void _sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message )
-			throw (EModuleNotReachable, EModuleNotPluggedHere)
+		void _sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message)
 		{
 			// the socket implementation already checked that the module is plugged here
 			// just check that the destination module effectively from here
@@ -1585,7 +1582,6 @@ namespace NLNET
 		}
 
 		virtual void _broadcastModuleMessage(IModule *senderModule, const NLNET::CMessage &message)
-			throw (EModuleNotPluggedHere)
 		{
 			H_AUTO(CModuleGetaway__broadcastModuleMessage);
 			// send the message to all proxies (except the sender module)

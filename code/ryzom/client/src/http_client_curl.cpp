@@ -19,8 +19,7 @@
 
 #include <curl/curl.h>
 
-#include <openssl/ssl.h>
-#include <openssl/err.h>
+#include "nel/gui/curl_certificates.h"
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -64,135 +63,20 @@ bool CCurlHttpClient::authenticate(const std::string &user, const std::string &p
 	return true;
 }
 
-const char *CAFilename = "ssl_ca_cert.pem"; // this is the certificate "Thawte Server CA"
-
-// ***************************************************************************
-static CURLcode sslctx_function(CURL * /* curl */, void *sslctx, void * /* parm */)
-{
-	// look for certificate in search paths
-	string path = CPath::lookup(CAFilename);
-	nlinfo("Cert path '%s'", path.c_str());
-
-	if (path.empty())
-	{
-		nlwarning("Unable to find %s", CAFilename);
-		return CURLE_SSL_CACERT;
-	}
-
-	CIFile file;
-
-	// open certificate
-	if (!file.open(path))
-	{
-		nlwarning("Unable to open %s", path.c_str());
-		return CURLE_SSL_CACERT;
-	}
-
-	CURLcode res = CURLE_OK;
-
-	// load certificate content into memory
-	std::vector<uint8> buffer(file.getFileSize());
-	file.serialBuffer(&buffer[0], file.getFileSize());
-
-	// get a BIO
-	BIO *bio = BIO_new_mem_buf(&buffer[0], file.getFileSize());
-	
-	char errorBuffer[1024];
-
-	if (bio)
-	{
-		// get a pointer to the X509 certificate store (which may be empty!)
-		X509_STORE *store = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
-
-		// use it to read the PEM formatted certificate from memory into an X509
-		// structure that SSL can use
-		STACK_OF(X509_INFO) *info = PEM_X509_INFO_read_bio(bio, NULL, NULL, NULL);
-
-		if (info)
-		{
-			// iterate over all entries from the PEM file, add them to the x509_store one by one
-			for (sint i = 0; i < sk_X509_INFO_num(info); ++i)
-			{
-				X509_INFO *itmp = sk_X509_INFO_value(info, i);
-
-				if (itmp && itmp->x509)
-				{
-					X509_NAME *subject = X509_get_subject_name(itmp->x509);
-
-					std::string name;
-					unsigned char *tmp = NULL;
-
-					// construct a multiline string with name
-					for (int i = 0, ilen = X509_NAME_entry_count(subject); i < ilen; ++i)
-					{
-						X509_NAME_ENTRY *e = X509_NAME_get_entry(subject, i);
-						ASN1_STRING *d = X509_NAME_ENTRY_get_data(e);
-
-						if (ASN1_STRING_to_UTF8(&tmp, d) > 0)
-						{
-							name += NLMISC::toString("%s\n", tmp);
-
-							OPENSSL_free(tmp);
-						}
-					}
-
-					// add our certificate to this store
-					if (X509_STORE_add_cert(store, itmp->x509) == 0)
-					{
-						uint errCode = ERR_get_error();
-
-						// ignore already in hash table errors
-						if (ERR_GET_LIB(errCode) != ERR_LIB_X509 || ERR_GET_REASON(errCode) != X509_R_CERT_ALREADY_IN_HASH_TABLE)
-						{
-							ERR_error_string_n(errCode, errorBuffer, 1024);
-							nlwarning("Error adding certificate %s: %s", name.c_str(), errorBuffer);
-							res = CURLE_SSL_CACERT;
-						}
-					}
-					else
-					{
-						nlinfo("Added certificate %s", name.c_str());
-					}
-				}
-			}
-
-			// cleanup
-			sk_X509_INFO_pop_free(info, X509_INFO_free);
-		}
-		else
-		{
-			nlwarning("Unable to read PEM info");
-			res = CURLE_SSL_CACERT;
-		}
-
-		// decrease reference counts
-		BIO_free(bio);
-	}
-	else
-	{
-		nlwarning("Unable to allocate BIO buffer for certificates");
-		res = CURLE_SSL_CACERT;
-	}
-
-	// all set to go
-	return res;
-}
+static const std::string CAFilename = "ssl_ca_cert.pem"; // this is the certificate "Thawte Server CA"
 
 // ***************************************************************************
 bool CCurlHttpClient::verifyServer(bool verify)
 {
 	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYHOST, verify ? 2 : 0);
 	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYPEER, verify ? 1 : 0);
-	curl_easy_setopt(_Curl, CURLOPT_SSLCERTTYPE, "PEM");
-	// would allow to provide the CA in memory instead of using CURLOPT_CAINFO, but needs to include and link OpenSSL
-	if (curl_easy_setopt(_Curl, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function) != CURLE_OK)
-	{
-		nlwarning("Unable to support CURLOPT_SSL_CTX_FUNCTION, curl not compiled with OpenSSL ?");
-	}
 
-	// set both CURLOPT_CAINFO and CURLOPT_CAPATH to NULL to be sure we won't use default values (these files can be missing and generate errors)
-	curl_easy_setopt(_Curl, CURLOPT_CAINFO, NULL);
-	curl_easy_setopt(_Curl, CURLOPT_CAPATH, NULL);
+	// specify custom CA certs
+	NLGUI::CCurlCertificates::addCertificateFile(CAFilename);
+
+	// if supported, use custom SSL context function to load certificates
+	NLGUI::CCurlCertificates::useCertificates(_Curl);
+
 	return true;
 }
 

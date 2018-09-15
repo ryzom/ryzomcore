@@ -1434,7 +1434,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CLuaIHM::luaValueToReflectedProperty(CLuaState &ls, int stackIndex, CReflectable &target, const CReflectedProperty &property) throw(ELuaIHMException)
+	void CLuaIHM::luaValueToReflectedProperty(CLuaState &ls, int stackIndex, CReflectable &target, const CReflectedProperty &property)
 	{
 		//H_AUTO(Lua_property_throw)
 		if(ls.isNil(stackIndex))

@@ -17,19 +17,22 @@
 #ifndef CL_CURL_CERTIFICATES_HTML_H
 #define CL_CURL_CERTIFICATES_HTML_H
 
-#include <curl/curl.h>
-
 #include "nel/misc/types_nl.h"
+
+// forward declaration to avoid curl.h inclusion everywhere
+typedef void CURL;
 
 namespace NLGUI
 {
-#if defined(NL_OS_WINDOWS)
-	class CCurlCertificates {
+	class CCurlCertificates
+	{
 	public:
-		// cURL SSL certificate loading
-		static CURLcode sslCtxFunction(CURL *curl, void *sslctx, void *parm);
+		// allow to use custom PEM certificates
+		static void addCertificateFile(const std::string &cert);
+
+		// set all CURL options to use custom SSL context function
+		static void useCertificates(CURL *curl);
 	};
-#endif // NL_OS_WINDOWS
 
 } // namespace
 #endif

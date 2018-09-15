@@ -42,7 +42,7 @@ namespace NLGUI
 	class CStrictTransportSecurity
 	{
 	public:
-		typedef std::map<std::string, SHSTSObject> THSTSObject;
+		typedef std::map<std::string, SHSTSObject> THSTSObjectMap;
 
 		static CStrictTransportSecurity* getInstance();
 		static void release();
@@ -66,7 +66,7 @@ namespace NLGUI
 		~CStrictTransportSecurity();
 
 		std::string _Filename;
-		THSTSObject _Domains;
+		THSTSObjectMap _Domains;
 	};
 
 }

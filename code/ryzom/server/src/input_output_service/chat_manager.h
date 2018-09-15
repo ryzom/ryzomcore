@@ -101,7 +101,7 @@ public :
 	 *	Get the client infos
 	 * \param id is the client character id
 	 */
-	CChatClient& getClient( const TDataSetRow& id ); //throw (EChatClient);
+	CChatClient& getClient( const TDataSetRow& id );
 
 	/**
 	 * Return a reference on the static database
@@ -145,7 +145,7 @@ public :
 	 * \param gId is the group's id
 	 * \return the group
 	 */
-	CChatGroup& getGroup( const TGroupId& gId );// throw (EChatGroup);
+	CChatGroup& getGroup( const TGroupId& gId );
 
 	/**
 	 * Transmit a chat message

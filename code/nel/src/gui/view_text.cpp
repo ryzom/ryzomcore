@@ -72,6 +72,8 @@ namespace NLGUI
 		_Shadow = false;
 		_ShadowOutline = false;
 		_ShadowColor = CRGBA(0,0,0,255);
+		_ShadowX = 1;
+		_ShadowY = 1;
 
 		_MultiLine = false;
 		_TextMode = DontClipWord;
@@ -444,6 +446,22 @@ namespace NLGUI
 			return true;
 		}
 		else
+		if( name == "shadow_x" )
+		{
+			sint sx;
+			if( fromString( value, sx ) )
+				_ShadowX = sx;
+			return true;
+		}
+		else
+		if( name == "shadow_y" )
+		{
+			sint sy;
+			if( fromString( value, sy ) )
+				_ShadowY = sy;
+			return true;
+		}
+		else
 		if( name == "multi_line" )
 		{
 			bool b;
@@ -624,6 +642,8 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "shadow", BAD_CAST toString( _Shadow ).c_str() );
 		xmlSetProp( node, BAD_CAST "shadow_outline", BAD_CAST toString( _ShadowOutline ).c_str() );
 		xmlSetProp( node, BAD_CAST "shadow_color", BAD_CAST toString( _ShadowColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "shadow_x", BAD_CAST toString( _ShadowX ).c_str() );
+		xmlSetProp( node, BAD_CAST "shadow_y", BAD_CAST toString( _ShadowY ).c_str() );
 		xmlSetProp( node, BAD_CAST "multi_line", BAD_CAST toString( _MultiLine ).c_str() );
 
 		std::string just;
@@ -734,6 +754,16 @@ namespace NLGUI
 		_ShadowColor = CRGBA(0,0,0,255);
 		if (prop)
 			_ShadowColor = convertColor(prop);
+
+		prop= (char*) xmlGetProp( cur, (xmlChar*)"shadow_x" );
+		_ShadowX = 1;
+		if (prop)
+			fromString( (const char *)prop, _ShadowX);
+
+		prop= (char*) xmlGetProp( cur, (xmlChar*)"shadow_y" );
+		_ShadowY = 1;
+		if (prop)
+			fromString( (const char *)prop, _ShadowY);
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"multi_line" );
 		_MultiLine = false;
@@ -895,8 +925,7 @@ namespace NLGUI
 			return maxw;
 		else
 		{
-			sint parentWidth = std::min(_Parent->getMaxWReal(), _Parent->getWReal() - _Parent->getMarginLeft());
-			return std::min(parentWidth-(sint)(_XReal-(_Parent->getXReal()-_Parent->getMarginLeft())), (sint)_LineMaxW);
+			return std::min(_Parent->getInnerWidth(), (sint)_LineMaxW);
 		}
 	}
 
@@ -989,6 +1018,19 @@ namespace NLGUI
 			((_YReal) > (ClipY+ClipH)) || ((_YReal+_HReal) < ClipY))
 			return;
 
+		// hack: allow shadow to overflow outside parent box.
+		//       In CGroupHTML context, clip is set for row
+		if (std::abs(_ShadowX) > 0)
+		{
+			ClipX -= 3;
+			ClipW += 3;
+		}
+		if (std::abs(_ShadowY) > 0)
+		{
+			ClipY -= 3;
+			ClipH += 3;
+		}
+
 		// *** Screen Minimized?
 		if (rVR.isMinimized())
 			return;
@@ -1012,6 +1054,8 @@ namespace NLGUI
 			shcol.A = (uint8)(((sint)shcol.A*((sint)CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
 		}
 
+		float	oow, ooh;
+		rVR.getScreenOOSize (oow, ooh);
 
 		// *** Draw multiline
 		if ((_MultiLine)&&(_Parent != NULL))
@@ -1022,6 +1066,7 @@ namespace NLGUI
 			TextContext->setShaded (_Shadow);
 			TextContext->setShadeOutline (_ShadowOutline);
 			TextContext->setShadeColor (shcol);
+			TextContext->setShadeExtent (_ShadowX*oow, _ShadowY*ooh);
 			TextContext->setFontSize (_FontSize*_Scale);
 			TextContext->setEmbolden (_Embolden);
 			TextContext->setOblique (_Oblique);
@@ -1142,6 +1187,7 @@ namespace NLGUI
 			TextContext->setShaded (_Shadow);
 			TextContext->setShadeOutline (_ShadowOutline);
 			TextContext->setShadeColor (shcol);
+			TextContext->setShadeExtent (_ShadowX*oow, _ShadowY*ooh);
 			TextContext->setFontSize (_FontSize*_Scale);
 			TextContext->setEmbolden (_Embolden);
 			TextContext->setOblique (_Oblique);
@@ -1353,6 +1399,13 @@ namespace NLGUI
 	void CViewText::setShadowColor(const NLMISC::CRGBA & color)
 	{
 		_ShadowColor = color;
+	}
+
+	// ***************************************************************************
+	void CViewText::setShadowOffset(sint32 x, sint32 y)
+	{
+		_ShadowX = x;
+		_ShadowY = y;
 	}
 
 	// ***************************************************************************

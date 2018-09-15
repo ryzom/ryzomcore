@@ -283,7 +283,7 @@ public:
 	/// The node is in the 'unloaded' state, so caller must load it afterward.
 	/// NB : no lookup is done, full path must be provided.
 	/// @return pointer to new node, or NULL if already inserted
-	CWorkspaceNode *addNode(const std::string &filenameWithFullPath) throw( NLMISC::Exception);
+	CWorkspaceNode *addNode(const std::string &filenameWithFullPath);
 
 	/// Remove a node by it's index
 	void removeNode(uint index);

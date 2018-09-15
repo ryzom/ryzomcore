@@ -53,8 +53,8 @@ ENDIF()
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
-SET(NL_VERSION_MAJOR 0)
-SET(NL_VERSION_MINOR 12)
+SET(NL_VERSION_MAJOR 1)
+SET(NL_VERSION_MINOR 0)
 SET(NL_VERSION_PATCH 0)
 SET(YEAR "2004-${CURRENT_YEAR}")
 SET(AUTHOR "Winch Gate and The Ryzom Core Community")
@@ -86,11 +86,11 @@ NL_SETUP_NELNS_DEFAULT_OPTIONS()
 NL_SETUP_RYZOM_DEFAULT_OPTIONS()
 NL_SETUP_SNOWBALLS_DEFAULT_OPTIONS()
 
-NL_SETUP_PREFIX_PATHS()
-RYZOM_SETUP_PREFIX_PATHS()
-
 NL_SETUP_BUILD()
 NL_SETUP_BUILD_FLAGS()
+
+NL_SETUP_PREFIX_PATHS()
+RYZOM_SETUP_PREFIX_PATHS()
 
 #-----------------------------------------------------------------------------
 #Platform specifics
@@ -167,6 +167,7 @@ ENDIF()
 IF(APPLE)
   FIND_LIBRARY(CARBON_FRAMEWORK Carbon)
   FIND_LIBRARY(FOUNDATION_FRAMEWORK Foundation)
+  FIND_LIBRARY(SECURITY_FRAMEWORK Security)
 
   IF(APPLE_CERTIFICATE)
     # Find codesign_allocate
@@ -191,214 +192,10 @@ IF(APPLE)
   ENDIF()
 ENDIF()
 
-MACRO(ADD_QT_LIBRARY _NAME)
-  IF(WIN32)
-    SET(_PREFIX "Qt5")
-    SET(_EXT "lib")
-  ELSE()
-    SET(_PREFIX "libQt5")
-    SET(_EXT "a")
-  ENDIF()
-  SET(_LIB "${QT_LIBRARY_DIR}/${_PREFIX}${_NAME}.${_EXT}")
-  IF(EXISTS ${_LIB})
-    SET(QT_LIBRARIES ${QT_LIBRARIES} optimized ${_LIB})
-  ENDIF()
-  SET(_LIB "${QT_LIBRARY_DIR}/${_PREFIX}${_NAME}d.${_EXT}")
-  IF(EXISTS ${_LIB})
-    SET(QT_LIBRARIES ${QT_LIBRARIES} debug ${_LIB})
-  ENDIF()
-ENDMACRO()
-
-MACRO(ADD_QT_PLUGIN _TYPE _NAME)
-  IF(WIN32)
-    SET(_PREFIX "")
-    SET(_EXT "lib")
-  ELSE()
-    SET(_PREFIX "lib")
-    SET(_EXT "a")
-  ENDIF()
-  SET(_LIB "${QT_PLUGINS_DIR}/${_TYPE}/${_PREFIX}${_NAME}.${_EXT}")
-  IF(EXISTS ${_LIB})
-    SET(QT_LIBRARIES ${QT_LIBRARIES} optimized ${_LIB})
-  ENDIF()
-  SET(_LIB "${QT_PLUGINS_DIR}/${_TYPE}/${_PREFIX}${_NAME}d.${_EXT}")
-  IF(EXISTS ${_LIB})
-    SET(QT_LIBRARIES ${QT_LIBRARIES} debug ${_LIB})
-  ENDIF()
-ENDMACRO()
+INCLUDE(FindHelpers)
 
 IF(WITH_QT5)
-  CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11 FATAL_ERROR)
-
-  SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QTDIR} $ENV{QTDIR})
-
-  FIND_PACKAGE(Qt5Core QUIET)
-
-  IF(Qt5Core_FOUND)
-    # Check if we are using Qt static or shared libraries
-    GET_TARGET_PROPERTY(_FILE Qt5::Core IMPORTED_LOCATION_RELEASE)
-
-    SET(QT_VERSION "${Qt5Core_VERSION_STRING}")
-    SET(_VERSION "${QT_VERSION}")
-
-    IF(_FILE MATCHES "\\.(lib|a)$")
-      SET(QT_STATIC ON)
-      SET(_VERSION "${_VERSION} static version")
-    ELSE()
-      SET(QT_STATIC OFF)
-      SET(_VERSION "${_VERSION} shared version")
-    ENDIF()
-
-    MESSAGE(STATUS "Found Qt ${_VERSION}")
-
-    # These variables are not defined with Qt5 CMake modules
-    SET(QT_BINARY_DIR "${_qt5Core_install_prefix}/bin")
-    SET(QT_LIBRARY_DIR "${_qt5Core_install_prefix}/lib")
-    SET(QT_PLUGINS_DIR "${_qt5Core_install_prefix}/plugins")
-    SET(QT_TRANSLATIONS_DIR "${_qt5Core_install_prefix}/translations")
-
-    # Fix wrong include directories with Qt 5 under Mac OS X
-    INCLUDE_DIRECTORIES("${_qt5Core_install_prefix}/include")
-
-    FIND_PACKAGE(Qt5Gui)
-    FIND_PACKAGE(Qt5Widgets)
-    FIND_PACKAGE(Qt5OpenGL)
-    FIND_PACKAGE(Qt5Xml)
-    FIND_PACKAGE(Qt5LinguistTools)
-    FIND_PACKAGE(Qt5Network)
-
-    IF(QT_STATIC)
-      ADD_DEFINITIONS(-DQT_STATICPLUGIN)
-
-      SET(QT_LIBRARIES Qt5::Widgets)
-
-      # Gui
-      SET(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Gui Qt5::OpenGL)
-
-      ADD_QT_LIBRARY(PrintSupport)
-
-      IF(WIN32)
-        SET(QT_LIBRARIES ${QT_LIBRARIES}
-          ${WINSDK_LIBRARY_DIR}/Imm32.lib
-          ${WINSDK_LIBRARY_DIR}/OpenGL32.lib
-          ${WINSDK_LIBRARY_DIR}/WinMM.Lib)
-        ADD_QT_PLUGIN(platforms qwindows)
-        ADD_QT_LIBRARY(PlatformSupport)
-      ELSEIF(APPLE)
-        # Cups needs .dylib
-        SET(OLD_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-        SET(CMAKE_FIND_LIBRARY_SUFFIXES .dylib)
-        FIND_LIBRARY(CUPS_LIBRARY cups)
-        SET(CMAKE_FIND_LIBRARY_SUFFIXES ${OLD_CMAKE_FIND_LIBRARY_SUFFIXES})
-
-        FIND_LIBRARY(IOKIT_FRAMEWORK IOKit)
-        FIND_LIBRARY(COCOA_FRAMEWORK Cocoa)
-        FIND_LIBRARY(SYSTEMCONFIGURATION_FRAMEWORK SystemConfiguration)
-        FIND_LIBRARY(OPENGL_FRAMEWORK NAMES OpenGL)
-
-        SET(QT_LIBRARIES ${QT_LIBRARIES}
-          ${CUPS_LIBRARY}
-          ${COCOA_FRAMEWORK}
-          ${SYSTEMCONFIGURATION_FRAMEWORK}
-          ${IOKIT_FRAMEWORK}
-          ${OPENGL_FRAMEWORK})
-
-        ADD_QT_PLUGIN(printsupport cocoaprintersupport)
-        ADD_QT_PLUGIN(platforms qcocoa)
-        ADD_QT_LIBRARY(PlatformSupport)
-      ELSE()
-        # order is very important there
-        ADD_QT_PLUGIN(platforms qxcb)
-        ADD_QT_PLUGIN(xcbglintegrations qxcb-glx-integration)
-
-        ADD_QT_LIBRARY(XcbQpa)
-        ADD_QT_LIBRARY(PlatformSupport)
-        SET(QT_LIBRARIES ${QT_LIBRARIES} -lX11-xcb -lXi -lSM -lICE -lxcb -lGL -lxcb-glx)
-        IF(EXISTS "${QT_LIBRARY_DIR}/libxcb-static.a")
-          SET(QT_LIBRARIES ${QT_LIBRARIES} "${QT_LIBRARY_DIR}/libxcb-static.a")
-        ENDIF()
-        SET(QT_LIBRARIES ${QT_LIBRARIES} -lfontconfig)
-        ADD_QT_LIBRARY(DBus)
-      ENDIF()
-
-      ADD_QT_PLUGIN(imageformats qgif)
-      ADD_QT_PLUGIN(imageformats qicns)
-      ADD_QT_PLUGIN(imageformats qico)
-      ADD_QT_PLUGIN(imageformats qjpeg)
-
-      # harfbuzz is needed since Qt 5.3
-      IF(UNIX)
-        SET(HB_LIB "${QT_LIBRARY_DIR}/libqtharfbuzzng.a")
-      ELSEIF(WIN32)
-        SET(HB_LIB "${QT_LIBRARY_DIR}/qtharfbuzzng.lib")
-      ENDIF()
-      IF(EXISTS ${HB_LIB})
-        SET(QT_LIBRARIES ${QT_LIBRARIES} ${HB_LIB})
-      ENDIF()
-
-      # freetype is needed since Qt 5.5
-      FIND_PACKAGE(Freetype)
-
-      IF(FREETYPE_FOUND)
-        SET(QT_LIBRARIES ${QT_LIBRARIES} ${FREETYPE_LIBRARIES})
-      ELSE()
-        IF(UNIX)
-          SET(FREETYPE_LIB "${QT_LIBRARY_DIR}/libqtfreetype.a")
-        ELSEIF(WIN32)
-          SET(FREETYPE_LIB "${QT_LIBRARY_DIR}/qtfreetype.lib")
-        ENDIF()
-        IF(EXISTS ${FREETYPE_LIB})
-          SET(QT_LIBRARIES ${QT_LIBRARIES} ${FREETYPE_LIB})
-        ENDIF()
-      ENDIF()
-
-      ADD_QT_PLUGIN(accessible qtaccessiblewidgets)
-
-      SET(QT_LIBRARIES ${QT_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARY})
-
-      # Network
-      SET(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Network Qt5::Xml)
-      SET(QT_LIBRARIES ${QT_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES})
-
-      IF(WIN32)
-        SET(QT_LIBRARIES ${QT_LIBRARIES}
-          ${WINSDK_LIBRARY_DIR}/Crypt32.lib
-          ${WINSDK_LIBRARY_DIR}/WS2_32.Lib
-          ${WINSDK_LIBRARY_DIR}/IPHlpApi.Lib)
-      ENDIF()
-
-      # Core
-      SET(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Core)
-
-      # pcre is needed since Qt 5.5
-      IF(UNIX)
-        SET(PCRE_LIB "${QT_LIBRARY_DIR}/libqtpcre.a")
-      ELSEIF(WIN32)
-        SET(PCRE_LIB "${QT_LIBRARY_DIR}/qtpcre.lib")
-      ENDIF()
-      IF(EXISTS ${PCRE_LIB})
-        SET(QT_LIBRARIES ${QT_LIBRARIES} ${PCRE_LIB})
-      ENDIF()
-
-      IF(APPLE)
-        FIND_LIBRARY(PCRE_LIBRARY pcre16 pcre)
-
-        FIND_LIBRARY(SECURITY_FRAMEWORK Security)
-
-        SET(QT_LIBRARIES ${QT_LIBRARIES}
-          ${PCRE_LIBRARY}
-          ${FOUNDATION_FRAMEWORK}
-          ${CARBON_FRAMEWORK}
-          ${SECURITY_FRAMEWORK})
-      ELSEIF(UNIX)
-        SET(QT_LIBRARIES ${QT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} -ldl -lrt)
-      ENDIF()
-    ELSE()
-      SET(QT_LIBRARIES Qt5::Widgets Qt5::Network Qt5::Xml Qt5::Gui Qt5::OpenGL Qt5::Core)
-    ENDIF()
-  ELSE()
-    MESSAGE(WARNING "Unable to find Qt 5")
-  ENDIF()
+  FIND_QT5()
 ENDIF()
 
 IF(WITH_QT)
@@ -430,22 +227,41 @@ IF(WITH_NEL)
     IF(CURL_STATIC)
       SET(CURL_DEFINITIONS -DCURL_STATICLIB)
 
-      SET(CURL_INCLUDE_DIRS ${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
-      SET(CURL_LIBRARIES ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES})
+      LIST(APPEND CURL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})
+      LIST(APPEND CURL_LIBRARIES ${OPENSSL_LIBRARIES})
 
-      IF(UNIX)
+      IF(WIN32)
+        LIST(APPEND CURL_LIBRARIES Crypt32 Cryptui)
+      ELSE()
         # CURL depends on libidn
         FIND_LIBRARY(IDN_LIBRARY idn)
         IF(IDN_LIBRARY)
-          SET(CURL_LIBRARIES ${CURL_LIBRARIES} ${IDN_LIBRARY})
+          LIST(APPEND CURL_LIBRARIES ${IDN_LIBRARY})
         ENDIF()
 
-        # CURL Macports version depends on libidn, libintl and libiconv too
+        # CURL Macports version can depend on libidn, libidn2, libintl, libpsl and libiconv too
         IF(APPLE)
           FIND_LIBRARY(INTL_LIBRARY intl)
           IF(INTL_LIBRARY)
-            SET(CURL_LIBRARIES ${CURL_LIBRARIES} ${INTL_LIBRARY})
+            LIST(APPEND CURL_LIBRARIES ${INTL_LIBRARY})
           ENDIF()
+
+          FIND_LIBRARY(IDN2_LIBRARY idn2)
+          IF(IDN2_LIBRARY)
+            LIST(APPEND CURL_LIBRARIES ${IDN2_LIBRARY})
+          ENDIF()
+
+          FIND_LIBRARY(PSL_LIBRARY psl)
+          IF(PSL_LIBRARY)
+            LIST(APPEND CURL_LIBRARIES ${PSL_LIBRARY})
+          ENDIF()
+
+          FIND_LIBRARY(UNISTRING_LIBRARY unistring)
+          IF(UNISTRING_LIBRARY)
+            LIST(APPEND CURL_LIBRARIES ${UNISTRING_LIBRARY})
+          ENDIF()
+
+          LIST(APPEND CURL_LIBRARIES ${SECURITY_FRAMEWORK})
         ENDIF()
       ENDIF()
     ENDIF()
@@ -453,6 +269,19 @@ IF(WITH_NEL)
 
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/nel/include)
   ADD_SUBDIRECTORY(nel)
+
+  # Aliases for targets
+  SET(NELMISC_LIBRARIES nelmisc)
+  SET(NELNET_LIBRARIES nelnet)
+  SET(NELLIGO_LIBRARIES nelligo)
+  SET(NELGEORGES_LIBRARIES nelgeorges)
+  SET(NEL3D_LIBRARIES nel3d)
+  SET(NELGUI_LIBRARIES nelgui)
+  SET(NELSOUND_LIBRARIES nelsound)
+ELSE()
+#  FIND_PACKAGE(NeL COMPONENTS 3d misc pacs sound nimp REQUIRED)
+  FIND_PACKAGE(NeL REQUIRED)
+  INCLUDE_DIRECTORIES(${NEL_INCLUDE_DIRS})
 ENDIF()
 
 IF(WITH_RYZOM)

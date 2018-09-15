@@ -2423,7 +2423,7 @@ void			CLandscape::checkZoneBinds(CZone &curZone, EBadBind &bindError)
 
 
 // ***************************************************************************
-void			CLandscape::checkBinds() throw(EBadBind)
+void			CLandscape::checkBinds()
 {
 	EBadBind	bindError;
 
@@ -2439,7 +2439,7 @@ void			CLandscape::checkBinds() throw(EBadBind)
 
 
 // ***************************************************************************
-void			CLandscape::checkBinds(uint16 zoneId) throw(EBadBind)
+void			CLandscape::checkBinds(uint16 zoneId)
 {
 	EBadBind	bindError;
 

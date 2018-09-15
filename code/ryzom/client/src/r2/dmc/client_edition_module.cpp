@@ -1312,8 +1312,8 @@ void CClientEditionModule::onUserComponentDownloaded(NLNET::IModuleProxy *sender
 
 	if (decompressionState != Z_OK)
 	{
-		delete  component;
-		nlwarning("Error: the downloaded user component is corrupted '%s' ", component->Filename.c_str());
+		nlwarning("Error: the downloaded user component is corrupted '%s'", component->Filename.c_str());
+		delete component;
 		return;
 	}
 	component->UncompressedData[component->UncompressedDataLength] = '\0';

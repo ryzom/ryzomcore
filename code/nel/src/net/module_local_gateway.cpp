@@ -102,7 +102,6 @@ namespace NLNET
 
 		/// Activate/stop firewalling mode on a transport
 		virtual void	setTransportFirewallMode(const std::string &/* transportInstanceName */, bool /* firewalled */)
-			throw (EGatewayFirewallBreak)
 		{
 			// unsupported
 			nlstop;
@@ -174,12 +173,10 @@ namespace NLNET
 //			return;
 //		}
 //		virtual void openGatewayServer(uint16 listeningPort)
-//			throw (EGatewayAlreadyOpen, EGatewayPortInUse)
 //		{
 //			nlstop;
 //		}
 //		virtual void closeGatewayServer()
-//			throw (EGatewayNotOpen)
 //		{
 //			nlstop;
 //		}
@@ -233,7 +230,6 @@ namespace NLNET
 		{
 		}
 		virtual void discloseModule(IModuleProxy *moduleProxy)
-			throw (EGatewayNotConnected)
 		{
 			// check that the module is plugged here
 			nlassert(_ModuleProxies.getB(moduleProxy) != NULL);
@@ -364,8 +360,7 @@ namespace NLNET
 			return getModuleName();
 		}
 
-		void _sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message )
-			throw (EModuleNotReachable, EModuleNotPluggedHere)
+		void _sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message)
 		{
 			TModuleProxies::TAToBMap::const_iterator first(_ModuleProxies.getAToBMap().begin()), last(_ModuleProxies.getAToBMap().end());
 			for (; first != last && first->first->getModuleProxyId() != destModuleProxyId; ++first) {}
@@ -373,7 +368,6 @@ namespace NLNET
 			throw EModuleNotReachable();
 		}
 		virtual void _broadcastModuleMessage(IModule * /* senderModule */, const NLNET::CMessage &/* message */)
-			throw (EModuleNotPluggedHere)
 		{
 			nlstop;
 		}

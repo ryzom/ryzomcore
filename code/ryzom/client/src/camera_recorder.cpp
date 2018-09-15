@@ -56,7 +56,7 @@ public:
 	CVector     Heading;
 	//CVMatrix     Matrix;
 public:
-	void serial(NLMISC::IStream &f) throw(EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial(Date);
 		f.serial(Pos);

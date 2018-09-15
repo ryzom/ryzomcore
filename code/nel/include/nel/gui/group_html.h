@@ -17,8 +17,6 @@
 #ifndef CL_GROUP_HTML_H
 #define CL_GROUP_HTML_H
 
-#include <curl/curl.h>
-
 #include "nel/misc/types_nl.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/group_scrolltext.h"
@@ -26,6 +24,9 @@
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/group_table.h"
 #include "nel/gui/libwww_types.h"
+
+// forward declaration
+typedef void CURLM;
 
 typedef std::map<std::string, std::string>	TStyle;
 
@@ -66,8 +67,6 @@ namespace NLGUI
 			std::vector< std::string > trustedDomains;
 			/// Maximum concurrent MultiCurl connections per CGroupHTML instance
 			sint32 curlMaxConnections;
-			/// cacert.pem location
-			std::string curlCABundle;
 
 			SWebOptions(): curlMaxConnections(2)
 			{
@@ -75,11 +74,26 @@ namespace NLGUI
 		};
 
 		static SWebOptions options;
-		
+
+		// text-shadow
+		struct STextShadow
+		{
+		public:
+			STextShadow(bool enabled = false, bool outline = false, sint32 x=1, sint32 y=1, NLMISC::CRGBA color=NLMISC::CRGBA::Black)
+				: Enabled(enabled), Outline(outline), X(x), Y(y), Color(color)
+			{ }
+
+			bool Enabled;
+			bool Outline;
+			sint32 X;
+			sint32 Y;
+			NLMISC::CRGBA Color;
+		};
+
 		class CStyleParams
 		{
 		public:
-			CStyleParams () : FontFamily(""), TextColor(255,255,255,255)
+			CStyleParams () : FontFamily(""), TextColor(255,255,255,255), TextShadow()
 			{
 				FontSize=10;
 				FontWeight=400;
@@ -97,6 +111,7 @@ namespace NLGUI
 			bool FontOblique;
 			std::string FontFamily;
 			NLMISC::CRGBA TextColor;
+			STextShadow TextShadow;
 			bool GlobalColor;
 			bool Underlined;
 			bool StrikeThrough;
@@ -505,78 +520,32 @@ namespace NLGUI
 		// IL mode
 		bool _LI;
 
-		// Current text color
-		std::vector<NLMISC::CRGBA>	_TextColor;
-		inline const NLMISC::CRGBA &getTextColor() const
+		// Current active style
+		CStyleParams _Style;
+		// Default style
+		CStyleParams _StyleDefault;
+		// Nested style stack
+		std::vector<CStyleParams> _StyleParams;
+		inline void pushStyle()
 		{
-			if (_TextColor.empty())
-				return TextColor;
-			return _TextColor.back();
+			_StyleParams.push_back(_Style);
+		}
+		inline void popStyle()
+		{
+			if (_StyleParams.empty())
+				_Style = _StyleDefault;
+			else
+			{
+				_Style = _StyleParams.back();
+				_StyleParams.pop_back();
+			}
 		}
 
-		// Current global color flag
-		std::vector<bool>	_GlobalColor;
-		inline bool getGlobalColor() const
-		{
-			if (_GlobalColor.empty())
-				return false;
-			return _GlobalColor.back();
-		}
-
-		// Current font name
-		std::vector<std::string>	_FontFamily;
-		inline const char* getFontFamily() const
-		{
-			if (_FontFamily.empty())
-				return "";
-			return _FontFamily.back().c_str();
-		}
-
-		// Current font size
-		std::vector<uint>			_FontSize;
-		inline uint getFontSize() const
-		{
-			if (_FontSize.empty())
-				return TextFontSize;
-			return _FontSize.back();
-		}
 		inline uint getFontSizeSmaller() const
 		{
-			if (getFontSize() < 5)
+			if (_Style.FontSize < 5)
 				return 3;
-			return getFontSize()-2;
-		}
-
-		std::vector<uint>			_FontWeight;
-		inline uint getFontWeight() const
-		{
-			if (_FontWeight.empty())
-				return 400;
-			return _FontWeight.back();
-		}
-
-		std::vector<bool>			_FontOblique;
-		inline bool getFontOblique() const
-		{
-			if (_FontOblique.empty())
-				return false;
-			return _FontOblique.back();
-		}
-
-		std::vector<bool>			_FontUnderlined;
-		inline bool getFontUnderlined() const
-		{
-			if (_FontUnderlined.empty())
-				return false;
-			return _FontUnderlined.back();
-		}
-
-		std::vector<bool>			_FontStrikeThrough;
-		inline bool getFontStrikeThrough() const
-		{
-			if (_FontStrikeThrough.empty())
-				return false;
-			return _FontStrikeThrough.back();
+			return _Style.FontSize-2;
 		}
 
 		// Current link
@@ -639,6 +608,14 @@ namespace NLGUI
 			if (_TR.empty())
 				return false;
 			return _TR.back();
+		}
+
+		std::vector<STextShadow> _TextShadow;
+		inline STextShadow getTextShadow() const
+		{
+			if (_TextShadow.empty())
+				return STextShadow();
+			return _TextShadow.back();
 		}
 
 		// Forms
@@ -880,11 +857,6 @@ namespace NLGUI
 
 		// HtmlType download finished
 		void htmlDownloadFinished(const std::string &content, const std::string &type, long code);
-
-		// cURL transfer callbacks
-		static size_t curlHeaderCallback(char *buffer, size_t size, size_t nmemb, void *pCCurlWWWData);
-		static size_t curlDataCallback(char *buffer, size_t size, size_t nmemb, void *pCCurlWWWData);
-		static size_t curlProgressCallback(void *pCCurlWWWData, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow);
 	};
 
 	// adapter group that store y offset for inputs inside an html form

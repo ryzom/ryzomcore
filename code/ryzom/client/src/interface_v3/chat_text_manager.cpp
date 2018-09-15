@@ -187,7 +187,21 @@ static inline bool	isUrlTag(const ucstring &s, ucstring::size_type index, ucstri
 			if (isUrl && i > 0 && !markdown)
 			{
 				// '}' is in the list because of color tags, ie "@{FFFF}http://..."
-				const vector<ucchar> chars {' ', '"', '\'', '(', '[', '}'};
+#ifdef NL_ISO_CPP0X_AVAILABLE
+				const vector<ucchar> chars{ ' ', '"', '\'', '(', '[', '}' };
+#else
+				static std::vector<ucchar> chars;
+
+				if (chars.empty())
+				{
+					chars.push_back(' ');
+					chars.push_back('"');
+					chars.push_back('\'');
+					chars.push_back('(');
+					chars.push_back('[');
+					chars.push_back('}');
+				}
+#endif
 				isUrl = std::find(chars.begin(), chars.end(), s[i - 1]) != chars.end();
 			}
 			return isUrl;

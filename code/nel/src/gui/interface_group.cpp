@@ -1398,6 +1398,13 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	sint32 CInterfaceGroup::getInnerWidth() const
+	{
+		sint width = CInterfaceElement::getInnerWidth();
+		return std::min(width, _MaxWReal - _MarginLeft);
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	void CInterfaceGroup::checkCoords()
 	{
 		//update all children elements
@@ -1468,7 +1475,7 @@ namespace NLGUI
 			pIE->updateCoords();
 		}
 
-		_XReal -= _OffsetX - _MarginLeft;
+		_XReal -= (_OffsetX + _MarginLeft);
 		_YReal -= _OffsetY;
 	}
 
@@ -1958,9 +1965,11 @@ namespace NLGUI
 			newSciH = newSciH - ((newSciY+newSciH)-(oldSciY+oldSciH));
 		}
 
-		newSciXDest = newSciX - _MarginLeft;
+		// Don't apply margins because HTML list marker is drawn outside group paragraph inner content.
+		// Should not be an issue because horizontal scolling not used.
+		newSciXDest = newSciX/* + _MarginLeft*/;
 		newSciYDest = newSciY;
-		newSciWDest = newSciW + _MarginLeft;
+		newSciWDest = newSciW/* - _MarginLeft*/;
 		newSciHDest = newSciH;
 
 	}
