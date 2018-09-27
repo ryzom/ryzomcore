@@ -1407,6 +1407,9 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	void CInterfaceGroup::checkCoords()
 	{
+		// Make XReal same as in updateCoords() as some elements (CViewText) depends on it
+		_XReal += _MarginLeft;
+
 		//update all children elements
 		vector<CViewBase*>::const_iterator ite;
 		for (ite = _EltOrder.begin() ; ite != _EltOrder.end(); ite++)
@@ -1415,7 +1418,9 @@ namespace NLGUI
 			if(pIE->getActive())
 				pIE->checkCoords();
 		}
-		executeLuaScriptOnDraw();	
+
+		_XReal -= _MarginLeft;
+		executeLuaScriptOnDraw();
 	}
 
 	// ------------------------------------------------------------------------------------------------
