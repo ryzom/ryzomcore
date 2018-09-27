@@ -2473,7 +2473,7 @@ namespace NLGUI
 
 			if (_LayerSetup == 0)
 			{
-				_List->forceSizeW(_W - pLayer->W_M_Open);
+				_List->forceSizeW(_W - (pLayer->W_M_Open + pLayer->W_R) );
 			}
 			else
 			{
@@ -2747,6 +2747,9 @@ namespace NLGUI
 
 			if (_Content != NULL)
 				h += _Content->getHReal();
+
+			if (_List != NULL)
+				h += _List->getHReal();
 
 			h -= _ContentYOffset;
 		}
