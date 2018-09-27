@@ -916,7 +916,8 @@ namespace NLGUI
 			return _LineMaxW;
 		else
 		{
-			return std::min(_Parent->getInnerWidth(), (sint)_LineMaxW);
+			sint offset = (sint)_XReal - (sint)_Parent->getXReal();
+			return std::min(_Parent->getInnerWidth() - offset, (sint)_LineMaxW);
 		}
 	}
 
