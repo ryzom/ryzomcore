@@ -2626,6 +2626,9 @@ static void hideTeleportButtonsInPopupMenuIfNotEnoughPriv()
 
 	CInterfaceElement *ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:map_menu:teleport");
 	if(ie) ie->setActive(showTeleport);
+	
+	ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:map_menu_island:teleport");
+	if(ie) ie->setActive(showTeleport);
 
 	ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:land_mark_menu:lmteleport");
 	if(ie) ie->setActive(showTeleport);
