@@ -1404,13 +1404,12 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 	// **** Init Video Modes
 	Driver->getModes(videoModes);
 
-	// Remove modes under 800x600 and get the unique strings
+	// Remove modes under 1024x768 (outgame ui limitation) and get the unique strings
 	sint i, j;
 	for (i = 0; i < (sint)videoModes.size(); ++i)
 	{
-		if ((videoModes[i].Width < 800) || (videoModes[i].Height < 600))
+		if ((videoModes[i].Width < 1024) || (videoModes[i].Height < 768))
 		{
-			// discard modes under 800x600
 			videoModes.erase(videoModes.begin()+i);
 			--i;
 		}
