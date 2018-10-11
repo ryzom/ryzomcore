@@ -201,9 +201,9 @@ void connectionRestoreVideoMode ()
 		mode.Height = height;
 	}
 
-	// don't allow sizes smaller than 800x600
-	if (ClientCfg.Width < 800) ClientCfg.Width = 800;
-	if (ClientCfg.Height < 600) ClientCfg.Height = 600;
+	// don't allow sizes smaller than 1024x768
+	if (ClientCfg.Width < 1024) ClientCfg.Width = 1024;
+	if (ClientCfg.Height < 768) ClientCfg.Height = 768;
 
 	if (StereoDisplay)
 		StereoDisplayAttached = StereoDisplay->attachToDisplay();
@@ -253,41 +253,13 @@ REGISTER_ACTION_HANDLER (CAHOnReloadTestPage, "on_reload_test_page");
 // ------------------------------------------------------------------------------------------------
 void	setOutGameFullScreen()
 {
-	// Setup full screen (special 1024x768 for outgame) if we have to.
-	// NB: don't setup fullscreen if player wants to play in window
 	if (!ClientCfg.Local && ClientCfg.SelectCharacter == -1)
 	{
 		if (StereoDisplayAttached)
 			StereoDisplay->detachFromDisplay();
 		StereoDisplayAttached = false;
 
-		UDriver::CMode currMode;
-		Driver->getCurrentScreenMode(currMode);
-		UDriver::CMode wantedMode;
-		wantedMode.Windowed = true;
-		wantedMode.Width = 1024;
-		wantedMode.Height = 768;
-		wantedMode.Depth = uint8(ClientCfg.Depth);
-		wantedMode.Frequency = ClientCfg.Frequency;
-
-		// change mode only if necessary
-		if ((wantedMode.Windowed != currMode.Windowed) ||
-			(wantedMode.Width != currMode.Width) ||
-			(wantedMode.Height != currMode.Height))
-		{
-			setVideoMode(wantedMode);
-		}
-
 		InitMouseWithCursor(ClientCfg.HardwareCursor && !StereoDisplayAttached);
-		/*
-		InitMouseWithCursor (true);
-		Driver->showCursor(false);
-		Driver->showCursor(true);
-		Driver->clearBuffers(CRGBA::Black);
-		Driver->swapBuffers();
-		Driver->showCursor(false);
-		Driver->showCursor(true);
-		*/
 	}
 
 }
@@ -307,8 +279,8 @@ bool connection (const string &cookie, const string &fsaddr)
 
 	game_exit = false;
 
-	// Setup full screen (special 1024x768 for outgame) if we have to.
-	setOutGameFullScreen();
+	// set resolution from cfg after login
+	connectionRestoreVideoMode ();
 
 	// Preload continents
 	{
@@ -342,13 +314,14 @@ bool connection (const string &cookie, const string &fsaddr)
 		// init the string manager cache.
 		STRING_MANAGER::CStringManagerClient::instance()->initCache("", ClientCfg.LanguageCode);	// VOIR BORIS
 #endif
-		connectionRestoreVideoMode ();
 		return true;
 	}
 
 	ProgressBar.setFontFactor(1.0f);
 
 	// Init out game
+	setOutGameFullScreen();
+
 	ucstring nmsg("Initializing outgame...");
 	ProgressBar.newMessage (ClientCfg.buildLoadingString(nmsg) );
 	pIM->initOutGame();
@@ -484,7 +457,6 @@ bool reconnection()
 
 	game_exit = false;
 
-	// Setup full screen (special 1024x768 for outgame) if we have to.
 	setOutGameFullScreen();
 
 	// Preload continents
@@ -1269,6 +1241,16 @@ TInterfaceState globalMenu()
 	// Restore video mode
 	if (ClientCfg.SelectCharacter == -1)
 	{
+		if (ClientCfg.Windowed)
+		{
+			// if used changed window resolution in char select
+			// if we don't update ClientCfg, then UI from icfg is restored wrong
+			uint32 width, height;
+			Driver->getWindowSize(width, height);
+			ClientCfg.Width = width;
+			ClientCfg.Height = height;
+		}
+
 		connectionRestoreVideoMode ();
 	}
 
