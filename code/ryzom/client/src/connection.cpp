@@ -1241,6 +1241,16 @@ TInterfaceState globalMenu()
 	// Restore video mode
 	if (ClientCfg.SelectCharacter == -1)
 	{
+		if (ClientCfg.Windowed)
+		{
+			// if used changed window resolution in char select
+			// if we don't update ClientCfg, then UI from icfg is restored wrong
+			uint32 width, height;
+			Driver->getWindowSize(width, height);
+			ClientCfg.Width = width;
+			ClientCfg.Height = height;
+		}
+
 		connectionRestoreVideoMode ();
 	}
 
