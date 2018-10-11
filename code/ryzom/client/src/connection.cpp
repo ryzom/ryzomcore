@@ -201,9 +201,9 @@ void connectionRestoreVideoMode ()
 		mode.Height = height;
 	}
 
-	// don't allow sizes smaller than 800x600
-	if (ClientCfg.Width < 800) ClientCfg.Width = 800;
-	if (ClientCfg.Height < 600) ClientCfg.Height = 600;
+	// don't allow sizes smaller than 1024x768
+	if (ClientCfg.Width < 1024) ClientCfg.Width = 1024;
+	if (ClientCfg.Height < 768) ClientCfg.Height = 768;
 
 	if (StereoDisplay)
 		StereoDisplayAttached = StereoDisplay->attachToDisplay();
