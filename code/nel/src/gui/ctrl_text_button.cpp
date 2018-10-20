@@ -899,7 +899,7 @@ namespace NLGUI
 		}
 		if (!(_SizeRef & 2))
 		{
-			_H= _BmpH;
+			_H= max(_BmpH, _ViewText->getH());
 		}
 
 		CViewBase::updateCoords();
