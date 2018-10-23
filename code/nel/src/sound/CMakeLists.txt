@@ -58,6 +58,7 @@ FILE(GLOB STREAM
 FILE(GLOB STREAM_FILE
 	audio_decoder.cpp ../../include/nel/sound/audio_decoder.h
 	audio_decoder_vorbis.cpp ../../include/nel/sound/audio_decoder_vorbis.h
+	audio_decoder_ffmpeg.cpp ../../include/nel/sound/audio_decoder_ffmpeg.h
 	stream_file_sound.cpp ../../include/nel/sound/stream_file_sound.h
 	stream_file_source.cpp ../../include/nel/sound/stream_file_source.h
 )
@@ -93,6 +94,12 @@ TARGET_LINK_LIBRARIES(nelsound ${VORBISFILE_LIBRARY} ${VORBIS_LIBRARY})
 IF(WITH_STATIC)
   # Add libogg dependency only if target is static because to libvorbisfile
   TARGET_LINK_LIBRARIES(nelsound ${OGG_LIBRARY})
+ENDIF()
+
+IF(FFMPEG_FOUND)
+	ADD_DEFINITIONS(-DFFMPEG_ENABLED)
+	INCLUDE_DIRECTORIES(${FFMPEG_INCLUDE_DIRS})
+	TARGET_LINK_LIBRARIES(nelsound ${FFMPEG_LIBRARIES})
 ENDIF()
 
 

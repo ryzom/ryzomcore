@@ -372,22 +372,10 @@ public:
 			// no format supported
 			if (extensions.empty()) return;
 
-			bool oggSupported = false;
-			bool mp3Supported = false;
-
 			std::string message;
 			for(uint i = 0; i < extensions.size(); ++i)
 			{
-				if (extensions[i] == "ogg")
-				{
-					oggSupported = true;
-					message += " ogg";
-				}
-				else if (extensions[i] == "mp3")
-				{
-					mp3Supported = true;
-					message += " mp3";
-				}
+				message += " " + extensions[i];
 			}
 			message += " m3u m3u8";
 			nlinfo("Media player supports: '%s'", message.substr(1).c_str());
@@ -404,15 +392,9 @@ public:
 			for (i = 0; i < filesToProcess.size(); ++i)
 			{
 				std::string ext = toLower(CFile::getExtension(filesToProcess[i]));
-				if (ext == "ogg")
+				if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
 				{
-					if (oggSupported)
-						filenames.push_back(filesToProcess[i]);
-				}
-				else if (ext == "mp3" || ext == "mp2" || ext == "mp1")
-				{
-					if (mp3Supported)
-						filenames.push_back(filesToProcess[i]);
+					filenames.push_back(filesToProcess[i]);
 				}
 				else if (ext == "m3u" || ext == "m3u8")
 				{
@@ -448,6 +430,7 @@ public:
 
 				CMusicPlayer::CSongs song;
 				song.Filename = filenames[i];
+				// TODO: cache the result for next refresh
 				SoundMngr->getMixer()->getSongTitle(filenames[i], song.Title, song.Length);
 				if (song.Length > 0)
 					songs.push_back (song);
