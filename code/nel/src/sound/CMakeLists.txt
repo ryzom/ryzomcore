@@ -1,6 +1,10 @@
 FILE(GLOB SRC *.cpp *.h)
 FILE(GLOB HEADERS ../../include/nel/sound/*.h)
 
+IF(NOT FFMPEG_FOUND)
+  LIST(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/audio_decoder_ffmpeg.cpp)
+  LIST(REMOVE_ITEM HEADERS ${CMAKE_CURRENT_SOURCE_DIR}../../include/nel/sound/audio_decoder_ffmpeg.h)
+ENDIF()
 
 FILE(GLOB ANIMATION
 	sound_anim_manager.cpp ../../include/nel/sound/sound_anim_manager.h
