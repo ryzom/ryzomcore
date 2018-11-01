@@ -77,11 +77,6 @@ namespace NLGUI
 		_LUAEnvTableCreated= false;
 		_DepthForZSort= 0.f;
 
-		_LastClipX = 0;
-		_LastClipY = 0;
-		_LastClipW = 0;
-		_LastClipH = 0;
-
 	#ifdef AJM_DEBUG_TRACK_INTERFACE_GROUPS
 		CInterfaceManager::getInstance()->DebugTrackGroupsCreated( this );
 	#endif
@@ -1259,8 +1254,7 @@ namespace NLGUI
 		{
 			const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 
-			// group might be partially hidden (scolling) so test against last visible area
-			if (!isInViewport(eventDesc.getX(), eventDesc.getY()))
+			if (!isIn(eventDesc.getX(), eventDesc.getY()))
 				return false;
 
 			bool taken = false;
@@ -1305,6 +1299,7 @@ namespace NLGUI
 			}
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 			{
+				// handle the Mouse Wheel only if interesting
 				if (_H>_MaxH)
 				{
 					CInterfaceGroup *currParent = _Parent;
@@ -1334,7 +1329,7 @@ namespace NLGUI
 	void CInterfaceGroup::draw ()
 	{
 		sint32 oldSciX, oldSciY, oldSciW, oldSciH;
-		makeNewClip (oldSciX, oldSciY, oldSciW, oldSciH, true);
+		makeNewClip (oldSciX, oldSciY, oldSciW, oldSciH);
 
 		// Display sons only if not total clipped
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
@@ -1724,16 +1719,6 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	bool CInterfaceGroup::isInViewport(sint32 x, sint32 y) const
-	{
-		return (
-				(x > _LastClipX) &&
-				(x < (_LastClipX + _LastClipW))&&
-				(y > _LastClipY) &&
-				(y < (_LastClipY + _LastClipH)));
-	}
-
-	// ------------------------------------------------------------------------------------------------
 	CInterfaceGroup* CInterfaceGroup::getGroupUnder (sint32 x, sint32 y)
 	{
 		// Begins by the children
@@ -1991,10 +1976,11 @@ namespace NLGUI
 		newSciYDest = newSciY;
 		newSciWDest = newSciW/* - _MarginLeft*/;
 		newSciHDest = newSciH;
+
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CInterfaceGroup::makeNewClip (sint32 &oldSciX, sint32 &oldSciY, sint32 &oldSciW, sint32 &oldSciH, bool drawing)
+	void CInterfaceGroup::makeNewClip (sint32 &oldSciX, sint32 &oldSciY, sint32 &oldSciW, sint32 &oldSciH)
 	{
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		rVR.getClipWindow (oldSciX, oldSciY, oldSciW, oldSciH);
@@ -2002,14 +1988,6 @@ namespace NLGUI
 		sint32 newSciX, newSciY, newSciW, newSciH;
 		computeCurrentClipContribution(oldSciX, oldSciY, oldSciW, oldSciH, newSciX, newSciY, newSciW, newSciH);
 		rVR.setClipWindow (newSciX, newSciY, newSciW, newSciH);
-
-		if (drawing)
-		{
-			_LastClipX = newSciX;
-			_LastClipY = newSciY;
-			_LastClipW = newSciW;
-			_LastClipH = newSciH;
-		}
 	}
 
 	// ------------------------------------------------------------------------------------------------

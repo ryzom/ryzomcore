@@ -101,9 +101,6 @@ namespace NLGUI
 		// test is a group is a direct child of this interface group
 		bool isChildGroup(const CInterfaceGroup *group) const;
 
-		// test is x,y is inside last draw clip aread
-		bool isInViewport(sint32 x, sint32 y) const;
-
 		virtual bool isWindowUnder (sint32 x, sint32 y); // Virtual for menu that is not square
 		CInterfaceGroup *getGroupUnder (sint32 x, sint32 y);
 		virtual bool getViewsUnder (sint32 x, sint32 y, sint32 clipX, sint32 clipY, sint32 clipW, sint32 clipH, std::vector<CViewBase*> &vVB); // Return true if x,y under the group
@@ -344,13 +341,8 @@ namespace NLGUI
 		void alignElements();
 
 	protected:
-		/// Last clip area cached from draw call
-		sint32 _LastClipX;
-		sint32 _LastClipY;
-		sint32 _LastClipW;
-		sint32 _LastClipH;
 
-		void makeNewClip (sint32 &oldClipX, sint32 &oldClipY, sint32 &oldClipW, sint32 &oldClipH, bool drawing = false);
+		void makeNewClip (sint32 &oldClipX, sint32 &oldClipY, sint32 &oldClipW, sint32 &oldClipH);
 		void restoreClip (sint32 oldSciX, sint32 oldSciY, sint32 oldSciW, sint32 oldSciH);
 
 		// Compute clip contribution for current window, and a previous clipping rectangle. This doesn't change the clip window in the driver.
