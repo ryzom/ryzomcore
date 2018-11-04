@@ -284,8 +284,13 @@ void CMusicPlayer::update ()
 		if (pVT)
 		{
 			TTime dur = (CTime::getLocalTime() - _PlayStart) / 1000;
-			std::string title;
-			title = toString("%02d:%02d %s", dur / 60, dur % 60, _CurrentSong.Title.c_str());
+			uint min = (dur / 60) % 60;
+			uint sec = dur % 60;
+			uint hour = dur / 3600;
+
+			std::string title(toString("%02d:%02d", min, sec));
+			if (hour > 0) title = toString("%02d:", hour) + title;
+			title += " " + _CurrentSong.Title;
 			pVT->setText(ucstring::makeFromUtf8(title));
 		}
 
@@ -372,22 +377,10 @@ public:
 			// no format supported
 			if (extensions.empty()) return;
 
-			bool oggSupported = false;
-			bool mp3Supported = false;
-
 			std::string message;
 			for(uint i = 0; i < extensions.size(); ++i)
 			{
-				if (extensions[i] == "ogg")
-				{
-					oggSupported = true;
-					message += " ogg";
-				}
-				else if (extensions[i] == "mp3")
-				{
-					mp3Supported = true;
-					message += " mp3";
-				}
+				message += " " + extensions[i];
 			}
 			message += " m3u m3u8";
 			nlinfo("Media player supports: '%s'", message.substr(1).c_str());
@@ -404,15 +397,9 @@ public:
 			for (i = 0; i < filesToProcess.size(); ++i)
 			{
 				std::string ext = toLower(CFile::getExtension(filesToProcess[i]));
-				if (ext == "ogg")
+				if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
 				{
-					if (oggSupported)
-						filenames.push_back(filesToProcess[i]);
-				}
-				else if (ext == "mp3" || ext == "mp2" || ext == "mp1")
-				{
-					if (mp3Supported)
-						filenames.push_back(filesToProcess[i]);
+					filenames.push_back(filesToProcess[i]);
 				}
 				else if (ext == "m3u" || ext == "m3u8")
 				{
@@ -433,14 +420,6 @@ public:
 			std::vector<CMusicPlayer::CSongs> songs;
 			for (i=0; i<filenames.size(); i++)
 			{
-				// '@' in filenames are reserved for .bnp files
-				// and sound system fails to open such file
-				if (filenames[i].find("@") != string::npos)
-				{
-					nlwarning("Ignore media file containing '@' in name: '%s'", filenames[i].c_str());
-					continue;
-				}
-
 				if (!CFile::fileExists(filenames[i])) {
 					nlwarning("Ignore non-existing file '%s'", filenames[i].c_str());
 					continue;
@@ -448,6 +427,7 @@ public:
 
 				CMusicPlayer::CSongs song;
 				song.Filename = filenames[i];
+				// TODO: cache the result for next refresh
 				SoundMngr->getMixer()->getSongTitle(filenames[i], song.Title, song.Length);
 				if (song.Length > 0)
 					songs.push_back (song);
