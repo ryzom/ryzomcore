@@ -284,8 +284,13 @@ void CMusicPlayer::update ()
 		if (pVT)
 		{
 			TTime dur = (CTime::getLocalTime() - _PlayStart) / 1000;
-			std::string title;
-			title = toString("%02d:%02d %s", dur / 60, dur % 60, _CurrentSong.Title.c_str());
+			uint min = (dur / 60) % 60;
+			uint sec = dur % 60;
+			uint hour = dur / 3600;
+
+			std::string title(toString("%02d:%02d", min, sec));
+			if (hour > 0) title = toString("%02d:", hour) + title;
+			title += " " + _CurrentSong.Title;
 			pVT->setText(ucstring::makeFromUtf8(title));
 		}
 
