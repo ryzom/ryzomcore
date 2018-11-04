@@ -26,10 +26,15 @@ extern "C"
 #include <libavformat/avformat.h>
 #include <libswresample/swresample.h>
 #include <libavutil/opt.h>
-};
+}
 
 using namespace std;
 using namespace NLMISC;
+using namespace NLSOUND;
+
+// Visual Studio does not support AV_TIME_BASE_Q macro in C++
+#undef AV_TIME_BASE_Q
+static const AVRational AV_TIME_BASE_Q = {1, AV_TIME_BASE};
 
 namespace {
 
