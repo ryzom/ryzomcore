@@ -415,14 +415,6 @@ public:
 			std::vector<CMusicPlayer::CSongs> songs;
 			for (i=0; i<filenames.size(); i++)
 			{
-				// '@' in filenames are reserved for .bnp files
-				// and sound system fails to open such file
-				if (filenames[i].find("@") != string::npos)
-				{
-					nlwarning("Ignore media file containing '@' in name: '%s'", filenames[i].c_str());
-					continue;
-				}
-
 				if (!CFile::fileExists(filenames[i])) {
 					nlwarning("Ignore non-existing file '%s'", filenames[i].c_str());
 					continue;
