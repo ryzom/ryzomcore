@@ -178,6 +178,10 @@ public:
 	CVertexBuffer Vertices;
 	CMaterial	*Material;
 	CRGBA Color;
+	ucstring Text;
+
+	uint32 CacheVersion;
+
 	/// The width of the string, in pixels (eg: 30)
 	float StringWidth;
 	/// The height of the string, in pixels (eg: 10)
@@ -223,6 +227,7 @@ public:
 	 */
 	CComputedString (bool bSetupVB=true)
 	{
+		CacheVersion = 0;
 		StringWidth = 0;
 		StringHeight = 0;
 		if (bSetupVB)

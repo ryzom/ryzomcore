@@ -3419,6 +3419,22 @@ void	displayDebugClusters()
 
 }
 
+NLMISC_COMMAND(dumpFontTexture, "Write font texture to file", "")
+{
+	CInterfaceManager *im = CInterfaceManager::getInstance();
+	if (TextContext)
+	{
+		std::string fname = CFile::findNewFile("font-texture.tga");
+		TextContext->dumpCacheTexture(fname.c_str());
+		im->displaySystemInfo(ucstring(fname + " created"), "SYS");
+	}
+	else
+	{
+		im->displaySystemInfo(ucstring("Error: TextContext == NULL"), "SYS");
+	}
+	return true;
+}
+
 
 // ***************************************************************************
 void inGamePatchUncompleteWarning()
