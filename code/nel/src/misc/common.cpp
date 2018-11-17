@@ -1720,12 +1720,12 @@ static bool openDocWithExtension (const std::string &document, const std::string
 	const char *previousEnv = getenv("LD_LIBRARY_PATH");
 
 	// clear LD_LIBRARY_PATH to avoid problems with Steam Runtime
-	setenv("LD_LIBRARY_PATH", "", 1);
+	if (previousEnv) setenv("LD_LIBRARY_PATH", "", 1);
 
 	bool res = launchProgram(command, document);
 
 	// restore previous LD_LIBRARY_PATH
-	setenv("LD_LIBRARY_PATH", previousEnv, 1);
+	if (previousEnv) setenv("LD_LIBRARY_PATH", previousEnv, 1);
 
 	return res;
 #endif // NL_OS_WINDOWS

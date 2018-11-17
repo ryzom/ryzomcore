@@ -2281,8 +2281,8 @@ namespace NLGUI
 				{
 					newParagraph(PBeginSpace);
 					pushStyle();
-					if (present[HTML_BLOCK_STYLE] && value[HTML_BLOCK_STYLE])
-						getStyleParams(value[HTML_BLOCK_STYLE], _Style);
+					if (present[MY_HTML_P_STYLE] && value[MY_HTML_P_STYLE])
+						getStyleParams(value[MY_HTML_P_STYLE], _Style);
 				}
 				break;
 			case HTML_PRE:

@@ -1272,32 +1272,19 @@ void CInterfaceManager::loadInterfaceConfig()
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::uninitInGame0 ()
 {
-
 	// Autosave of the keys
 	if (_KeysLoaded)
 	{
-		if (!ClientCfg.R2EDEnabled)
-		{
-			string filename = "save/keys_" + PlayerSelectedFileName + ".xml";
-			if (!CFile::fileExists(filename) && CFile::fileExists("save/shared_keys.xml"))
-				filename = "save/shared_keys.xml";
+		saveKeys();
 
-			saveKeys(filename);
-		}
 		_KeysLoaded = false;
 	}
 
 	// Autosave of the interface in interface.cfg
 	if (_ConfigLoaded)
 	{
-		if (!ClientCfg.R2EDEnabled)
-		{
-			string filename = "save/interface_" + PlayerSelectedFileName + ".icfg";
-			if (!CFile::fileExists(filename) && CFile::fileExists("save/shared_interface.icfg"))
-				filename = "save/shared_interface.icfg";
+		saveConfig();
 
-			saveConfig(filename);
-		}
 		_ConfigLoaded = false;
 	}
 }
@@ -1890,6 +1877,29 @@ public:
 	}
 };
 
+// ------------------------------------------------------------------------------------------------
+//
+bool CInterfaceManager::saveConfig (bool verbose)
+{
+	bool ret = true;
+
+	if (!ClientCfg.R2EDEnabled)
+	{
+		uint8 currMode = getMode();
+
+		string filename = "save/interface_" + PlayerSelectedFileName + ".icfg";
+		if (!CFile::fileExists(filename) && CFile::fileExists("save/shared_interface.icfg"))
+			filename = "save/shared_interface.icfg";
+
+		if (verbose) CInterfaceManager::getInstance()->displaySystemInfo("Saving " + filename);
+		ret = saveConfig(filename);
+
+		if (currMode != getMode())
+			setMode(currMode);
+	}
+
+	return ret;
+}
 
 // ------------------------------------------------------------------------------------------------
 bool CInterfaceManager::saveConfig (const string &filename)
@@ -2735,7 +2745,25 @@ void writeMacros (xmlNodePtr node)
 }
 
 // ***************************************************************************
+bool CInterfaceManager::saveKeys(bool verbose)
+{
+	bool ret = true;
 
+	if (!ClientCfg.R2EDEnabled)
+	{
+		string filename = "save/keys_" + PlayerSelectedFileName + ".xml";
+		if (!CFile::fileExists(filename) && CFile::fileExists("save/shared_keys.xml"))
+			filename = "save/shared_keys.xml";
+
+		if (verbose) CInterfaceManager::getInstance()->displaySystemInfo("Saving " + filename);
+
+		ret = saveKeys(filename);
+	}
+
+	return ret;
+}
+
+// ***************************************************************************
 bool	CInterfaceManager::saveKeys(const std::string &filename)
 {
 	bool ret = false;
@@ -2936,6 +2964,18 @@ void CInterfaceManager::displayWebWindow(const string & name, const string & url
 
 	CAHManager::getInstance()->runActionHandler("browse", NULL, "name="+name+":content:html|url="+url);
 }
+
+// ***************************************************************************
+class CAHSaveUI : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	{
+		CInterfaceManager::getInstance()->saveKeys(true);
+		CInterfaceManager::getInstance()->saveConfig(true);
+	}
+};
+REGISTER_ACTION_HANDLER (CAHSaveUI, "save_ui");
+
 /*
 // ***************************************************************************
 class CHandlerDispWebOnQuit : public IActionHandler

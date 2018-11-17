@@ -39,6 +39,9 @@ extern UDriver	*Driver;
 #define TEMPLATE_PLAYLIST_SONG "playlist_song"
 #define TEMPLATE_PLAYLIST_SONG_TITLE "title"
 #define TEMPLATE_PLAYLIST_SONG_DURATION "duration"
+// ui state
+#define MP3_SAVE_SHUFFLE "UI:SAVE:MP3_SHUFFLE"
+#define MP3_SAVE_REPEAT "UI:SAVE:MP3_REPEAT"
 
 static const std::string MediaPlayerDirectory("music/");
 
@@ -48,8 +51,20 @@ CMusicPlayer MusicPlayer;
 
 CMusicPlayer::CMusicPlayer ()
 {
-	_CurrentSong = 0;
+	_CurrentSongIndex = 0;
 	_State = Stopped;
+	_PlayStart = 0;
+	_PauseTime = 0;
+}
+
+bool CMusicPlayer::isRepeatEnabled() const
+{
+	return (NLGUI::CDBManager::getInstance()->getDbProp(MP3_SAVE_REPEAT)->getValue32() == 1);
+}
+
+bool CMusicPlayer::isShuffleEnabled() const
+{
+	return (NLGUI::CDBManager::getInstance()->getDbProp(MP3_SAVE_SHUFFLE)->getValue32() == 1);
 }
 
 
@@ -59,16 +74,61 @@ void CMusicPlayer::playSongs (const std::vector<CSongs> &songs)
 	_Songs = songs;
 
 	// reset song index if out of bounds
-	if (_CurrentSong > _Songs.size())
-		_CurrentSong = 0;
+	if (_CurrentSongIndex > _Songs.size())
+		_CurrentSongIndex = 0;
 
+	if (isShuffleEnabled())
+		shuffleAndRebuildPlaylist();
+	else
+		rebuildPlaylist();
+
+	// If pause, stop, else play will resume
+	if (_State == Paused)
+		_State = Stopped;
+}
+
+// ***************************************************************************
+void CMusicPlayer::updatePlaylist(sint prevIndex)
+{
+	CInterfaceElement  *pIE;
+	std::string rowId;
+
+	if (prevIndex >= 0 && prevIndex < _Songs.size())
+	{
+		rowId = toString("%s:s%d:bg", MP3_PLAYER_PLAYLIST_LIST, prevIndex);
+		pIE = dynamic_cast<CInterfaceElement*>(CWidgetManager::getInstance()->getElementFromId(rowId));
+		if (pIE) pIE->setActive(false);
+	}
+
+	rowId = toString("%s:s%d:bg", MP3_PLAYER_PLAYLIST_LIST, _CurrentSongIndex);
+	pIE = dynamic_cast<CInterfaceElement*>(CWidgetManager::getInstance()->getElementFromId(rowId));
+	if (pIE) pIE->setActive(true);
+}
+
+// ***************************************************************************
+void CMusicPlayer::shuffleAndRebuildPlaylist()
+{
+	std::random_shuffle(_Songs.begin(), _Songs.end());
+	rebuildPlaylist();
+}
+
+// ***************************************************************************
+void CMusicPlayer::rebuildPlaylist()
+{
 	CGroupList *pList = dynamic_cast<CGroupList *>(CWidgetManager::getInstance()->getElementFromId(MP3_PLAYER_PLAYLIST_LIST));
 	if (pList)
 	{
 		pList->clearGroups();
 		pList->setDynamicDisplaySize(true);
+		bool found = _CurrentSong.Filename.empty();
 		for (uint i=0; i < _Songs.size(); ++i)
 		{
+			if (!found && _CurrentSong.Filename == _Songs[i].Filename)
+			{
+				found = true;
+				_CurrentSongIndex = i;
+			}
+
 			uint min = (sint32)(_Songs[i].Length / 60) % 60;
 			uint sec = (sint32)(_Songs[i].Length) % 60;
 			uint hour = _Songs[i].Length / 3600;
@@ -103,9 +163,7 @@ void CMusicPlayer::playSongs (const std::vector<CSongs> &songs)
 		pList->invalidateCoords();
 	}
 
-	// If pause, stop, else play will resume
-	if (_State == Paused)
-		_State = Stopped;
+	updatePlaylist();
 }
 
 
@@ -116,31 +174,40 @@ void CMusicPlayer::play (sint index)
 	if(!SoundMngr)
 		return;
 
+	sint prevSongIndex = _CurrentSongIndex;
+
 	if (index >= 0 && index < (sint)_Songs.size())
 	{
 		if (_State == Paused)
+		{
 			stop();
+		}
 
-		_CurrentSong = index;
+		_CurrentSongIndex = index;
+		_PauseTime = 0;
 	}
 
 	if (!_Songs.empty())
 	{
-		nlassert (_CurrentSong<_Songs.size());
+		nlassert (_CurrentSongIndex<_Songs.size());
 
 		/* If the player is paused, resume, else, play the current song */
 		if (_State == Paused)
+		{
 			SoundMngr->resumeMusic();
+		}
 		else
-			SoundMngr->playMusic(_Songs[_CurrentSong].Filename, 0, true, false, false);
+		{
+			SoundMngr->playMusic(_Songs[_CurrentSongIndex].Filename, 0, true, false, false);
+			_PauseTime = 0;
+		}
 
 		_State = Playing;
+		_PlayStart = CTime::getLocalTime() - _PauseTime;
 
-		/* Show the song title */
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:mp3_player:screen:text"));
-		if (pVT)
-			pVT->setText (ucstring::makeFromUtf8(_Songs[_CurrentSong].Title));
+		_CurrentSong = _Songs[_CurrentSongIndex];
+
+		updatePlaylist(prevSongIndex);
 	}
 }
 
@@ -155,6 +222,9 @@ void CMusicPlayer::pause ()
 	{
 		SoundMngr->pauseMusic();
 		_State = Paused;
+
+		if (_PlayStart > 0)
+			_PauseTime = CTime::getLocalTime() - _PlayStart;
 	}
 }
 
@@ -167,6 +237,8 @@ void CMusicPlayer::stop ()
 	// stop the music only if we are really playing (else risk to stop a background music!)
 	SoundMngr->stopMusic(0);
 	_State = Stopped;
+	_PlayStart = 0;
+	_PauseTime = 0;
 }
 
 // ***************************************************************************
@@ -176,12 +248,13 @@ void CMusicPlayer::previous ()
 	if (!_Songs.empty())
 	{
 		// Point the previous song
-		if (_CurrentSong == 0)
-			_CurrentSong = (uint)_Songs.size()-1;
+		sint index;
+		if (_CurrentSongIndex == 0)
+			index = (uint)_Songs.size()-1;
 		else
-			_CurrentSong--;
+			index = _CurrentSongIndex-1;
 
-		play ();
+		play(index);
 	}
 }
 
@@ -191,9 +264,11 @@ void CMusicPlayer::next ()
 {
 	if (!_Songs.empty())
 	{
-		_CurrentSong++;
-		_CurrentSong%=_Songs.size();
-		play ();
+		sint index = _CurrentSongIndex+1;
+		if (index == _Songs.size())
+			index = 0;
+
+		play(index);
 	}
 }
 
@@ -205,17 +280,35 @@ void CMusicPlayer::update ()
 		return;
 	if (_State == Playing)
 	{
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:mp3_player:screen:text"));
+		if (pVT)
+		{
+			TTime dur = (CTime::getLocalTime() - _PlayStart) / 1000;
+			uint min = (dur / 60) % 60;
+			uint sec = dur % 60;
+			uint hour = dur / 3600;
+
+			std::string title(toString("%02d:%02d", min, sec));
+			if (hour > 0) title = toString("%02d:", hour) + title;
+			title += " " + _CurrentSong.Title;
+			pVT->setText(ucstring::makeFromUtf8(title));
+		}
+
 		if (SoundMngr->isMusicEnded ())
 		{
-			// Point the next song
-			_CurrentSong++;
-			_CurrentSong%=_Songs.size();
-
-			// End of the playlist ?
-			if (_CurrentSong != 0)
+			// select next song from playlist
+			sint index = _CurrentSongIndex + 1;
+			if (isRepeatEnabled() || index < _Songs.size())
 			{
-				// No, play the next song
-				play ();
+				if (index == _Songs.size())
+				{
+					index = 0;
+
+					if (isShuffleEnabled())
+						shuffleAndRebuildPlaylist();
+				}
+
+				play(index);
 			}
 			else
 			{
@@ -284,22 +377,10 @@ public:
 			// no format supported
 			if (extensions.empty()) return;
 
-			bool oggSupported = false;
-			bool mp3Supported = false;
-
 			std::string message;
 			for(uint i = 0; i < extensions.size(); ++i)
 			{
-				if (extensions[i] == "ogg")
-				{
-					oggSupported = true;
-					message += " ogg";
-				}
-				else if (extensions[i] == "mp3")
-				{
-					mp3Supported = true;
-					message += " mp3";
-				}
+				message += " " + extensions[i];
 			}
 			message += " m3u m3u8";
 			nlinfo("Media player supports: '%s'", message.substr(1).c_str());
@@ -316,15 +397,9 @@ public:
 			for (i = 0; i < filesToProcess.size(); ++i)
 			{
 				std::string ext = toLower(CFile::getExtension(filesToProcess[i]));
-				if (ext == "ogg")
+				if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
 				{
-					if (oggSupported)
-						filenames.push_back(filesToProcess[i]);
-				}
-				else if (ext == "mp3" || ext == "mp2" || ext == "mp1")
-				{
-					if (mp3Supported)
-						filenames.push_back(filesToProcess[i]);
+					filenames.push_back(filesToProcess[i]);
 				}
 				else if (ext == "m3u" || ext == "m3u8")
 				{
@@ -345,14 +420,6 @@ public:
 			std::vector<CMusicPlayer::CSongs> songs;
 			for (i=0; i<filenames.size(); i++)
 			{
-				// '@' in filenames are reserved for .bnp files
-				// and sound system fails to open such file
-				if (filenames[i].find("@") != string::npos)
-				{
-					nlwarning("Ignore media file containing '@' in name: '%s'", filenames[i].c_str());
-					continue;
-				}
-
 				if (!CFile::fileExists(filenames[i])) {
 					nlwarning("Ignore non-existing file '%s'", filenames[i].c_str());
 					continue;
@@ -360,11 +427,20 @@ public:
 
 				CMusicPlayer::CSongs song;
 				song.Filename = filenames[i];
+				// TODO: cache the result for next refresh
 				SoundMngr->getMixer()->getSongTitle(filenames[i], song.Title, song.Length);
-				songs.push_back (song);
+				if (song.Length > 0)
+					songs.push_back (song);
 			}
 
 			MusicPlayer.playSongs(songs);
+		}
+		else if (Params == "update_playlist")
+		{
+			if (MusicPlayer.isShuffleEnabled())
+				MusicPlayer.shuffleAndRebuildPlaylist();
+
+			MusicPlayer.rebuildPlaylist();
 		}
 		else if (Params == "previous")
 			MusicPlayer.previous();

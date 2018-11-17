@@ -150,6 +150,10 @@ public:
 	{
 		nlassert (index < _CacheStrings.size());
 		CComputedString &rCS = _CacheStrings[index];
+		if (rCS.CacheVersion != _FontManager->getCacheVersion())
+		{
+			computeString(rCS.Text, rCS);
+		}
 		if (_Shaded)
 		{
 			CRGBA bkup = rCS.Color;
@@ -184,6 +188,10 @@ public:
 	{
 		nlassert (index < _CacheStrings.size());
 		CComputedString &rCS = _CacheStrings[index];
+		if (rCS.CacheVersion != _FontManager->getCacheVersion())
+		{
+			computeString(rCS.Text, rCS);
+		}
 		if(_Shaded)
 		{
 			CRGBA	bkup = rCS.Color;
@@ -218,6 +226,11 @@ public:
 	{
 		nlassert (index < _CacheStrings.size());
 		CComputedString &rCS = _CacheStrings[index];
+		if (rCS.CacheVersion != _FontManager->getCacheVersion())
+		{
+			computeString(rCS.Text, rCS);
+		}
+
 		if (_Shaded)
 		{
 			CRGBA	bkup = rCS.Color;

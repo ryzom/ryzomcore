@@ -59,6 +59,9 @@ class CFontManager
 	CSmartPtr<CMaterial> _MatFont;
 	CSmartPtr<CTextureFont>	_TexFont;
 
+	// Keep track number of textures created to properly report cache version
+	uint32 _TexCacheNr;
+
 public:
 
 	/**
@@ -71,6 +74,7 @@ public:
 		_NbChar = 0;
 		_MatFont = NULL;
 		_TexFont = NULL;
+		_TexCacheNr = 0;
 	}
 
 
@@ -93,7 +97,6 @@ public:
 	 * \return CSmartPtr to a font texture
 	 */
 	CMaterial* getFontMaterial();
-
 
 	/**
 	 * Compute primitive blocks and materials of each character of
@@ -152,13 +155,23 @@ public:
 
 	void	dumpCache (const char *filename)
 	{
-		_TexFont->dumpTextureFont (filename);
+		if (_TexFont)
+			_TexFont->dumpTextureFont (filename);
 	}
 
 	/**
 	* invalidate the texture when the text context has been modified
 	*/
 	void invalidate();
+
+	// get font atlas rebuild count
+	uint32 getCacheVersion() const
+	{
+		if (_TexFont)
+			return (_TexFont->getCacheVersion() << 16) + _TexCacheNr;
+
+		return 0;
+	}
 
 };
 

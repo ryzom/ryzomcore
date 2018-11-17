@@ -45,7 +45,7 @@ using namespace std;
 namespace NLSOUND {
 
 CStreamFileSource::CStreamFileSource(CStreamFileSound *streamFileSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController)
-: CStreamSource(streamFileSound, spawn, cb, cbUserParam, cluster, groupController), m_AudioDecoder(NULL), m_Paused(false)
+: CStreamSource(streamFileSound, spawn, cb, cbUserParam, cluster, groupController), m_AudioDecoder(NULL), m_Paused(false), m_DecodingEnded(false)
 {
 	m_Thread = NLMISC::IThread::create(this);
 }
@@ -244,7 +244,7 @@ void CStreamFileSource::resume()
 
 bool CStreamFileSource::isEnded()
 {
-	return (!m_Thread->isRunning() && !_Playing && !m_WaitingForPlay && !m_Paused);
+	return m_DecodingEnded || (!m_Thread->isRunning() && !_Playing && !m_WaitingForPlay && !m_Paused);
 }
 
 float CStreamFileSource::getLength()
@@ -319,6 +319,7 @@ void CStreamFileSource::run()
 	this->getRecommendedBufferSize(samples, bytes);
 	uint32 recSleep = 40;
 	uint32 doSleep = 10;
+	m_DecodingEnded = false;
 	while (_Playing || m_WaitingForPlay)
 	{
 		if (!m_AudioDecoder->isMusicEnded())
@@ -369,6 +370,9 @@ void CStreamFileSource::run()
 	{
 		delete m_AudioDecoder;
 		m_AudioDecoder = NULL;
+		// _Playing cannot be used to detect play state because its required in cleanup
+		// Using m_AudioDecoder in isEnded() may result race condition (decoder is only created after thread is started)
+		m_DecodingEnded = true;
 	}
 	// drop buffers
 	m_FreeBuffers = 3;

@@ -74,6 +74,8 @@ public:
 
 	uint32	getUID() { return _UID; }
 
+	std::string getFontFileName() const;
+
 private:
 
 	static uint32 _FontGeneratorCounterUID;

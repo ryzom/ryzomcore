@@ -74,25 +74,9 @@ uint32 CTextContext::textPush (const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, NLMISC::MaxCStringSize);
 
-	if (_CacheNbFreePlaces == 0)
-	{
-		CComputedString csTmp;
-
-		_CacheStrings.push_back (csTmp);
-		if (_CacheFreePlaces.empty())
-			_CacheFreePlaces.resize (1);
-		_CacheFreePlaces[0] = (uint32)_CacheStrings.size()-1;
-		_CacheNbFreePlaces = 1;
-	}
-
-	// compute the string.
-	uint32 index = _CacheFreePlaces[_CacheNbFreePlaces-1];
-	CComputedString &strToFill = _CacheStrings[index];
-	_FontManager->computeString (str, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, strToFill, _Keep800x600Ratio);
-
-	_CacheNbFreePlaces--;
-
-	return index;
+	ucstring uc;
+	uc.fromUtf8((const char *)str);
+	return textPush(uc);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -115,8 +99,10 @@ uint32 CTextContext::textPush (const ucstring &str)
 	uint32 index = _CacheFreePlaces[_CacheNbFreePlaces-1];
 	nlassert (index < _CacheStrings.size());
 	CComputedString &strToFill = _CacheStrings[index];
-	_FontManager->computeString (str, _FontGen, _Color
-		, _FontSize, _Embolden, _Oblique, _Driver, strToFill, _Keep800x600Ratio);
+
+	_FontManager->computeString (str, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, strToFill, _Keep800x600Ratio);
+	// just compute letters, glyphs are rendered on demand before first draw
+	//_FontManager->computeStringInfo(str, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, strToFill, _Keep800x600Ratio);
 
 	_CacheNbFreePlaces--;
 
