@@ -402,6 +402,10 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 	para->setSizeRef("w");
 	para->setResizeFromChildH(true);
 
+	// use right click because left click might be used to activate chat window
+	para->setRightClickHandler("copy_to_clipboard");
+	para->setRightClickHandlerParams(msg.toUtf8());
+
 	if (plaintext)
 	{
 		CViewBase *vt = createMsgTextSimple(msg, col, justified, NULL);
