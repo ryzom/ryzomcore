@@ -1412,7 +1412,6 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::setLineMaxW (sint nMaxW, bool invalidate)
 	{
-		nMaxW *= _Scale;
 		if(_LineMaxW!=nMaxW)
 		{
 			_LineMaxW = nMaxW;
