@@ -516,6 +516,9 @@ CTextureFont::SLetterInfo* CTextureFont::getLetterInfo (SLetterKey& k, bool rend
 	// letter not found (=NULL) or render not requested
 	if (!letter || !render) return letter;
 
+	// nothing to render, ie space char
+	if (letter->CharWidth == 0 || letter->CharHeight == 0) return letter;
+
 	if (!letter->glyph || letter->glyph->CacheVersion != _CacheVersion)
 	{
 		// render glyph
