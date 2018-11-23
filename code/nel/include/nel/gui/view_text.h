@@ -70,6 +70,7 @@ namespace NLGUI
 		virtual void checkCoords();
 		virtual void updateCoords();
 		virtual	void onAddToGroup();
+		virtual void onInterfaceScaleChanged();
 
 		/// From CInterfaceElement
 		sint32	getMaxUsedW() const;
@@ -90,6 +91,7 @@ namespace NLGUI
 		void setShadowColor (const NLMISC::CRGBA &color);
 		void setShadowOffset (sint x, sint y);
 		void setLineMaxW (sint nMaxW, bool invalidate=true);
+		void setOverflowText(const ucstring &text) { _OverflowText = text; }
 		void setMultiLine (bool bMultiLine);
 		void setMultiLineSpace (sint nMultiLineSpace);
 		void setMultiLineMaxWOnly (bool state);
@@ -115,6 +117,7 @@ namespace NLGUI
 		NLMISC::CRGBA	getShadowColor()	{ return _ShadowColor; }
 		void			getShadowOffset(sint &x, sint &y) { x = _ShadowX; y = _ShadowY; }
 		sint			getLineMaxW()		const { return _LineMaxW; }
+		ucstring		getOverflowText()	const { return _OverflowText; }
 		bool			getMultiLine() const		{ return _MultiLine; }
 		sint			getMultiLineSpace()	const	{ return _MultiLineSpace; }
 		bool			getMultiLineMaxWOnly()	const	{ return _MultiLineMaxWOnly; }
@@ -128,6 +131,8 @@ namespace NLGUI
 		uint            getFontHeight() const;
 		// get current font leg height, in pixels
 		uint            getFontLegHeight() const;
+		// get current line height, in pixels
+		float           getLineHeight() const;
 		// Set the display mode (supported with multiline only for now)
 		void			setTextMode(TTextMode mode);
 		TTextMode		getTextMode() const	{ return _TextMode; }
@@ -148,11 +153,11 @@ namespace NLGUI
 		  *  When looking at standard edit box, we see that if a line is split accross to line with no
 		  * This also returns the height of the line
 		  */
-		void getCharacterPositionFromIndex(sint index, bool lineEnd, sint &x, sint &y, sint &height) const;
+		void getCharacterPositionFromIndex(sint index, bool lineEnd, float &x, float &y, float &height) const;
 		/** From a coordinate relative to the BR BR corner of the text, return the index of a character.
 		  * If no character is found at the given position, the closest character is returned (first or last character, for the line or the whole text)
 		  */
-		void getCharacterIndexFromPosition(sint x, sint y, uint &index, bool &lineEnd) const;
+		void getCharacterIndexFromPosition(float x, float y, uint &index, bool &lineEnd) const;
 		/** From a character index, get the index of the line it belongs to, or -1 if the index is invalid
 		  * \param cursorDisplayedAtEndOfPreviousLine true if the cursor is displayed at the end of the previous line that match its index
 		  */
@@ -238,12 +243,14 @@ namespace NLGUI
 		bool	_Embolden;
 		bool	_Oblique;
 		// width of the font in pixel. Just a Hint for tabing format (computed with '_')
-		uint	_FontWidth;
+		float	_FontWidth;
 		// height of the font in pixel.
 		// use getFontHeight
-		uint	_FontHeight;
-		uint	_FontLegHeight;
+		float	_FontHeight;
+		float	_FontLegHeight;
 		float	_SpaceWidth;
+		/// last UI scale used to calculate font size
+		float	_Scale;
 		/// the text color
 		NLMISC::CRGBA _Color;
 		/// the shadow mode
@@ -260,6 +267,7 @@ namespace NLGUI
 		sint32		_LineMaxW;
 		/// For single line, true if the text is clamped (ie displayed with "...")
 		bool		_SingleLineTextClamped;
+		ucstring	_OverflowText;
 
 		/// Multiple lines handling
 		bool		 _MultiLine;
@@ -341,8 +349,8 @@ namespace NLGUI
 				// Clear the line & remove text contexts
 				void clear(NL3D::UTextContext &textContext);
 				// Add a new word (and its context) in the line + a number of spaces to append at the end of the line
-				void	addWord(const ucstring &word, uint numSpaces, const CFormatInfo &wordFormat, uint fontWidth, NL3D::UTextContext &textContext);
-				void    addWord(const CWord &word, uint fontWidth);
+				void	addWord(const ucstring &word, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext);
+				void    addWord(const CWord &word, float fontWidth);
 				uint	getNumWords() const { return (uint)_Words.size(); }
 				CWord   &getWord(uint index) { return _Words[index]; }
 				float	getSpaceWidth() const { return _SpaceWidth; }
@@ -402,7 +410,7 @@ namespace NLGUI
 		uint	_TextSelectionEnd;
 
 		// First line X coordinate
-		sint	_FirstLineX;
+		float	_FirstLineX;
 
 		/// Dynamic tooltips
 		std::vector<CCtrlToolTip*>	_Tooltips;

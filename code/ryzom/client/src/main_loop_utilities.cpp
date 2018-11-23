@@ -36,6 +36,7 @@
 #include "input.h"
 #include "sound_manager.h"
 #include "camera.h"
+#include "interface_v3/interface_manager.h"
 
 using namespace NLMISC;
 using namespace NL3D;
@@ -99,6 +100,12 @@ void updateFromClientCfg()
 		else
 			Driver->forceTextureResize(1);
 	}
+
+	if (ClientCfg.InterfaceScale != LastClientCfg.InterfaceScale)
+		CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
+
+	if (ClientCfg.BilinearUI != LastClientCfg.BilinearUI)
+		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
 
 	//---------------------------------------------------
 	if (ClientCfg.WaitVBL != LastClientCfg.WaitVBL)

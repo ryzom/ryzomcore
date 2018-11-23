@@ -39,6 +39,16 @@ namespace NLGUI
 	class CGroupParagraph;
 
 	/**
+	 * Interface for UI scale change event
+	 */
+	class IInterfaceScaleWatcher
+	{
+		public:
+			virtual ~IInterfaceScaleWatcher(){}
+			virtual void onInterfaceScaleChanged()=0;
+	};
+
+	/**
 	 * A visitor to walk a tree of interface elements and apply a teartment on them.
 	 *
 	 * For each vsited element, visitElement() is called
@@ -66,7 +76,7 @@ namespace NLGUI
 	 * \author Nevrax France
 	 * \date 2002
 	 */
-	class CInterfaceElement : public CReflectableRefPtrTarget, public NLMISC::IStreamable
+	class CInterfaceElement : public IInterfaceScaleWatcher, public CReflectableRefPtrTarget, public NLMISC::IStreamable
 	{
 	public:
 
@@ -408,6 +418,10 @@ namespace NLGUI
 		/* This call back is called when the content or the content of a child is been invalidated.
 		 */
 		virtual void	onInvalidateContent() {}
+
+		/* Element UI scale change event callback
+		 */
+		virtual void	onInterfaceScaleChanged() {}
 
 		// called by interfaceManager for master window only
 		void			resetInvalidCoords();

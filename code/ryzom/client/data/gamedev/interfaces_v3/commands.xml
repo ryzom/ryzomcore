@@ -122,6 +122,8 @@
 
 	<command name="loot" action="inv_temp_all" params="" />
 
+	<command name="setuiscale" action="set_ui_scale" params="scale=$"/>
+
 	<command name="mapsearch" action="proc" params="map_search_show_set|+" />
 	<command name="mapsearch" action="proc" params="map_search_show" />
 

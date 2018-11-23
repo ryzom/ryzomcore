@@ -484,6 +484,8 @@ CInterfaceManager::CInterfaceManager()
 	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
 	_ScreenW = _ScreenH = 0;
 	_LastInGameScreenW = _LastInGameScreenH = 0;
+	_InterfaceScaleChanged = false;
+	_InterfaceScale = 1.0f;
 	_DescTextTarget = NULL;
 	_ConfigLoaded = false;
 	_LogState = false;
@@ -1828,8 +1830,12 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		CWidgetManager::getInstance()->setScreenWH(_LastInGameScreenW, _LastInGameScreenH);
 		// NB: we are typically InGame here (even though the _InGame flag is not yet set)
 		// Use the screen size of the config file. Don't update current UI, just _Modes
-		CWidgetManager::getInstance()->moveAllWindowsToNewScreenSize(ClientCfg.Width, ClientCfg.Height, false);
-		updateDesktops( ClientCfg.Width, ClientCfg.Height );
+		//
+		// ClientCfg has W/H set to screen size, but interface expects scaled size
+		sint32 scaledW = ClientCfg.Width / ClientCfg.InterfaceScale;
+		sint32 scaledH = ClientCfg.Height / ClientCfg.InterfaceScale;
+		CWidgetManager::getInstance()->moveAllWindowsToNewScreenSize(scaledW, scaledH, false);
+		updateDesktops(scaledW, scaledH);
 	}
 
 	// *** apply the current mode
@@ -2048,6 +2054,13 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 			node = &*_CurrentPlayerCharacLeaf[i];
 
 		_CurrentPlayerCharac[i] = node ? node->getValue32() : 0;
+	}
+
+	// scale must be updated right before widget manager checks it
+	if (_InterfaceScaleChanged)
+	{
+		CViewRenderer::getInstance()->setInterfaceScale(_InterfaceScale);
+		_InterfaceScaleChanged = false;
 	}
 
 	CWidgetManager::getInstance()->drawViews( camera );
@@ -2937,7 +2950,6 @@ NLMISC_COMMAND(loadui, "Load an interface file", "<loadui [all]/interface.xml>")
 
 	return result;
 }
-
 
 // ***************************************************************************
 void CInterfaceManager::displayWebWindow(const string & name, const string & url)

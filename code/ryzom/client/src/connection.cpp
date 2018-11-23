@@ -227,6 +227,9 @@ void connectionRestoreVideoMode ()
 	SetMouseCursor ();
 	SetMouseSpeed (ClientCfg.CursorSpeed);
 	SetMouseAcceleration (ClientCfg.CursorAcceleration);
+
+	// Restore user UI scaling
+	CViewRenderer::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
 }
 
 
@@ -262,6 +265,8 @@ void	setOutGameFullScreen()
 		InitMouseWithCursor(ClientCfg.HardwareCursor && !StereoDisplayAttached);
 	}
 
+	// Enable auto scaling in login window
+	CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
 }
 
 
@@ -427,6 +432,9 @@ bool connection (const string &cookie, const string &fsaddr)
 
 	firstConnection = false;
 
+	// Restore user UI scaling
+	CViewRenderer::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
+
 	// Disable inputs
 	Actions.enable(false);
 	EditActions.enable(false);
@@ -557,6 +565,9 @@ bool reconnection()
 		}
 		InterfaceState = globalMenu();
 	}
+
+	// Restore user UI scaling
+	CViewRenderer::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
 
 	// Disable inputs
 	Actions.enable(false);

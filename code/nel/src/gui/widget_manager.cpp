@@ -1850,7 +1850,7 @@ namespace NLGUI
 	class InvalidateTextVisitor : public CInterfaceElementVisitor
 	{
 	public:
-		InvalidateTextVisitor( bool reset )
+		InvalidateTextVisitor( bool reset)
 		{
 			this->reset = reset;
 		}
@@ -1893,6 +1893,13 @@ namespace NLGUI
 		}
 		CViewRenderer::getInstance()->setClipWindow(0, 0, w, h);
 
+		bool scaleChanged = _InterfaceScale != CViewRenderer::getInstance()->getInterfaceScale();
+		if (scaleChanged)
+		{
+			_InterfaceScale = CViewRenderer::getInstance()->getInterfaceScale();
+			notifyInterfaceScaleWatchers();
+		}
+
 		// If all conditions are OK, move windows so they fit correctly with new screen size
 		// Do this work only InGame when Config is loaded
 		moveAllWindowsToNewScreenSize(w,h,true);
@@ -1902,7 +1909,7 @@ namespace NLGUI
 		{
 			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 
-			InvalidateTextVisitor inv( false );
+			InvalidateTextVisitor inv( false);
 
 			rMG.Group->visitGroupAndChildren( &inv );
 			rMG.Group->invalidateCoords ();
@@ -3688,6 +3695,42 @@ namespace NLGUI
 	}
 
 
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::notifyInterfaceScaleWatchers()
+	{
+		std::vector< IInterfaceScaleWatcher* >::iterator itr = scaleWatchers.begin();
+		while( itr != scaleWatchers.end() )
+		{
+			(*itr)->onInterfaceScaleChanged();
+			++itr;
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::registerInterfaceScaleWatcher( IInterfaceScaleWatcher *watcher )
+	{
+		std::vector< IInterfaceScaleWatcher* >::const_iterator itr
+			= std::find( scaleWatchers.begin(), scaleWatchers.end(), watcher );
+
+		if( itr != scaleWatchers.end() )
+			return;
+
+		scaleWatchers.push_back( watcher );
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::unregisterInterfaceScaleWatcher( IInterfaceScaleWatcher *watcher )
+	{
+		std::vector< IInterfaceScaleWatcher* >::iterator itr
+			= std::find( scaleWatchers.begin(), scaleWatchers.end(), watcher );
+
+		if( itr == scaleWatchers.end() )
+			return;
+
+		scaleWatchers.erase( itr );
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	CWidgetManager::CWidgetManager()
 	{
 		LinkHack();
@@ -3724,6 +3767,7 @@ namespace NLGUI
 		inGame = false;
 
 		setScreenWH(0, 0);
+		_InterfaceScale = 1.0f;
 
 		_GroupSelection = false;
 		multiSelection = false;
