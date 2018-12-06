@@ -920,9 +920,8 @@ namespace NLGUI
 	// ***************************************************************************
 	sint	CViewText::getCurrentMultiLineMaxW() const
 	{
-		sint maxw = ceilf(_LineMaxW * _Scale);
 		if(_MultiLineMaxWOnly)
-			return maxw;
+			return _LineMaxW;
 		else
 		{
 			sint offset = (sint)_XReal - (sint)_Parent->getXReal();
@@ -2021,7 +2020,7 @@ namespace NLGUI
 			_W = (sint)ceilf(_Info.StringWidth / _Scale);
 
 			// Rare case: clamp W => recompute slowly, cut letters
-			if(_Info.StringWidth > _LineMaxW)
+			if(_W > _LineMaxW)
 			{
 				TextContext->erase (_Index);
 
@@ -2038,6 +2037,8 @@ namespace NLGUI
 					dotWidth = si.StringWidth;
 				}
 
+				// scale LineMaxW to actual font size
+				float fLineMaxW = (float)_LineMaxW * _Scale;
 				float rWidthCurrentLine = 0;
 				// for all the text
 				if (_ClampRight)
@@ -2048,7 +2049,7 @@ namespace NLGUI
 						ucstring ucStrLetter;
 						ucStrLetter= ucLetter;
 						si = TextContext->getStringInfo (ucStrLetter);
-						if ((rWidthCurrentLine + si.StringWidth + dotWidth) > _LineMaxW)
+						if ((rWidthCurrentLine + si.StringWidth + dotWidth) > fLineMaxW)
 						{
 							break;
 						}
@@ -2074,7 +2075,7 @@ namespace NLGUI
 						ucstring ucStrLetter;
 						ucStrLetter= ucLetter;
 						si = TextContext->getStringInfo (ucStrLetter);
-						if ((rWidthCurrentLine + si.StringWidth + dotWidth) > _LineMaxW)
+						if ((rWidthCurrentLine + si.StringWidth + dotWidth) > fLineMaxW)
 						{
 							break;
 						}
