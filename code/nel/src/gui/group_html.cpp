@@ -1846,7 +1846,11 @@ namespace NLGUI
 					{
 						CStyleParams style;
 						float tmpf;
-						
+
+						std::string id;
+						if (present[MY_HTML_IMG_ID] && value[MY_HTML_IMG_ID])
+							id = value[MY_HTML_IMG_ID];
+
 						if (present[MY_HTML_IMG_WIDTH] && value[MY_HTML_IMG_WIDTH])
 							getPercentage(style.Width, tmpf, value[MY_HTML_IMG_WIDTH]);
 						if (present[MY_HTML_IMG_HEIGHT] && value[MY_HTML_IMG_HEIGHT])
@@ -1880,13 +1884,13 @@ namespace NLGUI
 						if (getA() && getParent () && getParent ()->getParent())
 						{
 							string params = "name=" + getId() + "|url=" + getLink ();
-							addButton(CCtrlButton::PushButton, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
+							addButton(CCtrlButton::PushButton, id, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
 								overSrc, "browse", params.c_str(), tooltip, style);
 						}
 						else
 						if (tooltip || !overSrc.empty())
 						{
-							addButton(CCtrlButton::PushButton, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
+							addButton(CCtrlButton::PushButton, id, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
 								overSrc, "", "", tooltip, style);
 						}
 						else
@@ -1908,7 +1912,7 @@ namespace NLGUI
 									reloadImg = true;
 							}
 
-							addImage (value[MY_HTML_IMG_SRC], reloadImg, style);
+							addImage(id, value[MY_HTML_IMG_SRC], reloadImg, style);
 						}
 					}
 				}
@@ -1920,6 +1924,10 @@ namespace NLGUI
 					// read general property
 					string templateName;
 					string minWidth;
+					string id;
+
+					if (present[MY_HTML_INPUT_ID] && value[MY_HTML_INPUT_ID])
+						id = value[MY_HTML_INPUT_ID];
 
 					// Widget template name
 					if (present[MY_HTML_INPUT_Z_BTN_TMPL] && value[MY_HTML_INPUT_Z_BTN_TMPL])
@@ -2114,6 +2122,10 @@ namespace NLGUI
 							{
 								if (btnType == CCtrlButton::RadioButton)
 								{
+									// override with 'id' because radio buttons share same name
+									if (!id.empty())
+										checkbox->setId(id);
+
 									// group together buttons with same name
 									CForm &form = _Forms.back();
 									bool notfound = true;
@@ -4528,7 +4540,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::addImage(const char *img, bool reloadImg, const CStyleParams &style)
+	void CGroupHTML::addImage(const std::string &id, const char *img, bool reloadImg, const CStyleParams &style)
 	{
 		// In a paragraph ?
 		if (!_Paragraph)
@@ -4544,6 +4556,7 @@ namespace NLGUI
 
 		// Not added ?
 		CViewBitmap *newImage = new CViewBitmap (TCtorParam());
+		newImage->setId(id);
 
 		//
 		// 1/ try to load the image with the old system (local files in bnp)
@@ -4746,7 +4759,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	CCtrlButton *CGroupHTML::addButton(CCtrlButton::EType type, const std::string &/* name */, const std::string &normalBitmap, const std::string &pushedBitmap,
+	CCtrlButton *CGroupHTML::addButton(CCtrlButton::EType type, const std::string &name, const std::string &normalBitmap, const std::string &pushedBitmap,
 									  const std::string &overBitmap, const char *actionHandler, const char *actionHandlerParams,
 									  const char *tooltip, const CStyleParams &style)
 	{
@@ -4759,6 +4772,10 @@ namespace NLGUI
 
 		// Add the ctrl button
 		CCtrlButton *ctrlButton = new CCtrlButton(TCtorParam());
+		if (!name.empty())
+		{
+			ctrlButton->setId(name);
+		}
 
 		// Load only tga files.. (conversion in dds filename is done in the lookup procedure)
 		string normal = normalBitmap.empty()?"":CFile::getPath(normalBitmap) + CFile::getFilenameWithoutExtension(normalBitmap) + ".tga";
@@ -4855,7 +4872,7 @@ namespace NLGUI
 
 		getParagraph()->addChild (ctrlButton);
 		paragraphChange ();
-		
+
 		setImageSize(ctrlButton, style);
 
 		return ctrlButton;
@@ -6004,12 +6021,12 @@ namespace NLGUI
 		if (!url.empty())
 		{
 			string params = "name=" + getId() + "|url=" + getLink ();
-			addButton(CCtrlButton::PushButton, ls.toString(1), ls.toString(1), ls.toString(1),
+			addButton(CCtrlButton::PushButton, "", ls.toString(1), ls.toString(1),
 								"", "browse", params.c_str(), "", style);
 		}
 		else
 		{
-			addImage(ls.toString(1), false, style);
+			addImage("", ls.toString(1), false, style);
 		}
 
 
