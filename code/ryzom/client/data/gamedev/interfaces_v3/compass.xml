@@ -17,6 +17,9 @@
   <variable entry="UI:SAVE:MP3_SHUFFLE"
             type="sint32"
             value="0" />
+  <variable entry="UI:TEMP:MP3_PLAYING"
+            type="sint32"
+            value="0" />
   <!--******************-->
   <!--*   MP3 PLAYER   *-->
   <!--******************-->
@@ -37,17 +40,28 @@
         <ctrl type="button" id="btn" button_type="toggle_button" sizeref="wh" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" scale="true"
           color="255 255 255 0" col_pushed="255 255 255 0" col_over="255 255 255 90"
           global_color_normal="true" global_color_pushed="true" global_color_over="true"
-		  ondblclick_l="music_player" params_dblclick_l="song=#index" />
+          ondblclick_l="music_player" params_dblclick_l="song=#index" />
 
         <view type="bitmap" id="bg" posref="MM MM" sizeref="wh" color="200 200 200 50" texture="blank.tga" scale="true" active="false" />
         <view type="text" id="title" posref="ML ML" x="0" line_maxw="#line_maxw" fontsize="8" shadow="true" multi_line="true" multi_line_space="0" />
-		<view type="text" id="duration" posref="MR MR" x="0" fontsize="8" shadow="true" color="255 255 255 150" />
+        <view type="text" id="duration" posref="MR MR" x="0" fontsize="8" shadow="true" color="255 255 255 150" />
     </group>
   </template>
 
   <proc id="proc_mp3_toggle_shuffle">
       <action handler="set" params="dblink=UI:SAVE:MP3_SHUFFLE|value=not(@UI:SAVE:MP3_SHUFFLE)" />
       <action handler="music_player" params="update_playlist" />
+  </proc>
+
+  <proc id="proc_mp3_update_tooltip">
+      <action handler="lua" params="getUI('ui:interface:mp3_player:controls:but_play').tooltip = i18n.get('uiMP3Play')"  cond="eq(@UI:TEMP:MP3_PLAYING,0)" />
+      <action handler="lua" params="getUI('ui:interface:mp3_player:controls:but_play').tooltip = i18n.get('uiMP3Pause')" cond="eq(@UI:TEMP:MP3_PLAYING,1)" />
+  </proc>
+
+  <proc id="proc_mp3_but_play">
+      <action handler="set" params="dblink=UI:TEMP:MP3_PLAYING|value=not(@UI:TEMP:MP3_PLAYING)" />
+      <action handler="music_player" params="play"  cond="eq(@UI:TEMP:MP3_PLAYING,1)" />
+      <action handler="music_player" params="pause" cond="eq(@UI:TEMP:MP3_PLAYING,0)" />
   </proc>
 
   <group type="modal"
@@ -203,26 +217,30 @@
             tooltip="uiMP3Prev" />
       <ctrl type="button"
             id="but_play"
-            button_type="push_button"
+            button_type="toggle_button"
             posref="MM MM"
             posparent="slot2"
             tx_normal="mp3_button_play.tga"
-            tx_pushed="mp3_button_play.tga"
+            tx_pushed="mp3_button_pause.tga"
             tx_over="mp3_button_over.tga"
-            onclick_l="music_player"
-            params_l="play"
+            onclick_l="proc"
+            params_l="proc_mp3_but_play"
             tooltip="uiMP3Play" />
+      <!-- TODO: but_stop is using placeholder texture -->
       <ctrl type="button"
-            id="but_pause"
+            id="but_stop"
             button_type="push_button"
             posref="MM MM"
             posparent="slot3"
-            tx_normal="mp3_button_pause.tga"
-            tx_pushed="mp3_button_pause.tga"
+            tx_normal="w_button_10_choice.tga"
+            tx_pushed="w_button_10_choice.tga"
             tx_over="mp3_button_over.tga"
+            scale="true"
+            w="20"
+            h="16"
             onclick_l="music_player"
-            params_l="pause"
-            tooltip="uiMP3Pause" />
+            params_l="stop"
+            tooltip="uiMP3Stop" />
       <ctrl type="button"
             id="but_next"
             button_type="push_button"
@@ -312,6 +330,8 @@
             posref="TL TL"
             w="48"
             h="20" />
+
+      <link expr="@UI:TEMP:MP3_PLAYING" target="but_play:pushed" action="proc" params="proc_mp3_update_tooltip" />
     </group>
     <!-- SCREEN -->
     <group id="screen"

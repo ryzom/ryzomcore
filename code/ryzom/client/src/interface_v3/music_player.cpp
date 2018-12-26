@@ -174,6 +174,7 @@ void CMusicPlayer::play (sint index)
 	if(!SoundMngr)
 		return;
 
+
 	sint prevSongIndex = _CurrentSongIndex;
 
 	if (index >= 0 && index < (sint)_Songs.size())
@@ -208,6 +209,8 @@ void CMusicPlayer::play (sint index)
 		_CurrentSong = _Songs[_CurrentSongIndex];
 
 		updatePlaylist(prevSongIndex);
+
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MP3_PLAYING")->setValueBool(true);
 	}
 }
 
@@ -217,6 +220,7 @@ void CMusicPlayer::pause ()
 {
 	if(!SoundMngr)
 		return;
+
 	// pause the music only if we are really playing (else risk to pause a background music!)
 	if(_State==Playing)
 	{
@@ -225,6 +229,8 @@ void CMusicPlayer::pause ()
 
 		if (_PlayStart > 0)
 			_PauseTime = CTime::getLocalTime() - _PlayStart;
+
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MP3_PLAYING")->setValueBool(false);
 	}
 }
 
@@ -234,11 +240,14 @@ void CMusicPlayer::stop ()
 {
 	if(!SoundMngr)
 		return;
+
 	// stop the music only if we are really playing (else risk to stop a background music!)
 	SoundMngr->stopMusic(0);
 	_State = Stopped;
 	_PlayStart = 0;
 	_PauseTime = 0;
+
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MP3_PLAYING")->setValueBool(false);
 }
 
 // ***************************************************************************
@@ -446,6 +455,8 @@ public:
 			MusicPlayer.previous();
 		else if (Params == "play")
 			MusicPlayer.play();
+		else if (Params == "stop")
+			MusicPlayer.stop();
 		else if (Params == "pause")
 			MusicPlayer.pause();
 		else if (Params == "next")
