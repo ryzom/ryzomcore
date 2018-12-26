@@ -11,6 +11,12 @@
   <variable entry="UI:SAVE:MP3_VOLUME"
             type="sint64"
             value="255" />
+  <variable entry="UI:SAVE:MP3_REPEAT"
+            type="sint32"
+            value="1" />
+  <variable entry="UI:SAVE:MP3_SHUFFLE"
+            type="sint32"
+            value="0" />
   <!--******************-->
   <!--*   MP3 PLAYER   *-->
   <!--******************-->
@@ -33,10 +39,16 @@
           global_color_normal="true" global_color_pushed="true" global_color_over="true"
 		  ondblclick_l="music_player" params_dblclick_l="song=#index" />
 
+        <view type="bitmap" id="bg" posref="MM MM" sizeref="wh" color="200 200 200 50" texture="blank.tga" scale="true" active="false" />
         <view type="text" id="title" posref="ML ML" x="0" line_maxw="#line_maxw" fontsize="8" shadow="true" multi_line="true" multi_line_space="0" />
-		<view type="text" id="duration" posref="MR MR" x="0" fontsize="8" shadow="true" color="255 255 255 128" />
+		<view type="text" id="duration" posref="MR MR" x="0" fontsize="8" shadow="true" color="255 255 255 150" />
     </group>
   </template>
+
+  <proc id="proc_mp3_toggle_shuffle">
+      <action handler="set" params="dblink=UI:SAVE:MP3_SHUFFLE|value=not(@UI:SAVE:MP3_SHUFFLE)" />
+      <action handler="music_player" params="update_playlist" />
+  </proc>
 
   <group type="modal"
          id="playlist"
@@ -82,6 +94,30 @@
           hardtext="uiPlaylistRefresh"
           onclick_l="music_player"
           params_l="play_songs" />
+    <ctrl style="text_button_header"
+          button_type="toggle_button"
+          id="shuffle"
+          posparent="refresh"
+          posref="ML MR"
+          x="-4"
+          y="0"
+          hardtext="S"
+          onclick_l="proc"
+          params_l="proc_mp3_toggle_shuffle" />
+    <ctrl style="text_button_header"
+          button_type="toggle_button"
+          id="repeat"
+          posparent="shuffle"
+          posref="ML MR"
+          x="-4"
+          y="0"
+          hardtext="R"
+          onclick_l="set"
+          params_l="dblink=UI:SAVE:MP3_REPEAT|value=not(@UI:SAVE:MP3_REPEAT)" />
+
+    <!-- change button state when variable chaanged -->
+    <link expr="@UI:SAVE:MP3_REPEAT" target="repeat:pushed" />
+    <link expr="@UI:SAVE:MP3_SHUFFLE" target="shuffle:pushed" />
 
     <group id="content" x="8" y="-24" over="true" sizeref="w" posref="TL TL" child_resize_h="true" child_resize_hmargin="4">
       <group id="songs" x="10" y="0" sizeref="w" posref="TL TL" child_resize_h="true" max_h="215">
