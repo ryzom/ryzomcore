@@ -2759,7 +2759,7 @@ void	CAudioMixerUser::setEventMusicVolume(float gain)
 bool	CAudioMixerUser::isEventMusicEnded()
 {
 	if (_MusicChannelFaders[EventMusicChannel].isInitOk())
-		_MusicChannelFaders[EventMusicChannel].isEnded();
+		return _MusicChannelFaders[EventMusicChannel].isEnded();
 	return true;
 }
 
