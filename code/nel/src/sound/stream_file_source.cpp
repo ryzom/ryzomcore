@@ -372,7 +372,7 @@ void CStreamFileSource::run()
 		m_AudioDecoder = NULL;
 		// _Playing cannot be used to detect play state because its required in cleanup
 		// Using m_AudioDecoder in isEnded() may result race condition (decoder is only created after thread is started)
-		m_DecodingEnded = true;
+		m_DecodingEnded = !m_WaitingForPlay;
 	}
 	// drop buffers
 	m_FreeBuffers = 3;
