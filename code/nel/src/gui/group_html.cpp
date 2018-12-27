@@ -6301,10 +6301,7 @@ namespace NLGUI
 				if (it->second == "inherit")
 					style.FontFamily = current.FontFamily;
 				else
-				if (it->second == "monospace")
-					style.FontFamily = "monospace";
-				else
-					style.FontFamily.clear();
+					style.FontFamily = it->second;
 			}
 			else
 			if (it->first == "font-weight")
