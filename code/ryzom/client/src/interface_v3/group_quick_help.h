@@ -53,6 +53,11 @@ private:
 	virtual void browse (const char *url);
 	virtual std::string	home();
 
+	// Modify uri with '.html' or '_??.html' ending to have current user language,
+	// If the uri is not found locally, then try "en" as fallback language
+	// ie. 'help_ru.html' does not exists, return 'help_en.html'
+	std::string getLanguageUrl(const std::string &href, std::string lang) const;
+
 	// Init parsing value
 	void initParameters();
 
