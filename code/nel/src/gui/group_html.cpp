@@ -5788,6 +5788,13 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void	CGroupHTML::clearRefresh()
+	{
+		_URL.clear();
+		updateRefreshButton();
+	}
+
+	// ***************************************************************************
 	void	CGroupHTML::clearUndoRedo()
 	{
 		// erase any undo/redo
@@ -5873,7 +5880,7 @@ namespace NLGUI
 	{
 		CCtrlBaseButton		*butRefresh = dynamic_cast<CCtrlBaseButton *>(CWidgetManager::getInstance()->getElementFromId(_BrowseRefreshButton));
 
-		bool enabled = !_Browsing && !_Connecting;
+		bool enabled = !_Browsing && !_Connecting && !_URL.empty();
 		if(butRefresh)
 			butRefresh->setFrozen(!enabled);
 	}
@@ -5910,6 +5917,16 @@ namespace NLGUI
 		if (ptr)
 			fromString((const char*)ptr, Offset);
 		return true;
+	}
+
+	int CGroupHTML::luaClearRefresh(CLuaState &ls)
+	{
+		const char *funcName = "clearRefresh";
+		CLuaIHM::checkArgCount(ls, funcName, 0);
+
+		clearRefresh();
+
+		return 0;
 	}
 
 	int CGroupHTML::luaClearUndoRedo(CLuaState &ls)
