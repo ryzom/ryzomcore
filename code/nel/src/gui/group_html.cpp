@@ -5912,6 +5912,15 @@ namespace NLGUI
 		return true;
 	}
 
+	int CGroupHTML::luaClearUndoRedo(CLuaState &ls)
+	{
+		const char *funcName = "clearUndoRedo";
+		CLuaIHM::checkArgCount(ls, funcName, 0);
+
+		clearUndoRedo();
+		return 0;
+	}
+
 	// ***************************************************************************
 	int CGroupHTML::luaBrowse(CLuaState &ls)
 	{
