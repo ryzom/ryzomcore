@@ -214,6 +214,7 @@ int main(int argc, char **argv)
 	args.addArg("x", "extract", "", "Extract all interface elements from <output_filename> to <input_path>.");
 	args.addAdditionalArg("output_filename", "PNG or TGA file to generate", true);
 	args.addAdditionalArg("input_path", "Path that containts interfaces elements", false);
+	args.addArg("b", "border", "", "Duplicate icon border to allow bilinear filtering");
 
 	if (!args.parse(argc, argv)) return 1;
 
@@ -225,6 +226,13 @@ int main(int argc, char **argv)
 	{
 		buildSubset = true;
 		existingUVfilename = args.getArg("s").front();
+	}
+
+	//
+	uint borderSize = 0;
+	if (args.haveArg("b"))
+	{
+		borderSize = 1;
 	}
 
 	// extract all interface elements
@@ -407,6 +415,18 @@ int main(int argc, char **argv)
 				pBtmp->convertToType(CBitmap::RGBA);
 			}
 
+			// duplicate icon border
+			if (borderSize > 0)
+			{
+				NLMISC::CBitmap *tmp = new NLMISC::CBitmap;
+				tmp->resize(pBtmp->getWidth(), pBtmp->getHeight());
+				tmp->blit(pBtmp, 0, 0);
+				tmp->resample(tmp->getWidth() + borderSize * 2, tmp->getHeight() + borderSize * 2);
+				tmp->blit(pBtmp, borderSize, borderSize);
+				delete pBtmp;
+				pBtmp = tmp;
+			}
+
 			AllMaps[i] = pBtmp;
 		}
 		catch (const NLMISC::Exception &e)
@@ -461,10 +481,10 @@ int main(int argc, char **argv)
 		putIn (AllMaps[i], &GlobalTexture, x, y);
 		putIn (AllMaps[i], &GlobalMask, x, y, false);
 
-		UVMin[i].U = (float)x;
-		UVMin[i].V = (float)y;
-		UVMax[i].U = (float)x+AllMaps[i]->getWidth();
-		UVMax[i].V = (float)y+AllMaps[i]->getHeight();
+		UVMin[i].U = (float)x + borderSize;
+		UVMin[i].V = (float)y + borderSize;
+		UVMax[i].U = (float)x + AllMaps[i]->getWidth() - borderSize;
+		UVMax[i].V = (float)y + AllMaps[i]->getHeight() - borderSize;
 
 #if 0
 		// Do not remove this is useful for debugging

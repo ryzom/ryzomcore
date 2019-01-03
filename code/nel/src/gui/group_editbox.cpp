@@ -702,9 +702,9 @@ namespace NLGUI
 			sint32	maxPos= max(_CursorPos, _SelectCursorPos) + (sint32)_Prompt.length();
 
 			// get its position on screen
-			sint cxMinPos, cyMinPos;
-			sint cxMaxPos, cyMaxPos;
-			sint height;
+			float cxMinPos, cyMinPos;
+			float cxMaxPos, cyMaxPos;
+			float height;
 			_ViewText->getCharacterPositionFromIndex(minPos, false, cxMinPos, cyMinPos, height);
 			_ViewText->getCharacterPositionFromIndex(maxPos, false, cxMaxPos, cyMaxPos, height);
 
@@ -755,8 +755,8 @@ namespace NLGUI
 			if (_BlinkState) // is the cursor shown ?
 			{
 				// get its position on screen
-				sint cx, cy;
-				sint height;
+				float cx, cy;
+				float height;
 				_ViewText->getCharacterPositionFromIndex(_CursorPos + (sint)_Prompt.length(), _CursorAtPreviousLineEnd, cx, cy, height);
 				// display the cursor
 				// get the texture for the cursor
@@ -1482,7 +1482,7 @@ namespace NLGUI
 			if (_ViewText->getWReal() > _WReal)
 			{
 				// Check if cursor visible
-				sint xCursVT, xCurs, yTmp, hTmp;
+				float xCursVT, xCurs, yTmp, hTmp;
 				// Get the cursor pos from the BL of the viewtext
 				_ViewText->getCharacterPositionFromIndex(_CursorPos+(sint)_Prompt.size(), false, xCursVT, yTmp, hTmp);
 				// Get the cursor pos from the BL of the edit box

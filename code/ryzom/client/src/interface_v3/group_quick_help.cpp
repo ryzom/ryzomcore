@@ -298,6 +298,49 @@ void CGroupQuickHelp::beginElement (uint element_number, const std::vector<bool>
 }
 
 // ***************************************************************************
+std::string CGroupQuickHelp::getLanguageUrl(const std::string &href, std::string lang) const
+{
+	std::string uri = href;
+
+	if (uri.size() < 5 || uri.substr(0, 5) == "http://" || uri.substr(0, 6) == "https://")
+	{
+		return uri;
+	}
+
+	// modify uri such that '_??.html' ending contains current user language
+	if (uri.substr(uri.size()-5) == ".html")
+	{
+		if (uri.rfind("_") == uri.size() - 8)
+		{
+			uri = uri.substr(0, uri.size() - 8);
+		}
+		else
+		{
+			uri = uri.substr(0, uri.size() - 5);
+		}
+		uri += "_" + lang + ".html";
+
+		// files inside bnp (file:/gamedev.bnp@help_en.html) will always match with CPath::lookup()
+		std::string fname;
+		size_t pos = uri.find("@");
+		if (pos != std::string::npos)
+		{
+			fname = uri.substr(pos+1);
+		}
+		else
+		{
+			fname = uri;
+		}
+		if (CPath::lookup(fname, false) == "" && lang != "en")
+		{
+			uri = getLanguageUrl(href, "en");
+		}
+	}
+
+	return uri;
+}
+
+// ***************************************************************************
 
 void CGroupQuickHelp::browse (const char *url)
 {
@@ -307,12 +350,7 @@ void CGroupQuickHelp::browse (const char *url)
 
 	_IsQuickHelp = false;
 
-	string completeURL = url;
-	if (completeURL.substr(completeURL.size()-5, 5) == ".html")
-	{
-		completeURL = completeURL.substr(0, completeURL.size()-5); // Substract the ".html"
-		completeURL += "_" + ClientCfg.getHtmlLanguageCode() + ".html";
-	}
+	string completeURL = getLanguageUrl(url, ClientCfg.getHtmlLanguageCode());
 
 	CGroupHTML::browse (completeURL.c_str());
 }
@@ -321,9 +359,7 @@ void CGroupQuickHelp::browse (const char *url)
 
 std::string	CGroupQuickHelp::home()
 {
-	string completeURL = Home;
-	completeURL = completeURL.substr(0, completeURL.size()-5); // Substract the ".html"
-	completeURL += "_" + ClientCfg.getHtmlLanguageCode() + ".html";
+	string completeURL = getLanguageUrl(Home, ClientCfg.getHtmlLanguageCode());
 
 	return completeURL;
 }

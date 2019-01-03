@@ -262,6 +262,8 @@ namespace NLGUI
 		void browseUndo ();
 		// Redo browse: Browse the precedent url undoed. no op if none
 		void browseRedo ();
+		// disable refresh button
+		void clearRefresh();
 		// clear undo/redo
 		void clearUndoRedo();
 
@@ -272,6 +274,8 @@ namespace NLGUI
 		std::string getHTML() const { return _DocumentHtml; }
 		void		setHTML(const std::string &html);
 
+		int luaClearRefresh(CLuaState &ls);
+		int luaClearUndoRedo(CLuaState &ls);
 		int luaBrowse(CLuaState &ls);
 		int luaRefresh(CLuaState &ls);
 		int luaRemoveContent(CLuaState &ls);
@@ -288,6 +292,8 @@ namespace NLGUI
 		REFLECT_EXPORT_START(CGroupHTML, CGroupScrollText)
 			REFLECT_LUA_METHOD("browse", luaBrowse)
 			REFLECT_LUA_METHOD("refresh", luaRefresh)
+			REFLECT_LUA_METHOD("clearUndoRedo", luaClearUndoRedo)
+			REFLECT_LUA_METHOD("clearRefresh", luaClearRefresh)
 			REFLECT_LUA_METHOD("removeContent", luaRemoveContent)
 			REFLECT_LUA_METHOD("insertText", luaInsertText)
 			REFLECT_LUA_METHOD("addString", luaAddString)

@@ -300,6 +300,9 @@ CClientConfig::CClientConfig()
 	Luminosity			= 0.f;						// Default Monitor Luminosity.
 	Gamma				= 0.f;						// Default Monitor Gamma.
 
+	InterfaceScale		= 1.0f;                     // Resize UI
+	BilinearUI			= false;
+
 	VREnable			= false;
 	VRDisplayDevice		= "Auto";
 	VRDisplayDeviceId	= "";
@@ -834,6 +837,10 @@ void CClientConfig::setValues()
 	READ_FLOAT_FV(Luminosity)
 	// Gamma
 	READ_FLOAT_FV(Gamma)
+	// UI scaling
+	READ_FLOAT_FV(InterfaceScale);
+	clamp(ClientCfg.InterfaceScale, MIN_INTERFACE_SCALE, MAX_INTERFACE_SCALE);
+	READ_BOOL_FV(BilinearUI);
 	// 3D Driver
 	varPtr = ClientCfg.ConfigFile.getVarPtr ("Driver3D");
 	if (varPtr)

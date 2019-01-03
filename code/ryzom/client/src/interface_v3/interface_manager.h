@@ -549,6 +549,7 @@ public:
 	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_FACTION_TYPE;
 
 	void updateDesktops( uint32 newScreenW, uint32 newScreenH );
+	void setInterfaceScale( float scale ) { _InterfaceScaleChanged = true; _InterfaceScale = scale; }
 
 private:
 
@@ -587,6 +588,8 @@ private:
 
 	uint32			_ScreenW, _ScreenH; // Change res detection
 	sint32			_LastInGameScreenW, _LastInGameScreenH; // Resolution used for last InGame interface
+	float			_InterfaceScale;
+	bool			_InterfaceScaleChanged;
 
 	// Modes
 	std::vector<CInterfaceConfig::CDesktopImage> _Modes;
