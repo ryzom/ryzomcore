@@ -2625,6 +2625,7 @@
   <!-- *  EDIT BOX WIDGET  * -->
   <!-- ********************* -->
   <template name="edit_box_widget"
+            active="true"
             posref="TL TL"
             text_x="0"
             text_y="0"
@@ -2669,8 +2670,10 @@
             max_float_prec="5"
             tooltip=""
             tooltip_parent=""
-            negative_filter="">
+            negative_filter=""
+            render_layer="0">
     <group id="#id"
+           active="#active"
            posref="#posref"
            x="#x"
            y="#y"
@@ -2679,7 +2682,8 @@
            child_resize_hmargin="#child_resize_hmargin"
            sizeref="#sizeref"
            w="#w"
-           h="#h">
+           h="#h"
+           render_layer="#render_layer">
       <group type="edit_box"
              sizeref="w"
              w="-8"
@@ -2708,7 +2712,8 @@
              max_float_prec="#max_float_prec"
              tooltip="#tooltip"
              tooltip_parent="#tooltip_parent"
-             negative_filter="#negative_filter">
+             negative_filter="#negative_filter"
+             render_layer="#render_layer">
         <view type="bitmap"
               id="bg"
               scale="true"
@@ -2716,7 +2721,8 @@
               h="0"
               w="0"
               texture="#bg_texture"
-              inherit_gc_alpha="true" />
+              inherit_gc_alpha="true" 
+              render_layer="#render_layer" />
         <view id="edit_text"
               type="text"
               continuous_update="#continuous_text_update"
@@ -2733,7 +2739,8 @@
               shadow_color="#shadow_color"
               shadow_outline="#shadow_outline"
               hardtext=""
-              global_color="false" />
+              global_color="false"
+              render_layer="#render_layer" />
       </group>
       <!-- border around the list -->
       <view type="bitmap"
@@ -2741,25 +2748,29 @@
             texture="W_box_top_left.tga"
             posparent="eb"
             posref="TL BR"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
       <view type="bitmap"
             id="trb"
             texture="W_box_top_right.tga"
             posparent="eb"
             posref="TR BL"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
       <view type="bitmap"
             id="brb"
             texture="W_box_bot_right.tga"
             posparent="eb"
             posref="BR TL"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
       <view type="bitmap"
             id="blb"
             texture="W_box_bot_left.tga"
             posparent="eb"
             posref="BL TR"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
       <view type="bitmap"
             id="tb"
             texture="W_box_top.tga"
@@ -2769,7 +2780,8 @@
             sizeref="w"
             w="0"
             h="4"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
       <view type="bitmap"
             id="bb"
             texture="W_box_bot.tga"
@@ -2779,7 +2791,8 @@
             sizeref="w"
             w="0"
             h="4"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
       <view type="bitmap"
             id="lb"
             texture="W_box_left.tga"
@@ -2789,7 +2802,8 @@
             sizeref="h"
             h="0"
             w="4"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
       <view type="bitmap"
             id="rb"
             texture="W_box_right.tga"
@@ -2799,7 +2813,8 @@
             sizeref="h"
             h="0"
             w="4"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
     </group>
   </template>
   <!-- ******************************* -->
@@ -6337,6 +6352,7 @@
             x="0"
             y="0"
             posref="BL BL"
+            posparent=""
             dblink=""
             texture=""
             tooltip=""
@@ -6345,6 +6361,7 @@
           id="but_#id"
           button_type="toggle_button"
           posref="#posref"
+          posparent="but_#posparent"
           x="#x"
           y="#y"
           tx_normal="w_button_filter_off.tga"
@@ -6371,6 +6388,7 @@
             x="0"
             y="0"
             posref="BL BL"
+            posparent=""
             dblink=""
             texture=""
             tooltip=""
@@ -6379,6 +6397,7 @@
           id="but_#id"
           button_type="toggle_button"
           posref="#posref"
+          posparent="but_#posparent"
           x="#x"
           y="#y"
           tx_normal="w_button_filter_off.tga"
@@ -6553,83 +6572,109 @@
             texture="W_line_hor.tga" />
       <link expr="eq(@UI:SAVE:#inv_type:ICON_LIST, 0)"
             target="bag_list:active,sep2:active" />
+      <!-- details -->
+      <instance template="tinv_item_list_icon_swap"
+                id="detail"
+                x="-2"
+                y="10"
+                posref="BR MR"
+                dblink="UI:SAVE:#inv_type:ICON_LIST"
+                texture="details_on.tga"
+                tooltip="uittDetail" />
+      <link expr="ifthenelse(@UI:SAVE:#inv_type:ICON_LIST, 'details_off.tga', 'details_on.tga')"
+            target="bit_detail:texture" />
+      <!-- filter -->
       <instance template="tinv_item_list_filter"
                 id="filter_tp"
-                x="-35"
-                y="1"
-                posref="BR BR"
+                x="-8"
+                posref="ML MR"
+                posparent="detail"
                 inv_type="#inv_type"
                 dblink="UI:SAVE:#inv_type:FILTER_TP"
                 texture="filter_tp.tga"
                 tooltip="uittFilterTP" />
       <instance template="tinv_item_list_filter"
                 id="filter_missmp"
-                x="-60"
-                y="1"
-                posref="BR BR"
+                x="-2"
+                posref="ML MR"
+                posparent="filter_tp"
                 inv_type="#inv_type"
                 dblink="UI:SAVE:#inv_type:FILTER_MISSMP"
                 texture="filter_mission.tga"
                 tooltip="uittFilterMissMP" />
       <instance template="tinv_item_list_filter"
                 id="filter_mp"
-                x="-85"
-                y="1"
-                posref="BR BR"
+                x="-2"
+                posref="ML MR"
+                posparent="filter_missmp"
                 inv_type="#inv_type"
                 dblink="UI:SAVE:#inv_type:FILTER_MP"
                 texture="filter_mps.tga"
                 tooltip="uittFilterMP" />
       <instance template="tinv_item_list_filter"
                 id="filter_tool"
-                x="-110"
-                y="1"
-                posref="BR BR"
+                x="-2"
+                posref="ML MR"
+                posparent="filter_mp"
                 inv_type="#inv_type"
                 dblink="UI:SAVE:#inv_type:FILTER_TOOL"
                 texture="filter_tools.tga"
                 tooltip="uittFilterTool" />
       <instance template="tinv_item_list_filter"
                 id="filter_weapon"
-                x="-135"
-                y="1"
-                posref="BR BR"
+                x="-2"
+                posref="ML MR"
+                posparent="filter_tool"
                 inv_type="#inv_type"
                 dblink="UI:SAVE:#inv_type:FILTER_WEAPON"
                 texture="filter_weapon.tga"
                 tooltip="uittFilterWeapon" />
       <instance template="tinv_item_list_filter"
                 id="filter_armor"
-                x="-160"
-                y="1"
-                posref="BR BR"
+                x="-2"
+                posref="ML MR"
+                posparent="filter_weapon"
                 inv_type="#inv_type"
                 dblink="UI:SAVE:#inv_type:FILTER_ARMOR"
                 texture="filter_armor.tga"
                 tooltip="uittFilterArmor" />
+      <!-- search -->
+      <ctrl type="button"
+            id="but_inv_search"
+            button_type="toggle_button"
+            x="-2"
+            posref="ML MR"
+            posparent="but_filter_armor"
+            tx_normal="w_button_filter_off.tga"
+            tx_pushed="w_button_filter_on.tga"
+            tx_over=""
+            tooltip="uittInventorySearch"
+            onclick_l="inv_search_button"
+            params_l="inv_query_eb" />
+      <view type="bitmap"
+            id="bit_inv_search"
+            posref="MM MM"
+            posparent="but_inv_search"
+            texture="w_help_1.tga"
+            global_color="false"
+            color="255 255 255 150" />
       <instance template="edit_box_widget"
                 id="inv_query_eb"
-                posref="BR BR"
-                x="-190"
-                y="1"
+                active="false"
+                posref="TR BR"
+                posparent="but_detail"
+                x="0"
+                y="8"
                 w="100"
+                render_layer="9"
                 clear_on_escape="true"
                 enter_recover_focus="false"
                 max_num_chars="20"
                 max_historic="0"
                 onenter="inv_set_search"
-                onchange="inv_set_search" onchange_params="#inv_type" />
-      <!-- details -->
-      <instance template="tinv_item_list_icon_swap"
-                id="detail"
-                x="-4"
-                y="1"
-                posref="BR BR"
-                dblink="UI:SAVE:#inv_type:ICON_LIST"
-                texture="details_on.tga"
-                tooltip="uittDetail" />
-      <link expr="ifthenelse(@UI:SAVE:#inv_type:ICON_LIST, 'details_off.tga', 'details_on.tga')"
-            target="bit_detail:texture" />
+                onchange="inv_set_search"
+                on_focus_lost="inv_search_unfocus"
+                on_focus_lost_params="but_inv_search" />
     </group>
   </template>
   <!-- Link to trig brick action message. don't play when 0 (avoid flying text at startup) -->

@@ -2528,25 +2528,92 @@ class CHandlerInvDrag : public IActionHandler
 };
 REGISTER_ACTION_HANDLER( CHandlerInvDrag, "inv_drag" );
 
-// **********************************************************************************************************
-class CHandlerInvSetSearch : public IActionHandler
+// ***************************************************************************
+// show/hide edit box, set keyboard focus if 'show'
+class CHandlerInvSearchButton : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	virtual void execute (CCtrlBase *pCaller, const string &sParams)
+	{
+		if (sParams.empty())
+		{
+			nlwarning("inv_search_button: missing edit box shortid");
+			return;
+		}
+
+		CCtrlBaseButton* btn = dynamic_cast<CCtrlBaseButton *>(pCaller);
+		if (!btn)
+		{
+			nlwarning("inv_search_button pCaller == NULL, caller must be CCtrlBaseButton with 'toggle_button' type");
+			return;
+		}
+
+		ucstring filter;
+		std::string id = btn->getParent()->getId() + ":" + sParams + ":eb";
+		CGroupEditBox *eb = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(id));
+		if (!eb)
+		{
+			nlwarning("inv_search_button: editbox (%s) not found\n", id.c_str());
+			return;
+		}
+
+		eb->getParent()->setActive(btn->getPushed());
+		if (eb->getParent()->getActive())
+		{
+			CWidgetManager::getInstance()->setCaptureKeyboard(eb);
+			eb->setSelectionAll();
+			filter = eb->getInputString();
+		}
+
+		CDBGroupListSheetBag *pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(btn->getParent()->getId() + ":bag_list"));
+		if (pList != NULL) pList->setSearchFilter(filter);
+
+		CDBGroupIconListBag *pIcons = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(btn->getParent()->getId() + ":bag_icons"));
+		if (pIcons != NULL) pIcons->setSearchFilter(filter);
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerInvSearchButton, "inv_search_button" );
+
+// ***************************************************************************
+// if :eb is empty then hide edit box, unpush search button
+class CHandlerInvSearchUnfocus : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const string &sParams)
 	{
 		if (!pCaller) return;
 
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(pCaller);
-		if (!eb) return;
-
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		if (!eb || !eb->getInputString().empty()) return;
 
 		// ui:interface:inventory:content:bag:iil:inv_query_eb:eb
-		string invId = pCaller->getParent()->getParent()->getId();
+		std::string id = pCaller->getParent()->getParent()->getId() + ":" + sParams;
+		CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(id));
+		if (btn) btn->setPushed(false);
 
-		CDBGroupListSheetBag *pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(invId + ":bag_list"));
+		// hide :inv_query_eb
+		pCaller->getParent()->setActive(false);
+
+		// clear filter
+		CAHManager::getInstance()->runActionHandler("inv_set_search", pCaller, "");
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerInvSearchUnfocus, "inv_search_unfocus" );
+
+// **********************************************************************************************************
+// set inventory search string
+class CHandlerInvSetSearch : public IActionHandler
+{
+	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	{
+		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(pCaller);
+		if (!eb) return;
+
+		// ui:interface:inventory:content:bag:iil:inv_query_eb:eb
+		std::string id = pCaller->getParent()->getParent()->getId();
+
+		CDBGroupListSheetBag *pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(id + ":bag_list"));
 		if (pList != NULL) pList->setSearchFilter(eb->getInputString());
 
-		CDBGroupIconListBag *pIcons = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(invId + ":bag_icons"));
+		CDBGroupIconListBag *pIcons = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(id + ":bag_icons"));
 		if (pIcons != NULL) pIcons->setSearchFilter(eb->getInputString());
 	}
 };
