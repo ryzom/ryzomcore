@@ -3744,7 +3744,7 @@ class CHandlerSetInterfaceScale : public IActionHandler
 			float scale;
 			if (fromString(s, scale))
 			{
-				if (scale >= MIN_INTERFACE_SCALE && scale <= MAX_INTERFACE_SCALE)
+				if (scale >= ClientCfg.InterfaceScale_min && scale <= ClientCfg.InterfaceScale_max)
 				{
 					ClientCfg.InterfaceScale = scale;
 					ClientCfg.writeDouble("InterfaceScale", ClientCfg.InterfaceScale);
@@ -3755,7 +3755,7 @@ class CHandlerSetInterfaceScale : public IActionHandler
 			}
 		}
 
-		ucstring help("/setuiscale "+toString("%.1f .. %.1f", MIN_INTERFACE_SCALE, MAX_INTERFACE_SCALE));
+		ucstring help("/setuiscale "+toString("%.1f .. %.1f", ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max));
 		CInterfaceManager::getInstance()->displaySystemInfo(help);
 	}
 };

@@ -46,10 +46,6 @@ using NLMISC::CVector;
 using NLMISC::CRGBA;
 using std::string;
 
-// limits for UI scale
-const float MIN_INTERFACE_SCALE = 0.8;
-const float MAX_INTERFACE_SCALE = 2.0;
-
 //---------------------------------------------------
 // CClientConfig :
 // Struct to manage a config file for the client.
@@ -151,6 +147,9 @@ struct CClientConfig
 
 	// UI scaling
 	float			InterfaceScale;
+	float			InterfaceScale_min;
+	float			InterfaceScale_max;
+	float			InterfaceScale_step;
 	bool			BilinearUI;
 
 	// VR
