@@ -446,7 +446,7 @@ CTextureFont::SGlyphInfo* CTextureFont::findLetterGlyph(SLetterInfo *letter, boo
 	uint bitmapFontSize = max((sint)_MinGlyphSize, min((sint)_MaxGlyphSize, letter->Size));
 	if (_GlyphSizeStep > 1 && bitmapFontSize > _GlyphSizeStepMin)
 	{
-		uint size = (bitmapFontSize / _GlyphSizeStep) * _GlyphSizeStep;
+		bitmapFontSize = (bitmapFontSize / _GlyphSizeStep) * _GlyphSizeStep;
 	}
 
 	// CacheVersion not checked, all glyphs in cache must be rendered on texture
