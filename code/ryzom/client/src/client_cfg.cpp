@@ -301,6 +301,9 @@ CClientConfig::CClientConfig()
 	Gamma				= 0.f;						// Default Monitor Gamma.
 
 	InterfaceScale		= 1.0f;                     // Resize UI
+	InterfaceScale_min	= 0.8f;
+	InterfaceScale_max	= 2.0f;
+	InterfaceScale_step	= 0.05;
 	BilinearUI			= false;
 
 	VREnable			= false;
@@ -843,7 +846,10 @@ void CClientConfig::setValues()
 	READ_FLOAT_FV(Gamma)
 	// UI scaling
 	READ_FLOAT_FV(InterfaceScale);
-	clamp(ClientCfg.InterfaceScale, MIN_INTERFACE_SCALE, MAX_INTERFACE_SCALE);
+	READ_FLOAT_FV(InterfaceScale_min);
+	READ_FLOAT_FV(InterfaceScale_max);
+	READ_FLOAT_FV(InterfaceScale_step);
+	clamp(ClientCfg.InterfaceScale, ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max);
 	READ_BOOL_FV(BilinearUI);
 	// 3D Driver
 	varPtr = ClientCfg.ConfigFile.getVarPtr ("Driver3D");
