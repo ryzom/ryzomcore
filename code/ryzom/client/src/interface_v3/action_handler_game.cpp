@@ -1532,7 +1532,8 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		// free with no confirm
-		beastOrder ("free", Params, false);
+		if (!UserEntity->isBusy())
+			beastOrder ("free", Params, false);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerDoBeastFree, "do_beast_free")
