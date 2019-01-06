@@ -3091,8 +3091,29 @@ void CUserEntity::setAFK(bool b, string afkTxt)
 //-----------------------------------------------
 // rollDice
 //-----------------------------------------------
-void CUserEntity::rollDice(sint16 min, sint16 max)
+void CUserEntity::rollDice(sint16 min, sint16 max, bool local)
 {
+	if (local)
+	{
+		// no need to broadcast over network here
+		static NLMISC::CRandom* dice = (NLMISC::CRandom*)NULL;
+		if (!dice)
+		{
+			dice = new NLMISC::CRandom;
+			dice->srand(CTickEventHandler::getGameCycle());
+		}
+		sint16 roll = min + (sint16)dice->rand(max-min);
+
+		ucstring msg = CI18N::get("msgRollDiceLocal");
+		strFindReplace(msg, "%min", std::to_string(min));
+		strFindReplace(msg, "%max", std::to_string(max));
+		strFindReplace(msg, "%roll", std::to_string(roll));
+
+		CInterfaceManager *pIM= CInterfaceManager::getInstance();
+
+		pIM->displaySystemInfo(msg, getStringCategory(msg, msg));
+		return;
+	}
 	const string msgName = "COMMAND:RANDOM";
 	CBitMemStream out;
 	if (GenericMsgHeaderMngr.pushNameToStream(msgName, out))
