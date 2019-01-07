@@ -225,7 +225,7 @@ public:
 	void setAFK(bool b, std::string afkTxt="");
 
 	/// Roll a dice and tell the result around
-	void rollDice(sint16 min, sint16 max);
+	void rollDice(sint16 min, sint16 max, bool local);
 
 	/// return true if user can engage melee combat, else return false and display system msg
 	bool canEngageCombat();

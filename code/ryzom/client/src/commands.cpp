@@ -475,14 +475,17 @@ bool randomFromString(std::string const& str, sint16& val, sint16 min = -32768, 
 		return false;
 }
 
-NLMISC_COMMAND(random, "Roll a dice and say the result around","[<min>] <max>")
+NLMISC_COMMAND(random, "Roll a dice and say the result around","[<min>] <max> [h|ide]")
 {
 	// Check parameters.
-	if (args.size()<1 || args.size()>2)
+	if (args.size() < 1 || args.size() > 3)
 		return false;
 
 	sint16 min = 1;
 	sint16 max;
+
+	bool hide = args[args.size()-1][0] == 'h';
+
 	if (!randomFromString(args[0], max))
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -491,13 +494,13 @@ NLMISC_COMMAND(random, "Roll a dice and say the result around","[<min>] <max>")
 		pIM->displaySystemInfo(msg);
 		return false;
 	}
-	if (args.size()==2)
+	if (args.size() > 1 && args[1][0] != 'h')
 	{
 		if (!randomFromString(args[1], min))
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			ucstring msg = CI18N::get("uiRandomBadParameter");
-			strFindReplace(msg, "%s", args[0] );
+			strFindReplace(msg, "%s", args[1] );
 			pIM->displaySystemInfo(msg);
 			return false;
 		}
@@ -506,7 +509,7 @@ NLMISC_COMMAND(random, "Roll a dice and say the result around","[<min>] <max>")
 		std::swap(min, max);
 
 	if (UserEntity != NULL)
-		UserEntity->rollDice(min, max);
+		UserEntity->rollDice(min, max, hide);
 
 	return true;
 }
