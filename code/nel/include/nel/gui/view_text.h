@@ -82,7 +82,7 @@ namespace NLGUI
 
 		void setText (const ucstring &text);
 		void setFontName (const std::string &name);
-		void setFontSize (sint nFontSize);
+		void setFontSize (sint nFontSize, bool coef = true);
 		void setEmbolden (bool nEmbolden);
 		void setOblique (bool nOblique);
 		void setColor (const NLMISC::CRGBA &color);
@@ -243,6 +243,7 @@ namespace NLGUI
 		std::string _FontName;
 		/// the font size
 		sint	_FontSize;
+		bool	_FontSizeCoef;
 		bool	_Embolden;
 		bool	_Oblique;
 		// width of the font in pixel. Just a Hint for tabing format (computed with '_')

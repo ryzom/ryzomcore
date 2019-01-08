@@ -65,6 +65,7 @@ namespace NLGUI
 
 		_FontSize = 12 +
 			CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+		_FontSizeCoef = true;
 		_FontName.clear();
 		_Embolden = false;
 		_Oblique = false;
@@ -141,6 +142,7 @@ namespace NLGUI
 		setupDefault ();
 
 		_FontSize = FontSize + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		_FontSizeCoef = true;
 		_Color = Color;
 		_Shadow = Shadow;
 		_ShadowOutline = ShadowOutline;
@@ -185,6 +187,7 @@ namespace NLGUI
 		_PosRef = vt._PosRef;
 
 		_FontSize = vt._FontSize;
+		_FontSizeCoef = vt._FontSizeCoef;
 		_Embolden = vt._Embolden;
 		_Oblique = vt._Oblique;
 		_Underlined = vt._Underlined;
@@ -248,9 +251,15 @@ namespace NLGUI
 		else
 		if( name == "fontsize" )
 		{
-			return toString(
-				_FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32()
-				);
+			if (_FontSizeCoef)
+				return toString(_FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32());
+
+			return toString(_FontSize);
+		}
+		else
+		if ( name == "fontsize_coef" )
+		{
+			return toString(_FontSizeCoef);
 		}
 		else
 		if( name == "fontweight" )
@@ -423,6 +432,22 @@ namespace NLGUI
 			if( fromString( value, i ) )
 				_FontSize = i + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
 			return true;
+		}
+		else
+		if( name == "fontsize_coef" )
+		{
+			bool b;
+			bool oldValue = _FontSizeCoef;
+			if (fromString( value, b) )
+				_FontSizeCoef = b;
+			// must only change font size when current state changes
+			if (_FontSizeCoef != oldValue)
+			{
+				if (_FontSizeCoef)
+					_FontSize += CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+				else
+					_FontSize -= CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+			}
 		}
 		else
 		if( name == "fontweight" )
@@ -653,10 +678,11 @@ namespace NLGUI
 	{
 		xmlSetProp( node, BAD_CAST "color", BAD_CAST toString( _Color ).c_str() );
 		xmlSetProp( node, BAD_CAST "global_color", BAD_CAST toString( _ModulateGlobalColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "fontsize",
-			BAD_CAST toString(
-			_FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32() 
-			).c_str() );
+
+		sint32 fontSize = _FontSize;
+		if (_FontSizeCoef) fontSize -= CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+		xmlSetProp( node, BAD_CAST "fontsize", BAD_CAST toString(fontSize).c_str() );
+		xmlSetProp( node, BAD_CAST "fontsize_coef", BAD_CAST toString(_FontSizeCoef).c_str() );
 
 		std::string fontweight("normal");
 		if (_Embolden)
@@ -754,6 +780,16 @@ namespace NLGUI
 			fromString((const char*)prop, _FontSize);
 			_FontSize += CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
 		}
+
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"fontsize_coef" );
+		_FontSizeCoef = true;
+		if (prop)
+		{
+			_FontSizeCoef = convertBool(prop);
+			if (!_FontSizeCoef)
+				_FontSize -= CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		}
+
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"fontweight" );
 		_Embolden = false;
@@ -1395,9 +1431,11 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::setFontSize (sint nFontSize)
+	void CViewText::setFontSize (sint nFontSize, bool coef)
 	{
-		_FontSize = nFontSize + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		_FontSize = nFontSize;
+		if (coef) _FontSize += CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		_FontSizeCoef = coef;
 		computeFontSize ();
 		invalidateContent();
 	}
@@ -1405,7 +1443,10 @@ namespace NLGUI
 	// ***************************************************************************
 	sint CViewText::getFontSize() const
 	{
-		return _FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		if (_FontSizeCoef)
+			return _FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+
+		return _FontSize;
 	}
 
 	// ***************************************************************************
