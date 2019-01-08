@@ -54,7 +54,7 @@ REGISTER_ACTION_HANDLER( CHandlerBrowseHome, "browse_home");
 
 static string getWebAuthKey()
 {
-	if(!UserEntity) return "";
+	if(!UserEntity || !NetMngr.getLoginCookie().isValid()) return "";
 
 	// authkey = <sharid><name><cid><cookie>
 	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
@@ -83,7 +83,7 @@ void addWebIGParams (string &url, bool trustedDomain)
 	{
 		url += string("&cid=") + toString(cid) +
 		string("&authkey=") + getWebAuthKey();
-		
+
 		if (url.find('$') != string::npos)
 		{
 			strFindReplace(url, "$gender$", GSGENDER::toString(UserEntity->getGender()));
@@ -304,6 +304,8 @@ CGroupHTMLAuth::~CGroupHTMLAuth()
 
 void CGroupHTMLAuth::addHTTPGetParams (string &url, bool trustedDomain)
 {
+	if(!UserEntity || !NetMngr.getLoginCookie().isValid()) return;
+
 	addWebIGParams(url, trustedDomain);
 }
 
@@ -311,7 +313,7 @@ void CGroupHTMLAuth::addHTTPGetParams (string &url, bool trustedDomain)
 
 void CGroupHTMLAuth::addHTTPPostParams (SFormFields &formfields, bool trustedDomain)
 {
-	if(!UserEntity) return;
+	if(!UserEntity || !NetMngr.getLoginCookie().isValid()) return;
 
 	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
 	formfields.add("shardid", toString(CharacterHomeSessionId));

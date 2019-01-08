@@ -4238,7 +4238,7 @@ public:
 		string fileName = getParam(sParams, "music");
 
 		// don't play if db is in init stage
-		if (IngameDbMngr.initInProgress()) return;
+		if (!ClientCfg.Local && IngameDbMngr.initInProgress()) return;
 
 		if(SoundMngr)
 			SoundMngr->playEventMusic(fileName, xFade, loop);
@@ -4260,7 +4260,7 @@ public:
 		string		fileName= getParam(sParams, "music");
 
 		// don't play if db is in init stage
-		if (IngameDbMngr.initInProgress()) return;
+		if (!ClientCfg.Local && IngameDbMngr.initInProgress()) return;
 
 		if(SoundMngr)
 			SoundMngr->stopEventMusic(fileName, xFade);
