@@ -97,7 +97,6 @@ namespace NLGUI
 
 		_InvalidTextContext= true;
 		_FirstLineX = 0;
-		computeFontSize ();
 
 		_SingleLineTextClamped= false;
 		_OverExtendViewText= false;
@@ -110,6 +109,14 @@ namespace NLGUI
 		_LetterColors = NULL;
 		_Setuped= false;
 		_AutoClampOffset = 0;
+
+		// Letter size
+		// - "_" that should be the character with the lowest part
+		// - A with an accent for the highest part
+		_FontSizingChars.fromUtf8("_\xc3\x84");
+		// fallback if SizingChars are not supported by font
+		_FontSizingFallback.fromUtf8("|");
+		computeFontSize ();
 	}
 
 	// ***************************************************************************
@@ -371,6 +378,16 @@ namespace NLGUI
 			return toString( _ContinuousUpdate );
 		}
 		else
+		if ( name == "sizing_chars" )
+		{
+			return _FontSizingChars.toUtf8();
+		}
+		else
+		if ( name == "sizing_fallback" )
+		{
+			return _FontSizingFallback.toUtf8();
+		}
+		else
 			return "";
 	}
 
@@ -616,6 +633,18 @@ namespace NLGUI
 			return true;
 		}
 		else
+		if( name == "sizing_chars" )
+		{
+			_FontSizingChars.fromUtf8(value);
+			return true;
+		}
+		else
+		if( name == "sizing_fallback" )
+		{
+			_FontSizingFallback.fromUtf8(value);
+			return true;
+		}
+		else
 			return false;
 	}
 
@@ -679,6 +708,8 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "clamp_right", BAD_CAST toString( _ClampRight ).c_str() );
 		xmlSetProp( node, BAD_CAST "auto_clamp_offset", BAD_CAST toString( _AutoClampOffset ).c_str() );
 		xmlSetProp( node, BAD_CAST "continuous_update", BAD_CAST toString( _ContinuousUpdate ).c_str() );
+		xmlSetProp( node, BAD_CAST "sizing_chars", BAD_CAST _FontSizingChars.toUtf8().c_str() );
+		xmlSetProp( node, BAD_CAST "sizing_fallback", BAD_CAST _FontSizingFallback.toUtf8().c_str() );
 
 		return true;
 	}
@@ -854,6 +885,17 @@ namespace NLGUI
 			_ContinuousUpdate = convertBool(prop);
 		}
 
+		// "_Ä" lowest/highest chars (underscore, A+diaeresis)
+		_FontSizingChars.fromUtf8("_\xc3\x84");
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"sizing_chars" );
+		if (prop)
+			_FontSizingChars.fromUtf8((const char*)prop);
+
+		// fallback if SizingChars are not supported by font
+		_FontSizingFallback.fromUtf8("|");
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"sizing_fallback" );
+		if (prop)
+			_FontSizingFallback.fromUtf8((const char*)prop);
 
 		computeFontSize ();
 	}
@@ -1323,6 +1365,15 @@ namespace NLGUI
 
 		// clear format tags if any
 		_FormatTags.clear();
+	}
+
+	// ***************************************************************************
+	void CViewText::setFontSizing(const std::string &chars, const std::string &fallback)
+	{
+		_FontSizingChars.clear();
+		_FontSizingChars.fromUtf8(chars);
+		_FontSizingFallback.clear();
+		_FontSizingFallback.fromUtf8(fallback);
 	}
 
 	// ***************************************************************************
@@ -2856,22 +2907,14 @@ namespace NLGUI
 		TextContext->setOblique (_Oblique);
 
 		// Letter size
-		ucstring chars;
-		// instead of using the height of "|" that depends on font,
-		// we're using 2 characters:
-		// - "_" that should be the character with the lowest part
-		// - A with an accent for the highest part
-		chars.fromUtf8("_\xc3\x84");
-
-		// for now we can't know that directly from UTextContext
-		UTextContext::CStringInfo si = TextContext->getStringInfo(chars);
+		UTextContext::CStringInfo si = TextContext->getStringInfo(_FontSizingChars);
 
 		// font generator changes unknown glyphs to dot '.'. use fallback if it looks odd
 		if (_FontSize > (si.StringHeight + si.StringLine))
 		{
-			chars.fromUtf8("|");
-			si = TextContext->getStringInfo(chars);
+			si = TextContext->getStringInfo(_FontSizingFallback);
 		}
+
 		// add a padding of 1 pixel else the top will be truncated
 		_FontHeight = si.StringHeight + 1;
 		_FontLegHeight = si.StringLine;
@@ -2880,7 +2923,7 @@ namespace NLGUI
 		si = TextContext->getStringInfo(ucstring(" "));
 		_SpaceWidth = si.StringWidth;
 
-		// Font Width
+		// Font Width (used for <tab>)
 		si = TextContext->getStringInfo(ucstring("_"));
 		_FontWidth = si.StringWidth;
 	}
