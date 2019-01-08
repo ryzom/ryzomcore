@@ -82,7 +82,7 @@ namespace NLGUI
 
 		void setText (const ucstring &text);
 		void setFontName (const std::string &name);
-		void setFontSize (sint nFontSize);
+		void setFontSize (sint nFontSize, bool coef = true);
 		void setEmbolden (bool nEmbolden);
 		void setOblique (bool nOblique);
 		void setColor (const NLMISC::CRGBA &color);
@@ -99,6 +99,9 @@ namespace NLGUI
 		void setFirstLineX (sint firstLineX);
 		void setMultiMaxLine(uint l) { _MultiMaxLine = l; }
 		void setMultiMinLine(uint l) { _MultiMinLine = l; }
+
+		// Override chars used to compute font size
+		void setFontSizing(const std::string &chars, const std::string &fallback);
 
 		// Force only a subset of letter to be displayed. Default is 0/0xFFFFFFFF
 		void enableStringSelection(uint start, uint end);
@@ -240,10 +243,14 @@ namespace NLGUI
 		std::string _FontName;
 		/// the font size
 		sint	_FontSize;
+		bool	_FontSizeCoef;
 		bool	_Embolden;
 		bool	_Oblique;
 		// width of the font in pixel. Just a Hint for tabing format (computed with '_')
 		float	_FontWidth;
+		// strings to use when computing font size
+		ucstring _FontSizingChars;
+		ucstring _FontSizingFallback;
 		// height of the font in pixel.
 		// use getFontHeight
 		float	_FontHeight;

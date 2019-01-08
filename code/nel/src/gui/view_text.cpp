@@ -65,6 +65,7 @@ namespace NLGUI
 
 		_FontSize = 12 +
 			CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+		_FontSizeCoef = true;
 		_FontName.clear();
 		_Embolden = false;
 		_Oblique = false;
@@ -97,7 +98,6 @@ namespace NLGUI
 
 		_InvalidTextContext= true;
 		_FirstLineX = 0;
-		computeFontSize ();
 
 		_SingleLineTextClamped= false;
 		_OverExtendViewText= false;
@@ -110,6 +110,14 @@ namespace NLGUI
 		_LetterColors = NULL;
 		_Setuped= false;
 		_AutoClampOffset = 0;
+
+		// Letter size
+		// - "_" that should be the character with the lowest part
+		// - A with an accent for the highest part
+		_FontSizingChars.fromUtf8("_\xc3\x84");
+		// fallback if SizingChars are not supported by font
+		_FontSizingFallback.fromUtf8("|");
+		computeFontSize ();
 	}
 
 	// ***************************************************************************
@@ -134,6 +142,7 @@ namespace NLGUI
 		setupDefault ();
 
 		_FontSize = FontSize + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		_FontSizeCoef = true;
 		_Color = Color;
 		_Shadow = Shadow;
 		_ShadowOutline = ShadowOutline;
@@ -178,6 +187,7 @@ namespace NLGUI
 		_PosRef = vt._PosRef;
 
 		_FontSize = vt._FontSize;
+		_FontSizeCoef = vt._FontSizeCoef;
 		_Embolden = vt._Embolden;
 		_Oblique = vt._Oblique;
 		_Underlined = vt._Underlined;
@@ -241,9 +251,15 @@ namespace NLGUI
 		else
 		if( name == "fontsize" )
 		{
-			return toString(
-				_FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32()
-				);
+			if (_FontSizeCoef)
+				return toString(_FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32());
+
+			return toString(_FontSize);
+		}
+		else
+		if ( name == "fontsize_coef" )
+		{
+			return toString(_FontSizeCoef);
 		}
 		else
 		if( name == "fontweight" )
@@ -371,6 +387,16 @@ namespace NLGUI
 			return toString( _ContinuousUpdate );
 		}
 		else
+		if ( name == "sizing_chars" )
+		{
+			return _FontSizingChars.toUtf8();
+		}
+		else
+		if ( name == "sizing_fallback" )
+		{
+			return _FontSizingFallback.toUtf8();
+		}
+		else
 			return "";
 	}
 
@@ -406,6 +432,22 @@ namespace NLGUI
 			if( fromString( value, i ) )
 				_FontSize = i + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
 			return true;
+		}
+		else
+		if( name == "fontsize_coef" )
+		{
+			bool b;
+			bool oldValue = _FontSizeCoef;
+			if (fromString( value, b) )
+				_FontSizeCoef = b;
+			// must only change font size when current state changes
+			if (_FontSizeCoef != oldValue)
+			{
+				if (_FontSizeCoef)
+					_FontSize += CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+				else
+					_FontSize -= CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+			}
 		}
 		else
 		if( name == "fontweight" )
@@ -616,6 +658,18 @@ namespace NLGUI
 			return true;
 		}
 		else
+		if( name == "sizing_chars" )
+		{
+			_FontSizingChars.fromUtf8(value);
+			return true;
+		}
+		else
+		if( name == "sizing_fallback" )
+		{
+			_FontSizingFallback.fromUtf8(value);
+			return true;
+		}
+		else
 			return false;
 	}
 
@@ -624,10 +678,11 @@ namespace NLGUI
 	{
 		xmlSetProp( node, BAD_CAST "color", BAD_CAST toString( _Color ).c_str() );
 		xmlSetProp( node, BAD_CAST "global_color", BAD_CAST toString( _ModulateGlobalColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "fontsize",
-			BAD_CAST toString(
-			_FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32() 
-			).c_str() );
+
+		sint32 fontSize = _FontSize;
+		if (_FontSizeCoef) fontSize -= CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+		xmlSetProp( node, BAD_CAST "fontsize", BAD_CAST toString(fontSize).c_str() );
+		xmlSetProp( node, BAD_CAST "fontsize_coef", BAD_CAST toString(_FontSizeCoef).c_str() );
 
 		std::string fontweight("normal");
 		if (_Embolden)
@@ -679,6 +734,8 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "clamp_right", BAD_CAST toString( _ClampRight ).c_str() );
 		xmlSetProp( node, BAD_CAST "auto_clamp_offset", BAD_CAST toString( _AutoClampOffset ).c_str() );
 		xmlSetProp( node, BAD_CAST "continuous_update", BAD_CAST toString( _ContinuousUpdate ).c_str() );
+		xmlSetProp( node, BAD_CAST "sizing_chars", BAD_CAST _FontSizingChars.toUtf8().c_str() );
+		xmlSetProp( node, BAD_CAST "sizing_fallback", BAD_CAST _FontSizingFallback.toUtf8().c_str() );
 
 		return true;
 	}
@@ -723,6 +780,16 @@ namespace NLGUI
 			fromString((const char*)prop, _FontSize);
 			_FontSize += CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
 		}
+
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"fontsize_coef" );
+		_FontSizeCoef = true;
+		if (prop)
+		{
+			_FontSizeCoef = convertBool(prop);
+			if (!_FontSizeCoef)
+				_FontSize -= CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		}
+
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"fontweight" );
 		_Embolden = false;
@@ -854,6 +921,17 @@ namespace NLGUI
 			_ContinuousUpdate = convertBool(prop);
 		}
 
+		// "_Ä" lowest/highest chars (underscore, A+diaeresis)
+		_FontSizingChars.fromUtf8("_\xc3\x84");
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"sizing_chars" );
+		if (prop)
+			_FontSizingChars.fromUtf8((const char*)prop);
+
+		// fallback if SizingChars are not supported by font
+		_FontSizingFallback.fromUtf8("|");
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"sizing_fallback" );
+		if (prop)
+			_FontSizingFallback.fromUtf8((const char*)prop);
 
 		computeFontSize ();
 	}
@@ -1329,6 +1407,15 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CViewText::setFontSizing(const std::string &chars, const std::string &fallback)
+	{
+		_FontSizingChars.clear();
+		_FontSizingChars.fromUtf8(chars);
+		_FontSizingFallback.clear();
+		_FontSizingFallback.fromUtf8(fallback);
+	}
+
+	// ***************************************************************************
 	void CViewText::setFontName(const std::string &name)
 	{
 		if (_FontName == name)
@@ -1347,9 +1434,11 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::setFontSize (sint nFontSize)
+	void CViewText::setFontSize (sint nFontSize, bool coef)
 	{
-		_FontSize = nFontSize + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		_FontSize = nFontSize;
+		if (coef) _FontSize += CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		_FontSizeCoef = coef;
 		computeFontSize ();
 		invalidateContent();
 	}
@@ -1357,7 +1446,10 @@ namespace NLGUI
 	// ***************************************************************************
 	sint CViewText::getFontSize() const
 	{
-		return _FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		if (_FontSizeCoef)
+			return _FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+
+		return _FontSize;
 	}
 
 	// ***************************************************************************
@@ -2859,22 +2951,14 @@ namespace NLGUI
 		TextContext->setOblique (_Oblique);
 
 		// Letter size
-		ucstring chars;
-		// instead of using the height of "|" that depends on font,
-		// we're using 2 characters:
-		// - "_" that should be the character with the lowest part
-		// - A with an accent for the highest part
-		chars.fromUtf8("_\xc3\x84");
-
-		// for now we can't know that directly from UTextContext
-		UTextContext::CStringInfo si = TextContext->getStringInfo(chars);
+		UTextContext::CStringInfo si = TextContext->getStringInfo(_FontSizingChars);
 
 		// font generator changes unknown glyphs to dot '.'. use fallback if it looks odd
 		if (_FontSize > (si.StringHeight + si.StringLine))
 		{
-			chars.fromUtf8("|");
-			si = TextContext->getStringInfo(chars);
+			si = TextContext->getStringInfo(_FontSizingFallback);
 		}
+
 		// add a padding of 1 pixel else the top will be truncated
 		_FontHeight = si.StringHeight + 1;
 		_FontLegHeight = si.StringLine;
@@ -2883,7 +2967,7 @@ namespace NLGUI
 		si = TextContext->getStringInfo(ucstring(" "));
 		_SpaceWidth = si.StringWidth;
 
-		// Font Width
+		// Font Width (used for <tab>)
 		si = TextContext->getStringInfo(ucstring("_"));
 		_FontWidth = si.StringWidth;
 	}

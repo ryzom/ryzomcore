@@ -509,6 +509,7 @@ struct SBagOptions
 	NLMISC::CCDBNodeLeaf *DbFilterArmor;
 	NLMISC::CCDBNodeLeaf *DbFilterWeapon;
 	NLMISC::CCDBNodeLeaf *DbFilterTool;
+	NLMISC::CCDBNodeLeaf *DbFilterPet;
 	NLMISC::CCDBNodeLeaf *DbFilterMP;
 	NLMISC::CCDBNodeLeaf *DbFilterMissMP;
 	NLMISC::CCDBNodeLeaf *DbFilterTP;
@@ -516,6 +517,7 @@ struct SBagOptions
 	bool LastDbFilterArmor;
 	bool LastDbFilterWeapon;
 	bool LastDbFilterTool;
+	bool LastDbFilterPet;
 	bool LastDbFilterMP;
 	bool LastDbFilterMissMP;
 	bool LastDbFilterTP;
@@ -529,8 +531,8 @@ struct SBagOptions
 	SBagOptions()
 	{
 		InvType = CInventoryManager::InvUnknown;
-		DbFilterArmor = DbFilterWeapon = DbFilterTool = DbFilterMP = DbFilterMissMP = DbFilterTP = NULL;
-		LastDbFilterArmor = LastDbFilterWeapon = LastDbFilterTool = LastDbFilterMP = LastDbFilterMissMP = LastDbFilterTP = false;
+		DbFilterArmor = DbFilterWeapon = DbFilterTool = DbFilterPet = DbFilterMP = DbFilterMissMP = DbFilterTP = NULL;
+		LastDbFilterArmor = LastDbFilterWeapon = LastDbFilterTool = LastDbFilterPet = LastDbFilterMP = LastDbFilterMissMP = LastDbFilterTP = false;
 		SearchFilterChanged = false;
 		SearchQualityMin = 0;
 		SearchQualityMax = 999;
@@ -559,6 +561,12 @@ struct SBagOptions
 	{
 		if (DbFilterTool == NULL) return true;
 		return (DbFilterTool->getValue8()!=0);
+	}
+
+	bool getFilterPet() const
+	{
+		if (DbFilterPet == NULL) return true;
+		return (DbFilterPet->getValue8()!=0);
 	}
 
 	bool getFilterMP() const

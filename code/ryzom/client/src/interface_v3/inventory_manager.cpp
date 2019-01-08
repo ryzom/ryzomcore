@@ -2021,6 +2021,9 @@ bool SBagOptions::parse(xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 	prop = xmlGetProp (cur, (xmlChar*)"filter_tool");
 	if (prop) DbFilterTool = NLGUI::CDBManager::getInstance()->getDbProp(prop.str());
 
+	prop = xmlGetProp (cur, (xmlChar*)"filter_pet");
+	if (prop) DbFilterPet = NLGUI::CDBManager::getInstance()->getDbProp(prop.str());
+
 	prop = xmlGetProp (cur, (xmlChar*)"filter_mp");
 	if (prop) DbFilterMP = NLGUI::CDBManager::getInstance()->getDbProp(prop.str());
 
@@ -2097,6 +2100,13 @@ bool SBagOptions::isSomethingChanged()
 			LastDbFilterTool = (DbFilterTool->getValue8() != 0);
 		}
 
+	if (DbFilterPet != NULL)
+		if ((DbFilterPet->getValue8() != 0) != LastDbFilterPet)
+		{
+			bRet = true;
+			LastDbFilterPet = (DbFilterPet->getValue8() != 0);
+		}
+
 	if (DbFilterMP != NULL)
 		if ((DbFilterMP->getValue8() != 0) != LastDbFilterMP)
 		{
@@ -2135,6 +2145,7 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 	bool bFilterArmor = getFilterArmor();
 	bool bFilterWeapon = getFilterWeapon();
 	bool bFilterTool = getFilterTool();
+	bool bFilterPet = getFilterPet();
 	bool bFilterMP = getFilterMP();
 	bool bFilterMissMP = getFilterMissMP();
 	bool bFilterTP = getFilterTP();
@@ -2186,9 +2197,12 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 			(pIS->Family == ITEMFAMILY::HARVEST_TOOL) ||
 			(pIS->Family == ITEMFAMILY::TAMING_TOOL) || 
 			(pIS->Family == ITEMFAMILY::TRAINING_TOOL) ||
-			(pIS->Family == ITEMFAMILY::BAG) || 
-			(pIS->Family == ITEMFAMILY::PET_ANIMAL_TICKET) )
+			(pIS->Family == ITEMFAMILY::BAG))
 			if (!bFilterTool) bDisplay = false;
+
+		// Pet
+		if (pIS->Family == ITEMFAMILY::PET_ANIMAL_TICKET)
+			if (!bFilterPet) bDisplay = false;
 
 		// MP
 		if ((pIS->Family == ITEMFAMILY::RAW_MATERIAL) && pIS->canBuildSomeItemPart())
