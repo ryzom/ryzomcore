@@ -1688,7 +1688,13 @@ int CLuaIHMRyzom::getWeatherValue(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 0);
 	uint64 currDay = RT.getRyzomDay();
 	float currHour = (float) RT.getRyzomTime();
-	ls.push(::getBlendedWeather(currDay, currHour, *WeatherFunctionParams, ContinentMngr.cur()->WeatherFunction));
+	float weather = 0.f;
+	if (ContinentMngr.cur())
+	{
+		weather = ::getBlendedWeather(currDay, currHour, *WeatherFunctionParams, ContinentMngr.cur()->WeatherFunction);
+	}
+
+	ls.push(weather);
 	return 1;
 }
 
