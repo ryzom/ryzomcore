@@ -37,7 +37,7 @@ namespace NLGUI
 	class CViewText : public CViewBase
 	{
 	public:
-		enum TTextMode { ClipWord, DontClipWord, Justified };
+		enum TTextMode { ClipWord, DontClipWord, Justified, Centered };
 	public:
 
 		DECLARE_UI_CLASS(CViewText)

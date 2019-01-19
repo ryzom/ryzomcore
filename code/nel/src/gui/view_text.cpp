@@ -312,6 +312,9 @@ namespace NLGUI
 			case Justified:
 				return "justified";
 				break;
+
+			case Centered:
+				return "centered";
 			}
 
 			return "";
@@ -347,7 +350,7 @@ namespace NLGUI
 			return toString( _Underlined );
 		}
 		else
-		if( name == "strikthrough" )
+		if( name == "strikethrough" )
 		{
 			return toString( _StrikeThrough );
 		}
@@ -522,6 +525,9 @@ namespace NLGUI
 			else
 			if( value == "justified" )
 				_TextMode = Justified;
+			else
+			if( value == "centered" )
+				_TextMode = Centered;
 
 			return true;
 		}
@@ -716,6 +722,10 @@ namespace NLGUI
 		case Justified:
 			just = "justified";
 			break;
+
+		case Centered:
+			just = "centered";
+			break;
 		}
 		
 		xmlSetProp( node, BAD_CAST "justification", BAD_CAST just.c_str() );
@@ -843,6 +853,7 @@ namespace NLGUI
 			if (nlstricmp("clip_word", (const char *) prop) == 0)            _TextMode = ClipWord;
 			else if (nlstricmp("dont_clip_word", (const char *) prop) == 0)  _TextMode = DontClipWord;
 			else if (nlstricmp("justified", (const char *) prop) == 0)       _TextMode = Justified;
+			else if (nlstricmp("centered", (const char *) prop) == 0)        _TextMode = Centered;
 			else nlwarning("<CViewText::parse> bad text mode");
 		}
 
@@ -1198,7 +1209,18 @@ namespace NLGUI
 			{
 				CLine &currLine = *_Lines[i];
 				// current x position
-				float px = (float) (_XReal * _Scale + ((i==0) ? (sint)_FirstLineX : 0));
+				float px = (float) (_XReal * _Scale + ((i==0) ? _FirstLineX : 0.f));
+
+				// Center line to computed maximum line width (_WReal)
+				//
+				// Does not give most accurate result when _WReal is much smaller than parent,
+				// but _WReal also defines mouseover hotspot/tooltip area.
+				//
+				// May not work correctly in CGroupParagraph (multiple text elements).
+				//
+				if (_TextMode == Centered)
+					px += (float)(_WReal * _Scale - (currLine.getWidth() + (i == 0 ? _FirstLineX : 0.f)) )/ 2.f;
+
 				// draw each words of the line
 				for(uint k = 0; k < currLine.getNumWords(); ++k)
 				{
@@ -2042,6 +2064,7 @@ namespace NLGUI
 			switch(_TextMode)
 			{
 				case ClipWord: updateTextContextMultiLine(nMaxWidth); break;
+				case Centered: // fallthru to DontClipWord
 				case DontClipWord: updateTextContextMultiLineJustified(nMaxWidth, false); break;
 				case Justified: updateTextContextMultiLineJustified(nMaxWidth, true); break;
 			}
@@ -2872,7 +2895,7 @@ namespace NLGUI
 			return (sint32)ceilf(_FontHeight / _Scale);
 		}
 		// If we can't clip the words, return the size of the largest word
-		else if ((_TextMode == DontClipWord) || (_TextMode == Justified))
+		else if ((_TextMode == DontClipWord) || (_TextMode == Justified) || (_TextMode == Centered))
 		{
 			NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 			TextContext->setHotSpot (UTextContext::BottomLeft);
