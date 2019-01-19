@@ -350,7 +350,7 @@ namespace NLGUI
 			return toString( _Underlined );
 		}
 		else
-		if( name == "strikthrough" )
+		if( name == "strikethrough" )
 		{
 			return toString( _StrikeThrough );
 		}
