@@ -2,6 +2,10 @@
 
 <root id="interface" x="0" y="0" w="800" h="600" active="true" />
 
+<lua file="map.lua" />
+
+<!-- flag for game:onLoadMap() handler to override map texture or not -->
+<variable entry="UI:VARIABLES:SHOW_ALT_MAP" type="bool" value="0" />
 
 <!-- base menu of landmark -->
 <group type="menu" id="land_mark_menu" extends="base_menu">	

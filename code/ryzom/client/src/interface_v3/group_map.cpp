@@ -38,6 +38,7 @@
 #include "../sheet_manager.h" // for MaxNumPeopleInTeam
 #include "../global.h"
 #include "nel/gui/ctrl_quad.h"
+#include "nel/gui/lua_ihm.h"
 //
 #include "nel/misc/xml_auto_ptr.h"
 #include "game_share/mission_desc.h"
@@ -403,6 +404,7 @@ CGroupMap::CGroupMap(const TCtorParam &param)
 	_MaxH = 2000;
 	//_MinW = 50;
 	_MapTF = NULL;
+	_MapTexture.clear();
 	_PlayerPosMaterial = NULL;
 	_PlayerPosTF = NULL;
 	_MapTexW = 0;
@@ -462,6 +464,8 @@ CGroupMap::CGroupMap(const TCtorParam &param)
 	_PanStartDateInMs = 0;
 	_DeltaTimeBeforePanInMs = 0;
 	_DeltaPosBeforePan = 0;
+	//
+	_LuaLoadMapEntered = false;
 }
 
 //============================================================================================================
@@ -2071,15 +2075,61 @@ void CGroupMap::loadPlayerPos()
 }
 
 //============================================================================================================
+void CGroupMap::reload()
+{
+	if (!_CurMap || !getActive()) return;
+
+	SMap* current = _CurMap;
+	_CurMap = NULL;
+
+	setMap(current);
+}
+
+//============================================================================================================
 void CGroupMap::loadMap()
 {
 	_MapLoadFailure = true;
 	if (!_CurMap) return;
-	const std::string &mapName = _CurMap->BitmapName;
-	std::string fullName = NLMISC::CPath::lookup(mapName, false, false);
+
+	_MapTexture = _CurMap->BitmapName;
+
+	// call lua game:onLoadMap() function if present
+	// avoid deadlock if called recursively
+	if (!_LuaLoadMapEntered)
+	{
+		_LuaLoadMapEntered = true;
+		CLuaState *ls = CLuaManager::getInstance().getLuaState();
+
+		CLuaStackRestorer lsr(ls, ls->getTop());
+		ls->pushGlobalTable();
+
+		CLuaObject game(*ls);
+		game = game["game"];
+		if (!game["onLoadMap"].isNil())
+		{
+			uint numArg = 1;
+			uint numResult = 1;
+
+			CLuaIHM::pushReflectableOnStack(*ls, this);
+			if (game.callMethodByNameNoThrow("onLoadMap", numArg, numResult))
+			{
+				if (ls->isString(1))
+				{
+					if (!NLMISC::CPath::lookup(ls->toString(1), false, false).empty())
+						_MapTexture = ls->toString(1);
+					else
+						nlwarning("Custom map texture not found '%s' for map '%s'", ls->toString(1), _MapTexture.c_str());
+				}
+			}
+		}
+
+		_LuaLoadMapEntered = false;
+	}
+
+	std::string fullName = NLMISC::CPath::lookup(_MapTexture, false, false);
 	if (fullName.empty())
 	{
-		nlwarning("Can't find map %s", mapName.c_str());
+		nlwarning("Can't find map %s", _MapTexture.c_str());
 		return;
 	}
 	uint32 w, h;
@@ -2098,7 +2148,7 @@ void CGroupMap::loadMap()
 	}
 	else
 	{
-		nlwarning("Can't open map %s", mapName.c_str());
+		nlwarning("Can't open map %s", _MapTexture.c_str());
 		return;
 	}
 	_MapTF = Driver->createTextureFile(fullName);
@@ -3320,6 +3370,36 @@ SMap *CGroupMap::getParentMap(SMap *map)
 			return pM;
 	}
 	return NULL;
+}
+
+//=========================================================================================================
+std::string CGroupMap::getContinentName() const
+{
+	if (_CurMap == NULL) return "";
+
+	return toLower(_CurMap->ContinentName);
+}
+
+//=========================================================================================================
+std::string CGroupMap::getMapTexture() const
+{
+	return toLower(_MapTexture);
+}
+
+//=========================================================================================================
+int CGroupMap::luaReload(CLuaState &ls)
+{
+	CLuaIHM::checkArgCount(ls, "reload", 0);
+	reload();
+	return 0;
+}
+
+//=========================================================================================================
+int CGroupMap::luaIsIsland(CLuaState &ls)
+{
+	CLuaIHM::checkArgCount(ls, "isIsland", 0);
+	ls.push(_IsIsland);
+	return 1;
 }
 
 
