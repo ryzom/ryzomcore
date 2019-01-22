@@ -136,6 +136,17 @@ public:
 		  */
 		virtual void onUpdate(CGroupMap &/* owner */) {}
 	};
+
+	REFLECT_EXPORT_START(CGroupMap, CInterfaceGroup)
+		REFLECT_STRING("continent", getContinentName, dummySet);
+		REFLECT_STRING("texture", getMapTexture, dummySet);
+		REFLECT_LUA_METHOD("isIsland", luaIsIsland);
+		REFLECT_LUA_METHOD("reload", luaReload);
+	REFLECT_EXPORT_END
+
+	int luaReload(CLuaState &ls);
+	int luaIsIsland(CLuaState &ls);
+
 public:
 	CGroupMap(const TCtorParam &param);
 	virtual ~CGroupMap();
@@ -155,6 +166,14 @@ public:
 	// Name of the map as filled in the ryzom.world file
 	void setMap(const std::string &mapName);
 	void setMap(SMap *map);
+
+	// return current continent
+	std::string getContinentName() const;
+	// return currently displayed map texture
+	std::string getMapTexture() const;
+
+	// reload current map texture
+	void reload();
 
 	// pan the map of the given number of pixels
 	void pan(sint32 dx, sint32 dy);
@@ -358,6 +377,7 @@ private:
 		CContinent			*_CurContinent;	// the last continent for which the map was displayed (can be NULL if world)
 		NLMISC::CVector2f	_MapMinCorner; // In world coordinates
 		NLMISC::CVector2f	_MapMaxCorner;
+		std::string			_MapTexture; // currently displayed map texture
 
 		bool				_IsIsland;  // true if current map is an island (island bitmap need not to be raised to the next
 									  // power of 2
@@ -537,6 +557,8 @@ private:
 	// r2 islands
 	std::vector<SMap>	_Islands;
 
+	// guard against recursive calls
+	bool				_LuaLoadMapEntered;
 
 private:
 	void loadPlayerPos();
