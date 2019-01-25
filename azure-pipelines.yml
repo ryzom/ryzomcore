@@ -5,7 +5,13 @@ jobs:
     steps:
     - script: |
         sudo apt-get update
+        sudo apt-get install -y software-properties-common
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt-get update
         sudo apt-get install cmake build-essential -y
+        sudo apt-get install gcc-8 g++-8 -y
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60
         sudo apt-get install libmysqlclient-dev -y
         sudo apt-get install bison autoconf automake -y
         sudo apt-get install libpng12-dev libjpeg62-dev -y
