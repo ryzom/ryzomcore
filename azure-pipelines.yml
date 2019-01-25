@@ -1,0 +1,28 @@
+jobs:
+  - job: ubuntu16
+    pool:
+      vmImage: 'Ubuntu-16.04'
+    steps:
+    - script: |
+        sudo apt-get update
+        sudo apt-get install cmake build-essential -y
+        sudo apt-get install libmysqlclient-dev -y
+        sudo apt-get install bison autoconf automake -y
+        sudo apt-get install libpng12-dev libjpeg62-dev -y
+        sudo apt-get install liblua5.1-dev libluabind-dev libcpptest-dev -y
+        sudo apt-get install libogg-dev libvorbis-dev libopenal-dev -y
+        sudo apt-get install libgif-dev libfreetype6-dev -y
+        sudo apt-get install libxml2-dev -y
+        sudo apt-get install libcurl4-openssl-dev -y
+      displayName: 'Dependencies'
+    - script: |
+        mkdir build
+        cmake --version
+        cd build
+        cmake -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_TOOLS=OFF -DWITH_NEL_TOOLS=OFF ../code
+        cat CMakeCache.txt
+      displayName: 'CMake'
+    - script: |
+        cd build
+        make -j`nproc`
+      displayName: 'Make'
