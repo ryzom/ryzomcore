@@ -14,13 +14,12 @@ jobs:
         sudo apt-get install libgif-dev libfreetype6-dev -y
         sudo apt-get install libxml2-dev -y
         sudo apt-get install libcurl4-openssl-dev -y
-        sudo apt-get install libsquish-dev -y
       displayName: 'Dependencies'
     - script: |
         mkdir build
         cmake --version
         cd build
-        cmake -DWITH_NEL_TESTS=ON -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON ../code
+        cmake -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_TOOLS=OFF -DWITH_NEL_TOOLS=OFF ../code
         cat build/CMakeCache.txt
       displayName: 'CMake'
     - script: |
