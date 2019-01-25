@@ -23,5 +23,6 @@ jobs:
         cat CMakeCache.txt
       displayName: 'CMake'
     - script: |
+        cd build
         make -j`nproc`
       displayName: 'Make'
