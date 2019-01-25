@@ -6,7 +6,7 @@ jobs:
     - script: |
         sudo apt-get update
         sudo apt-get install cmake build-essential -y
-        sudo apt-get install libmysqlclient15-dev -y
+        sudo apt-get install libmysqlclient-dev -y
         sudo apt-get install bison autoconf automake -y
         sudo apt-get install libpng12-dev libjpeg62-dev -y
         sudo apt-get install liblua5.1-dev libluabind-dev libcpptest-dev -y
@@ -14,6 +14,7 @@ jobs:
         sudo apt-get install libgif-dev libfreetype6-dev -y
         sudo apt-get install libxml2-dev -y
         sudo apt-get install libcurl4-openssl-dev -y
+        sudo apt-get install libsquish-dev -y
       displayName: 'Dependencies'
     - script: |
         mkdir build
