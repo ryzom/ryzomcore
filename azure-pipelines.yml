@@ -20,7 +20,7 @@ jobs:
         cmake --version
         cd build
         cmake -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_TOOLS=OFF -DWITH_NEL_TOOLS=OFF ../code
-        cat build/CMakeCache.txt
+        cat CMakeCache.txt
       displayName: 'CMake'
     - script: |
         make -j`nproc`
