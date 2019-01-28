@@ -175,6 +175,7 @@ namespace NLGUI
 		bool	_CallingAH  : 1;
 		bool	_Cancelable : 1; // true if the slider may be cancelled when pressed on the mouse right button
 		bool	_Frozen		: 1;
+		bool	_Scale		: 1;
 
 		// For Target Scroller only: the target offset step in pixel.
 		sint32	_TargetStepX;
