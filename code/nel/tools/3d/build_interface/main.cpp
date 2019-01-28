@@ -214,7 +214,7 @@ int main(int argc, char **argv)
 	args.addArg("x", "extract", "", "Extract all interface elements from <output_filename> to <input_path>.");
 	args.addAdditionalArg("output_filename", "PNG or TGA file to generate", true);
 	args.addAdditionalArg("input_path", "Path that containts interfaces elements", false);
-	args.addArg("b", "border", "", "Duplicate icon border to allow bilinear filtering");
+	args.addArg("", "no-border", "", "Disable border duplication. Enabled by default");
 
 	if (!args.parse(argc, argv)) return 1;
 
@@ -229,10 +229,10 @@ int main(int argc, char **argv)
 	}
 
 	//
-	uint borderSize = 0;
-	if (args.haveArg("b"))
+	uint borderSize = 1;
+	if (args.haveLongArg("no-border"))
 	{
-		borderSize = 1;
+		borderSize = 0;
 	}
 
 	// extract all interface elements
