@@ -1042,7 +1042,9 @@
                h="24"
                posref="TL TL"
                x="0"
-               y="-4">
+               y="-4"
+               max_w="0"
+               max_sizeref="w">
           <ctrl style="tab_button_new"
                 id="tab0"
                 x="0"
@@ -1183,6 +1185,22 @@
               texture="blank.tga"
               color="166 166 166 255" />
       </group>
+
+      <!-- scroll target element will be set from c++ code: it does not exist on template build time -->
+      <ctrl type="scroll"
+            id="channel_scroll"
+            vertical="false"
+            align="L"
+            y="-1"
+            h="4"
+            scale="true"
+            posref="BL TL"
+            posparent="header_opened"
+            tx_bottomleft="skin_scroll_l.tga"
+            tx_middle="skin_scroll_h.tga"
+            tx_topright="skin_scroll_r.tga"
+            target="" />
+
       <group id="content"
              x="0"
              y="0"
