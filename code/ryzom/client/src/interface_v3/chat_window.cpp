@@ -1142,6 +1142,15 @@ CChatWindow *CChatWindowManager::createChatGroupWindow(const CChatWindowDesc &de
 		if (!desc.HeaderColor.empty())
 			w->setHeaderColor(desc.HeaderColor);
 
+
+		// because root group was created from template, element from scrollbar target attribute was not created yet
+		CInterfaceGroup *pIG = w->getContainer()->getGroup("header_opened:channel_select");
+		if (pIG)
+		{
+			CCtrlScroll *sb = dynamic_cast<CCtrlScroll*>(w->getContainer()->getCtrl("channel_scroll"));
+			if (sb) sb->setTarget(pIG);
+		}
+
 		return w;
 	}
 	else
