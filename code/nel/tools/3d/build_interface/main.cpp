@@ -421,8 +421,17 @@ int main(int argc, char **argv)
 				NLMISC::CBitmap *tmp = new NLMISC::CBitmap;
 				tmp->resize(pBtmp->getWidth(), pBtmp->getHeight());
 				tmp->blit(pBtmp, 0, 0);
+				// corners
 				tmp->resample(tmp->getWidth() + borderSize * 2, tmp->getHeight() + borderSize * 2);
+				// top, bottom
+				tmp->blit(pBtmp, borderSize, 0);
+				tmp->blit(pBtmp, borderSize, borderSize*2);
+				// left, right
+				tmp->blit(pBtmp, 0, borderSize);
+				tmp->blit(pBtmp, borderSize*2, borderSize);
+				// center
 				tmp->blit(pBtmp, borderSize, borderSize);
+
 				delete pBtmp;
 				pBtmp = tmp;
 			}
