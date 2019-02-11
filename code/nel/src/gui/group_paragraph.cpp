@@ -52,6 +52,7 @@ namespace NLGUI
 		_MinW= 0;
 		_MinH= 0;
 		_Over = false;
+		_TempOver = false;
 		_OverColor = CRGBA(255,255,255,32);
 		_OverElt = -1;
 		_LastW = 0;
@@ -967,7 +968,7 @@ namespace NLGUI
 		// TEMP TEMP
 		//CViewRenderer &rVR = *CViewRenderer::getInstance();
 		//rVR.drawRotFlipBitmap _RenderLayer, (_XReal, _YReal, _WReal, _HReal, 0, false, rVR.getBlankTextureId(), CRGBA(0,255,0,255) );
-		if (_Over)
+		if (_Over || _TempOver)
 		{
 			CViewRenderer &rVR = *CViewRenderer::getInstance();
 
@@ -1052,7 +1053,10 @@ namespace NLGUI
 
 			_OverElt = -1;
 			if (!isIn(eventDesc.getX(), eventDesc.getY()))
+			{
+				_TempOver = false;
 				return false;
+			}
 
 			for (uint32 i = 0; i < _Elements.size(); ++i)
 			if (_Elements[i].Element->getActive())

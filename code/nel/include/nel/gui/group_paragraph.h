@@ -206,6 +206,11 @@ namespace NLGUI
 			invalidateContent();
 		}
 
+		/// temporarily enable mouse over effect
+		//  will be automatically disabled when mouse leaves element
+		void	enableTempOver() { _TempOver = true; }
+		void	disableTempOver() { _TempOver = false; }
+
 		/// \from CInterfaceElement
 		void onInvalidateContent();
 		sint32	getMaxUsedW() const;
@@ -233,6 +238,8 @@ namespace NLGUI
 
 		// Do we have a color under the element pointed by the mouse
 		bool _Over;
+		// Temporarily force mouse over effect. Deactivated when mouse moves away
+		bool _TempOver;
 
 		// If over is true so we have a color
 		NLMISC::CRGBA _OverColor;

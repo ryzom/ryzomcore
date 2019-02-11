@@ -442,9 +442,9 @@ namespace NLGUI
 		// Clear all the lines and free their datas
 		void clearLines();
 		// Update in the case of a multiline text
-		void updateTextContextMultiLine(uint nMaxWidth);
+		void updateTextContextMultiLine(float nMaxWidth);
 		// Update in the case of a multiline text with justification
-		void updateTextContextMultiLineJustified(uint nMaxWidth, bool expandSpaces);
+		void updateTextContextMultiLineJustified(float nMaxWidth, bool expandSpaces);
 		// Recompute font size info
 		void computeFontSize ();
 

@@ -1631,7 +1631,7 @@ namespace NLGUI
 
 
 	// ***************************************************************************
-	void CViewText::updateTextContextMultiLine(uint nMaxWidth)
+	void CViewText::updateTextContextMultiLine(float nMaxWidth)
 	{
 		ucchar ucLetter;
 		UTextContext::CStringInfo si;
@@ -1744,7 +1744,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::updateTextContextMultiLineJustified(uint nMaxWidth, bool expandSpaces)
+	void CViewText::updateTextContextMultiLineJustified(float nMaxWidth, bool expandSpaces)
 	{
 		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		UTextContext::CStringInfo si;
@@ -1850,10 +1850,10 @@ namespace NLGUI
 			}
 			//
 			// Does the word go beyond the end of line ?
-			if (!lineFeed && newLineWidth > (float) nMaxWidth)
+			if (!lineFeed && newLineWidth > nMaxWidth)
 			{
 				// Have we enough room for this word on a line ?
-				bool roomForThisWord = (numWordsInLine > 0) || ( (newLineWidth - lineWidth) < (float) nMaxWidth );
+				bool roomForThisWord = (numWordsInLine > 0) || ( (newLineWidth - lineWidth) < nMaxWidth );
 
 				// not enough room for that word
 				// If it is the only word of the line, just split it
@@ -1930,7 +1930,7 @@ namespace NLGUI
 						word.build(wordValue, *TextContext, numSpaces);
 						word.Format= wordFormat;
 						_Lines.push_back(TLineSPtr(new CLine));
-						float roomForSpaces = (float) nMaxWidth - word.Info.StringWidth;
+						float roomForSpaces = nMaxWidth - word.Info.StringWidth;
 						if (expandSpaces && numSpaces != 0)
 						{
 							_Lines.back()->setSpaceWidth(roomForSpaces / (float) numSpaces);
