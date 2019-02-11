@@ -28,6 +28,9 @@ using namespace NLMISC;
 
 CChatTextManager* CChatTextManager::_Instance = NULL;
 
+// last selected chat from 'copy_chat_popup' action handler
+static std::string LastSelectedChat;
+
 //=================================================================================
 CChatTextManager::CChatTextManager() :
 	_TextFontSize(NULL),
@@ -403,7 +406,7 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 	para->setResizeFromChildH(true);
 
 	// use right click because left click might be used to activate chat window
-	para->setRightClickHandler("copy_to_clipboard");
+	para->setRightClickHandler("copy_chat_popup");
 	para->setRightClickHandlerParams(msg.toUtf8());
 
 	if (plaintext)
@@ -526,3 +529,41 @@ void CChatTextManager::reset ()
 	_TextShadowed = NULL;
 	_ShowTimestamps = NULL;
 }
+
+// ***************************************************************************
+// Called when we right click on a chat line
+class	CHandlerCopyChatPopup: public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &params )
+	{
+		if (pCaller == NULL) return;
+
+		LastSelectedChat = params;
+
+		CGroupParagraph *pGP = dynamic_cast<CGroupParagraph *>(pCaller);
+		if (pGP) pGP->enableTempOver();
+
+		CWidgetManager::getInstance()->enableModalWindow (pCaller, "ui:interface:chat_copy_action_menu");
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerCopyChatPopup, "copy_chat_popup");
+
+// ***************************************************************************
+// Called when we right click on a chat line and choose 'copy' from context menu
+class	CHandlerCopyChat: public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &params )
+	{
+		if (pCaller == NULL) return;
+
+		CGroupParagraph *pGP = dynamic_cast<CGroupParagraph *>(pCaller);
+		if (pGP) pGP->disableTempOver();
+
+		CAHManager::getInstance()->runActionHandler("copy_to_clipboard", NULL, LastSelectedChat);
+		CWidgetManager::getInstance()->disableModalWindow();
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerCopyChat, "copy_chat");
+

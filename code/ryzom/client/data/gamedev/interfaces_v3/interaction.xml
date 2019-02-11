@@ -3173,4 +3173,13 @@
             params="game:chatUrlBrowse()" />
   </group>
 
+  <group type="menu"
+         id="chat_copy_action_menu"
+         extends="base_menu">
+    <action id="copy"
+        name="uiCopy"
+        handler="copy_chat"
+        params="from_modal" />
+  </group>
+
 </interface_config>
