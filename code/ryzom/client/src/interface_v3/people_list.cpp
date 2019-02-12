@@ -774,6 +774,10 @@ void CPeopleList::setOnline(uint index, TCharConnectionState online)
 		CCtrlBase *chatButton = hc->getCtrl("chat_button");
 		if (chatButton != NULL)
 			chatButton->setActive(online != ccs_offline);
+		
+		CCtrlBase *inviteButton = hc->getCtrl("invite_button");
+		if (inviteButton != NULL)
+			inviteButton->setActive(online != ccs_offline);
 	}
 
 	_Peoples[index].Online = online;
