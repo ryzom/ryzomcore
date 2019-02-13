@@ -287,18 +287,7 @@ bool CAudioDecoderFfmpeg::getInfo(NLMISC::IStream *stream, std::string &artist, 
 		}
 	}
 
-	if (ffmpeg._FormatContext->duration != AV_NOPTS_VALUE)
-	{
-		length = ffmpeg._FormatContext->duration * av_q2d(AV_TIME_BASE_Q);
-	}
-	else if (ffmpeg._FormatContext->streams[ffmpeg._AudioStreamIndex]->duration != AV_NOPTS_VALUE)
-	{
-		length = ffmpeg._FormatContext->streams[ffmpeg._AudioStreamIndex]->duration * av_q2d(ffmpeg._FormatContext->streams[ffmpeg._AudioStreamIndex]->time_base);
-	}
-	else
-	{
-		length = 0.f;
-	}
+	length = ffmpeg.getLength();
 
 	return true;
 }
@@ -420,9 +409,16 @@ bool CAudioDecoderFfmpeg::isMusicEnded()
 
 float CAudioDecoderFfmpeg::getLength()
 {
-	printf(">> CAudioDecoderFfmpeg::getLength\n");
-	// TODO: return (float)ov_time_total(&_OggVorbisFile, -1);
-	return 0.f;
+	float length = 0.f;
+	if (_FormatContext->duration != AV_NOPTS_VALUE)
+	{
+		length = _FormatContext->duration * av_q2d(AV_TIME_BASE_Q);
+	}
+	else if (_FormatContext->streams[_AudioStreamIndex]->duration != AV_NOPTS_VALUE)
+	{
+		length = _FormatContext->streams[_AudioStreamIndex]->duration * av_q2d(_FormatContext->streams[_AudioStreamIndex]->time_base);
+	}
+	return length;
 }
 
 void CAudioDecoderFfmpeg::setLooping(bool loop)
