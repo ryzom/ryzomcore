@@ -2334,7 +2334,63 @@ CEntityCL *CEntityManager::getEntityByName (uint32 stringId) const
 }
 
 //-----------------------------------------------
+CEntityCL *CEntityManager::getEntityByKeywords (const std::vector<ucstring> &keywords, bool onlySelectable) const
+{
+	if (keywords.empty()) return NULL;
 
+	std::vector<ucstring> lcKeywords;
+	lcKeywords.resize(keywords.size());
+	for(uint k = 0; k < keywords.size(); k++)
+	{
+		lcKeywords[k] = toLower(keywords[k]);
+	}
+
+	const NLMISC::CVectorD &userPosD = UserEntity->pos();
+	const uint count = (uint)_Entities.size();
+	uint selectedEntityId = 0;
+	float selectedEntityDist = FLT_MAX;
+	for(uint i = 0; i < count; ++i)
+	{
+		if (!_Entities[i]) continue;
+
+		if (onlySelectable && !_Entities[i]->properties().selectable()) continue;
+
+		ucstring lcName;
+		lcName = toLower(_Entities[i]->getDisplayName());
+		if (lcName.empty()) continue;
+
+		bool match = true;
+		for (uint k = 0; k < lcKeywords.size(); ++k)
+		{
+			if (lcName.find(lcKeywords[k]) == ucstring::npos)
+			{
+				match = false;
+				break;
+			}
+		}
+
+		if (match)
+		{
+			const NLMISC::CVectorD &targetPosD = _Entities[i]->pos();
+
+			float deltaX = (float) targetPosD.x - (float) userPosD.x;
+			float deltaY = (float) targetPosD.y - (float) userPosD.y;
+			float dist = (float)sqrt(deltaX * deltaX + deltaY * deltaY);
+			if (dist < selectedEntityDist)
+			{
+				selectedEntityDist = dist;
+				selectedEntityId = i;
+			}
+		}
+	}
+
+	if (selectedEntityDist != FLT_MAX)
+		return _Entities[selectedEntityId];
+	else
+		return NULL;
+}
+
+//-----------------------------------------------
 CEntityCL *CEntityManager::getEntityByName (const ucstring &name, bool caseSensitive, bool complete) const
 {
 	ucstring source = name;

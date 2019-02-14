@@ -302,6 +302,12 @@ public:
 	  * \param complete : if true, the name must match the full name of the entity.
 	  */
 	CEntityCL *getEntityByName (const ucstring &name, bool caseSensitive, bool complete) const;
+	/**
+	 * Case insensitive match against entity name. All listed keywords must match.
+	 * \param keywords to match
+	 * \param onlySelectable : if true, match only entity that can be selected
+	 */
+	CEntityCL *getEntityByKeywords (const std::vector<ucstring> &keywords, bool onlySelectable) const;
 	CEntityCL *getEntityBySheetName (const std::string &sheet) const;
 	/// Get an entity by dataset index. Returns NULL if the entity is not found.
 	CEntityCL *getEntityByCompressedIndex(TDataSetIndex compressedIndex) const;

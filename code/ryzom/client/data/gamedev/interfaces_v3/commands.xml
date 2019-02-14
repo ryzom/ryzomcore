@@ -78,17 +78,11 @@
 
 	<command name="self" action="self_target" params="" />
 
-	<command name="target" action="target" params="entity=$" />
-	<command name="tar" action="target" params="entity=$" />
+	<command name="target" action="target" params="entity=+" ctrlchar="false" />
+	<command name="tar" action="target" params="entity=+" ctrlchar="false" />
 
-	<command name="target_quiet" action="target" params="entity=$|quiet=true" />
-	<command name="tarq" action="target" params="entity=$|quiet=true" />	
-	
-	<command name="target" action="target" params="entity=$|prefer_complete_match=$" />
-	<command name="tar" action="target" params="entity=$|prefer_complete_match=$" />
-
-	<command name="target_quiet" action="target" params="entity=$|prefer_complete_match=$|quiet=true" />
-	<command name="tarq" action="target" params="entity=$|prefer_complete_match=$|quiet=true" />
+	<command name="target_quiet" action="target" params="entity=+|quiet=true" ctrlchar="false" />
+	<command name="tarq" action="target" params="entity=+|quiet=true" ctrlchar="false" />
 
 	<command name="target" action="no_target" params="" />
 	<command name="tar" action="no_target" params="" />

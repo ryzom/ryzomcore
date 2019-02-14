@@ -2416,70 +2416,66 @@ class CAHTarget : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
-		// Get the entity name to target
 		ucstring entityName;
-		entityName.fromUtf8 (getParam (Params, "entity"));
-		bool preferCompleteMatch = (getParam (Params, "prefer_complete_match") != "0");
+		entityName.fromUtf8(getParam(Params, "entity"));
+		if (entityName.empty()) return;
+
+		string completeMatch = getParam(Params, "prefer_complete_match");
 		bool quiet = (getParam (Params, "quiet") == "true");
 
-		if (!entityName.empty())
+		vector<ucstring> keywords;
+		NLMISC::splitUCString(entityName, ucstring(" "), keywords);
+		if (!keywords.empty() && keywords[0].size() > 0 && keywords[0][0] == (ucchar)'"')
 		{
-			CEntityCL *entity = NULL;
-			if (preferCompleteMatch)
-			{
-				// Try to get the entity with complete match first
-				entity = EntitiesMngr.getEntityByName (entityName, false, true);
-			}
-			
-			if (entity == NULL)
-			{
-				// Get the entity with a partial match
-				entity = EntitiesMngr.getEntityByName (entityName, false, false);
-			}
+			// entity name is in quotes, do old style match with 'starts with' filter
+			// search for optional second parameter from old command for prefer_complete_match param
+			keywords.clear();
 
-			if (entity == NULL)
-			{
-				//Get the entity with a sheetName
-				entity = EntitiesMngr.getEntityBySheetName(entityName.toUtf8());
-			}
-			
-			if (entity)
-			{
-				CCharacterCL *character = dynamic_cast<CCharacterCL*>(entity);
-				if (character != NULL)
-				{
-					if(character->isSelectableBySpace())
-					{
-						nldebug("isSelectableBySpace");
-					}
-					else
-					{
-						nldebug("is not isSelectableBySpace");
-					}
-				}
-				if(entity->properties().selectable())
-				{
-					nldebug("is prop selectable");
-				}
-				else
-				{
-					// to avoid campfire selection exploit #316
-					nldebug("is not prop selectable");
-					CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-					if(!quiet)
-						pIM->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
-					return;
-				}
+			ucstring::size_type lastOf = entityName.rfind(ucstring("\""));
+			if (lastOf == 0)
+				lastOf = ucstring::npos;
 
-				// Select the entity
-				UserEntity->selection(entity->slot());
-			}
-			else
-			{
-				CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-				if(!quiet)
-					pIM->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
-			}
+			// override the value only when there is no 'prefer_complete_match' parameter set
+			if (completeMatch.empty() && lastOf < entityName.size())
+				completeMatch = trim(entityName.substr(lastOf+1).toUtf8());
+
+			entityName = entityName.substr(1, lastOf-1);
+		}
+
+		// late check because only possible if doing 'starts-with' search
+		bool preferCompleteMatch = (completeMatch != "0");
+
+		CEntityCL *entity = NULL;
+		if (preferCompleteMatch)
+		{
+			// Try to get the entity with complete match first
+			entity = EntitiesMngr.getEntityByName (entityName, false, true);
+		}
+
+		if (entity == NULL && !keywords.empty())
+		{
+			entity = EntitiesMngr.getEntityByKeywords(keywords, true);
+		}
+
+		if (entity == NULL)
+		{
+			// Get the entity with a partial match using 'starts with' search
+			entity = EntitiesMngr.getEntityByName(entityName, false, false);
+		}
+
+		if (entity == NULL)
+		{
+			//Get the entity with a sheetName
+			entity = EntitiesMngr.getEntityBySheetName(entityName.toUtf8());
+		}
+
+		if (entity && entity->properties().selectable() && !entity->getDisplayName().empty())
+		{
+			UserEntity->selection(entity->slot());
+		}
+		else if (!quiet)
+		{
+			CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
 		}
 	}
 };
