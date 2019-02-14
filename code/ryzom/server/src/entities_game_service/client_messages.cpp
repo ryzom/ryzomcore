@@ -1984,7 +1984,7 @@ void cbClientSendWhere( NLNET::CMessage& msgin, const std::string &serviceName, 
 	CZoneManager::getInstance().answerWhere(id);
 }
 
-// client send a command where for known where is it
+// client send a command afk to set the player as 'away from keyboard'
 void cbClientSendAfk( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
 {
 	H_AUTO(cbClientSendAfk);
@@ -2057,7 +2057,7 @@ void cbClientSit( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 			if( !c->isInWater() && c->getMode()!=MBEHAV::MOUNT_NORMAL && c->getMode()!=MBEHAV::DEATH )
 			{
 				c->setMode( MBEHAV::SIT );
-				// only if player is'nt equipping an item
+				// only if player isn't equipping an item
 				//( to prevent exploit "sit to reduce equip latency time")
 				if( !c->getGearLatency().isLatent() )
 				{
