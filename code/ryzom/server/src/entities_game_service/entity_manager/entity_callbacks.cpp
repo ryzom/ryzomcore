@@ -252,7 +252,7 @@ void cbClientConnection(CMessage& msgin, const std::string &serviceName, NLNET::
 		// load character of player
 		PlayerManager.loadPlayer( player );
 
-		// set status connexion of player to connected
+		// set status connection of player to connected
 		player->setPlayerConnection( true );
 
 		// set player cookie, for later web activation
@@ -2935,7 +2935,7 @@ void cbAnimalMount( NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 						}
 						else
 						{
-							nlwarning("<cbAnimalMount> %d Target %s %s is not moutable !! sheeter or client bug ?", CTickEventHandler::getGameCycle(), target.toString().c_str(), mount->getType().toString().c_str() );
+							nlwarning("<cbAnimalMount> %d Target %s %s is not moutable !! sheet or client bug ?", CTickEventHandler::getGameCycle(), target.toString().c_str(), mount->getType().toString().c_str() );
 						}
 					}
 					else
