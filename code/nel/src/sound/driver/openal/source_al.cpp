@@ -194,7 +194,7 @@ uint CSourceAL::countStreamingBuffers() const
 	// a bit ugly here, but makes a much easier/simpler implementation on both drivers
 	ALint buffersProcessed;
 	alGetSourcei(_Source, AL_BUFFERS_PROCESSED, &buffersProcessed);
-	while (buffersProcessed)
+	while (buffersProcessed && !_QueuedBuffers.empty())
 	{
 		ALuint bufferName = _QueuedBuffers.front()->bufferName();
 		alSourceUnqueueBuffers(_Source, 1, &bufferName);
