@@ -36,6 +36,7 @@
 
 // Project includes
 #include <nel/sound/audio_decoder_vorbis.h>
+#include <nel/sound/audio_decoder_mp3.h>
 
 #ifdef FFMPEG_ENABLED
 #include <nel/sound/audio_decoder_ffmpeg.h>
@@ -102,6 +103,10 @@ IAudioDecoder *IAudioDecoder::createAudioDecoder(const std::string &type, NLMISC
 	{
 		return new CAudioDecoderVorbis(stream, loop);
 	}
+	else if (type_lower == "mp3")
+	{
+		return new CAudioDecoderMP3(stream, loop);
+	}
 	else
 	{
 		nlwarning("Music file type unknown: '%s'", type_lower.c_str());
@@ -139,6 +144,16 @@ bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, st
 
 		nlwarning("Unable to open: '%s'", filepath.c_str());
 	}
+	else if (type_lower == "mp3")
+	{
+		CIFile ifile;
+		ifile.setCacheFileOnOpen(false);
+		ifile.allowBNPCacheFileOnOpen(false);
+		if (ifile.open(lookup))
+			return CAudioDecoderMP3::getInfo(&ifile, artist, title, length);
+
+		nlwarning("Unable to open: '%s'", filepath.c_str());
+	}
 	else
 	{
 		nlwarning("Music file type unknown: '%s'", type_lower.c_str());
@@ -156,6 +171,10 @@ void IAudioDecoder::getMusicExtensions(std::vector<std::string> &extensions)
 	if (std::find(extensions.begin(), extensions.end(), "ogg") == extensions.end())
 	{
 		extensions.push_back("ogg");
+	}
+	if (std::find(extensions.begin(), extensions.end(), "mp3") == extensions.end())
+	{
+		extensions.push_back("mp3");
 	}
 #ifdef FFMPEG_ENABLED
 	extensions.push_back("mp3");
