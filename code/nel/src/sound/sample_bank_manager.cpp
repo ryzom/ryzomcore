@@ -82,13 +82,14 @@ void CSampleBankManager::init(NLGEORGES::UFormElm *mixerConfig)
 					TFilteredBank fb;
 					std::string	bankName;
 					NLGEORGES::UFormElm	*realBank = NULL;
-					realBank->getArrayNode(&realBank, j);
-
-					realBank->getValueByName(bankName, ".SampleBank");
-					fb.BankName = CStringMapper::map(bankName);
-					realBank->getValueByName(fb.Filter, ".Filter");
-
-					vfb.push_back(fb);
+					realBanks->getArrayNode(&realBank, j);
+					if (realBank != 0)
+					{
+						realBank->getValueByName(bankName, ".SampleBank");
+						fb.BankName = CStringMapper::map(bankName);
+						realBank->getValueByName(fb.Filter, ".Filter");
+						vfb.push_back(fb);
+					}
 				}
 			}
 
