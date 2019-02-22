@@ -92,7 +92,10 @@ CAudioDecoderMP3::CAudioDecoderMP3(NLMISC::IStream *stream, bool loop)
 
 CAudioDecoderMP3::~CAudioDecoderMP3()
 {
-	drmp3_uninit(&_Decoder);
+	if (_IsSupported)
+	{
+		drmp3_uninit(&_Decoder);
+	}
 }
 
 bool CAudioDecoderMP3::isFormatSupported() const

@@ -194,6 +194,10 @@ uint CSourceAL::countStreamingBuffers() const
 	// a bit ugly here, but makes a much easier/simpler implementation on both drivers
 	ALint buffersProcessed;
 	alGetSourcei(_Source, AL_BUFFERS_PROCESSED, &buffersProcessed);
+	if (buffersProcessed && _QueuedBuffers.empty())
+	{
+		nlwarning("AL: QueuedBuffers is empty, but OpenAL buffers processed > 0");
+	}
 	while (buffersProcessed && !_QueuedBuffers.empty())
 	{
 		ALuint bufferName = _QueuedBuffers.front()->bufferName();
