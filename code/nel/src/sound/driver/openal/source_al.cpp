@@ -121,6 +121,11 @@ void CSourceAL::setStreaming(bool streaming)
 	alTestError();
 	_Buffer = NULL;
 	_IsStreaming = streaming;
+	if (_IsStreaming)
+	{
+		// make sure looping is disabled on OpenAL side
+		setLooping(false);
+	}
 }
 
 /* Set the buffer that will be played (no streaming)
