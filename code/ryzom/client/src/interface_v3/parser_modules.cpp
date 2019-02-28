@@ -24,12 +24,15 @@
 #include "../commands.h"
 #include "interface_3d_scene.h"
 #include "nel/misc/i_xml.h"
+#include "../continent_manager.h"
 
 using namespace NLMISC;
 
 #ifdef FINAL_VERSION
 #include "../client_cfg.h"
 #endif
+
+extern CContinentManager ContinentMngr;
 
 CIF3DSceneParser::CIF3DSceneParser()
 {
@@ -526,6 +529,24 @@ bool CMacroParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup )
 		CMacroCmdManager::getInstance()->addMacro(cmd);
 	else
 		return false;
+	return true;
+}
+
+CLandmarkParser::CLandmarkParser()
+{
+	parsingStage |= Unresolved;
+}
+
+CLandmarkParser::~CLandmarkParser()
+{
+}
+
+bool CLandmarkParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup )
+{
+	H_AUTO(parseLandmark)
+
+	ContinentMngr.readFrom(cur);
+
 	return true;
 }
 

@@ -458,6 +458,7 @@ CInterfaceManager::CInterfaceManager()
 	parser->addModule( "command", new CCommandParser() );
 	parser->addModule( "key", new CKeyParser() );
 	parser->addModule( "macro", new CMacroParser() );
+	parser->addModule( "landmarks", new CLandmarkParser() );
 	parser->setCacheUIParsing( ClientCfg.CacheUIParsing );
 
 	CViewRenderer::setDriver( Driver );
@@ -982,6 +983,9 @@ void CInterfaceManager::initInGame()
 	// Interface config
 	loadInterfaceConfig();
 
+	//Load user landmarks
+	loadLandmarks();
+
 	// Must do extra init for people interaction after load
 	PeopleInterraction.initAfterLoad();
 
@@ -1218,6 +1222,22 @@ void CInterfaceManager::configureQuitDialogBox()
 }
 
 // ------------------------------------------------------------------------------------------------
+//
+std::string CInterfaceManager::getSaveFileName(const std::string &module, const std::string &ext, bool useShared) const
+{
+	string filename = "save/" + module + "_" + PlayerSelectedFileName + "." + ext;
+	if (useShared && !CFile::fileExists(filename))
+	{
+		string sharedFile = "save/shared_" + module + "." + ext;
+		if (CFile::fileExists(sharedFile))
+		{
+			return sharedFile;
+		}
+	}
+	return filename;
+}
+
+// ------------------------------------------------------------------------------------------------
 void CInterfaceManager::loadKeys()
 {
 	if (ClientCfg.R2EDEnabled) // in R2ED mode the CEditor class deals with it
@@ -1228,26 +1248,19 @@ void CInterfaceManager::loadKeys()
 	vector<string> xmlFilesToParse;
 
 	// Does the keys file exist ?
-	string userKeyFileName = "save/keys_"+PlayerSelectedFileName+".xml";
+	string userKeyFileName = getSaveFileName("keys", "xml");
 	if (CFile::fileExists(userKeyFileName) && CFile::getFileSize(userKeyFileName) > 0)
 	{
 		// Load the user key file
 		xmlFilesToParse.push_back (userKeyFileName);
 	}
-	else
-	{
-		string filename = "save/shared_keys.xml";
-		if(CFile::fileExists(filename) && CFile::getFileSize(filename) > 0)
-		{
-			xmlFilesToParse.push_back(filename);
-		}
-	}
+
 	// Load the default key (but don't replace existings bounds, see keys.xml "key_def_no_replace")
 	xmlFilesToParse.push_back ("keys.xml");
 
 	if (!parseInterface (xmlFilesToParse, true))
 	{
-		badXMLParseMessageBox();
+		createFileBackup("Error loading keys", userKeyFileName);
 	}
 
 	_KeysLoaded = true;
@@ -1260,10 +1273,7 @@ void CInterfaceManager::loadInterfaceConfig()
 	if (ClientCfg.R2EDEnabled) // in R2ED mode the CEditor class deals with it
 		return;
 
-	string filename = "save/interface_" + PlayerSelectedFileName + ".icfg";
-	if (!CFile::fileExists(filename))
-		filename = "save/shared_interface.icfg";
-
+	string filename = getSaveFileName("interface", "icfg");
 	loadConfig(filename); // Invalidate coords of changed groups
 
 	_ConfigLoaded = true;
@@ -1680,6 +1690,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 	uint32	nNbMode;
 	CInterfaceConfig ic;
 	bool	lastInGameScreenResLoaded= false;
+	uint32	nbLandmarks = 0;
 	try
 	{
 		sint ver = f.serialVersion(ICFG_STREAM_VERSION);
@@ -1775,7 +1786,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		}
 
 		// Load user landmarks
-		ContinentMngr.serialUserLandMarks(f);
+		nbLandmarks = ContinentMngr.serialUserLandMarks(f);
 
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp( "SERVER:INTERFACES:NB_BONUS_LANDMARKS" );
 		if ( pNL )
@@ -1809,10 +1820,9 @@ bool CInterfaceManager::loadConfig (const string &filename)
 	catch(const NLMISC::EStream &)
 	{
 		f.close();
-		string	sFileNameBackup = sFileName+"backup";
-		if (CFile::fileExists(sFileNameBackup))
-			CFile::deleteFile(sFileNameBackup);
-		CFile::moveFile(sFileNameBackup, sFileName);
+
+		createFileBackup("Config loading failed", sFileName);
+
 		nlwarning("Config loading failed : restore default");
 		vector<string> v;
 		if (!ClientCfg.R2EDEnabled)
@@ -1822,6 +1832,35 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		return false;
 	}
 	f.close();
+
+	if (nbLandmarks > 0)
+	{
+		// use copy for backup so on save proper shared/player icfg file is used
+		createFileBackup("Landmarks will be migrated to xml", sFileName, true);
+
+		// if icfg is interface_player.icfg, then landmarks must also be loaded/saved to player file
+		if (nlstricmp(sFileName.substr(0, 12), "save/shared_") != 0)
+		{
+			string lmfile = getSaveFileName("landmarks", "xml", false);
+			if (!CFile::fileExists(lmfile))
+			{
+				// create placeholder player landmarks file so saveLandmarks will use it
+				// even if shared landmarks file exists
+				COFile f;
+				if (f.open(lmfile, false, false, true))
+				{
+					std::string xml;
+					xml = "<?xml version=\"1.0\"?>\n<interface_config />";
+					f.serialBuffer((uint8 *)xml.c_str(), xml.size());
+					f.close();
+				}
+			}
+		}
+
+		// merge .icfg landmarks with landmarks.xml
+		loadLandmarks();
+		saveLandmarks();
+	}
 
 	// *** If saved resolution is different from the current one setuped, must fix positions in _Modes
 	if(lastInGameScreenResLoaded)
@@ -1877,6 +1916,88 @@ public:
 	}
 };
 
+bool CInterfaceManager::saveLandmarks(bool verbose) const
+{
+	bool ret = true;
+
+	if (!ClientCfg.R2EDEnabled)
+	{
+		uint8 currMode = getMode();
+
+		string filename = getSaveFileName("landmarks", "xml");
+		if (verbose) CInterfaceManager::getInstance()->displaySystemInfo("Saving " + filename);
+		ret = saveLandmarks(filename);
+	}
+
+	return ret;
+}
+
+bool CInterfaceManager::loadLandmarks()
+{
+	// Does the keys file exist ?
+	string filename = getSaveFileName("landmarks", "xml");
+
+	CIFile f;
+	string sFileName;
+	sFileName = NLMISC::CPath::lookup (filename, false);
+	if (sFileName.empty() || !f.open(sFileName))
+		return false;
+
+	bool ret = false;
+	vector<string> xmlFilesToParse;
+	xmlFilesToParse.push_back (filename);
+
+	//ContinentMngr.serialUserLandMarks(node);
+	if (!parseInterface (xmlFilesToParse, true))
+	{
+		f.close();
+
+		createFileBackup("Error while loading landmarks", filename);
+
+		ret = false;
+	}
+
+	return ret;
+}
+
+bool CInterfaceManager::saveLandmarks(const std::string &filename) const
+{
+	nlinfo( "Saving landmarks : %s", filename.c_str() );
+
+	bool ret = false;
+	try
+	{
+		COFile f;
+
+		// using temporary file, so no f.close() unless its a success
+		if (f.open(filename, false, false, true))
+		{
+			COXml xmlStream;
+			xmlStream.init (&f);
+
+			xmlDocPtr doc = xmlStream.getDocument ();
+			xmlNodePtr node = xmlNewDocNode(doc, NULL, (const xmlChar*)"interface_config", NULL);
+			xmlDocSetRootElement (doc, node);
+
+			ContinentMngr.writeTo(node);
+
+			// Flush the stream
+			xmlStream.flush();
+
+			// Close the stream
+			f.close ();
+
+			ret = true;
+		}
+	}
+	catch (const Exception &e)
+	{
+		nlwarning ("Error while writing the file %s : %s.", filename.c_str(), e.what ());
+	}
+
+	return ret;
+}
+
 // ------------------------------------------------------------------------------------------------
 //
 bool CInterfaceManager::saveConfig (bool verbose)
@@ -1887,9 +2008,7 @@ bool CInterfaceManager::saveConfig (bool verbose)
 	{
 		uint8 currMode = getMode();
 
-		string filename = "save/interface_" + PlayerSelectedFileName + ".icfg";
-		if (!CFile::fileExists(filename) && CFile::fileExists("save/shared_interface.icfg"))
-			filename = "save/shared_interface.icfg";
+		string filename = getSaveFileName("interface", "icfg");
 
 		if (verbose) CInterfaceManager::getInstance()->displaySystemInfo("Saving " + filename);
 		ret = saveConfig(filename);
@@ -2004,8 +2123,13 @@ bool CInterfaceManager::saveConfig (const string &filename)
 		CTaskBarManager	*pTBM= CTaskBarManager::getInstance();
 		pTBM->serial(f);
 
-		// Save user landmarks
-		ContinentMngr.serialUserLandMarks(f);
+		//ContinentMngr.serialUserLandMarks(f);
+		// empty landmarks block for compatibility
+		{
+			f.serialVersion(1);
+			uint32 numCont = 0;
+			f.serial(numCont);
+		}
 
 		// Info Windows position.
 		CInterfaceHelp::serialInfoWindows(f);
@@ -2973,6 +3097,7 @@ class CAHSaveUI : public IActionHandler
 	{
 		CInterfaceManager::getInstance()->saveKeys(true);
 		CInterfaceManager::getInstance()->saveConfig(true);
+		CInterfaceManager::getInstance()->saveLandmarks(true);
 	}
 };
 REGISTER_ACTION_HANDLER (CAHSaveUI, "save_ui");
@@ -4136,3 +4261,40 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 	ucstr = str;
 	return true;;
 }
+
+std::string CInterfaceManager::getNextBackupName(std::string filename)
+{
+	std::string ts = getTimestampHuman("%Y-%m-%d");
+
+	if (!ts.empty())
+	{
+		std::string::size_type pos = filename.find_last_of('.');
+		if (pos == std::string::npos)
+			filename = filename + "_" + ts + "_";
+		else
+			filename = filename.substr(0, pos) + "_" + ts + "_" + filename.substr(pos);
+	}
+
+	// filename_YYYY-MM-DD_000.ext
+	return CFile::findNewFile(filename);
+}
+
+void CInterfaceManager::createFileBackup(const std::string &message, const std::string &filename, bool useCopy)
+{
+	std::string backupName = getNextBackupName(filename);
+	nlwarning("%s: '%s'.", message.c_str(), filename.c_str());
+	if (!backupName.empty())
+	{
+		if (useCopy)
+		{
+			nlwarning("Backup copy saved as '%s'", backupName.c_str());
+			CFile::copyFile(backupName, filename);
+		}
+		else
+		{
+			nlwarning("File renamed to '%s'", backupName.c_str());
+			CFile::moveFile(backupName, filename);
+		}
+	}
+}
+
