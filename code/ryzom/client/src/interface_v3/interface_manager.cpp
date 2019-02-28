@@ -3096,7 +3096,6 @@ class CAHSaveUI : public IActionHandler
 	{
 		CInterfaceManager::getInstance()->saveKeys(true);
 		CInterfaceManager::getInstance()->saveConfig(true);
-		CInterfaceManager::getInstance()->saveLandmarks(true);
 	}
 };
 REGISTER_ACTION_HANDLER (CAHSaveUI, "save_ui");

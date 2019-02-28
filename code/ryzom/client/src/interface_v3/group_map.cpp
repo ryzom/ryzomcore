@@ -2739,6 +2739,7 @@ void CGroupMap::removeUserLandMark(CCtrlButton *button)
 				updateUserLandMarks();
 			}
 
+			CInterfaceManager::getInstance()->saveLandmarks();
 			return;
 		}
 	}
@@ -2758,6 +2759,8 @@ void CGroupMap::updateUserLandMark(CCtrlButton *button, const ucstring &newTitle
 
 			updateLandMarkButton(_UserLM[k], getUserLandMarkOptions(k));
 			button->setDefaultContextHelp(newTitle);
+
+			CInterfaceManager::getInstance()->saveLandmarks();
 			return;
 		}
 	}
