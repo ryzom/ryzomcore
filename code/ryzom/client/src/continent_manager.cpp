@@ -518,7 +518,7 @@ void CContinentManager::writeTo(xmlNodePtr node) const
 				std::string title = lm.Title.toUtf8();
 				for(uint i = 0; i< title.size(); i++)
 				{
-					if (title[i] < ' ' && title[i] != '\n' && title[i] != '\t')
+					if (title[i] >= '\0' && title[i] < ' ' && title[i] != '\n' && title[i] != '\t')
 					{
 						title[i] = '?';
 					}
