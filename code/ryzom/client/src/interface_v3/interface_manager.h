@@ -203,6 +203,19 @@ public:
 	/// Load a set of xml files
 	bool parseInterface (const std::vector<std::string> &xmlFileNames, bool reload, bool isFilename = true);
 
+	/// return new filename that can be used to backup original file
+	std::string getNextBackupName(std::string filename);
+	/// copy/rename filename for backup and show error in log
+	void createFileBackup(const std::string &message, const std::string &filename, bool useCopy = false);
+
+	/// select player/shared file name from 'save' folder'
+	std::string getSaveFileName(const std::string &module, const std::string &ext, bool useShared = true) const;
+
+	/// Load / save user landmarks in .xml format
+	bool loadLandmarks ();
+	bool saveLandmarks (bool verbose = false) const;
+	bool saveLandmarks (const std::string &filename) const;
+
 	// Load/Save position, size, etc.. of windows
 	bool loadConfig (const std::string &filename);
 	// Save config to default location, if verbose is true, display message in game sysinfo

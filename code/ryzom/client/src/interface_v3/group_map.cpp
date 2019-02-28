@@ -2715,7 +2715,7 @@ CCtrlButton *CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucst
 	addLandMark(_UserLM, pos, title, getUserLandMarkOptions((uint32)_CurContinent->UserLandMarks.size() - 1));
 
 	// Save the config file each time a user landmark is created
-	CInterfaceManager::getInstance()->saveConfig();
+	CInterfaceManager::getInstance()->saveLandmarks();
 
 	return _UserLM.back();
 }

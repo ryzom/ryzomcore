@@ -1298,6 +1298,7 @@ void CFarTP::sendReady()
 				pIM->loadKeys();
 				CWidgetManager::getInstance()->hideAllWindows();
 				pIM->loadInterfaceConfig();
+				pIM->loadLandmarks();
 			}
 			else
 			{

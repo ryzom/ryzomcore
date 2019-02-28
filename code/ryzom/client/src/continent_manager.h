@@ -109,8 +109,13 @@ public:
 
 	const std::string &getCurrentContinentSelectName();
 
+	// load / save all user landmarks in xml format
+	void writeTo(xmlNodePtr node) const;
+	void readFrom(xmlNodePtr node);
+
 	// load / saves all user landMarks
-	void serialUserLandMarks(NLMISC::IStream &f);
+	// \return number of landmarks loaded or saved
+	uint32 serialUserLandMarks(NLMISC::IStream &f);
 
 	// rebuild visible landmarks on current map
 	void updateUserLandMarks();
