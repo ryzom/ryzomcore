@@ -290,8 +290,8 @@ CProfile CConfigFile::getProfile(const QString &id) const
 		if (m_profiles[i].id == id) return m_profiles[i];
 	}
 
-	// default profile
-	return getProfile();
+	// no profile
+	return NoProfile;
 }
 
 void CConfigFile::setProfile(int i, const CProfile &profile)

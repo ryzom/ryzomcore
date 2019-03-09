@@ -926,6 +926,9 @@ bool COperationDialog::createProfileShortcuts(const QString &profileId)
 
 	const CProfile &profile = config->getProfile(profileId);
 
+	// wrong profile
+	if (profile.id.isEmpty()) return false;
+
 	m_currentOperation = tr("Creating shortcuts for profile %1...").arg(profile.id);
 
 	profile.createShortcuts();
@@ -1079,6 +1082,9 @@ void COperationDialog::addComponentsProfiles()
 	foreach(const QString &profileId, m_addComponents.profiles)
 	{
 		const CProfile &profile = config->getProfile(profileId);
+
+		// wrong profile
+		if (profile.id.isEmpty()) continue;
 
 		profile.createShortcuts();
 		profile.createClientConfig();
