@@ -926,6 +926,9 @@ bool COperationDialog::createProfileShortcuts(const QString &profileId)
 
 	const CProfile &profile = config->getProfile(profileId);
 
+	// wrong profile
+	if (profile.id.isEmpty()) return false;
+
 	m_currentOperation = tr("Creating shortcuts for profile %1...").arg(profile.id);
 
 	profile.createShortcuts();
@@ -1080,6 +1083,9 @@ void COperationDialog::addComponentsProfiles()
 	{
 		const CProfile &profile = config->getProfile(profileId);
 
+		// wrong profile
+		if (profile.id.isEmpty()) continue;
+
 		profile.createShortcuts();
 		profile.createClientConfig();
 	}
@@ -1099,6 +1105,9 @@ void COperationDialog::deleteComponentsProfiles()
 
 	CConfigFile *config = CConfigFile::getInstance();
 
+	// some profiles have been removed, use backup profiles
+	bool useBackup = !config->getBackupProfiles().isEmpty();
+
 	int i = 0;
 
 	foreach(const QString &profileId, m_removeComponents.profiles)
@@ -1109,7 +1118,11 @@ void COperationDialog::deleteComponentsProfiles()
 			return;
 		}
 
-		const CProfile &profile = config->getProfile(profileId);
+		// only search in backup profiles, because they are already deleted in profiles
+		const CProfile &profile = useBackup ? config->getBackupProfile(profileId):config->getProfile(profileId);
+
+		// already deleted profile
+		if (profile.id.isEmpty()) continue;
 
 		emit progress(i++, profile.name);
 
@@ -1128,8 +1141,8 @@ void COperationDialog::deleteComponentsProfiles()
 
 		profile.deleteShortcuts();
 
-		// delete profile
-		config->removeProfile(profileId);
+		// delete profile if still used
+		if (!useBackup) config->removeProfile(profileId);
 	}
 
 	emit success(m_removeComponents.profiles.size());

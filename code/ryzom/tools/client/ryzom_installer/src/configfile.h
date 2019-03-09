@@ -53,6 +53,7 @@ public:
 	void setProfiles(const CProfiles &profiles) { m_profiles = profiles; }
 
 	CProfiles getBackupProfiles() const { return m_backupProfiles; }
+	CProfile getBackupProfile(const QString &id) const;
 	void backupProfiles();
 
 	QString getLanguage() const { return m_language; }

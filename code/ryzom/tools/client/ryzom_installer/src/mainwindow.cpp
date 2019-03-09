@@ -103,6 +103,10 @@ void CMainWindow::updateButtons()
 	CConfigFile *config = CConfigFile::getInstance();
 
 	const CProfile &profile = config->getProfile(profileIndex);
+
+	// wrong profile
+	if (profile.id.isEmpty()) return;
+
 	const CServer &server = config->getServer(profile.server);
 
 	// get full path of client executable
@@ -125,6 +129,10 @@ void CMainWindow::onPlayClicked()
 	CConfigFile *config = CConfigFile::getInstance();
 
 	const CProfile &profile = config->getProfile(profileIndex);
+
+	// wrong profile
+	if (profile.id.isEmpty()) return;
+
 	const CServer &server = config->getServer(profile.server);
 
 	// get full path of client executable
@@ -162,6 +170,10 @@ void CMainWindow::onConfigureClicked()
 	CConfigFile *config = CConfigFile::getInstance();
 
 	const CProfile &profile = config->getProfile(profileIndex);
+
+	// wrong profile
+	if (profile.id.isEmpty()) return;
+
 	const CServer &server = config->getServer(profile.server);
 
 	// get full path of configuration executable
@@ -310,6 +322,10 @@ void CMainWindow::onProfileChanged(int profileIndex)
 	CConfigFile *config = CConfigFile::getInstance();
 
 	CProfile profile = config->getProfile(profileIndex);
+
+	// wrong profile
+	if (profile.id.isEmpty()) return;
+
 	CServer server = config->getServer(profile.server);
 
 	// load changelog

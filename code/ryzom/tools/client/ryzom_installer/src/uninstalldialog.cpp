@@ -257,6 +257,9 @@ void CUninstallDialog::updateSizes()
 	{
 		const CProfile &profile = config->getProfile(it.key());
 
+		// wrong profile
+		if (profile.id.isEmpty()) continue;
+
 		qint64 bytes = getDirectorySize(profile.getDirectory(), true);
 
 		emit updateSize(it.value(), qBytesToHumanReadable(bytes));

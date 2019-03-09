@@ -264,6 +264,16 @@ const CServer& CConfigFile::getServer(const QString &id) const
 	return getServer();
 }
 
+CProfile CConfigFile::getBackupProfile(const QString &id) const
+{
+	for (int i = 0; i < m_backupProfiles.size(); ++i)
+	{
+		if (m_backupProfiles[i].id == id) return m_backupProfiles[i];
+	}
+
+	return NoProfile;
+}
+
 void CConfigFile::backupProfiles()
 {
 	m_backupProfiles = m_profiles;
@@ -290,8 +300,8 @@ CProfile CConfigFile::getProfile(const QString &id) const
 		if (m_profiles[i].id == id) return m_profiles[i];
 	}
 
-	// default profile
-	return getProfile();
+	// no profile
+	return NoProfile;
 }
 
 void CConfigFile::setProfile(int i, const CProfile &profile)
