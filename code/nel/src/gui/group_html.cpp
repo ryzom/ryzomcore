@@ -1851,10 +1851,11 @@ namespace NLGUI
 					// Get the string name
 					if (present[MY_HTML_IMG_SRC] && value[MY_HTML_IMG_SRC])
 					{
-						CStyleParams style;
 						float tmpf;
-
 						std::string id;
+						CStyleParams style;
+						style.FontSize = _Style.FontSize;
+
 						if (present[MY_HTML_IMG_ID] && value[MY_HTML_IMG_ID])
 							id = value[MY_HTML_IMG_ID];
 
@@ -2190,6 +2191,7 @@ namespace NLGUI
 				if (!(_Forms.empty()))
 				{
 					CStyleParams style;
+					style.FontSize = _Style.FontSize;
 
 					// A select box
 					string name;
@@ -2699,6 +2701,7 @@ namespace NLGUI
 					if (sep)
 					{
 						CStyleParams style;
+						style.FontSize = _Style.FontSize;
 						style.TextColor = CRGBA(120, 120, 120, 255);
 						style.Height = 0;
 						style.Width = 0;
@@ -6291,22 +6294,39 @@ namespace NLGUI
 		float tmpf;
 		TStyle styles = parseStyle(styleString);
 		TStyle::iterator it;
+
+		// first pass: get font-size for 'em' sizes
 		for (it=styles.begin(); it != styles.end(); ++it)
 		{
 			if (it->first == "font-size")
 			{
 				if (it->second == "inherit")
+				{
 					style.FontSize = current.FontSize;
+				}
 				else
 				{
-					float tmp;
-					sint size = 0;
-					getPercentage (size, tmp, it->second.c_str());
-					if (size > 0)
-						style.FontSize = size;
+					std::string unit;
+					if (getCssLength(tmpf, unit, it->second.c_str()))
+					{
+						if (unit == "rem")
+							style.FontSize = _StyleDefault.FontSize * tmpf;
+						else if (unit == "em")
+							style.FontSize = current.FontSize * tmpf;
+						else if (unit == "pt")
+							style.FontSize = tmpf / 0.75f;
+						else if (unit == "%")
+							style.FontSize = current.FontSize * tmpf / 100.f;
+						else
+							style.FontSize = tmpf;
+					}
 				}
 			}
-			else
+		}
+
+		// second pass: rest of style
+		for (it=styles.begin(); it != styles.end(); ++it)
+		{
 			if (it->first == "font-style")
 			{
 				if (it->second == "inherit")
@@ -6485,16 +6505,68 @@ namespace NLGUI
 			}
 			else
 			if (it->first == "width")
-				getPercentage(style.Width, tmpf, it->second.c_str());
+			{
+				std::string unit;
+				if (getCssLength(tmpf, unit, it->second.c_str()))
+				{
+					if (unit == "rem")
+						style.Width = tmpf * _StyleDefault.FontSize;
+					else if (unit == "em")
+						style.Width = tmpf * style.FontSize;
+					else if (unit == "pt")
+						style.FontSize = tmpf / 0.75f;
+					else
+						style.Width = tmpf;
+				}
+			}
 			else
 			if (it->first == "height")
-				getPercentage(style.Height, tmpf, it->second.c_str());
+			{
+				std::string unit;
+				if (getCssLength(tmpf, unit, it->second.c_str()))
+				{
+					if (unit == "rem")
+						style.Height = tmpf * _StyleDefault.FontSize;
+					else if (unit == "em")
+						style.Height = tmpf * style.FontSize;
+					else if (unit == "pt")
+						style.FontSize = tmpf / 0.75f;
+					else
+						style.Height = tmpf;
+				}
+			}
 			else
 			if (it->first == "max-width")
-				getPercentage(style.MaxWidth, tmpf, it->second.c_str());
+			{
+				std::string unit;
+				if (getCssLength(tmpf, unit, it->second.c_str()))
+				{
+					if (unit == "rem")
+						style.MaxWidth = tmpf * _StyleDefault.FontSize;
+					else if (unit == "em")
+						style.MaxWidth = tmpf * style.FontSize;
+					else if (unit == "pt")
+						style.FontSize = tmpf / 0.75f;
+					else
+						style.MaxWidth = tmpf;
+				}
+			}
 			else
 			if (it->first == "max-height")
-				getPercentage(style.MaxHeight, tmpf, it->second.c_str());
+			{
+				std::string unit;
+				if (getCssLength(tmpf, unit, it->second.c_str()))
+				{
+					if (unit == "rem")
+						style.MaxHeight = tmpf * _StyleDefault.FontSize;
+					else if (unit == "em")
+						style.MaxHeight = tmpf * style.FontSize;
+					else if (unit == "pt")
+						style.FontSize = tmpf / 0.75f;
+					else
+						style.MaxHeight = tmpf;
+				}
+			}
 			else
 			if (it->first == "-ryzom-modulate-color")
 			{
