@@ -1489,6 +1489,13 @@ namespace NLGUI
 			// Paragraph ?
 			switch(element_number)
 			{
+			case HTML_HTML:
+				if (present[MY_HTML_HTML_STYLE] && value[MY_HTML_HTML_STYLE])
+					getStyleParams(value[MY_HTML_HTML_STYLE], _StyleDefault);
+
+				_Style = _StyleDefault;
+				setBackgroundColor(_Style.BackgroundColor);
+				break;
 			case HTML_HEAD:
 				_ReadingHeadTag = !_IgnoreHeadTag;
 				_IgnoreHeadTag = true;
@@ -1708,18 +1715,22 @@ namespace NLGUI
 				break;
 			case HTML_BODY:
 				{
-					if (present[HTML_BODY_BGCOLOR] && value[HTML_BODY_BGCOLOR])
-					{
-						CRGBA bgColor;
-						if (scanHTMLColor(value[HTML_BODY_BGCOLOR], bgColor))
-							setBackgroundColor (bgColor);
-					}
-					
+					pushStyle();
+
 					string style;
 					if (present[HTML_BODY_STYLE] && value[HTML_BODY_STYLE])
 						style = value[HTML_BODY_STYLE];
-					
-					
+
+					if (!style.empty())
+						getStyleParams(style, _Style);
+
+					CRGBA bgColor = _Style.BackgroundColor;
+					if (present[HTML_BODY_BGCOLOR] && value[HTML_BODY_BGCOLOR])
+						scanHTMLColor(value[HTML_BODY_BGCOLOR], bgColor);
+
+					if (bgColor != _Style.BackgroundColor)
+						setBackgroundColor(bgColor);
+
 					if (!style.empty())
 					{
 						TStyle styles = parseStyle(style);
@@ -1743,10 +1754,6 @@ namespace NLGUI
 								image = image.substr(4, image.size()-5);
 							setBackground (image, scale, repeat);
 						}
-
-						// set default text style from <body>
-						getStyleParams(style, _StyleDefault);
-						_Style = _StyleDefault;
 					}
 				}
 				break;
@@ -2736,6 +2743,9 @@ namespace NLGUI
 			{
 			case HTML_HEAD:
 				_ReadingHeadTag = false;
+				break;
+			case HTML_BODY:
+				popStyle();
 				break;
 			case HTML_FONT:
 				popStyle();
@@ -4915,9 +4925,7 @@ namespace NLGUI
 		_IgnoreBaseUrlTag = false;
 
 		// reset style
-		_StyleDefault = CStyleParams();
-		_Style = _StyleDefault;
-		_StyleParams.clear();
+		resetCssStyle();
 
 		// TR
 
@@ -6253,6 +6261,18 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CGroupHTML::resetCssStyle()
+	{
+		_StyleDefault = CStyleParams();
+		_StyleDefault.TextColor = TextColor;
+		_StyleDefault.FontSize = TextFontSize;
+		_StyleDefault.BackgroundColor = BgColor;
+
+		_Style = _StyleDefault;
+		_StyleParams.clear();
+	}
+
+	// ***************************************************************************
 	// CGroupHTML::CStyleParams style;
 	// style.FontSize;    // font-size: 10px;
 	// style.TextColor;   // color: #ABCDEF;
@@ -6484,6 +6504,14 @@ namespace NLGUI
 				else
 				if (fromString(it->second, b))
 					style.GlobalColor = b;
+			}
+			else
+			if (it->first == "background-color")
+			{
+				if (it->second == "inherit")
+					style.BackgroundColor = current.backgroundColor;
+				else
+					scanHTMLColor(it->second.c_str(), style.BackgroundColor);
 			}
 		}
 	}

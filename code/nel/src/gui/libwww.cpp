@@ -47,6 +47,15 @@ namespace NLGUI
 	#undef HTML_ATTR
 	#define HTML_ATTR(a,b) { (char*) #b }
 
+	HTAttr html_attr[] =
+	{
+		HTML_ATTR(HTML,DIR),
+		HTML_ATTR(HTML,LANG),
+		HTML_ATTR(HTML,VERSION),
+		HTML_ATTR(HTML,STYLE),
+		{ 0 }
+	};
+
 	HTAttr a_attr[] =
 	{
 		HTML_ATTR(A,ACCESSKEY),
@@ -469,6 +478,8 @@ namespace NLGUI
 
 			// Change the HTML DTD
 			SGML_dtd *HTML_DTD = HTML_dtd ();
+			HTML_DTD->tags[HTML_HTML].attributes = html_attr;
+			HTML_DTD->tags[HTML_HTML].number_of_attributes = sizeof(html_attr) / sizeof(HTAttr) - 1;
 			HTML_DTD->tags[HTML_TABLE].attributes = table_attr;
 			HTML_DTD->tags[HTML_TABLE].number_of_attributes = sizeof(table_attr) / sizeof(HTAttr) - 1;
 			HTML_DTD->tags[HTML_TR].attributes = tr_attr;

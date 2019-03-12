@@ -105,6 +105,7 @@ namespace NLGUI
 				Height=-1;
 				MaxWidth=-1;
 				MaxHeight=-1;
+				BackgroundColor=NLMISC::CRGBA::Black;
 			}
 			uint FontSize;
 			uint FontWeight;
@@ -119,6 +120,7 @@ namespace NLGUI
 			sint32 Height;
 			sint32 MaxWidth;
 			sint32 MaxHeight;
+			NLMISC::CRGBA BackgroundColor;
 		};
 
 		// ImageDownload system
@@ -344,6 +346,9 @@ namespace NLGUI
 
 		// Get Home URL
 		virtual std::string	home();
+
+		// Clear style stack and restore default style
+		void resetCssStyle();
 
 		// Parse style html tag
 		TStyle parseStyle(const std::string &str_styles);
