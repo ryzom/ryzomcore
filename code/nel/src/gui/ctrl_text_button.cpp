@@ -46,6 +46,7 @@ namespace NLGUI
 		_BmpLeftW= _BmpMiddleW= _BmpRightW= _BmpH= 0;
 		_WMargin= 0;
 		_WMin= 0;
+		_HMin= 0;
 		_TextX= 0;
 		_TextY= 0;
 		_Setuped= false;
@@ -122,6 +123,11 @@ namespace NLGUI
 		if( name == "wmin" )
 		{
 			return toString( _WMin );
+		}
+		else
+		if( name == "hmin" )
+		{
+			return toString( _HMin );
 		}
 		else
 		if( name == "hardtext" )
@@ -293,6 +299,14 @@ namespace NLGUI
 			sint32 i;
 			if( fromString( value, i ) )
 				_WMin = i;
+			return;
+		}
+		else
+		if( name == "hmin" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_HMin = i;
 			return;
 		}
 		else
@@ -469,6 +483,7 @@ namespace NLGUI
 
 		xmlNewProp( node, BAD_CAST "wmargin", BAD_CAST toString( _WMargin ).c_str() );
 		xmlNewProp( node, BAD_CAST "wmin", BAD_CAST toString( _WMin ).c_str() );
+		xmlNewProp( node, BAD_CAST "hmin", BAD_CAST toString( _HMin ).c_str() );
 		xmlNewProp( node, BAD_CAST "hardtext", BAD_CAST _ViewText->getText().toString().c_str() );
 		xmlNewProp( node, BAD_CAST "text_y", BAD_CAST toString( _TextY ).c_str() );
 		xmlNewProp( node, BAD_CAST "text_x", BAD_CAST toString( _TextX ).c_str() );
@@ -518,7 +533,6 @@ namespace NLGUI
 			nlinfo(tmp.c_str());
 			return false;
 		}
-
 
 		// *** Read Textures.
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_normal" );
@@ -603,6 +617,15 @@ namespace NLGUI
 		}
 		// _WMin is at least the size of All W Bitmaps
 		_WMin= max(_WMin, _BmpLeftW + _BmpMiddleW + _BmpRightW);
+
+		// hmin
+		_HMin= 0;
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"hmin" );
+		if (prop)
+		{
+			fromString((const char *) prop, _HMin);
+		}
+		_HMin= max(_HMin, _BmpH);
 
 		// TextY
 		_TextY= 0;
@@ -900,6 +923,7 @@ namespace NLGUI
 		if (!(_SizeRef & 2))
 		{
 			_H= max(_BmpH, _ViewText->getH());
+			_H= max(_H, _HMin);
 		}
 
 		CViewBase::updateCoords();
