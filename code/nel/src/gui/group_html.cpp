@@ -381,7 +381,61 @@ namespace NLGUI
 			}
 		}
 	}
-	
+
+	void CGroupHTML::setTextButtonStyle(CCtrlTextButton *ctrlButton, const CStyleParams &style)
+	{
+		// this will also set size for <a class="ryzom-ui-button"> treating it like "display: inline-block;"
+		if (style.Width > 0)  ctrlButton->setWMin(_Style.Width);
+		if (style.Height > 0) ctrlButton->setHMin(_Style.Height);
+
+		CViewText *pVT = ctrlButton->getViewText();
+		if (pVT)
+		{
+			setTextStyle(pVT, _Style);
+		}
+
+		if (_Style.BackgroundColor.A > 0)
+		{
+			if (_Style.BackgroundColorOver.A == 0)
+				_Style.BackgroundColorOver = _Style.BackgroundColor;
+
+			ctrlButton->setColor(_Style.BackgroundColor);
+			ctrlButton->setColorOver(_Style.BackgroundColorOver);
+			ctrlButton->setTexture("", "blank.tga", "", false);
+			ctrlButton->setTextureOver("", "blank.tga", "");
+			ctrlButton->setProperty("force_text_over", "true");
+		}
+		else if (_Style.BackgroundColorOver.A > 0)
+		{
+			ctrlButton->setColorOver(_Style.BackgroundColorOver);
+			ctrlButton->setProperty("force_text_over", "true");
+			ctrlButton->setTextureOver("blank.tga", "blank.tga", "blank.tga");
+		}
+	}
+
+	void CGroupHTML::setTextStyle(CViewText *pVT, const CStyleParams &style)
+	{
+		if (pVT)
+		{
+			pVT->setFontSize(style.FontSize);
+			pVT->setColor(style.TextColor);
+			pVT->setColor(style.TextColor);
+			pVT->setFontName(style.FontFamily);
+			pVT->setFontSize(style.FontSize);
+			pVT->setEmbolden(style.FontWeight >= FONT_WEIGHT_BOLD);
+			pVT->setOblique(style.FontOblique);
+			pVT->setUnderlined(style.Underlined);
+			pVT->setStrikeThrough(style.StrikeThrough);
+			if (style.TextShadow.Enabled)
+			{
+				pVT->setShadow(true);
+				pVT->setShadowColor(style.TextShadow.Color);
+				pVT->setShadowOutline(style.TextShadow.Outline);
+				pVT->setShadowOffset(style.TextShadow.X, style.TextShadow.Y);
+			}
+		}
+	}
+
 	// Get an url and return the local filename with the path where the url image should be
 	string CGroupHTML::localImageName(const string &url)
 	{
@@ -1556,6 +1610,10 @@ namespace NLGUI
 				_Style.TextColor = LinkColor;
 				_Style.Underlined = true;
 				_Style.GlobalColor = LinkColorGlobalColor;
+				_Style.BackgroundColor.A = 0;
+				_Style.BackgroundColorOver.A = 0;
+				_Style.Width = -1;
+				_Style.Height = -1;
 
 				if (present[HTML_A_STYLE] && value[HTML_A_STYLE])
 					getStyleParams(value[HTML_A_STYLE], _Style);
@@ -1956,6 +2014,13 @@ namespace NLGUI
 						_Style.FontSize = TextFontSize;
 						_Style.FontWeight = FONT_WEIGHT_NORMAL;
 						_Style.FontOblique = false;
+						_Style.TextShadow = STextShadow(true);
+						_Style.Width = -1;
+						_Style.Height = -1;
+						// by default background texture is transparent,
+						// using alpha value to decide if to change it to 'blank.tga' for coloring
+						_Style.BackgroundColor.A = 0;
+						_Style.BackgroundColorOver.A = 0;
 
 						// Global color flag
 						if (present[MY_HTML_INPUT_GLOBAL_COLOR])
@@ -2058,6 +2123,8 @@ namespace NLGUI
 									}
 
 									ctrlButton->setText(ucstring::makeFromUtf8(text));
+
+									setTextButtonStyle(ctrlButton, _Style);
 								}
 								getParagraph()->addChild (buttonGroup);
 								paragraphChange ();
@@ -2226,6 +2293,7 @@ namespace NLGUI
 								sb->setMinH(style.Height);
 
 							sb->setMaxVisibleLine(size);
+							sb->setFontSize(style.FontSize);
 						}
 
 						entry.SelectBox = sb;
@@ -2234,6 +2302,14 @@ namespace NLGUI
 					{
 						CDBGroupComboBox *cb = addComboBox(DefaultFormSelectGroup, name.c_str());
 						entry.ComboBox = cb;
+
+						if (cb)
+						{
+							// create view text
+							cb->updateCoords();
+							if (cb->getViewText())
+								setTextStyle(cb->getViewText(), style);
+						}
 					}
 					_Forms.back().Entries.push_back (entry);
 				}
@@ -2460,6 +2536,9 @@ namespace NLGUI
 				_Style.FontOblique = false;
 				_Style.FontSize = TextFontSize;
 				_Style.TextShadow = STextShadow(true);
+				_Style.Width = -1;
+				_Style.Height = -1;
+				_Style.BackgroundColor.A = 0;
 
 				if (present[MY_HTML_TEXTAREA_STYLE] && value[MY_HTML_TEXTAREA_STYLE])
 					getStyleParams(value[MY_HTML_TEXTAREA_STYLE], _Style);
@@ -4494,6 +4573,8 @@ namespace NLGUI
 							// Translate the tooltip
 							ctrlButton->setDefaultContextHelp(ucstring::makeFromUtf8(getLinkTitle()));
 							ctrlButton->setText(tmpStr);
+
+							setTextButtonStyle(ctrlButton, _Style);
 						}
 						getParagraph()->addChild (buttonGroup);
 						paragraphChange ();
@@ -4516,23 +4597,10 @@ namespace NLGUI
 						}
 					}
 					newLink->setText(tmpStr);
-					newLink->setColor(_Style.TextColor);
-					newLink->setFontName(_Style.FontFamily);
-					newLink->setFontSize(_Style.FontSize);
-					newLink->setEmbolden(embolden);
-					newLink->setOblique(_Style.FontOblique);
-					newLink->setUnderlined(_Style.Underlined);
-					newLink->setStrikeThrough(_Style.StrikeThrough);
 					newLink->setMultiLineSpace((uint)((float)(_Style.FontSize)*LineSpaceFontFactor));
 					newLink->setMultiLine(true);
 					newLink->setModulateGlobalColor(_Style.GlobalColor);
-					if (_Style.TextShadow.Enabled)
-					{
-						newLink->setShadow(true);
-						newLink->setShadowColor(_Style.TextShadow.Color);
-						newLink->setShadowOutline(_Style.TextShadow.Outline);
-						newLink->setShadowOffset(_Style.TextShadow.X, _Style.TextShadow.Y);
-					}
+					setTextStyle(newLink, _Style);
 					// newLink->setLineAtBottom (true);
 
 					registerAnchor(newLink);
@@ -4638,6 +4706,10 @@ namespace NLGUI
 		_CurrentViewLink = NULL;
 
 		{
+			// override cols/rows values from style
+			if (_Style.Width > 0) cols = _Style.Width / _Style.FontSize;
+			if (_Style.Height > 0) rows = _Style.Height / _Style.FontSize;
+
 			// Not added ?
 			std::vector<std::pair<std::string,std::string> > templateParams;
 			templateParams.push_back (std::pair<std::string,std::string> ("w", toString (cols*_Style.FontSize)));
@@ -4675,7 +4747,18 @@ namespace NLGUI
 				// Set the content
 				CGroupEditBox *eb = dynamic_cast<CGroupEditBox*>(textArea->getGroup("eb"));
 				if (eb)
+				{
 					eb->setInputString(decodeHTMLEntities(content));
+					if (_Style.BackgroundColor.A > 0)
+					{
+						CViewBitmap *bg = dynamic_cast<CViewBitmap*>(eb->getView("bg"));
+						if (bg)
+						{
+							bg->setTexture("blank.tga");
+							bg->setColor(_Style.BackgroundColor);
+						}
+					}
+				}
 
 				textArea->invalidateCoords();
 				getParagraph()->addChild (textArea);
@@ -6327,6 +6410,16 @@ namespace NLGUI
 		// second pass: rest of style
 		for (it=styles.begin(); it != styles.end(); ++it)
 		{
+			if (it->first == "border")
+			{
+				sint32 b;
+				if (it->second == "none")
+					style.BorderWidth = 0;
+				else
+				if (fromString(it->second, b))
+					style.BorderWidth = b;
+			}
+			else
 			if (it->first == "font-style")
 			{
 				if (it->second == "inherit")
@@ -6581,9 +6674,17 @@ namespace NLGUI
 			if (it->first == "background-color")
 			{
 				if (it->second == "inherit")
-					style.BackgroundColor = current.backgroundColor;
+					style.BackgroundColor = current.BackgroundColor;
 				else
 					scanHTMLColor(it->second.c_str(), style.BackgroundColor);
+			}
+			else
+			if (it->first == "-ryzom-background-color-over")
+			{
+				if (it->second == "inherit")
+					style.BackgroundColorOver = current.BackgroundColorOver;
+				else
+					scanHTMLColor(it->second.c_str(), style.BackgroundColorOver);
 			}
 		}
 	}

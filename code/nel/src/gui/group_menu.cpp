@@ -2562,6 +2562,12 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	void CGroupMenu::setFontSize(uint fontSize)
+	{
+		_FontSize = fontSize;
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	uint CGroupMenu::getNumLine() const
 	{
 		return _RootMenu ? _RootMenu->getNumLine() : 0;

@@ -351,6 +351,9 @@ namespace NLGUI
 		void	setMinW(sint32 minW);
 		void	setMinH(sint32 minH);
 
+		// change fontsize for new menu items
+		void	setFontSize(uint32 fontSize);
+
 		// Gray a line on the RootMenu
 		void	setGrayedLine(uint line, bool g);
 

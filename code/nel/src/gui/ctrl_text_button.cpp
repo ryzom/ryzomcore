@@ -729,6 +729,43 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CCtrlTextButton::setTexture(const std::string &l, const std::string &m, const std::string &r, bool updateHeight)
+	{
+		nlctassert(NumTexture==3);
+		_TextureIdNormal[0].setTexture(l.c_str());
+		_TextureIdNormal[1].setTexture(m.c_str());
+		_TextureIdNormal[2].setTexture(r.c_str());
+
+		sint32 newH;
+
+		// Compute Bmp Sizes
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
+		rVR.getTextureSizeFromId(_TextureIdNormal[0], _BmpLeftW, newH);
+		rVR.getTextureSizeFromId(_TextureIdNormal[1], _BmpMiddleW, newH);
+		rVR.getTextureSizeFromId(_TextureIdNormal[2], _BmpRightW, newH);
+
+		if (updateHeight) _BmpH = newH;
+	}
+
+	// ***************************************************************************
+	void CCtrlTextButton::setTexturePushed(const std::string &l, const std::string &m, const std::string &r)
+	{
+		nlctassert(NumTexture==3);
+		_TextureIdPushed[0].setTexture(l.c_str());
+		_TextureIdPushed[1].setTexture(m.c_str());
+		_TextureIdPushed[2].setTexture(r.c_str());
+	}
+
+	// ***************************************************************************
+	void CCtrlTextButton::setTextureOver(const std::string &l, const std::string &m, const std::string &r)
+	{
+		nlctassert(NumTexture==3);
+		_TextureIdOver[0].setTexture(l.c_str());
+		_TextureIdOver[1].setTexture(m.c_str());
+		_TextureIdOver[2].setTexture(r.c_str());
+	}
+
+	// ***************************************************************************
 	void CCtrlTextButton::draw ()
 	{
 		CViewRenderer::CTextureId *pTxId = NULL;

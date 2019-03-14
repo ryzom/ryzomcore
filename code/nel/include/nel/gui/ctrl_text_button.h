@@ -117,6 +117,13 @@ namespace NLGUI
 		// Compute Size according to bitmap and Text (Ensure as big as possible button)
 		sint32			getWMax() const;
 
+		// Set texture directly without _l.tga, _m.tga, _r.tga convention
+		// Texture size is only read from normal textures
+		// If updateHeight == false, then _BmpH will keep its value
+		void setTexture(const std::string &l, const std::string &m, const std::string &r, bool updateHeight = true);
+		void setTexturePushed(const std::string &l, const std::string &m, const std::string &r);
+		void setTextureOver(const std::string &l, const std::string &m, const std::string &r);
+
 		int luaGetViewText(CLuaState &ls);
 
 		REFLECT_EXPORT_START(CCtrlTextButton, CCtrlBaseButton)

@@ -474,6 +474,12 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	CViewText *CDBGroupComboBox::getViewText()
+	{
+		return  _ViewText;
+	}
+
+	// ***************************************************************************
 	std::string CDBGroupComboBox::getSelectionText() const
 	{
 		ucstring text;
@@ -632,6 +638,9 @@ namespace NLGUI
 	void CDBGroupComboBox::fillMenu(CGroupMenu *groupMenu) const
 	{
 		nlassert(groupMenu);
+
+			if (_ViewText)
+				groupMenu->setFontSize(_ViewText->getFontSize());
 
 			// Setup the menu with combo action.
 			groupMenu->reset();

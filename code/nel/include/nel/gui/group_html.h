@@ -33,6 +33,7 @@ typedef std::map<std::string, std::string>	TStyle;
 namespace NLGUI
 {
 	class CCtrlButton;
+	class CCtrlTextButton;
 	class CCtrlScroll;
 	class CGroupList;
 	class CGroupMenu;
@@ -105,7 +106,9 @@ namespace NLGUI
 				Height=-1;
 				MaxWidth=-1;
 				MaxHeight=-1;
+				BorderWidth=1;
 				BackgroundColor=NLMISC::CRGBA::Black;
+				BackgroundColorOver=NLMISC::CRGBA::Black;
 			}
 			uint FontSize;
 			uint FontWeight;
@@ -120,7 +123,9 @@ namespace NLGUI
 			sint32 Height;
 			sint32 MaxWidth;
 			sint32 MaxHeight;
+			sint32 BorderWidth;
 			NLMISC::CRGBA BackgroundColor;
+			NLMISC::CRGBA BackgroundColorOver;
 		};
 
 		// ImageDownload system
@@ -856,6 +861,9 @@ namespace NLGUI
 		bool isTrustedDomain(const std::string &domain);
 		void setImage(CViewBase *view, const std::string &file, const TImageType type);
 		void setImageSize(CViewBase *view, const CStyleParams &style = CStyleParams());
+
+		void setTextButtonStyle(CCtrlTextButton *ctrlButton, const CStyleParams &style);
+		void setTextStyle(CViewText *pVT, const CStyleParams &style);
 
 		// BnpDownload system
 		void initBnpDownload();
