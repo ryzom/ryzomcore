@@ -330,9 +330,9 @@ CClientConfig::CClientConfig()
 	TexturesLoginInterface.push_back("texture_interfaces_v3_login");
 
 	DisplayAccountButtons = true;
-	CreateAccountURL	= "https://secure.ryzom.com/signup/from_client.php";
-	EditAccountURL		= "https://secure.ryzom.com/payment_profile/index.php";
-	ForgetPwdURL		= "https://secure.ryzom.com/payment_profile/lost_secure_password.php";
+	CreateAccountURL	= "https://account.ryzom.com/signup/from_client.php";
+	EditAccountURL		= "https://account.ryzom.com/payment_profile/index.php";
+	ForgetPwdURL		= "https://account.ryzom.com/payment_profile/lost_secure_password.php";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
 	EyesHeight			= 1.5f;						// Default User Eyes Height.
