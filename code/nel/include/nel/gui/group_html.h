@@ -796,7 +796,7 @@ namespace NLGUI
 		static TGroupHtmlByUIDMap _GroupHtmlByUID;
 
 		// read style attribute
-		void getStyleParams(const std::string &styleString, CStyleParams &style, bool inherit = true);
+		void getStyleParams(const std::string &styleString, CStyleParams &style, const CStyleParams &current);
 		void applyCssMinMax(sint32 &width, sint32 &height, sint32 minw=0, sint32 minh=0, sint32 maxw=0, sint32 maxh=0);
 
 		// load and render local html file (from bnp for example)

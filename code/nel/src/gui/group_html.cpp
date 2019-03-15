@@ -1545,7 +1545,7 @@ namespace NLGUI
 			{
 			case HTML_HTML:
 				if (present[MY_HTML_HTML_STYLE] && value[MY_HTML_HTML_STYLE])
-					getStyleParams(value[MY_HTML_HTML_STYLE], _StyleDefault);
+					getStyleParams(value[MY_HTML_HTML_STYLE], _StyleDefault, _StyleDefault);
 
 				_Style = _StyleDefault;
 				setBackgroundColor(_Style.BackgroundColor);
@@ -1616,7 +1616,7 @@ namespace NLGUI
 				_Style.Height = -1;
 
 				if (present[HTML_A_STYLE] && value[HTML_A_STYLE])
-					getStyleParams(value[HTML_A_STYLE], _Style);
+					getStyleParams(value[HTML_A_STYLE], _Style, _StyleParams.back());
 
 				_A.push_back(true);
 				_Link.push_back ("");
@@ -1669,7 +1669,7 @@ namespace NLGUI
 					style = value[MY_HTML_DIV_STYLE];
 
 				if (!style.empty())
-					getStyleParams(style, _Style);
+					getStyleParams(style, _Style, _StyleParams.back());
 
 				// use generic template system
 				if (_TrustedDomain && !instClass.empty() && instClass == "ryzom-ui-grouptemplate")
@@ -1780,7 +1780,7 @@ namespace NLGUI
 						style = value[HTML_BODY_STYLE];
 
 					if (!style.empty())
-						getStyleParams(style, _Style);
+						getStyleParams(style, _Style, _StyleParams.back());
 
 					CRGBA bgColor = _Style.BackgroundColor;
 					if (present[HTML_BODY_BGCOLOR] && value[HTML_BODY_BGCOLOR])
@@ -1841,7 +1841,7 @@ namespace NLGUI
 					_Style.TextColor = H1Color;
 					_Style.GlobalColor = H1ColorGlobalColor;
 					if (present[MY_HTML_H1_STYLE] && value[MY_HTML_H1_STYLE])
-						getStyleParams(value[MY_HTML_H1_STYLE], _Style);
+						getStyleParams(value[MY_HTML_H1_STYLE], _Style, _StyleParams.back());
 				}
 				break;
 			case HTML_H2:
@@ -1853,7 +1853,7 @@ namespace NLGUI
 					_Style.TextColor = H2Color;
 					_Style.GlobalColor = H2ColorGlobalColor;
 					if (present[MY_HTML_H2_STYLE] && value[MY_HTML_H2_STYLE])
-						getStyleParams(value[MY_HTML_H2_STYLE], _Style);
+						getStyleParams(value[MY_HTML_H2_STYLE], _Style, _StyleParams.back());
 				}
 				break;
 			case HTML_H3:
@@ -1865,7 +1865,7 @@ namespace NLGUI
 					_Style.TextColor = H3Color;
 					_Style.GlobalColor = H3ColorGlobalColor;
 					if (present[MY_HTML_H3_STYLE] && value[MY_HTML_H3_STYLE])
-						getStyleParams(value[MY_HTML_H3_STYLE], _Style);
+						getStyleParams(value[MY_HTML_H3_STYLE], _Style, _StyleParams.back());
 				}
 				break;
 			case HTML_H4:
@@ -1877,7 +1877,7 @@ namespace NLGUI
 					_Style.TextColor = H4Color;
 					_Style.GlobalColor = H4ColorGlobalColor;
 					if (present[MY_HTML_H4_STYLE] && value[MY_HTML_H4_STYLE])
-						getStyleParams(value[MY_HTML_H4_STYLE], _Style);
+						getStyleParams(value[MY_HTML_H4_STYLE], _Style, _StyleParams.back());
 				}
 				break;
 			case HTML_H5:
@@ -1889,7 +1889,7 @@ namespace NLGUI
 					_Style.TextColor = H5Color;
 					_Style.GlobalColor = H5ColorGlobalColor;
 					if (present[MY_HTML_H5_STYLE] && value[MY_HTML_H5_STYLE])
-						getStyleParams(value[MY_HTML_H5_STYLE], _Style);
+						getStyleParams(value[MY_HTML_H5_STYLE], _Style, _StyleParams.back());
 				}
 				break;
 			case HTML_H6:
@@ -1901,7 +1901,7 @@ namespace NLGUI
 					_Style.TextColor = H6Color;
 					_Style.GlobalColor = H6ColorGlobalColor;
 					if (present[MY_HTML_H6_STYLE] && value[MY_HTML_H6_STYLE])
-						getStyleParams(value[MY_HTML_H6_STYLE], _Style);
+						getStyleParams(value[MY_HTML_H6_STYLE], _Style, _StyleParams.back());
 				}
 				break;
 			case HTML_IMG:
@@ -1928,7 +1928,7 @@ namespace NLGUI
 
 						// width, height from inline css
 						if (present[MY_HTML_IMG_STYLE] && value[MY_HTML_IMG_STYLE])
-							getStyleParams(value[MY_HTML_IMG_STYLE], style);
+							getStyleParams(value[MY_HTML_IMG_STYLE], style, _Style);
 
 						// Tooltip
 						const char *tooltip = NULL;
@@ -2032,7 +2032,7 @@ namespace NLGUI
 							tooltip = value[MY_HTML_INPUT_ALT];
 
 						if (present[MY_HTML_INPUT_STYLE] && value[MY_HTML_INPUT_STYLE])
-							getStyleParams(value[MY_HTML_INPUT_STYLE], _Style);
+							getStyleParams(value[MY_HTML_INPUT_STYLE], _Style, _StyleParams.back());
 
 						string type = toLower(value[MY_HTML_INPUT_TYPE]);
 						if (type == "image")
@@ -2258,7 +2258,6 @@ namespace NLGUI
 				if (!(_Forms.empty()))
 				{
 					CStyleParams style;
-					style.FontSize = _Style.FontSize;
 
 					// A select box
 					string name;
@@ -2272,7 +2271,7 @@ namespace NLGUI
 					if (present[HTML_SELECT_MULTIPLE] && value[HTML_SELECT_MULTIPLE])
 						multiple = true;
 					if (present[HTML_SELECT_STYLE] && value[HTML_SELECT_STYLE])
-						getStyleParams(value[HTML_SELECT_STYLE], style);
+						getStyleParams(value[HTML_SELECT_STYLE], style, _Style);
 
 					CGroupHTML::CForm::CEntry entry;
 					entry.Name = name;
@@ -2356,7 +2355,7 @@ namespace NLGUI
 
 					pushStyle();
 					if (present[HTML_LI_STYLE] && value[HTML_LI_STYLE])
-						getStyleParams(value[HTML_LI_STYLE], _Style);
+						getStyleParams(value[HTML_LI_STYLE], _Style, _StyleParams.back());
 
 					ucstring str;
 					str.fromUtf8(_UL.back().getListMarkerText());
@@ -2379,7 +2378,7 @@ namespace NLGUI
 					newParagraph(PBeginSpace);
 					pushStyle();
 					if (present[MY_HTML_P_STYLE] && value[MY_HTML_P_STYLE])
-						getStyleParams(value[MY_HTML_P_STYLE], _Style);
+						getStyleParams(value[MY_HTML_P_STYLE], _Style, _StyleParams.back());
 				}
 				break;
 			case HTML_PRE:
@@ -2388,7 +2387,7 @@ namespace NLGUI
 					_Style.FontFamily = "monospace";
 
 					if (present[HTML_PRE_STYLE] && value[HTML_PRE_STYLE])
-						getStyleParams(value[HTML_PRE_STYLE], _Style);
+						getStyleParams(value[HTML_PRE_STYLE], _Style, _StyleParams.back());
 
 
 					_PRE.push_back(true);
@@ -2416,7 +2415,7 @@ namespace NLGUI
 					if (present[MY_HTML_TABLE_CELLPADDING] && value[MY_HTML_TABLE_CELLPADDING])
 						fromString(value[MY_HTML_TABLE_CELLPADDING], table->CellPadding);
 					if (present[MY_HTML_TABLE_STYLE] && value[MY_HTML_TABLE_STYLE])
-						getStyleParams(value[MY_HTML_TABLE_STYLE], _Style);
+						getStyleParams(value[MY_HTML_TABLE_STYLE], _Style, _StyleParams.back());
 
 					table->setMarginLeft(getIndent());
 					addHtmlGroup (table, 0);
@@ -2446,7 +2445,7 @@ namespace NLGUI
 					}
 
 					if (present[MY_HTML_TD_STYLE] && value[MY_HTML_TD_STYLE])
-						getStyleParams(value[MY_HTML_TD_STYLE], _Style);
+						getStyleParams(value[MY_HTML_TD_STYLE], _Style, _StyleParams.back());
 
 					CGroupTable *table = getTable();
 					if (table)
@@ -2541,7 +2540,7 @@ namespace NLGUI
 				_Style.BackgroundColor.A = 0;
 
 				if (present[MY_HTML_TEXTAREA_STYLE] && value[MY_HTML_TEXTAREA_STYLE])
-					getStyleParams(value[MY_HTML_TEXTAREA_STYLE], _Style);
+					getStyleParams(value[MY_HTML_TEXTAREA_STYLE], _Style, _StyleParams.back());
 
 				// Got one form ?
 				if (!(_Forms.empty()))
@@ -2597,7 +2596,7 @@ namespace NLGUI
 
 					pushStyle();
 					if (present[MY_HTML_TR_STYLE] && value[MY_HTML_TR_STYLE])
-						getStyleParams(value[MY_HTML_TR_STYLE], _Style);
+						getStyleParams(value[MY_HTML_TR_STYLE], _Style, _StyleParams.back());
 				}
 				break;
 			case HTML_UL:
@@ -2614,7 +2613,7 @@ namespace NLGUI
 
 				pushStyle();
 				if (present[HTML_UL_STYLE] && value[HTML_UL_STYLE])
-					getStyleParams(value[HTML_UL_STYLE], _Style);
+					getStyleParams(value[HTML_UL_STYLE], _Style, _StyleParams.back());
 				break;
 			case HTML_OBJECT:
 				_ObjectType.clear();
@@ -2637,7 +2636,7 @@ namespace NLGUI
 					pushStyle();
 
 					if (present[MY_HTML_SPAN_STYLE] && value[MY_HTML_SPAN_STYLE])
-						getStyleParams(value[MY_HTML_SPAN_STYLE], _Style);
+						getStyleParams(value[MY_HTML_SPAN_STYLE], _Style, _StyleParams.back());
 				}
 				break;
 			case HTML_DEL:
@@ -2681,7 +2680,7 @@ namespace NLGUI
 					endParagraph();
 					pushStyle();
 					if (present[HTML_GEN_STYLE] && value[HTML_GEN_STYLE])
-						getStyleParams(value[HTML_GEN_STYLE], _Style);
+						getStyleParams(value[HTML_GEN_STYLE], _Style, _StyleParams.back());
 				}
 				break;
 			case HTML_DT:
@@ -2704,7 +2703,7 @@ namespace NLGUI
 					pushStyle();
 					_Style.FontWeight = FONT_WEIGHT_BOLD;
 					if (present[HTML_GEN_STYLE] && value[HTML_GEN_STYLE])
-						getStyleParams(value[HTML_GEN_STYLE], _Style);
+						getStyleParams(value[HTML_GEN_STYLE], _Style, _StyleParams.back());
 
 					if (!_LI)
 					{
@@ -2739,7 +2738,7 @@ namespace NLGUI
 
 					pushStyle();
 					if (present[HTML_GEN_STYLE] && value[HTML_GEN_STYLE])
-						getStyleParams(value[HTML_GEN_STYLE], _Style);
+						getStyleParams(value[HTML_GEN_STYLE], _Style, _StyleParams.back());
 
 					if (!_LI)
 					{
@@ -2763,7 +2762,7 @@ namespace NLGUI
 					if (present[HTML_OL_TYPE] && value[HTML_OL_TYPE])
 						type = value[HTML_OL_TYPE];
 					if (present[HTML_OL_STYLE] && value[HTML_OL_STYLE])
-						getStyleParams(value[HTML_OL_STYLE], _Style);
+						getStyleParams(value[HTML_OL_STYLE], _Style, _StyleParams.back());
 
 					_UL.push_back(HTMLOListElement(start, type));
 					// if LI is already present
@@ -2786,7 +2785,7 @@ namespace NLGUI
 						style.Width = 0;
 
 						if (present[HTML_HR_STYLE] && value[HTML_HR_STYLE])
-							getStyleParams(value[HTML_HR_STYLE], style);
+							getStyleParams(value[HTML_HR_STYLE], style, _Style);
 
 						CViewBitmap *bitmap = dynamic_cast<CViewBitmap*>(sep->getView("hr"));
 						if (bitmap)
@@ -6364,16 +6363,8 @@ namespace NLGUI
 	// style.TextColor;   // color: #ABCDEF;
 	// style.Underlined;  // text-decoration: underline;     text-decoration-line: underline;
 	// style.StrikeThrough; // text-decoration: line-through;  text-decoration-line: line-through;
-	void CGroupHTML::getStyleParams(const std::string &styleString, CStyleParams &style, bool inherit)
+	void CGroupHTML::getStyleParams(const std::string &styleString, CStyleParams &style, const CStyleParams &current)
 	{
-		const CStyleParams current = _Style;
-
-		if (inherit)
-		{
-			style.Underlined = current.Underlined;
-			style.StrikeThrough = current.StrikeThrough;
-		}
-
 		float tmpf;
 		TStyle styles = parseStyle(styleString);
 		TStyle::iterator it;
@@ -6698,6 +6689,14 @@ namespace NLGUI
 					scanHTMLColor(it->second.c_str(), style.BackgroundColorOver);
 			}
 		}
+
+		// if outer element has underline set, then inner element cannot remove it
+		if (current.Underlined)
+			style.Underlined = current.Underlined;
+
+		// if outer element has line-through set, then inner element cannot remove it
+		if (current.StrikeThrough)
+			style.StrikeThrough = current.StrikeThrough;
 	}
 
 	// ***************************************************************************
