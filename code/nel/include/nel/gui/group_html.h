@@ -33,6 +33,7 @@ typedef std::map<std::string, std::string>	TStyle;
 namespace NLGUI
 {
 	class CCtrlButton;
+	class CCtrlTextButton;
 	class CCtrlScroll;
 	class CGroupList;
 	class CGroupMenu;
@@ -105,6 +106,9 @@ namespace NLGUI
 				Height=-1;
 				MaxWidth=-1;
 				MaxHeight=-1;
+				BorderWidth=1;
+				BackgroundColor=NLMISC::CRGBA::Black;
+				BackgroundColorOver=NLMISC::CRGBA::Black;
 			}
 			uint FontSize;
 			uint FontWeight;
@@ -119,6 +123,9 @@ namespace NLGUI
 			sint32 Height;
 			sint32 MaxWidth;
 			sint32 MaxHeight;
+			sint32 BorderWidth;
+			NLMISC::CRGBA BackgroundColor;
+			NLMISC::CRGBA BackgroundColorOver;
 		};
 
 		// ImageDownload system
@@ -349,6 +356,9 @@ namespace NLGUI
 
 		// Get Home URL
 		virtual std::string	home();
+
+		// Clear style stack and restore default style
+		void resetCssStyle();
 
 		// Parse style html tag
 		TStyle parseStyle(const std::string &str_styles);
@@ -793,7 +803,7 @@ namespace NLGUI
 		static TGroupHtmlByUIDMap _GroupHtmlByUID;
 
 		// read style attribute
-		void getStyleParams(const std::string &styleString, CStyleParams &style, bool inherit = true);
+		void getStyleParams(const std::string &styleString, CStyleParams &style, const CStyleParams &current);
 		void applyCssMinMax(sint32 &width, sint32 &height, sint32 minw=0, sint32 minh=0, sint32 maxw=0, sint32 maxh=0);
 
 		// load and render local html file (from bnp for example)
@@ -858,6 +868,9 @@ namespace NLGUI
 		bool isTrustedDomain(const std::string &domain);
 		void setImage(CViewBase *view, const std::string &file, const TImageType type);
 		void setImageSize(CViewBase *view, const CStyleParams &style = CStyleParams());
+
+		void setTextButtonStyle(CCtrlTextButton *ctrlButton, const CStyleParams &style);
+		void setTextStyle(CViewText *pVT, const CStyleParams &style);
 
 		// BnpDownload system
 		void initBnpDownload();

@@ -85,6 +85,7 @@ namespace NLGUI
 		// view text
 		void			setViewText(const ucstring & text);
 		ucstring		getViewText() const;
+		CViewText		*getViewText();
 
 		void			setTexture(uint i, const ucstring &texture);
 

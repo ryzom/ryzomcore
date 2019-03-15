@@ -51,6 +51,14 @@ namespace NLGUI
 
 	enum
 	{
+		HTML_ATTR(HTML,DIR) = 0,
+		HTML_ATTR(HTML,LANG),
+		HTML_ATTR(HTML,VERSION),
+		HTML_ATTR(HTML,STYLE),
+	};
+
+	enum
+	{
 		HTML_ATTR(A,ACCESSKEY) = 0,
 			HTML_ATTR(A,CHARSET),
 			HTML_ATTR(A,CLASS),
@@ -272,6 +280,9 @@ namespace NLGUI
 	#undef HTML_ATTR
 
 	// ***************************************************************************
+	// Read a CSS length value, return true if one of supported units '%, rem, em, px, pt'
+	// On failure: 'value' and 'unit' values are undefined
+	bool getCssLength (float &value, std::string &unit, const std::string &str);
 
 	// Read a width HTML parameter. "100" or "100%". Returns true if percent (0 ~ 1) else false
 	bool getPercentage (sint32 &width, float &percent, const char *str);

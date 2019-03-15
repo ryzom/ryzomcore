@@ -47,6 +47,15 @@ namespace NLGUI
 	#undef HTML_ATTR
 	#define HTML_ATTR(a,b) { (char*) #b }
 
+	HTAttr html_attr[] =
+	{
+		HTML_ATTR(HTML,DIR),
+		HTML_ATTR(HTML,LANG),
+		HTML_ATTR(HTML,VERSION),
+		HTML_ATTR(HTML,STYLE),
+		{ 0 }
+	};
+
 	HTAttr a_attr[] =
 	{
 		HTML_ATTR(A,ACCESSKEY),
@@ -284,6 +293,37 @@ namespace NLGUI
 	};
 
 	// ***************************************************************************
+	bool getCssLength (float &value, std::string &unit, const std::string &str)
+	{
+		std::string::size_type pos = 0;
+		std::string::size_type len = str.size();
+		if (len == 1 && str[0] == '.')
+		{
+			return false;
+		}
+
+		while(pos < len)
+		{
+			bool isNumeric = (str[pos] >= '0' && str[pos] <= '9')
+				|| (pos == 0 && str[pos] == '.')
+				|| (pos > 0 && str[pos] == '.' && str[pos-1] >= '0' && str[pos-1] <= '9');
+			if (!isNumeric)
+			{
+				break;
+			}
+
+			pos++;
+		}
+
+		unit = toLower(str.substr(pos));
+		if (unit == "%" || unit == "rem" || unit == "em" || unit == "px" || unit == "pt")
+		{
+			std::string tmpstr = str.substr(0, pos);
+			return fromString(tmpstr, value);
+		}
+
+		return false;
+	}
 
 	// Read a width HTML parameter. "100" or "100%". Returns true if percent (0 ~ 1) else false
 	bool getPercentage (sint32 &width, float &percent, const char *str)
@@ -469,6 +509,8 @@ namespace NLGUI
 
 			// Change the HTML DTD
 			SGML_dtd *HTML_DTD = HTML_dtd ();
+			HTML_DTD->tags[HTML_HTML].attributes = html_attr;
+			HTML_DTD->tags[HTML_HTML].number_of_attributes = sizeof(html_attr) / sizeof(HTAttr) - 1;
 			HTML_DTD->tags[HTML_TABLE].attributes = table_attr;
 			HTML_DTD->tags[HTML_TABLE].number_of_attributes = sizeof(table_attr) / sizeof(HTAttr) - 1;
 			HTML_DTD->tags[HTML_TR].attributes = tr_attr;

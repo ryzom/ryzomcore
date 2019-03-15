@@ -1096,23 +1096,21 @@ void prelogInit()
 
 		UDriver::CMode mode;
 
-		bool forceWindowed1024x768 = true;
-		
 		if (Driver->getCurrentScreenMode(mode))
 		{
-			// if screen mode lower than 1024x768, use same mode in fullscreen
-			if (mode.Width <= 1024 && mode.Height <= 768)
+			// use current mode if its smaller than 1024x768
+			// mode should be windowed already, but incase its not, use the mode as is
+			if (mode.Windowed && (mode.Width > 1024 && mode.Height > 768))
 			{
-				mode.Windowed = false;
-				forceWindowed1024x768 = false;
+				mode.Width		= 1024;
+				mode.Height		= 768;
 			}
 		}
-
-		if (forceWindowed1024x768)
+		else
 		{
-			mode.Width		= 1024;
-			mode.Height		= 768;
-			mode.Windowed	= true;
+			mode.Width = 1024;
+			mode.Height = 768;
+			mode.Windowed = true;
 		}
 
 		// Disable Hardware Vertex Program.
