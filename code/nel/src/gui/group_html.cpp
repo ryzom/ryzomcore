@@ -6381,6 +6381,17 @@ namespace NLGUI
 		// first pass: get font-size for 'em' sizes
 		for (it=styles.begin(); it != styles.end(); ++it)
 		{
+			if (it->first == "font")
+			{
+				if (it->second == "inherit")
+				{
+					style.FontSize = current.FontSize;
+					style.FontFamily = current.FontFamily;
+					style.FontWeight = current.FontWeight;
+					style.FontOblique = current.FontOblique;
+				}
+			}
+			else
 			if (it->first == "font-size")
 			{
 				if (it->second == "inherit")
