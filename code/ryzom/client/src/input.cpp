@@ -84,9 +84,6 @@ bool	InitMouseWithCursor (bool hardware)
 	MouseHardware = hardware;
 	CViewPointer::setHWMouse( hardware );
 
-	// Update mouse information
-	UpdateMouse ();
-
 	if (InitMouseFirstTime)
 	{
 		InitMouseFirstTime = false;
@@ -130,16 +127,6 @@ bool	IsMouseCursorHardware ()
 }
 
 // *********************************************************************************
-// Set the mouse mode. Call this method once per frame to update window size
-void	UpdateMouse ()
-{
-	if (!Driver->isSystemCursorCaptured())
-	{
-		DownMouseButtons = 0;
-	}
-}
-
-// *********************************************************************************
 // Use this method to toggle the mouse (freelook <- cursor)
 void	SetMouseFreeLook ()
 {
@@ -160,7 +147,6 @@ void	SetMouseFreeLook ()
 					pointer->show (false);
 			}
 		}
-		UpdateMouse ();
 	}
 }
 
@@ -202,7 +188,6 @@ void	SetMouseCursor (bool updatePos)
 		}
 
 		MouseFreeLook = false;
-		UpdateMouse ();
 
 		// Integer coordinates
 		sint ix = (sint)(x*(float)width+0.5f);
@@ -253,7 +238,6 @@ void	SetMouseCursor (bool updatePos)
 void	SetMouseSpeed (float speed)
 {
 	MouseCursorSpeed = speed;
-	UpdateMouse ();
 }
 
 // *********************************************************************************
@@ -261,12 +245,27 @@ void	SetMouseSpeed (float speed)
 void	SetMouseAcceleration (uint accel)
 {
 	MouseCursorAcceleration = accel;
-	UpdateMouse ();
 }
 
 // *********************************************************************************
 void HandleSystemCursorCapture(const CEvent &event)
 {
+	static bool mouseCaptured = false;
+
+	// capture on first move event after button is held down or free look is activated
+	if (event == EventMouseMoveId && !mouseCaptured && (MouseFreeLook || DownMouseButtons != 0))
+	{
+		mouseCaptured = true;
+		Driver->setCapture(true);
+	}
+
+	// release when button is released and not in free look
+	if (mouseCaptured && !MouseFreeLook && DownMouseButtons == 0)
+	{
+		mouseCaptured = false;
+		Driver->setCapture(false);
+	}
+
 	if (event == EventMouseDownId)
 	{
 		CEventMouseDown &em = (CEventMouseDown &) event;
@@ -279,8 +278,6 @@ void HandleSystemCursorCapture(const CEvent &event)
 				cursor->setPointerMiddleDown(em.Button == middleButton);
 				cursor->setPointerRightDown(em.Button == rightButton);
 		}
-
-		Driver->setCapture(true);
 	}
 
 	if (event == EventMouseUpId)
@@ -297,7 +294,6 @@ void HandleSystemCursorCapture(const CEvent &event)
 				cursor->setPointerMiddleDown(false);
 				cursor->setPointerRightDown(false);
 			}
-			Driver->setCapture(false);
 		}
 	}
 
