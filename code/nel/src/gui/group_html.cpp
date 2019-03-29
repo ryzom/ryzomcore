@@ -357,7 +357,7 @@ namespace NLGUI
 		// apply max-width, max-height rules if asked
 		if (maxw > -1 || maxh > -1)
 		{
-			applyCssMinMax(width, height, 0, 0, maxw, maxh);
+			_Style.applyCssMinMax(width, height, 0, 0, maxw, maxh);
 			changed = true;
 		}
 
@@ -386,29 +386,33 @@ namespace NLGUI
 	void CGroupHTML::setTextButtonStyle(CCtrlTextButton *ctrlButton, const CStyleParams &style)
 	{
 		// this will also set size for <a class="ryzom-ui-button"> treating it like "display: inline-block;"
-		if (style.Width > 0)  ctrlButton->setWMin(_Style.Width);
-		if (style.Height > 0) ctrlButton->setHMin(_Style.Height);
+		if (style.Width > 0)  ctrlButton->setWMin(style.Width);
+		if (style.Height > 0) ctrlButton->setHMin(style.Height);
 
 		CViewText *pVT = ctrlButton->getViewText();
 		if (pVT)
 		{
-			setTextStyle(pVT, _Style);
+			setTextStyle(pVT, style);
 		}
 
-		if (_Style.BackgroundColor.A > 0)
+		if (style.BackgroundColor.A > 0)
 		{
-			if (_Style.BackgroundColorOver.A == 0)
-				_Style.BackgroundColorOver = _Style.BackgroundColor;
-
-			ctrlButton->setColor(_Style.BackgroundColor);
-			ctrlButton->setColorOver(_Style.BackgroundColorOver);
+			ctrlButton->setColor(style.BackgroundColor);
+			if (style.BackgroundColorOver.A == 0)
+			{
+				ctrlButton->setColorOver(style.BackgroundColor);
+			}
+			else
+			{
+				ctrlButton->setColorOver(style.BackgroundColorOver);
+			}
 			ctrlButton->setTexture("", "blank.tga", "", false);
 			ctrlButton->setTextureOver("", "blank.tga", "");
 			ctrlButton->setProperty("force_text_over", "true");
 		}
-		else if (_Style.BackgroundColorOver.A > 0)
+		else if (style.BackgroundColorOver.A > 0)
 		{
-			ctrlButton->setColorOver(_Style.BackgroundColorOver);
+			ctrlButton->setColorOver(style.BackgroundColorOver);
 			ctrlButton->setProperty("force_text_over", "true");
 			ctrlButton->setTextureOver("blank.tga", "blank.tga", "blank.tga");
 		}
@@ -1027,7 +1031,7 @@ namespace NLGUI
 
 	TStyle CGroupHTML::parseStyle (const string &str_styles)
 	{
-		TStyle	styles;
+		TStyle styles;
 		vector<string> elements;
 		NLMISC::splitString(str_styles, ";", elements);
 
@@ -1149,392 +1153,6 @@ namespace NLGUI
 		_CellParams.push_back (cellParams); \
 	}
 
-	static bool scanCssLength(const std::string& str, uint32 &px)
-	{
-		if (fromString(str, px))
-			return true;
-
-		if (str == "thin")
-		{
-			px = 1;
-			return true;
-		}
-		if (str == "medium")
-		{
-			px = 3;
-			return true;
-		}
-		if (str == "thick")
-		{
-			px = 5;
-			return true;
-		}
-
-		return false;
-	}
-
-	static bool isHexa(char c)
-	{
-		return isdigit(c) || (tolower(c) >= 'a' && tolower(c) <= 'f');
-	}
-
-	static uint8 convertHexa(char c)
-	{
-		return (uint8) (tolower(c) - (isdigit(c) ? '0' : ('a' - 10)));
-	}
-
-	// scan a color component, and return pointer to next position
-	static const char *scanColorComponent(const char *src, uint8 &intensity)
-	{
-		if (!src) return NULL;
-		if (!isHexa(*src)) return NULL;
-		uint8 value = convertHexa(*src++) << 4;
-		if (!isHexa(*src)) return NULL;
-		value += convertHexa(*src++);
-		intensity = value;
-		return src;
-	}
-
-	static float hueToRgb(float m1, float m2, float h)
-	{
-		if (h < 0) h += 1.0f;
-		if (h > 1) h -= 1.0f;
-		if (h*6 < 1.0f) return m1 + (m2 - m1)*h*6;
-		if (h*2 < 1.0f) return m2;
-		if (h*3 < 2.0f) return m1 + (m2 - m1) * (2.0f/3.0f - h)*6;
-		return m1;
-	}
-
-	static void hslToRgb(float h, float s, float l, CRGBA &result)
-	{
-		float m1, m2;
-		if (l <= 0.5f)
-			m2 = l * (s + 1.0f);
-		else
-			m2 = l + s - l * s;
-		m1 = l*2 - m2;
-
-		result.R = 255 * hueToRgb(m1, m2, h + 1.0f/3.0f);
-		result.G = 255 * hueToRgb(m1, m2, h);
-		result.B = 255 * hueToRgb(m1, m2, h - 1.0f/3.0f);
-		result.A = 255;
-	}
-
-	class CNameToCol
-	{
-	public:
-		const char *Name;
-		CRGBA Color;
-		CNameToCol(const char *name, CRGBA color) : Name(name), Color(color) {}
-	};
-
-	static CNameToCol htmlColorNameToRGBA[] =
-	{
-		CNameToCol("AliceBlue", CRGBA(0xF0, 0xF8, 0xFF)),
-		CNameToCol("AntiqueWhite", CRGBA(0xFA, 0xEB, 0xD7)),
-		CNameToCol("Aqua", CRGBA(0x00, 0xFF, 0xFF)),
-		CNameToCol("Aquamarine", CRGBA(0x7F, 0xFF, 0xD4)),
-		CNameToCol("Azure", CRGBA(0xF0, 0xFF, 0xFF)),
-		CNameToCol("Beige", CRGBA(0xF5, 0xF5, 0xDC)),
-		CNameToCol("Bisque", CRGBA(0xFF, 0xE4, 0xC4)),
-		CNameToCol("Black", CRGBA(0x00, 0x00, 0x00)),
-		CNameToCol("BlanchedAlmond", CRGBA(0xFF, 0xEB, 0xCD)),
-		CNameToCol("Blue", CRGBA(0x00, 0x00, 0xFF)),
-		CNameToCol("BlueViolet", CRGBA(0x8A, 0x2B, 0xE2)),
-		CNameToCol("Brown", CRGBA(0xA5, 0x2A, 0x2A)),
-		CNameToCol("BurlyWood", CRGBA(0xDE, 0xB8, 0x87)),
-		CNameToCol("CadetBlue", CRGBA(0x5F, 0x9E, 0xA0)),
-		CNameToCol("Chartreuse", CRGBA(0x7F, 0xFF, 0x00)),
-		CNameToCol("Chocolate", CRGBA(0xD2, 0x69, 0x1E)),
-		CNameToCol("Coral", CRGBA(0xFF, 0x7F, 0x50)),
-		CNameToCol("CornflowerBlue", CRGBA(0x64, 0x95, 0xED)),
-		CNameToCol("Cornsilk", CRGBA(0xFF, 0xF8, 0xDC)),
-		CNameToCol("Crimson", CRGBA(0xDC, 0x14, 0x3C)),
-		CNameToCol("Cyan", CRGBA(0x00, 0xFF, 0xFF)),
-		CNameToCol("DarkBlue", CRGBA(0x00, 0x00, 0x8B)),
-		CNameToCol("DarkCyan", CRGBA(0x00, 0x8B, 0x8B)),
-		CNameToCol("DarkGoldenRod", CRGBA(0xB8, 0x86, 0x0B)),
-		CNameToCol("DarkGray", CRGBA(0xA9, 0xA9, 0xA9)),
-		CNameToCol("DarkGreen", CRGBA(0x00, 0x64, 0x00)),
-		CNameToCol("DarkKhaki", CRGBA(0xBD, 0xB7, 0x6B)),
-		CNameToCol("DarkMagenta", CRGBA(0x8B, 0x00, 0x8B)),
-		CNameToCol("DarkOliveGreen", CRGBA(0x55, 0x6B, 0x2F)),
-		CNameToCol("Darkorange", CRGBA(0xFF, 0x8C, 0x00)),
-		CNameToCol("DarkOrchid", CRGBA(0x99, 0x32, 0xCC)),
-		CNameToCol("DarkRed", CRGBA(0x8B, 0x00, 0x00)),
-		CNameToCol("DarkSalmon", CRGBA(0xE9, 0x96, 0x7A)),
-		CNameToCol("DarkSeaGreen", CRGBA(0x8F, 0xBC, 0x8F)),
-		CNameToCol("DarkSlateBlue", CRGBA(0x48, 0x3D, 0x8B)),
-		CNameToCol("DarkSlateGray", CRGBA(0x2F, 0x4F, 0x4F)),
-		CNameToCol("DarkTurquoise", CRGBA(0x00, 0xCE, 0xD1)),
-		CNameToCol("DarkViolet", CRGBA(0x94, 0x00, 0xD3)),
-		CNameToCol("DeepPink", CRGBA(0xFF, 0x14, 0x93)),
-		CNameToCol("DeepSkyBlue", CRGBA(0x00, 0xBF, 0xFF)),
-		CNameToCol("DimGray", CRGBA(0x69, 0x69, 0x69)),
-		CNameToCol("DodgerBlue", CRGBA(0x1E, 0x90, 0xFF)),
-		CNameToCol("Feldspar", CRGBA(0xD1, 0x92, 0x75)),
-		CNameToCol("FireBrick", CRGBA(0xB2, 0x22, 0x22)),
-		CNameToCol("FloralWhite", CRGBA(0xFF, 0xFA, 0xF0)),
-		CNameToCol("ForestGreen", CRGBA(0x22, 0x8B, 0x22)),
-		CNameToCol("Fuchsia", CRGBA(0xFF, 0x00, 0xFF)),
-		CNameToCol("Gainsboro", CRGBA(0xDC, 0xDC, 0xDC)),
-		CNameToCol("GhostWhite", CRGBA(0xF8, 0xF8, 0xFF)),
-		CNameToCol("Gold", CRGBA(0xFF, 0xD7, 0x00)),
-		CNameToCol("GoldenRod", CRGBA(0xDA, 0xA5, 0x20)),
-		CNameToCol("Gray", CRGBA(0x80, 0x80, 0x80)),
-		CNameToCol("Green", CRGBA(0x00, 0x80, 0x00)),
-		CNameToCol("GreenYellow", CRGBA(0xAD, 0xFF, 0x2F)),
-		CNameToCol("HoneyDew", CRGBA(0xF0, 0xFF, 0xF0)),
-		CNameToCol("HotPink", CRGBA(0xFF, 0x69, 0xB4)),
-		CNameToCol("IndianRed ", CRGBA(0xCD, 0x5C, 0x5C)),
-		CNameToCol("Indigo  ", CRGBA(0x4B, 0x00, 0x82)),
-		CNameToCol("Ivory", CRGBA(0xFF, 0xFF, 0xF0)),
-		CNameToCol("Khaki", CRGBA(0xF0, 0xE6, 0x8C)),
-		CNameToCol("Lavender", CRGBA(0xE6, 0xE6, 0xFA)),
-		CNameToCol("LavenderBlush", CRGBA(0xFF, 0xF0, 0xF5)),
-		CNameToCol("LawnGreen", CRGBA(0x7C, 0xFC, 0x00)),
-		CNameToCol("LemonChiffon", CRGBA(0xFF, 0xFA, 0xCD)),
-		CNameToCol("LightBlue", CRGBA(0xAD, 0xD8, 0xE6)),
-		CNameToCol("LightCoral", CRGBA(0xF0, 0x80, 0x80)),
-		CNameToCol("LightCyan", CRGBA(0xE0, 0xFF, 0xFF)),
-		CNameToCol("LightGoldenRodYellow", CRGBA(0xFA, 0xFA, 0xD2)),
-		CNameToCol("LightGrey", CRGBA(0xD3, 0xD3, 0xD3)),
-		CNameToCol("LightGreen", CRGBA(0x90, 0xEE, 0x90)),
-		CNameToCol("LightPink", CRGBA(0xFF, 0xB6, 0xC1)),
-		CNameToCol("LightSalmon", CRGBA(0xFF, 0xA0, 0x7A)),
-		CNameToCol("LightSeaGreen", CRGBA(0x20, 0xB2, 0xAA)),
-		CNameToCol("LightSkyBlue", CRGBA(0x87, 0xCE, 0xFA)),
-		CNameToCol("LightSlateBlue", CRGBA(0x84, 0x70, 0xFF)),
-		CNameToCol("LightSlateGray", CRGBA(0x77, 0x88, 0x99)),
-		CNameToCol("LightSteelBlue", CRGBA(0xB0, 0xC4, 0xDE)),
-		CNameToCol("LightYellow", CRGBA(0xFF, 0xFF, 0xE0)),
-		CNameToCol("Lime", CRGBA(0x00, 0xFF, 0x00)),
-		CNameToCol("LimeGreen", CRGBA(0x32, 0xCD, 0x32)),
-		CNameToCol("Linen", CRGBA(0xFA, 0xF0, 0xE6)),
-		CNameToCol("Magenta", CRGBA(0xFF, 0x00, 0xFF)),
-		CNameToCol("Maroon", CRGBA(0x80, 0x00, 0x00)),
-		CNameToCol("MediumAquaMarine", CRGBA(0x66, 0xCD, 0xAA)),
-		CNameToCol("MediumBlue", CRGBA(0x00, 0x00, 0xCD)),
-		CNameToCol("MediumOrchid", CRGBA(0xBA, 0x55, 0xD3)),
-		CNameToCol("MediumPurple", CRGBA(0x93, 0x70, 0xD8)),
-		CNameToCol("MediumSeaGreen", CRGBA(0x3C, 0xB3, 0x71)),
-		CNameToCol("MediumSlateBlue", CRGBA(0x7B, 0x68, 0xEE)),
-		CNameToCol("MediumSpringGreen", CRGBA(0x00, 0xFA, 0x9A)),
-		CNameToCol("MediumTurquoise", CRGBA(0x48, 0xD1, 0xCC)),
-		CNameToCol("MediumVioletRed", CRGBA(0xC7, 0x15, 0x85)),
-		CNameToCol("MidnightBlue", CRGBA(0x19, 0x19, 0x70)),
-		CNameToCol("MintCream", CRGBA(0xF5, 0xFF, 0xFA)),
-		CNameToCol("MistyRose", CRGBA(0xFF, 0xE4, 0xE1)),
-		CNameToCol("Moccasin", CRGBA(0xFF, 0xE4, 0xB5)),
-		CNameToCol("NavajoWhite", CRGBA(0xFF, 0xDE, 0xAD)),
-		CNameToCol("Navy", CRGBA(0x00, 0x00, 0x80)),
-		CNameToCol("OldLace", CRGBA(0xFD, 0xF5, 0xE6)),
-		CNameToCol("Olive", CRGBA(0x80, 0x80, 0x00)),
-		CNameToCol("OliveDrab", CRGBA(0x6B, 0x8E, 0x23)),
-		CNameToCol("Orange", CRGBA(0xFF, 0xA5, 0x00)),
-		CNameToCol("OrangeRed", CRGBA(0xFF, 0x45, 0x00)),
-		CNameToCol("Orchid", CRGBA(0xDA, 0x70, 0xD6)),
-		CNameToCol("PaleGoldenRod", CRGBA(0xEE, 0xE8, 0xAA)),
-		CNameToCol("PaleGreen", CRGBA(0x98, 0xFB, 0x98)),
-		CNameToCol("PaleTurquoise", CRGBA(0xAF, 0xEE, 0xEE)),
-		CNameToCol("PaleVioletRed", CRGBA(0xD8, 0x70, 0x93)),
-		CNameToCol("PapayaWhip", CRGBA(0xFF, 0xEF, 0xD5)),
-		CNameToCol("PeachPuff", CRGBA(0xFF, 0xDA, 0xB9)),
-		CNameToCol("Peru", CRGBA(0xCD, 0x85, 0x3F)),
-		CNameToCol("Pink", CRGBA(0xFF, 0xC0, 0xCB)),
-		CNameToCol("Plum", CRGBA(0xDD, 0xA0, 0xDD)),
-		CNameToCol("PowderBlue", CRGBA(0xB0, 0xE0, 0xE6)),
-		CNameToCol("Purple", CRGBA(0x80, 0x00, 0x80)),
-		CNameToCol("Red", CRGBA(0xFF, 0x00, 0x00)),
-		CNameToCol("RosyBrown", CRGBA(0xBC, 0x8F, 0x8F)),
-		CNameToCol("RoyalBlue", CRGBA(0x41, 0x69, 0xE1)),
-		CNameToCol("SaddleBrown", CRGBA(0x8B, 0x45, 0x13)),
-		CNameToCol("Salmon", CRGBA(0xFA, 0x80, 0x72)),
-		CNameToCol("SandyBrown", CRGBA(0xF4, 0xA4, 0x60)),
-		CNameToCol("SeaGreen", CRGBA(0x2E, 0x8B, 0x57)),
-		CNameToCol("SeaShell", CRGBA(0xFF, 0xF5, 0xEE)),
-		CNameToCol("Sienna", CRGBA(0xA0, 0x52, 0x2D)),
-		CNameToCol("Silver", CRGBA(0xC0, 0xC0, 0xC0)),
-		CNameToCol("SkyBlue", CRGBA(0x87, 0xCE, 0xEB)),
-		CNameToCol("SlateBlue", CRGBA(0x6A, 0x5A, 0xCD)),
-		CNameToCol("SlateGray", CRGBA(0x70, 0x80, 0x90)),
-		CNameToCol("Snow", CRGBA(0xFF, 0xFA, 0xFA)),
-		CNameToCol("SpringGreen", CRGBA(0x00, 0xFF, 0x7F)),
-		CNameToCol("SteelBlue", CRGBA(0x46, 0x82, 0xB4)),
-		CNameToCol("Tan", CRGBA(0xD2, 0xB4, 0x8C)),
-		CNameToCol("Teal", CRGBA(0x00, 0x80, 0x80)),
-		CNameToCol("Thistle", CRGBA(0xD8, 0xBF, 0xD8)),
-		CNameToCol("Tomato", CRGBA(0xFF, 0x63, 0x47)),
-		CNameToCol("Turquoise", CRGBA(0x40, 0xE0, 0xD0)),
-		CNameToCol("Violet", CRGBA(0xEE, 0x82, 0xEE)),
-		CNameToCol("VioletRed", CRGBA(0xD0, 0x20, 0x90)),
-		CNameToCol("Wheat", CRGBA(0xF5, 0xDE, 0xB3)),
-		CNameToCol("White", CRGBA(0xFF, 0xFF, 0xFF)),
-		CNameToCol("WhiteSmoke", CRGBA(0xF5, 0xF5, 0xF5)),
-		CNameToCol("Yellow", CRGBA(0xFF, 0xFF, 0x00)),
-		CNameToCol("YellowGreen", CRGBA(0x9A, 0xCD, 0x32))
-	};
-
-	// scan a color from a HTML form (#rrggbb format)
-	bool scanHTMLColor(const char *src, CRGBA &dest)
-	{
-		if (!src || *src == '\0') return false;
-		if (*src == '#')
-		{
-			++src;
-			if (strlen(src) == 3 || strlen(src) == 4)
-			{
-				bool hasAlpha = (strlen(src) == 4);
-				// check RGB for valid hex
-				if (isHexa(src[0]) && isHexa(src[1]) && isHexa(src[2]))
-				{
-					// check optional A for valid hex
-					if (hasAlpha && !isHexa(src[3])) return false;
-
-					dest.R = convertHexa(src[0]);
-					dest.G = convertHexa(src[1]);
-					dest.B = convertHexa(src[2]);
-
-					dest.R = dest.R << 4 | dest.R;
-					dest.G = dest.G << 4 | dest.G;
-					dest.B = dest.B << 4 | dest.B;
-
-					if (hasAlpha)
-					{
-						dest.A = convertHexa(src[3]);
-						dest.A = dest.A << 4 | dest.A;
-					}
-					else
-						dest.A = 255;
-
-					return true;
-				}
-
-				return false;
-			}
-
-			CRGBA result;
-			src = scanColorComponent(src, result.R); if (!src) return false;
-			src = scanColorComponent(src, result.G); if (!src) return false;
-			src = scanColorComponent(src, result.B); if (!src) return false;
-			src = scanColorComponent(src, result.A);
-			if (!src)
-			{
-				// Alpha is optional
-				result.A = 255;
-			}
-			dest = result;
-			return true;
-		}
-
-		if (strnicmp(src, "rgb(", 4) == 0 || strnicmp(src, "rgba(", 5) == 0)
-		{
-			src += 4;
-			if (*src == '(') src++;
-
-			vector<string> parts;
-			NLMISC::splitString(src, ",", parts);
-			if (parts.size() >= 3)
-			{
-				CRGBA result;
-				sint tmpv;
-				float tmpf;
-
-				// R
-				if (getPercentage(tmpv, tmpf, parts[0].c_str())) tmpv = 255 * tmpf;
-				clamp(tmpv, 0, 255);
-				result.R = tmpv;
-
-				// G
-				if (getPercentage(tmpv, tmpf, parts[1].c_str())) tmpv = 255 * tmpf;
-				clamp(tmpv, 0, 255);
-				result.G = tmpv;
-
-				// B
-				if (getPercentage(tmpv, tmpf, parts[2].c_str())) tmpv = 255 * tmpf;
-				clamp(tmpv, 0, 255);
-				result.B = tmpv;
-
-				// A
-				if (parts.size() == 4)
-				{
-					if (!fromString(parts[3], tmpf)) return false;
-					if (parts[3].find_first_of("%") != std::string::npos)
-						tmpf /= 100;
-
-					tmpv = 255 * tmpf;
-					clamp(tmpv, 0, 255);
-					result.A = tmpv;
-				}
-				else
-					result.A = 255;
-
-				dest = result;
-				return true;
-			}
-
-			return false;
-		}
-
-		if (strnicmp(src, "hsl(", 4) == 0 || strnicmp(src, "hsla(", 5) == 0)
-		{
-			src += 4;
-			if (*src == '(') src++;
-
-			vector<string> parts;
-			NLMISC::splitString(src, ",", parts);
-			if (parts.size() >= 3)
-			{
-				sint tmpv;
-				float h, s, l;
-				// hue
-				if (!fromString(parts[0], tmpv)) return false;
-				tmpv = ((tmpv % 360) + 360) % 360;
-				h = (float) tmpv / 360.0f;
-
-				// saturation
-				if (!getPercentage(tmpv, s, parts[1].c_str())) return false;
-				clamp(s, 0.0f, 1.0f);
-
-				// lightness
-				if (!getPercentage(tmpv, l, parts[2].c_str())) return false;
-				clamp(l, 0.0f, 1.0f);
-
-				CRGBA result;
-				hslToRgb(h, s, l, result);
-
-				// A
-				if (parts.size() == 4)
-				{
-					float tmpf;
-					if (!fromString(parts[3], tmpf)) return false;
-					if (parts[3].find_first_of("%") != std::string::npos)
-						tmpf /= 100;
-					clamp(tmpf, 0.0f, 1.0f);
-					result.A = 255 * tmpf;
-				}
-
-				dest = result;
-				return true;
-			}
-
-			return false;
-		}
-
-		{
-			// slow but should suffice for now
-			for(uint k = 0; k < sizeofarray(htmlColorNameToRGBA); ++k)
-			{
-				if (nlstricmp(src, htmlColorNameToRGBA[k].Name) == 0)
-				{
-					dest = htmlColorNameToRGBA[k].Color;
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-
 	// ***************************************************************************
 
 	void CGroupHTML::beginElement (uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value)
@@ -1546,10 +1164,10 @@ namespace NLGUI
 			{
 			case HTML_HTML:
 				if (present[MY_HTML_HTML_STYLE] && value[MY_HTML_HTML_STYLE])
-					getStyleParams(value[MY_HTML_HTML_STYLE], _StyleDefault, _StyleDefault);
+					_Style.applyRootStyle(value[MY_HTML_HTML_STYLE]);
 
-				_Style = _StyleDefault;
-				setBackgroundColor(_Style.BackgroundColor);
+				_Style.Current = _Style.Root;
+				setBackgroundColor(_Style.Current.BackgroundColor);
 				break;
 			case HTML_HEAD:
 				_ReadingHeadTag = !_IgnoreHeadTag;
@@ -1607,17 +1225,17 @@ namespace NLGUI
 			{
 				registerAnchorName(MY_HTML_A);
 
-				pushStyle();
-				_Style.TextColor = LinkColor;
-				_Style.Underlined = true;
-				_Style.GlobalColor = LinkColorGlobalColor;
-				_Style.BackgroundColor.A = 0;
-				_Style.BackgroundColorOver.A = 0;
-				_Style.Width = -1;
-				_Style.Height = -1;
+				_Style.pushStyle();
+				_Style.Current.TextColor = LinkColor;
+				_Style.Current.Underlined = true;
+				_Style.Current.GlobalColor = LinkColorGlobalColor;
+				_Style.Current.BackgroundColor.A = 0;
+				_Style.Current.BackgroundColorOver.A = 0;
+				_Style.Current.Width = -1;
+				_Style.Current.Height = -1;
 
 				if (present[HTML_A_STYLE] && value[HTML_A_STYLE])
-					getStyleParams(value[HTML_A_STYLE], _Style, _StyleParams.back());
+					_Style.applyStyle(value[HTML_A_STYLE]);
 
 				_A.push_back(true);
 				_Link.push_back ("");
@@ -1656,7 +1274,7 @@ namespace NLGUI
 			{
 				_BlockLevelElement.push_back(true);
 				registerAnchorName(MY_HTML_DIV);
-				pushStyle();
+				_Style.pushStyle();
 
 				if (present[MY_HTML_DIV_NAME] && value[MY_HTML_DIV_NAME])
 					_DivName = value[MY_HTML_DIV_NAME];
@@ -1670,7 +1288,7 @@ namespace NLGUI
 					style = value[MY_HTML_DIV_STYLE];
 
 				if (!style.empty())
-					getStyleParams(style, _Style, _StyleParams.back());
+					_Style.applyStyle(style);
 
 				// use generic template system
 				if (_TrustedDomain && !instClass.empty() && instClass == "ryzom-ui-grouptemplate")
@@ -1746,19 +1364,19 @@ namespace NLGUI
 				break;
 			case HTML_FONT:
 			{
-				pushStyle();
+				_Style.pushStyle();
 				if (present[HTML_FONT_COLOR] && value[HTML_FONT_COLOR])
 				{
 					CRGBA color;
 					if (scanHTMLColor(value[HTML_FONT_COLOR], color))
-						_Style.TextColor = color;
+						_Style.Current.TextColor = color;
 				}
 
 				if (present[HTML_FONT_SIZE] && value[HTML_FONT_SIZE])
 				{
 					uint fontsize;
 					fromString(value[HTML_FONT_SIZE], fontsize);
-					_Style.FontSize = fontsize;
+					_Style.Current.FontSize = fontsize;
 				}
 			}
 				break;
@@ -1774,20 +1392,20 @@ namespace NLGUI
 				break;
 			case HTML_BODY:
 				{
-					pushStyle();
+					_Style.pushStyle();
 
 					string style;
 					if (present[HTML_BODY_STYLE] && value[HTML_BODY_STYLE])
 						style = value[HTML_BODY_STYLE];
 
 					if (!style.empty())
-						getStyleParams(style, _Style, _StyleParams.back());
+						_Style.applyStyle(style);
 
-					CRGBA bgColor = _Style.BackgroundColor;
+					CRGBA bgColor = _Style.Current.BackgroundColor;
 					if (present[HTML_BODY_BGCOLOR] && value[HTML_BODY_BGCOLOR])
 						scanHTMLColor(value[HTML_BODY_BGCOLOR], bgColor);
 
-					if (bgColor != _Style.BackgroundColor)
+					if (bgColor != _Style.Current.BackgroundColor)
 						setBackgroundColor(bgColor);
 
 					if (!style.empty())
@@ -1837,72 +1455,72 @@ namespace NLGUI
 				{
 					registerAnchorName(MY_HTML_H1);
 					newParagraph(PBeginSpace);
-					pushStyle();
-					_Style.FontSize = H1FontSize;
-					_Style.TextColor = H1Color;
-					_Style.GlobalColor = H1ColorGlobalColor;
+					_Style.pushStyle();
+					_Style.Current.FontSize = H1FontSize;
+					_Style.Current.TextColor = H1Color;
+					_Style.Current.GlobalColor = H1ColorGlobalColor;
 					if (present[MY_HTML_H1_STYLE] && value[MY_HTML_H1_STYLE])
-						getStyleParams(value[MY_HTML_H1_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[MY_HTML_H1_STYLE]);
 				}
 				break;
 			case HTML_H2:
 				{
 					registerAnchorName(MY_HTML_H2);
 					newParagraph(PBeginSpace);
-					pushStyle();
-					_Style.FontSize = H2FontSize;
-					_Style.TextColor = H2Color;
-					_Style.GlobalColor = H2ColorGlobalColor;
+					_Style.pushStyle();
+					_Style.Current.FontSize = H2FontSize;
+					_Style.Current.TextColor = H2Color;
+					_Style.Current.GlobalColor = H2ColorGlobalColor;
 					if (present[MY_HTML_H2_STYLE] && value[MY_HTML_H2_STYLE])
-						getStyleParams(value[MY_HTML_H2_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[MY_HTML_H2_STYLE]);
 				}
 				break;
 			case HTML_H3:
 				{
 					registerAnchorName(MY_HTML_H3);
 					newParagraph(PBeginSpace);
-					pushStyle();
-					_Style.FontSize = H3FontSize;
-					_Style.TextColor = H3Color;
-					_Style.GlobalColor = H3ColorGlobalColor;
+					_Style.pushStyle();
+					_Style.Current.FontSize = H3FontSize;
+					_Style.Current.TextColor = H3Color;
+					_Style.Current.GlobalColor = H3ColorGlobalColor;
 					if (present[MY_HTML_H3_STYLE] && value[MY_HTML_H3_STYLE])
-						getStyleParams(value[MY_HTML_H3_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[MY_HTML_H3_STYLE]);
 				}
 				break;
 			case HTML_H4:
 				{
 					registerAnchorName(MY_HTML_H4);
 					newParagraph(PBeginSpace);
-					pushStyle();
-					_Style.FontSize = H4FontSize;
-					_Style.TextColor = H4Color;
-					_Style.GlobalColor = H4ColorGlobalColor;
+					_Style.pushStyle();
+					_Style.Current.FontSize = H4FontSize;
+					_Style.Current.TextColor = H4Color;
+					_Style.Current.GlobalColor = H4ColorGlobalColor;
 					if (present[MY_HTML_H4_STYLE] && value[MY_HTML_H4_STYLE])
-						getStyleParams(value[MY_HTML_H4_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[MY_HTML_H4_STYLE]);
 				}
 				break;
 			case HTML_H5:
 				{
 					registerAnchorName(MY_HTML_H5);
 					newParagraph(PBeginSpace);
-					pushStyle();
-					_Style.FontSize = H5FontSize;
-					_Style.TextColor = H5Color;
-					_Style.GlobalColor = H5ColorGlobalColor;
+					_Style.pushStyle();
+					_Style.Current.FontSize = H5FontSize;
+					_Style.Current.TextColor = H5Color;
+					_Style.Current.GlobalColor = H5ColorGlobalColor;
 					if (present[MY_HTML_H5_STYLE] && value[MY_HTML_H5_STYLE])
-						getStyleParams(value[MY_HTML_H5_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[MY_HTML_H5_STYLE]);
 				}
 				break;
 			case HTML_H6:
 				{
 					registerAnchorName(MY_HTML_H6);
 					newParagraph(PBeginSpace);
-					pushStyle();
-					_Style.FontSize = H6FontSize;
-					_Style.TextColor = H6Color;
-					_Style.GlobalColor = H6ColorGlobalColor;
+					_Style.pushStyle();
+					_Style.Current.FontSize = H6FontSize;
+					_Style.Current.TextColor = H6Color;
+					_Style.Current.GlobalColor = H6ColorGlobalColor;
 					if (present[MY_HTML_H6_STYLE] && value[MY_HTML_H6_STYLE])
-						getStyleParams(value[MY_HTML_H6_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[MY_HTML_H6_STYLE]);
 				}
 				break;
 			case HTML_IMG:
@@ -1912,24 +1530,24 @@ namespace NLGUI
 					{
 						float tmpf;
 						std::string id;
-						CStyleParams style;
-						style.FontSize = _Style.FontSize;
+
+						_Style.pushStyle();
 
 						if (present[MY_HTML_IMG_ID] && value[MY_HTML_IMG_ID])
 							id = value[MY_HTML_IMG_ID];
 
 						if (present[MY_HTML_IMG_WIDTH] && value[MY_HTML_IMG_WIDTH])
-							getPercentage(style.Width, tmpf, value[MY_HTML_IMG_WIDTH]);
+							getPercentage(_Style.Current.Width, tmpf, value[MY_HTML_IMG_WIDTH]);
 						if (present[MY_HTML_IMG_HEIGHT] && value[MY_HTML_IMG_HEIGHT])
-							getPercentage(style.Height, tmpf, value[MY_HTML_IMG_HEIGHT]);
+							getPercentage(_Style.Current.Height, tmpf, value[MY_HTML_IMG_HEIGHT]);
 
 						// Get the global color name
 						if (present[MY_HTML_IMG_GLOBAL_COLOR])
-							style.GlobalColor = true;
+							_Style.Current.GlobalColor = true;
 
 						// width, height from inline css
 						if (present[MY_HTML_IMG_STYLE] && value[MY_HTML_IMG_STYLE])
-							getStyleParams(value[MY_HTML_IMG_STYLE], style, _Style);
+							_Style.applyStyle(value[MY_HTML_IMG_STYLE]);
 
 						// Tooltip
 						const char *tooltip = NULL;
@@ -1952,13 +1570,13 @@ namespace NLGUI
 						{
 							string params = "name=" + getId() + "|url=" + getLink ();
 							addButton(CCtrlButton::PushButton, id, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
-								overSrc, "browse", params.c_str(), tooltip, style);
+								overSrc, "browse", params.c_str(), tooltip, _Style.Current);
 						}
 						else
 						if (tooltip || !overSrc.empty())
 						{
 							addButton(CCtrlButton::PushButton, id, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
-								overSrc, "", "", tooltip, style);
+								overSrc, "", "", tooltip, _Style.Current);
 						}
 						else
 						{
@@ -1979,8 +1597,10 @@ namespace NLGUI
 									reloadImg = true;
 							}
 
-							addImage(id, value[MY_HTML_IMG_SRC], reloadImg, style);
+							addImage(id, value[MY_HTML_IMG_SRC], reloadImg, _Style.Current);
 						}
+
+						_Style.popStyle();
 					}
 				}
 				break;
@@ -2010,22 +1630,22 @@ namespace NLGUI
 					if (present[MY_HTML_INPUT_TYPE] && value[MY_HTML_INPUT_TYPE])
 					{
 						// by default not inherited, font family defaults to system font
-						pushStyle();
-						_Style.TextColor = TextColor;
-						_Style.FontSize = TextFontSize;
-						_Style.FontWeight = FONT_WEIGHT_NORMAL;
-						_Style.FontOblique = false;
-						_Style.TextShadow = STextShadow(true);
-						_Style.Width = -1;
-						_Style.Height = -1;
+						_Style.pushStyle();
+						_Style.Current.TextColor = TextColor;
+						_Style.Current.FontSize = TextFontSize;
+						_Style.Current.FontWeight = FONT_WEIGHT_NORMAL;
+						_Style.Current.FontOblique = false;
+						_Style.Current.TextShadow = CStyleParams::STextShadow(true);
+						_Style.Current.Width = -1;
+						_Style.Current.Height = -1;
 						// by default background texture is transparent,
 						// using alpha value to decide if to change it to 'blank.tga' for coloring
-						_Style.BackgroundColor.A = 0;
-						_Style.BackgroundColorOver.A = 0;
+						_Style.Current.BackgroundColor.A = 0;
+						_Style.Current.BackgroundColorOver.A = 0;
 
 						// Global color flag
 						if (present[MY_HTML_INPUT_GLOBAL_COLOR])
-							_Style.GlobalColor = true;
+							_Style.Current.GlobalColor = true;
 
 						// Tooltip
 						const char *tooltip = NULL;
@@ -2033,7 +1653,7 @@ namespace NLGUI
 							tooltip = value[MY_HTML_INPUT_ALT];
 
 						if (present[MY_HTML_INPUT_STYLE] && value[MY_HTML_INPUT_STYLE])
-							getStyleParams(value[MY_HTML_INPUT_STYLE], _Style, _StyleParams.back());
+							_Style.applyStyle(value[MY_HTML_INPUT_STYLE]);
 
 						string type = toLower(value[MY_HTML_INPUT_TYPE]);
 						if (type == "image")
@@ -2053,7 +1673,7 @@ namespace NLGUI
 
 							// Add the ctrl button
 							addButton (CCtrlButton::PushButton, name, normal, pushed.empty()?normal:pushed, over,
-								"html_submit_form", param.c_str(), tooltip, _Style);
+								"html_submit_form", param.c_str(), tooltip, _Style.Current);
 						}
 						if (type == "button" || type == "submit")
 						{
@@ -2108,7 +1728,7 @@ namespace NLGUI
 								if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
 								if (ctrlButton)
 								{
-									ctrlButton->setModulateGlobalColorAll (_Style.GlobalColor);
+									ctrlButton->setModulateGlobalColorAll (_Style.Current.GlobalColor);
 
 									// Translate the tooltip
 									if (tooltip)
@@ -2125,7 +1745,7 @@ namespace NLGUI
 
 									ctrlButton->setText(ucstring::makeFromUtf8(text));
 
-									setTextButtonStyle(ctrlButton, _Style);
+									setTextButtonStyle(ctrlButton, _Style.Current);
 								}
 								getParagraph()->addChild (buttonGroup);
 								paragraphChange ();
@@ -2193,7 +1813,7 @@ namespace NLGUI
 							checked = (present[MY_HTML_INPUT_CHECKED] && value[MY_HTML_INPUT_CHECKED]);
 
 							// Add the ctrl button
-							CCtrlButton *checkbox = addButton (btnType, name, normal, pushed, over, "", "", tooltip, _Style);
+							CCtrlButton *checkbox = addButton (btnType, name, normal, pushed, over, "", "", tooltip, _Style.Current);
 							if (checkbox)
 							{
 								if (btnType == CCtrlButton::RadioButton)
@@ -2251,14 +1871,16 @@ namespace NLGUI
 							}
 						}
 
-						popStyle();
+						_Style.popStyle();
 					}
 				}
 				break;
 			case HTML_SELECT:
 				if (!(_Forms.empty()))
 				{
-					CStyleParams style;
+					_Style.pushStyle();
+					_Style.Current.Width = -1;
+					_Style.Current.Height = -1;
 
 					// A select box
 					string name;
@@ -2272,7 +1894,7 @@ namespace NLGUI
 					if (present[HTML_SELECT_MULTIPLE] && value[HTML_SELECT_MULTIPLE])
 						multiple = true;
 					if (present[HTML_SELECT_STYLE] && value[HTML_SELECT_STYLE])
-						getStyleParams(value[HTML_SELECT_STYLE], style, _Style);
+						_Style.applyStyle(value[HTML_SELECT_STYLE]);
 
 					CGroupHTML::CForm::CEntry entry;
 					entry.Name = name;
@@ -2286,14 +1908,14 @@ namespace NLGUI
 							if (size < 1)
 								size = 4;
 
-							if (style.Width > -1)
-								sb->setMinW(style.Width);
+							if (_Style.Current.Width > -1)
+								sb->setMinW(_Style.Current.Width);
 
-							if (style.Height > -1)
-								sb->setMinH(style.Height);
+							if (_Style.Current.Height > -1)
+								sb->setMinH(_Style.Current.Height);
 
 							sb->setMaxVisibleLine(size);
-							sb->setFontSize(style.FontSize);
+							sb->setFontSize(_Style.Current.FontSize);
 						}
 
 						entry.SelectBox = sb;
@@ -2308,10 +1930,12 @@ namespace NLGUI
 							// create view text
 							cb->updateCoords();
 							if (cb->getViewText())
-								setTextStyle(cb->getViewText(), style);
+								setTextStyle(cb->getViewText(), _Style.Current);
 						}
 					}
 					_Forms.back().Entries.push_back (entry);
+
+					_Style.popStyle();
 				}
 			break;
 			case HTML_OPTION:
@@ -2354,9 +1978,9 @@ namespace NLGUI
 					if (present[HTML_LI_VALUE] && value[HTML_LI_VALUE])
 						fromString(value[HTML_LI_VALUE], _UL.back().Value);
 
-					pushStyle();
+					_Style.pushStyle();
 					if (present[HTML_LI_STYLE] && value[HTML_LI_STYLE])
-						getStyleParams(value[HTML_LI_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[HTML_LI_STYLE]);
 
 					ucstring str;
 					str.fromUtf8(_UL.back().getListMarkerText());
@@ -2377,18 +2001,18 @@ namespace NLGUI
 			case HTML_P:
 				{
 					newParagraph(PBeginSpace);
-					pushStyle();
+					_Style.pushStyle();
 					if (present[MY_HTML_P_STYLE] && value[MY_HTML_P_STYLE])
-						getStyleParams(value[MY_HTML_P_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[MY_HTML_P_STYLE]);
 				}
 				break;
 			case HTML_PRE:
 				{
-					pushStyle();
-					_Style.FontFamily = "monospace";
+					_Style.pushStyle();
+					_Style.Current.FontFamily = "monospace";
 
 					if (present[HTML_PRE_STYLE] && value[HTML_PRE_STYLE])
-						getStyleParams(value[HTML_PRE_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[HTML_PRE_STYLE]);
 
 
 					_PRE.push_back(true);
@@ -2396,7 +2020,7 @@ namespace NLGUI
 				break;
 			case HTML_TABLE:
 				{
-					pushStyle();
+					_Style.pushStyle();
 					registerAnchorName(MY_HTML_TABLE);
 
 					// Get cells parameters
@@ -2416,7 +2040,7 @@ namespace NLGUI
 					if (present[MY_HTML_TABLE_CELLPADDING] && value[MY_HTML_TABLE_CELLPADDING])
 						fromString(value[MY_HTML_TABLE_CELLPADDING], table->CellPadding);
 					if (present[MY_HTML_TABLE_STYLE] && value[MY_HTML_TABLE_STYLE])
-						getStyleParams(value[MY_HTML_TABLE_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[MY_HTML_TABLE_STYLE]);
 
 					table->setMarginLeft(getIndent());
 					addHtmlGroup (table, 0);
@@ -2436,17 +2060,17 @@ namespace NLGUI
 					// Get cells parameters
 					getCellsParameters (MY_HTML_TD, true);
 
-					pushStyle();
+					_Style.pushStyle();
 					if (element_number == HTML_TH)
 					{
-						_Style.FontWeight = FONT_WEIGHT_BOLD;
+						_Style.Current.FontWeight = FONT_WEIGHT_BOLD;
 						// center if not specified otherwise. TD/TH present/value arrays have same indices
 						if (!(present[MY_HTML_TD_ALIGN] && value[MY_HTML_TD_ALIGN]))
 							_CellParams.back().Align = CGroupCell::Center;
 					}
 
 					if (present[MY_HTML_TD_STYLE] && value[MY_HTML_TD_STYLE])
-						getStyleParams(value[MY_HTML_TD_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[MY_HTML_TD_STYLE]);
 
 					CGroupTable *table = getTable();
 					if (table)
@@ -2527,21 +2151,21 @@ namespace NLGUI
 				}
 				break;
 			case HTML_TEXTAREA:
-				pushStyle();
+				_Style.pushStyle();
 				_PRE.push_back(true);
 
 				// not inherited by default, font family defaults to system font
-				_Style.TextColor = TextColor;
-				_Style.FontWeight = FONT_WEIGHT_NORMAL;
-				_Style.FontOblique = false;
-				_Style.FontSize = TextFontSize;
-				_Style.TextShadow = STextShadow(true);
-				_Style.Width = -1;
-				_Style.Height = -1;
-				_Style.BackgroundColor.A = 0;
+				_Style.Current.TextColor = TextColor;
+				_Style.Current.FontWeight = FONT_WEIGHT_NORMAL;
+				_Style.Current.FontOblique = false;
+				_Style.Current.FontSize = TextFontSize;
+				_Style.Current.TextShadow = CStyleParams::STextShadow(true);
+				_Style.Current.Width = -1;
+				_Style.Current.Height = -1;
+				_Style.Current.BackgroundColor.A = 0;
 
 				if (present[MY_HTML_TEXTAREA_STYLE] && value[MY_HTML_TEXTAREA_STYLE])
-					getStyleParams(value[MY_HTML_TEXTAREA_STYLE], _Style, _StyleParams.back());
+					_Style.applyStyle(value[MY_HTML_TEXTAREA_STYLE]);
 
 				// Got one form ?
 				if (!(_Forms.empty()))
@@ -2595,9 +2219,9 @@ namespace NLGUI
 					if (!_TR.empty())
 						_TR.back() = true;
 
-					pushStyle();
+					_Style.pushStyle();
 					if (present[MY_HTML_TR_STYLE] && value[MY_HTML_TR_STYLE])
-						getStyleParams(value[MY_HTML_TR_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[MY_HTML_TR_STYLE]);
 				}
 				break;
 			case HTML_UL:
@@ -2612,9 +2236,9 @@ namespace NLGUI
 				_Indent.push_back(getIndent() + ULIndent);
 				endParagraph();
 
-				pushStyle();
+				_Style.pushStyle();
 				if (present[HTML_UL_STYLE] && value[HTML_UL_STYLE])
-					getStyleParams(value[HTML_UL_STYLE], _Style, _StyleParams.back());
+					_Style.applyStyle(value[HTML_UL_STYLE]);
 				break;
 			case HTML_OBJECT:
 				_ObjectType.clear();
@@ -2634,40 +2258,40 @@ namespace NLGUI
 				break;
 			case HTML_SPAN:
 				{
-					pushStyle();
+					_Style.pushStyle();
 
 					if (present[MY_HTML_SPAN_STYLE] && value[MY_HTML_SPAN_STYLE])
-						getStyleParams(value[MY_HTML_SPAN_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[MY_HTML_SPAN_STYLE]);
 				}
 				break;
 			case HTML_DEL:
 				{
-					pushStyle();
-					_Style.StrikeThrough = true;
+					_Style.pushStyle();
+					_Style.Current.StrikeThrough = true;
 				}
 				break;
 			case HTML_U:
 				{
-					pushStyle();
-					_Style.Underlined = true;
+					_Style.pushStyle();
+					_Style.Current.Underlined = true;
 				}
 				break;
 			case HTML_EM:
 				{
-					pushStyle();
-					_Style.FontOblique = true;
+					_Style.pushStyle();
+					_Style.Current.FontOblique = true;
 				}
 				break;
 			case HTML_STRONG:
 				{
-					pushStyle();
-					_Style.FontWeight = FONT_WEIGHT_BOLD;
+					_Style.pushStyle();
+					_Style.Current.FontWeight = FONT_WEIGHT_BOLD;
 				}
 				break;
 			case HTML_SMALL:
 				{
-					pushStyle();
-					_Style.FontSize = getFontSizeSmaller();
+					_Style.pushStyle();
+					_Style.Current.FontSize = _Style.getFontSizeSmaller();
 				}
 				break;
 			case HTML_STYLE:
@@ -2679,9 +2303,9 @@ namespace NLGUI
 					_DL.push_back(HTMLDListElement());
 					_LI = _DL.size() > 1 || !_UL.empty();
 					endParagraph();
-					pushStyle();
+					_Style.pushStyle();
 					if (present[HTML_GEN_STYLE] && value[HTML_GEN_STYLE])
-						getStyleParams(value[HTML_GEN_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[HTML_GEN_STYLE]);
 				}
 				break;
 			case HTML_DT:
@@ -2692,19 +2316,19 @@ namespace NLGUI
 					{
 						_DL.back().DD = false;
 						popIfNotEmpty(_Indent);
-						popStyle();
+						_Style.popStyle();
 					}
 
 					// close if still open
 					if (_DL.back().DT)
-						popStyle();
+						_Style.popStyle();
 
 					_DL.back().DT = true;
 
-					pushStyle();
-					_Style.FontWeight = FONT_WEIGHT_BOLD;
+					_Style.pushStyle();
+					_Style.Current.FontWeight = FONT_WEIGHT_BOLD;
 					if (present[HTML_GEN_STYLE] && value[HTML_GEN_STYLE])
-						getStyleParams(value[HTML_GEN_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[HTML_GEN_STYLE]);
 
 					if (!_LI)
 					{
@@ -2724,22 +2348,22 @@ namespace NLGUI
 					if (_DL.back().DT)
 					{
 						_DL.back().DT = false;
-						popStyle();
+						_Style.popStyle();
 					}
 
 					if (_DL.back().DD)
 					{
 						_DL.back().DD = false;
-						popStyle();
+						_Style.popStyle();
 						popIfNotEmpty(_Indent);
 					}
 
 					_DL.back().DD = true;
 					_Indent.push_back(getIndent() + ULIndent);
 
-					pushStyle();
+					_Style.pushStyle();
 					if (present[HTML_GEN_STYLE] && value[HTML_GEN_STYLE])
-						getStyleParams(value[HTML_GEN_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[HTML_GEN_STYLE]);
 
 					if (!_LI)
 					{
@@ -2754,7 +2378,7 @@ namespace NLGUI
 				break;
 			case HTML_OL:
 				{
-					pushStyle();
+					_Style.pushStyle();
 					sint32 start = 1;
 					std::string type("1");
 
@@ -2763,7 +2387,7 @@ namespace NLGUI
 					if (present[HTML_OL_TYPE] && value[HTML_OL_TYPE])
 						type = value[HTML_OL_TYPE];
 					if (present[HTML_OL_STYLE] && value[HTML_OL_STYLE])
-						getStyleParams(value[HTML_OL_STYLE], _Style, _StyleParams.back());
+						_Style.applyStyle(value[HTML_OL_STYLE]);
 
 					_UL.push_back(HTMLOListElement(start, type));
 					// if LI is already present
@@ -2779,34 +2403,35 @@ namespace NLGUI
 					CInterfaceGroup *sep = CWidgetManager::getInstance()->getParser()->createGroupInstance("html_hr", "", NULL, 0);
 					if (sep)
 					{
-						CStyleParams style;
-						style.FontSize = _Style.FontSize;
-						style.TextColor = CRGBA(120, 120, 120, 255);
-						style.Height = 0;
-						style.Width = 0;
+						_Style.pushStyle();
+						_Style.Current.TextColor = CRGBA(120, 120, 120, 255);
+						_Style.Current.Height = -1;
+						_Style.Current.Width = -1;
 
 						if (present[HTML_HR_STYLE] && value[HTML_HR_STYLE])
-							getStyleParams(value[HTML_HR_STYLE], style, _Style);
+							_Style.applyStyle(value[HTML_HR_STYLE]);
 
 						CViewBitmap *bitmap = dynamic_cast<CViewBitmap*>(sep->getView("hr"));
 						if (bitmap)
 						{
-							bitmap->setColor(style.TextColor);
-							if (style.Width > 0)
+							bitmap->setColor(_Style.Current.TextColor);
+							if (_Style.Current.Width > 0)
 							{
-								clamp(style.Width, 1, 32000);
-								bitmap->setW(style.Width);
+								clamp(_Style.Current.Width, 1, 32000);
+								bitmap->setW(_Style.Current.Width);
 								bitmap->setSizeRef(CInterfaceElement::none);
 							}
-							if (style.Height > 0)
+							if (_Style.Current.Height > 0)
 							{
-								clamp(style.Height, 1, 1000);
-								bitmap->setH(style.Height);
+								clamp(_Style.Current.Height, 1, 1000);
+								bitmap->setH(_Style.Current.Height);
 							}
 						}
 
 						getParagraph()->addChild(sep);
 						endParagraph();
+
+						_Style.popStyle();
 					}
 				}
 				break;
@@ -2827,13 +2452,13 @@ namespace NLGUI
 				_ReadingHeadTag = false;
 				break;
 			case HTML_BODY:
-				popStyle();
+				_Style.popStyle();
 				break;
 			case HTML_FONT:
-				popStyle();
+				_Style.popStyle();
 			break;
 			case HTML_A:
-				popStyle();
+				_Style.popStyle();
 				popIfNotEmpty (_A);
 				popIfNotEmpty (_Link);
 				popIfNotEmpty (_LinkTitle);
@@ -2845,19 +2470,19 @@ namespace NLGUI
 			case HTML_H4:
 			case HTML_H5:
 			case HTML_H6:
-				popStyle();
+				_Style.popStyle();
 				endParagraph();
 				break;
 			case HTML_P:
-				popStyle();
+				_Style.popStyle();
 				endParagraph();
 				break;
 			case HTML_PRE:
-				popStyle();
+				_Style.popStyle();
 				popIfNotEmpty (_PRE);
 				break;
 			case HTML_DIV:
-				popStyle();
+				_Style.popStyle();
 				if (isBlockLevelElement())
 				{
 					endParagraph();
@@ -2868,7 +2493,7 @@ namespace NLGUI
 				break;
 
 			case HTML_TABLE:
-				popStyle();
+				_Style.popStyle();
 				popIfNotEmpty (_CellParams);
 				popIfNotEmpty (_TR);
 				popIfNotEmpty (_Cells);
@@ -2880,13 +2505,13 @@ namespace NLGUI
 			case HTML_TH:
 				// no break;
 			case HTML_TD:
-				popStyle();
+				_Style.popStyle();
 				popIfNotEmpty (_CellParams);
 				if (!_Cells.empty())
 					_Cells.back() = NULL;
 				break;
 			case HTML_TR:
-				popStyle();
+				_Style.popStyle();
 				popIfNotEmpty (_CellParams);
 				break;
 			case HTML_TEXTAREA:
@@ -2905,7 +2530,7 @@ namespace NLGUI
 						}
 					}
 
-					popStyle();
+					_Style.popStyle();
 					popIfNotEmpty (_PRE);
 				}
 				break;
@@ -3013,14 +2638,14 @@ namespace NLGUI
 				if (!_UL.empty())
 				{
 					endParagraph();
-					popStyle();
+					_Style.popStyle();
 					popIfNotEmpty(_UL);
 					popIfNotEmpty(_Indent);
 				}
 				break;
 			case HTML_LI:
 				{
-					popStyle();
+					_Style.popStyle();
 				}
 				break;
 			case HTML_DL:
@@ -3031,25 +2656,25 @@ namespace NLGUI
 					// unclosed DT
 					if (_DL.back().DT)
 					{
-						popStyle();
+						_Style.popStyle();
 					}
 
 					// unclosed DD
 					if (_DL.back().DD)
 					{
 						popIfNotEmpty(_Indent);
-						popStyle();
+						_Style.popStyle();
 					}
 
 					popIfNotEmpty (_DL);
-					popStyle();
+					_Style.popStyle();
 				}
 				break;
 			case HTML_DT:
 				if (!_DL.empty())
 				{
 					if (_DL.back().DT)
-						popStyle();
+						_Style.popStyle();
 					_DL.back().DT = false;
 				}
 				break;
@@ -3061,27 +2686,27 @@ namespace NLGUI
 					{
 						_DL.back().DD = false;
 						popIfNotEmpty(_Indent);
-						popStyle();
+						_Style.popStyle();
 					}
 				}
 				break;
 			case HTML_SPAN:
-				popStyle();
+				_Style.popStyle();
 				break;
 			case HTML_DEL:
-				popStyle();
+				_Style.popStyle();
 				break;
 			case HTML_U:
-				popStyle();
+				_Style.popStyle();
 				break;
 			case HTML_EM:
-				popStyle();
+				_Style.popStyle();
 				break;
 			case HTML_STRONG:
-				popStyle();
+				_Style.popStyle();
 				break;
 			case HTML_SMALL:
-				popStyle();
+				_Style.popStyle();
 				break;
 			case HTML_STYLE:
 			case HTML_SCRIPT:
@@ -4508,34 +4133,36 @@ namespace NLGUI
 				paragraphChange ();
 			}
 
+			CStyleParams &style = _Style.Current;
+
 			// Text added ?
 			bool added = false;
-			bool embolden = _Style.FontWeight >= FONT_WEIGHT_BOLD;
+			bool embolden = style.FontWeight >= FONT_WEIGHT_BOLD;
 
 			// Number of child in this paragraph
 			if (_CurrentViewLink)
 			{
 				bool skipLine = !_CurrentViewLink->getText().empty() && *(_CurrentViewLink->getText().rbegin()) == (ucchar) '\n';
-				bool sameShadow = _Style.TextShadow.Enabled && _CurrentViewLink->getShadow();
-				if (sameShadow && _Style.TextShadow.Enabled)
+				bool sameShadow = style.TextShadow.Enabled && _CurrentViewLink->getShadow();
+				if (sameShadow && style.TextShadow.Enabled)
 				{
 					sint sx, sy;
 					_CurrentViewLink->getShadowOffset(sx, sy);
-					sameShadow = (_Style.TextShadow.Color == _CurrentViewLink->getShadowColor());
-					sameShadow = sameShadow && (_Style.TextShadow.Outline == _CurrentViewLink->getShadowOutline());
-					sameShadow = sameShadow && (_Style.TextShadow.X == sx) && (_Style.TextShadow.Y == sy);
+					sameShadow = (style.TextShadow.Color == _CurrentViewLink->getShadowColor());
+					sameShadow = sameShadow && (style.TextShadow.Outline == _CurrentViewLink->getShadowOutline());
+					sameShadow = sameShadow && (style.TextShadow.X == sx) && (style.TextShadow.Y == sy);
 				}
 				// Compatible with current parameters ?
 				if (!skipLine && sameShadow &&
-					(_Style.TextColor == _CurrentViewLink->getColor()) &&
-					(_Style.FontFamily == _CurrentViewLink->getFontName()) &&
-					(_Style.FontSize == (uint)_CurrentViewLink->getFontSize()) &&
-					(_Style.Underlined == _CurrentViewLink->getUnderlined()) &&
-					(_Style.StrikeThrough == _CurrentViewLink->getStrikeThrough()) &&
+					(style.TextColor == _CurrentViewLink->getColor()) &&
+					(style.FontFamily == _CurrentViewLink->getFontName()) &&
+					(style.FontSize == (uint)_CurrentViewLink->getFontSize()) &&
+					(style.Underlined == _CurrentViewLink->getUnderlined()) &&
+					(style.StrikeThrough == _CurrentViewLink->getStrikeThrough()) &&
 					(embolden == _CurrentViewLink->getEmbolden()) &&
-					(_Style.FontOblique == _CurrentViewLink->getOblique()) &&
+					(style.FontOblique == _CurrentViewLink->getOblique()) &&
 					(getLink() == _CurrentViewLink->Link) &&
-					(_Style.GlobalColor == _CurrentViewLink->getModulateGlobalColor()))
+					(style.GlobalColor == _CurrentViewLink->getModulateGlobalColor()))
 				{
 					// Concat the text
 					_CurrentViewLink->setText(_CurrentViewLink->getText()+tmpStr);
@@ -4574,7 +4201,7 @@ namespace NLGUI
 							ctrlButton->setDefaultContextHelp(ucstring::makeFromUtf8(getLinkTitle()));
 							ctrlButton->setText(tmpStr);
 
-							setTextButtonStyle(ctrlButton, _Style);
+							setTextButtonStyle(ctrlButton, style);
 						}
 						getParagraph()->addChild (buttonGroup);
 						paragraphChange ();
@@ -4597,10 +4224,10 @@ namespace NLGUI
 						}
 					}
 					newLink->setText(tmpStr);
-					newLink->setMultiLineSpace((uint)((float)(_Style.FontSize)*LineSpaceFontFactor));
+					newLink->setMultiLineSpace((uint)((float)(style.FontSize)*LineSpaceFontFactor));
 					newLink->setMultiLine(true);
-					newLink->setModulateGlobalColor(_Style.GlobalColor);
-					setTextStyle(newLink, _Style);
+					newLink->setModulateGlobalColor(style.GlobalColor);
+					setTextStyle(newLink, style);
 					// newLink->setLineAtBottom (true);
 
 					registerAnchor(newLink);
@@ -4705,22 +4332,23 @@ namespace NLGUI
 		// No more text in this text view
 		_CurrentViewLink = NULL;
 
+		CStyleParams &style = _Style.Current;
 		{
 			// override cols/rows values from style
-			if (_Style.Width > 0) cols = _Style.Width / _Style.FontSize;
-			if (_Style.Height > 0) rows = _Style.Height / _Style.FontSize;
+			if (style.Width > 0) cols = style.Width / style.FontSize;
+			if (style.Height > 0) rows = style.Height / style.FontSize;
 
 			// Not added ?
 			std::vector<std::pair<std::string,std::string> > templateParams;
-			templateParams.push_back (std::pair<std::string,std::string> ("w", toString (cols*_Style.FontSize)));
+			templateParams.push_back (std::pair<std::string,std::string> ("w", toString (cols*style.FontSize)));
 			templateParams.push_back (std::pair<std::string,std::string> ("id", name));
 			templateParams.push_back (std::pair<std::string,std::string> ("prompt", ""));
 			templateParams.push_back (std::pair<std::string,std::string> ("multiline", multiLine?"true":"false"));
-			templateParams.push_back (std::pair<std::string,std::string> ("fontsize", toString (_Style.FontSize)));
-			templateParams.push_back (std::pair<std::string,std::string> ("color", _Style.TextColor.toString()));
-			if (_Style.FontWeight >= FONT_WEIGHT_BOLD)
+			templateParams.push_back (std::pair<std::string,std::string> ("fontsize", toString (style.FontSize)));
+			templateParams.push_back (std::pair<std::string,std::string> ("color", style.TextColor.toString()));
+			if (style.FontWeight >= FONT_WEIGHT_BOLD)
 				templateParams.push_back (std::pair<std::string,std::string> ("fontweight", "bold"));
-			if (_Style.FontOblique)
+			if (style.FontOblique)
 				templateParams.push_back (std::pair<std::string,std::string> ("fontstyle", "oblique"));
 			if (multiLine)
 				templateParams.push_back (std::pair<std::string,std::string> ("multi_min_line", toString(rows)));
@@ -4729,13 +4357,13 @@ namespace NLGUI
 			templateParams.push_back (std::pair<std::string,std::string> ("enter_recover_focus", "false"));
 			if (maxlength > 0)
 				templateParams.push_back (std::pair<std::string,std::string> ("max_num_chars", toString(maxlength)));
-			templateParams.push_back (std::pair<std::string,std::string> ("shadow", toString(_Style.TextShadow.Enabled)));
-			if (_Style.TextShadow.Enabled)
+			templateParams.push_back (std::pair<std::string,std::string> ("shadow", toString(style.TextShadow.Enabled)));
+			if (style.TextShadow.Enabled)
 			{
-				templateParams.push_back (std::pair<std::string,std::string> ("shadow_x", toString(_Style.TextShadow.X)));
-				templateParams.push_back (std::pair<std::string,std::string> ("shadow_y", toString(_Style.TextShadow.Y)));
-				templateParams.push_back (std::pair<std::string,std::string> ("shadow_color", _Style.TextShadow.Color.toString()));
-				templateParams.push_back (std::pair<std::string,std::string> ("shadow_outline", toString(_Style.TextShadow.Outline)));
+				templateParams.push_back (std::pair<std::string,std::string> ("shadow_x", toString(style.TextShadow.X)));
+				templateParams.push_back (std::pair<std::string,std::string> ("shadow_y", toString(style.TextShadow.Y)));
+				templateParams.push_back (std::pair<std::string,std::string> ("shadow_color", style.TextShadow.Color.toString()));
+				templateParams.push_back (std::pair<std::string,std::string> ("shadow_outline", toString(style.TextShadow.Outline)));
 			}
 
 			CInterfaceGroup *textArea = CWidgetManager::getInstance()->getParser()->createGroupInstance (templateName.c_str(),
@@ -4749,13 +4377,13 @@ namespace NLGUI
 				if (eb)
 				{
 					eb->setInputString(decodeHTMLEntities(content));
-					if (_Style.BackgroundColor.A > 0)
+					if (style.BackgroundColor.A > 0)
 					{
 						CViewBitmap *bg = dynamic_cast<CViewBitmap*>(eb->getView("bg"));
 						if (bg)
 						{
 							bg->setTexture("blank.tga");
-							bg->setColor(_Style.BackgroundColor);
+							bg->setColor(style.BackgroundColor);
 						}
 					}
 				}
@@ -6411,423 +6039,11 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::resetCssStyle()
 	{
-		_StyleDefault = CStyleParams();
-		_StyleDefault.TextColor = TextColor;
-		_StyleDefault.FontSize = TextFontSize;
-		_StyleDefault.BackgroundColor = BgColor;
-
-		_Style = _StyleDefault;
-		_StyleParams.clear();
-	}
-
-	// ***************************************************************************
-	// CGroupHTML::CStyleParams style;
-	// style.FontSize;    // font-size: 10px;
-	// style.TextColor;   // color: #ABCDEF;
-	// style.Underlined;  // text-decoration: underline;     text-decoration-line: underline;
-	// style.StrikeThrough; // text-decoration: line-through;  text-decoration-line: line-through;
-	void CGroupHTML::getStyleParams(const std::string &styleString, CStyleParams &style, const CStyleParams &current)
-	{
-		float tmpf;
-		TStyle styles = parseStyle(styleString);
-		TStyle::iterator it;
-
-		// first pass: get font-size for 'em' sizes
-		for (it=styles.begin(); it != styles.end(); ++it)
-		{
-			if (it->first == "font")
-			{
-				if (it->second == "inherit")
-				{
-					style.FontSize = current.FontSize;
-					style.FontFamily = current.FontFamily;
-					style.FontWeight = current.FontWeight;
-					style.FontOblique = current.FontOblique;
-				}
-			}
-			else
-			if (it->first == "font-size")
-			{
-				if (it->second == "inherit")
-				{
-					style.FontSize = current.FontSize;
-				}
-				else
-				{
-					std::string unit;
-					if (getCssLength(tmpf, unit, it->second.c_str()))
-					{
-						if (unit == "rem")
-							style.FontSize = _StyleDefault.FontSize * tmpf;
-						else if (unit == "em")
-							style.FontSize = current.FontSize * tmpf;
-						else if (unit == "pt")
-							style.FontSize = tmpf / 0.75f;
-						else if (unit == "%")
-							style.FontSize = current.FontSize * tmpf / 100.f;
-						else
-							style.FontSize = tmpf;
-					}
-				}
-			}
-		}
-
-		// second pass: rest of style
-		for (it=styles.begin(); it != styles.end(); ++it)
-		{
-			if (it->first == "border")
-			{
-				sint32 b;
-				if (it->second == "none")
-					style.BorderWidth = 0;
-				else
-				if (fromString(it->second, b))
-					style.BorderWidth = b;
-			}
-			else
-			if (it->first == "font-style")
-			{
-				if (it->second == "inherit")
-					style.FontOblique = current.FontOblique;
-				else
-				if (it->second == "italic" || it->second == "oblique")
-					style.FontOblique = true;
-			}
-			else
-			if (it->first == "font-family")
-			{
-				if (it->second == "inherit")
-					style.FontFamily = current.FontFamily;
-				else
-					style.FontFamily = it->second;
-			}
-			else
-			if (it->first == "font-weight")
-			{
-				// https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight
-				uint weight = 400;
-				if (it->second == "inherit")
-					weight = current.FontWeight;
-				else
-				if (it->second == "normal")
-					weight = 400;
-				else
-				if (it->second == "bold")
-					weight = 700;
-				else
-				if (it->second == "lighter")
-				{
-					const uint lighter[] = {100, 100, 100, 100, 100, 400, 400, 700, 700};
-					uint index = current.FontWeight / 100 - 1;
-					clamp(index, 1u, 9u);
-					weight = lighter[index-1];
-				}
-				else
-				if (it->second == "bolder")
-				{
-					const uint bolder[] =  {400, 400, 400, 700, 700, 900, 900, 900, 900};
-					uint index = current.FontWeight / 100 + 1;
-					clamp(index, 1u, 9u);
-					weight = bolder[index-1];
-				}
-				else
-				if (fromString(it->second, weight))
-				{
-					weight = (weight / 100);
-					clamp(weight, 1u, 9u);
-					weight *= 100;
-				}
-				style.FontWeight = weight;
-			}
-			else
-			if (it->first == "color")
-				if (it->second == "inherit")
-					style.TextColor = current.TextColor;
-				else
-					scanHTMLColor(it->second.c_str(), style.TextColor);
-			else
-			if (it->first == "text-decoration" || it->first == "text-decoration-line")
-			{
-				std::string prop(toLower(it->second));
-				style.Underlined = (prop.find("underline") != std::string::npos);
-				style.StrikeThrough = (prop.find("line-through") != std::string::npos);
-			}
-			else
-			if (it->first == "text-stroke" || it->first == "-webkit-text-stroke")
-			{
-				// text-stroke: length || color
-				bool success = false;
-				uint px = 0;
-				CRGBA color;
-				std::vector<std::string> parts;
-				NLMISC::splitString(it->second, " ", parts);
-				if (parts.size() == 1)
-				{
-					success = scanCssLength(parts[0], px);
-					if (!success)
-						success = scanHTMLColor(parts[0].c_str(), color);
-				}
-				else if (parts.size() == 2)
-				{
-					success = scanCssLength(parts[0], px);
-					if (success)
-						success = scanHTMLColor(parts[1].c_str(), color);
-					else
-					{
-						success = scanHTMLColor(parts[0].c_str(), color);
-						success = success && scanCssLength(parts[1], px);
-					}
-				}
-
-				// do not disable shadow if one is already set
-				if (success)
-				{
-					style.TextShadow.Enabled = (px > 0);
-					style.TextShadow.Color = color;
-					style.TextShadow.X = px;
-					style.TextShadow.Y = px;
-					style.TextShadow.Outline = true;
-				}
-			}
-			else
-			if (it->first == "text-shadow")
-			{
-				if (it->second == "none")
-					style.TextShadow = STextShadow(false);
-				else
-				if (it->second == "inherit")
-					style.TextShadow = current.TextShadow;
-				else
-				{
-					// text-shadow: offset-x offset-y | blur | #color
-					// text-shadow: #color | offset-x offset-y
-					bool success = true;
-					std::string prop(it->second);
-					size_t pos;
-					pos = prop.find_first_of(",\n\r");
-					if (pos != std::string::npos)
-						prop = prop.substr(0, pos);
-
-					std::vector<std::string> parts;
-					NLMISC::splitString(prop, " ", parts);
-					switch(parts.size())
-					{
-						case 1:
-						{
-							success = scanHTMLColor(it->second.c_str(), style.TextShadow.Color);
-							break;
-						}
-						// no case 2:
-						case 3:
-						{
-							if (!fromString(parts[0], style.TextShadow.X))
-							{
-								success = scanHTMLColor(parts[0].c_str(), style.TextShadow.Color);
-								success = success && fromString(parts[1], style.TextShadow.X);
-								success = success && fromString(parts[2], style.TextShadow.Y);
-							}
-							else
-							{
-								success = fromString(parts[1], style.TextShadow.Y);
-								success = success && scanHTMLColor(parts[2].c_str(), style.TextShadow.Color);
-							}
-							break;
-						}
-						case 4:
-						{
-							if (!fromString(parts[0], style.TextShadow.X))
-							{
-								success = scanHTMLColor(parts[0].c_str(), style.TextShadow.Color);
-								success = success && fromString(parts[1], style.TextShadow.X);
-								success = success && fromString(parts[2], style.TextShadow.Y);
-								// ignore blur [3]
-							}
-							else
-							{
-								success = fromString(parts[0], style.TextShadow.X);
-								success = success && fromString(parts[1], style.TextShadow.Y);
-								// ignore blur [2]
-								success = success && scanHTMLColor(parts[3].c_str(), style.TextShadow.Color);
-							}
-							break;
-						}
-						default:
-						{
-							// unsupported rule
-							break;
-						}
-					}
-
-					style.TextShadow.Enabled = success;
-				}
-			}
-			else
-			if (it->first == "width")
-			{
-				std::string unit;
-				if (getCssLength(tmpf, unit, it->second.c_str()))
-				{
-					if (unit == "rem")
-						style.Width = tmpf * _StyleDefault.FontSize;
-					else if (unit == "em")
-						style.Width = tmpf * style.FontSize;
-					else if (unit == "pt")
-						style.FontSize = tmpf / 0.75f;
-					else
-						style.Width = tmpf;
-				}
-			}
-			else
-			if (it->first == "height")
-			{
-				std::string unit;
-				if (getCssLength(tmpf, unit, it->second.c_str()))
-				{
-					if (unit == "rem")
-						style.Height = tmpf * _StyleDefault.FontSize;
-					else if (unit == "em")
-						style.Height = tmpf * style.FontSize;
-					else if (unit == "pt")
-						style.FontSize = tmpf / 0.75f;
-					else
-						style.Height = tmpf;
-				}
-			}
-			else
-			if (it->first == "max-width")
-			{
-				std::string unit;
-				if (getCssLength(tmpf, unit, it->second.c_str()))
-				{
-					if (unit == "rem")
-						style.MaxWidth = tmpf * _StyleDefault.FontSize;
-					else if (unit == "em")
-						style.MaxWidth = tmpf * style.FontSize;
-					else if (unit == "pt")
-						style.FontSize = tmpf / 0.75f;
-					else
-						style.MaxWidth = tmpf;
-				}
-			}
-			else
-			if (it->first == "max-height")
-			{
-				std::string unit;
-				if (getCssLength(tmpf, unit, it->second.c_str()))
-				{
-					if (unit == "rem")
-						style.MaxHeight = tmpf * _StyleDefault.FontSize;
-					else if (unit == "em")
-						style.MaxHeight = tmpf * style.FontSize;
-					else if (unit == "pt")
-						style.FontSize = tmpf / 0.75f;
-					else
-						style.MaxHeight = tmpf;
-				}
-			}
-			else
-			if (it->first == "-ryzom-modulate-color")
-			{
-				bool b;
-				if (it->second == "inherit")
-					style.GlobalColor = current.GlobalColor;
-				else
-				if (fromString(it->second, b))
-					style.GlobalColor = b;
-			}
-			else
-			if (it->first == "background-color")
-			{
-				if (it->second == "inherit")
-					style.BackgroundColor = current.BackgroundColor;
-				else
-					scanHTMLColor(it->second.c_str(), style.BackgroundColor);
-			}
-			else
-			if (it->first == "-ryzom-background-color-over")
-			{
-				if (it->second == "inherit")
-					style.BackgroundColorOver = current.BackgroundColorOver;
-				else
-					scanHTMLColor(it->second.c_str(), style.BackgroundColorOver);
-			}
-		}
-
-		// if outer element has underline set, then inner element cannot remove it
-		if (current.Underlined)
-			style.Underlined = current.Underlined;
-
-		// if outer element has line-through set, then inner element cannot remove it
-		if (current.StrikeThrough)
-			style.StrikeThrough = current.StrikeThrough;
-	}
-
-	// ***************************************************************************
-	void CGroupHTML::applyCssMinMax(sint32 &width, sint32 &height, sint32 minw, sint32 minh, sint32 maxw, sint32 maxh)
-	{
-		if (maxw <= 0) maxw = width;
-		if (maxh <= 0) maxh = height;
-
-		maxw = std::max(minw, maxw);
-		maxh = std::max(minh, maxh);
-		
-		float ratio = (float) width / std::max(1, height);
-		if (width > maxw)
-		{
-			width = maxw;
-			height = std::max((sint32)(maxw /ratio), minh);
-		}
-		if (width < minw)
-		{
-			width = minw;
-			height = std::min((sint32)(minw / ratio), maxh);
-		}
-		if (height > maxh)
-		{
-			width = std::max((sint32)(maxh * ratio), minw);
-			height = maxh;
-		}
-		if (height < minh)
-		{
-			width = std::min((sint32)(minh * ratio), maxw);
-			height = minh;
-		}
-		if (width > maxw && height > maxh)
-		{
-			if (maxw/width <= maxh/height)
-			{
-				width = maxw;
-				height = std::max(minh, (sint32)(maxw / ratio));
-			}
-			else
-			{
-				width = std::max(minw, (sint32)(maxh * ratio));
-				height = maxh;
-			}
-		}
-		if (width < minw && height < minh)
-		{
-			if (minw / width <= minh / height)
-			{
-				width = std::min(maxw, (sint32)(minh * ratio));
-				height = minh;
-			}
-			else
-			{
-				width = minw;
-				height = std::min(maxh, (sint32)(minw / ratio));
-			}
-		}
-		if (width < minw && height > maxh)
-		{
-			width = minw;
-			height = maxh;
-		}
-		if (width > maxw && height < minh)
-		{
-			width = maxw;
-			height = minh;
-		}
+		_Style.reset();
+		_Style.Root.TextColor = TextColor;
+		_Style.Root.FontSize = TextFontSize;
+		_Style.Root.BackgroundColor = BgColor;
+		_Style.Current = _Style.Root;
 	}
 	
 	// ***************************************************************************

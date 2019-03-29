@@ -24,11 +24,10 @@
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/group_table.h"
 #include "nel/gui/libwww_types.h"
+#include "nel/gui/css_style.h"
 
 // forward declaration
 typedef void CURLM;
-
-typedef std::map<std::string, std::string>	TStyle;
 
 namespace NLGUI
 {
@@ -75,58 +74,6 @@ namespace NLGUI
 		};
 
 		static SWebOptions options;
-
-		// text-shadow
-		struct STextShadow
-		{
-		public:
-			STextShadow(bool enabled = false, bool outline = false, sint32 x=1, sint32 y=1, NLMISC::CRGBA color=NLMISC::CRGBA::Black)
-				: Enabled(enabled), Outline(outline), X(x), Y(y), Color(color)
-			{ }
-
-			bool Enabled;
-			bool Outline;
-			sint32 X;
-			sint32 Y;
-			NLMISC::CRGBA Color;
-		};
-
-		class CStyleParams
-		{
-		public:
-			CStyleParams () : FontFamily(""), TextColor(255,255,255,255), TextShadow()
-			{
-				FontSize=10;
-				FontWeight=400;
-				FontOblique=false;
-				Underlined=false;
-				StrikeThrough=false;
-				GlobalColor=false;
-				Width=-1;
-				Height=-1;
-				MaxWidth=-1;
-				MaxHeight=-1;
-				BorderWidth=1;
-				BackgroundColor=NLMISC::CRGBA::Black;
-				BackgroundColorOver=NLMISC::CRGBA::Black;
-			}
-			uint FontSize;
-			uint FontWeight;
-			bool FontOblique;
-			std::string FontFamily;
-			NLMISC::CRGBA TextColor;
-			STextShadow TextShadow;
-			bool GlobalColor;
-			bool Underlined;
-			bool StrikeThrough;
-			sint32 Width;
-			sint32 Height;
-			sint32 MaxWidth;
-			sint32 MaxHeight;
-			sint32 BorderWidth;
-			NLMISC::CRGBA BackgroundColor;
-			NLMISC::CRGBA BackgroundColorOver;
-		};
 
 		// ImageDownload system
 		enum TDataType {ImgType= 0, BnpType};
@@ -535,33 +482,8 @@ namespace NLGUI
 		// IL mode
 		bool _LI;
 
-		// Current active style
-		CStyleParams _Style;
-		// Default style
-		CStyleParams _StyleDefault;
-		// Nested style stack
-		std::vector<CStyleParams> _StyleParams;
-		inline void pushStyle()
-		{
-			_StyleParams.push_back(_Style);
-		}
-		inline void popStyle()
-		{
-			if (_StyleParams.empty())
-				_Style = _StyleDefault;
-			else
-			{
-				_Style = _StyleParams.back();
-				_StyleParams.pop_back();
-			}
-		}
-
-		inline uint getFontSizeSmaller() const
-		{
-			if (_Style.FontSize < 5)
-				return 3;
-			return _Style.FontSize-2;
-		}
+		// Keep track of current element style
+		CCssStyle _Style;
 
 		// Current link
 		std::vector<std::string>	_Link;
@@ -623,14 +545,6 @@ namespace NLGUI
 			if (_TR.empty())
 				return false;
 			return _TR.back();
-		}
-
-		std::vector<STextShadow> _TextShadow;
-		inline STextShadow getTextShadow() const
-		{
-			if (_TextShadow.empty())
-				return STextShadow();
-			return _TextShadow.back();
 		}
 
 		// Forms
@@ -793,10 +707,6 @@ namespace NLGUI
 		static uint32		_GroupHtmlUIDPool;
 		typedef std::map<uint32, NLMISC::CRefPtr<CGroupHTML> >	TGroupHtmlByUIDMap;
 		static TGroupHtmlByUIDMap _GroupHtmlByUID;
-
-		// read style attribute
-		void getStyleParams(const std::string &styleString, CStyleParams &style, const CStyleParams &current);
-		void applyCssMinMax(sint32 &width, sint32 &height, sint32 minw=0, sint32 minh=0, sint32 maxw=0, sint32 maxh=0);
 
 		// load and render local html file (from bnp for example)
 		void doBrowseLocalFile(const std::string &filename);
