@@ -131,7 +131,7 @@ namespace NLGUI
 		// ImageDownload system
 		enum TDataType {ImgType= 0, BnpType};
 		enum TImageType {NormalImage=0, OverImage};
-		
+
 		// Constructor
 		CGroupHTML(const TCtorParam &param);
 		~CGroupHTML();
@@ -177,7 +177,7 @@ namespace NLGUI
 
 		// End of the paragraph
 		void endParagraph();
-		
+
 		// add image download (used by view_bitmap.cpp to load web images)
 		void addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams(), const TImageType type = NormalImage);
 		std::string localImageName(const std::string &url);
@@ -264,6 +264,8 @@ namespace NLGUI
 
 		// Browser home
 		std::string		Home;
+		// Get Home URL
+		virtual std::string	home();
 
 		// Undo browse: Browse the precedent url browsed. no op if none
 		void browseUndo ();
@@ -280,6 +282,8 @@ namespace NLGUI
 
 		std::string getHTML() const { return _DocumentHtml; }
 		void		setHTML(const std::string &html);
+
+		void		setHome(const std::string &home);
 
 		int luaClearRefresh(CLuaState &ls);
 		int luaClearUndoRedo(CLuaState &ls);
@@ -313,6 +317,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("setBackground", luaSetBackground)
 			REFLECT_STRING("url", getURL, setURL)
 			REFLECT_STRING("html", getHTML, setHTML)
+			REFLECT_STRING("home", home, setHome)
 			REFLECT_FLOAT("timeout", getTimeout, setTimeout)
 		REFLECT_EXPORT_END
 
@@ -353,9 +358,6 @@ namespace NLGUI
 		// libxml2 html parser functions
 		void htmlElement(xmlNode *node, int element_number);
 		void htmlWalkDOM(xmlNode *a_node);
-
-		// Get Home URL
-		virtual std::string	home();
 
 		// Clear style stack and restore default style
 		void resetCssStyle();
@@ -425,7 +427,7 @@ namespace NLGUI
 		std::string		_DocumentUrl;
 		std::string		_DocumentDomain;
 		std::string		_DocumentHtml; // not updated only set by first render
-		
+
 		// Valid base href was found
 		bool            _IgnoreBaseUrlTag;
 		// Fragment from loading url
@@ -730,7 +732,7 @@ namespace NLGUI
 				return 0;
 			return _Indent.back();
 		}
-		
+
 
 
 		// Current node is a title
@@ -821,7 +823,7 @@ namespace NLGUI
 	private:
 		// decode all HTML entities
 		static ucstring decodeHTMLEntities(const ucstring &str);
-		
+
 		struct CDataImageDownload
 		{
 		public:

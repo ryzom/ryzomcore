@@ -306,10 +306,10 @@ namespace NLGUI
 		sint32 height = style.Height;
 		sint32 maxw = style.MaxWidth;
 		sint32 maxh = style.MaxHeight;
-		
+
 		sint32 imageWidth, imageHeight;
 		bool changed = true;
-		
+
 		// get image texture size
 		// if image is being downloaded, then correct size is set after thats done
 		CCtrlButton *btn = dynamic_cast<CCtrlButton*>(view);
@@ -334,14 +334,14 @@ namespace NLGUI
 				return;
 			}
 		}
-		
+
 		// if width/height is not requested, then use image size
 		// else recalculate missing value, keep image ratio
 		if (width == -1 && height == -1)
 		{
 			width = imageWidth;
 			height = imageHeight;
-			
+
 			changed = false;
 		}
 		else
@@ -352,7 +352,7 @@ namespace NLGUI
 			else
 				height = width / ratio;
 		}
-		
+
 		// apply max-width, max-height rules if asked
 		if (maxw > -1 || maxh > -1)
 		{
@@ -1680,7 +1680,7 @@ namespace NLGUI
 
 					typedef pair<string, string> TTmplParam;
 					vector<TTmplParam> tmplParams;
-					
+
 					string templateName;
 					if (!style.empty())
 					{
@@ -1796,7 +1796,7 @@ namespace NLGUI
 
 						it = styles.find("background-repeat");
 						bool repeat = (it != styles.end() && it->second == "1");
-						
+
 						// Webig only
 						it = styles.find("background-scale");
 						bool scale = (it != styles.end() && it->second == "1");
@@ -3331,12 +3331,12 @@ namespace NLGUI
 		}
 		else
 		if( name == "error_color_global_color" )
-		{			
+		{
 			return toString( ErrorColorGlobalColor );
 		}
 		else
 		if( name == "link_color_global_color" )
-		{			
+		{
 			return toString( LinkColorGlobalColor );
 		}
 		else
@@ -3346,67 +3346,67 @@ namespace NLGUI
 		}
 		else
 		if( name == "h1_color_global_color" )
-		{			
+		{
 			return toString( H1ColorGlobalColor );
 		}
 		else
 		if( name == "h2_color_global_color" )
-		{			
+		{
 			return toString( H2ColorGlobalColor );
 		}
 		else
 		if( name == "h3_color_global_color" )
-		{			
+		{
 			return toString( H3ColorGlobalColor );
 		}
 		else
 		if( name == "h4_color_global_color" )
-		{			
+		{
 			return toString( H4ColorGlobalColor );
 		}
 		else
 		if( name == "h5_color_global_color" )
-		{			
+		{
 			return toString( H5ColorGlobalColor );
 		}
 		else
 		if( name == "h6_color_global_color" )
-		{			
+		{
 			return toString( H6ColorGlobalColor );
 		}
 		else
 		if( name == "text_font_size" )
-		{			
+		{
 			return toString( TextFontSize );
 		}
 		else
 		if( name == "h1_font_size" )
-		{			
+		{
 			return toString( H1FontSize );
 		}
 		else
 		if( name == "h2_font_size" )
-		{			
+		{
 			return toString( H2FontSize );
 		}
 		else
 		if( name == "h3_font_size" )
-		{			
+		{
 			return toString( H3FontSize );
 		}
 		else
 		if( name == "h4_font_size" )
-		{			
+		{
 			return toString( H4FontSize );
 		}
 		else
 		if( name == "h5_font_size" )
-		{			
+		{
 			return toString( H5FontSize );
 		}
 		else
 		if( name == "h6_font_size" )
-		{			
+		{
 			return toString( H6FontSize );
 		}
 		else
@@ -3615,7 +3615,7 @@ namespace NLGUI
 		}
 		else
 		if( name == "error_color_global_color" )
-		{			
+		{
 			bool b;
 			if( fromString( value, b ) )
 				ErrorColorGlobalColor = b;
@@ -3623,7 +3623,7 @@ namespace NLGUI
 		}
 		else
 		if( name == "link_color_global_color" )
-		{			
+		{
 			bool b;
 			if( fromString( value, b ) )
 				LinkColorGlobalColor = b;
@@ -3639,7 +3639,7 @@ namespace NLGUI
 		}
 		else
 		if( name == "h1_color_global_color" )
-		{			
+		{
 			bool b;
 			if( fromString( value, b ) )
 				H1ColorGlobalColor = b;
@@ -3647,7 +3647,7 @@ namespace NLGUI
 		}
 		else
 		if( name == "h2_color_global_color" )
-		{			
+		{
 			bool b;
 			if( fromString( value, b ) )
 				H2ColorGlobalColor = b;
@@ -3655,7 +3655,7 @@ namespace NLGUI
 		}
 		else
 		if( name == "h3_color_global_color" )
-		{			
+		{
 			bool b;
 			if( fromString( value, b ) )
 				H3ColorGlobalColor = b;
@@ -3663,7 +3663,7 @@ namespace NLGUI
 		}
 		else
 		if( name == "h4_color_global_color" )
-		{			
+		{
 			bool b;
 			if( fromString( value, b ) )
 				H4ColorGlobalColor = b;
@@ -3671,7 +3671,7 @@ namespace NLGUI
 		}
 		else
 		if( name == "h5_color_global_color" )
-		{			
+		{
 			bool b;
 			if( fromString( value, b ) )
 				H5ColorGlobalColor = b;
@@ -3679,7 +3679,7 @@ namespace NLGUI
 		}
 		else
 		if( name == "h6_color_global_color" )
-		{			
+		{
 			bool b;
 			if( fromString( value, b ) )
 				H6ColorGlobalColor = b;
@@ -3687,7 +3687,7 @@ namespace NLGUI
 		}
 		else
 		if( name == "text_font_size" )
-		{			
+		{
 			uint i;
 			if( fromString( value, i ) )
 				TextFontSize = i;
@@ -3695,7 +3695,7 @@ namespace NLGUI
 		}
 		else
 		if( name == "h1_font_size" )
-		{			
+		{
 			uint i;
 			if( fromString( value, i ) )
 				H1FontSize = i;
@@ -3703,7 +3703,7 @@ namespace NLGUI
 		}
 		else
 		if( name == "h2_font_size" )
-		{			
+		{
 			uint i;
 			if( fromString( value, i ) )
 				H2FontSize = i;
@@ -3711,7 +3711,7 @@ namespace NLGUI
 		}
 		else
 		if( name == "h3_font_size" )
-		{			
+		{
 			uint i;
 			if( fromString( value, i ) )
 				H3FontSize = i;
@@ -3719,7 +3719,7 @@ namespace NLGUI
 		}
 		else
 		if( name == "h4_font_size" )
-		{			
+		{
 			uint i;
 			if( fromString( value, i ) )
 				H4FontSize = i;
@@ -3727,7 +3727,7 @@ namespace NLGUI
 		}
 		else
 		if( name == "h5_font_size" )
-		{			
+		{
 			uint i;
 			if( fromString( value, i ) )
 				H5FontSize = i;
@@ -3735,7 +3735,7 @@ namespace NLGUI
 		}
 		else
 		if( name == "h6_font_size" )
-		{			
+		{
 			uint i;
 			if( fromString( value, i ) )
 				H6FontSize = i;
@@ -3920,7 +3920,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "h4_color", BAD_CAST toString( H4Color ).c_str() );
 		xmlSetProp( node, BAD_CAST "h5_color", BAD_CAST toString( H5Color ).c_str() );
 		xmlSetProp( node, BAD_CAST "h6_color", BAD_CAST toString( H6Color ).c_str() );
-		
+
 		xmlSetProp( node, BAD_CAST "error_color_global_color",
 			BAD_CAST toString( ErrorColorGlobalColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "link_color_global_color",
@@ -4580,7 +4580,7 @@ namespace NLGUI
 						getParagraph()->addChild (buttonGroup);
 						paragraphChange ();
 					}
-		
+
 				}
 				else
 				{
@@ -6094,14 +6094,14 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	int CGroupHTML::luaInsertText(CLuaState &ls)	
+	int CGroupHTML::luaInsertText(CLuaState &ls)
 	{
 		const char *funcName = "insertText";
 		CLuaIHM::checkArgCount(ls, funcName, 3);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TBOOLEAN);
-		
+
 		string name = ls.toString(1);
 
 		ucstring text;
@@ -6271,6 +6271,10 @@ namespace NLGUI
 		renderHtmlString(html);
 	}
 
+	void CGroupHTML::setHome(const std::string &home)
+	{
+		Home = home;
+	}
 
 	// ***************************************************************************
 	inline bool isDigit(ucchar c, uint base = 16)
@@ -6732,7 +6736,7 @@ namespace NLGUI
 
 		maxw = std::max(minw, maxw);
 		maxh = std::max(minh, maxh);
-		
+
 		float ratio = (float) width / std::max(1, height);
 		if (width > maxw)
 		{
@@ -6791,7 +6795,7 @@ namespace NLGUI
 			height = minh;
 		}
 	}
-	
+
 	// ***************************************************************************
 	std::string CGroupHTML::HTMLOListElement::getListMarkerText() const
 	{
