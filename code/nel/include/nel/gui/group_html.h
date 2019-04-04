@@ -78,7 +78,7 @@ namespace NLGUI
 		// ImageDownload system
 		enum TDataType {ImgType= 0, BnpType, StylesheetType};
 		enum TImageType {NormalImage=0, OverImage};
-		
+
 		// Constructor
 		CGroupHTML(const TCtorParam &param);
 		~CGroupHTML();
@@ -122,7 +122,7 @@ namespace NLGUI
 
 		// End of the paragraph
 		void endParagraph();
-		
+
 		// add image download (used by view_bitmap.cpp to load web images)
 		void addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams(), const TImageType type = NormalImage);
 		std::string localImageName(const std::string &url);
@@ -228,6 +228,8 @@ namespace NLGUI
 		std::string getHTML() const { return _DocumentHtml; }
 		void		setHTML(const std::string &html);
 
+		void		setHome(const std::string &home);
+
 		int luaClearRefresh(CLuaState &ls);
 		int luaClearUndoRedo(CLuaState &ls);
 		int luaBrowse(CLuaState &ls);
@@ -256,6 +258,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("setBackground", luaSetBackground)
 			REFLECT_STRING("url", getURL, setURL)
 			REFLECT_STRING("html", getHTML, setHTML)
+			REFLECT_STRING("home", home, setHome)
 			REFLECT_FLOAT("timeout", getTimeout, setTimeout)
 			REFLECT_STRING("title", getTitle, setTitle)
 		REFLECT_EXPORT_END
@@ -714,7 +717,7 @@ namespace NLGUI
 				return 0;
 			return _Indent.back();
 		}
-		
+
 
 
 		// Current node is a title
@@ -806,7 +809,7 @@ namespace NLGUI
 
 		// decode all HTML entities
 		static ucstring decodeHTMLEntities(const ucstring &str);
-		
+
 		struct CDataImageDownload
 		{
 		public:
