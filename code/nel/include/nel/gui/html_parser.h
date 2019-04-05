@@ -21,7 +21,7 @@
 
 namespace NLGUI
 {
-	class CGroupHTML;
+	class CHtmlElement;
 
 	/**
 	 * \brief HTML parsing
@@ -31,21 +31,21 @@ namespace NLGUI
 	class CHtmlParser
 	{
 	public:
-		CHtmlParser(CGroupHTML *group) : _GroupHtml(group)
-		{}
+		bool parseHtml(std::string htmlString) const;
 
-		bool parseHtml(std::string htmlString);
-
-	private:
-		// libxml2 html parser functions
-		void htmlElement(xmlNode *node, int element_number);
-		void parseNode(xmlNode *a_node);
+		// parse html string into DOM, extract <style> tags into styleString, <link stylesheet> urls into links
+		void getDOM(std::string htmlString, CHtmlElement &parent, std::string &styleString, std::vector<std::string> &links) const;
 
 	private:
+		// iterate over libxml html tree, build DOM, and join all <style> tags together
+		void parseNode(xmlNode *a_node, CHtmlElement &parent, std::string &styleString, std::vector<std::string> &links) const;
 
-		CGroupHTML *_GroupHtml;
+		// read <style> tag and add its content to styleString
+		void parseStyle(xmlNode *a_node, std::string &styleString) const;
+
+		// update parent/sibling in elm.Children
+		void reindexChilds(CHtmlElement &elm) const;
 	};
-
 }
 
 #endif

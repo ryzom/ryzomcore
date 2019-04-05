@@ -599,6 +599,11 @@ namespace NLGUI
 			return true;
 		}
 
+		// TODO: CSS Colors Level 4 support
+		// Whitespace syntax, aliases: rgb == rgba, hsl == hsla
+		// rgb(51 170 51 / 0.4)    /* 40% opaque green */ 
+		// rgb(51 170 51 / 40%)    /* 40% opaque green */ 
+
 		if (strnicmp(src, "rgb(", 4) == 0 || strnicmp(src, "rgba(", 5) == 0)
 		{
 			src += 4;
@@ -741,6 +746,11 @@ namespace NLGUI
 			dst.A = 255;
 		}
 		return dst;
+	}
+
+	std::string getRGBAString(const CRGBA &color)
+	{
+		return toString("rgba(%d, %d, %d, %.1f)", color.R, color.G, color.B, color.A / 255.f);
 	}
 
 	// update HTTPCookies list

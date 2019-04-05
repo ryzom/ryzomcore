@@ -24,6 +24,7 @@
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/group_table.h"
 #include "nel/gui/libwww_types.h"
+#include "nel/gui/html_element.h"
 #include "nel/gui/css_style.h"
 
 // forward declaration
@@ -76,7 +77,7 @@ namespace NLGUI
 		static SWebOptions options;
 
 		// ImageDownload system
-		enum TDataType {ImgType= 0, BnpType};
+		enum TDataType {ImgType= 0, BnpType, StylesheetType};
 		enum TImageType {NormalImage=0, OverImage};
 		
 		// Constructor
@@ -96,6 +97,9 @@ namespace NLGUI
 
 		// Browse
 		virtual void browse (const char *url);
+
+		// load css from local file and insert into active stylesheet collection
+		void parseStylesheetFile(const std::string &fname);
 
 		// parse html string using libxml2 parser
 		bool parseHtml(const std::string &htmlString);
@@ -273,16 +277,10 @@ namespace NLGUI
 		virtual void addText (const char * buf, int len);
 
 		// A new begin HTML element has been parsed (<IMG> for exemple)
-		virtual void beginElement (uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value);
+		virtual void beginElement(CHtmlElement &elm);
 
 		// A new end HTML element has been parsed (</IMG> for exemple)
-		virtual void endElement (uint element_number);
-
-		// A new begin unparsed element has been found
-		virtual void beginUnparsedElement(const char *buffer, int length);
-
-		// A new end unparsed element has been found
-		virtual void endUnparsedElement(const char *buffer, int length);
+		virtual void endElement(CHtmlElement &elm);
 
 		// Add GET params to the url
 		virtual void addHTTPGetParams (std::string &url, bool trustedDomain);
@@ -295,6 +293,9 @@ namespace NLGUI
 
 		// Get Home URL
 		virtual std::string	home();
+
+		// parse dom node and all child nodes recursively
+		void renderDOM(CHtmlElement &elm);
 
 		// Clear style stack and restore default style
 		void resetCssStyle();
@@ -326,7 +327,7 @@ namespace NLGUI
 		void addString(const ucstring &str);
 
 		// Add an image in the current paragraph
-		void addImage(const std::string &id, const char *image, bool reloadImg=false, const CStyleParams &style = CStyleParams());
+		void addImage(const std::string &id, const std::string &img, bool reloadImg=false, const CStyleParams &style = CStyleParams());
 
 		// Add a text area in the current paragraph
 		CInterfaceGroup *addTextArea (const std::string &templateName, const char *name, uint rows, uint cols, bool multiLine, const ucstring &content, uint maxlength);
@@ -365,6 +366,14 @@ namespace NLGUI
 		// Current URL
 		std::string		_DocumentUrl;
 		std::string		_DocumentDomain;
+        std::string		_DocumentHtml; // not updated, only set by first render
+		// If true, then render _DocumentHtml on next update (replaces content)
+		bool			_RenderNextTime;
+		// true if renderer is waiting for css files to finish downloading (link rel=stylesheet)
+		bool			_WaitingForStylesheet;
+		// list of css file urls that are queued up for download
+		std::vector<std::string> _StylesheetQueue;
+
 		// Valid base href was found
 		bool            _IgnoreBaseUrlTag;
 		// Fragment from loading url
@@ -484,6 +493,11 @@ namespace NLGUI
 
 		// Keep track of current element style
 		CCssStyle _Style;
+		CHtmlElement _HtmlDOM;
+		CHtmlElement *_CurrentHTMLElement;
+		// Backup of CurrentHTMLElement->nextSibling before ::beginElement() is called
+		// for luaParseHtml() to insert nodes into right place in right order
+		CHtmlElement *_CurrentHTMLNextSibling;
 
 		// Current link
 		std::vector<std::string>	_Link;
@@ -722,6 +736,12 @@ namespace NLGUI
 
 	private:
 		friend class CHtmlParser;
+		// TODO: beginElement is overwritten in client quick help class, merge it here?
+		void beginElementDeprecated(uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value);
+		void endElementDeprecated(uint element_number);
+
+		// move src->Children into CurrentHtmlElement.parent.children element
+		void spliceFragment(std::list<CHtmlElement>::iterator src);
 
 		// decode all HTML entities
 		static ucstring decodeHTMLEntities(const ucstring &str);
@@ -764,6 +784,8 @@ namespace NLGUI
 		int RunningCurls;
 
 		bool startCurlDownload(CDataDownload &download);
+		void finishCurlDownload(CDataDownload &download);
+		void pumpCurlDownloads();
 
 		void initImageDownload();
 		void checkImageDownload();
@@ -782,11 +804,94 @@ namespace NLGUI
 		bool addBnpDownload(std::string url, const std::string &action, const std::string &script, const std::string &md5sum);
 		std::string localBnpName(const std::string &url);
 
+		// add css file from <link href=".." rel="stylesheet"> to download queue
+		void addStylesheetDownload(std::vector<std::string> links);
+
 		void releaseDownloads();
 		void checkDownloads();
 
 		// HtmlType download finished
 		void htmlDownloadFinished(const std::string &content, const std::string &type, long code);
+
+		// stylesheet finished downloading. if local file does not exist, then it failed (404)
+		void cssDownloadFinished(const std::string &url, const std::string &local);
+
+		// read common table/tr/td parameters and push them to _CellParams
+		void getCellsParameters(const CHtmlElement &elm, bool inherit);
+
+		// render _HtmlDOM
+		void renderDocument();
+
+		// :before, :after rendering
+		void renderPseudoElement(const std::string &pseudo, const CHtmlElement &elm);
+
+		// HTML elements
+		void htmlA(const CHtmlElement &elm);
+		void htmlAend(const CHtmlElement &elm);
+		void htmlBASE(const CHtmlElement &elm);
+		void htmlBODY(const CHtmlElement &elm);
+		void htmlBR(const CHtmlElement &elm);
+		void htmlDD(const CHtmlElement &elm);
+		void htmlDDend(const CHtmlElement &elm);
+		//void htmlDEL(const CHtmlElement &elm);
+		void htmlDIV(const CHtmlElement &elm);
+		void htmlDIVend(const CHtmlElement &elm);
+		void htmlDL(const CHtmlElement &elm);
+		void htmlDLend(const CHtmlElement &elm);
+		void htmlDT(const CHtmlElement &elm);
+		void htmlDTend(const CHtmlElement &elm);
+		//void htmlEM(const CHtmlElement &elm);
+		void htmlFONT(const CHtmlElement &elm);
+		void htmlFORM(const CHtmlElement &elm);
+		void htmlH(const CHtmlElement &elm);
+		void htmlHend(const CHtmlElement &elm);
+		void htmlHEAD(const CHtmlElement &elm);
+		void htmlHEADend(const CHtmlElement &elm);
+		void htmlHR(const CHtmlElement &elm);
+		void htmlHTML(const CHtmlElement &elm);
+		void htmlI(const CHtmlElement &elm);
+		void htmlIend(const CHtmlElement &elm);
+		void htmlIMG(const CHtmlElement &elm);
+		void htmlINPUT(const CHtmlElement &elm);
+		void htmlLI(const CHtmlElement &elm);
+		void htmlLIend(const CHtmlElement &elm);
+		void htmlLUA(const CHtmlElement &elm);
+		void htmlLUAend(const CHtmlElement &elm);
+		void htmlMETA(const CHtmlElement &elm);
+		void htmlOBJECT(const CHtmlElement &elm);
+		void htmlOBJECTend(const CHtmlElement &elm);
+		void htmlOL(const CHtmlElement &elm);
+		void htmlOLend(const CHtmlElement &elm);
+		void htmlOPTION(const CHtmlElement &elm);
+		void htmlOPTIONend(const CHtmlElement &elm);
+		void htmlP(const CHtmlElement &elm);
+		void htmlPend(const CHtmlElement &elm);
+		void htmlPRE(const CHtmlElement &elm);
+		void htmlPREend(const CHtmlElement &elm);
+		void htmlSCRIPT(const CHtmlElement &elm);
+		void htmlSCRIPTend(const CHtmlElement &elm);
+		void htmlSELECT(const CHtmlElement &elm);
+		void htmlSELECTend(const CHtmlElement &elm);
+		//void htmlSMALL(const CHtmlElement &elm);
+		//void htmlSPAN(const CHtmlElement &elm);
+		//void htmlSTRONG(const CHtmlElement &elm);
+		void htmlSTYLE(const CHtmlElement &elm);
+		void htmlSTYLEend(const CHtmlElement &elm);
+		void htmlTABLE(const CHtmlElement &elm);
+		void htmlTABLEend(const CHtmlElement &elm);
+		void htmlTD(const CHtmlElement &elm);
+		void htmlTDend(const CHtmlElement &elm);
+		void htmlTEXTAREA(const CHtmlElement &elm);
+		void htmlTEXTAREAend(const CHtmlElement &elm);
+		void htmlTH(const CHtmlElement &elm);
+		void htmlTHend(const CHtmlElement &elm);
+		void htmlTITLE(const CHtmlElement &elm);
+		void htmlTITLEend(const CHtmlElement &elm);
+		void htmlTR(const CHtmlElement &elm);
+		void htmlTRend(const CHtmlElement &elm);
+		//void htmlU(const CHtmlElement &elm);
+		void htmlUL(const CHtmlElement &elm);
+		void htmlULend(const CHtmlElement &elm);
 	};
 
 	// adapter group that store y offset for inputs inside an html form

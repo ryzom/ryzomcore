@@ -297,6 +297,9 @@ namespace NLGUI
 	// Parse a HTML color
 	NLMISC::CRGBA getColor (const char *color);
 
+	// return css color in rgba() format
+	std::string getRGBAString(const NLMISC::CRGBA &color);
+
 	// ***************************************************************************
 
 	const std::string &setCurrentDomain(const std::string &uri);

@@ -19,9 +19,12 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/rgba.h"
+#include "nel/gui/css_selector.h"
 
 namespace NLGUI
 {
+	class CHtmlElement;
+
 	typedef std::map<std::string, std::string> TStyle;
 
 	/**
@@ -44,7 +47,7 @@ namespace NLGUI
 			sint32 X;
 			sint32 Y;
 			NLMISC::CRGBA Color;
-		};
+		};		
 	public:
 		CStyleParams () : FontFamily(""), TextColor(255,255,255,255), TextShadow()
 		{
@@ -62,6 +65,19 @@ namespace NLGUI
 			BackgroundColor=NLMISC::CRGBA::Black;
 			BackgroundColorOver=NLMISC::CRGBA::Black;
 		}
+
+		bool hasStyle(const std::string &key) const
+		{
+			return StyleRules.find(key) != StyleRules.end();
+		}
+
+		std::string getStyle(const std::string &key) const
+		{
+			TStyle::const_iterator it = StyleRules.find(key);
+			return (it != StyleRules.end() ? it->second : "");
+		}
+
+	public:
 		uint FontSize;
 		uint FontWeight;
 		bool FontOblique;
@@ -78,11 +94,26 @@ namespace NLGUI
 		sint32 BorderWidth;
 		NLMISC::CRGBA BackgroundColor;
 		NLMISC::CRGBA BackgroundColorOver;
+
+		std::string WhiteSpace;
+		std::string TextAlign;
+		std::string VerticalAlign;
+
+		TStyle StyleRules;
 	};
 
 	class CCssStyle {
 	public:
+		struct SStyleRule {
+			std::vector<CCssSelector> Selector;
+			TStyle Properties;
 
+			// pseudo element like ':before'
+			std::string PseudoElement;
+			
+			// returns selector specificity
+			uint specificity() const;
+		};
 
 		// 'browser' style, overwriten with '<html>'
 		CStyleParams Root;
@@ -90,17 +121,36 @@ namespace NLGUI
 		// current element style
 		CStyleParams Current;
 
+		// known style rules sorted by specificity
+		std::vector<SStyleRule> _StyleRules;
+
 	private:
 		std::vector<CStyleParams> _StyleStack;
 
-		// test if str is one of "thin/medium/thick" and return its pixel value 
+		// test if str is one of "thin/medium/thick" and return its pixel value
 		bool scanCssLength(const std::string& str, uint32 &px) const;
 
 		// read style attribute
 		void getStyleParams(const std::string &styleString, CStyleParams &style, const CStyleParams &current) const;
+		void getStyleParams(const TStyle &styleRules, CStyleParams &style, const CStyleParams &current) const;
+
+		// merge src into dest by overwriting key in dest
+		void merge(TStyle &dst, const TStyle &src) const;
+
+		// match selector to dom path
+		bool match(const std::vector<CCssSelector> &selector, const CHtmlElement &elm) const;
+
+		// parse 'background' into 'background-color', 'background-image', etc
+		void parseBackgroundShorthand(const std::string &value, CStyleParams &style) const;
 
 	public:
 		void reset();
+
+		// parse <style>..</style> tag or css file content
+		void parseStylesheet(const std::string &styleString);
+
+		// set element style from matching css rules
+		void getStyleFor(CHtmlElement &elm) const;
 
 		inline uint getFontSizeSmaller() const
 		{
@@ -109,15 +159,29 @@ namespace NLGUI
 			return Current.FontSize-2;
 		}
 
+		sint styleStackIndex = 0;
+
 		inline void pushStyle()
 		{
+			styleStackIndex++;
 			_StyleStack.push_back(Current);
+
+			Current.Width=-1;
+			Current.Height=-1;
+			Current.MaxWidth=-1;
+			Current.MaxHeight=-1;
+			Current.BorderWidth=1;
+			
+			Current.StyleRules.clear();
 		}
 
 		inline void popStyle()
 		{
+			styleStackIndex--;
 			if (_StyleStack.empty())
+			{
 				Current = Root;
+			}
 			else
 			{
 				Current = _StyleStack.back();
@@ -125,16 +189,32 @@ namespace NLGUI
 			}
 		}
 
-		// apply style string to this.Root
+		// apply style to this.Root
 		void applyRootStyle(const std::string &styleString);
+		void applyRootStyle(const TStyle &styleRules);
 
-		// apply style string to this.Current
+		// apply style to this.Current
 		void applyStyle(const std::string &styleString);
+		void applyStyle(const TStyle &styleRules);
 
 		void applyCssMinMax(sint32 &width, sint32 &height, sint32 minw=0, sint32 minh=0, sint32 maxw=0, sint32 maxh=0) const;
 
-	};
+		// check if current style property matches value
+		bool checkStyle(const std::string &key, const std::string &val) const
+		{
+			return Current.hasStyle(key) && Current.getStyle(key) == val;
+		}
 
+		bool hasStyle(const std::string &key) const
+		{
+			return Current.hasStyle(key);
+		}
+
+		std::string getStyle(const std::string &key) const
+		{
+			return Current.getStyle(key);
+		}
+	};
 }//namespace
 
 #endif // CL_CSS_STYLE_H

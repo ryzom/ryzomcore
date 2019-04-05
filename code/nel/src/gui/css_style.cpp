@@ -18,6 +18,7 @@
 
 #include <string>
 #include "nel/misc/types_nl.h"
+#include "nel/gui/html_element.h"
 #include "nel/gui/css_style.h"
 #include "nel/gui/css_parser.h"
 #include "nel/gui/libwww.h"
@@ -30,13 +31,217 @@ using namespace NLMISC;
 
 namespace NLGUI
 {
+	uint CCssStyle::SStyleRule::specificity() const
+	{
+		uint count = 0;
+		for(uint i = 0; i < Selector.size(); ++i)
+		{
+			count += Selector[i].specificity();
+		}
+		// counted as element tag like DIV
+		if (!PseudoElement.empty())
+		{
+			count += 0x000001;
+		}
+
+		return count;
+	}
+
 	// ***************************************************************************
 	void CCssStyle::reset()
 	{
+		_StyleRules.clear();
 		_StyleStack.clear();
 
 		Root = CStyleParams();
 		Current = CStyleParams();
+	}
+
+	// ***************************************************************************
+	// Sorting helper
+	struct CCssSpecificityPred
+	{
+		bool operator()(CCssStyle::SStyleRule lhs, CCssStyle::SStyleRule rhs) const
+		{
+			return lhs.specificity() < rhs.specificity();
+		}
+	};
+
+	// ***************************************************************************
+	void CCssStyle::parseStylesheet(const std::string &styleString)
+	{
+		CCssParser parser;
+		parser.parseStylesheet(styleString, _StyleRules);
+
+		// keep the list sorted
+		std::stable_sort(_StyleRules.begin(), _StyleRules.end(), CCssSpecificityPred());
+	}
+
+	void CCssStyle::getStyleFor(CHtmlElement &elm) const
+	{
+		std::vector<SStyleRule> mRules;
+		for (std::vector<SStyleRule>::const_iterator it = _StyleRules.begin(); it != _StyleRules.end(); ++it)
+		{
+			if (match(it->Selector, elm))
+			{
+				mRules.push_back(*it);
+			}
+		}
+
+		elm.Style.clear();
+		elm.StyleBefore.clear();
+		elm.StyleAfter.clear();
+
+		if (!mRules.empty())
+		{
+			// style is sorted by specificity (lowest first), eg. html, .class, html.class, #id, html#id.class
+			for(std::vector<SStyleRule>::const_iterator i = mRules.begin(); i != mRules.end(); ++i)
+			{
+				if (i->PseudoElement.empty())
+				{
+					merge(elm.Style, i->Properties);
+				}
+				else if (i->PseudoElement == ":before")
+				{
+					merge(elm.StyleBefore, i->Properties);
+				}
+				else if (i->PseudoElement == ":after")
+				{
+					merge(elm.StyleAfter, i->Properties);
+				}
+			}
+		}
+
+		// style from "style" attribute overrides <style>
+		if (elm.hasNonEmptyAttribute("style"))
+		{
+			TStyle styles = CCssParser::parseDecls(elm.getAttribute("style"));
+			merge(elm.Style, styles);
+		}
+	}
+
+	void CCssStyle::merge(TStyle &dst, const TStyle &src) const
+	{
+		// TODO: does not use '!important' flag
+		for(TStyle::const_iterator it = src.begin(); it != src.end(); ++it)
+		{
+			dst[it->first] = it->second;
+		}
+	}
+
+	bool CCssStyle::match(const std::vector<CCssSelector> &selector, const CHtmlElement &elm) const
+	{
+		if (selector.empty()) return false;
+
+		// first selector, '>' immediate parent
+		bool matches = false;
+		bool mustMatchNext = true;
+		bool matchGeneralChild = false;
+		bool matchGeneralSibling = false;
+
+		const CHtmlElement *child;
+		child = &elm;
+		std::vector<CCssSelector>::const_reverse_iterator ritSelector = selector.rbegin();
+		char matchCombinator = '\0';
+		while(ritSelector != selector.rend())
+		{
+			if (!child)
+			{
+				return false;
+			}
+
+			matches = ritSelector->match(*child);
+			if (!matches && mustMatchNext)
+			{
+				return false;
+			}
+
+			if (!matches)
+			{
+				if (matchCombinator == ' ')
+				{
+					if (!child->parent)
+					{
+						return false;
+					}
+					child = child->parent;
+					// walk up the tree until there is match for current selector
+					continue;
+				}
+
+				if (matchCombinator == '~')
+				{
+					// any previous sibling must match current selector
+					if (!child->previousSibling)
+					{
+						return false;
+					}
+					child = child->previousSibling;
+
+					// check siblings until there is match for current selector
+					continue;
+				}
+			}
+
+			mustMatchNext = false;
+			switch(ritSelector->Combinator)
+			{
+			case '\0':
+				// default case when single selector
+				break;
+			case ' ':
+				{
+					// general child - match child->parent to current/previous selector
+					if (!child->parent)
+					{
+						return false;
+					}
+					child = child->parent;
+					matchCombinator = ritSelector->Combinator;
+				}
+				break;
+			case '~':
+				{
+					// any previous sibling must match current selector
+					if (!child->previousSibling)
+					{
+						return false;
+					}
+					child = child->previousSibling;
+					matchCombinator = ritSelector->Combinator;
+				}
+				break;
+			case '+':
+				{
+					// adjacent sibling - previous sibling must match previous selector
+					if (!child->previousSibling)
+					{
+						return false;
+					}
+					child = child->previousSibling;
+					mustMatchNext = true;
+				}
+				break;
+			case '>':
+				{
+					// child of - immediate parent must match previous selector
+					if (!child->parent)
+					{
+						return false;					
+					}
+					child = child->parent;
+					mustMatchNext = true;
+				}
+				break;
+			default:
+				// should not reach
+				return false;
+			}
+
+			++ritSelector;
+		}
+
+		return matches;
 	}
 
 	// ***************************************************************************
@@ -46,8 +251,16 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CCssStyle::applyRootStyle(const TStyle &styleRules)
+	{
+		getStyleParams(styleRules, Root, Root);
+	}
+
+	// ***************************************************************************
 	void CCssStyle::applyStyle(const std::string &styleString)
 	{
+		if (styleString.empty()) return;
+
 		if (_StyleStack.empty())
 		{
 			getStyleParams(styleString, Current, Root);
@@ -58,6 +271,20 @@ namespace NLGUI
 		}
 	}
 
+	// ***************************************************************************
+	void CCssStyle::applyStyle(const TStyle &styleRules)
+	{
+		if (_StyleStack.empty())
+		{
+			getStyleParams(styleRules, Current, Root);
+		}
+		else
+		{
+			getStyleParams(styleRules, Current, _StyleStack.back());
+		}
+	}
+
+	// ***************************************************************************
 	bool CCssStyle::scanCssLength(const std::string& str, uint32 &px) const
 	{
 		if (fromString(str, px))
@@ -90,14 +317,30 @@ namespace NLGUI
 	// style.StrikeThrough; // text-decoration: line-through;  text-decoration-line: line-through;
 	void CCssStyle::getStyleParams(const std::string &styleString, CStyleParams &style, const CStyleParams &current) const
 	{
-		float tmpf;
 		TStyle styles = CCssParser::parseDecls(styleString);
-		TStyle::iterator it;
 
-		// first pass: get font-size for 'em' sizes
-		// get TextColor value used as 'currentcolor'
-		for (it=styles.begin(); it != styles.end(); ++it)
+		getStyleParams(styles, style, current);
+	}
+
+	void CCssStyle::getStyleParams(const TStyle &styleRules, CStyleParams &style, const CStyleParams &current) const
+	{
+		float tmpf;
+		TStyle::const_iterator it;
+
+		if(styleRules.empty())
 		{
+			return;
+		}
+
+		// first pass:
+		// - get font-size for 'em' sizes
+		// - split shorthand to its parts
+		// - get TextColor value that could be used for 'currentcolor'
+		for (it=styleRules.begin(); it != styleRules.end(); ++it)
+		{
+			// update local copy of applied style
+			style.StyleRules[it->first] = it->second;
+
 			if (it->first == "color")
 			{
 				if (it->second == "inherit")
@@ -180,19 +423,56 @@ namespace NLGUI
 					}
 				}
 			}
+			else
+			if (it->first == "background")
+			{
+				parseBackgroundShorthand(it->second, style);
+			}
 		}
 
 		// second pass: rest of style
-		for (it=styles.begin(); it != styles.end(); ++it)
+		for (it=styleRules.begin(); it != styleRules.end(); ++it)
 		{
-			if (it->first == "border")
+			if (it->first == "border" || it->first == "border-width")
 			{
-				sint32 b;
-				if (it->second == "none")
+				// TODO: border: 1px solid red;
+				if (it->second == "inherit")
+				{
+					style.BorderWidth = current.BorderWidth;
+				}
+				else if (it->second == "none")
+				{
 					style.BorderWidth = 0;
-				else
-				if (fromString(it->second, b))
-					style.BorderWidth = b;
+				}
+				else if (it->second == "thin")
+				{
+					style.BorderWidth = 1;
+				}
+				else if (it->second == "medium")
+				{
+					style.BorderWidth = 3;
+				}
+				else if (it->second == "thick")
+				{
+					style.BorderWidth = 5;
+				}
+				else 
+				{
+					std::string unit;
+					if (getCssLength(tmpf, unit, it->second.c_str()))
+					{
+						if (unit == "rem")
+							style.BorderWidth = Root.FontSize * tmpf;
+						else if (unit == "em")
+							style.BorderWidth = current.FontSize * tmpf;
+						else if (unit == "pt")
+							style.BorderWidth = tmpf / 0.75f;
+						else if (unit == "%")
+							style.BorderWidth = 0; // no support for % in border width
+						else
+							style.BorderWidth = tmpf;
+					}
+				}
 			}
 			else
 			if (it->first == "font-style")
@@ -366,6 +646,30 @@ namespace NLGUI
 				}
 			}
 			else
+			if (it->first == "text-align")
+			{
+				if (it->second == "inherit")
+					style.TextAlign = current.TextAlign;
+				else if (it->second == "left" || it->second == "right" || it->second == "center" || it->second == "justify")
+					style.TextAlign = it->second;
+			}
+			else
+			if (it->first == "vertical-align")
+			{
+				if (it->second == "inherit")
+					style.VerticalAlign = current.VerticalAlign;
+				else if (it->second == "top" || it->second == "middle" || it->second == "bottom")
+					style.VerticalAlign = it->second;
+			}
+			else
+			if (it->first == "white-space")
+			{
+				if (it->second == "inherit")
+					style.WhiteSpace = current.WhiteSpace;
+				else if (it->second == "normal" || it->second == "nowrap" || it->second == "pre")
+					style.WhiteSpace = it->second;
+			}
+			else
 			if (it->first == "width")
 			{
 				std::string unit;
@@ -472,6 +776,172 @@ namespace NLGUI
 		// if outer element has line-through set, then inner element cannot remove it
 		if (current.StrikeThrough)
 			style.StrikeThrough = current.StrikeThrough;
+	}
+
+	void CCssStyle::parseBackgroundShorthand(const std::string &value, CStyleParams &style) const
+	{
+		// background: url(image.jpg) top center / 200px 200px no-repeat fixed padding-box content-box red;
+		// background-image      : url(image.jpg)
+		// background-position   : top center
+		// background-size       : 200px 200px
+		// background-repeat     : no-repeat
+		// background-attachment : fixed
+		// background-origin     : padding-box
+		// background-clip       : content-box
+		// background-color      : red
+
+		const uint nbProps = 8;
+		std::string props[nbProps] = {"background-image", "background-position", "background-size", "background-repeat",
+			"background-attachment", "background-origin", "background-clip", "background-color"};
+		std::string values[nbProps];
+		bool found[nbProps] = {false};
+
+
+		uint partIndex = 0;
+		std::vector<std::string> parts;
+		std::vector<std::string>::iterator it;
+		// FIXME: this will fail if url() contains ' ' chars
+		NLMISC::splitString(value, " ", parts);
+
+		bool failed = false;
+		for(uint index = 0; index < parts.size(); index++)
+		{
+			const std::string val = toLower(trim(parts[index]));
+
+			for(uint i = 0; i < nbProps; i++)
+			{
+				if (found[i])
+				{
+					continue;
+				}
+
+				if (props[i] == "background-image")
+				{
+					if (val.substr(0, 4) == "url(")
+					{
+						// use original value as 'val' is lowercase
+						values[i] = parts[index];
+						found[i] = true;
+					}
+				}
+				else if (props[i] == "background-position")
+				{
+					// TODO:
+				}
+				else if (props[i] == "background-size")
+				{
+					// TODO: [<length-percentage> | auto ]{1,2} cover | contain
+				}
+				else if (props[i] == "background-repeat")
+				{
+					if (val == "repeat-x" || val == "repeat-y" || val == "repeat" || val == "space" || val == "round" || val == "no-repeat")
+					{
+						if (val == "repeat-x")
+						{
+							values[i] = "repeat no-repeat";
+						}
+						else if (val == "repeat-y")
+						{
+							values[i] = "no-repeat repeat";				
+						}
+						else
+						{
+							std::string horiz = val;
+							std::string vert = val;
+							if (index+1 < parts.size())
+							{
+								std::string next = toLower(trim(parts[index+1]));
+								if (next == "repeat" || next == "space" || next == "round" || next == "no-repeat")
+								{
+									vert = next;
+									index++;
+								}
+							}
+							
+							values[i] = horiz + " " + vert;
+						}
+
+						found[i] = true;
+					}
+				}
+				else if (props[i] == "background-attachment")
+				{
+					// TODO: scroll | fixed | local
+				}
+				else if (props[i] == "background-origin" || props[i] == "background-clip")
+				{
+					// same values for both
+					if (val == "padding-box" || val == "border-box" || val == "content-box")
+					{
+						values[i] = val;
+						found[i] = true;
+					}
+				}
+				else if (props[i] == "background-color")
+				{
+					CRGBA color;
+					if (!scanHTMLColor(val.c_str(), color))
+					{
+						failed = true;
+						break;
+					}
+					values[i] = val;
+					// color should come as last item
+					break;
+				}
+			}
+		}
+
+		// invalidate whole rule
+		if (failed)
+		{
+			return;
+		}
+
+		// apply found styles
+		for(uint i = 0; i < nbProps; i++)
+		{
+			if (found[i])
+			{
+				style.StyleRules[props[i]] = values[i];
+			}
+			else
+			{
+				// fill in default if one is set
+				if (props[i] == "background-image")
+				{
+					style.StyleRules[props[i]] = "none";
+				}
+				else if (props[i] == "background-position")
+				{
+					//style.StyleRules[props[i]] = "0% 0%";
+				}
+				else if (props[i] == "background-size")
+				{
+					//style.StyleRules[props[i]] = "auto auto";
+				}
+				else if (props[i] == "background-repeat")
+				{
+					style.StyleRules[props[i]] = "repeat repeat";
+				}
+				else if(props[i] == "background-attachment")
+				{
+					//style.StyleRules[props[i]] = "scroll";
+				}
+				else if(props[i] == "background-origin")
+				{
+					//style.StyleRules[props[i]] = "padding-box";
+				}
+				else if (props[i] == "background-clip")
+				{
+					//style.StyleRules[props[i]] = "border-box";
+				}
+				else if (props[i] == "background-color")
+				{
+					style.StyleRules[props[i]] = "transparent";
+				}
+			}
+		}
 	}
 
 	// ***************************************************************************

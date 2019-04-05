@@ -276,6 +276,17 @@ template <class T> T trimRightWhiteSpaces (const T &str)
 	return str.substr (0, end);
 }
 
+// if both first and last char are quotes (' or "), then remove them
+template <class T> T trimQuotes (const T&str)
+{
+	typename T::size_type size = str.size();
+	if (size == 0)
+		return str;
+	if (str[0] != str[size-1] && (str[0] != '"' || str[0] != '\''))
+		return str;
+	return str.substr(1, size - 1);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // ****  DEPRECATED *****: PLEASE DON'T USE THESE METHODS BUT FUNCTIONS ABOVE toLower() and toUpper()
 //////////////////////////////////////////////////////////////////////////

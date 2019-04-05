@@ -25,6 +25,7 @@
 #include "nel/gui/group_list.h"
 #include "nel/gui/group_paragraph.h"
 #include "nel/gui/libwww.h"
+#include "nel/gui/html_element.h"
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
 #include "nel/misc/xml_auto_ptr.h"
@@ -215,33 +216,29 @@ void CGroupQuickHelp::setGroupTextSize (CInterfaceGroup *group, bool selected)
 
 extern CActionsContext ActionsContext;
 
-void CGroupQuickHelp::beginElement (uint element_number, const std::vector<bool> &present, const std::vector<const char *>&value)
+void CGroupQuickHelp::beginElement(CHtmlElement &elm)
 {
-	CGroupHTML::beginElement (element_number, present, value);
+	CGroupHTML::beginElement (elm);
 
 	// Paragraph ?
-	switch(element_number)
+	switch(elm.ID)
 	{
 	case HTML_A:
 			// Quick help
-			if (_TrustedDomain && present[MY_HTML_A_Z_ACTION_SHORTCUT] && value[MY_HTML_A_Z_ACTION_SHORTCUT])
+			if (_TrustedDomain && elm.hasNonEmptyAttribute("z_action_shortcut"))
 			{
 				// Get the action category
-				string category;
-				if (present[MY_HTML_A_Z_ACTION_CATEGORY] && value[MY_HTML_A_Z_ACTION_CATEGORY])
-					category = value[MY_HTML_A_Z_ACTION_CATEGORY];
+				string category = elm.getAttribute("z_action_category");
 
 				// Get the action params
-				string params;
-				if (present[MY_HTML_A_Z_ACTION_PARAMS] && value[MY_HTML_A_Z_ACTION_PARAMS])
-					params = value[MY_HTML_A_Z_ACTION_PARAMS];
+				string params = elm.getAttribute("z_action_params");
 
 				// Get the action descriptor
 				CActionsManager *actionManager = ActionsContext.getActionsManager (category);
 				if (actionManager)
 				{
 					const CActionsManager::TActionComboMap &actionCombo = actionManager->getActionComboMap ();
-					CActionsManager::TActionComboMap::const_iterator ite = actionCombo.find (CAction::CName (value[MY_HTML_A_Z_ACTION_SHORTCUT], params.c_str()));
+					CActionsManager::TActionComboMap::const_iterator ite = actionCombo.find (CAction::CName (elm.getAttribute("z_action_shortcut").c_str(), params.c_str()));
 					if (ite != actionCombo.end())
 					{
 						addString (ite->second.toUCString());
@@ -252,7 +249,7 @@ void CGroupQuickHelp::beginElement (uint element_number, const std::vector<bool>
 
 	case HTML_P:
 		// Get the action name
-		if (present[MY_HTML_P_QUICK_HELP_EVENTS])
+		if (elm.hasAttribute("quick_help_events"))
 		{
 			// This page is a quick help
 			_IsQuickHelp = true;
@@ -260,38 +257,29 @@ void CGroupQuickHelp::beginElement (uint element_number, const std::vector<bool>
 			_Steps.push_back (CStep());
 			CStep &step = _Steps.back();
 
-			if (value[MY_HTML_P_QUICK_HELP_EVENTS])
+			// Get the event names
+			string events = elm.getAttribute("quick_help_events");
+			if (!events.empty())
 			{
-				// Get the event names
-				string events = value[MY_HTML_P_QUICK_HELP_EVENTS];
-				if (!events.empty())
+				uint first = 0;
+				while (first < events.size())
 				{
-					uint first = 0;
-					while (first < events.size())
-					{
-						// String end
-						string::size_type last = events.find_first_of(" ", first);
-						if (last == string::npos)
-							last = events.size();
+					// String end
+					string::size_type last = events.find_first_of(" ", first);
+					if (last == string::npos)
+						last = events.size();
 
-						// Extract the string
-						step.EventToComplete.insert (events.substr (first, last-first));
-						first = (uint)last+1;
-					}
+					// Extract the string
+					step.EventToComplete.insert (events.substr (first, last-first));
+					first = (uint)last+1;
 				}
 			}
 
 			// Get the condition
-			if (present[MY_HTML_P_QUICK_HELP_CONDITION] && value[MY_HTML_P_QUICK_HELP_CONDITION])
-			{
-				step.Condition = value[MY_HTML_P_QUICK_HELP_CONDITION];
-			}
+			step.Condition = elm.getAttribute("quick_help_condition");
 
 			// Get the action handlers to run
-			if (present[MY_HTML_P_QUICK_HELP_LINK] && value[MY_HTML_P_QUICK_HELP_LINK])
-			{
-				step.URL = value[MY_HTML_P_QUICK_HELP_LINK];
-			}
+			step.URL = elm.getAttribute("quick_help_link");
 		}
 		break;
 	}
