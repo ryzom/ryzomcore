@@ -98,6 +98,10 @@ private:
 	static int  getSheet2idx(CLuaState &ls);
 	static int	getTargetSlot(CLuaState &ls);
 	static int  getSlotDataSetId(CLuaState &ls);
+	//
+	static int	getMaxDynChan(CLuaState &ls);
+	static int	readUserChannels(CLuaState &ls);
+	static int	saveUserChannels(CLuaState &ls); // { name = "pass" }
 
 	// LUA functions exported for Dev only (debug)
 	static int	dumpUI(CLuaState &ls);			// params: CInterfaceElement*.... return: none

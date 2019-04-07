@@ -3489,6 +3489,15 @@ class CHandlerGameConfigApply : public IActionHandler
 			}
 		}
 
+		// save user created channels options
+		CCtrlBaseButton *pCS = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromDefine("game_config_save_channel_cb"));
+		if (pCS)
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SAVE_CHANNEL")->setValue32(pCS->getPushed());
+
+		pCS = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromDefine("game_config_auto_channel_cb"));
+		if (pCS)
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:AUTO_CHANNEL")->setValue32(pCS->getPushed());
+
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_VR_ENABLE_BUTTON));
 		if (pBut) 
 		{

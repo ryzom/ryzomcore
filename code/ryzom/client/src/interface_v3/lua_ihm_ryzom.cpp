@@ -118,6 +118,8 @@
 #include "nel/georges/u_form.h"
 #include "nel/georges/u_form_elm.h"
 #include "nel/misc/polygon.h"
+#include "nel/misc/i_xml.h"
+#include "nel/misc/o_xml.h"
 #include "game_share/scenario_entry_points.h"
 #include "game_share/bg_downloader_msg.h"
 #include "game_share/constants.h"
@@ -489,6 +491,9 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("delArkPoints",  delArkPoints);
 	ls.registerFunc("addRespawnPoint",  addRespawnPoint);
 	ls.registerFunc("setArkPowoOptions",  setArkPowoOptions);
+	ls.registerFunc("saveUserChannels", saveUserChannels);
+	ls.registerFunc("readUserChannels", readUserChannels);
+	ls.registerFunc("getMaxDynChan", getMaxDynChan);
 
 	lua_State *L = ls.getStatePointer();
 
@@ -3973,6 +3978,130 @@ int CLuaIHMRyzom::setArkPowoOptions(CLuaState &ls)
 		pMap->setArkPowoMapMenu(ls.toString(2));
 	}
 	return 0;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::readUserChannels(CLuaState &ls)
+{
+	std::string filename = CInterfaceManager::getInstance()->getSaveFileName("channels", "xml");
+	try
+	{
+		CIFile fd;
+		if (fd.open(CPath::lookup(filename)))
+		{
+			CIXml stream;
+			stream.init(fd);
+
+			xmlKeepBlanksDefault(0);
+			xmlNodePtr root = stream.getRootNode();
+			if (!root)
+				return 0;
+			CXMLAutoPtr prop;
+
+			// table
+			ls.newTable();
+			CLuaObject output(ls);
+
+			uint nb = 0;
+			xmlNodePtr node = root->children;
+			while (node)
+			{
+				prop = xmlGetProp(node, (xmlChar*)"name");
+				if (!prop)
+					return 0;
+				std::string name = (const char*)prop;
+
+				prop = xmlGetProp(node, (xmlChar*)"passwd");
+				if (!prop)
+					return 0;
+				std::string pass = (const char*)prop;
+
+				output.setValue(name.c_str(), pass.c_str());
+				node = node->next;
+				nb++;
+			}
+			// no exception
+			fd.close();
+
+			// release lua table
+			output.push();
+		}
+		nlinfo("parse %s", filename.c_str());
+	}
+	catch (const Exception &e)
+	{
+		nlwarning("Error while parsing xml file %s : %s", filename.c_str(), e.what());
+		return 0;
+	}
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::saveUserChannels(CLuaState &ls)
+{
+	const char *funcName = "saveUserChannels";
+
+	CLuaIHM::check(ls, ls.getTop()==1 || ls.getTop()==2, funcName);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TTABLE);
+
+	bool verbose = false;
+	if (ls.getTop() > 1)
+	{
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TBOOLEAN);
+		verbose = ls.toBoolean(2);
+		ls.pop();
+	}
+	CLuaObject params;
+	params.pop(ls);
+
+	std::string filename = CInterfaceManager::getInstance()->getSaveFileName("channels", "xml");
+	try
+	{
+		COFile fd;
+		if (fd.open(filename, false, false, true))
+		{
+			COXml stream;
+			stream.init(&fd);
+
+			xmlDocPtr doc = stream.getDocument();
+			xmlNodePtr node = xmlNewDocNode(doc, NULL, (const xmlChar*)"interface_config", NULL);
+			xmlDocSetRootElement(doc, node);
+
+			ENUM_LUA_TABLE(params, it)
+			{
+				if (!it.nextKey().isString())
+					continue;
+				if (!it.nextValue().isString())
+					continue;
+
+				std::string name = it.nextKey().toString();
+				std::string pass = it.nextValue().toString();
+
+				xmlNodePtr newNode = xmlNewChild(node, NULL, (const xmlChar*)"channels", NULL);
+				xmlSetProp(newNode, (const xmlChar*)"name", (const xmlChar*)name.c_str());
+				xmlSetProp(newNode, (const xmlChar*)"passwd", (const xmlChar*)pass.c_str());
+			}
+			stream.flush();
+			// no exception
+			fd.close();
+		}
+		nlinfo("save %s", filename.c_str());
+		if (verbose)
+			CInterfaceManager::getInstance()->displaySystemInfo("Saving " + filename);
+	}
+	catch (const Exception &e)
+	{
+		nlwarning("Error while writing the file %s : %s", filename.c_str(), e.what());
+		return 0;
+	}
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::getMaxDynChan(CLuaState &ls)
+{
+	ls.push((sint32)CChatGroup::MaxDynChanPerPlayer);
+	return 1;
 }
 
 // ***************************************************************************
