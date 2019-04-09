@@ -222,6 +222,7 @@ inline double	isValidDouble (double v)
  * \param str a string to transform to lower case
  */
 
+std::string toLower ( const char *str );
 std::string	toLower ( const std::string &str );
 void		toLower ( char *str );
 char		toLower ( const char ch );	// convert only one character

@@ -1443,12 +1443,11 @@ namespace NLGUI
 		if (_FontName == name)
 			return;
 
-		if (_FontName.length() > 0)
-		{
-			if (_Index != 0xFFFFFFFF)
-				CViewRenderer::getTextContext(_FontName)->erase (_Index);
-			clearLines();
-		}
+		if (_Index != 0xFFFFFFFF)
+			CViewRenderer::getTextContext(_FontName)->erase (_Index);
+		clearLines();
+
+		resetTextIndex();
 
 		_FontName = name;
 		computeFontSize ();
