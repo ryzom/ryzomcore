@@ -163,6 +163,7 @@ CUserEntity::CUserEntity()
 
 	// Your are not on a mount at the beginning.
 	_OnMount = false;
+	_HiddenMount = CLFECOMMON::INVALID_SLOT;
 
 	_AnimAttackOn = false;
 
@@ -3186,6 +3187,8 @@ void CUserEntity::viewMode(CUserEntity::TView viewMode, bool changeView)
 			CEntityCL *mount = EntitiesMngr.entity(_Mount);
 			if(mount)
 				mount->displayable(false);
+
+			_HiddenMount = _Mount;
 		}
 		// Change Controls.
 		if( isRiding() )
@@ -3203,11 +3206,14 @@ void CUserEntity::viewMode(CUserEntity::TView viewMode, bool changeView)
 	case ThirdPV:
 		if(changeView)
 			ClientCfg.FPV = false;
-		if(_Mount != CLFECOMMON::INVALID_SLOT)
+
+		if(_HiddenMount != CLFECOMMON::INVALID_SLOT)
 		{
-			CEntityCL *mount = EntitiesMngr.entity(_Mount);
+			CEntityCL *mount = EntitiesMngr.entity(_HiddenMount);
 			if(mount)
 				mount->displayable(true);
+
+			_HiddenMount == CLFECOMMON::INVALID_SLOT;
 		}
 		// Change Controls.
 		UserControls.mode(CUserControls::ThirdMode);
@@ -3391,9 +3397,24 @@ void CUserEntity::updateVisualDisplay()
 	if(UserControls.isInternalView() || View.forceFirstPersonView())
 	{
 		// Hide the mount
-		CCharacterCL *mount = dynamic_cast<CCharacterCL *>(EntitiesMngr.entity(_Mount));
-		if(mount)
-			mount->displayable(false);
+		if (_Mount != CLFECOMMON::INVALID_SLOT)
+		{
+			CCharacterCL *mount = dynamic_cast<CCharacterCL *>(EntitiesMngr.entity(_Mount));
+			if(mount)
+				mount->displayable(false);
+
+			_HiddenMount = _Mount;
+		}
+		else if (_HiddenMount != CLFECOMMON::INVALID_SLOT)
+		{
+			// not on mount anymore, but still in FPV
+			CCharacterCL *mount = dynamic_cast<CCharacterCL *>(EntitiesMngr.entity(_HiddenMount));
+			if(mount)
+				mount->displayable(true);
+
+			_HiddenMount = CLFECOMMON::INVALID_SLOT;
+		}
+
 		// Hide all user body parts.
 		for(uint i=0; i<_Instances.size(); ++i)
 			if(!_Instances[i].Current.empty())
