@@ -327,6 +327,7 @@ namespace NLGUI
 				nlwarning("html root node failed");
 				success = false;
 			}
+			xmlFreeDoc(parser->myDoc);
 		}
 		else
 		{
