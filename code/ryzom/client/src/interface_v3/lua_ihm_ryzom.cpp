@@ -556,6 +556,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(getClientCfg),
 		LUABIND_FUNC(sendMsgToServer),
 		LUABIND_FUNC(sendMsgToServerPvpTag),
+		LUABIND_FUNC(sendMsgToServerAutoPact),
 		LUABIND_FUNC(sendMsgToServerUseItem),
 		LUABIND_FUNC(isGuildQuitAvailable),
 		LUABIND_FUNC(sortGuildMembers),
@@ -3409,6 +3410,14 @@ void CLuaIHMRyzom::sendMsgToServerPvpTag(bool pvpTag)
 	//H_AUTO(Lua_CLuaIHM_sendMsgToServerPvpTag)
 	uint8 tag = (uint8)pvpTag;
 	::sendMsgToServer("PVP:PVP_TAG", tag);
+}
+
+// ***************************************************************************
+void CLuaIHMRyzom::sendMsgToServerAutoPact(bool bval)
+{
+	//H_AUTO(Lua_CLuaIHM_sendMsgToServerAutoPact)
+	uint8 dopact = (uint8)bval;
+	::sendMsgToServer("COMMAND:AUTOPACT", dopact);
 }
 
 // ***************************************************************************
