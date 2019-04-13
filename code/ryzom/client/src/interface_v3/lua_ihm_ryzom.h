@@ -206,6 +206,7 @@ private:
 	static std::string getClientCfg(const std::string &varName);
 	static void	sendMsgToServer(const std::string &msgName);
 	static void	sendMsgToServerPvpTag(bool pvpTag);
+	static void	sendMsgToServerAutoPact(bool bval);
 	static void	sendMsgToServerUseItem(sint32 slot);
 	static bool	isGuildQuitAvailable();
 	static void	sortGuildMembers();
