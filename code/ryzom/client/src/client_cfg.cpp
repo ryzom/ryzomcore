@@ -434,6 +434,7 @@ CClientConfig::CClientConfig()
 
 	WebIgMainDomain = "shard.ryzomcore.org";
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
+	WebIgNotifInterval = 10; // time in minutes
 
 	CurlMaxConnections = 2;
 	CurlCABundle.clear();
@@ -1097,6 +1098,7 @@ void CClientConfig::setValues()
 	// WEBIG //
 	READ_STRING_FV(WebIgMainDomain);
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
+	READ_INT_FV(WebIgNotifInterval);
 	READ_INT_FV(CurlMaxConnections);
 	if (ClientCfg.CurlMaxConnections < 0)
 		ClientCfg.CurlMaxConnections = 2;
