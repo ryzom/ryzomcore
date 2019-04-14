@@ -5153,6 +5153,25 @@ namespace NLGUI
 		}
 	}
 
+	void CGroupHTML::setTitle(const std::string &title)
+	{
+		ucstring uctitle;
+		uctitle.fromUtf8(title);
+
+		_TitleString.clear();
+		if(!_TitlePrefix.empty())
+		{
+			_TitleString = _TitlePrefix + " - ";
+		}
+		_TitleString += uctitle;
+
+		setTitle(_TitleString);
+	}
+	
+	std::string CGroupHTML::getTitle() const {
+		return _TitleString.toUtf8(); 
+	};
+
 	// ***************************************************************************
 
 	bool CGroupHTML::lookupLocalFile (string &result, const char *url, bool isUrl)
