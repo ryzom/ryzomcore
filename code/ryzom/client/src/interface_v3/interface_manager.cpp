@@ -1381,6 +1381,8 @@ void CInterfaceManager::uninitInGame1 ()
 	reset();
 	CInterfaceLink::removeAllLinks();
 
+	CWidgetManager::getInstance()->setPointer( NULL );
+
 	// Release DDX manager, before DB remove
 	CDDXManager::getInstance()->release();
 
