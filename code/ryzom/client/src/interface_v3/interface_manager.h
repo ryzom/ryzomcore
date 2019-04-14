@@ -19,8 +19,11 @@
 #ifndef NL_INTERFACE_MANAGER_H
 #define NL_INTERFACE_MANAGER_H
 
+#include <queue>
+
 #include "nel/misc/types_nl.h"
 #include "nel/misc/cdb_manager.h"
+#include "nel/misc/mutex.h"
 #include "nel/3d/u_texture.h"
 #include "nel/3d/u_text_context.h"
 #include "nel/gui/interface_group.h"
@@ -427,6 +430,10 @@ public:
 	void	notifyMailAvailable();
 	void	notifyForumUpdated();
 
+	/** Queue up lua script to be run on next frame update
+	 */
+	void queueLuaScript(const std::string &script);
+
 	/** Return true if 12-hour clock should be used
 	 */
 	static bool use12hClock();
@@ -569,6 +576,12 @@ private:
 	NLMISC::CCDBNodeLeaf *_CheckMailNode;
 	NLMISC::CCDBNodeLeaf *_CheckForumNode;
 	sint64 _UpdateWeatherTime;
+
+	// WebIG notify thread is pushing lua code here
+	std::queue<std::string> _ScriptQueue;
+	NLMISC::CMutex _ScriptQueueMutex;
+
+	void flushScriptQueue();
 
 	// @}
 

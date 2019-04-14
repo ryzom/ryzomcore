@@ -5155,6 +5155,25 @@ namespace NLGUI
 		}
 	}
 
+	void CGroupHTML::setTitle(const std::string &title)
+	{
+		ucstring uctitle;
+		uctitle.fromUtf8(title);
+
+		_TitleString.clear();
+		if(!_TitlePrefix.empty())
+		{
+			_TitleString = _TitlePrefix + " - ";
+		}
+		_TitleString += uctitle;
+
+		setTitle(_TitleString);
+	}
+	
+	std::string CGroupHTML::getTitle() const {
+		return _TitleString.toUtf8(); 
+	};
+
 	// ***************************************************************************
 
 	bool CGroupHTML::lookupLocalFile (string &result, const char *url, bool isUrl)
@@ -5684,6 +5703,22 @@ namespace NLGUI
 			// create html code with image url inside and do the request again
 			renderHtmlString("<html><head><title>"+_URL+"</title></head><body><img src=\"" + _URL + "\"></body></html>");
 		}
+		else if (_TrustedDomain && type.find("text/lua") == 0)
+		{
+			setTitle(_TitleString);
+
+			_LuaScript = "\nlocal __CURRENT_WINDOW__=\""+this->_Id+"\" \n"+content;
+			CLuaManager::getInstance().executeLuaScript(_LuaScript, true);
+			_LuaScript.clear();
+			
+			_Browsing = false;
+			_Connecting = false;
+
+			// disable refresh button
+			clearRefresh();
+			// disable redo into this url
+			_AskedUrl.clear();
+		}
 		else
 		{
 			renderHtmlString(content);
@@ -5928,7 +5963,9 @@ namespace NLGUI
 			return;
 
 		// push to redo, pop undo, and set current
-		_BrowseRedo.push_front(_AskedUrl);
+		if (!_AskedUrl.empty())
+			_BrowseRedo.push_front(_AskedUrl);
+
 		_AskedUrl= _BrowseUndo.back();
 		_BrowseUndo.pop_back();
 

@@ -134,6 +134,8 @@ using namespace NLGUI;
 #include "user_agent.h"
 #include "../item_group_manager.h"
 
+#include "group_html_webig.h"
+
 using namespace NLMISC;
 
 namespace NLGUI
@@ -1050,6 +1052,8 @@ void CInterfaceManager::initInGame()
 	{
 		displaySystemInfo(CI18N::get("uiLogTurnedOff"));
 	}
+
+	startWebIgNotificationThread();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1303,6 +1307,7 @@ void CInterfaceManager::uninitInGame0 ()
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::uninitInGame1 ()
 {
+	stopWebIgNotificationThread();
 
 	// release Bar Manager (HP, SAP etc... Bars)
 	CBarManager::getInstance()->releaseInGame();
@@ -1375,6 +1380,8 @@ void CInterfaceManager::uninitInGame1 ()
 	parser->removeAll();
 	reset();
 	CInterfaceLink::removeAllLinks();
+
+	CWidgetManager::getInstance()->setPointer( NULL );
 
 	// Release DDX manager, before DB remove
 	CDDXManager::getInstance()->release();
@@ -1463,6 +1470,9 @@ void CInterfaceManager::updateFrameEvents()
 {
 
 	H_AUTO_USE ( RZ_Client_Update_Frame_Events )
+
+	// lua scripts from different thread
+	flushScriptQueue();
 
 	flushDebugWindow();
 
@@ -3482,6 +3492,24 @@ void	CInterfaceManager::notifyForumUpdated()
 {
 	if (_CheckForumNode != NULL)
 		_CheckForumNode->setValue32(1);
+}
+
+void CInterfaceManager::queueLuaScript(const std::string &script)
+{
+	CAutoMutex<CMutex> autoMutex(_ScriptQueueMutex);
+
+	_ScriptQueue.push(script);
+}
+
+void CInterfaceManager::flushScriptQueue()
+{
+	CAutoMutex<CMutex> autoMutex(_ScriptQueueMutex);
+
+	while(!_ScriptQueue.empty())
+	{
+		CLuaManager::getInstance().executeLuaScript(_ScriptQueue.front());
+		_ScriptQueue.pop();
+	}
 }
 
 

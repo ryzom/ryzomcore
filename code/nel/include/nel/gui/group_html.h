@@ -319,6 +319,7 @@ namespace NLGUI
 			REFLECT_STRING("html", getHTML, setHTML)
 			REFLECT_STRING("home", home, setHome)
 			REFLECT_FLOAT("timeout", getTimeout, setTimeout)
+			REFLECT_STRING("title", getTitle, setTitle)
 		REFLECT_EXPORT_END
 
 	protected :
@@ -414,6 +415,8 @@ namespace NLGUI
 
 		// Set the title
 		void setTitle (const ucstring &title);
+		void setTitle (const std::string &title);
+		std::string getTitle() const;
 
 		// Lookup a url in local file system
 		bool lookupLocalFile (std::string &result, const char *url, bool isUrl);
