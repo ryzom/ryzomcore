@@ -299,6 +299,27 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
   SEPARATE_ARGUMENTS(PCH_FLAGS)
 ENDMACRO()
 
+MACRO(GET_PDB_FILENAME _out_filename _target)
+  # determine output directory based on target type
+  GET_TARGET_PROPERTY(_targetType ${_target} TYPE)
+  IF(${_targetType} STREQUAL EXECUTABLE)
+    SET(_targetOutput ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+  ELSEIF(${_targetType} STREQUAL STATIC_LIBRARY)
+    SET(_targetOutput ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
+  ELSE()
+    SET(_targetOutput ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+  ENDIF()
+
+  # determine target postfix
+  STRING(TOUPPER "${CMAKE_BUILD_TYPE}_POSTFIX" _postfix_var_name)
+  GET_TARGET_PROPERTY(_targetPostfix ${_target} ${_postfix_var_name})
+  IF(${_targetPostfix} MATCHES NOTFOUND)
+    SET(_targetPostfix "")
+  ENDIF()
+
+  SET(${_out_filename} "${_targetOutput}/${_target}${_targetPostfix}.pdb")
+ENDMACRO(GET_PDB_FILENAME)
+
 MACRO(PCH_SET_COMPILE_COMMAND _inputcpp _compile_FLAGS _includes)
   IF(CMAKE_CXX_COMPILER_ARG1)
     # remove leading space in compiler argument
@@ -308,7 +329,7 @@ MACRO(PCH_SET_COMPILE_COMMAND _inputcpp _compile_FLAGS _includes)
   ENDIF()
 
   IF(MSVC)
-    GET_INTERMEDIATE_PDB_FULLPATH(${_PCH_current_target} _PDB_FILE)
+    GET_PDB_FILENAME(_PDB_FILE ${_PCH_current_target})
 
     SET(PCH_TEMP_CONTENT)
 
