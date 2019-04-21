@@ -121,7 +121,8 @@ bool CConfigFile::load(const QString &filename)
 	// only resize if added servers in local ryzom_installer.ini
 	CServers defaultServers = m_servers;
 
-	m_servers.resize(serversCount);
+	// only resize if servers count is greater than default ones
+	if (serversCount > m_servers.count()) m_servers.resize(serversCount);
 
 	for (int i = 0; i < serversCount; ++i)
 	{
