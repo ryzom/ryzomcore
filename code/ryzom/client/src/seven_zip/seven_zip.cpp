@@ -35,6 +35,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 
 /// Input stream class for 7zip archive
 class CNel7ZipInStream : public ISeekInStream
@@ -110,18 +114,20 @@ bool unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName
 	lookStream.realStream = &inStr;
 	LookToRead2_CreateVTable(&lookStream, False);
 
+	size_t bufferSize = 1024;
+
 	{
-		lookStream.buf = (Byte*)ISzAlloc_Alloc(&allocImp, 1024);
+		lookStream.buf = (Byte*)ISzAlloc_Alloc(&allocImp, bufferSize);
 
 		if (!lookStream.buf)
 		{
+			nlerror("Unable to allocate %zu bytes", bufferSize);
+			return false;
 		}
-		else
-		{
-			lookStream.bufSize = 1024;
-			lookStream.realStream = &inStr;
-			LookToRead2_Init(&lookStream);
-		}
+
+		lookStream.bufSize = bufferSize;
+		lookStream.realStream = &inStr;
+		LookToRead2_Init(&lookStream);
 	}
 
 	CrcGenerateTable();

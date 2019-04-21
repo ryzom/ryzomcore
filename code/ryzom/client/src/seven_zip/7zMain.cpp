@@ -1,5 +1,5 @@
 /* 7zMain.c - Test application for 7z Decoder
-2018-04-19 : Igor Pavlov : Public domain */
+2019-02-02 : Igor Pavlov : Public domain */
 
 #include "Precomp.h"
 
@@ -227,7 +227,7 @@ static WRes MyCreateDir(const UInt16 *name)
 static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name)
 {
   #ifdef USE_WINDOWS_FILE
-  return OutFile_OpenW(p, (const WCHAR *)name);
+  return OutFile_OpenW(p, (LPCWSTR)name);
   #else
   CBuf buf;
   WRes res;
@@ -238,6 +238,7 @@ static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name)
   return res;
   #endif
 }
+
 
 static SRes PrintString(const UInt16 *s)
 {
@@ -353,7 +354,7 @@ static void PrintError(char *s)
   PrintLF();
 }
 
-static void GetAttribString(UInt32 wa, Bool isDir, char *s)
+static void GetAttribString(UInt32 wa, BoolInt isDir, char *s)
 {
   #ifdef USE_WINDOWS_FILE
   s[0] = (char)(((wa & FILE_ATTRIBUTE_DIRECTORY) != 0 || isDir) ? 'D' : '.');
@@ -429,7 +430,7 @@ int MY_CDECL main(int numargs, char *args[])
   res = SZ_OK;
 
   {
-    lookStream.buf = (Byte*)ISzAlloc_Alloc(&allocImp, kInputBufSize);
+    lookStream.buf = (Byte *)ISzAlloc_Alloc(&allocImp, kInputBufSize);
     if (!lookStream.buf)
       res = SZ_ERROR_MEM;
     else
