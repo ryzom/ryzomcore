@@ -51,7 +51,7 @@ public:
 	}
 
 	// the read function called by 7zip to read data
-	static SRes readFunc(void *object, void *buffer, size_t *size)
+	static SRes readFunc(const ISeekInStream *object, void *buffer, size_t *size)
 	{
 		try
 		{
@@ -67,7 +67,7 @@ public:
 	}
 
 	// the seek function called by seven zip to seek inside stream
-	static SRes seekFunc(void *object, Int64 *pos, ESzSeek origin)
+	static SRes seekFunc(const ISeekInStream *object, Int64 *pos, ESzSeek origin)
 	{
 		try
 		{
@@ -106,10 +106,23 @@ bool unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName
 	CIFile input(sevenZipFile);
 	CNel7ZipInStream inStr(&input);
 
-	CLookToRead lookStream;
+	CLookToRead2 lookStream;
 	lookStream.realStream = &inStr;
-	LookToRead_CreateVTable(&lookStream, False);
-	LookToRead_Init(&lookStream);
+	LookToRead2_CreateVTable(&lookStream, False);
+
+	{
+		lookStream.buf = (Byte*)ISzAlloc_Alloc(&allocImp, 1024);
+
+		if (!lookStream.buf)
+		{
+		}
+		else
+		{
+			lookStream.bufSize = 1024;
+			lookStream.realStream = &inStr;
+			LookToRead2_Init(&lookStream);
+		}
+	}
 
 	CrcGenerateTable();
 
@@ -117,7 +130,7 @@ bool unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName
 	SzArEx_Init(&db);
 
 	// unpack the file using the 7zip API
-	SRes res = SzArEx_Open(&db, &lookStream.s, &allocImp, &allocTempImp);
+	SRes res = SzArEx_Open(&db, &lookStream.vt, &allocImp, &allocTempImp);
 
 	if (res != SZ_OK)
 	{
@@ -139,10 +152,7 @@ bool unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName
 	size_t outSizeProcessed = 0;
 
 	// get the first file
-	res = SzArEx_Extract(&db, &lookStream.s, 0,
-		&blockIndex, &outBuffer, &outBufferSize,
-		&offset, &outSizeProcessed,
-		&allocImp, &allocTempImp);
+	res = SzArEx_Extract(&db, &lookStream.vt, 0, &blockIndex, &outBuffer, &outBufferSize, &offset, &outSizeProcessed, &allocImp, &allocTempImp);
 
 	// get the length of first file
 	size_t nameLen = SzArEx_GetFileNameUtf16(&db, 0, NULL);

@@ -10,7 +10,9 @@
 	#include <crtdbg.h>
 #endif
 
+#define _7ZIP_ST
+
 #include "Compiler.h"
-#include "7zTypes.h"
+/* #include "7zTypes.h" */
 
 #endif
