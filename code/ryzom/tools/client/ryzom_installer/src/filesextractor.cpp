@@ -86,8 +86,10 @@
 
 #define FILE_ATTRIBUTE_UNIX_EXTENSION   0x8000   /* trick for Unix */
 
-#define FILE_ATTRIBUTE_WINDOWS          0x5fff
+#define FILE_ATTRIBUTE_WINDOWS          0x7fff
 #define FILE_ATTRIBUTE_UNIX         0xffff0000
+
+#define kInputBufSize ((size_t)1 << 18)
 
 bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 {
@@ -192,7 +194,7 @@ public:
 	}
 
 	// the read function called by 7zip to read data
-	static SRes readFunc(void *object, void *buffer, size_t *size)
+	static SRes readFunc(const ISeekInStream *object, void *buffer, size_t *size)
 	{
 		Q7zFile *me = (Q7zFile*)object;
 		qint64 len = *size;
@@ -210,7 +212,7 @@ public:
 	}
 
 	// the seek function called by seven zip to seek inside stream
-	static SRes seekFunc(void *object, Int64 *pos, ESzSeek origin)
+	static SRes seekFunc(const ISeekInStream *object, Int64 *pos, ESzSeek origin)
 	{
 		Q7zFile *me = (Q7zFile*)object;
 		qint64 newPos = 0;
@@ -328,19 +330,6 @@ bool CFilesExtractor::extract7z()
 	UInt16 *temp = NULL;
 	size_t tempSize = 0;
 
-	// register the files read handlers
-	CLookToRead lookStream;
-	lookStream.realStream = &inFile;
-	LookToRead_CreateVTable(&lookStream, False);
-	LookToRead_Init(&lookStream);
-
-	// init CRC table
-	CrcGenerateTable();
-
-	// init 7z
-	CSzArEx db;
-	SzArEx_Init(&db);
-
 	// register allocators
 	ISzAlloc allocImp;
 	allocImp.Alloc = SzAlloc;
@@ -350,11 +339,37 @@ bool CFilesExtractor::extract7z()
 	allocTempImp.Alloc = SzAllocTemp;
 	allocTempImp.Free = SzFreeTemp;
 
+	// register the files read handlers
+	CLookToRead2 lookStream;
+	LookToRead2_CreateVTable(&lookStream, False);
+	lookStream.buf = (Byte*)ISzAlloc_Alloc(&allocImp, kInputBufSize);
+
+	if (!lookStream.buf)
+	{
+		nlwarning("Unable to allocate %u bytes", (uint32)kInputBufSize);
+
+		if (m_listener) m_listener->operationFail(QApplication::tr("Unable to allocate %1 bytes").arg(kInputBufSize));
+		return false;
+	}
+
+	LookToRead2_Init(&lookStream);
+
+	lookStream.bufSize = kInputBufSize;
+	lookStream.realStream = &inFile;
+	LookToRead2_Init(&lookStream);
+
+	// init CRC table
+	CrcGenerateTable();
+
+	// init 7z
+	CSzArEx db;
+	SzArEx_Init(&db);
+
 	qint64 total = 0, totalUncompressed = 0;
 	QString error;
 
-	// open 7z acrhive
-	SRes res = SzArEx_Open(&db, &lookStream.s, &allocImp, &allocTempImp);
+	// open 7z archive
+	SRes res = SzArEx_Open(&db, &lookStream.vt, &allocImp, &allocTempImp);
 
 	if (res == SZ_OK)
 	{
@@ -423,6 +438,27 @@ bool CFilesExtractor::extract7z()
 				modificationTime = convertWindowsFileTimeToUnixTimestamp(db.MTime.Vals[i]);
 			}
 
+
+			FILETIME mtime, ctime;
+			FILETIME * mtimePtr = NULL;
+			FILETIME * ctimePtr = NULL;
+
+			if (SzBitWithVals_Check(&db.MTime, i))
+			{
+				const CNtfsFileTime *t = &db.MTime.Vals[i];
+				mtime.dwLowDateTime = (DWORD)(t->Low);
+				mtime.dwHighDateTime = (DWORD)(t->High);
+				mtimePtr = &mtime;
+			}
+			
+			if (SzBitWithVals_Check(&db.CTime, i))
+			{
+				const CNtfsFileTime *t = &db.CTime.Vals[i];
+				ctime.dwLowDateTime = (DWORD)(t->Low);
+				ctime.dwHighDateTime = (DWORD)(t->High);
+				ctimePtr = &ctime;
+			}
+
 			if (isDir)
 			{
 				QDir().mkpath(destPath);
@@ -448,7 +484,7 @@ bool CFilesExtractor::extract7z()
 
 			if (m_listener) m_listener->operationProgress(totalUncompressed, filename);
 
-			res = SzArEx_Extract(&db, &lookStream.s, i, &blockIndex, &outBuffer, &outBufferSize,
+			res = SzArEx_Extract(&db, &lookStream.vt, i, &blockIndex, &outBuffer, &outBufferSize,
 				&offset, &outSizeProcessed, &allocImp, &allocTempImp);
 
 			if (res != SZ_OK) break;
@@ -518,8 +554,9 @@ bool CFilesExtractor::extract7z()
 		IAlloc_Free(&allocImp, outBuffer);
 	}
 
-	SzArEx_Free(&db, &allocImp);
 	SzFree(NULL, temp);
+	SzArEx_Free(&db, &allocImp);
+	ISzAlloc_Free(&allocImp, lookStream.buf);
 
 	switch(res)
 	{
