@@ -3213,7 +3213,7 @@ void CUserEntity::viewMode(CUserEntity::TView viewMode, bool changeView)
 			if(mount)
 				mount->displayable(true);
 
-			_HiddenMount == CLFECOMMON::INVALID_SLOT;
+			_HiddenMount = CLFECOMMON::INVALID_SLOT;
 		}
 		// Change Controls.
 		UserControls.mode(CUserControls::ThirdMode);
