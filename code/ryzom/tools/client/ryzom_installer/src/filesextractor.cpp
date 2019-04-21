@@ -431,32 +431,16 @@ bool CFilesExtractor::extract7z()
 			quint64 uncompressedSize = SzArEx_GetFileSize(&db, i);
 
 			// get modification time
-			quint32 modificationTime = 0;
+			quint32 modificationTime = 0, creationTime = 0;
 
 			if (SzBitWithVals_Check(&db.MTime, i))
 			{
 				modificationTime = convertWindowsFileTimeToUnixTimestamp(db.MTime.Vals[i]);
 			}
 
-
-			FILETIME mtime, ctime;
-			FILETIME * mtimePtr = NULL;
-			FILETIME * ctimePtr = NULL;
-
-			if (SzBitWithVals_Check(&db.MTime, i))
-			{
-				const CNtfsFileTime *t = &db.MTime.Vals[i];
-				mtime.dwLowDateTime = (DWORD)(t->Low);
-				mtime.dwHighDateTime = (DWORD)(t->High);
-				mtimePtr = &mtime;
-			}
-			
 			if (SzBitWithVals_Check(&db.CTime, i))
 			{
-				const CNtfsFileTime *t = &db.CTime.Vals[i];
-				ctime.dwLowDateTime = (DWORD)(t->Low);
-				ctime.dwHighDateTime = (DWORD)(t->High);
-				ctimePtr = &ctime;
+				creationTime = convertWindowsFileTimeToUnixTimestamp(db.CTime.Vals[i]);
 			}
 
 			if (isDir)
