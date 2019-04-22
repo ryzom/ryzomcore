@@ -34,6 +34,7 @@ IF(WITH_NEL_TOOLS)
   ENDIF()
   SUBDIRS(
     build_interface
+    unbuild_interface
     get_neighbors
     textures_optimizer
     textures_tool
