@@ -87,15 +87,16 @@ bool DisplayStream = false;
 bool DisplayReplaces = false;
 
 bool ReplacePaths = true;
-bool ReplaceMapExt = true;
+bool ReplaceMapExt = false;
 
+bool WritePathChangesOnly = true;
 bool WriteModified = true;
 bool WriteDummy = false;
 
 bool HaltOnIssue = false;
 
 const char *DatabaseDirectory = "w:\\database\\";
-const char *LinuxDatabaseDirectory = "/mnt/tsurugi/ryzom-assets/database/";
+const char *LinuxDatabaseDirectory = "/mnt/y/ryzom-assets/database/";
 bool RunningLinux = true;
 
 //const char *SrcDirectoryRecursive = "w:\\database\\interfaces\\";
@@ -103,7 +104,8 @@ bool RunningLinux = true;
 //const char *SrcDirectoryRecursive = "w:\\database\\stuff\\fyros\\city\\newpositionville\\";
 const char *SrcDirectoryRecursiveInit = "w:\\database\\";
 //const char *SrcDirectoryRecursiveHandle = "w:\\database\\stuff\\generique\\agents\\accessories\\";
-const char *SrcDirectoryRecursiveHandle = "w:\\database\\landscape\\ligo\\primes_racines\\max\\";
+//const char *SrcDirectoryRecursiveHandle = "w:\\database\\landscape\\ligo\\primes_racines\\max\\";
+const char *SrcDirectoryRecursiveHandle = "w:\\database\\stuff\\fyros\\decors\\constructions\\";
 
 bool UseFallbackTga = false;
 const char *FallbackTga = "w:\\database\\stuff\\lod_actors\\texture_lod\\trame.png";
@@ -204,6 +206,8 @@ inline char stripFrenchLocale(char c0)
 
 std::string rewritePath(const std::string &path, const std::string &databaseDirectory)
 {
+	// nldebug("Rewrite: %s", path.c_str());
+	
 	static std::set<std::string> fileNameCache;
 
 	std::string stdPath = standardizePath(path, false);
@@ -597,9 +601,6 @@ void runHandler()
 	nlinfo("DatabaseDirectory: '%s'", DatabaseDirectory);
 
 	doDirectoryHandler(SrcDirectoryRecursiveHandle);
-
-	for (std::set<std::string>::iterator it = MissingFiles.begin(), end = MissingFiles.end(); it != end; ++it)
-		nlinfo("Missing: '%s'", (*it).c_str());
 }
 
 void serializeStorageContainer(PIPELINE::MAX::CStorageContainer *storageContainer, GsfInfile *infile, const char *streamName)
@@ -716,6 +717,8 @@ std::string rewritePathFinal(const std::string &str)
 
 bool isImportantFilePath(const std::string &str)
 {
+	// nldebug("Is important? %s", str.c_str());
+	
 	std::string strtrimmed = cleanString(str);
 	if (strtrimmed.size() >= 4)
 	{
@@ -775,31 +778,51 @@ bool hasImportantFilePath(CStorageRaw *raw)
 	return false;
 }
 
-void fixChunk(uint16 id, IStorageObject *chunk)
+bool fixChunk(uint16 id, IStorageObject *chunk)
 {
+	if (id == 4656)
+	{
+		// nldebug("testing 4656: %s", chunk->toString().c_str());
+	}
+	bool changed = false;
 	CStorageValue<std::string> *asString = dynamic_cast<CStorageValue<std::string> *>(chunk);
 	if (asString)
 	{
 		// nldebug("String: %s", asString->Value.c_str());
 		if (isImportantFilePath(asString->Value))
-			asString->Value = rewritePathFinal(asString->Value);
-		return;
+		{
+			std::string rewritten = rewritePathFinal(asString->Value);
+			if (rewritten != asString->Value)
+			{
+				asString->Value = rewritten;
+				changed = true;
+			}
+		}
+		return changed;
 	}
 	CStorageValue<ucstring> *asUCString = dynamic_cast<CStorageValue<ucstring> *>(chunk);
 	if (asUCString)
 	{
 		// nldebug("UCString: %s", asUCString->Value.toUtf8().c_str());
 		if (isImportantFilePath(asUCString->Value.toString()))
-			asUCString->Value.fromUtf8(rewritePathFinal(asUCString->Value.toString()));
-		return;
+		{
+			std::string rewritten = rewritePathFinal(asUCString->Value.toString());
+			if (rewritten != asUCString->Value.toString())
+			{
+				asUCString->Value.fromUtf8(rewritten);
+				changed = true;
+			}
+		}
+		return changed;
 	}
 	CStorageRaw *asRaw = dynamic_cast<CStorageRaw *>(chunk);
 	if (asRaw)
 	{
 		switch (id)
 		{
-		case 256:
 		case 4656:
+			// nldebug("4656: %s", chunk->toString().c_str());
+		case 256:
 		case 16385:
 		case 288: // .max xref in classdata
 			if (hasImportantFilePath(asRaw))
@@ -811,9 +834,14 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 				memcpy(&str[0], &asRaw->Value[0], asRaw->Value.size());
 				// nldebug("[%s]", str.toString().c_str());
 				nlassert(isImportantFilePath(str.toString()));
-				str.fromUtf8(rewritePathFinal(str.toString()));
-				asRaw->Value.resize(str.size() * 2);
-				memcpy(&asRaw->Value[0], &str[0], asRaw->Value.size());
+				std::string rewritten = rewritePathFinal(str.toString());
+				if (rewritten != str.toString())
+				{
+					str.fromUtf8(rewritten);
+					asRaw->Value.resize(str.size() * 2);
+					memcpy(&asRaw->Value[0], &str[0], asRaw->Value.size());
+					changed = true;
+				}
 				break;
 			}
 		case 10:
@@ -883,7 +911,7 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 									std::string x;
 									std::cin >> x;
 								}
-								return;
+								return changed;
 							}
 							std::string v;
 							if (overrideFF && size == -1)
@@ -907,7 +935,7 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 									std::string x;
 									std::cin >> x;
 								}
-								return;
+								return changed;
 							}
 							v.resize(v.size() - 1);
 							// nldebug("%s", v.c_str());
@@ -924,7 +952,12 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 						if (isImportantFilePath(strings[i]))
 						{
 							foundone = true;
-							strings[i] = rewritePathFinal(strings[i]);
+							std::string rewritten = rewritePathFinal(strings[i]);
+							if (rewritten != strings[i])
+							{
+								strings[i] = rewritten;
+								changed = true;
+							}
 						}
 					}
 					nlassert(foundone);
@@ -950,7 +983,7 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 					}
 					//std::string x;
 					//std::cin >> x;
-					return;
+					return changed;
 				}
 				std::string str;
 				str.resize(size - 1);
@@ -970,11 +1003,16 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 					}
 					break;
 				}
-				str = rewritePathFinal(str);
-				asRaw->Value.resize(str.size() + 11 + 4 + 1);
-				memcpy(&asRaw->Value[15], &str[0], str.size());
-				((uint32 *)&asRaw->Value[11])[0] = str.size() + 1;
-				asRaw->Value[asRaw->Value.size() - 1] = 0;
+				std::string rewritten = rewritePathFinal(str);
+				if (rewritten != str)
+				{
+					str = rewritten;
+					asRaw->Value.resize(str.size() + 11 + 4 + 1);
+					memcpy(&asRaw->Value[15], &str[0], str.size());
+					((uint32 *)&asRaw->Value[11])[0] = str.size() + 1;
+					asRaw->Value[asRaw->Value.size() - 1] = 0;
+					changed = true;
+				}
 				break;
 			}
 		case 304:
@@ -991,10 +1029,15 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 					asRaw->toString(std::cout);
 					nlerror("not important");
 				}
-				str = rewritePathFinal(str);
-				asRaw->Value.resize(str.size() + 1);
-				memcpy(&asRaw->Value[0], &str[0], str.size());
-				asRaw->Value[asRaw->Value.size() - 1] = 0;
+				std::string rewritten = rewritePathFinal(str);
+				if (rewritten != str)
+				{
+					str = rewritten;
+					asRaw->Value.resize(str.size() + 1);
+					memcpy(&asRaw->Value[0], &str[0], str.size());
+					asRaw->Value[asRaw->Value.size() - 1] = 0;
+					changed = true;
+				}
 				break;
 			}
 		case 9730:
@@ -1014,26 +1057,29 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 					std::string x;
 					std::cin >> x;
 				}
-				return;
+				return changed;
 			}
 			break;
 		}
 	}
+	return changed;
 }
 
-void fixChunks(CStorageContainer *container)
+bool fixChunks(CStorageContainer *container)
 {
+	bool changed = false;
 	for (CStorageContainer::TStorageObjectConstIt it = container->chunks().begin(), end = container->chunks().end(); it != end; ++it)
 	{
 		if (it->second->isContainer())
 		{
-			fixChunks(static_cast<CStorageContainer *>(it->second));
+			changed = (changed || fixChunks(static_cast<CStorageContainer *>(it->second)));
 		}
 		else
 		{
-			fixChunk(it->first, it->second);
+			changed = (changed || fixChunk(it->first, it->second));
 		}
 	}
+	return changed;
 }
 
 void handleFile(const std::string &path)
@@ -1115,11 +1161,13 @@ void handleFile(const std::string &path)
 
 	g_object_unref(infile);
 
+	bool pathsChanged = !WritePathChangesOnly;
 	if (ReplacePaths)
 	{
-		fixChunks(&classData);
-		fixChunks(&scene);
+		pathsChanged = pathsChanged || fixChunks(&classData);
+		pathsChanged = pathsChanged || fixChunks(&scene);
 	}
+	
 	if (ReplaceMapExt)
 	{
 		// Parse the scene
@@ -1443,7 +1491,7 @@ void handleFile(const std::string &path)
 
 	dllDirectory.disown();
 	classDirectory3.disown();
-	if (WriteModified)
+	if (WriteModified && (ReplaceMapExt || pathsChanged))
 	{
 		const char *outpath = (WriteDummy ? "testdummy.max" : path.c_str());
 		GsfOutput  *output;
@@ -1506,10 +1554,14 @@ int main(int argc, char **argv)
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_fy_wea_trib_grand_bouclier.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_mission_entrepot.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\mesh_wip\\all_trib_weapons.max"));
+	//handleFile(nativeDatabasePath("w:\\database\\stuff\\fyros\\decors\\constructions\\fy_cn_smokehouse.max"));
 	//handleFile("/srv/work/database/landscape/ligo/jungle/pipeline_max/zonematerial-foret-ruine_boss.max");
 	//handleFile("/srv/work/database/stuff/fyros/agents/actors/male/animation/anims_non_utilisees/fy_hom_assis_boire_verre.max");
 	//handleFile("/home/kaetemi/3dsMax/scenes/test_clear_add_uvw.max");
 	//runScanner();
+
+	for (std::set<std::string>::iterator it = MissingFiles.begin(), end = MissingFiles.end(); it != end; ++it)
+		nlinfo("Missing: '%s'", (*it).c_str());
 
 	gsf_shutdown();
 
