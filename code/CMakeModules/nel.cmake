@@ -247,6 +247,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_INSTALL_LIBRARIES   "Install development files."                    ON )
 
   OPTION(WITH_ASSIMP              "Use assimp exporter"                           OFF)
+  OPTION(WITH_LIBGSF              "Use libgsf for max file library"               OFF)
 
   ###
   # GUI toolkits

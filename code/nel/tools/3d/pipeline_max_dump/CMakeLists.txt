@@ -17,20 +17,20 @@ INCLUDE_DIRECTORIES(${LIBGSF_INCLUDE_DIR})
 FILE(GLOB SRCS *.cpp)
 FILE(GLOB HDRS *.h)
 
-ADD_EXECUTABLE(pipeline_max_rewrite_assets
+ADD_EXECUTABLE(pipeline_max_dump
 	${SRCS}
 	${HDRS}
 	)
 
-TARGET_LINK_LIBRARIES(pipeline_max_rewrite_assets
+TARGET_LINK_LIBRARIES(pipeline_max_dump
 	${LIBGSF_LIBRARIES}
 	${GLIB2_LIBRARIES}
 	pipeline_max
 	nelmisc
 )
 
-NL_DEFAULT_PROPS(pipeline_max_dump "NeL, Tools, Pipeline: Max Rewrite Assets")
-NL_ADD_RUNTIME_FLAGS(pipeline_max_rewrite_assets)
+NL_DEFAULT_PROPS(pipeline_max_dump "NeL, Tools, 3D: Pipeline Max Dump (Temporary Tool)")
+NL_ADD_RUNTIME_FLAGS(pipeline_max_dump)
 
-INSTALL(TARGETS pipeline_max_rewrite_assets RUNTIME DESTINATION bin COMPONENT toolsmisc)
+INSTALL(TARGETS pipeline_max_dump RUNTIME DESTINATION bin COMPONENT toolsmisc)
 

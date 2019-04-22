@@ -30,7 +30,7 @@ TARGET_LINK_LIBRARIES(pipeline_max
 
 SET_TARGET_PROPERTIES(pipeline_max PROPERTIES LINK_INTERFACE_LIBRARIES "")
 
-NL_DEFAULT_PROPS(pipeline_max "NeL, Tools, Pipeline: Max (Library)")
+NL_DEFAULT_PROPS(pipeline_max "NeL, Tools, 3D: Pipeline Max (Library)")
 NL_ADD_LIB_SUFFIX(pipeline_max)
 NL_ADD_RUNTIME_FLAGS(pipeline_max)
 

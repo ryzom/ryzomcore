@@ -6,6 +6,12 @@ IF(WITH_NEL_TOOLS)
         mesh_utils
         mesh_export)
     ENDIF()
+    IF(WITH_LIBGSF)
+      SUBDIRS(
+        pipeline_max
+        pipeline_max_dump
+        pipeline_max_rewrite_assets)
+    ENDIF()
     SUBDIRS(
       anim_builder
       animation_set_builder
