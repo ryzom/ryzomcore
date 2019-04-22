@@ -1,0 +1,1184 @@
+
+
+
+see:
+http://area.autodesk.com/blogs/chris/reading_and_modifying_asset_file_paths_in_the_3ds_max_file
+file:///usr/share/doc/libgsf-1-dev/html/gsf/api.html
+
+
+
+(max 3.x)
+/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max:
+d          0 *root*
+f         52 VideoPostQueue
+f    2159653 Scene
+f       1228 DllDirectory
+f      18700 Config
+f       3194 ClassDirectory3
+f        176 ClassData
+f      34780 SummaryInformation
+f       3352 DocumentSummaryInformation
+
+(max 2010)
+/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max:
+d          0 *root*
+f         52 VideoPostQueue <- not important
+f     147230 Scene <- the main scene, todo
+f        366 FileAssetMetaData2 <- this is new in max2010! (it is unfortunately in a different format ...)
+f       2198 DllDirectory <- a listing of dlls used by this file
+f      29605 Config <- contains stuff related to the paramblocks in max scripts, needed for handling nel material
+f       3438 ClassDirectory3 <- a listing of used classes, the index in this list may be relevant to chunk ids
+f        691 ClassData <- maybe contains global class data
+f      29576 SummaryInformation <- standard windows stuff, different format
+f       2320 DocumentSummaryInformation
+
+
+
+kaetemi@benzaiten ~/source/minimax/build $ gsf dump /home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max VideoPostQueue
+VideoPostQueue
+[
+	50 00 (id: 0x0050)
+	0a 00 00 00 (size: 10 - 6 = 4)
+	[
+		01 00 00 00 (value: 1)
+	]
+]
+[
+	60 00 (id: 0x0060)
+	2a 00 00 80 (size: 42 - 6 = 36) (note: negative bit = container)
+	[
+		10 00 (id: 0x0010)
+		1e 00 00 00 (size: 30 - 6 = 24)
+		[
+			07 00 00 00 (value: 7)
+			01 00 00 00 (value: 1)
+			00 00 00 00
+			00 00 00 00
+			20 12 00 00 (value: 4610)
+			00 00 00 00
+		]
+		20 00 (id: 0x0020)
+		06 00 00 00 (size: 6 - 6 = 0)
+	]
+]
+
+
+
+
+Pipeline Max Dump (Temporary Tool)
+/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max
+DllDirectory
+CHUNK ID: 8248, SIZE: 112, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 80, CONTAINER: 0
+		UTF16: Default materials and textures (Kinetix)
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 20, CONTAINER: 0
+		UTF16: mtlgen.dlt
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 108, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 82, CONTAINER: 0
+		UTF16: Standard materials and textures (Kinetix)
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 14, CONTAINER: 0
+		UTF16: mtl.dlt
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 90, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 54, CONTAINER: 0
+		UTF16: Standard samplers (Kinetix)
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 24, CONTAINER: 0
+		UTF16: samplers.dlh
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 88, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 60, CONTAINER: 0
+		UTF16: Standard controllers (Kinetix)
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 16, CONTAINER: 0
+		UTF16: ctrl.dlc
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 128, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 92, CONTAINER: 0
+		UTF16: Physique Modifier: a skeletal deformation tool
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 24, CONTAINER: 0
+		UTF16: physique.dlm
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 94, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 60, CONTAINER: 0
+		UTF16: Editable mesh object (Kinetix)
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 22, CONTAINER: 0
+		UTF16: update1.dlo
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 84, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 54, CONTAINER: 0
+		UTF16: BIPED.DLC: Biped Controller
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 18, CONTAINER: 0
+		UTF16: biped.dlc
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 260, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 218, CONTAINER: 0
+		UTF16: Map extender plug-in --- made by 3DSMax Team - UBI Soft Romania & Daniel Raviart - Ubi Research & Development
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 30, CONTAINER: 0
+		UTF16: mapext198m3.dlm
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 106, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 74, CONTAINER: 0
+		UTF16: Standard pre-filter kernels (Kinetix)
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 20, CONTAINER: 0
+		UTF16: kernel.dlk
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 98, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 70, CONTAINER: 0
+		UTF16: Default scanline renderer (Kinetix)
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 16, CONTAINER: 0
+		UTF16: rend.dlr
+	SKIPPED: 0
+SKIPPED: 0
+
+
+
+Chunk Header
+As follows:
+2 bytes ID, interpretation context (parent) dependent, often refers to a class or version configuration used to parse this chunk
+4 bytes Size, most significant bit flags whether the chunk is a container
+if Size is 0: 8 bytes Size64, idem meaning Size, support for large files
+
+
+Scene
+
+
+The Scene stream contains 1 root chunk, with as ID the version that the max file is stored in.
+0x2004		3
+0x2006		4
+0x2008		5
+0x2009		6
+?			7
+?			8
+0x200E		9
+0x200F		2008 (10)
+?			2009 (11)
+0x2012		2010 (12)
+?			2011 (13)
+?			2012 (14)
+?			2013 (15)
+The size of this chunk, including the header size, is equal to the size of the Scene stream.
+
+
+
+
+
+max 3
+       0 | 04 20 (id version)
+                 25 f4 20 80 (size + containerflag)
+                             00 00 (id)
+                                   40 00 00 80 (size + containerflag)
+                                               35 20
+                                                     0a 00 | ..%.....@...5...
+      10 | 00 00 02 00 00 00 01 25 0a 00 00 00 00 00 80 3f | .......%.......?
+      20 | 00 25 0e 00 00 00 00 00 00 80 00 00 00 80 02 30 | .%.............0
+      30 | 0a 00 00 00 00 00 00 00 03 30 0e 00 00 00 00 00 | .........0......
+      40 | 00 80 00 00 00 80 01 00 b8 01 00 80 01 00 0a 00 | ................
+      50 | 00 00 0d 00 00 00 05 00 08 00 00 00 06 00 02 00 | ................
+      60 | 20 00 00 80 03 00 0a 00 00 00 00 00 00 00 04 00 | ................
+      70 | 06 00 00 00 00 01 0a 00 00 00 00 00 00 00 02 00 | ................
+      80 | 20 00 00 80 03 00 0a 00 00 00 01 00 00 00 04 00 | ................
+      90 | 06 00 00 00 00 01 0a 00 00 00 00 00 00 00 02 00 | ................
+      a0 | 20 00 00 80 03 00 0a 00 00 00 02 00 00 00 04 00 | ................
+      b0 | 06 00 00 00 00 01 0a 00 00 00 00 00 80 3f 02 00 | .............?..
+      c0 | 20 00 00 80 03 00 0a 00 00 00 03 00 00 00 04 00 | ................
+      d0 | 06 00 00 00 00 01 0a 00 00 00 00 00 80 3f 02 00 | .............?..
+      e0 | 20 00 00 80 03 00 0a 00 00 00 04 00 00 00 04 00 | ................
+      f0 | 06 00 00 00 00 01 0a 00 00 00 00 00 00 00 02 00 | ................
+     100 | 20 00 00 80 03 00 0a 00 00 00 05 00 00 00 04 00 | ................
+     110 | 06 00 00 00 00 01 0a 00 00 00 00 00 00 00 02 00 | ................
+     120 | 20 00 00 80 03 00 0a 00 00 00 06 00 00 00 04 00 | ................
+     130 | 06 00 00 00 00 01 0a 00 00 00 00 00 00 00 02 00 | ................
+     140 | 20 00 00 80 03 00 0a 00 00 00 07 00 00 00 04 00 | ................
+     150 | 06 00 00 00 00 01 0a 00 00 00 00 00 80 3f 02 00 | .............?..
+     160 | 20 00 00 80 03 00 0a 00 00 00 08 00 00 00 04 00 | ................
+
+
+
+
+
+max 9 (stored under wine)
+Scene:
+       0 | 0e 20 (id version)
+                 00 00 00 00 (missing size)
+                             01 49
+                                   40 00 00 00 00 80 00 00 | .......I@.......
+      10 | 00 00 00 00 d0 00 00 00 00 00 00 80 0b 00 00 00 | ................
+      20 | 00 00 26 00 00 00 00 00 00 00 3c 29 06 5a 1e 0c | ..&.......<).Z..
+      30 | 42 30 60 11 00 00 00 00 00 15 28 23 04 00 01 00 | B0`.......(#....
+      40 | 00 00 0e 00 00 00 00 00 21 00 00 00 00 00 00 00 | ........!.......
+      50 | 00 00 04 00 00 00 00 00 82 00 00 00 00 00 40 00 | ..............@.
+      60 | 00 00 00 0e 00 00 00 00 00 21 00 00 00 00 00 00 | .........!......
+      70 | 00 01 00 01 00 00 00 00 00 82 00 00 00 00 00 40 | ...............@
+      80 | 00 00 00 00 0e 00 00 00 00 00 21 00 00 00 00 00 | ..........!.....
+      90 | 00 00 02 00 04 00 00 00 00 00 82 00 00 00 00 00 | ................
+      a0 | 40 00 00 00 00 0e 00 00 00 00 00 21 00 00 00 00 | @..........!....
+      b0 | 00 00 00 04 00 09 00 00 00 00 00
+                                            80 06 00 00 00 | ................
+      c0 | 00 40 ff ff ff ff
+                             0c 00 00 00 00 00 18 00 00 00 | .@..............
+      d0 | 00 00 00 00 01 00 00 00 01 00 00 00 00 00 01 00 | ................
+      e0 | 00 00 00 00 ac 00 00 00 00 00 00 80 34 20 00 00 | ............4...
+      f0 | 00 00 16 00 00 00 00 00 00 00 00 00 00 00 ff ff | ................
+     100 | ff ff 45 20 00 00 00 00 12 00 00 00 00 00 00 00 | ..E.............
+     110 | 00 00 00 00 47 20 00 00 00 00 64 00 00 00 00 00 | ....G.....d.....
+     120 | 00 80 48 20 00 00 00 00 24 00 00 00 00 00 00 80 | ..H.....$.......
+     130 | 00 27 00 00 00 00 16 00 00 00 00 00 00 00 02 00 | .'..............
+     140 | 00 00 00 00 00 00 49 20 00 00 00 00 24 00 00 00 | ......I.....$...
+     150 | 00 00 00 80 00 27 00 00 00 00 16 00 00 00 00 00 | .....'..........
+     160 | 00 00 02 00 00 00 01 00 00 00 4a 20 00 00 00 00 | ..........J.....
+     170 | 0e 00 00 00 00 00 00 00 00 10 00 00 00 00 12 00 | ................
+     180 | 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 | ................
+
+
+
+max 2008 (stored under wine)
+Scene:
+       0 | 0f 20 (id version)
+                 00 00 00 00 (missing size)
+                             17 fe 01 00 00 00 00 80 (unknown 64 bits)
+                                                     00 00 | ................
+      10 | 00 00 00 00 d0 00 00 00 00 00 00 80
+                                               0b 00 (id)
+                                                     00 00 | ................
+      20 | 00 00 (missing size)
+                 26 00 00 00 00 00 00 00 (unknown 64 bits)
+                                         3c 29 06 5a 1e 0c | ..&.......<).Z..
+      30 | 42 30 60 11 00 00 00 00 00 17 10 27 04 00 01 00 | B0`........'....
+      40 | 00 00
+                 0e 00 00 00 00 00
+                                   21 00 00 00 00 00 00 00 | ........!.......
+      50 | 00 00 04 00 00 00 00 00 82 00 00 00 00 00 40 00 | ..............@.
+      60 | 00 00 00
+                    0e 00 00 00 00 00
+                                      21 00 00 00 00 00 00 | .........!......
+      70 | 00 01 00 01 00 00 00 00 00 82 00 00 00 00 00 40 | ...............@
+      80 | 00 00 00 00
+                       0e 00 00 00 00 00
+                                         21 00 00 00 00 00 | ..........!.....
+      90 | 00 00 02 00 04 00 00 00 00 00 82 00 00 00 00 00 | ................
+      a0 | 40 00 00 00 00
+                          0e 00 00 00 00 00
+                                            21 00 00 00 00 | @..........!....
+      b0 | 00 00 00 04 00 09 00 00 00 00 00
+                                            80 06 00 00 00 | ................
+      c0 | 00 40 ff ff ff ff
+                             0c 00 00 00 00 00 18 00 00 00 | .@..............
+      d0 | 00 00 00 00 01 00 00 00 01 00 00 00 11 00 01 00 | ................
+      e0 | 00 00 00 00 45 00 00 00 00 00 00 80 34 20 00 00 | ....E.......4...
+      f0 | 00 00 16 00 00 00 00 00 00 00 00 00 00 00 ff ff | ................
+     100 | ff ff 4b 20 00 00 00 00 0f 00 00 00 00 00 00 00 | ..K.............
+     110 | 2e 00 10 00 00 00 00 12 00 00 00 00 00 00 00 00 | ................
+
+max 2010
+Scene:
+       0 | 12 20 (id version)
+                 1e 3f 02 80 (size+containerflag)
+                             00 00 (id)
+                                   98 00 00 80 (size+containerflag)
+                                               0b 00 (id)
+                                                     1e 00 | ...?............
+      10 | 00 00 (size 30-6=24)
+                 3c 29 06 5a 1e 0c 42 30 60 11 00 00 00 00 | ..<).Z..B0`.....
+      20 | 00 21 e0 2e 04 00 01 00 00 00
+                                         0e 00 (id)
+                                               19 00 00 00 (size 25-6=19)
+                                                           | .!..............
+      30 | 00 00 04 00 00 00 00 00 82 00 00 00 00 00 40 00 | ..............@.
+      40 | 00 00 00
+                    0e 00 19 00 00 00
+                                      01 00 01 00 00 00 00 | ................
+      50 | 00 82 00 00 00 00 00 40 00 00 00 00 0e 00 19 00 | .......@........
+      60 | 00 00 02 00 04 00 00 00 00 00 82 00 00 00 00 00 | ................
+      70 | 40 00 00 00 00
+                          0e 00 19 00 00 00
+                                            04 00 09 00 00 | @...............
+      80 | 00 00 00
+                    80 06 00 00 00 00 40 ff ff ff ff
+                                                     0c 00 | .........@......
+      90 | 10 00 00 00 01 00 00 00 01 00 00 00 00 00 01 00 | ................
+      a0 | 25 00 00 80 34 20 0e 00 00 00 00 00 00 00 ff ff | %...4...........
+      b0 | ff ff 4b 20 07 00 00 00 2e 00 10 0a 00 00 00 00 | ..K.............
+      c0 | 00 00 00 00 00 be 03 00 80 35 20 0a 00 00 00 09 | .........5......
+      d0 | 00 00 00 4b 20 07 00 00 00 2e 0b 00 1e 00 00 00 | ...K............
+      e0 | 59 b4 8a 21 80 89 dc 25 60 11 00 00 00 00 00 21 | Y..!...%`......!
+      f0 | e0 2e 25 00 03 00 00 00 0e 00 19 00 00 00 00 00 | ..%.............
+     100 | 04 00 00 00 01 00 82 00 00 00 00 00 c0 00 00 00 | ................
+     110 | 00 0e 00 15 00 00 00 01 00 0f 00 00 00 40 20 81 | .............@..
+     120 | 10 00 00 00 00 40 0e 00 15 00 00 00 02 00 0f 00 | .....@..........
+     130 | 00 00 40 20 81 10 00 00 00 00 40 0e 00 15 00 00 | ..@.......@.....
+     140 | 00 03 00 0f 00 00 00 40 20 81 10 00 00 00 00 40 | .......@.......@
+     150 | 0e 00 15 00 00 00 04 00 0f 00 00 00 40 00 81 10 | ............@...
+     160 | 00 00 00 00 40 0e 00 15 00 00 00 05 00 0f 00 00 | ....@...........
+     170 | 00 40 00 81 10 00 00 00 00 40 0e 00 15 00 00 00 | .@.......@......
+     180 | 06 00 0f 00 00 00 40 00 81 10 00 00 00 00 40 0e | ......@.......@.
+     190 | 00 15 00 00 00 07 00 0f 00 00 00 40 20 81 10 00 | ...........@....
+     1a0 | 00 00 00 40 0e 00 15 00 00 00 08 00 0f 00 00 00 | ...@............
+     1b0 | 40 00 81 10 00 00 00 00 40 0e 00 15 00 00 00 09 | @.......@.......
+
+
+
+
+max 2010
+(DllDirectory) {
+0x21c0: (CStorageValue) { 786432216 }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Viewport Manager for DirectX (Autodesk) }
+	0x2037: (CStorageValue) { ViewportManager.gup } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { mental ray: Material Custom Attributes (Autodesk) }
+	0x2037: (CStorageValue) { mrMaterialAttribs.gup } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Custom Attribute Container (Autodesk) }
+	0x2037: (CStorageValue) { CustAttribContainer.dlo } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Standard Materials and Textures (Autodesk) }
+	0x2037: (CStorageValue) { mtl.dlt } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Standard Samplers (Autodesk) }
+	0x2037: (CStorageValue) { samplers.dlh } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Default Materials and Textures (Autodesk) }
+	0x2037: (CStorageValue) { mtlgen.dlt } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { ProSound - Multitrack Audio }
+	0x2037: (CStorageValue) { ProSound.dlc } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Editable Poly Object (Autodesk) }
+	0x2037: (CStorageValue) { EPoly.dlo } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Standard Pre-Filter Kernels (Autodesk) }
+	0x2037: (CStorageValue) { kernel.dlk } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Default Scanline Renderer (Autodesk) }
+	0x2037: (CStorageValue) { rend.dlr } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Standard Controllers (Autodesk) }
+	0x2037: (CStorageValue) { ctrl.dlc } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Block Manager Utility (Autodesk) }
+	0x2037: (CStorageValue) { AcadBlocks.dlu } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Propagation Manager Utility (Autodesk) }
+	0x2037: (CStorageValue) { InstanceMgr.dlu } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Scene Effect Manager (Autodesk) }
+	0x2037: (CStorageValue) { SceneEffectLoader.dlu } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Change Reaction Controller (Autodesk) }
+	0x2037: (CStorageValue) { reactor.dlc } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { ParameterEditor (Autodesk) }
+	0x2037: (CStorageValue) { ParamEditor.gup } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Bitmap Proxies (Autodesk) }
+	0x2037: (CStorageValue) { BitmapProxies.dlu } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Standard Bitmap Storages and Filters (Autodesk) }
+	0x2037: (CStorageValue) { StorageAndFilter.bms } }
+0x2038: (DllEntry) {
+	0x2039: (CStorageValue) { Biped Controller (Autodesk) }
+	0x2037: (CStorageValue) { biped.dlc } } }
+
+max 2010
+(ClassDirectory3) {
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x00000082)
+		SuperClassID: 130}
+	0x2042: (CStorageValue) { ParamBlock2 } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 0
+		ClassID: (0x30420c1e, 0x5a06293c)
+		SuperClassID: 4448}
+	0x2042: (CStorageValue) { ViewportManager } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 1
+		ClassID: (0x25dc8980, 0x218ab459)
+		SuperClassID: 4448}
+	0x2042: (CStorageValue) { mental ray: material custom attribute } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 2
+		ClassID: (0x23b708db, 0x5ddb3626)
+		SuperClassID: 256}
+	0x2042: (CStorageValue) { CustAttribContainer } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 3
+		ClassID: (0x00000000, 0x00001200)
+		SuperClassID: 4224}
+	0x2042: (CStorageValue) { Texmaps } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 3
+		ClassID: (0x00000000, 0x00000038)
+		SuperClassID: 4272}
+	0x2042: (CStorageValue) { Blinn } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x00000008)
+		SuperClassID: 8}
+	0x2042: (CStorageValue) { ParamBlock } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 4
+		ClassID: (0x00000000, 0x25773211)
+		SuperClassID: 4368}
+	0x2042: (CStorageValue) { Max 2.5 Star } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 3
+		ClassID: (0x00000000, 0x00000002)
+		SuperClassID: 3072}
+	0x2042: (CStorageValue) { Standard } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x00002007)
+		SuperClassID: 36867}
+	0x2042: (CStorageValue) { Bezier Float } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 5
+		ClassID: (0x00000000, 0x00000100)
+		SuperClassID: 3104}
+	0x2042: (CStorageValue) { Placement } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 5
+		ClassID: (0x00000000, 0x00000100)
+		SuperClassID: 3136}
+	0x2042: (CStorageValue) { Output } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 3
+		ClassID: (0x00000000, 0x00000240)
+		SuperClassID: 3088}
+	0x2042: (CStorageValue) { Bitmap } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -2
+		ClassID: (0x222b9eb9, 0x64c75fec)
+		SuperClassID: 3072}
+	0x2042: (CStorageValue) { NeL Material } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x00000c80)
+		SuperClassID: 256}
+	0x2042: (CStorageValue) { Material Editor } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x00003333)
+		SuperClassID: 256}
+	0x2042: (CStorageValue) { MtlBaseLib } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 6
+		ClassID: (0x5b918e4e, 0x476fa9de)
+		SuperClassID: 3328}
+	0x2042: (CStorageValue) { WaveMaster } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 6
+		ClassID: (0x5b918e4a, 0x476fa9de)
+		SuperClassID: 3328}
+	0x2042: (CStorageValue) { ProSound } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x00000002)
+		SuperClassID: 1}
+	0x2042: (CStorageValue) { RootNode } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x00002008)
+		SuperClassID: 36875}
+	0x2042: (CStorageValue) { Bezier Position } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x00442313)
+		SuperClassID: 36876}
+	0x2042: (CStorageValue) { TCB Rotation } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x00002010)
+		SuperClassID: 36877}
+	0x2042: (CStorageValue) { Bezier Scale } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x00002005)
+		SuperClassID: 36872}
+	0x2042: (CStorageValue) { Position/Rotation/Scale } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x0d9c20ff)
+		SuperClassID: 36880}
+	0x2042: (CStorageValue) { Master Point Controller } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 7
+		ClassID: (0x192f6098, 0x1bf8338d)
+		SuperClassID: 16}
+	0x2042: (CStorageValue) { Editable Poly } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x1dba1df0, 0x7e9858fe)
+		SuperClassID: 4336}
+	0x2042: (CStorageValue) { Base Layer } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x00000001)
+		SuperClassID: 1}
+	0x2042: (CStorageValue) { Node } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 8
+		ClassID: (0x00000000, 0x77912301)
+		SuperClassID: 4256}
+	0x2042: (CStorageValue) { Area } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 9
+		ClassID: (0x00000000, 0x00000001)
+		SuperClassID: 3840}
+	0x2042: (CStorageValue) { Default Scanline Renderer } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x06546546, 0x46576167)
+		SuperClassID: 512}
+	0x2042: (CStorageValue) { RenderElementMgr } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x00002011)
+		SuperClassID: 36869}
+	0x2042: (CStorageValue) { Bezier Color } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0xee448b23)
+		SuperClassID: 4112}
+	0x2042: (CStorageValue) { RenderEnvironment } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x00008d52)
+		SuperClassID: 256}
+	0x2042: (CStorageValue) { NamedSelSetList } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x90f2ee71, 0x8d73b8aa)
+		SuperClassID: 512}
+	0x2042: (CStorageValue) { TVNode } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 10
+		ClassID: (0x00000000, 0x4b4b1000)
+		SuperClassID: 36867}
+	0x2042: (CStorageValue) { Float List } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 10
+		ClassID: (0x00000000, 0x4b4b1001)
+		SuperClassID: 36869}
+	0x2042: (CStorageValue) { Point3 List } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 10
+		ClassID: (0x00000000, 0x4b4b1005)
+		SuperClassID: 36882}
+	0x2042: (CStorageValue) { Point4 List } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 10
+		ClassID: (0x00000000, 0x4b4b1002)
+		SuperClassID: 36875}
+	0x2042: (CStorageValue) { Position List } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 10
+		ClassID: (0x00000000, 0x4b4b1003)
+		SuperClassID: 36876}
+	0x2042: (CStorageValue) { Rotation List } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 10
+		ClassID: (0x00000000, 0x4b4b1004)
+		SuperClassID: 36877}
+	0x2042: (CStorageValue) { Scale List } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 10
+		ClassID: (0x00000000, 0x4b4b1015)
+		SuperClassID: 36881}
+	0x2042: (CStorageValue) { Block Control } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 11
+		ClassID: (0x11793bed, 0x1f8c3646)
+		SuperClassID: 36867}
+	0x2042: (CStorageValue) { Block Manager Wrapper } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 12
+		ClassID: (0x7620792b, 0x5a1b661e)
+		SuperClassID: 36867}
+	0x2042: (CStorageValue) { Propagation Manager Wrapper } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 13
+		ClassID: (0xf4044794, 0x368d1139)
+		SuperClassID: 36867}
+	0x2042: (CStorageValue) { Scene Effect Loader } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 14
+		ClassID: (0x087906d7, 0x294a389c)
+		SuperClassID: 256}
+	0x2042: (CStorageValue) { Reaction Manager } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 15
+		ClassID: (0x265a2326, 0x28250b30)
+		SuperClassID: 4448}
+	0x2042: (CStorageValue) { ParameterCollectorCA } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 16
+		ClassID: (0x01513165, 0x4a0c66e1)
+		SuperClassID: 2912}
+	0x2042: (CStorageValue) {  } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x2c1a0a7b, 0x0c6f6387)
+		SuperClassID: 36879}
+	0x2042: (CStorageValue) { SceneAppData Latch } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 17
+		ClassID: (0x68c22d6f, 0x5bf94f11)
+		SuperClassID: 2912}
+	0x2042: (CStorageValue) { BitmapPagerData } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 10
+		ClassID: (0x781f1430, 0x0f4871a5)
+		SuperClassID: 36879}
+	0x2042: (CStorageValue) { MasterLayerControlManager } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 18
+		ClassID: (0x30935afc, 0x57a52b8c)
+		SuperClassID: 36879}
+	0x2042: (CStorageValue) { Max Mixer Clip } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x00000001)
+		SuperClassID: 4294966784}
+	0x2042: (CStorageValue) { Grid Reference } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x17356912)
+		SuperClassID: 4240}
+	0x2042: (CStorageValue) { RenderEffects } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: 9
+		ClassID: (0x00000000, 0x00000100)
+		SuperClassID: 4304}
+	0x2042: (CStorageValue) { Shadow Map } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x51ff028e, 0x0d7374fc)
+		SuperClassID: 512}
+	0x2042: (CStorageValue) { Layer Manager } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x2cf03595)
+		SuperClassID: 256}
+	0x2042: (CStorageValue) { TrackSetList } }
+0x2040: (ClassEntry) {
+	0x2060: (ClassDirectoryHeader) {
+		DllIndex: -1
+		ClassID: (0x00000000, 0x00002222)
+		SuperClassID: 256}
+	0x2042: (CStorageValue) { Scene } } }
+
+
+
+
+Config
+
+nel script material id:
+0x64c75fec, 0x222b9eb9
+ec 5f c7 64 b9 9e 2b 22
+
+0x2180: (StorageContainer) {
+	0x0040: (StorageContainer) {
+		0x0050: (StorageRaw) {
+			Size: 12
+			String: ....._.d..+"
+			Hex: 00 0c 00 00 ec 5f c7 64 b9 9e 2b 22 }
+		0x0007: (StorageContainer) {
+			0x0060: (StorageRaw) {
+				Size: 4
+				String: ....
+				Hex: 09 00 00 00 }
+			0x0007: (StorageContainer) {
+				0x0060: (StorageRaw) {
+					Size: 4
+					String: ....
+					Hex: 0e 00 00 00 }
+				0x0006: (StorageRaw) {
+					Size: 9
+					String: ....nlbp.
+					Hex: 05 00 00 00 6e 6c 62 70 00 }
+				0x0003: (StorageRaw) {
+					Size: 4
+					String: .... }
+				0x0003: (StorageRaw) {
+					Size: 4
+					String: ....
+					Hex: 01 00 00 00 }
+				0x0007: (StorageContainer) {
+					0x0060: (StorageRaw) {
+						Size: 4
+						String: ....
+						Hex: 02 00 00 00 }
+
+
+
+max3
+(Config) {
+0x20e0: (StorageContainer) {
+	0x0100: (StorageRaw) {
+		Size: 12
+		String: ...=........
+		Hex: cd cc cc 3d 0a 00 00 00 01 00 00 00 }
+	0x0200: (StorageRaw) {
+		Size: 48
+		String: ...@.. A........................................
+		Hex: 00 00 a0 40 00 00 20 41 01 00 00 00 03 00 00 00 08 00 00 00 01 00 00 00 02 00 00 00 03 00 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 }
+	0x0300: (StorageRaw) {
+		Size: 0
+		String:
+		Hex: } }
+0x20a0: (StorageContainer) {
+	0x0100: (StorageRaw) {
+		Size: 4
+		String: ....
+
+
+max2010
+(Config) {
+0x20e0: (StorageContainer) {
+	0x0100: (StorageRaw) {
+		Size: 12
+		String: .. A........
+		Hex: 00 00 20 41 0a 00 00 00 01 00 00 00 }
+	0x0400: (StorageRaw) {
+		Size: 8
+		String: ........
+		Hex: 07 00 00 00 01 00 00 00 }
+	0x0200: (StorageRaw) {
+		Size: 40
+		String: ...@.. A................................
+		Hex: 00 00 a0 40 00 00 20 41 00 00 00 00 01 00 00 00 02 00 00 00 03 00 00 00 04 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 }
+	0x0300: (StorageRaw) {
+		Size: 0
+		String:
+		Hex: } }
+0x20a0: (StorageContainer) {
+	0x0100: (StorageRaw) {
+		Size: 4
+		String: ....
+		Hex: 01 00 00 00 }
+
+
+
+
+
+max2010 scene, near no fx
+2f 27 02 05
+std::string CExportNel::getScriptAppData (Animatable *node, uint32 id, const std::string& def)
+AppDataChunk *ap=node->GetAppDataChunk (MAXSCRIPT_UTILITY_CLASS_ID, UTILITY_CLASS_ID, id);
+MAXSCRIPT_UTILITY_CLASS_ID Class_ID(0x4d64858, 0x16d1751d)
+UTILITY_CLASS_ID 0x001020
+#define NEL3D_APPDATA_ENV_FX						(84682543)
+0x50C272F
+
+0x0110: (StorageContainer) [2] {
+	0x0120: (StorageRaw) {
+		Size: 20
+		String: XH...u.. .../'......
+		Hex: 58 48 d6 04 1d 75 d1 16 // MAXSCRIPT_UTILITY_CLASS_ID
+			20 10 00 00 // UTILITY_CLASS_ID
+			2f 27 0c 05 // NEL3D_APPDATA_ENV_FX
+			06 00 00 00 } // size???
+	0x0130: (StorageRaw) {
+		Size: 6
+		String: no fx. } }
+
+
+
+
+
+
+Scene class references
+
+ver3
+		References 0x2034: PARSED {
+			0: <ptr=0x000000000201f1b0> (Material Editor, (0x00000c80, 0x00000000))
+			1: <ptr=0x0000000002110e30> (MtlBaseLib, (0x00003333, 0x00000000))
+			2: <ptr=0x00000000021110d0> (Default Sound, (0x00000001, 0x00000000))
+			3: <ptr=0x00000000021118c0> (RootNode, (0x00000002, 0x00000000))
+			4: <ptr=0x00000000027be740> (RenderEnvironment, (0xee448b23, 0x00000000))
+			5: <ptr=0x00000000027c1400> (NamedSelSetList, (0x00008d52, 0x00000000))
+			6: <ptr=0x00000000027c3640> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			7: <ptr=0x00000000027c3bc0> (Grid Reference, (0x00000001, 0x00000000))
+			8: <ptr=0x00000000027c3de0> (RenderEffects, (0x17356912, 0x00000000))
+			9: <ptr=0x00000000027c4a20> (Shadow Map, (0x00000100, 0x00000000))
+			10: <ptr=0x00000000027c4cf0> (Layer Manager, (0x0d7374fc, 0x51ff028e)) }
+
+ver9
+		References 0x2034: PARSED {
+			0: <ptr=0x0000000000f04bf0> (Material Editor, (0x00000c80, 0x00000000))
+			1: <ptr=0x0000000000f05430> (MtlBaseLib, (0x00003333, 0x00000000))
+			2: <ptr=0x0000000000f059d0> (Default Sound, (0x00000001, 0x00000000))
+			3: <ptr=0x0000000000f05ec0> (RootNode, (0x00000002, 0x00000000))
+			4: <ptr=0x0000000002b8bfb0> (RenderEnvironment, (0xee448b23, 0x00000000))
+			5: <ptr=0x0000000002b91a20> (NamedSelSetList, (0x00008d52, 0x00000000))
+			6: <ptr=0x0000000002ba2380> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			7: <ptr=0x0000000002ba38a0> (Grid Reference, (0x00000001, 0x00000000))
+			8: <ptr=0x0000000002ba3dc0> (RenderEffects, (0x17356912, 0x00000000))
+			9: <ptr=0x0000000002ba4b60> (Shadow Map, (0x00000100, 0x00000000))
+			10: <ptr=0x0000000002ba5130> (Layer Manager, (0x0d7374fc, 0x51ff028e))
+			11: <ptr=0x0000000002ba57d0> (TrackSetList, (0x2cf03595, 0x00000000)) }
+
+ver2008
+		References 0x2034: PARSED {
+			0: <ptr=0x0000000001d96380> (Material Editor, (0x00000c80, 0x00000000))
+			1: <ptr=0x0000000001d96910> (MtlBaseLib, (0x00003333, 0x00000000))
+			2: <ptr=0x0000000001d96b30> (Default Sound, (0x00000001, 0x00000000))
+			3: <ptr=0x0000000001d97020> (RootNode, (0x00000002, 0x00000000))
+			4: <ptr=0x0000000001da0870> (RenderEnvironment, (0xee448b23, 0x00000000))
+			5: <ptr=0x0000000001da6020> (NamedSelSetList, (0x00008d52, 0x00000000))
+			6: <ptr=0x0000000001daf540> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			7: <ptr=0x0000000001db0610> (Grid Reference, (0x00000001, 0x00000000))
+			8: <ptr=0x0000000001db0880> (RenderEffects, (0x17356912, 0x00000000))
+			9: <ptr=0x0000000001db1620> (Shadow Map, (0x00000100, 0x00000000))
+			10: <ptr=0x0000000001db1940> (Layer Manager, (0x0d7374fc, 0x51ff028e))
+			11: <ptr=0x0000000001db1d30> (TrackSetList, (0x2cf03595, 0x00000000)) }
+
+ver2010
+		References 0x2034: PARSED {
+			0: <ptr=0x0000000000de4060> (Material Editor, (0x00000c80, 0x00000000))
+			1: <ptr=0x0000000000de45f0> (MtlBaseLib, (0x00003333, 0x00000000))
+			2: <ptr=0x0000000000de5050> (ProSound, (0x476fa9de, 0x5b918e4a))
+			3: <ptr=0x0000000000de61b0> (RootNode, (0x00000002, 0x00000000))
+			4: <ptr=0x0000000000e044e0> (RenderEnvironment, (0xee448b23, 0x00000000))
+			5: <ptr=0x0000000000e09ee0> (NamedSelSetList, (0x00008d52, 0x00000000))
+			6: <ptr=0x0000000000e14790> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			7: <ptr=0x0000000000e15bb0> (Grid Reference, (0x00000001, 0x00000000))
+			8: <ptr=0x0000000000e15e20> (RenderEffects, (0x17356912, 0x00000000))
+			9: <ptr=0x0000000000e16bc0> (Shadow Map, (0x00000100, 0x00000000))
+			10: <ptr=0x0000000000e16ee0> (Layer Manager, (0x0d7374fc, 0x51ff028e))
+			11: <ptr=0x0000000000e172d0> (TrackSetList, (0x2cf03595, 0x00000000)) }
+
+
+
+01 00 00 00 // one face
+	04 00 00 00 // four edges/vertices
+		02 00 00 00 // 2
+		00 00 00 00 // 0
+		01 00 00 00 // 1
+		03 00 00 00 // 3
+			30 00 // nomnom
+			01 00 00 00 // nomnom
+			01 00 00 00 // nomnom
+			03 00 00 00 // nomnom
+
+////// banner
+
+c2 00 00 00 // 194 faces
+	04 00 00 00 // four vertices
+		00 00 00 00
+		01 00 00 00
+		2e 00 00 00
+		2d 00 00 00
+		31 00 // magic
+			0c 00 00 00 // magic
+			08 00 00 00 // more magic?!
+		01 00 00 00 // cut from local 1
+		03 00 00 00 // to local 3
+	04 00 00 00 // four vertices
+		01 00 00 00
+		02 00 00 00
+		2f 00 00 00
+		2e 00 00 00
+		31 00 // magic
+			04 00 00 00 // magic
+			08 00 00 00 // more magic?!
+		01 00 00 00 // cut from local 1
+		03 00 00 00 // to local 3
+	04 00 00 00
+		02 00 00 00
+		03 00 00 00
+		30 00 00 00
+		2f 00 00 00
+		31 00
+			04 00 00 00
+			08 00 00 00
+		01 00 00 00
+		03 00 00 00
+	04 00 00 00
+		03 00 00 00
+		04 00 00 00
+		31 00 00 00
+		30 00 00 00
+		31 00
+			0c 00 00 00
+			08 00 00 00
+		01 00 00 00
+		03 00 00 00
+	04 00 00 00
+		04 00 00 00 00 00 00 00 2d 00 00 00 31 00 00 00
+		31 00
+			0c 00 00 00 08 00 00 00
+		01 00 00 00 03 00 00 00
+	04 00 00 00
+		14 00 00 00 13 00 00 00 19 00 00 00 18 00 00 00
+		39 00
+			0c 00 00 00
+			09 00
+			08 00 00 00
+		02 00 00 00
+		00 00 00 00
+	04 00 00 00 13 00 00 00 15 00 00 00 1a 00 00 00 19 00 00 00
+	39 00 04 00 00 00
+	09 00 08 00 00 00
+	02 00 00 00 00 00 00 00 04 00 00 00 15 00 00 00 16 00 00 00 1b 00 00 00 1a 00 00 00 39 00 04 00 00 00 09 00 08 00 00 00 02 00 00 00 00 00 00 00 04 00 00 00 16 00 00 00 17 00 00 00 1c 00 00 00 1b 00 00 00 39 00 0c 00 00 00 09 00 08 00 00 00 02 00 00 00 00 00 00 00 04 00 00 00 17 00 00 00 14 00 00 00 18 00 00 00 1c 00 00 00 39 00 0c 00 00 00 09 00 08 00 00 00 02 00 00 00 00 00 00 00 04 00 00 00 0b 00 00 00 0a 00 00 00 1f 00 00 00 20 00 00 00 31 00 04 00 00 00 08 00 00 00 00 00 00 00 02 00 00 00 04 00 00 00 0a 00 00 00 09 00 00 00 1e 00 00 00 1f 00 00 00 31 00 0c 00 00 01 08 00 00 00 00 00 00 00 02 00 00 00 04 00 00 00 0c 00 00 00 0b 00 00 00 20 00 00 00 21 00 00 00 31 00 04 00 00 00 08 00 00 00 00 00 00 00 02 00 0
+
+////// banner
+
+	3 0x0100: (StorageArraySizePre) [6] { { 0x0, -5.000000 -5.000000 0.000000 } { 0x1000000, 5.000000 -5.000000 0.000000 } { 0x0, -5.000000 5.000000 0.000000 } { 0x1000000, 5.000000 5.000000 0.000000 } { 0x0, 5.000000 -5.000000 10.000000 } { 0x0, 5.000000 5.000000 10.000000 } }
+	4 0x010a: (StorageArraySizePre) [7] { { 0x0, 2 0 } { 0x0, 3 2 } { 0x0, 1 3 } { 0x0, 0 1 } { 0x0, 1 4 } { 0x0, 5 3 } { 0x1, 4 5 } }
+	5 0x011a: (StorageRaw) {
+		Size: 68
+		String: ........................0................................. .........
+		Hex:
+
+02 00 00 00 // 2 faces!
+	04 00 00 00 // 4 vertices
+		02 00 00 00
+		00 00 00 00
+		01 00 00 00 // shared
+		03 00 00 00 // shared
+		30 00
+			01 00 00 00
+			01 00 00 00
+		03 00 00 00
+	04 00 00 00 // 4 vertices
+		03 00 00 00 // shared
+		01 00 00 00 // shared
+		04 00 00 00
+		05 00 00 00
+		20 00
+			00 00 00 00
+		02 00 00 00 }
+
+
+
+	3 0x0100: (StorageArraySizePre) [8] { { 0x0, -5.000000 -5.000000 0.000000 } { 0x0, 5.000000 -5.000000 0.000000 } { 0x0, -5.000000 5.000000 0.000000 } { 0x0, 5.000000 5.000000 0.000000 } { 0x1000000, 5.000000 -5.000000 10.000000 } { 0x1000000, 5.000000 5.000000 10.000000 } { 0x0, -5.000000 -5.000000 10.000000 } { 0x0, -5.000000 5.000000 10.000000 } }
+	4 0x010a: (StorageArraySizePre) [10] { { 0x8, 2 0 } { 0x8, 3 2 } { 0x8, 1 3 } { 0x8, 0 1 } { 0x8, 1 4 } { 0x8, 5 3 } { 0x0, 4 5 } { 0x0, 4 6 } { 0x0, 7 5 } { 0x0, 6 7 } }
+	5 0x011a: (StorageRaw) {
+		Size: 106
+		String: ........................1.....................................!................................. .........
+		Hex:
+
+03 00 00 00 // 3 faces
+	04 00 00 00 // 4 vertices
+		02 00 00 00
+		00 00 00 00
+		01 00 00 00
+		03 00 00 00
+		31 00 				// 0011 0001
+			08 00 00 00
+			01 00 00 00
+			01 00 00 00
+		03 00 00 00
+	04 00 00 00 // 4 vertices
+		03 00 00 00
+		01 00 00 00
+		04 00 00 00 // shared vertex
+		05 00 00 00 // shared vertex
+		21 00				// 0010 0001
+			08 00 00 00
+			00 00 00 00
+		02 00 00 00
+	04 00 00 00 // 4 vertices
+		05 00 00 00 // shared vertex
+		04 00 00 00 // shared vertex
+		06 00 00 00
+		07 00 00 00
+		20 00 				// 0010 0000
+			00 00 00 00
+		02 00 00 00 }
+
+** triangulation is stored inside the polyobject somewhere with the faces!
+
+	3 0x0100: (StorageArraySizePre) [5] { { 0x0, -5.000000 -2.000000 0.000000 } { 0x0, 1.169249 -6.003741 0.000000 } { 0x0, -3.931087 3.378710 0.000000 } { 0x0, 3.007738 4.420538 0.000000 } { 0x0, 5.070167 -1.944196 0.000000 } }
+	4 0x010a: (StorageArraySizePre) [5] { { 0x0, 2 0 } { 0x0, 3 2 } { 0x0, 1 4 } { 0x0, 0 1 } { 0x0, 4 3 } }
+	5 0x011a: (StorageRaw) {
+		Size: 50
+		String: ............................0.....................
+		Hex:
+
+01 00 00 00 // 1 face
+	05 00 00 00
+		02 00 00 00
+		00 00 00 00 // v0 at idx 1
+		01 00 00 00
+		04 00 00 00
+		03 00 00 00
+		30 00 // triangulation egdes should both 	touch vertex 0... locally 1?
+			01 00 00 00
+			01 00 00 00
+		03 00 00 00
+		01 00 00 00
+		oops deleted
+
+
+		Float: 4.2039e-45 }
+	3 0x0100: (StorageArraySizePre) [5] { { 0x0, -5.000000 -2.000000 0.000000 } { 0x0, 1.169249 -6.003741 0.000000 } { 0x0, -3.931087 3.378710 0.000000 } { 0x0, 3.007738 4.420538 0.000000 } { 0x0, 5.070167 -1.944196 0.000000 } }
+	4 0x010a: (StorageArraySizePre) [5] { { 0x0, 2 0 } { 0x0, 3 2 } { 0x0, 1 4 } { 0x0, 0 1 } { 0x0, 4 3 } }
+	5 0x011a: (StorageRaw) {
+		Size: 50
+		String: ............................0.....................
+		Hex:
+01 00 00 00
+	05 00 00 00
+		02 00 00 00
+		00 00 00 00
+		01 00 00 00 // v1 at idx 2
+		04 00 00 00
+		03 00 00 00
+	30 00 						30 00  // triangle edges should both touch vertex 1... locally 2?
+		01 00 00 00 				01 00 00 00
+		00 00 00 00					01 00 00 00
+	02 00 00 00 				03 00 00 00
+	02 00 00 00 				01 00 00 00 // hm!
+	04 00 00 00					oops deleted }
+
+
+	3 0x0100: (StorageArraySizePre) [5] { { 0x0, -5.000000 -2.000000 0.000000 } { 0x0, 1.169249 -6.003741 0.000000 } { 0x0, -3.931087 3.378710 0.000000 } { 0x0, 3.007738 4.420538 0.000000 } { 0x1, 5.070167 -1.944196 0.000000 } }
+	4 0x010a: (StorageArraySizePre) [5] { { 0x0, 2 0 } { 0x0, 3 2 } { 0x0, 1 4 } { 0x0, 0 1 } { 0x0, 4 3 } }
+	5 0x011a: (StorageRaw) {
+		Size: 50
+		String: ............................0.....................
+		Hex:
+
+01 00 00 00
+	05 00 00 00
+		02 00 00 00
+		00 00 00 00
+		01 00 00 00
+		04 00 00 00
+		03 00 00 00
+	30 00 // magic // triangle edges should touch vertex 4 .. locally 3?
+		01 00 00 00 // magic
+	01 00 00 00 // triangulate from local 1
+	03 00 00 00 // to local 3
+	00 00 00 00 // triangulate from local 0
+	03 00 00 00 // to local 3 }
+
+
+	3 0x0100: (StorageArraySizePre) [3] { { 0x0, -5.000000 -2.000000 0.000000 } { 0x0, 1.169249 -6.003741 0.000000 } { 0x0, 5.070167 -1.944196 0.000000 } }
+	4 0x010a: (StorageArraySizePre) [3] { { 0x0, 1 2 } { 0x0, 0 1 } { 0x1, 2 0 } }
+	5 0x011a: (StorageRaw) {
+		Size: 26
+		String: ..........................
+		Hex:
+
+01 00 00 00
+	03 00 00 00
+		00 00 00 00
+		01 00 00 00
+		02 00 00 00
+	10 00
+		01 00 00 00 }
+
+
+01 00 00 00
+	05 00 00 00
+		02 00 00 00
+		00 00 00 00
+		01 00 00 00
+		04 00 00 00
+		03 00 00 00
+	31 00    /// 20 00 = info, last; 10 00 = smoothing groups; 01 00 = ??
+		01 00 01 00
+		ff ff ff ff // smoothing group
+	01 00 00 00 03 00 00 00 // cut 1
+	00 00 00 00 03 00 00 00 // cut 1 }
+
+
+bitfield
+	01 00 = unknown, uint32 or pair<uint16> '01 00 01 00'
+	02 00
+	04 00
+	08 00 = material id, uint16 (max shows index + 1, so starts at 1, binary starts at 0)
+	10 00 = smoothing groups, uint32
+	20 00 = triangulation, pair<uint32> per cut
+	40 00 ?
+
+
+01 00 00 00 05 00 00 00 02 00 00 00 00 00 00 00 01 00 00 00 04 00 00 00 03 00 00 00 21 00 01 00 01 00 01 00 00 00 03 00 00 00 00 00 00 00 03 00 00 00 // selected
+01 00 00 00 05 00 00 00 02 00 00 00 00 00 00 00 01 00 00 00 04 00 00 00 03 00 00 00 21 00 00 00 01 00 01 00 00 00 03 00 00 00 00 00 00 00 03 00 00 00 // unselected - no difference *** byte changed from 1 to 0 ???
+01 00 00 00 05 00 00 00 02 00 00 00 00 00 00 00 01 00 00 00 04 00 00 00 03 00 00 00 29 00 01 00 01 00 04 00 01 00 00 00 03 00 00 00 00 00 00 00 03 00 00 00 // material id changed to '5', 08 00
+01 00 00 00 05 00 00 00 02 00 00 00 00 00 00 00 01 00 00 00 04 00 00 00 03 00 00 00 29 00 01 00 01 00 04 00 01 00 00 00 03 00 00 00 00 00 00 00 03 00 00 00 // clear selection unselected -- no diff
+01 00 00 00 05 00 00 00 02 00 00 00 00 00 00 00 01 00 00 00 04 00 00 00 03 00 00 00 29 00 01 00 01 00 04 00 01 00 00 00 03 00 00 00 00 00 00 00 03 00 00 00 // use subdiv -- no diff
+01 00 00 00 05 00 00 00 02 00 00 00 00 00 00 00 01 00 00 00 04 00 00 00 03 00 00 00 29 00 01 00 01 00 04 00 01 00 00 00 03 00 00 00 00 00 00 00 03 00 00 00 // vertex colors -- no diff
+
+
+
+
