@@ -14,15 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// Default NeL includes
-#include "nel/misc/types_nl.h"
+#ifndef STDDIRECT3D_H
+#define STDDIRECT3D_H
 
-#ifdef NL_OS_WINDOWS
-#	define WIN32_LEAN_AND_MEAN
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
+#if defined(_MSC_VER) && defined(_DEBUG)
+	#define _CRTDBG_MAP_ALLOC
+	#include <stdlib.h>
+	#include <crtdbg.h>
+	#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #endif
 
 // System includes
@@ -42,15 +41,13 @@
 #include <deque>
 #include <limits>
 
+// Default NeL includes
+#include "nel/misc/types_nl.h"
 
 #ifdef NL_DEBUG
 	// add Direct3D debug infos
 	#define D3D_DEBUG_INFO
 #endif
-
-// Directx includes
-#include <d3d9.h>
-#include <d3dx9math.h>
 
 // NeL includes
 #include "nel/misc/common.h"
@@ -59,3 +56,17 @@
 #include "nel/misc/mem_stream.h"
 #include "nel/misc/time_nl.h"
 #include "nel/misc/command.h"
+
+#ifdef NL_OS_WINDOWS
+#	define WIN32_LEAN_AND_MEAN
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
+#	include <windows.h>
+#endif
+
+// Directx includes
+#include <d3d9.h>
+#include <d3dx9math.h>
+
+#endif

@@ -36,6 +36,11 @@
 
 // Project includes
 #include <nel/sound/audio_decoder_vorbis.h>
+#include <nel/sound/audio_decoder_mp3.h>
+
+#ifdef FFMPEG_ENABLED
+#include <nel/sound/audio_decoder_ffmpeg.h>
+#endif
 
 using namespace std;
 using namespace NLMISC;
@@ -82,56 +87,112 @@ IAudioDecoder *IAudioDecoder::createAudioDecoder(const std::string &type, NLMISC
 		nlwarning("Stream is NULL");
 		return NULL;
 	}
+#ifdef FFMPEG_ENABLED
+	try {
+		CAudioDecoderFfmpeg *decoder = new CAudioDecoderFfmpeg(stream, loop);
+		return static_cast<IAudioDecoder *>(decoder);
+	}
+	catch(const Exception &e)
+	{
+		nlwarning("Exception %s during ffmpeg setup", e.what());
+		return NULL;
+	}
+#else
 	std::string type_lower = toLower(type);
 	if (type_lower == "ogg")
 	{
 		return new CAudioDecoderVorbis(stream, loop);
+	}
+	else if (type_lower == "mp3")
+	{
+		return new CAudioDecoderMP3(stream, loop);
 	}
 	else
 	{
 		nlwarning("Music file type unknown: '%s'", type_lower.c_str());
 		return NULL;
 	}
+#endif
 }
 
-bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, std::string &title)
+bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, std::string &title, float &length)
 {
 	std::string lookup = CPath::lookup(filepath, false);
 	if (lookup.empty())
-	{ 
+	{
 		nlwarning("Music file %s does not exist!", filepath.c_str());
-		return false; 
+		return false;
 	}
+
+#ifdef FFMPEG_ENABLED
+	CIFile ifile;
+	ifile.setCacheFileOnOpen(false);
+	ifile.allowBNPCacheFileOnOpen(false);
+	if (ifile.open(lookup))
+		return CAudioDecoderFfmpeg::getInfo(&ifile, artist, title, length);
+#else
 	std::string type = CFile::getExtension(filepath);
 	std::string type_lower = NLMISC::toLower(type);
 
 	if (type_lower == "ogg")
 	{
-		CIFile ifile; 
-		ifile.setCacheFileOnOpen(false); 
+		CIFile ifile;
+		ifile.setCacheFileOnOpen(false);
 		ifile.allowBNPCacheFileOnOpen(false);
-		ifile.open(lookup);
-		return CAudioDecoderVorbis::getInfo(&ifile, artist, title);
+		if (ifile.open(lookup))
+			return CAudioDecoderVorbis::getInfo(&ifile, artist, title, length);
+
+		nlwarning("Unable to open: '%s'", filepath.c_str());
+	}
+	else if (type_lower == "mp3")
+	{
+		CIFile ifile;
+		ifile.setCacheFileOnOpen(false);
+		ifile.allowBNPCacheFileOnOpen(false);
+		if (ifile.open(lookup))
+			return CAudioDecoderMP3::getInfo(&ifile, artist, title, length);
+
+		nlwarning("Unable to open: '%s'", filepath.c_str());
 	}
 	else
 	{
 		nlwarning("Music file type unknown: '%s'", type_lower.c_str());
-		artist.clear(); title.clear();
-		return false;
 	}
+#endif
+
+	artist.clear(); title.clear();
+	return false;
 }
 
 /// Get audio/container extensions that are currently supported by the nel sound library.
 void IAudioDecoder::getMusicExtensions(std::vector<std::string> &extensions)
 {
-	extensions.push_back("ogg");
+	// only add ogg format if not already in extensions list
+	if (std::find(extensions.begin(), extensions.end(), "ogg") == extensions.end())
+	{
+		extensions.push_back("ogg");
+	}
+	if (std::find(extensions.begin(), extensions.end(), "mp3") == extensions.end())
+	{
+		extensions.push_back("mp3");
+	}
+#ifdef FFMPEG_ENABLED
+	extensions.push_back("mp3");
+	extensions.push_back("flac");
+	extensions.push_back("aac");
+#endif
+
 	// extensions.push_back("wav"); // TODO: Easy.
 }
 
 /// Return if a music extension is supported by the nel sound library.
 bool IAudioDecoder::isMusicExtensionSupported(const std::string &extension)
 {
+#ifdef FFMPEG_ENABLED
+	return (extension == "ogg" || extension == "mp3" || extension == "flac" || extension == "aac");
+#else
 	return (extension == "ogg");
+#endif
 }
 
 } /* namespace NLSOUND */

@@ -25,7 +25,7 @@ using namespace NLMISC;
 
 // --------------------------------------------------
 
-bool CNelExport::exportZone (const char *sPath, INode& node, TimeValue time)
+bool CNelExport::exportZone (const std::string &sPath, INode& node, TimeValue time)
 {
 	// Result to return
 	bool bRet=false;

@@ -570,6 +570,10 @@ void CPVPManager::enterPVPZone( CCharacter * user, TAIAlias pvpZoneAlias )
 
 	if( zone->getPVPZoneType() != PVP_ZONE_TYPE::OutpostZone )
 	{
+		// Remove OP pvp interface
+		user->setOutpostAlias(0);
+		user->stopOutpostLeavingTimer();
+
 		// add user to entering PVP zone users
 		NLMISC::TGameCycle endDate = CTickEventHandler::getGameCycle() + PVPZoneEnterBufferTime;
 		CPVPZonePendingUser pendingUser;
@@ -884,7 +888,7 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 			++it;
 		}
 	}
-	// problem occured : bail out
+	// problem occurred : bail out
 	if ( problem )
 		return;
 	

@@ -80,7 +80,7 @@ public:
 
 	// Evaluate a node
 	bool				getValue (std::string &result, const class CForm *form, const class CFormElmAtom *node, const class CFormDfn &parentDfn,
-									uint parentIndex, UFormElm::TEval evaluate, uint32 *where, uint32 round, const char *formName) const;
+									uint parentIndex, UFormElm::TEval evaluate, uint32 *where, uint32 round, const std::string &formName) const;
 
 	// Definitions
 	class CDefinition
@@ -114,8 +114,8 @@ public:
 private:
 
 	// Error handling
-	virtual void		warning (bool exception, const char *formName, const char *formFilename, const char *function, const char *format, ... ) const;
-	virtual void		warning2 (bool exception, const char *function, const char *format, ... ) const;
+	virtual void		warning (bool exception, const std::string &formName, const std::string &formFilename, const std::string &function, const char *format, ... ) const;
+	virtual void		warning2 (bool exception, const std::string &function, const char *format, ... ) const;
 
 	// Type names
 	static const char	*TypeNames[];

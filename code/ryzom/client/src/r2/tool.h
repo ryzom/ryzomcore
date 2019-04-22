@@ -213,13 +213,18 @@ public:
 	static CInterfaceManager &getUI();
 	// Get mouse  position
 	static void getMousePos(sint32 &x, sint32 &y) ;
+	// Get if mouse are clicked down and position of last down click
+	static void getMouseDown(bool &down, sint32 &x, sint32 &y);
+	// Get if mouse are middle clicked down and position of last down click
+	static void getMouseMiddleDown(bool &down, sint32 &x, sint32 &y);
+	// Get if mouse are right clicked down and position of last down click
+	static void getMouseRightDown(bool &down, sint32 &x, sint32 &y);
 	// Get mouse x position
 	static sint32 getMouseX();
 	// Get mouse y position
 	static sint32 getMouseY();
 	// Set the current mouse cursor
-	static void  setMouseCursor(const char *cursorTexture);
-	static void  setMouseCursor(const std::string &cursorTexture) { setMouseCursor(cursorTexture.c_str()); }
+	static void  setMouseCursor(const std::string &cursorTexture);
 	/** Compute a view vector (with its direction z set to 1) from coordinate of the mouse on screen
 	  * If the mouse is on the island map, then a vector looking down from heights will be returned
 	  */

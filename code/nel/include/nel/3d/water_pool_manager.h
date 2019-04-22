@@ -97,7 +97,7 @@ public:
 
 
 	/// serial the pools data's
-	void serial(NLMISC::IStream &f)  throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 private:
 	friend class CWaterShape;

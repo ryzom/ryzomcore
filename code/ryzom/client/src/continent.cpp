@@ -485,6 +485,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 
 		{
 			H_AUTO(InitRZWorldPacs)
+
 			releasePACS();
 			// Init PACS
 			std::string pacsRBankPath = CPath::lookup(PacsRBank, false);
@@ -522,7 +523,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 				// Associate IGs with the ZC number or -1 if there is no ZC.
 				for(uint i = 0; i<igsWithNames.size(); ++i)
 				{
-					string igZone = strlwr(CFile::getFilenameWithoutExtension(igsWithNames[i].second));
+					string igZone = toLower(CFile::getFilenameWithoutExtension(igsWithNames[i].second));
 
 					// Search for the IG name in the ZC list to associate.
 					for(uint j = 0; j<ZCList.size(); ++j)
@@ -532,7 +533,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 						if (outpost)
 						{
 							// If name matching -> this zone should be a ZC.
-							string outpostZone = strlwr(CFile::getFilenameWithoutExtension(ZCList[j].Name));
+							string outpostZone = toLower(CFile::getFilenameWithoutExtension(ZCList[j].Name));
 							if(igZone == outpostZone)
 							{
 								nlctassert(RZ_MAX_BUILDING_PER_OUTPOST==4);
@@ -788,7 +789,7 @@ void CContinent::reloadFogMap()
 	const R2::CScenarioEntryPoints::CCompleteIsland *completeIsland = R2::CScenarioEntryPoints::getInstance().getCompleteIslandFromCoords(CVector2f((float) UserEntity->pos().x, (float) UserEntity->pos().y));
 	if (completeIsland)
 	{
-		std::string islandName = strlwr(completeIsland->Island);
+		std::string islandName = toLower(completeIsland->Island);
 		std::string::size_type lastPos = islandName.find_last_of("_");
 		if (lastPos != std::string::npos)
 		{
@@ -930,6 +931,9 @@ void CContinent::unselect()
 
 	// Remove the primitive for all entitites (new PACS coming soon and need new primitives).
 	EntitiesMngr.removeCollision();
+
+	// Remove the instances (shapes).
+	EntitiesMngr.removeInstances();
 
 	// release collision primitives
 	if (IGCallbacks)
@@ -1384,10 +1388,3 @@ void CContinent::releaseSky()
 	CurrentSky.release();
 }
 
-
-//=========================================================================
-/*static*/ uint CContinent::getMaxNbUserLandMarks()
-{
-	uint nbBonusLandmarks = (uint)IngameDbMngr.getProp( "INTERFACES:NB_BONUS_LANDMARKS" );
-	return STANDARD_NUM_USER_LANDMARKS + nbBonusLandmarks;
-}

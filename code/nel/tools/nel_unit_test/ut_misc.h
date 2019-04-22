@@ -19,6 +19,7 @@
 
 #include "ut_misc_co_task.h"
 #include "ut_misc_command.h"
+#include "ut_misc_common.h"
 #include "ut_misc_config_file.h"
 #include "ut_misc_debug.h"
 #include "ut_misc_dynlibload.h"
@@ -36,19 +37,20 @@ struct CUTMisc : public Test::Suite
 {
 	CUTMisc()
 	{
-		add(auto_ptr<Test::Suite>(new CUTMiscCoTask));
-		add(auto_ptr<Test::Suite>(new CUTMiscCommand));
-		add(auto_ptr<Test::Suite>(new CUTMiscConfigFile));
-		add(auto_ptr<Test::Suite>(new CUTMiscDebug));
-		add(auto_ptr<Test::Suite>(new CUTMiscDynLibLoad));
-		add(auto_ptr<Test::Suite>(new CUTMiscFile));
-		add(auto_ptr<Test::Suite>(new CUTMiscPackFile));
-		add(auto_ptr<Test::Suite>(new CUTMiscSingleton));
-		add(auto_ptr<Test::Suite>(new CUTMiscSString));
-		add(auto_ptr<Test::Suite>(new CUTMiscStream));
-		add(auto_ptr<Test::Suite>(new CUTMiscVariable));
-		add(auto_ptr<Test::Suite>(new CUTMiscTypes));
-		add(auto_ptr<Test::Suite>(new CUTMiscStringCommon));
+		add(std::auto_ptr<Test::Suite>(new CUTMiscCoTask));
+		add(std::auto_ptr<Test::Suite>(new CUTMiscCommand));
+		add(std::auto_ptr<Test::Suite>(new CUTMiscCommon));
+		add(std::auto_ptr<Test::Suite>(new CUTMiscConfigFile));
+		add(std::auto_ptr<Test::Suite>(new CUTMiscDebug));
+		add(std::auto_ptr<Test::Suite>(new CUTMiscDynLibLoad));
+		add(std::auto_ptr<Test::Suite>(new CUTMiscFile));
+		add(std::auto_ptr<Test::Suite>(new CUTMiscPackFile));
+		add(std::auto_ptr<Test::Suite>(new CUTMiscSingleton));
+		add(std::auto_ptr<Test::Suite>(new CUTMiscSString));
+		add(std::auto_ptr<Test::Suite>(new CUTMiscStream));
+		add(std::auto_ptr<Test::Suite>(new CUTMiscVariable));
+		add(std::auto_ptr<Test::Suite>(new CUTMiscTypes));
+		add(std::auto_ptr<Test::Suite>(new CUTMiscStringCommon));
 		// Add a line here when adding a new test CLASS
 	}
 };

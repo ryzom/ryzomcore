@@ -20,6 +20,10 @@
 #include "nel/gui/lua_ihm.h"
 #include "nel/gui/lua_helper.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -150,7 +154,8 @@ namespace NLGUI
 	// *************************************************
 	bool CLuaObject::isNil() const           { push(); bool result = _LuaState->isNil();           _LuaState->pop(); return result; }
 	bool CLuaObject::isNumber() const        { push(); bool result = _LuaState->isNumber();        _LuaState->pop(); return result; }
-	bool CLuaObject::isBoolean() const        { push(); bool result = _LuaState->isBoolean();      _LuaState->pop(); return result; }
+	bool CLuaObject::isInteger() const       { push(); bool result = _LuaState->isInteger();       _LuaState->pop(); return result; }
+	bool CLuaObject::isBoolean() const       { push(); bool result = _LuaState->isBoolean();       _LuaState->pop(); return result; }
 	bool CLuaObject::isString() const        { push(); bool result = _LuaState->isString();        _LuaState->pop(); return result; }
 	bool CLuaObject::isFunction() const      { push(); bool result = _LuaState->isFunction();      _LuaState->pop(); return result; }
 	bool CLuaObject::isCFunction() const     { push(); bool result = _LuaState->isCFunction();     _LuaState->pop(); return result; }
@@ -168,6 +173,7 @@ namespace NLGUI
 	// *************************************************
 	bool            CLuaObject::toBoolean() const    {	push(); bool          result  = _LuaState->toBoolean();   _LuaState->pop(); return result; }
 	lua_Number		CLuaObject::toNumber() const     {	push(); lua_Number    result  = _LuaState->toNumber();    _LuaState->pop(); return result; }
+	lua_Integer		CLuaObject::toInteger() const     {	push(); lua_Integer   result  = _LuaState->toInteger();    _LuaState->pop(); return result; }
 	std::string		CLuaObject::toString() const
 	{
 		push();
@@ -194,6 +200,8 @@ namespace NLGUI
 	CLuaObject::operator bool() const         { return toBoolean(); }
 	CLuaObject::operator float() const        { return (float) toNumber(); }
 	CLuaObject::operator double() const       { return (double) toNumber(); }
+	CLuaObject::operator sint32() const        { return (sint32) toInteger(); }
+	CLuaObject::operator sint64() const       { return (sint64) toInteger(); }
 	CLuaObject::operator std::string() const  { return toString(); }
 
 
@@ -214,7 +222,7 @@ namespace NLGUI
 	}
 
 	// *************************************************
-	CLuaEnumeration CLuaObject::enumerate() throw(ELuaNotATable)
+	CLuaEnumeration CLuaObject::enumerate()
 	{
 		if (!isEnumerable())
 		{
@@ -263,7 +271,7 @@ namespace NLGUI
 	}
 
 	// *************************************************
-	CLuaObject CLuaObject::at(const char *key) const throw(ELuaNotATable)
+	CLuaObject CLuaObject::at(const char *key) const
 	{
 		if (!isEnumerable()) throw ELuaNotATable(NLMISC::toString("Can't get key '%s' in object '%s' because type is '%s', it is not a table.", key, getId().c_str(), getTypename()).c_str());
 		return operator[](key);
@@ -278,7 +286,7 @@ namespace NLGUI
 	}
 
 	// *************************************************
-	CLuaObject CLuaObject::newTable(const char *tableName) throw(ELuaNotATable)
+	CLuaObject CLuaObject::newTable(const char *tableName)
 	{
 		nlassert(tableName);
 		nlassert(isValid());
@@ -293,7 +301,7 @@ namespace NLGUI
 	}
 
 	// *************************************************
-	void CLuaObject::setValue(const char *key,  const CLuaObject &value) throw(ELuaNotATable)
+	void CLuaObject::setValue(const char *key,  const CLuaObject &value)
 	{
 		nlassert(key);
 		nlassert(isValid());
@@ -309,7 +317,7 @@ namespace NLGUI
 	}
 
 	// *************************************************
-	void CLuaObject::setNil(const char *key) throw(ELuaNotATable)
+	void CLuaObject::setNil(const char *key)
 	{
 		nlassert(key);
 		nlassert(isValid());
@@ -323,7 +331,7 @@ namespace NLGUI
 	}
 
 	// *************************************************
-	void CLuaObject::setValue(const char *key,  const char *value) throw(ELuaNotATable)
+	void CLuaObject::setValue(const char *key,  const char *value)
 	{
 		nlassert(value);
 		nlassert(key);
@@ -338,13 +346,13 @@ namespace NLGUI
 	}
 
 	// *************************************************
-	void CLuaObject::setValue(const char *key,  const std::string &value) throw(ELuaNotATable)
+	void CLuaObject::setValue(const char *key,  const std::string &value)
 	{
 		setValue(key, value.c_str());
 	}
 
 	// *************************************************
-	void CLuaObject::setValue(const char *key, bool value) throw(ELuaNotATable)
+	void CLuaObject::setValue(const char *key, bool value)
 	{
 		nlassert(key);
 		nlassert(isValid());
@@ -358,7 +366,7 @@ namespace NLGUI
 	}
 
 	// *************************************************
-	void CLuaObject::setValue(const char *key, TLuaWrappedFunction value) throw(ELuaNotATable)
+	void CLuaObject::setValue(const char *key, TLuaWrappedFunction value)
 	{
 		nlassert(key);
 		nlassert(isValid());
@@ -372,7 +380,7 @@ namespace NLGUI
 	}
 
 	// *************************************************
-	void CLuaObject::setValue(const char *key,  double value) throw(ELuaNotATable)
+	void CLuaObject::setValue(const char *key,  double value)
 	{
 		nlassert(key);
 		nlassert(isValid());
@@ -386,7 +394,49 @@ namespace NLGUI
 	}
 
 	// *************************************************
-	void CLuaObject::eraseValue(const char *key) throw(ELuaNotATable)
+	void CLuaObject::setValue(const char *key,  uint32 value)
+	{
+		nlassert(key);
+		nlassert(isValid());
+		if (!isTable()) throw ELuaNotATable(NLMISC::toString("Trying to set a value '%u' at key %s on object '%s' of type %s (not a table).", value, key, getId().c_str(), getTypename()));
+		CLuaStackChecker lsc(_LuaState);
+		push();
+		_LuaState->push(key);
+		_LuaState->push(value);
+		_LuaState->setTable(-3);
+		_LuaState->pop();
+	}
+
+	// *************************************************
+	void CLuaObject::setValue(const char *key,  sint32 value)
+	{
+		nlassert(key);
+		nlassert(isValid());
+		if (!isTable()) throw ELuaNotATable(NLMISC::toString("Trying to set a value '%d' at key %s on object '%s' of type %s (not a table).", value, key, getId().c_str(), getTypename()));
+		CLuaStackChecker lsc(_LuaState);
+		push();
+		_LuaState->push(key);
+		_LuaState->push(value);
+		_LuaState->setTable(-3);
+		_LuaState->pop();
+	}
+
+	// *************************************************
+	void CLuaObject::setValue(const char *key,  sint64 value)
+	{
+		nlassert(key);
+		nlassert(isValid());
+		if (!isTable()) throw ELuaNotATable(NLMISC::toString("Trying to set a value '%" NL_I64 "d' at key %s on object '%s' of type %s (not a table).", value, key, getId().c_str(), getTypename()));
+		CLuaStackChecker lsc(_LuaState);
+		push();
+		_LuaState->push(key);
+		_LuaState->push(value);
+		_LuaState->setTable(-3);
+		_LuaState->pop();
+	}
+
+	// *************************************************
+	void CLuaObject::eraseValue(const char *key)
 	{
 		nlassert(isValid());
 		nlassert(key);

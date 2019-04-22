@@ -716,7 +716,7 @@ uint64 CBufServer::newBytesReceived()
 {
 	uint64 b = bytesReceived();
 	uint64 nbrecvd = b - _PrevBytesPoppedIn;
-	//nlinfo( "b: %"NL_I64"u   new: %"NL_I64"u", b, nbrecvd );
+	//nlinfo( "b: %" NL_I64 "u   new: %" NL_I64 "u", b, nbrecvd );
 	_PrevBytesPoppedIn = b;
 	return nbrecvd;
 }
@@ -728,7 +728,7 @@ uint64 CBufServer::newBytesSent()
 {
 	uint64 b = bytesSent();
 	uint64 nbsent = b - _PrevBytesPushedOut;
-	//nlinfo( "b: %"NL_I64"u   new: %"NL_I64"u", b, nbsent );
+	//nlinfo( "b: %" NL_I64 "u   new: %" NL_I64 "u", b, nbsent );
 	_PrevBytesPushedOut = b;
 	return nbsent;
 }

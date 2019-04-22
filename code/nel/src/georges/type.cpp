@@ -27,6 +27,10 @@
 #include "nel/georges/form_loader.h"
 #include "nel/georges/type.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLMISC;
 using namespace std;
 
@@ -109,8 +113,8 @@ void CType::read (xmlNodePtr root)
 	if ( ((const char*)root->name == NULL) || (strcmp ((const char*)root->name, "TYPE") != 0) )
 	{
 		// Throw exception
-		warning2 (true, "read", "XML Syntax error in block line %p, node (%s) should be TYPE.",
-			root->content, root->name);
+		warning2 (true, "read", "XML Syntax error in block line %d, node (%s) should be TYPE.",
+			(sint)root->line, root->name);
 	}
 
 	// Read the type
@@ -137,8 +141,8 @@ void CType::read (xmlNodePtr root)
 			xmlFree ((void*)value);
 
 			// Throw exception
-			warning2 (true, "read", "XML Syntax error in TYPE block line %p, the Type value is unknown (%s).",
-				root->content, valueStr.c_str ());
+			warning2 (true, "read", "XML Syntax error in TYPE block line %d, the Type value is unknown (%s).",
+				(sint)root->line, valueStr.c_str ());
 		}
 
 		// Delete the value
@@ -147,8 +151,8 @@ void CType::read (xmlNodePtr root)
 	else
 	{
 		// Throw exception
-		warning2 (true, "read", "XML Syntax error in TYPE block line %p, the Type argument was not found.",
-			root->content);
+		warning2 (true, "read", "XML Syntax error in TYPE block line %d, the Type argument was not found.",
+			(sint)root->line);
 	}
 
 	// Read the UI
@@ -185,7 +189,7 @@ void CType::read (xmlNodePtr root)
 		xmlFree ((void*)value);
 	}
 	else
-		Default = "";
+		Default.clear();
 
 	// Read Min
 	value = (const char*)xmlGetProp (root, (xmlChar*)"Min");
@@ -197,7 +201,7 @@ void CType::read (xmlNodePtr root)
 		xmlFree ((void*)value);
 	}
 	else
-		Min = "";
+		Min.clear();
 
 	// Read Max
 	value = (const char*)xmlGetProp (root, (xmlChar*)"Max");
@@ -209,7 +213,7 @@ void CType::read (xmlNodePtr root)
 		xmlFree ((void*)value);
 	}
 	else
-		Max = "";
+		Max.clear();
 
 	// Read Increment
 	value = (const char*)xmlGetProp (root, (xmlChar*)"Increment");
@@ -221,7 +225,7 @@ void CType::read (xmlNodePtr root)
 		xmlFree ((void*)value);
 	}
 	else
-		Increment = "";
+		Increment.clear();
 
 	// Read the definitions
 	uint childrenCount = CIXml::countChildren (root, "DEFINITION");
@@ -255,8 +259,8 @@ void CType::read (xmlNodePtr root)
 				xmlFree ((void*)label);
 
 				// Throw exception
-				warning2 (true, "read", "XML Syntax error in DEFINITION block line %p, the Value argument was not found.",
-					childPtr->content);
+				warning2 (true, "read", "XML Syntax error in DEFINITION block line %d, the Value argument was not found.",
+					(sint)childPtr->line);
 			}
 
 			// Delete the value
@@ -265,8 +269,8 @@ void CType::read (xmlNodePtr root)
 		else
 		{
 			// Throw exception
-			warning2 (true, "read", "XML Syntax error in DEFINITION block line %p, the Label argument was not found.",
-				childPtr->content);
+			warning2 (true, "read", "XML Syntax error in DEFINITION block line %d, the Label argument was not found.",
+				(sint)childPtr->line);
 		}
 
 		// One more
@@ -326,6 +330,7 @@ public:
 		Type = type;
 		Form = form;
 	}
+
 	virtual CEvalNumExpr::TReturnState evalValue (const char *value, double &result, uint32 round)
 	{
 		// If a form is available
@@ -412,7 +417,7 @@ public:
 								result = res.empty ()?0:1;
 								return CEvalNumExpr::NoError;
 							}
-							else if (((const CFormElm&)Form->getRootNode ()).convertValue (result, res.c_str ()))
+							else if (((const CFormElm&)Form->getRootNode ()).convertValue (result, res))
 							{
 								return CEvalNumExpr::NoError;
 							}
@@ -465,7 +470,7 @@ uint getNextToken (const char *startString, string &token, uint &offset)
 		offset += 9;
 		return NL_TOKEN_NAME;
 	}
-	token = "";
+	token.clear();
 	while (startString[offset])
 	{
 		if (startString[offset] == '\\')
@@ -535,7 +540,7 @@ void buildError (char *msg, uint offset)
 
 // ***************************************************************************
 
-bool CType::getValue (string &result, const CForm *form, const CFormElmAtom *node, const CFormDfn &parentDfn, uint parentIndex, UFormElm::TEval evaluate, uint32 *where, uint32 round, const char *formName) const
+bool CType::getValue (string &result, const CForm *form, const CFormElmAtom *node, const CFormDfn &parentDfn, uint parentIndex, UFormElm::TEval evaluate, uint32 *where, uint32 round, const std::string &formName) const
 {
 	if (round > NLGEORGES_MAX_RECURSION)
 	{
@@ -721,7 +726,7 @@ bool CType::getValue (string &result, const CForm *form, const CFormElmAtom *nod
 						UFormDfn::TEntryType type;
 
 						// Search for the node
-						if (((const CFormElm&)form->getRootNode ()).getNodeByName (valueName.c_str (), &parentDfn, parentIndex, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, false, round+1))
+						if (((const CFormElm&)form->getRootNode ()).getNodeByName (valueName, &parentDfn, parentIndex, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, false, round+1))
 						{
 							// End, return the current index
 							if (type == UFormDfn::EntryType)
@@ -809,7 +814,7 @@ bool CType::uiCompatible (TType type, TUI ui)
 
 // ***************************************************************************
 
-void CType::warning (bool exception, const char *formName, const char *formFilename, const char *function, const char *format, ... ) const
+void CType::warning (bool exception, const std::string &formName, const std::string &formFilename, const std::string &function, const char *format, ... ) const
 {
 	// Make a buffer string
 	va_list args;
@@ -819,12 +824,12 @@ void CType::warning (bool exception, const char *formName, const char *formFilen
 	va_end( args );
 
 	// Set the warning
-	NLGEORGES::warning (exception, "(CType::%s) In form (%s) in node (%s) : %s", function, formFilename, formName, buffer);
+	NLGEORGES::warning (exception, "(CType::%s) In form (%s) in node (%s) : %s", function.c_str(), formFilename.c_str(), formName.c_str(), buffer);
 }
 
 // ***************************************************************************
 
-void CType::warning2 (bool exception, const char *function, const char *format, ... ) const
+void CType::warning2 (bool exception, const std::string &function, const char *format, ... ) const
 {
 	// Make a buffer string
 	va_list args;
@@ -834,7 +839,7 @@ void CType::warning2 (bool exception, const char *function, const char *format, 
 	va_end( args );
 
 	// Set the warning
-	NLGEORGES::warning (exception, "(CType::%s) : %s", function, buffer);
+	NLGEORGES::warning (exception, "(CType::%s) : %s", function.c_str(), buffer);
 }
 
 // ***************************************************************************

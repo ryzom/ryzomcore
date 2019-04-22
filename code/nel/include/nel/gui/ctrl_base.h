@@ -151,8 +151,12 @@ namespace NLGUI
 		// called when keyboard capture has been lost
 		virtual void		onKeyboardCaptureLost() {}
 
+		// 'tooltip' property expects string to be ucstring or latin1 which is not possible from html page
+		int luaSetTooltipUtf8(CLuaState &ls);
+
 		REFLECT_EXPORT_START(CCtrlBase, CViewBase)
 			REFLECT_UCSTRING("tooltip", getDefaultContextHelp, setDefaultContextHelp);
+			REFLECT_LUA_METHOD("setTooltipUtf8", luaSetTooltipUtf8);
 		REFLECT_EXPORT_END
 
 		// special for mouse over : return true and fill the name of the cursor to display

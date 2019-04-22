@@ -89,6 +89,9 @@
 // Std.
 #include <vector>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 #define OLD_STRING_SYSTEM
 #define BAR_STEP_TP 2
@@ -290,7 +293,7 @@ static void readPrivileges(NLMISC::CBitMemStream &impulse)
 	catch(const EStreamOverflow &)
 	{
 		nlwarning("User privileges not serialised, assuming none");
-		UserPrivileges = "";
+		UserPrivileges.clear();
 	}
 }
 
@@ -507,7 +510,7 @@ void impulseShardId(NLMISC::CBitMemStream &impulse)
 
 	string	webHost;
 	impulse.serial(webHost);
-	if (webHost != "")
+	if (!webHost.empty())
 	{
 		WebServer = webHost;
 	}
@@ -692,7 +695,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		if (!stringCategory.empty() && stringCategory != "SYS")
 		{
 			map<string, CClientConfig::SSysInfoParam>::const_iterator it;
-			it = ClientCfg.SystemInfoParams.find(strlwr(stringCategory));
+			it = ClientCfg.SystemInfoParams.find(toLower(stringCategory));
 			if (it != ClientCfg.SystemInfoParams.end())
 			{
 				col = it->second.Color;
@@ -723,7 +726,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 	if( !stringCategory.empty() )
 	{
 		map<string, CClientConfig::SSysInfoParam>::const_iterator it;
-		it = ClientCfg.SystemInfoParams.find( strlwr(stringCategory) );
+		it = ClientCfg.SystemInfoParams.find( toLower(stringCategory) );
 		if( it != ClientCfg.SystemInfoParams.end() )
 		{
 			if( !(*it).second.SysInfoFxName.empty() )
@@ -850,7 +853,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 						}
 					}
 				}
-				finalString = "";
+				finalString.clear();
 			}
 			else
 			{
@@ -923,7 +926,7 @@ void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const u
 	bool windowVisible;
 
 	ucstring goodSenderName = CEntityCL::removeTitleAndShardFromName(senderName);
- 
+
 	// The sender part is up to and including the first ":" after the goodSenderName
 	ucstring::size_type pos = finalString.find(goodSenderName);
 	pos = finalString.find(':', pos);
@@ -1049,7 +1052,7 @@ string getInterfaceNameFromId (sint botType, sint interfaceId)
 	case BOTCHATTYPE::NeutralMainPage: interfaceName += "neutral_main"; break;
 	case BOTCHATTYPE::NastyMainPage: interfaceName += "nasty_main"; break;
 	case BOTCHATTYPE::MoreNewsPage: interfaceName += "more_news"; break;
-	case BOTCHATTYPE::Done: nlinfo ("end of bot chat"); interfaceName = ""; break;
+	case BOTCHATTYPE::Done: nlinfo ("end of bot chat"); interfaceName.clear(); break;
 	}
 	return interfaceName;
 }
@@ -1404,12 +1407,19 @@ void impulseCorrectPos(NLMISC::CBitMemStream &impulse)
 
 	if(UserEntity->mode() != MBEHAV::COMBAT_FLOAT)
 	{
-		// Compute the destination.
-		CVectorD dest = CVectorD((float)x/1000.0f, (float)y/1000.0f, (float)z/1000.0f);
-		// Update the position for the vision.
-		NetMngr.setReferencePosition(dest);
-		// Change the user poisition.
-		UserEntity->correctPos(dest);
+		if (x == 0) // Get SpeedAdjustement
+		{
+			UserEntity->setSpeedServerAdjust(-0.2f);
+		}
+		else
+		{
+			// Compute the destination.
+			CVectorD dest = CVectorD((float)x/1000.0f, (float)y/1000.0f, (float)z/1000.0f);
+			// Update the position for the vision.
+			NetMngr.setReferencePosition(dest);
+			// Change the user poisition.
+			UserEntity->correctPos(dest);
+		}
 	}
 }// impulseCorrectPos //
 
@@ -2499,7 +2509,7 @@ void impulseRemoteAdmin (NLMISC::CBitMemStream &impulse)
 	}
 	else
 	{
-		if (strs.size()>0)
+		if (!strs.empty())
 		{
 			str = strs[0].substr(0,strs[0].size()-1);
 			// replace all spaces into underscore because space is a reserved char
@@ -3285,10 +3295,10 @@ private:
 			}
 			else
 			{
-				contentStr = "";
+				contentStr.clear();
 				i = digitStart;
 			}
-		} 
+		}
 		else if(contentStr.size()>=5 && contentStr[0]=='@' && contentStr[1]=='{' && contentStr[2]=='W')
 		{
 			uint	i;
@@ -3883,30 +3893,67 @@ bool CNetManager::update()
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		if (im)
 		{
-			CCDBNodeLeaf *node = m_PingLeaf ? &*m_PingLeaf
-				: &*(m_PingLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PING", false));
-			if (node)
-				node->setValue32(getPing());
-			node = m_UploadLeaf ? &*m_UploadLeaf
-				: &*(m_UploadLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:UPLOAD", false));
-			if (node)
-				node->setValue32((sint32)(getMeanUpload()*1024.f/8.f));
-			node = m_DownloadLeaf ? &*m_DownloadLeaf
-				: &*(m_DownloadLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DOWNLOAD", false));
-			if (node)
-				node->setValue32((sint32)(getMeanDownload()*1024.f/8.f));
-			node = m_PacketLostLeaf ? &* m_PacketLostLeaf
-				: &*(m_PacketLostLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PACKETLOST", false));
-			if (node)
-				node->setValue32((sint32)getMeanPacketLoss());
-			node = m_ServerStateLeaf ? &*m_ServerStateLeaf
-				: &*(m_ServerStateLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SERVERSTATE", false));
-			if (node)
-				node->setValue32((sint32)getConnectionState());
-			node = m_ConnectionQualityLeaf ? &*m_ConnectionQualityLeaf
-				: &*(m_ConnectionQualityLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CONNECTION_QUALITY", false));
-			if (node)
-				node->setValue32((sint32)getConnectionQuality());
+			CCDBNodeLeaf *node = NULL;
+
+			if (!m_PingLeaf)
+				m_PingLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PING", false);
+
+			if (m_PingLeaf)
+			{
+				node = &*m_PingLeaf;
+				if (node)
+					node->setValue32(getPing());
+			}
+
+			if (!m_UploadLeaf)
+				m_UploadLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:UPLOAD", false);
+
+			if (m_UploadLeaf)
+			{
+				node = &*m_UploadLeaf;
+				if (node)
+					node->setValue32((sint32)(getMeanUpload()*1024.f/8.f));
+			}
+
+			if (!m_DownloadLeaf)
+				m_DownloadLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DOWNLOAD", false);
+
+			if (m_DownloadLeaf)
+			{
+				node = &*m_DownloadLeaf;
+				if (node)
+					node->setValue32((sint32)(getMeanDownload()*1024.f/8.f));
+			}
+
+			if (!m_PacketLostLeaf)
+				m_PacketLostLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PACKETLOST", false);
+
+			if (m_PacketLostLeaf)
+			{
+				node = &*m_PacketLostLeaf;
+				if (node)
+					node->setValue32((sint32)getMeanPacketLoss());
+			}
+
+			if (!m_ServerStateLeaf)
+				m_ServerStateLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SERVERSTATE", false);
+
+			if (m_ServerStateLeaf)
+			{
+				node = &*m_ServerStateLeaf;
+				if (node)
+					node->setValue32((sint32)getConnectionState());
+			}
+
+			if (!m_ConnectionQualityLeaf)
+				m_ConnectionQualityLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CONNECTION_QUALITY", false);
+
+			if (m_ConnectionQualityLeaf)
+			{
+				node = &*m_ConnectionQualityLeaf;
+				if (node)
+					node->setValue32((sint32)getConnectionQuality());
+			}
 		}
 	}
 

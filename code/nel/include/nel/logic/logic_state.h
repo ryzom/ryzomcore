@@ -149,7 +149,7 @@ public:
 	/**
 	 * serial
 	 */
-	//void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	//void serial(NLMISC::IStream &f);
 
 	void write (xmlNodePtr node) const;
 	void read (xmlNodePtr node);

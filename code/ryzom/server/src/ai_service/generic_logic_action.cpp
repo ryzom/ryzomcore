@@ -1438,7 +1438,8 @@ public:
 
 		// try to parse a constant value
 //		var.Type = constant;
-//		double val = atof(str.c_str());
+//		double val;
+//		NLMISC::fromString(str, val);
 //		var.Value = float(val);
 //		return true;
 	}
@@ -1722,7 +1723,7 @@ public:
 									const CAIAliasDescriptionNode *eventNode, 
 									CStateMachine *container)
 	{
-		uint32 emot = ~0;
+		uint32 emot = std::numeric_limits<uint32>::max();
 
 		if (!subActions.empty())
 		{
@@ -1736,7 +1737,7 @@ public:
 
 		emot = CAIS::instance().getEmotNumber(args[0]);
 
-		if (emot == ~0)
+		if (emot == std::numeric_limits<uint32>::max())
 		{
 			nlwarning("emot (%s) unknow emot name : '%s' !", eventNode->fullName().c_str(), args[0].c_str());
 			_EmotNumber = MBEHAV::NUMBER_OF_BEHAVIOURS;

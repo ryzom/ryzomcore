@@ -8,6 +8,7 @@
 
 #include "nel/misc/time_nl.h"
 #include "nel/misc/file.h"
+#include "nel/misc/common.h"
 #include "nel/misc/triangle.h"
 #include "nel/misc/bsphere.h"
 #include "3d/quad_tree.h"
@@ -3121,8 +3122,8 @@ void CNelExport::deleteLM(INode& ZeNode)
 		sprintf( tmp, "%d", i );
 		sSaveName += tmp;
 		sSaveName += ".tga";
-		FILE	*file;
-		if( file = fopen(sSaveName.c_str(),"rb") )
+		FILE *file = nlfopen(sSaveName, "rb")
+		if (file)
 		{
 			fclose( file );
 			DeleteFile( sSaveName.c_str() );
@@ -3521,8 +3522,8 @@ bool CNelExport::exportScene(std::vector<INode*>& vectNode)
 			sprintf( tmp, "%d", i );
 			sSaveName += tmp;
 			sSaveName += ".tga";
-			FILE	*file;
-			if( file = fopen(sSaveName.c_str(),"rb") )
+			FILE *file = nlfopen(sSaveName, "rb");
+			if (file)
 			{
 				fclose( file );
 				DeleteFile( sSaveName.c_str() );

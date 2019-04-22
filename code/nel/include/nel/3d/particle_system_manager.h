@@ -87,7 +87,7 @@ private:
 	{
 	public:
 		CParticleSystemModel *Model;
-		CMatrix				 OldAncestorMatOrRelPos;	// last matrix of ancestor skeleton or relative matrix of ps to its ancestor (see flag below)
+		NLMISC::CMatrix		 OldAncestorMatOrRelPos;	// last matrix of ancestor skeleton or relative matrix of ps to its ancestor (see flag below)
 		bool				 IsRelMatrix;				// gives usage of the field OldAncestorMatOrRelPos
 		bool				 HasAncestorSkeleton;		// has the system an ancestor skeleton ?
 	public:

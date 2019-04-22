@@ -21,6 +21,9 @@
 //
 #include "nel/gui/lua_ihm.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLMISC;
 
@@ -48,14 +51,14 @@ void CToolPick::setIgnoreInstances(const std::string & ignoreInstances)
 {
 	//H_AUTO(R2_CToolPick_setIgnoreInstances)
 	string allKind = ignoreInstances;
-	while (allKind.size() > 0)
+	while (!allKind.empty())
 	{
 		std::string::size_type e = allKind.find(',');
 		string tmp;
 		if (e == std::string::npos || e == 0)
 		{
 			tmp = allKind;
-			allKind="";
+			allKind.clear();
 		}
 		else
 		{
@@ -63,17 +66,17 @@ void CToolPick::setIgnoreInstances(const std::string & ignoreInstances)
 			allKind = allKind.substr(e+1,allKind.size());
 		}
 
-		while(tmp.size()>0 && tmp[0]==' ')
+		while(!tmp.empty() && tmp[0]==' ')
 		{
 			if(tmp.size()==1)
-				tmp="";
+				tmp.clear();
 			else
 				tmp = tmp.substr(1,tmp.size());
 		}
-		while(tmp.size()>0 && tmp[tmp.size()]==' ')
+		while(!tmp.empty() && tmp[tmp.size()]==' ')
 		{
 			if(tmp.size()==1)
-				tmp="";
+				tmp.clear();
 			else
 				tmp = tmp.substr(0,tmp.size()-1);
 		}
@@ -98,7 +101,7 @@ void CToolPick::updateAfterRender()
 	_CandidateInstance = NULL;
 	CInstance *instanceUnder = checkInstanceUnderMouse();
 	bool ignoreInstanceUnder = false;
-	if(instanceUnder && _IgnoreInstances.size()>0)
+	if(instanceUnder && !_IgnoreInstances.empty())
 	{
 		for(uint i=0; i<_IgnoreInstances.size(); i++)
 		{

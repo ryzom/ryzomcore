@@ -33,7 +33,7 @@ void COutpostSquadSheet::build(const NLGEORGES::UFormElm &root)
 }
 
 // ****************************************************************************
-void COutpostSquadSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void COutpostSquadSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(BuyPrice);
 }

@@ -255,8 +255,8 @@ public:
 
 	CStepObjective(CMissionData &md, IPrimitive *prim, const std::string &prefix = "")
 		: CStep(md, prim),
-		_HideObj(false),
-		_Prefix(prefix)
+		_Prefix(prefix),
+		_HideObj(false)
 	{
 	}
 
@@ -553,7 +553,7 @@ public:
 
 		// parse ai instance list
 		vector<string> vs = md.getPropertyArray(prim, "ai_instances", true, false);
-/*		if (vs.size() == 0)
+/*		if (vs.empty())
 		{
 			string err = toString("crash block need at least one ai instance !");
 			throw EParseException(prim, err.c_str());
@@ -741,7 +741,7 @@ public:
 //		_TalkToMenu.initPhrase(md, prim, temp);
 
 		_TalkToObjective = NULL;
-		std::auto_ptr<CStepDynChatTalkTo> talkToObjective; // next calls could throw exceptions, so take care...
+		CUniquePtr<CStepDynChatTalkTo> talkToObjective; // next calls could throw exceptions, so take care...
 		if (!temp.empty())
 		{
 			talkToObjective.reset(new CStepDynChatTalkTo(md, prim, "talk_to_"));

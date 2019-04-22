@@ -80,15 +80,12 @@ TReportResult report(const std::string &title, const std::string &subject, const
 	std::string reportPath;
 	if (!body.empty())
 	{
-		std::stringstream reportFile;
-		reportFile << getLogDirectory();
-		reportFile << "nel_report_";
-		reportFile << (int)time(NULL);
-		reportFile << ".log";
-		reportPath = CFile::findNewFile(reportFile.str());
-		std::ofstream f;
-		f.open(reportPath.c_str());
-		if (!f.good())
+		std::string reportFile = getLogDirectory() + NLMISC::toString("nel_report_%u.log", (uint)time(NULL));
+		reportPath = CFile::findNewFile(reportFile);
+
+		FILE *f = nlfopen(reportPath, "wb"); // write as binary so \n are preserved
+
+		if (!f)
 		{
 #if NL_DEBUG_REPORT
 			if (INelContext::isContextInitialised())
@@ -98,8 +95,14 @@ TReportResult report(const std::string &title, const std::string &subject, const
 		}
 		else
 		{
-			f << body;
-			f.close();
+			size_t written = fwrite(body.c_str(), 1, body.length(), f);
+
+			if (written != body.length())
+			{
+				nlwarning("Unable to write %u bytes to %s, only %u written", (uint)body.length(), reportPath.c_str(), (uint)written);
+			}
+
+			fclose(f);
 		}
 	}
 
@@ -108,36 +111,34 @@ TReportResult report(const std::string &title, const std::string &subject, const
 		|| CSystemUtils::detectWindowedApplication())
 		&& CFile::isExists(NL_CRASH_REPORT_TOOL))
 	{
-		std::stringstream params;
-		params << NL_CRASH_REPORT_TOOL;
+		std::string params;
 
 		if (!reportPath.empty())
-			params << " -log \"" << reportPath << "\"";
+			params += NLMISC::toString(" -log \"%s\"", reportPath.c_str());
 
 		if (!subject.empty())
-			params << " -attachment \"" << attachment << "\"";
+			params += NLMISC::toString(" -attachment \"%s\"", attachment.c_str());
 
 		if (!title.empty())
-			params << " -title \"" << title << "\"";
+			params += NLMISC::toString(" -title \"%s\"", title.c_str());
 
 		if (!subject.empty())
-			params << " -subject \"" << subject << "\"";
+			params += NLMISC::toString(" -subject \"%s\"", subject.c_str());
 
 		const char *reportPostUrl = getReportPostURL();
 		if (reportPostUrl)
-			params << " -host \"" << reportPostUrl << "\"";
+			params += NLMISC::toString(" -host \"%s\"", reportPostUrl);
 
 		if (synchronous)
-			params << " -dev";
+			params += " -dev";
 
 		if (sendReport)
-			params << " -sendreport";
-
-		std::string paramsStr = params.str();
+			params += " -sendreport";
 
 		if (synchronous)
 		{
-			TReportResult result = (TReportResult)::system(paramsStr.c_str());
+			TReportResult result = (TReportResult)NLMISC::launchProgramAndWaitForResult(NL_CRASH_REPORT_TOOL, params);
+
 			if (result != ReportAlwaysIgnore
 				&& result != ReportIgnore
 				&& result != ReportAbort
@@ -153,7 +154,7 @@ TReportResult report(const std::string &title, const std::string &subject, const
 		}
 		else
 		{
-			NLMISC::launchProgram(NL_CRASH_REPORT_TOOL, paramsStr, 
+			NLMISC::launchProgram(NL_CRASH_REPORT_TOOL, params,
 				NL_DEBUG_REPORT ? INelContext::isContextInitialised() : false); // Only log if required, avoid infinite loop
 			return defaultResult;
 		}

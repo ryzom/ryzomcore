@@ -19,6 +19,10 @@
 #include "nel/gui/lua_manager.h"
 #include "nel/gui/lua_helper.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -33,8 +37,20 @@ namespace NLGUI
 
 	CLuaManager::~CLuaManager()
 	{
-		delete luaState;
-		luaState = NULL;
+		if (luaState)
+		{
+			delete luaState;
+			luaState = NULL;
+		}
+	}
+
+	void CLuaManager::releaseInstance()
+	{
+		if (instance)
+		{
+			delete instance;
+			instance = NULL;
+		}
 	}
 
 	bool CLuaManager::executeLuaScript( const std::string &luaScript, bool smallScript )
@@ -60,7 +76,8 @@ namespace NLGUI
 
 	void CLuaManager::ResetLuaState()
 	{
-		delete luaState;
+		if (luaState) delete luaState;
+
 		luaState = new CLuaState( debugLua );
 	}
 

@@ -22,6 +22,10 @@
 #include "nel/3d/deform_2d.h"
 #include "nel/misc/vector_2f.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 

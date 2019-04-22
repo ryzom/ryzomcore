@@ -25,15 +25,15 @@
 #include "SelectionTerritoire.h"
 #include "View.h"
 
-#define REGKEY_TILEDIT "Software\\Nevrax\\Nel\\Tile_Edit"
-#define REGKEY_BUTTONZOOM "Zoom button"
-#define REGKEY_BUTTONVARIETY "Zoom variety"
-#define REGKEY_BUTTONTEXTURE "Texture button"
-#define REGKEY_BUTTONSORT "Sort button"
-#define REGKEY_BUTTONTEXTINFO "Info button"
-#define REGKEY_LISTCOMBOBOX "List type combo box"
-#define REGKEY_WNDPL "Window placement"
-#define REGKEY_LASTPATH "Last path"
+#define REGKEY_TILEDIT _T("Software\\Nevrax\\Nel\\Tile_Edit")
+#define REGKEY_BUTTONZOOM _T("Zoom button")
+#define REGKEY_BUTTONVARIETY _T("Zoom variety")
+#define REGKEY_BUTTONTEXTURE _T("Texture button")
+#define REGKEY_BUTTONSORT _T("Sort button")
+#define REGKEY_BUTTONTEXTINFO _T("Info button")
+#define REGKEY_LISTCOMBOBOX _T("List type combo box")
+#define REGKEY_WNDPL _T("Window placement")
+#define REGKEY_LASTPATH _T("Last path")
 
 #define SCROLL_MAX 50000
 

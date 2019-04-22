@@ -92,7 +92,7 @@ void CStreamSource::releasePhysicalSource()
 		// free the track
 		pSource->stop();
 		pSource->setStreaming(false);
-		mixer->freeTrack(m_Track);
+		if (mixer) mixer->freeTrack(m_Track);
 		m_Track = NULL;
 	}
 }

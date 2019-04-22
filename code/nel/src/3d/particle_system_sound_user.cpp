@@ -23,6 +23,9 @@
 #include "nel/3d/u_ps_sound_interface.h"
 #include "nel/3d/u_ps_sound_impl.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

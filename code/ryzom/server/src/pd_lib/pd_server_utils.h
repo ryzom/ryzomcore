@@ -22,6 +22,7 @@
  */
 #include <nel/misc/types_nl.h>
 #include <nel/misc/stream.h>
+#include <nel/misc/common.h>
 #include <nel/misc/bit_set.h>
 #include <nel/misc/variable.h>
 
@@ -282,7 +283,7 @@ public:
 		if (_File != NULL)
 			return false;
 
-		_File = fopen(filename, mode);
+		_File = NLMISC::nlfopen(filename, mode);
 		if (_File == NULL)
 			return false;
 
@@ -641,7 +642,7 @@ inline bool	CRowMapper::map(TKey key, const RY_PDS::CObjectIndex& index)
 
 	if (_KeyMap.find(key) != _KeyMap.end())
 	{
-		nlwarning("CRowMapper::map(): cannot map '%016"NL_I64"X' to '%d', already mapped", key, index.toString().c_str());
+		nlwarning("CRowMapper::map(): cannot map '%016" NL_I64 "X' to '%d', already mapped", key, index.toString().c_str());
 		return false;
 	}
 
@@ -677,7 +678,7 @@ inline RY_PDS::CObjectIndex	CRowMapper::get(TKey key) const
 
 	if (it == _KeyMap.end())
 	{
-		PDS_LOG_DEBUG(1)("CRowMapper::get(): key '%016"NL_I64"X' not mapped", key);
+		PDS_LOG_DEBUG(1)("CRowMapper::get(): key '%016" NL_I64 "X' not mapped", key);
 		return RY_PDS::CObjectIndex::null();
 	}
 
@@ -698,7 +699,7 @@ inline bool	CRowMapper::unmap(TKey key)
 
 	if (it == _KeyMap.end())
 	{
-		nlwarning("CRowMapper::unmap(): key '%016"NL_I64"X' not mapped", key);
+		nlwarning("CRowMapper::unmap(): key '%016" NL_I64 "X' not mapped", key);
 		return false;
 	}
 

@@ -46,7 +46,7 @@ void CColorModifier::convertBitmap(NLMISC::CBitmap &destBitmap, const NLMISC::CB
 	
 	
 	const NLMISC::CRGBA  *src   = (NLMISC::CRGBA *) &srcBitmap.getPixels()[0];
-	const NLMISC::CRGBA  *mask =  (NLMISC::CRGBA *) &maskBitmap.getPixels()[0];
+	const uint8  *mask =  &maskBitmap.getPixels()[0];
 		  NLMISC::CRGBA  *dest =  (NLMISC::CRGBA *) &destBitmap.getPixels()[0];
 	
 
@@ -69,7 +69,7 @@ void CColorModifier::convertBitmap(NLMISC::CBitmap &destBitmap, const NLMISC::CB
 			result.B = CalcBrightnessContrast(result.B, Luminosity, Contrast, grey);
 
 			// blend to the destination by using the mask alpha			
-			result.blendFromui(*dest, result, mask->R);
+			result.blendFromui(*dest, result, *mask);
 
 			/// keep alpha from the source			
 			dest->R = result.R;
@@ -111,7 +111,7 @@ void CColorModifier::evalBitmapStats(const NLMISC::CBitmap &srcBitmap,
 	float gTotal  = 0;	
 
 	const NLMISC::CRGBA *src = (NLMISC::CRGBA *) &srcBitmap.getPixels()[0];
-	const NLMISC::CRGBA *mask = (NLMISC::CRGBA *) &maskBitmap.getPixels()[0];
+	const uint8 *mask = &maskBitmap.getPixels()[0];
 
 	for (uint y = 0; y < srcBitmap.getHeight(); ++y)
 	{
@@ -119,7 +119,7 @@ void CColorModifier::evalBitmapStats(const NLMISC::CBitmap &srcBitmap,
 		{
 			float h, l, s;
 		
-			float intensity = mask->R * (1.f / 255.f);			
+			float intensity = *mask * (1.f / 255.f);			
 			bool achromatic = src->convertToHLS(h, l, s);
 
 			float grey = 0.299f * src->R + 0.587f * src->G + 0.114f * src->B;

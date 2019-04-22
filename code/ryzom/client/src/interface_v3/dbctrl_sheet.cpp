@@ -141,7 +141,7 @@ int CDBCtrlSheet::luaGetHpBuff(CLuaState &ls)
 	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
 	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
 
-	ls.push((double)itemInfo.HpBuff);
+	ls.push(itemInfo.HpBuff);
 
 	return 1;
 }
@@ -153,7 +153,7 @@ int CDBCtrlSheet::luaGetSapBuff(CLuaState &ls)
 	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
 	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
 
-	ls.push((double)itemInfo.SapBuff);
+	ls.push(itemInfo.SapBuff);
 	
 	return 1;
 }
@@ -165,7 +165,7 @@ int CDBCtrlSheet::luaGetFocusBuff(CLuaState &ls)
 	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
 	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
 
-	ls.push((double)itemInfo.FocusBuff);
+	ls.push(itemInfo.FocusBuff);
 
 	return 1;
 }
@@ -177,7 +177,7 @@ int CDBCtrlSheet::luaGetStaBuff(CLuaState &ls)
 	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
 	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
 
-	ls.push((double)itemInfo.StaBuff);
+	ls.push(itemInfo.StaBuff);
 
 	return 1;
 }
@@ -333,29 +333,29 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"nature" );
 	if (prop)
 	{
-		if (NLMISC::strlwr(prop.str()) == "item")
+		if (NLMISC::toLower(prop.str()) == "item")
 			_Type = CCtrlSheetInfo::SheetType_Item;
-		else if (NLMISC::strlwr(prop.str()) == "pact")
+		else if (NLMISC::toLower(prop.str()) == "pact")
 			_Type = CCtrlSheetInfo::SheetType_Pact;
-		else if (NLMISC::strlwr(prop.str()) == "skill")
+		else if (NLMISC::toLower(prop.str()) == "skill")
 			_Type = CCtrlSheetInfo::SheetType_Skill;
-		else if (NLMISC::strlwr(prop.str()) == "auto")
+		else if (NLMISC::toLower(prop.str()) == "auto")
 			_Type = CCtrlSheetInfo::SheetType_Auto;
-		else if (NLMISC::strlwr(prop.str()) == "macro")
+		else if (NLMISC::toLower(prop.str()) == "macro")
 			_Type = CCtrlSheetInfo::SheetType_Macro;
-		else if (NLMISC::strlwr(prop.str()) == "guild_flag")
+		else if (NLMISC::toLower(prop.str()) == "guild_flag")
 			_Type = CCtrlSheetInfo::SheetType_GuildFlag;
-		else if (NLMISC::strlwr(prop.str()) == "mission")
+		else if (NLMISC::toLower(prop.str()) == "mission")
 			_Type = CCtrlSheetInfo::SheetType_Mission;
-		else if (NLMISC::strlwr(prop.str()) == "sbrick")
+		else if (NLMISC::toLower(prop.str()) == "sbrick")
 			_Type = CCtrlSheetInfo::SheetType_SBrick;
-		else if (NLMISC::strlwr(prop.str()) == "sphraseid")
+		else if (NLMISC::toLower(prop.str()) == "sphraseid")
 			_Type = CCtrlSheetInfo::SheetType_SPhraseId;
-		else if (NLMISC::strlwr(prop.str()) == "sphrase")
+		else if (NLMISC::toLower(prop.str()) == "sphrase")
 			_Type = CCtrlSheetInfo::SheetType_SPhrase;
-		else if (NLMISC::strlwr(prop.str()) == "elevator_destination")
+		else if (NLMISC::toLower(prop.str()) == "elevator_destination")
 			_Type = CCtrlSheetInfo::SheetType_ElevatorDestination;
-		else if (NLMISC::strlwr(prop.str()) == "outpost_building")
+		else if (NLMISC::toLower(prop.str()) == "outpost_building")
 			_Type = CCtrlSheetInfo::SheetType_OutpostBuilding;
 	}
 
@@ -363,8 +363,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_noitem" );
 	if (prop)
 	{
-		string TxName = (const char *) prop;
-		TxName = strlwr (TxName);
+		string TxName = toLower((const char *) prop);
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		_DispNoSheetBmpId = rVR.getTextureIdFromName (TxName);
 	}
@@ -410,27 +409,23 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_l" );
 	if (prop)
 	{
-		string tmp = (const char *) prop;
-		_ListMenuLeft = strlwr(tmp);
+		_ListMenuLeft = toLower((const char *) prop);
 	}
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r" );
 	if (prop)
 	{
-		string tmp = (const char *) prop;
-		_ListMenuRight = strlwr(tmp);
+		_ListMenuRight = toLower((const char *) prop);
 	}
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r_empty_slot" );
 	if (prop)
 	{
-		string tmp = (const char *) prop;
-		_ListMenuRightEmptySlot = strlwr(tmp);
+		_ListMenuRightEmptySlot = toLower((const char *) prop);
 	}
 	// list menu on both clicks
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_b" );
 	if (prop)
 	{
-		string tmp = (const char *) prop;
-		setListMenuBoth(strlwr(tmp));
+		setListMenuBoth(toLower((const char *) prop));
 	}
 
 	// _BrickTypeBitField
@@ -449,13 +444,13 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 		for(uint i=0;i<strList.size();i++)
 		{
 			BRICK_TYPE::EBrickType	brickType= BRICK_TYPE::toBrickType(strList[i]);
-			if(brickType==BRICK_TYPE::UNKNOWN)
+			if (brickType==BRICK_TYPE::UNKNOWN)
 			{
 				nlwarning("<CCtrlSheetInfo::parseCtrlInfo> %s has an unvalid Brick Type", (const char *) prop);
 			}
 			else
 			{
-				// must not have so much brick type, else must change code!
+				// must not have so much brick type else must change code!
 				// nlassert(brickType<32);
 
 				// Ok set the bit associated
@@ -644,8 +639,8 @@ void CDBCtrlSheet::initSheet(const std::string &dbBranchId, const CCtrlSheetInfo
 {
 	H_AUTO ( RZ_CDBCtrlSheet_initSheet )
 
-	nlassert((ctrlInfo._Type == SheetType_Macro) || (dbBranchId.size()>0));
-	nlassert((ctrlInfo._Type == SheetType_Macro) || (_Id.size()>0));
+	nlassert((ctrlInfo._Type == SheetType_Macro) || !dbBranchId.empty());
+	nlassert((ctrlInfo._Type == SheetType_Macro) || !_Id.empty());
 
 	// init
 	*static_cast<CCtrlSheetInfo*>(this)= ctrlInfo;
@@ -1553,10 +1548,46 @@ void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bri
 
 	// Get the best SBrick to display.
 	CSheetId	rootBrickSheetId= bricks[0];
-
 	{
 		CSheetId	bestBrickSheetId= pBM->getSabrinaCom().getPhraseBestDisplayBrick(bricks);
 		setupDisplayAsSBrick (rootBrickSheetId.asInt(), bestBrickSheetId.asInt() );
+	}
+
+	// Override background if type is forace extraction/prospection and ecosystem brick is used
+	{
+		BRICK_FAMILIES::TBrickFamily family = pBM->getSabrinaCom().getPhraseForageFamily(bricks);
+		std::string icon;
+		switch(family)
+		{
+			case BRICK_FAMILIES::BHFEMA:
+			case BRICK_FAMILIES::BHFPMA:
+				icon = "bk_matis_brick.tga";
+				break;
+			case BRICK_FAMILIES::BHFEMB:
+			case BRICK_FAMILIES::BHFPMB:
+				icon = "bk_fyros_brick.tga";
+				break;
+			case BRICK_FAMILIES::BHFEMC:
+			case BRICK_FAMILIES::BHFPMC:
+				icon = "bk_zorai_brick.tga";
+				break;
+			case BRICK_FAMILIES::BHFEMD:
+			case BRICK_FAMILIES::BHFPMD:
+				icon = "bk_tryker_brick.tga";
+				break;
+			case BRICK_FAMILIES::BHFEME:
+			case BRICK_FAMILIES::BHFPME:
+				icon = "bk_generic_brick.tga";
+				break;
+			default:
+				icon = "";
+				break;
+		}
+		if (!icon.empty())
+		{
+			CViewRenderer &rVR = *CViewRenderer::getInstance();
+			_DispBackBmpId = rVR.getTextureIdFromName(icon);
+		}
 	}
 
 	// not so beautiful to display .sphrase name in progression, and in botchat
@@ -1745,7 +1776,7 @@ void CDBCtrlSheet::resetCharBitmaps()
 void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar, bool topDown)
 {
 	// Use the optString for the Macro name
-	_OptString = strlwr(_OptString);
+	_OptString = toLower(_OptString);
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
@@ -1821,8 +1852,7 @@ void CDBCtrlSheet::draw()
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
-	CRGBA color = CRGBA(255,255,255,255);
-
+	
 	if (_Type != SheetType_Macro)
 	{
 		if (_LastSheetId != _SheetId.getSInt32())
@@ -2966,6 +2996,8 @@ void	CDBCtrlSheet::swapSheet(CDBCtrlSheet *other)
 		swapDBProps(getItemRMClassTypePtr(), other->getItemRMClassTypePtr());
 		swapDBProps(getItemRMFaberStatTypePtr(), other->getItemRMFaberStatTypePtr());
 		swapDBProps(getItemPrerequisitValidPtr(), other->getItemPrerequisitValidPtr());
+		swapDBProps(getItemSerialPtr(), other->getItemSerialPtr());
+		swapDBProps(getItemCreateTimePtr(), other->getItemCreateTimePtr());
 	}
 }
 
@@ -3545,6 +3577,10 @@ void CDBCtrlSheet::copyAspect(CDBCtrlSheet *dest)
 		dest->setItemRMFaberStatType(getItemRMFaberStatType());
 		// copy prerequisit valid flag
 		dest->setItemPrerequisitValid(getItemPrerequisitValid());
+		// copy item serial
+		dest->setItemSerial(getItemSerial());
+		// copy item create time
+		dest->setItemCreateTime(getItemCreateTime());
 	}
 	// if brick, sphrase or sphraseId
 	if(isSBrick() || isSPhrase() || isSPhraseId())
@@ -4052,7 +4088,6 @@ void CDBCtrlSheet::setItemPrice(sint32 price)
 	node->setValue32(price);
 }
 
-
 // ***************************************************************************
 sint32 CDBCtrlSheet::getItemResaleFlag() const
 {
@@ -4073,6 +4108,54 @@ CCDBNodeLeaf *CDBCtrlSheet::getItemResaleFlagPtr() const
 void CDBCtrlSheet::setItemResaleFlag(sint32 rf)
 {
 	CCDBNodeLeaf *node = getItemResaleFlagPtr();
+	if (!node) return;
+	node->setValue32(rf);
+}
+
+// ***************************************************************************
+sint32 CDBCtrlSheet::getItemCreateTime() const
+{
+	CCDBNodeLeaf *node = getItemCreateTimePtr();
+	if (!node) return 0;
+	return node->getValue32();
+}
+
+// ***************************************************************************
+CCDBNodeLeaf *CDBCtrlSheet::getItemCreateTimePtr() const
+{
+	CCDBNodeBranch *root = getRootBranch();
+	if (!root) return NULL;
+	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("CREATE_TIME"), false));
+}
+
+// ***************************************************************************
+void CDBCtrlSheet::setItemCreateTime(sint32 ct)
+{
+	CCDBNodeLeaf *node = getItemCreateTimePtr();
+	if (!node) return;
+	node->setValue32(ct);
+}
+
+// ***************************************************************************
+sint32 CDBCtrlSheet::getItemSerial() const
+{
+	CCDBNodeLeaf *node = getItemSerialPtr();
+	if (!node) return 0;
+	return node->getValue32();
+}
+
+// ***************************************************************************
+CCDBNodeLeaf *CDBCtrlSheet::getItemSerialPtr() const
+{
+	CCDBNodeBranch *root = getRootBranch();
+	if (!root) return NULL;
+	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("SERIAL"), false));
+}
+
+// ***************************************************************************
+void CDBCtrlSheet::setItemSerial(sint32 rf)
+{
+	CCDBNodeLeaf *node = getItemSerialPtr();
 	if (!node) return;
 	node->setValue32(rf);
 }

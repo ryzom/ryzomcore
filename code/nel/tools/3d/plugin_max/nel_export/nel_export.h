@@ -49,7 +49,7 @@ public:
 
 	CNelExport ();
 
-	~CNelExport();
+	virtual ~CNelExport();
 
 	void init (bool view, bool errorInDialog, Interface	*ip, bool loadStruct);
 
@@ -59,21 +59,21 @@ public:
 	bool freeExported(void);
 	void getSelectedNode (std::vector<INode*>& vectNode);
 
-	bool	exportZone	(const char *sName, INode& node, TimeValue time);
-	bool	exportMesh	(const char *sPath, INode& node, TimeValue time);
-	bool	exportAnim	(const char *sPath, std::vector<INode*>& vectNode, TimeValue time, bool scene);
-	bool	exportSWT	(const char *sPath, std::vector<INode*>& vectNode);
+	bool	exportZone	(const std::string &sName, INode& node, TimeValue time);
+	bool	exportMesh	(const std::string &sPath, INode& node, TimeValue time);
+	bool	exportAnim	(const std::string &sPath, std::vector<INode*>& vectNode, TimeValue time, bool scene);
+	bool	exportSWT	(const std::string &sPath, std::vector<INode*>& vectNode);
 
 	bool	exportInstanceGroup	(std::string filename, std::vector<INode*>& vectNode);
-	bool	exportSkeleton	(const char *sPath, INode* pNode, TimeValue time);
+	bool	exportSkeleton	(const std::string &sPath, INode* pNode, TimeValue time);
 
-	bool	exportCollision	(const char *sPath, std::vector<INode *> &nodes, TimeValue time);
+	bool	exportCollision	(const std::string &sPath, std::vector<INode *> &nodes, TimeValue time);
 
-	bool	exportPACSPrimitives (const char *sPath, std::vector<INode *> &nodes, TimeValue time);
+	bool	exportPACSPrimitives (const std::string &sPath, std::vector<INode *> &nodes, TimeValue time);
 
-	bool	exportVegetable (const char *sPath, INode& node, TimeValue time);
+	bool	exportVegetable (const std::string &sPath, INode& node, TimeValue time);
 
-	bool	exportLodCharacter (const char *sPath, INode& node, TimeValue time);
+	bool	exportLodCharacter (const std::string &sPath, INode& node, TimeValue time);
 
 	void	viewMesh (TimeValue time);
 
@@ -81,16 +81,8 @@ public:
 	static void deleteLM(INode& ZeNode); // the export scene struct MUST be initialized before calling this fn
 	void			OnNodeProperties (const std::set<INode*> &listNode);
 
-	ULONG ExtractFileName(char* Path, char* Name);
-	ULONG ExtractPath(char* FullPath, char* Path);
-	ULONG SelectFileForLoad(HWND Parent, char* Title, const char* Mask, char* FileName);
-	ULONG SelectFileForSave(HWND Parent, char* Title, const char* Mask, char* FileName);
-	ULONG SelectDir(HWND Parent, char* Title, char* Path);
-	static ULONG FileExists(const char* FileName);
-	ULONG GetFileSize(char* FileName);
-	ULONG ProcessDir(char* Dir, const char* Mask, unsigned long flag, ULONG Fnct(char* FileName) );
-	ULONG CleanFileName(char* FileName);
-	ULONG CreateBAKFile(char* FileName);
+	ULONG SelectFileForSave(HWND Parent, const TCHAR* Title, const TCHAR* Mask, std::string &FileName);
+	ULONG SelectDir(HWND Parent, const TCHAR* Title, std::string &Path);
 
 	// The nel export objtect
 	CExportNel		*_ExportNel;
@@ -113,11 +105,11 @@ class CNelExportClassDesc:public ClassDesc2
 	public:
 	int 			IsPublic() {return 1;}
 	void *			Create(BOOL loading = FALSE);
-	const TCHAR *	ClassName() {return _T("NeL Export");}
+	const MCHAR *	ClassName() {return _M("NeL Export");}
 	SClass_ID		SuperClassID() {return UTILITY_CLASS_ID;}
 	Class_ID		ClassID() {return CNELEXPORT_CLASS_ID;}
-	const TCHAR* 	Category() {return _T("NeL Tools");}
-	const TCHAR*	InternalName() { return _T("NeL export and view"); }	// returns fixed parsable name (scripter-visible name)
+	const MCHAR* 	Category() {return _M("NeL Tools");}
+	const MCHAR*	InternalName() { return _M("NeL export and view"); }	// returns fixed parsable name (scripter-visible name)
 	HINSTANCE		HInstance() { return hInstance; }				// returns owning module handle
 };
 

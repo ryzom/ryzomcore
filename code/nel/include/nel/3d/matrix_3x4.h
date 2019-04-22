@@ -47,7 +47,7 @@ public:
 	float	a31, a32, a33, a34;
 
 	// Copy from a matrix.
-	void	set(const CMatrix &mat)
+	void	set(const NLMISC::CMatrix &mat)
 	{
 		const float	*m =mat.get();
 		a11= m[0]; a12= m[4]; a13= m[8] ; a14= m[12];
@@ -57,14 +57,14 @@ public:
 
 
 	// mulSetvector. NB: in should be different as v!! (else don't work).
-	void	mulSetVector(const CVector &in, CVector &out)
+	void	mulSetVector(const NLMISC::CVector &in, NLMISC::CVector &out)
 	{
 		out.x= (a11*in.x + a12*in.y + a13*in.z);
 		out.y= (a21*in.x + a22*in.y + a23*in.z);
 		out.z= (a31*in.x + a32*in.y + a33*in.z);
 	}
 	// mulSetpoint. NB: in should be different as v!! (else don't work).
-	void	mulSetPoint(const CVector &in, CVector &out)
+	void	mulSetPoint(const NLMISC::CVector &in, NLMISC::CVector &out)
 	{
 		out.x= (a11*in.x + a12*in.y + a13*in.z + a14);
 		out.y= (a21*in.x + a22*in.y + a23*in.z + a24);
@@ -73,14 +73,14 @@ public:
 
 
 	// mulSetvector. NB: in should be different as v!! (else don't work).
-	void	mulSetVector(const CVector &in, float scale, CVector &out)
+	void	mulSetVector(const NLMISC::CVector &in, float scale, NLMISC::CVector &out)
 	{
 		out.x= (a11*in.x + a12*in.y + a13*in.z) * scale;
 		out.y= (a21*in.x + a22*in.y + a23*in.z) * scale;
 		out.z= (a31*in.x + a32*in.y + a33*in.z) * scale;
 	}
 	// mulSetpoint. NB: in should be different as v!! (else don't work).
-	void	mulSetPoint(const CVector &in, float scale, CVector &out)
+	void	mulSetPoint(const NLMISC::CVector &in, float scale, NLMISC::CVector &out)
 	{
 		out.x= (a11*in.x + a12*in.y + a13*in.z + a14) * scale;
 		out.y= (a21*in.x + a22*in.y + a23*in.z + a24) * scale;
@@ -89,14 +89,14 @@ public:
 
 
 	// mulAddvector. NB: in should be different as v!! (else don't work).
-	void	mulAddVector(const CVector &in, float scale, CVector &out)
+	void	mulAddVector(const NLMISC::CVector &in, float scale, NLMISC::CVector &out)
 	{
 		out.x+= (a11*in.x + a12*in.y + a13*in.z) * scale;
 		out.y+= (a21*in.x + a22*in.y + a23*in.z) * scale;
 		out.z+= (a31*in.x + a32*in.y + a33*in.z) * scale;
 	}
 	// mulAddpoint. NB: in should be different as v!! (else don't work).
-	void	mulAddPoint(const CVector &in, float scale, CVector &out)
+	void	mulAddPoint(const NLMISC::CVector &in, float scale, NLMISC::CVector &out)
 	{
 		out.x+= (a11*in.x + a12*in.y + a13*in.z + a14) * scale;
 		out.y+= (a21*in.x + a22*in.y + a23*in.z + a24) * scale;

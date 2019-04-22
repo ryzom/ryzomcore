@@ -22,8 +22,9 @@
 #include <map>
 #include <set>
 
-// Include from libxml2
-#include <libxml/parser.h>
+// Forward declarations for libxml2
+typedef struct _xmlNode xmlNode;
+typedef xmlNode *xmlNodePtr;
 
 namespace NLLIGO
 {

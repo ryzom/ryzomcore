@@ -26,6 +26,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 
@@ -71,7 +74,7 @@ CVBDrvInfosGL::CVBDrvInfosGL(CDriverGL *drv, ItVBDrvInfoPtrList it, CVertexBuffe
 CVBDrvInfosGL::~CVBDrvInfosGL()
 {
 	H_AUTO_OGL(CVBDrvInfosGL_CVBDrvInfosGLDtor)
-	// Restaure non resident memory
+	// Restore non resident memory
 	if (VertexBufferPtr)
 	{
 		VertexBufferPtr->setLocation(CVertexBuffer::NotResident);
@@ -632,7 +635,7 @@ bool CDriverGL::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQuad
 				nlerror("not available in OpenGL ES 1.0, only use 16 bits indices");
 #else
 				// indices fits on 32 bits
-				GLint indices[QUAD_BATCH_SIZE];
+				GLint indices[QUAD_BATCH_SIZE * 6];
 				GLint *curr = indices;
 				GLint *end = indices + 6 * numQuadsToDraw;
 				uint32 vertexIndex = currIndex;
@@ -1710,9 +1713,9 @@ void			CDriverGL::resetVertexArrayRange()
 
 	// After, Clear the 2 vertexArrayRange, if any.
 	if(_AGPVertexArrayRange)
-		_AGPVertexArrayRange->free();
+		_AGPVertexArrayRange->freeBlock();
 	if(_VRAMVertexArrayRange)
-		_VRAMVertexArrayRange->free();
+		_VRAMVertexArrayRange->freeBlock();
 }
 
 

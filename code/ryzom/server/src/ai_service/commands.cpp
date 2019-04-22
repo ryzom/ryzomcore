@@ -578,10 +578,10 @@ NLMISC_COMMAND(createStaticAIInstance, "Create a new static AIInstance for a giv
 	CUsedContinent &uc = CUsedContinent::instance();
 
 	const	uint32 in = uc.getInstanceForContinent(args[0]);
-	if (in == INVALID_AI_INSTANCE)
+	if (in == std::numeric_limits<uint32>::max())
 	{
 		nlwarning("The continent '%s' is unknow or not active. Can't create instance, FATAL", args[0].c_str());
-		nlassert(in != INVALID_AI_INSTANCE);
+		nlassert(in != ~0);
 //		nlassertex(in != ~0, ("The continent '%s' is unknow or not active. Can't create instance, FATAL", args[0].c_str()));
 	}
 
@@ -1662,6 +1662,37 @@ bool execScriptGroupByName(CStringWriter& stringWriter, TCommand const& args)
 	
 	group->getPersistentStateInstance()->interpretCode(NULL, codePtr);
 	
+	return true;
+}
+
+NLMISC_COMMAND(getDatasetId,"get datasetid of bots with name matchiong the given filter", "<groupFilter>")
+{
+	if (args.size()!=1)
+		return false;
+
+	string const& botName = args[0];
+	string DatasetIds;
+
+	vector<CBot*> bots;
+	/// try to find the bot name
+	buildFilteredBotList(bots, botName);
+	if (bots.empty())
+	{
+		log.displayNL("ERR: No bot correspond to name %s", botName.c_str());
+		return false;
+	}
+	else
+	{
+		FOREACH(itBot, vector<CBot*>, bots)
+		{
+			CBot* bot = *itBot;
+			CSpawnBot* spawnBot = bot->getSpawnObj();
+			if (spawnBot!=NULL)
+				DatasetIds += spawnBot->dataSetRow().toString()+"|";
+
+		}
+	}
+	log.displayNL("%s", DatasetIds.c_str());
 	return true;
 }
 
@@ -3091,8 +3122,8 @@ static void setRyzomDebugDate(CRyzomDate &rd)
 NLMISC_COMMAND(setDebugHour, "set the current debug hour", "<hour>")
 {
 	if (args.size() != 1) return false;	
-	int hour;
-	if (sscanf(args[0].c_str(), "%d", &hour) != 1) return false;
+	sint hour;
+	if (!fromString(args[0], hour)) return false;
 	CRyzomDate rd;
 	getRyzomDebugDate(rd);
 	rd.Time = fmodf(rd.Time, 1.f) + (float) hour;
@@ -3103,8 +3134,8 @@ NLMISC_COMMAND(setDebugHour, "set the current debug hour", "<hour>")
 NLMISC_COMMAND(setDebugDayOfYear, "set the current debug day of year (first day has index 1)", "<day>")
 {
 	if (args.size() != 1) return false;	
-	int day;
-	if (sscanf(args[0].c_str(), "%d", &day) != 1) return false;
+	sint day;
+	if (!fromString(args[0], day)) return false;
 	CRyzomDate rd;	
 	getRyzomDebugDate(rd);
 	rd.Day = day - 1; // for the user, days start at '1'

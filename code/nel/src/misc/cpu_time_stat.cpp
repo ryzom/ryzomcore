@@ -42,14 +42,14 @@ bool	CCPUTimeStat::getCPUTicks(uint64& user, uint64& nice, uint64& system, uint6
 #ifdef NL_OS_UNIX
 
 	const char*	statfile = "/proc/stat";
-	FILE*		f = fopen(statfile, "r");
+	FILE*		f = nlfopen(statfile, "r");
 
 	if (f == NULL)
 		return false;
 
 	// /proc/stat
 			// cpu  [user]     [nice]    [system]    [idle]     [iowait]   [irq] [softirq]
-	if (fscanf(f, "cpu  %"NL_I64"u %"NL_I64"u %"NL_I64"u %"NL_I64"u %"NL_I64"u", &user, &nice, &system, &idle, &iowait) != 5)
+	if (fscanf(f, "cpu  %" NL_I64 "u %" NL_I64 "u %" NL_I64 "u %" NL_I64 "u %" NL_I64 "u", &user, &nice, &system, &idle, &iowait) != 5)
 		nlwarning("Failed to parse /proc/stat");
 
 	fclose(f);
@@ -66,14 +66,14 @@ bool	CCPUTimeStat::getPIDTicks(uint64& utime, uint64& stime, uint64& cutime, uin
 #ifdef NL_OS_UNIX
 
 	std::string	statfile = NLMISC::toString("/proc/%u/stat", pid);
-	FILE*	f = fopen(statfile.c_str(), "r");
+	FILE*	f = nlfopen(statfile, "r");
 
 	if (f == NULL)
 		return false;
 
 	// /proc/<pid>/stat
 			// pid com sta ppi pgi ses tty tpg fla mif maf cmi cma [utime]    [stime]    [cutime]   [cstime] ...
-	if (fscanf(f, "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %"NL_I64"u %"NL_I64"u %"NL_I64"u %"NL_I64"u", &utime, &stime, &cutime, &cstime) != 4)
+	if (fscanf(f, "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %" NL_I64 "u %" NL_I64 "u %" NL_I64 "u %" NL_I64 "u", &utime, &stime, &cutime, &cstime) != 4)
 		nlwarning("Failed to parse /proc/<pid>/stat");
 
 	fclose(f);

@@ -138,6 +138,24 @@ public:
 	 */
 	virtual	uint32			getFontSize () const = 0;
 	/**
+	 * set embolden (bold) state
+	 * \param embolden the embbolden state
+	 */
+	virtual void			setEmbolden (bool b) = 0;
+	/**
+	 * \return the embolden state
+	 */
+	virtual bool			getEmbolden () const = 0;
+	/**
+	 * set oblique (italic) state
+	 * \param oblique the oblique state
+	 */
+	virtual void			setOblique (bool b) = 0;
+	/**
+	 * \return the oblique state
+	 */
+	virtual bool			getOblique () const = 0;
+	/**
 	 * set the hot spot
 	 * \param fonSize the font size
 	 */
@@ -187,7 +205,7 @@ public:
 	 * set the shadow's size
 	 * \param the shade extent
 	 */
-	virtual	void			setShadeExtent (float shext) = 0;
+	virtual	void			setShadeExtent (float x, float y) = 0;
 	/**
 	 * set the shadow's color
 	 * The alpha of the shade is multiplied at each draw with the alpha of the color. Default: (0,0,0,255)

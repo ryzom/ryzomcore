@@ -765,7 +765,7 @@ void	CPDSLib::allocateRow(TTableIndex table, TRowIndex row, uint64 key)
 {
 	// send to PDS alloc(table, row, key);
 	if (PDVerbose)
-		nlinfo("CPDSLib: %12s index=%u:%u, key=%016"NL_I64"X", "allocrow", table, row, key);
+		nlinfo("CPDSLib: %12s index=%u:%u, key=%016" NL_I64 "X", "allocrow", table, row, key);
 
 	CDbMessage&	msg = nextMessage((uint8)table, row);
 	msg.allocRow(key);
@@ -787,7 +787,7 @@ void	CPDSLib::allocateRow(TTableIndex table, TRowIndex row, uint64 key, const NL
 {
 	// send to PDS alloc(table, row, key);
 	if (PDVerbose)
-		nlinfo("CPDSLib: %12s index=%u:%u, key=%016"NL_I64"X", "allocrow", table, row, key);
+		nlinfo("CPDSLib: %12s index=%u:%u, key=%016" NL_I64 "X", "allocrow", table, row, key);
 
 	CDbMessage&	msg = nextMessage((uint8)table, row);
 	msg.allocRow(key, id);
@@ -857,7 +857,7 @@ void	CPDSLib::notifyFetchFailure(NLMISC::IStream &f)
 
 	if (table >= _FetchFailures.size() || _FetchFailures[table] == NULL)
 	{
-		nlwarning("CPDSLib: Unable to notify fetch failure of %d:%016"NL_I64"X, callback not set.", table, key);
+		nlwarning("CPDSLib: Unable to notify fetch failure of %d:%016" NL_I64 "X, callback not set.", table, key);
 		return;
 	}
 
@@ -947,14 +947,14 @@ uint	CPDSLib::getMessageQueueSize()
 void	CPDSLib::erase(TTableIndex table, uint64 key)
 {
 	if (PDVerbose)
-		nlinfo("CPDSLib: %12s table=%u, key=%016"NL_I64"X", "erase", table, key);
+		nlinfo("CPDSLib: %12s table=%u, key=%016" NL_I64 "X", "erase", table, key);
 }
 
 // Load a row and its dependent rows from a mapped table
 void	CPDSLib::load(TTableIndex table, uint64 key)
 {
 	if (PDVerbose)
-		nlinfo("CPDSLib: %12s table=%u, key=%016"NL_I64"X", "load", table, key);
+		nlinfo("CPDSLib: %12s table=%u, key=%016" NL_I64 "X", "load", table, key);
 
 	if (!_UsePDS)
 	{

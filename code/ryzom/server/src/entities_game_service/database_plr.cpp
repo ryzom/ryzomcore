@@ -362,7 +362,7 @@ void CBankAccessor_PLR::TUSER::init(ICDBStructNode *parent)
 	node  = parent->getNode( ICDBStructNode::CTextId("IS_INVISIBLE"), false );
 	nlassert(node != NULL);
 	_IS_INVISIBLE = node;
-
+	
 	node  = parent->getNode( ICDBStructNode::CTextId("COUNTER"), false );
 	nlassert(node != NULL);
 	_COUNTER = node;
@@ -1198,6 +1198,14 @@ void CBankAccessor_PLR::TEXCHANGE::TGIVE::TArray::init(ICDBStructNode *parent, u
 	nlassert(node != NULL);
 	_QUANTITY = node;
 	
+	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
+	nlassert(node != NULL);
+	_CREATE_TIME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
+	nlassert(node != NULL);
+	_SERIAL = node;
+	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
 	_USER_COLOR = node;
@@ -1276,6 +1284,14 @@ void CBankAccessor_PLR::TEXCHANGE::TRECEIVE::TArray::init(ICDBStructNode *parent
 	node  = parent->getNode( ICDBStructNode::CTextId("QUANTITY"), false );
 	nlassert(node != NULL);
 	_QUANTITY = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
+	nlassert(node != NULL);
+	_CREATE_TIME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
+	nlassert(node != NULL);
+	_SERIAL = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
@@ -1484,6 +1500,14 @@ void CBankAccessor_PLR::TINVENTORY::TTEMP::TArray::init(ICDBStructNode *parent, 
 	nlassert(node != NULL);
 	_QUANTITY = node;
 	
+	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
+	nlassert(node != NULL);
+	_CREATE_TIME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
+	nlassert(node != NULL);
+	_SERIAL = node;
+	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
 	_USER_COLOR = node;
@@ -1573,6 +1597,14 @@ void CBankAccessor_PLR::TINVENTORY::TSHARE::TArray::init(ICDBStructNode *parent,
 	node  = parent->getNode( ICDBStructNode::CTextId("QUANTITY"), false );
 	nlassert(node != NULL);
 	_QUANTITY = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
+	nlassert(node != NULL);
+	_CREATE_TIME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
+	nlassert(node != NULL);
+	_SERIAL = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
@@ -2125,6 +2157,14 @@ void CBankAccessor_PLR::TTRADING::TArray::init(ICDBStructNode *parent, uint inde
 	node  = parent->getNode( ICDBStructNode::CTextId("QUANTITY"), false );
 	nlassert(node != NULL);
 	_QUANTITY = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
+	nlassert(node != NULL);
+	_CREATE_TIME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
+	nlassert(node != NULL);
+	_SERIAL = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
@@ -3139,10 +3179,11 @@ void CBankAccessor_PLR::TPACK_ANIMAL::TBEAST::init(ICDBStructNode *parent, uint 
 	node  = parent->getNode( ICDBStructNode::CTextId("DESPAWN"), false );
 	nlassert(node != NULL);
 	_DESPAWN = node;
-
-	node  = parent->getNode( ICDBStructNode::CTextId("NAME"), false );
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("NAME"), true );
 	nlassert(node != NULL);
 	_NAME = node;
+	
 
 	// branch init
 	

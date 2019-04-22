@@ -34,6 +34,7 @@
 #include "nel/misc/system_info.h"
 #include "nel/misc/block_memory.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/cmd_args.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
 #include "nel/3d/u_driver.h"
@@ -45,11 +46,6 @@
 // Ligo.
 #include "nel/ligo/ligo_config.h"
 
-// Std.
-#include <fstream>
-#include <sstream>
-// Game Share
-#include "game_share/ryzom_version.h"
 // Client
 #include "init.h"
 #include "input.h"
@@ -72,6 +68,8 @@
 
 #include "interface_v3/sbrick_manager.h"
 #include "nel/gui/widget_manager.h"
+#include "nel/gui/http_cache.h"
+#include "nel/gui/http_hsts.h"
 //
 #include "gabarit.h"
 #include "hair_set.h"
@@ -89,14 +87,13 @@
 #include "interface_v3/add_on_manager.h"
 
 #include "bg_downloader_access.h"
+#include "user_agent.h"
 
 #include "nel/misc/check_fpu.h"
 
 #include "login_progress_post_thread.h"
 
 #include "browse_faq.h"
-
-
 
 // XMLLib
 #include <libxml/xmlmemory.h>
@@ -107,9 +104,19 @@ extern HINSTANCE HInstance;
 extern HWND SlashScreen;
 #endif // NL_OS_WINDOWS
 
+#ifdef NL_OS_MAC
+#include <stdio.h>
+#include <sys/resource.h>
+#include "nel/misc/dynloadlib.h"
+#endif
+
 #include "app_bundle_utils.h"
 
 #include <new>
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ///////////
 // USING //
@@ -256,7 +263,10 @@ static INT_PTR CALLBACK ExitClientErrorDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 		{
 			if (CI18N::hasTranslation("TheSagaOfRyzom"))
 			{
-				SetWindowTextW(hwndDlg, (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str ());
+				if (!SetWindowTextW(hwndDlg, (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str ()))
+				{
+					nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+				}
 			}
 			SetDlgItemTextW(hwndDlg, IDC_ERROR_MSG_TEXT, (WCHAR*) CurrentErrorMessage.c_str ());
 			if (CI18N::hasTranslation("uiRyzomErrorMsgBoxExit"))
@@ -273,7 +283,7 @@ static INT_PTR CALLBACK ExitClientErrorDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 			GetWindowRect (GetDesktopWindow (), &rectDesktop);
 			SetWindowPos (hwndDlg, HWND_TOPMOST, (rectDesktop.right-rectDesktop.left-rect.right+rect.left)/2, (rectDesktop.bottom-rectDesktop.top-rect.bottom+rect.top)/2, 0, 0, SWP_NOSIZE);
 			HICON exitClientDlgIcon = LoadIcon(HInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
-			::SendMessage(hwndDlg, WM_SETICON, (WPARAM) ICON_BIG, (LPARAM) exitClientDlgIcon);
+			::SendMessageA(hwndDlg, WM_SETICON, (WPARAM) ICON_BIG, (LPARAM) exitClientDlgIcon);
 		}
 		break;
 		case WM_COMMAND:
@@ -366,7 +376,7 @@ void selectTipsOfTheDay (uint /* tips */)
 	TipsOfTheDay = title+CI18N::get ("uiTips"+toString (tips));*/
 	// todo tips of the day remove
 	//trap TipsOfTheDay = CI18N::get ("uiMessageOfTheDay");
-	TipsOfTheDay = ""; //trap
+	TipsOfTheDay.clear(); //trap
 }
 
 // ***************************************************************************
@@ -377,29 +387,40 @@ void outOfMemory()
 	nlstopex (("OUT OF MEMORY"));
 }
 
+uint64		Debug_OldCPUMask = 0;
+uint64		Debug_NewCPUMask = 0;
+
 // For multi cpu, active only one CPU for the main thread
-uint64		Debug_OldCPUMask= 0;
-uint64		Debug_NewCPUMask= 0;
-void setCPUMask ()
+void setCPUMask(uint64 userCPUMask)
 {
-	uint64 cpuMask = IProcess::getCurrentProcess ()->getCPUMask();
-	Debug_OldCPUMask= cpuMask;
+	uint64 cpuMask = IProcess::getCurrentProcess()->getCPUMask();
+	Debug_OldCPUMask = cpuMask;
 
-	// get the processor to allow process
-	uint i = 0;
-	while ((i<64) && ((cpuMask&(SINT64_CONSTANT(1)<<i)) == 0))
-		i++;
-
-	// Set the CPU mask
-	if (i<64)
+	// if user CPU mask is valid
+	if (cpuMask & userCPUMask)
 	{
-		IProcess::getCurrentProcess ()->setCPUMask(1<<i);
-		//IThread::getCurrentThread ()->setCPUMask (1<<i);
+		// use it
+		IProcess::getCurrentProcess ()->setCPUMask(cpuMask & userCPUMask);
+	}
+	else
+	{
+		// else get first available CPU
+
+		// get the processor to allow process
+		uint i = 0;
+		while ((i < 64) && ((cpuMask & (UINT64_CONSTANT(1) << i)) == 0))
+			i++;
+
+		// Set the CPU mask
+		if (i < 64)
+		{
+			IProcess::getCurrentProcess ()->setCPUMask(UINT64_CONSTANT(1) << i);
+		}
 	}
 
 	// check
 	cpuMask = IProcess::getCurrentProcess ()->getCPUMask();
-	Debug_NewCPUMask= cpuMask;
+	Debug_NewCPUMask = cpuMask;
 }
 
 void	displayCPUInfo()
@@ -506,8 +527,7 @@ void checkDriverVersion()
 		uint i;
 		for (i=0; i< sizeofarray(driversVersion); i++)
 		{
-			string lwr = deviceName;
-			strlwr(lwr);
+			string lwr = toLower(deviceName);
 			if ((lwr.find (driversTest[i])!=string::npos) && (driversNTest[i]==NULL || lwr.find (driversNTest[i])==string::npos))
 			{
 				if (driverVersion < driversVersion[i])
@@ -564,14 +584,12 @@ void listStereoDisplayDevices(std::vector<NL3D::CStereoDeviceInfo> &devices)
 	IStereoDisplay::listDevices(devices);
 	for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
 	{
-		std::stringstream name;
-		name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
-		std::stringstream fullname;
-		fullname << std::string("[") << name.str() << "] [" << it->Serial << "]";
-		nlinfo("VR [C]: Stereo Display: %s", name.str().c_str());
+		std::string name = toString("%s - %s - %s", IStereoDisplay::getLibraryName(it->Library), it->Manufacturer.c_str(), it->ProductName.c_str());
+		std::string fullname = toString("[%s] [%s]", name.c_str(), it->Serial.c_str());
+		nlinfo("VR [C]: Stereo Display: %s", name.c_str());
 		if (cache)
 		{
-			VRDeviceCache.push_back(std::pair<std::string, std::string>(name.str(), it->Serial)); // VR_CONFIG
+			VRDeviceCache.push_back(std::pair<std::string, std::string>(name, it->Serial)); // VR_CONFIG
 		}
 	}
 }
@@ -609,9 +627,8 @@ void initStereoDisplayDevice()
 		{
 			for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
 			{
-				std::stringstream name;
-				name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
-				if (name.str() == ClientCfg.VRDisplayDevice)
+				std::string name = toString("%s - %s - %s", IStereoDisplay::getLibraryName(it->Library), it->Manufacturer.c_str(), it->ProductName.c_str());
+				if (name == ClientCfg.VRDisplayDevice)
 					deviceInfo = &(*it);
 				if (ClientCfg.VRDisplayDeviceId == it->Serial)
 					break;
@@ -642,6 +659,83 @@ void initStereoDisplayDevice()
 	IStereoDisplay::releaseUnusedLibraries();
 }
 
+// we want to get executable directory
+extern NLMISC::CCmdArgs Args;
+
+static void addPaths(IProgressCallback &progress, const std::vector<std::string> &paths, bool recurse)
+{
+	// all prefixes for paths
+	std::vector<std::string> directoryPrefixes;
+
+	// current directory has priority everywhere
+	directoryPrefixes.push_back(CPath::standardizePath(CPath::getCurrentPath()));
+
+	// startup directory
+	directoryPrefixes.push_back(Args.getStartupPath());
+
+#if defined(NL_OS_WINDOWS)
+	// check in same directory as executable
+	directoryPrefixes.push_back(Args.getProgramPath());
+#elif defined(NL_OS_MAC)
+	// check in bundle (Installer)
+	directoryPrefixes.push_back(getAppBundlePath() + "/Contents/Resources/");
+
+	// check in same directory as bundle (Steam)
+	directoryPrefixes.push_back(CPath::makePathAbsolute(getAppBundlePath() + "/..", ".", true));
+#elif defined(NL_OS_UNIX)
+	// check in same directory as executable
+	directoryPrefixes.push_back(Args.getProgramPath());
+
+	// check in installed directory
+	if (CFile::isDirectory(getRyzomSharePrefix())) directoryPrefixes.push_back(CPath::standardizePath(getRyzomSharePrefix()));
+#endif
+
+	std::map<std::string, sint> directoriesToProcess;
+
+	// first pass, build a map with all existing directories to process in second pass
+	for (uint j = 0; j < directoryPrefixes.size(); j++)
+	{
+		std::string directoryPrefix = directoryPrefixes[j];
+
+		for (uint i = 0; i < paths.size(); i++)
+		{
+			std::string directory = NLMISC::expandEnvironmentVariables(paths[i]);
+
+			// only prepend prefix if path is relative
+			if (!directory.empty() && !directoryPrefix.empty() && !CPath::isAbsolutePath(directory))
+					directory = directoryPrefix + directory;
+
+			// only process existing directories
+			if (CFile::isExists(directory))
+				directoriesToProcess[directory] = 1;
+		}
+	}
+
+	uint total = (uint)directoriesToProcess.size();
+	uint current = 0, next = 0;
+
+	std::map<std::string, sint>::const_iterator it = directoriesToProcess.begin(), iend = directoriesToProcess.end();
+
+	// second pass, add search paths
+	while (it != iend)
+	{
+		// update next progress value
+		++next;
+
+		progress.progress((float)current/(float)total);
+		progress.pushCropedValues((float)current/(float)total, (float)next/(float)total);
+
+		// next is current value
+		current = next;
+
+		CPath::addSearchPath(it->first, recurse, false, &progress);
+
+		progress.popCropedValues();
+
+		++it;
+	}
+}
+
 void addSearchPaths(IProgressCallback &progress)
 {
 	// Add search path of UI addon. Allow only a subset of files.
@@ -651,54 +745,13 @@ void addSearchPaths(IProgressCallback &progress)
 	// Add Standard search paths
 	{
 		H_AUTO(InitRZAddSearchPath2)
-		for (uint i = 0; i < ClientCfg.DataPath.size(); i++)
-		{
-			progress.progress ((float)i/(float)ClientCfg.DataPath.size());
-			progress.pushCropedValues ((float)i/(float)ClientCfg.DataPath.size(), (float)(i+1)/(float)ClientCfg.DataPath.size());
 
-			CPath::addSearchPath(ClientCfg.DataPath[i], true, false, &progress);
-
-			progress.popCropedValues ();
-		}
+		addPaths(progress, ClientCfg.DataPath, true);
 
 		CPath::loadRemappedFiles("remap_files.csv");
 	}
 
-	for (uint i = 0; i < ClientCfg.DataPathNoRecurse.size(); i++)
-	{
-		progress.progress ((float)i/(float)ClientCfg.DataPathNoRecurse.size());
-		progress.pushCropedValues ((float)i/(float)ClientCfg.DataPathNoRecurse.size(), (float)(i+1)/(float)ClientCfg.DataPathNoRecurse.size());
-
-		CPath::addSearchPath(ClientCfg.DataPathNoRecurse[i], false, false, &progress);
-
-		progress.popCropedValues ();
-	}
-
-	std::string defaultDirectory;
-
-#ifdef NL_OS_MAC
-	defaultDirectory = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources");
-#elif defined(NL_OS_UNIX) && defined(RYZOM_SHARE_PREFIX)
-	defaultDirectory = CPath::standardizePath(std::string(RYZOM_SHARE_PREFIX));
-#endif
-
-	// add in last position, a specific possibly read only directory
-	if (!defaultDirectory.empty())
-	{
-		for (uint i = 0; i < ClientCfg.DataPath.size(); i++)
-		{
-			// don't prepend default directory if path is absolute
-			if (!ClientCfg.DataPath[i].empty() && ClientCfg.DataPath[i][0] != '/')
-			{
-				progress.progress ((float)i/(float)ClientCfg.DataPath.size());
-				progress.pushCropedValues ((float)i/(float)ClientCfg.DataPath.size(), (float)(i+1)/(float)ClientCfg.DataPath.size());
-
-				CPath::addSearchPath(defaultDirectory + ClientCfg.DataPath[i], true, false, &progress);
-
-				progress.popCropedValues ();
-			}
-		}
-	}
+	addPaths(progress, ClientCfg.DataPathNoRecurse, false);
 }
 
 void addPreDataPaths(NLMISC::IProgressCallback &progress)
@@ -707,43 +760,9 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 
 	H_AUTO(InitRZAddSearchPaths);
 
-	for (uint i = 0; i < ClientCfg.PreDataPath.size(); i++)
-	{
-		progress.progress ((float)i/(float)ClientCfg.PreDataPath.size());
-		progress.pushCropedValues ((float)i/(float)ClientCfg.PreDataPath.size(), (float)(i+1)/(float)ClientCfg.PreDataPath.size());
-
-		CPath::addSearchPath(ClientCfg.PreDataPath[i], true, false, &progress);
-
-		progress.popCropedValues ();
-	}
+	addPaths(progress, ClientCfg.PreDataPath, true);
 
 	//nlinfo ("PROFILE: %d seconds for Add search paths Predata", (uint32)(ryzomGetLocalTime ()-initPaths)/1000);
-
-	std::string defaultDirectory;
-
-#ifdef NL_OS_MAC
-	defaultDirectory = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources");
-#elif defined(NL_OS_UNIX) && defined(RYZOM_SHARE_PREFIX)
-	defaultDirectory = CPath::standardizePath(std::string(RYZOM_SHARE_PREFIX));
-#endif
-
-	// add in last position, a specific possibly read only directory
-	if (!defaultDirectory.empty())
-	{
-		for (uint i = 0; i < ClientCfg.PreDataPath.size(); i++)
-		{
-			// don't prepend default directory if path is absolute
-			if (!ClientCfg.PreDataPath[i].empty() && ClientCfg.PreDataPath[i][0] != '/')
-			{
-				progress.progress ((float)i/(float)ClientCfg.PreDataPath.size());
-				progress.pushCropedValues ((float)i/(float)ClientCfg.PreDataPath.size(), (float)(i+1)/(float)ClientCfg.PreDataPath.size());
-
-				CPath::addSearchPath(defaultDirectory + ClientCfg.PreDataPath[i], true, false, &progress);
-
-				progress.popCropedValues ();
-			}
-		}
-	}
 }
 
 static void addPackedSheetUpdatePaths(NLMISC::IProgressCallback &progress)
@@ -752,9 +771,100 @@ static void addPackedSheetUpdatePaths(NLMISC::IProgressCallback &progress)
 	{
 		progress.progress((float)i/(float)ClientCfg.UpdatePackedSheetPath.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.UpdatePackedSheetPath.size(), (float)(i+1)/(float)ClientCfg.UpdatePackedSheetPath.size());
-		CPath::addSearchPath(ClientCfg.UpdatePackedSheetPath[i], true, false, &progress);
+		CPath::addSearchPath(NLMISC::expandEnvironmentVariables(ClientCfg.UpdatePackedSheetPath[i]), true, false, &progress);
 		progress.popCropedValues();
 	}
+}
+
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+static bool addRyzomIconBitmap(const std::string &directory, vector<CBitmap> &bitmaps)
+{
+	if (CFile::isDirectory(directory))
+	{
+		// build filename from directory and default ryzom client icon name
+		std::string filename = NLMISC::toString("%s/%s.png", directory.c_str(), getRyzomClientIcon().c_str());
+
+		if (CFile::fileExists(filename))
+		{
+			CIFile file;
+
+			if (file.open(filename))
+			{
+				CBitmap bitmap;
+
+				if (bitmap.load(file))
+				{
+					bitmaps.push_back(bitmap);
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+#endif
+
+//---------------------------------------------------
+// initLog :
+// Initialize the client.log file
+//---------------------------------------------------
+void initLog()
+{
+	// Add a displayer for Debug Infos.
+	createDebug();
+
+	// Client.Log displayer
+	nlassert( !ErrorLog->getDisplayer("CLIENT.LOG") );
+	CFileDisplayer *ClientLogDisplayer = new CFileDisplayer(getLogDirectory() + "client.log", true, "CLIENT.LOG");
+	DebugLog->addDisplayer (ClientLogDisplayer);
+	InfoLog->addDisplayer (ClientLogDisplayer);
+	WarningLog->addDisplayer (ClientLogDisplayer);
+	ErrorLog->addDisplayer (ClientLogDisplayer);
+	AssertLog->addDisplayer (ClientLogDisplayer);
+
+	// Display the client version.
+	nlinfo("RYZOM VERSION: %s", getDebugVersion().c_str());
+	nlinfo("Memory: %s/%s", bytesToHumanReadable(CSystemInfo::availablePhysicalMemory()).c_str(), bytesToHumanReadable(CSystemInfo::totalPhysicalMemory()).c_str());
+	nlinfo("OS: %s", CSystemInfo::getOS().c_str());
+	nlinfo("Processor: %s", CSystemInfo::getProc().c_str());
+
+#ifdef NL_OS_MAC
+	struct rlimit rlp, rlp2, rlp3;
+
+	getrlimit(RLIMIT_NOFILE, &rlp);
+
+	rlim_t value = 1024;
+
+	rlp2.rlim_cur = std::min(value, rlp.rlim_max);
+	rlp2.rlim_max = rlp.rlim_max;
+	
+	if (setrlimit(RLIMIT_NOFILE, &rlp2))
+	{
+		if (errno == EINVAL)
+		{
+			nlwarning("Unable to set rlimit with error: the specified limit is invalid");
+		}
+		else if (errno == EPERM)
+		{
+			nlwarning("Unable to set rlimit with error: the limit specified would have raised the maximum limit value and the caller is not the super-user");
+		}
+		else
+		{
+			nlwarning("Unable to set rlimit with error: unknown error");
+		}
+	}
+
+	getrlimit(RLIMIT_NOFILE, &rlp3);
+	nlinfo("rlimit before %llu %llu", (uint64)rlp.rlim_cur, (uint64)rlp.rlim_max);
+	nlinfo("rlimit after %llu %llu", (uint64)rlp3.rlim_cur, (uint64)rlp3.rlim_max);
+
+	// add the bundle's plugins path as library search path (for nel drivers)
+	if (CFile::isExists(getAppBundlePath() + "/Contents/PlugIns/nel"))
+	{
+		CLibrary::addLibPath(getAppBundlePath() + "/Contents/PlugIns/nel/");
+	}
+#endif
 }
 
 //---------------------------------------------------
@@ -766,13 +876,24 @@ void prelogInit()
 {
 	try
 	{
+		H_AUTO ( RZ_Client_Init );
+
 		// Assert if no more memory
-		//	NLMEMORY::SetOutOfMemoryHook(outOfMemory);
+		set_new_handler(outOfMemory);
+
+		NLMISC_REGISTER_CLASS(CStage);
+		NLMISC_REGISTER_CLASS(CStageSet);
+		NLMISC_REGISTER_CLASS(CEntityManager);
+		NLMISC_REGISTER_CLASS(CCharacterCL);
+		NLMISC_REGISTER_CLASS(CPlayerCL);
+		NLMISC_REGISTER_CLASS(CUserEntity);
+		NLMISC_REGISTER_CLASS(CFxCL);
+		NLMISC_REGISTER_CLASS(CItemCL);
+		NLMISC_REGISTER_CLASS(CNamedEntityPositionState);
+		NLMISC_REGISTER_CLASS(CAnimalPositionState);
 
 		// Progress bar for init() and connection()
 		ProgressBar.reset (BAR_STEP_INIT_CONNECTION);
-
-		set_new_handler(outOfMemory);
 
 		// save screen saver state and disable it
 		LastScreenSaverEnabled = CSystemUtils::isScreensaverEnabled();
@@ -788,27 +909,9 @@ void prelogInit()
 		_control87 (_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
 #endif // NL_OS_WINDOWS
 
-		CTime::CTimerInfo timerInfo;
-		NLMISC::CTime::probeTimerInfo(timerInfo);
-		if (timerInfo.RequiresSingleCore) // TODO: Also have a FV configuration value to force single core.
-			setCPUMask();
-
 		FPU_CHECKER_ONCE
 
 		NLMISC::TTime initStart = ryzomGetLocalTime ();
-
-		H_AUTO ( RZ_Client_Init );
-
-		NLMISC_REGISTER_CLASS(CStage);
-		NLMISC_REGISTER_CLASS(CStageSet);
-		NLMISC_REGISTER_CLASS(CEntityManager);
-		NLMISC_REGISTER_CLASS(CCharacterCL);
-		NLMISC_REGISTER_CLASS(CPlayerCL);
-		NLMISC_REGISTER_CLASS(CUserEntity);
-		NLMISC_REGISTER_CLASS(CFxCL);
-		NLMISC_REGISTER_CLASS(CItemCL);
-		NLMISC_REGISTER_CLASS(CNamedEntityPositionState);
-		NLMISC_REGISTER_CLASS(CAnimalPositionState);
 
 	//	_CrtSetDbgFlag( _CRTDBG_CHECK_CRT_DF );
 
@@ -819,35 +922,35 @@ void prelogInit()
 		// Init the debug memory
 		initDebugMemory();
 
-		// Add a displayer for Debug Infos.
-		createDebug();
+		// Load the application configuration.
+		ucstring nmsg("Loading config file...");
+		ProgressBar.newMessage (nmsg);
 
-		// Client.Log displayer
-		nlassert( !ErrorLog->getDisplayer("CLIENT.LOG") );
-		CFileDisplayer *ClientLogDisplayer = new CFileDisplayer(getLogDirectory() + "client.log", true, "CLIENT.LOG");
-		DebugLog->addDisplayer (ClientLogDisplayer);
-		InfoLog->addDisplayer (ClientLogDisplayer);
-		WarningLog->addDisplayer (ClientLogDisplayer);
-		ErrorLog->addDisplayer (ClientLogDisplayer);
-		AssertLog->addDisplayer (ClientLogDisplayer);
+		ClientCfg.init(ConfigFileName);
+		CLoginProgressPostThread::getInstance().init(ClientCfg.ConfigFile);
+
+		sint cpuMask;
+
+		if (ClientCfg.CPUMask < 1)
+		{
+			CTime::CTimerInfo timerInfo;
+			NLMISC::CTime::probeTimerInfo(timerInfo);
+
+			cpuMask = timerInfo.RequiresSingleCore ? 1:0;
+		}
+		else
+		{
+			cpuMask = ClientCfg.CPUMask;
+		}
+
+		if (cpuMask) setCPUMask(cpuMask);
 
 		setCrashCallback(crashCallback);
 
 		// Display Some Info On CPU
 		displayCPUInfo();
 
-		// Display the client version.
-#if FINAL_VERSION
-		nlinfo("RYZOM VERSION : FV %s ("__DATE__" "__TIME__")", RYZOM_VERSION);
-#else
-		nlinfo("RYZOM VERSION : DEV %s ("__DATE__" "__TIME__")", RYZOM_VERSION);
-#endif
-
 		FPU_CHECKER_ONCE
-
-		// Set default email value for reporting error
-		setReportEmailFunction ((void*)sendEmail);
-		setDefaultEmailParams ("smtp.nevrax.com", "", "ryzombug@nevrax.com");
 
 		// create the save dir.
 		if (!CFile::isExists("save")) CFile::createDirectory("save");
@@ -859,14 +962,6 @@ void prelogInit()
 		// if we're not in final version then start the file access logger to keep track of the files that we read as we play
 		//ICommand::execute("iFileAccessLogStart",*NLMISC::InfoLog);
 #endif
-
-		// Load the application configuration.
-		ucstring nmsg("Loading config file...");
-		ProgressBar.newMessage (nmsg);
-
-		ClientCfg.init(ConfigFileName);
-
-		CLoginProgressPostThread::getInstance().init(ClientCfg.ConfigFile);
 
 		// check "BuildName" in ClientCfg
 		//nlassert(!ClientCfg.BuildName.empty()); // TMP comment by nico do not commit
@@ -953,6 +1048,45 @@ void prelogInit()
 			return;
 		}
 
+		// used to determine screen default resolution
+		if (ClientCfg.Width < 800 || ClientCfg.Height < 600)
+		{
+			UDriver::CMode mode;
+
+			CConfigFile::CVar *varPtr = NULL;
+
+			if (!ClientCfg.Windowed && Driver->getCurrentScreenMode(mode))
+			{
+				ClientCfg.Width = mode.Width;
+				ClientCfg.Height = mode.Height;
+				ClientCfg.Depth = mode.Depth;
+				ClientCfg.Frequency = mode.Frequency;
+
+				// update client.cfg with detected depth and frequency
+				varPtr = ClientCfg.ConfigFile.getVarPtr("Depth");
+				if(varPtr)
+					varPtr->forceAsInt(ClientCfg.Depth);
+
+				varPtr = ClientCfg.ConfigFile.getVarPtr("Frequency");
+				if(varPtr)
+					varPtr->forceAsInt(ClientCfg.Frequency);
+			}
+			else
+			{
+				ClientCfg.Width = 1024;
+				ClientCfg.Height = 768;
+			}
+
+			// update client.cfg with detected resolution
+			varPtr = ClientCfg.ConfigFile.getVarPtr("Width");
+			if(varPtr)
+				varPtr->forceAsInt(ClientCfg.Width);
+
+			varPtr = ClientCfg.ConfigFile.getVarPtr("Height");
+			if(varPtr)
+				varPtr->forceAsInt(ClientCfg.Height);
+		}
+
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_VideoModeSetup, "login_step_video_mode_setup"));
 
 		FPU_CHECKER_ONCE
@@ -960,11 +1094,24 @@ void prelogInit()
 		// Check the driver is not is 16 bits
 		checkDriverDepth ();
 
-		// For login phase, MUST be in windowed
 		UDriver::CMode mode;
-		mode.Width		= 1024;
-		mode.Height		= 768;
-		mode.Windowed	= true;
+
+		if (Driver->getCurrentScreenMode(mode))
+		{
+			// use current mode if its smaller than 1024x768
+			// mode should be windowed already, but incase its not, use the mode as is
+			if (mode.Windowed && (mode.Width > 1024 && mode.Height > 768))
+			{
+				mode.Width		= 1024;
+				mode.Height		= 768;
+			}
+		}
+		else
+		{
+			mode.Width = 1024;
+			mode.Height = 768;
+			mode.Windowed = true;
+		}
 
 		// Disable Hardware Vertex Program.
 		if(ClientCfg.DisableVtxProgram)
@@ -975,12 +1122,6 @@ void prelogInit()
 		// Disable Hardware Texture Shader.
 		if(ClientCfg.DisableTextureShdr)
 			Driver->disableHardwareTextureShader();
-
-		// Enable or disable VSync
-		if(ClientCfg.WaitVBL)
-			Driver->setSwapVBLInterval(1);
-		else
-			Driver->setSwapVBLInterval(0);
 
 		if (StereoDisplay) // VR_CONFIG // VR_DRIVER
 		{
@@ -1007,6 +1148,12 @@ void prelogInit()
 			return;
 		}
 
+		// Enable or disable VSync
+		if (ClientCfg.WaitVBL)
+			Driver->setSwapVBLInterval(1);
+		else
+			Driver->setSwapVBLInterval(0);
+
 		// initialize system utils class
 		CSystemUtils::init();
 		CSystemUtils::setWindow(Driver->getDisplay());
@@ -1026,32 +1173,62 @@ void prelogInit()
 		Driver->setWindowTitle(CI18N::get("TheSagaOfRyzom"));
 
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-		// add all existing icons
-		vector<string> filenames;
-		filenames.push_back("/usr/share/icons/hicolor/128x128/apps/ryzom.png");
-		filenames.push_back("/usr/share/icons/hicolor/48x48/apps/ryzom.png");
-		filenames.push_back("/usr/share/icons/hicolor/32x32/apps/ryzom.png");
-		filenames.push_back("/usr/share/icons/hicolor/24x24/apps/ryzom.png");
-		filenames.push_back("/usr/share/icons/hicolor/22x22/apps/ryzom.png");
-		filenames.push_back("/usr/share/icons/hicolor/16x16/apps/ryzom.png");
-		filenames.push_back("/usr/share/pixmaps/ryzom.png");
+		// add all existing directory prefixes
+		vector<string> directoryPrefixes;
 
-		// check if an icon is present in registered paths
-		if(CPath::exists("ryzom.png"))
-			filenames.push_back(CPath::lookup("ryzom.png"));
+		// user local directory prefix (~/.local)
+		const char* homeDirectory = getenv("HOME");
+
+		if (homeDirectory)
+			directoryPrefixes.push_back(CPath::standardizePath(homeDirectory) + ".local");
+
+		// system local directory prefix (/usr/local)
+		directoryPrefixes.push_back("/usr/local");
+
+		// system directory prefix (/usr)
+		directoryPrefixes.push_back("/usr");
+
+		// all supported icon sizes
+		vector<uint> iconSizes;
+		iconSizes.push_back(512);
+		iconSizes.push_back(256);
+		iconSizes.push_back(128);
+		iconSizes.push_back(96);
+		iconSizes.push_back(64);
+		iconSizes.push_back(48);
+		iconSizes.push_back(32);
+		iconSizes.push_back(24);
+		iconSizes.push_back(22);
+		iconSizes.push_back(16);
 
 		vector<CBitmap> bitmaps;
-		
-		for(size_t i = 0; i < filenames.size(); ++i)
-		{
-			CIFile file;
 
-			if (CFile::fileExists(filenames[i]) && file.open(filenames[i]))
+		// process all icon sizes
+		for(size_t j = 0; j < iconSizes.size(); ++j)
+		{
+			// process all directory prefixes
+			for(size_t i = 0; i < directoryPrefixes.size(); ++i)
 			{
-				CBitmap bitmap;
-				if (bitmap.load(file))
-					bitmaps.push_back(bitmap);
+				uint size = iconSizes[j];
+
+				// build directory where to look for icon
+				std::string directory = toString("%s/share/icons/hicolor/%ux%u/apps", directoryPrefixes[i].c_str(), size, size);
+
+				// if found, skip other directories for this icon size
+				if (addRyzomIconBitmap(directory, bitmaps)) break;
 			}
+		}
+
+		if (bitmaps.empty())
+		{
+			// check if an icon is present in same directory as executable
+			addRyzomIconBitmap(Args.getProgramPath(), bitmaps);
+		}
+
+		if (bitmaps.empty())
+		{
+			// check if an icon is present in current directory
+			addRyzomIconBitmap(".", bitmaps);
 		}
 
 		Driver->setWindowIcon(bitmaps);
@@ -1151,8 +1328,10 @@ void prelogInit()
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
 
-		
+
 		CInterfaceManager::getInstance();
+		CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
+		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
 
 		// Yoyo: initialize NOW the InputHandler for Event filtering.
 		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
@@ -1192,6 +1371,12 @@ void prelogInit()
 			//nlinfo ("PROFILE: %d seconds for Add search paths Data", (uint32)(ryzomGetLocalTime ()-initPaths)/1000);
 		}
 
+		// Initialize HTTP cache
+		CHttpCache::getInstance()->setCacheIndex("cache/cache.index");
+		CHttpCache::getInstance()->init();
+
+		CStrictTransportSecurity::getInstance()->init("save/hsts-list.save");
+
 		// Register the reflected classes
 		registerInterfaceElements();
 
@@ -1200,7 +1385,7 @@ void prelogInit()
 
 		// init bloom effect
 		CBloomEffect::getInstance().init();
-		
+
 		if (StereoDisplay) // VR_CONFIG
 		{
 			// Init stereo display resources
@@ -1256,7 +1441,7 @@ void	initBotObjectSelection()
 						{
 							// IS the item a valid one ?
 							CSheetId itemId;
-							if(itemId.buildSheetId(NLMISC::strlwr(strShape)))
+							if(itemId.buildSheetId(NLMISC::toLower(strShape)))
 							{
 								// Get this item sheet ?
 								CItemSheet		*itemSheet= dynamic_cast<CItemSheet *>(SheetMngr.get(itemId));
@@ -1370,15 +1555,6 @@ void postlogInit()
 			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 			if(ClientCfg.SoundOn)
 			{
-				// tmp fix : it seems that, at this point, if the bg downloader window has focus and
-				// not the Ryzom one, then sound init fails
-				/*#ifdef NL_OS_WINDOWS
-					HWND hWnd = Driver->getDisplay ();
-					nlassert (hWnd);
-					ShowWindow(hWnd, SW_RESTORE);
-					SetForegroundWindow(hWnd);
-				#endif*/
-				// bg downloader not used anymore anyways
 				SoundMngr = new CSoundManager(&ProgressBar);
 				try
 				{
@@ -1387,8 +1563,8 @@ void postlogInit()
 				catch(const Exception &e)
 				{
 					nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
-					// leak the alocated sound manager...
-					SoundMngr = 0;
+					delete SoundMngr;
+					SoundMngr = NULL;
 				}
 
 				// Play Music just after the SoundMngr is inited
@@ -1484,7 +1660,7 @@ void postlogInit()
 		else
 		{
 			// To have the same number of newMessage in client light
-			nmsg = "";
+			nmsg.clear();
 			ProgressBar.newMessage (nmsg);
 			ProgressBar.newMessage (nmsg);
 			ProgressBar.newMessage (nmsg);

@@ -233,14 +233,13 @@ CGameItemPtr CGameItemManager::createItem( const CSheetId& sheetId, uint16 quali
 //				nlerror("<CGameItemManager::createItem> Can't find the owner item %s",owner.toString().c_str());
 //			}
 //		}
+		log_Item_Create(item->getItemId(), item->getSheetId(), item->getStackSize(), item->quality());
 	}
 	else
 	{
 //		nlwarning("<CGameItemManager::createItem> Can't create the item %s with invalid sheet '%s'", id.toString().c_str(), sheetId.toString().c_str());
 		nlwarning("<CGameItemManager::createItem> Can't create an item with invalid sheet '%s'", sheetId.toString().c_str());
 	}
-
-	log_Item_Create(item->getItemId(), item->getSheetId(), item->getStackSize(), item->quality());
 
 	return item;
 
@@ -791,7 +790,7 @@ void CGameItemManager::destroyItem( CGameItemPtr &ptr )
 //void CGameItemManager::dumpGameItemList( const string& fileName )
 //{
 //	FILE * f;
-//	f = fopen(fileName.c_str(),"w");
+//	f = nlfopen(fileName, "w");
 //	
 //	if(f)
 //	{
@@ -918,8 +917,9 @@ NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality>")
 //		return false;
 //	}
 //
-//	CEntityId itemId( RYZOMID::object, NLMISC::fromString(args[0].c_str()) );
-//	//uint16 quality = (uint16)NLMISC::fromString(args[1].c_str());
+//	CEntityId itemId( RYZOMID::object, NLMISC::fromString(args[0]) );
+//	//uint16 quality;
+//	//NLMISC::fromString(args[1]; quality);
 //	
 //	sint32 x;
 //	NLMISC::fromString(args[2], x);
@@ -957,9 +957,10 @@ NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality>")
 //	}
 //	else
 //	{
-//		CEntityId itemId( RYZOMID::object, NLMISC::fromString(args[0].c_str()) );
+//		CEntityId itemId( RYZOMID::object, NLMISC::fromString(args[0]) );
 //		CSheetId sheetId(args[1]);
-//		uint16 quality = (uint16)NLMISC::fromString(args[2].c_str());
+//		uint16 quality;
+//		NLMISC::fromString(args[2], quality);
 //		sint32 x = (sint32)NLMISC::fromString(args[3].c_str()) * 1000;
 //		sint32 y = (sint32)NLMISC::fromString(args[4].c_str()) * 1000;
 //		sint32 z = (sint32)NLMISC::fromString(args[5].c_str()) * 1000;

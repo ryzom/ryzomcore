@@ -21,11 +21,15 @@
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/group_container_base.h"
+#include "nel/gui/group_html.h"
 
 using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 NLMISC_REGISTER_OBJECT(CViewBase, CViewBitmap, std::string, "bitmap");
 REGISTER_UI_CLASS(CViewBitmap)
@@ -449,7 +453,19 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CViewBitmap::setTexture(const std::string & TxName)
 	{
-		_TextureId.setTexture (TxName.c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
+		if (TxName.find("://") != string::npos || TxName.find("//") == 0)
+		{
+			CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:webig:content:html"));
+			if (groupHtml) {
+				string localname = groupHtml->localImageName(TxName);
+				if (!CFile::fileExists(localname))
+					localname = "web_del.tga";
+				_TextureId.setTexture (localname.c_str(), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
+				groupHtml->addImageDownload(TxName, dynamic_cast<CViewBase*>(this));
+			}
+		}
+		else
+			_TextureId.setTexture (TxName.c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
 	}
 
 	// ----------------------------------------------------------------------------
@@ -508,6 +524,9 @@ namespace NLGUI
 	// ***************************************************************************
 	sint32	CViewBitmap::getMaxUsedW() const
 	{
+		if (_Scale)
+			return _WReal;
+
 		sint32 txw, txh;
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		rVR.getTextureSizeFromId (_TextureId, txw, txh);

@@ -29,6 +29,10 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
@@ -242,11 +246,11 @@ void CPortal::serial (NLMISC::IStream& f)
 		{
 			std::string occName = CStringMapper::unmap(_OcclusionModelId);
 			if (occName == "no occlusion")
-				occName = "";
+				occName.clear();
 			f.serial(occName);
 			occName = CStringMapper::unmap(_OpenOcclusionModelId);
 			if (occName == "no occlusion")
-				occName = "";
+				occName.clear();
 			f.serial(occName);
 		}
 	}

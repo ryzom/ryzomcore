@@ -86,7 +86,7 @@ CSoundPlugin::CSoundPlugin(IEdit *globalInterface)
 	CLoadingDialog	loadDlg;
 
 	loadDlg.Create(IDD_DIALOG_LOADING);
-	loadDlg.Message = "";
+	loadDlg.Message.Empty();
 	loadDlg.UpdateData(FALSE);
 	loadDlg.ShowWindow(SW_SHOW);
 

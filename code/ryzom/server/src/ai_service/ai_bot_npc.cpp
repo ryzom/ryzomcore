@@ -1107,7 +1107,7 @@ void CBotNpc::setVisualProperties(std::string input)	// AJM
 	// load val from tail
 	// accept 64bit hex value
 	uint64 val;
-	sscanf( tail.c_str(), "%"NL_I64"x", &val );
+	sscanf( tail.c_str(), "%" NL_I64 "x", &val );
 
 	// can't set into mirror row until bot is spawned, so save away
 	if( NLMISC::nlstricmp( keyword,"VPA")==0 )	// VisualPropertyA

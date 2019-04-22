@@ -185,7 +185,7 @@ bool		CIFile::open(const std::string &path, bool text)
 
 	// Bigfile or xml pack access requested ?
 	string::size_type pos;
-	if ((pos = path.find('@')) != string::npos)
+	if (!CFile::fileExists(path) && (pos = path.find('@')) != string::npos)
 	{
 		// check for a double @ to identify XML pack file
 		if (pos+1 < path.size() && path[pos+1] == '@')
@@ -243,7 +243,7 @@ bool		CIFile::open(const std::string &path, bool text)
 		_IsInXMLPackFile = false;
 		_BigFileOffset = 0;
 		_AlwaysOpened = false;
-		_F = fopen (path.c_str(), mode);
+		_F = nlfopen (path, mode);
 		if (_F != NULL)
 		{
 			/*
@@ -401,7 +401,7 @@ bool		CIFile::eof ()
 }
 
 // ======================================================================================================
-void		CIFile::serialBuffer(uint8 *buf, uint len) throw(EReadError)
+void		CIFile::serialBuffer(uint8 *buf, uint len)
 {
 	if (len == 0)
 		return;
@@ -444,7 +444,7 @@ void		CIFile::serialBuffer(uint8 *buf, uint len) throw(EReadError)
 }
 
 // ======================================================================================================
-void		CIFile::serialBit(bool &bit) throw(EReadError)
+void		CIFile::serialBit(bool &bit)
 {
 	// Simple for now.
 	uint8	v=bit;
@@ -453,7 +453,7 @@ void		CIFile::serialBit(bool &bit) throw(EReadError)
 }
 
 // ======================================================================================================
-bool		CIFile::seek (sint32 offset, IStream::TSeekOrigin origin) const throw(EStream)
+bool		CIFile::seek (sint32 offset, IStream::TSeekOrigin origin) const
 {
 	if ((_CacheFileOnOpen) && (_Cache == NULL))
 		return false;
@@ -485,7 +485,7 @@ bool		CIFile::seek (sint32 offset, IStream::TSeekOrigin origin) const throw(EStr
 }
 
 // ======================================================================================================
-sint32		CIFile::getPos () const throw(EStream)
+sint32		CIFile::getPos () const
 {
 	return _ReadPos;
 }
@@ -550,7 +550,6 @@ uint	CIFile::getDbgStreamSize() const
 COFile::COFile() : IStream(false)
 {
 	_F=NULL;
-	_FileName = "";
 }
 
 // ======================================================================================================
@@ -598,7 +597,7 @@ bool	COFile::open(const std::string &path, bool append, bool text, bool useTempF
 			return false;
 	}
 
-	_F=fopen(fileToOpen.c_str(), mode);
+	_F = nlfopen(fileToOpen, mode);
 
 	return _F!=NULL;
 }
@@ -627,7 +626,7 @@ void	COFile::internalClose(bool success)
 					if (CFile::fileExists(_FileName))
 						CFile::deleteFile (_FileName);
 
-					if (CFile::moveFile (_FileName.c_str(), _TempFileName.c_str()))
+					if (CFile::moveFile(_FileName, _TempFileName))
 						break;
 					nlSleep (0);
 				}
@@ -653,7 +652,7 @@ void	COFile::flush()
 
 
 // ======================================================================================================
-void		COFile::serialBuffer(uint8 *buf, uint len) throw(EWriteError)
+void		COFile::serialBuffer(uint8 *buf, uint len)
 {
 	if(!_F)
 		throw	EFileNotOpened(_FileName);
@@ -668,14 +667,14 @@ void		COFile::serialBuffer(uint8 *buf, uint len) throw(EWriteError)
 	}
 }
 // ======================================================================================================
-void		COFile::serialBit(bool &bit) throw(EWriteError)
+void		COFile::serialBit(bool &bit)
 {
 	// Simple for now.
 	uint8	v=bit;
 	serialBuffer(&v, 1);
 }
 // ======================================================================================================
-bool		COFile::seek (sint32 offset, IStream::TSeekOrigin origin) const throw(EStream)
+bool		COFile::seek (sint32 offset, IStream::TSeekOrigin origin) const
 {
 	if (_F)
 	{
@@ -702,7 +701,7 @@ bool		COFile::seek (sint32 offset, IStream::TSeekOrigin origin) const throw(EStr
 	return false;
 }
 // ======================================================================================================
-sint32		COFile::getPos () const throw(EStream)
+sint32		COFile::getPos () const
 {
 	if (_F)
 	{
@@ -791,7 +790,7 @@ NLMISC_CATEGORISED_COMMAND(nel, iFileAccessLogDisplay, "Display file access logs
 		while (atIt!=atItEnd)
 		{
 			uint64 delta= (*atIt-IFileAccessLogStartTime);
-			log.display("%"NL_I64"u,",delta);
+			log.display("%" NL_I64 "u,",delta);
 			++atIt;
 		}
 		log.displayNL("");

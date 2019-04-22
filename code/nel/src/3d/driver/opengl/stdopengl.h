@@ -17,7 +17,12 @@
 #ifndef STDOPENGL_H
 #define STDOPENGL_H
 
-#include "nel/misc/types_nl.h"
+#if defined(_MSC_VER) && defined(_DEBUG)
+	#define _CRTDBG_MAP_ALLOC
+	#include <stdlib.h>
+	#include <crtdbg.h>
+	#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
 
 #include <cstdlib>
 #include <cstdio>
@@ -34,6 +39,8 @@
 #include <utility>
 #include <deque>
 #include <limits>
+
+#include "nel/misc/types_nl.h"
 
 #ifdef NL_OS_WINDOWS
 #	define WIN32_LEAN_AND_MEAN
@@ -99,5 +106,12 @@
 #include "nel/3d/u_driver.h"
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
+
+#ifdef NL_OS_MAC
+#include <AvailabilityMacros.h>
+#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#define NL_MAC_VERSION_10_6_UP
+#endif
+#endif
 
 #endif

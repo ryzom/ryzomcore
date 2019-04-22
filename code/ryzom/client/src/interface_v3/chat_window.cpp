@@ -627,9 +627,6 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 					}
 				}
 				break;
-
-				// NB: the yubo chat cannot be in a user chat
-			case CChatGroup::yubo_chat:	gl = NULL;	break;
 		}
 
 		if (gl != NULL)
@@ -899,11 +896,8 @@ bool CChatGroupWindow::removeFreeTeller(const std::string &containerID)
 	if (i == _FreeTellers.size())
 		return false;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	// Create the free teller in all the desktops images
-	for (uint m = 0; m < MAX_NUM_MODES; ++m)
-	{
-		pIM->removeGroupContainerImage(_FreeTellers[i]->getId(), m);
-	}
+	pIM->removeGroupContainerImageFromDesktops(_FreeTellers[i]->getId());
+
 	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 	CWidgetManager::getInstance()->unMakeWindow(_FreeTellers[i]);
 	pRoot->delGroup (_FreeTellers[i]);
@@ -1039,10 +1033,6 @@ void CChatGroupWindow::getAssociatedSubWindow(CChatGroup::TGroupType gt, uint32 
 		gl = dynamic_cast<CGroupList *>(_Chat->getGroup("content:cb:region:text_list"));
 		tab = dynamic_cast<CCtrlTabButton*>(_Chat->getCtrl("header_opened:channel_select:tab1"));
 		break;
-	case CChatGroup::yubo_chat:
-		gl = dynamic_cast<CGroupList *>(_Chat->getGroup("content:cb:yubo_chat:text_list"));
-		tab = dynamic_cast<CCtrlTabButton*>(_Chat->getCtrl("header_opened:channel_select:tab6"));
-		break;
 	case CChatGroup::dyn_chat:
 		{
 			// use dynamicChatDbIndex to get the wanted tab button/group
@@ -1052,7 +1042,7 @@ void CChatGroupWindow::getAssociatedSubWindow(CChatGroup::TGroupType gt, uint32 
 		break;
 	case CChatGroup::universe:
 		gl = dynamic_cast<CGroupList *>(_Chat->getGroup("content:cb:universe:text_list"));
-		tab = dynamic_cast<CCtrlTabButton*>(_Chat->getCtrl("header_opened:channel_select:tab7"));
+		tab = dynamic_cast<CCtrlTabButton*>(_Chat->getCtrl("header_opened:channel_select:tab6"));
 		break;
 	}
 }
@@ -1151,6 +1141,15 @@ CChatWindow *CChatWindowManager::createChatGroupWindow(const CChatWindowDesc &de
 		w->setAHOnCloseButtonParams(desc.AHOnCloseButtonParams);
 		if (!desc.HeaderColor.empty())
 			w->setHeaderColor(desc.HeaderColor);
+
+
+		// because root group was created from template, element from scrollbar target attribute was not created yet
+		CInterfaceGroup *pIG = w->getContainer()->getGroup("header_opened:channel_select");
+		if (pIG)
+		{
+			CCtrlScroll *sb = dynamic_cast<CCtrlScroll*>(w->getContainer()->getCtrl("channel_scroll"));
+			if (sb) sb->setTarget(pIG);
+		}
 
 		return w;
 	}
@@ -1272,7 +1271,7 @@ public:
 		if (pEB == NULL) return;
 		ucstring text = pEB->getInputString();
 		// If the line is empty, do nothing
-		if(text.size() == 0)
+		if(text.empty())
 			return;
 
 
@@ -1315,7 +1314,7 @@ public:
 			else
 			{
 				CInterfaceManager *im = CInterfaceManager::getInstance();
-				im->displaySystemInfo (ucstring(cmd+": ")+CI18N::get ("uiCommandNotExists"));
+				im->displaySystemInfo (ucstring::makeFromUtf8(cmd) + ": " + CI18N::get ("uiCommandNotExists"));
 			}
 		}
 		else

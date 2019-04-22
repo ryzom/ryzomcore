@@ -25,13 +25,15 @@
 #include <vector>
 #include <string>
 
+#include "../../3d/shared_widgets/common.h"
+
 class CCmdLineParser
 {
 public:
 	static void parse( int argc, char **argv, std::vector< std::pair< std::string, std::string > > &v )
 	{
 		std::stack< std::string > stack;
-		std::string key;		
+		std::string key;
 		std::string value;
 
 		for( int i = argc - 1 ; i >= 0; i-- )
@@ -76,9 +78,25 @@ public:
 	}
 };
 
-int main( int argc, char **argv )
+#ifdef QT_STATICPLUGIN
+
+#include <QtPlugin>
+
+#if defined(Q_OS_WIN32)
+	Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+#elif defined(Q_OS_MAC)
+	Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
+#elif defined(Q_OS_UNIX)
+	Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
+#endif
+
+	Q_IMPORT_PLUGIN(QICOPlugin)
+
+#endif
+
+int main(int argc, char **argv)
 {
-#ifndef WIN32
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 	// Workaround to default -style=gtk+ on recent Cinnamon versions
 	char *currentDesktop = getenv("XDG_CURRENT_DESKTOP");
 	if (currentDesktop)
@@ -91,21 +109,23 @@ int main( int argc, char **argv )
 	}
 #endif
 
-	QApplication app( argc, argv );
+	NLQT::preApplication();
+	QApplication app(argc, argv);
+
+	QApplication::setWindowIcon(QIcon(":/icons/nevraxpill.ico"));
 
 	std::vector< std::pair< std::string, std::string > > params;
 
 	CCmdLineParser::parse( argc, argv, params );
 
 	CCrashReportWidget w;
-	w.setup( params );
+	w.setup(params);
 	w.show();
 
 	int ret = app.exec();
 
-	if( ret != EXIT_SUCCESS )
+	if(ret != EXIT_SUCCESS)
 		return ret;
 	else
 		return w.getReturnValue();
-	
 }

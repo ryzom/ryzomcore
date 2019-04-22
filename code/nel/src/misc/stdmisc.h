@@ -17,6 +17,13 @@
 #ifndef NL_STDMISC_H
 #define NL_STDMISC_H
 
+#if defined(_MSC_VER) && defined(_DEBUG)
+	#define _CRTDBG_MAP_ALLOC
+	#include <stdlib.h>
+	#include <crtdbg.h>
+	#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
+
 #include <algorithm>
 #include <cmath>
 #include <csignal>
@@ -44,14 +51,16 @@
 
 #include <nel/misc/types_nl.h>
 
+#include <libxml/parser.h>
+
 #ifdef NL_OS_WINDOWS
 #	define WIN32_LEAN_AND_MEAN
-#	define _WIN32_WINDOWS 0x0410
+#	define _WIN32_WINDOWS 0x0500
 #	ifndef _WIN32_WINNT
-#		define _WIN32_WINNT 0x0400
+#		define _WIN32_WINNT 0x0500
 #	endif
 #	ifndef NL_COMP_MINGW
-#		define WINVER 0x0400
+#		define WINVER 0x0500
 #		define NOMINMAX
 #	endif
 #	include <WinSock2.h>

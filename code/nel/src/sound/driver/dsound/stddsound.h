@@ -14,6 +14,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef STDDSOUND_H
+#define STDDSOUND_H
+
+#if defined(_MSC_VER) && defined(_DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
+
 #include "nel/misc/types_nl.h"
 
 #define EAX_AVAILABLE 0
@@ -22,6 +32,7 @@
 #	include <eax.h>
 #endif
 
+#include <initguid.h>
 #include <dsound.h>
 
 #include <iostream>
@@ -43,4 +54,5 @@
 #include "nel/sound/driver/source.h"
 #include "nel/sound/driver/listener.h"
 
+#endif
 /* end of file */

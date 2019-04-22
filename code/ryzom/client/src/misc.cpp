@@ -234,10 +234,10 @@ void readStringArray(const std::string &filename, NLGEORGES::UFormLoader *formLo
 							if(elmt->getArrayValue(stringName, i))
 								container.insert(make_pair(nodeName, stringName));
 							else
-								nlwarning("readStringArray: no string associated to the node '%d(%s)'.", i, nodeName.c_str());
+								nlwarning("readStringArray: no string associated to the node '%u(%s)'.", i, nodeName.c_str());
 						}
 						else
-							nlwarning("readStringArray: node '%d', index valid.", i);
+							nlwarning("readStringArray: node '%u', index valid.", i);
 					}
 				}
 			}
@@ -298,7 +298,7 @@ bool mode2Anim(MBEHAV::EMode mode, string &result)
 			// No animset for the mode.
 			else
 			{
-				mode2AnimArray[i] = "";
+				mode2AnimArray[i].clear();
 				nlwarning("mode2Anim: no animset associated to the mode %d'%s'.", i, modeName.c_str());
 			}
 		}
@@ -1392,15 +1392,23 @@ bool isWindowMaximized()
 		screenMode.Width == width && screenMode.Height == height);
 }
 
-sint getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<std::string> &stringModeList)
+bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<std::string> &stringModeList, std::vector<std::string> &stringFreqList, sint &nFoundStringMode, sint &nFoundStringFreq)
 {
+	// default values
+	nFoundStringMode = -1;
+	nFoundStringFreq = -1;
+
+	// mode index in original video modes
+	sint nFoundMode = -1;
+
 	// **** Init Video Modes
 	Driver->getModes(videoModes);
-	// Remove modes under 800x600 and get the unique strings
-	sint i, j, nFoundMode = -1;
-	for (i=0; i < (sint)videoModes.size(); ++i)
+
+	// Remove modes under 1024x768 (outgame ui limitation) and get the unique strings
+	sint i, j;
+	for (i = 0; i < (sint)videoModes.size(); ++i)
 	{
-		if ((videoModes[i].Width < 800) || (videoModes[i].Height < 600))
+		if ((videoModes[i].Width < 1024) || (videoModes[i].Height < 768))
 		{
 			videoModes.erase(videoModes.begin()+i);
 			--i;
@@ -1408,42 +1416,134 @@ sint getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 		else
 		{
 			bool bFound = false;
-			string tmp = toString(videoModes[i].Width)+" x "+toString(videoModes[i].Height);
+
+			// create string format with width and height
+			string res = toString(videoModes[i].Width)+" x "+toString(videoModes[i].Height);
+
+			// check if video mode already found in list
 			for (j = 0; j < (sint)stringModeList.size(); ++j)
 			{
-				if (stringModeList[j] == tmp)
+				if (stringModeList[j] == res)
 				{
 					bFound = true;
 					break;
 				}
 			}
+
+			// if not found
 			if (!bFound)
 			{
-				stringModeList.push_back(tmp);
+				// add it to the list
+				stringModeList.push_back(res);
+
+				// process all screen sizes less or equal to desired one
 				if ((videoModes[i].Width <= ClientCfg.Width) && (videoModes[i].Height <= ClientCfg.Height))
 				{
-					if (nFoundMode == -1)
+					// take first one by default
+					if (nFoundStringMode == -1)
 					{
-						nFoundMode = j;
+						nFoundStringMode = j;
+						nFoundMode = i;
 					}
 					else
 					{
+						// then take the largest one
 						if ((videoModes[i].Width >= videoModes[nFoundMode].Width) &&
 							(videoModes[i].Height >= videoModes[nFoundMode].Height))
-							nFoundMode = j;
+						{
+							nFoundStringMode = j;
+							nFoundMode = i;
+						}
 					}
 				}
 			}
 		}
 	}
-	
+
 	// If no modes are available, fallback to windowed mode
-	if (nFoundMode == -1)
+	if (nFoundStringMode == -1)
 	{
 		nlwarning("Mode %ux%u not found, fall back to windowed", (uint)ClientCfg.Width, (uint)ClientCfg.Height);
 		ClientCfg.Windowed = true;
 		ClientCfg.writeInt("FullScreen", 0);
 	}
+	else
+	{
+		// add frequencies to frequencies list
+		for (i = 0; i < (sint)videoModes.size(); ++i)
+		{
+			// only take exact screen sizes
+			if (videoModes[i].Width == videoModes[nFoundMode].Width && videoModes[i].Height == videoModes[nFoundMode].Height)
+			{
+				uint freq = videoModes[i].Frequency;
+				std::string freqStr = toString(freq);
 
-	return nFoundMode;
+				bool bFound = false;
+
+				// check if frequency already found in list
+				for (j = 0; j < (sint)stringFreqList.size(); ++j)
+				{
+					if (stringFreqList[j] == freqStr)
+					{
+						bFound = true;
+						break;
+					}
+				}
+
+				if (!bFound)
+				{
+					// if frequency is 0, take the first one else use the exact one
+					if (nFoundStringFreq == -1 && ((ClientCfg.Frequency == 0) || (freq == ClientCfg.Frequency)))
+					{
+						nFoundStringFreq = stringFreqList.size();
+					}
+
+					stringFreqList.push_back(freqStr);
+				}
+			}
+		}
+	}
+
+	return nFoundStringMode > -1;
+}
+
+// Get float value from string. Return true if the value is relatif ( src = "+15.5" for example )
+bool getRelativeFloatFromString(const std::string src, float &dst)
+{
+	dst = 0;
+	if (src.empty())
+		return false;
+	
+	if (src[0] == '+')
+		return fromString(src.substr(1), dst);
+	else
+		fromString(src, dst);
+	
+	return false;
+}
+
+void updateVector(const string part, CVector &dst, float value, bool add /* = false */)
+{
+	string p = part;
+	if (part.size() > 1)
+		p = part.substr(part.size()-1, 1);
+		
+	if (add)
+	{
+		if (p == "x")
+			dst.x += value;
+		else if (p == "y")
+			dst.y += value;
+		else if (p == "z")
+			dst.z += value;
+	}
+	else 
+	{
+		if (p == "x")
+			dst.x = value;
+		else if (p == "y")
+			dst.y = value;
+		else if (p == "z")
+			dst.z = value;
+	}
 }

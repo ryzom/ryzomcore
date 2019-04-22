@@ -30,6 +30,9 @@
 # include <Windows.h>
 typedef unsigned long ulong;
 #endif
+#ifdef NL_OS_MAC
+typedef unsigned long ulong;
+#endif
 
 #include <mysql.h>
 #include <time.h>
@@ -108,8 +111,8 @@ namespace MSW
 			return uint32(mysql_affected_rows(_MysqlContext));
 		}
 
-		std::auto_ptr<CStoreResult>		storeResult();
-		std::auto_ptr<CUseResult>		useResult();
+		CUniquePtr<CStoreResult>		storeResult();
+		CUniquePtr<CUseResult>		useResult();
 
 	};
 

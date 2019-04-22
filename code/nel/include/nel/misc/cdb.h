@@ -25,7 +25,9 @@
 #include "string_mapper.h"
 #include "sstring.h"
 
-#include <libxml/parser.h>
+// Forward declarations for libxml2
+typedef struct _xmlNode xmlNode;
+typedef xmlNode *xmlNodePtr;
 
 namespace NLMISC
 {
@@ -118,9 +120,9 @@ public:
 		 */
 		std::string toString() const
 		{
-			if (_Ids.size()==0) return std::string("");
+			if (_Ids.empty()) return std::string("");
 			std::string str=_Ids[0];
-			for (unsigned i=1; i<_Ids.size(); i++)
+			for (uint i=1; i<_Ids.size(); i++)
 				str +=std::string(":")+ _Ids[i];
 			return str;
 		}

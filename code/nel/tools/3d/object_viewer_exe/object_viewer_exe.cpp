@@ -18,7 +18,7 @@
 //
 
 #include "std_afx.h"
-
+#include <tchar.h>
 
 //#include "nel/3d/register_3d.h"
 //#include "nel/3d/scene.h"
@@ -29,9 +29,9 @@
 using namespace NLMISC;
 using namespace std;
 
-int APIENTRY WinMain(HINSTANCE hInstance,
+int APIENTRY _tWinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
-                     LPSTR     lpCmdLine,
+                     LPTSTR     lpCmdLine,
                      int       nCmdShow)
 {
 	// Register 3d
@@ -41,13 +41,13 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 //	init3d ();
 
 	// Remove command line ""
-	char commandLine[512];
-	char *commandLinePtr=commandLine;
-	strcpy (commandLine, lpCmdLine);
-	if (commandLine[0]=='"')
+	TCHAR commandLine[512];
+	TCHAR *commandLinePtr=commandLine;
+	_tcscpy (commandLine, lpCmdLine);
+	if (commandLine[0]==_T('"'))
 		commandLinePtr++;
-	if (commandLinePtr[strlen (commandLinePtr)-1]=='"')
-		commandLinePtr[strlen (commandLinePtr)-1]=0;
+	if (commandLinePtr[_tcslen (commandLinePtr)-1]==_T('"'))
+		commandLinePtr[_tcslen (commandLinePtr)-1]=0;
 
  	// Create a object viewer
 	IObjectViewer *objectViewer=IObjectViewer::getInterface();
@@ -58,11 +58,11 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		if (objectViewer->initUI ())
 		{
 			// Argument ?
-			if (strcmp (commandLinePtr, "")!=0)
+			if (_tcscmp (commandLinePtr, _T(""))!=0)
 			{
 				// Make a string vector
 				vector<string> strVector;
-				strVector.push_back (commandLinePtr);
+				strVector.push_back (tStrToUtf8(commandLinePtr));
 
 				// Try to load a shape
 				if (objectViewer->loadMesh (strVector, ""))

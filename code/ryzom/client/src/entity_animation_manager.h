@@ -320,7 +320,7 @@ public :
 
 
 	/// Serialize a CEntityAnimationManager.
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	/** Count the number of emot
 	 * \return uint : the number of emot already known.

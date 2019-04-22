@@ -29,6 +29,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
@@ -221,7 +225,7 @@ bool CAnimationSet::loadFromFiles(const std::string &path, bool recurse /* = tru
 			{
 				NLMISC::CIFile	iFile;
 				iFile.open(anims[k]);
-				std::auto_ptr<CAnimation> anim(new CAnimation);
+				CUniquePtr<CAnimation> anim(new CAnimation);
 				anim->serial(iFile);
 				addAnimation(NLMISC::CFile::getFilenameWithoutExtension(anims[k]).c_str(), anim.release());
 				iFile.close();

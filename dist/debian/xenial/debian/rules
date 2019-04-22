@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+%:
+	dh $@ --buildsystem=cmake --parallel
+
+override_dh_strip:
+	dh_strip -plibnel0 --dbg-package=libnel0-dbg
+	dh_strip -pnel-tools --dbg-package=nel-tools-dbg
+	dh_strip -plibryzom-sevenzip0 --dbg-package=libryzom-sevenzip0-dbg
+	dh_strip -plibryzom-gameshare0 --dbg-package=libryzom-gameshare0-dbg
+	dh_strip -plibryzom-clientsheets0 --dbg-package=libryzom-clientsheets0-dbg
+	dh_strip -pryzom-client --dbg-package=ryzom-client-dbg
+	dh_strip -pryzom-tools --dbg-package=ryzom-tools-dbg
+
+override_dh_auto_configure:
+	dh_auto_configure -- -DLIBRARY_ARCHITECTURE=$(DEB_HOST_MULTIARCH) -DTARGET_CPU=$(DEB_HOST_GNU_CPU) -DWITH_SYMBOLS=ON -DNL_ETC_PREFIX=/etc/nel -DRYZOM_ETC_PREFIX=/etc/ryzom -DRYZOM_SHARE_PREFIX=/usr/share/games/ryzom -DRYZOM_BIN_PREFIX=/usr/bin -DRYZOM_GAMES_PREFIX=/usr/games -DWITH_RYZOM_SERVER=OFF -DWITH_NEL_TESTS=OFF -DWITH_QT=ON
+
+override_dh_install:
+	dh_install
+	install -m755 debian/ryzom debian/ryzom-client/usr/games/ryzom

@@ -25,6 +25,7 @@
 #include "nel/misc/config_file.h"
 #include "nel/misc/bit_mem_stream.h"
 #include "nel/misc/i18n.h"
+#include "nel/misc/cmd_args.h"
 // Client.
 #include "client_cfg.h"
 #include "entities.h"
@@ -33,23 +34,17 @@
 #include "view.h"	// For the cameraDistance funtion
 #include "user_entity.h"
 #include "misc.h"
+#include "user_agent.h"
 
 // 3D Interface.
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_scene.h"
 // Game Share.
 #include "game_share/time_weather_season/time_and_season.h"
-#include "game_share/ryzom_version.h"
-
-#ifdef HAVE_CONFIG_H
-#	include "config.h"
-#endif // HAVE_CONFIG_H
 
 #ifdef NL_OS_MAC
 #include "app_bundle_utils.h"
 #endif // NL_OS_MAC
-
-#include <locale.h>
 
 ///////////
 // MACRO //
@@ -262,6 +257,8 @@ extern string	Cookie;
 extern string	FSAddr;
 #endif
 
+extern NLMISC::CCmdArgs Args;
+
 /////////////
 // METHODS //
 /////////////
@@ -295,13 +292,19 @@ CClientConfig::CClientConfig()
 	SelectedSlot		= 0;						// Default is slot 0
 
 	Windowed			= false;					// Default is windowed mode.
-	Width				= 800;						// Default Width for the window.
-	Height				= 600;						// Default Height for the window.
+	Width				= 0;						// Default Width for the window (0 = current screen resolution).
+	Height				= 0;						// Default Height for the window (0 = current screen resolution).
 	Depth				= 32;						// Default Bit per Pixel.
 	Driver3D			= DrvAuto;					// Select best driver depending on hardware.
 	Contrast			= 0.f;						// Default Monitor Contrast.
 	Luminosity			= 0.f;						// Default Monitor Luminosity.
 	Gamma				= 0.f;						// Default Monitor Gamma.
+
+	InterfaceScale		= 1.0f;                     // Resize UI
+	InterfaceScale_min	= 0.8f;
+	InterfaceScale_max	= 2.0f;
+	InterfaceScale_step	= 0.05;
+	BilinearUI			= true;
 
 	VREnable			= false;
 	VRDisplayDevice		= "Auto";
@@ -357,6 +360,7 @@ CClientConfig::CClientConfig()
 	FreeLookAcceleration    = 0;					// Default FreeLookAcceleration
 	FreeLookSmoothingPeriod = 0.f;                  // when in absolute mode, free look factor is used instead of speed, the mouse gives the absolute angle
 	FreeLookInverted		= false;
+	FreeLookTablet			= false;                // Mouse reports absolute coordinates, so avoid mouse recentering
 	AutomaticCamera			= true;
 	DblClickMode			= true;					// when in dbl click mode, a double click is needed to execute default contextual action
 	AutoEquipTool			= true;					// when true player will auto-equip last used weapon or forage tool when doing an action
@@ -388,6 +392,7 @@ CClientConfig::CClientConfig()
 	HDTextureInstalled	= false;
 	Fog					= true;						// Fog is on by default
 	WaitVBL				= false;
+	VideoMemory			= 0;
 
 	FXAA				= true;
 
@@ -426,10 +431,13 @@ CClientConfig::CClientConfig()
 	PatchUrl.clear();
 	PatchletUrl.clear();
 	PatchVersion.clear();
-	PatchServer.clear();
 
 	WebIgMainDomain = "shard.ryzomcore.org";
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
+	WebIgNotifInterval = 10; // time in minutes
+
+	CurlMaxConnections = 2;
+	CurlCABundle.clear();
 
 	RingReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes_ring/index.php";
 	ReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes/index.php";
@@ -511,6 +519,7 @@ CClientConfig::CClientConfig()
 
 	Sleep				= -1;						// Default : client does not sleep.
 	ProcessPriority		= 0;						// Default : NORMAL
+	CPUMask				= 0;						// Default : auto detection
 	ShowPath			= false;					// Default : do not display the path.
 	DrawBoxes			= false;					// Default : Do not draw the selection.
 
@@ -588,7 +597,7 @@ CClientConfig::CClientConfig()
 	FollowOnAtk			= true;
 	AtkOnSelect			= false;
 	TransparentUnderCursor = false;
-
+	ItemGroupAllowGuild = false;
 	// PREFERENCES
 	FPV					= false;
 	CameraHeight		= 2.5f;
@@ -601,6 +610,9 @@ CClientConfig::CClientConfig()
 	CameraSpeedMin		= 0.2f;
 	CameraSpeedMax		= 1.0f;
 	CameraResetSpeed	= 2.0f;
+
+	MaxMapScale			= 2.0f;
+	R2EDMaxMapScale		= 8.0f;
 
 	// VERBOSES
 	VerboseVP				= false;
@@ -680,7 +692,6 @@ CClientConfig::CClientConfig()
 	DamageShieldEnabled = false;
 
 	AllowDebugLua = false;
-	LoadLuaDebugger = false;
 	DisplayLuaDebugInfo = false;
 	BeepWhenLaunched = false;
 
@@ -834,6 +845,13 @@ void CClientConfig::setValues()
 	READ_FLOAT_FV(Luminosity)
 	// Gamma
 	READ_FLOAT_FV(Gamma)
+	// UI scaling
+	READ_FLOAT_FV(InterfaceScale);
+	READ_FLOAT_FV(InterfaceScale_min);
+	READ_FLOAT_FV(InterfaceScale_max);
+	READ_FLOAT_FV(InterfaceScale_step);
+	clamp(ClientCfg.InterfaceScale, ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max);
+	READ_BOOL_FV(BilinearUI);
 	// 3D Driver
 	varPtr = ClientCfg.ConfigFile.getVarPtr ("Driver3D");
 	if (varPtr)
@@ -860,6 +878,7 @@ void CClientConfig::setValues()
 	READ_INT_FV(FreeLookAcceleration)
 	READ_FLOAT_FV(FreeLookSmoothingPeriod)
 	READ_BOOL_FV(FreeLookInverted)
+	READ_BOOL_FV(FreeLookTablet)
 	READ_BOOL_FV(AutomaticCamera)
 	READ_BOOL_FV(DblClickMode)
 	READ_BOOL_FV(AutoEquipTool)
@@ -885,6 +904,7 @@ void CClientConfig::setValues()
 	READ_STRING_FV(CreateAccountURL)
 	READ_STRING_FV(EditAccountURL)
 	READ_STRING_FV(ConditionsTermsURL)
+	READ_STRING_FV(NamingPolicyURL)
 	READ_STRING_FV(BetaAccountURL)
 	READ_STRING_FV(ForgetPwdURL)
 	READ_STRING_FV(FreeTrialURL)
@@ -1019,6 +1039,8 @@ void CClientConfig::setValues()
 
 	// WaitVBL
 	READ_BOOL_FV(WaitVBL)
+	// VideoMemory
+	READ_INT_FV(VideoMemory);
 
 	READ_INT_DEV(TimerMode)
 
@@ -1055,18 +1077,18 @@ void CClientConfig::setValues()
 	/////////////////////////
 	// NEW PATCHING SYSTEM //
 	READ_BOOL_FV(PatchWanted)
-	READ_STRING_FV(PatchServer)
+
+#ifdef RZ_USE_CUSTOM_PATCH_SERVER
 	READ_STRING_FV(PatchUrl)
 	READ_STRING_FV(PatchVersion)
 	READ_STRING_FV(RingReleaseNotePath)
 	READ_STRING_FV(ReleaseNotePath)
-	READ_BOOL_DEV(PatchWanted)
-	READ_STRING_DEV(PatchServer)
+#else
 	READ_STRING_DEV(PatchUrl)
 	READ_STRING_DEV(PatchVersion)
 	READ_STRING_DEV(RingReleaseNotePath)
 	READ_STRING_DEV(ReleaseNotePath)
-
+#endif
 
 	/////////////////////////
 	// NEW PATCHLET SYSTEM //
@@ -1076,6 +1098,12 @@ void CClientConfig::setValues()
 	// WEBIG //
 	READ_STRING_FV(WebIgMainDomain);
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
+	READ_INT_FV(WebIgNotifInterval);
+	READ_INT_FV(CurlMaxConnections);
+	if (ClientCfg.CurlMaxConnections < 0)
+		ClientCfg.CurlMaxConnections = 2;
+
+	READ_STRING_FV(CurlCABundle);
 
 	///////////////
 	// ANIMATION //
@@ -1433,6 +1461,8 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(FollowOnAtk);
 	READ_BOOL_FV(AtkOnSelect);
 	READ_BOOL_DEV(TransparentUnderCursor);
+	//
+	READ_BOOL_FV(ItemGroupAllowGuild);
 
 
 	/////////////////
@@ -1457,6 +1487,9 @@ void CClientConfig::setValues()
 		READ_FLOAT_FV(CameraDistance)
 	}
 
+	// Default values for CGroupMap
+	READ_FLOAT_FV(MaxMapScale);
+	READ_FLOAT_FV(R2EDMaxMapScale);
 
 	/////////////
 	// SHADOWS //
@@ -1489,6 +1522,8 @@ void CClientConfig::setValues()
 	READ_INT_FV(Sleep)
 	// ProcessPriority
 	READ_INT_FV(ProcessPriority)
+	// CPUMask
+	READ_INT_FV(CPUMask)
 	// ShowPath : Get the ShowPath value.
 	READ_BOOL_DEV(ShowPath)
 	// UserSheet : Get the sheet to used for the use rin Local mode.
@@ -1747,7 +1782,7 @@ void CClientConfig::setValues()
 	// Allow warning display only first time.
 	DisplayCFGWarning= false;
 
-	// If it is the load time, bkup the ClientCfg into LastClientCfg
+	// If it is the load time, backup the ClientCfg into LastClientCfg
 	if(firstTimeSetValues)
 		LastClientCfg = ClientCfg;
 
@@ -1760,9 +1795,8 @@ void CClientConfig::setValues()
 
 	READ_BOOL_DEV(DamageShieldEnabled)
 
-	READ_BOOL_DEV(AllowDebugLua)
-	READ_BOOL_DEV(LoadLuaDebugger)
-	READ_BOOL_DEV(DisplayLuaDebugInfo)
+	READ_BOOL_FV(AllowDebugLua)
+	READ_BOOL_FV(DisplayLuaDebugInfo)
 
 	READ_BOOL_DEV(LuaDebugInfoGotoButtonEnabled)
 	READ_STRING_DEV(LuaDebugInfoGotoButtonTemplate)
@@ -1855,7 +1889,7 @@ void CClientConfig::setValues()
 // serial :
 // Serialize CFG.
 //-----------------------------------------------
-void CClientConfig::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CClientConfig::serial(NLMISC::IStream &f)
 {
 	// Start the opening of a new node named ClientCFG.
 	f.xmlPush("ClientCFG");
@@ -1926,7 +1960,7 @@ void CClientConfig::init(const string &configFileName)
 	if(!CFile::fileExists(configFileName))
 	{
 		// create the basic .cfg
-		FILE *fp = fopen(configFileName.c_str(), "w");
+		FILE *fp = nlfopen(configFileName, "w");
 
 		if (fp == NULL)
 			nlerror("CFG::init: Can't create config file '%s'", configFileName.c_str());
@@ -1934,8 +1968,7 @@ void CClientConfig::init(const string &configFileName)
 			nlwarning("CFG::init: creating '%s' with default values", configFileName.c_str ());
 
 		// get current locale
-		std::string lang = toLower(std::string(setlocale(LC_CTYPE, "")));
-		lang = lang.substr(0, 2);
+		std::string lang = CI18N::getSystemLanguageCode();
 
 		const std::vector<std::string> &languages = CI18N::getLanguageCodes();
 
@@ -1995,10 +2028,10 @@ void CClientConfig::init(const string &configFileName)
 	if (varPtr)
 	{
 		string str = varPtr->asString ();
-		if (str != RYZOM_VERSION && ClientCfg.SaveConfig)
+		if (str != getVersion() && ClientCfg.SaveConfig)
 		{
-			nlinfo ("Update and save the ClientVersion variable in config file %s -> %s", str.c_str(), RYZOM_VERSION);
-			varPtr->setAsString (RYZOM_VERSION);
+			nlinfo ("Update and save the ClientVersion variable in config file %s -> %s", str.c_str(), getVersion().c_str());
+			varPtr->setAsString (getVersion());
 			ClientCfg.ConfigFile.save ();
 		}
 	}
@@ -2036,13 +2069,9 @@ void CClientConfig::release ()
 				// Are we in window mode ?
 				if (ClientCfg.Windowed /* && !isWindowMaximized() */)
 				{
-					// Save windows position
+					// Save windows position. width/height are saved when leaving ingame.
 					writeInt("PositionX", x);
 					writeInt("PositionY", y);
-
-					// Save windows size
-					writeInt("Width", std::max((sint)width, 800));
-					writeInt("Height", std::max((sint)height, 600));
 				}
 			}
 
@@ -2211,25 +2240,31 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 
 #ifdef NL_OS_MAC
 	// on mac, client_default.cfg should be searched in .app/Contents/Resources/
-	defaultConfigPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/");
-#elif defined(RYZOM_ETC_PREFIX)
-	// if RYZOM_ETC_PREFIX is defined, client_default.cfg might be over there
-	defaultConfigPath = CPath::standardizePath(RYZOM_ETC_PREFIX);
+	defaultConfigPath = getAppBundlePath() + "/Contents/Resources/";
 #else
-	// some other prefix here :)
-#endif // RYZOM_ETC_PREFIX
+	// unders Windows or Linux, search client_default.cfg is same directory as executable
+	defaultConfigPath = Args.getProgramPath();
+#endif
+
+	std::string currentPath = CPath::standardizePath(CPath::getCurrentPath());
+	std::string etcPath = CPath::standardizePath(getRyzomEtcPrefix());
 
 	// look in the current working directory first
-	if (CFile::isExists(defaultConfigFileName))
-		p_name = defaultConfigFileName;
+	if (CFile::isExists(currentPath + defaultConfigFileName))
+		p_name = currentPath + defaultConfigFileName;
 
-	// if not in working directory, check using prefix path
+	// look in startup directory
+	else if (CFile::isExists(Args.getStartupPath() + defaultConfigFileName))
+		p_name = Args.getStartupPath() + defaultConfigFileName;
+
+	// look in application directory
 	else if (CFile::isExists(defaultConfigPath + defaultConfigFileName))
 		p_name = defaultConfigPath + defaultConfigFileName;
 
-	// if some client_default.cfg was found return true
-	if(p_name.size())
-		return true;
+	// look in etc prefix path
+	else if (!etcPath.empty() && CFile::isExists(etcPath + defaultConfigFileName))
+		p_name = etcPath + defaultConfigFileName;
 
-	return false;
+	// if some client_default.cfg was found return true
+	return !p_name.empty();
 }

@@ -97,6 +97,8 @@ void CChatManager::onServiceDown(const std::string &serviceShortName)
 				case CChatGroup::universe:
 				case CChatGroup::say:
 				case CChatGroup::shout:
+				case CChatGroup::player:
+				case CChatGroup::nbChatMode:
 					continue;
 				case CChatGroup::team:
 				case CChatGroup::guild:
@@ -130,7 +132,7 @@ void CChatManager::onServiceDown(const std::string &serviceShortName)
 /*
  * Reset ChatLog management
  */
-void	CChatManager::resetChatLog()
+void CChatManager::resetChatLog()
 {
 	std::string	logPath = (LogChatDirectory.get().empty() ? Bsi.getLocalPath() : LogChatDirectory.get());
 	_Displayer.setParam(CPath::standardizePath(logPath) + "chat.log");
@@ -181,7 +183,7 @@ void CChatManager::addClient( const TDataSetRow& id )
 	}
 	else
 	{
-		nlwarning("CChatManager::addClient :  the client %s:%x is already in the manager !", 
+		nlwarning("CChatManager::addClient :  the client %s:%x is already in the manager !",
 			TheDataset.getEntityId(id).toString().c_str(),
 			id.getIndex());
 	}
@@ -486,7 +488,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 	{
 //		if( itCl->second->isMuted() )
 		CEntityId eid = TheDataset.getEntityId(sender);
-		if(_MutedUniverseUsers.find( eid ) != _MutedUniverseUsers.end())
+		if(_MutedUsers.find( eid ) != _MutedUsers.end())
 		{
 			nldebug("IOSCM:  chat The player %s:%x is universe muted",
 				TheDataset.getEntityId(sender).toString().c_str(),
@@ -648,7 +650,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 					// If universal channel check if player muted
 					if (session->getChan()->UniversalChannel)
 					{
-						if(_MutedUsers.find( eid ) != _MutedUsers.end())
+						if(_MutedUniverseUsers.find( eid ) != _MutedUniverseUsers.end())
 						{
 							nldebug("IOSCM:  chat The player %s:%x is muted",
 								TheDataset.getEntityId(sender).toString().c_str(),
@@ -1234,7 +1236,7 @@ void CChatManager::chatParamInGroup( TGroupId& grpId, const std::string & phrase
 			CMirrorPropValueRO<uint32> instanceId( TheDataset, *itM, DSPropertyAI_INSTANCE );
 
 			// check the ai instance for region chat
-			if (chatGrp.Type != CChatGroup::region 
+			if (chatGrp.Type != CChatGroup::region
 				|| instanceId == senderInstanceId)
 			{
 				const CEntityId &eid = TheDataset.getEntityId(*itM);
@@ -1814,7 +1816,7 @@ void CChatManager::tell2( const TDataSetRow& sender, const TDataSetRow& receiver
 
 				bms.serial( senderInfos->NameIndex );
 				bms.serial( id);
-		
+
 				msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 				CUnifiedNetwork::getInstance()->send(TServiceId(receiverInfos->EntityId.getDynamicId()), msgout);
 			}

@@ -165,7 +165,7 @@ void			*CHeapMemory::allocate(uint size)
 }
 
 // ***************************************************************************
-void			CHeapMemory::free(void *ptr)
+void			CHeapMemory::freeBlock(void *ptr)
 {
 	if(ptr==NULL)
 		return;

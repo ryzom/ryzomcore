@@ -294,7 +294,7 @@ static char *sha512crypt(const char *key, const char *setting, char *output)
 
   /* DS = sha(repeat-salt) */
   sha512_init(&ctx);
-  for (i = 0; i < 16 + md[0]; i++)
+  for (i = 0; i < 16u + md[0]; i++)
     sha512_update(&ctx, salt, slen);
   sha512_sum(&ctx, smd);
 
@@ -321,11 +321,28 @@ static char *sha512crypt(const char *key, const char *setting, char *output)
   p += sprintf(p, "$6$%s%.*s$", rounds, slen, salt);
 #if 1
   static const unsigned char perm[][3] = {
-    0,21,42,22,43,1,44,2,23,3,24,45,25,46,4,
-    47,5,26,6,27,48,28,49,7,50,8,29,9,30,51,
-    31,52,10,53,11,32,12,33,54,34,55,13,56,14,35,
-    15,36,57,37,58,16,59,17,38,18,39,60,40,61,19,
-    62,20,41 };
+	{ 0,  21, 42 },
+	{ 22, 43,  1 },
+	{ 44,  2, 23 },
+	{  3, 24, 45 },
+	{ 25, 46,  4 },
+	{ 47,  5, 26 },
+	{  6, 27, 48 },
+	{ 28, 49,  7 },
+	{ 50,  8, 29 },
+	{  9, 30, 51 },
+	{ 31, 52, 10 },
+	{ 53, 11, 32 },
+	{ 12, 33, 54 },
+	{ 34, 55, 13 },
+	{ 56, 14, 35 },
+	{ 15, 36, 57 },
+	{ 37, 58, 16 },
+	{ 59, 17, 38 },
+	{ 18, 39, 60 },
+	{ 40, 61, 19 },
+	{ 62, 20, 41 }
+  };
   for (i=0; i<21; i++) p = to64(p,
                                 (md[perm[i][0]]<<16)|(md[perm[i][1]]<<8)|md[perm[i][2]], 4);
 #else
@@ -356,7 +373,7 @@ static char *sha512crypt(const char *key, const char *setting, char *output)
   return output;
 }
 
-char *__crypt_sha512(const char *key, const char *setting, char *output)
+std::string __crypt_sha512(const char *key, const char *setting, char *output)
 {
   static const char testkey[] = "Xy01@#\x01\x02\x80\x7f\xff\r\n\x81\t !";
   static const char testsetting[] = "$6$rounds=1234$abc0123456789$";

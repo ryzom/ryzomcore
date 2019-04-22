@@ -509,6 +509,7 @@ struct SBagOptions
 	NLMISC::CCDBNodeLeaf *DbFilterArmor;
 	NLMISC::CCDBNodeLeaf *DbFilterWeapon;
 	NLMISC::CCDBNodeLeaf *DbFilterTool;
+	NLMISC::CCDBNodeLeaf *DbFilterPet;
 	NLMISC::CCDBNodeLeaf *DbFilterMP;
 	NLMISC::CCDBNodeLeaf *DbFilterMissMP;
 	NLMISC::CCDBNodeLeaf *DbFilterTP;
@@ -516,20 +517,33 @@ struct SBagOptions
 	bool LastDbFilterArmor;
 	bool LastDbFilterWeapon;
 	bool LastDbFilterTool;
+	bool LastDbFilterPet;
 	bool LastDbFilterMP;
 	bool LastDbFilterMissMP;
 	bool LastDbFilterTP;
+
+	bool SearchFilterChanged;
+	uint16 SearchQualityMin;
+	uint16 SearchQualityMax;
+	std::vector<ucstring> SearchFilter;
+
 	// -----------------------
 	SBagOptions()
 	{
 		InvType = CInventoryManager::InvUnknown;
-		DbFilterArmor = DbFilterWeapon = DbFilterTool = DbFilterMP = DbFilterMissMP = DbFilterTP = NULL;
-		LastDbFilterArmor = LastDbFilterWeapon = LastDbFilterTool = LastDbFilterMP = LastDbFilterMissMP = LastDbFilterTP = false;
+		DbFilterArmor = DbFilterWeapon = DbFilterTool = DbFilterPet = DbFilterMP = DbFilterMissMP = DbFilterTP = NULL;
+		LastDbFilterArmor = LastDbFilterWeapon = LastDbFilterTool = LastDbFilterPet = LastDbFilterMP = LastDbFilterMissMP = LastDbFilterTP = false;
+		SearchFilterChanged = false;
+		SearchQualityMin = 0;
+		SearchQualityMax = 999;
 	}
 
 	bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 	bool isSomethingChanged(); // From last call ?
+
+	bool isSearchFilterChanged() const { return SearchFilterChanged; }
+	void setSearchFilter(const ucstring &s);
 
 	bool getFilterArmor() const
 	{
@@ -547,6 +561,12 @@ struct SBagOptions
 	{
 		if (DbFilterTool == NULL) return true;
 		return (DbFilterTool->getValue8()!=0);
+	}
+
+	bool getFilterPet() const
+	{
+		if (DbFilterPet == NULL) return true;
+		return (DbFilterPet->getValue8()!=0);
 	}
 
 	bool getFilterMP() const
@@ -621,6 +641,8 @@ public:
 	// Return true if the sheet can be displayed due to filters
 	bool canDisplay(CDBCtrlSheet *pCS) { return _BO.canDisplay(pCS); }
 
+	void setSearchFilter(const ucstring &s) { _BO.setSearchFilter(s); }
+
 private:
 
 	SBagOptions	_BO;
@@ -651,6 +673,8 @@ public:
 
 	// Return true if the sheet can be displayed due to filters
 	bool canDisplay(CDBCtrlSheet *pCS) const { return _BO.canDisplay(pCS); }
+
+	void setSearchFilter(const ucstring &s) { _BO.setSearchFilter(s); }
 
 	//////////////////////////////////////////////////////////////////////////
 

@@ -280,11 +280,11 @@ NLMISC_COMMAND(gotoNote, "go to a note", "<id>|<text>")
 			if(i != 0) tok += " ";
 			tok += args[i];
 		}
-		tok = strlwr(tok);
+		tok = toLower(tok);
 		list<C3DNotes::CNote>::iterator it;
 		for(it = Notes.Notes.begin(); it != Notes.Notes.end(); it++)
 		{
-			string note = strlwr((*it).Note);
+			string note = toLower((*it).Note);
 			if(note.find(tok) != string::npos)
 			{
 				pos = (*it).Position;

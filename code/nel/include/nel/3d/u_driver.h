@@ -505,6 +505,12 @@ public:
 	  */
 	virtual const char*		getVideocardInformation () = 0;
 
+	/**
+	  * Get total video memory.
+	  * get the amount of video memory of current adapter, result is in KiB, -1 if unable to determine
+	  */
+	virtual sint			getTotalVideoMemory () const = 0;
+
 	/// Get the number of texture stage available, for multitexturing (Normal material shaders). Valid only after setDisplay().
 	virtual	uint			getNbTextureStages() = 0;
 
@@ -645,6 +651,16 @@ public:
 	 *	Default is 0.
 	 */
 	virtual void			setAnisotropicFilter(sint filter)=0;
+
+	/**
+	 * Get current anisotropic filter value
+	 */
+	virtual uint			getAnisotropicFilter() const = 0;
+
+	/**
+	 * Get maximum anisotropic filter value
+	 */
+	virtual uint			getAnisotropicFilterMaximum() const = 0;
 
 	/** if !=1, force mostly all the textures (but TextureFonts lightmaps, interfaces  etc..)
 	 *	to be divided by Divisor (2, 4, 8...)

@@ -42,7 +42,7 @@
 
 
 
-#define NEL_OV_SNAPSHOT_TOOL_REGKEY "Software\\Nevrax\\nel\\object_viewer\\snapshot_dlg"
+#define NEL_OV_SNAPSHOT_TOOL_REGKEY _T("Software\\Nevrax\\nel\\object_viewer\\snapshot_dlg")
 
 
 using namespace NLMISC;
@@ -109,30 +109,33 @@ void CSnapshotToolDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 //****************************************************************************************
-void CSnapshotToolDlg::stringFromRegistry(HKEY hKey, const char *name, CString &dest, const CString &defaultStr)
+void CSnapshotToolDlg::stringFromRegistry(HKEY hKey, const TCHAR *name, CString &dest, const CString &defaultStr)
 {	
 	DWORD type;
 	DWORD size;
 	LONG result = RegQueryValueEx(hKey, name, NULL, &type, NULL, &size);
+
 	if (type != REG_SZ || result != ERROR_SUCCESS || size == 0)
 	{
 		dest = defaultStr;
 		return;
 	}
-	std::string tmpDest;
-	tmpDest.resize(size);	
-	result = RegQueryValueEx(hKey, name, NULL, &type, (unsigned char *) &tmpDest[0], &size);
+
+	std::vector<TCHAR> tmpDest(size);
+	result = RegQueryValueEx(hKey, name, NULL, &type, (BYTE*)&tmpDest[0], &size);
+
 	if (result != ERROR_SUCCESS)
 	{
 		dest = defaultStr;
 		return;
 	}
-	dest = tmpDest.c_str();
+
+	dest = &tmpDest[0];
 }
 
 
 //****************************************************************************************
-template <class T, class U> void integralTypeFromRegistry(HKEY hKey, const char *name, T &dest, const U &defaultValue)
+template <class T, class U> void integralTypeFromRegistry(HKEY hKey, const TCHAR *name, T &dest, const U &defaultValue)
 {	
 	if (hKey == 0)
 	{
@@ -142,18 +145,22 @@ template <class T, class U> void integralTypeFromRegistry(HKEY hKey, const char 
 	DWORD type;
 	DWORD size;
 	LONG result = RegQueryValueEx(hKey, name, NULL, &type, NULL, &size);
+
 	if (type != REG_DWORD || result != ERROR_SUCCESS || size == 0)
 	{
 		dest = (T) defaultValue;
 		return;
 	}		
+
 	DWORD value;
 	result = RegQueryValueEx(hKey, name, NULL, &type, LPBYTE(&value), &size);
+
 	if (result != ERROR_SUCCESS)
 	{
 		dest = defaultValue;
 		return;
 	}
+
 	dest = (T) value;
 }
 
@@ -163,32 +170,35 @@ void CSnapshotToolDlg::fromRegistry()
 {
 	HKEY hKey = 0;
 	RegOpenKeyEx(HKEY_CURRENT_USER, NEL_OV_SNAPSHOT_TOOL_REGKEY, 0, KEY_READ, &hKey);					
-	stringFromRegistry(hKey, "InputPath", m_InputPath, "");
-	stringFromRegistry(hKey, "OutputPath", m_OutputPath, "");
+	stringFromRegistry(hKey, _T("InputPath"), m_InputPath, "");
+	stringFromRegistry(hKey, _T("OutputPath"), m_OutputPath, "");
+
 	CString filters;
-	stringFromRegistry(hKey, "Filters", filters, "*.shape");
-	std::string stdFilters((LPCTSTR) filters);
+	stringFromRegistry(hKey, _T("Filters"), filters, "*.shape");
+
 	std::vector<std::string> filterList;
-	NLMISC::splitString(stdFilters, ",", filterList);
+	NLMISC::splitString(tStrToUtf8(filters), ",", filterList);
+
 	m_Filters.ResetContent();
+
 	for (uint k = 0; k < filterList.size(); ++k)
 	{
-		m_Filters.AddString(filterList[k].c_str());
+		m_Filters.AddString(utf8ToTStr(filterList[k]));
 	}	
 	
-	integralTypeFromRegistry(hKey, "RecurseSubFolder", (int &) m_RecurseSubFolder, FALSE);
-	integralTypeFromRegistry(hKey, "DumpTextureSets", (int &) m_DumpTextureSets, TRUE);
-	integralTypeFromRegistry(hKey, "PostFixViewName", (int &) m_PostFixViewName, TRUE);
-	integralTypeFromRegistry(hKey, "ViewBack", (int &) m_ViewBack, FALSE);
-	integralTypeFromRegistry(hKey, "ViewBottom", (int &) m_ViewBottom, FALSE);
-	integralTypeFromRegistry(hKey, "ViewFront", (int &) m_ViewFront, TRUE);
-	integralTypeFromRegistry(hKey, "ViewLeft", (int &) m_ViewLeft, FALSE);
-	integralTypeFromRegistry(hKey, "ViewRight", (int &) m_ViewRight, FALSE);
-	integralTypeFromRegistry(hKey, "ViewTop", (int &) m_ViewTop, FALSE);
-	integralTypeFromRegistry(hKey, "OutputWidth", m_OutputWidth, 128);
-	integralTypeFromRegistry(hKey, "OutputHeight", m_OutputHeight, 128);	
-	integralTypeFromRegistry(hKey, "Format", m_Format, 0);
-	integralTypeFromRegistry(hKey, "OutputPathOption", m_OutputPathOption, 1);	
+	integralTypeFromRegistry(hKey, _T("RecurseSubFolder"), (int &) m_RecurseSubFolder, FALSE);
+	integralTypeFromRegistry(hKey, _T("DumpTextureSets"), (int &) m_DumpTextureSets, TRUE);
+	integralTypeFromRegistry(hKey, _T("PostFixViewName"), (int &) m_PostFixViewName, TRUE);
+	integralTypeFromRegistry(hKey, _T("ViewBack"), (int &) m_ViewBack, FALSE);
+	integralTypeFromRegistry(hKey, _T("ViewBottom"), (int &) m_ViewBottom, FALSE);
+	integralTypeFromRegistry(hKey, _T("ViewFront"), (int &) m_ViewFront, TRUE);
+	integralTypeFromRegistry(hKey, _T("ViewLeft"), (int &) m_ViewLeft, FALSE);
+	integralTypeFromRegistry(hKey, _T("ViewRight"), (int &) m_ViewRight, FALSE);
+	integralTypeFromRegistry(hKey, _T("ViewTop"), (int &) m_ViewTop, FALSE);
+	integralTypeFromRegistry(hKey, _T("OutputWidth"), m_OutputWidth, 128);
+	integralTypeFromRegistry(hKey, _T("OutputHeight"), m_OutputHeight, 128);
+	integralTypeFromRegistry(hKey, _T("Format"), m_Format, 0);
+	integralTypeFromRegistry(hKey, _T("OutputPathOption"), m_OutputPathOption, 1);
 	UpdateData(FALSE);
 	updateUIEnabledState();
 }
@@ -200,8 +210,8 @@ void CSnapshotToolDlg::toRegistry()
 	HKEY hKey;
 	if (RegCreateKey(HKEY_CURRENT_USER, NEL_OV_SNAPSHOT_TOOL_REGKEY, &hKey)==ERROR_SUCCESS)
 	{		
-		RegSetValueEx(hKey, "InputPath", 0, REG_SZ, (unsigned char *) (LPCTSTR) m_InputPath, m_InputPath.GetLength() + 1);
-		RegSetValueEx(hKey, "OutputPath", 0, REG_SZ, (unsigned char *) (LPCTSTR) m_OutputPath, m_OutputPath.GetLength() + 1);
+		RegSetValueEx(hKey, _T("InputPath"), 0, REG_SZ, (BYTE*) (LPCTSTR) m_InputPath, (m_InputPath.GetLength() + 1) * sizeof(TCHAR));
+		RegSetValueEx(hKey, _T("OutputPath"), 0, REG_SZ, (BYTE*) (LPCTSTR) m_OutputPath, (m_OutputPath.GetLength() + 1) * sizeof(TCHAR));
 		CString filters;
 		for (uint k = 0; k < (uint) m_Filters.GetCount(); ++k)
 		{
@@ -210,36 +220,28 @@ void CSnapshotToolDlg::toRegistry()
 			m_Filters.GetText(k, filter);
 			filters += filter;			
 		}
-		RegSetValueEx(hKey, "Filters", 0, REG_SZ, (unsigned char *) (LPCTSTR) filters, filters.GetLength() + 1);
+
+		RegSetValueEx(hKey, _T("Filters"), 0, REG_SZ, (BYTE*) (LPCTSTR) filters, (filters.GetLength() + 1) * sizeof(TCHAR));
 		DWORD recurseSubFolder = m_RecurseSubFolder;
 		DWORD dumpTextureSets = m_DumpTextureSets;
-		DWORD views [] = 
-		{ 
-			m_ViewBack,
-			m_ViewBottom,
-			m_ViewFront,
-			m_ViewLeft,
-			m_ViewRight,
-			m_ViewTop
-		};
 		DWORD width = (DWORD) m_OutputWidth;
 		DWORD height = (DWORD) m_OutputHeight;		
 		DWORD format = m_Format;
 		DWORD outputPathOption = m_OutputPathOption;
 		DWORD postFixViewName = m_PostFixViewName;
-		integralTypeFromRegistry(hKey, "PostFixViewName", (int &) m_PostFixViewName, TRUE);
-		RegSetValueEx(hKey, "ViewBack", 0, REG_DWORD, (const BYTE *) &m_ViewBack, sizeof(DWORD));
-		RegSetValueEx(hKey, "ViewBottom", 0, REG_DWORD, (const BYTE *) &m_ViewBottom, sizeof(DWORD));
-		RegSetValueEx(hKey, "ViewFront", 0, REG_DWORD, (const BYTE *) &m_ViewFront, sizeof(DWORD));
-		RegSetValueEx(hKey, "ViewLeft", 0, REG_DWORD, (const BYTE *) &m_ViewLeft, sizeof(DWORD));
-		RegSetValueEx(hKey, "ViewRight", 0, REG_DWORD, (const BYTE *) &m_ViewRight, sizeof(DWORD));
-		RegSetValueEx(hKey, "ViewTop", 0, REG_DWORD, (const BYTE *) &m_ViewTop, sizeof(DWORD));
-		RegSetValueEx(hKey, "RecurseSubFolder", 0, REG_DWORD, (const BYTE *) &recurseSubFolder, sizeof(DWORD));
-		RegSetValueEx(hKey, "DumpTextureSets", 0, REG_DWORD, (const BYTE *) &dumpTextureSets, sizeof(DWORD));
-		RegSetValueEx(hKey, "OutputWidth", 0, REG_DWORD, (const BYTE *) &width, sizeof(DWORD));
-		RegSetValueEx(hKey, "OutputHeight", 0, REG_DWORD, (const BYTE *) &height, sizeof(DWORD));		
-		RegSetValueEx(hKey, "Format", 0, REG_DWORD, (const BYTE *) &format, sizeof(DWORD));
-		RegSetValueEx(hKey, "OutputPathOption", 0, REG_DWORD, (const BYTE *) &outputPathOption, sizeof(DWORD));
+		integralTypeFromRegistry(hKey, _T("PostFixViewName"), (int &) m_PostFixViewName, TRUE);
+		RegSetValueEx(hKey, _T("ViewBack"), 0, REG_DWORD, (const BYTE *) &m_ViewBack, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("ViewBottom"), 0, REG_DWORD, (const BYTE *) &m_ViewBottom, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("ViewFront"), 0, REG_DWORD, (const BYTE *) &m_ViewFront, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("ViewLeft"), 0, REG_DWORD, (const BYTE *) &m_ViewLeft, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("ViewRight"), 0, REG_DWORD, (const BYTE *) &m_ViewRight, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("ViewTop"), 0, REG_DWORD, (const BYTE *) &m_ViewTop, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("RecurseSubFolder"), 0, REG_DWORD, (const BYTE *) &recurseSubFolder, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("DumpTextureSets"), 0, REG_DWORD, (const BYTE *) &dumpTextureSets, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("OutputWidth"), 0, REG_DWORD, (const BYTE *) &width, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("OutputHeight"), 0, REG_DWORD, (const BYTE *) &height, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("Format"), 0, REG_DWORD, (const BYTE *) &format, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("OutputPathOption"), 0, REG_DWORD, (const BYTE *) &outputPathOption, sizeof(DWORD));
 	}
 }
 
@@ -403,7 +405,7 @@ void CSnapshotToolDlg::OnGo()
 		MessageBox(getStrRsc(IDS_SNAPSHOT_EMPTY_INPUT_PATH), getStrRsc(IDS_OBJECT_VIEWER), MB_ICONEXCLAMATION);
 		return;
 	}
-	if (!NLMISC::CFile::isDirectory(LPCTSTR(m_InputPath)))
+	if (!NLMISC::CFile::isDirectory(tStrToUtf8(m_InputPath)))
 	{
 		MessageBox(getStrRsc(IDS_SNAPSHOT_EMPTY_INPUT_PATH_NOT_FOUND), getStrRsc(IDS_OBJECT_VIEWER), MB_ICONEXCLAMATION);
 		return;
@@ -413,19 +415,18 @@ void CSnapshotToolDlg::OnGo()
 		MessageBox(getStrRsc(IDS_SNAPSHOT_EMPTY_OUTPUT_PATH), getStrRsc(IDS_OBJECT_VIEWER), MB_ICONEXCLAMATION);
 		return;
 	}
-	if (m_OutputPathOption == OutputPath_Custom && !NLMISC::CFile::isDirectory(LPCTSTR(m_OutputPath)))
+	if (m_OutputPathOption == OutputPath_Custom && !NLMISC::CFile::isDirectory(tStrToUtf8(m_OutputPath)))
 	{
 		if (MessageBox(getStrRsc(IDS_SNAPSHOT_CREATE_OUTPUT_DIRECTORY), getStrRsc(IDS_OBJECT_VIEWER), MB_OKCANCEL) != IDOK)
 		{
 			return;
 		}
-		if(!NLMISC::CFile::createDirectoryTree(LPCTSTR(m_OutputPath)))
+		if(!NLMISC::CFile::createDirectoryTree(tStrToUtf8(m_OutputPath)))
 		{
 			MessageBox(getStrRsc(IDS_SNAPSHOT_OUTPUT_PATH_CREATION_FAILED), getStrRsc(IDS_OBJECT_VIEWER), MB_ICONEXCLAMATION);
 			return;
 		}
 	}
-
 
 	// make sure that the screen can contains the window client area
 	RECT desktopSize;
@@ -440,7 +441,7 @@ void CSnapshotToolDlg::OnGo()
 	m_Log.ResetContent();
 	m_Log.AddString(getStrRsc(IDS_GETTING_PATH_CONTENT));
 	std::vector<std::string> files;
-	CPath::getPathContent((LPCTSTR) m_InputPath, m_RecurseSubFolder == TRUE, false, true, files);
+	CPath::getPathContent(tStrToUtf8(m_InputPath), m_RecurseSubFolder == TRUE, false, true, files);
 	if (files.empty())
 	{
 		m_Log.AddString(getStrRsc(IDS_SNAPSHOT_NO_FILES_FOUND));
@@ -454,7 +455,7 @@ void CSnapshotToolDlg::OnGo()
 			CString wildCard;
 			m_Filters.GetText(l, wildCard);
 			wildCard.MakeLower();
-			if (testWildCard(toLower(NLMISC::CFile::getFilename(files[k])).c_str(), (LPCTSTR) wildCard))
+			if (testWildCard(toLower(NLMISC::CFile::getFilename(files[k])).c_str(), tStrToUtf8(wildCard).c_str()))
 			{
 				_FilteredFiles.push_back(files[k]);
 				break;
@@ -596,7 +597,7 @@ void CSnapshotToolDlg::OnTimer(UINT_PTR nIDEvent)
 		try
 		{
 			CShapeStream ss;
-			m_Log.AddString(_FilteredFiles[0].c_str());
+			m_Log.AddString(utf8ToTStr(_FilteredFiles[0]));
 			CIFile stream(_FilteredFiles[0]);
 			ss.serial(stream);
 			nlassert(ss.getShapePointer());
@@ -700,23 +701,46 @@ void CSnapshotToolDlg::OnTimer(UINT_PTR nIDEvent)
 							{
 								outputFilename += "_" + viewToString(viewIndex);
 							}
-							outputFilename += (m_Format == OutputFormat_Tga ? ".tga" : ".jpg");
+
+							std::string ext;
+							switch (m_Format)
+							{
+							case OutputFormat_Tga:
+								ext = "tga";
+								break;
+							case OutputFormat_Png:
+								ext = "png";
+								break;
+							case OutputFormat_Jpg:
+								ext = "jpg";
+								break;
+							default:
+								nlerror("Unsupported format %d", m_Format);
+								break;
+							}
+							outputFilename += "." + ext;
+
 							switch(m_OutputPathOption)
 							{
 								case OutputPath_Custom: // custom output path
-									outputFilename = LPCTSTR(m_OutputPath) + std::string("\\") + NLMISC::CFile::getFilename(outputFilename);
+									outputFilename = tStrToUtf8(m_OutputPath) + "\\" + NLMISC::CFile::getFilename(outputFilename);
 								break;
 								case OutputPath_SameAsInput: // Input path
-									outputFilename = LPCTSTR(m_InputPath) + std::string("\\") + NLMISC::CFile::getFilename(outputFilename);
+									outputFilename = tStrToUtf8(m_InputPath) + "\\" + NLMISC::CFile::getFilename(outputFilename);
 								break;
 								case OutputPath_CurrShapeDirectory: // current path
 									// no op
 								break;
 							}
 							COFile output(outputFilename);
+
 							if (m_Format == OutputFormat_Tga)
 							{
 								snapshot.writeTGA(output);
+							}
+							else if (m_Format == OutputFormat_Png)
+							{
+								snapshot.writePNG(output);
 							}
 							else
 							{
@@ -730,7 +754,7 @@ void CSnapshotToolDlg::OnTimer(UINT_PTR nIDEvent)
 			}
 			sb.reset();
 		}
-		catch(std::exception &e)
+		catch(const std::exception &e)
 		{
 			nlwarning(e.what());
 			

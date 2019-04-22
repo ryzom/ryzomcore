@@ -55,7 +55,7 @@ public:
 	// allocated a block of n bytes
 	void *alloc(uint numBytes);
 	// deallocate a block
-	void free(void *block, uint numBytes);
+	void freeBlock(void *block, uint numBytes);
 	// compute the total number of bytes allocated since init
 	// NB : freed block are not subtracted from that total !!
 	uint getNumAllocatedBytes() const { return _NumAllocatedBytes; }

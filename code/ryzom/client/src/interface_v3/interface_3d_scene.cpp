@@ -294,7 +294,7 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 			CXMLAutoPtr ptr((const char*)xmlGetProp (cur, (xmlChar*)"name"));
 			string animName;
 			if (ptr)
-				animName = strlwr (CFile::getFilenameWithoutExtension(ptr.str()));
+				animName = toLower(CFile::getFilenameWithoutExtension(ptr.str()));
 
 			if (!animName.empty())
 			{
@@ -323,7 +323,7 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	}
 
 	// If no camera create the default one
-	if (_Cameras.size() == 0)
+	if (_Cameras.empty())
 	{
 		CInterface3DCamera *pCam = new CInterface3DCamera;
 		_Cameras.push_back(pCam);
@@ -494,7 +494,7 @@ void CInterface3DScene::draw ()
 	cam.lookAt (pos, pI3DCam->getTarget(), pI3DCam->getRoll() * (float) (NLMISC::Pi / 180));
 
 	uint i;
-	if (_IGs.size() > 0)
+	if (!_IGs.empty())
 	{
 		for (i = 0; i < _Characters.size(); ++i)
 			_Characters[i]->setClusterSystem (_IGs[_CurrentCS]->getIG());
@@ -539,7 +539,7 @@ void CInterface3DScene::draw ()
 	Driver->setViewport(oldVP);
 	Driver->setFrustum(oldFrustum);
 
-	// Restaure render states
+	// Restore render states
 	CViewRenderer::getInstance()->setRenderStates();
 
 	restoreClip (oldSciX, oldSciY, oldSciW, oldSciH);
@@ -786,13 +786,13 @@ CInterface3DCharacter::~CInterface3DCharacter()
 }
 
 // ----------------------------------------------------------------------------
-bool CInterface3DCharacter::parse (xmlNodePtr cur, CInterface3DScene *parentGroup)
+bool CInterface3DCharacter::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 {
 	if (!CInterfaceElement::parse(cur, parentGroup))
 		return false;
 
 	CXMLAutoPtr ptr((const char*)xmlGetProp (cur, (xmlChar*)"dblink"));
-	_DBLink = "";
+	_DBLink.clear();
 	if (ptr) _DBLink = (const char *)ptr;
 
 	CVector pos(0,0,0), rot(0,0,0);
@@ -808,7 +808,7 @@ bool CInterface3DCharacter::parse (xmlNodePtr cur, CInterface3DScene *parentGrou
 
 	_Char3D = new CCharacter3D;
 	_Char3D->copyAnimation(copyAnim);
-	_Char3D->init (parentGroup->getScene());
+	_Char3D->init (dynamic_cast<CInterface3DScene*>(parentGroup)->getScene());
 	_Char3D->setPos (pos.x, pos.y, pos.z);
 	_Char3D->setRotEuler (	rot.x * ((float)(NLMISC::Pi / 180)),
 							rot.y * ((float)(NLMISC::Pi / 180)),
@@ -856,7 +856,7 @@ int CInterface3DCharacter::luaSetupCharacter3D(CLuaState &ls)
 	const char *funcName = "setupCharacter3D";
 	CLuaIHM::checkArgCount(ls, funcName, 1);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-	setupCharacter3D((sint32) ls.toNumber(1));
+	setupCharacter3D((sint32) ls.toInteger(1));
 	return 0;
 }
 
@@ -1073,7 +1073,7 @@ CInterface3DIG::~CInterface3DIG()
 }
 
 // ----------------------------------------------------------------------------
-bool CInterface3DIG::parse (xmlNodePtr cur, CInterface3DScene *parentGroup)
+bool CInterface3DIG::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 {
 	if (!CInterfaceElement::parse(cur, parentGroup))
 		return false;
@@ -1084,11 +1084,9 @@ bool CInterface3DIG::parse (xmlNodePtr cur, CInterface3DScene *parentGroup)
 	ptr = xmlGetProp (cur, (xmlChar*)"rot");
 	if (ptr) _Rot = convertVector(ptr);
 
-	string name;
 	ptr = xmlGetProp (cur, (xmlChar*)"name");
-	if (ptr) name = (const char*)ptr;
+	if (ptr) _Name = toLower((const char*)ptr);
 
-	_Name = strlwr(name);
 	_IG = UInstanceGroup::createInstanceGroup(_Name);
 	if (_IG == NULL)
 		return true; // Create anyway
@@ -1097,8 +1095,8 @@ bool CInterface3DIG::parse (xmlNodePtr cur, CInterface3DScene *parentGroup)
 	setRotX (_Rot.x);
 	setRotY (_Rot.y);
 	setRotZ (_Rot.z);
-	_IG->addToScene (*parentGroup->getScene(), CViewRenderer::getInstance()->getDriver() );
-	parentGroup->getScene()->setToGlobalInstanceGroup (_IG);
+	_IG->addToScene (*dynamic_cast<CInterface3DScene*>(parentGroup)->getScene(), CViewRenderer::getInstance()->getDriver() );
+	dynamic_cast<CInterface3DScene*>(parentGroup)->getScene()->setToGlobalInstanceGroup (_IG);
 
 	return true;
 }
@@ -1202,7 +1200,7 @@ std::string CInterface3DIG::getName() const
 // ----------------------------------------------------------------------------
 void CInterface3DIG::setName (const std::string &ht)
 {
-	string lwrname = strlwr(ht);
+	string lwrname = toLower(ht);
 	if (lwrname != _Name)
 	{
 		CInterface3DScene *pI3DS = dynamic_cast<CInterface3DScene*>(_Parent);
@@ -1237,7 +1235,7 @@ CInterface3DShape::~CInterface3DShape()
 }
 
 // ----------------------------------------------------------------------------
-bool CInterface3DShape::parse (xmlNodePtr cur, CInterface3DScene *parentGroup)
+bool CInterface3DShape::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 {
 	if (!CInterfaceElement::parse(cur, parentGroup))
 		return false;
@@ -1248,12 +1246,10 @@ bool CInterface3DShape::parse (xmlNodePtr cur, CInterface3DScene *parentGroup)
 	ptr = xmlGetProp (cur, (xmlChar*)"rot");
 	if (ptr) _Rot = convertVector(ptr);
 
-	string name;
 	ptr = xmlGetProp (cur, (xmlChar*)"name");
-	if (ptr) name = (const char*)ptr;
+	if (ptr) _Name = toLower((const char*)ptr);
 
-	_Name = strlwr(name);
-	_Instance = parentGroup->getScene()->createInstance(_Name);
+	_Instance = dynamic_cast<CInterface3DScene*>(parentGroup)->getScene()->createInstance(_Name);
 	if (_Instance.empty())
 		return false;
 
@@ -1389,7 +1385,7 @@ void CInterface3DShape::setName (const std::string &ht)
 // ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
-bool CInterface3DCamera::parse (xmlNodePtr cur, CInterface3DScene *parentGroup)
+bool CInterface3DCamera::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 {
 	if (!CInterfaceElement::parse(cur, parentGroup))
 		return false;
@@ -1426,12 +1422,12 @@ CInterface3DLight::~CInterface3DLight()
 }
 
 // ----------------------------------------------------------------------------
-bool CInterface3DLight::parse (xmlNodePtr cur, CInterface3DScene *parentGroup)
+bool CInterface3DLight::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 {
 	if (!CInterfaceElement::parse(cur, parentGroup))
 		return false;
 
-	_Light = parentGroup->getScene()->createPointLight();
+	_Light = dynamic_cast<CInterface3DScene*>(parentGroup)->getScene()->createPointLight();
 
 	CXMLAutoPtr ptr((const char*)xmlGetProp (cur, (xmlChar*)"pos"));
 	if (ptr) _Pos = convertVector(ptr);
@@ -1518,7 +1514,7 @@ CInterface3DFX::~CInterface3DFX()
 }
 
 // ----------------------------------------------------------------------------
-bool CInterface3DFX::parse (xmlNodePtr cur, CInterface3DScene *parentGroup)
+bool CInterface3DFX::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 {
 	if (!CInterfaceElement::parse(cur, parentGroup))
 		return false;
@@ -1529,11 +1525,8 @@ bool CInterface3DFX::parse (xmlNodePtr cur, CInterface3DScene *parentGroup)
 	ptr = xmlGetProp (cur, (xmlChar*)"rot");
 	if (ptr) _Rot = convertVector(ptr);
 
-	string name;
 	ptr = xmlGetProp (cur, (xmlChar*)"name");
-	if (ptr) name = (const char*)ptr;
-
-	_Name = strlwr(name);
+	if (ptr) _Name = toLower((const char*)ptr);
 
 	return true;
 }

@@ -115,7 +115,7 @@ static void cbSyncFromMaster(CMessage& msgin, const std::string &serviceName, TS
 	CTickProxy::setGameCycle( gameCycle );
 	//nldebug( "TCK-%u: Master Sync", gameCycle );
 	//time_t t; time( &t );
-	_QuickLog.displayNL( "%"NL_I64"u: TCK-%u: Master Sync", getPerfTime() /*IDisplayer::dateToHumanString( t )*/, gameCycle );
+	_QuickLog.displayNL( "%" NL_I64 "u: TCK-%u: Master Sync", getPerfTime() /*IDisplayer::dateToHumanString( t )*/, gameCycle );
 	// user callback
 	onSync();
 
@@ -257,7 +257,7 @@ void CTickProxy::receiveTockFromClient( CMessage& msgin, TServiceId senderId, bo
 	
 	//nldebug( "TCK-%u: %hu tocking", getGameCycle(), senderId );
 	//time_t t; time( &t );
-	_QuickLog.displayNL( "%"NL_I64"u: TCK-%u: %hu tocking", getPerfTime() /*IDisplayer::dateToHumanString( t )*/, getGameCycle(), senderId.get() );
+	_QuickLog.displayNL( "%" NL_I64 "u: TCK-%u: %hu tocking", getPerfTime() /*IDisplayer::dateToHumanString( t )*/, getGameCycle(), senderId.get() );
 	++_NbTocked;
 	_TockedServices.push_back( senderId );
 
@@ -276,7 +276,7 @@ void CTickProxy::masterTickUpdate( TServiceId serviceId )
 
 	//nldebug( "TCK-%u: Master Tick", getGameCycle() );
 	//time_t t; time( &t );
-	_QuickLog.displayNL( "%"NL_I64"u: TCK-%u: Master Tick", getPerfTime() /*IDisplayer::dateToHumanString( t )*/, getGameCycle() );
+	_QuickLog.displayNL( "%" NL_I64 "u: TCK-%u: Master Tick", getPerfTime() /*IDisplayer::dateToHumanString( t )*/, getGameCycle() );
 	
 	//nldebug( "--GC-%u-->", _GameCycle );
 
@@ -298,7 +298,7 @@ void CTickProxy::sendSyncToClient( TServiceId serviceId )
 	CUnifiedNetwork::getInstance()->send( serviceId, msgout );
 	//nldebug( "TCK-%u: Sync %hu", getGameCycle(), serviceId );
 	//time_t t; time( &t );
-	_QuickLog.displayNL( "%"NL_I64"u: TCK-%u: Sync %hu", getPerfTime() /*IDisplayer::dateToHumanString( t )*/, getGameCycle(), serviceId.get() );
+	_QuickLog.displayNL( "%" NL_I64 "u: TCK-%u: Sync %hu", getPerfTime() /*IDisplayer::dateToHumanString( t )*/, getGameCycle(), serviceId.get() );
 }
 
 void CTickProxy::sendSyncs()
@@ -313,7 +313,7 @@ void CTickProxy::sendSyncs()
 		CUnifiedNetwork::getInstance()->send( (*its), msgout );
 		//nldebug( "TCK-%u: Sync %hu", getGameCycle(), *its );
 		//time_t t; time( &t );
-		_QuickLog.displayNL( "%"NL_I64"u: TCK-%u: Sync %hu", getPerfTime() /*IDisplayer::dateToHumanString( t )*/, getGameCycle(), its->get());
+		_QuickLog.displayNL( "%" NL_I64 "u: TCK-%u: Sync %hu", getPerfTime() /*IDisplayer::dateToHumanString( t )*/, getGameCycle(), its->get());
 	}
 }
 
@@ -329,7 +329,7 @@ void CTickProxy::sendTicks()
 
 		//nldebug( "TCK-%u: Tick %hu", getGameCycle(), *its );
 		//time_t t; time( &t );
-		_QuickLog.displayNL( "%"NL_I64"u: TCK-%u: Tick %hu", getPerfTime() /*IDisplayer::dateToHumanString( t )*/, getGameCycle(), its->get() );
+		_QuickLog.displayNL( "%" NL_I64 "u: TCK-%u: Tick %hu", getPerfTime() /*IDisplayer::dateToHumanString( t )*/, getGameCycle(), its->get() );
 	}
 	// nldebug( "Now expecting local tocks" );
 	State = ExpectingLocalTocks;
@@ -391,7 +391,7 @@ void CTickProxy::sendTockBack( TServiceId serviceId )
 		nlwarning( "Tocked master twice in the same tick!" );
 	prev = getGameCycle();
 	//time_t t; time( &t );
-	_QuickLog.displayNL( "%"NL_I64"u: TCK-%u: Tocked Master", getPerfTime() /*IDisplayer::dateToHumanString( t )*/, getGameCycle() );
+	_QuickLog.displayNL( "%" NL_I64 "u: TCK-%u: Tocked Master", getPerfTime() /*IDisplayer::dateToHumanString( t )*/, getGameCycle() );
 }
 
 

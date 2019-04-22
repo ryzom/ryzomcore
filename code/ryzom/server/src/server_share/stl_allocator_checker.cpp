@@ -24,11 +24,11 @@
 #include "nel/misc/variable.h"
 #include "stl_allocator_checker.h"
 
-bool EnableStlAllocatorChecker= true;
-NLMISC_VARIABLE(bool,EnableStlAllocatorChecker,"Enable stl allocator tests");
+bool EnableStlAllocatorChecker = true;
+NLMISC_VARIABLE(bool, EnableStlAllocatorChecker, "Enable stl allocator tests");
 
-uintptr_t StlAllocatorMaxFree= 0;
-NLMISC_VARIABLE(uintptr_t,StlAllocatorMaxFree,"When EnableStlAllocatorChecker is true, this value gives the largest number of free blocks encountered");
+uint64 StlAllocatorMaxFree = 0;
+NLMISC_VARIABLE(uint64, StlAllocatorMaxFree, "When EnableStlAllocatorChecker is true, this value gives the largest number of free blocks encountered");
 
 // setup a 'max iterations' value of 3GBytes/ sizeof(void*) (32bit)
 // => this is equivalent to the total addressable memory space under linux
@@ -78,8 +78,8 @@ void testStlMemoryAllocator(const char* state)
 		// if we hit a NULL end of list terminator then return happily
 		if (p==NULL)
 		{
-			uintptr_t numIterations= MaxIterations- counter;
-			StlAllocatorMaxFree= std::max(numIterations,StlAllocatorMaxFree);
+			uintptr_t numIterations = MaxIterations - counter;
+			StlAllocatorMaxFree = std::max((uint64)numIterations, StlAllocatorMaxFree);
 			signal(SIGSEGV, NULL);
 			return;
 		}
@@ -92,8 +92,8 @@ void testStlMemoryAllocator(const char* state)
 	}
 
 	// we just hit a crash case so setup flags / globals accordingly
-	IsCrashed= true;
-	StlMemoryAllocatorCrashPoint= state;
+	IsCrashed = true;
+	StlMemoryAllocatorCrashPoint = state;
 	signal(SIGSEGV, NULL);
 }
 

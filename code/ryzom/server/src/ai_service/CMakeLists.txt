@@ -1,3 +1,6 @@
+IF(APPLE)
+	add_definitions("-ftemplate-depth=100")
+ENDIF()
 FILE(GLOB SRC *.cpp *.h)
 
 LIST(REMOVE_ITEM SRC
@@ -15,15 +18,13 @@ LIST(REMOVE_ITEM SRC
 
 ADD_EXECUTABLE(ryzom_ai_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
+
 TARGET_LINK_LIBRARIES(ryzom_ai_service
 					ryzom_adminmodules
 					ryzom_gameshare
 					ryzom_servershare
 					ryzom_aishare
-					${LIBXML2_LIBRARIES}
-					${MYSQL_LIBRARIES}
-					${ZLIB_LIBRARIES}
 					nelmisc
 					nelnet
 					nelgeorges
@@ -32,11 +33,9 @@ TARGET_LINK_LIBRARIES(ryzom_ai_service
 NL_DEFAULT_PROPS(ryzom_ai_service "Ryzom, Services: AI Service (AIS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_ai_service)
 
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
-
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(ryzom_ai_service ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
-ENDIF(WITH_PCH)
+ENDIF()
 
 INSTALL(TARGETS ryzom_ai_service RUNTIME DESTINATION sbin COMPONENT services)
 

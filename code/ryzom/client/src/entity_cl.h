@@ -86,10 +86,9 @@ namespace NL3D
 
 class CEntitySheet;
 class CEntityCL;
+struct CAttackInfo;
 
 class CItemSheet;
-
-class CPhysicalDamage;
 
 namespace NLMISC{
 class CCDBNodeLeaf;
@@ -172,7 +171,7 @@ public:
 		// hide every static fxs
 		void hideStaticFXs();
 
-		// Create the loading instance. return false if shapeName!="" while still fails to load. else return true.
+		// Create the loading instance. return false if shapeName is not empty while still fails to load. else return true.
 		bool createLoading(const std::string &shapeName, const std::string &stickPoint=std::string(""), sint texture=-1, bool clearIfFail= true);
 
 		// Apply Colors
@@ -586,7 +585,7 @@ public:
 	virtual void impact(uint /* impactType */, uint /* type */, uint /* id */, uint /* intensity */) {}
 	/** Try to play a melee impact on this entity.
 	  */
-	virtual void meleeImpact(const CPhysicalDamage &/* damage */) {}
+	virtual void meleeImpact(const CAttackInfo &/* attack */) {}
 	/** Play the magic impact on the entity
 	 * \param type : type of the impact (host/good/neutral).
 	 * \param intensity : intensity of the impact.
@@ -652,7 +651,7 @@ public:
 
 
 	/// Serialize entity.
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	// return vector of ground fxs sorted by ground type, or NULL is ground fxs are not supported for the entity
 	virtual const std::vector<CGroundFXSheet> *getGroundFX() const { return NULL; }
@@ -1211,7 +1210,7 @@ public:
 	//@}
 
 	// Read/Write Variables from/to the stream.
-	virtual void readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void readWrite(NLMISC::IStream &f);
 	// To call after a read from a stream to re-initialize the entity.
 	virtual void load();
 

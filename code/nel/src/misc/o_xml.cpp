@@ -17,6 +17,7 @@
 #include "stdmisc.h"
 
 #include "nel/misc/o_xml.h"
+#include "nel/misc/i_xml.h"
 
 #ifndef NL_DONT_USE_EXTERNAL_CODE
 
@@ -43,21 +44,10 @@ const char SEPARATOR = ' ';
 
 // ***************************************************************************
 
-#ifdef USE_LOCALE_SPRINTF
-
-#define writenumber(src,format,digits) \
-	char number_as_cstring [digits+1]; \
-	_sprintf_l( number_as_cstring, format, (_locale_t)_Locale, src ); \
-	serialSeparatedBufferOut( number_as_cstring );
-
-#else
-
 #define writenumber(src,format,digits) \
 	char number_as_cstring [digits+1]; \
 	sprintf( number_as_cstring, format, src ); \
 	serialSeparatedBufferOut( number_as_cstring );
-
-#endif
 
 // ***************************************************************************
 // XML callbacks
@@ -145,42 +135,23 @@ COXml::COXml () : IStream (false /* Output mode */)
 	_CurrentNode = NULL;
 
 	// Content string
-	_ContentString = "";
+	_ContentString.clear();
 
 	// Push begin
 	_PushBegin = false;
-
-#ifdef USE_LOCALE_SPRINTF
-	// create C numeric locale
-	_Locale = _create_locale(LC_NUMERIC, "C");
-#else
-	_Locale = NULL;
-#endif
 }
 
 // ***************************************************************************
 
-void xmlGenericErrorFuncWrite (void *ctx, const char *msg, ...)
-{
-	// Get the error string
-	string str;
-	NLMISC_CONVERT_VARGS (str, msg, NLMISC::MaxCStringSize);
-	((COXml*)ctx)->_ErrorString += str;
-}
-
-// ***************************************************************************
-
-bool COXml::init (IStream *stream, const char *version)
+bool COXml::init (IStream *stream, const std::string &version)
 {
 	resetPtrTable();
+
+	CIXml::initLibXml();
 
 	// Output stream ?
 	if (!stream->isReading())
 	{
-		// Set error handler
-		_ErrorString = "";
-		xmlSetGenericErrorFunc	(this, xmlGenericErrorFuncWrite);
-
 		// Set XML mode
 		setXMLMode (true);
 
@@ -197,7 +168,7 @@ bool COXml::init (IStream *stream, const char *version)
 		_CurrentNode = NULL;
 
 		// Content string
-		_ContentString = "";
+		_ContentString.clear();
 
 		// Push begin
 		_PushBegin = false;
@@ -215,15 +186,11 @@ COXml::~COXml ()
 {
 	// Flush document to the internal stream
 	flush ();
-
-#ifdef USE_LOCALE_SPRINTF
-	if (_Locale) _free_locale((_locale_t)_Locale);
-#endif
 }
 
 // ***************************************************************************
 
-void COXml::serialSeparatedBufferOut( const char *value )
+void COXml::serialSeparatedBufferOut( const std::string &value )
 {
 	nlassert( ! isReading() );
 
@@ -240,7 +207,7 @@ void COXml::serialSeparatedBufferOut( const char *value )
 				if (_AttribPresent)
 				{
 					// Set the attribute
-					xmlSetProp (_CurrentNode, (const xmlChar*)_AttribName.c_str(), (const xmlChar*)value);
+					xmlSetProp (_CurrentNode, (const xmlChar*)_AttribName.c_str(), (const xmlChar*)value.c_str());
 
 					// The attribute has been used
 					_AttribPresent = false;
@@ -327,14 +294,14 @@ void COXml::serial(sint32 &b)
 
 void COXml::serial(uint64 &b)
 {
-	writenumber( b, "%"NL_I64"u", 20 );
+	writenumber( b, "%" NL_I64 "u", 20 );
 }
 
 // ***************************************************************************
 
 void COXml::serial(sint64 &b)
 {
-	writenumber( b, "%"NL_I64"d", 20 );
+	writenumber( b, "%" NL_I64 "d", 20 );
 }
 
 // ***************************************************************************
@@ -371,7 +338,8 @@ void COXml::serialBit(bool &bit)
 #ifndef NL_OS_CYGWIN
 void COXml::serial(char &b)
 {
-	char tmp[2] = {b , 0};
+	std::string tmp;
+	tmp += b;
 	serialSeparatedBufferOut( tmp );
 }
 #endif // NL_OS_CYGWIN
@@ -386,7 +354,7 @@ void COXml::serial(std::string &b)
 	if (_PushBegin)
 	{
 		// Only serial the string
-		serialSeparatedBufferOut( b.c_str() );
+		serialSeparatedBufferOut( b );
 	}
 	else
 	{
@@ -394,7 +362,7 @@ void COXml::serial(std::string &b)
 		xmlPush ("S");
 
 		// Serial the string
-		serialSeparatedBufferOut( b.c_str() );
+		serialSeparatedBufferOut( b );
 
 		// Close the node
 		xmlPop ();
@@ -437,7 +405,7 @@ void COXml::serialBuffer(uint8 *buf, uint len)
 
 // ***************************************************************************
 
-bool COXml::xmlPushBeginInternal (const char *nodeName)
+bool COXml::xmlPushBeginInternal (const std::string &nodeName)
 {
 	nlassert( ! isReading() );
 
@@ -461,7 +429,7 @@ bool COXml::xmlPushBeginInternal (const char *nodeName)
 				}
 
 				// Create the first node
-				_CurrentNode=xmlNewDocNode (_Document, NULL, (const xmlChar*)nodeName, NULL);
+				_CurrentNode=xmlNewDocNode (_Document, NULL, (const xmlChar*)nodeName.c_str(), NULL);
 				xmlDocSetRootElement (_Document, _CurrentNode);
 
 				// Return NULL if error
@@ -473,7 +441,7 @@ bool COXml::xmlPushBeginInternal (const char *nodeName)
 				flushContentString ();
 
 				// Create a new node
-				_CurrentNode=xmlNewChild (_CurrentNode, NULL, (const xmlChar*)nodeName, NULL);
+				_CurrentNode=xmlNewChild (_CurrentNode, NULL, (const xmlChar*)nodeName.c_str(), NULL);
 
 				// Return NULL if error
 				nlassert (_CurrentNode);
@@ -565,7 +533,7 @@ bool COXml::xmlPopInternal ()
 
 // ***************************************************************************
 
-bool COXml::xmlSetAttribInternal (const char *attribName)
+bool COXml::xmlSetAttribInternal (const std::string &attribName)
 {
 	nlassert( ! isReading() );
 
@@ -630,7 +598,7 @@ bool COXml::xmlBreakLineInternal ()
 
 // ***************************************************************************
 
-bool COXml::xmlCommentInternal (const char *comment)
+bool COXml::xmlCommentInternal (const std::string &comment)
 {
 	nlassert( ! isReading() );
 
@@ -641,7 +609,7 @@ bool COXml::xmlCommentInternal (const char *comment)
 		if ( _CurrentNode != NULL)
 		{
 			// Add a comment node
-			xmlNodePtr commentPtr = xmlNewComment ((const xmlChar *)comment);
+			xmlNodePtr commentPtr = xmlNewComment ((const xmlChar *)comment.c_str());
 
 			// Add the node
 			xmlAddChild (_CurrentNode, commentPtr);
@@ -687,22 +655,17 @@ void COXml::flush ()
 
 // ***************************************************************************
 
-bool COXml::isStringValidForProperties (const char *str)
+bool COXml::isStringValidForProperties (const std::string &str)
 {
-	while (*str)
-	{
-		if (*str == '\n')
-			return false;
-		str++;
-	}
-	return true;
+	return str.find('\n') == std::string::npos;
 }
 
 // ***************************************************************************
 
-const char *COXml::getErrorString () const
+std::string COXml::getErrorString()
 {
-	return _ErrorString.c_str ();
+	// error string is managed by CIXml
+	return CIXml::getErrorString();
 }
 
 } // NLMISC

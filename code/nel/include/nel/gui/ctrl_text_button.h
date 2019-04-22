@@ -49,7 +49,7 @@ namespace NLGUI
 		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
 
 		// Init part
-		virtual bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup);
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
 
 		virtual void checkCoords();
 		virtual void updateCoords();
@@ -111,8 +111,18 @@ namespace NLGUI
 		sint32			getWMin() const { return _WMin; }
 		void			setWMin( sint32 wmin ) { _WMin = wmin; }
 
+		sint32			getHMin() const { return _HMin; }
+		void			setHMin( sint32 hmin ) { _HMin = hmin; }
+
 		// Compute Size according to bitmap and Text (Ensure as big as possible button)
 		sint32			getWMax() const;
+
+		// Set texture directly without _l.tga, _m.tga, _r.tga convention
+		// Texture size is only read from normal textures
+		// If updateHeight == false, then _BmpH will keep its value
+		void setTexture(const std::string &l, const std::string &m, const std::string &r, bool updateHeight = true);
+		void setTexturePushed(const std::string &l, const std::string &m, const std::string &r);
+		void setTextureOver(const std::string &l, const std::string &m, const std::string &r);
 
 		int luaGetViewText(CLuaState &ls);
 
@@ -122,6 +132,7 @@ namespace NLGUI
 			REFLECT_SINT32("text_x", getTextX, setTextX)
 			REFLECT_SINT32("wmargin", getWMargin, setWMargin)
 			REFLECT_SINT32("wmin", getWMin, setWMin)
+			REFLECT_SINT32("hmin", getHMin, setHMin)
 			REFLECT_LUA_METHOD("getViewText", luaGetViewText)
 		REFLECT_EXPORT_END
 
@@ -151,8 +162,8 @@ namespace NLGUI
 		sint32	_BmpLeftW, _BmpMiddleW, _BmpRightW, _BmpH;
 		// Value to add to TextW to get button W.
 		sint32	_WMargin;
-		// Min W Value
-		sint32	_WMin;
+		// Min W, H Value
+		sint32	_WMin, _HMin;
 		sint32	_TextY;
 		sint32	_TextX;
 		THotSpot _TextPosRef;

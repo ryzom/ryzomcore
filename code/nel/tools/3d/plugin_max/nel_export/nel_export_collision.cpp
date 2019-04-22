@@ -30,7 +30,7 @@ using namespace NLPACS;
 
 // --------------------------------------------------
 
-bool CNelExport::exportCollision (const char *sPath, std::vector<INode *> &nodes, TimeValue time)
+bool CNelExport::exportCollision (const std::string &sPath, std::vector<INode *> &nodes, TimeValue time)
 {
 	// get list of CMB froms nodes.
 	std::vector<std::pair<std::string, NLPACS::CCollisionMeshBuild*> >	meshBuildList;
@@ -43,7 +43,7 @@ bool CNelExport::exportCollision (const char *sPath, std::vector<INode *> &nodes
 //	ULONG SelectDir(HWND Parent, char* Title, char* Path);
 
 	std::string	path = std::string(sPath);
-	if (path.size() == 0 || path[path.size()-1] != '\\' && path[path.size()-1] != '/')
+	if (path.empty() || path[path.size()-1] != '\\' && path[path.size()-1] != '/')
 		path.insert(path.end(), '/');
 
 	if (meshBuildList.empty()) return true;
@@ -148,7 +148,7 @@ bool CNelExport::exportCollision (const char *sPath, INode& node, Interface& _Ip
 */
 // --------------------------------------------------
 
-bool CNelExport::exportPACSPrimitives (const char *sPath, std::vector<INode *> &nodes, TimeValue time)
+bool CNelExport::exportPACSPrimitives (const std::string &sPath, std::vector<INode *> &nodes, TimeValue time)
 {
 	// Build the primitive block
 	NLPACS::CPrimitiveBlock primitiveBlock;
@@ -172,12 +172,12 @@ bool CNelExport::exportPACSPrimitives (const char *sPath, std::vector<INode *> &
 			}
 			else
 			{
-				nlwarning ("Can't init XML stream with file %s", sPath);
+				nlwarning ("Can't init XML stream with file %s", sPath.c_str());
 			}
 		}
 		else
 		{
-			nlwarning ("Can't open the file %s for writing", sPath);
+			nlwarning ("Can't open the file %s for writing", sPath.c_str());
 		}
 	}
 	return false;

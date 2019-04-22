@@ -89,7 +89,7 @@ ADD_EXECUTABLE(ryzom_entities_game_service WIN32
 	${SRC_STABLES}
 	${SRC_TEAM_MANAGER})
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_entities_game_service
 						ryzom_adminmodules
@@ -98,9 +98,6 @@ TARGET_LINK_LIBRARIES(ryzom_entities_game_service
 						ryzom_aishare
 						ryzom_pd
 						ryzom_gameplaymodule
-						${LIBXML2_LIBRARIES}
-						${MYSQL_LIBRARIES}
-						${ZLIB_LIBRARIES}
 						nelmisc
 						nelnet
 						nelgeorges
@@ -111,8 +108,12 @@ NL_ADD_RUNTIME_FLAGS(ryzom_entities_game_service)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
+IF(MSVC)
+	SET_TARGET_PROPERTIES(ryzom_entities_game_service PROPERTIES COMPILE_FLAGS "/bigobj")
+ENDIF()
+
 IF(WITH_PCH AND NOT MINGW) # FIXME: PCH too large (> 130MB), crashes cc1plus under MinGW
   ADD_NATIVE_PRECOMPILED_HEADER(ryzom_entities_game_service ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
-ENDIF(WITH_PCH AND NOT MINGW)
+ENDIF()
 
 INSTALL(TARGETS ryzom_entities_game_service RUNTIME DESTINATION sbin COMPONENT services)

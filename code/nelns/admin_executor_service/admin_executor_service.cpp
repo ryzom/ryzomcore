@@ -333,7 +333,7 @@ std::string getServiceStateFileName(const std::string& serviceAlias,const std::s
 std::string getOfflineServiceState(const std::string& serviceAlias,const std::string& serviceExecutionPath)
 {
 	// open the file for reading
-	FILE* f= fopen(getServiceStateFileName(serviceAlias,serviceExecutionPath).c_str(),"rt");
+	FILE* f = nlfopen(getServiceStateFileName(serviceAlias,serviceExecutionPath), "rt");
 	if (f==NULL) return "Offline";
 
 	// setup a buffer to hold the text read from the file
@@ -366,7 +366,7 @@ bool writeServiceLaunchCtrl(const std::string& serviceAlias,const std::string& s
 	NLMISC::CFile::createDirectoryTree(serviceExecutionPath);
 
 	// open the file for writing
-	FILE* f= fopen(getServiceLaunchCtrlFileName(serviceAlias,serviceExecutionPath,delay).c_str(),"wt");
+	FILE* f= nlfopen(getServiceLaunchCtrlFileName(serviceAlias,serviceExecutionPath,delay), "wt");
 	if (f==NULL) return false;
 
 	// write the text to the file
@@ -1636,7 +1636,7 @@ NLMISC_COMMAND(aesSystem, "Execute a system() call", "<command>")
 
 	char str[1024];
 
-	FILE *fp = fopen(fn.c_str(), "rt");
+	FILE *fp = nlfopen(fn, "rt");
 	if (fp != NULL)
 	{
 		while (true)
@@ -1654,7 +1654,7 @@ NLMISC_COMMAND(aesSystem, "Execute a system() call", "<command>")
 		log.displayNL("No stdout");
 	}
 
-	fp = fopen(fne.c_str(), "rt");
+	fp = nlfopen(fne, "rt");
 	if (fp != NULL)
 	{
 		while (true)

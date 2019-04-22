@@ -52,7 +52,7 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 		// Extract parameters from sheet
 		vector<CSString> params;
 		CSString param = eff.splitTo(':', true);
-		while (param != "")
+		while (!param.empty())
 		{
 			params.push_back(param);
 			param = eff.splitTo(':', true);

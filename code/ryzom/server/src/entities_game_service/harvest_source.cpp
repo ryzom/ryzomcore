@@ -84,7 +84,7 @@ uint ImpactSchemes [6][3] = { { 0, 1, 2 }, { 0, 2, 1 }, { 1, 0, 2 }, { 1, 2, 0 }
 // Observed impact on E (/10):     6            3            1            1            3           10
 // Note: if modifying this schemes, please change FORAGE_SOURCE_IMPACT_MODE in phrase_en.txt.
 uint SpecialNewbieImpactSchemeD = 10;
-uint16 LowDangerMappings [2] = { SpecialNewbieImpactSchemeD+1, SpecialNewbieImpactSchemeD+4 };
+uint16 LowDangerMappings [2] = {(uint16)(SpecialNewbieImpactSchemeD+1), (uint16)(SpecialNewbieImpactSchemeD+4)};
 
 sint8 ExplosionResetPeriod = 50; // 5 s
 
@@ -1240,8 +1240,8 @@ bool forageTestDoExtract(
 	}
 
 	// Request and output results
-	FILE *f = fopen( std::string(getLogDirectory() + "forage_test.csv").c_str(), "at" );
-	FILE *f2 = fopen( std::string(getLogDirectory() + "forage_test.log").c_str(), "at" );
+	FILE *f = nlfopen(getLogDirectory() + "forage_test.csv", "at" );
+	FILE *f2 = nlfopen(getLogDirectory() + "forage_test.log", "at" );
 	float reqS = 1.0f / (reqPeriod * 10.0f);
 	float req [CHarvestSource::NbPosRTProps];
 	float abs [CHarvestSource::NbPosRTProps];

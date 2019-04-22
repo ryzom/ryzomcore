@@ -555,13 +555,13 @@ string CSheetId::toString(bool ifNotFoundUseNumericId) const
 		}
 		else
 		{
-			return NLMISC::toString( "<Sheet %d not found in sheet_id.bin>", _Id.Id );
+			return NLMISC::toString( "<Sheet %u not found in sheet_id.bin>", _Id.Id );
 		}
 	}
 
 } // toString //
 
-void CSheetId::serial(NLMISC::IStream	&f) throw(NLMISC::EStream)
+void CSheetId::serial(NLMISC::IStream	&f)
 {
 	nlassert(!_DontHaveSheetKnowledge);
 
@@ -576,7 +576,7 @@ void CSheetId::serial(NLMISC::IStream	&f) throw(NLMISC::EStream)
 #endif
 }
 
-void CSheetId::serialString(NLMISC::IStream &f, const std::string &defaultType) throw(NLMISC::EStream)
+void CSheetId::serialString(NLMISC::IStream &f, const std::string &defaultType)
 {
 	nlassert(_Initialised);
 	

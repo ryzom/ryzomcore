@@ -58,7 +58,7 @@ extern NL3D::UMaterial		GenericMat;
 #endif
 
 #ifdef NL_DEBUG
-	extern bool DisplayMicroLifeActiveTiles = false;
+	bool DisplayMicroLifeActiveTiles = false;
 #endif
 
 H_AUTO_DECL(RZ_MicroLifeManager)

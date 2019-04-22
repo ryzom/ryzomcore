@@ -32,6 +32,10 @@
 
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 
@@ -42,6 +46,7 @@ CMaterial* CFontManager::getFontMaterial()
 	if (_TexFont == NULL)
 	{
 		_TexFont = new CTextureFont;
+		_TexCacheNr++;
 	}
 
 	if (_MatFont == NULL)
@@ -64,6 +69,8 @@ void CFontManager::computeString (const std::string &s,
 								  CFontGenerator *fontGen,
 								  const NLMISC::CRGBA &color,
 								  uint32 fontSize,
+								  bool embolden,
+								  bool oblique,
 								  IDriver *driver,
 								  CComputedString &output,
 								  bool	keep800x600Ratio)
@@ -71,7 +78,7 @@ void CFontManager::computeString (const std::string &s,
 	// static to avoid reallocation
 	static ucstring	ucs;
 	ucs= s;
-	computeString(ucs, fontGen, color, fontSize, driver, output, keep800x600Ratio);
+	computeString(ucs, fontGen, color, fontSize, embolden, oblique, driver, output, keep800x600Ratio);
 }
 
 
@@ -80,6 +87,8 @@ void CFontManager::computeString (const ucstring &s,
 								  CFontGenerator *fontGen,
 								  const NLMISC::CRGBA &color,
 								  uint32 fontSize,
+								  bool embolden,
+								  bool oblique,
 								  IDriver *driver,
 								  CComputedString &output,
 								  bool	keep800x600Ratio)
@@ -134,11 +143,17 @@ void CFontManager::computeString (const ucstring &s,
 	sint32 nMaxZ = -1000000, nMinZ = 1000000;
 	output.StringHeight = 0;
 
+	// save string info for later rebuild as needed
+	output.Text = s;
+	output.CacheVersion = getCacheVersion();
+
 	uint j = 0;
 	{
 		CVertexBufferReadWrite vba;
 		output.Vertices.lock (vba);
 
+		hlfPixScrW = 0.f;
+		hlfPixScrH = 0.f;
 
 		// For all chars
 		for (uint i = 0; i < s.size(); i++)
@@ -147,38 +162,45 @@ void CFontManager::computeString (const ucstring &s,
 			k.Char = s[i];
 			k.FontGenerator = fontGen;
 			k.Size = fontSize;
-			CTextureFont::SLetterInfo *pLI = pTexFont->getLetterInfo (k);
+			k.Embolden = embolden;
+			k.Oblique = oblique;
+			// render letter
+			CTextureFont::SLetterInfo *pLI = pTexFont->getLetterInfo (k, true);
 			if(pLI != NULL)
 			{
-				if ((pLI->CharWidth > 0) && (pLI->CharHeight > 0))
+				if (pLI->glyph)
 				{
+					// If letter is heavily upscaled, then there is noticeable clipping on edges
+					// fixing UV will make it bit better
+					if ((pLI->Size >> 1) > pLI->glyph->Size)
+					{
+						hlfPixTexW = 0.5f * TexRatioW;
+						hlfPixTexH = 0.5f * TexRatioH;
+					}
+
 					// Creating vertices
 					dx = pLI->Left;
-					dz = -((sint32)pLI->CharHeight-(sint32)(pLI->Top));
-					u1 = pLI->U - hlfPixTexW;
-					v1 = pLI->V - hlfPixTexH;
-					u2 = pLI->U + ((float)pLI->CharWidth) * TexRatioW + hlfPixTexW;
-					v2 = pLI->V + ((float)pLI->CharHeight) * TexRatioH + hlfPixTexH;
+					dz = -((sint32)pLI->CharHeight - (sint32)(pLI->Top));
 
 					x1 = (penx + dx) - hlfPixScrW;
 					z1 = (penz + dz) - hlfPixScrH;
-					x2 = (penx + dx + (sint32)pLI->CharWidth)  + hlfPixScrW;
+					x2 = (penx + dx + (sint32)pLI->CharWidth) + hlfPixScrW;
 					z2 = (penz + dz + (sint32)pLI->CharHeight) + hlfPixScrH;
 
 					vba.setVertexCoord	(j, x1, 0, z1);
-					vba.setTexCoord		(j, 0, u1, v2);
+					vba.setTexCoord		(j, 0, pLI->glyph->U0-hlfPixTexW, pLI->glyph->V1+hlfPixTexH);
 					++j;
 
 					vba.setVertexCoord	(j, x2, 0, z1);
-					vba.setTexCoord		(j, 0, u2, v2);
+					vba.setTexCoord		(j, 0, pLI->glyph->U1+hlfPixTexW, pLI->glyph->V1+hlfPixTexH);
 					++j;
 
 					vba.setVertexCoord	(j, x2, 0, z2);
-					vba.setTexCoord		(j, 0, u2, v1);
+					vba.setTexCoord		(j, 0, pLI->glyph->U1+hlfPixTexW, pLI->glyph->V0-hlfPixTexH);
 					++j;
 
 					vba.setVertexCoord	(j, x1, 0, z2);
-					vba.setTexCoord		(j, 0, u1, v1);
+					vba.setTexCoord		(j, 0, pLI->glyph->U0-hlfPixTexW, pLI->glyph->V0-hlfPixTexH);
 					++j;
 
 					// String Bound
@@ -227,11 +249,26 @@ void CFontManager::computeStringInfo (	const ucstring &s,
 										CFontGenerator *fontGen,
 										const NLMISC::CRGBA &color,
 										uint32 fontSize,
+										bool embolden,
+										bool oblique,
 										IDriver *driver,
 										CComputedString &output,
 										bool keep800x600Ratio	)
 {
 	output.Color = color;
+
+	// save string info for later rebuild as needed
+	output.Text = s;
+	output.CacheVersion = 0;
+
+	if (s.empty())
+	{
+		output.StringWidth = 0.f;
+		output.StringHeight = 0;
+		output.StringLine = 0;
+
+		return;
+	}
 
 	// resize fontSize if window not of 800x600.
 	if (keep800x600Ratio)
@@ -259,7 +296,9 @@ void CFontManager::computeStringInfo (	const ucstring &s,
 		k.Char = s[i];
 		k.FontGenerator = fontGen;
 		k.Size = fontSize;
-		pLI = pTexFont->getLetterInfo (k);
+		k.Embolden = embolden;
+		k.Oblique = oblique;
+		pLI = pTexFont->getLetterInfo (k, false);
 		if(pLI != NULL)
 		{
 			if ((pLI->CharWidth > 0) && (pLI->CharHeight > 0))
@@ -294,9 +333,6 @@ void CFontManager::computeStringInfo (	const ucstring &s,
 // ***************************************************************************
 string CFontManager::getCacheInformation() const
 {
-//	stringstream ss;
-//	ss << "MaxMemory: " << (uint) _MaxMemory << " MemSize: " << (uint) _MemSize << " NbChar: " << (uint) _NbChar;
-//	return ss.str();
 	string str;
 	str = "MaxMemory: " + NLMISC::toString(_MaxMemory) + " MemSize: " + NLMISC::toString(_MemSize) + " NbChar: " + NLMISC::toString(_NbChar);
 	return str;
@@ -307,7 +343,11 @@ void CFontManager::invalidate()
 {
 	if (_TexFont)
 		_TexFont = NULL;
+
 	_TexFont = new CTextureFont;
+	_TexCacheNr++;
+
+	getFontMaterial()->setTexture(0, _TexFont);
 }
 
 

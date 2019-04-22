@@ -28,11 +28,15 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
 // ***************************************************************************
-const uint32 IDriver::InterfaceVersion = 0x6e; // gpu program interface
+const uint32 IDriver::InterfaceVersion = 0x70; // total video memory
 
 // ***************************************************************************
 IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )
@@ -50,14 +54,14 @@ IDriver::~IDriver()
 	{
 		CSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
 		TTexDrvInfoPtrMap &rTexDrvInfos = access.value();
-		nlassert( rTexDrvInfos.size() == 0 );
+		nlassert(rTexDrvInfos.empty());
 	}
 
-	nlassert(_TexDrvShares.size()==0);
-	nlassert(_MatDrvInfos.size()==0);
-	nlassert(_VBDrvInfos.size()==0);
-	nlassert(_IBDrvInfos.size()==0);
-	nlassert(_GPUPrgDrvInfos.size()==0);
+	nlassert(_TexDrvShares.empty());
+	nlassert(_MatDrvInfos.empty());
+	nlassert(_VBDrvInfos.empty());
+	nlassert(_IBDrvInfos.empty());
+	nlassert(_GPUPrgDrvInfos.empty());
 }
 
 

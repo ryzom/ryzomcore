@@ -20,12 +20,11 @@
 #ifndef CL_LIB_WWW_H
 #define CL_LIB_WWW_H
 
-extern "C"
-{
-#include "WWWInit.h"
-}
-
 #include "nel/misc/rgba.h"
+#include "nel/gui/libwww_types.h"
+
+// forward declaration to avoid curl.h inclusion everywhere
+typedef void CURL;
 
 namespace NLGUI
 {
@@ -35,13 +34,11 @@ namespace NLGUI
 
 	// ***************************************************************************
 
+	// Legacy function from libwww
+	SGML_dtd * HTML_dtd (void);
+
 	// Init the libwww
 	void initLibWWW();
-
-	// Get an url and setup a local domain
-	const std::string &setCurrentDomain(const std::string &url);
-
-	extern std::string CurrentCookie;
 
 	// ***************************************************************************
 
@@ -51,6 +48,14 @@ namespace NLGUI
 
 	#undef HTML_ATTR
 	#define HTML_ATTR(t,a) MY_HTML_##t##_##a
+
+	enum
+	{
+		HTML_ATTR(HTML,DIR) = 0,
+		HTML_ATTR(HTML,LANG),
+		HTML_ATTR(HTML,VERSION),
+		HTML_ATTR(HTML,STYLE),
+	};
 
 	enum
 	{
@@ -106,6 +111,7 @@ namespace NLGUI
 			HTML_ATTR(TR,L_MARGIN),
 			HTML_ATTR(TR,NOWRAP),
 			HTML_ATTR(TR,VALIGN),
+			HTML_ATTR(TR,STYLE),
 	};
 
 	enum
@@ -153,6 +159,8 @@ namespace NLGUI
 			HTML_ATTR(IMG,USEMAP),
 			HTML_ATTR(IMG,VSPACE),
 			HTML_ATTR(IMG,WIDTH),
+			// not sorted to keep enum values
+			HTML_ATTR(IMG,DATA_OVER_SRC),
 	};
 
 	enum
@@ -208,6 +216,7 @@ namespace NLGUI
 			HTML_ATTR(P,QUICK_HELP_EVENTS),
 			HTML_ATTR(P,QUICK_HELP_LINK),
 			HTML_ATTR(P,NAME),
+			HTML_ATTR(P,STYLE),
 	};
 
 	enum
@@ -218,50 +227,62 @@ namespace NLGUI
 		HTML_ATTR(DIV,STYLE),
 	};
 
+	enum
+	{
+		HTML_ATTR(SPAN,CLASS) = 0,
+		HTML_ATTR(SPAN,ID),
+		HTML_ATTR(SPAN,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H1,CLASS) = 0,
+		HTML_ATTR(H1,ID),
+		HTML_ATTR(H1,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H2,CLASS) = 0,
+		HTML_ATTR(H2,ID),
+		HTML_ATTR(H2,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H3,CLASS) = 0,
+		HTML_ATTR(H3,ID),
+		HTML_ATTR(H3,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H4,CLASS) = 0,
+		HTML_ATTR(H4,ID),
+		HTML_ATTR(H4,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H5,CLASS) = 0,
+		HTML_ATTR(H5,ID),
+		HTML_ATTR(H5,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H6,CLASS) = 0,
+		HTML_ATTR(H6,ID),
+		HTML_ATTR(H6,STYLE),
+	};
+
 
 	#undef HTML_ATTR
 
 	// ***************************************************************************
-
-	// A smart ptr for LibWWW strings
-	class C3WSmartPtr
-	{
-	public:
-		C3WSmartPtr ()
-		{
-			_Ptr = NULL;
-		}
-		C3WSmartPtr (const char *ptr)
-		{
-			_Ptr = ptr;
-		}
-		~C3WSmartPtr ()
-		{
-			clear();
-		}
-		void operator=(const char *str)
-		{
-			clear ();
-			_Ptr = str;
-		}
-		operator const char *() const
-		{
-			return _Ptr;
-		}
-		void clear()
-		{
-			if (_Ptr)
-			{
-				void *ptr = (void*)_Ptr;
-				HT_FREE(ptr);
-			}
-			_Ptr = NULL;
-		}
-	private:
-		const char *_Ptr;
-	};
-
-	// ***************************************************************************
+	// Read a CSS length value, return true if one of supported units '%, rem, em, px, pt'
+	// On failure: 'value' and 'unit' values are undefined
+	bool getCssLength (float &value, std::string &unit, const std::string &str);
 
 	// Read a width HTML parameter. "100" or "100%". Returns true if percent (0 ~ 1) else false
 	bool getPercentage (sint32 &width, float &percent, const char *str);
@@ -273,15 +294,10 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void _VerifyLibWWW(const char *function, bool ok, const char *file, int line);
-	#define VerifyLibWWW(a,b) _VerifyLibWWW(a,(b)!=FALSE,__FILE__,__LINE__)
+	const std::string &setCurrentDomain(const std::string &uri);
+	void receiveCookies (CURL *curl, const std::string &domain, bool trusted);
+	void sendCookies(CURL *curl, const std::string &domain, bool trusted);
 
-	// ***************************************************************************
-
-	// Standard request terminator
-	int requestTerminater (HTRequest * request, HTResponse * response, void * param, int status) ;
-
-	// ***************************************************************************
 }
 
 #endif

@@ -70,7 +70,7 @@ bool operator==( const CEvent &ev1, const CEvent &ev2)
 void cEventToCLogicEvent( CEvent& event, CLogicEvent& logicEvent )
 {
 	/// condition name
-	logicEvent.ConditionName = string( (LPCSTR)event.m_sConditionName );
+	logicEvent.ConditionName = tStrToUtf8(event.m_sConditionName);
 	
 	/// event action
 	logicEvent.EventAction.IsStateChange = !event.m_bActionIsMessage;
@@ -78,18 +78,18 @@ void cEventToCLogicEvent( CEvent& event, CLogicEvent& logicEvent )
 	if( logicEvent.EventAction.IsStateChange )
 	{
 		/// state name for state change
-		logicEvent.EventAction.StateChange = string( (LPCSTR)event.m_sStateChange );
+		logicEvent.EventAction.StateChange = tStrToUtf8(event.m_sStateChange);
 	}
 	else
 	{
 		/// message destination
-		logicEvent.EventAction.EventMessage.Destination = string( (LPCSTR)event.m_sMessageDestination );
+		logicEvent.EventAction.EventMessage.Destination = tStrToUtf8(event.m_sMessageDestination);
 		
 		/// message id
 		logicEvent.EventAction.EventMessage.MessageId = "LOGIC"; //string( (LPCSTR)event.m_sMessageID ); //TEMP!!!
 
 		/// message arguments
-		logicEvent.EventAction.EventMessage.Arguments = string( (LPCSTR)event.m_sArguments );
+		logicEvent.EventAction.EventMessage.Arguments = tStrToUtf8(event.m_sArguments);
 	}
 
 } // cEventToCLogicEvent //
@@ -176,7 +176,7 @@ BOOL CState::removeEvent( CEvent *event)
 void cStateToCLogicState( CState& state, CLogicState& logicState )
 {
 	/// state name
-	logicState.setName( string( (LPCSTR)state.m_sName ) );
+	logicState.setName(tStrToUtf8(state.m_sName));
 
 	POSITION pos;
 	for( pos = state.m_evEvents.GetHeadPosition(); pos != NULL; )

@@ -17,6 +17,10 @@
 #include "stdopengl.h"
 #include "driver_opengl.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 #ifdef NL_STATIC

@@ -23,8 +23,13 @@
 #include "nel/3d/cluster.h"
 #include "nel/3d/scene.h"
 #include "nel/3d/light_trav.h"
+
 using namespace std;
 using namespace NLMISC;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

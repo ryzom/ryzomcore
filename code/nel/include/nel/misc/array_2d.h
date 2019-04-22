@@ -132,7 +132,7 @@ public:
 	// See which parts of array will be discarded if the array is displaced by the given offset
 	void getDiscardRects(sint moveOffsetX, sint moveOffsetY, std::vector<NLMISC::CRect> &discardedRects);
 	//
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 private:
 	TArrayContainer _Array;
 	uint _Width;
@@ -157,7 +157,7 @@ void CArray2D<T>::clear()
 
 //*********************************************************************************
 template <class T>
-void CArray2D<T>::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CArray2D<T>::serial(NLMISC::IStream &f)
 {
 	f.serialCont(_Array);
 	uint32 width = _Width;

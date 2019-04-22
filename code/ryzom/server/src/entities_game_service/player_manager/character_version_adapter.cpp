@@ -21,6 +21,8 @@
 /////////////
 #include "stdpch.h"
 
+#include "guild_manager/fame_manager.h"
+
 #include "player_manager/character_version_adapter.h"
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
@@ -89,8 +91,11 @@ uint32 CCharacterVersionAdapter::currentVersionNumber() const
 	// 20 : (06/03/2006) give full hp to tools (even in player room and guild inv)
 	// 21 : (19/04/2006) convert to position stack & store the mainland in db
 	// 22 : (15/05/2006) reset flag pvp for resolve migration timer pb
+	// 23 : (05/04/2013) fix post merge marauder plan issue
+	// 24 : (23/10/2014) fix post merge rite bonus issue
+	// 25 : (05/03/2015) fix required faction in items on inventory
 	////////////////////////////////////
-	return 22;
+	return 25;
 }
 
 
@@ -102,7 +107,7 @@ void CCharacterVersionAdapter::adaptCharacterFromVersion( CCharacter &character,
 	{
 	case 0: adaptToVersion1(character);
 	case 1: adaptToVersion2(character);
-    case 2: adaptToVersion3(character);
+	case 2: adaptToVersion3(character);
 	case 3: adaptToVersion4(character);
 	case 4: adaptToVersion5(character);
 	case 5: adaptToVersion6(character);
@@ -122,6 +127,9 @@ void CCharacterVersionAdapter::adaptCharacterFromVersion( CCharacter &character,
 	case 19: adaptToVersion20(character);
 	case 20: adaptToVersion21(character);
 	case 21: adaptToVersion22(character);
+	case 22: adaptToVersion23(character);
+	case 23: adaptToVersion24(character);
+	case 24: adaptToVersion25(character);
 	default:;
 	}
 }
@@ -1008,4 +1016,331 @@ void CCharacterVersionAdapter::adaptToVersion21(CCharacter &character) const
 void CCharacterVersionAdapter::adaptToVersion22(CCharacter &character) const
 {
 	character.resetPVPTimers();
+}
+
+
+//---------------------------------------------------
+void CCharacterVersionAdapter::adaptToVersion23(CCharacter &character) const
+{
+	nlinfo("Start");
+	//check if phrase is already known and Fix marauder sbricks + sp craft
+	uint16 sp = 0;
+	vector<string> parts;
+	parts.push_back("b");
+	parts.push_back("g");
+	parts.push_back("h");
+	parts.push_back("p");
+	parts.push_back("s");
+	parts.push_back("v");
+	vector<uint> deletePhrases;
+	// Check each part 
+	for (uint i = 0; i < parts.size(); i++)
+	{
+		CSheetId phraseSId = CSheetId("abcbah"+parts[i]+".sphrase");
+		CSheetId brickMSid = CSheetId("bcbah"+parts[i]+"_m.sbrick");
+		CSheetId brickSid = CSheetId("bcbah"+parts[i]+".sbrick");
+		
+		if (character._BoughtPhrases.find(phraseSId)  != character._BoughtPhrases.end())
+		{
+			if (character._KnownBricks.find(brickMSid) != character._KnownBricks.end()
+			&& 	character._KnownBricks.find(brickSid) == character._KnownBricks.end() )
+			{
+				nlinfo("Bugged Char with phrase %s!", parts[i].c_str());
+				// Remove phrase and brick
+				character._BoughtPhrases.erase(phraseSId);
+				character._KnownBricks.erase(brickMSid);
+				sp += 40;
+			}
+		}
+	}
+	
+	if (sp > 0)
+	{
+		nlinfo("Adding %d SP Craft !", sp);
+		character._SpType[EGSPD::CSPType::Craft] += sp;
+	}
+
+}
+
+//---------------------------------------------------
+void CCharacterVersionAdapter::adaptToVersion24(CCharacter &character) const
+{
+	// HP
+	uint32 bonus;
+	vector<string> bricks;
+	bricks.push_back("bthp01");
+	bricks.push_back("bthp04");
+	bricks.push_back("bthp06");
+	bricks.push_back("bthp08");
+	bricks.push_back("bthp12");
+	bricks.push_back("bthp13");
+	bricks.push_back("bthp16");
+	bricks.push_back("bthp17");
+	bricks.push_back("bthp18");
+	bricks.push_back("bthp20");
+	
+	bonus = 0;
+	for (uint i = 0; i < bricks.size(); i++)
+	{
+		CSheetId brickSid = CSheetId(bricks[i]+".sbrick");
+		if (character._KnownBricks.find(brickSid) != character._KnownBricks.end())
+		{
+			bonus += 50;
+		}
+	}
+	
+	if (character.getScorePermanentModifiers(SCORES::hit_points) < bonus)
+	{
+		nlinfo("RITE BONUS FIX: Player %s need %d (hp) but have %d !", character.getName().toString().c_str(), bonus, character.getScorePermanentModifiers(SCORES::hit_points));
+		character.setScorePermanentModifiers(SCORES::hit_points, bonus);
+	}
+	
+	// SAP
+	bricks.clear();
+	bricks.push_back("btsap03");
+	bricks.push_back("btsap04");
+	bricks.push_back("btsap12");
+	bricks.push_back("btsap16");
+	bricks.push_back("btsap18");
+	
+	bonus = 0;
+	for (uint i = 0; i < bricks.size(); i++)
+	{
+		CSheetId brickSid = CSheetId(bricks[i]+".sbrick");
+		if (character._KnownBricks.find(brickSid) != character._KnownBricks.end())
+		{
+			bonus += 50;
+		}
+	}
+	
+	if (character.getScorePermanentModifiers(SCORES::sap) < bonus)
+	{
+		nlinfo("RITE BONUS FIX: Player %s need %d (sap) but have %d !", character.getName().toString().c_str(),bonus, character.getScorePermanentModifiers(SCORES::sap));
+		character.setScorePermanentModifiers(SCORES::sap, bonus);
+	}
+	
+	// FOCUS
+	bricks.clear();
+	bricks.push_back("btfoc01");
+	bricks.push_back("btfoc04");
+	bricks.push_back("btfoc09");
+	bricks.push_back("btfoc11");
+	bricks.push_back("btfoc15");
+	bricks.push_back("btfoc17");
+	bricks.push_back("btfoc19");
+	bricks.push_back("btfoc20");
+	
+	bonus = 0;
+	for (uint i = 0; i < bricks.size(); i++)
+	{
+		CSheetId brickSid = CSheetId(bricks[i]+".sbrick");
+		if (character._KnownBricks.find(brickSid) != character._KnownBricks.end())
+		{
+			bonus += 50;
+		}
+	}
+	
+	if (character.getScorePermanentModifiers(SCORES::focus) < bonus)
+	{
+		nlinfo("RITE BONUS FIX: Player %s need %d (focus) but have %d !", character.getName().toString().c_str(),bonus, character.getScorePermanentModifiers(SCORES::focus));
+		character.setScorePermanentModifiers(SCORES::focus, bonus);
+	}
+	
+	// STA
+	bricks.clear();
+	bricks.push_back("btsta13");
+	bricks.push_back("btsta14");
+	bricks.push_back("btsta15");
+	bricks.push_back("btsta16");
+	bricks.push_back("btsta17");
+	bricks.push_back("btsta20");
+	
+	bonus = 0;
+	for (uint i = 0; i < bricks.size(); i++)
+	{
+		CSheetId brickSid = CSheetId(bricks[i]+".sbrick");
+		if (character._KnownBricks.find(brickSid) != character._KnownBricks.end())
+		{
+			bonus += 50;
+		}
+	}
+	
+	if (character.getScorePermanentModifiers(SCORES::stamina) < bonus)
+	{
+		nlinfo("RITE BONUS FIX: Player %s need %d (stamina) but have %d !", character.getName().toString().c_str(),bonus, character.getScorePermanentModifiers(SCORES::stamina));
+		character.setScorePermanentModifiers(SCORES::stamina, bonus);
+	}
+}
+
+
+//---------------------------------------------------
+void CCharacterVersionAdapter::adaptToVersion25(CCharacter &character) const
+{
+
+	const uint sizeInv = INVENTORIES::NUM_INVENTORY;
+	for ( uint i = 0; i < sizeInv ; ++i )
+	if (character._Inventory[i] != NULL)
+	{
+		CInventoryPtr childSrc = character._Inventory[i];
+		for ( uint j = 0; j < childSrc->getSlotCount(); j++ )
+		{
+			CGameItemPtr item = childSrc->getItem(j);
+			if (item != NULL)
+			{
+				string phraseId = item->getPhraseId();
+
+				if (    (phraseId == "shield_ep2_kami50_1") ||
+						(phraseId == "shield_ep2_kami50_2") ||
+						(phraseId == "shield_ep2_kami100_1") ||
+						(phraseId == "shield_ep2_kami100_2") ||
+						(phraseId == "shield_ep2_kami150_1") ||
+						(phraseId == "shield_ep2_kami150_2") ||
+						(phraseId == "shield_ep2_kami200_1") ||
+						(phraseId == "shield_ep2_kami200_2") ||
+						(phraseId == "shield_ep2_kami250_1") ||
+						(phraseId == "shield_ep2_kami250_2") ||
+						(phraseId == "magic_dress_ep2_kami50_1") ||
+						(phraseId == "magic_dress_ep2_kami50_2") ||
+						(phraseId == "magic_dress_ep2_kami100_1") ||
+						(phraseId == "magic_dress_ep2_kami100_2") ||
+						(phraseId == "magic_dress_ep2_kami150_1") ||
+						(phraseId == "magic_dress_ep2_kami150_2") ||
+						(phraseId == "magic_dress_ep2_kami200_1") ||
+						(phraseId == "magic_dress_ep2_kami200_2") ||
+						(phraseId == "magic_dress_ep2_kami250_1") ||
+						(phraseId == "magic_dress_ep2_kami250_2")/* ||
+						(phraseId == "foragetool_kami_ep2_50_1") ||
+						(phraseId == "foragetool_kami_ep2_50_2") ||
+						(phraseId == "foragetool_kami_ep2_100_1") ||
+						(phraseId == "foragetool_kami_ep2_100_2") ||
+						(phraseId == "foragetool_kami_ep2_150_1") ||
+						(phraseId == "foragetool_kami_ep2_150_2") ||
+						(phraseId == "foragetool_kami_ep2_200_1") ||
+						(phraseId == "foragetool_kami_ep2_200_2") ||
+						(phraseId == "foragetool_kami_ep2_250_1") ||
+						(phraseId == "foragetool_kami_ep2_250_2")*/)
+				{
+						item->setRequiredFaction("kami");
+						item->addHp(item->durability());
+
+				}
+
+/*
+				if (    (phraseId == "foragetool_tryker_50") ||
+						(phraseId == "foragetool_tryker_100") ||
+						(phraseId == "foragetool_tryker_150") ||
+						(phraseId == "foragetool_tryker_200") ||
+						(phraseId == "foragetool_tryker_250") ||
+						(phraseId == "foragetool_tryker_sfx"))
+				{
+						item->setRequiredFaction("tryker");
+				}
+
+
+				if (    (phraseId == "foragetool_zorai_50") ||
+						(phraseId == "foragetool_zorai_100") ||
+						(phraseId == "foragetool_zorai_150") ||
+						(phraseId == "foragetool_zorai_200") ||
+						(phraseId == "foragetool_zorai_250") ||
+						(phraseId == "foragetool_zorai_sfx"))
+				{
+						item->setRequiredFaction("zorai");
+				}
+*/
+
+				if (    (phraseId == "shield_pvp_50") ||
+						(phraseId == "shield_pvp_100") ||
+						(phraseId == "shield_pvp_150") ||
+						(phraseId == "shield_pvp_200") ||
+						(phraseId == "shield_pvp_250") ||
+						(phraseId == "magic_dress_pvp_50") ||
+						(phraseId == "magic_dress_pvp_100") ||
+						(phraseId == "magic_dress_pvp_150") ||
+						(phraseId == "magic_dress_pvp_200") ||
+						(phraseId == "magic_dress_pvp_250"))
+				{
+						item->setRequiredFaction("neutralcult");
+						item->addHp(item->durability());
+
+				}
+
+/*
+				if (    (phraseId == "foragetool_fyros_50") ||
+						(phraseId == "foragetool_fyros_100") ||
+						(phraseId == "foragetool_fyros_150") ||
+						(phraseId == "foragetool_fyros_200") ||
+						(phraseId == "foragetool_fyros_250") ||
+						(phraseId == "foragetool_fyros_sfx"))
+				{
+						item->setRequiredFaction("fyros");
+				}
+
+
+				if (    (phraseId == "foragetool_matis_50") ||
+						(phraseId == "foragetool_matis_100") ||
+						(phraseId == "foragetool_matis_150") ||
+						(phraseId == "foragetool_matis_200") ||
+						(phraseId == "foragetool_matis_250") ||
+						(phraseId == "foragetool_matis_sfx"))
+				{
+						item->setRequiredFaction("matis");
+				}
+*/
+
+				if (    (phraseId == "shield_ep2_karavan50_1") ||
+						(phraseId == "shield_ep2_karavan50_2") ||
+						(phraseId == "shield_ep2_karavan100_1") ||
+						(phraseId == "shield_ep2_karavan100_2") ||
+						(phraseId == "shield_ep2_karavan150_1") ||
+						(phraseId == "shield_ep2_karavan150_2") ||
+						(phraseId == "shield_ep2_karavan200_1") ||
+						(phraseId == "shield_ep2_karavan200_2") ||
+						(phraseId == "shield_ep2_karavan250_1") ||
+						(phraseId == "shield_ep2_karavan250_2") ||
+						(phraseId == "magic_dress_ep2_karavan50_1") ||
+						(phraseId == "magic_dress_ep2_karavan50_2") ||
+						(phraseId == "magic_dress_ep2_karavan100_1") ||
+						(phraseId == "magic_dress_ep2_karavan100_2") ||
+						(phraseId == "magic_dress_ep2_karavan150_1") ||
+						(phraseId == "magic_dress_ep2_karavan150_2") ||
+						(phraseId == "magic_dress_ep2_karavan200_1") ||
+						(phraseId == "magic_dress_ep2_karavan200_2") ||
+						(phraseId == "magic_dress_ep2_karavan250_1") ||
+						(phraseId == "magic_dress_ep2_karavan250_2") ||
+						(phraseId == "foragetool_karavan_ep2_50_1")/* ||
+						(phraseId == "foragetool_karavan_ep2_50_2") ||
+						(phraseId == "foragetool_karavan_ep2_100_1") ||
+						(phraseId == "foragetool_karavan_ep2_100_2") ||
+						(phraseId == "foragetool_karavan_ep2_150_1") ||
+						(phraseId == "foragetool_karavan_ep2_150_2") ||
+						(phraseId == "foragetool_karavan_ep2_200_1") ||
+						(phraseId == "foragetool_karavan_ep2_200_2") ||
+						(phraseId == "foragetool_karavan_ep2_250_1") ||
+						(phraseId == "foragetool_karavan_ep2_250_2")*/)
+				{
+						item->setRequiredFaction("karavan");
+						item->addHp(item->durability());
+
+				}
+
+
+				if (    (phraseId == "shield_mar_50") ||
+						(phraseId == "shield_mar_100") ||
+						(phraseId == "shield_mar_150") ||
+						(phraseId == "shield_mar_200") ||
+						(phraseId == "shield_mar_250") ||
+						(phraseId == "magic_dress_mar_50") ||
+						(phraseId == "magic_dress_mar_100") ||
+						(phraseId == "magic_dress_mar_150") ||
+						(phraseId == "magic_dress_mar_200") ||
+						(phraseId == "magic_dress_mar_250"))
+				{
+						item->setRequiredFaction("marauder");
+						item->addHp(item->durability());
+				}
+			}
+		}
+	}
+
+	character.unequipCharacter( INVENTORIES::handling, INVENTORIES::left );
 }

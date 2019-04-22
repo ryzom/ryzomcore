@@ -246,7 +246,7 @@ void CConditionsView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 
 	TPositionList heap;
 
-	HTREEITEM hItem = m_tree.InsertItem( "Conditions",0,0);
+	HTREEITEM hItem = m_tree.InsertItem(_T("Conditions"), 0, 0);
 
 	// get the states map
 	CCondition *pCondition;
@@ -645,7 +645,7 @@ void CConditionsView::OnMoveAsChild()
 		}
 		else
 		{
-			AfxMessageBox("Error : root condition not found");
+			AfxMessageBox(_T("Error : root condition not found"));
 			delete pDragNode;
 		}
 	}
@@ -722,7 +722,7 @@ void CConditionsView::OnCopyAsChild()
 		}
 		else
 		{
-			AfxMessageBox("Error : root condition not found");
+			AfxMessageBox(_T("Error : root condition not found"));
 			delete pNewNode;
 		}
 	}

@@ -29,6 +29,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -336,7 +340,7 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
-	bool CGroupCell::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup, uint columnIndex, uint rowIndex)
+	bool CGroupCell::parseCell(xmlNodePtr cur, CInterfaceGroup * parentGroup, uint columnIndex, uint rowIndex)
 	{
 		CXMLAutoPtr ptr;
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"id");
@@ -699,7 +703,7 @@ namespace NLGUI
 		{
 			if (ContinuousUpdate)
 			{
-				sint parentWidth = std::min(_Parent->getMaxWReal(), _Parent->getWReal());
+				sint parentWidth = _Parent->getInnerWidth();
 				if (_LastParentW != (sint) parentWidth)
 				{
 					_LastParentW = parentWidth;
@@ -764,7 +768,7 @@ namespace NLGUI
 					}
 
 					// Resize the array
-					if (column>=_Columns.size())
+					if (column >= _Columns.size())
 						_Columns.resize(column+1);
 
 					// Handle rowspan from previous row
@@ -773,7 +777,7 @@ namespace NLGUI
 						_Columns[column].RowSpan--;
 						column++;
 						// if previous row had less <TD> elements, then we missing columns
-						if (column>=_Columns.size())
+						if (column >= _Columns.size())
 							_Columns.resize(column+1);
 					}
 
@@ -783,13 +787,12 @@ namespace NLGUI
 					// new column, set rowspan from current <TD>
 					_Columns[column].RowSpan = cell->RowSpan;
 					float colspan = 1.f / cell->ColSpan;
-					float rowspan = 1.f / cell->RowSpan;
 
 					// Update sizes
 					if (cellWidth*colspan > _Columns[column].Width)
-						_Columns[column].Width = cellWidth*colspan;
+						_Columns[column].Width = (sint32)(cellWidth*colspan);
 					if (cell->WidthMax*colspan > _Columns[column].WidthMax)
-						_Columns[column].WidthMax = cell->WidthMax*colspan;
+						_Columns[column].WidthMax = (sint32)(cell->WidthMax*colspan);
 					if (cell->TableRatio*colspan > _Columns[column].TableRatio)
 						_Columns[column].TableRatio = cell->TableRatio*colspan;
 					if (cell->WidthWanted*colspan + additionnalWidth > _Columns[column].WidthWanted)
@@ -800,17 +803,16 @@ namespace NLGUI
 					if (_Columns[column].WidthWanted > _Columns[column].Width)
 						_Columns[column].Width = _Columns[column].WidthWanted;
 
-					if (cell->ColSpan > 1) {
+					if (cell->ColSpan > 1)
+					{
 						// copy this info to all spanned columns, create new columns as needed
 						uint newsize = column + cell->ColSpan - 1;
 						if (newsize >= _Columns.size())
 							_Columns.resize(newsize+1);
-						for(uint span = 0; span < cell->ColSpan -1; span++){
-							column++;
-							_Columns[column].Width = _Columns[column-1].Width;
-							_Columns[column].WidthMax = _Columns[column-1].WidthMax;
-							_Columns[column].TableRatio = _Columns[column-1].TableRatio;
-							_Columns[column].WidthWanted = _Columns[column-1].WidthWanted;
+
+						for(sint span = 0; span < cell->ColSpan -1; ++span)
+						{
+							++column;
 							_Columns[column].RowSpan = _Columns[column-1].RowSpan;
 						}
 					}
@@ -1032,7 +1034,7 @@ namespace NLGUI
 					if (cell->TableColumnIndex > 0)
 					{
 						// we have active rowspan, must add up 'skipped' columns
-						for( ; column<cell->TableColumnIndex; column++)
+						for( ; column < (uint)cell->TableColumnIndex; ++column)
 							currentX += _Columns[column].Width + padding*2 + CellSpacing;
 					}
 
@@ -1078,7 +1080,7 @@ namespace NLGUI
 					cell->Group->updateCoords();
 
 					// Resize the row array
-					float rowspan = 1 / cell->RowSpan;
+					float rowspan = 1.f / (float)cell->RowSpan;
 					_Rows.back().Height = std::max((sint32)(cell->Height*rowspan), std::max(_Rows.back().Height, (sint32)(cell->Group->getH()*rowspan)));
 
 					// Next column
@@ -1157,7 +1159,7 @@ namespace NLGUI
 	{
 		if (_Parent != NULL)
 		{
-			sint parentWidth = std::min(_Parent->getMaxWReal(), _Parent->getWReal());
+			sint parentWidth = _Parent->getInnerWidth();
 			if (_LastParentW != (sint) parentWidth)
 			{
 				if (ContinuousUpdate)
@@ -1203,6 +1205,13 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	sint32	CGroupTable::getMaxUsedW() const
 	{
+		// Return table width if its requested by user.
+		// Need to do this because width of long line of text in here is calculated
+		// differently than final cell width in updateCoords()
+		// This will break tables with too narrow width set by user.
+		if (ForceWidthMin > 0)
+			return ForceWidthMin;
+
 		uint i;
 		uint column = 0;
 		vector<sint32> columns;
@@ -1298,6 +1307,9 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupTable::draw ()
 	{
+		// move X for clip and borders
+		_XReal += _MarginLeft;
+
 		// search a parent container
 		CInterfaceGroup *gr = getParent();
 		while (gr)
@@ -1378,6 +1390,9 @@ namespace NLGUI
 		}
 
 		CInterfaceGroup::draw ();
+
+		// restore
+		_XReal -= _MarginLeft;
 	}
 
 	std::string CGroupTable::getProperties( const std::string &name ) const
@@ -1556,7 +1571,7 @@ namespace NLGUI
 					if (strcmp((char*)currCol->name,"TD") == 0)
 					{
 						CGroupCell *cell = new CGroupCell(CViewBase::TCtorParam());
-						if (cell->parse(currCol, this, column, row))
+						if (cell->parseCell(currCol, this, column, row))
 						{
 							cell->NewLine = newLine;
 							newLine = false;

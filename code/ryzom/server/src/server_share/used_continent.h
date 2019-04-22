@@ -21,7 +21,6 @@
 #include "nel/misc/types_nl.h"
 #include "nel/net/service.h"
 #include "game_share/continent.h"
-#include "game_share/misc_const.h"
 
 #include <algorithm>
 

@@ -20,6 +20,7 @@
 #include <nel/misc/types_nl.h>
 #include <nel/misc/config_file.h>
 #include <nel/misc/debug.h>
+#include <nel/misc/common.h>
 #include <nel/misc/path.h>
 #include <nel/misc/i18n.h>
 
@@ -134,7 +135,6 @@ struct CViewerConfig
 		LandscapeThreshold = 0.001f;
 		LandscapeNoise = true;
 
-		HeightFieldName= "";
 		HeightFieldMaxZ= 100;
 		HeightFieldOriginX= 16000;
 		HeightFieldOriginY= -24000;
@@ -343,7 +343,7 @@ void displayZones()
 	CBitmap		heightBitmap;
 	CIFile file(ViewerCfg.HeightFieldName);
 
-	if( ViewerCfg.HeightFieldName!="" && heightBitmap.load(file) )
+	if( !ViewerCfg.HeightFieldName.empty() && heightBitmap.load(file) )
 	{
 		CHeightMap	heightMap;
 		heightMap.buildFromBitmap(heightBitmap);
@@ -372,7 +372,7 @@ void displayZones()
 		nlerror (tmp.c_str());
 	}
 
-	if ((Landscape->Landscape.TileBank.getAbsPath ()=="")&&(ViewerCfg.TilesPath!=""))
+	if ((Landscape->Landscape.TileBank.getAbsPath ().empty())&&(!ViewerCfg.TilesPath.empty()))
 		Landscape->Landscape.TileBank.setAbsPath (ViewerCfg.TilesPath + "/");
 
 	if (ViewerCfg.UseDDS)
@@ -743,7 +743,7 @@ void displayZones()
 \****************************************************************/
 void writeConfigFile(const char * configFileName)
 {
-	FILE * f = fopen(configFileName,"wt");
+	FILE * f = nlfopen(configFileName, "wt");
 
 	if(f==NULL)
 	{
@@ -801,7 +801,7 @@ void writeConfigFile(const char * configFileName)
 \****************************************************************/
 void initViewerConfig(const char * configFileName)
 {
-	FILE * f = fopen(configFileName,"rt");
+	FILE *f = nlfopen(configFileName, "rt");
 	if(f==NULL)
 	{
 		nlwarning("'%s' not found, default values used", configFileName);

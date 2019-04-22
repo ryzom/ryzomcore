@@ -93,7 +93,7 @@ void CUserControls::mountModeStart()
 //-----------------------------------------------
 void CUserControls::mountModeStop()
 {
-	// Restaure la hauteur des yeux.
+	// Restore eyes height.
 	UserEntity->eyesHeight(ClientCfg.EyesHeight);
 
 	// \todo GUIGUI : remove this after the UBI Demo.

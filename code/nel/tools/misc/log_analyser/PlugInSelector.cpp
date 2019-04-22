@@ -87,7 +87,7 @@ BOOL CPlugInSelector::OnInitDialog()
 }
 
 
-int getLastSeparator (const string &filename)
+std::string::size_type getLastSeparator (const string &filename)
 {
 	string::size_type pos = filename.find_last_of ('/');
 	if (pos == string::npos)
@@ -131,10 +131,10 @@ void CPlugInSelector::OnSelchangeList1()
 	if ( ! LibInst )
 	{
 		CString s;
-		char msg [300];
+		TCHAR msg [300];
 		FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), msg, 299, NULL );
-		s.Format( "Can't load %s: %s", dllName, msg );
+		s.Format(_T("Can't load %s: %s"), dllName, msg );
 		AfxMessageBox( s );
 		AnalyseFunc = NULL;
 		return;
@@ -144,17 +144,17 @@ void CPlugInSelector::OnSelchangeList1()
 	TInfoFunc infoFunc = (TInfoFunc)GetProcAddress( LibInst, "getInfoString" );
 	if ( ! infoFunc )
 	{
-		AfxMessageBox( "Can't find function getInfoString in dll" );
+		AfxMessageBox( _T("Can't find function getInfoString in dll") );
 		return;
 	}
-	GetDlgItem( IDC_GROUP_INFO )->SetWindowText( getFilename( string(dllName)).c_str() );
-	GetDlgItem( IDC_PLUGIN_INFO )->SetWindowText( infoFunc().c_str() );
+	GetDlgItem( IDC_GROUP_INFO )->SetWindowText( utf8ToTStr(getFilename(tStrToUtf8(dllName))) );
+	GetDlgItem( IDC_PLUGIN_INFO )->SetWindowText(utf8ToTStr(infoFunc()) );
 
 	// Prepare analyse func
 	AnalyseFunc = (TAnalyseFunc)GetProcAddress( LibInst, "doAnalyse" );
 	if ( ! AnalyseFunc )
 	{
-		AfxMessageBox( "Can't find function doAnalyse in dll" );
+		AfxMessageBox( _T("Can't find function doAnalyse in dll") );
 		return;
 	}
 

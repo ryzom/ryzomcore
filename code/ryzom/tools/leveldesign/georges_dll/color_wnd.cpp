@@ -78,7 +78,7 @@ void CColorWnd::create (DWORD wStyle, RECT &pos, CWnd *parent, uint dialogIndex)
 	LPCTSTR className = AfxRegisterWndClass(CS_DBLCLKS); 
 
 	// Create this window
-	if (CWnd::Create (className, "empty", wStyle, pos, parent, dialogIndex))
+	if (CWnd::Create (className, _T("empty"), wStyle, pos, parent, dialogIndex))
 	{
 	}
 }
@@ -118,8 +118,8 @@ void CColorWnd::setColor (const NLMISC::CRGBA &color)
 {
 	Color = color;
 
-	char buffer[256];
-	sprintf(buffer, "%d,%d,%d", Color.R, Color.G, Color.B);
+	CString buffer;
+	buffer.Format(_T("%d,%d,%d"), (int)Color.R, (int)Color.G, (int)Color.B);
 	SetWindowText(buffer);
 	
 	Invalidate ();
@@ -160,8 +160,8 @@ void CColorWnd::colorChanged ()
 	updateEdit();
 	Invalidate ();
 
-	char buffer[256];
-	sprintf(buffer, "%d,%d,%d", Color.R, Color.G, Color.B);
+	CString buffer;
+	buffer.Format(_T("%d,%d,%d"), (int)Color.R, (int)Color.G, (int)Color.B);
 	SetWindowText(buffer);
 
 	CWnd *wnd = GetParent ();
@@ -174,7 +174,7 @@ void CColorWnd::colorChanged ()
 
 void CColorWnd::updateEdit()
 {
-	char buffer[256];
-	sprintf(buffer, "%d,%d,%d", Color.R, Color.G, Color.B);
+	CString buffer;
+	buffer.Format(_T("%d,%d,%d"), (int)Color.R, (int)Color.G, (int)Color.B);
 	pEdit->SetWindowText(buffer);
 }

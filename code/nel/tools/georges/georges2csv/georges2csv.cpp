@@ -32,6 +32,7 @@
 #include "nel/misc/file.h"
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/command.h"
+#include "nel/misc/common.h"
 #include "nel/misc/path.h"
 //#include "nel/memory/memory_manager.h"
 #include "nel/misc/i18n.h"
@@ -43,10 +44,6 @@
 #include "nel/georges/u_form_dfn.h"
 #include "nel/georges/u_form_loader.h"
 #include "nel/georges/load_form.h"
-
-// Include from libxml2
-#include <libxml/parser.h>
-#include <libxml/tree.h>
 
 // Georges, bypassing interface
 #include "nel/georges/form.h"
@@ -182,7 +179,7 @@ void setOutputFile(const CSString &filename)
 {
 	if (Outf!=NULL)
 		fclose(Outf);
-	Outf=fopen(filename.c_str(), "wt");
+	Outf = nlfopen(filename.c_str(), "wt");
 	if (Outf == NULL)
 	{
 		fprintf(stderr, "Can't open output file '%s' ! aborting.", filename.c_str());
@@ -385,7 +382,7 @@ void scanFiles(const CSString &filespec)
 				UFormElm	*fieldForm=NULL;
 				std::string	valueString;
 				
-				form->getRootNode ().getNodeByName(&fieldForm, fields[i]._name.c_str());
+				form->getRootNode ().getNodeByName(&fieldForm, fields[i]._name);
 
 				if	(fieldForm)
 				{
@@ -408,7 +405,7 @@ void scanFiles(const CSString &filespec)
 					}
 					else
 					{
-						if	(form->getRootNode ().getValueByName(valueString,fields[i]._name.c_str(),fields[i]._evaluated,&where))	//fieldForm->getValue(valueString,fields[i]._evaluated))
+						if	(form->getRootNode ().getValueByName(valueString,fields[i]._name, fields[i]._evaluated, &where))	//fieldForm->getValue(valueString,fields[i]._evaluated))
 							;//addQuotesRoundString	(valueString);
 						else
 							setErrorString	(valueString, fields[i]._evaluated, where);
@@ -425,7 +422,7 @@ void scanFiles(const CSString &filespec)
 				
 //				UFormElm::TWhereIsValue where;
 //
-//				bool result=form->getRootNode ().getValueByName(s,fields[i]._name.c_str(),fields[i]._evaluated,&where);
+//				bool result=form->getRootNode ().getValueByName(s,fields[i]._name, fields[i]._evaluated,&where);
 //				if (!result)
 //				{
 //					if (fields[i]._evaluated)
@@ -553,7 +550,7 @@ void executeScriptBuf(const string &text)
 void executeScriptFile(const string &filename)
 {
 	ucstring	temp;
-	CI18N::readTextFile(filename, temp, false, false, false);
+	CI18N::readTextFile(filename, temp, false, false);
 
 	if (temp.empty())
 	{
@@ -689,12 +686,13 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 {
 	const uint			BUFFER_SIZE = 16*1024;
 	char			lineBuffer[BUFFER_SIZE];
-	FILE			*s;
 
 	vector<string>	fields;
 	vector<string>	args;
 
-	if ((s = fopen(file.c_str(), "r")) == NULL)
+	FILE *s = nlfopen(file, "r");
+	
+	if (s == NULL)
 	{
 		fprintf(stderr, "Can't find file %s to convert\n", file.c_str());
 		return;
@@ -935,7 +933,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 						if ( idm==dirmapDirs.end() )
 						{
 							nlinfo( "Directory mapping not found for %s (index %u)", filebase.c_str(), letterIndex );
-							dirbase = ""; // put into root
+							dirbase.clear(); // put into root
 						}
 					}
 					else
@@ -955,7 +953,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 		{
 
 			// Load sheet (skip if failed)
-			dirbase = "";
+			dirbase.clear();
 			filename = (*it).second; // whole path
 			form = (CForm*)formLoader->loadForm( filename.c_str() );
 			if (form == NULL)
@@ -1028,7 +1026,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 
 			const	UFormElm	*fieldForm=NULL;
 						
-			if	(rootForm.getNodeByName(&fieldForm, var.c_str()))
+			if	(rootForm.getNodeByName(&fieldForm, var))
 			{
 				UFormDfn	*dfnForm=const_cast<UFormElm&>(rootForm).getStructDfn();
 				nlassert(dfnForm);
@@ -1124,8 +1122,8 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 						}
 						//nldebug( "%s: %s '%s'", args[0].c_str(), var.c_str(), memberVal.c_str() );
 						// need to put the value at the correct index.
-						const	std::string	fieldName=NLMISC::toString("%s[%d]", var.c_str(), currentMemberIndex).c_str();
-						const_cast<UFormElm&>(rootForm).setValueByName(memberVal.c_str(), fieldName.c_str());
+						const	std::string	fieldName=NLMISC::toString("%s[%u]", var.c_str(), currentMemberIndex).c_str();
+						const_cast<UFormElm&>(rootForm).setValueByName(memberVal, fieldName);
 						isModified=true;
 						displayed = true;
 					}
@@ -1134,7 +1132,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 						if	(!isNewSheet)
 						{
 							string	test;
-							if	(	rootForm.getValueByName(test,var.c_str())
+							if	(	rootForm.getValueByName(test, var)
 								&&	test==memberVal	)
 							{
 								continue;
@@ -1142,7 +1140,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 							
 						}					
 						//nldebug( "%s: %s '%s'", args[0].c_str(), var.c_str(), memberVal.c_str() );
-						const_cast<UFormElm&>(rootForm).setValueByName(memberVal.c_str(), var.c_str());
+						const_cast<UFormElm&>(rootForm).setValueByName(memberVal, var);
 						isModified=true;
 						displayed = true;
 					}

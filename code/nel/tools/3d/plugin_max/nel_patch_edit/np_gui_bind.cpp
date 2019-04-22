@@ -165,7 +165,11 @@ int EPM_BindMouseProc::proc(
 			int flags, 
 			IPoint2 m)
 {
-	ViewExp *vpt = ip->GetViewport(hwnd);	
+#if MAX_VERSION_MAJOR >= 19
+	ViewExp *vpt = &ip->GetViewExp(hwnd);
+#else
+	ViewExp *vpt = ip->GetViewport(hwnd);
+#endif
 	int res = TRUE;
 	static PatchMesh *shape1 = NULL;
 	static int poly1, vert1, seg1;
@@ -302,8 +306,11 @@ int EPM_BindMouseProc::proc(
 			break;			
 		}
 
-	if (vpt)
+#if MAX_VERSION_MAJOR < 19
+		if (vpt)
 		ip->ReleaseViewport(vpt);
+#endif
+
 	return res;
 }
 

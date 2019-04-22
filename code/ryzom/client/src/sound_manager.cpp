@@ -53,6 +53,10 @@
 # include "view.h"
 #endif
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 extern CLightCycleManager	LightCycleManager;
 extern NL3D::UDriver		*Driver;
 extern NL3D::UCamera		MainCam;
@@ -1028,17 +1032,18 @@ void CSoundManager::loadProperties(const string &soundName, USource *source)
 
 	// Search for the file.
 	string filePath = CPath::lookup(soundName+".sdf");
-	ifstream file(filePath.c_str(), ios::in);
+
+	CIFile file;
 
 	// Try to open the file.
-	if(file.is_open())
+	if (file.open(filePath))
 	{
 		char tmpBuff[260];
 		char delimiterBox[] = "\t ";
 		// While the end of the file is not reached.
 		while(!file.eof())
 		{
-			// Get a line (teh line should not be more than _MAX_LINE_SIZE).
+			// Get a line (the line should not be more than _MAX_LINE_SIZE).
 			file.getline(tmpBuff, 260);
 			char *token = strtok(tmpBuff, delimiterBox);
 			while(token != NULL)

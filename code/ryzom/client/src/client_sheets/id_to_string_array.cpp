@@ -51,7 +51,7 @@ void CIDToStringArraySheet::build(const NLGEORGES::UFormElm &item)
 }
 
 // *******************************************************************************************
-void CIDToStringArraySheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CIDToStringArraySheet::serial(NLMISC::IStream &f)
 {
 	f.serialCont(Array);
 }
@@ -64,7 +64,7 @@ void CIDToString::build(const NLGEORGES::UFormElm &item)
 }
 
 // *******************************************************************************************
-void CIDToString::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CIDToString::serial(NLMISC::IStream &f)
 {
 	f.serial(ID);
 	f.serial(String);

@@ -71,7 +71,7 @@ typedef uint32 TUid;
  */
 struct CInetAddressHashMapTraits
 {
-	enum { bucket_size = 4, min_buckets = 8, };
+	enum { bucket_size = 4, min_buckets = 8 };
 	inline size_t operator() ( const NLNET::CInetAddress& x ) const
 	{
 		//return x.port();

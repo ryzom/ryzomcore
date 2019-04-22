@@ -49,6 +49,7 @@
 #include <nel/3d/material.h>
 
 #include <math.h>
+#include <limits>
 
 using namespace NLMISC;
 using namespace NL3D;
@@ -70,8 +71,8 @@ UMaterial sceneMaterial;
 namespace R2
 {
 
-const TBufferEntry InteriorValue= (TBufferEntry)(~0u-1);
-const TBufferEntry ValueBorder= (TBufferEntry)(~0u-2);
+const TBufferEntry InteriorValue = std::numeric_limits<TBufferEntry>::max()-1;
+const TBufferEntry ValueBorder = std::numeric_limits<TBufferEntry>::max()-2;
 const uint32 BigValue= 15*5;
 const float limitValue = 200.0;
 
@@ -843,6 +844,7 @@ void CScreenshotIslands::processProximityBuffer(TBuffer & inputBuffer, uint32 li
 
 		bool lastValue = false;
 		CVector2f firstPixelBorder;
+		firstPixelBorder.set(0.f, 0.f);
 		uint32 nbPixelsBorder = 0;
 
 		for (uint32 x=0;x<lineLength;++x)
@@ -906,6 +908,7 @@ void CScreenshotIslands::processProximityBuffer(TBuffer & inputBuffer, uint32 li
 	{
 		bool lastValue = false;
 		CVector2f firstPixelBorder;
+		firstPixelBorder.set(0.f, 0.f);
 		uint32 nbPixelsBorder = 0;
 	
 		for(uint32 y=0; y<numLines; y++)
@@ -1155,7 +1158,7 @@ void CScreenshotIslands::loadIslands()
 			TBuffer cleanBuffer;
 			processProximityBuffer(zoneBuffer, zones[i].getZoneWidth(), cleanBuffer);
 
-			string fileName = string("");
+			string fileName;
 			list< string >::const_iterator itIsland(continent.Islands.begin()), lastIsland(continent.Islands.end());
 			for( ; itIsland != lastIsland ; ++itIsland)
 			{
@@ -1175,7 +1178,7 @@ void CScreenshotIslands::loadIslands()
 			}
 		
 			// write the processed proximity map to an output file
-			if(fileName != "")
+			if(!fileName.empty())
 			{
 				writeProximityBufferToTgaFile(fileName, cleanBuffer, zones[i].getZoneWidth(), zones[i].getZoneHeight());
 				_TempFileNames.push_back(fileName);
@@ -1378,11 +1381,18 @@ void CScreenshotIslands::buildIslandsTextures()
 	{
 		string seasonSuffix = *itSeason;
 
-		int season;
-		if(seasonSuffix=="_sp") season = CSeason::Spring;
-		else if(seasonSuffix=="_su") season = CSeason::Summer;
-		else if(seasonSuffix=="_au") season = CSeason::Autumn;
-		else if(seasonSuffix=="_wi") season = CSeason::Winter;
+		sint season = -1;
+
+		if (seasonSuffix == "_sp") season = CSeason::Spring;
+		else if (seasonSuffix == "_su") season = CSeason::Summer;
+		else if (seasonSuffix == "_au") season = CSeason::Autumn;
+		else if (seasonSuffix == "_wi") season = CSeason::Winter;
+
+		if (season == -1)
+		{
+			nlwarning("Unknown season suffix %s, skipping...", seasonSuffix.c_str());
+			continue;
+		}
 
 		// Iterations on Continents
 		TContinentsData::iterator itCont(_ContinentsData.begin()), lastCont(_ContinentsData.end());
@@ -1672,11 +1682,9 @@ inline bool RGB2HSV(const CRGBA & rgba, uint & Hue, uint & Sat, uint & Val)
 {
 	double Min_, Max_, Delta, H, S, V;
 	
-	H = 0.0;
 	Min_ = min(min(rgba.R, rgba.G), rgba.B);
 	Max_ = max(max(rgba.R, rgba.G), rgba.B);
 	Delta = ( Max_ - Min_);
-	V = Max_;
 
 	if(Max_ != 0.0)
 	{
@@ -1684,10 +1692,14 @@ inline bool RGB2HSV(const CRGBA & rgba, uint & Hue, uint & Sat, uint & Val)
 	}
 	else
 	{
-		S = 0.0;
-		H = -1;
+		Hue = 0;
+		Sat = 0;
+		Val = 0;
 		return false;
 	}
+
+	H = 0.0;
+	V = Max_;
 
 	if(rgba.R == Max_) 
 	{
@@ -1760,7 +1772,6 @@ void CScreenshotIslands::buildBackTextureHLS(const std::string & islandName, con
 			}
 		}
 	}
-
 
 	// HLS order
 	list< CRGBA > sortedHLS;
@@ -1957,7 +1968,7 @@ void CProximityMapBuffer::load(const std::string& name)
 				}
 			}
 			// setup the next pixel in the output buffers...
-			_Buffer[y*_ScanWidth+x]= (isAccessible? 0: (TBufferEntry)~0u);
+			_Buffer[y*_ScanWidth+x]= (isAccessible? 0:std::numeric_limits<TBufferEntry>::max());
 		}
 	}
 }
@@ -2044,7 +2055,7 @@ void CProximityMapBuffer::_prepareBufferForZoneProximityMap(const CProximityZone
 	uint32 zoneWidth= zone.getZoneWidth();
 	uint32 zoneHeight= zone.getZoneHeight();
 	zoneBuffer.clear();
-	zoneBuffer.resize(zoneWidth*zoneHeight,(TBufferEntry)~0u);
+	zoneBuffer.resize(zoneWidth*zoneHeight, std::numeric_limits<TBufferEntry>::max());
 
 	// setup the buffer's accessible points and prime vects[0] with the set of accessible points in the zone buffer
 	for (uint32 i=0;i<zone.getOffsets().size();++i)
@@ -2073,11 +2084,11 @@ void CProximityMapBuffer::_prepareBufferForZoneProximityMap(const CProximityZone
 			{
 				zoneBuffer[offset]= InteriorValue;
 
-				if(offset-1>=startOffset && zoneBuffer[offset-1]==(TBufferEntry)~0u)
+				if(offset-1>=startOffset && zoneBuffer[offset-1] == std::numeric_limits<TBufferEntry>::max())
 				{
 					zoneBuffer[offset-1] = ValueBorder;
 				}
-				if(offset+1<=endOffset && zoneBuffer[offset+1]==(TBufferEntry)~0u)
+				if(offset+1<=endOffset && zoneBuffer[offset+1] == std::numeric_limits<TBufferEntry>::max())
 				{
 					zoneBuffer[offset+1] = ValueBorder;
 				}
@@ -2105,11 +2116,11 @@ void CProximityMapBuffer::_prepareBufferForZoneProximityMap(const CProximityZone
 			{
 				zoneBuffer[offset]= InteriorValue;
 
-				if(offset>zoneWidth && zoneBuffer[offset-zoneWidth]==(TBufferEntry)~0u)
+				if(offset>zoneWidth && zoneBuffer[offset-zoneWidth] == std::numeric_limits<TBufferEntry>::max())
 				{
 					zoneBuffer[offset-zoneWidth] = ValueBorder;
 				}
-				if(offset+zoneWidth<zoneHeight*zoneWidth && zoneBuffer[offset+zoneWidth]==(TBufferEntry)~0u)
+				if(offset+zoneWidth<zoneHeight*zoneWidth && zoneBuffer[offset+zoneWidth] == std::numeric_limits<TBufferEntry>::max())
 				{
 					zoneBuffer[offset+zoneWidth] = ValueBorder;
 				}
@@ -2154,19 +2165,19 @@ void CProximityMapBuffer::generateZoneProximityMap(const CProximityZone& zone,TB
 			zoneBuffer[val]=dist;
 
 			// decompose into x and y in order to manage identification of neighbour cells correctly
-			uint32 x= val% zoneWidth;
-			uint32 y= val/ zoneWidth;
+			uint32 x= val % zoneWidth;
+			uint32 y= val / zoneWidth;
 
 			#define TEST_MOVE(xoffs,yoffs,newDist)\
 				{\
-					if (((uint32)(x+(xoffs))<zoneWidth) && ((uint32)(y+(yoffs))<zoneHeight))\
+					if (((uint32)(x+xoffs)<zoneWidth) && ((uint32)(y+yoffs)<zoneHeight))\
 					{\
-						uint32 newVal= val+(xoffs)+((yoffs)*zoneWidth);\
-						bool isInterior= ((zoneBuffer[newVal]==InteriorValue && newDist > BigValue) || (zoneBuffer[newVal]==ValueBorder && newDist > BigValue));\
-						if (zoneBuffer[newVal]>(newDist) && !isInterior)\
+						uint32 newVal= val+xoffs+(yoffs*zoneWidth);\
+						bool isInterior = ((zoneBuffer[newVal] == InteriorValue && newDist > BigValue) || (zoneBuffer[newVal] == ValueBorder && newDist > BigValue));\
+						if (zoneBuffer[newVal] > newDist && !isInterior)\
 						{\
-							zoneBuffer[newVal]=(newDist);\
-							vects[(newDist)&15].push_back(newVal);\
+							zoneBuffer[newVal] = newDist;\
+							vects[newDist & 15].push_back(newVal);\
 							++entriesToTreat;\
 						}\
 					}\
@@ -2239,8 +2250,8 @@ CProximityZone::CProximityZone(uint32 scanWidth,uint32 scanHeight,sint32 xOffset
 
 	_MaxOffset	= scanWidth * scanHeight -1;
 
-	_XMin = ~0u;
-	_YMin = ~0u;
+	_XMin = std::numeric_limits<uint32>::max();
+	_YMin = std::numeric_limits<uint32>::max();
 	_XMax = 0;
 	_YMax = 0;
 

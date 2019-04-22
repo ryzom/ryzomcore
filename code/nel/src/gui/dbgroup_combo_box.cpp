@@ -28,6 +28,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupComboBox, std::string, "combo_box");
@@ -262,6 +266,7 @@ namespace NLGUI
 		dirt();
 		_Texts.clear();
 		_Textures.clear();
+		_Grayed.clear();
 	}
 
 	// ***************************************************************************
@@ -270,6 +275,7 @@ namespace NLGUI
 		dirt();
 		_Texts.push_back(make_pair((uint)_Texts.size(), text));
 		_Textures.push_back(std::string());
+		_Grayed.push_back(false);
 	}
 
 	// ***************************************************************************
@@ -292,9 +298,11 @@ namespace NLGUI
 			{
 				_Texts[t+1] = _Texts[t];
 				_Textures[t+1] = _Textures[t];
+				_Grayed[t+1] = _Grayed[t];
 			}
 			_Texts[i] = make_pair(i, text);
 			_Textures[i] = std::string();
+			_Grayed[i] = false;
 		}
 		else if(i==_Texts.size())
 			addText(text);
@@ -309,6 +317,24 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void	CDBGroupComboBox::setGrayed(uint i, bool g)
+	{
+		dirt();
+		if(i<_Grayed.size())
+			_Grayed[i] = g;
+	}
+
+	// ***************************************************************************
+	bool	CDBGroupComboBox::getGrayed(uint i) const
+	{
+		if(i<_Grayed.size())
+			return _Grayed[i];
+		else
+			return false;
+	}
+
+
+	// ***************************************************************************
 	void	CDBGroupComboBox::removeText(uint nPos)
 	{
 		dirt();
@@ -316,6 +342,7 @@ namespace NLGUI
 		{
 			_Texts.erase( _Texts.begin()+nPos );
 			_Textures.erase( _Textures.begin()+nPos );
+			_Grayed.erase ( _Grayed.begin()+nPos );
 		}
 	}
 
@@ -364,7 +391,6 @@ namespace NLGUI
 		else
 			return null;
 	}
-
 
 	// ***************************************************************************
 	void		CDBGroupComboBox::setSelection(sint32 val)
@@ -445,6 +471,12 @@ namespace NLGUI
 	ucstring CDBGroupComboBox::getViewText() const
 	{
 		return  _ViewText->getText();
+	}
+
+	// ***************************************************************************
+	CViewText *CDBGroupComboBox::getViewText()
+	{
+		return  _ViewText;
 	}
 
 	// ***************************************************************************
@@ -543,7 +575,7 @@ namespace NLGUI
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
 		ucstring text;
 		nlverify(CLuaIHM::pop(ls, text));
-		setText((uint) ls.toNumber(1), text);
+		setText((uint) ls.toInteger(1), text);
 		return 0;
 	}
 
@@ -556,7 +588,7 @@ namespace NLGUI
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
 		ucstring text;
 		nlverify(CLuaIHM::pop(ls, text));
-		insertText((uint) ls.toNumber(1), text);
+		insertText((uint) ls.toInteger(1), text);
 		return 0;
 	}
 
@@ -569,7 +601,7 @@ namespace NLGUI
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
 		ucstring texture;
 		nlverify(CLuaIHM::pop(ls, texture));
-		setTexture((uint) ls.toNumber(1), texture);
+		setTexture((uint) ls.toInteger(1), texture);
 		return 0;
 	}
 
@@ -579,7 +611,7 @@ namespace NLGUI
 		const char *funcName = "setText";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		CLuaIHM::push(ls, getText((uint) ls.toNumber(1)));
+		CLuaIHM::push(ls, getText((uint) ls.toInteger(1)));
 		return 1;
 	}
 
@@ -589,7 +621,7 @@ namespace NLGUI
 		const char *funcName = "removeText";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		removeText((uint) ls.toNumber(1));
+		removeText((uint) ls.toInteger(1));
 		return 0;
 	}
 
@@ -598,7 +630,7 @@ namespace NLGUI
 	{
 		const char *funcName = "getNumTexts";
 		CLuaIHM::checkArgCount(ls, funcName, 0);
-		ls.push((double) getNumTexts());
+		ls.push(getNumTexts());
 		return 1;
 	}
 
@@ -606,6 +638,9 @@ namespace NLGUI
 	void CDBGroupComboBox::fillMenu(CGroupMenu *groupMenu) const
 	{
 		nlassert(groupMenu);
+
+			if (_ViewText)
+				groupMenu->setFontSize(_ViewText->getFontSize());
 
 			// Setup the menu with combo action.
 			groupMenu->reset();
@@ -619,6 +654,7 @@ namespace NLGUI
 				}
 				groupMenu->addLine(getText(i), "combo_box_select_end", toString(i),
 					"", std::string(), getTexture(i).toString(), checkable);
+				groupMenu->setGrayedLine(i, getGrayed(i));
 			}
 
 

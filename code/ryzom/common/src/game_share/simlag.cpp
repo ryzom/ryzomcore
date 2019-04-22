@@ -22,6 +22,10 @@
 // Includes
 //
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 //
 // Using
 //
@@ -138,7 +142,7 @@ void sendUDPNow (CUdpSock *client, const uint8 *packet, uint32 packetSize, const
 		client->sendTo (packet, packetSize, *addr);
 
 //	uint32 packetNumber = *(uint32 *)packet;
-//	nlinfo ("time %"NL_I64"u sending now packet %5u", CTime::getLocalTime (), packetNumber);
+//	nlinfo ("time %" NL_I64 "u sending now packet %5u", CTime::getLocalTime (), packetNumber);
 }
 
 void sendUDP (CUdpSock *client, const uint8 *packet, uint32 packetSize, const CInetAddress *addr)
@@ -159,7 +163,7 @@ void sendUDP (CUdpSock *client, const uint8 *packet, uint32 packetSize, const CI
 			CBufferizedPacket *bp = new CBufferizedPacket (client, packet, packetSize, lag, addr);
 
 			// duplicate the packet
-			if ((float)rand()/(float)(RAND_MAX)*100.0f < PacketDisordering && BufferizedPackets.size() > 0)
+			if ((float)rand()/(float)(RAND_MAX)*100.0f < PacketDisordering && !BufferizedPackets.empty())
 			{
 				CBufferizedPacket *bp2 = BufferizedPackets.back();
 

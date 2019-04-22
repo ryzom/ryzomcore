@@ -139,7 +139,7 @@ public:
 
 	struct CEntityIdHash
 	{
-		enum { bucket_size = 4, min_buckets = 8, };
+		enum { bucket_size = 4, min_buckets = 8 };
 		size_t	operator () (const NLMISC::CEntityId &id) const { return (uint32)id.getShortId(); }
 		size_t	operator () (const NLMISC::CEntityId &left, const NLMISC::CEntityId &right) const { return left < right; }
 	};
@@ -999,7 +999,7 @@ private:
 	 * compute Cell Vision, 
 	 * \param CCell the cell to compute vision on
 	 */
-	static void computeCellVision( CCell *cell, CVisionEntry* entitiesSeenFromCell, uint &numEntities);
+	static void computeCellVision( CCell *cell, CVisionEntry* entitiesSeenFromCell, uint &numEntities, CWorldEntity *player);
 
 	/**
 	 * Update vision for this player

@@ -18,6 +18,7 @@
 #include "nel/misc/command.h"
 #include "nel/misc/variable.h"
 
+#include "nel/misc/common.h"
 #include "nel/misc/aabbox.h"
 #include "nel/misc/vector.h"
 #include "nel/misc/vectord.h"
@@ -1346,12 +1347,14 @@ public:
 				CComputeCell	*cell =	_WorldMap.getComputeCell(scanline);
 
 				{
-					uint	i;
-					for (i=0; i<16*16; ++i)
+					for (uint i = 0; i < 16; ++i)
 					{
-						toposGridList[0][i].topos[0]	=
-						toposGridList[0][i].topos[1]	=
-						toposGridList[0][i].topos[2]	=	-1;
+						for (uint j = 0; j < 16; ++j)
+						{
+							toposGridList[i][j].topos[0]	=
+							toposGridList[i][j].topos[1]	=
+							toposGridList[i][j].topos[2]	=	-1;
+						}
 					}
 				}
 
@@ -1977,7 +1980,7 @@ public:
 		CBMP4Image<2,2>::SHdr		imageHdr(imageWidth, imageHeight);
 		CBMP4Image<2,2>::SPalette	imagePalette;
 
-		FILE	*outf = fopen((OutputPath+name+".bmp").c_str(),"wb");
+		FILE	*outf = nlfopen(OutputPath+name+".bmp", "wb");
 
 		if (outf == NULL)
 			return;
@@ -2068,7 +2071,7 @@ public:
 
 		_WorldMap.clear();
 		string	ext = CFile::getExtension(name);
-		if (ext == "")
+		if (ext.empty())
 			ext = "cwmap2";
 		CIFile	f(OutputPath+CFile::getFilenameWithoutExtension(name)+"."+ext);
 		f.serial(_WorldMap);
@@ -2093,8 +2096,8 @@ public:
 		CBMP4Image<2,2>::SHdr		imageHdr(imageWidth, imageHeight);
 		CBMP4Image<2,2>::SPalette	imagePalette;
 
-		FILE	*outf = fopen((OutputPath+name+".bmp").c_str(),"wb");
-		FILE	*outfh = fopen((OutputPath+name+"_hm.bmp").c_str(),"wb");
+		FILE	*outf = nlfopen(OutputPath+name+".bmp", "wb");
+		FILE	*outfh = nlfopen(OutputPath+name+"_hm.bmp", "wb");
 
 		if (outf == NULL)
 			return;
@@ -2210,7 +2213,7 @@ public:
 
 		_WorldMap.clear();
 		string	ext = CFile::getExtension(name);
-		if (ext == "")
+		if (ext.empty())
 			ext = "cw_map2";
 		
 		CIFile	f(CFile::getPath(name) +  CFile::getFilenameWithoutExtension(name)+"."+ext);

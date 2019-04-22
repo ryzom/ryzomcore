@@ -20,6 +20,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/vector.h"
 #include "nel/misc/plane.h"
+#include "nel/misc/aabbox.h"
 
 
 namespace NL3D {
@@ -39,16 +40,16 @@ public:
 
 	/** build the camera collision as a cone or a cylinder
 	 */
-	void			build(const CVector &start, const CVector &end, float radius, bool cone);
+	void			build(const NLMISC::CVector &start, const NLMISC::CVector &end, float radius, bool cone);
 
 	/** build the camera collision as a simple ray
 	 */
-	void			buildRay(const CVector &start, const CVector &end);
+	void			buildRay(const NLMISC::CVector &start, const NLMISC::CVector &end);
 
 	/** compute the intersection of the Camera Volume against the triangle, and minimize
 	 *	minDist (actual square of distance) with min sqr distance of the poly.
 	 */
-	void			minimizeDistanceAgainstTri(const CVector &p0, const CVector &p1, const CVector &p2, float &sqrMinDist);
+	void			minimizeDistanceAgainstTri(const NLMISC::CVector &p0, const NLMISC::CVector &p1, const NLMISC::CVector &p2, float &sqrMinDist);
 
 	/** Compute into this the camera collision 'other' mul by 'matrix'
 	 *	NB: for cone Radius, suppose uniform scale, else will have strange result (a uniform scale is deduced)
@@ -69,9 +70,9 @@ private:
 	enum	{MaxNPlanes=6};
 
 	// The start of the camera raycast
-	CVector		_Start;
+	NLMISC::CVector		_Start;
 	// The end of the camera raycast
-	CVector		_End;
+	NLMISC::CVector		_End;
 	// The radius (at end only if cone)
 	float		_Radius;
 	// cone or cylinder?
@@ -83,8 +84,8 @@ private:
 	NLMISC::CAABBox		_BBox;
 
 	// Temp Data for minimizeDistanceAgainstTri
-	CVector		_ArrayIn[3+MaxNPlanes];
-	CVector		_ArrayOut[3+MaxNPlanes];
+	NLMISC::CVector		_ArrayIn[3+MaxNPlanes];
+	NLMISC::CVector		_ArrayOut[3+MaxNPlanes];
 
 	// The pyramid representing the camera collision volume. Nb: local to start for precision problems
 	NLMISC::CPlane		_Pyramid[MaxNPlanes];
@@ -97,10 +98,10 @@ private:
 	float		_MaxRadiusProj;
 	float		_OODeltaRadiusProj;
 	float		_RayLen;
-	CVector		_RayNorm;
+	NLMISC::CVector		_RayNorm;
 
 	// simpler method for simple ray
-	void			intersectRay(const CVector &p0, const CVector &p1, const CVector &p2, float &sqrMinDist);
+	void			intersectRay(const NLMISC::CVector &p0, const NLMISC::CVector &p1, const NLMISC::CVector &p2, float &sqrMinDist);
 
 };
 

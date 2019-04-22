@@ -40,7 +40,7 @@ using namespace std;
 
 namespace NLMISC {
 
-static CHARFORMAT2 CharFormat;
+static CHARFORMAT2A CharFormat;
 
 CWinDisplayer::CWinDisplayer(const char *displayerName) : CWindowDisplayer(displayerName), Exit(false)
 {
@@ -149,15 +149,14 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					CWinDisplayer *cwd=(CWinDisplayer *)GetWindowLongPtr (hWnd, GWLP_USERDATA);
 					// get the text as unicode string
 					GetWindowTextW(cwd->_HInputEdit, wText, 20000);
-					ucstring ucs((ucchar*)wText);
 					// and convert it to UTF-8 encoding.
-					TextSend = ucs.toUtf8();
-					SendMessage (cwd->_HInputEdit, WM_SETTEXT, (WPARAM)0, (LPARAM)"");
+					TextSend = wideToUtf8(wText);
+					SendMessageA (cwd->_HInputEdit, WM_SETTEXT, (WPARAM)0, (LPARAM)"");
 					const char *pos2 = TextSend.c_str();
 					string str;
 					while (*pos2 != '\0')
 					{
-						str = "";
+						str.clear();
 
 						// get the string
 						while (*pos2 != '\0' && *pos2 != '\n')
@@ -193,14 +192,13 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 					// get the text as unicode string
 					GetWindowTextW(cwd->_HInputEdit, wText, 20000);
-					ucstring ucs((ucchar*)wText);
 					// and convert it to UTF-8 encoding
-					string str = ucs.toUtf8();
+					string str = wideToUtf8(wText);
 					nlassert (cwd->Log != NULL);
 					ICommand::expand (str, *cwd->Log);
-					SendMessage (cwd->_HInputEdit, WM_SETTEXT, (WPARAM)0, (LPARAM)str.c_str());
+					SendMessageW (cwd->_HInputEdit, WM_SETTEXT, (WPARAM)0, (LPARAM)wText);
 
-					SendMessage (cwd->_HInputEdit, EM_SETSEL, str.size(), str.size());
+					SendMessageA (cwd->_HInputEdit, EM_SETSEL, wcslen(wText), wcslen(wText));
 
 					return 1;
 				}
@@ -209,7 +207,7 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				if (pmf->wParam == VK_UP)
 				{
-					CWinDisplayer *cwd=(CWinDisplayer *)GetWindowLongPtrW (hWnd, GWLP_USERDATA);
+					CWinDisplayer *cwd=(CWinDisplayer *)GetWindowLongPtrA (hWnd, GWLP_USERDATA);
 
 					if (cwd->_PosInHistory > 0)
 						cwd->_PosInHistory--;
@@ -219,9 +217,14 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						ucstring ucs;
 						// convert the text from UTF-8 to unicode
 						ucs.fromUtf8(cwd->_History[cwd->_PosInHistory]);
+
 						// set the text as unicode string
-						SetWindowTextW(cwd->_HInputEdit, (LPCWSTR)ucs.c_str());
-						SendMessage (cwd->_HInputEdit, EM_SETSEL, (WPARAM)ucs.size(), (LPARAM)ucs.size());
+						if (!SetWindowTextW(cwd->_HInputEdit, (LPCWSTR)ucs.c_str()))
+						{
+							nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+						}
+
+						SendMessageA (cwd->_HInputEdit, EM_SETSEL, (WPARAM)ucs.size(), (LPARAM)ucs.size());
 					}
 				}
 				else if (pmf->wParam == VK_DOWN)
@@ -236,9 +239,14 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						ucstring ucs;
 						// convert the text from UTF-8 to unicode
 						ucs.fromUtf8(cwd->_History[cwd->_PosInHistory]);
+
 						// set the text as unicode string
-						SetWindowTextW(cwd->_HInputEdit, (LPCWSTR)ucs.c_str());
-						SendMessage (cwd->_HInputEdit, EM_SETSEL, (WPARAM)ucs.size(), (LPARAM)ucs.size());
+						if (!SetWindowTextW(cwd->_HInputEdit, (LPCWSTR)ucs.c_str()))
+						{
+							nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+						}
+
+						SendMessageA (cwd->_HInputEdit, EM_SETSEL, (WPARAM)ucs.size(), (LPARAM)ucs.size());
 					}
 				}
 			}
@@ -262,13 +270,13 @@ void CWinDisplayer::updateLabels ()
 					// create a button for command and label for variables
 					if (access.value()[i].Value[0] == '@')
 					{
-						access.value()[i].Hwnd = CreateWindowW (L"BUTTON", L"", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 0, 0, 0, 0, _HWnd, (HMENU) NULL, (HINSTANCE) GetWindowLongPtr(_HWnd, GWLP_HINSTANCE), NULL);
+						access.value()[i].Hwnd = CreateWindowA ("BUTTON", "", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 0, 0, 0, 0, _HWnd, (HMENU) NULL, (HINSTANCE) GetWindowLongPtrA(_HWnd, GWLP_HINSTANCE), NULL);
 					}
 					else
 					{
-						access.value()[i].Hwnd = CreateWindowW (L"STATIC", L"", WS_CHILD | WS_VISIBLE | SS_SIMPLE, 0, 0, 0, 0, _HWnd, (HMENU) NULL, (HINSTANCE) GetWindowLongPtr(_HWnd, GWLP_HINSTANCE), NULL);
+						access.value()[i].Hwnd = CreateWindowA ("STATIC", "", WS_CHILD | WS_VISIBLE | SS_SIMPLE, 0, 0, 0, 0, _HWnd, (HMENU) NULL, (HINSTANCE) GetWindowLongPtrA(_HWnd, GWLP_HINSTANCE), NULL);
 					}
-					SendMessage ((HWND)access.value()[i].Hwnd, WM_SETFONT, (WPARAM)_HFont, TRUE);
+					SendMessageA ((HWND)access.value()[i].Hwnd, WM_SETFONT, (WPARAM)_HFont, TRUE);
 					needResize = true;
 				}
 
@@ -290,7 +298,7 @@ void CWinDisplayer::updateLabels ()
 					}
 				}
 
-				SendMessage ((HWND)access.value()[i].Hwnd, WM_SETTEXT, 0, (LPARAM) n.c_str());
+				SendMessageW ((HWND)access.value()[i].Hwnd, WM_SETTEXT, 0, (LPARAM) utf8ToWide(n));
 				access.value()[i].NeedUpdate = false;
 			}
 		}
@@ -354,7 +362,10 @@ void CWinDisplayer::setTitleBar (const string &titleBar)
 
 	nldebug("SERVICE: Set title bar to '%s'", wn.c_str());
 
-	SetWindowTextW (_HWnd, (LPWSTR)ucstring::makeFromUtf8(wn).c_str());
+	if (!SetWindowTextW(_HWnd, (LPWSTR)ucstring::makeFromUtf8(wn).c_str()))
+	{
+		nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+	}
 }
 
 void CWinDisplayer::open (string titleBar, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log)
@@ -427,14 +438,14 @@ void CWinDisplayer::open (string titleBar, bool iconified, sint x, sint y, sint 
 		dwStyle |= WS_HSCROLL;
 
 	_HEdit = CreateWindowExW(WS_EX_OVERLAPPEDWINDOW, RICHEDIT_CLASSW, L"", dwStyle, 0, _ToolBarHeight, w, h-_ToolBarHeight-_InputEditHeight, _HWnd, (HMENU) NULL, (HINSTANCE) GetWindowLongPtr(_HWnd, GWLP_HINSTANCE), NULL);
-	SendMessage (_HEdit, WM_SETFONT, (WPARAM)_HFont, TRUE);
+	SendMessageA (_HEdit, WM_SETFONT, (WPARAM)_HFont, TRUE);
 
 	// set the edit text limit to lot of :)
-	SendMessage (_HEdit, EM_LIMITTEXT, -1, 0);
+	SendMessageA (_HEdit, EM_LIMITTEXT, -1, 0);
 
 	CharFormat.cbSize = sizeof(CharFormat);
 	CharFormat.dwMask = CFM_COLOR;
-	SendMessage(_HEdit,EM_GETCHARFORMAT,(WPARAM)0,(LPARAM)&CharFormat);
+	SendMessageA(_HEdit,EM_GETCHARFORMAT,(WPARAM)0,(LPARAM)&CharFormat);
 	CharFormat.dwEffects &= ~CFE_AUTOCOLOR;
 
 	// create the input edit control
@@ -445,7 +456,7 @@ void CWinDisplayer::open (string titleBar, bool iconified, sint x, sint y, sint 
 
 	LRESULT dwEvent = SendMessageW(_HInputEdit, EM_GETEVENTMASK, (WPARAM)0, (LPARAM)0);
 	dwEvent |= ENM_MOUSEEVENTS | ENM_KEYEVENTS | ENM_CHANGE;
-	SendMessage(_HInputEdit, EM_SETEVENTMASK, (WPARAM)0, (LPARAM)dwEvent);
+	SendMessageA(_HInputEdit, EM_SETEVENTMASK, (WPARAM)0, (LPARAM)dwEvent);
 
 	// resize the window
 	RECT rc;
@@ -477,8 +488,8 @@ void CWinDisplayer::clear ()
 	bool focus = (GetFocus() == _HEdit);
 	if (focus)
 	{
-		SendMessage(_HEdit,EM_SETOPTIONS,ECOOP_AND,(LPARAM)~ECO_AUTOVSCROLL);
-		SendMessage(_HEdit,EM_SETOPTIONS,ECOOP_AND,(LPARAM)~ECO_AUTOHSCROLL);
+		SendMessageA(_HEdit,EM_SETOPTIONS,ECOOP_AND,(LPARAM)~ECO_AUTOVSCROLL);
+		SendMessageA(_HEdit,EM_SETOPTIONS,ECOOP_AND,(LPARAM)~ECO_AUTOHSCROLL);
 	}
 
 	// get number of line
@@ -491,7 +502,7 @@ void CWinDisplayer::clear ()
 	SendMessageW (_HEdit, EM_SETSEL, 0, nIndex);
 
 	// clear all the text
-	SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) "");
+	SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) L"");
 
 	SendMessageW(_HEdit,EM_SETMODIFY,(WPARAM)TRUE,(LPARAM)0);
 
@@ -534,13 +545,13 @@ void CWinDisplayer::display_main ()
 				bool focus = (GetFocus() == _HEdit);
 				if (focus)
 				{
-					SendMessage(_HEdit,EM_SETOPTIONS,ECOOP_AND,(LPARAM)~ECO_AUTOVSCROLL);
-					SendMessage(_HEdit,EM_SETOPTIONS,ECOOP_AND,(LPARAM)~ECO_AUTOHSCROLL);
+					SendMessageA(_HEdit,EM_SETOPTIONS,ECOOP_AND,(LPARAM)~ECO_AUTOVSCROLL);
+					SendMessageA(_HEdit,EM_SETOPTIONS,ECOOP_AND,(LPARAM)~ECO_AUTOHSCROLL);
 				}
 
 				// store old selection
 				DWORD startSel, endSel;
-				SendMessage (_HEdit, EM_GETSEL, (WPARAM)&startSel, (LPARAM)&endSel);
+				SendMessageA (_HEdit, EM_GETSEL, (WPARAM)&startSel, (LPARAM)&endSel);
 
 				// find how many lines we have to remove in the current output to add new lines
 
@@ -554,7 +565,7 @@ void CWinDisplayer::display_main ()
 
 					if (nblineremove == _HistorySize)
 					{
-						SendMessage (_HEdit, WM_SETTEXT, 0, (LPARAM) "");
+						SendMessageA (_HEdit, WM_SETTEXT, 0, (LPARAM) "");
 						startSel = endSel = -1;
 					}
 					else
@@ -564,7 +575,7 @@ void CWinDisplayer::display_main ()
 						LRESULT oldIndex2 = SendMessageW (_HEdit, EM_LINEINDEX, nblineremove, 0);
 						//nlassert (oldIndex2 != -1);
 						SendMessageW (_HEdit, EM_SETSEL, oldIndex1, oldIndex2);
-						SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) "");
+						SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) L"");
 
 						// update the selection due to the erasing
 						sint dt = (sint)(oldIndex2 - oldIndex1);
@@ -594,31 +605,31 @@ void CWinDisplayer::display_main ()
 						str += ucstring::makeFromUtf8((*it).second);
 					}
 
-					SendMessage (_HEdit, EM_SETSEL, -1, -1);
+					SendMessageA(_HEdit, EM_SETSEL, -1, -1);
 
 					if ((col>>24) == 0)
 					{
 						// there s a specific color
 						CharFormat.crTextColor = RGB ((col>>16)&0xFF, (col>>8)&0xFF, col&0xFF);
-						SendMessage((HWND) _HEdit, EM_SETCHARFORMAT, (WPARAM) SCF_SELECTION, (LPARAM) &CharFormat);
+						SendMessageA(_HEdit, EM_SETCHARFORMAT, (WPARAM) SCF_SELECTION, (LPARAM) &CharFormat);
 					}
 
 					// add the string to the edit control
-					SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) str.c_str());
+					SendMessageW(_HEdit, EM_REPLACESEL, FALSE, (LPARAM) str.c_str());
 				}
 
 				// restore old selection
-				SendMessage (_HEdit, EM_SETSEL, startSel, endSel);
+				SendMessageA(_HEdit, EM_SETSEL, startSel, endSel);
 
-				SendMessage(_HEdit,EM_SETMODIFY,(WPARAM)TRUE,(LPARAM)0);
+				SendMessageA(_HEdit,EM_SETMODIFY,(WPARAM)TRUE,(LPARAM)0);
 
 				if (bottom)
-					SendMessage(_HEdit,WM_VSCROLL,(WPARAM)SB_BOTTOM,(LPARAM)0L);
+					SendMessageA(_HEdit,WM_VSCROLL,(WPARAM)SB_BOTTOM,(LPARAM)0L);
 
 				if (focus)
 				{
-					SendMessage(_HEdit,EM_SETOPTIONS,ECOOP_OR,(LPARAM)ECO_AUTOVSCROLL);
-					SendMessage(_HEdit,EM_SETOPTIONS,ECOOP_OR,(LPARAM)ECO_AUTOHSCROLL);
+					SendMessageA(_HEdit,EM_SETOPTIONS,ECOOP_OR,(LPARAM)ECO_AUTOVSCROLL);
+					SendMessageA(_HEdit,EM_SETOPTIONS,ECOOP_OR,(LPARAM)ECO_AUTOHSCROLL);
 				}
 			}
 

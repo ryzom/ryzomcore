@@ -113,6 +113,8 @@
 #include "nel/gui/lua_helper.h"
 using namespace NLGUI;
 #include "nel/gui/lua_ihm.h"
+#include "nel/gui/curl_certificates.h"
+
 #include "lua_ihm_ryzom.h"
 
 #include "add_on_manager.h"
@@ -130,6 +132,9 @@ using namespace NLGUI;
 
 #include "../global.h"
 #include "user_agent.h"
+#include "../item_group_manager.h"
+
+#include "group_html_webig.h"
 
 using namespace NLMISC;
 
@@ -455,6 +460,7 @@ CInterfaceManager::CInterfaceManager()
 	parser->addModule( "command", new CCommandParser() );
 	parser->addModule( "key", new CKeyParser() );
 	parser->addModule( "macro", new CMacroParser() );
+	parser->addModule( "landmarks", new CLandmarkParser() );
 	parser->setCacheUIParsing( ClientCfg.CacheUIParsing );
 
 	CViewRenderer::setDriver( Driver );
@@ -469,11 +475,20 @@ CInterfaceManager::CInterfaceManager()
 	CGroupHTML::options.languageCode = ClientCfg.getHtmlLanguageCode();
 	CGroupHTML::options.appName = getUserAgentName();
 	CGroupHTML::options.appVersion = getUserAgentVersion();
+	CGroupHTML::options.curlMaxConnections = ClientCfg.CurlMaxConnections;
+
+	if (!ClientCfg.CurlCABundle.empty())
+	{
+		// specify custom CA certs, lookup will be made in this function
+		NLGUI::CCurlCertificates::addCertificateFile(ClientCfg.CurlCABundle);
+	}
 
 	NLGUI::CDBManager::getInstance()->resizeBanks( NB_CDB_BANKS );
 	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
 	_ScreenW = _ScreenH = 0;
 	_LastInGameScreenW = _LastInGameScreenH = 0;
+	_InterfaceScaleChanged = false;
+	_InterfaceScale = 1.0f;
 	_DescTextTarget = NULL;
 	_ConfigLoaded = false;
 	_LogState = false;
@@ -494,12 +509,13 @@ CInterfaceManager::CInterfaceManager()
 	CViewRenderer::getInstance()->checkNewScreenSize();
 	{
 		uint32 w,h;
-		CViewRenderer::getInstance()->getScreenSize( w, h );
-		CWidgetManager::getInstance()->setScreenWH( w, h );
+		CViewRenderer::getInstance()->getScreenSize(w, h);
+		CWidgetManager::getInstance()->setScreenWH(w, h);
 	}
 	CViewRenderer::getInstance()->init();
 
 	_CurrentMode = 0;
+	_Modes.resize(MAX_NUM_MODES);
 
 	setInGame( false );
 
@@ -642,7 +658,7 @@ void CInterfaceManager::initLogin()
 	ActionsContext.addActionsManager(&EditActions, RZ_CATEGORY_EDIT);
 
 
-	if (ClientCfg.XMLLoginInterfaceFiles.size()==0)
+	if (ClientCfg.XMLLoginInterfaceFiles.empty())
 	{
 		nlinfo("no xml login config files in client.cfg");
 		return;
@@ -728,7 +744,7 @@ void CInterfaceManager::initOutGame()
 
 	//NLMEMORY::CheckHeap (true);
 
-	if (ClientCfg.XMLOutGameInterfaceFiles.size()==0)
+	if (ClientCfg.XMLOutGameInterfaceFiles.empty())
 	{
 		nlinfo("no xml outgame config files in client.cfg");
 		return;
@@ -794,8 +810,8 @@ void CInterfaceManager::uninitOutGame()
 
 	CInterfaceItemEdition::getInstance()->setCurrWindow(NULL);
 
-	NLMISC::TTime initStart;
-	initStart = ryzomGetLocalTime ();
+//	NLMISC::TTime initStart;
+//	initStart = ryzomGetLocalTime ();
 	if (SoundMngr != NULL)
 	{
 		NLSOUND::UAudioMixer *pMixer = SoundMngr->getMixer();
@@ -803,23 +819,23 @@ void CInterfaceManager::uninitOutGame()
 	}
 	//nlinfo ("%d seconds for uninitOutGame", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 
-	initStart = ryzomGetLocalTime ();
+//	initStart = ryzomGetLocalTime ();
 	CWidgetManager::getInstance()->activateMasterGroup ("ui:outgame", false);
 
 	CInterfaceParser *parser = dynamic_cast< CInterfaceParser* >( CWidgetManager::getInstance()->getParser() );
 	//nlinfo ("%d seconds for activateMasterGroup", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
-	initStart = ryzomGetLocalTime ();
+//	initStart = ryzomGetLocalTime ();
 	parser->removeAll();
 	//nlinfo ("%d seconds for removeAll", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
-	initStart = ryzomGetLocalTime ();
+//	initStart = ryzomGetLocalTime ();
 	reset();
 	//nlinfo ("%d seconds for reset", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	// reset the mouse pointer to avoid invalid pointer access
 	CWidgetManager::getInstance()->setPointer( NULL );
-	initStart = ryzomGetLocalTime ();
+//	initStart = ryzomGetLocalTime ();
 	CInterfaceLink::removeAllLinks();
 	//nlinfo ("%d seconds for removeAllLinks", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
-	initStart = ryzomGetLocalTime ();
+//	initStart = ryzomGetLocalTime ();
 	ICDBNode::CTextId textId("UI");
 	NLGUI::CDBManager::getInstance()->getDB()->removeNode(textId);
 	//nlinfo ("%d seconds for removeNode", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
@@ -827,7 +843,7 @@ void CInterfaceManager::uninitOutGame()
 	// Init the action manager
 	{
 
-		initStart = ryzomGetLocalTime ();
+//		initStart = ryzomGetLocalTime ();
 		uninitActions();
 	//	nlinfo ("%d seconds for uninitActions", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	}
@@ -888,7 +904,7 @@ void CInterfaceManager::initInGame()
 
 //	NLMEMORY::CheckHeap (true);
 
-	if (ClientCfg.XMLInterfaceFiles.size()==0)
+	if (ClientCfg.XMLInterfaceFiles.empty())
 	{
 		nlinfo("no xml config files in client.cfg");
 		return;
@@ -969,6 +985,9 @@ void CInterfaceManager::initInGame()
 	// Interface config
 	loadInterfaceConfig();
 
+	//Load user landmarks
+	loadLandmarks();
+
 	// Must do extra init for people interaction after load
 	PeopleInterraction.initAfterLoad();
 
@@ -1033,6 +1052,8 @@ void CInterfaceManager::initInGame()
 	{
 		displaySystemInfo(CI18N::get("uiLogTurnedOff"));
 	}
+
+	startWebIgNotificationThread();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1205,6 +1226,22 @@ void CInterfaceManager::configureQuitDialogBox()
 }
 
 // ------------------------------------------------------------------------------------------------
+//
+std::string CInterfaceManager::getSaveFileName(const std::string &module, const std::string &ext, bool useShared) const
+{
+	string filename = "save/" + module + "_" + PlayerSelectedFileName + "." + ext;
+	if (useShared && !CFile::fileExists(filename))
+	{
+		string sharedFile = "save/shared_" + module + "." + ext;
+		if (CFile::fileExists(sharedFile))
+		{
+			return sharedFile;
+		}
+	}
+	return filename;
+}
+
+// ------------------------------------------------------------------------------------------------
 void CInterfaceManager::loadKeys()
 {
 	if (ClientCfg.R2EDEnabled) // in R2ED mode the CEditor class deals with it
@@ -1215,18 +1252,19 @@ void CInterfaceManager::loadKeys()
 	vector<string> xmlFilesToParse;
 
 	// Does the keys file exist ?
-	string userKeyFileName = "save/keys_"+PlayerSelectedFileName+".xml";
+	string userKeyFileName = getSaveFileName("keys", "xml");
 	if (CFile::fileExists(userKeyFileName) && CFile::getFileSize(userKeyFileName) > 0)
 	{
 		// Load the user key file
 		xmlFilesToParse.push_back (userKeyFileName);
 	}
+
 	// Load the default key (but don't replace existings bounds, see keys.xml "key_def_no_replace")
 	xmlFilesToParse.push_back ("keys.xml");
 
 	if (!parseInterface (xmlFilesToParse, true))
 	{
-		badXMLParseMessageBox();
+		createFileBackup("Error loading keys", userKeyFileName);
 	}
 
 	_KeysLoaded = true;
@@ -1239,7 +1277,8 @@ void CInterfaceManager::loadInterfaceConfig()
 	if (ClientCfg.R2EDEnabled) // in R2ED mode the CEditor class deals with it
 		return;
 
-	loadConfig ("save/interface_" + PlayerSelectedFileName + ".icfg"); // Invalidate coords of changed groups
+	string filename = getSaveFileName("interface", "icfg");
+	loadConfig(filename); // Invalidate coords of changed groups
 
 	_ConfigLoaded = true;
 }
@@ -1247,24 +1286,19 @@ void CInterfaceManager::loadInterfaceConfig()
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::uninitInGame0 ()
 {
-
 	// Autosave of the keys
 	if (_KeysLoaded)
 	{
-		if (!ClientCfg.R2EDEnabled)
-		{
-			saveKeys ("save/keys_" + PlayerSelectedFileName + ".xml");
-		}
+		saveKeys();
+
 		_KeysLoaded = false;
 	}
 
 	// Autosave of the interface in interface.cfg
 	if (_ConfigLoaded)
 	{
-		if (!ClientCfg.R2EDEnabled)
-		{
-			saveConfig ("save/interface_" + PlayerSelectedFileName + ".icfg");
-		}
+		saveConfig();
+
 		_ConfigLoaded = false;
 	}
 }
@@ -1273,6 +1307,7 @@ void CInterfaceManager::uninitInGame0 ()
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::uninitInGame1 ()
 {
+	stopWebIgNotificationThread();
 
 	// release Bar Manager (HP, SAP etc... Bars)
 	CBarManager::getInstance()->releaseInGame();
@@ -1346,6 +1381,8 @@ void CInterfaceManager::uninitInGame1 ()
 	reset();
 	CInterfaceLink::removeAllLinks();
 
+	CWidgetManager::getInstance()->setPointer( NULL );
+
 	// Release DDX manager, before DB remove
 	CDDXManager::getInstance()->release();
 
@@ -1412,10 +1449,30 @@ void CInterfaceManager::flushDebugWindow()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Make sure 0.166 is displayed as 16% and 0.167 as 17%
+// because they belong to different weather conditions
+static float roundWeatherValue(float weatherValue)
+{
+	// Number of possible weather setups in server
+	const static uint NB_WEATHER_SETUPS = 6;
+	float floorValue = floorf(weatherValue * 100.f) / 100.f;
+	uint weatherIndex = min((uint)(weatherValue * NB_WEATHER_SETUPS), NB_WEATHER_SETUPS - 1);
+	uint floorIndex = min((uint)(floorValue * NB_WEATHER_SETUPS), NB_WEATHER_SETUPS - 1);
+
+	if (weatherIndex > floorIndex)
+		return ceilf(weatherValue * 100.f) / 100.f;
+
+	return weatherValue;
+}
+
+// ------------------------------------------------------------------------------------------------
 void CInterfaceManager::updateFrameEvents()
 {
 
 	H_AUTO_USE ( RZ_Client_Update_Frame_Events )
+
+	// lua scripts from different thread
+	flushScriptQueue();
 
 	flushDebugWindow();
 
@@ -1446,25 +1503,33 @@ void CInterfaceManager::updateFrameEvents()
 		// Update contact list with incoming server string ids
 		PeopleInterraction.updateWaitingContacts();
 
-		// Connect and receive/send to the yubo chat
-		checkYuboChat();
-
 		// Update string if some waiting
 		CEncyclopediaManager::getInstance()->updateAllFrame();
 
-		// Setup the weather setup in the player's map
-		if ((T0 - _UpdateWeatherTime) > (1 * 5 * 1000))
+		// Setup the weather setup in the player's map every 3 sec (1 ingame minute)
+		if ((T0 - _UpdateWeatherTime) > (1 * 3 * 1000))
 		{
 			_UpdateWeatherTime = T0;
 			ucstring str =	CI18N::get ("uiTheSeasonIs") +
 							CI18N::get ("uiSeason"+toStringEnum(computeCurrSeason())) +
 							CI18N::get ("uiAndTheWeatherIs") +
-							CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName);
+							CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName) +
+							toString(", %d", (uint)(roundWeatherValue(WeatherManager.getWeatherValue()) * 100.f)) + "% " +CI18N::get("uiHumidity");
+
 
 
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:weather"));
 			if (pVT != NULL)
 				pVT->setText(str);
+
+			CCtrlBase *pTooltip= dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:weather_tt"));
+			if (pTooltip != NULL)
+			{
+				ucstring tt =	toString("%02d", WeatherManager.getNextWeatherHour()) + CI18N::get("uiMissionTimerHour") +
+								" - " + CI18N::get("uiHumidity") + " " +
+								toString("%d", (uint)(roundWeatherValue(WeatherManager.getNextWeatherValue()) * 100.f)) + "%";
+				pTooltip->setDefaultContextHelp(tt);
+			}
 
 			// The date feature is temporarily disabled
 			str.clear();
@@ -1479,7 +1544,8 @@ void CInterfaceManager::updateFrameEvents()
 
 			// literal version
 			// str = CI18N::get("uiDate");
-			str += toString("%02d", (sint)RT.getRyzomTime()) + CI18N::get("uiMissionTimerHour") + " - ";
+			uint minutes = ((RT.getRyzomTime() - (sint)RT.getRyzomTime()) * (float) RYZOM_HOUR_IN_MINUTES);
+			str += toString("%02d:%02d", (sint)RT.getRyzomTime(), minutes) + " - ";
 			str += CI18N::get("ui"+WEEKDAY::toString( (WEEKDAY::EWeekDay)RT.getRyzomDayOfWeek() )) + ", ";
 			str += CI18N::get("ui"+MONTH::toString( (MONTH::EMonth)RT.getRyzomMonthInCurrentCycle() )) + " ";
 			str += toString("%02d", RT.getRyzomDayOfMonth()+1) + ", ";
@@ -1497,7 +1563,10 @@ void CInterfaceManager::updateFrameEvents()
 			{
 				if (pVT->getActive())
 				{
-					str = getTimestampHuman("%H:%M");
+					if (use12hClock())
+						str = getTimestampHuman("%I:%M %p");
+					else
+						str = getTimestampHuman("%H:%M");
 					pVT->setText(str);
 				}
 			}
@@ -1520,6 +1589,8 @@ void CInterfaceManager::updateFrameEvents()
 	CLuaManager::getInstance().getLuaState()->handleGC();
 
 	CBGDownloaderAccess::getInstance().update();
+
+	CItemGroupManager::getInstance()->update();
 
 }
 
@@ -1551,6 +1622,10 @@ void CInterfaceManager::setupOptions()
 	if ((!sFont.empty()) && (Driver != NULL))
 		resetTextContext(sFont.c_str(), true);
 	// Continue to parse the rest of the interface
+
+	sFont = wm->getSystemOption (CWidgetManager::OptionMonospaceFont).getValStr();
+	if ((!sFont.empty()) && (Driver != NULL))
+		CViewRenderer::registerFont("monospace", sFont);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1625,6 +1700,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 	uint32	nNbMode;
 	CInterfaceConfig ic;
 	bool	lastInGameScreenResLoaded= false;
+	uint32	nbLandmarks = 0;
 	try
 	{
 		sint ver = f.serialVersion(ICFG_STREAM_VERSION);
@@ -1643,6 +1719,11 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		f.serialCheck(NELID("GFCI"));
 		f.serial(nNbMode);
 		f.serial(_CurrentMode);
+		if (_CurrentMode > nNbMode)
+		{
+			_CurrentMode = 0;
+		}
+
 		if(ver>=10)
 		{
 			f.serial(_LastInGameScreenW);
@@ -1650,10 +1731,16 @@ bool CInterfaceManager::loadConfig (const string &filename)
 			lastInGameScreenResLoaded= true;
 		}
 
+		// Initialize at least number of modes that are saved in stream
+		_Modes.resize(std::max((uint32)MAX_NUM_MODES, nNbMode));
+		for (uint32 i = 0; i < _Modes.size(); ++i)
+		{
+			NLMISC::contReset(_Modes[i]);
+		}
+
 		// Load All Window configuration of all Modes
 		for (uint32 i = 0; i < nNbMode; ++i)
 		{
-			NLMISC::contReset(_Modes[i]);
 			// must create a tmp mem stream because desktop image expect its datas to occupy the whole stream
 			// This is because of old system that manipulated desktop image direclty as a mem stream
 			CMemStream ms;
@@ -1709,7 +1796,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		}
 
 		// Load user landmarks
-		ContinentMngr.serialUserLandMarks(f);
+		nbLandmarks = ContinentMngr.serialUserLandMarks(f);
 
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp( "SERVER:INTERFACES:NB_BONUS_LANDMARKS" );
 		if ( pNL )
@@ -1743,10 +1830,9 @@ bool CInterfaceManager::loadConfig (const string &filename)
 	catch(const NLMISC::EStream &)
 	{
 		f.close();
-		string	sFileNameBackup = sFileName+"backup";
-		if (CFile::fileExists(sFileNameBackup))
-			CFile::deleteFile(sFileNameBackup);
-		CFile::moveFile(sFileNameBackup.c_str(), sFileName.c_str());
+
+		createFileBackup("Config loading failed", sFileName);
+
 		nlwarning("Config loading failed : restore default");
 		vector<string> v;
 		if (!ClientCfg.R2EDEnabled)
@@ -1757,13 +1843,48 @@ bool CInterfaceManager::loadConfig (const string &filename)
 	}
 	f.close();
 
+	if (nbLandmarks > 0)
+	{
+		// use copy for backup so on save proper shared/player icfg file is used
+		createFileBackup("Landmarks will be migrated to xml", sFileName, true);
+
+		// if icfg is interface_player.icfg, then landmarks must also be loaded/saved to player file
+		if (nlstricmp(sFileName.substr(0, 12), "save/shared_") != 0)
+		{
+			string lmfile = getSaveFileName("landmarks", "xml", false);
+			if (!CFile::fileExists(lmfile))
+			{
+				// create placeholder player landmarks file so saveLandmarks will use it
+				// even if shared landmarks file exists
+				COFile f;
+				if (f.open(lmfile, false, false, true))
+				{
+					std::string xml;
+					xml = "<?xml version=\"1.0\"?>\n<interface_config />";
+					f.serialBuffer((uint8 *)xml.c_str(), xml.size());
+					f.close();
+				}
+			}
+		}
+
+		// merge .icfg landmarks with landmarks.xml
+		loadLandmarks();
+		saveLandmarks();
+	}
+
 	// *** If saved resolution is different from the current one setuped, must fix positions in _Modes
 	if(lastInGameScreenResLoaded)
 	{
+		// Temporarily set screen to saved size so that positions are correctly calculated
+		CWidgetManager::getInstance()->setScreenWH(_LastInGameScreenW, _LastInGameScreenH);
 		// NB: we are typically InGame here (even though the _InGame flag is not yet set)
 		// Use the screen size of the config file. Don't update current UI, just _Modes
-		CWidgetManager::getInstance()->moveAllWindowsToNewScreenSize(ClientCfg.Width, ClientCfg.Height, false);
-		updateDesktops( ClientCfg.Width, ClientCfg.Height );
+		//
+		// ClientCfg has W/H set to screen size, but interface expects scaled size
+		sint32 scaledW = ClientCfg.Width / ClientCfg.InterfaceScale;
+		sint32 scaledH = ClientCfg.Height / ClientCfg.InterfaceScale;
+		CWidgetManager::getInstance()->moveAllWindowsToNewScreenSize(scaledW, scaledH, false);
+		updateDesktops(scaledW, scaledH);
 	}
 
 	// *** apply the current mode
@@ -1805,6 +1926,109 @@ public:
 	}
 };
 
+bool CInterfaceManager::saveLandmarks(bool verbose) const
+{
+	bool ret = true;
+
+	if (!ClientCfg.R2EDEnabled)
+	{
+		uint8 currMode = getMode();
+
+		string filename = getSaveFileName("landmarks", "xml");
+		if (verbose) CInterfaceManager::getInstance()->displaySystemInfo("Saving " + filename);
+		ret = saveLandmarks(filename);
+	}
+
+	return ret;
+}
+
+bool CInterfaceManager::loadLandmarks()
+{
+	// Does the keys file exist ?
+	string filename = getSaveFileName("landmarks", "xml");
+
+	CIFile f;
+	string sFileName;
+	sFileName = NLMISC::CPath::lookup (filename, false);
+	if (sFileName.empty() || !f.open(sFileName))
+		return false;
+
+	bool ret = false;
+	vector<string> xmlFilesToParse;
+	xmlFilesToParse.push_back (filename);
+
+	//ContinentMngr.serialUserLandMarks(node);
+	if (!parseInterface (xmlFilesToParse, true))
+	{
+		f.close();
+
+		createFileBackup("Error while loading landmarks", filename);
+
+		ret = false;
+	}
+
+	return ret;
+}
+
+bool CInterfaceManager::saveLandmarks(const std::string &filename) const
+{
+	nlinfo( "Saving landmarks : %s", filename.c_str() );
+
+	bool ret = false;
+	try
+	{
+		COFile f;
+
+		// using temporary file, so no f.close() unless its a success
+		if (f.open(filename, false, false, true))
+		{
+			COXml xmlStream;
+			xmlStream.init (&f);
+
+			xmlDocPtr doc = xmlStream.getDocument ();
+			xmlNodePtr node = xmlNewDocNode(doc, NULL, (const xmlChar*)"interface_config", NULL);
+			xmlDocSetRootElement (doc, node);
+
+			ContinentMngr.writeTo(node);
+
+			// Flush the stream
+			xmlStream.flush();
+
+			// Close the stream
+			f.close ();
+
+			ret = true;
+		}
+	}
+	catch (const Exception &e)
+	{
+		nlwarning ("Error while writing the file %s : %s.", filename.c_str(), e.what ());
+	}
+
+	return ret;
+}
+
+// ------------------------------------------------------------------------------------------------
+//
+bool CInterfaceManager::saveConfig (bool verbose)
+{
+	bool ret = true;
+
+	if (!ClientCfg.R2EDEnabled)
+	{
+		uint8 currMode = getMode();
+
+		string filename = getSaveFileName("interface", "icfg");
+
+		if (verbose) CInterfaceManager::getInstance()->displaySystemInfo("Saving " + filename);
+		ret = saveConfig(filename);
+
+		if (currMode != getMode())
+			setMode(currMode);
+	}
+
+	return ret;
+}
 
 // ------------------------------------------------------------------------------------------------
 bool CInterfaceManager::saveConfig (const string &filename)
@@ -1823,14 +2047,15 @@ bool CInterfaceManager::saveConfig (const string &filename)
 
 	COFile f;
 
-	if (!f.open(filename)) return false;
+	// using temporary file, so no f.close() unless its a success
+	if (!f.open(filename, false, false, true)) return false;
 
 	CInterfaceConfig ic;
 
 
 
 	// cleanup all desktops
-	for(uint k = 0; k < MAX_NUM_MODES; ++k)
+	for(uint k = 0; k < _Modes.size(); ++k)
 	{
 		quitVisitor.Desktop = k;
 		setMode(k);
@@ -1859,7 +2084,7 @@ bool CInterfaceManager::saveConfig (const string &filename)
 
 	uint32 i;
 
-	i = MAX_NUM_MODES;
+	i = _Modes.size();
 	try
 	{
 		f.serialVersion(ICFG_STREAM_VERSION);
@@ -1870,7 +2095,6 @@ bool CInterfaceManager::saveConfig (const string &filename)
 		{
 			nlwarning("Config saving failed");
 			// couldn't save result so do not continue
-			f.close();
 			return false;
 		}
 
@@ -1882,7 +2106,7 @@ bool CInterfaceManager::saveConfig (const string &filename)
 		f.serial(_LastInGameScreenH);
 
 		// Save All Window configuration of all Modes
-		for (i = 0; i < MAX_NUM_MODES; ++i)
+		for (i = 0; i < _Modes.size(); ++i)
 		{
 			// must create a tmp mem stream because desktop image expect its datas to occupy the whole stream
 			// This is because of old system that manipulated desktop image direclty as a mem stream
@@ -1909,8 +2133,13 @@ bool CInterfaceManager::saveConfig (const string &filename)
 		CTaskBarManager	*pTBM= CTaskBarManager::getInstance();
 		pTBM->serial(f);
 
-		// Save user landmarks
-		ContinentMngr.serialUserLandMarks(f);
+		//ContinentMngr.serialUserLandMarks(f);
+		// empty landmarks block for compatibility
+		{
+			f.serialVersion(1);
+			uint32 numCont = 0;
+			f.serial(numCont);
+		}
 
 		// Info Windows position.
 		CInterfaceHelp::serialInfoWindows(f);
@@ -1926,14 +2155,14 @@ bool CInterfaceManager::saveConfig (const string &filename)
 			nlwarning("Bad user dyn chat saving");
 			return false;
 		}
+
+		f.close();
 	}
 	catch(const NLMISC::EStream &)
 	{
-		f.close();
 		nlwarning("Config saving failed.");
 		return false;
 	}
-	f.close();
 
 	ContinentMngr.serialFOWMaps();
 
@@ -1950,9 +2179,22 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 	nlctassert(CHARACTERISTICS::NUM_CHARACTERISTICS==8);
 	for (uint i=0; i<CHARACTERISTICS::NUM_CHARACTERISTICS; ++i)
 	{
-		NLMISC::CCDBNodeLeaf *node = _CurrentPlayerCharacLeaf[i] ? &*_CurrentPlayerCharacLeaf[i]
-			: &*(_CurrentPlayerCharacLeaf[i] = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i), false));
+		if (!_CurrentPlayerCharacLeaf[i])
+			_CurrentPlayerCharacLeaf[i] = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i), false);
+
+		NLMISC::CCDBNodeLeaf *node = NULL;
+
+		if (_CurrentPlayerCharacLeaf[i])
+			node = &*_CurrentPlayerCharacLeaf[i];
+
 		_CurrentPlayerCharac[i] = node ? node->getValue32() : 0;
+	}
+
+	// scale must be updated right before widget manager checks it
+	if (_InterfaceScaleChanged)
+	{
+		CViewRenderer::getInstance()->setInterfaceScale(_InterfaceScale);
+		_InterfaceScaleChanged = false;
 	}
 
 	CWidgetManager::getInstance()->drawViews( camera );
@@ -2000,7 +2242,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 void CInterfaceManager::updateDesktops( uint32 newScreenW, uint32 newScreenH )
 {
 	// *** Do it for All Backuped Desktops
-	for(uint md=0;md<MAX_NUM_MODES;md++)
+	for(uint md=0; md<_Modes.size(); md++)
 	{
 		CInterfaceConfig::CDesktopImage		&mode= _Modes[md];
 		// For all containers of this mode
@@ -2011,6 +2253,9 @@ void CInterfaceManager::updateDesktops( uint32 newScreenW, uint32 newScreenH )
 			CWidgetManager::getInstance()->getNewWindowCoordToNewScreenSize(gcCont.X, gcCont.Y, gcCont.W, gcCont.H ,newScreenW, newScreenH);
 		}
 	}
+
+	_LastInGameScreenW = newScreenW;
+	_LastInGameScreenH = newScreenH;
 }
 
 class InvalidateTextVisitor : public CInterfaceElementVisitor
@@ -2268,7 +2513,7 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 	CRGBA color = CRGBA::White;
 
 
-	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(strlwr(cat));
+	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(toLower(cat));
 	if (it != ClientCfg.SystemInfoParams.end())
 	{
 		mode = it->second.Mode;
@@ -2303,7 +2548,7 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 CRGBA CInterfaceManager::getSystemInfoColor(const std::string &cat)
 {
 	CRGBA col = CRGBA::White;
-	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(strlwr(cat));
+	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(toLower(cat));
 	if (it != ClientCfg.SystemInfoParams.end())
 		col = it->second.Color;
 	return col;
@@ -2345,7 +2590,7 @@ void	CInterfaceManager::launchContextMenuInGame (const std::string &nameOfCM)
 // ***************************************************************************
 void CInterfaceManager::updateGroupContainerImage(CGroupContainer &gc, uint8 mode)
 {
-	if (mode >= MAX_NUM_MODES)
+	if (mode >= _Modes.size())
 	{
 		nlwarning("wrong desktop");
 		return;
@@ -2356,7 +2601,7 @@ void CInterfaceManager::updateGroupContainerImage(CGroupContainer &gc, uint8 mod
 // ***************************************************************************
 void CInterfaceManager::removeGroupContainerImage(const std::string &groupName, uint8 mode)
 {
-	if (mode >= MAX_NUM_MODES)
+	if (mode >= _Modes.size())
 	{
 		nlwarning("wrong desktop");
 		return;
@@ -2366,9 +2611,18 @@ void CInterfaceManager::removeGroupContainerImage(const std::string &groupName, 
 }
 
 // ***************************************************************************
+void CInterfaceManager::removeGroupContainerImageFromDesktops(const std::string &groupName)
+{
+	for (uint i = 0; i < _Modes.size(); i++)
+	{
+		_Modes[i].removeGroupContainerImage(groupName);
+	}
+}
+
+// ***************************************************************************
 void	CInterfaceManager::setMode(uint8 newMode)
 {
-	if (newMode >= MAX_NUM_MODES)
+	if (newMode >= _Modes.size())
 		return;
 
 	if (newMode == _CurrentMode)
@@ -2433,7 +2687,7 @@ void	CInterfaceManager::setMode(uint8 newMode)
 // ***************************************************************************
 void	CInterfaceManager::resetMode(uint8 newMode)
 {
-	if (newMode >= MAX_NUM_MODES)
+	if (newMode >= _Modes.size())
 		return;
 	NLMISC::contReset(_Modes[newMode]);
 }
@@ -2482,7 +2736,8 @@ void CInterfaceManager::dumpUI(bool /* indent */)
 				if (ig->getViews()[k])
 				{
 					info += id;
-					info += toString(", type = %s, address=0x%p", typeid(*ig->getViews()[k]).name(), ig->getViews()[k]);
+					NLGUI::CViewBase *view = ig->getViews()[k];
+					info += toString(", type = %s, address=0x%p", typeid(*view).name(), view);
 				}
 				else
 				{
@@ -2498,7 +2753,8 @@ void CInterfaceManager::dumpUI(bool /* indent */)
 				if (ig->getControls()[k])
 				{
 					info += id;
-					info += toString(", type = %s, address=0x%p", typeid(*ig->getControls()[k]).name(), ig->getControls()[k]);
+					NLGUI::CCtrlBase *control = ig->getControls()[k];
+					info += toString(", type = %s, address=0x%p", typeid(*control).name(), control);
 				}
 				else
 				{
@@ -2623,7 +2879,25 @@ void writeMacros (xmlNodePtr node)
 }
 
 // ***************************************************************************
+bool CInterfaceManager::saveKeys(bool verbose)
+{
+	bool ret = true;
 
+	if (!ClientCfg.R2EDEnabled)
+	{
+		string filename = "save/keys_" + PlayerSelectedFileName + ".xml";
+		if (!CFile::fileExists(filename) && CFile::fileExists("save/shared_keys.xml"))
+			filename = "save/shared_keys.xml";
+
+		if (verbose) CInterfaceManager::getInstance()->displaySystemInfo("Saving " + filename);
+
+		ret = saveKeys(filename);
+	}
+
+	return ret;
+}
+
+// ***************************************************************************
 bool	CInterfaceManager::saveKeys(const std::string &filename)
 {
 	bool ret = false;
@@ -2631,7 +2905,8 @@ bool	CInterfaceManager::saveKeys(const std::string &filename)
 	try
 	{
 		COFile file;
-		if (file.open (filename))
+		// using temporary file, so no file.close() unless its a success
+		if (file.open (filename, false, false, true))
 		{
 			COXml xmlStream;
 			xmlStream.init (&file);
@@ -2661,8 +2936,7 @@ bool	CInterfaceManager::saveKeys(const std::string &filename)
 	}
 	catch (const Exception &e)
 	{
-		nlwarning ("Error while writing the file %s : %s. Remove it.", filename.c_str(), e.what ());
-		CFile::deleteFile(filename);
+		nlwarning ("Error while writing the file %s : %s.", filename.c_str(), e.what ());
 	}
 	return ret;
 }
@@ -2690,7 +2964,7 @@ void CInterfaceManager::log(const ucstring &str, const std::string &cat)
 	{
 		// Open file with the name of the player
 		const string fileName= "save/log_" + PlayerSelectedFileName + ".txt";
-		FILE *f = fopen(fileName.c_str(), "at");
+		FILE *f = nlfopen(fileName, "at");
 		if (f != NULL)
 		{
 			const string finalString = string(NLMISC::IDisplayer::dateToHumanString()) + " (" + NLMISC::toUpper(cat) + ") * " + str.toUtf8();
@@ -2811,7 +3085,6 @@ NLMISC_COMMAND(loadui, "Load an interface file", "<loadui [all]/interface.xml>")
 	return result;
 }
 
-
 // ***************************************************************************
 void CInterfaceManager::displayWebWindow(const string & name, const string & url)
 {
@@ -2825,6 +3098,18 @@ void CInterfaceManager::displayWebWindow(const string & name, const string & url
 
 	CAHManager::getInstance()->runActionHandler("browse", NULL, "name="+name+":content:html|url="+url);
 }
+
+// ***************************************************************************
+class CAHSaveUI : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	{
+		CInterfaceManager::getInstance()->saveKeys(true);
+		CInterfaceManager::getInstance()->saveConfig(true);
+	}
+};
+REGISTER_ACTION_HANDLER (CAHSaveUI, "save_ui");
+
 /*
 // ***************************************************************************
 class CHandlerDispWebOnQuit : public IActionHandler
@@ -2889,6 +3174,32 @@ struct CEmoteEntry
 		return false;
 	}
 };
+
+static bool translateEmote(const std::string &id, ucstring &translatedName, std::string &commandName, std::string &commandNameAlt)
+{
+	if (CI18N::hasTranslation(id))
+	{
+		translatedName = CI18N::get(id);
+
+		// convert command to utf8 since emote translation can have strange chars
+		commandName = toLower(translatedName).toUtf8();
+
+		// replace all spaces by _
+		while (strFindReplace(commandName, " ", "_"));
+
+		// TODO: remove accents
+		commandNameAlt = commandName;
+
+		if (commandNameAlt == commandName) commandNameAlt.clear();
+
+		return true;
+	}
+
+	translatedName = id;
+	commandName = id;
+
+	return false;
+}
 
 // ***************************************************************************
 void CInterfaceManager::initEmotes()
@@ -2970,6 +3281,10 @@ void CInterfaceManager::initEmotes()
 		CGroupSubMenu *pMenu = pRootMenu->getRootMenu();
 		nlassert(pMenu);
 
+		ucstring sTranslatedName;
+		std::string sCommandName;
+		std::string sCommandNameAlt;
+
 		// Add to the game context menu
 		// ----------------------------
 		for (i = 0; i < nbToken; ++i)
@@ -3007,8 +3322,10 @@ void CInterfaceManager::initEmotes()
 				}
 				else
 				{
+					translateEmote(sTmp, sTranslatedName, sCommandName, sCommandNameAlt);
+
 					// Create a line
-					pMenu->addLine ("/" + CI18N::get(sTmp), "emote",
+					pMenu->addLine (sTranslatedName + " (/" + ucstring::makeFromUtf8(sCommandName) + ")", "emote",
 						"nb="+toString(nEmoteNb)+"|behav="+toString(nBehav), sTmp);
 				}
 			}
@@ -3021,24 +3338,41 @@ void CInterfaceManager::initEmotes()
 			}
 		}
 
+		if (sTranslatedName.empty())
+			translateEmote(sName, sTranslatedName, sCommandName, sCommandNameAlt);
+
 		// Create new command
 		// ------------------
-		if (CI18N::hasTranslation(sName))
+		if (!sTranslatedName.empty())
 		{
-			CGroupSubMenu *pMenu = pRootMenu->getRootMenu();
-
-			// convert command to utf8 since emote translation can have strange chars
-			string cmdName = (toLower(CI18N::get(sName))).toUtf8();
-			if(ICommand::exists(cmdName))
+			if(ICommand::exists(sCommandName))
 			{
-				nlwarning("Translation for emote %s already exist: '%s' exist twice", sName.c_str(), cmdName.c_str());
+				nlwarning("Translation for emote %s already exist: '%s' exist twice", sName.c_str(), sCommandName.c_str());
 			}
 			else
 			{
-				CEmoteCmd *pNewCmd = new CEmoteCmd(cmdName.c_str(), "", "");
+				CEmoteCmd *pNewCmd = new CEmoteCmd(sCommandName.c_str(), "", "");
 				pNewCmd->EmoteNb = nEmoteNb;
 				pNewCmd->Behaviour = nBehav;
 				_EmoteCmds.push_back(pNewCmd);
+
+				// add alternative command if defined
+				if (!sCommandNameAlt.empty())
+				{
+					if(ICommand::exists(sCommandNameAlt))
+					{
+						nlwarning("Translation for emote %s already exist: '%s' exist twice", sName.c_str(), sCommandName.c_str());
+					}
+					else
+					{
+						CEmoteCmd *pNewCmd = new CEmoteCmd(sCommandNameAlt.c_str(), "", "");
+						pNewCmd->EmoteNb = nEmoteNb;
+						pNewCmd->Behaviour = nBehav;
+						_EmoteCmds.push_back(pNewCmd);
+					}
+				}
+
+				CGroupSubMenu *pMenu = pRootMenu->getRootMenu();
 
 				// Quick-Emote too ?
 				for (i = 0; i< pMenu->getNumLine (); i++)
@@ -3047,7 +3381,7 @@ void CInterfaceManager::initEmotes()
 					{
 						// Yeah that's a quick emote too; set command
 						pMenu->addLineAtIndex (i,
-								"@{FFFF}/" + toLower(CI18N::get(sName)),
+								"@{FFFF}/" + ucstring::makeFromUtf8(sCommandName),
 								"emote", "nb="+toString(nEmoteNb)+"|behav="+toString(nBehav),
 								"", "", "", false, false, true);
 
@@ -3082,7 +3416,7 @@ void CInterfaceManager::uninitEmotes()
 
 	// reset the emotes menu
 	CTextEmotListSheet *pTELS = dynamic_cast<CTextEmotListSheet*>(SheetMngr.get(CSheetId("list.text_emotes")));
-	if (pTELS != NULL && pTELS->TextEmotList.size() > 0)
+	if (pTELS != NULL && !pTELS->TextEmotList.empty())
 	{
 		// get the emotes menu id
 		string sPath = pTELS->TextEmotList[0].Path;
@@ -3124,7 +3458,7 @@ void CInterfaceManager::updateEmotes()
 bool CInterfaceManager::CEmoteCmd::execute(const std::string &/* rawCommandString */, const vector<string> &args, CLog &/* log */, bool /* quiet */, bool /* human */)
 {
 	string customPhrase;
-	if( args.size() > 0 )
+	if (!args.empty())
 	{
 		customPhrase = args[0];
 	}
@@ -3159,6 +3493,24 @@ void	CInterfaceManager::notifyForumUpdated()
 		_CheckForumNode->setValue32(1);
 }
 
+void CInterfaceManager::queueLuaScript(const std::string &script)
+{
+	CAutoMutex<CMutex> autoMutex(_ScriptQueueMutex);
+
+	_ScriptQueue.push(script);
+}
+
+void CInterfaceManager::flushScriptQueue()
+{
+	CAutoMutex<CMutex> autoMutex(_ScriptQueueMutex);
+
+	while(!_ScriptQueue.empty())
+	{
+		CLuaManager::getInstance().executeLuaScript(_ScriptQueue.front());
+		_ScriptQueue.pop();
+	}
+}
+
 
 // ***************************************************************************
 void CInterfaceManager::resetTextIndex()
@@ -3189,67 +3541,6 @@ CInterfaceElement *getInterfaceResource(const std::string &key)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	return CWidgetManager::getInstance()->getElementFromId (key);
-}
-
-
-// ***************************************************************************
-void	CInterfaceManager::sendStringToYuboChat(const ucstring &str)
-{
-	// If the yubo chat really connected
-	if(_YuboChat.connected())
-	{
-		_YuboChat.send(str);
-	}
-}
-
-// ***************************************************************************
-void	CInterfaceManager::checkYuboChat()
-{
-	// flush the receive queue
-	if(_YuboChat.connected())
-	{
-		std::list<ucstring>		toReceive;
-		_YuboChat.receive(toReceive);
-		while(!toReceive.empty())
-		{
-			PeopleInterraction.ChatInput.YuboChat.displayMessage(toReceive.front(), CRGBA::White, 2, NULL);
-			toReceive.pop_front();
-		}
-	}
-}
-
-// ***************************************************************************
-void	CInterfaceManager::connectYuboChat()
-{
-	// force disconnection if was connected
-	_YuboChat.disconnect();
-
-	uint32 KlientChatPort = 0;
-
-	extern TSessionId HighestMainlandSessionId;
-	switch(HighestMainlandSessionId.asInt())
-	{
-	case 101: KlientChatPort = 6002; break;	// fr
-	case 102: KlientChatPort = 6003; break;	// de
-	case 103: KlientChatPort = 6001; break;	// en
-	case 301: KlientChatPort = 4000; break;	// yubo
-	default:
-		if(!ClientCfg.KlientChatPort.empty())
-			fromString(ClientCfg.KlientChatPort, KlientChatPort);
-		break;
-	}
-
-	// check if must reconnect
-	if(KlientChatPort != 0 && !_YuboChat.connected())
-	{
-		// NB: hard code url, to avoid "client.cfg trojan"
-		// (a client.cfg with an url pointing to a hacker site, to grab login/password)
-		extern std::string LoginLogin, LoginPassword;
-		_YuboChat.connect(string("chat.ryzom.com:")+toString(KlientChatPort), LoginLogin, LoginPassword);
-
-		// Inform the interface that the chat is present
-		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:YUBO_CHAT_PRESENT")->setValue32(1);
-	}
 }
 
 // ***************************************************************************
@@ -3313,11 +3604,17 @@ void		CInterfaceManager::getLuaValueInfo(std::string &str, sint index)
 
 	sint	type= ls.type(index);
 	if(type==LUA_TNIL)
+	{
 		str= "nil";
+	}
 	else if(type==LUA_TNUMBER)
-		str= NLMISC::toString(ls.toNumber(index));
+	{
+		str= NLMISC::toString(ls.isInteger(index) ? ls.toInteger(index):ls.toNumber(index));
+	}
 	else if(type==LUA_TBOOLEAN)
+	{
 		str= ls.toBoolean(index)?"true":"false";
+	}
 	else if(type==LUA_TSTRING)
 	{
 		ls.toString(index, str);
@@ -3684,6 +3981,14 @@ void CInterfaceManager::CServerToLocalAutoCopy::onLocalChange(ICDBNode *localNod
 }
 
 // ------------------------------------------------------------------------------------------------
+bool CInterfaceManager::use12hClock()
+{
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_CLOCK_12H", false);
+
+	return (node && node->getValueBool());
+}
+
+// ------------------------------------------------------------------------------------------------
 char* CInterfaceManager::getTimestampHuman(const char* format /* "[%H:%M:%S] " */)
 {
 	static char cstime[25];
@@ -3777,7 +4082,7 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		vector<ucstring> token_vector;
 		vector<ucstring> param_vector;
 		splitUCString(token_string, ucstring("."), token_vector);
-		if (token_vector.size() == 0)
+		if (token_vector.empty())
 		{
 			// Wrong formatting; give up on this one.
 			start_pos = end_pos;
@@ -3787,7 +4092,7 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		if (token_vector.size() == 1)
 		{
 			splitUCString(token_subject, ucstring("/"), param_vector);
-			token_subject = (param_vector.size() > 0) ? param_vector[0] : ucstring("");
+			token_subject = !param_vector.empty() ? param_vector[0] : ucstring("");
 			token_param = ucstring("name");
 		}
 		else if (token_vector.size() > 1)
@@ -3796,7 +4101,7 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 			if (token_param.luabind_substr(0, 3) != ucstring("gs("))
 			{
 				splitUCString(token_vector[1], ucstring("/"), param_vector);
-				token_param = (param_vector.size() > 0) ? param_vector[0] : ucstring("");
+				token_param = !param_vector.empty() ? param_vector[0] : ucstring("");
 			}
 		}
 
@@ -3982,3 +4287,40 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 	ucstr = str;
 	return true;;
 }
+
+std::string CInterfaceManager::getNextBackupName(std::string filename)
+{
+	std::string ts = getTimestampHuman("%Y-%m-%d");
+
+	if (!ts.empty())
+	{
+		std::string::size_type pos = filename.find_last_of('.');
+		if (pos == std::string::npos)
+			filename = filename + "_" + ts + "_";
+		else
+			filename = filename.substr(0, pos) + "_" + ts + "_" + filename.substr(pos);
+	}
+
+	// filename_YYYY-MM-DD_000.ext
+	return CFile::findNewFile(filename);
+}
+
+void CInterfaceManager::createFileBackup(const std::string &message, const std::string &filename, bool useCopy)
+{
+	std::string backupName = getNextBackupName(filename);
+	nlwarning("%s: '%s'.", message.c_str(), filename.c_str());
+	if (!backupName.empty())
+	{
+		if (useCopy)
+		{
+			nlwarning("Backup copy saved as '%s'", backupName.c_str());
+			CFile::copyFile(backupName, filename);
+		}
+		else
+		{
+			nlwarning("File renamed to '%s'", backupName.c_str());
+			CFile::moveFile(backupName, filename);
+		}
+	}
+}
+

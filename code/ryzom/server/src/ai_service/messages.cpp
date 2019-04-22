@@ -984,12 +984,64 @@ void CBSAIDeathReport::callback(const std::string &name, NLNET::TServiceId id)
 				CBotNpc* bot = NLMISC::safe_cast<CBotNpc*>(&(sb->getPersistent()));
 				spawnGrp.botHaveDied	(bot);
 				bot->notifyBotDeath();
-				
+
+				std::string eventBotKilled;
+				if (spawnGrp.getProfileParameter("event_bot_killed", eventBotKilled) && !eventBotKilled.empty())
+				{
+					nlinfo("NPC: TRIGGER EVENT BOT KILLED");
+				}
 				
 				spawnGrp.getPersistent().processStateEvent(mgr.EventBotKilled);
 
-				if	(!spawnGrp.isGroupAlive(0*1))
+				std::string eventGroupKilled;
+				if (!spawnGrp.isGroupAlive(0*1))
+				{
+					if (spawnGrp.getProfileParameter("event_group_killed", eventGroupKilled) && !eventGroupKilled.empty())
+					{
+						nlinfo("NPC: TRIGGER EVENT GROUP KILLED");
+					}
 					spawnGrp.getPersistent().processStateEvent(mgr.EventGrpEliminated);
+				}
+
+				if (!eventBotKilled.empty() || !eventGroupKilled.empty())
+				{
+					CSpawnBot *const spBot = static_cast<CSpawnBot*>(phys);
+					// make a vector of aggroable player
+					CBotAggroOwner::TBotAggroList const& aggroList = spBot->getBotAggroList();
+					//typedef std::map<TDataSetRow, TAggroEntryPtr> TBotAggroList;
+					CBotAggroOwner::TBotAggroList::const_iterator aggroIt(aggroList.begin()), aggroEnd(aggroList.end());
+					TDataSetRow foundRow = TDataSetRow();
+
+					std::vector<TDataSetRow> playerAggroable;
+					for (; aggroIt != aggroEnd; ++aggroIt)
+					{		
+						if (CMirrors::getEntityId(aggroIt->first).getType() != RYZOMID::player)
+							continue;
+						CAIEntityPhysical* ep = CAIS::instance().getEntityPhysical(aggroIt->first);
+						if (!ep)
+							continue;			
+						CBotPlayer const* const player = NLMISC::safe_cast<CBotPlayer const*>(ep);
+						if (!player)
+							continue;
+						if (!player->isAggroable())
+							continue;
+						playerAggroable.push_back(aggroIt->first);
+					}
+					
+					NLNET::CMessage	msgout("TRIGGER_WEBIG");
+					if (!eventBotKilled.empty())
+						msgout.serial(eventBotKilled);
+					else
+						msgout.serial(eventGroupKilled);
+
+					uint32 nbPlayers = (uint32)playerAggroable.size();
+					msgout.serial(nbPlayers);
+					for (uint32 i = 0; i < nbPlayers; i++)
+					{
+						msgout.serial(playerAggroable[i]);
+					}
+					sendMessageViaMirror("EGS", msgout);
+				}
 			}
 			break;
 		case RYZOMID::creature:

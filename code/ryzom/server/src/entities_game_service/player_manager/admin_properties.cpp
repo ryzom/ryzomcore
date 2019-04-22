@@ -78,26 +78,28 @@ void CAdminProperties::updateCSRJournal( CCharacter * user, CMission * mission,u
 	///TODO NICO test no list
 }
 
-CMission * CAdminProperties::getMission( uint indexInJournal ) const
+CMission* CAdminProperties::getMission(uint indexInJournal) const
 {
-	/// todo mission
-	/*
-	if ( !_Data ) return NULL;
-	CCharacter * user = PlayerManager.getChar( _Data->MissionUser );
-	if ( !user )
-		return NULL;
-	
-	CMission * mission = NULL;
-	if ( indexInJournal < user->getMissions().size() )
-		return (CMission*) user->getMissions()[indexInJournal];
+/*
+	if (!_Data) return NULL;
 
-	indexInJournal-= MaxSoloMissionCount;
+	CCharacter *user = PlayerManager.getChar(_Data->MissionUser);
+	if (!user)
+		return NULL;
+
+	CMission *mission = NULL;
+	if (indexInJournal < user->getMissions().size())
+		return (CMission*)user->getMissions()[indexInJournal];
+
+
+	indexInJournal -= MaxSoloMissionCount;
 	CTeam * team = TeamManager.getTeam( user->getTeamId() );
-	if (team )
+	if (team)
 	{
 		if ( indexInJournal < team->getMissions().size() )
 			return (CMission*) team->getMissions()[indexInJournal];
-	}		
+	}
+
 	indexInJournal-= ( MaxGroupMissionCount);
 	CGuild * guild = user->getGuild();
 	if (guild )
@@ -105,6 +107,6 @@ CMission * CAdminProperties::getMission( uint indexInJournal ) const
 		if ( indexInJournal < guild->getMissions().size() )
 			return(CMission*) guild->getMissions()[indexInJournal];
 	}
-	*/
+*/
 	return NULL;
 }

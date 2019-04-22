@@ -21,7 +21,6 @@
 #include "global.h"
 #include "nel/misc/events.h"
 #include "nel/3d/u_texture.h"
-#include "game_share/ryzom_version.h"
 #include "nel/misc/i18n.h"
 #include "continent.h"
 #include "weather.h"
@@ -31,6 +30,7 @@
 #include "release.h"
 #include "net_manager.h"
 #include "client_cfg.h"
+#include "user_agent.h"
 #include "bg_downloader_access.h"
 #include "nel/misc/system_utils.h"
 #include "nel/3d/stereo_hmd.h"
@@ -277,13 +277,7 @@ void CProgress::internalProgress (float value)
 				// Display the build version.
 				TextContext->setFontSize((uint)(12.f * fontFactor));
 				TextContext->setHotSpot(UTextContext::TopRight);
-				string str;
-#if FINAL_VERSION
-				str = "FV ";
-#else
-				str = "DEV ";
-#endif
-				str += RYZOM_VERSION;
+				string str = getDisplayVersion();
 				TextContext->printfAt(1.0f,1.0f, str.c_str());
 
 				// Display the tips of the day.

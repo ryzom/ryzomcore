@@ -164,6 +164,7 @@ namespace NLGUI
 		sint32 getMaxH () const { return _MaxH; }
 		sint32 getMaxWReal () const { return _Active ? _MaxWReal : 0; }
 		sint32 getMaxHReal () const { return _Active ? _MaxHReal : 0; }
+		sint32 getInnerWidth () const;
 		sint32 getOfsX () const { return _OffsetX; }
 		sint32 getOfsY () const { return _OffsetY; }
 		bool   getResizeFromChildW() const { return _ResizeFromChildW; }

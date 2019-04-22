@@ -53,7 +53,7 @@ public:
 	{}
 
 	/// serialize
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 public:
 	/// static value indicating the immune score (when someone cannot be affected at all by an effect type)

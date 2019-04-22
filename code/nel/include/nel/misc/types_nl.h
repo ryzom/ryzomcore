@@ -43,17 +43,34 @@
 // This way we know about _HAS_TR1 and _STLPORT_VERSION
 #include <string>
 
+#if defined(HAVE_X86_64)
+#	define NL_CPU_INTEL
+#	define NL_CPU_X86_64
+// x86_64 CPU always have SSE2 instructions
+#	ifndef NL_HAS_SSE2
+#		define NL_HAS_SSE2
+#	endif
+#elif defined(HAVE_X86)
+#	define NL_CPU_INTEL
+#	define NL_CPU_X86
+#endif
+
 // Operating systems definition
 #ifdef _WIN32
 #	define NL_OS_WINDOWS
 #	define NL_LITTLE_ENDIAN
-#	define NL_CPU_INTEL
+#	ifndef NL_CPU_INTEL
+#		define NL_CPU_INTEL
+#	endif
 #	ifndef _WIN32_WINNT
 #		define _WIN32_WINNT 0x0500	// Minimal OS = Windows 2000 (NeL is not supported on Windows 95/98)
 #	endif
 #	ifdef _MSC_VER
 #		define NL_COMP_VC
-#		if _MSC_VER >= 1800
+#		if _MSC_VER >= 1900
+#			define NL_COMP_VC14
+#			define NL_COMP_VC_VERSION 140
+#		elif _MSC_VER >= 1800
 #			define NL_COMP_VC12
 #			define NL_COMP_VC_VERSION 120
 #		elif _MSC_VER >= 1700
@@ -62,6 +79,9 @@
 #		elif _MSC_VER >= 1600
 #			define NL_COMP_VC10
 #			define NL_COMP_VC_VERSION 100
+#			ifdef _HAS_CPP0X
+#				undef _HAS_CPP0X	// VC++ 2010 doesn't implement C++11 stuff we need
+#			endif
 #		elif _MSC_VER >= 1500
 #			define NL_COMP_VC9
 #			define NL_COMP_VC_VERSION 90
@@ -145,8 +165,12 @@
 #	define NL_COMP_GCC
 #endif
 
-#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__)
+#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__) || (defined(NL_COMP_VC_VERSION) && NL_COMP_VC_VERSION >= 110)
 #	define NL_ISO_CPP0X_AVAILABLE
+#endif
+
+#if defined(NL_COMP_GCC) && (__cplusplus >= 201103L)
+#	define NL_NO_EXCEPTION_SPECS
 #endif
 
 // gcc 3.4 introduced ISO C++ with tough template rules
@@ -177,6 +201,10 @@
 #			define NL_ISO_STDTR1_HEADER(header) <header>
 #			define NL_ISO_STDTR1_NAMESPACE std
 #		endif
+#	endif
+	// clang define GCC version for compatibility
+#	ifdef __clang__
+#		define CLANG_VERSION (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 #	endif
 #endif
 
@@ -285,7 +313,7 @@
  * Used to display a int64 in a platform independent way with printf like functions.
  \code
  sint64 myint64 = SINT64_CONSTANT(0x123456781234);
- printf("This is a 64 bits int: %"NL_I64"u", myint64);
+ printf("This is a 64 bits int: %" NL_I64 "u", myint64);
  \endcode
  */
 
@@ -365,16 +393,17 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 #include <stdlib.h>
 #include <intrin.h>
 #include <malloc.h>
-inline void *aligned_malloc(size_t size, size_t alignment) { return _aligned_malloc(size, alignment); }
-inline void aligned_free(void *ptr) { _aligned_free(ptr); }
+#define aligned_malloc(size, alignment) _aligned_malloc(size, alignment)
+#define aligned_free(ptr) _aligned_free(ptr)
 #elif defined(NL_OS_MAC)
+#include <stdlib.h>
 // under Mac OS X, malloc is already aligned for SSE and Altivec (16 bytes alignment)
-inline void *aligned_malloc(size_t size, size_t alignment) { return malloc(size); }
-inline void aligned_free(void *ptr) { free(ptr); }
+#define aligned_malloc(size, alignment) malloc(size)
+#define aligned_free(ptr) free(ptr)
 #else
 #include <malloc.h>
-inline void *aligned_malloc(size_t size, size_t alignment) { return memalign(alignment, size); }
-inline void aligned_free(void *ptr) { free(ptr); }
+#define aligned_malloc(size, alignment) memalign(alignment, size)
+#define aligned_free(ptr) free(ptr)
 #endif /* NL_COMP_ */
 
 
@@ -383,10 +412,30 @@ inline void aligned_free(void *ptr) { free(ptr); }
 #define NL_DEFAULT_MEMORY_ALIGNMENT 16
 #define NL_ALIGN_SSE2 NL_ALIGN(NL_DEFAULT_MEMORY_ALIGNMENT)
 
+#ifdef NL_CPU_X86_64
+// on x86_64, new and delete are already aligned on 16 bytes
+#elif (defined(NL_COMP_VC) && defined(NL_DEBUG))
+// don't use aligned memory if debugging with VC++ in 32 bits
+#else
+// use aligned memory in all other cases
+#define NL_USE_ALIGNED_MEMORY_OPERATORS
+#endif
+
+#ifdef NL_USE_ALIGNED_MEMORY_OPERATORS
+
+#ifdef NL_NO_EXCEPTION_SPECS
+extern void *operator new(size_t size);
+extern void *operator new[](size_t size);
+extern void operator delete(void *p) noexcept;
+extern void operator delete[](void *p) noexcept;
+#else
 extern void *operator new(size_t size) throw(std::bad_alloc);
 extern void *operator new[](size_t size) throw(std::bad_alloc);
 extern void operator delete(void *p) throw();
 extern void operator delete[](void *p) throw();
+#endif /* NL_NO_EXCEPTION_SPECS */
+
+#endif /* NL_USE_ALIGNED_MEMORY_OPERATORS */
 
 #else /* NL_HAS_SSE2 */
 
@@ -405,30 +454,40 @@ extern void operator delete[](void *p) throw();
 #		define CHashSet ::std::hash_set
 #		define CHashMultiMap ::std::hash_multimap
 #	endif // _STLP_HASH_MAP
+#	define CUniquePtr ::std::auto_ptr
+#	define CUniquePtrMove
+#elif defined(NL_ISO_CPP0X_AVAILABLE) || (defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 100))
+#	include <unordered_map>
+#	include <unordered_set>
+#	define CHashMap ::std::unordered_map
+#	define CHashSet ::std::unordered_set
+#	define CHashMultiMap ::std::unordered_multimap
+#	define CUniquePtr ::std::unique_ptr
+#	define CUniquePtrMove ::std::move
 #elif defined(NL_ISO_STDTR1_AVAILABLE) // use std::tr1 for CHash* classes, if available (gcc 4.1+ and VC9 with TR1 feature pack)
 #	include NL_ISO_STDTR1_HEADER(unordered_map)
 #	include NL_ISO_STDTR1_HEADER(unordered_set)
 #	define CHashMap NL_ISO_STDTR1_NAMESPACE::unordered_map
 #	define CHashSet NL_ISO_STDTR1_NAMESPACE::unordered_set
 #	define CHashMultiMap NL_ISO_STDTR1_NAMESPACE::unordered_multimap
+#	define CUniquePtr ::std::auto_ptr
+#	define CUniquePtrMove
 #elif defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 70 && NL_COMP_VC_VERSION <= 90) // VC7 through 9
 #	include <hash_map>
 #	include <hash_set>
 #	define CHashMap stdext::hash_map
 #	define CHashSet stdext::hash_set
 #	define CHashMultiMap stdext::hash_multimap
-#elif defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 120)
-#	include <hash_map>
-#	include <hash_set>
-#	define CHashMap ::std::hash_map
-#	define CHashSet ::std::hash_set
-#	define CHashMultiMap ::std::hash_multimap
+#	define CUniquePtr ::std::auto_ptr
+#	define CUniquePtrMove
 #elif defined(NL_COMP_GCC) // GCC4
 #	include <ext/hash_map>
 #	include <ext/hash_set>
 #	define CHashMap ::__gnu_cxx::hash_map
 #	define CHashSet ::__gnu_cxx::hash_set
 #	define CHashMultiMap ::__gnu_cxx::hash_multimap
+#	define CUniquePtr ::std::auto_ptr
+#	define CUniquePtrMove
 
 namespace __gnu_cxx {
 
@@ -463,7 +522,7 @@ typedef	uint16	ucchar;
 
 // To define a 64bits constant; ie: UINT64_CONSTANT(0x123456781234)
 #ifdef NL_COMP_VC
-#	if (NL_COMP_VC_VERSION >= 120)
+#	if (NL_COMP_VC_VERSION >= 100)
 #		define INT64_CONSTANT(c)		(c##LL)
 #		define SINT64_CONSTANT(c)	(c##LL)
 #		define UINT64_CONSTANT(c)	(c##ULL)

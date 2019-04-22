@@ -22,7 +22,6 @@
 
 #include <QString>
 
-
 struct SCrashReportData
 {
 	QString description;

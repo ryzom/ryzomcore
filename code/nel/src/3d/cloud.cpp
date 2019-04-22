@@ -25,6 +25,10 @@
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
@@ -178,7 +182,7 @@ void CCloud::generate (CNoise3d &noise)
 	_Driver->activeVertexBuffer (rVB);
 	_Driver->renderRawQuads (_CloudTexClamp->ToClamp, 0, 1);
 
-	// Restaure render target
+	// Restore render target
 	_Driver->setRenderTarget (NULL);
 
 	_CloudTexTmp->Tex->setFilterMode (ITexture::Nearest, ITexture::NearestMipMapOff);
@@ -685,7 +689,7 @@ void CCloud::genBill (CCamera *pCam, uint32 nBillSize)
 
 	dispXYZ (&_CloudTexTmp->ToBill);
 
-	// Restaure render target
+	// Restore render target
 	_Driver->setRenderTarget (NULL);
 
 	// This is the end of render to texture like so reset all stuff

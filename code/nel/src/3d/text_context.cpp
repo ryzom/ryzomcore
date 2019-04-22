@@ -19,6 +19,10 @@
 #include "nel/3d/text_context.h"
 #include "nel/3d/font_generator.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 // ------------------------------------------------------------------------------------------------
@@ -31,6 +35,8 @@ CTextContext::CTextContext()
 	_FontGen = NULL;
 
 	_FontSize = 12;
+	_Embolden = false;
+	_Oblique = false;
 
 	_Color = NLMISC::CRGBA(0,0,0);
 
@@ -41,7 +47,8 @@ CTextContext::CTextContext()
 
 	_Shaded = false;
 	_ShadeOutline = false;
-	_ShadeExtent = 0.001f;
+	_ShadeExtentX = 0.001f;
+	_ShadeExtentY = 0.001f;
 	_ShadeColor = NLMISC::CRGBA(0,0,0);
 
 	_Keep800x600Ratio= true;
@@ -67,25 +74,9 @@ uint32 CTextContext::textPush (const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, NLMISC::MaxCStringSize);
 
-	if (_CacheNbFreePlaces == 0)
-	{
-		CComputedString csTmp;
-
-		_CacheStrings.push_back (csTmp);
-		if (_CacheFreePlaces.size() == 0)
-			_CacheFreePlaces.resize (1);
-		_CacheFreePlaces[0] = (uint32)_CacheStrings.size()-1;
-		_CacheNbFreePlaces = 1;
-	}
-
-	// compute the string.
-	uint32 index = _CacheFreePlaces[_CacheNbFreePlaces-1];
-	CComputedString &strToFill = _CacheStrings[index];
-	_FontManager->computeString (str, _FontGen, _Color, _FontSize, _Driver, strToFill, _Keep800x600Ratio);
-
-	_CacheNbFreePlaces--;
-
-	return index;
+	ucstring uc;
+	uc.fromUtf8((const char *)str);
+	return textPush(uc);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -98,7 +89,7 @@ uint32 CTextContext::textPush (const ucstring &str)
 		CComputedString csTmp;
 
 		_CacheStrings.push_back (csTmp);
-		if (_CacheFreePlaces.size() == 0)
+		if (_CacheFreePlaces.empty())
 			_CacheFreePlaces.resize (1);
 		_CacheFreePlaces[0] = (uint32)_CacheStrings.size()-1;
 		_CacheNbFreePlaces = 1;
@@ -108,8 +99,10 @@ uint32 CTextContext::textPush (const ucstring &str)
 	uint32 index = _CacheFreePlaces[_CacheNbFreePlaces-1];
 	nlassert (index < _CacheStrings.size());
 	CComputedString &strToFill = _CacheStrings[index];
-	_FontManager->computeString (str, _FontGen, _Color
-		, _FontSize, _Driver, strToFill, _Keep800x600Ratio);
+
+	_FontManager->computeString (str, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, strToFill, _Keep800x600Ratio);
+	// just compute letters, glyphs are rendered on demand before first draw
+	//_FontManager->computeStringInfo(str, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, strToFill, _Keep800x600Ratio);
 
 	_CacheNbFreePlaces--;
 

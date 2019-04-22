@@ -366,13 +366,13 @@ bool	CDbNode::epilog()
 
 	readyDb.init("ready");
 	readyDb.IsInline = false;
-	readyDb.Proto = "";
+	readyDb.Proto.clear();
 	readyDb.Type = "bool";
 	readyDb.Description = "Tells if database engine is ready to work.\nEngine may not be ready because PDS is down, not yet ready\nor message queue to PDS is full.";
 
 	updateDb.init("update");
 	updateDb.IsInline = false;
-	updateDb.Proto = "";
+	updateDb.Proto.clear();
 	updateDb.Type = "void";
 	updateDb.Description = "Update the database engine.\nCall this method once per tick, only if engine is ready (see also ready() above).";
 
@@ -390,7 +390,7 @@ bool	CDbNode::epilog()
 
 	releaseDb.init("release");
 	releaseDb.IsInline = false;
-	releaseDb.Proto = "";
+	releaseDb.Proto.clear();
 	releaseDb.Type = "void";
 	releaseDb.Description = "Release the whole database engine.\nCall this function at service release.";
 
@@ -2350,7 +2350,7 @@ bool	CClassNode::generateContent()
 
 		UnregisterId.add(unregisterAttributesFunction + "();");
 
-		oeid = "";
+		oeid.clear();
 		if (useEntityId())
 		{
 			oeid = ", "+getClassKey()->cppName();
@@ -4512,11 +4512,11 @@ void	CDeclarationNode::generateSetContent(CCallContext *context)
 	if (useReference)
 	{
 		FetchId.add(Type+"*\t"+objectVariable+" = static_cast<"+Type+"*>("+pdslibFunc("create")+"(tableIndex));");
-		FetchId.add(cppName()+".insert(std::make_pair<"+keyType->getName()+","+Type+"*>("+keyVariable+", "+objectVariable+"));");
+		FetchId.add(cppName()+".insert(std::make_pair("+keyVariable+", "+objectVariable+"));");
 	}
 	else
 	{
-		FetchId.add(cppName()+".insert(std::make_pair<"+keyType->getName()+","+Type+">("+keyVariable+", "+Type+"()));");
+		FetchId.add(cppName()+".insert(std::make_pair("+keyVariable+", "+Type+"()));");
 		FetchId.add(Type+"*\t"+objectVariable+" = &("+cppName()+"["+keyVariable+"]);");
 	}
 	FetchId.add(pdslibFunc("setRowIndex")+"(rowIndex, "+objectVariable+");");

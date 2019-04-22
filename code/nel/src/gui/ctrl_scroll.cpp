@@ -28,6 +28,10 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 NLMISC_REGISTER_OBJECT(CViewBase, CCtrlScroll, std::string, "scroll");
 
 namespace NLGUI
@@ -64,6 +68,7 @@ namespace NLGUI
 		_StepValue = 0;
 		_TileM = false;
 		_Frozen = false;
+		_Scale = false;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -102,6 +107,11 @@ namespace NLGUI
 		if( name == "tx_topright" )
 		{
 			return getTextureTopOrRight();
+		}
+		else
+		if( name == "scale" )
+		{
+			return toString( _Scale );
 		}
 		else
 		if( name == "vertical" )
@@ -237,6 +247,14 @@ namespace NLGUI
 		if( name == "tx_topright" )
 		{
 			setTextureTopOrRight( value );
+			return;
+		}
+		else
+		if( name =="scale" )
+		{
+			bool b;
+			if (fromString( value, b ) )
+				_Scale = b;
 			return;
 		}
 		else
@@ -404,6 +422,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "tx_bottomleft", BAD_CAST getTextureBottomOrLeft().c_str() );
 		xmlSetProp( node, BAD_CAST "tx_middle", BAD_CAST getTextureMiddle().c_str() );
 		xmlSetProp( node, BAD_CAST "tx_topright", BAD_CAST getTextureTopOrRight().c_str() );
+		xmlSetProp( node, BAD_CAST "scale", BAD_CAST toString( _Scale ).c_str() );
 		xmlSetProp( node, BAD_CAST "vertical", BAD_CAST toString( _Vertical ).c_str() );
 		
 		std::string align;
@@ -476,6 +495,10 @@ namespace NLGUI
 		if(prop) setTextureTopOrRight(string((const char*)prop));
 		else setTextureTopOrRight ("w_scroll_l0_t.tga");
 
+		// Override texture size (w for vertical, h for horizontal)
+		prop = (char*) xmlGetProp( node, (xmlChar*)"scale" );
+		if (prop) _Scale = convertBool((const char*)prop);
+
 		// Read properties
 		prop = (char*) xmlGetProp( node, (xmlChar*)"vertical" );
 		if (prop) _Vertical = convertBool((const char*)prop);
@@ -519,17 +542,17 @@ namespace NLGUI
 
 		// Read Action handlers
 		prop = (char*) xmlGetProp( node, (xmlChar*)"onscroll" );
-		if (prop)	_AHOnScroll = NLMISC::strlwr(prop.str());
+		if (prop)	_AHOnScroll = NLMISC::toLower(prop.str());
 		prop = (char*) xmlGetProp( node, (xmlChar*)"params" );
 		if (prop)	_AHOnScrollParams = string((const char*)prop);
 		//
 		prop = (char*) xmlGetProp( node, (xmlChar*)"onscrollend" );
-		if (prop)	_AHOnScrollEnd = NLMISC::strlwr(prop.str());
+		if (prop)	_AHOnScrollEnd = NLMISC::toLower(prop.str());
 		prop = (char*) xmlGetProp( node, (xmlChar*)"end_params" );
 		if (prop)	_AHOnScrollEndParams = string((const char*)prop);
 		//
 		prop = (char*) xmlGetProp( node, (xmlChar*)"onscrollcancel" );
-		if (prop)	_AHOnScrollCancel = NLMISC::strlwr(prop.str());
+		if (prop)	_AHOnScrollCancel = NLMISC::toLower(prop.str());
 		prop = (char*) xmlGetProp( node, (xmlChar*)"cancel_params" );
 		if (prop)	_AHOnScrollCancelParams = string((const char*)prop);
 
@@ -602,13 +625,13 @@ namespace NLGUI
 
 				if (_Vertical)
 				{
-					_W = w;
+					if (!_Scale) _W = w;
 					_H = _Target->getMaxHReal();
 				}
 				else
 				{
 					_W = _Target->getMaxWReal();
-					_H = h;
+					if (!_Scale) _H = h;
 				}
 
 				CCtrlBase::updateCoords ();
@@ -653,8 +676,7 @@ namespace NLGUI
 								factor = -(float)_Target->getOfsY() / factor;
 								if (factor < 0.0f) factor = 0.0f;
 								if (factor > 1.0f) factor = 1.0f;
-								factor = factor * (getHReal()-_TrackSize);
-								_TrackPos = (sint32)factor;
+								_TrackPos = factor * (getHReal()-_TrackSize);
 							}
 							else // TOP
 							{
@@ -663,8 +685,7 @@ namespace NLGUI
 								if (factor < 0.0f) factor = 0.0f;
 								if (factor > 1.0f) factor = 1.0f;
 								sint32 hreal = getHReal();
-								factor = (1.0f-factor) * (hreal - _TrackSize);
-								_TrackPos = (sint32)factor;
+								_TrackPos = (1.0f-factor) * (hreal - _TrackSize);
 							}
 						}
 
@@ -712,8 +733,7 @@ namespace NLGUI
 								factor = -(float)_Target->getOfsX() / factor;
 								if (factor < 0.0f) factor = 0.0f;
 								if (factor > 1.0f) factor = 1.0f;
-								factor = factor * (getWReal()-_TrackSize);
-								_TrackPos = (sint32)factor;
+								_TrackPos = factor * (getWReal()-_TrackSize);
 							}
 							else // RIGHT
 							{
@@ -722,8 +742,7 @@ namespace NLGUI
 								if (factor < 0.0f) factor = 0.0f;
 								if (factor > 1.0f) factor = 1.0f;
 								sint32 hreal = getWReal();
-								factor = (1.0f-factor) * (hreal - _TrackSize);
-								_TrackPos = (sint32)factor;
+								_TrackPos = (1.0f-factor) * (hreal - _TrackSize);
 							}
 						}
 
@@ -885,7 +904,7 @@ namespace NLGUI
 			}
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel && _Vertical)
 			{
-				moveTrackY (eventDesc.getWheel() * 12);
+				moveTargetY (-(eventDesc.getWheel() * 12));
 				return true;
 			}
 		}
@@ -930,8 +949,8 @@ namespace NLGUI
 		if ((getWReal()-_TrackSize) <= 0)
 			return 0;
 
-		sint32 newtpos;
-		sint32 tpos = _TrackPos;
+		float newtpos;
+		float tpos = _TrackPos;
 		sint32 tsize = _TrackSize;
 
 		// Limit the scroller to the defined area
@@ -998,8 +1017,8 @@ namespace NLGUI
 		if ((getHReal()-_TrackSize) <= 0)
 			return 0;
 
-		sint32 newtpos;
-		sint32 tpos = _TrackPos;
+		float newtpos;
+		float tpos = _TrackPos;
 		sint32 tsize = _TrackSize;
 
 		// Limit the scroller to the defined area
@@ -1139,7 +1158,7 @@ namespace NLGUI
 				factor = factor * (1.0f-(_TrackPos / favoid0((float)(getHReal()-_TrackSize))));
 
 			// Compute Steped target
-			sint32	nexOfsY= (sint32) (_Inverted ? factor : -factor);
+			sint32	nexOfsY= (sint32) floorf(0.5+(_Inverted ? factor : -factor));
 			if(_TargetStepY>1)
 				nexOfsY= ((nexOfsY+_TargetStepY/2)/_TargetStepY) * _TargetStepY;
 			_Target->setOfsY (nexOfsY);
@@ -1158,7 +1177,7 @@ namespace NLGUI
 				factor = factor * (1.0f-(_TrackPos / favoid0((float)(getWReal()-_TrackSize))));
 
 			// Compute Steped target
-			sint32	nexOfsX= (sint32) (_Inverted ? factor : -factor);
+			sint32	nexOfsX= (sint32) floorf(0.5+(_Inverted ? factor : -factor));
 			if(_TargetStepX>1)
 				nexOfsX= ((nexOfsX+_TargetStepX/2)/_TargetStepX) * _TargetStepX;
 			_Target->setOfsX (nexOfsX);
@@ -1202,16 +1221,14 @@ namespace NLGUI
 			float factor = (float)(wReal-maxWReal);
 			factor = -(float)ofsX / factor;
 			clamp(factor, 0.f, 1.f);
-			factor = factor * (getWReal()-_TrackSize);
-			_TrackPos = (sint32)factor;
+			_TrackPos = factor * (getWReal()-_TrackSize);
 		}
 		else // RIGHT
 		{
 			float factor = (float)(wReal-maxWReal);
 			factor = (float)ofsX / factor;
 			clamp(factor, 0.f, 1.f);
-			factor = (1.0f-factor) * (getWReal() - _TrackSize);
-			_TrackPos = (sint32)factor;
+			_TrackPos = (1.0f-factor) * (getWReal() - _TrackSize);
 		}
 
 		// invalidate only position. 1 pass is sufficient
@@ -1228,6 +1245,12 @@ namespace NLGUI
 		if(hReal <= maxHReal)
 			return;
 
+		if (_TargetStepY > 1)
+		{
+			sint sign = (0 < dy) - (dy < 0);
+			dy = sign * max(1, (dy / _TargetStepY)) * _TargetStepY;
+		}
+
 		// compute the new ofsY.
 		sint32	ofsY= _Target->getOfsY();
 		ofsY+= dy;
@@ -1240,8 +1263,7 @@ namespace NLGUI
 			float factor = (float)(hReal-maxHReal);
 			factor = -(float)ofsY / factor;
 			clamp(factor, 0.f, 1.f);
-			factor = factor * (getHReal()-_TrackSize);
-			_TrackPos = (sint32)factor;
+			_TrackPos = factor * (getHReal()-_TrackSize);
 		}
 		else // TOP
 		{
@@ -1250,8 +1272,7 @@ namespace NLGUI
 			float factor = (float)(hReal-maxHReal);
 			factor = (float)ofsY / factor;
 			clamp(factor, 0.f, 1.f);
-			factor = (1.0f-factor) * (getHReal() - _TrackSize);
-			_TrackPos = (sint32)factor;
+			_TrackPos = (1.0f-factor) * (getHReal() - _TrackSize);
 		}
 
 		// invalidate only position. 1 pass is sufficient

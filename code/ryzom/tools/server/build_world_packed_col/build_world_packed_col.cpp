@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 	//
 	for(uint k = 0; k < builderConfig.SearchPaths.size(); ++k)
 	{
-		CPath::addSearchPath(builderConfig.SearchPaths[k], true, false);
+		CPath::addSearchPath(NLMISC::expandEnvironmentVariables(builderConfig.SearchPaths[k]), true, false);
 	}
 	CPath::remapExtension("dds", "tga", true);
 	CPath::remapExtension("dds", "png", true);

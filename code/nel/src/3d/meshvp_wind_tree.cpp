@@ -28,6 +28,9 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -191,7 +194,7 @@ CMeshVPWindTree::~CMeshVPWindTree()
 
 
 // ***************************************************************************
-void	CMeshVPWindTree::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMeshVPWindTree::serial(NLMISC::IStream &f)
 {
 	(void)f.serialVersion(0);
 
@@ -223,7 +226,8 @@ void CMeshVPWindTree::initVertexPrograms()
 		{
 			// setup of the VPLight fragment
 			uint	numPls= i/4;
-			bool	normalize= (i&1)!=0;
+			// FIXME: normalize=true makes trees dance, workaround for issue #160
+			bool	normalize= false; //(i&1)!=0;
 			bool	specular= (i&2)!=0;
 
 			// combine

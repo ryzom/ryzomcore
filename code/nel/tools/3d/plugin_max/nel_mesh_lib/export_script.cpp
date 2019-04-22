@@ -41,11 +41,19 @@ bool CExportNel::scriptEvaluate (const char *script, void *out, TNelScriptValueT
 	four_typed_value_locals(Parser* parser,Value* code,Value* result,StringStream* source);
 
 	vl.parser = new Parser;
-	vl.source = new StringStream (const_cast<char *>(script));
+	vl.source = new StringStream (utf8ToTStr(script));
 	vl.source->log_to(NULL);
+
+#if MAX_VERSION_MAJOR < 19
 	save_current_frames();
+#endif
+
 	try
 	{
+#if MAX_VERSION_MAJOR >= 19
+		ScopedSaveCurrentFrames currentFrames;
+#endif
+
 		vl.source->flush_whitespace();
 		vl.code = vl.parser->compile_all(vl.source);
 		vl.result = vl.code->eval();
@@ -71,11 +79,16 @@ bool CExportNel::scriptEvaluate (const char *script, void *out, TNelScriptValueT
 	}
 	catch (...)
 	{
+#if MAX_VERSION_MAJOR < 19
 		restore_current_frames();
+#endif
 		result=FALSE;
 		vl.source->close();
 	}
+
+#if MAX_VERSION_MAJOR < 19
 	pop_value_locals();
+#endif
 	return (result!=FALSE);
 }
 
@@ -130,7 +143,7 @@ float CExportNel::getScriptAppData (Animatable *node, uint32 id, float def)
 
 	// String to int
 	float value = 0.f;
-	if (toFloatMax((const char*)ap->data, value))
+	if (toFloatMax((const TCHAR*)ap->data, value))
 		return value;
 	else
 		return def;

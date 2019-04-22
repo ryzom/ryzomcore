@@ -44,7 +44,7 @@
 #ifdef HAVE_LIBOVR
 
 #include "std3d.h"
-#include <nel/3d/stereo_ovr_04.h>
+#include "nel/3d/stereo_ovr_04.h"
 
 // STL includes
 #include <sstream>
@@ -55,18 +55,22 @@
 
 // NeL includes
 // #include <nel/misc/debug.h>
-#include <nel/3d/u_camera.h>
-#include <nel/3d/u_driver.h>
-#include <nel/3d/material.h>
-#include <nel/3d/texture_bloom.h>
-#include <nel/3d/texture_user.h>
-#include <nel/3d/driver_user.h>
-#include <nel/3d/u_texture.h>
+#include "nel/3d/u_camera.h"
+#include "nel/3d/u_driver.h"
+#include "nel/3d/material.h"
+#include "nel/3d/texture_bloom.h"
+#include "nel/3d/texture_user.h"
+#include "nel/3d/driver_user.h"
+#include "nel/3d/u_texture.h"
 
 // Project includes
 
 using namespace std;
 // using namespace NLMISC;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D {
 

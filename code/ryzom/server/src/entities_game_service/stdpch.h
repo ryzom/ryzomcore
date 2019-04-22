@@ -18,7 +18,6 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <libxml/parser.h>
 #include <math.h>
 #include <stdio.h>
 #include <stddef.h>
@@ -38,6 +37,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <functional>
 
 // NeL georges
 #include "nel/georges/load_form.h"

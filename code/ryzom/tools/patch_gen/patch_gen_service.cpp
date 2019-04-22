@@ -19,7 +19,10 @@
 #include "nel/misc/common.h"
 #include "nel/misc/file.h"
 
-#include "game_share/ryzom_version.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "game_share/tick_event_handler.h"
 #include "game_share/singleton_registry.h"
 

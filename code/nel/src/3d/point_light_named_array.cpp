@@ -23,6 +23,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 
@@ -92,7 +96,7 @@ void			CPointLightNamedArray::build(const std::vector<CPointLightNamed> &pointLi
 	// Regroup.
 	// ---------
 	_PointLightGroupMap.clear();
-	if(_PointLights.size() > 0 )
+	if (!_PointLights.empty())
 	{
 		bool	first= true;
 		string	precName;

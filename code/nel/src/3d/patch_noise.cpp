@@ -26,9 +26,13 @@
 #include "nel/misc/common.h"
 #include "nel/3d/tile_noise_map.h"
 #include "nel/3d/patchuv_locator.h"
+
 using	namespace	std;
 using	namespace	NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

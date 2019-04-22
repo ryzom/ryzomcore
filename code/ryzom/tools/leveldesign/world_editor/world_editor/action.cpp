@@ -191,13 +191,13 @@ bool CActionLigoResize::redo ()
 			// By default
 			data.PosX = 0;
 			data.PosY = 0;
-			data.ZoneName = "";
+			data.ZoneName.clear();
 			data.Rot = 0;
 			data.Flip = 0;
-			data.SharingMatNames[0] = "";
-			data.SharingMatNames[1] = "";
-			data.SharingMatNames[2] = "";
-			data.SharingMatNames[3] = "";
+			data.SharingMatNames[0].clear();
+			data.SharingMatNames[1].clear();
+			data.SharingMatNames[2].clear();
+			data.SharingMatNames[3].clear();
 			data.SharingCutEdges[0] = 0;
 			data.SharingCutEdges[1] = 0;
 			data.SharingCutEdges[2] = 0;
@@ -233,7 +233,7 @@ bool CActionLigoResize::redo ()
 // CActionImportPrimitive
 // ***************************************************************************
 
-CActionImportPrimitive::CActionImportPrimitive (const char *oldPrimFile)
+CActionImportPrimitive::CActionImportPrimitive (const std::string &oldPrimFile)
 {
 	_Filename = oldPrimFile;
 	_FirstLoad = true;
@@ -520,7 +520,7 @@ bool CActionImportPrimitive::redo ()
 				return false;
 			}
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			theApp.errorMessage ("Error reading the file (%s) : (%s).", _Filename.c_str (), e.what ());
 			return false;
@@ -549,7 +549,7 @@ bool CActionImportPrimitive::redo ()
 // CActionLoadPrimitive
 // ***************************************************************************
 
-CActionLoadPrimitive::CActionLoadPrimitive (const char *oldPrimFile)
+CActionLoadPrimitive::CActionLoadPrimitive(const std::string &oldPrimFile)
 {
 	_Filename = oldPrimFile;
 	_FirstLoad = true;
@@ -610,7 +610,7 @@ bool CActionLoadPrimitive::redo ()
 				return false;
 			}
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			theApp.errorMessage ("Error reading the file (%s) : (%s).", _Filename.c_str (), e.what ());
 			return false;
@@ -2156,7 +2156,7 @@ bool CActionDelete::redo ()
 // CActionSetPrimitivePropertyString
 // ***************************************************************************
 
-CActionSetPrimitivePropertyString::CActionSetPrimitivePropertyString (const CDatabaseLocatorPointer &locator, const char *propertyName, const char *newValue, bool _default)
+CActionSetPrimitivePropertyString::CActionSetPrimitivePropertyString(const CDatabaseLocatorPointer &locator, const std::string &propertyName, const std::string &newValue, bool _default)
 {
 	_PropertyName = propertyName;
 	_PropertyNewValue = newValue;
@@ -2238,7 +2238,7 @@ bool CActionSetPrimitivePropertyString::redo ()
 // CActionSetPrimitivePropertyStringArray
 // ***************************************************************************
 
-CActionSetPrimitivePropertyStringArray::CActionSetPrimitivePropertyStringArray (const CDatabaseLocatorPointer &locator, const char *propertyName, const std::vector<std::string> &newValue, bool _default)
+CActionSetPrimitivePropertyStringArray::CActionSetPrimitivePropertyStringArray (const CDatabaseLocatorPointer &locator, const std::string &propertyName, const std::vector<std::string> &newValue, bool _default)
 {
 	_PropertyName = propertyName;
 	_PropertyNewValue = newValue;
@@ -2312,7 +2312,7 @@ bool CActionSetPrimitivePropertyStringArray::redo ()
 // CActionAddPrimitiveByClass
 // ***************************************************************************
 
-CActionAddPrimitiveByClass::CActionAddPrimitiveByClass (const CDatabaseLocator &locator, const char *className, 
+CActionAddPrimitiveByClass::CActionAddPrimitiveByClass (const CDatabaseLocator &locator, const std::string &className, 
 														const NLMISC::CVector &initPos, float deltaPos,
 														const std::vector<CPrimitiveClass::CInitParameters>	initParameters)
 {
@@ -2424,7 +2424,7 @@ bool CActionAddPrimitiveByClass::redo ()
 // CActionAddLandscape
 // ***************************************************************************
 
-CActionAddLandscape::CActionAddLandscape (const char *filename)
+CActionAddLandscape::CActionAddLandscape (const std::string &filename)
 {
 	_FirstTime = true;
 	_Filename = filename;
@@ -2469,7 +2469,7 @@ bool CActionAddLandscape::redo ()
 	if (_FirstTime)
 	{
 		// Load the file
-		getMainFrame ()->launchLoadingDialog (string("loading land ") + _Filename);
+		getMainFrame ()->launchLoadingDialog ("loading land " + _Filename);
 
 		try
 		{
@@ -2488,7 +2488,7 @@ bool CActionAddLandscape::redo ()
 				result = false;
 			}
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			getMainFrame ()->terminateLoadingDialog ();
 			theApp.errorMessage ("Error reading file %s : %s", _Filename.c_str (), e.what ());

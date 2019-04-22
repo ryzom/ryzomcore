@@ -36,6 +36,7 @@
 #include "input.h"
 #include "sound_manager.h"
 #include "camera.h"
+#include "interface_v3/interface_manager.h"
 
 using namespace NLMISC;
 using namespace NL3D;
@@ -99,6 +100,12 @@ void updateFromClientCfg()
 		else
 			Driver->forceTextureResize(1);
 	}
+
+	if (ClientCfg.InterfaceScale != LastClientCfg.InterfaceScale)
+		CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
+
+	if (ClientCfg.BilinearUI != LastClientCfg.BilinearUI)
+		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
 
 	//---------------------------------------------------
 	if (ClientCfg.WaitVBL != LastClientCfg.WaitVBL)
@@ -238,6 +245,12 @@ void updateFromClientCfg()
 	}
 
 	//---------------------------------------------------
+	if (ClientCfg.AnisotropicFilter != LastClientCfg.AnisotropicFilter)
+	{
+		Driver->setAnisotropicFilter(ClientCfg.AnisotropicFilter);
+	}
+
+	//---------------------------------------------------
 	if (ClientCfg.FXAA != LastClientCfg.FXAA)
 	{
 		if (ClientCfg.FXAA)
@@ -323,7 +336,8 @@ void updateFromClientCfg()
 			catch(const Exception &e)
 			{
 				nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
-				SoundMngr = 0;
+				delete SoundMngr;
+				SoundMngr = NULL;
 			}
 
 			// re-init with good SFX/Music Volume

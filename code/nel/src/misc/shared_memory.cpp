@@ -51,7 +51,7 @@ void			*CSharedMemory::createSharedMemory( TSharedMemId sharedMemId, uint32 size
 #ifdef NL_OS_WINDOWS
 
 	// Create a file mapping backed by the virtual memory swap file (not a data file)
-	HANDLE hMapFile = CreateFileMapping( INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, sharedMemId );
+	HANDLE hMapFile = CreateFileMappingA( INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, sharedMemId );
 	if ( (hMapFile == NULL) || (GetLastError() == ERROR_ALREADY_EXISTS) )
 	{
 		nlwarning( "SHDMEM: Cannot create file mapping for smid %s: error %u%s, mapFile %p", sharedMemId, GetLastError(), (GetLastError()==ERROR_ALREADY_EXISTS) ? " (already exists) ": "", hMapFile );
@@ -97,7 +97,7 @@ void			*CSharedMemory::accessSharedMemory( TSharedMemId sharedMemId )
 #ifdef NL_OS_WINDOWS
 
 	// Open the existing file mapping by name
-	HANDLE hMapFile = OpenFileMapping( FILE_MAP_ALL_ACCESS, false, sharedMemId );
+	HANDLE hMapFile = OpenFileMappingA( FILE_MAP_ALL_ACCESS, false, sharedMemId );
 	if ( hMapFile == NULL )
 		return NULL;
 	//nldebug( "SHDMEM: Opening smid %s --> mapFile %p", sharedMemId, hMapFile );

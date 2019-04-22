@@ -88,7 +88,6 @@ void CSpawnBot::setVisualPropertiesName()
 			return;
 		// the npc name is displayed as a fauna
 	}
-
 	
 	CVisualPropertiesInterface::setName(dataSetRow(), name);
 }
@@ -370,6 +369,7 @@ CBot::CBot(CGroup* owner, CAIAliasDescriptionNode* alias)
 : CAliasChild<CGroup>(owner, alias)
 , _VerticalPos(AITYPES::vp_auto)
 , _Sheet(NULL)
+, _ClientCSheet(NULL)
 , _Stuck(false)
 , _IgnoreOffensiveActions(false)
 , _Healer(false)
@@ -384,6 +384,7 @@ CBot::CBot(CGroup* owner, uint32 alias, std::string const& name)
 : CAliasChild<CGroup>(owner,alias, name)
 , _VerticalPos(AITYPES::vp_auto)
 , _Sheet(NULL)
+, _ClientCSheet(NULL)
 , _Stuck(false)
 , _IgnoreOffensiveActions(false)
 , _Healer(false)
@@ -695,6 +696,17 @@ void CBot::setClientSheet(const std::string & clientSheetName)
 			nlwarning("Invalid CLIENT_SHEET %s", clientSheetName.c_str());
 			return;
 		}
+
+		AISHEETS::ICreatureCPtr sheet = AISHEETS::CSheets::getInstance()->lookup(NLMISC::CSheetId(clientSheetName));
+
+		if (!sheet || sheet->SheetId() == NLMISC::CSheetId::Unknown)
+		{
+			nlwarning("Unknown sheet %s", clientSheetName.c_str());
+			return;
+		}
+
+		_ClientCSheet = sheet;
+
 		sheetChanged();
 	}
 }

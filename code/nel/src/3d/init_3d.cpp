@@ -22,6 +22,10 @@
 #include "nel/3d/scene.h"
 #include "nel/3d/register_3d.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace
 {
 static bool _Initialized = false;

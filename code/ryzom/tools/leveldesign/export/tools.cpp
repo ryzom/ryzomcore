@@ -27,7 +27,7 @@ using namespace NLMISC;
 // ---------------------------------------------------------------------------
 void CTools::mkdir (const string &dirName)
 {
-	if (dirName == "")
+	if (dirName.empty())
 		return;
 	// Does the directory exist ?
 	string newDir = pwd();
@@ -38,7 +38,7 @@ void CTools::mkdir (const string &dirName)
 	}
 	SetCurrentDirectory (newDir.c_str());
 	// Create upper levels
-	newDir = "";
+	newDir.clear();
 	string::size_type pos = dirName.rfind('\\');
 	if (pos != string::npos)
 	{

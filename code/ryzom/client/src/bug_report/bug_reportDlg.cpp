@@ -389,8 +389,8 @@ END_MESSAGE_MAP()
 
 BOOL CBug_reportDlg::OnInitDialog()
 {
-	setReportEmailFunction ((void*)sendEmail);
-	setDefaultEmailParams ("gw.nevrax.com", "", "lecroart@nevrax.com");
+	// setReportEmailFunction ((void*)sendEmail);
+	// setDefaultEmailParams ("gw.nevrax.com", "", "lecroart@nevrax.com");
 
 	CDialog::OnInitDialog();
 
@@ -548,7 +548,7 @@ void CBug_reportDlg::sendReport (bool withScreenshot)
 	}
 	else
 	{
-		MessageBox ("An error occured when sending the report. Report wasn't sent, look log.log for more info", "Error");
+		MessageBox ("An error occurred when sending the report. Report wasn't sent, look log.log for more info", "Error");
 	}
 
 }

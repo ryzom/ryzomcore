@@ -29,7 +29,7 @@ struct CTypeSkillMod
 	CTypeSkillMod() : Modifier(0),Type(EGSPD::CClassificationType::Unknown)
 	{}
 
-	void serial(class NLMISC::IStream &f)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serialEnum( Type );
 		f.serial( Modifier );

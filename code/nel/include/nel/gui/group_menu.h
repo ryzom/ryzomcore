@@ -191,6 +191,7 @@ namespace NLGUI
 		int luaGetLineFromId(CLuaState &ls);
 		int luaIsSeparator(CLuaState &ls);
 		int luaAddLine(CLuaState &ls);
+		int luaAddIconLine(CLuaState &ls);
 		int luaAddLineAtIndex(CLuaState &ls);
 		int luaAddSeparator(CLuaState &ls);
 		int luaAddSeparatorAtIndex(CLuaState &ls);
@@ -210,6 +211,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("addSubMenu", luaAddSubMenu);
 			REFLECT_LUA_METHOD("isSeparator", luaIsSeparator);
 			REFLECT_LUA_METHOD("addLine", luaAddLine); // name, ah, ah_params, id
+			REFLECT_LUA_METHOD("addIconLine", luaAddIconLine); // name, ah, ah_params, id, texture
 			REFLECT_LUA_METHOD("addLineAtIndex", luaAddLineAtIndex); // index, name, ah, ah_params, id
 			REFLECT_LUA_METHOD("addSeparator", luaAddSeparator);
 			REFLECT_LUA_METHOD("addSeparatorAtIndex", luaAddSeparatorAtIndex);
@@ -278,6 +280,7 @@ namespace NLGUI
 		  */
 		CGroupSubMenu *cloneMenu(CGroupSubMenu *appendToMenu, CGroupMenu *newFather, CInterfaceGroup *initGroup = NULL) const;
 		void           initOptions(CInterfaceGroup *parent);
+		CViewBitmap    *createIcon(CInterfaceElement *parentPos, const std::string &texture);
 		CViewBitmap	   *createCheckBox(bool checked);
 		CViewBitmap	   *createRightArrow(CInterfaceElement *parentPos, bool center);
 	};
@@ -346,6 +349,10 @@ namespace NLGUI
 
 		// set the minW of the RootMenu.
 		void	setMinW(sint32 minW);
+		void	setMinH(sint32 minH);
+
+		// change fontsize for new menu items
+		void	setFontSize(uint32 fontSize);
 
 		// Gray a line on the RootMenu
 		void	setGrayedLine(uint line, bool g);

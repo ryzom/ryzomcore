@@ -325,7 +325,7 @@ public:
 	virtual void			disableHardwareVertexArrayAGP();
 	virtual void			disableHardwareTextureShader();
 
-	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay);
+	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable);
 	virtual bool			setMode(const GfxMode& mode);
 	virtual bool			getModes(std::vector<GfxMode> &modes);
 	virtual bool			getCurrentScreenMode(GfxMode &mode);
@@ -381,6 +381,8 @@ public:
 
 	virtual void			forceDXTCCompression(bool dxtcComp);
 	virtual void			setAnisotropicFilter(sint filter);
+	virtual uint			getAnisotropicFilter() const;
+	virtual uint			getAnisotropicFilterMaximum() const;
 
 	virtual void			forceTextureResize(uint divisor);
 
@@ -517,6 +519,8 @@ public:
 	}
 
 	virtual const char*		getVideocardInformation ();
+
+	virtual sint			getTotalVideoMemory() const;
 
 	virtual bool			isActive ();
 
@@ -1558,7 +1562,7 @@ private:
 
 
 	// Monitor color parameters backup
-	bool							_NeedToRestaureGammaRamp;
+	bool							_NeedToRestoreGammaRamp;
 	uint16							_GammaRampBackuped[3*256];
 
 
@@ -1667,7 +1671,7 @@ public:
 	{ 
 		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
 		if (it != ParamIndices.end()) return it->second; 
-		return ~0;
+		return std::numeric_limits<uint>::max();
 	};
 
 	std::map<std::string, uint> ParamIndices;
@@ -1687,7 +1691,7 @@ public:
 	{ 
 		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
 		if (it != ParamIndices.end()) return it->second; 
-		return ~0;
+		return std::numeric_limits<uint>::max();
 	};
 
 	std::map<std::string, uint> ParamIndices;

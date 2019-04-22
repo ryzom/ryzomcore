@@ -33,7 +33,7 @@
 
 class CDeposit;
 
-const uint16 MaxNbActiveSources = (uint16)~0;
+const uint16 MaxNbActiveSources = std::numeric_limits<uint16>::max();
 
 /**
  * A recent forage site prevents from extracting too much material from the same place in a short time.
@@ -195,6 +195,29 @@ namespace NLMISC
 	class CWordsDictionary;
 }
 
+struct CDepositState {
+	uint32 alias;
+	float currentQuantity;
+	uint32 nextRespawnDay;
+	CDepositState() : alias(0), currentQuantity(0.f), nextRespawnDay(0) {}
+	void serial(NLMISC::IStream &f)
+	{
+		if(f.isXML())
+		{
+			f.xmlSerial(alias, "ALIAS");
+			f.xmlSerial(currentQuantity, "CURRENT_QUANTITY");
+			f.xmlSerial(nextRespawnDay, "NEXT_RESPAWN_DAY");
+		}
+		else
+		{
+			f.serial(alias);
+			f.serial(currentQuantity);
+			f.serial(nextRespawnDay);
+		}
+	}
+};
+
+
 /**
  * \author Nicolas Brigand, Alain Saffray, Olivier Cado
  * \author Nevrax France
@@ -205,7 +228,7 @@ class CDeposit : public NLLIGO::CPrimZone, public NLMISC::CRefCount
 public:
 
 	/// Constructor
-	CDeposit() : _AutoSpawnSourcePt(NULL), _QuantityConstraintsPt(NULL), _Ecotype(ECOSYSTEM::common_ecosystem), _FilterPhase(0), _KamiAnger(0.0f), _MinQuality(-1), _MaxQuality(-1), _SourceFXIndex(0), _CanProspect(false), _Enabled(false), _CurrentNbAutoSpawnedSources(0), _AllowDepletionRisk(true) {}
+	CDeposit() : _AutoSpawnSourcePt(NULL), _QuantityConstraintsPt(NULL), _Ecotype(ECOSYSTEM::common_ecosystem), _FilterPhase(0), _KamiAnger(0.0f), _MinQuality(-1), _MaxQuality(-1), _SourceFXIndex(0), _CanProspect(false), _Enabled(false), _CurrentNbAutoSpawnedSources(0), _AllowDepletionRisk(true), _Alias(0) {}
 
 	/// Destructor
 	~CDeposit();
@@ -214,7 +237,7 @@ public:
 	static void		addEcotype( CEcotypeZone *ecotypeZone ) { _EcotypeZones.push_back( ecotypeZone ); }
 
 	/// Init deposit
-	bool			build( const NLLIGO::CPrimZone* zone );
+	bool			build(const NLLIGO::CPrimZone* zone );
 
 	/// Clear all ecotype information, after having built the deposits
 	static void		clearEcotypes();
@@ -319,7 +342,7 @@ public:
 	float			getMaxQuantity() { return _QuantityConstraintsPt ? _QuantityConstraintsPt->getCurrentQuantity() : FLT_MAX; }
 
 	/// Consume. Return the actual consumed quantity (may be lower if there is no more to get)
-	float			consumeQuantity( float requested ) { if ( _QuantityConstraintsPt ) return _QuantityConstraintsPt->consumeQuantity( requested ); else return requested; }
+	float			consumeQuantity( float requested ) { if ( _QuantityConstraintsPt )return _QuantityConstraintsPt->consumeQuantity( requested ); else return requested; }
 
 	/**
 	 * Get a random RM from the neighbourhood of the specified position.
@@ -346,6 +369,13 @@ public:
 	// For auto-spawn source minimum number. Internaly used by CHarvestSource only
 	void			decreaseAutoSpawnedSources();
 	void			increaseAutoSpawnedSources();
+	/// Used to save the deposit
+	bool needSave() const { return _QuantityConstraintsPt && (_QuantityConstraintsPt->CurrentQuantity != _QuantityConstraintsPt->InitialQuantity || _QuantityConstraintsPt->NextRespawnDay != 0); }
+	CDepositState currentState();
+	uint32 getAlias() const { return _Alias;}
+	void setCurrentQuantity(uint32 currentQuantity) { _QuantityConstraintsPt->CurrentQuantity = currentQuantity; }
+	void setNextRespawnDay(uint32 nextRespawnDay) { _QuantityConstraintsPt->NextRespawnDay = nextRespawnDay; }
+
 	
 protected:
 
@@ -429,6 +459,9 @@ private:
 
 	/// Current Number of AutoSpawned Sources in this deposit
 	uint32										_CurrentNbAutoSpawnedSources;
+
+	/// CPrimAlias, needed to identify a deposit to restore its state between shutdown of the EGS
+	uint32 _Alias;
 };
 
 

@@ -79,7 +79,7 @@ public:
 	/**
 	 * serial
 	 */
-	//void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	//void serial(NLMISC::IStream &f);
 
 	void write (xmlNodePtr node, const char *subName = "") const;
 	void read (xmlNodePtr node, const char *subName = "");
@@ -122,7 +122,7 @@ public:
 	/**
 	 * serial
 	 */
-	//void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	//void serial(NLMISC::IStream &f);
 
 	void write (xmlNodePtr node) const;
 	void read (xmlNodePtr node);
@@ -181,7 +181,7 @@ public:
 	/**
 	 * serial
 	 */
-	//void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	//void serial(NLMISC::IStream &f);
 
 	void write (xmlNodePtr node) const;
 	void read (xmlNodePtr node);

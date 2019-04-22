@@ -48,19 +48,19 @@ public:
 			SerialNumber(0)
 	{
 		// warn the client that the transport is open
-		CMessage nil;
-		sendRawMessage("MODULE_GATEWAY:FEOPEN", nil);
+		CMessage msg;
+		sendRawMessage("MODULE_GATEWAY:FEOPEN", msg);
 	}
 
 	~CFEServerRoute()
 	{
 		// warn the client that the transport is closed
-		CMessage nil;
+		CMessage msg;
 
 		// check special case when application close
 		if (!CActionFactory::isInstanceAllocated())
 			return;
-		sendRawMessage("MODULE_GATEWAY:FECLOSE", nil);
+		sendRawMessage("MODULE_GATEWAY:FECLOSE", msg);
 	}
 
 
@@ -179,13 +179,13 @@ public:
 		}
 	}
 
-	void onCommand(const CMessage &command) throw (EInvalidCommand) 
+	void onCommand(const CMessage &command)
 	{
 		// nothing done for now
 		throw EInvalidCommand();
 	}
 	/// The gateway send a textual command to the transport
-	bool onCommand(const TParsedCommandLine &command) throw (EInvalidCommand) 
+	bool onCommand(const TParsedCommandLine &command)
 	{
 		if (command.SubParams.size() < 1)
 			throw  EInvalidCommand();
@@ -212,7 +212,7 @@ public:
 	}
 
 	/// Open the server by intercepting client gateway message
-	void openServer() throw (ETransportError)
+	void openServer()
 	{
 		if (OpenTransport() != NULL)
 			throw ETransportError("openServer : a transport is already open !");

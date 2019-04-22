@@ -72,7 +72,7 @@ void CAttackSheet::build(const NLGEORGES::UFormElm &item, const std::string &pre
 }
 
 // *********************************************************************************************************
-void CAttackSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAttackSheet::serial(NLMISC::IStream &f)
 {
 	f.serialEnum(ProjectileMode);
 	f.serial(AttackBeginFX);

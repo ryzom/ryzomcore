@@ -213,6 +213,9 @@ void cbPlayerUnreachable( NLNET::CMessage& msgin, const std::string &serviceName
 // AIS ask to teleport player via script
 void cbTeleportPlayer(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
+// AIS ask to trigger webig
+void cbTriggerWebig(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+
 #endif //ENTITY_CALLBACKS_H
 
 

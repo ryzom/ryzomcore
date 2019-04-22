@@ -50,7 +50,6 @@
 #include "game_share/brick_types.h"
 #include "game_share/light_cycle.h"
 #include "game_share/time_weather_season/time_and_season.h"
-#include "game_share/ryzom_version.h"
 #include "game_share/bot_chat_types.h"
 // PACS
 #include "nel/pacs/u_global_position.h"
@@ -81,6 +80,7 @@
 #include "world_database_manager.h"
 #include "continent_manager.h"
 #include "ig_callback.h"
+#include "release.h"
 //#include "fog_map.h"
 #include "movie_shooter.h"
 #include "sound_manager.h"
@@ -122,7 +122,7 @@
 #include "bg_downloader_access.h"
 #include "login_progress_post_thread.h"
 #include "npc_icon.h"
-
+#include "item_group_manager.h"
 // R2ED
 #include "r2/editor.h"
 
@@ -160,6 +160,9 @@ using namespace NLPACS;
 using namespace NLNET;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 
@@ -272,6 +275,7 @@ CTimedFXManager::TDebugDisplayMode	ShowTimedFXMode = CTimedFXManager::NoText;
 
 // DEBUG
 bool				PACSBorders = false;
+bool				ARKPACSBorders = false;
 bool				DebugClusters = false;
 CVector				LastDebugClusterCameraThirdPersonStart= CVector::Null;
 CVector				LastDebugClusterCameraThirdPersonEnd= CVector::Null;
@@ -829,7 +833,7 @@ void	updateGameQuitting()
 	// if want quiting, and if server stalled, quit now
 	if(game_exit_request)
 	{
-		// abort until 10 seconds if connexion lost
+		// abort until 10 seconds if connection lost
 		if(!NetMngr.getConnectionQuality())
 		{
 			if(!firstTimeLostConnection)
@@ -840,7 +844,7 @@ void	updateGameQuitting()
 			firstTimeLostConnection= 0;
 		}
 
-		// if connexion lost until 10 seconds
+		// if connection lost until 10 seconds
 		if(firstTimeLostConnection && T1-firstTimeLostConnection > 10000)
 		{
 			game_exit= true;
@@ -1341,7 +1345,7 @@ bool mainLoop()
 			if (!ClientCfg.Local)
 			{
 				if(NetMngr.getCurrentServerTick() > LastGameCycle)
-					RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+					RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 			}
 			else if (ClientCfg.SimulateServerTick)
 			{
@@ -1349,7 +1353,7 @@ bool mainLoop()
 				uint numTicks = (uint) floor(SimulatedServerDate * 10);
 				SimulatedServerTick += numTicks;
 				SimulatedServerDate = (float)((double)SimulatedServerDate - (double) numTicks * 0.1);
-				RT.updateRyzomClock((uint32)SimulatedServerTick, ryzomGetLocalTime() * 0.001);
+				RT.updateRyzomClock((uint32)SimulatedServerTick);
 			}
 
 
@@ -1794,6 +1798,12 @@ bool mainLoop()
 						displayPACSPrimitive();
 					}
 
+					// Display PACS borders only (for ARK).
+					if (ARKPACSBorders)
+					{
+						displayPACSPrimitive();
+					}
+					
 					// display Sound box
 					if (SoundBox)
 					{
@@ -2016,7 +2026,7 @@ bool mainLoop()
 				}
 
 				// Temp for weather test
-				if (ClientCfg.ManualWeatherSetup && ContinentMngr.cur() && ContinentMngr.cur()->WeatherFunction)
+				if (ClientCfg.ManualWeatherSetup)
 				{
 					H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
 					static float displayHourDelta = 0.04f; // static for edition during debug..
@@ -2093,14 +2103,14 @@ bool mainLoop()
 						if (Actions.valide ("inc_hour"))
 						{
 							RT.increaseTickOffset( (uint32)(2000 * displayHourDelta) );
-							RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+							RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 						}
 
 						// Ctrl-L decrease hour
 						if (Actions.valide ("dec_hour"))
 						{
 							RT.decreaseTickOffset( (uint32)(2000 * displayHourDelta) );
-							RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+							RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 							CTimedFXManager::getInstance().setDate(CClientDate(RT.getRyzomDay(), (float) RT.getRyzomTime()));
 							if (IGCallbacks)
 							{
@@ -2504,6 +2514,10 @@ bool mainLoop()
 			// R2ED enabled ?
 			R2::getEditor().autoConfigInit(IsInRingSession);
 
+//			TODO: temporary commented, CEditor must be initialized before to call next lines
+//			if (!IsInRingSession)
+//				R2::getEditor().registerLuaFunc();
+
 			CurrSeason = computeCurrSeason();
 
 			// Get the Connection State (must be done after any Far TP to prevent the uiDisconnected box to be displayed)
@@ -2542,6 +2556,9 @@ bool mainLoop()
 
 	if ( ! FarTP.isReselectingChar() ) // skip some parts if the user wants to quit in the middle of a char reselect
 	{
+		// Saving ingame resolution when in windowed mode
+		saveIngameResolution();
+
 		// Release the structure for the ping.
 		Ping.release ();
 
@@ -2553,6 +2570,7 @@ bool mainLoop()
 
 		// Interface saving
 		CInterfaceManager::getInstance()->uninitInGame0();
+		CItemGroupManager::getInstance()->uninit();
 
 		/////////////////////////////////
 		// Display the end background. //
@@ -3399,6 +3417,22 @@ void	displayDebugClusters()
 	line.Color1= CRGBA::Green;
 	Driver->drawLine(line, GenericMat);
 
+}
+
+NLMISC_COMMAND(dumpFontTexture, "Write font texture to file", "")
+{
+	CInterfaceManager *im = CInterfaceManager::getInstance();
+	if (TextContext)
+	{
+		std::string fname = CFile::findNewFile("font-texture.tga");
+		TextContext->dumpCacheTexture(fname.c_str());
+		im->displaySystemInfo(ucstring(fname + " created"), "SYS");
+	}
+	else
+	{
+		im->displaySystemInfo(ucstring("Error: TextContext == NULL"), "SYS");
+	}
+	return true;
 }
 
 

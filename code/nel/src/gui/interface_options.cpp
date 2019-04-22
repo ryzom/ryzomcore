@@ -26,6 +26,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -127,8 +131,7 @@ namespace NLGUI
 	// ***************************************************************************
 	const CInterfaceOptionValue	 &CInterfaceOptions::getValue(const string &sParamName) const
 	{
-		string sLwrParamName = strlwr (sParamName);
-		std::map<std::string, CInterfaceOptionValue>::const_iterator it = _ParamValue.find (sLwrParamName);
+		std::map<std::string, CInterfaceOptionValue>::const_iterator it = _ParamValue.find (toLower(sParamName));
 		if (it != _ParamValue.end())
 			return it->second;
 		else

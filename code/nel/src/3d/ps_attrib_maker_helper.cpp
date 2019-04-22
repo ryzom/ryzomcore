@@ -17,12 +17,16 @@
 #include "std3d.h"
 #include "nel/3d/ps_attrib_maker_helper.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
 
 // ***********************************************************************************
-void CPSAttribMakerMemory<uint32>::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSAttribMakerMemory<uint32>::serial(NLMISC::IStream &f)
 {
 	CPSAttribMakerMemoryBase<uint32>::serial(f);
 	if (f.isReading())
@@ -55,7 +59,7 @@ void CPSAttribMakerMemory<uint32>::newElement(const CPSEmitterInfo &info)
 }
 
 // ***********************************************************************************
-void CPSAttribMakerMemory<sint32>::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSAttribMakerMemory<sint32>::serial(NLMISC::IStream &f)
 {
 	CPSAttribMakerMemoryBase<sint32>::serial(f);
 	if (f.isReading())
@@ -88,7 +92,7 @@ void CPSAttribMakerMemory<sint32>::newElement(const CPSEmitterInfo &info)
 }
 
 // ***********************************************************************************
-void CPSAttribMakerMemory<float>::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSAttribMakerMemory<float>::serial(NLMISC::IStream &f)
 {
 	CPSAttribMakerMemoryBase<float>::serial(f);
 	if (f.isReading())

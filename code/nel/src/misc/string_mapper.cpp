@@ -33,8 +33,7 @@ CStringMapper	CStringMapper::_GlobalMapper;
 // ****************************************************************************
 CStringMapper::CStringMapper()
 {
-	_EmptyId = new string;
-	*_EmptyId = "";
+	_EmptyId = new string();
 }
 
 // ****************************************************************************
@@ -46,7 +45,7 @@ CStringMapper *CStringMapper::createLocalMapper()
 // ****************************************************************************
 TStringId CStringMapper::localMap(const std::string &str)
 {
-	if (str.size() == 0)
+	if (str.empty())
 		return 0;
 
 	CAutoFastMutex	automutex(&_Mutex);
@@ -212,7 +211,7 @@ void CStaticStringMapper::clear()
 }
 
 // ****************************************************************************
-void CStaticStringMapper::serial(IStream &f, TSStringId &strId) throw(EStream)
+void CStaticStringMapper::serial(IStream &f, TSStringId &strId)
 {
 	std::string tmp;
 	if (f.isReading())
@@ -228,7 +227,7 @@ void CStaticStringMapper::serial(IStream &f, TSStringId &strId) throw(EStream)
 }
 
 // ****************************************************************************
-void CStaticStringMapper::serial(IStream &f, std::vector<TSStringId> &strIdVect) throw(EStream)
+void CStaticStringMapper::serial(IStream &f, std::vector<TSStringId> &strIdVect)
 {
 	std::vector<std::string> vsTmp;
 	std::string sTmp;

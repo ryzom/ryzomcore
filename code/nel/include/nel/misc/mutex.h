@@ -293,12 +293,7 @@ public:
 				if (!atomic_swap (&_Lock))
 					break;
 
-#ifdef NL_OS_WINDOWS
 				nlSleep (wait_time);
-#else
-				//std::cout <<  "Sleeping i=" << i << std::endl;
-				usleep( wait_time*1000 );
-#endif
 			}
 		}
 	}
@@ -401,12 +396,7 @@ public:
 				if (!CFastMutex::atomic_swap (&_Lock))
 					break;
 
-#ifdef NL_OS_WINDOWS
 				nlSleep (wait_time);
-#else
-				//std::cout <<  "Sleeping i=" << i << std::endl;
-				usleep( wait_time*1000 );
-#endif
 			}
 		}
 	}

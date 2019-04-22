@@ -204,7 +204,7 @@ void CAutomatonStateSheet::build(const NLGEORGES::UFormElm &item, const string &
 	for(uint mode = 0; mode<MBEHAV::NUMBER_OF_MODES; ++mode)
 	{
 		string animset;
-		animset = NLMISC::strlwr(MBEHAV::modeToString((MBEHAV::EMode)mode));
+		animset = NLMISC::toLower(MBEHAV::modeToString((MBEHAV::EMode)mode));
 		if(animset != "unknown_mode")
 		{
 			string resultTransition;
@@ -250,7 +250,7 @@ void CAutomatonStateSheet::build(const NLGEORGES::UFormElm &item, const string &
 // serial :
 // Serialize a CAutomatonStateSheet.
 //-----------------------------------------------
-void CAutomatonStateSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAutomatonStateSheet::serial(NLMISC::IStream &f)
 {
 	f.serialEnum(MoveState);
 	f.serialEnum(NextState);
@@ -402,7 +402,7 @@ void CAutomatonSheet::build(const NLGEORGES::UFormElm &item)
 
 //-----------------------------------------------
 //-----------------------------------------------
-void CAutomatonSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAutomatonSheet::serial(NLMISC::IStream &f)
 {
 	f.serialCont(_States);
 }// serial //
@@ -495,9 +495,9 @@ void CAutomatonListSheet::build(const NLGEORGES::UFormElm &rootList)
 				for(uint mode = 0; mode<MBEHAV::NUMBER_OF_MODES; ++mode)
 				{
 					// Get the Mode Name
-					string modeName = NLMISC::strlwr(MBEHAV::modeToString((MBEHAV::EMode)mode));
+					string modeName = NLMISC::toLower(MBEHAV::modeToString((MBEHAV::EMode)mode));
 					// Compute the automaton name
-					string filename = NLMISC::strlwr(automatonType) + "_" + modeName + ".automaton";
+					string filename = NLMISC::toLower(automatonType) + "_" + modeName + ".automaton";
 					// Push some information
 					nlinfo("loading automaton '%s'.", filename.c_str());
 					// Load the automaton's form.
@@ -540,7 +540,7 @@ void CAutomatonListSheet::build(const NLGEORGES::UFormElm &rootList)
 // version 1 : base  version
 
 //-----------------------------------------------
-void CAutomatonListSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAutomatonListSheet::serial(NLMISC::IStream &f)
 {
 	if (f.isReading())
 	{

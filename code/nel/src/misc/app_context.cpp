@@ -19,6 +19,8 @@
 #include "nel/misc/dynloadlib.h"
 #include "nel/misc/command.h"
 
+#include <locale.h>
+
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
 #endif
@@ -85,6 +87,9 @@ void INelContext::contextReady()
 	_NelContext = this;
 	*(_getInstance()) = this;
 
+	// set numeric locale to C to avoid the use of decimal separators different of a dot
+	char *locale = setlocale(LC_NUMERIC, "C");
+
 	// register any pending thinks
 
 	// register local instance counter in the global instance counter manager
@@ -117,6 +122,27 @@ CApplicationContext::CApplicationContext()
 	WindowedApplication = false;
 
 	contextReady();
+}
+
+CApplicationContext::~CApplicationContext()
+{
+#ifdef NL_DEBUG
+	TSingletonRegistry::iterator it = _SingletonRegistry.begin(), iend = _SingletonRegistry.end();
+
+	while (it != iend)
+	{
+		// can't use nldebug there because it'll create new displayers
+		std::string message = toString("Instance '%s' still allocated at %p", it->first.c_str(), it->second);
+
+#ifdef NL_OS_WINDOWS
+		OutputDebugStringW(utf8ToWide(message));
+#else
+		printf("%s\n", message.c_str());
+#endif
+
+		++it;
+	}
+#endif
 }
 
 void *CApplicationContext::getSingletonPointer(const std::string &singletonName)

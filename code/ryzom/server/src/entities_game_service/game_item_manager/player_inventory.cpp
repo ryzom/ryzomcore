@@ -186,7 +186,7 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 		vector< pair<uint32,uint32> > Modifs;
 
 		// If slot provided is NULL directly insert item in it
-		if (_Items[slotBegin] == NULL)
+		if (_Items[slotBegin] == NULL && slot != INVENTORIES::INSERT_IN_FIRST_FREE_SLOT)
 		{
 			Modifs.push_back(make_pair(slotBegin, itemStackSize));
 		}
@@ -1072,11 +1072,15 @@ void CCharacterInvView::updateClientSlot(uint32 slot, const CGameItemPtr item)
 			resaleFlag = BOTCHATTYPE::ResaleKOLockedByOwner;
 		}
 
+		const INVENTORIES::TItemId &itemId = item->getItemId();
+
 		INVENTORIES::CItemSlot itemSlot( slot );
 		itemSlot.setItemProp( INVENTORIES::Sheet, item->getSheetId().asInt() );
 		itemSlot.setItemProp( INVENTORIES::Quality, item->quality() );
 		itemSlot.setItemProp( INVENTORIES::Quantity, item->getStackSize() );
 		itemSlot.setItemProp( INVENTORIES::UserColor, item->color() );
+		itemSlot.setItemProp( INVENTORIES::CreateTime, itemId.getCreateTime() );
+		itemSlot.setItemProp( INVENTORIES::Serial, itemId.getSerialNumber() );
 		itemSlot.setItemProp( INVENTORIES::Locked, item->getLockCount() );
 		itemSlot.setItemProp( INVENTORIES::Weight, item->weight() / 10 );
 		itemSlot.setItemProp( INVENTORIES::NameId, item->sendNameId(getCharacter()) );

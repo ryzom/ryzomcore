@@ -19,6 +19,9 @@
 #include "nel/3d/text_context_user.h"
 #include "nel/misc/hierarchical_timer.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -100,6 +103,30 @@ uint32 CTextContextUser::getFontSize() const
 
 	return _TextContext.getFontSize();
 }
+void CTextContextUser::setEmbolden(bool b)
+{
+	H_AUTO2;
+
+	_TextContext.setEmbolden(b);
+}
+bool CTextContextUser::getEmbolden() const
+{
+	H_AUTO2;
+
+	return _TextContext.getEmbolden();
+}
+void CTextContextUser::setOblique(bool b)
+{
+	H_AUTO2;
+
+	_TextContext.setOblique(b);
+}
+bool CTextContextUser::getOblique() const
+{
+	H_AUTO2;
+
+	return _TextContext.getOblique();
+}
 void CTextContextUser::setHotSpot(THotSpot hotSpot)
 {
 	H_AUTO2;
@@ -160,11 +187,11 @@ bool CTextContextUser::getShadeOutline() const
 
 	return _TextContext.getShadeOutline();
 }
-void CTextContextUser::setShadeExtent(float shext)
+void CTextContextUser::setShadeExtent(float x, float y)
 {
 	H_AUTO2;
 
-	_TextContext.setShadeExtent(shext);
+	_TextContext.setShadeExtent(x, y);
 }
 void CTextContextUser::setShadeColor (NLMISC::CRGBA sc)
 {

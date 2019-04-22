@@ -16,36 +16,27 @@
 
 #include "stdpch.h"
 
+#include "nel/gui/libwww.h"
 #include "nel/gui/group_html.h"
 
-// LibWWW
-extern "C"
-{
-#include "WWWLib.h"			      /* Global Library Include file */
-#include "WWWApp.h"
-#include "WWWInit.h"
-}
-
-#include "nel/gui/group_html.h"
-#include "nel/gui/libwww_nel_stream.h"
+#include <curl/curl.h>
 
 using namespace NLMISC;
 
-// The HText structure for libwww
-struct _HText
-{
-	NLGUI::CGroupHTML *Parent;
-};
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NLGUI
 {
+
+	// ***************************************************************************
 
 	/// the cookie value for session identification (nel cookie)
 	std::string CurrentCookie;
 
 	/// store all cookies we receive and resent them depending of the domain
-	std::map<std::string, std::map<std::string, std::string> > HTTPCookies;
-	std::string HTTPCurrentDomain;	// The current domain that will be used to get which cookies to send
+	static std::map<std::string, std::map<std::string, std::string> > HTTPCookies;
 
 	// ***************************************************************************
 
@@ -55,6 +46,15 @@ namespace NLGUI
 
 	#undef HTML_ATTR
 	#define HTML_ATTR(a,b) { (char*) #b }
+
+	HTAttr html_attr[] =
+	{
+		HTML_ATTR(HTML,DIR),
+		HTML_ATTR(HTML,LANG),
+		HTML_ATTR(HTML,VERSION),
+		HTML_ATTR(HTML,STYLE),
+		{ 0 }
+	};
 
 	HTAttr a_attr[] =
 	{
@@ -112,6 +112,7 @@ namespace NLGUI
 			HTML_ATTR(TR,L_MARGIN),
 			HTML_ATTR(TR,NOWRAP),
 			HTML_ATTR(TR,VALIGN),
+			HTML_ATTR(TR,STYLE),
 		{ 0 }
 	};
 
@@ -161,6 +162,8 @@ namespace NLGUI
 			HTML_ATTR(IMG,USEMAP),
 			HTML_ATTR(IMG,VSPACE),
 			HTML_ATTR(IMG,WIDTH),
+			// not sorted to keep enum values
+			HTML_ATTR(IMG,DATA-OVER-SRC),
 			{ 0 }
 	};
 
@@ -213,13 +216,13 @@ namespace NLGUI
 		{ 0 }
 	};
 
-
 	HTAttr p_attr[] =
 	{
 		HTML_ATTR(P,QUICK_HELP_CONDITION),
 			HTML_ATTR(P,QUICK_HELP_EVENTS),
 			HTML_ATTR(P,QUICK_HELP_LINK),
 			HTML_ATTR(P,NAME),
+			HTML_ATTR(P,STYLE),
 		{ 0 }
 	};
 
@@ -233,91 +236,94 @@ namespace NLGUI
 		{ 0 }
 	};
 
-	// ***************************************************************************
-
-	void _VerifyLibWWW(const char *function, bool ok, const char *file, int line)
+	HTAttr span_attr[] =
 	{
-		if (!ok)
-			nlwarning("%s(%d) : LIBWWW %s returned a bad status", file, line, function);
-	}
-	#define VerifyLibWWW(a,b) _VerifyLibWWW(a,(b)!=FALSE,__FILE__,__LINE__)
+		HTML_ATTR(SPAN,CLASS),
+		HTML_ATTR(SPAN,ID),
+		HTML_ATTR(SPAN,STYLE),
+		{ 0 }
+	};
 
-	// ***************************************************************************
-
-	int NelPrinter (const char * fmt, va_list pArgs)
+	HTAttr h1_attr[] =
 	{
-		char info[1024];
-		int ret;
+		HTML_ATTR(H1,CLASS),
+		HTML_ATTR(H1,ID),
+		HTML_ATTR(H1,STYLE),
+		{ 0 }
+	};
 
-		ret = vsnprintf(info, sizeof(info), fmt, pArgs);
-		nlinfo("%s", info);
-		return ret;
-	}
-
-	// ***************************************************************************
-
-	int NelTracer (const char * fmt, va_list pArgs)
+	HTAttr h2_attr[] =
 	{
-		char err[1024];
-		int ret;
+		HTML_ATTR(H2,CLASS),
+		HTML_ATTR(H2,ID),
+		HTML_ATTR(H2,STYLE),
+		{ 0 }
+	};
 
-		ret = vsnprintf(err, sizeof(err), fmt, pArgs);
-		nlwarning ("%s", err);
-		return ret;
-	}
-
-	// ***************************************************************************
-
-	HText * TextNew (HTRequest *		request,
-				  HTParentAnchor *	/* anchor */,
-				  HTStream *		/* output_stream */)
+	HTAttr h3_attr[] =
 	{
-		HText *text = new HText;
-		text->Parent = (CGroupHTML *) HTRequest_context(request);
-		return text;
-	}
+		HTML_ATTR(H3,CLASS),
+		HTML_ATTR(H3,ID),
+		HTML_ATTR(H3,STYLE),
+		{ 0 }
+	};
 
-	// ***************************************************************************
-
-	BOOL TextDelete (HText * me)
+	HTAttr h4_attr[] =
 	{
-		delete me;
-		return YES;
-	}
+		HTML_ATTR(H4,CLASS),
+		HTML_ATTR(H4,ID),
+		HTML_ATTR(H4,STYLE),
+		{ 0 }
+	};
 
-	// ***************************************************************************
-
-	void TextBuild (HText * me, HTextStatus status)
+	HTAttr h5_attr[] =
 	{
-		// Do the work in the class
-		if (status == HTEXT_BEGIN)
-			me->Parent->beginBuild ();
-		else if (status == HTEXT_END)
-			me->Parent->endBuild ();
-	}
+		HTML_ATTR(H5,CLASS),
+		HTML_ATTR(H5,ID),
+		HTML_ATTR(H5,STYLE),
+		{ 0 }
+	};
 
-	// ***************************************************************************
-
-	void TextAdd (HText * me, const char * buf, int len)
+	HTAttr h6_attr[] =
 	{
-		// Do the work in the class
-		me->Parent->addText (buf, len);
-	}
+		HTML_ATTR(H6,CLASS),
+		HTML_ATTR(H6,ID),
+		HTML_ATTR(H6,STYLE),
+		{ 0 }
+	};
 
 	// ***************************************************************************
-
-	void TextLink (HText * 	me,
-				int		element_number,
-				int		attribute_number,
-				HTChildAnchor *	anchor,
-				const BOOL * 	present,
-				const char **	value)
+	bool getCssLength (float &value, std::string &unit, const std::string &str)
 	{
-		// Do the work in the class
-		me->Parent->addLink (element_number, attribute_number, anchor, present, value);
-	}
+		std::string::size_type pos = 0;
+		std::string::size_type len = str.size();
+		if (len == 1 && str[0] == '.')
+		{
+			return false;
+		}
 
-	// ***************************************************************************
+		while(pos < len)
+		{
+			bool isNumeric = (str[pos] >= '0' && str[pos] <= '9')
+				|| (pos == 0 && str[pos] == '.')
+				|| (pos > 0 && str[pos] == '.' && str[pos-1] >= '0' && str[pos-1] <= '9');
+			if (!isNumeric)
+			{
+				break;
+			}
+
+			pos++;
+		}
+
+		unit = toLower(str.substr(pos));
+		if (unit == "%" || unit == "rem" || unit == "em" || unit == "px" || unit == "pt")
+		{
+			std::string tmpstr = str.substr(0, pos);
+			return fromString(tmpstr, value);
+		}
+
+		return false;
+	}
 
 	// Read a width HTML parameter. "100" or "100%". Returns true if percent (0 ~ 1) else false
 	bool getPercentage (sint32 &width, float &percent, const char *str)
@@ -375,316 +381,144 @@ namespace NLGUI
 		return dst;
 	}
 
-	// ***************************************************************************
-
-	void TextBeginElement (HText *me, int element_number, const BOOL *present, const char **value)
+	// update HTTPCookies list
+	static void receiveCookie(const char *nsformat, const std::string &domain, bool trusted)
 	{
-		// Do the work in the class
-		me->Parent->beginElement (element_number, present, value);
-	}
+		// 0        1           2       3       4       5       6
+		// domain	tailmatch	path	secure	expires	name	value
+		// .app.ryzom.com	TRUE	/	 FALSE	1234	ryzomId	AAAAAAAA|BBBBBBBB|CCCCCCCC
+		// #HttpOnly_app.ryzom.com	FALSE	/	FALSE	0	PHPSESSID	sess-id-value
+		std::string cookie(nsformat);
 
-	// ***************************************************************************
-
-	void TextEndElement (HText *me, int element_number)
-	{
-		// Do the work in the class
-		me->Parent->endElement (element_number);
-	}
-
-	// ***************************************************************************
-	void TextBeginUnparsedElement(HText *me, const char *buffer, int length)
-	{
-		me->Parent->beginUnparsedElement(buffer, length);
-	}
-
-	// ***************************************************************************
-	void TextEndUnparsedElement(HText *me, const char *buffer, int length)
-	{
-		me->Parent->endUnparsedElement(buffer, length);
-	}
-
-	// ***************************************************************************
-	void TextUnparsedEntity (HText * /* HText */, const char *buffer, int length)
-	{
-		std::string str(buffer, buffer+length);
-		nlinfo("Unparsed entity '%s'", str.c_str());
-	}
-
-	// ***************************************************************************
-	int requestTerminater (HTRequest * request, HTResponse * /* response */,
-					void * param, int /* status */)
-	{
-		/*
-			Yoyo and Boris: we had to make the request terminate by UID and not by pointer (param is an uid).
-			Because this method was called at mainLoop time, but for GroupHTML created/deleted at login time !!!
-			=> Memory Crash.
-		*/
-
-		// TestYoyo
-		//nlinfo("** requestTerminater(): uid%d", (uint32)param);
-
-		// the parameter is actually an uint32
-		if (param != 0)
+		std::vector<std::string> chunks;
+		splitString(cookie, "\t", chunks);
+		if (chunks.size() < 6)
 		{
-			CGroupHTML::TGroupHtmlByUIDMap::iterator	it= CGroupHTML::_GroupHtmlByUID.find((uint32)(size_t)param);
-			if(it!=CGroupHTML::_GroupHtmlByUID.end())
-			{
-				// get the pointer. NB: the refptr should not be NULL
-				// since object removed from map when deleted
-				CGroupHTML *gh = it->second;
-				nlassert(gh);
+			nlwarning("invalid cookie format '%s'", cookie.c_str());
+		}
 
-				// callback the browser
-				gh->requestTerminated(request);
+		if (chunks[0].find("#HttpOnly_") == 0)
+		{
+			chunks[0] = chunks[0].substr(10);
+		}
+
+		// make sure domain is lowercase
+		chunks[0] = toLower(chunks[0]);
+
+		if (chunks[0] != domain && chunks[0] != std::string("." + domain))
+		{
+			// cookie is for different domain
+			//nlinfo("cookie for different domain ('%s')", nsformat);
+			return;
+		}
+
+		if (chunks[5] == "ryzomId")
+		{
+			// we receive this cookie because we are telling curl about this on send
+			// normally, this cookie should be set from client and not from headers
+			// it's used for R2 sessions
+			if (trusted && CurrentCookie != chunks[6])
+			{
+				CurrentCookie = chunks[6];
+				nlwarning("received ryzomId cookie '%s' from trusted domain '%s'", CurrentCookie.c_str(), domain.c_str());
 			}
 		}
-		return HT_OK;
-	}
-
-
-	// callback called when receiving a cookie
-	BOOL receiveCookie (HTRequest * /* request */, HTCookie * cookie, void * /* param */)
-	{
-		if (strcmp(HTCookie_name(cookie), "ryzomId") == 0)
-		{
-			// we receive the ryzom id cookie, store it
-			CurrentCookie = HTCookie_value(cookie);
-		}
 		else
 		{
-			// store the id/value cookie
-			HTTPCookies[HTTPCurrentDomain][HTCookie_name(cookie)] = HTCookie_value(cookie);
-	//		nlwarning("get cookie for domain %s %s=%s", HTTPCurrentDomain.c_str(), HTCookie_name(cookie), HTCookie_value(cookie));
-		}
+			uint32 expires = 0;
+			fromString(chunks[4], expires);
+			// expires == 0 is session cookie
+			if (expires > 0)
+			{
+				time_t now;
+				time(&now);
+				if (expires < (uint32)now)
+				{
+					nlwarning("cookie expired, remove from list '%s'", nsformat);
+					HTTPCookies[domain].erase(chunks[5]);
 
-		return YES;
+					return;
+				}
+			}
+
+			// this overrides cookies with same name, but different paths
+			//nlwarning("save domain '%s' cookie '%s' value '%s'", domain.c_str(), chunks[5].c_str(), nsformat);
+			HTTPCookies[domain][chunks[5]] = nsformat;
+		}
 	}
 
-	// callback called to add cookie to a request before sending it to the server
-	HTAssocList *sendCookie (HTRequest * /* request */, void * /* param */)
+	// update HTTPCookies with cookies received from curl
+	void receiveCookies (CURL *curl, const std::string &domain, bool trusted)
 	{
-		HTAssocList * alist = 0;
-		if (!CurrentCookie.empty())
+		struct curl_slist *cookies = NULL;
+		if (curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies) == CURLE_OK)
 		{
-			if(alist == 0) alist = HTAssocList_new();	/* Is deleted by the cookie module */
-			HTAssocList_addObject(alist, "ryzomId", CurrentCookie.c_str());
+			struct curl_slist *nc;
+			nc = cookies;
+			while(nc)
+			{
+				//nlwarning("received cookie '%s'", nc->data);
+				receiveCookie(nc->data, domain, trusted);
+				nc = nc->next;
+			}
+
+			curl_slist_free_all(cookies);
+		}
+	}
+
+	// add all cookies for domain to curl handle
+	void sendCookies(CURL *curl, const std::string &domain, bool trusted)
+	{
+		// enable curl cookie engine
+		curl_easy_setopt(curl, CURLOPT_COOKIELIST, "");
+
+		if (domain.empty())
+			return;
+
+		if (trusted && !CurrentCookie.empty())
+		{
+			// domain	tailmatch	path	secure	expires	name	value
+			// .app.ryzom.com	TRUE	/	 FALSE	1234	ryzomId	AAAAAAAA|BBBBBBBB|CCCCCCCC
+			// #HttpOnly_app.ryzom.com	FALSE	/	FALSE	0	PHPSESSID	sess-id-value
+			std::string cookie;
+			// set tailmatch
+			if (domain[0] != '.' && domain[0] != '#')
+				cookie = "." + domain + "\tTRUE";
+			else
+				cookie = domain + "\tFALSE";
+			cookie += "\t/\tFALSE\t0\tryzomId\t" + CurrentCookie;
+			curl_easy_setopt(curl, CURLOPT_COOKIELIST, cookie.c_str());
+			//nlwarning("domain '%s', cookie '%s'", domain.c_str(), cookie.c_str());
 		}
 
-		if(!HTTPCookies[HTTPCurrentDomain].empty())
+		if(!HTTPCookies[domain].empty())
 		{
-			if(alist == 0) alist = HTAssocList_new();
-			for(std::map<std::string, std::string>::iterator it = HTTPCookies[HTTPCurrentDomain].begin(); it != HTTPCookies[HTTPCurrentDomain].end(); it++)
+			for(std::map<std::string, std::string>::iterator it = HTTPCookies[domain].begin(); it != HTTPCookies[domain].end(); it++)
 			{
-				HTAssocList_addObject(alist, it->first.c_str(), it->second.c_str());
-	//			nlwarning("set cookie for domain '%s' %s=%s", HTTPCurrentDomain.c_str(), it->first.c_str(), it->second.c_str());
+				curl_easy_setopt(curl, CURLOPT_COOKIELIST, it->second.c_str());
+				//nlwarning("set domain '%s' cookie '%s'", domain.c_str(), it->second.c_str());
 			}
 		}
-		return alist;
 	}
-
-
-	// ***************************************************************************
-
-	HTAnchor * TextFindAnchor (HText * /* me */, int /* index */)
-	{
-		return NULL;
-	}
-
-	int HTMIME_location_custom (HTRequest * request, HTResponse * response, char * token, char * value)
-	{
-		char * location = HTStrip(value);
-
-		std::string finalLocation;
-
-		//nlinfo("redirect to '%s' '%s'", value, location);
-
-		// If not absolute URI (Error) then find the base
-		if (!HTURL_isAbsolute(location))
-		{
-			char * base = HTAnchor_address((HTAnchor *) HTRequest_anchor(request));
-			location = HTParse(location, base, PARSE_ALL);
-			//redirection = HTAnchor_findAddress(location);
-			finalLocation = location;
-			HT_FREE(base);
-			HT_FREE(location);
-		}
-		else
-		{
-			finalLocation = location;
-		}
-		//nlinfo("final location '%s'", finalLocation.c_str());
-
-		CGroupHTML *gh = (CGroupHTML *) HTRequest_context(request);
-
-		gh->setURL(finalLocation);
-
-		return HT_OK;
-	}
-
-
-	// ***************************************************************************
-
-	const std::string &setCurrentDomain(const std::string &url)
-	{
-		if(url.find("http://") == 0)
-		{
-			HTTPCurrentDomain = url.substr(7, url.find('/', 7)-7);
-	//		nlinfo("****cd: %s", HTTPCurrentDomain.c_str());
-		}
-		else
-		{
-			HTTPCurrentDomain.clear();
-	//		nlinfo("****cd: clear the domain");
-		}
-		return HTTPCurrentDomain;
-	}
-
 
 	void initLibWWW()
 	{
 		static bool initialized = false;
 		if (!initialized)
 		{
-			//HTProfile_newNoCacheClient("Ryzom", "1.1");
-
-			/* Need our own trace and print functions */
-			HTPrint_setCallback(NelPrinter);
-			HTTrace_setCallback(NelTracer);
-
-			/* Initiate libwww */
-			HTLib_setAppName( CGroupHTML::options.appName.c_str() );
-			HTLib_setAppVersion( CGroupHTML::options.appVersion.c_str() );
-
-			/* Set up TCP as transport */
-			VerifyLibWWW("HTTransport_add", HTTransport_add("buffered_tcp", HT_TP_SINGLE, HTReader_new, HTBufferWriter_new));
-			VerifyLibWWW("HTTransport_add", HTTransport_add("local", HT_TP_SINGLE, HTNeLReader_new, HTWriter_new));
-			// VerifyLibWWW("HTTransport_add", HTTransport_add("local", HT_TP_SINGLE, HTANSIReader_new, HTWriter_new));
-			// VerifyLibWWW("HTTransport_add", HTTransport_add("local", HT_TP_SINGLE, HTReader_new, HTWriter_new));
-
-			/* Set up HTTP as protocol */
-			VerifyLibWWW("HTProtocol_add", HTProtocol_add("http", "buffered_tcp", 80, NO, HTLoadHTTP, NULL));
-			VerifyLibWWW("HTProtocol_add", HTProtocol_add("file", 	"local", 	0, 	YES, 	HTLoadNeLFile, 	NULL));
-			//VerifyLibWWW("HTProtocol_add", HTProtocol_add("file", 	"local", 	0, 	YES, 	HTLoadFile, 	NULL));
-			// HTProtocol_add("cache", 	"local", 	0, 	NO, 	HTLoadCache, 	NULL);
-
-			HTBind_init();
-			// HTCacheInit(NULL, 20);
-
-			/* Setup up transfer coders */
-			HTFormat_addTransferCoding((char*)"chunked", HTChunkedEncoder, HTChunkedDecoder, 1.0);
-
-			/* Setup MIME stream converters */
-			HTFormat_addConversion("message/rfc822", "*/*", HTMIMEConvert, 1.0, 0.0, 0.0);
-			HTFormat_addConversion("message/x-rfc822-foot", "*/*", HTMIMEFooter, 1.0, 0.0, 0.0);
-			HTFormat_addConversion("message/x-rfc822-head", "*/*", HTMIMEHeader, 1.0, 0.0, 0.0);
-			HTFormat_addConversion("message/x-rfc822-cont", "*/*", HTMIMEContinue, 1.0, 0.0, 0.0);
-			HTFormat_addConversion("message/x-rfc822-partial","*/*", HTMIMEPartial, 1.0, 0.0, 0.0);
-			HTFormat_addConversion("multipart/*", "*/*", HTBoundary, 1.0, 0.0, 0.0);
-
-			/* Setup HTTP protocol stream */
-			HTFormat_addConversion("text/x-http", "*/*", HTTPStatus_new, 1.0, 0.0, 0.0);
-
-			/* Setup the HTML parser */
-			HTFormat_addConversion("text/html", "www/present", HTMLPresent, 1.0, 0.0, 0.0);
-
-			/* Setup black hole stream */
-			HTFormat_addConversion("*/*", "www/debug", HTBlackHoleConverter, 1.0, 0.0, 0.0);
-			HTFormat_addConversion("*/*", "www/present", HTBlackHoleConverter, 0.3, 0.0, 0.0);
-
-			/* Set max number of sockets we want open simultaneously */
-			HTNet_setMaxSocket(32);
-
-			/* Register our HTML parser callbacks */
-			VerifyLibWWW("HText_registerCDCallback", HText_registerCDCallback (TextNew, TextDelete));
-			VerifyLibWWW("HText_registerBuildCallback", HText_registerBuildCallback (TextBuild));
-			VerifyLibWWW("HText_registerTextCallback", HText_registerTextCallback(TextAdd));
-			VerifyLibWWW("HText_registerLinkCallback", HText_registerLinkCallback (TextLink));
-			VerifyLibWWW("HText_registerElementCallback", HText_registerElementCallback (TextBeginElement, TextEndElement));
-			VerifyLibWWW("HText_registerUnparsedElementCallback", HText_registerUnparsedElementCallback(TextBeginUnparsedElement, TextEndUnparsedElement));
-			VerifyLibWWW("HText_registerUnparsedEntityCallback ", HText_registerUnparsedEntityCallback (TextUnparsedEntity ));
-
-
-			/* Register the default set of MIME header parsers */
-			struct {
-				const char * string;
-			HTParserCallback * pHandler;
-			} fixedHandlers[] = {
-			{"accept", &HTMIME_accept},
-			{"accept-charset", &HTMIME_acceptCharset},
-			{"accept-encoding", &HTMIME_acceptEncoding},
-			{"accept-language", &HTMIME_acceptLanguage},
-			{"accept-ranges", &HTMIME_acceptRanges},
-			{"authorization", NULL},
-			{"cache-control", &HTMIME_cacheControl},
-			{"connection", &HTMIME_connection},
-			{"content-encoding", &HTMIME_contentEncoding},
-			{"content-length", &HTMIME_contentLength},
-			{"content-range", &HTMIME_contentRange},
-			{"content-transfer-encoding", &HTMIME_contentTransferEncoding},
-			{"content-type", &HTMIME_contentType},
-			{"digest-MessageDigest", &HTMIME_messageDigest},
-			{"keep-alive", &HTMIME_keepAlive},
-			{"link", &HTMIME_link},
-			{"location", &HTMIME_location_custom},
-			{"max-forwards", &HTMIME_maxForwards},
-			{"mime-version", NULL},
-			{"pragma", &HTMIME_pragma},
-				{"protocol", &HTMIME_protocol},
-				{"protocol-info", &HTMIME_protocolInfo},
-				{"protocol-request", &HTMIME_protocolRequest},
-			{"proxy-authenticate", &HTMIME_authenticate},
-			{"proxy-authorization", &HTMIME_proxyAuthorization},
-			{"public", &HTMIME_public},
-			{"range", &HTMIME_range},
-			{"referer", &HTMIME_referer},
-			{"retry-after", &HTMIME_retryAfter},
-			{"server", &HTMIME_server},
-			{"trailer", &HTMIME_trailer},
-			{"transfer-encoding", &HTMIME_transferEncoding},
-			{"upgrade", &HTMIME_upgrade},
-			{"user-agent", &HTMIME_userAgent},
-			{"vary", &HTMIME_vary},
-			{"via", &HTMIME_via},
-			{"warning", &HTMIME_warning},
-			{"www-authenticate", &HTMIME_authenticate},
-				{"authentication-info", &HTMIME_authenticationInfo},
-				{"proxy-authentication-info", &HTMIME_proxyAuthenticationInfo}
-			};
-
-			for (uint i = 0; i < sizeof(fixedHandlers)/sizeof(fixedHandlers[0]); i++)
-				HTHeader_addParser(fixedHandlers[i].string, NO, fixedHandlers[i].pHandler);
-
-			/* Set up default event loop */
-			HTEventInit();
-
-			/* Add our own request terminate handler */
-			HTNet_addAfter(requestTerminater, NULL, 0, HT_ALL, HT_FILTER_LAST);
-
-			/* Setup cookies */
-			HTCookie_init();
-			HTCookie_setCookieMode(HTCookieMode(HT_COOKIE_ACCEPT | HT_COOKIE_SEND));
-			HTCookie_setCallbacks(receiveCookie, NULL, sendCookie, NULL);
-
-			/* Start the first request */
-
-			/* Go into the event loop... */
-			// HTEventList_newLoop();
-
-			// App_delete(app);
-
-			HTBind_add("htm",	"text/html",			NULL,		"8bit",		NULL,	1.0);	/* HTML			*/
-			HTBind_add("html",	"text/html",			NULL,		"8bit",		NULL,	1.0);	/* HTML			*/
-
-			HTBind_caseSensitive(NO);
 
 			// Change the HTML DTD
 			SGML_dtd *HTML_DTD = HTML_dtd ();
+			HTML_DTD->tags[HTML_HTML].attributes = html_attr;
+			HTML_DTD->tags[HTML_HTML].number_of_attributes = sizeof(html_attr) / sizeof(HTAttr) - 1;
 			HTML_DTD->tags[HTML_TABLE].attributes = table_attr;
 			HTML_DTD->tags[HTML_TABLE].number_of_attributes = sizeof(table_attr) / sizeof(HTAttr) - 1;
 			HTML_DTD->tags[HTML_TR].attributes = tr_attr;
 			HTML_DTD->tags[HTML_TR].number_of_attributes = sizeof(tr_attr) / sizeof(HTAttr) - 1;
 			HTML_DTD->tags[HTML_TD].attributes = td_attr;
 			HTML_DTD->tags[HTML_TD].number_of_attributes = sizeof(td_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_TH].attributes = td_attr;
+			HTML_DTD->tags[HTML_TH].number_of_attributes = sizeof(td_attr) / sizeof(HTAttr) - 1;
 			HTML_DTD->tags[HTML_IMG].attributes = img_attr;
 			HTML_DTD->tags[HTML_IMG].number_of_attributes = sizeof(img_attr) / sizeof(HTAttr) - 1;
 			HTML_DTD->tags[HTML_INPUT].attributes = input_attr;
@@ -699,17 +533,21 @@ namespace NLGUI
 			HTML_DTD->tags[HTML_I].number_of_attributes = 0;
 			HTML_DTD->tags[HTML_DIV].attributes = div_attr;
 			HTML_DTD->tags[HTML_DIV].number_of_attributes = sizeof(div_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_SPAN].attributes = span_attr;
+			HTML_DTD->tags[HTML_SPAN].number_of_attributes = sizeof(span_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_H1].attributes = h1_attr;
+			HTML_DTD->tags[HTML_H1].number_of_attributes = sizeof(h1_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_H2].attributes = h2_attr;
+			HTML_DTD->tags[HTML_H2].number_of_attributes = sizeof(h2_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_H3].attributes = h3_attr;
+			HTML_DTD->tags[HTML_H3].number_of_attributes = sizeof(h3_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_H4].attributes = h4_attr;
+			HTML_DTD->tags[HTML_H4].number_of_attributes = sizeof(h4_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_H5].attributes = h5_attr;
+			HTML_DTD->tags[HTML_H5].number_of_attributes = sizeof(h5_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_H6].attributes = h6_attr;
+			HTML_DTD->tags[HTML_H6].number_of_attributes = sizeof(h6_attr) / sizeof(HTAttr) - 1;
 
-			// Set a request timeout
-			//		HTHost_setEventTimeout (30000);
-			//		HTHost_setActiveTimeout (30000);
-			//		HTHost_setPersistTimeout (30000);
-
-			// libwww default value is 2000ms for POST/PUT requests on the first and 3000 on the second, smallest allowed value is 21ms
-			// too small values may create timeout problems but we want it low as possible
-			// second value is the timeout for the second try to we set that high
-			HTTP_setBodyWriteDelay(250, 3000);
-	
 			// Initialized
 			initialized = true;
 		}

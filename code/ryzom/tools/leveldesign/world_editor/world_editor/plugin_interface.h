@@ -85,7 +85,7 @@ public:
 	/* Functions to create/remove the Root Primitive for server actions
 		Returns the id of the root primitive
 	*/
-	virtual NLLIGO::IPrimitive *createRootPluginPrimitive (const char *name) = 0;
+	virtual NLLIGO::IPrimitive *createRootPluginPrimitive (const std::string &name) = 0;
 	virtual void deleteRootPluginPrimitive (void) = 0;
 	/// get all the current root primitve in the world editor. only the editable one are returned
 	virtual void getAllRootPluginPrimitive (std::vector<NLLIGO::IPrimitive*> &prims) = 0;
@@ -95,8 +95,8 @@ public:
 	 */
 	// Create a plugin primitive
 	virtual const NLLIGO::IPrimitive *createPluginPrimitive (
-		const char *className, 
-		const char *primName, 
+		const std::string &className, 
+		const std::string &primName, 
 		const NLMISC::CVector &initPos, 
 		float deltaPos, 
 		const std::vector<NLLIGO::CPrimitiveClass::CInitParameters> &initParameters,

@@ -49,6 +49,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -619,6 +623,23 @@ namespace NLGUI
 			return defaultValue;
 		}
 		double result = toNumber(-1);
+		pop();
+		return result;
+	}
+
+	// ***************************************************************************
+	sint64		CLuaState::getTableIntegerValue(const char *name,    sint64 defaultValue)
+	{
+		//H_AUTO(Lua_CLuaState_getTableIntegerValue)
+		nlassert(name);
+		push(name);
+		getTable(-2);
+		if (isNil())
+		{
+			pop();
+			return defaultValue;
+		}
+		sint64 result = toInteger(-1);
 		pop();
 		return result;
 	}

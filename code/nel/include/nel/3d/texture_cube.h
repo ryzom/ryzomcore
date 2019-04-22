@@ -77,7 +77,7 @@ public:
 	virtual bool isTextureCube() const { return true; }
 
 	/// Save the texture file name.
-	virtual void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void	serial(NLMISC::IStream &f);
 	NLMISC_DECLARE_CLASS(CTextureCube);
 
 	/// If the face support multiple texture (such has CTextureMultiFile), this allow to select the active set

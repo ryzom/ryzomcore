@@ -48,7 +48,7 @@ public:
 	{}
 
 	/// serial
-	void serial(class NLMISC::IStream &f)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial( Name );
 		f.serial( AssociatedItemName );

@@ -29,6 +29,9 @@
 #include "nel/gui/view_renderer.h"
 #include "../interface_v3/group_map.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NL3D;
 using namespace NLMISC;
@@ -43,7 +46,7 @@ void readFromLua(const CLuaObject &table, const char *key, float &dest)
 }
 void readFromLua(const CLuaObject &table, const char *key, uint &dest)
 {
-	if (table[key].isNumber()) dest = (uint) table[key].toNumber();
+	if (table[key].isInteger()) dest = (uint) table[key].toInteger();
 }
 void readFromLua(const CLuaObject &table, const char *key, std::string &dest)
 {

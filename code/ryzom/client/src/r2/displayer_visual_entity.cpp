@@ -58,6 +58,10 @@
 //
 #include "../sheet_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 
 using namespace NLMISC;
 using namespace NL3D;
@@ -968,7 +972,7 @@ void CDisplayerVisualEntity::updateName()
 		ucName = CI18N::get("uiR2EDNoName");
 	}
 
-	std::string actName=std::string("");
+	std::string actName;
 
 	// If entity is in an additionnal act, then postfix its name with the name of the act
 	if (getDisplayedInstance()->getParentAct() != getEditor().getBaseAct())
@@ -978,7 +982,7 @@ void CDisplayerVisualEntity::updateName()
 		sint actNb = -1;
 		for(uint i=0; i<acts->getSize(); i++)
 		{
-			if(acts->getValue(i)->equal(act))
+			if(acts->getValueAtPos(i)->equal(act))
 			{
 				actNb = i;
 				break;
@@ -993,7 +997,7 @@ void CDisplayerVisualEntity::updateName()
 		else
 			actName = act->toString("Title"); //obsolete
 
-		if(actName!=firstPart && actName!="")
+		if(actName!=firstPart && !actName.empty())
 			actName = firstPart+":"+actName;
 	}
 	else
@@ -1108,7 +1112,7 @@ std::string CDisplayerVisualEntity::getVisualProperties() const
 	uint64 uVPB = leafB->getValue64();
 	uint64 uVPC = leafC->getValue64();
 
-	const std::string strVPABC = NLMISC::toString( "VPA:%016.16"NL_I64"x\nVPB:%016.16"NL_I64"x\nVPC:%016.16"NL_I64"x", uVPA, uVPB, uVPC );
+	const std::string strVPABC = NLMISC::toString( "VPA:%016.16" NL_I64 "x\nVPB:%016.16" NL_I64 "x\nVPC:%016.16" NL_I64 "x", uVPA, uVPB, uVPC );
 
 	return strVPABC;
 }

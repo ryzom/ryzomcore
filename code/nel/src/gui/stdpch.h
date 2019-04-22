@@ -17,8 +17,16 @@
 #ifndef NELGUI_H
 #define NELGUI_H
 
+#if defined(_MSC_VER) && defined(_DEBUG)
+	#define _CRTDBG_MAP_ALLOC
+	#include <stdlib.h>
+	#include <crtdbg.h>
+	#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
+
 #include <string>
 #include <limits>
+#include <ctime>
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/algo.h"
@@ -29,6 +37,8 @@
 #include "nel/misc/file.h"
 #include "nel/misc/uv.h"
 #include "nel/misc/hierarchical_timer.h"
+
+#include <libxml/parser.h>
 
 #ifdef NL_OS_WINDOWS
 	#ifndef NL_COMP_MINGW

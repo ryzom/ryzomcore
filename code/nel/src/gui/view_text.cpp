@@ -32,6 +32,10 @@ using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 typedef std::string::size_type TCharPos; // index of a chracter in a string
 
 REGISTER_UI_CLASS(CViewText)
@@ -42,8 +46,11 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::setupDefault ()
 	{
+		_ParentElm = NULL;
+
 		_CaseMode = CaseNormal;
 		_Underlined = false;
+		_StrikeThrough = false;
 		_ContinuousUpdate = false;
 		_Active = true;
 		_X = 0;
@@ -58,10 +65,16 @@ namespace NLGUI
 
 		_FontSize = 12 +
 			CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+		_FontSizeCoef = true;
+		_FontName.clear();
+		_Embolden = false;
+		_Oblique = false;
 		_Color = CRGBA(255,255,255,255);
 		_Shadow = false;
 		_ShadowOutline = false;
 		_ShadowColor = CRGBA(0,0,0,255);
+		_ShadowX = 1;
+		_ShadowY = 1;
 
 		_MultiLine = false;
 		_TextMode = DontClipWord;
@@ -70,9 +83,11 @@ namespace NLGUI
 		_MultiLineMaxWOnly = false;
 		_MultiLineClipEndSpace = false;
 		_LastMultiLineMaxW = 0;
+		_MultiMinLine = 0;
 		_MultiMaxLine = 0;
 		_Index = 0xFFFFFFFF;
 
+		_Scale = CWidgetManager::getInstance()->getInterfaceScale();
 		_FontWidth= 0;
 		_FontHeight = 0;
 		_FontLegHeight = 0;
@@ -83,7 +98,6 @@ namespace NLGUI
 
 		_InvalidTextContext= true;
 		_FirstLineX = 0;
-		computeFontSize ();
 
 		_SingleLineTextClamped= false;
 		_OverExtendViewText= false;
@@ -91,10 +105,19 @@ namespace NLGUI
 
 		_AutoClamp = false;
 		_ClampRight = true; // clamp on the right of the text
+		_OverflowText = "...";
 
 		_LetterColors = NULL;
 		_Setuped= false;
 		_AutoClampOffset = 0;
+
+		// Letter size
+		// - "_" that should be the character with the lowest part
+		// - A with an accent for the highest part
+		_FontSizingChars.fromUtf8("_\xc3\x84");
+		// fallback if SizingChars are not supported by font
+		_FontSizingFallback.fromUtf8("|");
+		computeFontSize ();
 	}
 
 	// ***************************************************************************
@@ -105,6 +128,8 @@ namespace NLGUI
 	:CViewBase(param)
 	{
 		setupDefault ();
+
+		CWidgetManager::getInstance()->registerInterfaceScaleWatcher(this);
 	}
 
 	///constructor
@@ -117,18 +142,23 @@ namespace NLGUI
 		setupDefault ();
 
 		_FontSize = FontSize + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		_FontSizeCoef = true;
 		_Color = Color;
 		_Shadow = Shadow;
 		_ShadowOutline = ShadowOutline;
 		setText(Text);
 		computeFontSize ();
+
+		CWidgetManager::getInstance()->registerInterfaceScaleWatcher(this);
 	}
 
 	// ***************************************************************************
 	CViewText::~CViewText()
 	{
+		CWidgetManager::getInstance()->unregisterInterfaceScaleWatcher(this);
+
 		if (_Index != 0xFFFFFFFF)
-			CViewRenderer::getTextContext()->erase (_Index);
+			CViewRenderer::getTextContext(_FontName)->erase (_Index);
 		clearLines();
 
 		if (!_Setuped)
@@ -142,7 +172,7 @@ namespace NLGUI
 	CViewText &CViewText::operator=(const CViewText &vt)
 	{
 		if (_Index != 0xFFFFFFFF)
-			CViewRenderer::getTextContext()->erase (_Index);
+			CViewRenderer::getTextContext(_FontName)->erase (_Index);
 
 		// Create database entries
 		_Active = vt._Active;
@@ -157,6 +187,11 @@ namespace NLGUI
 		_PosRef = vt._PosRef;
 
 		_FontSize = vt._FontSize;
+		_FontSizeCoef = vt._FontSizeCoef;
+		_Embolden = vt._Embolden;
+		_Oblique = vt._Oblique;
+		_Underlined = vt._Underlined;
+		_StrikeThrough = vt._StrikeThrough;
 		_Color = vt._Color;
 		_Shadow = vt._Shadow;
 		_ShadowOutline = vt._ShadowOutline;
@@ -216,9 +251,30 @@ namespace NLGUI
 		else
 		if( name == "fontsize" )
 		{
-			return toString(
-				_FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32()
-				);
+			if (_FontSizeCoef)
+				return toString(_FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32());
+
+			return toString(_FontSize);
+		}
+		else
+		if ( name == "fontsize_coef" )
+		{
+			return toString(_FontSizeCoef);
+		}
+		else
+		if( name == "fontweight" )
+		{
+			if (_Embolden)
+				return "bold";
+
+			return "normal";
+		}
+		if( name == "fontstyle" )
+		{
+			if (_Oblique)
+				return "oblique";
+
+			return "normal";
 		}
 		else
 		if( name == "shadow" )
@@ -256,6 +312,9 @@ namespace NLGUI
 			case Justified:
 				return "justified";
 				break;
+
+			case Centered:
+				return "centered";
 			}
 
 			return "";
@@ -281,9 +340,19 @@ namespace NLGUI
 			return toString( _MultiMaxLine );
 		}
 		else
+		if( name == "multi_min_line" )
+		{
+			return toString( _MultiMinLine );
+		}
+		else
 		if( name == "underlined" )
 		{
 			return toString( _Underlined );
+		}
+		else
+		if( name == "strikethrough" )
+		{
+			return toString( _StrikeThrough );
 		}
 		else
 		if( name == "case_mode" )
@@ -319,6 +388,16 @@ namespace NLGUI
 		if( name == "continuous_update" )
 		{
 			return toString( _ContinuousUpdate );
+		}
+		else
+		if ( name == "sizing_chars" )
+		{
+			return _FontSizingChars.toUtf8();
+		}
+		else
+		if ( name == "sizing_fallback" )
+		{
+			return _FontSizingFallback.toUtf8();
 		}
 		else
 			return "";
@@ -358,6 +437,36 @@ namespace NLGUI
 			return true;
 		}
 		else
+		if( name == "fontsize_coef" )
+		{
+			bool b;
+			bool oldValue = _FontSizeCoef;
+			if (fromString( value, b) )
+				_FontSizeCoef = b;
+			// must only change font size when current state changes
+			if (_FontSizeCoef != oldValue)
+			{
+				if (_FontSizeCoef)
+					_FontSize += CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+				else
+					_FontSize -= CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+			}
+		}
+		else
+		if( name == "fontweight" )
+		{
+			if (value == "bold")
+				_Embolden = true;
+
+			return true;
+		}
+		if( name == "fontstyle" )
+		{
+			if( value == "oblique" )
+				_Oblique = true;
+			return true;
+		}
+		else
 		if( name == "shadow" )
 		{
 			bool b;
@@ -382,6 +491,22 @@ namespace NLGUI
 			return true;
 		}
 		else
+		if( name == "shadow_x" )
+		{
+			sint sx;
+			if( fromString( value, sx ) )
+				_ShadowX = sx;
+			return true;
+		}
+		else
+		if( name == "shadow_y" )
+		{
+			sint sy;
+			if( fromString( value, sy ) )
+				_ShadowY = sy;
+			return true;
+		}
+		else
 		if( name == "multi_line" )
 		{
 			bool b;
@@ -400,6 +525,9 @@ namespace NLGUI
 			else
 			if( value == "justified" )
 				_TextMode = Justified;
+			else
+			if( value == "centered" )
+				_TextMode = Centered;
 
 			return true;
 		}
@@ -436,11 +564,27 @@ namespace NLGUI
 			return true;
 		}
 		else
+		if( name == "multi_min_line" )
+		{
+			uint32 i;
+			if( fromString( value, i ) )
+				_MultiMinLine = i;
+			return true;
+		}
+		else
 		if( name == "underlined" )
 		{
 			bool b;
 			if( fromString( value, b ) )
 				_Underlined = b;
+			return true;
+		}
+		else
+		if( name == "strikethrough" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_StrikeThrough = b;
 			return true;
 		}
 		else
@@ -520,6 +664,18 @@ namespace NLGUI
 			return true;
 		}
 		else
+		if( name == "sizing_chars" )
+		{
+			_FontSizingChars.fromUtf8(value);
+			return true;
+		}
+		else
+		if( name == "sizing_fallback" )
+		{
+			_FontSizingFallback.fromUtf8(value);
+			return true;
+		}
+		else
 			return false;
 	}
 
@@ -528,14 +684,27 @@ namespace NLGUI
 	{
 		xmlSetProp( node, BAD_CAST "color", BAD_CAST toString( _Color ).c_str() );
 		xmlSetProp( node, BAD_CAST "global_color", BAD_CAST toString( _ModulateGlobalColor ).c_str() );
-		xmlSetProp( node, BAD_CAST "fontsize",
-			BAD_CAST toString(
-			_FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32() 
-			).c_str() );
+
+		sint32 fontSize = _FontSize;
+		if (_FontSizeCoef) fontSize -= CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+		xmlSetProp( node, BAD_CAST "fontsize", BAD_CAST toString(fontSize).c_str() );
+		xmlSetProp( node, BAD_CAST "fontsize_coef", BAD_CAST toString(_FontSizeCoef).c_str() );
+
+		std::string fontweight("normal");
+		if (_Embolden)
+			fontweight = "bold";
+		xmlSetProp( node, BAD_CAST "fontweight", BAD_CAST fontweight.c_str() );
+
+		std::string fontstyle("normal");
+		if (_Oblique)
+			fontstyle = "oblique";
+		xmlSetProp( node, BAD_CAST "fontstyle", BAD_CAST fontstyle.c_str() );
 
 		xmlSetProp( node, BAD_CAST "shadow", BAD_CAST toString( _Shadow ).c_str() );
 		xmlSetProp( node, BAD_CAST "shadow_outline", BAD_CAST toString( _ShadowOutline ).c_str() );
 		xmlSetProp( node, BAD_CAST "shadow_color", BAD_CAST toString( _ShadowColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "shadow_x", BAD_CAST toString( _ShadowX ).c_str() );
+		xmlSetProp( node, BAD_CAST "shadow_y", BAD_CAST toString( _ShadowY ).c_str() );
 		xmlSetProp( node, BAD_CAST "multi_line", BAD_CAST toString( _MultiLine ).c_str() );
 
 		std::string just;
@@ -553,6 +722,10 @@ namespace NLGUI
 		case Justified:
 			just = "justified";
 			break;
+
+		case Centered:
+			just = "centered";
+			break;
 		}
 		
 		xmlSetProp( node, BAD_CAST "justification", BAD_CAST just.c_str() );
@@ -560,7 +733,9 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "multi_line_space", BAD_CAST toString( _MultiLineSpace ).c_str() );
 		xmlSetProp( node, BAD_CAST "multi_line_maxw_only", BAD_CAST toString( _MultiLineMaxWOnly ).c_str() );
 		xmlSetProp( node, BAD_CAST "multi_max_line", BAD_CAST toString( _MultiMaxLine ).c_str() );
+		xmlSetProp( node, BAD_CAST "multi_min_line", BAD_CAST toString( _MultiMinLine ).c_str() );
 		xmlSetProp( node, BAD_CAST "underlined", BAD_CAST toString( _Underlined ).c_str() );
+		xmlSetProp( node, BAD_CAST "strikethrough", BAD_CAST toString( _StrikeThrough ).c_str() );
 		xmlSetProp( node, BAD_CAST "case_mode", BAD_CAST toString( uint32( _CaseMode ) ).c_str() );
 		xmlSetProp( node, BAD_CAST "over_extend_view_text", BAD_CAST toString( _OverExtendViewText ).c_str() );
 		xmlSetProp( node, BAD_CAST "over_extend_parent_rect",
@@ -569,6 +744,8 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "clamp_right", BAD_CAST toString( _ClampRight ).c_str() );
 		xmlSetProp( node, BAD_CAST "auto_clamp_offset", BAD_CAST toString( _AutoClampOffset ).c_str() );
 		xmlSetProp( node, BAD_CAST "continuous_update", BAD_CAST toString( _ContinuousUpdate ).c_str() );
+		xmlSetProp( node, BAD_CAST "sizing_chars", BAD_CAST _FontSizingChars.toUtf8().c_str() );
+		xmlSetProp( node, BAD_CAST "sizing_fallback", BAD_CAST _FontSizingFallback.toUtf8().c_str() );
 
 		return true;
 	}
@@ -614,6 +791,32 @@ namespace NLGUI
 			_FontSize += CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
 		}
 
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"fontsize_coef" );
+		_FontSizeCoef = true;
+		if (prop)
+		{
+			_FontSizeCoef = convertBool(prop);
+			if (!_FontSizeCoef)
+				_FontSize -= CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		}
+
+
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"fontweight" );
+		_Embolden = false;
+		if (prop)
+		{
+			if (nlstricmp("bold", (const char*)prop) == 0) _Embolden = true;
+			else nlwarning("<CViewText::parse> bad fontweight '%s'", (const char *)prop);
+		}
+
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"fontstyle" );
+		_Oblique = false;
+		if (prop)
+		{
+			if (nlstricmp("oblique", (const char *) prop) == 0) _Oblique = true;
+			else nlwarning("<CViewText::parse> bad fontstyle '%s'", (const char *)prop);
+		}
+
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"shadow" );
 		_Shadow = false;
 		if (prop)
@@ -629,6 +832,16 @@ namespace NLGUI
 		if (prop)
 			_ShadowColor = convertColor(prop);
 
+		prop= (char*) xmlGetProp( cur, (xmlChar*)"shadow_x" );
+		_ShadowX = 1;
+		if (prop)
+			fromString( (const char *)prop, _ShadowX);
+
+		prop= (char*) xmlGetProp( cur, (xmlChar*)"shadow_y" );
+		_ShadowY = 1;
+		if (prop)
+			fromString( (const char *)prop, _ShadowY);
+
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"multi_line" );
 		_MultiLine = false;
 		if (prop)
@@ -640,6 +853,7 @@ namespace NLGUI
 			if (nlstricmp("clip_word", (const char *) prop) == 0)            _TextMode = ClipWord;
 			else if (nlstricmp("dont_clip_word", (const char *) prop) == 0)  _TextMode = DontClipWord;
 			else if (nlstricmp("justified", (const char *) prop) == 0)       _TextMode = Justified;
+			else if (nlstricmp("centered", (const char *) prop) == 0)        _TextMode = Centered;
 			else nlwarning("<CViewText::parse> bad text mode");
 		}
 
@@ -663,10 +877,20 @@ namespace NLGUI
 		if (prop)
 			fromString((const char*)prop, _MultiMaxLine);
 
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"multi_min_line" );
+		_MultiMinLine = 0;
+		if (prop)
+			fromString((const char*)prop, _MultiMinLine);
+
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"underlined" );
 		_Underlined = false;
 		if (prop)
 			_Underlined = convertBool(prop);
+
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"strikethrough" );
+		_StrikeThrough = false;
+		if (prop)
+			_StrikeThrough = convertBool(prop);
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"case_mode" );
 		_CaseMode = CaseNormal;
@@ -708,6 +932,17 @@ namespace NLGUI
 			_ContinuousUpdate = convertBool(prop);
 		}
 
+		// "_Ä" lowest/highest chars (underscore, A+diaeresis)
+		_FontSizingChars.fromUtf8("_\xc3\x84");
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"sizing_chars" );
+		if (prop)
+			_FontSizingChars.fromUtf8((const char*)prop);
+
+		// fallback if SizingChars are not supported by font
+		_FontSizingFallback.fromUtf8("|");
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"sizing_fallback" );
+		if (prop)
+			_FontSizingFallback.fromUtf8((const char*)prop);
 
 		computeFontSize ();
 	}
@@ -778,8 +1013,8 @@ namespace NLGUI
 			return _LineMaxW;
 		else
 		{
-			sint parentWidth = std::min(_Parent->getMaxWReal(), _Parent->getWReal());
-			return std::min(parentWidth-(sint)(_XReal-_Parent->getXReal()), (sint)_LineMaxW);
+			sint offset = (sint)_XReal - (sint)_Parent->getXReal();
+			return std::min(_Parent->getInnerWidth() - offset, (sint)_LineMaxW);
 		}
 	}
 
@@ -790,7 +1025,7 @@ namespace NLGUI
 		if ((_MultiLine)&&(_Parent != NULL))
 		{
 			// If never setuped, and if text is not empty
-			if (_Lines.size() == 0 && !_Text.empty())
+			if (_Lines.empty() && !_Text.empty())
 				invalidateContent ();
 
 			sint	currentMaxW= getCurrentMultiLineMaxW();
@@ -840,6 +1075,31 @@ namespace NLGUI
 
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
+#if 0
+		//rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, _HReal, 0, false, rVR.getBlankTextureId(), CRGBA(64,64,64,255));
+
+		// debug text with mouse hover
+		if(CWidgetManager::getInstance()->getPointer())
+		{
+			// but must check first if mouse is over
+			sint32 x = CWidgetManager::getInstance()->getPointer()->getX();
+			sint32 y = CWidgetManager::getInstance()->getPointer()->getY();
+			bool	mouseIn;
+			// use parent clip or self clip?
+			if(_OverExtendViewTextUseParentRect)
+				mouseIn= _Parent && _Parent->isIn(x,y);
+			else
+				mouseIn= isIn(x,y);
+			// if the mouse cursor is in the clip area
+			if(mouseIn) {
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal,         _YReal,        _WReal, 1, 0, false, rVR.getBlankTextureId(), CRGBA(200,200,200,255));
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal,         _YReal+_HReal, _WReal, 1, 0, false, rVR.getBlankTextureId(), CRGBA(200,200,200,255));
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal,         _YReal,        1,      _HReal, 0, false, rVR.getBlankTextureId(), CRGBA(200,200,200,255));
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal+_WReal,  _YReal,        1,      _HReal, 0, false, rVR.getBlankTextureId(), CRGBA(200,200,200,255));
+			}
+		}
+#endif
+
 		// *** Out Of Clip?
 		sint32 ClipX, ClipY, ClipW, ClipH;
 		rVR.getClipWindow (ClipX, ClipY, ClipW, ClipH);
@@ -847,15 +1107,24 @@ namespace NLGUI
 			((_YReal) > (ClipY+ClipH)) || ((_YReal+_HReal) < ClipY))
 			return;
 
+		// hack: allow shadow to overflow outside parent box.
+		//       In CGroupHTML context, clip is set for row
+		if (std::abs(_ShadowX) > 0)
+		{
+			ClipX -= 3;
+			ClipW += 3;
+		}
+		if (std::abs(_ShadowY) > 0)
+		{
+			ClipY -= 3;
+			ClipH += 3;
+		}
+
 		// *** Screen Minimized?
-		uint32	w, h;
-		float	oow, ooh;
-		rVR.getScreenSize (w, h);
 		if (rVR.isMinimized())
 			return;
-		rVR.getScreenOOSize (oow, ooh);
 
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 
 
 		// *** get current color
@@ -874,27 +1143,30 @@ namespace NLGUI
 			shcol.A = (uint8)(((sint)shcol.A*((sint)CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
 		}
 
+		float	oow, ooh;
+		rVR.getScreenOOSize (oow, ooh);
 
 		// *** Draw multiline
 		if ((_MultiLine)&&(_Parent != NULL))
 		{
-			if (_Lines.size() == 0) return;
-
-			NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+			if (_Lines.empty()) return;
 
 			TextContext->setHotSpot (UTextContext::BottomLeft);
 			TextContext->setShaded (_Shadow);
 			TextContext->setShadeOutline (_ShadowOutline);
 			TextContext->setShadeColor (shcol);
-			TextContext->setFontSize (_FontSize);
-
-			float y = (float)(_YReal) * ooh; // y is expressed in scree, coordinates [0..1]
-			//y += _LinesInfos[_LinesInfos.size()-1].StringLine / h;
+			TextContext->setShadeExtent (_ShadowX*oow, _ShadowY*ooh);
+			TextContext->setFontSize (_FontSize*_Scale);
+			TextContext->setEmbolden (_Embolden);
+			TextContext->setOblique (_Oblique);
 
 			// Y is the base line of the string, so it must be grown up.
-			y += (float)_FontLegHeight * ooh;
+			float y = _YReal * _Scale + _FontLegHeight;
 
-			sint y_line = _YReal+_FontLegHeight-2;
+			if (_MultiMinLine > _Lines.size())
+			{
+				y += getMultiMinOffsetY() * _Scale;
+			}
 
 			// special selection code
 			if(_TextSelection)
@@ -934,7 +1206,18 @@ namespace NLGUI
 			{
 				CLine &currLine = *_Lines[i];
 				// current x position
-				float px = (float) (_XReal + ((i==0) ? (sint)_FirstLineX : 0));
+				float px = (float) (_XReal * _Scale + ((i==0) ? _FirstLineX : 0.f));
+
+				// Center line to computed maximum line width (_WReal)
+				//
+				// Does not give most accurate result when _WReal is much smaller than parent,
+				// but _WReal also defines mouseover hotspot/tooltip area.
+				//
+				// May not work correctly in CGroupParagraph (multiple text elements).
+				//
+				if (_TextMode == Centered)
+					px += (float)(_WReal * _Scale - (currLine.getWidth() + (i == 0 ? _FirstLineX : 0.f)) )/ 2.f;
+
 				// draw each words of the line
 				for(uint k = 0; k < currLine.getNumWords(); ++k)
 				{
@@ -953,7 +1236,7 @@ namespace NLGUI
 					// skip spaces before current word
 					float firstSpace = currWord.NumSpaces * currLine.getSpaceWidth();
 					sint line_width = 0;
-					if (_Underlined)
+					if (_Underlined || _StrikeThrough)
 					{
 						line_width = (sint)floorf(currLine.getWidthWithoutSpaces() + currLine.getSpaceWidth());
 						line_width -= (sint)floorf(firstSpace);
@@ -961,22 +1244,25 @@ namespace NLGUI
 					px += firstSpace;
 					// skip tabulation before current word
 					if(currWord.Format.TabX)
-						px= max(px, (float)(_XReal + currWord.Format.TabX*_FontWidth));
+						px= max(px, (float)(_XReal * _Scale + currWord.Format.TabX*_FontWidth));
 
 					// draw. We take floorf px to avoid filtering of letters that are not located on a pixel boundary
-					rVR.drawText (_RenderLayer, floorf(px) * oow, y, currWord.Index, (float)ClipX * oow, (float)ClipY * ooh,
-						(float)(ClipX+ClipW) * oow, (float)(ClipY+ClipH) * ooh, *TextContext);
+					float fx = px / _Scale;
+					float fy = y / _Scale;
+					rVR.drawText (_RenderLayer, fx, fy, currWord.Index, ClipX, ClipY, ClipX+ClipW, ClipY+ClipH, *TextContext);
 
 					// Draw a line
 					if (_Underlined)
-						rVR.drawRotFlipBitmap (_RenderLayer, (sint)floorf(px), y_line, line_width, 1, 0, false, rVR.getBlankTextureId(), col);
+						rVR.drawRotFlipBitmap (_RenderLayer, fx, fy - _FontLegHeight*0.6f / _Scale, line_width / _Scale, 1.0f / _Scale, 0, false, rVR.getBlankTextureId(), col);
+
+					if (_StrikeThrough)
+						rVR.drawRotFlipBitmap (_RenderLayer, fx, fy + _FontHeight*0.2f / _Scale, line_width / _Scale, 1.0f / _Scale, 0, false, rVR.getBlankTextureId(), col);
 
 					// skip word
 					px += currWord.Info.StringWidth;
 				}
 				// go one line up
-				y += (_FontHeight + _MultiLineSpace) * ooh;
-				y_line += _FontHeight+_MultiLineSpace;
+				y += (_FontHeight + _MultiLineSpace * _Scale);
 			}
 
 			// reset selection
@@ -1001,20 +1287,18 @@ namespace NLGUI
 			TextContext->setShaded (_Shadow);
 			TextContext->setShadeOutline (_ShadowOutline);
 			TextContext->setShadeColor (shcol);
-			TextContext->setFontSize (_FontSize);
-
+			TextContext->setShadeExtent (_ShadowX*oow, _ShadowY*ooh);
+			TextContext->setFontSize (_FontSize*_Scale);
+			TextContext->setEmbolden (_Embolden);
+			TextContext->setOblique (_Oblique);
 
 			if(_LetterColors!=NULL && !TextContext->isSameLetterColors(_LetterColors, _Index))
 			{
 				TextContext->setLetterColors(_LetterColors, _Index);
 			}
 
-
-			float x = (float)(_XReal) * oow;
-			float y = (float)(_YReal) * ooh;
-
 			// Y is the base line of the string, so it must be grown up.
-			y += (float)_FontLegHeight * ooh;
+			float y = _YReal * _Scale + _FontLegHeight;
 
 			// special selection code
 			if(_TextSelection)
@@ -1025,12 +1309,14 @@ namespace NLGUI
 			TextContext->setStringColor(_Index, col);
 
 			// draw
-			rVR.drawText (_RenderLayer, x, y, _Index, (float)ClipX * oow, (float)ClipY * ooh,
-						(float)(ClipX+ClipW) * oow, (float)(ClipY+ClipH) * ooh, *TextContext);
+			rVR.drawText (_RenderLayer, _XReal, y / _Scale, _Index, ClipX, ClipY, ClipX+ClipW, ClipY+ClipH, *TextContext);
 
 			// Draw a line
 			if (_Underlined)
-				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal+_FontLegHeight-2, _WReal, 1, 0, false, rVR.getBlankTextureId(), col);
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal - _FontLegHeight*0.3f/_Scale, _WReal, 1, 0, false, rVR.getBlankTextureId(), col);
+
+			if (_StrikeThrough)
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal + _FontHeight*0.2f / _Scale, _WReal, 1, 0, false, rVR.getBlankTextureId(), col);
 
 			// reset selection
 			if(_TextSelection)
@@ -1079,7 +1365,6 @@ namespace NLGUI
 				}
 			}
 		}
-
 	}
 
 	// ***************************************************************************
@@ -1141,9 +1426,37 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::setFontSize (sint nFontSize)
+	void CViewText::setFontSizing(const std::string &chars, const std::string &fallback)
 	{
-		_FontSize = nFontSize + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		_FontSizingChars.clear();
+		_FontSizingChars.fromUtf8(chars);
+		_FontSizingFallback.clear();
+		_FontSizingFallback.fromUtf8(fallback);
+	}
+
+	// ***************************************************************************
+	void CViewText::setFontName(const std::string &name)
+	{
+		if (_FontName == name)
+			return;
+
+		if (_Index != 0xFFFFFFFF)
+			CViewRenderer::getTextContext(_FontName)->erase (_Index);
+		clearLines();
+
+		resetTextIndex();
+
+		_FontName = name;
+		computeFontSize ();
+		invalidateContent();
+	}
+
+	// ***************************************************************************
+	void CViewText::setFontSize (sint nFontSize, bool coef)
+	{
+		_FontSize = nFontSize;
+		if (coef) _FontSize += CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		_FontSizeCoef = coef;
 		computeFontSize ();
 		invalidateContent();
 	}
@@ -1151,7 +1464,26 @@ namespace NLGUI
 	// ***************************************************************************
 	sint CViewText::getFontSize() const
 	{
-		return _FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		if (_FontSizeCoef)
+			return _FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+
+		return _FontSize;
+	}
+
+	// ***************************************************************************
+	void CViewText::setEmbolden (bool embolden)
+	{
+		_Embolden = embolden;
+		computeFontSize ();
+		invalidateContent();
+	}
+
+	// ***************************************************************************
+	void CViewText::setOblique (bool oblique)
+	{
+		_Oblique = oblique;
+		computeFontSize ();
+		invalidateContent();
 	}
 
 	// ***************************************************************************
@@ -1183,6 +1515,13 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CViewText::setShadowOffset(sint32 x, sint32 y)
+	{
+		_ShadowX = x;
+		_ShadowY = y;
+	}
+
+	// ***************************************************************************
 	void CViewText::setLineMaxW (sint nMaxW, bool invalidate)
 	{
 		if(_LineMaxW!=nMaxW)
@@ -1200,7 +1539,7 @@ namespace NLGUI
 		sint32 value;
 		if(CLuaIHM::popSINT32(ls, value))
 		{
-			setLineMaxW(value);
+			setLineMaxW(ceilf(value / _Scale));
 		}
 		return 0;
 	}
@@ -1236,24 +1575,44 @@ namespace NLGUI
 	// ***************************************************************************
 	uint CViewText::getFontWidth() const
 	{
-		return _FontWidth;
+		return _FontWidth / _Scale;
 	}
 
 	// ***************************************************************************
 	uint CViewText::getFontHeight() const
 	{
-		return _FontHeight;
+		return _FontHeight / _Scale;
 	}
 
 	// ***************************************************************************
 	uint CViewText::getFontLegHeight() const
 	{
-		return _FontLegHeight;
+		return _FontLegHeight / _Scale;
+	}
+
+	// ***************************************************************************
+	float CViewText::getLineHeight() const
+	{
+		return _FontHeight / _Scale + _MultiLineSpace;
+	}
+
+	// ***************************************************************************
+	uint CViewText::getMultiMinOffsetY() const
+	{
+		uint dy = 0;
+		if (_MultiMinLine > _Lines.size())
+		{
+			// first line is always present even if _Lines is empty
+			uint nbLines = _MultiMinLine - std::max((sint)1, (sint)_Lines.size());
+			dy = (nbLines * _FontHeight + (nbLines - 1) * _MultiLineSpace * _Scale) / _Scale;
+		}
+		return dy;
 	}
 
 	// ***************************************************************************
 	void CViewText::flushWordInLine(ucstring &ucCurrentWord, bool &linePushed, const CFormatInfo &wordFormat)
 	{
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		// create a new line?
 		if(!linePushed)
 		{
@@ -1261,14 +1620,14 @@ namespace NLGUI
 			linePushed= true;
 		}
 		// Append to the last line
-		_Lines.back()->addWord(ucCurrentWord, 0, wordFormat, _FontWidth);
+		_Lines.back()->addWord(ucCurrentWord, 0, wordFormat, _FontWidth, *TextContext);
 		// reset the word
-		ucCurrentWord = ucstring("");
+		ucCurrentWord.clear();
 	}
 
 
 	// ***************************************************************************
-	void CViewText::updateTextContextMultiLine(uint nMaxWidth)
+	void CViewText::updateTextContextMultiLine(float nMaxWidth)
 	{
 		ucchar ucLetter;
 		UTextContext::CStringInfo si;
@@ -1277,11 +1636,12 @@ namespace NLGUI
 		ucstring ucCurrentWord;
 		CFormatInfo		wordFormat;
 		// line state
-		float	rWidthCurrentLine = 0, rWidthLetter;
+		float	rWidthCurrentLine = 0;
 		bool	linePushed= false;
 		// for all the text
 		uint	textSize= (uint)_Text.size();
 		uint	formatTagIndex= 0;
+		nMaxWidth *= _Scale;
 		for (i = 0; i < textSize; ++i)
 		{
 			if(isFormatTagChange(i, formatTagIndex))
@@ -1297,7 +1657,7 @@ namespace NLGUI
 				rWidthCurrentLine= max(rWidthCurrentLine, (float)wordFormat.TabX*_FontWidth);
 			}
 
-			NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+			NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 
 			// Parse the letter
 			{
@@ -1314,21 +1674,20 @@ namespace NLGUI
 					ucstring ucStrLetter;
 					ucStrLetter= ucLetter;
 					si = TextContext->getStringInfo (ucStrLetter);
-					rWidthLetter = (si.StringWidth);
-					if ((rWidthCurrentLine + rWidthLetter) > nMaxWidth)
+					if ((rWidthCurrentLine + si.StringWidth) > nMaxWidth)
 					{
 						flushWordInLine(ucCurrentWord, linePushed, wordFormat);
 
 						// reset line state, and begin with the cut letter
 						linePushed= false;
-						rWidthCurrentLine = rWidthLetter;
+						rWidthCurrentLine = si.StringWidth;
 						ucCurrentWord = ucLetter;
 					}
 					else
 					{
 						// Grow the current word
 						ucCurrentWord += ucLetter;
-						rWidthCurrentLine += rWidthLetter;
+						rWidthCurrentLine += si.StringWidth;
 					}
 				}
 			}
@@ -1343,6 +1702,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::addDontClipWordLine(std::vector<CWord> &currLine)
 	{
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		// create a new line
 		_Lines.push_back(TLineSPtr(new CLine));
 
@@ -1357,7 +1717,7 @@ namespace NLGUI
 				if(currLine[i].Format!=lineWordFormat)
 				{
 					// add the current lineWord to the line.
-					_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth);
+					_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth, *TextContext);
 					// get new lineWordFormat
 					lineWordFormat= currLine[i].Format;
 					// and clear
@@ -1372,7 +1732,7 @@ namespace NLGUI
 			}
 
 			if(!lineWord.empty())
-				_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth);
+				_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth, *TextContext);
 
 			// clear
 			currLine.clear();
@@ -1380,8 +1740,9 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::updateTextContextMultiLineJustified(uint nMaxWidth, bool expandSpaces)
+	void CViewText::updateTextContextMultiLineJustified(float nMaxWidth, bool expandSpaces)
 	{
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		UTextContext::CStringInfo si;
 		//
 		TCharPos currPos = 0;
@@ -1400,12 +1761,13 @@ namespace NLGUI
 		CFormatInfo	wordFormat;
 		uint		formatTagIndex= 0;
 		//
+		nMaxWidth *= _Scale;
 		while (currPos != _Text.length())
 		{
 			TCharPos spaceEnd;
 			TCharPos wordEnd;
 			uint numSpaces;
-			float newLineWidth;
+			float newLineWidth = 0;
 			breakLine = false;
 			//
 			if (_Text[currPos] == (ucchar) '\n')
@@ -1475,7 +1837,7 @@ namespace NLGUI
 				// Get the word value.
 				wordValue = _Text.substr(spaceEnd, wordEnd - spaceEnd);
 				// compute width of word
-				si = CViewRenderer::getTextContext()->getStringInfo(wordValue);
+				si = TextContext->getStringInfo(wordValue);
 
 				// compute size of spaces/Tab + word
 				newLineWidth = lineWidth + numSpaces * _SpaceWidth;
@@ -1484,10 +1846,10 @@ namespace NLGUI
 			}
 			//
 			// Does the word go beyond the end of line ?
-			if (!lineFeed && newLineWidth > (float) nMaxWidth)
+			if (!lineFeed && newLineWidth > nMaxWidth)
 			{
 				// Have we enough room for this word on a line ?
-				bool roomForThisWord = (numWordsInLine > 0) || ( (newLineWidth - lineWidth) < (float) nMaxWidth );
+				bool roomForThisWord = (numWordsInLine > 0) || ( (newLineWidth - lineWidth) < nMaxWidth );
 
 				// not enough room for that word
 				// If it is the only word of the line, just split it
@@ -1496,7 +1858,7 @@ namespace NLGUI
 				{
 					if (expandSpaces)
 					{
-						nlassert(_Lines.size() > 0);
+						nlassert(!_Lines.empty());
 						nlassert(_Lines.back()->getNumWords() > 0);
 
 						// Yoyo: if the line has tab, then don't justify
@@ -1532,7 +1894,7 @@ namespace NLGUI
 					{
 						uint maxNumSpaces = std::max(1U, (uint) (nMaxWidth / _SpaceWidth));
 						CWord spaceWord; // a word with only spaces in it
-						spaceWord.build (ucstring (""), maxNumSpaces);
+						spaceWord.build (ucstring (""), *TextContext, maxNumSpaces);
 						spaceWord.Format= wordFormat;
 						_Lines.push_back(TLineSPtr(new CLine));
 						_Lines.back()->addWord(spaceWord, _FontWidth);
@@ -1554,17 +1916,17 @@ namespace NLGUI
 						for(currChar = 0; currChar < wordValue.length(); ++currChar)
 						{
 							oneChar = wordValue[currChar];
-							si = CViewRenderer::getTextContext()->getStringInfo(oneChar);
+							si = TextContext->getStringInfo(oneChar);
 							if ((uint) (px + si.StringWidth) > nMaxWidth) break;
 							px += si.StringWidth;
 						}
 						currChar = std::max((uint) 1, currChar); // must fit at least one character otherwise there's an infinite loop
 						wordValue = _Text.substr(spaceEnd, currChar);
 						CWord word;
-						word.build(wordValue, numSpaces);
+						word.build(wordValue, *TextContext, numSpaces);
 						word.Format= wordFormat;
 						_Lines.push_back(TLineSPtr(new CLine));
-						float roomForSpaces = (float) nMaxWidth - word.Info.StringWidth;
+						float roomForSpaces = nMaxWidth - word.Info.StringWidth;
 						if (expandSpaces && numSpaces != 0)
 						{
 							_Lines.back()->setSpaceWidth(roomForSpaces / (float) numSpaces);
@@ -1596,7 +1958,7 @@ namespace NLGUI
 					if (!wordValue.empty() || numSpaces != 0)
 					{
 						CWord word;
-						word.build(wordValue, numSpaces);
+						word.build(wordValue, *TextContext, numSpaces);
 						word.Format= wordFormat;
 						// update line width
 						_Lines.back()->addWord(word, _FontWidth);
@@ -1673,19 +2035,21 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::updateTextContext ()
 	{
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
 		TextContext->setShadeOutline (_ShadowOutline);
-		TextContext->setFontSize (_FontSize);
+		TextContext->setFontSize (_FontSize*_Scale);
+		TextContext->setEmbolden (_Embolden);
+		TextContext->setOblique (_Oblique);
 
 		// default state
 		_SingleLineTextClamped= false;
 
 		if ((_MultiLine)&&(_Parent != NULL))
 		{
-			sint nMaxWidth = getCurrentMultiLineMaxW();
+			float nMaxWidth = getCurrentMultiLineMaxW();
 			_LastMultiLineMaxW = nMaxWidth;
 			clearLines();
 			if (nMaxWidth <= 0)
@@ -1696,43 +2060,51 @@ namespace NLGUI
 			switch(_TextMode)
 			{
 				case ClipWord: updateTextContextMultiLine(nMaxWidth); break;
+				case Centered: // fallthru to DontClipWord
 				case DontClipWord: updateTextContextMultiLineJustified(nMaxWidth, false); break;
 				case Justified: updateTextContextMultiLineJustified(nMaxWidth, true); break;
 			}
 
 			// Special case for multiline limited in number of lines
-			if ((_Lines.size() > 0) && (_MultiMaxLine > 0) && (_Lines.size() > _MultiMaxLine))
+			if (!_Lines.empty() && (_MultiMaxLine > 0) && (_Lines.size() > _MultiMaxLine))
 			{
 				while (_Lines.size() > _MultiMaxLine)
 				{
-					_Lines.back()->clear();
+					_Lines.back()->clear(*TextContext);
 					_Lines.pop_back();
 				}
-				_Lines.pop_back();
-				CViewText::CLine *endLine = new CViewText::CLine;
-				CViewText::CWord w;
-				w.build(string("..."));
-				endLine->addWord(w, _FontWidth);
-				_Lines.push_back(TLineSPtr(endLine));
+				if (_OverflowText.size() > 0)
+				{
+					_Lines.pop_back();
+					CViewText::CLine *endLine = new CViewText::CLine;
+					CViewText::CWord w;
+					w.build(_OverflowText, *TextContext);
+					endLine->addWord(w, _FontWidth);
+					_Lines.push_back(TLineSPtr(endLine));
+				}
 			}
 
 			// Calculate size
+			float rMultiLineSpace = _MultiLineSpace * _Scale;
 			float rTotalW = 0;
 			for (uint i = 0; i < _Lines.size(); ++i)
 			{
 				rTotalW = std::max(_Lines[i]->getWidth() + ((i==0)?_FirstLineX:0), rTotalW);
 			}
-			_W = (sint)rTotalW;
-			_H = std::max(_FontHeight, uint(_FontHeight * _Lines.size() + std::max(0, sint(_Lines.size()) - 1) * _MultiLineSpace));
+			_W = (sint)ceilf(rTotalW / _Scale);
+			_H = std::max(_FontHeight / _Scale, ceilf((_FontHeight * _Lines.size() + std::max(0, sint(_Lines.size()) - 1) * rMultiLineSpace) / _Scale));
+
+			// See if we should pretend to have at least X lines
+			if (_MultiMinLine > 1)
+				_H = std::max(_H, sint((_FontHeight * _MultiMinLine + (_MultiMinLine - 1) * rMultiLineSpace)/_Scale));
 
 			// Compute tooltips size
-			if (_Tooltips.size() > 0)
+			if (!_Tooltips.empty())
 			for (uint i=0 ; i<_Lines.size() ; ++i)
 			{
 				for (uint j=0 ; j<_Lines[i]->getNumWords() ; ++j)
 				{
 					CWord word = _Lines[i]->getWord(j);
-	//				float w = _Lines[i]->getWidth();
 
 					if (word.Format.IndexTt != -1)
 					{
@@ -1740,7 +2112,7 @@ namespace NLGUI
 						{
 							CCtrlToolTip *pTooltip = _Tooltips[word.Format.IndexTt];
 
-							sint y = (sint) ((_FontHeight + _MultiLineSpace) * (_Lines.size() - i - 1));
+							sint y = (sint) ceilf(((_FontHeight + rMultiLineSpace) * (_Lines.size() - i - 1))/_Scale);
 
 							pTooltip->setX(0);
 							pTooltip->setY(y);
@@ -1759,10 +2131,10 @@ namespace NLGUI
 			// Common case: no W clamp
 			_Index = TextContext->textPush (_Text);
 			_Info = TextContext->getStringInfo (_Index);
-			_W = (sint)(_Info.StringWidth);
+			_W = (sint)ceilf(_Info.StringWidth / _Scale);
 
 			// Rare case: clamp W => recompute slowly, cut letters
-			if(_W>_LineMaxW)
+			if(_W > _LineMaxW)
 			{
 				TextContext->erase (_Index);
 
@@ -1770,10 +2142,18 @@ namespace NLGUI
 				UTextContext::CStringInfo si;
 				ucstring	ucCurrentLine;
 				ucCurrentLine.reserve(_Text.size());
+
 				// Append ... to the end of line
-				si = TextContext->getStringInfo (ucstring("..."));
-				float		dotWidth= si.StringWidth;
-				float		rWidthCurrentLine = 0, rWidthLetter;
+				float dotWidth = 0.f;
+				if (_OverflowText.size() > 0)
+				{
+					si = TextContext->getStringInfo (ucstring(_OverflowText));
+					dotWidth = si.StringWidth;
+				}
+
+				// scale LineMaxW to actual font size
+				float fLineMaxW = (float)_LineMaxW * _Scale;
+				float rWidthCurrentLine = 0;
 				// for all the text
 				if (_ClampRight)
 				{
@@ -1783,8 +2163,7 @@ namespace NLGUI
 						ucstring ucStrLetter;
 						ucStrLetter= ucLetter;
 						si = TextContext->getStringInfo (ucStrLetter);
-						rWidthLetter = (si.StringWidth);
-						if ((rWidthCurrentLine + rWidthLetter + dotWidth) > _LineMaxW)
+						if ((rWidthCurrentLine + si.StringWidth + dotWidth) > fLineMaxW)
 						{
 							break;
 						}
@@ -1792,12 +2171,15 @@ namespace NLGUI
 						{
 							// Grow the current line
 							ucCurrentLine += ucLetter;
-							rWidthCurrentLine += rWidthLetter;
+							rWidthCurrentLine += si.StringWidth;
 						}
 					}
 
 					// Add the dots
-					ucCurrentLine+= "...";
+					if (_OverflowText.size() > 0)
+					{
+						ucCurrentLine += _OverflowText;
+					}
 				}
 				else
 				{
@@ -1807,8 +2189,7 @@ namespace NLGUI
 						ucstring ucStrLetter;
 						ucStrLetter= ucLetter;
 						si = TextContext->getStringInfo (ucStrLetter);
-						rWidthLetter = (si.StringWidth);
-						if ((rWidthCurrentLine + rWidthLetter + dotWidth) > _LineMaxW)
+						if ((rWidthCurrentLine + si.StringWidth + dotWidth) > fLineMaxW)
 						{
 							break;
 						}
@@ -1816,24 +2197,27 @@ namespace NLGUI
 						{
 							// Grow the current line
 							ucCurrentLine = ucLetter + ucCurrentLine;
-							rWidthCurrentLine += rWidthLetter;
+							rWidthCurrentLine += si.StringWidth;
 						}
 					}
 
 					// Add the dots
-					ucCurrentLine = "..." + ucCurrentLine;
+					if (_OverflowText.size() > 0)
+					{
+						ucCurrentLine = _OverflowText + ucCurrentLine;
+					}
 				}
 
 				// And so setup this trunc text
 				_Index = TextContext->textPush (ucCurrentLine);
 				_Info = TextContext->getStringInfo (_Index);
-				_W = (sint)(_Info.StringWidth);
+				_W = (sint)ceilf(_Info.StringWidth / _Scale);
 
 				_SingleLineTextClamped= true;
 			}
 
 			// same height always
-			_H = _FontHeight;
+			_H = (sint)ceilf(_FontHeight / _Scale);
 		}
 
 		_InvalidTextContext= false;
@@ -1992,24 +2376,29 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::getCharacterPositionFromIndex(sint index, bool cursorAtPreviousLineEnd, sint &x, sint &y, sint &height) const
+	void CViewText::getCharacterPositionFromIndex(sint index, bool cursorAtPreviousLineEnd, float &x, float &y, float &height) const
 	{
 		NLMISC::clamp(index, 0, (sint) _Text.length());
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
 		TextContext->setShadeOutline (_ShadowOutline);
-		TextContext->setFontSize (_FontSize);
-	//	CViewRenderer &rVR = *CViewRenderer::getInstance();
-		height = getFontHeight();
+		TextContext->setFontSize (_FontSize*_Scale);
+		TextContext->setEmbolden (_Embolden);
+		TextContext->setOblique (_Oblique);
+		height = getLineHeight();
 		//
 		if (_MultiLine)
 		{
+			float fx, fy;
+			float dy = getMultiMinOffsetY() * _Scale;
+			float nMaxWidth = getCurrentMultiLineMaxW() * _Scale;
+
 			uint charIndex = 0;
 			// special case for end of text
 			if (index == (sint) _Text.length())
 			{
-				y = 0;
+				fy = dy;
 				if (_Lines.empty())
 				{
 					x = 0;
@@ -2017,10 +2406,12 @@ namespace NLGUI
 				else
 				{
 					CLine &lastLine = *_Lines.back();
-					x = (sint) (lastLine.getWidth() + lastLine.getEndSpaces() * lastLine.getSpaceWidth());
-					sint nMaxWidth = getCurrentMultiLineMaxW();
-					x = std::min(x, nMaxWidth);
+					fx = lastLine.getWidth() + lastLine.getEndSpaces() * lastLine.getSpaceWidth();
+					fx = std::min(fx, nMaxWidth);
 				}
+
+				x = fx / _Scale;
+				y = fy / _Scale;
 				return;
 			}
 			for(sint i = 0; i < (sint) _Lines.size(); ++i)
@@ -2029,10 +2420,12 @@ namespace NLGUI
 				{
 					// should display the character at the end of previous line
 					CLine &currLine = *_Lines[i - 1];
-					y = (sint) ((_FontHeight + _MultiLineSpace) * (_Lines.size() - i));
-					x = (sint) (currLine.getWidth() + currLine.getEndSpaces() * currLine.getSpaceWidth());
-					sint nMaxWidth = getCurrentMultiLineMaxW();
-					x = std::min(x, nMaxWidth);
+					fy = (_FontHeight + _MultiLineSpace * _Scale) * (_Lines.size() - i) + dy;
+					fx = currLine.getWidth() + currLine.getEndSpaces() * currLine.getSpaceWidth();
+					fx = std::min(fx, nMaxWidth);
+
+					x = fx / _Scale;
+					y = fy / _Scale;
 					return;
 				}
 				CLine &currLine = *_Lines[i];
@@ -2040,14 +2433,16 @@ namespace NLGUI
 				if ((sint) newCharIndex > index)
 				{
 					// ok, this line contains the character, now, see which word contains it.
-					y = (sint) ((_FontHeight + _MultiLineSpace) * (_Lines.size() - 1 - i));
+					fy = (_FontHeight + _MultiLineSpace * _Scale) * (_Lines.size() - 1 - i) + dy;
 					// see if the index is in the spaces at the end of line
 					if (index - charIndex >= currLine.getNumChars())
 					{
 						uint numSpaces = index - charIndex - currLine.getNumChars();
-						x = (sint) (currLine.getWidth() + numSpaces * _SpaceWidth);
-						sint nMaxWidth = getCurrentMultiLineMaxW();
-						x = std::min(x, nMaxWidth);
+						fx = currLine.getWidth() + numSpaces * _SpaceWidth;
+						fx = std::min(fx, nMaxWidth);
+
+						x = fx / _Scale;
+						y = fy / _Scale;
 						return;
 					}
 					// now, search containing word in current line
@@ -2065,15 +2460,19 @@ namespace NLGUI
 								ucstring subStr = currWord.Text.substr(0, index - charIndex - currWord.NumSpaces);
 								// compute the size
 								UTextContext::CStringInfo si = TextContext->getStringInfo(subStr);
-								x = (sint) (px + si.StringWidth + currWord.NumSpaces * currLine.getSpaceWidth());
-								height = getFontHeight();
+								fx = px + si.StringWidth + currWord.NumSpaces * currLine.getSpaceWidth();
+
+								x = fx / _Scale;
+								y = fy / _Scale;
 								return;
 							}
 							else
 							{
 								// character is in the spaces preceding the word
-								x = (sint) (px + currLine.getSpaceWidth() * (index - charIndex));
-								height = getFontHeight();
+								fx = px + currLine.getSpaceWidth() * (index - charIndex);
+
+								x = fx / _Scale;
+								y = fy / _Scale;
 								return;
 							}
 						}
@@ -2092,15 +2491,16 @@ namespace NLGUI
 			// compute the size
 			UTextContext::CStringInfo si = TextContext->getStringInfo(subStr);
 			y = 0;
-			x = (sint) si.StringWidth;
+			x = (sint) ceilf(si.StringWidth / _Scale);
 		}
 	}
 
 	// ***************************************************************************
-	// Tool fct : From a word and a x coordinate, give the matching character index
-	static uint getCharacterIndex(const ucstring &textValue, float x)
+	// Tool fct : From a word and a x coordinate (font scale), give the matching character index
+	static uint getCharacterIndex(const ucstring &textValue, float x, NL3D::UTextContext &textContext)
 	{
 		float px = 0.f;
+
 		UTextContext::CStringInfo si;
 		ucstring singleChar(" ");
 		uint i;
@@ -2108,13 +2508,13 @@ namespace NLGUI
 		{
 			// get character width
 			singleChar[0] = textValue[i];
-			si = CViewRenderer::getTextContext()->getStringInfo(singleChar);
+			si = textContext.getStringInfo(singleChar);
 			px += si.StringWidth;
 			 // the character is at the i - 1 position
 			if (px > x)
 			{
 				// if the half of the character is after the cursor, then prefer select the next one (like in Word)
-				if(px-si.StringWidth/2 < x)
+				if(px-si.StringWidth/2.f < x)
 					i++;
 				break;
 			}
@@ -2123,20 +2523,26 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::getCharacterIndexFromPosition(sint x, sint y, uint &index, bool &cursorAtPreviousLineEnd) const
+	void CViewText::getCharacterIndexFromPosition(float x, float y, uint &index, bool &cursorAtPreviousLineEnd) const
 	{
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
+
+		x *= _Scale;
+		y = roundf(y * _Scale);
 
 		// setup the text context
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
 		TextContext->setShadeOutline (_ShadowOutline);
-		TextContext->setFontSize (_FontSize);
+		TextContext->setFontSize (_FontSize*_Scale);
+		TextContext->setEmbolden (_Embolden);
+		TextContext->setOblique (_Oblique);
 		 // find the line where the character is
 	//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 		uint      charPos = 0;
 		if (_MultiLine)
 		{
+			y -= getMultiMinOffsetY() * _Scale;
 			// seek the line
 			float py = 0.f;
 			if (py > y)
@@ -2148,7 +2554,7 @@ namespace NLGUI
 			sint line;
 			for (line = (uint)_Lines.size() - 1; line >= 0; --line)
 			{
-				float newPy = py + _FontHeight + _MultiLineSpace;
+				float newPy = py + _FontHeight + _MultiLineSpace * _Scale;
 				if (newPy > y)
 				{
 					break;
@@ -2181,6 +2587,7 @@ namespace NLGUI
 				return;
 			}
 
+			cursorAtPreviousLineEnd = false;
 			float px = (float)_FirstLineX;
 			for(uint k = 0; k < currLine.getNumWords(); ++k)
 			{
@@ -2197,14 +2604,12 @@ namespace NLGUI
 																	   : 0;
 						clamp(numSpaces, 0, (sint)currWord.NumSpaces);
 						index =  numSpaces + charPos;
-						cursorAtPreviousLineEnd = false;
 						return;
 					}
 					else
 					{
 						// the coord is in the word itself
-						index = charPos + currWord.NumSpaces + getCharacterIndex(currWord.Text, (float) x - (px + spacesWidth));
-						cursorAtPreviousLineEnd = false;
+						index = charPos + currWord.NumSpaces + getCharacterIndex(currWord.Text, x - (px + spacesWidth), *TextContext);
 						return;
 					}
 				}
@@ -2212,7 +2617,6 @@ namespace NLGUI
 				charPos += (uint)currWord.Text.length() + currWord.NumSpaces;
 			}
 			index =  charPos;
-			cursorAtPreviousLineEnd = false;
 			return;
 		}
 		else
@@ -2228,7 +2632,7 @@ namespace NLGUI
 				index = 0;
 				return;
 			}
-			index = getCharacterIndex(_Text, (float) x);
+			index = getCharacterIndex(_Text, x, *TextContext);
 			return;
 		}
 	}
@@ -2266,15 +2670,16 @@ namespace NLGUI
 				quadSize--;
 		}
 		// select what quad to skip
-		CViewRenderer::getTextContext()->setStringSelection(stringId, quadStart, quadSize);
+		CViewRenderer::getTextContext(_FontName)->setStringSelection(stringId, quadStart, quadSize);
 	}
 
 	// ***************************************************************************
 	void CViewText::clearLines()
 	{
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		for(uint k = 0; k < _Lines.size(); ++k)
 		{
-			_Lines[k]->clear();
+			_Lines[k]->clear(*TextContext);
 		}
 		_Lines.clear();
 	}
@@ -2295,21 +2700,21 @@ namespace NLGUI
 	// ***************************************************************************
 	uint CViewText::getFirstLineX() const
 	{
-		return _FirstLineX;
+		return _FirstLineX / _Scale;
 	}
 
 	// ***************************************************************************
 	uint CViewText::getLastLineW () const
 	{
 		if (!_Lines.empty())
-			return (uint)_Lines.back()->getWidth();
+			return (uint)_Lines.back()->getWidth() / _Scale;
 		return 0;
 	}
 
 	// ***************************************************************************
-	void CViewText::setFirstLineX(uint firstLineX)
+	void CViewText::setFirstLineX(sint firstLineX)
 	{
-		_FirstLineX = firstLineX;
+		_FirstLineX = firstLineX * _Scale;
 	}
 
 	/////////////////////////////////////
@@ -2328,16 +2733,16 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::CLine::addWord(const ucstring &text, uint numSpaces, const CFormatInfo &wordFormat, uint fontWidth)
+	void CViewText::CLine::addWord(const ucstring &text, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext)
 	{
 		CWord word;
-		word.build(text, numSpaces);
+		word.build(text, textContext, numSpaces);
 		word.Format= wordFormat;
 		addWord(word, fontWidth);
 	}
 
 	// ***************************************************************************
-	void CViewText::CLine::addWord(const CWord &word, uint fontWidth)
+	void CViewText::CLine::addWord(const CWord &word, float fontWidth)
 	{
 		_Words.push_back(word);
 		_NumChars += word.NumSpaces + uint(word.Text.length());
@@ -2347,18 +2752,18 @@ namespace NLGUI
 			_StringLine = word.Info.StringLine;
 		}
 		// the width of the line must reach at least the Tab
-		_WidthWithoutSpaces= max(_WidthWithoutSpaces, word.Format.TabX * float(fontWidth));
+		_WidthWithoutSpaces= max(_WidthWithoutSpaces, word.Format.TabX * fontWidth);
 		// append the text space
 		_WidthWithoutSpaces += word.Info.StringWidth;
 	}
 
 	// ***************************************************************************
-	void CViewText::CLine::clear()
+	void CViewText::CLine::clear(NL3D::UTextContext &textContext)
 	{
 		for(uint k = 0; k < _Words.size(); ++k)
 		{
 			if (_Words[k].Index != 0xffffffff)
-				CViewRenderer::getTextContext()->erase(_Words[k].Index);
+				textContext.erase(_Words[k].Index);
 		}
 		_Words.clear();
 		_NumChars = 0;
@@ -2375,13 +2780,12 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::CWord::build(const ucstring &text, uint numSpaces/*=0*/)
+	void CViewText::CWord::build(const ucstring &text, NL3D::UTextContext &textContext, uint numSpaces)
 	{
 		Text = text;
 		NumSpaces = numSpaces;
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
-		Index = TextContext->textPush(text);
-		Info = TextContext->getStringInfo(Index);
+		Index = textContext.textPush(text);
+		Info = textContext.getStringInfo(Index);
 	}
 
 	// ***************************************************************************
@@ -2402,11 +2806,13 @@ namespace NLGUI
 		static const ucstring lineFeedStr("\n");
 		float maxWidth = 0;
 
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
 		TextContext->setShadeOutline (_ShadowOutline);
-		TextContext->setFontSize (_FontSize);
+		TextContext->setFontSize (_FontSize*_Scale);
+		TextContext->setEmbolden (_Embolden);
+		TextContext->setOblique (_Oblique);
 
 		TCharPos linePos = 0;
 		while (linePos < _Text.length())
@@ -2465,14 +2871,14 @@ namespace NLGUI
 			linePos = lineEnd+1;
 		}
 
-		return (sint32)maxWidth;
+		return (sint32)ceilf(maxWidth / _Scale);
 	}
 
 	// ***************************************************************************
 	sint32 CViewText::getMinUsedW() const
 	{
 		static const ucstring spaceOrLineFeedStr(" \n\t");
-		sint32 maxWidth = 0;
+		float maxWidth = 0.0f;
 
 		// Not multi line ? Same size than min
 		if (!_MultiLine)
@@ -2482,16 +2888,18 @@ namespace NLGUI
 		if (_TextMode == ClipWord)
 		{
 			// No largest font parameter, return the font height
-			return _FontHeight;
+			return (sint32)ceilf(_FontHeight / _Scale);
 		}
 		// If we can't clip the words, return the size of the largest word
-		else if ((_TextMode == DontClipWord) || (_TextMode == Justified))
+		else if ((_TextMode == DontClipWord) || (_TextMode == Justified) || (_TextMode == Centered))
 		{
-			NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+			NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 			TextContext->setHotSpot (UTextContext::BottomLeft);
 			TextContext->setShaded (_Shadow);
 			TextContext->setShadeOutline (_ShadowOutline);
-			TextContext->setFontSize (_FontSize);
+			TextContext->setFontSize (_FontSize*_Scale);
+			TextContext->setEmbolden (_Embolden);
+			TextContext->setOblique (_Oblique);
 
 			// Current position in text
 			TCharPos currPos = 0;
@@ -2517,46 +2925,70 @@ namespace NLGUI
 				si = TextContext->getStringInfo(wordValue);
 
 				// Larger ?
-				sint32 stringWidth = (sint32)si.StringWidth;
-				if (stringWidth>maxWidth)
-					maxWidth = stringWidth;
+				if (maxWidth < si.StringWidth)
+					maxWidth = si.StringWidth;
 
 				// Next word
 				currPos = wordEnd;
 			}
 		}
 
-		return maxWidth;
+		return ceilf(maxWidth / _Scale);
 	}
 
 	// ***************************************************************************
 	void CViewText::onInvalidateContent()
 	{
 		_InvalidTextContext= true;
+
+		if (_ParentElm)
+			_ParentElm->invalidateCoords();
+
 		invalidateCoords();
+	}
+
+	// ***************************************************************************
+	void CViewText::onInterfaceScaleChanged()
+	{
+		_Scale = CWidgetManager::getInstance()->getInterfaceScale();
+
+		computeFontSize ();
+		invalidateContent();
+
+		CViewBase::onInterfaceScaleChanged();
 	}
 
 	// ***************************************************************************
 	void CViewText::computeFontSize ()
 	{
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
 		TextContext->setShadeOutline (_ShadowOutline);
-		TextContext->setFontSize (_FontSize);
+		TextContext->setFontSize (_FontSize * _Scale);
+		TextContext->setEmbolden (_Embolden);
+		TextContext->setOblique (_Oblique);
 
 		// Letter size
-		UTextContext::CStringInfo si = TextContext->getStringInfo(ucstring("|")); // for now we can't now that directly from UTextContext
-		_FontHeight = (uint) si.StringHeight; // + (_Shadow?(_ShadowOutline?2:1):0);
-		_FontLegHeight = (uint) si.StringLine; // + (_Shadow?(_ShadowOutline?2:1):0);
+		UTextContext::CStringInfo si = TextContext->getStringInfo(_FontSizingChars);
+
+		// font generator changes unknown glyphs to dot '.'. use fallback if it looks odd
+		if (_FontSize > (si.StringHeight + si.StringLine))
+		{
+			si = TextContext->getStringInfo(_FontSizingFallback);
+		}
+
+		// add a padding of 1 pixel else the top will be truncated
+		_FontHeight = si.StringHeight + 1;
+		_FontLegHeight = si.StringLine;
 
 		// Space width
 		si = TextContext->getStringInfo(ucstring(" "));
 		_SpaceWidth = si.StringWidth;
 
-		// Font Width
+		// Font Width (used for <tab>)
 		si = TextContext->getStringInfo(ucstring("_"));
-		_FontWidth = (uint)si.StringWidth;
+		_FontWidth = si.StringWidth;
 	}
 
 
@@ -2900,7 +3332,7 @@ namespace NLGUI
 		}
 
 		// convert in ULetterColors
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		ULetterColors * letterColors = TextContext->createLetterColors();
 		for(uint i=0; i<tempLetterColors.size(); i++)
 		{

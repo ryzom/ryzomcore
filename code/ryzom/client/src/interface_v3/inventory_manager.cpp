@@ -39,6 +39,7 @@
 
 // For handlers
 #include "nel/gui/action_handler.h"
+#include "nel/gui/group_editbox.h"
 #include "dbctrl_sheet.h"
 
 #include "../sheet_manager.h"
@@ -49,6 +50,10 @@
 #include "../client_cfg.h"
 
 #include "../misc.h"
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace std;
 using namespace NLMISC;
@@ -1998,6 +2003,9 @@ bool SBagOptions::parse(xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 	prop = xmlGetProp (cur, (xmlChar*)"filter_tool");
 	if (prop) DbFilterTool = NLGUI::CDBManager::getInstance()->getDbProp(prop.str());
 
+	prop = xmlGetProp (cur, (xmlChar*)"filter_pet");
+	if (prop) DbFilterPet = NLGUI::CDBManager::getInstance()->getDbProp(prop.str());
+
 	prop = xmlGetProp (cur, (xmlChar*)"filter_mp");
 	if (prop) DbFilterMP = NLGUI::CDBManager::getInstance()->getDbProp(prop.str());
 
@@ -2008,6 +2016,44 @@ bool SBagOptions::parse(xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 	if (prop) DbFilterTP = NLGUI::CDBManager::getInstance()->getDbProp(prop.str());
 
 	return true;
+}
+
+// ***************************************************************************
+void SBagOptions::setSearchFilter(const ucstring &s)
+{
+	SearchQualityMin = 0;
+	SearchQualityMax = 999;
+	SearchFilter.clear();
+	SearchFilterChanged = true;
+
+	if (!s.empty())
+	{
+		std::vector<ucstring> words;
+		splitUCString(toLower(s), ucstring(" "), words);
+
+		size_t pos;
+		for(int i = 0; i<words.size(); ++i)
+		{
+			std::string kw = words[i].toUtf8();
+
+			pos = kw.find("-");
+			if (pos != std::string::npos)
+			{
+				uint16 first;
+				uint16 last;
+				if (fromString(kw.substr(0, pos), first))
+					SearchQualityMin = first;
+
+				if (fromString(kw.substr(pos+1), last))
+					SearchQualityMax = last;
+
+				if (first == 0 && last == 0)
+					SearchFilter.push_back(words[i]);
+			}
+			else
+				SearchFilter.push_back(words[i]);
+		}
+	}
 }
 
 // ***************************************************************************
@@ -2036,6 +2082,13 @@ bool SBagOptions::isSomethingChanged()
 			LastDbFilterTool = (DbFilterTool->getValue8() != 0);
 		}
 
+	if (DbFilterPet != NULL)
+		if ((DbFilterPet->getValue8() != 0) != LastDbFilterPet)
+		{
+			bRet = true;
+			LastDbFilterPet = (DbFilterPet->getValue8() != 0);
+		}
+
 	if (DbFilterMP != NULL)
 		if ((DbFilterMP->getValue8() != 0) != LastDbFilterMP)
 		{
@@ -2057,6 +2110,12 @@ bool SBagOptions::isSomethingChanged()
 			LastDbFilterTP = (DbFilterTP->getValue8() != 0);
 		}
 
+	if (SearchFilterChanged)
+	{
+		bRet = true;
+		SearchFilterChanged = false;
+	}
+
 	return bRet;
 }
 
@@ -2068,6 +2127,7 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 	bool bFilterArmor = getFilterArmor();
 	bool bFilterWeapon = getFilterWeapon();
 	bool bFilterTool = getFilterTool();
+	bool bFilterPet = getFilterPet();
 	bool bFilterMP = getFilterMP();
 	bool bFilterMissMP = getFilterMissMP();
 	bool bFilterTP = getFilterTP();
@@ -2075,6 +2135,30 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 	const CItemSheet *pIS = pCS->asItemSheet();
 	if (pIS != NULL)
 	{
+		if (SearchFilter.size() > 0)
+		{
+			bool match = true;
+			ucstring lcName = toLower(pCS->getItemActualName());
+
+			// add item quality as a keyword to match
+			if (pCS->getQuality() > 1)
+			{
+				lcName += ucstring(" " + toString(pCS->getQuality()));
+			}
+
+			for (uint i = 0; i< SearchFilter.size(); ++i)
+			{
+				if (lcName.find(SearchFilter[i]) == ucstring::npos)
+				{
+					return false;
+				}
+			}
+		}
+
+		// Quality range
+		if (SearchQualityMin > pCS->getQuality() || SearchQualityMax < pCS->getQuality())
+			return false;
+
 		// Armor
 		if ((pIS->Family == ITEMFAMILY::ARMOR) || 
 			(pIS->Family == ITEMFAMILY::JEWELRY))
@@ -2095,9 +2179,12 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 			(pIS->Family == ITEMFAMILY::HARVEST_TOOL) ||
 			(pIS->Family == ITEMFAMILY::TAMING_TOOL) || 
 			(pIS->Family == ITEMFAMILY::TRAINING_TOOL) ||
-			(pIS->Family == ITEMFAMILY::BAG) || 
-			(pIS->Family == ITEMFAMILY::PET_ANIMAL_TICKET) )
+			(pIS->Family == ITEMFAMILY::BAG))
 			if (!bFilterTool) bDisplay = false;
+
+		// Pet
+		if (pIS->Family == ITEMFAMILY::PET_ANIMAL_TICKET)
+			if (!bFilterPet) bDisplay = false;
 
 		// MP
 		if ((pIS->Family == ITEMFAMILY::RAW_MATERIAL) && pIS->canBuildSomeItemPart())
@@ -2456,6 +2543,97 @@ class CHandlerInvDrag : public IActionHandler
 REGISTER_ACTION_HANDLER( CHandlerInvDrag, "inv_drag" );
 
 // ***************************************************************************
+// show/hide edit box, set keyboard focus if 'show'
+class CHandlerInvSearchButton : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const string &sParams)
+	{
+		if (sParams.empty())
+		{
+			nlwarning("inv_search_button: missing edit box shortid");
+			return;
+		}
+
+		CCtrlBaseButton* btn = dynamic_cast<CCtrlBaseButton *>(pCaller);
+		if (!btn)
+		{
+			nlwarning("inv_search_button pCaller == NULL, caller must be CCtrlBaseButton with 'toggle_button' type");
+			return;
+		}
+
+		ucstring filter;
+		std::string id = btn->getParent()->getId() + ":" + sParams + ":eb";
+		CGroupEditBox *eb = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(id));
+		if (!eb)
+		{
+			nlwarning("inv_search_button: editbox (%s) not found\n", id.c_str());
+			return;
+		}
+
+		eb->getParent()->setActive(btn->getPushed());
+		if (eb->getParent()->getActive())
+		{
+			CWidgetManager::getInstance()->setCaptureKeyboard(eb);
+			eb->setSelectionAll();
+			filter = eb->getInputString();
+		}
+
+		CDBGroupListSheetBag *pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(btn->getParent()->getId() + ":bag_list"));
+		if (pList != NULL) pList->setSearchFilter(filter);
+
+		CDBGroupIconListBag *pIcons = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(btn->getParent()->getId() + ":bag_icons"));
+		if (pIcons != NULL) pIcons->setSearchFilter(filter);
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerInvSearchButton, "inv_search_button" );
+
+// ***************************************************************************
+// if :eb is empty then hide edit box, unpush search button
+class CHandlerInvSearchUnfocus : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const string &sParams)
+	{
+		if (!pCaller) return;
+
+		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(pCaller);
+		if (!eb || !eb->getInputString().empty()) return;
+
+		// ui:interface:inventory:content:bag:iil:inv_query_eb:eb
+		std::string id = pCaller->getParent()->getParent()->getId() + ":" + sParams;
+		CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(id));
+		if (btn) btn->setPushed(false);
+
+		// hide :inv_query_eb
+		pCaller->getParent()->setActive(false);
+
+		// clear filter
+		CAHManager::getInstance()->runActionHandler("inv_set_search", pCaller, "");
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerInvSearchUnfocus, "inv_search_unfocus" );
+
+// **********************************************************************************************************
+// set inventory search string
+class CHandlerInvSetSearch : public IActionHandler
+{
+	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	{
+		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(pCaller);
+		if (!eb) return;
+
+		// ui:interface:inventory:content:bag:iil:inv_query_eb:eb
+		std::string id = pCaller->getParent()->getParent()->getId();
+
+		CDBGroupListSheetBag *pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(id + ":bag_list"));
+		if (pList != NULL) pList->setSearchFilter(eb->getInputString());
+
+		CDBGroupIconListBag *pIcons = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(id + ":bag_icons"));
+		if (pIcons != NULL) pIcons->setSearchFilter(eb->getInputString());
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerInvSetSearch, "inv_set_search" );
+
+// ***************************************************************************
 // COMMON INVENTORIES Test if we can drop an item to a slot or a list
 class CHandlerInvCanDropTo : public IActionHandler
 {
@@ -2504,13 +2682,13 @@ class CHandlerInvCanDropTo : public IActionHandler
 		if (pCSDst != NULL)
 		{
 			// If we want to drop something on a reference slot (hand or equip)
-			if (pInv->getDBIndexPath(pCSDst) != "")
+			if (!pInv->getDBIndexPath(pCSDst).empty())
 			{
 				// We must drag'n'drop an item
 				if (pCSSrc && pCSSrc->getType() == CCtrlSheetInfo::SheetType_Item)
 				if (pCSDst && pCSDst->getType() == CCtrlSheetInfo::SheetType_Item)
 				{
-					if (pInv->getDBIndexPath(pCSSrc) != "")
+					if (!pInv->getDBIndexPath(pCSSrc).empty())
 					{
 						// The item dragged comes from a slot check if this is the good type
 						if (pCSDst->canDropItem(pCSSrc))
@@ -2896,6 +3074,9 @@ class CHandlerInvTempAll : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
+		if (!CTempInvManager::getInstance()->isOpened()) return;
+		if (NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP_INV:ALL_EMPTY")->getValue32() != 0) return;
+
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInventoryManager *pInv = CInventoryManager::getInstance();
 
@@ -3488,7 +3669,7 @@ CItemImage &CInventoryManager::getServerItem(uint inv, uint index)
 // ***************************************************************************
 CInventoryManager::TInvType CInventoryManager::invTypeFromString(const string &str)
 {
-	string sTmp = strlwr(str);
+	string sTmp = toLower(str);
 	if (sTmp == "inv_bag")		return InvBag;
 	if (sTmp == "inv_pa0")		return InvPA0;
 	if (sTmp == "inv_pa1")		return InvPA1;

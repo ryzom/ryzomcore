@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// bin2c.cpp : Defines the entry point for the console application.
-//
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,22 +22,55 @@ int main(int argc, char* argv[])
 {
 	if (argc<2)
 	{
-		printf ("bin2c [filename.bin] [filename.c]\n");
+		printf ("bin2c <filename.bin> [filename.c]\n");
 	}
 	else
 	{
-		char sDir[256];
-		char sPath[256];
+		// path and filename but without extension
+		char sPathWithoutExtension[256];
+
+		// basename of file
 		char sName[256];
-		char sExt[256];
-		_splitpath (argv[1], sDir, sPath, sName, sExt);
+
+		// copy fullpath from command-line
+		strcpy(sPathWithoutExtension, argv[1]);
+
+		char *tmpExt = strrchr(sPathWithoutExtension, '.');
+
+		// remove extension
+		if (tmpExt) *tmpExt = 0;
+
+		// look for last directory separator
+		const char *tmpName1 = strrchr(sPathWithoutExtension, '/');
+#ifdef _WIN32
+		const char *tmpName2 = strrchr(sPathWithoutExtension, '\\');
+#else
+		const char *tmpName2 = NULL;
+#endif
+
+		// take last separator
+		const char *tmpName = tmpName1 > tmpName2 ? tmpName1:tmpName2;
+
+		// keep only path
+		if (tmpName)
+		{
+			// computes position in path
+			size_t pos = tmpName - sPathWithoutExtension;
+
+			// copy basename
+			strcpy(sName, sPathWithoutExtension+pos+1);
+		}
 
 		char sOutput[256];
+
 		if (argc>2)
+		{
 			strcpy (sOutput, argv[2]);
+		}
 		else
 		{
-			_makepath (sOutput, sDir, sPath, sName, ".cpp");
+			strcpy(sOutput, sPathWithoutExtension);
+			strcat(sOutput, ".cpp");
 		}
 
 		FILE *pIn=fopen( argv[1], "rb");

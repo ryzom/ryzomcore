@@ -32,27 +32,17 @@ using namespace NLMISC;
 
 // --------------------------------------------------
 
-bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
+bool CNelExport::exportMesh (const std::string &sPath, INode& node, TimeValue time)
 {
 	// Result to return
 	bool bRet = false;
-	char tempFileName[MAX_PATH] = { 0 };  
-	char tempPathBuffer[MAX_PATH] = { 0 };
-	
+	std::string tempFileName;
+	std::string tempPathBuffer;
+
 	try
-	{		
-		DWORD dwRetVal = GetTempPathA(MAX_PATH, tempPathBuffer);
-		if (dwRetVal > MAX_PATH || (dwRetVal == 0))
-		{
-			ToolLogger.writeError(PIPELINE::ERROR, "*", "GetTempPath failed");
-			nlerror("GetTempPath failed");
-		}
-		UINT uRetVal = GetTempFileNameA(tempPathBuffer, TEXT("_nel_export_mesh_"), 0, tempFileName);
-		if (uRetVal == 0)
-		{
-			ToolLogger.writeError(PIPELINE::ERROR, "*", "GetTempFileName failed");
-			nlerror("GetTempFileName failed");
-		}
+	{
+		tempPathBuffer = NLMISC::CPath::getTemporaryDirectory();
+		NLMISC::CFile::getTemporaryOutputFilename(tempPathBuffer + "_nel_export_mesh_", tempFileName);
 
 		// Eval the object a time
 		ObjectState os = node.EvalWorldState(time);
@@ -91,7 +81,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 					skeletonShape = NULL;
 				}
 			}
-			
+
 			DWORD t = timeGetTime();
 			if (InfoLog)
 				InfoLog->display("Beg buildShape %s \n", node.GetName());
@@ -99,7 +89,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 			IShape *pShape = _ExportNel->buildShape(node, time, mapIdPtr, true);
 			if (InfoLog)
 				InfoLog->display("End buildShape in %d ms \n", timeGetTime()-t);
-			
+
 			// Conversion success ?
 			if (pShape)
 			{
@@ -111,7 +101,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 					{
 						// Create a streamable shape
 						CShapeStream shapeStream(pShape);
-						
+
 						// Serial the shape
 						shapeStream.serial(file);
 
@@ -133,12 +123,13 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 						{
 
 						}
-						remove(tempFileName);
+
+						CFile::deleteFile(tempFileName);
 					}
 				}
 				else
 				{
-					nlwarning("Failed to create file %s", tempFileName);
+					nlwarning("Failed to create file %s", tempFileName.c_str());
 					ToolLogger.writeError(PIPELINE::ERROR, "*", "Failed to create temporary shape file");
 					if (_TerminateOnFileOpenIssues)
 						nelExportTerminateProcess();
@@ -157,7 +148,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 				{
 					nlwarning("Failed to delete pShape pointer! Something might be wrong.");
 					ToolLogger.writeError(PIPELINE::ERROR, "*", "Failed to delete pShape pointer");
-					remove(tempFileName);
+					CFile::deleteFile(tempFileName);
 					bRet = false;
 				}
 
@@ -182,7 +173,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 					}
 					else
 					{
-						nlwarning("Failed to open file: %s", tempFileName);
+						nlwarning("Failed to open file: %s", tempFileName.c_str());
 						ToolLogger.writeError(PIPELINE::ERROR, "*", "Failed to open temp shape file");
 						if (_TerminateOnFileOpenIssues)
 							nelExportTerminateProcess();
@@ -192,7 +183,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 				{
 					nlwarning("Failed to verify shape. Must crash now.");
 					ToolLogger.writeError(PIPELINE::ERROR, "*", "Failed to verify shape");
-					remove(tempFileName);
+					CFile::deleteFile(tempFileName);
 					bRet = false;
 				}
 
@@ -211,14 +202,14 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 		ToolLogger.writeDepend(PIPELINE::BUILD, sPath, "*");
 		try
 		{
-			remove(sPath);
+			CFile::deleteFile(sPath);
 		}
 		catch (...)
 		{
 
 		}
 		CFile::moveFile(sPath, tempFileName);
-		nlinfo("MOVE %s -> %s", tempFileName, sPath);
+		nlinfo("MOVE %s -> %s", tempFileName.c_str(), sPath.c_str());
 	}
 
 	return bRet;
@@ -226,7 +217,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 
 // --------------------------------------------------
 
-bool CNelExport::exportVegetable (const char *sPath, INode& node, TimeValue time)
+bool CNelExport::exportVegetable (const std::string &sPath, INode& node, TimeValue time)
 {
 	bool bRet=false;
 
@@ -246,7 +237,7 @@ bool CNelExport::exportVegetable (const char *sPath, INode& node, TimeValue time
 				// All is good
 				bRet=true;
 			}
-			catch (Exception &e)
+			catch (const Exception &e)
 			{
 				// Message box
 				const char *message = e.what();
@@ -259,40 +250,36 @@ bool CNelExport::exportVegetable (const char *sPath, INode& node, TimeValue time
 
 // --------------------------------------------------
 
-bool CNelExport::exportAnim (const char *sPath, std::vector<INode*>& vectNode, TimeValue time, bool scene)
+bool CNelExport::exportAnim (const std::string &sPath, std::vector<INode*>& vectNode, TimeValue time, bool scene)
 {
 	// Result to return
 	bool bRet=false;
-	char tempFileName[MAX_PATH] = { 0 };  
-	char tempPathBuffer[MAX_PATH] = { 0 };
-	
+	std::string tempFileName;
+	std::string tempPathBuffer;
+
 	try
 	{
-		DWORD dwRetVal = GetTempPathA(MAX_PATH, tempPathBuffer);
-		if (dwRetVal > MAX_PATH || (dwRetVal == 0))
-			nlerror("GetTempPath failed");
-		UINT uRetVal = GetTempFileNameA(tempPathBuffer, TEXT("_nel_export_mesh_"), 0, tempFileName);
-		if (uRetVal == 0)
-			nlerror("GetTempFileName failed");
-		
+		tempPathBuffer = NLMISC::CPath::getTemporaryDirectory();
+		NLMISC::CFile::getTemporaryOutputFilename(tempPathBuffer + "_nel_export_mesh_", tempFileName);
+
 		// Create an animation file
 		CAnimation animFile;
 
 		// For each node to export
 		for (uint n=0; n<vectNode.size(); n++)
-		{				
+		{
 			// Get name
-			std::string nodeName="";
+			std::string nodeName;
 
 			// Get NEL3D_APPDATA_EXPORT_ANIMATION_PREFIXE_NAME
 			int prefixe = CExportNel::getScriptAppData (vectNode[n], NEL3D_APPDATA_EXPORT_ANIMATION_PREFIXE_NAME, 0);
-			
+
 			// Set the name only if it is a scene animation
 			if (scene || prefixe)
 			{
 				// try to get the prefix from the appData if present. If not, takes it from the node name
 				nodeName = CExportNel::getScriptAppData (vectNode[n], NEL3D_APPDATA_INSTANCE_NAME, "");
-				if (nodeName == "") // not found ?
+				if (nodeName.empty()) // not found ?
 				{
 					nodeName=CExportNel::getName (*vectNode[n]);
 				}
@@ -303,7 +290,7 @@ bool CNelExport::exportAnim (const char *sPath, std::vector<INode*>& vectNode, T
 			bool root = vectNode[n]->GetParentNode () == _Ip->GetRootNode();
 
 			// Add animation
-			_ExportNel->addAnimation (animFile, *vectNode[n], nodeName.c_str(), root);		
+			_ExportNel->addAnimation (animFile, *vectNode[n], nodeName.c_str(), root);
 		}
 
 		if (vectNode.size())
@@ -340,7 +327,7 @@ bool CNelExport::exportAnim (const char *sPath, std::vector<INode*>& vectNode, T
 						}
 						else
 						{
-							nlwarning("Failed to open file: %s", tempFileName);
+							nlwarning("Failed to open file: %s", tempFileName.c_str());
 							bRet = false;
 							if (_TerminateOnFileOpenIssues)
 								nelExportTerminateProcess();
@@ -349,14 +336,14 @@ bool CNelExport::exportAnim (const char *sPath, std::vector<INode*>& vectNode, T
 					catch (...)
 					{
 						nlwarning("Failed to verify shape. Must crash now.");
-						remove(tempFileName);
+						CFile::deleteFile(tempFileName);
 						bRet = false;
 					}
 				}
-				catch (Exception& e)
+				catch (const Exception& e)
 				{
 					if (_ErrorInDialog)
-						MessageBox (NULL, e.what(), "NeL export", MB_OK|MB_ICONEXCLAMATION);
+						MessageBox (NULL, utf8ToTStr(e.what()), _T("NeL export"), MB_OK|MB_ICONEXCLAMATION);
 					else
 						nlwarning ("ERROR : %s", e.what ());
 				}
@@ -364,9 +351,9 @@ bool CNelExport::exportAnim (const char *sPath, std::vector<INode*>& vectNode, T
 			else
 			{
 				if (_ErrorInDialog)
-					MessageBox (NULL, "Can't open the file for writing.", "NeL export", MB_OK|MB_ICONEXCLAMATION);
+					MessageBox (NULL, _T("Can't open the file for writing."), _T("NeL export"), MB_OK|MB_ICONEXCLAMATION);
 				else
-					nlwarning ("ERROR : Can't open the file (%s) for writing", tempFileName);
+					nlwarning ("ERROR : Can't open the file (%s) for writing", tempFileName.c_str());
 				if (_TerminateOnFileOpenIssues)
 					nelExportTerminateProcess();
 			}
@@ -380,23 +367,16 @@ bool CNelExport::exportAnim (const char *sPath, std::vector<INode*>& vectNode, T
 
 	if (bRet)
 	{
-		try
-		{
-			remove(sPath);
-		}
-		catch (...)
-		{
-
-		}
+		CFile::deleteFile(sPath);
 		CFile::moveFile(sPath, tempFileName);
-		nlinfo("MOVE %s -> %s", tempFileName, sPath);
+		nlinfo("MOVE %s -> %s", tempFileName.c_str(), sPath.c_str());
 	}
 	return bRet;
 }
 
 // --------------------------------------------------
 
-bool CNelExport::exportSkeleton	(const char *sPath, INode* pNode, TimeValue time)
+bool CNelExport::exportSkeleton	(const std::string &sPath, INode* pNode, TimeValue time)
 {
 	// Result to return
 	bool bRet=false;
@@ -414,14 +394,14 @@ bool CNelExport::exportSkeleton	(const char *sPath, INode* pNode, TimeValue time
 		{
 			// Create a streamable shape
 			CShapeStream shapeStream (skeletonShape);
-			
+
 			// Serial the shape
 			shapeStream.serial (file);
 
 			// All is good
 			bRet=true;
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			nlwarning (e.what());
 		}
@@ -435,7 +415,7 @@ bool CNelExport::exportSkeleton	(const char *sPath, INode* pNode, TimeValue time
 
 // --------------------------------------------------
 
-bool CNelExport::exportLodCharacter (const char *sPath, INode& node, TimeValue time)
+bool CNelExport::exportLodCharacter (const std::string &sPath, INode& node, TimeValue time)
 {
 	// Result to return
 	bool bRet=false;

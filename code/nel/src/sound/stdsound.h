@@ -14,9 +14,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "nel/misc/types_nl.h"
-#include "nel/misc/common.h"
-#include "nel/misc/debug.h"
+#ifndef SOUND_STDPCH_H
+#define SOUND_STDPCH_H
+
+#if defined(_MSC_VER) && defined(_DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
 
 #include <cstdlib>
 #include <cstdio>
@@ -38,6 +44,13 @@
 #include <iomanip>
 #include <iterator>
 
+#include <libxml/parser.h>
+
+#include "nel/misc/types_nl.h"
+#include "nel/misc/common.h"
+#include "nel/misc/debug.h"
 #include "nel/misc/vector.h"
 #include "nel/misc/path.h"
 #include "nel/misc/file.h"
+
+#endif

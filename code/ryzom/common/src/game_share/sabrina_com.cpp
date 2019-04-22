@@ -141,6 +141,55 @@ TOOL_TYPE::TCraftingToolType		CSabrinaCom::getPhraseFaberPlanToolType(const std:
 }
 
 // ***************************************************************************
+BRICK_FAMILIES::TBrickFamily CSabrinaCom::getPhraseForageFamily(const std::vector<NLMISC::CSheetId> &phraseBricks) const
+{
+	if(phraseBricks.empty())
+		return BRICK_FAMILIES::Unknown;
+
+	BRICK_TYPE::EBrickType	bType= _BC->getBrickType(phraseBricks[0]);
+	if ( (bType == BRICK_TYPE::FORAGE_PROSPECTION) || (bType == BRICK_TYPE::FORAGE_EXTRACTION) )
+	{
+		for ( uint i=1; i<phraseBricks.size(); ++i ) // skip the root brick (index 0)
+		{
+			const CSheetId& brickId = phraseBricks[i];
+
+			uint indexInFamily;
+			BRICK_FAMILIES::TBrickFamily brickFamily = _BC->getBrickFamily( brickId, indexInFamily );
+			// FPMA=prospection, FEMA=extraction
+			if ((brickFamily == BRICK_FAMILIES::BHFPMA || brickFamily == BRICK_FAMILIES::BHFEMA))
+			{
+				// remapping need to be used because prospection ecosystem families
+				// have resource speciality inserted right in the middle
+				// luckily indexInFamily and TBrickFamily is defined in the same order
+				BRICK_FAMILIES::TBrickFamily bf = (BRICK_FAMILIES::TBrickFamily)(brickFamily + indexInFamily - 1);
+				// A:matis, B:fyros, C:zorai, D:tryker, E:prime roots
+				switch (bf) {
+					case BRICK_FAMILIES::BHFPMA:
+					case BRICK_FAMILIES::BHFPMB:
+						return bf;
+					case BRICK_FAMILIES::BHFPRMFMA:
+						return BRICK_FAMILIES::BHFPMC;
+					case BRICK_FAMILIES::BHFPRMFMB:
+						return BRICK_FAMILIES::BHFPMD;
+					case BRICK_FAMILIES::BHFPRMFMC:
+						return BRICK_FAMILIES::BHFPME;
+					case BRICK_FAMILIES::BHFEMA:
+					case BRICK_FAMILIES::BHFEMB:
+					case BRICK_FAMILIES::BHFEMC:
+					case BRICK_FAMILIES::BHFEMD:
+					case BRICK_FAMILIES::BHFEME:
+						return bf;
+					default:
+						break;
+				}
+			}
+		}
+	}
+
+	return BRICK_FAMILIES::Unknown;
+}
+
+// ***************************************************************************
 NLMISC::CSheetId	CSabrinaCom::getPhraseBestDisplayBrick(const std::vector<NLMISC::CSheetId> &phraseBricks) const
 {
 	if(phraseBricks.empty())

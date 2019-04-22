@@ -381,7 +381,7 @@ void serviceGetView (uint32 rid, const string &rawvarpath, TAdminViewResult &ans
 	if (CCommandRegistry::getInstance().isNamedCommandHandler(varpath.Destination[0].first))
 	{
 		varpath.Destination[0].first += "."+varpath.Destination[0].second;
-		varpath.Destination[0].second = "";
+		varpath.Destination[0].second.clear();
 	}
 
 	if (varpath.isFinal())
@@ -430,7 +430,7 @@ void serviceGetView (uint32 rid, const string &rawvarpath, TAdminViewResult &ans
 			else
 			{
 
-				if (strs.size()>0)
+				if (!strs.empty())
 				{
 					str = strs[0].substr(0,strs[0].size()-1);
 					// replace all spaces into udnerscore because space is a reserved char
@@ -717,7 +717,7 @@ void updateAdmin()
 			ICommand::execute(Alarms[i].Name, logDisplayVars, true, false);
 			const std::deque<std::string>	&strs = mdDisplayVars.lockStrings();
 
-			if (strs.size()>0)
+			if (!strs.empty())
 			{
 				str = strs[0].substr(0,strs[0].size()-1);
 			}
@@ -782,13 +782,13 @@ void setInformation (const vector<string> &alarms, const vector<string> &graphup
 	for (i = 0; i < alarms.size(); i+=3)
 	{
 		CVarPath shardvarpath (alarms[i]);
-		if(shardvarpath.Destination.size() == 0 || shardvarpath.Destination[0].second.empty())
+		if(shardvarpath.Destination.empty() || shardvarpath.Destination[0].second.empty())
 			continue;
 		CVarPath servervarpath (shardvarpath.Destination[0].second);
-		if(servervarpath.Destination.size() == 0 || servervarpath.Destination[0].second.empty())
+		if(servervarpath.Destination.empty() || servervarpath.Destination[0].second.empty())
 			continue;
 		CVarPath servicevarpath (servervarpath.Destination[0].second);
-		if(servicevarpath.Destination.size() == 0 || servicevarpath.Destination[0].second.empty())
+		if(servicevarpath.Destination.empty() || servicevarpath.Destination[0].second.empty())
 			continue;
 
 		string name = servicevarpath.Destination[0].second;
@@ -817,13 +817,13 @@ void setInformation (const vector<string> &alarms, const vector<string> &graphup
 	for (i = 0; i < graphupdate.size(); i+=2)
 	{
 		CVarPath shardvarpath (graphupdate[i]);
-		if(shardvarpath.Destination.size() == 0 || shardvarpath.Destination[0].second.empty())
+		if(shardvarpath.Destination.empty() || shardvarpath.Destination[0].second.empty())
 			continue;
 		CVarPath servervarpath (shardvarpath.Destination[0].second);
-		if(servervarpath.Destination.size() == 0 || servervarpath.Destination[0].second.empty())
+		if(servervarpath.Destination.empty() || servervarpath.Destination[0].second.empty())
 			continue;
 		CVarPath servicevarpath (servervarpath.Destination[0].second);
-		if(servicevarpath.Destination.size() == 0 || servicevarpath.Destination[0].second.empty())
+		if(servicevarpath.Destination.empty() || servicevarpath.Destination[0].second.empty())
 			continue;
 
 		string VarName = servicevarpath.Destination[0].second;

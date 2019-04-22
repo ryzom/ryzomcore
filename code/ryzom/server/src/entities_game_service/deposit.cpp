@@ -16,7 +16,6 @@
 
 
 #include "stdpch.h"
-#include <functional>
 #include "deposit.h"
 #include "player_manager/character.h"
 #include "player_manager/player_manager.h"
@@ -25,6 +24,7 @@
 #include "entities_game_service.h"
 #include "egs_globals.h"
 #include "nel/misc/noise_value.h"
+#include "nel/misc/common.h"
 #include "nel/misc/variable.h"
 #include "nel/misc/words_dictionary.h"
 #include "game_share/time_weather_season/time_date_season_manager.h"
@@ -36,6 +36,7 @@
 #include "game_share/multi_target.h"
 #include "phrase_manager/s_effect.h"
 #include "projectile_stats.h"
+#include "primitives_parser.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -293,11 +294,10 @@ struct TCompareStaticItemPtrBySheetId : public std::binary_function<CStaticItem*
 //-----------------------------------------------------------------------------
 // Parse primitive file for one deposit
 //-----------------------------------------------------------------------------
-bool CDeposit::build( const NLLIGO::CPrimZone* zone )
+bool CDeposit::build( const NLLIGO::CPrimZone* zone)
 {
 	if ( IsRingShard )
 		return false;
-	
 	//_Id  =id;
 	*( (NLLIGO::CPrimZone*)this ) = *zone;
 
@@ -305,7 +305,11 @@ bool CDeposit::build( const NLLIGO::CPrimZone* zone )
 	string name;
 	if ( ! zone->getPropertyByName( "name", name ) )								return malformed( "name", name );
 	_Name = name;
-
+	// Read alias
+	if(!CPrimitivesParser::getAlias(zone, _Alias))
+	{
+		nlwarning("<CDeposit::build> Could not find an alias for deposit %s", _Name.c_str());
+	}
 	// Read exact raw material codes to add
 	vector<string> *exactRMCodesS = NULL;
 	if ( ! (zone->getPropertyByName( "exact_mp_item", exactRMCodesS ) && exactRMCodesS) ) return malformed( "exact_mp_item", name );
@@ -469,6 +473,21 @@ bool CDeposit::build( const NLLIGO::CPrimZone* zone )
 	return true;
 }
 
+CDepositState CDeposit::currentState()
+{
+	CDepositState out;
+	//If we don't have an alias, don't send any information (it's better to be missing information than having wrong information)
+	if(_Alias == 0)
+		return out;
+	// We should never save the state of a spot without quantity constraint, this is just an additional safeguard against it
+	if(!_QuantityConstraintsPt)
+		return out;
+
+	out.alias = _Alias;
+	out.currentQuantity = _QuantityConstraintsPt->getCurrentQuantity();
+	out.nextRespawnDay = _QuantityConstraintsPt->NextRespawnDay;
+	return out;
+}
 
 /*
  * Select the raw materials, using the specified filters and _Ecotype
@@ -587,7 +606,7 @@ void CDeposit::selectRMsByFilters( std::vector<std::string>& exactRMCodesS, cons
 			if ( ! depositReportCreated )
 			{
 				depositReportCreated = true;
-				depositReportFile = fopen( "deposit_contents.csv", "wt" ); // fclose() auto?
+				depositReportFile = nlfopen( "deposit_contents.csv", "wt" ); // fclose() auto?
 				if ( depositReportFile )
 				{
 					fprintf( depositReportFile, "Deposit;RM;When in year;When in day;Weather;\n" );

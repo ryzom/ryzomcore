@@ -60,15 +60,15 @@ public:
 		// Serial node information into workspace stream. This does not save the particle system shape, only a reference to its file
 		void					   serial(NLMISC::IStream &f);
 		// Save the particle system target file
-		void					   savePS() throw(NLMISC::EStream);
+		void					   savePS();
 		// Save particle system with an arbitrary filename
-		void					   savePSAs(const std::string &fullPath) throw(NLMISC::EStream);
+		void					   savePSAs(const std::string &fullPath);
 		// put back in the unloaded state
 		void					   unload();
 		/** Load the particle system target file
 		  * \return true if loading succeed (false means that loading was ok, but this is not a particle system). Other cases throw an exception.
 		  */
-		bool					   loadPS() throw(NLMISC::EStream);
+		bool					   loadPS();
 		// create an empty particle system
 		void					   createEmptyPS();
 		// helper flag to know if a ps has been modified
@@ -186,7 +186,7 @@ public:
 	  * 
 	  * \return pointer to new node, or NULL if already inserted	  
 	  */
-	CNode		*addNode(const std::string &filenameWithFullPath) throw( NLMISC::Exception);	
+	CNode		*addNode(const std::string &filenameWithFullPath);	
 	// remove a node by its index
 	void		removeNode(uint index);
 	// remove a node by its pointer
@@ -196,11 +196,11 @@ public:
 	/** Save the workspace structure. The target file is the one given when this object was created	  
 	  * NB : ps shape are not saved, only the structure is. To save the shapes, call CNode::save()
 	  */
-	void		save() throw(NLMISC::EStream);
+	void		save();
 	/** Load the workspace structure. The target file is the one given when this object was created
 	  * All nodes are in the 'unloaded" state, so it is to the caller to load them by calling load() on their node
 	  */
-	void		load() throw(NLMISC::EStream);
+	void		load();
 	// Test whether the structure of the workspace has been modified (does not test if ps inside the workspace have been modified)
 	bool		isModified() const { return _Modified; }
 	// Test whether the content of the workspace has ben modified
@@ -229,7 +229,7 @@ private:
 	std::string						_Name;		// workspace user name
 private:
 	// serial the object
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);	
+	void serial(NLMISC::IStream &f);	
 	// set the 'modified flag' and call the callback
 	void setModifiedFlag(bool modified);
 public:		

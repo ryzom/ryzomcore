@@ -31,6 +31,9 @@
 //
 #include "nel/misc/matrix.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLMISC;
 
@@ -66,17 +69,17 @@ bool CToolSelectMove::checkAdditionnalRoomLeftFor(CInstance &instance)
 	CLuaStackRestorer lsr(&ls, 0);
 	// check ai & static cost : if they are too big, can't create the duplicate
 	if (!luaProj.callMethodByNameNoThrow("getAiCost", 0, 1)
-		|| !ls.isNumber(-1))
+		|| !ls.isInteger(-1))
 	{
 		return false;
 	}
-	uint aiCost = (uint) ls.toNumber(-1);
+	uint aiCost = (uint) ls.toInteger(-1);
 	ls.pop();
 	if (!luaProj.callMethodByNameNoThrow("getStaticObjectCost", 0, 1))
 	{
 		return false;
 	}
-	uint staticCost = (uint) ls.toNumber(-1);
+	uint staticCost = (uint) ls.toInteger(-1);
 	ls.pop();
 	if (!getEditor().verifyRoomLeft(aiCost, staticCost))
 	{
@@ -377,7 +380,7 @@ void CToolSelectMove::commitAction(CInstance &instance)
 						if (_AutoGroup.getGroupingCandidate())
 						{
 							newCopy.push();
-							std::auto_ptr<CObject> desc(CComLuaModule::getObjectFromLua(ls.getStatePointer()));
+							CUniquePtr<CObject> desc(CComLuaModule::getObjectFromLua(ls.getStatePointer()));
 							_AutoGroup.group(desc.get(), _FinalPos);
 						}
 						else

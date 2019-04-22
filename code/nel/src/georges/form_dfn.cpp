@@ -24,6 +24,10 @@
 #include "nel/georges/form_loader.h"
 #include "nel/georges/form_elm.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLMISC;
 using namespace std;
 
@@ -56,7 +60,7 @@ void CFormDfn::removeEntry( uint idx )
 
 // ***************************************************************************
 
-void CFormDfn::write (xmlDocPtr doc, const char *filename)
+void CFormDfn::write (xmlDocPtr doc, const std::string &filename)
 {
 	// Save filename
 	_Filename = CFile::getFilename (filename);
@@ -121,7 +125,7 @@ void CFormDfn::write (xmlDocPtr doc, const char *filename)
 
 // ***************************************************************************
 
-void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const char *filename)
+void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const std::string &filename)
 {
 	// Save filename
 	_Filename = CFile::getFilename (filename);
@@ -130,7 +134,7 @@ void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const
 	if ( ((const char*)root->name == NULL) || (strcmp ((const char*)root->name, "DFN") != 0) )
 	{
 		// Throw exception
-		warning (true, "read", "XML Syntax error in block line %p, node (%s) should be DFN.", root->content, root->name);
+		warning (true, "read", "XML Syntax error in block line %d, node (%s) should be DFN.", (sint)root->line, root->name);
 	}
 
 	// Count the parent
@@ -162,8 +166,8 @@ void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const
 		else
 		{
 			// Throw exception
-			warning (true, "read", "XML Syntax error in block (%s) line %p, aguments Name not found.",
-				parent->name, parent->content);
+			warning (true, "read", "XML Syntax error in block (%s) line %d, aguments Name not found.",
+				parent->name, (sint)parent->line);
 		}
 
 		// Next parent
@@ -245,8 +249,8 @@ void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const
 						if ((Entries[childNumber].Type == NULL) && !forceLoad)
 						{
 							// Throw exception
-							warning (true, "read", "In XML block (%s) line %p, file not found %s.",
-								child->name, child->content, Entries[childNumber].Filename.c_str ());
+							warning (true, "read", "In XML block (%s) line %d, file not found %s.",
+								child->name, (sint)child->line, Entries[childNumber].Filename.c_str ());
 						}
 
 						// Read the default value
@@ -262,8 +266,8 @@ void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const
 					else
 					{
 						// Throw exception
-						warning (true, "read", "XML In block (%s) line %p, no filename found for the .typ file.",
-							child->name, child->content);
+						warning (true, "read", "XML In block (%s) line %d, no filename found for the .typ file.",
+							child->name, (sint)child->line);
 					}
 				}
 				else if (stricmp (typeName, "Dfn") == 0)
@@ -279,15 +283,15 @@ void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const
 						if ((Entries[childNumber].Dfn == NULL) && !forceLoad)
 						{
 							// Throw exception
-							warning (true, "read", "XML In block (%s) line %p, file not found %s.",
-								child->name, child->content, Entries[childNumber].Filename.c_str ());
+							warning (true, "read", "XML In block (%s) line %d, file not found %s.",
+								child->name, (sint)child->line, Entries[childNumber].Filename.c_str ());
 						}
 					}
 					else
 					{
 						// Throw exception
-						warning (true, "read", "XML In block (%s) line %p, no filename found for the .typ file.",
-							child->name, child->content);
+						warning (true, "read", "XML In block (%s) line %d, no filename found for the .typ file.",
+							child->name, (sint)child->line);
 					}
 				}
 				else if (stricmp (typeName, "DfnPointer") == 0)
@@ -297,8 +301,8 @@ void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const
 				else
 				{
 					// Throw exception
-					warning (true, "read", "XML Syntax error in block (%s) line %p, element has not a valid type name attribut \"Type = %s\".",
-						child->name, child->content, typeName);
+					warning (true, "read", "XML Syntax error in block (%s) line %d, element has not a valid type name attribut \"Type = %s\".",
+						child->name, (sint)child->line, typeName);
 				}
 
 				// Delete the value
@@ -307,8 +311,8 @@ void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const
 			else
 			{
 				// Throw exception
-				warning (true, "read", "XML Syntax error in block (%s) line %p, element has no type name attribut \"Type = [Type][Dfn][DfnPointer]\".",
-					child->name, child->content);
+				warning (true, "read", "XML Syntax error in block (%s) line %d, element has no type name attribut \"Type = [Type][Dfn][DfnPointer]\".",
+					child->name, (sint)child->line);
 			}
 
 			// Get the array attrib
@@ -325,8 +329,8 @@ void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const
 		else
 		{
 			// Throw exception
-			warning (true, "read", "XML Syntax error in block (%s) line %p, aguments Name not found.",
-				root->name, root->content);
+			warning (true, "read", "XML Syntax error in block (%s) line %d, aguments Name not found.",
+				root->name, (sint)root->line);
 		}
 
 		// Next child
@@ -459,9 +463,9 @@ void CFormDfn::setNumParent (uint size)
 
 // ***************************************************************************
 
-void CFormDfn::setParent (uint parent, CFormLoader &loader, const char *filename)
+void CFormDfn::setParent (uint parent, CFormLoader &loader, const std::string &filename)
 {
-	if (strcmp (filename, "")==0)
+	if (filename.empty())
 		Parents[parent].Parent = NULL;
 	else
 		Parents[parent].Parent = loader.loadFormDfn (filename, false);
@@ -470,7 +474,7 @@ void CFormDfn::setParent (uint parent, CFormLoader &loader, const char *filename
 
 // ***************************************************************************
 
-void CFormDfn::CEntry::setType (CFormLoader &loader, const char *filename)
+void CFormDfn::CEntry::setType (CFormLoader &loader, const std::string &filename)
 {
 	TypeElement = EntryType;
 	Dfn = NULL;
@@ -485,7 +489,7 @@ void CFormDfn::CEntry::setType( TEntryType type )
 
 // ***************************************************************************
 
-void CFormDfn::CEntry::setDfn (CFormLoader &loader, const char *filename)
+void CFormDfn::CEntry::setDfn (CFormLoader &loader, const std::string &filename)
 {
 	TypeElement = EntryDfn;
 	Filename = filename;
@@ -498,7 +502,7 @@ void CFormDfn::CEntry::setDfn (CFormLoader &loader, const char *filename)
 void CFormDfn::CEntry::setDfnPointer ()
 {
 	TypeElement = EntryVirtualDfn;
-	Filename = "";
+	Filename.clear();
 	Type = NULL;
 	Dfn = NULL;
 }
@@ -512,7 +516,7 @@ const std::string &CFormDfn::CEntry::getName () const
 
 // ***************************************************************************
 
-void CFormDfn::CEntry::setName (const char *name)
+void CFormDfn::CEntry::setName (const std::string &name)
 {
 	Name = name;
 }
@@ -526,7 +530,7 @@ const std::string &CFormDfn::CEntry::getDefault () const
 
 // ***************************************************************************
 
-void CFormDfn::CEntry::setDefault (const char *def)
+void CFormDfn::CEntry::setDefault (const std::string &def)
 {
 	Default = def;
 }
@@ -561,7 +565,7 @@ const std::string &CFormDfn::CEntry::getFilename() const
 
 // ***************************************************************************
 
-void CFormDfn::CEntry::setFilename (const char *def)
+void CFormDfn::CEntry::setFilename (const std::string &def)
 {
 	Filename = def;
 }
@@ -849,14 +853,14 @@ const std::string &CFormDfn::CEntry::getFilenameExt() const
 
 // ***************************************************************************
 
-void CFormDfn::CEntry::setFilenameExt (const char *ext)
+void CFormDfn::CEntry::setFilenameExt (const std::string &ext)
 {
 	FilenameExt = ext;
 }
 
 // ***************************************************************************
 
-void CFormDfn::warning (bool exception, const char *function, const char *format, ... ) const
+void CFormDfn::warning (bool exception, const std::string &function, const char *format, ... ) const
 {
 	// Make a buffer string
 	va_list args;
@@ -866,7 +870,7 @@ void CFormDfn::warning (bool exception, const char *function, const char *format
 	va_end( args );
 
 	// Set the warning
-	NLGEORGES::warning (exception, "(CFormDfn::%s) in form DFN (%s) : %s", function, _Filename.c_str (), buffer);
+	NLGEORGES::warning (exception, "(CFormDfn::%s) in form DFN (%s) : %s", function.c_str(), _Filename.c_str (), buffer);
 }
 
 // ***************************************************************************

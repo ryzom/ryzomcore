@@ -77,7 +77,7 @@
 
 <group type="menu" id="r2ed_base_menu_look"
  options="context_menu_back" 
- text_y="-2"
+ text_y="0"
  color="255 255 255 255"
  fontsize="16"
  shadow="true"
@@ -1783,9 +1783,9 @@ text_y="-2"
 	<group id="#id" posparent="#posparent" posref="#posref" w="200" child_resize_h="true" 
 	 x="#x" y="#y">
 		
-		<ctrl style="button_ok" id="random" posref="TL TL" text_y="-2" onclick_l="#onclick_random" 
+		<ctrl style="button_ok" id="random" posref="TL TL" text_y="0" onclick_l="#onclick_random" 
 		 params_l="#onclick_random_param" hardtext="uiR2EdRandom" tooltip="#tooltip_ok" />
-		<ctrl style="button_ok" x="13" posparent="random" text_y="-2" posref ="TR TL" onclick_l="#onclick_add_list" 
+		<ctrl style="button_ok" x="13" posparent="random" text_y="0" posref ="TR TL" onclick_l="#onclick_add_list" 
 		 params_l="#onclick_add_list_param" hardtext="uiR2EdManageSetsShort" />
 	</group>
 	
@@ -1981,7 +1981,7 @@ text_y="-2"
 			</scene3d>
 
 			<ctrl style="button_ok" id="change_view" x="-10" y="10" posparent="char3d" posref="BR BR" 
-			 text_y="-2" onclick_l="lua" params_l="r2:changeView()" hardtext="uiR2EDChangeView" tooltip="" />
+			 text_y="0" onclick_l="lua" params_l="r2:changeView()" hardtext="uiR2EDChangeView" tooltip="" />
 		
 		</group>	
 
@@ -2131,7 +2131,7 @@ text_y="-2"
 						</group>
 
 						<ctrl style="button_ok" id="create_new" x="0" y="-2" posparent="options_list" posref="BR TR" 
-						 text_y="-2" onclick_l="" params_l="" hardtext="uiR2EdCreateNew" tooltip="" />
+						 text_y="0" onclick_l="" params_l="" hardtext="uiR2EdCreateNew" tooltip="" />
 					</group>
 					-->
 				</group>
@@ -2209,11 +2209,11 @@ text_y="-2"
 
 						<!-- equipment random button -->
 						<ctrl style="button_ok" id="equ_random" x="110" y="-20" posparent="arms_guard" posref="BL TL" 
-						 text_y="-2" onclick_l="lua" params_l="r2:randomEquipment()" hardtext="uiR2EdRandomEquipment" />
+						 text_y="0" onclick_l="lua" params_l="r2:randomEquipment()" hardtext="uiR2EdRandomEquipment" />
 
 						<!-- color random button -->
 						<ctrl style="button_ok" id="color_random" x="30" y="0" posparent="equ_random" posref="TR TL" 
-						 text_y="-2" onclick_l="lua" params_l="r2:randomColor()" hardtext="uiR2EdRandomColor" />
+						 text_y="0" onclick_l="lua" params_l="r2:randomColor()" hardtext="uiR2EdRandomColor" />
 
 						<!-- sets -->
 						<instance template="h_label_combo_box" id="equipment_sets"  
@@ -2222,7 +2222,7 @@ text_y="-2"
 
 						<!-- save set button -->
 						<ctrl style="button_ok" id="save_set" x="29" y="0" posparent="equipment_sets" posref="BR BL" 
-						 text_y="-2" hardtext="uiR2EdManageSets" onclick_l="proc" params_l="add_equipment_active" />
+						 text_y="0" hardtext="uiR2EdManageSets" onclick_l="proc" params_l="add_equipment_active" />
 
 					</group>
 
@@ -2230,7 +2230,7 @@ text_y="-2"
 					<!-- COMBAT MODE button 
 					<group id="combat_mode" sizeref="w" w="0" h="16" x="0" y="-15" posparent="armour" posref="BL TL">
 						<ctrl style="button_ok" id="combat_mode_button" x="10" posparent="parent" posref="TL TL" 
-						 text_y="-2" onclick_l="proc" params_l="combat_mode_active" hardtext="uiR2EdCombatMode" tooltip="" />
+						 text_y="0" onclick_l="proc" params_l="combat_mode_active" hardtext="uiR2EdCombatMode" tooltip="" />
 					</group>-->
 
 					<!-- ****** -->
@@ -2509,7 +2509,7 @@ text_y="-2"
 		</group>
 
 		<ctrl style="button_ok" id="preview" x="11" y="0" posparent="menu" posref="BL TL" 
-		 text_y="-2" onclick_l="lua" params_l="r2:preview()" hardtext="uiR2EdPreview" />
+		 text_y="0" onclick_l="lua" params_l="r2:preview()" hardtext="uiR2EdPreview" />
 
 	</group>
 </group>
@@ -2628,7 +2628,7 @@ text_y="-2"
 
 			<!-- Add list button -->
 			<ctrl style="button_ok" id="add_list" x="18" y="0" posparent="weight" posref="BR BL" 
-			 text_y="-2" onclick_l="" params_l="" hardtext="uiR2EdAddList" tooltip="" />
+			 text_y="0" onclick_l="" params_l="" hardtext="uiR2EdAddList" tooltip="" />
 			
 		</group>
 	</group>
@@ -2638,15 +2638,15 @@ text_y="-2"
 		
 		<!-- Ok -->
 		<ctrl style="button_ok" id="ok" x="0" y="0" posparent="parent" posref="TL TL" 
-		 text_y="-2" onclick_l="leave_modal" params_l="" hardtext="      OK      " tooltip="" />
+		 text_y="0" onclick_l="leave_modal" params_l="" hardtext="      OK      " tooltip="" />
 
 		<!-- Cancel -->
 		<ctrl style="button_ok" id="cancel" x="110" y="0" posparent="ok" posref="TR TL" 
-		 text_y="-2" onclick_l="leave_modal" params_l="" hardtext=" CANCEL " tooltip="" />
+		 text_y="0" onclick_l="leave_modal" params_l="" hardtext=" CANCEL " tooltip="" />
 		 
 		<!-- Update -->
 		<ctrl style="button_ok" id="update" x="110" y="0" posparent="cancel" posref="TR TL" 
-		 text_y="-2" onclick_l="leave_modal" params_l="" hardtext=" UPDATE " tooltip="" />	
+		 text_y="0" onclick_l="leave_modal" params_l="" hardtext=" UPDATE " tooltip="" />	
 	</group>
 
 </group>
@@ -2680,11 +2680,11 @@ text_y="-2"
 
 			<!-- Add -->
 			<ctrl style="button_ok" id="add" x="0" y="-2" posparent="new_sets" posref="BL TL" 
-			 text_y="-2" onclick_l="lua" params_l="#add_params" hardtext="uiR2EdAdd" />
+			 text_y="0" onclick_l="lua" params_l="#add_params" hardtext="uiR2EdAdd" />
 
 			<!-- Random sets -->
 			<ctrl style="button_ok" id="random_sets" x="40" y="-20" posparent="add" posref="BL TL" 
-			 text_y="-2" onclick_l="lua" params_l="#random_params" hardtext="uiR2EdRandomSet" />
+			 text_y="0" onclick_l="lua" params_l="#random_params" hardtext="uiR2EdRandomSet" />
 
 			<!-- Update sets -->
 			<instance template="label_combo_box" id="update_sets" posparent="random_sets" posref="BL TL" 
@@ -2692,11 +2692,11 @@ text_y="-2"
 
 			<!-- Update -->
 			<ctrl style="button_ok" id="update" x="0" y="-2" posparent="update_sets" posref="BL TL" 
-			 text_y="-2" onclick_l="lua" params_l="#update_params" hardtext="uiR2EdUpdate" />
+			 text_y="0" onclick_l="lua" params_l="#update_params" hardtext="uiR2EdUpdate" />
 
 			<!-- Remove button -->
 			<ctrl style="button_ok" id="remove" x="28" y="0" posparent="update" posref="TR TL" 
-			 text_y="-2" onclick_l="lua" params_l="#remove_params" hardtext="uiR2EdRemove" tooltip="" />
+			 text_y="0" onclick_l="lua" params_l="#remove_params" hardtext="uiR2EdRemove" tooltip="" />
 
 		</group>
 			 
@@ -3072,7 +3072,7 @@ text_y="-2"
 		/>
 		<view type="text" id="text_custom" posparent="custom_bbox_enabled" posref="MR ML" x="4" y="-3" global_color="true" fontsize="12" shadow="true" hardtext="uiR2showMessageAgain" auto_clamp="true"/>
 
-		<ctrl style="button_ok" x="0" y="6" posref="BM BM" text_y="-2"
+		<ctrl style="button_ok" x="0" y="6" posref="BM BM" text_y="0"
 			onclick_l="proc" params_l="help_close" hardtext="uittOK" /> 
 	</group>
 	
