@@ -47,26 +47,26 @@
 #include "nel/misc/file.h"
 #include "nel/misc/mem_stream.h"
 
-#include "../max/storage_stream.h"
-#include "../max/storage_object.h"
-#include "../max/dll_directory.h"
-#include "../max/class_directory_3.h"
-#include "../max/class_data.h"
-#include "../max/config.h"
-#include "../max/scene.h"
-#include "../max/scene_class_registry.h"
+#include "../pipeline_max/storage_stream.h"
+#include "../pipeline_max/storage_object.h"
+#include "../pipeline_max/dll_directory.h"
+#include "../pipeline_max/class_directory_3.h"
+#include "../pipeline_max/class_data.h"
+#include "../pipeline_max/config.h"
+#include "../pipeline_max/scene.h"
+#include "../pipeline_max/scene_class_registry.h"
 
 // Testing
-#include "../max/builtin/builtin.h"
-#include "../max/update1/update1.h"
-#include "../max/epoly/epoly.h"
+#include "../pipeline_max/builtin/builtin.h"
+#include "../pipeline_max/update1/update1.h"
+#include "../pipeline_max/epoly/epoly.h"
 
-#include "../max/builtin/storage/app_data.h"
-#include "../max/builtin/storage/geom_buffers.h"
-#include "../max/builtin/scene_impl.h"
-#include "../max/builtin/i_node.h"
-#include "../max/update1/editable_mesh.h"
-#include "../max/epoly/editable_poly.h"
+#include "../pipeline_max/builtin/storage/app_data.h"
+#include "../pipeline_max/builtin/storage/geom_buffers.h"
+#include "../pipeline_max/builtin/scene_impl.h"
+#include "../pipeline_max/builtin/i_node.h"
+#include "../pipeline_max/update1/editable_mesh.h"
+#include "../pipeline_max/epoly/editable_poly.h"
 
 #include <boost/algorithm/string.hpp>
 using namespace std;
@@ -1506,7 +1506,7 @@ int main(int argc, char **argv)
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_fy_wea_trib_grand_bouclier.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_mission_entrepot.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\mesh_wip\\all_trib_weapons.max"));
-	//handleFile("/srv/work/database/landscape/ligo/jungle/max/zonematerial-foret-ruine_boss.max");
+	//handleFile("/srv/work/database/landscape/ligo/jungle/pipeline_max/zonematerial-foret-ruine_boss.max");
 	//handleFile("/srv/work/database/stuff/fyros/agents/actors/male/animation/anims_non_utilisees/fy_hom_assis_boire_verre.max");
 	//handleFile("/home/kaetemi/3dsMax/scenes/test_clear_add_uvw.max");
 	//runScanner();
