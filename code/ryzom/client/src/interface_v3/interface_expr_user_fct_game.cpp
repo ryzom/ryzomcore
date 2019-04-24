@@ -879,6 +879,23 @@ static DECLARE_INTERFACE_USER_FCT(isAnimalStatusInStable)
 REGISTER_INTERFACE_USER_FCT("isAnimalStatusInStable", isAnimalStatusInStable)
 
 // ***************************************************************************
+static DECLARE_INTERFACE_USER_FCT(isAnimalStatusInBag)
+{
+	if (args.size() != 1)
+	{
+		nlwarning("<isAnimalStatusInStable> Expecting 1 args.");
+		return false;
+	}
+
+	// According to server status, change the inventory text
+	uint	status= (uint)args[0].getInteger();
+	result.setBool(ANIMAL_STATUS::isInBag(status));
+
+	return true;
+}
+REGISTER_INTERFACE_USER_FCT("isAnimalStatusInBag", isAnimalStatusInBag)
+
+// ***************************************************************************
 static DECLARE_INTERFACE_USER_FCT(isSkillAtMax)
 {
 	CSkillManager	*pSM= CSkillManager::getInstance();
