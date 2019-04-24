@@ -1592,6 +1592,8 @@ public:
 		CViewTextMenu *pFree = dynamic_cast<CViewTextMenu*>(pMenu->getView("free"));
 		CViewTextMenu *pEnterStable = dynamic_cast<CViewTextMenu*>(pMenu->getView("enter_stable"));
 		CViewTextMenu *pLeaveStable = dynamic_cast<CViewTextMenu*>(pMenu->getView("leave_stable"));
+		CViewTextMenu *pEnterBag = dynamic_cast<CViewTextMenu*>(pMenu->getView("enter_bag"));
+		CViewTextMenu *pLeaveBag = dynamic_cast<CViewTextMenu*>(pMenu->getView("leave_bag"));
 		CViewTextMenu *pMount = dynamic_cast<CViewTextMenu*>(pMenu->getView("mount"));
 		CViewTextMenu *pUnseat = dynamic_cast<CViewTextMenu*>(pMenu->getView("unseat"));
 
@@ -1618,7 +1620,7 @@ public:
 
 				// Enable menu items
 				testMenuOptionForPackAnimal(selectedAnimalInVision, i, (i==0),
-					pFollow, pStop, pFree, pEnterStable, pLeaveStable, pMount, pUnseat);
+					pFollow, pStop, pFree, pEnterStable, pLeaveStable, pMount, pUnseat, pEnterBag, pLeaveBag);
 			}
 		}
 		else if(selected>=1 && selected<=MAX_INVENTORY_ANIMAL)
@@ -1634,7 +1636,7 @@ public:
 
 			// Enable menu items
 			testMenuOptionForPackAnimal(selectedAnimalInVision, selected-1, true,
-				pFollow, pStop, pFree, pEnterStable, pLeaveStable, pMount, pUnseat);
+				pFollow, pStop, pFree, pEnterStable, pLeaveStable, pMount, pUnseat, pEnterBag, pLeaveBag);
 		}
 	}
 };

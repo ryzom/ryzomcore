@@ -35,6 +35,8 @@ const std::string  BeastOrders[] =
 	"attack",
 	"mount",
 	"unmount",
+	"enter_bag",
+	"leave_bag"
 };
 
 //-----------------------------------------------

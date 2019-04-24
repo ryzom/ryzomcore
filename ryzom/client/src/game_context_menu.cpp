@@ -201,6 +201,7 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 	_TextPAStop= "ui:interface:" + menuId + ":pa_stop";
 	_TextPAFree= "ui:interface:" + menuId + ":pa_free";
 	_TextPAEnterStable= "ui:interface:" + menuId + ":pa_enter_stable";
+	_TextPAEnterBag= "ui:interface:" + menuId + ":pa_enter_bag";
 
 	// Forage source
 	_TextExtractRM= "ui:interface:" + menuId + ":extract_rm";
@@ -612,7 +613,7 @@ void		CGameContextMenu::update()
 		// Enable/disable various menu items
 		bool ok = testMenuOptionForPackAnimal( selection, animalIndex, true, _TextPAFollow, _TextPAStop, _TextPAFree,
 			_TextPAEnterStable, NULL /*no 'leave stable' in context menu*/, pTextMount,
-			NULL /*unmount always active in context menu when the character is riding*/);
+			NULL /*unmount always active in context menu when the character is riding*/, _TextPAEnterBag, NULL);
 
 		// Follow & assist special case
 		if ( _TextFollow )
@@ -636,11 +637,16 @@ void		CGameContextMenu::update()
 			_TextPAFollow->setActive(false);
 		if (_TextPAStop)
 			_TextPAStop->setActive(false);
-		if (_TextPAFree)
-			_TextPAFree->setActive(false);
 		if (_TextPAEnterStable)
 			_TextPAEnterStable->setActive(false);
+		if (_TextPAEnterBag)
+			_TextPAEnterStable->setActive(false);
 	}
+
+	// Remove Free option to prevent miss click
+	if (_TextPAFree)
+		_TextPAFree->setActive(false);
+
 
 	// build spire
 	if(_TextBuildTotem)
@@ -1006,7 +1012,8 @@ void CGameContextMenu::applyTextTalk()
 bool testMenuOptionForPackAnimal( CEntityCL* selectedAnimalInVision, uint index, bool clearAll,
 								  CViewTextMenu *pFollow, CViewTextMenu *pStop, CViewTextMenu *pFree,
 								  CViewTextMenu *pEnterStable, CViewTextMenu *pLeaveStable,
-								  CViewTextMenu *pMount, CViewTextMenu *pUnmount )
+								  CViewTextMenu *pMount, CViewTextMenu *pUnmount,
+								  CViewTextMenu *pEnterBag, CViewTextMenu *pLeaveBag)
 {
 	if ( clearAll )
 	{
@@ -1016,6 +1023,8 @@ bool testMenuOptionForPackAnimal( CEntityCL* selectedAnimalInVision, uint index,
 		if(pFree)			{ pFree->setActive(false); pFree->setGrayed(true); }
 		if(pEnterStable)	{ pEnterStable->setActive(false); pEnterStable->setGrayed(true); }
 		if(pLeaveStable)	{ pLeaveStable->setActive(false); pLeaveStable->setGrayed(true); }
+		if(pEnterBag)		{ pEnterBag->setActive(false); pEnterBag->setGrayed(true); }
+		if(pLeaveBag)		{ pLeaveBag->setActive(false); pLeaveBag->setGrayed(false); }
 		if(pMount)			{ pMount->setActive(false); pMount->setGrayed(true); }
 		if(pUnmount)		{ pUnmount->setActive(false); pUnmount->setGrayed(true); }
 	}
@@ -1052,6 +1061,7 @@ bool testMenuOptionForPackAnimal( CEntityCL* selectedAnimalInVision, uint index,
 		distanceSquare = pow(vect1.x-vect2.x,2) + pow(vect1.y-vect2.y,2);
 	}
 
+	bool onBag = ANIMAL_STATUS::isInBag(status);
 
 	// Enable option only if pack animal present
 	if(ANIMAL_STATUS::isSpawned(status))
@@ -1083,7 +1093,15 @@ bool testMenuOptionForPackAnimal( CEntityCL* selectedAnimalInVision, uint index,
 				if(pFollow)			pFollow->setGrayed(false);
 				if(pStop)			pStop->setGrayed(false);
 				if(pEnterStable)	pEnterStable->setGrayed(false);
+				if (pEnterBag && !onBag)
+					pEnterBag->setGrayed(false);
 			}
+			if (pLeaveBag && onBag)
+				pLeaveBag->setActive(true);
+
+			if (pEnterBag && !onBag && anitype == ANIMAL_TYPE::Pet)
+				pEnterBag->setActive(true);
+
 			if(pLeaveStable)		pLeaveStable->setGrayed(false);
 		}
 	}
