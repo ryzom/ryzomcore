@@ -38,6 +38,8 @@ namespace ANIMALS_ORDERS
 		ATTACK,
 		MOUNT,			// For animal of type : Mount
 		UNMOUNT,		// For animal of type : Mount
+		ENTER_BAG,		// For animal of type : Creature (pet)
+		LEAVE_BAG,		// For animal of type : Creature (pet)
 
 		// the number of size existing
 		BEAST_ORDERS_SIZE,

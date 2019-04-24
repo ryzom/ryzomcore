@@ -31,10 +31,11 @@ namespace ANIMAL_STATUS
 		/* There is no PresentFlag: the animal is not present if AliveFlag and InLandscapeFlag are not set (cause an animal cannot be dead in a stable!)
 			"Present" is tested if not all 0!
 		*/
-		AliveFlag=					0x0001,		// if set, the animal is alive
-		InLandscapeFlag=			0x0002,		// if set, the animal is in Landscape. not set: in Stable
-		InventoryAvailableFlag=		0x0004,		// if set, the animal inventory is available
-		CanEnterLeaveStableFlag=	0x0008,		// if set, an order "Leave" or "Enter Stable" can be issued
+		AliveFlag=					 1,		// if set, the animal is alive
+		InLandscapeFlag=			 2,		// if set, the animal is in Landscape. not set: in Stable
+		InventoryAvailableFlag=		 4,		// if set, the animal inventory is available
+		CanEnterLeaveStableFlag=	 8,		// if set, an order "Leave" or "Enter Stable" can be issued
+		InBagFlag=					16,		// if set, an order "Enter Bag" or "Leave Bag" can be issued (only for pets)
 	};
 
 	// true if the animal is present and spawned
@@ -65,6 +66,12 @@ namespace ANIMAL_STATUS
 	inline bool		isInLandscape(EAnimalStatus e)
 	{
 		return isSpawned(e) && (e&InLandscapeFlag)!=0;
+	}
+
+	// true if the animal is present, spawned, and in bag (dead or not, and whatever the inventory state)
+	inline bool		isInBag(EAnimalStatus e)
+	{
+		return isSpawned(e) && (e&InBagFlag)!=0;
 	}
 
 	// true if the animal is present, spawned, and in a stable
