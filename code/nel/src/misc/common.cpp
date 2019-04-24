@@ -591,6 +591,22 @@ NLMISC_CATEGORISED_COMMAND(nel,stohr, "Convert a second number into an human rea
 	return true;
 }
 
+std::string toLower(const char *str)
+{
+	if (!str) return "";
+
+	uint len = strlen(str);
+	string res;
+	res.reserve(len);
+	for(uint i = 0; i < len; i++)
+	{
+		if( (str[i] >= 'A') && (str[i] <= 'Z') )
+			res += str[i] - 'A' + 'a';
+		else
+			res += str[i];
+	}
+	return res;
+}
 
 std::string	toLower(const std::string &str)
 {

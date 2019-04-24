@@ -98,6 +98,10 @@ private:
 	static int  getSheet2idx(CLuaState &ls);
 	static int	getTargetSlot(CLuaState &ls);
 	static int  getSlotDataSetId(CLuaState &ls);
+	//
+	static int	getMaxDynChan(CLuaState &ls);
+	static int	readUserChannels(CLuaState &ls);
+	static int	saveUserChannels(CLuaState &ls); // { name = "pass" }
 
 	// LUA functions exported for Dev only (debug)
 	static int	dumpUI(CLuaState &ls);			// params: CInterfaceElement*.... return: none
@@ -202,6 +206,7 @@ private:
 	static std::string getClientCfg(const std::string &varName);
 	static void	sendMsgToServer(const std::string &msgName);
 	static void	sendMsgToServerPvpTag(bool pvpTag);
+	static void	sendMsgToServerAutoPact(bool bval);
 	static void	sendMsgToServerUseItem(sint32 slot);
 	static bool	isGuildQuitAvailable();
 	static void	sortGuildMembers();

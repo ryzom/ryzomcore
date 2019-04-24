@@ -701,6 +701,8 @@ protected:
 private:
 	/// TO know if the user is on a mount at the moment.
 	bool _OnMount;
+	/// Keep track of last hidden mount when switching to FPV mode
+	CLFECOMMON::TCLEntityId _HiddenMount;
 	/// Is the attack animation is currently playing.
 	bool _AnimAttackOn;
 	/// Current View Mode (First/Third Person View).
