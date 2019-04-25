@@ -185,7 +185,7 @@ bool		CIFile::open(const std::string &path, bool text)
 
 	// Bigfile or xml pack access requested ?
 	string::size_type pos;
-	if (!CFile::fileExists(path) && (pos = path.find('@')) != string::npos)
+	if ((pos = path.find('@')) != string::npos)
 	{
 		// check for a double @ to identify XML pack file
 		if (pos+1 < path.size() && path[pos+1] == '@')
