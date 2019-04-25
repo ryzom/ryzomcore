@@ -237,7 +237,9 @@ bool		CIFile::open(const std::string &path, bool text)
 			}
 		}
 	}
-	else
+
+	// not in bnp, but may have '@' in the name
+	if (_F == NULL)
 	{
 		_IsInBigFile = false;
 		_IsInXMLPackFile = false;
