@@ -4177,3 +4177,56 @@ std::string CLuaIHMRyzom::getDbRGBA(const std::string &dbProp)
 	}
 	return "";
 }
+
+// ***************************************************************************
+int CLuaIHMRyzom::displayChatMessage(CLuaState &ls)
+{
+	//H_AUTO(Lua_CLuaIHM_displayChatMessage)
+	const char *funcName = "displayChatMessage";
+	CLuaIHM::checkArgMin(ls, funcName, 2);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+
+	CInterfaceProperty prop;
+	CChatStdInput &ci = PeopleInterraction.ChatInput;
+
+	std::string msg = ls.toString(1);
+	const std::string dbPath = "UI:SAVE:CHAT:COLORS";
+
+	if (ls.type(2) == LUA_TSTRING)
+	{
+		std::string input = toLower(ls.toString(2));
+		std::unordered_map<std::string, std::string> sParam;
+		// input should match chat_group_filter sParam
+		sParam.insert(make_pair(string("around"), string(dbPath+":SAY")));
+		sParam.insert(make_pair(string("region"), string(dbPath+":REGION")));
+		sParam.insert(make_pair(string("guild"), string(dbPath+":CLADE")));
+		sParam.insert(make_pair(string("team"), string(dbPath+":GROUP")));
+		sParam.insert(make_pair(string("universe"), string(dbPath+":UNIVERSE_NEW")));
+		for (const auto& db : sParam)
+		{
+			if (db.first.c_str() == input)
+			{
+				prop.readRGBA(db.second.c_str(), " ");
+				if (input == "around")
+					ci.AroundMe.displayMessage(ucstring(msg), prop.getRGBA());
+				if (input == "region")
+					ci.Region.displayMessage(ucstring(msg), prop.getRGBA());
+				if (input == "universe")
+					ci.Universe.displayMessage(ucstring(msg), prop.getRGBA());
+				if (input == "guild")
+					ci.Guild.displayMessage(ucstring(msg), prop.getRGBA());
+				if (input == "team")
+					ci.Team.displayMessage(ucstring(msg), prop.getRGBA());
+				break;
+			}
+		}
+	}
+	if (ls.type(2) == LUA_TNUMBER)
+	{
+		sint64 id = ls.toInteger(2);
+		prop.readRGBA(toString("%s:DYN:%i", dbPath.c_str(), id).c_str(), " ");
+		if (id >= 0 && id < CChatGroup::MaxDynChanPerPlayer)
+			ci.DynamicChat[id].displayMessage(ucstring(msg), prop.getRGBA());
+	}
+	return 1;
+}
