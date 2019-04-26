@@ -4132,3 +4132,47 @@ std::string	CLuaIHMRyzom::createGotoFileButtonTag(const char *fileName, uint lin
 
 	return "";
 }
+
+// ***************************************************************************
+void CLuaIHMRyzom::setDbRGBA(const std::string &dbProp, const NLMISC::CRGBA &color)
+{
+	//H_AUTO(Lua_CLuaIHM_setDbRGBA)
+	static const std::string dbServer = "SERVER:";
+	static const std::string dbLocal = "LOCAL:";
+	static const std::string dbLocalR2 = "LOCAL:R2";
+
+	// do not allow write on SERVER: or LOCAL:
+	if ((dbProp.compare(0, dbServer.size(), dbServer) == 0) || (dbProp.compare(0, dbLocal.size(), dbLocal) == 0))
+	{
+		if (dbProp.compare(0, dbLocalR2.size(), dbLocalR2) != 0)
+		{
+			nlstop;
+			throw ELuaIHMException("setDbRGBA(): You are not allowed to write on 'SERVER:...' or 'LOCAL:...' database");
+		}
+	}
+	// write to the db
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbProp, true);
+	if (node)
+		node->setValue64(color.R+(color.G<<8)+(color.B<<16)+(color.A<<24));
+	return;
+}
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::getDbRGBA(const std::string &dbProp)
+{
+	//H_AUTO(Lua_CLuaIHM_getDbRGBA)
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbProp, false);
+	if (node)
+	{
+		CRGBA color = CRGBA::White;
+		sint64 rgba = (sint64)node->getValue64();
+
+		color.R = (sint8)(rgba & 0xff);
+		color.G = (sint8)((rgba >> 8) & 0xff);
+		color.B = (sint8)((rgba >> 16) & 0xff);
+		color.A = (sint8)((rgba >> 24) & 0xff);
+
+		return toString("%i %i %i %i", color.R, color.G, color.B, color.A);
+	}
+	return "";
+}

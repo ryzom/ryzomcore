@@ -129,6 +129,8 @@ private:
 	static void	setDbProp64(const std::string &dbProp, sint64 value);		// Nb: the db prop is not created if not present.
 	static void	addDbProp(const std::string &dbProp, sint32 value);		// Nb: the db prop is created if not present.
 	static void	delDbProp(const std::string &dbProp);
+	static void setDbRGBA(const std::string &dbProp, const NLMISC::CRGBA &color); // the db prop is created if not present
+	static std::string getDbRGBA(const std::string &dbProp); // empty string if not found
 
 public:
 	// Print a message in the log.
