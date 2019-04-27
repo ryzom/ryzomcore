@@ -11,6 +11,8 @@ if(MAXSDK_INCLUDE_DIR)
   SET(MAXSDK_FIND_QUIETLY TRUE)
 endif()
 
+set(_pf_x86 "PROGRAMFILES(x86)")
+
 FIND_PATH(MAXSDK_DIR
   "include/maxversion.h"
   HINTS
@@ -27,6 +29,21 @@ FIND_PATH(MAXSDK_DIR
   "$ENV{ADSK_3DSMAX_SDK_2013}/maxsdk"
   "$ENV{ADSK_3DSMAX_SDK_2012}/maxsdk"
   "$ENV{3DSMAX_2011_SDK_PATH}/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3ds Max 2021 SDK/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3ds Max 2020 SDK/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3ds Max 2019 SDK/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3ds Max 2018 SDK/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3ds Max 2017 SDK/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3ds Max 2016 SDK/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3ds Max 2015 SDK/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3ds Max 2014 SDK/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3ds Max 2013 SDK/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3ds Max 2012 SDK/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3ds Max 2011 SDK/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3ds Max 2010 SDK/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3ds Max 2009 SDK/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3ds Max 2008 SDK/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3ds Max 9 SDK/maxsdk"
   "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2021 SDK/maxsdk"
   "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2020 SDK/maxsdk"
   "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2019 SDK/maxsdk"
