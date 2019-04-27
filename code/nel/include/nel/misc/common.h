@@ -313,7 +313,17 @@ inline sint nlstricmp(const char *lhs, const std::string &rhs) { return stricmp(
 #define utf8ToTStr(str) ((wchar_t*)ucstring::makeFromUtf8(str).c_str())
 #else
 #define tStrToUtf8(str) (std::string((LPCSTR)str))
-#define utf8ToTStr(str) (str.c_str())
+inline const char *nlutf8ToTStr(const char *str) { return str; }
+inline const char *nlutf8ToTStr(const std::string &str) { return str.c_str(); }
+#define utf8ToTStr(str) NLMISC::nlutf8ToTStr(str)
+#endif
+
+#if (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
+float nlroundf(float x)
+{
+   return x >= 0.0f ? floorf(x + 0.5f) : ceilf(x - 0.5f);
+}
+#define roundf(x) NLMISC::nlroundf(x)
 #endif
 
 // wrapper for fopen to be able to open files with an UTF-8 filename
