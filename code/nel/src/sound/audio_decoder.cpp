@@ -103,10 +103,12 @@ IAudioDecoder *IAudioDecoder::createAudioDecoder(const std::string &type, NLMISC
 	{
 		return new CAudioDecoderVorbis(stream, loop);
 	}
+#if (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
 	else if (type_lower == "mp3")
 	{
 		return new CAudioDecoderMP3(stream, loop);
 	}
+#endif
 	else
 	{
 		nlwarning("Music file type unknown: '%s'", type_lower.c_str());
