@@ -60,6 +60,7 @@ private:
 	static int	getMainPageURL(CLuaState &ls);
 	static int	getCharSlot(CLuaState &ls);
 	static int	displaySystemInfo(CLuaState &ls);
+	static int	displayChatMessage(CLuaState &ls);
 	static int	setWeatherValue(CLuaState &ls); // first value is a boolean to say automatic, second value ranges from of to 1 and gives the weather
 	static int	getWeatherValue(CLuaState &ls); // get current real weather value (blend between server driven value & predicted value). Manual weather value is ignored
 	static int	disableContextHelpForControl(CLuaState &ls);	// params: CCtrlBase*. return: none
@@ -129,6 +130,8 @@ private:
 	static void	setDbProp64(const std::string &dbProp, sint64 value);		// Nb: the db prop is not created if not present.
 	static void	addDbProp(const std::string &dbProp, sint32 value);		// Nb: the db prop is created if not present.
 	static void	delDbProp(const std::string &dbProp);
+	static void setDbRGBA(const std::string &dbProp, const NLMISC::CRGBA &color); // the db prop is created if not present
+	static std::string getDbRGBA(const std::string &dbProp); // empty string if not found
 
 public:
 	// Print a message in the log.
