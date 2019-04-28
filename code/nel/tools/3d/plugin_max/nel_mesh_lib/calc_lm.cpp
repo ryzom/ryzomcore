@@ -2524,13 +2524,13 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 		// Assign the name of the lightmap and get the complete save name
 			
 		// Get the name of the max project
-		char projectName[512];
-		_wsplitpath (_Ip->GetCurFileName(), NULL, NULL, utf8ToTStr(projectName), NULL);
+		ucchar projectName[512];
+		_wsplitpath(WStr(_Ip->GetCurFileName()), NULL, NULL, (wchar_t *)projectName, NULL);
 
 		// Add lightmap information in the lightmap log
 		COFile outputLog;
 		if (outputLightmapLog)
-			createLightmapLog (outputLog, gOptions.sExportLighting.c_str(), projectName, tStrToUtf8(ZeNode.GetName()).c_str());
+			createLightmapLog(outputLog, gOptions.sExportLighting.c_str(), ucstring(projectName).toUtf8(), CStr(ZeNode.GetName()).data());
 
 		// Update UV coords to Texture space
 		PutFaceUV1InTextureCoord( LightMap.w, LightMap.h, AllFaces.begin(), AllFaces.size() );
