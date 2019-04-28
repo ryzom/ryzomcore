@@ -93,7 +93,7 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 			resultInstanceNode[nNumIG] = pNode;
 			if (aIGArray[nNumIG].InstanceName == "") // no instance name was set, takes the node name instead
 			{
-				aIGArray[nNumIG].InstanceName = tStrToUtf8(pNode->GetName());
+				aIGArray[nNumIG].InstanceName = MCharStrToUtf8(pNode->GetName());
 			}
 
 			// Visible? always true, but if special flag for camera collision
@@ -236,7 +236,7 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 											 pMB->Vertices[pMB->Faces[j].Corner[2].Vertex]) )
 				{
 					// ERROR : The volume is not convex !!!
-					nlwarning("ERROR: The cluster %s is not convex.", tStrToUtf8(vectNode[i]->GetName()).c_str());
+					nlwarning("ERROR: The cluster %s is not convex.", MCharStrToUtf8(vectNode[i]->GetName()).c_str());
 				}
 			}
 
@@ -244,7 +244,7 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 			clusterTemp.VisibleFromFather = bVisibleFromFather;
 			clusterTemp.FatherAudible = bFatherAudible;
 			clusterTemp.AudibleFromFather = bAudibleFromFather;
-			clusterTemp.Name = tStrToUtf8(pNode->GetName());
+			clusterTemp.Name = MCharStrToUtf8(pNode->GetName());
 
 			vClusters.push_back (clusterTemp);
 			delete pMB; pMB = NULL;
@@ -333,7 +333,7 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 			if (!portalTemp.setPoly (polyv))
 			{
 				// ERROR : Poly not convex, or set of vertices not plane
-				nlwarning("ERROR: The portal %s is not convex.", tStrToUtf8(vectNode[i]->GetName()).c_str());
+				nlwarning("ERROR: The portal %s is not convex.", MCharStrToUtf8(vectNode[i]->GetName()).c_str());
 			}
 
 			if (nAccelType&16) // is dynamic portal ?
@@ -342,7 +342,7 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 				if (!InstanceName.empty())
 					portalTemp.setName (InstanceName);
 				else
-					portalTemp.setName (tStrToUtf8(pNode->GetName()));
+					portalTemp.setName (MCharStrToUtf8(pNode->GetName()));
 			}
 
 			// Check if portal has 2 cluster
@@ -362,7 +362,7 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 			if (nNbCluster != 2)
 			{
 				// ERROR
-				nlwarning("ERROR: The portal %s has not 2 clusters but %d", tStrToUtf8(vectNode[i]->GetName()).c_str(), nNbCluster);
+				nlwarning("ERROR: The portal %s has not 2 clusters but %d", MCharStrToUtf8(vectNode[i]->GetName()).c_str(), nNbCluster);
 			}
 
 
@@ -504,7 +504,7 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 				if (!vClusters.empty())
 				if (aIGArray[nNumIG].Clusters.empty())
 				{
-					nlwarning("ERROR: Object %s is not attached to any cluster\nbut his flag clusterize is set", tStrToUtf8(pNode->GetName()).c_str());
+					nlwarning("ERROR: Object %s is not attached to any cluster\nbut his flag clusterize is set", MCharStrToUtf8(pNode->GetName()).c_str());
 				}
 				// debug purpose : to remove
 
@@ -700,7 +700,7 @@ void CExportNel::buildScene (NL3D::CScene &scene, NL3D::CShapeBank &shapeBank, I
 		if ( (!pNode->IsHidden () || buildHidden) && (pNode->Selected () || !onlySelected) )
 		{
 			string sTmp = "Object Name: ";
-			sTmp += tStrToUtf8(pNode->GetName());
+			sTmp += MCharStrToUtf8(pNode->GetName());
 			if (progress)
 				progress->setLine (0, sTmp);
 			sTmp.clear();

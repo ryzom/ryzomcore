@@ -73,7 +73,7 @@ CCollisionMeshBuild*	CExportNel::createCollisionMeshBuild(std::vector<INode *> &
 				{
 					// get the mesh name
 					uint	meshId = rootMeshNames.size();
-					rootMeshNames.push_back(tStrToUtf8(nodes[node]->GetName()));
+					rootMeshNames.push_back(MCharStrToUtf8(nodes[node]->GetName()));
 					bool	collision = getScriptAppData (nodes[node], NEL3D_APPDATA_COLLISION, 0) != 0;
 					bool	exterior = getScriptAppData (nodes[node], NEL3D_APPDATA_COLLISION_EXTERIOR, 0) != 0;
 

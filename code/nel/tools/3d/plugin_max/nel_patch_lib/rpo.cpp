@@ -304,7 +304,7 @@ void RPO::GetDeformBBox(TimeValue t, Box3& box, Matrix3 *tm, BOOL useSel )
 // ------------------------------------------------------------------------------------------------------------------------------------------------
 
 //From ReferenceMaker
-RefResult RPO::NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget,PartID& partID, RefMessage message, BOOL propagate )
+RefResult RPO::NotifyRefChanged(NOTIFY_REF_PARAMS)
 {
 	//TODO: Implement, if the object makes references to other things
 	//return PatchObject::NotifyRefChanged( changeInt, hTarget, partID, message, propagate);

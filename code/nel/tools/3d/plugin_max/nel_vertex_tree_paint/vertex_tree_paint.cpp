@@ -483,7 +483,7 @@ void VertexPaint::EndEditParams(IObjParam *ip, ULONG flags, Animatable *next)
 
 
 //From ReferenceMaker 
-RefResult VertexPaint::NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate)
+RefResult VertexPaint::NotifyRefChanged(NOTIFY_REF_PARAMS)
 {
 	return REF_SUCCEED;
 }

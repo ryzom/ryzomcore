@@ -2839,7 +2839,7 @@ void	mainproc(CScene& scene, CEventListenerAsync& AsyncListener, CEvent3dMouseLi
 		if (GetOpenFileName(&openFile))
 		{
 			// Load the file
-			paintColor.loadBrush (tStrToUtf8(buffer));
+			paintColor.loadBrush (MCharStrToUtf8(buffer));
 			paintColor.setBrushMode (true);
 		}
 	}
@@ -3720,7 +3720,7 @@ void EPM_PaintCMode::DoPaint ()
 					{
 					 	std::string error = NLMISC::toString("Invalid edge '%i' with value '%i' in patch '%i' in PatchMesh", p, mYedge, e);
 					 	nlwarning(error.c_str());
-					 	MessageBox(NULL, utf8ToTStr(error), _T("NeL Patch Painter"), MB_OK | MB_ICONSTOP);
+					 	MessageBox(NULL, MaxTStrFromUtf8(error).data(), _T("NeL Patch Painter"), MB_OK | MB_ICONSTOP);
 					 	return;
 					}
 #if (MAX_RELEASE < 4000)
@@ -3883,8 +3883,8 @@ void EPM_PaintCMode::DoPaint ()
 					}
 					if (patchVoisin.patch!=-1)
 					{
-						std::string first = tStrToUtf8(vectMesh[i].Node->GetName());
-						std::string second = tStrToUtf8(vectMesh[patchVoisin.Mesh].Node->GetName());
+						std::string first = MCharStrToUtf8(vectMesh[i].Node->GetName());
+						std::string second = MCharStrToUtf8(vectMesh[patchVoisin.Mesh].Node->GetName());
 						int rot = (2-((vectMesh[i].Symmetry)?(2-e):e)+((vectMesh[patchVoisin.Mesh].Symmetry)?(2-edgeVoisin):edgeVoisin))&3;
 						int nU = 1 << rpatch->getUIPatch (p).NbTilesU;
 						int nV = 1 << rpatch->getUIPatch (p).NbTilesV;
@@ -3991,7 +3991,7 @@ void EPM_PaintCMode::DoPaint ()
 				}
 				catch (const EStream& stream)
 				{
-					MessageBox (NULL, utf8ToTStr(stream.what()), _T("Error"), MB_OK|MB_ICONEXCLAMATION);
+					MessageBox (NULL, MaxTStrFromUtf8(stream.what()).data(), _T("Error"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 		}
@@ -4063,7 +4063,7 @@ bool loadLigoConfigFile (CLigoConfig& config, Interface& it)
 		if (res)
 		{
 			// Path
-			std::string modulePath = NLMISC::CFile::getPath(tStrToUtf8(sModulePath));
+			std::string modulePath = NLMISC::CFile::getPath(MCharStrToUtf8(sModulePath));
 
 			try
 			{
@@ -4259,8 +4259,8 @@ DWORD WINAPI myThread (LPVOID vData)
 				}
 				else
 				{
-					std::string message = toString("Can't build the zone named %s", tStrToUtf8(pData->VectMesh[i].Node->GetName()).c_str());
-					MessageBox (pData->eproc->ip->GetMAXHWnd(), utf8ToTStr(message), _T("NeL Painter"), MB_OK|MB_ICONEXCLAMATION);
+					std::string message = toString("Can't build the zone named %s", MCharStrToUtf8(pData->VectMesh[i].Node->GetName()).c_str());
+					MessageBox (pData->eproc->ip->GetMAXHWnd(), MaxTStrFromUtf8(message).data(), _T("NeL Painter"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 
@@ -4362,14 +4362,14 @@ DWORD WINAPI myThread (LPVOID vData)
 		}
 		catch (const EDru& druExcept)
 		{
-			MessageBox (NULL, utf8ToTStr(druExcept.what()), _T("NeL driver utility"), MB_OK|MB_ICONEXCLAMATION);
+			MessageBox (NULL, MaxTStrFromUtf8(druExcept.what()).data(), _T("NeL driver utility"), MB_OK|MB_ICONEXCLAMATION);
 		}
 
 		delete pData;
 	}
 	catch (const Exception& e)
 	{
-		MessageBox (NULL, utf8ToTStr(e.what()), _T("NeL Painter"), MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (NULL, MaxTStrFromUtf8(e.what()).data(), _T("NeL Painter"), MB_OK|MB_ICONEXCLAMATION);
 	}
 
 	return 0;

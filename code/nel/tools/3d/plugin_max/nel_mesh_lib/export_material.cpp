@@ -768,7 +768,7 @@ void CExportNel::buildAMaterial (NL3D::CMaterial& material, CMaxMaterialInfo& ma
 
 		// Set material name		
 		TSTR name=mtl.GetName();
-		materialInfo.MaterialName = name.ToUTF8();
+		materialInfo.MaterialName = MaxTStrToUtf8(name);
 	}
 	else
 	{
@@ -1120,7 +1120,7 @@ void CExportNel::buildAMaterial (NL3D::CMaterial& material, CMaxMaterialInfo& ma
 
 		// Set material name		
 		TSTR name=mtl.GetName();
-		materialInfo.MaterialName = name.ToUTF8();
+		materialInfo.MaterialName = MaxTStrToUtf8(name);
 	}
 }
 
@@ -1255,7 +1255,7 @@ ITexture* CExportNel::buildATexture (Texmap& texmap, CMaterialDesc &remap3dsTexC
 		else // standard texture
 		{
 			srcTex = new CTextureFile;
-			std::string mapName = tStrToUtf8(pBitmap->GetMapName());
+			std::string mapName = MCharStrToUtf8(pBitmap->GetMapName());
 			static_cast<CTextureFile *>(srcTex)->setFileName (ConvertTexFileName(mapName, _AbsolutePath));
 		}
 

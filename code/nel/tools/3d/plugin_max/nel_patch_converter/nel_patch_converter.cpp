@@ -44,8 +44,8 @@ static ParamBlockDesc2 po2rpo_param_blk ( po2rpo_params, _T("params"),  0, &PO2R
 		p_default, 		0.1f,
 		p_range, 		0.0f,1000.0f,
 		p_ui, 			TYPE_SPINNER,		EDITTYPE_FLOAT, IDC_EDIT,	IDC_SPIN, 0.01f,
-		p_end,
-	p_end
+		nl_p_end,
+	nl_p_end
 	);
 
 IObjParam *PO2RPO::ip			= NULL;
@@ -142,7 +142,7 @@ INT_PTR CALLBACK DlgProc_Panel(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 					if (versionInfoSize)
 					{
 						// Alloc the buffer (size in bytes)
-						uint8_t *buffer = new uint8_t[versionInfoSize];
+						uint8 *buffer = new uint8[versionInfoSize];
 
 						// Find the verion resource
 						if (GetFileVersionInfo(moduldeFileName, 0, versionInfoSize, buffer))
@@ -174,7 +174,7 @@ INT_PTR CALLBACK DlgProc_Panel(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 							SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("GetFileVersionInfo failed"));
 
 						// Free the buffer
-						delete [] buffer;
+						delete[] buffer;
 					}
 					else
 						SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("GetFileVersionInfoSize failed"));
@@ -221,7 +221,7 @@ void PO2RPO::EndEditParams( IObjParam *ip, ULONG flags,Animatable *next)
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //From ReferenceMaker
-RefResult PO2RPO::NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate)
+RefResult PO2RPO::NotifyRefChanged(NOTIFY_REF_PARAMS)
 {
 	//TODO: Add code to handle the various reference changed messages
 	return REF_SUCCEED;

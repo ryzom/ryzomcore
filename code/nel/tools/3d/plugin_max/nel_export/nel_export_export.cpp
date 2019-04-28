@@ -329,7 +329,7 @@ bool CNelExport::exportAnim (const std::string &sPath, std::vector<INode*>& vect
 				catch (const Exception& e)
 				{
 					if (_ErrorInDialog)
-						MessageBox (NULL, utf8ToTStr(e.what()), _T("NeL export"), MB_OK|MB_ICONEXCLAMATION);
+						MessageBoxA (NULL, e.what(), "NeL export", MB_OK|MB_ICONEXCLAMATION);
 					else
 						nlwarning ("ERROR : %s", e.what ());
 				}

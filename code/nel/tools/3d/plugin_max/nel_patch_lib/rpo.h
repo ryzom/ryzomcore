@@ -83,7 +83,7 @@ class RPO : public PatchObject
 		int HitTest(TimeValue t, INode* inode, int type, int crossing, int flags, IPoint2 *p, ViewExp *vpt);
 		void Snap(TimeValue t, INode* inode, SnapInfo *snap, IPoint2 *p, ViewExp *vpt);
 		//TODO: Return the name that will appear in the history browser (modifier stack)
-		const MCHAR *GetObjectName() { return _M("Rykol Patch Object");}
+		GET_OBJECT_NAME_CONST MCHAR *GetObjectName() { return _M("Rykol Patch Object");}
 		
 		void GetWorldBoundBox(TimeValue t, INode *mat, ViewExp *vpt, Box3& box );
 		void GetLocalBoundBox(TimeValue t, INode *mat, ViewExp *vpt, Box3& box );
@@ -206,10 +206,10 @@ class RPO : public PatchObject
 				? true : PatchObject::IsSubClassOf(classID);
 		}
 		SClass_ID SuperClassID() { return GEOMOBJECT_CLASS_ID; }
-		void GetClassName(TSTR& s) {s.FromUTF8("Rykol Patch Object");}
+		void GetClassName(TSTR& s) { s = "Rykol Patch Object";}
 		
 		RefTargetHandle Clone ( RemapDir &remap );
-		RefResult NotifyRefChanged (const Interval& changeInt, RefTargetHandle hTarget, PartID& partID,  RefMessage message, BOOL propagate);
+		RefResult NotifyRefChanged (NOTIFY_REF_PARAMS);
 
 		int NumSubs() 
 		{ 
