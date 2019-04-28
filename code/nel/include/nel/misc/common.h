@@ -318,7 +318,7 @@ inline const char *nlutf8ToTStr(const std::string &str) { return str.c_str(); }
 #define utf8ToTStr(str) NLMISC::nlutf8ToTStr(str)
 #endif
 
-#if (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
+#if (NL_COMP_VC_VERSION <= 90) /* VS2008 does not have stdint.h */
 float nlroundf(float x)
 {
    return x >= 0.0f ? floorf(x + 0.5f) : ceilf(x - 0.5f);
