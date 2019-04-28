@@ -44,6 +44,7 @@ FIND_PATH(MAXSDK_DIR
   "$ENV{${_pf_x86}}/Autodesk/3ds Max 2009 SDK/maxsdk"
   "$ENV{${_pf_x86}}/Autodesk/3ds Max 2008 SDK/maxsdk"
   "$ENV{${_pf_x86}}/Autodesk/3ds Max 9 SDK/maxsdk"
+  "$ENV{${_pf_x86}}/Autodesk/3dsMax8/maxsdk"
   "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2021 SDK/maxsdk"
   "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2020 SDK/maxsdk"
   "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2019 SDK/maxsdk"
@@ -59,6 +60,7 @@ FIND_PATH(MAXSDK_DIR
   "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2009 SDK/maxsdk"
   "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2008 SDK/maxsdk"
   "$ENV{PROGRAMFILES}/Autodesk/3ds Max 9 SDK/maxsdk"
+  "$ENV{PROGRAMFILES}/Autodesk/3dsMax8/maxsdk"
 )
 
 FIND_PATH(MAXSDK_INCLUDE_DIR
