@@ -206,7 +206,7 @@ class RPO : public PatchObject
 				? true : PatchObject::IsSubClassOf(classID);
 		}
 		SClass_ID SuperClassID() { return GEOMOBJECT_CLASS_ID; }
-		void GetClassName(TSTR& s) { s = "Rykol Patch Object";}
+		void GetClassName(TSTR& s) { s = _T("Rykol Patch Object");}
 		
 		RefTargetHandle Clone ( RemapDir &remap );
 		RefResult NotifyRefChanged (NOTIFY_REF_PARAMS);

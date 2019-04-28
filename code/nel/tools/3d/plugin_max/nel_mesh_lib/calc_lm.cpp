@@ -2530,7 +2530,7 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 		// Add lightmap information in the lightmap log
 		COFile outputLog;
 		if (outputLightmapLog)
-			createLightmapLog(outputLog, gOptions.sExportLighting.c_str(), ucstring(projectName).toUtf8().c_str(), CStr(ZeNode.GetName()).data());
+			createLightmapLog(outputLog, gOptions.sExportLighting.c_str(), ucstring(projectName).toUtf8().c_str(), MaxTStrToUtf8(ZeNode.GetName()).c_str());
 
 		// Update UV coords to Texture space
 		PutFaceUV1InTextureCoord( LightMap.w, LightMap.h, AllFaces.begin(), AllFaces.size() );

@@ -2493,7 +2493,7 @@ INT_PTR CALLBACK LodDialogCallback (
 
 			// Window text
 			TSTR winName = (*(currentParam->ListNode->begin()))->GetName();
-			winName = TSTR("Node properties (") + winName + ((currentParam->ListNode->size() > 1) ? _M(" ...)") : _M(")"));
+			winName = TSTR(_M("Node properties (")) + winName + ((currentParam->ListNode->size() > 1) ? _M(" ...)") : _M(")"));
 			SetWindowText(hwndDlg, winName.data());
 
 			// Move dialog

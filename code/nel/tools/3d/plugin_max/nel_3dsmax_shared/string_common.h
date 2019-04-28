@@ -38,7 +38,7 @@ static TSTR MaxTStrFromUtf8(const std::string &src)
 	uc.fromUtf8(src);
 	dst = (const mwchar_t *)uc.c_str();
 #else
-	dst.FromUTF8(source);
+	dst.FromUTF8(src.c_str());
 #endif
 	return dst;
 }
@@ -55,7 +55,7 @@ static std::string MaxTStrToUtf8(const TSTR& src)
 	return uc.toUtf8();
 #endif
 #else
-	return src.ToUTF8();
+	return src.ToUTF8().data();
 #endif
 }
 
