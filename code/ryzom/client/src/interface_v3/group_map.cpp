@@ -2286,8 +2286,6 @@ void CGroupMap::setMap(SMap *map)
 	if (groupHtml)
 	{
 		groupHtml->setHome(groupHtml->Home+toString("&min_x=%f&min_y=%f&max_x=%f&max_y=%f", _CurMap->MinX, _CurMap->MinY, _CurMap->MaxX, _CurMap->MaxY));
-		if (groupHtml->isBrowsing())
-			groupHtml->stopBrowse();
 		groupHtml->browse(groupHtml->Home.c_str());
 	}
 
