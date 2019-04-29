@@ -3207,7 +3207,6 @@ void	CLuaIHMRyzom::browseNpcWebPage(const std::string &htmlId, const std::string
 		groupHtml->setTimeout((float)std::max(0.0, timeout));
 
 		// Browse the url
-		groupHtml->clean();
 		groupHtml->browse(url.c_str());
 		// Set top of the page
 		CCtrlScroll *pScroll = groupHtml->getScrollBar();

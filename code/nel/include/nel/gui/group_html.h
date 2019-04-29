@@ -113,12 +113,7 @@ namespace NLGUI
 		// Browse error
 		void browseError (const char *msg);
 
-		// stop browse
-		void stopBrowse ();
-
 		bool isBrowsing();
-
-		void clean() { stopBrowse(); updateRefreshButton(); removeContent(); }
 
 		// Update coords
 		void updateCoords();
@@ -263,10 +258,10 @@ namespace NLGUI
 
 		// \name callback from libwww
 
-		// Begin of the parsing of a HTML document
+		// Begin of the rendering of a HTML document
 		virtual void beginBuild ();
 
-		// End of the parsing of a HTML document
+		// End of the rendering of a HTML document
 		virtual void endBuild ();
 
 		// A new text block has been parsed
@@ -283,9 +278,6 @@ namespace NLGUI
 
 		// Add POST params to the libwww list
 		virtual void addHTTPPostParams (SFormFields &formfields, bool trustedDomain);
-
-		// the current request is terminated
-		virtual void requestTerminated();
 
 		// Get Home URL
 		virtual std::string	home();
@@ -402,7 +394,6 @@ namespace NLGUI
 
 		// Browsing..
 		bool			_Browsing;
-		bool			_Connecting;
 		double			_TimeoutValue;			// the timeout in seconds
 		double			_ConnectingTimeout;
 		sint			_RedirectsRemaining;
@@ -759,6 +750,7 @@ namespace NLGUI
 			{
 				if (t == ImgType) imgs.push_back(CDataImageDownload(i, style, imagetype));
 			}
+			~CDataDownload();
 
 		public:
 			CCurlWWWData *data;
@@ -772,13 +764,13 @@ namespace NLGUI
 			std::vector<CDataImageDownload> imgs;
 		};
 
-		std::vector<CDataDownload> Curls;
+		std::list<CDataDownload> Curls;
 		CURLM *MultiCurl;
 		int RunningCurls;
 
 		bool startCurlDownload(CDataDownload &download);
-		void finishCurlDownload(CDataDownload &download);
-		void pumpCurlDownloads();
+		void finishCurlDownload(const CDataDownload &download);
+		void pumpCurlQueue();
 
 		void initImageDownload();
 		void checkImageDownload();
@@ -800,8 +792,14 @@ namespace NLGUI
 		// add css file from <link href=".." rel="stylesheet"> to download queue
 		void addStylesheetDownload(std::vector<std::string> links);
 
+		// stop all curl downalods (html and data)
 		void releaseDownloads();
 		void checkDownloads();
+
+		// _CurlWWW download finished
+		void htmlDownloadFinished(bool success, const std::string &error);
+		// images, stylesheets, etc finished downloading
+		void dataDownloadFinished(bool success, const std::string &error, CDataDownload &data);
 
 		// HtmlType download finished
 		void htmlDownloadFinished(const std::string &content, const std::string &type, long code);
