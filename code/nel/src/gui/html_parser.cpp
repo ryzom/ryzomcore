@@ -17,13 +17,14 @@
 
 #include "stdpch.h"
 
+#include "nel/gui/html_parser.h"
+
 #include <string>
 #include <libxml/HTMLparser.h>
 
 #include "nel/misc/types_nl.h"
 #include "nel/gui/libwww.h"
 #include "nel/gui/group_html.h"
-#include "nel/gui/lua_ihm.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -35,7 +36,7 @@ using namespace NLMISC;
 namespace NLGUI
 {
 	// ***************************************************************************
-	void CGroupHTML::htmlElement(xmlNode *node, int element_number)
+	void CHtmlParser::htmlElement(xmlNode *node, int element_number)
 	{
 		SGML_dtd *HTML_DTD = HTML_dtd ();
 
@@ -65,30 +66,30 @@ namespace NLGUI
 				}
 			}
 
-			beginElement(element_number, present, value);
+			_GroupHtml->beginElement(element_number, present, value);
 		}
 		else
 		{
-			beginUnparsedElement((const char *)(node->name), xmlStrlen(node->name));
+			_GroupHtml->beginUnparsedElement((const char *)(node->name), xmlStrlen(node->name));
 		}
 
 		// recursive - text content / child nodes
-		htmlWalkDOM(node->children);
+		parseNode(node->children);
 
 		// closing tag
 		if (element_number < HTML_ELEMENTS)
 		{
-			endElement(element_number);
+			_GroupHtml->endElement(element_number);
 		}
 		else
 		{
-			endUnparsedElement((const char *)(node->name), xmlStrlen(node->name));
+			_GroupHtml->endUnparsedElement((const char *)(node->name), xmlStrlen(node->name));
 		}
 	}
 
 	// ***************************************************************************
 	// recursive function to walk html document
-	void CGroupHTML::htmlWalkDOM(xmlNode *a_node)
+	void CHtmlParser::parseNode(xmlNode *a_node)
 	{
 		SGML_dtd *HTML_DTD = HTML_dtd ();
 
@@ -98,7 +99,7 @@ namespace NLGUI
 		{
 			if (node->type == XML_TEXT_NODE)
 			{
-				addText((const char *)(node->content), xmlStrlen(node->content));
+				_GroupHtml->addText((const char *)(node->content), xmlStrlen(node->content));
 			}
 			else
 			if (node->type == XML_ELEMENT_NODE)
@@ -297,7 +298,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	bool CGroupHTML::parseHtml(std::string htmlString)
+	bool CHtmlParser::parseHtml(std::string htmlString)
 	{
 		htmlParserCtxtPtr parser = htmlCreatePushParserCtxt(NULL, NULL, NULL, 0, NULL, XML_CHAR_ENCODING_UTF8);
 		if (!parser)
@@ -320,7 +321,7 @@ namespace NLGUI
 			xmlNode *root = xmlDocGetRootElement(parser->myDoc);
 			if (root)
 			{
-				htmlWalkDOM(root);
+				parseNode(root);
 			}
 			else
 			{
@@ -339,18 +340,6 @@ namespace NLGUI
 		return success;
 	}
 
-	// ***************************************************************************
-	int CGroupHTML::luaParseHtml(CLuaState &ls)
-	{
-		const char *funcName = "parseHtml";
-		CLuaIHM::checkArgCount(ls, funcName, 1);
-		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
-		std::string html = ls.toString(1);
-
-		parseHtml(html);
-
-		return 0;
-	}
-
 }
+
 

@@ -151,7 +151,7 @@ namespace NLGUI
 		virtual void browse (const char *url);
 
 		// parse html string using libxml2 parser
-		virtual bool parseHtml(std::string htmlString);
+		bool parseHtml(const std::string &htmlString);
 
 		// Refresh
 		void refresh();
@@ -345,10 +345,6 @@ namespace NLGUI
 
 		// the current request is terminated
 		virtual void requestTerminated();
-
-		// libxml2 html parser functions
-		void htmlElement(xmlNode *node, int element_number);
-		void htmlWalkDOM(xmlNode *a_node);
 
 		// Get Home URL
 		virtual std::string	home();
@@ -815,6 +811,8 @@ namespace NLGUI
 		void buildHTTPPostParams (SFormFields &formfields);
 
 	private:
+		friend class CHtmlParser;
+
 		// decode all HTML entities
 		static ucstring decodeHTMLEntities(const ucstring &str);
 		

@@ -48,6 +48,7 @@
 #include "nel/gui/http_cache.h"
 #include "nel/gui/http_hsts.h"
 #include "nel/gui/curl_certificates.h"
+#include "nel/gui/html_parser.h"
 
 #include <curl/curl.h>
 
@@ -6049,6 +6050,19 @@ namespace NLGUI
 		return true;
 	}
 
+	// ***************************************************************************
+	int CGroupHTML::luaParseHtml(CLuaState &ls)
+	{
+		const char *funcName = "parseHtml";
+		CLuaIHM::checkArgCount(ls, funcName, 1);
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		std::string html = ls.toString(1);
+
+		parseHtml(html);
+
+		return 0;
+	}
+
 	int CGroupHTML::luaClearRefresh(CLuaState &ls)
 	{
 		const char *funcName = "clearRefresh";
@@ -6282,6 +6296,18 @@ namespace NLGUI
 	void CGroupHTML::setURL(const std::string &url)
 	{
 		browse(url.c_str());
+	}
+
+	// ***************************************************************************
+	bool CGroupHTML::parseHtml(const std::string &htmlString)
+	{
+		CHtmlParser html(this);
+
+		bool result = html.parseHtml(htmlString);
+		if (result)
+			_DocumentHtml = htmlString;
+
+		return result;
 	}
 
 	// ***************************************************************************
