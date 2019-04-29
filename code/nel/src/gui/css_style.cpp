@@ -95,8 +95,21 @@ namespace NLGUI
 		TStyle::iterator it;
 
 		// first pass: get font-size for 'em' sizes
+		// get TextColor value used as 'currentcolor'
 		for (it=styles.begin(); it != styles.end(); ++it)
 		{
+			if (it->first == "color")
+			{
+				if (it->second == "inherit")
+				{
+					style.TextColor = current.TextColor;
+				}
+				else
+				{
+					scanHTMLColor(it->second.c_str(), style.TextColor);
+				}
+			}
+			else
 			if (it->first == "font")
 			{
 				if (it->second == "inherit")
@@ -236,12 +249,6 @@ namespace NLGUI
 				}
 				style.FontWeight = weight;
 			}
-			else
-			if (it->first == "color")
-				if (it->second == "inherit")
-					style.TextColor = current.TextColor;
-				else
-					scanHTMLColor(it->second.c_str(), style.TextColor);
 			else
 			if (it->first == "text-decoration" || it->first == "text-decoration-line")
 			{
@@ -437,6 +444,10 @@ namespace NLGUI
 			{
 				if (it->second == "inherit")
 					style.BackgroundColor = current.BackgroundColor;
+				else if (it->second == "transparent")
+					style.BackgroundColor = CRGBA(0, 0, 0, 0);
+				else if (it->second == "currentcolor")
+					style.BackgroundColorOver = style.TextColor;
 				else
 					scanHTMLColor(it->second.c_str(), style.BackgroundColor);
 			}
@@ -445,6 +456,10 @@ namespace NLGUI
 			{
 				if (it->second == "inherit")
 					style.BackgroundColorOver = current.BackgroundColorOver;
+				else if (it->second == "transparent")
+					style.BackgroundColorOver = CRGBA(0, 0, 0, 0);
+				else if (it->second == "currentcolor")
+					style.BackgroundColorOver = style.TextColor;	
 				else
 					scanHTMLColor(it->second.c_str(), style.BackgroundColorOver);
 			}
