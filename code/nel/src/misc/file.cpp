@@ -157,6 +157,14 @@ bool		CIFile::open(const std::string &path, bool text)
 
 	close();
 
+	if ((_IsInBigFile || _IsInXMLPackFile) && path.find('@') == string::npos)
+	{
+		// CIFile can be reused to load file from bnp and from regular files.
+		// Last open happened to be inside bnp and close() may not set _F to NULL.
+		// Opening regular file will fail as _F points to bnp file.
+		_F = NULL;
+	}
+
 	// can't open empty filename
 	if(path.empty ())
 		return false;
