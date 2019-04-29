@@ -23,7 +23,6 @@
 #include "nel/misc/types_nl.h"
 #include "nel/gui/group_html.h"
 
-
 /**
  * Quick help group
  * \author Cyril 'Hulud' Corvazier
@@ -48,7 +47,7 @@ private:
 	virtual void updateCoords();
 
 	// From CGroupHTML
-	virtual void beginElement (uint element_number, const std::vector<bool> &present, const std::vector<const char *>&value);
+	virtual void beginElement (NLGUI::CHtmlElement &elm);
 	virtual void endBuild ();
 	virtual void browse (const char *url);
 	virtual std::string	home();

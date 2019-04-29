@@ -48,6 +48,10 @@
 #include "nel/gui/http_cache.h"
 #include "nel/gui/http_hsts.h"
 #include "nel/gui/curl_certificates.h"
+#include "nel/gui/html_parser.h"
+#include "nel/gui/html_element.h"
+#include "nel/gui/css_style.h"
+#include "nel/gui/css_parser.h"
 
 #include <curl/curl.h>
 
@@ -69,8 +73,10 @@ using namespace NLMISC;
 namespace NLGUI
 {
 
-	// Uncomment to see the log about image download
-	//#define LOG_DL 1
+	// Uncomment nlwarning() to see the log about curl downloads
+	#define LOG_DL(fmt, ...) //nlwarning(fmt, ## __VA_ARGS__)
+	// Uncomment to log curl progess
+	//#define LOG_CURL_PROGRESS 1
 
 	CGroupHTML::SWebOptions CGroupHTML::options;
 
@@ -86,9 +92,7 @@ namespace NLGUI
 			return url;
 		}
 
-	#ifdef LOG_DL
-		nlwarning("HSTS url : '%s', using https", url.c_str());
-	#endif
+		LOG_DL("HSTS url : '%s', using https", url.c_str());
 		uri.scheme = "https";
 
 		return uri.toString();
@@ -240,12 +244,20 @@ namespace NLGUI
 		{
 			if (dltotal > 0 || dlnow > 0 || ultotal > 0 || ulnow > 0)
 			{
-				nlwarning("> dltotal %d, dlnow %d, ultotal %d, ulnow %d, url '%s'", dltotal, dlnow, ultotal, ulnow, me->Url.c_str());
+				#ifdef LOG_CURL_PROGRESS
+				nlwarning("> dltotal %ld, dlnow %ld, ultotal %ld, ulnow %ld, url '%s'", dltotal, dlnow, ultotal, ulnow, me->Url.c_str());
+				#endif
 			}
 		}
 
 		// return 1 to cancel download
 		return 0;
+	}
+
+	CGroupHTML::CDataDownload::~CDataDownload()
+	{
+		delete data;
+		data = NULL;
 	}
 
 	// Check if domain is on TrustedDomain
@@ -356,7 +368,7 @@ namespace NLGUI
 		// apply max-width, max-height rules if asked
 		if (maxw > -1 || maxh > -1)
 		{
-			applyCssMinMax(width, height, 0, 0, maxw, maxh);
+			_Style.applyCssMinMax(width, height, 0, 0, maxw, maxh);
 			changed = true;
 		}
 
@@ -385,29 +397,33 @@ namespace NLGUI
 	void CGroupHTML::setTextButtonStyle(CCtrlTextButton *ctrlButton, const CStyleParams &style)
 	{
 		// this will also set size for <a class="ryzom-ui-button"> treating it like "display: inline-block;"
-		if (style.Width > 0)  ctrlButton->setWMin(_Style.Width);
-		if (style.Height > 0) ctrlButton->setHMin(_Style.Height);
+		if (style.Width > 0)  ctrlButton->setWMin(style.Width);
+		if (style.Height > 0) ctrlButton->setHMin(style.Height);
 
 		CViewText *pVT = ctrlButton->getViewText();
 		if (pVT)
 		{
-			setTextStyle(pVT, _Style);
+			setTextStyle(pVT, style);
 		}
 
-		if (_Style.BackgroundColor.A > 0)
+		if (style.hasStyle("background-color"))
 		{
-			if (_Style.BackgroundColorOver.A == 0)
-				_Style.BackgroundColorOver = _Style.BackgroundColor;
-
-			ctrlButton->setColor(_Style.BackgroundColor);
-			ctrlButton->setColorOver(_Style.BackgroundColorOver);
+			ctrlButton->setColor(style.BackgroundColor);
+			if (style.hasStyle("-ryzom-background-color-over"))
+			{
+				ctrlButton->setColorOver(style.BackgroundColorOver);
+			}
+			else
+			{
+				ctrlButton->setColorOver(style.BackgroundColor);
+			}
 			ctrlButton->setTexture("", "blank.tga", "", false);
 			ctrlButton->setTextureOver("", "blank.tga", "");
 			ctrlButton->setProperty("force_text_over", "true");
 		}
-		else if (_Style.BackgroundColorOver.A > 0)
+		else if (style.hasStyle("-ryzom-background-color-over"))
 		{
-			ctrlButton->setColorOver(_Style.BackgroundColorOver);
+			ctrlButton->setColorOver(style.BackgroundColorOver);
 			ctrlButton->setProperty("force_text_over", "true");
 			ctrlButton->setTextureOver("blank.tga", "blank.tga", "blank.tga");
 		}
@@ -418,7 +434,6 @@ namespace NLGUI
 		if (pVT)
 		{
 			pVT->setFontSize(style.FontSize);
-			pVT->setColor(style.TextColor);
 			pVT->setColor(style.TextColor);
 			pVT->setFontName(style.FontFamily);
 			pVT->setFontSize(style.FontSize);
@@ -445,6 +460,34 @@ namespace NLGUI
 		return dest;
 	}
 
+	void CGroupHTML::pumpCurlQueue()
+	{
+		if (RunningCurls < options.curlMaxConnections)
+		{
+			std::list<CDataDownload>::iterator it=Curls.begin();
+			uint c = 0;
+			while(it != Curls.end() && RunningCurls < options.curlMaxConnections)
+			{
+				if (it->data == NULL)
+				{
+					LOG_DL("(%s) starting new download '%s'", _Id.c_str(), it->url.c_str());
+					if (!startCurlDownload(*it))
+					{
+						LOG_DL("(%s) failed to start '%s)'", _Id.c_str(), it->url.c_str());
+						finishCurlDownload(*it);
+						it = Curls.erase(it);
+						continue;
+					}
+				}
+
+				++it;
+			}
+		}
+
+		if (RunningCurls > 0 || !Curls.empty())
+			LOG_DL("(%s) RunningCurls %d, _Curls %d", _Id.c_str(), RunningCurls, Curls.size());
+	}
+
 	// Add url to MultiCurl queue and return cURL handle
 	bool CGroupHTML::startCurlDownload(CDataDownload &download)
 	{
@@ -463,9 +506,7 @@ namespace NLGUI
 
 		if (cache.Expires > currentTime)
 		{
-	#ifdef LOG_DL
-			nlwarning("Cache for (%s) is not expired (%s, expires:%d)", download.url.c_str(), download.dest.c_str(), cache.Expires - currentTime);
-	#endif
+			LOG_DL("Cache for (%s) is not expired (%s, expires:%d)", download.url.c_str(), download.dest.c_str(), cache.Expires - currentTime);
 			return false;
 		}
 
@@ -473,7 +514,9 @@ namespace NLGUI
 
 		// erase the tmp file if exists
 		if (CFile::fileExists(tmpdest))
+		{
 			CFile::deleteFile(tmpdest);
+		}
 
 		FILE *fp = nlfopen (tmpdest, "wb");
 		if (fp == NULL)
@@ -491,6 +534,7 @@ namespace NLGUI
 			nlwarning("Creating cURL handle failed, unable to download '%s'", download.url.c_str());
 			return false;
 		}
+		LOG_DL("curl easy handle %p created for '%s'", curl, download.url.c_str());
 
 		// https://
 		if (toLower(download.url.substr(0, 8)) == "https://")
@@ -533,9 +577,120 @@ namespace NLGUI
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
 
-		curl_multi_add_handle(MultiCurl, curl);
+		CURLMcode ret = curl_multi_add_handle(MultiCurl, curl);
+		if (ret != CURLM_OK)
+		{
+			nlwarning("cURL multi handle %p error %d on '%s'", curl, ret, download.url.c_str());
+			return false;
+		}
 
+		RunningCurls++;
 		return true;
+	}
+
+	void CGroupHTML::finishCurlDownload(const CDataDownload &download)
+	{
+		std::string tmpfile = download.dest + ".tmp";
+
+		if (download.type == ImgType)
+		{
+			// there is race condition if two browser instances are downloading same file
+			// second instance deletes first tmpfile and creates new file for itself.
+			if (CFile::getFileSize(tmpfile) > 0)
+			{
+				try
+				{
+					// verify that image is not corrupted
+					uint32 w, h;
+					CBitmap::loadSize(tmpfile, w, h);
+					if (w != 0 && h != 0)
+					{
+						// if not tmpfile, then img is already in cache
+						if (CFile::fileExists(tmpfile))
+						{
+							if (CFile::fileExists(download.dest))
+							{
+								CFile::deleteFile(download.dest);
+							}
+
+							// to reload image on page, the easiest seems to be changing texture
+							// to temp file temporarily. that forces driver to reload texture from disk
+							// ITexture::touch() seem not to do this.
+							// cache was updated, first set texture as temp file
+							for(uint i = 0; i < download.imgs.size(); i++)
+							{
+								setImage(download.imgs[i].Image, tmpfile, download.imgs[i].Type);
+								setImageSize(download.imgs[i].Image, download.imgs[i].Style);
+							}
+
+							CFile::moveFile(download.dest, tmpfile);
+						}
+
+						for(uint i = 0; i < download.imgs.size(); i++)
+						{
+							setImage(download.imgs[i].Image, download.dest, download.imgs[i].Type);
+							setImageSize(download.imgs[i].Image, download.imgs[i].Style);
+						}
+
+					}
+				}
+				catch(const NLMISC::Exception &e)
+				{
+					// exception message has .tmp file name, so keep it for further analysis
+					nlwarning("Invalid image (%s): %s", download.url.c_str(), e.what());
+				}
+			}
+
+			return;
+		}
+
+		if (download.type == StylesheetType)
+		{
+			// no tmpfile if file was already in cache
+			if (CFile::fileExists(tmpfile) && CFile::fileExists(download.dest))
+			{
+				CFile::deleteFile(download.dest);
+				CFile::moveFile(download.dest, tmpfile);
+			}
+			cssDownloadFinished(download.url, download.dest);
+
+			return;
+		}
+
+		if (download.type == BnpType)
+		{
+			bool verified = false;
+			// no tmpfile if file was already in cache
+			if (CFile::fileExists(tmpfile))
+			{
+				verified = download.md5sum.empty() || (download.md5sum != getMD5(tmpfile).toString());
+				if (verified)
+				{
+					if (CFile::fileExists(download.dest))
+					{
+						CFile::deleteFile(download.dest);
+					}
+					CFile::moveFile(download.dest, tmpfile);
+				}
+				else
+				{
+					CFile::deleteFile(tmpfile);
+				}
+			}
+			else if (CFile::fileExists(download.dest))
+			{
+				verified = download.md5sum.empty() || (download.md5sum != getMD5(download.dest).toString());
+			}
+
+			std::string script = "\nlocal __CURRENT_WINDOW__ = \""+this->_Id+"\"";
+			script += toString("\nlocal __DOWNLOAD_STATUS__ = %s\n", verified ? "true" : "false");
+			script += download.luaScript;
+			CLuaManager::getInstance().executeLuaScript(script, true );
+
+			return;
+		}
+
+		nlwarning("Unknown CURL download type (%d) finished '%s'", download.type, download.url.c_str());
 	}
 
 	// Add a image download request in the multi_curl
@@ -545,9 +700,7 @@ namespace NLGUI
 
 		// use requested url for local name (cache)
 		string dest = localImageName(url);
-	#ifdef LOG_DL
-		nlwarning("add to download '%s' dest '%s' img %p", finalUrl.c_str(), dest.c_str(), img);
-	#endif
+		LOG_DL("add to download '%s' dest '%s' img %p", finalUrl.c_str(), dest.c_str(), img);
 
 		// Display cached image while downloading new
 		if (type != OverImage && CFile::fileExists(dest))
@@ -557,42 +710,23 @@ namespace NLGUI
 		}
 
 		// Search if we are not already downloading this url.
-		for(uint i = 0; i < Curls.size(); i++)
+		for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
 		{
-			if(Curls[i].url == finalUrl)
+			if(it->url == finalUrl)
 			{
-	#ifdef LOG_DL
-				nlwarning("already downloading '%s' img %p", finalUrl.c_str(), img);
-	#endif
-				Curls[i].imgs.push_back(CDataImageDownload(img, style, type));
+				LOG_DL("already downloading '%s' img %p", finalUrl.c_str(), img);
+				it->imgs.push_back(CDataImageDownload(img, style, type));
 				return;
 			}
 		}
 
 		Curls.push_back(CDataDownload(finalUrl, dest, ImgType, img, "", "", style, type));
-		if (Curls.size() < options.curlMaxConnections) {
-			if (!startCurlDownload(Curls.back()))
-			{
-				Curls.pop_back();
-				return;
-			}
-
-			RunningCurls++;
-	#ifdef LOG_DL
-			nlwarning("(%s) adding handle %x, %d curls", _Id.c_str(), Curls.back().data->Request, Curls.size());
-		}
-		else
-		{
-			nlwarning("(%s) download queued, %d curls", _Id.c_str(), Curls.size());
-	#endif
-		}
+		pumpCurlQueue();
 	}
 
 	void CGroupHTML::initImageDownload()
 	{
-	#ifdef LOG_DL
-		nlwarning("Init Image Download");
-	#endif
+		LOG_DL("Init Image Download");
 
 		string pathName = "cache";
 		if ( ! CFile::isExists( pathName ) )
@@ -614,21 +748,17 @@ namespace NLGUI
 		url = upgradeInsecureUrl(getAbsoluteUrl(url));
 
 		// Search if we are not already downloading this url.
-		for(uint i = 0; i < Curls.size(); i++)
+		for(std::list<CDataDownload>::const_iterator it = Curls.begin(); it != Curls.end(); ++it)
 		{
-			if(Curls[i].url == url)
+			if(it->url == url)
 			{
-	#ifdef LOG_DL
-				nlwarning("already downloading '%s'", url.c_str());
-	#endif
+				LOG_DL("already downloading '%s'", url.c_str());
 				return false;
 			}
 		}
 
 		string dest = localBnpName(url);
-	#ifdef LOG_DL
-		nlwarning("add to download '%s' dest '%s'", url.c_str(), dest.c_str());
-	#endif
+		LOG_DL("add to download '%s' dest '%s'", url.c_str(), dest.c_str());
 
 		// create/delete the local file
 		if (NLMISC::CFile::fileExists(dest))
@@ -646,22 +776,7 @@ namespace NLGUI
 		if (action != "delete")
 		{
 			Curls.push_back(CDataDownload(url, dest, BnpType, NULL, script, md5sum));
-			if (Curls.size() < options.curlMaxConnections)
-			{
-				if (!startCurlDownload(Curls.back()))
-				{
-					Curls.pop_back();
-					return false;
-				}
-				RunningCurls++;
-	#ifdef LOG_DL
-				nlwarning("(%s) adding handle %x, %d curls", _Id.c_str(), Curls.back().data->Request, Curls.size());
-			}
-			else
-			{
-				nlwarning("(%s) download queued, %d curls", _Id.c_str(), Curls.size());
-	#endif
-			}
+			pumpCurlQueue();
 		}
 		else
 			return true;
@@ -674,12 +789,29 @@ namespace NLGUI
 		if (!_TrustedDomain)
 			return;
 
-	#ifdef LOG_DL
-		nlwarning("Init Bnp Download");
-	#endif
+		LOG_DL("Init Bnp Download");
 		string pathName = "user";
 		if ( ! CFile::isExists( pathName ) )
 			CFile::createDirectory( pathName );
+	}
+
+	void CGroupHTML::addStylesheetDownload(std::vector<std::string> links)
+	{
+		for(uint i = 0; i < links.size(); ++i)
+		{
+			std::string url = getAbsoluteUrl(links[i]);
+			std::string local = localImageName(url);
+
+			// insert only if url not already downloading
+			std::vector<std::string>::const_iterator it = std::find(_StylesheetQueue.begin(), _StylesheetQueue.end(), url);
+			if (it == _StylesheetQueue.end())
+			{
+				_StylesheetQueue.push_back(url);
+				// push to the front of the queue
+				Curls.push_front(CDataDownload(url, local, StylesheetType, NULL, "", ""));
+			}
+		}
+		pumpCurlQueue();
 	}
 
 	// Call this evenly to check if an element is downloaded and then manage it
@@ -688,243 +820,51 @@ namespace NLGUI
 		//nlassert(_CrtCheckMemory());
 
 		if(Curls.empty() && _CurlWWW == NULL)
+		{
 			return;
+		}
 
 		int NewRunningCurls = 0;
 		while(CURLM_CALL_MULTI_PERFORM == curl_multi_perform(MultiCurl, &NewRunningCurls))
 		{
-	#ifdef LOG_DL
-			nlwarning("more to do now %d - %d curls", NewRunningCurls, Curls.size());
-	#endif
+			LOG_DL("more to do now %d - %d curls", NewRunningCurls, Curls.size());
 		}
-		if(NewRunningCurls < RunningCurls)
+
+		LOG_DL("NewRunningCurls:%d, RunningCurls:%d", NewRunningCurls, RunningCurls);
+
+		// check which downloads are done
+		CURLMsg *msg;
+		int msgs_left;
+		while ((msg = curl_multi_info_read(MultiCurl, &msgs_left)))
 		{
-			// some download are done, callback them
-	#ifdef LOG_DL
-			nlwarning ("new %d old %d", NewRunningCurls, RunningCurls);
-	#endif
-			// check msg
-			CURLMsg *msg;
-			int msgs_left;
-			while ((msg = curl_multi_info_read(MultiCurl, &msgs_left)))
+			LOG_DL("> (%s) msgs_left %d", _Id.c_str(), msgs_left);
+			if (msg->msg == CURLMSG_DONE)
 			{
-	#ifdef LOG_DL
-				nlwarning("> (%s) msgs_left %d", _Id.c_str(), msgs_left);
-	#endif
-				if (msg->msg == CURLMSG_DONE)
+				if (_CurlWWW && _CurlWWW->Request && _CurlWWW->Request == msg->easy_handle)
 				{
-					if (_CurlWWW && _CurlWWW->Request && _CurlWWW->Request == msg->easy_handle)
+					std::string error;
+					bool success = msg->data.result == CURLE_OK;
+					if (!success)
 					{
-						CURLcode res = msg->data.result;
-						long code;
-						curl_easy_getinfo(_CurlWWW->Request, CURLINFO_RESPONSE_CODE, &code);
-	#ifdef LOG_DL
-						nlwarning("(%s) web transfer '%p' completed with status %d, http %d, url (len %d) '%s'", _Id.c_str(), _CurlWWW->Request, res, code, _CurlWWW->Url.size(), _CurlWWW->Url.c_str());
-	#endif
-						// save HSTS header from all requests regardless of HTTP code
-						if (res == CURLE_OK && _CurlWWW->hasHSTSHeader())
-						{
-							CUrlParser uri(_CurlWWW->Url);
-							CStrictTransportSecurity::getInstance()->setFromHeader(uri.host, _CurlWWW->getHSTSHeader());
-						}
-
-						if (res != CURLE_OK)
-						{
-							std::string err;
-							err = "Connection failed with cURL error: ";
-							err += curl_easy_strerror(res);
-							err += "\nURL '" + _CurlWWW->Url + "'";
-							browseError(err.c_str());
-						}
-						else
-						if ((code >= 301 && code <= 303) || code == 307 || code == 308)
-						{
-							if (_RedirectsRemaining < 0)
-							{
-								browseError(string("Redirect limit reached : " + _URL).c_str());
-							}
-							else
-							{
-								receiveCookies(_CurlWWW->Request, _DocumentDomain, _TrustedDomain);
-
-								// redirect, get the location and try browse again
-								// we cant use curl redirection because 'addHTTPGetParams()' must be called on new destination
-								std::string location(_CurlWWW->getLocationHeader());
-								if (!location.empty())
-								{
-	#ifdef LOG_DL
-									nlwarning("(%s) request (%d) redirected to (len %d) '%s'", _Id.c_str(), _RedirectsRemaining, location.size(), location.c_str());
-	#endif
-									location = getAbsoluteUrl(location);
-									// throw away this handle and start with new one (easier than reusing)
-									requestTerminated();
-
-									_PostNextTime = false;
-									_RedirectsRemaining--;
-
-									doBrowse(location.c_str());
-								}
-								else
-								{
-									browseError(string("Request was redirected, but location was not set : "+_URL).c_str());
-								}
-							}
-						}
-						else
-						{
-							receiveCookies(_CurlWWW->Request, _DocumentDomain, _TrustedDomain);
-
-							_RedirectsRemaining = DEFAULT_RYZOM_REDIRECT_LIMIT;
-
-							if ( (code < 200 || code >= 300) )
-							{
-								browseError(string("Connection failed (curl code " + toString((sint32)res) + ")\nhttp code " + toString((sint32)code) + ")\nURL '" + _CurlWWW->Url + "'").c_str());
-							}
-							else
-							{
-								char *ch;
-								std::string contentType;
-								res = curl_easy_getinfo(_CurlWWW->Request, CURLINFO_CONTENT_TYPE, &ch);
-								if (res == CURLE_OK && ch != NULL)
-								{
-									contentType = ch;
-								}
-
-								htmlDownloadFinished(_CurlWWW->Content, contentType, code);
-							}
-							requestTerminated();
-						}
-
-						continue;
+						error = curl_easy_strerror(msg->data.result);
 					}
-
-					for (vector<CDataDownload>::iterator it=Curls.begin(); it<Curls.end(); it++)
+					LOG_DL("html download finished with curl code %d (%s)", (sint)msg->msg, error.c_str());
+					htmlDownloadFinished(success, error);
+				}
+				else
+				{
+					for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
 					{
 						if(it->data && it->data->Request == msg->easy_handle)
 						{
-							CURLcode res = msg->data.result;
-							long r;
-							curl_easy_getinfo(it->data->Request, CURLINFO_RESPONSE_CODE, &r);
-							fclose(it->fp);
-
-							CUrlParser uri(it->url);
-							if (!uri.host.empty())
-								receiveCookies(it->data->Request, uri.host, isTrustedDomain(uri.host));
-	#ifdef LOG_DL
-							nlwarning("(%s) transfer '%p' completed with status %d, http %d, url (len %d) '%s'", _Id.c_str(), it->data->Request, res, r, it->url.size(), it->url.c_str());
-	#endif
-							curl_multi_remove_handle(MultiCurl, it->data->Request);
-
-							// save HSTS header from all requests regardless of HTTP code
-							if (res == CURLE_OK && it->data->hasHSTSHeader())
+							std::string error;
+							bool success = msg->data.result == CURLE_OK;
+							if (!success)
 							{
-								CStrictTransportSecurity::getInstance()->setFromHeader(uri.host, it->data->getHSTSHeader());
+								error = curl_easy_strerror(msg->data.result);
 							}
-
-							string tmpfile = it->dest + ".tmp";
-							if(res != CURLE_OK || r < 200 || r >= 300 || (!it->md5sum.empty() && (it->md5sum != getMD5(tmpfile).toString())))
-							{
-								if (it->redirects < DEFAULT_RYZOM_REDIRECT_LIMIT && ((r >= 301 && r <= 303) || r == 307 || r == 308))
-								{
-									std::string location(it->data->getLocationHeader());
-									if (!location.empty())
-									{
-										CUrlParser uri(location);
-										if (!uri.isAbsolute())
-										{
-											uri.inherit(it->url);
-											location = uri.toString();
-										}
-
-										it->url = location;
-										it->fp = NULL;
-
-										// release CCurlWWWData
-										delete it->data;
-										it->data = NULL;
-
-										it->redirects++;
-	#ifdef LOG_DL
-										nlwarning("Redirect '%s'", location.c_str());
-	#endif
-										// keep the request in queue
-										continue;
-									}
-									else
-										nlwarning("Redirected to empty url '%s'", it->url.c_str());
-								}
-								else
-								{
-									if (it->redirects >= DEFAULT_RYZOM_REDIRECT_LIMIT)
-										nlwarning("Redirect limit reached for '%s'", it->url.c_str());
-
-									NLMISC::CFile::deleteFile(tmpfile.c_str());
-
-									// 304 Not Modified
-									if (res == CURLE_OK && r == 304)
-									{
-										CHttpCacheObject obj;
-										obj.Expires = it->data->getExpires();
-										obj.Etag = it->data->getEtag();
-										obj.LastModified = it->data->getLastModified();
-
-										CHttpCache::getInstance()->store(it->dest, obj);
-									}
-								}
-							}
-							else
-							{
-								CHttpCacheObject obj;
-								obj.Expires = it->data->getExpires();
-								obj.Etag = it->data->getEtag();
-								obj.LastModified = it->data->getLastModified();
-
-								CHttpCache::getInstance()->store(it->dest, obj);
-
-								string finalUrl;
-								if (it->type == ImgType)
-								{
-									// there is race condition if two browser instances are downloading same file
-									// second instance deletes first tmpfile and creates new file for itself.
-									if (CFile::getFileSize(tmpfile) > 0)
-									{
-										try
-										{
-											// verify that image is not corrupted
-											uint32 w, h;
-											CBitmap::loadSize(tmpfile, w, h);
-											if (w != 0 && h != 0)
-											{
-												if (CFile::fileExists(it->dest))
-													CFile::deleteFile(it->dest);
-
-												CFile::moveFile(it->dest, tmpfile);
-												for(uint i = 0; i < it->imgs.size(); i++)
-												{
-													setImage(it->imgs[i].Image, it->dest, it->imgs[i].Type);
-													setImageSize(it->imgs[i].Image, it->imgs[i].Style);
-												}
-											}
-										}
-										catch(const NLMISC::Exception &e)
-										{
-											// exception message has .tmp file name, so keep it for further analysis
-											nlwarning("Invalid image (%s): %s", it->url.c_str(), e.what());
-										}
-									}
-								}
-								else
-								{
-									CFile::moveFile(it->dest, tmpfile);
-									//if (lookupLocalFile (finalUrl, file.c_str(), false))
-									{
-										CLuaManager::getInstance().executeLuaScript( it->luaScript, true );
-									}
-								}
-							}
-
-							// release CCurlWWWData
-							delete it->data;
+							LOG_DL("data download finished with curl code %d (%s)", (sint)msg->msg, error.c_str());
+							dataDownloadFinished(success, error, *it);
 
 							Curls.erase(it);
 							break;
@@ -935,54 +875,51 @@ namespace NLGUI
 		}
 
 		RunningCurls = NewRunningCurls;
-
-		if (RunningCurls < options.curlMaxConnections)
-		{
-			for (vector<CDataDownload>::iterator it=Curls.begin(); it<Curls.end(); it++)
-			{
-				if (it->data == NULL) {
-	#ifdef LOG_DL
-					nlwarning("(%s) starting new download '%s'", _Id.c_str(), it->url.c_str());
-	#endif
-					if (!startCurlDownload(*it))
-					{
-						Curls.erase(it);
-						break;
-					}
-
-					RunningCurls++;
-					if (RunningCurls >= options.curlMaxConnections)
-						break;
-				}
-			}
-		}
-
-	#ifdef LOG_DL
-		if (RunningCurls > 0 || !Curls.empty())
-			nlwarning("(%s) RunningCurls %d, _Curls %d", _Id.c_str(), RunningCurls, Curls.size());
-	#endif
+		pumpCurlQueue();
 	}
 
 
 	void CGroupHTML::releaseDownloads()
 	{
-	#ifdef LOG_DL
-		nlwarning("Release Downloads");
-	#endif
+		LOG_DL("Release Downloads");
+
+		if (_CurlWWW)
+		{
+			LOG_DL("(%s) stop html url '%s'", _Id.c_str(), _CurlWWW->Url.c_str());
+			if (MultiCurl)
+				curl_multi_remove_handle(MultiCurl, _CurlWWW->Request);
+
+			delete _CurlWWW;
+			_CurlWWW = NULL;
+		}
 
 		// remove all queued and already started downloads
-		for (uint i = 0; i < Curls.size(); ++i)
+		for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
 		{
-			if (Curls[i].data)
+			if (it->data)
 			{
+				LOG_DL("(%s) stop data url '%s'", _Id.c_str(), it->url.c_str());
 				if (MultiCurl)
-					curl_multi_remove_handle(MultiCurl, Curls[i].data->Request);
+				{
+					curl_multi_remove_handle(MultiCurl, it->data->Request);
+				}
 
-				// release CCurlWWWData
-				delete Curls[i].data;
+				// close and remove temp file
+				if (it->fp)
+				{
+					fclose(it->fp);
+
+					if (CFile::fileExists(it->dest + ".tmp"))
+					{
+						CFile::deleteFile(it->dest + ".tmp");
+					}
+				}
 			}
 		}
 		Curls.clear();
+
+		// also clear css queue as it depends on Curls
+		_StylesheetQueue.clear();
 	}
 
 	class CGroupListAdaptor : public CInterfaceGroup
@@ -1010,23 +947,9 @@ namespace NLGUI
 	template<class A> void popIfNotEmpty(A &vect) { if(!vect.empty()) vect.pop_back(); }
 
 	// ***************************************************************************
-
-	void CGroupHTML::beginBuild ()
-	{
-		if (_Browsing)
-		{
-			_Connecting = false;
-
-			removeContent ();
-		}
-		else
-			nlwarning("_Browsing = FALSE");
-	}
-
-
 	TStyle CGroupHTML::parseStyle (const string &str_styles)
 	{
-		TStyle	styles;
+		TStyle styles;
 		vector<string> elements;
 		NLMISC::splitString(str_styles, ";", elements);
 
@@ -1111,2030 +1034,307 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-
-	#define getCellsParameters(prefix,inherit) \
-	{\
-		CGroupHTML::CCellParams cellParams; \
-		if (!_CellParams.empty() && inherit) \
-		{ \
-			cellParams = _CellParams.back(); \
-		} \
-		if (present[prefix##_BGCOLOR] && value[prefix##_BGCOLOR]) \
-			scanHTMLColor(value[prefix##_BGCOLOR], cellParams.BgColor); \
-		if (present[prefix##_L_MARGIN] && value[prefix##_L_MARGIN]) \
-			fromString(value[prefix##_L_MARGIN], cellParams.LeftMargin); \
-		if (present[prefix##_NOWRAP]) \
-			cellParams.NoWrap = true; \
-		if (present[prefix##_ALIGN] && value[prefix##_ALIGN]) \
-		{ \
-			string align = toLower(value[prefix##_ALIGN]); \
-			if (align == "left") \
-				cellParams.Align = CGroupCell::Left; \
-			if (align == "center") \
-				cellParams.Align = CGroupCell::Center; \
-			if (align == "right") \
-				cellParams.Align = CGroupCell::Right; \
-		} \
-		if (present[prefix##_VALIGN] && value[prefix##_VALIGN]) \
-		{ \
-			string align = toLower(value[prefix##_VALIGN]); \
-			if (align == "top") \
-				cellParams.VAlign = CGroupCell::Top; \
-			if (align == "middle") \
-				cellParams.VAlign = CGroupCell::Middle; \
-			if (align == "bottom") \
-				cellParams.VAlign = CGroupCell::Bottom; \
-		} \
-		_CellParams.push_back (cellParams); \
-	}
-
-	static bool scanCssLength(const std::string& str, uint32 &px)
+	void CGroupHTML::beginElement (CHtmlElement &elm)
 	{
-		if (fromString(str, px))
-			return true;
+		_Style.pushStyle();
+		_CurrentHTMLElement = &elm;
+		_CurrentHTMLNextSibling = elm.nextSibling;
 
-		if (str == "thin")
+		// set element style from css and style attribute
+		_Style.getStyleFor(elm);
+		if (!elm.Style.empty())
 		{
-			px = 1;
-			return true;
-		}
-		if (str == "medium")
-		{
-			px = 3;
-			return true;
-		}
-		if (str == "thick")
-		{
-			px = 5;
-			return true;
+			_Style.applyStyle(elm.Style);
 		}
 
-		return false;
+		if (elm.hasNonEmptyAttribute("name"))
+		{
+			_AnchorName.push_back(elm.getAttribute("name"));
+		}
+		if (elm.hasNonEmptyAttribute("id"))
+		{
+			_AnchorName.push_back(elm.getAttribute("id"));
+		}
+
+		switch(elm.ID)
+		{
+		case HTML_A:        htmlA(elm); break;
+		case HTML_BASE:     htmlBASE(elm); break;
+		case HTML_BODY:     htmlBODY(elm); break;
+		case HTML_BR:       htmlBR(elm); break;
+		case HTML_DD:       htmlDD(elm); break;
+		case HTML_DEL:      renderPseudoElement(":before", elm); break;
+		case HTML_DIV:      htmlDIV(elm); break;
+		case HTML_DL:       htmlDL(elm); break;
+		case HTML_DT:       htmlDT(elm); break;
+		case HTML_EM:       renderPseudoElement(":before", elm); break;
+		case HTML_FONT:     htmlFONT(elm); break;
+		case HTML_FORM:     htmlFORM(elm); break;
+		case HTML_H1://no-break
+		case HTML_H2://no-break
+		case HTML_H3://no-break
+		case HTML_H4://no-break
+		case HTML_H5://no-break
+		case HTML_H6:		htmlH(elm); break;
+		case HTML_HEAD:     htmlHEAD(elm); break;
+		case HTML_HR:       htmlHR(elm); break;
+		case HTML_HTML:     htmlHTML(elm); break;
+		case HTML_I:        htmlI(elm); break;
+		case HTML_IMG:      htmlIMG(elm); break;
+		case HTML_INPUT:    htmlINPUT(elm); break;
+		case HTML_LI:       htmlLI(elm); break;
+		case HTML_LUA:      htmlLUA(elm); break;
+		case HTML_META:     htmlMETA(elm); break;
+		case HTML_OBJECT:   htmlOBJECT(elm); break;
+		case HTML_OL:       htmlOL(elm); break;
+		case HTML_OPTION:   htmlOPTION(elm); break;
+		case HTML_P:        htmlP(elm); break;
+		case HTML_PRE:      htmlPRE(elm); break;
+		case HTML_SCRIPT:   htmlSCRIPT(elm); break;
+		case HTML_SELECT:   htmlSELECT(elm); break;
+		case HTML_SMALL:    renderPseudoElement(":before", elm); break;
+		case HTML_SPAN:     renderPseudoElement(":before", elm); break;
+		case HTML_STRONG:   renderPseudoElement(":before", elm); break;
+		case HTML_STYLE:    htmlSTYLE(elm); break;
+		case HTML_TABLE:    htmlTABLE(elm); break;
+		case HTML_TD:       htmlTD(elm); break;
+		case HTML_TEXTAREA: htmlTEXTAREA(elm); break;
+		case HTML_TH:       htmlTH(elm); break;
+		case HTML_TITLE:    htmlTITLE(elm); break;
+		case HTML_TR:       htmlTR(elm); break;
+		case HTML_U:        renderPseudoElement(":before", elm); break;
+		case HTML_UL:       htmlUL(elm); break;
+		default:
+			renderPseudoElement(":before", elm);
+			break;
+		}
 	}
 
-	static bool isHexa(char c)
+	// ***************************************************************************
+	void CGroupHTML::endElement(CHtmlElement &elm)
 	{
-		return isdigit(c) || (tolower(c) >= 'a' && tolower(c) <= 'f');
+		_CurrentHTMLElement = &elm;
+
+		switch(elm.ID)
+		{
+		case HTML_A:        htmlAend(elm); break;
+		case HTML_BASE:     break;
+		case HTML_BODY:     renderPseudoElement(":after", elm); break;
+		case HTML_BR:       break;
+		case HTML_DD:       htmlDDend(elm); break;
+		case HTML_DEL:      renderPseudoElement(":after", elm); break;
+		case HTML_DIV:      htmlDIVend(elm); break;
+		case HTML_DL:       htmlDLend(elm); break;
+		case HTML_DT:       htmlDTend(elm); break;
+		case HTML_EM:       renderPseudoElement(":after", elm);break;
+		case HTML_FONT:     break;
+		case HTML_FORM:     renderPseudoElement(":after", elm);break;
+		case HTML_H1://no-break
+		case HTML_H2://no-break
+		case HTML_H3://no-break
+		case HTML_H4://no-break
+		case HTML_H5://no-break
+		case HTML_H6:		htmlHend(elm); break;
+		case HTML_HEAD:     htmlHEADend(elm); break;
+		case HTML_HR:       break;
+		case HTML_HTML:     break;
+		case HTML_I:        htmlIend(elm); break;
+		case HTML_IMG:      break;
+		case HTML_INPUT:    break;
+		case HTML_LI:       htmlLIend(elm); break;
+		case HTML_LUA:      htmlLUAend(elm); break;
+		case HTML_META:     break;
+		case HTML_OBJECT:   htmlOBJECTend(elm); break;
+		case HTML_OL:       htmlOLend(elm); break;
+		case HTML_OPTION:   htmlOPTIONend(elm); break;
+		case HTML_P:        htmlPend(elm); break;
+		case HTML_PRE:      htmlPREend(elm); break;
+		case HTML_SCRIPT:   htmlSCRIPTend(elm); break;
+		case HTML_SELECT:   htmlSELECTend(elm); break;
+		case HTML_SMALL:    renderPseudoElement(":after", elm);break;
+		case HTML_SPAN:     renderPseudoElement(":after", elm);break;
+		case HTML_STRONG:   renderPseudoElement(":after", elm);break;
+		case HTML_STYLE:    htmlSTYLEend(elm); break;
+		case HTML_TABLE:    htmlTABLEend(elm); break;
+		case HTML_TD:       htmlTDend(elm); break;
+		case HTML_TEXTAREA: htmlTEXTAREAend(elm); break;
+		case HTML_TH:       htmlTHend(elm); break;
+		case HTML_TITLE:    htmlTITLEend(elm); break;
+		case HTML_TR:       htmlTRend(elm); break;
+		case HTML_U:        renderPseudoElement(":after", elm); break;
+		case HTML_UL:       htmlULend(elm); break;
+		default:
+			renderPseudoElement(":after", elm);
+			break;
+		}
+
+
+		_Style.popStyle();
 	}
 
-	static uint8 convertHexa(char c)
+	// ***************************************************************************
+	void CGroupHTML::renderPseudoElement(const std::string &pseudo, const CHtmlElement &elm)
 	{
-		return (uint8) (tolower(c) - (isdigit(c) ? '0' : ('a' - 10)));
-	}
-
-	// scan a color component, and return pointer to next position
-	static const char *scanColorComponent(const char *src, uint8 &intensity)
-	{
-		if (!src) return NULL;
-		if (!isHexa(*src)) return NULL;
-		uint8 value = convertHexa(*src++) << 4;
-		if (!isHexa(*src)) return NULL;
-		value += convertHexa(*src++);
-		intensity = value;
-		return src;
-	}
-
-	static float hueToRgb(float m1, float m2, float h)
-	{
-		if (h < 0) h += 1.0f;
-		if (h > 1) h -= 1.0f;
-		if (h*6 < 1.0f) return m1 + (m2 - m1)*h*6;
-		if (h*2 < 1.0f) return m2;
-		if (h*3 < 2.0f) return m1 + (m2 - m1) * (2.0f/3.0f - h)*6;
-		return m1;
-	}
-
-	static void hslToRgb(float h, float s, float l, CRGBA &result)
-	{
-		float m1, m2;
-		if (l <= 0.5f)
-			m2 = l * (s + 1.0f);
+		if (pseudo == ":before" && !elm.StyleBefore.empty())
+		{
+			_Style.pushStyle();
+			_Style.applyStyle(elm.StyleBefore);
+		}
+		else if (pseudo == ":after" && !elm.StyleAfter.empty())
+		{
+			_Style.pushStyle();
+			_Style.applyStyle(elm.StyleAfter);
+		}
 		else
-			m2 = l + s - l * s;
-		m1 = l*2 - m2;
-
-		result.R = 255 * hueToRgb(m1, m2, h + 1.0f/3.0f);
-		result.G = 255 * hueToRgb(m1, m2, h);
-		result.B = 255 * hueToRgb(m1, m2, h - 1.0f/3.0f);
-		result.A = 255;
-	}
-
-	class CNameToCol
-	{
-	public:
-		const char *Name;
-		CRGBA Color;
-		CNameToCol(const char *name, CRGBA color) : Name(name), Color(color) {}
-	};
-
-	static CNameToCol htmlColorNameToRGBA[] =
-	{
-		CNameToCol("AliceBlue", CRGBA(0xF0, 0xF8, 0xFF)),
-		CNameToCol("AntiqueWhite", CRGBA(0xFA, 0xEB, 0xD7)),
-		CNameToCol("Aqua", CRGBA(0x00, 0xFF, 0xFF)),
-		CNameToCol("Aquamarine", CRGBA(0x7F, 0xFF, 0xD4)),
-		CNameToCol("Azure", CRGBA(0xF0, 0xFF, 0xFF)),
-		CNameToCol("Beige", CRGBA(0xF5, 0xF5, 0xDC)),
-		CNameToCol("Bisque", CRGBA(0xFF, 0xE4, 0xC4)),
-		CNameToCol("Black", CRGBA(0x00, 0x00, 0x00)),
-		CNameToCol("BlanchedAlmond", CRGBA(0xFF, 0xEB, 0xCD)),
-		CNameToCol("Blue", CRGBA(0x00, 0x00, 0xFF)),
-		CNameToCol("BlueViolet", CRGBA(0x8A, 0x2B, 0xE2)),
-		CNameToCol("Brown", CRGBA(0xA5, 0x2A, 0x2A)),
-		CNameToCol("BurlyWood", CRGBA(0xDE, 0xB8, 0x87)),
-		CNameToCol("CadetBlue", CRGBA(0x5F, 0x9E, 0xA0)),
-		CNameToCol("Chartreuse", CRGBA(0x7F, 0xFF, 0x00)),
-		CNameToCol("Chocolate", CRGBA(0xD2, 0x69, 0x1E)),
-		CNameToCol("Coral", CRGBA(0xFF, 0x7F, 0x50)),
-		CNameToCol("CornflowerBlue", CRGBA(0x64, 0x95, 0xED)),
-		CNameToCol("Cornsilk", CRGBA(0xFF, 0xF8, 0xDC)),
-		CNameToCol("Crimson", CRGBA(0xDC, 0x14, 0x3C)),
-		CNameToCol("Cyan", CRGBA(0x00, 0xFF, 0xFF)),
-		CNameToCol("DarkBlue", CRGBA(0x00, 0x00, 0x8B)),
-		CNameToCol("DarkCyan", CRGBA(0x00, 0x8B, 0x8B)),
-		CNameToCol("DarkGoldenRod", CRGBA(0xB8, 0x86, 0x0B)),
-		CNameToCol("DarkGray", CRGBA(0xA9, 0xA9, 0xA9)),
-		CNameToCol("DarkGreen", CRGBA(0x00, 0x64, 0x00)),
-		CNameToCol("DarkKhaki", CRGBA(0xBD, 0xB7, 0x6B)),
-		CNameToCol("DarkMagenta", CRGBA(0x8B, 0x00, 0x8B)),
-		CNameToCol("DarkOliveGreen", CRGBA(0x55, 0x6B, 0x2F)),
-		CNameToCol("Darkorange", CRGBA(0xFF, 0x8C, 0x00)),
-		CNameToCol("DarkOrchid", CRGBA(0x99, 0x32, 0xCC)),
-		CNameToCol("DarkRed", CRGBA(0x8B, 0x00, 0x00)),
-		CNameToCol("DarkSalmon", CRGBA(0xE9, 0x96, 0x7A)),
-		CNameToCol("DarkSeaGreen", CRGBA(0x8F, 0xBC, 0x8F)),
-		CNameToCol("DarkSlateBlue", CRGBA(0x48, 0x3D, 0x8B)),
-		CNameToCol("DarkSlateGray", CRGBA(0x2F, 0x4F, 0x4F)),
-		CNameToCol("DarkTurquoise", CRGBA(0x00, 0xCE, 0xD1)),
-		CNameToCol("DarkViolet", CRGBA(0x94, 0x00, 0xD3)),
-		CNameToCol("DeepPink", CRGBA(0xFF, 0x14, 0x93)),
-		CNameToCol("DeepSkyBlue", CRGBA(0x00, 0xBF, 0xFF)),
-		CNameToCol("DimGray", CRGBA(0x69, 0x69, 0x69)),
-		CNameToCol("DodgerBlue", CRGBA(0x1E, 0x90, 0xFF)),
-		CNameToCol("Feldspar", CRGBA(0xD1, 0x92, 0x75)),
-		CNameToCol("FireBrick", CRGBA(0xB2, 0x22, 0x22)),
-		CNameToCol("FloralWhite", CRGBA(0xFF, 0xFA, 0xF0)),
-		CNameToCol("ForestGreen", CRGBA(0x22, 0x8B, 0x22)),
-		CNameToCol("Fuchsia", CRGBA(0xFF, 0x00, 0xFF)),
-		CNameToCol("Gainsboro", CRGBA(0xDC, 0xDC, 0xDC)),
-		CNameToCol("GhostWhite", CRGBA(0xF8, 0xF8, 0xFF)),
-		CNameToCol("Gold", CRGBA(0xFF, 0xD7, 0x00)),
-		CNameToCol("GoldenRod", CRGBA(0xDA, 0xA5, 0x20)),
-		CNameToCol("Gray", CRGBA(0x80, 0x80, 0x80)),
-		CNameToCol("Green", CRGBA(0x00, 0x80, 0x00)),
-		CNameToCol("GreenYellow", CRGBA(0xAD, 0xFF, 0x2F)),
-		CNameToCol("HoneyDew", CRGBA(0xF0, 0xFF, 0xF0)),
-		CNameToCol("HotPink", CRGBA(0xFF, 0x69, 0xB4)),
-		CNameToCol("IndianRed ", CRGBA(0xCD, 0x5C, 0x5C)),
-		CNameToCol("Indigo  ", CRGBA(0x4B, 0x00, 0x82)),
-		CNameToCol("Ivory", CRGBA(0xFF, 0xFF, 0xF0)),
-		CNameToCol("Khaki", CRGBA(0xF0, 0xE6, 0x8C)),
-		CNameToCol("Lavender", CRGBA(0xE6, 0xE6, 0xFA)),
-		CNameToCol("LavenderBlush", CRGBA(0xFF, 0xF0, 0xF5)),
-		CNameToCol("LawnGreen", CRGBA(0x7C, 0xFC, 0x00)),
-		CNameToCol("LemonChiffon", CRGBA(0xFF, 0xFA, 0xCD)),
-		CNameToCol("LightBlue", CRGBA(0xAD, 0xD8, 0xE6)),
-		CNameToCol("LightCoral", CRGBA(0xF0, 0x80, 0x80)),
-		CNameToCol("LightCyan", CRGBA(0xE0, 0xFF, 0xFF)),
-		CNameToCol("LightGoldenRodYellow", CRGBA(0xFA, 0xFA, 0xD2)),
-		CNameToCol("LightGrey", CRGBA(0xD3, 0xD3, 0xD3)),
-		CNameToCol("LightGreen", CRGBA(0x90, 0xEE, 0x90)),
-		CNameToCol("LightPink", CRGBA(0xFF, 0xB6, 0xC1)),
-		CNameToCol("LightSalmon", CRGBA(0xFF, 0xA0, 0x7A)),
-		CNameToCol("LightSeaGreen", CRGBA(0x20, 0xB2, 0xAA)),
-		CNameToCol("LightSkyBlue", CRGBA(0x87, 0xCE, 0xFA)),
-		CNameToCol("LightSlateBlue", CRGBA(0x84, 0x70, 0xFF)),
-		CNameToCol("LightSlateGray", CRGBA(0x77, 0x88, 0x99)),
-		CNameToCol("LightSteelBlue", CRGBA(0xB0, 0xC4, 0xDE)),
-		CNameToCol("LightYellow", CRGBA(0xFF, 0xFF, 0xE0)),
-		CNameToCol("Lime", CRGBA(0x00, 0xFF, 0x00)),
-		CNameToCol("LimeGreen", CRGBA(0x32, 0xCD, 0x32)),
-		CNameToCol("Linen", CRGBA(0xFA, 0xF0, 0xE6)),
-		CNameToCol("Magenta", CRGBA(0xFF, 0x00, 0xFF)),
-		CNameToCol("Maroon", CRGBA(0x80, 0x00, 0x00)),
-		CNameToCol("MediumAquaMarine", CRGBA(0x66, 0xCD, 0xAA)),
-		CNameToCol("MediumBlue", CRGBA(0x00, 0x00, 0xCD)),
-		CNameToCol("MediumOrchid", CRGBA(0xBA, 0x55, 0xD3)),
-		CNameToCol("MediumPurple", CRGBA(0x93, 0x70, 0xD8)),
-		CNameToCol("MediumSeaGreen", CRGBA(0x3C, 0xB3, 0x71)),
-		CNameToCol("MediumSlateBlue", CRGBA(0x7B, 0x68, 0xEE)),
-		CNameToCol("MediumSpringGreen", CRGBA(0x00, 0xFA, 0x9A)),
-		CNameToCol("MediumTurquoise", CRGBA(0x48, 0xD1, 0xCC)),
-		CNameToCol("MediumVioletRed", CRGBA(0xC7, 0x15, 0x85)),
-		CNameToCol("MidnightBlue", CRGBA(0x19, 0x19, 0x70)),
-		CNameToCol("MintCream", CRGBA(0xF5, 0xFF, 0xFA)),
-		CNameToCol("MistyRose", CRGBA(0xFF, 0xE4, 0xE1)),
-		CNameToCol("Moccasin", CRGBA(0xFF, 0xE4, 0xB5)),
-		CNameToCol("NavajoWhite", CRGBA(0xFF, 0xDE, 0xAD)),
-		CNameToCol("Navy", CRGBA(0x00, 0x00, 0x80)),
-		CNameToCol("OldLace", CRGBA(0xFD, 0xF5, 0xE6)),
-		CNameToCol("Olive", CRGBA(0x80, 0x80, 0x00)),
-		CNameToCol("OliveDrab", CRGBA(0x6B, 0x8E, 0x23)),
-		CNameToCol("Orange", CRGBA(0xFF, 0xA5, 0x00)),
-		CNameToCol("OrangeRed", CRGBA(0xFF, 0x45, 0x00)),
-		CNameToCol("Orchid", CRGBA(0xDA, 0x70, 0xD6)),
-		CNameToCol("PaleGoldenRod", CRGBA(0xEE, 0xE8, 0xAA)),
-		CNameToCol("PaleGreen", CRGBA(0x98, 0xFB, 0x98)),
-		CNameToCol("PaleTurquoise", CRGBA(0xAF, 0xEE, 0xEE)),
-		CNameToCol("PaleVioletRed", CRGBA(0xD8, 0x70, 0x93)),
-		CNameToCol("PapayaWhip", CRGBA(0xFF, 0xEF, 0xD5)),
-		CNameToCol("PeachPuff", CRGBA(0xFF, 0xDA, 0xB9)),
-		CNameToCol("Peru", CRGBA(0xCD, 0x85, 0x3F)),
-		CNameToCol("Pink", CRGBA(0xFF, 0xC0, 0xCB)),
-		CNameToCol("Plum", CRGBA(0xDD, 0xA0, 0xDD)),
-		CNameToCol("PowderBlue", CRGBA(0xB0, 0xE0, 0xE6)),
-		CNameToCol("Purple", CRGBA(0x80, 0x00, 0x80)),
-		CNameToCol("Red", CRGBA(0xFF, 0x00, 0x00)),
-		CNameToCol("RosyBrown", CRGBA(0xBC, 0x8F, 0x8F)),
-		CNameToCol("RoyalBlue", CRGBA(0x41, 0x69, 0xE1)),
-		CNameToCol("SaddleBrown", CRGBA(0x8B, 0x45, 0x13)),
-		CNameToCol("Salmon", CRGBA(0xFA, 0x80, 0x72)),
-		CNameToCol("SandyBrown", CRGBA(0xF4, 0xA4, 0x60)),
-		CNameToCol("SeaGreen", CRGBA(0x2E, 0x8B, 0x57)),
-		CNameToCol("SeaShell", CRGBA(0xFF, 0xF5, 0xEE)),
-		CNameToCol("Sienna", CRGBA(0xA0, 0x52, 0x2D)),
-		CNameToCol("Silver", CRGBA(0xC0, 0xC0, 0xC0)),
-		CNameToCol("SkyBlue", CRGBA(0x87, 0xCE, 0xEB)),
-		CNameToCol("SlateBlue", CRGBA(0x6A, 0x5A, 0xCD)),
-		CNameToCol("SlateGray", CRGBA(0x70, 0x80, 0x90)),
-		CNameToCol("Snow", CRGBA(0xFF, 0xFA, 0xFA)),
-		CNameToCol("SpringGreen", CRGBA(0x00, 0xFF, 0x7F)),
-		CNameToCol("SteelBlue", CRGBA(0x46, 0x82, 0xB4)),
-		CNameToCol("Tan", CRGBA(0xD2, 0xB4, 0x8C)),
-		CNameToCol("Teal", CRGBA(0x00, 0x80, 0x80)),
-		CNameToCol("Thistle", CRGBA(0xD8, 0xBF, 0xD8)),
-		CNameToCol("Tomato", CRGBA(0xFF, 0x63, 0x47)),
-		CNameToCol("Turquoise", CRGBA(0x40, 0xE0, 0xD0)),
-		CNameToCol("Violet", CRGBA(0xEE, 0x82, 0xEE)),
-		CNameToCol("VioletRed", CRGBA(0xD0, 0x20, 0x90)),
-		CNameToCol("Wheat", CRGBA(0xF5, 0xDE, 0xB3)),
-		CNameToCol("White", CRGBA(0xFF, 0xFF, 0xFF)),
-		CNameToCol("WhiteSmoke", CRGBA(0xF5, 0xF5, 0xF5)),
-		CNameToCol("Yellow", CRGBA(0xFF, 0xFF, 0x00)),
-		CNameToCol("YellowGreen", CRGBA(0x9A, 0xCD, 0x32))
-	};
-
-	// scan a color from a HTML form (#rrggbb format)
-	bool scanHTMLColor(const char *src, CRGBA &dest)
-	{
-		if (!src || *src == '\0') return false;
-		if (*src == '#')
 		{
-			++src;
-			if (strlen(src) == 3 || strlen(src) == 4)
-			{
-				bool hasAlpha = (strlen(src) == 4);
-				// check RGB for valid hex
-				if (isHexa(src[0]) && isHexa(src[1]) && isHexa(src[2]))
-				{
-					// check optional A for valid hex
-					if (hasAlpha && !isHexa(src[3])) return false;
-
-					dest.R = convertHexa(src[0]);
-					dest.G = convertHexa(src[1]);
-					dest.B = convertHexa(src[2]);
-
-					dest.R = dest.R << 4 | dest.R;
-					dest.G = dest.G << 4 | dest.G;
-					dest.B = dest.B << 4 | dest.B;
-
-					if (hasAlpha)
-					{
-						dest.A = convertHexa(src[3]);
-						dest.A = dest.A << 4 | dest.A;
-					}
-					else
-						dest.A = 255;
-
-					return true;
-				}
-
-				return false;
-			}
-
-			CRGBA result;
-			src = scanColorComponent(src, result.R); if (!src) return false;
-			src = scanColorComponent(src, result.G); if (!src) return false;
-			src = scanColorComponent(src, result.B); if (!src) return false;
-			src = scanColorComponent(src, result.A);
-			if (!src)
-			{
-				// Alpha is optional
-				result.A = 255;
-			}
-			dest = result;
-			return true;
+			// unknown pseudo element
+			return;
 		}
 
-		if (strnicmp(src, "rgb(", 4) == 0 || strnicmp(src, "rgba(", 5) == 0)
+		// TODO: 'content' should already be tokenized in css parser as it has all the functions for that
+		std::string content = trim(_Style.getStyle("content"));
+		if (toLower(content) == "none" || toLower(content) == "normal")
 		{
-			src += 4;
-			if (*src == '(') src++;
+			return;
+		}
 
-			vector<string> parts;
-			NLMISC::splitString(src, ",", parts);
-			if (parts.size() >= 3)
+		// TODO: use ucstring / ucchar as content is utf8 chars
+		std::string::size_type pos = 0;
+		while(pos < content.size())
+		{
+			std::string::size_type start;
+			std::string token;
+		
+			// not supported
+			// counter, open-quote, close-quote, no-open-quote, no-close-quote
+			if (content[pos] == '"' || content[pos] == '\'')
 			{
-				CRGBA result;
-				sint tmpv;
-				float tmpf;
-
-				// R
-				if (getPercentage(tmpv, tmpf, parts[0].c_str())) tmpv = 255 * tmpf;
-				clamp(tmpv, 0, 255);
-				result.R = tmpv;
-
-				// G
-				if (getPercentage(tmpv, tmpf, parts[1].c_str())) tmpv = 255 * tmpf;
-				clamp(tmpv, 0, 255);
-				result.G = tmpv;
-
-				// B
-				if (getPercentage(tmpv, tmpf, parts[2].c_str())) tmpv = 255 * tmpf;
-				clamp(tmpv, 0, 255);
-				result.B = tmpv;
-
-				// A
-				if (parts.size() == 4)
+				char quote = content[pos];
+				pos++;
+				start = pos;
+				while(pos < content.size() && content[pos] != quote)
 				{
-					if (!fromString(parts[3], tmpf)) return false;
-					if (parts[3].find_first_of("%") != std::string::npos)
-						tmpf /= 100;
+					if (content[pos] == '\\') pos++;
+					pos++;
+				}
+				token = content.substr(start, pos - start);
+				addString(ucstring::makeFromUtf8(token));
 
-					tmpv = 255 * tmpf;
-					clamp(tmpv, 0, 255);
-					result.A = tmpv;
+				// skip closing quote
+				pos++;
+			}
+			else if (content[pos] == 'u' && pos < content.size() - 6 && toLower(content.substr(pos, 4)) == "url(")
+			{
+				// url(/path-to/image.jpg) / "Alt!"
+				// url("/path to/image.jpg") / "Alt!"
+				std::string tooltip;
+
+				start = pos + 4;
+				// fails if url contains ')'
+				pos = content.find(")", start);
+				token = trim(content.substr(start, pos - start));
+				// skip ')'
+				pos++;
+
+				// scan for tooltip
+				start = pos;
+				while(pos < content.size() && content[pos] == ' ' && content[pos] != '/')
+				{
+					pos++;
+				}
+				if (pos < content.size() && content[pos] == '/')
+				{
+					// skip '/'
+					pos++;
+
+					// skip whitespace
+					while(pos < content.size() && content[pos] == ' ')
+					{
+						pos++;
+					}
+					if (pos < content.size() && (content[pos] == '\'' || content[pos] == '"'))
+					{
+						char openQuote =  content[pos];
+						pos++;
+						start = pos;
+						while(pos < content.size() && content[pos] != openQuote)
+						{
+							if (content[pos] == '\\') pos++;
+							pos++;
+						}
+						tooltip = content.substr(start, pos - start);
+
+						// skip closing quote
+						pos++;
+					}
+					else
+					{
+						// tooltip should be quoted
+						pos = start;
+						tooltip.clear();
+					}
 				}
 				else
-					result.A = 255;
-
-				dest = result;
-				return true;
-			}
-
-			return false;
-		}
-
-		if (strnicmp(src, "hsl(", 4) == 0 || strnicmp(src, "hsla(", 5) == 0)
-		{
-			src += 4;
-			if (*src == '(') src++;
-
-			vector<string> parts;
-			NLMISC::splitString(src, ",", parts);
-			if (parts.size() >= 3)
-			{
-				sint tmpv;
-				float h, s, l;
-				// hue
-				if (!fromString(parts[0], tmpv)) return false;
-				tmpv = ((tmpv % 360) + 360) % 360;
-				h = (float) tmpv / 360.0f;
-
-				// saturation
-				if (!getPercentage(tmpv, s, parts[1].c_str())) return false;
-				clamp(s, 0.0f, 1.0f);
-
-				// lightness
-				if (!getPercentage(tmpv, l, parts[2].c_str())) return false;
-				clamp(l, 0.0f, 1.0f);
-
-				CRGBA result;
-				hslToRgb(h, s, l, result);
-
-				// A
-				if (parts.size() == 4)
 				{
-					float tmpf;
-					if (!fromString(parts[3], tmpf)) return false;
-					if (parts[3].find_first_of("%") != std::string::npos)
-						tmpf /= 100;
-					clamp(tmpf, 0.0f, 1.0f);
-					result.A = 255 * tmpf;
+					// no tooltip
+					pos = start;
 				}
 
-				dest = result;
-				return true;
-			}
-
-			return false;
-		}
-
-		{
-			// slow but should suffice for now
-			for(uint k = 0; k < sizeofarray(htmlColorNameToRGBA); ++k)
-			{
-				if (nlstricmp(src, htmlColorNameToRGBA[k].Name) == 0)
+				if (tooltip.empty())
 				{
-					dest = htmlColorNameToRGBA[k].Color;
-					return true;
+					addImage(getId() + pseudo, token, false, _Style.Current);
 				}
-			}
-			return false;
-		}
-	}
-
-	// ***************************************************************************
-
-	void CGroupHTML::beginElement (uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value)
-	{
-		if (_Browsing)
-		{
-			// Paragraph ?
-			switch(element_number)
-			{
-			case HTML_HTML:
-				if (present[MY_HTML_HTML_STYLE] && value[MY_HTML_HTML_STYLE])
-					getStyleParams(value[MY_HTML_HTML_STYLE], _StyleDefault, _StyleDefault);
-
-				_Style = _StyleDefault;
-				setBackgroundColor(_Style.BackgroundColor);
-				break;
-			case HTML_HEAD:
-				_ReadingHeadTag = !_IgnoreHeadTag;
-				_IgnoreHeadTag = true;
-				break;
-			case HTML_BASE:
-				if (_ReadingHeadTag && !_IgnoreBaseUrlTag)
-				{
-					if (present[HTML_BASE_HREF] && value[HTML_BASE_HREF])
-					{
-						CUrlParser uri(value[HTML_BASE_HREF]);
-						if (uri.isAbsolute())
-						{
-							_URL = uri.toString();
-							_IgnoreBaseUrlTag = true;
-						}
-					}
-				}
-				break;
-			case HTML_META:
-				if (_ReadingHeadTag)
-				{
-					bool httpEquiv = present[HTML_META_HTTP_EQUIV] && value[HTML_META_HTTP_EQUIV];
-					bool httpContent = present[HTML_META_CONTENT] && value[HTML_META_CONTENT];
-					if (httpEquiv && httpContent)
-					{
-						// only first http-equiv="refresh" should be handled
-						if (_RefreshUrl.empty() && toLower(value[HTML_META_HTTP_EQUIV]) == "refresh")
-						{
-							const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
-							double timeSec = times.thisFrameMs / 1000.0f;
-							string content(value[HTML_META_CONTENT]);
-
-							string::size_type pos = content.find_first_of(";");
-							if (pos == string::npos)
-							{
-								fromString(content, _NextRefreshTime);
-								_RefreshUrl = _URL;
-							}
-							else
-							{
-								fromString(content.substr(0, pos), _NextRefreshTime);
-
-								pos = toLower(content).find("url=");
-								if (pos != string::npos)
-									_RefreshUrl = getAbsoluteUrl(content.substr(pos + 4));
-							}
-
-							_NextRefreshTime += timeSec;
-						}
-					}
-				}
-				break;
-			case HTML_A:
-			{
-				registerAnchorName(MY_HTML_A);
-
-				pushStyle();
-				_Style.TextColor = LinkColor;
-				_Style.Underlined = true;
-				_Style.GlobalColor = LinkColorGlobalColor;
-				_Style.BackgroundColor.A = 0;
-				_Style.BackgroundColorOver.A = 0;
-				_Style.Width = -1;
-				_Style.Height = -1;
-
-				if (present[HTML_A_STYLE] && value[HTML_A_STYLE])
-					getStyleParams(value[HTML_A_STYLE], _Style, _StyleParams.back());
-
-				_A.push_back(true);
-				_Link.push_back ("");
-				_LinkTitle.push_back("");
-				_LinkClass.push_back("");
-
-				// #fragment works with both ID and NAME so register both
-				if (present[MY_HTML_A_NAME] && value[MY_HTML_A_NAME])
-					_AnchorName.push_back(value[MY_HTML_A_NAME]);
-				if (present[MY_HTML_A_TITLE] && value[MY_HTML_A_TITLE])
-					_LinkTitle.back() = value[MY_HTML_A_TITLE];
-				if (present[MY_HTML_A_CLASS] && value[MY_HTML_A_CLASS])
-					_LinkClass.back() = value[MY_HTML_A_CLASS];
-				if (present[MY_HTML_A_HREF] && value[MY_HTML_A_HREF])
-				{
-					string suri = value[MY_HTML_A_HREF];
-					if(suri.find("ah:") == 0)
-					{
-						if (_TrustedDomain)
-							_Link.back() = suri;
-					}
-					else if (_TrustedDomain && suri[0] == '#' && _LuaHrefHack)
-					{
-						// Direct url (hack for lua beginElement)
-						_Link.back() = suri.substr(1);
-					}
-					else
-					{
-						// convert href from "?key=val" into "http://domain.com/?key=val"
-						_Link.back() = getAbsoluteUrl(suri);
-					}
-				}
-			}
-				break;
-			case HTML_DIV:
-			{
-				_BlockLevelElement.push_back(true);
-				registerAnchorName(MY_HTML_DIV);
-				pushStyle();
-
-				if (present[MY_HTML_DIV_NAME] && value[MY_HTML_DIV_NAME])
-					_DivName = value[MY_HTML_DIV_NAME];
-
-				string instClass;
-				if (present[MY_HTML_DIV_CLASS] && value[MY_HTML_DIV_CLASS])
-					instClass = value[MY_HTML_DIV_CLASS];
-
-				string style;
-				if (present[MY_HTML_DIV_STYLE] && value[MY_HTML_DIV_STYLE])
-					style = value[MY_HTML_DIV_STYLE];
-
-				if (!style.empty())
-					getStyleParams(style, _Style, _StyleParams.back());
-
-				// use generic template system
-				if (_TrustedDomain && !instClass.empty() && instClass == "ryzom-ui-grouptemplate")
-				{
-					string id;
-					if (present[MY_HTML_DIV_ID] && value[MY_HTML_DIV_ID])
-						id = value[MY_HTML_DIV_ID];
-
-					typedef pair<string, string> TTmplParam;
-					vector<TTmplParam> tmplParams;
-
-					string templateName;
-					if (!style.empty())
-					{
-						TStyle styles = parseStyle(style);
-						TStyle::iterator	it;
-						for (it=styles.begin(); it != styles.end(); it++)
-						{
-							if ((*it).first == "template")
-								templateName = (*it).second;
-							else if ((*it).first == "display" && (*it).second == "inline-block")
-								_BlockLevelElement.back() = false;
-							else
-								tmplParams.push_back(TTmplParam((*it).first, (*it).second));
-						}
-					}
-
-					if (!templateName.empty())
-					{
-						string parentId;
-						bool haveParentDiv = getDiv() != NULL;
-						if (haveParentDiv)
-							parentId = getDiv()->getId();
-						else
-						{
-							if (!_Paragraph)
-								newParagraph (0);
-
-							parentId = _Paragraph->getId();
-						}
-
-						CInterfaceGroup *inst = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, this->_Id+":"+id, tmplParams);
-						if (inst)
-						{
-							inst->setId(this->_Id+":"+id);
-							inst->updateCoords();
-							if (haveParentDiv)
-							{
-									inst->setParent(getDiv());
-									inst->setParentSize(getDiv());
-									inst->setParentPos(getDiv());
-									inst->setPosRef(Hotspot_TL);
-									inst->setParentPosRef(Hotspot_TL);
-									getDiv()->addGroup(inst);
-
-									_BlockLevelElement.back() = false;
-							}
-							else
-							{
-								getParagraph()->addChild(inst);
-								paragraphChange();
-							}
-							_Divs.push_back(inst);
-						}
-					}
-				}
-
-				if (isBlockLevelElement())
-				{
-					newParagraph(0);
-				}
-			}
-				break;
-			case HTML_FONT:
-			{
-				pushStyle();
-				if (present[HTML_FONT_COLOR] && value[HTML_FONT_COLOR])
-				{
-					CRGBA color;
-					if (scanHTMLColor(value[HTML_FONT_COLOR], color))
-						_Style.TextColor = color;
-				}
-
-				if (present[HTML_FONT_SIZE] && value[HTML_FONT_SIZE])
-				{
-					uint fontsize;
-					fromString(value[HTML_FONT_SIZE], fontsize);
-					_Style.FontSize = fontsize;
-				}
-			}
-				break;
-			case HTML_BR:
-			{
-				endParagraph();
-
-				// insert zero-width-space (0x200B) to prevent removal of empty lines
-				ucstring tmp;
-				tmp.fromUtf8("\xe2\x80\x8b");
-				addString(tmp);
-			}
-				break;
-			case HTML_BODY:
-				{
-					pushStyle();
-
-					string style;
-					if (present[HTML_BODY_STYLE] && value[HTML_BODY_STYLE])
-						style = value[HTML_BODY_STYLE];
-
-					if (!style.empty())
-						getStyleParams(style, _Style, _StyleParams.back());
-
-					CRGBA bgColor = _Style.BackgroundColor;
-					if (present[HTML_BODY_BGCOLOR] && value[HTML_BODY_BGCOLOR])
-						scanHTMLColor(value[HTML_BODY_BGCOLOR], bgColor);
-
-					if (bgColor != _Style.BackgroundColor)
-						setBackgroundColor(bgColor);
-
-					if (!style.empty())
-					{
-						TStyle styles = parseStyle(style);
-						TStyle::iterator	it;
-
-						it = styles.find("background-repeat");
-						bool repeat = (it != styles.end() && it->second == "1");
-
-						// Webig only
-						it = styles.find("background-scale");
-						bool scale = (it != styles.end() && it->second == "1");
-
-						it = styles.find("background-image");
-						if (it != styles.end())
-						{
-							string image = it->second;
-							string::size_type texExt = toLower(image).find("url(");
-							// Url image
-							if (texExt != string::npos)
-								// Remove url()
-								image = image.substr(4, image.size()-5);
-							setBackground (image, scale, repeat);
-						}
-					}
-				}
-				break;
-			case HTML_FORM:
-				{
-					// Build the form
-					CGroupHTML::CForm form;
-
-					// Get the action name
-					if (present[HTML_FORM_ACTION] && value[HTML_FORM_ACTION])
-					{
-						form.Action = getAbsoluteUrl(string(value[HTML_FORM_ACTION]));
-					}
-					else
-					{
-						form.Action = _URL;
-					}
-					_Forms.push_back(form);
-				}
-				break;
-			case HTML_H1:
-				{
-					registerAnchorName(MY_HTML_H1);
-					newParagraph(PBeginSpace);
-					pushStyle();
-					_Style.FontSize = H1FontSize;
-					_Style.TextColor = H1Color;
-					_Style.GlobalColor = H1ColorGlobalColor;
-					if (present[MY_HTML_H1_STYLE] && value[MY_HTML_H1_STYLE])
-						getStyleParams(value[MY_HTML_H1_STYLE], _Style, _StyleParams.back());
-				}
-				break;
-			case HTML_H2:
-				{
-					registerAnchorName(MY_HTML_H2);
-					newParagraph(PBeginSpace);
-					pushStyle();
-					_Style.FontSize = H2FontSize;
-					_Style.TextColor = H2Color;
-					_Style.GlobalColor = H2ColorGlobalColor;
-					if (present[MY_HTML_H2_STYLE] && value[MY_HTML_H2_STYLE])
-						getStyleParams(value[MY_HTML_H2_STYLE], _Style, _StyleParams.back());
-				}
-				break;
-			case HTML_H3:
-				{
-					registerAnchorName(MY_HTML_H3);
-					newParagraph(PBeginSpace);
-					pushStyle();
-					_Style.FontSize = H3FontSize;
-					_Style.TextColor = H3Color;
-					_Style.GlobalColor = H3ColorGlobalColor;
-					if (present[MY_HTML_H3_STYLE] && value[MY_HTML_H3_STYLE])
-						getStyleParams(value[MY_HTML_H3_STYLE], _Style, _StyleParams.back());
-				}
-				break;
-			case HTML_H4:
-				{
-					registerAnchorName(MY_HTML_H4);
-					newParagraph(PBeginSpace);
-					pushStyle();
-					_Style.FontSize = H4FontSize;
-					_Style.TextColor = H4Color;
-					_Style.GlobalColor = H4ColorGlobalColor;
-					if (present[MY_HTML_H4_STYLE] && value[MY_HTML_H4_STYLE])
-						getStyleParams(value[MY_HTML_H4_STYLE], _Style, _StyleParams.back());
-				}
-				break;
-			case HTML_H5:
-				{
-					registerAnchorName(MY_HTML_H5);
-					newParagraph(PBeginSpace);
-					pushStyle();
-					_Style.FontSize = H5FontSize;
-					_Style.TextColor = H5Color;
-					_Style.GlobalColor = H5ColorGlobalColor;
-					if (present[MY_HTML_H5_STYLE] && value[MY_HTML_H5_STYLE])
-						getStyleParams(value[MY_HTML_H5_STYLE], _Style, _StyleParams.back());
-				}
-				break;
-			case HTML_H6:
-				{
-					registerAnchorName(MY_HTML_H6);
-					newParagraph(PBeginSpace);
-					pushStyle();
-					_Style.FontSize = H6FontSize;
-					_Style.TextColor = H6Color;
-					_Style.GlobalColor = H6ColorGlobalColor;
-					if (present[MY_HTML_H6_STYLE] && value[MY_HTML_H6_STYLE])
-						getStyleParams(value[MY_HTML_H6_STYLE], _Style, _StyleParams.back());
-				}
-				break;
-			case HTML_IMG:
-				{
-					// Get the string name
-					if (present[MY_HTML_IMG_SRC] && value[MY_HTML_IMG_SRC])
-					{
-						float tmpf;
-						std::string id;
-						CStyleParams style;
-						style.FontSize = _Style.FontSize;
-
-						if (present[MY_HTML_IMG_ID] && value[MY_HTML_IMG_ID])
-							id = value[MY_HTML_IMG_ID];
-
-						if (present[MY_HTML_IMG_WIDTH] && value[MY_HTML_IMG_WIDTH])
-							getPercentage(style.Width, tmpf, value[MY_HTML_IMG_WIDTH]);
-						if (present[MY_HTML_IMG_HEIGHT] && value[MY_HTML_IMG_HEIGHT])
-							getPercentage(style.Height, tmpf, value[MY_HTML_IMG_HEIGHT]);
-
-						// Get the global color name
-						if (present[MY_HTML_IMG_GLOBAL_COLOR])
-							style.GlobalColor = true;
-
-						// width, height from inline css
-						if (present[MY_HTML_IMG_STYLE] && value[MY_HTML_IMG_STYLE])
-							getStyleParams(value[MY_HTML_IMG_STYLE], style, _Style);
-
-						// Tooltip
-						const char *tooltip = NULL;
-						// keep "alt" attribute for backward compatibility
-						if (present[MY_HTML_IMG_ALT] && value[MY_HTML_IMG_ALT])
-							tooltip = value[MY_HTML_IMG_ALT];
-						// tooltip
-						if (present[MY_HTML_IMG_TITLE] && value[MY_HTML_IMG_TITLE])
-							tooltip = value[MY_HTML_IMG_TITLE];
-
-						// Mouse over image
-						string overSrc;
-						if (present[MY_HTML_IMG_DATA_OVER_SRC] && value[MY_HTML_IMG_DATA_OVER_SRC])
-						{
-							overSrc = value[MY_HTML_IMG_DATA_OVER_SRC];
-						}
-
-
-						if (getA() && getParent () && getParent ()->getParent())
-						{
-							string params = "name=" + getId() + "|url=" + getLink ();
-							addButton(CCtrlButton::PushButton, id, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
-								overSrc, "browse", params.c_str(), tooltip, style);
-						}
-						else
-						if (tooltip || !overSrc.empty())
-						{
-							addButton(CCtrlButton::PushButton, id, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
-								overSrc, "", "", tooltip, style);
-						}
-						else
-						{
-							// Get the option to reload (class==reload)
-							bool reloadImg = false;
-
-							string styleString;
-							if (present[MY_HTML_IMG_STYLE] && value[MY_HTML_IMG_STYLE])
-								styleString = value[MY_HTML_IMG_STYLE];
-
-							if (!styleString.empty())
-							{
-								TStyle styles = parseStyle(styleString);
-								TStyle::iterator	it;
-
-								it = styles.find("reload");
-								if (it != styles.end() && (*it).second == "1")
-									reloadImg = true;
-							}
-
-							addImage(id, value[MY_HTML_IMG_SRC], reloadImg, style);
-						}
-					}
-				}
-				break;
-			case HTML_INPUT:
-				// Got one form ?
-				if (!(_Forms.empty()))
-				{
-					// read general property
-					string templateName;
-					string minWidth;
-					string id;
-
-					if (present[MY_HTML_INPUT_ID] && value[MY_HTML_INPUT_ID])
-						id = value[MY_HTML_INPUT_ID];
-
-					// Widget template name
-					if (present[MY_HTML_INPUT_Z_BTN_TMPL] && value[MY_HTML_INPUT_Z_BTN_TMPL])
-						templateName = value[MY_HTML_INPUT_Z_BTN_TMPL];
-					// Input name is the new
-					if (present[MY_HTML_INPUT_Z_INPUT_TMPL] && value[MY_HTML_INPUT_Z_INPUT_TMPL])
-						templateName = value[MY_HTML_INPUT_Z_INPUT_TMPL];
-					// Widget minimal width
-					if (present[MY_HTML_INPUT_Z_INPUT_WIDTH] && value[MY_HTML_INPUT_Z_INPUT_WIDTH])
-						minWidth = value[MY_HTML_INPUT_Z_INPUT_WIDTH];
-
-					// Get the type
-					if (present[MY_HTML_INPUT_TYPE] && value[MY_HTML_INPUT_TYPE])
-					{
-						// by default not inherited, font family defaults to system font
-						pushStyle();
-						_Style.TextColor = TextColor;
-						_Style.FontSize = TextFontSize;
-						_Style.FontWeight = FONT_WEIGHT_NORMAL;
-						_Style.FontOblique = false;
-						_Style.TextShadow = STextShadow(true);
-						_Style.Width = -1;
-						_Style.Height = -1;
-						// by default background texture is transparent,
-						// using alpha value to decide if to change it to 'blank.tga' for coloring
-						_Style.BackgroundColor.A = 0;
-						_Style.BackgroundColorOver.A = 0;
-
-						// Global color flag
-						if (present[MY_HTML_INPUT_GLOBAL_COLOR])
-							_Style.GlobalColor = true;
-
-						// Tooltip
-						const char *tooltip = NULL;
-						if (present[MY_HTML_INPUT_ALT] && value[MY_HTML_INPUT_ALT])
-							tooltip = value[MY_HTML_INPUT_ALT];
-
-						if (present[MY_HTML_INPUT_STYLE] && value[MY_HTML_INPUT_STYLE])
-							getStyleParams(value[MY_HTML_INPUT_STYLE], _Style, _StyleParams.back());
-
-						string type = toLower(value[MY_HTML_INPUT_TYPE]);
-						if (type == "image")
-						{
-							// The submit button
-							string name;
-							string normal;
-							string pushed;
-							string over;
-							if (present[MY_HTML_INPUT_NAME] && value[MY_HTML_INPUT_NAME])
-								name = value[MY_HTML_INPUT_NAME];
-							if (present[MY_HTML_INPUT_SRC] && value[MY_HTML_INPUT_SRC])
-								normal = value[MY_HTML_INPUT_SRC];
-
-							// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-							string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=image";
-
-							// Add the ctrl button
-							addButton (CCtrlButton::PushButton, name, normal, pushed.empty()?normal:pushed, over,
-								"html_submit_form", param.c_str(), tooltip, _Style);
-						}
-						if (type == "button" || type == "submit")
-						{
-							// The submit button
-							string name;
-							string text;
-							string normal;
-							string pushed;
-							string over;
-
-							string buttonTemplate(!templateName.empty() ? templateName : DefaultButtonGroup );
-							if (present[MY_HTML_INPUT_NAME] && value[MY_HTML_INPUT_NAME])
-								name = value[MY_HTML_INPUT_NAME];
-							if (present[MY_HTML_INPUT_SRC] && value[MY_HTML_INPUT_SRC])
-								normal = value[MY_HTML_INPUT_SRC];
-							if (present[MY_HTML_INPUT_VALUE] && value[MY_HTML_INPUT_VALUE])
-								text = value[MY_HTML_INPUT_VALUE];
-
-							// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-							string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=submit";
-							if (!text.empty())
-							{
-								// escape AH param separator
-								string tmp = text;
-								while(NLMISC::strFindReplace(tmp, "|", "&#124;"))
-									;
-								param = param + "|submit_button_value=" + tmp;
-							}
-
-							// Add the ctrl button
-							if (!_Paragraph)
-							{
-								newParagraph (0);
-								paragraphChange ();
-							}
-
-							typedef pair<string, string> TTmplParam;
-							vector<TTmplParam> tmplParams;
-							tmplParams.push_back(TTmplParam("id", name));
-							tmplParams.push_back(TTmplParam("onclick", "html_submit_form"));
-							tmplParams.push_back(TTmplParam("onclick_param", param));
-							//tmplParams.push_back(TTmplParam("text", text));
-							tmplParams.push_back(TTmplParam("active", "true"));
-							if (!minWidth.empty())
-								tmplParams.push_back(TTmplParam("wmin", minWidth));
-							CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
-							if (buttonGroup)
-							{
-
-								// Add the ctrl button
-								CCtrlTextButton *ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("button"));
-								if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
-								if (ctrlButton)
-								{
-									ctrlButton->setModulateGlobalColorAll (_Style.GlobalColor);
-
-									// Translate the tooltip
-									if (tooltip)
-									{
-										if (CI18N::hasTranslation(tooltip))
-										{
-											ctrlButton->setDefaultContextHelp(CI18N::get(tooltip));
-										}
-										else
-										{
-											ctrlButton->setDefaultContextHelp(ucstring(tooltip));
-										}
-									}
-
-									ctrlButton->setText(ucstring::makeFromUtf8(text));
-
-									setTextButtonStyle(ctrlButton, _Style);
-								}
-								getParagraph()->addChild (buttonGroup);
-								paragraphChange ();
-							}
-						}
-						else if (type == "text")
-						{
-							// Get the string name
-							string name;
-							ucstring ucValue;
-							uint size = 120;
-							uint maxlength = 1024;
-							if (present[MY_HTML_INPUT_NAME] && value[MY_HTML_INPUT_NAME])
-								name = value[MY_HTML_INPUT_NAME];
-							if (present[MY_HTML_INPUT_SIZE] && value[MY_HTML_INPUT_SIZE])
-								fromString(value[MY_HTML_INPUT_SIZE], size);
-							if (present[MY_HTML_INPUT_VALUE] && value[MY_HTML_INPUT_VALUE])
-								ucValue.fromUtf8(value[MY_HTML_INPUT_VALUE]);
-							if (present[MY_HTML_INPUT_MAXLENGTH] && value[MY_HTML_INPUT_MAXLENGTH])
-								fromString(value[MY_HTML_INPUT_MAXLENGTH], maxlength);
-
-							string textTemplate(!templateName.empty() ? templateName : DefaultFormTextGroup);
-							// Add the editbox
-							CInterfaceGroup *textArea = addTextArea (textTemplate, name.c_str (), 1, size/12, false, ucValue, maxlength);
-							if (textArea)
-							{
-								// Add the text area to the form
-								CGroupHTML::CForm::CEntry entry;
-								entry.Name = name;
-								entry.TextArea = textArea;
-								_Forms.back().Entries.push_back (entry);
-							}
-						}
-						else if (type == "checkbox" || type == "radio")
-						{
-							CCtrlButton::EType btnType;
-							string name;
-							string normal;
-							string pushed;
-							string over;
-							ucstring ucValue = ucstring("on");
-							bool checked = false;
-
-							if (type == "radio")
-							{
-								btnType = CCtrlButton::RadioButton;
-								normal = DefaultRadioButtonBitmapNormal;
-								pushed = DefaultRadioButtonBitmapPushed;
-								over = DefaultRadioButtonBitmapOver;
-							}
-							else
-							{
-								btnType = CCtrlButton::ToggleButton;
-								normal = DefaultCheckBoxBitmapNormal;
-								pushed = DefaultCheckBoxBitmapPushed;
-								over = DefaultCheckBoxBitmapOver;
-							}
-
-							if (present[MY_HTML_INPUT_NAME] && value[MY_HTML_INPUT_NAME])
-								name = value[MY_HTML_INPUT_NAME];
-							if (present[MY_HTML_INPUT_SRC] && value[MY_HTML_INPUT_SRC])
-								normal = value[MY_HTML_INPUT_SRC];
-							if (present[MY_HTML_INPUT_VALUE] && value[MY_HTML_INPUT_VALUE])
-								ucValue.fromUtf8(value[MY_HTML_INPUT_VALUE]);
-							checked = (present[MY_HTML_INPUT_CHECKED] && value[MY_HTML_INPUT_CHECKED]);
-
-							// Add the ctrl button
-							CCtrlButton *checkbox = addButton (btnType, name, normal, pushed, over, "", "", tooltip, _Style);
-							if (checkbox)
-							{
-								if (btnType == CCtrlButton::RadioButton)
-								{
-									// override with 'id' because radio buttons share same name
-									if (!id.empty())
-										checkbox->setId(id);
-
-									// group together buttons with same name
-									CForm &form = _Forms.back();
-									bool notfound = true;
-									for (uint i=0; i<form.Entries.size(); i++)
-									{
-										if (form.Entries[i].Name == name && form.Entries[i].Checkbox->getType() == CCtrlButton::RadioButton)
-										{
-											checkbox->initRBRefFromRadioButton(form.Entries[i].Checkbox);
-											notfound = false;
-											break;
-										}
-									}
-									if (notfound)
-									{
-										// this will start a new group (initRBRef() would take first button in group container otherwise)
-										checkbox->initRBRefFromRadioButton(checkbox);
-									}
-								}
-
-								checkbox->setPushed (checked);
-
-								// Add the button to the form
-								CGroupHTML::CForm::CEntry entry;
-								entry.Name = name;
-								entry.Value = decodeHTMLEntities(ucValue);
-								entry.Checkbox = checkbox;
-								_Forms.back().Entries.push_back (entry);
-							}
-						}
-						else if (type == "hidden")
-						{
-							if (present[MY_HTML_INPUT_NAME] && value[MY_HTML_INPUT_NAME])
-							{
-								// Get the name
-								string name = value[MY_HTML_INPUT_NAME];
-
-								// Get the value
-								ucstring ucValue;
-								if (present[MY_HTML_INPUT_VALUE] && value[MY_HTML_INPUT_VALUE])
-									ucValue.fromUtf8(value[MY_HTML_INPUT_VALUE]);
-
-								// Add an entry
-								CGroupHTML::CForm::CEntry entry;
-								entry.Name = name;
-								entry.Value = decodeHTMLEntities(ucValue);
-								_Forms.back().Entries.push_back (entry);
-							}
-						}
-
-						popStyle();
-					}
-				}
-				break;
-			case HTML_SELECT:
-				if (!(_Forms.empty()))
-				{
-					CStyleParams style;
-
-					// A select box
-					string name;
-					bool multiple = false;
-					sint32 size = 0;
-
-					if (present[HTML_SELECT_NAME] && value[HTML_SELECT_NAME])
-						name = value[HTML_SELECT_NAME];
-					if (present[HTML_SELECT_SIZE] && value[HTML_SELECT_SIZE])
-						fromString(value[HTML_SELECT_SIZE], size);
-					if (present[HTML_SELECT_MULTIPLE] && value[HTML_SELECT_MULTIPLE])
-						multiple = true;
-					if (present[HTML_SELECT_STYLE] && value[HTML_SELECT_STYLE])
-						getStyleParams(value[HTML_SELECT_STYLE], style, _Style);
-
-					CGroupHTML::CForm::CEntry entry;
-					entry.Name = name;
-					entry.sbMultiple = multiple;
-					if (size > 1 || multiple)
-					{
-						entry.InitialSelection = -1;
-						CGroupMenu *sb = addSelectBox(DefaultFormSelectBoxMenuGroup, name.c_str());
-						if (sb)
-						{
-							if (size < 1)
-								size = 4;
-
-							if (style.Width > -1)
-								sb->setMinW(style.Width);
-
-							if (style.Height > -1)
-								sb->setMinH(style.Height);
-
-							sb->setMaxVisibleLine(size);
-							sb->setFontSize(style.FontSize);
-						}
-
-						entry.SelectBox = sb;
-					}
-					else
-					{
-						CDBGroupComboBox *cb = addComboBox(DefaultFormSelectGroup, name.c_str());
-						entry.ComboBox = cb;
-
-						if (cb)
-						{
-							// create view text
-							cb->updateCoords();
-							if (cb->getViewText())
-								setTextStyle(cb->getViewText(), style);
-						}
-					}
-					_Forms.back().Entries.push_back (entry);
-				}
-			break;
-			case HTML_OPTION:
-				// Got one form ?
-				if (!(_Forms.empty()))
-				{
-					if (!_Forms.back().Entries.empty())
-					{
-						// clear the option string
-						_SelectOptionStr.clear();
-
-						std::string optionValue;
-						if (present[HTML_OPTION_VALUE] && value[HTML_OPTION_VALUE])
-							optionValue = value[HTML_OPTION_VALUE];
-						_Forms.back().Entries.back().SelectValues.push_back(optionValue);
-
-						if (present[HTML_OPTION_SELECTED])
-							_Forms.back().Entries.back().InitialSelection = (sint)_Forms.back().Entries.back().SelectValues.size() - 1;
-						if (present[HTML_OPTION_DISABLED])
-							_Forms.back().Entries.back().sbOptionDisabled = (sint)_Forms.back().Entries.back().SelectValues.size() - 1;
-					}
-				}
-				_SelectOption = true;
-			break;
-			case HTML_LI:
-				if (!_UL.empty())
-				{
-					// UL, OL top margin if this is the first LI
-					if (!_LI)
-					{
-						_LI = true;
-						newParagraph(ULBeginSpace);
-					}
-					else
-					{
-						newParagraph(LIBeginSpace);
-					}
-
-					// OL list index can be overridden by <li value="1"> attribute
-					if (present[HTML_LI_VALUE] && value[HTML_LI_VALUE])
-						fromString(value[HTML_LI_VALUE], _UL.back().Value);
-
-					pushStyle();
-					if (present[HTML_LI_STYLE] && value[HTML_LI_STYLE])
-						getStyleParams(value[HTML_LI_STYLE], _Style, _StyleParams.back());
-
-					ucstring str;
-					str.fromUtf8(_UL.back().getListMarkerText());
-					addString (str);
-
-					sint32 indent = LIIndent;
-					// list-style-type: outside
-					if (_CurrentViewLink)
-					{
-						getParagraph()->setFirstViewIndent(-_CurrentViewLink->getMaxUsedW());
-					}
-
-					flushString ();
-
-					_UL.back().Value++;
-				}
-				break;
-			case HTML_P:
-				{
-					newParagraph(PBeginSpace);
-					pushStyle();
-					if (present[MY_HTML_P_STYLE] && value[MY_HTML_P_STYLE])
-						getStyleParams(value[MY_HTML_P_STYLE], _Style, _StyleParams.back());
-				}
-				break;
-			case HTML_PRE:
-				{
-					pushStyle();
-					_Style.FontFamily = "monospace";
-
-					if (present[HTML_PRE_STYLE] && value[HTML_PRE_STYLE])
-						getStyleParams(value[HTML_PRE_STYLE], _Style, _StyleParams.back());
-
-
-					_PRE.push_back(true);
-				}
-				break;
-			case HTML_TABLE:
-				{
-					pushStyle();
-					registerAnchorName(MY_HTML_TABLE);
-
-					// Get cells parameters
-					getCellsParameters (MY_HTML_TABLE, false);
-
-					CGroupTable *table = new CGroupTable(TCtorParam());
-					table->BgColor = _CellParams.back().BgColor;
-
-					if (present[MY_HTML_TABLE_WIDTH] && value[MY_HTML_TABLE_WIDTH])
-						getPercentage (table->ForceWidthMin, table->TableRatio, value[MY_HTML_TABLE_WIDTH]);
-					if (present[MY_HTML_TABLE_BORDER] && value[MY_HTML_TABLE_BORDER])
-						fromString(value[MY_HTML_TABLE_BORDER], table->Border);
-					if (present[MY_HTML_TABLE_BORDERCOLOR] && value[MY_HTML_TABLE_BORDERCOLOR])
-						scanHTMLColor(value[MY_HTML_TABLE_BORDERCOLOR], table->BorderColor);
-					if (present[MY_HTML_TABLE_CELLSPACING] && value[MY_HTML_TABLE_CELLSPACING])
-						fromString(value[MY_HTML_TABLE_CELLSPACING], table->CellSpacing);
-					if (present[MY_HTML_TABLE_CELLPADDING] && value[MY_HTML_TABLE_CELLPADDING])
-						fromString(value[MY_HTML_TABLE_CELLPADDING], table->CellPadding);
-					if (present[MY_HTML_TABLE_STYLE] && value[MY_HTML_TABLE_STYLE])
-						getStyleParams(value[MY_HTML_TABLE_STYLE], _Style, _StyleParams.back());
-
-					table->setMarginLeft(getIndent());
-					addHtmlGroup (table, 0);
-
-					_Tables.push_back(table);
-
-					// Add a cell pointer
-					_Cells.push_back(NULL);
-					_TR.push_back(false);
-					_Indent.push_back(0);
-				}
-				break;
-			case HTML_TH:
-				// TH is similar to TD, just different font style
-			case HTML_TD:
-				{
-					// Get cells parameters
-					getCellsParameters (MY_HTML_TD, true);
-
-					pushStyle();
-					if (element_number == HTML_TH)
-					{
-						_Style.FontWeight = FONT_WEIGHT_BOLD;
-						// center if not specified otherwise. TD/TH present/value arrays have same indices
-						if (!(present[MY_HTML_TD_ALIGN] && value[MY_HTML_TD_ALIGN]))
-							_CellParams.back().Align = CGroupCell::Center;
-					}
-
-					if (present[MY_HTML_TD_STYLE] && value[MY_HTML_TD_STYLE])
-						getStyleParams(value[MY_HTML_TD_STYLE], _Style, _StyleParams.back());
-
-					CGroupTable *table = getTable();
-					if (table)
-					{
-						if (!_Cells.empty())
-						{
-							_Cells.back() = new CGroupCell(CViewBase::TCtorParam());
-							string style;
-							if (present[MY_HTML_TD_STYLE] && value[MY_HTML_TD_STYLE])
-								style = value[MY_HTML_TD_STYLE];
-
-							// Set the cell parameters
-							if (!style.empty())
-							{
-								TStyle styles = parseStyle(style);
-								TStyle::iterator	it;
-
-								it = styles.find("background-repeat");
-								_Cells.back()->setTextureTile(it != styles.end());
-
-								// Webig only
-								it = styles.find("background-scale");
-								_Cells.back()->setTextureScale(it != styles.end());
-
-								it = styles.find("background-image");
-								if (it != styles.end())
-								{
-									string image = (*it).second;
-									string::size_type texExt = toLower(image).find("url(");
-									// Url image
-									if (texExt != string::npos)
-									{
-										// Remove url()
-										image = image.substr(4, image.size()-5);
-										addImageDownload(image, _Cells.back());
-									// Image in BNP
-									}
-									else
-									{
-										_Cells.back()->setTexture(image);
-									}
-								}
-							}
-
-							if (present[MY_HTML_TD_COLSPAN] && value[MY_HTML_TD_COLSPAN])
-								fromString(value[MY_HTML_TD_COLSPAN], _Cells.back()->ColSpan);
-							if (present[MY_HTML_TD_ROWSPAN] && value[MY_HTML_TD_ROWSPAN])
-								fromString(value[MY_HTML_TD_ROWSPAN], _Cells.back()->RowSpan);
-
-							_Cells.back()->BgColor = _CellParams.back().BgColor;
-							_Cells.back()->Align = _CellParams.back().Align;
-							_Cells.back()->VAlign = _CellParams.back().VAlign;
-							_Cells.back()->LeftMargin = _CellParams.back().LeftMargin;
-							_Cells.back()->NoWrap = _CellParams.back().NoWrap;
-							_Cells.back()->ColSpan = std::max(1, _Cells.back()->ColSpan);
-							_Cells.back()->RowSpan = std::max(1, _Cells.back()->RowSpan);
-
-							float temp;
-							if (present[MY_HTML_TD_WIDTH] && value[MY_HTML_TD_WIDTH])
-								getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, value[MY_HTML_TD_WIDTH]);
-							if (present[MY_HTML_TD_HEIGHT] && value[MY_HTML_TD_HEIGHT])
-								getPercentage (_Cells.back()->Height, temp, value[MY_HTML_TD_HEIGHT]);
-
-							_Cells.back()->NewLine = getTR();
-							table->addChild (_Cells.back());
-
-							// reusing indent pushed by table
-							_Indent.back() = 0;
-
-							newParagraph(TDBeginSpace);
-							// indent is already 0, getParagraph()->setMarginLeft(0); // maybe setIndent(0) if LI is using one
-
-							// Reset TR flag
-							if (!_TR.empty())
-								_TR.back() = false;
-						}
-					}
-				}
-				break;
-			case HTML_TEXTAREA:
-				pushStyle();
-				_PRE.push_back(true);
-
-				// not inherited by default, font family defaults to system font
-				_Style.TextColor = TextColor;
-				_Style.FontWeight = FONT_WEIGHT_NORMAL;
-				_Style.FontOblique = false;
-				_Style.FontSize = TextFontSize;
-				_Style.TextShadow = STextShadow(true);
-				_Style.Width = -1;
-				_Style.Height = -1;
-				_Style.BackgroundColor.A = 0;
-
-				if (present[MY_HTML_TEXTAREA_STYLE] && value[MY_HTML_TEXTAREA_STYLE])
-					getStyleParams(value[MY_HTML_TEXTAREA_STYLE], _Style, _StyleParams.back());
-
-				// Got one form ?
-				if (!(_Forms.empty()))
-				{
-					// read general property
-					string templateName;
-
-					// Widget template name
-					if (present[MY_HTML_TEXTAREA_Z_INPUT_TMPL] && value[MY_HTML_TEXTAREA_Z_INPUT_TMPL])
-						templateName = value[MY_HTML_TEXTAREA_Z_INPUT_TMPL];
-
-					// Get the string name
-					_TextAreaName.clear();
-					_TextAreaRow = 1;
-					_TextAreaCols = 10;
-					_TextAreaContent.clear();
-					_TextAreaMaxLength = 1024;
-					if (present[MY_HTML_TEXTAREA_NAME] && value[MY_HTML_TEXTAREA_NAME])
-						_TextAreaName = value[MY_HTML_TEXTAREA_NAME];
-					if (present[MY_HTML_TEXTAREA_ROWS] && value[MY_HTML_TEXTAREA_ROWS])
-						fromString(value[MY_HTML_TEXTAREA_ROWS], _TextAreaRow);
-					if (present[MY_HTML_TEXTAREA_COLS] && value[MY_HTML_TEXTAREA_COLS])
-						fromString(value[MY_HTML_TEXTAREA_COLS], _TextAreaCols);
-					if (present[MY_HTML_TEXTAREA_MAXLENGTH] && value[MY_HTML_TEXTAREA_MAXLENGTH])
-						fromString(value[MY_HTML_TEXTAREA_MAXLENGTH], _TextAreaMaxLength);
-
-					_TextAreaTemplate = !templateName.empty() ? templateName : DefaultFormTextAreaGroup;
-					_TextArea = true;
-				}
-				break;
-			case HTML_TITLE:
-				{
-					if(!_TitlePrefix.empty())
-						_TitleString = _TitlePrefix + " - ";
-					else
-						_TitleString.clear();
-					_Title = true;
-				}
-				break;
-			case HTML_I:
-				{
-					_Localize = true;
-				}
-				break;
-			case HTML_TR:
-				{
-					// Get cells parameters
-					getCellsParameters (MY_HTML_TR, true);
-
-					// Set TR flag
-					if (!_TR.empty())
-						_TR.back() = true;
-
-					pushStyle();
-					if (present[MY_HTML_TR_STYLE] && value[MY_HTML_TR_STYLE])
-						getStyleParams(value[MY_HTML_TR_STYLE], _Style, _StyleParams.back());
-				}
-				break;
-			case HTML_UL:
-				if (_UL.empty())
-					_UL.push_back(HTMLOListElement(1, "disc"));
-				else if (_UL.size() == 1)
-					_UL.push_back(HTMLOListElement(1, "circle"));
 				else
-					_UL.push_back(HTMLOListElement(1, "square"));
-				// if LI is already present
-				_LI = _UL.size() > 1 || _DL.size() > 1;
-				_Indent.push_back(getIndent() + ULIndent);
-				endParagraph();
-
-				pushStyle();
-				if (present[HTML_UL_STYLE] && value[HTML_UL_STYLE])
-					getStyleParams(value[HTML_UL_STYLE], _Style, _StyleParams.back());
-				break;
-			case HTML_OBJECT:
-				_ObjectType.clear();
-				_ObjectData.clear();
-				_ObjectMD5Sum.clear();
-				_ObjectAction.clear();
-				if (present[HTML_OBJECT_TYPE] && value[HTML_OBJECT_TYPE])
-					_ObjectType = value[HTML_OBJECT_TYPE];
-				if (present[HTML_OBJECT_DATA] && value[HTML_OBJECT_DATA])
-					_ObjectData = value[HTML_OBJECT_DATA];
-				if (present[HTML_OBJECT_ID] && value[HTML_OBJECT_ID])
-					_ObjectMD5Sum = value[HTML_OBJECT_ID];
-				if (present[HTML_OBJECT_STANDBY] && value[HTML_OBJECT_STANDBY])
-					_ObjectAction = value[HTML_OBJECT_STANDBY];
-				_Object = true;
-
-				break;
-			case HTML_SPAN:
 				{
-					pushStyle();
-
-					if (present[MY_HTML_SPAN_STYLE] && value[MY_HTML_SPAN_STYLE])
-						getStyleParams(value[MY_HTML_SPAN_STYLE], _Style, _StyleParams.back());
+					tooltip = trimQuotes(tooltip);
+					addButton(CCtrlButton::PushButton, getId() + pseudo, token, token, "", "", "", tooltip.c_str(), _Style.Current);
 				}
-				break;
-			case HTML_DEL:
-				{
-					pushStyle();
-					_Style.StrikeThrough = true;
-				}
-				break;
-			case HTML_U:
-				{
-					pushStyle();
-					_Style.Underlined = true;
-				}
-				break;
-			case HTML_EM:
-				{
-					pushStyle();
-					_Style.FontOblique = true;
-				}
-				break;
-			case HTML_STRONG:
-				{
-					pushStyle();
-					_Style.FontWeight = FONT_WEIGHT_BOLD;
-				}
-				break;
-			case HTML_SMALL:
-				{
-					pushStyle();
-					_Style.FontSize = getFontSizeSmaller();
-				}
-				break;
-			case HTML_STYLE:
-			case HTML_SCRIPT:
-				_IgnoreText = true;
-				break;
-			case HTML_DL:
-				{
-					_DL.push_back(HTMLDListElement());
-					_LI = _DL.size() > 1 || !_UL.empty();
-					endParagraph();
-					pushStyle();
-					if (present[HTML_GEN_STYLE] && value[HTML_GEN_STYLE])
-						getStyleParams(value[HTML_GEN_STYLE], _Style, _StyleParams.back());
-				}
-				break;
-			case HTML_DT:
-				if (!_DL.empty())
-				{
-					// close if still open
-					if (_DL.back().DD)
-					{
-						_DL.back().DD = false;
-						popIfNotEmpty(_Indent);
-						popStyle();
-					}
-
-					// close if still open
-					if (_DL.back().DT)
-						popStyle();
-
-					_DL.back().DT = true;
-
-					pushStyle();
-					_Style.FontWeight = FONT_WEIGHT_BOLD;
-					if (present[HTML_GEN_STYLE] && value[HTML_GEN_STYLE])
-						getStyleParams(value[HTML_GEN_STYLE], _Style, _StyleParams.back());
-
-					if (!_LI)
-					{
-						_LI = true;
-						newParagraph(ULBeginSpace);
-					}
-					else
-					{
-						newParagraph(LIBeginSpace);
-					}
-				}
-				break;
-			case HTML_DD:
-				if (!_DL.empty())
-				{
-					// if there was no closing tag for <dt>, then remove <dt> style
-					if (_DL.back().DT)
-					{
-						_DL.back().DT = false;
-						popStyle();
-					}
-
-					if (_DL.back().DD)
-					{
-						_DL.back().DD = false;
-						popStyle();
-						popIfNotEmpty(_Indent);
-					}
-
-					_DL.back().DD = true;
-					_Indent.push_back(getIndent() + ULIndent);
-
-					pushStyle();
-					if (present[HTML_GEN_STYLE] && value[HTML_GEN_STYLE])
-						getStyleParams(value[HTML_GEN_STYLE], _Style, _StyleParams.back());
-
-					if (!_LI)
-					{
-						_LI = true;
-						newParagraph(ULBeginSpace);
-					}
-					else
-					{
-						newParagraph(LIBeginSpace);
-					}
-				}
-				break;
-			case HTML_OL:
-				{
-					pushStyle();
-					sint32 start = 1;
-					std::string type("1");
-
-					if (present[HTML_OL_START] && value[HTML_OL_START])
-						fromString(value[HTML_OL_START], start);
-					if (present[HTML_OL_TYPE] && value[HTML_OL_TYPE])
-						type = value[HTML_OL_TYPE];
-					if (present[HTML_OL_STYLE] && value[HTML_OL_STYLE])
-						getStyleParams(value[HTML_OL_STYLE], _Style, _StyleParams.back());
-
-					_UL.push_back(HTMLOListElement(start, type));
-					// if LI is already present
-					_LI = _UL.size() > 1 || _DL.size() > 1;
-					_Indent.push_back(getIndent() + ULIndent);
-					endParagraph();
-				}
-				break;
-			case HTML_HR:
-				{
-					newParagraph(0);
-
-					CInterfaceGroup *sep = CWidgetManager::getInstance()->getParser()->createGroupInstance("html_hr", "", NULL, 0);
-					if (sep)
-					{
-						CStyleParams style;
-						style.FontSize = _Style.FontSize;
-						style.TextColor = CRGBA(120, 120, 120, 255);
-						style.Height = 0;
-						style.Width = 0;
-
-						if (present[HTML_HR_STYLE] && value[HTML_HR_STYLE])
-							getStyleParams(value[HTML_HR_STYLE], style, _Style);
-
-						CViewBitmap *bitmap = dynamic_cast<CViewBitmap*>(sep->getView("hr"));
-						if (bitmap)
-						{
-							bitmap->setColor(style.TextColor);
-							if (style.Width > 0)
-							{
-								clamp(style.Width, 1, 32000);
-								bitmap->setW(style.Width);
-								bitmap->setSizeRef(CInterfaceElement::none);
-							}
-							if (style.Height > 0)
-							{
-								clamp(style.Height, 1, 1000);
-								bitmap->setH(style.Height);
-							}
-						}
-
-						getParagraph()->addChild(sep);
-						endParagraph();
-					}
-				}
-				break;
 			}
-		}
-	}
-
-	// ***************************************************************************
-
-	void CGroupHTML::endElement (uint element_number)
-	{
-		if (_Browsing)
-		{
-			// Paragraph ?
-			switch(element_number)
+			else if (content[pos] == 'a' && pos < content.size() - 7)
 			{
-			case HTML_HEAD:
-				_ReadingHeadTag = false;
-				break;
-			case HTML_BODY:
-				popStyle();
-				break;
-			case HTML_FONT:
-				popStyle();
-			break;
-			case HTML_A:
-				popStyle();
-				popIfNotEmpty (_A);
-				popIfNotEmpty (_Link);
-				popIfNotEmpty (_LinkTitle);
-				popIfNotEmpty (_LinkClass);
-				break;
-			case HTML_H1:
-			case HTML_H2:
-			case HTML_H3:
-			case HTML_H4:
-			case HTML_H5:
-			case HTML_H6:
-				popStyle();
-				endParagraph();
-				break;
-			case HTML_P:
-				popStyle();
-				endParagraph();
-				break;
-			case HTML_PRE:
-				popStyle();
-				popIfNotEmpty (_PRE);
-				break;
-			case HTML_DIV:
-				popStyle();
-				if (isBlockLevelElement())
-				{
-					endParagraph();
-				}
-				_DivName.clear();
-				popIfNotEmpty (_Divs);
-				popIfNotEmpty (_BlockLevelElement);
-				break;
+				// attr(title)
+				start = pos + 5;
+				pos = content.find(")", start);
+				token = content.substr(start, pos - start);
+				// skip ')'
+				pos++;
 
-			case HTML_TABLE:
-				popStyle();
-				popIfNotEmpty (_CellParams);
-				popIfNotEmpty (_TR);
-				popIfNotEmpty (_Cells);
-				popIfNotEmpty (_Tables);
-				popIfNotEmpty (_Indent);
-				endParagraph();
-				// Add a cell
-				break;
-			case HTML_TH:
-				// no break;
-			case HTML_TD:
-				popStyle();
-				popIfNotEmpty (_CellParams);
-				if (!_Cells.empty())
-					_Cells.back() = NULL;
-				break;
-			case HTML_TR:
-				popStyle();
-				popIfNotEmpty (_CellParams);
-				break;
-			case HTML_TEXTAREA:
+				if (elm.hasAttribute(token))
 				{
-					_TextArea = false;
-					if (!(_Forms.empty()))
-					{
-						CInterfaceGroup *textArea = addTextArea (_TextAreaTemplate, _TextAreaName.c_str (), _TextAreaRow, _TextAreaCols, true, _TextAreaContent, _TextAreaMaxLength);
-						if (textArea)
-						{
-							// Add the text area to the form
-							CGroupHTML::CForm::CEntry entry;
-							entry.Name = _TextAreaName;
-							entry.TextArea = textArea;
-							_Forms.back().Entries.push_back (entry);
-						}
-					}
-
-					popStyle();
-					popIfNotEmpty (_PRE);
+					addString(ucstring::makeFromUtf8(elm.getAttribute(token)));
 				}
-				break;
-			case HTML_TITLE:
-				{
-					_Title = false;
-
-					// Get the parent container
-					setTitle (_TitleString);
-				}
-				break;
-			case HTML_SELECT:
-				{
-					_SelectOption = false;
-					if (!(_Forms.empty()))
-					{
-						if (!_Forms.back().Entries.empty())
-						{
-							CDBGroupComboBox *cb = _Forms.back().Entries.back().ComboBox;
-							if (cb)
-							{
-								cb->setSelectionNoTrigger(_Forms.back().Entries.back().InitialSelection);
-								cb->setW(cb->evalContentWidth() + 16);
-							}
-						}
-					}
-				}
-				break;
-			case HTML_OPTION:
-				if (!(_Forms.empty()) && !(_Forms.back().Entries.empty()))
-				{
-					// insert the parsed text into the select control
-					CDBGroupComboBox *cb = _Forms.back().Entries.back().ComboBox;
-					if (cb)
-					{
-						uint lineIndex = cb->getNumTexts();
-						cb->addText(_SelectOptionStr);
-						if (_Forms.back().Entries.back().sbOptionDisabled == lineIndex)
-						{
-							cb->setGrayed(lineIndex, true);
-						}
-					}
-					else
-					{
-						CGroupMenu *sb = _Forms.back().Entries.back().SelectBox;
-						if (sb)
-						{
-							uint lineIndex = sb->getNumLine();
-							sb->addLine(_SelectOptionStr, "", "");
-
-							if (_Forms.back().Entries.back().sbOptionDisabled == lineIndex)
-							{
-								sb->setGrayedLine(lineIndex, true);
-							}
-							else
-							{
-								// create option line checkbox, CGroupMenu is taking ownership of the checbox
-								CInterfaceGroup *ig = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_checkbox", "", NULL, 0);
-								if (ig)
-								{
-									CCtrlButton *cb = dynamic_cast<CCtrlButton *>(ig->getCtrl("b"));
-									if (cb)
-									{
-										if (_Forms.back().Entries.back().sbMultiple)
-										{
-											cb->setType(CCtrlButton::ToggleButton);
-											cb->setTexture(DefaultCheckBoxBitmapNormal);
-											cb->setTexturePushed(DefaultCheckBoxBitmapPushed);
-											cb->setTextureOver(DefaultCheckBoxBitmapOver);
-										}
-										else
-										{
-											cb->setType(CCtrlButton::RadioButton);
-											cb->setTexture(DefaultRadioButtonBitmapNormal);
-											cb->setTexturePushed(DefaultRadioButtonBitmapPushed);
-											cb->setTextureOver(DefaultRadioButtonBitmapOver);
-
-											if (_Forms.back().Entries.back().sbRBRef == NULL)
-												_Forms.back().Entries.back().sbRBRef = cb;
-
-											cb->initRBRefFromRadioButton(_Forms.back().Entries.back().sbRBRef);
-										}
-
-										cb->setPushed(_Forms.back().Entries.back().InitialSelection == lineIndex);
-										sb->setUserGroupLeft(lineIndex, ig);
-									}
-									else
-									{
-										nlwarning("Failed to get 'b' element from 'menu_checkbox' template");
-										delete ig;
-									}
-								}
-							}
-						}
-					}
-				}
-				break;
-			case HTML_I:
-				{
-					_Localize = false;
-				}
-				break;
-			case HTML_OL:
-			case HTML_UL:
-				if (!_UL.empty())
-				{
-					endParagraph();
-					popStyle();
-					popIfNotEmpty(_UL);
-					popIfNotEmpty(_Indent);
-				}
-				break;
-			case HTML_LI:
-				{
-					popStyle();
-				}
-				break;
-			case HTML_DL:
-				if (!_DL.empty())
-				{
-					endParagraph();
-
-					// unclosed DT
-					if (_DL.back().DT)
-					{
-						popStyle();
-					}
-
-					// unclosed DD
-					if (_DL.back().DD)
-					{
-						popIfNotEmpty(_Indent);
-						popStyle();
-					}
-
-					popIfNotEmpty (_DL);
-					popStyle();
-				}
-				break;
-			case HTML_DT:
-				if (!_DL.empty())
-				{
-					if (_DL.back().DT)
-						popStyle();
-					_DL.back().DT = false;
-				}
-				break;
-			case HTML_DD:
-				if (!_DL.empty())
-				{
-					// parser will process two DD in a row as nested when first DD is not closed
-					if (_DL.back().DD)
-					{
-						_DL.back().DD = false;
-						popIfNotEmpty(_Indent);
-						popStyle();
-					}
-				}
-				break;
-			case HTML_SPAN:
-				popStyle();
-				break;
-			case HTML_DEL:
-				popStyle();
-				break;
-			case HTML_U:
-				popStyle();
-				break;
-			case HTML_EM:
-				popStyle();
-				break;
-			case HTML_STRONG:
-				popStyle();
-				break;
-			case HTML_SMALL:
-				popStyle();
-				break;
-			case HTML_STYLE:
-			case HTML_SCRIPT:
-				_IgnoreText = false;
-				break;
-			case HTML_OBJECT:
-				if (_TrustedDomain)
-				{
-					if (_ObjectType=="application/ryzom-data")
-					{
-						if (!_ObjectData.empty())
-						{
-							if (addBnpDownload(_ObjectData, _ObjectAction, _ObjectScript, _ObjectMD5Sum))
-							{
-								CLuaManager::getInstance().executeLuaScript("\nlocal __ALLREADYDL__=true\n"+_ObjectScript, true);
-							}
-							_ObjectScript.clear();
-						}
-					}
-					_Object = false;
-				}
-				break;
 			}
-		}
-	}
-
-	// ***************************************************************************
-	void CGroupHTML::beginUnparsedElement(const char *buffer, int length)
-	{
-		string str(buffer, buffer+length);
-		if (stricmp(str.c_str(), "lua") == 0)
-		{
-			// we receive an embeded lua script
-			_ParsingLua = _TrustedDomain; // Only parse lua if TrustedDomain
-			_LuaScript.clear();
-		}
-	}
-
-	// ***************************************************************************
-	void CGroupHTML::endUnparsedElement(const char *buffer, int length)
-	{
-		string str(buffer, buffer+length);
-		if (stricmp(str.c_str(), "lua") == 0)
-		{
-			if (_ParsingLua && _TrustedDomain)
+			else
 			{
-				_ParsingLua = false;
-				// execute the embeded lua script
-				_LuaScript = "\nlocal __CURRENT_WINDOW__=\""+this->_Id+"\" \n"+_LuaScript;
-				CLuaManager::getInstance().executeLuaScript(_LuaScript, true);
+				pos++;
 			}
 		}
+
+		_Style.popStyle();
 	}
 
+	// ***************************************************************************
+	void CGroupHTML::renderDOM(CHtmlElement &elm)
+	{
+		if (elm.Type == CHtmlElement::TEXT_NODE)
+		{
+			addText(elm.Value.c_str(), elm.Value.size());
+		}
+		else
+		{
+			beginElement(elm);
+
+			std::list<CHtmlElement>::iterator it = elm.Children.begin();
+			while(it != elm.Children.end())
+			{
+				renderDOM(*it);
+
+				++it;
+			}
+
+			endElement(elm);
+		}
+	}
 
 	// ***************************************************************************
 	NLMISC_REGISTER_OBJECT(CViewBase, CGroupHTML, std::string, "html");
@@ -3149,7 +1349,8 @@ namespace NLGUI
 	CGroupHTML::CGroupHTML(const TCtorParam &param)
 	:	CGroupScrollText(param),
 		_TimeoutValue(DEFAULT_RYZOM_CONNECTION_TIMEOUT),
-		_RedirectsRemaining(DEFAULT_RYZOM_REDIRECT_LIMIT)
+		_RedirectsRemaining(DEFAULT_RYZOM_REDIRECT_LIMIT),
+		_CurrentHTMLElement(NULL)
 	{
 		// add it to map of group html created
 		_GroupHtmlUID= ++_GroupHtmlUIDPool; // valid assigned Id begin to 1!
@@ -3163,7 +1364,6 @@ namespace NLGUI
 		_BrowseNextTime = false;
 		_PostNextTime = false;
 		_Browsing = false;
-		_Connecting = false;
 		_CurrentViewLink = NULL;
 		_CurrentViewImage = NULL;
 		_Indent.clear();
@@ -3174,6 +1374,8 @@ namespace NLGUI
 		_RefreshUrl.clear();
 		_NextRefreshTime = 0.0;
 		_LastRefreshTime = 0.0;
+		_RenderNextTime = false;
+		_WaitingForStylesheet = false;
 
 		// Register
 		CWidgetManager::getInstance()->registerClockMsgTarget(this);
@@ -3256,12 +1458,6 @@ namespace NLGUI
 			(useless and may be dangerous)
 		*/
 		_GroupHtmlByUID.erase(_GroupHtmlUID);
-
-		// stop browsing
-		stopBrowse (); // NB : we don't call updateRefreshButton here, because :
-					   // 1) it is useless,
-					   // 2) it crashed before when it called getElementFromId (that didn't work when a master group was being removed...). Btw it should work now
-					   //     this is why the call to 'updateRefreshButton' has been removed from stopBrowse
 
 		clearContext();
 		releaseDownloads();
@@ -4256,24 +2452,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::doBrowse(const char *url, bool force)
 	{
-		// Stop previous browse
-		if (_Browsing)
-		{
-			// Clear all the context
-			clearContext();
-
-			_Browsing = false;
-			updateRefreshButton();
-
-	#ifdef LOG_DL
-			nlwarning("(%s) *** ALREADY BROWSING, break first", _Id.c_str());
-	#endif
-		}
-
-	#ifdef LOG_DL
-		nlwarning("(%s) Browsing URL : '%s'", _Id.c_str(), url);
-	#endif
-
+		LOG_DL("(%s) Browsing URL : '%s'", _Id.c_str(), url);
 
 		CUrlParser uri(url);
 		if (!uri.hash.empty())
@@ -4297,7 +2476,6 @@ namespace NLGUI
 
 		// go
 		_URL = uri.toString();
-		_Connecting = false;
 		_BrowseNextTime = true;
 
 		// if a BrowseTree is bound to us, try to select the node that opens this URL (auto-locate)
@@ -4320,6 +2498,8 @@ namespace NLGUI
 
 	void CGroupHTML::browseError (const char *msg)
 	{
+		releaseDownloads();
+
 		// Get the list group from CGroupScrollText
 		removeContent();
 		newParagraph(0);
@@ -4331,30 +2511,17 @@ namespace NLGUI
 		if(!_TitlePrefix.empty())
 			setTitle (_TitlePrefix);
 
-		stopBrowse ();
 		updateRefreshButton();
+		invalidateCoords();
 	}
 
 	// ***************************************************************************
 
 	bool CGroupHTML::isBrowsing()
 	{
-		return _Browsing;
-	}
-
-
-	void CGroupHTML::stopBrowse ()
-	{
-	#ifdef LOG_DL
-		nlwarning("*** STOP BROWSE (%s)", _Id.c_str());
-	#endif
-
-		// Clear all the context
-		clearContext();
-
-		_Browsing = false;
-
-		requestTerminated();
+		return _BrowseNextTime || _PostNextTime || _RenderNextTime ||
+			_Browsing || _WaitingForStylesheet ||
+			_CurlWWW ||  !Curls.empty();
 	}
 
 	// ***************************************************************************
@@ -4507,34 +2674,36 @@ namespace NLGUI
 				paragraphChange ();
 			}
 
+			CStyleParams &style = _Style.Current;
+
 			// Text added ?
 			bool added = false;
-			bool embolden = _Style.FontWeight >= FONT_WEIGHT_BOLD;
+			bool embolden = style.FontWeight >= FONT_WEIGHT_BOLD;
 
 			// Number of child in this paragraph
 			if (_CurrentViewLink)
 			{
 				bool skipLine = !_CurrentViewLink->getText().empty() && *(_CurrentViewLink->getText().rbegin()) == (ucchar) '\n';
-				bool sameShadow = _Style.TextShadow.Enabled && _CurrentViewLink->getShadow();
-				if (sameShadow && _Style.TextShadow.Enabled)
+				bool sameShadow = style.TextShadow.Enabled && _CurrentViewLink->getShadow();
+				if (sameShadow && style.TextShadow.Enabled)
 				{
 					sint sx, sy;
 					_CurrentViewLink->getShadowOffset(sx, sy);
-					sameShadow = (_Style.TextShadow.Color == _CurrentViewLink->getShadowColor());
-					sameShadow = sameShadow && (_Style.TextShadow.Outline == _CurrentViewLink->getShadowOutline());
-					sameShadow = sameShadow && (_Style.TextShadow.X == sx) && (_Style.TextShadow.Y == sy);
+					sameShadow = (style.TextShadow.Color == _CurrentViewLink->getShadowColor());
+					sameShadow = sameShadow && (style.TextShadow.Outline == _CurrentViewLink->getShadowOutline());
+					sameShadow = sameShadow && (style.TextShadow.X == sx) && (style.TextShadow.Y == sy);
 				}
 				// Compatible with current parameters ?
 				if (!skipLine && sameShadow &&
-					(_Style.TextColor == _CurrentViewLink->getColor()) &&
-					(_Style.FontFamily == _CurrentViewLink->getFontName()) &&
-					(_Style.FontSize == (uint)_CurrentViewLink->getFontSize()) &&
-					(_Style.Underlined == _CurrentViewLink->getUnderlined()) &&
-					(_Style.StrikeThrough == _CurrentViewLink->getStrikeThrough()) &&
+					(style.TextColor == _CurrentViewLink->getColor()) &&
+					(style.FontFamily == _CurrentViewLink->getFontName()) &&
+					(style.FontSize == (uint)_CurrentViewLink->getFontSize()) &&
+					(style.Underlined == _CurrentViewLink->getUnderlined()) &&
+					(style.StrikeThrough == _CurrentViewLink->getStrikeThrough()) &&
 					(embolden == _CurrentViewLink->getEmbolden()) &&
-					(_Style.FontOblique == _CurrentViewLink->getOblique()) &&
+					(style.FontOblique == _CurrentViewLink->getOblique()) &&
 					(getLink() == _CurrentViewLink->Link) &&
-					(_Style.GlobalColor == _CurrentViewLink->getModulateGlobalColor()))
+					(style.GlobalColor == _CurrentViewLink->getModulateGlobalColor()))
 				{
 					// Concat the text
 					_CurrentViewLink->setText(_CurrentViewLink->getText()+tmpStr);
@@ -4575,7 +2744,7 @@ namespace NLGUI
 							ctrlButton->setDefaultContextHelp(ucstring::makeFromUtf8(getLinkTitle()));
 							ctrlButton->setText(tmpStr);
 
-							setTextButtonStyle(ctrlButton, _Style);
+							setTextButtonStyle(ctrlButton, style);
 						}
 						getParagraph()->addChild (buttonGroup);
 						paragraphChange ();
@@ -4598,10 +2767,10 @@ namespace NLGUI
 						}
 					}
 					newLink->setText(tmpStr);
-					newLink->setMultiLineSpace((uint)((float)(_Style.FontSize)*LineSpaceFontFactor));
+					newLink->setMultiLineSpace((uint)((float)(style.FontSize)*LineSpaceFontFactor));
 					newLink->setMultiLine(true);
-					newLink->setModulateGlobalColor(_Style.GlobalColor);
-					setTextStyle(newLink, _Style);
+					newLink->setModulateGlobalColor(style.GlobalColor);
+					setTextStyle(newLink, style);
 					// newLink->setLineAtBottom (true);
 
 					registerAnchor(newLink);
@@ -4622,7 +2791,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::addImage(const std::string &id, const char *img, bool reloadImg, const CStyleParams &style)
+	void CGroupHTML::addImage(const std::string &id, const std::string &img, bool reloadImg, const CStyleParams &style)
 	{
 		// In a paragraph ?
 		if (!_Paragraph)
@@ -4706,22 +2875,23 @@ namespace NLGUI
 		// No more text in this text view
 		_CurrentViewLink = NULL;
 
+		CStyleParams &style = _Style.Current;
 		{
 			// override cols/rows values from style
-			if (_Style.Width > 0) cols = _Style.Width / _Style.FontSize;
-			if (_Style.Height > 0) rows = _Style.Height / _Style.FontSize;
+			if (style.Width > 0) cols = style.Width / style.FontSize;
+			if (style.Height > 0) rows = style.Height / style.FontSize;
 
 			// Not added ?
 			std::vector<std::pair<std::string,std::string> > templateParams;
-			templateParams.push_back (std::pair<std::string,std::string> ("w", toString (cols*_Style.FontSize)));
+			templateParams.push_back (std::pair<std::string,std::string> ("w", toString (cols*style.FontSize)));
 			templateParams.push_back (std::pair<std::string,std::string> ("id", name));
 			templateParams.push_back (std::pair<std::string,std::string> ("prompt", ""));
 			templateParams.push_back (std::pair<std::string,std::string> ("multiline", multiLine?"true":"false"));
-			templateParams.push_back (std::pair<std::string,std::string> ("fontsize", toString (_Style.FontSize)));
-			templateParams.push_back (std::pair<std::string,std::string> ("color", _Style.TextColor.toString()));
-			if (_Style.FontWeight >= FONT_WEIGHT_BOLD)
+			templateParams.push_back (std::pair<std::string,std::string> ("fontsize", toString (style.FontSize)));
+			templateParams.push_back (std::pair<std::string,std::string> ("color", style.TextColor.toString()));
+			if (style.FontWeight >= FONT_WEIGHT_BOLD)
 				templateParams.push_back (std::pair<std::string,std::string> ("fontweight", "bold"));
-			if (_Style.FontOblique)
+			if (style.FontOblique)
 				templateParams.push_back (std::pair<std::string,std::string> ("fontstyle", "oblique"));
 			if (multiLine)
 				templateParams.push_back (std::pair<std::string,std::string> ("multi_min_line", toString(rows)));
@@ -4730,13 +2900,13 @@ namespace NLGUI
 			templateParams.push_back (std::pair<std::string,std::string> ("enter_recover_focus", "false"));
 			if (maxlength > 0)
 				templateParams.push_back (std::pair<std::string,std::string> ("max_num_chars", toString(maxlength)));
-			templateParams.push_back (std::pair<std::string,std::string> ("shadow", toString(_Style.TextShadow.Enabled)));
-			if (_Style.TextShadow.Enabled)
+			templateParams.push_back (std::pair<std::string,std::string> ("shadow", toString(style.TextShadow.Enabled)));
+			if (style.TextShadow.Enabled)
 			{
-				templateParams.push_back (std::pair<std::string,std::string> ("shadow_x", toString(_Style.TextShadow.X)));
-				templateParams.push_back (std::pair<std::string,std::string> ("shadow_y", toString(_Style.TextShadow.Y)));
-				templateParams.push_back (std::pair<std::string,std::string> ("shadow_color", _Style.TextShadow.Color.toString()));
-				templateParams.push_back (std::pair<std::string,std::string> ("shadow_outline", toString(_Style.TextShadow.Outline)));
+				templateParams.push_back (std::pair<std::string,std::string> ("shadow_x", toString(style.TextShadow.X)));
+				templateParams.push_back (std::pair<std::string,std::string> ("shadow_y", toString(style.TextShadow.Y)));
+				templateParams.push_back (std::pair<std::string,std::string> ("shadow_color", style.TextShadow.Color.toString()));
+				templateParams.push_back (std::pair<std::string,std::string> ("shadow_outline", toString(style.TextShadow.Outline)));
 			}
 
 			CInterfaceGroup *textArea = CWidgetManager::getInstance()->getParser()->createGroupInstance (templateName.c_str(),
@@ -4750,13 +2920,13 @@ namespace NLGUI
 				if (eb)
 				{
 					eb->setInputString(decodeHTMLEntities(content));
-					if (_Style.BackgroundColor.A > 0)
+					if (style.hasStyle("background-color"))
 					{
 						CViewBitmap *bg = dynamic_cast<CViewBitmap*>(eb->getView("bg"));
 						if (bg)
 						{
 							bg->setTexture("blank.tga");
-							bg->setColor(_Style.BackgroundColor);
+							bg->setColor(style.BackgroundColor);
 						}
 					}
 				}
@@ -5000,6 +3170,7 @@ namespace NLGUI
 		_TR.clear();
 		_Forms.clear();
 		_Groups.clear();
+		_Divs.clear();
 		_Anchors.clear();
 		_AnchorName.clear();
 		_CellParams.clear();
@@ -5011,33 +3182,15 @@ namespace NLGUI
 		_IgnoreHeadTag = false;
 		_IgnoreBaseUrlTag = false;
 
-		// reset style
-		resetCssStyle();
-
-		// TR
-
 		paragraphChange ();
 
 		// clear the pointer to the current image download since all the button are deleted
-	#ifdef LOG_DL
-		nlwarning("Clear pointers to %d curls", Curls.size());
-	#endif
-		for(uint i = 0; i < Curls.size(); i++)
-		{
-			Curls[i].imgs.clear();
-		}
+		LOG_DL("Clear pointers to %d curls", Curls.size());
 
-		// remove download that are still queued
-		for (vector<CDataDownload>::iterator it=Curls.begin(); it<Curls.end(); )
+		// remove image refs from downloads
+		for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
 		{
-			if (it->data == NULL) {
-	#ifdef LOG_DL
-		nlwarning("Remove waiting curl download (%s)", it->url.c_str());
-	#endif
-				it = Curls.erase(it);
-			} else {
-				++it;
-			}
+			it->imgs.clear();
 		}
 	}
 
@@ -5321,21 +3474,29 @@ namespace NLGUI
 			_NextRefreshTime = 0;
 		}
 
-		if (_Connecting)
+		if (_CurlWWW)
 		{
-			// Check timeout if needed
+			// still transfering html page
 			if (_TimeoutValue != 0 && _ConnectingTimeout <= ( times.thisFrameMs / 1000.0f ) )
 			{
 				browseError(("Connection timeout : "+_URL).c_str());
-
-				_Connecting = false;
 			}
+		}
+		else
+		if (_RenderNextTime)
+		{
+			_RenderNextTime = false;
+			renderHtmlString(_DocumentHtml);
+		}
+		else
+		if (_WaitingForStylesheet)
+		{
+			renderDocument();
 		}
 		else
 		if (_BrowseNextTime || _PostNextTime)
 		{
 			// Set timeout
-			_Connecting = true;
 			_ConnectingTimeout = ( times.thisFrameMs / 1000.0f ) + _TimeoutValue;
 
 			// freeze form buttons
@@ -5494,6 +3655,9 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::doBrowseLocalFile(const std::string &uri)
 	{
+		releaseDownloads();
+		updateRefreshButton();
+
 		std::string filename;
 		if (toLower(uri).find("file:/") == 0)
 		{
@@ -5504,18 +3668,10 @@ namespace NLGUI
 			filename = uri;
 		}
 
-	#if LOG_DL
-		nlwarning("browse local file '%s'", filename.c_str());
-	#endif
+		LOG_DL("browse local file '%s'", filename.c_str());
 
 		_TrustedDomain = true;
 		_DocumentDomain = "localhost";
-
-		// Stop previous browse, remove content
-		stopBrowse ();
-
-		_Browsing = true;
-		updateRefreshButton();
 
 		CIFile in;
 		if (in.open(filename))
@@ -5543,10 +3699,8 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::doBrowseRemoteUrl(std::string url, const std::string &referer, bool doPost, const SFormFields &formfields)
 	{
-		// Stop previous request and remove content
-		stopBrowse ();
-
-		_Browsing = true;
+		// stop all downloads from previous page
+		releaseDownloads();
 		updateRefreshButton();
 
 		// Reset the title
@@ -5557,10 +3711,8 @@ namespace NLGUI
 
 		url = upgradeInsecureUrl(url);
 
-	#if LOG_DL
-		nlwarning("(%s) browse url (trusted=%s) '%s', referer='%s', post='%s', nb form values %d",
+		LOG_DL("(%s) browse url (trusted=%s) '%s', referer='%s', post='%s', nb form values %d",
 				_Id.c_str(), (_TrustedDomain ? "true" :"false"), url.c_str(), referer.c_str(), (doPost ? "true" : "false"), formfields.Values.size());
-	#endif
 
 		if (!MultiCurl)
 		{
@@ -5610,9 +3762,7 @@ namespace NLGUI
 		if (!referer.empty())
 		{
 			curl_easy_setopt(curl, CURLOPT_REFERER, referer.c_str());
-	#ifdef LOG_DL
-			nlwarning("(%s) set referer '%s'", _Id.c_str(), referer.c_str());
-	#endif
+			LOG_DL("(%s) set referer '%s'", _Id.c_str(), referer.c_str());
 		}
 
 		if (doPost)
@@ -5658,7 +3808,7 @@ namespace NLGUI
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NLGUI::curlDataCallback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, _CurlWWW);
 
-	#if LOG_DL
+	#ifdef LOG_CURL_PROGRESS
 		// progress callback
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
 		curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, NLGUI::curlProgressCallback);
@@ -5675,14 +3825,192 @@ namespace NLGUI
 		int NewRunningCurls = 0;
 		curl_multi_perform(MultiCurl, &NewRunningCurls);
 		RunningCurls++;
+
+		_RedirectsRemaining = DEFAULT_RYZOM_REDIRECT_LIMIT;
 	}
 
 	// ***************************************************************************
+	void CGroupHTML::htmlDownloadFinished(bool success, const std::string &error)
+	{
+		if (!success)
+		{
+			std::string err;
+			err = "Connection failed with cURL error: ";
+			err += error;
+			err += "\nURL '" + _CurlWWW->Url + "'";
+			browseError(err.c_str());
+			return;
+		}
+
+		// save HSTS header from all requests regardless of HTTP code
+		if (_CurlWWW->hasHSTSHeader())
+		{
+			CUrlParser uri(_CurlWWW->Url);
+			CStrictTransportSecurity::getInstance()->setFromHeader(uri.host, _CurlWWW->getHSTSHeader());
+		}
+
+		receiveCookies(_CurlWWW->Request, _DocumentDomain, _TrustedDomain);
+
+		long code;
+		curl_easy_getinfo(_CurlWWW->Request, CURLINFO_RESPONSE_CODE, &code);
+		LOG_DL("(%s) web transfer '%p' completed with http code %d, url (len %d) '%s'", _Id.c_str(), _CurlWWW->Request, code, _CurlWWW->Url.size(), _CurlWWW->Url.c_str());
+
+		if ((code >= 301 && code <= 303) || code == 307 || code == 308)
+		{
+			if (_RedirectsRemaining < 0)
+			{
+				browseError(string("Redirect limit reached : " + _URL).c_str());
+				return;
+			}
+
+			// redirect, get the location and try browse again
+			// we cant use curl redirection because 'addHTTPGetParams()' must be called on new destination
+			std::string location(_CurlWWW->getLocationHeader());
+			if (location.empty())
+			{
+				browseError(string("Request was redirected, but location was not set : "+_URL).c_str());
+				return;
+			}
+
+			LOG_DL("(%s) request (%d) redirected to (len %d) '%s'", _Id.c_str(), _RedirectsRemaining, location.size(), location.c_str());
+			location = getAbsoluteUrl(location);
+
+			_PostNextTime = false;
+			_RedirectsRemaining--;
+
+			doBrowse(location.c_str());
+		}
+		else if ( (code < 200 || code >= 300) )
+		{
+			// catches 304 not modified, but html is not in cache anyway
+			browseError(string("Connection failed\nhttp code " + toString((sint32)code) + ")\nURL '" + _CurlWWW->Url + "'").c_str());
+			return;
+		}
+
+		char *ch;
+		std::string contentType;
+		CURLcode res = curl_easy_getinfo(_CurlWWW->Request, CURLINFO_CONTENT_TYPE, &ch);
+		if (res == CURLE_OK && ch != NULL)
+		{
+			contentType = ch;
+		}
+
+		htmlDownloadFinished(_CurlWWW->Content, contentType, code);
+
+		// clear curl handler
+		if (MultiCurl)
+		{
+			curl_multi_remove_handle(MultiCurl, _CurlWWW->Request);
+		}
+
+		delete _CurlWWW;
+		_CurlWWW = NULL;
+
+		// refresh button uses _CurlWWW. refresh button may stay disabled if
+		// there is no css files to download and page is rendered before _CurlWWW is freed
+		updateRefreshButton();
+	}
+
+	void CGroupHTML::dataDownloadFinished(bool success, const std::string &error, CDataDownload &data)
+	{
+		fclose(data.fp);
+
+		CUrlParser uri(data.url);
+		if (!uri.host.empty())
+		{
+			receiveCookies(data.data->Request, uri.host, isTrustedDomain(uri.host));
+		}
+
+		long code = -1;
+		curl_easy_getinfo(data.data->Request, CURLINFO_RESPONSE_CODE, &code);
+
+		LOG_DL("(%s) transfer '%p' completed with http code %d, url (len %d) '%s'", _Id.c_str(), data.data->Request, code, data.url.size(), data.url.c_str());
+		curl_multi_remove_handle(MultiCurl, data.data->Request);
+
+		// save HSTS header from all requests regardless of HTTP code
+		if (success)
+		{
+			if (data.data->hasHSTSHeader())
+			{
+				CStrictTransportSecurity::getInstance()->setFromHeader(uri.host, data.data->getHSTSHeader());
+			}
+
+			// 2XX success, 304 Not Modified
+			if ((code >= 200 && code <= 204) || code == 304)
+			{
+				CHttpCacheObject obj;
+				obj.Expires = data.data->getExpires();
+				obj.Etag = data.data->getEtag();
+				obj.LastModified = data.data->getLastModified();
+
+				CHttpCache::getInstance()->store(data.dest, obj);
+				std::string tmpfile = data.dest + ".tmp";
+				if (code == 304 && CFile::fileExists(tmpfile))
+				{
+					CFile::deleteFile(tmpfile);
+				}
+			}
+			else if ((code >= 301 && code <= 303) || code == 307 || code == 308)
+			{
+				if (data.redirects < DEFAULT_RYZOM_REDIRECT_LIMIT)
+				{
+					std::string location(data.data->getLocationHeader());
+					if (!location.empty())
+					{
+						CUrlParser uri(location);
+						if (!uri.isAbsolute())
+						{
+							uri.inherit(data.url);
+							location = uri.toString();
+						}
+
+						// push same request in the front of the queue
+						// cache filename is based of original url
+						Curls.push_front(data);
+						// clear old request state
+						Curls.front().data = NULL;
+						Curls.front().fp = NULL;
+						Curls.front().url = location;
+						Curls.front().redirects++;
+
+						LOG_DL("Redirect '%s'", location.c_str());
+						// no finished callback called, so cleanup old temp
+						std::string tmpfile = data.dest + ".tmp";
+						if (CFile::fileExists(tmpfile))
+						{
+							CFile::deleteFile(tmpfile);
+						}
+						return;
+					}
+
+					nlwarning("Redirected to empty url '%s'", data.url.c_str());
+				}
+				else
+				{
+					nlwarning("Redirect limit reached for '%s'", data.url.c_str());
+				}
+			}
+			else
+			{
+				nlwarning("HTTP request failed with code [%d] for '%s'\n",code, data.url.c_str());
+				// 404, 500, etc
+				if (CFile::fileExists(data.dest))
+				{
+					CFile::deleteFile(data.dest);
+				}
+			}
+		}
+		else
+		{
+			nlwarning("DATA download failed '%s', error '%s'", data.url.c_str(), error.c_str());
+		}
+
+		finishCurlDownload(data);
+	}
+
 	void CGroupHTML::htmlDownloadFinished(const std::string &content, const std::string &type, long code)
 	{
-	#ifdef LOG_DL
-		nlwarning("(%s) HTML download finished, content length %d, type '%s', code %d", _Id.c_str(), content.size(), type.c_str(), code);
-	#endif
+		LOG_DL("(%s) HTML download finished, content length %d, type '%s', code %d", _Id.c_str(), content.size(), type.c_str(), code);
 
 		// create <html> markup for image downloads
 		if (type.find("image/") == 0 && !content.empty())
@@ -5694,9 +4022,7 @@ namespace NLGUI
 				out.open(dest);
 				out.serialBuffer((uint8 *)(content.c_str()), content.size());
 				out.close();
-	#ifdef LOG_DL
-				nlwarning("(%s) image saved to '%s', url '%s'", _Id.c_str(), dest.c_str(), _URL.c_str());
-	#endif
+				LOG_DL("(%s) image saved to '%s', url '%s'", _Id.c_str(), dest.c_str(), _URL.c_str());
 			}
 			catch(...) { }
 
@@ -5710,9 +4036,6 @@ namespace NLGUI
 			_LuaScript = "\nlocal __CURRENT_WINDOW__=\""+this->_Id+"\" \n"+content;
 			CLuaManager::getInstance().executeLuaScript(_LuaScript, true);
 			_LuaScript.clear();
-			
-			_Browsing = false;
-			_Connecting = false;
 
 			// disable refresh button
 			clearRefresh();
@@ -5726,41 +4049,109 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CGroupHTML::cssDownloadFinished(const std::string &url, const std::string &local)
+	{
+		// remove file from download queue
+		std::vector<std::string>::iterator it = std::find(_StylesheetQueue.begin(), _StylesheetQueue.end(), url);
+		if (it != _StylesheetQueue.end())
+		{
+			_StylesheetQueue.erase(it);
+		}
+
+		if (!CFile::fileExists(local))
+		{
+			return;
+		}
+
+		parseStylesheetFile(local);
+	}
+
+	void CGroupHTML::renderDocument()
+	{
+		if (!_StylesheetQueue.empty())
+		{
+			// waiting for stylesheets to finish downloading
+			return;
+		}
+		_WaitingForStylesheet = false;
+
+		//TGameTime renderStart = CTime::getLocalTime();
+
+		// clear previous state and page
+		beginBuild();
+		removeContent();
+
+		std::list<CHtmlElement>::iterator it = _HtmlDOM.Children.begin();
+		while(it != _HtmlDOM.Children.end())
+		{
+			renderDOM(*it);
+			++it;
+		}
+
+		endBuild();
+
+		//TGameTime renderStop = CTime::getLocalTime();
+		//nlwarning("[%s] render: %.1fms (%s)\n", _Id.c_str(), (renderStop - renderStart), _URL.c_str());
+	}
+
+	// ***************************************************************************
 
 	bool CGroupHTML::renderHtmlString(const std::string &html)
 	{
 		bool success;
 
+		// if we are already rendering, then queue up the next page
+		if (_Browsing)
+		{
+			_DocumentHtml = html;
+			_RenderNextTime = true;
+
+			return true;
+		}
+
 		//
-		_Browsing = true;
 		_DocumentUrl = _URL;
+		_DocumentHtml = html;
 		_NextRefreshTime = 0;
 		_RefreshUrl.clear();
 
-		// clear content
-		beginBuild();
-
-		success = parseHtml(html);
-
-		// invalidate coords
-		endBuild();
-
-		// set the browser as complete
-		_Browsing = false;
-		updateRefreshButton();
-
-		// check that the title is set, or reset it (in the case the page
-		// does not provide a title)
-		if (_TitleString.empty())
+		if (trim(html).empty())
 		{
-			setTitle(_TitlePrefix);
+			// clear the page
+			beginBuild();
+				
+			// clear previous page and state
+			removeContent();
+
+			endBuild();
+		}
+		else
+		{
+			// browser.css
+			resetCssStyle();
+
+			// start new rendering
+			_HtmlDOM = CHtmlElement(CHtmlElement::NONE, "<root>");
+			_CurrentHTMLElement = NULL;
+			success = parseHtml(html);
+			if (success)
+			{
+				_WaitingForStylesheet = !_StylesheetQueue.empty();
+				renderDocument();
+			}
+			else
+			{
+				std::string error = "ERROR: HTML parse failed.";
+				error += toString("\nsize %d bytes", html.size());
+				error += toString("\n---start---\n%s\n---end---\n", html.c_str());
+				browseError(error.c_str());
+			}
 		}
 
 		return success;
 	}
 
 	// ***************************************************************************
-
 	void CGroupHTML::doBrowseAnchor(const std::string &anchor)
 	{
 		if (_Anchors.count(anchor) == 0)
@@ -5789,8 +4180,24 @@ namespace NLGUI
 
 	// ***************************************************************************
 
+	void CGroupHTML::beginBuild ()
+	{
+		_Browsing = true;
+	}
+
 	void CGroupHTML::endBuild ()
 	{
+		// set the browser as complete
+		_Browsing = false;
+		updateRefreshButton();
+
+		// check that the title is set, or reset it (in the case the page
+		// does not provide a title)
+		if (_TitleString.empty())
+		{
+			setTitle(_TitlePrefix);
+		}
+
 		invalidateCoords();
 	}
 
@@ -5804,24 +4211,6 @@ namespace NLGUI
 
 	void CGroupHTML::addHTTPPostParams (SFormFields &/* formfields */, bool /*trustedDomain*/)
 	{
-	}
-
-	// ***************************************************************************
-	void CGroupHTML::requestTerminated()
-	{
-		if (_CurlWWW)
-		{
-	#if LOG_DL
-			nlwarning("(%s) stop curl, url '%s'", _Id.c_str(), _CurlWWW->Url.c_str());
-	#endif
-			if (MultiCurl)
-				curl_multi_remove_handle(MultiCurl, _CurlWWW->Request);
-
-			delete _CurlWWW;
-
-			_CurlWWW = NULL;
-			_Connecting = false;
-		}
 	}
 
 	// ***************************************************************************
@@ -6011,10 +4400,12 @@ namespace NLGUI
 	void	CGroupHTML::updateRefreshButton()
 	{
 		CCtrlBaseButton		*butRefresh = dynamic_cast<CCtrlBaseButton *>(CWidgetManager::getInstance()->getElementFromId(_BrowseRefreshButton));
-
-		bool enabled = !_Browsing && !_Connecting && !_URL.empty();
 		if(butRefresh)
-			butRefresh->setFrozen(!enabled);
+		{
+			// connecting, rendering, or is missing url
+			bool frozen = _CurlWWW || _Browsing || _URL.empty();
+			butRefresh->setFrozen(frozen);
+		}
 	}
 
 	// ***************************************************************************
@@ -6049,6 +4440,19 @@ namespace NLGUI
 		if (ptr)
 			fromString((const char*)ptr, Offset);
 		return true;
+	}
+
+	// ***************************************************************************
+	int CGroupHTML::luaParseHtml(CLuaState &ls)
+	{
+		const char *funcName = "parseHtml";
+		CLuaIHM::checkArgCount(ls, funcName, 1);
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		std::string html = ls.toString(1);
+
+		parseHtml(html);
+
+		return 0;
 	}
 
 	int CGroupHTML::luaClearRefresh(CLuaState &ls)
@@ -6209,73 +4613,6 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	int CGroupHTML::luaBeginElement(CLuaState &ls)
-	{
-		const char *funcName = "beginElement";
-		CLuaIHM::checkArgCount(ls, funcName, 2);
-		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TTABLE);
-
-		uint element_number = (uint)ls.toInteger(1);
-		std::vector<bool> present;
-		std::vector<const char *> value;
-		present.resize(30, false);
-		value.resize(30);
-
-		CLuaObject params;
-		params.pop(ls);
-		uint max_idx = 0;
-
-
-		ENUM_LUA_TABLE(params, it)
-		{
-			if (!it.nextKey().isInteger())
-			{
-				nlwarning("%s : bad key encountered with type %s, integer expected.", funcName, it.nextKey().getTypename());
-				continue;
-			}
-			if (!it.nextValue().isString())
-			{
-				nlwarning("%s : bad value encountered with type %s for key %s, string expected.", funcName, it.nextValue().getTypename(), it.nextKey().toString().c_str());
-				continue;
-			}
-			uint idx = (uint)it.nextKey().toInteger();
-
-			present.insert(present.begin() + (uint)it.nextKey().toInteger(), true);
-
-			string str = it.nextValue().toString();
-			size_t size = str.size() + 1;
-			char * buffer = new char[ size ];
-			strncpy(buffer, str.c_str(), size );
-
-			value.insert(value.begin() + (uint)it.nextKey().toInteger(), buffer);
-		}
-
-		// ingame lua scripts from browser are using <a href="#http://..."> url scheme
-		// reason unknown
-		_LuaHrefHack = true;
-		beginElement(element_number, present, value);
-		_LuaHrefHack = false;
-
-		return 0;
-	}
-
-
-	// ***************************************************************************
-	int CGroupHTML::luaEndElement(CLuaState &ls)
-	{
-		const char *funcName = "endElement";
-		CLuaIHM::checkArgCount(ls, funcName, 1);
-		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-
-		uint element_number = (uint)ls.toInteger(1);
-		endElement(element_number);
-
-		return 0;
-	}
-
-
-	// ***************************************************************************
 	int CGroupHTML::luaShowDiv(CLuaState &ls)
 	{
 		const char *funcName = "showDiv";
@@ -6311,6 +4648,159 @@ namespace NLGUI
 	void CGroupHTML::setHome(const std::string &home)
 	{
 		Home = home;
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::parseStylesheetFile(const std::string &fname)
+	{
+		CIFile css;
+		if (css.open(fname))
+		{
+			uint32 remaining = css.getFileSize();
+			std::string content;
+			try {
+				while(!css.eof() && remaining > 0)
+				{
+					const uint BUF_SIZE = 4096;
+					char buf[BUF_SIZE];
+
+					uint32 readJustNow = std::min(remaining, BUF_SIZE);
+					css.serialBuffer((uint8 *)&buf, readJustNow);
+					content.append(buf, readJustNow);
+					remaining -= readJustNow;
+				}
+
+				_Style.parseStylesheet(content);
+			}
+			catch(const Exception &e)
+			{
+				nlwarning("exception while reading css file '%s'", e.what());
+			}
+		}
+		else
+		{
+			nlwarning("Stylesheet file '%s' not found (%s)", fname.c_str(), _URL.c_str());
+		}
+	}
+
+	// ***************************************************************************
+	bool CGroupHTML::parseHtml(const std::string &htmlString)
+	{
+		std::vector<std::string> links;
+		std::string styleString;
+
+		CHtmlElement *parsedDOM;
+		if (_CurrentHTMLElement == NULL)
+		{
+			// parse under <root> element (clean dom)
+			parsedDOM = &_HtmlDOM;
+		}
+		else
+		{
+			// parse under currently rendered <lua> element
+			parsedDOM = _CurrentHTMLElement;
+		}
+
+		CHtmlParser parser;
+		parser.getDOM(htmlString, *parsedDOM, styleString, links);
+
+		if (!styleString.empty())
+		{
+			_Style.parseStylesheet(styleString);
+		}
+		if (!links.empty())
+		{
+			addStylesheetDownload(links);
+		}
+
+		// this should rarely fail as first element should be <html>
+		bool success = parsedDOM->Children.size() > 0;
+
+		std::list<CHtmlElement>::iterator it = parsedDOM->Children.begin();
+		while(it != parsedDOM->Children.end())
+		{
+			if (it->Type == CHtmlElement::ELEMENT_NODE && it->Value == "html")
+			{
+				// more newly parsed childs from <body> into siblings
+				if (_CurrentHTMLElement) {
+					std::list<CHtmlElement>::iterator it2 = it->Children.begin();
+					while(it2 != it->Children.end())
+					{
+						if (it2->Type == CHtmlElement::ELEMENT_NODE && it2->Value == "body")
+						{
+							spliceFragment(it2);
+							break;
+						}
+						++it2;
+					}
+					// remove <html> fragment from current element child
+					it = parsedDOM->Children.erase(it);
+				}
+				else
+				{
+					// remove link to <root> (html->parent == '<root>') or css selector matching will break
+					it->parent = NULL;
+					++it;
+				}
+				continue;
+			}
+
+			// skip over other non-handled element
+			++it;
+		}
+
+		return success;
+	}
+
+	void CGroupHTML::spliceFragment(std::list<CHtmlElement>::iterator src)
+	{
+		if(!_CurrentHTMLElement->parent)
+		{
+			nlwarning("BUG: Current node is missing parent element. unable to splice fragment");
+			return;
+		}
+
+		// get the iterators for current element (<lua>) and next sibling
+		std::list<CHtmlElement>::iterator currentElement;
+		currentElement = std::find(_CurrentHTMLElement->parent->Children.begin(), _CurrentHTMLElement->parent->Children.end(), *_CurrentHTMLElement);
+		if (currentElement == _CurrentHTMLElement->parent->Children.end())
+		{
+			nlwarning("BUG: unable to find current element iterator from parent");
+			return;
+		}
+		
+		// where fragment should be moved
+		std::list<CHtmlElement>::iterator insertBefore;
+		if (_CurrentHTMLNextSibling == NULL)
+		{
+			insertBefore = _CurrentHTMLElement->parent->Children.end();
+		} else {
+			// get iterator for nextSibling
+			insertBefore = std::find(_CurrentHTMLElement->parent->Children.begin(), _CurrentHTMLElement->parent->Children.end(), *_CurrentHTMLNextSibling);
+		}
+
+		_CurrentHTMLElement->parent->Children.splice(insertBefore, src->Children);
+
+		// reindex moved elements
+		CHtmlElement *prev = NULL;
+		uint childIndex = _CurrentHTMLElement->childIndex;
+		while(currentElement != _CurrentHTMLElement->parent->Children.end())
+		{
+			if (currentElement->Type == CHtmlElement::ELEMENT_NODE)
+			{
+				if (prev != NULL)
+				{
+					currentElement->parent = _CurrentHTMLElement->parent;
+					currentElement->childIndex = childIndex;
+					currentElement->previousSibling = prev;
+					prev->nextSibling = &(*currentElement);
+				}
+
+				childIndex++;
+				prev = &(*currentElement);
+			}
+			++currentElement;
+		}
 	}
 
 	// ***************************************************************************
@@ -6414,423 +4904,38 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::resetCssStyle()
 	{
-		_StyleDefault = CStyleParams();
-		_StyleDefault.TextColor = TextColor;
-		_StyleDefault.FontSize = TextFontSize;
-		_StyleDefault.BackgroundColor = BgColor;
+		_WaitingForStylesheet = false;
+		_StylesheetQueue.clear();
+		_Style.reset();
 
-		_Style = _StyleDefault;
-		_StyleParams.clear();
-	}
+		std::string css;
 
-	// ***************************************************************************
-	// CGroupHTML::CStyleParams style;
-	// style.FontSize;    // font-size: 10px;
-	// style.TextColor;   // color: #ABCDEF;
-	// style.Underlined;  // text-decoration: underline;     text-decoration-line: underline;
-	// style.StrikeThrough; // text-decoration: line-through;  text-decoration-line: line-through;
-	void CGroupHTML::getStyleParams(const std::string &styleString, CStyleParams &style, const CStyleParams &current)
-	{
-		float tmpf;
-		TStyle styles = parseStyle(styleString);
-		TStyle::iterator it;
+		// TODO: browser css
+		css += "html { background-color: " + getRGBAString(BgColor) + "; color: " + getRGBAString(TextColor) + "; font-size: " + toString(TextFontSize) + "px;}";
+		css += "a { color: " + getRGBAString(LinkColor) + "; text-decoration: underline; -ryzom-modulate-color: "+toString(LinkColorGlobalColor)+";}";
+		css += "h1 { color: " + getRGBAString(H1Color) + "; font-size: "+ toString("%d", H1FontSize) + "px; -ryzom-modulate-color: "+toString(H1ColorGlobalColor)+";}";
+		css += "h2 { color: " + getRGBAString(H2Color) + "; font-size: "+ toString("%d", H2FontSize) + "px; -ryzom-modulate-color: "+toString(H2ColorGlobalColor)+";}";
+		css += "h3 { color: " + getRGBAString(H3Color) + "; font-size: "+ toString("%d", H3FontSize) + "px; -ryzom-modulate-color: "+toString(H3ColorGlobalColor)+";}";
+		css += "h4 { color: " + getRGBAString(H4Color) + "; font-size: "+ toString("%d", H4FontSize) + "px; -ryzom-modulate-color: "+toString(H4ColorGlobalColor)+";}";
+		css += "h5 { color: " + getRGBAString(H5Color) + "; font-size: "+ toString("%d", H5FontSize) + "px; -ryzom-modulate-color: "+toString(H5ColorGlobalColor)+";}";
+		css += "h6 { color: " + getRGBAString(H6Color) + "; font-size: "+ toString("%d", H6FontSize) + "px; -ryzom-modulate-color: "+toString(H6ColorGlobalColor)+";}";
+		css += "input[type=\"text\"] { color: " + getRGBAString(TextColor) + "; font-size: " + toString("%d", TextFontSize) + "px; font-weight: normal; text-shadow: 1px 1px #000;}";
+		css += "pre { font-family: monospace;}";
+		// th { text-align: center; } - overwrites align property
+		css += "th { font-weight: bold; }";
+		css += "textarea { color: " + getRGBAString(TextColor) + "; font-weight: normal; font-size: " + toString("%d", TextFontSize) + "px; text-shadow: 1px 1px #000;}";
+		css += "del { text-decoration: line-through;}";
+		css += "u { text-decoration: underline;}";
+		css += "em { font-style: italic; }";
+		css += "strong { font-weight: bold; }";
+		css += "small { font-size: smaller;}";
+		css += "dt { font-weight: bold; }";
+		css += "hr { color: rgb(120, 120, 120);}";
+		// td { padding: 1px;} - overwrites cellpadding attribute
+		// table { border-spacing: 2px;} - overwrites cellspacing attribute
+		css += "table { border-collapse: separate;}";
 
-		// first pass: get font-size for 'em' sizes
-		for (it=styles.begin(); it != styles.end(); ++it)
-		{
-			if (it->first == "font")
-			{
-				if (it->second == "inherit")
-				{
-					style.FontSize = current.FontSize;
-					style.FontFamily = current.FontFamily;
-					style.FontWeight = current.FontWeight;
-					style.FontOblique = current.FontOblique;
-				}
-			}
-			else
-			if (it->first == "font-size")
-			{
-				if (it->second == "inherit")
-				{
-					style.FontSize = current.FontSize;
-				}
-				else
-				{
-					std::string unit;
-					if (getCssLength(tmpf, unit, it->second.c_str()))
-					{
-						if (unit == "rem")
-							style.FontSize = _StyleDefault.FontSize * tmpf;
-						else if (unit == "em")
-							style.FontSize = current.FontSize * tmpf;
-						else if (unit == "pt")
-							style.FontSize = tmpf / 0.75f;
-						else if (unit == "%")
-							style.FontSize = current.FontSize * tmpf / 100.f;
-						else
-							style.FontSize = tmpf;
-					}
-				}
-			}
-		}
-
-		// second pass: rest of style
-		for (it=styles.begin(); it != styles.end(); ++it)
-		{
-			if (it->first == "border")
-			{
-				sint32 b;
-				if (it->second == "none")
-					style.BorderWidth = 0;
-				else
-				if (fromString(it->second, b))
-					style.BorderWidth = b;
-			}
-			else
-			if (it->first == "font-style")
-			{
-				if (it->second == "inherit")
-					style.FontOblique = current.FontOblique;
-				else
-				if (it->second == "italic" || it->second == "oblique")
-					style.FontOblique = true;
-			}
-			else
-			if (it->first == "font-family")
-			{
-				if (it->second == "inherit")
-					style.FontFamily = current.FontFamily;
-				else
-					style.FontFamily = it->second;
-			}
-			else
-			if (it->first == "font-weight")
-			{
-				// https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight
-				uint weight = 400;
-				if (it->second == "inherit")
-					weight = current.FontWeight;
-				else
-				if (it->second == "normal")
-					weight = 400;
-				else
-				if (it->second == "bold")
-					weight = 700;
-				else
-				if (it->second == "lighter")
-				{
-					const uint lighter[] = {100, 100, 100, 100, 100, 400, 400, 700, 700};
-					uint index = current.FontWeight / 100 - 1;
-					clamp(index, 1u, 9u);
-					weight = lighter[index-1];
-				}
-				else
-				if (it->second == "bolder")
-				{
-					const uint bolder[] =  {400, 400, 400, 700, 700, 900, 900, 900, 900};
-					uint index = current.FontWeight / 100 + 1;
-					clamp(index, 1u, 9u);
-					weight = bolder[index-1];
-				}
-				else
-				if (fromString(it->second, weight))
-				{
-					weight = (weight / 100);
-					clamp(weight, 1u, 9u);
-					weight *= 100;
-				}
-				style.FontWeight = weight;
-			}
-			else
-			if (it->first == "color")
-				if (it->second == "inherit")
-					style.TextColor = current.TextColor;
-				else
-					scanHTMLColor(it->second.c_str(), style.TextColor);
-			else
-			if (it->first == "text-decoration" || it->first == "text-decoration-line")
-			{
-				std::string prop(toLower(it->second));
-				style.Underlined = (prop.find("underline") != std::string::npos);
-				style.StrikeThrough = (prop.find("line-through") != std::string::npos);
-			}
-			else
-			if (it->first == "text-stroke" || it->first == "-webkit-text-stroke")
-			{
-				// text-stroke: length || color
-				bool success = false;
-				uint px = 0;
-				CRGBA color;
-				std::vector<std::string> parts;
-				NLMISC::splitString(it->second, " ", parts);
-				if (parts.size() == 1)
-				{
-					success = scanCssLength(parts[0], px);
-					if (!success)
-						success = scanHTMLColor(parts[0].c_str(), color);
-				}
-				else if (parts.size() == 2)
-				{
-					success = scanCssLength(parts[0], px);
-					if (success)
-						success = scanHTMLColor(parts[1].c_str(), color);
-					else
-					{
-						success = scanHTMLColor(parts[0].c_str(), color);
-						success = success && scanCssLength(parts[1], px);
-					}
-				}
-
-				// do not disable shadow if one is already set
-				if (success)
-				{
-					style.TextShadow.Enabled = (px > 0);
-					style.TextShadow.Color = color;
-					style.TextShadow.X = px;
-					style.TextShadow.Y = px;
-					style.TextShadow.Outline = true;
-				}
-			}
-			else
-			if (it->first == "text-shadow")
-			{
-				if (it->second == "none")
-					style.TextShadow = STextShadow(false);
-				else
-				if (it->second == "inherit")
-					style.TextShadow = current.TextShadow;
-				else
-				{
-					// text-shadow: offset-x offset-y | blur | #color
-					// text-shadow: #color | offset-x offset-y
-					bool success = true;
-					std::string prop(it->second);
-					size_t pos;
-					pos = prop.find_first_of(",\n\r");
-					if (pos != std::string::npos)
-						prop = prop.substr(0, pos);
-
-					std::vector<std::string> parts;
-					NLMISC::splitString(prop, " ", parts);
-					switch(parts.size())
-					{
-						case 1:
-						{
-							success = scanHTMLColor(it->second.c_str(), style.TextShadow.Color);
-							break;
-						}
-						// no case 2:
-						case 3:
-						{
-							if (!fromString(parts[0], style.TextShadow.X))
-							{
-								success = scanHTMLColor(parts[0].c_str(), style.TextShadow.Color);
-								success = success && fromString(parts[1], style.TextShadow.X);
-								success = success && fromString(parts[2], style.TextShadow.Y);
-							}
-							else
-							{
-								success = fromString(parts[1], style.TextShadow.Y);
-								success = success && scanHTMLColor(parts[2].c_str(), style.TextShadow.Color);
-							}
-							break;
-						}
-						case 4:
-						{
-							if (!fromString(parts[0], style.TextShadow.X))
-							{
-								success = scanHTMLColor(parts[0].c_str(), style.TextShadow.Color);
-								success = success && fromString(parts[1], style.TextShadow.X);
-								success = success && fromString(parts[2], style.TextShadow.Y);
-								// ignore blur [3]
-							}
-							else
-							{
-								success = fromString(parts[0], style.TextShadow.X);
-								success = success && fromString(parts[1], style.TextShadow.Y);
-								// ignore blur [2]
-								success = success && scanHTMLColor(parts[3].c_str(), style.TextShadow.Color);
-							}
-							break;
-						}
-						default:
-						{
-							// unsupported rule
-							break;
-						}
-					}
-
-					style.TextShadow.Enabled = success;
-				}
-			}
-			else
-			if (it->first == "width")
-			{
-				std::string unit;
-				if (getCssLength(tmpf, unit, it->second.c_str()))
-				{
-					if (unit == "rem")
-						style.Width = tmpf * _StyleDefault.FontSize;
-					else if (unit == "em")
-						style.Width = tmpf * style.FontSize;
-					else if (unit == "pt")
-						style.FontSize = tmpf / 0.75f;
-					else
-						style.Width = tmpf;
-				}
-			}
-			else
-			if (it->first == "height")
-			{
-				std::string unit;
-				if (getCssLength(tmpf, unit, it->second.c_str()))
-				{
-					if (unit == "rem")
-						style.Height = tmpf * _StyleDefault.FontSize;
-					else if (unit == "em")
-						style.Height = tmpf * style.FontSize;
-					else if (unit == "pt")
-						style.FontSize = tmpf / 0.75f;
-					else
-						style.Height = tmpf;
-				}
-			}
-			else
-			if (it->first == "max-width")
-			{
-				std::string unit;
-				if (getCssLength(tmpf, unit, it->second.c_str()))
-				{
-					if (unit == "rem")
-						style.MaxWidth = tmpf * _StyleDefault.FontSize;
-					else if (unit == "em")
-						style.MaxWidth = tmpf * style.FontSize;
-					else if (unit == "pt")
-						style.FontSize = tmpf / 0.75f;
-					else
-						style.MaxWidth = tmpf;
-				}
-			}
-			else
-			if (it->first == "max-height")
-			{
-				std::string unit;
-				if (getCssLength(tmpf, unit, it->second.c_str()))
-				{
-					if (unit == "rem")
-						style.MaxHeight = tmpf * _StyleDefault.FontSize;
-					else if (unit == "em")
-						style.MaxHeight = tmpf * style.FontSize;
-					else if (unit == "pt")
-						style.FontSize = tmpf / 0.75f;
-					else
-						style.MaxHeight = tmpf;
-				}
-			}
-			else
-			if (it->first == "-ryzom-modulate-color")
-			{
-				bool b;
-				if (it->second == "inherit")
-					style.GlobalColor = current.GlobalColor;
-				else
-				if (fromString(it->second, b))
-					style.GlobalColor = b;
-			}
-			else
-			if (it->first == "background-color")
-			{
-				if (it->second == "inherit")
-					style.BackgroundColor = current.BackgroundColor;
-				else
-					scanHTMLColor(it->second.c_str(), style.BackgroundColor);
-			}
-			else
-			if (it->first == "-ryzom-background-color-over")
-			{
-				if (it->second == "inherit")
-					style.BackgroundColorOver = current.BackgroundColorOver;
-				else
-					scanHTMLColor(it->second.c_str(), style.BackgroundColorOver);
-			}
-		}
-
-		// if outer element has underline set, then inner element cannot remove it
-		if (current.Underlined)
-			style.Underlined = current.Underlined;
-
-		// if outer element has line-through set, then inner element cannot remove it
-		if (current.StrikeThrough)
-			style.StrikeThrough = current.StrikeThrough;
-	}
-
-	// ***************************************************************************
-	void CGroupHTML::applyCssMinMax(sint32 &width, sint32 &height, sint32 minw, sint32 minh, sint32 maxw, sint32 maxh)
-	{
-		if (maxw <= 0) maxw = width;
-		if (maxh <= 0) maxh = height;
-
-		maxw = std::max(minw, maxw);
-		maxh = std::max(minh, maxh);
-
-		float ratio = (float) width / std::max(1, height);
-		if (width > maxw)
-		{
-			width = maxw;
-			height = std::max((sint32)(maxw /ratio), minh);
-		}
-		if (width < minw)
-		{
-			width = minw;
-			height = std::min((sint32)(minw / ratio), maxh);
-		}
-		if (height > maxh)
-		{
-			width = std::max((sint32)(maxh * ratio), minw);
-			height = maxh;
-		}
-		if (height < minh)
-		{
-			width = std::min((sint32)(minh * ratio), maxw);
-			height = minh;
-		}
-		if (width > maxw && height > maxh)
-		{
-			if (maxw/width <= maxh/height)
-			{
-				width = maxw;
-				height = std::max(minh, (sint32)(maxw / ratio));
-			}
-			else
-			{
-				width = std::max(minw, (sint32)(maxh * ratio));
-				height = maxh;
-			}
-		}
-		if (width < minw && height < minh)
-		{
-			if (minw / width <= minh / height)
-			{
-				width = std::min(maxw, (sint32)(minh * ratio));
-				height = minh;
-			}
-			else
-			{
-				width = minw;
-				height = std::min(maxh, (sint32)(minw / ratio));
-			}
-		}
-		if (width < minw && height > maxh)
-		{
-			width = minw;
-			height = maxh;
-		}
-		if (width > maxw && height < minh)
-		{
-			width = maxw;
-			height = minh;
-		}
+		_Style.parseStylesheet(css);
 	}
 
 	// ***************************************************************************
@@ -6932,6 +5037,1515 @@ namespace NLGUI
 		}
 
 		return ret;
+	}
+
+	void CGroupHTML::getCellsParameters(const CHtmlElement &elm, bool inherit)
+	{
+		CGroupHTML::CCellParams cellParams;
+		if (!_CellParams.empty() && inherit)
+		{
+			cellParams = _CellParams.back();
+		}
+
+		if (_Style.hasStyle("background-color"))
+			cellParams.BgColor = _Style.Current.BackgroundColor;
+		else if (elm.hasNonEmptyAttribute("bgcolor"))
+			scanHTMLColor(elm.getAttribute("bgcolor").c_str(), cellParams.BgColor);
+
+		if (elm.hasAttribute("nowrap") || _Style.Current.WhiteSpace == "nowrap")
+			cellParams.NoWrap = true;
+
+		if (elm.hasNonEmptyAttribute("l_margin"))
+			fromString(elm.getAttribute("l_margin"), cellParams.LeftMargin);
+
+		{
+			std::string align;
+			// having text-align on table/tr should not override td align attribute
+			if (_Style.hasStyle("text-align"))
+				align = _Style.Current.TextAlign;
+			else if (elm.hasNonEmptyAttribute("align"))
+				align = toLower(elm.getAttribute("align"));
+
+			if (align == "left")
+				cellParams.Align = CGroupCell::Left;
+			else if (align == "center")
+				cellParams.Align = CGroupCell::Center;
+			else if (align == "right")
+				cellParams.Align = CGroupCell::Right;
+		}
+
+		{
+			std::string valign;
+			if (_Style.hasStyle("vertical-align"))
+				valign = _Style.Current.VerticalAlign;
+			else if (elm.hasNonEmptyAttribute("valign"))
+				valign = toLower(elm.getAttribute("valign"));
+			
+			if (valign == "top")
+				cellParams.VAlign = CGroupCell::Top;
+			else if (valign == "middle")
+				cellParams.VAlign = CGroupCell::Middle;
+			else if (valign == "bottom")
+				cellParams.VAlign = CGroupCell::Bottom;
+		}
+		
+		_CellParams.push_back (cellParams);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlA(const CHtmlElement &elm)
+	{
+		_A.push_back(true);
+		_Link.push_back ("");
+		_LinkTitle.push_back("");
+		_LinkClass.push_back("");
+		if (elm.hasClass("ryzom-ui-button"))
+			_LinkClass.back() = "ryzom-ui-button";
+
+		// #fragment works with both ID and NAME so register both
+		if (elm.hasNonEmptyAttribute("name"))
+			_AnchorName.push_back(elm.getAttribute("name"));
+		if (elm.hasNonEmptyAttribute("title"))
+			_LinkTitle.back() = elm.getAttribute("title");
+		if (elm.hasNonEmptyAttribute("href"))
+		{
+			string suri = elm.getAttribute("href");
+			if(suri.find("ah:") == 0)
+			{
+				if (_TrustedDomain)
+					_Link.back() = suri;
+			}
+			else
+			{
+				// convert href from "?key=val" into "http://domain.com/?key=val"
+				_Link.back() = getAbsoluteUrl(suri);
+			}
+		}
+
+		renderPseudoElement(":before", elm);
+	}
+
+	void CGroupHTML::htmlAend(const CHtmlElement &elm)
+	{
+		renderPseudoElement(":after", elm);
+
+		popIfNotEmpty(_A);
+		popIfNotEmpty(_Link);
+		popIfNotEmpty(_LinkTitle);
+		popIfNotEmpty(_LinkClass);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlBASE(const CHtmlElement &elm)
+	{
+		if (!_ReadingHeadTag || _IgnoreBaseUrlTag)
+			return;
+
+		if (elm.hasNonEmptyAttribute("href"))
+		{
+			CUrlParser uri(elm.getAttribute("href"));
+			if (uri.isAbsolute())
+			{
+				_URL = uri.toString();
+				_IgnoreBaseUrlTag = true;
+			}
+		}
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlBODY(const CHtmlElement &elm)
+	{
+		// override <body> (or <html>) css style attribute
+		if (elm.hasNonEmptyAttribute("bgcolor"))
+		{
+			_Style.applyStyle("background-color: " + elm.getAttribute("bgcolor"));
+		}
+
+		if (_Style.hasStyle("background-color"))
+		{
+			CRGBA bgColor = _Style.Current.BackgroundColor;
+			scanHTMLColor(elm.getAttribute("bgcolor").c_str(), bgColor);
+			setBackgroundColor(bgColor);
+		}
+
+		if (elm.hasNonEmptyAttribute("style"))
+		{
+			string style = elm.getAttribute("style");
+
+			TStyle styles = parseStyle(style);
+			TStyle::iterator	it;
+
+			it = styles.find("background-repeat");
+			bool repeat = (it != styles.end() && it->second == "1");
+
+			// Webig only
+			it = styles.find("background-scale");
+			bool scale = (it != styles.end() && it->second == "1");
+
+			it = styles.find("background-image");
+			if (it != styles.end())
+			{
+				string image = it->second;
+				string::size_type texExt = toLower(image).find("url(");
+				// Url image
+				if (texExt != string::npos)
+					// Remove url()
+					image = image.substr(4, image.size()-5);
+				setBackground (image, scale, repeat);
+			}
+		}
+
+		renderPseudoElement(":before", elm);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlBR(const CHtmlElement &elm)
+	{
+		endParagraph();
+
+		// insert zero-width-space (0x200B) to prevent removal of empty lines
+		ucstring tmp;
+		tmp.fromUtf8("\xe2\x80\x8b");
+		addString(tmp);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlDD(const CHtmlElement &elm)
+	{
+		if (_DL.empty())
+			return;
+
+		// if there was no closing tag for <dt>, then remove <dt> style
+		if (_DL.back().DT)
+		{
+			nlwarning("BUG: nested DT in DD");
+			_DL.back().DT = false;
+		}
+
+		if (_DL.back().DD)
+		{
+			nlwarning("BUG: nested DD in DD");
+			_DL.back().DD = false;
+			popIfNotEmpty(_Indent);
+		}
+
+		_DL.back().DD = true;
+		_Indent.push_back(getIndent() + ULIndent);
+
+		if (!_LI)
+		{
+			_LI = true;
+			newParagraph(ULBeginSpace);
+		}
+		else
+		{
+			newParagraph(LIBeginSpace);
+		}
+
+		renderPseudoElement(":before", elm);
+	}
+
+	void CGroupHTML::htmlDDend(const CHtmlElement &elm)
+	{
+		if (_DL.empty())
+			return;
+
+		renderPseudoElement(":after", elm);
+
+		// parser will process two DD in a row as nested when first DD is not closed
+		if (_DL.back().DD)
+		{
+			_DL.back().DD = false;
+			popIfNotEmpty(_Indent);
+		}
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlDIV(const CHtmlElement &elm)
+	{
+		_BlockLevelElement.push_back(true);
+
+		_DivName = elm.getAttribute("name");
+
+		string instClass = elm.getAttribute("class");
+
+		// use generic template system
+		if (_TrustedDomain && !instClass.empty() && instClass == "ryzom-ui-grouptemplate")
+		{
+			string style = elm.getAttribute("style");
+			string id = elm.getAttribute("id");
+
+			typedef pair<string, string> TTmplParam;
+			vector<TTmplParam> tmplParams;
+
+			string templateName;
+			if (!style.empty())
+			{
+				TStyle styles = parseStyle(style);
+				TStyle::iterator	it;
+				for (it=styles.begin(); it != styles.end(); it++)
+				{
+					if ((*it).first == "template")
+						templateName = (*it).second;
+					else if ((*it).first == "display" && (*it).second == "inline-block")
+						_BlockLevelElement.back() = false;
+					else
+						tmplParams.push_back(TTmplParam((*it).first, (*it).second));
+				}
+			}
+
+			if (!templateName.empty())
+			{
+				string parentId;
+				bool haveParentDiv = getDiv() != NULL;
+				if (haveParentDiv)
+					parentId = getDiv()->getId();
+				else
+				{
+					if (!_Paragraph)
+						newParagraph (0);
+
+					parentId = _Paragraph->getId();
+				}
+
+				CInterfaceGroup *inst = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, this->_Id+":"+id, tmplParams);
+				if (inst)
+				{
+					inst->setId(this->_Id+":"+id);
+					inst->updateCoords();
+					if (haveParentDiv)
+					{
+							inst->setParent(getDiv());
+							inst->setParentSize(getDiv());
+							inst->setParentPos(getDiv());
+							inst->setPosRef(Hotspot_TL);
+							inst->setParentPosRef(Hotspot_TL);
+							getDiv()->addGroup(inst);
+
+							_BlockLevelElement.back() = false;
+					}
+					else
+					{
+						getParagraph()->addChild(inst);
+						paragraphChange();
+					}
+					_Divs.push_back(inst);
+				}
+			}
+		}
+
+		if (isBlockLevelElement())
+		{
+			newParagraph(0);
+		}
+
+		renderPseudoElement(":before", elm);
+	}
+
+	void CGroupHTML::htmlDIVend(const CHtmlElement &elm)
+	{
+		renderPseudoElement(":after", elm);
+
+		if (isBlockLevelElement())
+		{
+			endParagraph();
+		}
+		_DivName.clear();
+		popIfNotEmpty(_Divs);
+		popIfNotEmpty(_BlockLevelElement);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlDL(const CHtmlElement &elm)
+	{
+		_DL.push_back(HTMLDListElement());
+		_LI = _DL.size() > 1 || !_UL.empty();
+		endParagraph();
+
+		renderPseudoElement(":before", elm);
+	}
+
+	void CGroupHTML::htmlDLend(const CHtmlElement &elm)
+	{
+		if (_DL.empty())
+			return;
+
+		renderPseudoElement(":after", elm);
+
+		endParagraph();
+
+		// unclosed DT
+		if (_DL.back().DT)
+		{
+			nlwarning("BUG: unclosed DT in DL");
+		}
+
+		// unclosed DD
+		if (_DL.back().DD)
+		{
+			popIfNotEmpty(_Indent);
+			nlwarning("BUG: unclosed DD in DL");
+		}
+
+		popIfNotEmpty (_DL);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlDT(const CHtmlElement &elm)
+	{
+		if (_DL.empty())
+			return;
+
+		// TODO: check if nested tags still happen and fix it in parser
+		//     : remove special handling for nesting and let it happen
+
+		// html parser and libxml2 should prevent nested tags like these
+		if (_DL.back().DD)
+		{
+			nlwarning("BUG: nested DD in DT");
+
+			_DL.back().DD = false;
+			popIfNotEmpty(_Indent);
+		}
+
+		// html parser and libxml2 should prevent nested tags like these
+		if (_DL.back().DT)
+		{
+			nlwarning("BUG: nested DT in DT");
+		}
+
+		_DL.back().DT = true;
+
+		if (!_LI)
+		{
+			_LI = true;
+			newParagraph(ULBeginSpace);
+		}
+		else
+		{
+			newParagraph(LIBeginSpace);
+		}
+		
+		renderPseudoElement(":before", elm);
+	}
+
+	void CGroupHTML::htmlDTend(const CHtmlElement &elm)
+	{
+		if (_DL.empty())
+			return;
+
+		renderPseudoElement(":after", elm);
+
+		_DL.back().DT = false;
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlFONT(const CHtmlElement &elm)
+	{
+		if (elm.hasNonEmptyAttribute("color"))
+		{
+			CRGBA color;
+			if (scanHTMLColor(elm.getAttribute("color").c_str(), color))
+				_Style.Current.TextColor = color;
+		}
+
+		if (elm.hasNonEmptyAttribute("size"))
+		{
+			uint fontsize;
+			fromString(elm.getAttribute("size"), fontsize);
+			_Style.Current.FontSize = fontsize;
+		}
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlFORM(const CHtmlElement &elm)
+	{
+		// Build the form
+		CGroupHTML::CForm form;
+
+		// Get the action name
+		if (elm.hasNonEmptyAttribute("action"))
+		{
+			form.Action = getAbsoluteUrl(elm.getAttribute("action"));
+		}
+		else
+		{
+			form.Action = _URL;
+		}
+
+		_Forms.push_back(form);
+
+		renderPseudoElement(":before", elm);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlH(const CHtmlElement &elm)
+	{
+		newParagraph(PBeginSpace);
+		renderPseudoElement(":before", elm);
+	}
+
+	void CGroupHTML::htmlHend(const CHtmlElement &elm)
+	{
+		renderPseudoElement(":after", elm);
+		endParagraph();
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlHEAD(const CHtmlElement &elm)
+	{
+		_ReadingHeadTag = !_IgnoreHeadTag;
+		_IgnoreHeadTag = true;
+	}
+
+	void CGroupHTML::htmlHEADend(const CHtmlElement &elm)
+	{
+		_ReadingHeadTag = false;
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlHR(const CHtmlElement &elm)
+	{
+		newParagraph(0);
+
+		CInterfaceGroup *sep = CWidgetManager::getInstance()->getParser()->createGroupInstance("html_hr", "", NULL, 0);
+		if (sep)
+		{
+			CViewBitmap *bitmap = dynamic_cast<CViewBitmap*>(sep->getView("hr"));
+			if (bitmap)
+			{
+				bitmap->setColor(_Style.Current.TextColor);
+				if (_Style.Current.Width > 0)
+				{
+					clamp(_Style.Current.Width, 1, 32000);
+					bitmap->setW(_Style.Current.Width);
+					bitmap->setSizeRef(CInterfaceElement::none);
+				}
+				if (_Style.Current.Height > 0)
+				{
+					clamp(_Style.Current.Height, 1, 1000);
+					bitmap->setH(_Style.Current.Height);
+				}
+			}
+
+			renderPseudoElement(":before", elm);
+			getParagraph()->addChild(sep);
+			renderPseudoElement(":after", elm);
+
+			endParagraph();
+		}
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlHTML(const CHtmlElement &elm)
+	{
+		if (elm.hasNonEmptyAttribute("style"))
+		{
+			_Style.Root = _Style.Current;
+			_Style.applyRootStyle(elm.getAttribute("style"));
+			_Style.Current = _Style.Root;
+		}
+		setBackgroundColor(_Style.Current.BackgroundColor);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlI(const CHtmlElement &elm)
+	{
+		_Localize = true;
+		renderPseudoElement(":before", elm);
+	}
+
+	void CGroupHTML::htmlIend(const CHtmlElement &elm)
+	{
+		renderPseudoElement(":after", elm);
+		_Localize = false;
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlIMG(const CHtmlElement &elm)
+	{
+		// Get the string name
+		if (elm.hasNonEmptyAttribute("src"))
+		{
+			float tmpf;
+			std::string id = elm.getAttribute("id");
+			std::string src = elm.getAttribute("src");
+
+			if (elm.hasNonEmptyAttribute("width"))
+				getPercentage(_Style.Current.Width, tmpf, elm.getAttribute("width").c_str());
+			if (elm.hasNonEmptyAttribute("height"))
+				getPercentage(_Style.Current.Height, tmpf, elm.getAttribute("height").c_str());
+
+			// Get the global color name
+			if (elm.hasAttribute("global_color"))
+				_Style.Current.GlobalColor = true;
+
+			// Tooltip
+			// keep "alt" attribute for backward compatibility
+			std::string strtooltip = elm.getAttribute("alt");
+			// tooltip
+			if (elm.hasNonEmptyAttribute("title"))
+				strtooltip = elm.getAttribute("title");
+
+			const char *tooltip = NULL;
+			// note: uses pointer to string data
+			if (!strtooltip.empty())
+				tooltip = strtooltip.c_str();
+
+			// Mouse over image
+			string overSrc = elm.getAttribute("data-over-src");
+
+			if (getA() && getParent () && getParent ()->getParent())
+			{
+				string params = "name=" + getId() + "|url=" + getLink ();
+				addButton(CCtrlButton::PushButton, id, src, src, overSrc, "browse", params.c_str(), tooltip, _Style.Current);
+			}
+			else
+			if (tooltip || !overSrc.empty())
+			{
+				addButton(CCtrlButton::PushButton, id, src, src, overSrc, "", "", tooltip, _Style.Current);
+			}
+			else
+			{
+				// Get the option to reload (class==reload)
+				bool reloadImg = false;
+
+				if (elm.hasNonEmptyAttribute("style"))
+				{
+					string styleString = elm.getAttribute("style");
+					TStyle styles = parseStyle(styleString);
+					TStyle::iterator	it;
+
+					it = styles.find("reload");
+					if (it != styles.end() && (*it).second == "1")
+						reloadImg = true;
+				}
+
+				addImage(id, elm.getAttribute("src"), reloadImg, _Style.Current);
+			}
+		}
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlINPUT(const CHtmlElement &elm)
+	{
+		if (_Forms.empty())
+			return;
+
+		// read general property
+		string id = elm.getAttribute("id");
+
+		// Widget template name (old)
+		string templateName = elm.getAttribute("z_btn_tmpl");
+		// Input name is the new
+		if (elm.hasNonEmptyAttribute("z_input_tmpl"))
+			templateName = elm.getAttribute("z_input_tmpl");
+
+		// Widget minimal width
+		string minWidth = elm.getAttribute("z_input_width");
+
+		// Get the type
+		if (elm.hasNonEmptyAttribute("type"))
+		{
+			// Global color flag
+			if (elm.hasAttribute("global_color"))
+				_Style.Current.GlobalColor = true;
+
+			// Tooltip
+			std::string strtooltip = elm.getAttribute("alt");
+			const char *tooltip = NULL;
+			// note: uses pointer to strtooltip data
+			if (!strtooltip.empty())
+				tooltip = strtooltip.c_str();
+
+			string type = toLower(elm.getAttribute("type"));
+			if (type == "image")
+			{
+				// The submit button
+				string name = elm.getAttribute("name");
+				string normal = elm.getAttribute("src");
+				string pushed;
+				string over;
+
+				// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
+				string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=image";
+
+				// Add the ctrl button
+				addButton (CCtrlButton::PushButton, name, normal, pushed.empty()?normal:pushed, over,
+					"html_submit_form", param.c_str(), tooltip, _Style.Current);
+			}
+			else if (type == "button" || type == "submit")
+			{
+				// The submit button
+				string name = elm.getAttribute("name");
+				string normal = elm.getAttribute("src");
+				string text = elm.getAttribute("value");
+				string pushed;
+				string over;
+
+				string buttonTemplate(!templateName.empty() ? templateName : DefaultButtonGroup );
+
+				// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
+				string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=submit";
+				if (!text.empty())
+				{
+					// escape AH param separator
+					string tmp = text;
+					while(NLMISC::strFindReplace(tmp, "|", "&#124;"))
+						;
+					param = param + "|submit_button_value=" + tmp;
+				}
+
+				// Add the ctrl button
+				if (!_Paragraph)
+				{
+					newParagraph (0);
+					paragraphChange ();
+				}
+
+				typedef pair<string, string> TTmplParam;
+				vector<TTmplParam> tmplParams;
+				tmplParams.push_back(TTmplParam("id", name));
+				tmplParams.push_back(TTmplParam("onclick", "html_submit_form"));
+				tmplParams.push_back(TTmplParam("onclick_param", param));
+				//tmplParams.push_back(TTmplParam("text", text));
+				tmplParams.push_back(TTmplParam("active", "true"));
+				if (!minWidth.empty())
+					tmplParams.push_back(TTmplParam("wmin", minWidth));
+				CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
+				if (buttonGroup)
+				{
+
+					// Add the ctrl button
+					CCtrlTextButton *ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("button"));
+					if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
+					if (ctrlButton)
+					{
+						ctrlButton->setModulateGlobalColorAll (_Style.Current.GlobalColor);
+
+						// Translate the tooltip
+						if (tooltip)
+						{
+							if (CI18N::hasTranslation(tooltip))
+							{
+								ctrlButton->setDefaultContextHelp(CI18N::get(tooltip));
+							}
+							else
+							{
+								ctrlButton->setDefaultContextHelp(ucstring(tooltip));
+							}
+						}
+
+						ctrlButton->setText(ucstring::makeFromUtf8(text));
+
+						setTextButtonStyle(ctrlButton, _Style.Current);
+					}
+					getParagraph()->addChild (buttonGroup);
+					paragraphChange ();
+				}
+			}
+			else if (type == "text")
+			{
+				// Get the string name
+				string name = elm.getAttribute("name");
+				ucstring ucValue;
+				ucValue.fromUtf8(elm.getAttribute("value"));
+
+				uint size = 120;
+				uint maxlength = 1024;
+				if (elm.hasNonEmptyAttribute("size"))
+					fromString(elm.getAttribute("size"), size);
+				if (elm.hasNonEmptyAttribute("maxlength"))
+					fromString(elm.getAttribute("maxlength"), maxlength);
+
+				string textTemplate(!templateName.empty() ? templateName : DefaultFormTextGroup);
+				// Add the editbox
+				CInterfaceGroup *textArea = addTextArea (textTemplate, name.c_str (), 1, size/12, false, ucValue, maxlength);
+				if (textArea)
+				{
+					// Add the text area to the form
+					CGroupHTML::CForm::CEntry entry;
+					entry.Name = name;
+					entry.TextArea = textArea;
+					_Forms.back().Entries.push_back (entry);
+				}
+			}
+			else if (type == "checkbox" || type == "radio")
+			{
+				renderPseudoElement(":before", elm);
+
+				CCtrlButton::EType btnType;
+				string name = elm.getAttribute("name");
+				string normal = elm.getAttribute("src");
+				string pushed;
+				string over;
+				ucstring ucValue = ucstring("on");
+				bool checked = elm.hasAttribute("checked");
+
+				// TODO: unknown if empty attribute should override or not
+				if (elm.hasNonEmptyAttribute("value"))
+					ucValue.fromUtf8(elm.getAttribute("value"));
+
+				if (type == "radio")
+				{
+					btnType = CCtrlButton::RadioButton;
+					normal = DefaultRadioButtonBitmapNormal;
+					pushed = DefaultRadioButtonBitmapPushed;
+					over = DefaultRadioButtonBitmapOver;
+				}
+				else
+				{
+					btnType = CCtrlButton::ToggleButton;
+					normal = DefaultCheckBoxBitmapNormal;
+					pushed = DefaultCheckBoxBitmapPushed;
+					over = DefaultCheckBoxBitmapOver;
+				}
+
+				// Add the ctrl button
+				CCtrlButton *checkbox = addButton (btnType, name, normal, pushed, over, "", "", tooltip, _Style.Current);
+				if (checkbox)
+				{
+					if (btnType == CCtrlButton::RadioButton)
+					{
+						// override with 'id' because radio buttons share same name
+						if (!id.empty())
+							checkbox->setId(id);
+
+						// group together buttons with same name
+						CForm &form = _Forms.back();
+						bool notfound = true;
+						for (uint i=0; i<form.Entries.size(); i++)
+						{
+							if (form.Entries[i].Name == name && form.Entries[i].Checkbox->getType() == CCtrlButton::RadioButton)
+							{
+								checkbox->initRBRefFromRadioButton(form.Entries[i].Checkbox);
+								notfound = false;
+								break;
+							}
+						}
+						if (notfound)
+						{
+							// this will start a new group (initRBRef() would take first button in group container otherwise)
+							checkbox->initRBRefFromRadioButton(checkbox);
+						}
+					}
+
+					checkbox->setPushed (checked);
+
+					// Add the button to the form
+					CGroupHTML::CForm::CEntry entry;
+					entry.Name = name;
+					entry.Value = decodeHTMLEntities(ucValue);
+					entry.Checkbox = checkbox;
+					_Forms.back().Entries.push_back (entry);
+				}
+				renderPseudoElement(":after", elm);
+			}
+			else if (type == "hidden")
+			{
+				if (elm.hasNonEmptyAttribute("name"))
+				{
+					// Get the name
+					string name = elm.getAttribute("name");
+
+					// Get the value
+					ucstring ucValue;
+					ucValue.fromUtf8(elm.getAttribute("value"));
+
+					// Add an entry
+					CGroupHTML::CForm::CEntry entry;
+					entry.Name = name;
+					entry.Value = decodeHTMLEntities(ucValue);
+					_Forms.back().Entries.push_back (entry);
+				}
+			}
+		}
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlLI(const CHtmlElement &elm)
+	{
+		if (_UL.empty())
+			return;
+
+		// UL, OL top margin if this is the first LI
+		if (!_LI)
+		{
+			_LI = true;
+			newParagraph(ULBeginSpace);
+		}
+		else
+		{
+			newParagraph(LIBeginSpace);
+		}
+
+		// OL list index can be overridden by <li value="1"> attribute
+		if (elm.hasNonEmptyAttribute("value"))
+			fromString(elm.getAttribute("value"), _UL.back().Value);
+
+		ucstring str;
+		str.fromUtf8(_UL.back().getListMarkerText());
+		addString (str);
+
+		// list-style-type: outside
+		if (_CurrentViewLink)
+		{
+			getParagraph()->setFirstViewIndent(-_CurrentViewLink->getMaxUsedW());
+		}
+
+		flushString ();
+
+		// after marker
+		renderPseudoElement(":before", elm);
+
+		_UL.back().Value++;
+	}
+
+	void CGroupHTML::htmlLIend(const CHtmlElement &elm)
+	{
+		renderPseudoElement(":after", elm);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlLUA(const CHtmlElement &elm)
+	{
+		// we receive an embeded lua script
+		_ParsingLua = _TrustedDomain; // Only parse lua if TrustedDomain
+		_LuaScript.clear();
+	}
+	
+	void CGroupHTML::htmlLUAend(const CHtmlElement &elm)
+	{
+		if (_ParsingLua && _TrustedDomain)
+		{
+			_ParsingLua = false;
+			// execute the embeded lua script
+			_LuaScript = "\nlocal __CURRENT_WINDOW__=\""+this->_Id+"\" \n"+_LuaScript;
+			CLuaManager::getInstance().executeLuaScript(_LuaScript, true);
+		}
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlMETA(const CHtmlElement &elm)
+	{
+		if (!_ReadingHeadTag)
+			return;
+
+		std::string httpEquiv = elm.getAttribute("http-equiv");
+		std::string httpContent = elm.getAttribute("content");
+		if (!httpEquiv.empty() && !httpContent.empty())
+		{
+			// only first http-equiv="refresh" should be handled
+			if (_RefreshUrl.empty() && httpEquiv == "refresh")
+			{
+				const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
+				double timeSec = times.thisFrameMs / 1000.0f;
+
+				string::size_type pos = httpContent.find_first_of(";");
+				if (pos == string::npos)
+				{
+					fromString(httpContent, _NextRefreshTime);
+					_RefreshUrl = _URL;
+				}
+				else
+				{
+					fromString(httpContent.substr(0, pos), _NextRefreshTime);
+
+					pos = toLower(httpContent).find("url=");
+					if (pos != string::npos)
+						_RefreshUrl = getAbsoluteUrl(httpContent.substr(pos + 4));
+				}
+
+				_NextRefreshTime += timeSec;
+			}
+		}
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlOBJECT(const CHtmlElement &elm)
+	{
+		_ObjectType = elm.getAttribute("type");
+		_ObjectData = elm.getAttribute("data");
+		_ObjectMD5Sum = elm.getAttribute("id");
+		_ObjectAction = elm.getAttribute("standby");
+		_Object = true;
+	}
+
+	void CGroupHTML::htmlOBJECTend(const CHtmlElement &elm)
+	{
+		if (!_TrustedDomain)
+			return;
+
+		if (_ObjectType=="application/ryzom-data")
+		{
+			if (!_ObjectData.empty())
+			{
+				if (addBnpDownload(_ObjectData, _ObjectAction, _ObjectScript, _ObjectMD5Sum))
+				{
+					CLuaManager::getInstance().executeLuaScript("\nlocal __ALLREADYDL__=true\n"+_ObjectScript, true);
+				}
+				_ObjectScript.clear();
+			}
+		}
+		_Object = false;
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlOL(const CHtmlElement &elm)
+	{
+		sint32 start = 1;
+		std::string type("1");
+
+		if (elm.hasNonEmptyAttribute("start"))
+			fromString(elm.getAttribute("start"), start);
+		if (elm.hasNonEmptyAttribute("type"))
+			type = elm.getAttribute("type");
+
+		_UL.push_back(HTMLOListElement(start, type));
+		// if LI is already present
+		_LI = _UL.size() > 1 || _DL.size() > 1;
+		_Indent.push_back(getIndent() + ULIndent);
+		endParagraph();
+
+		renderPseudoElement(":before", elm);
+	}
+
+	void CGroupHTML::htmlOLend(const CHtmlElement &elm)
+	{
+		htmlULend(elm);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlOPTION(const CHtmlElement &elm)
+	{
+		_SelectOption = true;
+		_SelectOptionStr.clear();
+
+		// Got one form ?
+		if (_Forms.empty() || _Forms.back().Entries.empty())
+			return;
+
+		_Forms.back().Entries.back().SelectValues.push_back(elm.getAttribute("value"));
+
+		if (elm.hasAttribute("selected"))
+			_Forms.back().Entries.back().InitialSelection = (sint)_Forms.back().Entries.back().SelectValues.size() - 1;
+
+		if (elm.hasAttribute("disabled"))
+			_Forms.back().Entries.back().sbOptionDisabled = (sint)_Forms.back().Entries.back().SelectValues.size() - 1;
+	}
+
+	void CGroupHTML::htmlOPTIONend(const CHtmlElement &elm)
+	{
+		if (_Forms.empty() || _Forms.back().Entries.empty())
+			return;
+
+		// insert the parsed text into the select control
+		CDBGroupComboBox *cb = _Forms.back().Entries.back().ComboBox;
+		if (cb)
+		{
+			uint lineIndex = cb->getNumTexts();
+			cb->addText(_SelectOptionStr);
+			if (_Forms.back().Entries.back().sbOptionDisabled == lineIndex)
+			{
+				cb->setGrayed(lineIndex, true);
+			}
+		}
+		else
+		{
+			CGroupMenu *sb = _Forms.back().Entries.back().SelectBox;
+			if (sb)
+			{
+				uint lineIndex = sb->getNumLine();
+				sb->addLine(_SelectOptionStr, "", "");
+
+				if (_Forms.back().Entries.back().sbOptionDisabled == lineIndex)
+				{
+					sb->setGrayedLine(lineIndex, true);
+				}
+				else
+				{
+					// create option line checkbox, CGroupMenu is taking ownership of the checbox
+					CInterfaceGroup *ig = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_checkbox", "", NULL, 0);
+					if (ig)
+					{
+						CCtrlButton *cb = dynamic_cast<CCtrlButton *>(ig->getCtrl("b"));
+						if (cb)
+						{
+							if (_Forms.back().Entries.back().sbMultiple)
+							{
+								cb->setType(CCtrlButton::ToggleButton);
+								cb->setTexture(DefaultCheckBoxBitmapNormal);
+								cb->setTexturePushed(DefaultCheckBoxBitmapPushed);
+								cb->setTextureOver(DefaultCheckBoxBitmapOver);
+							}
+							else
+							{
+								cb->setType(CCtrlButton::RadioButton);
+								cb->setTexture(DefaultRadioButtonBitmapNormal);
+								cb->setTexturePushed(DefaultRadioButtonBitmapPushed);
+								cb->setTextureOver(DefaultRadioButtonBitmapOver);
+
+								if (_Forms.back().Entries.back().sbRBRef == NULL)
+									_Forms.back().Entries.back().sbRBRef = cb;
+
+								cb->initRBRefFromRadioButton(_Forms.back().Entries.back().sbRBRef);
+							}
+
+							cb->setPushed(_Forms.back().Entries.back().InitialSelection == lineIndex);
+							sb->setUserGroupLeft(lineIndex, ig);
+						}
+						else
+						{
+							nlwarning("Failed to get 'b' element from 'menu_checkbox' template");
+							delete ig;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlP(const CHtmlElement &elm)
+	{
+		newParagraph(PBeginSpace);
+		renderPseudoElement(":before", elm);
+	}
+
+	void CGroupHTML::htmlPend(const CHtmlElement &elm)
+	{
+		renderPseudoElement(":after", elm);
+		endParagraph();
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlPRE(const CHtmlElement &elm)
+	{
+		_PRE.push_back(true);
+		newParagraph(0);
+
+		renderPseudoElement(":before", elm);
+	}
+
+	void CGroupHTML::htmlPREend(const CHtmlElement &elm)
+	{
+		renderPseudoElement(":after", elm);
+
+		endParagraph();
+		popIfNotEmpty(_PRE);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlSCRIPT(const CHtmlElement &elm)
+	{
+		_IgnoreText = true;
+	}
+
+	void CGroupHTML::htmlSCRIPTend(const CHtmlElement &elm)
+	{
+		_IgnoreText = false;
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlSELECT(const CHtmlElement &elm)
+	{
+		if (_Forms.empty())
+			return;
+
+		// A select box
+		string name = elm.getAttribute("name");
+		bool multiple = elm.hasAttribute("multiple");
+		sint32 size = 0;
+
+		if (elm.hasNonEmptyAttribute("size"))
+			fromString(elm.getAttribute("size"), size);
+
+		CGroupHTML::CForm::CEntry entry;
+		entry.Name = name;
+		entry.sbMultiple = multiple;
+		if (size > 1 || multiple)
+		{
+			entry.InitialSelection = -1;
+			CGroupMenu *sb = addSelectBox(DefaultFormSelectBoxMenuGroup, name.c_str());
+			if (sb)
+			{
+				if (size < 1)
+					size = 4;
+
+				if (_Style.Current.Width > -1)
+					sb->setMinW(_Style.Current.Width);
+
+				if (_Style.Current.Height > -1)
+					sb->setMinH(_Style.Current.Height);
+
+				sb->setMaxVisibleLine(size);
+				sb->setFontSize(_Style.Current.FontSize);
+			}
+
+			entry.SelectBox = sb;
+		}
+		else
+		{
+			CDBGroupComboBox *cb = addComboBox(DefaultFormSelectGroup, name.c_str());
+			entry.ComboBox = cb;
+
+			if (cb)
+			{
+				// create view text
+				cb->updateCoords();
+				setTextStyle(cb->getViewText(), _Style.Current);
+			}
+		}
+		_Forms.back().Entries.push_back (entry);
+	}
+
+	void CGroupHTML::htmlSELECTend(const CHtmlElement &elm)
+	{
+		_SelectOption = false;
+		if (_Forms.empty() || _Forms.back().Entries.empty())
+			return;
+
+		CDBGroupComboBox *cb = _Forms.back().Entries.back().ComboBox;
+		if (cb)
+		{
+			cb->setSelectionNoTrigger(_Forms.back().Entries.back().InitialSelection);
+			// TODO: magic padding
+			cb->setW(cb->evalContentWidth() + 16);
+		}
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlSTYLE(const CHtmlElement &elm)
+	{
+		_IgnoreText = true;
+	}
+
+	void CGroupHTML::htmlSTYLEend(const CHtmlElement &elm)
+	{
+		_IgnoreText = false;
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlTABLE(const CHtmlElement &elm)
+	{
+		// Get cells parameters
+		getCellsParameters(elm, false);
+
+		CGroupTable *table = new CGroupTable(TCtorParam());
+		table->BgColor = _CellParams.back().BgColor;
+
+		// TODO: border-spacing: 2em;
+		{
+			if (elm.hasNonEmptyAttribute("cellspacing"))
+				fromString(elm.getAttribute("cellspacing"), table->CellSpacing);
+			
+			// TODO: cssLength, horiz/vert values
+			if (_Style.hasStyle("border-spacing"))
+				fromString(_Style.getStyle("border-spacing"), table->CellSpacing);
+
+			// overrides border-spacing if set to 'collapse'
+			if (_Style.checkStyle("border-collapse", "collapse"))
+				table->CellSpacing = 0;
+		}
+
+		if (elm.hasNonEmptyAttribute("cellpadding"))
+			fromString(elm.getAttribute("cellpadding"), table->CellPadding);
+
+		if (_Style.hasStyle("width"))
+			getPercentage(table->ForceWidthMin, table->TableRatio, _Style.getStyle("width").c_str());
+		else if (elm.hasNonEmptyAttribute("width"))
+			getPercentage (table->ForceWidthMin, table->TableRatio, elm.getAttribute("width").c_str());
+
+		if (_Style.hasStyle("border") || _Style.hasStyle("border-width"))
+		{
+			table->Border = _Style.Current.BorderWidth;
+		}
+		else if (elm.hasAttribute("border"))
+		{
+			std::string s = elm.getAttribute("border");
+			if (s.empty())
+				table->Border = 1;
+			else
+				fromString(elm.getAttribute("border"), table->Border);
+		}
+
+		if (_Style.hasStyle("border-color"))
+		{
+			std::string s = toLower(_Style.getStyle("border-color"));
+			if (s == "currentcolor")
+				table->BorderColor = _Style.Current.TextColor;
+			else
+				scanHTMLColor(s.c_str(), table->BorderColor);
+		}
+		else if (elm.hasNonEmptyAttribute("bordercolor"))
+		{
+			scanHTMLColor(elm.getAttribute("bordercolor").c_str(), table->BorderColor);
+		}
+
+		table->setMarginLeft(getIndent());
+		addHtmlGroup (table, 0);
+
+		renderPseudoElement(":before", elm);
+
+		_Tables.push_back(table);
+
+		// Add a cell pointer
+		_Cells.push_back(NULL);
+		_TR.push_back(false);
+		_Indent.push_back(0);
+	}
+
+	void CGroupHTML::htmlTABLEend(const CHtmlElement &elm)
+	{
+		popIfNotEmpty(_CellParams);
+		popIfNotEmpty(_TR);
+		popIfNotEmpty(_Cells);
+		popIfNotEmpty(_Tables);
+		popIfNotEmpty(_Indent);
+
+		renderPseudoElement(":after", elm);
+		endParagraph();
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlTD(const CHtmlElement &elm)
+	{
+		// Get cells parameters
+		getCellsParameters(elm, true);
+
+		if (elm.ID == HTML_TH)
+		{
+			if (!_Style.hasStyle("font-weight"))
+				_Style.Current.FontWeight = FONT_WEIGHT_BOLD;
+			// center if not specified otherwise.
+			if (!elm.hasNonEmptyAttribute("align") && !_Style.hasStyle("text-align"))
+				_CellParams.back().Align = CGroupCell::Center;
+		}
+
+		CGroupTable *table = getTable();
+		if (table)
+		{
+			if (_Style.hasStyle("padding"))
+			{
+				uint32 a;
+				// TODO: cssLength
+				if (fromString(_Style.getStyle("padding"), a))
+					table->CellPadding = a;
+			}
+
+			if (!_Cells.empty())
+			{
+				_Cells.back() = new CGroupCell(CViewBase::TCtorParam());
+
+				if (_Style.checkStyle("background-repeat", "1") || _Style.checkStyle("background-repeat", "repeat"))
+					_Cells.back()->setTextureTile(true);
+
+				if (_Style.checkStyle("background-scale", "1") || _Style.checkStyle("background-size", "cover"))
+					_Cells.back()->setTextureScale(true);
+
+				if (_Style.hasStyle("background-image"))
+				{
+					string image = _Style.getStyle("background-image");
+
+					string::size_type texExt = toLower(image).find("url(");
+					// Url image
+					if (texExt != string::npos)
+					{
+						// Remove url()
+						image = image.substr(4, image.size()-5);
+						addImageDownload(image, _Cells.back());
+					// Image in BNP
+					}
+					else
+					{
+						_Cells.back()->setTexture(image);
+					}
+				}
+
+				if (elm.hasNonEmptyAttribute("colspan"))
+					fromString(elm.getAttribute("colspan"), _Cells.back()->ColSpan);
+				if (elm.hasNonEmptyAttribute("rowspan"))
+					fromString(elm.getAttribute("rowspan"), _Cells.back()->RowSpan);
+
+				_Cells.back()->BgColor = _CellParams.back().BgColor;
+				_Cells.back()->Align = _CellParams.back().Align;
+				_Cells.back()->VAlign = _CellParams.back().VAlign;
+				_Cells.back()->LeftMargin = _CellParams.back().LeftMargin;
+				_Cells.back()->NoWrap = _CellParams.back().NoWrap;
+				_Cells.back()->ColSpan = std::max(1, _Cells.back()->ColSpan);
+				_Cells.back()->RowSpan = std::max(1, _Cells.back()->RowSpan);
+
+				float temp;
+				if (_Style.hasStyle("width"))
+					getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, _Style.getStyle("width").c_str());
+				else if (elm.hasNonEmptyAttribute("width"))
+					getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, elm.getAttribute("width").c_str());
+				
+				if (_Style.hasStyle("height"))
+					getPercentage (_Cells.back()->Height, temp, _Style.getStyle("height").c_str());
+				else if (elm.hasNonEmptyAttribute("height"))
+					getPercentage (_Cells.back()->Height, temp, elm.getAttribute("height").c_str());
+
+				_Cells.back()->NewLine = getTR();
+				table->addChild (_Cells.back());
+
+				// reusing indent pushed by table
+				_Indent.back() = 0;
+
+				newParagraph(TDBeginSpace);
+				// indent is already 0, getParagraph()->setMarginLeft(0); // maybe setIndent(0) if LI is using one
+
+				// Reset TR flag
+				if (!_TR.empty())
+					_TR.back() = false;
+
+				renderPseudoElement(":before", elm);
+			}
+		}
+	}
+
+	void CGroupHTML::htmlTDend(const CHtmlElement &elm)
+	{
+		renderPseudoElement(":after", elm);
+
+		popIfNotEmpty(_CellParams);
+		if (!_Cells.empty())
+			_Cells.back() = NULL;
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlTEXTAREA(const CHtmlElement &elm)
+	{
+		_PRE.push_back(true);
+
+		// Got one form ?
+		if (!(_Forms.empty()))
+		{
+			// read general property
+			string templateName;
+
+			// Widget template name
+			if (elm.hasNonEmptyAttribute("z_input_tmpl"))
+				templateName = elm.getAttribute("z_input_tmpl");
+
+			// Get the string name
+			_TextAreaName.clear();
+			_TextAreaRow = 1;
+			_TextAreaCols = 10;
+			_TextAreaContent.clear();
+			_TextAreaMaxLength = 1024;
+			if (elm.hasNonEmptyAttribute("name"))
+				_TextAreaName = elm.getAttribute("name");
+			if (elm.hasNonEmptyAttribute("rows"))
+				fromString(elm.getAttribute("rows"), _TextAreaRow);
+			if (elm.hasNonEmptyAttribute("cols"))
+				fromString(elm.getAttribute("cols"), _TextAreaCols);
+			if (elm.hasNonEmptyAttribute("maxlength"))
+				fromString(elm.getAttribute("maxlength"), _TextAreaMaxLength);
+
+			_TextAreaTemplate = !templateName.empty() ? templateName : DefaultFormTextAreaGroup;
+			_TextArea = true;
+		}
+	}
+
+	void CGroupHTML::htmlTEXTAREAend(const CHtmlElement &elm)
+	{
+		_TextArea = false;
+		popIfNotEmpty (_PRE);
+
+		if (_Forms.empty())
+			return;
+
+		CInterfaceGroup *textArea = addTextArea (_TextAreaTemplate, _TextAreaName.c_str (), _TextAreaRow, _TextAreaCols, true, _TextAreaContent, _TextAreaMaxLength);
+		if (textArea)
+		{
+			// Add the text area to the form
+			CGroupHTML::CForm::CEntry entry;
+			entry.Name = _TextAreaName;
+			entry.TextArea = textArea;
+			_Forms.back().Entries.push_back (entry);
+		}
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlTH(const CHtmlElement &elm)
+	{
+		htmlTD(elm);
+	}
+
+	void CGroupHTML::htmlTHend(const CHtmlElement &elm)
+	{
+		htmlTDend(elm);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlTITLE(const CHtmlElement &elm)
+	{
+		// TODO: only from <head>
+		// if (!_ReadingHeadTag) return;
+		if(!_TitlePrefix.empty())
+			_TitleString = _TitlePrefix + " - ";
+		else
+			_TitleString.clear();
+		_Title = true;
+	}
+
+	void CGroupHTML::htmlTITLEend(const CHtmlElement &elm)
+	{
+		_Title = false;
+		setTitle(_TitleString);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlTR(const CHtmlElement &elm)
+	{
+		// Get cells parameters
+		getCellsParameters(elm, true);
+
+		// TODO: this probably ends up in first cell
+		renderPseudoElement(":before", elm);
+
+		// Set TR flag
+		if (!_TR.empty())
+			_TR.back() = true;
+	}
+
+	void CGroupHTML::htmlTRend(const CHtmlElement &elm)
+	{
+		// TODO: this probably ends up in last cell
+		renderPseudoElement(":after", elm);
+
+		popIfNotEmpty(_CellParams);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlUL(const CHtmlElement &elm)
+	{
+		if (_UL.empty())
+			_UL.push_back(HTMLOListElement(1, "disc"));
+		else if (_UL.size() == 1)
+			_UL.push_back(HTMLOListElement(1, "circle"));
+		else
+			_UL.push_back(HTMLOListElement(1, "square"));
+
+		// if LI is already present
+		_LI = _UL.size() > 1 || _DL.size() > 1;
+		_Indent.push_back(getIndent() + ULIndent);
+		endParagraph();
+
+		renderPseudoElement(":before", elm);
+	}
+
+	void CGroupHTML::htmlULend(const CHtmlElement &elm)
+	{
+		if (_UL.empty())
+			return;
+
+		renderPseudoElement(":after", elm);
+
+		endParagraph();
+		popIfNotEmpty(_UL);
+		popIfNotEmpty(_Indent);
 	}
 
 }

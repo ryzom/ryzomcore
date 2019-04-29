@@ -17,13 +17,14 @@
 
 #include "stdpch.h"
 
+#include "nel/gui/html_parser.h"
+
 #include <string>
 #include <libxml/HTMLparser.h>
 
 #include "nel/misc/types_nl.h"
 #include "nel/gui/libwww.h"
 #include "nel/gui/group_html.h"
-#include "nel/gui/lua_ihm.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -34,71 +35,40 @@ using namespace NLMISC;
 
 namespace NLGUI
 {
+
 	// ***************************************************************************
-	void CGroupHTML::htmlElement(xmlNode *node, int element_number)
+	void CHtmlParser::parseStyle(xmlNode *a_node, std::string &styleString) const
 	{
-		SGML_dtd *HTML_DTD = HTML_dtd ();
-
-		if (element_number < HTML_ELEMENTS)
+		xmlNode *node = a_node;
+		while(node)
 		{
-			CXMLAutoPtr ptr;
-			// load attributes into libwww structs
-			std::vector<bool> present;
-			std::vector<const char *>value;
-			std::string strvalues[MAX_ATTRIBUTES];
-			present.resize(30, false);
-			value.resize(30);
-
-			uint nbAttributes = std::min(MAX_ATTRIBUTES, HTML_DTD->tags[element_number].number_of_attributes);
-			for(uint i=0; i<nbAttributes; i++)
+			if (node->type == XML_CDATA_SECTION_NODE)
 			{
-				std::string name;
-				name = toLower(std::string(HTML_DTD->tags[element_number].attributes[i].name));
-				ptr = xmlGetProp(node, (const xmlChar *)name.c_str());
-				if (ptr)
-				{
-					// copy xmlChar to string (xmlChar will be released)
-					strvalues[i] = (const char *)(ptr);
-					// now use string pointer in value[] array
-					value[i] = strvalues[i].c_str();
-					present[i] = true;
-				}
+				styleString += (const char*)node->content;
+			}
+			else
+			{
+				nlwarning("<style> tag has child elements other than cdata[%d]", node->type);
 			}
 
-			beginElement(element_number, present, value);
-		}
-		else
-		{
-			beginUnparsedElement((const char *)(node->name), xmlStrlen(node->name));
-		}
-
-		// recursive - text content / child nodes
-		htmlWalkDOM(node->children);
-
-		// closing tag
-		if (element_number < HTML_ELEMENTS)
-		{
-			endElement(element_number);
-		}
-		else
-		{
-			endUnparsedElement((const char *)(node->name), xmlStrlen(node->name));
+			node = node->next;
 		}
 	}
 
 	// ***************************************************************************
 	// recursive function to walk html document
-	void CGroupHTML::htmlWalkDOM(xmlNode *a_node)
+	void CHtmlParser::parseNode(xmlNode *a_node, CHtmlElement &parent, std::string &styleString, std::vector<std::string> &links) const
 	{
 		SGML_dtd *HTML_DTD = HTML_dtd ();
 
+		uint childIndex = 0;
 		uint element_number;
 		xmlNode *node = a_node;
 		while(node)
 		{
 			if (node->type == XML_TEXT_NODE)
 			{
-				addText((const char *)(node->content), xmlStrlen(node->content));
+				parent.Children.push_back(CHtmlElement(CHtmlElement::TEXT_NODE, (const char*)(node->content)));
 			}
 			else
 			if (node->type == XML_ELEMENT_NODE)
@@ -110,7 +80,123 @@ namespace NLGUI
 						break;
 				}
 
-				htmlElement(node, element_number);
+				// get pointer to previous sibling
+				CHtmlElement *prevSibling = NULL;
+				if (!parent.Children.empty())
+				{
+					// skip text nodes
+					for(std::list<CHtmlElement>::reverse_iterator it = parent.Children.rbegin(); it != parent.Children.rend(); ++it)
+					{
+						if (it->Type == CHtmlElement::ELEMENT_NODE)
+						{
+							prevSibling = &(*it);
+							break;
+						}
+					}
+				}
+
+				parent.Children.push_back(CHtmlElement(CHtmlElement::ELEMENT_NODE, toLower((const char*)node->name)));
+				CHtmlElement &elm = parent.Children.back();
+				elm.ID = element_number;
+				elm.parent = &parent;
+				elm.childIndex = childIndex;
+
+				// previous/next sibling that is ELEMENT_NODE
+				elm.previousSibling = prevSibling;
+				if (prevSibling)
+				{
+					prevSibling->nextSibling = &parent.Children.back();
+				}
+
+				childIndex++;
+
+				// TODO: harvest <link type="css">, <style>, <img>
+
+				elm.Attributes.clear();
+
+				for (xmlAttr *cur_attr = node->properties; cur_attr; cur_attr = cur_attr->next) {
+					std::string key(toLower((const char *)(cur_attr->name)));
+					std::string value;
+					if (cur_attr->children)
+					{
+						value = (const char *)(cur_attr->children->content);
+					}
+					elm.Attributes[key] = value;
+				}
+
+				if (elm.hasAttribute("class"))
+				{
+					std::vector<std::string> parts;
+					NLMISC::splitString(elm.getAttribute("class"), " ", parts);
+					for(uint i = 0; i<parts.size();++i)
+					{
+						elm.ClassNames.insert(toLower(trim(parts[i])));
+					}
+				}
+
+				if (elm.Value == "style")
+				{
+					// <style type="text/css" media="all, screen">
+					// ...
+					// </style>
+					bool useStyle = true;
+					if (elm.hasAttribute("media"))
+					{
+						std::string media = trim(toLower(elm.Attributes["media"]));
+						useStyle = media.empty() || media.find("all") != std::string::npos || media.find("screen") != std::string::npos;
+
+						// <style media="ryzom"> for ingame browser
+						useStyle = useStyle || media == "ryzom";
+					}
+
+					if (useStyle)
+					{
+						parseStyle(node->children, styleString);
+					}
+					// style tag is kept in dom
+				}
+				if (elm.Value == "link" && elm.getAttribute("rel") == "stylesheet")
+				{
+					bool useStyle = true;
+					if (elm.hasAttribute("media"))
+					{
+						std::string media = trim(toLower(elm.Attributes["media"]));
+						useStyle = media.empty() || media.find("all") != std::string::npos || media.find("screen") != std::string::npos;
+
+						// <style media="ryzom"> for ingame browser
+						useStyle = useStyle || media == "ryzom";
+					}
+
+					if (useStyle)
+					{
+						links.push_back(elm.getAttribute("href"));
+					}
+					// link tag is kept in dom
+				}
+				else if (node->children)
+				{
+					parseNode(node->children, elm, styleString, links);
+
+					// must cleanup nested tags that libxml2 does not fix
+					// dt without end tag: <dl><dt><dt></dl>
+					// dd without end tag: <dl><dd><dd></dl>
+					if (!elm.Children.empty() && (elm.Value == "dt" || elm.Value == "dd"))
+					{
+						std::string tag = elm.Value;
+						std::list<CHtmlElement>::iterator it;
+						for(it = elm.Children.begin(); it != elm.Children.end(); ++it)
+						{
+							if (it->Type == CHtmlElement::ELEMENT_NODE && it->Value == tag)
+							{
+								// relocate this and remaining elements over to parent
+								parent.Children.splice(parent.Children.end(), elm.Children, it, elm.Children.end());
+								break;
+							}
+						}
+						elm.reindexChilds();
+						parent.reindexChilds();
+					}
+				}
 			}
 
 			// move into next sibling
@@ -297,13 +383,13 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	bool CGroupHTML::parseHtml(std::string htmlString)
+	void CHtmlParser::getDOM(std::string htmlString, CHtmlElement &dom, std::string &styleString, std::vector<std::string> &links) const
 	{
 		htmlParserCtxtPtr parser = htmlCreatePushParserCtxt(NULL, NULL, NULL, 0, NULL, XML_CHAR_ENCODING_UTF8);
 		if (!parser)
 		{
 			nlwarning("Creating html parser context failed");
-			return false;
+			return;
 		}
 
 		htmlCtxtUseOptions(parser, HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING | HTML_PARSE_NONET);
@@ -314,45 +400,28 @@ namespace NLGUI
 		htmlParseChunk(parser, htmlString.c_str(), htmlString.size(), 0);
 		htmlParseChunk(parser, "", 0, 1);
 
-		bool success = true;
 		if (parser->myDoc)
 		{
 			xmlNode *root = xmlDocGetRootElement(parser->myDoc);
 			if (root)
 			{
-				htmlWalkDOM(root);
+				styleString.clear();
+				parseNode(root, dom, styleString, links);
 			}
 			else
 			{
 				nlwarning("html root node failed");
-				success = false;
 			}
 			xmlFreeDoc(parser->myDoc);
 		}
 		else
 		{
 			nlwarning("htmlstring parsing failed");
-			success = false;
 		}
 
 		htmlFreeParserCtxt(parser);
-		if (success)
-			_DocumentHtml = htmlString;
-		return success;
-	}
-
-	// ***************************************************************************
-	int CGroupHTML::luaParseHtml(CLuaState &ls)
-	{
-		const char *funcName = "parseHtml";
-		CLuaIHM::checkArgCount(ls, funcName, 1);
-		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
-		std::string html = ls.toString(1);
-
-		parseHtml(html);
-
-		return 0;
 	}
 
 }
+
 

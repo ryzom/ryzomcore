@@ -24,11 +24,11 @@
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/group_table.h"
 #include "nel/gui/libwww_types.h"
+#include "nel/gui/html_element.h"
+#include "nel/gui/css_style.h"
 
 // forward declaration
 typedef void CURLM;
-
-typedef std::map<std::string, std::string>	TStyle;
 
 namespace NLGUI
 {
@@ -76,60 +76,8 @@ namespace NLGUI
 
 		static SWebOptions options;
 
-		// text-shadow
-		struct STextShadow
-		{
-		public:
-			STextShadow(bool enabled = false, bool outline = false, sint32 x=1, sint32 y=1, NLMISC::CRGBA color=NLMISC::CRGBA::Black)
-				: Enabled(enabled), Outline(outline), X(x), Y(y), Color(color)
-			{ }
-
-			bool Enabled;
-			bool Outline;
-			sint32 X;
-			sint32 Y;
-			NLMISC::CRGBA Color;
-		};
-
-		class CStyleParams
-		{
-		public:
-			CStyleParams () : FontFamily(""), TextColor(255,255,255,255), TextShadow()
-			{
-				FontSize=10;
-				FontWeight=400;
-				FontOblique=false;
-				Underlined=false;
-				StrikeThrough=false;
-				GlobalColor=false;
-				Width=-1;
-				Height=-1;
-				MaxWidth=-1;
-				MaxHeight=-1;
-				BorderWidth=1;
-				BackgroundColor=NLMISC::CRGBA::Black;
-				BackgroundColorOver=NLMISC::CRGBA::Black;
-			}
-			uint FontSize;
-			uint FontWeight;
-			bool FontOblique;
-			std::string FontFamily;
-			NLMISC::CRGBA TextColor;
-			STextShadow TextShadow;
-			bool GlobalColor;
-			bool Underlined;
-			bool StrikeThrough;
-			sint32 Width;
-			sint32 Height;
-			sint32 MaxWidth;
-			sint32 MaxHeight;
-			sint32 BorderWidth;
-			NLMISC::CRGBA BackgroundColor;
-			NLMISC::CRGBA BackgroundColorOver;
-		};
-
 		// ImageDownload system
-		enum TDataType {ImgType= 0, BnpType};
+		enum TDataType {ImgType= 0, BnpType, StylesheetType};
 		enum TImageType {NormalImage=0, OverImage};
 
 		// Constructor
@@ -150,8 +98,11 @@ namespace NLGUI
 		// Browse
 		virtual void browse (const char *url);
 
+		// load css from local file and insert into active stylesheet collection
+		void parseStylesheetFile(const std::string &fname);
+
 		// parse html string using libxml2 parser
-		virtual bool parseHtml(std::string htmlString);
+		bool parseHtml(const std::string &htmlString);
 
 		// Refresh
 		void refresh();
@@ -162,12 +113,7 @@ namespace NLGUI
 		// Browse error
 		void browseError (const char *msg);
 
-		// stop browse
-		void stopBrowse ();
-
 		bool isBrowsing();
-
-		void clean() { stopBrowse(); updateRefreshButton(); removeContent(); }
 
 		// Update coords
 		void updateCoords();
@@ -293,8 +239,6 @@ namespace NLGUI
 		int luaInsertText(CLuaState &ls);
 		int luaAddString(CLuaState &ls);
 		int luaAddImage(CLuaState &ls);
-		int luaBeginElement(CLuaState &ls);
-		int luaEndElement(CLuaState &ls);
 		int luaShowDiv(CLuaState &ls);
 		int luaParseHtml(CLuaState &ls);
 		int luaRenderHtml(CLuaState &ls);
@@ -309,8 +253,6 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("insertText", luaInsertText)
 			REFLECT_LUA_METHOD("addString", luaAddString)
 			REFLECT_LUA_METHOD("addImage", luaAddImage)
-			REFLECT_LUA_METHOD("beginElement", luaBeginElement)
-			REFLECT_LUA_METHOD("endElement", luaEndElement)
 			REFLECT_LUA_METHOD("showDiv", luaShowDiv)
 			REFLECT_LUA_METHOD("parseHtml", luaParseHtml)
 			REFLECT_LUA_METHOD("renderHtml", luaRenderHtml)
@@ -326,26 +268,20 @@ namespace NLGUI
 
 		// \name callback from libwww
 
-		// Begin of the parsing of a HTML document
+		// Begin of the rendering of a HTML document
 		virtual void beginBuild ();
 
-		// End of the parsing of a HTML document
+		// End of the rendering of a HTML document
 		virtual void endBuild ();
 
 		// A new text block has been parsed
 		virtual void addText (const char * buf, int len);
 
 		// A new begin HTML element has been parsed (<IMG> for exemple)
-		virtual void beginElement (uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value);
+		virtual void beginElement(CHtmlElement &elm);
 
 		// A new end HTML element has been parsed (</IMG> for exemple)
-		virtual void endElement (uint element_number);
-
-		// A new begin unparsed element has been found
-		virtual void beginUnparsedElement(const char *buffer, int length);
-
-		// A new end unparsed element has been found
-		virtual void endUnparsedElement(const char *buffer, int length);
+		virtual void endElement(CHtmlElement &elm);
 
 		// Add GET params to the url
 		virtual void addHTTPGetParams (std::string &url, bool trustedDomain);
@@ -353,12 +289,8 @@ namespace NLGUI
 		// Add POST params to the libwww list
 		virtual void addHTTPPostParams (SFormFields &formfields, bool trustedDomain);
 
-		// the current request is terminated
-		virtual void requestTerminated();
-
-		// libxml2 html parser functions
-		void htmlElement(xmlNode *node, int element_number);
-		void htmlWalkDOM(xmlNode *a_node);
+		// parse dom node and all child nodes recursively
+		void renderDOM(CHtmlElement &elm);
 
 		// Clear style stack and restore default style
 		void resetCssStyle();
@@ -390,7 +322,7 @@ namespace NLGUI
 		void addString(const ucstring &str);
 
 		// Add an image in the current paragraph
-		void addImage(const std::string &id, const char *image, bool reloadImg=false, const CStyleParams &style = CStyleParams());
+		void addImage(const std::string &id, const std::string &img, bool reloadImg=false, const CStyleParams &style = CStyleParams());
 
 		// Add a text area in the current paragraph
 		CInterfaceGroup *addTextArea (const std::string &templateName, const char *name, uint rows, uint cols, bool multiLine, const ucstring &content, uint maxlength);
@@ -430,6 +362,12 @@ namespace NLGUI
 		std::string		_DocumentUrl;
 		std::string		_DocumentDomain;
 		std::string		_DocumentHtml; // not updated only set by first render
+		// If true, then render _DocumentHtml on next update (replaces content)
+		bool			_RenderNextTime;
+		// true if renderer is waiting for css files to finish downloading (link rel=stylesheet)
+		bool			_WaitingForStylesheet;
+		// list of css file urls that are queued up for download
+		std::vector<std::string> _StylesheetQueue;
 
 		// Valid base href was found
 		bool            _IgnoreBaseUrlTag;
@@ -463,7 +401,6 @@ namespace NLGUI
 
 		// Browsing..
 		bool			_Browsing;
-		bool			_Connecting;
 		double			_TimeoutValue;			// the timeout in seconds
 		double			_ConnectingTimeout;
 		sint			_RedirectsRemaining;
@@ -548,33 +485,13 @@ namespace NLGUI
 		// IL mode
 		bool _LI;
 
-		// Current active style
-		CStyleParams _Style;
-		// Default style
-		CStyleParams _StyleDefault;
-		// Nested style stack
-		std::vector<CStyleParams> _StyleParams;
-		inline void pushStyle()
-		{
-			_StyleParams.push_back(_Style);
-		}
-		inline void popStyle()
-		{
-			if (_StyleParams.empty())
-				_Style = _StyleDefault;
-			else
-			{
-				_Style = _StyleParams.back();
-				_StyleParams.pop_back();
-			}
-		}
-
-		inline uint getFontSizeSmaller() const
-		{
-			if (_Style.FontSize < 5)
-				return 3;
-			return _Style.FontSize-2;
-		}
+		// Keep track of current element style
+		CCssStyle _Style;
+		CHtmlElement _HtmlDOM;
+		CHtmlElement *_CurrentHTMLElement;
+		// Backup of CurrentHTMLElement->nextSibling before ::beginElement() is called
+		// for luaParseHtml() to insert nodes into right place in right order
+		CHtmlElement *_CurrentHTMLNextSibling;
 
 		// Current link
 		std::vector<std::string>	_Link;
@@ -636,14 +553,6 @@ namespace NLGUI
 			if (_TR.empty())
 				return false;
 			return _TR.back();
-		}
-
-		std::vector<STextShadow> _TextShadow;
-		inline STextShadow getTextShadow() const
-		{
-			if (_TextShadow.empty())
-				return STextShadow();
-			return _TextShadow.back();
 		}
 
 		// Forms
@@ -807,10 +716,6 @@ namespace NLGUI
 		typedef std::map<uint32, NLMISC::CRefPtr<CGroupHTML> >	TGroupHtmlByUIDMap;
 		static TGroupHtmlByUIDMap _GroupHtmlByUID;
 
-		// read style attribute
-		void getStyleParams(const std::string &styleString, CStyleParams &style, const CStyleParams &current);
-		void applyCssMinMax(sint32 &width, sint32 &height, sint32 minw=0, sint32 minh=0, sint32 maxw=0, sint32 maxh=0);
-
 		// load and render local html file (from bnp for example)
 		void doBrowseLocalFile(const std::string &filename);
 
@@ -824,6 +729,11 @@ namespace NLGUI
 		void buildHTTPPostParams (SFormFields &formfields);
 
 	private:
+		friend class CHtmlParser;
+
+		// move src->Children into CurrentHtmlElement.parent.children element
+		void spliceFragment(std::list<CHtmlElement>::iterator src);
+
 		// decode all HTML entities
 		static ucstring decodeHTMLEntities(const ucstring &str);
 
@@ -847,6 +757,7 @@ namespace NLGUI
 			{
 				if (t == ImgType) imgs.push_back(CDataImageDownload(i, style, imagetype));
 			}
+			~CDataDownload();
 
 		public:
 			CCurlWWWData *data;
@@ -860,11 +771,13 @@ namespace NLGUI
 			std::vector<CDataImageDownload> imgs;
 		};
 
-		std::vector<CDataDownload> Curls;
+		std::list<CDataDownload> Curls;
 		CURLM *MultiCurl;
 		int RunningCurls;
 
 		bool startCurlDownload(CDataDownload &download);
+		void finishCurlDownload(const CDataDownload &download);
+		void pumpCurlQueue();
 
 		void initImageDownload();
 		void checkImageDownload();
@@ -883,11 +796,100 @@ namespace NLGUI
 		bool addBnpDownload(std::string url, const std::string &action, const std::string &script, const std::string &md5sum);
 		std::string localBnpName(const std::string &url);
 
+		// add css file from <link href=".." rel="stylesheet"> to download queue
+		void addStylesheetDownload(std::vector<std::string> links);
+
+		// stop all curl downalods (html and data)
 		void releaseDownloads();
 		void checkDownloads();
 
+		// _CurlWWW download finished
+		void htmlDownloadFinished(bool success, const std::string &error);
+		// images, stylesheets, etc finished downloading
+		void dataDownloadFinished(bool success, const std::string &error, CDataDownload &data);
+
 		// HtmlType download finished
 		void htmlDownloadFinished(const std::string &content, const std::string &type, long code);
+
+		// stylesheet finished downloading. if local file does not exist, then it failed (404)
+		void cssDownloadFinished(const std::string &url, const std::string &local);
+
+		// read common table/tr/td parameters and push them to _CellParams
+		void getCellsParameters(const CHtmlElement &elm, bool inherit);
+
+		// render _HtmlDOM
+		void renderDocument();
+
+		// :before, :after rendering
+		void renderPseudoElement(const std::string &pseudo, const CHtmlElement &elm);
+
+		// HTML elements
+		void htmlA(const CHtmlElement &elm);
+		void htmlAend(const CHtmlElement &elm);
+		void htmlBASE(const CHtmlElement &elm);
+		void htmlBODY(const CHtmlElement &elm);
+		void htmlBR(const CHtmlElement &elm);
+		void htmlDD(const CHtmlElement &elm);
+		void htmlDDend(const CHtmlElement &elm);
+		//void htmlDEL(const CHtmlElement &elm);
+		void htmlDIV(const CHtmlElement &elm);
+		void htmlDIVend(const CHtmlElement &elm);
+		void htmlDL(const CHtmlElement &elm);
+		void htmlDLend(const CHtmlElement &elm);
+		void htmlDT(const CHtmlElement &elm);
+		void htmlDTend(const CHtmlElement &elm);
+		//void htmlEM(const CHtmlElement &elm);
+		void htmlFONT(const CHtmlElement &elm);
+		void htmlFORM(const CHtmlElement &elm);
+		void htmlH(const CHtmlElement &elm);
+		void htmlHend(const CHtmlElement &elm);
+		void htmlHEAD(const CHtmlElement &elm);
+		void htmlHEADend(const CHtmlElement &elm);
+		void htmlHR(const CHtmlElement &elm);
+		void htmlHTML(const CHtmlElement &elm);
+		void htmlI(const CHtmlElement &elm);
+		void htmlIend(const CHtmlElement &elm);
+		void htmlIMG(const CHtmlElement &elm);
+		void htmlINPUT(const CHtmlElement &elm);
+		void htmlLI(const CHtmlElement &elm);
+		void htmlLIend(const CHtmlElement &elm);
+		void htmlLUA(const CHtmlElement &elm);
+		void htmlLUAend(const CHtmlElement &elm);
+		void htmlMETA(const CHtmlElement &elm);
+		void htmlOBJECT(const CHtmlElement &elm);
+		void htmlOBJECTend(const CHtmlElement &elm);
+		void htmlOL(const CHtmlElement &elm);
+		void htmlOLend(const CHtmlElement &elm);
+		void htmlOPTION(const CHtmlElement &elm);
+		void htmlOPTIONend(const CHtmlElement &elm);
+		void htmlP(const CHtmlElement &elm);
+		void htmlPend(const CHtmlElement &elm);
+		void htmlPRE(const CHtmlElement &elm);
+		void htmlPREend(const CHtmlElement &elm);
+		void htmlSCRIPT(const CHtmlElement &elm);
+		void htmlSCRIPTend(const CHtmlElement &elm);
+		void htmlSELECT(const CHtmlElement &elm);
+		void htmlSELECTend(const CHtmlElement &elm);
+		//void htmlSMALL(const CHtmlElement &elm);
+		//void htmlSPAN(const CHtmlElement &elm);
+		//void htmlSTRONG(const CHtmlElement &elm);
+		void htmlSTYLE(const CHtmlElement &elm);
+		void htmlSTYLEend(const CHtmlElement &elm);
+		void htmlTABLE(const CHtmlElement &elm);
+		void htmlTABLEend(const CHtmlElement &elm);
+		void htmlTD(const CHtmlElement &elm);
+		void htmlTDend(const CHtmlElement &elm);
+		void htmlTEXTAREA(const CHtmlElement &elm);
+		void htmlTEXTAREAend(const CHtmlElement &elm);
+		void htmlTH(const CHtmlElement &elm);
+		void htmlTHend(const CHtmlElement &elm);
+		void htmlTITLE(const CHtmlElement &elm);
+		void htmlTITLEend(const CHtmlElement &elm);
+		void htmlTR(const CHtmlElement &elm);
+		void htmlTRend(const CHtmlElement &elm);
+		//void htmlU(const CHtmlElement &elm);
+		void htmlUL(const CHtmlElement &elm);
+		void htmlULend(const CHtmlElement &elm);
 	};
 
 	// adapter group that store y offset for inputs inside an html form

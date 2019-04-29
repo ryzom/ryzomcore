@@ -276,8 +276,13 @@ namespace NLGUI
 		HTML_ATTR(H6,STYLE),
 	};
 
-
 	#undef HTML_ATTR
+
+	// ***************************************************************************
+	// Read HTML color value from src and set dest
+	// Can handle #rgb(a), #rrggbb(aa) or rgb()/rgba(), hsl(), hsla() formats
+	// or color name directly
+	bool scanHTMLColor(const char *src, NLMISC::CRGBA &dest);
 
 	// ***************************************************************************
 	// Read a CSS length value, return true if one of supported units '%, rem, em, px, pt'
@@ -291,6 +296,9 @@ namespace NLGUI
 
 	// Parse a HTML color
 	NLMISC::CRGBA getColor (const char *color);
+
+	// return css color in rgba() format
+	std::string getRGBAString(const NLMISC::CRGBA &color);
 
 	// ***************************************************************************
 

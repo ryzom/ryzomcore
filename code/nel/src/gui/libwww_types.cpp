@@ -784,6 +784,8 @@ static HTTag tags[HTML_ELEMENTS] = {
 	{ "U"	, gen_attr,	HTML_GEN_ATTRIBUTES },
 	{ "UL"	, ul_attr,	HTML_UL_ATTRIBUTES },
 	{ "VAR"	, gen_attr,	HTML_GEN_ATTRIBUTES },
+	//
+	{ "LUA" , gen_attr, HTML_GEN_ATTRIBUTES },
 };
 
 static SGML_dtd HTMLP_dtd = {
