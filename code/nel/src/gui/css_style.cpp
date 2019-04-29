@@ -114,6 +114,41 @@ namespace NLGUI
 				{
 					style.FontSize = current.FontSize;
 				}
+				else if (it->second == "x-small")
+				{
+					style.FontSize = 10; // 62.5%
+				}
+				else if (it->second == "small")
+				{
+					style.FontSize = 13; // 80%;
+				}
+				else if (it->second == "medium")
+				{
+					style.FontSize = 16; // 100%;
+				}
+				else if (it->second == "large")
+				{
+					style.FontSize = 18; // 112.5%
+				}
+				else if (it->second == "x-large")
+				{
+					style.FontSize = 24; // 150%
+				}
+				else if (it->second == "xx-large")
+				{
+					style.FontSize = 32; // 200%;
+				}
+				else if (it->second == "smaller")
+				{
+					if (style.FontSize < 5)
+						style.FontSize = 3;
+					else
+						style.FontSize -= 2;
+				}
+				else if (it->second == "larger")
+				{
+					style.FontSize += 2;
+				}
 				else
 				{
 					std::string unit;
