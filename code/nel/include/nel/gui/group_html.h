@@ -238,8 +238,6 @@ namespace NLGUI
 		int luaInsertText(CLuaState &ls);
 		int luaAddString(CLuaState &ls);
 		int luaAddImage(CLuaState &ls);
-		int luaBeginElement(CLuaState &ls);
-		int luaEndElement(CLuaState &ls);
 		int luaShowDiv(CLuaState &ls);
 		int luaParseHtml(CLuaState &ls);
 		int luaRenderHtml(CLuaState &ls);
@@ -253,8 +251,6 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("insertText", luaInsertText)
 			REFLECT_LUA_METHOD("addString", luaAddString)
 			REFLECT_LUA_METHOD("addImage", luaAddImage)
-			REFLECT_LUA_METHOD("beginElement", luaBeginElement)
-			REFLECT_LUA_METHOD("endElement", luaEndElement)
 			REFLECT_LUA_METHOD("showDiv", luaShowDiv)
 			REFLECT_LUA_METHOD("parseHtml", luaParseHtml)
 			REFLECT_LUA_METHOD("renderHtml", luaRenderHtml)
@@ -736,9 +732,6 @@ namespace NLGUI
 
 	private:
 		friend class CHtmlParser;
-		// TODO: beginElement is overwritten in client quick help class, merge it here?
-		void beginElementDeprecated(uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value);
-		void endElementDeprecated(uint element_number);
 
 		// move src->Children into CurrentHtmlElement.parent.children element
 		void spliceFragment(std::list<CHtmlElement>::iterator src);
