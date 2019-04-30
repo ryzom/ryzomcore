@@ -5539,65 +5539,67 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlIMG(const CHtmlElement &elm)
 	{
-		// Get the string name
-		if (elm.hasNonEmptyAttribute("src"))
+		std::string src = trim(elm.getAttribute("src"));
+		if (src.empty())
 		{
-			float tmpf;
-			std::string id = elm.getAttribute("id");
-			std::string src = elm.getAttribute("src");
+			// no 'src' attribute, or empty
+			return;
+		}
 
-			if (elm.hasNonEmptyAttribute("width"))
-				getPercentage(_Style.Current.Width, tmpf, elm.getAttribute("width").c_str());
-			if (elm.hasNonEmptyAttribute("height"))
-				getPercentage(_Style.Current.Height, tmpf, elm.getAttribute("height").c_str());
+		float tmpf;
+		std::string id = elm.getAttribute("id");
 
-			// Get the global color name
-			if (elm.hasAttribute("global_color"))
-				_Style.Current.GlobalColor = true;
+		if (elm.hasNonEmptyAttribute("width"))
+			getPercentage(_Style.Current.Width, tmpf, elm.getAttribute("width").c_str());
+		if (elm.hasNonEmptyAttribute("height"))
+			getPercentage(_Style.Current.Height, tmpf, elm.getAttribute("height").c_str());
 
-			// Tooltip
-			// keep "alt" attribute for backward compatibility
-			std::string strtooltip = elm.getAttribute("alt");
-			// tooltip
-			if (elm.hasNonEmptyAttribute("title"))
-				strtooltip = elm.getAttribute("title");
+		// Get the global color name
+		if (elm.hasAttribute("global_color"))
+			_Style.Current.GlobalColor = true;
 
-			const char *tooltip = NULL;
-			// note: uses pointer to string data
-			if (!strtooltip.empty())
-				tooltip = strtooltip.c_str();
+		// Tooltip
+		// keep "alt" attribute for backward compatibility
+		std::string strtooltip = elm.getAttribute("alt");
+		// tooltip
+		if (elm.hasNonEmptyAttribute("title"))
+			strtooltip = elm.getAttribute("title");
 
-			// Mouse over image
-			string overSrc = elm.getAttribute("data-over-src");
+		const char *tooltip = NULL;
+		// note: uses pointer to string data
+		if (!strtooltip.empty())
+			tooltip = strtooltip.c_str();
 
-			if (getA() && getParent () && getParent ()->getParent())
+		// Mouse over image
+		string overSrc = elm.getAttribute("data-over-src");
+
+		if (getA() && getParent () && getParent ()->getParent())
+		{
+			string params = "name=" + getId() + "|url=" + getLink ();
+			addButton(CCtrlButton::PushButton, id, src, src, overSrc, "browse", params.c_str(), tooltip, _Style.Current);
+		}
+		else
+		if (tooltip || !overSrc.empty())
+		{
+			addButton(CCtrlButton::PushButton, id, src, src, overSrc, "", "", tooltip, _Style.Current);
+		}
+		else
+		{
+			// Get the option to reload (class==reload)
+			bool reloadImg = false;
+
+			if (elm.hasNonEmptyAttribute("style"))
 			{
-				string params = "name=" + getId() + "|url=" + getLink ();
-				addButton(CCtrlButton::PushButton, id, src, src, overSrc, "browse", params.c_str(), tooltip, _Style.Current);
-			}
-			else
-			if (tooltip || !overSrc.empty())
-			{
-				addButton(CCtrlButton::PushButton, id, src, src, overSrc, "", "", tooltip, _Style.Current);
-			}
-			else
-			{
-				// Get the option to reload (class==reload)
-				bool reloadImg = false;
+				string styleString = elm.getAttribute("style");
+				TStyle styles = parseStyle(styleString);
+				TStyle::iterator	it;
 
-				if (elm.hasNonEmptyAttribute("style"))
-				{
-					string styleString = elm.getAttribute("style");
-					TStyle styles = parseStyle(styleString);
-					TStyle::iterator	it;
-
-					it = styles.find("reload");
-					if (it != styles.end() && (*it).second == "1")
-						reloadImg = true;
-				}
-
-				addImage(id, elm.getAttribute("src"), reloadImg, _Style.Current);
+				it = styles.find("reload");
+				if (it != styles.end() && (*it).second == "1")
+					reloadImg = true;
 			}
+
+			addImage(id, elm.getAttribute("src"), reloadImg, _Style.Current);
 		}
 	}
 
@@ -5619,220 +5621,223 @@ namespace NLGUI
 		// Widget minimal width
 		string minWidth = elm.getAttribute("z_input_width");
 
-		// Get the type
-		if (elm.hasNonEmptyAttribute("type"))
+		// <input type="...">
+		std::string type = trim(elm.getAttribute("type"));
+		if (type.empty())
 		{
-			// Global color flag
-			if (elm.hasAttribute("global_color"))
-				_Style.Current.GlobalColor = true;
+			// no 'type' attribute, or empty
+			return;
+		}
+	
+		// Global color flag
+		if (elm.hasAttribute("global_color"))
+			_Style.Current.GlobalColor = true;
 
-			// Tooltip
-			std::string strtooltip = elm.getAttribute("alt");
-			const char *tooltip = NULL;
-			// note: uses pointer to strtooltip data
-			if (!strtooltip.empty())
-				tooltip = strtooltip.c_str();
+		// Tooltip
+		std::string strtooltip = elm.getAttribute("alt");
+		const char *tooltip = NULL;
+		// note: uses pointer to strtooltip data
+		if (!strtooltip.empty())
+			tooltip = strtooltip.c_str();
 
-			string type = toLower(elm.getAttribute("type"));
-			if (type == "image")
+		if (type == "image")
+		{
+			// The submit button
+			string name = elm.getAttribute("name");
+			string normal = elm.getAttribute("src");
+			string pushed;
+			string over;
+
+			// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
+			string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=image";
+
+			// Add the ctrl button
+			addButton (CCtrlButton::PushButton, name, normal, pushed.empty()?normal:pushed, over,
+				"html_submit_form", param.c_str(), tooltip, _Style.Current);
+		}
+		else if (type == "button" || type == "submit")
+		{
+			// The submit button
+			string name = elm.getAttribute("name");
+			string normal = elm.getAttribute("src");
+			string text = elm.getAttribute("value");
+			string pushed;
+			string over;
+
+			string buttonTemplate(!templateName.empty() ? templateName : DefaultButtonGroup );
+
+			// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
+			string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=submit";
+			if (!text.empty())
 			{
-				// The submit button
-				string name = elm.getAttribute("name");
-				string normal = elm.getAttribute("src");
-				string pushed;
-				string over;
-
-				// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-				string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=image";
-
-				// Add the ctrl button
-				addButton (CCtrlButton::PushButton, name, normal, pushed.empty()?normal:pushed, over,
-					"html_submit_form", param.c_str(), tooltip, _Style.Current);
+				// escape AH param separator
+				string tmp = text;
+				while(NLMISC::strFindReplace(tmp, "|", "&#124;"))
+					;
+				param = param + "|submit_button_value=" + tmp;
 			}
-			else if (type == "button" || type == "submit")
+
+			// Add the ctrl button
+			if (!_Paragraph)
 			{
-				// The submit button
-				string name = elm.getAttribute("name");
-				string normal = elm.getAttribute("src");
-				string text = elm.getAttribute("value");
-				string pushed;
-				string over;
+				newParagraph (0);
+				paragraphChange ();
+			}
 
-				string buttonTemplate(!templateName.empty() ? templateName : DefaultButtonGroup );
-
-				// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-				string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=submit";
-				if (!text.empty())
-				{
-					// escape AH param separator
-					string tmp = text;
-					while(NLMISC::strFindReplace(tmp, "|", "&#124;"))
-						;
-					param = param + "|submit_button_value=" + tmp;
-				}
+			typedef pair<string, string> TTmplParam;
+			vector<TTmplParam> tmplParams;
+			tmplParams.push_back(TTmplParam("id", name));
+			tmplParams.push_back(TTmplParam("onclick", "html_submit_form"));
+			tmplParams.push_back(TTmplParam("onclick_param", param));
+			//tmplParams.push_back(TTmplParam("text", text));
+			tmplParams.push_back(TTmplParam("active", "true"));
+			if (!minWidth.empty())
+				tmplParams.push_back(TTmplParam("wmin", minWidth));
+			CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
+			if (buttonGroup)
+			{
 
 				// Add the ctrl button
-				if (!_Paragraph)
+				CCtrlTextButton *ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("button"));
+				if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
+				if (ctrlButton)
 				{
-					newParagraph (0);
-					paragraphChange ();
-				}
+					ctrlButton->setModulateGlobalColorAll (_Style.Current.GlobalColor);
 
-				typedef pair<string, string> TTmplParam;
-				vector<TTmplParam> tmplParams;
-				tmplParams.push_back(TTmplParam("id", name));
-				tmplParams.push_back(TTmplParam("onclick", "html_submit_form"));
-				tmplParams.push_back(TTmplParam("onclick_param", param));
-				//tmplParams.push_back(TTmplParam("text", text));
-				tmplParams.push_back(TTmplParam("active", "true"));
-				if (!minWidth.empty())
-					tmplParams.push_back(TTmplParam("wmin", minWidth));
-				CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
-				if (buttonGroup)
-				{
-
-					// Add the ctrl button
-					CCtrlTextButton *ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("button"));
-					if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
-					if (ctrlButton)
+					// Translate the tooltip
+					if (tooltip)
 					{
-						ctrlButton->setModulateGlobalColorAll (_Style.Current.GlobalColor);
-
-						// Translate the tooltip
-						if (tooltip)
+						if (CI18N::hasTranslation(tooltip))
 						{
-							if (CI18N::hasTranslation(tooltip))
-							{
-								ctrlButton->setDefaultContextHelp(CI18N::get(tooltip));
-							}
-							else
-							{
-								ctrlButton->setDefaultContextHelp(ucstring(tooltip));
-							}
+							ctrlButton->setDefaultContextHelp(CI18N::get(tooltip));
 						}
-
-						ctrlButton->setText(ucstring::makeFromUtf8(text));
-
-						setTextButtonStyle(ctrlButton, _Style.Current);
+						else
+						{
+							ctrlButton->setDefaultContextHelp(ucstring(tooltip));
+						}
 					}
-					getParagraph()->addChild (buttonGroup);
-					paragraphChange ();
+
+					ctrlButton->setText(ucstring::makeFromUtf8(text));
+
+					setTextButtonStyle(ctrlButton, _Style.Current);
 				}
+				getParagraph()->addChild (buttonGroup);
+				paragraphChange ();
 			}
-			else if (type == "text")
+		}
+		else if (type == "text")
+		{
+			// Get the string name
+			string name = elm.getAttribute("name");
+			ucstring ucValue;
+			ucValue.fromUtf8(elm.getAttribute("value"));
+
+			uint size = 120;
+			uint maxlength = 1024;
+			if (elm.hasNonEmptyAttribute("size"))
+				fromString(elm.getAttribute("size"), size);
+			if (elm.hasNonEmptyAttribute("maxlength"))
+				fromString(elm.getAttribute("maxlength"), maxlength);
+
+			string textTemplate(!templateName.empty() ? templateName : DefaultFormTextGroup);
+			// Add the editbox
+			CInterfaceGroup *textArea = addTextArea (textTemplate, name.c_str (), 1, size/12, false, ucValue, maxlength);
+			if (textArea)
 			{
-				// Get the string name
+				// Add the text area to the form
+				CGroupHTML::CForm::CEntry entry;
+				entry.Name = name;
+				entry.TextArea = textArea;
+				_Forms.back().Entries.push_back (entry);
+			}
+		}
+		else if (type == "checkbox" || type == "radio")
+		{
+			renderPseudoElement(":before", elm);
+
+			CCtrlButton::EType btnType;
+			string name = elm.getAttribute("name");
+			string normal = elm.getAttribute("src");
+			string pushed;
+			string over;
+			ucstring ucValue = ucstring("on");
+			bool checked = elm.hasAttribute("checked");
+
+			// TODO: unknown if empty attribute should override or not
+			if (elm.hasNonEmptyAttribute("value"))
+				ucValue.fromUtf8(elm.getAttribute("value"));
+
+			if (type == "radio")
+			{
+				btnType = CCtrlButton::RadioButton;
+				normal = DefaultRadioButtonBitmapNormal;
+				pushed = DefaultRadioButtonBitmapPushed;
+				over = DefaultRadioButtonBitmapOver;
+			}
+			else
+			{
+				btnType = CCtrlButton::ToggleButton;
+				normal = DefaultCheckBoxBitmapNormal;
+				pushed = DefaultCheckBoxBitmapPushed;
+				over = DefaultCheckBoxBitmapOver;
+			}
+
+			// Add the ctrl button
+			CCtrlButton *checkbox = addButton (btnType, name, normal, pushed, over, "", "", tooltip, _Style.Current);
+			if (checkbox)
+			{
+				if (btnType == CCtrlButton::RadioButton)
+				{
+					// override with 'id' because radio buttons share same name
+					if (!id.empty())
+						checkbox->setId(id);
+
+					// group together buttons with same name
+					CForm &form = _Forms.back();
+					bool notfound = true;
+					for (uint i=0; i<form.Entries.size(); i++)
+					{
+						if (form.Entries[i].Name == name && form.Entries[i].Checkbox->getType() == CCtrlButton::RadioButton)
+						{
+							checkbox->initRBRefFromRadioButton(form.Entries[i].Checkbox);
+							notfound = false;
+							break;
+						}
+					}
+					if (notfound)
+					{
+						// this will start a new group (initRBRef() would take first button in group container otherwise)
+						checkbox->initRBRefFromRadioButton(checkbox);
+					}
+				}
+
+				checkbox->setPushed (checked);
+
+				// Add the button to the form
+				CGroupHTML::CForm::CEntry entry;
+				entry.Name = name;
+				entry.Value = decodeHTMLEntities(ucValue);
+				entry.Checkbox = checkbox;
+				_Forms.back().Entries.push_back (entry);
+			}
+			renderPseudoElement(":after", elm);
+		}
+		else if (type == "hidden")
+		{
+			if (elm.hasNonEmptyAttribute("name"))
+			{
+				// Get the name
 				string name = elm.getAttribute("name");
+
+				// Get the value
 				ucstring ucValue;
 				ucValue.fromUtf8(elm.getAttribute("value"));
 
-				uint size = 120;
-				uint maxlength = 1024;
-				if (elm.hasNonEmptyAttribute("size"))
-					fromString(elm.getAttribute("size"), size);
-				if (elm.hasNonEmptyAttribute("maxlength"))
-					fromString(elm.getAttribute("maxlength"), maxlength);
-
-				string textTemplate(!templateName.empty() ? templateName : DefaultFormTextGroup);
-				// Add the editbox
-				CInterfaceGroup *textArea = addTextArea (textTemplate, name.c_str (), 1, size/12, false, ucValue, maxlength);
-				if (textArea)
-				{
-					// Add the text area to the form
-					CGroupHTML::CForm::CEntry entry;
-					entry.Name = name;
-					entry.TextArea = textArea;
-					_Forms.back().Entries.push_back (entry);
-				}
-			}
-			else if (type == "checkbox" || type == "radio")
-			{
-				renderPseudoElement(":before", elm);
-
-				CCtrlButton::EType btnType;
-				string name = elm.getAttribute("name");
-				string normal = elm.getAttribute("src");
-				string pushed;
-				string over;
-				ucstring ucValue = ucstring("on");
-				bool checked = elm.hasAttribute("checked");
-
-				// TODO: unknown if empty attribute should override or not
-				if (elm.hasNonEmptyAttribute("value"))
-					ucValue.fromUtf8(elm.getAttribute("value"));
-
-				if (type == "radio")
-				{
-					btnType = CCtrlButton::RadioButton;
-					normal = DefaultRadioButtonBitmapNormal;
-					pushed = DefaultRadioButtonBitmapPushed;
-					over = DefaultRadioButtonBitmapOver;
-				}
-				else
-				{
-					btnType = CCtrlButton::ToggleButton;
-					normal = DefaultCheckBoxBitmapNormal;
-					pushed = DefaultCheckBoxBitmapPushed;
-					over = DefaultCheckBoxBitmapOver;
-				}
-
-				// Add the ctrl button
-				CCtrlButton *checkbox = addButton (btnType, name, normal, pushed, over, "", "", tooltip, _Style.Current);
-				if (checkbox)
-				{
-					if (btnType == CCtrlButton::RadioButton)
-					{
-						// override with 'id' because radio buttons share same name
-						if (!id.empty())
-							checkbox->setId(id);
-
-						// group together buttons with same name
-						CForm &form = _Forms.back();
-						bool notfound = true;
-						for (uint i=0; i<form.Entries.size(); i++)
-						{
-							if (form.Entries[i].Name == name && form.Entries[i].Checkbox->getType() == CCtrlButton::RadioButton)
-							{
-								checkbox->initRBRefFromRadioButton(form.Entries[i].Checkbox);
-								notfound = false;
-								break;
-							}
-						}
-						if (notfound)
-						{
-							// this will start a new group (initRBRef() would take first button in group container otherwise)
-							checkbox->initRBRefFromRadioButton(checkbox);
-						}
-					}
-
-					checkbox->setPushed (checked);
-
-					// Add the button to the form
-					CGroupHTML::CForm::CEntry entry;
-					entry.Name = name;
-					entry.Value = decodeHTMLEntities(ucValue);
-					entry.Checkbox = checkbox;
-					_Forms.back().Entries.push_back (entry);
-				}
-				renderPseudoElement(":after", elm);
-			}
-			else if (type == "hidden")
-			{
-				if (elm.hasNonEmptyAttribute("name"))
-				{
-					// Get the name
-					string name = elm.getAttribute("name");
-
-					// Get the value
-					ucstring ucValue;
-					ucValue.fromUtf8(elm.getAttribute("value"));
-
-					// Add an entry
-					CGroupHTML::CForm::CEntry entry;
-					entry.Name = name;
-					entry.Value = decodeHTMLEntities(ucValue);
-					_Forms.back().Entries.push_back (entry);
-				}
+				// Add an entry
+				CGroupHTML::CForm::CEntry entry;
+				entry.Name = name;
+				entry.Value = decodeHTMLEntities(ucValue);
+				_Forms.back().Entries.push_back (entry);
 			}
 		}
 	}
@@ -5908,31 +5913,33 @@ namespace NLGUI
 
 		std::string httpEquiv = elm.getAttribute("http-equiv");
 		std::string httpContent = elm.getAttribute("content");
-		if (!httpEquiv.empty() && !httpContent.empty())
+		if (httpEquiv.empty() || httpContent.empty())
 		{
-			// only first http-equiv="refresh" should be handled
-			if (_RefreshUrl.empty() && httpEquiv == "refresh")
+			return;
+		}
+
+		// only first http-equiv="refresh" should be handled
+		if (_RefreshUrl.empty() && httpEquiv == "refresh")
+		{
+			const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
+			double timeSec = times.thisFrameMs / 1000.0f;
+
+			string::size_type pos = httpContent.find_first_of(";");
+			if (pos == string::npos)
 			{
-				const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
-				double timeSec = times.thisFrameMs / 1000.0f;
-
-				string::size_type pos = httpContent.find_first_of(";");
-				if (pos == string::npos)
-				{
-					fromString(httpContent, _NextRefreshTime);
-					_RefreshUrl = _URL;
-				}
-				else
-				{
-					fromString(httpContent.substr(0, pos), _NextRefreshTime);
-
-					pos = toLower(httpContent).find("url=");
-					if (pos != string::npos)
-						_RefreshUrl = getAbsoluteUrl(httpContent.substr(pos + 4));
-				}
-
-				_NextRefreshTime += timeSec;
+				fromString(httpContent, _NextRefreshTime);
+				_RefreshUrl = _URL;
 			}
+			else
+			{
+				fromString(httpContent.substr(0, pos), _NextRefreshTime);
+
+				pos = toLower(httpContent).find("url=");
+				if (pos != string::npos)
+					_RefreshUrl = getAbsoluteUrl(httpContent.substr(pos + 4));
+			}
+
+			_NextRefreshTime += timeSec;
 		}
 	}
 
@@ -6298,85 +6305,91 @@ namespace NLGUI
 		}
 
 		CGroupTable *table = getTable();
-		if (table)
+		if (!table)
 		{
-			if (_Style.hasStyle("padding"))
+			// <td> appears to be outside <table>
+			return;
+		}
+
+		if (_Cells.empty())
+		{
+			// <table> not started
+			return;
+		}
+
+		if (_Style.hasStyle("padding"))
+		{
+			uint32 a;
+			// TODO: cssLength
+			if (fromString(_Style.getStyle("padding"), a))
+				table->CellPadding = a;
+		}
+
+		_Cells.back() = new CGroupCell(CViewBase::TCtorParam());
+
+		if (_Style.checkStyle("background-repeat", "1") || _Style.checkStyle("background-repeat", "repeat"))
+			_Cells.back()->setTextureTile(true);
+
+		if (_Style.checkStyle("background-scale", "1") || _Style.checkStyle("background-size", "cover"))
+			_Cells.back()->setTextureScale(true);
+
+		if (_Style.hasStyle("background-image"))
+		{
+			string image = _Style.getStyle("background-image");
+
+			string::size_type texExt = toLower(image).find("url(");
+			// Url image
+			if (texExt != string::npos)
 			{
-				uint32 a;
-				// TODO: cssLength
-				if (fromString(_Style.getStyle("padding"), a))
-					table->CellPadding = a;
+				// Remove url()
+				image = image.substr(4, image.size()-5);
+				addImageDownload(image, _Cells.back());
+			// Image in BNP
 			}
-
-			if (!_Cells.empty())
+			else
 			{
-				_Cells.back() = new CGroupCell(CViewBase::TCtorParam());
-
-				if (_Style.checkStyle("background-repeat", "1") || _Style.checkStyle("background-repeat", "repeat"))
-					_Cells.back()->setTextureTile(true);
-
-				if (_Style.checkStyle("background-scale", "1") || _Style.checkStyle("background-size", "cover"))
-					_Cells.back()->setTextureScale(true);
-
-				if (_Style.hasStyle("background-image"))
-				{
-					string image = _Style.getStyle("background-image");
-
-					string::size_type texExt = toLower(image).find("url(");
-					// Url image
-					if (texExt != string::npos)
-					{
-						// Remove url()
-						image = image.substr(4, image.size()-5);
-						addImageDownload(image, _Cells.back());
-					// Image in BNP
-					}
-					else
-					{
-						_Cells.back()->setTexture(image);
-					}
-				}
-
-				if (elm.hasNonEmptyAttribute("colspan"))
-					fromString(elm.getAttribute("colspan"), _Cells.back()->ColSpan);
-				if (elm.hasNonEmptyAttribute("rowspan"))
-					fromString(elm.getAttribute("rowspan"), _Cells.back()->RowSpan);
-
-				_Cells.back()->BgColor = _CellParams.back().BgColor;
-				_Cells.back()->Align = _CellParams.back().Align;
-				_Cells.back()->VAlign = _CellParams.back().VAlign;
-				_Cells.back()->LeftMargin = _CellParams.back().LeftMargin;
-				_Cells.back()->NoWrap = _CellParams.back().NoWrap;
-				_Cells.back()->ColSpan = std::max(1, _Cells.back()->ColSpan);
-				_Cells.back()->RowSpan = std::max(1, _Cells.back()->RowSpan);
-
-				float temp;
-				if (_Style.hasStyle("width"))
-					getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, _Style.getStyle("width").c_str());
-				else if (elm.hasNonEmptyAttribute("width"))
-					getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, elm.getAttribute("width").c_str());
-				
-				if (_Style.hasStyle("height"))
-					getPercentage (_Cells.back()->Height, temp, _Style.getStyle("height").c_str());
-				else if (elm.hasNonEmptyAttribute("height"))
-					getPercentage (_Cells.back()->Height, temp, elm.getAttribute("height").c_str());
-
-				_Cells.back()->NewLine = getTR();
-				table->addChild (_Cells.back());
-
-				// reusing indent pushed by table
-				_Indent.back() = 0;
-
-				newParagraph(TDBeginSpace);
-				// indent is already 0, getParagraph()->setMarginLeft(0); // maybe setIndent(0) if LI is using one
-
-				// Reset TR flag
-				if (!_TR.empty())
-					_TR.back() = false;
-
-				renderPseudoElement(":before", elm);
+				_Cells.back()->setTexture(image);
 			}
 		}
+
+		if (elm.hasNonEmptyAttribute("colspan"))
+			fromString(elm.getAttribute("colspan"), _Cells.back()->ColSpan);
+		if (elm.hasNonEmptyAttribute("rowspan"))
+			fromString(elm.getAttribute("rowspan"), _Cells.back()->RowSpan);
+
+		_Cells.back()->BgColor = _CellParams.back().BgColor;
+		_Cells.back()->Align = _CellParams.back().Align;
+		_Cells.back()->VAlign = _CellParams.back().VAlign;
+		_Cells.back()->LeftMargin = _CellParams.back().LeftMargin;
+		_Cells.back()->NoWrap = _CellParams.back().NoWrap;
+		_Cells.back()->ColSpan = std::max(1, _Cells.back()->ColSpan);
+		_Cells.back()->RowSpan = std::max(1, _Cells.back()->RowSpan);
+
+		float temp;
+		if (_Style.hasStyle("width"))
+			getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, _Style.getStyle("width").c_str());
+		else if (elm.hasNonEmptyAttribute("width"))
+			getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, elm.getAttribute("width").c_str());
+		
+		if (_Style.hasStyle("height"))
+			getPercentage (_Cells.back()->Height, temp, _Style.getStyle("height").c_str());
+		else if (elm.hasNonEmptyAttribute("height"))
+			getPercentage (_Cells.back()->Height, temp, elm.getAttribute("height").c_str());
+
+		_Cells.back()->NewLine = getTR();
+		table->addChild (_Cells.back());
+
+		// reusing indent pushed by table
+		_Indent.back() = 0;
+
+		newParagraph(TDBeginSpace);
+		// indent is already 0, getParagraph()->setMarginLeft(0); // maybe setIndent(0) if LI is using one
+
+		// Reset TR flag
+		if (!_TR.empty())
+			_TR.back() = false;
+
+		renderPseudoElement(":before", elm);
 	}
 
 	void CGroupHTML::htmlTDend(const CHtmlElement &elm)
@@ -6391,43 +6404,38 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlTEXTAREA(const CHtmlElement &elm)
 	{
+		if (_Forms.empty())
+			return;
+
+		// read general property
+		string templateName;
+
+		// Widget template name
+		if (elm.hasNonEmptyAttribute("z_input_tmpl"))
+			templateName = elm.getAttribute("z_input_tmpl");
+
+		// Get the string name
+		_TextAreaName.clear();
+		_TextAreaRow = 1;
+		_TextAreaCols = 10;
+		_TextAreaContent.clear();
+		_TextAreaMaxLength = 1024;
+		if (elm.hasNonEmptyAttribute("name"))
+			_TextAreaName = elm.getAttribute("name");
+		if (elm.hasNonEmptyAttribute("rows"))
+			fromString(elm.getAttribute("rows"), _TextAreaRow);
+		if (elm.hasNonEmptyAttribute("cols"))
+			fromString(elm.getAttribute("cols"), _TextAreaCols);
+		if (elm.hasNonEmptyAttribute("maxlength"))
+			fromString(elm.getAttribute("maxlength"), _TextAreaMaxLength);
+
+		_TextAreaTemplate = !templateName.empty() ? templateName : DefaultFormTextAreaGroup;
+		_TextArea = true;
 		_PRE.push_back(true);
-
-		// Got one form ?
-		if (!(_Forms.empty()))
-		{
-			// read general property
-			string templateName;
-
-			// Widget template name
-			if (elm.hasNonEmptyAttribute("z_input_tmpl"))
-				templateName = elm.getAttribute("z_input_tmpl");
-
-			// Get the string name
-			_TextAreaName.clear();
-			_TextAreaRow = 1;
-			_TextAreaCols = 10;
-			_TextAreaContent.clear();
-			_TextAreaMaxLength = 1024;
-			if (elm.hasNonEmptyAttribute("name"))
-				_TextAreaName = elm.getAttribute("name");
-			if (elm.hasNonEmptyAttribute("rows"))
-				fromString(elm.getAttribute("rows"), _TextAreaRow);
-			if (elm.hasNonEmptyAttribute("cols"))
-				fromString(elm.getAttribute("cols"), _TextAreaCols);
-			if (elm.hasNonEmptyAttribute("maxlength"))
-				fromString(elm.getAttribute("maxlength"), _TextAreaMaxLength);
-
-			_TextAreaTemplate = !templateName.empty() ? templateName : DefaultFormTextAreaGroup;
-			_TextArea = true;
-		}
 	}
 
 	void CGroupHTML::htmlTEXTAREAend(const CHtmlElement &elm)
 	{
-		_TextArea = false;
-		popIfNotEmpty (_PRE);
-
 		if (_Forms.empty())
 			return;
 
@@ -6440,6 +6448,9 @@ namespace NLGUI
 			entry.TextArea = textArea;
 			_Forms.back().Entries.push_back (entry);
 		}
+
+		_TextArea = false;
+		popIfNotEmpty (_PRE);
 	}
 
 	// ***************************************************************************
