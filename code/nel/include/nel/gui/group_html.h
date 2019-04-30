@@ -69,7 +69,7 @@ namespace NLGUI
 			/// Maximum concurrent MultiCurl connections per CGroupHTML instance
 			sint32 curlMaxConnections;
 
-			SWebOptions(): curlMaxConnections(2)
+			SWebOptions(): curlMaxConnections(5)
 			{
 			}
 		};
