@@ -46,9 +46,9 @@ public:
 
 	void onOK ();
 	void onCancel ();
-	void create (DWORD style, const RECT &rect, CWnd *parent, UINT nId, const char *registerAdress, int memoryCount);
+	void create (DWORD style, const RECT &rect, CWnd *parent, UINT nId, const TCHAR *registerAdress, int memoryCount);
 	void create (DWORD style, const RECT &rect, CWnd *parent, UINT nId);
-	void setRegisterAdress (const char *registerAdress);
+	void setRegisterAdress (const TCHAR *registerAdress);
 	void clearCommand ();
 	void addCommand (const char* commandLabel, uint commandId);
 	void clearStaticStrings ();
@@ -59,7 +59,7 @@ public:
 	bool isWnd (const CWnd *wnd) const;
 	void enableAutoCompleteExtension (bool enable, const char * ext);
 
-	std::string			RegisterAdress;
+	std::tstring			RegisterAdress;
 	int					MemoryCount;
 	UINT				Id;
 

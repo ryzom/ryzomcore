@@ -98,7 +98,7 @@ void COutputConsoleDlg::outputString (const char *message)
 	{
 		int index = edit->LineIndex(edit->GetLineCount( )-1) + edit->LineLength(edit->GetLineCount( )-1);
 		edit->SetSel (index, index);
-		edit->ReplaceSel (message);
+		edit->ReplaceSel (utf8ToTStr(message));
 	}
 }
 

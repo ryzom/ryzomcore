@@ -43,7 +43,7 @@ CMemoryComboBox::~CMemoryComboBox()
 
 // ***************************************************************************
 
-void CMemoryComboBox::create (DWORD style, const RECT &rect, CWnd *parent, UINT nId, const char *registerAdress, int memoryCount)
+void CMemoryComboBox::create (DWORD style, const RECT &rect, CWnd *parent, UINT nId, const TCHAR *registerAdress, int memoryCount)
 {
 	// Register a window
 	Id = nId;
@@ -52,7 +52,7 @@ void CMemoryComboBox::create (DWORD style, const RECT &rect, CWnd *parent, UINT 
 	LPCTSTR clas = AfxRegisterWndClass (0);
 	if (clas)
 	{
-		if (Create (clas, "MemoryComboBox", style, rect, parent, nId))
+		if (Create (clas, _T("MemoryComboBox"), style, rect, parent, nId))
 		{
 			// Create the combo box
 			RECT comboRect;
@@ -95,16 +95,16 @@ bool CMemoryComboBox::getMemory (int slot, std::string &ret)
 {
 	// Open the key
 	HKEY hKey;
-	if (RegOpenKey (HKEY_CURRENT_USER, RegisterAdress.c_str (), &hKey) == ERROR_SUCCESS)
+	if (RegOpenKey(HKEY_CURRENT_USER, RegisterAdress.c_str (), &hKey) == ERROR_SUCCESS)
 	{
 		// Get the value
 		char strSrc[512];
 		smprintf (strSrc, 512, "%d", slot);
-		char str[512];
-		long size = 512;
-		if (RegQueryValue (hKey, strSrc, str, &size) == ERROR_SUCCESS)
+		TCHAR str[512];
+		LONG size = 512 * sizeof(TCHAR);
+		if (RegQueryValue(hKey, utf8ToTStr(strSrc), str, &size) == ERROR_SUCCESS)
 		{
-			ret = str;
+			ret = tStrToUtf8(str);
 
 			// Close
 			RegCloseKey (hKey);
@@ -132,14 +132,14 @@ void CMemoryComboBox::scrollDown (int start, int end)
 			// Get the old value
 			char strSrc[512];
 			smprintf (strSrc, 512, "%d", i-1);
-			char str[512];
-			long size = 512;
-			if (RegQueryValue (hKey, strSrc, str, &size) == ERROR_SUCCESS)
+			TCHAR str[512];
+			LONG size = 512 * sizeof(TCHAR);
+			if (RegQueryValue (hKey, utf8ToTStr(strSrc), str, &size) == ERROR_SUCCESS)
 			{
 				// Set the value
 				char strDst[512];
 				smprintf (strDst, 512, "%d", i);
-				RegSetValue (hKey, strDst, REG_SZ, str, size);
+				RegSetValue (hKey, utf8ToTStr(strSrc), REG_SZ, str, size);
 			} 
 		}
 
@@ -157,7 +157,8 @@ void CMemoryComboBox::pushString (const std::string &str)
 	if (RegCreateKey (HKEY_CURRENT_USER, RegisterAdress.c_str (), &hKey) == ERROR_SUCCESS)
 	{
 		// Set the value
-		RegSetValue (hKey, _T("0"), REG_SZ, str.c_str (), str.size ());
+		tstring tstr = utf8ToTStr(str);
+		RegSetValue (hKey, _T("0"), REG_SZ, tstr.c_str (), tstr.size ());
 
 		// Close
 		RegCloseKey (hKey);
@@ -460,7 +461,7 @@ void CMemoryComboBox::refreshStrings ()
 
 // ***************************************************************************
 
-void CMemoryComboBox::setRegisterAdress (const char *registerAdress)
+void CMemoryComboBox::setRegisterAdress (const TCHAR *registerAdress)
 {
 	RegisterAdress = registerAdress;
 	refreshStrings ();

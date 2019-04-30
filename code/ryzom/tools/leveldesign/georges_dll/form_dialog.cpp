@@ -165,7 +165,7 @@ CWnd* CFormDialog::addTypeWidget (const NLGEORGES::CType &type, uint elmIndex, c
 
 			// Create a reg key
 			string tfn = typeFilename;
-			string key = GEORGES_EDIT_BASE_REG_KEY"\\"+strlwr (typeFilename)+" MemCombo";
+			tstring key = utf8ToTStr(GEORGES_EDIT_BASE_REG_KEY"\\"+strlwr (typeFilename)+" MemCombo");
 
 			// Create the widget
 			memCombo->create (WS_CHILD|WS_TABSTOP, currentPos, this, WidgetIndexCount, title, key.c_str(), type.UIType==CType::EditSpin, type.UIType==CType::FileBrowser, filenameExt);
@@ -251,7 +251,7 @@ void CFormDialog::getVirtualDfnFromDocument (const NLGEORGES::CFormDfn *_dfn, co
 
 			// Create the widget
 			memCombo->create (WS_CHILD|WS_TABSTOP, currentPos, this, WidgetIndexCount, "Dfn:", 
-				GEORGES_EDIT_BASE_REG_KEY"\\Virtual Dfn MemCombo", false, true, "*.dfn");
+				_T(GEORGES_EDIT_BASE_REG_KEY) _T("\\Virtual Dfn MemCombo"), false, true, "*.dfn");
 
 			// Get from document
 			memCombo->getFromDocument (*doc->getFormPtr ());
@@ -462,7 +462,7 @@ void CFormDialog::getArrayFromDocument (const char *structName, uint structId, u
 
 			// Create the widget
 			memCombo->create (WS_CHILD|WS_TABSTOP, currentPos, this, WidgetIndexCount, "Array size:", 
-				GEORGES_EDIT_BASE_REG_KEY"\\Array Size MemCombo", true, false, NULL);
+				_T(GEORGES_EDIT_BASE_REG_KEY) _T("\\Array Size MemCombo"), true, false, NULL);
 
 			// Get from document
 			memCombo->getFromDocument (*doc->getFormPtr ());
@@ -1541,7 +1541,7 @@ CFormMemCombo::~CFormMemCombo ()
 
 // ***************************************************************************
 
-void CFormMemCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, uint &dialog_index, const char *label, const char *reg, bool useSpinner, bool fileBrowser, const char *filenameExt)
+void CFormMemCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, uint &dialog_index, const char *label, const TCHAR *reg, bool useSpinner, bool fileBrowser, const char *filenameExt)
 {
 	// Get the doc
 	CGeorgesEditDoc *doc = Dialog->View->GetDocument ();

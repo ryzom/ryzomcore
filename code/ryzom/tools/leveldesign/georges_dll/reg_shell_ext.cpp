@@ -21,12 +21,12 @@
 using namespace std;
 using namespace NLMISC;
 
-void deleteKey (HKEY hKey, const char *name)
+void deleteKey (HKEY hKey, const TCHAR *name)
 {
 	HKEY subKey;
 	if (RegOpenKey (hKey, name, &subKey) == ERROR_SUCCESS)
 	{
-		char subName[512];
+		TCHAR subName[512];
 		while (RegEnumKey (subKey, 0, subName, 512) == ERROR_SUCCESS)
 		{
 			deleteKey (subKey, subName);

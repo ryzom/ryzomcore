@@ -69,7 +69,7 @@ bool CEditListCtrl::create (DWORD wStyle, RECT &rect, CWnd *parent, uint dialog_
 			Edit.SetFont (ListCtrl.GetFont());
 			Combo.Create (WS_BORDER|CBS_DROPDOWNLIST, rect, &ListCtrl, IdCombo);
 			Combo.SetFont (ListCtrl.GetFont());
-			MemCombo.create (WS_CHILD, rect, &ListCtrl, IdMemCombo, "", theApp.RememberListSize);
+			MemCombo.create (WS_CHILD, rect, &ListCtrl, IdMemCombo, _T(""), theApp.RememberListSize);
 			MemCombo.SetFont (ListCtrl.GetFont());
 			return true;
 		}
@@ -475,7 +475,7 @@ void CEditListCtrl::editItem (uint item, uint subitem)
 		string retString;
 		bool browse;
 		getMemComboBoxProp (Item, SubItem, retString, browse);
-		MemCombo.setRegisterAdress (retString.c_str ());
+		MemCombo.setRegisterAdress (utf8ToTStr(retString));
 		MemCombo.clearCommand ();
 		if (browse)
 			MemCombo.addCommand (GEORGES_EDIT_BROWSE_LABEL, CmdBrowse);
