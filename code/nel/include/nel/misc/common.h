@@ -303,42 +303,23 @@ inline sint nlstricmp(const std::string &lhs, const std::string &rhs) { return s
 inline sint nlstricmp(const std::string &lhs, const char *rhs) { return stricmp(lhs.c_str(),rhs); }
 inline sint nlstricmp(const char *lhs, const std::string &rhs) { return stricmp(lhs,rhs.c_str()); }
 
-// TODO: Can we prefix these with 'nl' like other macros?
-// Macros helper to convert UTF-8 std::string and wchar_t*
-// #define wideToUtf8(str) (ucstring((ucchar*)str).toUtf8())
-// #define utf8ToWide(str) ((wchar_t*)ucstring::makeFromUtf8(str).c_str())
-
-// Macros helper to convert UTF-8 std::string and TCHAR*
-#ifdef _UNICODE
-// #define tStrToUtf8(str) (ucstring((ucchar*)(LPCWSTR)str).toUtf8())
-// #define utf8ToTStr(str) ((const wchar_t *)ucstring::makeFromUtf8(str).c_str())
-// #define tstring wstring
-#else
-// FIXME: This is not accurate, it should be a conversion between local charset and utf8
-// #define tStrToUtf8(str) (std::string((LPCSTR)str))
-// inline const char *nlutf8ToTStr(const char *str) { return str; }
-// inline const char *nlutf8ToTStr(const std::string &str) { return str.c_str(); }
-// #define utf8ToTStr(str) NLMISC::nlutf8ToTStr(str)
-// #define tstring string
-#endif
-
 #if (NL_COMP_VC_VERSION <= 90)
 inline float nlroundf(float x)
 {
-   return x >= 0.0f ? floorf(x + 0.5f) : ceilf(x - 0.5f);
+	return x >= 0.0f ? floorf(x + 0.5f) : ceilf(x - 0.5f);
 }
 #define roundf(x) NLMISC::nlroundf(x)
 #endif
 
 // Wrapper for fopen to be able to open files with an UTF-8 filename
-FILE* nlfopen(const std::string &filename, const std::string &mode);
+FILE *nlfopen(const std::string &filename, const std::string &mode);
 
 /** Signed 64 bit fseek. Same interface as fseek
   */
-int		nlfseek64( FILE *stream, sint64 offset, int origin );
+int nlfseek64(FILE *stream, sint64 offset, int origin);
 
 // Retrieve position in a file, same interface as ftell
-sint64  nlftell64(FILE *stream);
+sint64 nlftell64(FILE *stream);
 
 /**
  * Base class for all NeL exception.
