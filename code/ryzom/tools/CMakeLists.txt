@@ -17,7 +17,10 @@ IF(WITH_RYZOM_TOOLS)
     ADD_SUBDIRECTORY(patch_gen)
 
     IF(WIN32)
-      ADD_SUBDIRECTORY(sheets_packer_shard)
+      FIND_PACKAGE(MySQL)
+      IF(MYSQL_FOUND)
+        ADD_SUBDIRECTORY(sheets_packer_shard)
+      ENDIF()
     ENDIF()
   ENDIF()
 
