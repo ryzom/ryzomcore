@@ -2519,9 +2519,10 @@ namespace NLGUI
 
 	bool CGroupHTML::isBrowsing()
 	{
+		// do not show spinning cursor for image downloads (!Curls.empty())
 		return _BrowseNextTime || _PostNextTime || _RenderNextTime ||
 			_Browsing || _WaitingForStylesheet ||
-			_CurlWWW ||  !Curls.empty();
+			_CurlWWW;
 	}
 
 	// ***************************************************************************
