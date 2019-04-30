@@ -1,3 +1,6 @@
+
+FIND_PACKAGE(MySQL)
+
 IF(WITH_RYZOM_TOOLS)
   ADD_SUBDIRECTORY(skill_extractor)
   ADD_SUBDIRECTORY(make_alias_file)
@@ -17,7 +20,6 @@ IF(WITH_RYZOM_TOOLS)
     ADD_SUBDIRECTORY(patch_gen)
 
     IF(WIN32)
-      FIND_PACKAGE(MySQL)
       IF(MYSQL_FOUND)
         ADD_SUBDIRECTORY(sheets_packer_shard)
       ENDIF()
@@ -30,7 +32,10 @@ IF(WITH_RYZOM_TOOLS)
 ENDIF()
 
 ADD_SUBDIRECTORY(client)
-ADD_SUBDIRECTORY(server)
+
+IF(MYSQL_FOUND)
+  ADD_SUBDIRECTORY(server)
+ENDIF()
 
 # Old stuff that doesn't compile anymore.
 #ADD_SUBDIRECTORY(occ2huff)
