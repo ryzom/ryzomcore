@@ -432,7 +432,7 @@ CClientConfig::CClientConfig()
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
 	WebIgNotifInterval = 10; // time in minutes
 
-	CurlMaxConnections = 2;
+	CurlMaxConnections = 5;
 	CurlCABundle.clear();
 
 	RingReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes_ring/index.php";

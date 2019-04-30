@@ -69,7 +69,7 @@ namespace NLGUI
 			/// Maximum concurrent MultiCurl connections per CGroupHTML instance
 			sint32 curlMaxConnections;
 
-			SWebOptions(): curlMaxConnections(2)
+			SWebOptions(): curlMaxConnections(5)
 			{
 			}
 		};
@@ -753,7 +753,7 @@ namespace NLGUI
 		{
 		public:
 			CDataDownload(const std::string &u, const std::string &d, TDataType t, CViewBase *i, const std::string &s, const std::string &m, const CStyleParams &style = CStyleParams(), const TImageType imagetype = NormalImage)
-				: data(NULL), fp(NULL), url(u), dest(d), type(t), luaScript(s), md5sum(m), redirects(0)
+				: data(NULL), fp(NULL), url(u), dest(d), type(t), luaScript(s), md5sum(m), redirects(0), ConnectionTimeout(60)
 			{
 				if (t == ImgType) imgs.push_back(CDataImageDownload(i, style, imagetype));
 			}
@@ -769,6 +769,7 @@ namespace NLGUI
 			uint32 redirects;
 			FILE *fp;
 			std::vector<CDataImageDownload> imgs;
+			uint32 ConnectionTimeout;
 		};
 
 		std::list<CDataDownload> Curls;
