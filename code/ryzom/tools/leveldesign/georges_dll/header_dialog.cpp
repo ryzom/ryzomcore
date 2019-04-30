@@ -86,20 +86,20 @@ BOOL CHeaderDialog::OnInitDialog()
 
 	// Create the version
 	setStaticSize (currentPos);
-	char versionText[512];
-	smprintf (versionText, 512, "Version %d.%d", 0, 0);
+	CString versionText;
+	versionText.Format(_T("Version %d.%d"), 0, 0);
 	LabelVersion.Create (versionText, WS_VISIBLE, currentPos, this);
 	initWidget (LabelVersion);
 	getNextPosLabel (currentPos);
 
 	setButtonSize (currentPos, SmallWidget);
-	IncrementVersion.Create ("Increment Version", WS_VISIBLE|WS_TABSTOP, currentPos, this, BtIncrement);
+	IncrementVersion.Create (_T("Increment Version"), WS_VISIBLE|WS_TABSTOP, currentPos, this, BtIncrement);
 	initWidget (IncrementVersion);
 	getNextPos (currentPos);
 
 	// Create the state combo
 	setStaticSize (currentPos);
-	LabelState.Create ("State:", WS_VISIBLE, currentPos, this);
+	LabelState.Create (_T("State:"), WS_VISIBLE, currentPos, this);
 	initWidget (LabelState);
 	getNextPosLabel (currentPos);
 
@@ -109,30 +109,30 @@ BOOL CHeaderDialog::OnInitDialog()
 	ComboState.Create (WS_VISIBLE|CBS_DROPDOWNLIST|WS_TABSTOP, pos, this, CbState);
 	uint item;
 	for (item=0; item<CFileHeader::StateCount; item++)
-		ComboState.InsertString (-1, CFileHeader::getStateString ((CFileHeader::TState)item));
+		ComboState.InsertString (-1, utf8ToTStr(CFileHeader::getStateString ((CFileHeader::TState)item)));
 	ComboState.SetCurSel (0);
 	initWidget (ComboState);
 	getNextPos (currentPos);
 
 	// Default value
 	setStaticSize (currentPos);
-	LabelComments.Create ("Comments:", WS_VISIBLE, currentPos, this);
+	LabelComments.Create (_T("Comments:"), WS_VISIBLE, currentPos, this);
 	initWidget (LabelComments);
 	getNextPosLabel (currentPos);
 
 	setBigEditSize (currentPos, SmallWidget);
-	Comments.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), "", WS_VSCROLL|ES_OEMCONVERT|ES_MULTILINE|ES_WANTRETURN|WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_AUTOHSCROLL|ES_AUTOVSCROLL, currentPos, this, EdComments);
+	Comments.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), _T(""), WS_VSCROLL|ES_OEMCONVERT|ES_MULTILINE|ES_WANTRETURN|WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_AUTOHSCROLL|ES_AUTOVSCROLL, currentPos, this, EdComments);
 	initWidget (Comments);
 	getNextPos (currentPos);
 
 	// Min value
 	setStaticSize (currentPos);
-	LabelLog.Create ("Log:", WS_VISIBLE, currentPos, this);
+	LabelLog.Create (_T("Log:"), WS_VISIBLE, currentPos, this);
 	initWidget (LabelLog);
 	getNextPosLabel (currentPos);
 
 	setBigEditSize (currentPos, SmallWidget);
-	Log.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), "", WS_VSCROLL|ES_READONLY|ES_MULTILINE|WS_CHILD|WS_VISIBLE|ES_AUTOHSCROLL|ES_AUTOVSCROLL, currentPos, this, EdLog);
+	Log.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), _T(""), WS_VSCROLL|ES_READONLY|ES_MULTILINE|WS_CHILD|WS_VISIBLE|ES_AUTOHSCROLL|ES_AUTOVSCROLL, currentPos, this, EdLog);
 	initWidget (Log);
 	getNextPos (currentPos);
 
@@ -244,8 +244,8 @@ void CHeaderDialog::getFromDocument (const NLGEORGES::CFileHeader &header)
 	{
 		// Nel standard version number
 		ComboState.SetCurSel (header.State);
-		char name[512];
-		smprintf (name, 512, "Version %d.%d", header.MajorVersion, header.MinorVersion);
+		CString name;
+		name.Format(_T("Version %d.%d"), header.MajorVersion, header.MinorVersion);
 		LabelVersion.SetWindowText (name);
 
 		// Set comments
@@ -276,16 +276,16 @@ void CHeaderDialog::setVersionToDocument ()
 		uint v0, v1;
 		CString str;
 		LabelVersion.GetWindowText (str);
-		if (sscanf ((const char*)str, "Version %d.%d", &v0, &v1)==2)
+		if (sscanf (tStrToUtf8(str).c_str(), "Version %d.%d", &v0, &v1)==2)
 		{
 			v0++;
 			v1=0;
-			char name[512];
-			smprintf (name, 512, "Version %d.%d", v0, v1);
+			CString name;
+			name.Format(_T("Version %d.%d"), v0, v1);
 			LabelVersion.SetWindowText (name);
 
 			// Modify docuemnt
-			doc->modify (new CActionString (IAction::HeaderVersion, name, *doc, "",  "",
+			doc->modify(new CActionString(IAction::HeaderVersion, tStrToUtf8(name).c_str(), *doc, "",  "",
 				doc->getLeftView ()->getCurrentSelectionId (), 0));
 		}
 	}
@@ -299,7 +299,7 @@ void CHeaderDialog::setCommentsToDocument ()
 		CGeorgesEditDocSub *current = doc->getSelectedObject ();
 		CString str;
 		Comments.GetWindowText (str);
-		doc->modify (new CActionString (IAction::HeaderComments, str, *doc, "",  "",
+		doc->modify(new CActionString(IAction::HeaderComments, tStrToUtf8(str).c_str(), *doc, "",  "",
 			doc->getLeftView ()->getCurrentSelectionId (), 0));
 	}
 }
