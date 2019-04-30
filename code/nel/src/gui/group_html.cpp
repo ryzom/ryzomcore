@@ -546,6 +546,9 @@ namespace NLGUI
 		download.data = new CCurlWWWData(curl, download.url);
 		download.fp = fp;
 
+		// initial connection timeout, curl default is 300sec
+		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, download.ConnectionTimeout);
+
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
 		curl_easy_setopt(curl, CURLOPT_URL, download.url.c_str());
 
