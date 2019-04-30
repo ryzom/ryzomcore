@@ -41,8 +41,8 @@
 #define GEORGES_EDIT_BASE_REG_KEY "Software\\Nevrax\\Georges Edit"
 #define GEORGES_EDIT_BROWSE_LABEL "--- Browse..."
 
-extern const char* TypeFilter;
-extern const char* DfnFilter;
+extern const TCHAR* TypeFilter;
+extern const TCHAR* DfnFilter;
 
 class CGeorgesEditDoc;
 
@@ -155,8 +155,8 @@ public:
 	// Get a template form
 	CMultiDocTemplate	*getFormDocTemplate (const char *dfnName);
 
-	void	saveWindowState (const CWnd *wnd, const char *name, bool controlBar);
-	void	loadWindowState (CWnd *wnd, const char *name, bool changeShowWindow, bool controlBar);
+	void	saveWindowState (const CWnd *wnd, const TCHAR *name, bool controlBar);
+	void	loadWindowState (CWnd *wnd, const TCHAR *name, bool changeShowWindow, bool controlBar);
 
 // Overrides
 	// ClassWizard generated virtual function overrides

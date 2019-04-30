@@ -36,7 +36,7 @@ class CDfnParentEditListCtrl : public CEditListCtrl
 	CEditListCtrl::TItemEdit	getItemEditMode (uint item, uint subItem);
 	void						getMemComboBoxProp (uint item, uint subItem, std::string &regAdr, bool &browse);
 	void						getNewItemText (uint item, uint subItem, std::string &ret);
-	void						getBrowseInfo (uint item, uint subItem, std::string &defExt, std::string &defFilename, std::string &defDir, std::string &filter);
+	void						getBrowseInfo (uint item, uint subItem, std::string &defExt, std::string &defFilename, std::string &defDir, std::tstring &filter);
 public:
 	class CDfnDialog			*Dialog;
 };
@@ -47,7 +47,7 @@ class CDfnEditListCtrl : public CEditListCtrl
 	void						getComboBoxStrings (uint item, uint subItem, std::vector<std::string> &retStrings);
 	void						getMemComboBoxProp (uint item, uint subItem, std::string &regAdr, bool &browse);
 	void						getNewItemText (uint item, uint subItem, std::string &ret);
-	void						getBrowseInfo (uint item, uint subItem, std::string &defExt, std::string &defFilename, std::string &defDir, std::string &filter);
+	void						getBrowseInfo (uint item, uint subItem, std::string &defExt, std::string &defFilename, std::string &defDir, std::tstring &filter);
 	void						onItemChanged (uint item, uint subItem);
 public:
 	class CDfnDialog			*Dialog;

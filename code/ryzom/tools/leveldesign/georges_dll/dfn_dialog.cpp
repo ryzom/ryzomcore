@@ -385,7 +385,7 @@ void CDfnEditListCtrl::getNewItemText (uint item, uint subItem, std::string &ret
 
 // ***************************************************************************
 
-void CDfnEditListCtrl::getBrowseInfo (uint item, uint subItem, std::string &defExt, std::string &defFilename, std::string &defDir, std::string &filter)
+void CDfnEditListCtrl::getBrowseInfo (uint item, uint subItem, std::string &defExt, std::string &defFilename, std::string &defDir, std::tstring &filter)
 {
 	if (subItem == 2)
 	{
@@ -621,7 +621,7 @@ void CDfnParentEditListCtrl::getNewItemText (uint item, uint subItem, std::strin
 
 // ***************************************************************************
 
-void CDfnParentEditListCtrl::getBrowseInfo (uint item, uint subItem, std::string &defExt, std::string &defFilename, std::string &defDir, std::string &filter)
+void CDfnParentEditListCtrl::getBrowseInfo (uint item, uint subItem, std::string &defExt, std::string &defFilename, std::string &defDir, std::tstring &filter)
 {
 	filter = DfnFilter;
 	defDir = theApp.RootSearchPath;
