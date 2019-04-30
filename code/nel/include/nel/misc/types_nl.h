@@ -220,6 +220,7 @@
 #	if defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
 #		pragma warning (disable : 4005)			// don't warn on redefinitions caused by xp platform sdk
 #	endif // NL_COMP_VC8 || NL_COMP_VC9
+#	pragma warning (disable : 26495)		// Variable is uninitialized. Always initialize a member variable. (On purpose for performance.)
 #endif // NL_OS_WINDOWS
 
 

@@ -312,12 +312,14 @@ inline sint nlstricmp(const char *lhs, const std::string &rhs) { return stricmp(
 #ifdef _UNICODE
 #define tStrToUtf8(str) (ucstring((ucchar*)(LPCWSTR)str).toUtf8())
 #define utf8ToTStr(str) ((const wchar_t *)ucstring::makeFromUtf8(str).c_str())
+#define tstring wstring
 #else
 // FIXME: This is not accurate, it should be a conversion between local charset and utf8
 #define tStrToUtf8(str) (std::string((LPCSTR)str))
 inline const char *nlutf8ToTStr(const char *str) { return str; }
 inline const char *nlutf8ToTStr(const std::string &str) { return str.c_str(); }
 #define utf8ToTStr(str) NLMISC::nlutf8ToTStr(str)
+#define tstring string
 #endif
 
 #if (NL_COMP_VC_VERSION <= 90)
