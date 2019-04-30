@@ -843,6 +843,19 @@ namespace NLGUI
 					ratio -= _Columns[i].TableRatio;
 				}
 
+				// force table width to fit all columns
+				// if width is set, then use column min width
+				if (ForceWidthMin > 0)
+					tableWidthMax = std::min(_LastParentW - borderWidth, std::max(tableWidthMax, tableWidth));
+				else
+					tableWidthMax = std::min(_LastParentW - borderWidth, std::max(tableWidthMax, tableMaxContentWidth));
+
+				if (tableWidthMax < 0)
+					tableWidthMax = 0;
+
+				if (tableWidthMax < tableWidthMin)
+					std::swap(tableWidthMin, tableWidthMax);
+
 				// Eval table size with all percent cells resized
 				sint32 tableWidthSizeAfterPercent = tableWidth;
 				for (i=0; i<_Columns.size(); i++)
