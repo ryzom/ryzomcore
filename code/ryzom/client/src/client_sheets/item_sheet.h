@@ -255,10 +255,16 @@ public:
 	struct CScroll
 	{
 		std::string Texture;
+		std::string LuaCommand;
+		std::string WebCommand;
+		std::string Label;
 
 		void	serial(NLMISC::IStream &f)
 		{
 			f.serial(Texture);
+			f.serial(LuaCommand);
+			f.serial(WebCommand);
+			f.serial(Label);
 		}
 	};
 
