@@ -911,7 +911,7 @@ static bool createProcess(const std::string &programName, const std::string &arg
 	}
 
 	// or 0 for a window
-	BOOL res = CreateProcessW(sProgramName, utf8ToWide(args), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL /* current dir */, &si, &pi);
+	BOOL res = CreateProcessW(sProgramName, (LPWSTR)nlUtf8ToWide(args), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL /* current dir */, &si, &pi);
 
 	if (sProgramName)
 	{
@@ -1453,7 +1453,7 @@ void displayDwordBits( uint32 b, uint nbits, sint beginpos, bool displayBegin, N
 FILE* nlfopen(const std::string &filename, const std::string &mode)
 {
 #ifdef NL_OS_WINDOWS
-	return _wfopen(utf8ToWide(filename), utf8ToWide(mode));
+	return _wfopen(nlUtf8ToWide(filename), nlUtf8ToWide(mode));
 #else
 	return fopen(filename.c_str(), mode.c_str());
 #endif
@@ -1632,7 +1632,7 @@ static bool openDocWithExtension (const std::string &document, const std::string
 {
 #ifdef NL_OS_WINDOWS
 	// First try ShellExecute()
-	HINSTANCE result = ShellExecuteW(NULL, L"open", utf8ToWide(document), NULL, NULL, SW_SHOWDEFAULT);
+	HINSTANCE result = ShellExecuteW(NULL, L"open", nlUtf8ToWide(document), NULL, NULL, SW_SHOWDEFAULT);
 
 	// If it failed, get the .htm regkey and lookup the program
 	if ((uintptr_t)result <= HINSTANCE_ERROR)
@@ -1640,7 +1640,7 @@ static bool openDocWithExtension (const std::string &document, const std::string
 		wchar_t key[MAX_PATH + MAX_PATH];
 
 		// get the type of the extension
-		if (GetRegKey(HKEY_CLASSES_ROOT, utf8ToWide("." + ext), key) == ERROR_SUCCESS)
+		if (GetRegKey(HKEY_CLASSES_ROOT, nlUtf8ToWide("." + ext), key) == ERROR_SUCCESS)
 		{
 			lstrcatW(key, L"\\shell\\open\\command");
 

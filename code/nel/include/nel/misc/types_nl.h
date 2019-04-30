@@ -526,6 +526,15 @@ template<> struct hash<uint64>
  */
 typedef	uint16	ucchar;
 
+#if defined(NL_OS_WINDOWS) && (defined(UNICODE) || defined(_UNICODE))
+#define nltmain wmain
+#define nltWinMain wWinMain
+#else
+#define nltmain main
+#if defined(NL_OS_WINDOWS)
+#define nltWinMain WinMain
+#endif
+#endif
 
 // To define a 64bits constant; ie: UINT64_CONSTANT(0x123456781234)
 #ifdef NL_COMP_VC

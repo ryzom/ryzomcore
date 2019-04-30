@@ -298,7 +298,7 @@ inline const wchar_t* asCStr(const std::wstring &str) { return str.c_str(); }
 #define nlMbcsToUtf8(str) (NLMISC::asCStr(str))
 #endif
 #define nlWideToUtf8(str) (NLMISC::wideToUtf8(str).c_str())
-#define nlUtf8ToWide(str) (NLMISC::utf8ToWide(str).c_str()
+#define nlUtf8ToWide(str) (NLMISC::utf8ToWide(str).c_str())
 #define nlWideToMbcs(str) (NLMISC::wideToMbcs(str).c_str())
 #define nlMbcsToWide(str) (NLMISC::mbcsToWide(str).c_str())
 
@@ -308,7 +308,6 @@ inline const wchar_t* asCStr(const std::wstring &str) { return str.c_str(); }
 #if defined(NL_OS_WINDOWS) && (defined(UNICODE) || defined(_UNICODE))
 typedef std::wstring tstring;
 typedef wchar_t tchar;
-#define nltmain wmain
 inline std::string tStrToUtf8(const tchar *str) { return wideToUtf8((const wchar_t *)str); }
 inline std::string tStrToUtf8(const tstring &str) { return wideToUtf8((const std::wstring &)str); }
 inline std::wstring tStrToWide(const tchar *str) { return (const wchar_t *)str; }
@@ -330,7 +329,6 @@ inline tstring mbcsToTStr(const std::string &str) { return (const tstring &)mbcs
 #else
 typedef std::string tstring;
 typedef char tchar;
-#define nltmain main
 inline std::string tStrToUtf8(const tchar *str) { return mbcsToUtf8((const char *)str); }
 inline std::string tStrToUtf8(const tstring &str) { return mbcsToUtf8((const std::string &)str); }
 inline std::wstring tStrToWide(const tchar *str) { return mbcsToWide((const char *)str); }

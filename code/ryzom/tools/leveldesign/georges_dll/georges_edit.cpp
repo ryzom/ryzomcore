@@ -477,9 +477,9 @@ void CGeorgesEditApp::OnAppAbout()
 void CGeorgesEditApp::outputError (const char* message)
 {
 	if (m_pMainWnd)
-		m_pMainWnd->MessageBox (utf8ToTStr(message), _T("Georges Edit"), MB_OK|MB_ICONEXCLAMATION);
+		m_pMainWnd->MessageBox(nlUtf8ToTStr(message), _T("Georges Edit"), MB_OK | MB_ICONEXCLAMATION);
 	else
-		MessageBox (NULL, utf8ToTStr(message), _T("Georges Edit"), MB_OK|MB_ICONEXCLAMATION);
+		MessageBox(NULL, nlUtf8ToTStr(message), _T("Georges Edit"), MB_OK | MB_ICONEXCLAMATION);
 }
 
 void CGeorgesEditApp::getConfigFilePath (std::string &output)
@@ -711,9 +711,9 @@ bool CGeorgesEditApp::getColor (NLMISC::CRGBA &color)
 bool CGeorgesEditApp::yesNo (const char* message)
 {
 	if (m_pMainWnd)
-		return m_pMainWnd->MessageBox (utf8ToTStr(message), _T("Georges Edit"), MB_YESNO|MB_ICONQUESTION) != IDNO;
+		return m_pMainWnd->MessageBox(nlUtf8ToTStr(message), _T("Georges Edit"), MB_YESNO | MB_ICONQUESTION) != IDNO;
 	else
-		return MessageBox (NULL, utf8ToTStr(message), _T("Georges Edit"), MB_YESNO|MB_ICONQUESTION)  != IDNO;
+		return MessageBox(NULL, nlUtf8ToTStr(message), _T("Georges Edit"), MB_YESNO | MB_ICONQUESTION) != IDNO;
 }
 
 void CGeorgesEditApp::loadPlugins ()
@@ -722,7 +722,7 @@ void CGeorgesEditApp::loadPlugins ()
 	for (i=0; i<PluginsNames.size (); i++)
 	{
 		// Load the dll
-		HINSTANCE hModule = AfxLoadLibrary (utf8ToTStr(PluginsNames[i]));
+		HINSTANCE hModule = AfxLoadLibrary(nlUtf8ToTStr(PluginsNames[i]));
 		if (hModule)
 		{
 			// Get the proc adrdess
@@ -829,10 +829,10 @@ NLGEORGES::IEditDocument *CGeorgesEditApp::createDocument (const char *dfnName, 
 			// Set the filename
 			if (strcmp (pathName, "") != 0)
 			{
-				doc->SetPathName (utf8ToTStr(pathName), FALSE );
+				doc->SetPathName (nlUtf8ToTStr(pathName), FALSE );
 
 				// Create the file
-				doc->OnSaveDocument(utf8ToTStr(pathName) );
+				doc->OnSaveDocument(nlUtf8ToTStr(pathName));
 			}
 
 			// Init the frame
@@ -925,7 +925,7 @@ void CGeorgesEditApp::gotoURL (LPCTSTR url)
 
 void CGeorgesEditApp::WinHelp(DWORD dwData, UINT nCmd) 
 {
-	gotoURL(utf8ToTStr(NLMISC::CFile::getPath(ExePath) + "georges_edit.html"));
+	gotoURL(nlUtf8ToTStr(NLMISC::CFile::getPath(ExePath) + "georges_edit.html"));
 }
 
 void CGeorgesEditApp::OnViewRefresh() 

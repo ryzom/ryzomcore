@@ -39,7 +39,7 @@ std::string CLoginRegistry::getProductInstallId()
 		if (RegQueryValueExW(hKey, InstallIdKeyHandle, NULL, &dwType, (BYTE *) buffer, &dwSize) == ERROR_SUCCESS && dwType == REG_SZ)
 		{
 			RegCloseKey(hKey);
-			return wideToUtf8(buffer);
+			return NLMISC::wideToUtf8(buffer);
 		}
 		RegCloseKey(hKey);
 	}
@@ -58,10 +58,9 @@ std::string CLoginRegistry::getProductInstallId()
 
 		// copy wide string to a buffer
 		const uint keyMaxLength = 16;
-		wchar_t	buffer[keyMaxLength];
-		wcscpy(buffer, utf8ToWide(id));
+		std::wstring wid = NLMISC::utf8ToWide(id);
 
-		if (RegSetValueExW(hKey, InstallIdKeyHandle, 0L, REG_SZ, (const BYTE *) buffer, (DWORD)(wcslen(buffer)*2+2)) == ERROR_SUCCESS)
+		if (RegSetValueExW(hKey, InstallIdKeyHandle, 0L, REG_SZ, (const BYTE *)wid.c_str(), (DWORD)((wid.size() + 1) * sizeof(WCHAR))) == ERROR_SUCCESS)
 		{
 			return id;
 		}

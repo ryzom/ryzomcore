@@ -1431,7 +1431,7 @@ int getLastError()
 std::string formatErrorMessage(int errorCode)
 {
 #ifdef NL_OS_WINDOWS
-	LPVOID lpMsgBuf = NULL;
+	LPWSTR lpMsgBuf = NULL;
 	DWORD len = FormatMessageW(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER |
 		FORMAT_MESSAGE_FROM_SYSTEM |
@@ -1439,7 +1439,7 @@ std::string formatErrorMessage(int errorCode)
 		NULL,
 		errorCode,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-		(LPWSTR) &lpMsgBuf,
+		(LPWSTR)(&lpMsgBuf),
 		0,
 		NULL
 	);

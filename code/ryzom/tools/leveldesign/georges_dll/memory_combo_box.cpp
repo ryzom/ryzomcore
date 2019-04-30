@@ -102,7 +102,7 @@ bool CMemoryComboBox::getMemory (int slot, std::string &ret)
 		smprintf (strSrc, 512, "%d", slot);
 		TCHAR str[512];
 		LONG size = 512 * sizeof(TCHAR);
-		if (RegQueryValue(hKey, utf8ToTStr(strSrc), str, &size) == ERROR_SUCCESS)
+		if (RegQueryValue(hKey, nlUtf8ToTStr(strSrc), str, &size) == ERROR_SUCCESS)
 		{
 			ret = tStrToUtf8(str);
 
@@ -134,12 +134,12 @@ void CMemoryComboBox::scrollDown (int start, int end)
 			smprintf (strSrc, 512, "%d", i-1);
 			TCHAR str[512];
 			LONG size = 512 * sizeof(TCHAR);
-			if (RegQueryValue (hKey, utf8ToTStr(strSrc), str, &size) == ERROR_SUCCESS)
+			if (RegQueryValue (hKey, nlUtf8ToTStr(strSrc), str, &size) == ERROR_SUCCESS)
 			{
 				// Set the value
 				char strDst[512];
 				smprintf (strDst, 512, "%d", i);
-				RegSetValue (hKey, utf8ToTStr(strSrc), REG_SZ, str, size);
+				RegSetValue (hKey, nlUtf8ToTStr(strDst), REG_SZ, str, size);
 			} 
 		}
 
@@ -158,7 +158,7 @@ void CMemoryComboBox::pushString (const std::string &str)
 	{
 		// Set the value
 		tstring tstr = utf8ToTStr(str);
-		RegSetValue (hKey, _T("0"), REG_SZ, tstr.c_str (), tstr.size ());
+		RegSetValue (hKey, _T("0"), REG_SZ, tstr.c_str(), (tstr.size() + 1) * sizeof(TCHAR));
 
 		// Close
 		RegCloseKey (hKey);
@@ -444,7 +444,7 @@ void CMemoryComboBox::refreshStrings ()
 	int count = Commands.size();
 	for (i=0; i<StaticStrings.size(); i++)
 	{
-		_ComboBox.InsertString (count, utf8ToTStr(StaticStrings[i]));
+		_ComboBox.InsertString(count, nlUtf8ToTStr(StaticStrings[i]));
 		count++;
 	}
 
@@ -453,7 +453,7 @@ void CMemoryComboBox::refreshStrings ()
 		std::string ret;
 		if (getMemory (i, ret))
 		{
-			_ComboBox.InsertString (count, utf8ToTStr(ret));
+			_ComboBox.InsertString(count, nlUtf8ToTStr(ret));
 			count++;
 		}
 	}
@@ -492,7 +492,7 @@ void CMemoryComboBox::clearCommand ()
 
 void CMemoryComboBox::addLabelCommands (uint i)
 {
-	_ComboBox.InsertString (i, utf8ToTStr(Commands[i].Label));
+	_ComboBox.InsertString(i, nlUtf8ToTStr(Commands[i].Label));
 }
 
 // ***************************************************************************
@@ -683,7 +683,7 @@ BOOL CMemoryComboBox::PreTranslateMessage(MSG* pMsg)
 						if ((!str.IsEmpty()) && (str.Find('.') == -1))
 						{
 							str += _T(".");
-							str += utf8ToTStr(_Extension);
+						    str += nlUtf8ToTStr(_Extension);
 							_ComboBox.SetWindowText (str);
 						}
 					}

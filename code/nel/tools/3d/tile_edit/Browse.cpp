@@ -612,7 +612,7 @@ void Browse::Init()
 	unsigned long value; 
 	unsigned long type; 
 	int cx=-1,cy=-1,x=-1,y=-1;
-	char sWindowpl[256];
+	TCHAR sWindowpl[256];
 
 	if (RegOpenKey(HKEY_CURRENT_USER,REGKEY_TILEDIT,&regkey)==ERROR_SUCCESS)
 	{		
@@ -621,7 +621,7 @@ void Browse::Init()
 		if (RegQueryValueEx(regkey,REGKEY_WNDPL,0,&type,(unsigned char *)&sWindowpl,&value)==ERROR_SUCCESS)
 		{
 			WINDOWPLACEMENT wndpl;
-			sscanf(sWindowpl,"%d %d %d %d %d %d %d %d %d %d",
+			_stscanf(sWindowpl,_T("%d %d %d %d %d %d %d %d %d %d"),
 						&wndpl.flags,
 						&wndpl.ptMaxPosition.x,&wndpl.ptMaxPosition.y,
 						&wndpl.ptMinPosition.x,&wndpl.ptMinPosition.y,
@@ -632,10 +632,10 @@ void Browse::Init()
 		}
 		value=256;
 		type=REG_SZ;
-		if (RegQueryValueEx(regkey,REGKEY_LASTPATH,0,&type,(unsigned char *)&sWindowpl,&value)!=ERROR_SUCCESS)
+		if (RegQueryValueEx(regkey, REGKEY_LASTPATH, 0, &type, (unsigned char *)&sWindowpl, &value) != ERROR_SUCCESS)
 			m_ctrl.LastPath.clear();
 		else
-			m_ctrl.LastPath=(const char*)sWindowpl;
+			m_ctrl.LastPath = tStrToUtf8(sWindowpl);
 		value=4;
 		type=REG_DWORD;
 		if (RegQueryValueEx(regkey,REGKEY_BUTTONZOOM,0,&type,(unsigned char *)&m_ctrl.Zoom,&value)!=ERROR_SUCCESS) 
@@ -808,8 +808,10 @@ void Browse::OnDestroy()
 	if (RegCreateKey(HKEY_CURRENT_USER,REGKEY_TILEDIT,&regkey)==ERROR_SUCCESS)
 	{	
 		//int sel = ((CComboBox*)GetDlgItem(IDC_LISTTYPE))->GetCurSel();
-		RegSetValueEx(regkey,REGKEY_WNDPL,0,REG_SZ,(const unsigned char*)sWindowpl,(DWORD)strlen(sWindowpl));
-		RegSetValueEx(regkey,REGKEY_LASTPATH,0,REG_SZ,(const unsigned char*)m_ctrl.LastPath.c_str(),(DWORD)strlen(m_ctrl.LastPath.c_str()));
+		tstring tWindowpl = utf8ToTStr(sWindowpl);
+		tstring tLastPath = utf8ToTStr(m_ctrl.LastPath);
+		RegSetValueEx(regkey, REGKEY_WNDPL, 0, REG_SZ, (const BYTE *)tWindowpl.c_str(), (tWindowpl.size() + 1) * sizeof(TCHAR));
+		RegSetValueEx(regkey, REGKEY_LASTPATH, 0, REG_SZ, (const BYTE *)tLastPath.c_str(), (tLastPath.size() + 1) * sizeof(TCHAR));
 		RegSetValueEx(regkey,REGKEY_BUTTONZOOM,0,REG_DWORD,(const unsigned char*)&m_ctrl.Zoom,4);
 		RegSetValueEx(regkey,REGKEY_BUTTONVARIETY,0,REG_DWORD,(const unsigned char*)&m_128x128,4);
 		RegSetValueEx(regkey,REGKEY_BUTTONTEXTURE,0,REG_DWORD,(const unsigned char*)&m_ctrl.Texture,4);
