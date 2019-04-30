@@ -60,7 +60,7 @@ void CTypeSelDlg::OnOK()
 
 	CString sTmp;
 	TypeList.GetText(TypeList.GetCurSel(), sTmp);
-	_TypeSelected = tStrToUtf8(sTmp);
+	_TypeSelected = NLMISC::tStrToUtf8(sTmp);
 
 	CDialog::OnOK();
 }
@@ -72,7 +72,7 @@ BOOL CTypeSelDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 	for (uint32 i = 0; i < _TypesInit->size(); ++i)
 	{
-		TypeList.InsertString(-1, utf8ToTStr(_TypesInit->operator[](i).Name));
+		TypeList.InsertString(-1, nlUtf8ToTStr(_TypesInit->operator[](i).Name));
 	}
 	
 	return TRUE;  // return TRUE unless you set the focus to a control

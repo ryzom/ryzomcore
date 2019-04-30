@@ -100,7 +100,7 @@ void CImageListEx::addResourceIcon (const char *filename)
 		int height = imageInfo.rcImage.bottom - imageInfo.rcImage.top;
 		
 		// Load the icon
-		HICON handle = (HICON) LoadImage (NULL, utf8ToTStr(filename), IMAGE_ICON, width, height, LR_COLOR|LR_LOADFROMFILE);
+		HICON handle = (HICON) LoadImage (NULL, nlUtf8ToTStr(filename), IMAGE_ICON, width, height, LR_COLOR|LR_LOADFROMFILE);
 		if (handle)
 		{
 			// Copy the icon

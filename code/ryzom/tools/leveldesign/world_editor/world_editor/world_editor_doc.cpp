@@ -830,7 +830,7 @@ void CWorldEditorDoc::updateModifiedState ()
 		if ( (title.size ()>=2) && (title[title.size()-1] == '*') && (title[title.size()-2] == ' ') )
 		{
 			title.resize (title.size () - 2);
-			SetTitle (utf8ToTStr(title));
+			SetTitle(nlUtf8ToTStr(title));
 		}
 	}
 }
@@ -1532,8 +1532,8 @@ const NLLIGO::IPrimitive *CWorldEditorDoc::createPrimitive (const CDatabaseLocat
 		if (primClass->Type == CPrimitiveClass::Bitmap)
 		{
 			// Create a dialog file
-			CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("image"), TRUE, utf8ToTStr(primClass->FileExtension), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,
-				utf8ToTStr(toString("%s (*.%s)|*.%s|All Files (*.*)|*.*||", primClass->FileType.c_str(), primClass->FileExtension.c_str(), primClass->FileExtension.c_str())), getMainFrame ());
+			CFileDialogEx dialog(BASE_REGISTRY_KEY, _T("image"), TRUE, nlUtf8ToTStr(primClass->FileExtension), NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+			    nlUtf8ToTStr(toString("%s (*.%s)|*.%s|All Files (*.*)|*.*||", primClass->FileType.c_str(), primClass->FileExtension.c_str(), primClass->FileExtension.c_str())), getMainFrame());
 			if (dialog.DoModal() == IDOK)
 			{
 				// Save filename

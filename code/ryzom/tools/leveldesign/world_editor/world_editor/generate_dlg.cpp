@@ -75,7 +75,7 @@ BOOL CGenerateDlg::OnInitDialog()
 	
 	// TODO: Add extra initialization here
 	for (uint32 i = 0; i < AllMaterials.size(); ++i)
-		ComboMaterial.InsertString(-1, utf8ToTStr(AllMaterials[i]));
+		ComboMaterial.InsertString(-1, nlUtf8ToTStr(AllMaterials[i]));
 
 	ComboMaterial.SetCurSel (0);
 

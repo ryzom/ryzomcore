@@ -170,7 +170,7 @@ BOOL CWorldEditorApp::InitInstance()
 	}
 	catch (const Exception& e)
 	{
-		::MessageBox (NULL, utf8ToTStr(e.what()), _T("Warning"), MB_OK|MB_ICONEXCLAMATION);
+		::MessageBox(NULL, nlUtf8ToTStr(e.what()), _T("Warning"), MB_OK | MB_ICONEXCLAMATION);
 
 		// Can't found the module put some default values
 		Config.CellSize = 160.0f;
@@ -292,7 +292,7 @@ BOOL CWorldEditorApp::InitInstance()
 	{
 		IPluginCallback* test=Plugins[k];
 		string retest=test->getName();
-		menu->InsertMenu( k, MF_BYPOSITION | MF_POPUP, ID_WINDOWS_PLUGINS+1 + k, utf8ToTStr(retest) );
+		menu->InsertMenu(k, MF_BYPOSITION | MF_POPUP, ID_WINDOWS_PLUGINS + 1 + k, nlUtf8ToTStr(retest));
 		menu->CheckMenuItem(ID_WINDOWS_PLUGINS+1 +k, MF_CHECKED);				
 	}
 	
@@ -444,7 +444,7 @@ bool CWorldEditorApp::yesNoMessage (const char *format, ... )
 		strcpy(buffer, "Unknown error");
 	}
 
-	return MessageBox (m_pMainWnd?m_pMainWnd->m_hWnd:NULL, utf8ToTStr(buffer), _T("NeL World Editor"), MB_YESNO|MB_ICONQUESTION) == IDYES;
+	return MessageBox(m_pMainWnd ? m_pMainWnd->m_hWnd : NULL, nlUtf8ToTStr(buffer), _T("NeL World Editor"), MB_YESNO | MB_ICONQUESTION) == IDYES;
 }
 
 void CWorldEditorApp::errorMessage (const char *format, ... )
@@ -463,7 +463,7 @@ void CWorldEditorApp::errorMessage (const char *format, ... )
 		strcpy(buffer, "Unknown error");
 	}
 
-	MessageBox (m_pMainWnd?m_pMainWnd->m_hWnd:NULL, utf8ToTStr(buffer), _T("NeL World Editor"), MB_OK|MB_ICONEXCLAMATION);
+	MessageBox(m_pMainWnd ? m_pMainWnd->m_hWnd : NULL, nlUtf8ToTStr(buffer), _T("NeL World Editor"), MB_OK | MB_ICONEXCLAMATION);
 }
 
 void CWorldEditorApp::infoMessage (const char *format, ... )
@@ -482,7 +482,7 @@ void CWorldEditorApp::infoMessage (const char *format, ... )
 		strcpy(buffer, "Unknown error");
 	}
 
-	MessageBox (m_pMainWnd?m_pMainWnd->m_hWnd:NULL, utf8ToTStr(buffer), _T("NeL World Editor"), MB_OK|MB_ICONINFORMATION);
+	MessageBox(m_pMainWnd ? m_pMainWnd->m_hWnd : NULL, nlUtf8ToTStr(buffer), _T("NeL World Editor"), MB_OK | MB_ICONINFORMATION);
 }
 
 void CWorldEditorApp::syntaxError (const std::string &filename, xmlNodePtr xmlNode, const char *format, ...)
@@ -813,7 +813,7 @@ void setEditTextMultiLine (CListBox &listBox, const std::vector<std::string> &ve
 	listBox.ResetContent();
 	uint i;
 	for (i=0; i<vect.size (); i++)
-		nlverify (listBox.InsertString( -1, utf8ToTStr(vect[i])) !=  LB_ERR);
+		nlverify(listBox.InsertString(-1, nlUtf8ToTStr(vect[i])) != LB_ERR);
 }
 
 // ***************************************************************************

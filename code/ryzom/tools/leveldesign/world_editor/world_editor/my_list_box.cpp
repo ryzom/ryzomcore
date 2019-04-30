@@ -69,7 +69,7 @@ BOOL CMyListBox::OnCommand(WPARAM wParam, LPARAM lParam)
 				std::string str;
 				getWindowTextUTF8 (StringSelectComboBox, str);
 				DeleteString(_EditingItem);
-				InsertString(_EditingItem, utf8ToTStr(str));
+			    InsertString(_EditingItem, nlUtf8ToTStr(str));
 				SetCurSel (_SelectAfter);
 				_EditingItem = LB_ERR;
 				notifyParent ();
