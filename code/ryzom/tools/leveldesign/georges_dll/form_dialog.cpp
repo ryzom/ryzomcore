@@ -832,7 +832,7 @@ BOOL CFormDialog::OnCommand(WPARAM wParam, LPARAM lParam)
 							smprintf (filter, 512, "%s Files (%s)|%s|All Files(*.*)|*.*|", typeName+i, ext.c_str(), ext.c_str());
 
 							// Open the dialog
-							CFileDialog dlgFile(TRUE, utf8ToTStr(ext), utf8ToTStr(ext), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, utf8ToTStr(filter), theApp.m_pMainWnd);
+						    CFileDialog dlgFile(TRUE, nlUtf8ToTStr(ext), nlUtf8ToTStr(ext), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, nlUtf8ToTStr(filter), theApp.m_pMainWnd);
 							if (dlgFile.DoModal () == IDOK)
 							{
 								combo->Combo.UpdateData ();
@@ -1316,16 +1316,16 @@ void IFormWidget::updateLabel ()
 					switch (where)
 					{
 					case UFormElm::ValueForm:
-						Label.SetWindowText(utf8ToTStr(SavedLabel + comp));
+						Label.SetWindowText(nlUtf8ToTStr(SavedLabel + comp));
 						break;
 					case UFormElm::ValueParentForm:
-						Label.SetWindowText(utf8ToTStr(SavedLabel + " (in parent form)" + comp));
+						Label.SetWindowText(nlUtf8ToTStr(SavedLabel + " (in parent form)" + comp));
 						break;
 					case UFormElm::ValueDefaultDfn:
-						Label.SetWindowText(utf8ToTStr(SavedLabel + " (default DFN value)" + comp));
+						Label.SetWindowText(nlUtf8ToTStr(SavedLabel + " (default DFN value)" + comp));
 						break;
 					case UFormElm::ValueDefaultType:
-						Label.SetWindowText(utf8ToTStr(SavedLabel + " (default TYPE value)" + comp));
+						Label.SetWindowText(nlUtf8ToTStr(SavedLabel + " (default TYPE value)" + comp));
 						break;
 					}
 				}
@@ -1352,18 +1352,18 @@ void IFormWidget::updateLabel ()
 						if (node->getForm () == doc->getFormPtr ())
 						{
 							// The node exist
-							Label.SetWindowText (utf8ToTStr(SavedLabel));
+							Label.SetWindowText(nlUtf8ToTStr(SavedLabel));
 						}
 						else
 						{
 							// The node exist in the parent form
-							Label.SetWindowText (utf8ToTStr(SavedLabel + " (in parent form)"));
+							Label.SetWindowText(nlUtf8ToTStr(SavedLabel + " (in parent form)"));
 						}
 					}	
 					else
 					{
 						// The node is empty
-						Label.SetWindowText (utf8ToTStr(SavedLabel + " (undefined)"));
+						Label.SetWindowText(nlUtf8ToTStr(SavedLabel + " (undefined)"));
 					}
 				}
 
@@ -1512,7 +1512,7 @@ void IFormWidget::onOpenSelected ()
 	std::string str2 = CPath::lookup (str, false, false);
 	if (str2.empty())
 		str2 = str;
-	theApp.OpenDocumentFile (utf8ToTStr(str2));
+	theApp.OpenDocumentFile(nlUtf8ToTStr(str2));
 }
 
 // ***************************************************************************
@@ -1569,7 +1569,7 @@ void CFormMemCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent,
 
 	// Create the type combo
 	parent->setStaticSize (currentPos);
-	Label.Create (utf8ToTStr(label), WS_VISIBLE, currentPos, parent);
+	Label.Create(nlUtf8ToTStr(label), WS_VISIBLE, currentPos, parent);
 	parent->initWidget (Label);
 	parent->getNextPosLabel (currentPos);
 
@@ -1691,7 +1691,7 @@ void CFormMemCombo::getFromDocument (CForm &form)
 		if (doc->getRootNode(getSlot ())->getValueByName (result, FormName, UFormElm::NoEval, NULL))
 		{
 			Combo.UpdateData ();
-			Combo.SetWindowText (utf8ToTStr(result));
+			Combo.SetWindowText(nlUtf8ToTStr(result));
 			Combo.UpdateData (FALSE);
 			updateLabel ();
 		}
@@ -1720,7 +1720,7 @@ void CFormMemCombo::getFromDocument (CForm &form)
 			CFormElmArray *arrayNode = safe_cast<CFormElmArray*> (node);
 			char label[512];
 			smprintf (label, 512, "%d", arrayNode->Elements.size ());
-			Combo.SetWindowText (utf8ToTStr(label));
+			Combo.SetWindowText(nlUtf8ToTStr(label));
 
 			if (arrayNode->getForm () == &form)
 				Label.SetWindowText (_T("Array size:"));
@@ -1751,7 +1751,7 @@ void CFormMemCombo::getFromDocument (CForm &form)
 		if (node)
 		{
 			CFormElmVirtualStruct *virtualNode = safe_cast<CFormElmVirtualStruct*> (node);
-			Combo.SetWindowText (utf8ToTStr(virtualNode->DfnFilename));
+			Combo.SetWindowText(nlUtf8ToTStr(virtualNode->DfnFilename));
 		}
 		else
 		{
@@ -1903,7 +1903,7 @@ void CFormCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, ui
 
 	// Create the type combo
 	parent->setStaticSize (currentPos);
-	Label.Create (utf8ToTStr(label), WS_VISIBLE, currentPos, parent);
+	Label.Create(nlUtf8ToTStr(label), WS_VISIBLE, currentPos, parent);
 	parent->initWidget (Label);
 	parent->getNextPosLabel (currentPos);
 
@@ -1921,7 +1921,7 @@ void CFormCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, ui
 		Combo.InsertString (0, _T(""));
 		for (uint predef=0; predef<nodeType->Definitions.size(); predef++)
 		{
-			Combo.InsertString (predef+1, utf8ToTStr(nodeType->Definitions[predef].Label));
+			Combo.InsertString(predef + 1, nlUtf8ToTStr(nodeType->Definitions[predef].Label));
 		}
 	}
 
@@ -2088,7 +2088,7 @@ void CFormBigEdit::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, 
 
 	// Create the type combo
 	parent->setStaticSize (currentPos);
-	Label.Create (utf8ToTStr(label), WS_VISIBLE, currentPos, parent);
+	Label.Create(nlUtf8ToTStr(label), WS_VISIBLE, currentPos, parent);
 	parent->initWidget (Label);
 	parent->getNextPosLabel (currentPos);
 
@@ -2262,7 +2262,7 @@ void CColorEdit::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, ui
 
 	// Create the type combo
 	parent->setStaticSize (currentPos);
-	Label.Create (utf8ToTStr(label), WS_VISIBLE, currentPos, parent);
+	Label.Create(nlUtf8ToTStr(label), WS_VISIBLE, currentPos, parent);
 	parent->initWidget (Label);
 	parent->getNextPosLabel (currentPos);
 
@@ -2492,7 +2492,7 @@ void CListWidget::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, u
 
 	// Create the type combo
 	parent->setStaticSize (currentPos);
-	Label.Create (utf8ToTStr(label), WS_VISIBLE, currentPos, parent);
+	Label.Create(nlUtf8ToTStr(label), WS_VISIBLE, currentPos, parent);
 	parent->initWidget (Label);
 	parent->getNextPosLabel (currentPos);
 
@@ -2515,7 +2515,7 @@ void CListWidget::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, u
 
 void CListWidget::addColumn (const char *name)
 {
-	ListCtrl.insertColumn (0, utf8ToTStr(name));
+	ListCtrl.insertColumn(0, nlUtf8ToTStr(name));
 	ListCtrl.recalcColumn ();
 }
 
@@ -2566,7 +2566,7 @@ void CListWidget::getFromDocument (NLGEORGES::CForm &form)
 		string filename = form.getParentFilename (parent);
 
 		// Insert in the list
-		ListCtrl.ListCtrl.InsertItem (parent, utf8ToTStr(filename));
+		ListCtrl.ListCtrl.InsertItem(parent, nlUtf8ToTStr(filename));
 
 		ListCtrl.ListCtrl.UpdateData (FALSE);
 		updateLabel ();
@@ -2709,7 +2709,7 @@ void CListWidget::onOpenSelected ()
 		if (str != "")
 		{
 			// Look for the file
-			CString name = utf8ToTStr(CPath::lookup(tStrToUtf8(str), false, false));
+			CString name = nlUtf8ToTStr(CPath::lookup(tStrToUtf8(str), false, false));
 			if (name.IsEmpty())
 				name = str;
 
@@ -2750,7 +2750,7 @@ void CIconWidget::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, u
 
 	// Create the type combo
 	parent->setStaticSize (currentPos);
-	Label.Create (utf8ToTStr(label), WS_VISIBLE, currentPos, parent);
+	Label.Create(nlUtf8ToTStr(label), WS_VISIBLE, currentPos, parent);
 	parent->initWidget (Label);
 	parent->getNextPosLabel (currentPos);
 

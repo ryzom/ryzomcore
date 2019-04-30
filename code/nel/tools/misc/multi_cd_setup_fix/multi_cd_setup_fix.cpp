@@ -40,11 +40,7 @@ void pump ()
 		DispatchMessage(&msg);
 	}
 }
-
-int APIENTRY _tWinMain(HINSTANCE hInstance,
-                     HINSTANCE hPrevInstance,
-                     LPSTR     lpCmdLine,
-                     int       nCmdShow)
+int APIENTRY _tWinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPTSTR /* lpCmdLine */, int /* nCmdShow */)
 {
 	// Windows
 	HWND hwnd = CreateDialog (hInstance, MAKEINTRESOURCE(IDD_WAIT), NULL, MyDialogProc);

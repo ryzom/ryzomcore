@@ -436,7 +436,7 @@ void CMainFrame::OnUpdateModules0(CCmdUI* pCmdUI)
 		pCmdUI->Enable ();
 		string name;
 		theApp.PluginArray[0].PluginInterface->getPluginName (name);
-		pCmdUI->SetText (utf8ToTStr(name));
+		pCmdUI->SetText(nlUtf8ToTStr(name));
 		pCmdUI->SetCheck (theApp.PluginArray[0].Activated);
 	}
 	else
@@ -464,7 +464,7 @@ void CMainFrame::OnUpdateModules1(CCmdUI* pCmdUI)
 		pCmdUI->Enable ();
 		string name;
 		theApp.PluginArray[1].PluginInterface->getPluginName (name);
-		pCmdUI->SetText (utf8ToTStr(name));
+		pCmdUI->SetText(nlUtf8ToTStr(name));
 		pCmdUI->SetCheck (theApp.PluginArray[1].Activated);
 	}
 	else
@@ -492,7 +492,7 @@ void CMainFrame::OnUpdateModules2(CCmdUI* pCmdUI)
 		pCmdUI->Enable ();
 		string name;
 		theApp.PluginArray[2].PluginInterface->getPluginName (name);
-		pCmdUI->SetText (utf8ToTStr(name));
+		pCmdUI->SetText(nlUtf8ToTStr(name));
 		pCmdUI->SetCheck (theApp.PluginArray[2].Activated);
 	}
 	else
@@ -520,7 +520,7 @@ void CMainFrame::OnUpdateModules3(CCmdUI* pCmdUI)
 		pCmdUI->Enable ();
 		string name;
 		theApp.PluginArray[3].PluginInterface->getPluginName (name);
-		pCmdUI->SetText (utf8ToTStr(name));
+		pCmdUI->SetText(nlUtf8ToTStr(name));
 		pCmdUI->SetCheck (theApp.PluginArray[3].Activated);
 	}
 	else

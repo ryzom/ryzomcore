@@ -579,12 +579,12 @@ void CGeorgesImpl::LoadDocument( const std::string& _sxfullname )
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	try
 	{
-		theApp.OpenDocumentFile(utf8ToTStr(_sxfullname));
+		theApp.OpenDocumentFile(nlUtf8ToTStr(_sxfullname));
 	}
 	catch (const NLMISC::Exception &e)
 	{
 		std::string tmp = std::string(e.what()) + "(" + _sxfullname + ")";
-		theApp.m_pMainWnd->MessageBox(utf8ToTStr(tmp), _T("Georges_Lib"), MB_ICONERROR | MB_OK);
+		theApp.m_pMainWnd->MessageBox(nlUtf8ToTStr(tmp), _T("Georges_Lib"), MB_ICONERROR | MB_OK);
 	}
 }
 

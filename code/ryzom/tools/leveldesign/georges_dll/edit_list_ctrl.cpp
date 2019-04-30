@@ -122,11 +122,11 @@ BOOL CEditListCtrl::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 				// Insert an item at the end
 				string text;
 				getNewItemText (ListCtrl.GetItemCount (), 0, text);
-				ListCtrl.InsertItem (ListCtrl.GetItemCount (), utf8ToTStr(text));
+			    ListCtrl.InsertItem(ListCtrl.GetItemCount(), nlUtf8ToTStr(text));
 				for (uint i=1; i<ColumnCount; i++)
 				{
 					getNewItemText (ListCtrl.GetItemCount ()-1, i, text);
-					ListCtrl.SetItemText (ListCtrl.GetItemCount ()-1, i, utf8ToTStr(text));
+				    ListCtrl.SetItemText(ListCtrl.GetItemCount() - 1, i, nlUtf8ToTStr(text));
 				}
 				ListCtrl.SetItemState (ListCtrl.GetItemCount ()-1, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
 
@@ -151,22 +151,22 @@ BOOL CEditListCtrl::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 						item = ListCtrl.GetNextSelectedItem(pos);
 						string text;
 						getNewItemText (item, 0, text);
-						ListCtrl.InsertItem (item, utf8ToTStr(text));
+				        ListCtrl.InsertItem(item, nlUtf8ToTStr(text));
 						for (uint i=1; i<ColumnCount; i++)
 						{
 							getNewItemText (item, i, text);
-							ListCtrl.SetItemText (item, i, utf8ToTStr(text));
+					        ListCtrl.SetItemText(item, i, nlUtf8ToTStr(text));
 						}
 					}
 					else
 					{
 						string text;
 						getNewItemText (0, 0, text);
-						ListCtrl.InsertItem (0, utf8ToTStr(text));
+				        ListCtrl.InsertItem(0, nlUtf8ToTStr(text));
 						for (uint i=1; i<ColumnCount; i++)
 						{
 							getNewItemText (0, i, text);
-							ListCtrl.SetItemText (0, i, utf8ToTStr(text));
+					        ListCtrl.SetItemText(0, i, nlUtf8ToTStr(text));
 						}
 						ListCtrl.SetItemState (0, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
 					}
@@ -312,9 +312,9 @@ LRESULT CMyListCtrl::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 				Ctrl->getBrowseInfo (Ctrl->Item, Ctrl->SubItem, defExt, defFilename, defDir, filter);
 
 				TCHAR buffer[MAX_PATH];
-				_tcscpy_s(buffer, MAX_PATH, utf8ToTStr(defDir));
+			    _tcscpy_s(buffer, MAX_PATH, nlUtf8ToTStr(defDir));
 
-				CFileDialog dlgFile (TRUE, utf8ToTStr(defExt), utf8ToTStr(defFilename), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, utf8ToTStr(filter), theApp.m_pMainWnd);
+				CFileDialog dlgFile(TRUE, nlUtf8ToTStr(defExt), nlUtf8ToTStr(defFilename), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, nlUtf8ToTStr(filter), theApp.m_pMainWnd);
 				dlgFile.m_ofn.lpstrInitialDir = buffer;
 				Ctrl->OnBrowse = true;
 				if (dlgFile.DoModal () == IDOK)
@@ -453,8 +453,8 @@ void CEditListCtrl::editItem (uint item, uint subitem)
 		getComboBoxStrings (Item, SubItem, retStrings);
 		for (uint i=0; i<retStrings.size (); i++)
 		{
-			Combo.InsertString (-1, utf8ToTStr(retStrings[i]));
-			if (retStrings[i] == tStrToUtf8(tmp))
+			Combo.InsertString(-1, nlUtf8ToTStr(retStrings[i]));
+			if (retStrings[i] == NLMISC::tStrToUtf8(tmp))
 				Combo.SetCurSel (i);
 		}
 
@@ -475,7 +475,7 @@ void CEditListCtrl::editItem (uint item, uint subitem)
 		string retString;
 		bool browse;
 		getMemComboBoxProp (Item, SubItem, retString, browse);
-		MemCombo.setRegisterAdress (utf8ToTStr(retString));
+		MemCombo.setRegisterAdress(nlUtf8ToTStr(retString));
 		MemCombo.clearCommand ();
 		if (browse)
 			MemCombo.addCommand (GEORGES_EDIT_BROWSE_LABEL, CmdBrowse);

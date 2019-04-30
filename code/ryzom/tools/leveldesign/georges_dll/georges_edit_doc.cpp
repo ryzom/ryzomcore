@@ -182,8 +182,8 @@ bool CGeorgesEditDocForm::initDocument (const char *dfnName, bool newElement)
 
 	// Set file name and title
 	std::string name2 = toLower(NLMISC::CFile::getFilenameWithoutExtension(dfnName));
-	SetPathName (utf8ToTStr("*." + name2), FALSE);
-	SetTitle (utf8ToTStr("New " + name2 + " form"));
+	SetPathName(nlUtf8ToTStr("*." + name2), FALSE);
+	SetTitle(nlUtf8ToTStr("New " + name2 + " form"));
 
 	// TMp
 	if (newElement)
@@ -223,7 +223,7 @@ BOOL CGeorgesEditDocForm::OnNewDocument()
 		string defFilename = theApp.RootSearchPath;
 		defFilename += "*.dfn";
 
-		CFileDialog dlgFile(TRUE, _T("*.dfn"), utf8ToTStr(defFilename.c_str()), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, DfnFilter, theApp.m_pMainWnd);
+		CFileDialog dlgFile(TRUE, _T("*.dfn"), nlUtf8ToTStr(defFilename.c_str()), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, DfnFilter, theApp.m_pMainWnd);
 		if (dlgFile.DoModal () == IDOK)
 		{
 			if (initDocument(tStrToUtf8(dlgFile.GetFileName()).c_str(), true))
@@ -1331,7 +1331,7 @@ void CGeorgesEditDoc::setModifiedState (bool modified)
 		if ( (title.size ()>=2) && (title[title.size()-1] == '*') && (title[title.size()-2] == ' ') )
 		{
 			title.resize (title.size () - 2);
-			SetTitle (utf8ToTStr(title));
+			SetTitle(nlUtf8ToTStr(title));
 		}
 	}
 }

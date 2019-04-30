@@ -59,7 +59,7 @@ public:
 	bool isWnd (const CWnd *wnd) const;
 	void enableAutoCompleteExtension (bool enable, const char * ext);
 
-	std::tstring			RegisterAdress;
+	NLMISC::tstring		RegisterAdress;
 	int					MemoryCount;
 	UINT				Id;
 

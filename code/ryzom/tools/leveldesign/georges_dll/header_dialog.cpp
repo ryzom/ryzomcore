@@ -109,7 +109,7 @@ BOOL CHeaderDialog::OnInitDialog()
 	ComboState.Create (WS_VISIBLE|CBS_DROPDOWNLIST|WS_TABSTOP, pos, this, CbState);
 	uint item;
 	for (item=0; item<CFileHeader::StateCount; item++)
-		ComboState.InsertString (-1, utf8ToTStr(CFileHeader::getStateString ((CFileHeader::TState)item)));
+		ComboState.InsertString(-1, nlUtf8ToTStr(CFileHeader::getStateString((CFileHeader::TState)item)));
 	ComboState.SetCurSel (0);
 	initWidget (ComboState);
 	getNextPos (currentPos);

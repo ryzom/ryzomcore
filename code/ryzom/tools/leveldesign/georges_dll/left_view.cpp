@@ -109,14 +109,14 @@ void CLeftView::getSubObject (CGeorgesEditDocSub *subObject, HTREEITEM parent, H
 	if (!item)
 	{
 		int itemImage = subObject->getItemImage (GetDocument());
-		item = TreeCtrl.InsertItem (utf8ToTStr(subObject->getName()), itemImage, itemImage, parent);
+		item = TreeCtrl.InsertItem(nlUtf8ToTStr(subObject->getName()), itemImage, itemImage, parent);
 	}
 
 	// Set name
-	TreeCtrl.SetItemText (item, utf8ToTStr(subObject->getName()));
+	TreeCtrl.SetItemText(item, nlUtf8ToTStr(subObject->getName()));
 
 	// Set item data
-	TreeCtrl.SetItemData (item, (DWORD)subObject);
+	TreeCtrl.SetItemData (item, (DWORD_PTR)subObject);
 
 	// For each children
 	HTREEITEM child = TreeCtrl.GetChildItem (item);
