@@ -468,16 +468,16 @@ void CDfnDialog::onOpenSelected ()
 					int nItem = Parents.ListCtrl.GetNextSelectedItem(pos);
 
 					// Get the string
-					std::string str = tStrToUtf8(Parents.ListCtrl.GetItemText (nItem, 0));
-					if (!str.empty())
+					CString str = Parents.ListCtrl.GetItemText (nItem, 0);
+					if (str != "")
 					{
 						// Look for the file
-						string name = CPath::lookup (str, false, false);
-						if (name.empty ())
+						CString name = utf8ToTStr(CPath::lookup(tStrToUtf8(str), false, false));
+						if (name.IsEmpty())
 							name = str;
 
 						// Open the file
-						theApp.OpenDocumentFile (utf8ToTStr(name));
+						theApp.OpenDocumentFile(name);
 					}
 				}
 			}
@@ -490,16 +490,16 @@ void CDfnDialog::onOpenSelected ()
 					int nItem = Struct.ListCtrl.GetNextSelectedItem(pos);
 
 					// Get the string
-					std::string str = tStrToUtf8(Struct.ListCtrl.GetItemText (nItem, 2));
-					if (!str.empty())
+					CString str = Struct.ListCtrl.GetItemText (nItem, 2);
+					if (str != "")
 					{
 						// Look for the file
-						string name = CPath::lookup (str, false, false);
-						if (name.empty ())
+						CString name = utf8ToTStr(CPath::lookup(tStrToUtf8(str), false, false));
+						if (name.IsEmpty())
 							name = str;
 
 						// Open the file
-						theApp.OpenDocumentFile (utf8ToTStr(name));
+						theApp.OpenDocumentFile(name);
 					}
 				}
 			}

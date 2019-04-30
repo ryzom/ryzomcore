@@ -1025,7 +1025,7 @@ void CGeorgesEditApp::OnUpdateFileSaveAll(CCmdUI* pCmdUI)
 	pCmdUI->Enable (getActiveDocument () != NULL);
 }
 
-bool CGeorgesEditApp::SerialIntoMemStream (const std::string &formName, CGeorgesEditDoc *doc, uint slot, bool copyToClipboard)
+bool CGeorgesEditApp::SerialIntoMemStream (const char *formName, CGeorgesEditDoc *doc, uint slot, bool copyToClipboard)
 {
 	// Ok, get the node
 	const CFormDfn *parentDfn;
@@ -1228,7 +1228,7 @@ bool CGeorgesEditApp::FillMemStreamWithClipboard (const char *formName, CGeorges
 		return false;
 }
 
-bool CGeorgesEditApp::SerialFromMemStream (const std::string &formName, CGeorgesEditDoc *doc, uint slot)
+bool CGeorgesEditApp::SerialFromMemStream (const char *formName, CGeorgesEditDoc *doc, uint slot)
 {
 	// The form pointer
 	CForm *form = doc->getFormPtr ();
