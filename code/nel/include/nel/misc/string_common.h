@@ -242,6 +242,10 @@ inline bool fromString(const std::string &str, sint64 &val) { bool ret = sscanf(
 inline bool fromString(const std::string &str, float &val) { bool ret = sscanf(str.c_str(), "%f", &val) == 1; if (!ret) val = 0.0f; return ret; }
 inline bool fromString(const std::string &str, double &val) { bool ret = sscanf(str.c_str(), "%lf", &val) == 1; if (!ret) val = 0.0; return ret; }
 
+// Fast string to bool, reliably defined for strings starting with 0, 1, t, T, f, F, y, Y, n, N, anything else is undefined.
+// (str[0] == '1' || (str[0] & 0xD2) == 0x50)
+//  - Kaetemi
+
 inline bool fromString(const std::string &str, bool &val)
 {
 	if (str.length() == 1)
@@ -273,11 +277,12 @@ inline bool fromString(const std::string &str, bool &val)
 	}
 	else
 	{
-		if (str == "true" || str == "yes")
+		std::string strl = toLower(str);
+		if (strl == "true" || strl == "yes")
 		{
 			val = true;
 		}
-		else if (str == "false" || str == "no")
+		else if (strl == "false" || strl == "no")
 		{
 			val = false;
 		}
