@@ -173,6 +173,12 @@
 #	define NL_NO_EXCEPTION_SPECS
 #endif
 
+#if defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 140)
+#define nlmove(v) std::move(v)
+#else
+#define nlmove(v) (v)
+#endif
+
 // gcc 3.4 introduced ISO C++ with tough template rules
 //
 // NL_ISO_SYNTAX can be used using #if NL_ISO_SYNTAX or #if !NL_ISO_SYNTAX

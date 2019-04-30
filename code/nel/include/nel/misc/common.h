@@ -303,23 +303,23 @@ inline sint nlstricmp(const std::string &lhs, const std::string &rhs) { return s
 inline sint nlstricmp(const std::string &lhs, const char *rhs) { return stricmp(lhs.c_str(),rhs); }
 inline sint nlstricmp(const char *lhs, const std::string &rhs) { return stricmp(lhs,rhs.c_str()); }
 
-// TODO: Can we prefix these with 'nl' like other methods?
+// TODO: Can we prefix these with 'nl' like other macros?
 // Macros helper to convert UTF-8 std::string and wchar_t*
-#define wideToUtf8(str) (ucstring((ucchar*)str).toUtf8())
-#define utf8ToWide(str) ((wchar_t*)ucstring::makeFromUtf8(str).c_str())
+// #define wideToUtf8(str) (ucstring((ucchar*)str).toUtf8())
+// #define utf8ToWide(str) ((wchar_t*)ucstring::makeFromUtf8(str).c_str())
 
 // Macros helper to convert UTF-8 std::string and TCHAR*
 #ifdef _UNICODE
 #define tStrToUtf8(str) (ucstring((ucchar*)(LPCWSTR)str).toUtf8())
 #define utf8ToTStr(str) ((const wchar_t *)ucstring::makeFromUtf8(str).c_str())
-#define tstring wstring
+// #define tstring wstring
 #else
 // FIXME: This is not accurate, it should be a conversion between local charset and utf8
 #define tStrToUtf8(str) (std::string((LPCSTR)str))
 inline const char *nlutf8ToTStr(const char *str) { return str; }
 inline const char *nlutf8ToTStr(const std::string &str) { return str.c_str(); }
 #define utf8ToTStr(str) NLMISC::nlutf8ToTStr(str)
-#define tstring string
+// #define tstring string
 #endif
 
 #if (NL_COMP_VC_VERSION <= 90)
