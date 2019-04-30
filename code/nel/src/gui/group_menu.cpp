@@ -1664,28 +1664,6 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CGroupSubMenu::setActionHandler(uint lineIndex, const std::string &ah)
-	{
-		if (lineIndex > _Lines.size())
-		{
-			nlwarning("Bad index");
-			return;
-		}
-		_Lines[lineIndex].AHName = ah;
-	}
-
-	// ------------------------------------------------------------------------------------------------
-	void CGroupSubMenu::setActionHandlerParam(uint lineIndex, const std::string &params)
-	{
-		if (lineIndex > _Lines.size())
-		{
-			nlwarning("Bad index");
-			return;
-		}
-		_Lines[lineIndex].AHParams = params;
-	}
-
-	// ------------------------------------------------------------------------------------------------
 	void CGroupSubMenu::setSelectable(uint lineIndex, bool selectable)
 	{
 		if (lineIndex > _Lines.size())
@@ -2616,20 +2594,6 @@ namespace NLGUI
 	const std::string CGroupMenu::getActionHandlerParam(uint lineIndex) const
 	{
 		return _RootMenu ? _RootMenu->getActionHandlerParam(lineIndex) : "";
-	}
-
-	// ------------------------------------------------------------------------------------------------
-	void CGroupMenu::setActionHandler(uint lineIndex, const std::string &ah)
-	{
-		if (_RootMenu)
-			_RootMenu->setActionHandler(lineIndex, ah);
-	}
-
-	// ------------------------------------------------------------------------------------------------
-	void CGroupMenu::setActionHandlerParam(uint lineIndex, const std::string &params)
-	{
-		if (_RootMenu)
-			_RootMenu->setActionHandlerParam(lineIndex, params);
 	}
 
 	// ------------------------------------------------------------------------------------------------

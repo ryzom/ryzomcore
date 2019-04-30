@@ -137,9 +137,6 @@ namespace NLGUI
 		const std::string getActionHandler(uint lineIndex) const;
 		const std::string getActionHandlerParam(uint lineIndex) const;
 
-		void setActionHandler(uint lineIndex, const std::string &ah = "");
-		void setActionHandlerParam(uint lineIndex, const std::string &params = "");
-
 		void	openSubMenu (sint32 nb);
 
 		void	hideSubMenus ();
@@ -333,8 +330,6 @@ namespace NLGUI
 		const std::string getActionHandler(uint lineIndex) const;
 		const std::string getActionHandlerParam(uint lineIndex) const;
 
-		void setActionHandler(uint lineIndex, const std::string &ah = "");
-		void setActionHandlerParam(uint lineIndex, const std::string &params = "");
 
 		void addLine (const ucstring &name, const std::string &ah = "", const std::string &params = "",
 					  const std::string &id = std::string(),

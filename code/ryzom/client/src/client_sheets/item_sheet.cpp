@@ -427,11 +427,6 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	if (!val.empty())
 		CraftPlan = CSheetId(val);
 
-	// commands and menu label
-	TRANSLATE_VAL( Scroll.LuaCommand, "basics.Scroll.LuaCommand" );
-	TRANSLATE_VAL( Scroll.WebCommand, "basics.Scroll.WebCommand" );
-	TRANSLATE_VAL( Scroll.Label, "basics.Scroll.Label" );
-
 	// Special according to Family;
 	switch(Family)
 	{
@@ -731,9 +726,6 @@ void CItemSheet::serial(NLMISC::IStream &f)
 	// **** Serial Help Infos
 	f.serialEnum(ItemOrigin);
 
-	// item commands
-	f.serial(Scroll);
-
 	// Different Serial according to family
 	switch(Family)
 	{
@@ -773,9 +765,8 @@ void CItemSheet::serial(NLMISC::IStream &f)
 	case ITEMFAMILY::TELEPORT:
 		f.serial(Teleport);
 		break;
-	// keep for readability
 	case ITEMFAMILY::SCROLL:
-		//f.serial(Scroll);
+		f.serial(Scroll);
 		break;
 	case ITEMFAMILY::CONSUMABLE:
 		f.serial(Consumable);
