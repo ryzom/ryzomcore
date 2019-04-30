@@ -147,8 +147,8 @@ void CPlugInSelector::OnSelchangeList1()
 		AfxMessageBox( _T("Can't find function getInfoString in dll") );
 		return;
 	}
-	GetDlgItem( IDC_GROUP_INFO )->SetWindowText( utf8ToTStr(getFilename(tStrToUtf8(dllName))) );
-	GetDlgItem( IDC_PLUGIN_INFO )->SetWindowText(utf8ToTStr(infoFunc()) );
+	GetDlgItem(IDC_GROUP_INFO)->SetWindowText(nlUtf8ToTStr(getFilename(NLMISC::tStrToUtf8(dllName))));
+	GetDlgItem(IDC_PLUGIN_INFO)->SetWindowText(nlUtf8ToTStr(infoFunc()));
 
 	// Prepare analyse func
 	AnalyseFunc = (TAnalyseFunc)GetProcAddress( LibInst, "doAnalyse" );
