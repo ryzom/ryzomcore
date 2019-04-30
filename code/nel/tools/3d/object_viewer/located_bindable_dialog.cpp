@@ -114,7 +114,7 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 		// z-test
 		((CButton *) GetDlgItem(IDC_ZTEST))->SetCheck(material->isZTestEnabled() ? BST_CHECKED : BST_UNCHECKED);
 		// z-bias
-		GetDlgItem(IDC_ZBIAS)->SetWindowText(utf8ToTStr(NLMISC::toString("%.2f", -material->getZBias())));
+		GetDlgItem(IDC_ZBIAS)->SetWindowText(nlUtf8ToTStr(NLMISC::toString("%.2f", -material->getZBias())));
 	}
 	else
 	{

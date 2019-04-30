@@ -209,7 +209,7 @@ void		CSkeletonScaleDlg::setSkeletonToEdit(NL3D::CSkeletonModel *skel, const std
 				name = tabStr + name;
 
 			// append to the list
-			_BoneList.AddString(utf8ToTStr(name));
+			_BoneList.AddString(nlUtf8ToTStr(name));
 		}
 	}
 
@@ -404,7 +404,7 @@ void		CSkeletonScaleDlg::applyScaleSlider(sint scrollValue)
 
 	// update marker text
 	std::string	str = NLMISC::toString("%d%%", (sint)(factor*100));
-	_StaticScaleMarkers[_SliderEdited]->SetWindowText(utf8ToTStr(str));
+	_StaticScaleMarkers[_SliderEdited]->SetWindowText(nlUtf8ToTStr(str));
 }
 
 // ***************************************************************************
@@ -717,7 +717,7 @@ void CSkeletonScaleDlg::updateScalesFromText(UINT ctrlId)
 		return;
 
 	// get the scale info
-	std::string	str = tStrToUtf8(*_ScaleEdits[sid]);
+	std::string str = NLMISC::tStrToUtf8(*_ScaleEdits[sid]);
 	if(str.empty())
 		return;
 	float	f;
@@ -846,13 +846,13 @@ void CSkeletonScaleDlg::OnSsdButtonSaveas()
 		return;
 
 	// choose the file
-	CFileDialog fd(FALSE, _T("skel"), utf8ToTStr(_SkeletonFileName), OFN_OVERWRITEPROMPT, _T("SkelFiles (*.skel)|*.skel|All Files (*.*)|*.*||"), this) ;
+	CFileDialog fd(FALSE, _T("skel"), nlUtf8ToTStr(_SkeletonFileName), OFN_OVERWRITEPROMPT, _T("SkelFiles (*.skel)|*.skel|All Files (*.*)|*.*||"), this);
 	fd.m_ofn.lpstrTitle = _T("Save As Skeleton");
 	if (fd.DoModal() == IDOK)
 	{
 		NLMISC::COFile	f;
 		
-		if( f.open(tStrToUtf8(fd.GetPathName())) )
+		if (f.open(NLMISC::tStrToUtf8(fd.GetPathName())))
 		{
 			if(saveCurrentInStream(f))
 			{
@@ -862,7 +862,7 @@ void CSkeletonScaleDlg::OnSsdButtonSaveas()
 			}
 
 			// bkup the valid fileName (new file edited)
-			_SkeletonFileName= tStrToUtf8(fd.GetPathName());
+			_SkeletonFileName = NLMISC::tStrToUtf8(fd.GetPathName());
 			_StaticFileName= _SkeletonFileName.c_str();
 			UpdateData(FALSE);
 		}
@@ -1228,13 +1228,13 @@ void CSkeletonScaleDlg::OnSsdButtonSaveScale()
 	std::string	defaultFileName = _SkeletonFileName;
 	NLMISC::strFindReplace(defaultFileName, ".skel", ".scale");
 
-	CFileDialog fd(FALSE, _T("scale"), utf8ToTStr(defaultFileName), OFN_OVERWRITEPROMPT, _T("SkelScaleFiles (*.scale)|*.scale|All Files (*.*)|*.*||"), this) ;
+	CFileDialog fd(FALSE, _T("scale"), nlUtf8ToTStr(defaultFileName), OFN_OVERWRITEPROMPT, _T("SkelScaleFiles (*.scale)|*.scale|All Files (*.*)|*.*||"), this);
 	fd.m_ofn.lpstrTitle = _T("Save As Skeleton Scale File");
 
 	if (fd.DoModal() == IDOK)
 	{
 		NLMISC::COFile	f;
-		if (f.open(tStrToUtf8(fd.GetPathName())))
+		if (f.open(NLMISC::tStrToUtf8(fd.GetPathName())))
 		{
 			saveSkelScaleInStream(f);
 		}
@@ -1256,13 +1256,13 @@ void CSkeletonScaleDlg::OnSsdButtonLoadScale()
 	std::string	defaultFileName= _SkeletonFileName;
 	NLMISC::strFindReplace(defaultFileName, ".skel", ".scale");
 
-	CFileDialog fd(TRUE, _T("scale"), utf8ToTStr(defaultFileName), 0, _T("SkelScaleFiles (*.scale)|*.scale|All Files (*.*)|*.*||"), this) ;
+	CFileDialog fd(TRUE, _T("scale"), nlUtf8ToTStr(defaultFileName), 0, _T("SkelScaleFiles (*.scale)|*.scale|All Files (*.*)|*.*||"), this);
 	fd.m_ofn.lpstrTitle= _T("Load a Skeleton Scale File");
 
 	if (fd.DoModal() == IDOK)
 	{
 		NLMISC::CIFile	f;
-		if (f.open(tStrToUtf8(fd.GetPathName())))
+		if (f.open(NLMISC::tStrToUtf8(fd.GetPathName())))
 		{
 			loadSkelScaleFromStream(f);
 		}

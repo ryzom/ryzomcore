@@ -1417,7 +1417,7 @@ void Browse::OnExportBorder()
 			{
 				// Error message
 				std::string tmp = toString("Can't write bitmap %s", tStrToUtf8(pathName).c_str());
-				MessageBox (utf8ToTStr(tmp), _T("Export border"), MB_OK|MB_ICONEXCLAMATION);
+				MessageBox(nlUtf8ToTStr(tmp), _T("Export border"), MB_OK | MB_ICONEXCLAMATION);
 			}
 		}
 	}
@@ -1460,7 +1460,7 @@ void Browse::OnImportBorder()
 		{
 			// Error message
 			std::string tmp = toString("Can't read bitmap %s", tStrToUtf8(pathName).c_str());
-			MessageBox (utf8ToTStr(tmp), _T("Import border"), MB_OK|MB_ICONEXCLAMATION);
+			MessageBox(nlUtf8ToTStr(tmp), _T("Import border"), MB_OK | MB_ICONEXCLAMATION);
 		}
 
 		// Get pixel
@@ -1484,7 +1484,7 @@ void Browse::OnImportBorder()
 		{
 			// Error message
 			std::string tmp = toString("The bitmap must have a size of 128x128 (%s)", tStrToUtf8(pathName).c_str());
-			MessageBox (utf8ToTStr(tmp), _T("Import border"), MB_OK|MB_ICONEXCLAMATION);
+			MessageBox(nlUtf8ToTStr(tmp), _T("Import border"), MB_OK | MB_ICONEXCLAMATION);
 		}
 
 		// 256 or 128 ?

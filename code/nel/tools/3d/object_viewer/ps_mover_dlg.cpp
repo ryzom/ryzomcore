@@ -120,7 +120,7 @@ void CPSMoverDlg::OnUpdateXpos()
 	UpdateData();
 	NLMISC::CVector &pos = _EditedLocated->getPos()[_EditedLocatedIndex];
 	float x;
-	if (NLMISC::fromString(tStrToUtf8(m_X), x))
+	if (NLMISC::fromString(NLMISC::tStrToUtf8(m_X), x))
 	{
 		pos.x = x;
 		updateListener();
@@ -137,7 +137,7 @@ void CPSMoverDlg::OnUpdateYpos()
 	UpdateData();
 	NLMISC::CVector &pos = _EditedLocated->getPos()[_EditedLocatedIndex];
 	float y;
-	if (NLMISC::fromString(tStrToUtf8(m_Y), y))
+	if (NLMISC::fromString(NLMISC::tStrToUtf8(m_Y), y))
 	{
 		pos.y = y;
 		updateListener();
@@ -154,7 +154,7 @@ void CPSMoverDlg::OnUpdateZpos()
 	UpdateData();
 	NLMISC::CVector &pos = _EditedLocated->getPos()[_EditedLocatedIndex];
 	float z;
-	if (NLMISC::fromString(tStrToUtf8(m_Z), z))
+	if (NLMISC::fromString(NLMISC::tStrToUtf8(m_Z), z))
 	{
 		pos.z = z;
 		updateListener();		
@@ -178,7 +178,7 @@ BOOL CPSMoverDlg::OnInitDialog()
 	{
 		if (dynamic_cast<NL3D::IPSMover *>(_EditedLocated->getBoundObject(k)))
 		{
-			uint insertedLine = m_SubComponentCtrl.AddString(utf8ToTStr(_EditedLocated->getBoundObject(k)->getName()));
+			uint insertedLine = m_SubComponentCtrl.AddString(nlUtf8ToTStr(_EditedLocated->getBoundObject(k)->getName()));
 			m_SubComponentCtrl.SetItemData(insertedLine, (DWORD_PTR) _EditedLocated->getBoundObject(k));
 			++nbCandidates;			
 		}

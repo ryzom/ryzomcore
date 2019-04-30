@@ -592,7 +592,7 @@ void CMainFrame::OnFileLoadconfig()
 			}
 			catch (const Exception& e)
 			{
-				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+				MessageBox(nlUtf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 			}
 		}
 		else
@@ -764,7 +764,7 @@ void CMainFrame::OnFileSaveconfig()
 			}
 			catch (const Exception& e)
 			{
-				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+				MessageBox(nlUtf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 			}
 		}
 		else
@@ -1443,7 +1443,7 @@ void CMainFrame::OnUpdateSceneCamera(CCmdUI* pCmdUI)
 		CInstanceInfo *instance = ObjView->getInstance (ObjView->getCameraInstance (pCmdUI->m_nID - ID_SCENE_CAMERA_FIRST));
 		nlassert (instance->Camera);
 		std::string text = NLMISC::toString("Camera %s", instance->Saved.ShapeFilename.c_str());
-		pCmdUI->SetText(utf8ToTStr(text));
+		pCmdUI->SetText(nlUtf8ToTStr(text));
 	}
 	else
 	{

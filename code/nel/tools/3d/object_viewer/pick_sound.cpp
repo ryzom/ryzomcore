@@ -74,7 +74,7 @@ BOOL CPickSound::OnInitDialog()
 	
 	for (TNameVect::iterator it = _Names.begin(); it	!= _Names.end(); ++it)
 	{
-		m_NameList.AddString(utf8ToTStr((*it).toString()));
+		m_NameList.AddString(nlUtf8ToTStr((*it).toString()));
 	}
 
 	_Timer = SetTimer (1, 100, NULL);
@@ -111,7 +111,7 @@ void CPickSound::OnSelchange()
 	nlassert(m_NameList.GetTextLen(m_NameList.GetCurSel()) < 1024);
 	
 	m_NameList.GetText(m_NameList.GetCurSel(), str);
-	_CurrName = NLMISC::CSheetId(tStrToUtf8(str), "sound"); 
+	_CurrName = NLMISC::CSheetId(NLMISC::tStrToUtf8(str), "sound"); 
 	
 }
 
@@ -123,7 +123,7 @@ void CPickSound::OnPlaySound()
 	stopCurrSource();
 	CString sName;
 	m_NameList.GetText(curSel, sName);
-	CSoundSystem::create(tStrToUtf8(sName));
+	CSoundSystem::create(NLMISC::tStrToUtf8(sName));
 }
 
 //========================================================================================
@@ -159,7 +159,7 @@ void CPickSound::OnDblclkList()
 	stopCurrSource();
 	CString sName;
 	m_NameList.GetText(curSel, sName);
-	_CurrSource = CSoundSystem::create(tStrToUtf8(sName));
+	_CurrSource = CSoundSystem::create(NLMISC::tStrToUtf8(sName));
 }
 
 //========================================================================================

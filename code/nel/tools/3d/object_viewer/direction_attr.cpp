@@ -173,7 +173,7 @@ void CDirectionAttr::OnDestroy()
 void CDirectionAttr::OnGlobalDirection() 
 {
 	nlassert(_DirectionWrapper);
-	CChooseName chooseName(utf8ToTStr(_DirectionWrapper->getGlobalVectorValueName()));
+	CChooseName chooseName(nlUtf8ToTStr(_DirectionWrapper->getGlobalVectorValueName()));
 
 	if (chooseName.DoModal() == IDOK)
 	{
