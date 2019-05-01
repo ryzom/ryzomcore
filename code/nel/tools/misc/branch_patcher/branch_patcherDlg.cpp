@@ -208,13 +208,13 @@ int CDirDialog::DoBrowse()
 	}
 
 	BROWSEINFO bInfo;
+	LPITEMIDLIST pidl;
 	ZeroMemory((PVOID)&bInfo, sizeof(BROWSEINFO));
 
 	if (!m_strInitDir.IsEmpty())
 	{
 		OLECHAR       olePath[MAX_PATH];
-		ULONG         chEaten;
-		ULONG         dwAttributes;
+		ULONG         dwAttributes = 0;
 		HRESULT       hr;
 		LPSHELLFOLDER pDesktopFolder;
 		// // Get a pointer to the Desktop's IShellFolder interface. //
@@ -236,7 +236,7 @@ int CDirDialog::DoBrowse()
 			hr = pDesktopFolder->ParseDisplayName(NULL,
 				NULL,
 				olePath,
-				&chEaten,
+				NULL,
 				&pidl,
 				&dwAttributes);
 
@@ -248,7 +248,6 @@ int CDirDialog::DoBrowse()
 			}
 
 			bInfo.pidlRoot = pidl;
-
 		}
 	}
 
@@ -257,8 +256,10 @@ int CDirDialog::DoBrowse()
 	bInfo.lpszTitle = (m_strTitle.IsEmpty()) ? "Open" : m_strTitle;
 	bInfo.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS;
 
-	PIDLIST_ABSOLUTE pidl = ::SHBrowseForFolder(&bInfo);
-	if (!pidl) return 0;
+	if ((pidl = ::SHBrowseForFolder(&bInfo)) == NULL)
+	{
+		return 0;
+	}
 
 	m_strPath.ReleaseBuffer();
 	m_iImageIndex = bInfo.iImage;
@@ -288,19 +289,26 @@ BOOL SendTextToClipboard(CString source)
 	if (OpenClipboard(NULL))
 	{
 		HGLOBAL clipbuffer;
-		char* buffer;
+		TCHAR* buffer;
 
 		EmptyClipboard(); // Empty whatever's already there
 
-		clipbuffer = GlobalAlloc(GMEM_DDESHARE, source.GetLength() + 1);
-		buffer = (char*)GlobalLock(clipbuffer);
-		strcpy(buffer, LPCSTR(source));
-		GlobalUnlock(clipbuffer);
+		clipbuffer = GlobalAlloc(GMEM_DDESHARE, ((SIZE_T)source.GetLength() + 1) * sizeof(TCHAR));
+		if (clipbuffer)
+		{
+			buffer = (TCHAR*)GlobalLock(clipbuffer);
+			if (buffer)
+			{
+				_tcscpy(buffer, LPCTSTR(source));
+				GlobalUnlock(clipbuffer);
 
-		SetClipboardData(CF_TEXT, clipbuffer); // Send the data
+				SetClipboardData(CF_TEXT, clipbuffer); // Send the data
 
+				CloseClipboard(); // VERY IMPORTANT
+				return TRUE;
+			}
+		}
 		CloseClipboard(); // VERY IMPORTANT
-		return TRUE;
 	}
 	return FALSE;
 }
@@ -326,11 +334,11 @@ void CBranch_patcherDlg::OnButtonPatch()
 	CString text;
 	text.Format(_T("Get diff from directory %s?\n\nCommand (choose No to copy it into the clipboard):\n%s"), m_SrcDir, diffCmdLine);
 	int result;
-	if ((result = ::MessageBox(m_hWnd, text, "Confirmation", MB_YESNOCANCEL | MB_ICONQUESTION)) == IDYES)
+	if ((result = ::MessageBox(m_hWnd, text, _T("Confirmation"), MB_YESNOCANCEL | MB_ICONQUESTION)) == IDYES)
 	{
-		if (_chdir(m_SrcDir) == 0)
+		if (_tchdir(m_SrcDir) == 0)
 		{
-			system(diffCmdLine);
+			_tsystem(diffCmdLine);
 			displayFile(TEMP_DIFF_FILE);
 			SaveDiff = true;
 			colorizeDiff();
@@ -461,11 +469,11 @@ void CBranch_patcherDlg::OnDoPatch()
 	int result;
 	if ((result = ::MessageBox(m_hWnd, text, _T("Confirmation"), MB_YESNOCANCEL | MB_ICONQUESTION)) == IDYES)
 	{
-		if (_chdir(m_DestDir) == 0)
+		if (_tchdir(m_DestDir) == 0)
 		{
-			system(patchCmdLine);
-			system(concatOutput);
-			system(delPatchErrors);
+			_tsystem(patchCmdLine);
+			_tsystem(concatOutput);
+			_tsystem(delPatchErrors);
 			displayFile(PATCH_RESULT);
 			SaveDiff = false;
 			m_Display->LineScroll(0);

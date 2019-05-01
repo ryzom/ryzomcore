@@ -266,7 +266,7 @@ NL3D::IShape *CExportNel::buildShape (INode& node, TimeValue time, const TInodeP
 							std::string nodeName=getScriptAppData (&node, NEL3D_APPDATA_LOD_NAME+lod, "");
 
 							// Get the node
-							INode *lodNode=_Ip->GetINodeByName(utf8ToTStr(nodeName));
+							INode *lodNode=_Ip->GetINodeByName(MaxTStrFromUtf8(nodeName).data());
 							if (lodNode)
 							{
 								// Index of the lod in the build structure
@@ -611,7 +611,7 @@ void CExportNel::buildBaseMeshInterface (NL3D::CMeshBase::CMeshBaseBuild& buildM
 			continue;
 		// get factor here !
 		buildMesh.DefaultBSFactors.push_back(0.0f);
-		std::string sTemp = tStrToUtf8(pNode->GetName());
+		std::string sTemp = MCharStrToUtf8(pNode->GetName());
 		buildMesh.BSNames.push_back (sTemp);
 	}
 
@@ -1045,7 +1045,7 @@ void CExportNel::buildMeshInterface (TriObject &tri, CMesh::CMeshBuild& buildMes
 			if (!vpColorVertex)
 			{
 				uint8 alphaBackup = pCorner->Color.A;
-				pCorner->Color.modulateFromColor (pCorner->Color, isLighted ? diffuse : color);
+				pCorner->Color.modulateFromColor(pCorner->Color, isLighted ? diffuse : color);
 				pCorner->Color.A = alphaBackup;
 			}
 		}
@@ -1058,18 +1058,18 @@ void CExportNel::buildMeshInterface (TriObject &tri, CMesh::CMeshBuild& buildMes
 	if (skined)
 	{
 		// Add skinning information to the buildMesh struct
-		uint error=buildSkinning (buildMesh, *nodeMap, node);
+		uint error = buildSkinning (buildMesh, *nodeMap, node);
 
 		// Error code ?
 		if (error!=NoError)
 		{
-			std::string msg = toString("%s skin: %s", getName (node).c_str(), ErrorMessage[error]);
-			MessageBoxW (NULL, utf8ToTStr(msg), L"NeL export", MB_OK|MB_ICONEXCLAMATION);
+			std::string msg = toString("%s skin: %s", getName(node).c_str(), ErrorMessage[error]);
+			MessageBox(NULL, MaxTStrFromUtf8(msg).data(), _T("NeL export"), MB_OK | MB_ICONEXCLAMATION);
 		}
 		else
 		{
 			// Active skinning
-			buildMesh.VertexFlags|=CVertexBuffer::PaletteSkinFlag;
+			buildMesh.VertexFlags |= CVertexBuffer::PaletteSkinFlag;
 		}
 	}
 
@@ -1082,7 +1082,7 @@ void CExportNel::buildMeshInterface (TriObject &tri, CMesh::CMeshBuild& buildMes
 	buildMesh.InterfaceLinks.clear();
 
 	// don't do it for morph target (unusefull and slow)
-	if(!isMorphTarget)
+	if (!isMorphTarget)
 	{
 		// Apply normal correction if there is a mesh interface
 		if (skined)
@@ -1118,41 +1118,41 @@ void CExportNel::buildMeshInterface (TriObject &tri, CMesh::CMeshBuild& buildMes
 	else  // standard case
 	{
 		// What Vertexprogram is used??
-		int	vpId= CExportNel::getScriptAppData (&node, NEL3D_APPDATA_VERTEXPROGRAM_ID, 0);
+		int	vpId = CExportNel::getScriptAppData (&node, NEL3D_APPDATA_VERTEXPROGRAM_ID, 0);
 		// Setup vertexProgram
 		switch(vpId)
 		{
 			case 0: 
-				buildMesh.MeshVertexProgram= NULL;
+				buildMesh.MeshVertexProgram = NULL;
 				break;
 			case 1:
 			{
 				// smartPtr set it.
-				buildMesh.MeshVertexProgram= new CMeshVPWindTree;
-				CMeshVPWindTree		&vpwt= *(CMeshVPWindTree*)(IMeshVertexProgram*)buildMesh.MeshVertexProgram;
+				buildMesh.MeshVertexProgram = new CMeshVPWindTree;
+				CMeshVPWindTree &vpwt = *(CMeshVPWindTree*)(IMeshVertexProgram*)buildMesh.MeshVertexProgram;
 
 				// Read the AppData
-				CVPWindTreeAppData	apd;
-				getScriptAppDataVPWT (&node, apd);
+				CVPWindTreeAppData apd;
+				getScriptAppDataVPWT(&node, apd);
 
 				// transform it to the vpwt.
 				nlassert(CVPWindTreeAppData::HrcDepth == CMeshVPWindTree::HrcDepth);
 				vpwt.SpecularLighting= apd.SpecularLighting == BST_CHECKED;
 				// read all levels.
-				float	nticks= CVPWindTreeAppData::NumTicks;
-				for(uint i=0; i<CVPWindTreeAppData::HrcDepth;i++)
+				float nticks = CVPWindTreeAppData::NumTicks;
+				for (uint i = 0; i < CVPWindTreeAppData::HrcDepth; i++)
 				{
-					float	scale;
+					float scale;
 					// read frequency
-					scale= apd.FreqScale;
-					vpwt.Frequency[i]= float(apd.Frequency[i])/nticks * scale;
-					vpwt.FrequencyWindFactor[i]= float(apd.FrequencyWindFactor[i])/nticks * scale;
+					scale = apd.FreqScale;
+					vpwt.Frequency[i] = float(apd.Frequency[i])/nticks * scale;
+					vpwt.FrequencyWindFactor[i] = float(apd.FrequencyWindFactor[i])/nticks * scale;
 					// read Distance
 					scale= apd.DistScale;
-					vpwt.PowerXY[i]= float(apd.DistXY[i])/nticks * scale;
-					vpwt.PowerZ[i]= float(apd.DistZ[i])/nticks * scale;
+					vpwt.PowerXY[i] = float(apd.DistXY[i])/nticks * scale;
+					vpwt.PowerZ[i] = float(apd.DistZ[i])/nticks * scale;
 					// read Bias. expand to -2,2
-					vpwt.Bias[i]= float(apd.Bias[i])/nticks*4 -2;
+					vpwt.Bias[i] = float(apd.Bias[i])/nticks*4 -2;
 				}
 
 				break;
@@ -1492,7 +1492,7 @@ void CExportNel::buildMeshMorph (CMesh::CMeshBuild& buildMesh, INode &node, Time
 			continue;
 		}
 
-		bs.Name = tStrToUtf8(pNode->GetName());
+		bs.Name = MCharStrToUtf8(pNode->GetName());
 
 		bool bIsDeltaPos = false;
 		bs.deltaPos.resize (nNbVertVB, CVector::Null);

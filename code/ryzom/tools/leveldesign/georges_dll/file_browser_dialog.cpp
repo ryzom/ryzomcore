@@ -279,7 +279,7 @@ void CFileBrowserDialog::openDocument ()
 			string pathName = CPath::lookup (filename.c_str (), false, false);
 			if (pathName.empty ())
 				pathName = filename;
-			theApp.OpenDocumentFile (utf8ToTStr(pathName));
+			theApp.OpenDocumentFile(nlUtf8ToTStr(pathName));
 		}
 	}
 	else if (IsWindow (TreeCtrlType) && TreeCtrlDfn.IsWindowVisible ())
@@ -289,7 +289,7 @@ void CFileBrowserDialog::openDocument ()
 			string pathName = CPath::lookup (filename.c_str (), false, false);
 			if (pathName.empty ())
 				pathName = filename;
-			theApp.OpenDocumentFile (utf8ToTStr(pathName));
+			theApp.OpenDocumentFile(nlUtf8ToTStr(pathName));
 		}
 	}
 	else if (TreeCtrlForm.IsWindowVisible ())
@@ -299,7 +299,7 @@ void CFileBrowserDialog::openDocument ()
 			string pathName = CPath::lookup (filename.c_str (), false, false);
 			if (pathName.empty ())
 				pathName = filename;
-			theApp.OpenDocumentFile (utf8ToTStr(pathName));
+			theApp.OpenDocumentFile(nlUtf8ToTStr(pathName));
 		}
 	}
 }

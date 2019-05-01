@@ -290,7 +290,7 @@ template <class T> T trimSeparators (const T &str)
 }
 
 // if both first and last char are quotes (' or "), then remove them
-template <class T> T trimQuotes (const T&str)
+template <class T> T trimQuotes (const T &str)
 {
 	typename T::size_type size = str.size();
 	if (size == 0)
@@ -327,28 +327,23 @@ inline sint nlstricmp(const std::string &lhs, const std::string &rhs) { return s
 inline sint nlstricmp(const std::string &lhs, const char *rhs) { return stricmp(lhs.c_str(),rhs); }
 inline sint nlstricmp(const char *lhs, const std::string &rhs) { return stricmp(lhs,rhs.c_str()); }
 
-// macros helper to convert UTF-8 std::string and wchar_t*
-#define wideToUtf8(str) (ucstring((ucchar*)str).toUtf8())
-#define utf8ToWide(str) ((wchar_t*)ucstring::makeFromUtf8(str).c_str())
-
-// macros helper to convert UTF-8 std::string and TCHAR*
-#ifdef _UNICODE
-#define tStrToUtf8(str) (ucstring((ucchar*)(LPCWSTR)str).toUtf8())
-#define utf8ToTStr(str) ((wchar_t*)ucstring::makeFromUtf8(str).c_str())
-#else
-#define tStrToUtf8(str) (std::string((LPCSTR)str))
-#define utf8ToTStr(str) (str.c_str())
+#if (NL_COMP_VC_VERSION <= 90)
+inline float nlroundf(float x)
+{
+	return x >= 0.0f ? floorf(x + 0.5f) : ceilf(x - 0.5f);
+}
+#define roundf(x) NLMISC::nlroundf(x)
 #endif
 
-// wrapper for fopen to be able to open files with an UTF-8 filename
-FILE* nlfopen(const std::string &filename, const std::string &mode);
+// Wrapper for fopen to be able to open files with an UTF-8 filename
+FILE *nlfopen(const std::string &filename, const std::string &mode);
 
 /** Signed 64 bit fseek. Same interface as fseek
   */
-int		nlfseek64( FILE *stream, sint64 offset, int origin );
+int nlfseek64(FILE *stream, sint64 offset, int origin);
 
 // Retrieve position in a file, same interface as ftell
-sint64  nlftell64(FILE *stream);
+sint64 nlftell64(FILE *stream);
 
 /**
  * Base class for all NeL exception.

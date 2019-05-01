@@ -55,15 +55,15 @@ bool CNelExport::exportSWT(const std::string &sPath, std::vector<INode*>& vectNo
 
 			// Store them in the temporary list
 			aSWNodes.resize(nNumNode+3);
-			aSWNodes[nNumNode].Name = tStrToUtf8(pNode->GetName());
+			aSWNodes[nNumNode].Name = MCharStrToUtf8(pNode->GetName());
 			aSWNodes[nNumNode].Name += std::string (".")+ITransformable::getRotQuatValueName();
 			aSWNodes[nNumNode].Weight = rRotValue;
 			++nNumNode;
-			aSWNodes[nNumNode].Name = tStrToUtf8(pNode->GetName());
+			aSWNodes[nNumNode].Name = MCharStrToUtf8(pNode->GetName());
 			aSWNodes[nNumNode].Name += std::string (".")+ITransformable::getPosValueName ();
 			aSWNodes[nNumNode].Weight = rPosValue;
 			++nNumNode;
-			aSWNodes[nNumNode].Name = tStrToUtf8(pNode->GetName());
+			aSWNodes[nNumNode].Name = MCharStrToUtf8(pNode->GetName());
 			aSWNodes[nNumNode].Name += std::string (".")+ITransformable::getScaleValueName();
 			aSWNodes[nNumNode].Weight = rScaleValue;
 			++nNumNode;

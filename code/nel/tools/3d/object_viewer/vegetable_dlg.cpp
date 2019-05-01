@@ -196,7 +196,7 @@ void				CVegetableDlg::updateCurSelVegetableName()
 		_Vegetables[id].updateVegetableName();
 		// replace name in the listBox: must delete, and re-insert
 		VegetableList.DeleteString(id);
-		VegetableList.InsertString(id, utf8ToTStr(_Vegetables[id].VegetableName));
+		VegetableList.InsertString(id, nlUtf8ToTStr(_Vegetables[id].VegetableName));
 		VegetableList.SetCurSel(id);
 	}
 }
@@ -349,14 +349,14 @@ bool		CVegetableDlg::loadVegetableSet(NL3D::CTileVegetableDesc &vegetSet, const 
 		
 		ok= true;
 
-		if( f.open(tStrToUtf8(fd.GetPathName())))
+		if (f.open(NLMISC::tStrToUtf8(fd.GetPathName())))
 		{
 			try
 			{
 				// read the vegetable
 				f.serial(vegetSet);
 				// bkup fileName.
-				_LastVegetSetName = tStrToUtf8(fd.GetFileName());
+				_LastVegetSetName = NLMISC::tStrToUtf8(fd.GetFileName());
 			}
 			catch(const NLMISC::EStream &)
 			{
@@ -439,7 +439,7 @@ void		CVegetableDlg::appendVegetableSet(NL3D::CTileVegetableDesc &vegetSet)
 			_Vegetables[id].initVegetable(veget);
 
 			// update view
-			VegetableList.AddString(utf8ToTStr(_Vegetables[id].VegetableName));
+			VegetableList.AddString(nlUtf8ToTStr(_Vegetables[id].VegetableName));
 		}
 	}
 }
@@ -529,7 +529,7 @@ void CVegetableDlg::OnButtonVegetableAdd()
 	_Vegetables[id].initDefaultVegetable();
 
 	// update view
-	VegetableList.AddString(utf8ToTStr(_Vegetables[id].VegetableName));
+	VegetableList.AddString(nlUtf8ToTStr(_Vegetables[id].VegetableName));
 
 	// update 3D view
 	refreshVegetableDisplay();
@@ -559,7 +559,7 @@ void CVegetableDlg::OnButtonVegetableInsert()
 		_Vegetables[id].initDefaultVegetable();
 
 		// update view
-		VegetableList.InsertString(id, utf8ToTStr(_Vegetables[id].VegetableName));
+		VegetableList.InsertString(id, nlUtf8ToTStr(_Vegetables[id].VegetableName));
 
 		// update 3D view
 		refreshVegetableDisplay();
@@ -611,7 +611,7 @@ void CVegetableDlg::OnButtonVegetableLoadDesc()
 	{
 		NLMISC::CIFile	f;
 		
-		if( f.open(tStrToUtf8(fd.GetPathName())) )
+		if (f.open(NLMISC::tStrToUtf8(fd.GetPathName())))
 		{
 			NL3D::CVegetable	veget;
 			try
@@ -624,7 +624,7 @@ void CVegetableDlg::OnButtonVegetableLoadDesc()
 				_Vegetables[id].initVegetable(veget);
 
 				// update view
-				VegetableList.AddString(utf8ToTStr(_Vegetables[id].VegetableName));
+				VegetableList.AddString(nlUtf8ToTStr(_Vegetables[id].VegetableName));
 
 				// update 3D view
 				refreshVegetableDisplay();
@@ -651,13 +651,13 @@ void CVegetableDlg::OnButtonVegetableSaveDesc()
 
 		std::string		fileName= _Vegetables[id].VegetableName + ".vegetdesc";
 
-		CFileDialog fd(FALSE, _T("vegetdesc"), utf8ToTStr(fileName), OFN_OVERWRITEPROMPT, _T("VegetDescFiles (*.vegetdesc)|*.vegetdesc|All Files (*.*)|*.*||"), this) ;
+		CFileDialog fd(FALSE, _T("vegetdesc"), nlUtf8ToTStr(fileName), OFN_OVERWRITEPROMPT, _T("VegetDescFiles (*.vegetdesc)|*.vegetdesc|All Files (*.*)|*.*||"), this);
 		fd.m_ofn.lpstrTitle = _T("Save Vegetable Descriptor");
 		if (fd.DoModal() == IDOK)
 		{
 			NLMISC::COFile	f;
 			
-			if( f.open(tStrToUtf8(fd.GetPathName())) )
+			if (f.open(NLMISC::tStrToUtf8(fd.GetPathName())))
 			{
 				try
 				{
@@ -722,13 +722,13 @@ void CVegetableDlg::OnButtonVegetableSaveSet()
 	buildVegetableSet(vegetSet);
 
 	// Then try to save it.
-	CFileDialog fd(FALSE, _T("vegetset"), utf8ToTStr(_LastVegetSetName), OFN_OVERWRITEPROMPT, _T("VegetSetFiles (*.vegetset)|*.vegetset|All Files (*.*)|*.*||"), this) ;
+	CFileDialog fd(FALSE, _T("vegetset"), nlUtf8ToTStr(_LastVegetSetName), OFN_OVERWRITEPROMPT, _T("VegetSetFiles (*.vegetset)|*.vegetset|All Files (*.*)|*.*||"), this);
 	fd.m_ofn.lpstrTitle = _T("Save Vegetable Set");
 	if (fd.DoModal() == IDOK)
 	{
 		NLMISC::COFile	f;
 		
-		if( f.open(tStrToUtf8(fd.GetPathName())) )
+		if (f.open(NLMISC::tStrToUtf8(fd.GetPathName())))
 		{
 			try
 			{

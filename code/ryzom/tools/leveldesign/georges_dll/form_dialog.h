@@ -207,7 +207,7 @@ public:
 	bool			FileBrowser;
 
 	// Create the widget
-	void create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, uint &dialog_index, const char *label, const char *reg, bool spinner, bool fileBrowser, const char *filenameExt);
+	void create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, uint &dialog_index, const char *label, const TCHAR *reg, bool spinner, bool fileBrowser, const char *filenameExt);
 
 	// From IFormWidget
 	void onOk ();

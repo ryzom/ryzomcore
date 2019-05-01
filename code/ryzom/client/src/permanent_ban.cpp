@@ -87,9 +87,9 @@ static void setPermanentBanFileMarker(const std::string &path, bool on)
 		{
 			// simply touch a file
 			COFile f(path);
-			#ifdef NL_OS_WINDOWS
-				SetFileAttributesW(utf8ToWide(path), FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM);
-			#endif
+#ifdef NL_OS_WINDOWS
+			SetFileAttributesW(nlUtf8ToWide(path), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM);
+#endif
 		}
 		catch(const EStream &e)
 		{

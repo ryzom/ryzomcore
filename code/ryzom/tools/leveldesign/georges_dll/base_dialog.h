@@ -126,7 +126,7 @@ public:
 	void	registerLastControl ();
 	void	unRegisterLastControl ();
 
-	static void setEditTextMultiLine(CEdit &edit, const std::string &text);
+	static void setEditTextMultiLine (CEdit &edit, const char *text);
 
 	virtual void onOpenSelected ();
 	virtual void setFocusLastWidget ();

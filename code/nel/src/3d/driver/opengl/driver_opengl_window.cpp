@@ -2644,7 +2644,7 @@ IDriver::TMessageBoxId CDriverGL::systemMessageBox (const char* message, const c
 {
 	H_AUTO_OGL(CDriverGL_systemMessageBox)
 #ifdef NL_OS_WINDOWS
-	switch (::MessageBoxW (NULL, utf8ToWide(message), utf8ToWide(title), ((type==retryCancelType)?MB_RETRYCANCEL:
+	switch (::MessageBoxW(NULL, nlUtf8ToWide(message), nlUtf8ToWide(title), ((type == retryCancelType) ? MB_RETRYCANCEL :
 										(type==yesNoCancelType)?MB_YESNOCANCEL:
 										(type==okCancelType)?MB_OKCANCEL:
 										(type==abortRetryIgnoreType)?MB_ABORTRETRYIGNORE:

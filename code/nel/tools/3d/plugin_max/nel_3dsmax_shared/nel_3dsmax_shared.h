@@ -25,3 +25,5 @@ class CPatchAllocator;
 extern NEL_3DSMAX_SHARED_API CPatchAllocator& GetAllocator();
 
 extern NEL_3DSMAX_SHARED_API NLMISC::INelContext &GetSharedNelContext();
+
+/* end of file */

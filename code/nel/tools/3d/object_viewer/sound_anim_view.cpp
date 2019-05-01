@@ -217,7 +217,7 @@ void CSoundAnimView::save()
 
 				// Create a dialog
 				TCHAR BASED_CODE szFilter[] = _T("NeL Sound Animations (*.sound_anim)|*.sound_anim|All Files (*.*)|*.*||");
-				CFileDialog fileDlg( FALSE, _T(".sound_anim"), utf8ToTStr(filename), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
+				CFileDialog fileDlg(FALSE, _T(".sound_anim"), nlUtf8ToTStr(filename), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 
 				if (fileDlg.DoModal() == IDOK)
 				{
@@ -236,7 +236,7 @@ void CSoundAnimView::save()
 			}
 			catch (const Exception& e)
 			{
-				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+				MessageBox(nlUtf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 			}
 		}
 	}

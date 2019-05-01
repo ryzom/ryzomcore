@@ -76,7 +76,7 @@ std::string CEditEx::getString() const
 {
 	TCHAR buf[128];
 	GetWindowText(buf, sizeof(buf));
-	return tStrToUtf8(buf);
+	return NLMISC::tStrToUtf8(buf);
 }
 
 void		CEditEx::setSInt(sint value)

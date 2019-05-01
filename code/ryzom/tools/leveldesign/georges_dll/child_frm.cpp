@@ -63,7 +63,7 @@ BOOL CChildFrame::OnCreateClient( LPCREATESTRUCT /*lpcs*/,
 	}
 
 	// Load state
-	theApp.loadWindowState (this, "child", true, false);
+	theApp.loadWindowState (this, _T("child"), true, false);
 
 	return TRUE;
 }

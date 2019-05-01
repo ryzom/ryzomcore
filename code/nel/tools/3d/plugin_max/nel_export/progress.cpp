@@ -70,7 +70,7 @@ INT_PTR CALLBACK CalculatingDialogCallback (
 			string all;
 			for (uint32 i = 0; i < 14; ++i)
 				all += pClass->sInfoProgress[i] + "\n";
-			SendMessage (GetDlgItem (hwndDlg, IDC_STATICINFO), WM_SETTEXT, 0, (LPARAM)utf8ToTStr(all));
+			SendMessage (GetDlgItem (hwndDlg, IDC_STATICINFO), WM_SETTEXT, 0, (LPARAM)MaxTStrFromUtf8(all).data());
 		}
 		break;
 

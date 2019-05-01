@@ -298,7 +298,7 @@ void CWinDisplayer::updateLabels ()
 					}
 				}
 
-				SendMessageW ((HWND)access.value()[i].Hwnd, WM_SETTEXT, 0, (LPARAM) utf8ToWide(n));
+				SendMessageW((HWND)access.value()[i].Hwnd, WM_SETTEXT, 0, (LPARAM)nlUtf8ToWide(n));
 				access.value()[i].NeedUpdate = false;
 			}
 		}

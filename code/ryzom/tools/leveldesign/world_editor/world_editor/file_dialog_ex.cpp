@@ -59,9 +59,9 @@ INT_PTR CFileDialogEx::DoModal ()
 	HKEY hKey;
 	DWORD type = REG_SZ;
 	DWORD size = 512 * sizeof(TCHAR);
-	if (RegCreateKey (HKEY_CURRENT_USER, utf8ToTStr(_RegistryPath), &hKey) == ERROR_SUCCESS)
+	if (RegCreateKey(HKEY_CURRENT_USER, nlUtf8ToTStr(_RegistryPath), &hKey) == ERROR_SUCCESS)
 	{
-		if (RegQueryValueEx (hKey, utf8ToTStr(_FileType), 0, &type, (LPBYTE)path, &size) == ERROR_SUCCESS)
+		if (RegQueryValueEx(hKey, nlUtf8ToTStr(_FileType), 0, &type, (LPBYTE)path, &size) == ERROR_SUCCESS)
 			m_ofn.lpstrInitialDir = path;
 	}
 
@@ -76,9 +76,9 @@ INT_PTR CFileDialogEx::DoModal ()
 		std::string newPath = NLMISC::CFile::getPath (tStrToUtf8(GetPathName()));
 
 		TCHAR buffer[MAX_PATH];
-		_tcscpy_s(buffer, MAX_PATH, utf8ToTStr(newPath));
+		_tcscpy_s(buffer, MAX_PATH, nlUtf8ToTStr(newPath));
 
-		RegSetValueEx (hKey, utf8ToTStr(_FileType), 0, REG_SZ, (LPBYTE)buffer, (_tcslen(buffer) + 1) * sizeof(TCHAR));
+		RegSetValueEx(hKey, nlUtf8ToTStr(_FileType), 0, REG_SZ, (LPBYTE)buffer, (_tcslen(buffer) + 1) * sizeof(TCHAR));
 
 		// Update the path list
 		set<string> oldPath;
@@ -86,7 +86,7 @@ INT_PTR CFileDialogEx::DoModal ()
 		for (i=0; i<PATH_REMEBERED_SIZE; i++)
 		{
 			size = 512;
-			if (RegQueryValueEx (hKey, utf8ToTStr(toString(i)), 0, &type, (LPBYTE)path, &size) == ERROR_SUCCESS)
+			if (RegQueryValueEx(hKey, nlUtf8ToTStr(toString(i)), 0, &type, (LPBYTE)path, &size) == ERROR_SUCCESS)
 				oldPath.insert (tStrToUtf8(path));
 		}
 		oldPath.insert (newPath);
@@ -94,9 +94,9 @@ INT_PTR CFileDialogEx::DoModal ()
 		uint index = 0;
 		while (ite != oldPath.end ())
 		{
-			_tcscpy_s(buffer, MAX_PATH, utf8ToTStr(*ite));
+			_tcscpy_s(buffer, MAX_PATH, nlUtf8ToTStr(*ite));
 
-			RegSetValueEx (hKey, utf8ToTStr(toString(index)), 0, REG_SZ, (LPBYTE)buffer, (_tcslen(buffer) + 1) * sizeof(TCHAR));
+			RegSetValueEx(hKey, nlUtf8ToTStr(toString(index)), 0, REG_SZ, (LPBYTE)buffer, (_tcslen(buffer) + 1) * sizeof(TCHAR));
 			ite++;
 			index++;
 		}
@@ -158,13 +158,13 @@ BOOL CFileDialogEx::OnInitDialog()
 	HKEY hKey;
 	DWORD type = REG_SZ;
 	DWORD size;
-	if (RegCreateKey (HKEY_CURRENT_USER, utf8ToTStr(_RegistryPath), &hKey) == ERROR_SUCCESS)
+	if (RegCreateKey(HKEY_CURRENT_USER, nlUtf8ToTStr(_RegistryPath), &hKey) == ERROR_SUCCESS)
 	{
 		uint i;
 		for (i=0; i<PATH_REMEBERED_SIZE; i++)
 		{
 			size = 512 * sizeof(TCHAR);
-			if (RegQueryValueEx (hKey, utf8ToTStr(toString(i)), 0, &type, (LPBYTE)text, &size) == ERROR_SUCCESS)
+			if (RegQueryValueEx(hKey, nlUtf8ToTStr(toString(i)), 0, &type, (LPBYTE)text, &size) == ERROR_SUCCESS)
 				combo.InsertString (-1, text);
 		}
 		if (m_ofn.lpstrInitialDir)

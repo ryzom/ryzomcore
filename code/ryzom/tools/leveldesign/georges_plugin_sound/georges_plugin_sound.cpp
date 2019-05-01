@@ -49,14 +49,13 @@ __declspec( dllexport ) IEditPlugin *IGeorgesEditGetInterface (int version, NLGE
 		}
 		catch (const std::exception &e)
 		{
-			string reason = e.what();
-			MessageBox (NULL, reason.c_str(), "Sound plugin", MB_OK);
+			MessageBox (NULL, nlUtf8ToTStr(e.what()), _T("Sound plugin"), MB_OK);
 			return NULL;
 		}
 	}
 	else
 	{
-		MessageBox (NULL, "Plugin version invalid.", "Sound plugin for georges editor", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (NULL, _T("Plugin version invalid."), _T("Sound plugin for georges editor"), MB_OK|MB_ICONEXCLAMATION);
 		return NULL;
 	}
 

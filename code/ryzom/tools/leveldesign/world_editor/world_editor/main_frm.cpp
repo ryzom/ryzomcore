@@ -759,11 +759,11 @@ void CMainFrame::displayStatusBarInfo ()
 	string text;
 	if (dispWnd->getActionHelp (text))
 	{
-		m_wndStatusBar.SetPaneText (0, utf8ToTStr(text));
+		m_wndStatusBar.SetPaneText(0, nlUtf8ToTStr(text));
 	}
 	else
 	{
-		m_wndStatusBar.SetPaneText (0, utf8ToTStr(sTmp));
+		m_wndStatusBar.SetPaneText(0, nlUtf8ToTStr(sTmp));
 	}
 	//for (uint32 i = sTmp.size(); i < 10; ++i)
 	//	sTmp += " ";
@@ -771,12 +771,12 @@ void CMainFrame::displayStatusBarInfo ()
 	// Write zone reference name 
 	if (dispWnd->getActionText (text))
 	{
-		m_wndStatusBar.SetPaneText (1, utf8ToTStr(text));
+		m_wndStatusBar.SetPaneText(1, nlUtf8ToTStr(text));
 	}
 	else
 	{
 		sTmp = _ZoneBuilder->getZoneName (x, y);
-		m_wndStatusBar.SetPaneText (1, utf8ToTStr(sTmp));
+		m_wndStatusBar.SetPaneText(1, nlUtf8ToTStr(sTmp));
 	}
 
 	// Write coordinates
@@ -784,15 +784,15 @@ void CMainFrame::displayStatusBarInfo ()
 	sprintf(temp, "(%.3f , %.3f)", v.x, v.y);
 	sTmp = temp;
 //	sTmp = "( " + toString(v.x) + " , " + toString(v.y) + " )";
-	m_wndStatusBar.SetPaneText (2, utf8ToTStr(sTmp));
+	m_wndStatusBar.SetPaneText(2, nlUtf8ToTStr(sTmp));
 
 	// Write rot
 	sTmp = "Rot(" + toString(_ZoneBuilder->getRot(x, y)) + ")";
-	m_wndStatusBar.SetPaneText (3, utf8ToTStr(sTmp));
+	m_wndStatusBar.SetPaneText(3, nlUtf8ToTStr(sTmp));
 
 	// Write flip
 	sTmp = "Flip(" + toString(_ZoneBuilder->getFlip(x, y)) + ")";
-	m_wndStatusBar.SetPaneText (4, utf8ToTStr(sTmp));
+	m_wndStatusBar.SetPaneText(4, nlUtf8ToTStr(sTmp));
 
 	// Write selection
 	if (Selection.size ())
@@ -804,7 +804,7 @@ void CMainFrame::displayStatusBarInfo ()
 	}
 	else
 		sTmp = "No selected primitive";
-	m_wndStatusBar.SetPaneText (5, utf8ToTStr(sTmp));
+	m_wndStatusBar.SetPaneText(5, nlUtf8ToTStr(sTmp));
 
 	// Write path of selected primitive
 	if (Selection.size())
@@ -812,14 +812,14 @@ void CMainFrame::displayStatusBarInfo ()
 	else
 		sTmp.clear();
 	
-	m_wndStatusBar.SetPaneText (6, utf8ToTStr(sTmp));
+	m_wndStatusBar.SetPaneText(6, nlUtf8ToTStr(sTmp));
 }
 
 // ***************************************************************************
 
 void CMainFrame::displayInfo (const std::string &info)
 {
-	m_wndStatusBar.SetPaneText (6, utf8ToTStr(info));
+	m_wndStatusBar.SetPaneText(6, nlUtf8ToTStr(info));
 }
 
 // ***************************************************************************
@@ -858,7 +858,7 @@ void CMainFrame::uninit ()
 	}
 	catch (const Exception& e)
 	{
-		MessageBox (utf8ToTStr(e.what()), _T("Warning"));
+		MessageBox(nlUtf8ToTStr(e.what()), _T("Warning"));
 	}
 }
 
@@ -2710,7 +2710,7 @@ void CMainFrame::createContextMenu (CWnd *parent, const CPoint &point, bool tran
 				// For each child, add a create method
 				for (uint i=0; i<primClass->DynamicChildren.size (); i++)
 				{
-					pMenu->AppendMenu (MF_STRING, ID_EDIT_CREATE_BEGIN+i, utf8ToTStr("Add " + primClass->DynamicChildren[i].ClassName));
+					pMenu->AppendMenu(MF_STRING, ID_EDIT_CREATE_BEGIN + i, nlUtf8ToTStr("Add " + primClass->DynamicChildren[i].ClassName));
 				}
 			}
 
@@ -2723,7 +2723,7 @@ void CMainFrame::createContextMenu (CWnd *parent, const CPoint &point, bool tran
 				// For each child, add a create method
 				for (uint i=0; i<primClass->GeneratedChildren.size (); i++)
 				{
-					pMenu->AppendMenu (MF_STRING, ID_EDIT_GENERATE_BEGIN+i, utf8ToTStr("Generate "+primClass->GeneratedChildren[i].ClassName));
+					pMenu->AppendMenu(MF_STRING, ID_EDIT_GENERATE_BEGIN + i, nlUtf8ToTStr("Generate " + primClass->GeneratedChildren[i].ClassName));
 				}
 			}
 
@@ -2747,7 +2747,7 @@ void CMainFrame::createContextMenu (CWnd *parent, const CPoint &point, bool tran
 					for (i=0; i<filenames.size (); i++)
 					{
 						// Add a menu entry
-						pMenu->AppendMenu (MF_STRING, ID_EDIT_OPEN_FILE_BEGIN+i, utf8ToTStr("Open " + NLMISC::CFile::getFilename (filenames[i])));
+						pMenu->AppendMenu(MF_STRING, ID_EDIT_OPEN_FILE_BEGIN + i, nlUtf8ToTStr("Open " + NLMISC::CFile::getFilename(filenames[i])));
 					}
 				}
 			}
@@ -3717,7 +3717,7 @@ void CMainFrame::OnProjectForceiduniqueness()
 	// End modifications
 	doc->endModification ();
 
-	AfxMessageBox(utf8ToTStr(NLMISC::toString("%u ids checked, %u non unique ID regenerated", ids.size()+nonUnique.size(), nonUnique.size())), MB_OK);
+	AfxMessageBox(nlUtf8ToTStr(NLMISC::toString("%u ids checked, %u non unique ID regenerated", ids.size() + nonUnique.size(), nonUnique.size())), MB_OK);
 }
 
 // ***************************************************************************
@@ -4351,7 +4351,7 @@ void CMainFrame::OnMissionCompiler()
 	}
 	
 	TCHAR path[MAX_PATH];
-	_tcscpy(path, utf8ToTStr(var->asString()));
+	_tcscpy(path, nlUtf8ToTStr(var->asString()));
 
 	SHELLEXECUTEINFO ExecuteInfo;    
 	memset(&ExecuteInfo, 0, sizeof(ExecuteInfo));

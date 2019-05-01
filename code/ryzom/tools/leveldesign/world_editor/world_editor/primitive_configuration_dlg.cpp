@@ -114,7 +114,7 @@ BOOL CPrimitiveConfigurationDlg::OnInitDialog()
 	uint i;
 	for (i=0; i<configurations.size(); i++)
 	{
-		ListCtrl.InsertItem (i, utf8ToTStr(configurations[i].Name));
+		ListCtrl.InsertItem(i, nlUtf8ToTStr(configurations[i].Name));
 		// setItemTextUTF8 (List, nItem, subString++, entry.Strings[CEntryFile::OldSize].c_str ());
 	}
 

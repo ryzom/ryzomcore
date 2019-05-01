@@ -230,9 +230,9 @@ BOOL CBaseDialog::PreTranslateMessage(MSG* pMsg)
 	return CDialog::PreTranslateMessage(pMsg);
 }
 
-void CBaseDialog::setEditTextMultiLine (CEdit &edit, const std::string &text)
+void CBaseDialog::setEditTextMultiLine (CEdit &edit, const char *text)
 {
-	edit.SetWindowText (utf8ToTStr(NLMISC::addSlashR(text)));
+	edit.SetWindowText (nlUtf8ToTStr(NLMISC::addSlashR(text)));
 }	
 
 void CBaseDialog::onOpenSelected() 

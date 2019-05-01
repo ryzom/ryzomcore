@@ -179,22 +179,22 @@ void CTextureChooser::OnBrowseTexture()
 	{
 		texName = (static_cast<NL3D::CTextureFile *>(_Wrapper->get()))->getFileName();
 	}
-	CFileDialog fd(TRUE, _T(".tga"), utf8ToTStr(texName), 0, NULL, this);
+	CFileDialog fd(TRUE, _T(".tga"), nlUtf8ToTStr(texName), 0, NULL, this);
 	if (fd.DoModal() == IDOK)
 	{
 		// Add search path for the texture
-		NLMISC::CPath::addSearchPath (NLMISC::CFile::getPath(tStrToUtf8(fd.GetPathName())));
+		NLMISC::CPath::addSearchPath(NLMISC::CFile::getPath(NLMISC::tStrToUtf8(fd.GetPathName())));
 
 		try
 		{
-			NL3D::CTextureFile *tf = new NL3D::CTextureFile(tStrToUtf8(fd.GetFileName()));
+			NL3D::CTextureFile *tf = new NL3D::CTextureFile(NLMISC::tStrToUtf8(fd.GetFileName()));
 			_Wrapper->setAndUpdateModifiedFlag(tf);
 			_Texture = tf;
 			textureToBitmap();
 		}
 		catch (const NLMISC::Exception &e)
 		{
-			MessageBox(utf8ToTStr(e.what()), _T("error loading texture"));
+			MessageBox(nlUtf8ToTStr(e.what()), _T("error loading texture"));
 		}		
 	
 	}

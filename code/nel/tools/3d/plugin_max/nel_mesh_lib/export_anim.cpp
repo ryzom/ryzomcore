@@ -189,7 +189,7 @@ void CExportNel::addSSSTrack(CSSSBuild	&ssBuilder, INode& node)
             if(note)
             {
 				CSSSBuild::CKey		ks;
-				ks.Value = note->note.ToUTF8();
+				ks.Value = MaxTStrToUtf8(note->note);
 				ks.Time= CExportNel::convertTime (note->time);
 				bs.Track.push_back(ks);
             }
@@ -228,7 +228,7 @@ NL3D::CTrackKeyFramerConstString*		CExportNel::buildFromNoteTrack(INode& node)
 				{
 					firstDate = CExportNel::convertTime (note->time);
 				}				
-				ks.Value = note->note.ToUTF8();
+				ks.Value = MaxTStrToUtf8(note->note);
 				lastDate = CExportNel::convertTime (note->time);
 				st->addKey(ks , lastDate );
 				
@@ -609,7 +609,7 @@ void CExportNel::addMorphTracks (NL3D::CAnimation& animation, INode& node, const
 		if (pNode == NULL)
 			continue;
 		std::string name = parentName;
-		name += tStrToUtf8(pNode->GetName());
+		name += MCharStrToUtf8(pNode->GetName());
 		name += "MorphFactor";
 		
 		IParamBlock *pb = (IParamBlock*)(pMorphMod->SubAnim (i+1));

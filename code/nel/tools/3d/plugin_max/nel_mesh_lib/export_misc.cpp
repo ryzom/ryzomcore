@@ -223,7 +223,7 @@ Animatable*	CExportNel::getSubAnimByName (Animatable& node, const char* sName)
 		TSTR sSubName=node.SubAnimName(nSub);
 
 		// Good name?
-		if (strcmp (sSubName.ToUTF8(), sName)==0)
+		if (strcmp (MaxTStrToUtf8(sSubName).c_str(), sName)==0)
 		{
 			// ok, return this subanim
 			return node.SubAnim(nSub);
@@ -265,7 +265,7 @@ Control* CExportNel::getControlerByName (Animatable& node, const char* sName)
 			ParamDef& paramDef=param->GetParamDef(id);
 
 			// Good name?
-			if (strcmp (tStrToUtf8(paramDef.int_name).c_str(), sName)==0)
+			if (strcmp (MCharStrToUtf8(paramDef.int_name).c_str(), sName)==0)
 			{
 				// ok, return this subanim
 #if MAX_VERSION_MAJOR >= 14
@@ -288,7 +288,7 @@ Control* CExportNel::getControlerByName (Animatable& node, const char* sName)
 		{
 			// Sub anim name
 			TSTR name=node.SubAnimName (s);
-			if (strcmp (name.ToUTF8(), sName)==0)
+			if (strcmp (MaxTStrToUtf8(name).c_str(), sName)==0)
 			{
 				// Get the controller pointer of this sub anim
 				Control* c=GetControlInterface (node.SubAnim(s));
@@ -332,7 +332,7 @@ bool getValueByNameUsingParamBlock2Internal (Animatable& node, const char* sName
 			ParamDef& paramDef=param->GetParamDef(id);
 
 			// Good name?
-			if (strcmp (tStrToUtf8(paramDef.int_name).c_str(), sName)==0)
+			if (strcmp (MCharStrToUtf8(paramDef.int_name).c_str(), sName)==0)
 			{
 				// Check this value is good type
 				ParamType2 paramType = param->GetParameterType(id);
@@ -372,7 +372,7 @@ bool getValueByNameUsingParamBlock2Internal (Animatable& node, const char* sName
 						break;
 						case TYPE_FILENAME:
 						case TYPE_STRING:
-							*(std::string*)pValue = tStrToUtf8(param->GetStr (id, tvTime));
+							*(std::string*)pValue = MCharStrToUtf8(param->GetStr (id, tvTime));
 							bRes = TRUE;
 						break;
 						case TYPE_FILENAME_TAB:
@@ -382,7 +382,7 @@ bool getValueByNameUsingParamBlock2Internal (Animatable& node, const char* sName
 							uint total = param->Count (id);
 							rTab.resize(total);
 							for( uint i = 0; i < total; ++i )
-								rTab[i] = tStrToUtf8(param->GetStr (id, tvTime, i));
+								rTab[i] = MCharStrToUtf8(param->GetStr (id, tvTime, i));
 							bRes = TRUE;
 						}
 						break;
@@ -502,7 +502,7 @@ std::string	CExportNel::getName (MtlBase& mtl)
 	// Return its name
 	TSTR name;
 	name=mtl.GetName();
-	return std::string((const char*)name.ToUTF8());
+	return MaxTStrToUtf8(name);
 }
 
 // --------------------------------------------------
@@ -511,8 +511,8 @@ std::string	CExportNel::getName (MtlBase& mtl)
 std::string	CExportNel::getName(INode& node)
 {
 	// Return its name
-	const MCHAR* name = node.GetName();
-	return tStrToUtf8(name);
+	const MCHAR *name = node.GetName();
+	return MCharStrToUtf8(name);
 }
 
 // --------------------------------------------------
@@ -549,7 +549,7 @@ std::string		CExportNel::getNelObjectName (INode& node)
 		}
 		else
 		{
-			return tStrToUtf8(node.GetName());
+			return MCharStrToUtf8(node.GetName());
 		}
 	}
 	else
@@ -564,23 +564,23 @@ std::string		CExportNel::getNelObjectName (INode& node)
 				if (_tcslen((const TCHAR *) ad->data) != 0)
 				{
 					// get file name only
-					return NLMISC::CFile::getFilename(tStrToUtf8((const TCHAR*)ad->data));
+					return NLMISC::CFile::getFilename(MCharStrToUtf8((const MCHAR*)ad->data));
 				}
 				else
 				{
-					return tStrToUtf8(node.GetName());
+					return MCharStrToUtf8(node.GetName());
 				}
 			}
 			else
 			{
 				// Extract the node name
-				return tStrToUtf8(node.GetName());
+				return MCharStrToUtf8(node.GetName());
 			}
 		}
 		else
 		{
 			// Extract the node name
-			return tStrToUtf8(node.GetName());
+			return MCharStrToUtf8(node.GetName());
 		}
 	}
 }
@@ -764,28 +764,26 @@ void CExportNel::outputErrorMessage(const std::string &message)
 {
 	if (_ErrorInDialog)
 	{
-		MessageBoxW (_Ip->GetMAXHWnd(), utf8ToTStr(message), utf8ToTStr(_ErrorTitle), MB_OK|MB_ICONEXCLAMATION);
+		MessageBoxW(_Ip->GetMAXHWnd(), nlUtf8ToWide(message), nlUtf8ToWide(_ErrorTitle), MB_OK|MB_ICONEXCLAMATION);
 	}
-	mprintf (utf8ToTStr(message));
-	mprintf (_T("\n"));
+	mprintf(_M("%s\n"), MaxTStrFromUtf8(message).data());
 
-	nlwarning ("Error in max file %s : ", _Ip->GetCurFilePath());
-	nlwarning (message.c_str());
+	nlwarning("Error in max file %s : ", _Ip->GetCurFilePath());
+	nlwarning("%s", message.c_str());
 }
 
 // --------------------------------------------------
 
-void CExportNel::outputWarningMessage (const std::string &message)
+void CExportNel::outputWarningMessage(const std::string &message)
 {
 	if (_ErrorInDialog)
 	{
-		MessageBox (_Ip->GetMAXHWnd(), utf8ToTStr(message), utf8ToTStr(_ErrorTitle), MB_OK|MB_ICONEXCLAMATION);
+		MessageBoxW(_Ip->GetMAXHWnd(), nlUtf8ToWide(message), nlUtf8ToWide(_ErrorTitle), MB_OK|MB_ICONEXCLAMATION);
 	}
-	mprintf (utf8ToTStr(message));
-	mprintf (_M("\n"));
+	mprintf(_M("%s\n"), MaxTStrFromUtf8(message).data());
 
-	nlwarning ("Warning in max file %s : ", _Ip->GetCurFilePath());
-	nlwarning (message.c_str());
+	nlwarning("Warning in max file %s : ", _Ip->GetCurFilePath());
+	nlwarning("%s", message.c_str());
 }
 
 // --------------------------------------------------
@@ -819,7 +817,7 @@ void CExportNel::addChildLodNode (std::set<INode*> &lodListToExclude, INode *cur
 		if (lodName != "")
 		{
 			// Get the lod by name
-			INode *lodNode = _Ip->GetINodeByName (utf8ToTStr(lodName));
+			INode *lodNode = _Ip->GetINodeByName(MaxTStrFromUtf8(lodName));
 			if (lodNode)
 			{
 				// Insert it in the set
@@ -850,7 +848,7 @@ void CExportNel::addParentLodNode (INode &child, std::set<INode*> &lodListToExcl
 		if (lodName != "")
 		{
 			// Get the lod by name
-			INode *lodNode = _Ip->GetINodeByName (utf8ToTStr(lodName));
+			INode *lodNode = _Ip->GetINodeByName(MaxTStrFromUtf8(lodName));
 			if (lodNode == &child)
 			{
 				// Insert it in the set
@@ -1111,7 +1109,7 @@ static void restoreDecimalSeparator()
 float toFloatMax(const TCHAR *src)
 {
 	float result = 0.f;
-	if (toFloatMax(tStrToUtf8(src), result)) return result;
+	if (toFloatMax(MCharStrToUtf8(src), result)) return result;
 	return 0.f;
 }
 
@@ -1124,7 +1122,7 @@ float toFloatMax(const std::string &src)
 
 bool toFloatMax(const TCHAR *src, float &dest)
 {
-	return toFloatMax(tStrToUtf8(src), dest);
+	return toFloatMax(MCharStrToUtf8(src), dest);
 }
 
 bool toFloatMax(const std::string &src, float &dest)

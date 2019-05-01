@@ -158,7 +158,7 @@ void CAnimationSetDlg::OnAddAnimation ()
 			}
 			catch (const Exception& e)
 			{
-				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (nlUtf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 	}
@@ -199,7 +199,7 @@ void CAnimationSetDlg::OnAddSkelWt()
 			}
 			catch (const Exception& e)
 			{
-				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
+				MessageBox(nlUtf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK | MB_ICONEXCLAMATION);
 			}
 		}
 	}
@@ -234,7 +234,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 		for (i=0; i<_ObjView->getNumInstance (); i++)
 		{
 			std::string name = NLMISC::CFile::getFilenameWithoutExtension(_ObjView->getInstance(i)->Saved.ShapeFilename);
-			EditedObject.InsertString (-1, utf8ToTStr(name));
+			EditedObject.InsertString(-1, nlUtf8ToTStr(name));
 		}
 
 		// Get edited object
@@ -268,7 +268,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 				CAnimation *anim = object->AnimationSet.getAnimation (object->AnimationSet.getAnimationIdByName (name));
 
 				// Insert an intem
-				HTREEITEM item=Tree.InsertItem(utf8ToTStr(name));
+				HTREEITEM item = Tree.InsertItem(nlUtf8ToTStr(name));
 				Tree.SetItemData (item, i);
 				nlassert (item!=NULL);
 
@@ -279,7 +279,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 				while (ite!=setString.end())
 				{
 					// Add this string
-					HTREEITEM newItem = Tree.InsertItem (utf8ToTStr(*ite), item);
+					HTREEITEM newItem = Tree.InsertItem(nlUtf8ToTStr(*ite), item);
 					Tree.SetItemData (newItem, 0xffffffff);
 
 					// Get the track
@@ -303,7 +303,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 						name = toString("%s (%f - %f)", typeid(*track).name(), track->getBeginTime(), track->getEndTime());
 					}
 
-					HTREEITEM keyItem = Tree.InsertItem(utf8ToTStr(name), newItem);
+					HTREEITEM keyItem = Tree.InsertItem(nlUtf8ToTStr(name), newItem);
 					Tree.SetItemData(keyItem, 0xffffffff);
 
 					ite++;
@@ -320,7 +320,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 				CSkeletonWeight *swt = object->AnimationSet.getSkeletonWeight(object->AnimationSet.getSkeletonWeightIdByName(name));
 
 				// Insert an intem
-				HTREEITEM item=SkelTree.InsertItem(utf8ToTStr(name));
+				HTREEITEM item = SkelTree.InsertItem(nlUtf8ToTStr(name));
 				nlassert (item!=NULL);
 
 				// Get number of node in this skeleton weight
@@ -332,7 +332,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 					std::string percent = toString("%s (%f%%)", swt->getNodeName(n).c_str(), swt->getNodeWeight(n)*100);
 
 					// Add this string
-					SkelTree.InsertItem (utf8ToTStr(percent), item);
+					SkelTree.InsertItem(nlUtf8ToTStr(percent), item);
 				}
 			}
 
@@ -340,7 +340,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 			for (i=0; i<object->Saved.PlayList.size(); i++)
 			{
 				// Insert an intem
-				int item=PlayList.InsertString (-1, utf8ToTStr(object->Saved.PlayList[i]));
+				int item = PlayList.InsertString(-1, nlUtf8ToTStr(object->Saved.PlayList[i]));
 				nlassert (item!=LB_ERR);
 			}
 		}

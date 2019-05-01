@@ -59,7 +59,7 @@ protected:
 	IAction (TTypeAction type, uint selId, uint slot);
 
 	// Init log label
-	void setLabel (const std::string &logLabel, CGeorgesEditDoc &doc);
+	void setLabel (const char *logLabel, CGeorgesEditDoc &doc);
 
 public:
 
@@ -96,7 +96,7 @@ protected:
 		UpdateValues,
 		Redraw
 	};
-	void			update (bool updateLeftView, TUpdateRightView rightView, CGeorgesEditDoc &doc, const std::string &_FormName);
+	void			update (bool updateLeftView, TUpdateRightView rightView, CGeorgesEditDoc &doc, const char *_FormName);
 };
 
 // String modification action
@@ -105,7 +105,7 @@ class CActionString : public IAction
 public:
 
 	// Constructor
-	CActionString(IAction::TTypeAction type, const std::string &newValue, CGeorgesEditDoc &doc, const std::string &formName, const std::string &userData, uint selId, uint slot);
+	CActionString (IAction::TTypeAction type, const char *newValue, CGeorgesEditDoc &doc, const char *formName, const char *userData, uint selId, uint slot);
 
 protected:
 
@@ -165,7 +165,7 @@ class CActionBuffer : public IAction
 public:
 
 	// Constructor
-	CActionBuffer (IAction::TTypeAction type, const uint8 *buffer, uint bufferSize, CGeorgesEditDoc &doc, const std::string &formName, const std::string &userData, uint selId, uint slot);
+	CActionBuffer (IAction::TTypeAction type, const uint8 *buffer, uint bufferSize, CGeorgesEditDoc &doc, const char *formName, const char *userData, uint selId, uint slot);
 
 protected:
 
@@ -182,4 +182,5 @@ protected:
 	virtual bool	doAction (CGeorgesEditDoc &doc, bool redo, bool &modified, bool firstTime);
 };
 
-#endif
+#endif /* GEORGES_EDIT_ACTION_H */
+

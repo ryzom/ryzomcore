@@ -113,7 +113,7 @@ void regsiterOVPath ()
 	int res = GetModuleFileName(hModule, sModulePath, 256);
 	if (!res) { ::MessageBox(NULL, _T("'res' failed at '") __FUNCTION__ _T("' in file '") __FILE__ _T(" on line ") NL_MACRO_TO_STR(__LINE__), _T("NeL Export"), MB_OK | MB_ICONERROR); return; }
 
-	std::string modulePath = NLMISC::CFile::getPath(tStrToUtf8(sModulePath)) + "object_viewer.cfg";
+	std::string modulePath = NLMISC::CFile::getPath(MCharStrToUtf8(sModulePath)) + "object_viewer.cfg";
 
 	// Load the config file
 	CConfigFile cf;
@@ -300,7 +300,7 @@ void CNelExport::viewMesh (TimeValue time)
 							_ExportNel->buildSkeletonShape (*skelShape, *skeletonRoot, &(iteSkeleton->second), mapId, time);
 
 							// Add the shape in the view
-							uint instance = view->addSkel (skelShape, tStrToUtf8(skeletonRoot->GetName()));
+							uint instance = view->addSkel (skelShape, MCharStrToUtf8(skeletonRoot->GetName()));
 
 							// Add tracks
 							CAnimation *anim=new CAnimation;
@@ -365,7 +365,7 @@ void CNelExport::viewMesh (TimeValue time)
 			INode* pNode=_Ip->GetSelNode (nNode);
 
 			string sTmp = "Object Name: ";
-			sTmp += tStrToUtf8(pNode->GetName());
+			sTmp += MCharStrToUtf8(pNode->GetName());
 			ProgBar.setLine (0, sTmp);
 			sTmp.clear();
 			for (uint32 i = 1; i < 10; ++i) 
@@ -410,7 +410,7 @@ void CNelExport::viewMesh (TimeValue time)
 						if (pShape)
 						{
 							// Add the shape in the view
-							uint instance = view->addMesh (pShape, tStrToUtf8(pNode->GetName()).c_str(), iteSkelShape->second.SkeletonInstance);
+							uint instance = view->addMesh (pShape, MCharStrToUtf8(pNode->GetName()), iteSkelShape->second.SkeletonInstance);
 
 							// Add tracks
 							CAnimation *anim=new CAnimation;

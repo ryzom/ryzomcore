@@ -492,6 +492,13 @@ void IService::setArgs (int argc, const char **argv)
 	}
 }
 
+void IService::setArgs(int argc, const wchar_t **argv)
+{
+	for (sint i = 0; i < argc; i++)
+	{
+		_Args.push_back(nlWideToUtf8(argv[i]));
+	}
+}
 
 void cbLogFilter (CConfigFile::CVar &var)
 {

@@ -113,7 +113,7 @@ void CRTWorld::build (vector<SLightBuild> &AllLights, CVector &trans, bool bExcl
 				pLAP->create( 64 ); // width of each grid in number of square
 				for( j = 0; j < vMB.size(); ++j )
 				{
-					if (rLight.setExclusion.find (tStrToUtf8(vINode[j]->GetName())) != rLight.setExclusion.end())
+					if (rLight.setExclusion.find (MCharStrToUtf8(vINode[j]->GetName())) != rLight.setExclusion.end())
 						continue;
 					
 					for (k = 0; k < vMB[j]->Faces.size(); ++k)
@@ -142,7 +142,7 @@ void CRTWorld::build (vector<SLightBuild> &AllLights, CVector &trans, bool bExcl
 				pLAD->create (64, rLight.rDirRadius/64.0f, rLight.Direction);
 				for( j = 0; j < vMB.size(); ++j )
 				{
-					if (rLight.setExclusion.find (tStrToUtf8(vINode[j]->GetName())) != rLight.setExclusion.end())
+					if (rLight.setExclusion.find (MCharStrToUtf8(vINode[j]->GetName())) != rLight.setExclusion.end())
 						continue;
 					
 					for (k = 0; k < vMB[j]->Faces.size(); ++k)

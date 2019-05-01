@@ -30,6 +30,7 @@
 #include "nel/misc/file.h"
 #include "nel/misc/rgba.h"
 #include "path_mesh_alloc.h"
+#include "../nel_3dsmax_shared/string_common.h"
 
 //#define USE_CACHE
 
@@ -451,7 +452,7 @@ public:
 			}
 			catch (const NLMISC::EStream& excp)
 			{
-				MessageBox (NULL, utf8ToTStr(excp.what()), _T("Load error"), MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (NULL, MaxTStrFromUtf8(excp.what()).data(), _T("Load error"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 		return _bank;

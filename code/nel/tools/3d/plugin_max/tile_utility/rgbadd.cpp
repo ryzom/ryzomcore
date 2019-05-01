@@ -85,7 +85,7 @@ class RGBAdd: public Texmap {
 		int RemapRefOnLoad(int iref); 
 
 		RefTargetHandle Clone(RemapDir &remap = DefaultRemapDir());
-		RefResult NotifyRefChanged(const Interval &changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate);
+		RefResult NotifyRefChanged(NOTIFY_REF_PARAMS);
 
 		// IO
 		IOResult Save(ISave *isave);
@@ -130,41 +130,41 @@ enum
 
 static ParamBlockDesc2 RGBAdd_param_blk ( RGBAdd_params, _T("parameters"),  0, &maskCD, P_AUTO_CONSTRUCT + P_AUTO_UI, 0, 
 	//rollout
-	IDD_RGBMULT, "RGB Additif Parameters", 0, 0, NULL, 
+	IDD_RGBMULT, _T("RGB Additif Parameters"), 0, 0, NULL, 
 	// params
 	RGBAdd_color1,	 _T("color1"),	TYPE_RGBA,				P_ANIMATABLE,	IDS_DS_COLOR1,
 		p_default,		Color(0,0,0), 
 		p_ui,			TYPE_COLORSWATCH, IDC_MULT_COL1, 
-		p_end,
+		nl_p_end,
 	RGBAdd_color2,	 _T("color2"),	TYPE_RGBA,				P_ANIMATABLE,	IDS_DS_COLOR2,	
 		p_default,		Color(0.5,0.5,0.5), 
 		p_ui,			TYPE_COLORSWATCH, IDC_MULT_COL2, 
-		p_end,
+		nl_p_end,
 	RGBAdd_map1,		_T("map1"),		TYPE_TEXMAP,			P_OWNERS_REF,	IDS_JW_MAP1,
 		p_refno,		1,
 		p_subtexno,		0,		
 		p_ui,			TYPE_TEXMAPBUTTON, IDC_MULT_TEX1,
-		p_end,
+		nl_p_end,
 	RGBAdd_map2,		_T("map2"),		TYPE_TEXMAP,			P_OWNERS_REF,	IDS_JW_MAP2,
 		p_refno,		2,
 		p_subtexno,		1,		
 		p_ui,			TYPE_TEXMAPBUTTON, IDC_MULT_TEX2,
-		p_end,
+		nl_p_end,
 	RGBAdd_map1_on,	_T("map1Enabled"), TYPE_BOOL,			0,				IDS_JW_MAP1ENABLE,
 		p_default,		TRUE,
 		p_ui,			TYPE_SINGLECHEKBOX, IDC_MAPON1,
-		p_end,
+		nl_p_end,
 	RGBAdd_map2_on,	_T("map2Enabled"), TYPE_BOOL,			0,				IDS_JW_MAP2ENABLE,
 		p_default,		TRUE,
 		p_ui,			TYPE_SINGLECHEKBOX, IDC_MAPON2,
-		p_end,
+		nl_p_end,
 	RGBAdd_type, _T("alphaFrom"), TYPE_INT,				0,				IDS_PW_ALPHAFROM,
 		p_default,		2,
 		p_range,		0,	2,
 		p_ui,			TYPE_RADIO, 3, IDC_MULT_ALPHA1, IDC_MULT_ALPHA2, IDC_MULT_ALPHA3,
-		p_end,
+		nl_p_end,
 
-	p_end
+	nl_p_end
 );
 
 
@@ -364,7 +364,7 @@ TSTR RGBAdd::SubAnimName(int i) {
 		}
 	}
 
-RefResult RGBAdd::NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate)
+RefResult RGBAdd::NotifyRefChanged(NOTIFY_REF_PARAMS)
 {
 	switch (message)
 	{

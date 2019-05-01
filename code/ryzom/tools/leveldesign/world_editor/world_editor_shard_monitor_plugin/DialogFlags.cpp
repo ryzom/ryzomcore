@@ -301,7 +301,7 @@ void CDialogFlags::setCurrentEntityDisplayMode(TEntityDisplayMode edm)
 void CDialogFlags::loadEntityDisplayInfoToRegistry(TEntityDisplayInfoVect &infos, const std::string &regId)
 {
 	HKEY hKey;
-	if (RegOpenKeyEx(HKEY_CURRENT_USER, utf8ToTStr(tStrToUtf8(REGKEY_ENTITY_DISPLAY_INFO) + regId), 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
+	if (RegOpenKeyEx(HKEY_CURRENT_USER, nlUtf8ToTStr(tStrToUtf8(REGKEY_ENTITY_DISPLAY_INFO) + regId), 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
 	{
 		DWORD index  = 0;
 		for(;;)
@@ -338,7 +338,7 @@ void CDialogFlags::loadEntityDisplayInfoToRegistry(TEntityDisplayInfoVect &infos
 void CDialogFlags::saveEntityDisplayInfoToRegistry(const TEntityDisplayInfoVect &infos, const std::string &regId)
 {
 	HKEY hKey;
-	if (RegCreateKeyEx(HKEY_CURRENT_USER, utf8ToTStr(tStrToUtf8(REGKEY_ENTITY_DISPLAY_INFO) + regId), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS)
+	if (RegCreateKeyEx(HKEY_CURRENT_USER, nlUtf8ToTStr(tStrToUtf8(REGKEY_ENTITY_DISPLAY_INFO) + regId), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS)
 	{
 		for(uint k = 0; k < infos.size(); ++k)
 		{

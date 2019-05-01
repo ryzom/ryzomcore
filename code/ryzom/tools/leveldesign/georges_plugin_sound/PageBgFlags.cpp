@@ -421,8 +421,8 @@ BOOL CPageBgFlags::OnInitDialog()
 	const NLSOUND::UAudioMixer::TBackgroundFlags &flag = SoundDialog->getSoundPlugin()->getMixer()->getBackgroundFlags();
 	for (uint i=0; i<32; ++i)
 	{
-		GetDlgItem(FILTER_EDIT_NAME[i])->SetWindowText(SoundDialog->EnvNames[i].Name.c_str());
-		GetDlgItem(FILTER_SIM_NAME[i])->SetWindowText(SoundDialog->EnvNames[i].ShortName.c_str());
+		GetDlgItem(FILTER_EDIT_NAME[i])->SetWindowText(nlUtf8ToTStr(SoundDialog->EnvNames[i].Name));
+		GetDlgItem(FILTER_SIM_NAME[i])->SetWindowText(nlUtf8ToTStr(SoundDialog->EnvNames[i].ShortName));
 
 		static_cast<CButton*>(GetDlgItem(FILTER_SIM[i]))->SetCheck(flag.Flags[i] ? 1 : 0);
 	}

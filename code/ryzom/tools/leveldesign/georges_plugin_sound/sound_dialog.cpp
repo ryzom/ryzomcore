@@ -239,7 +239,7 @@ void CSoundDialog::displayTime(uint32 msec)
 	uint min = sec / 60;
 	sec -= min * 60;
 	_snprintf(s, 256, "%02d:%02d", min, sec);
-	GetDlgItem(IDC_TIME)->SetWindowText(s);
+	GetDlgItem(IDC_TIME)->SetWindowText(nlUtf8ToTStr(s));
 }
 
 // ***************************************************************************
@@ -285,7 +285,7 @@ void CSoundDialog::updateInfo()
 
 	CPageBase::docChanged();
 
-	SetWindowText(_Name.c_str());
+	SetWindowText(nlUtf8ToTStr(_Name));
 
 	char s[256];
 /*	if (_Filename.empty())
@@ -342,7 +342,7 @@ void CSoundDialog::updateInfo()
 	msec -= sec * 1000;
 	sec -= min * 60;
 	_snprintf(s, 256, "%02d:%02d.%03d", min, sec, msec);
-	GetDlgItem(IDC_DURATION)->SetWindowText(s);
+	GetDlgItem(IDC_DURATION)->SetWindowText(nlUtf8ToTStr(s));
 
 	updateButton();
 }
@@ -361,7 +361,7 @@ bool CSoundDialog::getFileInfo(string& filename, uint& sampleRate, uint& sampleS
 	}
 
 	// Open the file 
-	HMMIO hmmio = mmioOpen((char*) path.c_str(), NULL, MMIO_READ | MMIO_DENYWRITE);
+	HMMIO hmmio = mmioOpen((LPTSTR)nlUtf8ToTStr(path), NULL, MMIO_READ | MMIO_DENYWRITE);
 	if (hmmio == NULL) 
 	{
 		return false;
@@ -484,7 +484,7 @@ void CSoundDialog::OnControlPlayback()
 
 		if (str == "*.sound")
 		{
-			MessageBox("You must save the file before playing it !", "Warning");
+			MessageBox(_T("You must save the file before playing it !"), _T("Warning"));
 			return;
 		}
 	}

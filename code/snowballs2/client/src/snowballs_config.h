@@ -41,7 +41,9 @@
 // - Bloom
 // 2.2
 // - OculusVR support
-#define SBCLIENT_VERSION "2.2"
+// 2.3
+// - Add music
+#define SBCLIENT_VERSION "2.3"
 
 
 
