@@ -173,6 +173,12 @@
 #	define NL_NO_EXCEPTION_SPECS
 #endif
 
+#if defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 140)
+#define nlmove(v) std::move(v)
+#else
+#define nlmove(v) (v)
+#endif
+
 // gcc 3.4 introduced ISO C++ with tough template rules
 //
 // NL_ISO_SYNTAX can be used using #if NL_ISO_SYNTAX or #if !NL_ISO_SYNTAX
@@ -220,6 +226,7 @@
 #	if defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
 #		pragma warning (disable : 4005)			// don't warn on redefinitions caused by xp platform sdk
 #	endif // NL_COMP_VC8 || NL_COMP_VC9
+#	pragma warning (disable : 26495)		// Variable is uninitialized. Always initialize a member variable. (On purpose for performance.)
 #endif // NL_OS_WINDOWS
 
 
@@ -519,6 +526,15 @@ template<> struct hash<uint64>
  */
 typedef	uint16	ucchar;
 
+#if defined(NL_OS_WINDOWS) && (defined(UNICODE) || defined(_UNICODE))
+#define nltmain wmain
+#define nltWinMain wWinMain
+#else
+#define nltmain main
+#if defined(NL_OS_WINDOWS)
+#define nltWinMain WinMain
+#endif
+#endif
 
 // To define a 64bits constant; ie: UINT64_CONSTANT(0x123456781234)
 #ifdef NL_COMP_VC

@@ -1189,7 +1189,7 @@ void CPlugin::updateConnectionState()
 				// Change the text
 				_DialogFlag->ConnectCtrl.SetWindowText (getStringRsc(IDS_DISCONNECT));
 				_DialogFlag->State = (LPCTSTR) (getStringRsc(IDS_CONNECTED_TO) + _SHost.c_str());
-				_DialogFlag->Sent = CString(utf8ToTStr(toString (_Client->getBytesSent ()))) + getStringRsc(IDS_BYTE_SENT);
+			    _DialogFlag->Sent = CString(nlUtf8ToTStr(toString(_Client->getBytesSent()))) + getStringRsc(IDS_BYTE_SENT);
 				//_DialogFlag->Received = (toString ((uint32)_Client->getBytesReceived ()) + " bytes received").c_str();
 				_DialogFlag->Received = (toString("%.1f", bandwidth/1024.0) + " kB/s").c_str();
 				_DialogFlag->DownloadValue = (toString("%.1f kB/s", _DialogFlag->Download/1024.0)).c_str();
@@ -1198,7 +1198,7 @@ void CPlugin::updateConnectionState()
 			break;
 			case WaitingServerParams:				
 				_DialogFlag->ConnectCtrl.SetWindowText (getStringRsc(IDS_CANCEL_CONNECT));
-				_DialogFlag->State = getStringRsc(IDS_WAITING_SERVER_PARAMS) + utf8ToTStr(_SHost);
+			    _DialogFlag->State = getStringRsc(IDS_WAITING_SERVER_PARAMS) + nlUtf8ToTStr(_SHost);
 			break;
 			case WaitingLoginConfirmation:
 			{

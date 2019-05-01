@@ -51,7 +51,7 @@ public:
 	bool create( const RECT& rect, CWnd* pParentWnd, UINT nID );
 	bool setRootDirectory (const char *dir);
 	void setArrangeMode (TArrange arrangeMode);
-	bool enumObjects (HTREEITEM hParentItem,IShellFolder* pParentFolder, ITEMIDLIST* pidlParent);
+	bool enumObjects (HTREEITEM hParentItem,IShellFolder* pParentFolder, LPITEMIDLIST pidlParent);
 	void doItemMenu (HWND hwndTreeView, HTREEITEM hItem, LPPOINT pptScreen);
 	void doClick (HWND hwndTreeView, HTREEITEM hItem);
 	void addExclusiveExtFilter (const char *ext);

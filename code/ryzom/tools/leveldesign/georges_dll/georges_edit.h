@@ -41,8 +41,8 @@
 #define GEORGES_EDIT_BASE_REG_KEY "Software\\Nevrax\\Georges Edit"
 #define GEORGES_EDIT_BROWSE_LABEL "--- Browse..."
 
-extern const char* TypeFilter;
-extern const char* DfnFilter;
+extern const TCHAR* TypeFilter;
+extern const TCHAR* DfnFilter;
 
 class CGeorgesEditDoc;
 
@@ -119,11 +119,11 @@ public:
 public:
 	// Memory stream
 	NLMISC::CMemStream	MemStream;
-	bool				FillMemStreamWithClipboard (const std::string &formName, CGeorgesEditDoc *doc, uint slot);
+	bool				FillMemStreamWithClipboard (const char *formName, CGeorgesEditDoc *doc, uint slot);
 	void				FillMemStreamWithBuffer (const uint8 *buffer, uint size);
 
-	bool				SerialIntoMemStream (const std::string &formName, CGeorgesEditDoc *doc, uint slot, bool copyToClipboard);
-	bool				SerialFromMemStream (const std::string &formName, CGeorgesEditDoc *doc, uint slot);
+	bool				SerialIntoMemStream (const char *formName, CGeorgesEditDoc *doc, uint slot, bool copyToClipboard);
+	bool				SerialFromMemStream (const char *formName, CGeorgesEditDoc *doc, uint slot);
 
 	// Init
 	BOOL initInstance (int nCmdShow, bool exeStandalone, int x, int y, int cx, int cy);
@@ -136,7 +136,7 @@ public:
 
 	// From IEdit
 	NLGEORGES::IEditDocument *getActiveDocument ();
-	NLGEORGES::IEditDocument *createDocument (const std::string &dfnName, const std::string &pathName);
+	NLGEORGES::IEditDocument *createDocument (const char *dfnName, const char *pathName);
 	virtual void getSearchPath (std::string &searchPath);
 	virtual NLMISC::CConfigFile		&getConfigFile()				{	return ConfigFile; }
 
@@ -153,10 +153,10 @@ public:
 	CImageListEx		ImageList;
 
 	// Get a template form
-	CMultiDocTemplate	*getFormDocTemplate (const std::string &dfnName);
+	CMultiDocTemplate	*getFormDocTemplate (const char *dfnName);
 
-	void	saveWindowState (const CWnd *wnd, const std::string &name, bool controlBar);
-	void	loadWindowState (CWnd *wnd, const std::string &name, bool changeShowWindow, bool controlBar);
+	void	saveWindowState (const CWnd *wnd, const TCHAR *name, bool controlBar);
+	void	loadWindowState (CWnd *wnd, const TCHAR *name, bool changeShowWindow, bool controlBar);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -176,8 +176,8 @@ public:
 	void	releasePlugins ();
 
 	// Dialog function
-	void	outputError (const std::string &message);
-	bool	yesNo (const std::string &message);
+	void	outputError (const char* message);
+	bool	yesNo (const char* message);
 	bool	getColor (NLMISC::CRGBA &color);
 
 	// Browse an URL

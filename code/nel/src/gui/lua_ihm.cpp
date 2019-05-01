@@ -115,7 +115,7 @@ namespace NLGUI
 		{
 		#if !FINAL_VERSION
 			#ifdef NL_OS_WINDOWS
-				ShellExecuteW(NULL, utf8ToWide(operation), utf8ToWide(fileName), utf8ToWide(parameters), NULL, SW_SHOWDEFAULT);
+				ShellExecuteW(NULL, nlUtf8ToWide(operation), nlUtf8ToWide(fileName), nlUtf8ToWide(parameters), NULL, SW_SHOWDEFAULT);
 			#endif
 		#endif
 		}

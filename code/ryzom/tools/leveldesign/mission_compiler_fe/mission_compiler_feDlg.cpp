@@ -184,7 +184,7 @@ BOOL CMissionCompilerFeDlg::OnInitDialog()
 	if (SearchPaths.size() > 1)
 	{
 		CWnd* pWnd = GetDlgItem(IDC_PATH_WARNING);
-		pWnd->SetWindowText("Warning ! config file contains more than one path ! Only the first is shown ! ");
+		pWnd->SetWindowText(_T("Warning ! config file contains more than one path ! Only the first is shown ! "));
 	}
 
 	UpdateData(FALSE);
@@ -196,16 +196,16 @@ BOOL CMissionCompilerFeDlg::OnInitDialog()
 	// Check if the file "tmptool.txt" exists in system temp directory
 	// It's that way world_editor pass arguments to the program
 	// The file contains a list of primitives to select
-	char tmpPath[MAX_PATH];
-	GetEnvironmentVariable("TMP", tmpPath, MAX_PATH);
-	strcat(tmpPath, "\\tmptool.txt");
+	TCHAR tmpPath[MAX_PATH];
+	GetEnvironmentVariable(_T ("TMP"), tmpPath, MAX_PATH);
+	_tcscat(tmpPath, _T("\\tmptool.txt"));
 
-	if (NLMISC::CFile::fileExists(tmpPath))
+	if (NLMISC::CFile::fileExists(NLMISC::tStrToUtf8(tmpPath)))
 	{
-		FILE *f = nlfopen(tmpPath, "r");
+		FILE *f = _tfopen(tmpPath, _T("r"));
 		if (f == NULL)
 		{
-			nlinfo("Can't open the file for reading !\n%s", tmpPath);
+			nlinfo("Can't open the file for reading !\n%s", nlTStrToUtf8(tmpPath));
 			return TRUE;
 		}
 
@@ -222,7 +222,7 @@ BOOL CMissionCompilerFeDlg::OnInitDialog()
 		fclose(f);
 
 		// delete temp file
-		NLMISC::CFile::deleteFile(tmpPath);
+		NLMISC::CFile::deleteFile(NLMISC::tStrToUtf8(tmpPath));
 
 		// Test to check if the primitive is in src list
 		// If it is, erase it form src and add it to dest
@@ -240,8 +240,8 @@ BOOL CMissionCompilerFeDlg::OnInitDialog()
 				files[i] = toUpper(CPath::standardizeDosPath(files[i]));
 				if (srcPath != files[i])
 				{
-					::MessageBox(NULL, "Primitive path and working directory are not the same !",
-									   "Mission compiler", MB_OK|MB_ICONEXCLAMATION);
+					::MessageBox(NULL, _T("Primitive path and working directory are not the same !"),
+									   _T("Mission compiler"), MB_OK|MB_ICONEXCLAMATION);
 				}
 				else
 				{
@@ -252,8 +252,8 @@ BOOL CMissionCompilerFeDlg::OnInitDialog()
 			else
 			{
 				char buffer[1024];
-				sprintf(buffer, "Can't find primitive in the directory !\n%s\n", files[i].c_str(), m_dataDirectory);
-				::MessageBox(NULL, buffer, "Mission compiler", MB_OK|MB_ICONEXCLAMATION);
+				sprintf(buffer, "Can't find primitive in the directory !\n%s\n", files[i].c_str(), nlTStrToUtf8(m_dataDirectory));
+				::MessageBox(NULL, nlUtf8ToTStr(buffer), _T("Mission compiler"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 
@@ -274,7 +274,7 @@ void CMissionCompilerFeDlg::fillSourceList()
 	addPath.CenterWindow();
 	addPath.ShowWindow(SW_SHOW);
 
-	string log(addPath.m_addPathLog);
+	string log = tStrToUtf8(addPath.m_addPathLog);
 	log += "Reading config file\r\n";
 	addPath.m_addPathLog = log.c_str();
 	addPath.UpdateData(FALSE);
@@ -283,7 +283,7 @@ void CMissionCompilerFeDlg::fillSourceList()
 	// Fill the src list with available primitives
 	for (uint i=0; i<SearchPaths.size(); ++i)
 	{
-		log = addPath.m_addPathLog;
+		log = tStrToUtf8(addPath.m_addPathLog);
 		log += SearchPaths[i]+"\r\n";
 		addPath.m_addPathLog = log.c_str();
 		addPath.UpdateData(FALSE);
@@ -319,7 +319,7 @@ bool CMissionCompilerFeDlg::readConfigFile()
 	}
 	else
 	{
-		AfxMessageBox("Can't find configuration var 'SearchPath', fatal", MB_OK);
+		AfxMessageBox(_T("Can't find configuration var 'SearchPath', fatal"), MB_OK);
 		PostQuitMessage(-1);
 		return false;
 	}
@@ -329,7 +329,7 @@ bool CMissionCompilerFeDlg::readConfigFile()
 		LigoConfigFile = var->asString();
 	else
 	{
-		AfxMessageBox("Can't find configuration var 'ligo_config', fatal", MB_OK);
+		AfxMessageBox(_T("Can't find configuration var 'ligo_config', fatal"), MB_OK);
 		PostQuitMessage(-1);
 		return false;
 	}
@@ -383,7 +383,7 @@ bool CMissionCompilerFeDlg::readConfigFile()
 		{
 			CWnd* pWnd = GetDlgItem(IDC_CHECK_SRV1 + i);
 			pWnd->EnableWindow(TRUE);
-			pWnd->SetWindowText(names->asString(i).c_str());
+			pWnd->SetWindowText(nlUtf8ToTStr(names->asString(i)));
 
 			ServerName.push_back(names->asString(i));
 			ServerPathPrim.push_back(pathsPrim->asString(i));
@@ -412,15 +412,15 @@ void CMissionCompilerFeDlg::updateFileList()
 		for (uint i=0; first != last; ++first)
 		{
 			if (m_filter.GetLength() == 0)
-				m_listSrc.InsertString(i++, first->first.c_str());
+				m_listSrc.InsertString(i++, nlUtf8ToTStr(first->first));
 			else
 			{
 				// check the filter
-				string filter(m_filter.LockBuffer());
+				string filter = tStrToUtf8(m_filter.LockBuffer());
 				m_filter.UnlockBuffer();
 
 				if (first->first.find(filter) != string::npos)
-					m_listSrc.InsertString(i++, first->first.c_str());
+					m_listSrc.InsertString(i++, nlUtf8ToTStr(first->first));
 			}
 		}
 	}
@@ -429,7 +429,7 @@ void CMissionCompilerFeDlg::updateFileList()
 		TFileList::iterator first(_DstList.begin()), last(_DstList.end());
 		for (uint i=0; first != last; ++first,++i)
 		{
-			m_listDst.InsertString(i, first->first.c_str());
+			m_listDst.InsertString(i, nlUtf8ToTStr(first->first));
 		}
 	}
 }
@@ -493,7 +493,7 @@ void CMissionCompilerFeDlg::compile(BOOL publish)
 			dlg.UpdateData(FALSE);
 //			dlg.m_compileLogCtrl.SetSel(compileLog.size(), compileLog.size(), FALSE);
 			dlg.RedrawWindow();
-			AfxMessageBox(msg.c_str());
+			AfxMessageBox(nlUtf8ToTStr(msg));
 			break;
 		}
 	}
@@ -569,7 +569,7 @@ void CMissionCompilerFeDlg::OnAdd()
 	{
 		CString tmp;
 		m_listSrc.GetText(sel[i], tmp);
-		string file(tmp.LockBuffer());
+		string file = tStrToUtf8(tmp.LockBuffer());
 		tmp.UnlockBuffer();
 		_DstList.insert(make_pair(file, _SrcList[file]));
 		_SrcList.erase(file);
@@ -585,7 +585,7 @@ void CMissionCompilerFeDlg::OnAddAll()
 	{
 		CString tmp;
 		m_listSrc.GetText(0, tmp);
-		string file(tmp.LockBuffer());
+		string file = tStrToUtf8(tmp.LockBuffer());
 		tmp.UnlockBuffer();
 
 		_DstList.insert(make_pair(file, _SrcList[file]));
@@ -608,7 +608,7 @@ void CMissionCompilerFeDlg::OnRemove()
 	{
 		CString tmp;
 		m_listDst.GetText(sel[i], tmp);
-		string file(tmp.LockBuffer());
+		string file = tStrToUtf8(tmp.LockBuffer());
 		tmp.UnlockBuffer();
 		_SrcList.insert(make_pair(file, _DstList[file]));
 		_DstList.erase(file);
@@ -662,7 +662,7 @@ void CMissionCompilerFeDlg::OnSpecialRuncompilertest()
 		CMissionCompiler mc;
 		if (!mc.compileMissions(primDoc.RootNode, sourceDocName))
 		{
-			AfxMessageBox("Error while compiling the test primitive, correct error(s) first");
+			AfxMessageBox(_T("Error while compiling the test primitive, correct error(s) first"));
 			return;
 		}
 		TMissionDataPtr testMission = mc.getMission(0);
@@ -699,7 +699,7 @@ void CMissionCompilerFeDlg::OnSpecialRuncompilertest()
 	{
 		string msg = "In primitive ";
 		msg += buildPrimPath(e.Primitive) + ": " + e.Why;
-		AfxMessageBox(utf8ToTStr(msg));
+		AfxMessageBox(nlUtf8ToTStr(msg));
 	}
 	
 }
@@ -991,21 +991,21 @@ void CMissionCompilerFeDlg::OnChangeDir()
 
 	// open a dialog to choose a directory
 	BROWSEINFO	bi;
-	char		str[MAX_PATH];
-	ITEMIDLIST*	pidl;
-	char sTemp[1024];
+	TCHAR		str[MAX_PATH];
+	LPITEMIDLIST pidl;
+	TCHAR sTemp[1024];
 
 	// fill the structure with options
 	bi.hwndOwner = this->m_hWnd;
 	bi.pidlRoot = NULL;
 	bi.pidlRoot = NULL;
 	bi.pszDisplayName = sTemp;
-	bi.lpszTitle = "Choose the data directory";
+	bi.lpszTitle = _T("Choose the data directory");
 	bi.ulFlags = 0;
 	bi.lpfn = dataDirBrowseCallbackProc;
 
-	char sDir[512];
-	strcpy(sDir, m_dataDirectory);
+	TCHAR sDir[512];
+	_tcscpy(sDir, m_dataDirectory);
 	bi.lParam = (LPARAM)sDir;
 	bi.iImage = 0;
 	pidl = SHBrowseForFolder (&bi);
@@ -1013,7 +1013,7 @@ void CMissionCompilerFeDlg::OnChangeDir()
 	if (SHGetPathFromIDList(pidl, str)) 
 	{
 		m_dataDirectory = str;
-		SearchPaths[0] = str;
+		SearchPaths[0] = tStrToUtf8(str);
 		fillSourceList();
 		updateFileList();
 		UpdateData(FALSE);
@@ -1023,7 +1023,7 @@ void CMissionCompilerFeDlg::OnChangeDir()
 void CMissionCompilerFeDlg::OnChangeDataDir() 
 {
 	UpdateData(TRUE);
-	SearchPaths[0] = m_dataDirectory;
+	SearchPaths[0] = tStrToUtf8(m_dataDirectory);
 	fillSourceList();
 	updateFileList();
 	UpdateData(FALSE);

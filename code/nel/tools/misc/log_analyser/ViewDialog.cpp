@@ -359,7 +359,7 @@ void		CViewDialog::getBookmarksAbsoluteLines( vector<int>& bookmarksAbsoluteLine
 
 		NLMISC::CIFile ifs;
 
-		if (ifs.open(tStrToUtf8(filename)))
+		if (ifs.open(NLMISC::tStrToUtf8(filename)))
 		{
 			char line [1024];
 
@@ -370,7 +370,7 @@ void		CViewDialog::getBookmarksAbsoluteLines( vector<int>& bookmarksAbsoluteLine
 				if ( SessionDatePassed )
 				{
 					// Stop if the session is finished
-					if ( (! LogSessionStartDate.IsEmpty()) && (strstr( line, tStrToUtf8(LogDateString).c_str())) )
+					if ( (! LogSessionStartDate.IsEmpty()) && (strstr( line, nlTStrToUtf8(LogDateString))) )
 					{
 						return;
 					}
@@ -394,7 +394,7 @@ void		CViewDialog::getBookmarksAbsoluteLines( vector<int>& bookmarksAbsoluteLine
 				else
 				{
 					// Look for the session beginning
-					if ( strstr( line, tStrToUtf8(LogSessionStartDate).c_str()) != NULL )
+					if ( strstr( line, nlTStrToUtf8(LogSessionStartDate)) != NULL )
 					{
 						SessionDatePassed = true;
 					}
@@ -466,7 +466,7 @@ std::string		CViewDialog::corruptedLinesString( const std::vector<unsigned int>&
 		vector<unsigned int>::const_iterator ivc;
 		for ( ivc=corruptedLines.begin(); ivc!=corruptedLines.end(); ++ivc )
 		{
-			res += NLMISC::toString("\r\n   line %u : %s...", *ivc, tStrToUtf8(Buffer[*ivc].Left(20)).c_str());
+			res += NLMISC::toString("\r\n   line %u : %s...", *ivc, NLMISC::tStrToUtf8(Buffer[*ivc].Left(20)).c_str());
 		}
 		HasCorruptedLines = true;
 	}
@@ -484,7 +484,7 @@ void		CViewDialog::loadFileOrSeries( const vector<int>& bookmarksAbsoluteLines )
 	if ( LogSessionStartDate.IsEmpty() )
 		actualFilenames += ":\r\n";
 	else
-		actualFilenames += " for Session of " + tStrToUtf8(LogSessionStartDate) + ":\r\n";
+		actualFilenames += " for Session of " + NLMISC::tStrToUtf8(LogSessionStartDate) + ":\r\n";
 	bool corruptionDetectionEnabled = (((CButton*)(((CLog_analyserDlg*)GetParent())->GetDlgItem( IDC_DetectCorruptedLines )))->GetCheck() == 1);
 	HasCorruptedLines = false;
 	vector<unsigned int> corruptedLines;
@@ -505,9 +505,9 @@ void		CViewDialog::loadFileOrSeries( const vector<int>& bookmarksAbsoluteLines )
 				if ( SessionDatePassed )
 				{
 					// Stop if the session is finished
-					if ( (! LogSessionStartDate.IsEmpty()) && (strstr( line, LogDateString )) )
+					if ( (! LogSessionStartDate.IsEmpty()) && (strstr( line, nlTStrToUtf8(LogDateString) )) )
 					{
-						actualFilenames += string(filename) + corruptedLinesString( corruptedLines ) + "\r\n";
+						actualFilenames += NLMISC::tStrToUtf8(filename) + corruptedLinesString(corruptedLines) + "\r\n";
 						corruptedLines.clear();
 						goto endOfLoading;
 					}
@@ -540,7 +540,7 @@ void		CViewDialog::loadFileOrSeries( const vector<int>& bookmarksAbsoluteLines )
 				else
 				{
 					// Look for the session beginning
-					if ( strstr( line, LogSessionStartDate ) != NULL )
+					if ( strstr( line, nlTStrToUtf8(LogSessionStartDate) ) != NULL )
 					{
 						SessionDatePassed = true;
 					}
@@ -549,15 +549,15 @@ void		CViewDialog::loadFileOrSeries( const vector<int>& bookmarksAbsoluteLines )
 
 			if ( SessionDatePassed )
 			{
-				actualFilenames += string(filename) + corruptedLinesString( corruptedLines ) + "\r\n";
+				actualFilenames += NLMISC::tStrToUtf8(filename) + corruptedLinesString(corruptedLines) + "\r\n";
 				corruptedLines.clear();
 			}
 		}
 		else
 		{
 			CString s;
-			s.Format( "<Cannot open file %s>\r\n", filename );
-			actualFilenames += s;
+			s.Format(_T( "<Cannot open file %s>\r\n"), filename);
+			actualFilenames += NLMISC::tStrToUtf8(s);
 		}
 	}
 
@@ -598,7 +598,7 @@ bool		CViewDialog::passFilter( const char *text, const std::vector<CString>& pos
 	// 1. Positive filter
 	for ( ilf=posFilter.begin(); ilf!=posFilter.end(); ++ilf )
 	{
-		found = ( strstr( text, *ilf ) != NULL );
+		found = (strstr(text, nlTStrToUtf8(*ilf)) != NULL);
 		if ( found )
 		{
 			yes = true; // positive filter passed (no need to check another one)
@@ -614,7 +614,7 @@ bool		CViewDialog::passFilter( const char *text, const std::vector<CString>& pos
 	// 2. Negative filter
 	for ( ilf=negFilter.begin(); ilf!=negFilter.end(); ++ilf )
 	{
-		found = ( strstr( text, *ilf ) != NULL );
+		found = (strstr(text, nlTStrToUtf8(*ilf)) != NULL);
 		if ( found )
 		{
 			return false; // negative filter not passed (no need to check another one)
@@ -665,14 +665,15 @@ void		CViewDialog::reloadTrace()
 			if ( SessionDatePassed )
 			{
 				// Stop if the session is finished
-				if ( (! LogSessionStartDate.IsEmpty()) && (strstr( line, LogDateString )) )
+				if ((!LogSessionStartDate.IsEmpty()) && (strstr(line, nlTStrToUtf8(LogDateString))))
 					break;
 
 				// Read if it's a TRACE
 				char *pc = strstr( line, "TRACE" );
 				if ( pc != NULL )
 				{
-					if ( PosFilter.empty() || (strncmp( pc-PosFilter[0].GetLength(), PosFilter[0], PosFilter[0].GetLength() ) == 0) )
+					std::string tposFilter0 = NLMISC::tStrToUtf8(PosFilter[0]);
+					if (PosFilter.empty() || (strncmp(pc - PosFilter[0].GetLength(), tposFilter0.c_str(), tposFilter0.size()) == 0))
 					{
 						((CLog_analyserDlg*)GetParent())->insertTraceLine( Index, pc+6 );
 					}
@@ -681,7 +682,7 @@ void		CViewDialog::reloadTrace()
 			else
 			{
 				// Look for the session beginning
-				if ( strstr( line, LogSessionStartDate ) != NULL )
+				if (strstr(line, nlTStrToUtf8(LogSessionStartDate)) != NULL)
 				{
 					SessionDatePassed = true;
 				}
@@ -974,7 +975,7 @@ BOOL CViewDialog::OnInitDialog()
 	CDialog::OnInitDialog();
 	
 	m_ListCtrl.GetHeaderCtrl()->ModifyStyle( 0, HDS_HIDDEN );
-	m_ListCtrl.InsertColumn( 0, "" );
+	m_ListCtrl.InsertColumn(0, _T(""));
 	m_ListCtrl.setViewDialog( this );
 	m_ListCtrl.initIt();
 
@@ -998,11 +999,11 @@ COLORREF CViewDialog::getTextColorForLine( int index, bool selected )
 		return ::GetSysColor(COLOR_HIGHLIGHTTEXT);
 	else
 	{
-		if ( Buffer[index].Find( "DBG" ) != -1 )
+		if ( Buffer[index].Find( _T("DBG") ) != -1 )
 			return RGB(0x80,0x80,0x80);
-		else if ( Buffer[index].Find( "WRN" ) != -1 )
+		else if ( Buffer[index].Find( _T("WRN") ) != -1 )
 			return RGB(0x80,0,0);
-		else if ( (Buffer[index].Find( "ERR" ) != -1) || (Buffer[index].Find( "AST" ) != -1) )
+		else if ( (Buffer[index].Find( _T("ERR") ) != -1) || (Buffer[index].Find( _T("AST") ) != -1) )
 			return RGB(0xFF,0,0);
 		else // INF and others
 			return RGB(0,0,0);
@@ -1038,7 +1039,7 @@ void formatLogStr( CString& str, bool displayHeaders )
 {
 	if ( ! displayHeaders )
 	{
-		int pos = str.Find( " : " );
+		int pos = str.Find( _T(" : ") );
 		if ( pos != -1 )
 		{
 			str.Delete( 0, pos + 3 );
@@ -1156,7 +1157,7 @@ afx_msg LRESULT CViewDialog::OnFindReplace(WPARAM wParam, LPARAM lParam)
 					//BeginFindIndex = getSelectionIndex()+1;
 					//displayString();
 					CString s;
-					s.Format( "Found '%s' (downwards from line %d) at line %d:\r\n%s", FindStr, BeginFindIndex, lineIndex, Buffer[lineIndex] );
+					s.Format( _T("Found '%s' (downwards from line %d) at line %d:\r\n%s"), FindStr, BeginFindIndex, lineIndex, Buffer[lineIndex] );
 					((CLog_analyserDlg*)GetParent())->displayCurrentLine( s );
 					((CLog_analyserDlg*)GetParent())->selectText( 1, matchPos, FindStr.GetLength() );
 					//BeginFindIndex = lineIndex+1;
@@ -1176,7 +1177,7 @@ afx_msg LRESULT CViewDialog::OnFindReplace(WPARAM wParam, LPARAM lParam)
 					//BeginFindIndex = getSelectionIndex()-1;
 					//displayString();
 					CString s;
-					s.Format( "Found '%s' (upwards from line %d) at line %d:\r\n%s", FindStr, BeginFindIndex, lineIndex, Buffer[lineIndex] );
+					s.Format( _T("Found '%s' (upwards from line %d) at line %d:\r\n%s"), FindStr, BeginFindIndex, lineIndex, Buffer[lineIndex] );
 					((CLog_analyserDlg*)GetParent())->displayCurrentLine( s );
 					((CLog_analyserDlg*)GetParent())->selectText( 1, matchPos, FindStr.GetLength() );
 					//BeginFindIndex = lineIndex-1;
@@ -1185,7 +1186,7 @@ afx_msg LRESULT CViewDialog::OnFindReplace(WPARAM wParam, LPARAM lParam)
 			}
 		}
 		CString s;
-		s.Format( "Not found (%s from line %d)", FindDialog->SearchDown() ? "downwards" : "upwards", BeginFindIndex );
+		s.Format( _T("Not found (%s from line %d)"), FindDialog->SearchDown() ? _T("downwards") : _T("upwards"), BeginFindIndex );
 		AfxMessageBox( s );
 		//BeginFindIndex = 0;
 		return 0;

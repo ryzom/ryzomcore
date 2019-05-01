@@ -182,8 +182,8 @@ bool CGeorgesEditDocForm::initDocument (const char *dfnName, bool newElement)
 
 	// Set file name and title
 	std::string name2 = toLower(NLMISC::CFile::getFilenameWithoutExtension(dfnName));
-	SetPathName (utf8ToTStr("*." + name2), FALSE);
-	SetTitle (utf8ToTStr("New " + name2 + " form"));
+	SetPathName(nlUtf8ToTStr("*." + name2), FALSE);
+	SetTitle(nlUtf8ToTStr("New " + name2 + " form"));
 
 	// TMp
 	if (newElement)
@@ -223,10 +223,10 @@ BOOL CGeorgesEditDocForm::OnNewDocument()
 		string defFilename = theApp.RootSearchPath;
 		defFilename += "*.dfn";
 
-		CFileDialog dlgFile (TRUE, _T("*.dfn"), defFilename.c_str (), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, DfnFilter, theApp.m_pMainWnd);
+		CFileDialog dlgFile(TRUE, _T("*.dfn"), nlUtf8ToTStr(defFilename.c_str()), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, DfnFilter, theApp.m_pMainWnd);
 		if (dlgFile.DoModal () == IDOK)
 		{
-			if (initDocument (dlgFile.GetFileName (), true))
+			if (initDocument(tStrToUtf8(dlgFile.GetFileName()).c_str(), true))
 				return TRUE;
 		}
 	}
@@ -491,7 +491,7 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		try
 		{
 			// Read the form with the loader
-			Type = FormLoader.loadType (lpszPathName);
+			Type = FormLoader.loadType(tStrToUtf8(lpszPathName));
 			if (!Type)
 			{
 				char msg[512];
@@ -517,11 +517,11 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		try
 		{
 			// Read the form with the loader
-			Dfn = FormLoader.loadFormDfn (lpszPathName, true);
+			Dfn = FormLoader.loadFormDfn (tStrToUtf8(lpszPathName), true);
 			if (!Dfn)
 			{
 				char msg[512];
-				smprintf (msg, 512, "Error while loading Dfn file %s", lpszPathName);
+				smprintf (msg, 512, "Error while loading Dfn file %s", tStrToUtf8(lpszPathName).c_str());
 				theApp.outputError (msg);
 				return FALSE;
 			}
@@ -554,13 +554,13 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 				if (theApp.getFormDocTemplate (dfnName.c_str ()) == NULL)
 				{
 					char message[512];
-					smprintf (message, 512, "Can't open the file '%s'.", lpszPathName);
+					smprintf (message, 512, "Can't open the file '%s'.", tStrToUtf8(lpszPathName).c_str());
 					theApp.outputError (message);
 					return FALSE;
 				}
 				
 				// Read the form with the loader
-				if (!loadFormFile (lpszPathName))
+				if (!loadFormFile (tStrToUtf8(lpszPathName).c_str()))
 					return FALSE;
 
 				if (theApp.ExeStandalone)
@@ -743,7 +743,7 @@ BOOL CGeorgesEditDoc::OnSaveDocument(LPCTSTR lpszPathName)
 
 	// Open the filt
 	COFile file;
-	if (file.open (lpszPathName))
+	if (file.open(tStrToUtf8(lpszPathName)))
 	{
 		try
 		{
@@ -778,7 +778,7 @@ BOOL CGeorgesEditDoc::OnSaveDocument(LPCTSTR lpszPathName)
 					Dfn->Header.MinorVersion++;
 					flushValueChange ();
 				}
-				Dfn->write (xmlStream.getDocument (), lpszPathName);
+				Dfn->write (xmlStream.getDocument (), tStrToUtf8(lpszPathName));
 				modify (NULL, NULL, false);
 				UpdateAllViews (NULL);
 				return TRUE;
@@ -793,11 +793,11 @@ BOOL CGeorgesEditDoc::OnSaveDocument(LPCTSTR lpszPathName)
 					((CForm*)(UForm*)Form)->Header.MinorVersion++;				
 					flushValueChange ();
 				}
-				((CForm*)(UForm*)Form)->write (xmlStream.getDocument (), lpszPathName);
-				if (strcmp (xmlStream.getErrorString (), "") != 0)
+				((CForm*)(UForm*)Form)->write (xmlStream.getDocument (), tStrToUtf8(lpszPathName));
+				if (strcmp(xmlStream.getErrorString().c_str(), "") != 0)
 				{
 					char message[512];
-					smprintf (message, 512, "Error while saving file: %s", xmlStream.getErrorString ());
+					smprintf (message, 512, "Error while saving file: %s", xmlStream.getErrorString().c_str());
 					theApp.outputError (message);
 				}
 				modify (NULL, NULL, false);
@@ -1122,7 +1122,7 @@ void CGeorgesEditDoc::getFilename (std::string &pathname)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	pathname = (const char*)GetPathName ();
+	pathname = tStrToUtf8(GetPathName());
 }
 
 // ***************************************************************************
@@ -1131,7 +1131,7 @@ void CGeorgesEditDoc::getTitle (std::string &title)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	title = (const char*)GetTitle ();
+	title = tStrToUtf8(GetTitle());
 }
 
 // ***************************************************************************
@@ -1327,11 +1327,11 @@ void CGeorgesEditDoc::setModifiedState (bool modified)
 	}
 	else
 	{
-		string title = (const char*)GetTitle ();
+		string title = tStrToUtf8(GetTitle());
 		if ( (title.size ()>=2) && (title[title.size()-1] == '*') && (title[title.size()-2] == ' ') )
 		{
 			title.resize (title.size () - 2);
-			SetTitle (title.c_str());
+			SetTitle(nlUtf8ToTStr(title));
 		}
 	}
 }

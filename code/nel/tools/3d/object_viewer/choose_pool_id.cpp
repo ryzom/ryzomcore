@@ -53,10 +53,10 @@ void CChoosePoolID::OnOK()
 	CString val;
 	GetDlgItem(IDC_POOL_ID)->GetWindowText(val);
 
-	if (NLMISC::fromString(tStrToUtf8(val), PoolID))
+	if (NLMISC::fromString(NLMISC::tStrToUtf8(val), PoolID))
 	{
 		GetDlgItem(IDC_POOL_NAME)->GetWindowText(val);
-		Name = tStrToUtf8(val);
+		Name = NLMISC::tStrToUtf8(val);
 		CDialog::OnOK();
 	}
 	else
@@ -71,8 +71,8 @@ BOOL CChoosePoolID::OnInitDialog()
 
 	std::string val = NLMISC::toString(PoolID);
 
-	GetDlgItem(IDC_POOL_ID)->SetWindowText(utf8ToTStr(val));
-	GetDlgItem(IDC_POOL_NAME)->SetWindowText(utf8ToTStr(Name));
+	GetDlgItem(IDC_POOL_ID)->SetWindowText(nlUtf8ToTStr(val));
+	GetDlgItem(IDC_POOL_NAME)->SetWindowText(nlUtf8ToTStr(Name));
 
 	if (_FreezeID)
 	{

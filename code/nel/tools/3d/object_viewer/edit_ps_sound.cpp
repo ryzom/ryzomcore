@@ -195,7 +195,7 @@ void CEditPSSound::OnChangeSoundName()
 {
 	nlassert(_Sound);
 	UpdateData();
-	_Sound->setSoundName(NLMISC::CSheetId(tStrToUtf8(m_SoundName), "sound"));	
+	_Sound->setSoundName(NLMISC::CSheetId(NLMISC::tStrToUtf8(m_SoundName), "sound"));	
 	 updateModifiedFlag();
 }
 
@@ -209,7 +209,7 @@ void CEditPSSound::OnSpawn()
 // play the currently selected sound
 void CEditPSSound::OnPlaySound() 
 {
-	CSoundSystem::play(tStrToUtf8(m_SoundName));
+	CSoundSystem::play(NLMISC::tStrToUtf8(m_SoundName));
 }
 
 void CEditPSSound::OnMute() 

@@ -762,10 +762,10 @@ void updateEntities ()
 			switch (entity.Type)
 			{
 			case CEntity::Self:
-				jdir = CVector(-(float)cos(entity.Angle), -(float)sin(entity.Angle), 0.0f);
+				jdir = CVector(-(float)cos(entity.Angle - (Pi * 0.5)), -(float)sin(entity.Angle - (Pi * 0.5)), 0.0f);
 				break;
 			case CEntity::Other:
-				jdir = CVector(-(float)cos(entity.Angle), -(float)sin(entity.Angle), 0.0f);
+				jdir = CVector(-(float)cos(entity.Angle - (Pi * 0.5)), -(float)sin(entity.Angle - (Pi * 0.5)), 0.0f);
 				break;
 			case CEntity::Snowball:
 				jdir = entity.Trajectory.evalSpeed(LocalTime).normed();

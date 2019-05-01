@@ -72,3 +72,5 @@ NEL_3DSMAX_SHARED_API NLMISC::INelContext &GetSharedNelContext()
 	}
 	return NLMISC::INelContext::getInstance();
 }
+
+/* end of file */

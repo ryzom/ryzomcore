@@ -21,6 +21,8 @@
 #include "nel/misc/file.h"
 #include "../nel_patch_lib/rpo.h"
 
+#include "../nel_3dsmax_shared/string_common.h"
+
 #define TILE_UTILITY_CLASS_ID	Class_ID(0x2301c0, 0x4c156b46)
 
 extern ClassDesc* GetRGBAddDesc();
@@ -192,7 +194,7 @@ static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, 
 						ofn.lpTemplateName=0;
 						if (GetOpenFileName(&ofn))
 						{
-							theTile_utility.Load (tStrToUtf8(sPath));
+							theTile_utility.Load (MCharStrToUtf8(sPath));
 							theTile_utility.SetLand (theTile_utility.Land);
 							theTile_utility.SetupUI ();
 						}
@@ -287,7 +289,7 @@ void Tile_utility::Load (const std::string& path)
 		if (!file.open (path))
 		{
 			std::string tmp = toString("File not found: %s", path.c_str());
-			MessageBox (NULL, utf8ToTStr(tmp), _T("Error.."), MB_OK|MB_ICONEXCLAMATION);
+			MessageBox (NULL, MaxTStrFromUtf8(tmp).data(), _T("Error.."), MB_OK|MB_ICONEXCLAMATION);
 		}
 		else
 		{
@@ -299,7 +301,7 @@ void Tile_utility::Load (const std::string& path)
 	catch (const EStream &stream)
 	{
 		std::string tmp = toString("Error while loading %s:\n\n%s", path.c_str(), stream.what());
-		MessageBox (NULL, utf8ToTStr(tmp), _T("Error.."), MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (NULL, MaxTStrFromUtf8(tmp).data(), _T("Error.."), MB_OK|MB_ICONEXCLAMATION);
 	}
 }
 
@@ -337,7 +339,7 @@ void Tile_utility::SetupUI ()
 		std::string name=Bank.getLand(nLand)->getName();
 		if (hCombo)
 		{
-			SendMessage (hCombo, CB_INSERTSTRING, -1, (LPARAM)utf8ToTStr(name));
+			SendMessage (hCombo, CB_INSERTSTRING, -1, (LPARAM)MaxTStrFromUtf8(name).data());
 		}
 	}
 
@@ -369,7 +371,7 @@ void Tile_utility::SetupUI ()
 				name[0] = upName[0];
 			}
 
-			SetWindowText (hwnd, utf8ToTStr(name));
+			SetWindowText (hwnd, MaxTStrFromUtf8(name).data());
 
 			// Static text
 			TCHAR sTmp[256];
@@ -451,7 +453,7 @@ bool Tile_utility::SetupMaterial () const
 					tex->SetAlphaSource (ALPHA_NONE);
 					tex->SetAlphaAsMono (FALSE);
 					tex->SetAlphaAsRGB (FALSE);
-					tex->SetMapName (utf8ToTStr(Bank.getAbsPath() + tile->getRelativeFileName(CTile::diffuse)));
+					tex->SetMapName (MaxTStrFromUtf8(Bank.getAbsPath() + tile->getRelativeFileName(CTile::diffuse)).data());
 
 					// Assign BitmapTex
 					rgb->SetSubTexmap (0, tex);
@@ -471,7 +473,7 @@ bool Tile_utility::SetupMaterial () const
 					tex->SetAlphaSource (ALPHA_NONE);
 					tex->SetAlphaAsMono (FALSE);
 					tex->SetAlphaAsRGB (FALSE);
-					tex->SetMapName (utf8ToTStr(Bank.getAbsPath() + tile->getRelativeFileName(CTile::additive)));
+					tex->SetMapName (MaxTStrFromUtf8(Bank.getAbsPath() + tile->getRelativeFileName(CTile::additive)).data());
 
 					// Assign BitmapTex
 					rgb->SetSubTexmap (1, tex);

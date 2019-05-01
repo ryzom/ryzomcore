@@ -70,10 +70,10 @@ public:
 	static void setRootKey(const std::string &root);
 
 	/// Read a value from registry.
-	static std::string getRegKey(const std::string &Entry);
+	static std::string getRegKey(const std::string &entry);
 
 	/// Write a value to registry.
-	static bool setRegKey(const std::string &ValueName, const std::string &Value);
+	static bool setRegKey(const std::string &valueName, const std::string &value);
 
 	/// Get desktop current color depth without using UDriver.
 	static uint getCurrentColorDepth();

@@ -362,7 +362,7 @@ void CSoundPlugin::setActiveDocument(IEditDocument *pdoc)
 
 			if (invalid && !_InvalidSound)
 			{
-				MessageBox(NULL, "This sound contains an infinite recursion !", "Sound Error", MB_ICONERROR);
+				MessageBox(NULL, _T("This sound contains an infinite recursion !"), _T("Sound Error"), MB_ICONERROR);
 			}
 
 			// pre-create the sound to force loading any missing sample bank (thus avoiding unwanted message box)
@@ -410,7 +410,7 @@ void CSoundPlugin::setActiveDocument(IEditDocument *pdoc)
 						message += (*first)+"\n";
 				}
 
-				MessageBox(NULL, message.c_str(), "Sound incomplete", MB_ICONWARNING);
+				MessageBox(NULL, nlUtf8ToTStr(message), _T("Sound incomplete"), MB_ICONWARNING);
 			}
 			
 
@@ -474,12 +474,12 @@ void CSoundPlugin::onCreateDocument(IEditDocument *document)
 void CSoundPlugin::createNew()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	char BASED_CODE szFilter[] = "Sound (*.sound)|*.sound|All Files (*.*)|*.*||";
-	CFileDialog fileDlg(FALSE, ".sound", "*.sound", OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
+	TCHAR BASED_CODE szFilter[] = _T("Sound (*.sound)|*.sound|All Files (*.*)|*.*||");
+	CFileDialog fileDlg(FALSE, _T(".sound"), _T("*.sound"), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
 
 	if (fileDlg.DoModal() == IDOK)
 	{
-		string filename = (const char*) fileDlg.GetPathName();
+		string filename = NLMISC::tStrToUtf8(fileDlg.GetPathName());
 		_GlobalInterface->createDocument("sound.dfn", filename.c_str());
 	}
 }
@@ -585,8 +585,7 @@ void CSoundPlugin::play(std::string &filename)
 	}
 	catch (ESoundDriver& e)
 	{
-		string reason = e.what();
-		MessageBox (NULL, reason.c_str(), "Sound plugin", MB_OK);
+		MessageBox(NULL, nlUtf8ToTStr(e.what()), _T("Sound plugin"), MB_OK);
 	}
 }
 

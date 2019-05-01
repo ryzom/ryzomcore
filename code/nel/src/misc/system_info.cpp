@@ -1460,7 +1460,7 @@ uint64 CSystemInfo::availableHDSpace (const string &filename)
 	return (uint64)stfs.f_bavail * (uint64)stfs.f_bsize;
 #else
 	ULARGE_INTEGER freeSpace = {0};
-	BOOL bRes = ::GetDiskFreeSpaceExW(utf8ToWide(path), &freeSpace, NULL, NULL);
+	BOOL bRes = ::GetDiskFreeSpaceExW(nlUtf8ToWide(path), &freeSpace, NULL, NULL);
 	if (!bRes) return 0;
 
 	return (uint64)freeSpace.QuadPart;

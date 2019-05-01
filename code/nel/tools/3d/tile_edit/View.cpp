@@ -242,7 +242,7 @@ int TileList::setTile128 (int tile, const std::string& name, NL3D::CTile::TBitma
 		{
 			std::string msg = tileBank2.getAbsPath() + troncated + "\nContinue ?";
 
-			return (int)(MessageBox (NULL, utf8ToTStr(msg), _T("Can't load bitmap."), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
+			return (int)(MessageBox(NULL, nlUtf8ToTStr(msg), _T("Can't load bitmap."), MB_YESNO | MB_ICONEXCLAMATION) == IDYES);
 		}
 		else
 		{
@@ -261,7 +261,7 @@ int TileList::setTile128 (int tile, const std::string& name, NL3D::CTile::TBitma
 				static const char* comp[]={"Red", "Green", "Blue", "Alpha", ""};
 				std::string msg = NLMISC::toString("%s\nPixel: %d (%s)\nContinue ?", CTileSet::getErrorMessage (error), pixel, comp[composante]);
 
-				return (int)(MessageBox (NULL, utf8ToTStr(msg), _T("Can't add tile"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
+				return (int)(MessageBox(NULL, nlUtf8ToTStr(msg), _T("Can't add tile"), MB_YESNO | MB_ICONEXCLAMATION) == IDYES);
 			}
 			else
 			{
@@ -289,7 +289,7 @@ int TileList::setTile128 (int tile, const std::string& name, NL3D::CTile::TBitma
 	{
 		// Error: bitmap not in the absolute path..
 		std::string msg = NLMISC::toString("The bitmap %s is not in the absolute path %s.\nContinue ?", name.c_str(), tileBank2.getAbsPath ().c_str());
-		return (int)(MessageBox (NULL, utf8ToTStr(msg), _T("Load error"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
+		return (int)(MessageBox(NULL, nlUtf8ToTStr(msg), _T("Load error"), MB_YESNO | MB_ICONEXCLAMATION) == IDYES);
 	}
 
 	return 1;
@@ -307,7 +307,7 @@ int TileList::setTile256 (int tile, const std::string& name, NL3D::CTile::TBitma
 		if (!loadPic(tileBank2.getAbsPath ()+troncated, tampon, Width, Height))
 		{
 			std::string msg = tileBank2.getAbsPath() + troncated + "\nContinue ?";
-			return (int)(MessageBox (NULL, utf8ToTStr(msg), _T("Can't load bitmap."), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
+			return (int)(MessageBox(NULL, nlUtf8ToTStr(msg), _T("Can't load bitmap."), MB_YESNO | MB_ICONEXCLAMATION) == IDYES);
 		}
 		else
 		{
@@ -326,7 +326,7 @@ int TileList::setTile256 (int tile, const std::string& name, NL3D::CTile::TBitma
 			{
 				static const char* comp[] = { "Red", "Green", "Blue", "Alpha", "" };
 				std::string msg = NLMISC::toString("%s\nPixel: %d (%s)\nContinue ?", CTileSet::getErrorMessage (error), pixel, comp[composante]);
-				return (int)(MessageBox (NULL, utf8ToTStr(msg), _T("Can't add tile"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
+				return (int)(MessageBox(NULL, nlUtf8ToTStr(msg), _T("Can't add tile"), MB_YESNO | MB_ICONEXCLAMATION) == IDYES);
 			}
 			else
 			{
@@ -351,7 +351,7 @@ int TileList::setTile256 (int tile, const std::string& name, NL3D::CTile::TBitma
 	{
 		// Error: bitmap not in the absolute path..
 		std::string msg = NLMISC::toString("The bitmap %s is not in the absolute path %s.\nContinue ?", name.c_str(), tileBank2.getAbsPath ().c_str());
-		return (int)(MessageBox (NULL, utf8ToTStr(msg), _T("Load error"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
+		return (int)(MessageBox(NULL, nlUtf8ToTStr(msg), _T("Load error"), MB_YESNO | MB_ICONEXCLAMATION) == IDYES);
 	}
 
 	return 1;
@@ -372,7 +372,7 @@ int TileList::setTileTransition (int tile, const std::string& name, NL3D::CTile:
 		if (!loadPic(tileBank2.getAbsPath ()+troncated, tampon, Width, Height))
 		{
 			std::string msg = tileBank2.getAbsPath() + troncated + "\nContinue ?";
-			return (int)(MessageBox (NULL, utf8ToTStr(msg), _T("Can't load bitmap."), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
+			return (int)(MessageBox(NULL, nlUtf8ToTStr(msg), _T("Can't load bitmap."), MB_YESNO | MB_ICONEXCLAMATION) == IDYES);
 		}
 		else
 		{
@@ -390,7 +390,7 @@ int TileList::setTileTransition (int tile, const std::string& name, NL3D::CTile:
 			{
 				static const char* comp[]={"Red", "Green", "Blue", "Alpha", ""};
 				std::string msg = NLMISC::toString("%s\nPixel: %d (%s)\nContinue ?", CTileSet::getErrorMessage(error), pixel, comp[composante]);
-				return MessageBox (NULL, utf8ToTStr(msg), _T("Can't add tile"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES;
+				return MessageBox(NULL, nlUtf8ToTStr(msg), _T("Can't add tile"), MB_YESNO | MB_ICONEXCLAMATION) == IDYES;
 			}
 			else
 			{
@@ -418,7 +418,7 @@ int TileList::setTileTransition (int tile, const std::string& name, NL3D::CTile:
 	{
 		// Error: bitmap not in the absolute path..
 		std::string msg = NLMISC::toString("The bitmap %s is not in the absolute path %s.", name.c_str(), tileBank2.getAbsPath ().c_str());
-		MessageBox (NULL, utf8ToTStr(msg), _T("Load error"), MB_OK|MB_ICONEXCLAMATION);
+		MessageBox(NULL, nlUtf8ToTStr(msg), _T("Load error"), MB_OK | MB_ICONEXCLAMATION);
 	}
 
 	return 1;
@@ -439,7 +439,7 @@ int TileList::setDisplacement (int tile, const std::string& name)
 			if (!_LoadBitmap(tileBank2.getAbsPath() + troncated, &theListDisplacement[tile].BmpInfo, theListDisplacement[tile].Bits, NULL, 0))
 			{
 				std::string msg = tileBank2.getAbsPath() + troncated;
-				MessageBox(NULL, utf8ToTStr(msg), _T("Can't load file"), MB_OK | MB_ICONEXCLAMATION);
+				MessageBox(NULL, nlUtf8ToTStr(msg), _T("Can't load file"), MB_OK | MB_ICONEXCLAMATION);
 			}
 			else
 			{
@@ -447,7 +447,7 @@ int TileList::setDisplacement (int tile, const std::string& name)
 				if ((theListDisplacement[tile].BmpInfo.bmiHeader.biWidth!=32)||(-theListDisplacement[tile].BmpInfo.bmiHeader.biHeight!=32))
 				{
 					// Error message
-					MessageBox (NULL, _T("Invalid size: displacement map must be 32x32 8 bits."), utf8ToTStr(troncated),
+					MessageBox(NULL, _T("Invalid size: displacement map must be 32x32 8 bits."), nlUtf8ToTStr(troncated),
 						MB_OK|MB_ICONEXCLAMATION);
 
 					// Free the bitmap
@@ -468,7 +468,7 @@ int TileList::setDisplacement (int tile, const std::string& name)
 	{
 		// Error: bitmap not in the absolute path..
 		std::string msg = NLMISC::toString("The bitmap %s is not in the absolute path %s.", name.c_str(), tileBank2.getAbsPath ().c_str());
-		MessageBox (NULL, utf8ToTStr(msg), _T("Load error"), MB_OK|MB_ICONEXCLAMATION);
+		MessageBox(NULL, nlUtf8ToTStr(msg), _T("Load error"), MB_OK | MB_ICONEXCLAMATION);
 	}
 
 	return 1;
@@ -486,7 +486,7 @@ int TileList::setTileTransitionAlpha (int tile, const std::string& name, int rot
 		if (!loadPic(tileBank2.getAbsPath ()+troncated, tampon, Width, Height))
 		{
 			std::string msg = tileBank2.getAbsPath() + troncated + "\nContinue ?";
-			return MessageBox (NULL, utf8ToTStr(msg), _T("Can't load bitmap."), MB_YESNO|MB_ICONEXCLAMATION)==IDYES;
+			return MessageBox(NULL, nlUtf8ToTStr(msg), _T("Can't load bitmap."), MB_YESNO | MB_ICONEXCLAMATION) == IDYES;
 		}
 		else
 		{
@@ -528,7 +528,7 @@ int TileList::setTileTransitionAlpha (int tile, const std::string& name, int rot
 
 				msg += "\nContinue ?";
 				
-				return MessageBox (NULL, utf8ToTStr(msg), _T("Can't add tile"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES;
+				return MessageBox(NULL, nlUtf8ToTStr(msg), _T("Can't add tile"), MB_YESNO | MB_ICONEXCLAMATION) == IDYES;
 			}
 			else
 			{
@@ -542,7 +542,7 @@ int TileList::setTileTransitionAlpha (int tile, const std::string& name, int rot
 	{
 		// Error: bitmap not in the absolute path..
 		TCHAR msg[512];
-		_stprintf(msg, _T("The bitmap %s is not in the absolute path %s."), utf8ToTStr(name), utf8ToTStr(tileBank2.getAbsPath ()));
+		_stprintf(msg, _T("The bitmap %s is not in the absolute path %s."), nlUtf8ToTStr(name), nlUtf8ToTStr(tileBank2.getAbsPath()));
 		MessageBox (NULL, msg, _T("Load error"), MB_OK|MB_ICONEXCLAMATION);
 	}
 
@@ -681,7 +681,7 @@ bool TileInfo::Load (int index, std::vector<NLMISC::CBGRA>* Alpha)
 		if (!_LoadBitmap(tileBank2.getAbsPath() + getRelativeFileName (CTile::diffuse, index), &BmpInfo, Bits, Alpha, 0))
 		{
 			bRes=false;
-			MessageBox (NULL, utf8ToTStr(tileBank2.getAbsPath() + getRelativeFileName (CTile::diffuse, index)), _T("Can't load file"), MB_OK|MB_ICONEXCLAMATION);
+			MessageBox(NULL, nlUtf8ToTStr(tileBank2.getAbsPath() + getRelativeFileName(CTile::diffuse, index)), _T("Can't load file"), MB_OK | MB_ICONEXCLAMATION);
 		}
 		else
 			loaded=1;
@@ -691,7 +691,7 @@ bool TileInfo::Load (int index, std::vector<NLMISC::CBGRA>* Alpha)
 		if (!_LoadBitmap(tileBank2.getAbsPath() + getRelativeFileName (CTile::additive, index), &nightBmpInfo, nightBits, Alpha, 0))
 		{
 			bRes=false;
-			MessageBox (NULL, utf8ToTStr(tileBank2.getAbsPath() + getRelativeFileName (CTile::additive, index)), _T("Can't load file"), MB_OK|MB_ICONEXCLAMATION);
+			MessageBox(NULL, nlUtf8ToTStr(tileBank2.getAbsPath() + getRelativeFileName(CTile::additive, index)), _T("Can't load file"), MB_OK | MB_ICONEXCLAMATION);
 		}
 		else
 			nightLoaded=1;
@@ -702,7 +702,7 @@ bool TileInfo::Load (int index, std::vector<NLMISC::CBGRA>* Alpha)
 			tileBank2.getTile (index)->getRotAlpha ()))
 		{
 			bRes=false;
-			MessageBox (NULL, utf8ToTStr(tileBank2.getAbsPath() + getRelativeFileName (CTile::alpha, index)), _T("Can't load file"), MB_OK|MB_ICONEXCLAMATION);
+			MessageBox(NULL, nlUtf8ToTStr(tileBank2.getAbsPath() + getRelativeFileName(CTile::alpha, index)), _T("Can't load file"), MB_OK | MB_ICONEXCLAMATION);
 		}
 		else
 			alphaLoaded=1;
@@ -1145,7 +1145,7 @@ void CTView::OnDropFiles(HDROP hDropInfo)
 			case 0:
 				{
 					int index=InfoList.addTile128 ();
-					if (InfoList.setTile128 (index, tStrToUtf8(FileName), Texture==1?CTile::diffuse:(Texture==2?CTile::additive:CTile::alpha)))
+					if (InfoList.setTile128 (index, NLMISC::tStrToUtf8(FileName), Texture==1?CTile::diffuse:(Texture==2?CTile::additive:CTile::alpha)))
 					{
 						tilelist::iterator it = InfoList.GetLast(parent->m_128x128);
 						it--;
@@ -1159,7 +1159,7 @@ void CTView::OnDropFiles(HDROP hDropInfo)
 			case 1:
 				{
 					int index=InfoList.addTile256 ();
-					if (InfoList.setTile256 (index, tStrToUtf8(FileName), Texture==1?CTile::diffuse:(Texture==2?CTile::additive:CTile::alpha)))
+				    if (InfoList.setTile256(index, NLMISC::tStrToUtf8(FileName), Texture == 1 ? CTile::diffuse : (Texture == 2 ? CTile::additive : CTile::alpha)))
 					{
 						tilelist::iterator it = InfoList.GetLast(parent->m_128x128);
 						it--;
@@ -1534,7 +1534,7 @@ LRESULT CTView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 		else if ((id==ID_MENU_ADD)||(id==ID_MENU_REPLACE))
 		{
 			_chdir (LastPath.c_str());
-			CFileDialog load(true, NULL, utf8ToTStr(LastPath), OFN_ENABLESIZING | OFN_ALLOWMULTISELECT, _T("PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||"), NULL);
+			CFileDialog load(true, NULL, nlUtf8ToTStr(LastPath), OFN_ENABLESIZING | OFN_ALLOWMULTISELECT, _T("PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||"), NULL);
 			load.m_ofn.lpstrFile = new TCHAR[10000]; // buffer contains filenames list
 			load.m_ofn.lpstrFile[0] = 0;
 			// with 10 KB we should be large enough...
@@ -1551,12 +1551,12 @@ LRESULT CTView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 				{
 					CString str = load.GetNextPathName(p);
 
-					LastPath = NLMISC::CFile::getPath(tStrToUtf8(str));
+					LastPath = NLMISC::CFile::getPath(NLMISC::tStrToUtf8(str));
 
 					if (!str.IsEmpty())
 					{
 						int index=0;
-						std::string pathname = tStrToUtf8(str);
+						std::string pathname = NLMISC::tStrToUtf8(str);
 
 						// Add mode, to the end of the list
 						if (id==ID_MENU_ADD)

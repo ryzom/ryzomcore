@@ -112,7 +112,7 @@ void CFindPrimitiveDlg::OnFindNext()
 //					||	(	_Locator.Primitive->getPropertyByName ("selected", property)
 					||	(	getPrimitiveEditor(_Locator.Primitive)->getSelected()))
 //						&&	property)	)
-				&&	_Locator.Primitive->getPropertyByName (tStrToUtf8(Property), property)
+				&&	_Locator.Primitive->getPropertyByName (NLMISC::tStrToUtf8(Property), property)
 				&&	property)
 			{
 				// Kind of primitive ?
@@ -120,7 +120,7 @@ void CFindPrimitiveDlg::OnFindNext()
 				if (propString)
 				{
 					// Good value ?
-					if	(propString->String.find(tStrToUtf8(Value))!=std::string::npos)
+					if (propString->String.find(NLMISC::tStrToUtf8(Value)) != std::string::npos)
 					{
 						found = true;
 					}
@@ -135,7 +135,7 @@ void CFindPrimitiveDlg::OnFindNext()
 						uint i;
 						for (i=0; i<propStringArray->StringArray.size (); i++)
 						{
-							if	(propStringArray->StringArray[i].find(tStrToUtf8(Value))!=std::string::npos)
+							if (propStringArray->StringArray[i].find(NLMISC::tStrToUtf8(Value)) != std::string::npos)
 							{
 								found = true;
 							}
@@ -230,7 +230,7 @@ void CFindPrimitiveDlg::replace(bool all)
 //					||	(	_Locator.Primitive->getPropertyByName ("selected", property)
 					||	(	getPrimitiveEditor(_Locator.Primitive)->getSelected()))
 //						&&	property)	)
-				&&	_Locator.Primitive->getPropertyByName (tStrToUtf8(Property), property)
+			    && _Locator.Primitive->getPropertyByName(NLMISC::tStrToUtf8(Property), property)
 				&&	property	)
 			{
 				// Kind of primitive ?
@@ -238,14 +238,14 @@ void CFindPrimitiveDlg::replace(bool all)
 				if	(propString)
 				{
 					// Good value ?
-					if	(propString->String.find(tStrToUtf8(Value))!=std::string::npos)
+					if (propString->String.find(NLMISC::tStrToUtf8(Value)) != std::string::npos)
 					{
 						if	(!firstTime	&&	!all)
 							break;
 
 						CString	tmp(propString->String.c_str());
 						tmp.Replace(Value, ReplaceText);
-						doc->addModification (new CActionSetPrimitivePropertyString (_Locator, tStrToUtf8(Property), tStrToUtf8(tmp), false));
+						doc->addModification(new CActionSetPrimitivePropertyString(_Locator, NLMISC::tStrToUtf8(Property), NLMISC::tStrToUtf8(tmp), false));
 						doc->addModification (new CActionSelect (_Locator));
 						
 						firstTime=false;
@@ -265,7 +265,7 @@ void CFindPrimitiveDlg::replace(bool all)
 						for (i=0; i<propStringArray->StringArray.size (); i++)
 						{
 							//	todo.
-							if	(propStringArray->StringArray[i].find(tStrToUtf8(Value))!=std::string::npos)
+							if (propStringArray->StringArray[i].find(NLMISC::tStrToUtf8(Value)) != std::string::npos)
 							{
 								if	(	!firstTime
 									&&	!all)
@@ -281,7 +281,7 @@ void CFindPrimitiveDlg::replace(bool all)
 										newStrings=propStringArray->StringArray;
 										firstChange=false;
 									}
-									newStrings[i] = tStrToUtf8(tmp);
+									newStrings[i] = NLMISC::tStrToUtf8(tmp);
 								}
 								firstTime=false;
 							}
@@ -290,7 +290,7 @@ void CFindPrimitiveDlg::replace(bool all)
 
 						if (!firstChange)	//	have to make a change
 						{
-							doc->addModification (new CActionSetPrimitivePropertyStringArray (_Locator, tStrToUtf8(Property), newStrings, false));
+							doc->addModification(new CActionSetPrimitivePropertyStringArray(_Locator, NLMISC::tStrToUtf8(Property), newStrings, false));
 							doc->addModification (new CActionSelect (_Locator));
 						}
 

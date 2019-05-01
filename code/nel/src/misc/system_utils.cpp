@@ -323,58 +323,55 @@ void CSystemUtils::setRootKey(const std::string &root)
 	RootKey = root;
 }
 
-string CSystemUtils::getRegKey(const string &Entry)
+string CSystemUtils::getRegKey(const string &entry)
 {
 	string ret;
 #ifdef NL_OS_WINDOWS
 	HKEY hkey;
 
-	if (RegOpenKeyExW(HKEY_CURRENT_USER, utf8ToWide(RootKey), 0, KEY_READ, &hkey) == ERROR_SUCCESS)
+	if (RegOpenKeyExW(HKEY_CURRENT_USER, nlUtf8ToWide(RootKey), 0, KEY_READ, &hkey) == ERROR_SUCCESS)
 	{
 		DWORD	dwType	= 0L;
 		DWORD	dwSize	= KeyMaxLength;
-		wchar_t Buffer[KeyMaxLength];
+		wchar_t buffer[KeyMaxLength];
 
-		if (RegQueryValueExW(hkey, utf8ToWide(Entry), NULL, &dwType, (LPBYTE)Buffer, &dwSize) != ERROR_SUCCESS)
+		if (RegQueryValueExW(hkey, nlUtf8ToWide(entry), NULL, &dwType, (LPBYTE)buffer, &dwSize) != ERROR_SUCCESS)
 		{
-			nlwarning("Can't get the reg key '%s'", Entry.c_str());
+			nlwarning("Can't get the reg key '%s'", entry.c_str());
 		}
 		else
 		{
-			ret = wideToUtf8(Buffer);
+			ret = wideToUtf8(buffer);
 		}
 
 		RegCloseKey(hkey);
 	}
 	else
 	{
-		nlwarning("Can't get the reg key '%s'", Entry.c_str());
+		nlwarning("Can't get the reg key '%s'", entry.c_str());
 	}
 #endif
 	return ret;
 }
 
-bool CSystemUtils::setRegKey(const string &ValueName, const string &Value)
+bool CSystemUtils::setRegKey(const string &valueName, const string &value)
 {
 	bool res = false;
 #ifdef NL_OS_WINDOWS
 	HKEY hkey;
 	DWORD dwDisp;
 
-	if (RegCreateKeyExW(HKEY_CURRENT_USER, utf8ToWide(RootKey), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
+	if (RegCreateKeyExW(HKEY_CURRENT_USER, nlUtf8ToWide(RootKey), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
 	{
-		ucstring utf16Value = ucstring::makeFromUtf8(Value);
-
 		// we must use the real Unicode string size in bytes
-		DWORD size = (utf16Value.length() + 1) * 2;
-
-		if (RegSetValueExW(hkey, utf8ToWide(ValueName), 0L, REG_SZ, (const BYTE *)utf16Value.c_str(), size) == ERROR_SUCCESS)
+		std::wstring wvalue = nlUtf8ToWide(value);
+		if (RegSetValueExW(hkey, nlUtf8ToWide(valueName), 0, REG_SZ, (const BYTE *)wvalue.c_str(), (wvalue.size() + 1) * sizeof(WCHAR)) == ERROR_SUCCESS)
 			res = true;
 		RegCloseKey(hkey);
 	}
 	else
 	{
-		nlwarning("Can't set the reg key '%s' '%s'", ValueName.c_str(), Value.c_str());
+		nlwarning("Can't set the reg key '%s' '%s'", valueName.c_str(), value.c_str());
 	}
 #endif
 

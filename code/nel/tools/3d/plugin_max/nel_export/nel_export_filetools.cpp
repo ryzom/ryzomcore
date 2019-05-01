@@ -50,8 +50,8 @@ ULONG CNelExport::SelectFileForSave(HWND Parent, const TCHAR* Title, const TCHAR
 	}
 
 	// copy path and filename to temporary buffers
-	_tcscpy_s(curdir, MAX_PATH, utf8ToTStr(path));
-	_tcscpy_s(fname, MAX_PATH, utf8ToTStr(filename));
+	_tcscpy_s(curdir, MAX_PATH, MaxTStrFromUtf8(path).data());
+	_tcscpy_s(fname, MAX_PATH, MaxTStrFromUtf8(filename).data());
 
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(OPENFILENAME));
@@ -69,7 +69,7 @@ ULONG CNelExport::SelectFileForSave(HWND Parent, const TCHAR* Title, const TCHAR
 	ofn.lpstrInitialDir		=	curdir;
 	BOOL r = GetSaveFileName ( &ofn );
 
-	FileName = tStrToUtf8(fname);
+	FileName = MCharStrToUtf8(fname);
 
 	return r;
 }
@@ -79,7 +79,7 @@ ULONG CNelExport::SelectFileForSave(HWND Parent, const TCHAR* Title, const TCHAR
 ULONG CNelExport::SelectDir(HWND Parent, const TCHAR* Title, std::string &Path)
 {
 	TCHAR str[MAX_PATH];
-	_tcscpy_s(str, MAX_PATH, utf8ToTStr(Path));
+	_tcscpy_s(str, MAX_PATH, MaxTStrFromUtf8(Path).data());
 
 	BROWSEINFO	bi;
 	bi.hwndOwner=Parent;
@@ -98,7 +98,7 @@ ULONG CNelExport::SelectDir(HWND Parent, const TCHAR* Title, std::string &Path)
 		return 0;
 	}
 
-	Path = tStrToUtf8(str);
+	Path = MCharStrToUtf8(str);
 
 	return 1;
 }

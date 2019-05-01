@@ -15,15 +15,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <windows.h>
+#include <tchar.h>
+
 #include <string>
 #include <stdio.h>
 
 using namespace std;
-
-int APIENTRY WinMain(HINSTANCE hInstance,
-                     HINSTANCE hPrevInstance,
-                     LPSTR     lpCmdLine,
-                     int       nCmdShow)
+int APIENTRY _tWinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPTSTR lpCmdLine, int /* nCmdShow */)
 {
 	char *filename;
 	if (filename = strstr (lpCmdLine, "-f "))

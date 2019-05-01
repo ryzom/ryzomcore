@@ -472,7 +472,7 @@ void CSlotDlg::setWindowName ()
 		}
 	}
 
-	GetDlgItem (IDC_SLOT_NAME)->SetWindowText (utf8ToTStr(tmp));
+	GetDlgItem(IDC_SLOT_NAME)->SetWindowText(nlUtf8ToTStr(tmp));
 }
 
 // ***************************************************************************

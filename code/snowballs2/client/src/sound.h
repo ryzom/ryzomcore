@@ -35,34 +35,42 @@
 // Defines
 // 
 
-//#define SBCLIENT_MUSIC_WAIT (0), (0)
-//#define SBCLIENT_MUSIC_LOGIN (1), (0)
-//#define SBCLIENT_MUSIC_BACKGROUND (2), (0)
-//#define SBCLIENT_MUSIC_BACKGROUND_BEAT (2), (1)
+#define SBCLIENT_MUSIC_WAIT "xtarsia_evil-snowballs_wait.ogg"
+#define SBCLIENT_MUSIC_LOGIN "xtarsia_evil-snowballs_login.ogg"
+#define SBCLIENT_MUSIC_BACKGROUND "xtarsia_evil-snowballs_beat.ogg" /* "xtarsia_evil-snowballs_game.ogg" */
+#define SBCLIENT_MUSIC_BACKGROUND_BEAT "xtarsia_evil-snowballs_beat.ogg"
+
+namespace SBCLIENT {
 
 //
 // External variables
 //
 
-//extern NLSOUND::UAudioMixer *AudioMixer;
+#ifdef SBCLIENT_WITH_SOUND
+extern NLSOUND::UAudioMixer *AudioMixer;
 //extern NLSOUND::TSoundId SoundId;
+#endif
+
 //
-////
-//// External functions
-////
+// External functions
 //
+
 //void playMusic(sint32 playlist, sint32 track);
 //void setMusicVolume(sint32 playlist, float volume);
-//
-//void initSound();
-//void updateSound();
-//void releaseSound();
-//
+
+void initSound();
+void updateSound();
+void releaseSound();
+
+void playMusic(const char *file);
+
 //// Set and play a sound on an entity
 //void playSound(CEntity &entity, NLSOUND::TSoundId id);
-//
+
 //// Remove the sound system link to the entity
 //void deleteSound(CEntity &entity);
+
+} /* namespace SBCLIENT */
 
 #endif // SBCLIENT_SOUND_H
 

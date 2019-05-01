@@ -73,7 +73,7 @@ BOOL CData_mirrorApp::InitInstance()
 	{
 		// Get the module
 		CConfigFile	cf;
-		string exePath = GetCommandLine ();
+		string exePath = nlTStrToUtf8(GetCommandLineW());
 		if (exePath.size()>0)
 		{
 			if (exePath[0] == '\"')
@@ -124,7 +124,7 @@ BOOL CData_mirrorApp::InitInstance()
 		if ((sBinaryCompare == "true") || (sBinaryCompare=="1"))
 			BinaryCompare = true;
 
-		CurrentDir = m_lpCmdLine;
+		CurrentDir = nlTStrToUtf8(m_lpCmdLine);
 		// Remove 
 		if (CurrentDir.size ()>=2)
 		{
@@ -151,7 +151,7 @@ BOOL CData_mirrorApp::InitInstance()
 		}
 		else
 		{
-			MessageBox (NULL, (CurrentDir+" is not a directory nor a file.").c_str (), "NeL Data Mirror", MB_OK|MB_ICONEXCLAMATION);
+			MessageBox (NULL, nlUtf8ToTStr(CurrentDir+" is not a directory nor a file."), _T("NeL Data Mirror"), MB_OK|MB_ICONEXCLAMATION);
 			return FALSE;
 		}
 
@@ -168,8 +168,8 @@ BOOL CData_mirrorApp::InitInstance()
 			}
 			else
 			{
-				MessageBox (NULL, (CurrentDir+" is not a sub directory of "+MainDirectory+" or "+MirrorDirectory).c_str (), 
-							"NeL Data Mirror", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox(NULL, nlUtf8ToTStr(CurrentDir + " is not a sub directory of " + MainDirectory + " or " + MirrorDirectory), 
+							_T("NeL Data Mirror"), MB_OK|MB_ICONEXCLAMATION);
 				return FALSE;
 			}
 		}
@@ -200,7 +200,7 @@ BOOL CData_mirrorApp::InitInstance()
 	}
 	catch (const Exception &e)
 	{
-		MessageBox (NULL, e.what (), "NeL Data Mirror", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox(NULL, nlUtf8ToTStr(e.what()), _T("NeL Data Mirror"), MB_OK | MB_ICONEXCLAMATION);
 	}
 
 	CData_mirrorDlg dlg;
@@ -227,19 +227,21 @@ bool RegisterDirectoryAppCommand (const char *appName, const char *command, cons
 {
 	// Create the app key
 	HKEY hKey;
-	if (RegCreateKey (HKEY_CLASSES_ROOT, "Directory", &hKey) == ERROR_SUCCESS)
+	if (RegCreateKey (HKEY_CLASSES_ROOT, _T("Directory"), &hKey) == ERROR_SUCCESS)
 	{
 		// Create the icon
 		char tmp[512];
 		smprintf (tmp, 512, "shell\\%s", appName);
-		if (RegCreateKey (hKey, tmp, &hKey) == ERROR_SUCCESS)
+		if (RegCreateKey(hKey, nlUtf8ToTStr(tmp), &hKey) == ERROR_SUCCESS)
 		{
 			// Set the description
-			RegSetValue (hKey, "", REG_SZ, command, (DWORD)strlen (command));
-			if (RegCreateKey (hKey, "command", &hKey) == ERROR_SUCCESS)
+			tstring tcommand = utf8ToTStr(command);
+			RegSetValue(hKey, _T(""), REG_SZ, tcommand.c_str(), (tcommand.size() + 1) * sizeof(TCHAR));
+			if (RegCreateKey (hKey, _T("command"), &hKey) == ERROR_SUCCESS)
 			{
 				// Set the description
-				RegSetValue (hKey, "", REG_SZ, app, (DWORD)strlen (app));
+				tstring tapp = utf8ToTStr(app);
+				RegSetValue(hKey, _T(""), REG_SZ, tapp.c_str(), (tapp.size() + 1) * sizeof(TCHAR));
 				return true;
 			}
 		}

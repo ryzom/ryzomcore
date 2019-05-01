@@ -280,8 +280,8 @@ void CData_mirrorDlg::updateList ()
 	{
 		// Add the items
 		const CEntryFile &entry = *ite;
-		uint nItem = List.InsertItem (0, utf8ToTStr(entry.Strings[CEntryFile::Path]), entry.Image);
-		List.SetItemData (nItem, DWORD(new std::list<CEntryFile>::iterator (ite)));
+		uint nItem = List.InsertItem(0, nlUtf8ToTStr(entry.Strings[CEntryFile::Path]), entry.Image);
+		List.SetItemData (nItem, DWORD_PTR(new std::list<CEntryFile>::iterator (ite)));
 
 		// Sub string
 		subString = 1;
@@ -289,25 +289,25 @@ void CData_mirrorDlg::updateList ()
 		// Add the sizes
 		if (ModifiedFilter != Removed)
 		{
-			List.SetItemText (nItem, subString++, utf8ToTStr(entry.Strings[CEntryFile::NewSize]));
+			List.SetItemText(nItem, subString++, nlUtf8ToTStr(entry.Strings[CEntryFile::NewSize]));
 		}
 		if (ModifiedFilter != Added)
 		{
-			List.SetItemText (nItem, subString++, utf8ToTStr(entry.Strings[CEntryFile::OldSize]));
+			List.SetItemText(nItem, subString++, nlUtf8ToTStr(entry.Strings[CEntryFile::OldSize]));
 		}
 
 		// Add the dates
 		if (ModifiedFilter != Removed)
 		{
-			List.SetItemText (nItem, subString++, utf8ToTStr(entry.Strings[CEntryFile::NewDate]));
+			List.SetItemText(nItem, subString++, nlUtf8ToTStr(entry.Strings[CEntryFile::NewDate]));
 		}
 		if (ModifiedFilter != Added)
 		{
-			List.SetItemText (nItem, subString++, utf8ToTStr(entry.Strings[CEntryFile::OldDate]));
+			List.SetItemText(nItem, subString++, nlUtf8ToTStr(entry.Strings[CEntryFile::OldDate]));
 		}
 
 		// Add the type
-		List.SetItemText (nItem, subString++, utf8ToTStr(entry.Strings[CEntryFile::Type]));
+		List.SetItemText(nItem, subString++, nlUtf8ToTStr(entry.Strings[CEntryFile::Type]));
 
 		// Next item
 		ite++;
@@ -410,7 +410,7 @@ void createDirectory (const string &dir)
 
 bool setFileTime(const std::string &filename, const FILETIME &result)
 {
-	HANDLE handle = CreateFile (utf8ToTStr(filename), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE handle = CreateFile(nlUtf8ToTStr(filename), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (handle)
 	{
 		SetFileTime (handle, NULL, NULL, &result);
@@ -450,18 +450,18 @@ void CData_mirrorDlg::OnOK()
 	{
 		// Copy it
 		const string &itemText = modifiedList[i];
-		string source = MainDirectory+itemText;
-		string dest = MirrorDirectory+itemText;
-	
-		progress.DisplayString = "Copy \"" + source + "\" to \"" + dest + "\"";
-		progress.progress (float(currentFile++)/(float(totalCount)));
+		string source = MainDirectory + itemText;
+		string dest = MirrorDirectory + itemText;
 
-		string directory = NLMISC::CFile::getPath (dest);
-		createDirectory (directory.c_str ());
-		if (!CopyFile (source.c_str (), dest.c_str (), FALSE))
+		progress.DisplayString = "Copy \"" + source + "\" to \"" + dest + "\"";
+		progress.progress(float(currentFile++) / (float(totalCount)));
+
+		string directory = NLMISC::CFile::getPath(dest);
+		createDirectory(directory.c_str());
+		if (!CopyFile(nlUtf8ToTStr(source), nlUtf8ToTStr(dest), FALSE))
 		{
-			MessageBox (("Can't copy file "+source+" in file "+dest).c_str (), _T("NeL Data Mirror"),
-				MB_OK|MB_ICONEXCLAMATION);
+			MessageBox(nlUtf8ToTStr("Can't copy file " + source + " in file " + dest), _T("NeL Data Mirror"),
+			    MB_OK | MB_ICONEXCLAMATION);
 			success = false;
 		}
 		else
@@ -497,9 +497,9 @@ void CData_mirrorDlg::OnOK()
 		progress.progress (float(currentFile++)/(float(totalCount)));
 		
 		createDirectory (directory.c_str ());
-		if (!CopyFile (source.c_str (), dest.c_str (), FALSE))
+		if (!CopyFile(nlUtf8ToTStr(source), nlUtf8ToTStr(dest), FALSE))
 		{
-			MessageBox (("Can't copy file "+source+" in file "+dest).c_str (), _T("NeL Data Mirror"),
+			MessageBox(nlUtf8ToTStr("Can't copy file " + source + " in file " + dest), _T("NeL Data Mirror"),
 				MB_OK|MB_ICONEXCLAMATION);
 			success = false;
 		}
@@ -532,9 +532,9 @@ void CData_mirrorDlg::OnOK()
 		progress.DisplayString = "Delete \"" + dest + "\"";
 		progress.progress (float(currentFile++)/(float(totalCount)));
 
-		if (!DeleteFile (dest.c_str ()))
+		if (!DeleteFile(nlUtf8ToTStr(dest)))
 		{
-			MessageBox (("Can't delete the file "+dest).c_str (), _T("NeL Data Mirror"),
+			MessageBox(nlUtf8ToTStr("Can't delete the file " + dest), _T("NeL Data Mirror"),
 				MB_OK|MB_ICONEXCLAMATION);
 			success = false;
 		}
@@ -596,7 +596,7 @@ void CData_mirrorDlg::OnSize(UINT nType, int cx, int cy)
 
 bool getFileTime (const std::string &filename, FILETIME &result)
 {
-	HANDLE handle = CreateFile (utf8ToTStr(filename), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE handle = CreateFile(nlUtf8ToTStr(filename), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (handle)
 	{
 		FILETIME res0;
@@ -700,7 +700,7 @@ void CData_mirrorDlg::buildSourceFiles ()
 			{
 				FILETIME time;
 				getFileTime (mainFile, time);
-				addEntry (Added, str, time, time);
+				addEntry (Added, str.c_str(), time, time);
 			}
 		}
 	}
@@ -812,7 +812,7 @@ void CData_mirrorDlg::addEntry (uint where, const char *filename, FILETIME &newD
 		// Get the image
 		SHFILEINFO     sfi;
 		TCHAR winName[512];
-		_tcscpy (winName, utf8ToTStr(aFilename));
+		_tcscpy(winName, nlUtf8ToTStr(aFilename));
 		TCHAR *ptr = winName;
 		while (*ptr)
 		{

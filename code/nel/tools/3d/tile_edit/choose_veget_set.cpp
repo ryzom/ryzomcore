@@ -68,8 +68,8 @@ void CChooseVegetSet::OnBrowse()
 	if (dialog.DoModal() == IDOK)
 	{
 		// Get the file name
-		FileName = tStrToUtf8(dialog.GetFileName ());
-		Name.SetWindowText (utf8ToTStr(FileName));
+		FileName = NLMISC::tStrToUtf8(dialog.GetFileName());
+		Name.SetWindowText(nlUtf8ToTStr(FileName));
 	}
 }
 
@@ -78,7 +78,7 @@ BOOL CChooseVegetSet::OnInitDialog()
 	CDialog::OnInitDialog();
 	
 	if (!FileName.empty())
-		Name.SetWindowText (utf8ToTStr(FileName));
+		Name.SetWindowText(nlUtf8ToTStr(FileName));
 	else
 		Name.SetWindowText (_T("Browse..."));
 

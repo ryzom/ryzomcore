@@ -193,7 +193,7 @@ void CDfnDialog::getFromDocument (const NLGEORGES::CFormDfn &dfn)
 		for (parent=0; parent<dfn.getNumParent (); parent++)
 		{
 			// Add the label and value
-			Parents.ListCtrl.InsertItem (parent, utf8ToTStr(dfn.getParentFilename (parent)));
+			Parents.ListCtrl.InsertItem(parent, nlUtf8ToTStr(dfn.getParentFilename(parent)));
 		}
 
 		// Add the struct element
@@ -202,12 +202,12 @@ void CDfnDialog::getFromDocument (const NLGEORGES::CFormDfn &dfn)
 		for (elm=0; elm<dfn.getNumEntry (); elm++)
 		{
 			// Add the label and value
-			Struct.ListCtrl.InsertItem (elm, utf8ToTStr(dfn.getEntry (elm).getName()));
+			Struct.ListCtrl.InsertItem(elm, nlUtf8ToTStr(dfn.getEntry(elm).getName()));
 			switch (elm, dfn.getEntry (elm).getType ())
 			{
 			case UFormDfn::EntryType:
 				Struct.ListCtrl.SetItemText (elm, 1, dfn.getEntry (elm).getArrayFlag () ? _T("Type array") : _T("Type"));
-				Struct.ListCtrl.SetItemText (elm, 4, utf8ToTStr(dfn.getEntry (elm).getFilenameExt ()));
+				Struct.ListCtrl.SetItemText(elm, 4, nlUtf8ToTStr(dfn.getEntry(elm).getFilenameExt()));
 				break;
 			case UFormDfn::EntryDfn:
 				Struct.ListCtrl.SetItemText (elm, 1, dfn.getEntry (elm).getArrayFlag () ? _T("Dfn array") : _T("Dfn"));
@@ -216,8 +216,8 @@ void CDfnDialog::getFromDocument (const NLGEORGES::CFormDfn &dfn)
 				Struct.ListCtrl.SetItemText (elm, 1, _T("Virtual Dfn"));
 				break;
 			}
-			Struct.ListCtrl.SetItemText (elm, 2, utf8ToTStr(dfn.getEntry (elm).getFilename()));
-			Struct.ListCtrl.SetItemText (elm, 3, utf8ToTStr(dfn.getEntry (elm).getDefault()));
+			Struct.ListCtrl.SetItemText(elm, 2, nlUtf8ToTStr(dfn.getEntry(elm).getFilename()));
+			Struct.ListCtrl.SetItemText(elm, 3, nlUtf8ToTStr(dfn.getEntry(elm).getDefault()));
 		}
 	}
 }
@@ -385,7 +385,7 @@ void CDfnEditListCtrl::getNewItemText (uint item, uint subItem, std::string &ret
 
 // ***************************************************************************
 
-void CDfnEditListCtrl::getBrowseInfo (uint item, uint subItem, std::string &defExt, std::string &defFilename, std::string &defDir, std::string &filter)
+void CDfnEditListCtrl::getBrowseInfo (uint item, uint subItem, std::string &defExt, std::string &defFilename, std::string &defDir, NLMISC::tstring &filter)
 {
 	if (subItem == 2)
 	{
@@ -422,7 +422,7 @@ void CDfnEditListCtrl::onItemChanged (uint item, uint subItem)
 			str = Dialog->Struct.ListCtrl.GetItemText (item, 2);
 			std::string ext = NLMISC::CFile::getExtension(tStrToUtf8(str));
 			if (ext == "typ")
-				Dialog->Struct.ListCtrl.SetItemText (item, 2, utf8ToTStr(theApp.DefaultType));
+				Dialog->Struct.ListCtrl.SetItemText(item, 2, nlUtf8ToTStr(theApp.DefaultType));
 		}
 		else if ((type == "Dfn") || (type == "Dfn array"))
 		{
@@ -430,7 +430,7 @@ void CDfnEditListCtrl::onItemChanged (uint item, uint subItem)
 			str = Dialog->Struct.ListCtrl.GetItemText (item, 2);
 			std::string ext = NLMISC::CFile::getExtension(tStrToUtf8(str));
 			if (ext == "dfn")
-				Dialog->Struct.ListCtrl.SetItemText (item, 2, utf8ToTStr(theApp.DefaultDfn));
+				Dialog->Struct.ListCtrl.SetItemText(item, 2, nlUtf8ToTStr(theApp.DefaultDfn));
 
 			// Clear default value
 			Dialog->Struct.ListCtrl.SetItemText (item, 3, _T(""));
@@ -468,16 +468,16 @@ void CDfnDialog::onOpenSelected ()
 					int nItem = Parents.ListCtrl.GetNextSelectedItem(pos);
 
 					// Get the string
-					std::string str = tStrToUtf8(Parents.ListCtrl.GetItemText (nItem, 0));
-					if (!str.empty())
+					CString str = Parents.ListCtrl.GetItemText (nItem, 0);
+					if (str != "")
 					{
 						// Look for the file
-						string name = CPath::lookup (str, false, false);
-						if (name.empty ())
+						CString name = nlUtf8ToTStr(CPath::lookup(tStrToUtf8(str), false, false));
+						if (name.IsEmpty())
 							name = str;
 
 						// Open the file
-						theApp.OpenDocumentFile (utf8ToTStr(name));
+						theApp.OpenDocumentFile(name);
 					}
 				}
 			}
@@ -490,16 +490,16 @@ void CDfnDialog::onOpenSelected ()
 					int nItem = Struct.ListCtrl.GetNextSelectedItem(pos);
 
 					// Get the string
-					std::string str = tStrToUtf8(Struct.ListCtrl.GetItemText (nItem, 2));
-					if (!str.empty())
+					CString str = Struct.ListCtrl.GetItemText (nItem, 2);
+					if (str != "")
 					{
 						// Look for the file
-						string name = CPath::lookup (str, false, false);
-						if (name.empty ())
+						CString name = nlUtf8ToTStr(CPath::lookup(tStrToUtf8(str), false, false));
+						if (name.IsEmpty())
 							name = str;
 
 						// Open the file
-						theApp.OpenDocumentFile (utf8ToTStr(name));
+						theApp.OpenDocumentFile(name);
 					}
 				}
 			}
@@ -621,7 +621,7 @@ void CDfnParentEditListCtrl::getNewItemText (uint item, uint subItem, std::strin
 
 // ***************************************************************************
 
-void CDfnParentEditListCtrl::getBrowseInfo (uint item, uint subItem, std::string &defExt, std::string &defFilename, std::string &defDir, std::string &filter)
+void CDfnParentEditListCtrl::getBrowseInfo (uint item, uint subItem, std::string &defExt, std::string &defFilename, std::string &defDir, NLMISC::tstring &filter)
 {
 	filter = DfnFilter;
 	defDir = theApp.RootSearchPath;
