@@ -68,6 +68,7 @@
 #include "interface.h"
 #include "lens_flare.h"
 #include "mouse_listener.h"
+#include "sound.h"
 #include "configuration.h"
 #include "internationalization.h"
 #include "game_time.h"
@@ -301,6 +302,8 @@ void initCore()
 		LoadedCore = true;
 		// Seed the randomizer
 		srand(uint(time(0)));
+		// Sheet Id
+		CSheetId::initWithoutSheet(); // Temporary for sound
 		// Load configuration file, set paths, extension remapping
 		CConfiguration::init();
 		// Load language file
@@ -333,11 +336,9 @@ void initCore()
 		displayLoadingState("Initialize Loading");
 		initLoadingState();
 		// Initialize sound for loading screens etc
-//#ifdef NL_OS_WINDOWS
-//		displayLoadingState("Initialize Sound");
-//		initSound();
-//		playMusic(SBCLIENT_MUSIC_WAIT);
-//#endif
+		displayLoadingState("Initialize Sound");
+		initSound();
+		playMusic(SBCLIENT_MUSIC_WAIT);
 		// Required for 3d rendering (3d nel logo etc)
 		displayLoadingState("Initialize Light");
 		initLight();
@@ -366,9 +367,7 @@ void initIngame()
 	if (!LoadedIngame)
 	{
 		LoadedIngame = true;
-//#ifdef NL_OS_WINDOWS
-//		playMusic(SBCLIENT_MUSIC_WAIT);
-//#endif
+		playMusic(SBCLIENT_MUSIC_WAIT);
 		displayLoadingState("Initialize");
 
 		// Create a scene
@@ -441,10 +440,9 @@ void initIngame()
 
 void initOnline()
 {
-	if (LoadedOnline) return;
-//#ifdef NL_OS_WINDOWS
-//	playMusic(SBCLIENT_MUSIC_WAIT);
-//#endif
+	if (LoadedOnline)
+		return;
+	playMusic(SBCLIENT_MUSIC_WAIT);
 
 	displayLoadingState("Connecting");
 
@@ -460,9 +458,7 @@ void initOnline()
 
 	displayLoadingState("Ready!");
 
-//#ifdef NL_OS_WINDOWS
-//	playMusic(SBCLIENT_MUSIC_BACKGROUND);
-//#endif
+	playMusic(SBCLIENT_MUSIC_BACKGROUND);
 	LoadedOnline = true;
 }
 
@@ -471,9 +467,7 @@ void initOffline()
 	if (!LoadedOffline)
 	{
 		LoadedOffline = true;
-//#ifdef NL_OS_WINDOWS
-//		playMusic(SBCLIENT_MUSIC_WAIT);
-//#endif
+		playMusic(SBCLIENT_MUSIC_WAIT);
 
 		uint32 id = NextEID++;
 		Login = ucstring("Entity" + toString(id));
@@ -492,9 +486,7 @@ void initOffline()
 
 		displayLoadingState("Ready!");
 
-//#ifdef NL_OS_WINDOWS
-//		playMusic(SBCLIENT_MUSIC_BACKGROUND);
-//#endif
+		playMusic(SBCLIENT_MUSIC_BACKGROUND);
 	}
 }
 
@@ -517,9 +509,7 @@ void releaseCore()
 		// Release the loading state textures
 		releaseLoadingState();
 		// Release the sound
-//#ifdef NL_OS_WINDOWS
-//		releaseSound();
-//#endif
+		releaseSound();
 		// Release the text context
 		Driver->deleteTextContext(TextContext);
 		TextContext = NULL;
@@ -529,11 +519,13 @@ void releaseCore()
 		Driver = NULL;
 
 		// Release timing system
-		CGameTime::init();
+		CGameTime::release();
 		// Release language file
-		CInternationalization::init();
+		CInternationalization::release();
 		// Release the configuration
 		CConfiguration::release();
+		// Release sheet id
+		CSheetId::uninit(); // Temporary for sound
 	}
 }
 
@@ -611,9 +603,7 @@ void releaseOffline()
 
 void loopLogin()
 {
-//#ifdef NL_OS_WINDOWS
-//	playMusic(SBCLIENT_MUSIC_LOGIN);
-//#endif
+	playMusic(SBCLIENT_MUSIC_LOGIN);
 	// todo: login screen, move this stuff to a button or something
 	displayLoadingState("Login");
 	if (ConfigFile->getVar("Local").asInt() == 0)
@@ -730,9 +720,7 @@ void loopIngame()
 		// ...
 
 		// 11. Update Sound (sound driver)
-//#ifdef NL_OS_WINDOWS
-//		updateSound(); // Update the sound
-//#endif
+		updateSound(); // Update the sound
 
 		// 12. Update Outgoing (network, send new position etc)
 		// ...
@@ -1118,9 +1106,7 @@ void updateLoadingState(const char *state, bool network, bool information)
 void updateLoadingState(ucstring state, bool network, bool information)
 {
 	CGameTime::updateTime(); // important that time is updated here!!!
-//#ifdef NL_OS_WINDOWS
-//	updateSound();
-//#endif
+	updateSound();
 	renderLoadingState(state, true);
 	if (information) renderInformation();
 	if (network) updateNetwork();
