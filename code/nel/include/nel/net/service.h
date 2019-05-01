@@ -54,7 +54,17 @@ struct HINSTANCE__;
 typedef struct HINSTANCE__ *HINSTANCE;
 
 typedef char CHAR;
+typedef wchar_t WCHAR;
+
 typedef CHAR *LPSTR;
+typedef WCHAR *LPWSTR;
+
+#if defined(UNICODE) || defined(_UNICODE)
+typedef LPWSTR LPTSTR;
+#else
+typedef LPSTR LPTSTR;
+#endif
+
 #endif
 
 namespace NLNET
