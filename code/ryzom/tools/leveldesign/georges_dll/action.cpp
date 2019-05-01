@@ -44,7 +44,7 @@ IAction::IAction (TTypeAction type, uint selId, uint slot)
 
 // ***************************************************************************
 
-void IAction::setLabel (const std::string &logLabel, CGeorgesEditDoc &doc)
+void IAction::setLabel (const char *logLabel, CGeorgesEditDoc &doc)
 {
 	_LogLabel = logLabel;
 
@@ -75,7 +75,7 @@ bool IAction::doAction (CGeorgesEditDoc &doc, bool redo, bool &modified, bool fi
 
 // ***************************************************************************
 
-void IAction::update (bool updateLeftView, TUpdateRightView rightViewFlag, CGeorgesEditDoc &doc, const std::string &_FormName)
+void IAction::update (bool updateLeftView, TUpdateRightView rightViewFlag, CGeorgesEditDoc &doc, const char *_FormName)
 {
 	// Right and left view
 	CGeorgesEditView *rightView = doc.getRightView ();
@@ -129,7 +129,7 @@ void IAction::update (bool updateLeftView, TUpdateRightView rightViewFlag, CGeor
 
 // ***************************************************************************
 
-CActionString::CActionString (IAction::TTypeAction type, const std::string &newValue, CGeorgesEditDoc &doc, const std::string &formName, const std::string &userData, uint selId, uint slot) : IAction (type, selId, slot)
+CActionString::CActionString (IAction::TTypeAction type, const char *newValue, CGeorgesEditDoc &doc, const char *formName, const char *userData, uint selId, uint slot) : IAction (type, selId, slot)
 {
 	// Set the new value
 	_NewValue = newValue;
@@ -235,7 +235,7 @@ CActionString::CActionString (IAction::TTypeAction type, const std::string &newV
 			bool vdfnArray;
 			CForm *form=doc.getFormPtr ();
 			CFormElm *elm = doc.getRootNode (slot);
-			nlverify ( elm->getNodeByName (_FormName, &parentDfn, indexDfn, 
+			nlverify ( elm->getNodeByName (_FormName.c_str (), &parentDfn, indexDfn, 
 				&nodeDfn, &nodeType, &node, type, array, vdfnArray, true, NLGEORGES_FIRST_ROUND) );
 			if (node)
 			{
@@ -364,7 +364,7 @@ bool CActionString::doAction (CGeorgesEditDoc &doc, bool redo, bool &modified, b
 					bool parentVDnfArray;
 					CForm *form=doc.getFormPtr ();
 					CFormElm *elm = doc.getRootNode (_Slot);
-					nlverify ( elm->getNodeByName (_FormName, &parentDfn, indexDfn, 
+					nlverify ( elm->getNodeByName (_FormName.c_str (), &parentDfn, indexDfn, 
 						&nodeDfn, &nodeType, &node, type, array, parentVDnfArray, true, NLGEORGES_FIRST_ROUND) );
 					nlassert (node);
 					CFormElmAtom *atom = safe_cast<CFormElmAtom*> (node);
@@ -437,14 +437,14 @@ bool CActionString::doAction (CGeorgesEditDoc &doc, bool redo, bool &modified, b
 			bool vdfnArray;
 			CForm *form=doc.getFormPtr ();
 			CFormElm *elm = doc.getRootNode (_Slot);
-			nlverify ( elm->getNodeByName (_FormName, &parentDfn, indexDfn, 
+			nlverify ( elm->getNodeByName (_FormName.c_str (), &parentDfn, indexDfn, 
 				&nodeDfn, &nodeType, &node, type, array, vdfnArray, true, NLGEORGES_FIRST_ROUND) );
 			if (node)
 			{
 				CFormElmArray* array = safe_cast<CFormElmArray*> (node->getParent ());
 				array->Elements[idInParent].Name = _Value[index];
 				modified = true;
-				update (true, DoNothing, doc, _FormName);
+				update (true, DoNothing, doc, _FormName.c_str ());
 			}
 		}
 		break;
@@ -716,14 +716,14 @@ bool CActionStringVector::doAction (CGeorgesEditDoc &doc, bool redo, bool &modif
 			bool parentVDfnArray;
 			CForm *form=doc.getFormPtr ();
 			CFormElm *elm = doc.getRootNode (slot);
-			nlverify ( elm->getNodeByName (_FormName, &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true) );
+			nlverify ( elm->getNodeByName (_FormName.c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true) );
 
 			// Is a type entry ?
 			if ((type == UFormDfn::EntryType) && array)
 			{
 				// Create the array
 				bool created;
-				nlverify ( elm->createNodeByName (_FormName, &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, created) );
+				nlverify ( elm->createNodeByName (_FormName.c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, created) );
 				nlassert (node);
 
 				// Get the atom
@@ -921,7 +921,7 @@ bool CActionStringVectorVector::doAction (CGeorgesEditDoc &doc, bool redo, bool 
 
 // ***************************************************************************
 
-CActionBuffer::CActionBuffer(IAction::TTypeAction type, const uint8 *buffer, uint bufferSize, CGeorgesEditDoc &doc, const std::string &formName, const std::string &userData, uint selId, uint slot) : IAction(type, selId, slot)
+CActionBuffer::CActionBuffer (IAction::TTypeAction type, const uint8 *buffer, uint bufferSize, CGeorgesEditDoc &doc, const char *formName, const char *userData, uint selId, uint slot) : IAction (type, selId, slot)
 {
 	// New value
 	_FormName = formName;

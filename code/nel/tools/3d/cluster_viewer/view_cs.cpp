@@ -201,9 +201,9 @@ void LoadSceneScript (const char *ScriptName, CScene* pScene, vector<SDispCS> &D
 // Main
 // ---------------------------------------------------------------------------
 #ifdef NL_OS_WINDOWS
-int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+int APIENTRY nltWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nShowCmd)
 #else // NL_OS_WINDOWS
-int main(int argc, char **argv)
+int nltmain(int argc, NLMISC::tchar **argv)
 #endif // NL_OS_WINDOWS
 {
 	double rGlobalTime = 0;

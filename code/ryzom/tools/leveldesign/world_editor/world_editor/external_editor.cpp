@@ -58,7 +58,7 @@ bool EditExternalText (const std::string &editor, std::string &text, const std::
 		}
 
 		// Hide the file
-		SetFileAttributes (utf8ToTStr(tempFilename), FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM);
+		SetFileAttributes(nlUtf8ToTStr(tempFilename), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM);
 
 		// Open the temp file with a text editor
 		if (saved)

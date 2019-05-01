@@ -176,7 +176,7 @@ void CWords_dicDlg::lookUp( const CString& inputStr )
 			const CSString& res = (*ivs);
 			if ( showAll || (res.find( "lvl" ) == string::npos) )
 			{
-				m_Results.AddString( utf8ToTStr(res) );
+				m_Results.AddString(nlUtf8ToTStr(res));
 			}
 			else
 				lvlRemoved = true;
@@ -234,7 +234,7 @@ void CWords_dicDlg::OnFileList()
 	const vector<string>& fileList = Dico.getFileList();
 	for ( vector<string>::const_iterator ifl=fileList.begin(); ifl!=fileList.end(); ++ifl )
 	{
-		m_Results.AddString( utf8ToTStr(*ifl) );
+		m_Results.AddString( nlUtf8ToTStr(*ifl) );
 	}
 }
 

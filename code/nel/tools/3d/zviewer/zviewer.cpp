@@ -953,12 +953,11 @@ void initViewerConfig(const char * configFileName)
 							MAIN
 \****************************************************************/
 #ifdef NL_OS_WINDOWS
-int WINAPI WinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPSTR cmdline, int /* nCmdShow */)
+int APIENTRY nltWinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPTSTR /* lpCmdLine */, int /* nCmdShow */)
+#else // NL_OS_WINDOWS
+int nltmain(int /* argc */, NLMISC::tchar ** /* argv */)
+#endif // NL_OS_WINDOWS
 {
-#else
-int main(int /* argc */, char ** /* argv */)
-{
-#endif
 	try
 	{
 		NLMISC::CApplicationContext myApplicationContext;

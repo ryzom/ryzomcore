@@ -295,7 +295,7 @@ void CGeorgesEditView::updateTab ()
 						// Init the tab
 						CGeorgesEditDocSub *child = parent->getChild (i);
 						int image = child->getItemImage (doc);
-						TabCtrl.InsertItem (i, utf8ToTStr(child->getName()), image);
+						TabCtrl.InsertItem(i, nlUtf8ToTStr(child->getName()), image);
 
 						// This is the selection ?
 						if (subObject == child)

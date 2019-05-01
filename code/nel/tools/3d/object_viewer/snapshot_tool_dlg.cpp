@@ -183,7 +183,7 @@ void CSnapshotToolDlg::fromRegistry()
 
 	for (uint k = 0; k < filterList.size(); ++k)
 	{
-		m_Filters.AddString(utf8ToTStr(filterList[k]));
+		m_Filters.AddString(nlUtf8ToTStr(filterList[k]));
 	}	
 	
 	integralTypeFromRegistry(hKey, _T("RecurseSubFolder"), (int &) m_RecurseSubFolder, FALSE);
@@ -597,7 +597,7 @@ void CSnapshotToolDlg::OnTimer(UINT_PTR nIDEvent)
 		try
 		{
 			CShapeStream ss;
-			m_Log.AddString(utf8ToTStr(_FilteredFiles[0]));
+			m_Log.AddString(nlUtf8ToTStr(_FilteredFiles[0]));
 			CIFile stream(_FilteredFiles[0]);
 			ss.serial(stream);
 			nlassert(ss.getShapePointer());

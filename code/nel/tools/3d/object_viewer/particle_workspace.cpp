@@ -371,13 +371,13 @@ CParticleWorkspace::CNode *CParticleWorkspace::addNode(const std::string &filena
 	TCHAR resultPath[MAX_PATH];
 	std::string dosPath = NLMISC::CPath::standardizeDosPath(getPath());
 	std::string relativePath;
-	if (!PathRelativePathTo(resultPath, utf8ToTStr(dosPath), FILE_ATTRIBUTE_DIRECTORY, utf8ToTStr(filenameWithFullPath), 0))
+	if (!PathRelativePathTo(resultPath, nlUtf8ToTStr(dosPath), FILE_ATTRIBUTE_DIRECTORY, nlUtf8ToTStr(filenameWithFullPath), 0))
 	{
 		relativePath = filenameWithFullPath; 
 	}
 	else
 	{
-		relativePath = tStrToUtf8(resultPath);
+		relativePath = NLMISC::tStrToUtf8(resultPath);
 	}
 
 	if (relativePath.size() >= 2)

@@ -231,13 +231,13 @@ void CStartStopParticleSystem::updateUIFromState()
 	{	
 		if (!_ActiveNode->getParentSkelName().empty())
 		{
-			GetDlgItem(IDC_STICK_BONE)->SetWindowText(utf8ToTStr(_ActiveNode->getParentBoneName() + "." + _ActiveNode->getParentBoneName()));
+			GetDlgItem(IDC_STICK_BONE)->SetWindowText(nlUtf8ToTStr(_ActiveNode->getParentBoneName() + "." + _ActiveNode->getParentBoneName()));
 		}
 		else
 		{
 			GetDlgItem(IDC_STICK_BONE)->SetWindowText(_T(""));
 		}		
-		GetDlgItem(IDC_ACTIVE_PS)->SetWindowText(utf8ToTStr(_ActiveNode->getFilename()));
+		GetDlgItem(IDC_ACTIVE_PS)->SetWindowText(nlUtf8ToTStr(_ActiveNode->getFilename()));
 		GetDlgItem(IDC_ENABLE_AUTO_COUNT)->EnableWindow(TRUE);
 		((CButton *) GetDlgItem(IDC_ENABLE_AUTO_COUNT))->SetCheck(getCurrPS()->getAutoCountFlag() ? 1 : 0);
 		GetDlgItem(IDC_RESET_COUNT)->EnableWindow((_ActiveNode->getPSPointer()->getAutoCountFlag() && !_ActiveNode->getResetAutoCountFlag()) ? TRUE : FALSE);
@@ -844,7 +844,7 @@ void CStartStopParticleSystem::OnLinkToSkeleton()
 	uint boneIndex;
 	std::string parentSkelName;
 	std::string parentBoneName;
-	if (ov->chooseBone(tStrToUtf8(chooseBoneForPS), skel, boneIndex, &parentSkelName, &parentBoneName))
+	if (ov->chooseBone(NLMISC::tStrToUtf8(chooseBoneForPS), skel, boneIndex, &parentSkelName, &parentBoneName))
 	{
 		_ParticleDlg->stickPSToSkeleton(_ActiveNode, skel, boneIndex, parentSkelName, parentBoneName);
 	}
@@ -1017,11 +1017,11 @@ void CStartStopParticleSystem::OnBrowseAnim()
 		}
 	}
 	std::vector<std::string> animList(animSet.begin(), animSet.end());
-	CSelectString st(animList, tStrToUtf8(getStrRsc(IDS_SELECT_ANIMATION)), this, false);
+	CSelectString st(animList, NLMISC::tStrToUtf8(getStrRsc(IDS_SELECT_ANIMATION)), this, false);
 	if (st.DoModal() == IDOK && st.Selection != -1)
 	{
 		m_TriggerAnim = animList[st.Selection].c_str();
-		_ActiveNode->setTriggerAnim(tStrToUtf8(m_TriggerAnim));
+		_ActiveNode->setTriggerAnim(NLMISC::tStrToUtf8(m_TriggerAnim));
 		GetDlgItem(IDC_CLEAR_ANIM)->EnableWindow(!_ActiveNode->getTriggerAnim().empty());
 	}	
 	_ParticleDlg->ParticleTreeCtrl->updateCaption(*_ActiveNode);

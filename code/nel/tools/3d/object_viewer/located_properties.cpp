@@ -322,7 +322,7 @@ void CLocatedProperties::goPostRender()
 		_MaxNbParticles->update();
 	}
 	// in all cases, show the current number of particles being used
-	GetDlgItem(IDC_CURR_NUM_PARTS)->SetWindowText(utf8ToTStr(NLMISC::toString(_Located->getSize())));
+	GetDlgItem(IDC_CURR_NUM_PARTS)->SetWindowText(nlUtf8ToTStr(NLMISC::toString(_Located->getSize())));
 }
 
 //****************************************************************************************************************

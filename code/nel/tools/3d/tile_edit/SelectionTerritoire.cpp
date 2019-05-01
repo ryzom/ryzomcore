@@ -120,13 +120,13 @@ private:
 	{
 		UpdateData ();
 		TCHAR sTitle[512];
-		_stprintf(sTitle, _T("Tile sets use by %s"), utf8ToTStr(tileBank.getLand(_land)->getName()));
+		_stprintf(sTitle, _T("Tile sets use by %s"), nlUtf8ToTStr(tileBank.getLand(_land)->getName()));
 		SetWindowText (sTitle);
 		for (int i=0; i<tileBank.getTileSetCount(); i++)
 		{
-			m_ctrlCombo.InsertString (-1, utf8ToTStr(tileBank.getTileSet(i)->getName()));
+			m_ctrlCombo.InsertString(-1, nlUtf8ToTStr(tileBank.getTileSet(i)->getName()));
 			if (tileBank.getLand(_land)->isTileSet (tileBank.getTileSet(i)->getName()))
-				m_ctrlList.InsertString (-1, utf8ToTStr(tileBank.getTileSet(i)->getName()));
+				m_ctrlList.InsertString(-1, nlUtf8ToTStr(tileBank.getTileSet(i)->getName()));
 		}
 		UpdateData (FALSE);
 	}
@@ -219,15 +219,15 @@ private:
 	{
 		UpdateData ();
 		TCHAR sTitle[512];
-		_stprintf(sTitle, _T("Children of the tile set %s"), utf8ToTStr(tileBank.getTileSet(_tileSet)->getName()));
+		_stprintf(sTitle, _T("Children of the tile set %s"), nlUtf8ToTStr(tileBank.getTileSet(_tileSet)->getName()));
 		SetWindowText (sTitle);
 		for (int i=0; i<tileBank.getTileSetCount(); i++)
 		{
 			if (i!=_tileSet)
-				m_ctrlCombo.InsertString (-1, utf8ToTStr(tileBank.getTileSet(i)->getName()));
+				m_ctrlCombo.InsertString(-1, nlUtf8ToTStr(tileBank.getTileSet(i)->getName()));
 
 			if (tileBank.getTileSet(_tileSet)->isChild (tileBank.getTileSet(i)->getName()))
-				m_ctrlList.InsertString (-1, utf8ToTStr(tileBank.getTileSet(i)->getName()));
+				m_ctrlList.InsertString(-1, nlUtf8ToTStr(tileBank.getTileSet(i)->getName()));
 		}
 
 		UpdateData (FALSE);
@@ -379,17 +379,17 @@ void SelectionTerritoire::OnSelect()
 			for (i=0; i<tileBank.getLandCount(); i++)
 			{
 				// Add to the list
-				list->AddString(utf8ToTStr(tileBank.getLand(i)->getName()));
+				list->AddString(nlUtf8ToTStr(tileBank.getLand(i)->getName()));
 			}
 
 			for (i=0; i<tileBank.getTileSetCount(); i++)
 			{
 				// Add to the list
-				list2->AddString(utf8ToTStr(tileBank.getTileSet(i)->getName()));
+				list2->AddString(nlUtf8ToTStr(tileBank.getTileSet(i)->getName()));
 			}
 
-			MainFileName = CString(utf8ToTStr(NLMISC::CFile::getFilename(temp)));
-			DefautPath = CString(utf8ToTStr(NLMISC::CFile::getPath(temp)));
+			MainFileName = CString(nlUtf8ToTStr(NLMISC::CFile::getFilename(temp)));
+			DefautPath = CString(nlUtf8ToTStr(NLMISC::CFile::getPath(temp)));
 			
 			MainFileOk = 1;
 			CButton *button = (CButton*)GetDlgItem(IDC_ADD_TERRITOIRE);
@@ -402,7 +402,7 @@ void SelectionTerritoire::OnSelect()
 			button->EnableWindow(true);
 
 			// Change the bouton text path
-			GetDlgItem (IDC_PATH)->SetWindowText (utf8ToTStr(tileBank.getAbsPath()));
+			GetDlgItem(IDC_PATH)->SetWindowText(nlUtf8ToTStr(tileBank.getAbsPath()));
 		}
 	}
 
@@ -468,8 +468,8 @@ void SelectionTerritoire::OnSaveAs()
 		// Create a file name
 		std::string temp = tStrToUtf8(sFile.GetPathName());
 	
-		MainFileName = CString(utf8ToTStr(NLMISC::CFile::getFilename(temp)));
-		DefautPath = CString(utf8ToTStr(NLMISC::CFile::getPath(temp)));
+		MainFileName = CString(nlUtf8ToTStr(NLMISC::CFile::getFilename(temp)));
+		DefautPath = CString(nlUtf8ToTStr(NLMISC::CFile::getPath(temp)));
 	}
 }
 
@@ -582,7 +582,7 @@ void SelectionTerritoire::OnPath()
 									goodPath=false;
 
 									// Make a message
-									_stprintf(msg, _T("Path '%s' can't be found in bitmap '%s'. Continue ?"), path, utf8ToTStr(bitmapPath));
+									_stprintf(msg, _T("Path '%s' can't be found in bitmap '%s'. Continue ?"), path, nlUtf8ToTStr(bitmapPath));
 
 									// Message
 									if (MessageBox (msg, _T("TileEdit"), MB_YESNO|MB_ICONQUESTION)==IDNO)
@@ -611,7 +611,7 @@ void SelectionTerritoire::OnPath()
 							goodPath=false;
 
 							// Make a message
-							_stprintf(msg, _T("Path '%s' can't be found in bitmap '%s'. Continue ?"), path, utf8ToTStr(bitmapPath));
+							_stprintf(msg, _T("Path '%s' can't be found in bitmap '%s'. Continue ?"), path, nlUtf8ToTStr(bitmapPath));
 
 							// Message
 							if (MessageBox (msg, _T("TileEdit"), MB_YESNO|MB_ICONQUESTION)==IDNO)

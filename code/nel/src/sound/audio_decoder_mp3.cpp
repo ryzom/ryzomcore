@@ -17,6 +17,8 @@
 
 #include "stdsound.h"
 
+#if (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
+
 #include <nel/sound/audio_decoder_mp3.h>
 
 #define DR_MP3_IMPLEMENTATION
@@ -220,5 +222,7 @@ void CAudioDecoderMP3::setLooping(bool loop)
 }
 
 } /* namespace NLSOUND */
+
+#endif /* (NL_COMP_VC_VERSION > 90) */
 
 /* end of file */

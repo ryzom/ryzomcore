@@ -78,7 +78,7 @@ void CSoundAnimDlg::handle()
 {
 	float sec = _AnimationDlg->getTime();
 	std::string text = toString("time: %.3f", sec);
-	GetDlgItem(IDC_SOUNDANIMINFO)->SetWindowText(utf8ToTStr(text));
+	GetDlgItem(IDC_SOUNDANIMINFO)->SetWindowText(nlUtf8ToTStr(text));
 
 	_AnimView.updateCursor(); 
 }
@@ -136,7 +136,7 @@ void CSoundAnimDlg::updateSounds()
 
 		for (iter = sounds.begin(); iter != sounds.end(); iter++)
 		{
-			list->AddString(utf8ToTStr((*iter).toString()));
+			list->AddString(nlUtf8ToTStr((*iter).toString()));
 		}
 
 		list->UpdateData();

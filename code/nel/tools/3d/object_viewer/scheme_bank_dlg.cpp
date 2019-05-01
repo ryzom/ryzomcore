@@ -84,7 +84,7 @@ void CSchemeBankDlg::buildList()
 	SchemeManager.getSchemes(_Type, schemes);
 	for (TSchemeVect::const_iterator it = schemes.begin(); it != schemes.end(); ++it)
 	{
-		int index = m_SchemeList.AddString(utf8ToTStr(it->first));
+		int index = m_SchemeList.AddString(nlUtf8ToTStr(it->first));
 		m_SchemeList.SetItemData(index, (DWORD_PTR) it->second);
 	}
 
@@ -99,18 +99,18 @@ void CSchemeBankDlg::OnSaveBank()
 	if (fd.DoModal() == IDOK)
 	{
 		// Add search path for the texture
-		NLMISC::CPath::addSearchPath (NLMISC::CFile::getPath(tStrToUtf8(fd.GetPathName())));
+		NLMISC::CPath::addSearchPath(NLMISC::CFile::getPath(NLMISC::tStrToUtf8(fd.GetPathName())));
 		
 		try
 		{
 			NLMISC::COFile iF;
-			iF.open(tStrToUtf8(fd.GetFileName()));
+			iF.open(NLMISC::tStrToUtf8(fd.GetFileName()));
 			iF.serial(SchemeManager);			
 		}
 		catch (const std::exception &e)
 		{
 			std::string message = NLMISC::toString("Error saving scheme bank : %s", e.what());
-			MessageBox(utf8ToTStr(message), _T("Object viewer"), MB_ICONEXCLAMATION | MB_OK);
+			MessageBox(nlUtf8ToTStr(message), _T("Object viewer"), MB_ICONEXCLAMATION | MB_OK);
 			return;
 		}		
 	}	
@@ -124,20 +124,20 @@ void CSchemeBankDlg::OnLoadBank()
 	if (fd.DoModal() == IDOK)
 	{
 		// Add search path for the texture
-		NLMISC::CPath::addSearchPath(NLMISC::CFile::getPath(tStrToUtf8(fd.GetPathName())));
+		NLMISC::CPath::addSearchPath(NLMISC::CFile::getPath(NLMISC::tStrToUtf8(fd.GetPathName())));
 
 		CSchemeManager sm;
 		try
 		{
 			NLMISC::CIFile iF;
-			iF.open(NLMISC::CPath::lookup(tStrToUtf8(fd.GetFileName())));
+			iF.open(NLMISC::CPath::lookup(NLMISC::tStrToUtf8(fd.GetFileName())));
 			iF.serial(sm);
 			SchemeManager.swap(sm);
 		}
 		catch (const std::exception &e)
 		{
 			std::string message = NLMISC::toString("Error loading scheme bank : %s", e.what());
-			MessageBox(utf8ToTStr(message), _T("Object viewer"), MB_ICONEXCLAMATION | MB_OK);
+			MessageBox(nlUtf8ToTStr(message), _T("Object viewer"), MB_ICONEXCLAMATION | MB_OK);
 			return;
 		}
 		buildList();
@@ -167,7 +167,7 @@ void CSchemeBankDlg::OnRename()
 		SchemeManager.rename(scheme, cn.getName());
 		int curSel = m_SchemeList.GetCurSel();
 		m_SchemeList.DeleteString(curSel);
-		int insertedPos = m_SchemeList.InsertString(curSel, utf8ToTStr(cn.getName()));
+		int insertedPos = m_SchemeList.InsertString(curSel, nlUtf8ToTStr(cn.getName()));
 		m_SchemeList.SetCurSel(insertedPos);
 		m_SchemeList.Invalidate();
 	}	

@@ -568,6 +568,11 @@ MACRO(NL_SETUP_BUILD)
     ADD_PLATFORM_FLAGS("-DENABLE_LOGS")
   ENDIF()
 
+  SET(CUSTOM_FLAGS "" CACHE STRING "Custom compile flags (useful for /MPn)")
+  IF(NOT ${CUSTOM_FLAGS} STREQUAL "")
+    ADD_PLATFORM_FLAGS(${CUSTOM_FLAGS})
+  ENDIF()
+
   IF(MSVC)
     # Ignore default include paths
     ADD_PLATFORM_FLAGS("/X")

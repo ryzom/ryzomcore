@@ -63,7 +63,7 @@ BOOL CVegetableSelectDlg::OnInitDialog()
 	uint	num= _VegetableDlg->getNumVegetables();
 	for(uint i=0; i<num; i++)
 	{
-		VegetableList.AddString(utf8ToTStr(_VegetableDlg->getVegetableName(i)));
+		VegetableList.AddString(nlUtf8ToTStr(_VegetableDlg->getVegetableName(i)));
 	}
 	
 	return TRUE;  // return TRUE unless you set the focus to a control

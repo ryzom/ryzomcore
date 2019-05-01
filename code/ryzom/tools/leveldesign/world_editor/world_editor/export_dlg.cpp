@@ -162,9 +162,9 @@ int CALLBACK expBrowseCallbackProc (HWND hwnd,UINT uMsg,LPARAM lp, LPARAM pData)
 // \return true if not canceled
 bool CExportDlg::callChoosePathDlg(CString &dest) const
 {
-	BROWSEINFO	bi;
-	TCHAR		str[MAX_PATH];
-	ITEMIDLIST*	pidl;
+	BROWSEINFO bi;
+	TCHAR str[MAX_PATH];
+	LPITEMIDLIST pidl;
 	TCHAR sTemp[1024];
 
 	bi.hwndOwner = this->m_hWnd;

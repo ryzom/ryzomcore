@@ -48,4 +48,6 @@ extern HINSTANCE hInstance;
 
 #define RGBAddClassID (Class_ID(0x5621932, 0x565a6387))
 
+#include "../nel_3dsmax_shared/string_common.h"
+
 #endif // __TILE_UTILITY__H

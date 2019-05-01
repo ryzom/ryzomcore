@@ -88,7 +88,7 @@ BOOL CNameDlg::OnInitDialog()
 
 	// print the data directory
 	CWnd* pWnd = GetDlgItem(IDC_NAME_DIR);
-	pWnd->SetWindowText(CString(_T("Data directory: ")) + utf8ToTStr(m_dataDir));
+	pWnd->SetWindowText(CString(_T("Data directory: ")) + nlUtf8ToTStr(m_dataDir));
 
 	// tab stops to simulate multi-columns edit boxes
 	int tab_stop1[1] = {160};
@@ -156,18 +156,18 @@ void CNameDlg::updateSearchList()
 		{
 			// no filter
 			m_listToName.insert(std::make_pair(j, i));
-			m_searchList.InsertString(j++, utf8ToTStr(s));
+			m_searchList.InsertString(j++, nlUtf8ToTStr(s));
 		}
 		else
 		{
-			std::string filter(tStrToUtf8(m_nameFilter.LockBuffer()));
+			std::string filter(NLMISC::tStrToUtf8(m_nameFilter.LockBuffer()));
 			m_nameFilter.UnlockBuffer();
 
 			// filter
 			if (NLMISC::toLower(ig).find(NLMISC::toLower(filter)) != std::string::npos)
 			{
 				m_listToName.insert(std::make_pair(j, i));
-				m_searchList.InsertString(j++, utf8ToTStr(s));
+				m_searchList.InsertString(j++, nlUtf8ToTStr(s));
 			}
 		}
 	}	
@@ -214,7 +214,7 @@ void CNameDlg::updateSelectList()
 			m_listToId.insert(std::make_pair(i, row));
 		}
 
-		m_idList.InsertString(i++, utf8ToTStr(s));
+		m_idList.InsertString(i++, nlUtf8ToTStr(s));
 	}
 }
 
@@ -251,8 +251,8 @@ void CNameDlg::OnBtnAssign()
 
 	// get strings
 	ucstring id;
-	std::string gn = tStrToUtf8(m_assignGn);
-	std::string ig = tStrToUtf8(m_assignIg);
+	std::string gn = NLMISC::tStrToUtf8(m_assignGn);
+	std::string ig = NLMISC::tStrToUtf8(m_assignIg);
 
 	for (uint i=0 ; i<sel.size() ; i++)
 	{
@@ -268,7 +268,7 @@ void CNameDlg::OnBtnAssign()
 			uint n = m_idList.GetTextLen(i);
 			m_idList.GetText(i, str.GetBuffer(n));
 			str.ReleaseBuffer();
-			id.fromUtf8(tStrToUtf8(str));
+			id.fromUtf8(NLMISC::tStrToUtf8(str));
 		}
 
 		// assign name to selected id
@@ -359,7 +359,7 @@ void CNameDlg::checkNewGn()
 {
 	// print a message if a new gn will be added to the list
 	CWnd* pWnd = GetDlgItem(IDC_NAME_NEWGN);
-	std::string s = tStrToUtf8(m_assignGn);
+	std::string s = NLMISC::tStrToUtf8(m_assignGn);
 	uint rowIndex;
 	if (s == "")
 	{

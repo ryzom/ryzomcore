@@ -1810,7 +1810,7 @@ emptyProc CDriverD3D::getWindowProc()
 
 IDriver::TMessageBoxId CDriverD3D::systemMessageBox (const char* message, const char* title, TMessageBoxType type, TMessageBoxIcon icon)
 {
-	switch (::MessageBoxW (_HWnd, utf8ToWide(message), utf8ToWide(title), ((type==retryCancelType)?MB_RETRYCANCEL:
+	switch (::MessageBoxW(_HWnd, nlUtf8ToWide(message), nlUtf8ToWide(title), ((type == retryCancelType) ? MB_RETRYCANCEL :
 		(type==yesNoCancelType)?MB_YESNOCANCEL:
 		(type==okCancelType)?MB_OKCANCEL:
 		(type==abortRetryIgnoreType)?MB_ABORTRETRYIGNORE:

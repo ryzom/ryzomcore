@@ -700,7 +700,7 @@ bool CFileContainer::setCurrentPath (const std::string &path)
 	int res;
 	//nldebug("Change current path to '%s' (current path is '%s')", path.c_str(), getCurrentPath().c_str());
 #ifdef NL_OS_WINDOWS
-	res = _wchdir(utf8ToWide(path));
+	res = _wchdir(nlUtf8ToWide(path));
 #else
 	res = chdir(path.c_str());
 #endif
@@ -792,7 +792,7 @@ dirent *readdir (DIR *dir)
 	// first visit in this directory : FindFirstFile()
 	if (hFind == NULL)
 	{
-		hFind = FindFirstFileW (utf8ToWide(CPath::standardizePath(sDir) + "*"), &findData);
+		hFind = FindFirstFileW(nlUtf8ToWide(CPath::standardizePath(sDir) + "*"), &findData);
 	}
 	// directory already visited : FindNextFile()
 	else
@@ -1914,7 +1914,7 @@ string CFile::getPath (const string &filename)
 bool CFile::isDirectory (const string &filename)
 {
 #ifdef NL_OS_WINDOWS
-	DWORD res = GetFileAttributesW(utf8ToWide(filename));
+	DWORD res = GetFileAttributesW(nlUtf8ToWide(filename));
 	if (res == INVALID_FILE_ATTRIBUTES)
 	{
 		// nlwarning ("PATH: '%s' is not a valid file or directory name", filename.c_str ());
@@ -1937,7 +1937,7 @@ bool CFile::isDirectory (const string &filename)
 bool CFile::isExists (const string &filename)
 {
 #ifdef NL_OS_WINDOWS
-	return GetFileAttributesW(utf8ToWide(filename)) != INVALID_FILE_ATTRIBUTES;
+	return GetFileAttributesW(nlUtf8ToWide(filename)) != INVALID_FILE_ATTRIBUTES;
 #else // NL_OS_WINDOWS
 	struct stat buf;
 	return stat (filename.c_str (), &buf) == 0;
@@ -2017,7 +2017,7 @@ uint32	CFile::getFileSize (const std::string &filename)
 	{
 #if defined (NL_OS_WINDOWS)
 		struct _stat buf;
-		int result = _wstat (utf8ToWide(filename), &buf);
+		int result = _wstat(nlUtf8ToWide(filename), &buf);
 #elif defined (NL_OS_UNIX)
 		struct stat buf;
 		int result = stat (filename.c_str (), &buf);
@@ -2068,7 +2068,7 @@ uint32	CFile::getFileModificationDate(const std::string &filename)
 	// Use the WIN32 API to read the file times in UTC
 
 	// create a file handle (this does not open the file)
-	HANDLE h = CreateFileW(utf8ToWide(fn), 0, 0, NULL, OPEN_EXISTING, 0, 0);
+	HANDLE h = CreateFileW(nlUtf8ToWide(fn), 0, 0, NULL, OPEN_EXISTING, 0, 0);
 	if (h == INVALID_HANDLE_VALUE)
 	{
 		nlwarning("Can't get modification date on file '%s' : %s", fn.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
@@ -2138,7 +2138,7 @@ bool	CFile::setFileModificationDate(const std::string &filename, uint32 modTime)
 	// Use the WIN32 API to set the file times in UTC
 
 	// create a file handle (this does not open the file)
-	HANDLE h = CreateFileW(utf8ToWide(fn), GENERIC_WRITE|GENERIC_READ, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
+	HANDLE h = CreateFileW(nlUtf8ToWide(fn), GENERIC_WRITE | GENERIC_READ, FILE_SHARE_WRITE | FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
 	if (h == INVALID_HANDLE_VALUE)
 	{
 		nlwarning("Can't set modification date on file '%s' (error accessing file) : %s", fn.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
@@ -2223,7 +2223,7 @@ uint32	CFile::getFileCreationDate(const std::string &filename)
 
 #if defined (NL_OS_WINDOWS)
 	struct _stat buf;
-	int result = _wstat(utf8ToWide(fn), &buf);
+	int result = _wstat(nlUtf8ToWide(fn), &buf);
 #elif defined (NL_OS_UNIX)
 	struct stat buf;
 	int result = stat(fn.c_str (), &buf);
@@ -2357,7 +2357,7 @@ static bool CopyMoveFile(const std::string &dest, const std::string &src, bool c
 	else
 	{
 #ifdef NL_OS_WINDOWS
-		if (MoveFileW(utf8ToWide(ssrc), utf8ToWide(sdest)) == 0)
+		if (MoveFileW(nlUtf8ToWide(ssrc), nlUtf8ToWide(sdest)) == 0)
 		{
 			sint lastError = NLMISC::getLastError();
 			nlwarning ("PATH: CopyMoveFile error: can't link/move '%s' into '%s', error %u (%s)",
@@ -2482,7 +2482,7 @@ bool CFile::moveFile(const std::string &dest, const std::string &src)
 bool CFile::createDirectory(const std::string &filename)
 {
 #ifdef NL_OS_WINDOWS
-	return _wmkdir(utf8ToWide(filename))==0;
+	return _wmkdir(nlUtf8ToWide(filename)) == 0;
 #else
 	// Set full permissions....
 	return mkdir(filename.c_str(), 0xFFFF)==0;
@@ -2751,7 +2751,7 @@ bool CFile::deleteFile(const std::string &filename)
 {
 	setRWAccess(filename);
 #ifdef NL_OS_WINDOWS
-	sint res = _wunlink(utf8ToWide(filename));
+	sint res = _wunlink(nlUtf8ToWide(filename));
 #else
 	sint res = unlink(filename.c_str());
 #endif
@@ -2770,7 +2770,7 @@ bool CFile::deleteDirectory(const std::string &filename)
 {
 	setRWAccess(filename);
 #ifdef NL_OS_WINDOWS
-	sint res = _wrmdir(utf8ToWide(filename));
+	sint res = _wrmdir(nlUtf8ToWide(filename));
 #else
 	sint res = rmdir(filename.c_str());
 #endif

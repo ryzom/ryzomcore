@@ -73,4 +73,6 @@ namespace std
 #include "nel/misc/bsphere.h"
 #include "nel/misc/path.h"
 
+#include "../nel_3dsmax_shared/string_common.h"
+
 #endif

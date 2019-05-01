@@ -88,7 +88,7 @@ BOOL CTypeDialog::OnInitDialog()
 
 	// Create the type combo
 	setStaticSize (currentPos);
-	LabelType.Create ("Type:", WS_VISIBLE, currentPos, this);
+	LabelType.Create (_T("Type:"), WS_VISIBLE, currentPos, this);
 	initWidget (LabelType);
 	getNextPosLabel (currentPos);
 
@@ -101,7 +101,7 @@ BOOL CTypeDialog::OnInitDialog()
 	uint item;
 	ComboType.ResetContent ();
 	for (item=0; item<CType::TypeCount; item++)
-		ComboType.InsertString (-1, CType::getTypeName ((CType::TType)item));
+		ComboType.InsertString (-1, nlUtf8ToTStr(CType::getTypeName ((CType::TType)item)));
 
 	ComboType.SetCurSel (0);
 	initWidget (ComboType);
@@ -109,7 +109,7 @@ BOOL CTypeDialog::OnInitDialog()
 
 	// Create the type combo
 	setStaticSize (currentPos);
-	LabelUIType.Create ("User Interface:", WS_VISIBLE, currentPos, this);
+	LabelUIType.Create (_T("User Interface:"), WS_VISIBLE, currentPos, this);
 	initWidget (LabelUIType);
 	getNextPosLabel (currentPos);
 
@@ -123,59 +123,59 @@ BOOL CTypeDialog::OnInitDialog()
 
 	// Default value
 	setStaticSize (currentPos);
-	LabelDefault.Create ("Default value:", WS_VISIBLE, currentPos, this);
+	LabelDefault.Create (_T("Default value:"), WS_VISIBLE, currentPos, this);
 	initWidget (LabelDefault);
 	getNextPosLabel (currentPos);
 
 	setComboSize (currentPos, SmallWidget);
-	Default.create (WS_CHILD|WS_TABSTOP, currentPos, this, EdDefault, GEORGES_EDIT_BASE_REG_KEY"\\Type Default MemCombo", theApp.RememberListSize);
+	Default.create (WS_CHILD|WS_TABSTOP, currentPos, this, EdDefault, nlUtf8ToTStr(GEORGES_EDIT_BASE_REG_KEY"\\Type Default MemCombo"), theApp.RememberListSize);
 	initWidget (Default);
 	getNextPos (currentPos);
 
 	// Min value
 	setStaticSize (currentPos);
-	LabelMin.Create ("Min value:", WS_VISIBLE, currentPos, this);
+	LabelMin.Create (_T("Min value:"), WS_VISIBLE, currentPos, this);
 	initWidget (LabelMin);
 	getNextPosLabel (currentPos);
 
 	setComboSize (currentPos, SmallWidget);
-	Min.create (WS_CHILD|WS_TABSTOP, currentPos, this, EdMin, GEORGES_EDIT_BASE_REG_KEY"\\Type Min MemCombo", theApp.RememberListSize);
+	Min.create (WS_CHILD|WS_TABSTOP, currentPos, this, EdMin, nlUtf8ToTStr(GEORGES_EDIT_BASE_REG_KEY"\\Type Min MemCombo"), theApp.RememberListSize);
 	initWidget (Min);
 	getNextPos (currentPos);
 
 	// Max value
 	setStaticSize (currentPos);
-	LabelMax.Create ("Max value:", WS_VISIBLE, currentPos, this);
+	LabelMax.Create (_T("Max value:"), WS_VISIBLE, currentPos, this);
 	initWidget (LabelMax);
 	getNextPosLabel (currentPos);
 
 	setComboSize (currentPos, SmallWidget);
-	Max.create (WS_CHILD|WS_TABSTOP, currentPos, this, EdMax, GEORGES_EDIT_BASE_REG_KEY"\\Type Max MemCombo", theApp.RememberListSize);
+	Max.create (WS_CHILD|WS_TABSTOP, currentPos, this, EdMax, nlUtf8ToTStr(GEORGES_EDIT_BASE_REG_KEY"\\Type Max MemCombo"), theApp.RememberListSize);
 	initWidget (Max);
 	getNextPos (currentPos);
 
 	// Increment value
 	setStaticSize (currentPos);
-	LabelIncrement.Create ("Increment value:", WS_VISIBLE, currentPos, this);
+	LabelIncrement.Create (_T("Increment value:"), WS_VISIBLE, currentPos, this);
 	initWidget (LabelIncrement);
 	getNextPosLabel (currentPos);
 
 	setComboSize (currentPos, SmallWidget);
-	Increment.create (WS_CHILD|WS_TABSTOP, currentPos, this, EdIncrement, GEORGES_EDIT_BASE_REG_KEY"\\Type Increment MemCombo", theApp.RememberListSize);
+	Increment.create (WS_CHILD|WS_TABSTOP, currentPos, this, EdIncrement, nlUtf8ToTStr(GEORGES_EDIT_BASE_REG_KEY"\\Type Increment MemCombo"), theApp.RememberListSize);
 	initWidget (Increment);
 	getNextColumn (currentPos);
 
 	// Predef list value
 	setStaticSize (currentPos);
-	LabelPreDef.Create ("Predefintion list:", WS_VISIBLE, currentPos, this);
+	LabelPreDef.Create (_T("Predefintion list:"), WS_VISIBLE, currentPos, this);
 	initWidget (LabelPreDef);
 	getNextPosLabel (currentPos);
 
 	setListSize (currentPos, SmallWidgetNotLimited, 250);
 	Predef.create (WS_TABSTOP, currentPos, this, LtPredef);
 	Predef.Dialog = this;
-	Predef.insertColumn (0, "Label");
-	Predef.insertColumn (1, "Value");
+	Predef.insertColumn (0, _T("Label"));
+	Predef.insertColumn (1, _T("Value"));
 	Predef.recalcColumn ();
 	initWidget (Predef);
 	getNextPos (currentPos);
@@ -356,7 +356,7 @@ void CTypeDialog::getFromDocument (const NLGEORGES::CType &type)
 		// Insert type string
 		ComboType.ResetContent ();
 		for (item=0; item<CType::TypeCount; item++)
-			ComboType.InsertString (-1, CType::getTypeName ((CType::TType)item));
+			ComboType.InsertString (-1, nlUtf8ToTStr(CType::getTypeName ((CType::TType)item)));
 
 		// Insert UI types
 		ComboUIType.ResetContent ();
@@ -364,7 +364,7 @@ void CTypeDialog::getFromDocument (const NLGEORGES::CType &type)
 		{
 			if (CType::uiCompatible (type.Type, (CType::TUI)item))
 			{
-				int index = ComboUIType.InsertString (-1, CType::getUIName ((CType::TUI)item));
+				int index = ComboUIType.InsertString(-1, nlUtf8ToTStr(CType::getUIName((CType::TUI)item)));
 				ComboUIType.SetItemData (index, item);
 				
 				if (item == (uint)type.UIType)
@@ -373,10 +373,10 @@ void CTypeDialog::getFromDocument (const NLGEORGES::CType &type)
 		}
 
 		ComboType.SetCurSel (type.Type);
-		Default.SetWindowText (type.Default.c_str());
-		Min.SetWindowText (type.Min.c_str());
-		Max.SetWindowText (type.Max.c_str());
-		Increment.SetWindowText (type.Increment.c_str());
+		Default.SetWindowText (nlUtf8ToTStr(type.Default));
+		Min.SetWindowText (nlUtf8ToTStr(type.Min));
+		Max.SetWindowText (nlUtf8ToTStr(type.Max));
+		Increment.SetWindowText (nlUtf8ToTStr(type.Increment));
 
 		// Disable some windows
 		bool number = (type.Type == UType::UnsignedInt) || (type.Type == UType::SignedInt) || (type.Type == UType::Double);
@@ -390,8 +390,8 @@ void CTypeDialog::getFromDocument (const NLGEORGES::CType &type)
 		for (predef=0; predef<type.Definitions.size(); predef++)
 		{
 			// Add the label and value
-			Predef.ListCtrl.InsertItem (predef, type.Definitions[predef].Label.c_str());
-			Predef.ListCtrl.SetItemText (predef, 1, type.Definitions[predef].Value.c_str());
+			Predef.ListCtrl.InsertItem (predef, nlUtf8ToTStr(type.Definitions[predef].Label));
+			Predef.ListCtrl.SetItemText (predef, 1, nlUtf8ToTStr(type.Definitions[predef].Value));
 		}
 	}
 }
@@ -431,71 +431,71 @@ void CTypeDialog::setUIToDocument ()
 
 void CTypeDialog::setDefaultToDocument ()
 {
-	CGeorgesEditDoc *doc = View->GetDocument ();
+	CGeorgesEditDoc *doc = View->GetDocument();
 	if (doc)
 	{
-		CGeorgesEditDocSub *current = doc->getSelectedObject ();
+		CGeorgesEditDocSub *current = doc->getSelectedObject();
 		if (current)
 		{
 			CString str;
 
-			Default.UpdateData ();
-			Default.GetWindowText (str);
+			Default.UpdateData();
+			Default.GetWindowText(str);
 
-			doc->modify (new CActionString (IAction::TypeDefault, str, *doc, "",  "",
-				doc->getLeftView ()->getCurrentSelectionId (), 0));
+			doc->modify(new CActionString(IAction::TypeDefault, nlTStrToUtf8(str), *doc, "", "",
+			    doc->getLeftView()->getCurrentSelectionId(), 0));
 		}
 	}
 }
 
 void CTypeDialog::setMinToDocument ()
 {
-	CGeorgesEditDoc *doc = View->GetDocument ();
+	CGeorgesEditDoc *doc = View->GetDocument();
 	if (doc)
 	{
-		CGeorgesEditDocSub *current = doc->getSelectedObject ();
+		CGeorgesEditDocSub *current = doc->getSelectedObject();
 		if (current)
 		{
 			CString str;
 
-			Min.UpdateData ();
-			Min.GetWindowText (str);
+			Min.UpdateData();
+			Min.GetWindowText(str);
 
-			doc->modify (new CActionString (IAction::TypeMin, str, *doc, "", "", 
-				doc->getLeftView ()->getCurrentSelectionId (), 0));
+			doc->modify(new CActionString(IAction::TypeMin, nlTStrToUtf8(str), *doc, "", "",
+			    doc->getLeftView()->getCurrentSelectionId(), 0));
 		}
 	}
 }
 
-void CTypeDialog::setMaxToDocument ()
+void CTypeDialog::setMaxToDocument()
 {
-	CGeorgesEditDoc *doc = View->GetDocument ();
+	CGeorgesEditDoc *doc = View->GetDocument();
 	if (doc)
 	{
-		CGeorgesEditDocSub *current = doc->getSelectedObject ();
+		CGeorgesEditDocSub *current = doc->getSelectedObject();
 		CString str;
 
-		Max.UpdateData ();
-		Max.GetWindowText (str);
+		Max.UpdateData();
+		Max.GetWindowText(str);
 
-		doc->modify (new CActionString (IAction::TypeMax, str, *doc, "", "", 
-			doc->getLeftView ()->getCurrentSelectionId (), 0));
+		doc->modify(new CActionString(IAction::TypeMax, nlTStrToUtf8(str), *doc, "", "",
+		    doc->getLeftView()->getCurrentSelectionId(), 0));
 	}
 }
 
-void CTypeDialog::setIncrementToDocument ()
+void CTypeDialog::setIncrementToDocument()
 {
-	CGeorgesEditDoc *doc = View->GetDocument ();
+	CGeorgesEditDoc *doc = View->GetDocument();
 	if (doc)
 	{
-		CGeorgesEditDocSub *current = doc->getSelectedObject ();
+		CGeorgesEditDocSub *current = doc->getSelectedObject();
 		CString str;
 
-		Increment.UpdateData ();
-		Increment.GetWindowText (str);
+		Increment.UpdateData();
+		Increment.GetWindowText(str);
 
-		doc->modify (new CActionString (IAction::TypeIncrement, str, *doc, "", "",
-			doc->getLeftView ()->getCurrentSelectionId (), 0));
+		doc->modify(new CActionString(IAction::TypeIncrement, nlTStrToUtf8(str), *doc, "", "",
+		    doc->getLeftView()->getCurrentSelectionId(), 0));
 	}
 }
 

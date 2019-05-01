@@ -33,7 +33,7 @@ CChooseName::CChooseName(const CString &initialName, CWnd* pParent /*=NULL*/)
 
 std::string CChooseName::getName()
 {
-	return tStrToUtf8(m_Name);
+	return NLMISC::tStrToUtf8(m_Name);
 }
 
 void CChooseName::DoDataExchange(CDataExchange* pDX)

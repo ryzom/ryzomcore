@@ -118,7 +118,7 @@ void CDialogFlags::init(CSoundPlugin *plugin)
 	for (uint i =0; i<NLSOUND::UAudioMixer::TBackgroundFlags::NB_BACKGROUND_FLAGS; ++i)
 	{
 		static_cast<CButton*>(GetDlgItem(BG_FLAG_ID[i]))->SetCheck(flags.Flags[i] ? 1 : 0);
-		GetDlgItem(BG_FLAG_ID[i])->SetWindowText(utf8ToTStr(_Mixer->getBackgroundFlagName(i)));
+		GetDlgItem(BG_FLAG_ID[i])->SetWindowText(nlUtf8ToTStr(_Mixer->getBackgroundFlagName(i)));
 	}
 
 
@@ -229,7 +229,7 @@ void CDialogFlags::OnTimer(UINT_PTR nIDEvent)
 		_stprintf(temp, _T("%6.2f"), SampleBanks[i].second / (1024.0f*1024.0f));
 
 		TCHAR bankName[1024];
-		_tcscpy_s(bankName, 1024, utf8ToTStr(SampleBanks[i].first));
+		_tcscpy_s(bankName, 1024, nlUtf8ToTStr(SampleBanks[i].first));
 
 		if (i < c)
 		{

@@ -75,9 +75,9 @@ void CProjectSettings::OnBrowse()
 {
 	UpdateData ();
 
-	BROWSEINFO	bi;
-	TCHAR		str[MAX_PATH];
-	ITEMIDLIST*	pidl;
+	BROWSEINFO	 bi;
+	TCHAR		 str[MAX_PATH];
+	LPITEMIDLIST pidl;
 	TCHAR sTemp[1024];
 
 	bi.hwndOwner = this->m_hWnd;
@@ -133,11 +133,11 @@ BOOL CProjectSettings::OnInitDialog()
 	for (uint i=0; i<contexts.size (); i++)
 	{
 		// Add the string
-		Context.InsertString (-1, utf8ToTStr(contexts[i]));
+		Context.InsertString(-1, nlUtf8ToTStr(contexts[i]));
 	}
 
 	// Select the string 
-	Context.SelectString (-1, utf8ToTStr(doc->getContext ()));
+	Context.SelectString(-1, nlUtf8ToTStr(doc->getContext()));
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

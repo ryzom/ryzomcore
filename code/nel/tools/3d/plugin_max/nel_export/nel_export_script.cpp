@@ -91,7 +91,7 @@ Value* export_shape_cf (Value** arg_list, int count)
 	theCNelExport.init (false, false, ip, true);
 
 	// Export path 
-	std::string sPath = tStrToUtf8(arg_list[1]->to_string());
+	std::string sPath = MCharStrToUtf8(arg_list[1]->to_string());
 
 	// Ok ?
 	Boolean *ret=&false_value;
@@ -154,12 +154,12 @@ Value* export_shape_ex_cf (Value** arg_list, int count)
 	nlassert(node->GetName());
 
 	// Export path 
-	std::string sPath = tStrToUtf8(arg_list[1]->to_string());
+	std::string sPath = MCharStrToUtf8(arg_list[1]->to_string());
 
 	// Ex argu
 	theExportSceneStruct.bShadow = arg_list[2]->to_bool()!=FALSE;
 	theExportSceneStruct.bExportLighting = arg_list[3]->to_bool()!=FALSE;
-	theExportSceneStruct.sExportLighting = tStrToUtf8(arg_list[4]->to_string());
+	theExportSceneStruct.sExportLighting = MCharStrToUtf8(arg_list[4]->to_string());
 	theExportSceneStruct.nExportLighting = arg_list[5]->to_int();
 	theExportSceneStruct.rLumelSize = arg_list[6]->to_float();
 	theExportSceneStruct.nOverSampling = arg_list[7]->to_int();
@@ -220,7 +220,7 @@ Value* export_skeleton_cf (Value** arg_list, int count)
 	nlassert (node);
 
 	// Export path 
-	std::string sPath = tStrToUtf8(arg_list[1]->to_string());
+	std::string sPath = MCharStrToUtf8(arg_list[1]->to_string());
 
 	// Ok ?
 	Boolean *ret=&false_value;
@@ -260,7 +260,7 @@ Value* export_animation_cf (Value** arg_list, int count)
 	theCNelExport.init (false, false, ip, true);
 
 	// Export path 
-	std::string sPath = tStrToUtf8(arg_list[1]->to_string());
+	std::string sPath = MCharStrToUtf8(arg_list[1]->to_string());
 
 	// Get time
 	TimeValue time=MAXScript_interface->GetTime();
@@ -298,7 +298,7 @@ Value* export_animation_cf (Value** arg_list, int count)
 			else
 			{
 				// Error message
-				mprintf (_M("Error exporting animation %s in the file\n%s\n"), (*vectNode.begin())->GetName(), utf8ToTStr(sPath));
+				mprintf(_M("Error exporting animation %s in the file\n%s\n"), (*vectNode.begin())->GetName(), MaxTStrFromUtf8(sPath).data());
 			}
 		}
 	}
@@ -352,7 +352,7 @@ Value* export_ig_cf (Value** arg_list, int count)
 					vect.push_back (array->get (i+1)->to_node());
 					
 				// Export path 
-				std::string sPath = tStrToUtf8(arg_list[1]->to_string());
+				std::string sPath = MCharStrToUtf8(arg_list[1]->to_string());
 
 				// Export
 				if (theCNelExport.exportInstanceGroup (sPath, vect))
@@ -411,7 +411,7 @@ Value* export_skeleton_weight_cf (Value** arg_list, int count)
 					vect.push_back (array->get (i+1)->to_node());
 					
 				// Export path 
-				std::string sPath = tStrToUtf8(arg_list[1]->to_string());
+				std::string sPath = MCharStrToUtf8(arg_list[1]->to_string());
 
 				// Export
 				if (theCNelExport.exportSWT (sPath, vect))
@@ -462,8 +462,8 @@ Value* test_file_date_cf (Value** arg_list, int count)
 	// Make sure we have the correct number of arguments (2)
 	check_arg_count(view_shape, 2, count);
 
-	type_check (arg_list[0], String, _M("NeLTestFileDate [DestFilename] [SrcFilename]"));
-	type_check (arg_list[1], String, _M("NeLTestFileDate [DestFilename] [SrcFilename]"));
+	type_check(arg_list[0], String, _M("NeLTestFileDate [DestFilename] [SrcFilename]"));
+	type_check(arg_list[1], String, _M("NeLTestFileDate [DestFilename] [SrcFilename]"));
 
 	// Get a good interface pointer
 	Interface *ip = MAXScript_interface;
@@ -471,11 +471,11 @@ Value* test_file_date_cf (Value** arg_list, int count)
 	theCNelExport.init (false, false, ip, true);
 
 	// The 2 filenames
-	string file0 = tStrToUtf8(arg_list[0]->to_string());
-	string file1 = tStrToUtf8(arg_list[1]->to_string());
+	WStr file0 = arg_list[0]->to_string();
+	WStr file1 = arg_list[1]->to_string();
 
 	// Open it
-	FILE *file=nlfopen (file0.c_str(), "r");
+	FILE *file= nlfopen(ucstring((const ucchar *)file0.data()).toUtf8().c_str(), "r");
 	if (file == NULL)
 		return &true_value;
 	
@@ -486,10 +486,10 @@ Value* test_file_date_cf (Value** arg_list, int count)
 	Value *ret = &undefined;
 
 	// Create first file
-	HANDLE h0 = CreateFile (utf8ToTStr(file0), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE h0 = CreateFileW((LPCWSTR)file0.data(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (h0!=INVALID_HANDLE_VALUE)
 	{
-		HANDLE h1 = CreateFile (utf8ToTStr(file1), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		HANDLE h1 = CreateFileW((LPCWSTR)file1.data(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (h1!=INVALID_HANDLE_VALUE)
 		{
 			// Get file time
@@ -536,7 +536,7 @@ Value* export_vegetable_cf (Value** arg_list, int count)
 	nlassert (node);
 
 	// Export path 
-	std::string sPath = tStrToUtf8(arg_list[1]->to_string());
+	std::string sPath = MCharStrToUtf8(arg_list[1]->to_string());
 
 	// Message in dialog
 	bool dialogMessage = arg_list[2]->to_bool() != FALSE;
@@ -615,7 +615,7 @@ Value* export_collision_cf (Value** arg_list, int count)
 	theCNelExport.init (false, false, ip, true);
 
 	// Export path 
-	string sPath = tStrToUtf8(arg_list[1]->to_string());
+	string sPath = MCharStrToUtf8(arg_list[1]->to_string());
 
 	// Get time
 	TimeValue time = MAXScript_interface->GetTime();
@@ -674,7 +674,7 @@ Value* export_pacs_primitives_cf (Value** arg_list, int count)
 	theCNelExport.init (false, false, ip, true);
 
 	// Export path 
-	string sPath = tStrToUtf8(arg_list[1]->to_string());
+	string sPath = MCharStrToUtf8(arg_list[1]->to_string());
 
 	// Get time
 	TimeValue time = MAXScript_interface->GetTime();
@@ -733,7 +733,7 @@ Value* export_lod_character_cf (Value** arg_list, int count)
 	nlassert (node);
 
 	// Export path 
-	std::string sPath = tStrToUtf8(arg_list[1]->to_string());
+	std::string sPath = MCharStrToUtf8(arg_list[1]->to_string());
 
 	// Message in dialog
 	bool dialogMessage = arg_list[2]->to_bool() != FALSE;
@@ -879,18 +879,18 @@ Value* get_file_modification_date_cf (Value** arg_list, int count)
 	type_check (arg_list[0], String, message);
 	
 	// get the node
-	string sPath = tStrToUtf8(arg_list[0]->to_string());
+	WStr sPath = arg_list[0]->to_string();
 
 	// get vertices indices
 	string result;
-	HANDLE file = CreateFile (utf8ToTStr(sPath), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE file = CreateFileW((LPCWSTR)sPath.data(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (file)
 	{
 		FILETIME lastWriteTime;
 		if (GetFileTime(file, NULL, NULL, &lastWriteTime))
 		{
 			char number[512];
-			sprintf (number, "%08x%08x", lastWriteTime.dwHighDateTime, lastWriteTime.dwLowDateTime);
+			sprintf(number, "%08x%08x", lastWriteTime.dwHighDateTime, lastWriteTime.dwLowDateTime);
 			result = number;
 		}
 		CloseHandle (file);
@@ -899,7 +899,7 @@ Value* get_file_modification_date_cf (Value** arg_list, int count)
 	if (result.empty())
 		return &undefined;
 	else
-		return new String(utf8ToTStr(result));
+		return new String(MaxTStrFromUtf8(result));
 }
 
 // ***************************************************************************
@@ -914,24 +914,24 @@ Value* set_file_modification_date_cf (Value** arg_list, int count)
 	MCHAR *message = _M("bool NeLSetFileModificationDate [filename] [date] - If an error occurred, returns false.");
 	
 	//type_check
-	type_check (arg_list[0], String, message);
-	type_check (arg_list[1], String, message);
+	type_check(arg_list[0], String, message);
+	type_check(arg_list[1], String, message);
 	
 	// get the node
-	string sPath = tStrToUtf8(arg_list[0]->to_string());
-	string sDate = tStrToUtf8(arg_list[1]->to_string());
+	WStr sPath = arg_list[0]->to_string();
+	WStr sDate = arg_list[1]->to_string();
 
 	// get vertices indices
 	string result;
-	HANDLE file = CreateFile (utf8ToTStr(sPath), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE file = CreateFileW(sPath.data(), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (file)
 	{
 		FILETIME lastWriteTime;
-		if (sscanf (sDate.c_str(), "%08x%08x", &lastWriteTime.dwHighDateTime, &lastWriteTime.dwLowDateTime) == 2)
+		if (swscanf(sDate.data(), L"%08x%08x", &lastWriteTime.dwHighDateTime, &lastWriteTime.dwLowDateTime) == 2)
 		{
 			if (SetFileTime(file, NULL, NULL, &lastWriteTime))
 			{
-				CloseHandle (file);
+				CloseHandle(file);
 				return &true_value;
 			}
 		}

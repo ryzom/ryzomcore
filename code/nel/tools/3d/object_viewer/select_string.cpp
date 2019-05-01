@@ -77,14 +77,14 @@ BOOL CSelectString::OnInitDialog()
 	CDialog::OnInitDialog();
 	
 	// Change title
-	SetWindowText (utf8ToTStr(Title));
+	SetWindowText(nlUtf8ToTStr(Title));
 
 	// Empty button ?
 	EmptyCtrl.ShowWindow (Empty?SW_SHOW:SW_HIDE);
 
 	// Add string
 	for (uint s=0; s<Strings.size(); s++)
-		ListCtrl.InsertString (-1, utf8ToTStr(Strings[s]));
+		ListCtrl.InsertString(-1, nlUtf8ToTStr(Strings[s]));
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
