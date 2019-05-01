@@ -357,9 +357,6 @@ inline tstring mbcsToTStr(const std::string &str) { return (const tstring &)str;
 #define nlMbcsToTStr(str) ((const tchar *)NLMISC::asCStr(str))
 #endif
 
-inline const tchar *asCStr(const tchar *str) { return str; }
-inline const tchar *asCStr(const tstring &str) { return str.c_str(); }
-
 } // NLMISC
 
 #endif	// NL_STRING_COMMON_H
