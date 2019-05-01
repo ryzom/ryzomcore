@@ -277,7 +277,7 @@ template <class T> T trimRightWhiteSpaces (const T &str)
 }
 
 // if both first and last char are quotes (' or "), then remove them
-template <class T> T trimQuotes (const T&str)
+template <class T> T trimQuotes (const T &str)
 {
 	typename T::size_type size = str.size();
 	if (size == 0)
