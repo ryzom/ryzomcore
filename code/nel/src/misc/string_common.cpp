@@ -286,7 +286,7 @@ std::string wideToMbcs(const wchar_t *str, size_t len)
 #if defined(NL_OS_WINDOWS)
 	return winWideToCp(str, len, CP_ACP);
 #else
-	return wideToUTf8(str, len);
+	return wideToUtf8(str, len);
 #endif
 }
 
@@ -295,7 +295,7 @@ std::string wideToMbcs(const std::wstring &str)
 #if defined(NL_OS_WINDOWS)
 	return winWideToCp(str.c_str(), str.size(), CP_ACP);
 #else
-	return wideToUTf8(str);
+	return wideToUtf8(str);
 #endif
 }
 
