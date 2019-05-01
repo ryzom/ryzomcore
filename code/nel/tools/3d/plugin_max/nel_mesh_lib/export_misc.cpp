@@ -764,7 +764,7 @@ void CExportNel::outputErrorMessage(const std::string &message)
 {
 	if (_ErrorInDialog)
 	{
-		MessageBoxW(_Ip->GetMAXHWnd(), utf8ToWide(message), utf8ToWide(_ErrorTitle), MB_OK|MB_ICONEXCLAMATION);
+		MessageBoxW(_Ip->GetMAXHWnd(), nlUtf8ToWide(message), nlUtf8ToWide(_ErrorTitle), MB_OK|MB_ICONEXCLAMATION);
 	}
 	mprintf(_M("%s\n"), MaxTStrFromUtf8(message).data());
 
@@ -778,7 +778,7 @@ void CExportNel::outputWarningMessage(const std::string &message)
 {
 	if (_ErrorInDialog)
 	{
-		MessageBoxW(_Ip->GetMAXHWnd(), utf8ToWide(message), utf8ToWide(_ErrorTitle), MB_OK|MB_ICONEXCLAMATION);
+		MessageBoxW(_Ip->GetMAXHWnd(), nlUtf8ToWide(message), nlUtf8ToWide(_ErrorTitle), MB_OK|MB_ICONEXCLAMATION);
 	}
 	mprintf(_M("%s\n"), MaxTStrFromUtf8(message).data());
 
