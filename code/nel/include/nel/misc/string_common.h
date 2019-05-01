@@ -285,10 +285,10 @@ std::string wideToMbcs(const std::wstring &str);
 std::wstring mbcsToWide(const char *str, size_t len = 0);
 std::wstring mbcsToWide(const std::string &str);
 
-inline const char* asCStr(const char *str) { return str; }
-inline const char* asCStr(const std::string &str) { return str.c_str(); }
-inline const wchar_t* asCStr(const wchar_t *str) { return str; }
-inline const wchar_t* asCStr(const std::wstring &str) { return str.c_str(); }
+inline const char *asCStr(const char *str) { return str; }
+inline const char *asCStr(const std::string &str) { return str.c_str(); }
+inline const wchar_t *asCStr(const wchar_t *str) { return str; }
+inline const wchar_t *asCStr(const std::wstring &str) { return str.c_str(); }
 
 #if defined(NL_OS_WINDOWS)
 #define nlUtf8ToMbcs(str) (NLMISC::utf8ToMbcs(str).c_str())
@@ -357,8 +357,8 @@ inline tstring mbcsToTStr(const std::string &str) { return (const tstring &)str;
 #define nlMbcsToTStr(str) ((const tchar *)NLMISC::asCStr(str))
 #endif
 
-inline const tchar* asCStr(const tchar *str) { return str; }
-inline const tchar* asCStr(const tstring &str) { return str.c_str(); }
+inline const tchar *asCStr(const tchar *str) { return str; }
+inline const tchar *asCStr(const tstring &str) { return str.c_str(); }
 
 } // NLMISC
 
