@@ -699,7 +699,20 @@ namespace NLGUI
 	// Add a image download request in the multi_curl
 	void CGroupHTML::addImageDownload(const string &url, CViewBase *img, const CStyleParams &style, TImageType type)
 	{
-		string finalUrl = upgradeInsecureUrl(getAbsoluteUrl(url));
+		std::string finalUrl;
+		img->setModulateGlobalColor(style.GlobalColor);
+
+		// load the image from local files/bnp
+		std::string image = CFile::getPath(url) + CFile::getFilenameWithoutExtension(url) + ".tga";
+		if (lookupLocalFile(finalUrl, image.c_str(), false))
+		{
+			setImage(img, image, type);
+			setImageSize(img, style);
+			return;
+		}
+
+		// TODO: if no image in cache, nothing is visible
+		finalUrl = upgradeInsecureUrl(getAbsoluteUrl(url));
 
 		// use requested url for local name (cache)
 		string dest = localImageName(url);
@@ -2801,8 +2814,6 @@ namespace NLGUI
 			paragraphChange ();
 		}
 
-		string finalUrl;
-
 		// No more text in this text view
 		_CurrentViewLink = NULL;
 
@@ -2810,51 +2821,8 @@ namespace NLGUI
 		CViewBitmap *newImage = new CViewBitmap (TCtorParam());
 		newImage->setId(id);
 
-		//
-		// 1/ try to load the image with the old system (local files in bnp)
-		//
-		string image = CFile::getPath(img) + CFile::getFilenameWithoutExtension(img) + ".tga";
-		if (lookupLocalFile (finalUrl, image.c_str(), false))
-		{
-			newImage->setRenderLayer(getRenderLayer()+1);
-			image = finalUrl;
-		}
-		else
-		{
-			//
-			// 2/ if it doesn't work, try to load the image in cache
-			//
-			image = localImageName(img);
-
-			if (reloadImg && CFile::fileExists(image))
-				CFile::deleteFile(image);
-
-			if (lookupLocalFile (finalUrl, image.c_str(), false))
-			{
-				// don't display image that are not power of 2
-				try
-				{
-					uint32 w, h;
-					CBitmap::loadSize (image, w, h);
-					if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
-						image = "web_del.tga";
-				}
-				catch(const NLMISC::Exception &e)
-				{
-					nlwarning(e.what());
-					image = "web_del.tga";
-				}
-			}
-			else
-			{
-				// no image in cache
-				image = "web_del.tga";
-			}
-
-			addImageDownload(img, newImage, style);
-		}
-		newImage->setTexture (image);
-		newImage->setModulateGlobalColor(style.GlobalColor);
+		addImageDownload(img, newImage, style, TImageType::NormalImage);
+		newImage->setRenderLayer(getRenderLayer()+1);
 
 		getParagraph()->addChild(newImage);
 		paragraphChange ();
@@ -3058,26 +3026,6 @@ namespace NLGUI
 			if(id == -1)
 			{
 				normal = localImageName(normalBitmap);
-				if(!CFile::fileExists(normal))
-				{
-					normal = "web_del.tga";
-				}
-				else
-				{
-					try
-					{
-						uint32 w, h;
-						CBitmap::loadSize(normal, w, h);
-						if (w == 0 || h == 0)
-							normal = "web_del.tga";
-					}
-					catch(const NLMISC::Exception &e)
-					{
-						nlwarning(e.what());
-						normal = "web_del.tga";
-					}
-				}
-
 				addImageDownload(normalBitmap, ctrlButton, style);
 			}
 		}
