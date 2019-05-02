@@ -1444,7 +1444,6 @@ namespace NLGUI
 
 		initImageDownload();
 		initBnpDownload();
-		initLibWWW();
 	}
 
 	// ***************************************************************************
