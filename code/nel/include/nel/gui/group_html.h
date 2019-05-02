@@ -23,7 +23,6 @@
 #include "nel/gui/group_tree.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/group_table.h"
-#include "nel/gui/libwww_types.h"
 #include "nel/gui/html_element.h"
 #include "nel/gui/css_style.h"
 

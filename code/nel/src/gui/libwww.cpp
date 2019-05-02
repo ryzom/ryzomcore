@@ -29,6 +29,167 @@ using namespace NLMISC;
 
 namespace NLGUI
 {
+	struct CNameToHtmlElement
+	{
+		HTMLElement ID;
+		const char* Name;
+		CNameToHtmlElement(HTMLElement id, const char*name)
+			: ID(id), Name(name) {}
+	};
+
+	// sorted list of HTML_ELEMENT enum to TAG name
+	static CNameToHtmlElement htmlElementToName[] =
+	{
+		CNameToHtmlElement(HTML_A, "a"),
+		CNameToHtmlElement(HTML_ABBR, "abbr"),
+		CNameToHtmlElement(HTML_ADDRESS, "address"),
+		CNameToHtmlElement(HTML_APPLET, "applet"),
+		CNameToHtmlElement(HTML_AREA, "area"),
+		CNameToHtmlElement(HTML_ARTICLE, "article"),
+		CNameToHtmlElement(HTML_ASIDE, "aside"),
+		CNameToHtmlElement(HTML_AUDIO, "audio"),
+		CNameToHtmlElement(HTML_B, "b"),
+		CNameToHtmlElement(HTML_BASE, "base"),
+		CNameToHtmlElement(HTML_BDI, "bdi"),
+		CNameToHtmlElement(HTML_BDO, "bdo"),
+		CNameToHtmlElement(HTML_BLOCKQUOTE, "blockquote"),
+		CNameToHtmlElement(HTML_BODY, "body"),
+		CNameToHtmlElement(HTML_BR, "br"),
+		CNameToHtmlElement(HTML_BUTTON, "button"),
+		CNameToHtmlElement(HTML_CANVAS, "canvas"),
+		CNameToHtmlElement(HTML_CAPTION, "caption"),
+		CNameToHtmlElement(HTML_CITE, "cite"),
+		CNameToHtmlElement(HTML_CODE, "code"),
+		CNameToHtmlElement(HTML_COL, "col"),
+		CNameToHtmlElement(HTML_COLGROUP, "colgroup"),
+		CNameToHtmlElement(HTML_DATA, "data"),
+		CNameToHtmlElement(HTML_DATALIST, "datalist"),
+		CNameToHtmlElement(HTML_DD, "dd"),
+		CNameToHtmlElement(HTML_DEL, "del"),
+		CNameToHtmlElement(HTML_DETAILS, "details"),
+		CNameToHtmlElement(HTML_DFN, "dfn"),
+		CNameToHtmlElement(HTML_DIALOG, "dialog"),
+		CNameToHtmlElement(HTML_DIR, "dir"),
+		CNameToHtmlElement(HTML_DIV, "div"),
+		CNameToHtmlElement(HTML_DL, "dl"),
+		CNameToHtmlElement(HTML_DT, "dt"),
+		CNameToHtmlElement(HTML_EM, "em"),
+		CNameToHtmlElement(HTML_EMBED, "embed"),
+		CNameToHtmlElement(HTML_FIELDSET, "fieldset"),
+		CNameToHtmlElement(HTML_FIGCAPTION, "figcaption"),
+		CNameToHtmlElement(HTML_FIGURE, "figure"),
+		CNameToHtmlElement(HTML_FONT, "font"),
+		CNameToHtmlElement(HTML_FOOTER, "footer"),
+		CNameToHtmlElement(HTML_FORM, "form"),
+		CNameToHtmlElement(HTML_H1, "h1"),
+		CNameToHtmlElement(HTML_H2, "h2"),
+		CNameToHtmlElement(HTML_H3, "h3"),
+		CNameToHtmlElement(HTML_H4, "h4"),
+		CNameToHtmlElement(HTML_H5, "h5"),
+		CNameToHtmlElement(HTML_H6, "h6"),
+		CNameToHtmlElement(HTML_HEAD, "head"),
+		CNameToHtmlElement(HTML_HEADER, "header"),
+		CNameToHtmlElement(HTML_HGROUP, "hgroup"),
+		CNameToHtmlElement(HTML_HR, "hr"),
+		CNameToHtmlElement(HTML_HTML, "html"),
+		CNameToHtmlElement(HTML_I, "i"),
+		CNameToHtmlElement(HTML_IFRAME, "iframe"),
+		CNameToHtmlElement(HTML_IMG, "img"),
+		CNameToHtmlElement(HTML_INPUT, "input"),
+		CNameToHtmlElement(HTML_INS, "ins"),
+		CNameToHtmlElement(HTML_KBD, "kbd"),
+		CNameToHtmlElement(HTML_LABEL, "label"),
+		CNameToHtmlElement(HTML_LEGEND, "legend"),
+		CNameToHtmlElement(HTML_LI, "li"),
+		CNameToHtmlElement(HTML_LINK, "link"),
+		CNameToHtmlElement(HTML_LUA, "lua"),
+		CNameToHtmlElement(HTML_MAIN, "main"),
+		CNameToHtmlElement(HTML_MAP, "map"),
+		CNameToHtmlElement(HTML_MARK, "mark"),
+		CNameToHtmlElement(HTML_MENU, "menu"),
+		CNameToHtmlElement(HTML_MENUITEM, "menuitem"),
+		CNameToHtmlElement(HTML_META, "meta"),
+		CNameToHtmlElement(HTML_METER, "meter"),
+		CNameToHtmlElement(HTML_NAV, "nav"),
+		CNameToHtmlElement(HTML_NOEMBED, "noembed"),
+		CNameToHtmlElement(HTML_NOSCRIPT, "noscript"),
+		CNameToHtmlElement(HTML_OBJECT, "object"),
+		CNameToHtmlElement(HTML_OL, "ol"),
+		CNameToHtmlElement(HTML_OPTGROUP, "optgroup"),
+		CNameToHtmlElement(HTML_OPTION, "option"),
+		CNameToHtmlElement(HTML_OUTPUT, "output"),
+		CNameToHtmlElement(HTML_P, "p"),
+		CNameToHtmlElement(HTML_PARAM, "param"),
+		CNameToHtmlElement(HTML_PICTURE, "picture"),
+		CNameToHtmlElement(HTML_PRE, "pre"),
+		CNameToHtmlElement(HTML_PROGRESS, "progress"),
+		CNameToHtmlElement(HTML_Q, "q"),
+		CNameToHtmlElement(HTML_RB, "rb"),
+		CNameToHtmlElement(HTML_RP, "rp"),
+		CNameToHtmlElement(HTML_RT, "rt"),
+		CNameToHtmlElement(HTML_RTC, "rtc"),
+		CNameToHtmlElement(HTML_RUBY, "ruby"),
+		CNameToHtmlElement(HTML_S, "s"),
+		CNameToHtmlElement(HTML_SAMP, "samp"),
+		CNameToHtmlElement(HTML_SCRIPT, "script"),
+		CNameToHtmlElement(HTML_SECTION, "section"),
+		CNameToHtmlElement(HTML_SELECT, "select"),
+		CNameToHtmlElement(HTML_SMALL, "small"),
+		CNameToHtmlElement(HTML_SOURCE, "source"),
+		CNameToHtmlElement(HTML_SPAN, "span"),
+		CNameToHtmlElement(HTML_STRONG, "strong"),
+		CNameToHtmlElement(HTML_STYLE, "style"),
+		CNameToHtmlElement(HTML_SUB, "sub"),
+		CNameToHtmlElement(HTML_SUMMARY, "summary"),
+		CNameToHtmlElement(HTML_SUP, "sup"),
+		CNameToHtmlElement(HTML_TABLE, "table"),
+		CNameToHtmlElement(HTML_TBODY, "tbody"),
+		CNameToHtmlElement(HTML_TD, "td"),
+		CNameToHtmlElement(HTML_TEXTAREA, "textarea"),
+		CNameToHtmlElement(HTML_TFOOT, "tfoot"),
+		CNameToHtmlElement(HTML_TH, "th"),
+		CNameToHtmlElement(HTML_THEAD, "thead"),
+		CNameToHtmlElement(HTML_TIME, "time"),
+		CNameToHtmlElement(HTML_TITLE, "title"),
+		CNameToHtmlElement(HTML_TR, "tr"),
+		CNameToHtmlElement(HTML_TRACK, "track"),
+		CNameToHtmlElement(HTML_TT, "tt"),
+		CNameToHtmlElement(HTML_U, "u"),
+		CNameToHtmlElement(HTML_UL, "ul"),
+		CNameToHtmlElement(HTML_VAR, "var"),
+		CNameToHtmlElement(HTML_VIDEO, "video"),
+		CNameToHtmlElement(HTML_WBR, "wbr")
+	};
+
+	HTMLElement htmlElementLookup(const char* name)
+	{
+		uint end = sizeofarray(htmlElementToName);
+		uint mid = end >> 1;
+		sint ret;
+		while(mid < end)
+		{
+			sint ret = nlstricmp(name, htmlElementToName[mid].Name);
+			if (ret == 0)
+			{
+				return htmlElementToName[mid].ID;
+			}
+			else if (ret < 0)
+			{
+				// lower half
+				end = mid;
+				mid = end >> 1;
+			}
+			else
+			{
+				// upper half
+				mid++;
+				mid += (end - mid) >> 1;
+			}
+		}
+
+		// not found
+		return HTML_NB_ELEMENTS;
+	}
 
 	// ***************************************************************************
 
@@ -39,258 +200,6 @@ namespace NLGUI
 	static std::map<std::string, std::map<std::string, std::string> > HTTPCookies;
 
 	// ***************************************************************************
-
-	// Some DTD table
-
-	// Here, modify the DTD table to change the HTML parser (add new tags for examples)
-
-	#undef HTML_ATTR
-	#define HTML_ATTR(a,b) { (char*) #b }
-
-	HTAttr html_attr[] =
-	{
-		HTML_ATTR(HTML,DIR),
-		HTML_ATTR(HTML,LANG),
-		HTML_ATTR(HTML,VERSION),
-		HTML_ATTR(HTML,STYLE),
-		{ 0 }
-	};
-
-	HTAttr a_attr[] =
-	{
-		HTML_ATTR(A,ACCESSKEY),
-			HTML_ATTR(A,CHARSET),
-			HTML_ATTR(A,CLASS),
-			HTML_ATTR(A,COORDS),
-			HTML_ATTR(A,DIR),
-			HTML_ATTR(A,HREF),
-			HTML_ATTR(A,HREFLANG),
-			HTML_ATTR(A,ID),
-			HTML_ATTR(A,NAME),
-			HTML_ATTR(A,REL),
-			HTML_ATTR(A,REV),
-			HTML_ATTR(A,SHAPE),
-			HTML_ATTR(A,STYLE),
-			HTML_ATTR(A,TABINDEX),
-			HTML_ATTR(A,TARGET),
-			HTML_ATTR(A,TYPE),
-			HTML_ATTR(A,TITLE),
-			HTML_ATTR(A,Z_ACTION_CATEGORY),
-			HTML_ATTR(A,Z_ACTION_PARAMS),
-			HTML_ATTR(A,Z_ACTION_SHORTCUT),
-		{ 0 }
-	};
-
-	HTAttr table_attr[] =
-	{
-		HTML_ATTR(TABLE,ALIGN),
-			HTML_ATTR(TABLE,BGCOLOR),
-			HTML_ATTR(TABLE,BORDER),
-			HTML_ATTR(TABLE,BORDERCOLOR),
-			HTML_ATTR(TABLE,CELLPADDING),
-			HTML_ATTR(TABLE,CELLSPACING),
-			HTML_ATTR(TABLE,CLASS),
-			HTML_ATTR(TABLE,DIR),
-			HTML_ATTR(TABLE,FRAME),
-			HTML_ATTR(TABLE,ID),
-			HTML_ATTR(TABLE,L_MARGIN),
-			HTML_ATTR(TABLE,LANG),
-			HTML_ATTR(TABLE,NOWRAP),
-			HTML_ATTR(TABLE,RULES),
-			HTML_ATTR(TABLE,SUMMARY),
-			HTML_ATTR(TABLE,STYLE),
-			HTML_ATTR(TABLE,TITLE),
-			HTML_ATTR(TABLE,VALIGN),
-			HTML_ATTR(TABLE,WIDTH),
-		{ 0 }
-	};
-
-	HTAttr tr_attr[] =
-	{
-		HTML_ATTR(TR,ALIGN),
-			HTML_ATTR(TR,BGCOLOR),
-			HTML_ATTR(TR,L_MARGIN),
-			HTML_ATTR(TR,NOWRAP),
-			HTML_ATTR(TR,VALIGN),
-			HTML_ATTR(TR,STYLE),
-		{ 0 }
-	};
-
-	HTAttr td_attr[] =
-	{
-		HTML_ATTR(TD,ABBR),
-			HTML_ATTR(TD,ALIGN),
-			HTML_ATTR(TD,AXIS),
-			HTML_ATTR(TD,BGCOLOR),
-			HTML_ATTR(TD,CHAR),
-			HTML_ATTR(TD,CHAROFF),
-			HTML_ATTR(TD,CLASS),
-			HTML_ATTR(TD,COLSPAN),
-			HTML_ATTR(TD,DIR),
-			HTML_ATTR(TD,ID),
-			HTML_ATTR(TD,HEADERS),
-			HTML_ATTR(TD,HEIGHT),
-			HTML_ATTR(TD,L_MARGIN),
-			HTML_ATTR(TD,LANG),
-			HTML_ATTR(TD,NOWRAP),
-			HTML_ATTR(TD,ROWSPAN),
-			HTML_ATTR(TD,SCOPE),
-			HTML_ATTR(TD,STYLE),
-			HTML_ATTR(TD,TITLE),
-			HTML_ATTR(TD,VALIGN),
-			HTML_ATTR(TD,WIDTH),
-		{ 0 }
-	};
-
-	HTAttr img_attr[] =
-	{
-		HTML_ATTR(IMG,ALIGN),
-			HTML_ATTR(IMG,ALT),
-			HTML_ATTR(IMG,BORDER),
-			HTML_ATTR(IMG,CLASS),
-			HTML_ATTR(IMG,DIR),
-			HTML_ATTR(IMG,GLOBAL_COLOR),
-			HTML_ATTR(IMG,HEIGHT),
-			HTML_ATTR(IMG,HSPACE),
-			HTML_ATTR(IMG,ID),
-			HTML_ATTR(IMG,ISMAP),
-			HTML_ATTR(IMG,LANG),
-			HTML_ATTR(IMG,LONGDESC),
-			HTML_ATTR(IMG,SRC),
-			HTML_ATTR(IMG,STYLE),
-			HTML_ATTR(IMG,TITLE),
-			HTML_ATTR(IMG,USEMAP),
-			HTML_ATTR(IMG,VSPACE),
-			HTML_ATTR(IMG,WIDTH),
-			// not sorted to keep enum values
-			HTML_ATTR(IMG,DATA-OVER-SRC),
-			{ 0 }
-	};
-
-	HTAttr input_attr[] =
-	{
-		HTML_ATTR(INPUT,ACCEPT),
-			HTML_ATTR(INPUT,ACCESSKEY),
-			HTML_ATTR(INPUT,ALIGN),
-			HTML_ATTR(INPUT,ALT),
-			HTML_ATTR(INPUT,CHECKED),
-			HTML_ATTR(INPUT,CLASS),
-			HTML_ATTR(INPUT,DIR),
-			HTML_ATTR(INPUT,DISABLED),
-			HTML_ATTR(INPUT,GLOBAL_COLOR),
-			HTML_ATTR(INPUT,ID),
-			HTML_ATTR(INPUT,LANG),
-			HTML_ATTR(INPUT,MAXLENGTH),
-			HTML_ATTR(INPUT,NAME),
-			HTML_ATTR(INPUT,READONLY),
-			HTML_ATTR(INPUT,SIZE),
-			HTML_ATTR(INPUT,SRC),
-			HTML_ATTR(INPUT,STYLE),
-			HTML_ATTR(INPUT,TABINDEX),
-			HTML_ATTR(INPUT,TITLE),
-			HTML_ATTR(INPUT,TYPE),
-			HTML_ATTR(INPUT,USEMAP),
-			HTML_ATTR(INPUT,VALUE),
-			HTML_ATTR(INPUT,Z_BTN_TMPL),
-			HTML_ATTR(INPUT,Z_INPUT_TMPL),
-			HTML_ATTR(INPUT,Z_INPUT_WIDTH),
-		{ 0 }
-	};
-
-	HTAttr textarea_attr[] =
-	{
-		HTML_ATTR(TEXTAREA,CLASS),
-		HTML_ATTR(TEXTAREA,COLS),
-		HTML_ATTR(TEXTAREA,DIR),
-		HTML_ATTR(TEXTAREA,DISABLED),
-		HTML_ATTR(TEXTAREA,ID),
-		HTML_ATTR(TEXTAREA,LANG),
-		HTML_ATTR(TEXTAREA,MAXLENGTH),
-		HTML_ATTR(TEXTAREA,NAME),
-		HTML_ATTR(TEXTAREA,READONLY),
-		HTML_ATTR(TEXTAREA,ROWS),
-		HTML_ATTR(TEXTAREA,STYLE),
-		HTML_ATTR(TEXTAREA,TABINDEX),
-		HTML_ATTR(TEXTAREA,TITLE),
-		HTML_ATTR(TEXTAREA,Z_INPUT_TMPL),
-		{ 0 }
-	};
-
-	HTAttr p_attr[] =
-	{
-		HTML_ATTR(P,QUICK_HELP_CONDITION),
-			HTML_ATTR(P,QUICK_HELP_EVENTS),
-			HTML_ATTR(P,QUICK_HELP_LINK),
-			HTML_ATTR(P,NAME),
-			HTML_ATTR(P,STYLE),
-		{ 0 }
-	};
-
-
-	HTAttr div_attr[] =
-	{
-		HTML_ATTR(DIV,CLASS),
-			HTML_ATTR(DIV,ID),
-			HTML_ATTR(DIV,NAME),
-			HTML_ATTR(DIV,STYLE),
-		{ 0 }
-	};
-
-	HTAttr span_attr[] =
-	{
-		HTML_ATTR(SPAN,CLASS),
-		HTML_ATTR(SPAN,ID),
-		HTML_ATTR(SPAN,STYLE),
-		{ 0 }
-	};
-
-	HTAttr h1_attr[] =
-	{
-		HTML_ATTR(H1,CLASS),
-		HTML_ATTR(H1,ID),
-		HTML_ATTR(H1,STYLE),
-		{ 0 }
-	};
-
-	HTAttr h2_attr[] =
-	{
-		HTML_ATTR(H2,CLASS),
-		HTML_ATTR(H2,ID),
-		HTML_ATTR(H2,STYLE),
-		{ 0 }
-	};
-
-	HTAttr h3_attr[] =
-	{
-		HTML_ATTR(H3,CLASS),
-		HTML_ATTR(H3,ID),
-		HTML_ATTR(H3,STYLE),
-		{ 0 }
-	};
-
-	HTAttr h4_attr[] =
-	{
-		HTML_ATTR(H4,CLASS),
-		HTML_ATTR(H4,ID),
-		HTML_ATTR(H4,STYLE),
-		{ 0 }
-	};
-
-	HTAttr h5_attr[] =
-	{
-		HTML_ATTR(H5,CLASS),
-		HTML_ATTR(H5,ID),
-		HTML_ATTR(H5,STYLE),
-		{ 0 }
-	};
-
-	HTAttr h6_attr[] =
-	{
-		HTML_ATTR(H6,CLASS),
-		HTML_ATTR(H6,ID),
-		HTML_ATTR(H6,STYLE),
-		{ 0 }
-	};
 
 	// ***************************************************************************
 	bool getCssLength (float &value, std::string &unit, const std::string &str)
@@ -870,58 +779,6 @@ namespace NLGUI
 				curl_easy_setopt(curl, CURLOPT_COOKIELIST, it->second.c_str());
 				//nlwarning("set domain '%s' cookie '%s'", domain.c_str(), it->second.c_str());
 			}
-		}
-	}
-
-	void initLibWWW()
-	{
-		static bool initialized = false;
-		if (!initialized)
-		{
-
-			// Change the HTML DTD
-			SGML_dtd *HTML_DTD = HTML_dtd ();
-			HTML_DTD->tags[HTML_HTML].attributes = html_attr;
-			HTML_DTD->tags[HTML_HTML].number_of_attributes = sizeof(html_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_TABLE].attributes = table_attr;
-			HTML_DTD->tags[HTML_TABLE].number_of_attributes = sizeof(table_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_TR].attributes = tr_attr;
-			HTML_DTD->tags[HTML_TR].number_of_attributes = sizeof(tr_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_TD].attributes = td_attr;
-			HTML_DTD->tags[HTML_TD].number_of_attributes = sizeof(td_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_TH].attributes = td_attr;
-			HTML_DTD->tags[HTML_TH].number_of_attributes = sizeof(td_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_IMG].attributes = img_attr;
-			HTML_DTD->tags[HTML_IMG].number_of_attributes = sizeof(img_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_INPUT].attributes = input_attr;
-			HTML_DTD->tags[HTML_INPUT].number_of_attributes = sizeof(input_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_TEXTAREA].attributes = textarea_attr;
-			HTML_DTD->tags[HTML_TEXTAREA].number_of_attributes = sizeof(textarea_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_P].attributes = p_attr;
-			HTML_DTD->tags[HTML_P].number_of_attributes = sizeof(p_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_A].attributes = a_attr;
-			HTML_DTD->tags[HTML_A].number_of_attributes = sizeof(a_attr) / sizeof(HTAttr) - 1;
-			//HTML_DTD->tags[HTML_I].attributes = a_attr;
-			HTML_DTD->tags[HTML_I].number_of_attributes = 0;
-			HTML_DTD->tags[HTML_DIV].attributes = div_attr;
-			HTML_DTD->tags[HTML_DIV].number_of_attributes = sizeof(div_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_SPAN].attributes = span_attr;
-			HTML_DTD->tags[HTML_SPAN].number_of_attributes = sizeof(span_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_H1].attributes = h1_attr;
-			HTML_DTD->tags[HTML_H1].number_of_attributes = sizeof(h1_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_H2].attributes = h2_attr;
-			HTML_DTD->tags[HTML_H2].number_of_attributes = sizeof(h2_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_H3].attributes = h3_attr;
-			HTML_DTD->tags[HTML_H3].number_of_attributes = sizeof(h3_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_H4].attributes = h4_attr;
-			HTML_DTD->tags[HTML_H4].number_of_attributes = sizeof(h4_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_H5].attributes = h5_attr;
-			HTML_DTD->tags[HTML_H5].number_of_attributes = sizeof(h5_attr) / sizeof(HTAttr) - 1;
-			HTML_DTD->tags[HTML_H6].attributes = h6_attr;
-			HTML_DTD->tags[HTML_H6].number_of_attributes = sizeof(h6_attr) / sizeof(HTAttr) - 1;
-
-			// Initialized
-			initialized = true;
 		}
 	}
 
