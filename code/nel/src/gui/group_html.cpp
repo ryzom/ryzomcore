@@ -3379,6 +3379,13 @@ namespace NLGUI
 				bitmap->setRenderLayer(-2);
 				bitmap->setScale(scale);
 				bitmap->setTile(tile);
+
+				// clear size ref for non-scaled image or it does not show up
+				if (scale || tile)
+					bitmap->setSizeRef("wh");
+				else
+					bitmap->setSizeRef("");
+
 				addImageDownload(bgtex, view);
 			}
 		}
@@ -5016,6 +5023,52 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CGroupHTML::applyBackground(const CHtmlElement &elm)
+	{
+		bool root = elm.Value == "html" || elm.Value == "body";
+
+		// non-empty image
+		if (_Style.hasStyle("background-image"))
+		{
+			// value '1' and 'background-scale' are ryzom only
+			bool repeat = _Style.checkStyle("background-repeat", "1") || _Style.checkStyle("background-repeat", "repeat");
+			bool scale = _Style.checkStyle("background-scale", "1") || _Style.checkStyle("background-size", "100% 100%");
+			std::string image = trim(_Style.getStyle("background-image"));
+			string::size_type texExt = toLower(image).find("url(");
+			if (texExt != string::npos)
+			{
+				image = image.substr(texExt+4, image.size()-texExt-5);
+			}
+			if (!image.empty())
+			{
+				if (root)
+				{
+					setBackground (image, scale, repeat);
+				}
+				// TODO: else
+
+				// default background color is transparent, so image does not show
+				if (!_Style.hasStyle("background-color"))
+				{
+					_Style.applyStyle("background-color: #fff;");
+				}
+			}
+		}
+
+		if (_Style.hasStyle("background-color"))
+		{
+			CRGBA bgColor = _Style.Current.BackgroundColor;
+			scanHTMLColor(elm.getAttribute("bgcolor").c_str(), bgColor);
+			if (root)
+			{
+				setBackgroundColor(bgColor);
+			}
+			// TODO: else 
+		}
+
+	}
+
+	// ***************************************************************************
 	void CGroupHTML::htmlA(const CHtmlElement &elm)
 	{
 		_A.push_back(true);
@@ -5084,39 +5137,7 @@ namespace NLGUI
 			_Style.applyStyle("background-color: " + elm.getAttribute("bgcolor"));
 		}
 
-		if (_Style.hasStyle("background-color"))
-		{
-			CRGBA bgColor = _Style.Current.BackgroundColor;
-			scanHTMLColor(elm.getAttribute("bgcolor").c_str(), bgColor);
-			setBackgroundColor(bgColor);
-		}
-
-		if (elm.hasNonEmptyAttribute("style"))
-		{
-			string style = elm.getAttribute("style");
-
-			TStyle styles = parseStyle(style);
-			TStyle::iterator	it;
-
-			it = styles.find("background-repeat");
-			bool repeat = (it != styles.end() && it->second == "1");
-
-			// Webig only
-			it = styles.find("background-scale");
-			bool scale = (it != styles.end() && it->second == "1");
-
-			it = styles.find("background-image");
-			if (it != styles.end())
-			{
-				string image = it->second;
-				string::size_type texExt = toLower(image).find("url(");
-				// Url image
-				if (texExt != string::npos)
-					// Remove url()
-					image = image.substr(4, image.size()-5);
-				setBackground (image, scale, repeat);
-			}
-		}
+		applyBackground(elm);
 
 		renderPseudoElement(":before", elm);
 	}
@@ -5468,7 +5489,7 @@ namespace NLGUI
 			_Style.applyRootStyle(elm.getAttribute("style"));
 			_Style.Current = _Style.Root;
 		}
-		setBackgroundColor(_Style.Current.BackgroundColor);
+		applyBackground(elm);
 	}
 
 	// ***************************************************************************
@@ -6278,7 +6299,7 @@ namespace NLGUI
 		if (_Style.checkStyle("background-repeat", "1") || _Style.checkStyle("background-repeat", "repeat"))
 			_Cells.back()->setTextureTile(true);
 
-		if (_Style.checkStyle("background-scale", "1") || _Style.checkStyle("background-size", "cover"))
+		if (_Style.checkStyle("background-scale", "1") || _Style.checkStyle("background-size", "100% 100%"))
 			_Cells.back()->setTextureScale(true);
 
 		if (_Style.hasStyle("background-image"))
