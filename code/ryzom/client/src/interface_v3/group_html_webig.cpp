@@ -357,6 +357,9 @@ void CGroupHTMLAuth::addHTTPGetParams (string &url, bool trustedDomain)
 
 void CGroupHTMLAuth::addHTTPPostParams (SFormFields &formfields, bool trustedDomain)
 {
+	// no extras parameters added to url if not in trusted domains list
+	if (!trustedDomain) return;
+
 	if(!UserEntity || !NetMngr.getLoginCookie().isValid()) return;
 
 	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;

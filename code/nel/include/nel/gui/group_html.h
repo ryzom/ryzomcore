@@ -823,6 +823,9 @@ namespace NLGUI
 		// :before, :after rendering
 		void renderPseudoElement(const std::string &pseudo, const CHtmlElement &elm);
 
+		// apply background from current style (for html, body)
+		void applyBackground(const CHtmlElement &elm);
+
 		// HTML elements
 		void htmlA(const CHtmlElement &elm);
 		void htmlAend(const CHtmlElement &elm);
