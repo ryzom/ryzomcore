@@ -4193,6 +4193,7 @@ namespace NLGUI
 
 		// Reset default background color
 		setBackgroundColor (BgColor);
+		setBackground ("blank.tga", true, false);
 
 		paragraphChange ();
 	}
