@@ -227,7 +227,7 @@ namespace NLGUI
 					// child of - immediate parent must match previous selector
 					if (!child->parent)
 					{
-						return false;					
+						return false;
 					}
 					child = child->parent;
 					mustMatchNext = true;
@@ -332,10 +332,18 @@ namespace NLGUI
 			return;
 		}
 
-		// first pass:
-		// - get font-size for 'em' sizes
-		// - split shorthand to its parts
-		// - get TextColor value that could be used for 'currentcolor'
+		normalize(styleRules, style, current);
+		apply(style, current);
+	}
+
+	// first pass
+	// - get font-size for 'em' sizes
+	// - split shorthand to its parts
+	// - get TextColor value that could be used for 'currentcolor'
+	// - normalize values
+	void CCssStyle::normalize(const TStyle &styleRules, CStyleParams &style, const CStyleParams &current) const
+	{
+		TStyle::const_iterator it;
 		for (it=styleRules.begin(); it != styleRules.end(); ++it)
 		{
 			// update local copy of applied style
@@ -407,6 +415,7 @@ namespace NLGUI
 				}
 				else
 				{
+					float tmpf;
 					std::string unit;
 					if (getCssLength(tmpf, unit, it->second.c_str()))
 					{
@@ -428,10 +437,39 @@ namespace NLGUI
 			{
 				parseBackgroundShorthand(it->second, style);
 			}
-		}
+			else
+			if (it->first == "background-repeat")
+			{
+				// old ryzom specific value
+				if (it->second == "1")
+					style.StyleRules[it->first] = "repeat";
+			}
+			else
+			if (it->first == "background-scale")
+			{
+				// replace old ryzom specific rule with background-size
+				if (it->second != "1")
+				{
+					style.StyleRules["background-size"] = "auto";
+				}
+				else
+				{
+					style.StyleRules["background-size"] = "100%";
+				}
 
-		// second pass: rest of style
-		for (it=styleRules.begin(); it != styleRules.end(); ++it)
+				TStyle::iterator pos = style.StyleRules.find(it->first);
+				if (pos != style.StyleRules.end())
+					style.StyleRules.erase(pos);
+			}
+		}
+	}
+
+	// apply style rules
+	void CCssStyle::apply(CStyleParams &style, const CStyleParams &current) const
+	{
+		float tmpf;
+		TStyle::const_iterator it;
+		for (it=style.StyleRules.begin(); it != style.StyleRules.end(); ++it)
 		{
 			if (it->first == "border" || it->first == "border-width")
 			{
@@ -456,8 +494,9 @@ namespace NLGUI
 				{
 					style.BorderWidth = 5;
 				}
-				else 
+				else
 				{
+					float tmpf;
 					std::string unit;
 					if (getCssLength(tmpf, unit, it->second.c_str()))
 					{
@@ -763,9 +802,45 @@ namespace NLGUI
 				else if (it->second == "transparent")
 					style.BackgroundColorOver = CRGBA(0, 0, 0, 0);
 				else if (it->second == "currentcolor")
-					style.BackgroundColorOver = style.TextColor;	
+					style.BackgroundColorOver = style.TextColor;
 				else
 					scanHTMLColor(it->second.c_str(), style.BackgroundColorOver);
+			}
+			else
+			if (it->first == "background-image")
+			{
+				// normalize
+				std::string image = trim(it->second);
+				if (toLower(image.substr(0, 4)) == "url(")
+				{
+					image = image.substr(4, image.size()-5);
+				}
+				style.StyleRules[it->first] = trimQuotes(image);
+			}
+			else
+			if (it->first == "background-repeat")
+			{
+				// normalize
+				std::string val = toLower(trim(it->second));
+				std::vector<std::string> parts;
+				NLMISC::splitString(val, " ", parts);
+				// check for "repeat repeat"
+				if (parts.size() == 2 && parts[0] == parts[1])
+					val = parts[0];
+
+				style.StyleRules[it->first] = val;
+			}
+			else
+			if (it->first == "background-size")
+			{
+				// normalize
+				std::string val = toLower(trim(it->second));
+				std::vector<std::string> parts;
+				NLMISC::splitString(val, " ", parts);
+				if (parts.size() == 2 && parts[0] == parts[1])
+					val = parts[0];
+
+				style.StyleRules[it->first] = val;
 			}
 		}
 
@@ -795,115 +870,278 @@ namespace NLGUI
 			"background-attachment", "background-origin", "background-clip", "background-color"};
 		std::string values[nbProps];
 		bool found[nbProps] = {false};
-
+		bool bgClipFound = false;
+		std::string bgClipValue;
+		std::string bgPositionX;
+		std::string bgPositionY;
 
 		uint partIndex = 0;
 		std::vector<std::string> parts;
 		std::vector<std::string>::iterator it;
 		// FIXME: this will fail if url() contains ' ' chars
+		// FIXME: this will also fail on 'background: rgb(255, 0, 0)'
 		NLMISC::splitString(value, " ", parts);
 
 		bool failed = false;
-		for(uint index = 0; index < parts.size(); index++)
+		bool allowSize = false;
+		uint index = 0;
+		while(!failed && index < parts.size())
 		{
-			const std::string val = toLower(trim(parts[index]));
-
+			std::string val = toLower(parts[index]);
+			bool matches = false;
 			for(uint i = 0; i < nbProps; i++)
 			{
-				if (found[i])
-				{
-					continue;
-				}
+				if (found[i]) continue;
 
 				if (props[i] == "background-image")
 				{
 					if (val.substr(0, 4) == "url(")
 					{
+						matches = true;
+						found[i] = true;
 						// use original value as 'val' is lowercase
 						values[i] = parts[index];
-						found[i] = true;
 					}
 				}
 				else if (props[i] == "background-position")
 				{
-					// TODO:
+					uint next = index;
+					bool loop = false;
+					do
+					{
+						float fval;
+						std::string unit;
+
+						// first loop -> true
+						// second loop -> false && break
+						loop = !loop;
+
+						val = toLower(parts[next]);
+						if (val == "center")
+						{
+							if (bgPositionX.empty()) bgPositionX = "center";
+							if (bgPositionY.empty()) bgPositionY = "center";
+							// consume 'center'
+							next++;
+						}
+						else if (val == "left" || val == "right")
+						{
+							bgPositionX = val;
+							// consume 'left|right'
+							next++;
+							if(next < parts.size() && getCssLength(fval, unit, parts[next]))
+							{
+								bgPositionX += " " + toString("%.0f%s", fval, unit.c_str());
+								// consume css length
+								next++;
+							}
+						}
+						else if (val == "top" || val == "bottom")
+						{
+							bgPositionY = val;
+							// consume top|bottom
+							next++;
+							if (next < parts.size() && getCssLength(fval, unit, parts[next]))
+							{
+								bgPositionY += " " + toString("%.0f%s", fval, unit.c_str());
+								// consume css length
+								next++;
+							}
+						}
+					} while (loop);
+
+					//
+					if (!bgPositionX.empty() && !bgPositionY.empty())
+					{
+						matches = true;
+						found[i] = true;
+						// consume position values if there were any
+						index = next-1;
+
+						// look ahead to see if size is next
+						if (next < parts.size() && parts[next] == "/")
+							allowSize = true;
+					}
 				}
 				else if (props[i] == "background-size")
 				{
-					// TODO: [<length-percentage> | auto ]{1,2} cover | contain
+					if (allowSize && val == "/")
+					{
+						uint next = index + 1;
+						if (next < parts.size())
+						{
+							val = toLower(parts[next]);
+							if (val == "cover" || val == "contain")
+							{
+								matches = true;
+								found[i] = true;
+								values[i] = val;
+								index = next;
+							}
+							else
+							{
+								float fval;
+								std::string unit;
+								std::string h, v;
+
+								if (val == "auto" || getCssLength(fval, unit, val))
+								{
+									if (val == "auto")
+										h = v = "auto";
+									else
+										h = v = toString("%.0f%s", fval, unit.c_str());
+
+									next++;
+									if (next < parts.size())
+									{
+										val = toLower(parts[next]);
+										if (val == "auto")
+											v = "auto";
+										else if (getCssLength(fval, unit, val))
+											v = toString("%.0f%s", fval, unit.c_str());
+										else
+											next--; // not size token
+									}
+									else
+									{
+										// not size token
+										next--;
+									}
+								}
+
+								if (!h.empty() && !v.empty())
+								{
+									matches = true;
+									found[i] = true;
+									values[i] = h + " " + v;
+									index = next;
+								}
+							}
+						}
+						else
+						{
+							// no size, just '/'
+							failed = true;
+							break;
+						}
+					}
 				}
 				else if (props[i] == "background-repeat")
 				{
 					if (val == "repeat-x" || val == "repeat-y" || val == "repeat" || val == "space" || val == "round" || val == "no-repeat")
 					{
+						matches = true;
+						found[i] = true;
+
 						if (val == "repeat-x")
 						{
 							values[i] = "repeat no-repeat";
 						}
 						else if (val == "repeat-y")
 						{
-							values[i] = "no-repeat repeat";				
+							values[i] = "no-repeat repeat";
 						}
 						else
 						{
 							std::string horiz = val;
 							std::string vert = val;
-							if (index+1 < parts.size())
+							uint next = index + 1;
+							if (next < parts.size())
 							{
-								std::string next = toLower(trim(parts[index+1]));
-								if (next == "repeat" || next == "space" || next == "round" || next == "no-repeat")
+								val = toLower(parts[next]);
+								if (val == "repeat" || val == "space" || val == "round" || val == "no-repeat")
 								{
-									vert = next;
-									index++;
+									vert = val;
+									index = next;
 								}
 							}
-							
-							values[i] = horiz + " " + vert;
+							if (vert == horiz)
+								values[i] = vert;
+							else
+								values[i] = horiz + " " + vert;
 						}
-
-						found[i] = true;
 					}
 				}
 				else if (props[i] == "background-attachment")
 				{
-					// TODO: scroll | fixed | local
+					if (val == "scroll" || val == "fixed" || val == "local")
+					{
+						matches = true;
+						found[i] = true;
+						values[i] = val;
+					}
 				}
-				else if (props[i] == "background-origin" || props[i] == "background-clip")
+				else if (props[i] == "background-origin")
 				{
-					// same values for both
 					if (val == "padding-box" || val == "border-box" || val == "content-box")
 					{
-						values[i] = val;
+						matches = true;
 						found[i] = true;
+						values[i] = val;
+
+						// first time background-origin is set, also set background-clip
+						if (!bgClipFound)
+							bgClipValue = val;
+					}
+				}
+				else if (props[i] == "background-clip")
+				{
+					if (val == "text" || val == "padding-box" || val == "border-box" || val == "content-box")
+					{
+						matches = true;
+						found[i] = true;
+						bgClipFound = true;
+						bgClipValue = val;
 					}
 				}
 				else if (props[i] == "background-color")
 				{
 					CRGBA color;
-					if (!scanHTMLColor(val.c_str(), color))
+					if (val == "transparent" || val == "currentcolor" || scanHTMLColor(val.c_str(), color))
 					{
-						failed = true;
-						break;
+						matches = true;
+						found[i] = true;
+						values[i] = val;
 					}
-					values[i] = val;
-					// color should come as last item
-					break;
 				}
+
+				// prop was found and parsed
+				if (found[i])
+					break;
 			}
+			failed = !matches;
+
+			index++;
 		}
 
 		// invalidate whole rule
 		if (failed)
 		{
-			return;
+			bgClipFound = false;
+			for(uint i = 0; i < nbProps; i++)
+			{
+				found[i] = false;
+			}
 		}
 
-		// apply found styles
+		// apply found styles or use default
 		for(uint i = 0; i < nbProps; i++)
 		{
 			if (found[i])
 			{
-				style.StyleRules[props[i]] = values[i];
+				if (props[i] == "background-position")
+				{
+					style.StyleRules["background-position-x"] = bgPositionX;
+					style.StyleRules["background-position-y"] = bgPositionY;
+				}
+				else if (props[i] == "background-clip")
+				{
+					style.StyleRules["background-clip"] = bgClipValue;
+				}
+				else
+				{
+					style.StyleRules[props[i]] = values[i];
+				}
 			}
 			else
 			{
@@ -914,27 +1152,32 @@ namespace NLGUI
 				}
 				else if (props[i] == "background-position")
 				{
-					//style.StyleRules[props[i]] = "0% 0%";
+					style.StyleRules[props[i]] = "0% 0%";
+					style.StyleRules["background-position-x"] = "left 0%";
+					style.StyleRules["background-position-y"] = "top 0%";
 				}
 				else if (props[i] == "background-size")
 				{
-					//style.StyleRules[props[i]] = "auto auto";
+					style.StyleRules[props[i]] = "auto auto";
 				}
 				else if (props[i] == "background-repeat")
 				{
-					style.StyleRules[props[i]] = "repeat repeat";
+					style.StyleRules[props[i]] = "repeat";
 				}
 				else if(props[i] == "background-attachment")
 				{
-					//style.StyleRules[props[i]] = "scroll";
+					style.StyleRules[props[i]] = "scroll";
 				}
 				else if(props[i] == "background-origin")
 				{
-					//style.StyleRules[props[i]] = "padding-box";
+					style.StyleRules[props[i]] = "padding-box";
 				}
 				else if (props[i] == "background-clip")
 				{
-					//style.StyleRules[props[i]] = "border-box";
+					if (bgClipFound)
+						style.StyleRules[props[i]] = bgClipValue;
+					else
+						style.StyleRules[props[i]] = "border-box";
 				}
 				else if (props[i] == "background-color")
 				{
