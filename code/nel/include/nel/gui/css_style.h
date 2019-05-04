@@ -47,7 +47,7 @@ namespace NLGUI
 			sint32 X;
 			sint32 Y;
 			NLMISC::CRGBA Color;
-		};		
+		};
 	public:
 		CStyleParams () : FontFamily(""), TextColor(255,255,255,255), TextShadow()
 		{
@@ -110,7 +110,7 @@ namespace NLGUI
 
 			// pseudo element like ':before'
 			std::string PseudoElement;
-			
+
 			// returns selector specificity
 			uint specificity() const;
 		};
@@ -133,6 +133,12 @@ namespace NLGUI
 		// read style attribute
 		void getStyleParams(const std::string &styleString, CStyleParams &style, const CStyleParams &current) const;
 		void getStyleParams(const TStyle &styleRules, CStyleParams &style, const CStyleParams &current) const;
+
+		// extract from styleRules into style.StyleRules (expand shorthand, normalize, calculate current font-size)
+		void normalize(const TStyle &styleRules, CStyleParams &style, const CStyleParams &current) const;
+
+		// apply style.StyleRyles
+		void apply(CStyleParams &style, const CStyleParams &current) const;
 
 		// merge src into dest by overwriting key in dest
 		void merge(TStyle &dst, const TStyle &src) const;
@@ -171,7 +177,7 @@ namespace NLGUI
 			Current.MaxWidth=-1;
 			Current.MaxHeight=-1;
 			Current.BorderWidth=1;
-			
+
 			Current.StyleRules.clear();
 		}
 

@@ -332,10 +332,18 @@ namespace NLGUI
 			return;
 		}
 
-		// first pass:
-		// - get font-size for 'em' sizes
-		// - split shorthand to its parts
-		// - get TextColor value that could be used for 'currentcolor'
+		normalize(styleRules, style, current);
+		apply(style, current);
+	}
+
+	// first pass
+	// - get font-size for 'em' sizes
+	// - split shorthand to its parts
+	// - get TextColor value that could be used for 'currentcolor'
+	// - normalize values
+	void CCssStyle::normalize(const TStyle &styleRules, CStyleParams &style, const CStyleParams &current) const
+	{
+		TStyle::const_iterator it;
 		for (it=styleRules.begin(); it != styleRules.end(); ++it)
 		{
 			// update local copy of applied style
@@ -407,6 +415,7 @@ namespace NLGUI
 				}
 				else
 				{
+					float tmpf;
 					std::string unit;
 					if (getCssLength(tmpf, unit, it->second.c_str()))
 					{
@@ -428,9 +437,38 @@ namespace NLGUI
 			{
 				parseBackgroundShorthand(it->second, style);
 			}
-		}
+			else
+			if (it->first == "background-repeat")
+			{
+				// old ryzom specific value
+				if (it->second == "1")
+					style.StyleRules[it->first] = "repeat";
+			}
+			else
+			if (it->first == "background-scale")
+			{
+				// replace old ryzom specific rule with background-size
+				if (it->second != "1")
+				{
+					style.StyleRules["background-size"] = "auto";
+				}
+				else
+				{
+					style.StyleRules["background-size"] = "100%";
+				}
 
-		// second pass: use style own StyleRules as its updated from first pass
+				TStyle::iterator pos = style.StyleRules.find(it->first);
+				if (pos != style.StyleRules.end())
+					style.StyleRules.erase(pos);
+			}
+		}
+	}
+
+	// apply style rules
+	void CCssStyle::apply(CStyleParams &style, const CStyleParams &current) const
+	{
+		float tmpf;
+		TStyle::const_iterator it;
 		for (it=style.StyleRules.begin(); it != style.StyleRules.end(); ++it)
 		{
 			if (it->first == "border" || it->first == "border-width")
@@ -458,6 +496,7 @@ namespace NLGUI
 				}
 				else
 				{
+					float tmpf;
 					std::string unit;
 					if (getCssLength(tmpf, unit, it->second.c_str()))
 					{
@@ -766,6 +805,42 @@ namespace NLGUI
 					style.BackgroundColorOver = style.TextColor;
 				else
 					scanHTMLColor(it->second.c_str(), style.BackgroundColorOver);
+			}
+			else
+			if (it->first == "background-image")
+			{
+				// normalize
+				std::string image = trim(it->second);
+				if (toLower(image.substr(0, 4)) == "url(")
+				{
+					image = image.substr(4, image.size()-5);
+				}
+				style.StyleRules[it->first] = trimQuotes(image);
+			}
+			else
+			if (it->first == "background-repeat")
+			{
+				// normalize
+				std::string val = toLower(trim(it->second));
+				std::vector<std::string> parts;
+				NLMISC::splitString(val, " ", parts);
+				// check for "repeat repeat"
+				if (parts.size() == 2 && parts[0] == parts[1])
+					val = parts[0];
+
+				style.StyleRules[it->first] = val;
+			}
+			else
+			if (it->first == "background-size")
+			{
+				// normalize
+				std::string val = toLower(trim(it->second));
+				std::vector<std::string> parts;
+				NLMISC::splitString(val, " ", parts);
+				if (parts.size() == 2 && parts[0] == parts[1])
+					val = parts[0];
+
+				style.StyleRules[it->first] = val;
 			}
 		}
 

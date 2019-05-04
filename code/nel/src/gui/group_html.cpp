@@ -1220,7 +1220,7 @@ namespace NLGUI
 		{
 			std::string::size_type start;
 			std::string token;
-		
+
 			// not supported
 			// counter, open-quote, close-quote, no-open-quote, no-close-quote
 			if (content[pos] == '"' || content[pos] == '\'')
@@ -3271,9 +3271,9 @@ namespace NLGUI
 
 		setTitle(_TitleString);
 	}
-	
+
 	std::string CGroupHTML::getTitle() const {
-		return _TitleString.toUtf8(); 
+		return _TitleString.toUtf8();
 	};
 
 	// ***************************************************************************
@@ -4075,7 +4075,7 @@ namespace NLGUI
 		{
 			// clear the page
 			beginBuild();
-				
+
 			// clear previous page and state
 			removeContent();
 
@@ -4698,7 +4698,7 @@ namespace NLGUI
 			nlwarning("BUG: unable to find current element iterator from parent");
 			return;
 		}
-		
+
 		// where fragment should be moved
 		std::list<CHtmlElement>::iterator insertBefore;
 		if (_CurrentHTMLNextSibling == NULL)
@@ -5010,7 +5010,7 @@ namespace NLGUI
 				valign = _Style.Current.VerticalAlign;
 			else if (elm.hasNonEmptyAttribute("valign"))
 				valign = toLower(elm.getAttribute("valign"));
-			
+
 			if (valign == "top")
 				cellParams.VAlign = CGroupCell::Top;
 			else if (valign == "middle")
@@ -5018,7 +5018,7 @@ namespace NLGUI
 			else if (valign == "bottom")
 				cellParams.VAlign = CGroupCell::Bottom;
 		}
-		
+
 		_CellParams.push_back (cellParams);
 	}
 
@@ -5030,15 +5030,9 @@ namespace NLGUI
 		// non-empty image
 		if (_Style.hasStyle("background-image"))
 		{
-			// value '1' and 'background-scale' are ryzom only
-			bool repeat = _Style.checkStyle("background-repeat", "1") || _Style.checkStyle("background-repeat", "repeat");
-			bool scale = _Style.checkStyle("background-scale", "1") || _Style.checkStyle("background-size", "100% 100%");
-			std::string image = trim(_Style.getStyle("background-image"));
-			string::size_type texExt = toLower(image).find("url(");
-			if (texExt != string::npos)
-			{
-				image = image.substr(texExt+4, image.size()-texExt-5);
-			}
+			bool repeat = _Style.checkStyle("background-repeat", "repeat");
+			bool scale = _Style.checkStyle("background-size", "100%");
+			std::string image = _Style.getStyle("background-image");
 			if (!image.empty())
 			{
 				if (root)
@@ -5063,7 +5057,7 @@ namespace NLGUI
 			{
 				setBackgroundColor(bgColor);
 			}
-			// TODO: else 
+			// TODO: else
 		}
 
 	}
@@ -5369,7 +5363,7 @@ namespace NLGUI
 		{
 			newParagraph(LIBeginSpace);
 		}
-		
+
 		renderPseudoElement(":before", elm);
 	}
 
@@ -5597,7 +5591,7 @@ namespace NLGUI
 			// no 'type' attribute, or empty
 			return;
 		}
-	
+
 		// Global color flag
 		if (elm.hasAttribute("global_color"))
 			_Style.Current.GlobalColor = true;
@@ -5862,7 +5856,7 @@ namespace NLGUI
 		_ParsingLua = _TrustedDomain; // Only parse lua if TrustedDomain
 		_LuaScript.clear();
 	}
-	
+
 	void CGroupHTML::htmlLUAend(const CHtmlElement &elm)
 	{
 		if (_ParsingLua && _TrustedDomain)
@@ -6189,7 +6183,7 @@ namespace NLGUI
 		{
 			if (elm.hasNonEmptyAttribute("cellspacing"))
 				fromString(elm.getAttribute("cellspacing"), table->CellSpacing);
-			
+
 			// TODO: cssLength, horiz/vert values
 			if (_Style.hasStyle("border-spacing"))
 				fromString(_Style.getStyle("border-spacing"), table->CellSpacing);
@@ -6296,29 +6290,16 @@ namespace NLGUI
 
 		_Cells.back() = new CGroupCell(CViewBase::TCtorParam());
 
-		if (_Style.checkStyle("background-repeat", "1") || _Style.checkStyle("background-repeat", "repeat"))
+		if (_Style.checkStyle("background-repeat", "repeat"))
 			_Cells.back()->setTextureTile(true);
 
-		if (_Style.checkStyle("background-scale", "1") || _Style.checkStyle("background-size", "100% 100%"))
+		if (_Style.checkStyle("background-size", "100%"))
 			_Cells.back()->setTextureScale(true);
 
 		if (_Style.hasStyle("background-image"))
 		{
 			string image = _Style.getStyle("background-image");
-
-			string::size_type texExt = toLower(image).find("url(");
-			// Url image
-			if (texExt != string::npos)
-			{
-				// Remove url()
-				image = image.substr(4, image.size()-5);
-				addImageDownload(image, _Cells.back());
-			// Image in BNP
-			}
-			else
-			{
-				_Cells.back()->setTexture(image);
-			}
+			addImageDownload(image, _Cells.back());
 		}
 
 		if (elm.hasNonEmptyAttribute("colspan"))
@@ -6339,7 +6320,7 @@ namespace NLGUI
 			getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, _Style.getStyle("width").c_str());
 		else if (elm.hasNonEmptyAttribute("width"))
 			getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, elm.getAttribute("width").c_str());
-		
+
 		if (_Style.hasStyle("height"))
 			getPercentage (_Cells.back()->Height, temp, _Style.getStyle("height").c_str());
 		else if (elm.hasNonEmptyAttribute("height"))
