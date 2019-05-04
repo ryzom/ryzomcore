@@ -3545,7 +3545,7 @@ namespace NLGUI
 				// todo handle unicode POST here
 				if (form.Entries[i].Checkbox->getPushed ())
 				{
-                                        entryData = form.Entries[i].Value;
+					entryData = form.Entries[i].Value;
 					addEntry = true;
 				}
 			}
@@ -5048,7 +5048,7 @@ namespace NLGUI
 				// TODO: else
 
 				// default background color is transparent, so image does not show
-				if (!_Style.hasStyle("background-color"))
+				if (!_Style.hasStyle("background-color") || _Style.checkStyle("background-color", "transparent"))
 				{
 					_Style.applyStyle("background-color: #fff;");
 				}
