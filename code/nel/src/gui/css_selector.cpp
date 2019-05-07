@@ -310,5 +310,43 @@ namespace NLGUI
 		}
 	}
 
+	std::string CCssSelector::toString() const
+	{
+		std::string ret;
+		ret += Element;
+		ret += Id;
+		if (!Class.empty())
+		{
+			for(uint i = 0; i<Class.size(); i++)
+				ret += "." + Class[i];
+		}
+		if (!Attr.empty())
+		{
+			for(uint i = 0; i<Attr.size(); ++i)
+			{
+				ret += "[" + Attr[i].key;
+				if (Attr[i].op != ' ')
+				{
+					ret += Attr[i].op + Attr[i].value;
+				}
+				ret += "]";
+			}
+		}
+		if (!PseudoClass.empty())
+		{
+			for(uint i = 0; i<PseudoClass.size(); ++i)
+			{
+				ret += ":" + PseudoClass[i];
+			}
+		}
+		if (Combinator != '\0')
+		{
+			ret += Combinator;
+		}
+
+		// ret += ":" + PseudoClass;
+		return ret;
+	}
+
 } // namespace
 
