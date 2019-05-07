@@ -502,6 +502,29 @@ namespace NLGUI
 			float optimum;
 		};
 
+		class HTMLProgressElement
+		{
+		public:
+			HTMLProgressElement()
+				: value(0.f), max(1.f)
+			{}
+
+			// read attributes from html element
+			void readValues(const CHtmlElement &elm);
+
+			// return value ratio to min-max
+			float getValueRatio() const;
+
+			// return meter bar color
+			NLMISC::CRGBA getBarColor(const CHtmlElement &elm, CCssStyle &style) const;
+
+			// return meter value bar color based value and optimum range
+			NLMISC::CRGBA getValueColor(const CHtmlElement &elm, CCssStyle &style) const;
+
+			float value;
+			float max;
+		};
+
 		// A mode
 		std::vector<bool>	_A;
 		inline bool getA() const
@@ -941,6 +964,7 @@ namespace NLGUI
 		void htmlPend(const CHtmlElement &elm);
 		void htmlPRE(const CHtmlElement &elm);
 		void htmlPREend(const CHtmlElement &elm);
+		void htmlPROGRESS(const CHtmlElement &elm);
 		void htmlSCRIPT(const CHtmlElement &elm);
 		void htmlSCRIPTend(const CHtmlElement &elm);
 		void htmlSELECT(const CHtmlElement &elm);

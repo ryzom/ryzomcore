@@ -1108,6 +1108,7 @@ namespace NLGUI
 		case HTML_OPTION:   htmlOPTION(elm); break;
 		case HTML_P:        htmlP(elm); break;
 		case HTML_PRE:      htmlPRE(elm); break;
+		case HTML_PROGRESS: htmlPROGRESS(elm); break;
 		case HTML_SCRIPT:   htmlSCRIPT(elm); break;
 		case HTML_SELECT:   htmlSELECT(elm); break;
 		case HTML_SMALL:    renderPseudoElement(":before", elm); break;
@@ -4889,6 +4890,10 @@ namespace NLGUI
 		css += "meter::-webkit-meter-optimum-value { background-color: rgb(80, 220, 80); }";
 		css += "meter::-webkit-meter-suboptimum-value { background-color: rgb(220, 220, 80); }";
 		css += "meter::-webkit-meter-even-less-good-value { background-color: rgb(220, 80, 80); }";
+		// webkit pseudo elements
+		css += "progress::-webkit-progress-bar, progress::-webkit-progress-value { background: none; }";
+		css += "progress::-webkit-progress-bar { background-color: rgb(230, 230, 230); width: 10em; height: 1em; }";
+		css += "progress::-webkit-progress-value { background-color: rgb(0, 100, 180);}";
 		_Style.parseStylesheet(css);
 	}
 	
@@ -5110,6 +5115,54 @@ namespace NLGUI
 				break;
 			}
 		}//switch
+		style.popStyle();
+
+		return color;
+	}
+
+	// ****************************************************************************
+	void CGroupHTML::HTMLProgressElement::readValues(const CHtmlElement &elm)
+	{
+		if (!elm.hasAttribute("value") || !fromString(elm.getAttribute("value"), value))
+			value = 0.f;
+		if (!elm.hasAttribute("max") || !fromString(elm.getAttribute("max"), max))
+			max = 1.f;
+
+		if (value > max)
+			value = max;
+	}
+
+	// ****************************************************************************
+	float CGroupHTML::HTMLProgressElement::getValueRatio() const
+	{
+		if (max > 0.f)
+			return value / max;
+		return 0.f;
+	}
+
+	// ****************************************************************************
+	NLMISC::CRGBA CGroupHTML::HTMLProgressElement::getBarColor(const CHtmlElement &elm, CCssStyle &style) const
+	{
+		CRGBA color;
+
+		style.pushStyle();
+		style.applyStyle(elm.getPseudo(":-webkit-progress-bar"));
+		if (style.hasStyle("background-color"))
+			color = style.Current.BackgroundColor;
+		style.popStyle();
+
+		return color;
+	}
+
+	// ****************************************************************************
+	NLMISC::CRGBA CGroupHTML::HTMLProgressElement::getValueColor(const CHtmlElement &elm, CCssStyle &style) const
+	{
+		CRGBA color;
+
+		style.pushStyle();
+		style.applyStyle(elm.getPseudo(":-webkit-progress-value"));
+		if (style.hasStyle("background-color"))
+			color = style.Current.BackgroundColor;
 		style.popStyle();
 
 		return color;
@@ -6314,6 +6367,50 @@ namespace NLGUI
 
 		endParagraph();
 		popIfNotEmpty(_PRE);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlPROGRESS(const CHtmlElement &elm)
+	{
+		HTMLProgressElement progress;
+		progress.readValues(elm);
+
+		std::string id = "progress";
+		if (elm.hasAttribute("id"))
+			id = elm.getAttribute("id");
+
+		// width: 10em, height: 1em
+		uint32 width = _Style.Current.Width > -1 ? _Style.Current.Width : _Style.Current.FontSize * 10;
+		uint32 height = _Style.Current.Height > -1 ? _Style.Current.Height : _Style.Current.FontSize;
+		uint32 border = _Style.Current.BorderWidth > -1 ? _Style.Current.BorderWidth : 0;
+
+		uint barw = (uint) (width * progress.getValueRatio());
+		CRGBA bgColor = progress.getBarColor(elm, _Style);
+		CRGBA valueColor = progress.getValueColor(elm, _Style);
+
+		typedef pair<string, string> TTmplParam;
+		vector<TTmplParam> tmplParams;
+		tmplParams.push_back(TTmplParam("id", id));
+		tmplParams.push_back(TTmplParam("active", "true"));
+		tmplParams.push_back(TTmplParam("w", toString(width)));
+		tmplParams.push_back(TTmplParam("h", toString(height)));
+		tmplParams.push_back(TTmplParam("border_x2", toString(border*2)));
+		tmplParams.push_back(TTmplParam("bgtexture", "blank.tga"));
+		tmplParams.push_back(TTmplParam("bgcolor", bgColor.toString()));
+		tmplParams.push_back(TTmplParam("value_w", toString(barw)));
+		tmplParams.push_back(TTmplParam("value_texture", "blank.tga"));
+		tmplParams.push_back(TTmplParam("value_color", valueColor.toString()));
+
+		CInterfaceGroup *gr = CWidgetManager::getInstance()->getParser()->createGroupInstance("html_progress", getParagraph()->getId(), &tmplParams[0], (uint)tmplParams.size());
+		if (gr)
+		{
+			renderPseudoElement(":before", elm);
+			getParagraph()->addChild(gr);
+			renderPseudoElement(":after", elm);
+
+			// ignore any inner elements
+			_IgnoreChildElements = true;
+		}
 	}
 
 	// ***************************************************************************
