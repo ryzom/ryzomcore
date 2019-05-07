@@ -325,7 +325,7 @@ namespace NLGUI
 
 		// Add a button in the current paragraph. actionHandler, actionHandlerParams and tooltip can be NULL.
 		CCtrlButton *addButton(CCtrlButton::EType type, const std::string &name, const std::string &normalBitmap, const std::string &pushedBitmap,
-			const std::string &overBitmap, const char *actionHandler, const char *actionHandlerParams, const char *tooltip,
+			const std::string &overBitmap, const char *actionHandler, const char *actionHandlerParams, const std::string &tooltip,
 			const CStyleParams &style = CStyleParams());
 
 		// Set the background color
@@ -818,6 +818,23 @@ namespace NLGUI
 
 		// apply background from current style (for html, body)
 		void applyBackground(const CHtmlElement &elm);
+
+		void insertFormImageButton(const std::string &name,
+			const std::string &tooltip,
+			const std::string &src,
+			const std::string &over,
+			uint32 formId,
+			const std::string &formAction = "",
+			uint32 minWidth = 0,
+			const std::string &templateName = "");
+
+		void insertFormTextButton(const std::string &name,
+			const std::string &tooltip,
+			const std::string &value,
+			uint32 formId,
+			const std::string &formAction = "",
+			uint32 minWidth = 0,
+			const std::string &templateName = "");
 
 		// HTML elements
 		void htmlA(const CHtmlElement &elm);

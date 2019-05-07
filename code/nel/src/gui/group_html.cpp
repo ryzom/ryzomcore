@@ -2997,7 +2997,7 @@ namespace NLGUI
 
 	CCtrlButton *CGroupHTML::addButton(CCtrlButton::EType type, const std::string &name, const std::string &normalBitmap, const std::string &pushedBitmap,
 									  const std::string &overBitmap, const char *actionHandler, const char *actionHandlerParams,
-									  const char *tooltip, const CStyleParams &style)
+									  const std::string &tooltip, const CStyleParams &style)
 	{
 		// In a paragraph ?
 		if (!_Paragraph)
@@ -3067,7 +3067,7 @@ namespace NLGUI
 		ctrlButton->setParamsOnLeftClick (actionHandlerParams);
 
 		// Translate the tooltip or display raw text (tooltip from webig)
-		if (tooltip)
+		if (!tooltip.empty())
 		{
 			if (CI18N::hasTranslation(tooltip))
 			{
@@ -5063,6 +5063,80 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CGroupHTML::insertFormImageButton(const std::string &name, const std::string &tooltip, const std::string &src, const std::string &over, uint32 formId, const std::string &action, uint32 minWidth, const std::string &templateName)
+	{
+		// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
+		std::string param = "name=" + getId() + "|form=" + toString(formId) + "|submit_button=" + name + "|submit_button_type=image";
+
+		// Add the ctrl button
+		addButton (CCtrlButton::PushButton, name, src, src, over, "html_submit_form", param.c_str(), tooltip.c_str(), _Style.Current);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::insertFormTextButton(const std::string &name, const std::string &tooltip, const std::string &value, uint32 formId, const std::string &formAction, uint32 minWidth, const std::string &templateName)
+	{
+		// The submit button
+		string buttonTemplate(!templateName.empty() ? templateName : DefaultButtonGroup);
+
+		// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
+		string param = "name=" + getId() + "|form=" + toString(formId) + "|submit_button=" + name + "|submit_button_type=submit";
+		if (!value.empty())
+		{
+			// escape AH param separator
+			string tmp = value;
+			while(NLMISC::strFindReplace(tmp, "|", "&#124;"))
+				;
+			param = param + "|submit_button_value=" + tmp;
+		}
+
+		// Add the ctrl button
+		if (!_Paragraph)
+		{
+			newParagraph (0);
+			paragraphChange ();
+		}
+
+		typedef pair<string, string> TTmplParam;
+		vector<TTmplParam> tmplParams;
+		tmplParams.push_back(TTmplParam("id", name));
+		tmplParams.push_back(TTmplParam("onclick", "html_submit_form"));
+		tmplParams.push_back(TTmplParam("onclick_param", param));
+		//tmplParams.push_back(TTmplParam("text", text));
+		tmplParams.push_back(TTmplParam("active", "true"));
+		if (minWidth > 0) tmplParams.push_back(TTmplParam("wmin", toString(minWidth)));
+		CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
+		if (buttonGroup)
+		{
+			// Add the ctrl button
+			CCtrlTextButton *ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("button"));
+			if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
+			if (ctrlButton)
+			{
+				ctrlButton->setModulateGlobalColorAll (_Style.Current.GlobalColor);
+
+				// Translate the tooltip
+				if (!tooltip.empty())
+				{
+					if (CI18N::hasTranslation(tooltip))
+					{
+						ctrlButton->setDefaultContextHelp(CI18N::get(tooltip));
+					}
+					else
+					{
+						ctrlButton->setDefaultContextHelp(ucstring(tooltip));
+					}
+				}
+
+				ctrlButton->setText(ucstring::makeFromUtf8(value));
+
+				setTextButtonStyle(ctrlButton, _Style.Current);
+			}
+			getParagraph()->addChild (buttonGroup);
+			paragraphChange ();
+		}
+	}
+
+	// ***************************************************************************
 	void CGroupHTML::htmlA(const CHtmlElement &elm)
 	{
 		_A.push_back(true);
@@ -5523,15 +5597,10 @@ namespace NLGUI
 
 		// Tooltip
 		// keep "alt" attribute for backward compatibility
-		std::string strtooltip = elm.getAttribute("alt");
+		std::string tooltip = elm.getAttribute("alt");
 		// tooltip
 		if (elm.hasNonEmptyAttribute("title"))
-			strtooltip = elm.getAttribute("title");
-
-		const char *tooltip = NULL;
-		// note: uses pointer to string data
-		if (!strtooltip.empty())
-			tooltip = strtooltip.c_str();
+			tooltip = elm.getAttribute("title");
 
 		// Mouse over image
 		string overSrc = elm.getAttribute("data-over-src");
@@ -5542,7 +5611,7 @@ namespace NLGUI
 			addButton(CCtrlButton::PushButton, id, src, src, overSrc, "browse", params.c_str(), tooltip, _Style.Current);
 		}
 		else
-		if (tooltip || !overSrc.empty())
+		if (!tooltip.empty() || !overSrc.empty())
 		{
 			addButton(CCtrlButton::PushButton, id, src, src, overSrc, "", "", tooltip, _Style.Current);
 		}
@@ -5582,7 +5651,8 @@ namespace NLGUI
 			templateName = elm.getAttribute("z_input_tmpl");
 
 		// Widget minimal width
-		string minWidth = elm.getAttribute("z_input_width");
+		uint32 minWidth = 0;
+		fromString(elm.getAttribute("z_input_width"), minWidth);
 
 		// <input type="...">
 		std::string type = trim(elm.getAttribute("type"));
@@ -5597,96 +5667,23 @@ namespace NLGUI
 			_Style.Current.GlobalColor = true;
 
 		// Tooltip
-		std::string strtooltip = elm.getAttribute("alt");
-		const char *tooltip = NULL;
-		// note: uses pointer to strtooltip data
-		if (!strtooltip.empty())
-			tooltip = strtooltip.c_str();
+		std::string tooltip = elm.getAttribute("alt");
 
 		if (type == "image")
 		{
-			// The submit button
 			string name = elm.getAttribute("name");
-			string normal = elm.getAttribute("src");
-			string pushed;
-			string over;
+			string src = elm.getAttribute("src");
+			string over = elm.getAttribute("data-over-src");
 
-			// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-			string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=image";
-
-			// Add the ctrl button
-			addButton (CCtrlButton::PushButton, name, normal, pushed.empty()?normal:pushed, over,
-				"html_submit_form", param.c_str(), tooltip, _Style.Current);
+			insertFormImageButton(name, tooltip, src, over, _Forms.size()-1, "", minWidth, templateName);
 		}
 		else if (type == "button" || type == "submit")
 		{
 			// The submit button
 			string name = elm.getAttribute("name");
-			string normal = elm.getAttribute("src");
-			string text = elm.getAttribute("value");
-			string pushed;
-			string over;
+			string value = elm.getAttribute("value");
 
-			string buttonTemplate(!templateName.empty() ? templateName : DefaultButtonGroup );
-
-			// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-			string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=submit";
-			if (!text.empty())
-			{
-				// escape AH param separator
-				string tmp = text;
-				while(NLMISC::strFindReplace(tmp, "|", "&#124;"))
-					;
-				param = param + "|submit_button_value=" + tmp;
-			}
-
-			// Add the ctrl button
-			if (!_Paragraph)
-			{
-				newParagraph (0);
-				paragraphChange ();
-			}
-
-			typedef pair<string, string> TTmplParam;
-			vector<TTmplParam> tmplParams;
-			tmplParams.push_back(TTmplParam("id", name));
-			tmplParams.push_back(TTmplParam("onclick", "html_submit_form"));
-			tmplParams.push_back(TTmplParam("onclick_param", param));
-			//tmplParams.push_back(TTmplParam("text", text));
-			tmplParams.push_back(TTmplParam("active", "true"));
-			if (!minWidth.empty())
-				tmplParams.push_back(TTmplParam("wmin", minWidth));
-			CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
-			if (buttonGroup)
-			{
-
-				// Add the ctrl button
-				CCtrlTextButton *ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("button"));
-				if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
-				if (ctrlButton)
-				{
-					ctrlButton->setModulateGlobalColorAll (_Style.Current.GlobalColor);
-
-					// Translate the tooltip
-					if (tooltip)
-					{
-						if (CI18N::hasTranslation(tooltip))
-						{
-							ctrlButton->setDefaultContextHelp(CI18N::get(tooltip));
-						}
-						else
-						{
-							ctrlButton->setDefaultContextHelp(ucstring(tooltip));
-						}
-					}
-
-					ctrlButton->setText(ucstring::makeFromUtf8(text));
-
-					setTextButtonStyle(ctrlButton, _Style.Current);
-				}
-				getParagraph()->addChild (buttonGroup);
-				paragraphChange ();
-			}
+			insertFormTextButton(name, tooltip, value, _Forms.size()-1, "", minWidth, templateName);
 		}
 		else if (type == "text")
 		{
