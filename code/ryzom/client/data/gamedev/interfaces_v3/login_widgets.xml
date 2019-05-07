@@ -1025,4 +1025,17 @@
           force_inside_screen="false"></group>
 	</template>
 
+	<template name="html_meter" keep="true"
+		id="meter" w="0" h="0" active="true" border_x2="0"
+		bgtexture="blank.tga" bgcolor="0 0 0 255"
+		value_w="0" value_texture="blank.tga" value_color="100 100 100 100"
+		>
+		<group id="#id" w="#w" h="#h" active="#active">
+			<view type="bitmap" id="bg" posref="MM MM"  sizeref="wh" scale="true" texture="#bgtexture" color="#bgcolor" />
+			<group id="inner" posref="MM MM" sizeref="wh" w="-#border_x2" h="-#border_x2">
+				<view type="bitmap" id="gauge" posref="ML ML" posparent="bg" sizeref="h" sizeparent="bg" w="#value_w" scale="true" texture="#value_texture" color="#value_color" />
+			</group>
+		</group>
+	</template>
+
 </interface_config>

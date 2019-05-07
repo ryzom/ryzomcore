@@ -1102,6 +1102,7 @@ namespace NLGUI
 		case HTML_LI:       htmlLI(elm); break;
 		case HTML_LUA:      htmlLUA(elm); break;
 		case HTML_META:     htmlMETA(elm); break;
+		case HTML_METER:    htmlMETER(elm); break;
 		case HTML_OBJECT:   htmlOBJECT(elm); break;
 		case HTML_OL:       htmlOL(elm); break;
 		case HTML_OPTION:   htmlOPTION(elm); break;
@@ -1162,6 +1163,7 @@ namespace NLGUI
 		case HTML_LI:       htmlLIend(elm); break;
 		case HTML_LUA:      htmlLUAend(elm); break;
 		case HTML_META:     break;
+		case HTML_METER:    break;
 		case HTML_OBJECT:   htmlOBJECTend(elm); break;
 		case HTML_OL:       htmlOLend(elm); break;
 		case HTML_OPTION:   htmlOPTIONend(elm); break;
@@ -1337,12 +1339,16 @@ namespace NLGUI
 			beginElement(elm);
 
 			std::list<CHtmlElement>::iterator it = elm.Children.begin();
-			while(it != elm.Children.end())
+			if (!_IgnoreChildElements)
 			{
-				renderDOM(*it);
+				while(it != elm.Children.end())
+				{
+					renderDOM(*it);
 
-				++it;
+					++it;
+				}
 			}
+			_IgnoreChildElements = false;
 
 			endElement(elm);
 		}
@@ -1373,6 +1379,7 @@ namespace NLGUI
 		_ParsingLua = false;
 		_LuaHrefHack = false;
 		_IgnoreText = false;
+		_IgnoreChildElements = false;
 		_BrowseNextTime = false;
 		_PostNextTime = false;
 		_Browsing = false;
@@ -4876,7 +4883,12 @@ namespace NLGUI
 		// td { padding: 1px;} - overwrites cellpadding attribute
 		// table { border-spacing: 2px;} - overwrites cellspacing attribute
 		css += "table { border-collapse: separate;}";
-
+		// webkit pseudo elements
+		css += "meter::-webkit-meter-bar, meter::-webkit-optimum-value, meter::-webkit-suboptimum-value, meter::-webkit-even-less-good-value { background: none; }";
+		css += "meter::-webkit-meter-bar { background-color: rgb(100, 100, 100); width: 5em; height: 1em;}";
+		css += "meter::-webkit-meter-optimum-value { background-color: rgb(80, 220, 80); }";
+		css += "meter::-webkit-meter-suboptimum-value { background-color: rgb(220, 220, 80); }";
+		css += "meter::-webkit-meter-even-less-good-value { background-color: rgb(220, 80, 80); }";
 		_Style.parseStylesheet(css);
 	}
 	
@@ -4981,6 +4993,129 @@ namespace NLGUI
 		return ret;
 	}
 
+	void CGroupHTML::HTMLMeterElement::readValues(const CHtmlElement &elm)
+	{
+		if (!elm.hasAttribute("value") || !fromString(elm.getAttribute("value"), value))
+			value = 0.f;
+		if (!elm.hasAttribute("min") || !fromString(elm.getAttribute("min"), min))
+			min = 0.f;
+		if (!elm.hasAttribute("max") || !fromString(elm.getAttribute("max"), max))
+			max = 1.f;
+
+		// ensure min < max
+		if (max < min)
+			std::swap(min, max);
+
+		if (!elm.hasAttribute("low") || !fromString(elm.getAttribute("low"), low))
+			low = min;
+		if (!elm.hasAttribute("high") || !fromString(elm.getAttribute("high"), high))
+			high = max;
+
+		if (!elm.hasAttribute("optimum") || !fromString(elm.getAttribute("optimum"), optimum))
+			optimum = (max - min) / 2.f;
+
+		// ensure low < high
+		if (high < low)
+			std::swap(low, high);
+		if (low < min)
+			low = min;
+		if (high > max)
+			max = max;
+	}
+
+	float CGroupHTML::HTMLMeterElement::getValueRatio() const
+	{
+		if (max <= min)
+			return 0.f;
+
+		return (value - min) / (max - min);
+	}
+
+	CGroupHTML::HTMLMeterElement::EValueRegion CGroupHTML::HTMLMeterElement::getValueRegion() const
+	{
+		if (optimum <= low)
+		{
+			// low region is optimum
+			if (value <= low)
+				return VALUE_OPTIMUM;
+			else if (value <= high)
+				return VALUE_SUB_OPTIMAL;
+
+			return VALUE_EVEN_LESS_GOOD;
+		}
+		else if (optimum >= high)
+		{
+			// high region is optimum
+			if (value >= high)
+				return VALUE_OPTIMUM;
+			else if (value >= low)
+				return VALUE_SUB_OPTIMAL;
+
+			return VALUE_EVEN_LESS_GOOD;
+		}
+
+		// middle region is optimum
+		if (value >= low && value <= high)
+			return VALUE_OPTIMUM;
+
+		return VALUE_SUB_OPTIMAL;
+	}
+
+	NLMISC::CRGBA CGroupHTML::HTMLMeterElement::getBarColor(const CHtmlElement &elm, CCssStyle &style) const
+	{
+		// color meter (inactive) bar segment
+		// firefox:: meter { background:none; background-color: #555; },
+		//  webkit:: meter::-webkit-meter-bar { background:none; background-color: #555; }
+		// webkit makes background color visible when padding is added
+		CRGBA color(150, 150, 150, 255);
+
+		// use webkit pseudo elements as thats easier than firefox pseudo classes
+		// background-color is expected to be set from browser.css
+		style.pushStyle();
+		style.applyStyle(elm.getPseudo(":-webkit-meter-bar"));
+		if(style.hasStyle("background-color"))
+			color = style.Current.BackgroundColor;
+		style.popStyle();
+
+		return color;
+	}
+
+	NLMISC::CRGBA CGroupHTML::HTMLMeterElement::getValueColor(const CHtmlElement &elm, CCssStyle &style) const
+	{
+		// background-color is expected to be set from browser.css
+		CRGBA color;
+		style.pushStyle();
+		switch(getValueRegion())
+		{
+		case VALUE_OPTIMUM:
+			{
+				style.applyStyle(elm.getPseudo(":-webkit-meter-optimum-value"));
+				if (style.hasStyle("background-color"))
+					color = style.Current.BackgroundColor;
+				break;
+			}
+		case VALUE_SUB_OPTIMAL:
+			{
+				style.applyStyle(elm.getPseudo(":-webkit-meter-suboptimum-value"));
+				if (style.hasStyle("background-color"))
+					color = style.Current.BackgroundColor;
+				break;
+			}
+		case VALUE_EVEN_LESS_GOOD: // fall through
+		default:
+			{
+				style.applyStyle(elm.getPseudo(":-webkit-meter-even-less-good-value"));
+				if (style.hasStyle("background-color"))
+					color = style.Current.BackgroundColor;
+				break;
+			}
+		}//switch
+		style.popStyle();
+
+		return color;
+	}
+
+	// ****************************************************************************
 	void CGroupHTML::getCellsParameters(const CHtmlElement &elm, bool inherit)
 	{
 		CGroupHTML::CCellParams cellParams;
@@ -5960,6 +6095,50 @@ namespace NLGUI
 			}
 
 			_NextRefreshTime += timeSec;
+		}
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlMETER(const CHtmlElement &elm)
+	{
+		HTMLMeterElement meter;
+		meter.readValues(elm);
+
+		std::string id = "meter";
+		if (elm.hasAttribute("id"))
+			id = elm.getAttribute("id");
+
+		// width: 5em, height: 1em
+		uint32 width = _Style.Current.Width > -1 ? _Style.Current.Width : _Style.Current.FontSize * 5;
+		uint32 height = _Style.Current.Height > -1 ? _Style.Current.Height : _Style.Current.FontSize;
+		uint32 border = _Style.Current.BorderWidth > -1 ? _Style.Current.BorderWidth : 0;
+
+		uint barw = (uint) (width * meter.getValueRatio());
+		CRGBA bgColor = meter.getBarColor(elm, _Style);
+		CRGBA valueColor = meter.getValueColor(elm, _Style);
+
+		typedef pair<string, string> TTmplParam;
+		vector<TTmplParam> tmplParams;
+		tmplParams.push_back(TTmplParam("id", id));
+		tmplParams.push_back(TTmplParam("active", "true"));
+		tmplParams.push_back(TTmplParam("w", toString(width)));
+		tmplParams.push_back(TTmplParam("h", toString(height)));
+		tmplParams.push_back(TTmplParam("border_x2", toString(border*2)));
+		tmplParams.push_back(TTmplParam("bgtexture", "blank.tga"));
+		tmplParams.push_back(TTmplParam("bgcolor", bgColor.toString()));
+		tmplParams.push_back(TTmplParam("value_w", toString(barw)));
+		tmplParams.push_back(TTmplParam("value_texture", "blank.tga"));
+		tmplParams.push_back(TTmplParam("value_color", valueColor.toString()));
+
+		CInterfaceGroup *gr = CWidgetManager::getInstance()->getParser()->createGroupInstance("html_meter", getParagraph()->getId(), &tmplParams[0], (uint)tmplParams.size());
+		if (gr)
+		{
+			renderPseudoElement(":before", elm);
+			getParagraph()->addChild(gr);
+			renderPseudoElement(":after", elm);
+
+			// ignore any inner elements
+			_IgnoreChildElements = true;
 		}
 	}
 

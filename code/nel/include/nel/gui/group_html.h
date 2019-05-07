@@ -408,6 +408,7 @@ namespace NLGUI
 		// True when the <lua> element has been encountered
 		bool			_ParsingLua;
 		bool			_IgnoreText;
+		bool			_IgnoreChildElements;
 		// the script to execute
 		std::string		_LuaScript;
 		bool			_LuaHrefHack;
@@ -465,6 +466,41 @@ namespace NLGUI
 			bool First;
 		};
 		std::vector<HTMLOListElement> _UL;
+
+		class HTMLMeterElement {
+		public:
+			enum EValueRegion {
+				VALUE_OPTIMUM = 0,
+				VALUE_SUB_OPTIMAL,
+				VALUE_EVEN_LESS_GOOD
+			};
+		public:
+			HTMLMeterElement()
+				: value(0.f), min(0.f), max(1.f), low(0.f), high(1.f), optimum(0.5f)
+			{}
+
+			// read attributes from html element
+			void readValues(const CHtmlElement &elm);
+
+			// return value ratio to min-max
+			float getValueRatio() const;
+
+			// return optimum region based current value
+			EValueRegion getValueRegion() const;
+
+			// return meter bar color
+			NLMISC::CRGBA getBarColor(const CHtmlElement &elm, CCssStyle &style) const;
+
+			// return meter value bar color based value and optimum range
+			NLMISC::CRGBA getValueColor(const CHtmlElement &elm, CCssStyle &style) const;
+
+			float value;
+			float min;
+			float max;
+			float low;
+			float high;
+			float optimum;
+		};
 
 		// A mode
 		std::vector<bool>	_A;
@@ -894,6 +930,7 @@ namespace NLGUI
 		void htmlLUA(const CHtmlElement &elm);
 		void htmlLUAend(const CHtmlElement &elm);
 		void htmlMETA(const CHtmlElement &elm);
+		void htmlMETER(const CHtmlElement &elm);
 		void htmlOBJECT(const CHtmlElement &elm);
 		void htmlOBJECTend(const CHtmlElement &elm);
 		void htmlOL(const CHtmlElement &elm);
