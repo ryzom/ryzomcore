@@ -107,7 +107,7 @@ namespace NLGUI
 		void refresh();
 
 		// submit form
-		void submitForm (uint formId, const char *submitButtonType, const char *submitButtonName, const char *submitButtonValue, sint32 x, sint32 y);
+		void submitForm(uint button, sint32 x, sint32 y);
 
 		// Browse error
 		void browseError (const char *msg);
@@ -600,6 +600,9 @@ namespace NLGUI
 				sint					 InitialSelection; // initial selection for the combo box
 			};
 
+			// <form> element "id" attribute
+			std::string id;
+
 			// The action the form has to perform
 			std::string Action;
 
@@ -607,6 +610,23 @@ namespace NLGUI
 			std::vector<CEntry>	Entries;
 		};
 		std::vector<CForm>	_Forms;
+
+		// submit buttons added to from
+		struct SFormSubmitButton
+		{
+			SFormSubmitButton(const std::string &form, const std::string &name, const std::string &value, const std::string &type)
+				: form(form), name(name), value(value), type(type)
+			{ }
+
+			std::string form; // form 'id'
+			std::string name; // submit button name
+			std::string value; // submit button value
+			std::string type; // button type, ie 'image'
+		};
+
+		// submit buttons added to form
+		std::vector<SFormSubmitButton> _FormSubmit;
+
 		std::vector<CInterfaceGroup *>	_Groups;
 
 		// Cells parameters
@@ -823,7 +843,7 @@ namespace NLGUI
 			const std::string &tooltip,
 			const std::string &src,
 			const std::string &over,
-			uint32 formId,
+			const std::string &formId,
 			const std::string &formAction = "",
 			uint32 minWidth = 0,
 			const std::string &templateName = "");
@@ -831,7 +851,7 @@ namespace NLGUI
 		void insertFormTextButton(const std::string &name,
 			const std::string &tooltip,
 			const std::string &value,
-			uint32 formId,
+			const std::string &formId,
 			const std::string &formAction = "",
 			uint32 minWidth = 0,
 			const std::string &templateName = "");

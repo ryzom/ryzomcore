@@ -3118,6 +3118,7 @@ namespace NLGUI
 		_Cells.clear();
 		_TR.clear();
 		_Forms.clear();
+		_FormSubmit.clear();
 		_Groups.clear();
 		_Divs.clear();
 		_Anchors.clear();
@@ -3328,19 +3329,29 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::submitForm (uint formId, const char *submitButtonType, const char *submitButtonName, const char *submitButtonValue, sint32 x, sint32 y)
+	void CGroupHTML::submitForm(uint button, sint32 x, sint32 y)
 	{
-		// Form id valid ?
-		if (formId < _Forms.size())
+		if (button >= _FormSubmit.size())
+			return;
+
+		for(uint formId = 0; formId < _Forms.size(); formId++)
 		{
-			_PostNextTime = true;
-			_PostFormId = formId;
-			_PostFormSubmitType = submitButtonType;
-			_PostFormSubmitButton = submitButtonName;
-			_PostFormSubmitValue = submitButtonValue;
-			_PostFormSubmitX = x;
-			_PostFormSubmitY = y;
+			// case sensitive search (user id is lowecase, auto id is uppercase)
+			if (_Forms[formId].id == _FormSubmit[button].form)
+			{
+				_PostNextTime = true;
+				_PostFormId = formId;
+				_PostFormSubmitType = _FormSubmit[button].type;
+				_PostFormSubmitButton = _FormSubmit[button].name;
+				_PostFormSubmitValue = _FormSubmit[button].value;
+				_PostFormSubmitX = x;
+				_PostFormSubmitY = y;
+
+				return;
+			}
 		}
+
+		nlwarning("Unable to find form '%s' to submit (button '%s')", _FormSubmit[button].form.c_str(), _FormSubmit[button].name.c_str());
 	}
 
 	// ***************************************************************************
@@ -5063,31 +5074,22 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CGroupHTML::insertFormImageButton(const std::string &name, const std::string &tooltip, const std::string &src, const std::string &over, uint32 formId, const std::string &action, uint32 minWidth, const std::string &templateName)
+	void CGroupHTML::insertFormImageButton(const std::string &name, const std::string &tooltip, const std::string &src, const std::string &over, const std::string &formId, const std::string &action, uint32 minWidth, const std::string &templateName)
 	{
-		// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-		std::string param = "name=" + getId() + "|form=" + toString(formId) + "|submit_button=" + name + "|submit_button_type=image";
+		_FormSubmit.push_back(SFormSubmitButton(formId, name, "", "image"));
+		// Action handler parameters
+		std::string param = "name=" + getId() + "|button=" + toString(_FormSubmit.size()-1);
 
 		// Add the ctrl button
 		addButton (CCtrlButton::PushButton, name, src, src, over, "html_submit_form", param.c_str(), tooltip.c_str(), _Style.Current);
 	}
 
 	// ***************************************************************************
-	void CGroupHTML::insertFormTextButton(const std::string &name, const std::string &tooltip, const std::string &value, uint32 formId, const std::string &formAction, uint32 minWidth, const std::string &templateName)
+	void CGroupHTML::insertFormTextButton(const std::string &name, const std::string &tooltip, const std::string &value, const std::string &formId, const std::string &formAction, uint32 minWidth, const std::string &templateName)
 	{
-		// The submit button
-		string buttonTemplate(!templateName.empty() ? templateName : DefaultButtonGroup);
-
-		// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-		string param = "name=" + getId() + "|form=" + toString(formId) + "|submit_button=" + name + "|submit_button_type=submit";
-		if (!value.empty())
-		{
-			// escape AH param separator
-			string tmp = value;
-			while(NLMISC::strFindReplace(tmp, "|", "&#124;"))
-				;
-			param = param + "|submit_button_value=" + tmp;
-		}
+		_FormSubmit.push_back(SFormSubmitButton(formId, name, value, "submit"));
+		// Action handler parameters
+		string param = "name=" + getId() + "|button=" + toString(_FormSubmit.size()-1);
 
 		// Add the ctrl button
 		if (!_Paragraph)
@@ -5096,12 +5098,12 @@ namespace NLGUI
 			paragraphChange ();
 		}
 
+		string buttonTemplate(!templateName.empty() ? templateName : DefaultButtonGroup);
 		typedef pair<string, string> TTmplParam;
 		vector<TTmplParam> tmplParams;
 		tmplParams.push_back(TTmplParam("id", name));
 		tmplParams.push_back(TTmplParam("onclick", "html_submit_form"));
 		tmplParams.push_back(TTmplParam("onclick_param", param));
-		//tmplParams.push_back(TTmplParam("text", text));
 		tmplParams.push_back(TTmplParam("active", "true"));
 		if (minWidth > 0) tmplParams.push_back(TTmplParam("wmin", toString(minWidth)));
 		CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
@@ -5474,6 +5476,12 @@ namespace NLGUI
 	{
 		// Build the form
 		CGroupHTML::CForm form;
+		// id check is case sensitive and auto id's are uppercase
+		form.id = toLower(trim(elm.getAttribute("id")));
+		if (form.id.empty())
+		{
+			form.id = toString("FORM%d", _Forms.size());
+		}
 
 		// Get the action name
 		if (elm.hasNonEmptyAttribute("action"))
@@ -5675,7 +5683,7 @@ namespace NLGUI
 			string src = elm.getAttribute("src");
 			string over = elm.getAttribute("data-over-src");
 
-			insertFormImageButton(name, tooltip, src, over, _Forms.size()-1, "", minWidth, templateName);
+			insertFormImageButton(name, tooltip, src, over, _Forms.back().id, "", minWidth, templateName);
 		}
 		else if (type == "button" || type == "submit")
 		{
@@ -5683,7 +5691,7 @@ namespace NLGUI
 			string name = elm.getAttribute("name");
 			string value = elm.getAttribute("value");
 
-			insertFormTextButton(name, tooltip, value, _Forms.size()-1, "", minWidth, templateName);
+			insertFormTextButton(name, tooltip, value, _Forms.back().id, "", minWidth, templateName);
 		}
 		else if (type == "text")
 		{
