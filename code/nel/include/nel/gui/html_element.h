@@ -47,8 +47,6 @@ namespace NLGUI
 
 		// defined style and :before/:after pseudo elements
 		TStyle Style;
-		TStyle StyleBefore;
-		TStyle StyleAfter;
 
 		// hierarchy
 		CHtmlElement *parent;
@@ -79,6 +77,16 @@ namespace NLGUI
 
 		// debug
 		std::string toString(bool tree = false, uint depth = 0) const;
+
+		// query, get, set pseudo element style rules
+		void clearPseudo();
+		bool hasPseudo(const std::string &key) const;
+		TStyle getPseudo(const std::string &key) const;
+		void setPseudo(const std::string &key, const TStyle &style);
+
+	private:
+		// pseudo elements like ":before" and ":after"
+		std::map<std::string, TStyle> _Pseudo;
 	};
 }
 

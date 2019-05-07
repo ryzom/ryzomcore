@@ -89,8 +89,7 @@ namespace NLGUI
 		}
 
 		elm.Style.clear();
-		elm.StyleBefore.clear();
-		elm.StyleAfter.clear();
+		elm.clearPseudo();
 
 		if (!mRules.empty())
 		{
@@ -101,13 +100,9 @@ namespace NLGUI
 				{
 					merge(elm.Style, i->Properties);
 				}
-				else if (i->PseudoElement == ":before")
+				else
 				{
-					merge(elm.StyleBefore, i->Properties);
-				}
-				else if (i->PseudoElement == ":after")
-				{
-					merge(elm.StyleAfter, i->Properties);
+					elm.setPseudo(i->PseudoElement, i->Properties);
 				}
 			}
 		}

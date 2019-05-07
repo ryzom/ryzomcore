@@ -1193,26 +1193,20 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::renderPseudoElement(const std::string &pseudo, const CHtmlElement &elm)
 	{
-		if (pseudo == ":before" && !elm.StyleBefore.empty())
-		{
-			_Style.pushStyle();
-			_Style.applyStyle(elm.StyleBefore);
-		}
-		else if (pseudo == ":after" && !elm.StyleAfter.empty())
-		{
-			_Style.pushStyle();
-			_Style.applyStyle(elm.StyleAfter);
-		}
-		else
-		{
-			// unknown pseudo element
+		if (pseudo != ":before" && pseudo != ":after")
 			return;
-		}
+
+		if (!elm.hasPseudo(pseudo))
+			return;
+
+		_Style.pushStyle();
+		_Style.applyStyle(elm.getPseudo(pseudo));
 
 		// TODO: 'content' should already be tokenized in css parser as it has all the functions for that
 		std::string content = trim(_Style.getStyle("content"));
 		if (toLower(content) == "none" || toLower(content) == "normal")
 		{
+			_Style.popStyle();
 			return;
 		}
 
