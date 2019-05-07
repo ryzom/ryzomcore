@@ -1078,6 +1078,7 @@ namespace NLGUI
 		case HTML_BASE:     htmlBASE(elm); break;
 		case HTML_BODY:     htmlBODY(elm); break;
 		case HTML_BR:       htmlBR(elm); break;
+		case HTML_BUTTON:   htmlBUTTON(elm); break;
 		case HTML_DD:       htmlDD(elm); break;
 		case HTML_DEL:      renderPseudoElement(":before", elm); break;
 		case HTML_DIV:      htmlDIV(elm); break;
@@ -1137,6 +1138,7 @@ namespace NLGUI
 		case HTML_BASE:     break;
 		case HTML_BODY:     renderPseudoElement(":after", elm); break;
 		case HTML_BR:       break;
+		case HTML_BUTTON:   htmlBUTTONend(elm); break;
 		case HTML_DD:       htmlDDend(elm); break;
 		case HTML_DEL:      renderPseudoElement(":after", elm); break;
 		case HTML_DIV:      htmlDIVend(elm); break;
@@ -2757,6 +2759,9 @@ namespace NLGUI
 							// Translate the tooltip
 							ctrlButton->setDefaultContextHelp(ucstring::makeFromUtf8(getLinkTitle()));
 							ctrlButton->setText(tmpStr);
+							// empty url / button disabled
+							bool disabled = string(getLink()).empty();
+							ctrlButton->setFrozen(disabled);
 
 							setTextButtonStyle(ctrlButton, style);
 						}
@@ -3341,6 +3346,7 @@ namespace NLGUI
 			{
 				_PostNextTime = true;
 				_PostFormId = formId;
+				_PostFormAction = _FormSubmit[button].formAction;
 				_PostFormSubmitType = _FormSubmit[button].type;
 				_PostFormSubmitButton = _FormSubmit[button].name;
 				_PostFormSubmitValue = _FormSubmit[button].value;
@@ -3525,7 +3531,8 @@ namespace NLGUI
 		// Ref the form
 		CForm &form = _Forms[_PostFormId];
 
-		_URL = form.Action;
+		// button can override form action url (and methor, but we only do POST)
+		_URL = _PostFormAction.empty() ? form.Action : _PostFormAction;
 
 		CUrlParser uri(_URL);
 		_TrustedDomain = isTrustedDomain(uri.host);
@@ -5224,6 +5231,55 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CGroupHTML::htmlBUTTON(const CHtmlElement &elm)
+	{
+		std::string name = elm.getAttribute("name");
+		std::string value = elm.getAttribute("value");
+		std::string formId = elm.getAttribute("form");
+		std::string formAction = elm.getAttribute("formaction");
+		std::string tooltip = elm.getAttribute("tooltip");
+		bool disabled = elm.hasAttribute("disabled");
+
+		if (!formAction.empty())
+		{
+			formAction = getAbsoluteUrl(formAction);
+		}
+
+		_FormSubmit.push_back(SFormSubmitButton(formId, name, value, "text", formAction));
+		// Action handler parameters
+		std::string param;
+		if (!disabled)
+		{
+			if (elm.getAttribute("type") == "submit")
+			{
+				param = "ah:html_submit_form&name=" + getId() + "&button=" + toString(_FormSubmit.size()-1);
+			}
+			else
+			{
+				param = "ah:";
+			}
+		}
+
+		_A.push_back(true);
+		_Link.push_back(param);
+		_LinkTitle.push_back(tooltip);
+		_LinkClass.push_back("ryzom-ui-button");
+
+		// TODO: this creates separate button element
+		//renderPseudoElement(":before", elm);
+	}
+	void CGroupHTML::htmlBUTTONend(const CHtmlElement &elm)
+	{
+		// TODO: this creates separate button element
+		//renderPseudoElement(":after", elm);
+
+		popIfNotEmpty(_A);
+		popIfNotEmpty(_Link);
+		popIfNotEmpty(_LinkTitle);
+		popIfNotEmpty(_LinkClass);
+	}
+
+	// ***************************************************************************
 	void CGroupHTML::htmlDD(const CHtmlElement &elm)
 	{
 		if (_DL.empty())
@@ -5613,9 +5669,11 @@ namespace NLGUI
 		// Mouse over image
 		string overSrc = elm.getAttribute("data-over-src");
 
-		if (getA() && getParent () && getParent ()->getParent())
+		// inside a/button with valid url (ie, button is not disabled)
+		string url = getLink();
+		if (getA() && !url.empty() && getParent() && getParent()->getParent())
 		{
-			string params = "name=" + getId() + "|url=" + getLink ();
+			string params = "name=" + getId() + "|url=" + url;
 			addButton(CCtrlButton::PushButton, id, src, src, overSrc, "browse", params.c_str(), tooltip, _Style.Current);
 		}
 		else

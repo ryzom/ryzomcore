@@ -385,6 +385,7 @@ namespace NLGUI
 		bool			_BrowseNextTime;
 		bool			_PostNextTime;
 		uint			_PostFormId;
+		std::string		_PostFormAction;
 		std::string		_PostFormSubmitType;
 		std::string		_PostFormSubmitButton;
 		std::string		_PostFormSubmitValue;
@@ -614,14 +615,16 @@ namespace NLGUI
 		// submit buttons added to from
 		struct SFormSubmitButton
 		{
-			SFormSubmitButton(const std::string &form, const std::string &name, const std::string &value, const std::string &type)
-				: form(form), name(name), value(value), type(type)
+			SFormSubmitButton(const std::string &form, const std::string &name, const std::string &value, const std::string &type, const std::string &formAction="")
+				: form(form), name(name), value(value), type(type), formAction(formAction)
 			{ }
 
 			std::string form; // form 'id'
 			std::string name; // submit button name
 			std::string value; // submit button value
 			std::string type; // button type, ie 'image'
+
+			std::string formAction; // override form action attribute (url)
 		};
 
 		// submit buttons added to form
@@ -862,6 +865,8 @@ namespace NLGUI
 		void htmlBASE(const CHtmlElement &elm);
 		void htmlBODY(const CHtmlElement &elm);
 		void htmlBR(const CHtmlElement &elm);
+		void htmlBUTTON(const CHtmlElement &elm);
+		void htmlBUTTONend(const CHtmlElement &elm);
 		void htmlDD(const CHtmlElement &elm);
 		void htmlDDend(const CHtmlElement &elm);
 		//void htmlDEL(const CHtmlElement &elm);
