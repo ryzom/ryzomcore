@@ -631,18 +631,9 @@ namespace NLGUI
 		{
 			result.clear();
 		}
-		else if (result.empty() || !current.empty())
+		else if (!current.empty())
 		{
-			// pseudo element like ':before' can only be set on the last selector
-			if (!result.empty() && !pseudoElement.empty())
-			{
-				// failed
-				result.clear();
-			}
-			else
-			{
-				result.push_back(current);
-			}
+			result.push_back(current);
 		}
 
 		return result;

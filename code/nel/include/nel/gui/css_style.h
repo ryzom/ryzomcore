@@ -61,7 +61,7 @@ namespace NLGUI
 			Height=-1;
 			MaxWidth=-1;
 			MaxHeight=-1;
-			BorderWidth=1;
+			BorderWidth=-1;
 			BackgroundColor=NLMISC::CRGBA::Black;
 			BackgroundColorOver=NLMISC::CRGBA::Black;
 		}
@@ -176,7 +176,7 @@ namespace NLGUI
 			Current.Height=-1;
 			Current.MaxWidth=-1;
 			Current.MaxHeight=-1;
-			Current.BorderWidth=1;
+			Current.BorderWidth=-1;
 
 			Current.StyleRules.clear();
 		}

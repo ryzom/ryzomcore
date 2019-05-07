@@ -83,6 +83,46 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CHtmlElement::clearPseudo()
+	{
+		_Pseudo.clear();
+	}
+
+	// ***************************************************************************
+	bool CHtmlElement::hasPseudo(const std::string &key) const
+	{
+		return _Pseudo.find(key) != _Pseudo.end();
+	}
+
+	// ***************************************************************************
+	TStyle CHtmlElement::getPseudo(const std::string &key) const
+	{
+		std::map<std::string, TStyle>::const_iterator it = _Pseudo.find(key);
+		if (it != _Pseudo.end())
+			return it->second;
+
+		return TStyle();
+	}
+
+	// ***************************************************************************
+	void CHtmlElement::setPseudo(const std::string &key, const TStyle &style)
+	{
+		std::map<std::string, TStyle>::iterator it = _Pseudo.find(key);
+		if (it != _Pseudo.end())
+		{
+			// insert into previous, override previous values if they exist
+			for(TStyle::const_iterator itStyle = style.begin(); itStyle != style.end(); ++itStyle)
+			{
+				it->second[itStyle->first] = itStyle->second;
+			}
+		}
+		else
+		{
+			_Pseudo[key] = style;
+		}
+	}
+
+	// ***************************************************************************
 	std::string CHtmlElement::toString(bool tree, uint depth) const
 	{
 		std::string result;
