@@ -170,7 +170,7 @@ std::wstring winCpToWide(const char *str, size_t len, UINT cp)
 	wchar_t *tmp = (wchar_t *)_malloca((len + 1) * 4);
 	if (!tmp)
 		return std::wstring();
-	int tmpLen = MultiByteToWideChar(cp, MB_PRECOMPOSED,
+	int tmpLen = MultiByteToWideChar(cp, 0,
 	    str, (int)(len + 1), /* include null-termination */
 	    tmp, (int)((len + 1) * 4));
 	if (tmpLen <= 1)
