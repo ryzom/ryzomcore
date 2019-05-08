@@ -146,7 +146,7 @@ std::string winCpToCp(const char *str, size_t len, UINT srcCp, UINT dstCp)
 		return std::string();
 	int tmpLen = MultiByteToWideChar(srcCp, 0,
 	    str, (int)(len + 1), /* include null-termination */
-	    tmp, (int)((len + 1) * 4));
+	    tmp, (int)((len + 1) * 2));
 	if (tmpLen <= 1)
 	{
 		_freea(tmp);
@@ -172,7 +172,7 @@ std::wstring winCpToWide(const char *str, size_t len, UINT cp)
 		return std::wstring();
 	int tmpLen = MultiByteToWideChar(cp, 0,
 	    str, (int)(len + 1), /* include null-termination */
-	    tmp, (int)((len + 1) * 4));
+	    tmp, (int)((len + 1) * 2));
 	if (tmpLen <= 1)
 	{
 		_freea(tmp);
