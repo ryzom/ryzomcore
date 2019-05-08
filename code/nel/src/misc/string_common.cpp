@@ -144,7 +144,7 @@ std::string winCpToCp(const char *str, size_t len, UINT srcCp, UINT dstCp)
 	wchar_t *tmp = (wchar_t *)_malloca((len + 1) * 4);
 	if (!tmp)
 		return std::string();
-	int tmpLen = MultiByteToWideChar(srcCp, MB_PRECOMPOSED,
+	int tmpLen = MultiByteToWideChar(srcCp, 0,
 	    str, (int)(len + 1), /* include null-termination */
 	    tmp, (int)((len + 1) * 4));
 	if (tmpLen <= 1)
