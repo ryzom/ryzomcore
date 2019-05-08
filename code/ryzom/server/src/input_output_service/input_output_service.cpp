@@ -21,7 +21,6 @@
 #include "game_share/tick_event_handler.h"
 #include "game_share/msg_client_server.h"
 #include "game_share/mode_and_behaviour.h" //TEMP!!!
-#include "game_share/news_types.h"
 #include "game_share/bot_chat_types.h"
 #include "game_share/brick_types.h"
 #include "game_share/loot_harvest_state.h"
@@ -35,7 +34,6 @@
 #include "nel/misc/command.h"
 #include "nel/net/message.h"
 
-#include "news_manager.h"
 #include "string_manager.h"
 #include "messages.h"
 //#include "ios_pd.h"
