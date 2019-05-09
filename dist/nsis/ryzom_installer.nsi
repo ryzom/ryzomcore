@@ -102,8 +102,8 @@ Section
 
   ;Client, configuration and misc files
   File "${SrcDir}\${Executable}"
-  File "${SrcDir}\msvcp100.dll"
-  File "${SrcDir}\msvcr100.dll"
+  File "${SrcDir}\msvcp120.dll"
+  File "${SrcDir}\msvcr120.dll"
 
   ;Shortcut on desktop
   CreateShortCut "$DESKTOP\${Product}.lnk" "$INSTDIR\${Executable}"
