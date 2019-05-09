@@ -26,12 +26,13 @@ jobs:
         sudo apt-get install libsquish-dev -y
         sudo apt-get install liblzma-dev -y
         sudo apt-get install libgsf-1-dev -y
+        sudo apt-get install qtbase5-dev qttools5-dev
       displayName: 'Dependencies'
     - script: |
         mkdir build
         cmake --version
         cd build
-        cmake -DWITH_STATIC=ON -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_TOOLS=OFF -DWITH_NEL_TOOLS=ON -DWITH_LIBGSF=ON ../code
+        cmake -DWITH_STATIC=ON -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ../code
         cat CMakeCache.txt
       displayName: 'CMake'
     - script: |
