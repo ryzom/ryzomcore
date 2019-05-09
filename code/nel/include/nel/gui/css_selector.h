@@ -84,6 +84,9 @@ namespace NLGUI
 		// NOTE: Does not check combinator
 		bool match(const CHtmlElement &elm) const;
 
+		// debug
+		std::string toString() const;
+
 	private:
 		bool matchClass(const CHtmlElement &elm) const;
 		bool matchAttributes(const CHtmlElement &elm) const;
@@ -91,7 +94,7 @@ namespace NLGUI
 
 		// match An+B rule to child index (1 based)
 		bool matchNth(sint childNr, sint a, sint b) const;
-		
+
 		// parse nth-child string to 'a' and 'b' components
 		// :nth-child(odd)
 		// :nth-child(even)

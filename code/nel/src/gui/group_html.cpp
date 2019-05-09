@@ -699,7 +699,20 @@ namespace NLGUI
 	// Add a image download request in the multi_curl
 	void CGroupHTML::addImageDownload(const string &url, CViewBase *img, const CStyleParams &style, TImageType type)
 	{
-		string finalUrl = upgradeInsecureUrl(getAbsoluteUrl(url));
+		std::string finalUrl;
+		img->setModulateGlobalColor(style.GlobalColor);
+
+		// load the image from local files/bnp
+		std::string image = CFile::getPath(url) + CFile::getFilenameWithoutExtension(url) + ".tga";
+		if (lookupLocalFile(finalUrl, image.c_str(), false))
+		{
+			setImage(img, image, type);
+			setImageSize(img, style);
+			return;
+		}
+
+		// TODO: if no image in cache, nothing is visible
+		finalUrl = upgradeInsecureUrl(getAbsoluteUrl(url));
 
 		// use requested url for local name (cache)
 		string dest = localImageName(url);
@@ -1065,6 +1078,7 @@ namespace NLGUI
 		case HTML_BASE:     htmlBASE(elm); break;
 		case HTML_BODY:     htmlBODY(elm); break;
 		case HTML_BR:       htmlBR(elm); break;
+		case HTML_BUTTON:   htmlBUTTON(elm); break;
 		case HTML_DD:       htmlDD(elm); break;
 		case HTML_DEL:      renderPseudoElement(":before", elm); break;
 		case HTML_DIV:      htmlDIV(elm); break;
@@ -1088,11 +1102,13 @@ namespace NLGUI
 		case HTML_LI:       htmlLI(elm); break;
 		case HTML_LUA:      htmlLUA(elm); break;
 		case HTML_META:     htmlMETA(elm); break;
+		case HTML_METER:    htmlMETER(elm); break;
 		case HTML_OBJECT:   htmlOBJECT(elm); break;
 		case HTML_OL:       htmlOL(elm); break;
 		case HTML_OPTION:   htmlOPTION(elm); break;
 		case HTML_P:        htmlP(elm); break;
 		case HTML_PRE:      htmlPRE(elm); break;
+		case HTML_PROGRESS: htmlPROGRESS(elm); break;
 		case HTML_SCRIPT:   htmlSCRIPT(elm); break;
 		case HTML_SELECT:   htmlSELECT(elm); break;
 		case HTML_SMALL:    renderPseudoElement(":before", elm); break;
@@ -1124,6 +1140,7 @@ namespace NLGUI
 		case HTML_BASE:     break;
 		case HTML_BODY:     renderPseudoElement(":after", elm); break;
 		case HTML_BR:       break;
+		case HTML_BUTTON:   htmlBUTTONend(elm); break;
 		case HTML_DD:       htmlDDend(elm); break;
 		case HTML_DEL:      renderPseudoElement(":after", elm); break;
 		case HTML_DIV:      htmlDIVend(elm); break;
@@ -1147,6 +1164,7 @@ namespace NLGUI
 		case HTML_LI:       htmlLIend(elm); break;
 		case HTML_LUA:      htmlLUAend(elm); break;
 		case HTML_META:     break;
+		case HTML_METER:    break;
 		case HTML_OBJECT:   htmlOBJECTend(elm); break;
 		case HTML_OL:       htmlOLend(elm); break;
 		case HTML_OPTION:   htmlOPTIONend(elm); break;
@@ -1178,26 +1196,20 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::renderPseudoElement(const std::string &pseudo, const CHtmlElement &elm)
 	{
-		if (pseudo == ":before" && !elm.StyleBefore.empty())
-		{
-			_Style.pushStyle();
-			_Style.applyStyle(elm.StyleBefore);
-		}
-		else if (pseudo == ":after" && !elm.StyleAfter.empty())
-		{
-			_Style.pushStyle();
-			_Style.applyStyle(elm.StyleAfter);
-		}
-		else
-		{
-			// unknown pseudo element
+		if (pseudo != ":before" && pseudo != ":after")
 			return;
-		}
+
+		if (!elm.hasPseudo(pseudo))
+			return;
+
+		_Style.pushStyle();
+		_Style.applyStyle(elm.getPseudo(pseudo));
 
 		// TODO: 'content' should already be tokenized in css parser as it has all the functions for that
 		std::string content = trim(_Style.getStyle("content"));
 		if (toLower(content) == "none" || toLower(content) == "normal")
 		{
+			_Style.popStyle();
 			return;
 		}
 
@@ -1207,7 +1219,7 @@ namespace NLGUI
 		{
 			std::string::size_type start;
 			std::string token;
-		
+
 			// not supported
 			// counter, open-quote, close-quote, no-open-quote, no-close-quote
 			if (content[pos] == '"' || content[pos] == '\'')
@@ -1328,12 +1340,16 @@ namespace NLGUI
 			beginElement(elm);
 
 			std::list<CHtmlElement>::iterator it = elm.Children.begin();
-			while(it != elm.Children.end())
+			if (!_IgnoreChildElements)
 			{
-				renderDOM(*it);
+				while(it != elm.Children.end())
+				{
+					renderDOM(*it);
 
-				++it;
+					++it;
+				}
 			}
+			_IgnoreChildElements = false;
 
 			endElement(elm);
 		}
@@ -1364,6 +1380,7 @@ namespace NLGUI
 		_ParsingLua = false;
 		_LuaHrefHack = false;
 		_IgnoreText = false;
+		_IgnoreChildElements = false;
 		_BrowseNextTime = false;
 		_PostNextTime = false;
 		_Browsing = false;
@@ -1444,7 +1461,6 @@ namespace NLGUI
 
 		initImageDownload();
 		initBnpDownload();
-		initLibWWW();
 	}
 
 	// ***************************************************************************
@@ -2747,6 +2763,9 @@ namespace NLGUI
 							// Translate the tooltip
 							ctrlButton->setDefaultContextHelp(ucstring::makeFromUtf8(getLinkTitle()));
 							ctrlButton->setText(tmpStr);
+							// empty url / button disabled
+							bool disabled = string(getLink()).empty();
+							ctrlButton->setFrozen(disabled);
 
 							setTextButtonStyle(ctrlButton, style);
 						}
@@ -2804,8 +2823,6 @@ namespace NLGUI
 			paragraphChange ();
 		}
 
-		string finalUrl;
-
 		// No more text in this text view
 		_CurrentViewLink = NULL;
 
@@ -2813,51 +2830,8 @@ namespace NLGUI
 		CViewBitmap *newImage = new CViewBitmap (TCtorParam());
 		newImage->setId(id);
 
-		//
-		// 1/ try to load the image with the old system (local files in bnp)
-		//
-		string image = CFile::getPath(img) + CFile::getFilenameWithoutExtension(img) + ".tga";
-		if (lookupLocalFile (finalUrl, image.c_str(), false))
-		{
-			newImage->setRenderLayer(getRenderLayer()+1);
-			image = finalUrl;
-		}
-		else
-		{
-			//
-			// 2/ if it doesn't work, try to load the image in cache
-			//
-			image = localImageName(img);
-
-			if (reloadImg && CFile::fileExists(image))
-				CFile::deleteFile(image);
-
-			if (lookupLocalFile (finalUrl, image.c_str(), false))
-			{
-				// don't display image that are not power of 2
-				try
-				{
-					uint32 w, h;
-					CBitmap::loadSize (image, w, h);
-					if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
-						image = "web_del.tga";
-				}
-				catch(const NLMISC::Exception &e)
-				{
-					nlwarning(e.what());
-					image = "web_del.tga";
-				}
-			}
-			else
-			{
-				// no image in cache
-				image = "web_del.tga";
-			}
-
-			addImageDownload(img, newImage, style);
-		}
-		newImage->setTexture (image);
-		newImage->setModulateGlobalColor(style.GlobalColor);
+		addImageDownload(img, newImage, style, TImageType::NormalImage);
+		newImage->setRenderLayer(getRenderLayer()+1);
 
 		getParagraph()->addChild(newImage);
 		paragraphChange ();
@@ -3032,7 +3006,7 @@ namespace NLGUI
 
 	CCtrlButton *CGroupHTML::addButton(CCtrlButton::EType type, const std::string &name, const std::string &normalBitmap, const std::string &pushedBitmap,
 									  const std::string &overBitmap, const char *actionHandler, const char *actionHandlerParams,
-									  const char *tooltip, const CStyleParams &style)
+									  const std::string &tooltip, const CStyleParams &style)
 	{
 		// In a paragraph ?
 		if (!_Paragraph)
@@ -3061,26 +3035,6 @@ namespace NLGUI
 			if(id == -1)
 			{
 				normal = localImageName(normalBitmap);
-				if(!CFile::fileExists(normal))
-				{
-					normal = "web_del.tga";
-				}
-				else
-				{
-					try
-					{
-						uint32 w, h;
-						CBitmap::loadSize(normal, w, h);
-						if (w == 0 || h == 0)
-							normal = "web_del.tga";
-					}
-					catch(const NLMISC::Exception &e)
-					{
-						nlwarning(e.what());
-						normal = "web_del.tga";
-					}
-				}
-
 				addImageDownload(normalBitmap, ctrlButton, style);
 			}
 		}
@@ -3122,7 +3076,7 @@ namespace NLGUI
 		ctrlButton->setParamsOnLeftClick (actionHandlerParams);
 
 		// Translate the tooltip or display raw text (tooltip from webig)
-		if (tooltip)
+		if (!tooltip.empty())
 		{
 			if (CI18N::hasTranslation(tooltip))
 			{
@@ -3173,6 +3127,7 @@ namespace NLGUI
 		_Cells.clear();
 		_TR.clear();
 		_Forms.clear();
+		_FormSubmit.clear();
 		_Groups.clear();
 		_Divs.clear();
 		_Anchors.clear();
@@ -3326,9 +3281,9 @@ namespace NLGUI
 
 		setTitle(_TitleString);
 	}
-	
+
 	std::string CGroupHTML::getTitle() const {
-		return _TitleString.toUtf8(); 
+		return _TitleString.toUtf8();
 	};
 
 	// ***************************************************************************
@@ -3383,19 +3338,30 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::submitForm (uint formId, const char *submitButtonType, const char *submitButtonName, const char *submitButtonValue, sint32 x, sint32 y)
+	void CGroupHTML::submitForm(uint button, sint32 x, sint32 y)
 	{
-		// Form id valid ?
-		if (formId < _Forms.size())
+		if (button >= _FormSubmit.size())
+			return;
+
+		for(uint formId = 0; formId < _Forms.size(); formId++)
 		{
-			_PostNextTime = true;
-			_PostFormId = formId;
-			_PostFormSubmitType = submitButtonType;
-			_PostFormSubmitButton = submitButtonName;
-			_PostFormSubmitValue = submitButtonValue;
-			_PostFormSubmitX = x;
-			_PostFormSubmitY = y;
+			// case sensitive search (user id is lowecase, auto id is uppercase)
+			if (_Forms[formId].id == _FormSubmit[button].form)
+			{
+				_PostNextTime = true;
+				_PostFormId = formId;
+				_PostFormAction = _FormSubmit[button].formAction;
+				_PostFormSubmitType = _FormSubmit[button].type;
+				_PostFormSubmitButton = _FormSubmit[button].name;
+				_PostFormSubmitValue = _FormSubmit[button].value;
+				_PostFormSubmitX = x;
+				_PostFormSubmitY = y;
+
+				return;
+			}
 		}
+
+		nlwarning("Unable to find form '%s' to submit (button '%s')", _FormSubmit[button].form.c_str(), _FormSubmit[button].name.c_str());
 	}
 
 	// ***************************************************************************
@@ -3434,6 +3400,13 @@ namespace NLGUI
 				bitmap->setRenderLayer(-2);
 				bitmap->setScale(scale);
 				bitmap->setTile(tile);
+
+				// clear size ref for non-scaled image or it does not show up
+				if (scale || tile)
+					bitmap->setSizeRef("wh");
+				else
+					bitmap->setSizeRef("");
+
 				addImageDownload(bgtex, view);
 			}
 		}
@@ -3562,7 +3535,8 @@ namespace NLGUI
 		// Ref the form
 		CForm &form = _Forms[_PostFormId];
 
-		_URL = form.Action;
+		// button can override form action url (and methor, but we only do POST)
+		_URL = _PostFormAction.empty() ? form.Action : _PostFormAction;
 
 		CUrlParser uri(_URL);
 		_TrustedDomain = isTrustedDomain(uri.host);
@@ -3593,7 +3567,7 @@ namespace NLGUI
 				// todo handle unicode POST here
 				if (form.Entries[i].Checkbox->getPushed ())
 				{
-                                        entryData = form.Entries[i].Value;
+					entryData = form.Entries[i].Value;
 					addEntry = true;
 				}
 			}
@@ -4123,7 +4097,7 @@ namespace NLGUI
 		{
 			// clear the page
 			beginBuild();
-				
+
 			// clear previous page and state
 			removeContent();
 
@@ -4248,6 +4222,7 @@ namespace NLGUI
 
 		// Reset default background color
 		setBackgroundColor (BgColor);
+		setBackground ("blank.tga", true, false);
 
 		paragraphChange ();
 	}
@@ -4772,7 +4747,7 @@ namespace NLGUI
 			nlwarning("BUG: unable to find current element iterator from parent");
 			return;
 		}
-		
+
 		// where fragment should be moved
 		std::list<CHtmlElement>::iterator insertBefore;
 		if (_CurrentHTMLNextSibling == NULL)
@@ -4938,7 +4913,16 @@ namespace NLGUI
 		// td { padding: 1px;} - overwrites cellpadding attribute
 		// table { border-spacing: 2px;} - overwrites cellspacing attribute
 		css += "table { border-collapse: separate;}";
-
+		// webkit pseudo elements
+		css += "meter::-webkit-meter-bar, meter::-webkit-optimum-value, meter::-webkit-suboptimum-value, meter::-webkit-even-less-good-value { background: none; }";
+		css += "meter::-webkit-meter-bar { background-color: rgb(100, 100, 100); width: 5em; height: 1em;}";
+		css += "meter::-webkit-meter-optimum-value { background-color: rgb(80, 220, 80); }";
+		css += "meter::-webkit-meter-suboptimum-value { background-color: rgb(220, 220, 80); }";
+		css += "meter::-webkit-meter-even-less-good-value { background-color: rgb(220, 80, 80); }";
+		// webkit pseudo elements
+		css += "progress::-webkit-progress-bar, progress::-webkit-progress-value { background: none; }";
+		css += "progress::-webkit-progress-bar { background-color: rgb(230, 230, 230); width: 10em; height: 1em; }";
+		css += "progress::-webkit-progress-value { background-color: rgb(0, 100, 180);}";
 		_Style.parseStylesheet(css);
 	}
 
@@ -5043,6 +5027,177 @@ namespace NLGUI
 		return ret;
 	}
 
+	void CGroupHTML::HTMLMeterElement::readValues(const CHtmlElement &elm)
+	{
+		if (!elm.hasAttribute("value") || !fromString(elm.getAttribute("value"), value))
+			value = 0.f;
+		if (!elm.hasAttribute("min") || !fromString(elm.getAttribute("min"), min))
+			min = 0.f;
+		if (!elm.hasAttribute("max") || !fromString(elm.getAttribute("max"), max))
+			max = 1.f;
+
+		// ensure min < max
+		if (max < min)
+			std::swap(min, max);
+
+		if (!elm.hasAttribute("low") || !fromString(elm.getAttribute("low"), low))
+			low = min;
+		if (!elm.hasAttribute("high") || !fromString(elm.getAttribute("high"), high))
+			high = max;
+
+		if (!elm.hasAttribute("optimum") || !fromString(elm.getAttribute("optimum"), optimum))
+			optimum = (max - min) / 2.f;
+
+		// ensure low < high
+		if (high < low)
+			std::swap(low, high);
+		if (low < min)
+			low = min;
+		if (high > max)
+			max = max;
+	}
+
+	float CGroupHTML::HTMLMeterElement::getValueRatio() const
+	{
+		if (max <= min)
+			return 0.f;
+
+		return (value - min) / (max - min);
+	}
+
+	CGroupHTML::HTMLMeterElement::EValueRegion CGroupHTML::HTMLMeterElement::getValueRegion() const
+	{
+		if (optimum <= low)
+		{
+			// low region is optimum
+			if (value <= low)
+				return VALUE_OPTIMUM;
+			else if (value <= high)
+				return VALUE_SUB_OPTIMAL;
+
+			return VALUE_EVEN_LESS_GOOD;
+		}
+		else if (optimum >= high)
+		{
+			// high region is optimum
+			if (value >= high)
+				return VALUE_OPTIMUM;
+			else if (value >= low)
+				return VALUE_SUB_OPTIMAL;
+
+			return VALUE_EVEN_LESS_GOOD;
+		}
+
+		// middle region is optimum
+		if (value >= low && value <= high)
+			return VALUE_OPTIMUM;
+
+		return VALUE_SUB_OPTIMAL;
+	}
+
+	NLMISC::CRGBA CGroupHTML::HTMLMeterElement::getBarColor(const CHtmlElement &elm, CCssStyle &style) const
+	{
+		// color meter (inactive) bar segment
+		// firefox:: meter { background:none; background-color: #555; },
+		//  webkit:: meter::-webkit-meter-bar { background:none; background-color: #555; }
+		// webkit makes background color visible when padding is added
+		CRGBA color(150, 150, 150, 255);
+
+		// use webkit pseudo elements as thats easier than firefox pseudo classes
+		// background-color is expected to be set from browser.css
+		style.pushStyle();
+		style.applyStyle(elm.getPseudo(":-webkit-meter-bar"));
+		if(style.hasStyle("background-color"))
+			color = style.Current.BackgroundColor;
+		style.popStyle();
+
+		return color;
+	}
+
+	NLMISC::CRGBA CGroupHTML::HTMLMeterElement::getValueColor(const CHtmlElement &elm, CCssStyle &style) const
+	{
+		// background-color is expected to be set from browser.css
+		CRGBA color;
+		style.pushStyle();
+		switch(getValueRegion())
+		{
+		case VALUE_OPTIMUM:
+			{
+				style.applyStyle(elm.getPseudo(":-webkit-meter-optimum-value"));
+				if (style.hasStyle("background-color"))
+					color = style.Current.BackgroundColor;
+				break;
+			}
+		case VALUE_SUB_OPTIMAL:
+			{
+				style.applyStyle(elm.getPseudo(":-webkit-meter-suboptimum-value"));
+				if (style.hasStyle("background-color"))
+					color = style.Current.BackgroundColor;
+				break;
+			}
+		case VALUE_EVEN_LESS_GOOD: // fall through
+		default:
+			{
+				style.applyStyle(elm.getPseudo(":-webkit-meter-even-less-good-value"));
+				if (style.hasStyle("background-color"))
+					color = style.Current.BackgroundColor;
+				break;
+			}
+		}//switch
+		style.popStyle();
+
+		return color;
+	}
+
+	// ****************************************************************************
+	void CGroupHTML::HTMLProgressElement::readValues(const CHtmlElement &elm)
+	{
+		if (!elm.hasAttribute("value") || !fromString(elm.getAttribute("value"), value))
+			value = 0.f;
+		if (!elm.hasAttribute("max") || !fromString(elm.getAttribute("max"), max))
+			max = 1.f;
+
+		if (value > max)
+			value = max;
+	}
+
+	// ****************************************************************************
+	float CGroupHTML::HTMLProgressElement::getValueRatio() const
+	{
+		if (max > 0.f)
+			return value / max;
+		return 0.f;
+	}
+
+	// ****************************************************************************
+	NLMISC::CRGBA CGroupHTML::HTMLProgressElement::getBarColor(const CHtmlElement &elm, CCssStyle &style) const
+	{
+		CRGBA color;
+
+		style.pushStyle();
+		style.applyStyle(elm.getPseudo(":-webkit-progress-bar"));
+		if (style.hasStyle("background-color"))
+			color = style.Current.BackgroundColor;
+		style.popStyle();
+
+		return color;
+	}
+
+	// ****************************************************************************
+	NLMISC::CRGBA CGroupHTML::HTMLProgressElement::getValueColor(const CHtmlElement &elm, CCssStyle &style) const
+	{
+		CRGBA color;
+
+		style.pushStyle();
+		style.applyStyle(elm.getPseudo(":-webkit-progress-value"));
+		if (style.hasStyle("background-color"))
+			color = style.Current.BackgroundColor;
+		style.popStyle();
+
+		return color;
+	}
+
+	// ****************************************************************************
 	void CGroupHTML::getCellsParameters(const CHtmlElement &elm, bool inherit)
 	{
 		CGroupHTML::CCellParams cellParams;
@@ -5084,7 +5239,7 @@ namespace NLGUI
 				valign = _Style.Current.VerticalAlign;
 			else if (elm.hasNonEmptyAttribute("valign"))
 				valign = toLower(elm.getAttribute("valign"));
-			
+
 			if (valign == "top")
 				cellParams.VAlign = CGroupCell::Top;
 			else if (valign == "middle")
@@ -5092,8 +5247,113 @@ namespace NLGUI
 			else if (valign == "bottom")
 				cellParams.VAlign = CGroupCell::Bottom;
 		}
-		
+
 		_CellParams.push_back (cellParams);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::applyBackground(const CHtmlElement &elm)
+	{
+		bool root = elm.Value == "html" || elm.Value == "body";
+
+		// non-empty image
+		if (_Style.hasStyle("background-image"))
+		{
+			bool repeat = _Style.checkStyle("background-repeat", "repeat");
+			bool scale = _Style.checkStyle("background-size", "100%");
+			std::string image = _Style.getStyle("background-image");
+			if (!image.empty())
+			{
+				if (root)
+				{
+					setBackground (image, scale, repeat);
+				}
+				// TODO: else
+
+				// default background color is transparent, so image does not show
+				if (!_Style.hasStyle("background-color") || _Style.checkStyle("background-color", "transparent"))
+				{
+					_Style.applyStyle("background-color: #fff;");
+				}
+			}
+		}
+
+		if (_Style.hasStyle("background-color"))
+		{
+			CRGBA bgColor = _Style.Current.BackgroundColor;
+			scanHTMLColor(elm.getAttribute("bgcolor").c_str(), bgColor);
+			if (root)
+			{
+				setBackgroundColor(bgColor);
+			}
+			// TODO: else
+		}
+
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::insertFormImageButton(const std::string &name, const std::string &tooltip, const std::string &src, const std::string &over, const std::string &formId, const std::string &action, uint32 minWidth, const std::string &templateName)
+	{
+		_FormSubmit.push_back(SFormSubmitButton(formId, name, "", "image"));
+		// Action handler parameters
+		std::string param = "name=" + getId() + "|button=" + toString(_FormSubmit.size()-1);
+
+		// Add the ctrl button
+		addButton (CCtrlButton::PushButton, name, src, src, over, "html_submit_form", param.c_str(), tooltip.c_str(), _Style.Current);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::insertFormTextButton(const std::string &name, const std::string &tooltip, const std::string &value, const std::string &formId, const std::string &formAction, uint32 minWidth, const std::string &templateName)
+	{
+		_FormSubmit.push_back(SFormSubmitButton(formId, name, value, "submit"));
+		// Action handler parameters
+		string param = "name=" + getId() + "|button=" + toString(_FormSubmit.size()-1);
+
+		// Add the ctrl button
+		if (!_Paragraph)
+		{
+			newParagraph (0);
+			paragraphChange ();
+		}
+
+		string buttonTemplate(!templateName.empty() ? templateName : DefaultButtonGroup);
+		typedef pair<string, string> TTmplParam;
+		vector<TTmplParam> tmplParams;
+		tmplParams.push_back(TTmplParam("id", name));
+		tmplParams.push_back(TTmplParam("onclick", "html_submit_form"));
+		tmplParams.push_back(TTmplParam("onclick_param", param));
+		tmplParams.push_back(TTmplParam("active", "true"));
+		if (minWidth > 0) tmplParams.push_back(TTmplParam("wmin", toString(minWidth)));
+		CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
+		if (buttonGroup)
+		{
+			// Add the ctrl button
+			CCtrlTextButton *ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("button"));
+			if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
+			if (ctrlButton)
+			{
+				ctrlButton->setModulateGlobalColorAll (_Style.Current.GlobalColor);
+
+				// Translate the tooltip
+				if (!tooltip.empty())
+				{
+					if (CI18N::hasTranslation(tooltip))
+					{
+						ctrlButton->setDefaultContextHelp(CI18N::get(tooltip));
+					}
+					else
+					{
+						ctrlButton->setDefaultContextHelp(ucstring(tooltip));
+					}
+				}
+
+				ctrlButton->setText(ucstring::makeFromUtf8(value));
+
+				setTextButtonStyle(ctrlButton, _Style.Current);
+			}
+			getParagraph()->addChild (buttonGroup);
+			paragraphChange ();
+		}
 	}
 
 	// ***************************************************************************
@@ -5165,39 +5425,7 @@ namespace NLGUI
 			_Style.applyStyle("background-color: " + elm.getAttribute("bgcolor"));
 		}
 
-		if (_Style.hasStyle("background-color"))
-		{
-			CRGBA bgColor = _Style.Current.BackgroundColor;
-			scanHTMLColor(elm.getAttribute("bgcolor").c_str(), bgColor);
-			setBackgroundColor(bgColor);
-		}
-
-		if (elm.hasNonEmptyAttribute("style"))
-		{
-			string style = elm.getAttribute("style");
-
-			TStyle styles = parseStyle(style);
-			TStyle::iterator	it;
-
-			it = styles.find("background-repeat");
-			bool repeat = (it != styles.end() && it->second == "1");
-
-			// Webig only
-			it = styles.find("background-scale");
-			bool scale = (it != styles.end() && it->second == "1");
-
-			it = styles.find("background-image");
-			if (it != styles.end())
-			{
-				string image = it->second;
-				string::size_type texExt = toLower(image).find("url(");
-				// Url image
-				if (texExt != string::npos)
-					// Remove url()
-					image = image.substr(4, image.size()-5);
-				setBackground (image, scale, repeat);
-			}
-		}
+		applyBackground(elm);
 
 		renderPseudoElement(":before", elm);
 	}
@@ -5211,6 +5439,55 @@ namespace NLGUI
 		ucstring tmp;
 		tmp.fromUtf8("\xe2\x80\x8b");
 		addString(tmp);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlBUTTON(const CHtmlElement &elm)
+	{
+		std::string name = elm.getAttribute("name");
+		std::string value = elm.getAttribute("value");
+		std::string formId = elm.getAttribute("form");
+		std::string formAction = elm.getAttribute("formaction");
+		std::string tooltip = elm.getAttribute("tooltip");
+		bool disabled = elm.hasAttribute("disabled");
+
+		if (!formAction.empty())
+		{
+			formAction = getAbsoluteUrl(formAction);
+		}
+
+		_FormSubmit.push_back(SFormSubmitButton(formId, name, value, "text", formAction));
+		// Action handler parameters
+		std::string param;
+		if (!disabled)
+		{
+			if (elm.getAttribute("type") == "submit")
+			{
+				param = "ah:html_submit_form&name=" + getId() + "&button=" + toString(_FormSubmit.size()-1);
+			}
+			else
+			{
+				param = "ah:";
+			}
+		}
+
+		_A.push_back(true);
+		_Link.push_back(param);
+		_LinkTitle.push_back(tooltip);
+		_LinkClass.push_back("ryzom-ui-button");
+
+		// TODO: this creates separate button element
+		//renderPseudoElement(":before", elm);
+	}
+	void CGroupHTML::htmlBUTTONend(const CHtmlElement &elm)
+	{
+		// TODO: this creates separate button element
+		//renderPseudoElement(":after", elm);
+
+		popIfNotEmpty(_A);
+		popIfNotEmpty(_Link);
+		popIfNotEmpty(_LinkTitle);
+		popIfNotEmpty(_LinkClass);
 	}
 
 	// ***************************************************************************
@@ -5429,7 +5706,7 @@ namespace NLGUI
 		{
 			newParagraph(LIBeginSpace);
 		}
-		
+
 		renderPseudoElement(":before", elm);
 	}
 
@@ -5466,6 +5743,12 @@ namespace NLGUI
 	{
 		// Build the form
 		CGroupHTML::CForm form;
+		// id check is case sensitive and auto id's are uppercase
+		form.id = toLower(trim(elm.getAttribute("id")));
+		if (form.id.empty())
+		{
+			form.id = toString("FORM%d", _Forms.size());
+		}
 
 		// Get the action name
 		if (elm.hasNonEmptyAttribute("action"))
@@ -5549,7 +5832,7 @@ namespace NLGUI
 			_Style.applyRootStyle(elm.getAttribute("style"));
 			_Style.Current = _Style.Root;
 		}
-		setBackgroundColor(_Style.Current.BackgroundColor);
+		applyBackground(elm);
 	}
 
 	// ***************************************************************************
@@ -5589,26 +5872,23 @@ namespace NLGUI
 
 		// Tooltip
 		// keep "alt" attribute for backward compatibility
-		std::string strtooltip = elm.getAttribute("alt");
+		std::string tooltip = elm.getAttribute("alt");
 		// tooltip
 		if (elm.hasNonEmptyAttribute("title"))
-			strtooltip = elm.getAttribute("title");
-
-		const char *tooltip = NULL;
-		// note: uses pointer to string data
-		if (!strtooltip.empty())
-			tooltip = strtooltip.c_str();
+			tooltip = elm.getAttribute("title");
 
 		// Mouse over image
 		string overSrc = elm.getAttribute("data-over-src");
 
-		if (getA() && getParent () && getParent ()->getParent())
+		// inside a/button with valid url (ie, button is not disabled)
+		string url = getLink();
+		if (getA() && !url.empty() && getParent() && getParent()->getParent())
 		{
-			string params = "name=" + getId() + "|url=" + getLink ();
+			string params = "name=" + getId() + "|url=" + url;
 			addButton(CCtrlButton::PushButton, id, src, src, overSrc, "browse", params.c_str(), tooltip, _Style.Current);
 		}
 		else
-		if (tooltip || !overSrc.empty())
+		if (!tooltip.empty() || !overSrc.empty())
 		{
 			addButton(CCtrlButton::PushButton, id, src, src, overSrc, "", "", tooltip, _Style.Current);
 		}
@@ -5648,7 +5928,8 @@ namespace NLGUI
 			templateName = elm.getAttribute("z_input_tmpl");
 
 		// Widget minimal width
-		string minWidth = elm.getAttribute("z_input_width");
+		uint32 minWidth = 0;
+		fromString(elm.getAttribute("z_input_width"), minWidth);
 
 		// <input type="...">
 		std::string type = trim(elm.getAttribute("type"));
@@ -5657,102 +5938,29 @@ namespace NLGUI
 			// no 'type' attribute, or empty
 			return;
 		}
-	
+
 		// Global color flag
 		if (elm.hasAttribute("global_color"))
 			_Style.Current.GlobalColor = true;
 
 		// Tooltip
-		std::string strtooltip = elm.getAttribute("alt");
-		const char *tooltip = NULL;
-		// note: uses pointer to strtooltip data
-		if (!strtooltip.empty())
-			tooltip = strtooltip.c_str();
+		std::string tooltip = elm.getAttribute("alt");
 
 		if (type == "image")
 		{
-			// The submit button
 			string name = elm.getAttribute("name");
-			string normal = elm.getAttribute("src");
-			string pushed;
-			string over;
+			string src = elm.getAttribute("src");
+			string over = elm.getAttribute("data-over-src");
 
-			// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-			string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=image";
-
-			// Add the ctrl button
-			addButton (CCtrlButton::PushButton, name, normal, pushed.empty()?normal:pushed, over,
-				"html_submit_form", param.c_str(), tooltip, _Style.Current);
+			insertFormImageButton(name, tooltip, src, over, _Forms.back().id, "", minWidth, templateName);
 		}
 		else if (type == "button" || type == "submit")
 		{
 			// The submit button
 			string name = elm.getAttribute("name");
-			string normal = elm.getAttribute("src");
-			string text = elm.getAttribute("value");
-			string pushed;
-			string over;
+			string value = elm.getAttribute("value");
 
-			string buttonTemplate(!templateName.empty() ? templateName : DefaultButtonGroup );
-
-			// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-			string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=submit";
-			if (!text.empty())
-			{
-				// escape AH param separator
-				string tmp = text;
-				while(NLMISC::strFindReplace(tmp, "|", "&#124;"))
-					;
-				param = param + "|submit_button_value=" + tmp;
-			}
-
-			// Add the ctrl button
-			if (!_Paragraph)
-			{
-				newParagraph (0);
-				paragraphChange ();
-			}
-
-			typedef pair<string, string> TTmplParam;
-			vector<TTmplParam> tmplParams;
-			tmplParams.push_back(TTmplParam("id", name));
-			tmplParams.push_back(TTmplParam("onclick", "html_submit_form"));
-			tmplParams.push_back(TTmplParam("onclick_param", param));
-			//tmplParams.push_back(TTmplParam("text", text));
-			tmplParams.push_back(TTmplParam("active", "true"));
-			if (!minWidth.empty())
-				tmplParams.push_back(TTmplParam("wmin", minWidth));
-			CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
-			if (buttonGroup)
-			{
-
-				// Add the ctrl button
-				CCtrlTextButton *ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("button"));
-				if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
-				if (ctrlButton)
-				{
-					ctrlButton->setModulateGlobalColorAll (_Style.Current.GlobalColor);
-
-					// Translate the tooltip
-					if (tooltip)
-					{
-						if (CI18N::hasTranslation(tooltip))
-						{
-							ctrlButton->setDefaultContextHelp(CI18N::get(tooltip));
-						}
-						else
-						{
-							ctrlButton->setDefaultContextHelp(ucstring(tooltip));
-						}
-					}
-
-					ctrlButton->setText(ucstring::makeFromUtf8(text));
-
-					setTextButtonStyle(ctrlButton, _Style.Current);
-				}
-				getParagraph()->addChild (buttonGroup);
-				paragraphChange ();
-			}
+			insertFormTextButton(name, tooltip, value, _Forms.back().id, "", minWidth, templateName);
 		}
 		else if (type == "text")
 		{
@@ -5922,7 +6130,7 @@ namespace NLGUI
 		_ParsingLua = _TrustedDomain; // Only parse lua if TrustedDomain
 		_LuaScript.clear();
 	}
-	
+
 	void CGroupHTML::htmlLUAend(const CHtmlElement &elm)
 	{
 		if (_ParsingLua && _TrustedDomain)
@@ -5969,6 +6177,50 @@ namespace NLGUI
 			}
 
 			_NextRefreshTime += timeSec;
+		}
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlMETER(const CHtmlElement &elm)
+	{
+		HTMLMeterElement meter;
+		meter.readValues(elm);
+
+		std::string id = "meter";
+		if (elm.hasAttribute("id"))
+			id = elm.getAttribute("id");
+
+		// width: 5em, height: 1em
+		uint32 width = _Style.Current.Width > -1 ? _Style.Current.Width : _Style.Current.FontSize * 5;
+		uint32 height = _Style.Current.Height > -1 ? _Style.Current.Height : _Style.Current.FontSize;
+		uint32 border = _Style.Current.BorderWidth > -1 ? _Style.Current.BorderWidth : 0;
+
+		uint barw = (uint) (width * meter.getValueRatio());
+		CRGBA bgColor = meter.getBarColor(elm, _Style);
+		CRGBA valueColor = meter.getValueColor(elm, _Style);
+
+		typedef pair<string, string> TTmplParam;
+		vector<TTmplParam> tmplParams;
+		tmplParams.push_back(TTmplParam("id", id));
+		tmplParams.push_back(TTmplParam("active", "true"));
+		tmplParams.push_back(TTmplParam("w", toString(width)));
+		tmplParams.push_back(TTmplParam("h", toString(height)));
+		tmplParams.push_back(TTmplParam("border_x2", toString(border*2)));
+		tmplParams.push_back(TTmplParam("bgtexture", "blank.tga"));
+		tmplParams.push_back(TTmplParam("bgcolor", bgColor.toString()));
+		tmplParams.push_back(TTmplParam("value_w", toString(barw)));
+		tmplParams.push_back(TTmplParam("value_texture", "blank.tga"));
+		tmplParams.push_back(TTmplParam("value_color", valueColor.toString()));
+
+		CInterfaceGroup *gr = CWidgetManager::getInstance()->getParser()->createGroupInstance("html_meter", getParagraph()->getId(), &tmplParams[0], (uint)tmplParams.size());
+		if (gr)
+		{
+			renderPseudoElement(":before", elm);
+			getParagraph()->addChild(gr);
+			renderPseudoElement(":after", elm);
+
+			// ignore any inner elements
+			_IgnoreChildElements = true;
 		}
 	}
 
@@ -6147,6 +6399,50 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CGroupHTML::htmlPROGRESS(const CHtmlElement &elm)
+	{
+		HTMLProgressElement progress;
+		progress.readValues(elm);
+
+		std::string id = "progress";
+		if (elm.hasAttribute("id"))
+			id = elm.getAttribute("id");
+
+		// width: 10em, height: 1em
+		uint32 width = _Style.Current.Width > -1 ? _Style.Current.Width : _Style.Current.FontSize * 10;
+		uint32 height = _Style.Current.Height > -1 ? _Style.Current.Height : _Style.Current.FontSize;
+		uint32 border = _Style.Current.BorderWidth > -1 ? _Style.Current.BorderWidth : 0;
+
+		uint barw = (uint) (width * progress.getValueRatio());
+		CRGBA bgColor = progress.getBarColor(elm, _Style);
+		CRGBA valueColor = progress.getValueColor(elm, _Style);
+
+		typedef pair<string, string> TTmplParam;
+		vector<TTmplParam> tmplParams;
+		tmplParams.push_back(TTmplParam("id", id));
+		tmplParams.push_back(TTmplParam("active", "true"));
+		tmplParams.push_back(TTmplParam("w", toString(width)));
+		tmplParams.push_back(TTmplParam("h", toString(height)));
+		tmplParams.push_back(TTmplParam("border_x2", toString(border*2)));
+		tmplParams.push_back(TTmplParam("bgtexture", "blank.tga"));
+		tmplParams.push_back(TTmplParam("bgcolor", bgColor.toString()));
+		tmplParams.push_back(TTmplParam("value_w", toString(barw)));
+		tmplParams.push_back(TTmplParam("value_texture", "blank.tga"));
+		tmplParams.push_back(TTmplParam("value_color", valueColor.toString()));
+
+		CInterfaceGroup *gr = CWidgetManager::getInstance()->getParser()->createGroupInstance("html_progress", getParagraph()->getId(), &tmplParams[0], (uint)tmplParams.size());
+		if (gr)
+		{
+			renderPseudoElement(":before", elm);
+			getParagraph()->addChild(gr);
+			renderPseudoElement(":after", elm);
+
+			// ignore any inner elements
+			_IgnoreChildElements = true;
+		}
+	}
+
+	// ***************************************************************************
 	void CGroupHTML::htmlSCRIPT(const CHtmlElement &elm)
 	{
 		_IgnoreText = true;
@@ -6249,7 +6545,7 @@ namespace NLGUI
 		{
 			if (elm.hasNonEmptyAttribute("cellspacing"))
 				fromString(elm.getAttribute("cellspacing"), table->CellSpacing);
-			
+
 			// TODO: cssLength, horiz/vert values
 			if (_Style.hasStyle("border-spacing"))
 				fromString(_Style.getStyle("border-spacing"), table->CellSpacing);
@@ -6356,29 +6652,16 @@ namespace NLGUI
 
 		_Cells.back() = new CGroupCell(CViewBase::TCtorParam());
 
-		if (_Style.checkStyle("background-repeat", "1") || _Style.checkStyle("background-repeat", "repeat"))
+		if (_Style.checkStyle("background-repeat", "repeat"))
 			_Cells.back()->setTextureTile(true);
 
-		if (_Style.checkStyle("background-scale", "1") || _Style.checkStyle("background-size", "cover"))
+		if (_Style.checkStyle("background-size", "100%"))
 			_Cells.back()->setTextureScale(true);
 
 		if (_Style.hasStyle("background-image"))
 		{
 			string image = _Style.getStyle("background-image");
-
-			string::size_type texExt = toLower(image).find("url(");
-			// Url image
-			if (texExt != string::npos)
-			{
-				// Remove url()
-				image = image.substr(4, image.size()-5);
-				addImageDownload(image, _Cells.back());
-			// Image in BNP
-			}
-			else
-			{
-				_Cells.back()->setTexture(image);
-			}
+			addImageDownload(image, _Cells.back());
 		}
 
 		if (elm.hasNonEmptyAttribute("colspan"))
@@ -6399,7 +6682,7 @@ namespace NLGUI
 			getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, _Style.getStyle("width").c_str());
 		else if (elm.hasNonEmptyAttribute("width"))
 			getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, elm.getAttribute("width").c_str());
-		
+
 		if (_Style.hasStyle("height"))
 			getPercentage (_Cells.back()->Height, temp, _Style.getStyle("height").c_str());
 		else if (elm.hasNonEmptyAttribute("height"))

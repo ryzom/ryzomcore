@@ -23,7 +23,6 @@
 #include "nel/gui/group_tree.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/group_table.h"
-#include "nel/gui/libwww_types.h"
 #include "nel/gui/html_element.h"
 #include "nel/gui/css_style.h"
 
@@ -108,7 +107,7 @@ namespace NLGUI
 		void refresh();
 
 		// submit form
-		void submitForm (uint formId, const char *submitButtonType, const char *submitButtonName, const char *submitButtonValue, sint32 x, sint32 y);
+		void submitForm(uint button, sint32 x, sint32 y);
 
 		// Browse error
 		void browseError (const char *msg);
@@ -333,7 +332,7 @@ namespace NLGUI
 
 		// Add a button in the current paragraph. actionHandler, actionHandlerParams and tooltip can be NULL.
 		CCtrlButton *addButton(CCtrlButton::EType type, const std::string &name, const std::string &normalBitmap, const std::string &pushedBitmap,
-			const std::string &overBitmap, const char *actionHandler, const char *actionHandlerParams, const char *tooltip,
+			const std::string &overBitmap, const char *actionHandler, const char *actionHandlerParams, const std::string &tooltip,
 			const CStyleParams &style = CStyleParams());
 
 		// Set the background color
@@ -393,6 +392,7 @@ namespace NLGUI
 		bool			_BrowseNextTime;
 		bool			_PostNextTime;
 		uint			_PostFormId;
+		std::string		_PostFormAction;
 		std::string		_PostFormSubmitType;
 		std::string		_PostFormSubmitButton;
 		std::string		_PostFormSubmitValue;
@@ -415,6 +415,7 @@ namespace NLGUI
 		// True when the <lua> element has been encountered
 		bool			_ParsingLua;
 		bool			_IgnoreText;
+		bool			_IgnoreChildElements;
 		// the script to execute
 		std::string		_LuaScript;
 		bool			_LuaHrefHack;
@@ -472,6 +473,64 @@ namespace NLGUI
 			bool First;
 		};
 		std::vector<HTMLOListElement> _UL;
+
+		class HTMLMeterElement {
+		public:
+			enum EValueRegion {
+				VALUE_OPTIMUM = 0,
+				VALUE_SUB_OPTIMAL,
+				VALUE_EVEN_LESS_GOOD
+			};
+		public:
+			HTMLMeterElement()
+				: value(0.f), min(0.f), max(1.f), low(0.f), high(1.f), optimum(0.5f)
+			{}
+
+			// read attributes from html element
+			void readValues(const CHtmlElement &elm);
+
+			// return value ratio to min-max
+			float getValueRatio() const;
+
+			// return optimum region based current value
+			EValueRegion getValueRegion() const;
+
+			// return meter bar color
+			NLMISC::CRGBA getBarColor(const CHtmlElement &elm, CCssStyle &style) const;
+
+			// return meter value bar color based value and optimum range
+			NLMISC::CRGBA getValueColor(const CHtmlElement &elm, CCssStyle &style) const;
+
+			float value;
+			float min;
+			float max;
+			float low;
+			float high;
+			float optimum;
+		};
+
+		class HTMLProgressElement
+		{
+		public:
+			HTMLProgressElement()
+				: value(0.f), max(1.f)
+			{}
+
+			// read attributes from html element
+			void readValues(const CHtmlElement &elm);
+
+			// return value ratio to min-max
+			float getValueRatio() const;
+
+			// return meter bar color
+			NLMISC::CRGBA getBarColor(const CHtmlElement &elm, CCssStyle &style) const;
+
+			// return meter value bar color based value and optimum range
+			NLMISC::CRGBA getValueColor(const CHtmlElement &elm, CCssStyle &style) const;
+
+			float value;
+			float max;
+		};
 
 		// A mode
 		std::vector<bool>	_A;
@@ -608,6 +667,9 @@ namespace NLGUI
 				sint					 InitialSelection; // initial selection for the combo box
 			};
 
+			// <form> element "id" attribute
+			std::string id;
+
 			// The action the form has to perform
 			std::string Action;
 
@@ -615,6 +677,25 @@ namespace NLGUI
 			std::vector<CEntry>	Entries;
 		};
 		std::vector<CForm>	_Forms;
+
+		// submit buttons added to from
+		struct SFormSubmitButton
+		{
+			SFormSubmitButton(const std::string &form, const std::string &name, const std::string &value, const std::string &type, const std::string &formAction="")
+				: form(form), name(name), value(value), type(type), formAction(formAction)
+			{ }
+
+			std::string form; // form 'id'
+			std::string name; // submit button name
+			std::string value; // submit button value
+			std::string type; // button type, ie 'image'
+
+			std::string formAction; // override form action attribute (url)
+		};
+
+		// submit buttons added to form
+		std::vector<SFormSubmitButton> _FormSubmit;
+
 		std::vector<CInterfaceGroup *>	_Groups;
 
 		// Cells parameters
@@ -824,12 +905,34 @@ namespace NLGUI
 		// :before, :after rendering
 		void renderPseudoElement(const std::string &pseudo, const CHtmlElement &elm);
 
+		// apply background from current style (for html, body)
+		void applyBackground(const CHtmlElement &elm);
+
+		void insertFormImageButton(const std::string &name,
+			const std::string &tooltip,
+			const std::string &src,
+			const std::string &over,
+			const std::string &formId,
+			const std::string &formAction = "",
+			uint32 minWidth = 0,
+			const std::string &templateName = "");
+
+		void insertFormTextButton(const std::string &name,
+			const std::string &tooltip,
+			const std::string &value,
+			const std::string &formId,
+			const std::string &formAction = "",
+			uint32 minWidth = 0,
+			const std::string &templateName = "");
+
 		// HTML elements
 		void htmlA(const CHtmlElement &elm);
 		void htmlAend(const CHtmlElement &elm);
 		void htmlBASE(const CHtmlElement &elm);
 		void htmlBODY(const CHtmlElement &elm);
 		void htmlBR(const CHtmlElement &elm);
+		void htmlBUTTON(const CHtmlElement &elm);
+		void htmlBUTTONend(const CHtmlElement &elm);
 		void htmlDD(const CHtmlElement &elm);
 		void htmlDDend(const CHtmlElement &elm);
 		//void htmlDEL(const CHtmlElement &elm);
@@ -857,6 +960,7 @@ namespace NLGUI
 		void htmlLUA(const CHtmlElement &elm);
 		void htmlLUAend(const CHtmlElement &elm);
 		void htmlMETA(const CHtmlElement &elm);
+		void htmlMETER(const CHtmlElement &elm);
 		void htmlOBJECT(const CHtmlElement &elm);
 		void htmlOBJECTend(const CHtmlElement &elm);
 		void htmlOL(const CHtmlElement &elm);
@@ -867,6 +971,7 @@ namespace NLGUI
 		void htmlPend(const CHtmlElement &elm);
 		void htmlPRE(const CHtmlElement &elm);
 		void htmlPREend(const CHtmlElement &elm);
+		void htmlPROGRESS(const CHtmlElement &elm);
 		void htmlSCRIPT(const CHtmlElement &elm);
 		void htmlSCRIPTend(const CHtmlElement &elm);
 		void htmlSELECT(const CHtmlElement &elm);

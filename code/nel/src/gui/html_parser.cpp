@@ -59,8 +59,6 @@ namespace NLGUI
 	// recursive function to walk html document
 	void CHtmlParser::parseNode(xmlNode *a_node, CHtmlElement &parent, std::string &styleString, std::vector<std::string> &links) const
 	{
-		SGML_dtd *HTML_DTD = HTML_dtd ();
-
 		uint childIndex = 0;
 		uint element_number;
 		xmlNode *node = a_node;
@@ -73,12 +71,8 @@ namespace NLGUI
 			else
 			if (node->type == XML_ELEMENT_NODE)
 			{
-				// find libwww tag
-				for(element_number = 0; element_number<HTML_ELEMENTS; ++element_number)
-				{
-					if (xmlStrncasecmp(node->name, (const xmlChar *)HTML_DTD->tags[element_number].name.c_str(), xmlStrlen(node->name)) == 0)
-						break;
-				}
+				// find html element
+				element_number = htmlElementLookup((const char*)node->name);
 
 				// get pointer to previous sibling
 				CHtmlElement *prevSibling = NULL;
