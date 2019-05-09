@@ -1,4 +1,6 @@
-FILE(GLOB SRC *.cpp *.h ${RZ_SERVER_SRC_DIR}/ai_data_service/pacs_scan.h ${RZ_SERVER_SRC_DIR}/ai_data_service/pacs_scan.cpp)
+FILE(GLOB SRC *.cpp *.h ${RZ_SERVER_SRC_DIR}/ai_data_service/pacs_scan.h ${RZ_SERVER_SRC_DIR}/ai_data_service/pacs_scan.cpp *.rc)
+
+SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(ai_build_wmap ${SRC})
 
