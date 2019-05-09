@@ -976,6 +976,14 @@ bool testMenuOptionForPackAnimal( CEntityCL* selectedAnimalInVision, uint index,
 	if(!node)	return false;
 	ANIMAL_TYPE::EAnimalType		anitype= (ANIMAL_TYPE::EAnimalType)node->getValue32();
 
+	if (anitype != ANIMAL_TYPE::Pet)
+	{
+		if (pEnterBag)
+			pEnterBag->setActive(false);
+		if (pLeaveBag)
+			pLeaveBag->setActive(false);
+	}
+
 	// COMMON PART FOR ALL TYPES OF ANIMAL
 
 	// Is the character mounted on the animal?
