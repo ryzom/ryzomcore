@@ -474,6 +474,8 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getUserRace",  getUserRace);
 	ls.registerFunc("getSheet2idx",  getSheet2idx);
 	ls.registerFunc("getTargetSlot",  getTargetSlot);
+	ls.registerFunc("setTargetAsInterlocutor",  setTargetAsInterlocutor);
+	ls.registerFunc("unsetTargetAsInterlocutor",  unsetTargetAsInterlocutor);
 	ls.registerFunc("getSlotDataSetId",  getSlotDataSetId);
 	ls.registerFunc("addShape",  addShape);
 	ls.registerFunc("moveShape",  moveShape);
@@ -1589,6 +1591,22 @@ int CLuaIHMRyzom::getTargetSlot(CLuaState &ls)
 	uint32 slot = (uint32)getTargetSlotNr();
 	ls.push(slot);
 	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::setTargetAsInterlocutor(CLuaState &ls)
+{
+	uint32 slot = (uint32)getTargetSlotNr();
+	UserEntity->interlocutor(slot);
+	return 0;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::unsetTargetAsInterlocutor(CLuaState &ls)
+{
+	uint32 slot = (uint32)getTargetSlotNr();
+	UserEntity->interlocutor(CLFECOMMON::INVALID_SLOT);
+	return 0;
 }
 
 // ***************************************************************************
