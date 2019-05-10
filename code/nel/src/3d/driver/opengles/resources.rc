@@ -27,11 +27,11 @@ BEGIN
             VALUE "OriginalFilename", "nel_drv_opengles_win_r.dll"
 #endif			
             VALUE "ProductName", "Ryzom Core"
-            VALUE "ProductVersion", NL_VERSION
+            VALUE "ProductVersion", NL_PRODUCT_VERSION
         END
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x409, 1252
+        VALUE "Translation", 0x9, 1200
     END
 END
