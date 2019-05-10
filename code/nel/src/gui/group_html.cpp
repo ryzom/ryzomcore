@@ -5799,10 +5799,9 @@ namespace NLGUI
 	{
 		if (elm.hasNonEmptyAttribute("style"))
 		{
-			_Style.Root = _Style.Current;
-			_Style.applyRootStyle(elm.getAttribute("style"));
-			_Style.Current = _Style.Root;
+			_Style.applyStyle(elm.getAttribute("style"));
 		}
+		_Style.Root = _Style.Current;
 		applyBackground(elm);
 	}
 
