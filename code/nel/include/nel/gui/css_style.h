@@ -57,6 +57,7 @@ namespace NLGUI
 			Underlined=false;
 			StrikeThrough=false;
 			GlobalColor=false;
+			DisplayBlock=false;
 			Width=-1;
 			Height=-1;
 			MaxWidth=-1;
@@ -87,6 +88,7 @@ namespace NLGUI
 		bool GlobalColor;
 		bool Underlined;
 		bool StrikeThrough;
+		bool DisplayBlock;
 		sint32 Width;
 		sint32 Height;
 		sint32 MaxWidth;
@@ -172,6 +174,7 @@ namespace NLGUI
 			styleStackIndex++;
 			_StyleStack.push_back(Current);
 
+			Current.DisplayBlock = false;
 			Current.Width=-1;
 			Current.Height=-1;
 			Current.MaxWidth=-1;

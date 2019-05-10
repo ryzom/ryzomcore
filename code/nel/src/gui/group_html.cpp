@@ -1072,6 +1072,11 @@ namespace NLGUI
 			_AnchorName.push_back(elm.getAttribute("id"));
 		}
 
+		if (_Style.Current.DisplayBlock)
+		{
+			endParagraph();
+		}
+
 		switch(elm.ID)
 		{
 		case HTML_A:        htmlA(elm); break;
@@ -1189,6 +1194,10 @@ namespace NLGUI
 			break;
 		}
 
+		if (_Style.Current.DisplayBlock)
+		{
+			endParagraph();
+		}
 
 		_Style.popStyle();
 	}
@@ -4910,6 +4919,11 @@ namespace NLGUI
 		css += "small { font-size: smaller;}";
 		css += "dt { font-weight: bold; }";
 		css += "hr { color: rgb(120, 120, 120);}";
+		// block level elements
+		css += "address, article, aside, blockquote, details, dialog, dd, div, dl, dt, fieldset, figcaption, figure,";
+		css += "footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, li, main, nav, ol, p, pre, section, table,";
+		css += "ul { display: block; }";
+		css += "table { display: table; }";
 		// td { padding: 1px;} - overwrites cellpadding attribute
 		// table { border-spacing: 2px;} - overwrites cellspacing attribute
 		css += "table { border-collapse: separate;}";
@@ -5433,11 +5447,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlBR(const CHtmlElement &elm)
 	{
-		endParagraph();
-
-		// insert zero-width-space (0x200B) to prevent removal of empty lines
-		ucstring tmp;
-		tmp.fromUtf8("\xe2\x80\x8b");
+		ucstring tmp("\n");
 		addString(tmp);
 	}
 
@@ -5544,8 +5554,6 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlDIV(const CHtmlElement &elm)
 	{
-		_BlockLevelElement.push_back(true);
-
 		_DivName = elm.getAttribute("name");
 
 		string instClass = elm.getAttribute("class");
@@ -5568,8 +5576,6 @@ namespace NLGUI
 				{
 					if ((*it).first == "template")
 						templateName = (*it).second;
-					else if ((*it).first == "display" && (*it).second == "inline-block")
-						_BlockLevelElement.back() = false;
 					else
 						tmplParams.push_back(TTmplParam((*it).first, (*it).second));
 				}
@@ -5602,8 +5608,6 @@ namespace NLGUI
 							inst->setPosRef(Hotspot_TL);
 							inst->setParentPosRef(Hotspot_TL);
 							getDiv()->addGroup(inst);
-
-							_BlockLevelElement.back() = false;
 					}
 					else
 					{
@@ -5615,25 +5619,14 @@ namespace NLGUI
 			}
 		}
 
-		if (isBlockLevelElement())
-		{
-			newParagraph(0);
-		}
-
 		renderPseudoElement(":before", elm);
 	}
 
 	void CGroupHTML::htmlDIVend(const CHtmlElement &elm)
 	{
 		renderPseudoElement(":after", elm);
-
-		if (isBlockLevelElement())
-		{
-			endParagraph();
-		}
 		_DivName.clear();
 		popIfNotEmpty(_Divs);
-		popIfNotEmpty(_BlockLevelElement);
 	}
 
 	// ***************************************************************************
@@ -5641,7 +5634,6 @@ namespace NLGUI
 	{
 		_DL.push_back(HTMLDListElement());
 		_LI = _DL.size() > 1 || !_UL.empty();
-		endParagraph();
 
 		renderPseudoElement(":before", elm);
 	}
@@ -5652,8 +5644,6 @@ namespace NLGUI
 			return;
 
 		renderPseudoElement(":after", elm);
-
-		endParagraph();
 
 		// unclosed DT
 		if (_DL.back().DT)
@@ -5775,7 +5765,6 @@ namespace NLGUI
 	void CGroupHTML::htmlHend(const CHtmlElement &elm)
 	{
 		renderPseudoElement(":after", elm);
-		endParagraph();
 	}
 
 	// ***************************************************************************
@@ -5793,8 +5782,6 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlHR(const CHtmlElement &elm)
 	{
-		endParagraph();
-
 		CInterfaceGroup *sep = CWidgetManager::getInstance()->getParser()->createGroupInstance("html_hr", "", NULL, 0);
 		if (sep)
 		{
@@ -5818,8 +5805,6 @@ namespace NLGUI
 			renderPseudoElement(":before", elm);
 			addHtmlGroup(sep, 0);
 			renderPseudoElement(":after", elm);
-
-			endParagraph();
 		}
 	}
 
@@ -6267,7 +6252,6 @@ namespace NLGUI
 		// if LI is already present
 		_LI = _UL.size() > 1 || _DL.size() > 1;
 		_Indent.push_back(getIndent() + ULIndent);
-		endParagraph();
 
 		renderPseudoElement(":before", elm);
 	}
@@ -6377,7 +6361,6 @@ namespace NLGUI
 	void CGroupHTML::htmlPend(const CHtmlElement &elm)
 	{
 		renderPseudoElement(":after", elm);
-		endParagraph();
 	}
 
 	// ***************************************************************************
@@ -6393,7 +6376,6 @@ namespace NLGUI
 	{
 		renderPseudoElement(":after", elm);
 
-		endParagraph();
 		popIfNotEmpty(_PRE);
 	}
 
@@ -6610,7 +6592,6 @@ namespace NLGUI
 		popIfNotEmpty(_Indent);
 
 		renderPseudoElement(":after", elm);
-		endParagraph();
 	}
 
 	// ***************************************************************************
@@ -6828,7 +6809,6 @@ namespace NLGUI
 		// if LI is already present
 		_LI = _UL.size() > 1 || _DL.size() > 1;
 		_Indent.push_back(getIndent() + ULIndent);
-		endParagraph();
 
 		renderPseudoElement(":before", elm);
 	}
@@ -6840,7 +6820,6 @@ namespace NLGUI
 
 		renderPseudoElement(":after", elm);
 
-		endParagraph();
 		popIfNotEmpty(_UL);
 		popIfNotEmpty(_Indent);
 	}
