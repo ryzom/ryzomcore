@@ -5793,7 +5793,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlHR(const CHtmlElement &elm)
 	{
-		newParagraph(0);
+		endParagraph();
 
 		CInterfaceGroup *sep = CWidgetManager::getInstance()->getParser()->createGroupInstance("html_hr", "", NULL, 0);
 		if (sep)
@@ -5816,7 +5816,7 @@ namespace NLGUI
 			}
 
 			renderPseudoElement(":before", elm);
-			getParagraph()->addChild(sep);
+			addHtmlGroup(sep, 0);
 			renderPseudoElement(":after", elm);
 
 			endParagraph();
@@ -5828,10 +5828,9 @@ namespace NLGUI
 	{
 		if (elm.hasNonEmptyAttribute("style"))
 		{
-			_Style.Root = _Style.Current;
-			_Style.applyRootStyle(elm.getAttribute("style"));
-			_Style.Current = _Style.Root;
+			_Style.applyStyle(elm.getAttribute("style"));
 		}
+		_Style.Root = _Style.Current;
 		applyBackground(elm);
 	}
 

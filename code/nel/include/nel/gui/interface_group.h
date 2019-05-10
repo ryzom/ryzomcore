@@ -211,6 +211,11 @@ namespace NLGUI
 		int luaGetNumGroups(CLuaState &ls);
 		int luaGetGroup(CLuaState &ls);
 
+		// debug functions
+		int luaDumpSize(CLuaState &ls);
+		int luaDumpEltsOrder(CLuaState &ls);
+		int luaDumpGroups(CLuaState &ls);
+
 		void setMaxSizeRef(const std::string &maxSizeRef);
 		std::string getMaxSizeRefAsString() const;
 
@@ -223,6 +228,9 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("delGroup", luaDelGroup);
 			REFLECT_LUA_METHOD("getNumGroups", luaGetNumGroups);
 			REFLECT_LUA_METHOD("getGroup", luaGetGroup);
+			REFLECT_LUA_METHOD("dumpSize", luaDumpSize);
+			REFLECT_LUA_METHOD("dumpEltsOrder", luaDumpEltsOrder);
+			REFLECT_LUA_METHOD("dumpGroups", luaDumpGroups);
 			REFLECT_STRING ("left_click", getLeftClickHandler, setLeftClickHandler);
 			REFLECT_STRING ("right_click", getRightClickHandler, setRightClickHandler);
 			REFLECT_STRING ("left_click_params", getLeftClickHandlerParams, setLeftClickHandlerParams);
@@ -274,8 +282,8 @@ namespace NLGUI
 		sint getInsertionOrder(CViewBase *vb) const;
 
 		// for debug only
-		void dumpGroups();
-		void dumpEltsOrder();
+		void dumpGroups() const;
+		void dumpEltsOrder() const;
 
 		virtual void renderWiredQuads(CInterfaceElement::TRenderWired type, const std::string &uiFilter);
 

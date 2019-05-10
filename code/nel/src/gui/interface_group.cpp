@@ -829,7 +829,7 @@ namespace NLGUI
 
 		const std::map< uint32, SLinkData > &linkMap =
 			CWidgetManager::getInstance()->getParser()->getLinkMap();
-		
+
 		xmlNodePtr node = NULL;
 
 		std::map< uint32, SLinkData >::const_iterator itr;
@@ -847,17 +847,17 @@ namespace NLGUI
 			xmlAddChild( parentNode, node );
 
 			xmlSetProp( node, BAD_CAST "expr", BAD_CAST data.expr.c_str() );
-			
+
 			if( !data.target.empty() )
 				xmlSetProp( node, BAD_CAST "target", BAD_CAST data.target.c_str() );
-			
+
 			if( !data.action.empty() )
 			{
 				xmlSetProp( node, BAD_CAST "action", BAD_CAST data.action.c_str() );
-				
+
 				if( !data.params.empty() )
 					xmlSetProp( node, BAD_CAST "params", BAD_CAST data.params.c_str() );
-				
+
 				if( !data.cond.empty() )
 					xmlSetProp( node, BAD_CAST "cond", BAD_CAST data.cond.c_str() );
 			}
@@ -1792,7 +1792,7 @@ namespace NLGUI
 			CInterfaceGroup *pChild = *itg;
 			if (pChild->getActive())
 			{
-	//		bool bUnder = 
+	//		bool bUnder =
 				pChild->getViewsUnder (x, y, clipX, clipY, clipW, clipH, vVB);
 	//			if (bUnder && !vICL.empty())
 	//				return true;
@@ -1847,7 +1847,7 @@ namespace NLGUI
 			CInterfaceGroup *pChild = *itg;
 			if (pChild->getActive())
 			{
-	//		bool bUnder = 
+	//		bool bUnder =
 				pChild->getCtrlsUnder (x, y, clipX, clipY, clipW, clipH, vICL);
 	//			if (bUnder && !vICL.empty())
 	//				return true;
@@ -1903,7 +1903,7 @@ namespace NLGUI
 			CInterfaceGroup *pChild = *itg;
 			if (pChild->getActive())
 			{
-	//		bool bUnder = 
+	//		bool bUnder =
 				pChild->getGroupsUnder (x, y, clipX, clipY, clipW, clipH, vIGL);
 	//			if (bUnder && !vICL.empty())
 	//				return true;
@@ -2149,7 +2149,34 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CInterfaceGroup::dumpGroups()
+	int CInterfaceGroup::luaDumpSize(CLuaState &ls)
+	{
+		const char *funcName = "dumpSize";
+		CLuaIHM::checkArgCount(ls, funcName, 0);
+		dumpSize();
+		return 0;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	int CInterfaceGroup::luaDumpEltsOrder(CLuaState &ls)
+	{
+		const char *funcName = "dumpEltsOrder";
+		CLuaIHM::checkArgCount(ls, funcName, 0);
+		dumpEltsOrder();
+		return 0;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	int CInterfaceGroup::luaDumpGroups(CLuaState &ls)
+	{
+		const char *funcName = "dumpGroups";
+		CLuaIHM::checkArgCount(ls, funcName, 0);
+		dumpGroups();
+		return 0;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CInterfaceGroup::dumpGroups() const
 	{
 		nlinfo("Num groups = %d", (int) _ChildrenGroups.size());
 		for(uint k = 0; k < _ChildrenGroups.size(); ++k)
@@ -2166,21 +2193,18 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CInterfaceGroup::dumpEltsOrder()
+	void CInterfaceGroup::dumpEltsOrder() const
 	{
-		nlinfo("Num elements = %d", (int) _EltOrder.size());
+		nlinfo("Num elements = %d, num groups = %d", (int) _EltOrder.size(), _ChildrenGroups.size());
 		for(uint k = 0; k < _EltOrder.size(); ++k)
 		{
-			std::string typeName = "???";
-			if (_ChildrenGroups[k])
-			{
-				NLGUI::CViewBase *view = _EltOrder[k];
-				const type_info &ti = typeid(*view);
-				typeName = ti.name();
-			}
 			CInterfaceElement *el = _EltOrder[k];
 			if (el)
 			{
+				std::string typeName;
+				NLGUI::CViewBase *view = _EltOrder[k];
+				const type_info &ti = typeid(*view);
+				typeName = ti.name();
 				nlinfo("Element %d, name = %s, type=%s, x=%d, y=%d, parent_name=%s parentposname=%s xreal=%d, yreal=%d, wreal=%d, hreal=%d",
 					   k, el->getId().c_str(), typeName.c_str(), el->getX(), el->getY(), el->getParent() ? el->getParent()->getId().c_str() : "no parent",
 					   el->getParentPos() ? el->getParentPos()->getId().c_str() : "parent",
@@ -2595,7 +2619,7 @@ namespace NLGUI
 			e->setSizeRef("");
 
 			e->setParent(p);
-			
+
 			e->setParentPos(p);
 			e->setParentSize(p);
 			e->alignTo(p);

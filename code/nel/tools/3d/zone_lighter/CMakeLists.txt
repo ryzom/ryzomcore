@@ -1,4 +1,6 @@
-FILE(GLOB SRC *.cpp *.h ../zone_lib/*.cpp ../zone_lib/*.h)
+FILE(GLOB SRC *.cpp *.h ../zone_lib/*.cpp ../zone_lib/*.h *.rc)
+
+SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(zone_lighter ${SRC})
 

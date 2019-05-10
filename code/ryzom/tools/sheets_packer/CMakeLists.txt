@@ -1,4 +1,6 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc)
+
+SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(sheets_packer	${SRC} 
 				${CMAKE_SOURCE_DIR}/ryzom/client/src/continent_manager_build.cpp

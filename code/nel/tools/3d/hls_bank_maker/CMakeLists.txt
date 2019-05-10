@@ -1,5 +1,7 @@
-FILE(GLOB SRC *.cpp *.h ../panoply_maker/hls_bank_texture_info.cpp ../panoply_maker/hls_bank_texture_info.h)
-		
+FILE(GLOB SRC *.cpp *.h ../panoply_maker/hls_bank_texture_info.cpp ../panoply_maker/hls_bank_texture_info.h *.rc)
+
+SOURCE_GROUP("" FILES ${SRC})
+
 ADD_EXECUTABLE(hls_bank_maker ${SRC})
 
 TARGET_LINK_LIBRARIES(hls_bank_maker s3tc_compressor nelmisc nel3d)
