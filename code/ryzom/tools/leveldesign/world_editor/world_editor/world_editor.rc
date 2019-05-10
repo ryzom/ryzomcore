@@ -13,11 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 #pragma code_page(1252)
 #endif //_WIN32
 
@@ -427,12 +427,12 @@ BEGIN
     GROUPBOX        "",IDC_STATIC,180,22,59,18,WS_GROUP
     GROUPBOX        "",IDC_STATIC,180,41,59,18,WS_GROUP
     GROUPBOX        "",IDC_STATIC,180,60,59,18,WS_GROUP
-    CONTROL         "0°",IDC_ROT0,"Button",BS_AUTORADIOBUTTON | WS_GROUP,7,
+    CONTROL         "0Â°",IDC_ROT0,"Button",BS_AUTORADIOBUTTON | WS_GROUP,7,
                     83,23,10
-    CONTROL         "90°",IDC_ROT90,"Button",BS_AUTORADIOBUTTON,31,83,27,10
-    CONTROL         "180°",IDC_ROT180,"Button",BS_AUTORADIOBUTTON,59,83,31,
+    CONTROL         "90Â°",IDC_ROT90,"Button",BS_AUTORADIOBUTTON,31,83,27,10
+    CONTROL         "180Â°",IDC_ROT180,"Button",BS_AUTORADIOBUTTON,59,83,31,
                     10
-    CONTROL         "270°",IDC_ROT270,"Button",BS_AUTORADIOBUTTON,91,83,31,
+    CONTROL         "270Â°",IDC_ROT270,"Button",BS_AUTORADIOBUTTON,91,83,31,
                     10
     CONTROL         "Ran",IDC_ROTRANDOM,"Button",BS_AUTORADIOBUTTON,123,83,
                     29,10
@@ -1139,19 +1139,6 @@ BEGIN
     ID_REPAIR_SELECTED      "Repair selected elements by adding missing fields"
 END
 
-#endif    // English (U.S.) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// French (France) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
-#ifdef _WIN32
-LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
-#pragma code_page(1252)
-#endif //_WIN32
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Menu
@@ -1239,7 +1226,7 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // French (France) resources
+#endif    // English resources
 /////////////////////////////////////////////////////////////////////////////
 
 
