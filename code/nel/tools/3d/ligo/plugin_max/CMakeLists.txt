@@ -1,8 +1,8 @@
-FILE(GLOB SRC *.cpp *.h ../../ig_lighter_lib/*.cpp ../../ig_lighter_lib/*.h *.rc *.rc2)
+FILE(GLOB SRC *.cpp *.h ../../ig_lighter_lib/*.cpp ../../ig_lighter_lib/*.h *.rc *.rc2 *.def)
 
 SOURCE_GROUP("" FILES ${SRC})
 
-ADD_LIBRARY(ligoscape_utility SHARED ${SRC} ligoscape_utility.def)
+ADD_LIBRARY(ligoscape_utility SHARED ${SRC})
 
 INCLUDE_DIRECTORIES(${MAXSDK_INCLUDE_DIR})
 

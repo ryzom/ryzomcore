@@ -37,10 +37,10 @@ BEGIN
         BEGIN
             VALUE "Comments", "NeL is provided under the AGPLv3 with a linking exception for the 3ds Max SDK"
             VALUE "CompanyName", AUTHOR
-            VALUE "FileDescription", "NeL Ligoscape utility"
+            VALUE "FileDescription", "NeL Patch Converter: PatchMesh to RykolPatchMesh"
             VALUE "FileVersion", NL_VERSION
             VALUE "LegalCopyright", COPYRIGHT ". Copyright (C) 2000 Nevrax Ltd."
-            VALUE "OriginalFilename", "nelligoscapeutility" NL_FILEEXT ".dlx"
+            VALUE "OriginalFilename", "nelconvertpatch" NL_FILEEXT ".dlm"
             VALUE "ProductName", "NeL Plugins for 3ds Max " STRINGIFY(MAX_PRODUCT_YEAR_NUMBER)
             VALUE "ProductVersion", NL_PRODUCT_VERSION
         END

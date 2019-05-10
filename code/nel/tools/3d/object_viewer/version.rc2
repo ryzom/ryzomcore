@@ -8,9 +8,6 @@ LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 
 #include <windows.h>
 #include "config.h"
-#include "maxversion.h"
-#define STRINGIFY_(x) #x
-#define STRINGIFY(x) STRINGIFY_(x)
 
 #ifdef _DEBUG
 #define NL_FILEEXT "_d"
@@ -35,13 +32,12 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "NeL is provided under the AGPLv3 with a linking exception for the 3ds Max SDK"
             VALUE "CompanyName", AUTHOR
-            VALUE "FileDescription", "NeL Ligoscape utility"
+            VALUE "FileDescription", "NeL Object Viewer dynamic library"
             VALUE "FileVersion", NL_VERSION
-            VALUE "LegalCopyright", COPYRIGHT ". Copyright (C) 2000 Nevrax Ltd."
-            VALUE "OriginalFilename", "nelligoscapeutility" NL_FILEEXT ".dlx"
-            VALUE "ProductName", "NeL Plugins for 3ds Max " STRINGIFY(MAX_PRODUCT_YEAR_NUMBER)
+            VALUE "LegalCopyright", COPYRIGHT
+            VALUE "OriginalFilename", "object_viewer" NL_FILEEXT ".dll"
+            VALUE "ProductName", "NeL Tools"
             VALUE "ProductVersion", NL_PRODUCT_VERSION
         END
     END
