@@ -81,25 +81,33 @@ IF(EXISTS "${ROOT_DIR}/.git/")
       RESULT_VARIABLE git_exit_code
       OUTPUT_VARIABLE REVISION)
     IF(NOT ${git_exit_code} EQUAL 0)
-      message(WARNING "git rev-list failed, unable to include version.")
+      MESSAGE(WARNING "git rev-list failed, unable to include version.")
     ENDIF()
     EXECUTE_PROCESS(COMMAND ${GIT_EXECUTABLE} rev-parse --short=8 HEAD
       WORKING_DIRECTORY ${ROOT_DIR}
       RESULT_VARIABLE git_exit_code
       OUTPUT_VARIABLE CHANGESET)
     IF(NOT ${git_exit_code} EQUAL 0)
-      message(WARNING "git rev-parse failed, unable to include version.")
+      MESSAGE(WARNING "git rev-parse failed, unable to include version.")
     ENDIF()
     EXECUTE_PROCESS(COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
       WORKING_DIRECTORY ${ROOT_DIR}
       RESULT_VARIABLE git_exit_code
       OUTPUT_VARIABLE BRANCH)
     IF(NOT ${git_exit_code} EQUAL 0)
-      message(WARNING "git rev-parse failed, unable to include git branch.")
+      MESSAGE(WARNING "git rev-parse failed, unable to include git branch.")
+    ENDIF()
+    EXECUTE_PROCESS(COMMAND ${GIT_EXECUTABLE} describe
+      WORKING_DIRECTORY ${ROOT_DIR}
+      RESULT_VARIABLE git_exit_code
+      OUTPUT_VARIABLE DESCRIBE)
+    IF(NOT ${git_exit_code} EQUAL 0)
+      MESSAGE(WARNING "git rev-parse failed, unable to include git branch.")
     ENDIF()
     STRING(STRIP ${REVISION} REVISION)
     STRING(STRIP ${CHANGESET} CHANGESET)
     STRING(STRIP ${BRANCH} BRANCH)
+    STRING(STRIP ${DESCRIBE} DESCRIBE)
   ENDIF()
 ENDIF()
 
