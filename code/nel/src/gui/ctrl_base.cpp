@@ -259,7 +259,7 @@ namespace NLGUI
 	{
 		if( name == "tooltip" )
 		{
-			_ContextHelp = value;
+			_ContextHelp = ucstring::makeFromUtf8(value);
 			return;
 		}
 		else
