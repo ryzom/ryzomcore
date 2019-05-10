@@ -1,12 +1,12 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc *.rc2)
 
 ADD_DEFINITIONS(${MFC_DEFINITIONS})
 SET(CMAKE_MFC_FLAG 2)
-ADD_EXECUTABLE(georges_exe WIN32 ${SRC} georges_exe.rc)
+ADD_EXECUTABLE(georges WIN32 ${SRC})
 
-TARGET_LINK_LIBRARIES(georges_exe nelmisc nelgeorges georges_dll)
+TARGET_LINK_LIBRARIES(georges nelmisc nelgeorges georges_dll)
 
-NL_DEFAULT_PROPS(georges_exe "Ryzom, Tools, Georges: Georges Exe")
-NL_ADD_RUNTIME_FLAGS(georges_exe)
+NL_DEFAULT_PROPS(georges "Ryzom, Tools, Georges: Georges Exe")
+NL_ADD_RUNTIME_FLAGS(georges)
 
-INSTALL(TARGETS georges_exe RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)
+INSTALL(TARGETS georges RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)
