@@ -569,14 +569,6 @@ namespace NLGUI
 			return _LinkClass.back().c_str();
 		}
 
-		std::vector<bool>				_BlockLevelElement;
-		inline bool isBlockLevelElement() const
-		{
-			if (_BlockLevelElement.empty())
-				return false;
-			return _BlockLevelElement.back();
-		}
-
 		// Divs (i.e. interface group)
 		std::vector<class CInterfaceGroup*>	_Divs;
 		inline CInterfaceGroup *getDiv() const

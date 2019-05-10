@@ -456,6 +456,14 @@ namespace NLGUI
 				if (pos != style.StyleRules.end())
 					style.StyleRules.erase(pos);
 			}
+			else
+			if (it->first == "display")
+			{
+				if (it->second == "inherit")
+					style.DisplayBlock = current.DisplayBlock;
+				else
+					style.DisplayBlock = (it->second == "block" || it->second == "table");
+			}
 		}
 	}
 
