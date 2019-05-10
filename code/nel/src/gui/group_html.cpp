@@ -5418,11 +5418,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlBR(const CHtmlElement &elm)
 	{
-		endParagraph();
-
-		// insert zero-width-space (0x200B) to prevent removal of empty lines
-		ucstring tmp;
-		tmp.fromUtf8("\xe2\x80\x8b");
+		ucstring tmp("\n");
 		addString(tmp);
 	}
 
