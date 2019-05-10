@@ -1,4 +1,4 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc)
 
 SOURCE_GROUP("" FILES ${SRC})
 

@@ -997,11 +997,10 @@ void CDBCtrlSheet::updateCoords ()
 {
 	if (getActive())
 	{
-		if(!_SetupInit)
-			setupInit();
-
 		if (_Type != CCtrlSheetInfo::SheetType_Macro)
 		{
+			if (!_SetupInit) setupInit();
+
 			if (_LastSheetId != _SheetId.getSInt32())
 			{
 				updateActualType();
