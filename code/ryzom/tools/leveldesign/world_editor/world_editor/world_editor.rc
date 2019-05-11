@@ -54,6 +54,8 @@ BEGIN
     "#include ""afxprint.rc""       // printing/print preview resources\r\n"
     "#include ""afxdb.rc""          // Database resources\r\n"
     "#endif\r\n"
+    "\r\n"
+    "#include ""version.rc2""\r\n"
     "\0"
 END
 
@@ -366,20 +368,6 @@ END
 //
 // Dialog
 //
-
-IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 235, 73
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About NeL World Editor"
-FONT 8, "MS Sans Serif"
-BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
-    LTEXT           "NeL World Editor Version 0.47",IDC_TITLE_VERSION,40,10,
-                    96,8,SS_NOPREFIX
-    LTEXT           "Copyright Nevrax (C) 2005",IDC_STATIC,40,25,119,8
-    DEFPUSHBUTTON   "OK",IDOK,178,8,50,14,WS_GROUP
-    LTEXT           "Allocated Video Mem :",IDC_STATIC,15,43,73,16
-    LTEXT           "Static",IDC_STATIC_VIDEO_MEM,97,43,87,16
-END
 
 IDD_CREATE_ELEMENT DIALOG DISCARDABLE  0, 0, 247, 47
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
@@ -801,52 +789,6 @@ BEGIN
 END
 
 
-#ifndef _MAC
-/////////////////////////////////////////////////////////////////////////////
-//
-// Version
-//
-
-VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
- PRODUCTVERSION 1,0,0,1
- FILEFLAGSMASK 0x3fL
-#ifdef _DEBUG
- FILEFLAGS 0x1L
-#else
- FILEFLAGS 0x0L
-#endif
- FILEOS 0x4L
- FILETYPE 0x1L
- FILESUBTYPE 0x0L
-BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "040904b0"
-        BEGIN
-            VALUE "Comments", "\0"
-            VALUE "CompanyName", "Nevrax\0"
-            VALUE "FileDescription", "NeL World Editor\0"
-            VALUE "FileVersion", "0, 0, 0, 1\0"
-            VALUE "InternalName", "world_editor\0"
-            VALUE "LegalCopyright", "Nevrax Copyright (C) 2002\0"
-            VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "world_editor.exe\0"
-            VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "NeL World Editor\0"
-            VALUE "ProductVersion", "0, 0, 0, 1\0"
-            VALUE "SpecialBuild", "\0"
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x409, 1200
-    END
-END
-
-#endif    // !_MAC
-
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // DESIGNINFO
@@ -1250,6 +1192,8 @@ LANGUAGE 9, 1
 #include "afxprint.rc"       // printing/print preview resources
 #include "afxdb.rc"          // Database resources
 #endif
+
+#include "version.rc2"
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED

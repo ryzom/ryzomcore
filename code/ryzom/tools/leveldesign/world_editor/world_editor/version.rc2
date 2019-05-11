@@ -33,10 +33,10 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", AUTHOR
-            VALUE "FileDescription", "Ryzom Mission Compiler Frontend"
+            VALUE "FileDescription", "Ryzom World Editor"
             VALUE "FileVersion", NL_VERSION
             VALUE "LegalCopyright", COPYRIGHT
-            VALUE "OriginalFilename", "ryzom_mission_compiler_fe" NL_FILEEXT ".exe"
+            VALUE "OriginalFilename", "world_editor" NL_FILEEXT ".exe"
             VALUE "ProductName", "Ryzom Tools"
             VALUE "ProductVersion", NL_PRODUCT_VERSION
         END
@@ -47,15 +47,17 @@ BEGIN
     END
 END
 
-IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 235, 55
+IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 235, 73
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About Ryzom Mission Compiler Frontend"
+CAPTION "About World Editor"
 FONT 8, "MS Sans Serif"
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
-    LTEXT           NL_VERSION,IDC_STATIC,40,10,119,8,SS_NOPREFIX
+    LTEXT           NL_VERSION,IDC_TITLE_VERSION,40,10,96,8,SS_NOPREFIX
     LTEXT           COPYRIGHT,IDC_STATIC,40,25,119,8
-    DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
+    DEFPUSHBUTTON   "OK",IDOK,178,8,50,14,WS_GROUP
+    LTEXT           "Allocated Video Mem :",IDC_STATIC,15,43,73,16
+    LTEXT           "Static",IDC_STATIC_VIDEO_MEM,97,43,87,16
 END
 
 #endif /* #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU) */

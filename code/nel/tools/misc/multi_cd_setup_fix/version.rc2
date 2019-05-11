@@ -33,11 +33,11 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", AUTHOR
-            VALUE "FileDescription", "Ryzom Mission Compiler Frontend"
+            VALUE "FileDescription", "NeL Multi CD Setup Fix"
             VALUE "FileVersion", NL_VERSION
             VALUE "LegalCopyright", COPYRIGHT
-            VALUE "OriginalFilename", "ryzom_mission_compiler_fe" NL_FILEEXT ".exe"
-            VALUE "ProductName", "Ryzom Tools"
+            VALUE "OriginalFilename", "multi_cd_setup_fix" NL_FILEEXT ".exe"
+            VALUE "ProductName", "NeL Tools"
             VALUE "ProductVersion", NL_PRODUCT_VERSION
         END
     END
@@ -45,17 +45,6 @@ BEGIN
     BEGIN
         VALUE "Translation", 0x9, 1200
     END
-END
-
-IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 235, 55
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About Ryzom Mission Compiler Frontend"
-FONT 8, "MS Sans Serif"
-BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
-    LTEXT           NL_VERSION,IDC_STATIC,40,10,119,8,SS_NOPREFIX
-    LTEXT           COPYRIGHT,IDC_STATIC,40,25,119,8
-    DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
 END
 
 #endif /* #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU) */

@@ -12,7 +12,6 @@
 #define IDR_MENU1                       131
 #define IDD_DIALOG_ADD_PATH             132
 #define IDD_DIALOG_MODE                 133
-#define IDS_VERSIONTEXT                 140
 #define IDC_LIST_SRC                    1000
 #define IDC_LIST_DST                    1001
 #define IDC_ADD                         1002
