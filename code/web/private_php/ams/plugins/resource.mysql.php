@@ -12,7 +12,7 @@
  *   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
  *   `source` text,
  *   PRIMARY KEY (`name`)
- * ) ENGINE=InnoDB DEFAULT CHARSET=utf8;</pre>
+ * ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;</pre>
  *
  * Demo data:
  * <pre>INSERT INTO `templates` (`name`, `modified`, `source`) VALUES ('test.tpl', "2010-12-25 22:00:00", '{$x="hello world"}{$x}');</pre>

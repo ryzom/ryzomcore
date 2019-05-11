@@ -92,17 +92,17 @@ function api_key_management_hook_activate()
 
                         CREATE TABLE IF NOT EXISTS `ams_api_keys` (
                           `SNo` int(10) NOT NULL AUTO_INCREMENT,
-                          `User` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
-                          `FrName` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
-                          `UserType` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
-                          `UserCharacter` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+                          `User` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                          `FrName` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                          `UserType` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                          `UserCharacter` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                           `ExpiryDate` date DEFAULT NULL,
-                          `AccessToken` text COLLATE utf8_unicode_ci DEFAULT NULL,
+                          `AccessToken` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                           `AddedOn` datetime DEFAULT NULL,
-                          `Items` text COLLATE utf8_unicode_ci,
+                          `Items` text COLLATE utf8mb4_unicode_ci,
                           PRIMARY KEY (`SNo`),
                           KEY `User` (`User`)
-                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=1 ;
 
                         --
                         -- Constraints for table `ams_api_keys`

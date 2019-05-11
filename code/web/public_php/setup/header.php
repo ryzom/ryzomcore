@@ -62,7 +62,7 @@ function validate_writable($continue, $path) {
 function create_use_database($continue_r, $con, $database) {
 	$continue = $continue_r;
 	if ($continue) {
-		$sql = "CREATE DATABASE `" . mysqli_real_escape_string($con, $database) . "` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;";
+		$sql = "CREATE DATABASE `" . mysqli_real_escape_string($con, $database) . "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;";
 		if (mysqli_query($con, $sql)) {
 			printalert("success", "Database <em>" . $database . "</em> created");
 		} else {
