@@ -1,4 +1,6 @@
-FILE(GLOB SRC *.cpp *.h *.def)
+FILE(GLOB SRC *.cpp *.h *.def *.rc *.rc2)
+
+SOURCE_GROUP("" FILES ${SRC})
 
 ADD_LIBRARY(nel_3dsmax_shared SHARED ${SRC})
 
@@ -11,7 +13,7 @@ TARGET_LINK_LIBRARIES(nel_3dsmax_shared
 							${MAXSDK_LIBRARIES} 
 							Version.lib)
 							
-NL_DEFAULT_PROPS(nel_3dsmax_shared "MAX Plugin: NeL 3DSMAX Shared")
+NL_DEFAULT_PROPS(nel_3dsmax_shared "MAX Plugin: NeL 3ds Max Shared")
 NL_ADD_RUNTIME_FLAGS(nel_3dsmax_shared)
 NL_ADD_LIB_SUFFIX(nel_3dsmax_shared)
 #SET_TARGET_PROPERTIES(nel_export PROPERTIES SUFFIX ".dlx")

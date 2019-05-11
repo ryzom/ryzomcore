@@ -27,9 +27,12 @@
 
 #cmakedefine NL_VERSION "${NL_VERSION}"
 #cmakedefine NL_VERSION_RC ${NL_VERSION_RC}
+#cmakedefine NL_PRODUCT_VERSION "${NL_PRODUCT_VERSION}"
 
 #cmakedefine RYZOM_VERSION "${RYZOM_VERSION}"
 #cmakedefine RYZOM_VERSION_RC ${RYZOM_VERSION_RC}
+#cmakedefine RYZOM_PRODUCT_VERSION "${RYZOM_PRODUCT_VERSION}"
+
 #cmakedefine AUTHOR "${AUTHOR}"
 #cmakedefine YEAR "${YEAR}"
 #cmakedefine COPYRIGHT "${COPYRIGHT}"

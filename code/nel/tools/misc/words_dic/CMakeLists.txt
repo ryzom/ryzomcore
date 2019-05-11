@@ -1,4 +1,6 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc *.rc2)
+
+SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(words_dic WIN32 ${SRC} words_dic.rc)
 

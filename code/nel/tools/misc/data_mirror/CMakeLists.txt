@@ -1,6 +1,8 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc *.rc2)
 
-ADD_EXECUTABLE(data_mirror WIN32 ${SRC} data_mirror.rc)
+SOURCE_GROUP("" FILES ${SRC})
+
+ADD_EXECUTABLE(data_mirror WIN32 ${SRC})
 
 TARGET_LINK_LIBRARIES(data_mirror nelmisc)
 NL_DEFAULT_PROPS(data_mirror "NeL, Tools, Misc: data_mirror")

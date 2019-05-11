@@ -13,11 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
 #pragma code_page(1252)
 #endif //_WIN32
 
@@ -91,48 +91,11 @@ END
 
 3 TEXTINCLUDE 
 BEGIN
-    "\r\n"
+    "#include ""version.rc2""\r\n"
     "\0"
 END
 
 #endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Version
-//
-
-VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,6,0,0
- PRODUCTVERSION 0,6,0,0
- FILEFLAGSMASK 0x3fL
-#ifdef _DEBUG
- FILEFLAGS 0x1L
-#else
- FILEFLAGS 0x0L
-#endif
- FILEOS 0x40004L
- FILETYPE 0x2L
- FILESUBTYPE 0x0L
-BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "040904b0"
-        BEGIN
-            VALUE "FileVersion", "0.6.0.0"
-            VALUE "InternalName", "tile_edit_exe"
-            VALUE "OriginalFilename", "tile_edit.exe"
-            VALUE "ProductName", "NeL Tilebank Editor"
-            VALUE "ProductVersion", "0.6.0.0"
-			VALUE "Comments", "http://www.opennel.org/"
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x409, 1200
-    END
-END
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -155,19 +118,6 @@ BEGIN
     IDS_PARAMS              "Parameters"
     IDS_SPIN                "Spin"
 END
-
-#endif    // English (U.S.) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// French (France) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
-#ifdef _WIN32
-LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
-#pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -412,7 +362,7 @@ IDB_BITMAP2             BITMAP                  "rot0.bmp"
 IDB_BITMAP3             BITMAP                  "rot1.bmp"
 IDB_BITMAP4             BITMAP                  "rot2.bmp"
 IDB_BITMAP5             BITMAP                  "rot3.bmp"
-#endif    // French (France) resources
+#endif    // English resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -422,7 +372,7 @@ IDB_BITMAP5             BITMAP                  "rot3.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
+#include "version.rc2"
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
