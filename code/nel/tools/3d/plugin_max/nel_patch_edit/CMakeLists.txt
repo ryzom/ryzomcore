@@ -1,6 +1,8 @@
-FILE(GLOB SRC *.cpp *.h *.def)
+FILE(GLOB SRC *.cpp *.h *.def *.rc *.rc2)
 
-ADD_LIBRARY(nel_patch_edit SHARED ${SRC} mods.rc)
+SOURCE_GROUP("" FILES ${SRC})
+
+ADD_LIBRARY(nel_patch_edit SHARED ${SRC})
 
 INCLUDE_DIRECTORIES(${MAXSDK_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nel_patch_edit 

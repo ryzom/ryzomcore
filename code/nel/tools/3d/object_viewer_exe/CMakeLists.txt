@@ -1,9 +1,11 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc *.rc2)
+
+SOURCE_GROUP("" FILES ${SRC})
 
 ENABLE_LANGUAGE(RC)
 ADD_DEFINITIONS(${MFC_DEFINITIONS})
 SET(CMAKE_MFC_FLAG 2)
-ADD_EXECUTABLE(object_viewer WIN32 ${SRC} object_viewer_exe.rc)
+ADD_EXECUTABLE(object_viewer WIN32 ${SRC})
 
 TARGET_LINK_LIBRARIES(	object_viewer 
 						nelmisc 
