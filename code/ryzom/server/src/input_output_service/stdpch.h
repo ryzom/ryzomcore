@@ -74,7 +74,6 @@
 #include "game_share/mirror_prop_value.h"
 #include "game_share/mode_and_behaviour.h"
 #include "game_share/msg_client_server.h"
-#include "game_share/news_types.h"
 #include "game_share/people.h"
 #include "game_share/player_visual_properties.h"
 #include "game_share/power_types.h"
