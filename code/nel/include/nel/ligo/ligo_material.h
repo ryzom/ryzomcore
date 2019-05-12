@@ -36,7 +36,7 @@ class CLigoConfig;
  * \author Nevrax France
  * \date 2001
  */
-class CMaterial
+class NLLIGO_API CMaterial
 {
 public:
 

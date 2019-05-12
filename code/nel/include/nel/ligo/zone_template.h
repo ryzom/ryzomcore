@@ -37,7 +37,7 @@ class CLigoError;
  * \author Nevrax France
  * \date 2001
  */
-class CZoneTemplate
+class NLLIGO_API CZoneTemplate
 {
 public:
 

@@ -36,7 +36,7 @@ class CPrimitive;
  * \author Nevrax France
  * \date 2001
  */
-class CLigoConfig
+class NLLIGO_API CLigoConfig
 {
 public:
 

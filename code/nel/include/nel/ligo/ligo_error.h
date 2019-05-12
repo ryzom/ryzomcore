@@ -31,7 +31,7 @@ namespace NLLIGO
  * \author Nevrax France
  * \date 2001
  */
-class CLigoError
+class NLLIGO_API CLigoError
 {
 public:
 	enum TError

@@ -361,10 +361,10 @@ void filterPrimitiveChilds(IPrimitive *parent, Pred &predicate, TPrimitiveSet &r
  *	return a unique node because there is no name
  *	uniqueness constraint in the primitive system.
  */
-std::string buildPrimPath(const IPrimitive *prim);
+NLLIGO_API std::string buildPrimPath(const IPrimitive *prim);
 
 /** Return a set of primitive that match a given path*/
-void selectPrimByPath(IPrimitive *rootNode, const std::string &path, TPrimitiveSet &result);
+NLLIGO_API void selectPrimByPath(IPrimitive *rootNode, const std::string &path, TPrimitiveSet &result);
 
 } // namespace NLLIGO
 

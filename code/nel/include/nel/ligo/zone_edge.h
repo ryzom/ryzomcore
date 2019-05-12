@@ -43,7 +43,7 @@ class CLigoConfig;
  * \author Nevrax France
  * \date 2001
  */
-class CZoneEdge
+class NLLIGO_API CZoneEdge
 {
 public:
 

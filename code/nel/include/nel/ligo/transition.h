@@ -38,7 +38,7 @@ class CMaterial;
  * \author Nevrax France
  * \date 2001
  */
-class CTransition
+class NLLIGO_API CTransition
 {
 public:
 

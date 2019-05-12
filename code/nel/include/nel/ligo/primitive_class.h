@@ -39,7 +39,7 @@ class CLigoConfig;
  * \author Nevrax France
  * \date 2002
  */
-class CPrimitiveClass
+class NLLIGO_API CPrimitiveClass
 {
 public:
 
@@ -127,7 +127,7 @@ public:
 	};
 
 	// Parameter description
-	class CParameter : public CInitParameters
+	class NLLIGO_API CParameter : public CInitParameters
 	{
 	public:
 		CParameter () {}

@@ -45,7 +45,7 @@ namespace NLLIGO
 
 // ***************************************************************************
 
-class CZoneBankElement
+class NLLIGO_API CZoneBankElement
 {
 
 	// Category stuff
@@ -87,7 +87,7 @@ public:
 
 // ***************************************************************************
 
-class CZoneBank
+class NLLIGO_API CZoneBank
 {
 
 	std::map<std::string,CZoneBankElement>	_ElementsMap;

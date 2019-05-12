@@ -38,7 +38,7 @@ class IPrimitive;
  * \author Nevrax France
  * \date 2001
  */
-class CPrimitiveConfigurations
+class NLLIGO_API CPrimitiveConfigurations
 {
 public:
 

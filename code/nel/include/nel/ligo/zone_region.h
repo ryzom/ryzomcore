@@ -33,7 +33,7 @@ namespace NLLIGO
 
 // ***************************************************************************
 
-struct SPiece
+struct NLLIGO_API SPiece
 {
 	sint32				w, h;			// Max 255x255
 	std::vector<uint8>	Tab;
@@ -43,7 +43,7 @@ struct SPiece
 
 // ***************************************************************************
 
-class CZoneRegion
+class NLLIGO_API CZoneRegion
 {
 
 public:

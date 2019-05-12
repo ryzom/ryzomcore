@@ -79,7 +79,7 @@ public:
  * This class is a property class for ligo primitive.
  * This is a simple string
  */
-class CPropertyString : public IProperty
+class NLLIGO_API CPropertyString : public IProperty
 {
 public:
 	CPropertyString () {}
@@ -106,7 +106,7 @@ public:
  * This class is a property class for ligo primitive.
  * This is a string array
  */
-class CPropertyStringArray : public IProperty
+class NLLIGO_API CPropertyStringArray : public IProperty
 {
 public:
 	CPropertyStringArray () {}
@@ -132,7 +132,7 @@ public:
  * This class is a property class for ligo primitive.
  * This is a string array
  */
-class CPropertyColor : public IProperty
+class NLLIGO_API CPropertyColor : public IProperty
 {
 public:
 	NLMISC::CRGBA		Color;
@@ -154,7 +154,7 @@ public:
 
 // ***************************************************************************
 
-class CPrimVector : public NLMISC::CVector
+class NLLIGO_API CPrimVector : public NLMISC::CVector
 {
 public:
 	CPrimVector ()
@@ -184,7 +184,7 @@ public:
  * Provide access to common properties.
  * Provide access to the primitive hierachy
  */
-class IPrimitive : public NLMISC::IStreamable
+class NLLIGO_API IPrimitive : public NLMISC::IStreamable
 {
 	friend class CPrimitives;
 public:
@@ -417,7 +417,7 @@ private:
 // ***************************************************************************
 
 // Simple primitive node
-class CPrimNode : public IPrimitive
+class NLLIGO_API CPrimNode : public IPrimitive
 {
 public:
 	// \name From IClassable
@@ -442,7 +442,7 @@ protected:
 
 // ***************************************************************************
 
-class CPrimPoint : public IPrimitive
+class NLLIGO_API CPrimPoint : public IPrimitive
 {
 
 public:
@@ -484,7 +484,7 @@ protected:
 
 
 // ***************************************************************************
-class CPrimPath : public IPrimitive
+class NLLIGO_API CPrimPath : public IPrimitive
 {
 
 public:
@@ -520,7 +520,7 @@ protected:
 
 // ***************************************************************************
 
-class CPrimZone : public IPrimitive
+class NLLIGO_API CPrimZone : public IPrimitive
 {
 
 public:
@@ -583,7 +583,7 @@ protected:
  *	Usage of this primitive imply the setting of the appropriate 'ligo context'
  *	before reading or copy/pasting alias.
 */
-class CPrimAlias : public IPrimitive
+class NLLIGO_API CPrimAlias : public IPrimitive
 {
 	friend class CPrimitives;
 
@@ -646,7 +646,7 @@ public:
 /*
 This class is deprecated.
 */
-class CPrimRegion
+class NLLIGO_API CPrimRegion
 {
 
 public:
@@ -670,7 +670,7 @@ public:
 /**
   * This class is a ligo primitives set
   */
-class CPrimitives
+class NLLIGO_API CPrimitives
 {
 public:
 
@@ -752,7 +752,7 @@ private:
 /** Singleton to manage special loading feature related to
  *	unique alias assignment
  */
-class CPrimitiveContext
+class NLLIGO_API CPrimitiveContext
 {
 	static CPrimitiveContext	*_Instance;
 
