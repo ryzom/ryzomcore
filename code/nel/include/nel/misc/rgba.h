@@ -386,7 +386,7 @@ public:
  * \author Nevrax France
  * \date 2000
  */
-class CBGRA
+class NLMISC_API CBGRA
 {
 public:
 
@@ -495,7 +495,7 @@ inline CRGBA blend(CRGBA c0, CRGBA c1, U blendFactor)
  * \author Nevrax France
  * \date 2000
  */
-class CRGBAF
+class NLMISC_API CRGBAF
 {
 public:
 	/// Default constructor. do nothing

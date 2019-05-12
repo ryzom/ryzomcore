@@ -84,7 +84,7 @@ enum TThreadPriority
  * \author Nevrax France
  * \date 2000
  */
-class IThread
+class NLMISC_API IThread
 {
 public:
 

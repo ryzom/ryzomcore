@@ -72,7 +72,7 @@ protected:
  * \author Nevrax France
  * \date 2002
  */
-class CLightMemDisplayer : public CMemDisplayer
+class NLMISC_API CLightMemDisplayer : public CMemDisplayer
 {
 public:
 	/// Constructor

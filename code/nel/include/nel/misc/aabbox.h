@@ -151,7 +151,7 @@ public:
  * \author Nevrax France
  * \date 2000
  */
-class	CAABBoxExt : private CAABBox
+class NLMISC_API CAABBoxExt : private CAABBox
 {
 protected:
 	float			RadiusMin, RadiusMax;

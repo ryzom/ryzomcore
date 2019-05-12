@@ -227,7 +227,7 @@ struct TCommandHandlerClassInfo
  * \author Nevrax France
  * \date 2005
  */
-class ICommandsHandler
+class NLMISC_API ICommandsHandler
 {
 	/// Store the class name after handler registration
 	const std::string		*_ClassName;
@@ -556,7 +556,7 @@ struct TCommandHandler : public TCommandHandlerInfo
  * \author Nevrax France
  * \date 2005
  */
-class CCommandRegistry
+class NLMISC_API CCommandRegistry
 {
 	// this class is a safe singleton (dll friendly)
 	NLMISC_SAFE_SINGLETON_DECL(CCommandRegistry);

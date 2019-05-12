@@ -120,7 +120,7 @@ public:
 	 * \author Nevrax France
 	 * \date 2000
 	 */
-	struct CVar
+	struct NLMISC_API CVar
 	{
 	public:
 

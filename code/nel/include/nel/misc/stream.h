@@ -74,9 +74,9 @@ struct EStream : public Exception
 
 	EStream( const std::string& str ) : Exception( str ) {}
 
-	EStream( const IStream &f );
+	NLMISC_API EStream(const IStream &f);
 
-	EStream( const IStream &f, const std::string& str );
+	NLMISC_API EStream(const IStream &f, const std::string &str);
 
 	virtual ~EStream() throw() {}
 

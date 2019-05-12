@@ -116,7 +116,7 @@ public:
 /**
   * A 2d convex polygon
   */
-class CPolygon2D
+class NLMISC_API CPolygon2D
 {
 public:
 	typedef std::vector<CVector2f> TVec2fVect;
@@ -223,8 +223,8 @@ private:
 };
 
 // comparison of 2D polygon
-bool operator == (const CPolygon2D &lhs, const CPolygon2D &rhs);
-bool operator < (const CPolygon2D &lhs, const CPolygon2D &rhs);
+NLMISC_API bool operator==(const CPolygon2D &lhs, const CPolygon2D &rhs);
+NLMISC_API bool operator<(const CPolygon2D &lhs, const CPolygon2D &rhs);
 
 } // NLMISC
 

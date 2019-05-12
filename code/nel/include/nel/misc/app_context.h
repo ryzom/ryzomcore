@@ -104,7 +104,7 @@ namespace NLMISC
 	 *	\author Boris 'SoniX' Boucher
 	 *  \date 2005
 	 */
-	class CApplicationContext : public INelContext
+    class NLMISC_API CApplicationContext : public INelContext
 	{
 	public:
 		CApplicationContext();
@@ -160,7 +160,7 @@ namespace NLMISC
 	 *	\author Boris 'SoniX' Boucher
 	 *  \date 2005
 	 */
-	class CLibraryContext : public INelContext
+    class NLMISC_API CLibraryContext : public INelContext
 	{
 	public:
 		CLibraryContext (INelContext &applicationContext);

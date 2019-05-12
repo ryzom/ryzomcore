@@ -77,7 +77,7 @@ private:
  * \author Nevrax France
  * \date 2000
  */
-class CEventListenerAsync: public IEventListener
+class NLMISC_API CEventListenerAsync : public IEventListener
 {
 public:
 

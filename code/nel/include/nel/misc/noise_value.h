@@ -22,13 +22,8 @@
 #include "stream.h"
 #include "rgba.h"
 
-
 namespace NLMISC
 {
-
-
-
-
 
 // ***************************************************************************
 /**
@@ -77,7 +72,7 @@ private:
  * \author Nevrax France
  * \date 2001
  */
-class	CNoiseColorGradient
+class NLMISC_API CNoiseColorGradient
 {
 public:
 	/// Abs and Rand should be 0 and 1 here. If not, some colors may not be generated...
@@ -96,9 +91,7 @@ public:
 };
 
 
-
 } // NL3D
-
 
 #endif // NL_NOISE_VALUE_H
 

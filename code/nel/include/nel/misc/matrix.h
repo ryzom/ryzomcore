@@ -356,7 +356,7 @@ public:
 
 	// Friend.
 	/// Plane (line vector) multiplication.
-	friend CPlane		operator*(const CPlane &p, const CMatrix &m);
+	NLMISC_API friend CPlane operator*(const CPlane &p, const CMatrix &m);
 
 
 private:

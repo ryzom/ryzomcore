@@ -488,7 +488,7 @@ void	CQuatT<T>::makeClosest(const CQuatT<T> &o)
 class	CQuat : public CQuatT<float>
 {
 public:
-	static const CQuat		Identity;
+	NLMISC_API static const CQuat Identity;
 
 	/// \name Object
 	// @{
@@ -515,7 +515,7 @@ public:
 class	CQuatD : public CQuatT<double>
 {
 public:
-	static const CQuatD		Identity;
+	NLMISC_API static const CQuatD Identity;
 
 	/// \name Object
 	// @{
