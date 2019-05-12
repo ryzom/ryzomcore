@@ -282,9 +282,11 @@ template <class T> T trimQuotes (const T &str)
 	typename T::size_type size = str.size();
 	if (size == 0)
 		return str;
-	if (str[0] != str[size-1] && (str[0] != '"' || str[0] != '\''))
+	if (str[0] != str[size-1])
 		return str;
-	return str.substr(1, size - 1);
+	if (str[0] != '"' && str[0] != '\'')
+		return str;
+	return str.substr(1, size - 2);
 }
 
 //////////////////////////////////////////////////////////////////////////

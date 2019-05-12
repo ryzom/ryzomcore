@@ -71,9 +71,17 @@ namespace NLGUI
 		}
 	}
 
-	void CCssSelector::addAttribute(const std::string &key, const std::string &val, char op)
+	void CCssSelector::addAttribute(const std::string &key, const std::string &val, char op, bool cs)
 	{
-		Attr.push_back(SAttribute(key, val, op));
+		if (cs)
+		{
+			// case sensitive match
+			Attr.push_back(SAttribute(key, val, op, cs));
+		}
+		else
+		{
+			Attr.push_back(SAttribute(key, toLower(val), op, cs));
+		}
 	}
 
 	void CCssSelector::addPseudoClass(const std::string &key)
@@ -135,6 +143,12 @@ namespace NLGUI
 			if (!elm.hasAttribute(Attr[i].key)) return false;
 
 			std::string value = elm.getAttribute(Attr[i].key);
+			// case-insensitive compare, Attr.value is already lowercased
+			if (!Attr[i].caseSensitive)
+			{
+				value = toLower(value);
+			}
+
 			switch(Attr[i].op)
 			{
 				case '=':
