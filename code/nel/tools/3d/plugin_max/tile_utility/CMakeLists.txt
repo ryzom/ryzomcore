@@ -1,6 +1,8 @@
-FILE(GLOB SRC *.cpp *.h *.def)
+FILE(GLOB SRC *.cpp *.h *.def *.rc *.rc2)
 
-ADD_LIBRARY(tile_utility SHARED ${SRC} tile_utility.rc)
+SOURCE_GROUP("" FILES ${SRC})
+
+ADD_LIBRARY(tile_utility SHARED ${SRC})
 
 INCLUDE_DIRECTORIES(${MAXSDK_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(tile_utility 

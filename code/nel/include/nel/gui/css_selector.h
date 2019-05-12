@@ -43,8 +43,9 @@ namespace NLGUI
 			std::string key;
 			std::string value;
 			char op; // =, ~, |, ^, $, *
-			SAttribute(const std::string &k, const std::string &v, char o)
-				:key(k),value(v),op(o)
+			bool caseSensitive;
+			SAttribute(const std::string &k, const std::string &v, char o, bool cs)
+				:key(k),value(v),op(o), caseSensitive(cs)
 			{}
 		};
 
@@ -69,7 +70,8 @@ namespace NLGUI
 
 		// add attribute to selector
 		// ' ' op means 'key exists, ignore value'
-		void addAttribute(const std::string &key, const std::string &val = "", char op = ' ');
+		// cs case-sensitive true|false
+		void addAttribute(const std::string &key, const std::string &val = "", char op = ' ', bool cs = true);
 
 		// add pseudo class to selector, eg 'first-child'
 		void addPseudoClass(const std::string &key);

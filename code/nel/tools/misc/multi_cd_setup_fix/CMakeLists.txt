@@ -1,6 +1,8 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc *.rc2)
 
-ADD_EXECUTABLE(multi_cd_setup_fix WIN32 ${SRC} multi_cd_setup_fix.rc)
+SOURCE_GROUP("" FILES ${SRC})
+
+ADD_EXECUTABLE(multi_cd_setup_fix WIN32 ${SRC})
 
 #TARGET_LINK_LIBRARIES(multi_cd_setup_fix ${PLATFORM_LINKFLAGS})
 NL_DEFAULT_PROPS(multi_cd_setup_fix "NeL, Tools, Misc: multi_cd_setup_fix")
