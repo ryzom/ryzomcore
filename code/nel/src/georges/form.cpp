@@ -64,12 +64,6 @@ void warning (bool exception, const char *format, ... )
 // UForm
 // ***************************************************************************
 
-UForm::~UForm ()
-{
-}
-
-// ***************************************************************************
-
 UFormElm& CForm::getRootNode ()
 {
 	return Elements;

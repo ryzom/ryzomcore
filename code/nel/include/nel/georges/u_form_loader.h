@@ -58,10 +58,10 @@ public:
 	virtual UType *loadFormType (const std::string &filename) = 0;
 
 	/// Create a form loader
-	static UFormLoader *createLoader ();
+	NLGEORGES_API static UFormLoader *createLoader();
 
 	/// Create a form loader
-	static void releaseLoader (UFormLoader *loader);
+	NLGEORGES_API static void releaseLoader(UFormLoader *loader);
 };
 
 

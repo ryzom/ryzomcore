@@ -38,7 +38,7 @@ class UForm : public NLMISC::CRefCount
 {
 public:
 
-	virtual ~UForm ();
+	virtual ~UForm() {}
 
 	/**
 	  * Access form nodes

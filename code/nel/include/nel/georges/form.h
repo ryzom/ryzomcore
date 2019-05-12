@@ -22,7 +22,7 @@
 #include "form_elm.h"
 #include "header.h"
 
-extern bool convertFormFile (const std::string &oldFileName, const std::string &newFileName);
+NLGEORGES_API extern bool convertFormFile(const std::string &oldFileName, const std::string &newFileName);
 
 namespace NLGEORGES
 {
