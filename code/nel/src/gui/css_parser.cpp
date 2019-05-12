@@ -463,7 +463,7 @@ namespace NLGUI
 						{
 							if (sel[pos] == '\'' || sel[pos] == '"')
 							{
-								// value is quoted
+								// skip over quoted value
 								start = pos;
 								pos++;
 								while(pos < sel.size() && sel[pos] != sel[start])
@@ -476,9 +476,6 @@ namespace NLGUI
 								}
 
 								if (pos == sel.size()) break;
-
-								value = sel.substr(start + 1, pos - start - 1);
-								break;
 							}
 							else if (sel[pos] == '\\')
 							{
@@ -486,7 +483,6 @@ namespace NLGUI
 							}
 							else if (!quote && sel[pos] == ']')
 							{
-								// unquoted value
 								value = sel.substr(start, pos - start);
 								break;
 							}
@@ -494,17 +490,20 @@ namespace NLGUI
 							pos++;
 						} // while 'value'
 
-						// TODO: scan for sel[pos] == ']'
-						if (pos == sel.size()) break;
-						// whitespace between quote and ], ie '[ attr $= "val" ]'
-						if (sel[pos] != ']')
-						{
-							while(pos < sel.size() && sel[pos] != ']')
-								pos++;
-						}
 						if (pos == sel.size()) break;
 
-						current.addAttribute(key.toUtf8(), value.toUtf8(), (char)op);
+						bool cs = true;
+						// [value="attr" i]
+						if (value.size() > 2 && value[value.size()-2] == ' ')
+						{
+							ucchar lastChar = value[value.size()-1];
+							if (lastChar == 'i' || lastChar == 'I' || lastChar == 's' || lastChar == 'S')
+							{
+								value = value.substr(0, value.size()-2);
+								cs = !((lastChar == 'i' || lastChar == 'I'));
+							}
+						}
+						current.addAttribute(key.toUtf8(), trimQuotes(value).toUtf8(), (char)op, cs);
 					} // op error
 				} // no value
 
