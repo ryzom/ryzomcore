@@ -22,17 +22,12 @@
 using namespace std;
 // using namespace NLMISC;
 
+// leave not static else this workaround don't work
+void dummyToAvoidStupidCompilerWarning_effect_cpp()
+{
+}
+
 namespace NLSOUND {
-
-IReverbEffect::IReverbEffect()
-{
-	
-}
-
-IReverbEffect::~IReverbEffect()
-{
-	
-}
 
 } /* namespace NLSOUND */
 

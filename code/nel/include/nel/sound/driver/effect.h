@@ -165,8 +165,8 @@ public:
 		/* This struct can *float* on water! */
 	};
 	
-	IReverbEffect();
-	virtual ~IReverbEffect();
+	IReverbEffect() {}
+	virtual ~IReverbEffect() {}
 	
 	/// Set the environment (you have full control now, have fun); size: [1.0, 100.0] in meters, default: 7.5 m; influences environment parameters, 7.5 is no change
 	virtual void setEnvironment(const CEnvironment &environment = CEnvironment(), float roomSize = 7.5f) = 0;

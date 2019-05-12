@@ -83,7 +83,7 @@ uint32 interfaceVersionXAudio2()
 __declspec(dllexport) uint32 NLSOUND_interfaceVersion()
 #endif
 {
-	return ISoundDriver::InterfaceVersion;
+	return NLSOUND_INTERFACE_VERSION;
 }
 
 // ******************************************************************

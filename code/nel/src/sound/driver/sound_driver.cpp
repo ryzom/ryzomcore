@@ -47,13 +47,7 @@
 
 using namespace NLMISC;
 
-namespace NLSOUND
-{
-
-/// Interface version, increase when any part of sound_lowlevel is changed.
-/// Put your name in comment to make sure you don't commit with
-/// the same interface version number as someone else.
-const uint32 ISoundDriver::InterfaceVersion = 0x16; // Kaetemi
+namespace NLSOUND {
 
 #ifdef NL_STATIC
 
@@ -103,8 +97,13 @@ const char *ISoundDriver::getDriverName(TDriver driverType)
 /*
  * The static method which builds the sound driver instance
  */
-ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TDriver driverType)
+ISoundDriver *ISoundDriver::createDriver(int interfaceVersion, IStringMapperProvider *stringMapper, TDriver driverType)
 {
+	if (interfaceVersion < NLSOUND_INTERFACE_VERSION)
+		throw ESoundDriverUnknownVersion("nlsnd_lowlevel");
+	else if (interfaceVersion > NLSOUND_INTERFACE_VERSION)
+		throw ESoundDriverOldVersion("nlsnd_lowlevel");
+
 #ifdef NL_STATIC
 	
 	nlinfo("Creating statically linked sound driver %s", getDriverName(driverType));
@@ -245,9 +244,9 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 	versionDriver = (ISDRV_VERSION_PROC) driverLib.getSymbolAddress(IDRV_VERSION_PROC_NAME);
 	if (versionDriver != NULL)
 	{
-		if (versionDriver()<ISoundDriver::InterfaceVersion)
+		if (versionDriver() < NLSOUND_INTERFACE_VERSION)
 			throw ESoundDriverOldVersion(dllName);
-		else if (versionDriver()>ISoundDriver::InterfaceVersion)
+		else if (versionDriver() > NLSOUND_INTERFACE_VERSION)
 			throw ESoundDriverUnknownVersion(dllName);
 	}
 

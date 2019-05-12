@@ -481,9 +481,9 @@ public:
 protected:
 	
 	// common method used only with OptionManualRolloff. return the volume in 1/100th DB  ( = mB)modified
-	static sint32 computeManualRollOff(sint32 volumeMB, sint32 mbMin, sint32 mbMax, double alpha, float sqrdist, float distMin, float distMax);
+	NLSOUND_LOWLEVEL_API static sint32 computeManualRollOff(sint32 volumeMB, sint32 mbMin, sint32 mbMax, double alpha, float sqrdist, float distMin, float distMax);
 	// common method used only with OptionManualRolloff. return the rolloff in amplitude ratio (gain)
-	static float computeManualRolloff(double alpha, float sqrdist, float distMin, float distMax);
+	NLSOUND_LOWLEVEL_API static float computeManualRolloff(double alpha, float sqrdist, float distMin, float distMax);
 };
 
 

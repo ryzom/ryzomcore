@@ -25,8 +25,8 @@
 #include "effect.h"
 
 /// This namespace contains the sound classes
-namespace NLSOUND
-{
+namespace NLSOUND {
+
 	class IBuffer;
 	class IListener;
 	class ISource;
@@ -37,6 +37,12 @@ namespace NLSOUND
 #if !defined( EAX_AVAILABLE )
 #	define EAX_AVAILABLE 0
 #endif
+
+/// Version of the driver interface. To increment when the interface change.
+/// Interface version, increase when any part of sound_lowlevel is changed.
+/// Put your name in comment to make sure you don't commit with
+/// the same interface version number as someone else.
+#define NLSOUND_INTERFACE_VERSION 0x17 // Kaetemi
 
 /*
  * Deprecated sound sample format.
@@ -119,16 +125,14 @@ public:
 		virtual const std::string &unmap(const NLMISC::TStringId &stringId) = 0;
 	};
 
-	/// Version of the driver interface. To increment when the interface change.
-	static const uint32 InterfaceVersion;
-
 	/// Return driver name from type.
-	static const char *getDriverName(TDriver driverType);
+	NLSOUND_LOWLEVEL_API static const char *getDriverName(TDriver driverType);
 	/** The static method which builds the sound driver instance
 	 * In case of failure, can throw one of these ESoundDriver exception objects:
 	 * ESoundDriverNotFound, ESoundDriverCorrupted, ESoundDriverOldVersion, ESoundDriverUnknownVersion
 	*/
-	static ISoundDriver *createDriver(IStringMapperProvider *stringMapper, TDriver driverType = DriverAuto);
+	NLSOUND_LOWLEVEL_API static ISoundDriver *createDriver(int interfaceVersion, IStringMapperProvider *stringMapper, TDriver driverType = DriverAuto);
+	inline static ISoundDriver *createDriver(IStringMapperProvider *stringMapper, TDriver driverType = DriverAuto) { return createDriver(NLSOUND_INTERFACE_VERSION, stringMapper, driverType); }
 
 	/// Constructor
 	ISoundDriver() { }

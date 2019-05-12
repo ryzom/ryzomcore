@@ -122,7 +122,7 @@ uint32 interfaceVersionOpenAl()
 __declspec(dllexport) uint32 NLSOUND_interfaceVersion()
 #endif
 {
-	return ISoundDriver::InterfaceVersion;
+	return NLSOUND_INTERFACE_VERSION;
 }
 
 // ******************************************************************
@@ -172,7 +172,7 @@ ISoundDriver* NLSOUND_createISoundDriverInstance(ISoundDriver::IStringMapperProv
 
 uint32 NLSOUND_interfaceVersion ()
 {
-	return ISoundDriver::InterfaceVersion;
+	return NLSOUND_INTERFACE_VERSION;
 }
 
 #ifndef NL_STATIC

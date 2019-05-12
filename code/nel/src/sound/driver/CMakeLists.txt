@@ -1,7 +1,7 @@
 FILE(GLOB SRC *.cpp *.h)
 FILE(GLOB HEADERS ../../../include/nel/sound/driver/*.h)
 
-NL_TARGET_LIB(nelsnd_lowlevel ${HEADERS} ${SRC})
+NL_TARGET_LIB2(nelsnd_lowlevel ${HEADERS} ${SRC})
 
 TARGET_LINK_LIBRARIES(nelsnd_lowlevel nelmisc)
 NL_DEFAULT_PROPS(nelsnd_lowlevel "NeL, Library: Sound Lowlevel")
@@ -9,6 +9,10 @@ NL_ADD_RUNTIME_FLAGS(nelsnd_lowlevel)
 NL_ADD_STATIC_SND_DRIVERS(nelsnd_lowlevel)
 
 NL_ADD_LIB_SUFFIX(nelsnd_lowlevel)
+
+IF(WIN32 AND NOT WITH_STATIC2)
+  ADD_DEFINITIONS(-DNLSOUND_LOWLEVEL_DLLEXP)
+ENDIF()
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(nelsnd_lowlevel ${CMAKE_CURRENT_SOURCE_DIR}/stdsound_lowlevel.h ${CMAKE_CURRENT_SOURCE_DIR}/stdsound_lowlevel.cpp)

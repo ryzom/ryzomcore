@@ -544,14 +544,21 @@ typedef	uint16	ucchar;
 #define NL_DECL_DLLIMP
 #endif
 
+// TODO: Move this within libraries?
 #ifdef NL_DLLEXP
 #ifdef NLMISC_DLLEXP
 #define NLMISC_API NL_DECL_DLLEXP
 #else
 #define NLMISC_API NL_DECL_DLLIMP
 #endif
+#ifdef NLSOUND_LOWLEVEL_DLLEXP
+#define NLSOUND_LOWLEVEL_API NL_DECL_DLLEXP
+#else
+#define NLSOUND_LOWLEVEL_API NL_DECL_DLLIMP
+#endif
 #else
 #define NLMISC_API
+#define NLSOUND_LOWLEVEL_API
 #endif
 
 // To define a 64bits constant; ie: UINT64_CONSTANT(0x123456781234)
