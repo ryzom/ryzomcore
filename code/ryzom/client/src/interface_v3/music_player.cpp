@@ -23,6 +23,7 @@
 #include "../input.h"
 #include "../sound_manager.h"
 #include "interface_manager.h"
+#include "../client_cfg.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -42,8 +43,6 @@ extern UDriver	*Driver;
 // ui state
 #define MP3_SAVE_SHUFFLE "UI:SAVE:MP3_SHUFFLE"
 #define MP3_SAVE_REPEAT "UI:SAVE:MP3_REPEAT"
-
-static const std::string MediaPlayerDirectory("music/");
 
 CMusicPlayer MusicPlayer;
 
@@ -396,7 +395,7 @@ public:
 
 			// Recursive scan for files from media directory
 			vector<string> filesToProcess;
-			string newPath = CPath::standardizePath(MediaPlayerDirectory);
+			string newPath = CPath::standardizePath(ClientCfg.MediaPlayerDirectory);
 			CPath::getPathContent (newPath, true, false, true, filesToProcess);
 
 			uint i;

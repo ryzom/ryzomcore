@@ -17,7 +17,7 @@
 
 #include "stdsound.h"
 
-#if (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
+#if !defined(NL_OS_WINDOWS) || (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
 
 #include <nel/sound/audio_decoder_mp3.h>
 
