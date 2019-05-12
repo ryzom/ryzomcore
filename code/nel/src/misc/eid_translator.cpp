@@ -285,7 +285,7 @@ void CEntityIdTranslator::registerEntity (const CEntityId &eid, const ucstring &
 		return;
 	}
 
-	nlinfo ("EIT: Register EId %s EntityName '%s' UId %d UserName '%s'", reid.toString().c_str(), entityName.toString().c_str(), uid, userName.c_str());
+	//nlinfo ("EIT: Register EId %s EntityName '%s' UId %d UserName '%s'", reid.toString().c_str(), entityName.toString().c_str(), uid, userName.c_str());
 	RegisteredEntities.insert (make_pair(reid, CEntityIdTranslator::CEntity(entityName, uid, userName, entitySlot, shardId)));
 	NameIndex.insert(make_pair(toLower(entityName), reid));
 }
