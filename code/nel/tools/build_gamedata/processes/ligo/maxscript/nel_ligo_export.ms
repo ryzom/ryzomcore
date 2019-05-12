@@ -16,6 +16,7 @@ TransitionNumBis		= #( 5,			4,			2,				3,				7,			6,			0,				1,				8)
 NEL3D_APPDATA_IGNAME = 1423062564			-- string : name of the Instance Group
 
 tagThisFile = true
+removeRunningTag = true
 
 -- Unhide layers
 fn unhidelayers = 
@@ -599,12 +600,17 @@ try
 					if tagFile == undefined then
 					(
 						nlerror ("WARNING can't create tag file "+tag)
+						removeRunningTag = false
 					)
 					else
 					(
 						print "toto" to: tagFile
 						close tagFile
 					)
+				)
+				else
+				(
+					removeRunningTag = false
 				)
 				
 				resetMAXFile #noprompt
@@ -832,12 +838,17 @@ try
 						if tagFile == undefined then
 						(
 							nlerror ("WARNING can't create tag file "+tag)
+							removeRunningTag = false
 						)
 						else
 						(
 							print "toto" to: tagFile
 							close tagFile
 						)
+					)
+					else
+					(
+						removeRunningTag = false
 					)
 				)
 				
@@ -956,12 +967,17 @@ try
 					if tagFile == undefined then
 					(
 						nlerror ("WARNING can't create tag file "+tag)
+						removeRunningTag = false
 					)
 					else
 					(
 						print "toto" to: tagFile
 						close tagFile
 					)
+				)
+				else
+				(
+					removeRunningTag = false
 				)
 				
 				resetMAXFile #noprompt
@@ -978,13 +994,38 @@ try
 catch 
 (
 	-- Error
-	nlerror ("ERROR fatal error exporting ligo zone in folder"+ligo_root_path)
+	nlerror("ERROR fatal error exporting ligo zone in folder"+ligo_root_path)
+	nlerror("FAIL Fatal error occurred")
+	NelForceQuitRightNow()
+	removeRunningTag = false
 	tagThisFile = false
 )
 
+try
+(
+	if (removeRunningTag) then
+	(
+		resetMAXFile #noPrompt
+	)
+)
+catch 
+(
+	nlerror("FAIL Last reset fails")
+	removeRunningTag = false
+)
 
+if (removeRunningTag) then
+(
+	nlerror("SUCCESS All .max files have been successfully exported")
+	deleteFile("%TagDirectory%/max_running.tag")
+)
+else
+(
+	nlerror("FAIL One or more issues occurred")
+	NelForceQuitRightNow()
+)
 
-resetMAXFile #noprompt
+nlerror("BYE")
 quitMAX #noPrompt
 quitMAX () #noPrompt
 

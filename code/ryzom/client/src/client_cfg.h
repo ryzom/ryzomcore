@@ -366,6 +366,10 @@ struct CClientConfig
 	/// The max number of track we want to use.
 	uint			MaxTrack;
 
+	// MP3 Player
+	string			MediaPlayerDirectory;
+	bool			MediaPlayerAutoPlay;
+
 	/// Pre Data Path.
 	std::vector<string>			PreDataPath;
 	/// Data Path.

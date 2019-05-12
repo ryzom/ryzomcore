@@ -18,7 +18,7 @@
 #define NLSOUND_AUDIO_DECODER_MP3_H
 #include <nel/misc/types_nl.h>
 
-#if (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
+#if !defined(NL_OS_WINDOWS) || (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
 
 #include <nel/sound/audio_decoder.h>
 
