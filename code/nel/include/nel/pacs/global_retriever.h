@@ -52,7 +52,7 @@ namespace NLPACS
  * \author Nevrax France
  * \date 2001
  */
-class CGlobalRetriever : public UGlobalRetriever
+class NLPACS_API CGlobalRetriever : public UGlobalRetriever
 {
 public:
 

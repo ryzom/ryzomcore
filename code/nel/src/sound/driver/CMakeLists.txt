@@ -1,6 +1,8 @@
 FILE(GLOB SRC *.cpp *.h)
 FILE(GLOB HEADERS ../../../include/nel/sound/driver/*.h)
 
+SOURCE_GROUP("" FILES ${HEADERS} ${SRC})
+
 NL_TARGET_LIB2(nelsnd_lowlevel ${HEADERS} ${SRC})
 
 TARGET_LINK_LIBRARIES(nelsnd_lowlevel nelmisc)

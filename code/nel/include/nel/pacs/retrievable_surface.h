@@ -45,7 +45,7 @@ enum
 /**
  * The features of the models, as floats
  */
-extern	float	Models[NumMaxCreatureModels][NumModelCharacteristics];
+NLPACS_API extern	float	Models[NumMaxCreatureModels][NumModelCharacteristics];
 
 
 
@@ -56,7 +56,7 @@ extern	float	Models[NumMaxCreatureModels][NumModelCharacteristics];
  * \author Nevrax France
  * \date 2001
  */
-class CRetrievableSurface
+class NLPACS_API CRetrievableSurface
 {
 public:
 	/**

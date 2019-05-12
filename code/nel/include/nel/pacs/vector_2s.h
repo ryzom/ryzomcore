@@ -34,7 +34,7 @@ const float		Vector2sAccuracy = 128.0f;
  * \author Nevrax France
  * \date 2001
  */
-class CVector2s
+class NLPACS_API CVector2s
 {
 private:
 	// safely cast a fixed64 into a fixed16

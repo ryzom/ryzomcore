@@ -566,11 +566,17 @@ typedef	uint16	ucchar;
 #else
 #define NLLIGO_API NL_DECL_DLLIMP
 #endif
+#ifdef NLPACS_DLLEXP
+#define NLPACS_API NL_DECL_DLLEXP
+#else
+#define NLPACS_API NL_DECL_DLLIMP
+#endif
 #else
 #define NLMISC_API
 #define NLSOUND_LOWLEVEL_API
 #define NLGEORGES_API
 #define NLLIGO_API
+#define NLPACS_API
 #endif
 
 // To define a 64bits constant; ie: UINT64_CONSTANT(0x123456781234)

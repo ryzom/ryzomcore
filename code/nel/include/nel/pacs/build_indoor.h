@@ -32,7 +32,7 @@ class CLocalRetriever;
 
 
 /// Computation functions, returns false if false
-bool	computeRetriever(CCollisionMeshBuild	&cmb,
+NLPACS_API bool	computeRetriever(CCollisionMeshBuild	&cmb,
 						 CLocalRetriever		&lr,
 						 NLMISC::CVector		&translation,
 						 std::string			&error,

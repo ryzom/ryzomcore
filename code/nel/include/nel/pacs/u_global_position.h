@@ -32,7 +32,7 @@ namespace NLPACS
  * \author Nevrax France
  * \date 2001
  */
-class ULocalPosition
+class NLPACS_API ULocalPosition
 {
 public:
 	/// The id of the surface corresponding to the local position.
@@ -59,7 +59,7 @@ public:
  * \author Nevrax France
  * \date 2001
  */
-class UGlobalPosition
+class NLPACS_API UGlobalPosition
 {
 public:
 

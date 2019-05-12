@@ -51,7 +51,7 @@ class CCollisionSurfaceTemp;
  * \author Nevrax France
  * \date 2001
  */
-class CLocalRetriever
+class NLPACS_API CLocalRetriever
 {
 public:
 	/**

@@ -1,7 +1,7 @@
 FILE(GLOB SRC *.cpp *.h)
 FILE(GLOB HEADERS ../../include/nel/georges/*.h)
 
-# SOURCE_GROUP(headers FILES ${HEADERS})
+SOURCE_GROUP("" FILES ${HEADERS} ${SRC})
 
 NL_TARGET_LIB2(nelgeorges ${HEADERS} ${SRC})
 

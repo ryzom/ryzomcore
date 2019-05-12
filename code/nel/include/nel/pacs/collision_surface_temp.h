@@ -239,7 +239,7 @@ public:
  * \author Nevrax France
  * \date 2001
  */
-class CCollisionSurfaceTemp
+class NLPACS_API CCollisionSurfaceTemp
 {
 public:
 	typedef std::pair<uint16, uint16>	TExteriorEdgeIndex;

@@ -36,7 +36,7 @@ namespace NLPACS
  * \author Nevrax France
  * \date 2002
  */
-class UPrimitiveBlock
+class NLPACS_API UPrimitiveBlock
 {
 public:
 	// dtor

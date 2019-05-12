@@ -31,7 +31,7 @@ namespace NLPACS {
  * \author Nevrax France
  * \date 2001
  */
-class CPrimitiveWorldImage
+class NLPACS_API CPrimitiveWorldImage
 {
 public:
 

@@ -44,7 +44,7 @@ namespace NLPACS
  * \author Nevrax France
  * \date 2001
  */
-class CExteriorMesh
+class NLPACS_API CExteriorMesh
 {
 public:
 	/// An edge of the edge list

@@ -42,7 +42,7 @@ class UGlobalPosition;
  * \author Nevrax France
  * \date 2001
  */
-class UGlobalRetriever
+class NLPACS_API UGlobalRetriever
 {
 public:
 	virtual ~UGlobalRetriever() {}

@@ -33,7 +33,7 @@ namespace NLPACS {
  * \author Nevrax France
  * \date 2001
  */
-class URetrieverBank
+class NLPACS_API URetrieverBank
 {
 public:
 

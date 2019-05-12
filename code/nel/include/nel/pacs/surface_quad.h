@@ -93,7 +93,7 @@ public:
 };
 
 //
-class CQuadBranch : public IQuadNode
+class NLPACS_API CQuadBranch : public IQuadNode
 {
 public:
 	enum
@@ -142,7 +142,7 @@ public:
 	void					serial(NLMISC::IStream &f);
 };
 
-class CSurfaceQuadTree
+class NLPACS_API CSurfaceQuadTree
 {
 protected:
 

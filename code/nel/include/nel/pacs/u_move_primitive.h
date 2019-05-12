@@ -40,7 +40,7 @@ class UGlobalPosition;
  * \author Nevrax France
  * \date 2001
  */
-class UMovePrimitive
+class NLPACS_API UMovePrimitive
 {
 public:
 

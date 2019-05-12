@@ -53,7 +53,7 @@ struct EEdgeQuad : public NLMISC::Exception
  * \author Nevrax France
  * \date 2001
  */
-class CEdgeQuad
+class NLPACS_API CEdgeQuad
 {
 public:
 

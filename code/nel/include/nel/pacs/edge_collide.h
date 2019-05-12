@@ -168,7 +168,7 @@ public:
  * \author Nevrax France
  * \date 2001
  */
-class	CEdgeCollide
+class NLPACS_API CEdgeCollide
 {
 public:
 	enum	TPointMoveProblem {ParallelEdges=0, StartOnEdge, StopOnEdge, TraverseEndPoint, EdgeNull, PointMoveProblemCount};

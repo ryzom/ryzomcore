@@ -48,7 +48,7 @@ class UPrimitiveBlock;
  * \author Nevrax France
  * \date 2001
  */
-class UMoveContainer
+class NLPACS_API UMoveContainer
 {
 public:
 

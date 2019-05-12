@@ -48,7 +48,7 @@ struct EChainQuad : public NLMISC::Exception
  * \author Nevrax France
  * \date 2001
  */
-class CChainQuad
+class NLPACS_API CChainQuad
 {
 public:
 

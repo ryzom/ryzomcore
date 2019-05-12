@@ -44,7 +44,7 @@ const	float	SnapPrecision= 1024;
  * \author Nevrax France
  * \date 2001
  */
-class CRetrieverInstance
+class NLPACS_API CRetrieverInstance
 {
 public:
 	/**

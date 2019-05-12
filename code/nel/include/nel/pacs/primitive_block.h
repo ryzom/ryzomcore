@@ -31,7 +31,7 @@ namespace NLPACS
  * \author Nevrax France
  * \date 2002
  */
-class CPrimitiveDesc
+class NLPACS_API CPrimitiveDesc
 {
 public:
 
@@ -85,7 +85,7 @@ public:
  * \author Nevrax France
  * \date 2002
  */
-class CPrimitiveBlock	: public UPrimitiveBlock
+class NLPACS_API CPrimitiveBlock	: public UPrimitiveBlock
 {
 public:
 

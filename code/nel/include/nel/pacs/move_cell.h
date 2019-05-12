@@ -32,7 +32,7 @@ class CMoveElement;
  * \author Nevrax France
  * \date 2001
  */
-class CMoveCell
+class NLPACS_API CMoveCell
 {
 public:
 

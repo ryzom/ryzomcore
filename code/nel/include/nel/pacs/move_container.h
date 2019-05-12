@@ -44,7 +44,7 @@ class CPrimitiveWorldImage;
  * \date 2001
  */
 
-class CMoveContainer: public UMoveContainer
+class NLPACS_API CMoveContainer: public UMoveContainer
 {
 	friend class CMovePrimitive;
 	friend class CPrimitiveWorldImage;

@@ -96,7 +96,7 @@ public:
 	}
 
 	/// Get next element in the ot
-	CCollisionOTInfo	*getNextInfo () const;
+	NLPACS_API CCollisionOTInfo	*getNextInfo () const;
 
 private:
 	// The next cell
@@ -292,7 +292,7 @@ public:
 	}
 
 	// Remove the collision from the primitives
-	void				removeFromPrimitives ();
+	NLPACS_API void				removeFromPrimitives ();
 
 	// Get second primitive
 	CMovePrimitive		*getOtherPrimitive (CMovePrimitive *primitive) const
@@ -418,7 +418,7 @@ public:
 	}
 
 	// Remove the collision from the primitives
-	void				removeFromPrimitives ();
+	NLPACS_API void				removeFromPrimitives ();
 
 	CMovePrimitive		*getOtherPrimitive (CMovePrimitive * /* primitive */) const
 	{

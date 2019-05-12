@@ -39,7 +39,7 @@ namespace NLPACS
  * \author Nevrax France
  * \date 2001
  */
-class UCollisionDesc
+class NLPACS_API UCollisionDesc
 {
 public:
 	NLMISC::CVectorD		ContactPosition;
@@ -58,7 +58,7 @@ public:
  * \author Nevrax France
  * \date 2001
  */
-class UTriggerInfo
+class NLPACS_API UTriggerInfo
 {
 public:
 	enum

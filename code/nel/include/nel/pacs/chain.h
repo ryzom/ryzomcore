@@ -36,7 +36,7 @@ class COrderedChain;
  * \author Nevrax France
  * \date 2001
  */
-class COrderedChain3f
+class NLPACS_API COrderedChain3f
 {
 protected:
 	friend class CChain;
@@ -95,7 +95,7 @@ public:
  * \author Nevrax France
  * \date 2001
  */
-class COrderedChain
+class NLPACS_API COrderedChain
 {
 protected:
 	friend class CChain;
@@ -198,7 +198,7 @@ public:
  * \author Nevrax France
  * \date 2001
  */
-class CChain
+class NLPACS_API CChain
 {
 protected:
 	friend class CRetrievableSurface;

@@ -40,7 +40,7 @@ namespace NLPACS
  * \author Nevrax France
  * \date 2001
  */
-class CMovePrimitive: public UMovePrimitive
+class NLPACS_API CMovePrimitive: public UMovePrimitive
 {
 private:
 	friend class CMoveContainer;
