@@ -88,7 +88,7 @@ namespace NLMISC
   * \author Nevrax France
   * \date 2002
   */
-class CSimpleClock
+class NLMISC_API CSimpleClock
 {
 public:
 	CSimpleClock() : _NumTicks(0)
@@ -175,7 +175,7 @@ private:
  * \author Nevrax France
  * \date 2001, 2002
  */
-class CHTimer
+class NLMISC_API CHTimer
 {
 public:
 	// this enum is used to sort displayed results

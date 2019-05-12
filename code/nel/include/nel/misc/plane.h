@@ -38,7 +38,7 @@ class CUV;
  * \author Nevrax France
  * \date 2000
  */
-class CPlane
+class NLMISC_API CPlane
 {
 public:
 	float	a,b,c,d;

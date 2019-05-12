@@ -33,7 +33,7 @@ namespace NLMISC
  * \author Nevrax France
  * \date 2000
  */
-class CLine
+class NLMISC_API CLine
 {
 public:
 	CVector		V0, V1;

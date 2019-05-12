@@ -33,7 +33,7 @@ class CEventServer;
  * \author Nevrax France
  * \date 2000
  */
-class IEventListener
+class NLMISC_API IEventListener
 {
 public:
 

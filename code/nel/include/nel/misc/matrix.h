@@ -54,7 +54,7 @@ class	CPlane;
  * \date 2000
  */
 
-class NL_ALIGN_SSE2 CMatrix
+class NLMISC_API NL_ALIGN_SSE2 CMatrix
 {
 public:
 	/// Rotation Order.

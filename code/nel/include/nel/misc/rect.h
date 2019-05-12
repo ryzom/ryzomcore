@@ -31,7 +31,7 @@ class CVector2f;
  * \author Nevrax France
  * \date 2000
  */
-class CRect
+class NLMISC_API CRect
 {
 public:
 	/// default ctor

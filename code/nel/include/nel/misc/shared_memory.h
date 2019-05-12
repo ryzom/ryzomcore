@@ -56,7 +56,7 @@ typedef key_t TSharedMemId;
  * \author Nevrax France
  * \date 2002
  */
-class CSharedMemory
+class NLMISC_API CSharedMemory
 {
 public:
 

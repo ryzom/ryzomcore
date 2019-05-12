@@ -39,7 +39,7 @@ const	double	QuatEpsilon= 0.000001;
  * \author Nevrax France
  * \date 2000
  */
-struct	CAngleAxis
+struct NLMISC_API CAngleAxis
 {
 	CVector		Axis;		/// an axis.
 	float		Angle;		/// angle in radians.

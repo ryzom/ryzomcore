@@ -49,10 +49,10 @@ enum TReportResult
  *
  * \return the button clicked or defaultResult
  */
-TReportResult report(const std::string &title, const std::string &subject, const std::string &body, const std::string &attachment, bool synchronous, bool sendReport, TReportResult defaultResult);
+NLMISC_API TReportResult report(const std::string &title, const std::string &subject, const std::string &body, const std::string &attachment, bool synchronous, bool sendReport, TReportResult defaultResult);
 
 /// Set the Url of the web service used to post crash reports to. String is copied
-void setReportPostUrl(const char *postUrl);
+NLMISC_API void setReportPostUrl(const char *postUrl);
 
 } // NLMISC
 

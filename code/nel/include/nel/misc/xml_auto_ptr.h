@@ -26,7 +26,7 @@
 
 /** Simple auto pointer for xml pointers
   */
-class CXMLAutoPtr
+class NLMISC_API CXMLAutoPtr
 {
 public:
 	CXMLAutoPtr(const char *value = NULL) : _Value(value) {}

@@ -32,7 +32,7 @@ namespace	NLMISC
  * \author Nevrax France
  * \date 2000
  */
-class CVectorD
+class NLMISC_API CVectorD
 {
 public:		// Attributes.
 	double	x,y,z;

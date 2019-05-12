@@ -44,7 +44,7 @@ class CCDBBankHandler;
  * \date 2002
  */
 
-class ICDBNode : public CRefCount
+class NLMISC_API ICDBNode : public CRefCount
 {
 	//-----------------------------------------------------------------------
 	// end of IDBNode interface

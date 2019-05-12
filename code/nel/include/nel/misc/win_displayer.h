@@ -53,7 +53,7 @@ namespace NLMISC {
  * \author Nevrax France
  * \date 2001
  */
-class CWinDisplayer : public NLMISC::CWindowDisplayer
+class NLMISC_API CWinDisplayer : public NLMISC::CWindowDisplayer
 {
 public:
 

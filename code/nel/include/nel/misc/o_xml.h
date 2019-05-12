@@ -76,7 +76,7 @@ namespace NLMISC {
  * \author Nevrax France
  * \date 2001
  */
-class COXml : public IStream
+class NLMISC_API COXml : public IStream
 {
 	friend int xmlOutputWriteCallbackForNeL ( void *context, const char *buffer, int len );
 	friend int xmlOutputCloseCallbackForNeL ( void *context );

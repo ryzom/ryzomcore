@@ -84,7 +84,7 @@ namespace NLMISC {
  * \author Nevrax France
  * \date 2000
  */
-class CUnfairMutex
+class NLMISC_API CUnfairMutex
 {
 public:
 
@@ -424,7 +424,7 @@ private:
  * \author Nevrax France
  * \date 2002
  */
-class CSharedMutex
+class NLMISC_API CSharedMutex
 {
 public:
 
@@ -504,7 +504,7 @@ struct TNelRtlCriticalSection {
  * \author Nevrax France
  * \date 2001
  */
-class CFairMutex
+class NLMISC_API CFairMutex
 {
 public:
 

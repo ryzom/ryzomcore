@@ -114,7 +114,7 @@ namespace NLMISC
 	 *
 	 *
 	 */
-	class CCoTask
+    class NLMISC_API CCoTask
 	{
 		/// Flag stating if the task is started or not
 		bool	_Started;

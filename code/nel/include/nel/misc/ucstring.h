@@ -372,18 +372,18 @@ struct CUCStringHashMapTraits
  * \param a string or a char to transform to lower case
  */
 
-ucstring	toLower (const ucstring &str);
-void		toLower (ucchar *str);
-ucchar		toLower (ucchar c);
+NLMISC_API ucstring toLower(const ucstring &str);
+NLMISC_API void toLower(ucchar *str);
+NLMISC_API ucchar toLower(ucchar c);
 
 /** Convert an unicode string in upper case.
  * Characters with accent are converted in a uppercase character without accent
  * \param a string or a char to transform to upper case
  */
 
-ucstring	toUpper (const ucstring &str);
-void		toUpper (ucchar *str);
-ucchar		toUpper (ucchar c);
+NLMISC_API ucstring toUpper(const ucstring &str);
+NLMISC_API void toUpper(ucchar *str);
+NLMISC_API ucchar toUpper(ucchar c);
 
 };
 

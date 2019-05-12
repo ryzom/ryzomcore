@@ -37,7 +37,7 @@ namespace NLMISC
   * \author Nevrax France
   * \date 2004
   */
-class CFixedSizeAllocator
+class NLMISC_API CFixedSizeAllocator
 {
 public:
 	CFixedSizeAllocator(uint numBytesPerBlock, uint numBlockPerChunk);

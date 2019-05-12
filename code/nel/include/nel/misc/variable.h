@@ -133,7 +133,7 @@ void __name##Class::ptr(__type *pointer, bool get, bool human) const
 //
 //
 
-class IVariable : public ICommand
+class NLMISC_API IVariable : public ICommand
 {
 	friend class CCommandRegistry;
 public:

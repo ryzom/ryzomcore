@@ -84,7 +84,7 @@ struct EXmlParsingError : public EStream
  * \author Nevrax France
  * \date 2001
  */
-class CIXml : public IStream
+class NLMISC_API CIXml : public IStream
 {
 	friend void xmlGenericErrorFuncRead (void *ctx, const char *msg, ...);
 public:

@@ -27,7 +27,7 @@ namespace NLMISC
 {
 
 
-	struct CWin32Util
+	struct NLMISC_API CWin32Util
 	{
 		/** replace all occurence of 'uiIdentifier' in a window with their localized versions
 		  * (from CI18N)

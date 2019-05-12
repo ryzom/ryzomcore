@@ -78,7 +78,7 @@ namespace NLMISC
   * .
   */
 
-class CInterWindowMsgQueue
+class NLMISC_API CInterWindowMsgQueue
 {
 public:
 	CInterWindowMsgQueue();

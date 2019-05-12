@@ -32,7 +32,7 @@ namespace NLMISC{
  * \author Nevrax France
  * \date 2002
  */
-class CCDBNodeLeaf : public ICDBNode
+class NLMISC_API CCDBNodeLeaf : public ICDBNode
 {
 public:
 	// flush all observers calls for modified nodes

@@ -43,7 +43,7 @@ namespace NLMISC {
  * \author Nevrax France
  * \date 2002
  */
-class CSheetId
+class NLMISC_API CSheetId
 {
 
 public :

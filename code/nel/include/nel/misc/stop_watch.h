@@ -37,7 +37,7 @@ typedef uint32 TMsDuration;
  * \author Nevrax France
  * \date 2001
  */
-class CStopWatch
+class NLMISC_API CStopWatch
 {
 public:
 

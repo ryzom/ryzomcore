@@ -32,7 +32,7 @@ namespace NLMISC {
  * \author Nevrax France
  * \date 2003
  */
-class CWordsDictionary
+class NLMISC_API CWordsDictionary
 {
 	NL_INSTANCE_COUNTER_DECL(CWordsDictionary);
 public:

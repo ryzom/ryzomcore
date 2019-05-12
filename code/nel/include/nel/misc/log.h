@@ -40,7 +40,8 @@ class IDisplayer;
  * \author Nevrax France
  * \date 2001
  */
-class CLog {
+class NLMISC_API CLog
+{
 public:
 
 	typedef enum { LOG_NO=0, LOG_ERROR, LOG_WARNING, LOG_INFO, LOG_DEBUG, LOG_STAT, LOG_ASSERT, LOG_UNKNOWN } TLogType;

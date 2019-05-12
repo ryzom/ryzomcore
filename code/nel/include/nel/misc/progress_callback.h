@@ -29,7 +29,7 @@ namespace NLMISC {
  * \author Nevrax France
  * \date 2002
  */
-class IProgressCallback
+class NLMISC_API IProgressCallback
 {
 public:
 

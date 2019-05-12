@@ -60,7 +60,7 @@ struct CStringIdHashMapTraits
  * \author Nevrax France
  * \date 2003
  */
-class CStringMapper
+class NLMISC_API CStringMapper
 {
 	class CCharComp
 	{
@@ -132,7 +132,7 @@ typedef uint TSStringId;
  * \author Nevrax France
  * \date November 2003
  */
-class CStaticStringMapper
+class NLMISC_API CStaticStringMapper
 {
 
 	std::map<std::string, TSStringId>	_TempStringTable;

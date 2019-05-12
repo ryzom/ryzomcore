@@ -41,7 +41,7 @@ namespace NLMISC
  *	the loadForm function of george) that are a binary extraction of
  *	the content of the xml files.
  */
-	class CXMLPack
+class NLMISC_API CXMLPack
 	{
 		NLMISC_SAFE_SINGLETON_DECL(CXMLPack);
 

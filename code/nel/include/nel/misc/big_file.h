@@ -35,7 +35,7 @@ const uint32 BF_ALWAYS_OPENED		=	0x00000001;
 const uint32 BF_CACHE_FILE_ON_OPEN	=	0x00000002;
 
 // ***************************************************************************
-class CBigFile
+class NLMISC_API CBigFile
 {
 	NLMISC_SAFE_SINGLETON_DECL(CBigFile);
 

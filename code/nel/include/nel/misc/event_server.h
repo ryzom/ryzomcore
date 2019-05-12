@@ -40,7 +40,7 @@ typedef std::multimap<CClassId, IEventListener*, CClassIdHashMapTraits> mapListe
  * \author Nevrax France
  * \date 2000
  */
-class CEventServer
+class NLMISC_API CEventServer
 {
 	mapListener _Listeners;
 	std::list<IEventEmitter*> _Emitters;

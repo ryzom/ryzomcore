@@ -60,7 +60,7 @@ namespace NLMISC {
  * \date 2000
  */
 
-class CI18N
+class NLMISC_API CI18N
 {
 public:
 

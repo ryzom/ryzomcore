@@ -32,7 +32,7 @@ namespace NLMISC{
  * \author Nevrax France
  * \date 2002
  */
-class CCDBCheckSum
+class NLMISC_API CCDBCheckSum
 {
 public:
 	///constructor

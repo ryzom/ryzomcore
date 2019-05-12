@@ -26,7 +26,8 @@
 namespace NLMISC{
 
 	/// Class that encapsulates the separate CDB components
-	class CCDBManager{
+class NLMISC_API CCDBManager
+{
 	
 	public:
 		/**

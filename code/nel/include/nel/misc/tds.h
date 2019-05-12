@@ -34,7 +34,7 @@ namespace NLMISC
  * \author Nevrax France
  * \date 2002
  */
-class CTDS
+class NLMISC_API CTDS
 {
 public:
 

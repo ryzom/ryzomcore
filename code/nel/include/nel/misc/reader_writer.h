@@ -29,7 +29,7 @@ namespace NLMISC {
  * \author Nevrax France
  * \date 2001
  */
-class CReaderWriter
+class NLMISC_API CReaderWriter
 {
 private:
 

@@ -25,9 +25,9 @@ namespace NLMISC
 {
 
 const uint		OptFastFloorCWStackSize = 10;
-extern int      OptFastFloorCWStack[OptFastFloorCWStackSize];
-extern int      *OptFastFloorCWStackPtr;
-extern int      *OptFastFloorCWStackEnd;
+NLMISC_API extern int OptFastFloorCWStack[OptFastFloorCWStackSize];
+NLMISC_API extern int *OptFastFloorCWStackPtr;
+NLMISC_API extern int *OptFastFloorCWStackEnd;
 
 // fastFloor function.
 #if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM) && defined(NL_USE_FASTFLOOR)
@@ -35,7 +35,7 @@ extern int      *OptFastFloorCWStackEnd;
 #include <cfloat>
 
 // The magic constant value. support both positive and negative numbers.
-extern double	OptFastFloorMagicConst ;
+NLMISC_API extern double OptFastFloorMagicConst;
 
 inline void OptFastFloorPushCW(int ctrl)
 {

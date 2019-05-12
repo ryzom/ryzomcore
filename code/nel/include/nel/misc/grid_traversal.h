@@ -30,7 +30,7 @@ class CVector2f;
   * \author Nevrax France
   * \date 2005
   */
-class CGridTraversal
+class NLMISC_API CGridTraversal
 {
 public:
 	/** begin to traverse a grid along the given segments

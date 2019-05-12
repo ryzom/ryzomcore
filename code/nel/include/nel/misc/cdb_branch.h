@@ -31,7 +31,7 @@ namespace NLMISC{
  * \author Nevrax France
  * \date 2002
  */
-class CCDBNodeBranch : public ICDBNode
+class NLMISC_API CCDBNodeBranch : public ICDBNode
 {
 public:
 

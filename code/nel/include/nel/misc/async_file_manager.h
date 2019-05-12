@@ -31,7 +31,7 @@ namespace NLMISC
  * \author Nevrax France
  * \date 2002
  */
-class CAsyncFileManager : public CTaskManager
+class NLMISC_API CAsyncFileManager : public CTaskManager
 {
 	NLMISC_SAFE_SINGLETON_DECL(CAsyncFileManager);
 	CAsyncFileManager() {}

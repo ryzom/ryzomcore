@@ -34,7 +34,7 @@ class	IStream;
  * \author Nevrax France
  * \date 2000
  */
-class CRGBA
+class NLMISC_API CRGBA
 {
 public:
 

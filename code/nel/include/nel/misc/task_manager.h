@@ -44,7 +44,7 @@ public:
  * \author Nevrax France
  * \date 2000
  */
-class CTaskManager : public IRunnable
+class NLMISC_API CTaskManager : public IRunnable
 {
 public:
 

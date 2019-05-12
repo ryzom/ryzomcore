@@ -40,7 +40,7 @@ namespace NLMISC
   * \date 2004
   *
   */
-class CContiguousBlockAllocator
+class NLMISC_API CContiguousBlockAllocator
 {
 public:
 	// ctor

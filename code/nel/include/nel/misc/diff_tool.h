@@ -528,21 +528,21 @@ namespace STRING_MANAGER
 	typedef CMakeDiff<TWorksheet::TRow, TWordsDiffContext, TGetWorksheetIdentifier, TGetWorksheetHashValue, TTestWorksheetItem>	TWorkSheetDiff;
 
 
-	uint64		makePhraseHash(const TPhrase &phrase);
-	bool		parseHashFromComment(const ucstring &comments, uint64 &hashValue);
+	NLMISC_API uint64 makePhraseHash(const TPhrase &phrase);
+    NLMISC_API bool parseHashFromComment(const ucstring &comments, uint64 &hashValue);
 
-	bool		loadStringFile(const std::string filename, std::vector<TStringInfo> &stringInfos, bool forceRehash, ucchar openMark = '[', ucchar closeMark = ']', bool specialCase = false);
-	ucstring	prepareStringFile(const std::vector<TStringInfo> &strings, bool removeDiffComments, bool noDiffInfo = false);
+	NLMISC_API bool loadStringFile(const std::string filename, std::vector<TStringInfo> &stringInfos, bool forceRehash, ucchar openMark = '[', ucchar closeMark = ']', bool specialCase = false);
+    NLMISC_API ucstring prepareStringFile(const std::vector<TStringInfo> &strings, bool removeDiffComments, bool noDiffInfo = false);
 
-	bool		readPhraseFile(const std::string &filename, std::vector<TPhrase> &phrases, bool forceRehash);
-	bool		readPhraseFileFromString(ucstring const& doc, const std::string &filename, std::vector<TPhrase> &phrases, bool forceRehash);
-	ucstring	tabLines(uint nbTab, const ucstring &str);
-	ucstring	preparePhraseFile(const std::vector<TPhrase> &phrases, bool removeDiffComments);
+	NLMISC_API bool readPhraseFile(const std::string &filename, std::vector<TPhrase> &phrases, bool forceRehash);
+    NLMISC_API bool readPhraseFileFromString(ucstring const &doc, const std::string &filename, std::vector<TPhrase> &phrases, bool forceRehash);
+    NLMISC_API ucstring tabLines(uint nbTab, const ucstring &str);
+    NLMISC_API ucstring preparePhraseFile(const std::vector<TPhrase> &phrases, bool removeDiffComments);
 
-	bool		loadExcelSheet(const std::string filename, TWorksheet &worksheet, bool checkUnique = true);
-	bool		readExcelSheet(const ucstring &text, TWorksheet &worksheet, bool checkUnique = true);
-	void		makeHashCode(TWorksheet &sheet, bool forceRehash);
-	ucstring	prepareExcelSheet(const TWorksheet &worksheet);
+	NLMISC_API bool loadExcelSheet(const std::string filename, TWorksheet &worksheet, bool checkUnique = true);
+    NLMISC_API bool readExcelSheet(const ucstring &text, TWorksheet &worksheet, bool checkUnique = true);
+    NLMISC_API void makeHashCode(TWorksheet &sheet, bool forceRehash);
+    NLMISC_API ucstring prepareExcelSheet(const TWorksheet &worksheet);
 
 }	// namespace STRING_MANAGER
 

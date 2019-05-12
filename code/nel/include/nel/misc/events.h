@@ -33,7 +33,7 @@ class IEventEmitter;
  * CEvent. System event.
  * \date 2000
  */
-class CEvent : public CClassId
+class NLMISC_API CEvent : public CClassId
 {
 public:
 	/// Emitter of the event. Can be NULL if the event is posted directly to the CEventServer.

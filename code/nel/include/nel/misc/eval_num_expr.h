@@ -25,7 +25,7 @@ namespace NLMISC
 /**
   * This class performs numerical expression parsing.
   */
-class CEvalNumExpr
+class NLMISC_API CEvalNumExpr
 {
 public:
 	virtual ~CEvalNumExpr() {}

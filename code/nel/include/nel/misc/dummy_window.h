@@ -53,7 +53,7 @@ namespace NLMISC
   * \author Nevrax France
   * \date 2007
   */
-class CDummyWindow
+class NLMISC_API CDummyWindow
 {
 public:
 	CDummyWindow();

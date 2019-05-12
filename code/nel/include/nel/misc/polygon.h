@@ -41,7 +41,7 @@ class CBSPNode2v;
  * \author Nevrax France
  * \date 2000
  */
-class CPolygon
+class NLMISC_API CPolygon
 {
 public:
 	std::vector<CVector>	Vertices;

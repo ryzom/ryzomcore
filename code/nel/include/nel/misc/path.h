@@ -40,7 +40,7 @@ struct EPathNotFound : public Exception
  * \warning addSearchPath(), clearMap() and remapExtension() are not reentrant.
  * \warning all path and files are *case sensitive* on linux.
  */
-class CFileContainer
+class NLMISC_API CFileContainer
 {
 	// no copy allowed
 	CFileContainer(const CFileContainer &/* other */)
@@ -336,7 +336,7 @@ private:
  * \author Nevrax France
  * \date 2001
  */
-class CPath
+class NLMISC_API CPath
 {
 	NLMISC_SAFE_SINGLETON_DECL_PTR(CPath);
 public:
@@ -568,7 +568,7 @@ private:
  * \author Nevrax France
  * \date 2001
  */
-struct CFile
+struct NLMISC_API CFile
 {
 	/**
 	 * Retrieve the associated file name.

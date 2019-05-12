@@ -536,6 +536,24 @@ typedef	uint16	ucchar;
 #endif
 #endif
 
+#ifdef WIN32
+#define NL_DECL_DLLEXP __declspec(dllexport)
+#define NL_DECL_DLLIMP __declspec(dllimport)
+#else
+#define NL_DECL_DLLEXP
+#define NL_DECL_DLLIMP
+#endif
+
+#ifdef NL_DLLEXP
+#ifdef NLMISC_DLLEXP
+#define NLMISC_API NL_DECL_DLLEXP
+#else
+#define NLMISC_API NL_DECL_DLLIMP
+#endif
+#else
+#define NLMISC_API
+#endif
+
 // To define a 64bits constant; ie: UINT64_CONSTANT(0x123456781234)
 #ifdef NL_COMP_VC
 #	if (NL_COMP_VC_VERSION >= 100)

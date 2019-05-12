@@ -89,7 +89,7 @@ extern "C" \
  * \author Nevrax France
  * \date 2004
  */
-class CLibrary
+class NLMISC_API CLibrary
 {
 	/// Dynamic library handle
 	NL_LIB_HANDLE	_LibHandle;
@@ -200,7 +200,7 @@ public:
  *	and to add some hooks for library implementor
  *	over library loading/unloading.
  */
-class INelLibrary
+class NLMISC_API INelLibrary
 {
 	friend class CLibrary;
 

@@ -29,7 +29,7 @@ namespace NLMISC {
  * This is useful when you don't have the opportunity to register more than
  * one event emitter to an event server.
  */
-class CEventEmitterMulti : public IEventEmitter
+class NLMISC_API CEventEmitterMulti : public IEventEmitter
 {
 public:
 	/// dtor

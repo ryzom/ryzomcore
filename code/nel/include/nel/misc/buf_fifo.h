@@ -60,7 +60,7 @@ namespace NLMISC {
  * \author Nevrax France
  * \date 2001
  */
-class CBufFIFO
+class NLMISC_API CBufFIFO
 {
 public:
 

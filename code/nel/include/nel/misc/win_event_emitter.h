@@ -30,7 +30,7 @@ namespace NLMISC {
  * CWinEventEmitter
  * CEventEmitter Windows implementation
  */
-class CWinEventEmitter : public IEventEmitter
+class NLMISC_API CWinEventEmitter : public IEventEmitter
 {
 public:
 	CWinEventEmitter () : _MouseEventsEnabled(true), _KeyboardEventsEnabled(true), _IMEEventsEnabled(true)

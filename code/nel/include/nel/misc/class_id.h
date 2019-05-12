@@ -33,8 +33,8 @@ namespace	NLMISC
  * \author Nevrax France
  * \date 2000
  */
-class	CClassId
-{
+    class NLMISC_API CClassId
+    {
 	uint64	Uid;
 
 public:

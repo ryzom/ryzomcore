@@ -32,7 +32,8 @@ namespace NLMISC{
  and the other way around.
 
  */
-class CCDBBankHandler{
+class NLMISC_API CCDBBankHandler
+{
 public:
 	/**
 	 @brief The class' constructor

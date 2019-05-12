@@ -35,7 +35,7 @@ namespace NLMISC
  * \author Nevrax France
  * \date 2001
  */
-class CVector2f
+class NLMISC_API CVector2f
 {
 public:
 

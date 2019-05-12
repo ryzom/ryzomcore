@@ -35,7 +35,7 @@ class CFixedSizeAllocator;
   * \author Nevrax France
   * \date 2004
   */
-class CObjectArenaAllocator
+class NLMISC_API CObjectArenaAllocator
 {
 public:
 	/** ctor

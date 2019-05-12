@@ -59,7 +59,7 @@ class IStream;
    */
 
 // ****************************************************************************
-struct CHashKeyMD5
+struct NLMISC_API CHashKeyMD5
 {
 	uint8 Data[16];
 
@@ -74,7 +74,7 @@ struct CHashKeyMD5
 };
 
 // ****************************************************************************
-class CMD5Context
+class NLMISC_API CMD5Context
 {
 
 public:
@@ -117,10 +117,10 @@ inline bool operator <(const struct CHashKeyMD5 &a,const struct CHashKeyMD5 &b)
 */
 
 // This function get a filename (it works with big files) and returns his MD5 hash key
-CHashKeyMD5 getMD5(const std::string &filename);
+NLMISC_API CHashKeyMD5 getMD5(const std::string &filename);
 
 // This function get a buffer with size and returns his MD5 hash key
-CHashKeyMD5 getMD5(const uint8 *buffer, uint32 size);
+NLMISC_API CHashKeyMD5 getMD5(const uint8 *buffer, uint32 size);
 
 }; // namespace NLMISC
 

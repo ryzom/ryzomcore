@@ -172,18 +172,18 @@ template<class T>	inline void contReset (T& a)
  *   raiseToNextPowerOf2(8) is 8
  *   raiseToNextPowerOf2(5) is 8
  */
-uint			raiseToNextPowerOf2 (uint v);
+NLMISC_API uint raiseToNextPowerOf2(uint v);
 
 /** Return the power of 2 of v.
  * Example:
  *   getPowerOf2(8) is 3
  *   getPowerOf2(5) is 3
  */
-uint			getPowerOf2 (uint v);
+NLMISC_API uint getPowerOf2(uint v);
 
 /** Return \c true if the value is a power of 2.
  */
-bool			isPowerOf2 (sint32 v);
+NLMISC_API bool isPowerOf2(sint32 v);
 
 
 /** Converts from degrees to radians
@@ -222,37 +222,37 @@ inline double	isValidDouble (double v)
  * \param str a string to transform to lower case
  */
 
-std::string toLower ( const char *str );
-std::string	toLower ( const std::string &str );
-void		toLower ( char *str );
-char		toLower ( const char ch );	// convert only one character
+NLMISC_API std::string toLower(const char *str);
+NLMISC_API std::string toLower(const std::string &str);
+NLMISC_API void toLower(char *str);
+NLMISC_API char toLower(const char ch); // convert only one character
 
 /** Convert a string in upper case.
  * \param a string to transform to upper case
  */
 
-std::string	toUpper ( const std::string &str);
-void		toUpper ( char *str);
+NLMISC_API std::string toUpper(const std::string &str);
+NLMISC_API void toUpper(char *str);
 
 
 /**
  *  Convert to an hexadecimal std::string
  */
-std::string toHexa(const uint8 &b);
-std::string toHexa(const uint8 *data, uint size);
-std::string toHexa(const std::string &str);
-std::string toHexa(const char *str);
+NLMISC_API std::string toHexa(const uint8 &b);
+NLMISC_API std::string toHexa(const uint8 *data, uint size);
+NLMISC_API std::string toHexa(const std::string &str);
+NLMISC_API std::string toHexa(const char *str);
 
 /**
 *  Convert from an hexadecimal std::string
 */
-bool fromHexa(const std::string &hexa, uint8 &b);
-bool fromHexa(const std::string &hexa, uint8 *data);
-bool fromHexa(const std::string &hexa, std::string &str);
-bool fromHexa(const char *hexa, uint8 &b);
-bool fromHexa(const char *hexa, uint8 *data);
-bool fromHexa(const char *hexa, std::string &str);
-bool fromHexa(const char hexa, uint8 &b);
+NLMISC_API bool fromHexa(const std::string &hexa, uint8 &b);
+NLMISC_API bool fromHexa(const std::string &hexa, uint8 *data);
+NLMISC_API bool fromHexa(const std::string &hexa, std::string &str);
+NLMISC_API bool fromHexa(const char *hexa, uint8 &b);
+NLMISC_API bool fromHexa(const char *hexa, uint8 *data);
+NLMISC_API bool fromHexa(const char *hexa, std::string &str);
+NLMISC_API bool fromHexa(const char hexa, uint8 &b);
 
 // Remove all the characters <= 32 (tab, space, new line, return, vertical tab etc..) at the beginning and at the end of a string
 template <class T> T trim (const T &str)
@@ -323,20 +323,20 @@ inline float nlroundf(float x)
 #endif
 
 // Wrapper for fopen to be able to open files with an UTF-8 filename
-FILE *nlfopen(const std::string &filename, const std::string &mode);
+NLMISC_API FILE *nlfopen(const std::string &filename, const std::string &mode);
 
 /** Signed 64 bit fseek. Same interface as fseek
   */
-int nlfseek64(FILE *stream, sint64 offset, int origin);
+NLMISC_API int nlfseek64(FILE *stream, sint64 offset, int origin);
 
 // Retrieve position in a file, same interface as ftell
-sint64 nlftell64(FILE *stream);
+NLMISC_API sint64 nlftell64(FILE *stream);
 
 /**
  * Base class for all NeL exception.
  * It enables to construct simple string at the ctor.
  */
-class Exception : public std::exception
+class NLMISC_API Exception : public std::exception
 {
 protected:
 	std::string	_Reason;
@@ -353,7 +353,7 @@ public:
  * Portable Sleep() function that suspends the execution of the calling thread for a number of milliseconds.
  * Note: the resolution of the timer is system-dependant and may be more than 1 millisecond.
  */
-void nlSleep( uint32 ms );
+NLMISC_API void nlSleep(uint32 ms);
 
 
 /// Returns Process Id (note: on Linux, Process Id is the same as the Thread Id)
@@ -362,73 +362,73 @@ void nlSleep( uint32 ms );
 #endif
 
 /// Returns Thread Id (note: on Linux, Process Id is the same as the Thread Id)
-size_t getThreadId();
+NLMISC_API size_t getThreadId();
 
 /// Returns a readable string from a vector of bytes. unprintable char are replaced by '?'
-std::string stringFromVector( const std::vector<uint8>& v, bool limited = true );
+NLMISC_API std::string stringFromVector(const std::vector<uint8> &v, bool limited = true);
 
 
 /// Convert a string into an sint64 (same as atoi() function but for 64 bits intergers)
-sint64 atoiInt64 (const char *ident, sint64 base = 10);
+NLMISC_API sint64 atoiInt64(const char *ident, sint64 base = 10);
 
 /// Convert an sint64 into a string (same as itoa() function but for 64 bits intergers)
-void itoaInt64 (sint64 number, char *str, sint64 base = 10);
+NLMISC_API void itoaInt64(sint64 number, char *str, sint64 base = 10);
 
 
 /// Convert a number in bytes into a string that is easily readable by an human, for example 105123 -> "102kb"
-std::string bytesToHumanReadable (const std::string &bytes);
-std::string bytesToHumanReadable (uint64 bytes);
+NLMISC_API std::string bytesToHumanReadable(const std::string &bytes);
+NLMISC_API std::string bytesToHumanReadable(uint64 bytes);
 
 /// Convert a number in bytes into a string that is easily readable by an human, for example 105123 -> "102kb"
 /// Using units array as string: 0 => B, 1 => KiB, 2 => MiB, 3 => GiB, etc...
-std::string bytesToHumanReadableUnits (uint64 bytes, const std::vector<std::string> &units);
+NLMISC_API std::string bytesToHumanReadableUnits(uint64 bytes, const std::vector<std::string> &units);
 
 /// Convert a human readable into a bytes,  for example "102kb" -> 105123
-uint32 humanReadableToBytes (const std::string &str);
+NLMISC_API uint32 humanReadableToBytes(const std::string &str);
 
 /// Convert a time into a string that is easily readable by an human, for example 3600 -> "1h"
-std::string secondsToHumanReadable (uint32 time);
+NLMISC_API std::string secondsToHumanReadable(uint32 time);
 
 /// Convert a UNIX timestamp to a formatted date in ISO format
-std::string timestampToHumanReadable(uint32 timestamp);
+NLMISC_API std::string timestampToHumanReadable(uint32 timestamp);
 
 /// Get a bytes or time in string format and convert it in seconds or bytes
-uint32 fromHumanReadable (const std::string &str);
+NLMISC_API uint32 fromHumanReadable(const std::string &str);
 
 /// Add digit grouping seperator to if value >= 10 000. Assumes input is numerical string.
-std::string formatThousands(const std::string& s);
+NLMISC_API std::string formatThousands(const std::string &s);
 
 /// This function executes a program in the background and returns instantly (used for example to launch services in AES).
 /// The program will be launched in the current directory
-bool launchProgram (const std::string &programName, const std::string &arguments, bool log = true);
+NLMISC_API bool launchProgram(const std::string &programName, const std::string &arguments, bool log = true);
 
 /// Same but with an array of strings for arguments
-bool launchProgramArray (const std::string &programName, const std::vector<std::string> &arguments, bool log = true);
+NLMISC_API bool launchProgramArray(const std::string &programName, const std::vector<std::string> &arguments, bool log = true);
 
 /// This function executes a program and wait for result (used for example for crash report).
 /// The program will be launched in the current directory
-sint launchProgramAndWaitForResult (const std::string &programName, const std::string &arguments, bool log = true);
+NLMISC_API sint launchProgramAndWaitForResult(const std::string &programName, const std::string &arguments, bool log = true);
 
 /// This function executes a program and returns output as a string
-std::string getCommandOutput(const std::string &command);
+NLMISC_API std::string getCommandOutput(const std::string &command);
 
 /// This function replace all environment variables in a string by their content.
 /// Environment variables names can use both Windows (%NAME%) and UNIX syntax ($NAME)
 /// Authorized characters in names are A-Z, a-z, 0-9 and _
-std::string expandEnvironmentVariables(const std::string &s);
+NLMISC_API std::string expandEnvironmentVariables(const std::string &s);
 
 /// Functions to convert a string with arguments to array or array to string (will espace strings with spaces)
 bool explodeArguments(const std::string &str, std::vector<std::string> &args);
-std::string joinArguments(const std::vector<std::string> &args);
+NLMISC_API std::string joinArguments(const std::vector<std::string> &args);
 
 /// Escape an argument to not evaluate environment variables or special cases
-std::string escapeArgument(const std::string &arg);
+NLMISC_API std::string escapeArgument(const std::string &arg);
 
 /// This function kills a program using his pid (on unix, it uses the kill() POSIX function)
-bool killProgram(uint32 pid);
+NLMISC_API bool killProgram(uint32 pid);
 
 /// This function kills a program using his pid with abort signal (on unix, it uses the kill() POSIX function)
-bool abortProgram(uint32 pid);
+NLMISC_API bool abortProgram(uint32 pid);
 
 /** Returns a string corresponding to the class T in string format.
  * Example:
@@ -702,10 +702,10 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os, const sint64& __z)
 class CLog;
 
 /// Display the bits (with 0 and 1) composing a byte (from right to left)
-void displayByteBits( uint8 b, uint nbits, sint beginpos, bool displayBegin, NLMISC::CLog *log );
+NLMISC_API void displayByteBits(uint8 b, uint nbits, sint beginpos, bool displayBegin, NLMISC::CLog *log);
 
 /// Display the bits (with 0 and 1) composing a number (uint32) (from right to left)
-void displayDwordBits( uint32 b, uint nbits, sint beginpos, bool displayBegin, NLMISC::CLog *log );
+NLMISC_API void displayDwordBits(uint32 b, uint nbits, sint beginpos, bool displayBegin, NLMISC::CLog *log);
 
 /// this wrapping is due to a visual bug when calling isprint with big value
 /// example of crash with VC6 SP4:	int a = isprint(0x40e208);
@@ -720,10 +720,10 @@ inline int nlisprint(int c)
 #endif
 
 // Open an url in a browser
-bool openURL (const std::string &url);
+NLMISC_API bool openURL(const std::string &url);
 
 // Open a document
-bool openDoc (const std::string &document);
+NLMISC_API bool openDoc(const std::string &document);
 
 // AntiBug method that return an epsilon if x==0, else x
 inline float	favoid0(float x)

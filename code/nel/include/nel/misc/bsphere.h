@@ -33,7 +33,7 @@ namespace NLMISC
  * \author Nevrax France
  * \date 2000
  */
-class CBSphere
+class NLMISC_API CBSphere
 {
 public:
 	CVector			Center;

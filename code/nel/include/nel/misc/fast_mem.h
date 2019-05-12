@@ -32,7 +32,7 @@ namespace NLMISC
  * \author Nevrax France
  * \date 2002
  */
-class CFastMem
+class NLMISC_API CFastMem
 {
 public:
 

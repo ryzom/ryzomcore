@@ -41,167 +41,167 @@ typedef std::vector<CSString> CVectorSString;
  * \author Nevrax
  * \date 2003
  */
-class CSString: public std::string
+class CSString : public std::string
 {
 public:
 	///	ctor
-	CSString();
+	NLMISC_API CSString();
 	///	ctor
-	CSString(const char *s);
+	NLMISC_API CSString(const char *s);
 	/// ctor
-	CSString(const std::string &s);
+	NLMISC_API CSString(const std::string &s);
 	///	ctor
-	CSString(char c);
+	NLMISC_API CSString(char c);
 	///	ctor
-	CSString(int i,const char *fmt="%d");
+	NLMISC_API CSString(int i, const char *fmt = "%d");
 	///	ctor
-	CSString(uint32 u,const char *fmt="%u");
+	NLMISC_API CSString(uint32 u, const char *fmt = "%u");
 	/// ctor
-	CSString(double d,const char *fmt="%f");
+	NLMISC_API CSString(double d, const char *fmt = "%f");
 	///	ctor
-	CSString(const char *s,const char *fmt);
+	NLMISC_API CSString(const char *s, const char *fmt);
 	///	ctor
-	CSString(const std::string &s,const char *fmt);
+	NLMISC_API CSString(const std::string &s, const char *fmt);
 	///	ctor
-	CSString(const std::vector<NLMISC::CSString>& v,const std::string& separator="\n");
+	NLMISC_API CSString(const std::vector<NLMISC::CSString> &v, const std::string &separator = "\n");
 
 	/// Const [] operator
-	std::string::const_reference operator[](std::string::size_type idx) const;
+	NLMISC_API std::string::const_reference operator[](std::string::size_type idx) const;
 	/// Non-Const [] operator
-	std::string::reference operator[](std::string::size_type idx);
+	NLMISC_API std::string::reference operator[](std::string::size_type idx);
 
 	/// Return the first character, or '\\0' is the string is empty
-	char operator*();
+	NLMISC_API char operator*();
 	/// Return the n right hand most characters of a string
-	char back() const;
+	NLMISC_API char back() const;
 
 	/// Return the n left hand most characters of a string
-	CSString left(uint32 count) const;
+	NLMISC_API CSString left(uint32 count) const;
 	/// Return the n right hand most characters of a string
-	CSString right(uint32 count) const;
+	NLMISC_API CSString right(uint32 count) const;
 
 	/// Return the string minus the n left hand most characters of a string
-	CSString leftCrop(uint32 count) const;
+	NLMISC_API CSString leftCrop(uint32 count) const;
 	/// Return the string minus the n right hand most characters of a string
-	CSString rightCrop(uint32 count) const;
+	NLMISC_API CSString rightCrop(uint32 count) const;
 
 	/// Return sub string up to but not including first instance of given character, starting at 'iterator'
 	/// on exit 'iterator' indexes first character after extracted string segment
-	CSString splitToWithIterator(char c,uint32& iterator) const;
+	NLMISC_API CSString splitToWithIterator(char c, uint32 &iterator) const;
 	/// Return sub string up to but not including first instance of given character
-	CSString splitTo(char c) const;
+	NLMISC_API CSString splitTo(char c) const;
 	/// Return sub string up to but not including first instance of given character
-	CSString splitTo(char c,bool truncateThis=false,bool absorbSeparator=true);
+	NLMISC_API CSString splitTo(char c, bool truncateThis = false, bool absorbSeparator = true);
 	/// Return sub string up to but not including first instance of given character
-	CSString splitTo(const char *s,bool truncateThis=false);
+	NLMISC_API CSString splitTo(const char *s, bool truncateThis = false);
 	/// Return sub string up to but not including first non-quote encapsulated '//'
-	CSString splitToLineComment(bool truncateThis=false, bool useSlashStringEscape=true);
+	NLMISC_API CSString splitToLineComment(bool truncateThis = false, bool useSlashStringEscape = true);
 
 	/// Return sub string from character following first instance of given character on
-	CSString splitFrom(char c) const;
+	NLMISC_API CSString splitFrom(char c) const;
 	/// Return sub string from character following first instance of given character on
-	CSString splitFrom(const char *s) const;
+	NLMISC_API CSString splitFrom(const char *s) const;
 
 	/// Behave like a s strtok() routine, returning the sun string extracted from (and removed from) *this
-	CSString strtok(const char *separators,
+	NLMISC_API CSString strtok(const char *separators,
 					bool useSmartExtensions=false,			// if true then match brackets etc (and refine with following args)
 					bool useAngleBrace=false,				// - treat '<' and '>' as brackets
 					bool useSlashStringEscape=true,			// - treat '\' as escape char so "\"" == '"'
 					bool useRepeatQuoteStringEscape=true);	// - treat """" as '"')
 
 	/// Return first word (blank separated) - can remove extracted word from source string
-	CSString firstWord(bool truncateThis=false);
+	NLMISC_API CSString firstWord(bool truncateThis = false);
 	///	Return first word (blank separated)
-	CSString firstWordConst() const;
+	NLMISC_API CSString firstWordConst() const;
 	/// Return sub string remaining after the first word
-	CSString tailFromFirstWord() const;
+	NLMISC_API CSString tailFromFirstWord() const;
 	/// Count the number of words in a string
-	uint32 countWords() const;
+	NLMISC_API uint32 countWords() const;
 	/// Extract the given word
-	CSString word(uint32 idx) const;
+	NLMISC_API CSString word(uint32 idx) const;
 
 	/// Return first word or quote-encompassed sub-string - can remove extracted sub-string from source string
-	CSString firstWordOrWords(bool truncateThis=false,bool useSlashStringEscape=true,bool useRepeatQuoteStringEscape=true);
+	NLMISC_API CSString firstWordOrWords(bool truncateThis = false, bool useSlashStringEscape = true, bool useRepeatQuoteStringEscape = true);
 	///	Return first word or quote-encompassed sub-string
-	CSString firstWordOrWordsConst(bool useSlashStringEscape=true,bool useRepeatQuoteStringEscape=true) const;
+	NLMISC_API CSString firstWordOrWordsConst(bool useSlashStringEscape = true, bool useRepeatQuoteStringEscape = true) const;
 	/// Return sub string following first word (or quote-encompassed sub-string)
-	CSString tailFromFirstWordOrWords(bool useSlashStringEscape=true,bool useRepeatQuoteStringEscape=true) const;
+	NLMISC_API CSString tailFromFirstWordOrWords(bool useSlashStringEscape = true, bool useRepeatQuoteStringEscape = true) const;
 	/// Count the number of words (or quote delimited sub-strings) in a string
-	uint32 countWordOrWords(bool useSlashStringEscape=true,bool useRepeatQuoteStringEscape=true) const;
+	NLMISC_API uint32 countWordOrWords(bool useSlashStringEscape = true, bool useRepeatQuoteStringEscape = true) const;
 	/// Extract the given words (or quote delimited sub-strings)
-	CSString wordOrWords(uint32 idx,bool useSlashStringEscape=true,bool useRepeatQuoteStringEscape=true) const;
+	NLMISC_API CSString wordOrWords(uint32 idx, bool useSlashStringEscape = true, bool useRepeatQuoteStringEscape = true) const;
 
 	/// Return first line - can remove extracted line from source string
-	CSString firstLine(bool truncateThis=false);
+	NLMISC_API CSString firstLine(bool truncateThis = false);
 	///	Return first line
-	CSString firstLineConst() const;
+	NLMISC_API CSString firstLineConst() const;
 	/// Return sub string remaining after the first line
-	CSString tailFromFirstLine() const;
+	NLMISC_API CSString tailFromFirstLine() const;
 	/// Count the number of lines in a string
-	uint32 countLines() const;
+	NLMISC_API uint32 countLines() const;
 	/// Extract the given line
-	CSString line(uint32 idx) const;
+	NLMISC_API CSString line(uint32 idx) const;
 
 	/// A handy utility routine for knowing if a character is a white space character or not (' ','\t','\n','\r',26)
-	static bool isWhiteSpace(char c);
+	NLMISC_API static bool isWhiteSpace(char c);
 	///	Test whether character matches '{', '(','[' or '<' (the '<' test depends on the useAngleBrace parameter
-	static bool isOpeningDelimiter(char c,bool useAngleBrace=false);
+	NLMISC_API static bool isOpeningDelimiter(char c, bool useAngleBrace = false);
 	///	Test whether character matches '}', ')',']' or '>' (the '>' test depends on the useAngleBrace parameter
-	static bool isClosingDelimiter(char c,bool useAngleBrace=false);
+	NLMISC_API static bool isClosingDelimiter(char c, bool useAngleBrace = false);
 	///	Test whether character matches '\'' or '\"'
-	static bool isStringDelimiter(char c);
+	NLMISC_API static bool isStringDelimiter(char c);
 	///	Tests whether the character 'b' is the closing delimiter or string delimiter corresponding to character 'a'
-	static bool isMatchingDelimiter(char a,char b);
+	NLMISC_API static bool isMatchingDelimiter(char a, char b);
 
 	/// A handy utility routine for knowing if a character is a valid component of a file name
-	static bool isValidFileNameChar(char c);
+	NLMISC_API static bool isValidFileNameChar(char c);
 	/// A handy utility routine for knowing if a character is a valid first char for a keyword (a..z, '_')
-	static bool isValidKeywordFirstChar(char c);
+	NLMISC_API static bool isValidKeywordFirstChar(char c);
 	/// A handy utility routine for knowing if a character is a valid subsequent char for a keyword (a..z, '_', '0'..'9')
-	static bool isValidKeywordChar(char c);
+	NLMISC_API static bool isValidKeywordChar(char c);
 	/// A handy utility routine for knowing if a character is printable (isValidFileNameChar + more basic punctuation)
-	static bool isPrintable(char c);
+	NLMISC_API static bool isPrintable(char c);
 
 	/// A handy utility routine for knowing if a character is a hex digit 0..9, a..f
-	static bool isHexDigit(char c);
+	NLMISC_API static bool isHexDigit(char c);
 	/// A handy utility routine for converting a hex digit to a numeric value 0..15
-	static char convertHexDigit(char c);
+	NLMISC_API static char convertHexDigit(char c);
 
 	// a handy routine that tests whether a given string contains binary characters or not. Only characters>32 + isWhiteSpace() are valid
-	bool isValidText();
+	NLMISC_API bool isValidText();
 	// a handy routine that tests whether a given string is a valid file name or not
 	// "\"hello there\\bla\""	is valid
 	// "hello there\\bla"		is not valid - missing quotes
 	// "\"hello there\"\\bla"	is not valid - text after quotes
-	bool isValidFileName() const;
+	NLMISC_API bool isValidFileName() const;
 	// a second handy routine that tests whether a given string is a valid file name or not
 	// equivalent to ('\"'+*this+'\"').isValidFileName()
 	// "\"hello there\\bla\""	is not valid  - too many quotes
 	// "hello there\\bla"		is valid
-	bool isValidUnquotedFileName() const;
+	NLMISC_API bool isValidUnquotedFileName() const;
 	// a handy routine that tests whether or not a given string is a valid keyword
-	bool isValidKeyword() const;
+	NLMISC_API bool isValidKeyword() const;
 	// a handy routine that tests whether or not a given string is quote encapsulated
-	bool isQuoted(	bool useAngleBrace=false,						// treat '<' and '>' as brackets
+	NLMISC_API bool isQuoted(bool useAngleBrace = false, // treat '<' and '>' as brackets
 					bool useSlashStringEscape=true,					// treat '\' as escape char so "\"" == '"'
 					bool useRepeatQuoteStringEscape=true) const;	// treat """" as '"'
 
 	///	Search for the closing delimiter matching the opening delimiter at position 'startPos' in the 'this' string
 	/// on error returns startPos
-	uint32 findMatchingDelimiterPos(bool useAngleBrace,bool useSlashStringEscape,bool useRepeatQuoteStringEscape,uint32 startPos=0) const;
+	NLMISC_API uint32 findMatchingDelimiterPos(bool useAngleBrace, bool useSlashStringEscape, bool useRepeatQuoteStringEscape, uint32 startPos = 0) const;
 
 	///	Extract a chunk from the 'this' string
 	/// if first non-blank character is a string delimiter or an opening delimiter then extracts up to the matching closing delimiter
 	/// in all other cases an empty string is returned
 	/// the return string includes the opening blank characters (it isn't stripped)
-	CSString matchDelimiters(bool truncateThis=false,
+	NLMISC_API CSString matchDelimiters(bool truncateThis = false,
 							 bool useAngleBrace=false,				// treat '<' and '>' as brackets
 							 bool useSlashStringEscape=true,		// treat '\' as escape char so "\"" == '"'
 							 bool useRepeatQuoteStringEscape=true);	// treat """" as '"'
 
 	/// copy out section of string up to separator character, respecting quotes (but not brackets etc)
 	/// on error tail after returned string doesn't begin with valid separator character
-	CSString splitToStringSeparator(	char separator,
+	NLMISC_API CSString splitToStringSeparator(char separator,
 										bool truncateThis=false,
 										bool useSlashStringEscape=true,			// treat '\' as escape char so "\"" == '"'
 										bool useRepeatQuoteStringEscape=true,	// treat """" as '"'
@@ -210,14 +210,14 @@ public:
 	/// copy out section of string up to separator character, respecting quotes, brackets, etc
 	/// on error tail after returned string doesn't begin with valid separator character
 	/// eg: splitToSeparator(','); - this might be used to split some sort of ',' separated input
-	CSString splitToSeparator(	char separator,
+	NLMISC_API CSString splitToSeparator(char separator,
 								bool truncateThis=false,
 								bool useAngleBrace=false,				// treat '<' and '>' as brackets
 								bool useSlashStringEscape=true,			// treat '\' as escape char so "\"" == '"'
 								bool useRepeatQuoteStringEscape=true,	// treat """" as '"'
 								bool truncateSeparatorCharacter=false);	// if true tail begins after separator char
 
-	CSString splitToSeparator(	char separator,
+	NLMISC_API CSString splitToSeparator(char separator,
 								bool useAngleBrace=false,						// treat '<' and '>' as brackets
 								bool useSlashStringEscape=true,					// treat '\' as escape char so "\"" == '"'
 								bool useRepeatQuoteStringEscape=true) const;	// treat """" as '"'
@@ -225,7 +225,7 @@ public:
 	/// copy out section of string up to any of a given set of separator characters, respecting quotes, brackets, etc
 	/// on error tail after returned string doesn't begin with valid separator character
 	/// eg: splitToOneOfSeparators(",;",true,false,false,true); - this might be used to split a string read from a CSV file
-	CSString splitToOneOfSeparators(	const CSString& separators,
+	NLMISC_API CSString splitToOneOfSeparators(const CSString &separators,
 										bool truncateThis=false,
 										bool useAngleBrace=false,				// treat '<' and '>' as brackets
 										bool useSlashStringEscape=true,			// treat '\' as escape char so "\"" == '"'
@@ -233,14 +233,14 @@ public:
 										bool truncateSeparatorCharacter=false,	// if true tail begins after separator char
 										bool splitStringAtBrackets=true);		// if true consider brackets as breaks in the string
 
-	CSString splitToOneOfSeparators(	const CSString& separators,
+	NLMISC_API CSString splitToOneOfSeparators(const CSString &separators,
 										bool useAngleBrace=false,						// treat '<' and '>' as brackets
 										bool useSlashStringEscape=true,					// treat '\' as escape char so "\"" == '"'
 										bool useRepeatQuoteStringEscape=true) const;	// treat """" as '"'
 
 	/// Return true if the string is a single block encompassed by a pair of delimiters
 	/// eg: "((a)(b)(c))" or "(abc)" return true wheras "(a)(b)(c)" or "abc" return false
-	bool isDelimitedMonoBlock(	bool useAngleBrace=false,				// treat '<' and '>' as brackets
+	NLMISC_API bool isDelimitedMonoBlock(bool useAngleBrace = false, // treat '<' and '>' as brackets
 								bool useSlashStringEscape=true,			// treat '\' as escape char so "\"" == '"'
 								bool useRepeatQuoteStringEscape=true	// treat """" as '"'
 							 ) const;
@@ -248,26 +248,26 @@ public:
 	/// Return the sub string with leading and trailing delimiters ( such as '(' and ')' or '[' and ']' ) removed
 	/// if the string isn't a delimited monoblock then the complete string is returned
 	/// eg "((a)b(c))" returns "(a)b(c)" whereas "(a)b(c)" returns the identical "(a)b(c)"
-	CSString stripBlockDelimiters(	bool useAngleBrace=false,				// treat '<' and '>' as brackets
+	NLMISC_API CSString stripBlockDelimiters(bool useAngleBrace = false, // treat '<' and '>' as brackets
 									bool useSlashStringEscape=true,			// treat '\' as escape char so "\"" == '"'
 									bool useRepeatQuoteStringEscape=true	// treat """" as '"'
 								 ) const;
 
 	/// Append the individual words in the string to the result vector
 	/// retuns true on success
-	bool splitWords(CVectorSString& result) const;
+	NLMISC_API bool splitWords(CVectorSString &result) const;
 
 	/// Append the individual "wordOrWords" elements in the string to the result vector
 	/// retuns true on success
-	bool splitWordOrWords(CVectorSString& result,bool useSlashStringEscape=true,bool useRepeatQuoteStringEscape=true) const;
+	NLMISC_API bool splitWordOrWords(CVectorSString &result, bool useSlashStringEscape = true, bool useRepeatQuoteStringEscape = true) const;
 
 	/// Append the individual lines in the string to the result vector
 	/// retuns true on success
-	bool splitLines(CVectorSString& result) const;
+	NLMISC_API bool splitLines(CVectorSString &result) const;
 
 	/// Append the separator-separated elements in the string to the result vector
 	/// retuns true on success
-	bool splitBySeparator(	char separator, CVectorSString& result,
+	NLMISC_API bool splitBySeparator(char separator, CVectorSString &result,
 							bool useAngleBrace=false,				// treat '<' and '>' as brackets
 							bool useSlashStringEscape=true,			// treat '\' as escape char so "\"" == '"'
 							bool useRepeatQuoteStringEscape=true,	// treat """" as '"'
@@ -276,7 +276,7 @@ public:
 
 	/// Append the separator-separated elements in the string to the result vector
 	/// retuns true on success
-	bool splitByOneOfSeparators(	const CSString& separators, CVectorSString& result,
+	NLMISC_API bool splitByOneOfSeparators(const CSString &separators, CVectorSString &result,
 									bool useAngleBrace=false,				// treat '<' and '>' as brackets
 									bool useSlashStringEscape=true,			// treat '\' as escape char so "\"" == '"'
 									bool useRepeatQuoteStringEscape=true,	// treat """" as '"'
@@ -286,142 +286,142 @@ public:
 
 	/// join an array of strings to form a single string (appends to the existing content of this string)
 	/// if this string is not empty then a separator is added between this string and the following
-	const CSString& join(const std::vector<CSString>& strings, const CSString& separator="");
-	const CSString& join(const std::vector<CSString>& strings, char separator);
+	NLMISC_API const CSString &join(const std::vector<CSString> &strings, const CSString &separator = "");
+	NLMISC_API const CSString &join(const std::vector<CSString> &strings, char separator);
 
 	/// Return a copy of the string with leading and trainling spaces removed
-	CSString strip() const;
+	NLMISC_API CSString strip() const;
 	/// Return a copy of the string with leading spaces removed
-	CSString leftStrip() const;
+	NLMISC_API CSString leftStrip() const;
 	/// Return a copy of the string with trainling spaces removed
-	CSString rightStrip() const;
+	NLMISC_API CSString rightStrip() const;
 
 	/// Making an upper case copy of a string
-	CSString toUpper() const;
+	NLMISC_API CSString toUpper() const;
 
 	/// Making a lower case copy of a string
-	CSString toLower() const;
+	NLMISC_API CSString toLower() const;
 
 	/// encapsulate string in quotes, adding escape characters as necessary
-	CSString quote(	bool useSlashStringEscape=true,			// treat '\' as escape char so "\"" == '"'
+	NLMISC_API CSString quote(bool useSlashStringEscape = true, // treat '\' as escape char so "\"" == '"'
 					bool useRepeatQuoteStringEscape=true	// treat """" as '"'
 					) const;
 
 	/// if a string is not already encapsulated in quotes then return quote() else return *this
-	CSString quoteIfNotQuoted(	bool useSlashStringEscape=true,			// treat '\' as escape char so "\"" == '"'
+	NLMISC_API CSString quoteIfNotQuoted(bool useSlashStringEscape = true, // treat '\' as escape char so "\"" == '"'
 								bool useRepeatQuoteStringEscape=true	// treat """" as '"'
 								) const;
 
 	/// if a string is not a single word and is not already encapsulated in quotes then return quote() else return *this
-	CSString quoteIfNotAtomic(	bool useSlashStringEscape=true,			// treat '\' as escape char so "\"" == '"'
+	NLMISC_API CSString quoteIfNotAtomic(bool useSlashStringEscape = true, // treat '\' as escape char so "\"" == '"'
 								bool useRepeatQuoteStringEscape=true	// treat """" as '"'
 								) const;
 
 	/// strip delimiting quotes and clear through escape characters as necessary
-	CSString unquote(bool useSlashStringEscape=true,		// treat '\' as escape char so "\"" == '"'
+	NLMISC_API CSString unquote(bool useSlashStringEscape = true, // treat '\' as escape char so "\"" == '"'
 					 bool useRepeatQuoteStringEscape=true	// treat """" as '"'
 					) const;
 
 	/// equivalent to if (isQuoted()) unquote()
-	CSString unquoteIfQuoted(bool useSlashStringEscape=true,
+	NLMISC_API CSString unquoteIfQuoted(bool useSlashStringEscape = true,
 					 bool useRepeatQuoteStringEscape=true
 					) const;
 
 	///	encode special characters such as quotes, gt, lt, etc to xml encoding
 	/// the isParameter paramter is true if the string is to be used in an XML parameter block
-	CSString encodeXML(bool isParameter=false) const;
+	NLMISC_API CSString encodeXML(bool isParameter = false) const;
 
 	///	decode special characters such as quotes, gt, lt, etc from xml encoding
-	CSString decodeXML() const;
+	NLMISC_API CSString decodeXML() const;
 
 	/// verifies whether a string contains sub-strings that correspond to xml special character codes
-	bool isEncodedXML() const;
+	NLMISC_API bool isEncodedXML() const;
 
 	/// verifies whether a string contains any XML incompatible characters
 	/// in this case the string can be converted to xml compatible format via encodeXML()
 	/// the isParameter paramter is true if the string is to be used in an XML parameter block
-	bool isXMLCompatible(bool isParameter=false) const;
+	NLMISC_API bool isXMLCompatible(bool isParameter = false) const;
 
 	/// Replacing all occurences of one string with another
-	CSString replace(const char *toFind,const char *replacement) const;
+	NLMISC_API CSString replace(const char *toFind, const char *replacement) const;
 
 	/// Find index at which a sub-string starts (case not sensitive) - if sub-string not found then returns string::npos
-	std::string::size_type find(const char *toFind, std::string::size_type startLocation=0) const;
+	NLMISC_API std::string::size_type find(const char *toFind, std::string::size_type startLocation = 0) const;
 
 	/// Find index at which a sub-string starts (case NOT sensitive) - if sub-string not found then returns string::npos
-	std::string::size_type findNS(const char *toFind, std::string::size_type startLocation=0) const;
+	NLMISC_API std::string::size_type findNS(const char *toFind, std::string::size_type startLocation = 0) const;
 
 	/// Return true if this contains given sub string
-	bool contains(const char *toFind) const;
+	NLMISC_API bool contains(const char *toFind) const;
 
 	/// Return true if this contains given sub string
-	bool contains(int character) const;
+	NLMISC_API bool contains(int character) const;
 
 	/// Handy atoi routines...
-	int atoi() const;
-	sint32 atosi() const;
-	uint32 atoui() const;
-	sint64 atoi64() const;
-	sint64 atosi64() const;
-	uint64 atoui64() const;
+	NLMISC_API int atoi() const;
+	NLMISC_API sint32 atosi() const;
+	NLMISC_API uint32 atoui() const;
+	NLMISC_API sint64 atoi64() const;
+	NLMISC_API sint64 atosi64() const;
+	NLMISC_API uint64 atoui64() const;
 
 	/// A handy atof routine...
-	double atof() const;
+	NLMISC_API double atof() const;
 
 	/// assignment operator
-	CSString& operator=(const char *s);
+	NLMISC_API CSString &operator=(const char *s);
 	/// assignment operator
-	CSString& operator=(const std::string &s);
+	NLMISC_API CSString &operator=(const std::string &s);
 	/// assignment operator
-	CSString& operator=(char c);
+	NLMISC_API CSString &operator=(char c);
 	/// assignment operator
-	CSString& operator=(int i);
+	NLMISC_API CSString &operator=(int i);
 	/// assignment operator
-	CSString& operator=(uint32 u);
+	NLMISC_API CSString &operator=(uint32 u);
 	/// assignment operator
-	CSString& operator=(double d);
+	NLMISC_API CSString &operator=(double d);
 
 	/// Case insensitive string compare
-	bool operator==(const CSString &other) const;
+	NLMISC_API bool operator==(const CSString &other) const;
 	/// Case insensitive string compare
-	bool operator==(const std::string &other) const;
+	NLMISC_API bool operator==(const std::string &other) const;
 	/// Case insensitive string compare
-	bool operator==(const char* other) const;
+	NLMISC_API bool operator==(const char *other) const;
 
 	/// Case insensitive string compare
-	bool operator!=(const CSString &other) const;
+	NLMISC_API bool operator!=(const CSString &other) const;
 	/// Case insensitive string compare
-	bool operator!=(const std::string &other) const;
+	NLMISC_API bool operator!=(const std::string &other) const;
 	/// Case insensitive string compare
-	bool operator!=(const char* other) const;
+	NLMISC_API bool operator!=(const char *other) const;
 
 	/// Case insensitive string compare
-	bool operator<=(const CSString &other) const;
+	NLMISC_API bool operator<=(const CSString &other) const;
 	/// Case insensitive string compare
-	bool operator<=(const std::string &other) const;
+	NLMISC_API bool operator<=(const std::string &other) const;
 	/// Case insensitive string compare
-	bool operator<=(const char* other) const;
+	NLMISC_API bool operator<=(const char *other) const;
 
 	/// Case insensitive string compare
-	bool operator>=(const CSString &other) const;
+	NLMISC_API bool operator>=(const CSString &other) const;
 	/// Case insensitive string compare
-	bool operator>=(const std::string &other) const;
+	NLMISC_API bool operator>=(const std::string &other) const;
 	/// Case insensitive string compare
-	bool operator>=(const char* other) const;
+	NLMISC_API bool operator>=(const char *other) const;
 
 	/// Case insensitive string compare
-	bool operator>(const CSString &other) const;
+	NLMISC_API bool operator>(const CSString &other) const;
 	/// Case insensitive string compare
-	bool operator>(const std::string &other) const;
+	NLMISC_API bool operator>(const std::string &other) const;
 	/// Case insensitive string compare
-	bool operator>(const char* other) const;
+	NLMISC_API bool operator>(const char *other) const;
 
 	/// Case insensitive string compare
-	bool operator<(const CSString &other) const;
+	NLMISC_API bool operator<(const CSString &other) const;
 	/// Case insensitive string compare
-	bool operator<(const std::string &other) const;
+	NLMISC_API bool operator<(const std::string &other) const;
 	/// Case insensitive string compare
-	bool operator<(const char* other) const;
+	NLMISC_API bool operator<(const char *other) const;
 
 	//@{
 	//@name Easy concatenation operator to build strings
@@ -466,22 +466,22 @@ public:
 	//@}
 
 	/// Case insensitive string compare (useful for use as map keys, see less<CSString> below)
-	bool icompare(const std::string &other) const;
+	NLMISC_API bool icompare(const std::string &other) const;
 
 	/// Serial
-	void serial( NLMISC::IStream& s );
+	NLMISC_API void serial(NLMISC::IStream &s);
 
 	/// Read a text file into a string
-	bool readFromFile(const CSString& fileName);
+	NLMISC_API bool readFromFile(const CSString &fileName);
 
 	/// Write a string to a text file
 	// returns true on success, false on failure
-	bool writeToFile(const CSString& fileName) const;
+	NLMISC_API bool writeToFile(const CSString &fileName) const;
 
 	/// Write a string to a text file
 	// if the file already exists and its content is identicall to our own then it is not overwritten
 	// returns true on success (including the case where the file exists and is not overwritten), false on failure
-	bool writeToFileIfDifferent(const CSString& fileName) const;
+	NLMISC_API bool writeToFileIfDifferent(const CSString &fileName) const;
 };
 
 

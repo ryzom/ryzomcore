@@ -45,7 +45,7 @@ namespace NLMISC
  *	Btw the method is optimized like this (1 call instead of 3 (and one with virtual)) because we added a local cache (_Log)
  *	Thus it is much better like this.
  */
-class CImposterLog
+class NLMISC_API CImposterLog
 {
 private:
 	typedef CLog *(INelContext::*TAccessor)();
@@ -66,14 +66,14 @@ public:
 
 // NOTE: The following are all NULL until createDebug() has been called at least once
 // NOTE2: You must not use this class before the main() (not inside a static class ctor)
-extern CImposterLog		ErrorLog;
-extern CImposterLog		WarningLog;
-extern CImposterLog		InfoLog;
-extern CImposterLog		DebugLog;
-extern CImposterLog		AssertLog;
+NLMISC_API extern CImposterLog ErrorLog;
+NLMISC_API extern CImposterLog WarningLog;
+NLMISC_API extern CImposterLog InfoLog;
+NLMISC_API extern CImposterLog DebugLog;
+NLMISC_API extern CImposterLog AssertLog;
 
-extern CMemDisplayer *DefaultMemDisplayer;
-extern CMsgBoxDisplayer *DefaultMsgBoxDisplayer;
+NLMISC_API extern CMemDisplayer *DefaultMemDisplayer;
+NLMISC_API extern CMsgBoxDisplayer *DefaultMsgBoxDisplayer;
 
 
 //
@@ -81,36 +81,36 @@ extern CMsgBoxDisplayer *DefaultMsgBoxDisplayer;
 //
 
 // internal use only
-void createDebug (const char *logPath = NULL, bool logInFile = true, bool eraseLastLog = false);
+NLMISC_API void createDebug(const char *logPath = NULL, bool logInFile = true, bool eraseLastLog = false);
 
 /// Do not call this, unless you know what you're trying to do (it kills debug)!
-void destroyDebug();
+NLMISC_API void destroyDebug();
 
 // call this if you want to change the dir of the log.log file
-void changeLogDirectory(const std::string &dir);
+NLMISC_API void changeLogDirectory(const std::string &dir);
 
 // call this if you want to get the dir of the log.log file
-std::string getLogDirectory();
+NLMISC_API std::string getLogDirectory();
 
 // internal breakpoint window
-void enterBreakpoint (const char *message);
+NLMISC_API void enterBreakpoint(const char *message);
 
 // if true, the assert generates an assert
 // if false, the assert just displays a warning and continue
-void setAssert (bool assert);
+NLMISC_API void setAssert(bool assert);
 
 // Beep (Windows only, no effect elsewhere)
-void beep( uint freq, uint duration );
+NLMISC_API void beep(uint freq, uint duration);
 
 
-typedef std::string (*TCrashCallback)();
+NLMISC_API typedef std::string (*TCrashCallback)();
 
 // this function enables user application to add information in the log when a crash occurs
-void setCrashCallback(TCrashCallback crashCallback);
+NLMISC_API void setCrashCallback(TCrashCallback crashCallback);
 
 // For Crash report window. allow to know if a crash has already raised in the application
-bool	isCrashAlreadyReported();
-void	setCrashAlreadyReported(bool state);
+NLMISC_API bool isCrashAlreadyReported();
+NLMISC_API void setCrashAlreadyReported(bool state);
 
 
 // This very amazing macro __FUNCTION__ doesn't exist on VC6, map it to NULL
@@ -175,7 +175,7 @@ void	setCrashAlreadyReported(bool state);
 #		define nldebug 0&&
 #	endif
 #else // NL_NO_DEBUG
-	extern bool DisableNLDebug;
+NLMISC_API extern bool DisableNLDebug;
 #	define nldebug if (NLMISC::DisableNLDebug) {} else (NLMISC::createDebug(), NLMISC::INelContext::getInstance().getDebugLog()->setPosition( __LINE__, __FILE__, __FUNCTION__ ), NLMISC::INelContext::getInstance().getDebugLog())->displayNL
 #endif // NL_NO_DEBUG
 
@@ -359,9 +359,9 @@ void	setCrashAlreadyReported(bool state);
 #endif
 
 // Internal, don't use it (make smaller assert code)
-extern bool _assert_stop(bool &ignoreNextTime, sint line, const char *file, const char *funcName, const char *exp);
-extern void _assertex_stop_0(bool &ignoreNextTime, sint line, const char *file, const char *funcName, const char *exp);
-extern bool _assertex_stop_1(bool &ignoreNextTime);
+NLMISC_API extern bool _assert_stop(bool &ignoreNextTime, sint line, const char *file, const char *funcName, const char *exp);
+NLMISC_API extern void _assertex_stop_0(bool &ignoreNextTime, sint line, const char *file, const char *funcName, const char *exp);
+NLMISC_API extern bool _assertex_stop_1(bool &ignoreNextTime);
 
 // removed because we always check assert (even in release mode) #if defined(NL_DEBUG)
 
@@ -542,10 +542,10 @@ class ETrapDebug : public Exception
 
 
 /// Get the call stack and set it with result
-void getCallStack(std::string &result, sint skipNFirst = 0);
+NLMISC_API void getCallStack(std::string &result, sint skipNFirst = 0);
 
 /// Get the call stack and the logs and set it with result
-void getCallStackAndLog (std::string &result, sint skipNFirst = 0);
+NLMISC_API void getCallStackAndLog(std::string &result, sint skipNFirst = 0);
 
 /**
  * safe_cast<>: this is a function which nlassert() a dynamic_cast in Debug, and just do a static_cast in release.
@@ -610,10 +610,10 @@ template<class T, class U>	inline T	type_cast(U o)
 */
 
 // Need a breakpoint in the assert / verify macro
-extern bool DebugNeedAssert;
+NLMISC_API extern bool DebugNeedAssert;
 
 // Internal process, don't use it
-extern bool NoAssert;
+NLMISC_API extern bool NoAssert;
 
 
 template<class T>
@@ -672,7 +672,7 @@ private:
 };
 
 /// Data for instance counting
-struct TInstanceCounterData
+struct NLMISC_API TInstanceCounterData
 {
 	sint32		_InstanceCounter;
 	sint32		_DeltaCounter;
@@ -864,20 +864,20 @@ private:
 //
 
 /// Never use this function (internal use only)
-void nlFatalError (const char *format, ...);
+NLMISC_API void nlFatalError(const char *format, ...);
 
 /// Never use this function but call the nlerror macro (internal use only)
-void nlError (const char *format, ...);
+NLMISC_API void nlError(const char *format, ...);
 
 #define NL_CRASH_DUMP_FILE "nel_debug.dmp"
 
 // Standard API to retrieve error code and test for windows or unix platform
 
 /// Return the last error code generated by a system call
-int getLastError();
+NLMISC_API int getLastError();
 
 /// Return a readable text according to the error code submited
-std::string formatErrorMessage(int errorCode);
+NLMISC_API std::string formatErrorMessage(int errorCode);
 
 
 //-------------------------------------------------------------------------------------------------

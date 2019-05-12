@@ -28,7 +28,7 @@
 namespace NLMISC
 {
 
-class CCmdArgs
+class NLMISC_API CCmdArgs
 {
 public:
 	CCmdArgs();

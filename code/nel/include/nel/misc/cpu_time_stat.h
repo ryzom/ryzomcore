@@ -35,7 +35,7 @@ namespace NLMISC
  * \author Nevrax France
  * \date 2004
  */
-class CCPUTimeStat
+class NLMISC_API CCPUTimeStat
 {
 public:
 

@@ -37,7 +37,7 @@ namespace NLMISC
  * \author Nevrax France
  * \date 2000
  */
-class CTriangle
+class NLMISC_API CTriangle
 {
 public:
 	CVector		V0,V1,V2;

@@ -95,7 +95,7 @@ bool __category##_##__name##Class::execute(const std::string &rawCommandString, 
  * \author Nevrax France
  * \date 2001
  */
-class ICommand
+class NLMISC_API ICommand
 {
 public:
 

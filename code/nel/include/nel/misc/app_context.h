@@ -41,7 +41,7 @@ namespace NLMISC
 	 *	\author Boris 'SoniX' Boucher
 	 *  \date 2005
 	 */
-	class INelContext
+    class NLMISC_API INelContext
 	{
 		static INelContext ** _getInstance();
 	public:

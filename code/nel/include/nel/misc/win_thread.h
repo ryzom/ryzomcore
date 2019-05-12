@@ -31,7 +31,7 @@ namespace NLMISC {
  * \author Nevrax France
  * \date 2000
  */
-class CWinThread : public IThread
+class NLMISC_API CWinThread : public IThread
 {
 public:
 
@@ -91,7 +91,7 @@ private:
  * \author Nevrax France
  * \date 2001, 2007
  */
-class CWinProcess : public IProcess
+class NLMISC_API CWinProcess : public IProcess
 {
 public:
 

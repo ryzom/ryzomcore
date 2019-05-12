@@ -38,7 +38,7 @@ class CMatrix;
  * \author Nevrax France
  * \date 2000
  */
-class CAABBox
+class NLMISC_API CAABBox
 {
 protected:
 	/// The center of the bbox.

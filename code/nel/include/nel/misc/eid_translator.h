@@ -30,7 +30,7 @@
 namespace	NLMISC
 {
 
-class CEntityIdTranslator
+class NLMISC_API CEntityIdTranslator
 {
 	NLMISC_SAFE_SINGLETON_DECL_PTR(CEntityIdTranslator);
 public:

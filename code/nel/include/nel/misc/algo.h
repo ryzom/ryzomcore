@@ -82,12 +82,12 @@ T computeBilinear(const T &v0, const T &v1, const T &v2, const T &v3, const U &s
 /** Select all points crossed by the line [(x0,y0) ; (x1,y1)]
  *  Not the same than brensenham
  */
-void drawFullLine (float x0, float y0, float x1, float y1, std::vector<std::pair<sint, sint> > &result);
+NLMISC_API void drawFullLine(float x0, float y0, float x1, float y1, std::vector<std::pair<sint, sint>> &result);
 
 // ***************************************************************************
 /** Select points on the line [(x0,y0) ; (x1,y1)]
  */
-void drawLine (float x0, float y0, float x1, float y1, std::vector<std::pair<sint, sint> > &result);
+NLMISC_API void drawLine(float x0, float y0, float x1, float y1, std::vector<std::pair<sint, sint>> &result);
 
 
 // ***************************************************************************
@@ -177,18 +177,18 @@ static inline	void fastClamp8(sint &v)
  *	return false if wildcard has some "**" or "*?"
  *	NB: case-sensitive
  */
-bool		testWildCard(const char *strIn, const char *wildCard);
+NLMISC_API bool testWildCard(const char *strIn, const char *wildCard);
 
-bool		testWildCard(const std::string &strIn, const std::string &wildCard);
+NLMISC_API bool testWildCard(const std::string &strIn, const std::string &wildCard);
 
 
 // ***************************************************************************
 /** From a string with some separators, build a vector of string.
  *	eg: splitString("hello|bye|||bee", "|", list) return 3 string into list: "hello", "bye" and "bee".
  */
-void		splitString(const std::string &str, const std::string &separator, std::vector<std::string> &retList);
+NLMISC_API void splitString(const std::string &str, const std::string &separator, std::vector<std::string> &retList);
 
-void		splitUCString(const ucstring &ucstr, const ucstring &separator, std::vector<ucstring> &retList);
+NLMISC_API void splitUCString(const ucstring &ucstr, const ucstring &separator, std::vector<ucstring> &retList);
 
 // ***************************************************************************
 /// In a string or ucstring, find a substr and replace it with another. return true if replaced

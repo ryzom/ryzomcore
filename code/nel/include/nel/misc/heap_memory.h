@@ -34,7 +34,7 @@ namespace NLMISC
  * \author Nevrax France
  * \date 2001
  */
-class CHeapMemory
+class NLMISC_API CHeapMemory
 {
 public:
 

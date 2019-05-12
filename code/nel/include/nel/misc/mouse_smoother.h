@@ -33,7 +33,7 @@ namespace NLMISC
  * \author Nevrax France
  * \date 1/2004
  */
-class CMouseSmoother
+class NLMISC_API CMouseSmoother
 {
 public:
 	// create a mouse smoother with the given sampling period.

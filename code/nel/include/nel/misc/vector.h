@@ -36,7 +36,7 @@ class IStream;
  * \author Nevrax France
  * \date 2000
  */
-class CVector
+class NLMISC_API CVector
 {
 public:		// Attributes.
 	float	x,y,z;

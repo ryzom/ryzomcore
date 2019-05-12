@@ -28,7 +28,7 @@ namespace NLMISC
  * \author Kervala
  * \date 2010
  */
-class CSystemUtils
+class NLMISC_API CSystemUtils
 {
 	static nlWindow s_window;
 public:

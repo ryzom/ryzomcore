@@ -28,7 +28,8 @@ namespace NLMISC{
 	 The marked observers can then be notified and flushed on request.
 
 	 */
-	class CCDBBranchObservingHandler{
+class NLMISC_API CCDBBranchObservingHandler
+{
 
 		enum{
 			MAX_OBS_LST  = 2

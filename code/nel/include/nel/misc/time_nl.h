@@ -45,7 +45,7 @@ typedef sint64 TTicks;
  * \author Nevrax France
  * \date 2000-2005
  */
-class CTime
+class NLMISC_API CTime
 {
 public:
 	struct CTimerInfo

@@ -80,7 +80,7 @@ struct ERenameError : public EFile
  *	It can be loaded/called through CAsyncFileManager for instance
  * ***********************************************
  */
-class CIFile : public IStream
+class NLMISC_API CIFile : public IStream
 {
 public:		// Basic Usage.
 	/// Object. NB: destructor close() the stream.
@@ -198,7 +198,7 @@ private:
  * \author Nevrax France
  * \date 2000
  */
-class COFile : public IStream
+class NLMISC_API COFile : public IStream
 {
 public:		// Basic Usage.
 	/// Object. NB: destructor close() the stream.

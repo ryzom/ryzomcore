@@ -30,7 +30,7 @@ namespace NLMISC {
  * \author Nevrax France
  * \date 2000
  */
-class CSystemInfo
+class NLMISC_API CSystemInfo
 {
 public:
 

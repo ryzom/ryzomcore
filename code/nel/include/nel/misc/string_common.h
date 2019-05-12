@@ -28,8 +28,8 @@ namespace NLMISC
 {
 
 // get a string and add \r before \n if necessary
-std::string addSlashR (const std::string &str);
-std::string removeSlashR (const std::string &str);
+NLMISC_API std::string addSlashR(const std::string &str);
+NLMISC_API std::string removeSlashR(const std::string &str);
 
 /**
  * \def MaxCStringSize
@@ -81,7 +81,7 @@ _dest = _cstring
  * \param count Size of the buffer
  * \param format of the string, it must be the last argument before the \c '...'
  */
-sint smprintf( char *buffer, size_t count, const char *format, ... );
+NLMISC_API sint smprintf(char *buffer, size_t count, const char *format, ...);
 
 
 #ifdef NL_OS_WINDOWS
@@ -246,7 +246,7 @@ inline bool fromString(const std::string &str, double &val) { bool ret = sscanf(
 // (str[0] == '1' || (str[0] & 0xD2) == 0x50)
 //  - Kaetemi
 
-bool fromString(const std::string &str, bool &val);
+NLMISC_API bool fromString(const std::string &str, bool &val);
 
 inline bool fromString(const std::string &str, std::string &val) { val = str; return true; }
 
@@ -260,30 +260,30 @@ inline bool fromString(const std::string &str, sint &val) { return sscanf(str.c_
 // Convert local codepage to UTF-8
 // On Windows, the local codepage is undetermined
 // On Linux, the local codepage is always UTF-8 (no-op)
-std::string mbcsToUtf8(const char *str, size_t len = 0);
-std::string mbcsToUtf8(const std::string &str);
+NLMISC_API std::string mbcsToUtf8(const char *str, size_t len = 0);
+NLMISC_API std::string mbcsToUtf8(const std::string &str);
 
 // Convert wide codepage to UTF-8
 // On Windows, the wide codepage is UTF-16
 // On Linux, the wide codepage is UTF-32
-std::string wideToUtf8(const wchar_t *str, size_t len = 0);
-std::string wideToUtf8(const std::wstring &str);
+NLMISC_API std::string wideToUtf8(const wchar_t *str, size_t len = 0);
+NLMISC_API std::string wideToUtf8(const std::wstring &str);
 
 // Convert UTF-8 to wide character set
-std::wstring utf8ToWide(const char *str, size_t len = 0);
-std::wstring utf8ToWide(const std::string &str);
+NLMISC_API std::wstring utf8ToWide(const char *str, size_t len = 0);
+NLMISC_API std::wstring utf8ToWide(const std::string &str);
 
 // Convert UTF-8 to local multibyte character set
-std::string utf8ToMbcs(const char *str, size_t len = 0);
-std::string utf8ToMbcs(const std::string &str);
+NLMISC_API std::string utf8ToMbcs(const char *str, size_t len = 0);
+NLMISC_API std::string utf8ToMbcs(const std::string &str);
 
 // Convert wide to local multibyte character set
-std::string wideToMbcs(const wchar_t *str, size_t len = 0);
-std::string wideToMbcs(const std::wstring &str);
+NLMISC_API std::string wideToMbcs(const wchar_t *str, size_t len = 0);
+NLMISC_API std::string wideToMbcs(const std::wstring &str);
 
 // Convert local multibyte to wide character set
-std::wstring mbcsToWide(const char *str, size_t len = 0);
-std::wstring mbcsToWide(const std::string &str);
+NLMISC_API std::wstring mbcsToWide(const char *str, size_t len = 0);
+NLMISC_API std::wstring mbcsToWide(const std::string &str);
 
 inline const char *asCStr(const char *str) { return str; }
 inline const char *asCStr(const std::string &str) { return str.c_str(); }

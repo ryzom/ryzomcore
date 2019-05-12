@@ -76,7 +76,7 @@ public:
  * \author Nevrax France
  * \date 2000
  */
-class CClassRegistry
+class NLMISC_API CClassRegistry
 {
 public:
 	/// Inits the ClassRegistry (especially RegistredClasses)

@@ -22,7 +22,7 @@
 namespace NLMISC
 {
 
-class CFpuChecker
+class NLMISC_API CFpuChecker
 {
 private:
 	static int	_RefFpuCtrl;

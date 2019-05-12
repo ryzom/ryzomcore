@@ -107,7 +107,7 @@ namespace NLMISC
  * \author Nevrax France
  * \date 2000
  */
-class CConfigFile
+class NLMISC_API CConfigFile
 {
 public:
 

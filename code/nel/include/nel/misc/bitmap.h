@@ -70,7 +70,7 @@ const uint8	MAX_MIPMAP = 16;
  * *** IF YOU MODIFY THE STRUCTURE OF THIS CLASS, PLEASE INCREMENT IDriver::InterfaceVersion TO INVALIDATE OLD DRIVER DLL
  * **********************************
  */
-class CBitmap
+class NLMISC_API CBitmap
 {
 protected :
 	CObjectVector<uint8> _Data[MAX_MIPMAP];

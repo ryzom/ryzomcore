@@ -30,7 +30,7 @@ namespace NLMISC {
  * \author Nevrax France
  * \date 2001
  */
-struct CEntityId
+struct NLMISC_API CEntityId
 {
 	// pseudo constants
 	enum

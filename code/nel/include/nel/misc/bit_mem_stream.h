@@ -365,7 +365,7 @@ private:
  * \author Nevrax France
  * \date 2001, 2003
  */
-class CBitMemStream : public CMemStream
+class NLMISC_API CBitMemStream : public CMemStream
 {
 public:
 

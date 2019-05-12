@@ -30,7 +30,7 @@ namespace NLMISC
 
 // ***************************************************************************
 /// See CBlockMemory::Purge
-extern	bool		NL3D_BlockMemoryAssertOnPurge;	// =true.
+NLMISC_API extern bool NL3D_BlockMemoryAssertOnPurge; // =true.
 
 
 // ***************************************************************************

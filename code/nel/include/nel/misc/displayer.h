@@ -37,7 +37,7 @@ class CMutex;
  * \author Nevrax France
  * \date 2000
  */
-class IDisplayer
+class NLMISC_API IDisplayer
 {
 public:
 
@@ -90,7 +90,7 @@ private:
  * \author Nevrax France
  * \date 2000
  */
-class CStdDisplayer : virtual public IDisplayer
+class NLMISC_API CStdDisplayer : virtual public IDisplayer
 {
 public:
 	CStdDisplayer (const char *displayerName = "") : IDisplayer (displayerName) {}
@@ -110,7 +110,7 @@ protected:
  * \author Nevrax France
  * \date 2000
  */
-class CFileDisplayer : virtual public IDisplayer
+class NLMISC_API CFileDisplayer : virtual public IDisplayer
 {
 public:
 
@@ -147,7 +147,7 @@ private:
  * \author Nevrax France
  * \date 2000
  */
-class CMsgBoxDisplayer : virtual public IDisplayer
+class NLMISC_API CMsgBoxDisplayer : virtual public IDisplayer
 {
 public:
 	CMsgBoxDisplayer (const char *displayerName = "") : IDisplayer (displayerName), IgnoreNextTime(false) {}

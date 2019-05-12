@@ -194,7 +194,7 @@ class	IStreamable;
  * \author Nevrax France
  * \date 2000
  */
-class IStream
+class NLMISC_API IStream
 {
 public:
 	/**

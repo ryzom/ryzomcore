@@ -37,7 +37,7 @@ namespace NLMISC
  * \author Nevrax France
  * \date 2001
  */
-class	CNoiseValue
+class NLMISC_API CNoiseValue
 {
 public:
 	float	Abs;

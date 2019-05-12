@@ -37,7 +37,7 @@ namespace NLMISC
  * \author Nevrax France
  * \date 2000
  */
-class CRefCount
+class NLMISC_API CRefCount
 {
 public:
 	/// Destructor which release pinfo if necessary.

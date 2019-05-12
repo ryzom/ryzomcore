@@ -130,7 +130,7 @@ public:
  * \author Nevrax France
  * \date 2000, 2002
  */
-class CMemStream : public NLMISC::IStream
+class NLMISC_API CMemStream : public NLMISC::IStream
 {
 public:
 
