@@ -1081,6 +1081,8 @@ bool mainLoop()
 
 	ProgressBar.finish();
 
+	bool musicTriggerAutoPlay = true;
+
 	// Main loop. If the window is no more Active -> Exit.
 	while( !UserEntity->permanentDeath()
 		&& !game_exit )
@@ -1733,7 +1735,7 @@ bool mainLoop()
 					bool wantTraversals = !StereoDisplay || StereoDisplay->isSceneFirst();
 					bool keepTraversals = StereoDisplay && !StereoDisplay->isSceneLast();
 					doRenderScene(wantTraversals, keepTraversals);
-					
+
 					if (!StereoDisplay || StereoDisplay->isSceneLast())
 					{
 						if (fullDetail)
@@ -1803,7 +1805,7 @@ bool mainLoop()
 					{
 						displayPACSPrimitive();
 					}
-					
+
 					// display Sound box
 					if (SoundBox)
 					{
@@ -2418,6 +2420,17 @@ bool mainLoop()
 		// Update ingame duration and stat report sending
 		updateStatReport ();
 
+		// Auto play once on character login
+		if (musicTriggerAutoPlay)
+		{
+			musicTriggerAutoPlay = false;
+			if (ClientCfg.SoundOn && ClientCfg.MediaPlayerAutoPlay)
+			{
+				MusicPlayer.stop();
+				CAHManager::getInstance()->runActionHandler("music_player", NULL, "play_songs");
+				MusicPlayer.play();
+			}
+		}
 		// Update the music player
 		MusicPlayer.update ();
 
@@ -2452,6 +2465,9 @@ bool mainLoop()
 
 				// we have just completed init main loop, after reselecting character
 				//	repeat the steps before the main loop itself
+
+				// new char, retrigger music autoplay
+				musicTriggerAutoPlay = true;
 
 				// pre main loop in mainLoop
 				resetIngameTime ();
