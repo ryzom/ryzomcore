@@ -585,7 +585,7 @@ void		CGameContextMenu::update()
 		if (_TextPAEnterStable)
 			_TextPAEnterStable->setActive(false);
 		if (_TextPAEnterBag)
-			_TextPAEnterStable->setActive(false);
+			_TextPAEnterBag->setActive(false);
 	}
 
 	// Remove Free option to prevent miss click
