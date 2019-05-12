@@ -468,6 +468,10 @@ CClientConfig::CClientConfig()
 	ColorShout			= CRGBA(150,0,0,255);		// Default Shout color.
 	ColorTalk			= CRGBA(255,255,255,255);	// Default Talk color.
 
+	// MP3 player
+	MediaPlayerDirectory	= "music";
+	MediaPlayerAutoPlay		= false;
+
 //	PreDataPath.push_back("data/gamedev/language/");	// Default Path for the language data
 
 //	DataPath.push_back("data/");					// Default Path for the Data.
@@ -1242,6 +1246,10 @@ void CClientConfig::setValues()
 	READ_BOOL_DEV(UseADPCM)
 	// Max track
 	READ_INT_FV(MaxTrack)
+
+	// MP3 Player
+	READ_STRING_FV(MediaPlayerDirectory);
+	READ_BOOL_FV(MediaPlayerAutoPlay);
 
 	/////////////////
 	// USER COLORS //

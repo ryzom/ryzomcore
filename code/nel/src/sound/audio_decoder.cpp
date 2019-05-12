@@ -103,7 +103,7 @@ IAudioDecoder *IAudioDecoder::createAudioDecoder(const std::string &type, NLMISC
 	{
 		return new CAudioDecoderVorbis(stream, loop);
 	}
-#if (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
+#if !defined(NL_OS_WINDOWS) || (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
 	else if (type_lower == "mp3")
 	{
 		return new CAudioDecoderMP3(stream, loop);
@@ -146,7 +146,7 @@ bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, st
 
 		nlwarning("Unable to open: '%s'", filepath.c_str());
 	}
-#if (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
+#if !defined(NL_OS_WINDOWS) || (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
 	else if (type_lower == "mp3")
 	{
 		CIFile ifile;
