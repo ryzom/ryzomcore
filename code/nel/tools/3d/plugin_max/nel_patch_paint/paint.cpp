@@ -4063,7 +4063,7 @@ bool loadLigoConfigFile (CLigoConfig& config, Interface& it)
 		if (res)
 		{
 			// Path
-			std::string modulePath = NLMISC::CFile::getPath(MCharStrToUtf8(sModulePath));
+			std::string modulePath = NLMISC::CFile::getPath(MCharStrToUtf8(sModulePath)) + "ligoscape.cfg";
 
 			try
 			{
