@@ -508,7 +508,7 @@ bool CZoneBank::initFromPath(const std::string &sPathName, std::string &error)
 
 		if (ext == "ligozone")
 		{
-			if (!addElement(NLMISC::CFile::getFilename(files[i]), error))
+			if (!addElement(files[i], error))
 				return false;
 		}
 	}

@@ -134,7 +134,7 @@ bool CMaxToLigo::loadLigoConfigFile (CLigoConfig& config, Interface& it, bool di
 		if (res)
 		{
 			// Path
-			std::string path = NLMISC::CFile::getPath(MCharStrToUtf8(sModulePath) + "ligoscape.cfg");
+			std::string path = NLMISC::CFile::getPath(MCharStrToUtf8(sModulePath)) + "ligoscape.cfg";
 
 			try
 			{
