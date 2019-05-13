@@ -89,7 +89,7 @@ heapSize += 15000000
 -- In case of error just abort the app and don't show nel report window
 NelForceQuitOnMsgDisplayer()
 
-nlErrorFilename = "output_logfile"
+nlErrorFilename = "%OutputLogfile%"
 nlErrorStream = openFile nlErrorFilename mode:"a"
 if nlErrorStream == undefined then
 	nlErrorStream = createFile nlErrorFilename
@@ -237,16 +237,19 @@ fn isToBeExportedCollision node =
 	return false
 )
 
--- Export collisions from the current loaded zone
-fn exportCollisionsFromZone outputNelDir filename =
+fn selectCollisionsForExport =
 (
 	-- Select all collision mesh
 	max select none
 	clearSelection()
+	anySelected = false;
 	for m in geometry do
 	(
 		if (isToBeExportedCollision m) == true then
+		(
 			selectmore m
+			anySelected = true
+		)
 	)
 	for node in objects where classOf node == XRefObject do
 	(
@@ -254,10 +257,18 @@ fn exportCollisionsFromZone outputNelDir filename =
 		if (superclassOf sourceObject == GeometryClass) then
 		(
 			if (isToBeExportedCollision node) == true then
+			(
 				selectmore node
+				anySelected = true
+			)
 		)
 	)
-	
+	return anySelected
+)
+
+-- Export collisions from the current loaded zone
+fn exportCollisionsFromZone outputNelDir filename =
+(
 	-- Export the collision
 	if (NelExportCollision ($selection as array) outputNelDir) == false then
 	(
@@ -388,8 +399,8 @@ fn exportInstanceGroupFromZone inputFile outputPath igName transitionZone cellSi
 				output = (outputPath + ig_array[ig] + ".ig")
 
 				-- Check date
-				if (NeLTestFileDate output inputFile) == true then
-				(
+				-- if (NeLTestFileDate output inputFile) == true then
+				-- (
 					-- Select none
 					max select none
 					clearSelection()
@@ -460,12 +471,12 @@ fn exportInstanceGroupFromZone inputFile outputPath igName transitionZone cellSi
 						nlerror ("ERROR fatal error exporting ig "+ig_array[ig]+" in file "+inputFile)
 						tagThisFile = false
 					)
-				)
-				else
-				(
-					nlerror ("SKIPPED ligo ig "+output)
-					tagThisFile = false
-				)
+				-- )
+				-- else
+				-- (
+				-- 	nlerror ("SKIPPED ligo ig "+output)
+				-- 	tagThisFile = false
+				-- )
 			)
 		)
 	)
@@ -488,7 +499,7 @@ MaxFilesList = getFiles (ligo_root_path + "*.max")
 try
 (
 	-- Set the bank pathname
-	bank_filename = "bankFilename"
+	bank_filename = "%SmallBankFilename%"
 	NelSetTileBank bank_filename
 
 	cellSize = NeLLigoGetCellSize ()
@@ -504,7 +515,7 @@ try
 		if (tokenArray.count == 3) and (tokenArray[1] == "zonematerial")  then
 		(			
 			-- Get the tag file name
-			tag = ("output_directory_tag/"+(getFilenameFile curFileName)+(getFilenameType curFileName)+".tag")
+			tag = ("%TagDirectory%/"+(getFilenameFile curFileName)+(getFilenameType curFileName)+".tag")
 
 			-- Compare date with the tag file
 			if (NeLTestFileDate tag curFileName) == true then
@@ -584,21 +595,27 @@ try
 				)
 
 				-- export collisions
-				try
+				if selectCollisionsForExport() then
 				(
-					nlerror("exportCollisionsFromZone " + curFileName)
-					exportCollisionsFromZone (ligo_export_path + "cmb\\") curFileName
-				)
-				catch
-				(
-					nlerror("couldn't export collision for " + curFileName)
-					tagThisFile = false
+					try
+					(
+						nlerror("exportCollisionsFromZone " + curFileName)
+						exportCollisionsFromZone (ligo_export_path + "cmb\\") curFileName
+						nlerror("past exportCollisionsFromZone")
+					)
+					catch
+					(
+						nlerror("couldn't export collision for " + curFileName)
+						tagThisFile = false
+					)
 				)
 
 				-- Write a tag file
+				nlerror("check to write tag")
 				if tagThisFile == true then
 				(
-					nlerror("tagThisFile " + curFileName)
+					nlerror("TAG " + curFileName)
+					nlerror("TAGFILE " + tag)
 					tagFile = createFile tag
 					if tagFile == undefined then
 					(
@@ -613,6 +630,7 @@ try
 				)
 				else
 				(
+					nlerror("NOT TAGGING " + curFileName)
 					removeRunningTag = false
 				)
 				
@@ -657,7 +675,7 @@ try
 			)
 
 			-- Get the tag file name
-			tag = ("output_directory_tag/"+(getFilenameFile curFileName)+(getFilenameType curFileName)+".tag")
+			tag = ("%TagDirectory%/"+(getFilenameFile curFileName)+(getFilenameType curFileName)+".tag")
 
 			-- Compare date with the tag file
 			if (NeLTestFileDate tag curFileName) == true then
@@ -813,6 +831,7 @@ try
 							-- export igs
 							try
 							(
+								nlerror("exportInstanceGroupFromZone " + curFileName)
 								exportInstanceGroupFromZone curFileName (ligo_export_path + "igs\\") (lowercase (zoneBaseName)) zone cellSize
 							)
 							catch
@@ -822,14 +841,18 @@ try
 							)
 
 							-- export collisions
-							try
+							if selectCollisionsForExport() then
 							(
-								exportCollisionsFromZone (ligo_export_path + "cmb\\") curFileName
-							)
-							catch
-							(
-								nlerror("couldn't export collision for " + curFileName)
-								tagThisFile = false
+								try
+								(
+									nlerror("exportCollisionsFromZone " + curFileName)
+									exportCollisionsFromZone (ligo_export_path + "cmb\\") curFileName
+								)
+								catch
+								(
+									nlerror("couldn't export collision for " + curFileName)
+									tagThisFile = false
+								)
 							)
 						)
 					)
@@ -837,6 +860,8 @@ try
 					-- Write a tag file
 					if tagThisFile == true then
 					(
+						nlerror("TAG " + curFileName)
+						nlerror("TAGFILE " + tag)
 						tagFile = createFile tag
 						if tagFile == undefined then
 						(
@@ -851,6 +876,7 @@ try
 					)
 					else
 					(
+						nlerror("NOT TAGGING " + curFileName)
 						removeRunningTag = false
 					)
 				)
@@ -878,7 +904,7 @@ try
 		if (tokenArray.count == 2) and (tokenArray[1] == "zonespecial")  then
 		(
 			-- Get the tag file name
-			tag = ("output_directory_tag/"+(getFilenameFile curFileName)+(getFilenameType curFileName)+".tag")
+			tag = ("%TagDirectory%/"+(getFilenameFile curFileName)+(getFilenameType curFileName)+".tag")
 
 			-- Compare date with the tag file
 			if (NeLTestFileDate tag curFileName) == true then
@@ -944,6 +970,7 @@ try
 				-- export matching igs
 				try
 				(
+					nlerror("exportInstanceGroupFromZone " + curFileName)
 					exportInstanceGroupFromZone curFileName (ligo_export_path + "igs\\") "" 0 cellSize
 				)
 				catch
@@ -953,19 +980,25 @@ try
 				)
 
 				-- export collisions
-				try
+				if selectCollisionsForExport() then
 				(
-					exportCollisionsFromZone (ligo_export_path + "cmb\\") curFileName
-				)
-				catch
-				(
-					nlerror("couldn't export collision for " + curFileName)
-					tagThisFile = false
+					try
+					(
+						nlerror("exportCollisionsFromZone " + curFileName)
+						exportCollisionsFromZone (ligo_export_path + "cmb\\") curFileName
+					)
+					catch
+					(
+						nlerror("couldn't export collision for " + curFileName)
+						tagThisFile = false
+					)
 				)
 
 				-- Write a tag file
 				if tagThisFile == true then
 				(
+					nlerror("TAG " + curFileName)
+					nlerror("TAGFILE " + tag)
 					tagFile = createFile tag
 					if tagFile == undefined then
 					(
@@ -980,6 +1013,7 @@ try
 				)
 				else
 				(
+					nlerror("NOT TAGGING " + curFileName)
 					removeRunningTag = false
 				)
 				

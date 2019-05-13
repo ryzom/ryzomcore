@@ -92,9 +92,9 @@ if LigoExportLand == "" or LigoExportOnePass == 1:
 		sSrc = open(scriptSrc, "r")
 		sDst = open(scriptDst, "w")
 		for line in sSrc:
-			newline = line.replace("output_logfile", outputLogfile)
-			newline = newline.replace("output_directory_tag", tagDirectory)
-			newline = newline.replace("bankFilename", smallBank)
+			newline = line.replace("%OutputLogfile%", outputLogfile)
+			newline = newline.replace("%TagDirectory%", tagDirectory)
+			newline = newline.replace("%SmallBankFilename%", smallBank)
 			sDst.write(newline)
 		sSrc.close()
 		sDst.close()
