@@ -354,7 +354,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 						if (RPO::isZone (*pNode, time))
 						{
 							// Save path
-							std::string sSavePath = MCharStrToUtf8(pNode->GetName());
+							std::string sSavePath = NLMISC::toLower(MCharStrToUtf8(pNode->GetName()));
 
 							// Choose a file to export
 							if (!CExportNel::getScriptAppData (pNode, NEL3D_APPDATA_DONTEXPORT, 0))
@@ -372,7 +372,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 						else if (CExportNel::isVegetable (*pNode, time))
 						{
 							// Save path
-							std::string sSavePath = MCharStrToUtf8(pNode->GetName());
+							std::string sSavePath = NLMISC::toLower(MCharStrToUtf8(pNode->GetName()));
 
 							// Choose a file to export
 							if (!CExportNel::getScriptAppData (pNode, NEL3D_APPDATA_DONTEXPORT, 0))
@@ -391,7 +391,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 						else if (CExportNel::isLodCharacter (*pNode, time))
 						{
 							// Save path
-							std::string sSavePath = MCharStrToUtf8(pNode->GetName());
+							std::string sSavePath = NLMISC::toLower(MCharStrToUtf8(pNode->GetName()));
 
 							// Choose a file to export
 							if (!CExportNel::getScriptAppData (pNode, NEL3D_APPDATA_DONTEXPORT, 0))
@@ -410,7 +410,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 						else if (CExportNel::isMesh (*pNode, time))
 						{
 							// Save path
-							std::string sSavePath = MCharStrToUtf8(pNode->GetName());
+							std::string sSavePath = NLMISC::toLower(MCharStrToUtf8(pNode->GetName()));
 
 							// Choose a file to export
 							if (!CExportNel::getScriptAppData (pNode, NEL3D_APPDATA_DONTEXPORT, 0))
