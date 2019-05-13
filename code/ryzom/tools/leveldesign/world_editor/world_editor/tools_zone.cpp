@@ -118,12 +118,11 @@ const string &CToolsZoneList::getItem (uint32 nIndex)
 void CToolsZoneList::DrawItem (LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	ASSERT(lpDrawItemStruct->CtlType == ODT_LISTBOX);
-	LPCTSTR lpszText = (LPCTSTR) lpDrawItemStruct->itemData;
-	if (lpszText == NULL)
-		return;
 	CDC dc;
 
 	if (lpDrawItemStruct->itemID >= _BitmapList.size())
+		return;
+	if (lpDrawItemStruct->itemID >= _ItemNames.size())
 		return;
 
 	dc.Attach (lpDrawItemStruct->hDC);
@@ -168,7 +167,8 @@ void CToolsZoneList::DrawItem (LPDRAWITEMSTRUCT lpDrawItemStruct)
 	}
 
 	// Draw the text.
-	dc.DrawText (lpszText, _tcslen(lpszText), &rectLeft, DT_CENTER|DT_SINGLELINE|DT_VCENTER);
+	NLMISC::tstring itemName = NLMISC::utf8ToTStr(_ItemNames[lpDrawItemStruct->itemID]);
+	dc.DrawText(itemName.c_str(), itemName.size(), &rectLeft, DT_CENTER|DT_SINGLELINE|DT_VCENTER);
 
 	// Reset the background color and the text color back to their original values.
 	dc.SetTextColor (crOldTextColor);
