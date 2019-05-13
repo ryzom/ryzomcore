@@ -86,6 +86,9 @@ fn lowercase instring =
 -- Allocate 20 Me for the script
 heapSize += 15000000
 
+-- In case of error just abort the app and don't show nel report window
+NelForceQuitOnMsgDisplayer()
+
 nlErrorFilename = "output_logfile"
 nlErrorStream = openFile nlErrorFilename mode:"a"
 if nlErrorStream == undefined then
