@@ -84,7 +84,7 @@ fn lowercase instring =
 )
 
 -- Allocate 20 Me for the script
-heapSize += 15000000
+heapSize += 30000000
 
 -- In case of error just abort the app and don't show nel report window
 NelForceQuitOnMsgDisplayer()
@@ -526,8 +526,17 @@ try
 				resetMAXFile #noprompt
 				
 				nlerror ("Scanning file "+curFileName+" ...")
-				mergeMaxFile curFileName quiet:true
-				objXRefMgr.UpdateAllRecords()
+				loadMaxFile curFileName quiet:true
+				try
+				(
+					nlerror("Update XRef records...")
+					objXRefMgr.UpdateAllRecords()
+				)
+				catch
+				(
+					nlerror("ERROR Failed to update XRef! (DON'T TAG)...")
+					tagThisFile = false
+				)
 
 				-- Unhide category
 				unhidelayers()
@@ -686,8 +695,17 @@ try
 				resetMAXFile #noprompt
 				
 				nlerror ("Scanning file "+curFileName+" ...")
-				mergeMaxFile curFileName quiet:true
-				objXRefMgr.UpdateAllRecords()
+				loadMaxFile curFileName quiet:true
+				try
+				(
+					nlerror("Update XRef records...")
+					objXRefMgr.UpdateAllRecords()
+				)
+				catch
+				(
+					nlerror("ERROR Failed to update XRef! (DON'T TAG)...")
+					tagThisFile = false
+				)
 				
 				-- Unhide category
 				unhidelayers()
@@ -915,8 +933,17 @@ try
 				resetMAXFile #noprompt
 				
 				nlerror ("Scanning file "+curFileName+" ...")
-				mergeMaxFile curFileName quiet:true
-				objXRefMgr.UpdateAllRecords()
+				loadMaxFile curFileName quiet:true
+				try
+				(
+					nlerror("Update XRef records...")
+					objXRefMgr.UpdateAllRecords()
+				)
+				catch
+				(
+					nlerror("ERROR Failed to update XRef! (DON'T TAG)...")
+					tagThisFile = false
+				)
 
 				-- Unhide category
 				unhidelayers()
