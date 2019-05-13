@@ -29,7 +29,9 @@ sys.path.append("../../configuration")
 
 if os.path.isfile("log.log"):
 	os.remove("log.log")
-log = open("log.log", "w")
+if os.path.isfile("temp_log.log"):
+	os.remove("temp_log.log")
+log = open("temp_log.log", "w")
 from scripts import *
 from buildsite import *
 from process import *
@@ -140,6 +142,9 @@ if LigoExportLand == "" or LigoExportOnePass == 1:
 	printLog(log, "")
 
 log.close()
+if os.path.isfile("log.log"):
+	os.remove("log.log")
+shutil.move("temp_log.log", "log.log")
 
 
 # end of file
