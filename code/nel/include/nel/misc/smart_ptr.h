@@ -37,11 +37,11 @@ namespace NLMISC
  * \author Nevrax France
  * \date 2000
  */
-class NLMISC_API CRefCount
+class CRefCount
 {
 public:
 	/// Destructor which release pinfo if necessary.
-	~CRefCount();
+	NLMISC_API ~CRefCount();
 	/// Default constructor init crefs to 0.
 	CRefCount() { crefs = 0; pinfo = &NullPtrInfo; }
 
@@ -63,7 +63,7 @@ public:
 	};
 
 	// OWN null for ref ptr. (Optimisations!!!)
-	static	CPtrInfoBase	NullPtrInfo;
+	NLMISC_API static	CPtrInfoBase	NullPtrInfo;
 	friend struct			CPtrInfo;
 
 	// for special case use only.

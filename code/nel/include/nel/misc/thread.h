@@ -164,7 +164,7 @@ public:
 	  * Return a pointer on the current process.
 	  * Implemented in the derived class.
 	  */
-	static IProcess *getCurrentProcess ();
+	NLMISC_API static IProcess *getCurrentProcess ();
 
 	/**
 	  * Return process CPU mask. Each bit stand for a CPU usable by the process threads.
