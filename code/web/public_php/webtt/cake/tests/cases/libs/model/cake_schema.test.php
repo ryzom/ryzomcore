@@ -872,8 +872,8 @@ class CakeSchemaTest extends CakeTestCase {
 					'author_id' => array('column' => 'author_id'),
 				),
 				'tableParameters' => array(
-					'charset' => 'utf8',
-					'collate' => 'utf8_general_ci',
+					'charset' => 'utf8mb4',
+					'collate' => 'utf8mb4_general_ci',
 					'engine' => 'MyISAM'
 				)
 			),
@@ -885,8 +885,8 @@ class CakeSchemaTest extends CakeTestCase {
 					'PRIMARY' => array('column' => 'id', 'unique' => true),
 				),
 				'tableParameters' => array(
-					'charset' => 'utf8',
-					'collate' => 'utf8_general_ci'
+					'charset' => 'utf8mb4',
+					'collate' => 'utf8mb4_general_ci'
 				)
 			)
 		);
@@ -898,8 +898,8 @@ class CakeSchemaTest extends CakeTestCase {
 				),
 				'change' => array(
 					'tableParameters' => array(
-						'charset' => 'utf8',
-						'collate' => 'utf8_general_ci',
+						'charset' => 'utf8mb4',
+						'collate' => 'utf8mb4_general_ci',
 						'engine' => 'MyISAM'
 					)
 				)
@@ -910,8 +910,8 @@ class CakeSchemaTest extends CakeTestCase {
 				),
 				'change' => array(
 					'tableParameters' => array(
-						'charset' => 'utf8',
-						'collate' => 'utf8_general_ci',
+						'charset' => 'utf8mb4',
+						'collate' => 'utf8mb4_general_ci',
 					)
 				)
 			)

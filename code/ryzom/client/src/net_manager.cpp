@@ -25,7 +25,6 @@
 #include "game_share/generic_xml_msg_mngr.h"
 #include "game_share/msg_client_server.h"
 #include "game_share/bot_chat_types.h"
-#include "game_share/news_types.h"
 #include "game_share/mode_and_behaviour.h"
 #include "game_share/chat_group.h"
 #include "game_share/character_summary.h"

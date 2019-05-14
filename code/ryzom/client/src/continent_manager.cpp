@@ -628,8 +628,8 @@ void CContinentManager::readFrom(xmlNodePtr node)
 			for(uint i = 0; i< itContinent->second->UserLandMarks.size(); ++i)
 			{
 				const CUserLandMark& test = itContinent->second->UserLandMarks[i];
-				uint xdiff = abs(test.Pos.x - lm.Pos.x) * 100;
-				uint ydiff = abs(test.Pos.y - lm.Pos.y) * 100;
+				uint xdiff = fabs(test.Pos.x - lm.Pos.x) * 100.f;
+				uint ydiff = fabs(test.Pos.y - lm.Pos.y) * 100.f;
 				if (xdiff == 0 && ydiff == 0)
 				{
 					add = false;
