@@ -1817,7 +1817,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		{
 			
 			// Check that the value is not out of database precision
-			STOP_IF(value > (1<<4)-1, "setCOUNTER : Value out of bound : trying to store "<<value<<" in a unsigned field limited to 4 bits");
+			STOP_IF(value > (1<<5)-1, "setCOUNTER : Value out of bound : trying to store "<<value<<" in a unsigned field limited to 5 bits");
 				
 
 			_setProp(dbGroup, _COUNTER, value, forceSending);
