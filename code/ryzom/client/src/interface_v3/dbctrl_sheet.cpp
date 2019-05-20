@@ -135,53 +135,39 @@ int CDBCtrlSheet::luaGetDraggedSheet(CLuaState &ls)
 }
 
 // ***************************************************************************
-int CDBCtrlSheet::luaGetHpBuff(CLuaState &ls)
+int CDBCtrlSheet::luaGetItemInfo(CLuaState &ls)
 {
 	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
-	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
+	uint32 itemSlotId = getInventory().getItemSlotId(ctrlSheet);
 	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
 
-	ls.push(itemInfo.HpBuff);
+	ls.newTable();
+	CLuaObject out(ls);
+	// for now all but magic
+	out.setValue("CurrentDamage", itemInfo.CurrentDamage);
+	out.setValue("MaxDamage", itemInfo.MaxDamage);
+	out.setValue("DodgeModifier", itemInfo.DodgeModifier);
+	out.setValue("ParryModifier", itemInfo.ParryModifier);
+	out.setValue("AdversaryDodgeModifier", itemInfo.AdversaryDodgeModifier);
+	out.setValue("AdversaryParryModifier", itemInfo.AdversaryParryModifier);
+	out.setValue("Hp", itemInfo.Hp);
+	out.setValue("HpMax", itemInfo.HpMax);
+	out.setValue("Range", itemInfo.Range);
+	out.setValue("HpBuff", itemInfo.HpBuff);
+	out.setValue("SapBuff", itemInfo.SapBuff);
+	out.setValue("StaBuff", itemInfo.StaBuff);
+	out.setValue("FocusBuff", itemInfo.FocusBuff);
+	out.setValue("SapLoadCurrent", itemInfo.SapLoadCurrent);
+	out.setValue("SapLoadMax", itemInfo.SapLoadMax);
+	out.setValue("ProtectionFactor", itemInfo.ProtectionFactor);
+	out.setValue("MaxSlashingProtection", itemInfo.MaxSlashingProtection);
+	out.setValue("MaxPiercingProtection", itemInfo.MaxPiercingProtection);
+	out.setValue("MaxBluntProtection", itemInfo.MaxBluntProtection);
+	out.setValue("WearEquipmentMalus", itemInfo.WearEquipmentMalus);
+	out.push();
 
 	return 1;
 }
-
-// ***************************************************************************
-int CDBCtrlSheet::luaGetSapBuff(CLuaState &ls)
-{
-	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
-	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
-	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
-
-	ls.push(itemInfo.SapBuff);
-	
-	return 1;
-}
-
-// ***************************************************************************
-int CDBCtrlSheet::luaGetFocusBuff(CLuaState &ls)
-{
-	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
-	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
-	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
-
-	ls.push(itemInfo.FocusBuff);
-
-	return 1;
-}
-
-// ***************************************************************************
-int CDBCtrlSheet::luaGetStaBuff(CLuaState &ls)
-{
-	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
-	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
-	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
-
-	ls.push(itemInfo.StaBuff);
-
-	return 1;
-}
-
 
 // ***************************************************************************
 int CDBCtrlSheet::luaGetName(CLuaState &ls)
