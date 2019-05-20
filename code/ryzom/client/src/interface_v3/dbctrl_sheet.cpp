@@ -3123,6 +3123,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 			{
 				string luaMethodName = ( (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) ? "updateCrystallizedSpellTooltip" : "updateBuffItemTooltip");
 				CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
+				CCtrlBase *ctrlBase = const_cast<CDBCtrlSheet*>(this);
 				if ( ! getInventory().isItemInfoUpToDate(getInventory().getItemSlotId(ctrlSheet)))
 				{
 					// Prepare the waiter
@@ -3136,7 +3137,10 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 				}
 
 				if (!_ContextHelp.empty())
+				{
 					help= _ContextHelp;
+					ctrlBase->setDefaultContextHelp(ucstring());
+				}
 				else
 					help = ControlSheetTooltipUpdater.infoValidated(ctrlSheet, luaMethodName);
 			}
