@@ -3111,8 +3111,50 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 	}
 	else if(getType() == CCtrlSheetInfo::SheetType_Macro)
 	{
-		// TODO Find the name + params of the action
 		help = _ContextHelp;
+		const CMacroCmd *macro = CMacroCmdManager::getInstance()->getMacroFromMacroID(getMacroId());
+		if (!macro)
+			return;
+
+		ucstring macroName = macro->Name;
+		if (macroName.empty())
+			macroName = CI18N::get("uiNotAssigned");
+
+		ucstring assignedTo = macro->Combo.toUCString();
+		if (assignedTo.empty())
+			assignedTo = CI18N::get("uiNotAssigned");
+
+		ucstring dispText;
+		ucstring dispCommands;
+		const CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
+
+		uint nb = 0;
+		for (uint i = 0; i < macro->Commands.size(); ++i)
+		{
+			ucstring commandName;
+			for (uint j = 0; j < pMCM->ActionManagers.size(); ++j)
+			{
+				CAction::CName c(macro->Commands[i].Name.c_str(), macro->Commands[i].Params.c_str());
+				if (pMCM->ActionManagers[j]->getBaseAction(c) != NULL)
+				{
+					commandName = pMCM->ActionManagers[j]->getBaseAction(c)->getActionLocalizedText(c);
+					// display a few commands
+					if (nb < 5)
+						dispCommands += "\n" + commandName;
+					++nb;
+					break;
+				}
+			}
+		}
+		// formats
+		dispText = ucstring("%n (@{6F6F}%k@{FFFF})\n%c");
+		if (nb > 5) // more?
+			dispCommands += toString(" ... @{6F6F}%i@{FFFF}+", nb-5);
+
+		strFindReplace(dispText, ucstring("%n"), macroName);
+		strFindReplace(dispText, ucstring("%k"), assignedTo);
+		strFindReplace(dispText, ucstring("%c"), dispCommands);
+		help = dispText;
 	}
 	else if(getType() == CCtrlSheetInfo::SheetType_Item)
 	{
