@@ -279,22 +279,16 @@ public:
 		REFLECT_STRING ("on_drop_params", getParamsOnDrop, setParamsOnDrop);
 		REFLECT_STRING ("on_can_drop", getActionOnCanDrop, setActionOnCanDrop);
 		REFLECT_STRING ("on_can_drop_params", getParamsOnCanDrop, setParamsOnCanDrop);
-		REFLECT_LUA_METHOD("getDraggedSheet",	luaGetDraggedSheet)
-		REFLECT_LUA_METHOD("getHpBuff",	luaGetHpBuff)
-		REFLECT_LUA_METHOD("getSapBuff",	luaGetSapBuff)
-		REFLECT_LUA_METHOD("getFocusBuff",	luaGetFocusBuff)
-		REFLECT_LUA_METHOD("getStaBuff",	luaGetStaBuff)
-		REFLECT_LUA_METHOD("getName",		luaGetName)
-		REFLECT_LUA_METHOD("getCreatorName", luaGetCreatorName)
-		REFLECT_LUA_METHOD("waitInfo", luaWaitInfo)
-		REFLECT_LUA_METHOD("buildCrystallizedSpellListBrick",		luaBuildCrystallizedSpellListBrick)
+		REFLECT_LUA_METHOD("getDraggedSheet", luaGetDraggedSheet);
+		REFLECT_LUA_METHOD("getItemInfo", luaGetItemInfo);
+		REFLECT_LUA_METHOD("getName", luaGetName);
+		REFLECT_LUA_METHOD("getCreatorName", luaGetCreatorName);
+		REFLECT_LUA_METHOD("waitInfo", luaWaitInfo);
+		REFLECT_LUA_METHOD("buildCrystallizedSpellListBrick", luaBuildCrystallizedSpellListBrick);
 	REFLECT_EXPORT_END
 
 	int luaGetDraggedSheet(CLuaState &ls);
-	int luaGetHpBuff(CLuaState &ls);
-	int luaGetSapBuff(CLuaState &ls);
-	int luaGetFocusBuff(CLuaState &ls);
-	int luaGetStaBuff(CLuaState &ls);
+	int luaGetItemInfo(CLuaState &ls);
 	int luaGetName(CLuaState &ls);
 	int luaGetCreatorName(CLuaState &ls);
 	int luaWaitInfo(CLuaState &ls);
