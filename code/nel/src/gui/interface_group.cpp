@@ -51,14 +51,14 @@ namespace NLGUI
 	CInterfaceGroup::CInterfaceGroup(const TCtorParam &param) : CCtrlBase(param)
 	{
 		_ParentSizeMax = NULL;
-		_MaxW = _MaxH = 16384;
+		_MaxW = _MaxH = std::numeric_limits<sint32>::max();
 		_OffsetX = _OffsetY = 0;
 		_Overlappable= true;
 		_ResizeFromChildW= false;
 		_ResizeFromChildH= false;
 		_ResizeFromChildWMargin= 0;
 		_ResizeFromChildHMargin= 0;
-		_MaxWReal = _MaxHReal = 16384;
+		_MaxWReal = _MaxHReal = std::numeric_limits<sint32>::max();
 		_GroupSizeRef = 0;
 		_Escapable= false;
 		_Priority= WIN_PRIORITY_NORMAL;
@@ -1542,12 +1542,8 @@ namespace NLGUI
 				// \todo yoyo: do not know why but don't work if this==scroll_text
 				if(sonGroup && !isGroupScrollText())
 				{
-					sint32	oldSciX= -16384;
-					sint32	oldSciY= -16384;
-					sint32	oldSciW= 32768;
-					sint32	oldSciH= 32768;
 					sint32	w, h;
-					sonGroup->computeCurrentClipContribution(oldSciX, oldSciY, oldSciW, oldSciH, x0, y0, w, h);
+					sonGroup->computeClipContribution(x0, y0, w, h);
 					x1= x0 + w;
 					y1= y0 + h;
 				}
@@ -1926,8 +1922,7 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CInterfaceGroup::computeCurrentClipContribution(sint32 oldSciX, sint32 oldSciY, sint32 oldSciW, sint32 oldSciH,
-														 sint32 &newSciXDest, sint32 &newSciYDest, sint32 &newSciWDest, sint32 &newSciHDest) const
+	void CInterfaceGroup::computeClipContribution(sint32 &newSciXDest, sint32 &newSciYDest, sint32 &newSciWDest, sint32 &newSciHDest) const
 	{
 		sint32 newSciX = _XReal;
 		sint32 newSciY = _YReal;
@@ -1947,6 +1942,21 @@ namespace NLGUI
 				newSciY = _YReal + _HReal - _MaxHReal;
 			newSciH = _MaxHReal;
 		}
+		// Don't apply margins because HTML list marker is drawn outside group paragraph inner content.
+		// Should not be an issue because horizontal scolling not used.
+		newSciXDest = newSciX/* + _MarginLeft*/;
+		newSciYDest = newSciY;
+		newSciWDest = newSciW/* - _MarginLeft*/;
+		newSciHDest = newSciH;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CInterfaceGroup::computeCurrentClipContribution(sint32 oldSciX, sint32 oldSciY, sint32 oldSciW, sint32 oldSciH,
+														 sint32 &newSciXDest, sint32 &newSciYDest, sint32 &newSciWDest, sint32 &newSciHDest) const
+	{
+		sint32 newSciX, newSciY, newSciW, newSciH;
+		computeClipContribution(newSciX, newSciY, newSciW, newSciH);
+
 		// Clip Left
 		if (newSciX < oldSciX)
 		{

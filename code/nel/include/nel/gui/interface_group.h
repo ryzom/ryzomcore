@@ -353,6 +353,9 @@ namespace NLGUI
 		void makeNewClip (sint32 &oldClipX, sint32 &oldClipY, sint32 &oldClipW, sint32 &oldClipH);
 		void restoreClip (sint32 oldSciX, sint32 oldSciY, sint32 oldSciW, sint32 oldSciH);
 
+		// Compute clip contribution for current window. This doesn't change the clip window in the driver.
+		void computeClipContribution(sint32 &newX, sint32 &newY, sint32 &newW, sint32 &newH) const;
+
 		// Compute clip contribution for current window, and a previous clipping rectangle. This doesn't change the clip window in the driver.
 		void computeCurrentClipContribution(sint32 prevX, sint32 prevY, sint32 prevW, sint32 prevH,
 								sint32 &newX, sint32 &newY, sint32 &newW, sint32 &newH) const;

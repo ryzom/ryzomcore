@@ -1026,7 +1026,6 @@ namespace NLGUI
 		}
 		child->_Parent = this;
 		child->_ParentPos = NULL;
-		child->_Active = true;
 		child->_X = 0;
 		child->_Y = 0;
 		child->_RenderLayer = this->_RenderLayer;
