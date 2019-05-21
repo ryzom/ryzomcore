@@ -79,7 +79,7 @@ namespace NLGUI
 		_MultiLine = false;
 		_TextMode = DontClipWord;
 		_MultiLineSpace = 8;
-		_LineMaxW = 16384;
+		_LineMaxW = std::numeric_limits<sint32>::max();
 		_MultiLineMaxWOnly = false;
 		_MultiLineClipEndSpace = false;
 		_LastMultiLineMaxW = 0;
@@ -199,7 +199,7 @@ namespace NLGUI
 
 		_MultiLine = false;
 		_MultiLineSpace = 8;
-		_LineMaxW= 16384;
+		_LineMaxW= std::numeric_limits<sint32>::max();
 		_MultiLineMaxWOnly = false;
 		_MultiLineClipEndSpace = false;
 		_LastMultiLineMaxW = 0;
@@ -858,7 +858,7 @@ namespace NLGUI
 		}
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"line_maxw" );
-		_LineMaxW = 16384;
+		_LineMaxW = std::numeric_limits<sint32>::max();
 		if (prop)
 			fromString((const char*)prop, _LineMaxW);
 

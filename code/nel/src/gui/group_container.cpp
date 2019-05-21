@@ -2385,7 +2385,7 @@ namespace NLGUI
 			{
 				_W = _Parent->getW();
 			}
-			setMaxH (16384); // No scrollbar for container of layer > 0
+			setMaxH (std::numeric_limits<sint32>::max()); // No scrollbar for container of layer > 0
 			newH = (pLayer->H_T - pLayer->InsetT);
 		}
 
@@ -2468,7 +2468,7 @@ namespace NLGUI
 			else
 			{
 				if (_List != NULL)
-					_List->setMaxH (16384);
+					_List->setMaxH (std::numeric_limits<sint32>::max());
 			}
 
 			if (_LayerSetup == 0)
