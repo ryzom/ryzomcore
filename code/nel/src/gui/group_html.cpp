@@ -5418,8 +5418,15 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlBR(const CHtmlElement &elm)
 	{
-		ucstring tmp("\n");
-		addString(tmp);
+		if (!_Paragraph || _Paragraph->getNumChildren() == 0)
+		{
+			ucstring tmp("\n");
+			addString(tmp);
+		}
+		else
+		{
+			endParagraph();
+		}
 	}
 
 	// ***************************************************************************
