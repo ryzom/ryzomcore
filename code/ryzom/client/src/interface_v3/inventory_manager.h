@@ -31,7 +31,7 @@ namespace NLMISC{
 class CCDBNodeBranch;
 }
 class CDBCtrlSheet;
-
+class IItermInfoWaiter;
 
 const uint MAX_TEMPINV_ENTRIES = INVENTORIES::NbTempInvSlots;
 const uint MAX_BAGINV_ENTRIES = INVENTORIES::NbBagSlots;
@@ -152,21 +152,6 @@ private:
 	typedef std::map<uint64, CClientItemInfo> TItemInfoCacheMap;
 	TItemInfoCacheMap _ItemInfoCacheMap;
 };
-
-class	IItemInfoWaiter
-{
-public:
-	IItemInfoWaiter() {ItemSlotId= 0; ItemSheet= 0;}
-	virtual ~IItemInfoWaiter() {}
-	// The item SheetId. If differ from current sheet in the SlotId, the infos are not updated / requested
-	uint			ItemSheet;
-	// The item SlotId to retrieve info.
-	uint			ItemSlotId;
-
-	// Called when the info is received for this slot.
-	virtual void	infoReceived() =0;
-};
-
 
 // ***************************************************************************
 /** This manager gives direct access to inventory slots (bag, temporary inventory, hands, and equip inventory)
