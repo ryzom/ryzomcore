@@ -74,6 +74,7 @@ public:
 	CItemImage();
 	// build from a branch
 	void build(NLMISC::CCDBNodeBranch *branch);
+	uint64 getItemId() const;
 	// shortcuts to avoid NULL pointer tests
 	uint32 getSheetID() const						{ return (uint32)			(Sheet ? Sheet->getValue32() : 0); }
 	uint16 getQuality() const						{ return (uint16)			(Quality ? Quality->getValue16() : 0); }
@@ -114,11 +115,15 @@ public:
 	// This is the InfoVersionFromSlot when last request was sent to server
 	uint16				InfoVersionSlotServerWaiting;
 
+	// Used to track cache age (reset on use, +1 on every save)
+	uint32				CacheCycle;
+
 	CClientItemInfo()
 	{
 		InfoVersionFromMsg= 0;
 		InfoVersionFromSlot= 0;
 		InfoVersionSlotServerWaiting= 0;
+		CacheCycle= 0;
 	}
 
 	/// Set InfoVersion from Info message (info requested by the player)
@@ -128,6 +133,25 @@ public:
 	void			refreshInfoVersion(uint8 infoVersion) { InfoVersionFromMsg= infoVersion; }
 };
 
+class CItemInfoCache
+{
+public:
+	void load(const std::string &filename);
+	void save(const std::string &filename);
+	void serial(NLMISC::IStream &s);
+
+	// retrieve pointer to item info or null if error
+	const CClientItemInfo *getItemInfo(uint32 serial, uint32 createTime) const;
+	const CClientItemInfo *getItemInfo(uint64 itemId) const;
+
+	// set/update item info in cache
+	void readFromImpulse(uint64 itemId, CItemInfos itemInfo);
+	void debugItemInfoCache() const;
+
+private:
+	typedef std::map<uint64, CClientItemInfo> TItemInfoCacheMap;
+	TItemInfoCacheMap _ItemInfoCacheMap;
+};
 
 class	IItemInfoWaiter
 {
@@ -195,8 +219,10 @@ public:
 	// SERVER INVENTORY
 		// get item of bag (local inventory)
 		CItemImage &getServerBagItem(uint index);
+		const CItemImage &getServerBagItem(uint index) const;
 		// get temporary item (local inventory)
 		CItemImage &getServerTempItem(uint index);
+		const CItemImage &getServerTempItem(uint index) const;
 		// get hand item (local inventory)
 		CItemImage *getServerHandItem(uint index);
 		// get equip item (local inventory)
@@ -206,8 +232,11 @@ public:
 		void		setServerMoney(uint64 value);
 		// get item of pack animal (server inventory). beastIndex ranges from 0 to MAX_INVENTORY_ANIMAL-1
 		CItemImage &getServerPAItem(uint beastIndex, uint index);
+		const CItemImage &getServerPAItem(uint beastIndex, uint index) const;
 		// get the item Image for the given inventory. assert if bad inventory
 		CItemImage &getServerItem(uint inv, uint index);
+		// get the item Image for the given slotId or NULL if bad
+		const CItemImage *getServerItem(uint slotId) const;
 
 	// Drag'n'Drop Management
 		enum TFrom { Slot, TextList, IconList, Nowhere };
@@ -273,9 +302,13 @@ public:
 		uint16				getItemSlotId(CDBCtrlSheet *ctrl);
 		uint16				getItemSlotId(const std::string &itemDb, uint slotIndex);
 		const	CClientItemInfo	&getItemInfo(uint slotId) const;
+		// get item info from cache
+		const	CClientItemInfo *getItemInfoCache(uint32 serial, uint32 createTime) const;
 		uint				getItemSheetForSlotId(uint slotId) const;
+		// Returns true if the item info is already in slot cache
+		bool				isItemInfoAvailable(uint slotId) const;
 		// Returns true if the item info version already matches
-		bool				isItemInfoUpToDate(uint slotId);
+		bool				isItemInfoUpToDate(uint slotId) const;
 		// Add a Waiter on ItemInfo (ItemHelp opening). no-op if here, but reorder (returns true if the version already matches or if waiter is NULL)
 		void				addItemInfoWaiter(IItemInfoWaiter *waiter);
 		// remove a Waiter on ItemInfo (ItemHelp closing). no-op if not here. NB: no delete
@@ -285,6 +318,7 @@ public:
 		void				onRefreshItemInfoVersion(uint16 slotId, uint8 infoVersion);
 		// Log for debug
 		void				debugItemInfoWaiters();
+		void				debugItemInfoCache() const;
 
 		void				sortBag();
 
@@ -299,6 +333,9 @@ public:
 
 		enum TInvType { InvBag, InvPA0, InvPA1, InvPA2, InvPA3, InvPA4, InvPA5, InvPA6, InvGuild, InvRoom, InvUnknown };
 		static TInvType invTypeFromString(const std::string &str);
+
+		// inventory and slot from slotId
+		void				getSlotInvIndex(uint slotId, uint &inv, uint &index) const;
 
 
 private:
@@ -324,7 +361,9 @@ private:
 		CDBCtrlSheet	*DNDCurrentItem;
 
 	// ItemExtraInfo management.
-		typedef std::map<uint, CClientItemInfo>		TItemInfoMap;
+		std::string								_ItemInfoCacheFilename;
+		CItemInfoCache							_ItemInfoCache;
+		typedef std::map<uint, CClientItemInfo>	TItemInfoMap;
 		TItemInfoMap							_ItemInfoMap;
 		typedef std::list<IItemInfoWaiter*>		TItemInfoWaiters;
 		TItemInfoWaiters						_ItemInfoWaiters;

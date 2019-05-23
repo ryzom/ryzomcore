@@ -58,6 +58,8 @@
 using namespace std;
 using namespace NLMISC;
 
+extern TSessionId CharacterHomeSessionId;
+
 extern NLMISC::CLog g_log;
 // Context help
 extern void contextHelp (const std::string &help);
@@ -156,6 +158,144 @@ void CItemImage::build(CCDBNodeBranch *branch)
 	nlassert(Sheet && Quality && Quantity && CreateTime && Serial && UserColor && Weight && NameId && InfoVersion);
 }
 
+uint64 CItemImage::getItemId() const
+{
+	return ((uint64)getSerial() << 32) | getCreateTime();
+}
+
+// *************************************************************************************************
+void CItemInfoCache::load(const std::string &filename)
+{
+	try
+	{
+		CIFile f;
+		if (f.open(filename))
+		{
+			serial(f);
+		}
+	} catch(...)
+	{ }
+}
+
+void CItemInfoCache::save(const std::string &filename)
+{
+	try
+	{
+		COFile f;
+		if (f.open(filename))
+		{
+			serial(f);
+		}
+	}catch(...)
+	{ }
+}
+
+void CItemInfoCache::serial(NLMISC::IStream &s)
+{
+	s.serialCheck(NELID("METI"));
+	uint ver = 1;
+	s.serialVersion(ver);
+
+	uint8 byte = 1;
+	if (s.isReading())
+	{
+		_ItemInfoCacheMap.clear();
+		while(true)
+		{
+			uint64 key;
+
+			s.serial(byte);
+			if (byte == 0)
+			{
+				break;
+			}
+			s.serial(key);
+			s.serial(_ItemInfoCacheMap[key].CacheCycle);
+			_ItemInfoCacheMap[key].serial(s);
+
+			// these are not used in item info cache
+			_ItemInfoCacheMap[key].InfoVersionFromMsg = 0;
+			_ItemInfoCacheMap[key].InfoVersionFromSlot = 0;
+			_ItemInfoCacheMap[key].InfoVersionSlotServerWaiting = 0;
+		}
+	}
+	else
+	{
+		byte = 1;
+		TItemInfoCacheMap::iterator it = _ItemInfoCacheMap.begin();
+		while (it != _ItemInfoCacheMap.end())
+		{
+			// purge item from cache if not encountered in X save
+			if (it->second.CacheCycle < 10000)
+			{
+				// 'record exists' byte
+				s.serial(byte);
+
+				// item id (serial << 32 | createTime)
+				uint64 key = it->first;
+				s.serial(key);
+
+				uint32 cycle = it->second.CacheCycle+1;
+				s.serial(cycle);
+
+				// item info
+				it->second.serial(s);
+			}
+
+			++it;
+		}
+		// eof of records byte
+		byte = 0;
+		s.serial(byte);
+	}
+}
+
+const CClientItemInfo *CItemInfoCache::getItemInfo(uint32 serial, uint32 createTime) const
+{
+	if (serial > 0 && createTime > 0)
+	{
+		uint64 itemId = ((uint64)serial << 32) | createTime;
+		return getItemInfo(itemId);
+	}
+
+	return NULL;
+}
+
+const CClientItemInfo *CItemInfoCache::getItemInfo(uint64 itemId) const
+{
+	if (itemId > 0)
+	{
+		TItemInfoCacheMap::const_iterator it = _ItemInfoCacheMap.find(itemId);
+		if (it != _ItemInfoCacheMap.end())
+			return &(it->second);
+	}
+
+	return NULL;
+}
+
+void CItemInfoCache::readFromImpulse(uint64 itemId, CItemInfos itemInfo)
+{
+	if (itemId > 0)
+	{
+		_ItemInfoCacheMap[itemId].readFromImpulse(itemInfo);
+		_ItemInfoCacheMap[itemId].CacheCycle = 0;
+	}
+}
+
+void CItemInfoCache::debugItemInfoCache() const
+{
+	nlinfo("ItemInfoCache: %d entries", _ItemInfoCacheMap.size());
+	uint count = 0;
+	for (auto it = _ItemInfoCacheMap.begin(); it != _ItemInfoCacheMap.end(); ++it)
+	{
+		uint32 serial = (it->first >> 32) & 0xFFFFFFFF;
+		uint32 created = it->first & 0xFFFFFFFF;
+		nlinfo("[%-4d] cacheCycle:%d, serial:%d, createTime:%d", count++, it->second.CacheCycle, serial, created);
+	}
+	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
+	pIM->displaySystemInfo(toString("ItemInfoCache: %d entries written to client.log", _ItemInfoCacheMap.size()));
+}
+
 // *************************************************************************************************
 // CInventoryManager
 // *************************************************************************************************
@@ -184,12 +324,16 @@ CInventoryManager::CInventoryManager()
 		BagItemEquipped[i]= false;
 	}
 
+	_ItemInfoCacheFilename = toString("save/item_infos_%d.cache", CharacterHomeSessionId.asInt());
+	_ItemInfoCache.load(_ItemInfoCacheFilename);
+
 	nlctassert(NumInventories== sizeof(InventoryIndexes)/sizeof(InventoryIndexes[0]));
 }
 
 // ***************************************************************************
 CInventoryManager::~CInventoryManager()
 {
+	_ItemInfoCache.save(_ItemInfoCacheFilename);
 }
 
 // *************************************************************************************************
@@ -261,9 +405,19 @@ CItemImage &CInventoryManager::getServerBagItem(uint index)
 	nlassert(index < MAX_BAGINV_ENTRIES);
 	return ServerBag[index];
 }
+const CItemImage &CInventoryManager::getServerBagItem(uint index) const
+{
+	nlassert(index < MAX_BAGINV_ENTRIES);
+	return ServerBag[index];
+}
 
 // *************************************************************************************************
 CItemImage &CInventoryManager::getServerTempItem(uint index)
+{
+	nlassert(index < MAX_TEMPINV_ENTRIES);
+	return ServerTempInv[index];
+}
+const CItemImage &CInventoryManager::getServerTempItem(uint index) const
 {
 	nlassert(index < MAX_TEMPINV_ENTRIES);
 	return ServerTempInv[index];
@@ -1740,12 +1894,12 @@ void CTempInvManager::update()
 
 	// show/hide weight info depending on temp inventory mode
 	bool displayWeight = (_Mode == TEMP_INV_MODE::Craft);
-	CViewBase *weightText = dynamic_cast<CViewBase*>(pGC->getView("weight_txt"));	
-	if (weightText != NULL)	
+	CViewBase *weightText = dynamic_cast<CViewBase*>(pGC->getView("weight_txt"));
+	if (weightText != NULL)
 		weightText->setActive(displayWeight);
 	CViewBase *weightImg = dynamic_cast<CViewBase*>(pGC->getView("weight"));
 	if (weightImg != NULL)
-		weightImg->setActive(displayWeight);	
+		weightImg->setActive(displayWeight);
 
 	if (_Mode == TEMP_INV_MODE::Forage)
 	{
@@ -2182,24 +2336,24 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 			return false;
 
 		// Armor
-		if ((pIS->Family == ITEMFAMILY::ARMOR) || 
+		if ((pIS->Family == ITEMFAMILY::ARMOR) ||
 			(pIS->Family == ITEMFAMILY::JEWELRY))
 			if (!bFilterArmor) bDisplay = false;
 
 		// Weapon
-		if ((pIS->Family == ITEMFAMILY::SHIELD) || 
+		if ((pIS->Family == ITEMFAMILY::SHIELD) ||
 			(pIS->Family == ITEMFAMILY::MELEE_WEAPON) ||
-			(pIS->Family == ITEMFAMILY::RANGE_WEAPON) || 
+			(pIS->Family == ITEMFAMILY::RANGE_WEAPON) ||
 			(pIS->Family == ITEMFAMILY::AMMO) ||
-			(pIS->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) || 
+			(pIS->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) ||
 			(pIS->Family == ITEMFAMILY::ITEM_SAP_RECHARGE) ||
 			(pIS->Family == ITEMFAMILY::BRICK) )
 			if (!bFilterWeapon) bDisplay = false;
 
 		// Tool
-		if ((pIS->Family == ITEMFAMILY::CRAFTING_TOOL) || 
+		if ((pIS->Family == ITEMFAMILY::CRAFTING_TOOL) ||
 			(pIS->Family == ITEMFAMILY::HARVEST_TOOL) ||
-			(pIS->Family == ITEMFAMILY::TAMING_TOOL) || 
+			(pIS->Family == ITEMFAMILY::TAMING_TOOL) ||
 			(pIS->Family == ITEMFAMILY::TRAINING_TOOL) ||
 			(pIS->Family == ITEMFAMILY::BAG))
 			if (!bFilterTool) bDisplay = false;
@@ -3267,21 +3421,52 @@ uint				CInventoryManager::getItemSheetForSlotId(uint slotId) const
 }
 
 // ***************************************************************************
+const	CClientItemInfo *CInventoryManager::getItemInfoCache(uint32 serial, uint32 createTime) const
+{
+	return _ItemInfoCache.getItemInfo(serial, createTime);
+}
+
+// ***************************************************************************
 const	CClientItemInfo	&CInventoryManager::getItemInfo(uint slotId) const
 {
 	TItemInfoMap::const_iterator	it= _ItemInfoMap.find(slotId);
 	static	CClientItemInfo	empty;
-	if(it==_ItemInfoMap.end())
+	if (it == _ItemInfoMap.end() || !isItemInfoUpToDate(slotId))
+	{
+		// if slot has not been populated yet or out of date, then return info from cache if possible
+		const CItemImage *item = getServerItem(slotId);
+		if (item && item->getItemId() > 0) {
+			const CClientItemInfo *ret = _ItemInfoCache.getItemInfo(item->getItemId());
+			if (ret != NULL)
+			{
+				return *ret;
+			}
+		}
+	}
+
+	if (it == _ItemInfoMap.end())
+	{
 		return empty;
-	else
-		return it->second;
+	}
+
+	return it->second;
 }
 
 // ***************************************************************************
-bool				CInventoryManager::isItemInfoUpToDate(uint slotId)
+bool				CInventoryManager::isItemInfoAvailable(uint slotId) const
 {
+	TItemInfoMap::const_iterator	it= _ItemInfoMap.find(slotId);
+	return it != _ItemInfoMap.end();
+}
+// ***************************************************************************
+bool				CInventoryManager::isItemInfoUpToDate(uint slotId) const
+{
+	TItemInfoMap::const_iterator it= _ItemInfoMap.find(slotId);
+	if (it == _ItemInfoMap.end())
+		return true;
+
 	// true if the version already matches
-	return getItemInfo(slotId).InfoVersionFromMsg == getItemInfo(slotId).InfoVersionFromSlot;
+	return it->second.InfoVersionFromMsg == it->second.InfoVersionFromSlot;
 }
 
 // ***************************************************************************
@@ -3318,8 +3503,10 @@ void				CInventoryManager::removeItemInfoWaiter(IItemInfoWaiter *waiter)
 void			CInventoryManager::updateItemInfoWaiters(uint itemSlotId)
 {
 	// First verify if the versions matches. If differ, no need to update waiters since not good.
-	if(getItemInfo(itemSlotId).InfoVersionFromMsg != getItemInfo(itemSlotId).InfoVersionFromSlot)
+	if (!isItemInfoUpToDate(itemSlotId))
+	{
 		return;
+	}
 
 	bool	isItemFromTrading= (itemSlotId>>CItemInfos::SlotIdIndexBitSize)==INVENTORIES::trading;
 
@@ -3413,10 +3600,15 @@ void			CInventoryManager::onReceiveItemSheet(ICDBNode* node)
 // ***************************************************************************
 void			CInventoryManager::onReceiveItemInfo(const CItemInfos &itemInfo)
 {
-	uint	itemSlotId;
-
 	// update the Info
-	itemSlotId= itemInfo.slotId;
+	uint itemSlotId = itemInfo.slotId;
+
+	const CItemImage *item = getServerItem(itemSlotId);
+	if (item && item->getItemId() > 0)
+	{
+		_ItemInfoCache.readFromImpulse(item->getItemId(), itemInfo);
+	}
+
 	// write in map, from DB.
 	_ItemInfoMap[itemSlotId].readFromImpulse(itemInfo);
 
@@ -3430,7 +3622,7 @@ void			CInventoryManager::onReceiveItemInfo(const CItemInfos &itemInfo)
 // ***************************************************************************
 void			CInventoryManager::onRefreshItemInfoVersion(uint16 slotId, uint8 infoVersion)
 {
-	_ItemInfoMap[slotId].refreshInfoVersion( infoVersion );
+	_ItemInfoMap[slotId].refreshInfoVersion(infoVersion);
 }
 
 // ***************************************************************************
@@ -3527,12 +3719,18 @@ void			CInventoryManager::debugItemInfoWaiters()
 }
 
 // ***************************************************************************
+void			CInventoryManager::debugItemInfoCache() const
+{
+	_ItemInfoCache.debugItemInfoCache();
+}
+
+// ***************************************************************************
 void CInventoryManager::sortBag()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CDBGroupIconListBag *pIconList;
 	CDBGroupListSheetBag *pList;
-	
+
 	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_BAG_ICONS));
 	if (pIconList != NULL) pIconList->needToSort();
 	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_BAG_TEXT));
@@ -3681,6 +3879,14 @@ CItemImage &CInventoryManager::getServerPAItem(uint beastIndex, uint index)
 	return ServerPAInv[beastIndex][index];
 }
 
+const CItemImage &CInventoryManager::getServerPAItem(uint beastIndex, uint index) const
+{
+	nlassert(beastIndex < MAX_INVENTORY_ANIMAL);
+	nlassert(index < MAX_ANIMALINV_ENTRIES);
+	return ServerPAInv[beastIndex][index];
+}
+
+
 // ***************************************************************************
 CItemImage &CInventoryManager::getLocalItem(uint inv, uint index)
 {
@@ -3708,6 +3914,93 @@ CItemImage &CInventoryManager::getServerItem(uint inv, uint index)
 }
 
 // ***************************************************************************
+const CItemImage *CInventoryManager::getServerItem(uint slotId) const
+{
+	uint inv, index;
+	getSlotInvIndex(slotId, inv, index);
+
+	if (inv == INVENTORIES::bag)
+	{
+		return &getServerBagItem(index);
+	}
+	else if (inv >= INVENTORIES::pet_animal && inv <INVENTORIES::pet_animal+MAX_INVENTORY_ANIMAL)
+	{
+		return &getServerPAItem(inv-INVENTORIES::pet_animal, index);
+	}
+	else if (inv == INVENTORIES::temporary)
+	{
+		return &getServerTempItem(index);
+	}
+	else if (inv == INVENTORIES::guild)
+	{
+		// player is in guild outpost or in guild hall
+		if (getInventory().isInventoryAvailable(INVENTORIES::guild))
+		{
+			CCDBNodeBranch *itemBranch = NLGUI::CDBManager::getInstance()->getDbBranch("SERVER:GUILD:INVENTORY:" + toString(index));
+			if (itemBranch)
+			{
+				static CItemImage image;
+				image.build(itemBranch);
+				return &image;
+			}
+		}
+		return NULL;
+	}
+	else if (inv == INVENTORIES::player_room)
+	{
+		// player is in their room
+		if (getInventory().isInventoryAvailable(INVENTORIES::player_room))
+		{
+			CCDBNodeBranch *itemBranch = NLGUI::CDBManager::getInstance()->getDbBranch(SERVER_INVENTORY ":ROOM:" + toString(index));
+			if (itemBranch)
+			{
+				static CItemImage image;
+				image.build(itemBranch);
+				return &image;
+			}
+		}
+		return NULL;
+	}
+	else if (inv == INVENTORIES::trading)
+	{
+		CCDBNodeBranch *itemBranch = NLGUI::CDBManager::getInstance()->getDbBranch("LOCAL:TRADING:" + toString(index));
+		if (itemBranch)
+		{
+			static CItemImage image;
+			image.build(itemBranch);
+			return &image;
+		}
+	}
+	else if (inv == INVENTORIES::exchange)
+	{
+		CCDBNodeBranch *itemBranch = NLGUI::CDBManager::getInstance()->getDbBranch("LOCAL:EXCHANGE:GIVE:" + toString(index));
+		if (itemBranch)
+		{
+			static CItemImage image;
+			image.build(itemBranch);
+			return &image;
+		}
+	}
+	else if (inv == INVENTORIES::exchange_proposition)
+	{
+		CCDBNodeBranch *itemBranch = NLGUI::CDBManager::getInstance()->getDbBranch("LOCAL:EXCHANGE:RECEIVE:" + toString(index));
+		if (itemBranch)
+		{
+			static CItemImage image;
+			image.build(itemBranch);
+			return &image;
+		}
+	}
+	else
+	{
+		nlwarning("getServerItem: invalid inventory %d for slotId %d", inv, slotId);
+	}
+
+	// invalid inventory
+	return NULL;
+}
+
+// ***************************************************************************
 CInventoryManager::TInvType CInventoryManager::invTypeFromString(const string &str)
 {
 	string sTmp = toLower(str);
@@ -3723,3 +4016,11 @@ CInventoryManager::TInvType CInventoryManager::invTypeFromString(const string &s
 	if (sTmp == "inv_room")		return InvRoom;
 	return InvUnknown;
 }
+
+// ***************************************************************************
+void CInventoryManager::getSlotInvIndex(uint slotId, uint &inv, uint &index) const
+{
+	inv = slotId >> CItemInfos::SlotIdIndexBitSize;
+	index = slotId & CItemInfos::SlotIdIndexBitMask;
+}
+
