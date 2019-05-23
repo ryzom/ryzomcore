@@ -127,6 +127,8 @@ CItemImage::CItemImage()
 	Sheet = NULL;
 	Quality = NULL;
 	Quantity = NULL;
+	CreateTime = NULL;
+	Serial = NULL;
 	UserColor = NULL;
 	Price = NULL;
 	Weight= NULL;
@@ -141,6 +143,8 @@ void CItemImage::build(CCDBNodeBranch *branch)
 	Sheet = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("SHEET"), false));
 	Quality = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("QUALITY"), false));
 	Quantity = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("QUANTITY"), false));
+	CreateTime = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("CREATE_TIME"), false));
+	Serial = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("SERIAL"), false));
 	UserColor = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("USER_COLOR"), false));
 	Price = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("PRICE"), false));
 	Weight = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("WEIGHT"), false));
@@ -149,7 +153,7 @@ void CItemImage::build(CCDBNodeBranch *branch)
 	ResaleFlag = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("RESALE_FLAG"), false));
 
 	// Should always have at least those one:(ie all but Price)
-	nlassert(Sheet && Quality && Quantity && UserColor && Weight && NameId && InfoVersion);
+	nlassert(Sheet && Quality && Quantity && CreateTime && Serial && UserColor && Weight && NameId && InfoVersion);
 }
 
 // *************************************************************************************************
