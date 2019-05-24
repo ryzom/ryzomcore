@@ -108,6 +108,7 @@ void CProfilesDialog::displayProfile(int index)
 	serverComboBox->setEnabled(enabled);
 	argumentsEdit->setEnabled(enabled);
 	commentsEdit->setEnabled(enabled);
+	langComboBox->setEnabled(enabled);
 
 	if (index < 0) return;
 
@@ -134,6 +135,7 @@ void CProfilesDialog::displayProfile(int index)
 	directoryPathLabel->setText(profileDirectory);
 	desktopShortcutCheckBox->setChecked(profile.desktopShortcut);
 	menuShortcutCheckBox->setChecked(profile.menuShortcut);
+	langComboBox->setCurrentIndex(getIndexFromProfileLanguage(profile.language));
 
 	// disable click on button if directory doesn't exist
 	directoryButton->setEnabled(QFile::exists(profileDirectory));
@@ -155,6 +157,7 @@ void CProfilesDialog::saveProfile(int index)
 	profile.comments = commentsEdit->toPlainText();
 	profile.desktopShortcut = desktopShortcutCheckBox->isChecked();
 	profile.menuShortcut = menuShortcutCheckBox->isChecked();
+	profile.language = getProfileLanguageFromIndex(langComboBox->currentIndex());
 }
 
 void CProfilesDialog::deleteProfile(int index)
@@ -216,6 +219,7 @@ void CProfilesDialog::addProfile()
 	// set default parameters
 	profile.id = QString::number(nextId);
 	profile.server = server.id;
+	profile.language = config->getLanguage(); // locale
 
 	profilesListView->setCurrentIndex(m_model->index(index, 0));
 	displayProfile(index);
@@ -311,4 +315,26 @@ void CProfilesDialog::onProfileDirectoryClicked()
 	QString profileDirectory = profile.getDirectory();
 
 	QDesktopServices::openUrl(QUrl::fromLocalFile(profileDirectory));
+}
+
+int CProfilesDialog::getIndexFromProfileLanguage(const QString &lang) const
+{
+	if (lang == "en") return 0;
+	if (lang == "fr") return 1;
+	if (lang == "de") return 2;
+	if (lang == "es") return 3;
+	if (lang == "ru") return 4;
+
+	return -1;
+}
+
+QString CProfilesDialog::getProfileLanguageFromIndex(int index) const
+{
+	if (index == 0) return "en";
+	if (index == 1) return "fr";
+	if (index == 2) return "de";
+	if (index == 3) return "es";
+	if (index == 4) return "ru";
+	// locale
+	return CConfigFile::getInstance()->getLanguage();
 }
