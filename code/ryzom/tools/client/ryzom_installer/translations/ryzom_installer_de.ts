@@ -830,16 +830,21 @@ Drücke Weiter und folge den verschiedenen Schritten bis zum Ende.</translation>
     </message>
     <message>
         <location filename="../ui/profilesdialog.ui" line="207"/>
+        <source>Language:</source>
+        <translation>Sprache :</translation>
+    </message>
+    <message>
+        <location filename="../ui/profilesdialog.ui" line="207"/>
         <source>Create shortcuts:</source>
         <translation>Erstelle Verknüpfungen:</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="216"/>
+        <location filename="../ui/profilesdialog.ui" line="223"/>
         <source>Desktop</source>
         <translation>Desktop</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="223"/>
+        <location filename="../ui/profilesdialog.ui" line="230"/>
         <source>Start Menu</source>
         <translation>Start-Menü</translation>
     </message>

@@ -34,6 +34,7 @@ public:
 	QString executable;
 	QString arguments;
 	QString comments;
+	QString language;
 	bool desktopShortcut;
 	bool menuShortcut;
 

@@ -841,16 +841,21 @@ Vous n&apos;avez qu&apos;à cliquer sur Suivant et suivre les différentes étap
     </message>
     <message>
         <location filename="../ui/profilesdialog.ui" line="207"/>
+        <source>Language:</source>
+        <translation>Langage :</translation>
+    </message>
+    <message>
+        <location filename="../ui/profilesdialog.ui" line="214"/>
         <source>Create shortcuts:</source>
         <translation>Créer les raccourcis :</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="216"/>
+        <location filename="../ui/profilesdialog.ui" line="223"/>
         <source>Desktop</source>
         <translation>Bureau</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="223"/>
+        <location filename="../ui/profilesdialog.ui" line="230"/>
         <source>Start Menu</source>
         <translation>Menu Démarrer</translation>
     </message>

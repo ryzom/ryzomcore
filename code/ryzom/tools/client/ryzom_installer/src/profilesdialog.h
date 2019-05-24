@@ -54,6 +54,10 @@ private slots:
 	void onExecutableDefaultClicked();
 	void onExecutableBrowseClicked();
 
+	int getIndexFromProfileLanguage(const QString &langId) const;
+
+	QString getProfileLanguageFromIndex(int index) const;
+
 private:
 	CProfilesModel *m_model;
 	CServersModel *m_serversModel;
