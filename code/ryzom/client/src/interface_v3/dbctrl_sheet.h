@@ -34,6 +34,7 @@
 #include "game_share/skills.h"
 #include "game_share/slot_types.h"
 #include "game_share/rm_family.h"
+#include "game_share/item_family.h"
 //
 #include "../time_client.h"
 
@@ -580,6 +581,8 @@ public:
 	void	startNotifyAnim();
 
 protected:
+
+	inline bool useItemInfoForFamily(ITEMFAMILY::EItemFamily family) const;
 
 	void setupItem();
 	void setupPact();

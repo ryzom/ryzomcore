@@ -1082,6 +1082,20 @@ void CDBCtrlSheet::setupPact()
 	}
 }
 
+// ***************************************************************************
+bool CDBCtrlSheet::useItemInfoForFamily(ITEMFAMILY::EItemFamily family) const
+{
+	return family == ITEMFAMILY::CRYSTALLIZED_SPELL
+		|| family == ITEMFAMILY::JEWELRY
+		|| family == ITEMFAMILY::ARMOR
+		|| family == ITEMFAMILY::MELEE_WEAPON
+		|| family == ITEMFAMILY::RANGE_WEAPON
+		|| family == ITEMFAMILY::SHIELD
+		|| family == ITEMFAMILY::CRAFTING_TOOL
+		|| family == ITEMFAMILY::HARVEST_TOOL
+		|| family == ITEMFAMILY::TAMING_TOOL
+		|| family == ITEMFAMILY::TRAINING_TOOL;
+}
 
 // ***************************************************************************
 void CDBCtrlSheet::setupItem ()
@@ -3161,11 +3175,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		const CItemSheet	*item= asItemSheet();
 		if(item)
 		{
-			if (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL
-				|| item->Family == ITEMFAMILY::JEWELRY
-				|| item->Family == ITEMFAMILY::ARMOR
-				|| item->Family == ITEMFAMILY::MELEE_WEAPON
-				|| item->Family == ITEMFAMILY::RANGE_WEAPON)
+			if (useItemInfoForFamily(item->Family))
 			{
 				string luaMethodName = ( (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) ? "updateCrystallizedSpellTooltip" : "updateBuffItemTooltip");
 				CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
@@ -3310,11 +3320,7 @@ void	CDBCtrlSheet::getContextHelpToolTip(ucstring &help) const
 		const CItemSheet *item = asItemSheet();
 		if (item)
 		{
-			if (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL
-				|| item->Family == ITEMFAMILY::JEWELRY
-				|| item->Family == ITEMFAMILY::ARMOR
-				|| item->Family == ITEMFAMILY::MELEE_WEAPON
-				|| item->Family == ITEMFAMILY::RANGE_WEAPON)
+			if (useItemInfoForFamily(item->Family))
 			{
 				string luaMethodName = (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) ? "updateCrystallizedSpellTooltip" : "updateBuffItemTooltip";
 				CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
@@ -4469,16 +4475,13 @@ std::string CDBCtrlSheet::getContextHelpWindowName() const
 	if (getType() == CCtrlSheetInfo::SheetType_Item)
 	{
 		const CItemSheet	*item= asItemSheet();
-		if(item)
+		if(item && useItemInfoForFamily(item->Family))
 		{
 			if (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL)
 			{
 				return "crystallized_spell_context_help";
 			}
-			else if (item->Family == ITEMFAMILY::JEWELRY
-				|| item->Family == ITEMFAMILY::ARMOR
-				|| item->Family == ITEMFAMILY::MELEE_WEAPON
-				|| item->Family == ITEMFAMILY::RANGE_WEAPON)
+			else
 			{
 				return "buff_item_context_help";
 			}
