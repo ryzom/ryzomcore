@@ -3161,7 +3161,11 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		const CItemSheet	*item= asItemSheet();
 		if(item)
 		{
-			if (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL || item->Family == ITEMFAMILY::JEWELRY || item->Family == ITEMFAMILY::ARMOR)
+			if (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL
+				|| item->Family == ITEMFAMILY::JEWELRY
+				|| item->Family == ITEMFAMILY::ARMOR
+				|| item->Family == ITEMFAMILY::MELEE_WEAPON
+				|| item->Family == ITEMFAMILY::RANGE_WEAPON)
 			{
 				string luaMethodName = ( (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) ? "updateCrystallizedSpellTooltip" : "updateBuffItemTooltip");
 				CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
@@ -3306,9 +3310,12 @@ void	CDBCtrlSheet::getContextHelpToolTip(ucstring &help) const
 		const CItemSheet *item = asItemSheet();
 		if (item)
 		{
-			if (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL 
-				|| item->Family == ITEMFAMILY::JEWELRY || item->Family == ITEMFAMILY::ARMOR)
-			{				
+			if (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL
+				|| item->Family == ITEMFAMILY::JEWELRY
+				|| item->Family == ITEMFAMILY::ARMOR
+				|| item->Family == ITEMFAMILY::MELEE_WEAPON
+				|| item->Family == ITEMFAMILY::RANGE_WEAPON)
+			{
 				string luaMethodName = (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) ? "updateCrystallizedSpellTooltip" : "updateBuffItemTooltip";
 				CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
 				if ( ! getInventory().isItemInfoUpToDate(getInventory().getItemSlotId(ctrlSheet)))
@@ -4468,7 +4475,10 @@ std::string CDBCtrlSheet::getContextHelpWindowName() const
 			{
 				return "crystallized_spell_context_help";
 			}
-			else if (item->Family == ITEMFAMILY::JEWELRY || item->Family == ITEMFAMILY::ARMOR)
+			else if (item->Family == ITEMFAMILY::JEWELRY
+				|| item->Family == ITEMFAMILY::ARMOR
+				|| item->Family == ITEMFAMILY::MELEE_WEAPON
+				|| item->Family == ITEMFAMILY::RANGE_WEAPON)
 			{
 				return "buff_item_context_help";
 			}
