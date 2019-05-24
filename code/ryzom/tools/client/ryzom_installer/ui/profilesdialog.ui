@@ -250,10 +250,10 @@
   <tabstop>serverComboBox</tabstop>
   <tabstop>executableBrowseButton</tabstop>
   <tabstop>argumentsEdit</tabstop>
-  <tabstop>commentsEdit</tabstop>
   <tabstop>directoryButton</tabstop>
   <tabstop>desktopShortcutCheckBox</tabstop>
   <tabstop>menuShortcutCheckBox</tabstop>
+  <tabstop>commentsEdit</tabstop>
  </tabstops>
  <resources/>
  <connections>
