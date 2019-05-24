@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>583</width>
-    <height>329</height>
+    <width>631</width>
+    <height>356</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -202,13 +202,20 @@
         </layout>
        </item>
        <item row="7" column="0">
+        <widget class="QLabel" name="langLabel">
+         <property name="text">
+          <string>Language:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
         <widget class="QLabel" name="shortcutsLabel">
          <property name="text">
           <string>Create shortcuts:</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
+       <item row="8" column="1">
         <layout class="QVBoxLayout" name="shortcutsLayout">
          <item>
           <widget class="QCheckBox" name="desktopShortcutCheckBox">
@@ -225,6 +232,35 @@
           </widget>
          </item>
         </layout>
+       </item>
+       <item row="7" column="1">
+        <widget class="QComboBox" name="langComboBox">
+         <item>
+          <property name="text">
+           <string>English</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Francais</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Deutsch</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Español</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Russian (РУССКИЙ)</string>
+          </property>
+         </item>
+        </widget>
        </item>
       </layout>
      </item>
@@ -251,6 +287,7 @@
   <tabstop>executableBrowseButton</tabstop>
   <tabstop>argumentsEdit</tabstop>
   <tabstop>directoryButton</tabstop>
+  <tabstop>langComboBox</tabstop>
   <tabstop>desktopShortcutCheckBox</tabstop>
   <tabstop>menuShortcutCheckBox</tabstop>
   <tabstop>commentsEdit</tabstop>
