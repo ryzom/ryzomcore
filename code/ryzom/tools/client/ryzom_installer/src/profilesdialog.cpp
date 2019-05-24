@@ -170,7 +170,9 @@ void CProfilesDialog::deleteProfile(int index)
 	profilesListView->setCurrentIndex(m_model->index(index, 0));
 	displayProfile(index);
 
-	// TODO: delete files for delete profile
+	// delete files for delete profile
+	COperationDialog dialog(this);
+	dialog.setOperation(OperationUpdateProfiles);
 }
 
 void CProfilesDialog::addProfile()
