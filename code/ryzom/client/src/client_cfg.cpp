@@ -2019,30 +2019,43 @@ void CClientConfig::init(const string &configFileName)
 
 	// now we can continue loading and parsing the config file
 
-
 	// if the config file will be modified, it calls automatically the function setValuesOnFileChange()
 	ClientCfg.ConfigFile.setCallback (CClientConfig::setValuesOnFileChange);
 
 	// load the config files
 	ClientCfg.ConfigFile.load (configFileName);
 
+	CConfigFile::CVar *pCV;
+	// check language code is supported
+	pCV = ClientCfg.ConfigFile.getVarPtr("LanguageCode");
+	if (pCV)
+	{
+		std::string lang = pCV->asString();
+		if (!CI18N::isLanguageCodeSupported(lang))
+		{
+			nlinfo("Unsupported language code \"%s\" fallback on default", lang.c_str());
+			// fallback to default language
+			ClientCfg.LanguageCode = CI18N::getSystemLanguageCode();
+			// update ConfigFile variable
+			pCV->setAsString(ClientCfg.LanguageCode);
+			ClientCfg.ConfigFile.save();
+		}
+	}
 
 	// update the ConfigFile variable in the config file
-	CConfigFile::CVar *varPtr = ClientCfg.ConfigFile.getVarPtr ("ClientVersion");
-	if (varPtr)
+	pCV = ClientCfg.ConfigFile.getVarPtr("ClientVersion");
+	if (pCV)
 	{
-		string str = varPtr->asString ();
+		std::string str = pCV->asString ();
 		if (str != getVersion() && ClientCfg.SaveConfig)
 		{
 			nlinfo ("Update and save the ClientVersion variable in config file %s -> %s", str.c_str(), getVersion().c_str());
-			varPtr->setAsString (getVersion());
-			ClientCfg.ConfigFile.save ();
+			pCV->setAsString(getVersion());
+			ClientCfg.ConfigFile.save();
 		}
 	}
 	else
-	{
 		nlwarning ("There's no ClientVersion variable in the config file!");
-	}
 
 }// init //
 
