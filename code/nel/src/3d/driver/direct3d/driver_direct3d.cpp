@@ -1247,23 +1247,23 @@ bool CDriverD3D::init (uintptr_t windowIcon, emptyProc exitFunc)
 
 	createCursors();
 
-	_WindowClass = "NLD3D" + toString(windowIcon);
+	_WindowClass = utf8ToWide("NLD3D" + toString(windowIcon));
 
 	// Register a window class
-	WNDCLASSA		wc;
+	WNDCLASSW		wc;
 
 	memset(&wc,0,sizeof(wc));
 	wc.style			= 0; // CS_HREDRAW | CS_VREDRAW ;//| CS_DBLCLKS;
 	wc.lpfnWndProc		= (WNDPROC)WndProc;
 	wc.cbClsExtra		= 0;
 	wc.cbWndExtra		= 0;
-	wc.hInstance		= GetModuleHandleA(NULL);
+	wc.hInstance		= GetModuleHandleW(NULL);
 	wc.hIcon			= (HICON)windowIcon;
 	wc.hCursor			= _DefaultCursor;
 	wc.hbrBackground	= WHITE_BRUSH;
 	wc.lpszClassName	= _WindowClass.c_str();
 	wc.lpszMenuName		= NULL;
-	if (!RegisterClassA(&wc))
+	if (!RegisterClassW(&wc))
 	{
 		DWORD error = GetLastError();
 		if (error != ERROR_CLASS_ALREADY_EXISTS)
@@ -1416,8 +1416,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 		AdjustWindowRect(&WndRect,WndFlags,FALSE);
 
 		// Create
-		ucstring ustr(_WindowClass);
-		_HWnd = CreateWindowW((LPCWSTR)ustr.c_str(), L"", WndFlags, CW_USEDEFAULT,CW_USEDEFAULT, WndRect.right-WndRect.left,WndRect.bottom-WndRect.top, NULL, NULL,
+		_HWnd = CreateWindowW(_WindowClass.c_str(), L"", WndFlags, CW_USEDEFAULT,CW_USEDEFAULT, WndRect.right-WndRect.left,WndRect.bottom-WndRect.top, NULL, NULL,
 			GetModuleHandleW(NULL), NULL);
 		if (!_HWnd)
 		{

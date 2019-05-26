@@ -2314,7 +2314,7 @@ private:
 	TShaderDrvInfoPtrList	_ShaderDrvInfos;
 
 	// Windows
-	std::string				_WindowClass;
+	std::wstring			_WindowClass;
 	HWND					_HWnd;
 	sint32					_WindowX;
 	sint32					_WindowY;
