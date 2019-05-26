@@ -316,7 +316,7 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 		wc.lpfnWndProc		= (WNDPROC)WndProc;
 		wc.cbClsExtra		= 0;
 		wc.cbWndExtra		= 0;
-		wc.hInstance		= GetModuleHandle(NULL);
+		wc.hInstance		= GetModuleHandleW(NULL);
 		wc.hIcon			= (HICON)windowIcon;
 		wc.hCursor			= _DefaultCursor;
 		wc.hbrBackground	= WHITE_BRUSH;
