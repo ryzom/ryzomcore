@@ -4493,6 +4493,13 @@ NLMISC_COMMAND(debugItemInfoWaiters, "log ItemInfoWaiters", "")
 	return true;
 }
 
+NLMISC_COMMAND(debugItemInfoCache, "log ItemInfoCache", "")
+{
+	getInventory().debugItemInfoCache();
+
+	return true;
+}
+
 NLMISC_COMMAND(debugInfoWindows, "log info windows sheetId", "")
 {
 	CInterfaceHelp::debugOpenedInfoWindows();
