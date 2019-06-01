@@ -793,7 +793,7 @@ protected:
 
 	sint64		_NotifyAnimEndTime;
 
-	CControlSheetInfoWaiter _ItemInfoWaiter;
+	mutable CControlSheetInfoWaiter _ItemInfoWaiter;
 private:
 	mutable TSheetType			_ActualType;
 
