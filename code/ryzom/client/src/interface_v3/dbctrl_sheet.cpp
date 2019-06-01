@@ -3374,6 +3374,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 			if (useItemInfoForFamily(item->Family))
 			{
 				// call lua function to update tooltip window
+				_ItemInfoWaiter.sendRequest();
 				help = _ItemInfoWaiter.infoValidated();
 			}
 			else if (!_ContextHelp.empty())
@@ -3501,6 +3502,7 @@ void	CDBCtrlSheet::getContextHelpToolTip(ucstring &help) const
 		{
 			if (useItemInfoForFamily(item->Family))
 			{
+				_ItemInfoWaiter.sendRequest();
 				help = _ItemInfoWaiter.infoValidated();
 				return;
 			}
