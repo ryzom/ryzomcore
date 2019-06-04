@@ -30,6 +30,7 @@
 #include "../connection.h"
 
 #include <curl/curl.h>
+#include "nel/gui/curl_certificates.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -168,6 +169,17 @@ public:
 		_Thread = NULL;
 		curl_global_init(CURL_GLOBAL_ALL);
 
+		Curl = NULL;
+		//nlinfo("ctor CWebigNotificationThread");
+	}
+
+	void init()
+	{
+		if (Curl)
+		{
+			return;
+		}
+
 		Curl = curl_easy_init();
 		if(!Curl) return;
 		curl_easy_setopt(Curl, CURLOPT_COOKIEFILE, "");
@@ -175,7 +187,8 @@ public:
 		curl_easy_setopt(Curl, CURLOPT_USERAGENT, getUserAgent().c_str());
 		curl_easy_setopt(Curl, CURLOPT_FOLLOWLOCATION, 1);
 		curl_easy_setopt(Curl, CURLOPT_WRITEFUNCTION, writeDataFromCurl);
-		//nlinfo("ctor CWebigNotificationThread");
+
+		NLGUI::CCurlCertificates::useCertificates(Curl);
 	}
 
 	~CWebigNotificationThread()
@@ -183,7 +196,7 @@ public:
 		if(Curl)
 		{
 			curl_easy_cleanup(Curl);
-			Curl = 0;
+			Curl = NULL;
 		}
 		if (_Thread)
 		{
@@ -275,6 +288,9 @@ public:
 
 	void startThread()
 	{
+		// initialize curl outside thread
+		init();
+
 		if (!_Thread)
 		{
 			_Thread = IThread::create(this);
@@ -286,7 +302,6 @@ public:
 		{
 			nlwarning("WebIgNotification thread already started");
 		}
-		
 	}
 
 	void stopThread()
@@ -305,7 +320,7 @@ public:
 		}
 	}
 
-	bool isRunning() const 
+	bool isRunning() const
 	{
 		return _Running;
 	}
