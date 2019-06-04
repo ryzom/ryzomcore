@@ -332,7 +332,9 @@ namespace NLGUI
 						{
 							ERR_error_string_n(errCode, errorBuffer, 1024);
 							nlwarning("Error adding certificate %s: %s", entry.name.c_str(), errorBuffer);
-							res = CURLE_SSL_CACERT;
+							// There seems to be intermittent issues (on windows) where cert loading will fail for same 3 to 5 certs
+							// with an 'SSL_shutdown while in init' error. It does not seem to be fatal for connection.
+							//res = CURLE_SSL_CACERT;
 						}
 					}
 					else
