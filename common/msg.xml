@@ -561,6 +561,10 @@
           sendto="EGS"
           format="s"
           description="client asks EGS to set the guild message of the day" />
+    <leaf name="AUTOPACT"
+          sendto="EGS"
+          format="u8"
+          description="client want set AUTOPACT to TRUE or FALSE" />
   </branch>
   <!-- MP Exotic Price Evaluation (discontinued) -->
   <branch name="MP_EVAL">
