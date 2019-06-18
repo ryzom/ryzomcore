@@ -180,6 +180,7 @@ int main(int argc, char **argv)
 	Args.addAdditionalArg("login", "Login to use", true, false);
 	Args.addAdditionalArg("password", "Password to use", true, false);
 	Args.addAdditionalArg("shard_id", "Shard ID to use", true, false);
+	Args.addAdditionalArg("slot", "Char slot to use", true, false);
 
 #ifdef TEST_CRASH_COUNTER
 	Args.addArg("", "crash", "", "Crash client before init");
@@ -220,6 +221,12 @@ int main(int argc, char **argv)
 
 			if (Args.haveAdditionalArg("shard_id"))
 				sLoginShardId = Args.getAdditionalArg("shard_id").front();
+
+			if (Args.haveAdditionalArg("slot"))
+			{
+				if (!fromString(Args.getAdditionalArg("slot").front(), LoginCharsel))
+					LoginCharsel = -1;
+			}
 		}
 	}
 

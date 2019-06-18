@@ -144,14 +144,13 @@ ucstring	PlayerSelectedHomeShardName;
 ucstring	PlayerSelectedHomeShardNameWithParenthesis;
 extern std::string CurrentCookie;
 
-
 ucstring NewKeysCharNameWanted; // name of the character for which a new keyset must be created
 ucstring NewKeysCharNameValidated;
 std::string GameKeySet = "keys.xml";
 std::string RingEditorKeySet = "keys_r2ed.xml";
 
 string		ScenarioFileName;
-
+sint 		LoginCharsel = -1;
 
 static const char *KeySetVarName = "BuiltInKeySets";
 
@@ -1095,8 +1094,15 @@ TInterfaceState globalMenu()
 				noUserChar = userChar = false;
 				if( FarTP.isReselectingChar() || !FarTP.isServerHopInProgress() ) // if doing a Server Hop, expect serverReceivedReady without action from the user
 				{
+					sint charSelect = -1;
+					if (ClientCfg.SelectCharacter != -1)
+						charSelect = ClientCfg.SelectCharacter;
+
+					if (LoginCharsel != -1)
+						charSelect = LoginCharsel;
+
 					WaitServerAnswer = false;
-					if (ClientCfg.SelectCharacter == -1)
+					if (charSelect == -1)
 					{
 						CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SERVER_RECEIVED_CHARS", false);
 						if (pNL != NULL)
@@ -1112,7 +1118,7 @@ TInterfaceState globalMenu()
 					else
 					{
 						// check that the pre selected character is available
-						if (CharacterSummaries[ClientCfg.SelectCharacter].People == EGSPD::CPeople::Unknown)
+						if (CharacterSummaries[charSelect].People == EGSPD::CPeople::Unknown || charSelect > 4)
 						{
 							// BAD ! preselected char does not exist, use the first available or fail
 							uint i;
@@ -1132,12 +1138,14 @@ TInterfaceState globalMenu()
 								if (ret == UDriver::noId)
 									exit(-1);
 								else
-									ClientCfg.SelectCharacter = i;
+									charSelect = i;
 							}
 						}
-
 						// Auto-selection for fast launching (dev only)
-						CAHManager::getInstance()->runActionHandler("launch_game", NULL, toString("slot=%d|edit_mode=0", ClientCfg.SelectCharacter));
+						CAHManager::getInstance()->runActionHandler("launch_game", NULL, toString("slot=%d|edit_mode=0", charSelect));
+
+						if (LoginCharsel == -1)
+							ClientCfg.SelectCharacter = charSelect;
 					}
 
 				}
