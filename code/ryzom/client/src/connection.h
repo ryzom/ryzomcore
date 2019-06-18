@@ -34,6 +34,7 @@ extern ucstring		PlayerSelectedHomeShardName;					// The home shard name (aniro,
 extern ucstring		PlayerSelectedHomeShardNameWithParenthesis;		// Same with parenthesis
 extern std::vector<CCharacterSummary>	CharacterSummaries;
 extern std::string UserPrivileges;
+extern sint LoginCharsel;
 
 extern ucstring NewKeysCharNameWanted;
 extern ucstring NewKeysCharNameValidated;
