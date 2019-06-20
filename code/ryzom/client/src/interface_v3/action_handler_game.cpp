@@ -4609,3 +4609,30 @@ public:
 };
 REGISTER_ACTION_HANDLER( CHandlerSortTribeFame, "sort_tribefame");
 
+// ***************************************************************************
+class CHandlerCharselNaviGetKeys : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	{
+		const std::string ui = pCaller->getParent()->getId();
+		if (ui != "ui:outgame")
+			return;
+
+		if (Params.empty())
+		{
+			sint32 event = -1;
+
+			if (Driver->AsyncListener.isKeyPushed(KeyESCAPE)) event = 0;
+			if (Driver->AsyncListener.isKeyPushed(KeyDELETE)) event = 1;
+			if (Driver->AsyncListener.isKeyPushed(KeyRETURN)) event = 2;
+			if (Driver->AsyncListener.isKeyPushed(KeyDOWN))   event = 3;
+			if (Driver->AsyncListener.isKeyPushed(KeyUP))     event = 4;
+
+			if (event != -1)
+				CLuaManager::getInstance().executeLuaScript(toString("outgame:eventCharselKeyGet(%i)", event));
+		}
+		// reset previous input
+		Driver->AsyncListener.reset();
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerCharselNaviGetKeys, "navigate_charsel" );
