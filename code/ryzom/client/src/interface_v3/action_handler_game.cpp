@@ -4610,37 +4610,29 @@ public:
 REGISTER_ACTION_HANDLER( CHandlerSortTribeFame, "sort_tribefame");
 
 // ***************************************************************************
-// navigate_charsel
-// Arg : current slot selected
-// ***************************************************************************
 class CHandlerCharselNaviGetKeys : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
-		sint32 slot = 0;
-		if (!getParam(Params, "cs").empty())
-			fromString(getParam(Params, "cs"), slot);
+		const std::string ui = pCaller->getParent()->getId();
+		if (ui != "ui:outgame")
+			return;
 
-		if (Driver->AsyncListener.isKeyPushed(KeyESCAPE))
-			CAHManager::getInstance()->runActionHandler("proc", NULL, "proc_quit");
-
-		if (Driver->AsyncListener.isKeyPushed(KeyRETURN))
-			CAHManager::getInstance()->runActionHandler("proc", NULL, "proc_charsel_enterkeyslot");
-
-		const sint32 index = slot;
-		if (Driver->AsyncListener.isKeyPushed(KeyUP))
+		if (Params.empty())
 		{
-			slot--;
-			if (slot < 0) slot = 4;
+			sint32 event = -1;
+
+			if (Driver->AsyncListener.isKeyPushed(KeyESCAPE)) event = 0;
+			if (Driver->AsyncListener.isKeyPushed(KeyDELETE)) event = 1;
+			if (Driver->AsyncListener.isKeyPushed(KeyRETURN)) event = 2;
+			if (Driver->AsyncListener.isKeyPushed(KeyDOWN))   event = 3;
+			if (Driver->AsyncListener.isKeyPushed(KeyUP))     event = 4;
+
+			if (event != -1)
+				CLuaManager::getInstance().executeLuaScript(toString("outgame:eventCharselKeyGet(%i)", event));
 		}
-		else if (Driver->AsyncListener.isKeyPushed(KeyDOWN))
-		{
-			slot++;
-			if (slot > 4) slot = 0;
-		}
-		// now select
-		if (index != slot)
-			CAHManager::getInstance()->runActionHandler("proc", NULL, toString("proc_charsel_clickslot|%i", slot));
+		// reset previous input
+		Driver->AsyncListener.reset();
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerCharselNaviGetKeys, "navigate_charsel" );
