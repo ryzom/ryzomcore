@@ -4614,8 +4614,10 @@ class CHandlerCharselNaviGetKeys : public IActionHandler
 {
 	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
-		const std::string ui = pCaller->getParent()->getId();
-		if (ui != "ui:outgame")
+		if (!pCaller->getParent())
+			return;
+
+		if (pCaller->getParent()->getId() != "ui:outgame")
 			return;
 
 		if (Params.empty())
