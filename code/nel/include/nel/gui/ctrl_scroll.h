@@ -174,6 +174,7 @@ namespace NLGUI
 		bool    _MouseDown  : 1;
 		bool	_CallingAH  : 1;
 		bool	_Cancelable : 1; // true if the slider may be cancelled when pressed on the mouse right button
+		bool	_Keyboard   : 1;
 		bool	_Frozen		: 1;
 		bool	_Scale		: 1;
 

@@ -53,6 +53,7 @@ namespace NLGUI
 		_MouseDown = false;
 		_CallingAH = false;
 		_Cancelable = false;
+		_Keyboard = false;
 		_Target = NULL;
 		_Inverted = false;
 		_IsDBLink = false;
@@ -219,6 +220,11 @@ namespace NLGUI
 		if( name == "cancelable" )
 		{
 			return toString( _Cancelable );
+		}
+		else
+		if( name == "keyboard" )
+		{
+			return toString( _Keyboard );
 		}
 		else
 		if( name == "frozen" )
@@ -401,6 +407,14 @@ namespace NLGUI
 			return;
 		}
 		else
+		if( name == "keyboard" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Keyboard = b;
+			return;
+		}
+		else
 		if( name == "frozen" )
 		{
 			bool b;
@@ -470,6 +484,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "target_stepy", BAD_CAST toString( _TargetStepY ).c_str() );
 		xmlSetProp( node, BAD_CAST "step_value", BAD_CAST toString( _StepValue ).c_str() );
 		xmlSetProp( node, BAD_CAST "cancelable", BAD_CAST toString( _Cancelable ).c_str() );
+		xmlSetProp( node, BAD_CAST "keyboard", BAD_CAST toString( _Keyboard ).c_str() );
 		xmlSetProp( node, BAD_CAST "frozen", BAD_CAST toString( _Frozen ).c_str() );
 
 		return node;
@@ -584,6 +599,9 @@ namespace NLGUI
 
 		prop = (char*) xmlGetProp( node, (xmlChar*)"cancelable" );
 		if (prop) _Cancelable = convertBool(prop);
+
+		prop = (char*) xmlGetProp( node, (xmlChar*)"keyboard" );
+		if (prop) _Keyboard = convertBool(prop);
 
 		prop= (char*) xmlGetProp (node, (xmlChar*)"frozen");
 		_Frozen = false;
@@ -850,6 +868,7 @@ namespace NLGUI
 		if (CCtrlBase::handleEvent(event)) return true;
 		if (!_Active || _Frozen)
 			return false;
+
 		if (event.getType() == NLGUI::CEventDescriptor::mouse)
 		{
 			const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
@@ -906,6 +925,28 @@ namespace NLGUI
 			{
 				moveTargetY (-(eventDesc.getWheel() * 12));
 				return true;
+			}
+		}
+		else if (event.getType() == NLGUI::CEventDescriptor::key)
+		{
+			const NLGUI::CEventDescriptorKey &eventDesc = (const NLGUI::CEventDescriptorKey &)event;
+
+			if (eventDesc.getKeyEventType() == NLGUI::CEventDescriptorKey::keydown)
+			{
+				if (_Keyboard)
+				{
+					sint32 i = 0;
+					// direction
+					if (eventDesc.getKey() == KeyNEXT)  i++;
+					if (eventDesc.getKey() == KeyPRIOR) i--;
+
+					if (_Vertical)
+						moveTrackY(-(i * _TargetStepY));
+					else
+						moveTrackX(-(i * _TargetStepX));
+
+					return true;
+				}
 			}
 		}
 		return false;
@@ -1208,6 +1249,7 @@ namespace NLGUI
 		sint32	wReal= _Target->getWReal();
 		if(wReal <= maxWReal)
 			return;
+
 
 		// compute the new ofsX.
 		sint32	ofsX= _Target->getOfsX();
