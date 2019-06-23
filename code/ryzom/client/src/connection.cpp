@@ -2110,7 +2110,7 @@ public:
 
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
 		if (pList == NULL)
@@ -2189,7 +2189,7 @@ public:
 
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
 		pList->clearGroups();
 	}
@@ -2200,32 +2200,56 @@ REGISTER_ACTION_HANDLER (CAHResetMainlandList, "reset_mainland_list");
 // ***************************************************************************
 class CAHMainlandSelect : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const std::string &Params)
 	{
-		nlinfo("CAHMainlandSelect called");
-
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-
-		CCtrlButton *pCB = NULL;
-		// Unselect
-		if (MainlandSelected.asInt() != 0)
+		//nlinfo("CAHMainlandSelect called");
+		struct CUnpush : public CInterfaceElementVisitor
 		{
-			pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND ":"+toString(MainlandSelected)+":but"));
-			if (pCB != NULL)
-				pCB->setPushed(false);
+			CCtrlBase *Ref;
+			virtual void visitCtrl(CCtrlBase *ctrl)
+			{
+				if (ctrl == Ref) return;
+				CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton*>(ctrl);
+				if (but)
+				{
+					but->setPushed(false);
+				}
+			}
+		};
+		CInterfaceGroup *list = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
+		if (!list)
+			return;
+
+		// unselect
+		if (Params.empty())
+		{
+			CUnpush unpusher;
+			unpusher.Ref = pCaller;
+			list->visit(&unpusher);
 		}
 
-		pCB = dynamic_cast<CCtrlButton*>(pCaller);
-		if (pCB != NULL)
+		// now select
+		uint32 mainland;
+		if (Params.empty())
 		{
-			string name = pCB->getId();
-			name = name.substr(0,name.rfind(':'));
-			uint32 mainland;
-			fromString(name.substr(name.rfind(':')+1,name.size()), mainland);
-			MainlandSelected = (TSessionId)mainland;
+			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(pCaller);
+			if (!pCB)
+				return;
+
+			std::string name = pCB->getId();
+			name = name.substr(0, name.rfind(':'));
+
+			if (!fromString(name.substr(name.rfind(':')+1, name.size()), mainland))
+				return;
 
 			pCB->setPushed(true);
 		}
+		else
+			if (!fromString(Params, mainland))
+				return;
+
+		// and store
+		MainlandSelected = (TSessionId)mainland;
 	}
 };
 REGISTER_ACTION_HANDLER (CAHMainlandSelect, "mainland_select");
