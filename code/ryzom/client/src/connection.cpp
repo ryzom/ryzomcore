@@ -2454,7 +2454,7 @@ public:
 
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
 		pList->clearGroups();
 	}
@@ -2465,59 +2465,66 @@ REGISTER_ACTION_HANDLER (CAHResetKeysetList, "reset_keyset_list");
 // ***************************************************************************
 class CAHResetKeysetSelect : public IActionHandler
 {
-public:
 	std::string getIdPostFix(const std::string fullId)
 	{
 		std::string::size_type pos = fullId.find_last_of(":");
 		if (pos != std::string::npos)
-		{
 			return fullId.substr(pos + 1);
-		}
+
 		return "";
 	}
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+
+	virtual void execute(CCtrlBase *pCaller, const std::string &Params)
 	{
-		if (!pCaller) return;
 		// 'unpush' all groups but the caller
-		//
 		struct CUnpush : public CInterfaceElementVisitor
 		{
 			CCtrlBase *Ref;
 			virtual void visitCtrl(CCtrlBase *ctrl)
 			{
 				if (ctrl == Ref) return;
-				CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton *>(ctrl);
+				CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton*>(ctrl);
 				if (but)
 				{
 					but->setPushed(false);
 				}
 			}
 		};
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup * list = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
-		if (list)
-		{
-			CUnpush unpusher;
-			unpusher.Ref = pCaller;
-			list->visit(&unpusher);
-		}
-		CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton *>(pCaller);
+		CInterfaceGroup *list = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
+		if (!list)
+			return;
+
+		// unselect
+		CUnpush unpusher;
+		unpusher.Ref = pCaller;
+		list->visit(&unpusher);
+
+		// now select
+		CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton*>(pCaller);
 		if (but)
-		{
 			but->setPushed(true);
+
+		std::string id;
+		if (Params.empty())
+		{
+			if (!pCaller) return;
+			if (!pCaller->getParent()) return;
+
+			id = getIdPostFix(pCaller->getParent()->getId());
 		}
-		//
+		else
+			id = getIdPostFix(Params);
+
 		GameKeySet = "keys.xml";
 		RingEditorKeySet = "keys_r2ed.xml";
-		if (!pCaller->getParent()) return;
-		// compute the 2 filenames from the id
-		// if id is in the built-in keysets :
+
+		// compute the two filenames from the id
+		// if id is in the built-in keysets
 		CConfigFile::CVar *keySetVar = ClientCfg.ConfigFile.getVarPtr(KeySetVarName);
-		if (keySetVar && keySetVar->size() != 0)
+		if (keySetVar && keySetVar->size() > 0)
 		{
 			for (uint k = 0; k < keySetVar->size(); ++k)
 			{
-				std::string id = getIdPostFix(pCaller->getParent()->getId());
 				if (keySetVar->asString(k) == id)
 				{
 					GameKeySet = "keys" + string(id.empty() ? "" : "_") + id + ".xml";
@@ -2526,17 +2533,15 @@ public:
 				}
 			}
 		}
-		// ... else maybe from a previous character	?
-		if (CFile::isExists("save/keys_" + getIdPostFix(pCaller->getParent()->getId()) + ".xml") )
-		{
-			GameKeySet = "keys_" + getIdPostFix(pCaller->getParent()->getId()) + ".xml";
-		}
-		if (CFile::isExists("save/keys_r2ed_" + getIdPostFix(pCaller->getParent()->getId()) + ".xml") )
-		{
-			RingEditorKeySet = "keys_r2ed_" + getIdPostFix(pCaller->getParent()->getId()) + ".xml";
-		}
-		// NB : key file will be copied for real when the new 'character summary' is
 
+		// else maybe from a previous character?
+		if (CFile::isExists("save/keys_" + id + ".xml"))
+			GameKeySet = "keys_" + id + ".xml";
+
+		if (CFile::isExists("save/keys_r2ed_" + id + ".xml"))
+			RingEditorKeySet = "keys_r2ed_" + id + ".xml";
+
+		// NB: key file will be copied for real when the new character summary is
 	}
 };
 REGISTER_ACTION_HANDLER (CAHResetKeysetSelect, "keyset_select");
