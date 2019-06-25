@@ -4610,9 +4610,9 @@ public:
 REGISTER_ACTION_HANDLER( CHandlerSortTribeFame, "sort_tribefame");
 
 // ***************************************************************************
-class CHandlerCharselNaviGetKeys : public IActionHandler
+class CHandlerOutgameNaviGetKeys : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const std::string &Params)
 	{
 		if (!pCaller->getParent())
 			return;
@@ -4629,12 +4629,18 @@ class CHandlerCharselNaviGetKeys : public IActionHandler
 			if (Driver->AsyncListener.isKeyPushed(KeyRETURN)) event = 2;
 			if (Driver->AsyncListener.isKeyPushed(KeyDOWN))   event = 3;
 			if (Driver->AsyncListener.isKeyPushed(KeyUP))     event = 4;
+			if (Driver->AsyncListener.isKeyPushed(KeyI))      event = 5;
+			if (Driver->AsyncListener.isKeyPushed(KeyP))      event = 6;
+
+			std::string id = "create";
+			if (pCaller->getId() == "ui:outgame:charsel")
+				id = "sel";
 
 			if (event != -1)
-				CLuaManager::getInstance().executeLuaScript(toString("outgame:eventCharselKeyGet(%i)", event));
+				CLuaManager::getInstance().executeLuaScript(toString("outgame:eventChar%sKeyGet(%i)", id.c_str(), event));
 		}
 		// reset previous input
 		Driver->AsyncListener.reset();
 	}
 };
-REGISTER_ACTION_HANDLER( CHandlerCharselNaviGetKeys, "navigate_charsel" );
+REGISTER_ACTION_HANDLER( CHandlerOutgameNaviGetKeys, "navigate_outgame" );
