@@ -3616,3 +3616,54 @@ class CAHImportCharacter : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER( CAHImportCharacter, "import_char" );
+
+// ***************************************************************************
+class CAHExportCharacter : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
+	{
+		if (Params.empty())
+			return;
+
+		sint32 slot = -1;
+		if (!fromString(getParam(Params, "slot"), slot))
+			return;
+
+		if (slot >= CharacterSummaries.size() || slot < 0)
+			return;
+
+		// retrieve infos
+		CCharacterSummary &CS = CharacterSummaries[slot];
+		if (CS.Name.empty())
+			return;
+
+		// extract name
+		const std::string name = buildPlayerNameForSaveFile(CS.Name.toString());
+
+		COFile fd;
+		bool success = false;
+		// use temporary file until close()
+		if (fd.open(toString("save/character_%s.save", name.c_str()), false, false, true))
+		{
+			try
+			{
+				fd.serial(CS);
+				fd.flush();
+				// validate
+				success = true;
+			}
+			catch (const EStream &e)
+			{
+				nlwarning(e.what());
+			}
+			fd.close();
+		}
+		else
+			nlwarning("Failed to open file: save/character_%s.save", name.c_str());
+
+		const uint8 val = (success == true) ? 0 : 1;
+		// user notification
+		CLuaManager::getInstance().executeLuaScript(toString("outgame:procCharselNotifaction(%i)", val));
+	}
+};
+REGISTER_ACTION_HANDLER( CAHExportCharacter, "export_char" );
