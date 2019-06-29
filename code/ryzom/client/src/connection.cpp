@@ -3479,6 +3479,11 @@ class CAHInitImportCharacter : public IActionHandler
 					if (text)
 						text->setText(ucstring(savedCharacters[i]));
 
+					// first button is pushed
+					CCtrlButton *button = dynamic_cast<CCtrlButton*>(newLine->getCtrl("but"));
+					if (button && list->getNumGroup() == 0)
+						button->setPushed(true);
+
 					// add to the list now
 					newLine->setParent(list);
 					newLine->setParentSize(list);
