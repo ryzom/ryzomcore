@@ -4631,6 +4631,7 @@ class CHandlerOutgameNaviGetKeys : public IActionHandler
 			if (Driver->AsyncListener.isKeyPushed(KeyUP))     event = 4;
 			if (Driver->AsyncListener.isKeyPushed(KeyI))      event = 5;
 			if (Driver->AsyncListener.isKeyPushed(KeyP))      event = 6;
+			if (Driver->AsyncListener.isKeyPushed(KeyE))      event = 7;
 
 			std::string id = "create";
 			if (pCaller->getId() == "ui:outgame:charsel")
