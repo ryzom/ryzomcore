@@ -28,6 +28,7 @@
 #include "nel/misc/time_nl.h"
 #include "nel/misc/algo.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/stream.h"
 // 3D Interface.
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_text_context.h"
@@ -152,6 +153,7 @@ std::string RingEditorKeySet = "keys_r2ed.xml";
 
 string		ScenarioFileName;
 
+std::string ImportCharacter;
 
 static const char *KeySetVarName = "BuiltInKeySets";
 
