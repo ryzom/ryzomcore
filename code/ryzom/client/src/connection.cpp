@@ -28,6 +28,7 @@
 #include "nel/misc/time_nl.h"
 #include "nel/misc/algo.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/stream.h"
 // 3D Interface.
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_text_context.h"
@@ -144,6 +145,7 @@ ucstring	PlayerSelectedHomeShardName;
 ucstring	PlayerSelectedHomeShardNameWithParenthesis;
 extern std::string CurrentCookie;
 
+
 ucstring NewKeysCharNameWanted; // name of the character for which a new keyset must be created
 ucstring NewKeysCharNameValidated;
 std::string GameKeySet = "keys.xml";
@@ -151,6 +153,8 @@ std::string RingEditorKeySet = "keys_r2ed.xml";
 
 string		ScenarioFileName;
 sint 		LoginCharsel = -1;
+
+std::string ImportCharacter;
 
 static const char *KeySetVarName = "BuiltInKeySets";
 
