@@ -938,7 +938,9 @@ namespace NLGUI
 					sint32 i = 0;
 					// direction
 					if (eventDesc.getKey() == KeyNEXT)  i++;
-					if (eventDesc.getKey() == KeyPRIOR) i--;
+					else if (eventDesc.getKey() == KeyPRIOR) i--;
+					else
+						return false;
 
 					if (_Vertical)
 						moveTrackY(-(i * _TargetStepY));
