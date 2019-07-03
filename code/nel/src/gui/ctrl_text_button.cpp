@@ -1074,6 +1074,69 @@ namespace NLGUI
 
 	// ***************************************************************************
 
+	void CCtrlTextButton::setTextureLua(const std::string &name)
+	{
+		_TextureIdNormal[0].setTexture(std::string(name + "_l.tga").c_str());
+		_TextureIdNormal[1].setTexture(std::string(name + "_m.tga").c_str());
+		_TextureIdNormal[2].setTexture(std::string(name + "_r.tga").c_str());
+	}
+
+	// ***************************************************************************
+
+	void CCtrlTextButton::setTexturePushedLua(const std::string &name)
+	{
+		_TextureIdPushed[0].setTexture(std::string(name + "_l.tga").c_str());
+		_TextureIdPushed[1].setTexture(std::string(name + "_m.tga").c_str());
+		_TextureIdPushed[2].setTexture(std::string(name + "_r.tga").c_str());
+	}
+
+	// ***************************************************************************
+
+	void CCtrlTextButton::setTextureOverLua(const std::string &name)
+	{
+		_TextureIdOver[0].setTexture(std::string(name + "_l.tga").c_str());
+		_TextureIdOver[1].setTexture(std::string(name + "_m.tga").c_str());
+		_TextureIdOver[2].setTexture(std::string(name + "_r.tga").c_str());
+	}
+
+	// ***************************************************************************
+
+	std::string CCtrlTextButton::getTexture() const
+	{
+		std::string tx = CViewRenderer::getInstance()->getTextureNameFromId(_TextureIdNormal[0]);
+		std::string::size_type i = tx.rfind("_l.tga");
+		if (i != std::string::npos)
+			tx = tx.substr(0, i);
+
+		return tx;
+	}
+
+	// ***************************************************************************
+
+	std::string CCtrlTextButton::getTexturePushed() const
+	{
+		std::string tx = CViewRenderer::getInstance()->getTextureNameFromId(_TextureIdOver[0]);
+		std::string::size_type i = tx.rfind("_l.tga");
+		if (i != std::string::npos)
+			tx = tx.substr(0, i);
+
+		return tx;
+	}
+
+	// ***************************************************************************
+
+	std::string CCtrlTextButton::getTextureOver() const
+	{
+		std::string tx = CViewRenderer::getInstance()->getTextureNameFromId(_TextureIdPushed[0]);
+		std::string::size_type i = tx.rfind("_l.tga");
+		if (i != std::string::npos)
+			tx = tx.substr(0, i);
+
+		return tx;
+	}
+
+	// ***************************************************************************
+
 	int CCtrlTextButton::luaGetViewText(CLuaState &ls)
 	{
 		const char *funcName = "getViewText";
