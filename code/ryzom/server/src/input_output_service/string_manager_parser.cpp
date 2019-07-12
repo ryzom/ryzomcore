@@ -242,8 +242,16 @@ public:
 			return;
 		}
 
+		// no _wk file or empty
 		if (addition.size() == 0)
 			return;
+
+		// no _lang file or empty
+		if (reference.size() == 0)
+		{
+			text = prepareExcelSheet(addition);
+			return;
+		}
 
 		// create missing columns in reference and addition to make the diff
 		for (uint i=0; i<reference.ColCount || i < addition.ColCount; ++i)
