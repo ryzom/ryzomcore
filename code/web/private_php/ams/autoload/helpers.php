@@ -29,7 +29,6 @@ class Helpers {
 
          // define('SMARTY_SPL_AUTOLOAD',1);
         require_once $AMS_LIB . '/smarty/libs/Smarty.class.php';
-         spl_autoload_register( '__autoload' );
 
          $smarty = new Smarty;
          $smarty -> setCompileDir( $SITEBASE . '/templates_c/' );

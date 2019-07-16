@@ -14,7 +14,7 @@
 	{
 		var $Value;
 		
-		function WS_TUserRole()
+		function __construct()
 		{
 			global $WS_TUserRole_InvalidValue;
 			$this->Value = $WS_TUserRole_InvalidValue;
