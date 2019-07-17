@@ -221,6 +221,13 @@ namespace ADMIN
 				fclose(fp);
 			}
 
+			string rrddirname = CPath::standardizePath (IService::getInstance()->ConfigFile.getVar("RRDVarPath").asString());
+			if (!NLMISC::CFile::isExists(rrddirname))
+			{
+				CFile::createDirectory(rrddirname);
+				CFile::setRWAccess(rrddirname);
+			}
+
 			return true;
 		}
 
