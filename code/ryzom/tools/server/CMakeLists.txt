@@ -1,10 +1,12 @@
 IF(WITH_RYZOM_TOOLS)
   IF(WITH_LIGO)
-    ADD_SUBDIRECTORY(ai_build_wmap)
+    # Disabled because no server code in atys/yubo branch
+    #ADD_SUBDIRECTORY(ai_build_wmap)
   ENDIF()
 
   IF(WITH_3D)
-    ADD_SUBDIRECTORY(build_world_packed_col)
+    # Disabled because no server code in atys/yubo branch
+    #ADD_SUBDIRECTORY(build_world_packed_col)
   ENDIF()
 ENDIF()
 
