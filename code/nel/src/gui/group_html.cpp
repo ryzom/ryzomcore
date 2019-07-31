@@ -740,6 +740,24 @@ namespace NLGUI
 		pumpCurlQueue();
 	}
 
+	void CGroupHTML::removeImageDownload(CViewBase *img)
+	{
+		for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
+		{
+			// check all active downloads because image does not keep url around
+			std::vector<CDataImageDownload>::iterator imgIter = it->imgs.begin();
+			while(imgIter != it->imgs.end())
+			{
+				if (imgIter->Image == img)
+				{
+					it->imgs.erase(imgIter);
+					break;
+				}
+				++imgIter;
+			}
+		}
+	}
+
 	void CGroupHTML::initImageDownload()
 	{
 		LOG_DL("Init Image Download");
