@@ -711,7 +711,6 @@ namespace NLGUI
 			return;
 		}
 
-		// TODO: if no image in cache, nothing is visible
 		finalUrl = upgradeInsecureUrl(getAbsoluteUrl(url));
 
 		// use requested url for local name (cache)
@@ -719,9 +718,15 @@ namespace NLGUI
 		LOG_DL("add to download '%s' dest '%s' img %p", finalUrl.c_str(), dest.c_str(), img);
 
 		// Display cached image while downloading new
-		if (type != OverImage && CFile::fileExists(dest))
+		if (type != OverImage)
 		{
-			setImage(img, dest, type);
+			std::string temp = dest;
+			if (!CFile::fileExists(temp))
+			{
+				// TODO: placeholder
+				temp = "web_del.tga";
+			}
+			setImage(img, temp, type);
 			setImageSize(img, style);
 		}
 
