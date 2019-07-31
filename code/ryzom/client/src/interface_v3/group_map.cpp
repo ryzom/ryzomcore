@@ -101,6 +101,12 @@ const uint32 ISLAND_PIXEL_PER_METER = 2;
 
 static void setupFromZoom(CViewBase *pVB, CContLandMark::TContLMType t, float fMeterPerPixel);
 
+// calculate distance (squared) between two points
+static float distsqr(const CVector2f a, const CVector2f b)
+{
+	return pow(a.x - b.x, 2) + pow(a.y - b.y, 2);
+}
+
 // popup the landmark name dialog
 
 static void popupLandMarkNameDialog()
@@ -2760,19 +2766,36 @@ void CGroupMap::updateLandMarkButton(CLandMarkButton *lmb, const CLandMarkOption
 }
 
 //============================================================================================================
-bool CGroupMap::filterLandmark(const ucstring &title) const
+bool CGroupMap::filterLandmark(const ucstring &title, const std::vector<ucstring> filter, bool startsWith) const
 {
-	if (_LandmarkFilter.size() > 0)
+	if (filter.size() > 0)
 	{
 		ucstring lcTitle = toLower(title);
-		for(uint i = 0; i< _LandmarkFilter.size(); ++i) {
-			if (lcTitle.find(_LandmarkFilter[i]) == ucstring::npos) {
+		if (startsWith)
+		{
+			if (lcTitle.find(filter[0]) != 0)
+			{
 				return false;
 			}
 		}
+		else
+		{
+			for(uint i = 0; i< filter.size(); ++i)
+			{
+				if (lcTitle.find(filter[i]) == ucstring::npos)
+				{
+					return false;
+				}
+			}
+		}
 	}
-
 	return true;
+}
+
+//============================================================================================================
+bool CGroupMap::filterLandmark(const ucstring &title) const
+{
+	return filterLandmark(title, _LandmarkFilter);
 }
 
 //============================================================================================================
@@ -3317,6 +3340,129 @@ void CGroupMap::targetLandmarkResult(uint32 index)
 		gc->blink();
 		CWidgetManager::getInstance()->setTopWindow(gc);
 	}
+}
+
+//=========================================================================================================
+CGroupMap::CLandMarkButton* CGroupMap::findClosestLandmark(const CVector2f &center, const ucstring &search, bool startsWith, const TLandMarkButtonVect &landmarks, float &closest) const
+{
+	CLandMarkButton *ret = NULL;
+
+	std::vector<ucstring> keywords;
+	if (startsWith)
+		keywords.push_back(search);
+	else
+		splitUCString(toLower(search), ucstring(" "), keywords);
+
+	closest = std::numeric_limits<float>::max();
+	for(TLandMarkButtonVect::const_iterator it = landmarks.begin(); it != landmarks.end(); ++it)
+	{
+		ucstring lc;
+		(*it)->getContextHelp(lc);
+		if(filterLandmark(lc, keywords, startsWith)) {
+			CVector2f pos;
+			mapToWorld(pos, (*it)->Pos);
+			float dist = distsqr(center, pos);
+			if (dist < closest)
+			{
+				ret = (*it);
+				closest = dist;
+			}
+		}
+	}
+
+	return ret;
+}
+
+//=========================================================================================================
+CGroupMap::CLandMarkText* CGroupMap::findClosestLandmark(const CVector2f &center, const ucstring &search, bool startsWith, const TLandMarkTextVect &landmarks, float &closest) const
+{
+	CLandMarkText *ret = NULL;
+
+	std::vector<ucstring> keywords;
+	if (startsWith)
+		keywords.push_back(search);
+	else
+		splitUCString(toLower(search), ucstring(" "), keywords);
+
+	closest = std::numeric_limits<float>::max();
+	for(TLandMarkTextVect::const_iterator it = landmarks.begin(); it != landmarks.end(); ++it)
+	{
+		ucstring lc;
+		lc = (*it)->getText();
+		if(filterLandmark(lc, keywords, startsWith)) {
+			CVector2f pos;
+			mapToWorld(pos, (*it)->Pos);
+			float dist = distsqr(center, pos);
+			if (dist < closest)
+			{
+				ret = (*it);
+				closest = dist;
+			}
+		}
+	}
+
+	return ret;
+}
+
+bool CGroupMap::targetLandmarkByName(const ucstring &search, bool startsWith) const
+{
+	CCompassTarget ct;
+	CLandMarkButton* lm;
+	float dist;
+	float closest = std::numeric_limits<float>::max();
+	bool found = false;
+	CVector2f center;
+	mapToWorld(center, _PlayerPos);
+
+	lm = findClosestLandmark(center, search, startsWith, _UserLM, dist);
+	if (lm && dist < closest)
+	{
+		ct.setType(CCompassTarget::UserLandMark);
+		mapToWorld(ct.Pos, lm->Pos);
+		lm->getContextHelp(ct.Name);
+		closest = dist;
+		found = true;
+	}
+
+	// only check other types if user landmark was not found
+	if (!found)
+	{
+		lm = findClosestLandmark(center, search, startsWith, _ContinentLM, dist);
+		if (lm && dist < closest)
+		{
+			ct.setType(CCompassTarget::ContinentLandMark);
+			mapToWorld(ct.Pos, lm->Pos);
+			lm->getContextHelp(ct.Name);
+			closest = dist;
+			found = true;
+		}
+
+		CLandMarkText* lmt;
+		lmt = findClosestLandmark(center, search, startsWith, _ContinentText, dist);
+		if (lmt && dist < closest)
+		{
+			ct.setType(CCompassTarget::ContinentLandMark);
+			mapToWorld(ct.Pos, lmt->Pos);
+			ct.Name = lmt->getText();
+			closest = dist;
+			found = true;
+		}
+	}
+
+	if (found)
+	{
+		CInterfaceManager *im = CInterfaceManager::getInstance();
+		CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId(_CompassId));
+		if (gc)
+		{
+			gc->setActive(true);
+			gc->setTarget(ct);
+			gc->blink();
+			CWidgetManager::getInstance()->setTopWindow(gc);
+		}
+	}
+
+	return found;
 }
 
 //=========================================================================================================

@@ -56,7 +56,13 @@ namespace NLGUI
 			_TxtOffsetY = 0;
 			_TxtWidth = -1;
 			_TxtHeight = -1;
+
+			// Support for https://.. textures
+			_HtmlDownload = false;
 		}
+
+		/// Destructor
+		virtual ~CViewBitmap();
 
 		std::string getProperty( const std::string &name ) const;
 		void setProperty( const std::string &name, const std::string &value );
@@ -132,6 +138,7 @@ namespace NLGUI
 		bool	_Flip           : 1;
 		bool	_Tile           : 1;
 		bool	_InheritGCAlpha : 1;
+		bool	_HtmlDownload   : 1;
 
 		// For single texture
 

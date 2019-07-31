@@ -125,6 +125,8 @@ namespace NLGUI
 
 		// add image download (used by view_bitmap.cpp to load web images)
 		void addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams(), const TImageType type = NormalImage);
+		// remove image from download list if present
+		void removeImageDownload(CViewBase *img);
 		std::string localImageName(const std::string &url);
 
 		// Timeout

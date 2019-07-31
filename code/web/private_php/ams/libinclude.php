@@ -3,7 +3,7 @@
 * Base include file for library functions for AMS.
 * Autoload function that loads the classes in case they aren't loaded yet.
 */
-function __autoload( $className ){
+function __ams_autoload( $className ){
      global $AMS_LIB;
      global $SITEBASE;
      //if the class exists in the lib's autload dir, load that one
@@ -15,5 +15,7 @@ function __autoload( $className ){
           require_once $SITEBASE.'/autoload/' . strtolower ( $className ) . '.php';
      }
 }
+
+spl_autoload_register( '__ams_autoload' );
 
 
