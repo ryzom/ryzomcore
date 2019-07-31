@@ -53,6 +53,7 @@
 #include "action_handler_tools.h"
 #include "../connection.h"
 #include "../client_chat_manager.h"
+#include "group_compas.h"
 
 // Game specific includes
 #include "../motion/user_controls.h"
@@ -2472,6 +2473,17 @@ class CAHTarget : public IActionHandler
 		if (entity && entity->properties().selectable() && !entity->getDisplayName().empty())
 		{
 			UserEntity->selection(entity->slot());
+			CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
+			if (gc)
+			{
+				CCompassTarget ct;
+				ct.setType(CCompassTarget::Selection);
+
+				gc->setActive(true);
+				gc->setTarget(ct);
+				gc->blink();
+				CWidgetManager::getInstance()->setTopWindow(gc);
+			}
 		}
 		else if (!quiet)
 		{
