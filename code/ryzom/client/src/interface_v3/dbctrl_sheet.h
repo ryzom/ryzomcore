@@ -602,6 +602,9 @@ public:
 	// callback from info waiter
 	void infoReceived();
 
+	// set enchant/buff marker visiblility
+	static void setShowIconBuffs(bool b) { _ShowIconBuffs = b; }
+
 protected:
 	inline bool useItemInfoForFamily(ITEMFAMILY::EItemFamily family) const;
 
@@ -799,11 +802,15 @@ private:
 
 	static		CDBCtrlSheet *_CurrSelection;
 	static		CDBCtrlSheet *_CurrMenuSheet;
+
+	static		bool _ShowIconBuffs;
 private:
 	void		updateActualType() const;
 	void		updateIconSize();
 	void		resetAllTexIDs();
 	void		setupInit();
+	// remove enchant and buff markers from item icon
+	void		clearIconBuffs();
 
 	void		setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar= 1000, bool topDown= false);
 	void		resetCharBitmaps();
