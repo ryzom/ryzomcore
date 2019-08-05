@@ -73,6 +73,9 @@ REGISTER_UI_CLASS(CDBCtrlSheet)
 
 const uint64 NOTIFY_ANIM_MS_DURATION = 1000;
 
+// state kept and changed by UI:SAVE:SHOW_ICON_BUFFS
+bool CDBCtrlSheet::_ShowIconBuffs = true;
+
 // ***************************************************************************
 
 void CControlSheetInfoWaiter::sendRequest()
@@ -2323,7 +2326,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					rVR.draw11RotFlipBitmap (_RenderLayer+1, x, y, 0, false, _DispOver2BmpId, fastMulRGB(curSheetColor, _IconOver2Color));
 				}
 
-				if (!_BuffIcons.empty())
+				if (_ShowIconBuffs && !_BuffIcons.empty())
 				{
 					// there is max 4 icons
 					sint32 hArea = (hSheet / 4);
@@ -2358,7 +2361,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					drawNumber(x+1, y-2+hSheet-rVR.getFigurTextureH(), wSheet, hSheet, numberColor, enchant, false);
 				}
 
-				if (!_EnchantIcons.empty())
+				if (_ShowIconBuffs && !_EnchantIcons.empty())
 				{
 					// should only only 2 icons at most
 					// draw them in single line, top-right
@@ -4690,8 +4693,4 @@ void CDBCtrlSheet::startNotifyAnim()
 {
 	_NotifyAnimEndTime = T1 + NOTIFY_ANIM_MS_DURATION;
 }
-
-
-
-
 
