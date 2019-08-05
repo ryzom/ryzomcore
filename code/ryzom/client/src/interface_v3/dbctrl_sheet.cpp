@@ -1067,10 +1067,18 @@ void CDBCtrlSheet::updateIconSize()
 }
 
 // ***************************************************************************
+void CDBCtrlSheet::clearIconBuffs()
+{
+	_EnchantIcons.clear();
+	_BuffIcons.clear();
+}
+
+// ***************************************************************************
 void CDBCtrlSheet::infoReceived()
 {
 	if (!_ItemSheet)
 	{
+		clearIconBuffs();
 		return;
 	}
 
@@ -1082,9 +1090,10 @@ void CDBCtrlSheet::infoReceived()
 		return;
 	}
 
+	clearIconBuffs();
+
 	// crystallized spell
 	{
-		_EnchantIcons.clear();
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		CSBrickManager *pBM= CSBrickManager::getInstance();
 		for(uint i=0; i<itemInfo->Enchantment.Bricks.size(); ++i)
@@ -1109,7 +1118,6 @@ void CDBCtrlSheet::infoReceived()
 
 	// buff icons
 	{
-		_BuffIcons.clear();
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		if (itemInfo->HpBuff > 0) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(_HpBuffIcon)));
@@ -3268,13 +3276,22 @@ void	CDBCtrlSheet::setupItemInfoWaiter()
 {
 	const CItemSheet *item = asItemSheet();
 	if(!item)
+	{
+		clearIconBuffs();
 		return;
+	}
 
 	if (!useItemInfoForFamily(item->Family))
+	{
+		clearIconBuffs();
 		return;
+	}
 
 	if (getItemSerial() == 0 || getItemCreateTime() == 0)
+	{
+		clearIconBuffs();
 		return;
+	}
 
 	string luaMethodName = ((item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) ? "updateCrystallizedSpellTooltip" : "updateBuffItemTooltip");
 	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
