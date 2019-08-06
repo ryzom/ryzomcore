@@ -36,8 +36,8 @@ class LinePlot extends Plot{
 
 //---------------
 // CONSTRUCTOR
-    function LinePlot(&$datay,$datax=false) {
-	$this->Plot($datay,$datax);
+    function __construct(&$datay,$datax=false) {
+	parent::__construct($datay,$datax);
 	$this->mark = new PlotMark();
     }
 //---------------
@@ -424,7 +424,7 @@ class AccLinePlot extends Plot {
     var $iStartEndZero=true;
 //---------------
 // CONSTRUCTOR
-    function AccLinePlot($plots) {
+    function __construct($plots) {
         $this->plots = $plots;
 	$this->nbrplots = count($plots);
 	$this->numpoints = $plots[0]->numpoints;

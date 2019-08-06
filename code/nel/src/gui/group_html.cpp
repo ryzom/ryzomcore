@@ -740,6 +740,24 @@ namespace NLGUI
 		pumpCurlQueue();
 	}
 
+	void CGroupHTML::removeImageDownload(CViewBase *img)
+	{
+		for(std::list<CDataDownload>::iterator it = Curls.begin(); it != Curls.end(); ++it)
+		{
+			// check all active downloads because image does not keep url around
+			std::vector<CDataImageDownload>::iterator imgIter = it->imgs.begin();
+			while(imgIter != it->imgs.end())
+			{
+				if (imgIter->Image == img)
+				{
+					it->imgs.erase(imgIter);
+					break;
+				}
+				++imgIter;
+			}
+		}
+	}
+
 	void CGroupHTML::initImageDownload()
 	{
 		LOG_DL("Init Image Download");
@@ -3829,6 +3847,9 @@ namespace NLGUI
 			return;
 		}
 
+		// received content from remote
+		std::string content = trim(_CurlWWW->Content);
+
 		// save HSTS header from all requests regardless of HTTP code
 		if (_CurlWWW->hasHSTSHeader())
 		{
@@ -3870,8 +3891,11 @@ namespace NLGUI
 		else if ( (code < 200 || code >= 300) )
 		{
 			// catches 304 not modified, but html is not in cache anyway
-			browseError(string("Connection failed\nhttp code " + toString((sint32)code) + ")\nURL '" + _CurlWWW->Url + "'").c_str());
-			return;
+			// if server did not send any error back
+			if (content.empty())
+			{
+				content = string("<html><head><title>ERROR</title></head><body><h1>Connection failed</h1><p>HTTP code '" + toString((sint32)code) + "'</p><p>URL '" + _CurlWWW->Url + "'</p></body></html>");
+			}
 		}
 
 		char *ch;
@@ -3882,7 +3906,7 @@ namespace NLGUI
 			contentType = ch;
 		}
 
-		htmlDownloadFinished(_CurlWWW->Content, contentType, code);
+		htmlDownloadFinished(content, contentType, code);
 
 		// clear curl handler
 		if (MultiCurl)
