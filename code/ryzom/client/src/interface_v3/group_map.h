@@ -199,6 +199,8 @@ public:
 	float				getScale() const { return _UserScale; }
 	/// add a user landmark (returns a pointer on its button).Coordinate are in the current map (not world coordinates)
 	CCtrlButton			*addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, const CUserLandMark::EUserLandMarkType lmType);
+	/// return current continent landmark by its index and type
+	CCtrlButton*		getLandmarkCtrl(const std::string &lmType, uint lmIndex) const;
 	// remove a user landmark from a pointer on its button
 	void				removeUserLandMark(CCtrlButton *button);
 	// update a user landmark from a pointer on its button
@@ -294,6 +296,8 @@ public:
 
 
 	bool isIsland() const { return _IsIsland; }
+
+	void updateClosestLandMarkMenu(const std::string &menu, const NLMISC::CVector2f &pos) const;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 private:
