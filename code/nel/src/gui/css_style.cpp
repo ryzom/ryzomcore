@@ -723,6 +723,8 @@ namespace NLGUI
 						style.Width = tmpf * style.FontSize;
 					else if (unit == "pt")
 						style.FontSize = tmpf / 0.75f;
+					else if (unit == "%")
+						style.Width = 0; // TODO: style.WidthRatio
 					else
 						style.Width = tmpf;
 				}
@@ -739,6 +741,8 @@ namespace NLGUI
 						style.Height = tmpf * style.FontSize;
 					else if (unit == "pt")
 						style.FontSize = tmpf / 0.75f;
+					else if (unit == "%")
+						style.Height = 0; // TODO: style.HeightRatio
 					else
 						style.Height = tmpf;
 				}
@@ -755,6 +759,8 @@ namespace NLGUI
 						style.MaxWidth = tmpf * style.FontSize;
 					else if (unit == "pt")
 						style.FontSize = tmpf / 0.75f;
+					else if (unit == "%")
+						style.MaxWidth = 0; // TODO: style.MaxWidthRatio
 					else
 						style.MaxWidth = tmpf;
 				}
@@ -771,6 +777,8 @@ namespace NLGUI
 						style.MaxHeight = tmpf * style.FontSize;
 					else if (unit == "pt")
 						style.FontSize = tmpf / 0.75f;
+					else if (unit == "%")
+						style.MaxHeight = 0; // TODO: style.MaxHeightRatio
 					else
 						style.MaxHeight = tmpf;
 				}
