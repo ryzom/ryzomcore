@@ -795,6 +795,35 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	int CLuaIHM::getOnDraw(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_getOnDraw
+		CLuaStackChecker lsc(&ls, 1);
+
+		// params: CInterfaceElement*.
+		// return: "script" (nil if empty)
+		CLuaIHM::checkArgCount(ls, "getOnDraw", 1);
+		CLuaIHM::check(ls, CLuaIHM::isUIOnStack(ls, 1), "getOnDraw() requires a UI object in param 1");
+
+		// retrieve arguments
+		CInterfaceElement *pIE = CLuaIHM::getUIOnStack(ls, 1);
+		if (pIE)
+		{
+			// must be a group
+			CInterfaceGroup *group = dynamic_cast<CInterfaceGroup*>(pIE);
+			if (group)
+			{
+				if (!group->getLuaScriptOnDraw().empty()) {
+					ls.push(group->getLuaScriptOnDraw());
+					return 1;
+				}
+			}
+		}
+		ls.pushNil();
+		return 1;
+	}
+
+	// ***************************************************************************
 	int	CLuaIHM::addOnDbChange(CLuaState &ls)
 	{
 		//H_AUTO(Lua_CLuaIHM_addOnDbChange)
@@ -1589,6 +1618,7 @@ namespace NLGUI
 
 		// *** Register Functions
 		ls.registerFunc("setOnDraw",    setOnDraw);
+		ls.registerFunc("getOnDraw", getOnDraw);
 		ls.registerFunc("setCaptureKeyboard", setCaptureKeyboard);
 		ls.registerFunc("resetCaptureKeyboard", resetCaptureKeyboard);
 		ls.registerFunc("setTopWindow", setTopWindow);

@@ -273,6 +273,9 @@ private:
 	static bool	isPlayerInPVPMode();
 	static bool	isTargetInPVPMode();
 
+	// vertical and horizontal scrolling
+	// do not require element to be focused
+	static int scrollElement(CLuaState &ls); // return none (nil if error)
 
 public:
 
