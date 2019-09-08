@@ -2643,31 +2643,49 @@ namespace NLGUI
 		// Keep this char ?
 		bool keep = true;
 
+		// char is between table elements
+		// TODO: only whitespace is handled, text is added to either TD, or after TABLE (should be before)
+		bool tableWhitespace = getTable() && (_Cells.empty() || _Cells.back() == NULL);
+
 		switch (input)
 		{
 			// Return / tab only in <PRE> mode
 		case '\t':
 		case '\n':
 			{
-				// Get the last char
-				ucchar lastChar = lastCharParam;
-				if (lastChar == 0)
-					lastChar = getLastChar();
-				keep = ((lastChar != (ucchar)' ') &&
-						(lastChar != 0)) || getPRE() || (_CurrentViewImage && (lastChar == 0));
-				if(!getPRE())
-					input = ' ';
+				if (tableWhitespace)
+				{
+					keep = false;
+				}
+				else
+				{
+					// Get the last char
+					ucchar lastChar = lastCharParam;
+					if (lastChar == 0)
+						lastChar = getLastChar();
+					keep = ((lastChar != (ucchar)' ') &&
+							(lastChar != 0)) || getPRE() || (_CurrentViewImage && (lastChar == 0));
+					if(!getPRE())
+						input = ' ';
+				}
 			}
 			break;
 		case ' ':
 			{
-				// Get the last char
-				ucchar lastChar = lastCharParam;
-				if (lastChar == 0)
-					lastChar = getLastChar();
-				keep = ((lastChar != (ucchar)' ') &&
-						(lastChar != (ucchar)'\n') &&
-						(lastChar != 0)) || getPRE() || (_CurrentViewImage && (lastChar == 0));
+				if (tableWhitespace)
+				{
+					keep = false;
+				}
+				else
+				{
+					// Get the last char
+					ucchar lastChar = lastCharParam;
+					if (lastChar == 0)
+						lastChar = getLastChar();
+					keep = ((lastChar != (ucchar)' ') &&
+							(lastChar != (ucchar)'\n') &&
+							(lastChar != 0)) || getPRE() || (_CurrentViewImage && (lastChar == 0));
+				}
 			}
 			break;
 		case 0xd:
