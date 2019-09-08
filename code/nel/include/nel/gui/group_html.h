@@ -700,6 +700,7 @@ namespace NLGUI
 				VAlign = CGroupCell::Middle;
 				LeftMargin = 0;
 				NoWrap = false;
+				Height = 0;
 			}
 			NLMISC::CRGBA	BgColor;
 			std::string		Style;
@@ -707,6 +708,7 @@ namespace NLGUI
 			CGroupCell::TVAlign	VAlign;
 			sint32	LeftMargin;
 			bool	NoWrap;
+			sint32	Height;
 		};
 		std::vector<CCellParams>	_CellParams;
 

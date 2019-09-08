@@ -5235,6 +5235,11 @@ namespace NLGUI
 		if (elm.hasNonEmptyAttribute("l_margin"))
 			fromString(elm.getAttribute("l_margin"), cellParams.LeftMargin);
 
+		if (_Style.hasStyle("height"))
+			cellParams.Height = _Style.Current.Height;
+		else if (elm.hasNonEmptyAttribute("height"))
+			fromString(elm.getAttribute("height"), cellParams.Height);
+
 		{
 			std::string align;
 			// having text-align on table/tr should not override td align attribute
@@ -6708,17 +6713,13 @@ namespace NLGUI
 		_Cells.back()->NoWrap = _CellParams.back().NoWrap;
 		_Cells.back()->ColSpan = std::max(1, _Cells.back()->ColSpan);
 		_Cells.back()->RowSpan = std::max(1, _Cells.back()->RowSpan);
+		_Cells.back()->Height = _CellParams.back().Height;
 
 		float temp;
 		if (_Style.hasStyle("width"))
 			getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, _Style.getStyle("width").c_str());
 		else if (elm.hasNonEmptyAttribute("width"))
 			getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, elm.getAttribute("width").c_str());
-
-		if (_Style.hasStyle("height"))
-			getPercentage (_Cells.back()->Height, temp, _Style.getStyle("height").c_str());
-		else if (elm.hasNonEmptyAttribute("height"))
-			getPercentage (_Cells.back()->Height, temp, elm.getAttribute("height").c_str());
 
 		_Cells.back()->NewLine = getTR();
 
@@ -6871,9 +6872,12 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlTR(const CHtmlElement &elm)
 	{
-		// prevent inheriting background color
+		// prevent inheriting from table
 		if (!_CellParams.empty())
+		{
 			_CellParams.back().BgColor = CRGBA::Transparent;
+			_CellParams.back().Height = 0;
+		}
 
 		// Get cells parameters
 		getCellsParameters(elm, true);
