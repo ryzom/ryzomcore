@@ -27,6 +27,11 @@ namespace NLGUI
 
 	typedef std::map<std::string, std::string> TStyle;
 
+	// ie. border-style
+	enum CSSLineStyle { NONE = 0, HIDDEN, SOLID };
+	// ie, border-width (px)
+	enum CSSLineWidth { THIN = 1, MEDIUM = 3, THICK = 5 };
+
 	/**
 	 * \brief CSS style rules
 	 * \date 2019-03-15 10:50 GMT
@@ -62,7 +67,11 @@ namespace NLGUI
 			Height=-1;
 			MaxWidth=-1;
 			MaxHeight=-1;
-			BorderWidth=-1;
+			// border style
+			BorderTopWidth = BorderRightWidth = BorderBottomWidth = BorderLeftWidth = CSSLineWidth::MEDIUM;
+			BorderTopStyle = BorderRightStyle = BorderBottomStyle = BorderLeftStyle = CSSLineStyle::NONE;
+			BorderTopColor = BorderRightColor = BorderBottomColor = BorderLeftColor = NLMISC::CRGBA::Transparent;
+			// background
 			BackgroundColor=NLMISC::CRGBA::Black;
 			BackgroundColorOver=NLMISC::CRGBA::Black;
 		}
@@ -93,7 +102,9 @@ namespace NLGUI
 		sint32 Height;
 		sint32 MaxWidth;
 		sint32 MaxHeight;
-		sint32 BorderWidth;
+		uint32 BorderTopWidth, BorderRightWidth, BorderBottomWidth, BorderLeftWidth;
+		CSSLineStyle BorderTopStyle, BorderRightStyle, BorderBottomStyle, BorderLeftStyle;
+		NLMISC::CRGBA BorderTopColor, BorderRightColor, BorderBottomColor, BorderLeftColor;
 		NLMISC::CRGBA BackgroundColor;
 		NLMISC::CRGBA BackgroundColorOver;
 
@@ -106,6 +117,7 @@ namespace NLGUI
 
 	class CCssStyle {
 	public:
+
 		struct SStyleRule {
 			std::vector<CCssSelector> Selector;
 			TStyle Properties;
@@ -148,8 +160,22 @@ namespace NLGUI
 		// match selector to dom path
 		bool match(const std::vector<CCssSelector> &selector, const CHtmlElement &elm) const;
 
+		// get shorthang 'top right bottom left' index values based size, ie 'padding' syntax
+		bool getShorthandIndices(const uint32 size, uint8 &t, uint8 &r, uint8 &b, uint8 &l) const;
+
+		// break 'border' into 'border-top-color', 'border-top-style', etc rules
+		bool tryBorderWidthShorthand(const std::string &value, CStyleParams &style, const std::string &prop) const;
+		bool tryBorderStyleShorthand(const std::string &value, CStyleParams &style, const std::string &prop) const;
+		bool tryBorderColorShorthand(const std::string &value, CStyleParams &style, const std::string &prop) const;
+		void parseBorderShorthand(const std::string &value, CStyleParams &style, const std::string &prop) const;
+
 		// parse 'background' into 'background-color', 'background-image', etc
 		void parseBackgroundShorthand(const std::string &value, CStyleParams &style) const;
+
+		// parse string value into corresponding value
+		void applyBorderWidth(const std::string &value, uint32 *dest, const uint32 currentWidth, const uint32 fontSize) const;
+		void applyBorderColor(const std::string &value, NLMISC::CRGBA *dest, const NLMISC::CRGBA &currentColor, const NLMISC::CRGBA &textColor) const;
+		void applyLineStyle(const std::string &value, CSSLineStyle *dest, const CSSLineStyle &currentStyle) const;
 
 	public:
 		void reset();
@@ -180,7 +206,10 @@ namespace NLGUI
 			Current.Height=-1;
 			Current.MaxWidth=-1;
 			Current.MaxHeight=-1;
-			Current.BorderWidth=-1;
+
+			Current.BorderTopWidth = Current.BorderRightWidth = Current.BorderBottomWidth = Current.BorderLeftWidth = CSSLineWidth::MEDIUM;
+			Current.BorderTopStyle = Current.BorderRightStyle = Current.BorderBottomStyle = Current.BorderLeftStyle = CSSLineStyle::NONE;
+			Current.BorderTopColor = Current.BorderRightColor = Current.BorderBottomColor = Current.BorderLeftColor = Current.TextColor;
 
 			Current.StyleRules.clear();
 		}

@@ -6187,7 +6187,8 @@ namespace NLGUI
 		// width: 5em, height: 1em
 		uint32 width = _Style.Current.Width > -1 ? _Style.Current.Width : _Style.Current.FontSize * 5;
 		uint32 height = _Style.Current.Height > -1 ? _Style.Current.Height : _Style.Current.FontSize;
-		uint32 border = _Style.Current.BorderWidth > -1 ? _Style.Current.BorderWidth : 0;
+		// FIXME: only using border-top
+		uint32 border = _Style.Current.BorderTopWidth > -1 ? _Style.Current.BorderTopWidth : 0;
 
 		uint barw = (uint) (width * meter.getValueRatio());
 		CRGBA bgColor = meter.getBarColor(elm, _Style);
@@ -6402,7 +6403,8 @@ namespace NLGUI
 		// width: 10em, height: 1em
 		uint32 width = _Style.Current.Width > -1 ? _Style.Current.Width : _Style.Current.FontSize * 10;
 		uint32 height = _Style.Current.Height > -1 ? _Style.Current.Height : _Style.Current.FontSize;
-		uint32 border = _Style.Current.BorderWidth > -1 ? _Style.Current.BorderWidth : 0;
+		// FIXME: only using border-top
+		uint32 border = _Style.Current.BorderTopWidth > -1 ? _Style.Current.BorderTopWidth : 0;
 
 		uint barw = (uint) (width * progress.getValueRatio());
 		CRGBA bgColor = progress.getBarColor(elm, _Style);
@@ -6554,9 +6556,10 @@ namespace NLGUI
 		else if (elm.hasNonEmptyAttribute("width"))
 			getPercentage (table->ForceWidthMin, table->TableRatio, elm.getAttribute("width").c_str());
 
-		if (_Style.hasStyle("border") || _Style.hasStyle("border-width"))
+		if (_Style.hasStyle("border") || _Style.hasStyle("border-width") || _Style.hasStyle("border-top-width"))
 		{
-			table->Border = _Style.Current.BorderWidth;
+			// FIXME: only using border-top
+			table->Border = _Style.Current.BorderTopWidth;
 		}
 		else if (elm.hasAttribute("border"))
 		{
