@@ -813,24 +813,24 @@ namespace NLGUI
 						additionnalWidth = (sint32) width;
 					}
 
+					sint32 cellBorderPadding = cell->getPaddingLeftRight();
+					if (cell->Border)
+						cellBorderPadding += cell->Border->getLeftRightWidth();
+
 					// Get width min and max
 					if( !cell->IgnoreMaxWidth)
-					{
-						cell->WidthMax = cell->getMaxUsedW() + cell->LeftMargin;
-					}
+						cell->WidthMax = cell->getMaxUsedW() + cell->LeftMargin + cellBorderPadding;
 					else
-					{
 						cell->WidthMax = cell->WidthWanted + additionnalWidth + cell->LeftMargin;
-					}
+
 					sint32 cellWidth;
 					if(!cell->IgnoreMinWidth)
-					{
-						cellWidth = cell->NoWrap ? cell->WidthMax : cell->getMinUsedW() + cell->LeftMargin;
-					}
+						cellWidth = cell->NoWrap ? cell->WidthMax : cell->getMinUsedW() + cell->LeftMargin + cellBorderPadding;
 					else
-					{
 						cellWidth = cell->NoWrap ? cell->WidthMax : cell->LeftMargin;
-					}
+
+					if (cellWidth < cellBorderPadding)
+						cellWidth = cellBorderPadding;
 
 					// New cell ?
 					if (cell->NewLine)
@@ -872,11 +872,11 @@ namespace NLGUI
 						_Columns[column].WidthMax = (sint32)(cell->WidthMax*colspan);
 					if (cell->TableRatio*colspan > _Columns[column].TableRatio)
 						_Columns[column].TableRatio = cell->TableRatio*colspan;
-					if (cell->WidthWanted*colspan + additionnalWidth > _Columns[column].WidthWanted)
-						_Columns[column].WidthWanted = (sint32)(cell->WidthWanted*colspan) + additionnalWidth;
+					if ((cell->WidthWanted + additionnalWidth)*colspan > _Columns[column].WidthWanted)
+						_Columns[column].WidthWanted = (sint32)((cell->WidthWanted + additionnalWidth)*colspan);
 
-					if (_Columns[column].WidthWanted + additionnalWidth)
-						_Columns[column].WidthMax = _Columns[column].WidthWanted + additionnalWidth;
+					if (_Columns[column].WidthWanted > _Columns[column].WidthMax)
+						_Columns[column].WidthMax = _Columns[column].WidthWanted;
 					if (_Columns[column].WidthWanted > _Columns[column].Width)
 						_Columns[column].Width = _Columns[column].WidthWanted;
 
@@ -899,14 +899,20 @@ namespace NLGUI
 				}
 
 				// Additional space contributing to table width
-				sint32 borderWidth = Border->getLeftWidth() + Border->getRightWidth();
-				borderWidth += ((sint32)_Columns.size()+1) * CellSpacing;// + ((sint32)_Columns.size()*2) * padding;
+				sint32 tableBorderSpacing = Border->getLeftWidth() + Border->getRightWidth();
+				tableBorderSpacing += ((sint32)_Columns.size()+1) * CellSpacing;;
+
+				sint32 innerForceWidthMin = ForceWidthMin;
+				if (innerForceWidthMin < tableBorderSpacing)
+					innerForceWidthMin = 0;
+				else
+					innerForceWidthMin -= tableBorderSpacing;
 
 				// Get the width
-				sint32 tableWidthMax = ForceWidthMin?ForceWidthMin:_LastParentW; // getWReal();
-				sint32 tableWidthMin = std::max(ForceWidthMin, (sint32)((float)tableWidthMax*TableRatio));
-				tableWidthMax = std::max ((sint32)0, tableWidthMax-borderWidth);
-				tableWidthMin = std::max ((sint32)0, tableWidthMin-borderWidth);
+				sint32 tableWidthMax = innerForceWidthMin ? innerForceWidthMin : _LastParentW - tableBorderSpacing; // getWReal();
+				sint32 tableWidthMin = std::max(innerForceWidthMin, (sint32)((float)tableWidthMax*TableRatio));
+				tableWidthMax = std::max ((sint32)0, tableWidthMax);
+				tableWidthMin = std::max ((sint32)0, tableWidthMin);
 
 				// Get the width of the table and normalize percent of the cell (sum of TableRatio must == 1)
 				sint32 tableWidth = 0;
@@ -922,10 +928,10 @@ namespace NLGUI
 
 				// force table width to fit all columns
 				// if width is set, then use column min width
-				if (ForceWidthMin > 0)
-					tableWidthMax = std::min(_LastParentW - borderWidth, std::max(tableWidthMax, tableWidth));
+				if (innerForceWidthMin > 0)
+					tableWidthMax = std::min(_LastParentW - tableBorderSpacing, std::max(tableWidthMax, tableWidth));
 				else
-					tableWidthMax = std::min(_LastParentW - borderWidth, std::max(tableWidthMax, tableMaxContentWidth));
+					tableWidthMax = std::min(_LastParentW - tableBorderSpacing, std::max(tableWidthMax, tableMaxContentWidth));
 
 				if (tableWidthMax < 0)
 					tableWidthMax = 0;
@@ -934,6 +940,7 @@ namespace NLGUI
 					std::swap(tableWidthMin, tableWidthMax);
 
 				// Eval table size with all percent cells resized
+				// TODO: _Columns[i].TableRatio is for outer width
 				sint32 tableWidthSizeAfterPercent = tableWidth;
 				for (i=0; i<_Columns.size(); i++)
 				{
@@ -1106,9 +1113,8 @@ namespace NLGUI
 
 				column = 0;
 				// FIXME: real cell padding
-				sint32 padding = CellPadding;
 				sint32 row = 0;
-				sint32 currentX = Border->LeftWidth + CellSpacing + padding;
+				sint32 currentX = 0;
 
 				_Rows.clear ();
 				for (i=0; i<_Cells.size(); i++)
@@ -1118,7 +1124,7 @@ namespace NLGUI
 					if (cell->NewLine)
 					{
 						column = 0;
-						currentX = Border->LeftWidth + CellSpacing + padding;
+						currentX = Border->LeftWidth + CellSpacing;
 
 						_Rows.push_back(CRow());
 					}
@@ -1127,7 +1133,7 @@ namespace NLGUI
 					{
 						// we have active rowspan, must add up 'skipped' columns
 						for( ; column < (uint)cell->TableColumnIndex; ++column)
-							currentX += _Columns[column].Width + padding*2 + CellSpacing;
+							currentX += _Columns[column].Width + CellSpacing;
 					}
 
 					// Set the x and width
@@ -1136,11 +1142,19 @@ namespace NLGUI
 					sint32 alignmentX = 0;
 					sint32 widthReduceX = 0;
 					sint32 columnWidth = _Columns[column].Width;
+					sint32 cellBorderPaddingLeft = cell->PaddingLeft;
+					sint32 cellBorderPaddingRight = cell->PaddingRight;
+					if (cell->Border)
+					{
+						cellBorderPaddingLeft += cell->Border->getLeftWidth();
+						cellBorderPaddingRight += cell->Border->getRightWidth();
+					}
+
 					if (cell->ColSpan > 1)
 					{
 						// scan ahead and add up column widths as they might be different
 						for(int j = 1; j<cell->ColSpan; j++)
-							columnWidth += CellSpacing + padding*2 +  _Columns[column+j].Width;
+							columnWidth += CellSpacing + _Columns[column+j].Width;
 					}
 
 					if (cell->WidthMax < columnWidth)
@@ -1160,11 +1174,13 @@ namespace NLGUI
 						}
 					}
 
-					cell->setX(currentX - padding);
-					cell->setW(columnWidth + padding*2);
+					// outer
+					cell->setX(currentX);
+					cell->setW(columnWidth);
 
-					cell->Group->setX(alignmentX + cell->LeftMargin + padding);
-					cell->Group->setW(columnWidth - widthReduceX);
+					// inner
+					cell->Group->setX(cellBorderPaddingLeft + alignmentX + cell->LeftMargin);
+					cell->Group->setW(columnWidth - widthReduceX - cellBorderPaddingLeft - cellBorderPaddingRight);
 					cell->Group->CInterfaceElement::updateCoords();
 
 					// Update coords to get H
@@ -1173,22 +1189,22 @@ namespace NLGUI
 
 					// Resize the row array
 					float rowspan = 1.f / (float)cell->RowSpan;
-					uint cellBorder = 0;
+					uint cellBorderPadding = cell->getPaddingTopBottom();
 					if (cell->Border)
-						cellBorder += cell->Border->TopWidth + cell->Border->BottomWidth;
-					sint32 cellHeight = std::max((sint32)(cell->Height*rowspan + cellBorder), (sint32)(cell->Group->getH()*rowspan + cellBorder));
+						cellBorderPadding += cell->Border->getTopBottomWidth();
+					sint32 cellHeight = std::max((sint32)(cell->Height*rowspan), (sint32)(cell->Group->getH()*rowspan + cellBorderPadding));
 					_Rows.back().Height = std::max(_Rows.back().Height, (sint32)cellHeight);
 
 					// Next column
-					currentX += columnWidth + 2*padding + CellSpacing;
+					currentX += columnWidth + CellSpacing;
 					column += cell->ColSpan;
 				}
 
 				// Set cell Y
 				row = 0;
-				sint32 currentY = -(CellSpacing + padding);
+				sint32 currentY = -CellSpacing;
 				if (Border)
-					currentY -= Border->TopWidth;
+					currentY -= Border->getTopWidth();
 
 				for (i=0; i<_Cells.size(); i++)
 				{
@@ -1198,7 +1214,7 @@ namespace NLGUI
 					{
 						if (_Rows[row].Height != 0)
 						{
-							currentY -= _Rows[row].Height + 2*padding + CellSpacing;
+							currentY -= _Rows[row].Height + CellSpacing;
 						}
 						row++;
 					}
@@ -1206,12 +1222,19 @@ namespace NLGUI
 					// Check align
 					sint32 alignmentY = 0;
 					sint32 rowHeight = _Rows[row].Height;
+					sint32 cellBorderPaddingTop = cell->PaddingTop;
+					sint32 cellBorderPaddingBottom = cell->PaddingBottom;
+					if (cell->Border)
+					{
+						cellBorderPaddingTop += cell->Border->getTopWidth();
+						cellBorderPaddingBottom += cell->Border->getBottomWidth();
+					}
 					if (cell->RowSpan > 1)
 					{
 						// we need to scan down and add up row heights
 						int k = std::min((sint32)_Rows.size(), row + cell->RowSpan);
 						for(int j=row+1; j<k; j++)
-							rowHeight += CellSpacing + padding*2 + _Rows[j].Height;
+							rowHeight += CellSpacing + _Rows[j].Height;
 					}
 					if ((sint32)cell->Group->getH() < rowHeight)
 					{
@@ -1228,15 +1251,26 @@ namespace NLGUI
 						}
 					}
 
-					cell->setY(currentY + padding);
-					cell->setH (rowHeight + 2*padding);
-					cell->Group->setY(-(alignmentY + padding));
+					// outer
+					cell->setY(currentY);
+					cell->setH (rowHeight);
+					// inner
+					cell->Group->setY(-(alignmentY + cellBorderPaddingTop - cellBorderPaddingBottom));
+				}
+
+				// final row
+				if (!_Rows.empty())
+					currentY -= _Rows.back().Height;
+				currentY -= CellSpacing;
+				finalWidth += ((sint)_Columns.size() + 1) * CellSpacing;
+				if (Border)
+				{
+					currentY -= Border->getBottomWidth();
+					finalWidth += Border->getLeftWidth() + Border->getRightWidth();
 				}
 
 				// Resize the table
-				setW(finalWidth+borderWidth-_LastParentW);
-				if (!_Rows.empty())
-					currentY -= _Rows[row].Height + padding + CellSpacing + Border->BottomWidth;
+				setW(finalWidth-_LastParentW);
 				setH(-currentY);
 
 				// All done
