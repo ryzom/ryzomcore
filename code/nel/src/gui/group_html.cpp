@@ -6682,14 +6682,6 @@ namespace NLGUI
 			return;
 		}
 
-		if (_Style.hasStyle("padding"))
-		{
-			uint32 a;
-			// TODO: cssLength
-			if (fromString(_Style.getStyle("padding"), a))
-				table->CellPadding = a;
-		}
-
 		_Cells.back() = new CGroupCell(CViewBase::TCtorParam());
 
 		if (_Style.checkStyle("background-repeat", "repeat"))
@@ -6756,6 +6748,20 @@ namespace NLGUI
 		if (_Style.hasStyle("border-right-style"))	_Cells.back()->Border->RightStyle = _Style.Current.BorderRightStyle;
 		if (_Style.hasStyle("border-bottom-style"))	_Cells.back()->Border->BottomStyle = _Style.Current.BorderBottomStyle;
 		if (_Style.hasStyle("border-left-style"))	_Cells.back()->Border->LeftStyle = _Style.Current.BorderLeftStyle;
+
+		// padding from <table cellpadding="1">
+		if (table->CellPadding)
+		{
+			_Cells.back()->PaddingTop = table->CellPadding;
+			_Cells.back()->PaddingRight = table->CellPadding;
+			_Cells.back()->PaddingBottom = table->CellPadding;
+			_Cells.back()->PaddingLeft = table->CellPadding;
+		}
+
+		if (_Style.hasStyle("padding-top"))    _Cells.back()->PaddingTop    = _Style.Current.PaddingTop;
+		if (_Style.hasStyle("padding-right"))  _Cells.back()->PaddingRight  = _Style.Current.PaddingRight;
+		if (_Style.hasStyle("padding-bottom")) _Cells.back()->PaddingBottom = _Style.Current.PaddingBottom;
+		if (_Style.hasStyle("padding-left"))   _Cells.back()->PaddingLeft   = _Style.Current.PaddingLeft;
 
 		table->addChild (_Cells.back());
 

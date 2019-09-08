@@ -55,6 +55,7 @@ namespace NLGUI
 		Group = new CInterfaceGroup(CViewBase::TCtorParam());
 		// TODO: only initialize if border is set
 		Border = new CSSBorderRenderer();
+		PaddingTop = PaddingRight = PaddingBottom = PaddingLeft = 0;
 		Align = Left;
 		VAlign = Middle;
 		LeftMargin = 0;

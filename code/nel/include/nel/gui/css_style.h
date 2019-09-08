@@ -70,6 +70,7 @@ namespace NLGUI
 			// background
 			BackgroundColor=NLMISC::CRGBA::Black;
 			BackgroundColorOver=NLMISC::CRGBA::Black;
+			PaddingTop = PaddingRight = PaddingBottom = PaddingLeft = 0;
 		}
 
 		bool hasStyle(const std::string &key) const
@@ -103,6 +104,7 @@ namespace NLGUI
 		NLMISC::CRGBA BorderTopColor, BorderRightColor, BorderBottomColor, BorderLeftColor;
 		NLMISC::CRGBA BackgroundColor;
 		NLMISC::CRGBA BackgroundColorOver;
+		uint32 PaddingTop, PaddingRight, PaddingBottom, PaddingLeft;
 
 		std::string WhiteSpace;
 		std::string TextAlign;
@@ -168,10 +170,14 @@ namespace NLGUI
 		// parse 'background' into 'background-color', 'background-image', etc
 		void parseBackgroundShorthand(const std::string &value, CStyleParams &style) const;
 
+		// parse 'padding' into 'padding-top', 'padding-left', etc
+		void parsePaddingShorthand(const std::string &value, CStyleParams &style) const;
+
 		// parse string value into corresponding value
 		void applyBorderWidth(const std::string &value, uint32 *dest, const uint32 currentWidth, const uint32 fontSize) const;
 		void applyBorderColor(const std::string &value, NLMISC::CRGBA *dest, const NLMISC::CRGBA &currentColor, const NLMISC::CRGBA &textColor) const;
 		void applyLineStyle(const std::string &value, CSSLineStyle *dest, const CSSLineStyle &currentStyle) const;
+		void applyPaddingWidth(const std::string &value, uint32 *dest, const uint32 currentPadding, uint32 fontSize) const;
 
 	public:
 		void reset();
@@ -206,6 +212,7 @@ namespace NLGUI
 			Current.BorderTopWidth = Current.BorderRightWidth = Current.BorderBottomWidth = Current.BorderLeftWidth = CSSLineWidth::MEDIUM;
 			Current.BorderTopStyle = Current.BorderRightStyle = Current.BorderBottomStyle = Current.BorderLeftStyle = CSSLineStyle::NONE;
 			Current.BorderTopColor = Current.BorderRightColor = Current.BorderBottomColor = Current.BorderLeftColor = Current.TextColor;
+			Current.PaddingTop = Current.PaddingRight = Current.PaddingBottom = Current.PaddingLeft = 0;
 
 			Current.StyleRules.clear();
 		}

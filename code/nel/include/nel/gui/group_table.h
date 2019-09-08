@@ -94,6 +94,7 @@ namespace NLGUI
 		NLMISC::CRGBA	BgColor;
 
 		CSSBorderRenderer* Border;
+		uint32 PaddingTop, PaddingRight, PaddingBottom, PaddingLeft;
 
 		// Texture
 		CViewRenderer::CTextureId	_TextureId;
@@ -119,6 +120,9 @@ namespace NLGUI
 		void setTexture(const std::string & TxName);
 		void setTextureTile(bool tiled);
 		void setTextureScale(bool scaled);
+
+		uint32 getPaddingLeftRight() const { return PaddingLeft + PaddingRight; };
+		uint32 getPaddingTopBottom() const { return PaddingTop + PaddingBottom; };
 
 		virtual void updateCoords();
 

@@ -493,6 +493,12 @@ namespace NLGUI
 				else
 					style.DisplayBlock = (it->second == "block" || it->second == "table");
 			}
+			else
+			if (it->first == "padding")
+			{
+				parsePaddingShorthand(it->second, style);
+				keep = false;
+			}
 
 			if (!keep)
 			{
@@ -578,6 +584,33 @@ namespace NLGUI
 			*dest = CSSLineStyle::SOLID;
 	}
 
+	void CCssStyle::applyPaddingWidth(const std::string &value, uint32 *dest, const uint32 currentPadding, uint32 fontSize) const
+	{
+		if (!dest) return;
+
+		if (value == "inherit")
+		{
+			*dest = currentPadding;
+			return;
+		}
+
+		float tmpf;
+		std::string unit;
+		if (getCssLength(tmpf, unit, value.c_str()))
+		{
+			if (unit == "rem")
+				*dest = fontSize * tmpf;
+			else if (unit == "em")
+				*dest = fontSize * tmpf;
+			else if (unit == "pt")
+				*dest = tmpf / 0.75f;
+			else if (unit == "%")
+				*dest = 0; // TODO: requires content width, must remember 'unit' type
+			else
+				*dest = tmpf;
+		}
+	}
+
 	// apply style rules
 	void CCssStyle::apply(CStyleParams &style, const CStyleParams &current) const
 	{
@@ -597,6 +630,10 @@ namespace NLGUI
 			else if (it->first == "border-left-width")	 applyBorderWidth(it->second, &style.BorderLeftWidth, current.BorderLeftWidth, current.FontSize);
 			else if (it->first == "border-left-color")	 applyBorderColor(it->second, &style.BorderLeftColor, current.BorderLeftColor, current.TextColor);
 			else if (it->first == "border-left-style")	 applyLineStyle(it->second, &style.BorderLeftStyle, current.BorderLeftStyle);
+			else if (it->first == "padding-top")		 applyPaddingWidth(it->second, &style.PaddingTop, current.PaddingTop, current.FontSize);
+			else if (it->first == "padding-right")		 applyPaddingWidth(it->second, &style.PaddingRight, current.PaddingRight, current.FontSize);
+			else if (it->first == "padding-bottom")		 applyPaddingWidth(it->second, &style.PaddingBottom, current.PaddingBottom, current.FontSize);
+			else if (it->first == "padding-left")		 applyPaddingWidth(it->second, &style.PaddingLeft, current.PaddingLeft, current.FontSize);
 			else
 			if (it->first == "font-style")
 			{
@@ -1505,6 +1542,22 @@ namespace NLGUI
 			if (hasBottom) style.StyleRules["border-bottom-color"] = "currentcolor";
 			if (hasLeft) style.StyleRules["border-left-color"] = "currentcolor";
 		}
+	}
+
+	// ***************************************************************************
+	void CCssStyle::parsePaddingShorthand(const std::string &value, CStyleParams &style) const
+	{
+		std::vector<std::string> parts;
+		NLMISC::splitString(toLower(value), " ", parts);
+
+		uint8 t, r, b, l;
+		if (!getShorthandIndices(parts.size(), t, r, b, l))
+			return;
+
+		style.StyleRules["padding-top"] = parts[t];
+		style.StyleRules["padding-right"] = parts[r];
+		style.StyleRules["padding-bottom"] = parts[b];
+		style.StyleRules["padding-left"] = parts[l];
 	}
 
 	// ***************************************************************************
