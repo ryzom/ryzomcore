@@ -5969,16 +5969,20 @@ namespace NLGUI
 			ucstring ucValue;
 			ucValue.fromUtf8(elm.getAttribute("value"));
 
-			uint size = 120;
+			uint size = 20;
 			uint maxlength = 1024;
 			if (elm.hasNonEmptyAttribute("size"))
 				fromString(elm.getAttribute("size"), size);
 			if (elm.hasNonEmptyAttribute("maxlength"))
 				fromString(elm.getAttribute("maxlength"), maxlength);
 
+			// ryzom client used to have 'size' attribute in pixels, (12 == was default font size)
+			if (_Style.hasStyle("-ryzom-input-size-px") && _Style.getStyle("-ryzom-input-size-px") == "true")
+				size = size / 12;
+
 			string textTemplate(!templateName.empty() ? templateName : DefaultFormTextGroup);
 			// Add the editbox
-			CInterfaceGroup *textArea = addTextArea (textTemplate, name.c_str (), 1, size/12, false, ucValue, maxlength);
+			CInterfaceGroup *textArea = addTextArea (textTemplate, name.c_str (), 1, size, false, ucValue, maxlength);
 			if (textArea)
 			{
 				// Add the text area to the form
