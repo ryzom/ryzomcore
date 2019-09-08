@@ -706,7 +706,7 @@ namespace NLGUI
 	}
 
 	// Add a image download request in the multi_curl
-	void CGroupHTML::addImageDownload(const string &url, CViewBase *img, const CStyleParams &style, TImageType type)
+	void CGroupHTML::addImageDownload(const string &url, CViewBase *img, const CStyleParams &style, TImageType type, const std::string &placeholder)
 	{
 		std::string finalUrl;
 		img->setModulateGlobalColor(style.GlobalColor);
@@ -732,8 +732,7 @@ namespace NLGUI
 			std::string temp = dest;
 			if (!CFile::fileExists(temp))
 			{
-				// TODO: placeholder
-				temp = "web_del.tga";
+				temp = placeholder;
 			}
 			setImage(img, temp, type);
 			setImageSize(img, style);
@@ -3483,7 +3482,7 @@ namespace NLGUI
 				else
 					bitmap->setSizeRef("");
 
-				addImageDownload(bgtex, view);
+				addImageDownload(bgtex, view, CStyleParams(), TImageType::NormalImage, "");
 			}
 		}
 	}
@@ -6590,7 +6589,7 @@ namespace NLGUI
 				table->setTextureScale(true);
 
 			string image = _Style.getStyle("background-image");
-			addImageDownload(image, table);
+			addImageDownload(image, table, CStyleParams(), TImageType::NormalImage, "");
 		}
 
 		table->setMarginLeft(getIndent());
@@ -6664,7 +6663,7 @@ namespace NLGUI
 		if (_Style.hasStyle("background-image"))
 		{
 			string image = _Style.getStyle("background-image");
-			addImageDownload(image, _Cells.back());
+			addImageDownload(image, _Cells.back(), CStyleParams(), TImageType::NormalImage, "");
 		}
 
 		if (elm.hasNonEmptyAttribute("colspan"))
