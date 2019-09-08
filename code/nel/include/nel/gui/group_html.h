@@ -539,6 +539,11 @@ namespace NLGUI
 		// IL mode
 		bool _LI;
 
+		// style from browser.css
+		CCssStyle _BrowserStyle;
+		// local file for browser.css
+		std::string _BrowserCssFile;
+
 		// Keep track of current element style
 		CCssStyle _Style;
 		CHtmlElement _HtmlDOM;

@@ -1493,6 +1493,9 @@ namespace NLGUI
 
 		initImageDownload();
 		initBnpDownload();
+
+		// setup default browser style
+		setProperty("browser_css_file", "browser.css");
 	}
 
 	// ***************************************************************************
@@ -1770,6 +1773,11 @@ namespace NLGUI
 		if( name == "timeout" )
 		{
 			return toString( _TimeoutValue );
+		}
+		else
+		if( name == "browser_css_file" )
+		{
+			return _BrowserCssFile;
 		}
 		else
 			return CGroupScrollText::getProperty( name );
@@ -2145,6 +2153,24 @@ namespace NLGUI
 			return;
 		}
 		else
+		if( name == "browser_css_file")
+		{
+			_BrowserStyle.reset();
+			_BrowserCssFile = value;
+			if (!_BrowserCssFile.empty())
+			{
+				std::string filename = CPath::lookup(_BrowserCssFile, false, true, true);
+				if (!filename.empty())
+				{
+					NLMISC::CSString css;
+					if (css.readFromFile(filename))
+					{
+						_BrowserStyle.parseStylesheet(css);
+					}
+				}
+			}
+		}
+		else
 			CGroupScrollText::setProperty( name, value );
 	}
 
@@ -2217,6 +2243,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "browse_redo", BAD_CAST _BrowseRedoButton.c_str() );
 		xmlSetProp( node, BAD_CAST "browse_refresh", BAD_CAST _BrowseRefreshButton.c_str() );
 		xmlSetProp( node, BAD_CAST "timeout", BAD_CAST toString( _TimeoutValue ).c_str() );
+		xmlSetProp( node, BAD_CAST "browser_css_file", BAD_CAST _BrowserCssFile.c_str() );
 
 		return node;
 	}
@@ -2399,6 +2426,12 @@ namespace NLGUI
 		ptr = xmlGetProp (cur, (xmlChar*)"timeout");
 		if(ptr)
 			fromString((const char*)ptr, _TimeoutValue);
+
+		ptr = xmlGetProp (cur, (xmlChar*)"browser_css_file");
+		if (ptr)
+		{
+			setProperty("browser_css_file", (const char *)ptr);
+		}
 
 		return true;
 	}
@@ -4895,49 +4928,7 @@ namespace NLGUI
 		_WaitingForStylesheet = false;
 		_StylesheetQueue.clear();
 		_Style.reset();
-
-		std::string css;
-
-		// TODO: browser css
-		css += "html { background-color: " + getRGBAString(BgColor) + "; color: " + getRGBAString(TextColor) + "; font-size: " + toString(TextFontSize) + "px;}";
-		css += "a { color: " + getRGBAString(LinkColor) + "; text-decoration: underline; -ryzom-modulate-color: "+toString(LinkColorGlobalColor)+";}";
-		css += "h1 { color: " + getRGBAString(H1Color) + "; font-size: "+ toString("%d", H1FontSize) + "px; -ryzom-modulate-color: "+toString(H1ColorGlobalColor)+";}";
-		css += "h2 { color: " + getRGBAString(H2Color) + "; font-size: "+ toString("%d", H2FontSize) + "px; -ryzom-modulate-color: "+toString(H2ColorGlobalColor)+";}";
-		css += "h3 { color: " + getRGBAString(H3Color) + "; font-size: "+ toString("%d", H3FontSize) + "px; -ryzom-modulate-color: "+toString(H3ColorGlobalColor)+";}";
-		css += "h4 { color: " + getRGBAString(H4Color) + "; font-size: "+ toString("%d", H4FontSize) + "px; -ryzom-modulate-color: "+toString(H4ColorGlobalColor)+";}";
-		css += "h5 { color: " + getRGBAString(H5Color) + "; font-size: "+ toString("%d", H5FontSize) + "px; -ryzom-modulate-color: "+toString(H5ColorGlobalColor)+";}";
-		css += "h6 { color: " + getRGBAString(H6Color) + "; font-size: "+ toString("%d", H6FontSize) + "px; -ryzom-modulate-color: "+toString(H6ColorGlobalColor)+";}";
-		css += "input[type=\"text\"] { color: " + getRGBAString(TextColor) + "; font-size: " + toString("%d", TextFontSize) + "px; font-weight: normal; text-shadow: 1px 1px #000;}";
-		css += "pre { font-family: monospace;}";
-		// th { text-align: center; } - overwrites align property
-		css += "th { font-weight: bold; }";
-		css += "textarea { color: " + getRGBAString(TextColor) + "; font-weight: normal; font-size: " + toString("%d", TextFontSize) + "px; text-shadow: 1px 1px #000;}";
-		css += "del { text-decoration: line-through;}";
-		css += "u { text-decoration: underline;}";
-		css += "em { font-style: italic; }";
-		css += "strong { font-weight: bold; }";
-		css += "small { font-size: smaller;}";
-		css += "dt { font-weight: bold; }";
-		css += "hr { color: rgb(120, 120, 120);}";
-		// block level elements
-		css += "address, article, aside, blockquote, details, dialog, dd, div, dl, dt, fieldset, figcaption, figure,";
-		css += "footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, li, main, nav, ol, p, pre, section, table,";
-		css += "ul { display: block; }";
-		css += "table { display: table; }";
-		// td { padding: 1px;} - overwrites cellpadding attribute
-		// table { border-spacing: 2px;} - overwrites cellspacing attribute
-		css += "table { border-collapse: separate;}";
-		// webkit pseudo elements
-		css += "meter::-webkit-meter-bar, meter::-webkit-optimum-value, meter::-webkit-suboptimum-value, meter::-webkit-even-less-good-value { background: none; }";
-		css += "meter::-webkit-meter-bar { background-color: rgb(100, 100, 100); width: 5em; height: 1em;}";
-		css += "meter::-webkit-meter-optimum-value { background-color: rgb(80, 220, 80); }";
-		css += "meter::-webkit-meter-suboptimum-value { background-color: rgb(220, 220, 80); }";
-		css += "meter::-webkit-meter-even-less-good-value { background-color: rgb(220, 80, 80); }";
-		// webkit pseudo elements
-		css += "progress::-webkit-progress-bar, progress::-webkit-progress-value { background: none; }";
-		css += "progress::-webkit-progress-bar { background-color: rgb(230, 230, 230); width: 10em; height: 1em; }";
-		css += "progress::-webkit-progress-value { background-color: rgb(0, 100, 180);}";
-		_Style.parseStylesheet(css);
+		_Style = _BrowserStyle;
 	}
 	
 	// ***************************************************************************
