@@ -20,17 +20,13 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/rgba.h"
 #include "nel/gui/css_selector.h"
+#include "nel/gui/css_types.h"
 
 namespace NLGUI
 {
 	class CHtmlElement;
 
 	typedef std::map<std::string, std::string> TStyle;
-
-	// ie. border-style
-	enum CSSLineStyle { NONE = 0, HIDDEN, SOLID };
-	// ie, border-width (px)
-	enum CSSLineWidth { THIN = 1, MEDIUM = 3, THICK = 5 };
 
 	/**
 	 * \brief CSS style rules

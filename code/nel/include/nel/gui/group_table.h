@@ -23,9 +23,11 @@
 #include "nel/gui/group_frame.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/ctrl_button.h"
+#include "nel/gui/css_types.h"
 
 namespace NLGUI
 {
+	class CSSBorderRenderer;
 
 	/**
 	  * This group is used to simulate HTML cells.
@@ -91,6 +93,8 @@ namespace NLGUI
 		// The cell color
 		NLMISC::CRGBA	BgColor;
 
+		CSSBorderRenderer* Border;
+
 		// Texture
 		CViewRenderer::CTextureId	_TextureId;
 		bool _TextureTiled;
@@ -151,9 +155,10 @@ namespace NLGUI
 		// The Width you want in pixel. This is the <table width="100"> parameter
 		sint32	ForceWidthMin;
 
-		// Table borders
-		sint32	Border;
-		NLMISC::CRGBA BorderColor;
+		CSSBorderRenderer* Border;
+
+		// Cell has 1px solid border when <table> has 'border' attribute with width > 0
+		bool	CellBorder;
 		sint32	CellPadding;
 		sint32	CellSpacing;
 

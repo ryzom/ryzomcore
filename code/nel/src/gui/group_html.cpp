@@ -52,6 +52,7 @@
 #include "nel/gui/html_element.h"
 #include "nel/gui/css_style.h"
 #include "nel/gui/css_parser.h"
+#include "nel/gui/css_border_renderer.h"
 
 #include <curl/curl.h>
 
@@ -6556,31 +6557,50 @@ namespace NLGUI
 		else if (elm.hasNonEmptyAttribute("width"))
 			getPercentage (table->ForceWidthMin, table->TableRatio, elm.getAttribute("width").c_str());
 
-		if (_Style.hasStyle("border") || _Style.hasStyle("border-width") || _Style.hasStyle("border-top-width"))
+		// border from css or from attribute
 		{
-			// FIXME: only using border-top
-			table->Border = _Style.Current.BorderTopWidth;
-		}
-		else if (elm.hasAttribute("border"))
-		{
-			std::string s = elm.getAttribute("border");
-			if (s.empty())
-				table->Border = 1;
-			else
-				fromString(elm.getAttribute("border"), table->Border);
-		}
+			uint32 borderWidth = 0;
+			CRGBA borderColor = CRGBA::Transparent;
 
-		if (_Style.hasStyle("border-color"))
-		{
-			std::string s = toLower(_Style.getStyle("border-color"));
-			if (s == "currentcolor")
-				table->BorderColor = _Style.Current.TextColor;
+			// TODO: _Style->hasBorder() ??
+			table->Border = new CSSBorderRenderer();
+			if (elm.hasAttribute("border"))
+			{
+				std::string s = elm.getAttribute("border");
+				if (s.empty())
+					borderWidth = 1;
+				else
+					fromString(elm.getAttribute("border"), borderWidth);
+
+				if (elm.hasNonEmptyAttribute("bordercolor"))
+					scanHTMLColor(elm.getAttribute("bordercolor").c_str(), borderColor);
+				else
+					borderColor = CRGBA(128, 128, 128, 255);
+
+				table->CellBorder = (borderWidth > 0);
+				table->Border->setWidth(borderWidth, borderWidth, borderWidth, borderWidth);
+				table->Border->setColor(borderColor, borderColor, borderColor, borderColor);
+				table->Border->setStyle(CSSLineStyle::OUTSET, CSSLineStyle::OUTSET, CSSLineStyle::OUTSET, CSSLineStyle::OUTSET);
+			}
 			else
-				scanHTMLColor(s.c_str(), table->BorderColor);
-		}
-		else if (elm.hasNonEmptyAttribute("bordercolor"))
-		{
-			scanHTMLColor(elm.getAttribute("bordercolor").c_str(), table->BorderColor);
+			{
+				table->CellBorder = false;
+			}
+
+			if (_Style.hasStyle("border-top-width"))	table->Border->TopWidth = _Style.Current.BorderTopWidth;
+			if (_Style.hasStyle("border-right-width"))	table->Border->RightWidth = _Style.Current.BorderRightWidth;
+			if (_Style.hasStyle("border-bottom-width"))	table->Border->BottomWidth = _Style.Current.BorderBottomWidth;
+			if (_Style.hasStyle("border-left-width"))	table->Border->LeftWidth = _Style.Current.BorderLeftWidth;
+
+			if (_Style.hasStyle("border-top-color"))	table->Border->TopColor = _Style.Current.BorderTopColor;
+			if (_Style.hasStyle("border-right-color"))	table->Border->RightColor = _Style.Current.BorderRightColor;
+			if (_Style.hasStyle("border-bottom-color"))	table->Border->BottomColor = _Style.Current.BorderBottomColor;
+			if (_Style.hasStyle("border-left-color"))	table->Border->LeftColor = _Style.Current.BorderLeftColor;
+
+			if (_Style.hasStyle("border-top-style"))	table->Border->TopStyle = _Style.Current.BorderTopStyle;
+			if (_Style.hasStyle("border-right-style"))	table->Border->RightStyle = _Style.Current.BorderRightStyle;
+			if (_Style.hasStyle("border-bottom-style"))	table->Border->BottomStyle = _Style.Current.BorderBottomStyle;
+			if (_Style.hasStyle("border-left-style"))	table->Border->LeftStyle = _Style.Current.BorderLeftStyle;
 		}
 
 		if (_Style.hasStyle("background-image"))
@@ -6713,6 +6733,29 @@ namespace NLGUI
 		// setting ModulateGlobalColor must be after addImageDownload
 		if (_Style.checkStyle("-ryzom-modulate-bgcolor", "true"))
 			_Cells.back()->setModulateGlobalColor(true);
+
+		// border from <table border="1">
+		if (table->CellBorder)
+		{
+			_Cells.back()->Border->setWidth(1, 1, 1, 1);
+			_Cells.back()->Border->setColor(table->Border->TopColor, table->Border->RightColor, table->Border->BottomColor, table->Border->LeftColor);
+			_Cells.back()->Border->setStyle(CSSLineStyle::INSET, CSSLineStyle::INSET, CSSLineStyle::INSET, CSSLineStyle::INSET);
+		}
+
+		if (_Style.hasStyle("border-top-width"))	_Cells.back()->Border->TopWidth = _Style.Current.BorderTopWidth;
+		if (_Style.hasStyle("border-right-width"))	_Cells.back()->Border->RightWidth = _Style.Current.BorderRightWidth;
+		if (_Style.hasStyle("border-bottom-width"))	_Cells.back()->Border->BottomWidth = _Style.Current.BorderBottomWidth;
+		if (_Style.hasStyle("border-left-width"))	_Cells.back()->Border->LeftWidth = _Style.Current.BorderLeftWidth;
+
+		if (_Style.hasStyle("border-top-color"))	_Cells.back()->Border->TopColor = _Style.Current.BorderTopColor;
+		if (_Style.hasStyle("border-right-color"))	_Cells.back()->Border->RightColor = _Style.Current.BorderRightColor;
+		if (_Style.hasStyle("border-bottom-color"))	_Cells.back()->Border->BottomColor = _Style.Current.BorderBottomColor;
+		if (_Style.hasStyle("border-left-color"))	_Cells.back()->Border->LeftColor = _Style.Current.BorderLeftColor;
+
+		if (_Style.hasStyle("border-top-style"))	_Cells.back()->Border->TopStyle = _Style.Current.BorderTopStyle;
+		if (_Style.hasStyle("border-right-style"))	_Cells.back()->Border->RightStyle = _Style.Current.BorderRightStyle;
+		if (_Style.hasStyle("border-bottom-style"))	_Cells.back()->Border->BottomStyle = _Style.Current.BorderBottomStyle;
+		if (_Style.hasStyle("border-left-style"))	_Cells.back()->Border->LeftStyle = _Style.Current.BorderLeftStyle;
 
 		table->addChild (_Cells.back());
 
