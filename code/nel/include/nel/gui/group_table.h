@@ -96,6 +96,11 @@ namespace NLGUI
 		bool _UserTexture;
 		bool _TextureTiled;
 		bool _TextureScaled;
+		// cached absolute coords for background texture
+		sint32 _TextureXReal;
+		sint32 _TextureYReal;
+		sint32 _TextureWReal;
+		sint32 _TextureHReal;
 
 		// Alignment
 		TAlign	Align;
@@ -112,10 +117,14 @@ namespace NLGUI
 		void setTextureTile(bool tiled);
 		void setTextureScale(bool scaled);
 
+		virtual void updateCoords();
+
 		static void setDebugUICell( bool d ){ DebugUICell = d; }
 		static bool getDebugUICell(){ return DebugUICell; }
 
 	private:
+		void updateTextureCoords();
+
 		void setEnclosedGroupDefaultParams();
 		static bool DebugUICell;
 	};

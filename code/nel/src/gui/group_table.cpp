@@ -62,6 +62,10 @@ namespace NLGUI
 		_UserTexture = false;
 		_TextureTiled = false;
 		_TextureScaled = false;
+		_TextureXReal = 0;
+		_TextureYReal = 0;
+		_TextureWReal = 0;
+		_TextureHReal = 0;
 		setEnclosedGroupDefaultParams();
 		addGroup (Group);
 	}
@@ -492,36 +496,23 @@ namespace NLGUI
 					col = CRGBA(255,255,255,255);
 				else
 					col = BgColor;
-					
-				
+
+				sint32 oldSciX, oldSciY, oldSciW, oldSciH;
+				makeNewClip (oldSciX, oldSciY, oldSciW, oldSciH);
+
 				if (_TextureScaled && !_TextureTiled)
 				{
-					rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal,
-											_WReal, _HReal,
-											0, false,
-											_TextureId,
-											col );
+					rVR.drawRotFlipBitmap(_RenderLayer, _TextureXReal, _TextureYReal, _WReal, _HReal, 0, false, _TextureId, col);
 				}
 				else
 				{
 					if (!_TextureTiled)
-					{
-						rVR.draw11RotFlipBitmap (_RenderLayer, _XReal, _YReal,
-												0, false,
-												_TextureId,
-												col);
-					}
+						rVR.drawRotFlipBitmap(_RenderLayer, _TextureXReal, _TextureYReal, _TextureWReal, _TextureHReal, 0, false, _TextureId, col);
 					else
-					{
-						rVR.drawRotFlipBitmapTiled(_RenderLayer, _XReal, _YReal,
-												   _WReal, _HReal,
-													0, false,
-												   _TextureId,
-												   0,
-												   col);
-					}
+						rVR.drawRotFlipBitmapTiled(_RenderLayer, _TextureXReal, _TextureYReal, _WReal, _TextureHReal, 0, false, _TextureId, 0, col);
 				}
-				
+
+				restoreClip (oldSciX, oldSciY, oldSciW, oldSciH);
 			}
 			else
 			{
@@ -534,7 +525,7 @@ namespace NLGUI
 					CGroupTable *table = static_cast<CGroupTable*> (getParent ());
 					finalColor.A = (uint8) (((uint16) table->CurrentAlpha * (uint16) finalColor.A) >> 8);
 				}
-				
+
 				//nlinfo("Blank Texture");
 				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, _HReal, 0, false, rVR.getBlankTextureId(), finalColor);
 			}
@@ -592,6 +583,8 @@ namespace NLGUI
 			nlinfo("Set texture to cell : %s", TxName.c_str());
 			_UserTexture = true;
 			_TextureId.setTexture (TxName.c_str (), 0, 0, -1, -1, false);
+
+			updateTextureCoords();
 		}
 	}
 
@@ -611,6 +604,31 @@ namespace NLGUI
 		_TextureScaled = scaled;
 	}
 
+	// ----------------------------------------------------------------------------
+	void CGroupCell::updateTextureCoords()
+	{
+		if (_TextureId < 0) return;
+
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
+		rVR.getTextureSizeFromId (_TextureId, _TextureWReal, _TextureHReal);
+
+		_TextureXReal = _XReal;
+		_TextureYReal = _YReal + _HReal - _TextureHReal;
+		if (_TextureTiled && _TextureHReal > 0)
+		{
+			sint diff = (_HReal / _TextureHReal) * _TextureHReal;
+			_TextureYReal -= diff;
+			_TextureHReal += diff;
+		}
+	}
+
+	// ----------------------------------------------------------------------------
+	void CGroupCell::updateCoords()
+	{
+		CInterfaceGroup::updateCoords();
+
+		updateTextureCoords();
+	}
 
 	// ----------------------------------------------------------------------------
 	NLMISC_REGISTER_OBJECT(CViewBase, CGroupTable, std::string, "table");
