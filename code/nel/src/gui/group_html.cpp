@@ -433,10 +433,9 @@ namespace NLGUI
 	{
 		if (pVT)
 		{
-			pVT->setFontSize(style.FontSize);
 			pVT->setColor(style.TextColor);
 			pVT->setFontName(style.FontFamily);
-			pVT->setFontSize(style.FontSize);
+			pVT->setFontSize(style.FontSize, false);
 			pVT->setEmbolden(style.FontWeight >= FONT_WEIGHT_BOLD);
 			pVT->setOblique(style.FontOblique);
 			pVT->setUnderlined(style.Underlined);
@@ -6465,7 +6464,7 @@ namespace NLGUI
 					sb->setMinH(_Style.Current.Height);
 
 				sb->setMaxVisibleLine(size);
-				sb->setFontSize(_Style.Current.FontSize);
+				sb->setFontSize(_Style.Current.FontSize, false);
 			}
 
 			entry.SelectBox = sb;
