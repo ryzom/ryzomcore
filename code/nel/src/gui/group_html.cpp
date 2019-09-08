@@ -6558,9 +6558,22 @@ namespace NLGUI
 			fromString(elm.getAttribute("cellpadding"), table->CellPadding);
 
 		if (_Style.hasStyle("width"))
-			getPercentage(table->ForceWidthMin, table->TableRatio, _Style.getStyle("width").c_str());
+		{
+			// _Style.Width does not handle '%' unit currently
+			if (_Style.Current.Width > 0)
+			{
+				table->ForceWidthMin = _Style.Current.Width;
+				table->TableRatio = 0;
+			}
+			else
+			{
+				getPercentage (table->ForceWidthMin, table->TableRatio, _Style.getStyle("width").c_str());
+			}
+		}
 		else if (elm.hasNonEmptyAttribute("width"))
+		{
 			getPercentage (table->ForceWidthMin, table->TableRatio, elm.getAttribute("width").c_str());
+		}
 
 		// border from css or from attribute
 		{
@@ -6717,9 +6730,22 @@ namespace NLGUI
 
 		float temp;
 		if (_Style.hasStyle("width"))
-			getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, _Style.getStyle("width").c_str());
+		{
+			// _Style.Width does not handle '%' unit currently
+			if (_Style.Current.Width > 0)
+			{
+				_Cells.back()->WidthWanted = _Style.Current.Width;
+				_Cells.back()->TableRatio = 0;
+			}
+			else
+			{
+				getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, _Style.getStyle("width").c_str());
+			}
+		}
 		else if (elm.hasNonEmptyAttribute("width"))
+		{
 			getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, elm.getAttribute("width").c_str());
+		}
 
 		_Cells.back()->NewLine = getTR();
 
