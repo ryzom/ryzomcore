@@ -487,18 +487,18 @@ namespace NLGUI
 			rVR.drawRotFlipBitmap (_RenderLayer, _XReal+_WReal-1, _YReal, 1, _HReal, 0, false, rVR.getBlankTextureId(), CRGBA(0,255,255,255) );
 		}
 
+		uint8 CurrentAlpha = 255;
+		CGroupTable *table = NULL;
+		if (getParent ())
+		{
+			table = static_cast<CGroupTable*> (getParent ());
+			CurrentAlpha = table->CurrentAlpha;
+		}
+
 		// Draw the background
 		if (BgColor.A > 0 || !_TextureId.empty())
 		{
 			CViewRenderer &rVR = *CViewRenderer::getInstance();
-
-			uint8 CurrentAlpha = 255;
-
-			if (getParent ())
-			{
-				CGroupTable *table = static_cast<CGroupTable*> (getParent ());
-				CurrentAlpha = table->CurrentAlpha;
-			}
 
 			bool flush = false;
 			if (CurrentAlpha > 0 && !_TextureId.empty())
@@ -544,13 +544,16 @@ namespace NLGUI
 		}
 
 		// Get the parent table
-		if (CurrentAlpha > 0)
 		{
 			// TODO: monitor these in checkCoords and update when changed
-			Border->CurrentAlpha = CurrentAlpha;
-			Border->setRenderLayer(_RenderLayer);
-			Border->setModulateGlobalColor(_ModulateGlobalColor);
-			Border->draw();
+			uint8 contentAlpha = CWidgetManager::getInstance()->getGlobalColorForContent().A;
+			if (contentAlpha > 0)
+			{
+				Border->CurrentAlpha = contentAlpha;
+				Border->setRenderLayer(_RenderLayer);
+				Border->setModulateGlobalColor(_ModulateGlobalColor);
+				Border->draw();
+			}
 		}
 
 		CInterfaceGroup::draw ();
@@ -1484,14 +1487,17 @@ namespace NLGUI
 			if (flush)
 				rVR.flush();
 
-			// TODO: monitor ModulateGlobalColor and CurrentAlpha in checkCoords and recalculate colors on change only
-			if (CurrentAlpha > 0 && Border)
+			if (Border)
 			{
 				// TODO: monitor these in checkCoords and update when changed
-				Border->CurrentAlpha = CurrentAlpha;
-				Border->setRenderLayer(_RenderLayer);
-				Border->setModulateGlobalColor(_ModulateGlobalColor);
-				Border->draw();
+				uint8 contentAlpha = CWidgetManager::getInstance()->getGlobalColorForContent().A;
+				if (contentAlpha > 0)
+				{
+					Border->CurrentAlpha = CurrentAlpha;
+					Border->setRenderLayer(_RenderLayer);
+					Border->setModulateGlobalColor(_ModulateGlobalColor);
+					Border->draw();
+				}
 			}
 		}
 
