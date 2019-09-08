@@ -367,7 +367,7 @@ namespace NLGUI
 		void	setMinH(sint32 minH);
 
 		// change fontsize for new menu items
-		void	setFontSize(uint32 fontSize);
+		void	setFontSize(uint32 fontSize, bool coef = true);
 
 		// Gray a line on the RootMenu
 		void	setGrayedLine(uint line, bool g);
@@ -407,6 +407,7 @@ namespace NLGUI
 		bool					_Formatted;
 		uint8					_Space;
 		sint32					_FontSize;
+		bool					_FontSizeCoef;
 
 		NLMISC::CRGBA			_ColorOver;			// Color of the text when the mouse is over it
 		NLMISC::CRGBA			_ShadowColorOver;	// Color of the shadow when the mouse is over it
