@@ -1143,8 +1143,10 @@ namespace NLGUI
 		case HTML_STRONG:   renderPseudoElement(":before", elm); break;
 		case HTML_STYLE:    htmlSTYLE(elm); break;
 		case HTML_TABLE:    htmlTABLE(elm); break;
+		case HTML_TBODY:    renderPseudoElement(":before", elm); break;
 		case HTML_TD:       htmlTD(elm); break;
 		case HTML_TEXTAREA: htmlTEXTAREA(elm); break;
+		case HTML_TFOOT:    renderPseudoElement(":before", elm); break;
 		case HTML_TH:       htmlTH(elm); break;
 		case HTML_TITLE:    htmlTITLE(elm); break;
 		case HTML_TR:       htmlTR(elm); break;
@@ -1205,7 +1207,9 @@ namespace NLGUI
 		case HTML_STYLE:    htmlSTYLEend(elm); break;
 		case HTML_TABLE:    htmlTABLEend(elm); break;
 		case HTML_TD:       htmlTDend(elm); break;
+		case HTML_TBODY:    renderPseudoElement(":after", elm); break;
 		case HTML_TEXTAREA: htmlTEXTAREAend(elm); break;
+		case HTML_TFOOT:    renderPseudoElement(":after", elm); break;
 		case HTML_TH:       htmlTHend(elm); break;
 		case HTML_TITLE:    htmlTITLEend(elm); break;
 		case HTML_TR:       htmlTRend(elm); break;
