@@ -92,8 +92,7 @@ namespace NLGUI
 		NLMISC::CRGBA	BgColor;
 
 		// Texture
-		CViewRenderer::CTextureId	_TextureId;	/// Accelerator
-		bool _UserTexture;
+		CViewRenderer::CTextureId	_TextureId;
 		bool _TextureTiled;
 		bool _TextureScaled;
 		// cached absolute coords for background texture
@@ -191,7 +190,6 @@ namespace NLGUI
 
 		// Texture
 		CViewRenderer::CTextureId _TextureId;
-		bool _UserTexture;
 		bool _TextureTiled;
 		bool _TextureScaled;
 		// cached absolute coords for background texture

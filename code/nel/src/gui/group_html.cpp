@@ -3450,6 +3450,7 @@ namespace NLGUI
 			CViewBitmap *bitmap = dynamic_cast<CViewBitmap*> (view);
 			if (bitmap)
 			{
+				// TODO: background color should have separate bitmap from background texture
 				// Change the background color
 				bitmap->setColor (bgcolor);
 				bitmap->setModulateGlobalColor(false);
@@ -3472,6 +3473,7 @@ namespace NLGUI
 				bitmap->setPosRef(Hotspot_TL);
 				bitmap->setX(0);
 				bitmap->setY(0);
+				// FIXME: renders behind container background
 				bitmap->setRenderLayer(-2);
 				bitmap->setScale(scale);
 				bitmap->setTile(tile);
@@ -5219,9 +5221,7 @@ namespace NLGUI
 	{
 		CGroupHTML::CCellParams cellParams;
 		if (!_CellParams.empty() && inherit)
-		{
 			cellParams = _CellParams.back();
-		}
 
 		if (_Style.hasStyle("background-color"))
 			cellParams.BgColor = _Style.Current.BackgroundColor;
@@ -6592,6 +6592,9 @@ namespace NLGUI
 			addImageDownload(image, table, CStyleParams(), TImageType::NormalImage, "");
 		}
 
+		// setting ModulateGlobalColor must be after addImageDownload
+		if (_Style.checkStyle("-ryzom-modulate-bgcolor", "true"))
+			table->setModulateGlobalColor(true);
 		table->setMarginLeft(getIndent());
 		addHtmlGroup (table, 0);
 
@@ -6619,8 +6622,20 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlTD(const CHtmlElement &elm)
 	{
+		CRGBA rowColor = CRGBA::Transparent;
+		// remember row color so we can blend it with cell color
+		if (!_CellParams.empty())
+			rowColor = _CellParams.back().BgColor;
+
 		// Get cells parameters
 		getCellsParameters(elm, true);
+
+		// if cell has own background,then it must be blended with row
+		if (rowColor.A > 0 && (elm.hasNonEmptyAttribute("bgcolor") || _Style.hasStyle("background-color")))
+		{
+			if (_CellParams.back().BgColor.A < 255)
+				_CellParams.back().BgColor.blendFromui(rowColor, _CellParams.back().BgColor, _CellParams.back().BgColor.A);
+		}
 
 		if (elm.ID == HTML_TH)
 		{
@@ -6691,6 +6706,11 @@ namespace NLGUI
 			getPercentage (_Cells.back()->Height, temp, elm.getAttribute("height").c_str());
 
 		_Cells.back()->NewLine = getTR();
+
+		// setting ModulateGlobalColor must be after addImageDownload
+		if (_Style.checkStyle("-ryzom-modulate-bgcolor", "true"))
+			_Cells.back()->setModulateGlobalColor(true);
+
 		table->addChild (_Cells.back());
 
 		// reusing indent pushed by table
@@ -6799,6 +6819,10 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlTR(const CHtmlElement &elm)
 	{
+		// prevent inheriting background color
+		if (!_CellParams.empty())
+			_CellParams.back().BgColor = CRGBA::Transparent;
+
 		// Get cells parameters
 		getCellsParameters(elm, true);
 

@@ -174,6 +174,7 @@ namespace NLGUI
 			styleStackIndex++;
 			_StyleStack.push_back(Current);
 
+			Current.GlobalColor = false;
 			Current.DisplayBlock = false;
 			Current.Width=-1;
 			Current.Height=-1;

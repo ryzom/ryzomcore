@@ -59,7 +59,6 @@ namespace NLGUI
 		IgnoreMaxWidth = false;
 		IgnoreMinWidth = false;
 		AddChildW = false;
-		_UserTexture = false;
 		_TextureTiled = false;
 		_TextureScaled = false;
 		_TextureXReal = 0;
@@ -486,16 +485,23 @@ namespace NLGUI
 		}
 
 		// Draw the background
-		if (_UserTexture || BgColor.A != 0)
+		if (BgColor.A > 0 || !_TextureId.empty())
 		{
 			CViewRenderer &rVR = *CViewRenderer::getInstance();
-			if (_UserTexture)
+
+			uint8 CurrentAlpha = 255;
+
+			if (getParent ())
 			{
-				CRGBA col;
-				if (BgColor.A == 0 )
-					col = CRGBA(255,255,255,255);
-				else
-					col = BgColor;
+				CGroupTable *table = static_cast<CGroupTable*> (getParent ());
+				CurrentAlpha = table->CurrentAlpha;
+			}
+
+			bool flush = false;
+			if (CurrentAlpha > 0 && !_TextureId.empty())
+			{
+				CRGBA col = CRGBA::White;
+				col.A = CurrentAlpha;
 
 				sint32 oldSciX, oldSciY, oldSciW, oldSciH;
 				makeNewClip (oldSciX, oldSciY, oldSciW, oldSciH);
@@ -513,22 +519,25 @@ namespace NLGUI
 				}
 
 				restoreClip (oldSciX, oldSciY, oldSciW, oldSciH);
+
+				flush = true;
 			}
-			else
+
+			if (BgColor.A > 0)
 			{
-				CRGBA finalColor;
-				finalColor.modulateFromColor (BgColor, CWidgetManager::getInstance()->getGlobalColor());
+				CRGBA finalColor = BgColor;
+				if (_ModulateGlobalColor)
+					finalColor.modulateFromColor (finalColor, CWidgetManager::getInstance()->getGlobalColor());
+				finalColor.A = (uint8) (((uint16) CurrentAlpha * (uint16) finalColor.A) >> 8);
 
-				// Get the parent table
-				if (getParent ())
-				{
-					CGroupTable *table = static_cast<CGroupTable*> (getParent ());
-					finalColor.A = (uint8) (((uint16) table->CurrentAlpha * (uint16) finalColor.A) >> 8);
-				}
+				if (finalColor.A > 0)
+					rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, _HReal, 0, false, rVR.getBlankTextureId(), finalColor);
 
-				//nlinfo("Blank Texture");
-				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, _HReal, 0, false, rVR.getBlankTextureId(), finalColor);
+				flush = true;
 			}
+
+			if (flush)
+				rVR.flush();
 		}
 
 		// Get the parent table
@@ -536,14 +545,14 @@ namespace NLGUI
 		{
 			CGroupTable *table = static_cast<CGroupTable*> (getParent ());
 			if (table->Border) {
-				CRGBA lighter = blend(table->BorderColor, CRGBA::White, 0.5f);
-
-				CRGBA borderColorTL;
-				borderColorTL.modulateFromColor (lighter, CWidgetManager::getInstance()->getGlobalColor());
+				CRGBA borderColorTL = blend(table->BorderColor, CRGBA::White, 0.5f);
+				if (_ModulateGlobalColor)
+					borderColorTL.modulateFromColor (borderColorTL, CWidgetManager::getInstance()->getGlobalColor());
 				borderColorTL.A = (uint8) (((uint16) table->CurrentAlpha * (uint16) borderColorTL.A) >> 8);
 
-				CRGBA borderColorBR;
-				borderColorBR.modulateFromColor (table->BorderColor, CWidgetManager::getInstance()->getGlobalColor());
+				CRGBA borderColorBR = table->BorderColor;
+				if (_ModulateGlobalColor)
+					borderColorBR.modulateFromColor (borderColorBR, CWidgetManager::getInstance()->getGlobalColor());
 				borderColorBR.A = (uint8) (((uint16) table->CurrentAlpha * (uint16) borderColorBR.A) >> 8);
 
 				CViewRenderer &rVR = *CViewRenderer::getInstance();
@@ -575,13 +584,10 @@ namespace NLGUI
 	{
 		if (TxName.empty() || TxName == "none")
 		{
-			_UserTexture = false;
-			nlinfo("Set no texture");
+			_TextureId.clear();
 		}
 		else
 		{
-			nlinfo("Set texture to cell : %s", TxName.c_str());
-			_UserTexture = true;
 			_TextureId.setTexture (TxName.c_str (), 0, 0, -1, -1, false);
 
 			updateTextureCoords();
@@ -607,7 +613,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupCell::updateTextureCoords()
 	{
-		if (_TextureId < 0) return;
+		if (_TextureId.empty()) return;
 
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		rVR.getTextureSizeFromId (_TextureId, _TextureWReal, _TextureHReal);
@@ -724,7 +730,7 @@ namespace NLGUI
 	{
 		if (TxName.empty() || TxName == "none")
 		{
-			_TextureId.setTexture(NULL);
+			_TextureId.clear();
 		}
 		else
 		{
@@ -749,7 +755,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupTable::updateTextureCoords()
 	{
-		if (_TextureId < 0) return;
+		if (_TextureId.empty()) return;
 
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		rVR.getTextureSizeFromId (_TextureId, _TextureWReal, _TextureHReal);
@@ -1410,13 +1416,30 @@ namespace NLGUI
 
 		if (!_Columns.empty() && !_Rows.empty())
 		{
-			// Draw the background
-			if (_TextureId >= 0 && CurrentAlpha != 0)
+			bool flush = false;
+			CViewRenderer &rVR = *CViewRenderer::getInstance();
+
+			if (BgColor.A > 0)
 			{
-				CViewRenderer &rVR = *CViewRenderer::getInstance();
+				CRGBA finalColor = BgColor;
+				if (_ModulateGlobalColor)
+					finalColor.modulateFromColor (finalColor, CWidgetManager::getInstance()->getGlobalColor());
+				finalColor.A = (uint8) (((uint16) CurrentAlpha * (uint16) finalColor.A) >> 8);
+
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, _HReal, 0, false, rVR.getBlankTextureId(), finalColor);
+
+				flush = true;
+			}
+
+			// Draw the background
+			if (CurrentAlpha > 0 && !_TextureId.empty())
+			{
+				sint32 oldSciX, oldSciY, oldSciW, oldSciH;
+				makeNewClip (oldSciX, oldSciY, oldSciW, oldSciH);
 
 				CRGBA col = CRGBA::White;
 				col.A = CurrentAlpha;
+
 				if (_TextureScaled && !_TextureTiled)
 				{
 					rVR.drawRotFlipBitmap(_RenderLayer, _TextureXReal, _TextureYReal, _WReal, _HReal, 0, false, _TextureId, col);
@@ -1428,53 +1451,25 @@ namespace NLGUI
 					else
 						rVR.drawRotFlipBitmapTiled(_RenderLayer, _TextureXReal, _TextureYReal, _WReal, _TextureHReal, 0, false, _TextureId, 0, col);
 				}
+
+				restoreClip (oldSciX, oldSciY, oldSciW, oldSciH);
+				flush = true;
 			}
 
-			sint32 border = Border + CellSpacing;
-			if (border && BgColor.A)
-			{
-				CRGBA finalColor;
-				finalColor.modulateFromColor (BgColor, CWidgetManager::getInstance()->getGlobalColor());
-				finalColor.A = CurrentAlpha;
+			// flush background color and image
+			if (flush)
+				rVR.flush();
 
-				// Draw the top line
-				CViewRenderer &rVR = *CViewRenderer::getInstance();
-				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal-border+_HReal, _WReal, border, 0, false, rVR.getBlankTextureId(), finalColor);
-
-				// Draw the left line
-				sint32 insideHeight = std::max((sint32)0, (sint32)_HReal - (sint32)border);
-				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, border, insideHeight, 0, false, rVR.getBlankTextureId(), finalColor);
-
-				// Draw the inside borders
-				if (CellSpacing)
-				{
-					uint i;
-					sint32 x, y;
-					for (i=0; i<_Cells.size(); i++)
-					{
-						CGroupCell *cell = _Cells[i];
-
-						x = cell->getXReal();
-						y = cell->getYReal() - CellSpacing;
-						// right
-						rVR.drawRotFlipBitmap (_RenderLayer, x + cell->getW(), y, CellSpacing, cell->getH() + CellSpacing, 0, false, rVR.getBlankTextureId(), finalColor);
-						// bottom
-						rVR.drawRotFlipBitmap (_RenderLayer, x, y, cell->getW(), CellSpacing, 0, false, rVR.getBlankTextureId(), finalColor);
-					}
-				}
-
-			}
 			if (Border)
 			{
-				CViewRenderer &rVR = *CViewRenderer::getInstance();
-
-				CRGBA borderColorTL;
-				CRGBA lighter = blend(BorderColor, CRGBA::White, 0.5f);
-				borderColorTL.modulateFromColor (lighter, CWidgetManager::getInstance()->getGlobalColor());
+				CRGBA borderColorTL = blend(BorderColor, CRGBA::White, 0.5f);
+				if (_ModulateGlobalColor)
+					borderColorTL.modulateFromColor (borderColorTL, CWidgetManager::getInstance()->getGlobalColor());
 				borderColorTL.A = CurrentAlpha;
 
-				CRGBA borderColorBR;
-				borderColorBR.modulateFromColor (BorderColor, CWidgetManager::getInstance()->getGlobalColor());
+				CRGBA borderColorBR = BorderColor;
+				if (_ModulateGlobalColor)
+					borderColorBR.modulateFromColor (borderColorBR, CWidgetManager::getInstance()->getGlobalColor());
 				borderColorBR.A = CurrentAlpha;
 
 				// beveled table border
