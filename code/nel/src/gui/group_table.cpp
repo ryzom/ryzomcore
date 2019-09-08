@@ -645,6 +645,13 @@ namespace NLGUI
 		CellPadding=1;
 		CellSpacing=2;
 		ContinuousUpdate = false;
+
+		_TextureTiled = false;
+		_TextureScaled = false;
+		_TextureXReal = 0;
+		_TextureYReal = 0;
+		_TextureWReal = 0;
+		_TextureHReal = 0;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -712,7 +719,50 @@ namespace NLGUI
 		_Cells.clear ();*/
 	}
 
+	// ----------------------------------------------------------------------------
+	void CGroupTable::setTexture(const std::string & TxName)
+	{
+		if (TxName.empty() || TxName == "none")
+		{
+			_TextureId.setTexture(NULL);
+		}
+		else
+		{
+			_TextureId.setTexture (TxName.c_str (), 0, 0, -1, -1, false);
 
+			updateTextureCoords();
+		}
+	}
+
+	// ----------------------------------------------------------------------------
+	void CGroupTable::setTextureTile(bool tiled)
+	{
+		_TextureTiled = tiled;
+	}
+
+	// ----------------------------------------------------------------------------
+	void CGroupTable::setTextureScale(bool scaled)
+	{
+		_TextureScaled = scaled;
+	}
+
+	// ----------------------------------------------------------------------------
+	void CGroupTable::updateTextureCoords()
+	{
+		if (_TextureId < 0) return;
+
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
+		rVR.getTextureSizeFromId (_TextureId, _TextureWReal, _TextureHReal);
+
+		_TextureXReal = _XReal;
+		_TextureYReal = _YReal + _HReal - _TextureHReal;
+		if (_TextureTiled && _TextureHReal > 0)
+		{
+			sint diff = (_HReal / _TextureHReal) * _TextureHReal;
+			_TextureYReal -= diff;
+			_TextureHReal += diff;
+		}
+	}
 
 	// ----------------------------------------------------------------------------
 	void CGroupTable::updateCoords()
@@ -1178,7 +1228,7 @@ namespace NLGUI
 
 		CInterfaceGroup::updateCoords();
 
-
+		updateTextureCoords();
 
 
 		// Validated
@@ -1360,6 +1410,26 @@ namespace NLGUI
 
 		if (!_Columns.empty() && !_Rows.empty())
 		{
+			// Draw the background
+			if (_TextureId >= 0 && CurrentAlpha != 0)
+			{
+				CViewRenderer &rVR = *CViewRenderer::getInstance();
+
+				CRGBA col = CRGBA::White;
+				col.A = CurrentAlpha;
+				if (_TextureScaled && !_TextureTiled)
+				{
+					rVR.drawRotFlipBitmap(_RenderLayer, _TextureXReal, _TextureYReal, _WReal, _HReal, 0, false, _TextureId, col);
+				}
+				else
+				{
+					if (!_TextureTiled)
+						rVR.drawRotFlipBitmap(_RenderLayer, _TextureXReal, _TextureYReal, _TextureWReal, _TextureHReal, 0, false, _TextureId, col);
+					else
+						rVR.drawRotFlipBitmapTiled(_RenderLayer, _TextureXReal, _TextureYReal, _WReal, _TextureHReal, 0, false, _TextureId, 0, col);
+				}
+			}
+
 			sint32 border = Border + CellSpacing;
 			if (border && BgColor.A)
 			{

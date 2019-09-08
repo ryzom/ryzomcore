@@ -286,28 +286,38 @@ namespace NLGUI
 			{
 				btn->setTextureOver(file);
 			}
+
+			return;
 		}
-		else
+
+		CViewBitmap *btm = dynamic_cast<CViewBitmap*>(view);
+		if(btm)
 		{
-			CViewBitmap *btm = dynamic_cast<CViewBitmap*>(view);
-			if(btm)
-			{
-				btm->setTexture (file);
-				btm->invalidateCoords();
-				btm->invalidateContent();
-				paragraphChange();
-			}
-			else
-			{
-				CGroupCell *btgc = dynamic_cast<CGroupCell*>(view);
-				if(btgc)
-				{
-					btgc->setTexture (file);
-					btgc->invalidateCoords();
-					btgc->invalidateContent();
-					paragraphChange();
-				}
-			}
+			btm->setTexture (file);
+			btm->invalidateCoords();
+			btm->invalidateContent();
+			paragraphChange();
+
+			return;
+		}
+
+		CGroupCell *btgc = dynamic_cast<CGroupCell*>(view);
+		if(btgc)
+		{
+			btgc->setTexture (file);
+			btgc->invalidateCoords();
+			btgc->invalidateContent();
+			paragraphChange();
+
+			return;
+		}
+
+		CGroupTable *table = dynamic_cast<CGroupTable*>(view);
+		if (table)
+		{
+			table->setTexture(file);
+
+			return;
 		}
 	}
 
@@ -6569,6 +6579,18 @@ namespace NLGUI
 		else if (elm.hasNonEmptyAttribute("bordercolor"))
 		{
 			scanHTMLColor(elm.getAttribute("bordercolor").c_str(), table->BorderColor);
+		}
+
+		if (_Style.hasStyle("background-image"))
+		{
+			if (_Style.checkStyle("background-repeat", "repeat"))
+				table->setTextureTile(true);
+
+			if (_Style.checkStyle("background-size", "100%"))
+				table->setTextureScale(true);
+
+			string image = _Style.getStyle("background-image");
+			addImageDownload(image, table);
 		}
 
 		table->setMarginLeft(getIndent());

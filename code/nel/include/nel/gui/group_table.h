@@ -164,6 +164,10 @@ namespace NLGUI
 
 		bool    ContinuousUpdate;
 
+		void setTexture(const std::string & TxName);
+		void setTextureTile(bool tiled);
+		void setTextureScale(bool scaled);
+
 		std::string getProperties( const std::string &name ) const;
 		void setProperty( const std::string &name, const std::string &value );
 		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
@@ -184,6 +188,19 @@ namespace NLGUI
 		virtual void checkCoords();
 
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
+
+		// Texture
+		CViewRenderer::CTextureId _TextureId;
+		bool _UserTexture;
+		bool _TextureTiled;
+		bool _TextureScaled;
+		// cached absolute coords for background texture
+		sint32 _TextureXReal;
+		sint32 _TextureYReal;
+		sint32 _TextureWReal;
+		sint32 _TextureHReal;
+
+		void updateTextureCoords();
 
 		// Content validated
 		bool	_ContentValidated;
