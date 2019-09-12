@@ -124,7 +124,7 @@ namespace NLGUI
 		void endParagraph();
 
 		// add image download (used by view_bitmap.cpp to load web images)
-		void addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams(), const TImageType type = NormalImage);
+		void addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams(), const TImageType type = NormalImage, const std::string &placeholder = "web_del.tga");
 		// remove image from download list if present
 		void removeImageDownload(CViewBase *img);
 		std::string localImageName(const std::string &url);
@@ -546,6 +546,11 @@ namespace NLGUI
 		// IL mode
 		bool _LI;
 
+		// style from browser.css
+		CCssStyle _BrowserStyle;
+		// local file for browser.css
+		std::string _BrowserCssFile;
+
 		// Keep track of current element style
 		CCssStyle _Style;
 		CHtmlElement _HtmlDOM;
@@ -702,6 +707,7 @@ namespace NLGUI
 				VAlign = CGroupCell::Middle;
 				LeftMargin = 0;
 				NoWrap = false;
+				Height = 0;
 			}
 			NLMISC::CRGBA	BgColor;
 			std::string		Style;
@@ -709,6 +715,7 @@ namespace NLGUI
 			CGroupCell::TVAlign	VAlign;
 			sint32	LeftMargin;
 			bool	NoWrap;
+			sint32	Height;
 		};
 		std::vector<CCellParams>	_CellParams;
 

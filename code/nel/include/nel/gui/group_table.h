@@ -23,9 +23,11 @@
 #include "nel/gui/group_frame.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/ctrl_button.h"
+#include "nel/gui/css_types.h"
 
 namespace NLGUI
 {
+	class CSSBorderRenderer;
 
 	/**
 	  * This group is used to simulate HTML cells.
@@ -91,11 +93,18 @@ namespace NLGUI
 		// The cell color
 		NLMISC::CRGBA	BgColor;
 
+		CSSBorderRenderer* Border;
+		uint32 PaddingTop, PaddingRight, PaddingBottom, PaddingLeft;
+
 		// Texture
-		CViewRenderer::CTextureId	_TextureId;	/// Accelerator
-		bool _UserTexture;
+		CViewRenderer::CTextureId	_TextureId;
 		bool _TextureTiled;
 		bool _TextureScaled;
+		// cached absolute coords for background texture
+		sint32 _TextureXReal;
+		sint32 _TextureYReal;
+		sint32 _TextureWReal;
+		sint32 _TextureHReal;
 
 		// Alignment
 		TAlign	Align;
@@ -112,10 +121,17 @@ namespace NLGUI
 		void setTextureTile(bool tiled);
 		void setTextureScale(bool scaled);
 
+		uint32 getPaddingLeftRight() const { return PaddingLeft + PaddingRight; };
+		uint32 getPaddingTopBottom() const { return PaddingTop + PaddingBottom; };
+
+		virtual void updateCoords();
+
 		static void setDebugUICell( bool d ){ DebugUICell = d; }
 		static bool getDebugUICell(){ return DebugUICell; }
 
 	private:
+		void updateTextureCoords();
+
 		void setEnclosedGroupDefaultParams();
 		static bool DebugUICell;
 	};
@@ -143,9 +159,10 @@ namespace NLGUI
 		// The Width you want in pixel. This is the <table width="100"> parameter
 		sint32	ForceWidthMin;
 
-		// Table borders
-		sint32	Border;
-		NLMISC::CRGBA BorderColor;
+		CSSBorderRenderer* Border;
+
+		// Cell has 1px solid border when <table> has 'border' attribute with width > 0
+		bool	CellBorder;
 		sint32	CellPadding;
 		sint32	CellSpacing;
 
@@ -154,6 +171,10 @@ namespace NLGUI
 		uint8	CurrentAlpha;
 
 		bool    ContinuousUpdate;
+
+		void setTexture(const std::string & TxName);
+		void setTextureTile(bool tiled);
+		void setTextureScale(bool scaled);
 
 		std::string getProperties( const std::string &name ) const;
 		void setProperty( const std::string &name, const std::string &value );
@@ -175,6 +196,18 @@ namespace NLGUI
 		virtual void checkCoords();
 
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
+
+		// Texture
+		CViewRenderer::CTextureId _TextureId;
+		bool _TextureTiled;
+		bool _TextureScaled;
+		// cached absolute coords for background texture
+		sint32 _TextureXReal;
+		sint32 _TextureYReal;
+		sint32 _TextureWReal;
+		sint32 _TextureHReal;
+
+		void updateTextureCoords();
 
 		// Content validated
 		bool	_ContentValidated;

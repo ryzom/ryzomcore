@@ -362,6 +362,37 @@ void		CIFile::flush()
 }
 
 // ======================================================================================================
+bool	CIFile::readAll(std::string &buffer)
+{
+	try
+	{
+		uint32 remaining = _FileSize;
+
+		buffer.clear();
+		buffer.reserve(_FileSize);
+		while(!eof() && remaining > 0)
+		{
+			const static uint bufsize = 1024;
+			char buf[bufsize];
+			uint32 readnow = bufsize;
+			if (readnow > remaining)
+				readnow = remaining;
+
+			serialBuffer((uint8 *)&buf[0], readnow);
+			buffer.append(buf, readnow);
+			remaining -= readnow;
+		}
+	}
+	catch (const EFile &)
+	{
+		// buffer state is unknown
+		return false;
+	}
+
+	return true;
+}
+
+// ======================================================================================================
 void		CIFile::getline (char *buffer, uint32 bufferSize)
 {
 	if (bufferSize == 0)

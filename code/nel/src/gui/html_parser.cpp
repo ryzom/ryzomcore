@@ -190,6 +190,35 @@ namespace NLGUI
 						elm.reindexChilds();
 						parent.reindexChilds();
 					}
+
+					// move all <tr> directly under <table> to its own <tbody> ("table > tbody > tr" selector).
+					// TODO: move first real <thead> to front, move first real <tfoot> at the end
+					if (elm.ID == HTML_TABLE)
+					{
+						std::list<CHtmlElement>::iterator it = elm.Children.begin();
+						std::list<CHtmlElement>::iterator tbody = elm.Children.end();
+						for(it = elm.Children.begin(); it != elm.Children.end(); ++it)
+						{
+							if (it->ID == HTML_TR)
+							{
+								if (tbody == elm.Children.end())
+								{
+									tbody = elm.Children.insert(it, CHtmlElement(CHtmlElement::ELEMENT_NODE, "tbody"));
+									tbody->ID = HTML_TBODY;
+									tbody->parent = &elm;
+								}
+								tbody->Children.splice(tbody->Children.end(), elm.Children, it);
+								it = tbody;
+							}
+							else if (tbody != elm.Children.end())
+							{
+								tbody->reindexChilds();
+								tbody = elm.Children.end();
+							}
+						}
+
+						elm.reindexChilds();
+					}
 				}
 			}
 
