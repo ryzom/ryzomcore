@@ -2071,14 +2071,14 @@ int CLuaIHMRyzom::getIslandId(CLuaState &ls)
 
 // ***************************************************************************
 //
-// addShape("shape", .x, .y, .z, "angle", .scale, collision?, "context", "url", highlight?, transparency?, "texture", "skeleton")
+// addShape("shape", .x, .y, .z, "angle", .scale, collision?, "context", "url", highlight?, transparency?, "texture", "skeleton", "inIgZone?")
 //
 //********
 int CLuaIHMRyzom::addShape(CLuaState &ls)
 {
 	const char* funcName = "addShape";
 	CLuaIHM::checkArgMin(ls, funcName, 1);
-	CLuaIHM::checkArgMax(ls, funcName, 13);
+	CLuaIHM::checkArgMax(ls, funcName, 14);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 
 	sint32 idx = -1;
@@ -2098,6 +2098,7 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 	bool highlight = false;
 	bool transparency = false;
 	bool collision = true;
+	bool inIgZone = false;
 	
 	if (ls.getTop() >= 2)
 	{
@@ -2188,7 +2189,13 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 		skeleton = ls.toString(13);
 	}
 	
-	CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector(x, y, z), context, url, collision, idx);
+	if (ls.getTop() >= 14)
+	{
+		CLuaIHM::checkArgType(ls, funcName, 14, LUA_TBOOLEAN);
+		inIgZone = ls.toBoolean(14);
+	}
+	
+	CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector(x, y, z), context, url, collision, inIgZone, idx);
 	UInstance instance = instref.Instance;
 
 	if(!instance.empty())
