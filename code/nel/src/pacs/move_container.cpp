@@ -415,7 +415,7 @@ void CMoveContainer::updateCells (CMovePrimitive *primitive, uint8 worldImage)
 	CPrimitiveWorldImage *wI=primitive->getWorldImage (worldImage);
 
 #if !FINAL_VERSION
-	// Check BB width not too large
+/*	// Check BB width not too large
 	if (wI->getBBXMax() - wI->getBBXMin() > _CellWidth)
 	{
 		nlwarning ("Primitives have moved more than a cell.");
@@ -426,6 +426,7 @@ void CMoveContainer::updateCells (CMovePrimitive *primitive, uint8 worldImage)
 	{
 		nlwarning ("Primitives have moved more than a cell.");
 	}
+*/
 #endif
 
 	// Get coordinate in the cell array
