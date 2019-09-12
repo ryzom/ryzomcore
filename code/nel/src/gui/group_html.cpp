@@ -2175,11 +2175,23 @@ namespace NLGUI
 				std::string filename = CPath::lookup(_BrowserCssFile, false, true, true);
 				if (!filename.empty())
 				{
-					NLMISC::CSString css;
-					if (css.readFromFile(filename))
+					CIFile in;
+					if (in.open(filename))
 					{
-						_BrowserStyle.parseStylesheet(css);
+						std::string css;
+						if (in.readAll(css))
+							_BrowserStyle.parseStylesheet(css);
+						else
+							nlwarning("Failed to read browser css from '%s'", filename.c_str());
 					}
+					else
+					{
+						nlwarning("Failed to open browser css file '%s'", filename.c_str());
+					}
+				}
+				else
+				{
+					nlwarning("Browser css file '%s' not found", _BrowserCssFile.c_str());
 				}
 			}
 		}
