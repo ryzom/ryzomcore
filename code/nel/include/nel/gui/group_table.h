@@ -41,6 +41,7 @@ namespace NLGUI
         DECLARE_UI_CLASS( CGroupCell )
 
 		CGroupCell(const TCtorParam &param);
+		~CGroupCell();
 
 		enum TAlign
 		{

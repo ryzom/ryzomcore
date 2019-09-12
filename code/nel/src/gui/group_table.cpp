@@ -74,6 +74,16 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
+	CGroupCell::~CGroupCell()
+	{
+		if (Border)
+		{
+			delete Border;
+			Border = NULL;
+		}
+	}
+
+	// ----------------------------------------------------------------------------
 	void CGroupCell::setEnclosedGroupDefaultParams()
 	{
 		nlassert(Group);

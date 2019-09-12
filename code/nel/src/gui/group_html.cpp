@@ -6614,8 +6614,6 @@ namespace NLGUI
 			uint32 borderWidth = 0;
 			CRGBA borderColor = CRGBA::Transparent;
 
-			// TODO: _Style->hasBorder() ??
-			table->Border = new CSSBorderRenderer();
 			if (elm.hasAttribute("border"))
 			{
 				std::string s = elm.getAttribute("border");
