@@ -27,6 +27,8 @@ namespace NLGUI
 	class CHtmlElement;
 
 	typedef std::map<std::string, std::string> TStyle;
+	typedef std::pair<std::string, std::string> TStylePair;
+	typedef std::vector<TStylePair> TStyleVec;
 
 	/**
 	 * \brief CSS style rules
@@ -118,7 +120,7 @@ namespace NLGUI
 
 		struct SStyleRule {
 			std::vector<CCssSelector> Selector;
-			TStyle Properties;
+			TStyleVec Properties;
 
 			// pseudo element like ':before'
 			std::string PseudoElement;
@@ -153,7 +155,7 @@ namespace NLGUI
 		void apply(CStyleParams &style, const CStyleParams &current) const;
 
 		// merge src into dest by overwriting key in dest
-		void merge(TStyle &dst, const TStyle &src) const;
+		void merge(TStyle &dst, const TStyleVec &src) const;
 
 		// match selector to dom path
 		bool match(const std::vector<CCssSelector> &selector, const CHtmlElement &elm) const;

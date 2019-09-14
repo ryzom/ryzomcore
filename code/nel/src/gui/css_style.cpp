@@ -102,7 +102,9 @@ namespace NLGUI
 				}
 				else
 				{
-					elm.setPseudo(i->PseudoElement, i->Properties);
+					TStyle props;
+					merge(props, i->Properties);
+					elm.setPseudo(i->PseudoElement, props);
 				}
 			}
 		}
@@ -110,17 +112,18 @@ namespace NLGUI
 		// style from "style" attribute overrides <style>
 		if (elm.hasNonEmptyAttribute("style"))
 		{
-			TStyle styles = CCssParser::parseDecls(elm.getAttribute("style"));
+			TStyleVec styles = CCssParser::parseDecls(elm.getAttribute("style"));
 			merge(elm.Style, styles);
 		}
 	}
 
-	void CCssStyle::merge(TStyle &dst, const TStyle &src) const
+	void CCssStyle::merge(TStyle &dst, const TStyleVec &src) const
 	{
 		// TODO: does not use '!important' flag
-		for(TStyle::const_iterator it = src.begin(); it != src.end(); ++it)
+		for(TStyleVec::const_iterator it = src.begin(); it != src.end(); ++it)
 		{
 			dst[it->first] = it->second;
+			expandShorthand(it->first, it->second, dst);
 		}
 	}
 
@@ -312,7 +315,10 @@ namespace NLGUI
 	// style.StrikeThrough; // text-decoration: line-through;  text-decoration-line: line-through;
 	void CCssStyle::getStyleParams(const std::string &styleString, CStyleParams &style, const CStyleParams &current) const
 	{
-		TStyle styles = CCssParser::parseDecls(styleString);
+		TStyleVec stylevec = CCssParser::parseDecls(styleString);
+
+		TStyle styles;
+		merge(styles, stylevec);
 
 		getStyleParams(styles, style, current);
 	}
@@ -441,10 +447,6 @@ namespace NLGUI
 					style.DisplayBlock = current.DisplayBlock;
 				else
 					style.DisplayBlock = (it->second == "block" || it->second == "table");
-			}
-			else
-			{
-				expandShorthand(it->first, it->second, style.StyleRules);
 			}
 		}
 	}

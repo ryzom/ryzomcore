@@ -31,7 +31,7 @@ namespace NLGUI
 	class CCssParser {
 	public:
 		// parse style declaration, eg "color: red; font-size: 10px;"
-		static TStyle parseDecls(const std::string &styleString);
+		static TStyleVec parseDecls(const std::string &styleString);
 
 		// parse css stylesheet
 		void parseStylesheet(const std::string &cssString, std::vector<CCssStyle::SStyleRule> &rules);
