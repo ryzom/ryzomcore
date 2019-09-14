@@ -162,16 +162,16 @@ namespace NLGUI
 		bool getShorthandIndices(const uint32 size, uint8 &t, uint8 &r, uint8 &b, uint8 &l) const;
 
 		// break 'border' into 'border-top-color', 'border-top-style', etc rules
-		bool tryBorderWidthShorthand(const std::string &value, CStyleParams &style, const std::string &prop) const;
-		bool tryBorderStyleShorthand(const std::string &value, CStyleParams &style, const std::string &prop) const;
-		bool tryBorderColorShorthand(const std::string &value, CStyleParams &style, const std::string &prop) const;
-		void parseBorderShorthand(const std::string &value, CStyleParams &style, const std::string &prop) const;
+		bool tryBorderWidthShorthand(const std::string &prop, const std::string &value, TStyle &style) const;
+		bool tryBorderStyleShorthand(const std::string &prop, const std::string &value, TStyle &style) const;
+		bool tryBorderColorShorthand(const std::string &prop, const std::string &value, TStyle &style) const;
+		void expandBorderShorthand(const std::string &prop, const std::string &value, TStyle &style) const;
 
 		// parse 'background' into 'background-color', 'background-image', etc
-		void parseBackgroundShorthand(const std::string &value, CStyleParams &style) const;
+		void expandBackgroundShorthand(const std::string &value, TStyle &style) const;
 
 		// parse 'padding' into 'padding-top', 'padding-left', etc
-		void parsePaddingShorthand(const std::string &value, CStyleParams &style) const;
+		void expandPaddingShorthand(const std::string &value, TStyle &style) const;
 
 		// parse string value into corresponding value
 		void applyBorderWidth(const std::string &value, uint32 *dest, const uint32 currentWidth, const uint32 fontSize) const;
