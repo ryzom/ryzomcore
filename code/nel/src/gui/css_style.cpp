@@ -338,13 +338,9 @@ namespace NLGUI
 	// - normalize values
 	void CCssStyle::normalize(const TStyle &styleRules, CStyleParams &style, const CStyleParams &current) const
 	{
-		bool keep = true;
 		TStyle::const_iterator it;
 		for (it=styleRules.begin(); it != styleRules.end(); ++it)
 		{
-			// shorthands will be replaced with proper statements  and shorthand rule is removed
-			keep = true;
-
 			// update local copy of applied style
 			style.StyleRules[it->first] = it->second;
 
@@ -432,58 +428,11 @@ namespace NLGUI
 				}
 			}
 			else
-			if (it->first == "background")
-			{
-				expandBackgroundShorthand(it->second, style.StyleRules);
-			}
-			else
 			if (it->first == "background-repeat")
 			{
 				// old ryzom specific value
 				if (it->second == "1")
 					style.StyleRules[it->first] = "repeat";
-			}
-			else
-			if (it->first == "background-scale")
-			{
-				// replace old ryzom specific rule with background-size
-				if (it->second != "1")
-				{
-					style.StyleRules["background-size"] = "auto";
-				}
-				else
-				{
-					style.StyleRules["background-size"] = "100%";
-				}
-
-				keep = false;
-			}
-			else
-			if (it->first == "border"
-				|| it->first == "border-top" || it->first == "border-right"
-				|| it->first == "border-bottom" || it->first == "border-left")
-			{
-				// TODO: use enum or bitmap constant instead of passing a string name (it->first)
-				expandBorderShorthand(it->first, it->second, style.StyleRules);
-				keep = false;
-			}
-			else
-			if (it->first == "border-width")
-			{
-				tryBorderWidthShorthand(it->first, it->second, style.StyleRules);
-				keep = false;
-			}
-			else
-			if (it->first == "border-style")
-			{
-				tryBorderStyleShorthand(it->first, it->second, style.StyleRules);
-				keep = false;
-			}
-			else
-			if (it->first == "border-color")
-			{
-				tryBorderColorShorthand(it->first, it->second, style.StyleRules);
-				keep = false;
 			}
 			else
 			if (it->first == "display")
@@ -494,17 +443,8 @@ namespace NLGUI
 					style.DisplayBlock = (it->second == "block" || it->second == "table");
 			}
 			else
-			if (it->first == "padding")
 			{
-				expandPaddingShorthand(it->second, style.StyleRules);
-				keep = false;
-			}
-
-			if (!keep)
-			{
-				TStyle::iterator pos = style.StyleRules.find(it->first);
-				if (pos != style.StyleRules.end())
-					style.StyleRules.erase(pos);
+				expandShorthand(it->first, it->second, style.StyleRules);
 			}
 		}
 	}
@@ -1558,6 +1498,64 @@ namespace NLGUI
 		style["padding-right"] = parts[r];
 		style["padding-bottom"] = parts[b];
 		style["padding-left"] = parts[l];
+	}
+
+	// ***************************************************************************
+	void CCssStyle::expandShorthand(const std::string &prop, const std::string &value, TStyle &style) const
+	{
+		// if shorthand matches, then remove it after expansion
+		bool keep = false;
+
+		if (prop == "background")
+		{
+			expandBackgroundShorthand(value, style);
+		}
+		else if (prop == "background-scale")
+		{
+			// replace old ryzom specific rule with background-size
+			if (value != "1")
+			{
+				style["background-size"] = "auto";
+			}
+			else
+			{
+				style["background-size"] = "100%";
+			}
+		}
+		else if (prop == "border"
+			|| prop == "border-top" || prop == "border-right"
+			|| prop == "border-bottom" || prop == "border-left")
+		{
+			// TODO: use enum or bitmap constant instead of passing a string name (prop)
+			expandBorderShorthand(prop, value, style);
+		}
+		else if (prop == "border-width")
+		{
+			tryBorderWidthShorthand(prop, value, style);
+		}
+		else if (prop == "border-style")
+		{
+			tryBorderStyleShorthand(prop, value, style);
+		}
+		else if (prop == "border-color")
+		{
+			tryBorderColorShorthand(prop, value, style);
+		}
+		else if (prop == "padding")
+		{
+			expandPaddingShorthand(value, style);
+		}
+		else
+		{
+			keep = true;
+		}
+
+		if (!keep)
+		{
+			TStyle::iterator pos = style.find(prop);
+			if (pos != style.end())
+				style.erase(pos);
+		}
 	}
 
 	// ***************************************************************************

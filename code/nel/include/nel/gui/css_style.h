@@ -173,6 +173,10 @@ namespace NLGUI
 		// parse 'padding' into 'padding-top', 'padding-left', etc
 		void expandPaddingShorthand(const std::string &value, TStyle &style) const;
 
+		// expand shorthand rule, ie "border", into longhand names, ie "border-top-width"
+		// if shorthand is present in style, then its removed
+		void expandShorthand(const std::string &prop, const std::string &value, TStyle &style) const;
+
 		// parse string value into corresponding value
 		void applyBorderWidth(const std::string &value, uint32 *dest, const uint32 currentWidth, const uint32 fontSize) const;
 		void applyBorderColor(const std::string &value, NLMISC::CRGBA *dest, const NLMISC::CRGBA &currentColor, const NLMISC::CRGBA &textColor) const;
