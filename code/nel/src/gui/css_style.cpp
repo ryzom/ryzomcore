@@ -308,6 +308,48 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CCssStyle::splitParams(const std::string &str, char sep, std::vector<std::string> &result) const
+	{
+		// TODO: does not handle utf8
+
+		uint32 pos = 0;
+		for(uint i = 0; i< str.size(); i++)
+		{
+			// split by separator first, then check if string or function
+			if (str[i] == sep)
+			{
+				std::string sub = trim(str.substr(pos, i - pos));
+				if (!sub.empty())
+					result.push_back(str.substr(pos, i - pos));
+				// skip sep
+				pos = i + 1;
+			}
+			else if (str[i] == '"' || str[i] == '(')
+			{
+				// string "this is string", or function rgb(1, 2, 3)
+				char endChar;
+				if (str[i] == '"')
+					endChar = '"';
+				else if (str[i] == '\'')
+					endChar = '\'';
+				else
+					endChar = ')';
+
+				// skip start
+				i++;
+				while(i < str.size() && str[i] != endChar)
+				{
+					if (str[i] == '\\')
+						i++;
+					i++;
+				}
+			}
+		}
+		if (pos < str.size())
+			result.push_back(str.substr(pos).c_str());
+	}
+
+	// ***************************************************************************
 	// CStyleParams style;
 	// style.FontSize;    // font-size: 10px;
 	// style.TextColor;   // color: #ABCDEF;
@@ -646,7 +688,7 @@ namespace NLGUI
 				uint px = 0;
 				CRGBA color;
 				std::vector<std::string> parts;
-				NLMISC::splitString(it->second, " ", parts);
+				splitParams(it->second, ' ', parts);
 				if (parts.size() == 1)
 				{
 					success = scanCssLength(parts[0], px);
@@ -695,7 +737,7 @@ namespace NLGUI
 						prop = prop.substr(0, pos);
 
 					std::vector<std::string> parts;
-					NLMISC::splitString(prop, " ", parts);
+					splitParams(prop, ' ', parts);
 					switch(parts.size())
 					{
 						case 1:
@@ -894,7 +936,7 @@ namespace NLGUI
 				// normalize
 				std::string val = toLower(trim(it->second));
 				std::vector<std::string> parts;
-				NLMISC::splitString(val, " ", parts);
+				splitParams(val, ' ', parts);
 				// check for "repeat repeat"
 				if (parts.size() == 2 && parts[0] == parts[1])
 					val = parts[0];
@@ -907,7 +949,7 @@ namespace NLGUI
 				// normalize
 				std::string val = toLower(trim(it->second));
 				std::vector<std::string> parts;
-				NLMISC::splitString(val, " ", parts);
+				splitParams(val, ' ', parts);
 				if (parts.size() == 2 && parts[0] == parts[1])
 					val = parts[0];
 
@@ -950,9 +992,7 @@ namespace NLGUI
 		uint partIndex = 0;
 		std::vector<std::string> parts;
 		std::vector<std::string>::iterator it;
-		// FIXME: this will fail if url() contains ' ' chars
-		// FIXME: this will also fail on 'background: rgb(255, 0, 0)'
-		NLMISC::splitString(value, " ", parts);
+		splitParams(value, ' ', parts);
 
 		bool failed = false;
 		bool allowSize = false;
@@ -1294,7 +1334,7 @@ namespace NLGUI
 	bool CCssStyle::tryBorderWidthShorthand(const std::string &prop, const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		NLMISC::splitString(toLower(value), " ", parts);
+		splitParams(toLower(value), ' ', parts);
 		float tmpf;
 		std::string unit;
 
@@ -1331,7 +1371,7 @@ namespace NLGUI
 	bool CCssStyle::tryBorderStyleShorthand(const std::string &prop, const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		NLMISC::splitString(toLower(value), " ", parts);
+		splitParams(toLower(value), ' ', parts);
 
 		// verify that parts are valid
 		uint8 maxSize  = (prop == "border" || prop == "border-style") ? 4 : 1;
@@ -1380,7 +1420,7 @@ namespace NLGUI
 	bool CCssStyle::tryBorderColorShorthand(const std::string &prop, const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		NLMISC::splitString(toLower(value), " ", parts);
+		splitParams(toLower(value), ' ', parts);
 		CRGBA color;
 
 		// verify that parts are valid
@@ -1425,7 +1465,7 @@ namespace NLGUI
 
 		TStyle borderStyle;
 		std::vector<std::string> parts;
-		NLMISC::splitString(toLower(value), " ", parts);
+		splitParams(toLower(value), ' ', parts);
 
 		for(uint index = 0; index < parts.size(); ++index)
 		{
@@ -1490,7 +1530,7 @@ namespace NLGUI
 	void CCssStyle::expandPaddingShorthand(const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		NLMISC::splitString(toLower(value), " ", parts);
+		splitParams(toLower(value), ' ', parts);
 
 		uint8 t, r, b, l;
 		if (!getShorthandIndices(parts.size(), t, r, b, l))

@@ -144,6 +144,9 @@ namespace NLGUI
 		// test if str is one of "thin/medium/thick" and return its pixel value
 		bool scanCssLength(const std::string& str, uint32 &px) const;
 
+		// split css properties string, ie '1px solid rgb(100, 100, 100)' split by ' ' returns 3 parts.
+		void splitParams(const std::string &str, char sep, std::vector<std::string> &result) const;
+
 		// read style attribute
 		void getStyleParams(const std::string &styleString, CStyleParams &style, const CStyleParams &current) const;
 		void getStyleParams(const TStyle &styleRules, CStyleParams &style, const CStyleParams &current) const;
