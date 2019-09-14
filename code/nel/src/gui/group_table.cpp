@@ -74,6 +74,16 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
+	CGroupCell::~CGroupCell()
+	{
+		if (Border)
+		{
+			delete Border;
+			Border = NULL;
+		}
+	}
+
+	// ----------------------------------------------------------------------------
 	void CGroupCell::setEnclosedGroupDefaultParams()
 	{
 		nlassert(Group);
@@ -1124,7 +1134,9 @@ namespace NLGUI
 					if (cell->NewLine)
 					{
 						column = 0;
-						currentX = Border->LeftWidth + CellSpacing;
+						currentX = CellSpacing;
+						if (Border)
+							currentX += Border->getLeftWidth();
 
 						_Rows.push_back(CRow());
 					}
@@ -1402,7 +1414,9 @@ namespace NLGUI
 			maxWidth += columns[i];
 
 		// TODO: CellPadding is probably already in columns width
-		maxWidth += Border->LeftWidth + Border->RightWidth + ((sint32)columns.size()+1) * CellSpacing + ((sint32)columns.size()*2) * CellPadding;
+		maxWidth += ((sint32)columns.size()+1) * CellSpacing + ((sint32)columns.size()*2) * CellPadding;
+		if (Border)
+			maxWidth += Border->getLeftRightWidth();
 
 		return maxWidth;
 	}
@@ -1448,7 +1462,9 @@ namespace NLGUI
 			maxWidth += columns[i];
 
 		// TODO: CellPadding is probably already in columns width
-		maxWidth += Border->LeftWidth + Border->RightWidth + ((sint32)columns.size()+1) * CellSpacing + ((sint32)columns.size()*2) * CellPadding;
+		maxWidth += ((sint32)columns.size()+1) * CellSpacing + ((sint32)columns.size()*2) * CellPadding;
+		if (Border)
+			maxWidth += Border->getLeftRightWidth();
 
 		return maxWidth;
 	}
@@ -1546,12 +1562,16 @@ namespace NLGUI
 	{
 		if( name == "border" )
 		{
-			return toString( Border->TopWidth );
+			if (Border)
+				return toString( Border->TopWidth );
+			return "0";
 		}
 		else
 		if( name == "bordercolor" )
 		{
-			return toString( Border->TopColor );
+			if (Border)
+				return toString( Border->TopColor );
+			return toString(CRGBA::Transparent);
 		}
 		else
 		if( name == "cellpadding" )
@@ -1587,6 +1607,8 @@ namespace NLGUI
 			sint32 i;
 			if( fromString( value, i ) )
 			{
+				if (!Border)
+					Border = new CSSBorderRenderer();
 				Border->TopWidth = i;
 				Border->RightWidth = i;
 				Border->BottomWidth = i;
@@ -1600,6 +1622,8 @@ namespace NLGUI
 			CRGBA c;
 			if( fromString( value, c ) )
 			{
+				if (!Border)
+					Border = new CSSBorderRenderer();
 				Border->TopColor = c;
 				Border->RightColor = c;
 				Border->BottomColor = c;
@@ -1649,8 +1673,11 @@ namespace NLGUI
 			return NULL;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "table" );
-		xmlSetProp( node, BAD_CAST "border", BAD_CAST toString( Border->TopWidth ).c_str() );
-		xmlSetProp( node, BAD_CAST "bordercolor", BAD_CAST toString( Border->TopColor ).c_str() );
+		if (Border)
+		{
+			xmlSetProp( node, BAD_CAST "border", BAD_CAST toString( Border->TopWidth ).c_str() );
+			xmlSetProp( node, BAD_CAST "bordercolor", BAD_CAST toString( Border->TopColor ).c_str() );
+		}
 		xmlSetProp( node, BAD_CAST "cellpadding", BAD_CAST toString( CellPadding ).c_str() );
 		xmlSetProp( node, BAD_CAST "cellspacing", BAD_CAST toString( CellSpacing ).c_str() );
 		xmlSetProp( node, BAD_CAST "bgcolor", BAD_CAST toString( BgColor ).c_str() );

@@ -102,7 +102,9 @@ namespace NLGUI
 				}
 				else
 				{
-					elm.setPseudo(i->PseudoElement, i->Properties);
+					TStyle props;
+					merge(props, i->Properties);
+					elm.setPseudo(i->PseudoElement, props);
 				}
 			}
 		}
@@ -110,17 +112,18 @@ namespace NLGUI
 		// style from "style" attribute overrides <style>
 		if (elm.hasNonEmptyAttribute("style"))
 		{
-			TStyle styles = CCssParser::parseDecls(elm.getAttribute("style"));
+			TStyleVec styles = CCssParser::parseDecls(elm.getAttribute("style"));
 			merge(elm.Style, styles);
 		}
 	}
 
-	void CCssStyle::merge(TStyle &dst, const TStyle &src) const
+	void CCssStyle::merge(TStyle &dst, const TStyleVec &src) const
 	{
 		// TODO: does not use '!important' flag
-		for(TStyle::const_iterator it = src.begin(); it != src.end(); ++it)
+		for(TStyleVec::const_iterator it = src.begin(); it != src.end(); ++it)
 		{
 			dst[it->first] = it->second;
+			expandShorthand(it->first, it->second, dst);
 		}
 	}
 
@@ -305,6 +308,48 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CCssStyle::splitParams(const std::string &str, char sep, std::vector<std::string> &result) const
+	{
+		// TODO: does not handle utf8
+
+		uint32 pos = 0;
+		for(uint i = 0; i< str.size(); i++)
+		{
+			// split by separator first, then check if string or function
+			if (str[i] == sep)
+			{
+				std::string sub = trim(str.substr(pos, i - pos));
+				if (!sub.empty())
+					result.push_back(str.substr(pos, i - pos));
+				// skip sep
+				pos = i + 1;
+			}
+			else if (str[i] == '"' || str[i] == '(')
+			{
+				// string "this is string", or function rgb(1, 2, 3)
+				char endChar;
+				if (str[i] == '"')
+					endChar = '"';
+				else if (str[i] == '\'')
+					endChar = '\'';
+				else
+					endChar = ')';
+
+				// skip start
+				i++;
+				while(i < str.size() && str[i] != endChar)
+				{
+					if (str[i] == '\\')
+						i++;
+					i++;
+				}
+			}
+		}
+		if (pos < str.size())
+			result.push_back(str.substr(pos).c_str());
+	}
+
+	// ***************************************************************************
 	// CStyleParams style;
 	// style.FontSize;    // font-size: 10px;
 	// style.TextColor;   // color: #ABCDEF;
@@ -312,7 +357,10 @@ namespace NLGUI
 	// style.StrikeThrough; // text-decoration: line-through;  text-decoration-line: line-through;
 	void CCssStyle::getStyleParams(const std::string &styleString, CStyleParams &style, const CStyleParams &current) const
 	{
-		TStyle styles = CCssParser::parseDecls(styleString);
+		TStyleVec stylevec = CCssParser::parseDecls(styleString);
+
+		TStyle styles;
+		merge(styles, stylevec);
 
 		getStyleParams(styles, style, current);
 	}
@@ -338,13 +386,9 @@ namespace NLGUI
 	// - normalize values
 	void CCssStyle::normalize(const TStyle &styleRules, CStyleParams &style, const CStyleParams &current) const
 	{
-		bool keep = true;
 		TStyle::const_iterator it;
 		for (it=styleRules.begin(); it != styleRules.end(); ++it)
 		{
-			// shorthands will be replaced with proper statements  and shorthand rule is removed
-			keep = true;
-
 			// update local copy of applied style
 			style.StyleRules[it->first] = it->second;
 
@@ -432,58 +476,11 @@ namespace NLGUI
 				}
 			}
 			else
-			if (it->first == "background")
-			{
-				parseBackgroundShorthand(it->second, style);
-			}
-			else
 			if (it->first == "background-repeat")
 			{
 				// old ryzom specific value
 				if (it->second == "1")
 					style.StyleRules[it->first] = "repeat";
-			}
-			else
-			if (it->first == "background-scale")
-			{
-				// replace old ryzom specific rule with background-size
-				if (it->second != "1")
-				{
-					style.StyleRules["background-size"] = "auto";
-				}
-				else
-				{
-					style.StyleRules["background-size"] = "100%";
-				}
-
-				keep = false;
-			}
-			else
-			if (it->first == "border"
-				|| it->first == "border-top" || it->first == "border-right"
-				|| it->first == "border-bottom" || it->first == "border-left")
-			{
-				// TODO: use enum or bitmap constant instead of passing a string name (it->first)
-				parseBorderShorthand(it->second, style, it->first);
-				keep = false;
-			}
-			else
-			if (it->first == "border-width")
-			{
-				tryBorderWidthShorthand(it->second, style, it->first);
-				keep = false;
-			}
-			else
-			if (it->first == "border-style")
-			{
-				tryBorderStyleShorthand(it->second, style, it->first);
-				keep = false;
-			}
-			else
-			if (it->first == "border-color")
-			{
-				tryBorderColorShorthand(it->second, style, it->first);
-				keep = false;
 			}
 			else
 			if (it->first == "display")
@@ -492,19 +489,6 @@ namespace NLGUI
 					style.DisplayBlock = current.DisplayBlock;
 				else
 					style.DisplayBlock = (it->second == "block" || it->second == "table");
-			}
-			else
-			if (it->first == "padding")
-			{
-				parsePaddingShorthand(it->second, style);
-				keep = false;
-			}
-
-			if (!keep)
-			{
-				TStyle::iterator pos = style.StyleRules.find(it->first);
-				if (pos != style.StyleRules.end())
-					style.StyleRules.erase(pos);
 			}
 		}
 	}
@@ -704,7 +688,7 @@ namespace NLGUI
 				uint px = 0;
 				CRGBA color;
 				std::vector<std::string> parts;
-				NLMISC::splitString(it->second, " ", parts);
+				splitParams(it->second, ' ', parts);
 				if (parts.size() == 1)
 				{
 					success = scanCssLength(parts[0], px);
@@ -753,7 +737,7 @@ namespace NLGUI
 						prop = prop.substr(0, pos);
 
 					std::vector<std::string> parts;
-					NLMISC::splitString(prop, " ", parts);
+					splitParams(prop, ' ', parts);
 					switch(parts.size())
 					{
 						case 1:
@@ -952,7 +936,7 @@ namespace NLGUI
 				// normalize
 				std::string val = toLower(trim(it->second));
 				std::vector<std::string> parts;
-				NLMISC::splitString(val, " ", parts);
+				splitParams(val, ' ', parts);
 				// check for "repeat repeat"
 				if (parts.size() == 2 && parts[0] == parts[1])
 					val = parts[0];
@@ -965,7 +949,7 @@ namespace NLGUI
 				// normalize
 				std::string val = toLower(trim(it->second));
 				std::vector<std::string> parts;
-				NLMISC::splitString(val, " ", parts);
+				splitParams(val, ' ', parts);
 				if (parts.size() == 2 && parts[0] == parts[1])
 					val = parts[0];
 
@@ -983,7 +967,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CCssStyle::parseBackgroundShorthand(const std::string &value, CStyleParams &style) const
+	void CCssStyle::expandBackgroundShorthand(const std::string &value, TStyle &style) const
 	{
 		// background: url(image.jpg) top center / 200px 200px no-repeat fixed padding-box content-box red;
 		// background-image      : url(image.jpg)
@@ -1008,9 +992,7 @@ namespace NLGUI
 		uint partIndex = 0;
 		std::vector<std::string> parts;
 		std::vector<std::string>::iterator it;
-		// FIXME: this will fail if url() contains ' ' chars
-		// FIXME: this will also fail on 'background: rgb(255, 0, 0)'
-		NLMISC::splitString(value, " ", parts);
+		splitParams(value, ' ', parts);
 
 		bool failed = false;
 		bool allowSize = false;
@@ -1261,16 +1243,16 @@ namespace NLGUI
 			{
 				if (props[i] == "background-position")
 				{
-					style.StyleRules["background-position-x"] = bgPositionX;
-					style.StyleRules["background-position-y"] = bgPositionY;
+					style["background-position-x"] = bgPositionX;
+					style["background-position-y"] = bgPositionY;
 				}
 				else if (props[i] == "background-clip")
 				{
-					style.StyleRules["background-clip"] = bgClipValue;
+					style["background-clip"] = bgClipValue;
 				}
 				else
 				{
-					style.StyleRules[props[i]] = values[i];
+					style[props[i]] = values[i];
 				}
 			}
 			else
@@ -1278,40 +1260,40 @@ namespace NLGUI
 				// fill in default if one is set
 				if (props[i] == "background-image")
 				{
-					style.StyleRules[props[i]] = "none";
+					style[props[i]] = "none";
 				}
 				else if (props[i] == "background-position")
 				{
-					style.StyleRules[props[i]] = "0% 0%";
-					style.StyleRules["background-position-x"] = "left 0%";
-					style.StyleRules["background-position-y"] = "top 0%";
+					style[props[i]] = "0% 0%";
+					style["background-position-x"] = "left 0%";
+					style["background-position-y"] = "top 0%";
 				}
 				else if (props[i] == "background-size")
 				{
-					style.StyleRules[props[i]] = "auto auto";
+					style[props[i]] = "auto auto";
 				}
 				else if (props[i] == "background-repeat")
 				{
-					style.StyleRules[props[i]] = "repeat";
+					style[props[i]] = "repeat";
 				}
 				else if(props[i] == "background-attachment")
 				{
-					style.StyleRules[props[i]] = "scroll";
+					style[props[i]] = "scroll";
 				}
 				else if(props[i] == "background-origin")
 				{
-					style.StyleRules[props[i]] = "padding-box";
+					style[props[i]] = "padding-box";
 				}
 				else if (props[i] == "background-clip")
 				{
 					if (bgClipFound)
-						style.StyleRules[props[i]] = bgClipValue;
+						style[props[i]] = bgClipValue;
 					else
-						style.StyleRules[props[i]] = "border-box";
+						style[props[i]] = "border-box";
 				}
 				else if (props[i] == "background-color")
 				{
-					style.StyleRules[props[i]] = "transparent";
+					style[props[i]] = "transparent";
 				}
 			}
 		}
@@ -1349,10 +1331,10 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	bool CCssStyle::tryBorderWidthShorthand(const std::string &value, CStyleParams &style, const std::string &prop) const
+	bool CCssStyle::tryBorderWidthShorthand(const std::string &prop, const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		NLMISC::splitString(toLower(value), " ", parts);
+		splitParams(toLower(value), ' ', parts);
 		float tmpf;
 		std::string unit;
 
@@ -1378,18 +1360,18 @@ namespace NLGUI
 
 		uint8 t, r, b, l;
 		if (!getShorthandIndices(parts.size(), t, r, b, l)) return false;
-		if (hasTop) style.StyleRules["border-top-width"] = parts[t];
-		if (hasRight) style.StyleRules["border-right-width"] = parts[r];
-		if (hasBottom) style.StyleRules["border-bottom-width"] = parts[b];
-		if (hasLeft) style.StyleRules["border-left-width"] = parts[l];
+		if (hasTop) style["border-top-width"] = parts[t];
+		if (hasRight) style["border-right-width"] = parts[r];
+		if (hasBottom) style["border-bottom-width"] = parts[b];
+		if (hasLeft) style["border-left-width"] = parts[l];
 
 		return true;
 	}
 	// ***************************************************************************
-	bool CCssStyle::tryBorderStyleShorthand(const std::string &value, CStyleParams &style, const std::string &prop) const
+	bool CCssStyle::tryBorderStyleShorthand(const std::string &prop, const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		NLMISC::splitString(toLower(value), " ", parts);
+		splitParams(toLower(value), ' ', parts);
 
 		// verify that parts are valid
 		uint8 maxSize  = (prop == "border" || prop == "border-style") ? 4 : 1;
@@ -1427,18 +1409,18 @@ namespace NLGUI
 
 		uint8 t, r, b, l;
 		if (!getShorthandIndices(parts.size(), t, r, b, l)) return false;
-		if (hasTop) style.StyleRules["border-top-style"] = parts[t];
-		if (hasRight) style.StyleRules["border-right-style"] = parts[r];
-		if (hasBottom) style.StyleRules["border-bottom-style"] = parts[b];
-		if (hasLeft) style.StyleRules["border-left-style"] = parts[l];
+		if (hasTop) style["border-top-style"] = parts[t];
+		if (hasRight) style["border-right-style"] = parts[r];
+		if (hasBottom) style["border-bottom-style"] = parts[b];
+		if (hasLeft) style["border-left-style"] = parts[l];
 
 		return true;
 	}
 	// ***************************************************************************
-	bool CCssStyle::tryBorderColorShorthand(const std::string &value, CStyleParams &style, const std::string &prop) const
+	bool CCssStyle::tryBorderColorShorthand(const std::string &prop, const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		NLMISC::splitString(toLower(value), " ", parts);
+		splitParams(toLower(value), ' ', parts);
 		CRGBA color;
 
 		// verify that parts are valid
@@ -1460,16 +1442,16 @@ namespace NLGUI
 
 		uint8 t, r, b, l;
 		if (!getShorthandIndices(parts.size(), t, r, b, l)) return false;
-		if (hasTop) style.StyleRules["border-top-color"] = parts[t];
-		if (hasRight) style.StyleRules["border-right-color"] = parts[r];
-		if (hasBottom) style.StyleRules["border-bottom-color"] = parts[b];
-		if (hasLeft) style.StyleRules["border-left-color"] = parts[l];
+		if (hasTop) style["border-top-color"] = parts[t];
+		if (hasRight) style["border-right-color"] = parts[r];
+		if (hasBottom) style["border-bottom-color"] = parts[b];
+		if (hasLeft) style["border-left-color"] = parts[l];
 
 		return true;
 	}
 
 	// ***************************************************************************
-	void CCssStyle::parseBorderShorthand(const std::string &value, CStyleParams &style, const std::string &prop) const
+	void CCssStyle::expandBorderShorthand(const std::string &prop, const std::string &value, TStyle &style) const
 	{
 		// border: 1px solid #000;
 		bool hasTop    = (prop == "border" || prop == "border-top");
@@ -1481,26 +1463,26 @@ namespace NLGUI
 		bool foundStyle = false;
 		bool foundColor = false;
 
-		CStyleParams borderStyle;
+		TStyle borderStyle;
 		std::vector<std::string> parts;
-		NLMISC::splitString(toLower(value), " ", parts);
+		splitParams(toLower(value), ' ', parts);
 
 		for(uint index = 0; index < parts.size(); ++index)
 		{
 			bool matched = false;
 			if (!foundWidth)
 			{
-				matched = foundWidth = tryBorderWidthShorthand(parts[index], borderStyle, prop);
+				matched = foundWidth = tryBorderWidthShorthand(prop, parts[index], borderStyle);
 			}
 
 			if (!matched && !foundStyle)
 			{
-				matched = foundStyle = tryBorderStyleShorthand(parts[index], borderStyle, prop);
+				matched = foundStyle = tryBorderStyleShorthand(prop, parts[index], borderStyle);
 			}
 
 			if (!matched && !foundColor)
 			{
-				matched = foundColor = tryBorderColorShorthand(parts[index], borderStyle, prop);
+				matched = foundColor = tryBorderColorShorthand(prop, parts[index], borderStyle);
 			}
 
 			// invalid rule if nothing gets matched
@@ -1511,53 +1493,111 @@ namespace NLGUI
 		}
 
 		// apply rules that are present
-		TStyle::const_iterator it = borderStyle.StyleRules.begin();
-		while(it != borderStyle.StyleRules.end())
+		TStyle::const_iterator it = borderStyle.begin();
+		while(it != borderStyle.end())
 		{
-			style.StyleRules[it->first] = it->second;
+			style[it->first] = it->second;
 			++it;
 		}
 
 		// reset those not present
 		if (!foundWidth)
 		{
-			if (hasTop) style.StyleRules["border-top-width"] = "medium";
-			if (hasRight) style.StyleRules["border-right-width"] = "medium";
-			if (hasBottom) style.StyleRules["border-bottom-width"] = "medium";
-			if (hasLeft) style.StyleRules["border-left-width"] = "medium";
+			if (hasTop) style["border-top-width"] = "medium";
+			if (hasRight) style["border-right-width"] = "medium";
+			if (hasBottom) style["border-bottom-width"] = "medium";
+			if (hasLeft) style["border-left-width"] = "medium";
 		}
 		//
 		if (!foundStyle)
 		{
-			if (hasTop) style.StyleRules["border-top-style"] = "none";
-			if (hasRight) style.StyleRules["border-right-style"] = "none";
-			if (hasBottom) style.StyleRules["border-bottom-style"] = "none";
-			if (hasLeft) style.StyleRules["border-left-style"] = "none";
+			if (hasTop) style["border-top-style"] = "none";
+			if (hasRight) style["border-right-style"] = "none";
+			if (hasBottom) style["border-bottom-style"] = "none";
+			if (hasLeft) style["border-left-style"] = "none";
 		}
 		//
 		if (!foundColor)
 		{
-			if (hasTop) style.StyleRules["border-top-color"] = "currentcolor";
-			if (hasRight) style.StyleRules["border-right-color"] = "currentcolor";
-			if (hasBottom) style.StyleRules["border-bottom-color"] = "currentcolor";
-			if (hasLeft) style.StyleRules["border-left-color"] = "currentcolor";
+			if (hasTop) style["border-top-color"] = "currentcolor";
+			if (hasRight) style["border-right-color"] = "currentcolor";
+			if (hasBottom) style["border-bottom-color"] = "currentcolor";
+			if (hasLeft) style["border-left-color"] = "currentcolor";
 		}
 	}
 
 	// ***************************************************************************
-	void CCssStyle::parsePaddingShorthand(const std::string &value, CStyleParams &style) const
+	void CCssStyle::expandPaddingShorthand(const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		NLMISC::splitString(toLower(value), " ", parts);
+		splitParams(toLower(value), ' ', parts);
 
 		uint8 t, r, b, l;
 		if (!getShorthandIndices(parts.size(), t, r, b, l))
 			return;
 
-		style.StyleRules["padding-top"] = parts[t];
-		style.StyleRules["padding-right"] = parts[r];
-		style.StyleRules["padding-bottom"] = parts[b];
-		style.StyleRules["padding-left"] = parts[l];
+		style["padding-top"] = parts[t];
+		style["padding-right"] = parts[r];
+		style["padding-bottom"] = parts[b];
+		style["padding-left"] = parts[l];
+	}
+
+	// ***************************************************************************
+	void CCssStyle::expandShorthand(const std::string &prop, const std::string &value, TStyle &style) const
+	{
+		// if shorthand matches, then remove it after expansion
+		bool keep = false;
+
+		if (prop == "background")
+		{
+			expandBackgroundShorthand(value, style);
+		}
+		else if (prop == "background-scale")
+		{
+			// replace old ryzom specific rule with background-size
+			if (value != "1")
+			{
+				style["background-size"] = "auto";
+			}
+			else
+			{
+				style["background-size"] = "100%";
+			}
+		}
+		else if (prop == "border"
+			|| prop == "border-top" || prop == "border-right"
+			|| prop == "border-bottom" || prop == "border-left")
+		{
+			// TODO: use enum or bitmap constant instead of passing a string name (prop)
+			expandBorderShorthand(prop, value, style);
+		}
+		else if (prop == "border-width")
+		{
+			tryBorderWidthShorthand(prop, value, style);
+		}
+		else if (prop == "border-style")
+		{
+			tryBorderStyleShorthand(prop, value, style);
+		}
+		else if (prop == "border-color")
+		{
+			tryBorderColorShorthand(prop, value, style);
+		}
+		else if (prop == "padding")
+		{
+			expandPaddingShorthand(value, style);
+		}
+		else
+		{
+			keep = true;
+		}
+
+		if (!keep)
+		{
+			TStyle::iterator pos = style.find(prop);
+			if (pos != style.end())
+				style.erase(pos);
+		}
 	}
 
 	// ***************************************************************************
