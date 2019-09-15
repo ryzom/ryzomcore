@@ -167,11 +167,11 @@ namespace NLGUI
 			return Current.FontSize-2;
 		}
 
-		sint styleStackIndex = 0;
+		static sint styleStackIndex;
 
 		inline void pushStyle()
 		{
-			styleStackIndex++;
+			CCssStyle::styleStackIndex++;
 			_StyleStack.push_back(Current);
 
 			Current.DisplayBlock = false;
@@ -186,7 +186,7 @@ namespace NLGUI
 
 		inline void popStyle()
 		{
-			styleStackIndex--;
+			CCssStyle::styleStackIndex--;
 			if (_StyleStack.empty())
 			{
 				Current = Root;
