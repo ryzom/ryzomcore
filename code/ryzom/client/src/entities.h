@@ -95,7 +95,7 @@ public:
 class CShapeInstanceReference
 {
 public:
-	CShapeInstanceReference (NL3D::UInstance instance, const string &text, const string &url, bool bbox_active=true)
+	CShapeInstanceReference (NL3D::UInstance instance, const string &text, const string &url, bool bbox_active=true, bool in_ig_zone = false)
 	{
 		Instance = instance;
 		ContextText = text;
@@ -103,6 +103,7 @@ public:
 		BboxActive = bbox_active;
 		Deleted = false;
 		LastDeleted = -1;
+		InIGZone = in_ig_zone;
 		Primitive = NULL;
 		PrimSize = CVector(1.f, 1.f, 1.f);
 		PrimHeight = 1.f;
@@ -118,6 +119,7 @@ public:
 	string ContextURL;
 	bool BboxActive;
 	bool Deleted;
+	bool InIGZone;
 	sint32 LastDeleted;
 };
 
@@ -143,6 +145,8 @@ private:
 	std::vector<CEntityReference>	_VisibleEntities;
 
 	/// Shapes Instances caches
+	typedef std::map<uint16, std::vector<uint32>>	TIGZoneShapes;
+	TIGZoneShapes							_IgZoneShapes;
 	std::vector<CShapeInstanceReference>	_ShapeInstances;
 	sint32									_LastRemovedInstance;
 	bool									_InstancesRemoved;
@@ -226,9 +230,10 @@ public:
 	void reinit();
 
 
-	CShapeInstanceReference createInstance(const string& shape, const CVector &pos, const string &text, const string &url, bool haveCollisions, sint32 &idx);
+	CShapeInstanceReference createInstance(const string& shape, const CVector &pos, const string &text, const string &url, bool haveCollisions, uint16 inIgZone, sint32 &idx);
 	bool deleteInstance(uint32 idx);
 	bool removeInstances();
+	void removeInstancesInIgZone(uint16 igZone);
 	CVector getInstancePos(uint32 idx);
 	bool setInstancePos(uint32 idx, CVector pos);
 	CVector getInstanceRot(uint32 idx);
@@ -239,7 +244,6 @@ public:
 	CVector getInstanceBBoxMin(uint32 idx);
 	CVector getInstanceBBoxMax(uint32 idx);
 	bool setInstanceRot(uint32 idx, CVector pos);
-	bool instancesRemoved();
 	bool setupInstance(uint32 idx, const std::vector<std::string> &keys, const std::vector<std::string> &values);
 	CShapeInstanceReference getShapeInstanceUnderPos(float x, float y, sint32 &idx);
 

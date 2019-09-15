@@ -529,7 +529,7 @@ void CEntityManager::reinit()
 	initialize(_NbMaxEntity);
 }
 
-CShapeInstanceReference CEntityManager::createInstance(const string& shape, const CVector &pos, const string& text, const string& url, bool haveCollisions, sint32& idx)
+CShapeInstanceReference CEntityManager::createInstance(const string& shape, const CVector &pos, const string& text, const string& url, bool haveCollisions, uint16 inIgZone, sint32& idx)
 {
 	idx = -1;
 	CShapeInstanceReference nullinstref(UInstance(), string(""), string(""));
@@ -557,17 +557,42 @@ CShapeInstanceReference CEntityManager::createInstance(const string& shape, cons
 			_ShapeInstances[idx].ContextURL = url;
 			_ShapeInstances[idx].BboxActive = !text.empty() || !url.empty();
 			_ShapeInstances[idx].Deleted = false;
+			_ShapeInstances[idx].InIGZone = inIgZone > 0;
 			
 			_LastRemovedInstance = _ShapeInstances[idx].LastDeleted;
 			_ShapeInstances[idx].LastDeleted = -1;
+			TIGZoneShapes::iterator it = _IgZoneShapes.find(inIgZone);
+			if (it == _IgZoneShapes.end())
+			{
+				vector<uint32> shapes;
+				shapes.push_back(idx);
+				_IgZoneShapes.insert(make_pair(inIgZone, shapes));
+			}
+			else
+			{
+				vector<uint32> &shapes = (*it).second;
+				shapes.push_back(idx);
+			}
 			return _ShapeInstances[idx];
 		}
 		else
 		{
-			CShapeInstanceReference instref = CShapeInstanceReference(instance, text, url, !text.empty() || !url.empty());
+			CShapeInstanceReference instref = CShapeInstanceReference(instance, text, url, !text.empty() || !url.empty(), inIgZone > 0);
 			instref.Primitive = primitive;
 			idx = _ShapeInstances.size();
 			_ShapeInstances.push_back(instref);
+			TIGZoneShapes::iterator it = _IgZoneShapes.find(inIgZone);
+			if (it == _IgZoneShapes.end())
+			{
+				vector<uint32> shapes;
+				shapes.push_back(idx);
+				_IgZoneShapes.insert(make_pair(inIgZone, shapes));
+			}
+			else
+			{
+				vector<uint32> &shapes = (*it).second;
+				shapes.push_back(idx);
+			}
 			return instref;
 		}
 	}
@@ -583,9 +608,7 @@ bool CEntityManager::deleteInstance(uint32 idx)
 		Scene->deleteInstance(_ShapeInstances[idx].Instance);
 	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
 	if (primitive)
-	{
 		PACS->removePrimitive(primitive);
-	}
 	
 	if (!_ShapeInstances[idx].Deleted)
 	{
@@ -596,6 +619,22 @@ bool CEntityManager::deleteInstance(uint32 idx)
 	}
 
 	return true;
+}
+
+void CEntityManager::removeInstancesInIgZone(uint16 igZone)
+{
+	if (!Scene)
+		return;
+
+	TIGZoneShapes::iterator it = _IgZoneShapes.find(igZone);
+	if (it != _IgZoneShapes.end())
+	{
+		vector<uint32> &shapes = (*it).second;
+		for (uint i = 0; i < shapes.size(); i++)
+			deleteInstance(shapes[i]);
+		_IgZoneShapes.erase(it);
+	}
+
 }
 
 CVector CEntityManager::getInstancePos(uint32 idx)
@@ -758,29 +797,13 @@ CVector CEntityManager::getInstanceBBoxMax(uint32 idx)
 bool CEntityManager::removeInstances()
 {
 	if (!Scene) return false;
-	// Remove all instances.
+	
 	for(uint i=0; i<_ShapeInstances.size(); ++i)
 	{
-		if (!_ShapeInstances[i].Instance.empty())
-			Scene->deleteInstance(_ShapeInstances[i].Instance);
-		
-		UMovePrimitive *primitive = _ShapeInstances[i].Primitive;
-		if (primitive)
-		{
-			PACS->removePrimitive(primitive);
-		}
+		if (!_ShapeInstances[i].InIGZone)
+			deleteInstance(i);
 	}
-	_ShapeInstances.clear();
-	_InstancesRemoved = true;
-	_LastRemovedInstance = -1;
 	return true;
-}
-
-bool CEntityManager::instancesRemoved()
-{
-	bool instRemoved = _InstancesRemoved;
-	_InstancesRemoved = false;
-	return instRemoved;
 }
 
 bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const vector<string> &values)

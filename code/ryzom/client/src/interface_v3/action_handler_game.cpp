@@ -2555,7 +2555,7 @@ class CAHAddShape : public IActionHandler
 			}
 
 			sint32 idx;
-			CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector((float)x, (float)y, (float)z), c, u, false, idx);
+			CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector((float)x, (float)y, (float)z), c, u, false, 0, idx);
 			UInstance instance = instref.Instance;
 
 			if(!instance.empty())
