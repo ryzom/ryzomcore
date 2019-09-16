@@ -573,13 +573,19 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	sint32 CGroupCell::getMaxUsedW() const
 	{
-		return Group->getMaxUsedW();
+		sint32 result = getPaddingLeftRight() + Group->getMaxUsedW();
+		if (Border)
+			result += Border->getLeftRightWidth();
+		return result;
 	}
 
 	// ------------------------------------------------------------------------------------------------
 	sint32 CGroupCell::getMinUsedW() const
 	{
-		return Group->getMinUsedW();
+		sint32 result = getPaddingLeftRight() + Group->getMinUsedW();
+		if (Border)
+			result += Border->getLeftRightWidth();
+		return result;
 	}
 
 
@@ -823,24 +829,25 @@ namespace NLGUI
 						additionnalWidth = (sint32) width;
 					}
 
-					sint32 cellBorderPadding = cell->getPaddingLeftRight();
-					if (cell->Border)
-						cellBorderPadding += cell->Border->getLeftRightWidth();
-
 					// Get width min and max
 					if( !cell->IgnoreMaxWidth)
-						cell->WidthMax = cell->getMaxUsedW() + cell->LeftMargin + cellBorderPadding;
+						cell->WidthMax = cell->getMaxUsedW() + cell->LeftMargin;
 					else
 						cell->WidthMax = cell->WidthWanted + additionnalWidth + cell->LeftMargin;
 
 					sint32 cellWidth;
 					if(!cell->IgnoreMinWidth)
-						cellWidth = cell->NoWrap ? cell->WidthMax : cell->getMinUsedW() + cell->LeftMargin + cellBorderPadding;
+						cellWidth = cell->NoWrap ? cell->WidthMax : cell->getMinUsedW() + cell->LeftMargin;
 					else
 						cellWidth = cell->NoWrap ? cell->WidthMax : cell->LeftMargin;
 
-					if (cellWidth < cellBorderPadding)
-						cellWidth = cellBorderPadding;
+					{
+						sint32 cellBorderPadding = cell->getPaddingLeftRight();
+						if (cell->Border)
+							cellBorderPadding += cell->Border->getLeftRightWidth();
+						if (cellWidth < cellBorderPadding)
+							cellWidth = cellBorderPadding;
+					}
 
 					// New cell ?
 					if (cell->NewLine)
@@ -1122,7 +1129,6 @@ namespace NLGUI
 				// *** Now we know each column width, resize cells and get the height for each row
 
 				column = 0;
-				// FIXME: real cell padding
 				sint32 row = 0;
 				sint32 currentX = 0;
 
@@ -1413,8 +1419,7 @@ namespace NLGUI
 		for (i=0; i<columns.size(); i++)
 			maxWidth += columns[i];
 
-		// TODO: CellPadding is probably already in columns width
-		maxWidth += ((sint32)columns.size()+1) * CellSpacing + ((sint32)columns.size()*2) * CellPadding;
+		maxWidth += ((sint32)columns.size()+1) * CellSpacing;
 		if (Border)
 			maxWidth += Border->getLeftRightWidth();
 
@@ -1461,8 +1466,7 @@ namespace NLGUI
 		for (i=0; i<columns.size(); i++)
 			maxWidth += columns[i];
 
-		// TODO: CellPadding is probably already in columns width
-		maxWidth += ((sint32)columns.size()+1) * CellSpacing + ((sint32)columns.size()*2) * CellPadding;
+		maxWidth += ((sint32)columns.size()+1) * CellSpacing;
 		if (Border)
 			maxWidth += Border->getLeftRightWidth();
 
