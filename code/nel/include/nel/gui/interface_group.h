@@ -321,6 +321,8 @@ namespace NLGUI
 		void	deleteLUAEnvTable(bool recurse = false);
 		// Set the LUA script to execute at checkCoords time (empty to reset)
 		void	setLuaScriptOnDraw(const std::string &script);
+		// Get the LUA script executed at checkCoords time
+		inline	CStringShared getLuaScriptOnDraw() { return _LUAOnDraw; }
 		//
 		void	executeLuaScriptOnDraw();
 		// Set the LUA script to execute when a list of DB change (of forms: "@DB1,@DB2" ....). The dbList is the key

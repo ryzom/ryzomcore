@@ -1,0 +1,1912 @@
+﻿*HASH_VALUE	title_id	name	women_name
+_C27F65FEE99C5036	gn_apprentice_tracer	Apprentice Tracer	
+_7F3E91DD23C6651F	gn_bandit_bountybeaches_1	Blood Rooters	
+_C53D8D3533B1790F	gn_bandit_bountybeaches_2	Bounty Snatchers	
+_3E7B70E3ECBA5115	gn_bandit_bountybeaches_3	Infamous Five	
+_37A9127C4ABCBCE0	gn_bandit_citiesofintuition_1	Birds of Omen	
+_3F5B0C14CB0E21F1	gn_bandit_citiesofintuition_2	Zora Kovans	
+_57E4B19BC9AF260B	gn_bandit_citiesofintuition_3	Eyes of Intuition	
+_448EF90B66A614CE	gn_bandit_dunesofexil_1	Ridge Ravagers	
+_A788B0A2E6C760B4	gn_bandit_dunesofexil_2	Waylayers	
+_C69E51219ED7DC5B	gn_bandit_dunesofexil_3	Dyron Dragons	
+_E718611C1F0788AA	gn_bandit_dunesofexil_4	Firebooters	
+_C4BE65A0844B690C	gn_bandit_enchantedisle_1	Tyler's Rippers	
+_9ADF725B7C1C1806	gn_bandit_enchantedisle_2	Magicians of Malice	
+_3F3E09153DEF6D16	gn_bandit_enchantedisle_3	Bucking Mektoubs	
+_01AC1C6DF31F1510	gn_bandit_fleetinggarden_1	Green Ravishers	
+_B5172C0DEA700512	gn_bandit_fleetinggarden_2	Deadened Eyes	
+_7F8B7009241C4904	gn_bandit_fleetinggarden_3	High Watchers	
+_3937401685703D0C	gn_bandit_fleetinggarden_4	Fleeting Lords	
+_3C9C380C9FE53D11	gn_bandit_fleetinggarden_5	Seed Addicts	
+_F18AE58CB2BF35EC	gn_bandit_forbidden_depths_1	Eva's Empalers	
+_D66D610C6879888A	gn_bandit_forbidden_depths_2	Slicers	
+_1EC30E8485DFF1BB	gn_bandit_forbidden_depths_3	Beastie Bandits	
+_68381E88C26F31EA	gn_bandit_forbidden_depths_4	Dragon Dodgers	
+_070E0D04128AA908	gn_bandit_frahartowers_1	Canyon Creepers	
+_807011C2371D8918	gn_bandit_frahartowers_2	Stunning Stavons	
+_862C50089D53D90A	gn_bandit_frahartowers_3	Swords of Fury	
+_008F41019353BD07	gn_bandit_frahartowers_4	Frahar Blazers	
+_EF311E8103FE91EB	gn_bandit_gate_of_obscurity_1	Heart Breakers	
+_5353A573E4E0A660	gn_bandit_gate_of_obscurity_2	Merchants of Terror	
+_67C6E27B09DF09BD	gn_bandit_gate_of_obscurity_3	Valley Busters	
+_5875CA8281BE599C	gn_bandit_gate_of_obscurity_4	Scarlet Loafers	
+_23CC358CC1AF71D0	gn_bandit_groveofconfusion_1	Madding Maids	
+_B99BFC8849AFB5EF	gn_bandit_groveofconfusion_2	Grove Tyrants	
+_5092C28CC3AF65A9	gn_bandit_groveofconfusion_3	Slashing Slathes	
+_825D4501D593E01A	gn_bandit_groveofumbra_1	Killer Queens	
+_7E4E990951939D19	gn_bandit_groveofumbra_2	Spleen Busters	
+_A45789F0595597AD	gn_bandit_groveofumbra_3	Black Lams	
+_25685DF79B872862	gn_bandit_groveofumbra_4	Dare Doers	
+_80DF8592A819BD17	gn_bandit_havenofpurity_1	Skelter Punks	
+_00AEEDE21EFCA10E	gn_bandit_havenofpurity_2	Homin Hounders	
+_EEFECD94463195ED	gn_bandit_havenofpurity_3	Flights of Fury	
+_819D2D8F82D0311E	gn_bandit_hereticshovel_1	Channel Gaugers	
+_5A43C5037F2F0642	gn_bandit_hereticshovel_2	Heathens of the Hovel	
+_43EDE1E15F559421	gn_bandit_hereticshovel_3	Hovel Spooks	
+_E8C8B4A11DB87494	gn_bandit_hiddensource_1	Spoilers	
+_85BF1D09DBA72848	gn_bandit_hiddensource_2	Hell Raisers	
+_E6EF550D9193AC4F	gn_bandit_hiddensource_3	Jena's Cuss	
+_B1BE56506C2069A3	gn_bandit_imperialdunes_1	Eye of the Dragon	
+_44DEA9CFA8D93016	gn_bandit_imperialdunes_2	Dune Stalkers	
+_88BEC9E2E8CBF0D2	gn_bandit_imperialdunes_3	Pyr Crushers	
+_3DE9C1DF93DB6519	gn_bandit_imperialdunes_4	Pagans of Pyr	
+_447BD4C0CA6F2519	gn_bandit_knollofdissent_1	Border Raiders	
+_1D51A486CADEE1D6	gn_bandit_knollofdissent_2	Casters of Dissent	
+_712BF97BC66E45FC	gn_bandit_knollofdissent_3	Highcliff Riders	
+_898B54126C39B32A	gn_bandit_knollofdissent_4	Cutthroats	
+_29BD64056C2984B5	gn_bandit_knollofdissent_5	Thrashers	
+_05FB700F2D189428	gn_bandit_knollofdissent_6	Firebooters	
+_B8DE2964BE3FF51F	gn_bandit_knotofdementia_1	Browbeat Brothers	
+_42ACE4BE27449922	gn_bandit_knotofdementia_2	Zora's Thorn	
+_02BC600EFBFB7517	gn_bandit_knotofdementia_3	Zora Springers	
+_454C6873F12F95FB	gn_bandit_lagoonsofloria_1	Swamp Slouchers	
+_7E7CD4CDE8FFC503	gn_bandit_lagoonsofloria_2	Lagoon Fylers	
+_B8678CD4C57EC104	gn_bandit_lagoonsofloria_3	Diller's Mates	
+_414B940EA0D4D4A9	gn_bandit_lagoonsofloria_4	Mire Mates	
+_BBA94714E89F8D11	gn_bandit_lagoonsofloria_5	Damning Dames	
+_5A81286630BAA17F	gn_bandit_lagoonsofloria_6	Seven Swords of Sin	
+_853D39269E827D01	gn_bandit_libertylake_1	Liberty Pirates	
+_C33DD9A4BBCC0DF2	gn_bandit_libertylake_2	Crystabell Skinners	
+_C48B0C2CE3A27DFE	gn_bandit_libertylake_3	Friends of Fury	
+_859D151821D34719	gn_bandit_maidengrove_1	Shadow Bandits	
+_C4AD4D23E4F514C2	gn_bandit_maidengrove_2	Plain Scourers	
+_954E7508A1E5847B	gn_bandit_maidengrove_3	Lake Loafers	
+_77B82012736F81FF	gn_bandit_majesticgarden_1	Wrath of Natae	
+_BFCDA06D471A1814	gn_bandit_majesticgarden_2	Turn of the Tide	
+_BBB90F16F55F3528	gn_bandit_majesticgarden_3	Davae's Clutch	
+_3DDBA036073F4510	gn_bandit_majesticgarden_4	Avalae Charmers	
+_7D2BA0C38A701116	gn_bandit_majesticgarden_5	Border Blights	
+_A67AE5E00EB6D4A6	gn_bandit_nexus_1	Rebels of the West	
+_66C7F870257908B4	gn_bandit_nexus_2	Highwatchers	
+_AA4738F5A1D50CB5	gn_bandit_nexus_3	Nexus Stranglers	
+_F24DB97A15FAC4C1	gn_bandit_nexus_4	Casters of the Knot	
+_395EDDB991CA791B	gn_bandit_oflovaksoasis_1	Dragon Breath	
+_3AADF5CA915BA516	gn_bandit_oflovaksoasis_2	Shadow Riders	
+_E95EAA4E7B4091E8	gn_bandit_oflovaksoasis_3	Dragonfire Angels	
+_7EED459A7E214513	gn_bandit_oflovaksoasis_4	Hothead Hackers	
+_097D11F65653A92A	gn_bandit_outlawcanyon_1	Canyon Outlaws	
+_C50D79A49C6E5D25	gn_bandit_outlawcanyon_2	Fighting Flames	
+_2B075DF25CA7DCA5	gn_bandit_outlawcanyon_3	Buccaneers	
+_80AF15F78A007C0B	gn_bandit_sawdustmines_1	Vinni's Rapiers	
+_80FE55F21BB920D0	gn_bandit_sawdustmines_2	Bone Breakers	
+_1A275BDD3C0FFD72	gn_bandit_sawdustmines_3	Bandits of the Wooded Dunes	
+_2D263E7D7E7B50E1	gn_bandit_the_abyss_of_ichor_1	Death Mongers	
+_DBF5AE38007CE076	gn_bandit_the_abyss_of_ichor_2	Slayers of Ichor	
+_DD01CFF581BFE161	gn_bandit_the_abyss_of_ichor_3	Sentinels of the Sap	
+_3EC02929A45C68F9	gn_bandit_the_abyss_of_ichor_4	Marauders	
+_07960A91C4FC90AA	gn_bandit_the_elusive_forest_1	Flaxen Fiends	
+_74EF4296893C44CC	gn_bandit_the_elusive_forest_2	Brown Braves	
+_74EF2D8D450C48D1	gn_bandit_the_elusive_forest_3	Green Grief	
+_D933A2426C500E77	gn_bandit_the_land_of_continuty_1	Shadow Zoners	
+_8A6C2BBB9371E25E	gn_bandit_the_land_of_continuty_2	Prime Root Princes	
+_60F36E2D6CBF1A71	gn_bandit_the_land_of_continuty_3	Cavern Cranks	
+_D9347E2F6CBF417B	gn_bandit_the_land_of_continuty_4	Dragon Dudes	
+_9EF3BA7F1956AA6C	gn_bandit_the_land_of_continuty_5	Diehard Ditchers	
+_3EDC0515DC1061F9	gn_bandit_the_sunken_city_1	Soul Sisters	
+_E1EC2927EF5A9486	gn_bandit_the_sunken_city_2	Rattlers	
+_73C7FD302E5131EF	gn_bandit_the_sunken_city_3	Ripping Jaks	
+_3B80A1980BEF5003	gn_bandit_the_sunken_city_4	Loving Goo-drops	
+_001E69F6F50F5505	gn_bandit_the_trench_of_trials_1	Blasters	
+_96D47E8F0D24E671	gn_bandit_the_trench_of_trials_2	Highland Heathens	
+_1A94661692153A64	gn_bandit_the_trench_of_trials_3	Bigmount Bandits	
+_49451A6B8CA7FE5F	gn_bandit_the_under_spring_1	Underspring Lynchers	
+_1D8FD191C4D07DBF	gn_bandit_the_under_spring_2	Cooky's Cranks	
+_295A1A8605213D00	gn_bandit_the_under_spring_3	Spooky Stavons	
+_32AEF51BA88A9CFF	gn_bandit_the_under_spring_4	Silencers	
+_BC6DED7F3D618DAE	gn_bandit_the_windy_gate_1	Heartbreak Babes	
+_3CC6DD543131A9BB	gn_bandit_the_windy_gate_2	Windy Gate Wipers	
+_C21EA03BC6F025F9	gn_bandit_the_windy_gate_3	Spirit Catchers	
+_DA589CB42947D47D	gn_bandit_thefount_1	Prakkers	
+_96A58730EEE9A872	gn_bandit_thefount_2	Fount Gaffers	
+_F1060D99053850E3	gn_bandit_thefount_3	Flibusters of the Fount	
+_C7FFA120E9487C64	gn_bandit_thefount_4	Liberty Rangers	
+_46631112F45E8D85	gn_bandit_thesavagedunes_1	Wicked of the Woods	
+_7B8DE82EC87E6524	gn_bandit_thesavagedunes_2	Savage Slashers	
+_FC3C24DFDBAF8D0E	gn_bandit_thesavagedunes_3	Canal Daggers	
+_7E04E081859F25C4	gn_bandit_thesavagedunes_4	Thieves of Thesos	
+_5660570DDCB1FE6F	gn_bandit_thescorchedcorridor_1	Underground Slicers	
+_1B34DAA9C1191008	gn_bandit_thescorchedcorridor_2	Tunnel Hounds	
+_9C85EA7E293CE28C	gn_bandit_thescorchedcorridor_3	Alleyway Strays	
+_207C211BE8E86C54	gn_bandit_thevoid_1	Underwood Rebels	
+_9F6638B16165E4A1	gn_bandit_thevoid_2	Goo Grapplers	
+_E4A80110294A810D	gn_bandit_thevoid_3	Villains of the Void	
+_59F7589C95EAA096	gn_bandit_upperbog_1	Sap Rakers	
+_185774C1A71AF07E	gn_bandit_upperbog_2	Bushwhacks	
+_14435826A9D9F893	gn_bandit_upperbog_3	Stalia Rovers	
+_B2404D2220669C88	gn_bandit_windsofmuse_1	Muse Tumblers	
+_4350251BA0B61854	gn_bandit_windsofmuse_2	Cliff Tanners	
+_D650811B61269C81	gn_bandit_windsofmuse_3	Muse Muggers	
+_04B29E80817EAD6C	gn_bandit_windsofmuse_4	Wicked Winds of the West	
+_974EBE71857F49AB	gn_class_apprentice_trader	Händler-Lehrling	Händler-Lehrling
+_0FFBE24C1B17562E	gn_class_arcane_apprentice	erfahrener Elitemagier	erfahrene Elitemagierin
+_1DB612296E4B0E7A	gn_class_arcane_master	hochrangiger Elitemagier	hochrangige Elitemagierin
+_7BE6B973CA02D906	gn_class_archery_lord	altgedienter starker Schütze	altgediente starke Schützin
+_AD3FF465C4B1B9B1	gn_class_archery_master	erfahrener starker Schütze	erfahrene starke Schützin
+_BF35F2474E2FA8CA	gn_class_archery_recruit	junger starker Schütze	junge starke Schützin
+_05BE38C86D31411B	gn_class_assassin	mächtiger Schütze	mächtige Schützin
+_A666A89D6CEB5CB6	gn_class_bodyguard	Eskorte	Eskorte
+_449DB905FE446315	gn_class_bowmen	junger regulärer Schütze	junge reguläre Schützin
+_680D09761B791F2F	gn_class_captain	altgedienter Meisterkrieger	altgedienter Meisterkriegerin
+_1C34927CC4BCC4BC	gn_class_charm_adept	junger mächtiger Magier	junge mächtige Magierin
+_1B641E863959B414	gn_class_charm_expert	hochrangiger mächtiger Magier	hochrangige mächtige Magierin
+_6EFAA6800280817F	gn_class_cleric	altgedienter Eliteheiler	altgediente Eliteheilerin
+_40FEA1C52B2C3D1F	gn_class_conjurer	hochrangiger starker Magier	hochrangige starke Magierin
+_6C880A670543357B	gn_class_conscript	junger regulärer Krieger	junge reguläre Kriegerin
+_FB6632F5443E62D8	gn_class_cure_adept	junger Meisterheiler	junge Meisterheilerin
+_61183C6503FFD960	gn_class_cure_expert	hochrangiger Meisterheiler	hochrangige Meisterheilerin
+_7FB6706CBE4120F2	gn_class_cure_master	altgedienter Meisterheiler	altgediente Meisterheilerin
+_BE3E17C1E5AF781E	gn_class_elite	junger Elitekrieger	junge Elitekriegerin
+_C16D0E8E440040D5	gn_class_executionner	erfahrener mächtiger Schütze	erfahrene mächtige Schützin
+_C88D38E8BDFB5B0C	gn_class_expert	erfahrener Elitekrieger	erfahrene Elitekriegerin
+_810C44A8689F7522	gn_class_fighter	mächtiger altgedienter Krieger	mächtige altgediente Kriegerin
+_2607968AB1F9A49C	gn_class_forager	Ernter	Ernterin
+_AC5AE7D73951AFFB	gn_class_healing_apprentice	junger regulärer Heiler	junge reguläre Heilerin
+_D924028287EEB4B7	gn_class_legionnaire	junger mächtiger Krieger	junge mächtige Kriegerin
+_60020157C3426C76	gn_class_life_surgeon	erfahrener Eliteheiler	erfahrene Eliteheilerin
+_3B7BD730818039A2	gn_class_magician	altgedienter Meistermagier	altgediente Meistermagierin
+_C1AF9702679197A5	gn_class_major	junger Meisterkrieger	junge Meisterkriegerin
+_AC0F99FE664BB07A	gn_class_medic	erfahrener mächtiger Heiler	erfahrene mächtige Heilerin
+_6796449BAB5A3CA5	gn_class_milician	Aufseher	Aufseherin
+_9ABCE64F229C1585	gn_class_mystical_adept	junger kundiger Magier	junge kundiger Magierin
+_04045EE8F440D490	gn_class_mystical_expert	erfahrener Meistermagier	erfahrene Meistermagierin
+_6437B0A16788A4A7	gn_class_noble	Kamerad	Kameradin
+_306D211280A075FF	gn_class_priest	junger Eliteheiler	junge Eliteheilerin
+_81A0B1E0E4F45394	gn_class_private	erfahrener starker Krieger	erfahrene starke Kriegerin
+_DD65628AC5908F40	gn_class_professional	altgedienter mächtiger Schütze	altgediente mächtige Schützin
+_C721327A4500FD3C	gn_class_range_adept	regulärer Schütze	reguläre Schützin
+_77B5B2678B6CA8D5	gn_class_range_master	hochrangiger Eliteschütze	hochrangige Eliteschützin
+_C0D3209F684F812E	gn_class_recruit	regulärer Krieger	reguläre Kriegerin
+_0FA6226535F72A71	gn_class_ritual_master	hochrangiger starker Heiler	hochrangige starke Heilerin
+_C30AB1164AC0411D	gn_class_sergent	altgedienter mächtiger Krieger	altgediente mächtige Kriegerin
+_7FFF6DF82F9B91C1	gn_class_shaman	junger starker Heiler	junge starke Heilerin
+_A1F32251304D271B	gn_class_shooting_elite	junger Eliteschütze	junge Eliteschützin
+_837DE27F7C6A9D8D	gn_class_shooting_lord	erfahrener Eliteschütze	erfahrene Eliteschützin
+_82B1DD0D48A0591C	gn_class_soldier	regulärer Krieger	reguläre Kriegerin
+_F12BBB0B04C0FDF3	gn_class_sorcerer	junger Elitemagier	junge Elitemagierin
+_15424D1C22F66692	gn_class_sorcery_apprentice	junger Magier	junge Magierin
+_3C131E697F2F64D1	gn_class_sorcery_master	altgedienter starker Magier	altgediente starke Magierin
+_B8289067014F7DF5	gn_class_spellcaster	junger starker Magier	junge starke Magierin
+_43642EED81DEDCD2	gn_class_throwing_adept	junger Meisterschütze	junge Meisterschützin
+_01D5384B828A4025	gn_class_throwing_expert	erfahrener Meisterschütze	erfahrene Meisterschützin
+_9CE6404780F73596	gn_class_throwing_master	altgedienter Meisterschütze	altgediente Meisterschützin
+_A65814B3DE6B2CA1	gn_class_trader	Entdecker	Entdeckerin
+_65F880AA6E6968A6	gn_class_traveler	Reisender	Reisende
+_64D602589240C40B	gn_class_treat_adept	erfahrener mächtiger Heiler	erfahrene mächtige Heilerin
+_DDBB2EEB2064F6B7	gn_class_treat_apprentice	junger mächtiger Heiler	junge mächtige Heilerin
+_80EFF5E168038F09	gn_class_trooper	junger starker Krieger	junge starke Kriegerin
+_7EBCE72C828089A5	gn_class_warchief	hochrangiger Meisterkrieger	hochrangige Meisterkriegerin
+_4389D91207102D19	gn_class_warlock	altgedienter mächtiger Magier	altgediente mächtige Magierin
+_BA59B0BB85F1552C	gn_class_warlord	altgedienter Elitekrieger	altgediente Elitekriegerin
+_D43585BDEEEBB00E	gn_class_warmaster	Kriegsmeister	Kriegsmeisterin
+_05AFBDDA1F892C16	gn_class_warrior	starker Kriegerveteran	starke Kriegerveteranin
+_286E452F6126AF9C	gn_darkeningsap_static_guard_5	resoluter Wächter 	resolute Wächterin
+_45B7DCA3A9E04CB2	gn_forager	Ernter	Ernterin
+_B59C8E8683909DC8	gn_fraharhunters_guards_w_10	mächtiger Wächter	mächtige Wächterin
+_5CEB24AD6A6904BC	gn_fyros_defender	Verteidiger der Fyros	Verteidigerin der Fyros
+_28582835AF18C8B4	gn_fyros_officer	Fyros-Offizier	Fyros-Offizierin
+_4DC81556748F111A	gn_green_seed_noble	Kommandant	Kommandant
+_644C556B01400116	gn_green_seed_volunteer	Krieger-Volontär	Krieger-Volontärin
+_2677B899A5787FAB	gn_guard_inv_1	Wächter	Wächterin
+_2677B899A57883AB	gn_guard_inv_2	Wachposten	Wachposten
+_09592DFADF44F498	gn_kami_sentinel	Kami-Wachposten	Kami-Wachposten
+_5F79285F42CDEDF3	gn_karavan_guard_h_1	Karavan-Wächter	Karavan-Wächterin
+_39E8DDB6035F70FD	gn_karavan_guardian	Karavan-Beschützer	Karavan-Beschützerin
+_81DF25198B97A80A	gn_levier_volunteer	Regulärer Freiwilliger	Reguläre Freiwillige
+_06ED994C4EDB1DCF	gn_leviers_noble	Kommandant	Kommandantin
+_6BD74435AFB8D096	gn_matis_officer	Matis-Offizier	Matis-Offizierin
+_628B6CAD6AB92C9C	gn_matis_voluteer	Verteidiger der Matis	Verteidigerin der Matis
+_B875480402405716	gn_mystical__adept	junger Magiekundiger	junge Magiekundige
+_0C0D4D76346F8D2A	gn_professionnal	altgedienter mächtiger Schütze	altgediente mächtige Schützin
+_2DB778352D38BA9C	gn_zorai_officer	Zoraï-Offizier	Zoraï-Offizierin
+_66A8630CEAB89CED	gn_zorai_voluteer_f	Verteidiger der Zoraï	Verteidigerin der Zoraï
+_14B9F493A7FD7884	fct_steward	 (Verwalter)	(Verwalterin)
+_A60BCD9FF551E100	fct_k_pactgiver	 (Kami-Paktanbieter)	(Kami-Paktanbieterin)
+_C835544345DE31D6	fct_kv_pactgiver	(Karavan-Paktanbieter)	(Karavan-Paktanbieterin)
+_87E51509F5291577	fct_kitin_mg_1	 (Kitin-Gefahren-Beobachter)	(Kitin-Gefahren-Beobachterin)
+_87E51509F5291977	fct_kitin_mg_2	 (Kitin-Gefahren-Beobachter)	(Kitin-Gefahren-Beobachterin)
+_87E51509F5291D77	fct_kitin_mg_3	 (Kitin-Gefahren-Beobachter)	(Kitin-Gefahren-Beobachterin)
+_87E51509F5292177	fct_kitin_mg_4	 (Kitin-Gefahren-Beobachter)	(Kitin-Gefahren-Beobachterin)
+_3FCD2DC92075146F	fct_goo_obs	 (Goo-Beobachter)	(Goo-Beobachterin)
+_2459F030D15C6A9E	fct_bg	 (Leibwächter)	(Leibwächterin)
+_1EE570945970A0B0	fct_kami_adept	 (Kami-Anhänger)	(Kami-Anhängerin)
+_6CE520262C272D41	fct_larmor_merchant	 (Händler für leichte Rüstungen)	(Händlerin für leichte Rüstungen)
+_8B063650BE46513E	fct_marmor_merchant	 (Händler für mittelschwere Rüstungen)	(Händlerin für mittelschwere Rüstungen)
+_CEC636262C272D2F	fct_harmor_merchant	 (Händler für schwere Rüstungen)	(Händlerin für schwere Rüstungen)
+_E8C2E2AB12F1C516	fct_ctool_merchant	 (Händler für Handwerkswerkzeug)	(Händlerin für Handwerkswerkzeug)
+_C7C2E6A21071C139	fct_ttool_merchant	 (Händler für Dressurwerkzeug)	(Händlerin für Dressurwerkzeug)
+_46397A6690A2A529	fct_htool_merchant	 (Händler für Erntewerkzeug)	(Händlerin für Erntewerkzeug)
+_32214E28C1BED0C7	fct_shield_merchant	 (Händler für Schilde)	(Händlerin für Schilde)
+_EBFB3438BF0A71F2	fct_ammo_merchant	 (Händler für Munition)	(Händlerin für Munition)
+_919CA19DDAA4D948	fct_rangeweapon_merchant	 (Händler für Fernwaffen)	(Händlerin für Fernwaffen)
+_DBF2A497BA13E943	fct_meleeweapon_merchant	 (Händler für Nahkampfwaffen)	(Händlerin für Nahkampfwaffen)
+_ADE0C9FD9644E8C0	fct_stableboy_merchant	 (Stallbursche)	(Stallbedienstete)
+_7996632501A4593B	fct_rm_merchant	 (Rohmaterial-Händler)	(Rohmaterial-Händlerin)
+_2EAB05EA910C19BE	fct_jewel_merchant	 (Schmuck-Händler)	(Schmuck-Händlerin)
+_AA2B200E2D36C3C5	fct_tool_merchant	 (Werkzeughändler)	(Werkzeughändlerin)
+_70F01D08DCBDE22A	fct_plarmor_merchant	 (Händler für Bestandteile leichter Rüstungen)	(Händlerin für Bestandteile leichter Rüstungen)
+_8F1133326EDC0A26	fct_pmarmor_merchant	 (Händler für Bestandteile mittelschwerer Rüstungen)	(Händlerin für Bestandteile mittelschwerer Rüstungen)
+_D2D13308DCBDD21C	fct_pharmor_merchant	 (Händler für Bestandteile schwerer Rüstungen)	(Händlerin für Bestandteile schwerer Rüstungen)
+_67DC179F14F41E56	fct_parmor_merchant	 (Händler für Rüstungsteile)	(Händlerin für Rüstungsteile)
+_6042CC304B5EAAC5	fct_pctool_merchant	 (Händler für Werkzeugteile)	(Händlerin für Werkzeugteile)
+_3F42D02749DEEAD7	fct_pttool_merchant	 (Händler für Dressurwerkzeugteile)	(Händlerin für Dressurwerkzeugteile)
+_BEB964EBC90F9ED3	fct_phtool_merchant	 (Händler für Erntewerkzeugteile)	(Händlerin für Erntewerkzeugteile)
+_53877FC88D83DD4B	fct_ptool_merchant	 (Händler für Werkzeug-Zusammensetzung)	(Händlerin für Werkzeug-Zusammensetzung)
+_364B7705315585A9	fct_pshield_merchant	 (Händler für Schildteile)	(Händlerin für Schildteile)
+_945793F5DF57478B	fct_pammo_merchant	 (Händler für Munitionsteile)	(Händlerin für Munitionsteile)
+_34E7EFB6CA0DB3F8	fct_prangeweapon_merchant	 (Händler für Fernwaffenteile)	(Händlerin für Fernwaffenteile)
+_7E3DF2AEAADC9FF8	fct_pmeleeweapon_merchant	 (Händler für Nahkampfwaffenteile)	(Händlerin für Nahkampfwaffenteile)
+_E83DEC0A055E761D	fct_prm_merchant	 (Händler für Rohmaterialteile)	(Händlerin für Rohmaterialteile)
+_A62BEF654E075666	fct_pjewel_merchant	 (Händler für Schmuckteile)	(Händlerin für Schmuckteile)
+_AA2319C048ABD076	fct_mf_welcomer	 (Nahkampf-Gilden-Empfänger)	(Nahkampf-Gilden-Empfängerin)
+_FD25F4C9262CF297	fct_rf_welcomer	(Fernkampf-Gilden-Empfänger)	(Fernkampf-Gilden-Empfängerin)
+_61BD0474ED26592D	fct_mh_welcomer	 (Heilmagier-Gilden-Empfänger)	(Heilmagier-Gilden-Empfängerin)
+_61ADF43F30FF58F1	fct_mb_welcomer	 (Schutzmagier-Gilden-Empfänger)	(Schutzmagier-Gilden-Empfängerin)
+_909C344AEF81E95D	fct_ma_welcomer	 (Kampfmagier-Gilden-Empfänger)	(Kampfmagier-Gilden-Empfängerin)
+_061720C2F34C9125	fct_t_welcomer	 (Händler-Gilden-Empfänger)	(Händler-Gilden-Empfängerin)
+_376864BFF40BEDAB	fct_h_welcomer	 (Ranger-Gilden-Empfänger)	(Ranger-Gilden-Empfängerin)
+_7F8454BBF7BB39C9	fct_f_welcomer	 (Handwerks-Gilden-Empfänger)	(Handwerks-Gilden-Empfängerin)
+_A5657CBE7FDECF61	fct_welcomer	 (Gildenempfänger)	(Gildenempfängerin)
+_015226EF338D0839	fct_p_caretaker	 (Wohnungs-Verwalter)	(Wohnungs-Verwalterin)
+_3E3226F7299DCE6C	fct_g_caretaker	 (Gildenhallen-Verwalter)	(Gildenhallen-Verwalterin)
+_E519A4C75ED1939F	fct_caretaker	 (Hausverwalter)	(Hausverwalterin)
+_B52DAAA1521B7120	fct_mf_chief	 (Nahkampf-Gilden-Führer)	(Nahkampf-Gilden-Führerin)
+_B7B61AEE5A87959D	fct_rf_chief	 (Fernkampf-Gilden-Führer)	(Fernkampf-Gilden-Führerin
+_9B308580B8C348B3	fct_mh_chief	 (Heilmagier-Gilden-Führer)	(Heilmagier-Gilden-Führerin)
+_FF89948078835CBD	fct_mb_chief	 (Schutzmagier-Gilden-Führer)	(Schutzmagier-Gilden-Führerin)
+_09E3463D348484B8	fct_ma_chief	 (Kampfmagier-Gilden-Führer)	(Kampfmagier-Gilden-Führerin)
+_2DE15522C48C2BE5	fct_t_chief	 (Händler-Gilden-Führer)	(Händler-Gilden-Führerin)
+_B30E653382BD3BE5	fct_h_chief	 (Ernte-Gilden-Führer)	(Ernte-Gilden-Führerin)
+_EB801C08755C0FE7	fct_f_chief	 (Handwerks-Gilden-Führer)	(Handwerks-Gilden-Führerin)
+_EB80452EC33FA0E9	fct_mission_officer	 (Missionsoffizier)	(Missionsoffizierin)
+_52AA28B8A564B964	fct_mv_guard	 (Wächter von Yrkanis)	(Wächterin von Yrkanis)
+_BDBFAD6B2D3FF9CF	fct_mv_guardchief	 (Oberwächter von Yrkanis)	(Oberwächterin von Yrkanis)
+_51DA74AEE1A1531A	fct_ma_guard	 (Wächter von Natae)	(Wächterin von Natae)
+_2B7F797EABFCC0E4	fct_ma_guardchief	 (Oberwächter von Natae)	(Oberwächterin von Natae)
+_51DA7CAE5FA1571A	fct_mb_guard	 (Wächter von Davae)	(Wächterin von Davae)
+_2B7F7980AB5CC4E4	fct_mb_guardchief	 (Oberwächter von Davae)	(Oberwächterin von Davae)
+_51DA54AEEBB3621A	fct_mc_guard	 (Wächter von Avalae)	(Wächterin von Avalae)
+_2B7F7976AB7F4DA6	fct_mc_guardchief	 (Oberwächter von Avalae)	(Oberwächterin von Avalae)
+_934C39F8D52E7365	fct_mf_guard	 (Grenzwächter)	(Grenzwächterin)
+_BE7B1B4740912E20	fct_tax_collector	 (Steuereintreiber)	(Steuereintreiberin)
+_A42A681392D4B3A5	fct_tribe_chief	 (Stammesführer)	(Stammesführerin)
+_D2B1C889DEC55B75	fct_barman	 (Barmann)	(Bardame)
+_51016F702E6A647A	fct_mayor	 (Bürgermeister)	(Bürgermeisterin)
+_D6755C68AE259788	fct_amayor	 (Bürgermeister-Assistent)	(Bürgermeister-Assistentin)
+_6DEFA5986EB0A4F7	fct_natae_chief	 (Dorfvorsteher von Natae)	(Dorfvorsteherin von Natae)
+_6DEFA5986EF0A4E3	fct_davae_chief	 (Dorfvorsteher von Davae)	(Dorfvorsteherin von Davae)
+_ECAD5722C19AA1DB	fct_avalae_chief	 (Dorfvorsteher von Avalae)	(Dorfvorsteherin von Avalae)
+_688A5BE31E95375E	fct_counselor	 (Berater des Königs)	(Beraterin des Königs)
+_62AB98824E56CEAF	fct_cutthroat	 (Halsaufschneider)	(Halsaufschneiderin)
+_590498C825847C90	fct_bandit_chief	 (Banditenanführer)	(Banditenanführerin)
+_6F5E3CC02C56331C	fct_mv_intendant	 (Intendant von Yrkanis)	(Intendantin von Yrkanis)
+_6E8E88B623C334D2	fct_ma_intendant	 (Intendant von Natae)	(Intendantin von Natae)
+_6E8E90B6A1C338D2	fct_mb_intendant	 (Intendant von Davae)	(Intendantin von Davae)
+_6E8E68B62DD543D2	fct_mc_intendant	 (Intendant von Avalae)	(Intendantin von Avalae)
+_5F8E80C426C388B6	fct_zv_intendant	 (Intendant von Zora)	(Intendantin von Zora)
+_284A70BA2255F317	fct_za_intendant	 (Intendant von Jen-Laï)	(Intendantin von Jen-Laï)
+_E54A70BEE355F51E	fct_zb_intendant	 (Intendant von Min-Cho)	(Intendantin von Min-Cho)
+_2FAC6B446B45E725	fct_zc_intendant	 (Intendant von Hoï-Cho)	(Intendantin von Hoï-Cho)
+_150A80CEA4C388A2	fct_fv_intendant	 (Intendant von Pyr)	(Intendantin von Pyr)
+_F0AF4CBDA5C3D815	fct_fa_intendant	 (Intendant von Thesos)	(Intendantin von Thesos)
+_B06E80CEA1C338CB	fct_fb_intendant	 (Intendant von Dyron)	(Intendantin von Dyron)
+_2F9F5CDFBC196111	fct_tv_intendant	 (Intendant von Fairhaven)	(Intendantin von Fairhaven)
+_6EBE1430BE19E922	fct_ta_intendant	 (Intendant von Windermeer)	(Intendantin von Windermeer)
+_32AF40337B19C511	fct_tc_intendant	 (Intendant von Crystabell)	(Intendantin von Crystabell)
+_6DBE70BA2D67D41C	fct_tb_intendant	 (Intendant von Avendale)	(Intendantin von Avendale)
+_42DA6CBC9EB29B64	fct_zv_guard	 (Wächter von Zora)	(Wächterin von Zora)
+_E1BB797C2EBD14F1	fct_zv_guardchief	 (Oberwächter von Zora)	(Oberwächterin von Zora)
+_0B965CB25CFD795F	fct_za_guard	 (Wächter von Jen-Laï)	(Wächterin von Jen-Laï)
+_39EDA878ACBC64E0	fct_za_guardchief	 (Oberwächter von Jen-Laï)	(Oberwächterin von Jen-Laï)
+_C8965CB61DFD7B66	fct_zb_guard	 (Wächter von Min-Cho)	(Wächterin von Min-Cho)
+_FB5DA878ADEC6860	fct_zb_guardchief	 (Oberwächter von Min-Cho)	(Oberwächterin von Min-Cho)
+_12F8573CE4536D6D	fct_zc_guard	 (Wächter von Hoï-Cho)	(Wächterin von Hoï-Cho)
+_BCAF01374E0E69DC	fct_zc_guardchief	 (Oberwächter von Hoï-Cho)	(Oberwächterin von Hoï-Cho)
+_91566CC6DE60DF4D	fct_fv_guard	 (Wächter von Pyr)	(Wächterin von Pyr)
+_E129987CB11D14DD	fct_fv_guardchief	 (Oberwächter von Pyr)	(Oberwächterin von Pyr)
+_2CE3104044200DA7	fct_fv_rookieguard	 (Wächter-Rekrut von Pyr)	(Wächter-Rekrutin von Pyr)
+_BD1FC16F6D5DC006	fct_fa_guardchief	 (Oberwächter von Thesos)	(Oberwächterin von Thesos)
+_D3FB38B51ED15E5D	fct_fa_guard	 (Wächter von Thesos)	(Wächterin von Thesos)
+_2B0FB17CB15CC4DD	fct_fb_guardchief	 (Oberwächter von Dyron)	(Oberwächterin von Dyron)
+_93BA6CC65FA15713	fct_fb_guard	 (Wächter von Dyron)	(Wächterin von Dyron)
+_934C39F8D52E735E	fct_ff_guard	 (Grenzwächter)	(Grenzwächterin)
+_12EB48D75DC1E759	fct_tv_guard	 (Wächter von Fairhaven)	(Wächterin von Fairhaven)
+_39AFBD73F562A961	fct_tv_guardchief	 (Oberwächter von Fairhaven)	(Oberwächterin von Fairhaven)
+_510A00285FC16F6A	fct_ta_guard	 (Wächter von Windermeer)	(Wächterin von Windermeer)
+_7D7F85A149E35558	fct_ta_guardchief	 (Oberwächter von Windermeer)	(Oberwächterin von Windermeer)
+_15FB2C2B1CC14B59	fct_tc_guard	 (Wächter von Crystabell)	(Wächterin von Crystabell)
+_3970C1AC0A125D4D	fct_tc_guardchief	 (Oberwächter von Crystabell)	(Oberwächterin von Crystabell)
+_500A5CB2670F5A64	fct_tb_guard	 (Wächter von Avendale)	(Wächterin von Avendale)
+_FC3F8578AC7FED12	fct_tb_guardchief	 (Oberwächter von Avendale)	(Oberwächterin von Avendale)
+_934C39F8D52E7372	fct_zf_guard	 (Grenzwächter)	(Grenzwächterin)
+_0297D1CD54797810	fct_stablegirl_merchant	 (Stallbedienstete)	 (Stallbedienstete)
+_943940932D09AC20	fct_barmaid	 (Bardame)	 (Bardame)
+_65A97CB129288099	fct_civil	 (Einwohner)	(Einwohnerin)
+_E4874B11D2C45BA0	fct_sage	 (Weiser)	(Weise)
+_E3A8FCAF9F9087A4	fct_craftsman	 (Handwerker)	(Handwerkerin)
+_A5E99FB9B1F8BF7A	fct_supplier	 (Zulieferer)	(Zuliefererin)
+_18F78C9D1E59A448	fct_hunter	 (Jäger)	(Jägerin)
+_759998B5AB7598C6	fct_hunter_chief	 (Oberjäger)	(Oberjägerin)
+_D421E8995A435B7B	fct_bandit	Bandit	Banditin
+_07566EBE2DE9E060	fct_actor	 (Schauspieler)	 (Schauspielerin)
+_55EA849CB2EAC024	fct_actress	 (Schauspielerin)	 (Schauspielerin)
+_C849FC3887897C7C	fct_kami_master	Kami-Meister	Kami-Meisterin
+_61E66A3EFC6060BF	fct_karavan_officer	Karavan-Offizier	Karavan-Offizierin
+_DC332A0753F9F828	fct_newb_welcomer	 (Empfänger)	(Empfangsdame)
+_84254396E02CF43B	fct_newb_a	 (Stalli-Wächter)	(Stalli-Wächterin)
+_3D4EB029FB5CE9BC	fct_newb_a_chief	 (Stalli-Oberwächter)	(Stalli-Oberwächterin)
+_D3211B8FE889F438	fct_newb_b	 (Borea-Wächter)	(Borea-Wächterin)
+_F34A88223F0BA5BC	fct_newb_b_chief	 (Borea-Oberwächter)	(Borea-Oberwächterin)
+_84A53F9E647BE03B	fct_newb_c	 (Nistia-Wächter)	(Nistia-Wächterin)
+_3DCEAC317FABD5BC	fct_newb_c_chief	 (Nistia Oberwächter)	(Nistia Oberwächterin)
+_15254F93AACAFCFE	fct_newb_d	 (Rosilio-Wächter)	(Rosilio-Wächterin)
+_CE4EBC267F0BE5E5	fct_newb_d_chief	 (Rosilio-Oberwächter)	(Rosilio-Oberwächterin)
+_D3214798A4292038	fct_newb_e	 (Miani-Wächter)	(Miani-Wächterin)
+_F34AB42BFBABD1BC	fct_newb_e_chief	 (Miani Oberwächter)	(Miani Oberwächterin)
+_D323BF18A9D8CB24	fct_newb_za	 (Qaï-Lo Wächter)	(Qaï-Lo Wächterin)
+_7ADC0CE36AAFD00E	fct_newb_za_chief	 (Qaï-Lo Oberwächter)	(Qaï-Lo Oberwächterin)
+_5204BF972603CF69	fct_newb_zc	 (Nen-Xing Wächter)	(Nen-Xing Wächterin)
+_F9BD0C626B106D53	fct_newb_zc_chief	 (Nen-Xing Oberwächter)	(Nen-Xing Oberwächterin)
+_43E5C48EE754EF52	fct_newb_zb	 (Sheng-Wo Wächter)	(Sheng-Wo Wächterin)
+_EA9E11592C618D3C	fct_newb_zb_chief	 (Sheng-Wo Oberwächter)	(Sheng-Wo Oberwächterin)
+_52A4BF97D898EB5C	fct_newb_ze	 (Yin-Piang Wächter)	(Yin-Piang Wächterin)
+_F95D0C62B6A58946	fct_newb_ze_chief	 (Yin-Piang Oberwächter)	(Yin-Piang Oberwächterin)
+_5534BF18E7A7D669	fct_newb_zd	 (Koï-Zun Wächter)	(Koï-Zun Wächterin)
+_FCED0CE3ED4E7453	fct_newb_zd_chief	 (Koï-Zun Oberwächter)	(Koï-Zun Oberwächterin)
+_91F1889EA8D88820	fct_newb_fa	 (Aegus-Wächter)	(Aegus-Wächterin)
+_9FAAD569EBF055A7	fct_newb_fa_chief	 (Aegus-Oberwächter)	(Aegus-Oberwächterin)
+_52E678946528D673	fct_newb_fc	 (Sekovix-Wächter)	(Sekovix-Wächterin)
+_F99FC55F6BCF745D	fct_newb_fc_chief	 (Sekovix-Oberwächter)	(Sekovix-Oberwächterin)
+_9365708EA977CB24	fct_newb_fb	 (Kaemon-Wächter)	(Kaemon-Wächterin)
+_3A1EBD596A4ED00E	fct_newb_fb_chief	 (Kaemon-Oberwächter)	(Kaemon-Oberwächterin)
+_557550956467D66E	fct_newb_fe	 (Galemus-Wächter)	(Galemus-Wächterin)
+_FC2E9D606A0E7458	fct_newb_fe_chief	 (Galemus-Oberwächter)	(Galemus-Oberwächterin)
+_93859CA26BC8CB24	fct_newb_fd	 (Phyxon-Wächter)	(Phyxon-Wächterin)
+_3A3EE96D2C9FD00E	fct_newb_fd_chief	 (Phyxon-Oberwächter)	(Phyxon-Oberwächterin)
+_D335BC8E166A8832	fct_newb_ta	 (Aubermouth-Wächter)	(Aubermouth-Wächterin)
+_7AEE0959F477261C	fct_newb_ta_chief	 (Aubermouth-Oberwächter)	(Aubermouth-Oberwächterin)
+_51B5A09B2543E367	fct_newb_tb	 (Barkdell-Wächter)	(Barkdell-Wächterin)
+_F86EED666A508151	fct_newb_tb_chief	 (Barkdell-Oberwächter)	(Barkdell-Oberwächterin)
+_134588A0A4E97736	fct_newb_tc	 (Hobwelly-Wächter)	(Hobwelly Wächterin)
+_BAFED56BAA901520	fct_newb_tc_chief	 (Hobwelly-Oberwächter)	(Hobwelly-Oberwächterin)
+_15B6889F2594EB6A	fct_newb_td	 (Waverton-Wächter)	(Waverton-Wächterin)
+_BC6FD56A6AA18954	fct_newb_td_chief	 (Waverton-Oberwächter)	(Waverton-Oberwächterin)
+_51659097D8B7EF6F	fct_newb_te	 (Dingleton-Wächter)	(Dingleton-Wächterin)
+_F81EDD62B6C48D59	fct_newb_te_chief	 (Dingleton-Oberwächter)	(Dingleton-Oberwächterin)
+_9459CCB3DF3E975B	fct_registar	 (Gildenschreiber)	(Gildenschreiberin)
+_5D441AD8E996D8B9	fct_ins_f	 (Kampflehrer)	(Kampflehrerin)
+_DAE41AB616D6F4B3	fct_ins_m	 (Magielehrer)	(Magielehrerin)
+_686B9F2924B7F4C0	fct_ins_r	 (Handwerkslehrer)	(Handwerkslehrerin)
+_FC35BE16E9460CAF	fct_ins_h	 (Rohstoffernte-Lehrer)	(Rohstoffernte-Lehrerin)
+_41F4E0488729241C	fct_mf_rolemaster	 (Nahkampf-Gilden-Gelehrter)	(Nahkampf-Gilden-Gelehrte)
+_1F750264DA2BFF2A	fct_rf_rolemaster	(Fernkampf-Gilden-Gelehrter)	(Fernkampf-Gilden-Gelehrte)
+_2900034FE35E71B7	fct_c_rolemaster	 (Kampf-Gilden-Gelehrter)	(Kampf-Gilden-Gelehrte)
+_E66F61FF3EC317D0	fct_mh_rolemaster	 (Heilmagie-Gilden-Gelehrter)	(Heilmagie-Gilden-Gelehrte)
+_294878C33EB3EF9B	fct_mb_rolemaster	 (Schutzmagie-Gilden-Gelehrter)	(Schutzmagie-Gilden-Gelehrte)
+_E8CA0D2F6DA22BA6	fct_ma_rolemaster	 (Kampfmagie-Gilden-Gelehrter)	(Kampfmagie-Gilden-Gelehrte)
+_A169FAEB8B1744C5	fct_m_rolemaster	 (Magie-Gilden-Gelehrter)	(Magie-Gilden-Gelehrte)
+_1F1A9E5EA4FD25CF	fct_t_rolemaster	 (Handels-Gilden-Gelehrter)	(Handels-Gilden-Gelehrte)
+_22BBE962E86D71C7	fct_h_rolemaster	 (Rohstoffernte-Gilden-Gelehrter)	(Rohstoffernte-Gilden-Gelehrte)
+_238946101D6A59BA	fct_f_rolemaster	 (Handwerks-Gilden-Gelehrter)	(Handwerks-Gilden-Gelehrte)
+_FEE10832815C7C47	fct_f_trainer	 (Kampflehrer)	(Kampflehrerin)
+_3A30101023C7B85B	fct_m_trainer	(Magielehrer)	(Magielehrerin)
+_2D80081AA4667F2D	fct_c_trainer	 (Handwerkslehrer)	(Handwerkslehrerin)
+_3AE134166CF4C85D	fct_h_trainer	 (Rohstoffernte-Lehrer)	(Rohstoffernte-Lehrerin)
+_B9C8045A62476B86	fct_f_guild_trainer	 (Kampf-Gilden-Lehrer)	(Kampf-Gilden-Lehrerin)
+_39A61F0126172F82	fct_m_guild_trainer	 (Magie-Gilden-Lehrer)	(Magie-Gilden-Lehrerin)
+_B94727EB93D56E7D	fct_c_guild_trainer	 (Handwerks-Gilden-Lehrer)	(Handwerks-Gilden-Lehrerin)
+_7C06B3D327882F88	fct_h_guild_trainer	 (Rohstoffernte-Gilden-Lehrer)	(Rohstoffernte-Gilden-Lehrerin)
+_645634B34D8613D7	fct_guild_we	 (Empfänger)	(Empfängerin)
+_06ABAA82B32B6C54	fct_guild_rm_craft	 (Handwerks-Gelehrter)	(Handwerks-Gelehrte)
+_CB8A8E7D2973F30F	fct_guild_rm_fight	 (Kampf-Gelehrter)	(Kampf-Gelehrte)
+_F8CA6678A6930FE6	fct_guild_rm_magic	 (Magie-Gelehrter)	(Magie-Gelehrte)
+_9F566FABDE44A874	fct_scout	 (Kundschafter)	(Kundschafterin)
+_92AAE47F5285D8A9	fct_ambassador	 (Botschafter)	(Botschafterin)
+_25BA90B9E8B7C261	fct_corporal	 (Korporal)	(Korporalin)
+_98CAA891AF99102B	fct_sergent	 (Wachtmeister)	(Wachtmeisterin)
+_1138D4932AF6E85A	fct_captain	 (Befehlshaber)	(Befehlshaberin)
+_11CFB773732E88B9	fct_city_welcomer	 (Stadtempfänger)	(Stadtempfängerin)
+_992106B23D12F5C0	fct_village_welcomer	 (Dorfempfänger)	(Dorfempfängerin)
+_DBB854FAB4CD3968	fct_foreman_apprentice	 (Lehrlings-Ausbilder)	(Lehrlings-Ausbilderin)
+_12E97FAC6BCA0263	fct_foreman	 (Vorarbeiter)	(Vorarbeiterin)
+_2C8C85CA36B29969	fct_foreman_master	 (Obervorarbeiter)	(Obervorarbeiterin)
+_5485F09DE885E881	fct_hawker	 (Hausierer)	(Hausiererin)
+_EAC803F3D976B8A0	fct_journeyman	 (Geselle)	(Gesellin)
+_2A91C9AAE63A90C1	fct_kami_ambassador	 Kami-Gesandter	 Kami-Gesandte
+_34E7060715EA8D92	fct_kami_welcomer	 Kami-Empfänger	 Kami-Empfängerin
+_7F448DC446CEEA84	fct_karavan_ambassador	 Karavan-Botschafter	Karavan-Botschafterin
+_A31BECD1E2F7F500	fct_karavan_agent	 Karavan-Agent	Karavan-Agentin
+_50AF2F01EA1319AA	fct_karavan_welcomer	 Karavan-Empfänger	 Karavan-Empfängerin
+_DB80A90FAAA63F79	fct_local_messenger	 (Lokaler Bote)	(Lokale Botin)
+_9DD66D7FCD23A90E	fct_frontiers_messenger	 (Grenzbote)	(Grenzbotin)
+_E7CD1B8DD473CB65	fct_outlands_messenger	 (Kurier)	(Kurierin)
+_546BE49BA2D637B9	fct_patrolman	 (Patrouille)	 (Patrouille)
+_1A9AC08BDA75B4B5	fct_prospector	 (Prospektor)	(Prospektorin)
+_005ABA2BBA2C2763	fct_tribe_welcomer	 (Stammesempfänger)	(Stammesempfängerin)
+_72ED35F1567AB4F3	fct_local_supplier	 (Lokaler Lieferant)	(Lokale Lieferantin)
+_0C691BA0822BEE84	fct_frontiers_supplier	 (Grenzzulieferer)	(Grenzzulieferin)
+_71BA1712ED73F5EA	fct_outlands_supplier	 (Fernzulieferer)	(Fernzulieferin)
+_B3D62478D0A96233	fct_outpost_steward	 (Außenposten-Verwalter)	(Außenposten-Verwalterin)
+_6E218F06F6C4C35A	fct_outpost_steward_tribe	 (Stammesaußenposten-Verwalter)	(Stammesaußenposten-Verwalterin)
+_C996B964B332B13E	fct_outpost_officer	 (Außenposten-Offizier)	(Außenposten-Offizierin)
+_E07DCF51AA67A79E	fct_outpost_officer_tribe	 (Stammesaußenposten-Offizier)	(Stammesaußenposten-Offizierin)
+_E9A9D807003E1A1E	Refugee	Flüchtling	Flüchtling
+_6AB4EC6268B88CB6	Homin	Homin	Homina
+_5B0936F36CAAED6F	Novice_Artisan	Handwerks-Neuling	Handwerks-Neuling
+_5FD1130608EF5476	Novice_Warrior	Kampf-Neuling	Kampf-Neuling
+_A77AD8BADDD4704B	Novice_Harvester	Ernte-Neuling	Ernte-Neuling
+_2B787170835462F5	Novice_Magician	Magie-Neuling	Magie-Neuling
+_A6121B911E679EAF	Artisan_Apprentice	Handwerks-Lehrling	Handwerks-Lehrling
+_E1D997A261BCDE41	Warrior_Apprentice	Kampf-Lehrling	Kampf-Lehrling
+_5E3BBF1E7588AF84	Magician_Apprentice	Magie-Lehrling	Magie-Lehrling
+_F72B78A052A04DDB	Fyros_Artisan_Apprentice	Fyros-Handwerkslehrling	Fyros-Handwerkslehrling
+_F13A34A752A035D7	Matis_Artisan_Apprentice	Matis-Handwerkslehrling	Matis-Handwerkslehrling
+_D7157CC15C0669CB	Tryker_Artisan_Apprentice	Tryker-Handwerkslehrling	Tryker-Handwerkslehrling
+_F1CBA0B4526707C3	Zorai_Artisan_Apprentice	Zoraï-Handwerkslehrling	Zoraï-Handwerkslehrling
+_BA5834306E2070B0	Melee_Warrior_Apprentice	Krieger-Lehrling	Krieger-Lehrling
+_1C02198C57B42A8E	Sniper_Apprentice	Scharfschützen-Lehrling	Scharfschützen-Lehrling
+_76CA54C7B85E21F4	Fyros_Armorer_Apprentice	Fyros-Rüstungsmacherlehrling	Fyros-Rüstungsmacherlehrling
+_E534877171A78595	Fyros_Jeweler_Apprentice	Fyros-Juwelierlehrling	Fyros-Juwelierlehrling
+_687F1E242A40234E	Fyros_Weapon_Smith_Apprentice	Fyros-Waffenschmiedelehrling	Fyros-Waffenschmiedelehrling
+_65BF28B111BF9A58	Fyros_Munitioner_Apprentice	Fyros-Munitionsmacherlehrling	Fyros-Munitionsmacherlehrling
+_53283BB2978F818B	Fyros_Gun_Smith_Apprentice	Fyros-Pistolenschmiedelehrling	Fyros-Pistolenschmiedelehrling
+_B608DB98443FEF1B	Fyros_Shield_Smith_Apprentice	Fyros-Schildschmiedelehrling	Fyros-Schildschmiedelehrling
+_70D910CEB85E09F0	Matis_Armorer_Apprentice	Matis-Rüstungsmacherlehrling	Matis-Rüstungsmacherlehrling
+_26542772F2C6A97D	Matis_Jeweler_Apprentice	Matis-Juwelierlehrling	Matis-Juwelierlehrling
+_822A4EA8BDBEFE33	Matis_Weapon_Smith_Apprentice	Matis-Waffenschmiedelehrling	Matis-Waffenschmiedelehrling
+_639F70A7D3BF9A58	Matis_Munitioner_Apprentice	Matis-Munitionsmacherlehrling	Matis-Munitionsmacherlehrling
+_13687BC0972F8973	Matis_Gun_Smith_Apprentice	Matis-Pistolenschmiedelehrling	Matis-Pistolenschmiedelehrling
+_B017979F443FD717	Matis_Shield_Smith_Apprentice	Matis-Schildschmiedelehrling	Matis-Schildschmiedelehrling
+_69EEDB1B180601DA	Tryker_Armorer_Apprentice	Tryker-Rüstungsmacherlehrling	Tryker-Rüstungsmacherlehrling
+_831CA520595281FE	Tryker_Jeweler_Apprentice	Tryker-Juwelierlehrling	Tryker-Juwelierlehrling
+_401C5CE185F60D3B	Tryker_Weapon_Smith_Apprentice	Tryker-Waffenschmiedelehrling	Tryker-Waffenschmiedelehrling
+_B76AAD020B48B78F	Tryker_Munitioner_Apprentice	Tryker-Munitionsmacherlehrling	Tryker-Munitionsmacherlehrling
+_1C698F11A7FE97D5	Tryker_Gun_Smith_Apprentice	Tryker-Pistolenschmiedelehrling	Tryker-Pistolenschmiedelehrling
+_CDCD2F3DAD72A8AB	Tryker_Shield_Smith_Apprentice	Tryker-Schildschmiedelehrling	Tryker-Schildschmiedelehrling
+_706A7CDBB825DBDC	Zorai_Armorer_Apprentice	Zoraï-Rüstungsmacherlehrling	Zoraï-Rüstungsmacherlehrling
+_673451779026D581	Zorai_Jeweler_Apprentice	Zoraï-Juwelierlehrling	Zoraï-Juwelierlehrling
+_39FFFDFF77507EE9	Zorai_Weapon_Smith_Apprentice	Zoraï-Waffenschmiedelehrling	Zoraï-Waffenschmiedelehrling
+_09CB7CB49F3105B2	Zorai_Munitioner_Apprentice	Zoraï-Munitionsmacherlehrling	Zoraï-Munitionsmacherlehrling
+_7C8DEC74BB6B633F	Zorai_Gun_Smith_Apprentice	Zoraï-Pistolenschmiedelehrling	Zoraï-Pistolenschmiedelehrling
+_2E2688E2772531E4	Zorai_Shield_Smith_Apprentice	Zoraï-Schildschmiedelehrling	Zoraï-Schildschmiedelehrling
+_55C9BA1AC87A2904	Melee_Warrior	Nahkampfkrieger	Nahkampfkriegerin
+_BE09EA16D611D6DE	Range_Fighter	Fernkämpfer	Fernkämpferin
+_181A65577BF81C9B	Light_Armsman	Einhandkämpfer	Einhandkämpferin
+_FCBA5545DDF858AE	Heavy_Armsman	Zweihandkämpfer	Zweihandkämpferin
+_C9AB444C6EC52866	Gunman	Einhandschütze	Einhandschützin
+_97E711B3BC2F4476	Heavy_Gunman	Zweihandschütze	Zweihandschützin
+_E92EA28E3C2E54F7	Advanced_Gunman	Fortgeschrittener Einhandschütze	Fortgeschrittene Einhandschützin
+_CA6BE5AF4CC52861	Advanced_Heavy_Gunman	Fortgeschrittener Zweihandschütze	Fortgeschrittene Zweihandschützin
+_66D9D47D23A9B09D	Bludgeoner	Keulenschwinger	Keulenschwingerin
+_B027C07526886C9B	Skewerer	Aufspießer	Aufspießerin
+_AC496C98A5599C88	Slasher	Aufschlitzer	Aufschlitzerin
+_EBD8D88ADF8600C2	Smasher	Zerschmetterer	Zerschmetterin
+_E63AEC6C4CACD4A2	Impaler	Durchbohrer	Durchbohrerin
+_6759807BA0150CD0	Cleaver	Aufspalter	Aufspalterin
+_EC27F04BED74007E	Bowman	Bogenschütze	Bogenschützin
+_6710339D5689E95C	Heavy_Bowman	Kriegsbogenschütze	Kriegsbogenschützin
+_0B39E16F13969BAB	Pistoleer	Pistolenschütze	Pistolenschützin
+_8C40965B20B52E76	Heavy_Artilleryman	Kriegs-Artillerist	Kriegs-Artilleristin
+_BEDC54D580B584A2	Crossbowman	Armbrustschütze	Armbrustschützin
+_AB79E08FAFD84894	Artilleryman	Artillerist	Artilleristin
+_EA3AF4306ED8B4A2	Rifleman	Gewehrschütze	Gewehrschützin
+_7DABE2F42D1F7827	Maceman	Streitkolbenkämpfer	Streitkolbenkämpferin
+_6FE93C8DA6F83890	Brute	Stabkämpfer	Stabkämpferin
+_E391104CC68BF954	Knifeman	Dolchkämpfer	Dolchkämpferin
+_EA1A8C36E87AB4A6	Spearman	Lanzenkämpfer	Lanzenkämpferin
+_053049A64AA7F86B	Axeman	Axtkämpfer	Axtkämpferin
+_89C2707D208920B3	Swordsman	Schwertkämpfer	Schwertkämpferin
+_C9C490904BB5CB60	Heavy_Maceman	Zweihand-Streitkolbenkämpfer	Zweihand-Streitkolbenkämpferin
+_A7B9F48FA5983494	Pikeman	Pikenier	Pikenierin
+_03FC743C726229DC	Heavy_Axeman	Zweihand-Axtkämpfer	Zweihand-Axtkämpferin
+_583588BDA81F3653	Heavy_Swordsman	Zweihand-Schwertkämpfer	Zweihand-Schwertkämpferin
+_AD5EF9B5BE8F2D6A	Master_Bowman	Meister-Bogenschütze	Meister-Bogenschützin
+_28DCA65EF3DA8166	Master_Heavy_Bowman	Meister-Kriegsbogenschütze	Meister-Kriegsbogenschützin
+_7A183255D98ACD09	Master_Pistoleer	Meister-Pistolenschütze	Meister-Pistolenschützin
+_17E9565DE31F4BB9	Master_Heavy_Artilleryman	Meister-Kriegsartillerist	Meister-Kriegsartilleristin
+_E9918E776489D0A0	Master_Crossbowman	Meister-Armbrustschütze	Meister-Armbrustschützin
+_162985C01C361E7B	Master_Artilleryman	Meister-Artillerist	Meister-Artilleristin
+_1EC700E1786AB02E	Master_Rifleman	Meister-Scharfschütze	Meister-Scharfschützin
+_2548586A7D920133	Master_Maceman	Meister des Streitkolbens	Meisterin des Streitkolbens
+_7CB549F0962CB896	Master_Brute	Meister des Stabkampfes	Meisterin des Stabkampfes
+_FA79B57A7EE4018E	Master_Knifeman	Meister der Dolche	Meisterin der Dolche
+_A467FCF3B349842E	Master_Spearman	Meister der Lanze	Meisterin der Lanze
+_37C5C66FEA25A583	Master_Axeman	Meister der Axt	Meisterin der Axt
+_E1500CD892E8BDDE	Master_Swordsman	Klingentänzer	Klingentänzerin
+_9F0755B55BAB0B94	Master_Heavy_Maceman	Zermalmer	Zermalmerin
+_810C06F03FA40D9C	Master_Pikeman	Meister-Pikenier	Meister-Pikenierin
+_670CE3818BE4005E	Master_Heavy_Axeman	Vollstrecker	Vollstreckerin
+_B714102DCEAB442E	Master_Heavy_Swordsman	Meister des Breitschwertes	Meisterin des Breitschwertes
+_10DAC64F5D008F77	Master_Hand_To_Hand_Fighter	Schattentänzer	Schattentänzerin
+_451911F73690DC2E	Hand_To_Hand_Fighter	Unbewaffneter Nahkämpfer	Unbewaffnete Nahkämpferin
+_9E50AB0BC1885AE7	Close_Fighter	Nahkämpfer	Nahkämpferin
+_621BB90A9BF07755	Advanced_Close_Fighter	Fortgeschrittener Nahkämpfer	Fortgeschrittene Nahkämpferin
+_E44253B13E88A654	Defensive_Magician	Defensiv-Magier	Defensiv-Magierin
+_A64257BC5D38A6D1	Offensive_Magician	Offensiv-Magier	Offensiv-Magierin
+_35720B8BACA0403C	Elementalist_Apprentice	 Elementalisten-Lehrling	 Elementalisten-Lehrling
+_28C940A029F9249F	Mentalist	Mentalist	Mentalistin
+_DF99748A27EA989C	Enchanter	Verzauberer	Verzauberin
+_30587C83EDF908BC	Summoner	Illusionist	Illusionistin
+_41EB54751CD7B6A2	Master_Of_Illusion	Weber der Illusionen	Weberin der Illusionen
+_D4719D915781293F	Mind_Lord	Geistesfürst	Geistesfürstin
+_A5A000EDABC8B0A6	Healer	Heiler	Heilerin
+_6B77B0582A94C866	Shaman	Schamane	Schamanin
+_A23BFC11AF21869A	Priest	Priester	Priesterin
+_D94DBEC4EDAED128	Master_Of_Life	Quell des Lebens	Quelle des Lebens
+_F4FA92C59F5516FF	Celestial_Guardian	Himmelswächter	Himmelswächterin
+_1FA7A866CB426075	Black_Mage	Schwarzmagier	Schwarzmagierin
+_9F8FBBF2BC268FDC	Affliction_Bringer	Peiniger	Peinigerin
+_A54EB0364137A3F4	Master_Of_Torment	Orakel des Leidens	Orakel des Leidens
+_FE14EF539780121A	Avatar_Of_Sorrow	Avatar der Sorgen	Avatara der Sorgen
+_B21A109CA75BC09C	Destroyer	Zerstörer	Zerstörerin
+_87E98CAAA35638B1	Warlock	Hexenmeister	Hexenmeisterin
+_A8A72C4EE23880A1	Archmage	Elementarmagier	Elementarmagierin
+_068EBFBEFDE98CC3	Master_Of_Pain	Beschwörer der Qualen	Beschwörerin der Qualen
+_B7FE98E4ACFFE429	Avatar_Of_Destruction	Avatar der Zerstörung	Avatara der Zerstörung
+_2630D5DCED0239F7	Elementalist	Elementalist	Elementalistin
+_5F892C9568B8EC9E	Alchemist	Alchemist	Alchemistin
+_23091087648804A9	Biomancer	Biomagier	Biomagier
+_72DA28EC8CB7D72C	Master_Of_Energies	Meister der Energien	Meisterin der Energien
+_1BDE34D71A52E83F	Chosen_Of_Atys	Auserwählter von Atys	Auserwählte von Atys
+_25761B555085A3CB	Title00079	Reisender	Reisende
+_C333D3151F4AFC88	FBT	Ältester von Atys	Älteste von Atys
+_40348BC240606E6F	SGM	Senior Game Master	Senior Game Master
+_59C7AAE85D981BE4	GM	Game Master	Game Master
+_CB17320A534E8C51	VG	Veteran Guide	Veteran Guide
+_90E50C7ED846C472	SG	Senior Guide	Senior Guide
+_DE4A708A6014D456	G	Guide	Guide
+_D706CFA21E18566A	Armorer_Apprentice	Rüstungsmacherlehrling	Rüstungsmacherlehrling
+_B488ABA5780CA4B9	Jeweler_Apprentice	Juwelierlehrling	Juwelierlehrling
+_3AF7ECD6AAD82953	Melee_Weapon_Smith_Apprentice	Nahkampfwaffen-Schmiedelehrling	Nahkampfwaffen-Schmiedelehrling
+_3DAEABE942DF5DDB	Range_Weapon_Smith_Apprentice	Fernkampfwaffen-Schmiedelehrling	Fernkampfwaffen-Schmiedelehrling
+_A740796C0AAD741B	Heavy_Armorer	Schmied für schwere Rüstungen	Schmiedin für schwere Rüstungen
+_2481557066CC5E16	Light_Armorer	Hersteller von leichten Rüstungen	Herstellerin von leichten Rüstungen
+_870F6272FAD745A0	Medium_Armorer	Schmied für mittelschwere Rüstungen	Schmiedin für mittelschwere Rüstungen
+_1EF53269518F722B	Shield_Smith	Schildschmied	Schildschmiedin
+_EAB77867BFD9A0CC	Jeweler	Juwelier	Juwelierin
+_B274ABE8E1B9A2B3	Melee_Weapon_Smith	Nahkampfwaffenschmied	Nahkampfwaffenschmiedin
+_74ECC282139428F6	Melee_Heavy_Weapon_Smith	Schmied für schwere Nahkampfwaffen	Schmiedin für schwere Nahkampfwaffen
+_95223C0214D42804	Melee_Light_Weapon_Smith	Schmied für leichte Nahkampfwaffen	Schmiedin für leichte Nahkampfwaffen
+_F56A1486E04AFEE1	Range_Weapon_Smith	Fernkampfwaffenschmied	Fernkampfwaffenschmiedin
+_61ABE21384D00C19	Range_Heavy_Weapon_Smith	Schmied für schwere Fernkampfwaffen	Schmiedin für schwere Fernkampfwaffen
+_B4DAB32922AC34ED	Advanced_Heavy_Armorer	Fortgeschrittener Schmied für schwere Rüstungen	Fortgeschrittene Schmiedin für schwere Rüstungen
+_B8498BB1DFCB0ADF	Advanced_Light_Armorer	Fortgeschrittener Hersteller von leichten Rüstungen	Fortgeschrittene Herstellerin von leichten Rüstungen
+_A70F18C178408FF7	Advanced_Medium_Armorer	Fortgeschrittener Schmied für mittelschwere Rüstungen	Fortgeschrittene Schmiedin für mittelschwere Rüstungen
+_4B78417B8C5DEB07	Advanced_Shield_Smith	Fortgeschrittener Schildschmied	Fortgeschrittene Schildschmiedin
+_D81FAEF19AF41E94	Advanced_Jeweler	Fortgeschrittener Juwelier	Fortgeschrittene Juwelierin
+_8D7D2FCA01DD6349	Advanced_Melee_Weapon_Smith	Fortgeschrittener Nahkampfwaffenschmied	Fortgeschrittene Nahkampfwaffenschmiedin
+_3554AE0FE215004F	Advanced_Melee_Heavy_Weapon_Smith	Fortgeschrittener Schmied für schwere Nahkampfwaffen	Fortgeschrittene Schmiedin für schwere Nahkampfwaffen
+_304442DFF101C324	Advanced_Melee_Light_Weapon_Smith	Fortgeschrittener Schmied für leichte Nahkampfwaffen	Fortgeschrittene Schmiedin für leichte Nahkampfwaffen
+_8F4121D90AB790AE	Advanced_Range_Weapon_Smith	Fortgeschrittener Fernkampfwaffenschmied	Fortgeschrittene Fernkampfwaffenschmiedin
+_B8A99E663016B610	Advanced_Range_Heavy_Weapon_Smith	Fortgeschrittener Schmied für schwere Fernkampfwaffen	Fortgeschrittene Schmiedin für schwere Fernkampfwaffen
+_CF0ECB28241AF406	Expert_Heavy_Armorer	Erfahrener Schmied für schwere Rüstungen	Erfahrene Schmiedin für schwere Rüstungen
+_2D2D1B1FA1A3C0F8	Expert_Light_Armorer	Erfahrener Hersteller von leichten Rüstungen	Erfahrene Herstellerin von leichten Rüstungen
+_7BDD3CFC73CF3749	Expert_Medium_Armorer	Erfahrener Schmied für mittelschwere Rüstungen	Erfahrene Schmiedin für mittelschwere Rüstungen
+_7B75B199C9E25C14	Expert_Shield_Smith	Erfahrener Schildschmied	Erfahrene Schildschmiedin
+_23992EE300D26C80	Expert_Jeweler	Erfahrener Juwelier	Erfahrene Juwelierin
+_602177F7CAB5A035	Expert_Melee_Weapon_Smith	Erfahrener Nahkampfwaffenschmied	Erfahrene Nahkampfwaffenschmiedin
+_5C43FA82BD66C2C9	Expert_Melee_Heavy_Weapon_Smith	Erfahrener Schmied für schwere Nahkampfwaffen	Erfahrene Schmiedin für schwere Nahkampfwaffen
+_B81EFA836624B202	Expert_Melee_Light_Weapon_Smith	Erfahrener Schmied für leichte Nahkampfwaffen	Erfahrene Schmiedin für leichte Nahkampfwaffen
+_38FE3140F7AD6419	Expert_Range_Weapon_Smith	Erfahrener Fernkampfwaffenschmied	Erfahrene Fernkampfwaffenschmiedin
+_055D71B8EA8EBDCD	Expert_Range_Heavy_Weapon_Smith	Erfahrener Schmied für schwere Fernkampfwaffen	Erfahrene Schmiedin für schwere Fernkampfwaffen
+_5F9E7CC8ED30F04E	Heavy_Armorer_Master	Meister-Schmied schwerer Rüstungen	Meister-Schmiedin schwerer Rüstungen
+_58A68CDAAA4F123C	Light_Armorer_Master	Meister-Hersteller leichter Rüstungen	Meister-Herstellerin leichter Rüstungen
+_81FEC3FDCB6FE089	Medium_Armorer_Master	Meister-Schmied mittelschwerer Rüstungen	Meister-Schmiedin mittelschwerer Rüstungen
+_05BFA0C15199FE7E	Shield_Smith_Master	Schildschmied-Meister	Schildschmied-Meisterin
+_DC8A6651BBFB02DB	Jeweler_Master	Juweliermeister	Juweliermeisterin
+_7EA226004EE26728	Melee_Weapon_Smith_Master	Nahkampfwaffenschmied-Meister	Nahkampfwaffenschmied-Meisterin
+_8B4278913507CA8F	Melee_Heavy_Weapon_Smith_Master	Meisterschmied schwerer Nahkampfwaffen	Meisterschmiedin schwerer Nahkampfwaffen
+_8BD31A977366B48F	Melee_Light_Weapon_Smith_Master	Meisterschmied leichter Nahkampfwaffen	Meisterschmiedin leichter Nahkampfwaffenn
+_CCC8BD2311896DAF	Range_Weapon_Smith_Master	Fernkampfwaffen-Meisterschmied	Fernkampfwaffen-Meisterschmiedin
+_9EDC1ABECD5C1ADA	Range_Heavy_Weapon_Smith_Master	Meisterschmied schwerer Fernkampfwaffen	Meisterschmiedin schwerer Fernkampfwaffen
+_98AF3D39E2570A8F	Forager_Apprentice	Ernte-Lehrling	Ernte-Lehrling
+_2108247FA28A0CBA	Forager	Ernter	Ernterin
+_1C69D61F576B5EFB	Desert_Forager	Wüstenernter	Wüstenernterin
+_A2447D290E7327C6	Forest_Forager	Waldernter	Waldernterin
+_F01303CEF4F0FD2C	Jungle_Forager	Dschungelernter	Dschungelernterin
+_1A6F7138F8FC117F	Lacustre_Forager	Seelandernter	Seelandernterin
+_9FA430B4C90BD63E	Prime_Roots_Forager	Urwurzelernter	Urwurzelernterin
+_FCF277C36AFCA736	Advanced_Desert_Forager	Fortgeschrittener Wüstenernter	Fortgeschrittene Wüstenernterin
+_32889DC60406B332	Advanced_Forest_Forager	Fortgeschrittener Waldernter	Fortgeschrittene Waldernterin
+_439BA194FD33422B	Advanced_Jungle_Forager	Fortgeschrittener Dschungelernter	Fortgeschrittene Dschungelernterin
+_0491B10D39DDF983	Advanced_Lacustre_Forager	Fortgeschrittener Seenlandernter	Fortgeschrittene Seenlandernterin
+_EC139AD0939151D8	Advanced_Prime_Roots_Forager	Fortgeschrittener Urwurzelernter	Fortgeschrittene Urwurzelernterin
+_3AB280B42CB557F0	Expert_Desert_Forager	Erfahrener Wüstenernter	Erfahrene Wüstenernterin
+_0A810DB27857DC92	Expert_Forest_Forager	Erfahrener Waldlandernter	Erfahrene Waldlandernterin
+_95F2D1D38C924361	Expert_Jungle_Forager	Erfahrener Dschungelernter	Erfahrene Dschungelernterin
+_0078ED237D1B07FC	Expert_Lacustre_Forager	Erfahrener Seenlandernter	Erfahrene Seenlandernterin
+_691AA42CFC954B50	Expert_Prime_Roots_Forager	Erfahrener Urwurzelernter	Erfahrene Urwurzelernterin
+_3E11DCC9D0BC17E2	Master_Desert_Forager	Meister-Wüstenernter	Meister-Wüstenernterin
+_CE0F89DEB6D7C487	Master_Forest_Forager	Meister-Waldernter	Meister-Waldernterin
+_177253E12AE23348	Master_Jungle_Forager	Meister-Dschungelernter	Meister-Dschungelernterin
+_82F86F311B6BF7E3	Master_Lacustre_Forager	Meister-Seenlandernter	Meister-Seenlandernterin
+_2708503476F5D33B	Master_Prime_Roots_Forager	Meister-Urwurzelernter	Meister-Urwurzelernterin
+_C58698FE29D8F4A2	gn_green_seed_comrade	Regulärer Kamerad	Reguläre Kameradin
+_61208066BB6B6D62	gn_kitin_gatherers-magician_guard	Kundiger Wächter	Kundige Wächterin
+_0075026D1C60BDD1	gn_kitin_gatheres_wander_guards	Mächtiger Wächter	Mächtige Wächterin
+_E0EB24AD6AA9148C	gn_matis_defender	Verteidiger der Matis	Verteidigerin der Matis
+_6293E0F632C9E26F	gn_recoverers_guard_6	Mächtiger Wächter	Mächtige Wächterin
+_6618630CEAB89CED	gn_zorai_voluteer_m	Verteidiger der Zoraï	Verteidigerin der Zoraï
+_A9ED8487D5B994B1	gn_antikamis_guard	Mächtiger Wächter	Mächtige Wächterin
+_3E983C556658B4BA	gn_arid_matis_guard	Mächtiger Wächter	Mächtige Wächterin
+_E248D8896A589FA9	gn_barkers_guard	Erfahrener Wächter	Erfahrene Wächterin
+_1FE3E0FA29CA268F	gn_beachcombers_guard	Mächtiger Wächter	Mächtige Wächterin
+_23A3B0F6E9E90E94	gn_black_circle_guard	Mächtiger Wächter	Mächtige Wächterin
+_29974C212519DC87	gn_cholorogoos_guard	Erfahrener Wächter	Erfahrene Wächterin
+_2658DBEAD9554281	gn_company_eternal_guard_havenofpurity	Erfahrener Wächter	Erfahrene Wächterin
+_4D711E7A405F711D	gn_company_eternal_guard_nexus	Mächtiger Wächter	Mächtige Wächterin
+_66993C1D6176C8A3	gn_corsairs_guard	Regulärer Wächter	Reguläre Wächterin
+_E1F3C805681A2699	gn_darkeningsap_guard	Mächtiger Wächter	Mächtige Wächterin
+_41A748512B68C8BD	gn_duneriders_guard	Mächtiger Wächter	Mächtige Wächterin
+_A58687B3A3BAE00A	gn_ecowarriors_guard	Mächtiger Wächter	Mächtige Wächterin
+_BF9E69E8ECAA6816	gn_first_deserters_guard	Erfahrener Wächter	Erfahrene Wächterin
+_B1DF0D1D68B780A8	gn_fraharhunters_guard	Erfahrener Wächter	Erfahrene Wächterin
+_80FF8D0C5F3BECEC	gn_fraharhunters_guards	Erfahrener Wächter	Erfahrene Wächterin
+_A8A7BC6511D927B1	gn_frahars_guard	Elite-Wächter	Elite-Wächterin
+_E889228D1F84C49F	gn_gooheads_guard	Mächtiger Wächter	Mächtige Wächterin
+_DC2F98B9AAA88CAC	gn_green_seed_guard	Regulärer Wächter	Reguläre Wächterin
+_A299588D2523D49D	gn_hamazans_guard	Starker Wächter	Starke Wächterin
+_82FE9DFE4539300A	gn_iconeworshipers_guard	Regulärer Wächter	Reguläre Wächterin
+_424E796D65B86BAB	gn_kitin_gatherers_guard	Mächtiger Wächter	Mächtige Wächterin
+_6638DC0FE5B69BA2	gn_lawless_guard	Mächtiger Wächter	Mächtige Wächterin
+_67D7E0878758A7A4	gn_leviers_guard	Regulärer Wächter	Reguläre Wächterin
+_5CA21A7C39811D2D	gn_matisian_border_guards_guard	Erfahrener Wächter	Erfahrene Wächterin
+_AC48642367D9B87E	gn_nightturner_guard	Erfahrener Wächter	Erfahrene Wächterin
+_14380D092D1F7887	gn_oasis_diggers_guard	Mächtiger Wächter	Mächtige Wächterin
+_E62677A2A639EC20	gn_pyromancers_guard	Mächtiger Wächter	Mächtige Wächterin
+_C4A7804D2C089CAD	gn_recoverers_guard	Mächtiger Wächter	Mächtige Wächterin
+_EDAD6087D4797CA8	gn_renegades_guard	Mächtiger Wächter	Mächtige Wächterin
+_EBE47BAF144ACC9F	gn_restorers_guard	Elite-Wächter	Elite-Wächterin
+_ADA69C8490AA8086	gn_sacredsap_guard	Starker Wächter	Starke Wächterin
+_6623B803E889628B	gn_sap_gleaners_guard	Mächtiger Wächter	Mächtige Wächterin
+_57149854EBF8ACA1	gn_sap_slaves_guard	Elite-Wächter	Elite-Wächterin
+_2BE47BA5112ABC9D	gn_scorchers_guard	Elite-Wächter	Elite-Wächterin
+_D7E9D8036C08308F	gn_shadowrunners_guard	Starker Wächter	Starke Wächterin
+_64993C9AA3D3A8A5	gn_siblings_guard	Starker Wächter	Starke Wächterin
+_6DA8DD23E099685A	gn_silt_sculptors_guard	Starker Wächter	Starke Wächterin
+_ABED4D0942EA0C4C	gn_slash_and_burn_guard	Mächtiger Wächter	Mächtige Wächterin
+_2738DC0EA65743AD	gn_slavers_guard	Mächtiger Wächter	Mächtige Wächterin
+_EC26B495560988B1	gn_smugglers_guard	Erfahrener Wächter	Erfahrene Wächterin
+_9A886CABEDF5F09E	gn_tutor_guard	Erfahrener Wächter	Erfahrene Wächterin
+_AC78D90FA5086443	gn_water_breakers_guard	Starker Wächter	Starke Wächterin
+_97C90509EC0EA092	gn_woven_bridles_guard	Mächtiger Wächter	Mächtige Wächterin
+_8A4D35C26548A80B	gn_zorai_kami_sentinel	Kami-Wachposten	Kami-Wachposten
+_E308306C5FDA08B1	Fighter	Kämpfer	Kämpferin
+_68D814346CD8948C	Magician	Magier	Magierin
+_6C7A9C62E6D834BA	Craftsman	Handwerker	Handwerkerin
+_0737B77BDDC44E82	MeleeFighter	Nahkämpfer	Nahkämpferin
+_A91938A081542C8A	RangeFighter	Fernkämpfer	Fernkämpferin
+_5F69048626095079	AttackCaster	Kampfmagier	Kampfmagierin
+_AF17F45DEA140072	BufferCaster	Schutzmagier	Schutzmagierin
+_ACF9E4856A8DEC64	HealerCaster	Heiler	Heilerin
+_61702CA3A9DAE42F	Harvester	Rohstoffsammler	Rohstoffsammlerin
+_2A55BC8BA5B96899	Shopkeeper	Händler	Händlerin
+_6A89DC672E8A5C93	Faber	Handwerker	Handwerkerin
+_E3A7E4872F39505C	IreFighter	Berserker	Berserkerin
+_EC1AAC9A6D19E068	Swashbuckler	Säbelrassler	Säbelrasslerin
+_68F8948362647C90	KamicFist	Kamische Faust	Kamische Faust
+_D676A49662A7D7A5	BladeBearer	Schwertmeister	Schwertmeisterin
+_5599AC929A49FC5E	WindChild	Kind des Windes	Kind des Windes
+_2588FCAA6B08A0B4	Runner	Läufer	Läuferin
+_A3BB9C95AA771C9F	Scout	Späher	Späherin
+_8DCAFC38E2A9945E	FireLance	Feuerkämpfer	Feuerkämpferin
+_AA79DC9C1A56B7C4	ScarletHunter	Scharlachroter Jäger	Scharlachrote Jägerin
+_8AFAFC672F0C5C9A	GreenHunter	Grüner Jäger	Grüne Jägerin
+_9CA7D8872FC5C36B	AtysGuardian	Wächter von Atys	Wächterin von Atys
+_ACB7A3801546D834	ShadowHunter	Schattenjäger	Schattenjägerin
+_9DEBC0746D5AD4AC	Witherer	Verdorrer	Verdorrerin
+_2BAA60956197BCA7	Fouler	Verderber	Verderberin
+_EDA7649DEB5A0C55	Disturber	Unruhestifter	Unruhestifterin
+_E3F9F89257A40CB6	KamicFury	Kamische Furie	Kamische Furie
+_ADE8A4ED491BE8A0	SpiritualShield	Spirituelles Schild	Spirituelles Schild
+_67D4E88E1EDA80B8	Faker	Täuscher	Täuscherin
+_D9C8747A580A4C65	WindGuardian	Wächter des Windes	Wächterin des Windes
+_A576488A20B90C5E	KamicGuardian	Wächter der Kami	Wächterin der Kami
+_7088B89D60D790A0	Unknown	Unbekannter	Unbekannte
+_22B4409229A6B893	SecondBreath	Zweiter Atem	Zweiter Atem
+_E069EB9D67892847	LifeStealer	Lebensräuber	Lebensräuberin
+_A116638D1F56349F	SecondLife	Zweites Leben	Zweites Leben
+_E1970385EEA2883E	SapCristal	Sap-Kristall	Sap-Kristall
+_41CFC00F61268789	SandCaravanner	Dünen-Karavanenführer	Dünen-Karavanenführerin
+_34A2C1B90DAAA495	ImperialSupplier	Imperaler Ausrüster	Imperaler Ausrüsterin
+_72D8DC78603ABCA8	Steward	Verwalter	Verwalterin
+_ECDA8C68EE16BCB2	Hawker	Reisender Händler	Reisende Händlerin
+_2A49BC9A1212D3AA	range_warrior	Fernkämpfer	Fernkämpferin
+_61722CC3A9DAE42F	harvester	Rohstoffsammler	Rohstoffsammlerin
+_E43A109723B664A4	attack_magician	Kampfmagier	Kampfmagierin
+_A189A09EDEA85CAD	buffer_magician	Schutzmagier	Schutzmagierin
+_A5297AB06058B0AD	healer_magician	Heiler	Heilerin
+_6A89DCA72E8A5CB3	faber	Handwerker	Handwerkerin
+_0CA8C83460FCB8E2	FireMaster	Meister des Feuers	Meisterin des Feuers
+_67F610442A8ABCC0	LakeMaster	Meister des Sees	Meisterin des Sees
+_E8F8A4AD53D39C51	gn_gibbay_guard	Elite-Wächter	Elite-Wächterin
+_33185DBF82913503	gn_masters_of_the_goo_guard	Elite-Wächter	Elite-Wächterin
+_AFE00123666AD460	gn_tryker_tribe_slave	Tryker-Sklave	Tryker-Sklavin
+_B3EF601A05BBAC70	CM	Community Manager	Community Managerin
+_090C14DD8E0A2524	EM	Event Manager	Event Managerin
+_A3E59E30A3E581EB	EG	Event Guide	Event Guide
+_19DAEC7920168C8F	OBSERVER	Beobachter	Beobachterin
+_5A05B79F1EA71CA5	Kami_Ally	Kami-Champion	Kami-Champion
+_ECF9B45D2639D824	Karavan_Ally	Karavan-Champion	Karavan-Champion
+_35DF10730898A57F	gn_aegus_kami_priest	Aegus Kami-Prediger	Aegus Kami-Predigerin
+_1F4FD67C615A7B19	gn_kaemon_kami_priest	Aegus Kami-Prediger	Aegus Kami-Predigerin
+_0D9252F0B695727B	gn_sekovix_kami_priest	Aegus Kami-Prediger	Aegus Kami-Predigerin
+_614F0290235CCB20	gn_phyxon_kami_priest	Aegus Kami-Prediger	Aegus Kami-Predigerin
+_C8F242F871F56283	gn_galemus_kami_priest	Aegus Kami-Prediger	Aegus Kami-Predigerin
+_72985B38F3CD25F5	gn_stalli_karavan_teleporter	Stalli Karavan-Teleporter	Stalli Karavan-Teleporter
+_3509DECE961A2B66	gn_borea_karavan_teleporter	Borea Karavan-Teleporter	Borea Karavan-Teleporter
+_F0985B2871CFB5DF	gn_nistia_karavan_teleporter	Nistia Karavan-Teleporter	Nistia Karavan-Teleporter
+_2C7E1C358044C3CE	gn_rosilio_karavan_teleporter	Rosilio Karavan-Teleporter	Rosilio Karavan-Teleporter
+_77B9DECE982A0B4F	gn_miani_karavan_teleporter	Miani Karavan-Teleporter	Miani Karavan-Teleporter
+_A0930267E8EFFEFB	gn_stalli_karavan_guide	Stalli Karavan-Führer	Stalli Karavan-Führerin
+_F6F4E273380951E3	gn_borea_karavan_guide	Borea Karavan-Führer	Borea Karavan-Führerin
+_61B4D65A277026ED	gn_nistia_karavan_guide	Nistia Karavan-Führer	Nistia Karavan-Führerin
+_9CD2D20A9D82EC81	gn_rosilio_karavan_guide	Rosilio Karavan-Führer	Rosilio Karavan-Führerin
+_BB849E6DFD990DDD	gn_miani_karavan_guide	Miani Karavan-Führer	Miani Karavan-Führerin
+_E11DA181A1DA8B19	gn_qai_lo_kami_priest	Qai Lo Kami-Prediger	Qai Lo Kami-Predigerin
+_1C74283532F5CD24	gn_sheng_wo_kami_priest	Sheng Wo Kami-Prediger	Sheng Wo Kami-Predigerin
+_0884F83975751612	gn_men_xing_kami_priest	Men Xing Kami-Prediger	Men Xing Kami-Predigerin
+_049E2206B5944291	gn_koi_zun_kami_priest	Koi Zun Kami-Prediger	Koi Zun Kami-Predigerin
+_A13CB337E1755122	gn_yin_piang_kami_priest	Yin Piang Kami-Prediger	Yin Piang Kami-Predigerin
+_8DB42643D552074B	gn_aubermouth_karavan_teleporter	Aubermouth Karavan-Teleporter	Aubermouth Karavan-Teleporter
+_0F302872195B6F17	gn_waverton_karavan_teleporter	Aubermouth Karavan-Teleporter	Aubermouth Karavan-Teleporter
+_3F60046A168C7FDF	gn_hobwelly_karavan_teleporter	Hobwelly Karavan-Teleporter	Hobwelly Karavan-Teleporter
+_4B5FF4BF37909B44	gn_dingleton_karavan_teleporter	Dingleton Karavan-Teleporter	Dingleton Karavan-Teleporter
+_0A1FE46995BB0B15	gn_barkdell_karavan_teleporter	Barkdell Karavan-Teleporter	Barkdell Karavan-Teleporter
+_A7E8075CE1348AFE	gn_aubermouth_karavan_guide	Aubermouth Karavan-Führer	Aubermouth Karavan-Führer
+_DAA31AEB153E166E	gn_waverton_karavan_guide	Waverton Karavan-Führer	Waverton Karavan-Führerin
+_57D5F6AFD0FEC67D	gn_hobwelly_karavan_guide	Hobwelly Karavan-Führer	Hobwelly Karavan-Führerin
+_B094E3A53C95D26F	gn_dingleton_karavan_guide	Dingleton Karavan-Führer	Dingleton Karavan-Führerin
+_953206D9CEBD1E6A	gn_barkdell_karavan_guide	Barkdell Karavan-Führer	Barkdell Karavan-Führerin
+_25A7947BE9967BAA	gn_karavan_agent	Karavan-Agent	Karavan-Agentin
+_340E740DE26E9C5B	gn_ancientdryads_kami_ambassador_m1	Kami-Botschafter der Alten Dryaden	Kami-Botschafterin der Alten Dryaden
+_4F9A5B34C23DE732	gn_beachcombers_kami_ambassador_t1	Kami-Botschafter der Gischtläufer	Kami-Botschafterin der Gischtläufer
+_C8716716D18ED704	gn_cockroaches_kami_ambassador_p1	Kami-Botschafter der Kakerlaken	Kami-Botschafterin der Kakerlaken
+_E4072AE7BEBFD0CD	gn_company_kami_ambassador_p1	Kami-Botschafter der Gemeinschaft des Ewigen Baumes	Kami-Botschafterin der Gemeinschaft des Ewigen Baumes
+_66072AE7BEBFD0CD	gn_company_kami_ambassador_z1	Kami-Botschafter der Gemeinschaft des Ewigen Baumes	Kami-Botschafterin der Gemeinschaft des Ewigen Baumes
+_FE6C5F3533E7DEEC	gn_corsairs_kami_ambassador_t1	Kami-Botschafter der Korsaren	Kami-Botschafterin der Korsaren
+_7D9F14ECEC8ADB18	gn_duneriders_kami_ambassador_f1	Kami-Botschafter der Dünenreiter	Kami-Botschafterin der Dünenreiter
+_4D01DB0DF35F29FB	gn_ecowarriors_kami_ambassador_m1	Kami-Botschafter der Ökokrieger	Kami-Botschafterin der Ökokrieger
+_BED02C6E419264EF	gn_firstdeserters_kami_ambassador_m1	Kami-Botschafter der Ersten Deserteure	Kami-Botschafterin der Ersten Deserteure
+_2D0B05EBD586BD89	gn_fraharhunters_kami_ambassador_f1	Kami-Botschafter der Frahar-Jäger	Kami-Botschafterin der Frahar-Jäger
+_EC4D1BA5567D0B2F	gn_hamazans_kami_ambassador_z1	Kami-Botschafter der Matis-Amazonen	Kami-Botschafterin der Matis-Amazonen
+_82C1FD0D8B307A8E	gn_kami_welcomer_f1	Kami-Empfänger der Dünen der Verbannung	Kami-Empfängerin der Dünen der Verbannung
+_170E3D0D0CB03AB7	gn_kami_welcomer_f2	Kami-Empfänger der Frahar-Türme	Kami-Empfängerin der Frahar-Türme
+_55B93E8802601EB2	gn_kami_welcomer_f3	Kami-Empfänger der Imperialen Dünen	Kami-Empfängerin der Imperialen Dünen
+_0FBCA4C3E3362EC3	gn_kami_welcomer_f4	Kami-Empfänger von Oflovaks Oase	Kami-Empfängerin von Oflovaks Oase
+_1820C239D5E22AB7	gn_kami_welcomer_f5	Kami-Empfänger des Canyons der Gesetzlosen	Kami-Empfängerin des Canyons der Gesetzlosen
+_91BF210DC9C16EB2	gn_kami_welcomer_f6	Kami-Empfänger der Sägemehl-Minen	Kami-Empfängerin der Sägemehl-Minen
+_11C252092BD12EB0	gn_kami_welcomer_f7	Kami-Empfänger der Wilden Dünen	Kami-Empfängerin der Wilden Dünen
+_542AF20D8BC0713C	gn_kami_welcomer_f8	Kami-Empfänger der Sengenden Schlucht	Kami-Empfängerin der Sengenden Schlucht
+_0FE1AA47149B85B2	gn_kami_welcomer_m1	Kami-Empfänger des Vergänglichen Gartens	Kami-Empfängerin des Vergänglichen Gartens
+_7144739C66FA9E23	gn_kami_welcomer_m2	Kami-Empfänger des Hains der Verwirrung	Kami-Empfängerin des Hains der Verwirrung
+_E7AA56428AB80FCE	gn_kami_welcomer_m3	Kami-Empfänger von Ketzers Hütte	Kami-Empfängerin von Ketzers Hütte
+_4A0A8D59B45D42B6	gn_kami_welcomer_m4	Kami-Empfänger der Versteckten Quelle	Kami-Empfängerin der Versteckten Quelle
+_B5F65A2115DC1FD6	gn_kami_welcomer_m5	Kami-Empfänger der Hügel der Abtrünnigen	Kami-Empfängerin der Hügel der Abtrünnigen
+_54A7BB2D90C53EAD	gn_kami_welcomer_m6	Kami-Empfänger des Majestätischen Gartens	Kami-Empfängerin des Majestätischen Gartens
+_12C9CE4AF3F22EB6	gn_kami_welcomer_m7	Kami-Empfänger des Oberen Sumpfes	Kami-Empfängerin des Oberen Sumpfes
+_2F3873728D9B43DE	gn_kami_welcomer_p1	Kami-Empfänger der Verbotenen Tiefen	Kami-Empfängerin der Verbotenen Tiefen
+_7A773E509B05FA44	gn_kami_welcomer_p10	Kami-Empfänger der Pforte des Sturms	Kami-Empfängerin der Pforte des Sturms
+_D663378774710228	gn_kami_welcomer_p2	Kami-Empfänger des Tors der Dunkelheit	Kami-Empfängerin des Tors der Dunkelheit
+_7B4B29D68399CC57	gn_kami_welcomer_p3	Kami-Empfänger des Nexus	Kami-Empfängerin des Nexus
+_8FBFED338B1652B2	gn_kami_welcomer_p4	Kami-Empfänger des Abgrunds von Ichor	Kami-Empfängerin des Abgrunds von Ichor
+_23E20B87FA7DCF20	gn_kami_welcomer_p5	Kami-Empfänger des Unergründlichen Waldes	Kami-Empfängerin des Unergründlichen Waldes
+_9593636CC957EF23	gn_kami_welcomer_p6	Kami-Empfänger des Landes der Kontinuität	Kami-Empfängerin des Landes der Kontinuität
+_097CD29EE57D72BC	gn_kami_welcomer_p7	Kami-Empfänger der Versunkenen Stadt	Kami-Empfängerin der Versunkenen Stadt
+_26D4737978D6AEE6	gn_kami_welcomer_p8	Kami-Empfänger des Grabens der Heimsuchung	Kami-Empfängerin des Grabens der Heimsuchung
+_98379B3C8D3422BB	gn_kami_welcomer_p9	Kami-Empfänger der Verbotenen Quellen	Kami-Empfängerin der Verbotenen Quellen
+_0ED40E7AB7151ABA	gn_kami_welcomer_t1	Kami-Empfänger der Strände des Überflusses	Kami-Empfängerin der Strände des Überflusses
+_9692ED7F3AF4E1B9	gn_kami_welcomer_t2	Kami-Empfänger der Region der Tautropfen	Kami-Empfängerin der Region der Tautropfen
+_D46EE1571E42F3BD	gn_kami_welcomer_t3	Kami-Empfänger der Verzauberten Insel	Kami-Empfängerin der Verzauberten Insel
+_0AEC6A0CB7654EC2	gn_kami_welcomer_t4	Kami-Empfänger der Lagunen von Loria	Kami-Empfängerin der Lagunen von Loria
+_80DEA91EBBC2F6AA	gn_kami_welcomer_t5	Kami-Empfänger des Sees der Freiheit	Kami-Empfängerin des Sees der Freiheit
+_929E8914E0DE19C8	gn_kami_welcomer_t6	Kami-Empfänger des Ruhigen Wassers	Kami-Empfängerin des Ruhigen Wassers
+_F20629595BBFA153	gn_kami_welcomer_t7	Kami-Empfänger des Ursprungs	Kami-Empfängerin des Ursprungs
+_949F7D1D70F036C6	gn_kami_welcomer_t8	Kami-Empfänger der Winde der Muse	Kami-Empfängerin der Winde der Muse
+_DF961A76CDE15284	gn_kami_welcomer_z1	Kami-Empfänger der Städte der Einsicht	Kami-Empfängerin der Städte der Einsicht
+_95EDA3A023B69E80	gn_kami_welcomer_z2	Kami-Empfänger des Wäldchens von Umbra	Kami-Empfängerin des Wäldchens von Umbra
+_568282F0DC7D1DAE	gn_kami_welcomer_z3	Kami-Empfänger des Hafens der Reinheit	Kami-Empfängerin des Hafens der Reinheit
+_8396B76435B5F38C	gn_kami_welcomer_z4	Kami-Empfänger des Knotens des Demenz	Kami-Empfängerin des Knotens des Demenz
+_16711E208BE0F6C0	gn_kami_welcomer_z5	Kami-Empfänger des Jungfräulichen Wäldchens	Kami-Empfängerin des Jungfräulichen Wäldchens
+_773A61DE8399CCE4	gn_kami_welcomer_z6	Kami-Empfänger des Nichts	Kami-Empfängerin des Nichts
+_55264B0272BCEEA4	gn_keepers_kami_ambassador_p1	Kami-Botschafter der Erinnerer	Kami-Botschafterin der Erinnerer
+_972A9AD04625984E	gn_lagoonbrothers_kami_ambassador_t1	Kami-Botschafter der Lagunenbrüder	Kami-Botschafterin der Lagunenbrüder
+_F1977E10720C0AAF	gn_leviers_kami_ambassador_f1	Kami-Botschafter der Zöllner	Kami-Botschafterin der Zöllner
+_2676847A13EE1B1D	gn_pyromancers_kami_ambassador_p1	Kami-Botschafter der Feuermagierinnen	Kami-Botschafterin der Feuermagierinnen
+_00EF54EB6842740A	gn_recoverers_kami_ambassador_p1	Kami-Botschafter der Recycler	Kami-Botschafterin der Recycler
+_C1CED855DE196722	gn_restorers_kami_ambassador_f1	Kami-Botschafter der Aufpasser	Kami-Botschafterin der Aufpasser
+_8C3310B6F5BFBB17	gn_sacredsap_kami_ambassador_m1	Kami-Botschafter des Heiligen Sap	Kami-Botschafterin des Heiligen Sap
+_BA313C79703E29EA	gn_sapgleaners_kami_ambassador_p1	Kami-Botschafter der Sapsammler	Kami-Botschafterin der Sapsammler
+_9CFB26E3C4563618	gn_shadowrunners_kami_ambassador_z1	Kami-Botschafter der Schattenschmuggler	Kami-Botschafterin der Schattenschmuggler
+_99A3A3A5516BF8C8	gn_siblings_kami_ambassador_m1	Kami-Botschafter der Geschwister der Pflanzen	Kami-Botschafterin der Geschwister der Pflanzen
+_2DABDF97E7FBEB80	gn_tutors_kami_ambassador_z1	Kami-Botschafter der Tutoren	Kami-Botschafterin der Tutoren
+_C223D074C1867594	gn_waterbreakers_kami_ambassador_f1	Kami-Botschafter der Wasserbrecher	Kami-Botschafterin der Wasserbrecher
+_E2CC5411CD04E032	gn_wovenbridles_kami_ambassador_m1	Kami-Botschafter der Wüstenplünderer	Kami-Botschafterin der Wüstenplünderer
+_2B7D1365632C5EC4	gn_zorai_kami_master	Kami-Meister des Hornbergs	Kami-Meisterin des Hornbergs
+_D2F413B7CA90DA46	gn_antikamis_karavan_ambassador_z1	Karavan-Botschafter der Antikamis	Karavan-Botschafterin der Antikamis
+_A813537EFBC18BAF	gn_aridmatis_karavan_ambassador_m1	Karavan-Botschafter der Dörre Matis	Karavan-Botschafterin der Dörre Matis
+_E5B6FD7C33B20CAC	gn_barkers_karavan_ambassador_f1	Karavan-Botschafter der Rindengräber	Karavan-Botschafterin der Rindengräber
+_5112D4916ACFF996	gn_blackcircle_karavan_ambassador_z1	Karavan-Botschafter des Schwarzen Kreises	Karavan-Botschafterin des Schwarzen Kreises
+_A6D6B91A0C120542	gn_darkeningsap_karavan_ambassador_m1	Karavan-Botschafter der Matiagoo	Karavan-Botschafterin der Matiagoo
+_8A3101B0120100C0	gn_gooheads_karavan_ambassador_z1	Karavan-Botschafter der Erleuchteten des Goo	Karavan-Botschafterin der Erleuchteten des Goo
+_EA42CEC268D67FA9	gn_greenseed_karavan_ambassador_m1	Karavan-Botschafter des Grünen Samens	Karavan-Botschafterin des Grünen Samens
+_73BFAAEB6B3E167B	gn_karavan_welcomer_f1	Karavan-Empfänger der Dünen der Verbannung	Karavan-Empfängerin der Dünen der Verbannung
+_6F52F3BF6F3E3273	gn_karavan_welcomer_f2	Karavan-Empfänger der Frahar-Türme	Karavan-Empfängerin der Frahar-Türme
+_AD01D7687FF5967E	gn_karavan_welcomer_f3	Karavan-Empfänger der Imperialen Dünen	Karavan-Empfängerin der Imperialen Dünen
+_AE1273A8E4A898DB	gn_karavan_welcomer_f4	Karavan-Empfänger von Oflovaks Oase	Karavan-Empfängerin von Oflovaks Oase
+_6E5103DDC7003C96	gn_karavan_welcomer_f5	Karavan-Empfänger des Canyons der Gesetzlosen	Karavan-Empfängerin des Canyons der Gesetzlosen
+_B2019BC6AD400E84	gn_karavan_welcomer_f6	Karavan-Empfänger der Sägemehl-Minen	Karavan-Empfängerin der Sägemehl-Minen
+_AEE193F5C0FEB985	gn_karavan_welcomer_f7	Karavan-Empfänger der Wilden Dünen	Karavan-Empfängerin der Wilden Dünen
+_DBA9B77AC93E2374	gn_karavan_welcomer_f8	Karavan-Empfänger der Sengenden Schlucht	Karavan-Empfängerin der Sengenden Schlucht
+_1C0173DD83E1A029	gn_karavan_welcomer_m1	Karavan-Empfänger des Vergänglichen Gartens	Karavan-Empfängerin des Vergänglichen Gartens
+_B51898121F36482E	gn_karavan_welcomer_m2	Karavan-Empfänger des Hains der Verwirrung	Karavan-Empfängerin des Hains der Verwirrung
+_CCC3F0774EA20E0A	gn_karavan_welcomer_m3	Karavan-Empfänger von Ketzers Hütte	Karavan-Empfängerin von Ketzers Hütte
+_F041276DB204B554	gn_karavan_welcomer_m4	Karavan-Empfänger der Versteckten Quelle	Karavan-Empfängerin der Versteckten Quelle
+_BD43CC4A968ECE4C	gn_karavan_welcomer_m5	Karavan-Empfänger der Hügel der Abtrünnigen	Karavan-Empfängerin der Hügel der Abtrünnigen
+_AFB1474494408ADB	gn_karavan_welcomer_m6	Karavan-Empfänger des Majestätischen Gartens	Karavan-Empfängerin des Majestätischen Gartens
+_AE41A365C613B59E	gn_karavan_welcomer_m7	Karavan-Empfänger des Oberen Sumpfes	Karavan-Empfängerin des Oberen Sumpfes
+_794C2A82ABCA870C	gn_karavan_welcomer_p1	Karavan-Empfänger des Nexus	Karavan-Empfängerin des Nexus
+_6D81E31C0714D9D7	gn_karavan_welcomer_t1	Karavan-Empfänger der Strände des Überflusses	Karavan-Empfängerin der Strände des Überflusses
+_DA725BF7F56515C5	gn_karavan_welcomer_t2	Karavan-Empfänger der Region der Tautropfen	Karavan-Empfängerin der Region der Tautropfen
+_FBB2BFB435E2C8AA	gn_karavan_welcomer_t3	Karavan-Empfänger der Verzauberten Insel	Karavan-Empfängerin der Verzauberten Insel
+_B001238BBE30E5DC	gn_karavan_welcomer_t4	Karavan-Empfänger der Lagunen von Loria	Karavan-Empfängerin der Lagunen von Loria
+_2B817AB9BA5E19A2	gn_karavan_welcomer_t5	Karavan-Empfänger des Sees der Freiheit	Karavan-Empfängerin des Sees der Freiheit
+_5D629BB4AFAE7084	gn_karavan_welcomer_t6	Karavan-Empfänger der Ruhigen Wasser	Karavan-Empfängerin der Ruhigen Wasser
+_D60BA22AAA022C72	gn_karavan_welcomer_t7	Karavan-Empfänger des Ursprungs	Karavan-Empfängerin des Ursprungs
+_2E42CBC2EF3F0185	gn_karavan_welcomer_t8	Karavan-Empfänger der Winde der Muse	Karavan-Empfängerin der Winde der Muse
+_F82D7F4847D43A9A	gn_karavan_welcomer_z1	Karavan-Empfänger der Städte der Einsicht	Karavan-Empfängerin der Städte der Einsicht
+_A5DECBBDDF7794F7	gn_karavan_welcomer_z2	Karavan-Empfänger des Wäldchens von Umbra	Karavan-Empfängerin des Wäldchens von Umbra
+_9EC1E7F5BE6CA463	gn_karavan_welcomer_z3	Karavan-Empfänger des Hafens der Reinheit	Karavan-Empfängerin des Hafens der Reinheit
+_FB9F2A3520B2BDE7	gn_karavan_welcomer_z4	Karavan-Empfänger des Knotens der Demenz	Karavan-Empfängerin des Knotens der Demenz
+_2BE2E3E2876F17AA	gn_karavan_welcomer_z5	Karavan-Empfänger des Jungfräulichen Wäldchens	Karavan-Empfängerin des Jungfräulichen Wäldchens
+_7915EA6EAC4B9B16	gn_karavan_welcomer_z6	Karavan-Empfänger des Nichts	Karavan-Empfängerin des Nichts
+_4A287CFEEBEFCF4D	gn_kuilde_karavan_ambassador_p1	Karavan-Empfänger der Kuilde	Karavan-Empfängerin der Kuilde
+_92BE343DC9BFB7B5	gn_lawless_karavan_ambassador_f1	Karavan-Empfänger der Gesetzlosen	Karavan-Empfängerin der Gesetzlosen
+_0848EDE97A399896	gn_masters_karavan_ambassador_z1	Karavan-Empfänger des Meister des Goo	Karavan-Empfängerin des Meister des Goo
+_BC445624F8A5F197	gn_matisianborder_karavan_ambassador_m1	Karavan-Empfänger der Matisianischen Grenzwächter	Karavan-Empfängerin der Matisianischen Grenzwächter
+_E997711ACC9A652A	gn_oasisdiggers_karavan_ambassador_m1	Karavan-Empfänger der Brunnengräber	Karavan-Empfängerin der Brunnengräber
+_D48E17AAC910D437	gn_renegades_karavan_ambassador_f1	Karavan-Empfänger der Abtrünnigen	Karavan-Empfängerin der Abtrünnigen
+_4D4DACC2A85766F2	gn_sapslaves_karavan_ambassador_m1	Karavan-Empfänger der Sapsklaven	Karavan-Empfängerin der Sapsklaven
+_938E1B268AA1FA36	gn_scorchers_karavan_ambassador_f1	Karavan-Empfänger der Enthäuteten	Karavan-Empfängerin der Enthäuteten
+_B55C44C3C81FC814	gn_siltsculptors_karavan_ambassador_t1	Karavan-Empfänger der Lehmbildhauer	Karavan-Empfängerin der Lehmbildhauer
+_FF3C778C451EC2BB	gn_slashandburn_karavan_ambassador_m1	Karavan-Empfänger der Scharlachroten Söldner	Karavan-Empfängerin der Scharlachroten Söldner
+_C5D56D77706414A2	gn_slavers_karavan_ambassador_t1	Karavan-Empfänger der Sklaventreiber	Karavan-Empfängerin der Sklaventreiber
+_AF54D3B1A608AFA8	gn_smugglers_karavan_ambassador_t1	Karavan-Empfänger der Schmuggler	Karavan-Empfängerin der Schmuggler
+_3EB9FB0AA6DCEB16	gn_fairhaven_karavan_officer	Karavan-Offizier von Fairhaven	Karavan-Offizierin von Fairhaven
+_9837517501107C54	gn_iconworshipers_kami_ambassador_z1	Kami-Empfänger der Ikonenschnitzer	Kami-Empfängerin der Ikonenschnitzer
+_77C501027D4C21B1	gn_yrkanis_kami_master	Kami-Meister von Yrkanis	Kami-Meisterin von Yrkanis
+_736D43BDE135E227	gn_yrkanis_karavan_officer	Karavan-Offizer von Yrkanis	Karavan-Offizerin von Yrkanis
+_AE66FBD662235749	gn_r_10_17_kami_gentil	Freundlicher Kami	Freundlicher Kami
+_E1284020E483E8BD	gn_cowardly_ragus	Feiger Ragus	Feiger Ragus
+_420CA56DA9999F3D	gn_pyr_kami_master	Kami-Meister von Pyr	Kami-Meisterin von Pyr
+_7BD0F6ECBF46BA47	gn_Black_Circle_Magician	Magier des Schwarzen Kreises	Magierin des Schwarzen Kreises
+_5077A0630FF9ECAC	gn_Kami_Adept	Kami-Anhänger	Kami-Anhängerin
+_D71294899E0724A8	gn_Kami_Envoy	Kami-Gesandter	Kami-Gesandte
+_5D0F7827E6298895	gn_Kami_Preacher	Kami-Verkünder	Kami-Verkünderin
+_20579C6ACBE60C92	gn_Kami_Seeker	Kami Sucher	Kami Sucherin
+_DEC37879E6D8DC94	gn_Kami_Sentinel	Kami-Wachposten	Kami-Wachposten
+_46D269F7AD99E098	gn_Karavan_Guardian	Karavan-Wächter	Karavan-Wächterin
+_783D29400B77390D	gn_Karavan_Teleporter	Karavan-Teleporter	Karavan-Teleporter
+_99E8A1192899A0F1	gn_Trophies_Trader	Trophäenhändler	Trophäenhändlerin
+_6164A3B1ED596CAE	gn_akiolulk	Mecaon Lyseus	Mecaon Lyseus
+_27A6D0A99BE7F4A8	gn_ancient_dryads_guard	Mächtiger Wächter	Mächtige Wächterin
+_A1A780996488789C	gn_chichai	Chichai	Chichai
+_A6C858AFE9B704A6	gn_cockroaches_guards	Elite-Wächter	Elite-Wächterin
+_6F9DD50658848FC6	gn_e_01_fy_passeur_1	Schleuser	Schleuserin
+_BA0EE5DF59B740C2	gn_e_01_ma_gatherer_1	Sammler	Sammlerin
+_61B47FA124859A76	gn_e_01_ma_guard_1	Wächter	Wächterin
+_61B483A124859A76	gn_e_01_ma_guard_2	Wächter	Wächterin
+_61B487A124859A76	gn_e_01_ma_guard_3	Wächter	Wächterin
+_61B48BA124859A76	gn_e_01_ma_guard_4	Wächter	Wächterin
+_6F1C910D58848FC6	gn_e_01_ma_passeur_1	Schleuser	Schleuserin
+_6F8DF10E58848FC6	gn_e_01_nx_passeur_1	Schleuser	Schleuserin
+_FE7F29E659B740C2	gn_e_01_tr_gatherer_1	Sammler	Sammlerin
+_61B4C3A8E6859A76	gn_e_01_tr_guard_1	Wächter	Wächterin
+_61B4C7A8E6859A76	gn_e_01_tr_guard_2	Wächter	Wächterin
+_61B4CBA8E6859A76	gn_e_01_tr_guard_3	Wächter	Wächterin
+_61B4CFA8E6859A76	gn_e_01_tr_guard_4	Wächter	Wächterin
+_61B4B7AE67859A76	gn_e_01_zo_guard_1	Wächter	Wächterin
+_61B4BBAE67859A76	gn_e_01_zo_guard_2	Wächter	Wächterin
+_61B4BFAE67859A76	gn_e_01_zo_guard_3	Wächter	Wächterin
+_61B4C3AE67859A76	gn_e_01_zo_guard_4	Wächter	Wächterin
+_64B54CB965298CAC	gn_firebrand_guard	Elite-Wächter	Elite-Wächterin
+_E867A08B204B80A4	gn_keepers_guard	Elite-Wächter	Elite-Wächterin
+_EA176C729715B79D	gn_lady_1	Dame	Dame
+_A937888E248990AA	gn_lagoon_brothers_guard	Elite-Wächter	Elite-Wächterin
+_A927CC2D2AA910AE	gn_leviers_warrior	Krieger der Zöllner	Kriegerin der Zöllner
+_9F447643741679B0	gn_outpost_pr_29_fyros_steward_p1	Debus Mekops	Debus Mekops
+_FDE9669EF07A8D0A	gn_outpost_pr_29_tmg_steward_p1	Kyn Pelorus	Kyn Pelorus
+_E3095E02875FC88F	gn_outpost_pr_29_tryker_steward_p1	Mac'Darssey Hathy	Mac'Darssey Hathy
+_E5099CA22C59CC9A	gn_roottappers_guard	Elite-Wächter	Elite-Wächterin
+_6BAE61F964A788BB	gn_tribe_lagoon_brothers_guard	Elite-Wächter	Elite-Wächterin
+_6D8B0F571C347EA5	gn_firebrands_karavan_agent	Karavan-Agent der Heißsporne	Karavan-Agentin der Heißsporne
+_FA9AA009B09C4F4E	gn_kitingatherers_karavan_agent	Karavan-Agent der Kitin-Jäger	Karavan-Agentin der Kitin-Jäger
+_14EEAFF111DF6B2E	gn_nightturner_karavan_agent	Karavan-Agent der Nachtwender	Karavan-Agentin der Nachtwender
+_ACFB1B5CA07BE3A0	gn_chlorogoos_karavan_agent	Karavan-Agent der Chlorogoos	Karavan-Agentin der Chlorogoos
+_4DDAD7A43DF03B3E	gn_roottappers_karavan_agent	Karavan-Agent der Unterwasserwurzel-Extrahierer	Karavan-Agentin der Unterwasserwurzel-Extrahierer
+_E5A26D3EDAAC35B1	gn_forbidden_depths_karavan_agent	Karavan-Agent der Verbotenen Tiefen	Karavan-Agentin der Verbotenen Tiefen
+_284AAD17890E131A	gn_the_abyss_of_ichor_karavan_agent	Karavan-Agent des Abgrunds von Ichor	Karavan-Agentin des Abgrunds von Ichor
+_16815695E0B00987	gn_the_elusive_forest_karavan_agent	Karavan-Agent des Unergründlichen Waldes	Karavan-Agentin des Unergründlichen Waldes
+_621881039555B50B	gn_the_land_of_continuty_karavan_agent	Karavan-Agent des Landes der Kontinuität	Karavan-Agentin des Landes der Kontinuität
+_545BBD6B3AC2506D	gn_the_windy_gate_karavan_agent	Karavan-Agent der Pforte des Sturms	Karavan-Agentin der Pforte des Sturms
+_DD0070D38973F884	gn_gate_of_obscurity_karavan_agent	Karavan-Agent des Tors der Dunkelheit	Karavan-Agentin des Tors der Dunkelheit
+_7C4E8D0D38BFD22F	gn_the_sunken_city_karavan_agent	Karavan-Agent der Versunkenen Stadt	Karavan-Agentin der Versunkenen Stadt
+_5AB25ADE67B2F4C4	gn_the_trench_of_trials_karavan_agent	Karavan-Agent des Grabens der Heimsuchung	Karavan-Agentin des Grabens der Heimsuchung
+_DC7E95B74BFAB4B2	gn_the_under_spring_karavan_agent	Karavan-Agent der Verbotenen Quellen	Karavan-Agentin der Verbotenen Quellen
+_70FB64E8434CC518	gn_karavan_worshipper	Karavan-Anhänger	Karavan-Anhängerin
+_E1CCB27E1A8C0319	gn_group_fde_boss_fyros	Aen Klinge der Wüste	Aen Klinge der Wüste
+_37BBA6079810AB02	gn_group_fde_guardian_fyros_heal	Anhänger der Wüstenklinge	Anhängerin der Wüstenklinge
+_35321DC3C5E1DD09	gn_group_fde_guardian_fyros_melee	Anhänger der Wüstenklinge	Anhängerin der Wüstenklinge
+_37BBA607D6B0EB08	gn_group_fde_guardian_fyros_nuke	Anhänger der Wüstenklinge	Anhängerin der Wüstenklinge
+_35321DC34501CD0E	gn_group_fde_guardian_fyros_range	Anhänger der Wüstenklinge	Anhängerin der Wüstenklinge
+_37BBA6079AF0D30C	gn_group_fde_guardian_fyros_root	Anhänger der Wüstenklinge	Anhängerin der Wüstenklinge
+_C18C35540651898F	gn_mhs_bandit_boss_matis	Sirgio der Schurke	Sirgio der Schurke
+_3F82516FD752F3D7	gn_mhs_bandit_guards_healer	Scherge des Schurken	Schergin des Schurken
+_F66C846D06A2A1BC	gn_mhs_bandit_guards_melee	Scherge des Schurken	Schergin des Schurken
+_3F82517D1D5207D7	gn_mhs_bandit_guards_mezzer	Scherge des Schurken	Schergin des Schurken
+_F66CB86DC5A3A5BC	gn_mhs_bandit_guards_nuker	Scherge des Schurken	Schergin des Schurken
+_F66C846F8662B5BC	gn_mhs_bandit_guards_range	Scherge des Schurken	Schergin des Schurken
+_0F2AF00EE7294126	gn_tei_bandit_boss_tryker	Lixie die Furie	Lixie die Furie
+_BEC1CCA4B8DABF47	gn_tei_bandit_guards_healer	Komplize der Furie	Komplizin der Furie
+_959A544C52DA5BF6	gn_tei_bandit_guards_melee	Komplize der Furie	Komplizin der Furie
+_BEC1CCB2FEDAD347	gn_tei_bandit_guards_mezzer	Komplize der Furie	Komplizin der Furie
+_959A884C11DB5FF6	gn_tei_bandit_guards_nuker	Komplize der Furie	Komplizin der Furie
+_959A544ED29A6FF6	gn_tei_bandit_guards_range	Komplize der Furie	Komplizin der Furie
+_DDBC9DF93A96C500	gn_zkod_bandit_boss_zorai	Pei-Ziao der Verdorbene	Pei-Ziao der Verdorbene
+_7899B52415024CCC	gn_zkod_bandit_guards_healer	Anhänger des Verdorbenen	Anhängerin des Verdorbenen
+_71DA25B8AA93D855	gn_zkod_bandit_guards_melee	Anhänger des Verdorbenen	Anhängerin des Verdorbenen
+_7899ED3D15524CCC	gn_zkod_bandit_guards_mezzer	Anhänger des Verdorbenen	Anhängerin des Verdorbenen
+_71AB25B7AEA3D855	gn_zkod_bandit_guards_nuker	Anhänger des Verdorbenen	Anhängerin des Verdorbenen
+_AB1CA514D0E63C52	fct_h_tattooer	(Herren-Tätowierer)	(Herren-Tätowiererin)
+_C4997CFE124A5C13	fct_h_hairdresser	(Herren-Friseur)	(Herren-Friseurin)
+_C4997CFE12DC4D11	fct_f_hairdresser	(Damen-Friseur)	(Damen-Friseurin)
+_F5E0A514D0E63C50	fct_f_tattooer	(Damen-Tätowierer)	(Damen-Tätowiererin)
+_5877A0830FF9ECAC	gn_kami_adept	Kami-Anhänger	Kami-Anhängerin
+_6B37B89DE8B7304C	gn_kami_guardian	Kami-Wächter	Kami-Wächterin
+_1D94BCB599F834A4	tribe_chief	Stammesführer	Stammesanführerin
+_CBCCEE400FED266A	gn_fairhaven_kami_master	Kami-Meister von Fairhaven	Kami-Meisterin von Fairhaven
+_69479C86212958C0	gn_guard_company_caster	Erfahrener Wächter	Erfahrene Wächterin
+_2808646CE9095CBE	gn_guard_company_footman	Erfahrener Kämpfer	Erfahrene Kämpferin
+_E968986C6BD93CB1	gn_guard_company_sergent	Wachmeister	Wachmeisterin
+_88ED89F520E0CD05	gn_pyr_karavan_officer	Karavan-Offizier von Pyr	Karavan-Offizierin von Pyr
+_9666D3651A47B78D	gn_r_07_13_boss	Söldneranführer	Söldneranführerin
+_0229DC773D8C57FF	gn_r_07_13_guard	Karavan-Söldner	Karavan-Söldnerin
+_2F3FC3A8F944664D	gn_tryker_kami_master	Kami-Meister des Verzauberten Kreises 	Kami-Meisterin des Verzauberten Kreises 
+_F6AE7577F7167298	gn_fyros_war_master_event	Fyros-Kriegsmeister	Fyros-Kriegsmeisterin
+_410682F316DF1BE7	gn_fyros_supply_master_event	Fyros-Ressourcenmeister	Fyros-Ressourcenmeister
+_DD1C99E0DD332078	gn_fyros_craftsman_master_event	Fyros-Handwerkermeister	Fyros-Handwerkermeisterin
+_5F072F8E5FA88F22	gn_fyros_armoury_master_event	Fyros-Rüstungsmeister	Fyros-Rüstungsmeisterin
+_736472ED875FEDF2	gn_fyros_treasury_officer_event	Fyros-Schatzmeister	Fyros-Schatzmeisterin
+_B21E7577F7B66282	gn_matis_war_master_event	Matis-Kriegsmeister	Matis-Kriegsmeisterin
+_FD7682F3167F0BD1	gn_matis_supply_master_event	Matis-Ressourcenmeister	Matis-Ressourcenmeisterin
+_9F1C81E2D7432860	gn_matis_craftsman_master_event	Matis-Handwerkermeister	Matis-Handwerkermeisterin
+_E3072F8E5FE89FF2	gn_matis_armoury_master_event	Matis-Rüstungsmeister	Matis-Rüstungsmeisterin
+_2FD472ED87FFDDDC	gn_matis_treasury_officer_event	Matis-Schatzmeister	Matis-Schatzmeisterin
+_86EEFEBE582682EA	gn_tryker_war_master_event	Tryker-Kriegsmeister	Tryker-Kriegsmeisterin
+_EA27EF3A82CDBF0F	gn_tryker_supply_master_event	Tryker-Ressourcenmeister	Tryker-Ressourcenmeisterin
+_3B40BFDCD41EE6FB	gn_tryker_craftsman_master_event	Tryker-Handwerkermeister	Tryker-Handwerkermeisterin
+_67D923E2244B73A1	gn_tryker_armoury_master_event	Tryker-Rüstungsmeister	Tryker-Rüstungsmeisterin
+_64E5D7007C13EBDC	gn_tryker_treasury_officer_event	Tryker-Schatzmeister	Tryker-Schatzmeisterin
+_78EF757775FD3A8E	gn_zorai_war_master_event	Zoraï-Kriegsmeister	Zoraï-Kriegsmeisterin
+_C34782F394C6E3DD	gn_zorai_supply_master_event	Zoraï-Ressourcenmeister	Zoraï-Ressourcenmeisterin
+_E2E361E0D894206E	gn_zorai_craftsman_master_event	Zoraï-Handwerkermeister	Zoraï-Handwerkermeisterin
+_69072F8EFCE88F0E	gn_zorai_armoury_master_event	Zoraï-Rüstungsmeister	Zoraï-Rüstungsmeisterin
+_F5A572ED0546B5E8	gn_zorai_treasury_officer_event	Zoraï-Schatzmeister	Zoraï-Schatzmeisterin
+_635F908DDB68D455	gn_femme_gibbai	Gibbaï-Frau	Gibbaï-Frau
+_02CE59FCB59ADB17	gn_guerisseuse_gibbai	Gibbaï-Heiler	Gibbaï-Heilerin
+_24F7A47C5619AA9B	gn_gibbai_welcomer	Alter Gibbaï	Alte Gibbaï
+_7E4BD3106875630E	gn_zora_kami_master	Kami-Meister von Zora	Kami-Meisterin von Zora
+_4C192174745CF64A	gn_matis_kami_master	Kami-Meister des Kamikreises	Kami-Meisterin des Kamikreises
+_3535EE417CC7BE84	gn_prime_roots_kami_master	Kami-Meister des Mittelwegpunktes	Kami-Meisterin des Mittelwegpunktes
+_4B14339E56F54E67	gn_tribe_sacred_sap_tribe_lieutenant	Kommandant	Kriegsanführerin
+_D4DB285EAEEB3E8C	gn_fyros_karavan_officer	Karavan-Offizier der Dünen des Exils 	Karavan-Offizierin der Dünen des Exils 
+_FE9DDC863E33FBB1	gn_matis_karavan_officer	Karavan-Offizier des Oberen Sumpfes	Karavan-Offizierin des Oberen Sumpfes
+_CE447A27A7B65A41	gn_nexus_karavan_officer	Karavan-Offizier von Nexus	Karavan-Offizierin von Nexus
+_F458ADECC36667A8	gn_tryker_karavan_officer	Karavan-Offizier des Ursprungs	Karavan-Offizierin des Ursprungs
+_16418A569146C696	gn_zora_karavan_officer	Karavan-Offizier von Zora	Karavan-Offizierin von Zora
+_71614C503F279415	gn_zorai_karavan_officer	Karavan-Offizier des Hains von Umbra	Karavan-Offizierin des Hains von Umbra
+_C8068465E6069C94	gn_Goo_Spot	Goo-Stelle	Goo-Stelle
+_62970C91E9F83099	gn_Tower	Turm	Turm
+_6907C8A102D82064	gn_kuilde_guard	Mächtiger Wächter	Mächtige Wächterin
+_EDBF4C858F925029	gn_tribe_company_of_the_eternal_tree_tribe_chief	Mac'Rippsey Lynle	Mac'Rippsey Lynle
+_6C75F51328F7A471	gn_tribe_cutes_guards	Elite-Wächter	Elite-Wächterin
+_4D088BDA0AA9D2BA	gn_fyros_kami_master	Kamimeister der Thesos-Quelle	Kamimeisterin der Thesos-Quelle
+_FF7DAFB9F3AA72D6	gn_kami_altar_bountybeaches	Kamialtar der Strände des Überflusses	Kamialtar der Strände des Überflusses
+_E650933956EA1376	gn_kami_altar_citiesofintuition_hoi_cho	Kamialtar von Hoï-Cho	Kamialtar von Hoï-Cho
+_D0C0FB18E94A6357	gn_kami_altar_citiesofintuition_jen_lai	Kamialatar von Jen-Laï 	Kamialatar von Jen-Laï 
+_5130E71BE9EA8B4E	gn_kami_altar_citiesofintuition_min_cho	Kamialtar von Min-Cho	Kamialtar von Min-Cho
+_B6A8A1FB159187CB	gn_kami_altar_citiesofintuition_zora	Kamialtar von Zora	Kamialtar von Zora
+_41137715B1A5C60E	gn_kami_altar_dunesofexil_dyron	Kamialtar der Dünen der Verbannung	Kamialtar der Dünen der Verbannung
+_22B6274CEA6E7EFF	gn_kami_altar_enchantedisle	Kamialtar der Verzauberten Insel	Kamialtar der Verzauberten Insel
+_B088A9A057A767C2	gn_kami_altar_fleetinggarden	Kamialtar des Vergänglichen Gartens	Kamialtar des Vergänglichen Gartens
+_82F8252C5160F8D4	gn_kami_altar_forbidden_depths	Kamialtar der Verbotenen Tiefen	Kamialtar der Verbotenen Tiefen
+_7E962EDE65A783AE	gn_kami_altar_frahartowers	Kamialtar der Frahar-Türme	Kamialtar der Frahar-Türme
+_5A471070187CE807	gn_kami_altar_groveofconfusion	Kamialtar des Hains der Verwirrung	Kamialtar des Hains der Verwirrung
+_3BB5340CBB1CFF69	gn_kami_altar_groveofumbra	Kamialtar des Wäldchens von Umbra	Kamialtar des Wäldchens von Umbra
+_B2EA9E4CD6586EFB	gn_kami_altar_havenofpurity	Kamialtar des Hafens der Reinheit	Kamialtar des Hafens der Reinheit
+_D29EAE0F0252FA3A	gn_kami_altar_hereticshovel	Kamialtar von Ketzers Hütte	Kamialtar von Ketzers Hütte
+_B0B21AAB0E548BAC	gn_kami_altar_hiddensource	Kamialtar der Versteckten Quelle	Kamialtar der Versteckten Quelle
+_FA831F6411FAF7E5	gn_kami_altar_imperialdunes_pyr	Kamialtar der Imperialen Dünen	Kamialtar der Imperialen Dünen
+_3D6E0E79023A2829	gn_kami_altar_knollofdissent	Kamialtar der Hügel der Abtrünnigen	Kamialtar der Hügel der Abtrünnigen
+_49483657BFF59610	gn_kami_altar_knotofdementia	Kamialtar des Knoten der Demenz	Kamialtar des Knoten der Demenz
+_E9C4424BF3F73775	gn_kami_altar_lagoonsofloria	Kamialtar der Lagunen von Loria	Kamialtar der Lagunen von Loria
+_ACDB10AA74AA9E05	gn_kami_altar_libertylake_fairhaven	Kamialtar von Fairhaven 	Kamialtar von Fairhaven 
+_28BD17CFC36852CD	gn_kami_altar_maidengrove	Kamialtar des Jungfräulichen Wäldchens	Kamialtar des Jungfräulichen Wäldchens
+_606D38B809EE9083	gn_kami_altar_majesticgarden_yrkanis	Kamialtar des Majestätischen Gartens	Kamialtar des Majestätischen Gartens
+_0AB7DA6B31A74D10	gn_kami_altar_nexus_terre	Kamialtar des Nexus	Kamialtar des Nexus
+_DBD4E868B5AACEE3	gn_kami_altar_oflovaksoasis	Kamialtar von Oflovaks Oase	Kamialtar von Oflovaks Oase
+_C078AFA7F4D83B9D	gn_kami_altar_outlawcanyon	Kamialtar des Canyons der Gesetzlosen	Kamialtar des Canyons der Gesetzlosen
+_F8666E77BA3582B2	gn_kami_altar_restingwater	Kamialtar der Ruhigen Wasser	Kamialtar der Ruhigen Wasser
+_384802E720A8AFA9	gn_kami_altar_sawdustmines	Kamialtar der Sägemehlminen	Kamialtar der Sägemehlminen
+_0D7C200860782067	gn_kami_altar_the_abyss_of_ichor	Kamialtar des Abgrunds von Ichor	Kamialtar des Abgrunds von Ichor
+_E9134D2F895D0AE8	gn_kami_altar_the_elusive_forest	Kamialtar des Unergründlichen Waldes	Kamialtar des Unergründlichen Waldes
+_278F7CD42AB38456	gn_kami_altar_the_land_of_continuity	Kamialtar des Landes der Kontinuität	Kamialtar des Landes der Kontinuität
+_43A5323EE61AB6EA	gn_kami_altar_the_sunken_city	Kamialtar der Versunkenen Stadt	Kamialtar der Versunkenen Stadt
+_E2567AB12291DBCF	gn_kami_altar_the_trench_of_trials_zorai	Kamialtar des Grabens der Heimsuchung	Kamialtar des Grabens der Heimsuchung
+_DAAF30B347BF84A3	gn_kami_altar_the_under_spring_fyros	Kamialtar der Verbotenen Quellen	Kamialtar der Verbotenen Quellen
+_8ABDBA3E6BB54B74	gn_kami_altar_the_windy_gate	Kamialtar der Pforte des Sturms	Kamialtar der Pforte des Sturms
+_5090DFFBBBE22340	gn_kami_altar_thesavagedunes_thesos	Kamialtar der Wilden Dünen	Kamialtar der Wilden Dünen
+_23E1424557AFB3E9	gn_kami_altar_thescorchedcorridor	Kamialtar der Sengenden Schlucht	Kamialtar der Sengenden Schlucht
+_F336C9F616207D01	gn_kami_altar_thevoid	Kamialtar des Nichts	Kamialtar des Nichts
+_EA3C977244E342DC	gn_kami_altar_windsofmuse	Kamialtar der Winde der Musen	Kamialtar der Winde der Musen
+_4AD9879E9E9C9A4F	gn_kami_altar_upperbog	Kamialtar des Oberen Sumpfes	Kamialtar des Oberen Sumpfes
+_D4DB36A85FA4CD85	gn_kami_altar_dewdrops	Kamialtar der Tautropfen	Kamialtar der Tautropfen
+_7775FE307CC90D5D	gn_kami_altar_thefount	Kamialtar des Ursprungs	Kamialtar des Ursprungs
+_8704F06F3041ABA9	gn_kami_altar_gate_of_obscurity	Kamialtar des Tors der Dunkelheit	Kamialtar des Tors der Dunkelheit
+_6DFEE550424DB022	gn_karavan_altar_bountybeaches	Karavanaltar der Strände des Überflusses	Karavanaltar der Strände des Überflusses
+_18EEC42C622C5B5A	gn_karavan_altar_citiesofintuition_zora	Karavanaltar von Zora	Karavanaltar von Zora
+_6C2CDB25A18353E4	gn_karavan_altar_dewdrops	Karavanaltar der Tautropfen	Karavanaltar der Tautropfen
+_FE55DC9528BD98DF	gn_karavan_altar_dunesofexil_dyron	Karavanaltar der Dünen der Verbannung	Karavanaltar der Dünen der Verbannung
+_6CBE5C05FE357859	gn_karavan_altar_enchantedisle	Karavanaltar der Verzauberten Insel	Karavanaltar der Verzauberten Insel
+_CE6F7423591777A4	gn_karavan_altar_fleetinggarden	Karavanaltar des Vergänglichen Gartens	Karavanaltar des Vergänglichen Gartens
+_AEF0C114DD6C99A2	gn_karavan_altar_forbidden_depths	Karavanaltar der Verbotenen Tiefen	Karavanaltar der Verbotenen Tiefen
+_07A8F0112D4F14EF	gn_karavan_altar_frahartowers	Karavanaltar der Frahar-Türme	Karavanaltar der Frahar-Türme
+_DFDF80B68C23F0A7	gn_karavan_altar_gate_of_obscurity	Karavanaltar des Tors der Dunkelheit	Karavanaltar des Tors der Dunkelheit
+_2DB457F3D4BFA986	gn_karavan_altar_groveofconfusion	Karavanaltar des Hains der Verwirrung	Karavanaltar des Hains der Verwirrung
+_C004A4F51920865B	gn_karavan_altar_groveofumbra	Karavanaltar des Wäldchens von Umbra	Karavanaltar des Wäldchens von Umbra
+_35538677B4007C96	gn_karavan_altar_hereticshovel	Karavanaltar von Ketzers Hütte 	Karavanaltar von Ketzers Hütte 
+_85D724BF2F9B9FB7	gn_karavan_altar_hiddensource	Karavanaltar der Versteckten Quelle	Karavanaltar der Versteckten Quelle
+_DD73BC8F7070C635	gn_karavan_altar_imperialdunes_pyr	Karavanaltar der Imperialen Dünen	Karavanaltar der Imperialen Dünen
+_6DA6288DBBC4F5DE	gn_karavan_altar_knollofdissent	Karavanaltar der Hügel der Abtrünnigen	Karavanaltar der Hügel der Abtrünnigen
+_C354793EF831E19D	gn_karavan_altar_knotofdementia	Karavanaltar des Knotens der Demenz	Karavanaltar des Knotens der Demenz
+_884A2CF03D613CCC	gn_karavan_altar_lagoonsofloria	Karavanaltar der Lagunen von Loria	Karavanaltar der Lagunen von Loria
+_4466343503AEBBE3	gn_karavan_altar_libertylake_avendale	Karavanalter von Avendale	Karavanalter von Avendale
+_4D4F9D8B42F2E4AA	gn_karavan_altar_libertylake_crystabell	Karavanaltar von Crystabell 	Karavanaltar von Crystabell 
+_EA1F0850D21CA806	gn_karavan_altar_libertylake_fairhaven	Karavanaltar von Fairhaven	Karavanaltar von Fairhaven
+_4DAF55897F725C9B	gn_karavan_altar_libertylake_windermeer	Karavanaltar von Windermeer	Karavanaltar von Windermeer
+_ECEE6836BCA8B2A6	gn_karavan_altar_majesticgarden_avalae	Karavanaltar von Avalae 	Karavanaltar von Avalae 
+_ABD7382A7C0A4AC1	gn_karavan_altar_majesticgarden_davae	Karavanaltar von Davae 	Karavanaltar von Davae 
+_ABB738327CAA4AC1	gn_karavan_altar_majesticgarden_natae	Karavanaltar von Natae	Karavanaltar von Natae
+_114EE44BAC182CAD	gn_karavan_altar_majesticgarden_yrkanis	Karavanaltar von Yrkanis 	Karavanaltar von Yrkanis 
+_5E61C1DB2525FA15	gn_karavan_altar_nexus_terre	Karavanaltar des Nexus	Karavanaltar des Nexus
+_0A180021402A9211	gn_karavan_altar_outlawcanyon	Karavanaltar des Canyons der Gesetzlosen	Karavanaltar des Canyons der Gesetzlosen
+_36D8700E294762DD	gn_karavan_altar_restingwater	Karavanaltar der Ruhigen Wasser	Karavanaltar der Ruhigen Wasser
+_8CD694166B2830FC	gn_karavan_altar_sawdustmines	Karavanaltar der Sägemehlminen	Karavanaltar der Sägemehlminen
+_9BB39B222B1FB183	gn_karavan_altar_the_abyss_of_ichor_matis	Karavanaltar des Abgrunds von Ichor	Karavanaltar des Abgrunds von Ichor
+_4F6F767BED52E960	gn_karavan_altar_the_elusive_forest	Karavanaltar des Unergründlichen Waldes	Karavanaltar des Unergründlichen Waldes
+_AE57DEB9A9FA8A73	gn_karavan_altar_the_land_of_continuity	Karavanaltar des Landes der Kontinuität	Karavanaltar des Landes der Kontinuität
+_664C9ABB481B0AD5	gn_karavan_altar_the_trench_of_trials_zorai	Karavanaltar des Grabens der Heimsuchung	Karavanaltar des Grabens der Heimsuchung
+_F54A3A7DEBE70925	gn_karavan_altar_the_under_spring_fyros	Karavanaltar der Verbotenen Quellen	Karavanaltar der Verbotenen Quellen
+_0A29B561BC21285C	gn_karavan_altar_the_windy_gate	Karavanaltar der Pforte des Sturms	Karavanaltar der Pforte des Sturms
+_9DF91ED31C7D0E19	gn_karavan_altar_thefount	Karavanaltar des Ursprungs	Karavanaltar des Ursprungs
+_06B441A57D71E8A4	gn_karavan_altar_thesavagedunes_thesos	Karavanaltar der Wilden Dünen	Karavanaltar der Wilden Dünen
+_914CD9A57D145496	gn_karavan_altar_thescorchedcorridor	Karavanaltar der Sengenden Schlucht	Karavanaltar der Sengenden Schlucht
+_55B4F6FA07BC5782	gn_karavan_altar_thevoid	Karavanaltar des Nichts	Karavanaltar des Nichts
+_7C89ABF934821B53	gn_karavan_altar_upperbog	Karavanaltar des Oberen Sumpfs	Karavanaltar des Oberen Sumpfs
+_385EAE4BB03716BB	gn_karavan_altar_windsofmuse	Karavanaltar der Winde der Musen	Karavanaltar der Winde der Musen
+_B70D5656F84CEB24	gn_karavan_altar_maidengrove	Karavanaltar des Jungfräulichen Wäldchens	Karavanaltar des Jungfräulichen Wäldchens
+_EB21B032A1B5CAE9	gn_karavan_altar_havenofpurity	Karavanaltar des Hafens der Reinheit	Karavanaltar des Hafens der Reinheit
+_308E80D2D697002C	gn_karavan_altar_oflovaksoasis	Karavanaltar von Oflovaks Oase	Karavanaltar von Oflovaks Oase
+_F4008DEE7A626E18	gn_karavan_altar_the_sunken_city	Karavanaltar der Versunkenen Stadt	Karavanaltar der Versunkenen Stadt
+_C7883CFA5F71C65E	gn_karavan_altar_oflovakoasis	Karavanaltar von Oflovaks Oase	Karavanaltar von Oflovaks Oase
+_E5104F05CFE4E3B8	gn_fyros_general_event	Fyros-General	Fyros-Generälin
+_A7103707C9F4EBA0	gn_matis_general_event	Matis-General	Matis-Generälin
+_081551A09726E418	gn_tryker_general_event	Tryker-General	Tryker-Generälin
+_EAD71705CA45E3AE	gn_zorai_general_event	Zoraï-General	Zoraï-Generälin
+_5CBD563E6B087591	gn_fyros_officer_event	Imperialer Fyros-Offizier	Imperiale Fyros-Offizierin
+_C20E6263C2F82DBD	gn_matis_officer_event	Königlicher Matis-Offizier	Königliche Matis-Offizierin
+_7FB4BC4B9520267D	gn_tryker_officer_event	Föderaler Tryker-Offizier	Föderale Tryker-Offizierin
+_A1B3E969FD771A91	gn_zorai_officer_event	Dynastischer Zoraï-Offizier	Dynastische Zoraï-Offizierin
+_82543A6F6E1C28FF	gn_matis_royal_guard_event	Königlicher Matis-Wächter	Königliche Matis-Wächterin
+_E12FCE2C455CBA52	gn_matis_royal_soldier_event	Königlicher Matis-Kämpfer	Königliche Matis-Kämpferin
+_075FCED71EAD1E66	gn_fyros_imperial_guard_event	Imperialer Fyros-Wächter	Imperiale Fyros-Wächterin
+_BBBB79FC4DFF0D84	gn_fyros_imperial_soldier_event	Imperialer Fyros-Kämpfer	Imperiale Fyros-Kämpferin
+_9F6F5FD8DE74B583	gn_zorai_dynastic_guard_event	Dynastischer Zoraï-Wächter	Dynastische Zoraï-Wächterin
+_C28CE39898D5E4DF	gn_zorai_dynastic_soldier_event	Dynastischer Zoraï-Kämpfer	Dynastische Zoraï-Kämpferin
+_142BD2E1198DD606	gn_tryker_federal_guard_event	Föderaler Tryker-Wächter	Föderale Tryker-Wächterin
+_3AAB3503F463C487	gn_tryker_federal_soldier_event	Föderaler Tryker-Kämpfer	Föderale Tryker-Kämpferin
+_E1703269857FF5BC	gn_karavan_commander_event	Karavan-Kommandant	Karavan-Kommandantin
+_3D376A48878E5512	gn_karavan_officer_event	Karavan-Offizier	Karavan-Offizierin
+_82581FB6824FD807	gn_karavan_ally_event	Karavan-Alliierter	Karavan-Alliierte
+_3C8A9087018F6114	gn_karavan_commando_event	Karavan-Kommandeur	Karavan-Kommandeurin
+_01FD9D1226E74720	gn_karavan_ship_event	Karavan-Schiff	Karavan-Schiff
+_A0F5721569CE1428	gn_kami_warlord_event	Kami-Kommandant	Kami-Kommandantin
+_B7D4C26623EB65D6	gn_kami_keeper_event	Kami-Landhalter	Kami-Landhalterin
+_5B06D00D92717477	gn_kami_ally_event	Kami-Alliierter	Kami-Alliierte
+_E857A5115FC8E7BB	gn_kami_fighter_event	Kami-Kämpfer	Kami-Kämpferin
+_813222557C88FCD9	gn_kitin_commander_event	Kitin Schwarm-Anführer	Kitin Schwarm-Anführer
+_2755C391A42918B5	gn_kitin_leader_event	Kitin-Anführer	Kitin-Anführer
+_FD09D5FAC98F5921	gn_kitin_protector_event	Kitin-Beschützer	Kitin-Beschützer
+_A9E66BA1E6988C96	gn_kitin_guard_event	Kitin-Wächter	Kitin-Wächter
+_C32EF9F9E03534B6	gn_kitin_raider_event	Kitin-Angreifer	Kitin-Angreifer
+_46FFB5E897C88029	gn_kitin_patrol_event	Kitin-Patrouille	Kitin-Patrouille
+_379CD8D1CFB93045	gn_infected_frahar_high_chief_event	Infizierter Frahar-Horden-Anführer	Infizierte Frahar-Horden-Anführerin
+_770BB8D14DA00C40	gn_infected_gibbai_high_chief_event	Infizierter Gibbaï-Horden-Anführer	Infizierte Gibbaï-Horden-Anführerin
+_DEA7540F68D792B1	gn_infected_cute_high_chief_event	Infizierter Cute-Horden-Anführer	Infizierte Cute-Horden-Anführerin
+_1BD0952738456673	gn_infected_frahar_hero_event	Infizierter Frahar-Anführer	Infizierte Frahar-Anführerin
+_D9E0712715552A75	gn_infected_gibbai_hero_event	Infizierter Gibbaï-Anführer	Infizierte Gibbaï-Anführerin
+_70660A476F3FA5C8	gn_infected_cute_hero_event	Infizierter Cute-Anführer	Infizierte Cute-Anführerin
+_56A7324E37BACBC6	gn_infected_frahar_defender_event	Infizierter Frahar-Beschützer	Infizierte Frahar-Beschützerin
+_56A7044E33DA83C8	gn_infected_gibbai_defender_event	Infizierter Gibbaï-Beschützer	Infizierte Gibbaï-Beschützerin
+_F5B832FE4D82EDE6	gn_infected_cute_defender_event	Infizierter Cute-Beschützer	Infizierte Cute-Beschützerin
+_3A3D08A34441DBFD	gn_infected_frahar_guard_leader_event	Infizierter Frahar Wächteranführer	Infizierte Frahar Wächteranführerin
+_3A14E49D02C0BBFE	gn_infected_gibbai_guard_leader_event	Infizierter Gibbaï Wächteranführer	Infizierte Gibbaï Wächteranführerin
+_E3BE44161269383C	gn_infected_cute_guard_leader_event	Infizierter Cute Wächteranführer	Infizierte Cute Wächteranführerin
+_BDEFADE255731A6B	gn_infected_frahar_guard_event	Infizierter Frahar Wächter	Infizierte Frahar Wächterin
+_BDEF7FE25193D26D	gn_infected_gibbai_guard_event	Infizierter Gibbaï Wächter 	Infizierte Gibbaï Wächter in
+_DB029983F5BBC072	gn_infected_cute_guard_event	Infizierter Cute Wächter 	Infizierte Cute Wächterin
+_2A250157B1ACAF47	gn_infected_frahar_raid_leader_event	Infizierter Fraharaggressoren-Anführer	Infizierte Fraharaggressoren-Anführerin
+_A835B9582FBC8148	gn_infected_gibbai_raid_leader_event	Infizierter Gibbaï-Aggressoren-Anführer	Infizierte Gibbaï-Aggressoren-Anführerin
+_7F3617C90DACFB41	gn_infected_cute_raid_leader_event	Infizierter Cute-Aggressoren-Anführer	Infizierte Cute-Aggressoren-Anführerin
+_F7692F7E3F15ABD8	gn_infected_frahar_raider_event	Infizierter Fraharaggressor	Infizierte Fraharaggressorin
+_37D80F7EBDFC87D3	gn_infected_gibbai_raider_event	Infizierter Gibbai-Aggressor	Infizierte Gibbai-Aggressorin
+_87D25FDCCDA28A67	gn_infected_cute_raider_event	Infizierter Cute-Aggressor	Infizierte Cute-Aggressorin
+_19D4C18583DB1F08	gn_infected_frahar_hunt_leader_event	Infizierter Frahar-Patrouillenanführer	Infizierte Frahar-Patrouillenanführerin
+_1974A17C41EBFB86	gn_infected_gibbai_hunt_leader_event	Infizierter Gibbaï-Patrouillenanführer	Infizierte Gibbaï-Patrouillenanführerin
+_CE7B0225934F8403	gn_infected_cute_hunt_leader_event	Infizierter Cute-Patrouillenanführer	Infizierte Cute-Patrouillenanführerin
+_FAF70AF312FDBFD5	gn_infected_frahar_patrol_event	Infizierte Frahar Patrouille	Infizierte Frahar Patrouille
+_B807E6F3EF0D83D7	gn_infected_gibbai_patrol_event	Infizierte Gibbai Patrouille	Infizierte Gibbai Patrouille
+_168C07B9C6B542A8	gn_infected_cute_patrol_event	Infizierte Cute Patrouille	Infizierte Cute Patrouille
+_C1C2D25AE94F8DB9	gn_frahar_high_chief_event	Hoher Frahar-Anführer	Hohe Frahar-Anführerin
+_0199D24B295E95B0	gn_gibbai_high_chief_event	Hoher Gibbaï-Anführer	Hohe Gibbaï-Anführerin
+_B67859E0684C4423	gn_cute_high_chief_event	Hoher Cute-Anführer	Hohe Cute-Anführerin
+_ABC54BC228B88A8D	gn_frahar_hero_event	Frahar-Held	Frahar-Heldin
+_A9D54BB987587685	gn_gibbai_hero_event	Gibbaï-Held	Gibbaï-Heldin
+_86E7F48010E9DCAD	gn_cute_hero_event	Cute-Held	Cute-Heldin
+_40FA26F487BE1D1D	gn_frahar_defender_event	Frahar-Verteidiger	Frahar-Verteidigerin
+_3E0A26EBE65E0915	gn_gibbai_defender_event	Gibbaï-Verteidiger	Gibbaï-Verteidigerin
+_BFEF4DD3F51708B6	gn_cute_defender_event	Cute-Verteidiger	Cute-Verteidigerin
+_A7D0050165F72461	gn_frahar_shaman_event	Frahar-Schamane	Frahar-Schamanin
+_E7A705F2A5062C58	gn_gibbai_shaman_event	Gibbaï-Schamane	Gibbaï-Schamanin
+_20F3A8B164B7FC8E	gn_cute_shaman_event	Cute-Schamane	Cute-Schamanin
+_10F44FA0D7439EE1	gn_frahar_guard_leader_event	Frahar Wächter-Anführer	Frahar Wächter-Anführerin
+_50F4459755F37ED9	gn_gibbai_guard_leader_event	Gibbaï Wächter-Anführer	Gibbaï Wächter-Anführerin
+_58CB3D75FBCBDA72	gn_cute_guard_leader_event	Cute Wächter-Anführer	Cute Wächter-Anführerin
+_22C3A4142368F0B9	gn_frahar_guard_event	Frahar-Wächter	Frahar-Wächterin
+_A2C3A48823A8F8A7	gn_gibbai_guard_event	Gibbaï-Wächter	Gibbaï-Wächterin
+_62A95453A4D8B49F	gn_cute_guard_event	Cute-Wächter	Cute-Wächterin
+_DE45DA8EB5A17983	gn_frahar_witch_doctor_event	Frahar-Hexenarzt	Frahar-Hexenärztin
+_1EE5DE7CF5417DF7	gn_gibbai_witch_doctor_event	Gibbaï-Hexenarzt	Gibbaï-Hexenärztin
+_45FD958704F0B945	gn_cute_witch_doctor_event	Cute-Hexenarzt	Cute-Hexenärztin
+_EAE64FDD8FC2B980	gn_frahar_hunt_leader_event	Frahar Patrouillen-Anführer	Frahar Patrouillen-Anführerin
+_89E637D54D72BD77	gn_gibbai_hunt_leader_event	Gibbaï Patrouillen-Anführer	Gibbaï Patrouillen-Anführerin
+_4AF42233D6E66D54	gn_cute_hunt_leader_event	Cute Patrouillen-Anführer	Cute Patrouillen-Anführerin
+_FF80ADCC246E5525	gn_frahar_patrol_event	Frahar-Patrouille	Frahar-Patrouille
+_7FEFB1C324E55916	gn_gibbai_patrol_event	Gibbaï-Patrouille	Gibbaï-Patrouille
+_AC0E79319C949CA0	gn_cute_patrol_event	Cute-Patrouille	Cute-Patrouille
+_C8C1D24D207D9677	gn_frahar_raid_leader_event	Frahar Überfalls-Anführer	Frahar Überfalls-Anführerin
+_86D1AE45201D906E	gn_gibbai_raid_leader_event	Gibbaï Überfalls-Anführer	Gibbaï Überfalls-Anführerin
+_7B4EBE45807C5B03	gn_cute_raid_leader_event	Cute Überfalls-Anführer	Cute Überfalls-Anführerin
+_BD4069CBEDFDF11D	gn_frahar_raider_event	Frahar-Räuber	Frahar-Räuberin
+_3DAF6DC2ED74F50E	gn_gibbai_raider_event	Gibbaï-Räuber	Gibbaï-Räuberin
+_668D552D58843889	gn_cute_raider_event	Cute-Räuber	Cute-Räuberin
+_76FAA3B33F4346DF	gn_frahar_shaman_raider_event	Frahar-Hexenschamane	Frahar-Hexenschamanin
+_B69AA7A17FE34A53	gn_gibbai_shaman_raider_event	Gibbaï-Hexenschamane	Gibbaï-Hexenschamanin
+_12C41ED2A142614F	gn_cute_shaman_raider_event	Cute-Hexenschamane	Cute-Hexenschamanin
+_19039D76FB304653	gn_cuthroat_high_chief_event	Hoher Anführer der Halsaufschneider 	Hohe Anführerin der Halsaufschneider
+_AC31250E8D27D490	gn_cuthroat_hero_event	Halsaufschneider-Held	Halsaufschneider-Heldin
+_9B9042A51EF1E970	gn_bandit_leader_event	Halsaufschneider-Patrouillenanführer	Halsaufschneider-Patrouillenanführerin
+_96A1C6689D726294	gn_cuthroat_patrol_event	Halsaufschneider-Patrouille 	Halsaufschneider-Patrouille 
+_D48291D998550A4E	gn_cuthroat_raid_leader_event	Halsaufschneider-Überfallsanführer	Halsaufschneider-Überfallsanführerin
+_B1917A4F03EF592D	gn_cuthroat_raider_event	Halsaufschneider-Räuber	Halsaufschneider-Räuberin
+_69540A7EC62F2DE3	gn_cuthroat_defender_event	Halsaufschneider-Verteidiger	Halsaufschneider-Verteidigerin
+_2C277BCE987C1EF8	gn_cuthroat_guard_leader_event	Halsaufschneider-Wächteranführer	Halsaufschneider-Wächteranführerin
+_022E210DE45974D3	gn_cuthroat_guard_event	Halsaufschneider-Wächter 	Halsaufschneider-Wächterin
+_D14EEE5DF7DE3A06	gn_goo_warder_yelk_event	Goo-Yelk Aufseher	Goo-Yelk Aufseherin
+_66D28F81A0F5857C	gn_goo_warder_slaveni_event	Goo-Slaveni Aufseher	Goo-Slaveni Aufseherin
+_37F4DB4D9E25AD72	gn_goo_warder_stinga_event	Goo-Stinga Aufseher	Goo-Stinga Aufseherin
+_4CF2635718019E82	gn_goo_warder_varinx_event	Goo-Varinx Aufseher	Goo-Varinx Aufseherin
+_8B02475757118282	gn_goo_warder_torbak_event	Goo-Torbak Aufseher	Goo-Torbak Aufseherin
+_D8E808FF2A018094	gn_fyros_herald_event	Fyros-Bote	Fyros-Botin
+_9AE808FFA9C12883	gn_matis_herald_event	Matis-Bote	Matis-Botin
+_EC60E5154A278C72	gn_tryker_herald_event	Tryker-Bote	Tryker-Botin
+_DDE8087B2521589E	gn_zorai_herald_event	Zoraï-Bote	Zoraï-Botin
+_449A3F1FDDF4CC77	gn_kami_herald_event	Kami-Gesandter	Kami-Gesandte
+_479D4D0C6127CB82	gn_karavan_herald_event	Karavan-Gesandter	Karavan-Gesandte
+_2452537FC3260EA8	gn_fyros_representative_event	Fyros-Vertreter	Fyros-Vertreterin
+_E0C2537FC3C6FE92	gn_matis_representative_event	Matis-Vertreter	Matis-Vertreterin
+_186A1EED9895C29B	gn_tryker_representative_event	Tryker-Vertreter	Tryker-Vertreterin
+_A693537F410DD69E	gn_zorai_representative_event	Zoraï-Vertreter	Zoraï-Vertreterin
+_64D59335DFE45E22	gn_kami_representative_event	Kami-Vertreter	Kami-Vertreterin
+_A873562DD857924E	gn_karavan_representative_event	Karavan-Emissär	Karavan-Emissärin
+_199A62503F5C4BD1	gn_fyros_recruiting_officer_event	Fyros-Rekrutierungsoffizier	Fyros-Rekrutierungsoffizierin
+_DB9A6250BE1CF3C0	gn_matis_recruiting_officer_event	Matis-Rekrutierungsoffizier	Matis-Rekrutierungsoffizierin
+_B4CC2C68BA5E837E	gn_tryker_recruiting_officer_event	Tryker-Rekrutierungsoffizier	Tryker-Rekrutierungsoffizierin
+_1E9A62CC3A7C23DB	gn_zorai_recruiting_officer_event	Zoraï-Rekrutierungsoffizier	Zoraï-Rekrutierungsoffizierin
+_5D20B9D39A058244	gn_kami_recruiting_officer_event	Hoher Kamidiener	Hoher Kamidienerin
+_FAE18C4CFC09FE37	gn_karavan_recruiting_officer_event	Karavan-Rekrutierungsoffizier	Karavan-Rekrutierungsoffizierin
+_2D687D202D987C62	gn_fyros_scout_event	Fyros-Spurenleser	Fyros-Spurenleserin
+_EF687D1AAEB7A04A	gn_matis_scout_event	Matis-Spurenleser	Matis-Spurenleserin
+_892E912824698BC7	gn_tryker_scout_event	Tryker-Spurenleser	Tryker-Spurenleserin
+_32686F12AB17CC58	gn_zorai_scout_event	Zoraï-Spurenleser	Zoraï-Spurenleserin
+_D059D4A4EB188095	gn_kami_scout_event	Kami-Sucher	Kami-Sucherin
+_030E11DE9ACEB10D	gn_karavan_scout_event	Karavan-Kundschafter	Karavan-Kundschafterin
+_C93EA1C39E5A9126	gn_fyros_diplomat_event	Fyros-Diplomat	Fyros-Diplomatin
+_0CBDBDC39EFA9908	gn_matis_diplomat_event	Matis-Diplomat	Matis-Diplomatin
+_877C2CE38AFE8D40	gn_tryker_diplomat_event	Tryker-Diplomat	Tryker-Diplomatin
+_CE9DF1C31C7A830E	gn_zorai_diplomat_event	Zoraï-Diplomat	Zoraï-Diplomatin
+_68C0550B2FE403BE	gn_fyros_citizen_event	Fyros-Bürger	Fyros-Bürgerin
+_5DE4BA2662605588	gn_fyros_old_citizen_event	Alter Fyros-Bürger	Alte Fyros-Bürgerin
+_2AC03D0D29F40BA6	gn_matis_citizen_event	Matis-Bürger	Matis-Bürgerin
+_9E045A2D62005D70	gn_matis_old_citizen_event	Alter Matis-Bürger	Alte Matis-Bürgerin
+_CB2D692297A6FC22	gn_tryker_citizen_event	Tryker-Bürger	Tryker-Bürgerin
+_A196F2F20916EE87	gn_tryker_old_citizen_event	Alter Tryker-Bürger	Alte Tryker-Bürgerin
+_6D871D0B2A4503B4	gn_zorai_citizen_event	Zoraï-Bürger	Zoraï-Bürgerin
+_DFE4923AE08055FA	gn_zorai_old_citizen_event	Alter Zoraï-Bürger	Alte Zoraï-Bürgerin
+_C78AB7DB4219A403	gn_r_09_19_convoi_escorte	Konvoi-Geleitschutz	Konvoi-Geleitschutz
+_83AB57BCC149B023	gn_r_09_19_convoi_foreur	Konvoi-Rohstoffsucher	Konvoi-Rohstoffsucherin
+_43DE54FFA9C7251E	gn_debug_bestiole	robuster Bodoc	robuster Bodoc
+_46975C01DD304515	gn_debug_bestiole2	robuster Bodoc	robuster Bodoc
+_9ACD03B3DE87DA77	gn_assistant_escort_debug	Eskorten-Assistent	Eskorten-Assistentin
+_9F7360AF26D7EC1F	gn_debug_ai	Assistent	Assistentin
+_5817BE5F2D1CF92A	gn_garde_escort_debug	Assistent der Garde	Assistentin der Garde
+_2F9B73404B20CBD6	gn_debug_black_circle_bandit	Bandit des Schwarzen Kreises	Banditin des Schwarzen Kreises
+_58308253FF410168	gn_debug_black_circle_bandit2	Banditenanführer des Schwarzen Kreises	Banditenanführerin des Schwarzen Kreises
+_DA9590BEABB9709E	gn_test_debug_kill	Bandit  	Banditin
+_BC6A04DE52DB85FF	gn_test_debug_kill2	Banditenanführer 	Banditenanführerin
+_C71D6B0E417795F6	gn_warchief_guard	Beschützer des Kommandantn	Beschützerin des Kommandantn
+_27256ADF66A1AF52	gn_r_05_15_gnoof_1	Weee'ly das Gnoof	Weee'ly das Gnoof
+_4338F4E414359E85	gn_r_07_05_bandit	Bandit des Ursprungs	Banditin des Ursprungs
+_25F4A95425451B59	gn_r_07_05_chief	O'Darghan der Verrückte	O'Darghan der Verrückte
+_CBB5D772D1C27373	gn_r_05_24_izam	Izam'el	Izam'el
+_EE1690E125055F49	gn_r_05_39_peon_leader	Fyros-Soldat	Fyros-Soldatin
+_DC77E7E862A7EF6F	gn_r_05_39_peon	Fyros-Sucher	Fyros-Sucherin
+_6B6292D8ABF607A1	gn_r_05_41_foreuse	Amazonen-Sucher	Amazonen-Sucherin
+_D7D6FCDBA955F796	gn_r_05_39_big_varinx	Riesiger Varinx	Riesiger Varinx
+_A6271F7CD6B5EA54	gn_r_03_38_bandit	Räuber	Räuberin
+_001870C258CFC009	gn_r_03_38_chef_bandit	Räuber-Anführer	Räuber-Anführerin
+_A6271F7A56A5EA55	gn_r_12_18_bandit	Bandit	Banditin
+_001870C060BFC409	gn_r_12_18_chef_bandit	Banditen-Anführer	Banditen-Anführerin
+_23760B5AE2B6D38F	gn_r_12_18_marchand	Barmann	Bardame
+_EC6C7880A466C372	gn_r_12_04_marchand	Selno der Barmann	Selno der Barmann
+_2575AD25A71934B5	gn_pyr_bar_serveuse	Kellner	Kellnerin
+_E90634A89E08BCBE	gn_pyr_bar_client	Gast	Gast
+_A9879C7329E8709E	gn_pyr_bar_garde	Aufpasser	Aufpasserin
+_6A0885225FC80FB0	gn_kami_warrior_event	Kami-Kämpfer	Kami-Kämpferin
+_AA98207460E76889	gn_kami_wizard_event	Kami-Magier	Kami-Magierin
+_06BBC1E1A8F4A50B	gn_karavan_trooper_event	Karavan-Soldat	Karavan-Soldatin
+_B5F9AE77C9AEC17E	gn_karavan_engineer_event	Karavan-Techniker	Karavan-Technikerin
+_419F31D8184D4513	gn_karavan_medic_event	Karavan-Mediziner	Karavan-Medizinerin
+_B2090B778CCB620D	gn_karavan_assault_ship_event	Karavan-Kriegsschiff	Karavan-Kriegsschiff
+_BEA049E5690FDD24	gn_forge_apprentice_pyr	Schmiedelehrling	Schmiedelehrling
+_A774B5076EF8EC9C	gn_bot_squad_melee_fighter	Kämpfer	Kämpferin
+_A445ECA430E8CCA9	gn_bot_squad_range_fighter	Scharfschütze	Scharfschützin
+_27F80D24AAB8ECA9	gn_bot_squad_artilleryman	Artillerieschütze	Artillerieschützin
+_00B4E684029C4D1B	gn_bot_squad_defensive_affliction	Mentalist	Mentalistin
+_83BC5520E9F7F016	gn_bot_squad_healing_magic	Heiler	Heilerin
+_02EEBE86012DE316	gn_bot_squad_offensive_affliction	Magier	Magierin
+_C3BD9518AD0E81D8	gn_bot_squad_elemental_magic	Elementarmagier	Elementarmagierin
+_B0B79E12F8C5DFE2	gn_bot_squad_melee_fighter_leader	Kampftruppführer	Kampftruppführerin
+_F7D76BCC46C6B382	gn_bot_squad_range_fighter_leader	Scharfschützentruppführer	Scharfschützentruppführerin
+_AF491AEE7CB6EBE1	gn_bot_squad_artilleryman_leader	Artillerietruppführer	Artillerietruppführerin
+_870AB89A807F5C34	gn_bot_squad_defensive_affliction_leader	Mentalistentruppführer	Mentalistentruppführerin
+_782CD405382A7FBA	gn_bot_squad_healing_magic_leader	Heilertruppführer	Heilertruppführerin
+_8BA0AB54D3AAC4D7	gn_bot_squad_offensive_affliction_leader	Magiertruppführer	Magiertruppführerin
+_70B2344A30A38F30	gn_bot_squad_elemental_magic_leader	Elementarmagiertruppführer	Elementarmagiertruppführerin
+_1498B0B11D61A8B6	gn_dyron_guard	Wächter von Dyron	Wächterin von Dyron
+_377555E5DE1E53FB	gn_fyros_kamist_combatant_event	Fyros-Kamistenmeister	Fyros-Kamistenmeisterin
+_B97CA780D935D600	gn_fyros_kamist_gatherer_event	Fyros-Kamistenrohstoffabbauer	Fyros-Kamistenrohstoffabbauerin
+_1CD46FCF9E38760A	gn_fyros_kamist_crafter_event	Fyros-Kamistenhandwerker	Fyros-Kamistenhandwerkerin
+_F3E555E5D6BE43E5	gn_matis_kamist_combatant_event	Matis-Kamistenmeister	Matis-Kamistenmeisterin
+_FA9C4787D9D5DEE8	gn_matis_kamist_gatherer_event	Matis-Kamistenrohstoffabbauer	Matis-Kamistenrohstoffabbauerin
+_DED46FC91F579AF2	gn_matis_kamist_crafter_event	Matis-Kamistenhandwerker	Matis-Kamistenhandwerkerin
+_B9B655E5549D1BF1	gn_zorai_kamist_combatant_event	Zoraï-Kamistenmeister	Zoraï-Kamistenmeisterin
+_3B7C7F945755D6EC	gn_zorai_kamist_gatherer_event	Zoraï-Kamistenrohstoffabbauer	Zoraï-Kamistenrohstoffabbauerin
+_21D447C11CB7C600	gn_zorai_kamist_crafter_event	Zoraï-Kamistenhandwerker	Zoraï-Kamistenhandwerkerin
+_A870B73D78AD0FEB	gn_tryker_kamist_combatant_event	Tryker-Kamistenmeister	Tryker-Kamistenmeisterin
+_034A5BD35820CFF4	gn_tryker_kamist_gatherer_event	Tryker-Kamistenrohstoffabbauer	Tryker-Kamistenrohstoffabbauerin
+_37FD4FF1A2502C86	gn_tryker_kamist_crafter_event	Tryker-Kamistenhandwerker	Tryker-Kamistenhandwerkerin
+_2739AC2BE4563051	gn_kami_master	Kamimeister	Kamimeister
+_84B32EE83B49EC0F	gn_kami_preacher_lord	Kami-Priesterfürst	Kami-Priesterfürstin
+_691A5103FCF0C3EF	gn_kami_high_preacher	Großer Kamipriester	Große Kami-Priesterin
+_5B85DF95DF6358AA	gn_maduk_bonze	Ma-Duk-Priester	Ma-Duk-Priesterin
+_A4C339182B885097	gn_kamist_guard_event	Kamistenwächter	Kamistenwächterin
+_BF1E21E7596F7121	gn_kamist_sergeant_event	Kamistensergeant	Kamistensergeantin
+_472DA1CAB820B100	gn_kamist_captain_event	Kamisten-Führungskraft	Kamisten-Führungskraft
+_5CC3FD9DC53B7508	gn_kamist_guard_sanctuary	Altarwächter	Altarwächterin
+_8BC53BD012F63A34	gn_kamist_captain_sanctuary	Altar-Oberwächter	Altar-Oberwächter
+_E5E9AF1B2840C413	gn_kami_tower	Kami-Wachturm	Kami-Wachturm
+_C37F580742478D54	gn_kami_preacher_pyr	Kamipriester von Pyr	Kamipriester von Pyr
+_97EC26FFB456C964	gn_kami_preacher_yrkanis	Kamipriester von Yrkanis	Kamipriester von Yrkanis
+_44993678606C97FC	gn_kami_preacher_zora	Kamipriester von Zora	Kamipriester von Zora
+_26C00BD58B45DEE2	gn_kami_preacher_fairhaven	Kamipriester von Fairhaven	Kamipriester von Fairhaven
+_06A3F4F7F86A8371	gn_fyros_karavaneer_combatant_event	Fyros-Karavanierkämpfer	Fyros-Karavanierkämpferin
+_60B0B852F0A9C7B3	gn_fyros_karavaneer_gatherer_event	Fyros-Karavanierabbauer	Fyros-Karavanierabbauerin
+_A4BD570FBCCBCFB2	gn_fyros_karavaneer_crafter_event	Fyros Karavanier-Handwerker	Fyros Karavanier-Handwerkerin
+_492210F7F8088B53	gn_matis_karavaneer_combatant_event	Matis-Karavanierkämpfer	Matis-Karavanierkämpferin
+_2250C03AB249CF9B	gn_matis_karavaneer_gatherer_event	Matis-Karavanierabbauer	Matis-Karavanierabbauerin
+_66BD570F3B8B77A1	gn_matis_karavaneer_crafter_event	Matis Karavanier-Handwerker	Matis Karavanier-Handwerkerin
+_0B0244F776885B59	gn_zorai_karavaneer_combatant_event	Zoraï-Karavanierkämpfer	Zoraï-Karavanierkämpferin
+_E3D0B84873C9C7A9	gn_zorai_karavaneer_gatherer_event	Zoraï-Karavanierabbauer	Zoraï Karavanierabbauerin
+_A9BD5705B7EBA7BC	gn_zorai_karavaneer_crafter_event	Zoraï Karavanier-Handwerker	Zoraï Karavanier-Handwerkerin
+_17D0FF53C4CCBC3C	gn_tryker_karavaneer_combatant_event	Tryker-Karavanierkämpfer	Tryker-Karavanierkämpferin
+_0F73503D2ABC9C8C	gn_tryker_karavaneer_gatherer_event	Tryker-Karavanierabbauer	Tryker-Karavanierabbauerin
+_3D9C2762707007A8	gn_tryker_karavaneer_crafter_event	Tryker Karavanier-Handwerker	Tryker Karavanier-Handwerkerin
+_C21B4CEED9EE9D0E	gn_karavan_high_guide	Hoher Karavanführer	Hohe Karavanführerin
+_20E0BDF36CF8D08E	gn_karavan_officer	Karavanoffizier	Karavanoffizierin
+_24E7CC8125F68BA9	gn_karavan_guide	Karavanführer	Karavanführerin
+_A498E80B1566D45F	gn_jena_priest	Priester der Jena	Priesterin der Jena
+_933527066183B300	gn_karavan_teleporteur_pyr	Karavan-Teleporter nach Pyr	Karavan-Teleporterin nach Pyr
+_127F3C679C650063	gn_karavan_teleporteur_yrkanis	Karavan-Teleporter nach Yrkanis	Karavan-Teleporterin nach Yrkanis
+_4E41B34CDB42943F	gn_karavan_teleporteur_fairhaven	Karavan-Teleporter nach Fairhaven	Karavan-Teleporterin nach Fairhaven
+_63DB5FDB3A2A3354	gn_karavan_teleporteur_zora	Karavan-Teleporter nach Zora	Karavan-Teleporterin nach Zora
+_43BD2170C07A6DFD	gn_karavaneer_guard_event	Karavanierwächter	Karavanier-Wächterin
+_0AB4E28B8090FA44	gn_karavaneer_sergeant_event	Karavan-Wachtmeister	Karavan-Wachtmeisterin
+_51A47A5F4B75462B	gn_karavaneer_captain_event	Karavan-Führungskraft	Karavan-Führungskraft
+_186F666EC7CD6834	gn_karavaneer_guard_sanctuary	Tempelwächter	Tempelwächterin
+_0F95B79392D6C657	gn_karavaneer_captain_sanctuary	Tempel-Oberwächter	Tempel-Oberwächter
+_44CE5BCB49FE89D4	gn_karavan_tower	Karavan-Verteidigungsturm	Karavan-Verteidigungsturm
+_5CF4989B257814A1	gn_kami_altar	Kami-Altar	Kami-Altar
+_E398CC7B68C6B7A7	gn_karavan_altar	Karavan-Altar	Karavan-Altar
+_5127D064E4388AAA	gn_kami_hof	Ruhmessäule	Ruhmessäule
+_18D714975A94709C	gn_kami_frise	Wissenswurzel	Wissenswurzel
+_5996D4112E3394A6	gn_karavan_hof	Ruhmessäule	Ruhmessäule
+_22B204E1589900A2	gn_karavan_frise	Wissenskolonne	Wissenskolonne
+_23F991F96E1818A8	gn_psykopla_ally	Psykopla-Kumpane	Psykopla-Kumpanin
+_2425730D9DAAC0A6	gn_cratcha_ally	Cratcha-Kumpane	Cratcha-Kumpanin
+_505CF916C2AFDD94	gn_driller_kami_lvl50	Kleiner Kami-Bohrer	Kleiner Kami-Bohrer
+_6292624D27330291	gn_driller_karavan_lvl50	Kleiner Kami-Bohrer	Kleiner Kami-Bohrer
+_7A0213BE42C21380	gn_driller_kami_lvl50_const	Bau eines kleinen Kami-Bohrers	Bau eines kleinen Kami-Bohrers
+_2CC2515A622275AC	gn_driller_karavan_lvl50_const	Bau eines kleinen Karavan-Bohrers	Bau eines kleinen Karavan-Bohrers
+_78E727345195053A	gn_driller_karavan_const	Großer Tiefbohrer im Bau	Großer Tiefbohrer im Bau
+_5C1F25E71BD5623C	gn_driller_kami_const	Baumschraube im Bau	Baumschraube im Bau
+_ABFC04815B98E095	gn_driller_karavan	Großer Tiefbohrer   	Großer Tiefbohrer   
+_2567BCAA61C9306E	gn_driller_kami	Baumschraube  	Baumschraube  
+_5D12D99A04724A6B	gn_placeholder_driller	Bebaubarer Ort	Bebaubarer Ort
+_FD35D457C748F4C2	fct_lodge_master	(Meister der Logen)	(Meisterin der Logen)
+_B367C066EDAF8A4C	fct_artisan_trepans	(Handwerker des Großen Tiefbohrers)	(Handwerkerin des Großen Tiefbohrers)
+_66939FDFD93089A7	fct_artisan_arbres_vrilles	(Handwerker der Baumschrauben)	(Handwerkerin der Baumschrauben)
+_8B52F2B5828A9DE7	gn_citizenship_flame_truth	Flamme der Wahrheit	Flamme der Wahrheit
+_8E55ED7A3FC93232	gn_citizenship_flame_honnor	Flamme der Ehre	Flamme der Ehre
+_23BB9390D5F496B1	gn_citizenship_flame_discipline	Flamme der Disziplin	Flamme der Disziplin
+_99915A391FF41150	gn_citizenship_flame_justice	Flamme der Gerechtigkeit	Flamme der Gerechtigkeit
+_4340B563EEC1B30C	fct_imperial_magistrate	(Imperialer Magistrat)	(Imperialer Magistrat)
+_3FC1411CE2E6688B	fct_royal_magistrate	(Königlicher Magistrat)	(Königlicher Magistrat)
+_FB6899F53E6A41A4	fct_federal_magistrate	(Föderaler Magistrat)	(Föderaler Magistrat)
+_5C35F56CB0B0C12E	fct_dynastic_magistrate	(Dynastischer Magistrat)	(Dynastischer Magistrat)
+_E38A509DE4180769	fct_vagabond	(Vagabund)	(Vagabund)
+_ABD01032E149C38C	gn_lenja_lunatic	Lenja die Verrückte	Lenja die Verrückte
+_486054DC9F3ADAB8	fct_imperial_magistrate_guild	(Imperialer Gildenmagistrat)	(Imperialer Gildenmagistrat)
+_6A444BEE66256547	fct_royal_magistrate_guild	(Königlicher Gildenmagistrat)	(Königlicher Gildenmagistrat)
+_B45366A06811179A	fct_federal_magistrate_guild	(Föderaler Gildenmagistrat)	(Föderaler Gildenmagistrat)
+_4D1FD0322177E1FB	fct_dynastic_magistrate_guild	(Dynastischer Gildenmagistrat)	(Dynastischer Gildenmagistrat)
+_A8096A60F0F7FF33	gn_fyros_karavan_aumonier	Karavan-Geistlicher des Tempels in Pyr	Karavan-Geistlicher des Tempels in Pyr
+_C4EF2652782A0E8E	gn_matis_karavan_aumonier	Karavan-Geistlicher des Tempels in Yrkanis	Karavan-Geistlicher des Tempels in Yrkanis
+_0F354493BC03591C	gn_tryker_karavan_aumonier	Karavan-Geistlicher des Tempels in Fairhaven	Karavan-Geistlicher des Tempels in Fairhaven
+_AD1F6A56F017FF29	gn_zorai_karavan_aumonier	Karavan-Geistlicher des Tempels in Zora	Karavan-Geistlicher des Tempels in Zora
+_A7C0977A14C17CAF	fct_jena_priest	(Jena-Priester)	(Jena-Priester)
+_B232D9BC6A214FE5	fct_jena_priestress	(Jena-Priesterin)	(Jena-Priesterin)
+_9B69FC330A98C384	fct_maduk_bonze	(Ma-Duk-Priester)	(Ma-Duk-Priesterin)
+_7E14E86F7FAB0B5C	fct_maduk_bonze_sup	(Höchster Ma-Duk-Priester)	(Höchste Ma-Duk-Priesterin)
+_FB80F5B0E60883D4	fct_karavan_aumonier	(Karavan-Geistlicher)	(Karavan-Geistliche)
+_F6D94526ADF9A093	vagabond_taciturne	Schweigsamer Vagabund	Schweigsamer Vagabund
+_F2E00115DDE94111	gn_rotoa_bravichi_tree	Bravichi-Rotoa	Bravichi-Rotoa
+_6536FEC11354BCC8	gn_bothaya_tree	Heißer Bothaya 	Heißer Bothaya 
+_C4FD940F48FA180B	gn_outpost_townhall	Außenpostenhalle	Außenpostenhalle
+_9FD2D8040FFAB43E	gn_outpost_flag	Außenpostenflagge	Außenpostenflagge
+_498BB0FC7F9ADC10	gn_outpost_info	Außenposten-Information	Außenposten-Information
+_234178502D897036	fct_rangers_master	Ranger-Veteran	Ranger-Veteranin
+_3ABFF02569E86CA6	fct_rangers_fighter	Ranger-Kämpfer	Ranger-Kämpferin
+_DE785B1EE4DAACA8	fct_rangers_artisan	Ranger-Handwerker	Ranger-Handwerkerin
+_A15A2CF69B5970B5	fct_rangers_scout	Ranger-Kundschafter	Ranger-Kundschafterin
+_0A82D387BF6D73F8	gn_newbieland_bandit_1	Plünderer der Goo-Erleuchteten	Plünderin der Goo-Erleuchteten
+_41A7B7C970ADBED8	gn_newbieland_bandit_1_lieutnant	Leutnant der Goo-Erleuchteten	Leutnant der Goo-Erleuchteten
+_E5E1E98040BE5FF8	gn_newbieland_bandit_2	Plünderer der Chlorogoos	Plünderin der Chlorogoos
+_8246B738ED05A6DE	gn_newbieland_bandit_2_lieutnant	Leutnant der Chlorogoos	Leutnant der Chlorogoos
+_E3EB4B88AE1942CA	gn_newbieland_starting_city_karavan_officer	Offizier für Kommunikation der Karavan	Offizierin für Kommunikation der Karavan
+_B0EE9A7CF1CE6CF7	gn_karavan_ardent	Mitglied der Lodernden Lanze	Mitglied der Lodernden Lanze
+_A9392AF9FB060EE1	gn_karavan_ardent_speaker	Sprecher der Lodernden Lanze	Sprecherin der Lodernden Lanze
+_7432ABE2E002916E	gn_chiang_the_strong	Chiang der Starke$fct_ranger_leader$	Chiang der Starke
+_AAD773BD6668F093	gn_ranger_guard	Ranger-Beschützer	Ranger-Beschützerin
+_E6DE450B67F8F04E	gn_Ranger_elite_guard	Ranger-Wächter	Ranger-Wächterin
+_5579E50324F81496	fct_ranger_leader	Ranger-Kommandant 	Ranger-Kommandantin
+_1DF1ED1D2C77CFB6	fct_fyros_commander	Fyros-Kommandant	Fyros-Kommandantin
+_215EB6583CB7711C	fct_matis_master_artisan	Matis-Handwerksmeister	Matis-Handwerksmeisterin
+_EA975D1EA7D570AA	fct_chief_explorer	Leitender Kundschafter	Leitende Kundschafterin
+_9FC4DAE99395F615	gn_kami_master_newbieland_starting_city	Kami-Ratgeber	Kami-Ratgeber
+_22F39C97A678CCAF	gn_ring_welcomer	Ring-Techniker	Ring-Technikerin
+_90E9849BE847E48A	gn_device_ring_warp	Ring-Terminal	Ring-Terminal
+_99A4DA2C4189C09C	gn_spot_goo_mission_1	Frischer Goo-Ausbruch	Frischer Goo-Ausbruch
+_E584FE7438B37520	gn_newbieland_bandit_2_mission	Spezialisierter Bandit	Spezialisierter Bandit
+_54E2907783C97B65	gn_kami_master_shining_lake	Kamimeister des Sees	Kamimeister des Sees
+_0B5476FD1BEF5C5C	gn_tcm_extraction_engineer	Bergbauingenieur	Bergbauingenieurin
+_450658200C1DB1FE	gn_tcm_extraction_guard	Elite-Kommando	Elite-Kommando
+_CAADF1CA1F7E8100	gn_tcm_trooper_engineer	Karavan-Kundschafter	Karavan-Kundschafterin
+_48FECD0CA4698C4C	gn_tcm_engineer_guard	Karavan-Eskorte	Karavan-Eskorte
+_DAB40222B28EE555	gn_tcm_squad_leader_alpha	Geschwaderführer Alpha	Geschwaderführer Alpha
+_17E5E634EDEA49B6	gn_tcm_squad_leader_beta	Geschwaderführer Beta	Geschwaderführer Beta
+_17E5E64CEDEA49CE	gn_tcm_squad_leader_zeta	Geschwaderführer Zeta	Geschwaderführer Zeta
+_3D16DE934ABCB7A4	gn_tcm_trooper_guard	Elite-Karavan-Squadron	Elite-Karavan-Squadron
+_4136DE7FEC3D2501	gn_tcm_trooper_static	Oberste Garde der Karavan	Oberste Garde der Karavan
+_44BF7DEADEC41D23	gn_tcm_trooper_wander	Karavan-Reservist	Karavan-Reservistin
+_68887893CE4784B0	gn_tcm_training	Karavan-Kommando	Karavan-Kommando
+_58C91513E5099060	gn_tcm_medic	Karavan-Arzt	Karavan-Ärztin
+_108DB243F75D0671	gn_tcm_engineer	Karavan-Ingenieur	Karavan-Ingenieurin
+_826D508FE3C3D10E	gn_tcm_chief_engineer	Chef-Ingenieur	Chef-Ingenieurin
+_E08F368CC07AA793	gn_tcm_coordinator	Operations-Koordinator	Operations-Koordinatorin
+_8775E5C88758B5F7	gn_tcm_officer	Oberster Karavan-Offizier	Oberster Karavan-Offizierin
+_7A0402AD631E8D84	gn_tcm_quartermaster	Karavan-Quartiersmeister	Karavan-Quartiersmeisterin
+_FBA54E4D83DD4801	gn_tcm_commander	Karavan-Kommandeur	Karavan-Kommandeurin
+_2CA1598EA606436C	fct_tcm_chief_forager	(Meister-Driller)	(Meister-Drillerin)
+_A39B883084EAB8A9	fct_tcm_forager	(Bohrer-Schüler)	(Bohrer-Schülerin)
+_77FD1254EC71610B	fct_tcm_fighter_company	(Kamisten-Kämpfer)	(Kamisten-Kämpferin)
+_84C0C5FA8722E5C9	fct_explorer_company	(Kamisten-Entdecker)	(Kamisten-Entdeckerin)
+_32B28905ECE70DF4	fct_harvest_company	(Kamisten-Rohstoffabbauer)	(Kamisten-Rohstoffabbauerin)
+_31BEF6084B5271F2	fct_keepers_squad_leader	(Inspektions-Teamleiter)	(Inspektions-Teamleiterin)
+_FFBE33006C824413	fct_keepers_squad	(Kamisten-Archäologe)	(Kamisten-Archäologin)
+_843BDF8E98D404F3	fct_tcm_company_guard	(Wachposten des ewigen Baumes)	(Wachposten des ewigen Baumes)
+_C41095F5DE6E5025	fct_tcm_tutor_praying	(Gläubiger Kamist)	(Gläubige Kamistin)
+_2FB0627EEF1091E5	fct_tcm_tutor_trader	(Erfahrener Händler)	(Erfahrener Händlerin)
+_C1E17D4E7FAAD42D	fct_tcm_tutor_sitting	(Gläubiger Anhänger)	(Gläubiger Anhängerin)
+_08A62D2C031E1725	fct_tcm_tutor_chief_guard	(Treuer Beschützer)	(Treuer Beschützerin)
+_BE5A4A186F6B5546	fct_tcm_tutors_sitting2	(Angehender Prediger)	(Angehender Prediger)
+_F76412B39FBFE4B3	fct_tcm_tutors_storyteller	(Wanderprediger)	(Wanderpredigerin)
+_B312551F68289B73	fct_tcm_tutor_wander	(Tutoren-Anhänger)	(Tutoren-Anhängerin)
+_B825B6990837C25B	fct_tcm_keepers_chief_guard	(Beschützer der Reliquien)	(Beschützerin der Reliquien)
+_DD69AA142DC06F38	fct_tcm_keepers_sitting	(Archäologen-Lehrling)	(Archäologen-Lehrling)
+_82413E86202C991D	fct_tcm_keepers_trader	(Hausierer-Lehrling)	(Hausierer-Lehrling)
+_C4907DFEDD155426	fct_tcm_keepers_guard	(Kamisten-Beobachter)	(Kamisten-Beobachterin)
+_89F3154AB0B07519	fct_tcm_keepers_sitting2	(Beobachter-Lehrling)	(Beobachter-Lehrling)
+_EB372E88401F69E0	fct_tcm_keepers_storyteller	(Kamisten-Prediger)	(Kamisten-Predigerin)
+_BB37C6770BDF5023	fct_tcm_keepers_elder	(Bewahrer des Wissens)	(Bewahrerin des Wissens)
+_C3200DF011378FD7	fct_tcm_keepers_walking	(Einfacher Gelehrter)	(Einfache Gelehrte)
+_F4E00969940AD1E0	fct_tcm_keep_wander	(Archäologischer Gelehrter)	(Archäologische Gelehrte)
+_32F2090E2084E8D2	fct_tcm_keep_wander2	(Historien-Bewahrer)	(Historien-Bewahrerin)
+_CA1F22162B980D91	fct_tcm_eternal_tree_chief_guard 	(Hüter des ewigen Baumes)	(Hüterin des ewigen Baumes)
+_56F4F1B75AE1060B	fct_tcm_eternal_tree_sitting	(Diener von Ma-Duk)	(Dienerin von Ma-Duk)
+_491DDEAAD796F617	fct_tcm_eternal_tree_static	(Kultur-Beschützer)	(Kultur-Beschützerin)
+_5A36183C66884E41	fct_tcm_eternal_tree_praying	(Predigender Gelehrter)	(Predigende Gelehrter)
+_0FBE627401EB197A	fct_tcm_eternal_tree_spwan	(Torwächter)	(Torwächterin)
+_2897627B7F6E09DC	fct_tcm_eternal_tree_wander	(Kamisten-Philosoph)	(Kamisten-Philosophin)
+_5E45661071C4DD46	fct_tcm_eternal_tree_praying2	(Gläubiger)	(Gläubige)
+_5D06FA78FA7C6C32	fct_tcm_eternal_tree_walking	(Wandernder Kamist)	(Wandernde Kamistin)
+_D22996EF17FEE544	fct_tcm_eternal_tree_walking2	(Gemeinschaftsmitglied)	(Gemeinschaftsmitglied)
+_BFB28A77E04B59E4	fct_tcm_healer	(Haupttrainer der Gemeinschaft)	(Haupttrainer der Gemeinschaft)
+_A5C1ED8DD8E9906A	fct_tcm_armorer	(Erfahrener Gewehrschütze)	(Erfahrene Gewehrschützin)
+_F8F3C4737FEA0927	fct_tcm_intendant	(Intendant der Gemeinschaft)	(Intendantin der Gemeinschaft)
+_E8C99793D9A511A7	fct_tcm_assistant_intendant	(Assistent des Intendanten)	(Assistentin des Intendanten)
+_614B3C2513C87BB4	fct_tcm_warchief	(Kommandant)	(Kommandant)
+_57B8D1848B10C23D	fct_tcm_merchant	(Großer Hausierer der Gemeinschaft)	(Große Hausiererin der Gemeinschaft)
+_58C33769BDF82A32	fct_tcm_campchief	(Lager-Organisator der Gemeinschaft)	(Lager-Organisatorin der Gemeinschaft)
+_00C141EA25BB4C15	fct_tcm_warrior	(Großer Wandernder Krieger)	(Großer Wandernde Kriegerin)
+_2774F56A82B8181A	fct_tcm_noble	(Edler Philosoph der Gemeinschaft)	(Edle Philosophin der Gemeinschaft)
+_CAC83A8DCD565BA0	gn_chad	Meister Chad	Meister Chad
+_68F693A0E5027CA8	gn_chad_assist	Lehrling von Chad	Lehrling von Chad
+_2DF751F2EA66E037	gn_tcm_officer_radar	Radars-Offizier	Radars-Offizierin
+_6947BC965EB774AD	gn_tcm_chlorogoo_shaman	Schamane	Schamanin
+_45EEC5F8A3E5A8B1	gn_tcm_chlorogoo_shaman_escort	Adept	Adeptin
+_80DFAD012908B429	gn_tcm_chlorogoo_prisonners	Gefangener	Gefangene
+_B0575D1164A8900B	gn_tcm_chlorogoo_camp_ranger	Spieß	Spieß
+_B07E5D0AE3488C95	gn_tcm_chlorogoo_camp_caster	Magier	Magierin
+_21E50A65C4FE540B	gn_tcm_chlorogoo_camp_fighter	Goo-infizierter Assassine	Goo-infizierte Assassinin
+_EF8784FF20498CB3	gn_tcm_chlorogoo_caster	Alchemist	Alchemistin
+_6B68B215E168B4B1	gn_tcm_chlorogoo_healer	Heiler	Heilerin
+_7157FCA31D39BC9E	gn_tcm_chlorogoo_ranger	Aufspürer	Aufspürerin
+_D74D6667BEEA390F	gn_tcm_chlorogoo_harvester	Goo-Sammler	Goo-Sammlerin
+_2943F1961EE50A6F	gn_tcm_chlorogoo_patrol_dill	Goo-berauschte Patrouille	Goo-berauschte Patrouille
+_A5F9F8A7638990C9	fct_tcm_chlorogoo	Chlorogoo	Chlorogoo
+_EAB298ADAC8737AE	fct_tcm_basile	Mysteriöser Einsiedler	Mysteriöser Einsiedler
+_AE1E0DFE2557D77A	gn_tcm_radar_trainee	Radar-Lehrling	Radar-Lehrling
+_9F81E690018E9894	gn_tcm_crate	Karavan-Versorgungs-Kiste	Karavan-Versorgungs-Kiste
+_6D98B7B2A94708B7	gn_tcm_unknown_entity	Echo-Radar	Echo-Radar
+_46232C8E2A6574AA	gn_tcm_soulchest	Sichere Seelen	Sichere Seelen
+_C4B29923E957ABA2	gn_satooi_remains	Gereinigte Satooi	Gereinigte Satooi
+_2759E3A36AB96AAB	gn_tcm_reward_chest	Verlorener Schatz	Verlorener Schatz
+_2468E3821B5703BD	title00001	Reisender	Reisender
+_ED07B7861F0653B7	title00047	Maschinengewehrschütze	Maschinengewehrschützin
+_D8D0950FF5D535F0	title00048	Meister Maschinengewehrschütze	Meister Maschinengewehrschützin
+_A947D8A9EF56539B	gn_landslide_3_target	Geröll	Geröll
+_304784824BD6A895	gn_tcm_sacrified	Opfer	Opfer
+_C43DE5BBDAA6C4A9	gn_boss_mainland_varinx	Aen Beschützer	Aen Beschützerin
+_898DAB7DC3B94701	title00002	Kitinjäger-Neuling	Kitinjäger-Neuling
+_D1E1593DA37B2321	title00003	Kitinjäger	Kitinjägerin
+_2D87019AB2295667	title00004	Meister-Kitinjäger	Meister-Kitinjägerin
+_2205425D8D0EDB67	title00005	Kitinausrotter	Kitinausrotterin
+_EC4F658FFCF5A29B	title00006	Kitin-Metzler	Kitin-Metzlerin
+_1334940BF309F834	title00007	Matis-Wächter	Matis-Wächterin
+_92B59409F999F83A	title00008	Fyros-Wächter	Fyros-Wächterin
+_9F82CB670FA1836F	title00009	Tryker-Wächter	Tryker-Wächterin
+_92DB8C0A76DAEA2C	title00010	Zoraï-Wächter	Zoraï-Wächterin
+_1E6EEEBFB8AD88C2	title00011	Wächter von Atys	Wächterin von Atys
+_B25C6A0B82C0F2A9	slaughter_week_mgiver_matis	Östlicher Kitinbeobachter	Östliche Kitinbeobachterin
+_EF2FA3EB8851F235	slaughter_week_mgiver_fyros	Nördlicher Kitinbeobachter	Nördliche Kitinbeobachterin
+_335B4A0905D8BF9A	slaughter_week_mgiver_zorai	Westlicher Kitinbeobachter	Westliche Kitinbeobachterin
+_3BFE4BA20E27A960	slaughter_week_mgiver_tryker	Südlicher Kitinbeobachter	Südliche Kitinbeobachterin
+_875BA49BBF0043EE	slaughter_week_informer_name	Sonderbeauftragter	Sonderbeauftragte
+_ED58CFD255937A9E	sw_boss_fyros	Fyros-Exterminator	Fyros-Exterminatorin
+_2E1877C117338286	sw_boss_matis	Matis-Exterminator	Matis-Exterminatorin
+_8E78A7DC79B37A8A	sw_boss_zorai	Zoraï-Exterminator	Zoraï-Exterminatorin
+_6E6BE3AEA0BCE7E2	sw_boss_tryker	Tryker-Exterminator	Tryker-Exterminatorin
+_882412021BB36D59	gn_sirgio_fyros_dancer	Fyros-Tänzer	Fyros-Tänzerin
+_8294FA049443F562	gn_sirgio_matis_dancer	Matis-Tänzer	Matis-Tänzerin
+_052CDA7E15530D6D	gn_sirgio_zorai_dancer	Zoraï-Tänzer	Zoraï-Tänzerin
+_3DECA7F453506591	gn_sirgio_tryker_dancer	Tryker-Tänzer	Tryker-Tänzerin
+_DE95A6417003F52E	gn_bomber_boss	Mineuranführer	Mineuranführerin
+_15B2C5B50AF01AA3	gn_bomber_random	Mineur	Mineurin
+_E7B870971D68ECAB	gn_bomb_lixie	Bombe	Bombe
+_AAF8AC9725A628A4	gn_mine_lixie	Landmine	Landmine
+_1929DA4173E24D1B	fct_artisan_restaurateur	Wiederherstellungs-Spezialist	Wiederherstellungs-Spezialistin
+_EB25B0ACF3A8A0B5	gn_explosion_lixie	Explosion	Explosion
+_58865C5622EA9E8A	gn_peipbae	Peis Zorn	Peis Zorn
+_5779690BA7E9A8A2	fct_ranger_worker	Ranger-Handwerker	Ranger-Handwerkerin
+_65B978A0217917B2	fct_ranger_guard	(Ranger-Wache)	(Ranger-Wache)
+_858E090B25A88FBD	fct_ranger_intendant	Ranger-Intendant	Ranger-Intendantin
+_3A9E69F36225B422	fct_ranger_great_mage	Ranger-Erzmagier	Ranger-Erzmagierin
+_5BF5796480AF9442	fct_ranger_guard_captain	Ranger-Wachtmeister	Ranger-Wachtmeisterin
+_3B2029102B74D049	fct_ranger_explorer	Ranger-Forscher	Ranger-Forscherin
+_44DE81FDE5187FB7	fct_ranger_coord	Ranger-Koordinator	Ranger-Koordinatorin
+_DF97BB749906725A	title00014	Glückskind	Glückskind
+_DF9813815C47A65A	title00015	Pechvogel	Pechvogel
+_F03E6126BF73AB87	fct_confgu	Bruderschaft des glücklichen Gubani	Bruderschaft des glücklichen Gubani
+_AEA9CCAB21A910AD	eboulis	Geröll	Geröll
+_E60838B3AA6ABCBA	monticule	Hügel	Hügel
+_442C188A1CD6DC2A	title00020	Fyros-Patriot	Fyros-Patriotin
+_2DC5BF788A3773A3	title00021	Matis-Vasall	Matis-Vasallin
+_885012BC382C6C44	title00022	Tryker-Bürger	Tryker-Bürgerin
+_CC65B0A1FCD4D094	title00023	Zoraï-Initiat	Zoraï-Initiatin
+_1EFFADFCAE281D0A	title00024	Kami-Jünger	Kami-Jüngerin
+_742C7CA0382DCDF2	title00025	Karavan-Anhänger	Karavan-Anhängerin
+_6B089C9A5CC4DF59	title00026	Akenak der Fyros	Akenak der Fyros
+_AB749B7F88E57B9B	title00027	Matis-Adliger	Matis-Adlige
+_C59FB4A059877AAE	title00028	Taliar der Tryker	Taliar der Tryker
+_06FF5B7F801D9197	title00029	Zoraï-Erleuchteter	Zoraï-Erleuchtete
+_6299CF709DB7B3AC	title00030	Marodeur	Marodeurin
+_89DA3461EE687880	fct_camprangerguide	Lagerführerin	Lagerführerin
+_4322291BFA7A68F0	fct_ranger_kitiniere_welcomer	Kitinnest-Beobachter	Kitinnest-Beobachterin
+_A9248F8D59496CA7	gn_Xmas_Event	Segensfest	Segensfest
+_DF8F69B8A11380CD	gn_Xmas_Super_Loot_1	Segensfest Riesenbeute	Segensfest Riesenbeute
+_1B534672C1DE8D9C	gn_attack_gookitin_group	gooverseuchte Kitin-Angreifer	gooverseuchte Kitin-Angreifer
+_E319C0949BFBECC2	gn_axodus_garatus	Axodus Garatus	Axodus Garatus
+_5DB1E01A6828E467	gn_ba_mirri_vichan	Be'Mirri Vichan	Be'Mirri Vichan
+_9FE3685A92B9B098	gn_ba_rima_dixie	Ba'Rima Dixie	Ba'Rima Dixie
+_EB788C8BE105BCB1	gn_ballis_sothus	Ballis Sothus	Ballis Sothus
+_BD7E195536CDC0D2	gn_bandit_mastergoo_01	Bandit der Meister des Goo	Bandit der Meister des Goo
+_FDED4D8481BEE515	gn_base_gookitin_group	gooverseuchter Kitin	gooverseuchter Kitin
+_E491AD1BE698949E	gn_base_kitin_group	gewöhnlicher Kitin	gewöhnlicher Kitin
+_88A7FD032B167777	gn_be_liccha_niorda	Be'Licha Niorda	Be'Licha Niorda
+_52070FB7673B6492	gn_be_sarsy_boxie	Be Sarsy Roxie	Be Sarsy Roxie
+_5C318806E4090C67	gn_be_valda_riddan	Be'Valda Riddan	Be'Valda Riddan
+_5DB20812A7AA486B	gn_be_willy_virgen	Be'Willy Virgen	Be'Willy Virgen
+_A7A8D4959B879F9A	gn_cadan_tandus	Candan Tandus	Candan Tandus
+_66D7489DA93AD4B0	gn_caisse	Kiste	Kiste
+_A31798AE27C68067	gn_campfire_4	Lagerfeuer	Lagerfeuer
+_2578403DE1186463	gn_chio_sei_tung	Chio Sei Tung	Chio Sei Tung
+_662F1D2DF0187C8E	gn_chlorogoo_caster	Chlorogoo-Magier	Chlorogoo-Magierin
+_83FE8517AAB8680B	gn_chlorogoo_fighter	Chlorogoo-Krieger	Chlorogoo-Kriegerin
+_48702D92827FA5F8	gn_chlorogoo_harvester	Chlorogoo-Ernter	Chlorogoo-Ernterin
+_662F1D1DE898A48E	gn_chlorogoo_healer	Chlorogoo-Heiler	Chlorogoo-Heilerin
+_662F1D136E18F48E	gn_chlorogoo_ranger	Chlorogoo-Fernkämpfer	Chlorogoo-Fernkämpferin
+_61E653A6E7964458	gn_chu_ni_rama	Chu Ni Rama	Chu Ni Rama
+_252770699855879B	gn_ckdic1	ckdic1	
+_2527706AD8658B9B	gn_ckdic2	ckdic2	
+_2527706B18758F9B	gn_ckdic3	ckdic3	
+_2527706C5985939B	gn_ckdic4	ckdic4	
+_25277069D9658B9C	gn_ckdid1	ckdid1	
+_2527706A19758F9C	gn_ckdid2	ckdid2	
+_2527706B5985939C	gn_ckdid3	ckdid3	
+_2527706C9A95979C	gn_ckdid4	ckdid4	
+_2527706919758F9D	gn_ckdie1	ckdie1	
+_2527706A5985939D	gn_ckdie2	ckdie2	
+_2527706B9995979D	gn_ckdie3	ckdie3	
+_2527706CDAA59B9D	gn_ckdie4	ckdie4	
+_252770695985939E	gn_ckdif1	ckdif1	
+_2527706A9995979E	gn_ckdif2	ckdif2	
+_2527706BD9A59B9E	gn_ckdif3	ckdif3	
+_2527706C1AB59F9E	gn_ckdif4	ckdif4	
+_A547706998558F9D	gn_ckfic1	ckfic1	
+_A547706AD865939D	gn_ckfic2	ckfic2	
+_A547706B1875979D	gn_ckfic3	ckfic3	
+_A547706C59859B9D	gn_ckfic4	ckfic4	
+_A5477069D965939E	gn_ckfid1	ckfid1	
+_A547706A1975979E	gn_ckfid2	ckfid2	
+_A547706B59859B9E	gn_ckfid3	ckfid3	
+_A547706C9A959F9E	gn_ckfid4	ckfid4	
+_A54770691975979F	gn_ckfie1	ckfie1	
+_A547706A59859B9F	gn_ckfie2	ckfie2	
+_A547706B99959F9F	gn_ckfie3	ckfie3	
+_A547706CDAA5A39F	gn_ckfie4	ckfie4	
+_A547706959859BA0	gn_ckfif1	ckfif1	
+_A547706A99959FA0	gn_ckfif2	ckfif2	
+_A547706BD9A5A3A0	gn_ckfif3	ckfif3	
+_A547706C1AB5A7A0	gn_ckfif4	ckfif4	
+_6893D337F25A889B	gn_damarus_vidorus	Damarus Vidorus	Damarus Vidorus
+_1904989DA6B79C98	gn_daro_carera	Daro Carera	Daro Carera
+_A4C7909AE4984C99	gn_egg	Ei	Ei
+_5147B877C8B87C7E	gn_fang_cho_lin	Fang Cho Lin	Fang Cho Lin
+_E9056F9A627633A1	gn_fi_cha_fuing	Fi Cha Fuing	Fi Cha Fuing
+_A37860B1A8D76C63	gn_forcio_pani	Forcio Pani	Forcio Pani
+_24A8D0A71E19146F	gn_forti_amarri	Forti Amarri	Forti Amarri
+_6C06C869571A88B5	gn_goloris_raeps	Goloris Raeps	Goloris Raeps
+_7E7E5DF328BD0125	gn_goo_kipucka_leader	gooverseuchter Anführer-Kipucka	gooverseuchter Anführer-Kipucka
+_AA97DC9B2AF7C893	gn_goo_kitimandib	gooverseuchter Kitin	gooverseuchter Kitin
+_E126BCA05557A87C	gn_goo_mob_code1	gooverseuchte Kreatur	gooverseuchte Kreatur
+_E126BCA09557A87D	gn_goo_mob_code2	gooverseuchte Kreatur	gooverseuchte Kreatur
+_E126BCA0D557A87E	gn_goo_mob_code3	gooverseuchte Kreatur	gooverseuchte Kreatur
+_E126BCA01657A87F	gn_goo_mob_code4	gooverseuchte Kreatur	gooverseuchte Kreatur
+_E836F0B22A3A98AA	gn_goomaster_boss	gooverseuchter Rudelführer	gooverseuchter Rudelführer
+_F4EDE7E61E54E2ED	gn_guard_spire_zorai_karavan	Karavan-Turmwächter der Zoraï	Karavan-Turmwächterin der Zoraï
+_A497908C661854A0	gn_heal	Heiler	Heilerin
+_6235DAF15B14EA6B	gn_healer_fyros_spire_kami	Fyros-Heiler am Kami-Turm	Fyros-Heilerin am Kami-Turm
+_B7DD1308926C93EF	gn_healer_fyros_spire_karavan	Fyros-Heiler am Karavan-Turm	Fyros-Heilerin am Karavan-Turm
+_DD24F6F15B14D267	gn_healer_matis_spire_kami	Matis-Heiler am Kami-Turm  	Matis-Heilerin am Kami-Turm
+_B14D1308118C1BF8	gn_healer_matis_spire_karavan	Matis-Heiler am Karavan-Turm 	Matis-Heilerin am Karavan-Turm 
+_20BDB7CB9E228EA0	gn_healer_tryker_spire_kami	Tryker-Heiler am Kami-Turm  	Tryker-Heilerin am Kami-Turm
+_788C8F387ABB97F5	gn_healer_tryker_spire_karavan	Tryker-Heiler am Karavan-Turm	Tryker-Heilerin am Karavan-Turm
+_DFD52AF15B738A5D	gn_healer_zorai_spire_kami	Zoraï-Heiler am Kami-Turm  	Zoraï-Heilerin am Kami-Turm
+_341E13FE0FCB3303	gn_healer_zorai_spire_karavan	Zoraï-Heiler am Karavan-Turm	Zoraï-Heilerin am Karavan-Turm
+_68D7BC9B2A5880AF	gn_hill	Hügel	Hügel
+_E9C7A0A1AB4864AE	gn_hole	Loch	Loch
+_2DB88BB8E1886CB4	gn_horde_barrack_1	Baracke der Horde	Baracke der Horde
+_E6A9DDEDEAB8B4BA	gn_horde_etendard_1	Horden-Eingang	Horden-Eingang
+_E739DCA55768AC6A	gn_horde_tower_1	Turm der Horde	Turm der Horde
+_670648C9E9A990A6	gn_irolus_vadagaan	Irolus Vadagaan	Irolus Vadagaan
+_6588609F97C77854	gn_kami_device_1	Kami-Gerät	Kami-Gerät
+_024E05EDA4E9A00D	gn_kami_fighter_base	Kami-Kämpfer-Basis	Kami-Kämpfer-Basis
+_667888A625B48473	gn_kami_hut_1	Kami-Hütte	Kami-Hütte
+_F3CC413A310B40CF	gn_kami_landkeeper_200	Kami-Landhalter	Kami-Landhalter
+_EC2F5D09DE16CCA0	gn_kami_patrol_base	Kami-Patrouillen-Basis	Kami-Patrouillen-Basis
+_E315A8AE62D66CB5	gn_kami_tower_1	Kami-Turm 	Kami-Turm 
+_85AE391962ED49D5	gn_kami_trooper_code1	Kami-Kämpfer	Kami-Kämpferin
+_85AE391962FD49D6	gn_kami_trooper_code2	Kami-Kämpfer	Kami-Kämpferin
+_85AE3919620D49D7	gn_kami_trooper_code3	Kami-Kämpfer	Kami-Kämpferin
+_85AE3919621D49D8	gn_kami_trooper_code4	Kami-Kämpfer	Kami-Kämpferin
+_64EF9D17DE168CA6	gn_kami_wizard_base	Kami-Magier	Kami-Magierin
+_6C7B3102E98B9CC0	gn_karavan_barrack_1	Karavan-Baracke	Karavan-Baracke
+_E60525F3EA58448C	gn_karavan_device_1	Karavan-Gerät	Karavan-Gerät
+_AD5C61162BDAA4C5	gn_karavan_gateway_1	Karavan-Durchgang	Karavan-Durchgang
+_5CF3421DFCFF4546	gn_karavan_lieutenant_200	Karavan-Leutnant	Karavan-Leutnantin
+_440B61F12A6E89EB	gn_karavan_medic_base	Karavan-Basis für Mediziner	Karavan-Basis für Mediziner
+_C16D3D7F04103502	gn_karavan_patrol_base	Karavan_Basis für Patrouillen	Karavan_Basis für Patrouillen
+_2AE7B3C668FAC0B9	gn_karavan_tower_1	Karavan-Turm	Karavan-Turm
+_48418E61484CD5FA	gn_karavan_trooper_base	Karavan-Trooper-Basis	Karavan-Trooper-Basis
+_5B42466FB36F3159	gn_karavan_trooper_code1	Karavan-Trooper 	Karavan-Trooper 
+_6E16FC58E805D08F	gn_karavan_wall_1	Karavan-Umzäunung	Karavan-Umzäunung
+_CE36BC9F9929906D	gn_kincherC1	Kincher	Kincher
+_4E36BC9F9929906F	gn_kincherC3	Kincher	Kincher
+_8F36BC9F99299070	gn_kincherC4	Kincher	Kincher
+_9836BC9F99299094	gn_kincherCX	Kincher	Kincher
+_69D69CA3627A68A7	gn_kipucka_leader	Anführer-Kipucka	Anführer-Kipucka
+_D166B4B95E19DC78	gn_kirostaC1	Kirosta 	Kirosta 
+_5166B4B95E19DC7A	gn_kirostaC3	Kirosta	Kirosta
+_9266B4B95E19DC7B	gn_kirostaC4	Kirosta	Kirosta
+_9B66B4B95E19DC9F	gn_kirostaCX	Kirosta	Kirosta
+_860D550F25E8D430	gn_kitin_larva_event	Kitin-Larve	Kitin-Larve
+_8975165D89805DF6	gn_kitin_pondeuse_event	Kitin-Verlegung	Kitin-Verlegung
+_6813D31FAB098492	gn_ladamis_valoris	Ladamis Valoris	Ladamis Valoris
+_69B7145F21F88C7B	gn_lani_lido	Lani Lido	Lani Lido
+_D508D89D1BD99C84	gn_lano_fergoto	Lano Fergoto	Lano Fergoto
+_D26774A124679873	gn_lardo_cicci	Lardo Cicci	Lardo Cicci
+_2A4790A0E35593A0	gn_lasini_choci	Lasini Chochi	Lasini Chochi
+_98F7B0AE61C87495	gn_lono_sigrefi	Lono Sigrefi	Lono Sigrefi
+_EAB70096E488445E	gn_lorio_malara	Lorio Malara	Lorio Malara
+_6A98E05DE556EC5C	gn_ma_cho_sung	Ma Cho Sung	Ma Cho Sung
+_7F2E35DC0F5448EB	gn_mac_bargan_rochan	Mac Bargan Rochan	Mac Bargan Rochan
+_6AADC52FE1E33441	gn_mac_furdy_soroli	Mac Furdy Solori	Mac Furdy Solori
+_03FD5DE98C7348F9	gn_mac_liggon_dallen	Mac Liggon Dallen	Mac Liggon Dallen
+_C59E89FD521330F8	gn_mac_silith_noksan	Mac Silith Noksan	Mac Silith Noksan
+_AA5750AA61A8A486	gn_magic	Magie	Magie
+_24E53BA7A317349C	gn_malo_canda	Malo Canda	Malo Canda
+_A583629AB8A0AD46	gn_maurauder_guard_magic	Magier-Wächter der Marodeure	Magier-Wächterin der Marodeure
+_A4D3729A3960C14C	gn_maurauder_guard_melee	Nahkampf-Wächter der Marodeure	Nahkampf-Wächterin der Marodeure
+_65F3629F3980C948	gn_maurauder_guard_range	Fernkampf-Wächter der Marodeure	Fernkampf-Wächterin der Marodeure
+_6E56C8B0E6CAC497	gn_maurauder_hero	Held der Marodeure	Heldin der Marodeure
+_15961F9DE5D9588F	gn_me_balla_soufi	Me Balla Soufi	Me Balla Soufi
+_9AD6D0B1DAC49498	gn_ming_xi_ying	Ming Xi Ying	Ming Xi Ying
+_E7D8DCAC6599BCB1	gn_mirador	Mirador	Mirador
+_D97394995F32A0B7	gn_mong_chi_sa	Mong Chi Sa	Mong Chi Sa
+_1BA360A8A627DCAF	gn_mora_falari	Mora Falari	Mora Falari
+_D6E7ACA76AB8C891	gn_morio_lario	Morio Lario	Morio Lario
+_ABD8B8AAA5C77FB1	gn_noriko_suena	Noriko Suena	Noriko Suena
+_1E92FBAAEB0900AD	gn_o_carlan_tryxi	O'Carlan Tryxi	O'Carlan Tryxi
+_22B2E4622BD9C8A5	gn_o_lormy_berran	O'Lormy Berran	O'Lormy Berran
+_2B08F887E9F67BC7	gn_ordis_nirosis	Ordis Nirosis	Ordis Nirosis
+_EDC7F4B4E799C4C3	gn_prisonner	Gefangener	Gefangene
+_6218888FEDD9D0BF	gn_queen_guard	Leibwächter der Königin	Leibwächterin der Königin
+_E93758B26688E88A	gn_range	Ranger	Ranger
+_EBD8689B2605C0B4	gn_relaus_xogips	Relaus Xogips	Relaus Xogips
+_DF85227CF9FF4D50	gn_strangers_welcomer_t1	Empfangsposten	Empfangsposten
+_AE48FC9BAB28ACA1	gn_target	Tonkrug	Tonkrug
+_89B23A7289BD810B	gn_tcm_chlorogoo_patrol	Chlorogoo-Patrouille	Chlorogoo-Patrouille
+_A2167AE198E30288	gn_tcm_chlorogoo_prisonner	Chlorogoo-Gefangener	Chlorogoo-Gefangene
+_ECB1BD03707664AA	gn_tcm_master_dummy	Meister-Trainingspuppe	Meister-Trainingspuppe
+_0EE1327C0EEC7915	gn_tcm_trooper_training	Truppen-Trainer	Truppen-Trainerin
+_ED3773B127B768AC	gn_tini_solni	Tini Solni	Tini Solni
+_EC359769684A0CC9	gn_tower_1	Turm	Turm
+_246980B16B6A44B6	gn_tower_event	Turm	Turm
+_2D47AC992909F8B0	gn_tower_kami	Kami-Turm	Kami-Turm
+_6AE9A8AC6608D0B0	gn_tower_karavan	Karavan-Turm	Karavan-Turm
+_EA8B751DEA9A9CC2	gn_traitre_corsaire	Verräter der Korsaren	Verräterin der Korsaren
+_98529AC61B56E2A6	gn_warmap_marauder_chief_250	Marodeurs-Führungskraft	Marodeurs-Führungskraft
+_9E91C57590462E70	gn_warmap_marauder_hero_200	Marodeurs-Held	Marodeurs-Heldin
+_A66727F41609A666	gn_warmap_marauder_leader_200	Marodeurs-Anführer	Marodeurs-Anführerin
+_A0194FC520244E98	gn_warrior_fyros_spire_kami	Fyros-Wächter des Kami-Turmes	Fyros-Wächterin des Kami-Turmes
+_778A1B4DBAECA304	gn_warrior_fyros_spire_karavan	Fyros-Wächter des Karavan-Turmes	Fyros-Wächterin des Karavan-Turmes
+_24194FC520645E68	gn_warrior_matis_spire_kami	Matis-Wächter des Kami-Turmes	Matis-Wächterin des Kami-Turmes 
+_398A034FB4FCABEC	gn_warrior_matis_spire_karavan	Matis-Wächter des Karavan-Turmes	Matis-Wächterin des Karavan-Turmes 
+_7E29B7E059186A00	gn_warrior_tryker_spire_kami	Tryker-Wächter des Kami-Turmes	Tryker-Wächterin des Kami-Turmes 
+_F8618065F86CC7FE	gn_warrior_tryker_spire_karavan	Tryker-Wächter des Karavan-Turmes	Tryker-Wächterin des Karavan-Turmes 
+_AA194FC51C644E84	gn_warrior_zorai_spire_kami	Zoraï-Wächter des Kami-Turmes	Zoraï-Wächterin des Kami-Turmes  
+_7CE9E34DB54DA3FA	gn_warrior_zorai_spire_karavan	Zoraï-Wächter des Karaven-Turmes	Zoraï-Wächterin des Karaven-Turmes
+_692A94AC2DF9D0BE	gn_watchtower	Wachturm	Wachturm
+_E39398B3DFF79CA9	gn_xala_rokian	Xala Rokian	Xala Rokian
+_64A3A8A0E3266FA7	gn_xan_mi_chong	Xan Mi Chong	Xan Mi Chong
+_6346E4BE66327FA9	gn_xao_tun	Xao Tun	Xao Tun
+_ECE65BB9E717EC5D	gn_xeim_wi_lo	Xeim Wi Lo	Xeim Wi Lo
+_190784CA6979305A	gn_magicpanel	Tafel der Magie	Tafel der Magie
+_3D6E641B66F0C369	gn_foragepanel	Tafel der Rohstoffsuche	Tafel der Rohstoffsuche
+_574755C6ECC96858	gn_fightpanel	Tafel des Kampfes	Tafel des Kampfes
+_03793DC630696470	gn_craftpanel	Tafel des Handwerks	Tafel des Handwerks
+_810DF59AC3E83012	office_tourisme_f	Fremdenführer von Pyr	Fremdenführerin von Pyr
+_5DA3AE903F0A15D4	office_tourisme_m	Fremdenführer von Yrkanis	Fremdenführerin von Yrkanis
+_D993BE9FBD2DC588	office_tourisme_t	Fremdenführer von Fairhaven	Fremdenführerin von Fairhaven
+_810D7AAE40883012	office_tourisme_z	Fremdenführer von Zora	Fremdenführerin von Zora
+_5479EC8969F54E6B	cwmf03_bandit	Bandit aus Avalae	Banditin aus Avalae
+_AC29E4FE53F5165E	cwzf03_goo	infizierter Ragus	infizierter Ragus
+_59E9E4ACEAE863BF	cwff03_termit	Termitenhügel	Termitenhügel
+_ABC877AE9E64B34B	cwff03_goari	Goari-Gelege	Goari-Gelege
+_286786B1A3D888AC	stele_epee_bois	Stele	Stele
+_6D7079069A6AE508	corsaire_dechu_coffer	Korsaren-Kiste	Korsaren-Kiste
+_13A4529EB7A07482	kef0904observer100	Hof am Nördlichen See-Beobachter (1)	Hof am Nördlichen See-Beobachterin (1)
+_5FB8B6B91D8A7DB0	kef0904observer150	Hochtürme-Beobachter (2)	Hochtürme-Beobachterin (2)
+_06FDE3E3A46CE026	kef0904observer200	Stachel-des-Drachen-Beobachter (3)	Stachel-des-Drachen-Beobachterin (3)
+_367AAFB1A918F404	kef0904observer210	Werkstatt am Langen Grat-Beobachter (4)	Werkstatt am Langen Grat-Beobachterin (4)
+_957BA930A758DC04	kef0904observer250	Flammender Wald-Beobachter (5)	Flammender Wald-Beobachterin (5)
+_A2C3F2BEB998E7DA	kef0904observer260	Sengende Schlucht-Beobachter (6)	Sengende Schlucht-Beobachterin (6)
+_8D0516CD4B9323BF	kem0904observer100	Erhebungs-Beobachter (1)	Erhebungs-Beobachterin (1)
+_3DF6BF3A9D57762E	kem0904observer150	Anhöhe der Torbaks-Beobachter (2)	Anhöhe der Torbaks-Beobachterin (2)
+_078B7340248958DF	kem0904observer200	Kleiner Berg-Beobachter (3)	Kleiner Berg-Beobachterin (3)
+_2B8EB867EBACF229	kem0904observer210	Wasserfall der zwei Totems-Beobachter (4)	Wasserfall der zwei Totems-Beobachterin (4)
+_46C820287320E968	kem0904observer250	Hain der Verwirrung-Beobachter (5)	Hain der Verwirrung-Beobachterin (5)
+_A533FABADE5A85DD	kem0904observer260	Westwald-Beobachter (6)	Westwald-Beobachterin (6)
+_23932F3E63103A6A	ket0904observer100	Verzauberte Bucht-Beobachter (1)	Verzauberte Bucht-Beobachterin (1)
+_A7185AC75C29CD9B	ket0904observer150	Ruhiges Wasser-Beobachter (2)	Ruhiges Wasser-Beobachterin (2)
+_671A9607D8A801DC	ket0904observer200	Zwillingsgipfel-Beobachter (3)	Zwillingsgipfel-Beobachterin (3)
+_11FE185565BD9161	ket0904observer210	Friedhofsweg-Beobachter (4)	Friedhofsweg-Beobachterin (4)
+_218CBB0DDA7848CB	ket0904observer250	Lorias Teiche-Beobachter (5)	Lorias Teiche-Beobachterin (5)
+_EB43F3FC07B9350A	ket0904observer260	Grube der Stille-Beobachter (6)	Grube der Stille-Beobachterin (6)
+_D4851E97F8708C82	kez0904observer100	Sai-Shun-Festung-Beobachter (1)	Sai-Shun-Festung-Beobachterin (1)
+_8B4B7BE0234BD5B3	kez0904observer150	Kincherbogen-Beobachter (2)	Kincherbogen-Beobachterin (2)
+_9521C99DBE21D797	kez0904observer200	Gu-Qin-Beobachter (3)	Gu-Qin-Beobachterin (3)
+_884F502EF77CE13B	kez0904observer210	Tal der Hoffnung-Beobachter (4)	Tal der Hoffnung-Beobachterin (4)
+_7493CF045859B8A2	kez0904observer250	Verlorenes Tal-Beobachter (5)	Verlorenes Tal-Beobachterin (5)
+_E8007F8774ADE278	kez0904observer260	Kap der Verzweiflung-Beobachter (6)	Kap der Verzweiflung-Beobachterin (6)
+_0240250D47ED1404	fct_dynastic_merchant	Dynastischer Zoraï-Händler	Dynastische Zoraï-Händlerin
+_FFEFE5912232C840	fct_federal_merchant	Föderaler Tryker-Händler	Föderale Tryker-Händlerin
+_82B01B0EEC07D001	fct_imperial_merchant	Imperialer Fyros-Händler	Imperiale Fyros-Händlerin
+_1CF36CAE23B9BCC5	fct_royal_merchant	Königlicher Matis-Händler	Königliche Matis-Händlerin
+_A5F9146E2CEAF8AC	gn_autel	Altar	Altar
+_A0D75C1A6ACA1CCB	fct_tryker_governor	Gouverneur der Tryker	Gouverneurin der Tryker
+_72F86E8F01BBC5F9	fct_fyros_emperor	Imperator der Fyros	Imperatorin der Fyros
+_9361C9FFE8164799	fct_matis_king	König der Matis	Königin der Matis
+_C11D94848FDAEC96	fct_zorai_grand_sage	Großer Weiser der Zoraï	Große Weise der Zoraï
+_23AA7CAC6CD8BC8E	fct_chronicler	Chronist	Chronistin
+_2AE92CA8D936DCAE	fct_royal_adviser	Berater des Königs	Beraterin des Königs
+_65D7608B191BC0C3	fct_matis_minstrel	Minnesänger der Matis	Minnesängerin der Matis
+_E2FA2498E2F827B8	fct_matis_herena	Herena der Matis	Herena der Matis
+_C2D0957502FFFCFF	fct_matis_prince	Prinz der Matis	Prinzessin der Matis
+_E92BDCB062D600B2	fct_fyros_senator	Senator der Fyros	Senatorin der Fyros
+_FFE0E91CF99A6109	fct_imperial_alchemist	Imperialer Alchemist	Imperiale Alchemistin
+_43B0F56E04BFBCF1	fct_fyros_prince	Prinz der Fyros	Prinzessin der Fyros
+_8E8622613B4C95FB	fct_tryker_vice_governor	Vize-Gouverneur	Vize-Gouverneurin
+_0EC31CA7E46994AE	fct_zorai_sage	Weiser der Zoraï	Weise der Zoraï
+_9F73B8B5690B94A1	fct_marauder_scout	Späher der Marodeure	Späherin der Marodeure
+_9B7380A5645A3CA6	fct_marauder_chief	Anführer der Marodeure	Anführerin der Marodeure
+_E14B80C29F7BB0BD	fct_spy	Spion	Spionin
+_A064353AF0B9B1FE	Title00050	Fleischer-Lehrling	Fleischer-Lehrling
+_B009174F0DE2AEA1	Title00051	Fleischer	Fleischerin
+_61362D40AF28C90C	Title00052	Floristik-Lehrling	Floristik-Lehrling
+_2CB82F5111D3EEAB	Title00053	Florist	Floristin
+_A57FE30530299E47	Title00054	Wasserträger-Lehrling	Wasserträger-Lehrling
+_478F749FC867F76F	Title00055	Wasserträger	Wasserträgerin
+_5B37A8849FA2AB0A	Title00056	Lehrling der Magneto-Kartographie	Lehrling der Magneto-Kartographie
+_57D0EE89488C2D65	Title00057	Magneto-Kartograph	Magneto-Kartographin
+_E0F3C25ED1AFFD3A	Title00058	Werkzeugmacher-Lehrling	Werkzeugmacher-Lehrling
+_A709CB55DAE6D397	Title00059	Werkzeugmacher	Werkzeugmacherin
+_E364652BB3B8F1FE	Title00060	Lehrling der Wundheilung	Lehrling der Wundheilung
+_6B0957500DB3E2A0	Title00061	Wundheiler	Wundheilerin
+_E4346A69D5F0BD44	Title00062	Larvisten-Lehrling	Larvisten-Lehrling
+_2288D7715C07078C	Title00063	Larvist	Larvistin
+_3576D67D5422CE83	Title00064	Papiermacher-Lehrling	Papiermacher-Lehrling
+_A7F8AF665F5577AA	Title00065	Papiermacher	Papiermacherin
+_703912893FD2B1F6	fyros_rpjob_herbihunter_title	Fleischermeister	Fleischermeisterin
+_80C0F50BDBD2352A	matis_rpjob_florist_title	Meister der Floristik	Meisterin der Floristik
+_BAC1D91017F3E138	zorai_rpjob_rescuer_title	Meister der Wundheilung	Meisterin der Wundheilung
+_10416A7ECC100D60	zorai_rpjob_magnecarto_title	Meister-Kartograph	Meister-Kartographin
+_DC34E23282FA8260	tryker_rpjob_aquamin_title	Meister-Wasserträger	Meister-Wasserträgerin
+_473FADF1413B8116	fyros_rpjob_tooler_title	Werkzeugmacher-Meister	Werkzeugmacher-Meisterin
+_A5E64EA2C8EBDA21	tryker_rpjob_larvicultor_title	Larvisten-Meister	Larvisten-Meisterin
+_FFC1498EF96FB836	matis_rpjob_paper_title	Papiermachermeister	Papiermachermeisterin
+_9B218ADF61B44A53	gn_fyros_rpjob_herbihunter_convert	Schlachtbank	Schlachtbank
+_1F66A27B04DAD945	gn_matis_rpjob_florist_convert	Blumen-Werkbank	Blumen-Werkbank
+_1317925C30AA91F6	gn_zorai_rpjob_rescuer_convert	Erste-Hilfe-Station	Erste-Hilfe-Station
+_A1EEC6D2D0F58E79	gn_tryker_rpjob_aquamin_convert	Anzeigetafel der Lieferungen	Anzeigetafel der Lieferungen
+_23A456E452843E34	gn_zorai_rpjob_magnecarto_convert	Karte des Magnetismus	Karte des Magnetismus
+_4C354E82893EDD45	gn_fyros_rpjob_tooler_convert	Werkbank	Werkbank
+_B4CE3C1E316C1B99	gn_tryker_rpjob_larvicultor_convert	Larven-Seziertisch	Larven-Seziertisch
+_E07646A092C5AA60	gn_matis_rpjob_paper_convert	Papiermacher-Werkbank	Papiermacher-Werkbank
+_06BF0113E7F9B3CE	gn_tryker_aquamin_source	Wasserquelle	Wasserquelle
+_048EE9BE67D88030	gn_tryker_aquamin_barrel	Seewasser	Seewasser
+_D022BE8F454D399C	gn_tryker_aquamin_silo	Regenwasser-Sammelbehälter	Regenwasser-Sammelbehälter
+_6DF864B36A28ECB2	gn_tryker_aquamin_well	Brunnen	Brunnen
+_99C0B7AC1AA6394B	gn_tryker_aquamin_npc	Vertreter der Wassergesellschaft	Vertreterin der Wassergesellschaft
+_E044F7A1C8C1FE48	gn_zorai_magnecarto_npc	Beamter für Magnetismuskontrolle	Beamtin für Magnetismuskontrolle
+_4A231AFA00808E5A	gn_zorai_magnecarto_npc_A	Kartograph (Goo Chase)	Kartographin (Goo Chase)
+_CD231A08C08E3910	gn_zorai_magnecarto_npc_B	Kartograph (Win-Cho)	Kartographin (Win-Cho)
+_3CB3AE4F200EEDE7	gn_zorai_magnecarto_npc_C	Kartograph (Daïsha)	Kartographin (Daïsha)
+_CD218D7ADE44EA53	gn_zorai_magnecarto_npc_D	Kartograph (West Hollow)	Kartographin (West Hollow)
+_EED5FCA72749A896	gn_rpjob_herbihunter_chest	Truhe	Truhe
+_E013AD7F418EEC81	gn_rpjob_florist_jar_4	Gefäß mit Cratcha-Stempeln	Gefäß mit Cratcha-Stempeln
+_E2640975C50FD735	gn_rpjob_florist_jar_2	Gefäß mit Psykopla-Stempeln	Gefäß mit Psykopla-Stempeln
+_E273B581412D2881	gn_rpjob_florist_jar_3	Gefäß mit Slaveni-Stempeln	Gefäß mit Slaveni-Stempeln
+_C8C9D96885AE94CA	gn_rpjob_florist_jar_1	Gefäß mit gemischten Stempeln	Gefäß mit gemischten Stempeln
+_2F47E091A8A9E0A6	gn_rpjob_florist_water	Brunnen	Brunnen
+_91145E59C63AB922	gn_rpjob_florist_water_barrel	Wasserfass	Wasserfass
+_AAE8B0FC9F6A78C0	gn_rpjob_florist_engrai	Dünger	Dünger
+_244593C48AE3F242	gn_rpjob_florist_engrai_barrel	Düngerfass	Düngerfass
+_3F2AC591445B390C	gn_boss_tryker_light_boss	Dante der Schelm	Dante der Schelm
+_041D89F026A9D00C	gn_boss_tryker_light_melee_guard	Wache	Wache
+_BE90D114E6989D0C	gn_boss_tryker_light_healer_guard	Wache	Wache
+_E7AF8504E806E4A5	gn_boss_tryker_light_off_guard	Wache	Wache
+_041D89F2A669E40C	gn_boss_tryker_light_range_guard	Wache	Wache
+_B06E4DD32045E3AA	gn_moving_guards_group_1	Elitewache	Elitewache
+_B06E4DD36045E3AA	gn_moving_guards_group_2	Elitewache	Elitewache
+_A0635697B060B56D	gn_boss_tryker_light_stone	Teleportations-Markierung	Teleportations-Markierung
+_DE539FF915B78623	gn_boss_tryker_light_stone_back	Teleportations-Markierung	Teleportations-Markierung
+_46AA029FC1BEE5CB	gn_boss_tryker_light_loot_box	Dantes Truhe	Dantes Truhe
+_D8A4FA37B4579635	gn_boss_tryker_light_start_boss	Dante der Schelm	Dante der Schelm
+_9FB90FDADDB75D85	gn_boss_tryker_light_start_stone	Teleportations-Markierung	Teleportations-Markierung
+_F0B392853EEDC415	gn_boss_tryker_light_start_box	Dantes Kiste	Dantes Kiste
+_02C21650F36E890A	fct_consumable_merchant	(Händler für Verbrauchsgegenstände)	(Händlerin für Verbrauchsgegenstände)
+_875B65074E9DD42F	title00031	Botschafter der Fyros	Botschafterin der Fyros
+_7B3B69074E9DA433	title00032	Botschafter der Matis	Botschafterin der Matis
+_5B9344FE357DA413	title00033	Botschafter der Tryker	Botschafterin der Tryker
+_81DD71074E2B642F	title00034	Botschafter der Zoraï	Botschafterin der Zoraï
+_1A4F0671322299DE	gn_boss_zorai_light_boss	Pei-Ruz der Verruchte	Pei-Ruz der Verruchte
+_1E181185FD852670	gn_boss_zorai_light_tomb_out	Teleportations-Markierung	Teleportations-Markierung
+_0FD75236801FF293	gn_boss_zorai_light_tomb_in	Teleportations-Markierung	Teleportations-Markierung
+_242A8DFB2F9FD907	gn_boss_zorai_light_dalton_1	Vao Do-Duang	Vao Do-Duang
+_9E4EE13E43CF39CA	gn_boss_zorai_light_dalton_2	Jeoi Do-Duang	Jeoi Do-Duang
+_6E9CED94003081AC	gn_boss_zorai_light_dalton_3	Chaio Do-Duang	Chaio Do-Duang
+_319C84265F3B1DF4	gn_boss_zorai_light_dalton_4	We Do-Duang	We Do-Duang
+_BB5BE2556F8EA5A3	gn_kami_altar_almati	Kami-Altar des Almati-Waldes	Kami-Altar des Almati-Waldes
+_CCCAF6639D638564	gn_karavan_altar_almati	Karavan-Altar des Almati-Waldes	Karavan-Altar des Almati-Waldes
+_20B0F1D427E793A1	gn_kami_altar_nexus	Kami-Altar des Nexus	Kami-Altar des Nexus
+_605D8587427E9DCE	gn_karavan_altar_nexus	Karavan-Altar des Nexus	Karavan-Altar des Nexus
+_6C340CB6625A1CA8	gn_gravats	Geröll	Geröll
+_294880982226786E	gn_room_access	Zugriffsterminal	Zugriffsterminal
+_B1BFD0FB3C756DEC	gn_karavan_altar_silan_ranger_camp	Ranger Lager Karavan Altar	
+_64D6E3A8FE84A1EB	gn_kami_altar_silan_ranger_camp	Ranger Lager Kami Altar	
+_10893D87C3BA7E54	gn_karavan_altar_silan_shattered_ruins	Zerstörte Ruinen Karavan Altar	
+_EFF84EA588CCC3AF	gn_kami_altar_silan_shining_lake	Funkelnder See Kami Altar	
+_31E04D192D7A1D0A	fct_ranger_instructor	Ranger-Ausbilder	Ranger-Ausbilderin
+_445F7D25463D70FD	fct_ranger_assistant	Assistent der Ausbilder	Assistentin der Ausbilder
+_25C68F9A69B988B9	fct_ranger_veteran	Ranger Veteran	Ranger Veteranin

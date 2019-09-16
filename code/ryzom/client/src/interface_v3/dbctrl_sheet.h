@@ -34,9 +34,10 @@
 #include "game_share/skills.h"
 #include "game_share/slot_types.h"
 #include "game_share/rm_family.h"
+#include "game_share/item_family.h"
 //
 #include "../time_client.h"
-
+#include "item_info_waiter.h"
 
 class CItemSheet;
 class CPactSheet;
@@ -51,6 +52,25 @@ namespace NLGUI
 {
 	class CViewRenderer;
 }
+
+class CDBCtrlSheet;
+
+// ***************************************************************************
+// Item info request from server
+class CControlSheetInfoWaiter : public IItemInfoWaiter
+{
+public:
+	CDBCtrlSheet* CtrlSheet;
+	string LuaMethodName;
+	bool Requesting;
+	CControlSheetInfoWaiter()
+		: IItemInfoWaiter(), Requesting(false)
+	{ }
+public:
+	ucstring infoValidated() const;
+	void sendRequest();
+	virtual void infoReceived();
+};
 
 
 // ***************************************************************************
@@ -279,22 +299,16 @@ public:
 		REFLECT_STRING ("on_drop_params", getParamsOnDrop, setParamsOnDrop);
 		REFLECT_STRING ("on_can_drop", getActionOnCanDrop, setActionOnCanDrop);
 		REFLECT_STRING ("on_can_drop_params", getParamsOnCanDrop, setParamsOnCanDrop);
-		REFLECT_LUA_METHOD("getDraggedSheet",	luaGetDraggedSheet)
-		REFLECT_LUA_METHOD("getHpBuff",	luaGetHpBuff)
-		REFLECT_LUA_METHOD("getSapBuff",	luaGetSapBuff)
-		REFLECT_LUA_METHOD("getFocusBuff",	luaGetFocusBuff)
-		REFLECT_LUA_METHOD("getStaBuff",	luaGetStaBuff)
-		REFLECT_LUA_METHOD("getName",		luaGetName)
-		REFLECT_LUA_METHOD("getCreatorName", luaGetCreatorName)
-		REFLECT_LUA_METHOD("waitInfo", luaWaitInfo)
-		REFLECT_LUA_METHOD("buildCrystallizedSpellListBrick",		luaBuildCrystallizedSpellListBrick)
+		REFLECT_LUA_METHOD("getDraggedSheet", luaGetDraggedSheet);
+		REFLECT_LUA_METHOD("getItemInfo", luaGetItemInfo);
+		REFLECT_LUA_METHOD("getName", luaGetName);
+		REFLECT_LUA_METHOD("getCreatorName", luaGetCreatorName);
+		REFLECT_LUA_METHOD("waitInfo", luaWaitInfo);
+		REFLECT_LUA_METHOD("buildCrystallizedSpellListBrick", luaBuildCrystallizedSpellListBrick);
 	REFLECT_EXPORT_END
 
 	int luaGetDraggedSheet(CLuaState &ls);
-	int luaGetHpBuff(CLuaState &ls);
-	int luaGetSapBuff(CLuaState &ls);
-	int luaGetFocusBuff(CLuaState &ls);
-	int luaGetStaBuff(CLuaState &ls);
+	int luaGetItemInfo(CLuaState &ls);
 	int luaGetName(CLuaState &ls);
 	int luaGetCreatorName(CLuaState &ls);
 	int luaWaitInfo(CLuaState &ls);
@@ -581,11 +595,18 @@ public:
 	// For auras, powers, etc. set the range of ticks during which regen occurs
 	void	setRegenTickRange(const CTickRange &tickRange);
 	const CTickRange &getRegenTickRange() const { return _RegenTickRange; }
-	
+
 	// start notify anim (at the end of regen usually)
 	void	startNotifyAnim();
 
+	// callback from info waiter
+	void infoReceived();
+
+	// set enchant/buff marker visiblility
+	static void setShowIconBuffs(bool b) { _ShowIconBuffs = b; }
+
 protected:
+	inline bool useItemInfoForFamily(ITEMFAMILY::EItemFamily family) const;
 
 	void setupItem();
 	void setupPact();
@@ -625,6 +646,7 @@ protected:
 	NLMISC::CCDBNodeLeaf		*_ItemRMFaberStatType;
 
 	mutable sint32		_LastSheetId;
+	bool				_ItemInfoChanged;
 
 	/// Display
 	sint32				_DispSlotBmpId;		// Display slot bitmap id
@@ -634,6 +656,26 @@ protected:
 	sint32				_DispSheetBmpId;	// Main Icon
 	sint32				_DispOverBmpId;		// Over Icon
 	sint32				_DispOver2BmpId;	// Over Icon N0 2 for bricks / items. Useful for items when _DispOverBmpId is used to paint user color on the item.
+
+	std::string			_HpBuffIcon;
+	std::string			_SapBuffIcon;
+	std::string			_StaBuffIcon;
+	std::string			_FocusBuffIcon;
+
+	// texture ids to show
+	struct SBuffIcon
+	{
+		SBuffIcon(sint32 txid, NLMISC::CRGBA col=NLMISC::CRGBA::White)
+			:TextureId(txid), Color(col), IconW(0), IconH(0)
+		{ }
+
+		sint32 TextureId;
+		NLMISC::CRGBA Color;
+		sint32 IconW;
+		sint32 IconH;
+	};
+	std::vector<SBuffIcon> _BuffIcons;
+	std::vector<SBuffIcon> _EnchantIcons;
 
 	// Level Brick or Quality
 	union
@@ -754,16 +796,21 @@ protected:
 
 	sint64		_NotifyAnimEndTime;
 
+	mutable CControlSheetInfoWaiter _ItemInfoWaiter;
 private:
 	mutable TSheetType			_ActualType;
 
 	static		CDBCtrlSheet *_CurrSelection;
 	static		CDBCtrlSheet *_CurrMenuSheet;
+
+	static		bool _ShowIconBuffs;
 private:
 	void		updateActualType() const;
 	void		updateIconSize();
 	void		resetAllTexIDs();
 	void		setupInit();
+	// remove enchant and buff markers from item icon
+	void		clearIconBuffs();
 
 	void		setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar= 1000, bool topDown= false);
 	void		resetCharBitmaps();
@@ -772,17 +819,20 @@ private:
 	// special for items
 	void		updateItemCharacRequirement(sint32 sheetId);
 
+	// Send ITEM_INFO:GET request to server to fetch Buffs, Enchant info
+	void		setupItemInfoWaiter();
+
 	// update armour color, and cache
 	void		updateArmourColor(sint8 col);
 
 	// setup sheet DB. _DbBranchName must be ok, and _SecondIndexInDb and _IndexInDb as well
 	void	    setupSheetDbLinks ();
 
-	
+
 	// 'regen' rendering
 	// convert from uv coordinates in the [0, 1] x [0, 1] range to screen coords
 	inline void uvToScreen(float x, float y, NLMISC::CVector &screenPos, uint texSize) const;
-	// from an angle in the [0, 1] range, return both uv & screen coords for that angle 
+	// from an angle in the [0, 1] range, return both uv & screen coords for that angle
 	// (angle is projected on the side of rectangle of the 'regen' texture)
 	void buildPieCorner(float angle, NLMISC::CUV &uv, NLMISC::CVector &pos, uint texSize) const;
 	// from a start and end angle in the [0, 1] range, build the set of uv mapped triangles necessary

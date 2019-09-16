@@ -1,0 +1,67 @@
+﻿*HASH_VALUE	faction	name	da	ia	member	mda	mia
+_A0EC3CB6728A80B6	fyros	Fyros	el	un	Fyros	los	unos
+_E10CC4B36E98C09E	matis	Matis	el	un	Matis	los	unos
+_2DCA2CC01F48D0B6	tryker	Tryker	el	un	Tryker	los	unos
+_224BC0AE0EA920A2	zorai	Zoraï	el	un	Zoraïs	los	unos
+_A7882077E757D4B4	bandit	Bandido	el	un	Bandidos	los	unos
+_AC0AD4AB2947CC7C	civil	Civil	el	un	Civiles	los	unos
+_2BF98095A426C07F	degen	Degenerado	el	un	Degenerados	los	unos
+_2A9A98AAE9E7B874	fauna	Fauna	la	una	Fauna	la	una
+_A8F93F8ED3E7C6CD	fauna_carnivore	Carnívoro	el	un	Carnívoros	los	unos
+_A9890F92163796CD	fauna_herbivore	Herbívoro	el	un	Herbívoros	los	unos
+_2B7ABCB32B36E474	flora	Flora	la	una	Flora	la	una
+_58767495AA0A0894	goo	Goo	el	un	Goo	el	un
+_64584C9E66D83075	kami	Kami	el	un	Kami	los	unos
+_2059C0A2A31898AB	karavan	Karavan	la	un	Karavan	la	unos
+_2C0AD4B1ABA7EC86	kitin	Kitin	el	unos	Kitins	los 	unos
+_A85CA3F578D722AB	tribe_ancient_dryads	Dríadas Antiguos	los	unos	Dríadas Antiguos	los	unos
+_7C0E65967AB061E7	tribe_antikamis	Antikamis	los	unos	Antikamis	los	unos
+_EA5025FB69C9F0B1	tribe_barkers	Descortezadores	los	unos	Descortezadores	los	unos
+_D4B097EF96E6E67A	tribe_beachcombers	Raqueros	los	unos	Raqueros	los	unos
+_55E23F9137476662	tribe_black_circle	Círculo Negro	los	unos	Circulo Negro	los	unos
+_2335A26F01B5D68B	tribe_cholorogoos	Clorogoos	los	unos	Clorogoos	los	unos
+_1E767658BC34C67F	tribe_cockroaches	Cucarachas	los	unos	Cucarachas	los	unos
+_E8A578485AA340D4	tribe_company_of_the_eternal_tree	Compañía del Árbol Eterno	la	unos	Compañía del Árbol Eterno	la	unos
+_83BEF92D6C48E01E	tribe_corsair	Corsarios	los	unos	Corsarios	los	unos
+_6769CCCA2D0A5CA7	tribe_cute	Cuzans	los	unos	Cuzans	los	unos
+_694BCB10D6E4515B	tribe_darkening_sap	Oscurecedores de Savia 	los	unos	Oscurecedores de Savia	los	unos
+_2126A262C4C30D2F	tribe_dune_riders	Jinetes de las Dunas	los	unos	Jinetes de las Dunas	los	unos
+_E536CE73C206A68B	tribe_ecowarriors	Ecoguerreros	los	unos	Ecoguerreros	los	unos
+_9BA60676076C3DEE	tribe_firebrands	Instigadores	los	unos	Instigadores	los	unos
+_225B4E15B7DC079F	tribe_first_deserter	Primeros Desertores	los	unos	Primeros Desertores	los	unos
+_C23F69132AF97CA3	tribe_frahar	Fraiders	los	unos	Fraiders	los	unos
+_B459CBF1392BE778	tribe_frahar_hunters	Cazadores de Frahar	los	unos	Cazadores de Frahars	los	unos
+_EC39A49C646848A5	tribe_gibbay	Gibads	los	unos	Gibads	los	unos
+_748A396FE96F21E5	tribe_goo_heads	Cabezas de Goo	los	unos	Cabezas de Goo	los	unos
+_4255EE5EC3CBACFE	tribe_green_seed	Semilla Verde	los	unos	Semilla Verde	los	unos
+_36BF4380A26E67C9	tribe_hamazans_of_the_dead_seed	Amazonas de la Semilla Muerta	los	unos	Amazonas de la Semilla Muerta	las	unas
+_08ADBC69EE67A864	tribe_icon_workshipers	Adoradores de Iconos	los	unos	Adoradores de Iconos	los	unos
+_2C7F49FC279914B1	tribe_keepers	Guardianes	los	unos	Guardianes 	los	unos
+_B43A6B56730DC785	tribe_kitin_gatheres	Recoletores de Kitins	los	unos	Recolectores de Kitins	los	unos
+_A8C2504C2E8823C1	tribe_lagoon_brothers	Hermanos de la Laguna	los	unos	Hermanos de la Laguna	los	unos
+_6BB0290BAA691CB1	tribe_lawless	Sin Ley	los	unos	Sin Ley	los	unos
+_6A902D076BA918B1	tribe_leviers	Recaudadores	los	unos	Recaudadores	los	unos
+_C3DB437B861E6ADF	tribe_master_of_the_goo	Maestros del Goo	los	unos	Maestros del Goo	los	unos
+_73A03E377C347598	tribe_matisian_border_guards	Guardas Fronterizos Matis	los	unos	Guardas Fronterizos Matis	los	unos
+_AC8C76BBA486E2D1	tribe_night_turners	Torneros Nocturnos	los	unos	Torneros Nocturnos	los	unos
+_26BA3AC6DFB6A6A8	tribe_oasis_diggers	Excavadores de Oasis	los	unos	Excavadores de Oasis	los	unos
+_60880A71C5C57A8B	tribe_pyromancers	Pirománticos	los	unos	Pirománticos	los	unos
+_97374672C3C1C124	tribe_recoverers	Recuperadores	los	unos	Recuperadores	los	unos
+_7AFE3D837B2009EF	tribe_renegades	Renegados	los	unos	Renegados	los	unos
+_3D1FC91565CB65F5	tribe_restorers	Vigilantes	los	unos	Vigilantes	los	unos
+_1DE3F3E192C07A88	tribe_root_tappers	Extractores de Raíces	los	unos	Extractores de Raíces	los	unos
+_D8154262BC9AADAE	tribe_sacred_sap	Savia Sagrada	los	unos	Savia Sagrada	los	unos
+_154227EA1B939C8E	tribe_sap_gleaners	Recolectores de Savia	los	unos	Recolectores de Savia	los	unos
+_48A6B980052E65DF	tribe_sap_slaves	Esclavos de la Savia	los	unos	Esclavos de la Savia	los	unos
+_7E9F917E7D1139F8	tribe_scorchers	Abrasadores	los	unos	Abrasadores	los	unos
+_B819BFF3346C0F85	tribe_shadow_runners	Traficantes de Sombras	los	unos	Traficantes de Sombras	los	unos
+_938B861B1593F579	tribe_siblings_of_the_weeds	Hermanos de la Maleza	los	unos	Hermanos de la Maleza	los	unos
+_7758FFC63C5BB3C3	tribe_silt_sculptors	Escultores de Cieno	los	unos	Escultores de Cieno	los	unos
+_AD3F7D06E88A34B1	tribe_slavers	Esclavistas	los	unos	Esclavistas	los	unos
+_BF9E553529793923	tribe_smuglers	Contrabandistas	los	unos	Contrabandistas	los	unos
+_BBC9FEAA5F459B84	tribe_the_arid_matis	Matis Áridos	los	unos	Matis Áridos	los	unos
+_B07F6A1601F0E5E6	tribe_the_kuilde	Kuilde	los	unos	Kuilde	los	unos
+_C295B382822077E7	tribe_the_slash_and_burn	Cortar y Quemar	los	unos	Cortar y Quemar	los	unos
+_6A2B10CEED297892	tribe_tutors	Tutores	los	unos	Tutores	los	unos
+_E59D6A166AEB3F9E	tribe_water_breakers	Rompe Aguas	los	unos	Rompe Aguas	los	unos
+_EBDAEECB1DE61EBB	tribe_woven_bridles	Bridas Tejidas	los	unos	Bridas Tejidas	los	unos

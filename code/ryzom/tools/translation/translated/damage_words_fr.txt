@@ -1,0 +1,11 @@
+﻿*HASH_VALUE	damageTypeId	name	ia	da	p	pia	pda	description
+_EC0860AC264890AB	Slashing	Tranchant			Tranchants			
+_2D9830A326487C9B	Piercing	Perforant			Perforants			
+_6CFA0460721A84D2	Blunt	Contondant			Contondants			
+_2EDA18A76F8924A9	Rot	Pourriture			Pourritures			
+_64766C6AA518A8A1	Acid	Acide			Acides			
+_28B6D46E2AE8E8A6	Cold	Froid			Froid			
+_A848B076EBB9ECB0	Fire	Feu			Feux			
+_E5B90496AEBAD8C1	Poison	Poison			Poisons			
+_6659CC92EA58A491	Electricity	Electricité			Electricité			
+_E45A9C6C6E78B4B4	Shock	Choc			Chocs			

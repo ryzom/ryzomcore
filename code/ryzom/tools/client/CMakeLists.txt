@@ -15,5 +15,6 @@ IF(WITH_QT5 AND WITH_RYZOM_INSTALLER)
 ENDIF()
 
 IF(WITH_RYZOM_TOOLS AND MYSQL_FOUND)
-  ADD_SUBDIRECTORY(r2_islands_textures)
+  # requires <ai_share/world_map.h> which is missing from yubo/atys branch
+  #ADD_SUBDIRECTORY(r2_islands_textures)
 ENDIF()

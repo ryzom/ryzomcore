@@ -1,0 +1,136 @@
+﻿*HASH_VALUE	race ID	name	ia	da	p	pia	pda
+_A6AB2C9934550CBC	Fyros	Fyros	a	the	Fyros	\d	the
+_E7CB9C9EA95430A4	Matis	Matis	a	the	Matis	\d	the
+_ECC9D489AE5810A4	Tryker	Tryker	a	the	Trykers	\d	the
+_AB51CA9C65185C9F	Zorai	Zoraï	a	the	Zoraïs	\d	the
+_6738B082E379F0AE	Karavan	Karavan	a	the	Karavan	\d	the
+_EA288C91A3585095	Tribe	Tribe	a	the	Tribes	\d	the
+_2CD6E862AC34E48E	Common	Common	\d	\d	Common	\d	\d
+_E78B54642B0A586C	Arma	Arma	an	the	Armas	\d	the
+_E877986CA4D9ECB9	Balduse	Baldusa	a	the	Baldusas	\d	the
+_DED93048E8DADC79	Bul	Bodoc	a	the	Bodocs	\d	the
+_6CA9A875A45934BC	Capryni	Capryni	a	the	Caprynis	\d	the
+_6E6B247C28A74478	Cephaloplant	Jubla	a	the	Jublas	\d	the
+_2AD80C589E8AEC9F	Chonari	Gingo	a	the	Gingos	\d	the
+_24C9E46CA6B9D8A5	Clapclap	Prakker	a	the	Prakker	\d	the
+_E4B9D85F2C7898A7	Cococlaw	Clopper	a	the	Cloppers	\d	the
+_649A4C5A645B502A	Cute	Cute	a	the	Cutes	\d	the
+_DA38848EEE1644B3	Dag	Yubo	a	the	Yubos	\d	the
+_1E8AA48F531984B9	Diranak	Horncher	a	the	Hornchers	\d	the
+_A2EA7080DC795CC1	Electroalgs	Stinga	a	the	Stingas	\d	the
+_69CCFC7DEBFCA4C5	Estrasson	Cray	a	the	Crays	\d	the
+_25B91083A2C75CAD	Filin	Messab	a	the	Messabs	\d	the
+_6CA6C855AE370484	Frahar	Frahar	a	the	Frahars	\d	the
+_85D668582A47BE85	Gibbai	Gibbaï	a	the	Gibbaïs	\d	the
+_66C6F45CE74B50B2	Hachtaha	Goari	a	the	Goaris	\d	the
+_5F589092269A58AE	Jungler	Torbak	a	the	Torbaks	\d	the
+_A8FAFC95E5B884D3	Kakty	Lumper	a	the	Lumpers	\d	the
+_E91844799DE6E889	Kalab	Kalab	a	the	Kalabs	\d	the
+_66B8AC6A67086042	Kami	Kami	a	the	Kamis	\d	the
+_6DE9185A9E88EC9F	Kazoar	Igara	an	the	Igaras	\d	the
+_22295C8D619B8CB0	Kitifly	Kizoar	a	the	Kizoars	\d	the
+_A967B071AF99D886	Kitihank	Kinrey	a	the	Kinreys	\d	the
+_2D1928895C3A9488	Kitiharak	Kizarak	a	the	Kizaraks	\d	the
+_AA98C87D29A9ECB4	Kitikil	Kipesta	a	the	Kipestas	\d	the
+_6A985489668810B3	Kitimandib	Kincher	a	the	Kinchers	\d	the
+_EED9D491A3E70895	Kitin	Kitin	a	the	Kitins	\d	the
+_AB79507DDF8958A2	Kitinagan	Kipucka	a	the	Kipuckas	\d	the
+_24FB707EE636C4B2	Kitinega	Kirosta	a	the	Kirostas	\d	the
+_1EE70896B148CC9A	Kitinokto	Kiban	a	the	Kibans	\d	the
+_6A75F4806EFA64A9	Lightbird	Izam	an	the	Izams	\d	the
+_6B18A47CA78864B4	Mektoub	Mektoub	a	the	Mektoubs	\d	the
+_A87A0070E91A20A1	Phytopsy	Psykopla	a	the	Psykoplas	\d	the
+_2BD83C686EBB78A1	Pucetron	Kipee	a	the	Kipees	\d	the
+_2BFA0C9566B710A4	Regus	Ragus	a	the	Ragus	\d	the
+_A28AF86F9CA484CB	Ryzerb	Najab	a	the	Najabs	\d	the
+_E648F0812DAACC99	Ryzoholo	Timari	a	the	Timaris	\d	the
+_B027688DF0E9E0B5	Ryzoholok	Vorax	a	the	Vorax	\d	the
+_DD9A98FDE6A9B4AB	SapEnslaver	Slaveni	a	the	Slavenis	\d	the
+_ABDE4DD566A924AB	SpittingWeeds	Cratcha	a	the	Cratchas	\d	the
+_662AE099E1986CAE	Swarmplants	Shooki	a	the	Shookis	\d	the
+_AD98A88EAAEA94AF	Vampignon	Yelk	a	the	Yelks	\d	the
+_6E4A088360B94CA6	Varinx	Varinx	a	the	Varinx	\d	the
+_EAB8B4862D886C6C	Yber	Yber	a	the	Ybers	\d	the
+_658AD094682B948D	Zerx	Zerx	a	the	Zerx	\d	the
+_2D3828AC5F265890	race_c1	Javing	a	the	Javings	\d	the
+_EBF8B8C11E15F09D	race_c2	Cuttler	a	the	Cuttlers	\d	the
+_649ADC991AD39BAA	race_c3	Ocyx	a	the	Ocyxes	\d	the
+_E93AECC05FF65096	race_c4	Jugula	a	the	Jugulas	\d	the
+_68C778AE1F65A889	race_c5	Kidinak	a	the	Kidinaks	\d	the
+_29A93CAC6176389C	race_h1	Raspal	a	the	Raspals	\d	the
+_2AB80CAC5DE63883	race_h2	Bawaab	a	the	Bawaabs	\d	the
+_6BBAE4BD5EC6749F	race_h3	Frippo	a	the	Frippos	\d	the
+_6B2828B061077096	race_h4	Rendor	a	the	Rendors	\d	the
+_A538C48C91A6BC8B	race_h5	Gnoof	a	the	Gnoofs	\d	the
+_A878E0BA5D963C98	race_h6	Bolobi	a	the	Bolobis	\d	the
+_A5D8F8B3A1963894	race_h7	Shalah	a	the	Shalahs	\d	the
+_A209A0C46156BCB1	race_h8	Ploderos	a	the	Ploderoses	\d	the
+_A8A838BAA2C6388B	race_h9	Wombaï	a	the	Wombaïs	\d	the
+_2109609496264C93	race_h10	Madakam	a	the	Madakams	\d	the
+_2CB6848F1C656C82	race_h11	Arana	an	the	Aranas	\d	the
+_6756C0945C4550A1	race_h12	Gubani	a	the	Gubanis	\d	the
+_E5B890C2A4E598AF	race_c6	Tyrancha	a	the	Tyranchas	\d	the
+_2629B4959676A893	race_c7	Yetin	a	the	Yetins	\d	the
+_01A8F8B90018E492	gooArma	Goo Arma	a	the	Goo Armas	\d	the
+_9E846FA06CAA4C7E	gooBalduse	Goo Baldusa	a	the	Goo Baldusas	\d	the
+_8A7824AB6140B89A	gooBul	Goo Bodoc	a	the	Goo Bodocs	\d	the
+_DE947FA3AF0C9483	gooCapryni	Goo Capryni	a	the	Goo Caprynis	\d	the
+_9C49D4A995B9544D	gooCephaloplant	Goo Jubla	a	the	Goo Jublas	\d	the
+_9C94DC8FD548B4B9	gooChonari	Goo Gingo	a	the	Goo Gingos	\d	the
+_9075A0A02799D4BC	gooClapclap	Goo Prakker	a	the	Goo Prakkers	\d	the
+_4CE5A0A0E90914B9	gooCococlaw	Goo Clopper	a	the	Goo Cloppers	\d	the
+_0ED6C4C45682E09F	gooCute	Goo Cute	a	the	Goo Cutes	\d	the
+_9894E48A2EB7885F	gooDag	Goo Yubo	a	the	Goo Yubos	\d	the
+_98F2C8956EF850B9	gooDiranak	Goo Horncher	a	the	Goo Hornchers	\d	the
+_1D0804A366573C5A	gooElectroalgs	Goo Stinga	a	the	Goo Stingas	\d	the
+_18D8646167EA3C8A	gooEstrasson	Goo Cray	a	the	Goo Crays	\d	the
+_A5D92892A0E2889B	gooFilin	Goo Messab	a	the	Goo Messabs	\d	the
+_DD77508FD5194CAF	gooFrahar	Goo Frahar	a	the	Goo Frahars	\d	the
+_1BF65486932938A1	gooGibbai	Goo Gibbaï	a	the	Goo Gibbaïs	\d	the
+_D0F8384FEDB97092	gooHachtaha	Goo Goari	a	the	Goo Goaris	\d	the
+_DA2760536988CCBD	gooJungler	Goo Torbak	a	the	Goo Torbaks	\d	the
+_E5F87C916783F0A2	gooKakty	Goo Lumper	a	the	Goo Lumpers	\d	the
+_9CC94C6C6996FB8A	gooKalab	Goo Kalab	a	the	Goo Kalabs	\d	the
+_0B96B8A95342D484	gooKami	Goo Kami	a	the	Goo Kamis	\d	the
+_1D365CB79E64CCC1	gooKazoar	Goo Igara	a	the	Goo Igaras	\d	the
+_D9967C5A27C830AD	gooKitifly	Goo Kizoar	a	the	Goo Kizoars	\d	the
+_5A1693A6E74BB48C	gooKitihank	Goo Kinrey	a	the	Goo Kinreys	\d	the
+_8D18ACAE24E7F06A	gooKitiharak	Goo Kizarak	a	the	Goo Kizaraks	\d	the
+_E2148B966B5B9093	gooKitikil	Goo Kipesta	a	the	Goo Kipestas	\d	the
+_2118E88CA318D852	gooKitimandib	Goo Kincher	a	the	Goo Kinchers	\d	the
+_A0CB8C6C6E961BAA	gooKitin	Goo Kitin	a	the	Goo Kitins	\d	the
+_4E78A89FAA47F06A	gooKitinagan	Goo Kipucka	a	the	Goo Kipuckas	\d	the
+_508474A8B13884B0	gooKitinega	Goo Kirosta	a	the	Goo Kirostas	\d	the
+_63A787A9674AA06E	gooKitinokto	Goo Kiban	a	the	Goo Kibans	\d	the
+_E2091C4EAC59E45F	gooLightbird	Goo Izam	a	the	Goo Izams	\d	the
+_623463A36F3A988C	gooMektoub	Goo Mektoub	a	the	Goo Mektoubs	\d	the
+_09F9DCBB28F84491	gooPhytopsy	Goo Psykopla	a	the	Goo Psykoplas	\d	the
+_D5C85460EC88ACB4	gooPucetron	Goo Kipee	a	the	Goo Kipees	\d	the
+_68295C7A6BD703B0	gooRegus	Goo Ragus	a	the	Goo Raguss	\d	the
+_E9B9FCA7DBF4D0A7	gooRyzerb	Goo Najab	a	the	Goo Najabs	\d	the
+_5F568BA4ABFA08A3	gooRyzoholo	Goo Timari	a	the	Goo Timaris	\d	the
+_24568BB3670B1090	gooRyzoholok	Goo Vorax	a	the	Goo Voraxes	\d	the
+_26A9CCAA6CF3A794	gooSapEnslaver	Goo Slaveni	a	the	Goo Slavenis	\d	the
+_1E78FC5ADAF97CAC	gooSpittingWeeds	Goo Cratcha	a	the	Goo Cratchas	\d	the
+_2248FCA724482C72	gooSwarmplants	Goo Shooki	a	the	Goo Shookis	\d	the
+_A0D85055E75AD07C	gooVampignon	Goo Yelk	a	the	Goo Yelks	\d	the
+_E16790959A59C8B0	gooVarinx	Goo Varinx	a	the	Goo Varinxes	\d	the
+_CF08BCA217B4D87D	gooYber	Goo Yber	a	the	Goo Ybers	\d	the
+_D07808B21824248D	gooZerx	Goo Zerx	a	the	Goo Zerxes	\d	the
+_13299C8E12444055	gooc1	Goo Javing	a	the	Goo Javings	\d	the
+_EA294C6E6C99982D	gooc2	Goo Cuttler	a	the	Goo Cuttlers	\d	the
+_5F62BBBD6D874B74	gooc3	Goo Ocyx	a	the	Goo Ocyxes	\d	the
+_16D8E49A0F852856	gooc4	Goo Jugula	a	the	Goo Jugulas	\d	the
+_24287466A698C025	gooc5	Goo Kidinak	a	the	Goo Kidinaks	\d	the
+_1749689D51947448	gooh1	Goo Raspal	a	the	Goo Raspals	\d	the
+_53E9687E92940C49	gooh2	Goo Bawaab	a	the	Goo Bawaabs	\d	the
+_17D8E8914FA55059	gooh3	Goo Frippo	a	the	Goo Frippos	\d	the
+_1459B091D1D48C59	gooh4	Goo Rendor	a	the	Goo Rendors	\d	the
+_5F64A8ACA4459833	gooh5	Goo Gnoof	a	the	Goo Gnoofs	\d	the
+_D6A8A48CD174284E	gooh6	Goo Bolobi	a	the	Goo Bolobis	\d	the
+_16E8849A4E04684E	gooh7	Goo Shalah	a	the	Goo Shalahs	\d	the
+_2A69B7A22D86EF7F	gooh8	Goo Ploderos	a	the	Goo Ploderoses	\d	the
+_93B8A094D2747C50	gooh9	Goo Wombai	a	the	Goo Wombais	\d	the
+_DFF68BA2E8546E64	gooh10	Goo Madakam	a	the	Goo Madakams	\d	the
+_17A60B671616F740	gooh11	Goo Arana	a	the	Goo Aranas	\d	the
+_2AD6DB5BAC46271A	gooh12	Goo Gubani	a	the	Goo Gubanis	\d	the

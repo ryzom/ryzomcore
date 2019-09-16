@@ -330,13 +330,9 @@ CClientConfig::CClientConfig()
 	TexturesLoginInterface.push_back("texture_interfaces_v3_login");
 
 	DisplayAccountButtons = true;
-	CreateAccountURL	= "http://shard.ryzomcore.org/ams/index.php?page=register";
-	ConditionsTermsURL	= "http://www.gnu.org/licenses/agpl-3.0.html";
-	EditAccountURL		= "http://shard.ryzomcore.org/ams/index.php?page=settings";
-	BetaAccountURL		= "http://shard.ryzomcore.org/ams/index.php?page=settings";
-	ForgetPwdURL		= "http://shard.ryzomcore.org/ams/index.php?page=forgot_password";
-	FreeTrialURL		= "http://shard.ryzomcore.org/ams/index.php?page=register";
-	LoginSupportURL		= "http://shard.ryzomcore.org/ams/index.php";
+	CreateAccountURL	= "https://account.ryzom.com/signup/from_client.php";
+	EditAccountURL		= "https://account.ryzom.com/payment_profile/index.php";
+	ForgetPwdURL		= "https://account.ryzom.com/payment_profile/lost_secure_password.php";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
 	EyesHeight			= 1.5f;						// Default User Eyes Height.
@@ -432,7 +428,7 @@ CClientConfig::CClientConfig()
 	PatchletUrl.clear();
 	PatchVersion.clear();
 
-	WebIgMainDomain = "shard.ryzomcore.org";
+	WebIgMainDomain = "atys.ryzom.com";
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
 	WebIgNotifInterval = 10; // time in minutes
 
@@ -899,19 +895,13 @@ void CClientConfig::setValues()
 	READ_BOOL_DEV(DisplayAccountButtons)
 	READ_STRING_DEV(CreateAccountURL)
 	READ_STRING_DEV(EditAccountURL)
-	READ_STRING_DEV(ConditionsTermsURL)
-	READ_STRING_DEV(BetaAccountURL)
 	READ_STRING_DEV(ForgetPwdURL)
+	READ_STRING_DEV(BetaAccountURL)
 	READ_STRING_DEV(FreeTrialURL)
-	READ_STRING_DEV(LoginSupportURL)
 
-	READ_STRING_FV(CreateAccountURL)
-	READ_STRING_FV(EditAccountURL)
+	// defined in client_default.cfg
 	READ_STRING_FV(ConditionsTermsURL)
 	READ_STRING_FV(NamingPolicyURL)
-	READ_STRING_FV(BetaAccountURL)
-	READ_STRING_FV(ForgetPwdURL)
-	READ_STRING_FV(FreeTrialURL)
 	READ_STRING_FV(LoginSupportURL)
 
 #ifndef RZ_NO_CLIENT
@@ -1108,7 +1098,13 @@ void CClientConfig::setValues()
 		ClientCfg.CurlMaxConnections = 2;
 
 	READ_STRING_FV(CurlCABundle);
-
+	if (!ClientCfg.CurlCABundle.empty() && ClientCfg.CurlCABundle[0] == '%') // Path is relative to client_default.cfg path (used by ryzom patch)
+	{
+		string defaultConfigFileName;
+		if (ClientCfg.getDefaultConfigLocation(defaultConfigFileName))
+			ClientCfg.CurlCABundle = CFile::getPath(defaultConfigFileName)+ClientCfg.CurlCABundle.substr(1);
+	}
+		
 	///////////////
 	// ANIMATION //
 	// AnimatedAngleThreshold
@@ -2023,30 +2019,43 @@ void CClientConfig::init(const string &configFileName)
 
 	// now we can continue loading and parsing the config file
 
-
 	// if the config file will be modified, it calls automatically the function setValuesOnFileChange()
 	ClientCfg.ConfigFile.setCallback (CClientConfig::setValuesOnFileChange);
 
 	// load the config files
 	ClientCfg.ConfigFile.load (configFileName);
 
+	CConfigFile::CVar *pCV;
+	// check language code is supported
+	pCV = ClientCfg.ConfigFile.getVarPtr("LanguageCode");
+	if (pCV)
+	{
+		std::string lang = pCV->asString();
+		if (!CI18N::isLanguageCodeSupported(lang))
+		{
+			nlinfo("Unsupported language code \"%s\" fallback on default", lang.c_str());
+			// fallback to default language
+			ClientCfg.LanguageCode = CI18N::getSystemLanguageCode();
+			// update ConfigFile variable
+			pCV->setAsString(ClientCfg.LanguageCode);
+			ClientCfg.ConfigFile.save();
+		}
+	}
 
 	// update the ConfigFile variable in the config file
-	CConfigFile::CVar *varPtr = ClientCfg.ConfigFile.getVarPtr ("ClientVersion");
-	if (varPtr)
+	pCV = ClientCfg.ConfigFile.getVarPtr("ClientVersion");
+	if (pCV)
 	{
-		string str = varPtr->asString ();
+		std::string str = pCV->asString ();
 		if (str != getVersion() && ClientCfg.SaveConfig)
 		{
 			nlinfo ("Update and save the ClientVersion variable in config file %s -> %s", str.c_str(), getVersion().c_str());
-			varPtr->setAsString (getVersion());
-			ClientCfg.ConfigFile.save ();
+			pCV->setAsString(getVersion());
+			ClientCfg.ConfigFile.save();
 		}
 	}
 	else
-	{
 		nlwarning ("There's no ClientVersion variable in the config file!");
-	}
 
 }// init //
 

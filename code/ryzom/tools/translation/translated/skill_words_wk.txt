@@ -1,0 +1,732 @@
+﻿*HASH_VALUE	skill ID	name	ia	da	p	pia	pda	description
+_5979759B8A93795C	AcurateBleedingShot	Accurate Bleeding Shot 	an	the	Accurate Bleeding Shots 		the	
+_0F7B36D368992032	AcurateBreathlessShot	Accurate Breathless Shot	an	the	Accurate Breathless Shots		the	
+_BC36B3C3F3DCAAE5	AnimalSlideslip	Animal Slideslip	an	the	Animal Slideslips		the	
+_789CFB66E3240290	AnimalStalking	Animal Stalking	an	the	Animal Stalkings		the	
+_CBD079DCFCDF911F	Apothecary	Apothecary	an	the	Apothecaries		the	
+_E50BD464278AD88C	Area	Area	an	the	Areas		the	
+_A02E0ECB46A16D80	ArmorAndWeaponSmithing	Armor And Weapon Smithing			Armor And Weapon Smithing		the	
+_EC3782B1B764528C	ArtAndCraft	Art And Craft		the	Arts And Crafts		the	
+_8485014AA6E44CB9	AttackKamisKnowledge	Attack-Kamis Knowledge	an	the	Attack-Kamis Knowledge		the	
+_9A04698DCE729857	AtysianRegeneration	Atysian Regeneration	an	the	Atysian Regenerations		the	
+_E807D07E6A5B34BA	Axe	Axe	an	the	Axes		the	
+_53C7427B1C311674	BackdraftStab	Backdraft Stab	a	the	Backdraft Stabs		the	
+_A254448C9BC44CBF	BadLuck	Bad Luck	a	the	Bad Lucks		the	
+_B2B7A412689B37D6	BarehandedCombat	Barehanded Combat	a	the	Barehanded Combats		the	
+_51B5E2642044F96E	BersekAttack	Berserk Attack	a	the	Berserk Attacks		the	
+_41FA850941AFA11F	BlackSmithing	Blacksmithing			Blacksmithing			
+_9B58B47AA4088498	Bleeding	Bleeding			Bleedings		the	
+_9F068632FF7FBD1A	BlindingRage	Blinding Rage	a	the	Blinding Rages		the	
+_A07079EF2A9BD00B	BlindShot	Blind Shot 	a	the	Blind Shots		the	
+_2069AC83EC3A60C2	BowGun	Bowgun	a	the	Bowguns		the	
+_EA6F5908AF6AC4B5	BowPistol	Bowpistol	a	the	Bowpistols		the	
+_E118207AA47894A1	Building	Building			Buildings		the	
+_8263A437755BB63B	BullyraggingBlast	Bullyragging Blast	a	the	Bullyragging Blasts		the	
+_819FB9E0A269C01D	Camouflage	Camouflage	a	the	Camouflage		the	
+_6738B07AE379D0AE	Caravan	Karavan	a	the	Karavans		the	
+_5399A6940A35C998	CerebralFever	Cerebral Fever	a	the	Cerebral Fevers		the	
+_10214E7346C44686	ClothTailoring	Cloth Tailoring			Cloth Tailoring		the	
+_A938E464E4A8E0A7	Cooking	Cooking			Cooking		the	
+_B43E828EDE531A84	CreatureHatred	Creature Hatred	a	the	Creature Hatred		the	
+_A6863C776A590092	Dagger	Dagger	a	the	Daggers		the	
+_28D95483EC2A08B8	Desert	Desert	a	the	Deserts		the	
+_64321CB4417124D5	DesertExoticRawMaterialKnowledge	Desert Exotic Raw Material Knowledge	a	the	Desert Exotic Raw Material Knowledge		the	
+_9E81D1509077A986	DesertKamisKnowledge	Desert-Kami Knowledge	a	the	Desert-Kamis Knowledge		the	
+_D0543E4DC74FDA89	DesertTravel	Desert Travel	a	the	Desert Travels		the	
+_A7F88458E5B8E0A7	Digging	Digging			Diggings		the	
+_336548B800FA1E01	DiscreetApproach	Discreet Approach	a	the	Discreet Approaches		the	
+_660AA091ECD92CA0	Diving	Diving			Divings		the	
+_2849B082EA1804A0	Dodging	Dodging	a	the	Dodgings		the	
+_E966C471ADF9E0A0	Dragon	Dragon	a	the	Dragons		the	
+_218AFC73AA689CAF	Dryade	Dryad	a	the	Dryads		the	
+_EDC069E6A9796B13	DualWield	Dual Wield	a	the	Dual Wields		the	
+_A2982C83689B14D5	Evaluate	Evaluate	an	the	Evaluates		the	
+_25C6AC835EE6E4A5	FarShot	Far Shot	a	the	Far Shots		the	
+_D31BF5AB716AE0B0	FarThrow	Far Throw	a	the	Far Throws		the	
+_6524C96802819286	FeverProtect	Fever Protect	a	the	Fever Protects		the	
+_2A97A0E82989AFB6	FirstAid	First Aid	a	the	First Aids		the	
+_27A9D87E6B599C90	Fishing	Fishing			Fishings		the	
+_AAE9A4866E5A08B9	Forest	Forest	a	the	Forests		the	
+_1B40C95A916F95AB	ForestExoticRawMaterialKnowledge	Forest Exotic Raw Material Knowledge	a	the 	Forest Exotic Raw Material Knowledge		the	
+_9E81F9521287D189	ForestKamisKnowledge	Forest-Kami Knowledge	a	the	Forest-Kamis Knowledge		the	
+_D0446A5087DF0A8C	ForestTravel	Forest Travel	a	the	Forest Travels		the	
+_F28A249AE4D998B6	Frost	Frost	a	the	Frosts		the	
+_A6AB2C9934550CBC	Fyros	Fyros	a	the	Fyros		the	
+_2BD9DDF45B0AB0C7	FyrosGoods	Fyros Goods			Fyros Goods		the	
+_A729D462E87AD48A	Goo	Goo		the	Goo		the	
+_22F57DDCEDFBB7C5	GreatAxe	Great Axe	a	the	Great Axes		the	
+_44534B5AC0E0AD79	GreatMass	Great Mace	a	the	Great Maces		the	
+_A9F9C08668A9FC8F	Grenade	Grenade	a	the	Grenades		the	
+_08065EDCA6B5FD93	GroundExtract	Ground Extract	a	the	Ground Extracts		the	
+_79FEAB61C9E5010C	HandToHand	Hand To Hand	a	the	Hand To Hand		the	
+_2EBBA88CA573D4A7	Harpoon	Harpoon 	a	the	Harpoons		the	
+_7CEDE3955515C196	HarpoonHunting	Underwater Hunting	a	the	Harpoon Huntings		the	
+_685BB085AFC998AF	Harvest	Harvest	a	the	Harvests		the	
+_AA026ED99657A448	HealingKamisKnowledge	Healing-Kami Knowledge	a	the	Healing Kamis Knowledge		the	
+_8C56E5B75CD7FA84	HearWithering	Hearing Withering	a	the	Hearing Witherings		the	
+_FE4A6384635B83AB	HeavyArmourWear	Wear Heavy Armor	a	the	Wear Heavy Armors		the	
+_81544EE048F0E123	HeavyWeapon	Heavy Weapon	a	the	Heavy Weapons		the	
+_25A6B87AE5F8FCA4	Hide	Hiding	a	the	Hidings		the	
+_B16323A8635A04D1	HominOpponentConsiderWeapon	Homin Considering	a	the	Homin Considerings		the	
+_AEA2EEE1D958A448	HuntingKamisKnowledge	Hunting-Kami Knowledge	a	the	Hunting Kamis Knowledge		the	
+_EA6AC4A9F229689B	Jewellery	Jewelry		the	Jewelry		the	
+_6836DC8A2C2998A7	Jungle	Jungle	a	the	Jungles		the	
+_E43FDCC6417170C3	JungleExoticRawMaterialKnowledge	Jungle Exotic Raw Material Knowledge	a	the	Jungle Exotic Raw Material Knowledge		the	
+_5ACFDD4B1486AD86	JungleKamisKnowledge	Jungle-Kami Knowledge	a	the	Jungle-Kamis Knowledge		the	
+_50122A4F06FFF689	JungleTravel	Jungle Travel	a	the	Jungle Travels		the	
+_66B8AC6A67086042	Kami	Kami	a	the	Kamis		the	
+_B2D412D83E3E19EF	KamicShield	Kamic Shield	a	the	Kamic Shields		the	
+_BFCCBDEE328BD517	KamicShock	Kamic Shock	a	the	Kamic Shocks		the	
+_6678EC8AE728C082	Kick	Kick	a	the	Kicks		the	
+_6E29A89C6C96A8A7	Kitin	Kitin	a	the	Kitin		the	
+_6478AC8C64A86085	Lake	Lake	a	the	Lakes		the	
+_A84B290A6BA89380	LakeArmor	Lake Armor		the	Lake Armors		the	
+_B87E348201AD4818	LakeExoticRawMaterialKnowledge	Lake Exotic Raw Material Knowledge	a	the	Lake Exotic Raw Material Knowledge		the	
+_CE00A8A30459E4A6	LakeKamisKnowledge	Lake-Kami Knowledge	a	the	Lake-Kamis Knowledge		the	
+_FF4F45E9C92C3403	LakeTravel	Lake Travel	a	the	Lake Travels		the	
+_3D1E51E9C17B20E5	LeadAnimal	Leading Animal	a	the	Leading Animals		the	
+_404CCC3C606DB7A4	LeatherTailoring	Leather Tailoring	a	the	Leather Tailorings		the	
+_0CDA1F2172BB4F7A	LeftHandedAttack	Left Handed Attack	a	the	Left Handed Attacks		the	
+_2977DCD4ED6D5BBC	LeftHandedParry	Left Handed Parry	a	the	Left Handed Parries		the	
+_1C452E5ADB0F4DDD	LifeAlchemy	Life Alchemy	a	the	Life Alchemies		the	
+_2689E4F96CC9C432	LifeGift	Life Gift	a	the	Life Gifts		the	
+_3BC98B8C237A9BAA	LightArmourWear	Wear Light Armor 	a	the	Wear Light Armors		the	
+_69394089AC77E8A4	Madness	Madness	a	the	Madnesses		the	
+_7F1FF04F061BB117	MagicObjects	Magic Object			Magic Objects		the	
+_4A1563CB5D170572	MagicTransfert	Magic Transfer	a	the	Magic Transfers		the	
+_449005FF39A1D502	MajorDryade	Major Dryad	a	the	Major Dryads		the	
+_DDA2FBD688944578	MajorHealLife	Major Life Healing	a	the	Major Life Healings		the	
+_32142614590778BD	MajorLifeRegeneration	Major Life Regeneration	a	the	Major Life Regenerations		the	
+_FB8ADF795E3A8FA9	MajorMandragore	Major Mandragore	a	the	Major Mandragores		the	
+_8E469D3A09A53D9D	MajorSapHeal	Major Sap Healing	a	the	Major Sap Healings		the	
+_723965FA2CF480B7	MajorSapRegenearation	Major Sap Regenearation	a	the	Major Sap Regenearations		the	
+_C3BF6514728D2923	MajorSylve	Major Sylve	a	the	Major Sylves		the	
+_48923BB1F7616C43	MajorTirednessHeal	Major Tiredness Healing	a	the	Major Tiredness Healings		the	
+_28B70F8EE7F1E397	MajorTirednessRegenearation	Major Tiredness Regeneration	a	the	Major Tiredness Regenerations		the	
+_01BE69F0286BF4F9	MakeAnklet	Make Anklet	a	the	Make Anklets		the	
+_562787D2DFA6055B	MakeAutolaunch	Make Autolauncher	a	the	Make Autolaunchers		the	
+_90D1FEADCD88C416	MakeAutolaunchAmmo	Make Autolauncher Ammo	a	the	Make Autolauncher Ammo		the	
+_D9B8B48313D6046B	MakeAxe	Make Axe	a	the	Make Axes		the	
+_93A88C2FE9286084	MakeBag	Make Bag	a	the	Make Bags		the	
+_836F6D0D663CF8F4	MakeBowgun	Make Bowgun	a	the	Make Bowguns		the	
+_767582DF9EF129C9	MakeBowgunAmmo	Make Bowgun Ammo	a	the	Make Bowgun Ammo		the	
+_9EE795107FFE253D	MakeBracelet	Make Bracelet	a	the	Make Bracelets		the	
+_C39FFA595F3059DC	MakeBuckler	Make Buckler	a	the	Make Bucklers		the	
+_492FB257A21035D5	MakeClothes	Make Clothes	a	the	Make Clothes		the	
+_806E3DDF645BC0FA	MakeDagger	Make Dagger	a	the	Make Daggers		the	
+_3F3E05E1A6FBE0F5	MakeDiadem	Make Diadem	a	the	Make Diadems		the	
+_FF1E45F3251CC0F0	MakeEaring	Make Earring	a	the	Make Earrings		the	
+_4914A1E198420674	MakeFireAmmos	Make Incendiary Ammo	a	the	Make Incendiary Ammo		the	
+_73FA26423280690E	MakeFireToughenedArmors	Make Fire Toughened Armor	a	the	Make Fire Toughened Armors		the	
+_65DBA76FC56DEB80	MakeFireWeapons	Make Fire Weapon	a	the	Make Fire Weapons		the	
+_4AB749A9D24AB50C	MakeFloralLivingJewels	Make Floral Living Jewel	a	the	Make Floral Living Jewels		the	
+_536E971B64FC1969	MakeFloralPatternLivingClothes	Make Floral Living Clothes	a	the	Make Floral Living Clothes		the	
+_450EDE5820AE45CB	MakeGrenade	Make Grenade	a	the	Make Grenades		the	
+_6DB4A7D45F1EA3D5	MakeHarpoonGun	Make Harpoon Gun	a	the	Make Harpoon Guns		the	
+_34341DB6AD476035	MakeHarpoonGunAmmo	Make Harpoon Gun Ammo	a	the	Make Harpoon Gun Ammo		the	
+_6DDCAAE991F672CE	MakeHeavyArmors	Make Heavy Armor	a	the	Make Heavy Armors		the	
+_F92893926561D285	MakeHeavyBoots	Make Heavy Boots	a	the	Make Heavy Boots		the	
+_618BFE8DFCF7D3EB	MakeHeavyGloves	Make Heavy Gloves	a	the	Make Heavy Gloves		the	
+_DF9AF6867E07AFE0	MakeHeavyHelmet	Make Heavy Helmet	a	the	Make Heavy Helmets		the	
+_7968039225810A85	MakeHeavyPants	Make Heavy Pants	a	the	Make Heavy Pants		the	
+_77680C0D00AB976B	MakeHeavySleeves	Make Heavy Sleeves	a	the	Make Heavy Sleeves		the	
+_A181F2EC4DE66203	MakeHeavyVest	Make Heavy Vest	a	the	Make Heavy Vests		the	
+_82BE79FA66BCD001	MakeJewels	Make Jewel	a	the	Make Jewels		the	
+_2F6834EAB74BFB88	MakeKamicClothes	Make Kami Clothes	a	the	Make Kami Clothes		the	
+_66FAB65A37E733BB	MakeKamicJewels	Make Kami Jewel	a	the	Make Kami Jewels		the	
+_A17C92BFFA8767AB	MakeKamicWeapon	Make Kami Weapon	a	the	Make Kami Weapons		the	
+_ECFE45E663E82B91	MakeLance	Make Lance	a	the	Make Lances		the	
+_DE76A50C41DF0566	MakeLauncher	Make Launcher	a	the	Make Launchers		the	
+_E7DDC03F39EB8A49	MakeLauncherAmmo	Make Launcher Ammo	a	the	Make Launcher Ammo		the	
+_B947AB91A2E0FA8D	MakeLightBoots	Make Light Boots	a	the	Make Light Boots		the	
+_E2CB0E83F6B7DFE5	MakeLightGloves	Make Light Gloves	a	the	Make Light Gloves		the	
+_60DA067C78C7BBDA	MakeLightHelmet	Make Light Helmet	a	the	Make Light Helmets		the	
+_39871B916200328D	MakeLightPants	Make Light Pants	a	the	Make Light Pants		the	
+_7868F8FABD6ACF73	MakeLightSleeves	Make Light Sleeves	a	the	Make Light Sleeves		the	
+_A2C1DED94B364A0D	MakeLightVest	Make Light Vest	a	the	Make Light Vests		the	
+_DAF476E0B18FF4A1	MakeLongAxe	Make Long Axe	a	the	Make Long Axes		the	
+_DE306AF5EA14B16B	MakeLongMace	Make Long Mace	a	the	Make Long Maces		the	
+_1F8639B8A0C05A0E	MakeLongSword	Make Long Sword	a	the	Make Long Swords		the	
+_24890FE925A98435	MakeMace	Make Mace	a	the	Make Maces		the	
+_249A1EF4794DF373	MakeMediumArmors	Make Medium Armor	a	the	Make Medium Armors		the	
+_6304DF7BA51CE3E1	MakeMediumBoots	Make Medium Boots	a	the	Make Medium Boots		the	
+_689A17497DAAD37F	MakeMediumGloves	Make Medium Gloves	a	the	Make Medium Gloves		the	
+_E4BA1B49BD7A6F7A	MakeMediumHelmet	Make Medium Helmet	a	the	Make Medium Helmets		the	
+_64D5A789A51CDFD2	MakeMediumPants	Make Medium Pants	a	the	Make Medium Pants		the	
+_03715C4A307B4393	MakeMediumSleeves	Make Medium Sleeves	a	the	Make Medium Sleeves		the	
+_353746DAE031DDD5	MakeMediumVest	Make Medium Vest	a	the	Make Medium Vests		the	
+_76F72B362AAC8F82	MakeMeleeWeapons	Make Melee Weapon	a	the	Make Melee Weapons		the	
+_411F9E6A9E2061D4	MakePendant	Make Pendant	a	the	Make Pendants		the	
+_26BA0FE927A9B040	MakePike	Make Pike	a	the	Make Pikes		the	
+_81DF89FDADDDE000	MakePistol	Make Pistol	a	the	Make Pistols		the	
+_78466AD1E48201CF	MakePistolAmmo	Make Pistol Ammo	a	the	Make Pistol Ammo		the	
+_4B75DD52E356426D	MakePistolarc	Make Bowpistol	a	the	Make Bowpistols		the	
+_9320684D6768A7D4	MakePistolarcAmmo	Make Bowpistol Ammo	a	the	Make Bowpistol Ammo		the	
+_991ADAB89946888F	MakePoisonnousLivingWeapons	Make Poisonnous Living Weapon 	a	the	Make Poisonnous Living Weapons		the	
+_EF63C9FD732288B1	MakeRangeWeaponAmmos	Make Range Weapon Ammo	a	the	Make Range Weapon Ammo		the	
+_75482B382A8C9B89	MakeRangeWeapons	Make Range Weapon	a	the	Make Range Weapons		the	
+_ECFE69DEEB496B9D	MakeRifle	Make Rifle	a	the	Make Rifles		the	
+_9A416EB90CE45A15	MakeRifleAmmo	Make Rifle Ammo	a	the	Make Rifle Ammo		the	
+_26DA0FEB68D9C045	MakeRing	Make Ring	a	the	Make Rings		the	
+_BFBE05EFC29C0CFA	MakeShield	Make Shield	a	the	Make Shields		the	
+_E3AB5AE138E88FDC	MakeShiftRepair	Makeshift Repair	a	the	Makeshift Repairs		the	
+_80F1FC4005C90AD9	MakeSurvivalTools	Make Survival Tool	a	the	Make Survival Tools		the	
+_1072FDCDBB1A104A	MakeSurvivalWeapon	Make Survival Weapon	a	the	Make Survival Weapons		the	
+_ECEE81E57079DB9F	MakeSword	Make Sword	a	the	Make Swords		the	
+_D460C9C17B7A4431	MakeThrowingWeapon	Make Throwing Weapon	a	the	Make Throwing Weapons		the	
+_6D3A210E2AD98F90	MakeTools	Make Tool	a	the	Make Tools		the	
+_1A71F239B2E251D9	MakeTwo_handsMeleeWeapons	Make Two-Handed Melee Weapon	a	the	Make Two-Handed Melee Weapons		the	
+_3EB0EACB668C31A4	MakeTwo_handsRangeWeaponAmmos	Make Two-Handed Range Weapon Ammo	a	the	Make Two-Handed Range Weapon Ammo		the	
+_9AB1EA3C73A265D9	MakeTwo_handsRangeWeapons	Make Two-Handed Range Weapon	a	the	Make Two-Handed Range Weapons		the	
+_0000F1056799011B	Mandragore	Mandragore	a	the	Mandragores		the	
+_A067CE5043AE6D31	MandrakeFist	Mandrake Fist	a	the	Mandrake Fists		the	
+_2B1AD886AECBC4B2	Mass	Mace	a	the	Maces		the	
+_51682E7744501A37	MassiveThrow	Massive Throw	a	the	Massive Throws		the	
+_E7CB9C9EA95430A4	Matis	Matis	a	the	Matis		the	
+_A4697DF5DC89B4C9	MatisGoods	Matis Goods			Matis Goods		the	
+_67E3918848E72E85	MatisMystery	Matis Mystery	a	the	Matis Mysteries		the	
+_6588B47C23E8D8A2	Mechanic	Mechanic	a	the	Mechanics		the	
+_86F3B04039B62EB2	MediumArmourWear	Wear Medium Armor	a	the	Wear Medium Armors		the	
+_5E92FFD0CB94557F	MinorLifeHeal	Minor Life Healing	a	the	Minor Life Healings		the	
+_8E86BD3E0BE55D9D	MinorSapHeal	Minor Sap Healing	a	the	Minor Sap Healings		the	
+_4CD25BB1F7616C4B	MinorTirednessHeal	Minor Tiredness Healing	a	the	Minor Tiredness Healings		the	
+_2E18A8946C892CB1	Mirror	Mirror	a	the	Mirrors		the	
+_972836AC4E97D9AB	MuscularFever	Muscular Fever	a	the	Muscular Fevers		the	
+_54894E6FC071E630	NervousFever	Nervous Fever	a	the	Nervous Fevers		the	
+_822085072D648CD5	NightShot	Night Shot	a	the	Night Shots		the	
+_E2D84C902138508B	Nunb	Numb	a	the	Numbs		the	
+_4616F4A6A6A2826D	OnHorseBackMelee	Mektoub-Back Fighting	a	the	Mektoub-Back Fightings		the	
+_C7F844ACEC048E70	OnHorseBackShoot	Mektoub-Back Shooting	a	the	Mektoub-Back Shootings		the	
+_6F2F81DC6EB9630D	PainShare	Pain Share	a	the	Pain Shares		the	
+_6F192D06AB0CC0A8	Paralysis	Paralysis	a	the	Paralyses		the	
+_6478EC9464A8C091	Pike	Pike	a	the	Pikes		the	
+_CBA44A71617EA1EC	PikeHunting	Creature Hunting	a	the	Creature Huntings		the	
+_AF69B09BEBBA04B2	Pistol	Pistol	a	the	Pistols		the	
+_0D34CAEA8B6E5530	PlantHatred	Plant Hatred	a	the	Plant Hatreds		the	
+_6A9DBACB0D772AF0	PointBlankShot	Point Blank Shot	a	the	Point Blank Shots		the	
+_D12926744140D92D	PrimaryRoots	Primary Roots	a	the	Primary Roots		the	
+_467A2A6B5F907117	ProtectingKamisKnoledge	Protecting-Kamis Knowledge	a	the	Protecting-Kamis Knowledge		the	
+_8B608910661B5912	Quartering	Quartering	a	the	Quarterings		the	
+_7EB1C916EE6468C7	QuickShot	Quick Shot	a	the	Quick Shots		the	
+_4721E101340BE121	QuickThrow	Quick Throw	a	the	Quick Throws		the	
+_2BC87088607984B3	Range	Range	a	the	Ranges		the	
+_C7A2BD01AF6C9524	RapidBurst	Rapid Burst	a	the	Rapid Bursts		the	
+_2ACA649FEC1B18BA	Resist	Resist	a	the	Resists		the	
+_83020DEBACE9AD22	Resistance	Resistance	a	the	Resistances		the	
+_8290155535EB41F4	RidePackers	Leading Packer	a	the	Leading Packers		the	
+_E7978490A9CAB0A1	Riding	Riding	a	the	Ridings		the	
+_6D98848DA279A4B3	Rifle	Rifle	a	the	Rifles		the	
+_A252816C4430AE87	RifleHunting	Shooting	a	the	Shootings		the	
+_ACE7BC8F6E3A208E	Rocket	Rocket	a	the	Rockets		the	
+_2C1F9D07AAE92B0C	RockTabou	Rock Taboo	a	the	Rock Taboos		the	
+_E4D8D8862478A8A7	Rondache	Rondache	a	the	Rondaches		the	
+_30BA3C93ACDB2CC4	Rot	Rot	a	the	Rots		the	
+_6C3AF096EF7958AA	Running	Running	a	the	Runnings		the	
+_79806D5580F0E4DA	SapAlchemy	Sap Alchemy	a	the	Sap Alchemies		the	
+_CD7CA9C0B01914A7	SapArmor	Sap Armor	a	the	Sap Armors		the	
+_62A68091E1E694A7	SapGift	Sap Gift	a	the	Sap Gifts		the	
+_E5276C97A9BA88A2	Shield	Shield	a	the	Shields		the	
+_DEA519080950AC38	ShootAndRun	Shoot And Run	a	the	Shoot And Runs		the	
+_0FD5028061125DEA	ShotProtect	Shot Protect	a	the	Shot Protects		the	
+_A2050EE052021A3B	SlowingBreath	Slowing Breath	a	the	Slowing Breaths		the	
+_CBFCC680FB10A513	SlowingLife	Slowing Life	a	the	Slowing Lives		the	
+_EDA9A489A1EAC4C1	Spear	Spear	a	the	Spears		the	
+_5D3066C7A2A68E41	SpellDeletion	Spell Deletion	a	the	Spell Deletions		the	
+_2713DD768021F28D	SpellProtect	Spell Protect	a	the	Spell Protects		the	
+_A078F656C840E13B	SpurtingFire	Spurting Fire	a	the	Spurting Fires		the	
+_85C1715287AF5529	Squandering	Squandering	a	the	Squanderings		the	
+_6512E65E672F3118	StallSetUp	Stall Set Up	a	the	Stall Set Ups		the	
+_C2D6F6DCC35FD516	StealBreath	Stealing Breath	a	the	Stealing Breaths		the	
+_3E5099FA2D8434C6	StealLife	Stealing Life	a	the	Stealing Lives		the	
+_A6F56DFFEACB5B9E	StealSap	Stealing Sap	a	the	Stealing Sap		the	
+_AB98B093236AD4BA	Stick	Staff	a	the	Staves		the	
+_E4C822470500ED36	StrenghtGift	Strength Gift	a	the	Strength Gifts		the	
+_E898309466E8F8C0	Swimming	Swimming	a	the	Swimmings		the	
+_AE79F4AB28FAE0B3	Sword	Sword	a	the	Swords		the	
+_8C56EA607EEF6A3B	SylphicSlide	Sylphic Slide	a	the	Sylphic Slide		the	
+_EF9904AEEAEAE8B4	Sylve	Sylve	a	the	Sylves		the	
+_7A6DD453630B1B9C	TactileWithering	Tactile Withering	a	the	Tactile Witherings		the	
+_27E93CA2EB5A109D	Target	Target	a	the	Targets		the	
+_2D8988A26BFA2CB1	Terror	Terror	a	the	Terrors		the	
+_7133136C41C6EBD8	TirednessAlchemy	Tiredness Alchemy	a	the	Tiredness Alchemies		the	
+_E2980894E368E4BD	Tracking	Tracking	a	the	Trackings		the	
+_C59F9DCCE81750DB	TradingCenterKnowledge	Trading Center Knowledge	a	the	Trading Center Knowledges		the	
+_A93AB3AE653CF3EF	TrainingAgility	Training Agility	a	the	Training Agilities		the	
+_B32BEEA39D22E67B	TrainingAnimal	Training Animal	a	the	Training Animals		the	
+_393B5CBEF56D92F0	TrainingCharisme	Training Charisma	a	the	Training Charismas		the	
+_F3C965A093732C93	TrainingConstitution	Training Constitution	a	the	Training Constitutions		the	
+_351EF274DFBA0BAC	TrainingDiseaseResist	Training Disease Resistance	a	the	Training Disease Resistances		the	
+_B4FB23C2F91BE7AA	TrainingEmpathie	Training Empathy	a	the	Training Empathies		the	
+_142CBD9D31843032	TrainingFearResist	Training Fear Resistance	a	the	Training Fear Resistances		the	
+_ABF5E073A7799BA6	TrainingHp	Training Hit Points			Training Hit Points			
+_E1CCAD99D96490E8	TrainingHp2	Training Hit Points 2			Training Hit Points 2			
+_E1DCAD99196490E9	TrainingHp3	Training Hit Points 3			Training Hit Points 3			
+_E1ECAD995A6490EA	TrainingHp4	Training Hit Points 4			Training Hit Points 4			
+_1CCA3193AA24FC94	TrainingImpactResist	Training Impact Resistance	a	the	Training Impact Resistances		the	
+_2C19F97A8F71DC72	TrainingIntelligence	Training Intelligence	a	the	Training Intelligences		the	
+_1A252482D641E881	TrainingMagicResist	Training Magic Resistance	a	the	Training Magic Resistances		the	
+_11407B3110027055	TrainingPerception	Training Perception	a	the	Training Perceptions		the	
+_3DC154E16BE889E1	TrainingSeve	Training Sap			Training Sap			
+_B31ED15981B08C9B	TrainingSeve2	Training Sap 2			Training Sap 2			
+_F32ED15981B08C9C	TrainingSeve3	Training Sap 3			Training Sap 3			
+_343ED15981B08C9D	TrainingSeve4	Training Sap 4			Training Sap 4			
+_ACBA03D24C8AC702	TrainingStamina	Training Stamina	a	the	Training Stamina		the	
+_385B22309A135FF6	TrainingStamina2	Training Stamina 2	a	the	Training Stamina 2			
+_385B26301A135FF6	TrainingStamina3	Training Stamina 3	a	the	Training Stamina 3			
+_385B2A309C135FF6	TrainingStamina4	Training Stamina 4	a	the	Training Stamina 4			
+_375D98E67B1E92EF	TrainingStrength	Training Strength	a	the	Training Strengths		the	
+_A118099D29A4149A	TrainingTechnoResist	Training Techno Resistance	a	the	Training Techno Resistances		the	
+_5756848CA893DD5B	TrainingWellBalanced	Training Well Balance	a	the	Training Well Balance		the	
+_20D6025A00303136	TrainingWill	Training Will	a	the	Training Wills		the	
+_ECC9D489AE5810A4	Tryker	Tryker	a	the	Trykers		the	
+_4031501624D75420	TrykerGoods	Tryker Goods			Tryker Goods		the	
+_CBB743E46995B59A	TrykerMystery	Tryker Mystery	a	the	Tryker Mysteries		the	
+_2CB63230E628BBDE	TwoHandedCombat	Two-Handed Combat	a	the	Two-Handed Combats		the	
+_47AC1699E1717661	TwoHandsSword	Two-Handed Sword	a	the	Two-Handed Swords		the	
+_BF6DCC40B7AD6470	UnderwaterExtract	Underwater Extract	an	the	Underwater Extracts		the	
+_C07D8EF09DDBB2F0	VisualWithering	Visual Withering	a	the	Visual Witherings		the	
+_C8A2ED05AFEC9528	VitalBurst	Vital Burst	a	the	Vital Bursts		the	
+_081EF286B90381FD	WarriorGift	Warrior Gift	a	the	Warrior Gifts		the	
+_7A1C339955F7BD9B	WeaponsCutting	Weapons Cutting	a	the	Weapons Cuttings		the	
+_6D6FC9112F18B37A	WindArmor	Wind Armor	a	the	Wind Armors		the	
+_A689E40E6EC9F032	WindGift	Wind Gift	a	the	Wind Gifts		the	
+_6D6F9109A739639E	WindShear	Wind Shear	a	the	Wind Shears		the	
+_AB51CA9C65185C9F	Zorai	Zoraï	a	the	Zoraïs		the	
+_251AA7FA5B30C8BD	ZoraiGoods	Zoraï Goods			Zoraï Goods		the	
+_65C3BB09C5A79A88	ZoraiMystery	Zoraï Mystery	a	the	Zoraï Mysteries		the	
+_38C1105E6F782063	TrainingImpactResist2	Training Impact Resist 2	a	the	Training Impact Resists 2		the	
+_38C1145E6F782065	TrainingImpactResist3	Training Impact Resist 3	a	the	Training Impact Resists 3		the	
+_1F21110F5F14937D	TrainingMagicResist2	Training Magic Resist 2	a	the	Training Magic Resists 2		the	
+_5F31110F5F24937D	TrainingMagicResist3	Training Magic Resist 3	a	the	Training Magic Resists 3		the	
+_AE1F115ACB37454D	MakeEnchantedWeapons	Make Enchanted Weapons	a	the	Make Enchanted Weapons		the	
+_A574083FC4B3A01F	MakeEnchantedArmors	Make Enchanted Armors	a	the	Make Enchanted Armors		the	
+_6648641242913825	MakeVampiricWeapons	Make Vampiric Weapons	a	the	Make Vampiric Weapons		the	
+_F08B51C1F532CB9C	MakeEnchantedFloralPatternLivingClothes	Make Enchanted Floral Pattern Living Clothes	a	the	Make Enchanted Floral Pattern Living Clothes		the	
+_E9038876D5D7F5A8	MakeDeadlyHarpoongun	Make Deadly Harpoongun	a	the	Make Deadly Harpoonguns		the	
+_49D27454017C168F	MakeHuntingArmors	Make Hunting Armors	a	the	Make Hunting Armors		the	
+_C31F00537ECC6392	MakeRitualClothes	Make Ritual Clothes	a	the	Make Ritual Clothes		the	
+_25EAC3473B0D939B	MakeRitualJewels	Make Ritual Jewels	a	the	Make Ritual Jewels		the	
+_D8145C8EEA5A3CA6	SC	Craft	a	the	Craft		the	Craft
+_5654AC8E60988490	SM	Magic	a	the	Magic		the	Magic
+_4A520987D8F5BA5B	SMT	Impact Magic	a	the	Magic Targeted		the	Magic targeted
+_31D259A451019CC9	SMTM	Missile Magic	a	the	Magic Targeted Missile		the	Magic targeted missile
+_640F8F5DAF790CBD	SMTMR	Primal Magic	a	the	Magic Targeted Missile - Primal		the	Magic targeted missile - Primal
+_0AD18AB0336B16A3	SMTMG	Atysian Magic	a	the	Magic Targeted Missile - Atysian		the	Magic targeted missile - Atysian
+_D597B474862DAA66	SMTMB	Celestial Magic	a	the	Magic Targeted Missile - Celestial		the	Magic targeted missile - Celestial
+_9F35DAC8D1B51346	SMTO	Offensive Magic	a	the	Magic Targeted Offensive		the	Magic targeted offensive
+_CB82E2597BAD9530	SMTOD	Physical Magic	a	the	Magic Targeted Offensive Damage		the	Magic targeted offensive damage
+_D9120D1AF3794F37	SMTODP	Piercing Magic	a	the	Magic Targeted Offensive Damage - Piercing		the	Magic targeted offensive damage - piercing
+_EF6C9101CB8E8A81	SMTODB	Smashing Magic	a	the	Magic Targeted Offensive Damage - Smashing		the	Magic targeted offensive damage - smashing
+_DCA2011974F95F33	SMTODS	Slashing Magic	a	the	Magic Targeted Offensive Damage - Slashing		the	Magic targeted offensive damage - slashing
+_4D659DBE77790808	SMTOE	Elemental Magic	a	the	Magic Targeted Offensive Special Damage		the	Magic targeted offensive special damage
+_BB60D2172BB08E5E	SMTOEC	Cold Magic	a	the	Magic Targeted Offensive Special Damage - Cold		the	Magic targeted offensive special damage - cold
+_BB60C605A570865E	SMTOEA	Acid Magic	a	the	Magic Targeted Offensive Special Damage - Acid		the	Magic targeted offensive special damage - acid
+_F1197F29E7259AF6	SMTOER	Rot Magic	a	the	Magic Targeted Offensive Special Damage - Rot		the	Magic targeted offensive special damage - rot
+_BB70F21DEA109A5E	SMTOEF	Fire Magic	a	the	Magic Targeted Offensive Special Damage - Fire		the	Magic targeted offensive special damage - fire
+_56BE8647C4E9FB22	SMTOES	Shockwave Magic	a	the	Magic Targeted Offensive Special Damage - Shockwave		the	Magic targeted offensive special damage - shockwave
+_3067102BE3BA7298	SMTOEP	Poison Magic	a	the	Magic Targeted Offensive Special Damage - Poison		the	Magic targeted offensive special damage - poison
+_D21E1B9D6AE6E80B	SMTOEE	Electric Magic	a	the	Magic Targeted Offensive Special Damage - Electric		the	Magic targeted offensive special damage - electric
+_98C6999187B46CF5	SMTC	Curative Magic	a	the	Magic Targeted Curative		the	Magic targeted curative
+_1C592673394DF112	SMTCH	Healing Magic	a	the	Magic Targeted Curative Heal		the	Magic targeted curative heal
+_4DB2CBA23981B32C	SMTCHP	Hp Healing Magic	a	the	Magic Targeted Curative Heal - Hp		the	Magic targeted curative heal - HP
+_AB6EC18600125241	SMTCHT	Sta Healing Magic	a	the	Magic Targeted Curative Heal - Sta		the	Magic targeted curative heal - STA
+_E66EFD823B120650	SMTCHA	Sap Healing Magic	a	the	Magic Targeted Curative Heal - Sap		the	Magic targeted curative heal - SAP
+_A2E1FE031A7E6577	SMTCHC	Focus Healing Magic	a	the	Magic Targeted Curative Heal - Focus		the	Magic targeted curative heal - Focus
+_4EB97B460102495E	SMTCB	Break Link	a	the	Magic Targeted Curative Break Link		the	Magic targeted curative break link
+_4E2722E946AAA84C	SMTCBD	Break Link Damage	a	the	Magic Targeted Curative Break Link - Damage		the	Magic targeted curative break link - damage
+_CAEF0EEFDA4C2F23	SMTCBS	Break Link Sickness	a	the	Magic Targeted Curative Break Link - Sickness		the	Magic targeted curative break link - sickness
+_7DF328968C5BD4A4	SMTCBC	Break Link Curse	a	the	Magic Targeted Curative Break Link - Curse		the	Magic targeted curative break link - curse
+_EC5CF9A83F99E909	SML	Magic Link	a	the	Magic Link		the	Magic link
+_49BFA3207C154396	SMLM	Missile Link	a	the	Magic Link Missile		the	Magic link missile
+_A58A9DC6491B4045	SMLMR	Primal Link	a	the	Magic Link Missile - Primal		the	Magic link missile - Primal
+_8738348ED5250EB1	SMLMG	Atysian Link	a	the	Magic Link Missile - Atysian		the	Magic link missile - Atysian
+_F156BD51B8794EA6	SMLMB	Celestial Link	a	the	Magic Link Missile - Celestial		the	Magic link missile - Celestial
+_BCBBCC69BD7DC729	SMLO	Offensive Link	a	the	Magic Link Offensive		the	Magic link offensive
+_E3DA23F080A8CD0A	SMLOS	Sickness Link	a	the	Magic Link Offensive Sickness		the	Magic link offensive sickness
+_32D62DF15F56B9C9	SMLOSM	Madness Link	a	the	Magic Link Offensive Sickness - Madness		the	Magic link offensive sickness - madness
+_A670C9FEE90146B5	SMLOSS	Speed Debuff Link	a	the	Magic Link Offensive Sickness - Speed Debuff		the	Magic link offensive sickness - speed debuff
+_8679830685E75B9F	SMLOSR	Resist Debuff Link	a	the	Magic Link Offensive Sickness - Resist Debuff		the	Magic link offensive sickness - resist debuff
+_64F0E502A9F152B4	SMLOSK	Skill Debuff Link	a	the	Magic Link Offensive Sickness - Skill Debuff		the	Magic link offensive sickness - skill debuff
+_1A9EF2C457E8332F	SMLOC	Curse Link	a	the	Magic Link Offensive Curse		the	Magic link offensive curse
+_A24F5221B88715E8	SMLOCI	Incapacity Link	a	the	Magic Link Offensive Curse - Incapacity		the	Magic link offensive curse - incapacity
+_7AB2ED7B3CF3A487	SMLOCM	Mental Disturbance Link	a	the	Magic Link Offensive Curse - Mental Disturbance		the	Magic link offensive curse - mental disturbance
+_6B2E163F2F56E109	SMLOCS	Misfortune Link	a	the	Magic Link Offensive Curse - Misfortune		the	Magic link offensive curse - misfortune
+_71C5EA6113DCAA84	SMLOCH	Hatred Link	a	the	Magic Link Offensive Curse - Hatred		the	Magic link offensive curse - hatred
+_AB66F97FAB86DDD9	SMLOD	Physical Link	a	the	Magic Link Offensive Damage		the	Magic link offensive damage
+_D4950C23EB04A31B	SMLODP	Piercing Link	a	the	Magic Link Offensive Damage - Piercing		the	Magic link offensive damage - piercing
+_9F47423B6AF6526A	SMLODB	Smashing Link	a	the	Magic Link Offensive Damage - Smashing		the	Magic link offensive damage - smashing
+_D435281C6C94BB1B	SMLODS	Slashing Link	a	the	Magic Link Offensive Damage - Slashing		the	Magic link offensive damage - slashing
+_CB34B9D79534C085	SMLOE	Elemental Link	a	the	Magic Link Offensive Special Damage		the	Magic link offensive special damage
+_AC052A0EDC899E4D	SMLOEC	Cold Link	a	the	Magic Link Offensive Special Damage - Cold		the	Magic link offensive special damage - cold
+_EB452208D649964D	SMLOEA	Acid Link	a	the	Magic Link Offensive Special Damage - Acid		the	Magic link offensive special damage - acid
+_A77ED706553118F2	SMLOER	Rot Link	a	the	Magic Link Offensive Special Damage - Rot		the	Magic link offensive special damage - rot
+_2DA53E1ADAE9AA4E	SMLOEF	Fire Link	a	the	Magic Link Offensive Special Damage - Fire		the	Magic link offensive special damage - fire
+_AF94EB51965FCCCC	SMLOES	Shockwave Link	a	the	Magic Link Offensive Special Damage - Shockwave		the	Magic link offensive special damage - shockwave
+_69AE2994CC81CA3D	SMLOEP	Poison Link	a	the	Magic Link Offensive Special Damage - Poison		the	Magic link offensive special damage - poison
+_3A2402E09E2FB9A1	SMLOEE	Electric Link	a	the	Magic Link Offensive Special Damage - Electric		the	Magic link offensive special damage - electric
+_FECE980462BC4BE7	SMLC	Curative Link	a	the	Magic Link Curative		the	Magic link curative
+_C83E6D3A18979456	SMLCH	Healing Link	a	the	Magic Link Curative Heal		the	Magic link curative heal
+_47BAADEFB7F6F387	SMLCHP	Hp Healing Link	a	the	Magic Link Curative Heal - Hp		the	Magic link curative heal - HP
+_ED574D3D7E3CE092	SMLCHT	Sta Healing Link	a	the	Magic Link Curative Heal - Sta		the	Magic link curative heal - STA
+_ED574D5BB80B9492	SMLCHA	Sap Healing Link	a	the	Magic Link Curative Heal - Sap		the	Magic link curative heal - SAP
+_D172319EEB6037EE	SMLCHC	Focus Healing Link	a	the	Magic Link Curative Heal - Focus		the	Magic link curative heal - Focus
+_6BE71C3763BAAEC0	SMA	Autonomous Magic	a	the	Magic Autonomous		the	Magic autonomous
+_038C64191F38E825	SMAE	Enchantment Magic	a	the	Magic Enchantment		the	Magic enchantment
+_11B74DB9C76E41BB	SMAES	Spell Enchantment	a	the	Magic Enchantment - Spell		the	Magic enchantment - spell
+_D0178DCBC8BD21B3	SMAEB	Bonus Enchantment	a	the	Magic Enchantment - Bonus		the	Magic enchantment - bonus
+_167E0069BBAE1327	SMAP	Potion Making Magic	a	the	Magic Potion Making		the	Magic potion making
+_6718E88297C7DCB2	SD	Defense	a	the	Defense		the	Defense
+_4FFC1798E127AA6B	SDA	Armor Defense	an	the	Armor Defense		the	Armor defense
+_DF268460BB1A8CFA	SDAL	Light Armor Defense	a	the	Light Armor Defense		the	Light armor defense
+_2D7B65D65A42F5E0	SDALF	Light Armor Defense - Fyros	a	the	Light Armor Defense - Fyros		the	Light armor defense - Fyros
+_424A70D037D0F59E	SDALFA	Advanced Light Armor Defense - Fyros	an	the	Advanced Light Armor Defense - Fyros		the	Advanced light armor defense - Fyros
+_112F07890ABFA7C8	SDALFAE	Expert Light Armor Defense - Fyros	an	the	Expert Light Armor Defense - Fyros		the	Expert light armor defense - Fyros
+_680B05DD5AE2E5D1	SDALM	Light Armor Defense - Matis	a	the	Light Armor Defense - Matis		the	Light armor defense - Matis
+_424A58C6333E2DA5	SDALMA	Advanced Light Armor Defense - Matis	an	the	Advanced Light Armor Defense - Matis		the	Advanced light armor defense - Matis
+_524FA790897F4FBE	SDALMAE	Expert Light Armor Defense - Matis	an	the	Expert Light Armor Defense - Matis		the	Expert light armor defense - Matis
+_2356288C143BE4EB	SDALT	Light Armor Defense - Tryker	a	the	Light Armor Defense - Tryker		the	Light armor defense - Tryker
+_C26B50D37826EDDC	SDALTA	Advanced Light Armor Defense - Tryker	an	the	Advanced Light Armor Defense - Tryker		the	Advanced light armor defense - Tryker
+_6BE3C5F35AACE50B	SDALTAE	Expert Light Armor Defense - Tryker	an	the	Expert Light Armor Defense - Tryker		the	Expert light armor defense - Tryker
+_2CBC3DEA7929BD66	SDALZ	Light Armor Defense - Zoraï	a	the	Light Armor Defense - Zoraï		the	Light armor defense - Zoraï
+_42111CB4B4CF95B2	SDALZA	Advanced Light Armor Defense - Zoraï	an	the	Advanced Light Armor Defense - Zoraï		the	Advanced light armor defense - Zoraï
+_932FDF19A6DF7F62	SDALZAE	Expert Light Armor Defense - Zoraï	an	the	Expert Light Armor Defense - Zoraï		the	Expert light armor defense - Zoraï
+_D61C242303F92188	SDAM	Medium Armor Defense	a	the	Medium Armor Defense		the	Medium armor defense
+_1A170B6E81DBBC62	SDAMF	Medium Armor Defense - Fyros	a	the	Medium Armor Defense - Fyros		the	Medium armor defense - Fyros
+_F68480577D8A9159	SDAMFA	Advanced Medium Armor Defense - Fyros	an	the	Advanced Medium Armor Defense - Fyros		the	Advanced medium armor defense - Fyros
+_4874F6C7BF6EF50E	SDAMFAE	Expert Medium Armor Defense - Fyros	an	the	Expert Medium Armor Defense - Fyros		the	Expert medium armor defense - Fyros
+_DC170B6E7FBB045F	SDAMM	Medium Armor Defense - Matis	a	the	Medium Armor Defense - Matis		the	Medium armor defense - Matis
+_F4C4A86777FA9160	SDAMMA	Advanced Medium Armor Defense - Matis	an	the	Advanced Medium Armor Defense - Matis		the	Advanced medium armor defense - Matis
+_0A74F6BBC10C35FD	SDAMMAE	Expert Medium Armor Defense - Matis	an	the	Expert Medium Armor Defense - Matis		the	Expert medium armor defense - Matis
+_741CDF5A04996489	SDAMT	Medium Armor Defense - Tryker	a	the	Medium Armor Defense - Tryker		the	Medium armor defense - Tryker
+_83FA0DBB35258259	SDAMTA	Advanced Medium Armor Defense - Tryker	an	the	Advanced Medium Armor Defense - Tryker		the	Advanced medium armor defense - Tryker
+_C3346CA341E7BBD8	SDAMTAE	Expert Medium Armor Defense - Tryker	an	the	Expert Medium Armor Defense - Tryker		the	Expert medium armor defense - Tryker
+_1F170B669AFB6C94	SDAMZ	Medium Armor Defense - Zoraï	a	the	Medium Armor Defense - Zoraï		the	Medium armor defense - Zoraï
+_F04BF87FFACB9165	SDAMZA	Advanced Medium Armor Defense - Zoraï	an	the	Advanced Medium Armor Defense - Zoraï		the	Advanced medium armor defense - Zoraï
+_4D74DAABDE4C9518	SDAMZAE	Expert Medium Armor Defense - Zoraï	an	the	Expert Medium Armor Defense - Zoraï		the	Expert medium armor defense - Zoraï
+_C81EA8146FAB1164	SDAH	Heavy Armor Defense	an	the	Heavy Armor Defense		the	Heavy armor defense
+_9C2AE8720C3C7CD2	SDAHF	Heavy Armor Defense - Fyros	an	the	Heavy Armor Defense - Fyros		the	Heavy armor defense - Fyros
+_FAA6706A7B6C7958	SDAHFA	Advanced Heavy Armor Defense - Fyros	an	the	Advanced Heavy Armor Defense - Fyros		the	Advanced Heavy armor defense - Fyros
+_8B14F2DC482F4106	SDAHFAE	Expert Heavy Armor Defense - Fyros	an	the	Expert Heavy Armor Defense - Fyros		the	Expert Heavy armor defense - Fyros
+_9C2AE86C8BFBD8E7	SDAHM	Heavy Armor Defense - Matis	an	the	Heavy Armor Defense - Matis		the	Heavy armor defense - Matis
+_F8E6987A75DC795F	SDAHMA	Advanced Heavy Armor Defense - Matis	an	the	Advanced Heavy Armor Defense - Matis		the	Advanced Heavy armor defense - Matis
+_4D14F2D04ACD81F5	SDAHMAE	Expert Heavy Armor Defense - Matis	an	the	Expert Heavy Armor Defense - Matis		the	Expert Heavy armor defense - Matis
+_A6DB938C7108A861	SDAHT	Heavy Armor Defense - Tryker	an	the	Heavy Armor Defense - Tryker		the	Heavy armor defense - Tryker
+_443A3DD534B5A27F	SDAHTA	Advanced Heavy Armor Defense - Tryker	an	the	Advanced Heavy Armor Defense - Tryker		the	Advanced Heavy armor defense - Tryker
+_45947CCEC9E7BBDF	SDAHTAE	Expert Heavy Armor Defense - Tryker	an	the	Expert Heavy Armor Defense - Tryker		the	Expert Heavy armor defense - Tryker
+_9C2ADA5C069B7C0E	SDAHZ	Heavy Armor Defense - Zoraï	an	the	Heavy Armor Defense - Zoraï		the	Heavy armor defense - Zoraï
+_F46DE892F8AD7964	SDAHZA	Advanced Heavy Armor Defense - Zoraï	an	the	Advanced Heavy Armor Defense - Zoraï		the	Advanced Heavy armor defense - Zoraï
+_9014D6C0670DE110	SDAHZAE	Expert Heavy Armor Defense - Zoraï	an	the	Expert Heavy Armor Defense - Zoraï		the	Expert Heavy armor defense - Zoraï
+_DE5BE2BD5DB3421F	SDS	Shield Defense	a	the	Shield Defense		the	Shield defense
+_765F9EF3CB6EFB1B	SDSB	Shield Buckler Defense 	a	the	Shield Buckler Defense 		the	Shield buckler defense 
+_D6918DC8D2A6E50E	SDSBF	Shield Buckler Defense - Fyros	a	the	Shield Buckler Defense - Fyros		the	Shield buckler defense - Fyros
+_D06E36DA1636349A	SDSBFA	Advanced Shield Buckler Defense - Fyros	an	the	Advanced Shield Buckler Defense - Fyros		the	Advanced shield buckler defense - Fyros
+_A4548421A96216AB	SDSBFAE	Expert Shield Buckler Defense - Fyros	an	the	Expert Shield Buckler Defense - Fyros		the	Expert shield buckler defense - Fyros
+_D63031D1CC16E50F	SDSBM	Shield Buckler Defense - Matis	a	the	Shield Buckler Defense - Matis		the	Shield buckler defense - Matis
+_4F8EBEE38FC6D4A8	SDSBMA	Advanced Shield Buckler Defense - Matis	an	the	Advanced Shield Buckler Defense - Matis		the	Advanced shield buckler defense - Matis
+_A6F2C4096B6216A6	SDSBMAE	Expert Shield Buckler Defense - Matis	an	the	Expert Shield Buckler Defense - Matis		the	Expert shield buckler defense - Matis
+_51FB4C9202237002	SDSBT	Shield Buckler Defense - Tryker	a	the	Shield Buckler Defense - Tryker		the	Shield buckler defense - Tryker
+_05FC35CF099D3F97	SDSBTA	Advanced Shield Buckler Defense - Tryker	an	the	Advanced Shield Buckler Defense - Tryker		the	Advanced shield buckler defense - Tryker
+_CB8BF1ABE2BFD2E5	SDSBTAE	Expert Shield Buckler Defense - Tryker	an	the	Expert Shield Buckler Defense - Tryker		the	Expert shield buckler defense - Tryker
+_53B77DDC4FE7D790	SDSBZ	Shield Buckler Defense - Zoraï	a	the	Shield Buckler Defense - Zoraï		the	Shield buckler defense - Zoraï
+_4D35D66A10770C3E	SDSBZA	Advanced Shield Buckler Defense - Zoraï	an	the	Advanced Shield Buckler Defense - Zoraï		the	Advanced shield buckler defense - Zoraï
+_C3322417AE62FAA3	SDSBZAE	Expert Shield Buckler Defense - Zoraï	an	the	Expert Shield Buckler Defense - Zoraï		the	Expert shield buckler defense - Zoraï
+_67D57F922370122A	SDSS	Shield Large Shield Defense	a	the	Shield Large Shield Defense		the	Shield large shield defense
+_2D903077B65FB8FE	SDSSF	Shield Large Shield Defense - Fyros	a	the	Shield Large Shield Defense - Fyros		the	Shield large shield defense - Fyros
+_A76C030C3EAC0B24	SDSSFA	Advanced Shield Large Shield Defense - Fyros	an	the	Advanced Shield Large Shield Defense - Fyros		the	Advanced shield large shield defense - Fyros
+_25537D6D6A2E3EAD	SDSSFAE	Expert Shield Large Shield Defense - Fyros	an	the	Expert Shield Large Shield Defense - Fyros		the	Expert shield large shield defense - Fyros
+_6820D07EB6FFA8EF	SDSSM	Shield Large Shield Defense - Matis	a	the	Shield Large Shield Defense - Matis		the	Shield large shield defense - Matis
+_A76CEB023A1A432B	SDSSMA	Advanced Shield Large Shield Defense - Matis	an	the	Advanced Shield Large Shield Defense - Matis		the	Advanced shield large shield defense - Matis
+_66731D74E9EEE6A3	SDSSMAE	Expert Shield Large Shield Defense - Matis	an	the	Expert Shield Large Shield Defense - Matis		the	Expert shield large shield defense - Matis
+_51DFC6685ABE9F11	SDSST	Shield Large Shield Defense - Tryker	a	the	Shield Large Shield Defense - Tryker		the	Shield large shield defense - Tryker
+_3780BF0723514957	SDSSTA	Advanced Shield Large Shield Defense - Tryker	an	the	Advanced Shield Large Shield Defense - Tryker		the	Advanced shield large shield defense - Tryker
+_DF78B5C12A6FB8B9	SDSSTAE	Expert Shield Large Shield Defense - Tryker	an	the	Expert Shield Large Shield Defense - Tryker		the	Expert shield large shield defense - Tryker
+_2CD1088BD5468084	SDSSZ	Shield Large Shield Defense - Zoraï	a	the	Shield Large Shield Defense - Zoraï		the	Shield large shield defense - Zoraï
+_A733AFF0BBABAB38	SDSSZA	Advanced Shield Large Shield Defense - Zoraï	an	the	Advanced Shield Large Shield Defense - Zoraï		the	Advanced shield large shield defense - Zoraï
+_A75355FD064E1647	SDSSZAE	Expert Shield Large Shield Defense - Zoraï	an	the	Expert Shield Large Shield Defense - Zoraï		the	Expert shield large shield defense - Zoraï
+_ECFEE2CD5824CE24	SDD	Defense Dodge	a	the	Defense Dodge		the	Defense dodge
+_345CCA3A35B86265	SDDA	Standard Defense Dodge	an	the	Standard Defense Dodge		the	Advanced defense dodge
+_B2FE7E9B64E30817	SDDAT	Advanced Defense Dodge	a	the	Advanced Defense Dodge		the	Technical advanced defense dodge
+_BAFC02FA96146BE4	SDDATM	Expert Defense Dodge	a	the	Expert Defense Dodge		the	Mastery defense dodge
+_04C01121C4A4DC3F	SDDATME	Master Defense Dodge	an	the	Master Defense Dodge		the	Expert advanced defense dodge
+_97F03668731C6899	uknown	Unknown Skill			Unknown Skill			Unknown Skill
+_CDE48A297AAB6A68	Unknown	Unknown Skill			Unknown Skill			Unknown Skill
+_E869049E9CF76CBE	SH	Harvest	a	the	Harvest		the	Harvest
+_D877C88BA9F6CC7D	SHF	Forage	a	the	Forages			
+_4CF4D9F7265A5C80	SHFF	Forest Forage	a	the	Forest Forages			
+_2C7A6BC005402574	SHFFA	Advanced Forest Forage	an	the	Advanced Forest Forages			
+_F8560FCB24E256B5	SHFFAE	Expert Forest Forage	an	the	Expert Forest Forages			
+_D50C1FBB94E2E8D9	SHFFAEM	Master Forest Forage	a	the	Master Forest Forages			
+_CCF4D5F666CA2C7E	SHFD	Desert Forage	a	the	Desert Forages			
+_AC7A43BF83202573	SHFDA	Advanced Desert Forage	an	the	Advanced Desert Forages			
+_785607CBA4A246B5	SHFDAE	Expert Desert Forage	an	the	Expert Desert Forages			
+_55EC1FBD90A2E8D9	SHFDAEM	Master Desert Forage	a	the	Master Desert Forages			
+_4D0381F2A57A8484	SHFJ	Jungle Forage	a	the	Jungle Forages			
+_E9C88BC08780E96D	SHFJA	Advanced Jungle Forage	an	the	Advanced Jungle Forages			
+_F974D7CF22A476B5	SHFJAE	Expert Jungle Forage	an	the	Expert Jungle Forages			
+_4E2A2FB39862E8D9	SHFJAEM	Master Jungle Forage	a	the	Master Jungle Forages			
+_1AD7184DCB976475	SHFL	Lake Forage	a	the	Lake Forages			
+_111B42B59C449C4C	SHFLA	Advanced Lake Forage	an	the	Advanced Lake Forages			
+_D7A09561B23D6EE0	SHFLAE	Expert Lake Forage	an	the	Expert Lake Forages			
+_C3113618B9D2B554	SHFLAEM	Master Lake Forage	a	the	Master Lake Forages			
+_5923356A639F6402	SHFP	Prime Root Forage	a	the	Prime Root Forages			
+_FA2A9BEC3DE473BA	SHFPA	Advanced Prime Root Forage	an	the	Advanced Prime Root Forages			
+_CC4C471C2B2A2685	SHFPAE	Expert Prime Root Forage	an	the	Expert Prime Root Forages			
+_79FB4FE57456CE2F	SHFPAEM	Master Prime Root Forage	a	the	Expert Prime Root Forages			
+_BA3D57D26A7885B0	SMTOECA	Advanced Cold Magic	an	the	Advanced Magic Targeted Offensive Special Damage - Cold		the	Advanced Magic Targeted Offensive special Damage - Cold
+_AFEDA7D06A484DAB	SMTOEAA	Advanced Acid Magic	an	the	Advanced Magic Targeted Offensive Special Damage - Acid		the	Advanced Magic Targeted Offensive Special Damage - Acid
+_01CD9DBDADC47BC9	SMTOERA	Advanced Rot Magic	an	the	Advanced Magic Targeted Offensive Special Damage - Rot		the	Advanced Magic Targeted Offensive Special Damage - Rot
+_71CEBFD5AAD97DB9	SMTOEFA	Advanced Fire Magic	an	the	Advanced Magic Targeted Offensive Special Damage - Fire		the	Advanced Magic Targeted Offensive Special Damage - Fire
+_318D06154CC1104A	SMTOESA	Advanced Shockwave Magic	an	the	Advanced Magic Targeted Offensive Special Damage - Shockwave		the	Advanced Magic Targeted Offensive Special Damage - Shockwave
+_73261D03FCFBFD13	SMTOEPA	Advanced Poison Magic	an	the	Advanced Magic Targeted Offensive Special Damage - Poison		the	Advanced Magic Targeted Offensive Special Damage - Poison
+_E6D785444091E28C	SMTOEEA	Advanced Electric Magic	an	the	Advanced Magic Targeted Offensive Special Damage - Electric		the	Advanced Magic Targeted Offensive Special Damage - Electric
+_D7E662B1D5A77148	SMTCHPA	Advanced Hp Healing Magic	an	the	Advanced Magic Targeted Curative Heal - Hp		the	Advanced Magic Targeted Curative Heal - HP
+_F3F803579301E2AC	SMTCHTA	Advanced Stamina Healing Magic	an	the	Advanced Magic Targeted Curative Heal - Sta		the	Advanced Magic Targeted Curative Heal - STA
+_F3E9B766CEF24AAC	SMTCHAA	Advanced Sap Healing Magic	an	the	Advanced Magic Targeted Curative Heal - Sap		the	Advanced Magic Targeted Curative Heal - SAP
+_E9A9A59BE96CEC2F	SMTCHCA	Advanced Focus Healing Magic	an	the	Advanced Magic Targeted Curative Heal - Focus		the	Advanced Magic Targeted Curative Heal - Focus
+_5E798E3F74FE345E	SMLOSMA	Advanced Madness Link	an	the	Advanced Magic Link Offensive Sickness - Madness		the	Advanced Magic Link Offensive Sickness - Madness
+_26EEA5D39E743F06	SMLOSSA	Advanced Speed Debuff Link	an	the	Advanced Magic Link Offensive Sickness - Speed Debuff		the	Advanced Magic Link Offensive Sickness - Speed Debuff
+_5172DB6301F6E8D5	SMLOCIA	Advanced Incapacity Link	an	the	Advanced Magic Link Offensive Curse - Incapacity		the	Advanced Magic Link Offensive Curse - Incapacity
+_9163A3774C6560F0	SMLOCSA	Advanced Misfortune Link	an	the	Advanced Magic Link Offensive Curse - Misfortune		the	Advanced Magic Link Offensive Curse - Misfortune
+_6AD31D5BA8BF214B	SMLOECA	Advanced Cold Link	an	the	Advanced Magic Link Offensive Special Damage - Cold		the	Advanced Magic Link Offensive Special Damage - Cold
+_EAA3ED59E7FF053F	SMLOEAA	Advanced Acid Link	an	the	Advanced Magic Link Offensive Special Damage - Acid		the	Advanced Magic Link Offensive Special Damage - Acid
+_A7C460984F98020C	SMLOERA	Advanced Rot Link	an	the	Advanced Magic Link Offensive Special Damage - Rot		the	Advanced Magic Link Offensive Special Damage - Rot
+_6B34055F296F5145	SMLOEFA	Advanced Fire Link	an	the	Advanced Magic Link Offensive Special Damage - Fire		the	Advanced Magic Link Offensive Special Damage - Fire
+_D4F777BB9FE1FFC6	SMLOESA	Advanced Shockwave Link	an	the	Advanced Magic Link Offensive Special Damage - Shockwave		the	Advanced Magic Link Offensive Special Damage - Shockwave
+_663E8A6237DAFF8F	SMLOEPA	Advanced Poison Link	an	the	Advanced Magic Link Offensive Special Damage - Poison		the	Advanced Magic Link Offensive Special Damage - Poison
+_F03F1412EF9651DB	SMLOEEA	Advanced Electric Link	an	the	Advanced Magic Link Offensive Special Damage - Electric		the	Advanced Magic Link Offensive Special Damage - Electric
+_6E57968BCB587F8E	SMD	Defensive Magic	a	the	Defensive Magic		the	Defensive Magic
+_77BA81F88554AE82	SMDA	Defensive Affliction	a	the	Defensive Affliction		the	Standard Defensive Affliction
+_8BE8FBCCF2B753CD	SMDAA	Advanced Defensive Affliction	an	the	Advanced Defensive Affliction		the	Advanced Defensive Affliction
+_EF9774F6512DD4CE	SMDAAE	Expert Defensive Affliction	an	the	Expert Defensive Affliction		the	Expert Defensive Affliction
+_ED65F0BA7B50E721	SMDAAEM	Master Defensive Affliction	a	the	Master Defensive Affliction		the	Master Defensive Affliction
+_397B66BC32CD0D7C	SMDH	Standard Healing Magic	a	the	Standard Healing Magic		the	Standard Healing Magic
+_35B7302DA7A9A4E6	SMDHA	Advanced Healing Magic	an	the	Advanced Healing Magic		the	Advanced Healing Magic
+_ED96DA1DA02EF778	SMDHAE	Expert Healing Magic	an	the	Expert Healing Magic		the	Expert Healing Magic
+_E4A67EED911AA10F	SMDHAEM	Master Healing Magic	a	the	Master Healing Magic		the	Master Healing Magic
+_27450790EC3DF79C	SMO	Offensive Magic	an	the	Offensive Magic		the	Offensive Magic
+_776A81F805C4DA82	SMOA	Offensive Affliction	a	the	Offensive Affliction		the	Standard Offensive Affliction
+_8B9803E2326753CD	SMOAA	Advanced Offensive Affliction	an	the	Advanced Offensive Affliction		the	Advanced Offensive Affliction
+_B14774F6514D2CCF	SMOAAE	Expert Offensive Affliction	an	the	Expert Offensive Affliction		the	Expert Offensive Affliction
+_AF15F0BABB101322	SMOAAEM	Master Offensive Affliction	a	the	Master Offensive Affliction		the	Master Offensive Affliction
+_DA8E4BFA7A17D58C	SMOE	Elemental Magic	a	the	Elemental Magic		the	Standard Elemental Magic
+_8C6B9F1DA778E81E	SMOEA	Advanced Elemental Magic	an	the	Advanced Elemental Magic		the	Advanced Elemental Magic
+_FC649D9073CA8292	SMOEAE	Expert Elemental Magic	an	the	Expert Elemental Magic		the	Expert Elemental Magic
+_32E3FD659EAB950B	SMOEAEM	Master Elemental Magic	a	the	Master Elemental Magic		the	Master Elemental Magic
+_B93945D8AB4CE8F7	SMS	Self Magic	a	the	Self Magic		the	Self Magic
+_83F4433CC9AD94E4	SMSS	Standard Self Magic	a	the	Standard Self Magic		the	Standard Self Magic
+_779EFD45D0FE3F50	SMSSA	Advanced Self Magic	an	the	Advanced Self Magic		the	Advanced Self Magic
+_319B0363794BC094	SMSSAE	Expert Self Magic	an	the	Expert Self Magic		the	Expert Self Magic
+_2C19F048303A87DB	SMSSAEM	Master Self Magic	a	the	Master Self Magic		the	Master Self Magic
+_DC262CA3A8C7EC7E	SF	Fight	a	the	Fight		the	
+_9FB46C21D748E8AD	SFM	Melee Fight	a	the	Melee Fights		the	
+_B85B2AD2782EBD1F	SFM1	1 Handed Melee Fight	a	the	1 Handed Melee Fights		the	
+_AFBF2433BF019904	SFM1B	1 Handed Melee Smashing	a	the	1 Handed Melee Smashings		the	
+_D94507669A13E45F	SFM1BM	Mace	a	the	Maces		the	
+_73DA5D3CEA2FF9DB	SFM1BME	Electric Mace	an	the	Electric Maces		the	
+_B70D1DEFDB927F3C	SFM1BMM	Master Mace	a	the	Master Maces		the	
+_8974507B67460C6B	SFM1BS	Staff	a	the	Staffs		the	
+_732EE5D7E0948302	SFM1BSM	Master Staff	a	the	Master Staffs		the	
+_1593C29DC08E165B	SFM1P	1 Handed Melee Piercing	a	the	1 Handed Melee Piercings		the	
+_8CE54C7B65460C87	SFM1PS	Spear	a	the	Spears		the	
+_093C6256AECD9909	SFM1PSE	Electric Spear	an	the	Electric Spears		the	
+_B64ED5EF5EDA8F06	SFM1PSL	Living Spear	a	the	Living Spears		the	
+_73B0BDDFDE948310	SFM1PSM	Master Spear	a	the	Master Spears		the	
+_96C3C29D02EE0A5D	SFM1S	1 Handed Melee Slashing	a	the	1 Handed Melee Slashings		the	
+_D315B84E2AA27C98	SFM1SA	Axe	an	the	Axes		the	
+_78ADFD175B5EB7F5	SFM1SAB	Burning Axe	a	the	Burning Axes		the	
+_C78995F56A549B6B	SFM1SAM	Master Axe	a	the	Master Axes		the	
+_0915B88CE7460C8D	SFM1SS	Sword	a	the	Swords		the	
+_73EE45F360948313	SFM1SSM	Master Sword	a	the	Master Swords		the	
+_B68C5DF3648B8F09	SFM1SSW	Waving Sword	a	the	Waving Swords		the	
+_F86B2AD2782EBD20	SFM2	2 Handed Melee Fight	a	the	2 Handed Melee Fights		the	
+_2FBF2433BF019D04	SFM2B	2 Handed Melee Smashing	a	the	2 Handed Melee Smashings		the	
+_20CDADD44B71B714	SFM2BM	2 Handed Mace	a	the	2 Handed Maces		the	
+_9C72B9043E748FD8	SFM2BME	2 Handed Electric Mace	a	the	2 Handed Electric Maces		the	
+_7371ABAB84FD2CCC	SFM2BMM	2 Handed Master Mace	a	the	2 Handed Master Maces		the	
+_5593C29DC09E1A5B	SFM2P	2 Handed Melee Piercing	a	the	2 Handed Melee Piercings		the	
+_DA260B769EF51070	SFM2PP	Pike	a	the	Pikes		the	
+_37ADF902A12397A4	SFM2PPL	Living Pike	a	the	Living Pikes		the	
+_F70D1DF7DF43974A	SFM2PPM	Master Pike	a	the	Master Pikes		the	
+_D6C3C29D02FE0E5D	SFM2S	2 Handed Melee Slashing	a	the	2 Handed Melee Slashings		the	
+_4E4295D2D6651F1D	SFM2SA	2 Handed Axe	a	the	2 Handed Axes		the	
+_7C998790C4E9D4EB	SFM2SAB	2 Handed Burning Axe	a	the	2 Handed Burning Axes		the	
+_019D8526C55101B7	SFM2SAM	2 Handed Master Axe	a	the	2 Handed Master Axes		the	
+_F8ED45C7C6341163	SFM2SS	2 Handed Sword	a	the	2 Handed Swords		the	
+_AA587F5BF23EC9DF	SFM2SSB	2 Handed Burning Sword	a	the	2 Handed Burning Swords		the	
+_58D933B1FE1A541A	SFM2SSL	2 Handed Living Sword	a	the	2 Handed Living Swords		the	
+_183957A63C3A54C0	SFM2SSM	2 Handed Master Sword	a	the	2 Handed Master Swords		the	
+_58D933A9BE7C541A	SFM2SSW	2 Handed Waving Sword	a	the	2 Handed Waving Swords		the	
+_DF188BF2F2187460	SFMC	Close Combat	a	the	Close Combats		the	
+_6098839883769998	SFMCA	Advanced Close Combat	an	the	Advanced Close Combats		the	
+_D6D5D066DF15B854	SFMCAD	Dagger	a	the	Daggers		the	
+_BA9DD135EFD7CCE9	SFMCADL	Living Dagger	a	the	Living Daggers		the	
+_3B1EA5C96E26FCEB	SFMCADM	Master Dagger	a	the	Master Daggers		the	
+_BA9DB138B188CCE9	SFMCADW	Waving Dagger	a	the	Waving Daggers		the	
+_41355D0B6010B6EC	SFMCAH	Hand To Hand	a	the	Hand To Hands		the	
+_33562ACB91DCF8CA	SFMCAHM	Master Hand To Hand	a	the	Master Hand To Hands		the	
+_DF566C21D768F8AB	SFR	Range Fight	a	the	Range Fights		the	
+_796C3ED2784EC51D	SFR1	1 Handed Range Fight	a	the	1 Handed Range Fights		the	
+_6CFE1948BAEAD680	SFR1A	Advanced 1 Handed Range Fight	an	the	Advanced 1 Handed Range Fights		the	
+_5C8878F919A85063	SFR1AB	Bowpistol 	a	the	Bowpistols		the	
+_CC428585BB9B6967	SFR1ABM	Master Bowpistol	a	the	Master Bowpistols		the	
+_4F91917A7FE18168	SFR1ABW	Waving Bowpistol	a	the	Waving Bowpistols		the	
+_1587247EE4D68763	SFR1AP	Pistol	a	the	Pistols		the	
+_375F3549F498FCE3	SFR1APL	Living Pistol	a	the	Living Pistols		the	
+_B8E009DD73E72CE5	SFR1APM	Master Pistol	a	the	Master Pistols		the	
+_B97C3ED2784EC51E	SFR2	2 Handed Range Fight	a	the	2 Handed Range Fights		the	
+_ACFE1948BA0AD680	SFR2A	Advanced 2 Handed Range Fight	an	the	Advanced 2 Handed Range Fights		the	
+_761E05099FDCD5FF	SFR2AA	Autolauncher	an	the	Autolaunchers		the	
+_AA2B77F770A02BC7	SFR2AAB	Burning Autolauncher	a	the	Burning Autolaunchers		the	
+_AC3ABFE198CF651E	SFR2AAM	Master Autolauncher	a	the	Master Autolaunchers		the	
+_1D160C9E2205FC8C	SFR2AB	Bowrifle	a	the	Bowrifles		the	
+_52D653A403717150	SFR2ABE	Electric Bowrifle	an	the	Electric Bowrifles		the	
+_0C521E1802CA9404	SFR2ABM	Master Bowrifle	a	the	Master Bowrifles		the	
+_1B56309520454883	SFR2AL	Launcher	a	the	Launchers		the	
+_3D708A732D6FA261	SFR2ALB	Burning Launcher	a	the	Burning Launchers		the	
+_D2560BACC3A1D543	SFR2ALE	Electric Launcher	an	the	Electric Launchers		the	
+_0D123623BD8AD8F9	SFR2ALM	Master Launcher	a	the	Master Launchers		the	
+_C9667C75A1260469	SFR2AR	Rifle	a	the	Rifles		the	
+_F6FD2DF1DABA8BF7	SFR2ARL	Living Rifle	a	the	Living Rifles		the	
+_B35F15E15A747F01	SFR2ARM	Master Rifle	a	the	Master Rifles		the	
+_C84552DEBD4BD51F	SCA	Armor Crafting	an	the	Armor Crafting		the	Armor Crafting
+_3543A6C935EC9422	SCJ	Jewel Crafting	a	the	Jewel Crafting		the	Jewel Crafting
+_2F3CD4BC7E09B74D	SCM	Melee Weapon Crafting	a	the	Melee Weapon Crafting		the	Melee Weapon Crafting
+_F04DF0BE7D7ABF4B	SCR	Range Weapon Crafting	a	the	Range Weapon Crafting		the	Range Weapon Crafting
+_FDFAEFE25BF970FC	SCAH	Heavy Armor Crafting	a	the	Heavy Armor Crafting		the	Heavy Armor Crafting
+_7F3AEBCF59997CF2	SCAL	Light Armor Crafting	a	the	Light Armor Crafting		the	Light Armor Crafting
+_315B3C28C62B731C	SCAM	Medium Armor Crafting	a	the	Medium Armor Crafting		the	Medium Armor Crafting
+_3D28216407958A53	SCAS	Shield Crafting	a	the	Shield Crafting		the	Shield Crafting
+_6BBCCE5EE3344A0E	SCJA	Anklet Crafting	an	the	Anklet Crafting		the	Anklet Crafting
+_F418EFA634007283	SCJB	Bracelet Crafting	a	the	Bracelet Crafting		the	Bracelet Crafting
+_B7B8695FC5857236	SCJD	Diadem Crafting	a	the	Diadem Crafting		the	Diadem Crafting
+_6CEB8A6D2346F216	SCJE	Earring Crafting	an	the	Earring Crafting		the	Earring Crafting
+_8A45F7BC98F6FA9D	SCJP	Pendant Crafting	a	the	Pendant Crafting		the	Pendant Crafting
+_6BCCED2AF36A7DDD	SCJR	Ring Crafting	a	the	Ring Crafting		the	Ring Crafting
+_C9164EC4B6AEE968	SCM1	One-handed Melee Weapon Crafting	a	the	One-handed Melee Weapon Craftings		the	One-handed Melee Weapon Crafting
+_09164EC4B6AEF169	SCM2	Two-handed Melee Weapon Crafting	a	the	Two-handed Melee Weapon Craftings		the	Two-handed Melee Weapon Crafting
+_C9C736CAF7AEE968	SCR1	One-handed Range Weapon Crafting	a	the	One-handed Range Weapon Craftings		the	One-handed Range Weapon Crafting
+_09C736CAF7AEF169	SCR2	Two-handed Range Weapon Crafting	a	the	Two-handed Range Weapon Craftings		the	Two-handed Range Weapon Crafting
+_31C943C86B3FF3F6	SCAHB	Heavy Boots Crafting	a	the	Heavy Boots Crafting		the	Heavy Boots Crafting
+_7EE838303BC3EFFC	SCAHG	Heavy Gloves Crafting	a	the	Heavy Gloves Crafting		the	Heavy Gloves Crafting
+_ECC8633592A34F8E	SCAHH	Heavy Helmet Crafting	a	the	Heavy Helmet Crafting		the	Heavy Helmet Crafting
+_B5B90BD66B2FB704	SCAHP	Heavy Pants Crafting	a	the	Heavy Pants Crafting		the	Heavy Pants Crafting
+_11F79F7935A46C8A	SCAHS	Heavy Sleeves Crafting	a	the	Heavy Sleeves Crafting		the	Heavy Sleeves Crafting
+_6F1A7F35151487A3	SCAHV	Heavy Vest Crafting	a	the	Heavy Vest Crafting		the	Heavy Vest Crafting
+_33B9F7C0ED6FCBFC	SCALB	Light Boots Crafting	a	the	Light Boots Crafting		the	Light Boots Crafting
+_FD4834267B2217FB	SCALG	Light Gloves Crafting	a	the	Light Gloves Crafting		the	Light Gloves Crafting
+_B7A9BFCEED5F8F0A	SCALP	Light Pants Crafting	a	the	Light Pants Crafting		the	Light Pants Crafting
+_13378B6633F45494	SCALS	Light Sleeves Crafting	a	the	Light Sleeves Crafting		the	Light Sleeves Crafting
+_F15A7B2213B49399	SCALV	Light Vest Crafting	a	the	Light Vest Crafting		the	Light Vest Crafting
+_F43B6F75340F80C2	SCAMB	Medium Boots Crafting	a	the	Medium Boots Crafting		the	Medium Boots Crafting
+_BE58303506349068	SCAMG	Medium Gloves Crafting	a	the	Medium Gloves Crafting		the	Medium Gloves Crafting
+_711C6B67B8FF48DD	SCAMP	Medium Pants Crafting	a	the	Medium Pants Crafting		the	Medium Pants Crafting
+_8AFFB9D32A860D0F	SCAMS	Medium Sleeves Crafting	a	the	Medium Sleeves Crafting		the	Medium Sleeves Crafting
+_FC0D9B9D7F9F47D3	SCAMV	Medium Vest Crafting	a	the	Medium Vest Crafting		the	Medium Vest Crafting
+_3C29C4103B5147DB	SCASS	Large Shield Crafting	a	the	Large Shield Craftings		the	Large Shield Crafting
+_5C9A1BAC222E4016	SCASB	Buckler Crafting	a	the	Buckler Crafting		the	Buckler Crafting
+_07AA76B3E0BDA03D	SCJAA	Advanced Anklet Crafting	an	the	Advanced Anklet Crafting		the	Advanced Anklet Crafting
+_9FF4E6577FF88965	SCJBA	Advanced Bracelet Crafting	an	the	Advanced Bracelet Crafting		the	Advanced Bracelet Crafting
+_026A2EAF9FED683D	SCJDA	Advanced Diadem Crafting	an	the	Advanced Diadem Crafting		the	Advanced Diadem Crafting
+_421C02C29DFD384F	SCJEA	Advanced Earring Crafting	an	the	Advanced Earring Crafting		the	Advanced Earring Crafting
+_3D9AD4412F1B9CEF	SCJPA	Advanced Pendant Crafting	an	the	Advanced Pendant Crafting		the	Advanced Pendant Crafting
+_B01EB5499C9E636E	SCJRA	Advanced Ring Crafting	an	the	Advanced Ring Crafting		the	Advanced Ring Crafting
+_2DAC4D42E960B9A3	SCM1M	Mace Crafting	a	the	Mace Crafting		the	Mace Crafting
+_C7DB552B3370D54F	SCM1T	Staff Crafting	a	the	Staff Crafting		the	Staff Crafting
+_C6DB8532F331B14F	SCM1P	Spear Crafting	a	the	Spear Crafting		the	Spear Crafting
+_E1B9D5D1315B9105	SCM1A	Axe Crafting	an	the	Axe Crafting		the	Axe Crafting
+_87DB4D35B960115C	SCM1S	Sword Crafting	a	the	Sword Crafting		the	Sword Crafting
+_9FF1566EDA34BEE5	SCM1D	Dagger Crafting	a	the	Dagger Crafting		the	Dagger Crafting
+_CFDAFF08BC59FF07	SCM2M	Two-handed Mace Crafting	a	the	Two-handed Mace Crafting		the	Two-handed Mace Crafting
+_2E2A6D25EBE065AE	SCM2P	Pike Crafting	a	the	Pike Crafting		the	Pike Crafting
+_DF4FBA35AF9CC8D0	SCM2A	Two-handed Axe Crafting	a	the	Two-handed Axe Crafting		the	Two-handed Axe Crafting
+_2285FAE4AA0111EB	SCM2S	Two-handed Sword Crafting	a	the	Two-handed Sword Crafting		the	Two-handed Sword Crafting
+_2157C63373B87B96	SCR1B	Bowpistol Crafting	a	the	Bowpistol Crafting		the	Bowpistol Crafting
+_9F808E9224F53EFD	SCR1P	Pistol Crafting	a	the	Pistol Crafting		the	Pistol Crafting
+_4797CC625852A3FB	SCR2A	Autolauncher Crafting	an	the	Autolauncher Crafting		the	Autolauncher Crafting
+_E6ADBB3AC32216C4	SCR2B	Bowrifle Crafting	a	the	Bowrifle Crafting		the	Bowrifle Crafting
+_A16C633209A32AD7	SCR2L	Launcher Crafting	a	the	Launcher Crafting		the	Launcher Crafting
+_441C5130F6FFBD51	SCR2R	Rifle Crafting	a	the	Rifle Crafting		the	Rifle Crafting
+_00CB92EA7F1922E0	SCAHBE	Expert Heavy Boots Crafting	an	the	Expert Heavy Boots Crafting		the	Expert Heavy Boots Crafting
+_3A7A8A83C5610F9D	SCAHGE	Expert Heavy Gloves Crafting	an	the	Expert Heavy Gloves Crafting		the	Expert Heavy Gloves Crafting
+_DEF813D0B6479581	SCAHHE	Expert Heavy Helmet Crafting	an	the	Expert Heavy Helmet Crafting		the	Expert Heavy Helmet Crafting
+_08BB5AF87F191AD2	SCAHPE	Expert Heavy Pants Crafting	an	the	Expert Heavy Pants Crafting		the	Expert Heavy Pants Crafting
+_DC9CA6B620DC6F0F	SCAHSE	Expert Heavy Sleeves Crafting	an	the	Expert Heavy Sleeves Crafting		the	Expert Heavy Sleeves Crafting
+_226967D039B8B196	SCAHVE	Expert Heavy Vest Crafting	an	the	Expert Heavy Vest Crafting		the	Expert Heavy Vest Crafting
+_020B6ACE81490AE6	SCALBE	Expert Light Boots Crafting	an	the	Expert Light Boots Crafting		the	Expert Light Boots Crafting
+_FB998E7906C037A1	SCALGE	Expert Light Gloves Crafting	an	the	Expert Light Gloves Crafting		the	Expert Light Gloves Crafting
+_0AFB32DC814902D8	SCALPE	Expert Light Pants Crafting	an	the	Expert Light Pants Crafting		the	Expert Light Pants Crafting
+_5EDCA2A31E7C7B05	SCALSE	Expert Light Sleeves Crafting	an	the	Expert Light Sleeves Crafting		the	Expert Light Sleeves Crafting
+_A5A963C27917C58C	SCALVE	Expert Light Vest Crafting	an	the	Expert Light Vest Crafting		the	Expert Light Vest Crafting
+_F2DB25BC8A7DCEB4	SCAMBE	Expert Medium Boots Crafting	an	the	Expert Medium Boots Crafting		the	Expert Medium Boots Crafting
+_C8DDFB80D280B7DD	SCAMGE	Expert Medium Gloves Crafting	an	the	Expert Medium Gloves Crafting		the	Expert Medium Gloves Crafting
+_6FBC25BB074E96CF	SCAMPE	Expert Medium Pants Crafting	an	the	Expert Medium Pants Crafting		the	Expert Medium Pants Crafting
+_2D53322B6177A897	SCAMSE	Expert Medium Sleeves Crafting	an	the	Expert Medium Sleeves Crafting		the	Expert Medium Sleeves Crafting
+_F0230EAED6B9C6C6	SCAMVE	Expert Medium Vest Crafting	an	the	Expert Medium Vest Crafting		the	Expert Medium Vest Crafting
+_049040BB9684F58F	SCASSE	Expert Shield Crafting	an	the	Expert Shield Crafting		the	Expert Shield Crafting
+_F3874211E6527784	SCASBE	Expert Buckler Crafting	an	the	Expert Buckler Crafting		the	Expert Buckler Crafting
+_FC2208D9D4B46D83	SCJAAE	Expert Anklet Crafting	an	the	Expert Anklet Crafting		the	Expert Anklet Crafting
+_F47E2E7BF44D0CE7	SCJBAE	Expert Bracelet Crafting	an	the	Expert Bracelet Crafting		the	Expert Bracelet Crafting
+_7E4008C2D0945D7E	SCJDAE	Expert Diadem Crafting	an	the	Expert Diadem Crafting		the	Expert Diadem Crafting
+_FE8050C69AE4A976	SCJEAE	Expert Earring Crafting	an	the	Expert Earring Crafting		the	Expert Earring Crafting
+_7787CE0E6831E785	SCJPAE	Expert Pendant Crafting	an	the	Expert Pendant Crafting		the	Expert Pendant Crafting
+_341A276FF84CFC99	SCJRAE	Expert Ring Crafting	an	the	Expert Ring Crafting		the	Expert Ring Crafting
+_AB2CFB85F4ACBCBD	SCM1ME	Expert Mace Crafting	an	the	Expert Mace Crafting		the	Expert Mace Crafting
+_8AC0A44F520E94D5	SCM1TE	Expert Staff Crafting	an	the	Expert Staff Crafting		the	Expert Staff Crafting
+_8B80D456120EB4CC	SCM1PE	Expert Spear Crafting	an	the	Expert Spear Crafting		the	Expert Spear Crafting
+_C2210BBCC1569792	SCM1AE	Expert Axe Crafting	an	the	Expert Axe Crafting		the	Expert Axe Crafting
+_0DF09C59D81E98E0	SCM1SE	Expert Sword Crafting	an	the	Expert Sword Crafting		the	Expert Sword Crafting
+_B91208CDD2C47579	SCM1DE	Expert Dagger Crafting	an	the	Expert Dagger Crafting		the	Expert Dagger Crafting
+_A4577292FBABF582	SCM2ME	Expert Two-handed Mace Crafting	an	the	Expert Two-handed Mace Crafting		the	Expert Two-handed Mace Crafting
+_AC2A1B6DB72CE8A8	SCM2PE	Expert Pike Crafting	an	the	Expert Pike Crafting		the	Expert Pike Crafting
+_7470A074F53EC65D	SCM2AE	Expert Two-handed Axe Crafting	an	the	Expert Two-handed Axe Crafting		the	Expert Two-handed Axe Crafting
+_3BDC6C179CA833EF	SCM2SE	Expert Two-handed Sword Crafting	an	the	Expert Two-handed Sword Crafting		the	Expert Two-handed Sword Crafting
+_42676DAF3C2C76B3	SCR1BE	Expert Bowpistol Crafting	an	the	Expert Bowpistol Crafting		the	Expert Bowpistol Crafting
+_BCA158E15A95058D	SCR1PE	Expert Pistol Crafting	an	the	Expert Pistol Crafting		the	Expert Pistol Crafting
+_383E5ABE8220C7DC	SCR2AE	Expert Autolauncher Crafting	an	the	Expert Autolauncher Crafting		the	Expert Autolauncher Crafting
+_B481EE84793A44CD	SCR2BE	Expert Bowrifle Crafting	an	the	Expert Bowrifle Crafting		the	Expert Bowrifle Crafting
+_EE1FC664FFFC34E8	SCR2LE	Expert Launcher Crafting	an	the	Expert Launcher Crafting		the	Expert Launcher Crafting
+_0B609C5415AD60D8	SCR2RE	Expert Rifle Crafting	an	the	Expert Rifle Crafting		the	Expert Rifle Crafting
+_79BC6D1AAA1855E9	SCAHBEM	Master Heavy Boots Crafting	a	the	Master Heavy Boots Crafting		the	Master Heavy Boots Crafting
+_A52D9F3FC8EDEAD6	SCAHGEM	Master Heavy Gloves Crafting	a	the	Master Heavy Gloves Crafting		the	Master Heavy Gloves Crafting
+_093E7B7C827404B3	SCAHHEM	Master Heavy Helmet Crafting	a	the	Master Heavy Helmet Crafting		the	Master Heavy Helmet Crafting
+_FDAC3528AA0819F7	SCAHPEM	Master Heavy Pants Crafting	a	the	Master Heavy Pants Crafting		the	Master Heavy Pants Crafting
+_BEE632C5CDF88A1C	SCAHSEM	Master Heavy Sleeves Crafting	a	the	Master Heavy Sleeves Crafting		the	Master Heavy Sleeves Crafting
+_CAAFCF7CC7E504D6	SCAHVEM	Master Heavy Vest Crafting	a	the	Master Heavy Vest Crafting		the	Master Heavy Vest Crafting
+_7BAC21122C482DEF	SCALBEM	Master Light Boots Crafting	a	the	Master Light Boots Crafting		the	Master Light Boots Crafting
+_66FC7F49894C02DA	SCALGEM	Master Light Gloves Crafting	a	the	Master Light Gloves Crafting		the	Master Light Gloves Crafting
+_FF9CE9202C38F1FD	SCALPEM	Master Light Pants Crafting	a	the	Master Light Pants Crafting		the	Master Light Pants Crafting
+_40D60AC64B988612	SCALSEM	Master Light Sleeves Crafting	a	the	Master Light Sleeves Crafting		the	Master Light Sleeves Crafting
+_4D9FA782874408CC	SCALVEM	Master Light Vest Crafting	a	the	Master Light Vest Crafting		the	Master Light Vest Crafting
+_797A169746CAEDF0	SCAMBEM	Master Medium Boots Crafting	a	the	Master Medium Boots Crafting		the	Master Medium Boots Crafting
+_C913639F40BC0EDC	SCAMGEM	Master Medium Gloves Crafting	a	the	Master Medium Gloves Crafting		the	Master Medium Gloves Crafting
+_F65B169683CB25FD	SCAMPEM	Master Medium Pants Crafting	a	the	Master Medium Pants Crafting		the	Master Medium Pants Crafting
+_0F72FEEE93A6779B	SCAMSEM	Master Medium Sleeves Crafting	a	the	Master Medium Sleeves Crafting		the	Master Medium Sleeves Crafting
+_4400C5EFBE78A9C6	SCAMVEM	Master Medium Vest Crafting	a	the	Master Medium Vest Crafting		the	Master Medium Vest Crafting
+_D08FDC98487410C6	SCASSEM	Master Shield Crafting	a	the	Master Shield Crafting		the	Master Shield Crafting
+_E56886E1202C6126	SCASBEM	Master Buckler Crafting	a	the	Master Buckler Crafting		the	Master Buckler Crafting
+_CCB0DCB18723D0BA	SCJAAEM	Master Anklet Crafting	a	the	Master Anklet Crafting		the	Master Anklet Crafting
+_3FAD928BA198C403	SCJBAEM	Master Bracelet Crafting	a	the	Master Bracelet Crafting		the	Master Bracelet Crafting
+_8C3FBC98C483B4B5	SCJDAEM	Master Diadem Crafting	a	the	Master Diadem Crafting		the	Master Diadem Crafting
+_8A6FF4A84863FCAD	SCJEAEM	Master Earring Crafting	a	the	Master Earring Crafting		the	Master Earring Crafting
+_2A2822F0DBED9929	SCJPAEM	Master Pendant Crafting	a	the	Master Pendant Crafting		the	Master Pendant Crafting
+_6838185575AABBF7	SCJRAEM	Master Ring Crafting	a	the	Master Ring Crafting		the	Master Ring Crafting
+_DF48E44232398FFB	SCM1MEM	Master Mace Crafting	a	the	Master Mace Crafting		the	Master Mace Crafting
+_38A4745D07EA67FB	SCM1TEM	Master Staff Crafting	a	the	Master Staff Crafting		the	Master Staff Crafting
+_3925606DC52A87F2	SCM1PEM	Master Spear Crafting	a	the	Master Spear Crafting		the	Master Spear Crafting
+_C37DF2F36F05E6C8	SCM1AEM	Master Axe Crafting	a	the	Master Axe Crafting		the	Master Axe Crafting
+_BBB4A469CACA6B06	SCM1SEM	Master Sword Crafting	a	the	Master Sword Crafting		the	Master Sword Crafting
+_08C0C8A64333CCB0	SCM1DEM	Master Dagger Crafting	a	the	Master Dagger Crafting		the	Master Dagger Crafting
+_58A86A3DBA572017	SCM2MEM	Master Two-handed Mace Crafting	a	the	Master Two-handed Mace Crafting		the	Master Two-handed Mace Crafting
+_E0480452F56AAF06	SCM2PEM	Master Pike Crafting	a	the	Master Pike Crafting		the	Master Pike Crafting
+_80207C2CF11E6694	SCM2AEM	Master Two-handed Axe Crafting	a	the	Master Two-handed Axe Crafting		the	Master Two-handed Axe Crafting
+_03FC48F60F95EC28	SCM2SEM	Master Two-handed Sword Crafting	a	the	Master Two-handed Sword Crafting		the	Master Two-handed Sword Crafting
+_B3A5257826ADCD2F	SCR1BEM	Master Bowpistol Crafting	a	the	Master Bowpistol Crafting		the	Master Bowpistol Crafting
+_8A5024B9CA452CC4	SCR1PEM	Master Pistol Crafting	a	the	Master Pistol Crafting		the	Master Pistol Crafting
+_670C8395415CF641	SCR2AEM	Master Autolauncher Crafting	a	the	Master Autolauncher Crafting		the	Master Autolauncher Crafting
+_BB507E9BE0B6C0FF	SCR2BEM	Master Bowrifle Crafting	a	the	Master Bowrifle Crafting		the	Master Bowrifle Crafting
+_386E5E7D63F8BC06	SCR2LEM	Master Launcher Crafting	a	the	Master Launcher Crafting		the	Master Launcher Crafting
+_B9348861C62A37FE	SCR2REM	Master Rifle Crafting	a	the	Master Rifle Crafting		the	Master Rifle Crafting
+_2562F2A1E5A6ECCE	SCMC	Close Combat Weapon Crafting	a	the	Close Combat Weapon Crafting		the	Close Combat Weapon Crafting
+_80C9965548175036	SCMCA	Advanced Magic Amplifier Crafting	a	the	Advanced Magic Amplifier Crafting		the	Advanced Magic Amplifier Crafting
+_7CF7AC665E6FB8A3	SCMCAE	Expert Magic Amplifier Crafting	a	the	Expert Magic Amplifier Crafting		the	Expert Magic Amplifier Crafting
+_5FDB6AB40ED68708	SCMCAEM	Master Magic Amplifier Crafting	a	the	Master Magic Amplifier Crafting		the	Master Magic Amplifier Crafting

@@ -60,6 +60,7 @@ private:
 	static int	getMainPageURL(CLuaState &ls);
 	static int	getCharSlot(CLuaState &ls);
 	static int	displaySystemInfo(CLuaState &ls);
+	static int	displayChatMessage(CLuaState &ls);
 	static int	setWeatherValue(CLuaState &ls); // first value is a boolean to say automatic, second value ranges from of to 1 and gives the weather
 	static int	getWeatherValue(CLuaState &ls); // get current real weather value (blend between server driven value & predicted value). Manual weather value is ignored
 	static int	disableContextHelpForControl(CLuaState &ls);	// params: CCtrlBase*. return: none
@@ -97,7 +98,13 @@ private:
 	static int  getUserRace(CLuaState &ls);
 	static int  getSheet2idx(CLuaState &ls);
 	static int	getTargetSlot(CLuaState &ls);
+	static int	setTargetAsInterlocutor(CLuaState &ls);
+	static int	unsetTargetAsInterlocutor(CLuaState &ls);
 	static int  getSlotDataSetId(CLuaState &ls);
+	//
+	static int	getMaxDynChan(CLuaState &ls);
+	static int	readUserChannels(CLuaState &ls);
+	static int	saveUserChannels(CLuaState &ls); // { name = "pass" }
 
 	// LUA functions exported for Dev only (debug)
 	static int	dumpUI(CLuaState &ls);			// params: CInterfaceElement*.... return: none
@@ -122,8 +129,11 @@ private:
 	static sint32 getDbProp(const std::string &dbProp); // return 0 if not found.
 	static sint64 getDbProp64(const std::string &dbProp); // return 0 if not found.
 	static void	setDbProp(const std::string &dbProp, sint32 value);		// Nb: the db prop is not created if not present.
+	static void	setDbProp64(const std::string &dbProp, sint64 value);		// Nb: the db prop is not created if not present.
 	static void	addDbProp(const std::string &dbProp, sint32 value);		// Nb: the db prop is created if not present.
 	static void	delDbProp(const std::string &dbProp);
+	static void setDbRGBA(const std::string &dbProp, const NLMISC::CRGBA &color); // the db prop is created if not present
+	static std::string getDbRGBA(const std::string &dbProp); // empty string if not found
 
 public:
 	// Print a message in the log.
@@ -177,6 +187,8 @@ private:
 	static bool	isPlayerSlotNewbieLand(uint32 slot);  // test if one of the player slot is a newbieland one, if not so, client must be patched in order to continue
 
 	// GameInfo
+	static ucstring	getSheetLocalizedName(const std::string &sheet);
+	static ucstring	getSheetLocalizedDesc(const std::string &sheet);
 	static sint32 getSkillIdFromName(const std::string &def);
 	static ucstring	getSkillLocalizedName(sint32 skillId);
 	static sint32 getMaxSkillValue(sint32 skillId);
@@ -189,6 +201,7 @@ private:
 	static bool	isDynStringAvailable(sint32 dynStringId);
 	static bool	isFullyPatched();
 	static std::string getSheetType(const std::string &sheet);
+	static std::string getSheetFamily(const std::string &sheet);
 	static std::string getSheetName(uint32 sheetId);
 	static sint32 getFameIndex(const std::string &factionName);
 	static std::string getFameName(sint32 fameIndex);
@@ -198,6 +211,7 @@ private:
 	static std::string getClientCfg(const std::string &varName);
 	static void	sendMsgToServer(const std::string &msgName);
 	static void	sendMsgToServerPvpTag(bool pvpTag);
+	static void	sendMsgToServerAutoPact(bool bval);
 	static void	sendMsgToServerUseItem(sint32 slot);
 	static bool	isGuildQuitAvailable();
 	static void	sortGuildMembers();
@@ -214,7 +228,7 @@ private:
 	static sint getCharacterSheetRegionForce(const std::string &sheet);
 	static sint	getCharacterSheetRegionLevel(const std::string &sheet);
 	static std::string getRegionByAlias(uint32 alias);
-	static sint getGroundZ(uint32 x, sint32 y);
+	static float getGroundZ(float x, float y);
 	static int getGroundAtMouse(CLuaState &ls);
 	static int getMousePos(CLuaState &ls);
 	static int getMouseDown(CLuaState &ls);
@@ -223,6 +237,15 @@ private:
 	static int getShapeIdAt(CLuaState &ls);
 	static int setupShape(CLuaState &ls);
 	static void setMouseCursor(const std::string &texture);
+
+	static int removeLandMarks(CLuaState &ls);
+	static int addLandMark(CLuaState &ls);
+	static int updateUserLandMarks(CLuaState &ls);
+	static int addRespawnPoint(CLuaState &ls);
+	static int delArkPoints(CLuaState &ls);
+	static int setArkPowoOptions(CLuaState &ls);
+	
+
 	// open the window to do a tell to 'player', if 'msg' is not empty, then the message will be sent immediatly
     // else, current command of the chat window will be replaced with tell 'player'
 	static void	tell(const ucstring &player, const ucstring &msg);
@@ -250,6 +273,9 @@ private:
 	static bool	isPlayerInPVPMode();
 	static bool	isTargetInPVPMode();
 
+	// vertical and horizontal scrolling
+	// do not require element to be focused
+	static int scrollElement(CLuaState &ls); // return none (nil if error)
 
 public:
 

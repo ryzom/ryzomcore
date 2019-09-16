@@ -1,0 +1,32 @@
+﻿*HASH_VALUE	powerType	name	ia	da	p	pia	pda	description
+_6DCA609CECF858BE	Taunt	Provocation	une	la	Provocations	des	les	Provoque l'attaque d'une cible ennemie
+_2AB8D88D6969889E	Shielding	Garde	une	la	Garde	des	les	Protège une cible amie proche
+_23E3F07BA6C9808C	SpeedingUp	Accélération	une	l'\d	Accélérations	des	les	Double momentanément la vitesse de déplacement
+_FE6DF5A5685844B3	MeditationLife	Don de vie	un	le	Dons de vie	des	les	Régénère la vie d'une cible amie
+_F0CD8E578A5F7D05	MeditationStamina	Don d'endurance	un	le	Dons d'endurance	des	les	Régénère l'endurance d'une cible amie
+_279839E098D918C1	MeditationSap	Don de sève	un	le	Dons de sève	des	les	Régénère la sève d'une cible amie
+_872EA1EBE6F753A8	ConvertStamina	Endurance transformée	une	la	Endurances transformées	des	les	
+_29D5CF7D27CAE486	ConvertSap	Sève transformée	une	la	Sèves transformées	des	les	
+_29CC88822549147E	Berserk	Fureur sacrée	une	la	Fureurs sacrées	des	les	Augmente les dégâts que vous infligez
+_25797445A52B8007	LifeAura	Aura de vie	une	l'\d	Auras de vie	des	les	Accélère la régénération de la vie des coéquipiers proches
+_9C84C0AA1F379CBA	StaminaAura	Aura d'endurance	une	l'\d	Auras d'endurance	des	les	Accélère la régénération de l'endurance des coéquipiers proches
+_59B6EC98A07774B3	SapAura	Aura de sève	une	l'\d	Auras de sève	des	les	Accélère la régénération de la sève des coéquipiers proches
+_FD34328D8A827302	Umbrella	Bouclier anti-projectile	un	le	Boucliers anti-projectile	des	les	Rend vos coéquipiers et vous-même invulnérables aux attaques à distance.
+_92F0C1BB89BC5683	MeleeProtection	Bouclier de mêlée	un	le	Boucliers de mêlée	des	les	Rend vos coéquipiers et vous-même invulnérables aux attaques de mêlée.
+_86197EEC1899F525	AntiMagicShield	Bouclier anti-magie	un	le	Boucliers anti-magie	des	les	Rend vos coéquipiers et vous-même invulnérables aux attaques de magie.
+_8758671228A5AB28	Invulnerability	Invulnérabilité	une	l'\d	Invulnérabilités	des	les	Rend invulnérable et insensible à toute magie en interdisant toute action
+_29AB5F80EF88004E	FireWall	Bouclier de feu	un	le	Boucliers de feu	des	les	
+_D8C8F48265958CB5	ThornWall	Bouclier d'épines	un	le	Boucliers d'épines	des	les	
+_D7A9E48525959CAC	WaterWall	Bouclier d'eau	un	le	Boucliers d'eau	des	les	
+_F0BE55DDA9AB7D23	LightningWall	Bouclier d'électricité	un	le	Boucliers d'électricité	des	les	
+_1D5ABBA0DE1B6FB4	WarCry	Cri de guerre	un	le	Cris de guerre	des	les	Augmente les dégâts que vous et vos coéquipiers proches infligent
+_ABB88C82DEB650A9	Heal	Soin	un	le	Soins	des	les	Régénère la vie d'une cible amie
+_2305443A60C86CAF	BalanceHp	Équilibrage des vies	un	l'\d	Équilibrages des vies	des	les	Répartit équitablement entre les équipiers le total des points de vie de l'équipe
+_B6604DDCE6C6ACA1	ChgCharac	Amélioration de caractéristique	une	l'\d	Améliorations de caractéristique	des	les	Modifie la valeur d'une caractéristique
+_16F116141048A371	ModMagicProtection	Modificateur de protection	un	le	Modificateurs de protections	des	les	Modifie la valeur de vos protections magiques.
+_3A7CADB6DF38F847	ModDefense	Modificateur de taux de succès de défense	un	le	Modificateurs de taux de succès de défense	des	les	Modifie vos chances de réussite d'action de défense
+_A25E08467860F1F2	ModCraftSuccess	Modificateur de succès d'artisanat	un	le	Modificateurs de succès d'artisanat	des	les	Modifie vos chances de réussite de vos actions d'artisanat
+_24BA6F597234C2DA	ModMeleeSuccess	Modificateur de succès d'action de combat au corps à corps	un	le	Modificateurs de succès d'action de combat au corps à corps	des	les	Modifie vos chances de réussite de vos actions de combat de mêlée
+_8F7EEBA94B68D5F8	ModRangeSuccess	Modificateur de succès d'action de combat à distance	un	le	Modificateurs de succès d'action de combat à distance	des	les	Modifie vos chances de réussite de vos actions de combat à distance
+_9CAFEDAD47AFE1C5	ModMagicSuccess	Modificateur de succès d'action de magie	un	le	Modificateurs de succès d'action de magie	des	les	Modifie vos chances de réussite de vos actions de magie
+_A043E58C54A010EF	ModForageSuccess	Modificateur de succès d'action de forage	un	le	Modificateurs de succès d'action de forage	des	les	Modifie vos chances de réussite de vos actions de forage

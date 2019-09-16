@@ -75,6 +75,15 @@ CItemSheet::CItemSheet()
 {
 	IdShape = 0;
 	IdShapeFemale = 0;
+	IdShapeFyros = 0;
+	IdShapeFyrosFemale = 0;
+	IdShapeMatis = 0;
+	IdShapeMatisFemale = 0;
+	IdShapeTryker = 0;
+	IdShapeTrykerFemale = 0;
+	IdShapeZorai = 0;
+	IdShapeZoraiFemale = 0;
+	
 	MapVariant = 0;
 	ItemType = ITEM_TYPE::UNDEFINED;
 	Family = ITEMFAMILY::UNDEFINED;
@@ -172,6 +181,57 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	if(!item.getValueByName(ShapeFemale, "3d.shape_female"))
 		debug("key '3d.shape_female' not found.");
 	IdShapeFemale = ClientSheetsStrings.add(ShapeFemale);
+
+	// Load the name fyros.
+	string ShapeFyros;
+	if(!item.getValueByName(ShapeFyros, "3d.shape_fyros"))
+		debug("key '3d.shape_fyros' not found.");
+	IdShapeFyros = ClientSheetsStrings.add(ShapeFyros);
+
+	// Load the name fyros .
+	string ShapeFyrosFemale;
+	if(!item.getValueByName(ShapeFyrosFemale, "3d.shape_fyros_female"))
+		debug("key '3d.shape_fyros_female' not found.");
+	IdShapeFyrosFemale = ClientSheetsStrings.add(ShapeFyrosFemale);
+
+	// Load the name matis.
+	string ShapeMatis;
+	if(!item.getValueByName(ShapeMatis, "3d.shape_matis"))
+		debug("key '3d.shape_matis' not found.");
+	IdShapeMatis = ClientSheetsStrings.add(ShapeMatis);
+
+	// Load the name matis .
+	string ShapeMatisFemale;
+	if(!item.getValueByName(ShapeMatisFemale, "3d.shape_matis_female"))
+		debug("key '3d.shape_matis_female' not found.");
+	IdShapeMatisFemale = ClientSheetsStrings.add(ShapeMatisFemale);
+
+
+	// Load the name tryker.
+	string ShapeTryker;
+	if(!item.getValueByName(ShapeTryker, "3d.shape_tryker"))
+		debug("key '3d.shape_tryker' not found.");
+	IdShapeTryker = ClientSheetsStrings.add(ShapeTryker);
+
+	// Load the name tryker .
+	string ShapeTrykerFemale;
+	if(!item.getValueByName(ShapeTrykerFemale, "3d.shape_tryker_female"))
+		debug("key '3d.shape_tryker_female' not found.");
+	IdShapeTrykerFemale = ClientSheetsStrings.add(ShapeTrykerFemale);
+
+
+	// Load the name zorai.
+	string ShapeZorai;
+	if(!item.getValueByName(ShapeZorai, "3d.shape_zorai"))
+		debug("key '3d.shape_zorai' not found.");
+	IdShapeZorai = ClientSheetsStrings.add(ShapeZorai);
+
+	// Load the name zorai .
+	string ShapeZoraiFemale;
+	if(!item.getValueByName(ShapeZoraiFemale, "3d.shape_zorai_female"))
+		debug("key '3d.shape_zorai_female' not found.");
+	IdShapeZoraiFemale = ClientSheetsStrings.add(ShapeZoraiFemale);
+
 
 	// Get the icon associated.
 	string IconMain;
@@ -366,6 +426,11 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	TRANSLATE_VAL( val, "basics.CraftPlan" );
 	if (!val.empty())
 		CraftPlan = CSheetId(val);
+
+	// commands and menu label
+	TRANSLATE_VAL( Scroll.LuaCommand, "basics.Scroll.LuaCommand" );
+	TRANSLATE_VAL( Scroll.WebCommand, "basics.Scroll.WebCommand" );
+	TRANSLATE_VAL( Scroll.Label, "basics.Scroll.Label" );
 
 	// Special according to Family;
 	switch(Family)
@@ -615,6 +680,14 @@ void CItemSheet::serial(NLMISC::IStream &f)
 {
 	ClientSheetsStrings.serial(f, IdShape);
 	ClientSheetsStrings.serial(f, IdShapeFemale);
+	ClientSheetsStrings.serial(f, IdShapeFyros);
+	ClientSheetsStrings.serial(f, IdShapeFyrosFemale);
+	ClientSheetsStrings.serial(f, IdShapeMatis);
+	ClientSheetsStrings.serial(f, IdShapeMatisFemale);
+	ClientSheetsStrings.serial(f, IdShapeTryker);
+	ClientSheetsStrings.serial(f, IdShapeTrykerFemale);
+	ClientSheetsStrings.serial(f, IdShapeZorai);
+	ClientSheetsStrings.serial(f, IdShapeZoraiFemale);
 	f.serial(SlotBF);			// Serialize Slots used.
 	f.serial(MapVariant);		// Serialize Map Variant.
 	f.serialEnum(Family);		// Serialize Family.
@@ -658,6 +731,9 @@ void CItemSheet::serial(NLMISC::IStream &f)
 	// **** Serial Help Infos
 	f.serialEnum(ItemOrigin);
 
+	// item commands
+	f.serial(Scroll);
+
 	// Different Serial according to family
 	switch(Family)
 	{
@@ -697,8 +773,9 @@ void CItemSheet::serial(NLMISC::IStream &f)
 	case ITEMFAMILY::TELEPORT:
 		f.serial(Teleport);
 		break;
+	// keep for readability
 	case ITEMFAMILY::SCROLL:
-		f.serial(Scroll);
+		//f.serial(Scroll);
 		break;
 	case ITEMFAMILY::CONSUMABLE:
 		f.serial(Consumable);

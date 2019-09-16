@@ -1556,6 +1556,8 @@ public:
 		CViewTextMenu *pFree = dynamic_cast<CViewTextMenu*>(pMenu->getView("free"));
 		CViewTextMenu *pEnterStable = dynamic_cast<CViewTextMenu*>(pMenu->getView("enter_stable"));
 		CViewTextMenu *pLeaveStable = dynamic_cast<CViewTextMenu*>(pMenu->getView("leave_stable"));
+		CViewTextMenu *pEnterBag = dynamic_cast<CViewTextMenu*>(pMenu->getView("enter_bag"));
+		CViewTextMenu *pLeaveBag = dynamic_cast<CViewTextMenu*>(pMenu->getView("leave_bag"));
 		CViewTextMenu *pMount = dynamic_cast<CViewTextMenu*>(pMenu->getView("mount"));
 		CViewTextMenu *pUnseat = dynamic_cast<CViewTextMenu*>(pMenu->getView("unseat"));
 
@@ -1582,7 +1584,7 @@ public:
 
 				// Enable menu items
 				testMenuOptionForPackAnimal(selectedAnimalInVision, i, (i==0),
-					pFollow, pStop, pFree, pEnterStable, pLeaveStable, pMount, pUnseat);
+					pFollow, pStop, pFree, pEnterStable, pLeaveStable, pMount, pUnseat, pEnterBag, pLeaveBag);
 			}
 		}
 		else if(selected>=1 && selected<=MAX_INVENTORY_ANIMAL)
@@ -1598,7 +1600,7 @@ public:
 
 			// Enable menu items
 			testMenuOptionForPackAnimal(selectedAnimalInVision, selected-1, true,
-				pFollow, pStop, pFree, pEnterStable, pLeaveStable, pMount, pUnseat);
+				pFollow, pStop, pFree, pEnterStable, pLeaveStable, pMount, pUnseat, pEnterBag, pLeaveBag);
 		}
 	}
 };
@@ -2067,6 +2069,7 @@ class CActionHandlerSetTargetName : public IActionHandler
 			}
 			// Set to target
 			CInterfaceExprValue evUCStr;
+			TargetName = STRING_MANAGER::CStringManagerClient::getLocalizedName(TargetName);
 			evUCStr.setUCString(TargetName);
 			CInterfaceLink::setTargetProperty(sNameTarget, evUCStr);
 			evUCStr.setUCString(TargetTitle);
@@ -2591,7 +2594,7 @@ class CAHAddShape : public IActionHandler
 			}
 
 			sint32 idx;
-			CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector((float)x, (float)y, (float)z), c, u, false, idx);
+			CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector((float)x, (float)y, (float)z), c, u, false, 0, idx);
 			UInstance instance = instref.Instance;
 
 			if(!instance.empty())
@@ -3526,6 +3529,15 @@ class CHandlerGameConfigApply : public IActionHandler
 				}
 			}
 		}
+
+		// save user created channels options
+		CCtrlBaseButton *pCS = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromDefine("game_config_save_channel_cb"));
+		if (pCS)
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SAVE_CHANNEL")->setValue32(pCS->getPushed());
+
+		pCS = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromDefine("game_config_auto_channel_cb"));
+		if (pCS)
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:AUTO_CHANNEL")->setValue32(pCS->getPushed());
 
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_VR_ENABLE_BUTTON));
 		if (pBut) 
@@ -4635,4 +4647,18 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerSortTribeFame, "sort_tribefame");
+
+// ***************************************************************************
+class CHandlerTriggerIconBuffs : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	{
+		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_ICON_BUFFS", false);
+		// no node - show,
+		// node == false - hide
+		CDBCtrlSheet::setShowIconBuffs(!node || node->getValueBool());
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerTriggerIconBuffs, "trigger_show_icon_buffs");
 

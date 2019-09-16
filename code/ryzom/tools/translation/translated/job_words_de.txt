@@ -1,0 +1,33 @@
+﻿*HASH_VALUE	job ID	name	named	* noms français	ia	da	p	pd	pia	pda
+_7B0C6949087BEF17	IreFighter	Berserker	Berserker	guerrier fou 	ein	der	Wutkämpfer	Wutkämpfer		die
+_DA264262C82FA5E4	Swashbuckler	Säbelrassler	Säbelrassler	bretteur	ein	der	Säbelrassler	Säbelrassler		die
+_FF1001FD1B8460C5	KamicFist	Kamische Faust	Kamische Faust	poing kamique	eine	die	Kamische Fäuste	Kamischen Fäuste		die
+_E9959ADC3E303D21	BladeBearer	Klingenträger	Klingenträger	porte lame	ein	der	Klingenträger	Klingenträger		die
+_AF5E35F1250C04D2	WindChild	Kind des Windes	Kind des Windes	enfant des vents	ein	das	Kinder des Windes	Kinder des Windes		die
+_2F47F87A6F381C99	Runner	Läufer	Läufer	courreur	ein	der	Läufer	Läufer		die
+_73AAF09AE4B710A3	Scout	Kundschafter	Kundschafter	éclaireur	ein	der	Kundschafter	Kundschafter		die
+_C66185C2249CA8A6	FireLance	Feuerwerfer	Feuerwerfer	lance-feu	ein	der	Feuerwerfer	Feuerwerfer		die
+_296AE474AB790894	Witherer	Verwelker	Verwelker	fletrisseur	ein	der	Verwelker	Verwelker		die
+_AD68C069ED7714A0	Fouler	Verfauler	Verfauler	pestilent	ein	der	Verfauler	Verfauler		die
+_B290F10227B8C8B3	Disturber	Unruhestifter	Unruhestifter	troubleur d'esprit	ein	der	Unruhestifter	Unruhestifter		die
+_0250C5039B06F5C8	KamicFury	Kamische Furie	Kamische Furie	furie kamique	eine	die	Kamische Furien	Kamischen Furien		die
+_757B279C53FC9BAB	SpiritualShield	Heiliges Schild	Heiliges Schild	bouclier spirituel	ein	das	Heilige Schilde	Heiligen Schilde		die
+_EE4990771C86D494	Faker	Täuscher	Täuscher	trompeur	ein	der	Schwindler	Schwindler		die
+_A045250E026EC63E	WindGuardian	Windwächter	Windwächter	gardien des vents	ein	der	Windwächter	Windwächter		die
+_0B806EC710885A48	KamicGuardian	Kamischer Wächter	Kamische Wächter	bouclier kamique	ein	der	Kamische Wächter	Kamischen Wächter		die
+_C4438A71C41C6642	SecondBreath	Zweiter Atemzug	Zweite Atemzug	second souffle	ein	der	Zweite Atemzüge	Zweiten Atemzüge		die
+_2FE51E469C502DFD	LifeStealer	Lebensdieb	Lebensdieb	voleur de vie	ein	der	Lebensdiebe	Lebensdiebe		die
+_FEBE4D8AEEBD5D18	SecondLife	Zweites Leben	Zweite Leben	seconde vie	ein	das	Zweite Leben	Zweiten Leben		die
+_B7AF21058A5F88E1	SapCristal	Sapkristall	Sapkristall	cristal de sève	ein	der	Sapkristalle	Sapkristalle		die
+_DE48CAEB05734249	ScarletHunter	Scharlachroter Jäger	Scharlachrote Jäger	chasseur écarlate	ein	der	Scharlachroten Jäger	Scharlachroten Jäger		die
+_31D7E2E30551753A	GreenHunter	Grüner Jäger	Grüne Jäger	chasseur vert	ein	der	Grüne Jäger	Grünen Jäger		die
+_06635A6B444DEE4C	ShadowHunter	Schattenjäger	Schattenjäger	chasseur de l'ombre	ein	der	Schattenjäger	Schattenjäger		die
+_99D26A1506D4F24B	AtysGuardian	Atysianischer Wächter	Atysianische Wächter	gardien d'atys	ein	der	Atysianische Wächter	Atysianischen Wächter		die
+_2BB7F7E25BC3D54D	SandCaravanner	Dünen-Karawanenführer	Dünen-Karawanenführer	caravanier des sables	ein	der	Dünen-Karawanenführer	Dünen-Karawanenführer		die
+_7CD608D036D57BF2	ImperialSupplier	Imperialer Lieferant	Imperiale Lieferant	pourvoyeur impérial	ein	der	Imperiale Lieferanten	Imperialen Lieferanten		die
+_6C49C893E6B9849D	Steward	Aufseher	Aufseher	intendants	ein	der	Aufseher	Aufseher		die
+_A8C84C6F6A9710A2	Hawker	Straßenhändler	Straßenhändler	colporteurs	ein	der	Straßenhändler	Straßenhändler		die
+_44BE25E43BDAF009	FireMaster	Feuermeister	Feuermeister	maitre du feu	ein	der	Feuermeister	Feuermeister		die
+_0BF32E6C860E7A26	FlowerMaster	Blumenmeister	Blumenmeister	maitre des fleurs	ein	der	Blumenmeister	Blumenmeister		die
+_802D1DEA3BDAF002	LakeMaster	Seenmeister	Seenmeister	maitre des lacs 	ein	der	Seenmeister	Seenmeister		die
+_348DF50C62FA70BB	SapMaster	Sapmeister	Sapmeister	maitre de la sève	ein	der	Sapmeister	Sapmeister		die

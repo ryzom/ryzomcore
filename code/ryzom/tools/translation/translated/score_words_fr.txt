@@ -1,0 +1,5 @@
+﻿*HASH_VALUE	score_ID	name	point	ia	points
+_BE6C89EE2F599BBE	HitPoints	Vie	Point de vie	un	Points de vie
+_B0DF4A6ECA004C1B	Stamina	Endurance	Point d'endurance	un	Points d'endurance
+_174A57AA672A04AA	Sap	Sève	Point de sève	un	Points de sève
+_DB69E9025629B0BA	Focus	Concentration	Point de concentration	un	Points de concentration

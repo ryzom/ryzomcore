@@ -161,6 +161,7 @@ namespace NLGUI
 		static int luaMethodCall(lua_State *ls);
 		
 		static int	setOnDraw(CLuaState &ls);		// params: CInterfaceGroup*, "script". return: none
+		static int	getOnDraw(CLuaState &ls);		// params: CInterfaceGroup*. return: "script" (nil if none)
 		static int	addOnDbChange(CLuaState &ls);	// params: CInterfaceGroup*, "dblist", "script". return: none
 		static int	removeOnDbChange(CLuaState &ls);// params: CInterfaceGroup*. return: none
 		static int  setCaptureKeyboard(CLuaState &ls);

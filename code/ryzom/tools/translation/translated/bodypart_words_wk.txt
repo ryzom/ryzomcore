@@ -1,0 +1,43 @@
+﻿*HASH_VALUE	bodypartID	name	ia	da	p	pia	pda	description
+_ACB9BC721BA65099	HHead	head	an	the	heads		the	
+_278A7C5D654814CD	HChest	chest	a	the	chests		the	
+_A2D940906B29B889	HArms	arms		the	arms		the	
+_B1CAFC85DB767C9C	HHands	hands		the	hands		the	
+_20A8389BAC987C9F	HLegs	legs		the	legs		the	
+_E18820962C586494	HFeet	feet		the	feet		the	
+_ACB9BC7B1B375099	QHead	head	an	the	heads		the	
+_E80BB4A21A9838B5	QBody	body	a	the	bodies		the	
+_C96F0919D2F8DC71	QFrontPaws	front legs		the	front legs		the	
+_08A1A8FEABC3CD11	QFrontHooves	front legs		the	front legs		the	
+_23B95F02A87957B0	QRearPaws	rear legs		the	rear legs		the	
+_D880990C5BE9DCB7	QRearHooves	rear legs		the	rear legs		the	
+_2836645DDE8874AD	LKHead	head	an	the	heads		the	
+_ED86C05FE298A4B9	LKBody	body	a	the	bodies		the	
+_39BFC0EBE486B512	LKFrontPaws1	front legs		the	front legs		the	
+_79BFC0EBE486B512	LKFrontPaws2	front legs		the	front legs		the	
+_D92BB508D8F884A6	LKRearPaws1	rear legs		the	rear legs		the	
+_D93BB508D8F884A6	LKRearPaws2	rear legs		the	rear legs		the	
+_283664575C8874AD	FKHead	head	an	the	heads		the	
+_ED86C0596098A4B9	FKBody	body	a	the	bodies		the	
+_DBBA7473640310B0	FKPaws1	legs		the	legs		the	
+_1BBA7473641310B0	FKPaws2	legs		the	legs		the	
+_66B6A47A4A7ADCC2	FKWings1	wings		the	wings		the	
+_66B6A47ACA7ADCC2	FKWings2	wings		the	wings		the	
+_ACB9BC701B865099	FHead	head	an	the	heads		the	
+_E80BB4971AE738B5	FBody	body	a	the	bodies		the	
+_C40D15A82A36DF2C	FFrontFins1	front fins		the	front fins		the	
+_C41D15A82A36DF2C	FFrontFins2	front fins		the	front fins		the	
+_67B624EBAAF630A4	FRearFins1	rear fins		the	rear fins		the	
+_67B628EBAAF630A4	FRearFins2	rear fins		the	rear fins		the	
+_ACB9BC6C1B465099	BHead	head	an	the	heads		the	
+_E80BB4931AA738B5	BBody	body	a	the	bodies		the	
+_25897F8F25594780	BFeet1	feet		the	feet		the	
+_2589838F25594B80	BFeet2	feet		the	feet		the	
+_2C68746BA436D3C2	BWings1	wings		the	wings		the	
+_2C68746BA446D7C2	BWings2	wings		the	wings		the	
+_CCD189BCC86AD11B	PUpperTrunk	Upper Trunk	an	the	Upper Trunks		the	
+_F1EA0CAEA90BB4B5	Ptrunk	Trunk	a	the	Trunks		the	
+_60C70C89DC1C7CB6	PLeaves1	Leaf	a	the	Leaves		the	
+_60C70C891C1C7CB6	PLeaves2	Leaf	a	the	Leaves		the	
+_0CAF41BCC86AED1A	PLowerTrunk	Lower Trunk	a	the	Lower Trunks		the	
+_DFA6C25CC7DECDE6	PVisibleRoots	Visible Root	a	the	Visible Roots		the	

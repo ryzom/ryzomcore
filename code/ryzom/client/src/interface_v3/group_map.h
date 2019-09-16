@@ -81,6 +81,27 @@ public:
 	}
 };
 
+class CArkPoint
+{
+public:
+	sint32 				x, y;
+	std::string			Texture;
+	NLMISC::CRGBA		Color;
+	std::string			Title;
+	std::string			LeftClickAction;
+	std::string			LeftClickParam;
+	std::string			RightClickAction;
+	std::string			RightClickParam;
+
+public:
+	CArkPoint()
+	{
+		Color = NLMISC::CRGBA::White;
+		x = 0;
+		y = 0;
+	}
+};
+
 /**
  * Display of map and landmarks.
  *
@@ -100,6 +121,7 @@ public:
 class CGroupMap : public CInterfaceGroup
 {
 public:
+
 	// external element to be displayed on the map
 	struct IDeco
 	{
@@ -198,7 +220,12 @@ public:
 	void				getLandmarkPosition(const CCtrlButton *lm, NLMISC::CVector2f &worldPos);
 
 	//Remove and re-create UserLandMarks
+	void removeUserLandMarks();
 	void updateUserLandMarks();
+	void addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, NLMISC::CRGBA color);
+	void addUserRespawnPoint(const NLMISC::CVector2f &pos);
+	void delArkPoints();
+	
 
 	// set landmarks visibility based text query
 	void setLandmarkFilter(const std::string &s);
@@ -246,6 +273,14 @@ public:
 
 	// Server set all valid respawn points
 	void addRespawnPoints(const CRespawnPointsMsg &rpm);
+
+	// add Ark landscape point
+	void addArkPoint(const CArkPoint &point);
+
+	std::string getArkPowoMode() const { return _ArkPowoMode; }
+	void setArkPowoMode(const std::string &mode)  { _ArkPowoMode = mode; }
+	std::string getArkPowoMapMenu() const { return _ArkPowoMapMenu; }
+	void setArkPowoMapMenu(const std::string &menu)  { _ArkPowoMapMenu = menu; }
 
 	bool isInDeathMode() { return _MapMode == MapMode_Death; }
 
@@ -401,6 +436,8 @@ private:
 		sint32				_MapW;
 		sint32				_MapH;
 
+		std::string			_ArkPowoMode;
+		std::string			_ArkPowoMapMenu;
 		NLMISC::CRGBA		_FrustumViewColor;
 		NLMISC::CRGBA		_FrustumViewColorOver;
 		float				_FrustumOverBlendFactor;
@@ -507,6 +544,7 @@ private:
 		};
 
 		TMapMode			_MapMode;
+		std::vector<CArkPoint> _ArkPoints;
 		CLandMarkOptions	_RespawnLMOptions;
 		// landmark for respawn
 		TLandMarkButtonVect	_RespawnLM;
@@ -548,6 +586,9 @@ private:
 	void addLandMark(TLandMarkButtonVect &destList, const NLMISC::CVector2f &pos, const ucstring &title, const CLandMarkOptions &options);
 	// Create a landmark button, but do not add it to this group
 	CLandMarkButton *createLandMarkButton(const CLandMarkOptions &options);
+	// Create a Ark landmark button, but do not add it to this group
+	CLandMarkButton *createArkPointButton(const CArkPoint &point);
+	
 	// update a landmark button
 	void updateLandMarkButton(CLandMarkButton *lmb, const CLandMarkOptions &options);
 

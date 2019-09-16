@@ -1,0 +1,43 @@
+﻿bodypartID	name	ia	da	p	pia	pda	description
+HHead	head	an	the	heads		the	
+HChest	chest	a	the	chests		the	
+HArms	arms		the	arms		the	
+HHands	hands		the	hands		the	
+HLegs	legs		the	legs		the	
+HFeet	feet		the	feet		the	
+QHead	head	an	the	heads		the	
+QBody	body	a	the	bodies		the	
+QFrontPaws	front legs		the	front legs		the	
+QFrontHooves	front legs		the	front legs		the	
+QRearPaws	rear legs		the	rear legs		the	
+QRearHooves	rear legs		the	rear legs		the	
+LKHead	head	an	the	heads		the	
+LKBody	body	a	the	bodies		the	
+LKFrontPaws1	front legs		the	front legs		the	
+LKFrontPaws2	front legs		the	front legs		the
+LKRearPaws1	rear legs		the	rear legs		the
+LKRearPaws2	rear legs		the	rear legs		the
+FKHead	head	an	the	heads		the
+FKBody	body	a	the	bodies		the
+FKPaws1	legs		the	legs		the
+FKPaws2	legs		the	legs		the
+FKWings1	wings		the	wings		the
+FKWings2	wings		the	wings		the
+FHead	head	an	the	heads		the
+FBody	body	a	the	bodies		the
+FFrontFins1	front fins		the	front fins		the
+FFrontFins2	front fins		the	front fins		the
+FRearFins1	rear fins		the	rear fins		the
+FRearFins2	rear fins		the	rear fins		the
+BHead	head	an	the	heads		the
+BBody	body	a	the	bodies		the
+BFeet1	feet		the	feet		the
+BFeet2	feet		the	feet		the
+BWings1	wings		the	wings		the
+BWings2	wings		the	wings		the
+PUpperTrunk	upper trunk		the	upper trunks		the
+Ptrunk	trunk		the	trunks		the
+PLeaves1	leaves		the	leaves		the
+PLeaves2	leaves		the	leaves		the
+PLowerTrunk	lower trunk		the	lower trunks		the
+PVisibleRoots	visible roots		the	visible roots		the

@@ -1,0 +1,819 @@
+﻿*HASH_VALUE	placeId	name	placegen	placeaccus	placedat
+_84AF650B260BB428	region_majesticgarden	Сады Величия	Садов Величия		
+_06FE551623FBAC21	region_fleetinggarden	Ускользающий сад	Ускользающего сада		
+_DA073675680D99DC	region_groveofconfusion	Роща Смятения	Рощи Смятения		
+_A09DD42F2967E0BB	region_hiddensource	Потаенный источник	Потаенного источника		
+_86EA9D32C2EBD02C	region_knollofdissent	Холмы раскола	Холмов раскола		
+_2E78B8C666F71C56	region_upperbog	Верхняя Топь	Верхней Топи		
+_781E713068D7F0FB	region_hereticshovel	Логово Еретика	Логова Еретика		
+_67C874A86C3B68AB	place_yrkanis	Ирканис	Ирканиса		
+_A2D868B962D67093	place_davae	Дэвей	Дэвея		
+_A4D890B762166893	place_natae	Нэтей	Нэтея		
+_9DA990A8E9461CB1	place_arena	Арена	Арены		
+_A3688C9568B89C81	place_avalae	Эвелей	Эвелея		
+_E778A80664D6FCBF	continent_matis	Цветущие выси	Цветущих высей		
+_2BB98CB6EA59EC44	region_nland	Леса матисов	Леса матисов		
+_209AF856EBF9ACA9	matis_nland	Земли матисов	Земель матисов		
+_68F9D8B02CD88085	place_stalli	Сталли	Сталли		
+_D0588CC466F88CA8	place_borea	Борея	Борея		
+_68EAACBAA857347D	place_nistia	Нистия	Нистия		
+_E89984B1E9F91CB7	place_rosilio	Росилио	Росилио		
+_5658D4A26878049C	place_miani	Миани	Миани		
+_2A4800B92E49C494	region_nexus	Нексус	Нексуса		
+_6C6AE4AB64195066	continent_nexus	Плато Нексус	Плато Нексус		
+_0C3E4110AAC8E5CE	region_the_under_spring	Подземный источник	Подземного источника		
+_AC9958BA21141CAA	continent_sources	Подземный источник	Подземного источника		
+_BF8B0179CCDBB515	region_the_abyss_of_ichor	Кровоточащая бездна	Кровоточащей бездны		
+_2CC9AC824C980062	continent_bagne	Кровоточащая бездна	Кровоточащей бездны		
+_0D640EA59E955242	region_the_land_of_continuty	Земли непрерывности	Земель непрерывности		
+_847D252FF0766478	region_the_sunken_city	Погребенный город	Погребенного города		
+_466E5E377D0F1D1F	region_forbidden_depths	Запретные Глубины	Запретных Глубин		
+_28FAD8ABA678C4AA	continent_terre	Пустоземье	Пустоземья		
+_258341053327A09E	region_the_windy_gate	Врата Ветров	Врат Ветров		
+_18061244372D7DE5	region_gate_of_obscurity	Врата Туманности	Врат Туманности		
+_DBC5896C810F9A3A	region_the_trench_of_trials	Ров Испытаний	Ров Испытаний		
+_451C824CC930C922	region_the_elusive_forest	Эфемерный лес	Эфемерного леса		
+_09D065F4E6EEE1C5	continent_route_gouffre	Земля Теней	Земли Теней		
+_1F24195BC5E95297	region_citiesofintuition	Города Провидцев	Города Провидцев		
+_E6B7ECCEEBB97CBC	region_maidengrove	Роща Дев	Рощи Дев	Рощу Дев	Роще Дев
+_09A0641C6CBAADAE	region_havenofpurity	Прибежище Благочестия	Прибежища Благочестия		
+_E5DFA9C729D9C4A5	region_groveofumbra	Роща Мрака	Рощи Мрака		
+_8241441EC40D59B7	region_knotofdementia	Узел Безумия	Узла Безумия		
+_260A78AC6E06B4B1	region_thevoid	Великая Пустота	Великой Пустоты		
+_E238809D26EB70C1	place_zora	Зора	Зоры	Зору	
+_8498DC7024D8D4AC	place_jen_lai	Джен-Лаи	Джен-Лаи		
+_27A8B870E7B8E0B2	place_min_cho	Мин-Хо	Мин-Хо		
+_A858B86BC8C8CCAD	place_hoi_cho	Хоа-Шо	Хоа-Шо		
+_AA99DCB366B8A0B0	continent_zorai	Земли Увядания	Земель Увядания		
+_E44B30630AD884AB	zorai_nland	Земли Зораи	Земель Зораи		
+_A57970968F804C83	place_qai_lo	Квай-Ло	Квай-Ло		
+_63783BADA4A74CAE	place_men_xing	Нен-Ксинг	Нен-Ксинг		
+_8E58B09BEAC998A6	place_sheng_wo	Шенг-Уо	Шенг-Уо		
+_ABCA145E0B69D8AC	place_koi_zun	Кои-Зан	Кои-Зан		
+_1E3598B7E38A3894	place_yin_piang	Йин-Панг	Йин-Панг		
+_077F812B671904A6	region_imperialdunes	Имперские дюны	Имперских дюн		
+_B9EF3D22E9E614FA	region_oflovaksoasis	Оазис Офловака	Оазиса Офловака		
+_DE4B79286F6720AC	region_sawdustmines	Древесная шахта	Древесной шахты		
+_1ECE042FAA98A4CA	region_frahartowers	Башни фрахаров	Башни фрахаров		
+_6C6F6D126C67609C	region_thesavagedunes	Дикие дюны	Диких дюн		
+_E468393398488CC4	region_dunesofexil	Дюны Изгнания	Дюн Изгнания		
+_DDAC444B69C7FCC9	region_outlawcanyon	Каньон Беззакония	Каньона Беззакония		
+_D241D277C41E7296	region_thescorchedcorridor	Выжженный коридор	Выжженного коридора		
+_AACA20B730BBECAC	place_pyr	Пайр	Пайра		
+_AB69ECB8E7387889	place_thesos	Фессос	Фессоса		
+_D2F8DCC4F2788CBC	place_dyron	Дайрон	Дайрона		
+_7188D0B19515E4BD	continent_fyros	Пылающая Пустыня	Пылающей Пустыни		
+_CB801D2A284B2C1F	continent_fyros_newbie	Пылающая Пустыня	Пылающей Пустыни		
+_E50A584FEB59BCBF	fyros_nland	Земли файросов	Земель файросов		
+_509A0CAE6ADA3494	place_aegus	Аэгус	Аэгуса		
+_E969A4AFE2164880	place_kaemon	Каэмон	Каэмона		
+_A94AC4AF650A38B8	place_sekovix	Сековикс	Сековикса		
+_ACAAECC829F96485	place_phyxon	Фиксон	Фиксона		
+_69B978A6A878E0B4	place_galemus	Галэмус	Галэмуса		
+_A8543324AA29C8B0	region_libertylake	Озеро Свободы	Озера Свободы		
+_A314F0B0E1C9D4B5	region_dewdrops	Капли Росы	Капель Росы		
+_1D3C352DEA09F4A3	region_restingwater	Воды Покоя	Вод Покоя		
+_E33311255F58B0C1	region_windsofmuse	Ветра Муз	Ветров Муз		
+_2D589CAE64D990C6	region_thefount	Родник	Родника		
+_FDFBBD1DA5D884F4	region_bountybeaches	Отмели Изобилия	Отмелей Изобилия		
+_7E503D166815C3EB	region_enchantedisle	Зачарованный Остров	Зачарованного Острова		
+_C5A069FAEEED45BF	region_lagoonsofloria	Лагуны Лории	Лагун Лории		
+_22D9D0AADC0868A1	place_fairhaven	Фэрхевен	Фэрхевена		
+_5FF8B09BF087809E	place_avendale	Эвендейл	Эвендейла		
+_27FBF898E778249C	place_crystabell	Кристабелл	Кристабелла		
+_A859B09A26F96898	place_windermeer	Виндермеер	Виндермеера		
+_6F69648D2EB673C3	continent_tryker	Эден Аквеос	Эден Аквеоса		
+_0D304100E4191064	continent_tryker_newbie	Эден Аквеос	Эден Аквеоса		
+_9E05E8A9EA390CA0	tryker_nland	Земли трайкеров	Земель трайкеров		
+_A76ABC87ABA994A7	place_aubermouth	Обермаут	Обермаута		
+_61F898B5A578649F	place_barkdell	Баркделл	Баркделла		
+_E518F895AE3704A5	place_hobwelly	Хобвэлли	Хобвэлли		
+_E9BA68BD245A74BA	place_waverton	Уэвертон	Уэвертона		
+_2468B8B7606888A3	place_dingleton	Динглтон	Динглтона		
+_AC96B090543870A0	guild_hall	Зал Гильдии 	Зала Гильдии 		
+_5F15D0B167CA0CA4	guild_council	Совет Гильдии	Совета Гильдии		
+_F13D701523F59873	guild_RM_fight	Инструктор ведения боя гильдии	Инструктора ведения боя гильдии		
+_F1BD8C0463F5347B	guild_RM_magic	Инструктор по магии гильдии	Инструктора по магии гильдии		
+_077EC9E0BDABE324	guild_RM_harvest	Инструктор по добыче ресурсов гильдии	Инструктора по добыче ресурсов гильдии		
+_70CE6415A295BC6E	guild_RM_craft	Инструктор по ремеслам гильдии	Инструктора по ремеслам гильдии		
+_A5D7AFB6E6FA98B9	player_room	Апартаменты игрока	Апартаментов игрока		
+_B187F8BAA67AEC8E	exit	Выход	Выхода		
+_21A51698B819D00D	place_lieudit_majesticgarden_1	Холмы Псикопл 	Холмов Псикопл 		
+_F2205186FD3C18E2	place_lieudit_majesticgarden_2	Арена матисов	Арены матисов		
+_4356FA692CB82013	place_lieudit_majesticgarden_3	Тропа Чародеев	Тропы Чародеев		
+_F7FB517E408C240F	place_lieudit_fleetinggarden_1	Круг Ками	Круга Ками		
+_C33E2C11E73D3815	place_lieudit_fleetinggarden_2	Сокровищница	Сокровищницы		
+_C0EF2C93C23D7CC6	place_lieudit_fleetinggarden_3	Логово ярости	Логова ярости		
+_811E2C11C0CD0C19	place_lieudit_fleetinggarden_4	Возвышение	Возвышения		
+_45B4427C36BD0CBE	place_lieudit_knollofdissent_1	Тоннель страданий	Тоннеля страданий		
+_1DA3059149CDC178	place_lieudit_knollofdissent_2	Ущелье Бегущего холма	Ущелья Бегущего холма		
+_1AA4E193859DFC89	place_lieudit_knollofdissent_3	Дороги у Башенного Моста	Дороги у Башенного Моста		
+_1620069204445D27	place_lieudit_knollofdissent_4	Холм Тропы Торбаков	Холма Тропы Торбаков		
+_C59E1288C70BDF05	place_lieudit_knollofdissent_5	Убийственное дерево	Убийственного дерева		
+_83965695071BE30C	place_lieudit_knollofdissent_6	Разбитая гора	Разбитой горы		
+_3D5FF1AB5AEA211B	place_lieudit_upperbog_1	Пруды Фенкумба	Прудов Фенкумба		
+_427F45D10A8850B1	place_lieudit_upperbog_2	Трясина Испуга	Трясины Испуга		
+_41A6096B7658B814	place_lieudit_upperbog_3	Топи Демона	Топей Демона		
+_C3A025E58B8850B1	place_lieudit_upperbog_4	Изнуряющий перевал	Изнуряющего перевала		
+_FCB5018BC8EF498D	place_lieudit_hereticshovel_1	Лабиринт Фей	Лабиринта Фей		
+_FE06168AC58D54D5	place_lieudit_hereticshovel_2	Мерзлое болото	Мерзлого болота		
+_F78692029E74E044	place_lieudit_hereticshovel_3	Водопады двух Тотемов	Водопадов двух Тотемов		
+_7F6B9529445E65DC	place_lieudit_hereticshovel_4	Равнина причуд	Равнины причуд		
+_6C8FE6698AD03107	place_lieudit_hiddensource_1	Малая гора	Малой горы		
+_B13D327144E075C2	place_lieudit_hiddensource_2	Водопад Виргиния	Водопада Виргиния		
+_6AA9510AAABF6D01	place_lieudit_hiddensource_3	Врата Тайлини	Врат Тайлини		
+_82AF095C7A1D0915	place_lieudit_groveofconfusion_1	Маллгроув	Маллгроува		
+_DC943954BA1D9E89	place_lieudit_groveofconfusion_2	Врата Восточной рощи	Врат Восточной рощи		
+_DC944966FA1D9E89	place_lieudit_groveofconfusion_3	Врата Западной рощи	Врат Западной рощи		
+_815FD9573B1D0915	place_lieudit_groveofconfusion_4	Верхняя роща	Верхней рощи		
+_21E51E4FFB7A0190	place_lieudit_citiesofintuition_1	Недвижные воды	Недвижных вод		
+_2365BA52FA7A3524	place_lieudit_citiesofintuition_2	Замшелый откос	Замшелого откоса		
+_22B4277C9955D68A	place_lieudit_citiesofintuition_3	Водопой Мектубов	Водопоя Мектубов		
+_22A5BA372EAEF598	place_lieudit_citiesofintuition_4	Загадочный водопад	Загадочного водопада		
+_FC8B19F957685906	place_lieudit_maidengrove_1	Долина Пальм	Долины Пальм		
+_FBDA1411A8D8F90F	place_lieudit_maidengrove_2	Девственный Пруд	Девственного Пруда		
+_3D3C3511A8F9191F	place_lieudit_maidengrove_3	Холм Словини	Холм Словини		
+_71F73111A9AE4D10	place_lieudit_maidengrove_4	Озеро Птицеловов	Озера Птицеловов		
+_9652EEE308C47E8C	place_lieudit_maidengrove_5	Тоннель Великой глыбы	Тоннель Великой глыбы		
+_D9167A8A842FF9FE	place_lieudit_havenofpurity_1	Гора Бигхорн	Горы Бигхорн		
+_3C9FD1282AFA69DC	place_lieudit_havenofpurity_2	Затхлое озеро	Затхлого озера		
+_802F8D7FC160ED92	place_lieudit_havenofpurity_3	Арка Кинчеров	Арки Кинчеров		
+_B67B641BE71925F6	place_lieudit_groveofumbra_1	Мыс Киппи	Мыса Киппи		
+_F25D690296A98092	place_lieudit_groveofumbra_2	Озеро Коварства	Озера Коварства		
+_37BDC190BF7F8DB4	place_lieudit_groveofumbra_3	Подземный свод	Подземного свода		
+_33FD5A7E83A0C1B6	place_lieudit_groveofumbra_4	Заброшенный Кладезь 	Заброшенного Кладезя		
+_57A37D6670946562	place_lieudit_knotofdementia_1	Великая Целина	Великой Целины		
+_400FBD907F8C280F	place_lieudit_knotofdementia_2	Пустынный кладезь	Пустынного кладезя		
+_7ECECD136BAE180B	place_lieudit_knotofdementia_3	Стэйнмур	Стэйнмура		
+_D715525A73AE1C0B	place_lieudit_knotofdementia_4	Врата Стэйнмура	Врат Стэйнмура		
+_57C48A86FAD8897D	place_lieudit_knotofdementia_5	Непроходимое Нагорье	Непроходимого Нагорья		
+_7C2EBD2229D61808	place_lieudit_knotofdementia_6	Хоупделл	Хоупделла		
+_C2AF75BBA506F90F	place_lieudit_thevoid_1	Бездонный Кладезь	Бездонного Кладезя		
+_BA1A79F891772911	place_lieudit_thevoid_2	Затерянная долина	Затерянной долины		
+_6F1FDD14D842A11A	place_lieudit_thevoid_3	Мыс Отчаяния	Мыса Отчаяния		
+_07A7068C7EF16649	place_lieudit_imperialdunes_1	Долина Императоров	Долины Императоров		
+_C1D08D256F98C4DF	place_lieudit_imperialdunes_2	Четырепутье	Четырепутья		
+_6BA06D2C89EF3DBD	place_lieudit_imperialdunes_3	Горловина Каньона	Горловины Каньона		
+_F5FCB51D270F9DDE	place_lieudit_oflovaksoasis_1	Разлом Оазиса	Разлома Оазиса		
+_FD50A990410EF596	place_lieudit_oflovaksoasis_2	Холм Клопперов	Холм Клопперов		
+_3B107D246448FCEA	place_lieudit_oflovaksoasis_3	Средигорье	Средигорье		
+_7C51851FE7C8B5E4	place_lieudit_oflovaksoasis_4	Корковражье	Корковражья		
+_32C47DF47ABCDAB2	place_lieudit_oflovaksoasis_5	Путь в пылающий лес	Пути в пылающий лес		
+_77DF690855E95006	place_lieudit_sawdustmines_1	Пустошь	Пустоши		
+_73EE8923670921FA	place_lieudit_sawdustmines_2	Вышние Хребты	Вышних Хребтов		
+_EBAAAD160310ED04	place_lieudit_sawdustmines_3	Дюны Короедов	Дюн Короедов		
+_AFAAC51FAB10010C	place_lieudit_sawdustmines_4	Возвышение Варинксов	Возвышения Варинксов		
+_74FE5E78C79FD5C1	place_lieudit_sawdustmines_5	Неспокойные воды	Неспокойных вод		
+_733DB18E849FB5B9	place_lieudit_frahartowers_1	Страда Одиночества	Страды Одиночества		
+_D0D5325F73806DC1	place_lieudit_frahartowers_2	Широкие просторы	Широких просторов		
+_F3DEB11C69192907	place_lieudit_frahartowers_3	Высокие Башни	Высоких Башен		
+_863C8C1769CDF80B	place_lieudit_thesavagedunes_1	Пепельная Пасть	Пепельной Пасти		
+_6334927D43AFACB9	place_lieudit_thesavagedunes_2	Источники Фессоса	Источников Фессоса		
+_62E45E80C23E0927	place_lieudit_thesavagedunes_3	Заводи Фессоса	Заводей Фессоса		
+_B34EDD89417EECEB	place_lieudit_thesavagedunes_4	Южная Гряда	Южной Гряды		
+_9CC0A680C2BE4D28	place_lieudit_thesavagedunes_5	Водопад Фессоса	Водопада Фессоса		
+_85E48680021CEFFA	place_lieudit_thesavagedunes_6	Равнина Кипакки	Равнины Кипакки		
+_B30C301DECBA25EF	place_lieudit_dunesofexile_1	Холм Дайрона	Холма Дайрона		
+_75FA698A44BFA9A3	place_lieudit_dunesofexile_2	Хвост Дракона	Хвоста Дракона		
+_D9CF691E6C59148C	place_lieudit_dunesofexile_3	Мальмонт	Мальмонт		
+_B334ED95881F99B1	place_lieudit_dunesofexile_4	Руины Моссока	Руин Моссока		
+_37D93E9548BF95A0	place_lieudit_outlawcanyon_1	Драконий Хребет	Драконьего Хребта		
+_11248A9B80DAE5E9	place_lieudit_outlawcanyon_2	 Сверкающая Отмель	Сверкающей Отмели		
+_BF760B0661161AE9	place_lieudit_outlawcanyon_3	Глотка Дракона 	Глотки Дракона 		
+_CB9DFAF2DE057A98	place_lieudit_thescorchedcorridor_1	Пылающая Чаща	Пылающей Чащи		
+_962FDD8843B7AE93	place_lieudit_thescorchedcorridor_2	Обиталище Варинксов	Обиталища Варинксов		
+_B105AAE5D4025E8F	place_lieudit_thescorchedcorridor_3	Тайный Оазис Ками	Тайного Оазиса Ками		
+_60BD550BE95874B3	place_lieudit_libertylake_1	Даркмур	Даркмура		
+_BB6C650529F858B3	place_lieudit_libertylake_2	Озерная отмель	Озерной отмели		
+_38FD1D1368D83030	place_lieudit_libertylake_3	Черноводье	Черноводья		
+_BDDA1421AA01151E	place_lieudit_windsofmuse_1	Пещеры Ведьм	Пещер Ведьм 		
+_38FDAE6AF0AEFC1C	place_lieudit_windsofmuse_2	Озеро Муз	Озера Муз		
+_1332FA82C18C8136	place_lieudit_windsofmuse_3	Гора Долгого Сна	Горы Долгого Сна		
+_40ECF1C8EEDA68A8	place_lieudit_windsofmuse_4	Дорога Ветров	Дороги Ветров		
+_042EF59E1EC81D18	place_lieudit_thefount_1	Роковая Равнина	Роковой Равнины		
+_2A2F69F2DB074BBB	place_lieudit_thefount_2	Террасы Родника	Террасы Родника		
+_2AA971EB98C64BBB	place_lieudit_thefount_3	Озеро Родника	Озера Родника		
+_ACA9A9F25B187CAF	place_lieudit_thefount_4	Южные Озера	Южных Озер		
+_B0B55E30E4FF39FC	place_lieudit_thefount_5	Колонны Предела Раздумий	Колонн Предела Раздумий		
+_6F90EA75021FA1BF	place_lieudit_bountybeaches_1	Равнина Торбаков	Равнин Торбаков		
+_830F548A033F41DF	place_lieudit_bountybeaches_2	Ключи Кьют	Ключей Кьют		
+_6054D4F19ED5FA49	place_lieudit_bountybeaches_3	Плетение Кьют	Плетения Кьют		
+_23377A7CC2AEDD8F	place_lieudit_bountybeaches_4	Врата Свободы	Врат Свободы		
+_421F54206779ADE0	place_lieudit_bountybeaches_5	Пики Близнецы	Пик Близнецов		
+_0026ED8F42DF2591	place_lieudit_bountybeaches_6	Разлом Противостояния	Разлома Противостояния		
+_B8CABD1B47AE65E3	place_lieudit_enchantedisle_1	Острые Пики	Острых Пик		
+_B7CABD85846E35E0	place_lieudit_enchantedisle_2	Лагуна Бэйли	Лагуны Бэйли		
+_D9546930447E9505	place_lieudit_enchantedisle_3	Зловещая Трясина	Зловещей Трясины		
+_FC151E827C8B3DF3	place_lieudit_enchantedisle_4	Кладбищенская тропа	Кладбищенской тропы		
+_DCE4267C50D0064C	place_lieudit_enchantedisle_5	Зачарованный круг	Зачарованного круга		
+_2D7FDD83038D38F2	place_lieudit_lagoonsofloria_1	Теснина Ветров	Теснины Ветров		
+_F9115E7FC10C4020	place_lieudit_lagoonsofloria_2	Озеро Верхнее	Озера Верхнего		
+_37EAAD1E2ACC341A	place_lieudit_lagoonsofloria_3	Нора Тссс!	Норы Тссс!		
+_88470A6FBBCBE815	place_lieudit_the_windy_gate_1	Руины Лероны	Руин Лероны		
+_8907026EB4A0A57E	place_lieudit_the_windy_gate_2	Залы Темного Кольца	Залов Темного Кольца		
+_96A55926003F0877	place_lieudit_the_windy_gate_3	Падшее Дерево	Падшего Дерево		
+_1B77D652AD6FE574	place_lieudit_the_windy_gate_4	Колонна Ветряных Врат	Колонны Ветряных Врат		
+_A3049E4AB61D1E9E	place_lieudit_gateofobscurity_1	Утес проулков	Утеса проулков		
+_F06E818C757C9509	place_lieudit_gateofobscurity_2	Высокие Мезолиты	Высоких Мезолитов		
+_426EC12D9DDDB12D	place_lieudit_gateofobscurity_3	Малохолмье	Малохолмья		
+_419EAD8BB60CDD2F	place_lieudit_gateofobscurity_4	Даркенвелл	Даркенвелла		
+_A489686D2848EC6D	place_lieudit_nexus_1	Конха	Конхи		
+_6779912FE004D832	place_lieudit_nexus_2	Роковой Предел	Рокового Предела		
+_11BAF02D2988C054	place_lieudit_nexus_3	Холмы Молота	Холмов Молота		
+_FDBDF4DB65E891ED	place_lieudit_nexus_4	Покинутый лагерь	Покинутого лагеря		
+_CFD396CEE116EE90	place_lieudit_the_abyss_of_ichor_1	Священная Гора	Священной Горы		
+_99B2C1288291D288	place_lieudit_the_abyss_of_ichor_2	Вахта Текущего Сэпа	Вахты Текущего Сэпа		
+_D8A2256C40002922	place_lieudit_the_abyss_of_ichor_3	Храм Обреченных	Храма Обреченных		
+_49630D6A9E56C263	place_lieudit_the_trench_of_trials_1	Долина Ужаса	Долины Ужаса		
+_CEF4566CC09F1170	place_lieudit_the_trench_of_trials_2	Роща Йелков	Рощи Йелков		
+_C2007270C1CFCE73	place_lieudit_the_trench_of_trials_3	Мрачный Предел	Мрачного Предела		
+_9BE1C4646723A693	place_lieudit_the_elusive_forest_1	Земли Изобилия	Земель Изобилия		
+_829CF96A8751FD27	place_lieudit_the_elusive_forest_2	Хайвелл	Хайвелла		
+_CBB3096D0B57AE7B	place_lieudit_the_elusive_forest_3	Горе Подлесное	Горя Подлесного		
+_A0A2911E09212DA2	place_lieudit_the_elusive_forest_4	Сквозной Грот	Сквозного Грота		
+_9BDBDEB34A32BE9F	place_lieudit_the_elusive_forest_5	Проход Трех Тотемов	Прохода Трех Тотемов		
+_78D96E6B9117D206	place_lieudit_the_elusive_forest_6	Проход Гигантских Грибов	Прохода Гигантских Грибов		
+_5BE67A11F07FF584	place_lieudit_the_under_spring_1	Яма Мертводрева	Ямы Мертводрева		
+_2FE14968B350B1F8	place_lieudit_the_under_spring_2	Болото сэпа	Болота сэпа		
+_9D481E4A1F7FD286	place_lieudit_the_under_spring_3	Потаенные Воды	Потаенных Вод		
+_2097EA1FF11F4182	place_lieudit_the_under_spring_4	Руины Трайда	Руин Трайда		
+_5A269A2071868E83	place_lieudit_the_under_spring_5	Луг Стрелков	Луга Стрелков		
+_241D67F3180FB983	place_lieudit_the_land_of_continuity_1	Крылья Досады	Крыльев Досады		
+_26DC67507B395681	place_lieudit_the_land_of_continuity_2	Великие Грибные Леса 	Великих Грибных Лесов		
+_BDE9B29A1D19BEEB	place_lieudit_the_land_of_continuity_3	Проклятая Пещера	Проклятой Пещеры		
+_9EE6F6EFA1228934	place_lieudit_the_land_of_continuity_4	Тропа Грота	Тропы Грота		
+_21B5D3E79E627134	place_lieudit_the_land_of_continuity_5	Срединное Место	Срединного Места		
+_A0E5FA5B3678B92B	place_lieudit_the_sunken_city_1	Большое озеро сэп	Большого озера сэп		
+_22852E69F288B525	place_lieudit_the_sunken_city_2	Ущелье Призраков	Ущелья Призраков		
+_8FD6CEF654E02984	place_lieudit_the_sunken_city_3	Долина Драконова Рога	Долины Драконова Рога		
+_20363A5BAA09827D	place_lieudit_forbidden_depths_1	Проклятый Тупик	Проклятого Тупика		
+_26AB4F40D6DADF32	place_lieudit_forbidden_depths_2	Зал Горной Погибели	Зала Горной Погибели 		
+_43D6BE3BE03EF813	place_lieudit_forbidden_depths_3	Ложбина Демона	Ложбины Демона		
+_9BE5261797F0E5B6	place_outpost_matis_15	Торговая застава Холмы Псикоплы 	Торговой заставы Холмы Псикоплы 		
+_9E955D2DB01E08E0	place_outpost_matis_05	Пограничная застава На Возвышенности	Пограничной заставы На Возвышенности		
+_FDDF8294734D1FCF	place_outpost_matis_06	Юго-Восточная торговая застава	Юго-Восточная торговой заставы		
+_276F7127A032A330	place_outpost_matis_07	Ферма Первооткрывателей	Фермы Первооткрывателей		
+_AF8F913A2B389760	place_outpost_matis_08	Мастерская Сокровищницы	Мастерской Сокровищницы		
+_0CDFF97A30EC4CD9	place_outpost_matis_09	Магический Полюс Ками	Магического Полюса Ками		
+_DDF39152C9DD0457	place_outpost_matis_16	Застава Бегущего Холма	Заставы Бегущего Холма		
+_AFD0653A6A689361	place_outpost_matis_17	Мастерская Вуки	Мастерской Вуки		
+_1551FEAC447A2346	place_outpost_matis_18	Форт Врата Засухи	Форта Врат Засухи		
+_4F00F10722E4CD49	place_outpost_matis_19	Исследовательский центр Бегущего Холма	Исследовательского центра Бегущего Холма		
+_80FF6D9502E9F4D8	place_outpost_matis_20	Форт Ржавого Утеса	Форта Ржавого Утеса		
+_BDBD2036ABA7949D	place_outpost_matis_21	Фирма Холма Торбаков	Фермы Холма Торбаков		
+_08C716A9C5FCFFD0	place_outpost_matis_22	Мастерская Разбитой горы	Мастерской Разбитой горы		
+_ECD1753646FCCBBF	place_outpost_matis_23	Ферма Разбитой Горы	Фермы Разбитой Горы		
+_C2610B10DA12A018	place_outpost_matis_01	Исследовательский центр Изнуряющего Перевала	Исследовательского центра Изнуряющего Перевала		
+_FD4F81286E8EC098	place_outpost_matis_02	Форт Сталия	Форта Сталия		
+_B7DB991E9F080FD1	place_outpost_matis_03	Ферма Болото Страха	Фермы Болото Страха		
+_42EF6D35E33910DE	place_outpost_matis_04	Мастерская у Фенкумба	Мастерской у Фенкумба		
+_585666AC47FB5008	place_outpost_matis_28	Мастерская у Малой Горы	Мастерской у Малой Горы		
+_170576ACA2815001	place_outpost_matis_29	Форт у Малой Горы	Форта у Малой Горы		
+_C26112A102D2C42C	place_outpost_matis_30	Пограничная застава Ущелье Берелло	Пограничной заставы Ущелья Берелло		
+_76BCF7E6C446C678	place_outpost_matis_31	Дипломатическая миссия Водопад Виргиния	Дипломатической миссии Водопад Виргиния		
+_16A1F294799F2D04	place_outpost_matis_32	Очаг Магии Водопад Виргиния	Очага Магии Водопад Виргиния		
+_E27BBA05A2D565E2	place_outpost_matis_10	Дипломатическая миссия верхнего Логова	Дипломатической миссии верхнего Логова		
+_93DAC8C4EB574350	place_outpost_matis_11	Ферма Причуд	Фермы Причуд		
+_8150691475FC20EC	place_outpost_matis_12	Мастерская Зеленого Пруда	Мастерской Зеленого Пруда		
+_755CA30BD88C2C00	place_outpost_matis_13	Исследовательский центр Мерзлого Болота	Исследовательского центра Мерзлого Болота		
+_C7B3E6A8E20210E0	place_outpost_matis_14	Пограничная застава Лабиринта Спрайтов	Пограничной заставы Лабиринта Спрайтов		
+_02E04A8AF11D40E8	place_outpost_matis_24	Форт Западной Рощи	Форта Западной Рощи		
+_01E0A522316C48ED	place_outpost_matis_25	Мастерская Восточной Рощи	Мастерской Восточной Рощи		
+_1B465A313103094F	place_outpost_matis_26	Исследовательский центр Вышней Рощи	Исследовательского центра Вышней Рощи		
+_AFCF8939E9679362	place_outpost_matis_27	Лаборатория Джинти	Лаборатории Джинти		
+_C36C782A2CA83799	place_outpost_zorai_08	Мастерская Кай-Ду	Мастерской Кай-Ду		
+_032AA1E4A947F396	place_outpost_zorai_09	Ферма на краю Света	Фермы на краю Света		
+_40CD74977FCA14E6	place_outpost_zorai_10	Форт Саи-Шуна	Форта Саи-Шуна		
+_016DC992459EAC9C	place_outpost_zorai_11	Мастерская у Девственного Пруда	Мастерской у Девственного Пруда		
+_C20E29A349DB838E	place_outpost_zorai_12	Пограничная Застава Тяжелая Рука	Пограничной Заставы Тяжелой Рука		
+_B706B292C98F40A3	place_outpost_zorai_13	Мастерская Великой Глыбы	Мастерской Великой Глыбы		
+_76159184087E2113	place_outpost_zorai_14	Торговая застава Великой Глыбы	Торговой заставы Великой Глыбы		
+_4F2FA59987ABD45F	place_outpost_zorai_20	Пограничная застава арки Кинчеров	Пограничной заставы арки Кинчеров		
+_80608520B94D0CDF	place_outpost_zorai_21	Мастерская Затхлого Озера	Мастерской Затхлого Озера		
+_14D204357D7859A8	place_outpost_zorai_22	Дипломатическая миссия Перекресток Демона 	Дипломатической миссии Перекресток Демона 		
+_7FB51A93FE97FFE2	place_outpost_zorai_23	Ферма у горы Бигхорн	Фермы у горы Бигхорн		
+_1530E2A73F8035FD	place_outpost_zorai_01	Очаг Магии Заброшенный Кладезь	Очаг Магии Заброшенного Кладезя		
+_01BE09EE31071F99	place_outpost_zorai_02	Мастерская Гу-Кина	Мастерской Гу-Кина		
+_FC5C2C2AB1F7B09B	place_outpost_zorai_03	Ферма Лабиринт Обреченных	Фермы Лабиринт Обреченных		
+_4BD5B69AFE1B1129	place_outpost_zorai_04	Форт Подземного Свода	Форта Подземного Свода		
+_9AB59256CA9B9791	place_outpost_zorai_05	Исследовательский центр Гу-Кина	Исследовательского центра Гу-Кина		
+_8725F28C88DDB8E0	place_outpost_zorai_06	Мастерская Теневой гряды	Мастерской Теневой гряды		
+_76B7F5D4D840B9CC	place_outpost_zorai_07	Пограничная застава перекрестка у Озера Коварства	Пограничной заставы перекрестка у Озера Коварства		
+_D8C3F99CBA68EBCF	place_outpost_zorai_24	Исследовательский центр Джен-Лаи	Исследовательского центра Джен-Лаи		
+_BD1E8D36495C0BEA	place_outpost_zorai_25	Форт Одинокого Наблюдателя	Форта Одинокого Наблюдателя		
+_C1AFFE76387F2CE8	place_outpost_zorai_26	Форт Стэйнмура	Форта Стэйнмура		
+_FFF6266871FB5CDF	place_outpost_zorai_27	Пограничная застава Стэйнмура	Пограничной заставы Стэйнмура		
+_002D0C3469D760F0	place_outpost_zorai_28	Ферма Пустынный Кладезь	Фермы Пустынного Кладезь		
+_B795AA8F467F70B1	place_outpost_zorai_29	Мастерская Великая Целина 	Мастерской Великой Целина 		
+_2638D5F5EAE53A73	place_outpost_zorai_30	Ферма Ни-Джинг	Фермы Ни-Джинг		
+_07657E5F4A8E0BCF	place_outpost_zorai_15	Мастерская Руины Зо-Киан	Мастерской Руины Зо-Киан		
+_569F05AA450D40DD	place_outpost_zorai_16	Форт Затерянной Долины	Форта Затерянной Долины		
+_58A5FA8D735ED059	place_outpost_zorai_17	Мастерская Верховный Кладезь	Мастерской Верховного Кладезь		
+_FF1E7D298BCD17D9	place_outpost_zorai_18	Форт Бдительность	Форта Бдительность		
+_7F5C18356A0864EF	place_outpost_zorai_19	Ферма у Заброшенного Кладезя	Фермы у Заброшенного Кладезя		
+_3C0F567EB96B13E4	place_outpost_fyros_14	Торговая застава Кострище	Торговой заставы Кострище		
+_01F0850E9E96676B	place_outpost_fyros_10	Ферма у Северного Озера	Фермы у Северного Озера		
+_BFDF9A8F799BEBD0	place_outpost_fyros_11	Торговая застава у Севеерного Озера	Торговой заставы у Севеерного Озера		
+_C2E0991F370D14E9	place_outpost_fyros_12	Мастерская Корковражье	Мастерской Корковражье		
+_BE936A8FA73411E6	place_outpost_fyros_13	Пограничная застава Западное Кострище	Пограничной заставы Западное Кострище		
+_0A0536AF89BD45E9	place_outpost_fyros_17	Форт Каньона Искусников 	Форта Каньона Короедов 		
+_2F7F994109BD6C70	place_outpost_fyros_18	Ферма Каньона Искусников	Фермы Каньона Короедов		
+_097D53C065530D29	place_outpost_fyros_19	Дипломатическая миссия Вышние Хребты	Дипломатической миссии Вышних Хребты		
+_C7172DA1C948FBDF	place_outpost_fyros_20	Мастерская Пустоши	Мастерской Пустоши		
+_DBB6528E0A2B8793	place_outpost_fyros_21	Исследовательский центр Фессоса	Исследовательского центра Фессоса		
+_383B5D59892C68ED	place_outpost_fyros_06	Мастерская Восточный Дайрон	Мастерской Восточного Дайрона		
+_439262814D24B1DA	place_outpost_fyros_07	Пограничная застава Башни Фрахаров	Пограничной заставы Башни Фрахаров		
+_0217CE4C0B7D28EF	place_outpost_fyros_08	Форт Высоких Башен	Форта Высоких Башен		
+_02A0E9DDF10773ED	place_outpost_fyros_09	Ферма Высоких Башен	Фермы Высоких Башен		
+_5D256E930D350DBA	place_outpost_fyros_22	Форт Родники Фессоса	Форта Родники Фессоса		
+_4A25269B4CCD03C9	place_outpost_fyros_23	Мастерская Бегущей Гряды	Мастерской Бегущей Гряды		
+_E2DA0E01E7C43DED	place_outpost_fyros_24	Дипломатическая миссия южного Предела	Дипломатической миссии южного Предела		
+_EC1FB94002BAE4BF	place_outpost_fyros_25	Ферма Южные дюны	Фермы Южных дюн		
+_8161728C4983DC1D	place_outpost_fyros_26	Пограничная Застава Равнин Кипакка	Пограничной Заставы Равнин Кипакка		
+_4C56B2383C8DF8B5	place_outpost_fyros_01	Пограничная Застава Холм Дайрона	Пограничной Заставы Холм Дайрона		
+_C9C43D9E4A4D64BF	place_outpost_fyros_02	Форт Северный Дайрон	Форта Северного Дайрон		
+_4AF5128B46C95087	place_outpost_fyros_03	Мастерская Хвост Дракона	Мастерской Хвост Дракона		
+_263999346B944A7D	place_outpost_fyros_04	Ферма Мальмонт	Фермы Мальмонт		
+_01AE559785BDC49B	place_outpost_fyros_05	Мастерская дороги Каньонов	Мастерской дороги Каньонов		
+_99952A96C72F99C0	place_outpost_fyros_15	Форт Драконий Хребет	Форта Драконий Хребта		
+_5AA53E92C798FCC1	place_outpost_fyros_16	Мастерская Драконий Хребет	Мастерской Драконий Хребта		
+_C0FF5D8B04C9D09D	place_outpost_fyros_27	Очаг магии Пылающее Древо	Очаг магии Пылающее древо		
+_835F899D85C934E4	place_outpost_fyros_28	Форт Пылающее Древо	Форта Пылающее Древо		
+_C486726F2689400C	place_outpost_tryker_02	Пограничная застава Даркмур	Пограничной заставы Даркмур		
+_42511692C2BA0320	place_outpost_tryker_03	Мастерская Острова Дайнти	Мастерской Острова Дайнти		
+_892EA529697617C8	place_outpost_tryker_04	Песчаная Мастерская	Песчаной Мастерской		
+_6BB89D30E2F43AB1	place_outpost_tryker_05	Ферма Фэрли	Фермы Фэрли		
+_4326D25E3768D412	place_outpost_tryker_06	Торговая застава Зеленая Долина	Торговой заставы Зеленой Долины		
+_010C58382706241C	place_outpost_tryker_07	Ферма Виндермеера	Фермы Виндермеера		
+_6125AE3C6DDEDC03	place_outpost_tryker_23	Пограничная застава Врата Лории	Пограничной заставы Врата Лории		
+_88CF951DF20DE822	place_outpost_tryker_24	Мастерская Дороги Ветров	Мастерской Дороги Ветров		
+_0B54F17D2E2CD4F8	place_outpost_tryker_25	Ферма Стражи Озера Муз	Фермы Стражи Озера Муз		
+_B1EFB126848DECEE	place_outpost_tryker_26	Ферма Три Опоры	Фермы Три Опоры		
+_85DFA92970FC2C10	place_outpost_tryker_27	Мастерская Озера Муз	Мастерской Озера Муз		
+_48BD35A07E0D98CA	place_outpost_tryker_08	Мастерская Озера Родника	Мастерской Озера Родника		
+_2462B551423CE897	place_outpost_tryker_09	Пограничная застава Врата Изобилия	Пограничной заставы Врат Изобилия		
+_5E40D64F7F7C843E	place_outpost_tryker_10	Торговая застава Террасы Родника	Торговой заставы Террасы Родника		
+_08DF99A7BFCA57BD	place_outpost_tryker_11	Ферма Корри Финли	Фермы Корри Финли		
+_7EB126A23A185419	place_outpost_tryker_12	Мастерская Предел Раздумий	Мастерской Предел Раздумий		
+_7A4CEB15177421FD	place_outpost_tryker_18	Исследовательский центр Ключи Кьют	Исследовательского центра Ключи Кьют		
+_2254130948D9087F	place_outpost_tryker_19	Пограничная застава Врата Свободы	Пограничной заставы Врат Свободы		
+_43EBE3179924C29E	place_outpost_tryker_20	Форт Плетения Кьют	Форта Плетения Кьют		
+_734E7133C7CCFFED	place_outpost_tryker_21	Торговая застава Тьюпайл	Торговой заставы Тьюпайл		
+_476F812B328D241A	place_outpost_tryker_22	Мастерская Пики Близнецы	Мастерской Пики Близнецы		
+_F5A8F3129E804098	place_outpost_tryker_13	Дипломатическая миссия Острые Пики	Дипломатической миссии Острые Пики		
+_61E45E923D78B836	place_outpost_tryker_14	Мастерская Зыбучие пески	Мастерской Зыбучие пески		
+_0515D24DB7B90809	place_outpost_tryker_15	Очаг Магии Истхорн	Очаг Магии Истхорн		
+_BB3C0FC70CEE64EB	place_outpost_tryker_16	Исследовательский центр Кладбищенские Врата	Исследовательского центра Кладбищенские Врата		
+_44E1DFED4C8EBD7E	place_outpost_tryker_17	Форт Зловещей Трясины	Форта Зловещей Трясины		
+_A5E5B62E2F2EDC03	place_outpost_tryker_28	Пограничная застава Врата Вод	Пограничной заставы Врата Вод		
+_C26EA13BA85DC0C7	place_outpost_tryker_29	Форт Лории	Форта Лории		
+_44800B071C726900	place_outpost_tryker_30	Исследовательский центр Пруды Лории 	Исследовательского центра Пруды Лории 		
+_46B02684B14C1C0F	place_outpost_tryker_31	Форт Ветряки	Форта Ветряки		
+_83B23EA1420CACC7	place_outpost_tryker_32	Мастерская Теснины Ветров	Мастерской Теснины Ветров		
+_2B2A3040CA41E10C	place_outpost_pr_04	Мастерская Руин Лернона	Мастерской Руин Лернона		
+_1B28EAA8E474F906	place_outpost_pr_05	Исследовательский центр Залы темного кольца 	Исследовательского центра Залы темного кольца 		
+_F73E357102FAD81E	place_outpost_pr_06	Мастерская Падшего Древа	Мастерской Падшего Древа		
+_CF9EF5874F0F7D3D	place_outpost_pr_10	Форт Утеса Проулков	Форта Утеса Проулков		
+_946219632AAAB87C	place_outpost_pr_11	Исследовательский центр Высокие Мезолиты 	Исследовательского центра Высокие Мезолиты 		
+_AAEC841D2EAA3907	place_outpost_pr_12	Форт Малохолмья	Форта Малохолмья		
+_E9D34584471079BA	place_outpost_pr_13	Исследовательский центр Малохолмья	Исследовательского центра Малохолмья		
+_58F7A636B023ED3F	place_outpost_nexus_01	Исследовательский центр Врата Ихора	Исследовательского центра Врат Ихора		
+_18910A55823C680F	place_outpost_nexus_02	Торговая застава Холмов Молота	Торговой заставы Холмов Молота		
+_BF8095041987976A	place_outpost_nexus_03	Ферма Врата Тени	Фермы Врат Тени		
+_263C57F8056069A2	place_outpost_nexus_04	Дипломатическая миссия Роковой Предел	Дипломатической миссии Роковой Предел		
+_3DF09127326D24EB	place_outpost_nexus_05	Мастерская Гребень Наблюдателей	Мастерской Гребень Наблюдателей		
+_3EE16D0918E65F7D	place_outpost_nexus_06	Ферма Верхогляд	Фермы Верхогляд		
+_7D07A2802AA970CF	place_outpost_nexus_07	Пограничная застава Врата Пустоши	Пограничной заставы Врата Пустоши		
+_9A62193E9DCCD68A	place_outpost_pr_01	Исследовательский центр западного Сэпотока	Исследовательского центра западного Сэпотока		
+_7DEC8005D64D3D17	place_outpost_pr_02	Мастерская восточного Сэпотока	Мастерской восточного Сэпотока		
+_BAFC701971E1D9CD	place_outpost_pr_03	Форт Врата Нексуса	Форта Врата Нексуса		
+_7ADBA91C352FD80D	place_outpost_pr_14	Очаг Магии Долина Ужаса	Очага Магии Долины Ужаса		
+_382C88153049E8CE	place_outpost_pr_15	Мастерская Врата Аэдан	Мастерской Врат Аэдан		
+_6BFD88198BE071AE	place_outpost_pr_16	Пограничная застава Роща Йелков	Пограничной заставы Рощи Йелков		
+_04A8EC001386967E	place_outpost_pr_07	Исследовательский центр Земли изобилия	Исследовательского центра Земель изобилия		
+_BE12ED4908BFA1D6	place_outpost_pr_08	Форт Горе Подлесное	Форта Горе Подлесное		
+_9D52D51EF680D536	place_outpost_pr_09	Мастерская Проход трех Тотемов	Мастерской Прохода трех Тотемов		
+_A85B6823F16AE1FD	place_outpost_pr_17	Форт Мертводрева	Форта Мертводрева		
+_B6C89408A46DD9C9	place_outpost_pr_18	Торговая застава Болота Сэпа	Торговой заставы Болота Сэпа		
+_FB1C4C8D884FE670	place_outpost_pr_19	Пограничная застава Луг Стрелков	Пограничной заставы Луг Стрелков		
+_52C01C5AB2CCBA8E	place_outpost_pr_20	Исследовательский центр Тропа Грота	Исследовательского центра Тропа Грота		
+_78E0B83607D11133	place_outpost_pr_21	Форт Проклятой Пещеры	Форта Проклятой Пещеры		
+_18B1B83FC612A68A	place_outpost_pr_22	Мастерская Великого Грибного Леса	Мастерской Великого Грибного Леса		
+_E90977C8F2092907	place_outpost_pr_23	Ферма Крылья Досады	Фермы Крылья Досады		
+_B1585ADE528BB6C4	place_outpost_pr_24	Дипломатическая миссия Точка Непрерывности	Дипломатической миссии Точка Непрерывности		
+_77EECD3D072F1D0A	place_outpost_pr_25	Форт Большое Сэпозеро	Форта Большое Сэпозеро		
+_BD6C7C19AEA8F8DC	place_outpost_pr_26	Мастерская Стокделл	Мастерской Стокделл		
+_3397E4C86F599816	place_outpost_pr_27	Мастерская ущелья Призраков	Мастерской ущелья Призраков		
+_7A3A7708F8A0D930	place_outpost_pr_28	Мастерская Драконова Рога	Мастерской Драконова Рога		
+_E107B0D2F25031F2	place_outpost_pr_29	Ферма Руины Крайтона	Фермы Руины Крайтона		
+_7353EAD2F838E392	place_outpost_pr_30	Форт залов горного Бедствия	Форта залов горного Бедствия		
+_FEFDADE4AD50EF34	indoors_rolemaster_craft	Инструктор по ремеслам	Инструктора по ремеслам		
+_405D89E7AD70072B	indoors_rolemaster_fight	Инструктор ведения боя	Инструктора ведения боя		
+_425D69EE68800712	indoors_rolemaster_magic	Инструктор по Магии	Инструктора по Магии		
+_42012C9982119510	indoors_rolemaster_harvest	Инструктор по добыче ресурсов	Инструктора по добыче ресурсов		
+_690960B32C28148A	tryker_nland_terrace	Терраса	Террасы		
+_673DA0205C66A7AE	tryker_terrace_1st	Терраса, 1й этаж	Террасы, 1й этаж		
+_264D601B9C66A79E	tryker_terrace_2nd	Терраса, 2й этаж	Террасы, 2й этаж		
+_31FE7929E858237A	place_pyr_p_market_1	Рынок Чипсайд 	Рынка Чипсайд 		
+_856FEDC62F1A4414	place_pyr_p_west_entrance	Врата Церакос	Врат Церакос		
+_153984B46DAB787F	place_pyr_p_market_2	Большой Базар	Большого Базара		
+_6B5C4D2302CF0516	place_pyr_p_place_warschool	Военная Академия	Военной Академии		
+_B7690C84C9814D00	place_pyr_p_fontaine	Площадь Фонтана Оазиса	Площади Фонтана Оазиса		
+_5C3011142E8923B2	place_pyr_p_sheriff	Городские Казармы	Городских Казармы		
+_CCE0E55AF1A0D281	place_pyr_p_place_mairie_1	Площадь Имперских Залов	Площади Имперских Залов		
+_BBDCF30742410125	place_pyr_p_place_mairie_2	Площадь Каравии	Площади Каравии		
+_E05A68AE5E49A8B4	place_pyr_p_place_agora	Агора	Агоры		
+_0E14D0ACADAB8C86	place_pyr_p_street_1	Рыночный пееулок	Рыночного переулка		
+_54A8CC3067F96F80	place_pyr_p_street_2	Улица Чипсайд 	Улицы Чипсайд 		
+_5784C8AC2E5A744C	place_pyr_p_street_3	Улица Торговцев	Улицы Торговцев		
+_D6CF39F45B9C8048	place_pyr_p_street_4	Улица Высоты Пира	Улицы Высоты Пира		
+_19282D10AF7A8B8B	place_pyr_p_street_5	Путь Северных Врат	Пути Северных Врат		
+_44495127AAABBC5C	place_pyr_p_street_6	Церакос авеню	Церакос авеню		
+_F0B0751C30D8977E	place_pyr_p_street_7	Ариспотл авеню	Ариспотл авеню		
+_99DF8519ADEB183B	place_pyr_p_street_8	Круг Кориолиса	Круга Кориолиса		
+_05499BB56C3AB881	place_pyr_p_street_9	Переулок Райдона	Переулка Райдона		
+_1628C820ED9A8C28	place_pyr_p_street_10	Улица Центральная	Улицы Центральная		
+_03F88D1A68AB505C	place_pyr_p_street_11	Улица Леанон	Улицы Леанон		
+_03F88D202EAB305D	place_pyr_p_street_12	Улица Декстона	Улицы Декстона		
+_D62F151017DB3880	place_pyr_p_street_13	Казарменный переулок	Казарменного переулка		
+_AB5B15CCAF7201DA	place_pyr_p_street_14	Улица Верхний Пайрос	Улицы Верхний Пайрос		
+_53A8D80CAB3AC42D	place_pyr_p_street_15	Каравия авеню	Каравия авеню		
+_ACEA4988BD9B78EE	place_pyr_p_street_16	Переулок Молота и Наковальни	Переулка Молота и Наковальни		
+_AB5B15CC7061DDDD	place_pyr_p_street_17	Улица Нижний Пайрос	Улицы Нижний Пайрос		
+_53CE252AA8263084	place_pyr_p_street_18	Путь Южных врат	Пути Южных врат		
+_53D67FAFEF4BEC7F	place_pyr_p_street_19	Улица Терм	Улицы Терм		
+_4349A128ED7BF84B	place_pyr_p_street_20	Круг Абилуса	Круга Абилуса		
+_95286116EF49E777	place_pyr_p_street_21	Улица Фонтанов	Улицы Фонтанов		
+_0449C8AC2FBACC2A	place_pyr_p_street_22	Шахтерские ряды	Шахтерских рядов		
+_B0EE25015BBB1F7F	place_pyr_p_street_23	Купеческий переулок	Купеческого переулка		
+_2FB105272227C0F4	continent_matis_newbie	Земли Матисов	Земель Матисов		
+_B249E525A557A0F2	continent_zorai_newbie	Земли Зораи	Земель Зораи		
+_57AB20D9AC098C9C	place_aegus_indoors	Инструкторы Аэгуса	Инструкторов Аэгуса		
+_6C6CA51867882C81	place_kaemon_indoors	Инструкторы Каэмона	Инструкторов Каэмона		
+_885FBD17264A18E3	place_sekovix_indoors	Инструкторы Сековикса	Инструкторов Сековикса		
+_6C6CD12CEC1A4886	place_phyxon_indoors	Инструкторы Пхиксона	Инструкторов Пхиксона		
+_498F710E6649E8DE	place_galemus_indoors	Инструкторы Галемуса	Инструкторов Галемуса		
+_2B3C8D11ECC97889	place_stalli_indoors	Инструкторы Сталли	Инструкторов Сталли		
+_978AE0E4AA18B8A6	place_borea_indoors	Инструкторы Бореи	Инструкторов Бореи		
+_290C8D202B994C84	place_nistia_indoors	Инструкторы Нистии	Инструкторов Нистии		
+_45BE7D19AADA14DA	place_rosilio_indoors	Инструкторы Росилио	Инструкторов Росилио		
+_5A0A04D32B5874A0	place_miani_indoors	Инструкторы Миани	Инструкторов Миани		
+_AC3C71F957912C87	place_qai_lo_indoors	Инструкторы Куай-Ло	Инструкторов Куай-Ло		
+_708E391AAB9A8D0A	place_sheng_wo_indoors	Инструкторы Шенг-Уо	Инструкторов Шенг-Уо		
+_02AEF82C29E84D18	place_men_xing_indoors	Инструкторы Нен-Ксинг	Инструкторов Нен-Ксинг		
+_08600DD3C969F8D9	place_koi_zun_indoors	Инструкторы Кои-Зан	Инструкторов Кои-Зан		
+_795C7143FC803D07	place_yin_piang_indoors	Инструкторы Йин-Пианг	Инструкторов Йин-Пианг		
+_C2822A4B4B104927	place_aubermouth_indoors	Инструкторы Аубермоф	Инструкторов Аубермоф		
+_002E213427787514	place_barkdell_indoors	Инструкторы Баркделла	Инструкторов Баркделла		
+_844E81142D38DD14	place_hobwelly_indoors	Инструкторы Хаубелли	Инструкторов Хаубелли		
+_88F0F13C271A851A	place_waverton_indoors	Инструкторы Уэйвертона	Инструкторов Уэйвертона		
+_7FBF914379AF8D16	place_dingleton_indoors	Инструкторы Динглтона	Инструкторов Динглтона		
+_422F691DA0BA1111	place_zora_p_cimetiere	Кладбище	Кладбища		
+_362EEE95C6B05DF7	place_zora_p_marche_commun	Квартал Большого Базара	Большого Базара		
+_A715481EA9293757	place_zora_p_2	Квартал Храмовых залов	Храмовых залов		
+_6051582F6909CBA6	place_zora_p_3	Квартал Чистого колодца	Чистого колодца		
+_68E7D432A958E750	place_zora_p_4	Имение Даиши	Имений Даиши		
+_67866FC4E98682A3	place_zora_p_5	Имение Вин-Чо	Имений Вин-Чо		
+_28F478B3AA59D4B1	continent_indoors	здание	здание		
+_A645B49270E8B0A0	faihaven_stable	Стойла Мектубов Фэрхевена	Стойл Мектубов Фэрхевена		
+_61C994A76EB8D819	place_yrk_p_1	Округ Зачини	Округа Зачини		
+_8F199CBE2D6BE453	place_yrk_p_2	Округ Яссон	Округа Яссон		
+_DD5570B9ECEA3058	place_yrk_p_3	Округ Аниро	Округа Аниро		
+_8FC998B46CECD055	place_yrk_p_4	Округ Тайлини	Округа Тайлини		
+_DD5538B02A9A5C5A	place_yrk_p_5	Округ Либия	Округа Либия		
+_A378A8B8E9878BC0	yrkanis_stable	Стойла Мектубов Ирканиса	Стойл Мектубов Ирканиса		
+_2B765B95DBA7B397	place_zora_p_1	Квартал Изгнания Гуу	Квартала Изгнания Гуу		
+_613AD4975989B0AC	zora_stable	Стойла Мектубов Зоры	Стойл Мектубов Зоры		
+_2D6F0161343115EF	place_yrkanis_bar_indoor	Вход в Таверну Ирканиса	Входа в Таверну Ирканиса		
+_CB7D74EB5E299B6B	place_yrkanis_greenhouse_indoor	Вход в кабинеты Интенданта Ирканиса	Входа в кабинеты Интенданта Ирканиса		
+_C1BF2DE9E86D431A	ma_natae_captain_quarter	Комнаты Военачальника Нэтея	Покоев Военачальника Нэтея		
+_40C031DE09E8A002	ma_natae_foreman_quarter	Комнаты Надзирателя Нэтея	Покоев Надзирателя Нэтея		
+_0792FD55B0EF2922	ma_natae_messenger_quarter	Комнаты Посланника Нэтея	Покоев Посланника Нэтея		
+_A154B0019C992499	ma_natae_sage_quarter	Комнаты Мудреца Нэтея	Покоев Мудреца Нэтея		
+_DE02B94EE9261147	ma_natae_guard_chief_quarter	Комнаты Начальника стражи Нэтея	Покоев Начальника стражи Нэтея		
+_C532195C71EF251D	ma_natae_intendant_quarter	Комнаты Интенданта Нэтея	Покоев Интенданта Нэтея		
+_005F39E16BBE5B13	ma_davae_sergent_quarter	Комнаты Сержанта Дэвея	Покоев Сержанта Дэвея		
+_BEE031D409E8A802	ma_davae_foreman_quarter	Комнаты Надзирателя Дэвея	Покоев Надзирателя Дэвея		
+_85F2FD55B0EF3124	ma_davae_messenger_quarter	Комнаты Курьера Дэвея	Покоев Курьера Дэвея		
+_1F54B0011C990499	ma_davae_sage_quarter	Комнаты Мудреца Дэвея	Покоев Мудреца Дэвея		
+_5C02B94EE946193D	ma_davae_guard_chief_quarter	Комнаты Начальника Стражи Дэвея	Покоев Начальника Стражи Дэвея		
+_4392195C71EF2D1F	ma_davae_intendant_quarter	Комнаты Интенданта Дэвея	Покоев Интенданта Дэвея		
+_82B00968DC5F4914	ma_avalae_captain_quarter	Комнаты Военначальника Эвелея	Покоев Военначальника Эвелея		
+_842F2A28AD8FFD28	ma_avalae_foreman_quarter	Комнаты Надзирателя Эвелея	Покоев Надзирателя Эвелея		
+_FA144179824E79B6	ma_avalae_messenger_quarter	Комнаты Курьера Эвелея	Покоев Курьера Эвелея		
+_26A0D40D2AE53062	ma_avalae_sage_quarter	Комнаты Мудреца Эвелея	Покоев Мудреца Эвелея		
+_89D271D949063A5F	ma_avalae_guard_chief_quarter	Комнаты Начальника Стражи Эвелея	Покоев Начальника Стражи Эвелея		
+_7ED4896D7E6E09B8	ma_avalae_intendant_quarter	Комнаты Интенданта Эвелея	Покоев Интенданта Эвелея		
+_06AEBA0AA1CF09CA	zo_jenlai_captain_quarter	Комнаты Военачальника Джен-Лай	Покоев Военачальника Джен-Лай		
+_C666B9555D4F15CA	zo_jenlai_foreman_quarter	Комнаты Надзирателя Джен-Лай	Покоев Надзирателя Джен-Лай		
+_4B71C08DFB6BAE3A	zo_jenlai_messenger_quarter	Комнаты Посланника Джен-Лай	Покоев Посланника Джен-Лай		
+_4389082D65949720	zo_jenlai_sage_quarter	Комнаты Мудреца Джен-Лай	Покоев Мудреца Джен-Лай		
+_0DE1CC7DBBEA7A44	zo_jenlai_intendant_quarter	Комнаты Интенданта Джен-Лай	Покоев Интенданта Джен-Лай		
+_7460336D1826EA26	zo_jenlai_guard_chief_quarter	Комнаты Начальника стражи Джен-Лай	Покоев Начальника стражи Джен-Лай		
+_C7EEC61043AFE5CE	zo_mincho_captain_quarter	Комнаты Военачальника Мин Хо	Покоев Военачальника Мин Хо		
+_87A6C55BFF2FF1CE	zo_mincho_foreman_quarter	Комнаты Надзирателя Мин Хо	Покоев Надзирателя Мин Хо		
+_CD71BE9A7ADBAE42	zo_mincho_messenger_quarter	Комнаты Посланника Мин Хо	Покоев Посланника Мин Хо		
+_C6F90833283497A4	zo_mincho_sage_quarter	Комнаты Мудреца Мин Хо	Покоев Мудреца Мин Хо		
+_8FE1CA8A3A5A7A4C	zo_mincho_intendant_quarter	Комнаты Интенданта Мин Хо	Покоев Интенданта Мин Хо		
+_15D00F73DAD6F62A	zo_mincho_guard_chief_quarter	Комнаты Начальника стражи Мин Хо	Покоев Начальника стражи Мин Хо		
+_E64EB21043AFD1D4	zo_hoicho_captain_quarter	Комнаты Военачальника Хоа Шо	Покоев Военачальника Хоа Шо		
+_A606B15BFF2FDDD4	zo_hoicho_foreman_quarter	Комнаты Надзирателя Хоа Шо	Покоев Надзирателя Хоа Шо		
+_4B71BE9A7ADBA04E	zo_hoicho_messenger_quarter	Комнаты Посланника Хоа Шо	Покоев Посланника Хоа Шо		
+_85F908B4A9E483AA	zo_hoicho_sage_quarter	Комнаты Мудреца Хоа Шо	Покоев Мудреца Хоа Шо		
+_0DE1CA8A3A5A6C58	zo_hoicho_intendant_quarter	Комнаты Интенданта Хоа Шо	Покоев Интенданта Хоа Шо		
+_D4D00F733A36CE30	zo_hoicho_guard_chief_quarter	Комнаты Начальника стражи Хоа Шо	Покоев Начальника стражи Хоа Шо		
+_1A656D1C65D737B0	place_fairhaven_p_1	Развилка Фэйрмаркет	Развилки Фэйрмаркет		
+_DE1377BC50588CA0	place_fairhaven_p_2	Край Света	Края Света		
+_5D251869E5588CA8	place_fairhaven_p_3	Ветреные головы	Ветреных голов		
+_56E1DCAE677980AB	place_fairhaven_p_4	Хартли Поинт	Хартли Поинт		
+_A4F3717C3B1E4123	place_fairhaven_p_5	Площадь Палат Совета	Площади Палат Совета		
+_DAB5C0AAE259A0B0	place_fairhaven_p_6	Восточный Рынок	Восточного Рынка		
+_C965C01D62D8809D	place_fairhaven_p_7	Площадь Лягушек	Площади Лягушек		
+_D721C470A338A8B3	place_fairhaven_p_8	Возвышение Лории	Возвышения Лории		
+_1CA5406C222870A8	place_fairhaven_s_1	Риган Роуд	Риган Роуд		
+_19A57C980F2874B0	place_fairhaven_s_2	Колокольная Улица	Колокольной Улицы		
+_36BC098C674E3126	place_fairhaven_s_3	Авеню Верхних палат	Авеню Верхних палат		
+_F4CC098C674E4D25	place_fairhaven_s_4	Авеню Нижних палат	Авеню Нижних палат		
+_1E61DCB1A8A9385C	place_fairhaven_s_5	Проулок Хартли 	Проулка Хартли 		
+_DAB56D19E2085FB0	place_fairhaven_s_6	Переулок Восточного Рынка	Переулка Восточного Рынка		
+_1711B0B166584CAB	place_fairhaven_s_7	Переулок Гобеленов	Переулка Гобеленов		
+_C975C0BBE3A85499	place_fairhaven_s_8	Лягушачья улица	Лягушачья улица		
+_61D632D17A364A81	tr_windermeer_captain_quarter	Комнаты Военачальника Эвелея	Покоев Военачальника Эвелея		
+_DF83BAF54EB76E85	tr_windermeer_foreman_quarter	Комнаты Надзирателя Эвелея	Покоев Надзирателя Эвелея		
+_E8F8EE0C5216E20E	tr_windermeer_messenger_quarter	Комнаты Посланника Эвелея	Покоев Посланника Эвелея		
+_88420D84431099DE	tr_windermeer_sage_quarter	Комнаты Мудреца Эвелея	Покоев Мудреца Эвелея		
+_2799365B283C9FB3	tr_windermeer_guard_chief_quarter	Комнаты Начальника стражи Эвелея	Покоев Начальника стражи Эвелея		
+_A868DA071286CE09	tr_windermeer_intendant_quarter	Комнаты Интенданта Эвелея	Покоев Интенданта Эвелея		
+_27940A6C08F00976	tr_avendale_captain_quarter	Комнаты Военачальника Эвендейла	Покоев Военачальника Эвендейла		
+_78E50E7CC4FD059B	tr_avendale_foreman_quarter	Комнаты Надзирателя Эвендейла	Покоев Надзирателя Эвендейла		
+_97745AEFCD96C193	tr_avendale_messenger_quarter	Комнаты Посланника Эвендейла	Покоев Посланника Эвендейла		
+_FB0E659567AF0C24	tr_avendale_sage_quarter	Комнаты Мудреца Эвендейла	Покоев Мудреца Эвендейла		
+_63F9CBD0FE13C5F2	tr_avendale_guard_chief_quarter	Комнаты Начальника стражи Эвендейла	Покоев Начальника стражи Эвендейла		
+_57A4FAF98C86098B	tr_avendale_intendant_quarter	Комнаты Интенданта Эвендейла	Покоев Интенданта Эвендейла		
+_58251EE102B9568E	tr_crystabell_sergent_quarter	Комнаты Военачальника Кристабелла	Покоев Военачальника Кристабелла		
+_D972CAF3D5D86688	tr_crystabell_foreman_quarter	Комнаты Надзирателя Кристабелла	Покоев Надзирателя Кристабелла		
+_69E9EEFED307E200	tr_crystabell_messenger_quarter	Комнаты Посланника Кристабелла	Покоев Посланника Кристабелла		
+_0671E168C3F201EC	tr_crystabell_sage_quarter	Комнаты Мудреца Кристабелла	Покоев Мудреца Кристабелла		
+_A7C9D64A291C07C5	tr_crystabell_guard_chief_quarter	Комнаты Начальника стражи Кристабелла	Покоев Начальника стражи Кристабелла		
+_2959DAF99377CEFB	tr_crystabell_intendant_quarter	Комнаты Интенданта Кристабелла	Покоев Интенданта Кристабелла		
+_ED2748C72CF6E4C0	zo_zora_mairie_ss	Помещения зала совета	Помещения зала совета		
+_72572111A2B7D8B6	zo_zora_mairie_mainroom	Канцелярии зала совета	Канцелярии зала совета		
+_84BF1DE6480C5928	fy_fortress_rdc	Нижний уровень Бастиона	Нижнего уровня Бастиона		
+_6D4019DD10BB144B	fy_fortress_1st	Первый уровень Бастиона	Первого уровня Бастиона		
+_E2A697A5283587B1	hoi_cho_stable	Стойла Хоа Шо	Стойл Хоа Шо		
+_20866FACA6F56BB4	jen_lai_stable	Стойла Джен Лай	Стойл Джен Лай		
+_E2F67FAFA78587B1	min_cho_stable	Стойла Мин Хо	Стойл Мин Хо		
+_E1D7F4AD9FB58880	pyr_stable1	Стойла Северного Пайра	Стойл Северного Пайра		
+_E1E700ADE0B58880	pyr_stable2	Стойла Южного Пайра	Стойл Южного Пайра		
+_10D8DCAD633500A7	pyr_stable3	Стойла Восточного Пайра	Стойл Восточного Пайра		
+_27C85FA7268B1082	natae_stable	Стойла Нэтея	Стойл Нэтея		
+_27E85F9D26CB106E	davae_stable	Стойла Дэвея	Стойл Дэвея		
+_5BC978AD69880081	avalae_stable	Стойла Эвелея	Стойл Эвелея		
+_1CEA78C7E7D8848F	thesos_stable	Стойла Фессоса	Стойл Фессоса		
+_AAA8BFA62C4BD077	dyron_stable	Стойла Дайрона	Стойл Дайрона		
+_CB1ED8FB645A1C92	fairhaven_stable	Стойла Фэрхевена	Стойл Фэрхевена		
+_B5CFF512673949F8	windermeer_stable	Стойла Виндермеера	Стойл Виндермеера		
+_A499A1F1CEA97C93	avendale_stable	Стойла Эвендейла	Стойл Эвендейла		
+_3BB0CD05A4784116	crystabell_stable	Стойла Кристабелла	Стойл Кристабелла		
+_A3D908AC6D6A6495	place_pyr_p_forge	Кузня	Кузня		
+_AF2D0919C1576A05	r_01_06_forage_place_1	Силосные запасы	Силосных запасов		
+_AAA9B7061540F1D4	r_05_36_mission_place_hunting_1	Угодья охоты на Рагусов	Угодьев охоты на Рагусов		
+_8EB43958F24FD851	place_r_08_03_espionnage	Наблюдательный пункт	Наблюдательного пункт		
+_C78F426D3D0F1C2A	continent_fyros_islands	Старые земли	Старых земель		
+_C343A9685F37CC90	region_fyros_island1pvp 3	<fyros islets 1 (pvp)>	<fyros islets 1 (pvp)>		
+_20188FF2F929407C	region_fyros_island2	<fyros islets 2>	<fyros islets 2>		
+_24BE643467D8C8C6	region_fyros_island3	Дюны Аэлиуса	Дюн Аэлиуса		
+_8FDA400352CEC92B	r_11_10_kitin_hunting_1	Первое место охоты	Первого места охоты		
+_3ED36A63D73EA16C	r_11_10_kitin_hunting_2	Второе место охоты	Второго места охоты		
+_50D58839A2EE9278	r_08_04_kitin_boss_1	Испытание	Испытания		
+_65CACC23504263D7	r_05_34_place_lake_1	У озера	У озера		
+_16B10294F1118B4F	place_arrival_from_sources	Если вы видите этот текст, произошла следующая ошибка: place_arrival_from_sources.	Если вы видите этот текст, произошла следующей ошибка: place_arrival_from_sources.		
+_E6013EFFB4FEB861	place_arrival_from_zorai	Если вы видите этот текст, произошла следующая ошибка: place_arrival_from_zorai.	Если вы видите этот текст, произошла следующей ошибка: place_arrival_from_zorai.		
+_20303EFF361FE055	place_arrival_from_matis	Если вы видите этот текст, произошла следующая ошибка: place_arrival_from_matis.	Если вы видите этот текст, произошла следующей ошибка: place_arrival_from_matis.		
+_DACE98C5E36C7230	place_arrival_from_route_gouffre	Если вы видите этот текст, произошла следующая ошибка: place_arrival_from_route_gouffre.	Если вы видите этот текст, произошла следующей ошибка: place_arrival_from_route_gouffre.		
+_68FB04BEDC8A4CC3	oasis_rdc	Дайрон	Дайрон		
+_DADA0C766985AFA5	oasis_1st	Таверна Оазиса	Таверны Оазиса		
+_DBA1B2879853B535	war_school_rdc	Цокольный этаж военной академии	Цокольного этажа военной академии		
+_235BE50B449EE81E	war_school_ss	Подвальный этаж военной академии	Подвалаьного этажа военной академии		
+_94352638B17CB560	sherif_armory_rdc	Первый этаж оружейной	Первого этажа оружейной		
+_85303230FE1225CE	sherif_armory_1st	Второй этаж оружейной	Второй этажа оружейной		
+_97B394C0997974A0	sherif_rdc	Казарменная Площадь 	Казарменной Площади 		
+_9902D8CF497984A0	sherif_1st	Этаж Казарм	Этажа Казарм		
+_C68FF216063FADD6	zo_hoicho_sergent_quarter	Комнаты Сержанта Хоа Шо	Покоев Сержанта Хоа Шо		
+_2A289CA228F9A0A7	region_matis_island				
+_64C03EFF367FF06B	place_arrival_from_fyros	Если вы видите этот текст, произошла следующая ошибка: place_arrival_from_fyros.	Если вы видите этот текст, произошла следующей ошибка: place_arrival_from_fyros.		
+_0F4F819946B886B3	place_arrival_from_tryker	Если вы видите этот текст, произошла следующая ошибка: place_arrival_from_tryker.	Если вы видите этот текст, произошла следующей ошибка: place_arrival_from_tryker.		
+_5D803EFFB38EC048	place_arrival_from_bagne	Если вы видите этот текст, произошла следующая ошибка: place_arrival_from_bagne.	Если вы видите этот текст, произошла следующей ошибка: place_arrival_from_bagne.		
+_F598ACE61E4941CB	place_r_07_13_boss_kill	Наемники	Наемников		
+_7735415374A70966	place_r_01_10_escort	Место встречи	Места встречи		
+_59D5046521FB70DA	place_arena_warning	Если вы видите этот текст, произошла следующая ошибка: place_arena_warning	Если вы видите этот текст, произошла следующей ошибка: place_arena_warning		
+_CC714C9FEBEF2433	r_01_06_hill_light	Если вы видите этот текст, произошла следующая ошибка: r_01_06_hill_light.	Если вы видите этот текст, произошла следующей ошибка: r_01_06_hill_light.		
+_AC2EEFFFCD1C6926	r_05_36_mission_place_hunting_2	Если вы видите этот текст, произошла следующая ошибка: r_05_36_mission_place_hunting_2.	Если вы видите этот текст, произошла следующей ошибка: r_05_36_mission_place_hunting_2.		
+_AC2EEFFFCD2C6927	r_05_36_mission_place_hunting_3	Если вы видите этот текст, произошла следующая ошибка: r_05_36_mission_place_hunting_3.	Если вы видите этот текст, произошла следующей ошибка: r_05_36_mission_place_hunting_3.		
+_0144BC1A72366C6C	r_09_10_mission_forage_1	Место добычи опилок	Места добычи опилок		
+_6543E020AE366C07	r_09_10_mission_forage_2	Место добычи воска	Места добычи воска		
+_65EE17B7F2CAA4FD	r_09_10_mission_forage_3	Место добычи древесины	Места добычи древесины		
+_794C1D8BEBD85488	r_08_16_mission_place_2	Первая засада	Первой засады		
+_399DE9213CD418F4	r_08_16_mission_place_4	Вторая засада	Второй засады		
+_FEF3F18880D42C69	r_08_16_mission_place_5	Главарь ищет тебя	Главарь ищет тебя		
+_DEC9CC99E7779F78	ava_bar_ext1	Эвелей	Эвелея		
+_D787078F0F8B4067	ava_bar_int2	Таверна Эвелея	Таверны Эвелея		
+_5636A84F67199C69	ava_bar_int_2	Таверна Эвелея	Таверны Эвелея		
+_1D4B8C8D68BAA437	dav_bar_ext2	Дэвей	Дэвея		
+_4B1758950F8B6867	dav_bar_int2	Таверна Дэвея	Таверны Дэвея		
+_9D2BB497E89ACC41	nat_bar_ext2	Нэтей	Нэтея		
+_D3FA885C679A9C41	nat_bar_int_2	Таверна Нэтея	Таверны Нэтея		
+_CDD758A90F8B6067	nat_bar_int2	Таверна Нэтея	Таверны Нэтея		
+_A5677CB95F570BBC	serre2	Ирканис	Ирканиса		
+_A5577CB91F5707BC	serre1	Ирканис	Ирканиса		
+_11D894BB6B18DEBA	yrk_serre_ncp2	Оранжерея Ирканиса	Оранжереи Ирканиса		
+_55D894BB6B18DAAD	yrk_serre_npc1	Оранжерея Ирканиса	Оранжереи Ирканиса		
+_E7EAF4B9A48A14B3	yrk_bar_ext	Ирканис	Ирканиса		
+_99B903B9D54A188E	yrk_bar_int1	Бар Ирканиса	Бар Ирканиса		
+_A759546346C8BBCA	mairie_rdc	Первый этаж	Первого этажа		
+_C45A9DE5178C1321	yrkanis mairie ss	Подвал зала совета	Подвала зала совета		
+_61403EFF36E0205D	place_arrival_from_nexus	Если вы видите этот текст, произошла следующая ошибка: place_arrival_from_nexus.	Если вы видите этот текст, произошла следующей ошибка: place_arrival_from_nexus.		
+_E3A13EFFB3CFFC57	place_arrival_from_terre	Если вы видите этот текст, произошла следующая ошибка: place_arrival_from_terre.	Если вы видите этот текст, произошла следующей ошибка: place_arrival_from_terre.		
+_C8E11A63023D3424	continent_tryker_island	Стародавние земли	Стародавних земель		
+_782750B66DD50B84	region_tryker_island1	<tryker islet 1>	<tryker islet 1>		
+_783750B66DD50B85	region_tryker_island2	<tryker islet 2>	<tryker islet 2>		
+_784750B66DD50B86	region_tryker_island3	<tryker islet 3>	<tryker islet 3>		
+_9FDAC1DE6DF71481	region_tryker_island4	Озеро Олкерн	Озера Олкерн		
+_786750B66DD50B88	region_tryker_island5	<tryker islet 5>	<tryker islet 5>		
+_06C2A8376442D645	r_01_28_mission_tp_1a	Пещера вихрей у Капель Росы	Пещера вихрей у Капель Росы		
+_5D3124100950F084	r_01_28_mission_tp_2a	Проход неподалеку от Капель Росы	Прохода неподалеку от Капель Росы		
+_1EA438315D638A9E	r_05_33_creek_1	Ручей Клопперов	Ручья Клопперов		
+_F27CBD6F00A82016	r_01_27_place_libertylake	Опасный пляж	Опасного пляжа		
+_0F1086393F8B083C	r_01_27_place_libertylake_2	Пляж Клопперов	Пляжа Клопперов		
+_53F9A97830AA1FE7	r_12_04	Если вы видите этот текст, произошла следующая ошибка: r_12_04	Если вы видите этот текст, произошла следующей ошибка: r_12_04		
+_D8EE237CA3C73181	r_01_28_mission_tp_1	Пещера вихрей у Ветров Муз	Пещера вихрей у Ветров Муз		
+_321059AE9A1F0970	r_01_28_mission_tp_2	Проход неподалеку от Ветров Муз	Прохода неподалеку от Ветров Муз		
+_2C7D7F0D60A5B869	continent_zorai_island	<zorai islets>	<zorai islets>		
+_DB798FE7FE88087C	region_zorai_island1	<zorai islet 1>	<zorai islet 1>		
+_1B798FE8FE88087C	region_zorai_island2	<zorai islet 2>	<zorai islet 2>		
+_5B798FE9FE88087C	region_zorai_island3	<zorai islet 3>	<zorai islet 3>		
+_9C798FEAFE88087C	region_zorai_island4	<zorai islet 4>	<zorai islet 4>		
+_FBA877B09500939C	r_06_12_forage_1	Ресурсы: Смола	Ресурса: Смола		
+_772E4C85FE065074	r_06_12_forage_2	Ресурсы: Гнилое волокно	Ресурса: Гнилого волокно		
+_8926187ED6A4F65B	r_06_12_hunting_1	Охота	Охота		
+_DAE5ACAB55DD2399	r_10_10_goo_hunting	Зараженная зона	Зараженной зоны		
+_7FE78D2E9558B3A2	zora_mairie_ss	Подвал зала совета	Подвала зала совета		
+_651AB4C7EC37448B	zora_mairie_mainroom	Зал Совета	Зала Совета		
+_F28C868C7F5ABFC0	r_07_04_place_adept_spawn	Место Священнодействий Ками	Места Священнодействий Ками		
+_CFE5AAFE0E263A60	place_zora_puits_aux_offrandes	Колодец Подношений	Колодца Подношений		
+_6CE9E88E6105DCA9	gmisland	Остров Атриума	Острова Атриума		
+_EA39D49BE04753AE	gmisland_stable	Стойла Атриума	Стойл Атриума		
+_69670C5ADDE9CCB8	gmcampfire	Лагерь Атриума	Лагеря Атриума		
+_EFD6BCAEA0A863B1	gmarena	Арена Атриума	Арена Атриума		
+_CDA66BB129164B9B	r_06_13_kitin	Место исследования	Места исследования		
+_E589639EDA4288B3	debug_place_visit	place de test 1	place de test 1		
+_6C857FCF85DB7CA3	debug_place_visit2	place de test 2	place de test 2		
+_46DF20FF673994DF	debug_place_teleport	place de teleport	place de teleport		
+_F48DF7D5800A5CC9	r_05_15_repere_bandits	Бандитское логово	Бандитского логова		
+_F50B113966162410	r_03_38_village_shadowrunners	Лагерь	Лагеря		
+_33DA74E9E7B74760	place_r_05_41_foreuses	Неопознанный ресурс	Неопознанного ресурса		
+_CC24A4B02636DE04	place_r_09_09_arrivee_bagne	Место входа в Кровоточащую бездну	Места входа в Кровоточащую бездну		
+_C8E5A6975D642900	welcomer_natae_guardchief	Начальник стражи Нэтея			
+_42BFED62CB5D99C2	welcomer_natae_intendant	Интендант Нэтея			
+_5C34809BD9B7B892	welcomer_natae_sage	Мудрец Нэтея			
+_C2BFC5624B5D71C2	welcomer_davae_intendant	Интендант Дэвея			
+_5A34589BD9B7C092	welcomer_davae_sage	Мудрец Дэвея			
+_48E57E97DD640100	welcomer_davae_guardchief	Начальник стражи Дэвея			
+_579522D7DAB182EB	welcomer_avalae_guardchief	Начальник стражи Эвелея			
+_D91530CE24E844A4	welcomer_avalae_sage	Мудрец Эвелея			
+_BFB24E8DBE6F89D5	welcomer_avalae_intendant	Интендант Эвелея			
+_FEABB5156969D8D2	welcomer_avendale	Чиновник Эвендейла			
+_3B2F0A60303F3DBE	welcomer_windermeer	Чиновник Виндермеера			
+_C110E2536D7E35DC	welcomer_crystabell	Чиновник Кристабелла			
+_F2F241D9DB2EFD92	welcomer_jenlai_guardchief	Начальник стражи Джен Лай			
+_5A0F6D8FBFEC047C	welcomer_jenlai_intendant	Интендант Джен Лай			
+_D47ED9B5D4485478	welcomer_jenlai_sage	Мудрец Джен Лай			
+_1CBF798FC07C2079	welcomer_mincho_intendant	Интендант Мин Хо			
+_B4A24DD9DCBE198F	welcomer_mincho_guardchief	Начальник стражи Мин Хо			
+_D41E01ACD4A88072	welcomer_mincho_sage	Мудрец Мин Хо			
+_DB1F658A412C2079	welcomer_hoicho_intendant	Интендант Хоа Шо			
+_937EEDACD458986D	welcomer_hoicho_sage	Мудрец Хоа Шо			
+_730239D45D6E198F	welcomer_hoicho_guardchief	Начальник стражи Хоа Шо			
+_BC5EF96FBE283C5E	episode2_camp_karavan_fyros_island	Лагерь Каравана в дюнах Аэлиуса	Лагеря Каравана в дюнах Аэлиуса		
+_036E80DFA0CB2BB0	episode2_camp_kami_fyros_island	Лагерь Ками в дюнах Аэлиуса	Лагеря Ками в дюнах Аэлиуса		
+_0DFE209AE36A8F9A	episode2_camp_kami_matis_island	Лагерь Ками в лесу Алмати	Лагеря Ками в лесу Алмати		
+_917E577AB344704E	episode2_camp_karavan_matis_island	Лагерь Каравана в дюнах Аэлиуса	Лагеря Каравана в дюнах Аэлиуса		
+_409ED04BDF5FC049	episode2_camp_karavan_tryker_island	Лагерь Каравана у озера Олкерн	Лагеря Каравана у озера Олкерн		
+_FB7BA7032F267DF7	episode_2_camp_kami_tryker_island	Лагерь Ками у озера Олкерн	Лагеря Ками у озера Олкерн		
+_D88CD76935E9BC0D	region_newbieland_hunting_grounds	Охотничьи Угодья	Охотничьих Угодьев		
+_FF7B805391F2CE15	region_newbieland_the_shattered_ruins	Разрушенный город	Разрушенного города		
+_6BAB95F65A4612C5	place_shattered_ruins_silan	Руины Силана	Руины Силана		
+_C1B6D7A38910C280	place_shattered_ruins_trone	Тронный зал	Тронного зал		
+_F7ED900FB606BF52	region_newbieland_starting_zone	Земля Рейнджеров	Земель Рейнджеров		
+_F207FC792E5B7FD7	place_starting_zone_starting_city	Лагерь Рейнджеров	Лагеря Рейнджеров		
+_1FC0BD051FBA29C2	place_starting_zone_arena	Арена	Арены		
+_1AD4EDDE25EF9A7C	region_newbieland_blight_zone	Зона поражения Гуу	Зоны поражения Гуу		
+_7B1F3EDFDAE106E2	region_newbieland_shining_lake	Сверкающее озеро	Сверкающего озера		
+_76195654F845B2F6	region_newbieland_kitins_jungle	Джунгли Китинов	Джунглей Китинов		
+_80BF8CB067DB7D2B	Karavan Embassy	Посольство Каравана	Посольства Каравана		
+_13D97FAB68F4205D	Kami_Enclave	Анклав Ками	Анклава Ками		
+_710627533E632FDF	place_hunting_grounds_gingo_lair	Логово Рагусов	Логова Рагусов		
+_CC0CE3C65B7FA15A	mission_place_tryker_02	prospecting	prospecting		
+_CC0CE3C65B8FA15A	mission_place_tryker_03	prospecting	prospecting		
+_AADAC0B4A615B39C	mission_place_ranger_01				
+_AADAC0B4A625B39C	mission_place_ranger_02				
+_A35A89087EC54678	mission_place_ilot				
+_C2EB1553A7B1C119	newbieland	Освоенные Земли	Освоенных Земель		
+_FB2D817EC31E3E85	region_newbieland	Малоизученные Земли 	Малоизученных Земель 		
+_CC0CE3C6639FA15A	mission_place_tryker_04	Место разведки ресурсов	Места разведки ресурсов		
+_7B1B7F9960E2527E	continent_corrupted_moor	Трясины Тления	Трясины Тления		
+_3874F76125ABDBD0	region_karavanexclusionzone	Изрезанные Равнины	Изрезанных Равнин		
+_F72E18E86DBAD71D	place_tcm_karavan_camp	Экспериментальный Лагерь Каравана	Экспериментального Лагеря Каравана		
+_84DA729970FAC598	region_hopeforest	Лес Сновидений	Леса Сновидений		
+_3EF4CE5601CB0411	place_tcm_company_camp	Миссия Ками	Миссии Ками		
+_F626D6DF156DE713	place_tcm_company_eternal_tree	Лагерь Общества Вечного Древа	Лагеря Общества Вечного Древа		
+_A742D3D0E55D59D7	place_tcm_keepers	Археологическая база Хранителей	Археологической базы Хранителей		
+_3B9B8E81B2B19923	place_tcm_tutors	Святилище Наставников	Святилища Наставников		
+_454F7CA10219582C	region_northspire	Северные Пики	Северных Пиков		
+_AC63A7DA9FD6BECE	place_tcm_chlorogoo_camp	Форт ХлороГуу	Форта ХлороГуу		
+_5195E131C73B2859	region_fyreruins	Старый город Файросов	Старого города Файросов		
+_8925B345F92FFD83	place_tcm_arena	Арена Жертвоприношений	Арены Жертвоприношений		
+_5C614563DCCA42D2	place_tcm_kitin_nest	Заброшенная база Каравана	Заброшенной базы Каравана		
+_72E6CE3DF34E5F02	region_mistvalley	Долина Туманов	Долины Туманов		
+_7D2B4C1CAFA6BFFC	fyre_village	Деревня Огненные Руины	Деревни Огненных Руины		
+_270C2BB5543D5BA2	place_tcm_karavan_south_west	Зона Патрулирования	Зоны Патрулирования		
+_270C1BA3543D5BA2	place_tcm_karavan_south_east	Зона Патрулирования	Зоны Патрулирования		
+_729FB81B15BB49D6	place_tcm_karavan_raid_ceremony_trigger	Полевая Экспериментальная Лаборатория Каравана	Полевой Экспериментальной Лаборатории Каравана		
+_2B9C66C11C4631ED	place_tcm_karavan_raid_ceremony_target	Полевая Экспериментальная Лаборатория Каравана	Полевой Экспериментальной Лаборатории Каравана		
+_0CF23F6CE22867E1	place_tcm_company_raid_ceremony_trigger	Миссия Ками	Миссия Ками		
+_72621C2FB0575EE1	place_tcm_company_raid_ceremony_target	Миссия Ками	Миссия Ками		
+_2454F9A3756BE489	place_tcm_shaman_tent	Если вы видите этот текст, произошла следующая ошибка: place_tcm_shaman_tent	Если вы видите этот текст, произошла следующей ошибка: place_tcm_shaman_tent		
+_7086751EB6C58F8F	place_tcm_rock_fall	Заброшенная база Каравана	Заброшенной базы Каравана		
+_D986F2FBCC9A5D45	place_tcm_karavan_outpost	Аванпост Каравана	Аванпоста Каравана		
+_57B18A7D7106EFE2	kitiniere_cattle_room	Хлев	Хлева	Хлев	Хлеву
+_C48FA13F83FE24FC	kitiniere_dark_mines	Темные шахты	Темных шахт	Темные шахты	Темным шахтам
+_3A30A9CE6C46971F	kitiniere_eggs_room	Главный зал яиц	Главного зала яиц	Главный зал яиц	Главному залу яиц
+_AA384C96EF18E4BB	kitiniere_entrance	Вход	Входа	Вход	Входу
+_24CA70A7238454B2	kitiniere_old_mines	Древние шахты	Древних шахт	Древние шахты	Древним шахтам
+_44F20D1B6CB6931E	kitiniere_princes_room	Покои Принца	Покоев Принца	Покои Принца	Покоям Принца
+_ED795F15E6D9C493	kitiniere_queen_room	Покои Королевы	Покоев Королевы	Покои Королевы	Покоям Королевы
+_2959ECAE0CB888AF	kitiniere	Логово китинов	Логова китинов	Логово китинов	Логову китинов
+_9701C07FF26F0E41	continent_kitiniere	Логово китинов	Логова китинов		
+_7556019ACD0C07D7	place_mission_fyros_01_yubo	Сады юбо	Садов юбо		
+_46BF61EE6B3E0F09	place_mission_fyros_02_huntingground_t1	Группа бодоков	Группы бодоков		
+_2DED2FD120F0B5AB	place_mission_fyros_02_huntingground_t1exit	Place pipo	Place pipo		
+_2DED2FD12000B5AB	place_mission_fyros_02_huntingground_t2exit	Place pipo	Place pipo		
+_C8D0B0E082190B1C	place_mission_fyros_02_huntingground_t2	Группа Юбо	Группы Юбо		
+_E12DF302E2D0898E	place_mission_fyros_02_huntingground	Охотничьи угодья	Охотничьих угодьев		
+_5E480BFFD3CF01AB	place_mission_fyros_04_carcasse	место преступления	места преступления		
+_BFB72D82489D03B7	place_mission_fyros_04_ragus	Стая рагусов	Стаи рагусов		
+_1B83DD9701AFB48C	place_mission_zorai_rendor	Равнины рендоров	Равнин рендоров		
+_3F9B714E67806100	place_shooting_range	Место для упражнений	Места для упражнений		
+_42EBB9231FA2290D	place_mission_javezone	Лес джавингов	Леса джавингов		
+_C59E293FF88FC82B	place_mission_slavezone	Поля словини	Полей словини		
+_8B05117DBECCE27B	place_forage_start	Зона поиска месторождений	Зоны поиска месторождений		
+_D32CB2D7CF615792	place_forage_zun	Zun Prospection Zone	Zun Prospection Zone		
+_65DD63BF98F5768D	place_forage_shat	Множественная зона поиска месторождений	Множественной зоны поиска месторождений		
+_651E2A3B082B51E9	place_forage_chloro	Очаги гуу	Очагов Гуу		
+_A4C578AF23F6B7A0	gerder_food	Пища Гердера			
+_0B9FC534BF35F140	rpjob_magnecarto_1_a	Зона измерения магнетизма А	Зоны измерения магнетизма А	Зону измерения магнетизма А	Зоне измерения магнетизма А
+_4B9FC934BF35F140	rpjob_magnecarto_1_b	Зона измерения магнетизма Б	Зоны измерения магнетизма Б	Зону измерения магнетизма Б	Зоне измерения магнетизма Б
+_8B9FCD34BF35F140	rpjob_magnecarto_1_c	Зона измерения магнетизма Г	Зоны измерения магнетизма Г	Зону измерения магнетизма Г	Зоне измерения магнетизма Г
+_CC9FD134BF35F140	rpjob_magnecarto_1_d	Зона измерения магнетизма Д	Зоны измерения магнетизма Д	Зону измерения магнетизма Д	Зоне измерения магнетизма Д
+_0B9FC934BF35F140	rpjob_magnecarto_2_a	Зона измерения магнетизма А	Зоны измерения магнетизма А	Зону измерения магнетизма А	Зоне измерения магнетизма А
+_4B9FCD34BF35F140	rpjob_magnecarto_2_b	Зона измерения магнетизма Б	Зоны измерения магнетизма Б	Зону измерения магнетизма Б	Зоне измерения магнетизма Б
+_8B9FD134BF35F140	rpjob_magnecarto_2_c	Зона измерения магнетизма В	Зоны измерения магнетизма В	Зону измерения магнетизма В	Зоне измерения магнетизма В
+_CC9FD534BF35F140	rpjob_magnecarto_2_d	Зона измерения магнетизма Г	Зоны измерения магнетизма Г	Зону измерения магнетизма Г	Зоне измерения магнетизма Г
+_0B9FCD34BF35F140	rpjob_magnecarto_3_a	Зона измерения магнетизма А	Зоны измерения магнетизма А	Зону измерения магнетизма А	Зоне измерения магнетизма А
+_4B9FD134BF35F140	rpjob_magnecarto_3_b	Зона измерения магнетизма Б	Зоны измерения магнетизма Б	Зону измерения магнетизма Б	Зоне измерения магнетизма Б
+_8B9FD534BF35F140	rpjob_magnecarto_3_c	Зона измерения магнетизма В	Зоны измерения магнетизма В	Зону измерения магнетизма В	Зоне измерения магнетизма В
+_CC9FD934BF35F140	rpjob_magnecarto_3_d	Зона измерения магнетизма Г	Зоны измерения магнетизма Г	Зону измерения магнетизма Г	Зоне измерения магнетизма Г
+_0B9FD134BF35F140	rpjob_magnecarto_4_a	Зона измерения магнетизма А	Зоны измерения магнетизма А	Зону измерения магнетизма А	Зоне измерения магнетизма А
+_4B9FD534BF35F140	rpjob_magnecarto_4_b	Зона измерения магнетизма Б	Зоны измерения магнетизма Б	Зону измерения магнетизма Б	Зоне измерения магнетизма Б
+_8B9FD934BF35F140	rpjob_magnecarto_4_c	Зона измерения магнетизма В	Зоны измерения магнетизма В	Зону измерения магнетизма В	Зоне измерения магнетизма В
+_CC9FDD34BF35F140	rpjob_magnecarto_4_d	Зона измерения магнетизма Г	Зоны измерения магнетизма Г	Зону измерения магнетизма Г	Зоне измерения магнетизма Г
+_0B9FD534BF35F140	rpjob_magnecarto_5_a	Зона измерения магнетизма А	Зоны измерения магнетизма А	Зону измерения магнетизма А	Зоне измерения магнетизма А
+_4B9FD934BF35F140	rpjob_magnecarto_5_b	Зона измерения магнетизма Б	Зоны измерения магнетизма Б	Зону измерения магнетизма Б	Зоне измерения магнетизма Б
+_8B9FDD34BF35F140	rpjob_magnecarto_5_c	Зона измерения магнетизма В	Зоны измерения магнетизма В	Зону измерения магнетизма В	Зоне измерения магнетизма В
+_CC9FE134BF35F140	rpjob_magnecarto_5_d	Зона измерения магнетизма Г	Зоны измерения магнетизма Г	Зону измерения магнетизма Г	Зоне измерения магнетизма Г
+_FE340A03BD4BB987	kitinslair_zone_1	Начальная открытая зона Логова китинов	Начальной открытой зоны Логова китинов	Начальную открытую зону Логова китинов	Начальной открытой зоне Логова китинов
+_43CF242BA7986462	place_matis_island_2	Пик Данте			
+_153E9109EAE82056	region_matis_island_1	Леса Алмати	Лесов Алмати		
+_424A85186C58FC20	region_matis_island_2	Лагерь Данте			
+_E438DC9DA9C9AC6E	region_matis_island_3				
+_DFD4F60155444143	continent_matis_island	Старые земли	Старых земель		
+_5FE21E8487AF99BC	boss_tryker_light_island_zone	Лагерь Данте			
+_4DF006937CDFE456	place_matis_island_1	Лагерь Рэйнджеров	Лагеря Рэйнджеров		
+_D31864B75FE9A0B2	place_matis_island_3				
+_FCB64A9225573F9D	boss_zorai_light_maincamp	Тайный лагерь Пэй-Руза	Тайного лагеря Пэй-Руза	Тайный лагерь Пэй-Руза	Тайному лагерю Пэй-Руза
+_0A052D7DE3336174	boss_zorai_light_startcamp	Лагерь Пэй-Руза	Лагеря Пэй-Руза	Лагерь Пэй-Руза	Лагерю Пэй-Руза
+_F04B39B29F5A18BD	place_cwmh01_mp1	Область добычи кости	Области добычи кости	Области добычи кости	Области добычи кости
+_F45B39C29F5A18BD	place_cwmh02_mp1	Область добычи корня	Области добычи корня	Области добычи корня	Области добычи корня
+_74BB600DA0D818FA	place_cwmh03_mp1	Область добычи спор	Области добычи спор	Области добычи спор	Области добычи спор
+_E975870968B79A7F	cwfh01_mp1	Область добычи мусора	Области добычи мусора	Области добычи мусора	Области добычи мусора
+_A7C317B4A194A372	cwfh02_mp1	Область добычи кости	Области добычи кости	Области добычи кости	Области добычи кости
+_ABE6EEB0AFC6B265	cwfh03_mp1	Область добычи грязи	Области добычи грязи	Области добычи грязи	Области добычи грязи
+_6AF8449C1E94D37B	cwff03_termites	Термитник	Термитника	Термитник	Термитнику
+_731B4014A0D81801	place_cwth01_mp1	Область добычи ракушек	Области добычи кости	Области добычи кости	Области добычи кости
+_F47B11C79F5A18BD	place_cwth02_mp1	Область добычи торфа	Области добычи кости	Области добычи кости	Области добычи кости
+_345B39C99F5A18BD	place_cwth03_mp1	Область добычи корня	Области добычи кости	Области добычи кости	Области добычи кости
+_739C39CA9F5A18BD	place_cwzh01_mp1	Область добычи мха	Области добычи кости	Области добычи кости	Области добычи кости
+_B04B51C19F5A18BD	place_cwzh02_mp1	Область добычи помета	Области добычи кости	Области добычи кости	Области добычи кости
+_74DB3417A0D81801	place_cwzh03_mp1	Область добычи жемчуга	Области добычи кости	Области добычи кости	Области добычи кости
+_42DFA10429F6E8C4	place_cimetiere_avalae	Кладбище Эвелей	Кладбища Эвелей	Кладбище Эвелей	Кладбищу Эвелей
+_5193CA370C64AE7D	mission_ff60_emplacement_message	Message Location	Message Location	Message Location	Message Location

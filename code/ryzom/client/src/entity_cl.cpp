@@ -2296,7 +2296,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 				if (pos != ucstring::npos)
 				{
 					ucstring sn = replacement;
-					_EntityName = sn.substr(0, pos);
+					_EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(sn.substr(0, pos));
 					ucstring::size_type pos2 = sn.find('$', pos + 1);
 					_TitleRaw = sn.substr(pos+1, pos2 - pos - 1);
 					replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
@@ -2309,7 +2309,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 			{
 				// build the final name
 				p1 = _EntityName.find('$');
-				_EntityName   = _EntityName.substr(0, p1);	// + _Name.substr(p2+1)
+				_EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(_EntityName.substr(0, p1));	// + _Name.substr(p2+1)
 				// Get extended name
 				_NameEx = replacement;
 				newtitle = _NameEx;
@@ -2326,6 +2326,10 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 				if ( titleEnum == CHARACTER_TITLE::FBT )
 					_HasReservedTitle = true;
 			}
+		}
+		else
+		{
+			_EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(_EntityName);
 		}
 	}
 

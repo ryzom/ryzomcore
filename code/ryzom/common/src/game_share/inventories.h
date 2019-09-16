@@ -34,8 +34,8 @@ WARNING!!!!! If you change MAX_INVENTORY_ANIMAL value, you'll have to:
 * ******/
 #define MAX_PACK_ANIMAL					3
 #define MAX_MEKTOUB_MOUNT				1
-#define MAX_OTHER_PET					0
-#define MAX_INVENTORY_ANIMAL			( MAX_PACK_ANIMAL + MAX_MEKTOUB_MOUNT )
+#define MAX_OTHER_PET					3
+#define MAX_INVENTORY_ANIMAL			( MAX_PACK_ANIMAL + MAX_MEKTOUB_MOUNT + MAX_OTHER_PET)
 
 // This give by which value the WEIGHT in database must be divided to get the value in Kg
 // valueKg= valueDb / DB_WEIGHT_SCALE
@@ -159,22 +159,25 @@ namespace INVENTORIES
 			temporary,						// 1
 			equipment,						// 2
 			bag,							// 3
-			pet_animal,						// 4 Character can have 5 pack animal
+			pet_animal,						// 4 Character can have 7 pack animal
 			pet_animal1 = pet_animal,	// for toString => TInventory convertion
 			pet_animal2,
 			pet_animal3,
 			pet_animal4,
-			max_pet_animal,					// 8
-			NUM_INVENTORY = max_pet_animal,	// 8
-			UNDEFINED = NUM_INVENTORY,		// 8
+			pet_animal5,
+			pet_animal6,
+			pet_animal7,
+			max_pet_animal,					// 11
+			NUM_INVENTORY = max_pet_animal,	// 11
+			UNDEFINED = NUM_INVENTORY,		// 11
 
-			exchange,						// 9  This is not a bug : exchange is a fake inventory
-			exchange_proposition,			// 10  and should not count in the number of inventory
+			exchange,						// 12  This is not a bug : exchange is a fake inventory
+			exchange_proposition,			// 13  and should not count in the number of inventory
 			// same for botChat trading.
-			trading,						// 11
-			reward_sharing,					// 12 fake inventory, not in database.xml. Used by the item info protocol only
-			guild,							// 13 (warning: number stored in guild saved file)
-			player_room,					// 14
+			trading,						// 14
+			reward_sharing,					// 15 fake inventory, not in database.xml. Used by the item info protocol only
+			guild,							// 16 (warning: number stored in guild saved file)
+			player_room,					// 17
 			NUM_ALL_INVENTORY				// warning: distinct from NUM_INVENTORY
 	};
 

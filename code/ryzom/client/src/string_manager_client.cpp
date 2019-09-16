@@ -716,6 +716,12 @@ restartLoop:
 						if (!getString(param.StringId, str))
 							return false;
 
+						ucstring::size_type p1 = str.find('[');
+						if (p1 != ucstring::npos)
+						{
+							str = str.substr(0, p1)+STRING_MANAGER::CStringManagerClient::getLocalizedName(str.substr(p1));
+						}
+
 						// If the string is a player name, we may have to remove the shard name (if the string looks like a player name)
 						if(!str.empty() && !PlayerSelectedHomeShardNameWithParenthesis.empty())
 						{
@@ -1411,8 +1417,7 @@ const ucchar * CStringManagerClient::getSpecialWord(const std::string &label, bo
 	if (label[0] == '#')
 	{
 		static ucstring	rawString;
-		rawString = label.substr(1, label.size()-1);
-		return rawString.c_str();
+		return getLocalizedName(label.substr(1, label.size()-1));
 	}
 
 	// avoid case problems
@@ -1615,14 +1620,44 @@ const ucchar *CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CShee
 const ucchar *CStringManagerClient::getTitleLocalizedName(const ucstring &titleId, bool women)
 {
 	vector<ucstring> listInfos = getTitleInfos(titleId, women);
-
 	if (!listInfos.empty())
 	{
 		_TitleWords.push_back(listInfos[0]);
-		return _TitleWords.back().c_str();
+		return getLocalizedName(_TitleWords.back());
 	}
 	
-	return titleId.c_str();
+	return getLocalizedName(titleId);
+}
+
+
+const ucchar *CStringManagerClient::getLocalizedName(const ucstring &uctext)
+{
+	string text = uctext.toUtf8();
+	if (text[0] == '[')
+	{
+		vector<string> textLocalizations;
+		static ucstring defaultText;
+		splitString(text.substr(1), "[", textLocalizations);
+		if (!textLocalizations.empty())
+		{
+			for(uint i = 0; i<textLocalizations.size(); i++)
+			{
+				if (textLocalizations[i].substr(0, 3) == CI18N::getCurrentLanguageCode()+"]")
+				{
+					defaultText.fromUtf8(textLocalizations[i].substr(3));
+					return defaultText.c_str();
+				}
+				else if (textLocalizations[i].substr(0, 3) == "wk]")
+				{
+					defaultText.fromUtf8(textLocalizations[i].substr(3));
+				}
+			}
+		}
+		if (!defaultText.empty()) {
+			return defaultText.c_str();
+		}
+	}
+	return uctext.c_str();
 }
 
 // ***************************************************************************

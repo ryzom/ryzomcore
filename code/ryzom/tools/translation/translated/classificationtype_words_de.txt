@@ -1,0 +1,21 @@
+﻿*HASH_VALUE	classification_type	name	ia	da	p	pia	pda	description
+_3A05A61DFA348A48	TypeHumanoid	Humanoider	ein	der	Humanoide		die	Humanoiden
+_45506C09EB15E8F6	TypeHomin	Homin	ein	der	Homins		die	Homins
+_8E983B69E6751B5B	TypeDegenerated	Degenerierter	ein	der	Degenerierte		die	Degenerierten
+_A9DA837C2389848E	TypeFauna	Tier	ein	das	Tiere		die	Tiere
+_EB29AF7C2428C08C	TypeFlora	Pflanze	eine	die	Pflanzen		die	Pflanzen
+_418079E7A7FCBDE4	TypeDog	Hund	ein	der	Hunde		die	Hunde
+_2ADE76E9CAEF61FD	TypeRunner	Läufer	ein	der	Läufer		die	Läufer
+_E66DB1300A4F65FE	TypeHorse	Pferd	ein	das	Pferde		die	Pferde
+_41C17C16195279E3	TypeBird	Vogel	ein	der	Vögel		die	Vögel
+_86208D03AB86D000	TypeKitin	Kitin	ein	der	Kitins		die	Kitins
+_6BA9A101DCF285C2	TypeLandKitin	Kitin	ein	der	Kitins		die	Kitins
+_084D91AFD5E36708	TypeFlyingKitin	Flugkitin	ein	der	Flugkitins		die	Flugkitins
+_473159828751A1F6	TypeFish	Fisch	ein	der	Fische		die	Fische
+_2117AAF84DF7627F	TypeRyzomian	Ryzomier	ein	der	Ryzomier		die	Ryzomier
+_367CB4F6AA3221AE	TypeGreatRyzomian	großer Ryzomier	ein	der	große Ryzomier		die	großen Ryzomier
+_FABC37E2BA5ACB87	TypePachyderm	Dickhäuter	ein	der	Dickhäuter		die	Dickhäuter
+_20C7038A1FE556FD	TypeShellfish	Krebstier	ein	das	Krebstiere		die	Krebstiere
+_15EA8409E9C8749E	TypeKami	Kami	ein	der	Kami		die	Kami
+_84632E6705B131E4	TypeKaravan	Karavan	ein	der	Karavan		die	Karavan
+_66BC409E659A149E	TypeAll	Alle			Alle			Alle

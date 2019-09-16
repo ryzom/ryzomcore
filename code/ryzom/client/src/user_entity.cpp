@@ -1257,6 +1257,8 @@ void CUserEntity::applyMotion(CEntityCL *target)
 			mount->_Stages.addStage(NetMngr.getCurrentClientTick()+time, CLFECOMMON::PROPERTY_POSZ, z);
 		}
 	}
+
+
 }// applyMotion //
 
 

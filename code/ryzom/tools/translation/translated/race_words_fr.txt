@@ -1,0 +1,136 @@
+﻿*HASH_VALUE	race ID	name	ia	da	cc	p	pia	pda
+_A6AB2C9934550CBC	Fyros	Fyros	un	le	du	Fyros	des	les
+_E7CB9C9EA95430A4	Matis	Matis	un	le	du	Matis	des	les
+_ECC9D489AE5810A4	Tryker	Tryker	un	le	du	Trykers	des	les
+_AB51CA9C65185C9F	Zorai	Zoraï	un	le	du	Zoraïs	des	les
+_6738B082E379F0AE	Karavan	Karavan	une	la	de la	Karavan	des	les
+_EA288C91A3585095	Tribe	Tribu	une	la	de la	Tribus	des	les
+_2CD6E862AC34E48E	Common	Ordinaire	un	l'\d	de l'\d	Ordinaires	des	les
+_E78B54642B0A586C	Arma	Arma	un	l'\d	de l'\d	Armas	des	les
+_E877986CA4D9ECB9	Balduse	Baldusa	un	le	du	Baldusas	des	les
+_DED93048E8DADC79	Bul	Bodoc	un	le	du	Bodocs	des	les
+_6CA9A875A45934BC	Capryni	Capryni	un	le	du	Caprynis	des	les
+_6E6B247C28A74478	Cephaloplant	Jubla	un	le	du	Jublas	des	les
+_2AD80C589E8AEC9F	Chonari	Gingo	un	le	du	Gingos	des	les
+_24C9E46CA6B9D8A5	Clapclap	Prakker	un	le	du	Prakkers	des	les
+_E4B9D85F2C7898A7	Cococlaw	Clopper	un	le	du	Cloppers	des	les
+_649A4C5A645B502A	Cute	Cute	un	le	du	Cutes	des	les
+_DA38848EEE1644B3	Dag	Yubo	un	le	du	Yubos	des	les
+_1E8AA48F531984B9	Diranak	Horncher	un	le	du	Hornchers	des	les
+_A2EA7080DC795CC1	Electroalgs	Stinga	une	la	de la	Stingas	des	les
+_69CCFC7DEBFCA4C5	Estrasson	Cray	un	le	du	Crays	des	les
+_25B91083A2C75CAD	Filin	Messab	un	le	du	Messabs	des	les
+_6CA6C855AE370484	Frahar	Frahar	un	le	du	Frahars	des	les
+_85D668582A47BE85	Gibbai	Gibbaï	un	le	du	Gibbaïs	des	les
+_66C6F45CE74B50B2	Hachtaha	Goari	un	le	du	Goaris	des	les
+_5F589092269A58AE	Jungler	Torbak	un	le	du	Torbaks	des	les
+_A8FAFC95E5B884D3	Kakty	Lumper	un	le	du	Lumpers	des	les
+_E91844799DE6E889	Kalab	Kalab	un	le	du	Kalabs	des	les
+_66B8AC6A67086042	Kami	Kami	un	le	du	Kamis	des	les
+_6DE9185A9E88EC9F	Kazoar	Igara	un	l'\d	de l'\d	Igaras	des	les
+_22295C8D619B8CB0	Kitifly	Kizoar	un	le	du	Kizoars	des	les
+_A967B071AF99D886	Kitihank	Kinrey	un	le	du	Kinreys	des	les
+_2D1928895C3A9488	Kitiharak	Kizarak	un	le	du	Kizaraks	des	les
+_AA98C87D29A9ECB4	Kitikil	Kipesta	un	le	du	Kipestas	des	les
+_6A985489668810B3	Kitimandib	Kincher	un	le	du	Kinchers	des	les
+_EED9D491A3E70895	Kitin	Kitin	un	le	du	Kitins	des	les
+_AB79507DDF8958A2	Kitinagan	Kipucka	un	le	du	Kipuckas	des	les
+_24FB707EE636C4B2	Kitinega	Kirosta	un	le	du	Kirostas	des	les
+_1EE70896B148CC9A	Kitinokto	Kiban	un	le	du	Kibans	des	les
+_6A75F4806EFA64A9	Lightbird	Izam	un	l'\d	de l'	Izams	des	les
+_6B18A47CA78864B4	Mektoub	Mektoub	un	le	du	Mektoubs	des	les
+_A87A0070E91A20A1	Phytopsy	Psykopla	un	le	du	Psykoplas	des	les
+_2BD83C686EBB78A1	Pucetron	Kipee	un	le	du	Kipees	des	les
+_2BFA0C9566B710A4	Regus	Ragus	un	le	du	Ragus	des	les
+_A28AF86F9CA484CB	Ryzerb	Najab	un	le	du	Najabs	des	les
+_E648F0812DAACC99	Ryzoholo	Timari	un	le	du	Timaris	des	les
+_B027688DF0E9E0B5	Ryzoholok	Vorax	un	le	du	Vorax	des	les
+_DD9A98FDE6A9B4AB	SapEnslaver	Slaveni	un	le	du	Slavenis	des	les
+_ABDE4DD566A924AB	SpittingWeeds	Cratcha	un	le	du	Cratchas	des	les
+_662AE099E1986CAE	Swarmplants	Shooki	un	le	du	Shookis	des	les
+_AD98A88EAAEA94AF	Vampignon	Yelk	un	le	du	Yelks	des	les
+_6E4A088360B94CA6	Varinx	Varinx	un	le	du	Varinx	des	les
+_EAB8B4862D886C6C	Yber	Yber	un	l'\d	de l'	Ybers	des	les
+_658AD094682B948D	Zerx	Zerx	un	le	du	Zerx	des	les
+_2D3828AC5F265890	race_c1	Javing	un	le	du	Javings	des	les
+_EBF8B8C11E15F09D	race_c2	Cuttler	un	le	du	Cuttlers	des	les
+_649ADC991AD39BAA	race_c3	Ocyx	un	l'\d	de l'\d	Ocyx	des	les
+_E93AECC05FF65096	race_c4	Jugula	un	le	du	Jugulas	des	les
+_68C778AE1F65A889	race_c5	Kidinak	un	le	du	Kidinaks	des	les
+_29A93CAC6176389C	race_h1	Raspal	un	le	du	Raspals	des	les
+_2AB80CAC5DE63883	race_h2	Bawaab	un	le	du	Bawaabs	des	les
+_6BBAE4BD5EC6749F	race_h3	Frippo	un	le	du	Frippos	des	les
+_6B2828B061077096	race_h4	Rendor	un	le	du	Rendors	des	les
+_A538C48C91A6BC8B	race_h5	Gnoof	un	le	du	Gnoofs	des	les
+_A878E0BA5D963C98	race_h6	Bolobi	un	le	du	Bolobis	des	les
+_A5D8F8B3A1963894	race_h7	Shalah	un	le	du	Shalahs	des	les
+_A209A0C46156BCB1	race_h8	Ploderos	un	le	du	Ploderos	des	les
+_A8A838BAA2C6388B	race_h9	Wombai	un	le	du	Wombais	des	les
+_2109609496264C93	race_h10	Madakam	un	le	du	Madakams	des	les
+_2CB6848F1C656C82	race_h11	Arana	un	l'\d	de l'	Aranas	des	les
+_6756C0945C4550A1	race_h12	Gubani	un	le	du	Gubanis	des	les
+_E5B890C2A4E598AF	race_c6	Tyrancha	un	le	du	Tyranchas	des	les
+_2629B4959676A893	race_c7	Yetin	un	le	du	Yetins	des	les
+_01A8F8B90018E492	gooArma	Arma à Goo	un	l'\d	de l'	Armas à Goo	des	les
+_9E846FA06CAA4C7E	gooBalduse	Baldusa à Goo	un	le	du	Baldusas à Goo	des	les
+_8A7824AB6140B89A	gooBul	Bodoc à Goo	un	le	du	Bodocs à Goo	des	les
+_DE947FA3AF0C9483	gooCapryni	Capryni à Goo	un	le	du	Caprynis à Goo	des	les
+_9C49D4A995B9544D	gooCephaloplant	Jubla à Goo	un	le	du	Jublas à Goo	des	les
+_9C94DC8FD548B4B9	gooChonari	Gingo à Goo	un	le	du	Gingos à Goo	des	les
+_9075A0A02799D4BC	gooClapclap	Prakker à Goo	un	le	du	Prakkers à Goo	des	les
+_4CE5A0A0E90914B9	gooCococlaw	Clopper à Goo	un	le	du	Cloppers à Goo	des	les
+_0ED6C4C45682E09F	gooCute	Cute à Goo	un	le	du	Cutes à Goo	des	les
+_9894E48A2EB7885F	gooDag	Yubo à Goo	un	le	du	Yubos à Goo	des	les
+_98F2C8956EF850B9	gooDiranak	Horncher à Goo	un	le	du	Hornchers à Goo	des	les
+_1D0804A366573C5A	gooElectroalgs	Stinga à Goo	une	la	de la	Stingas à Goo	des	les
+_18D8646167EA3C8A	gooEstrasson	Cray à Goo	un	le	du	Crays à Goo	des	les
+_A5D92892A0E2889B	gooFilin	Messab à Goo	un	le	du	Messabs à Goo	des	les
+_DD77508FD5194CAF	gooFrahar	Frahar à Goo	un	le	du	Frahars à Goo	des	les
+_1BF65486932938A1	gooGibbai	Gibbaï à Goo	un	le	du	Gibbaïs à Goo	des	les
+_D0F8384FEDB97092	gooHachtaha	Goari à Goo	un	le	du	Goaris à Goo	des	les
+_DA2760536988CCBD	gooJungler	Torbak à Goo	un	le	du	Torbaks à Goo	des	les
+_E5F87C916783F0A2	gooKakty	Lumper à Goo	un	le	du	Lumpers à Goo	des	les
+_9CC94C6C6996FB8A	gooKalab	Kalab à Goo	un	le	du	Kalabs à Goo	des	les
+_0B96B8A95342D484	gooKami	Kami à Goo	un	le	du	Kamis à Goo	des	les
+_1D365CB79E64CCC1	gooKazoar	Igara à Goo	un	l'\d	de l'\d	Igaras à Goo	des	les
+_D9967C5A27C830AD	gooKitifly	Kizoar à Goo	un	le	du	Kizoars à Goo	des	les
+_5A1693A6E74BB48C	gooKitihank	Kinrey à Goo	un	le	du	Kinreys à Goo	des	les
+_8D18ACAE24E7F06A	gooKitiharak	Kizarak à Goo	un	le	du	Kizaraks à Goo	des	les
+_E2148B966B5B9093	gooKitikil	Kipesta à Goo	un	le	du	Kipestas à Goo	des	les
+_2118E88CA318D852	gooKitimandib	Kincher à Goo	un	le	du	Kinchers à Goo	des	les
+_A0CB8C6C6E961BAA	gooKitin	Kitin à Goo	un	le	du	Kitins à Goo	des	les
+_4E78A89FAA47F06A	gooKitinagan	Kipucka à Goo	un	le	du	Kipuckas à Goo	des	les
+_508474A8B13884B0	gooKitinega	Kirosta à Goo	un	le	du	Kirostas à Goo	des	les
+_63A787A9674AA06E	gooKitinokto	Kiban à Goo	un	le	du	Kibans à Goo	des	les
+_E2091C4EAC59E45F	gooLightbird	Izam à Goo	un	l'\d	de l'\d	Izams à Goo	des	les
+_623463A36F3A988C	gooMektoub	Mektoub à Goo	un	le	du	Mektoubs à Goo	des	les
+_09F9DCBB28F84491	gooPhytopsy	Psykopla à Goo	un	le	du	Psykoplas à Goo	des	les
+_D5C85460EC88ACB4	gooPucetron	Kipee à Goo	un	le	du	Kipees à Goo	des	les
+_68295C7A6BD703B0	gooRegus	Ragus à Goo	un	le	du	Ragus à Goo	des	les
+_E9B9FCA7DBF4D0A7	gooRyzerb	Najab à Goo	un	le	du	Najabs à Goo	des	les
+_5F568BA4ABFA08A3	gooRyzoholo	Timari à Goo	un	le	du	Timaris à Goo	des	les
+_24568BB3670B1090	gooRyzoholok	Vorax à Goo	un	le	du	Vorax à Goo	des	les
+_26A9CCAA6CF3A794	gooSapEnslaver	Slaveni à Goo	un	le	du	Slavenis à Goo	des	les
+_1E78FC5ADAF97CAC	gooSpittingWeeds	Cratcha à Goo	un	le	du	Cratchas à Goo	des	les
+_2248FCA724482C72	gooSwarmplants	Shooki à Goo	un	le	du	Shookis à Goo	des	les
+_A0D85055E75AD07C	gooVampignon	Yelk à Goo	un	le	du	Yelks à Goo	des	les
+_E16790959A59C8B0	gooVarinx	Varinx à Goo	un	le	du	Varinx à Goo	des	les
+_CF08BCA217B4D87D	gooYber	Yber à Goo	un	l'\d	de l'\d	Ybers à Goo	des	les
+_D07808B21824248D	gooZerx	Zerx à Goo	un	le	du	Zerx à Goo	des	les
+_13299C8E12444055	gooc1	Javing à Goo	un	le	du	Javings à Goo	des	les
+_EA294C6E6C99982D	gooc2	Cuttler à Goo	un	le	du	Cuttlers à Goo	des	les
+_5F62BBBD6D874B74	gooc3	Ocyx à Goo	un	l'\d	de l'\d	Ocyx à Goo	des	les
+_16D8E49A0F852856	gooc4	Jugula à Goo	un	le	du	Jugulas à Goo	des	les
+_24287466A698C025	gooc5	Kidinak à Goo	un	le	du	Kidinaks à Goo	des	les
+_1749689D51947448	gooh1	Raspal à Goo	un	le	du	Raspals à Goo	des	les
+_53E9687E92940C49	gooh2	Bawaab à Goo	un	le	du	Bawaabs à Goo	des	les
+_17D8E8914FA55059	gooh3	Frippo à Goo	un	le	du	Frippos à Goo	des	les
+_1459B091D1D48C59	gooh4	Rendor à Goo	un	le	du	Rendors à Goo	des	les
+_5F64A8ACA4459833	gooh5	Gnoof à Goo	un	le	du	Gnoofs à Goo	des	les
+_D6A8A48CD174284E	gooh6	Bolobi à Goo	un	le	du	Bolobis à Goo	des	les
+_16E8849A4E04684E	gooh7	Shalah à Goo	un	le	du	Shalahs à Goo	des	les
+_2A69B7A22D86EF7F	gooh8	Ploderos à Goo	un	le	du	Ploderos à Goo	des	les
+_93B8A094D2747C50	gooh9	Wombai à Goo	un	le	du	Wombais à Goo	des	les
+_DFF68BA2E8546E64	gooh10	Madakam à Goo	un	le	du	Madakams à Goo	des	les
+_17A60B671616F740	gooh11	Arana à Goo	un	l'\d	de l'\d	Aranas à Goo	des	les
+_2AD6DB5BAC46271A	gooh12	Gubani à Goo	un	le	du	Gubanis à Goo	des	les

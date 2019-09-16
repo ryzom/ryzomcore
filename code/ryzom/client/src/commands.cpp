@@ -1386,7 +1386,7 @@ NLMISC_COMMAND(setItemName, "set name of items, sbrick, etc..","<sheet_id> <name
 	ucstring desc2;
 	if (args.size() > 2)
 		desc.fromUtf8(args[2]);
-	if (args.size() > 2)
+	if (args.size() > 3)
 		desc2.fromUtf8(args[3]);
 
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
@@ -4031,15 +4031,6 @@ NLMISC_COMMAND(displayActionCounter, "display the action counters", "")
 	return true;
 }
 
-
-NLMISC_COMMAND (url, "launch a browser to the specified url", "<url>")
-{
-	if (args.size () != 1)
-		return false;
-
-	return openURL(args[0]);
-}
-
 NLMISC_COMMAND( reconnect, "Reconnect to the same shard (self Far TP)", "")
 {
 	// If the server is up, the egs will begin the quit sequence (shortened only if we are in edition or animation mode).
@@ -4498,6 +4489,13 @@ NLMISC_COMMAND(debugItemInfo, "simulate a ItemInfo received from server", "itemS
 NLMISC_COMMAND(debugItemInfoWaiters, "log ItemInfoWaiters", "")
 {
 	getInventory().debugItemInfoWaiters();
+
+	return true;
+}
+
+NLMISC_COMMAND(debugItemInfoCache, "log ItemInfoCache", "")
+{
+	getInventory().debugItemInfoCache();
 
 	return true;
 }
@@ -5854,6 +5852,14 @@ NLMISC_COMMAND(failMission, "clear the content of a mission", "<mission index>")
 
 // ***************************************************************************
 
+
+NLMISC_COMMAND (url, "launch a browser to the specified url", "<url>")
+{
+	if (args.size () != 1)
+		return false;
+
+	return openURL(args[0]);
+}
 
 
 NLMISC_COMMAND(em, "emote command", "<emote phrase>")

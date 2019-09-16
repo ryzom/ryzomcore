@@ -3196,8 +3196,10 @@ void impulseUserBars(NLMISC::CBitMemStream &impulse)
 void impulseOutpostChooseSide(NLMISC::CBitMemStream &impulse)
 {
 	// read message
+	bool outpostInFire;
 	bool playerGuildInConflict;
 	bool playerGuildIsAttacker;
+	impulse.serial(outpostInFire);
 	impulse.serial(playerGuildInConflict);
 	impulse.serial(playerGuildIsAttacker);
 	uint32 ownerGuildNameId;
@@ -3208,7 +3210,7 @@ void impulseOutpostChooseSide(NLMISC::CBitMemStream &impulse)
 	impulse.serial( declTimer );
 
 	// start
-	OutpostManager.startPvpJoinProposal(playerGuildInConflict, playerGuildIsAttacker,
+	OutpostManager.startPvpJoinProposal(outpostInFire, playerGuildInConflict, playerGuildIsAttacker,
 		ownerGuildNameId, attackerGuildNameId, declTimer);
 }
 

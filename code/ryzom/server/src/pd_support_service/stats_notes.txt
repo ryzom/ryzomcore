@@ -1,2 +1,0 @@
-Add Scheduler
-* Add better management of output directory in scheduled tasks
