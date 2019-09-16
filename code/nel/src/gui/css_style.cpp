@@ -31,8 +31,6 @@ using namespace NLMISC;
 
 namespace NLGUI
 {
-	sint CCssStyle::styleStackIndex = 0;
-
 	uint CCssStyle::SStyleRule::specificity() const
 	{
 		uint count = 0;
