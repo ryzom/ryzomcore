@@ -1038,6 +1038,18 @@ namespace NLGUI
 				}
 			}
 
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
+			{
+				// If a line is selected and the line is not grayed and has right click action handler
+				if ((_Selected != -1) && (!_Lines[i].ViewText->getGrayed()) && !_Lines[_Selected].AHRightClick.empty())
+				{
+					CAHManager::getInstance()->runActionHandler (	_Lines[_Selected].AHRightClick,
+											CWidgetManager::getInstance()->getCtrlLaunchingModal(),
+											_Lines[_Selected].AHRightClickParams );
+					return true;
+				}
+			}
+
 			if (event.getType() == NLGUI::CEventDescriptor::mouse)
 			{
 				const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
@@ -1683,6 +1695,28 @@ namespace NLGUI
 			return;
 		}
 		_Lines[lineIndex].AHParams = params;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CGroupSubMenu::setRightClickHandler(uint lineIndex, const std::string &ah)
+	{
+		if (lineIndex > _Lines.size())
+		{
+			nlwarning("Bad index");
+			return;
+		}
+		_Lines[lineIndex].AHRightClick = ah;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CGroupSubMenu::setRightClickHandlerParam(uint lineIndex, const std::string &params)
+	{
+		if (lineIndex > _Lines.size())
+		{
+			nlwarning("Bad index");
+			return;
+		}
+		_Lines[lineIndex].AHRightClickParams = params;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -2632,6 +2666,20 @@ namespace NLGUI
 	{
 		if (_RootMenu)
 			_RootMenu->setActionHandlerParam(lineIndex, params);
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CGroupMenu::setRightClickHandler(uint lineIndex, const std::string &ah)
+	{
+		if (_RootMenu)
+			_RootMenu->setRightClickHandler(lineIndex, ah);
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CGroupMenu::setRightClickHandlerParam(uint lineIndex, const std::string &params)
+	{
+		if (_RootMenu)
+			_RootMenu->setRightClickHandlerParam(lineIndex, params);
 	}
 
 	// ------------------------------------------------------------------------------------------------
