@@ -204,11 +204,8 @@ namespace NLGUI
 			return Current.FontSize-2;
 		}
 
-		sint styleStackIndex = 0;
-
 		inline void pushStyle()
 		{
-			styleStackIndex++;
 			_StyleStack.push_back(Current);
 
 			Current.GlobalColor = false;
@@ -228,7 +225,6 @@ namespace NLGUI
 
 		inline void popStyle()
 		{
-			styleStackIndex--;
 			if (_StyleStack.empty())
 			{
 				Current = Root;
