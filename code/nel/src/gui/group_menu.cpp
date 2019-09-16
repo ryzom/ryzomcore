@@ -1221,7 +1221,7 @@ namespace NLGUI
 			pV->setText (name);
 		}
 		pV->setColor (_GroupMenu->_Color);
-		pV->setFontSize (_GroupMenu->_FontSize);
+		pV->setFontSize (_GroupMenu->_FontSize, _GroupMenu->_FontSizeCoef);
 		pV->setShadow (_GroupMenu->_Shadow);
 		pV->setShadowOutline (_GroupMenu->_ShadowOutline);
 		pV->setCheckable(checkable);
@@ -1310,7 +1310,7 @@ namespace NLGUI
 		}
 
 		pV->setColor (_GroupMenu->_Color);
-		pV->setFontSize (_GroupMenu->_FontSize);
+		pV->setFontSize (_GroupMenu->_FontSize, _GroupMenu->_FontSizeCoef);
 		pV->setShadow (_GroupMenu->_Shadow);
 		pV->setShadowOutline (_GroupMenu->_ShadowOutline);
 		pV->setCheckable(checkable);
@@ -1990,6 +1990,7 @@ namespace NLGUI
 		_ShadowColorGrayed = CRGBA::Black;
 		_HighLightOver.set(128, 0, 0, 255);
 		_FontSize = 12;
+		_FontSizeCoef = true;
 		_Shadow = false;
 		_ShadowOutline = false;
 		_ResizeFromChildH = _ResizeFromChildW = true;
@@ -2584,9 +2585,10 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CGroupMenu::setFontSize(uint fontSize)
+	void CGroupMenu::setFontSize(uint fontSize, bool coef)
 	{
 		_FontSize = fontSize;
+		_FontSizeCoef = coef;
 	}
 
 	// ------------------------------------------------------------------------------------------------

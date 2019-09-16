@@ -101,6 +101,12 @@ namespace NLGUI
 				return _TextureId;
 			}
 
+			// Return true if TextureId is not set
+			bool empty() const { return _TextureId < 0; };
+
+			// delete TextureId if set
+			void clear();
+
 			void serial(NLMISC::IStream &f);
 
 		private:

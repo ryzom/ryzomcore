@@ -48,6 +48,7 @@ const CRGBA CRGBA::Blue(0, 0, 255) ;
 const CRGBA CRGBA::Magenta(255, 0, 255) ;
 const CRGBA CRGBA::Cyan(0, 255, 255) ;
 const CRGBA CRGBA::White(255, 255, 255) ;
+const CRGBA CRGBA::Transparent(0, 0, 0, 0);
 
 // ***************************************************************************
 void CRGBA::serial(NLMISC::IStream &f)

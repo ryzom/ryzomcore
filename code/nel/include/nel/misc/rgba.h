@@ -377,6 +377,7 @@ public:
 	static const CRGBA Magenta ;
 	static const CRGBA Cyan ;
 	static const CRGBA White ;
+	static const CRGBA Transparent ;
 };
 
 
