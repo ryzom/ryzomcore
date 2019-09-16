@@ -554,7 +554,7 @@ namespace NLGUI
 				rVR.flush();
 		}
 
-		// Get the parent table
+		if (Border)
 		{
 			// TODO: monitor these in checkCoords and update when changed
 			uint8 contentAlpha = CWidgetManager::getInstance()->getGlobalColorForContent().A;
@@ -916,7 +916,9 @@ namespace NLGUI
 				}
 
 				// Additional space contributing to table width
-				sint32 tableBorderSpacing = Border->getLeftWidth() + Border->getRightWidth();
+				sint32 tableBorderSpacing = 0;
+				if (Border)
+					tableBorderSpacing += Border->getLeftRightWidth();
 				tableBorderSpacing += ((sint32)_Columns.size()+1) * CellSpacing;;
 
 				sint32 innerForceWidthMin = ForceWidthMin;
@@ -1284,7 +1286,7 @@ namespace NLGUI
 				if (Border)
 				{
 					currentY -= Border->getBottomWidth();
-					finalWidth += Border->getLeftWidth() + Border->getRightWidth();
+					finalWidth += Border->getLeftRightWidth();
 				}
 
 				// Resize the table
@@ -1705,6 +1707,8 @@ namespace NLGUI
 		{
 			uint32 w;
 			fromString((const char*)ptr, w);
+			if (!Border)
+				Border = new CSSBorderRenderer();
 			Border->setWidth(w, w, w, w);
 		}
 		//
@@ -1712,6 +1716,8 @@ namespace NLGUI
 		if (ptr)
 		{
 			CRGBA c = convertColor((const char*)ptr);
+			if (!Border)
+				Border = new CSSBorderRenderer();
 			Border->setColor(c, c, c, c);
 		}
 		//
