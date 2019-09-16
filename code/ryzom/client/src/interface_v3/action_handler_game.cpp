@@ -53,6 +53,7 @@
 #include "action_handler_tools.h"
 #include "../connection.h"
 #include "../client_chat_manager.h"
+#include "group_compas.h"
 
 // Game specific includes
 #include "../motion/user_controls.h"
@@ -2475,6 +2476,17 @@ class CAHTarget : public IActionHandler
 		if (entity && entity->properties().selectable() && !entity->getDisplayName().empty())
 		{
 			UserEntity->selection(entity->slot());
+			CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
+			if (gc)
+			{
+				CCompassTarget ct;
+				ct.setType(CCompassTarget::Selection);
+
+				gc->setActive(true);
+				gc->setTarget(ct);
+				gc->blink();
+				CWidgetManager::getInstance()->setTopWindow(gc);
+			}
 		}
 		else if (!quiet)
 		{
@@ -2484,6 +2496,33 @@ class CAHTarget : public IActionHandler
 };
 REGISTER_ACTION_HANDLER (CAHTarget, "target");
 
+// ***************************************************************************
+class CAHTargetLandmark : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	{
+		string search = getParam(Params, "search");
+		if (search.empty()) return;
+
+		bool startsWith = false;
+		if (search.size() > 0 && (search[0] == '\'' || search[0] == '"') && search[0] == search[search.size()-1])
+		{
+			startsWith = true;
+			search = trimQuotes(search);
+		}
+
+		const std::string mapid = "ui:interface:map:content:map_content:actual_map";
+		CGroupMap* cgMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(mapid));
+		if (cgMap)
+		{
+			if (!cgMap->targetLandmarkByName(search, startsWith))
+			{
+				CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
+			}
+		}
+	}
+};
+REGISTER_ACTION_HANDLER (CAHTargetLandmark, "target_landmark");
 
 
 class CAHAddShape : public IActionHandler

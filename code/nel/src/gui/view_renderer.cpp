@@ -1933,6 +1933,16 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CViewRenderer::CTextureId::clear()
+	{
+		if (_TextureId >= 0)
+		{
+			CViewRenderer::getInstance()->deleteTexture(_TextureId);
+			_TextureId = -1;
+		}
+	}
+
+	// ***************************************************************************
 	void CViewRenderer::CTextureId::serial(NLMISC::IStream &f)
 	{
 		std::string texName;
