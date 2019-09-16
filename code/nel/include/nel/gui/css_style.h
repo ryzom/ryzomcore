@@ -168,7 +168,6 @@ namespace NLGUI
 		}
 
 		static sint styleStackIndex;
-		
 
 		inline void pushStyle()
 		{
