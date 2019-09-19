@@ -2476,16 +2476,19 @@ class CAHTarget : public IActionHandler
 		if (entity && entity->properties().selectable() && !entity->getDisplayName().empty())
 		{
 			UserEntity->selection(entity->slot());
-			CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
-			if (gc)
+			if (ClientCfg.TargetChangeCompass)
 			{
-				CCompassTarget ct;
-				ct.setType(CCompassTarget::Selection);
+				CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
+				if (gc)
+				{
+					CCompassTarget ct;
+					ct.setType(CCompassTarget::Selection);
 
-				gc->setActive(true);
-				gc->setTarget(ct);
-				gc->blink();
-				CWidgetManager::getInstance()->setTopWindow(gc);
+					gc->setActive(true);
+					gc->setTarget(ct);
+					gc->blink();
+					CWidgetManager::getInstance()->setTopWindow(gc);
+				}
 			}
 		}
 		else if (!quiet)
