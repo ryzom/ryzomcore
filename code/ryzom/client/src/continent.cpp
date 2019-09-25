@@ -113,7 +113,7 @@ extern CContinentManager ContinentMngr;
 extern CEntityManager	EntitiesMngr;
 
 //-----------------------------------------------
-// CUserLandMark 
+// CUserLandMark
 //-----------------------------------------------
 
 NLMISC::CRGBA	CUserLandMark::getColor () const
@@ -742,20 +742,28 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 
 					for (uint i = 0; i < zonesAdded.size(); i++)
 					{
-						CSString luaScript;
 						string luaScriptName = CPath::lookup(zonesAdded[i]+".lua", false);
+
 						if (!luaScriptName.empty())
 						{
-							luaScript.readFromFile(luaScriptName);
-							CLuaManager::getInstance().executeLuaScript(luaScript, true);
-							nlinfo("loading %s", luaScriptName.c_str());
+							CIFile in;
+							if (in.open(luaScriptName))
+							{
+
+								string luaScript;
+								if (in.readAll(luaScript))
+								{
+									CLuaManager::getInstance().executeLuaScript(luaScript, true);
+									nlinfo("loading %s", luaScriptName.c_str());
+								}
+							}
 						}
 						else
 						{
 							nlinfo("file not found %s", luaScriptName.c_str());
 						}
 					}
-						
+
 					LandscapeIGManager.unloadArrayZoneIG(zonesRemoved);
 					LandscapeIGManager.loadArrayZoneIG(zonesAdded, &igAdded);
 				}
