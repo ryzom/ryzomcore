@@ -3143,7 +3143,7 @@ void CBankAccessor_PLR::TPACK_ANIMAL::init(ICDBStructNode *parent)
 
 	// branch init
 	
-	for (uint i=0; i<4; ++i)
+	for (uint i=0; i<7; ++i)
 	{
 		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("BEAST%u", i)), false );
 		nlassert(node != NULL);
