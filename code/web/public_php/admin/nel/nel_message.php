@@ -19,7 +19,7 @@
 		var $InputStream;
 		var $Pos;
 
-		function CMemStream ()
+		function __construct()
 		{
 			$this->InputStream = false;
 			$this->Pos = 0;
@@ -103,11 +103,6 @@
 	class CMessage extends CMemStream
 	{
 		var $MsgName;
-		
-		function CMessage()
-		{
-			$this->CMemStream();
-		}
 		
 		function setName($name)
 		{

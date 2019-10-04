@@ -61,6 +61,7 @@
 #include "game_share/bg_downloader_msg.h"
 
 #include "misc.h"
+#include "user_agent.h"
 
 void ConnectToShard();
 
@@ -782,6 +783,15 @@ void initLoginScreen()
 	if(pPM->isVerboseLog()) nlinfo("Using verbose log mode");
 
 	ClientApp = ClientCfg.ConfigFile.getVar("Application").asString(0);
+
+	// version
+	std::string ext;
+	if (ClientApp.find("ryzom_") != ucstring::npos)
+		ext = " (" + ClientApp.substr(6) + ")";
+
+	CViewText *pV = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:ver_value"));
+	if (pV)
+		pV->setHardText(getDisplayVersion() + (ext.empty() ? "" : ext));
 
 	// give priority to login specified as argument
 	string l = !LoginLogin.empty() ? LoginLogin:ClientCfg.LastLogin;

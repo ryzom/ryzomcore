@@ -4,6 +4,13 @@
 	 * THIS FILE SHOULD ONLY INCLUDE SMALL USEFUL FUNCTIONS
 	 */
 
+	if (!function_exists('ereg')) {
+		/** removed from php 7.0.0 */
+		function ereg($pattern, $line, &$match = array()) {
+			return preg_match('/'.$pattern.'/', $line, $match);
+		}
+	}
+
 	/*
 	 * pushes some data in the debug variable
 	 */

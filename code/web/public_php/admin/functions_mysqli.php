@@ -41,7 +41,7 @@ class sql_db
 	//
 	// Constructor
 	//
-	function sql_db($sqlserver, $sqluser, $sqlpassword, $database, $persistency = true)
+	function __construct($sqlserver, $sqluser, $sqlpassword, $database, $persistency = true)
 	{
 
 		$this->persistency = $persistency;
@@ -72,8 +72,7 @@ class sql_db
 		}
 		else
 		{
-			echo "Connection to mySQL failed!";
-			exit;
+			throw new \RuntimeException('Connection to mySQL failed!');
 		}
 	}
 
@@ -270,7 +269,7 @@ class sql_db_string extends sql_db
 	//
 	// Constructor ($connstring format : mysql://user:password@host/dbname)
 	//
-	function sql_db_string($connstring, $persistency = true)
+	function __construct($connstring, $persistency = true)
 	{
 		$ret = false;
 		if ($connstring != '')
@@ -282,10 +281,9 @@ class sql_db_string extends sql_db
 				$sqlpassword	= $params[2];
 				$database		= $params[4];
 
-				$ret = $this->sql_db($sqlserver, $sqluser, $sqlpassword, $database, $persistency);
+				$ret = parent::__construct($sqlserver, $sqluser, $sqlpassword, $database, $persistency);
 			}
 		}
-
 		return $ret;
 	}
 } // class sql_db_string
