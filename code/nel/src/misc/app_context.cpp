@@ -135,7 +135,7 @@ CApplicationContext::~CApplicationContext()
 		std::string message = toString("Instance '%s' still allocated at %p", it->first.c_str(), it->second);
 
 #ifdef NL_OS_WINDOWS
-		OutputDebugStringW(utf8ToWide(message));
+		OutputDebugStringW(utf8ToWide(message).c_str());
 #else
 		printf("%s\n", message.c_str());
 #endif
