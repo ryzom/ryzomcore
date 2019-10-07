@@ -4080,6 +4080,7 @@ int CLuaIHMRyzom::readUserChannels(CLuaState &ls)
 	return 1;
 }
 
+// ***************************************************************************
 int CLuaIHMRyzom::saveUserChannels(CLuaState &ls)
 {
 	const char *funcName = "saveUserChannels";

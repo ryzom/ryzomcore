@@ -607,6 +607,9 @@ struct CClientConfig
 	float			MaxMapScale;
 	float			R2EDMaxMapScale;
 
+	// If successfull /tar command should set compass or not
+	bool			TargetChangeCompass;
+
 	//////////////
 	// VERBOSES //
 	bool			VerboseVP;

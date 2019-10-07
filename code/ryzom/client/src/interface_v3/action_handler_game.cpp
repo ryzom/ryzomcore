@@ -2476,16 +2476,19 @@ class CAHTarget : public IActionHandler
 		if (entity && entity->properties().selectable() && !entity->getDisplayName().empty())
 		{
 			UserEntity->selection(entity->slot());
-			CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
-			if (gc)
+			if (ClientCfg.TargetChangeCompass)
 			{
-				CCompassTarget ct;
-				ct.setType(CCompassTarget::Selection);
+				CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
+				if (gc)
+				{
+					CCompassTarget ct;
+					ct.setType(CCompassTarget::Selection);
 
-				gc->setActive(true);
-				gc->setTarget(ct);
-				gc->blink();
-				CWidgetManager::getInstance()->setTopWindow(gc);
+					gc->setActive(true);
+					gc->setTarget(ct);
+					gc->blink();
+					CWidgetManager::getInstance()->setTopWindow(gc);
+				}
 			}
 		}
 		else if (!quiet)
@@ -4647,45 +4650,7 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerSortTribeFame, "sort_tribefame");
-
-// ***************************************************************************
-class CHandlerOutgameNaviGetKeys : public IActionHandler
-{
-	virtual void execute (CCtrlBase *pCaller, const std::string &Params)
-	{
-		if (!pCaller->getParent())
-			return;
-
-		if (pCaller->getParent()->getId() != "ui:outgame")
-			return;
-
-		if (Params.empty())
-		{
-			sint32 event = -1;
-
-			if (Driver->AsyncListener.isKeyPushed(KeyESCAPE)) event = 0;
-			if (Driver->AsyncListener.isKeyPushed(KeyDELETE)) event = 1;
-			if (Driver->AsyncListener.isKeyPushed(KeyRETURN)) event = 2;
-			if (Driver->AsyncListener.isKeyPushed(KeyDOWN))   event = 3;
-			if (Driver->AsyncListener.isKeyPushed(KeyUP))     event = 4;
-			if (Driver->AsyncListener.isKeyPushed(KeyI))      event = 5;
-			if (Driver->AsyncListener.isKeyPushed(KeyP))      event = 6;
-			if (Driver->AsyncListener.isKeyPushed(KeyE))      event = 7;
-			if (Driver->AsyncListener.isKeyPushed(KeyLEFT))   event = 8;
-			if (Driver->AsyncListener.isKeyPushed(KeyRIGHT))  event = 9;
-
-			std::string id = "create";
-			if (pCaller->getId() == "ui:outgame:charsel")
-				id = "sel";
-
-			if (event != -1)
-				CLuaManager::getInstance().executeLuaScript(toString("outgame:eventChar%sKeyGet(%i)", id.c_str(), event));
-		}
-		// reset previous input
-		Driver->AsyncListener.reset();
-	}
-};
-REGISTER_ACTION_HANDLER( CHandlerOutgameNaviGetKeys, "navigate_outgame" );
+(??)
 
 // ***************************************************************************
 class CHandlerTriggerIconBuffs : public IActionHandler
