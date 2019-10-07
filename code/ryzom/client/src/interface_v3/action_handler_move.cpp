@@ -295,6 +295,31 @@ class CAHRearView : public IActionHandler
 };
 REGISTER_ACTION_HANDLER (CAHRearView, "rear_view");
 
+
+// ------------------------------------------------------------------------------------------------
+class CAHRunAction : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	{
+
+		CActionsManager *pAM = &Actions;
+		pAM->validate(CAction::CName(Params.c_str(), ""));
+	}
+};
+REGISTER_ACTION_HANDLER (CAHRunAction, "run_action");
+
+// ------------------------------------------------------------------------------------------------
+class CAHStopAction : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	{
+
+		CActionsManager *pAM = &Actions;
+		pAM->unvalidate(CAction::CName(Params.c_str(), ""));
+	}
+};
+REGISTER_ACTION_HANDLER (CAHStopAction, "stop_action");
+
 // ------------------------------------------------------------------------------------------------
 class CAHCameraUp : public IActionHandler
 {
