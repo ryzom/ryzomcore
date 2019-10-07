@@ -119,6 +119,11 @@ public:		// Advanced Usage.
 	// return a string separated by \n or eof, used to parsing text file
 	void getline (char *buffer, uint32 bufferSize);
 
+	// read whole file into a string. resulting buffer may contain NULL chars.
+	// internal read position is modified.
+	// return true on success, false on failure.
+	bool readAll(std::string &buffer);
+
 	// return the size of the file
 	uint32 getFileSize () const { return _FileSize; }
 

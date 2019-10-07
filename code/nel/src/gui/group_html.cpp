@@ -52,6 +52,7 @@
 #include "nel/gui/html_element.h"
 #include "nel/gui/css_style.h"
 #include "nel/gui/css_parser.h"
+#include "nel/gui/css_border_renderer.h"
 
 #include <curl/curl.h>
 
@@ -286,28 +287,38 @@ namespace NLGUI
 			{
 				btn->setTextureOver(file);
 			}
+
+			return;
 		}
-		else
+
+		CViewBitmap *btm = dynamic_cast<CViewBitmap*>(view);
+		if(btm)
 		{
-			CViewBitmap *btm = dynamic_cast<CViewBitmap*>(view);
-			if(btm)
-			{
-				btm->setTexture (file);
-				btm->invalidateCoords();
-				btm->invalidateContent();
-				paragraphChange();
-			}
-			else
-			{
-				CGroupCell *btgc = dynamic_cast<CGroupCell*>(view);
-				if(btgc)
-				{
-					btgc->setTexture (file);
-					btgc->invalidateCoords();
-					btgc->invalidateContent();
-					paragraphChange();
-				}
-			}
+			btm->setTexture (file);
+			btm->invalidateCoords();
+			btm->invalidateContent();
+			paragraphChange();
+
+			return;
+		}
+
+		CGroupCell *btgc = dynamic_cast<CGroupCell*>(view);
+		if(btgc)
+		{
+			btgc->setTexture (file);
+			btgc->invalidateCoords();
+			btgc->invalidateContent();
+			paragraphChange();
+
+			return;
+		}
+
+		CGroupTable *table = dynamic_cast<CGroupTable*>(view);
+		if (table)
+		{
+			table->setTexture(file);
+
+			return;
 		}
 	}
 
@@ -433,10 +444,9 @@ namespace NLGUI
 	{
 		if (pVT)
 		{
-			pVT->setFontSize(style.FontSize);
 			pVT->setColor(style.TextColor);
 			pVT->setFontName(style.FontFamily);
-			pVT->setFontSize(style.FontSize);
+			pVT->setFontSize(style.FontSize, false);
 			pVT->setEmbolden(style.FontWeight >= FONT_WEIGHT_BOLD);
 			pVT->setOblique(style.FontOblique);
 			pVT->setUnderlined(style.Underlined);
@@ -697,7 +707,7 @@ namespace NLGUI
 	}
 
 	// Add a image download request in the multi_curl
-	void CGroupHTML::addImageDownload(const string &url, CViewBase *img, const CStyleParams &style, TImageType type)
+	void CGroupHTML::addImageDownload(const string &url, CViewBase *img, const CStyleParams &style, TImageType type, const std::string &placeholder)
 	{
 		std::string finalUrl;
 		img->setModulateGlobalColor(style.GlobalColor);
@@ -711,7 +721,6 @@ namespace NLGUI
 			return;
 		}
 
-		// TODO: if no image in cache, nothing is visible
 		finalUrl = upgradeInsecureUrl(getAbsoluteUrl(url));
 
 		// use requested url for local name (cache)
@@ -719,9 +728,14 @@ namespace NLGUI
 		LOG_DL("add to download '%s' dest '%s' img %p", finalUrl.c_str(), dest.c_str(), img);
 
 		// Display cached image while downloading new
-		if (type != OverImage && CFile::fileExists(dest))
+		if (type != OverImage)
 		{
-			setImage(img, dest, type);
+			std::string temp = dest;
+			if (!CFile::fileExists(temp))
+			{
+				temp = placeholder;
+			}
+			setImage(img, temp, type);
 			setImageSize(img, style);
 		}
 
@@ -1139,8 +1153,10 @@ namespace NLGUI
 		case HTML_STRONG:   renderPseudoElement(":before", elm); break;
 		case HTML_STYLE:    htmlSTYLE(elm); break;
 		case HTML_TABLE:    htmlTABLE(elm); break;
+		case HTML_TBODY:    renderPseudoElement(":before", elm); break;
 		case HTML_TD:       htmlTD(elm); break;
 		case HTML_TEXTAREA: htmlTEXTAREA(elm); break;
+		case HTML_TFOOT:    renderPseudoElement(":before", elm); break;
 		case HTML_TH:       htmlTH(elm); break;
 		case HTML_TITLE:    htmlTITLE(elm); break;
 		case HTML_TR:       htmlTR(elm); break;
@@ -1201,7 +1217,9 @@ namespace NLGUI
 		case HTML_STYLE:    htmlSTYLEend(elm); break;
 		case HTML_TABLE:    htmlTABLEend(elm); break;
 		case HTML_TD:       htmlTDend(elm); break;
+		case HTML_TBODY:    renderPseudoElement(":after", elm); break;
 		case HTML_TEXTAREA: htmlTEXTAREAend(elm); break;
+		case HTML_TFOOT:    renderPseudoElement(":after", elm); break;
 		case HTML_TH:       htmlTHend(elm); break;
 		case HTML_TITLE:    htmlTITLEend(elm); break;
 		case HTML_TR:       htmlTRend(elm); break;
@@ -1488,6 +1506,9 @@ namespace NLGUI
 
 		initImageDownload();
 		initBnpDownload();
+
+		// setup default browser style
+		setProperty("browser_css_file", "browser.css");
 	}
 
 	// ***************************************************************************
@@ -1765,6 +1786,11 @@ namespace NLGUI
 		if( name == "timeout" )
 		{
 			return toString( _TimeoutValue );
+		}
+		else
+		if( name == "browser_css_file" )
+		{
+			return _BrowserCssFile;
 		}
 		else
 			return CGroupScrollText::getProperty( name );
@@ -2140,6 +2166,36 @@ namespace NLGUI
 			return;
 		}
 		else
+		if( name == "browser_css_file")
+		{
+			_BrowserStyle.reset();
+			_BrowserCssFile = value;
+			if (!_BrowserCssFile.empty())
+			{
+				std::string filename = CPath::lookup(_BrowserCssFile, false, true, true);
+				if (!filename.empty())
+				{
+					CIFile in;
+					if (in.open(filename))
+					{
+						std::string css;
+						if (in.readAll(css))
+							_BrowserStyle.parseStylesheet(css);
+						else
+							nlwarning("Failed to read browser css from '%s'", filename.c_str());
+					}
+					else
+					{
+						nlwarning("Failed to open browser css file '%s'", filename.c_str());
+					}
+				}
+				else
+				{
+					nlwarning("Browser css file '%s' not found", _BrowserCssFile.c_str());
+				}
+			}
+		}
+		else
 			CGroupScrollText::setProperty( name, value );
 	}
 
@@ -2212,6 +2268,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "browse_redo", BAD_CAST _BrowseRedoButton.c_str() );
 		xmlSetProp( node, BAD_CAST "browse_refresh", BAD_CAST _BrowseRefreshButton.c_str() );
 		xmlSetProp( node, BAD_CAST "timeout", BAD_CAST toString( _TimeoutValue ).c_str() );
+		xmlSetProp( node, BAD_CAST "browser_css_file", BAD_CAST _BrowserCssFile.c_str() );
 
 		return node;
 	}
@@ -2394,6 +2451,12 @@ namespace NLGUI
 		ptr = xmlGetProp (cur, (xmlChar*)"timeout");
 		if(ptr)
 			fromString((const char*)ptr, _TimeoutValue);
+
+		ptr = xmlGetProp (cur, (xmlChar*)"browser_css_file");
+		if (ptr)
+		{
+			setProperty("browser_css_file", (const char *)ptr);
+		}
 
 		return true;
 	}
@@ -2592,31 +2655,49 @@ namespace NLGUI
 		// Keep this char ?
 		bool keep = true;
 
+		// char is between table elements
+		// TODO: only whitespace is handled, text is added to either TD, or after TABLE (should be before)
+		bool tableWhitespace = getTable() && (_Cells.empty() || _Cells.back() == NULL);
+
 		switch (input)
 		{
 			// Return / tab only in <PRE> mode
 		case '\t':
 		case '\n':
 			{
-				// Get the last char
-				ucchar lastChar = lastCharParam;
-				if (lastChar == 0)
-					lastChar = getLastChar();
-				keep = ((lastChar != (ucchar)' ') &&
-						(lastChar != 0)) || getPRE() || (_CurrentViewImage && (lastChar == 0));
-				if(!getPRE())
-					input = ' ';
+				if (tableWhitespace)
+				{
+					keep = false;
+				}
+				else
+				{
+					// Get the last char
+					ucchar lastChar = lastCharParam;
+					if (lastChar == 0)
+						lastChar = getLastChar();
+					keep = ((lastChar != (ucchar)' ') &&
+							(lastChar != 0)) || getPRE() || (_CurrentViewImage && (lastChar == 0));
+					if(!getPRE())
+						input = ' ';
+				}
 			}
 			break;
 		case ' ':
 			{
-				// Get the last char
-				ucchar lastChar = lastCharParam;
-				if (lastChar == 0)
-					lastChar = getLastChar();
-				keep = ((lastChar != (ucchar)' ') &&
-						(lastChar != (ucchar)'\n') &&
-						(lastChar != 0)) || getPRE() || (_CurrentViewImage && (lastChar == 0));
+				if (tableWhitespace)
+				{
+					keep = false;
+				}
+				else
+				{
+					// Get the last char
+					ucchar lastChar = lastCharParam;
+					if (lastChar == 0)
+						lastChar = getLastChar();
+					keep = ((lastChar != (ucchar)' ') &&
+							(lastChar != (ucchar)'\n') &&
+							(lastChar != 0)) || getPRE() || (_CurrentViewImage && (lastChar == 0));
+				}
 			}
 			break;
 		case 0xd:
@@ -3402,6 +3483,7 @@ namespace NLGUI
 			CViewBitmap *bitmap = dynamic_cast<CViewBitmap*> (view);
 			if (bitmap)
 			{
+				// TODO: background color should have separate bitmap from background texture
 				// Change the background color
 				bitmap->setColor (bgcolor);
 				bitmap->setModulateGlobalColor(false);
@@ -3424,6 +3506,7 @@ namespace NLGUI
 				bitmap->setPosRef(Hotspot_TL);
 				bitmap->setX(0);
 				bitmap->setY(0);
+				// FIXME: renders behind container background
 				bitmap->setRenderLayer(-2);
 				bitmap->setScale(scale);
 				bitmap->setTile(tile);
@@ -3434,7 +3517,7 @@ namespace NLGUI
 				else
 					bitmap->setSizeRef("");
 
-				addImageDownload(bgtex, view);
+				addImageDownload(bgtex, view, CStyleParams(), TImageType::NormalImage, "");
 			}
 		}
 	}
@@ -4919,49 +5002,7 @@ namespace NLGUI
 		_WaitingForStylesheet = false;
 		_StylesheetQueue.clear();
 		_Style.reset();
-
-		std::string css;
-
-		// TODO: browser css
-		css += "html { background-color: " + getRGBAString(BgColor) + "; color: " + getRGBAString(TextColor) + "; font-size: " + toString(TextFontSize) + "px;}";
-		css += "a { color: " + getRGBAString(LinkColor) + "; text-decoration: underline; -ryzom-modulate-color: "+toString(LinkColorGlobalColor)+";}";
-		css += "h1 { color: " + getRGBAString(H1Color) + "; font-size: "+ toString("%d", H1FontSize) + "px; -ryzom-modulate-color: "+toString(H1ColorGlobalColor)+";}";
-		css += "h2 { color: " + getRGBAString(H2Color) + "; font-size: "+ toString("%d", H2FontSize) + "px; -ryzom-modulate-color: "+toString(H2ColorGlobalColor)+";}";
-		css += "h3 { color: " + getRGBAString(H3Color) + "; font-size: "+ toString("%d", H3FontSize) + "px; -ryzom-modulate-color: "+toString(H3ColorGlobalColor)+";}";
-		css += "h4 { color: " + getRGBAString(H4Color) + "; font-size: "+ toString("%d", H4FontSize) + "px; -ryzom-modulate-color: "+toString(H4ColorGlobalColor)+";}";
-		css += "h5 { color: " + getRGBAString(H5Color) + "; font-size: "+ toString("%d", H5FontSize) + "px; -ryzom-modulate-color: "+toString(H5ColorGlobalColor)+";}";
-		css += "h6 { color: " + getRGBAString(H6Color) + "; font-size: "+ toString("%d", H6FontSize) + "px; -ryzom-modulate-color: "+toString(H6ColorGlobalColor)+";}";
-		css += "input[type=\"text\"] { color: " + getRGBAString(TextColor) + "; font-size: " + toString("%d", TextFontSize) + "px; font-weight: normal; text-shadow: 1px 1px #000;}";
-		css += "pre { font-family: monospace;}";
-		// th { text-align: center; } - overwrites align property
-		css += "th { font-weight: bold; }";
-		css += "textarea { color: " + getRGBAString(TextColor) + "; font-weight: normal; font-size: " + toString("%d", TextFontSize) + "px; text-shadow: 1px 1px #000;}";
-		css += "del { text-decoration: line-through;}";
-		css += "u { text-decoration: underline;}";
-		css += "em { font-style: italic; }";
-		css += "strong { font-weight: bold; }";
-		css += "small { font-size: smaller;}";
-		css += "dt { font-weight: bold; }";
-		css += "hr { color: rgb(120, 120, 120);}";
-		// block level elements
-		css += "address, article, aside, blockquote, details, dialog, dd, div, dl, dt, fieldset, figcaption, figure,";
-		css += "footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, li, main, nav, ol, p, pre, section, table,";
-		css += "ul { display: block; }";
-		css += "table { display: table; }";
-		// td { padding: 1px;} - overwrites cellpadding attribute
-		// table { border-spacing: 2px;} - overwrites cellspacing attribute
-		css += "table { border-collapse: separate;}";
-		// webkit pseudo elements
-		css += "meter::-webkit-meter-bar, meter::-webkit-optimum-value, meter::-webkit-suboptimum-value, meter::-webkit-even-less-good-value { background: none; }";
-		css += "meter::-webkit-meter-bar { background-color: rgb(100, 100, 100); width: 5em; height: 1em;}";
-		css += "meter::-webkit-meter-optimum-value { background-color: rgb(80, 220, 80); }";
-		css += "meter::-webkit-meter-suboptimum-value { background-color: rgb(220, 220, 80); }";
-		css += "meter::-webkit-meter-even-less-good-value { background-color: rgb(220, 80, 80); }";
-		// webkit pseudo elements
-		css += "progress::-webkit-progress-bar, progress::-webkit-progress-value { background: none; }";
-		css += "progress::-webkit-progress-bar { background-color: rgb(230, 230, 230); width: 10em; height: 1em; }";
-		css += "progress::-webkit-progress-value { background-color: rgb(0, 100, 180);}";
-		_Style.parseStylesheet(css);
+		_Style = _BrowserStyle;
 	}
 
 	// ***************************************************************************
@@ -5240,9 +5281,7 @@ namespace NLGUI
 	{
 		CGroupHTML::CCellParams cellParams;
 		if (!_CellParams.empty() && inherit)
-		{
 			cellParams = _CellParams.back();
-		}
 
 		if (_Style.hasStyle("background-color"))
 			cellParams.BgColor = _Style.Current.BackgroundColor;
@@ -5254,6 +5293,11 @@ namespace NLGUI
 
 		if (elm.hasNonEmptyAttribute("l_margin"))
 			fromString(elm.getAttribute("l_margin"), cellParams.LeftMargin);
+
+		if (_Style.hasStyle("height"))
+			cellParams.Height = _Style.Current.Height;
+		else if (elm.hasNonEmptyAttribute("height"))
+			fromString(elm.getAttribute("height"), cellParams.Height);
 
 		{
 			std::string align;
@@ -5984,16 +6028,20 @@ namespace NLGUI
 			ucstring ucValue;
 			ucValue.fromUtf8(elm.getAttribute("value"));
 
-			uint size = 120;
+			uint size = 20;
 			uint maxlength = 1024;
 			if (elm.hasNonEmptyAttribute("size"))
 				fromString(elm.getAttribute("size"), size);
 			if (elm.hasNonEmptyAttribute("maxlength"))
 				fromString(elm.getAttribute("maxlength"), maxlength);
 
+			// ryzom client used to have 'size' attribute in pixels, (12 == was default font size)
+			if (_Style.hasStyle("-ryzom-input-size-px") && _Style.getStyle("-ryzom-input-size-px") == "true")
+				size = size / 12;
+
 			string textTemplate(!templateName.empty() ? templateName : DefaultFormTextGroup);
 			// Add the editbox
-			CInterfaceGroup *textArea = addTextArea (textTemplate, name.c_str (), 1, size/12, false, ucValue, maxlength);
+			CInterfaceGroup *textArea = addTextArea (textTemplate, name.c_str (), 1, size, false, ucValue, maxlength);
 			if (textArea)
 			{
 				// Add the text area to the form
@@ -6208,7 +6256,8 @@ namespace NLGUI
 		// width: 5em, height: 1em
 		uint32 width = _Style.Current.Width > -1 ? _Style.Current.Width : _Style.Current.FontSize * 5;
 		uint32 height = _Style.Current.Height > -1 ? _Style.Current.Height : _Style.Current.FontSize;
-		uint32 border = _Style.Current.BorderWidth > -1 ? _Style.Current.BorderWidth : 0;
+		// FIXME: only using border-top
+		uint32 border = _Style.Current.BorderTopWidth > -1 ? _Style.Current.BorderTopWidth : 0;
 
 		uint barw = (uint) (width * meter.getValueRatio());
 		CRGBA bgColor = meter.getBarColor(elm, _Style);
@@ -6423,7 +6472,8 @@ namespace NLGUI
 		// width: 10em, height: 1em
 		uint32 width = _Style.Current.Width > -1 ? _Style.Current.Width : _Style.Current.FontSize * 10;
 		uint32 height = _Style.Current.Height > -1 ? _Style.Current.Height : _Style.Current.FontSize;
-		uint32 border = _Style.Current.BorderWidth > -1 ? _Style.Current.BorderWidth : 0;
+		// FIXME: only using border-top
+		uint32 border = _Style.Current.BorderTopWidth > -1 ? _Style.Current.BorderTopWidth : 0;
 
 		uint barw = (uint) (width * progress.getValueRatio());
 		CRGBA bgColor = progress.getBarColor(elm, _Style);
@@ -6498,7 +6548,7 @@ namespace NLGUI
 					sb->setMinH(_Style.Current.Height);
 
 				sb->setMaxVisibleLine(size);
-				sb->setFontSize(_Style.Current.FontSize);
+				sb->setFontSize(_Style.Current.FontSize, false);
 			}
 
 			entry.SelectBox = sb;
@@ -6571,36 +6621,82 @@ namespace NLGUI
 			fromString(elm.getAttribute("cellpadding"), table->CellPadding);
 
 		if (_Style.hasStyle("width"))
-			getPercentage(table->ForceWidthMin, table->TableRatio, _Style.getStyle("width").c_str());
+		{
+			// _Style.Width does not handle '%' unit currently
+			if (_Style.Current.Width > 0)
+			{
+				table->ForceWidthMin = _Style.Current.Width;
+				table->TableRatio = 0;
+			}
+			else
+			{
+				getPercentage (table->ForceWidthMin, table->TableRatio, _Style.getStyle("width").c_str());
+			}
+		}
 		else if (elm.hasNonEmptyAttribute("width"))
+		{
 			getPercentage (table->ForceWidthMin, table->TableRatio, elm.getAttribute("width").c_str());
-
-		if (_Style.hasStyle("border") || _Style.hasStyle("border-width"))
-		{
-			table->Border = _Style.Current.BorderWidth;
 		}
-		else if (elm.hasAttribute("border"))
+
+		// border from css or from attribute
 		{
-			std::string s = elm.getAttribute("border");
-			if (s.empty())
-				table->Border = 1;
+			uint32 borderWidth = 0;
+			CRGBA borderColor = CRGBA::Transparent;
+
+			if (elm.hasAttribute("border"))
+			{
+				std::string s = elm.getAttribute("border");
+				if (s.empty())
+					borderWidth = 1;
+				else
+					fromString(elm.getAttribute("border"), borderWidth);
+
+				if (elm.hasNonEmptyAttribute("bordercolor"))
+					scanHTMLColor(elm.getAttribute("bordercolor").c_str(), borderColor);
+				else
+					borderColor = CRGBA(128, 128, 128, 255);
+
+				table->CellBorder = (borderWidth > 0);
+				table->Border->setWidth(borderWidth, borderWidth, borderWidth, borderWidth);
+				table->Border->setColor(borderColor, borderColor, borderColor, borderColor);
+				table->Border->setStyle(CSSLineStyle::OUTSET, CSSLineStyle::OUTSET, CSSLineStyle::OUTSET, CSSLineStyle::OUTSET);
+			}
 			else
-				fromString(elm.getAttribute("border"), table->Border);
+			{
+				table->CellBorder = false;
+			}
+
+			if (_Style.hasStyle("border-top-width"))	table->Border->TopWidth = _Style.Current.BorderTopWidth;
+			if (_Style.hasStyle("border-right-width"))	table->Border->RightWidth = _Style.Current.BorderRightWidth;
+			if (_Style.hasStyle("border-bottom-width"))	table->Border->BottomWidth = _Style.Current.BorderBottomWidth;
+			if (_Style.hasStyle("border-left-width"))	table->Border->LeftWidth = _Style.Current.BorderLeftWidth;
+
+			if (_Style.hasStyle("border-top-color"))	table->Border->TopColor = _Style.Current.BorderTopColor;
+			if (_Style.hasStyle("border-right-color"))	table->Border->RightColor = _Style.Current.BorderRightColor;
+			if (_Style.hasStyle("border-bottom-color"))	table->Border->BottomColor = _Style.Current.BorderBottomColor;
+			if (_Style.hasStyle("border-left-color"))	table->Border->LeftColor = _Style.Current.BorderLeftColor;
+
+			if (_Style.hasStyle("border-top-style"))	table->Border->TopStyle = _Style.Current.BorderTopStyle;
+			if (_Style.hasStyle("border-right-style"))	table->Border->RightStyle = _Style.Current.BorderRightStyle;
+			if (_Style.hasStyle("border-bottom-style"))	table->Border->BottomStyle = _Style.Current.BorderBottomStyle;
+			if (_Style.hasStyle("border-left-style"))	table->Border->LeftStyle = _Style.Current.BorderLeftStyle;
 		}
 
-		if (_Style.hasStyle("border-color"))
+		if (_Style.hasStyle("background-image"))
 		{
-			std::string s = toLower(_Style.getStyle("border-color"));
-			if (s == "currentcolor")
-				table->BorderColor = _Style.Current.TextColor;
-			else
-				scanHTMLColor(s.c_str(), table->BorderColor);
-		}
-		else if (elm.hasNonEmptyAttribute("bordercolor"))
-		{
-			scanHTMLColor(elm.getAttribute("bordercolor").c_str(), table->BorderColor);
+			if (_Style.checkStyle("background-repeat", "repeat"))
+				table->setTextureTile(true);
+
+			if (_Style.checkStyle("background-size", "100%"))
+				table->setTextureScale(true);
+
+			string image = _Style.getStyle("background-image");
+			addImageDownload(image, table, CStyleParams(), TImageType::NormalImage, "");
 		}
 
+		// setting ModulateGlobalColor must be after addImageDownload
+		if (_Style.checkStyle("-ryzom-modulate-bgcolor", "true"))
+			table->setModulateGlobalColor(true);
 		table->setMarginLeft(getIndent());
 		addHtmlGroup (table, 0);
 
@@ -6628,8 +6724,20 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlTD(const CHtmlElement &elm)
 	{
+		CRGBA rowColor = CRGBA::Transparent;
+		// remember row color so we can blend it with cell color
+		if (!_CellParams.empty())
+			rowColor = _CellParams.back().BgColor;
+
 		// Get cells parameters
 		getCellsParameters(elm, true);
+
+		// if cell has own background,then it must be blended with row
+		if (rowColor.A > 0 && (elm.hasNonEmptyAttribute("bgcolor") || _Style.hasStyle("background-color")))
+		{
+			if (_CellParams.back().BgColor.A < 255)
+				_CellParams.back().BgColor.blendFromui(rowColor, _CellParams.back().BgColor, _CellParams.back().BgColor.A);
+		}
 
 		if (elm.ID == HTML_TH)
 		{
@@ -6653,14 +6761,6 @@ namespace NLGUI
 			return;
 		}
 
-		if (_Style.hasStyle("padding"))
-		{
-			uint32 a;
-			// TODO: cssLength
-			if (fromString(_Style.getStyle("padding"), a))
-				table->CellPadding = a;
-		}
-
 		_Cells.back() = new CGroupCell(CViewBase::TCtorParam());
 
 		if (_Style.checkStyle("background-repeat", "repeat"))
@@ -6672,7 +6772,7 @@ namespace NLGUI
 		if (_Style.hasStyle("background-image"))
 		{
 			string image = _Style.getStyle("background-image");
-			addImageDownload(image, _Cells.back());
+			addImageDownload(image, _Cells.back(), CStyleParams(), TImageType::NormalImage, "");
 		}
 
 		if (elm.hasNonEmptyAttribute("colspan"))
@@ -6687,19 +6787,70 @@ namespace NLGUI
 		_Cells.back()->NoWrap = _CellParams.back().NoWrap;
 		_Cells.back()->ColSpan = std::max(1, _Cells.back()->ColSpan);
 		_Cells.back()->RowSpan = std::max(1, _Cells.back()->RowSpan);
+		_Cells.back()->Height = _CellParams.back().Height;
 
 		float temp;
 		if (_Style.hasStyle("width"))
-			getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, _Style.getStyle("width").c_str());
+		{
+			// _Style.Width does not handle '%' unit currently
+			if (_Style.Current.Width > 0)
+			{
+				_Cells.back()->WidthWanted = _Style.Current.Width;
+				_Cells.back()->TableRatio = 0;
+			}
+			else
+			{
+				getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, _Style.getStyle("width").c_str());
+			}
+		}
 		else if (elm.hasNonEmptyAttribute("width"))
+		{
 			getPercentage (_Cells.back()->WidthWanted, _Cells.back()->TableRatio, elm.getAttribute("width").c_str());
-
-		if (_Style.hasStyle("height"))
-			getPercentage (_Cells.back()->Height, temp, _Style.getStyle("height").c_str());
-		else if (elm.hasNonEmptyAttribute("height"))
-			getPercentage (_Cells.back()->Height, temp, elm.getAttribute("height").c_str());
+		}
 
 		_Cells.back()->NewLine = getTR();
+
+		// setting ModulateGlobalColor must be after addImageDownload
+		if (_Style.checkStyle("-ryzom-modulate-bgcolor", "true"))
+			_Cells.back()->setModulateGlobalColor(true);
+
+		// border from <table border="1">
+		if (table->CellBorder)
+		{
+			_Cells.back()->Border->setWidth(1, 1, 1, 1);
+			_Cells.back()->Border->setColor(table->Border->TopColor, table->Border->RightColor, table->Border->BottomColor, table->Border->LeftColor);
+			_Cells.back()->Border->setStyle(CSSLineStyle::INSET, CSSLineStyle::INSET, CSSLineStyle::INSET, CSSLineStyle::INSET);
+		}
+
+		if (_Style.hasStyle("border-top-width"))	_Cells.back()->Border->TopWidth = _Style.Current.BorderTopWidth;
+		if (_Style.hasStyle("border-right-width"))	_Cells.back()->Border->RightWidth = _Style.Current.BorderRightWidth;
+		if (_Style.hasStyle("border-bottom-width"))	_Cells.back()->Border->BottomWidth = _Style.Current.BorderBottomWidth;
+		if (_Style.hasStyle("border-left-width"))	_Cells.back()->Border->LeftWidth = _Style.Current.BorderLeftWidth;
+
+		if (_Style.hasStyle("border-top-color"))	_Cells.back()->Border->TopColor = _Style.Current.BorderTopColor;
+		if (_Style.hasStyle("border-right-color"))	_Cells.back()->Border->RightColor = _Style.Current.BorderRightColor;
+		if (_Style.hasStyle("border-bottom-color"))	_Cells.back()->Border->BottomColor = _Style.Current.BorderBottomColor;
+		if (_Style.hasStyle("border-left-color"))	_Cells.back()->Border->LeftColor = _Style.Current.BorderLeftColor;
+
+		if (_Style.hasStyle("border-top-style"))	_Cells.back()->Border->TopStyle = _Style.Current.BorderTopStyle;
+		if (_Style.hasStyle("border-right-style"))	_Cells.back()->Border->RightStyle = _Style.Current.BorderRightStyle;
+		if (_Style.hasStyle("border-bottom-style"))	_Cells.back()->Border->BottomStyle = _Style.Current.BorderBottomStyle;
+		if (_Style.hasStyle("border-left-style"))	_Cells.back()->Border->LeftStyle = _Style.Current.BorderLeftStyle;
+
+		// padding from <table cellpadding="1">
+		if (table->CellPadding)
+		{
+			_Cells.back()->PaddingTop = table->CellPadding;
+			_Cells.back()->PaddingRight = table->CellPadding;
+			_Cells.back()->PaddingBottom = table->CellPadding;
+			_Cells.back()->PaddingLeft = table->CellPadding;
+		}
+
+		if (_Style.hasStyle("padding-top"))    _Cells.back()->PaddingTop    = _Style.Current.PaddingTop;
+		if (_Style.hasStyle("padding-right"))  _Cells.back()->PaddingRight  = _Style.Current.PaddingRight;
+		if (_Style.hasStyle("padding-bottom")) _Cells.back()->PaddingBottom = _Style.Current.PaddingBottom;
+		if (_Style.hasStyle("padding-left"))   _Cells.back()->PaddingLeft   = _Style.Current.PaddingLeft;
+
 		table->addChild (_Cells.back());
 
 		// reusing indent pushed by table
@@ -6808,6 +6959,13 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlTR(const CHtmlElement &elm)
 	{
+		// prevent inheriting from table
+		if (!_CellParams.empty())
+		{
+			_CellParams.back().BgColor = CRGBA::Transparent;
+			_CellParams.back().Height = 0;
+		}
+
 		// Get cells parameters
 		getCellsParameters(elm, true);
 

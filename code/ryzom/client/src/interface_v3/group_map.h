@@ -199,6 +199,8 @@ public:
 	float				getScale() const { return _UserScale; }
 	/// add a user landmark (returns a pointer on its button).Coordinate are in the current map (not world coordinates)
 	CCtrlButton			*addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, const CUserLandMark::EUserLandMarkType lmType);
+	/// return current continent landmark by its index and type
+	CCtrlButton*		getLandmarkCtrl(const std::string &lmType, uint lmIndex) const;
 	// remove a user landmark from a pointer on its button
 	void				removeUserLandMark(CCtrlButton *button);
 	// update a user landmark from a pointer on its button
@@ -214,6 +216,8 @@ public:
 	// target the given landmark
 	void				targetLandmark(CCtrlButton *lm);
 	void				targetLandmarkResult(uint32 index);
+	// search matching landmark and target it. return true if landmark was targeted
+	bool				targetLandmarkByName(const ucstring &search, bool startsWith) const;
 	// get the world position of a landmark or return vector Null if not found
 	void				getLandmarkPosition(const CCtrlButton *lm, NLMISC::CVector2f &worldPos);
 
@@ -292,6 +296,8 @@ public:
 
 
 	bool isIsland() const { return _IsIsland; }
+
+	void updateClosestLandMarkMenu(const std::string &menu, const NLMISC::CVector2f &pos) const;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 private:
@@ -592,6 +598,12 @@ private:
 
 	// Test title against landmark filter
 	bool filterLandmark(const ucstring &title) const;
+	bool filterLandmark(const ucstring &title, const std::vector<ucstring> filter, bool startsWith = false) const;
+
+	// return closest landmark which matches (case insensitive) search string
+	// center position must be in world coordindates
+	CLandMarkButton* findClosestLandmark(const NLMISC::CVector2f &center, const ucstring &search, bool startsWith, const TLandMarkButtonVect &landmarks, float &closest) const;
+	CLandMarkText* findClosestLandmark(const NLMISC::CVector2f &center, const ucstring &search, bool startsWith, const TLandMarkTextVect &landmarks, float &closest) const;
 
 	// update the scale depending on the window size and the user scale
 	void updateScale();

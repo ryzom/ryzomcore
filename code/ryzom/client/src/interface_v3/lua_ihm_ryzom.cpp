@@ -497,6 +497,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("saveUserChannels", saveUserChannels);
 	ls.registerFunc("readUserChannels", readUserChannels);
 	ls.registerFunc("getMaxDynChan", getMaxDynChan);
+	ls.registerFunc("scrollElement", scrollElement);
 
 	lua_State *L = ls.getStatePointer();
 
@@ -4020,7 +4021,7 @@ int CLuaIHMRyzom::setArkPowoOptions(CLuaState &ls)
 // ***************************************************************************
 int CLuaIHMRyzom::readUserChannels(CLuaState &ls)
 {
-	std::string filename = CInterfaceManager::getInstance()->getSaveFileName("channels", "xml");
+	const std::string filename = CInterfaceManager::getInstance()->getSaveFileName("channels", "xml");
 	try
 	{
 		CIFile fd;
@@ -4031,37 +4032,43 @@ int CLuaIHMRyzom::readUserChannels(CLuaState &ls)
 
 			xmlKeepBlanksDefault(0);
 			xmlNodePtr root = stream.getRootNode();
-			if (!root)
-				return 0;
+
+			if (!root) return 0;
+
 			CXMLAutoPtr prop;
 
-			// table
 			ls.newTable();
 			CLuaObject output(ls);
 
-			uint nb = 0;
+			std::vector< string > tags;
+
+			// allowed tags
+			tags.push_back("id");
+			tags.push_back("name");
+			tags.push_back("rgba");
+			tags.push_back("passwd");
+
 			xmlNodePtr node = root->children;
+			uint nb = 0;
 			while (node)
 			{
-				prop = xmlGetProp(node, (xmlChar*)"name");
-				if (!prop)
-					return 0;
-				std::string name = (const char*)prop;
+				ls.newTable();
+				CLuaObject nodeTable(ls);
 
-				prop = xmlGetProp(node, (xmlChar*)"passwd");
-				if (!prop)
-					return 0;
-				std::string pass = (const char*)prop;
+				for (uint i = 0; i < tags.size(); i++)
+				{
+					prop = xmlGetProp(node, (xmlChar*)tags[i].c_str());
+					if (!prop) return 0;
 
-				output.setValue(name.c_str(), pass.c_str());
+					nodeTable.setValue(tags[i].c_str(), (const char *)prop);
+				}
+				output.setValue(toString("%i", nb).c_str(), nodeTable);
 				node = node->next;
 				nb++;
 			}
+			output.push();
 			// no exception
 			fd.close();
-
-			// release lua table
-			output.push();
 		}
 		nlinfo("parse %s", filename.c_str());
 	}
@@ -4091,7 +4098,7 @@ int CLuaIHMRyzom::saveUserChannels(CLuaState &ls)
 	CLuaObject params;
 	params.pop(ls);
 
-	std::string filename = CInterfaceManager::getInstance()->getSaveFileName("channels", "xml");
+	const std::string filename = CInterfaceManager::getInstance()->getSaveFileName("channels", "xml");
 	try
 	{
 		COFile fd;
@@ -4104,27 +4111,38 @@ int CLuaIHMRyzom::saveUserChannels(CLuaState &ls)
 			xmlNodePtr node = xmlNewDocNode(doc, NULL, (const xmlChar*)"interface_config", NULL);
 			xmlDocSetRootElement(doc, node);
 
+			std::string key, value;
 			ENUM_LUA_TABLE(params, it)
 			{
-				if (!it.nextKey().isString())
-					continue;
-				if (!it.nextValue().isString())
-					continue;
+				if (it.nextKey().type() == LUA_TSTRING)
+				{
+					xmlNodePtr newNode = xmlNewChild(node, NULL, (const xmlChar*)"channels", NULL);
 
-				std::string name = it.nextKey().toString();
-				std::string pass = it.nextValue().toString();
+					if (it.nextValue().type() == LUA_TTABLE)
+					{
+						xmlSetProp(newNode, (const xmlChar*)"id", (const xmlChar*)it.nextKey().toString().c_str());
 
-				xmlNodePtr newNode = xmlNewChild(node, NULL, (const xmlChar*)"channels", NULL);
-				xmlSetProp(newNode, (const xmlChar*)"name", (const xmlChar*)name.c_str());
-				xmlSetProp(newNode, (const xmlChar*)"passwd", (const xmlChar*)pass.c_str());
+						ENUM_LUA_TABLE(it.nextValue(), itt)
+						{
+							if (!itt.nextKey().isString())
+								continue;
+							if (!itt.nextValue().isString())
+								continue;
+
+							key = itt.nextKey().toString();
+							value = itt.nextValue().toString();
+
+							xmlSetProp(newNode, (const xmlChar*)key.c_str(), (const xmlChar*)value.c_str());
+						}
+					}
+				}
 			}
 			stream.flush();
-			// no exception
 			fd.close();
 		}
 		nlinfo("save %s", filename.c_str());
 		if (verbose)
-			CInterfaceManager::getInstance()->displaySystemInfo("Saving " + filename);
+			CInterfaceManager::getInstance()->displaySystemInfo("Save " + filename);
 	}
 	catch (const Exception &e)
 	{
@@ -4255,5 +4273,49 @@ int CLuaIHMRyzom::displayChatMessage(CLuaState &ls)
 		if (id >= 0 && id < CChatGroup::MaxDynChanPerPlayer)
 			ci.DynamicChat[id].displayMessage(ucstring(msg), prop.getRGBA());
 	}
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::scrollElement(CLuaState &ls)
+{
+	const char *funcName = "scrollElement";
+
+	// scrollElement(object, vertical, direction, offset_multiplier)
+
+	CLuaIHM::checkArgMin(ls, funcName, 3);
+	CLuaIHM::check(ls, ls.getTop() > 2, funcName);
+
+	CLuaIHM::check(ls, CLuaIHM::isUIOnStack(ls, 1), toString("%s requires a UI object in param 1", funcName));
+	CLuaIHM::check(ls, ls.type(2)==LUA_TBOOLEAN, toString("%s requires a boolean in param 2", funcName));
+	CLuaIHM::check(ls, ls.isInteger(3), toString("%s requires a number in param 3", funcName));
+
+	if (ls.getTop() > 3)
+		CLuaIHM::check(ls, ls.isInteger(4), toString("%s requires a number in param 4", funcName));
+
+	CInterfaceElement *pIE = CLuaIHM::getUIOnStack(ls, 1);
+	if (pIE)
+	{
+		// must be a scroll element
+		CCtrlScroll *pCS = dynamic_cast<CCtrlScroll*>(pIE);
+		if (pCS)
+		{
+			sint32 direction = 0;
+			sint32 multiplier = 16;
+
+			direction = (ls.toInteger(3) > 0) ? 1 : -1;
+			if (ls.getTop() > 3)
+				multiplier = (ls.toInteger(4) > 0) ? ls.toInteger(4) : 1;
+
+			const bool vertical = ls.toBoolean(2);
+			if (vertical)
+				pCS->moveTrackY(-(direction * multiplier));
+			else
+				pCS->moveTrackX(-(direction * multiplier));
+
+			return 0;
+		}
+	}
+	ls.pushNil();
 	return 1;
 }

@@ -1038,6 +1038,18 @@ namespace NLGUI
 				}
 			}
 
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
+			{
+				// If a line is selected and the line is not grayed and has right click action handler
+				if ((_Selected != -1) && (!_Lines[i].ViewText->getGrayed()) && !_Lines[_Selected].AHRightClick.empty())
+				{
+					CAHManager::getInstance()->runActionHandler (	_Lines[_Selected].AHRightClick,
+											CWidgetManager::getInstance()->getCtrlLaunchingModal(),
+											_Lines[_Selected].AHRightClickParams );
+					return true;
+				}
+			}
+
 			if (event.getType() == NLGUI::CEventDescriptor::mouse)
 			{
 				const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
@@ -1221,7 +1233,7 @@ namespace NLGUI
 			pV->setText (name);
 		}
 		pV->setColor (_GroupMenu->_Color);
-		pV->setFontSize (_GroupMenu->_FontSize);
+		pV->setFontSize (_GroupMenu->_FontSize, _GroupMenu->_FontSizeCoef);
 		pV->setShadow (_GroupMenu->_Shadow);
 		pV->setShadowOutline (_GroupMenu->_ShadowOutline);
 		pV->setCheckable(checkable);
@@ -1310,7 +1322,7 @@ namespace NLGUI
 		}
 
 		pV->setColor (_GroupMenu->_Color);
-		pV->setFontSize (_GroupMenu->_FontSize);
+		pV->setFontSize (_GroupMenu->_FontSize, _GroupMenu->_FontSizeCoef);
 		pV->setShadow (_GroupMenu->_Shadow);
 		pV->setShadowOutline (_GroupMenu->_ShadowOutline);
 		pV->setCheckable(checkable);
@@ -1686,6 +1698,28 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	void CGroupSubMenu::setRightClickHandler(uint lineIndex, const std::string &ah)
+	{
+		if (lineIndex > _Lines.size())
+		{
+			nlwarning("Bad index");
+			return;
+		}
+		_Lines[lineIndex].AHRightClick = ah;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CGroupSubMenu::setRightClickHandlerParam(uint lineIndex, const std::string &params)
+	{
+		if (lineIndex > _Lines.size())
+		{
+			nlwarning("Bad index");
+			return;
+		}
+		_Lines[lineIndex].AHRightClickParams = params;
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	void CGroupSubMenu::setSelectable(uint lineIndex, bool selectable)
 	{
 		if (lineIndex > _Lines.size())
@@ -1990,6 +2024,7 @@ namespace NLGUI
 		_ShadowColorGrayed = CRGBA::Black;
 		_HighLightOver.set(128, 0, 0, 255);
 		_FontSize = 12;
+		_FontSizeCoef = true;
 		_Shadow = false;
 		_ShadowOutline = false;
 		_ResizeFromChildH = _ResizeFromChildW = true;
@@ -2584,9 +2619,10 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CGroupMenu::setFontSize(uint fontSize)
+	void CGroupMenu::setFontSize(uint fontSize, bool coef)
 	{
 		_FontSize = fontSize;
+		_FontSizeCoef = coef;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -2630,6 +2666,20 @@ namespace NLGUI
 	{
 		if (_RootMenu)
 			_RootMenu->setActionHandlerParam(lineIndex, params);
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CGroupMenu::setRightClickHandler(uint lineIndex, const std::string &ah)
+	{
+		if (_RootMenu)
+			_RootMenu->setRightClickHandler(lineIndex, ah);
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CGroupMenu::setRightClickHandlerParam(uint lineIndex, const std::string &params)
+	{
+		if (_RootMenu)
+			_RootMenu->setRightClickHandlerParam(lineIndex, params);
 	}
 
 	// ------------------------------------------------------------------------------------------------

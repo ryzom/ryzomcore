@@ -124,6 +124,8 @@ private:
 		//
 		NLMISC::CCDBNodeLeaf *SlotType;
 		NLMISC::CCDBNodeLeaf *Quality;
+		NLMISC::CCDBNodeLeaf *Serial;
+		NLMISC::CCDBNodeLeaf *CreateTime;
 		NLMISC::CCDBNodeLeaf *SheetIDOrSkill;
 		//
 		NLMISC::CCDBNodeLeaf *LogicTextID;	// valid if the item is to be obtained for a mission
@@ -157,6 +159,8 @@ private:
 							GuildName(NULL),
 							SlotType(NULL),
 							Quality(NULL),
+							Serial(NULL),
+							CreateTime(NULL),
 							SheetIDOrSkill(NULL),
 							LogicTextID(NULL),
 							DescTextID(NULL),
@@ -216,6 +220,8 @@ private:
 
 		TRADE_SLOT_TYPE::TTradeSlotType	SlotType;
 		uint16							Quality;
+		uint32							Serial;
+		uint32							CreateTime;
 		uint32							SheetIDOrSkill;
 		uint32 LogicTextID;				// Valid if the item is to be obtained as a mission reward
 		uint32 DescTextID;				// Valid if the item is to be obtained as a mission reward

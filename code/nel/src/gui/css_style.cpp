@@ -102,7 +102,9 @@ namespace NLGUI
 				}
 				else
 				{
-					elm.setPseudo(i->PseudoElement, i->Properties);
+					TStyle props;
+					merge(props, i->Properties);
+					elm.setPseudo(i->PseudoElement, props);
 				}
 			}
 		}
@@ -110,17 +112,18 @@ namespace NLGUI
 		// style from "style" attribute overrides <style>
 		if (elm.hasNonEmptyAttribute("style"))
 		{
-			TStyle styles = CCssParser::parseDecls(elm.getAttribute("style"));
+			TStyleVec styles = CCssParser::parseDecls(elm.getAttribute("style"));
 			merge(elm.Style, styles);
 		}
 	}
 
-	void CCssStyle::merge(TStyle &dst, const TStyle &src) const
+	void CCssStyle::merge(TStyle &dst, const TStyleVec &src) const
 	{
 		// TODO: does not use '!important' flag
-		for(TStyle::const_iterator it = src.begin(); it != src.end(); ++it)
+		for(TStyleVec::const_iterator it = src.begin(); it != src.end(); ++it)
 		{
 			dst[it->first] = it->second;
+			expandShorthand(it->first, it->second, dst);
 		}
 	}
 
@@ -305,6 +308,48 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CCssStyle::splitParams(const std::string &str, char sep, std::vector<std::string> &result) const
+	{
+		// TODO: does not handle utf8
+
+		uint32 pos = 0;
+		for(uint i = 0; i< str.size(); i++)
+		{
+			// split by separator first, then check if string or function
+			if (str[i] == sep)
+			{
+				std::string sub = trim(str.substr(pos, i - pos));
+				if (!sub.empty())
+					result.push_back(str.substr(pos, i - pos));
+				// skip sep
+				pos = i + 1;
+			}
+			else if (str[i] == '"' || str[i] == '(')
+			{
+				// string "this is string", or function rgb(1, 2, 3)
+				char endChar;
+				if (str[i] == '"')
+					endChar = '"';
+				else if (str[i] == '\'')
+					endChar = '\'';
+				else
+					endChar = ')';
+
+				// skip start
+				i++;
+				while(i < str.size() && str[i] != endChar)
+				{
+					if (str[i] == '\\')
+						i++;
+					i++;
+				}
+			}
+		}
+		if (pos < str.size())
+			result.push_back(str.substr(pos).c_str());
+	}
+
+	// ***************************************************************************
 	// CStyleParams style;
 	// style.FontSize;    // font-size: 10px;
 	// style.TextColor;   // color: #ABCDEF;
@@ -312,7 +357,10 @@ namespace NLGUI
 	// style.StrikeThrough; // text-decoration: line-through;  text-decoration-line: line-through;
 	void CCssStyle::getStyleParams(const std::string &styleString, CStyleParams &style, const CStyleParams &current) const
 	{
-		TStyle styles = CCssParser::parseDecls(styleString);
+		TStyleVec stylevec = CCssParser::parseDecls(styleString);
+
+		TStyle styles;
+		merge(styles, stylevec);
 
 		getStyleParams(styles, style, current);
 	}
@@ -428,33 +476,11 @@ namespace NLGUI
 				}
 			}
 			else
-			if (it->first == "background")
-			{
-				parseBackgroundShorthand(it->second, style);
-			}
-			else
 			if (it->first == "background-repeat")
 			{
 				// old ryzom specific value
 				if (it->second == "1")
 					style.StyleRules[it->first] = "repeat";
-			}
-			else
-			if (it->first == "background-scale")
-			{
-				// replace old ryzom specific rule with background-size
-				if (it->second != "1")
-				{
-					style.StyleRules["background-size"] = "auto";
-				}
-				else
-				{
-					style.StyleRules["background-size"] = "100%";
-				}
-
-				TStyle::iterator pos = style.StyleRules.find(it->first);
-				if (pos != style.StyleRules.end())
-					style.StyleRules.erase(pos);
 			}
 			else
 			if (it->first == "display")
@@ -467,6 +493,108 @@ namespace NLGUI
 		}
 	}
 
+	void CCssStyle::applyBorderWidth(const std::string &value, uint32 *dest, const uint32 currentWidth, const uint32 fontSize) const
+	{
+		if (!dest) return;
+		if (value == "inherit")
+		{
+			*dest = currentWidth;
+		}
+		else if (value == "thin")
+		{
+			*dest = 1;
+		}
+		else if (value == "medium")
+		{
+			*dest = 3;
+		}
+		else if (value == "thick")
+		{
+			*dest = 5;
+		}
+		else if (value == "0")
+		{
+			*dest = 0;
+		}
+		else
+		{
+			float tmpf;
+			std::string unit;
+			if (getCssLength(tmpf, unit, value.c_str()))
+			{
+				if (unit == "rem")
+					*dest = fontSize * tmpf;
+				else if (unit == "em")
+					*dest = fontSize * tmpf;
+				else if (unit == "pt")
+					*dest = tmpf / 0.75f;
+				else if (unit == "%")
+					*dest = 0; // no support for % in border width
+				else
+					*dest = tmpf;
+			}
+		}
+	}
+
+	void CCssStyle::applyBorderColor(const std::string &value, CRGBA *dest, const CRGBA &currentColor, const CRGBA &textColor) const
+	{
+		if (!dest) return;
+
+		if (value == "inherit")
+			*dest = currentColor;
+		else if (value == "transparent")
+			*dest = CRGBA::Transparent;
+		else if (value == "currentcolor")
+			*dest  = textColor;
+		else
+			scanHTMLColor(value.c_str(), *dest);
+	}
+
+	void CCssStyle::applyLineStyle(const std::string &value, CSSLineStyle *dest, const CSSLineStyle &currentStyle) const
+	{
+		if (!dest) return;
+
+		if (value == "inherit")
+			*dest = currentStyle;
+		else if (value == "none")
+			*dest = CSSLineStyle::NONE;
+		else if (value == "hidden")
+			*dest = CSSLineStyle::HIDDEN;
+		else if (value == "inset")
+			*dest = CSSLineStyle::INSET;
+		else if (value == "outset")
+			*dest = CSSLineStyle::OUTSET;
+		else if (value == "solid")
+			*dest = CSSLineStyle::SOLID;
+	}
+
+	void CCssStyle::applyPaddingWidth(const std::string &value, uint32 *dest, const uint32 currentPadding, uint32 fontSize) const
+	{
+		if (!dest) return;
+
+		if (value == "inherit")
+		{
+			*dest = currentPadding;
+			return;
+		}
+
+		float tmpf;
+		std::string unit;
+		if (getCssLength(tmpf, unit, value.c_str()))
+		{
+			if (unit == "rem")
+				*dest = fontSize * tmpf;
+			else if (unit == "em")
+				*dest = fontSize * tmpf;
+			else if (unit == "pt")
+				*dest = tmpf / 0.75f;
+			else if (unit == "%")
+				*dest = 0; // TODO: requires content width, must remember 'unit' type
+			else
+				*dest = tmpf;
+		}
+	}
+
 	// apply style rules
 	void CCssStyle::apply(CStyleParams &style, const CStyleParams &current) const
 	{
@@ -474,48 +602,22 @@ namespace NLGUI
 		TStyle::const_iterator it;
 		for (it=style.StyleRules.begin(); it != style.StyleRules.end(); ++it)
 		{
-			if (it->first == "border" || it->first == "border-width")
-			{
-				// TODO: border: 1px solid red;
-				if (it->second == "inherit")
-				{
-					style.BorderWidth = current.BorderWidth;
-				}
-				else if (it->second == "none")
-				{
-					style.BorderWidth = 0;
-				}
-				else if (it->second == "thin")
-				{
-					style.BorderWidth = 1;
-				}
-				else if (it->second == "medium")
-				{
-					style.BorderWidth = 3;
-				}
-				else if (it->second == "thick")
-				{
-					style.BorderWidth = 5;
-				}
-				else
-				{
-					float tmpf;
-					std::string unit;
-					if (getCssLength(tmpf, unit, it->second.c_str()))
-					{
-						if (unit == "rem")
-							style.BorderWidth = Root.FontSize * tmpf;
-						else if (unit == "em")
-							style.BorderWidth = current.FontSize * tmpf;
-						else if (unit == "pt")
-							style.BorderWidth = tmpf / 0.75f;
-						else if (unit == "%")
-							style.BorderWidth = 0; // no support for % in border width
-						else
-							style.BorderWidth = tmpf;
-					}
-				}
-			}
+			     if (it->first == "border-top-width")	 applyBorderWidth(it->second, &style.BorderTopWidth, current.BorderTopWidth, current.FontSize);
+			else if (it->first == "border-top-color")	 applyBorderColor(it->second, &style.BorderTopColor, current.BorderTopColor, current.TextColor);
+			else if (it->first == "border-top-style")	 applyLineStyle(it->second, &style.BorderTopStyle, current.BorderTopStyle);
+			else if (it->first == "border-right-width")	 applyBorderWidth(it->second, &style.BorderRightWidth, current.BorderRightWidth, current.FontSize);
+			else if (it->first == "border-right-color")	 applyBorderColor(it->second, &style.BorderRightColor, current.BorderRightColor, current.TextColor);
+			else if (it->first == "border-right-style")	 applyLineStyle(it->second, &style.BorderRightStyle, current.BorderRightStyle);
+			else if (it->first == "border-bottom-width") applyBorderWidth(it->second, &style.BorderBottomWidth, current.BorderBottomWidth, current.FontSize);
+			else if (it->first == "border-bottom-color") applyBorderColor(it->second, &style.BorderBottomColor, current.BorderBottomColor, current.TextColor);
+			else if (it->first == "border-bottom-style") applyLineStyle(it->second, &style.BorderBottomStyle, current.BorderBottomStyle);
+			else if (it->first == "border-left-width")	 applyBorderWidth(it->second, &style.BorderLeftWidth, current.BorderLeftWidth, current.FontSize);
+			else if (it->first == "border-left-color")	 applyBorderColor(it->second, &style.BorderLeftColor, current.BorderLeftColor, current.TextColor);
+			else if (it->first == "border-left-style")	 applyLineStyle(it->second, &style.BorderLeftStyle, current.BorderLeftStyle);
+			else if (it->first == "padding-top")		 applyPaddingWidth(it->second, &style.PaddingTop, current.PaddingTop, current.FontSize);
+			else if (it->first == "padding-right")		 applyPaddingWidth(it->second, &style.PaddingRight, current.PaddingRight, current.FontSize);
+			else if (it->first == "padding-bottom")		 applyPaddingWidth(it->second, &style.PaddingBottom, current.PaddingBottom, current.FontSize);
+			else if (it->first == "padding-left")		 applyPaddingWidth(it->second, &style.PaddingLeft, current.PaddingLeft, current.FontSize);
 			else
 			if (it->first == "font-style")
 			{
@@ -586,7 +688,7 @@ namespace NLGUI
 				uint px = 0;
 				CRGBA color;
 				std::vector<std::string> parts;
-				NLMISC::splitString(it->second, " ", parts);
+				splitParams(it->second, ' ', parts);
 				if (parts.size() == 1)
 				{
 					success = scanCssLength(parts[0], px);
@@ -635,7 +737,7 @@ namespace NLGUI
 						prop = prop.substr(0, pos);
 
 					std::vector<std::string> parts;
-					NLMISC::splitString(prop, " ", parts);
+					splitParams(prop, ' ', parts);
 					switch(parts.size())
 					{
 						case 1:
@@ -723,6 +825,8 @@ namespace NLGUI
 						style.Width = tmpf * style.FontSize;
 					else if (unit == "pt")
 						style.FontSize = tmpf / 0.75f;
+					else if (unit == "%")
+						style.Width = 0; // TODO: style.WidthRatio
 					else
 						style.Width = tmpf;
 				}
@@ -739,6 +843,8 @@ namespace NLGUI
 						style.Height = tmpf * style.FontSize;
 					else if (unit == "pt")
 						style.FontSize = tmpf / 0.75f;
+					else if (unit == "%")
+						style.Height = 0; // TODO: style.HeightRatio
 					else
 						style.Height = tmpf;
 				}
@@ -755,6 +861,8 @@ namespace NLGUI
 						style.MaxWidth = tmpf * style.FontSize;
 					else if (unit == "pt")
 						style.FontSize = tmpf / 0.75f;
+					else if (unit == "%")
+						style.MaxWidth = 0; // TODO: style.MaxWidthRatio
 					else
 						style.MaxWidth = tmpf;
 				}
@@ -771,6 +879,8 @@ namespace NLGUI
 						style.MaxHeight = tmpf * style.FontSize;
 					else if (unit == "pt")
 						style.FontSize = tmpf / 0.75f;
+					else if (unit == "%")
+						style.MaxHeight = 0; // TODO: style.MaxHeightRatio
 					else
 						style.MaxHeight = tmpf;
 				}
@@ -826,7 +936,7 @@ namespace NLGUI
 				// normalize
 				std::string val = toLower(trim(it->second));
 				std::vector<std::string> parts;
-				NLMISC::splitString(val, " ", parts);
+				splitParams(val, ' ', parts);
 				// check for "repeat repeat"
 				if (parts.size() == 2 && parts[0] == parts[1])
 					val = parts[0];
@@ -839,7 +949,7 @@ namespace NLGUI
 				// normalize
 				std::string val = toLower(trim(it->second));
 				std::vector<std::string> parts;
-				NLMISC::splitString(val, " ", parts);
+				splitParams(val, ' ', parts);
 				if (parts.size() == 2 && parts[0] == parts[1])
 					val = parts[0];
 
@@ -856,7 +966,8 @@ namespace NLGUI
 			style.StrikeThrough = current.StrikeThrough;
 	}
 
-	void CCssStyle::parseBackgroundShorthand(const std::string &value, CStyleParams &style) const
+	// ***************************************************************************
+	void CCssStyle::expandBackgroundShorthand(const std::string &value, TStyle &style) const
 	{
 		// background: url(image.jpg) top center / 200px 200px no-repeat fixed padding-box content-box red;
 		// background-image      : url(image.jpg)
@@ -881,9 +992,7 @@ namespace NLGUI
 		uint partIndex = 0;
 		std::vector<std::string> parts;
 		std::vector<std::string>::iterator it;
-		// FIXME: this will fail if url() contains ' ' chars
-		// FIXME: this will also fail on 'background: rgb(255, 0, 0)'
-		NLMISC::splitString(value, " ", parts);
+		splitParams(value, ' ', parts);
 
 		bool failed = false;
 		bool allowSize = false;
@@ -1134,16 +1243,16 @@ namespace NLGUI
 			{
 				if (props[i] == "background-position")
 				{
-					style.StyleRules["background-position-x"] = bgPositionX;
-					style.StyleRules["background-position-y"] = bgPositionY;
+					style["background-position-x"] = bgPositionX;
+					style["background-position-y"] = bgPositionY;
 				}
 				else if (props[i] == "background-clip")
 				{
-					style.StyleRules["background-clip"] = bgClipValue;
+					style["background-clip"] = bgClipValue;
 				}
 				else
 				{
-					style.StyleRules[props[i]] = values[i];
+					style[props[i]] = values[i];
 				}
 			}
 			else
@@ -1151,42 +1260,343 @@ namespace NLGUI
 				// fill in default if one is set
 				if (props[i] == "background-image")
 				{
-					style.StyleRules[props[i]] = "none";
+					style[props[i]] = "none";
 				}
 				else if (props[i] == "background-position")
 				{
-					style.StyleRules[props[i]] = "0% 0%";
-					style.StyleRules["background-position-x"] = "left 0%";
-					style.StyleRules["background-position-y"] = "top 0%";
+					style[props[i]] = "0% 0%";
+					style["background-position-x"] = "left 0%";
+					style["background-position-y"] = "top 0%";
 				}
 				else if (props[i] == "background-size")
 				{
-					style.StyleRules[props[i]] = "auto auto";
+					style[props[i]] = "auto auto";
 				}
 				else if (props[i] == "background-repeat")
 				{
-					style.StyleRules[props[i]] = "repeat";
+					style[props[i]] = "repeat";
 				}
 				else if(props[i] == "background-attachment")
 				{
-					style.StyleRules[props[i]] = "scroll";
+					style[props[i]] = "scroll";
 				}
 				else if(props[i] == "background-origin")
 				{
-					style.StyleRules[props[i]] = "padding-box";
+					style[props[i]] = "padding-box";
 				}
 				else if (props[i] == "background-clip")
 				{
 					if (bgClipFound)
-						style.StyleRules[props[i]] = bgClipValue;
+						style[props[i]] = bgClipValue;
 					else
-						style.StyleRules[props[i]] = "border-box";
+						style[props[i]] = "border-box";
 				}
 				else if (props[i] == "background-color")
 				{
-					style.StyleRules[props[i]] = "transparent";
+					style[props[i]] = "transparent";
 				}
 			}
+		}
+	}
+
+	// ***************************************************************************
+	bool CCssStyle::getShorthandIndices(const uint32 size, uint8 &t, uint8 &r, uint8 &b, uint8 &l) const
+	{
+		if (size == 0 || size > 4) return false;
+
+		if (size == 1)
+		{
+			t = r = b = l = 0;
+		}
+		else if (size == 2)
+		{
+			t = b = 0;
+			r = l = 1;
+		}
+		else if (size == 3)
+		{
+			t = 0;
+			r = l = 1;
+			b = 2;
+		}
+		else // size == 4
+		{
+			t = 0;
+			r = 1;
+			b = 2;
+			l = 3;
+		}
+
+		return true;
+	}
+
+	// ***************************************************************************
+	bool CCssStyle::tryBorderWidthShorthand(const std::string &prop, const std::string &value, TStyle &style) const
+	{
+		std::vector<std::string> parts;
+		splitParams(toLower(value), ' ', parts);
+		float tmpf;
+		std::string unit;
+
+		// verify that parts are valid
+		uint8 maxSize  = (prop == "border" || prop == "border-width") ? 4 : 1;
+		bool hasTop    = (prop == "border" || prop == "border-width" || prop == "border-top"    || prop == "border-top-width");
+		bool hasRight  = (prop == "border" || prop == "border-width" || prop == "border-right"  || prop == "border-right-width");
+		bool hasBottom = (prop == "border" || prop == "border-width" || prop == "border-bottom" || prop == "border-bottom-width");
+		bool hasLeft   = (prop == "border" || prop == "border-width" || prop == "border-left"   || prop == "border-left-width");
+		if (parts.size() > maxSize || (!hasTop && !hasRight && !hasBottom && !hasLeft))
+		{
+			return false;
+		}
+
+		for(uint i = 0; i< parts.size(); ++i)
+		{
+			if (parts[i] != "inherit" && parts[i] != "thin" && parts[i] != "medium" && parts[i] != "thick"
+				&& !getCssLength(tmpf, unit, parts[i].c_str()))
+			{
+				return false;
+			}
+		}
+
+		uint8 t, r, b, l;
+		if (!getShorthandIndices(parts.size(), t, r, b, l)) return false;
+		if (hasTop) style["border-top-width"] = parts[t];
+		if (hasRight) style["border-right-width"] = parts[r];
+		if (hasBottom) style["border-bottom-width"] = parts[b];
+		if (hasLeft) style["border-left-width"] = parts[l];
+
+		return true;
+	}
+	// ***************************************************************************
+	bool CCssStyle::tryBorderStyleShorthand(const std::string &prop, const std::string &value, TStyle &style) const
+	{
+		std::vector<std::string> parts;
+		splitParams(toLower(value), ' ', parts);
+
+		// verify that parts are valid
+		uint8 maxSize  = (prop == "border" || prop == "border-style") ? 4 : 1;
+		bool hasTop    = (prop == "border" || prop == "border-style" || prop == "border-top"    || prop == "border-top-style");
+		bool hasRight  = (prop == "border" || prop == "border-style" || prop == "border-right"  || prop == "border-right-style");
+		bool hasBottom = (prop == "border" || prop == "border-style" || prop == "border-bottom" || prop == "border-bottom-style");
+		bool hasLeft   = (prop == "border" || prop == "border-style" || prop == "border-left"   || prop == "border-left-style");
+		if (parts.size() > maxSize || (!hasTop && !hasRight && !hasBottom && !hasLeft))
+		{
+			return false;
+		}
+
+		const uint nbValues = 10;
+		std::string values[nbValues] = {"none", "hidden", "dotted", "dashed",
+			"solid", "double", "groove", "ridge", "inset", "outset"};
+
+		for(uint i = 0; i < parts.size(); ++i)
+		{
+			bool found = false;
+			for(uint iValue = 0; iValue < nbValues; ++iValue)
+			{
+				if (parts[i] == values[iValue])
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+			{
+				// invalid rule
+				return false;
+			}
+		}
+
+		uint8 t, r, b, l;
+		if (!getShorthandIndices(parts.size(), t, r, b, l)) return false;
+		if (hasTop) style["border-top-style"] = parts[t];
+		if (hasRight) style["border-right-style"] = parts[r];
+		if (hasBottom) style["border-bottom-style"] = parts[b];
+		if (hasLeft) style["border-left-style"] = parts[l];
+
+		return true;
+	}
+	// ***************************************************************************
+	bool CCssStyle::tryBorderColorShorthand(const std::string &prop, const std::string &value, TStyle &style) const
+	{
+		std::vector<std::string> parts;
+		splitParams(toLower(value), ' ', parts);
+		CRGBA color;
+
+		// verify that parts are valid
+		uint8 maxSize  = (prop == "border" || prop == "border-color") ? 4 : 1;
+		bool hasTop    = (prop == "border" || prop == "border-color" || prop == "border-top"    || prop == "border-top-color");
+		bool hasRight  = (prop == "border" || prop == "border-color" || prop == "border-right"  || prop == "border-right-color");
+		bool hasBottom = (prop == "border" || prop == "border-color" || prop == "border-bottom" || prop == "border-bottom-color");
+		bool hasLeft   = (prop == "border" || prop == "border-color" || prop == "border-left"   || prop == "border-left-color");
+		if (parts.size() > maxSize || (!hasTop && !hasRight && !hasBottom && !hasLeft))
+		{
+			return false;
+		}
+
+		for(uint i = 0; i< parts.size(); ++i)
+		{
+			if (!scanHTMLColor(parts[i].c_str(), color) && parts[i] != "currentcolor" && parts[i] != "inherit")
+				return false;
+		}
+
+		uint8 t, r, b, l;
+		if (!getShorthandIndices(parts.size(), t, r, b, l)) return false;
+		if (hasTop) style["border-top-color"] = parts[t];
+		if (hasRight) style["border-right-color"] = parts[r];
+		if (hasBottom) style["border-bottom-color"] = parts[b];
+		if (hasLeft) style["border-left-color"] = parts[l];
+
+		return true;
+	}
+
+	// ***************************************************************************
+	void CCssStyle::expandBorderShorthand(const std::string &prop, const std::string &value, TStyle &style) const
+	{
+		// border: 1px solid #000;
+		bool hasTop    = (prop == "border" || prop == "border-top");
+		bool hasRight  = (prop == "border" || prop == "border-right");
+		bool hasBottom = (prop == "border" || prop == "border-bottom");
+		bool hasLeft   = (prop == "border" || prop == "border-left");
+
+		bool foundWidth = false;
+		bool foundStyle = false;
+		bool foundColor = false;
+
+		TStyle borderStyle;
+		std::vector<std::string> parts;
+		splitParams(toLower(value), ' ', parts);
+
+		for(uint index = 0; index < parts.size(); ++index)
+		{
+			bool matched = false;
+			if (!foundWidth)
+			{
+				matched = foundWidth = tryBorderWidthShorthand(prop, parts[index], borderStyle);
+			}
+
+			if (!matched && !foundStyle)
+			{
+				matched = foundStyle = tryBorderStyleShorthand(prop, parts[index], borderStyle);
+			}
+
+			if (!matched && !foundColor)
+			{
+				matched = foundColor = tryBorderColorShorthand(prop, parts[index], borderStyle);
+			}
+
+			// invalid rule if nothing gets matched
+			if (!matched)
+			{
+				return;
+			}
+		}
+
+		// apply rules that are present
+		TStyle::const_iterator it = borderStyle.begin();
+		while(it != borderStyle.end())
+		{
+			style[it->first] = it->second;
+			++it;
+		}
+
+		// reset those not present
+		if (!foundWidth)
+		{
+			if (hasTop) style["border-top-width"] = "medium";
+			if (hasRight) style["border-right-width"] = "medium";
+			if (hasBottom) style["border-bottom-width"] = "medium";
+			if (hasLeft) style["border-left-width"] = "medium";
+		}
+		//
+		if (!foundStyle)
+		{
+			if (hasTop) style["border-top-style"] = "none";
+			if (hasRight) style["border-right-style"] = "none";
+			if (hasBottom) style["border-bottom-style"] = "none";
+			if (hasLeft) style["border-left-style"] = "none";
+		}
+		//
+		if (!foundColor)
+		{
+			if (hasTop) style["border-top-color"] = "currentcolor";
+			if (hasRight) style["border-right-color"] = "currentcolor";
+			if (hasBottom) style["border-bottom-color"] = "currentcolor";
+			if (hasLeft) style["border-left-color"] = "currentcolor";
+		}
+	}
+
+	// ***************************************************************************
+	void CCssStyle::expandPaddingShorthand(const std::string &value, TStyle &style) const
+	{
+		std::vector<std::string> parts;
+		splitParams(toLower(value), ' ', parts);
+
+		uint8 t, r, b, l;
+		if (!getShorthandIndices(parts.size(), t, r, b, l))
+			return;
+
+		style["padding-top"] = parts[t];
+		style["padding-right"] = parts[r];
+		style["padding-bottom"] = parts[b];
+		style["padding-left"] = parts[l];
+	}
+
+	// ***************************************************************************
+	void CCssStyle::expandShorthand(const std::string &prop, const std::string &value, TStyle &style) const
+	{
+		// if shorthand matches, then remove it after expansion
+		bool keep = false;
+
+		if (prop == "background")
+		{
+			expandBackgroundShorthand(value, style);
+		}
+		else if (prop == "background-scale")
+		{
+			// replace old ryzom specific rule with background-size
+			if (value != "1")
+			{
+				style["background-size"] = "auto";
+			}
+			else
+			{
+				style["background-size"] = "100%";
+			}
+		}
+		else if (prop == "border"
+			|| prop == "border-top" || prop == "border-right"
+			|| prop == "border-bottom" || prop == "border-left")
+		{
+			// TODO: use enum or bitmap constant instead of passing a string name (prop)
+			expandBorderShorthand(prop, value, style);
+		}
+		else if (prop == "border-width")
+		{
+			tryBorderWidthShorthand(prop, value, style);
+		}
+		else if (prop == "border-style")
+		{
+			tryBorderStyleShorthand(prop, value, style);
+		}
+		else if (prop == "border-color")
+		{
+			tryBorderColorShorthand(prop, value, style);
+		}
+		else if (prop == "padding")
+		{
+			expandPaddingShorthand(value, style);
+		}
+		else
+		{
+			keep = true;
+		}
+
+		if (!keep)
+		{
+			TStyle::iterator pos = style.find(prop);
+			if (pos != style.end())
+				style.erase(pos);
 		}
 	}
 
