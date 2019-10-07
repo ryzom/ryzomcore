@@ -2513,6 +2513,14 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 	CClientConfig::SSysInfoParam::TMode mode = CClientConfig::SSysInfoParam::Normal;
 	CRGBA color = CRGBA::White;
 
+	// If broadcast, parse lua code
+	if (toLower(cat) == "bc" && str.size() > 3 && str[0]=='@' && str[1]=='L' && str[2]=='U' && str[3]=='A')
+	{
+		string code = str.substr(4, str.size()-4).toString();
+		if (!code.empty())
+			CLuaManager::getInstance().executeLuaScript(code);
+		return;
+	}
 
 	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(toLower(cat));
 	if (it != ClientCfg.SystemInfoParams.end())
@@ -2543,6 +2551,7 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 	else if ( (mode == CClientConfig::SSysInfoParam::Around || mode == CClientConfig::SSysInfoParam::CenterAround)
 		&& PeopleInterraction.AroundMe.Window)
 		PeopleInterraction.ChatInput.AroundMe.displayMessage(str, color, 2);
+
 }
 
 // ***************************************************************************

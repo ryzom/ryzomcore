@@ -223,6 +223,31 @@ bool CActionsManager::valide(const CAction::CName &name) const
 		return false;
 }// valide //
 
+
+// ***************************************************************************
+void CActionsManager::validate(const CAction::CName &name)
+{
+	// Recover the pointer on "actionName" if it exists.
+	TActionsMap::iterator it = _Actions.find(name);
+	if(it != _Actions.end())
+	{
+		it->second.Valide = true;
+	}
+}
+
+
+// ***************************************************************************
+void CActionsManager::unvalidate(const CAction::CName &name)
+{
+	// Recover the pointer on "actionName" if it exists.
+	TActionsMap::iterator it = _Actions.find(name);
+	if(it != _Actions.end())
+	{
+		it->second.Valide = false;
+	}
+}
+
+
 // ***************************************************************************
 bool CActionsManager::isActionPresentInContext(const CAction::CName &name) const
 {

@@ -364,6 +364,8 @@ public:
 
 	/// Return if the Action is valide.
 	bool valide(const CAction::CName &name) const;
+	void validate(const CAction::CName &name);
+	void unvalidate(const CAction::CName &name);
 
 	// Return true if the action is present in current (global) context
 	bool isActionPresentInContext(const CAction::CName &name) const;
