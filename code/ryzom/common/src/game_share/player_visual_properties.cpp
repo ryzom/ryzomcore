@@ -23,6 +23,11 @@
 std::string SPropVisualA::toString( ) const	{ return NLMISC::toString( PropertyA ); }
 std::string SPropVisualB::toString( ) const	{ return NLMISC::toString( PropertyB ); }
 std::string SPropVisualC::toString( ) const	{ return NLMISC::toString( PropertyC ); }
+
+void SPropVisualA::fromString(const std::string &value) { NLMISC::fromString(value, PropertyA); }
+void SPropVisualB::fromString(const std::string &value) { NLMISC::fromString(value, PropertyB); }
+void SPropVisualC::fromString(const std::string &value) { NLMISC::fromString(value, PropertyC); }
+
 std::string SAltLookProp::toString( ) const	{ return NLMISC::toString( Summary ); }
 std::string SAltLookProp2::toString( ) const	{ return NLMISC::toString( Summary ); }
 
