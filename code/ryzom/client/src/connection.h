@@ -51,6 +51,7 @@ bool hasPrivilegeG();
 bool hasPrivilegeEM();
 bool hasPrivilegeEG();
 bool hasPrivilegeVG();
+bool hasPrivilegeOBSERVER();
 
 
 // connection with the server. (login, shard list, etc.).

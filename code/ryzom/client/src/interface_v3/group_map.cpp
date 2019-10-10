@@ -2646,7 +2646,7 @@ void CGroupMap::createContinentLandMarks()
 
 static void hideTeleportButtonsInPopupMenuIfNotEnoughPriv()
 {
-	bool showTeleport = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeEG());
+	bool showTeleport = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeEG() || hasPrivilegeOBSERVER());
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 
 	CInterfaceElement *ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:map_menu:teleport");
