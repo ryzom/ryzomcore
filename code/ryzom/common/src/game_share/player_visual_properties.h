@@ -88,6 +88,7 @@ struct SPropVisualA
 	}
 
 	std::string toString() const;
+	void fromString(const std::string &value);
 };
 
 struct SPropVisualB
@@ -138,6 +139,7 @@ struct SPropVisualB
 	}
 
 	std::string toString() const;
+	void fromString(const std::string &value);
 };
 
 struct SPropVisualC
@@ -223,6 +225,7 @@ struct SPropVisualC
 	}
 
 	std::string toString() const;
+	void fromString(const std::string &value);
 };
 
 /**
