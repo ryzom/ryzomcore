@@ -2405,6 +2405,7 @@ namespace NLGUI
 				if (_Lines.empty())
 				{
 					x = 0;
+				    fx = 0;
 				}
 				else
 				{
