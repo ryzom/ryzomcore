@@ -4218,6 +4218,8 @@ namespace NLGUI
 			removeContent();
 
 			endBuild();
+
+			success = false;
 		}
 		else
 		{
