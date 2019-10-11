@@ -850,10 +850,10 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"justification" );
 		if (prop)
 		{
-			if (nlstricmp("clip_word", (const char *) prop) == 0)            _TextMode = ClipWord;
-			else if (nlstricmp("dont_clip_word", (const char *) prop) == 0)  _TextMode = DontClipWord;
-			else if (nlstricmp("justified", (const char *) prop) == 0)       _TextMode = Justified;
-			else if (nlstricmp("centered", (const char *) prop) == 0)        _TextMode = Centered;
+			if (nlstricmp("clip_word", (const char *) prop) == 0)			_TextMode = ClipWord;
+			else if (nlstricmp("dont_clip_word", (const char *) prop) == 0)	_TextMode = DontClipWord;
+			else if (nlstricmp("justified", (const char *) prop) == 0)		_TextMode = Justified;
+			else if (nlstricmp("centered", (const char *) prop) == 0)		_TextMode = Centered;
 			else nlwarning("<CViewText::parse> bad text mode");
 		}
 
@@ -1094,11 +1094,12 @@ namespace NLGUI
 			else
 				mouseIn= isIn(x,y);
 			// if the mouse cursor is in the clip area
-			if(mouseIn) {
-				rVR.drawRotFlipBitmap (_RenderLayer, _XReal,         _YReal,        _WReal, 1, 0, false, rVR.getBlankTextureId(), CRGBA(200,200,200,255));
-				rVR.drawRotFlipBitmap (_RenderLayer, _XReal,         _YReal+_HReal, _WReal, 1, 0, false, rVR.getBlankTextureId(), CRGBA(200,200,200,255));
-				rVR.drawRotFlipBitmap (_RenderLayer, _XReal,         _YReal,        1,      _HReal, 0, false, rVR.getBlankTextureId(), CRGBA(200,200,200,255));
-				rVR.drawRotFlipBitmap (_RenderLayer, _XReal+_WReal,  _YReal,        1,      _HReal, 0, false, rVR.getBlankTextureId(), CRGBA(200,200,200,255));
+			if(mouseIn)
+			{
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal,		_YReal,			_WReal,	1, 0, false, rVR.getBlankTextureId(), CRGBA(200,200,200,255));
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal,		_YReal+_HReal,	_WReal,	1, 0, false, rVR.getBlankTextureId(), CRGBA(200,200,200,255));
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal,		_YReal,			1,		_HReal, 0, false, rVR.getBlankTextureId(), CRGBA(200,200,200,255));
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal+_WReal,	_YReal,			1,		_HReal, 0, false, rVR.getBlankTextureId(), CRGBA(200,200,200,255));
 			}
 		}
 #endif
@@ -1111,7 +1112,7 @@ namespace NLGUI
 			return;
 
 		// hack: allow shadow to overflow outside parent box.
-		//       In CGroupHTML context, clip is set for row
+		// In CGroupHTML context, clip is set for row
 		if (std::abs(_ShadowX) > 0)
 		{
 			ClipX -= 3;
@@ -2373,7 +2374,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void        CViewText::setColorRGBA(NLMISC::CRGBA col)
+	void CViewText::setColorRGBA(NLMISC::CRGBA col)
 	{
 		_Color = col;
 	}
@@ -2405,7 +2406,7 @@ namespace NLGUI
 				if (_Lines.empty())
 				{
 					x = 0;
-				    fx = 0;
+					fx = 0;
 				}
 				else
 				{
@@ -2543,7 +2544,7 @@ namespace NLGUI
 		TextContext->setOblique (_Oblique);
 		 // find the line where the character is
 	//	CViewRenderer &rVR = *CViewRenderer::getInstance();
-		uint      charPos = 0;
+		uint charPos = 0;
 		if (_MultiLine)
 		{
 			y -= getMultiMinOffsetY() * _Scale;
