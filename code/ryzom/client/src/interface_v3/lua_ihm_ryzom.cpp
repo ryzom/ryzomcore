@@ -111,6 +111,7 @@
 #include "../r2/tool.h"
 #include "../entities.h"
 #include "../misc.h"
+#include "../gabarit.h"
 
 #include "bot_chat_page_all.h"
 #include "bot_chat_page_ring_sessions.h"
@@ -126,6 +127,8 @@
 #include "game_share/visual_slot_manager.h"
 #include "nel/gui/lua_manager.h"
 #include "pacs_client.h"
+#include "character_3d.h"
+
 
 #ifdef LUA_NEVRAX_VERSION
 #include "lua_ide_dll_nevrax/include/lua_ide_dll/ide_interface.h" // external debugger
@@ -576,6 +579,8 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(getSheetId),
 		LUABIND_FUNC(getCharacterSheetRegionForce),
 		LUABIND_FUNC(getCharacterSheetRegionLevel),
+		LUABIND_FUNC(setChar3dDBfromVPX),
+		LUABIND_FUNC(getRefHeightScale),
 		LUABIND_FUNC(getRegionByAlias),
 		LUABIND_FUNC(getGroundZ),
 		LUABIND_FUNC(tell),
@@ -587,10 +592,16 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(getPlayerVpa),
 		LUABIND_FUNC(getPlayerVpb),
 		LUABIND_FUNC(getPlayerVpc),
+		LUABIND_FUNC(getPlayerVpaHex),
+		LUABIND_FUNC(getPlayerVpbHex),
+		LUABIND_FUNC(getPlayerVpcHex),
 		LUABIND_FUNC(getTargetLevel),
 		LUABIND_FUNC(getTargetForceRegion),
 		LUABIND_FUNC(getTargetLevelForce),
 		LUABIND_FUNC(getTargetSheet),
+		LUABIND_FUNC(getTargetVpaHex),
+		LUABIND_FUNC(getTargetVpbHex),
+		LUABIND_FUNC(getTargetVpcHex),
 		LUABIND_FUNC(getTargetVpa),
 		LUABIND_FUNC(getTargetVpb),
 		LUABIND_FUNC(getTargetVpc),
@@ -3589,6 +3600,31 @@ sint CLuaIHMRyzom::getCharacterSheetRegionLevel(const std::string &sheet)
 	return charSheet->RegionForce;
 }
 
+
+float CLuaIHMRyzom::setChar3dDBfromVPX(const std::string &branch, const std::string &people, const std::string &vpa, const std::string &vpb, const std::string &vpc)
+{
+	CCharacterSummary cs;
+	cs.VisualPropA.fromString(vpa);
+	cs.VisualPropB.fromString(vpb);
+	cs.VisualPropC.fromString(vpc);
+	cs.People = EGSPD::CPeople::fromString(people);
+	SCharacter3DSetup::setupDBFromCharacterSummary(branch, cs);
+
+	
+	return cs.VisualPropC.PropertySubData.CharacterHeight;
+}
+
+float CLuaIHMRyzom::getRefHeightScale(const std::string &people, const std::string &vpa)
+{
+	CCharacterSummary cs;
+	cs.VisualPropA.fromString(vpa);
+	cs.People = EGSPD::CPeople::fromString(people);
+	float fyrosRefScale = GabaritSet.getRefHeightScale(cs.VisualPropA.PropertySubData.Sex, EGSPD::CPeople::Fyros);
+	if (fyrosRefScale == 0) return 1.f;
+	return GabaritSet.getRefHeightScale(cs.VisualPropA.PropertySubData.Sex, cs.People) / fyrosRefScale;
+}
+
+
 // ***************************************************************************
 string CLuaIHMRyzom::getRegionByAlias(uint32 alias)
 {
@@ -3714,6 +3750,27 @@ sint32 CLuaIHMRyzom::getPlayerLevel()
 }
 
 // ***************************************************************************
+std::string CLuaIHMRyzom::getPlayerVpaHex()
+{
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	return NLMISC::toString("%X", prop);
+}
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::getPlayerVpbHex()
+{
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	return NLMISC::toString("%X", prop);
+}
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::getPlayerVpcHex()
+{
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	return NLMISC::toString("%X", prop);
+}
+
+// ***************************************************************************
 sint64 CLuaIHMRyzom::getPlayerVpa()
 {
 	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
@@ -3733,6 +3790,7 @@ sint64 CLuaIHMRyzom::getPlayerVpc()
 	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
 	return prop;
 }
+
 
 // ***************************************************************************
 sint32 CLuaIHMRyzom::getTargetLevel()
@@ -3771,6 +3829,36 @@ ucstring CLuaIHMRyzom::getTargetSheet()
 	if (!target) return ucstring();
 
 	return target->sheetId().toString();
+}
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::getTargetVpaHex()
+{
+	CEntityCL *target = getTargetEntity();
+	if (!target) return 0;
+
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	return NLMISC::toString("%X", prop);
+}
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::getTargetVpbHex()
+{
+	CEntityCL *target = getTargetEntity();
+	if (!target) return 0;
+
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	return NLMISC::toString("%X", prop);
+}
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::getTargetVpcHex()
+{
+	CEntityCL *target = getTargetEntity();
+	if (!target) return 0;
+
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + toString("%d", getTargetSlotNr()) + ":P" + toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	return NLMISC::toString("%X", prop);
 }
 
 // ***************************************************************************
@@ -3922,7 +4010,6 @@ bool CLuaIHMRyzom::isTargetInPVPMode()
 
 	return (target->getPvpMode() & PVP_MODE::PvpFaction || target->getPvpMode() & PVP_MODE::PvpFactionFlagged || target->getPvpMode() & PVP_MODE::PvpZoneFaction)  != 0;
 }
-
 
 // ***************************************************************************
 int CLuaIHMRyzom::removeLandMarks(CLuaState &ls)

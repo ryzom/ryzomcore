@@ -227,6 +227,8 @@ private:
 	static sint32 getSheetId(const std::string &itemName);
 	static sint getCharacterSheetRegionForce(const std::string &sheet);
 	static sint	getCharacterSheetRegionLevel(const std::string &sheet);
+	static float setChar3dDBfromVPX(const std::string &branch, const std::string &people, const std::string &vpa, const std::string &vpb, const std::string &vpc);
+	static float getRefHeightScale(const std::string &people, const std::string &vpa);
 	static std::string getRegionByAlias(uint32 alias);
 	static float getGroundZ(float x, float y);
 	static int getGroundAtMouse(CLuaState &ls);
@@ -257,6 +259,9 @@ private:
 	static std::string encodeURLUnicodeParam(const ucstring &text);
 
 	static sint32 getPlayerLevel();		// get max level among player skills (magi, combat, crafting ,foraging)
+	static std::string getPlayerVpaHex();
+	static std::string getPlayerVpbHex();
+	static std::string getPlayerVpcHex();
 	static sint64 getPlayerVpa();
 	static sint64 getPlayerVpb();
 	static sint64 getPlayerVpc();
@@ -264,6 +269,9 @@ private:
 	static sint32 getTargetForceRegion(); // get 'force region' for current target, or -1 if there's no selected target
 	static sint32 getTargetLevelForce();	// get 'level force' for current target, or -1 if there's no selected target
 	static ucstring getTargetSheet();		// get the name of the target sheet (like 'zoha2old.creature')
+	static std::string getTargetVpaHex();
+	static std::string getTargetVpbHex();
+	static std::string getTargetVpcHex();
 	static sint64 getTargetVpa();
 	static sint64 getTargetVpb();
 	static sint64 getTargetVpc();
