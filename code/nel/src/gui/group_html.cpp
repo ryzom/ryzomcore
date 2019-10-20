@@ -2586,6 +2586,7 @@ namespace NLGUI
 		// go
 		_URL = uri.toString();
 		_BrowseNextTime = true;
+		_WaitingForStylesheet = false;
 
 		// if a BrowseTree is bound to us, try to select the node that opens this URL (auto-locate)
 		if(!_BrowseTree.empty())
