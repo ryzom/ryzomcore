@@ -659,10 +659,12 @@ namespace NLGUI
 
 		if (download.type == StylesheetType)
 		{
-			// no tmpfile if file was already in cache
-			if (CFile::fileExists(tmpfile) && CFile::fileExists(download.dest))
+			if (CFile::fileExists(tmpfile))
 			{
-				CFile::deleteFile(download.dest);
+				if (CFile::fileExists(download.dest))
+				{
+					CFile::deleteFile(download.dest);
+				}
 				CFile::moveFile(download.dest, tmpfile);
 			}
 			cssDownloadFinished(download.url, download.dest);
