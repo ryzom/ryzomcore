@@ -4163,7 +4163,7 @@ namespace NLGUI
 
 	void CGroupHTML::renderDocument()
 	{
-		if (!_StylesheetQueue.empty())
+		if (!Curls.empty() && !_StylesheetQueue.empty())
 		{
 			// waiting for stylesheets to finish downloading
 			return;
