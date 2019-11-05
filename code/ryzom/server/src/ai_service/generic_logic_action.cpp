@@ -2688,7 +2688,7 @@ CAILogicActionCode::CAILogicActionCode (const std::vector<std::string> &args, 	c
 	const CAIAliasDescriptionNode *eventNode, 	CStateMachine *container)
 {
 	nldebug("loadActionCode");
-	_byteCode=CCompiler::getInstance().compileCode	(args, eventNode->fullName());
+	_byteCode=CCompiler::getInstance().compileCode	(args, eventNode ? eventNode->fullName() : "NULL");
 }
 	
 bool	CAILogicActionCode::executeAction(CStateInstance	*entity,const IAIEvent *event)
