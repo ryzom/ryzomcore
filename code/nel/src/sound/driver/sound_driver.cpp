@@ -200,7 +200,7 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 #if defined (NL_COMP_MINGW)
 		dllName = "libnel_drv_xaudio2_win";
 #elif defined (NL_OS_WINDOWS)
-		dllName = "nel_drv_fmod_win";
+		dllName = "nel_drv_xaudio2_win";
 #elif defined (NL_OS_UNIX)
 		dllName = "nel_drv_openal";
 #else
