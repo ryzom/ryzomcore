@@ -1,0 +1,6 @@
+﻿*HASH_VALUE	ecosysteme ID	name	* nom en français	ia	da	p	pia	pda
+_28DB5483EC2808B8	desert	Desert	désert	a	the	Deserts	\d	the
+_AAEBA4866E5808B9	forest	Forest	forêt	a	the	Forests	\d	the
+_6478AC8C64A86065	lake	Lakes	lacustre	a	the	Lakes	\d	the
+_6838DC8A2C2798A7	jungle	Jungle	jungle	a	the	Jungles	\d	the
+_4AFF510A91EB3922	primeroots	Prime Roots	primes racines	a	the	Prime Roots	\d	the

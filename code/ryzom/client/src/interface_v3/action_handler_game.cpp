@@ -4636,3 +4636,17 @@ public:
 };
 REGISTER_ACTION_HANDLER( CHandlerSortTribeFame, "sort_tribefame");
 
+// ***************************************************************************
+class CHandlerTriggerIconBuffs : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	{
+		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_ICON_BUFFS", false);
+		// no node - show,
+		// node == false - hide
+		CDBCtrlSheet::setShowIconBuffs(!node || node->getValueBool());
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerTriggerIconBuffs, "trigger_show_icon_buffs");
+

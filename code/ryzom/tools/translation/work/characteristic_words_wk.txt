@@ -1,0 +1,9 @@
+﻿characteristic_ID	name
+Constitution	constitution
+Metabolism	metabolism
+Intelligence	intelligence
+Wisdom	wisdom
+Strength	strength
+WellBalanced	well balanced
+Dexterity	dexterity
+Will	will

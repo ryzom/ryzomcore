@@ -1,0 +1,33 @@
+﻿*HASH_VALUE	job ID	name	* noms français	ia	da	p	pia	pda
+_7B0C6949087BEF17	IreFighter	Combattant fou-furieux	guerrier fou 	un	le	Combattants fous-furieux	des	les
+_DA264262C82FA5E4	Swashbuckler	Bretteur	bretteur	un	le	Bretteurs	des	les
+_FF1001FD1B8460C5	KamicFist	Poing kamique	poing kamique	un	le	Poings kamiques	des	les
+_E9959ADC3E303D21	BladeBearer	Porteur de lames	porte lame	un	le	Porteurs de lames	des	les
+_AF5E35F1250C04D2	WindChild	Enfant des vents	enfant des vents	un	l'\d	Enfants des vents	des	les
+_2F47F87A6F381C99	Runner	Coureur	courreur	un	le	Coureurs	des	les
+_73AAF09AE4B710A3	Scout	Éclaireur	éclaireur	un	l'\d	Éclaireurs	des	les
+_C66185C2249CA8A6	FireLance	Lanceur de flammes	lance-feu	un	le	Lanceurs de flammes	des	les
+_296AE474AB790894	Witherer	Flétrisseur	fletrisseur	un	le	Flétrisseurs	des	les
+_AD68C069ED7714A0	Fouler	Contamineur	pestilent	un	le	Contamineurs	des	les
+_B290F10227B8C8B3	Disturber	Troubleur d'esprits	troubleur d'esprit	un	le	Troubleurs d'esprits	des	les
+_0250C5039B06F5C8	KamicFury	Furie kamique	furie kamique	une	la	Furies kamiques	des	les
+_757B279C53FC9BAB	SpiritualShield	Bouclier spirituel	bouclier spirituel	un	le	Boucliers spirituels	des	les
+_EE4990771C86D494	Faker	Feinteur	trompeur	un	le	Feinteurs	des	les
+_A045250E026EC63E	WindGuardian	Gardien des vents	gardien des vents	un	le	Gardiens des vents	des	les
+_0B806EC710885A48	KamicGuardian	Gardien kamique	bouclier kamique	un	le	Gardiens kamiques	des	les
+_C4438A71C41C6642	SecondBreath	Second souffle	second souffle	un	le	Seconds souffles	des	les
+_2FE51E469C502DFD	LifeStealer	Voleur de vie	voleur de vie	un	le	Voleurs de vie	des	les
+_FEBE4D8AEEBD5D18	SecondLife	Seconde vie	seconde vie	une	la	Secondes vies	des	les
+_B7AF21058A5F88E1	SapCristal	Cristal de sève	cristal de sève	un	le	Cristaux de sève	des	les
+_DE48CAEB05734249	ScarletHunter	Chasseur écarlate	chasseur écarlate	un	le	Chasseurs écarlates	des	les
+_31D7E2E30551753A	GreenHunter	Chasseur vert	chasseur vert	un	le	Chasseurs verts	des	les
+_06635A6B444DEE4C	ShadowHunter	Chasseur de l'ombre	chasseur de l'ombre	un	le	Chasseurs de l'ombre	des	les
+_99D26A1506D4F24B	AtysGuardian	Gardien d'Atys	gardien d'atys	un	le	Gardiens d'Atys	des	les
+_2BB7F7E25BC3D54D	SandCaravanner	Caravanier des dunes	caravanier des sables	un	le	Caravaniers des dunes	des	les
+_7CD608D036D57BF2	ImperialSupplier	Fournisseur impérial	pourvoyeur impérial	un	le	Fournisseurs impériaux	des	les
+_6C49C893E6B9849D	Steward	Régisseur	intendants	un	le	Régisseurs	des	les
+_A8C84C6F6A9710A2	Hawker	Colporteur	colporteurs	un	le	Colporteurs	des	les
+_44BE25E43BDAF009	FireMaster	Maître du feu	maitre du feu	un	le	Maîtres du feu	des	les
+_0BF32E6C860E7A26	FlowerMaster	Maître des fleurs	maitre des fleurs	un	le	Maîtres des fleurs	des	les
+_802D1DEA3BDAF002	LakeMaster	Maître des lacs	maitre des lacs 	un	le	Maîtres des lacs	des	les
+_348DF50C62FA70BB	SapMaster	Maître de la sève	maitre de la sève	un	le	Maîtres de la sève	des	les

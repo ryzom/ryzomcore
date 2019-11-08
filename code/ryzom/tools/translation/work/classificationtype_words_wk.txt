@@ -1,0 +1,21 @@
+﻿classification_type	name	ia	da	p	pia	pda	description
+TypeHumanoid	humanoïde	un	l'	humanoïdes		les	les humanoïdes
+TypeHomin	homin	un	l'	homins		les	les homins
+TypeDegenerated	homin dégénéré	un	l'	homins dégénérés		les	les homins dégénérés
+TypeFauna	faune	la		faune		la	la faune
+TypeFlora	flore	la		flore		la	la flore
+TypeDog	canidé	un	le	canidés		les	les canidés
+TypeRunner	capriné	un	le	caprinés		les	les caprinés
+TypeHorse	équidé	un	l'	équidés		les	les équidés
+TypeBird	oiseau	un	l'	oiseaux		les	les oiseaux
+TypeKitin	kitin	un	le	kitins		les	les kitins
+TypeLandKitin	kitin terrestre	un	le	kitins terrestres		les	les kitins terrestres
+TypeFlyingKitin	kitin volant	un	le	kitins volants		les	les kitins volants
+TypeFish	poisson	un	le	poissons		les	les poissons
+TypeRyzomian	ryzomien	un	le	ryzomiens		les	les ryzomiens
+TypeGreatRyzomian	grand ryzomien	un	le	grands ryzomiens		les	les grands ryzomiens
+TypePachyderm	pachyderme	un	le	pachydermes		les	les pachydermes
+TypeShellfish	crustacé	un	le	crustacés		les	les crustacés
+TypeKami	kami	un	le	kamis		les	les kamis
+TypeKaravan	karavan	un		karavans		les	les karavans
+TypeAll	tous			tous			tous

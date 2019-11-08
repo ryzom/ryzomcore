@@ -1,0 +1,6 @@
+﻿*HASH_VALUE	ecosysteme ID	name	* nom en français	p
+_28DB5483EC2808B8	desert	Пустыня	désert	Пустыни
+_AAEBA4866E5808B9	forest	Лес	forêt	Леса
+_6478AC8C64A86065	lake	Озеро	lacustre	Озера
+_6838DC8A2C2798A7	jungle	Джунгли	jungle	Джунгли
+_4AFF510A91EB3922	primeroots	Изначальные Корни	primes racines	Изначальные Корни

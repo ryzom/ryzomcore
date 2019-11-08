@@ -1,0 +1,21 @@
+﻿*HASH_VALUE	classification_type	name	ia	da	p	pia	pda	description
+_3A05A61DFA348A48	TypeHumanoid	humanoide	un	el	humanoides	unos	los	humanoides
+_45506C09EB15E8F6	TypeHomin	homin	un	el	homins	unos	los	homins
+_8E983B69E6751B5B	TypeDegenerated	homin degenerado	un	el	homins degenerados	unos	los	homins degenerados
+_A9DA837C2389848E	TypeFauna	fauna		la	faunas		las	faunas
+_EB29AF7C2428C08C	TypeFlora	flora		la	floras		las	floras
+_418079E7A7FCBDE4	TypeDog	cánido	un	el	cánidos	unos	los	cánidos
+_2ADE76E9CAEF61FD	TypeRunner	corredor	un	el	corredores	unos	los	corredores
+_E66DB1300A4F65FE	TypeHorse	équido	un	el	équidos	unos	los	équidos
+_41C17C16195279E3	TypeBird	ave	un	el	aves	unas	los	aves
+_86208D03AB86D000	TypeKitin	Kitin	un	el	Kitins	unos	los	Kitins
+_6BA9A101DCF285C2	TypeLandKitin	Kitin	un	el	Kitins	unos	los	Kitins
+_084D91AFD5E36708	TypeFlyingKitin	Kitin volador	un	los	Kitins voladores	unos	los	Kitins voladores
+_473159828751A1F6	TypeFish	pez	un	el	peces	unos	los	peces
+_2117AAF84DF7627F	TypeRyzomian	ryzomiano	un	el	ryzomianos	unos	los	ryzomianos
+_367CB4F6AA3221AE	TypeGreatRyzomian	gran ryzomiano 	un	el	grandes ryzomianos	unos	los	ryzomianos 
+_FABC37E2BA5ACB87	TypePachyderm	paquidermo	un	el	paquidermos	unos	un	paquidermos
+_20C7038A1FE556FD	TypeShellfish	crustáceo	un	el	crustáceos	unos	los	crustáceos
+_15EA8409E9C8749E	TypeKami	Kami	un	el	Kamis	unos	los	Kamis
+_84632E6705B131E4	TypeKaravan	Karavan	un	el	Karavan	unos	los	Karavan
+_66BC409E659A149E	TypeAll	todo	un	el	todos	unos	los	todos

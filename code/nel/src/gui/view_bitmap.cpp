@@ -323,7 +323,7 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"texture" );
 		if (prop)
 		{
-			string TxName = toLower((const char *) prop);
+			string TxName = (const char *) prop;
 			setTexture (TxName);
 			//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			//CViewRenderer &rVR = *CViewRenderer::getInstance();
@@ -478,7 +478,7 @@ namespace NLGUI
 			}
 		}
 		else
-			_TextureId.setTexture (TxName.c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
+			_TextureId.setTexture (toLower(TxName).c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
 	}
 
 	// ----------------------------------------------------------------------------

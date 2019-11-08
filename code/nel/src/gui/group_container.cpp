@@ -4756,6 +4756,7 @@ namespace NLGUI
 			if (_Resizer[k]) _Resizer[k]->HMax = maxH;
 		}
 	}
+
 	// ***************************************************************************
 	int CGroupContainer::luaSetHeaderColor(CLuaState &ls)
 	{
@@ -4763,6 +4764,16 @@ namespace NLGUI
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 		_HeaderColor.link(ls.toString(1));
+		return 0;
+	}
+	
+	// ***************************************************************************
+	int CGroupContainer::luaSetModalParentList(CLuaState &ls)
+	{
+		const char *funcName = "setModalParentList";
+		CLuaIHM::checkArgCount(ls, funcName, 1);
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		setModalParentList(ls.toString(1));
 		return 0;
 	}
 

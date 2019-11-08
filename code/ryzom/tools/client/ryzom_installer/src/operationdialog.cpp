@@ -877,6 +877,8 @@ bool COperationDialog::createDefaultProfile()
 	profile.comments = "Default profile created by Ryzom Installer";
 	profile.desktopShortcut = false;
 	profile.menuShortcut = false;
+	// default use locale
+	profile.language = config->getLanguage();
 
 #ifdef Q_OS_WIN32
 	QStringList paths;

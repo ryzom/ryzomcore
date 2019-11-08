@@ -1,0 +1,9 @@
+﻿*HASH_VALUE	career ID	name	* noms français	ia	da	p	pia	pda
+_1700C956C37FB64F	MeleeFighter	Luchador Cuerpo a Cuerpo	Combattant Contact	un	el	Luchadores Cuerpo a Cuerpo	unos	los
+_9720B95DC35FBA54	RangeFighter	Luchador a Distancia	Combattant Distance	un	el	Luchadores a Distancia	unos	los
+_D32171700AD23D57	AttackCaster	Lanzador de Ataque	Caster Attaque	un	el	Lanzadores de Ataque	unos	los
+_9A511D668371AE04	BufferCaster	Lanzador de Defensa 	Caster Buffer	un	el	Lanzadores de Defensa	unos	los
+_1C01F56701816E0A	HealerCaster	Sanador	Caster Healer	un	el	Sanadores	unos	los
+_A6473C7A6A380099	Ranger	Ranger		un	el	Rangers	unos	los
+_EA665D00EAE788B3	Shopkeeper	Tendero		un	el	Tenderos	unos	los
+_2D28B08D636AEC9E	Artisan	Artesano		un	el	Artesanos	unos	los

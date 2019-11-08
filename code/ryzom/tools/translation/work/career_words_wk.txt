@@ -1,0 +1,9 @@
+﻿career ID	name	* noms français	ia	da	p	pia	pda
+MeleeFighter	Melee Fighter	Combattant Contact	a	the	Melee Fighters		the
+RangeFighter	Range Fighter	Combattant Distance	a	the	Range Fighters		the
+AttackCaster	Attack Caster 	Caster Attaque	an	the	Attack Casters		the
+BufferCaster	Buffer Caster 	Caster Buffer	a	the	Buffer Casters		the
+HealerCaster	Healer Caster 	Caster Healer	a	the	Healer Casters		the
+Ranger	Ranger	Ranger	a	the	Rangers		the
+Shopkeeper	Merchant	Marchand	a	the	Merchants		the
+Artisan	Artisan	Artisan	a	the	Artisans		the

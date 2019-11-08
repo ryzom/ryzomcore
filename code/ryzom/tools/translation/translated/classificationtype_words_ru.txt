@@ -1,0 +1,21 @@
+﻿*HASH_VALUE	classification_type	name	p	description
+_3A05A61DFA348A48	TypeHumanoid	человекообразный	человекообразные	человекообразные
+_45506C09EB15E8F6	TypeHomin	хомин	хомины	хомины
+_8E983B69E6751B5B	TypeDegenerated	вырождающийся хомин	вырождающиеся хомины	вырождающиеся хомины
+_A9DA837C2389848E	TypeFauna	фауна	фауна	фауна
+_EB29AF7C2428C08C	TypeFlora	флора	флора	флора
+_418079E7A7FCBDE4	TypeDog	псовое	псовые	псовые
+_2ADE76E9CAEF61FD	TypeRunner	серна	серны	серны
+_E66DB1300A4F65FE	TypeHorse	копытное 	копытные	копытные
+_41C17C16195279E3	TypeBird	птица 	птицы	птицы
+_86208D03AB86D000	TypeKitin	кхитин	кхитины	кxитины
+_6BA9A101DCF285C2	TypeLandKitin	кхитин	кхитины	кхитины
+_084D91AFD5E36708	TypeFlyingKitin	летучий кхитин	летучие кхитины	летучие кxитины
+_473159828751A1F6	TypeFish	рыба	рыбы	рыбы
+_2117AAF84DF7627F	TypeRyzomian	ризомиан	ризомиане	ризомиане
+_367CB4F6AA3221AE	TypeGreatRyzomian	большой ризомиан	большие ризомиане	большие ризомиане
+_FABC37E2BA5ACB87	TypePachyderm	толстокожее	толстокожие	толстокожие
+_20C7038A1FE556FD	TypeShellfish	ракообразное	ракообразные	ракообразные
+_15EA8409E9C8749E	TypeKami	ками	ками	ками
+_84632E6705B131E4	TypeKaravan	караван	караван	караван
+_66BC409E659A149E	TypeAll	все	все	все

@@ -1,0 +1,136 @@
+﻿race ID	name	ia	da	p	pia	pda
+Fyros	Fyros	a	the	Fyros		the
+Matis	Matis	a	the	Matis		the
+Tryker	Tryker	a	the	Trykers		the
+Zorai	Zoraï	a	the	Zoraïs		the
+Karavan	Karavan	a	the	Karavans		the
+Tribe	Tribe	a	the	Tribes		the
+Common	Common			Common		
+Arma	Arma	an	the	Armas		the
+Balduse	Baldusa	a	the	Baldusas		the
+Bul	Bodoc	a	the	Bodocs		the
+Capryni	Capryni	a	the	Caprynis		the
+Cephaloplant	Jubla	a	the	Jublas		the
+Chonari	Gingo	a	the	Gingos		the
+Clapclap	Prakker	a	the	Prakker		the
+Cococlaw	Clopper	a	the	Cloppers		the
+Cute	Cute	a	the	Cutes		the
+Dag	Yubo	a	the	Yubos		the
+Diranak	Horncher	a	the			the
+Electroalgs	Stinga	a	the	Stingas		the
+Estrasson	Cray	a	the	Crays		the
+Filin	Messab	a	the	Messabs		the
+Frahar	Frahar	a	the	Frahars		the
+Gibbai	Gibbaï	a	the	Gibbaïs		the
+Hachtaha	Goari	a	the	Goaris		the
+Jungler	Torbak	a	the	Torbaks		the
+Kakty	Lumper	a	the	Lumpers		the
+Kalab	Kalab	a	the	Kalabs		the
+Kami	Kami	a	the	Kamis		the
+Kazoar	Igara	an	the	Igaras		the
+Kitifly	Kizoar	a	the	Kizoars		the
+Kitihank	Kinrey	a	the	Kinreys		the
+Kitiharak	Kizarak	a	the	Kizaraks		the
+Kitikil	Kipesta	a	the	Kipestas		the
+Kitimandib	Kincher	a	the	Kinchers		the
+Kitin	Kitin	a	the	Kitins		the
+Kitinagan	Kipucka	a	the	Kipuckas		the
+Kitinega	Kirosta	a	the	Kirostas		the
+Kitinokto	Kiban	a	the	Kibans		the
+Lightbird	Izam	an	the	Izams		the
+Mektoub	Mektoub	a	the	Mektoubs		the
+Phytopsy	Psykopla	a	the	Psykoplas		the
+Pucetron	Kipee	a	the	Kipees		the
+Regus	Ragus	a	the	Ragus		the
+Ryzerb	Najab	a	the	Najabs		the
+Ryzoholo	Timari	a	the	Timaris		the
+Ryzoholok	Vorax	a	the	Vorax		the
+SapEnslaver	Slaveni	a	the	Slavenis		the
+SpittingWeeds	Cratcha	a	the	Cratchas		the
+Swarmplants	Shooki	a	the	Shookis		the
+Vampignon	Yelk	a	the	Yelks		the
+Varinx	Varinx	a	the	Varinx		the
+Yber	Yber	a	the	Ybers		the
+Zerx	Zerx	a	the	Zerx		the
+race_c1	Javing	a	the	Javings		the
+race_c2	Cuttler					
+race_c3	Ocyx					
+race_c4	Jugula					
+race_c5	Kidinak					
+race_h1	Raspal					
+race_h2	Bawaab					
+race_h3	Frippo					
+race_h4	Rendor					
+race_h5	Gnoof					
+race_h6	Bolobi					
+race_h7	Shalah					
+race_h8	Ploderos					
+race_h9	Wombai					
+race_h10	Madakam					
+race_h11	Arana					
+race_h12	Gubani					
+race_c6	Tyrancha	a	the	Tyranchas		the
+race_c7	Yetin	a	the	Yetins		the
+gooArma	Arma Goo	an	the			
+gooBalduse	Baldusa Goo	a	the			
+gooBul	Bodoc Goo	a	the			
+gooCapryni	Capryni Goo	a	the			
+gooCephaloplant	Jubla Goo	a	the			
+gooChonari	Gingo Goo	a	the			
+gooClapclap	Prakker Goo	a	the			
+gooCococlaw	Clopper Goo	a	the
+gooCute	Cute Goo	a	the
+gooDag	Yubo Goo	a	the
+gooDiranak	Horncher Goo	a	the
+gooElectroalgs	Stinga Goo	a	the
+gooEstrasson	Cray Goo	a	the
+gooFilin	Messab Goo	a	the
+gooFrahar	Frahar Goo	a	the
+gooGibbai	Gibbay Goo	a	the
+gooHachtaha	Goari Goo	a	the
+gooJungler	Torbak Goo	a	the
+gooKakty	Lumper Goo	a	the
+gooKalab	Kalab Goo	a	the
+gooKami	Kami Goo	a	the
+gooKazoar	Igara Goo	an	the
+gooKitifly	Kizoar Goo	a	the
+gooKitihank	Kinrey Goo	a	the
+gooKitiharak	Kizarak Goo	a	the
+gooKitikil	Kipesta Goo	a	the
+gooKitimandib	Kincher Goo	a	the
+gooKitin	Kitin Goo	a	the
+gooKitinagan	Kipucka Goo	a	the
+gooKitinega	Kirosta Goo	a	the
+gooKitinokto	Kiban Goo	a	the
+gooLightbird	Izam Goo	an	the
+gooMektoub	Mektoub Goo	a	the
+gooPhytopsy	Psykopla Goo	a	the
+gooPucetron	Kipee Goo	a	the
+gooRegus	Ragus Goo	a	the
+gooRyzerb	Najab Goo	a	the
+gooRyzoholo	Timari Goo	a	the
+gooRyzoholok	Vorax Goo	a	the
+gooSapEnslaver	Slaveni Goo	a	the
+gooSpittingWeeds	Cratcha Goo	a	the
+gooSwarmplants	Shooki Goo	a	the
+gooVampignon	Yelk Goo	a	the
+gooVarinx	Varinx Goo	a	the
+gooYber	Yber Goo	a	the
+gooZerx	Zerx Goo	a	the
+gooc1	Javing Goo	a	the
+gooc2	Cuttler Goo	a	the
+gooc3	Ocyx Goo	a	the
+gooc4	Jugula Goo	a	the
+gooc5	Kidinak Goo	a	the
+gooh1	Raspal Goo	a	the
+gooh2	Bawaab Goo	a	the
+gooh3	Frippo Goo	a	the
+gooh4	Rendor Goo	a	the
+gooh5	Gnoof Goo	a	the
+gooh6	Bolobi Goo	a	the
+gooh7	Shalah Goo	a	the
+gooh8	Ploderos Goo	a	the
+gooh9	Wombai Goo	a	the
+gooh10	Madakam Goo	a	the
+gooh11	Arana Goo	an	the
+gooh12	Gubani Goo	a	the

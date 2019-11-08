@@ -1,0 +1,11 @@
+﻿*HASH_VALUE	damageTypeId	name	ia	da	p	pia	pda	description
+_EC08606C264890AB	Slashing	Cortante			Cortantes			
+_2D98306326487C9B	Piercing	Perforante			Perforantes			
+_6CF60460721A84D2	Blunt	Contundente			Contundentes			
+_26D818876787A4A9	Rot	Podredumbre			Podredumbre			
+_6476EC4AA5162881	Acid	Ácido			Ácido			
+_28B6544E2AE66886	Cold	Frío			Frío			
+_A8483056EBB76C90	Fire	Fuego			Fuego			
+_E5B98496A6B8D8A1	Poison	Veneno			Veneno			
+_5659CC92EA58A491	Electricity	Eléctrico			Eléctricos			
+_E4569C6C6E78B4B4	Shock	Choque			Choque			

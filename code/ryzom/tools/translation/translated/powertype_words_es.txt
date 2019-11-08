@@ -1,0 +1,32 @@
+﻿*HASH_VALUE	powerType	name	ia	da	p	pia	pda	description
+_6DCA609CECF858BE	Taunt	Molestar	una	la			las	
+_2AB8D88D6969889E	Shielding	Blindaje	un	el			los	
+_23E3F07BA6C9808C	SpeedingUp	Aceleración	una	la	Aceleraciones	unas	las	
+_FE6DF5A5685844B3	MeditationLife	Meditación de Salud	una	la			las	
+_F0CD8E578A5F7D05	MeditationStamina	Meditación de Resistencia	un	la			las	
+_279839E098D918C1	MeditationSap	Meditación de Savia 	una	la 			las	
+_872EA1EBE6F753A8	ConvertStamina	Convertir Resistencia 	una	la			las	
+_29D5CF7D27CAE486	ConvertSap	Convertir Savia	una	la			las	
+_29CC88822549147E	Berserk	Berserker	un	el	Berserkers	unos	los	
+_25797445A52B8007	LifeAura	Aura de Vida	un	el			las	
+_9C84C0AA1F379CBA	StaminaAura	Aura de Resistencia	un	el			las	
+_59B6EC98A07774B3	SapAura	Aura de Savia 	un	el			las	
+_FD34328D8A827302	Umbrella	Aura de Protección a Distancia	un	el			las	Te vuelve a ti y a tus compañeros de equipo cercanos invulnerables a los ataques de alcance.
+_92F0C1BB89BC5683	MeleeProtection	Aura de Protección de Combate Cuerpo a Cuerpo	un	el			las	Te vuelve a ti y a tus compañeros de equipo cercanos invulnerables a los  ataques de Lucha Cuerpo a Cuerpo 
+_86197EEC1899F525	AntiMagicShield	Aura de Escudo Anti Magia 	un	el			las	Te vuelve a ti y a tus compañeros cercanos invulnerables a los ataques de magia.
+_8758671228A5AB28	Invulnerability	Invulnerabilidad 	una	la			las	Te vuelve invulnerable pero incapaz de utilizar acciones
+_29AB5F80EF88004E	FireWall	Aura Barrera de Fuego	un	el			las	
+_D8C8F48265958CB5	ThornWall	Aura Barrera de Espinas	un	el			las	
+_D7A9E48525959CAC	WaterWall	Aura Barrera de Agua	una	el			las	
+_F0BE55DDA9AB7D23	LightningWall	Aura Barrera de Electricidad	un	el	Auras Barrera de Electricidad		las	
+_1D5ABBA0DE1B6FB4	WarCry	Grito de Guerra	un	el	Gritos de Guerra	unos	los	
+_ABB88C82DEB650A9	Heal	Sanación	una	la	Sanaciones	unas	las	
+_2305443A60C86CAF	BalanceHp	Equilibrar Salud	un	el	Equilibrar Salud	unos	los	
+_B6604DDCE6C6ACA1	ChgCharac	Mejora de Característica 	una	la	Mejoras de Característica	unas	las	
+_16F116141048A371	ModMagicProtection	Modificador de Protección 	una	la	Modificadores de Protección	unos	los	Modifica el valor de tu protección mágica
+_3A7CADB6DF38F847	ModDefense	Modificador de Tasa de Éxito de Defensa	una	la	Modificadores de Tasa de Éxito de Defensa	unos	los	Modifica tu oportunidad de éxito al defenderte tu mismo
+_A25E08467860F1F2	ModCraftSuccess	Bonus de Artesanía	un	el	Bonus de Artesanía	unos	los	Mejora tu habilidad de fabricación 
+_24BA6F597234C2DA	ModMeleeSuccess	Bonus de Combate Cuerpo a Cuerpo	un	el	Bouos de Combate Cuerpo a Cuerpo	unos	los	Mejora tu habilidad de Combate Cuerpo a Cuerpo
+_8F7EEBA94B68D5F8	ModRangeSuccess	Bonus de Combate a Distancia	un	el	Bonus de Combate de Alcance	unos	los	Mejora tu habilidad de combate de alcance
+_9CAFEDAD47AFE1C5	ModMagicSuccess	Bonus de Mágia	un	el	Bonus de Mágia	unos	los	Mejora tu habilidad de magia
+_A043E58C54A010EF	ModForageSuccess	Bonus de Recolección	un	el	Bonus de Recolección	unos	los	Mejora tu habilidad de excavación

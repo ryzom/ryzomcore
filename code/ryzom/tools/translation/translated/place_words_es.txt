@@ -1,0 +1,824 @@
+﻿*HASH_VALUE	placeId	name	da
+_84AF650B260BB428	region_majesticgarden	Jardín Majestuoso	el
+_06FE551623FBAC21	region_fleetinggarden	Jardín Pasajero	el
+_DA073675680D99DC	region_groveofconfusion	Bosque de la Confusión	el
+_A09DD42F2967E0BB	region_hiddensource	Fuente Oculta	la
+_86EA9D32C2EBD02C	region_knollofdissent	Monte de la Discordancia	el
+_2E78B8C666F71C56	region_upperbog	Pantano Alto	el
+_781E713068D7F0FB	region_hereticshovel	Cabaña del Hereje	la
+_67C874A86C3B68AB	place_yrkanis	Yrkanis	
+_A2D868B962D67093	place_davae	Davae	
+_A4D890B762166893	place_natae	Natae	
+_9DA990A8E9461CB1	place_arena	Arena	
+_A3688C9568B89C81	place_avalae	Avalae	
+_E778A80664D6FCBF	continent_matis	Alturas Verdes	los
+_2BB98CB6EA59EC44	region_nland	Bosque de los Matisianos	los
+_209AF856EBF9ACA9	matis_nland	Isla de los Matis	la
+_68F9D8B02CD88085	place_stalli	Stalli	
+_D0588CC466F88CA8	place_borea	Borea	
+_68EAACBAA857347D	place_nistia	Nistia	
+_E89984B1E9F91CB7	place_rosilio	Rosilio	
+_5658D4A26878049C	place_miani	Miani	
+_2A4800B92E49C494	region_nexus	Nexo	el
+_6C6AE4AB64195066	continent_nexus	Nexo Menor	el
+_0C3E4110AAC8E5CE	region_the_under_spring	Bajo la Primavera	la
+_AC9958BA21141CAA	continent_sources	Bajo la Primavera	el
+_BF8B0179CCDBB515	region_the_abyss_of_ichor	Abismo de Ichor	el
+_2CC9AC824C980062	continent_bagne	Abismo de Ichor	el
+_0D640EA59E955242	region_the_land_of_continuty	Tierra de la Continuidad	la
+_847D252FF0766478	region_the_sunken_city	Ciudad Sumergida	la
+_466E5E377D0F1D1F	region_forbidden_depths	Profundidades Prohibidas	las
+_28FAD8ABA678C4AA	continent_terre	Paramos	los
+_258341053327A09E	region_the_windy_gate	Puerta del Viento	la
+_18061244372D7DE5	region_gate_of_obscurity	Puerta de la Oscuridad 	la
+_DBC5896C810F9A3A	region_the_trench_of_trials	Trinchera de las Pruebas	la
+_451C824CC930C922	region_the_elusive_forest	Bosque Pasajero	el
+_09D065F4E6EEE1C5	continent_route_gouffre	Tierras de las Sombras	las
+_1F24195BC5E95297	region_citiesofintuition	Ciudades de la Intuicion	las
+_E6B7ECCEEBB97CBC	region_maidengrove	Bosque de las Doncellas	el
+_09A0641C6CBAADAE	region_havenofpurity	Refugio de la Pureza	el
+_E5DFA9C729D9C4A5	region_groveofumbra	Bosque de las Sombras	el
+_8241441EC40D59B7	region_knotofdementia	Nudo de la Demencia	el
+_260A78AC6E06B4B1	region_thevoid	Vacio	el
+_E238809D26EB70C1	place_zora	Zora	
+_8498DC7024D8D4AC	place_jen_lai	Jen-Laï	
+_27A8B870E7B8E0B2	place_min_cho	Min-Cho	
+_A858B86BC8C8CCAD	place_hoi_cho	Hoï-Cho	
+_AA99DCB366B8A0B0	continent_zorai	Witherings	los
+_E44B30630AD884AB	zorai_nland	Isla de los Zoraï	la
+_A57970968F804C83	place_qai_lo	Qaï Lo	
+_63783BADA4A74CAE	place_men_xing	Nen Xing	
+_8E58B09BEAC998A6	place_sheng_wo	Sheng Wo	
+_ABCA145E0B69D8AC	place_koi_zun	Koï Zun	
+_1E3598B7E38A3894	place_yin_piang	Yin Piang	
+_077F812B671904A6	region_imperialdunes	Dunas Imperiales	las
+_B9EF3D22E9E614FA	region_oflovaksoasis	Oasis de Oflovak	el
+_DE4B79286F6720AC	region_sawdustmines	Minas de Aserrín	las
+_1ECE042FAA98A4CA	region_frahartowers	Torres de Frahar	las
+_6C6F6D126C67609C	region_thesavagedunes	Dunas Salvajes	las
+_E468393398488CC4	region_dunesofexil	Dunas del Exilio	las
+_DDAC444B69C7FCC9	region_outlawcanyon	Canon de los Forajidos	el
+_D241D277C41E7296	region_thescorchedcorridor	Corredor Quemado	el
+_AACA20B730BBECAC	place_pyr	Pyr	
+_AB69ECB8E7387889	place_thesos	Thesos	
+_D2F8DCC4F2788CBC	place_dyron	Dyron	
+_7188D0B19515E4BD	continent_fyros	Desierto Ardiente	el
+_CB801D2A284B2C1F	continent_fyros_newbie	Desierto Ardiente	el
+_E50A584FEB59BCBF	fyros_nland	Isla de los Fyros 	la
+_509A0CAE6ADA3494	place_aegus	Aegus	
+_E969A4AFE2164880	place_kaemon	Kaemon	
+_A94AC4AF650A38B8	place_sekovix	Sekovix	
+_ACAAECC829F96485	place_phyxon	Phyxon	
+_69B978A6A878E0B4	place_galemus	Galemus	
+_A8543324AA29C8B0	region_libertylake	Lago de la Libertad	el
+_A314F0B0E1C9D4B5	region_dewdrops	Gotas de Rocío	las
+_1D3C352DEA09F4A3	region_restingwater	Aguas en Reposo	las
+_E33311255F58B0C1	region_windsofmuse	Vientos de la Musa	los
+_2D589CAE64D990C6	region_thefount	Fuente	la
+_FDFBBD1DA5D884F4	region_bountybeaches	Playas de la Recompensa	las
+_7E503D166815C3EB	region_enchantedisle	Isla Encantada	la
+_C5A069FAEEED45BF	region_lagoonsofloria	Lagunas de Loria	las
+_22D9D0AADC0868A1	place_fairhaven	Fairhaven	
+_5FF8B09BF087809E	place_avendale	Avendale	
+_27FBF898E778249C	place_crystabell	Crystabell	
+_A859B09A26F96898	place_windermeer	Windermeer	
+_6F69648D2EB673C3	continent_tryker	Aeden Acuoso	
+_0D304100E4191064	continent_tryker_newbie	Aeden Acuoso	el
+_9E05E8A9EA390CA0	tryker_nland	Isla de los Tryker	la
+_A76ABC87ABA994A7	place_aubermouth	Aubermouth	
+_61F898B5A578649F	place_barkdell	Barkdell	
+_E518F895AE3704A5	place_hobwelly	Hobwelly	
+_E9BA68BD245A74BA	place_waverton	Waverton	
+_2468B8B7606888A3	place_dingleton	Dingleton	
+_AC96B090543870A0	guild_hall	Sala de reuniones del gremio	la
+_5F15D0B167CA0CA4	guild_council	Consejo del Gremio	el
+_F13D701523F59873	guild_RM_fight	Entrenador de Combate del Gremio	el
+_F1BD8C0463F5347B	guild_RM_magic	Entrenador de Magia del Gremio	el
+_077EC9E0BDABE324	guild_RM_harvest	Entrenador de Recolección del Gremio	el
+_70CE6415A295BC6E	guild_RM_craft	Entrenador de fabricación de artesanías 	el
+_A5D7AFB6E6FA98B9	player_room	Sala del Jugador	la
+_B187F8BAA67AEC8E	exit	Salida	la
+_21A51698B819D00D	place_lieudit_majesticgarden_1	Monte de Psykopla	
+_F2205186FD3C18E2	place_lieudit_majesticgarden_2	Arena Matis	
+_4356FA692CB82013	place_lieudit_majesticgarden_3	Manera de los Encantadores	
+_F7FB517E408C240F	place_lieudit_fleetinggarden_1	Circulo Kami	
+_C33E2C11E73D3815	place_lieudit_fleetinggarden_2	El Tesoro	
+_C0EF2C93C23D7CC6	place_lieudit_fleetinggarden_3	Madriguera de la Furia	
+_811E2C11C0CD0C19	place_lieudit_fleetinggarden_4	La Sublevación 	
+_45B4427C36BD0CBE	place_lieudit_knollofdissent_1	El Túnel de Woe	
+_1DA3059149CDC178	place_lieudit_knollofdissent_2	El Desfiladero de Runninghill 	
+_1AA4E193859DFC89	place_lieudit_knollofdissent_3	Camino del Puente de la Torre	
+_1620069204445D27	place_lieudit_knollofdissent_4	Colina del Sendero de Torbakl	
+_C59E1288C70BDF05	place_lieudit_knollofdissent_5	Árbol Mortal	
+_83965695071BE30C	place_lieudit_knollofdissent_6	Monte Smitten	
+_3D5FF1AB5AEA211B	place_lieudit_upperbog_1	Estanques de Fencoomb 	
+_427F45D10A8850B1	place_lieudit_upperbog_2	Pantanos Temidos	
+_41A6096B7658B814	place_lieudit_upperbog_3	Ciénaga del Demonio	
+_C3A025E58B8850B1	place_lieudit_upperbog_4	Pase Jadeante 	
+_FCB5018BC8EF498D	place_lieudit_hereticshovel_1	Laberinto del Duende	
+_FE06168AC58D54D5	place_lieudit_hereticshovel_2	Pantano Gélido	
+_F78692029E74E044	place_lieudit_hereticshovel_3	Cascada de los Dos Tótems	
+_7F6B9529445E65DC	place_lieudit_hereticshovel_4	Llanura de la Locura	
+_6C8FE6698AD03107	place_lieudit_hiddensource_1	Montana Pequeña	
+_B13D327144E075C2	place_lieudit_hiddensource_2	Cascadas de Virginia	
+_6AA9510AAABF6D01	place_lieudit_hiddensource_3	Puerta Tylini	
+_82AF095C7A1D0915	place_lieudit_groveofconfusion_1	Mullgrove	
+_DC943954BA1D9E89	place_lieudit_groveofconfusion_2	Puerta del Patio del Este	
+_DC944966FA1D9E89	place_lieudit_groveofconfusion_3	Puerta del Patio del Oeste	
+_815FD9573B1D0915	place_lieudit_groveofconfusion_4	Highgrove	
+_21E51E4FFB7A0190	place_lieudit_citiesofintuition_1	Aguas Tranquilas	
+_2365BA52FA7A3524	place_lieudit_citiesofintuition_2	Escarpa de Musgo	
+_22B4277C9955D68A	place_lieudit_citiesofintuition_3	Pozo de Auga de Mektoub	
+_22A5BA372EAEF598	place_lieudit_citiesofintuition_4	Cascada Mística	
+_FC8B19F957685906	place_lieudit_maidengrove_1	Valle de las Palmeras	
+_FBDA1411A8D8F90F	place_lieudit_maidengrove_2	Estanque de la Doncella	
+_3D3C3511A8F9191F	place_lieudit_maidengrove_3	Slavenhurst	
+_71F73111A9AE4D10	place_lieudit_maidengrove_4	Lago para Cazar Aves	
+_9652EEE308C47E8C	place_lieudit_maidengrove_5	Túnel de la Gran Roca	
+_D9167A8A842FF9FE	place_lieudit_havenofpurity_1	Montana del Carnero	
+_3C9FD1282AFA69DC	place_lieudit_havenofpurity_2	Fustylake	
+_802F8D7FC160ED92	place_lieudit_havenofpurity_3	Arco de Kincher	
+_B67B641BE71925F6	place_lieudit_groveofumbra_1	Reflexión de Kipee	
+_F25D690296A98092	place_lieudit_groveofumbra_2	Lago Sly	
+_37BDC190BF7F8DB4	place_lieudit_groveofumbra_3	Archo en Marcha	
+_33FD5A7E83A0C1B6	place_lieudit_groveofumbra_4	Acción Marchita	
+_57A37D6670946562	place_lieudit_knotofdementia_1	El Gran Despoblado	
+_400FBD907F8C280F	place_lieudit_knotofdementia_2	Desertstock	
+_7ECECD136BAE180B	place_lieudit_knotofdementia_3	Stainmoor	
+_D715525A73AE1C0B	place_lieudit_knotofdementia_4	Puerta de Stainmoor	
+_57C48A86FAD8897D	place_lieudit_knotofdementia_5	Callejón de las Tierras Altas	
+_7C2EBD2229D61808	place_lieudit_knotofdementia_6	Hopedell	
+_C2AF75BBA506F90F	place_lieudit_thevoid_1	Acciones Primordiales	
+_BA1A79F891772911	place_lieudit_thevoid_2	El Valle Perdido	
+_6F1FDD14D842A11A	place_lieudit_thevoid_3	Reflexión del Desaliento	
+_07A7068C7EF16649	place_lieudit_imperialdunes_1	Valle de los Emperadores	
+_C1D08D256F98C4DF	place_lieudit_imperialdunes_2	Cuatro Caminos	
+_6BA06D2C89EF3DBD	place_lieudit_imperialdunes_3	Pase del Canon 	
+_F5FCB51D270F9DDE	place_lieudit_oflovaksoasis_1	Grieta del Oasis	
+_FD50A990410EF596	place_lieudit_oflovaksoasis_2	Colina Clopper	
+_3B107D246448FCEA	place_lieudit_oflovaksoasis_3	Midpeaks	
+_7C51851FE7C8B5E4	place_lieudit_oflovaksoasis_4	Barkgully	
+_32C47DF47ABCDAB2	place_lieudit_oflovaksoasis_5	Ruta de la Llama Ardiente	 
+_77DF690855E95006	place_lieudit_sawdustmines_1	Los Residuos	
+_73EE8923670921FA	place_lieudit_sawdustmines_2	Highridges	
+_EBAAAD160310ED04	place_lieudit_sawdustmines_3	Dunas del Descortezador	
+_AFAAC51FAB10010C	place_lieudit_sawdustmines_4	La Cuesta del Varinx	
+_74FE5E78C79FD5C1	place_lieudit_sawdustmines_5	Aguas Turbulentas	
+_733DB18E849FB5B9	place_lieudit_frahartowers_1	Pase Solitario	
+_D0D5325F73806DC1	place_lieudit_frahartowers_2	La Vasta Extensión 	
+_F3DEB11C69192907	place_lieudit_frahartowers_3	Torres altas	
+_863C8C1769CDF80B	place_lieudit_thesavagedunes_1	El Desfiladero de las Cenizas	
+_6334927D43AFACB9	place_lieudit_thesavagedunes_2	Manantiales de Thesos	
+_62E45E80C23E0927	place_lieudit_thesavagedunes_3	Billabong de Thesos	
+_B34EDD89417EECEB	place_lieudit_thesavagedunes_4	Cordillera Sur	
+_9CC0A680C2BE4D28	place_lieudit_thesavagedunes_5	Catarata Tor de Thesos 	
+_85E48680021CEFFA	place_lieudit_thesavagedunes_6	Llanura de la Kipucka	
+_B30C301DECBA25EF	place_lieudit_dunesofexile_1	Colina de Dyron	
+_75FA698A44BFA9A3	place_lieudit_dunesofexile_2	Cola del Dragón 	
+_D9CF691E6C59148C	place_lieudit_dunesofexile_3	Malmont	
+_B334ED95881F99B1	place_lieudit_dunesofexile_4	Ruinas de	
+_37D93E9548BF95A0	place_lieudit_outlawcanyon_1	Columna de Dragón 	
+_11248A9B80DAE5E9	place_lieudit_outlawcanyon_2	Lucenthead Hurst	
+_BF760B0661161AE9	place_lieudit_outlawcanyon_3	Callejón de las Fauces del Dragón 	
+_CB9DFAF2DE057A98	place_lieudit_thescorchedcorridor_1	Bosque en Llamas	
+_962FDD8843B7AE93	place_lieudit_thescorchedcorridor_2	Guarida del Varynxx	
+_B105AAE5D4025E8F	place_lieudit_thescorchedcorridor_3	Oasis Secreto Kami 	
+_60BD550BE95874B3	place_lieudit_libertylake_1	Darkmoor	
+_BB6C650529F858B3	place_lieudit_libertylake_2	Lakenisle	
+_38FD1D1368D83030	place_lieudit_libertylake_3	Agua Negra	
+_BDDA1421AA01151E	place_lieudit_windsofmuse_1	Calas de las Brujas	
+_38FDAE6AF0AEFC1C	place_lieudit_windsofmuse_2	Lago para Observar a la Musa	
+_1332FA82C18C8136	place_lieudit_windsofmuse_3	Gran Montana Durmiente	
+_40ECF1C8EEDA68A8	place_lieudit_windsofmuse_4	Camino Ventoso	
+_042EF59E1EC81D18	place_lieudit_thefount_1	Llanura Deathfly	
+_2A2F69F2DB074BBB	place_lieudit_thefount_2	Porche de la Fuente	
+_2AA971EB98C64BBB	place_lieudit_thefount_3	Lago de la Fuente	
+_ACA9A9F25B187CAF	place_lieudit_thefount_4	Lagos del Sur	
+_B0B55E30E4FF39FC	place_lieudit_thefount_5	Reflexiones sobre los Pilares Finales	
+_6F90EA75021FA1BF	place_lieudit_bountybeaches_1	Propagación de Torbak	
+_830F548A033F41DF	place_lieudit_bountybeaches_2	Lindos Manantiales	
+_6054D4F19ED5FA49	place_lieudit_bountybeaches_3	Hermanamiento de Lindos Manantiales	
+_23377A7CC2AEDD8F	place_lieudit_bountybeaches_4	Entrada de la Libertad	
+_421F54206779ADE0	place_lieudit_bountybeaches_5	Cimas Gemelas	
+_0026ED8F42DF2591	place_lieudit_bountybeaches_6	Brecha de la Lucha	
+_B8CABD1B47AE65E3	place_lieudit_enchantedisle_1	Pico Tippy	
+_B7CABD85846E35E0	place_lieudit_enchantedisle_2	Laguna Baily	
+_D9546930447E9505	place_lieudit_enchantedisle_3	Fango de lo Fatal	
+_FC151E827C8B3DF3	place_lieudit_enchantedisle_4	Caminata al Cementerio	
+_DCE4267C50D0064C	place_lieudit_enchantedisle_5	Circulo Encantado	
+_2D7FDD83038D38F2	place_lieudit_lagoonsofloria_1	Barranco Borrascoso	
+_F9115E7FC10C4020	place_lieudit_lagoonsofloria_2	Lago Superior	
+_37EAAD1E2ACC341A	place_lieudit_lagoonsofloria_3	Hoyo del Silencio 	
+_88470A6FBBCBE815	place_lieudit_the_windy_gate_1	Ruinas de Leron 	
+_8907026EB4A0A57E	place_lieudit_the_windy_gate_2	Salones del Anillo oscuro	
+_96A55926003F0877	place_lieudit_the_windy_gate_3	El Árbol Caído	
+_1B77D652AD6FE574	place_lieudit_the_windy_gate_4	Columna de la Puerta del Viento	
+_A3049E4AB61D1E9E	place_lieudit_gateofobscurity_1	Callejones del Acantilado	
+_F06E818C757C9509	place_lieudit_gateofobscurity_2	Altura Henge	
+_426EC12D9DDDB12D	place_lieudit_gateofobscurity_3	Colinas Bajas	
+_419EAD8BB60CDD2F	place_lieudit_gateofobscurity_4	Pozo Oscurecido	
+_A489686D2848EC6D	place_lieudit_nexus_1	La Concha	
+_6779912FE004D832	place_lieudit_nexus_2	El Desino Final	
+_11BAF02D2988C054	place_lieudit_nexus_3	Colinas Hammer	
+_FDBDF4DB65E891ED	place_lieudit_nexus_4	Campamento Abandonado	
+_CFD396CEE116EE90	place_lieudit_the_abyss_of_ichor_1	Montana Sagrada	
+_99B2C1288291D288	place_lieudit_the_abyss_of_ichor_2	Reloj Saprun	
+_D8A2256C40002922	place_lieudit_the_abyss_of_ichor_3	Templedoom	
+_49630D6A9E56C263	place_lieudit_the_trench_of_trials_1	Valle Eerie	
+_CEF4566CC09F1170	place_lieudit_the_trench_of_trials_2	Yelkgrove	
+_C2007270C1CFCE73	place_lieudit_the_trench_of_trials_3	Final Espeluznante	
+_9BE1C4646723A693	place_lieudit_the_elusive_forest_1	Tierra de la Abundancia	
+_829CF96A8751FD27	place_lieudit_the_elusive_forest_2	Highwell	
+_CBB3096D0B57AE7B	place_lieudit_the_elusive_forest_3	Bosque Elusivo	
+_A0A2911E09212DA2	place_lieudit_the_elusive_forest_4	Pase de la Gruta	
+_9BDBDEB34A32BE9F	place_lieudit_the_elusive_forest_5	Pase de los Tres Tótems	
+_78D96E6B9117D206	place_lieudit_the_elusive_forest_6	Pase del Hongo Gigante	
+_5BE67A11F07FF584	place_lieudit_the_under_spring_1	Hoyo del Árbol Muerto	
+_2FE14968B350B1F8	place_lieudit_the_under_spring_2	Savia del Pantano	
+_9D481E4A1F7FD286	place_lieudit_the_under_spring_3	Aguas Furtivas	
+_2097EA1FF11F4182	place_lieudit_the_under_spring_4	Ruinas de Tryde	
+_5A269A2071868E83	place_lieudit_the_under_spring_5	Pradera de Tiro	
+_241D67F3180FB983	place_lieudit_the_land_of_continuity_1	Alas de Malevolencia	
+_26DC67507B395681	place_lieudit_the_land_of_continuity_2	Bosque del Gran Hongo	
+_BDE9B29A1D19BEEB	place_lieudit_the_land_of_continuity_3	La Caverna Maldita	
+_9EE6F6EFA1228934	place_lieudit_the_land_of_continuity_4	Paseo de la Gruta	
+_21B5D3E79E627134	place_lieudit_the_land_of_continuity_5	Punto Medio 	
+_A0E5FA5B3678B92B	place_lieudit_the_sunken_city_1	Principal Lago de Savia	
+_22852E69F288B525	place_lieudit_the_sunken_city_2	Barranco Encantado	
+_8FD6CEF654E02984	place_lieudit_the_sunken_city_3	Valle de los Cuernos de Dragón 	
+_20363A5BAA09827D	place_lieudit_forbidden_depths_1	Callejón Maldito	
+_26AB4F40D6DADF32	place_lieudit_forbidden_depths_2	Salón de la Montana de la Perdición	
+_43D6BE3BE03EF813	place_lieudit_forbidden_depths_3	Regazo del Demonio	
+_9BE5261797F0E5B6	place_outpost_matis_15	Puesto de Comercio del Montículo de la Psykopla	
+_9E955D2DB01E08E0	place_outpost_matis_05	El Puesto Fronterizo Creciente	
+_FDDF8294734D1FCF	place_outpost_matis_06	Puesto Fronterizo del Sureste	
+_276F7127A032A330	place_outpost_matis_07	Granja del Descubridor	
+_AF8F913A2B389760	place_outpost_matis_08	Taller de Trove	
+_0CDFF97A30EC4CD9	place_outpost_matis_09	Polo del Circulo Mágico Kami	
+_DDF39152C9DD0457	place_outpost_matis_16	Puesto Fronterizo Runninghill	
+_AFD0653A6A689361	place_outpost_matis_17	Taller de Wooky	
+_1551FEAC447A2346	place_outpost_matis_18	Puerta de la Fortaleza de la Tierra Seca 	
+_4F00F10722E4CD49	place_outpost_matis_19	Centro de Investigación Runninghill	
+_80FF6D9502E9F4D8	place_outpost_matis_20	Fortaleza Ryecliff	
+_BDBD2036ABA7949D	place_outpost_matis_21	Granja La Colina de Torbak	
+_08C716A9C5FCFFD0	place_outpost_matis_22	Taller del Monte Herido	
+_ECD1753646FCCBBF	place_outpost_matis_23	Granja del Monte Herido	
+_C2610B10DA12A018	place_outpost_matis_01	Centro de Investigación Paseo Jadeante	
+_FD4F81286E8EC098	place_outpost_matis_02	Fortaleza Stalia	
+_B7DB991E9F080FD1	place_outpost_matis_03	Granja del Pantano Temible	
+_42EF6D35E33910DE	place_outpost_matis_04	Taller Fencoomb	
+_585666AC47FB5008	place_outpost_matis_28	Taller de la Montana Pequeña	
+_170576ACA2815001	place_outpost_matis_29	Fortaleza de la Montana Pequeña	
+_C26112A102D2C42C	place_outpost_matis_30	Puesto Fronterizo del Desfiladero Berello	
+_76BCF7E6C446C678	place_outpost_matis_31	Puesto Diplomático de la Cascada de Virginia	
+_16A1F294799F2D04	place_outpost_matis_32	Polo Mágico de la Cascada de Virginia	
+_E27BBA05A2D565E2	place_outpost_matis_10	Puesto Diplomático Tugurio Superior	
+_93DAC8C4EB574350	place_outpost_matis_11	Granja de la Locura	
+_8150691475FC20EC	place_outpost_matis_12	Taller Piscina Verde	
+_755CA30BD88C2C00	place_outpost_matis_13	Centro de Investigación Pantano Gélido	
+_C7B3E6A8E20210E0	place_outpost_matis_14	Puesto Fronterizo del Laberinto del Duende	
+_02E04A8AF11D40E8	place_outpost_matis_24	Fortaleza o Bastión de Westgrove	
+_01E0A522316C48ED	place_outpost_matis_25	Taller de Eastgrove	
+_1B465A313103094F	place_outpost_matis_26	Centro de Investigación High Grove	
+_AFCF8939E9679362	place_outpost_matis_27	Taller Ginti	
+_C36C782A2CA83799	place_outpost_zorai_08	Taller Qai-Du 	
+_032AA1E4A947F396	place_outpost_zorai_09	Granja Final de la Tierra	
+_40CD74977FCA14E6	place_outpost_zorai_10	Fortaleza Sai-Shun 	
+_016DC992459EAC9C	place_outpost_zorai_11	Taller del Estanque de las Doncellas	
+_C20E29A349DB838E	place_outpost_zorai_12	Puesto Fronterizo Mano Grande	
+_B706B292C98F40A3	place_outpost_zorai_13	Taller del Gran Boulder	
+_76159184087E2113	place_outpost_zorai_14	Puesto de Comercio Gran Boulder	
+_4F2FA59987ABD45F	place_outpost_zorai_20	Puesto Fronterizo Arco de Kincher	
+_80608520B94D0CDF	place_outpost_zorai_21	Taller Fustylake	
+_14D204357D7859A8	place_outpost_zorai_22	Puesto Diplomático de La Encrucijada del Demonio	
+_7FB51A93FE97FFE2	place_outpost_zorai_23	Granja de la Montana del Carnero	
+_1530E2A73F8035FD	place_outpost_zorai_01	Polo Mágico de Existencias Marchitas	
+_01BE09EE31071F99	place_outpost_zorai_02	Taller Gu-Qin	
+_FC5C2C2AB1F7B09B	place_outpost_zorai_03	Granja del Laberinto de los Condenados	
+_4BD5B69AFE1B1129	place_outpost_zorai_04	Fortaleza del Arco en Marcha	
+_9AB59256CA9B9791	place_outpost_zorai_05	Centro de Investigación Gu-Qin 	
+_8725F28C88DDB8E0	place_outpost_zorai_06	Taller de Highback de Umbra	
+_76B7F5D4D840B9CC	place_outpost_zorai_07	Puesto Fronterizo Encrucijada del Lago Sly 	
+_D8C3F99CBA68EBCF	place_outpost_zorai_24	Centro de Investigación Jen-Laï 	
+_BD1E8D36495C0BEA	place_outpost_zorai_25	Fortaleza Lonview	
+_C1AFFE76387F2CE8	place_outpost_zorai_26	Fortaleza Stainmoor	
+_FFF6266871FB5CDF	place_outpost_zorai_27	Puesto Fronterizo Stainmoor	
+_002D0C3469D760F0	place_outpost_zorai_28	Granja Desertstock	
+_B795AA8F467F70B1	place_outpost_zorai_29	Taller Gran Despoblado	
+_2638D5F5EAE53A73	place_outpost_zorai_30	Franja Ni-Jing 	
+_07657E5F4A8E0BCF	place_outpost_zorai_15	Taller de las Ruinas de Zo-Kian	
+_569F05AA450D40DD	place_outpost_zorai_16	Fortaleza del Valle Perdido	
+_58A5FA8D735ED059	place_outpost_zorai_17	Taller de las Acciones Primordiales	
+_FF1E7D298BCD17D9	place_outpost_zorai_18	Fortaleza Curiosa	
+_7F5C18356A0864EF	place_outpost_zorai_19	Granja Whiterstock	
+_3C0F567EB96B13E4	place_outpost_fyros_14	Puesto de Comercio Blackburn	
+_01F0850E9E96676B	place_outpost_fyros_10	Granja Lago del Norte	
+_BFDF9A8F799BEBD0	place_outpost_fyros_11	Puesto de Comercio Lago del Norte	
+_C2E0991F370D14E9	place_outpost_fyros_12	Taller Barkgully	
+_BE936A8FA73411E6	place_outpost_fyros_13	Puesto Fronterizo Blackburn del Este	
+_0A0536AF89BD45E9	place_outpost_fyros_17	Fortaleza del Canon del Descortezador	
+_2F7F994109BD6C70	place_outpost_fyros_18	Granja Canon del Descortezador	
+_097D53C065530D29	place_outpost_fyros_19	Puesto Diplomático Highridges	
+_C7172DA1C948FBDF	place_outpost_fyros_20	Taller de los Residuos	
+_DBB6528E0A2B8793	place_outpost_fyros_21	Centro de Investigación de Thesos	
+_383B5D59892C68ED	place_outpost_fyros_06	Taller Dyron del Este	
+_439262814D24B1DA	place_outpost_fyros_07	Puesto Fronterizo Torres de Frahar	
+_0217CE4C0B7D28EF	place_outpost_fyros_08	Fortaleza Torres Altas	
+_02A0E9DDF10773ED	place_outpost_fyros_09	Granja Torres Altas	
+_5D256E930D350DBA	place_outpost_fyros_22	Fortaleza de los Manantiales de Thesos	
+_4A25269B4CCD03C9	place_outpost_fyros_23	Taller de la Cadena en Marcha	
+_E2DA0E01E7C43DED	place_outpost_fyros_24	Puesto Diplomático de la Cordillera Sur	
+_EC1FB94002BAE4BF	place_outpost_fyros_25	Granja de la Dunas Southend	
+_8161728C4983DC1D	place_outpost_fyros_26	Puesto Fronterizo de los Llanos de Kipucka	
+_4C56B2383C8DF8B5	place_outpost_fyros_01	Puesto Fronterizo de la Colina de Dyron	
+_C9C43D9E4A4D64BF	place_outpost_fyros_02	Fortaleza de Dyron del Norte	
+_4AF5128B46C95087	place_outpost_fyros_03	Taller de la Cola del Dragón 	
+_263999346B944A7D	place_outpost_fyros_04	Granja Malmont	
+_01AE559785BDC49B	place_outpost_fyros_05	Taller de la Calle del Dragón 	
+_99952A96C72F99C0	place_outpost_fyros_15	Fortaleza del Espinazo del Dragón 	
+_5AA53E92C798FCC1	place_outpost_fyros_16	Taller del Espinazo del Dragón 	
+_C0FF5D8B04C9D09D	place_outpost_fyros_27	Polo Mágico de Woodburn	
+_835F899D85C934E4	place_outpost_fyros_28	Fortaleza de Woodburn	
+_C486726F2689400C	place_outpost_tryker_02	Puesto Fronterizo de Darkmoor	
+_42511692C2BA0320	place_outpost_tryker_03	Taller de la Isla Delicada	
+_892EA529697617C8	place_outpost_tryker_04	Taller Arenoso	
+_6BB89D30E2F43AB1	place_outpost_tryker_05	Granja Farely	
+_4326D25E3768D412	place_outpost_tryker_06	Puesto de Comercio Greenvale	
+_010C58382706241C	place_outpost_tryker_07	Granja Windemeer	
+_6125AE3C6DDEDC03	place_outpost_tryker_23	Puesto Fronterizo Loriagate	
+_88CF951DF20DE822	place_outpost_tryker_24	Taller Camino del Viento	
+_0B54F17D2E2CD4F8	place_outpost_tryker_25	Granja del Lago para Observar a la Musa	
+_B1EFB126848DECEE	place_outpost_tryker_26	Granja Tres Pilares	
+_85DFA92970FC2C10	place_outpost_tryker_27	Taller Musemere	
+_48BD35A07E0D98CA	place_outpost_tryker_08	Taller Fuente del Lago	
+_2462B551423CE897	place_outpost_tryker_09	Puesto Fronterizo de la Puerta de la Recompensa	
+_5E40D64F7F7C843E	place_outpost_tryker_10	Puesto de Comercio Porche de la Fuente	
+_08DF99A7BFCA57BD	place_outpost_tryker_11	Granja Corrie Finley	
+_7EB126A23A185419	place_outpost_tryker_12	Taller Final de la Reflexión 	
+_7A4CEB15177421FD	place_outpost_tryker_18	Centro de Investigación de los Manantiales Bonitos	
+_2254130948D9087F	place_outpost_tryker_19	Puesto Fronterizo Puerta de la Libertad	
+_43EBE3179924C29E	place_outpost_tryker_20	Fortaleza del Hermanamiento de los Manantiales Bonitos	
+_734E7133C7CCFFED	place_outpost_tryker_21	Puesto de Comercio Tupile	
+_476F812B328D241A	place_outpost_tryker_22	Taller de las Cimas Gemelas	
+_F5A8F3129E804098	place_outpost_tryker_13	Puesto Diplomático de los Picos Tippy	
+_61E45E923D78B836	place_outpost_tryker_14	Taller de las Arenas Movedizas	
+_0515D24DB7B90809	place_outpost_tryker_15	Polo Mágico de la Costa del Este	
+_BB3C0FC70CEE64EB	place_outpost_tryker_16	Centro de Investigación de la Puerta del Cementerio	
+_44E1DFED4C8EBD7E	place_outpost_tryker_17	Fortaleza del Fango de lo Fatal	
+_A5E5B62E2F2EDC03	place_outpost_tryker_28	Puerto Fronterizo de la Puerta del Agua	
+_C26EA13BA85DC0C7	place_outpost_tryker_29	Fortaleza de Loria	
+_44800B071C726900	place_outpost_tryker_30	Centro de Investigación Estanques de Loria	
+_46B02684B14C1C0F	place_outpost_tryker_31	Fortaleza de Whirling	
+_83B23EA1420CACC7	place_outpost_tryker_32	Taller del Barranco Borrascoso	
+_2B2A3040CA41E10C	place_outpost_pr_04	Taller de las Ruinas de Lerong	
+_1B28EAA8E474F906	place_outpost_pr_05	Centro de Investigación del Pasillo del Anillo Oscuro	
+_F73E357102FAD81E	place_outpost_pr_06	Taller del Árbol Caído	
+_CF9EF5874F0F7D3D	place_outpost_pr_10	Fortaleza de los Callejones del Acantilado	
+_946219632AAAB87C	place_outpost_pr_11	Centro de Investigación de Henge Alto	
+_AAEC841D2EAA3907	place_outpost_pr_12	Fortaleza de las Colinas Bajas	
+_E9D34584471079BA	place_outpost_pr_13	Centro de Investigación de las Colinas Altas	
+_58F7A636B023ED3F	place_outpost_nexus_01	Centro de Investigación de la Puerta de Ichor	
+_18910A55823C680F	place_outpost_nexus_02	Puesto de Comercio de las Colinas del Martillo	
+_BF8095041987976A	place_outpost_nexus_03	Granja de la Puerta de la Sombra	
+_263C57F8056069A2	place_outpost_nexus_04	Puesto Diplomático Final del Destino	
+_3DF09127326D24EB	place_outpost_nexus_05	Taller Watchcomb	
+_3EE16D0918E65F7D	place_outpost_nexus_06	Granja de la Alta Vigilancia	
+_7D07A2802AA970CF	place_outpost_nexus_07	Puesto Fronterizo de la Puerta de los Residuos	
+_9A62193E9DCCD68A	place_outpost_pr_01	Centro de Investigación de la Saprun del Oeste	
+_7DEC8005D64D3D17	place_outpost_pr_02	Taller de Saprun del Este	
+_BAFC701971E1D9CD	place_outpost_pr_03	Fortaleza de Nexusgate	
+_7ADBA91C352FD80D	place_outpost_pr_14	Polo Mágico del Valle de Eerie	
+_382C88153049E8CE	place_outpost_pr_15	Taller de la Puerta de Aeden	
+_6BFD88198BE071AE	place_outpost_pr_16	Puesto Fronterizo de Yelkgrove	
+_04A8EC001386967E	place_outpost_pr_07	Centro de Investigación de la Tierra de la Abundancia	
+_BE12ED4908BFA1D6	place_outpost_pr_08	Fortaleza de Underwood	
+_9D52D51EF680D536	place_outpost_pr_09	Taller del Pase de los Tres Tótems	
+_A85B6823F16AE1FD	place_outpost_pr_17	Fortaleza del Árbol Muerto	
+_B6C89408A46DD9C9	place_outpost_pr_18	Puesto de Comercio de la Savia de los Pantanos	
+_FB1C4C8D884FE670	place_outpost_pr_19	Puesto Fronterizo de la Pradera de Tiro	
+_52C01C5AB2CCBA8E	place_outpost_pr_20	Centro de Investigación Caminata de la Gruta	
+_78E0B83607D11133	place_outpost_pr_21	Fortaleza de la Caverna Maldita	
+_18B1B83FC612A68A	place_outpost_pr_22	Taller Bosque del Hongo Gigante	
+_E90977C8F2092907	place_outpost_pr_23	Granja de las Alas de la Malevolencia	
+_B1585ADE528BB6C4	place_outpost_pr_24	Puesto Diplomático de la Esquina de la Continuidad	
+_77EECD3D072F1D0A	place_outpost_pr_25	Fortaleza del Lago de la Savia Mayor	
+_BD6C7C19AEA8F8DC	place_outpost_pr_26	Taller de Stockdell	
+_3397E4C86F599816	place_outpost_pr_27	Granja de la Quebrada Encantada	
+_7A3A7708F8A0D930	place_outpost_pr_28	Taller Cuernos del Dragón	
+_E107B0D2F25031F2	place_outpost_pr_29	Granja de las Ruinas de Cryton	
+_7353EAD2F838E392	place_outpost_pr_30	Fortaleza de la Sala de la Montana de la Perdición	
+_FEFDADE4AD50EF34	indoors_rolemaster_craft	Entrenador de Artesanos	
+_405D89E7AD70072B	indoors_rolemaster_fight	Entrenador de Combate 	
+_425D69EE68800712	indoors_rolemaster_magic	Entrenador de Magia	
+_42012C9982119510	indoors_rolemaster_harvest	Entrenador de Recolección 	
+_690960B32C28148A	tryker_nland_terrace	Terraza	
+_673DA0205C66A7AE	tryker_terrace_1st	Terraza 1er Piso	
+_264D601B9C66A79E	tryker_terrace_2nd	Terraza 2do Piso	
+_31FE7929E858237A	place_pyr_p_market_1	Mercado de Cheapside	
+_856FEDC62F1A4414	place_pyr_p_west_entrance	Puerta de Cerakos	
+_153984B46DAB787F	place_pyr_p_market_2	Mercado Alto	
+_6B5C4D2302CF0516	place_pyr_p_place_warschool	Lugar de la Academia	
+_B7690C84C9814D00	place_pyr_p_fontaine	Plaza de la Fuente del Oasis	
+_5C3011142E8923B2	place_pyr_p_sheriff	Lugar de la Cárcel Militar	
+_CCE0E55AF1A0D281	place_pyr_p_place_mairie_1	Plaza del Salón Imperial	
+_BBDCF30742410125	place_pyr_p_place_mairie_2	Plaza de Karavia	
+_E05A68AE5E49A8B4	place_pyr_p_place_agora	Agora	
+_0E14D0ACADAB8C86	place_pyr_p_street_1	Camino del Mercado	
+_54A8CC3067F96F80	place_pyr_p_street_2	Camino de Cheapside	
+_5784C8AC2E5A744C	place_pyr_p_street_3	La Manera del Comerciante	
+_D6CF39F45B9C8048	place_pyr_p_street_4	Calle Principal de Pyr	
+_19282D10AF7A8B8B	place_pyr_p_street_5	Carretera de la Puerta del Norte	
+_44495127AAABBC5C	place_pyr_p_street_6	Avenida Cerakos	
+_F0B0751C30D8977E	place_pyr_p_street_7	Avenida Arispotle	
+_99DF8519ADEB183B	place_pyr_p_street_8	Circo Coriolis	
+_05499BB56C3AB881	place_pyr_p_street_9	Camino de Rydon	
+_1628C820ED9A8C28	place_pyr_p_street_10	Carril Central	
+_03F88D1A68AB505C	place_pyr_p_street_11	Calle Leanon 	
+_03F88D202EAB305D	place_pyr_p_street_12	Calle Dexton 	
+_D62F151017DB3880	place_pyr_p_street_13	Camino de la Cárcel Militar	
+_AB5B15CCAF7201DA	place_pyr_p_street_14	Calle de Piros de Arriba	
+_53A8D80CAB3AC42D	place_pyr_p_street_15	Calla Karavia	
+_ACEA4988BD9B78EE	place_pyr_p_street_16	Forma de la Fragua y del Martillo	
+_AB5B15CC7061DDDD	place_pyr_p_street_17	Calle de Piros de Abajo	
+_53CE252AA8263084	place_pyr_p_street_18	Carretera de la Puerta del Sur	
+_53D67FAFEF4BEC7F	place_pyr_p_street_19	Carril de Baño	
+_4349A128ED7BF84B	place_pyr_p_street_20	Circo Abylus	
+_95286116EF49E777	place_pyr_p_street_21	Carretera de la Fuente	
+_0449C8AC2FBACC2A	place_pyr_p_street_22	Fila del Minero	
+_B0EE25015BBB1F7F	place_pyr_p_street_23	Caminata del Comerciante	
+_2FB105272227C0F4	continent_matis_newbie	Isla Matis	la
+_B249E525A557A0F2	continent_zorai_newbie	fIsla Zoraï	la
+_57AB20D9AC098C9C	place_aegus_indoors	Entrenadores de Aegus	
+_6C6CA51867882C81	place_kaemon_indoors	Entrenadores de Kaemon	
+_885FBD17264A18E3	place_sekovix_indoors	Entrenadores de Sekovix	
+_6C6CD12CEC1A4886	place_phyxon_indoors	Entrenadores de Phyxon 	
+_498F710E6649E8DE	place_galemus_indoors	Entrenadores de Galemus	
+_2B3C8D11ECC97889	place_stalli_indoors	Entrenadores de Stalli	
+_978AE0E4AA18B8A6	place_borea_indoors	Entrenadores de Borea	
+_290C8D202B994C84	place_nistia_indoors	Entrenadores de Nistia	
+_45BE7D19AADA14DA	place_rosilio_indoors	Entrenadores de Rosilio	
+_5A0A04D32B5874A0	place_miani_indoors	Entrenadores de Miani	
+_AC3C71F957912C87	place_qai_lo_indoors	Entrenadores de Qaï-Lo 	
+_708E391AAB9A8D0A	place_sheng_wo_indoors	Entrenadores de Sheng-Wo 	
+_02AEF82C29E84D18	place_men_xing_indoors	Entrenadores de Nen-Xing 	
+_08600DD3C969F8D9	place_koi_zun_indoors	Entrenadores de Koï-Zun 	
+_795C7143FC803D07	place_yin_piang_indoors	Entrenadores de Yin-Piang 	
+_C2822A4B4B104927	place_aubermouth_indoors	Entrenadores de Aubermouth 	
+_002E213427787514	place_barkdell_indoors	Entrenadores de Barkdell 	
+_844E81142D38DD14	place_hobwelly_indoors	Entrenadores de Hobwelly 	
+_88F0F13C271A851A	place_waverton_indoors	Entrenadores de Waverton 	
+_7FBF914379AF8D16	place_dingleton_indoors	Entrenadores de Dingleton 	
+_422F691DA0BA1111	place_zora_p_cimetiere	Distrito del Cementerio	
+_362EEE95C6B05DF7	place_zora_p_marche_commun	Distrito de Highmart	
+_A715481EA9293757	place_zora_p_2	Distrito del Salón del Templo	
+_6051582F6909CBA6	place_zora_p_3	Distrito de la Hondonada del Oeste	
+_68E7D432A958E750	place_zora_p_4	Hacienda de Daïsha 	
+_67866FC4E98682A3	place_zora_p_5	Hacienda de Win-Cho 	
+_28F478B3AA59D4B1	continent_indoors	un edificio 	
+_A645B49270E8B0A0	faihaven_stable	establos	los
+_61C994A76EB8D819	place_yrk_p_1	Barrio Zachini	
+_8F199CBE2D6BE453	place_yrk_p_2	Barrio Yasson	
+_DD5570B9ECEA3058	place_yrk_p_3	Barrio Aniro	
+_8FC998B46CECD055	place_yrk_p_4	Barrio Tylini	
+_DD5538B02A9A5C5A	place_yrk_p_5	Barrio ibia 	
+_A378A8B8E9878BC0	yrkanis_stable	Establos Yrkanis 	los
+_2B765B95DBA7B397	place_zora_p_1	Distrito Persecución del Goo	
+_613AD4975989B0AC	zora_stable	Establos Zora	los
+_2D6F0161343115EF	place_yrkanis_bar_indoor	Entrada al Bar Yrkanis	
+_CB7D74EB5E299B6B	place_yrkanis_greenhouse_indoor	Entrada a la Oficina del Intendente de Yrkanis 	
+_C1BF2DE9E86D431A	ma_natae_captain_quarter	Capitán de Natae	
+_40C031DE09E8A002	ma_natae_foreman_quarter	Inspector / Capataz de Natae	
+_0792FD55B0EF2922	ma_natae_messenger_quarter	Mensajero de Natae	
+_A154B0019C992499	ma_natae_sage_quarter	Sabio de Natae	
+_DE02B94EE9261147	ma_natae_guard_chief_quarter	Jefe de la Guardia de Natae	
+_C532195C71EF251D	ma_natae_intendant_quarter	Intendente de Natae	
+_005F39E16BBE5B13	ma_davae_sergent_quarter	Sargento de Davae	
+_BEE031D409E8A802	ma_davae_foreman_quarter	Inspector / Capataz de Davae	
+_85F2FD55B0EF3124	ma_davae_messenger_quarter	Mensajero de Davae	
+_1F54B0011C990499	ma_davae_sage_quarter	Savio de Davae	
+_5C02B94EE946193D	ma_davae_guard_chief_quarter	Jefe de la Guardia de Davae	
+_4392195C71EF2D1F	ma_davae_intendant_quarter	Intendente de Davae	
+_82B00968DC5F4914	ma_avalae_captain_quarter	Capitán de Avalae	
+_842F2A28AD8FFD28	ma_avalae_foreman_quarter	Inspector / Capataz de Avalae	
+_FA144179824E79B6	ma_avalae_messenger_quarter	Mensajero de Avalae	
+_26A0D40D2AE53062	ma_avalae_sage_quarter	Sabio de Avalae	
+_89D271D949063A5F	ma_avalae_guard_chief_quarter	Jefe de la Guardia de Avalae	
+_7ED4896D7E6E09B8	ma_avalae_intendant_quarter	Intendente de Avalae	
+_06AEBA0AA1CF09CA	zo_jenlai_captain_quarter	Capitán de Jen Laï 	
+_C666B9555D4F15CA	zo_jenlai_foreman_quarter	Inspector / Capataz de Jen Laï	
+_4B71C08DFB6BAE3A	zo_jenlai_messenger_quarter	Mensajero Jen Laï 	
+_4389082D65949720	zo_jenlai_sage_quarter	Sabio de Jen-Laï 	
+_0DE1CC7DBBEA7A44	zo_jenlai_intendant_quarter	Intendente de Jen-Laï 	
+_7460336D1826EA26	zo_jenlai_guard_chief_quarter	Jefe de la Guardia de Jen-Laï 	
+_C7EEC61043AFE5CE	zo_mincho_captain_quarter	Capitán de Min Cho 	
+_87A6C55BFF2FF1CE	zo_mincho_foreman_quarter	Inspector / Capataz de Min Cho	
+_CD71BE9A7ADBAE42	zo_mincho_messenger_quarter	Mensajero de Min Cho	
+_C6F90833283497A4	zo_mincho_sage_quarter	Savio de Min-Cho	
+_8FE1CA8A3A5A7A4C	zo_mincho_intendant_quarter	Intendente de Min-Cho	
+_15D00F73DAD6F62A	zo_mincho_guard_chief_quarter	Jefe de laGuardia de Min-Cho	
+_E64EB21043AFD1D4	zo_hoicho_captain_quarter	Capitán de Hoï Cho 	
+_A606B15BFF2FDDD4	zo_hoicho_foreman_quarter	Inspector / Capataz Hoï Cho 	
+_4B71BE9A7ADBA04E	zo_hoicho_messenger_quarter	Mensajero de Hoï Cho	
+_85F908B4A9E483AA	zo_hoicho_sage_quarter	Sabio de Hoï-Cho	
+_0DE1CA8A3A5A6C58	zo_hoicho_intendant_quarter	Intendente de Hoï-Cho 	
+_D4D00F733A36CE30	zo_hoicho_guard_chief_quarter	Jefe de la Guardia de Hoï-Cho Guard 	
+_1A656D1C65D737B0	place_fairhaven_p_1	Tenedor de Fairmarket	
+_DE1377BC50588CA0	place_fairhaven_p_2	Final de la Tierra	
+_5D251869E5588CA8	place_fairhaven_p_3	Cabeza del Viento	
+_56E1DCAE677980AB	place_fairhaven_p_4	Punto de Hartley	
+_A4F3717C3B1E4123	place_fairhaven_p_5	Plaza de la Cámara del Consejo	
+_DAB5C0AAE259A0B0	place_fairhaven_p_6	Mercado del Este	
+_C965C01D62D8809D	place_fairhaven_p_7	Lugar de Frogrmore	
+_D721C470A338A8B3	place_fairhaven_p_8	Subida de Loria	
+_1CA5406C222870A8	place_fairhaven_s_1	Carretera Rigan	
+_19A57C980F2874B0	place_fairhaven_s_2	Carril Campana	
+_36BC098C674E3126	place_fairhaven_s_3	Avenida de la Cámara Superior	
+_F4CC098C674E4D25	place_fairhaven_s_4	Avenida de la Cámara Inferior	
+_1E61DCB1A8A9385C	place_fairhaven_s_5	En Camino de Hartley	
+_DAB56D19E2085FB0	place_fairhaven_s_6	El Camino del Mercado del Este	
+_1711B0B166584CAB	place_fairhaven_s_7	Camino de Hobelen	
+_C975C0BBE3A85499	place_fairhaven_s_8	Carril de Frogmore	
+_61D632D17A364A81	tr_windermeer_captain_quarter	Capitán de Windermeer 	
+_DF83BAF54EB76E85	tr_windermeer_foreman_quarter	Inspector / Capataz de Windermeer 	
+_E8F8EE0C5216E20E	tr_windermeer_messenger_quarter	Mensajero de Windermeer 	
+_88420D84431099DE	tr_windermeer_sage_quarter	Sabio de Windermeer	
+_2799365B283C9FB3	tr_windermeer_guard_chief_quarter	Jefe de la Guardia de Windermeer	
+_A868DA071286CE09	tr_windermeer_intendant_quarter	Intendente de Windermeer 	
+_27940A6C08F00976	tr_avendale_captain_quarter	Capitán de Avendale 	
+_78E50E7CC4FD059B	tr_avendale_foreman_quarter	Inspector / Capataz de Avendale 	
+_97745AEFCD96C193	tr_avendale_messenger_quarter	Mensajero de Avendale	
+_FB0E659567AF0C24	tr_avendale_sage_quarter	Sabio de Avendale	
+_63F9CBD0FE13C5F2	tr_avendale_guard_chief_quarter	Jefe de la Guardia de Avendale	
+_57A4FAF98C86098B	tr_avendale_intendant_quarter	Intendente de Avendale	
+_58251EE102B9568E	tr_crystabell_sergent_quarter	Sargento de Avendale	
+_D972CAF3D5D86688	tr_crystabell_foreman_quarter	Inspector / Capataz de Crystabell	
+_69E9EEFED307E200	tr_crystabell_messenger_quarter	Mensajero de Crystabell	
+_0671E168C3F201EC	tr_crystabell_sage_quarter	Sabio de Crystabell	
+_A7C9D64A291C07C5	tr_crystabell_guard_chief_quarter	Jefe de la Guardia de Crystabell	
+_2959DAF99377CEFB	tr_crystabell_intendant_quarter	Intendente de Crystabell	
+_ED2748C72CF6E4C0	zo_zora_mairie_ss	Salón Principal	el
+_72572111A2B7D8B6	zo_zora_mairie_mainroom	Salón Principal	el
+_84BF1DE6480C5928	fy_fortress_rdc	Fortaleza a nivel del Suelo	el
+_6D4019DD10BB144B	fy_fortress_1st	1er piso de la Fortaleza	el
+_E2A697A5283587B1	hoi_cho_stable	Establo de Hoi Cho 	el
+_20866FACA6F56BB4	jen_lai_stable	Establos de Jen Lai 	los
+_E2F67FAFA78587B1	min_cho_stable	Establos de Min Cho 	los
+_E1D7F4AD9FB58880	pyr_stable1	Establos al Norte de Pyr	los
+_E1E700ADE0B58880	pyr_stable2	Establos al Sur de Pyr	los
+_10D8DCAD633500A7	pyr_stable3	Establos al Este de Pyr	los
+_27C85FA7268B1082	natae_stable	Establos de Natae	los
+_27E85F9D26CB106E	davae_stable	Establos de Davae	los
+_5BC978AD69880081	avalae_stable	Establos de Avalae	los
+_1CEA78C7E7D8848F	thesos_stable	Establos de Thesos	los
+_AAA8BFA62C4BD077	dyron_stable	Establos de Dyron	los
+_CB1ED8FB645A1C92	fairhaven_stable	Establos de Fairhaven	los
+_B5CFF512673949F8	windermeer_stable	Establos de Windermeer	los
+_A499A1F1CEA97C93	avendale_stable	Establos de Avendale	los
+_3BB0CD05A4784116	crystabell_stable	Establos de Crystabell	los
+_A3D908AC6D6A6495	place_pyr_p_forge	Fundición / Herrería	la
+_AF2D0919C1576A05	r_01_06_forage_place_1	Deposito Especial	el
+_AAA9B7061540F1D4	r_05_36_mission_place_hunting_1	Terreno de Caza de Ragus	el
+_8EB43958F24FD851	place_r_08_03_espionnage	punto de observación 	el
+_C78F426D3D0F1C2A	continent_fyros_islands	Tierras Antiguas	las
+_C343A9685F37CC90	region_fyros_island1pvp 3	<isletas fyros 1 (pvp)>	
+_20188FF2F929407C	region_fyros_island2	<isletas fyros 2>	
+_24BE643467D8C8C6	region_fyros_island3	Dunas Aelius	las
+_8FDA400352CEC92B	r_11_10_kitin_hunting_1	El primer terreno de caza	
+_3ED36A63D73EA16C	r_11_10_kitin_hunting_2	El segundo terrero de caza	
+_50D58839A2EE9278	r_08_04_kitin_boss_1	El Reto	
+_65CACC23504263D7	r_05_34_place_lake_1	Junto al lago	
+_16B10294F1118B4F	place_arrival_from_sources	"Si ves este texto, es un error: lugar_llegada_d_fuentes."	
+_E6013EFFB4FEB861	place_arrival_from_zorai	"Si ves este texto, es un error: lugar_llegada_de_zoraï."	
+_20303EFF361FE055	place_arrival_from_matis	"Si ves este texto, es un error: lugar_llegada_de_matis."	
+_DACE98C5E36C7230	place_arrival_from_route_gouffre	"Si ves este texto, es un error: lugar_llegada_de_ruta_gouffre."	
+_68FB04BEDC8A4CC3	oasis_rdc	Dyron	
+_DADA0C766985AFA5	oasis_1st	La Taberna del Oasis 	
+_DBA1B2879853B535	war_school_rdc	Planta baja de la escuela militar	
+_235BE50B449EE81E	war_school_ss	Sótano de la escuela militar	
+_94352638B17CB560	sherif_armory_rdc	Planta baja del arsenal	
+_85303230FE1225CE	sherif_armory_1st	suelo del arsenal	
+_97B394C0997974A0	sherif_rdc	Plaza del Cuerpo de la Guardia	
+_9902D8CF497984A0	sherif_1st	Piso del Cuerpo de la Guardia	
+_C68FF216063FADD6	zo_hoicho_sergent_quarter	Sargento de Hoi-Cho 	
+_2A289CA228F9A0A7	region_matis_island		
+_64C03EFF367FF06B	place_arrival_from_fyros	"Si ves este texto, es un error: lugar_llegada_de_fyros."	
+_0F4F819946B886B3	place_arrival_from_tryker	"Si ves este texto, es un error: lugar_llegada_de_tryker."	
+_5D803EFFB38EC048	place_arrival_from_bagne	"Si ves este texto, es un error: lugar_llegada_de_bagne."	
+_F598ACE61E4941CB	place_r_07_13_boss_kill	Mercenarios	
+_7735415374A70966	place_r_01_10_escort	Punto de Encuentro	
+_59D5046521FB70DA	place_arena_warning	"Si ves este texto, es un error: lugar_arena_advertencia"	
+_CC714C9FEBEF2433	r_01_06_hill_light	"Si ves este texto, es un error: r_01_06_colina_luz."	
+_AC2EEFFFCD1C6926	r_05_36_mission_place_hunting_2	"Si ves este texto, es un error: r_05_36_mision_lugar_caceria_2."	
+_AC2EEFFFCD2C6927	r_05_36_mission_place_hunting_3	"Si ves este texto, es un error: r_05_36_mision_lugar_caceria_3."	
+_0144BC1A72366C6C	r_09_10_mission_forage_1	Reunir aserrín	
+_6543E020AE366C07	r_09_10_mission_forage_2	Reunir cera	
+_65EE17B7F2CAA4FD	r_09_10_mission_forage_3	Reunir madera	
+_794C1D8BEBD85488	r_08_16_mission_place_2	primer emboscada	
+_399DE9213CD418F4	r_08_16_mission_place_4	segunda emboscada	
+_FEF3F18880D42C69	r_08_16_mission_place_5	el líder te esta buscando	
+_DEC9CC99E7779F78	ava_bar_ext1	Avalae	
+_D787078F0F8B4067	ava_bar_int2	Barra de Avalae	
+_5636A84F67199C69	ava_bar_int_2	Barra de Avalae	
+_1D4B8C8D68BAA437	dav_bar_ext2	Davae	
+_4B1758950F8B6867	dav_bar_int2	Barra de Davae	
+_9D2BB497E89ACC41	nat_bar_ext2	Natae	
+_D3FA885C679A9C41	nat_bar_int_2	Barra de Natae	
+_CDD758A90F8B6067	nat_bar_int2	Barra de Natae	
+_A5677CB95F570BBC	serre2	Yrkanis	
+_A5577CB91F5707BC	serre1	Yrkanis	
+_11D894BB6B18DEBA	yrk_serre_ncp2	Invernadero de Yrkanis	
+_55D894BB6B18DAAD	yrk_serre_npc1	Invernadero de Yrkanis	
+_E7EAF4B9A48A14B3	yrk_bar_ext	Yrkanis	
+_99B903B9D54A188E	yrk_bar_int1	Barra de Yrkanis	
+_A759546346C8BBCA	mairie_rdc	planta baja	
+_C45A9DE5178C1321	yrkanis mairie ss	sótano del ayuntamiento	
+_61403EFF36E0205D	place_arrival_from_nexus	"Si ves este texto, es un error: lugar_llegada_desde_nexus."	
+_E3A13EFFB3CFFC57	place_arrival_from_terre	"si ves este texto, es un error: place_arrival_from_terre."	
+_C8E11A63023D3424	continent_tryker_island	Tierras Antiguas	las
+_782750B66DD50B84	region_tryker_island1	<islote tryker1>	
+_783750B66DD50B85	region_tryker_island2	<islote tryker 2>	
+_784750B66DD50B86	region_tryker_island3	<islote tryker3>	
+_9FDAC1DE6DF71481	region_tryker_island4	Lago de Olkern	las
+_786750B66DD50B88	region_tryker_island5	<islote tryker5>	
+_06C2A8376442D645	r_01_28_mission_tp_1a	Cueva del Torbellino o Vórtice cerca de las Gotas de Rocío	la
+_5D3124100950F084	r_01_28_mission_tp_2a	Pasaje cerca de las Gotas de Rocío	el
+_1EA438315D638A9E	r_05_33_creek_1	Arroyo de Clopper	
+_F27CBD6F00A82016	r_01_27_place_libertylake	Playa Peligrosa	
+_0F1086393F8B083C	r_01_27_place_libertylake_2	Playa de Clopper	
+_53F9A97830AA1FE7	r_12_04	"Si ves este texto, es un error: r_12_04"	
+_D8EE237CA3C73181	r_01_28_mission_tp_1	Cueva del Torbellino o Vórtice cerca de los Vientos de la Musa	la
+_321059AE9A1F0970	r_01_28_mission_tp_2	Pasaje cerca de los Vientos de la Musa	el
+_2C7D7F0D60A5B869	continent_zorai_island	Camino de Oflovak	
+_DB798FE7FE88087C	region_zorai_island1	<isleta zoraï 1>	
+_1B798FE8FE88087C	region_zorai_island2	<isleta zoraï 2>	
+_5B798FE9FE88087C	region_zorai_island3	<isleta zoraï 3>	
+_9C798FEAFE88087C	region_zorai_island4	<isleta zoraï 4>	
+_FBA877B09500939C	r_06_12_forage_1	fuente de resina	
+_772E4C85FE065074	r_06_12_forage_2	fuente de fibra podrida	
+_8926187ED6A4F65B	r_06_12_hunting_1	La caza	
+_DAE5ACAB55DD2399	r_10_10_goo_hunting	área infectada	
+_7FE78D2E9558B3A2	zora_mairie_ss	sótano del ayuntamiento	
+_651AB4C7EC37448B	zora_mairie_mainroom	Ayuntamiento	
+_F28C868C7F5ABFC0	r_07_04_place_adept_spawn	Lugar de Ritual Kami	
+_CFE5AAFE0E263A60	place_zora_puits_aux_offrandes	Pozo de las Ofrendas	el
+_6CE9E88E6105DCA9	gmisland	Isla del Atrium	la
+_EA39D49BE04753AE	gmisland_stable	Establos del Atrium	los
+_69670C5ADDE9CCB8	gmcampfire	Campamento del Atrium	el
+_EFD6BCAEA0A863B1	gmarena	Arena del Atrium	la
+_CDA66BB129164B9B	r_06_13_kitin	área de exploración 	el
+_E589639EDA4288B3	debug_place_visit	lugar de prueba 1	el
+_6C857FCF85DB7CA3	debug_place_visit2	lugar de prueba 2	el
+_46DF20FF673994DF	debug_place_teleport	lugar de tele transportación 	el
+_F48DF7D5800A5CC9	r_05_15_repere_bandits	Escondite de los bandidos	el
+_F50B113966162410	r_03_38_village_shadowrunners	Campamento	el
+_33DA74E9E7B74760	place_r_05_41_foreuses	Deposito de Materia Prima	el
+_CC24A4B02636DE04	place_r_09_09_arrivee_bagne	Punto de Llegada del Abismo de Ichor	el
+_C8E5A6975D642900	welcomer_natae_guardchief	Jefe de la Guardia Natae	el
+_42BFED62CB5D99C2	welcomer_natae_intendant	Intendente de Natae	el
+_5C34809BD9B7B892	welcomer_natae_sage	Sabio de Natae	el
+_C2BFC5624B5D71C2	welcomer_davae_intendant	Intendente de Davae	el
+_5A34589BD9B7C092	welcomer_davae_sage	Sabio de Davae	el
+_48E57E97DD640100	welcomer_davae_guardchief	Jefe de la Guardia de Davae	el
+_579522D7DAB182EB	welcomer_avalae_guardchief	Jefe de la Guardia de Avalae	el
+_D91530CE24E844A4	welcomer_avalae_sage	Sabio de Avalae	el
+_BFB24E8DBE6F89D5	welcomer_avalae_intendant	Intendente de Avalae	el
+_FEABB5156969D8D2	welcomer_avendale	Oficial de Avendale	el
+_3B2F0A60303F3DBE	welcomer_windermeer	Oficial de Windermeer	el
+_C110E2536D7E35DC	welcomer_crystabell	Oficial de Crystabell	el
+_F2F241D9DB2EFD92	welcomer_jenlai_guardchief	Jefe de la Guardia de Jen-Laï 	el
+_5A0F6D8FBFEC047C	welcomer_jenlai_intendant	Intendente de Jen-Laï 	el
+_D47ED9B5D4485478	welcomer_jenlai_sage	Sabio Jen Lai	el
+_1CBF798FC07C2079	welcomer_mincho_intendant	Intendente de Jen-Laï 	el
+_B4A24DD9DCBE198F	welcomer_mincho_guardchief	Jefe de la Guardia Min Cho	el
+_D41E01ACD4A88072	welcomer_mincho_sage	Sabio Min Cho	el
+_DB1F658A412C2079	welcomer_hoicho_intendant	Intendente de Hoï-Cho 	el
+_937EEDACD458986D	welcomer_hoicho_sage	Sabio Hoi Cho	el
+_730239D45D6E198F	welcomer_hoicho_guardchief	Jefe de la Guardia Hoi Cho	el
+_BC5EF96FBE283C5E	episode2_camp_karavan_fyros_island	Campamento Karavan de las Dunas Aelius	el
+_036E80DFA0CB2BB0	episode2_camp_kami_fyros_island	Campamento Kami de las Dunas Aelius	el
+_0DFE209AE36A8F9A	episode2_camp_kami_matis_island	Campamento Kami del Bosque Almati	el
+_917E577AB344704E	episode2_camp_karavan_matis_island	Campamento Karavan del Bosque Almati	el
+_409ED04BDF5FC049	episode2_camp_karavan_tryker_island	Campamento Karavan del Lago Olken	el
+_FB7BA7032F267DF7	episode_2_camp_kami_tryker_island	Campamento Kami del Lago Olken	el
+_D88CD76935E9BC0D	region_newbieland_hunting_grounds	Tierras de Cacería	las
+_FF7B805391F2CE15	region_newbieland_the_shattered_ruins	Ruinas Destrozadas	las
+_6BAB95F65A4612C5	place_shattered_ruins_silan	Ruinas de Silan	las
+_C1B6D7A38910C280	place_shattered_ruins_trone	Salón del Trono	el
+_F7ED900FB606BF52	region_newbieland_starting_zone	Tierras de Guardabosques	las
+_F207FC792E5B7FD7	place_starting_zone_starting_city	Campo del Guardabosques	el
+_1FC0BD051FBA29C2	place_starting_zone_arena	Arena	la
+_1AD4EDDE25EF9A7C	region_newbieland_blight_zone	Zona de Plaga	la
+_7B1F3EDFDAE106E2	region_newbieland_shining_lake	El Lago Brillante	el
+_76195654F845B2F6	region_newbieland_kitins_jungle	Jungla Kitin	la
+_80BF8CB067DB7D2B	Karavan Embassy	Embajada Karavan	la
+_13D97FAB68F4205D	Kami_Enclave	Enclave Kami	el
+_710627533E632FDF	place_hunting_grounds_gingo_lair	Guarida Ragus	la
+_CC0CE3C65B7FA15A	mission_place_tryker_02	Zona de Prospección 	la
+_CC0CE3C65B8FA15A	mission_place_tryker_03	Zona de Prospección 	la
+_AADAC0B4A615B39C	mission_place_ranger_01		
+_AADAC0B4A625B39C	mission_place_ranger_02		
+_A35A89087EC54678	mission_place_ilot	terreno de experimentación 	el
+_C2EB1553A7B1C119	newbieland	Tierras Controladas	las
+_FB2D817EC31E3E85	region_newbieland	Tierras para Explorar	las
+_CC0CE3C6639FA15A	mission_place_tryker_04	Zona de Prospección 	la
+_7B1B7F9960E2527E	continent_corrupted_moor	Paramos Corruptos	los
+_3874F76125ABDBD0	region_karavanexclusionzone	Llanuras Laceradas	las
+_F72E18E86DBAD71D	place_tcm_karavan_camp	Campo de Experimentación Karavan	el
+_84DA729970FAC598	region_hopeforest	Bosque de Sueños	el
+_3EF4CE5601CB0411	place_tcm_company_camp	Misión Kami	la
+_F626D6DF156DE713	place_tcm_company_eternal_tree	Campo de la Compañía del Árbol Eterno	el
+_A742D3D0E55D59D7	place_tcm_keepers	Base Arqueológica de los Guardianes	la
+_3B9B8E81B2B19923	place_tcm_tutors	Santuario del Tutor	el
+_454F7CA10219582C	region_northspire	Picos del Norte	los
+_AC63A7DA9FD6BECE	place_tcm_chlorogoo_camp	Fuerte de Chlorogoo	el
+_5195E131C73B2859	region_fyreruins	Antigua Ciudad de los Fyros	la
+_8925B345F92FFD83	place_tcm_arena	Arena del Sacrificio	la
+_5C614563DCCA42D2	place_tcm_kitin_nest	Antiguo Deposito Karavan	el
+_72E6CE3DF34E5F02	region_mistvalley	Valle de Mist	el
+_7D2B4C1CAFA6BFFC	fyre_village	Ruinas de un Pueblo de Fyre	las
+_270C2BB5543D5BA2	place_tcm_karavan_south_west	Zona de Patrulla	la
+_270C1BA3543D5BA2	place_tcm_karavan_south_east	Zona de Patrulla	la
+_729FB81B15BB49D6	place_tcm_karavan_raid_ceremony_trigger	Campo de Experimentacion Karavan	el
+_2B9C66C11C4631ED	place_tcm_karavan_raid_ceremony_target	Campo de Experimentación Karavan	el
+_0CF23F6CE22867E1	place_tcm_company_raid_ceremony_trigger	Misión Kami	la
+_72621C2FB0575EE1	place_tcm_company_raid_ceremony_target	Misión Kami	la
+_2454F9A3756BE489	place_tcm_shaman_tent	"Si ves este texto, es un erro: lugar_tcm_shaman_tienda"	
+_7086751EB6C58F8F	place_tcm_rock_fall	Antiguo Deposito Karavan	el
+_D986F2FBCC9A5D45	place_tcm_karavan_outpost	Puesto fronterizo Karavan	el
+_57B18A7D7106EFE2	kitiniere_cattle_room	Sala del Ganado	la
+_C48FA13F83FE24FC	kitiniere_dark_mines	Minas Oscuras	las
+_3A30A9CE6C46971F	kitiniere_eggs_room	Sala del Huevo Principal	la
+_AA384C96EF18E4BB	kitiniere_entrance	Entrada	la
+_24CA70A7238454B2	kitiniere_old_mines	Viejas Minas	las
+_44F20D1B6CB6931E	kitiniere_princes_room	Sala de la Princesa	la
+_ED795F15E6D9C493	kitiniere_queen_room	Sala de la Reina	la
+_2959ECAE0CB888AF	kitiniere	Madriguera de los Kitins	la
+_9701C07FF26F0E41	continent_kitiniere	Madriguera de los Kitins	la
+_7556019ACD0C07D7	place_mission_fyros_01_yubo	Jardín Yubo	
+_46BF61EE6B3E0F09	place_mission_fyros_02_huntingground_t1	Grupo de Bodocs	el
+_2DED2FD120F0B5AB	place_mission_fyros_02_huntingground_t1exit	Ubicar a Pipo	
+_2DED2FD12000B5AB	place_mission_fyros_02_huntingground_t2exit	Ubicar a Pipo	
+_C8D0B0E082190B1C	place_mission_fyros_02_huntingground_t2	Grupo de Yubos	el
+_E12DF302E2D0898E	place_mission_fyros_02_huntingground	Tierras de Caza	
+_5E480BFFD3CF01AB	place_mission_fyros_04_carcasse	escena del crimen	la
+_BFB72D82489D03B7	place_mission_fyros_04_ragus	Paquete de Ragus	
+_1B83DD9701AFB48C	place_mission_zorai_rendor	Llanuras de Rendor	las
+_3F9B714E67806100	place_shooting_range	Área de Entrenamiento	el
+_42EBB9231FA2290D	place_mission_javezone	Bosques de Javings	el
+_C59E293FF88FC82B	place_mission_slavezone	Campos de Slavenis	the
+_8B05117DBECCE27B	place_forage_start	Zona de Prospección 	the
+_D32CB2D7CF615792	place_forage_zun	Zona de Prospección Zun	la
+_65DD63BF98F5768D	place_forage_shat	Zona de Prospección Múltiple	la
+_651E2A3B082B51E9	place_forage_chloro	Manchas de Goo	las
+_A4C578AF23F6B7A0	gerder_food	Callejón de Gerder 	el
+_0B9FC534BF35F140	rpjob_magnecarto_1_a	Medida de la zona A de magnetismo	
+_4B9FC934BF35F140	rpjob_magnecarto_1_b	Medida de la zona B de magnetismo	
+_8B9FCD34BF35F140	rpjob_magnecarto_1_c	Medida de la zona C de magnetismo	
+_CC9FD134BF35F140	rpjob_magnecarto_1_d	Medida de la zona D de magnetismo	
+_0B9FC934BF35F140	rpjob_magnecarto_2_a	Medida de la zona A de magnetismo	
+_4B9FCD34BF35F140	rpjob_magnecarto_2_b	Medida de la zona B de magnetismo	
+_8B9FD134BF35F140	rpjob_magnecarto_2_c	Medida de la zona C de magnetismo	
+_CC9FD534BF35F140	rpjob_magnecarto_2_d	Medida de la zona D de magnetismo	
+_0B9FCD34BF35F140	rpjob_magnecarto_3_a	Medida de la zona A de magnetismo	
+_4B9FD134BF35F140	rpjob_magnecarto_3_b	Medida de la zona B de magnetismo	
+_8B9FD534BF35F140	rpjob_magnecarto_3_c	Medida de la zona C de magnetismo	
+_CC9FD934BF35F140	rpjob_magnecarto_3_d	Medida de la zona D de magnetismo	
+_0B9FD134BF35F140	rpjob_magnecarto_4_a	Medida de la zona A de magnetismo	
+_4B9FD534BF35F140	rpjob_magnecarto_4_b	Medida de la zona B de magnetismo	
+_8B9FD934BF35F140	rpjob_magnecarto_4_c	Medida de la zona C de magnetismo	
+_CC9FDD34BF35F140	rpjob_magnecarto_4_d	Medida de la zona D de magnetismo	
+_0B9FD534BF35F140	rpjob_magnecarto_5_a	Medida de la zona A de magnetismo	
+_4B9FD934BF35F140	rpjob_magnecarto_5_b	Medida de la zona B de magnetismo	
+_8B9FDD34BF35F140	rpjob_magnecarto_5_c	Medida de la zona C de magnetismo	
+_CC9FE134BF35F140	rpjob_magnecarto_5_d	Medida de la zona D de magnetismo	
+_FE340A03BD4BB987	kitinslair_zone_1	Primera zona abierta de la guarida Kitin	
+_43CF242BA7986462	place_matis_island_2	Pico de Dante	el
+_153E9109EAE82056	region_matis_island_1	Bosque Almati	la
+_424A85186C58FC20	region_matis_island_2	Campamento de Dante	el
+_E438DC9DA9C9AC6E	region_matis_island_3		
+_DFD4F60155444143	continent_matis_island	Tierras Antiguas	las
+_5FE21E8487AF99BC	boss_tryker_light_island_zone	Campamento de Dante	el
+_4DF006937CDFE456	place_matis_island_1	Campamento de los guardabosques	el
+_D31864B75FE9A0B2	place_matis_island_3		
+_FCB64A9225573F9D	boss_zorai_light_maincamp	Campamento secreto de Pei-Ruz	el
+_0A052D7DE3336174	boss_zorai_light_startcamp	Campamento de Pei-Ruz	el
+_F04B39B29F5A18BD	place_cwmh01_mp1	Zona de Prospección de Huesos	
+_F45B39C29F5A18BD	place_cwmh02_mp1	Zona de Prospección de Raíces	
+_74BB600DA0D818FA	place_cwmh03_mp1	Zona de Prospección de Esporas	
+_E975870968B79A7F	cwfh01_mp1	Zona de Prospección de Basura	
+_A7C317B4A194A372	cwfh02_mp1	Zona de Prospección de Huesos	
+_ABE6EEB0AFC6B265	cwfh03_mp1	Zona de Prospección de Barro	
+_6AF8449C1E94D37B	cwff03_termites	Monte de las Termitas	
+_731B4014A0D81801	place_cwth01_mp1	Zona de Prospección de Conchas	
+_F47B11C79F5A18BD	place_cwth02_mp1	Zona de Prospección de Turbas	
+_345B39C99F5A18BD	place_cwth03_mp1	Zona de Prospección de Raíces	
+_739C39CA9F5A18BD	place_cwzh01_mp1	Zona de Prospección de Musgo	
+_B04B51C19F5A18BD	place_cwzh02_mp1	Zona de Prospección de Estiércol	
+_74DB3417A0D81801	place_cwzh03_mp1	Zona de Prospección de Perlas	
+_42DFA10429F6E8C4	place_cimetiere_avalae	Cementerio de Avalae	
+_5193CA370C64AE7D	mission_ff60_emplacement_message	Ubicación del Mensaje	
+_4C9B80A7A9B7946E	place_marauder_camp	Campamento Merodeador	el
+_3FEFB69CBBDF4DAB	place_lieudit_marauder_arena	Arena Merodeadora	la
+_A59A81E8140A6CA7	marauder_stable	Establos Merodeadores	los
+_29AC391EC68F71FC	continent_r2_forest	Cumbres Borrascosas	las
+_BAA17AACA3D42E1E	region_zorai_islands	Camino de Oflovak -- Jungla	el

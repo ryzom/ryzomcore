@@ -1,0 +1,9 @@
+﻿*HASH_VALUE	career ID	name	* noms français	ia	da	p	pia	pda
+_1700C956C37FB64F	MeleeFighter	Combattant de mêlée	Combattant Contact	un	le	Combattants de mêlée	des	les
+_9720B95DC35FBA54	RangeFighter	Combattant à distance	Combattant Distance	un	le	Combattants à distance	des	les
+_D32171700AD23D57	AttackCaster	Mage offensif	Mage Attaque	un	le	Mages offensifs	des	les
+_9A511D668371AE04	BufferCaster	Mage protecteur	Mage Protection	un	le	Mages protecteurs	des	les
+_1C01F56701816E0A	HealerCaster	Guérisseur	Guérisseur	un	le	Guérisseurs	des	les
+_A6473C7A6A380099	Ranger	Récolteur	Ranger	un	le	Récolteurs	des	les
+_EA665D00EAE788B3	Shopkeeper	Marchand	Marchand	un	le	Marchands	des	les
+_2D28B08D636AEC9E	Artisan	Artisan	Artisan	un	l'\d	Artisans	des	les

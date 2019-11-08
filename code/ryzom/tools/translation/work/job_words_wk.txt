@@ -1,0 +1,33 @@
+﻿job ID	name	* noms français	ia	da	p	pia	pda
+IreFighter	Ire Fighter	guerrier fou 	an	the	Ire Fighters		the
+Swashbuckler	Swashbuckler	bretteur	a	the	Swashbucklers		the
+KamicFist	Kamic Fist	poing kamique	a	the	Kamic Fists		the
+BladeBearer	Blade Bearer	porte lame	a	the	Blade Bearers		the
+WindChild	Wind Child	enfant des vents	a	the	Wind Children		the
+Runner	Runner	courreur	a	the	Runners		the
+Scout	Scout	éclaireur	a	the	Scouts		the
+FireLance	Fire Lancer	lance-feu	a	the	Fire Lancers		the
+Witherer	Witherer	fletrisseur	a	the	Witherers		the
+Fouler	Fouler	pestilent	a	the	Foulers		the
+Disturber	Disturber	troubleur d'esprit	a	the	Disturbers		the
+KamicFury	Kamic Fury	furie kamique	a	the	Kamic Furies		the
+SpiritualShield	Spiritual Shield	bouclier spirituel	a	the	Spiritual Shields		the
+Faker	Faker	trompeur	a	the	Fakers		the
+WindGuardian	Wind Guardian	gardien des vents	a	the	Wind Guardians		the
+KamicGuardian	Kamic Guardian	bouclier kamique	a	the	Kamic Guardians		the
+SecondBreath	Second Breath	second souffle	a	the	Second Breaths		the
+LifeStealer	Life Stealer	voleur de vie	a	the	Life Stealers		the
+SecondLife	Second Life	seconde vie	a	the	Second Lives		the
+SapCristal	Sap Crystal	cristal de sève	a	the	Sap Crystals		the
+ScarletHunter	Scarlet Hunter	chasseur écarlate	a	the	Scarlet Hunters		the
+GreenHunter	Green Hunter	chasseur vert	a	the	Green Hunters		the
+ShadowHunter	Shadow Hunter	chasseur de l'ombre	a	the	Shadow Hunters		the
+AtysGuardian	Atys Guardian	gardien d'atys	an	the	Atys Guardians		the
+SandCaravanner	Sand Karavanner	caravanier des sables	a	the	Sand Karavanners		the
+ImperialSupplier	Imperial Supplier	pourvoyeur impérial	an	the	Imperial Suppliers		the
+Steward	Steward	intendants	a	the	Stewards		the
+Hawker	Hawker	colporteurs	a	the	Hawkers		the
+FireMaster	Fire Master	maître du feu	a	the	Fire Masters		the
+FlowerMaster	Flower Master	maître des fleurs	a	the	Flower Masters		the
+LakeMaster	Lake Master	maître des lacs 	a	the	Lake Masters		the
+SapMaster	Sap Master	maître de la sève	a	the	Sap Masters		the

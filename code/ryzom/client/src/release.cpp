@@ -690,7 +690,7 @@ void release()
 	CStrictTransportSecurity::release();
 
 #if FINAL_VERSION
-	// openURL ("http://www.ryzomcore.org/exit/");
+	// openURL ("http://ryzom.com/exit/");
 #endif
 
 }// release //

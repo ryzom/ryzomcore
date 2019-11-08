@@ -1,0 +1,11 @@
+﻿damageTypeId	name	ia	da	p	pia	pda	description
+Slashing	slashing			slashing			
+Piercing	piercing			piercing			
+Blunt	blunt			blunt			
+Rot	rot			rot			
+Acid	acid			acid			
+Cold	cold			cold			
+Fire	fire			fire			
+Poison	poison			poison			
+Electricity	electric			electric			
+Shock	shock			shock			

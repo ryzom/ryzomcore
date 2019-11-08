@@ -106,7 +106,10 @@ public:
 class ITexture : public CBitmap, public NLMISC::CRefCount, public NLMISC::IStreamable
 {
 public:
+#ifndef RYZOM_FORGE
 	NL_USES_DEFAULT_ARENA_OBJECT_ALLOCATOR // for fast alloc
+#endif
+
 	// Those enums MUST be the same than in UTexture!!
 	enum	TWrapMode
 	{

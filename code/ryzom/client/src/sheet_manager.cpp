@@ -93,6 +93,8 @@ public:
 	CTypeVersion(std::string type, uint version) {Type=type; Version=version;}
 };
 
+// if you change these values please rebuild the packed_sheets with an updated sheets_packer binary.
+//   This is the only way to have correct version in both client and packed_sheets
 CTypeVersion TypeVersion [] =
 {
 	CTypeVersion("creature",                17),

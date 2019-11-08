@@ -32,6 +32,7 @@
 #include "nel/gui/action_handler.h"
 #include "../dummy_progress.h"
 #include "group_compas.h"
+#include "group_html_cs.h"
 #include "../connection.h"
 #include "../net_manager.h"
 #include "people_interraction.h" // for MaxNumPeopleInTeam
@@ -120,10 +121,10 @@ static void popupLandMarkNameDialog()
 	gc->center();
 	CWidgetManager::getInstance()->setTopWindow(gc);
 	gc->enableBlink(1);
-	
+
 	CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(gc->getGroup("eb"));
-	if (!eb) return; 
-	
+	if (!eb) return;
+
 	// Load ComboBox for Landmarks & sort entries
 	CDBGroupComboBox *cb = dynamic_cast<CDBGroupComboBox *>(gc->getGroup("landmarktypes"));
 	cb->sortText();
@@ -132,7 +133,7 @@ static void popupLandMarkNameDialog()
 	{
 		CGroupMap *map = dynamic_cast<CGroupMap *>(LastSelectedLandMark->getParent());
 		if (!map) return;
-		
+
 		const CUserLandMark userLM = map->getUserLandMark(LastSelectedLandMark);
 
 		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(userLM.Type));
@@ -1352,7 +1353,7 @@ void CGroupMap::checkCoords()
 	{
 
 		if (_TeammateLM[i])
-		{		
+		{
 			sint32	px, py;
 
 			if (_TeammatePosStates[i]->getPos(px, py))
@@ -2803,7 +2804,7 @@ CUserLandMark CGroupMap::getUserLandMark(CCtrlButton *button) const
 		}
 	}
 
-	
+
 	return ulm;
 }
 
@@ -2816,7 +2817,7 @@ uint CGroupMap::getNumUserLandMarks() const
 //============================================================================================================
 CLandMarkOptions CGroupMap::getUserLandMarkOptions(uint32 lmindex) const
 {
-	if (_CurContinent == NULL || _CurContinent->UserLandMarks.size() < lmindex) 
+	if (_CurContinent == NULL || _CurContinent->UserLandMarks.size() < lmindex)
 		return _UserLMOptions;
 
 	CLandMarkOptions clmo(_UserLMOptions);
@@ -3933,9 +3934,9 @@ REGISTER_ACTION_HANDLER(CAHMapTeleport, "map_teleport");
 
 //=========================================================================================================
 // update LandMarks Colors
-class CUpdateLandMarksColor : public IActionHandler{public:	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)	
-{		
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();		
+class CUpdateLandMarksColor : public IActionHandler{public:	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	CUserLandMark::_LandMarksColor[CUserLandMark::Misc] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:MISC")->getValueRGBA();
 	CUserLandMark::_LandMarksColor[CUserLandMark::Tribe] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:TRIBE")->getValueRGBA();
@@ -3969,10 +3970,10 @@ class CUpdateLandMarksColor : public IActionHandler{public:	virtual void execute
 	CUserLandMark::_LandMarksColor[CUserLandMark::Teleporter] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:TELEPORTER")->getValueRGBA();
 
 
-	
-	CGroupMap *pGM = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));		
-	if (pGM == NULL) return;		
-	pGM->updateUserLandMarks();	
+
+	CGroupMap *pGM = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (pGM == NULL) return;
+	pGM->updateUserLandMarks();
 
 }};
 REGISTER_ACTION_HANDLER (CUpdateLandMarksColor, "update_landmarks_color");

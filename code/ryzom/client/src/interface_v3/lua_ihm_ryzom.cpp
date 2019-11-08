@@ -456,6 +456,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getTargetTitle", getTargetTitle);
 	ls.registerFunc("addSearchPathUser", addSearchPathUser);
 	ls.registerFunc("displaySystemInfo", displaySystemInfo);
+	ls.registerFunc("displayChatMessage", displayChatMessage);
 	ls.registerFunc("disableContextHelpForControl", disableContextHelpForControl);
 	ls.registerFunc("disableContextHelp", disableContextHelp);
 	ls.registerFunc("setWeatherValue", setWeatherValue);
@@ -470,6 +471,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getUserRace",  getUserRace);
 	ls.registerFunc("getSheet2idx",  getSheet2idx);
 	ls.registerFunc("getTargetSlot",  getTargetSlot);
+	ls.registerFunc("unsetTargetAsInterlocutor",  unsetTargetAsInterlocutor);
 	ls.registerFunc("getSlotDataSetId",  getSlotDataSetId);
 	ls.registerFunc("addShape",  addShape);
 	ls.registerFunc("moveShape",  moveShape);
@@ -493,8 +495,11 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(getDbProp),
 		LUABIND_FUNC(getDbProp64),
 		LUABIND_FUNC(setDbProp),
+		LUABIND_FUNC(setDbProp64),
 		LUABIND_FUNC(addDbProp),
 		LUABIND_FUNC(delDbProp),
+		LUABIND_FUNC(getDbRGBA),
+		LUABIND_FUNC(setDbRGBA),
 		LUABIND_FUNC(debugInfo),
 		LUABIND_FUNC(rawDebugInfo),
 		LUABIND_FUNC(dumpCallStack),
@@ -531,6 +536,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(isDynStringAvailable),
 		LUABIND_FUNC(isFullyPatched),
 		LUABIND_FUNC(getSheetType),
+		LUABIND_FUNC(getSheetFamily),
 		LUABIND_FUNC(getSheetName),
 		LUABIND_FUNC(getFameIndex),
 		LUABIND_FUNC(getFameName),
@@ -2585,10 +2591,12 @@ sint64	CLuaIHMRyzom::getDbProp64(const std::string &dbProp)
 	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbProp,    false);
 
 	if (node)
+	{
 		return node->getValue64();
+	}
 	else
 	{
-		debugInfo(toString("getDbProp(): '%s' dbProp Not found",    dbProp.c_str()));
+		debugInfo(toString("getDbProp64(): '%s' dbProp Not found",    dbProp.c_str()));
 		return 0;
 	}
 }
@@ -2622,6 +2630,36 @@ void	CLuaIHMRyzom::setDbProp(const std::string &dbProp,    sint32 value)
 	else
 		debugInfo(toString("setDbProp(): '%s' dbProp Not found",    dbProp.c_str()));
 }
+
+void	CLuaIHMRyzom::setDbProp64(const std::string &dbProp,    sint64 value)
+{
+	//H_AUTO(Lua_CLuaIHM_setDbProp)
+	// Do not allow Write on SERVER: or LOCAL:
+	static const std::string	dbServer = "SERVER:";
+	static const std::string	dbLocal = "LOCAL:";
+	static const std::string	dbLocalR2 = "LOCAL:R2";
+
+	if ((dbProp.compare(0,    dbServer.size(),    dbServer) == 0) ||
+		(dbProp.compare(0,    dbLocal.size(),    dbLocal) == 0)
+		)
+	{
+		if (dbProp.compare(0,    dbLocalR2.size(),    dbLocalR2) != 0)
+		{
+			nlstop;
+			throw ELuaIHMException("setDbProp(): You are not allowed to write on 'SERVER:...' or 'LOCAL:...' database");
+		}
+	}
+
+	// Write to the DB if found
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbProp,    false);
+
+	if (node)
+		node->setValue64(value);
+	else
+		debugInfo(toString("setDbProp(): '%s' dbProp Not found",    dbProp.c_str()));
+}
+
 
 void	CLuaIHMRyzom::delDbProp(const string &dbProp)
 {
@@ -3151,7 +3189,7 @@ void	CLuaIHMRyzom::browseNpcWebPage(const std::string &htmlId, const std::string
 	if (groupHtml)
 	{
 		// if true, it means that we want to display a web page that use webig auth
-		bool webig = urlIn.find("http://") == 0;
+		bool webig = urlIn.find("http://") == 0 || urlIn.find("https://") == 0;
 
 		string	url;
 
@@ -3263,6 +3301,21 @@ std::string CLuaIHMRyzom::getSheetType(const std::string &sheet)
 	return CEntitySheet::typeToString(sheetPtr->Type);
 }
 
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::getSheetFamily(const std::string &sheet)
+{
+	CEntitySheet *pES = SheetMngr.get ( CSheetId(sheet) );
+	if ((pES != NULL) && (pES->type() == CEntitySheet::ITEM))
+	{
+		CItemSheet *pIS = (CItemSheet*)pES;
+
+		if (pIS)
+			return ITEMFAMILY::toString(pIS->Family);
+	}
+	
+	return "";
+}
 
 // ***************************************************************************
 std::string CLuaIHMRyzom::getSheetName(uint32 sheetId)
@@ -3825,4 +3878,145 @@ std::string	CLuaIHMRyzom::createGotoFileButtonTag(const char *fileName, uint lin
 	}
 
 	return "";
+}
+
+// ***************************************************************************
+void CLuaIHMRyzom::setDbRGBA(const std::string &dbProp, const NLMISC::CRGBA &color)
+{
+	//H_AUTO(Lua_CLuaIHM_setDbRGBA)
+	static const std::string dbServer = "SERVER:";
+	static const std::string dbLocal = "LOCAL:";
+	static const std::string dbLocalR2 = "LOCAL:R2";
+
+	// do not allow write on SERVER: or LOCAL:
+	if ((dbProp.compare(0, dbServer.size(), dbServer) == 0) || (dbProp.compare(0, dbLocal.size(), dbLocal) == 0))
+	{
+		if (dbProp.compare(0, dbLocalR2.size(), dbLocalR2) != 0)
+		{
+			nlstop;
+			throw ELuaIHMException("setDbRGBA(): You are not allowed to write on 'SERVER:...' or 'LOCAL:...' database");
+		}
+	}
+	// write to the db
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbProp, true);
+	if (node)
+		node->setValue64(color.R+(color.G<<8)+(color.B<<16)+(color.A<<24));
+	return;
+}
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::getDbRGBA(const std::string &dbProp)
+{
+	//H_AUTO(Lua_CLuaIHM_getDbRGBA)
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbProp, false);
+	if (node)
+	{
+		CRGBA color = CRGBA::White;
+		sint64 rgba = (sint64)node->getValue64();
+
+		color.R = (sint8)(rgba & 0xff);
+		color.G = (sint8)((rgba >> 8) & 0xff);
+		color.B = (sint8)((rgba >> 16) & 0xff);
+		color.A = (sint8)((rgba >> 24) & 0xff);
+
+		return toString("%i %i %i %i", color.R, color.G, color.B, color.A);
+	}
+	return "";
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::displayChatMessage(CLuaState &ls)
+{
+	//H_AUTO(Lua_CLuaIHM_displayChatMessage)
+	const char *funcName = "displayChatMessage";
+	CLuaIHM::checkArgMin(ls, funcName, 2);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+
+	CInterfaceProperty prop;
+	CChatStdInput &ci = PeopleInterraction.ChatInput;
+
+	std::string msg = ls.toString(1);
+	const std::string dbPath = "UI:SAVE:CHAT:COLORS";
+
+	if (ls.type(2) == LUA_TSTRING)
+	{
+		std::string input = toLower(ls.toString(2));
+		std::unordered_map<std::string, std::string> sParam;
+		// input should match chat_group_filter sParam
+		sParam.insert(make_pair(string("around"), string(dbPath+":SAY")));
+		sParam.insert(make_pair(string("region"), string(dbPath+":REGION")));
+		sParam.insert(make_pair(string("guild"), string(dbPath+":CLADE")));
+		sParam.insert(make_pair(string("team"), string(dbPath+":GROUP")));
+		sParam.insert(make_pair(string("universe"), string(dbPath+":UNIVERSE_NEW")));
+		for (const auto& db : sParam)
+		{
+			if (db.first.c_str() == input)
+			{
+				prop.readRGBA(db.second.c_str(), " ");
+				if (input == "around")
+					ci.AroundMe.displayMessage(ucstring(msg), prop.getRGBA());
+				if (input == "region")
+					ci.Region.displayMessage(ucstring(msg), prop.getRGBA());
+				if (input == "universe")
+					ci.Universe.displayMessage(ucstring(msg), prop.getRGBA());
+				if (input == "guild")
+					ci.Guild.displayMessage(ucstring(msg), prop.getRGBA());
+				if (input == "team")
+					ci.Team.displayMessage(ucstring(msg), prop.getRGBA());
+				break;
+			}
+		}
+	}
+	if (ls.type(2) == LUA_TNUMBER)
+	{
+		sint64 id = ls.toInteger(2);
+		prop.readRGBA(toString("%s:DYN:%i", dbPath.c_str(), id).c_str(), " ");
+		if (id >= 0 && id < CChatGroup::MaxDynChanPerPlayer)
+			ci.DynamicChat[id].displayMessage(ucstring(msg), prop.getRGBA());
+	}
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::scrollElement(CLuaState &ls)
+{
+	const char *funcName = "scrollElement";
+
+	// scrollElement(object, vertical, direction, offset_multiplier)
+
+	CLuaIHM::checkArgMin(ls, funcName, 3);
+	CLuaIHM::check(ls, ls.getTop() > 2, funcName);
+
+	CLuaIHM::check(ls, CLuaIHM::isUIOnStack(ls, 1), toString("%s requires a UI object in param 1", funcName));
+	CLuaIHM::check(ls, ls.type(2)==LUA_TBOOLEAN, toString("%s requires a boolean in param 2", funcName));
+	CLuaIHM::check(ls, ls.isInteger(3), toString("%s requires a number in param 3", funcName));
+
+	if (ls.getTop() > 3)
+		CLuaIHM::check(ls, ls.isInteger(4), toString("%s requires a number in param 4", funcName));
+
+	CInterfaceElement *pIE = CLuaIHM::getUIOnStack(ls, 1);
+	if (pIE)
+	{
+		// must be a scroll element
+		CCtrlScroll *pCS = dynamic_cast<CCtrlScroll*>(pIE);
+		if (pCS)
+		{
+			sint32 direction = 0;
+			sint32 multiplier = 16;
+
+			direction = (ls.toInteger(3) > 0) ? 1 : -1;
+			if (ls.getTop() > 3)
+				multiplier = (ls.toInteger(4) > 0) ? ls.toInteger(4) : 1;
+
+			const bool vertical = ls.toBoolean(2);
+			if (vertical)
+				pCS->moveTrackY(-(direction * multiplier));
+			else
+				pCS->moveTrackX(-(direction * multiplier));
+
+			return 0;
+		}
+	}
+	ls.pushNil();
+	return 1;
 }

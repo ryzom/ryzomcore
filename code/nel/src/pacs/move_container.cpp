@@ -415,6 +415,7 @@ void CMoveContainer::updateCells (CMovePrimitive *primitive, uint8 worldImage)
 	CPrimitiveWorldImage *wI=primitive->getWorldImage (worldImage);
 
 #if !FINAL_VERSION
+#ifndef RYZOM_FORGE
 	// Check BB width not too large
 	if (wI->getBBXMax() - wI->getBBXMin() > _CellWidth)
 	{
@@ -426,6 +427,7 @@ void CMoveContainer::updateCells (CMovePrimitive *primitive, uint8 worldImage)
 	{
 		nlwarning ("Primitives have moved more than a cell.");
 	}
+#endif
 #endif
 
 	// Get coordinate in the cell array
