@@ -1,0 +1,69 @@
+<html>
+<head>
+<title>New Message</title>
+<meta HTTP-EQUIV="content-type" CONTENT="text/html; charset=UTF-8">
+</head>
+
+<body bgcolor="#333333" text="#FFFFFF">
+<form method='post' action='post_mail.php'>
+<input type='hidden' name='mail_from' value='%%FROM%%'>
+<table width="100%" height="100%">
+  <tr> 
+    <td valign="top"> 
+      <table width="100%">
+        <tr> 
+          <td height="80"> 
+              <table width="100%" border="00" cellspacing="8" bgcolor="#000000" >
+                <tr valign="middle"> 
+                  <td width="2%"><img src="web_message.gif"></td>
+                  <td width="98%" ><h1><i>uiMFNewMessage</i></h1></td>
+                </tr>
+              </table>
+              <table>
+                <tr valign="bottom">
+                  <td height="27"><a href="mailbox.php"><img src="web_home.gif" global_color alt="uiWebHome" ></a>
+                  <a href="mailbox.php"><img src="web_back.gif"global_color  alt="uiWebBack" ></a></td>
+                </tr>
+              </table>
+          </td>
+        </tr>
+        <tr>
+          <td> 
+	          <table valign="middle" width="100%" cellspacing="2" l_margin="4">
+                <tr> 
+				  <h5><td width="10%" height="30" bgcolor="#000000">To</td></h5>
+                  <td width="90%" height="7" bgcolor="#666666" l_margin="0"> 
+					<table border="4"><tr><td>
+                    <input type="text" name="mail_to" size="180" value="%%TO%%">
+					</td></tr></table>
+                  </td>
+                </tr>
+                <tr valign="middle"> 
+				  <h5><td width="10%" height="30" bgcolor="#000000"><i>uiMFSubject</i></td></h5>
+                  <td width="90%" height="3" bgcolor="#666666" l_margin="0"> 
+					<table border="4"><tr><td>
+                    <input type="text" name="mail_subject" size="360" value="%%SUBJECT%%">
+					</td></tr></table>
+                  </td>
+                </tr>
+                <tr valign="middle"> 
+				  <h5><td width="10%" height="30" bgcolor="#000000"><i>uiMFMailBody</i></td></h5>
+                  <td width="90%" height="18" bgcolor="#666666" l_margin="0"><font face="Arial, Helvetica, sans-serif" size="2"> 
+					<table border="4"><tr><td>
+						<textarea name="mail_content" rows="8" cols="30">%%CONTENT%%</textarea>
+					</td></tr></table>
+                    </font></td>
+                </tr>
+              </table>
+          </td>
+        </tr>
+        <tr>
+ 			<td align="right"><input type="image" name="Submit2" value="Submit" src="web_submit.gif" alt="uiWebSend" ></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</form>
+</body>
+</html>

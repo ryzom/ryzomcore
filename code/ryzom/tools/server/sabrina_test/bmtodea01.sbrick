@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="FamilyId" Value="BMTODEA"/>
+      <ATOM Name="SabrinaCost" Value="0"/>
+      <ATOM Name="LearnRequiresOneOfSkills" Value="M 0"/>
+      <ATOM Name="Action Nature" Value="OFFENSIVE"/>
+      <ATOM Name="Skill" Value="SMTODB"/>
+    </STRUCT>
+    <STRUCT Name="Client">
+      <ATOM Name="Icon" Value="ICO_Blunt.tga"/>
+      <ATOM Name="IconBack" Value="EF_Back.tga"/>
+    </STRUCT>
+    <STRUCT Name="Parameter">
+      <ATOM Name="f0" Value="BMTODMB"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+</FORM>

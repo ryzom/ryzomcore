@@ -1,0 +1,9 @@
+WildcardTables =
+{
+// ==== Top 10 des meilleurs guildes crafteurs de l'episode 2
+	"nom_Top10_Best_Guild_Craft_kami", "storyline.episode2.*.kami.craft.*", "GuildName", "*", "Sum",
+	"score_Top10_Best_Guild_Craft_kami", "storyline.episode2.*.kami.craft.*", "GuildValue", "*", "Sum",
+
+	"nom_Top10_Best_Guild_Craft_karavan", "storyline.episode2.*.karavan.craft.*", "GuildName", "*", "Sum",
+	"score_Top10_Best_Guild_Craft_karavan", "storyline.episode2.*.karavan.craft.*", "GuildValue", "*", "Sum",
+};

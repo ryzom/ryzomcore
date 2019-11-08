@@ -1,0 +1,9 @@
+WildcardTables =
+{
+// ==== Top 10 des meilleurs killers de l'episode 2
+	"nom_Top10_Best_Guild_faction_Craft_kami", "storyline.episode2.*.kami.craft.*", "GuildName", "*", "Sum",
+	"nom_Top10_Best_Guild_faction_Craft_karavan", "storyline.episode2.*.karavan.craft.*", "GuildName", "*", "Sum",
+	
+	"score_Top10_Best_Guild_faction_Craft_kami", "storyline.episode2.*.kami.craft.*", "GuildValue", "*", "Sum",
+	"score_Top10_Best_Guild_faction_Craft_karavan", "storyline.episode2.*.karavan.craft.*", "GuildValue", "*", "Sum",
+};

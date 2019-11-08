@@ -1,0 +1,57 @@
+<html>
+<head>
+<title>%%UCFORUM%% Forum</title>
+<meta HTTP-EQUIV="content-type" CONTENT="text/html; charset=UTF-8">
+</head>
+
+<body bgcolor="#333333" text="#ffffff">
+<form method='post' action='remove_thread.php'>
+<table width="100%" height="100%">
+  <tr> 
+    <td valign="top"> 
+      <table width="100%">
+        <tr> 
+          <td height="80"> 
+              <table width="100%" border="00" cellspacing="8" bgcolor="#000000" >
+                <tr valign="middle"> 
+                  <td width="98%" ><h1>%%UCFORUM%%</h1></td>
+                </tr>
+              </table>
+          </td>
+        </tr>
+        <tr>
+          <td> 
+          <table valign="middle" width="100%" border="0" cellspacing="2" cellpadding="0" l_margin="4" >
+            <tr bgcolor="#000000"> 
+			<h5>
+              <td width="3%" height="30" bgcolor="#333333"></td>
+              <td width="59%"><i>uiMFTopics</i></td>
+              <td width="15%"><i>uiMFAuthor</i></td>
+              <td width="8%"><i>uiMFPosts</i></td>
+              <td width="15%"><i>uiMFLastPost</i></td>
+			</h5>
+            </tr>
+%%TOPICS%%
+          </table>
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            <table width="100%" >
+              <tr valign="middle"> 
+				<td><a href="%%PREVIOUS%%"><img src="web_previous.gif" global_color alt="uiWebPrevious" ></a></td>
+%%LINKS%%
+				<td width="100%"><a href="%%NEXT%%"><img src="web_next.gif" global_color alt="uiWebNext" ></a></td>
+                <td><input type="image" name="del2" value="Submit" src="web_del.gif" alt="uiWebDelTopic" ></td>
+                <td><a href="new_thread.php"><img src="web_topic.gif" alt="uiWebNewTopic" ></a></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</form>
+</body>
+</html>

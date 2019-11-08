@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <ATOM Name="brick 0" Value="bcpa01.sbrick"/>
+    <ATOM Name="brick 1" Value="bcfmea01.sbrick"/>
+    <ATOM Name="brick 2" Value="bcca01.sbrick"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Sun Oct 12 01:01:33 2003 (miller) .brick 0 = bcpa01.sbrick
+Sun Oct 12 01:01:33 2003 (miller) .brick 1 = bsfmea01.sbrick
+Sun Oct 12 01:01:33 2003 (miller) .brick 2 = bcca01.sbrick</LOG>
+</FORM>

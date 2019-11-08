@@ -1,0 +1,10 @@
+WildcardTables =
+{
+// ==== Top 10 des meilleurs crafteurs de l'episode 2
+
+	"nom_Top10_Best_Craft_matis_kami", "storyline.episode2.matis.kami.craft.*", "PlayerName", "*", "Sum",
+	"nom_Top10_Best_Craft_matis_karavan", "storyline.episode2.matis.karavan.craft.*", "PlayerName", "*", "Sum",
+	
+	"score_Top10_Best_Craft_matis_kami", "storyline.episode2.matis.kami.craft.*", "PlayerValue", "*", "Sum",
+	"score_Top10_Best_Craft_matis_karavan", "storyline.episode2.matis.karavan.craft.*", "PlayerValue", "*", "Sum",	
+};

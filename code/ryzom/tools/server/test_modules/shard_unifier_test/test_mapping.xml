@@ -1,0 +1,49 @@
+<generator header_tag="TEST_MAPPING">
+	<namespace name="TM">
+
+
+		<class name="CRootTable">
+			<database table="root_table"/>
+
+			<property type="uint32"			name="Id"		db_col="Id" unique_id="true" autogen="true"/>
+			
+			<child_class	type="COneChild"		name="OneChild"			relation="one-to-one"					on-delete="cascade"/>
+			<child_class	type="CMapChild"		name="MapChilds"		relation="one-to-many" cont="map"		on-delete="cascade"/>
+			<child_class	type="CVectorChild"		name="VectorChilds"		relation="one-to-many" cont="vector"	on-delete="update"/>
+
+		</class>
+		
+		<class name="COneChild">
+			<database table="one_child"/>
+
+			<parent	class="CRootTable"		child_name="OneChild" relation="one-to-one" db_col="Id" />
+
+			<property type="uint32"			name="Id"		db_col="Id" unique_id="true"/>
+			
+		</class>
+
+		<class name="CMapChild">
+			<database table="map_child"/>
+
+			<parent	class="CRootTable"		child_name="MapChilds" relation="one-to-many" db_col="parent_id" cont="map"/>
+
+			<property type="uint32"			name="Id"		db_col="Id" unique_id="true"/>
+			<property type="uint32"			name="ParentId"	db_col="parent_id" />
+			
+		</class>
+
+		<class name="CVectorChild">
+			<database table="vector_child"/>
+
+			<parent	class="CRootTable"		child_name="VectorChilds" relation="one-to-many" db_col="parent_id" cont="vector"/>
+
+			<property type="uint32"			name="Id"		db_col="Id" unique_id="true"/>
+			<property type="uint32"			name="ParentId"	db_col="parent_id" />
+			<property type="sint32"			name="Info"		db_col="info" />
+			
+		</class>
+
+
+	</namespace>
+</generator>
+

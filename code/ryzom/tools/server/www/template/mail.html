@@ -1,0 +1,85 @@
+<html>
+<head>
+<title>Message From %%UCFROM%%</title>
+<meta HTTP-EQUIV="content-type" CONTENT="text/html; charset=UTF-8">
+</head>
+
+<body bgcolor="#333333" text="#FFFFFF">
+<table width="100%" height="100%">
+  <tr> 
+    <td valign="top"> 
+      <table width="100%">
+        <tr> 
+          <td valign="top" height="80"> 
+            <div align="center"> 
+              <table width="100%" cellspacing="8" bgcolor="#000000">
+                <tr valign="middle"> 
+                  <td width="3%"><img src="web_message.gif"></td>
+                  <td width="97%"><h1><i>uiMFMessageFrom</i> %%UCFROM%%</h1></td>
+                </tr>
+              </table>
+              <table>
+                <tr valign="bottom">
+                  <td height="27"><a href="mailbox.php"><img src="web_home.gif" global_color alt="uiWebHome" ></a>
+                  <a href="mailbox.php"><img src="web_back.gif" global_color alt="uiWebBack" ></a></td>
+                </tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" height="86" align="center"> 
+			  <table width="100%" cellspacing="2" l_margin="4" >
+				<tr bgcolor="#333333" valign="middle"> 
+				  <h5><td width="10%" height="30" bgcolor="#000000"><i>uiMFAuthor</i></td></h5>
+				  <td width="90%" bgcolor="#666666">%%UCFROM%%</td>
+				</tr>
+				<tr bgcolor="#333333" valign="middle"> 
+				  <h5><td width="10%" height="30" bgcolor="#000000"><i>uiMFDate</i></td></h5>
+				  <td width="90%" bgcolor="#666666">%%DATE%%</td>
+				</tr>
+				<tr bgcolor="#333333" valign="middle" valign="middle"> 
+				  <h5><td width="10%" height="30" bgcolor="#000000"><i>uiMFSubject</i></td></h5>
+				  <td width="90%" bgcolor="#666666">%%SUBJECT%%</td>
+				</tr>
+				<tr bgcolor="#333333" valign="middle"> 
+				  <h5><td width="10%" height="30" bgcolor="#000000"><i>uiMFMessage</i></td></h5>
+				  <td width="90%" bgcolor="#666666">%%CONTENT%%</td>
+				</tr>
+			  </table>
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            <table>
+              <tr align="right"> 
+                <form method='post' action='confirm_remove_mail.php'>
+					<input type='hidden' name='select_mail_%%MAIL%%' value='select'>
+					<td width="100%"><input type="image" name="del" value="Submit" src="web_del.gif" alt="uiWebDelMess" ></td>
+                </form>
+                <form method='post' action='new_mail.php'>
+					<input type='hidden' name='msg' value='%%MAIL%%'>
+					<input type='hidden' name='mail_to' value='%%FROM%%'>
+					<input type='hidden' name='mail_subject' value='Re: %%SUBJECT%%'>
+					<input type='hidden' name='mail_content' value='%%UCFROM%% wrote:
+%%CLEANCONTENT%%'>
+	                <td><input type="image" name="del2" value="Submit" src="web_reply.gif" alt="uiWebReply" ></td>
+                </form>
+                <form method='post' action='new_mail.php'>
+					<input type='hidden' name='msg' value='%%MAIL%%'>
+					<input type='hidden' name='mail_subject' value='Tr: %%SUBJECT%%'>
+					<input type='hidden' name='mail_content' value='%%UCFROM%% wrote:
+%%CLEANCONTENT%%'>
+					<td><input type="image" name="del3" value="Submit" src="web_forward.gif" alt="uiWebForward" ></td>
+                </form>
+                <td><a href="new_mail.php"><img src="web_send.gif" alt="uiWebNewMessage" ></a></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

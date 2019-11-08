@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="FamilyId" Value="BCPA"/>
+    </STRUCT>
+    <STRUCT Name="Client">
+      <ATOM Name="Icon" Value="FP_Melee.tga"/>
+      <ATOM Name="IconBack" Value="BK_fyros_brick.tga"/>
+      <ATOM Name="IconOver" Value="FP_Over.tga"/>
+    </STRUCT>
+    <STRUCT Name="Mandatory">
+      <ATOM Name="f0" Value="BCFMEA"/>
+    </STRUCT>
+    <STRUCT Name="Credit">
+      <ATOM Name="f0" Value="BCCA"/>
+      <ATOM Name="f1" Value="BCXMCA"/>
+      <ATOM Name="f2" Value="BCXMCB"/>
+      <ATOM Name="f3" Value="BCXMCC"/>
+      <ATOM Name="f4" Value="BCXMCD"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+</FORM>

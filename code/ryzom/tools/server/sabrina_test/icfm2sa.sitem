@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <PARENT Filename="_2h_axe.sitem"/>
+  <PARENT Filename="_fy_Wea_Hache2M.sitem"/>
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="name" Value="fyros long axe"/>
+      <ATOM Name="origin" Value="fyros"/>
+    </STRUCT>
+    <STRUCT Name="melee weapon">
+      <ATOM Name="skill" Value="two handed axe fyros"/>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="map_variant" Value="Low Quality"/>
+    </STRUCT>
+    <STRUCT Name="faber">
+      <ATOM Name="Skill" Value="burning 2h axe craft"/>
+      <ATOM Name="Price" Value="0.1*Standart_prices*8"/>
+      <STRUCT Name="Create">
+        <ATOM Name="MP 1 Family" Value="Wood"/>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="AsBrick">
+      <STRUCT Name="Client">
+        <ATOM Name="IconBack" Value="BK_fyros_brick.tga"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Aug 08 09:25:01 2002 (mauduit) .3d.map_variant = Low Quality
+Fri Sep 27 15:31:17 2002 (favre) .basics.name = fyros long axe
+Thu Sep 18 12:28:08 2003 (coutelas) .basics.origin = fyros
+Thu Sep 18 12:28:08 2003 (coutelas) .faber.Create.MP 1 Family = Wood
+Thu Sep 18 12:28:08 2003 (coutelas) .faber.Skill = burning 2h axe craft
+Thu Sep 18 12:28:08 2003 (coutelas) .melee weapon.skill = two handed axe fyros
+Fri Sep 19 12:05:35 2003 (coutelas) .AsBrick.Client.IconBack = BK_fyros_brick.tga</LOG>
+</FORM>

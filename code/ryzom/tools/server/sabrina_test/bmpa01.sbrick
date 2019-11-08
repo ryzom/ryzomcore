@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="FamilyId" Value="BMPA"/>
+      <ATOM Name="SabrinaCost" Value="0"/>
+      <ATOM Name="LearnRequiresOneOfSkills" Value="M 0"/>
+      <ATOM Name="Action Nature" Value="OFFENSIVE"/>
+      <ATOM Name="Skill" Value="SMTPG"/>
+    </STRUCT>
+    <STRUCT Name="Client">
+      <ATOM Name="Icon" Value="ICO_Atysian.tga"/>
+      <ATOM Name="IconBack" Value="MP_Back_Offensive.tga"/>
+    </STRUCT>
+    <STRUCT Name="Mandatory">
+      <ATOM Name="f0" Value="BMTODEA"/>
+    </STRUCT>
+    <STRUCT Name="Optional">
+      <ATOM Name="f0" Value="BMOA"/>
+      <ATOM Name="f1" Value="BMOC"/>
+      <ATOM Name="f2" Value="BMOD"/>
+      <ATOM Name="f3" Value="BMOE"/>
+      <ATOM Name="f4" Value="BMOB"/>
+    </STRUCT>
+    <STRUCT Name="Credit">
+      <ATOM Name="f0" Value="BMCA"/>
+      <ATOM Name="f1" Value="BMCB"/>
+      <ATOM Name="f2" Value="BMCC"/>
+      <ATOM Name="f3" Value="BMCD"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+</FORM>

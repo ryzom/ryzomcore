@@ -1,0 +1,22 @@
+WildcardTables =
+{
+// ==== Top 10 des meilleurs harvesteurs par faction (par chantier) par acte
+//zorai
+	"nom_Top10_Best_Guild_Harvest_zorai_kami_Acte1",	"storyline.episode2.zorai.kami.harvest.acte1",	"GuildName",	"*", "Sum",
+	"nom_Top10_Best_Guild_Harvest_zorai_karavan_Acte1",	"storyline.episode2.zorai.karavan.harvest.acte1",	"GuildName",	"*", "Sum",
+
+	"score_Top10_Best_Guild_Harvest_zorai_kami_Acte1",	"storyline.episode2.zorai.kami.harvest.acte1",	"GuildValue",	"*", "Sum",
+	"score_Top10_Best_Guild_Harvest_zorai_karavan_Acte1",	"storyline.episode2.zorai.karavan.harvest.acte1",	"GuildValue",	"*", "Sum",
+
+	"nom_Top10_Best_Guild_Harvest_zorai_kami_Acte2",	"storyline.episode2.zorai.kami.harvest.acte2",	"GuildName",	"*", "Sum",
+	"nom_Top10_Best_Guild_Harvest_zorai_karavan_Acte2",	"storyline.episode2.zorai.karavan.harvest.acte2",	"GuildName",	"*", "Sum",
+
+	"score_Top10_Best_Guild_Harvest_zorai_kami_Acte2",	"storyline.episode2.zorai.kami.harvest.acte2",	"GuildValue",	"*", "Sum",
+	"score_Top10_Best_Guild_Harvest_zorai_karavan_Acte2",	"storyline.episode2.zorai.karavan.harvest.acte2",	"GuildValue",	"*", "Sum",
+
+	"nom_Top10_Best_Guild_Harvest_zorai_kami_Acte3",	"storyline.episode2.zorai.kami.harvest.acte3",	"GuildName",	"*", "Sum",
+	"nom_Top10_Best_Guild_Harvest_zorai_karavan_Acte3",	"storyline.episode2.zorai.karavan.harvest.acte3",	"GuildName",	"*", "Sum",
+
+	"score_Top10_Best_Guild_Harvest_zorai_kami_Acte3",	"storyline.episode2.zorai.kami.harvest.acte3",	"GuildValue",	"*", "Sum",
+	"score_Top10_Best_Guild_Harvest_zorai_karavan_Acte3",	"storyline.episode2.zorai.karavan.harvest.acte3",	"GuildValue",	"*", "Sum",
+};
