@@ -2596,6 +2596,9 @@ static void hideTeleportButtonsInPopupMenuIfNotEnoughPriv()
 
 	ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:user_land_mark_menu:lmteleport");
 	if(ie) ie->setActive(showTeleport);
+
+	ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:user_land_mark_menu_base:lmteleport");
+	if(ie) ie->setActive(showTeleport);
 }
 
 //============================================================================================================
@@ -2659,8 +2662,8 @@ CGroupMap::CLandMarkButton *CGroupMap::createLandMarkButton(const CLandMarkOptio
 	lmb->setModulateGlobalColorAll(false);
 	if (!options.LandMarkMenu.empty())
 	{
-		lmb->setActionOnRightClick("active_menu");
-		lmb->setParamsOnRightClick(NLMISC::toString("menu=%s", options.LandMarkMenu.c_str()));
+		lmb->setActionOnRightClick("world_map_right_click");
+		lmb->setParamsOnRightClick(NLMISC::toString("map=%s|menu=%s", _Id.c_str(), options.LandMarkMenu.c_str()));
 	}
 	lmb->setPosRef(Hotspot_MM);
 	return lmb;
@@ -2742,6 +2745,23 @@ CCtrlButton *CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucst
 	CInterfaceManager::getInstance()->saveLandmarks();
 
 	return _UserLM.back();
+}
+
+//============================================================================================================
+CCtrlButton* CGroupMap::getLandmarkCtrl(const std::string &lmType, uint lmIndex) const
+{
+	CCtrlButton *ctrl = NULL;
+	if (lmType == "user")
+	{
+		if (lmIndex < _UserLM.size())
+		{
+			ctrl = _UserLM[lmIndex];
+		}
+		else nlwarning("_UserLM index out of bounds (size:%u, index:%u)", (uint)_UserLM.size(), lmIndex);
+	}
+	else nlwarning("unsupported landmark type '%s'", lmType.c_str());
+
+	return ctrl;
 }
 
 //============================================================================================================
@@ -3558,6 +3578,126 @@ int CGroupMap::luaIsIsland(CLuaState &ls)
 /////////////////////
 
 //=========================================================================================================
+void CGroupMap::updateClosestLandMarkMenu(const std::string &menu, const NLMISC::CVector2f &pos) const
+{
+	static uint nbShowLandmarks = 5;
+	static uint nbShowLandmarksMax = 5;
+
+	const CGroupMenu *pMenu = dynamic_cast<CGroupMenu *>(CWidgetManager::getInstance()->getElementFromId(menu));
+	if (!pMenu) return;
+
+	CGroupSubMenu *rootMenu = pMenu->getRootMenu();
+	if (!rootMenu) return;
+
+	// remove previous markers from menu
+	for(uint i = 0; i < nbShowLandmarksMax; ++i)
+	{
+		std::string lineId = toString("%s:lmcosest%d", menu.c_str(), i);
+		sint index = rootMenu->getLineFromId(lineId);
+		if (index < 0) break;
+		rootMenu->removeLine(index);
+	}
+
+	// no continent selected (ie world map view)
+	if (!_CurContinent) return;
+
+	// sort landmarks, keep indices
+	typedef std::pair<uint, float> TSortedDistPair;
+	std::vector<TSortedDistPair> sortedIndices;
+	for(uint i = 0; i < _CurContinent->UserLandMarks.size(); ++i)
+	{
+		float dist = distsqr(pos, _CurContinent->UserLandMarks[i].Pos);
+		if (sortedIndices.empty())
+		{
+			sortedIndices.push_back(TSortedDistPair(i, dist));
+		}
+		else
+		{
+			bool found = false;
+			for(uint j = 0; j< sortedIndices.size(); j++)
+			{
+				if (dist < sortedIndices[j].second)
+				{
+					sortedIndices.insert(sortedIndices.begin() + j, TSortedDistPair(i, dist));
+					found = true;
+					if (sortedIndices.size() > nbShowLandmarks)
+					{
+						sortedIndices.pop_back();
+					}
+					break;
+				}
+			}
+
+			if (!found && sortedIndices.size() < nbShowLandmarks)
+			{
+				sortedIndices.push_back(TSortedDistPair(i, dist));
+			}
+		}
+	}
+
+	// add landmarks to menu
+	uint lineIndex = rootMenu->getNumLines();
+	for(uint i = 0; i< sortedIndices.size(); ++i)
+	{
+		uint32 index = sortedIndices[i].first;
+		ucstring name = ucstring(toString("%.2fm ", sqrt(sortedIndices[i].second))) + _CurContinent->UserLandMarks[index].Title;
+		std::string lineId = toString("%s:lmcosest%d", menu.c_str(), i);
+		std::string ahParams = toString("type=user|map=%s|index=%d", _Id.c_str(), index);
+
+		CViewTextMenu* vt = rootMenu->addLine(ucstring(""), "map_landmark_by_index", ahParams, lineId.c_str(), "", "", false, false, false);
+		if (!vt) break;
+
+		vt->setSingleLineTextFormatTaged(name);
+		// TODO: should calculate from mouse pos and client width
+		vt->setLineMaxW(800);
+
+		CLandMarkOptions options = getUserLandMarkOptions(index);
+
+		typedef std::pair<std::string, std::string> TTmplParams;
+		std::vector<TTmplParams> vparams;
+		vparams.push_back(TTmplParams("id", toString("lmicon%d", i)));
+		vparams.push_back(TTmplParams("sizeref", ""));
+		vparams.push_back(TTmplParams("icon_texture", options.LandMarkTexNormal));
+		vparams.push_back(TTmplParams("icon_color", options.ColorNormal.toString()));
+
+		CInterfaceGroup *pUGLeft = CWidgetManager::getInstance()->getParser()->createGroupInstance("landmark_row_icon", lineId, vparams);
+		if (pUGLeft)
+			rootMenu->setUserGroupLeft(lineIndex, pUGLeft, true);
+
+		rootMenu->setRightClickHandler(lineIndex, "map_landmark_by_index");
+		rootMenu->setRightClickHandlerParam(lineIndex, toString("%s|menu=%s_base", ahParams.c_str(), options.LandMarkMenu.c_str()));
+		lineIndex++;
+	}
+}
+
+//=========================================================================================================
+// remap caller with landmark using index/type and call popup menu or set compass target if no menu is set
+class CAHMapLandmarkByIndex : public IActionHandler
+{
+	virtual void execute (CCtrlBase* pCaller, const string &params )
+	{
+		const std::string mapName = getParam(params, "map");
+		const std::string lmType = getParam(params, "type");
+		const std::string menuId = getParam(params, "menu");
+		uint index;
+		if (!fromString(getParam(params, "index"), index)) return;
+
+		CGroupMap *map = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(mapName));
+		if (!map) return;
+
+		// remap caller to landmark from menu row
+		CCtrlButton* pButton = map->getLandmarkCtrl(lmType, index);
+		if (!pButton) return;
+
+		if (menuId.empty())
+			map->targetLandmark(pButton);
+		else
+			CAHManager::getInstance()->runActionHandler("active_menu", pButton, toString("pushmodal=true|popmodal=false|menu=%s", menuId.c_str()));
+	}
+};
+REGISTER_ACTION_HANDLER(CAHMapLandmarkByIndex, "map_landmark_by_index");
+
+//=========================================================================================================
 // Set landmark filter
 class CAHLandMarkFilter : public IActionHandler
 {
@@ -3861,20 +4001,45 @@ class CAHWorldMapRightClick : public IActionHandler
 	virtual void execute (CCtrlBase *pCaller, const string &params)
 	{
 		std::string map = getParam(params, "map");
-		CInterfaceManager *im = CInterfaceManager::getInstance();
+		std::string menu = getParam(params, "menu");
 
 		hideTeleportButtonsInPopupMenuIfNotEnoughPriv();
 
 		CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (!gm) return;
-		if (!gm->isIsland())
+
+		if (gm->isIsland())
 		{
-			CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu");
+			if (gm->getArkPowoMode() == "editor")
+				menu = gm->getArkPowoMapMenu();
+			else
+				menu = "ui:interface:map_menu_island";
 		}
 		else
 		{
+<<<<<<< HEAD
 			CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu_island");
+=======
+			if (menu.empty())
+				menu = "ui:interface:map_menu";
+
+			// update menu with closest landmarks
+			NLMISC::CVector2f pos(NLMISC::CVector2f::Null);
+			CCtrlButton *button = dynamic_cast<CCtrlButton *>(pCaller);
+			if (button)
+				gm->getLandmarkPosition(button, pos);
+
+			if(pos == NLMISC::CVector2f::Null)
+			{
+				pos = gm->getRightClickLastPos();
+				gm->mapToWorld(pos, pos);
+			}
+
+			gm->updateClosestLandMarkMenu(menu, pos);
+>>>>>>> origin/develop
 		}
+
+		CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=" + menu);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHWorldMapRightClick, "world_map_right_click")

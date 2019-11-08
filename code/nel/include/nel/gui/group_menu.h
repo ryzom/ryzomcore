@@ -136,9 +136,13 @@ namespace NLGUI
 		void	removeLine(uint index);
 		const std::string getActionHandler(uint lineIndex) const;
 		const std::string getActionHandlerParam(uint lineIndex) const;
+		const std::string getRightClickHandler(uint lineIndex) const;
+		const std::string getRightClickHandlerParam(uint lineIndex) const;
 
 		void setActionHandler(uint lineIndex, const std::string &ah = "");
 		void setActionHandlerParam(uint lineIndex, const std::string &params = "");
+		void setRightClickHandler(uint lineIndex, const std::string &ah = "");
+		void setRightClickHandlerParam(uint lineIndex, const std::string &params = "");
 
 		void	openSubMenu (sint32 nb);
 
@@ -235,6 +239,8 @@ namespace NLGUI
 			CInterfaceGroup *Separator;
 			std::string		AHName;
 			std::string		AHParams;
+			std::string		AHRightClick;
+			std::string		AHRightClickParams;
 			std::string		Id;
 			std::string     Cond;      // condition to know if the entry is grayed
 			CViewBitmap     *CheckBox;
@@ -332,9 +338,13 @@ namespace NLGUI
 		void deleteLine(uint index);
 		const std::string getActionHandler(uint lineIndex) const;
 		const std::string getActionHandlerParam(uint lineIndex) const;
+		const std::string getRightClickHandler(uint lineIndex) const;
+		const std::string getRightClickHandlerParam(uint lineIndex) const;
 
 		void setActionHandler(uint lineIndex, const std::string &ah = "");
 		void setActionHandlerParam(uint lineIndex, const std::string &params = "");
+		void setRightClickHandler(uint lineIndex, const std::string &ah = "");
+		void setRightClickHandlerParam(uint lineIndex, const std::string &params = "");
 
 		void addLine (const ucstring &name, const std::string &ah = "", const std::string &params = "",
 					  const std::string &id = std::string(),
@@ -357,7 +367,7 @@ namespace NLGUI
 		void	setMinH(sint32 minH);
 
 		// change fontsize for new menu items
-		void	setFontSize(uint32 fontSize);
+		void	setFontSize(uint32 fontSize, bool coef = true);
 
 		// Gray a line on the RootMenu
 		void	setGrayedLine(uint line, bool g);
@@ -397,6 +407,7 @@ namespace NLGUI
 		bool					_Formatted;
 		uint8					_Space;
 		sint32					_FontSize;
+		bool					_FontSizeCoef;
 
 		NLMISC::CRGBA			_ColorOver;			// Color of the text when the mouse is over it
 		NLMISC::CRGBA			_ShadowColorOver;	// Color of the shadow when the mouse is over it

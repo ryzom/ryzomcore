@@ -26,6 +26,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/gui/interface_common.h"
 #include "nel/gui/interface_options.h"
+#include "nel/gui/interface_group.h"
 #include "nel/gui/event_descriptor.h"
 #include "nel/3d/u_camera.h"
 #include "nel/gui/parser.h"

@@ -35,9 +35,9 @@ namespace NLGUI
 	//
 	// key is converted to lowercase
 	// value is left as is
-	TStyle CCssParser::parseDecls(const std::string &styleString)
+	TStyleVec CCssParser::parseDecls(const std::string &styleString)
 	{
-		TStyle styles;
+		TStyleVec styles;
 		std::vector<std::string> elements;
 		NLMISC::splitString(styleString, ";", elements);
 
@@ -49,7 +49,7 @@ namespace NLGUI
 			{
 				std::string key = trim(toLower(elements[i].substr(0, pos)));
 				std::string value = trim(elements[i].substr(pos+1));
-				styles[key] = value;
+				styles.push_back(TStylePair(key, value));
 			}
 		}
 
@@ -94,7 +94,7 @@ namespace NLGUI
 		std::vector<ucstring> selectors;
 		NLMISC::explode(selectorString, ucstring(","), selectors);
 
-		TStyle props;
+		TStyleVec props;
 		props = parseDecls(styleString.toUtf8());
 
 		// duplicate props to each selector in selector list,

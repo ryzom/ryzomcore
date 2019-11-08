@@ -100,7 +100,6 @@ void CControlSheetInfoWaiter::infoReceived()
 ucstring CControlSheetInfoWaiter::infoValidated() const
 {
 	ucstring help;
-
 	if (CtrlSheet && !LuaMethodName.empty())
 	{
 		// delegate setup of context he help ( & window ) to lua
@@ -3390,6 +3389,9 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 				// call lua function to update tooltip window
 				_ItemInfoWaiter.sendRequest();
 				help = _ItemInfoWaiter.infoValidated();
+				// its expected to get at least item name back
+				if (help.empty())
+					help = getItemActualName();
 			}
 			else if (!_ContextHelp.empty())
 			{

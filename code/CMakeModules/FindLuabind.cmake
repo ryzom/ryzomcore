@@ -3,6 +3,7 @@
 #  LUABIND_LIBRARIES, the libraries to link against
 #  LUABIND_FOUND, if false, do not try to link to LUABIND
 #  LUABIND_INCLUDE_DIR, where to find headers.
+INCLUDE(FindHelpers)
 
 MACRO(FIND_CORRECT_LUA_VERSION)
   # Check Lua version linked to Luabind under Linux
@@ -85,18 +86,6 @@ IF(LUABIND_LIBRARIES AND LUABIND_INCLUDE_DIR)
   SET(Luabind_FIND_QUIETLY TRUE)
 ENDIF()
 
-FIND_PATH(LUABIND_INCLUDE_DIR
-  luabind/luabind.hpp
-  PATHS
-  $ENV{LUABIND_DIR}/include
-  /usr/local/include
-  /usr/include
-  /sw/include
-  /opt/local/include
-  /opt/csw/include
-  /opt/include
-)
-
 SET(LIBRARY_NAME_RELEASE)
 SET(LIBRARY_NAME_DEBUG)
 
@@ -149,35 +138,7 @@ ENDIF()
 LIST(APPEND LIBRARY_NAME_RELEASE luabind libluabind)
 LIST(APPEND LIBRARY_NAME_DEBUG luabind_d luabindd libluabind_d libluabindd)
 
-FIND_LIBRARY(LUABIND_LIBRARY_RELEASE
-  NAMES ${LIBRARY_NAME_RELEASE}
-  PATHS
-  $ENV{LUABIND_DIR}/lib
-  /usr/local/lib
-  /usr/lib
-  /usr/local/X11R6/lib
-  /usr/X11R6/lib
-  /sw/lib
-  /opt/local/lib
-  /opt/csw/lib
-  /opt/lib
-  /usr/freeware/lib64
-)
-
-FIND_LIBRARY(LUABIND_LIBRARY_DEBUG
-  NAMES ${LIBRARY_NAME_DEBUG}
-  PATHS
-  $ENV{LUABIND_DIR}/lib
-  /usr/local/lib
-  /usr/lib
-  /usr/local/X11R6/lib
-  /usr/X11R6/lib
-  /sw/lib
-  /opt/local/lib
-  /opt/csw/lib
-  /opt/lib
-  /usr/freeware/lib64
-)
+FIND_PACKAGE_HELPER(Luabind luabind/luabind.hpp RELEASE ${LIBRARY_NAME_RELEASE} DEBUG ${LIBRARY_NAME_DEBUG})
 
 FIND_PACKAGE(Boost REQUIRED)
 

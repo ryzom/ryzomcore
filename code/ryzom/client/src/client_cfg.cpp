@@ -620,6 +620,8 @@ CClientConfig::CClientConfig()
 	MaxMapScale			= 2.0f;
 	R2EDMaxMapScale		= 8.0f;
 
+	TargetChangeCompass	= true;
+
 	// VERBOSES
 	VerboseVP				= false;
 	VerboseAnimUser			= false;
@@ -1500,6 +1502,9 @@ void CClientConfig::setValues()
 	// Default values for CGroupMap
 	READ_FLOAT_FV(MaxMapScale);
 	READ_FLOAT_FV(R2EDMaxMapScale);
+
+	// /tar to update compass or not
+	READ_BOOL_FV(TargetChangeCompass);
 
 	/////////////
 	// SHADOWS //
