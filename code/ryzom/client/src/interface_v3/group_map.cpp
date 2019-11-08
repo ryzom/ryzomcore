@@ -4010,33 +4010,11 @@ class CAHWorldMapRightClick : public IActionHandler
 
 		if (gm->isIsland())
 		{
-			if (gm->getArkPowoMode() == "editor")
-				menu = gm->getArkPowoMapMenu();
-			else
-				menu = "ui:interface:map_menu_island";
+			menu = "ui:interface:map_menu_island";
 		}
 		else
 		{
-<<<<<<< HEAD
 			CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu_island");
-=======
-			if (menu.empty())
-				menu = "ui:interface:map_menu";
-
-			// update menu with closest landmarks
-			NLMISC::CVector2f pos(NLMISC::CVector2f::Null);
-			CCtrlButton *button = dynamic_cast<CCtrlButton *>(pCaller);
-			if (button)
-				gm->getLandmarkPosition(button, pos);
-
-			if(pos == NLMISC::CVector2f::Null)
-			{
-				pos = gm->getRightClickLastPos();
-				gm->mapToWorld(pos, pos);
-			}
-
-			gm->updateClosestLandMarkMenu(menu, pos);
->>>>>>> origin/develop
 		}
 
 		CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=" + menu);

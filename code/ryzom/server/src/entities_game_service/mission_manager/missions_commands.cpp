@@ -560,11 +560,6 @@ NLMISC_COMMAND(addMission,"Add mission to character","<character_id> <Mission gi
 	return true;
 }
 
-
-
-/// Commands used by ARK
-
-
 CInventoryPtr getInventory(CCharacter *c, const string &inv)
 {
 	CInventoryPtr inventoryPtr = NULL;
