@@ -1,0 +1,4120 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <ARRAY Name="properties">
+      <STRUCT>
+        <ATOM Name="name" Value="_Sheet"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BasicPlayer.Name"/>
+        <ATOM Name="type" Value="string"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Surname"/>
+        <ATOM Name="type" Value="string"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="_X"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="_Y"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="_Z"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Heading"/>
+        <ATOM Name="type" Value="float"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="_VisualPropertyA"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="_VisualPropertyB"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="PactType"/>
+        <ATOM Name="type" Value="uint8"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="NumberOfPacts"/>
+        <ATOM Name="type" Value="sint16"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="SpeedVariationModifier"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MeleeAttackModifierOnEnemy"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MeleeAttackModifierOnSelf"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="GlobalSkillModifier"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseWalkSpeed"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRunSpeed"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentWalkSpeed"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRunSpeed"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseHitPoints"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxHitPoints"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierHitPoints"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentHitPoints"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateHitPoints"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierHitPoints"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateHitPoints"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateHitPoints"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateHitPoints"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateRateModifierHitPoints"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateHitPoints"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseSap"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxSap"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierSap"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentSap"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateSap"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierSap"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateSap"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateSap"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateSap"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateRateModifierSap"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateSap"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseStamina"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxStamina"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierStamina"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentStamina"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateStamina"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierStamina"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateStamina"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateStamina"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateStamina"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateRateModifierStamina"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateStamina"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseWeight"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxWeight"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierWeight"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentWeight"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateWeight"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierWeight"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateWeight"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateWeight"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateWeight"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateRateModifierWeight"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateWeight"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseDiseaseResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxDiseaseResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierDiseaseResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentDiseaseResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateDiseaseResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierDiseaseResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateDiseaseResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateDiseaseResist"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateDiseaseResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateRateModifierDiseaseResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateDiseaseResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseMagicResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxMagicResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierMagicResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentMagicResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateMagicResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierMagicResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateMagicResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateMagicResist"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateMagicResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateRateModifierMagicResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateMagicResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseTechnoResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxTechnoResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierTechnoResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentTechnoResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateTechnoResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierTechnoResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateTechnoResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateTechnoResist"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateTechnoResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateRateModifierTechnoResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateTechnoResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseImpactResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxImpactResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierImpactResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentImpactResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateImpactResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierImpactResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateImpactResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateImpactResist"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateImpactResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateRateModifierImpactResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateImpactResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseFearResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxFearResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierFearResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentFearResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateFearResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierFearResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateFearResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateFearResist"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateFearResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierFearResistRegenerateRate"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateFearResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseStrength"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxStrength"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierStrength"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentStrength"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateStrength"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierStrength"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateStrength"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateStrength"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateStrength"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierStrengthRegenerateRate"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateStrength"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseConstitution"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxConstitution"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierConstitution"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentConstitution"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateConstitution"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierConstitution"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateConstitution"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateConstitution"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateConstitution"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierConstitutionRegenerateRate"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateConstitution"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseAgility"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxAgility"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierAgility"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentAgility"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateAgility"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierAgility"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateAgility"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateAgility"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateAgility"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierAgilityRegenerateRate"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateAgility"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseWill"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxWill"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierWill"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentWill"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateWill"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierWill"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateWill"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateWill"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateWill"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierWillRegenerateRate"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateWill"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseWellBalanced"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxWellBalanced"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierWellBalanced"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentWellBalanced"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateWellBalanced"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierWellBalanced"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateWellBalanced"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateWellBalanced"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateWellBalanced"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierWellBalancedRegenerateRate"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateWellBalanced"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseIntelligence"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxIntelligence"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierIntelligence"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentIntelligence"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateIntelligence"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierIntelligence"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateIntelligence"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateIntelligence"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateIntelligence"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierIntelligenceRegenerateRate"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateIntelligence"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseCharisme"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxCharisme"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierCharisme"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentCharisme"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateCharisme"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierCharisme"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateCharisme"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateCharisme"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateCharisme"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierCharismeRegenerateRate"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateCharisme"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseEmpathie"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxEmpathie"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierEmpathie"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentEmpathie"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateEmpathie"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierEmpathie"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateEmpathie"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdateEmpathie"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRateEmpathie"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierEmpathieRegenerateRate"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRateEmpathie"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BasePerception"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxPerception"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierPerception"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentPerception"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegeneratePerception"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateModifierPerception"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegeneratePerception"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RegenerateTickUpdatePerception"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BaseRegenerateRatePerception"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ModifierPerceptionRegenerateRate"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRegenerateRatePerception"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Harvest"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedHarvest"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpHarvest"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlHarvest"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Quartering"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedQuartering"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpQuartering"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlQuartering"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fishing"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFishing"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFishing"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFishing"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Diving"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedDiving"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpDiving"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlDiving"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Digging"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedDigging"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpDigging"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlDigging"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Desert"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedDesert"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpDesert"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlDesert"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Jungle"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedJungle"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpJungle"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlJungle"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Lake"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedLake"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpLake"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlLake"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="PrimaryRoots"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedPrimaryRoots"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpPrimaryRoots"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlPrimaryRoots"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="FirstAid"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFirstAid"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFirstAid"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFirstAid"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="HominOpponentConsider"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedHominOpponentConsider"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpHominOpponentConsider"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlHominOpponentConsider"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Camouflage"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedCamouflage"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpCamouflage"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlCamouflage"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fyros"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFyros"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFyros"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFyros"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Tryker"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTryker"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTryker"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTryker"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Matis"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMatis"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMatis"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMatis"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Zorai"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedZorai"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpZorai"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlZorai"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Kitin"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedKitin"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpKitin"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlKitin"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Dragon"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedDragon"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpDragon"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlDragon"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingStrength"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingStrength"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingStrength"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingStrength"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingConstitution"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingConstitution"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingConstitution"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingConstitution"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingAgility"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingAgility"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingAgility"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingAgility"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingPerception"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingPerception"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingPerception"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingPerception"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingWill"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingWill"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingWill"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingWill"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingWellBalanced"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingWellBalanced"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingWellBalanced"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingWellBalanced"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingIntelligence"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingIntelligence"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingIntelligence"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingIntelligence"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingCharisme"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingCharisme"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingCharisme"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingCharisme"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingEmpathie"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingEmpathie"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingEmpathie"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingEmpathie"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingHp"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingHp"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingHp"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingHp"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingSeve"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingSeve"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingSeve"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingSeve"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingStamina"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingStamina"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingStamina"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingStamina"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingMagicResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingMagicResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingMagicResist"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingMagicResist"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingImpactResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingImpactResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingImpactResist"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingImpactResist"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingDiseaseResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingDiseaseResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingDiseaseResist"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingDiseaseResist"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingTechnoResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingTechnoResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingTechnoResist"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingTechnoResist"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainingFearResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainingFearResist"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainingFearResist"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainingFearResist"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Caravan"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedCaravan"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpCaravan"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlCaravan"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Rocktabou"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedRocktabou"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpRocktabou"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlRocktabou"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Goo"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedGoo"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpGoo"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlGoo"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Kami"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedKami"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpKami"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlKami"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrykerMystery"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrykerMystery"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrykerMystery"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrykerMystery"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MatisMystery"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMatisMystery"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMatisMystery"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMatisMystery"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ZoraiMystery"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedZoraiMystery"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpZoraiMystery"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlZoraiMystery"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Dagger"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedDagger"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpDagger"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlDagger"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Sword"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedSword"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpSword"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlSword"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="LongSword"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedLongSword"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpLongSword"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlLongSword"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TwoHandsSword"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTwoHandsSword"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTwoHandsSword"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTwoHandsSword"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Saber"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedSaber"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpSaber"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlSaber"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Axe"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedAxe"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpAxe"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlAxe"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Mass"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMass"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMass"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMass"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Stick"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedStick"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpStick"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlStick"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="GreatAxe"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedGreatAxe"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpGreatAxe"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlGreatAxe"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="GreatMass"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedGreatMass"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpGreatMass"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlGreatMass"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Pike"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedPike"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpPike"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlPike"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="HandToHand"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedHandToHand"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpHandToHand"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlHandToHand"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BersekAttack"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedBersekAttack"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpBersekAttack"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlBersekAttack"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Kick"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedKick"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpKick"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlKick"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="OnHorseBackMelee"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedOnHorseBackMelee"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpOnHorseBackMelee"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlOnHorseBackMelee"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Rondache"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedRondache"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpRondache"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlRondache"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Shield"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedShield"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpShield"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlShield"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="DualWield"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedDualWield"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpDualWield"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlDualWield"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Dodging"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedDodging"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpDodging"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlDodging"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="HeavyArmourWear"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedHeavyArmourWear"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpHeavyArmourWear"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlHeavyArmourWear"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MediumArmourWear"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMediumArmourWear"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMediumArmourWear"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMediumArmourWear"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="LightArmourWear"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedLightArmourWear"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpLightArmourWear"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlLightArmourWear"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="FyrosSword"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFyrosSword"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFyrosSword"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFyrosSword"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="FyrosLongSword"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFyrosLongSword"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFyrosLongSword"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFyrosLongSword"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="FyrosTwoHandsSword"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFyrosTwoHandsSword"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFyrosTwoHandsSword"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFyrosTwoHandsSword"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="FyrosSaber"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFyrosSaber"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFyrosSaber"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFyrosSaber"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="FyrosDagger"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFyrosDagger"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFyrosDagger"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFyrosDagger"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="FyrosHeavyArmourWear"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFyrosHeavyArmourWear"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFyrosHeavyArmourWear"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFyrosHeavyArmourWear"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="FyrosMediumArmourWear"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFyrosMediumArmourWear"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFyrosMediumArmourWear"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFyrosMediumArmourWear"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="FyrosLightArmourWear"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFyrosLightArmourWear"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFyrosLightArmourWear"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFyrosLightArmourWear"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="FyrosShield"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFyrosShield"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFyrosShield"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFyrosShield"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="FyrosRondache"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFyrosRondache"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFyrosRondache"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFyrosRondache"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BowPistol"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedBowPistol"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpBowPistol"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlBowPistol"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BowRifle"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedBowRifle"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpBowRifle"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlBowRifle"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Pistol"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedPistol"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpPistol"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlPistol"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Rifle"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedRifle"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpRifle"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlRifle"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="HeavyWeapon"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedHeavyWeapon"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpHeavyWeapon"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlHeavyWeapon"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Rocket"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedRocket"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpRocket"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlRocket"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Grenade"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedGrenade"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpGrenade"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlGrenade"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="OnHorseBackShoot"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedOnHorseBackShoot"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpOnHorseBackShoot"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlOnHorseBackShoot"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="FyrosBowPistol"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFyrosBowPistol"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFyrosBowPistol"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFyrosBowPistol"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="FyrosRifle"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFyrosRifle"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFyrosRifle"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFyrosRifle"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="FyrosPistol"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedFyrosPistol"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpFyrosPistol"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlFyrosPistol"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Mandragore"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMandragore"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMandragore"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMandragore"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Dryade"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedDryade"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpDryade"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlDryade"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorMandragore"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedSylve"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpSylve"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlSylve"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorMandragore"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMajorMandragore"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMajorMandragore"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMajorMandragore"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorDryade"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMajorDryade"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMajorDryade"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMajorDryade"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorSylve"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMajorSylve"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMajorSylve"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMajorSylve"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MagicTransfert"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMagicTransfert"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMagicTransfert"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMagicTransfert"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MagicObjects"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMagicObjects"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMagicObjects"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMagicObjects"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MandragoreSpring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMandragoreSpring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMandragoreSpring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMandragoreSpring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MandragoreSummer"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMandragoreSummer"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMandragoreSummer"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMandragoreSummer"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MandragoreAutomn"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMandragoreAutomn"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMandragoreAutomn"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMandragoreAutomn"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MandragoreWinter"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMandragoreWinter"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMandragoreWinter"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMandragoreWinter"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="SylveSpring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedSylveSpring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpSylveSpring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlSylveSpring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="SylveSummer"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedSylveSummer"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpSylveSummer"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlSylveSummer"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="SylveAutomn"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedSylveAutomn"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpSylveAutomn"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlSylveAutomn"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="SylveWinter"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedSylveWinter"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpSylveWinter"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlSylveWinter"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="DryadeSpring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedDryadeSpring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpDryadeSpring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlDryadeSpring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="DryadeSummer"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedDryadeSummer"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpDryadeSummer"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlDryadeSummer"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="DryadeAutomn"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedDryadeAutomn"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpDryadeAutomn"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlDryadeAutomn"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="DryadeWinter"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedDryadeWinter"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpDryadeWinter"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlDryadeWinter"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorMandragoreSpring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMajorMandragoreSpring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMajorMandragoreSpring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMajorMandragoreSpring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorMandragoreSummer"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMajorMandragoreSummer"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMajorMandragoreSummer"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMajorMandragoreSummer"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorMandragoreAutomn"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMajorMandragoreAutomn"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMajorMandragoreAutomn"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMajorMandragoreAutomn"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorMandragoreWinter"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMajorMandragoreWinter"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMajorMandragoreWinter"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMajorMandragoreWinter"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorSylveSpring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMajorSylveSpring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMajorSylveSpring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMajorSylveSpring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorSylveSummer"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMajorSylveSummer"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMajorSylveSummer"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMajorSylveSummer"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorSylveAutomn"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMajorSylveAutomn"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMajorSylveAutomn"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMajorSylveAutomn"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorSylveWinter"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMajorSylveWinter"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMajorSylveWinter"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMajorSylveWinter"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorDryadeSpring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMajorDryadeSpring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMajorDryadeSpring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMajorDryadeSpring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorDryadeSummer"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMajorDryadeSummer"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMajorDryadeSummer"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMajorDryadeSummer"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorDryadeAutomn"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMajorDryadeAutomn"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMajorDryadeAutomn"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMajorDryadeAutomn"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MajorDryadeWinter"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMajorDryadeWinter"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMajorDryadeWinter"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMajorDryadeWinter"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Running"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedRunning"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpRunning"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlRunning"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Swimming"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedSwimming"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpSwimming"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlSwimming"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Riding"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedRiding"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpRiding"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlRiding"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TrainAnimal"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedTrainAnimal"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpTrainAnimal"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlTrainAnimal"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="LeadAnimal"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedLeadAnimal"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpLeadAnimal"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlLeadAnimal"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="WeaponsCutting"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedWeaponsCutting"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpWeaponsCutting"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlWeaponsCutting"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MakeThrowingWeapons"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMakeThrowingWeapons"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMakeThrowingWeapons"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMakeThrowingWeapons"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Blacksmithing"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedBlacksmithing"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpBlacksmithing"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlBlacksmithing"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ClothTailoring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedClothTailoring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpClothTailoring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlClothTailoring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="LeatherTailoring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedLeatherTailoring"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpLeatherTailoring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlLeatherTailoring"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Jewellery"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedJewellery"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpJewellery"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlJewellery"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Cooking"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedCooking"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpCooking"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlCooking"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Mechanic"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedMechanic"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpMechanic"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlMechanic"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Building"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedBuilding"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpBuilding"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlBuilding"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Apothecary"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedApothecary"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpApothecary"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlApothecary"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="akeShiftRep"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedakeShiftRep"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpakeShiftRep"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlakeShiftRep"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ArmorAndWeaponSmithing"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxLvlReachedArmorAndWeaponSmithing"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpArmorAndWeaponSmithing"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="XpNextLvlArmorAndWeaponSmithing"/>
+        <ATOM Name="type" Value="double"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ListTest"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="is a list" Value="true"/>
+      </STRUCT>
+    </ARRAY>
+    <ATOM Name="max number of rows or entities" Value="5000"/>
+    <ARRAY Name="entity types">
+      <ATOM Value="0"/>
+    </ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Mon Sep 23 12:17:09 2002 (cado) .entity types[0] = 0
+Mon Sep 23 12:17:09 2002 (cado) .max number of rows or entities = 5000
+Mon Sep 23 12:17:09 2002 (cado) formName Resized = 1
+Tue Sep 24 16:47:49 2002 (cado) .properties[753].is a list = true
+Tue Sep 24 16:47:49 2002 (cado) .properties[753].mirror = true
+Tue Sep 24 16:47:49 2002 (cado) .properties[753].name = ListTest
+Tue Sep 24 16:47:49 2002 (cado) .properties[753].type = sint32
+Tue Sep 24 16:47:49 2002 (cado) formName Resized = 754</LOG>
+</FORM>

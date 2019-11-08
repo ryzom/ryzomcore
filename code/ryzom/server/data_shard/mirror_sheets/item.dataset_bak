@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<FORM Version="0.1" State="modified">
+  <STRUCT>
+    <ARRAY Name="properties">
+      <STRUCT>
+        <ATOM Name="name" Value="slot"/>
+        <ATOM Name="type" Value="uint8"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="x"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="y"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="z"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="quality"/>
+        <ATOM Name="type" Value="uint16"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="hp"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="true"/>
+      </STRUCT>
+    </ARRAY>
+  </STRUCT>
+</FORM>

@@ -1,0 +1,9 @@
+root_id	spell_power	range	characteristic	virulence	healing	spell length	destination	target_needed
+1	1	1	1	0	0	0	0	1
+2	0	1	1	0	1	0	0	1
+3	0	1	1	1	0	1	0	1
+35	0	0	0	0	0	0	1	0
+38	1	1	1	0	0	0	0	1
+39	0	1	1	1	0	0	0	1
+41	0	1	0	1	0	1	0	0
+40	0	1	1	1	0	1	0	1

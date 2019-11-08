@@ -1,0 +1,15 @@
+family_name	id	type	description	texture_id	texture
+root	0	ROOT	root bricks	9000	root_bricks.tga
+spell_power	1	KEY	power of the spell	9001	power.tga
+effect_area	2	SUFFIX	define the effect area of the spell	9002	area.tga
+casting_time	3	SUFFIX	inc/dec the casting time of the spell	9003	casting_time.tga
+range	4	KEY	range of the spell	9004	range.tga
+characteristic	5	KEY	choose affected characteristic	9005	charac.tga
+virulence	6	KEY	virulence	9006	virulence.tga
+healing	7	KEY	healing power	9007	healing_power.tga
+spell length	8	KEY	length of spell effects	9008	effect_length.tga
+destination	9	KEY	teleport's destination	10003	teleport.tga
+reduce resistance	10	SUFFIX	reduce target's resistance	10003	teleport.tga
+easy	11	SUFFIX	reduce spell difficulty	10003	teleport.tga
+cheap	12	SUFFIX	reduce spell cost	10003	teleport.tga
+concentration	13	SUFFIX	reduce casting interruption chances	10003	teleport.tga

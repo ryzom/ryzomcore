@@ -1,0 +1,13 @@
+// a set of system messages for sending to the player during gus cc / ce contests
+promptSubmitAnswers	You may now submit answers
+errorNoQuestion		Your answer has been ignored because no question has been asked
+announceWinners		The contest is over. The winners are:
+treatedAnswer0		You have submitted an answer: 
+treatedAnswer1		The winners will be announced within the next few minutes
+treatedAnswer2		Please stay on line
+treatedAnswer3		You will not be allowed to submit another answer for the next 60 seconds
+queuedAnswer0		You have submitted another answer: 
+queuedAnswer1		You are only allowed to submit one answer every 60 seconds
+queuedAnswer2		This answer will be treated in
+queuedAnswer2b		seconds
+systemName		Kaeru

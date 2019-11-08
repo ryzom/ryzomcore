@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <ARRAY Name="properties">
+      <STRUCT>
+        <ATOM Name="name" Value="ItemId"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CreatureSheet"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="OwnerIndex"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CreatureIndex"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Order"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+    </ARRAY>
+    <ATOM Name="max number of rows or entities" Value="1"/>
+    <ARRAY Name="entity types">
+      <ATOM Value="4"/>
+    </ARRAY>
+  </STRUCT>
+  <LOG></LOG>
+</FORM>

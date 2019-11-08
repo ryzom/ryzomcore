@@ -1,0 +1,258 @@
+
+! AGS testroom_merchants script
+
+		cmd	actorCreatePattern line
+		cmd	actorCreateSpacing 3
+
+		cmd actorCreatePosition 1700 -4990
+		cmd actorCreateStationary ammo_fyros_01_05.creature ammo_fyros_01_05
+		cmd actorCreateStationary ammo_fyros_06_10.creature ammo_fyros_06_10
+		cmd actorCreateStationary ammo_fyros_11_15.creature ammo_fyros_11_15
+		cmd actorCreateStationary ammo_fyros_16_20.creature ammo_fyros_16_20
+		cmd actorCreateStationary ammo_fyros_21_25.creature ammo_fyros_21_25
+
+		cmd actorCreatePosition 1700 -4980
+		cmd actorCreateStationary ammo_matis_01_05.creature ammo_matis_01_05
+		cmd actorCreateStationary ammo_matis_06_10.creature ammo_matis_06_10
+		cmd actorCreateStationary ammo_matis_11_15.creature ammo_matis_11_15
+		cmd actorCreateStationary ammo_matis_16_20.creature ammo_matis_16_20
+		cmd actorCreateStationary ammo_matis_21_25.creature ammo_matis_21_25
+
+		cmd actorCreatePosition 1700 -4970
+		cmd actorCreateStationary ammo_tryker_01_05.creature ammo_tryker_01_05
+		cmd actorCreateStationary ammo_tryker_06_10.creature ammo_tryker_06_10
+		cmd actorCreateStationary ammo_tryker_11_15.creature ammo_tryker_11_15
+		cmd actorCreateStationary ammo_tryker_16_20.creature ammo_tryker_16_20
+		cmd actorCreateStationary ammo_tryker_21_25.creature ammo_tryker_21_25
+
+		cmd actorCreatePosition 1700 -4960
+		cmd actorCreateStationary ammo_zorai_01_05.creature ammo_zorai_01_05
+		cmd actorCreateStationary ammo_zorai_06_10.creature ammo_zorai_06_10
+		cmd actorCreateStationary ammo_zorai_11_15.creature ammo_zorai_11_15
+		cmd actorCreateStationary ammo_zorai_16_20.creature ammo_zorai_16_20
+		cmd actorCreateStationary ammo_zorai_21_25.creature ammo_zorai_21_25
+
+
+		cmd actorCreatePosition 1700 -4950
+		cmd actorCreateStationary armor_fyros_01_05.creature armor_fyros_01_05
+		cmd actorCreateStationary armor_fyros_06_10.creature armor_fyros_06_10
+		cmd actorCreateStationary armor_fyros_11_15.creature armor_fyros_11_15
+		cmd actorCreateStationary armor_fyros_16_20.creature armor_fyros_16_20
+		cmd actorCreateStationary armor_fyros_21_25.creature armor_fyros_21_25
+
+		cmd actorCreatePosition 1700 -4940
+		cmd actorCreateStationary armor_matis_01_05.creature armor_matis_01_05
+		cmd actorCreateStationary armor_matis_06_10.creature armor_matis_06_10
+		cmd actorCreateStationary armor_matis_11_15.creature armor_matis_11_15
+		cmd actorCreateStationary armor_matis_16_20.creature armor_matis_16_20
+		cmd actorCreateStationary armor_matis_21_25.creature armor_matis_21_25
+
+		cmd actorCreatePosition 1700 -4930
+		cmd actorCreateStationary armor_tryker_01_05.creature armor_tryker_01_05
+		cmd actorCreateStationary armor_tryker_06_10.creature armor_tryker_06_10
+		cmd actorCreateStationary armor_tryker_11_15.creature armor_tryker_11_15
+		cmd actorCreateStationary armor_tryker_16_20.creature armor_tryker_16_20
+		cmd actorCreateStationary armor_tryker_21_25.creature armor_tryker_21_25
+
+		cmd actorCreatePosition 1700 -4920
+		cmd actorCreateStationary armor_zorai_01_05.creature armor_zorai_01_05
+		cmd actorCreateStationary armor_zorai_06_10.creature armor_zorai_06_10
+		cmd actorCreateStationary armor_zorai_11_15.creature armor_zorai_11_15
+		cmd actorCreateStationary armor_zorai_16_20.creature armor_zorai_16_20
+		cmd actorCreateStationary armor_zorai_21_25.creature armor_zorai_21_25
+
+
+		cmd actorCreatePosition 1700 -4995
+		cmd actorCreateStationary range_weapon_fyros_01_05.creature range_weapon_fyros_01_05
+		cmd actorCreateStationary range_weapon_fyros_06_10.creature range_weapon_fyros_06_10
+		cmd actorCreateStationary range_weapon_fyros_11_15.creature range_weapon_fyros_11_15
+		cmd actorCreateStationary range_weapon_fyros_16_20.creature range_weapon_fyros_16_20
+		cmd actorCreateStationary range_weapon_fyros_21_25.creature range_weapon_fyros_21_25
+
+		cmd actorCreatePosition 1700 -4985
+		cmd actorCreateStationary range_weapon_matis_01_05.creature range_weapon_matis_01_05
+		cmd actorCreateStationary range_weapon_matis_06_10.creature range_weapon_matis_06_10
+		cmd actorCreateStationary range_weapon_matis_11_15.creature range_weapon_matis_11_15
+		cmd actorCreateStationary range_weapon_matis_16_20.creature range_weapon_matis_16_20
+		cmd actorCreateStationary range_weapon_matis_21_25.creature range_weapon_matis_21_25
+
+		cmd actorCreatePosition 1700 -4975
+		cmd actorCreateStationary range_weapon_tryker_01_05.creature range_weapon_tryker_01_05
+		cmd actorCreateStationary range_weapon_tryker_06_10.creature range_weapon_tryker_06_10
+		cmd actorCreateStationary range_weapon_tryker_11_15.creature range_weapon_tryker_11_15
+		cmd actorCreateStationary range_weapon_tryker_16_20.creature range_weapon_tryker_16_20
+		cmd actorCreateStationary range_weapon_tryker_21_25.creature range_weapon_tryker_21_25
+
+		cmd actorCreatePosition 1700 -4965
+		cmd actorCreateStationary range_weapon_zorai_01_05.creature range_weapon_zorai_01_05
+		cmd actorCreateStationary range_weapon_zorai_06_10.creature range_weapon_zorai_06_10
+		cmd actorCreateStationary range_weapon_zorai_11_15.creature range_weapon_zorai_11_15
+		cmd actorCreateStationary range_weapon_zorai_16_20.creature range_weapon_zorai_16_20
+		cmd actorCreateStationary range_weapon_zorai_21_25.creature range_weapon_zorai_21_25
+
+
+		cmd actorCreatePosition 1700 -4955
+		cmd actorCreateStationary shield_fyros_01_05.creature shield_fyros_01_05
+		cmd actorCreateStationary shield_fyros_06_10.creature shield_fyros_06_10
+		cmd actorCreateStationary shield_fyros_11_15.creature shield_fyros_11_15
+		cmd actorCreateStationary shield_fyros_16_20.creature shield_fyros_16_20
+		cmd actorCreateStationary shield_fyros_21_25.creature shield_fyros_21_25
+
+		cmd actorCreatePosition 1700 -4945
+		cmd actorCreateStationary shield_matis_01_05.creature shield_matis_01_05
+		cmd actorCreateStationary shield_matis_06_10.creature shield_matis_06_10
+		cmd actorCreateStationary shield_matis_11_15.creature shield_matis_11_15
+		cmd actorCreateStationary shield_matis_16_20.creature shield_matis_16_20
+		cmd actorCreateStationary shield_matis_21_25.creature shield_matis_21_25
+
+		cmd actorCreatePosition 1700 -4935
+		cmd actorCreateStationary shield_tryker_01_05.creature shield_tryker_01_05
+		cmd actorCreateStationary shield_tryker_06_10.creature shield_tryker_06_10
+		cmd actorCreateStationary shield_tryker_11_15.creature shield_tryker_11_15
+		cmd actorCreateStationary shield_tryker_16_20.creature shield_tryker_16_20
+		cmd actorCreateStationary shield_tryker_21_25.creature shield_tryker_21_25
+
+		cmd actorCreatePosition 1700 -4925
+		cmd actorCreateStationary shield_zorai_01_05.creature shield_zorai_01_05
+		cmd actorCreateStationary shield_zorai_06_10.creature shield_zorai_06_10
+		cmd actorCreateStationary shield_zorai_11_15.creature shield_zorai_11_15
+		cmd actorCreateStationary shield_zorai_16_20.creature shield_zorai_16_20
+		cmd actorCreateStationary shield_zorai_21_25.creature shield_zorai_21_25
+
+
+		cmd actorCreatePosition 1680 -4995
+		cmd actorCreateStationary melee_weapon_fyros_01_05.creature melee_weapon_fyros_01_05
+		cmd actorCreateStationary melee_weapon_fyros_06_10.creature melee_weapon_fyros_06_10
+		cmd actorCreateStationary melee_weapon_fyros_11_15.creature melee_weapon_fyros_11_15
+		cmd actorCreateStationary melee_weapon_fyros_16_20.creature melee_weapon_fyros_16_20
+		cmd actorCreateStationary melee_weapon_fyros_21_25.creature melee_weapon_fyros_21_25
+
+		cmd actorCreatePosition 1680 -4990
+		cmd actorCreateStationary melee_weapon_matis_01_05.creature melee_weapon_matis_01_05
+		cmd actorCreateStationary melee_weapon_matis_06_10.creature melee_weapon_matis_06_10
+		cmd actorCreateStationary melee_weapon_matis_11_15.creature melee_weapon_matis_11_15
+		cmd actorCreateStationary melee_weapon_matis_16_20.creature melee_weapon_matis_16_20
+		cmd actorCreateStationary melee_weapon_matis_21_25.creature melee_weapon_matis_21_25
+
+		cmd actorCreatePosition 1680 -4985
+		cmd actorCreateStationary melee_weapon_tryker_01_05.creature melee_weapon_tryker_01_05
+		cmd actorCreateStationary melee_weapon_tryker_06_10.creature melee_weapon_tryker_06_10
+		cmd actorCreateStationary melee_weapon_tryker_11_15.creature melee_weapon_tryker_11_15
+		cmd actorCreateStationary melee_weapon_tryker_16_20.creature melee_weapon_tryker_16_20
+		cmd actorCreateStationary melee_weapon_tryker_21_25.creature melee_weapon_tryker_21_25
+
+		cmd actorCreatePosition 1680 -4980
+		cmd actorCreateStationary melee_weapon_zorai_01_05.creature melee_weapon_zorai_01_05
+		cmd actorCreateStationary melee_weapon_zorai_06_10.creature melee_weapon_zorai_06_10
+		cmd actorCreateStationary melee_weapon_zorai_11_15.creature melee_weapon_zorai_11_15
+		cmd actorCreateStationary melee_weapon_zorai_16_20.creature melee_weapon_zorai_16_20
+		cmd actorCreateStationary melee_weapon_zorai_21_25.creature melee_weapon_zorai_21_25
+
+
+		cmd actorCreatePosition 1680 -4975
+		cmd actorCreateStationary tools_harvesting_tool_01_05.creature tools_harvesting_tool_01_05
+		cmd actorCreateStationary tools_harvesting_tool_06_10.creature tools_harvesting_tool_06_10
+		cmd actorCreateStationary tools_harvesting_tool_11_15.creature tools_harvesting_tool_11_15
+		cmd actorCreateStationary tools_harvesting_tool_16_20.creature tools_harvesting_tool_16_20
+		cmd actorCreateStationary tools_harvesting_tool_21_25.creature tools_harvesting_tool_21_25
+
+		cmd actorCreatePosition 1680 -4970
+		cmd actorCreateStationary tools_taming_tool_01_05.creature tools_taming_tool_01_05
+		cmd actorCreateStationary tools_taming_tool_06_10.creature tools_taming_tool_06_10
+		cmd actorCreateStationary tools_taming_tool_11_15.creature tools_taming_tool_11_15
+		cmd actorCreateStationary tools_taming_tool_16_20.creature tools_taming_tool_16_20
+		cmd actorCreateStationary tools_taming_tool_21_25.creature tools_taming_tool_21_25
+
+
+		cmd actorCreatePosition 1720 -4995
+		cmd actorCreateStationary jewels_anklet_01_05.creature jewels_anklet_01_05
+		cmd actorCreateStationary jewels_anklet_06_10.creature jewels_anklet_06_10
+		cmd actorCreateStationary jewels_anklet_11_15.creature jewels_anklet_11_15
+		cmd actorCreateStationary jewels_anklet_16_20.creature jewels_anklet_16_20
+		cmd actorCreateStationary jewels_anklet_21_25.creature jewels_anklet_21_25
+
+		cmd actorCreatePosition 1720 -4990
+		cmd actorCreateStationary jewels_bracelet_01_05.creature jewels_bracelet_01_05
+		cmd actorCreateStationary jewels_bracelet_06_10.creature jewels_bracelet_06_10
+		cmd actorCreateStationary jewels_bracelet_11_15.creature jewels_bracelet_11_15
+		cmd actorCreateStationary jewels_bracelet_16_20.creature jewels_bracelet_16_20
+		cmd actorCreateStationary jewels_bracelet_21_25.creature jewels_bracelet_21_25
+
+		cmd actorCreatePosition 1720 -4985
+		cmd actorCreateStationary jewels_diadem_01_05.creature jewels_diadem_01_05
+		cmd actorCreateStationary jewels_diadem_06_10.creature jewels_diadem_06_10
+		cmd actorCreateStationary jewels_diadem_11_15.creature jewels_diadem_11_15
+		cmd actorCreateStationary jewels_diadem_16_20.creature jewels_diadem_16_20
+		cmd actorCreateStationary jewels_diadem_21_25.creature jewels_diadem_21_25
+
+		cmd actorCreatePosition 1720 -4980
+		cmd actorCreateStationary jewels_earing_01_05.creature jewels_earing_01_05
+		cmd actorCreateStationary jewels_earing_06_10.creature jewels_earing_06_10
+		cmd actorCreateStationary jewels_earing_11_15.creature jewels_earing_11_15
+		cmd actorCreateStationary jewels_earing_16_20.creature jewels_earing_16_20
+		cmd actorCreateStationary jewels_earing_21_25.creature jewels_earing_21_25
+
+		cmd actorCreatePosition 1720 -4975
+		cmd actorCreateStationary jewels_pendant_01_05.creature jewels_pendant_01_05
+		cmd actorCreateStationary jewels_pendant_06_10.creature jewels_pendant_06_10
+		cmd actorCreateStationary jewels_pendant_11_15.creature jewels_pendant_11_15
+		cmd actorCreateStationary jewels_pendant_16_20.creature jewels_pendant_16_20
+		cmd actorCreateStationary jewels_pendant_21_25.creature jewels_pendant_21_25
+
+		cmd actorCreatePosition 1720 -4970
+		cmd actorCreateStationary jewels_ring_01_05.creature jewels_ring_01_05
+		cmd actorCreateStationary jewels_ring_06_10.creature jewels_ring_06_10
+		cmd actorCreateStationary jewels_ring_11_15.creature jewels_ring_11_15
+		cmd actorCreateStationary jewels_ring_16_20.creature jewels_ring_16_20
+		cmd actorCreateStationary jewels_ring_21_25.creature jewels_ring_21_25
+
+
+		cmd actorCreatePosition 1740 -4995
+		cmd actorCreateStationary mp_fauna_common.creature mp_fauna_common
+		cmd actorCreateStationary mp_fauna_desert.creature mp_fauna_desert
+		cmd actorCreateStationary mp_fauna_forest.creature mp_fauna_forest
+		cmd actorCreateStationary mp_fauna_goo.creature mp_fauna_goo
+		cmd actorCreateStationary mp_fauna_jungle.creature mp_fauna_jungle
+		cmd actorCreateStationary mp_fauna_lake.creature mp_fauna_lake
+
+		cmd actorCreatePosition 1740 -4990
+		cmd actorCreateStationary mp_flora_common_desert.creature mp_flora_common_desert
+		cmd actorCreateStationary mp_flora_common_forest.creature mp_flora_common_forest
+		cmd actorCreateStationary mp_flora_common_goo.creature mp_flora_common_goo
+		cmd actorCreateStationary mp_flora_common_jungle.creature mp_flora_common_jungle
+		cmd actorCreateStationary mp_flora_common_lake.creature mp_flora_common_lake
+
+		cmd actorCreatePosition 1740 -4985
+		cmd actorCreateStationary mp_flora_exotic_desert.creature mp_flora_exotic_desert
+		cmd actorCreateStationary mp_flora_exotic_forest.creature mp_flora_exotic_forest
+		cmd actorCreateStationary mp_flora_exotic_jungle.creature mp_flora_exotic_jungle
+		cmd actorCreateStationary mp_flora_exotic_lake.creature mp_flora_exotic_lake
+		cmd actorCreateStationary mp_flora_exotic_prime.creature mp_flora_exotic_prime
+
+		cmd actorCreatePosition 1740 -4980
+		cmd actorCreateStationary mp_flora_special_desert.creature mp_flora_special_desert
+		cmd actorCreateStationary mp_flora_special_forest.creature mp_flora_special_forest
+		cmd actorCreateStationary mp_flora_special_goo.creature mp_flora_special_goo
+		cmd actorCreateStationary mp_flora_special_jungle.creature mp_flora_special_jungle
+		cmd actorCreateStationary mp_flora_special_lake.creature mp_flora_special_lake
+		cmd actorCreateStationary mp_flora_special_prime.creature mp_flora_special_prime
+
+		cmd actorCreatePosition 1740 -4975
+		cmd actorCreateStationary mp_ground_exotic_desert.creature mp_ground_exotic_desert
+		cmd actorCreateStationary mp_ground_exotic_forest.creature mp_ground_exotic_forest
+		cmd actorCreateStationary mp_ground_exotic_jungle.creature mp_ground_exotic_jungle
+		cmd actorCreateStationary mp_ground_exotic_lake.creature mp_ground_exotic_lake
+		cmd actorCreateStationary mp_ground_exotic_prime.creature mp_ground_exotic_prime
+
+		cmd actorCreatePosition 1740 -4970
+		cmd actorCreateStationary mp_ground_special_desert.creature mp_ground_special_desert
+		cmd actorCreateStationary mp_ground_special_forest.creature mp_ground_special_forest
+		cmd actorCreateStationary mp_ground_special_jungle.creature mp_ground_special_jungle
+		cmd actorCreateStationary mp_ground_special_lake.creature mp_ground_special_lake
+		cmd actorCreateStationary mp_ground_special_prime.creature mp_ground_special_prime
+
+		cmd actorCreatePosition 1740 -4965
+		cmd actorCreateStationary mp_meat.creature mp_meat
+		cmd actorCreateStationary mp_ground_common.creature mp_ground_common
+		cmd actorCreateStationary mp_ground_seeds_dead.creature mp_ground_seeds_dead
+		cmd actorCreateStationary mp_ground_seeds_live.creature mp_ground_seeds_live
