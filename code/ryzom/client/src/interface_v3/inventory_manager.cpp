@@ -146,11 +146,6 @@ void CItemImage::build(CCDBNodeBranch *branch)
 	nlassert(Sheet && Quality && Quantity && UserColor && Weight && NameId && InfoVersion);
 }
 
-uint64 CItemImage::getItemId() const
-{
-	return ((uint64)getSerial() << 32) | getCreateTime();
-}
-
 // *************************************************************************************************
 void CItemInfoCache::load(const std::string &filename)
 {
@@ -3388,18 +3383,6 @@ const	CClientItemInfo	&CInventoryManager::getItemInfo(uint slotId) const
 {
 	TItemInfoMap::const_iterator	it= _ItemInfoMap.find(slotId);
 	static	CClientItemInfo	empty;
-	if (it == _ItemInfoMap.end() || !isItemInfoUpToDate(slotId))
-	{
-		// if slot has not been populated yet or out of date, then return info from cache if possible
-		const CItemImage *item = getServerItem(slotId);
-		if (item && item->getItemId() > 0) {
-			const CClientItemInfo *ret = _ItemInfoCache.getItemInfo(item->getItemId());
-			if (ret != NULL)
-			{
-				return *ret;
-			}
-		}
-	}
 
 	if (it == _ItemInfoMap.end())
 	{
@@ -3559,12 +3542,6 @@ void			CInventoryManager::onReceiveItemInfo(const CItemInfos &itemInfo)
 {
 	// update the Info
 	uint itemSlotId = itemInfo.slotId;
-
-	const CItemImage *item = getServerItem(itemSlotId);
-	if (item && item->getItemId() > 0)
-	{
-		_ItemInfoCache.readFromImpulse(item->getItemId(), itemInfo);
-	}
 
 	// write in map, from DB.
 	_ItemInfoMap[itemSlotId].readFromImpulse(itemInfo);
