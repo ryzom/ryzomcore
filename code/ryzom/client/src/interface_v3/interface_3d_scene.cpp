@@ -691,23 +691,6 @@ CInterfaceElement* CInterface3DScene::getElement (const string &id)
 
 	return NULL;
 }
-
-int CInterface3DScene::luaGetElement(CLuaState &ls)
-{
-	CLuaIHM::checkArgCount(ls, "CInterfaceGroup::find", 1);
-	CLuaIHM::checkArgType(ls, "CInterfaceGroup::find", 1, LUA_TSTRING);
-	std::string id = ls.toString(1);
-	CInterfaceElement* element = getElement(id);
-	if (!element)
-	{
-		ls.pushNil();
-	}
-	else
-	{
-		CLuaIHM::pushUIOnStack(ls, element);
-	}
-	return 1;
-}
 	
 // ----------------------------------------------------------------------------
 string CInterface3DScene::getCurrentCamera() const
