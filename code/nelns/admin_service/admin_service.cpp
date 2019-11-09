@@ -38,7 +38,9 @@ typedef unsigned long ulong;
 #endif
 
 #include <mysql.h>
+#ifndef LIBMARIADB
 #include <mysql_version.h>
+#endif
 
 #include "nel/misc/debug.h"
 #include "nel/misc/config_file.h"
