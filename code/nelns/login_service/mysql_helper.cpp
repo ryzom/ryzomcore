@@ -20,7 +20,9 @@
 
 #include "mysql_helper.h"
 
-#include "mysql_version.h"
+#ifndef LIBMARIADB
+#include <mysql_version.h>
+#endif
 
 
 //
