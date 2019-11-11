@@ -3108,9 +3108,9 @@ void CUserEntity::rollDice(sint16 min, sint16 max, bool local)
 		sint16 roll = min + (sint16)dice->rand(max-min);
 
 		ucstring msg = CI18N::get("msgRollDiceLocal");
-		strFindReplace(msg, "%min", std::to_string(min));
-		strFindReplace(msg, "%max", std::to_string(max));
-		strFindReplace(msg, "%roll", std::to_string(roll));
+		strFindReplace(msg, "%min", toString(min));
+		strFindReplace(msg, "%max", toString(max));
+		strFindReplace(msg, "%roll", toString(roll));
 
 		CInterfaceManager *pIM= CInterfaceManager::getInstance();
 

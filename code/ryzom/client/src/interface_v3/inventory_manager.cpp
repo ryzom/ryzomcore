@@ -286,7 +286,7 @@ void CItemInfoCache::debugItemInfoCache() const
 {
 	nlinfo("ItemInfoCache: %d entries", _ItemInfoCacheMap.size());
 	uint count = 0;
-	for (auto it = _ItemInfoCacheMap.begin(); it != _ItemInfoCacheMap.end(); ++it)
+	for (TItemInfoCacheMap::const_iterator it = _ItemInfoCacheMap.begin(); it != _ItemInfoCacheMap.end(); ++it)
 	{
 		uint32 serial = (it->first >> 32) & 0xFFFFFFFF;
 		uint32 created = it->first & 0xFFFFFFFF;
