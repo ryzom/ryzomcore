@@ -36,7 +36,7 @@ namespace NLGUI
 	{
 		TopWidth = RightWidth = BottomWidth = LeftWidth = 0;
 		TopColor = RightColor = BottomColor = LeftColor = CRGBA(128, 128, 128, 255);
-		TopStyle = RightStyle = BottomStyle = LeftStyle = CSSLineStyle::SOLID;
+		TopStyle = RightStyle = BottomStyle = LeftStyle = CSS_LINE_STYLE_SOLID;
 		CurrentAlpha = 255;
 
 		_RenderLayer = 0;
@@ -127,7 +127,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	uint32 CSSBorderRenderer::getTopWidth() const
 	{
-		if (TopStyle == CSSLineStyle::NONE || TopStyle == CSSLineStyle::HIDDEN)
+		if (TopStyle == CSS_LINE_STYLE_NONE || TopStyle == CSS_LINE_STYLE_HIDDEN)
 			return 0;
 
 		return TopWidth;
@@ -136,7 +136,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	uint32 CSSBorderRenderer::getRightWidth() const
 	{
-		if (RightStyle == CSSLineStyle::NONE || RightStyle == CSSLineStyle::HIDDEN)
+		if (RightStyle == CSS_LINE_STYLE_NONE || RightStyle == CSS_LINE_STYLE_HIDDEN)
 			return 0;
 
 		return RightWidth;
@@ -145,7 +145,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	uint32 CSSBorderRenderer::getBottomWidth() const
 	{
-		if (BottomStyle == CSSLineStyle::NONE || BottomStyle == CSSLineStyle::HIDDEN)
+		if (BottomStyle == CSS_LINE_STYLE_NONE || BottomStyle == CSS_LINE_STYLE_HIDDEN)
 			return 0;
 
 		return BottomWidth;
@@ -154,7 +154,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	uint32 CSSBorderRenderer::getLeftWidth() const
 	{
-		if (LeftStyle == CSSLineStyle::NONE || LeftStyle == CSSLineStyle::HIDDEN)
+		if (LeftStyle == CSS_LINE_STYLE_NONE || LeftStyle == CSS_LINE_STYLE_HIDDEN)
 			return 0;
 
 		return LeftWidth;
@@ -269,7 +269,7 @@ namespace NLGUI
 		if (_BorderTop)
 		{
 			CRGBA borderColorT = TopColor;
-			if (TopStyle == CSSLineStyle::INSET)
+			if (TopStyle == CSS_LINE_STYLE_INSET)
 				borderColorT = blend(borderColorT, CRGBA::Black, 0.5f);
 
 			if (_ModulateGlobalColor)
@@ -281,7 +281,7 @@ namespace NLGUI
 		if (_BorderRight)
 		{
 			CRGBA borderColorR = RightColor;
-			if (RightStyle == CSSLineStyle::OUTSET)
+			if (RightStyle == CSS_LINE_STYLE_OUTSET)
 				borderColorR = blend(borderColorR, CRGBA::Black, 0.5f);
 
 			if (_ModulateGlobalColor)
@@ -293,7 +293,7 @@ namespace NLGUI
 		if (_BorderBottom)
 		{
 			CRGBA borderColorB = BottomColor;
-			if (BottomStyle == CSSLineStyle::OUTSET)
+			if (BottomStyle == CSS_LINE_STYLE_OUTSET)
 				borderColorB = blend(borderColorB, CRGBA::Black, 0.5f);
 
 			if (_ModulateGlobalColor)
@@ -305,7 +305,7 @@ namespace NLGUI
 		if (_BorderLeft)
 		{
 			CRGBA borderColorL = LeftColor;
-			if (LeftStyle == CSSLineStyle::INSET)
+			if (LeftStyle == CSS_LINE_STYLE_INSET)
 				borderColorL = blend(borderColorL, CRGBA::Black, 0.5f);
 
 			if (_ModulateGlobalColor)

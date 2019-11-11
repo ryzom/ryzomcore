@@ -557,15 +557,15 @@ namespace NLGUI
 		if (value == "inherit")
 			*dest = currentStyle;
 		else if (value == "none")
-			*dest = CSSLineStyle::NONE;
+			*dest = CSS_LINE_STYLE_NONE;
 		else if (value == "hidden")
-			*dest = CSSLineStyle::HIDDEN;
+			*dest = CSS_LINE_STYLE_HIDDEN;
 		else if (value == "inset")
-			*dest = CSSLineStyle::INSET;
+			*dest = CSS_LINE_STYLE_INSET;
 		else if (value == "outset")
-			*dest = CSSLineStyle::OUTSET;
+			*dest = CSS_LINE_STYLE_OUTSET;
 		else if (value == "solid")
-			*dest = CSSLineStyle::SOLID;
+			*dest = CSS_LINE_STYLE_SOLID;
 	}
 
 	void CCssStyle::applyPaddingWidth(const std::string &value, uint32 *dest, const uint32 currentPadding, uint32 fontSize) const

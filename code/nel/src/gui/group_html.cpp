@@ -2941,7 +2941,7 @@ namespace NLGUI
 		CViewBitmap *newImage = new CViewBitmap (TCtorParam());
 		newImage->setId(id);
 
-		addImageDownload(img, newImage, style, TImageType::NormalImage);
+		addImageDownload(img, newImage, style, NormalImage);
 		newImage->setRenderLayer(getRenderLayer()+1);
 
 		getParagraph()->addChild(newImage);
@@ -3520,7 +3520,7 @@ namespace NLGUI
 				else
 					bitmap->setSizeRef("");
 
-				addImageDownload(bgtex, view, CStyleParams(), TImageType::NormalImage, "");
+				addImageDownload(bgtex, view, CStyleParams(), NormalImage, "");
 			}
 		}
 	}
@@ -6664,7 +6664,7 @@ namespace NLGUI
 				table->CellBorder = (borderWidth > 0);
 				table->Border->setWidth(borderWidth, borderWidth, borderWidth, borderWidth);
 				table->Border->setColor(borderColor, borderColor, borderColor, borderColor);
-				table->Border->setStyle(CSSLineStyle::OUTSET, CSSLineStyle::OUTSET, CSSLineStyle::OUTSET, CSSLineStyle::OUTSET);
+				table->Border->setStyle(CSS_LINE_STYLE_OUTSET, CSS_LINE_STYLE_OUTSET, CSS_LINE_STYLE_OUTSET, CSS_LINE_STYLE_OUTSET);
 			}
 			else
 			{
@@ -6696,7 +6696,7 @@ namespace NLGUI
 				table->setTextureScale(true);
 
 			string image = _Style.getStyle("background-image");
-			addImageDownload(image, table, CStyleParams(), TImageType::NormalImage, "");
+			addImageDownload(image, table, CStyleParams(), NormalImage, "");
 		}
 
 		// setting ModulateGlobalColor must be after addImageDownload
@@ -6777,7 +6777,7 @@ namespace NLGUI
 		if (_Style.hasStyle("background-image"))
 		{
 			string image = _Style.getStyle("background-image");
-			addImageDownload(image, _Cells.back(), CStyleParams(), TImageType::NormalImage, "");
+			addImageDownload(image, _Cells.back(), CStyleParams(), NormalImage, "");
 		}
 
 		if (elm.hasNonEmptyAttribute("colspan"))
@@ -6824,7 +6824,7 @@ namespace NLGUI
 		{
 			_Cells.back()->Border->setWidth(1, 1, 1, 1);
 			_Cells.back()->Border->setColor(table->Border->TopColor, table->Border->RightColor, table->Border->BottomColor, table->Border->LeftColor);
-			_Cells.back()->Border->setStyle(CSSLineStyle::INSET, CSSLineStyle::INSET, CSSLineStyle::INSET, CSSLineStyle::INSET);
+			_Cells.back()->Border->setStyle(CSS_LINE_STYLE_INSET, CSS_LINE_STYLE_INSET, CSS_LINE_STYLE_INSET, CSS_LINE_STYLE_INSET);
 		}
 
 		if (_Style.hasStyle("border-top-width"))	_Cells.back()->Border->TopWidth = _Style.Current.BorderTopWidth;
