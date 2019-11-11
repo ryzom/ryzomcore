@@ -66,8 +66,8 @@ namespace NLGUI
 			MaxWidth=-1;
 			MaxHeight=-1;
 			// border style
-			BorderTopWidth = BorderRightWidth = BorderBottomWidth = BorderLeftWidth = CSSLineWidth::MEDIUM;
-			BorderTopStyle = BorderRightStyle = BorderBottomStyle = BorderLeftStyle = CSSLineStyle::NONE;
+			BorderTopWidth = BorderRightWidth = BorderBottomWidth = BorderLeftWidth = CSS_LINE_WIDTH_MEDIUM;
+			BorderTopStyle = BorderRightStyle = BorderBottomStyle = BorderLeftStyle = CSS_LINE_STYLE_NONE;
 			BorderTopColor = BorderRightColor = BorderBottomColor = BorderLeftColor = NLMISC::CRGBA::Transparent;
 			// background
 			BackgroundColor=NLMISC::CRGBA::Black;
@@ -215,8 +215,8 @@ namespace NLGUI
 			Current.MaxWidth=-1;
 			Current.MaxHeight=-1;
 
-			Current.BorderTopWidth = Current.BorderRightWidth = Current.BorderBottomWidth = Current.BorderLeftWidth = CSSLineWidth::MEDIUM;
-			Current.BorderTopStyle = Current.BorderRightStyle = Current.BorderBottomStyle = Current.BorderLeftStyle = CSSLineStyle::NONE;
+			Current.BorderTopWidth = Current.BorderRightWidth = Current.BorderBottomWidth = Current.BorderLeftWidth = CSS_LINE_WIDTH_MEDIUM;
+			Current.BorderTopStyle = Current.BorderRightStyle = Current.BorderBottomStyle = Current.BorderLeftStyle = CSS_LINE_STYLE_NONE;
 			Current.BorderTopColor = Current.BorderRightColor = Current.BorderBottomColor = Current.BorderLeftColor = Current.TextColor;
 			Current.PaddingTop = Current.PaddingRight = Current.PaddingBottom = Current.PaddingLeft = 0;
 
