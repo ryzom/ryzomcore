@@ -139,6 +139,7 @@ using namespace NLNET;
 using namespace std;
 
 extern CVariable<string>	BannerPriv;
+extern CVariable<string>	ArkSalt;
 
 //
 // Functions
@@ -243,7 +244,6 @@ AdminCommandsInit[] =
 		"guildMOTD",						true,
 
 		// CSR commands
-		"setSalt",							true,
 		"motd",								false,
 		"broadcast",						false,
 		"summon",							true,
@@ -417,8 +417,6 @@ static string					CommandsPrivilegesFileName;
 static string					PositionFlagsFileName;
 static const char *				DefaultPriv = ":DEV:";
 
-static string					Salt;
-
 // forward declarations
 static void loadCommandsPrivileges(const string & fileName, bool init);
 void cbRemoteClientCallback (uint32 rid, const std::string &cmd, const std::string &entityNames);
@@ -566,7 +564,6 @@ void initCommandsPrivileges(const std::string & fileName)
 
 	H_AUTO(initCommandsPrivileges);
 
-	initSalt();
 	loadCommandsPrivileges(fileName, true);
 }
 
@@ -696,34 +693,6 @@ void initPositionFlags(const std::string & fileName)
 	PositionFlagsFileName = fileName;
 }
 
-struct SaltFileLoadCallback: public IBackupFileReceiveCallback
-{
-	std::string FileName;
-
-	SaltFileLoadCallback(const std::string& fileName): FileName(fileName)  {}
-
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
-	{
-		// if the file isn't found then just give up
-		DROP_IF(fileDescription.FileName.empty(),"<SaltFileLoadCallback> file not found: "<< FileName, return);
-		
-		dataStream.serial(Salt);
-		nlinfo("Salt loaded : %s", Salt.c_str());
-	}
-};
-
-void initSalt()
-{
-	H_AUTO(initSalt);
-
-	string fileNameAndPath = Bsi.getLocalPath() + "salt_egs.txt";
-	if (CFile::fileExists(fileNameAndPath))
-	{
-		nlinfo("Salt loading : salt_egs.txt");
-		Bsi.syncLoadFile("salt_egs.txt", new SaltFileLoadCallback("salt_egs.txt"));
-	}
-}
-
 string getStringFromHash(const string &hash)
 {
 	ucstring finaltext;
@@ -754,21 +723,6 @@ void getUCstringFromHash(const string &hash, ucstring &finaltext)
 		
 		finaltext.push_back((ucchar)ch);
 	}
-}
-
-const string &getSalt()
-{
-	if (Salt.empty()) Salt = "qdRUODw9Vk78Y5MW4Ec1J0FKxjyNgrCfI";
-
-	return Salt;
-}
-
-void saveSalt(const string salt)
-{
-	Salt = salt;
-	CBackupMsgSaveFile msg("salt_egs.txt", CBackupMsgSaveFile::SaveFile, Bsi );
-	msg.DataMsg.serial(Salt);
-	Bsi.sendFile(msg);
 }
 
 static void selectEntities (const string &entityName, vector <CEntityId> &entities)
@@ -4679,21 +4633,6 @@ NLMISC_COMMAND (updateTarget, "Update current target", "<user id>")
 	return true;
 }
 
-NLMISC_COMMAND (setSalt, "Set Salt", "<dev_eid> <salt>")
-{
-	if (args.size() != 2)
-		return false;
-
-	GET_CHARACTER
-
-	string salt = args[1];
-	if (salt.empty())
-		return false;
-
-	saveSalt(salt);
-	return true;
-}
-
 // !!! Deprecated !!!
 NLMISC_COMMAND (webAddCommandsIds, "Add ids of commands will be run from webig", "<user id> <bot_name> <web_app_url> <indexes>")
 {
@@ -4704,15 +4643,8 @@ NLMISC_COMMAND (webAddCommandsIds, "Add ids of commands will be run from webig",
 
 	string web_app_url = args[2];
 	string indexes = args[3];
-	string salt = getSalt();
 
-	if (salt.empty())
-	{
-		nlwarning("no salt");
-		return false;
-	}
-
-	c->addWebCommandCheck(web_app_url, indexes, salt);
+	c->addWebCommandCheck(web_app_url, indexes, ArkSalt.get());
 	return true;
 }
 
@@ -4828,10 +4760,11 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 			return false;
 		}
 
-		string salt = getSalt();
 		string checksumEid = web_app_url + toString(c->getLastConnectedDate()) + index + command + c->getId().toString();
 
 		string checksumRowId = web_app_url + toString(c->getLastConnectedDate()) + index + command + toString(c->getEntityRowId().getIndex());
+
+		string salt = ArkSalt.get();
 
 		string realhmacEid = getHMacSHA1((uint8*)&checksumEid[0], checksumEid.size(), (uint8*)&salt[0], salt.size()).toString();
 		string realhmacRowId = getHMacSHA1((uint8*)&checksumRowId[0], checksumRowId.size(), (uint8*)&salt[0], salt.size()).toString();

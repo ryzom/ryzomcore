@@ -44,8 +44,6 @@ struct CAdminCommand
 void initAdmin ();
 void initCommandsPrivileges(const std::string & fileName);
 void initPositionFlags(const std::string & fileName);
-void initSalt();
-const std::string &getSalt();
 void getUCstringFromHash(const std::string & hash, ucstring & finaltext);
 std::string getStringFromHash(const std::string &hash);
 bool getAIInstanceFromGroupName(std::string& groupName, uint32& instanceNumber);
