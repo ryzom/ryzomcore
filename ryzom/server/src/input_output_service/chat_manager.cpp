@@ -763,7 +763,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 					name = senderName;
 
 #ifdef HAVE_MONGO
-				CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'univers', 'chatId': 'all', 'date': %f, 'ig': true }", name.c_str(), CMongo::quote(ucstr.toUtf8()).c_str(), date));
+				CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'univers', 'chatId': 'all', 'date': %f, 'ig': true }", CMongo::quote(name).c_str(), CMongo::quote(ucstr.toUtf8()).c_str(), date));
 #endif
 				chatInGroup( grpId, ucstr, sender );
 			}
@@ -802,7 +802,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 					name = senderName;
 
 #ifdef HAVE_MONGO
-				CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'guildId', 'chatId': '%s', 'date': %f, 'ig': true }", name.c_str(), CMongo::quote(ucstr.toUtf8()).c_str(), sGuildId.str().c_str(), date));
+				CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'guildId', 'chatId': '%s', 'date': %f, 'ig': true }", CMongo::quote(name).c_str(), CMongo::quote(ucstr.toUtf8()).c_str(), sGuildId.str().c_str(), date));
 #endif
 				chatInGroup( grpId, ucstr, sender );
 			}
@@ -843,7 +843,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 					else
 						name = senderName;
 
-					CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': '%s', 'date': %f, 'ig': true }", name.c_str(), CMongo::quote(ucstr.toUtf8()).c_str(), chatId.c_str(), date));
+					CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': '%s', 'date': %f, 'ig': true }", CMongo::quote(name).c_str(), CMongo::quote(ucstr.toUtf8()).c_str(), chatId.c_str(), date));
 #endif
 
 					if (!session->getChan()->getDontBroadcastPlayerInputs())
@@ -2248,7 +2248,7 @@ void CChatManager::farTell( const NLMISC::CEntityId &senderCharId, const ucstrin
 			chatId = chatId.substr(0, pos);
 
 #ifdef HAVE_MONGO
-		CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'username', 'chatId': '%s', 'date': %f, 'ig': true }", username.c_str(), CMongo::quote(ucstr.toUtf8()).c_str(), chatId.c_str(), date));
+		CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'username', 'chatId': '%s', 'date': %f, 'ig': true }", CMongo::quote(username).c_str(), CMongo::quote(ucstr.toUtf8()).c_str(), chatId.c_str(), date));
 #endif
 
 /*
