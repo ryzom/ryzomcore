@@ -26,6 +26,9 @@
 #include <X11/XKBlib.h>
 #include "nel/misc/debug.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 typedef bool (*x11Proc)(NL3D::IDriver *drv, XEvent *e);
 
@@ -79,8 +82,6 @@ void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver)
 void CUnixEventEmitter::createIM()
 {
 #ifdef X_HAVE_UTF8_STRING
-
-	XModifierKeymap *g_mod_map = XGetModifierMapping(_dpy);
 
 	_im = XOpenIM(_dpy, NULL, NULL, NULL);
 
@@ -626,7 +627,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	}
 	case SelectionClear:
 		_SelectionOwned = false;
-		_CopiedString = "";
+		_CopiedString.clear();
 		break;
 	case SelectionNotify:
 	{

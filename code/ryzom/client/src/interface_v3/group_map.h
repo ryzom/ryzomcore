@@ -81,6 +81,27 @@ public:
 	}
 };
 
+class CArkPoint
+{
+public:
+	sint32 				x, y;
+	std::string			Texture;
+	NLMISC::CRGBA		Color;
+	std::string			Title;
+	std::string			LeftClickAction;
+	std::string			LeftClickParam;
+	std::string			RightClickAction;
+	std::string			RightClickParam;
+
+public:
+	CArkPoint()
+	{
+		Color = NLMISC::CRGBA::White;
+		x = 0;
+		y = 0;
+	}
+};
+
 /**
  * Display of map and landmarks.
  *
@@ -100,6 +121,7 @@ public:
 class CGroupMap : public CInterfaceGroup
 {
 public:
+
 	// external element to be displayed on the map
 	struct IDeco
 	{
@@ -114,6 +136,17 @@ public:
 		  */
 		virtual void onUpdate(CGroupMap &/* owner */) {}
 	};
+
+	REFLECT_EXPORT_START(CGroupMap, CInterfaceGroup)
+		REFLECT_STRING("continent", getContinentName, dummySet);
+		REFLECT_STRING("texture", getMapTexture, dummySet);
+		REFLECT_LUA_METHOD("isIsland", luaIsIsland);
+		REFLECT_LUA_METHOD("reload", luaReload);
+	REFLECT_EXPORT_END
+
+	int luaReload(CLuaState &ls);
+	int luaIsIsland(CLuaState &ls);
+
 public:
 	CGroupMap(const TCtorParam &param);
 	virtual ~CGroupMap();
@@ -134,11 +167,22 @@ public:
 	void setMap(const std::string &mapName);
 	void setMap(SMap *map);
 
+	// return current continent
+	std::string getContinentName() const;
+	// return currently displayed map texture
+	std::string getMapTexture() const;
+
+	// reload current map texture
+	void reload();
+
 	// pan the map of the given number of pixels
 	void pan(sint32 dx, sint32 dy);
 
 	// center the map on the player
 	void centerOnPlayer();
+	// center current map on world coords (if not out of map bounds)
+	void centerOnWorldPos(const NLMISC::CVector2f &worldPos);
+
 	void setPlayerPos(const NLMISC::CVector2f &p) { _PlayerPos = p; }
 	NLMISC::CVector2f getPlayerPos() const { return _PlayerPos; }
 	// test if player is currently panning the map
@@ -155,6 +199,8 @@ public:
 	float				getScale() const { return _UserScale; }
 	/// add a user landmark (returns a pointer on its button).Coordinate are in the current map (not world coordinates)
 	CCtrlButton			*addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, const CUserLandMark::EUserLandMarkType lmType);
+	/// return current continent landmark by its index and type
+	CCtrlButton*		getLandmarkCtrl(const std::string &lmType, uint lmIndex) const;
 	// remove a user landmark from a pointer on its button
 	void				removeUserLandMark(CCtrlButton *button);
 	// update a user landmark from a pointer on its button
@@ -169,11 +215,22 @@ public:
 	CLandMarkOptions		getUserLandMarkOptions(uint32 lmindex) const;
 	// target the given landmark
 	void				targetLandmark(CCtrlButton *lm);
+	void				targetLandmarkResult(uint32 index);
+	// search matching landmark and target it. return true if landmark was targeted
+	bool				targetLandmarkByName(const ucstring &search, bool startsWith) const;
 	// get the world position of a landmark or return vector Null if not found
 	void				getLandmarkPosition(const CCtrlButton *lm, NLMISC::CVector2f &worldPos);
 
 	//Remove and re-create UserLandMarks
+	void removeUserLandMarks();
 	void updateUserLandMarks();
+	void addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, NLMISC::CRGBA color);
+	void addUserRespawnPoint(const NLMISC::CVector2f &pos);
+	void delArkPoints();
+	
+
+	// set landmarks visibility based text query
+	void setLandmarkFilter(const std::string &s);
 
 	// set the selection axis pos & visibility
 	void				setSelectionAxis(bool active, const NLMISC::CVector2f &worldPos = NLMISC::CVector2f::Null);
@@ -219,6 +276,14 @@ public:
 	// Server set all valid respawn points
 	void addRespawnPoints(const CRespawnPointsMsg &rpm);
 
+	// add Ark landscape point
+	void addArkPoint(const CArkPoint &point);
+
+	std::string getArkPowoMode() const { return _ArkPowoMode; }
+	void setArkPowoMode(const std::string &mode)  { _ArkPowoMode = mode; }
+	std::string getArkPowoMapMenu() const { return _ArkPowoMapMenu; }
+	void setArkPowoMapMenu(const std::string &menu)  { _ArkPowoMapMenu = menu; }
+
 	bool isInDeathMode() { return _MapMode == MapMode_Death; }
 
 	sint32 getRespawnSelected() const;
@@ -231,6 +296,8 @@ public:
 
 
 	bool isIsland() const { return _IsIsland; }
+
+	void updateClosestLandMarkMenu(const std::string &menu, const NLMISC::CVector2f &pos) const;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 private:
@@ -262,6 +329,7 @@ private:
 				NLMISC::CVector2f Pos;
 				CContLandMark::TContLMType Type;
 				bool					   HandleEvents;
+				bool					   SearchMatch;
 			public:
 				virtual bool handleEvent (const NLGUI::CEventDescriptor& event)
 				{
@@ -279,6 +347,7 @@ private:
 					Type = CContLandMark::Unknown;
 					Pos.set(0.f, 0.f);
 					HandleEvents = true;
+					SearchMatch = false;
 				}
 		};
 		typedef std::vector<CLandMarkButton*> TLandMarkButtonVect;
@@ -289,12 +358,14 @@ private:
 			public:
 				NLMISC::CVector2f Pos;
 				CContLandMark::TContLMType Type;
+				bool SearchMatch;
 
 				CLandMarkText(const TCtorParam &param)
 					: CViewText(param)
 				{
 					Type = CContLandMark::Unknown;
 					Pos.set(0.f, 0.f);
+					SearchMatch = false;
 				}
 		};
 		typedef std::vector<CLandMarkText*> TLandMarkTextVect;
@@ -312,6 +383,7 @@ private:
 		CContinent			*_CurContinent;	// the last continent for which the map was displayed (can be NULL if world)
 		NLMISC::CVector2f	_MapMinCorner; // In world coordinates
 		NLMISC::CVector2f	_MapMaxCorner;
+		std::string			_MapTexture; // currently displayed map texture
 
 		bool				_IsIsland;  // true if current map is an island (island bitmap need not to be raised to the next
 									  // power of 2
@@ -368,6 +440,8 @@ private:
 		sint32				_MapW;
 		sint32				_MapH;
 
+		std::string			_ArkPowoMode;
+		std::string			_ArkPowoMapMenu;
 		NLMISC::CRGBA		_FrustumViewColor;
 		NLMISC::CRGBA		_FrustumViewColorOver;
 		float				_FrustumOverBlendFactor;
@@ -448,6 +522,20 @@ private:
 		typedef std::set<IDeco *> TDecos;
 		TDecos _Decos;
 
+		// filter keywords
+		std::vector<ucstring> _LandmarkFilter;
+		struct SMatchedLandmark
+		{
+			SMatchedLandmark(const NLMISC::CVector2f pos, const ucstring &title, CLandMarkOptions opts)
+				: Pos(pos), Title(title), Options(opts)
+			{}
+			NLMISC::CVector2f Pos;
+			ucstring Title;
+
+			CLandMarkOptions Options;
+		};
+		std::vector<SMatchedLandmark> _MatchedLandmarks;
+
 	//////////////////////
 	// Respawn handling //
 	// //////////////// //
@@ -460,6 +548,7 @@ private:
 		};
 
 		TMapMode			_MapMode;
+		std::vector<CArkPoint> _ArkPoints;
 		CLandMarkOptions	_RespawnLMOptions;
 		// landmark for respawn
 		TLandMarkButtonVect	_RespawnLM;
@@ -474,6 +563,8 @@ private:
 	// r2 islands
 	std::vector<SMap>	_Islands;
 
+	// guard against recursive calls
+	bool				_LuaLoadMapEntered;
 
 private:
 	void loadPlayerPos();
@@ -486,6 +577,7 @@ private:
 	  */
 	void updateLandMarkList(TLandMarkButtonVect &lm);
 	void updateLandMarkTextList(TLandMarkTextVect &lm);
+	void updateMatchedLandmarks();
 	//
 	void removeLandMarks(TLandMarkButtonVect &lm);
 	/** create landmarks from the continent (and remove previous ones)
@@ -498,8 +590,20 @@ private:
 	void addLandMark(TLandMarkButtonVect &destList, const NLMISC::CVector2f &pos, const ucstring &title, const CLandMarkOptions &options);
 	// Create a landmark button, but do not add it to this group
 	CLandMarkButton *createLandMarkButton(const CLandMarkOptions &options);
+	// Create a Ark landmark button, but do not add it to this group
+	CLandMarkButton *createArkPointButton(const CArkPoint &point);
+	
 	// update a landmark button
 	void updateLandMarkButton(CLandMarkButton *lmb, const CLandMarkOptions &options);
+
+	// Test title against landmark filter
+	bool filterLandmark(const ucstring &title) const;
+	bool filterLandmark(const ucstring &title, const std::vector<ucstring> filter, bool startsWith = false) const;
+
+	// return closest landmark which matches (case insensitive) search string
+	// center position must be in world coordindates
+	CLandMarkButton* findClosestLandmark(const NLMISC::CVector2f &center, const ucstring &search, bool startsWith, const TLandMarkButtonVect &landmarks, float &closest) const;
+	CLandMarkText* findClosestLandmark(const NLMISC::CVector2f &center, const ucstring &search, bool startsWith, const TLandMarkTextVect &landmarks, float &closest) const;
 
 	// update the scale depending on the window size and the user scale
 	void updateScale();

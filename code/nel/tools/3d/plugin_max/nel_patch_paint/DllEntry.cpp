@@ -4,30 +4,32 @@
 #include "nel/misc/app_context.h"
 #include "../nel_3dsmax_shared/nel_3dsmax_shared.h"
 #include <maxversion.h>
-#include "nel/misc/sheet_id.h"
 
 HINSTANCE hInstance;
 int controlsInit = FALSE;
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 /** public functions **/
-BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved) 
+BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 {
 	// initialize nel context
 	if (!NLMISC::INelContext::isContextInitialised())
 	{
 		new NLMISC::CLibraryContext(GetSharedNelContext());
 		nldebug("NeL Patch Paint: DllMain");
-		NLMISC::CSheetId::initWithoutSheet();
 	}
-			
+
 	hInstance = hinstDLL;
 
-	if ( !controlsInit ) 
+	if ( !controlsInit )
 	{
 		controlsInit = TRUE;
-		
+
 		// jaguar controls
 #if MAX_VERSION_MAJOR < 14
 		InitCustomControls(hInstance);
@@ -38,7 +40,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 		Ctl3dRegister(hinstDLL);
 		Ctl3dAutoSubclass(hinstDLL);
 #endif
-		
+
 		// initialize Chicago controls
 		InitCommonControls();
 		}
@@ -62,9 +64,9 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 //------------------------------------------------------
 
 __declspec( dllexport ) const TCHAR *
-LibDescription() 
-{ 
-	return "NeL patch painter"; 
+LibDescription()
+{
+	return _T("NeL patch painter");
 }
 
 
@@ -105,7 +107,7 @@ LibClassDesc(int i) {
 
 
 // Return version so can detect obsolete DLLs
-__declspec( dllexport ) ULONG 
+__declspec( dllexport ) ULONG
 LibVersion() { return VERSION_3DSMAX; }
 
 // Let the plug-in register itself for deferred loading
@@ -123,12 +125,6 @@ BOOL CALLBACK DefaultSOTProc(
 		case WM_INITDIALOG:
 			SetWindowLongPtr(hWnd,GWLP_USERDATA,lParam);
 			break;
-
-		case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_MOUSEMOVE:
-			if (ip) ip->RollupMouseMessage(hWnd,msg,wParam,lParam);
-			return FALSE;
 
 		default:
 			return FALSE;

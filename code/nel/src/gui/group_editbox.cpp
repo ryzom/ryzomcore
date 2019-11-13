@@ -33,6 +33,9 @@ using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NLGUI
 {
@@ -74,6 +77,7 @@ namespace NLGUI
 									_ResetFocusOnHide(false),
 									_BackupFatherContainerPos(false),
 									_WantReturn(false),
+									_ClearOnEscape(false),
 									_Savable(true),
 									_DefaultInputString(false),
 									_Frozen(false),
@@ -234,6 +238,11 @@ namespace NLGUI
 		if( name == "want_return" )
 		{
 			return toString( _WantReturn );
+		}
+		else
+		if( name == "clear_on_escape" )
+		{
+			return toString( _ClearOnEscape );
 		}
 		else
 		if( name == "savable" )
@@ -410,6 +419,14 @@ namespace NLGUI
 			return;
 		}
 		else
+		if( name == "clear_on_escape" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_ClearOnEscape = b;
+			return;
+		}
+		else
 		if( name == "savable" )
 		{
 			bool b;
@@ -511,6 +528,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "backup_father_container_pos",
 			BAD_CAST toString( _BackupFatherContainerPos ).c_str() );
 		xmlSetProp( node, BAD_CAST "want_return", BAD_CAST toString( _WantReturn ).c_str() );
+		xmlSetProp( node, BAD_CAST "clear_on_escape", BAD_CAST toString( _ClearOnEscape ).c_str() );
 		xmlSetProp( node, BAD_CAST "savable", BAD_CAST toString( _Savable ).c_str() );
 		xmlSetProp( node, BAD_CAST "max_float_prec", BAD_CAST toString( _MaxFloatPrec ).c_str() );
 
@@ -617,6 +635,9 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"want_return" );
 		if (prop) _WantReturn = convertBool(prop);
 
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"clear_on_escape" );
+		if (prop) _ClearOnEscape = convertBool(prop);
+
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"savable" );
 		if (prop) _Savable = convertBool(prop);
 
@@ -681,9 +702,9 @@ namespace NLGUI
 			sint32	maxPos= max(_CursorPos, _SelectCursorPos) + (sint32)_Prompt.length();
 
 			// get its position on screen
-			sint cxMinPos, cyMinPos;
-			sint cxMaxPos, cyMaxPos;
-			sint height;
+			float cxMinPos, cyMinPos;
+			float cxMaxPos, cyMaxPos;
+			float height;
 			_ViewText->getCharacterPositionFromIndex(minPos, false, cxMinPos, cyMinPos, height);
 			_ViewText->getCharacterPositionFromIndex(maxPos, false, cxMaxPos, cyMaxPos, height);
 
@@ -734,8 +755,8 @@ namespace NLGUI
 			if (_BlinkState) // is the cursor shown ?
 			{
 				// get its position on screen
-				sint cx, cy;
-				sint height;
+				float cx, cy;
+				float height;
 				_ViewText->getCharacterPositionFromIndex(_CursorPos + (sint)_Prompt.length(), _CursorAtPreviousLineEnd, cx, cy, height);
 				// display the cursor
 				// get the texture for the cursor
@@ -984,10 +1005,15 @@ namespace NLGUI
 		{
 			case KeyESCAPE:
 				_CurrentHistoricIndex= -1;
-				CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
 				// stop selection
 				_CurrSelection = NULL;
 				_CursorAtPreviousLineEnd = false;
+				if (_ClearOnEscape)
+				{
+					setInputString(ucstring(""));
+					triggerOnChangeAH();
+				}
+				CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
 			break;
 			case KeyTAB:
 				makeTopWindow();
@@ -1456,7 +1482,7 @@ namespace NLGUI
 			if (_ViewText->getWReal() > _WReal)
 			{
 				// Check if cursor visible
-				sint xCursVT, xCurs, yTmp, hTmp;
+				float xCursVT, xCurs, yTmp, hTmp;
 				// Get the cursor pos from the BL of the viewtext
 				_ViewText->getCharacterPositionFromIndex(_CursorPos+(sint)_Prompt.size(), false, xCursVT, yTmp, hTmp);
 				// Get the cursor pos from the BL of the edit box
@@ -1768,7 +1794,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupEditBox::clearAllEditBox()
 	{
-		_InputString = "";
+		_InputString.clear();
 		_CursorPos = 0;
 		_CursorAtPreviousLineEnd = false;
 		if (!_ViewText) return;

@@ -28,6 +28,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupComboBox, std::string, "combo_box");
@@ -321,7 +325,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	const bool	CDBGroupComboBox::getGrayed(uint i) const
+	bool	CDBGroupComboBox::getGrayed(uint i) const
 	{
 		if(i<_Grayed.size())
 			return _Grayed[i];
@@ -467,6 +471,12 @@ namespace NLGUI
 	ucstring CDBGroupComboBox::getViewText() const
 	{
 		return  _ViewText->getText();
+	}
+
+	// ***************************************************************************
+	CViewText *CDBGroupComboBox::getViewText()
+	{
+		return  _ViewText;
 	}
 
 	// ***************************************************************************
@@ -628,6 +638,9 @@ namespace NLGUI
 	void CDBGroupComboBox::fillMenu(CGroupMenu *groupMenu) const
 	{
 		nlassert(groupMenu);
+
+			if (_ViewText)
+				groupMenu->setFontSize(_ViewText->getFontSize());
 
 			// Setup the menu with combo action.
 			groupMenu->reset();

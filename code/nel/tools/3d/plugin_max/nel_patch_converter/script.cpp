@@ -157,7 +157,7 @@ def_visible_primitive( set_vertex_pos,			"SetRykolVertexPos");
 def_visible_primitive( get_vector_pos,			"GetRykolVectorPos");
 def_visible_primitive( set_vector_pos,			"SetRykolVectorPos");*/
 
-void errorMessage (const char *msg, const char *title, Interface& it, bool dialog)
+void errorMessage (const MCHAR *msg, const TCHAR *title, Interface& it, bool dialog)
 {
 	// Text or dialog ?
 	if (dialog)
@@ -168,7 +168,8 @@ void errorMessage (const char *msg, const char *title, Interface& it, bool dialo
 	else
 	{
 		// Text message
-		mprintf ((string(msg) + "\n").c_str());
+		mprintf(msg);
+		mprintf(_M("\n"));
 	}
 }
 
@@ -180,7 +181,7 @@ export_zone_cf (Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "ExportRykolZone [Object]");
+	type_check(arg_list[0], MAXNode, _M("ExportRykolZone [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -215,7 +216,7 @@ export_zone_cf (Value** arg_list, int count)
 			if (tri->rpatch->exportZone (node, &tri->patch, zone, zoneSymmetry, nZone, 160, 1, false))
 			{
 				// Export path 
-				const char* sPath=arg_list[1]->to_string();
+				const std::string sPath = MCharStrToUtf8(arg_list[1]->to_string());
 
 				COFile file;
 				if (file.open (sPath))
@@ -237,7 +238,7 @@ Value* import_zone_cf (Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	char *help = "NeLImportZone filename dialogError";
+	MCHAR *help = _M("NeLImportZone filename dialogError");
 	type_check (arg_list[0], String, help);
 	type_check (arg_list[1], Boolean, help);
 
@@ -245,7 +246,7 @@ Value* import_zone_cf (Value** arg_list, int count)
 	Interface *ip = MAXScript_interface;
 
 	// Get the filename
-	string filename = arg_list[0]->to_string();
+	string filename = MCharStrToUtf8(arg_list[0]->to_string());
 
 	// Get the flip
 	bool dialog = arg_list[1]->to_bool ()!=FALSE;
@@ -284,16 +285,18 @@ Value* import_zone_cf (Value** arg_list, int count)
 			// Redraw the viewports
 			ip->RedrawViews(ip->GetTime());
        	}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			// Error message
-			errorMessage (("Error when loading file "+filename+": "+e.what()).c_str(), "NeL import zone", *ip, dialog);
+			std::string msg = toString("Error when loading file %s: %s", filename.c_str(), e.what());
+			errorMessage (MaxTStrFromUtf8(msg), _M("NeL import zone"), *ip, dialog);
 		}
 	}
 	else
 	{
 		// Error message
-		errorMessage (("Can't open the file "+filename+" for reading.").c_str(), "NeL import zone", *ip, dialog);
+		std::string msg = toString("Can't open the file %s for reading.", filename.c_str());
+		errorMessage (MaxTStrFromUtf8(msg), _M("NeL import zone"), *ip, dialog);
 	}
 
 	return ret;
@@ -307,7 +310,7 @@ get_selected_tile_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "GetRykolSeltile [Object]");
+	type_check(arg_list[0], MAXNode, _M("GetRykolSeltile [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -354,7 +357,7 @@ get_selected_patch_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "GetRykolSelPatch [Object]");
+	type_check(arg_list[0], MAXNode, _M("GetRykolSelPatch [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -401,7 +404,7 @@ get_selected_vertex_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "GetRykolSelVertex [Object]");
+	type_check(arg_list[0], MAXNode, _M("GetRykolSelVertex [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -448,7 +451,7 @@ set_tile_mode_cf (Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "SetRykolTileMode [Object]");
+	type_check(arg_list[0], MAXNode, _M("SetRykolTileMode [Object]"));
 
 	// Get a good interface pointer
 	Interface *ip = MAXScript_interface;
@@ -498,7 +501,7 @@ set_compute_interior_cf (Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "RykolComputeInterior [Object]");
+	type_check(arg_list[0], MAXNode, _M("RykolComputeInterior [Object]"));
 
 	// Get a good interface pointer
 	Interface *ip = MAXScript_interface;
@@ -546,7 +549,7 @@ set_interior_mode_cf (Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "SetRykolInteriorMode [Object]");
+	type_check(arg_list[0], MAXNode, _M("SetRykolInteriorMode [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -598,7 +601,7 @@ set_vertex_count_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "GetRykolVertexCount [Object]");
+	type_check(arg_list[0], MAXNode, _M("GetRykolVertexCount [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -638,7 +641,7 @@ set_vector_count_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "GetRykolVectorCount [Object]");
+	type_check(arg_list[0], MAXNode, _M("GetRykolVectorCount [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -678,7 +681,7 @@ set_vertex_pos_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "SetRykolVertexPos [Object]");
+	type_check(arg_list[0], MAXNode, _M("SetRykolVertexPos [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -728,7 +731,7 @@ set_vector_pos_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "SetRykolVectorPos [Object]");
+	type_check(arg_list[0], MAXNode, _M("SetRykolVectorPos [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -778,7 +781,7 @@ get_vertex_pos_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "GetRykolVertexPos [Object]");
+	type_check(arg_list[0], MAXNode, _M("GetRykolVertexPos [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -822,7 +825,7 @@ get_vector_pos_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "GetRykolVectorPos [Object]");
+	type_check(arg_list[0], MAXNode, _M("GetRykolVectorPos [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -867,7 +870,7 @@ get_edge_vect1_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "GetRykolEdgesVect1 [Object]");
+	type_check(arg_list[0], MAXNode, _M("GetRykolEdgesVect1 [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -911,7 +914,7 @@ get_edge_vect2_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "GetRykolEdgesVect2 [Object]");
+	type_check(arg_list[0], MAXNode, _M("GetRykolEdgesVect2 [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -955,7 +958,7 @@ get_edge_vert1_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "GetRykolEdgesVert1 [Object]");
+	type_check(arg_list[0], MAXNode, _M("GetRykolEdgesVert1 [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -1000,7 +1003,7 @@ get_edge_vert2_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "GetRykolEdgesVert2 [Object]");
+	type_check(arg_list[0], MAXNode, _M("GetRykolEdgesVert2 [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -1044,7 +1047,7 @@ get_sel_edge_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "SetRykolSelEdges [Object]");
+	type_check(arg_list[0], MAXNode, _M("SetRykolSelEdges [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -1092,7 +1095,7 @@ set_steps_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "SetRykolPatchSteps [Object]");
+	type_check(arg_list[0], MAXNode, _M("SetRykolPatchSteps [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -1155,7 +1158,7 @@ set_tile_steps_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "SetRykoltileSteps [Object]");
+	type_check(arg_list[0], MAXNode, _M("SetRykoltileSteps [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -1208,7 +1211,7 @@ get_tile_count_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "GetRykolTileCount [Zone] [PatchNumber]");
+	type_check(arg_list[0], MAXNode, _M("GetRykolTileCount [Zone] [PatchNumber]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -1265,7 +1268,7 @@ Value* get_patch_vertex_cf (Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	char *message="NeLGetPatchVertex [NeLPatchMesh] [PatchId] [VertexId]";
+	const MCHAR *message= _M("NeLGetPatchVertex [NeLPatchMesh] [PatchId] [VertexId]");
 	type_check(arg_list[0], MAXNode, message);
 	type_check(arg_list[1], Integer, message);
 	type_check(arg_list[2], Integer, message);
@@ -1336,7 +1339,7 @@ get_patch_count_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "GetRykolPatchCount [Object]");
+	type_check(arg_list[0], MAXNode, _M("GetRykolPatchCount [Object]"));
 	//type_check(arg_list[1], Integer, "SetRykolPatchSteps [Object]");
 
 	// Get a good interface pointer
@@ -1389,10 +1392,10 @@ get_tile_tile_number_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "NelGetTileTileNumber [Zone] [PatchNumber] [TileNumber] [Layer]");
-	type_check(arg_list[1], Integer, "NelGetTileTileNumber [Zone] [PatchNumber] [TileNumber] [Layer]");
-	type_check(arg_list[2], Integer, "NelGetTileTileNumber [Zone] [PatchNumber] [TileNumber] [Layer]");
-	type_check(arg_list[3], Integer, "NelGetTileTileNumber [Zone] [PatchNumber] [TileNumber] [Layer]");
+	type_check(arg_list[0], MAXNode, _M("NelGetTileTileNumber [Zone] [PatchNumber] [TileNumber] [Layer]"));
+	type_check(arg_list[1], Integer, _M("NelGetTileTileNumber [Zone] [PatchNumber] [TileNumber] [Layer]"));
+	type_check(arg_list[2], Integer, _M("NelGetTileTileNumber [Zone] [PatchNumber] [TileNumber] [Layer]"));
+	type_check(arg_list[3], Integer, _M("NelGetTileTileNumber [Zone] [PatchNumber] [TileNumber] [Layer]"));
 
 	// Get a good interface pointer
 	Interface *ip = MAXScript_interface;
@@ -1411,7 +1414,7 @@ get_tile_tile_number_cf(Value** arg_list, int count)
 	uint layer=arg_list[3]->to_int()-1;
 	if (layer>=3)
 	{
-		mprintf ("Error: layer must be 1, 2, or 3\n");
+		mprintf (_M("Error: layer must be 1, 2, or 3\n"));
 	}
 	else
 	{
@@ -1427,7 +1430,7 @@ get_tile_tile_number_cf(Value** arg_list, int count)
 				uint nPatch=arg_list[1]->to_int()-1;
 				if (nPatch>=tri->rpatch->getUIPatchSize())
 				{
-					mprintf ("Error: patch index is invalid.\n");
+					mprintf (_M("Error: patch index is invalid.\n"));
 				}
 				else
 				{
@@ -1439,7 +1442,7 @@ get_tile_tile_number_cf(Value** arg_list, int count)
 					uint tile=arg_list[2]->to_int()-1;
 					if (tile>=nPatchCount)
 					{
-						mprintf ("Error: tile index is invalid.\n");
+						mprintf (_M("Error: tile index is invalid.\n"));
 					}
 					else
 					{
@@ -1475,9 +1478,9 @@ get_tile_noise_number_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "NelGetTileTileNumber [Zone] [PatchNumber] [TileNumber]");
-	type_check(arg_list[1], Integer, "NelGetTileTileNumber [Zone] [PatchNumber] [TileNumber]");
-	type_check(arg_list[2], Integer, "NelGetTileTileNumber [Zone] [PatchNumber] [TileNumber]");
+	type_check(arg_list[0], MAXNode, _M("NelGetTileTileNumber [Zone] [PatchNumber] [TileNumber]"));
+	type_check(arg_list[1], Integer, _M("NelGetTileTileNumber [Zone] [PatchNumber] [TileNumber]"));
+	type_check(arg_list[2], Integer, _M("NelGetTileTileNumber [Zone] [PatchNumber] [TileNumber]"));
 
 	// Get a good interface pointer
 	Interface *ip = MAXScript_interface;
@@ -1504,7 +1507,7 @@ get_tile_noise_number_cf(Value** arg_list, int count)
 			uint nPatch=arg_list[1]->to_int()-1;
 			if (nPatch>=tri->rpatch->getUIPatchSize())
 			{
-				mprintf ("Error: patch index is invalid.\n");
+				mprintf (_M("Error: patch index is invalid.\n"));
 			}
 			else
 			{
@@ -1516,7 +1519,7 @@ get_tile_noise_number_cf(Value** arg_list, int count)
 				uint tile=arg_list[2]->to_int()-1;
 				if (tile>=nPatchCount)
 				{
-					mprintf ("Error: patch index is invalid.\n");
+					mprintf (_M("Error: patch index is invalid.\n"));
 				}
 				else
 				{
@@ -1544,10 +1547,10 @@ set_tile_noise_number_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "NelGetTileNoiseNumber [Zone] [PatchNumber] [TileNumber] [noise]");
-	type_check(arg_list[1], Integer, "NelGetTileNoiseNumber [Zone] [PatchNumber] [TileNumber] [noise]");
-	type_check(arg_list[2], Integer, "NelGetTileNoiseNumber [Zone] [PatchNumber] [TileNumber] [noise]");
-	type_check(arg_list[3], Integer, "NelGetTileNoiseNumber [Zone] [PatchNumber] [TileNumber] [noise]");
+	type_check(arg_list[0], MAXNode, _M("NelGetTileNoiseNumber [Zone] [PatchNumber] [TileNumber] [noise]"));
+	type_check(arg_list[1], Integer, _M("NelGetTileNoiseNumber [Zone] [PatchNumber] [TileNumber] [noise]"));
+	type_check(arg_list[2], Integer, _M("NelGetTileNoiseNumber [Zone] [PatchNumber] [TileNumber] [noise]"));
+	type_check(arg_list[3], Integer, _M("NelGetTileNoiseNumber [Zone] [PatchNumber] [TileNumber] [noise]"));
 
 	// Get a good interface pointer
 	Interface *ip = MAXScript_interface;
@@ -1566,7 +1569,7 @@ set_tile_noise_number_cf(Value** arg_list, int count)
 	uint noise=arg_list[3]->to_int()-1;
 	if (noise>=16)
 	{
-		mprintf ("Error: noise value must be 1~16\n");
+		mprintf (_M("Error: noise value must be 1~16\n"));
 	}
 	else
 	{
@@ -1582,7 +1585,7 @@ set_tile_noise_number_cf(Value** arg_list, int count)
 				uint nPatch=arg_list[1]->to_int()-1;
 				if (nPatch>=tri->rpatch->getUIPatchSize())
 				{
-					mprintf ("Error: patch index is invalid.\n");
+					mprintf (_M("Error: patch index is invalid.\n"));
 				}
 				else
 				{
@@ -1594,7 +1597,7 @@ set_tile_noise_number_cf(Value** arg_list, int count)
 					uint tile=arg_list[2]->to_int()-1;
 					if (tile>=nPatchCount)
 					{
-						mprintf ("Error: patch index is invalid.\n");
+						mprintf (_M("Error: patch index is invalid.\n"));
 					}
 					else
 					{
@@ -1627,7 +1630,7 @@ load_bank_cf(Value** arg_list, int count)
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
 	std::string bankName = GetBankPathName ();
-	if (bankName!="")
+	if (!bankName.empty())
 	{
 		try
 		{
@@ -1646,13 +1649,13 @@ load_bank_cf(Value** arg_list, int count)
 			}
 			else
 			{
-				mprintf ("Error: can't open bank file %s\n", bankName.c_str());
+				mprintf (_M("Error: can't open bank file %s\n"), bankName.c_str());
 			}
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			// Error message
-			mprintf ("Error: %s\n", e.what());
+			mprintf (_M("Error: %s\n"), e.what());
 		}
 	}
 
@@ -1668,7 +1671,7 @@ get_tile_set_cf(Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], Integer, "NelGetTileSet [tileId]");
+	type_check(arg_list[0], Integer, _M("NelGetTileSet [tileId]"));
 
 	// ok ?
 	int nRet=-1;
@@ -1677,7 +1680,7 @@ get_tile_set_cf(Value** arg_list, int count)
 	uint tile=arg_list[0]->to_int()-1;
 	if (tile>=(uint)scriptedBank.getTileCount())
 	{
-		mprintf ("Error: tile number is wrong. (1 ~ %d)\n", scriptedBank.getTileCount());
+		mprintf (_M("Error: tile number is wrong. (1 ~ %d)\n"), scriptedBank.getTileCount());
 	}
 	else
 	{
@@ -1702,10 +1705,10 @@ Value* set_tile_bank_cf (Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], String, "NelSetTileBank [tile bank pathname]");
+	type_check(arg_list[0], String, _M("NelSetTileBank [tile bank pathname]"));
 
 	// ok ?
-	const char *pathname = arg_list[0]->to_string();
+	const std::string pathname = MCharStrToUtf8(arg_list[0]->to_string());
 
 	// Get tile number
 	SetBankPathName (pathname);
@@ -1947,8 +1950,8 @@ attach_cf (Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "NeLAttachPatchMesh [RykolPatchMeshSrc] [RykolPatchMeshDest]");
-	type_check(arg_list[1], MAXNode, "NeLAttachPatchMesh [RykolPatchMeshSrc] [RykolPatchMeshDest]");
+	type_check(arg_list[0], MAXNode, _M("NeLAttachPatchMesh [RykolPatchMeshSrc] [RykolPatchMeshDest]"));
+	type_check(arg_list[1], MAXNode, _M("NeLAttachPatchMesh [RykolPatchMeshSrc] [RykolPatchMeshDest]"));
 
 	// Get a good interface pointer
 	Interface *ip = MAXScript_interface;
@@ -2005,8 +2008,8 @@ weld_cf (Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "NeLWeldPatchMesh [RykolPatchMeshSrc] [threshold]");
-	type_check(arg_list[1], Float, "NeLWeldPatchMesh [RykolPatchMeshSrc] [threshold]");
+	type_check(arg_list[0], MAXNode, _M("NeLWeldPatchMesh [RykolPatchMeshSrc] [threshold]"));
+	type_check(arg_list[1], Float, _M("NeLWeldPatchMesh [RykolPatchMeshSrc] [threshold]"));
 
 	// Get a good interface pointer
 	Interface *ip = MAXScript_interface;

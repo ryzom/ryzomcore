@@ -9,17 +9,12 @@ $HGBIN log -M --style $CODEROOT/changelog.template > $CODEROOT/changelog
 REVISION=$($HGBIN identify -n | grep -o -P "[0-9]+")
 echo "Found revision $REVISION"
 
-REVISION_H=$CODEROOT/revision.h
-
-# Copy revision.h template
-cp $REVISION_H.in $REVISION_H
+REVISION_H=$CODEROOT/revision
 
 DATE=$(date "+%Y-%m-%d %H:%M:%S")
 
 # Update revision.h with revision and build date
-sed -i 's/#cmakedefine/#define/g' $REVISION_H
-sed -i 's/${REVISION}/'$REVISION'/g' $REVISION_H
-sed -i 's/${BUILD_DATE}/'"$DATE"'/g' $REVISION_H
+echo $REVISION > $REVISION_H
 
 VERSION=$(./ryzomcore_version.sh)
 

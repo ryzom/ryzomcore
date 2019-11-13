@@ -133,7 +133,7 @@ public:
 	// SPECIALIZE THAT. write value into the given CString
 	static void value2CString(T value, CString &dest);
 	// SPECIALIZE THAT. convert a CString into a value, return NULL if ok, or a pointer to an error message
-	static const char *string2value(const CString &value, T &result);
+	static const TCHAR *string2value(const CString &value, T &result);
 	
 	
 
@@ -162,14 +162,13 @@ protected:
 	void updateValueFromText(void)
 	{
 		T value;
-		const char *message = string2value(m_Value, value);
+		const TCHAR *message = string2value(m_Value, value);
 		if (!message)
 		{
-			const char *mess = validateUpperBound(value) 
-					  ,*mess2 = validateLowerBound(value);
+			const TCHAR *mess = validateUpperBound(value), *mess2 = validateLowerBound(value);
 			if (mess || mess2)
 			{
-				MessageBox(mess ? mess : mess2, "error");
+				MessageBox(mess ? mess : mess2, _T("error"));
 				return;
 			}
 			
@@ -179,7 +178,7 @@ protected:
 			return;
 		}
 		
-		MessageBox(message, "error");
+		MessageBox(message, _T("error"));
 		
 	}
 	void selectRange(void)
@@ -249,24 +248,23 @@ protected:
 	{
 		T upT, loT;
 
-		const char *message = string2value(lo, loT);
+		const TCHAR *message = string2value(lo, loT);
 		if (message)
 		{
-			::MessageBox(NULL, message, "Range selection error", MB_OK);
+			::MessageBox(NULL, message, _T("Range selection error"), MB_OK);
 			return false;
 		}
-		const char *mess = validateUpperBound(loT)
-					  ,*mess2 = validateLowerBound(loT);
+		const TCHAR *mess = validateUpperBound(loT), *mess2 = validateLowerBound(loT);
 		if (mess ||  mess2)
 		{
-			MessageBox(mess ? mess : mess2, "error");
+			MessageBox(mess ? mess : mess2, _T("error"));
 			return false;
 		}
 
 		message = string2value(up, upT);
 		if (message)
 		{
-			::MessageBox(NULL, message, "Range selection error", MB_OK);
+			::MessageBox(NULL, message, _T("Range selection error"), MB_OK);
 			return false;
 		}
 
@@ -274,14 +272,14 @@ protected:
 		mess2 = validateLowerBound(upT);
 		if (mess || mess2)
 		{
-			MessageBox(mess ? mess : mess2, "error");
+			MessageBox(mess ? mess : mess2, _T("error"));
 			return false;
 		}
 
 
 		if (upT <= loT)
 		{
-			::MessageBox(NULL, "upper bound must be strictly greater than lower bound", "Range selection error", MB_OK);
+			::MessageBox(NULL, _T("upper bound must be strictly greater than lower bound"), _T("Range selection error"), MB_OK);
 			return false;
 		}
 
@@ -314,18 +312,18 @@ CEditableRangeT<float>::CEditableRangeT(const std::string &id, CParticleWorkspac
 
 inline void CEditableRangeT<float>::value2CString(float value, CString &dest)
 {
-	dest.Format("%g", (double) value);
+	dest.Format(_T("%g"), (double) value);
 }
 
-inline const char *CEditableRangeT<float>::string2value(const CString &value, float &result)
+inline const TCHAR *CEditableRangeT<float>::string2value(const CString &value, float &result)
 {			
-	if (sscanf((LPCTSTR) value, "%f", &result) == 1)
+	if (NLMISC::fromString(NLMISC::tStrToUtf8(value), result))
 	{			
 		return NULL;
 	}
 	else
 	{
-		return "invalid value";
+		return _T("invalid value");
 	}	
 }
 
@@ -340,17 +338,17 @@ CEditableRangeT<uint32>::CEditableRangeT(const std::string &id, CParticleWorkspa
 
 inline void CEditableRangeT<uint32>::value2CString(uint32 value, CString &dest)
 {
-	dest.Format("%d", value);
+	dest.Format(_T("%d"), value);
 }
 
-inline const char *CEditableRangeT<uint32>::string2value(const CString &value, uint32 &result)
+inline const TCHAR *CEditableRangeT<uint32>::string2value(const CString &value, uint32 &result)
 {			
-	uint32 tmp;
-	if (sscanf((LPCTSTR) value, "%d", &tmp) == 1)
+	sint32 tmp;
+	if (NLMISC::fromString(NLMISC::tStrToUtf8(value), tmp))
 	{
-		if (strchr((LPCTSTR) value, '-'))
+		if (value.Find(_T("-")) > -1)
 		{
-			return "negative values not allowed";
+			return _T("negative values not allowed");
 		}
 		else
 		{
@@ -360,7 +358,7 @@ inline const char *CEditableRangeT<uint32>::string2value(const CString &value, u
 	}
 	else
 	{
-		return "invalid value";
+		return _T("invalid value");
 	}	
 }
 
@@ -376,20 +374,20 @@ CEditableRangeT<sint32>::CEditableRangeT(const std::string &id, CParticleWorkspa
 
 inline void CEditableRangeT<sint32>::value2CString(sint32 value, CString &dest)
 {
-	dest.Format("%d", value);
+	dest.Format(_T("%d"), value);
 }
 
-inline const char *CEditableRangeT<sint32>::string2value(const CString &value, sint32 &result)
+inline const TCHAR *CEditableRangeT<sint32>::string2value(const CString &value, sint32 &result)
 {			
-	uint32 tmp;
-	if (sscanf((LPCTSTR) value, "%d", &tmp) == 1)
+	sint32 tmp;
+	if (NLMISC::fromString(NLMISC::tStrToUtf8(value), tmp))
 	{				
 		result = tmp;
 		return NULL;				
 	}
 	else
 	{
-		return "invalid value";
+		return _T("invalid value");
 	}	
 }
 

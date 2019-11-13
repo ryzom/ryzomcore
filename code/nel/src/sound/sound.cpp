@@ -92,7 +92,7 @@ CSound *CSound::createSound(const std::string &filename, NLGEORGES::UFormElm& fo
 		}
 		else
 		{
-			nlassertex(false, ("SoundType unsuported : %s", dfnName.c_str()));
+			nlassertex(false, ("SoundType unsupported: %s", dfnName.c_str()));
 		}
 
 	}
@@ -133,9 +133,18 @@ void	CSound::serial(NLMISC::IStream &s)
 	s.serial(_Direction);
 	s.serial(_Looping);
 	s.serial(_MaxDist);
-
-	_Name.serialString(s, "sound");
-
+	if (s.isReading())
+	{
+		std::string name;
+		s.serial(name);
+		_Name = CStringMapper::map(name);
+	}
+	else
+	{
+		std::string name = CStringMapper::unmap(_Name);
+		s.serial(name);
+	}
+	
 	nlassert(CGroupControllerRoot::isInitialized()); // not sure
 #if NLSOUND_SHEET_VERSION_BUILT < 2
 	if (s.isReading()) _GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER);
@@ -161,8 +170,7 @@ void	CSound::serial(NLMISC::IStream &s)
 void				CSound::importForm(const std::string& filename, NLGEORGES::UFormElm& root)
 {
 	// Name
-	nlassert(filename.find(".sound") != std::string::npos);
-	_Name = NLMISC::CSheetId(filename);
+	_Name = CStringMapper::map(CFile::getFilenameWithoutExtension(filename));
 
 	// InternalConeAngle
 	uint32 inner;

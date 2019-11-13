@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2008  Jan Boon (Kaetemi)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,12 @@
 #ifndef NLSOUND_STDPCH_XAUDIO2_H
 #define NLSOUND_STDPCH_XAUDIO2_H
 
-#include "nel/misc/types_nl.h"
+#if defined(_MSC_VER) && defined(_DEBUG)
+	#define _CRTDBG_MAP_ALLOC
+	#include <stdlib.h>
+	#include <crtdbg.h>
+	#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
 
 // STL includes
 #include <iostream>
@@ -26,6 +31,8 @@
 #include <algorithm>
 #include <limits>
 #include <intrin.h>
+
+#include "nel/misc/types_nl.h"
 
 // 3rd Party Includes
 #include <basetyps.h>

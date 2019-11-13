@@ -30,13 +30,6 @@
 #include <csignal>
 #endif
 
-#ifdef NL_OS_MAC
-#include <stdio.h>
-#include <sys/resource.h>
-#include "nel/misc/dynloadlib.h"
-#include "app_bundle_utils.h"
-#endif
-
 #include "nel/misc/debug.h"
 #include "nel/misc/command.h"
 #include "nel/net/tcp_sock.h"
@@ -61,6 +54,10 @@
 #include "far_tp.h"
 #include "user_agent.h"
 
+#ifdef RZ_USE_STEAM
+#include "steam_client.h"
+#endif
+
 ///////////
 // USING //
 ///////////
@@ -71,6 +68,10 @@ using namespace NLNET;
 //
 // Macros
 //
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 //
 // RYZOM_TRY and RYZOM_CATCH aim is to catch differently in dev and final version
@@ -150,6 +151,10 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPSTR cm
 int main(int argc, char **argv)
 #endif
 {
+#if defined(_MSC_VER) && defined(_DEBUG)
+	_CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+
 	// init the Nel context
 	CApplicationContext *appContext = new CApplicationContext;
 
@@ -175,6 +180,7 @@ int main(int argc, char **argv)
 	Args.addAdditionalArg("login", "Login to use", true, false);
 	Args.addAdditionalArg("password", "Password to use", true, false);
 	Args.addAdditionalArg("shard_id", "Shard ID to use", true, false);
+	Args.addAdditionalArg("slot", "Char slot to use", true, false);
 
 #ifdef TEST_CRASH_COUNTER
 	Args.addArg("", "crash", "", "Crash client before init");
@@ -182,24 +188,46 @@ int main(int argc, char **argv)
 	Args.addArg("", "release", "", "Crash client after init");
 #endif // TEST_CRASH_COUNTER
 
+	// extract the 2 or 3 first param (argv[1], argv[2] and argv[3]) it must be <login> <password> [shardId]
 #ifdef NL_OS_WINDOWS
 	if (!Args.parse(cmdline)) return 1;
 #else
 	if (!Args.parse(argc, argv)) return 1;
 #endif
 
-	// extract the 2 or 3 first param (argv[1], argv[2] and argv[3]) it must be <login> <password> [shardId]
-
 	// no shard id in ring mode
 	std::string sLoginShardId;
 
-	if (Args.haveAdditionalArg("login") && Args.haveAdditionalArg("password"))
+	if (Args.haveAdditionalArg("login"))
 	{
 		LoginLogin = Args.getAdditionalArg("login").front();
-		LoginPassword = Args.getAdditionalArg("password").front();
 
-		if (Args.haveAdditionalArg("shard_id"))
-			sLoginShardId = Args.getAdditionalArg("shard_id").front();
+		if (Args.haveAdditionalArg("password"))
+		{
+			LoginPassword = Args.getAdditionalArg("password").front();
+
+			// password in hexadecimal
+			if (LoginPassword.compare(0, 2, "0x") == 0)
+			{
+				std::string decodedPassword;
+
+				// decode password
+				if (fromHexa(LoginPassword.substr(2), decodedPassword))
+				{
+					// only use it if real hexadecimal
+					LoginPassword = decodedPassword;
+				}
+			}
+
+			if (Args.haveAdditionalArg("shard_id"))
+				sLoginShardId = Args.getAdditionalArg("shard_id").front();
+
+			if (Args.haveAdditionalArg("slot"))
+			{
+				if (!fromString(Args.getAdditionalArg("slot").front(), LoginCharsel))
+					LoginCharsel = -1;
+			}
+		}
 	}
 
 	if (sLoginShardId.empty() || !fromString(sLoginShardId, LoginShardId))
@@ -210,13 +238,18 @@ int main(int argc, char **argv)
 	{
 		std::string currentPath = CPath::getApplicationDirectory("Ryzom");
 
-		// append profile ID to directory
-		if (Args.haveArg("p"))
-			currentPath = NLMISC::CPath::standardizePath(currentPath) + Args.getArg("p").front();
-
+		// create parent directory
 		if (!CFile::isExists(currentPath)) CFile::createDirectory(currentPath);
 
-		CPath::setCurrentPath(currentPath);
+		// append profile ID to directory
+		if (Args.haveArg("p"))
+		{
+			currentPath = NLMISC::CPath::standardizePath(currentPath) + Args.getArg("p").front();
+
+			if (!CFile::isExists(currentPath)) CFile::createDirectory(currentPath);
+		}
+
+		if (!CPath::setCurrentPath(currentPath)) return 1;
 	}
 
 #ifdef TEST_CRASH_COUNTER
@@ -225,23 +258,6 @@ int main(int argc, char **argv)
 		volatile int toto = *(int*)0;
 	}
 #endif // TEST_CRASH_COUNTER
-
-#ifdef NL_OS_MAC
-	struct rlimit rlp, rlp2, rlp3;
-
-	getrlimit(RLIMIT_NOFILE, &rlp);
-
-	rlp2.rlim_cur = 1024;
-	rlp2.rlim_max = rlp.rlim_max;
-	setrlimit(RLIMIT_NOFILE, &rlp2);
-
-	getrlimit(RLIMIT_NOFILE, &rlp3);
-	nlinfo("rlimit before %d %d\n", rlp.rlim_cur, rlp.rlim_max);
-	nlinfo("rlimit after %d %d\n", rlp3.rlim_cur, rlp3.rlim_max);
-
-	// add the bundle's plugins path as library search path (for nel drivers)
-	CLibrary::addLibPath(getAppBundlePath() + "/Contents/PlugIns/nel/");
-#endif
 
 #if defined(NL_OS_WINDOWS)
 
@@ -291,6 +307,16 @@ int main(int argc, char **argv)
 	// TODO for Linux : splashscreen
 #endif
 
+	// initialize log
+	initLog();
+
+#ifdef RZ_USE_STEAM
+	CSteamClient steamClient;
+
+	if (steamClient.init())
+		LoginCustomParameters = "&steam_auth_session_ticket=" + steamClient.getAuthSessionTicket();
+#endif
+
 	// initialize patch manager and set the ryzom full path, before it's used
 	CPatchManager *pPM = CPatchManager::getInstance();
 	pPM->setRyzomFilename(Args.getProgramPath() + Args.getProgramName());
@@ -316,6 +342,16 @@ int main(int argc, char **argv)
 			//ICommand::execute("iFileAccessLogStop",*NLMISC::InfoLog);
 			//ICommand::execute("iFileAccessLogClear",*NLMISC::InfoLog);
 #endif
+
+			release();
+
+			// delete all logs and displayers when we're not using logs macros anymore
+			destroyDebug();
+			CLog::releaseProcessName();
+
+			// delete the Nel context
+			delete appContext;
+
 			return EXIT_SUCCESS;
 		}
 	}
@@ -403,6 +439,10 @@ int main(int argc, char **argv)
 #if FINAL_VERSION || defined (TEST_CRASH_COUNTER)
 	quitCrashReport ();
 #endif // FINAL_VERSION
+
+	// delete all logs and displayers when we're not using logs macros anymore
+	destroyDebug();
+	CLog::releaseProcessName();
 
 	// delete the Nel context
 	delete appContext;

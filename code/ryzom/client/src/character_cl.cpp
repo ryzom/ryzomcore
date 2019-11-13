@@ -111,6 +111,9 @@
 #include "game_share/range_weapon_type.h"
 //
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ////////////
 // DEFINE //
@@ -136,7 +139,6 @@ using namespace NLSOUND;
 using namespace std;
 using namespace MBEHAV;
 using namespace CLFECOMMON;
-
 
 ////////////
 // EXTERN //
@@ -183,7 +185,7 @@ extern UCamera					MainCam;
 ////////////
 // STATIC //
 ////////////
-const std::string CCharacterCL::_EmptyString = "";
+const std::string CCharacterCL::_EmptyString;
 const uint8	 CCharacterCL::_BadHairIndex = 0xFF;
 
 H_AUTO_DECL ( RZ_Client_Character_CL_Update_Pos_Combat_Float )
@@ -1306,8 +1308,9 @@ void CCharacterCL::updateVisualPropertyMode(const NLMISC::TGameCycle &gameCycle,
 			nlwarning("CH::updtVPMode:%d: Cannot find the property 'PROPERTY_ORIENTATION(%d)'.", _Slot, CLFECOMMON::PROPERTY_ORIENTATION);
 			return;
 		}
-		const sint64 &ori = nodeOri->getValue64();
-		float angleZ = *(float *)(&ori);
+		C64BitsParts parts;
+		parts.i64[0] = nodeOri->getValue64();
+		float angleZ = parts.f[0];
 		// server forces the entity orientation even if it cannot turn
 		front(CVector((float)cos(angleZ), (float)sin(angleZ), 0.f), true, true, true);
 		dir(front(), false, false);
@@ -1500,7 +1503,7 @@ void CCharacterCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycl
 
 		// Retrieve the right sheet for clothes.
 		_ClothesSheet = _Sheet;
-		if(_Sheet->IdAlternativeClothes.size() > 0)
+		if(!_Sheet->IdAlternativeClothes.empty())
 		{
 			sint32 num = rnd.rand()%(_Sheet->IdAlternativeClothes.size()+1);
 			if(num > 0)
@@ -1528,7 +1531,7 @@ void CCharacterCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycl
 		else
 			_HairColor = (sint8)altLookProp.Element.ColorHair%SheetMngr.nbHairColor();
 		// Hair Index
-		if(_Sheet->HairItemList.size() > 0)
+		if(!_Sheet->HairItemList.empty())
 		{
 			sint32 num = rnd.rand()%_Sheet->HairItemList.size();
 			if(num>=0 && num <_BadHairIndex)
@@ -1712,6 +1715,17 @@ void CCharacterCL::updateVisualPropertyVpb(const NLMISC::TGameCycle &/* gameCycl
 	{
 		float	s= getScale();
 		_Instances[0].setScale(CVector(s,s,s));
+	}
+
+
+	if (_Primitive)
+	{
+		float width, depth;
+		_Primitive->getSize(width, depth);
+		UMovePrimitive::TType primtype = _Primitive->getPrimitiveType();
+		_Primitive->setPrimitiveType(UMovePrimitive::_2DOrientedBox);
+		_Primitive->setSize((width / oldCustomScale) * _CustomScale, (depth / oldCustomScale) * _CustomScale);
+		_Primitive->setPrimitiveType(primtype);
 	}
 
 }// updateVisualPropertyVpb //
@@ -5225,7 +5239,9 @@ bool CCharacterCL::applyStage(CStage &stage)
 	pair<bool, sint64> resultTeta = stage.property(PROPERTY_ORIENTATION);
 	if(resultTeta.first)
 	{
-		float angleZ = *(float *)(&resultTeta.second);
+		C64BitsParts parts;
+		parts.i64[0] = resultTeta.second;
+		float angleZ = parts.f[0];
 		// server forces the entity orientation even if it cannot turn
 		front(CVector((float)cos(angleZ), (float)sin(angleZ), 0.f), true, true, true);
 
@@ -5239,7 +5255,9 @@ bool CCharacterCL::applyStage(CStage &stage)
 	if(resultMode.first)
 	{
 		// Get the mode from stage.
-		uint8 mo = *(uint8 *)(&resultMode.second);
+		C64BitsParts parts;
+		parts.i64[0] = resultMode.second;
+		uint8 mo = parts.u8[0];
 		// If the mode wanted is not the same, change the mode wanted.
 		if(mo != _ModeWanted)
 		{
@@ -8288,10 +8306,53 @@ std::string CCharacterCL::currentAnimationSetName(TAnimationType animType) const
 //---------------------------------------------------
 std::string CCharacterCL::shapeFromItem(const CItemSheet &itemSheet) const
 {
-	if(_Gender == GSGENDER::female && !itemSheet.getShapeFemale().empty())
-		return itemSheet.getShapeFemale();
+	string sheet = "";
+
+	if(_Gender == GSGENDER::male)
+	{
+		if(_Sheet)
+			switch(_Sheet->Race)
+			{
+				case EGSPD::CPeople::Fyros:
+					sheet = itemSheet.getShapeFyros();
+					break;
+				case EGSPD::CPeople::Matis:
+					sheet = itemSheet.getShapeMatis();
+					break;
+				case EGSPD::CPeople::Tryker:
+					sheet = itemSheet.getShapeTryker();
+					break;
+				case EGSPD::CPeople::Zorai:
+					sheet = itemSheet.getShapeZorai();
+					break;
+			}
+	}
 	else
-		return itemSheet.getShape();
+	{
+		if(_Sheet)
+			switch(_Sheet->Race)
+			{
+				case EGSPD::CPeople::Fyros:
+					sheet = itemSheet.getShapeFyrosFemale();
+					break;
+				case EGSPD::CPeople::Matis:
+					sheet = itemSheet.getShapeMatisFemale();
+					break;
+				case EGSPD::CPeople::Tryker:
+					sheet = itemSheet.getShapeTrykerFemale();
+					break;
+				case EGSPD::CPeople::Zorai:
+					sheet = itemSheet.getShapeZoraiFemale();
+					break;
+			}
+		if (sheet.empty())
+			sheet = itemSheet.getShapeFemale();
+	}
+	if (sheet.empty())
+		sheet = itemSheet.getShape();
+
+	return sheet;
+		
 }// shapeFromItem //
 
 
@@ -8463,7 +8524,7 @@ void CCharacterCL::displayDebugPropertyStages(float x, float &y, float lineStep)
 // readWrite :
 // Read/Write Variables from/to the stream.
 //---------------------------------------------------
-void CCharacterCL::readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CCharacterCL::readWrite(NLMISC::IStream &f)
 {
 	CEntityCL::readWrite(f);
 
@@ -8852,7 +8913,7 @@ void CCharacterCL::animIndex(TAnimationType channel, CAnimation::TAnimId index)
 	else
 	{
 		// Check the AnimSet needed to get the animation Id.
-		CHECK(_CurrentAnimSet[channel]);
+		CHECK(_CurrentAnimSet[channel] != NULL);
 		// Get the Pointer on the animation state, if Null, return empty
 		const CAnimationState *animStatePtr = _CurrentAnimSet[channel]->getAnimationState( (animState(channel)==CAnimationStateSheet::Emote)?_SubStateKey:animState(channel));
 		if(animStatePtr == 0)
@@ -10276,7 +10337,7 @@ NLMISC_COMMAND(pvpMode, "modify pvp mode", "[<pvp mode> <state>]")
 	if (!playerTarget)
 		return false;
 
-	if( args.size() == 0 )
+	if (args.empty())
 	{
 		uint16 pvpMode = playerTarget->getPvpMode();
 		string str;

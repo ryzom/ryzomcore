@@ -1,0 +1,5 @@
+- to install snapcraft : sudo apt-get install snapcraft snapd
+- to generate snap : snapcraft
+- to clean build directory : snapcraft clean ryzom --step build
+- to install a .snap : sudo snap install <file .snap> --dangerous
+- to uninstall an installed .snap : sudo snap remove ryzom

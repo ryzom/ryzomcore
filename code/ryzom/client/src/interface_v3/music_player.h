@@ -41,10 +41,11 @@ public:
 	public:
 		std::string	Filename;
 		std::string	Title;
+		float       Length;
 	};
 
 	void playSongs (const std::vector<CSongs> &songs);
-	void play ();											// Play the song at current position, if playing, restart. If paused, resume.
+	void play (sint index = -1);						// Play the song at current position, if playing, restart. If paused, resume.
 	void pause ();
 	void stop ();
 	void previous ();
@@ -54,14 +55,28 @@ public:
 
 	void update ();
 
+	bool isRepeatEnabled() const;
+	bool isShuffleEnabled() const;
+
+	// Build playlist UI from songs
+	void rebuildPlaylist();
+	// Randomize playlist and rebuild the ui
+	void shuffleAndRebuildPlaylist();
+	// Update playlist active row
+	void updatePlaylist(sint prevIndex = -1);
+
 private:
 
 	// The playlist
-	uint								_CurrentSong;	// If (!_Songs.empty()) must always be <_Songs.size()
+	CSongs								_CurrentSong;
+	uint								_CurrentSongIndex;	// If (!_Songs.empty()) must always be <_Songs.size()
 	std::vector<CSongs>					_Songs;
 
 	// State
 	enum TState { Stopped, Playing, Paused }	_State;
+
+	TTime _PlayStart;
+	TTime _PauseTime;
 };
 
 extern CMusicPlayer MusicPlayer;

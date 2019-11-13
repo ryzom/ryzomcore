@@ -27,6 +27,10 @@
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	std::map< std::string, std::map< std::string, std::string > > CCtrlBase::AHCache;
@@ -119,8 +123,11 @@ namespace NLGUI
 		if (prop)
 		{
 			const char *propPtr = prop;
-
-			_ContextHelp = ucstring(propPtr);
+			if (strlen(propPtr) > 2 && propPtr[0] == 'u' && propPtr[1] == ':')
+				_ContextHelp = ucstring::makeFromUtf8(std::string(propPtr).substr(2));
+			else
+				_ContextHelp = ucstring(propPtr);
+			
 
 			if( !editorMode && ( strlen(propPtr) > 2 ) )
 			{
@@ -252,7 +259,7 @@ namespace NLGUI
 	{
 		if( name == "tooltip" )
 		{
-			_ContextHelp = value;
+			_ContextHelp = ucstring::makeFromUtf8(value);
 			return;
 		}
 		else

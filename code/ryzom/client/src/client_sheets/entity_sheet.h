@@ -131,7 +131,7 @@ public:
 
 
 	/// Serialize character sheet into binary data file.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream) = 0;
+	virtual void serial(NLMISC::IStream &f) = 0;
 };
 
 

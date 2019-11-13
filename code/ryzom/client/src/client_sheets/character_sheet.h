@@ -84,7 +84,7 @@ public:
 		std::string	getBindPoint() const { return ClientSheetsStrings.get(IdBindPoint); }
 
 		/// Serialize character sheet into binary data file.
-		virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+		virtual void serial(NLMISC::IStream &f)
 		{
 
 			ClientSheetsStrings.serial(f, IdItem);
@@ -208,7 +208,7 @@ public:
 	public:
 		NLMISC::CVector Origin;
 		NLMISC::CVector Pos;
-		void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serial(Origin);
 			f.serial(Pos);
@@ -234,7 +234,7 @@ public:
 	virtual void build(const NLGEORGES::UFormElm &item);
 
 	/// Serialize character sheet into binary data file.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 	/// Return the list of all equipement possibles (body... + HairList). Pointers should be used localy
 	void	getWholeEquipmentList(std::vector<const CEquipment*> &equipList) const;

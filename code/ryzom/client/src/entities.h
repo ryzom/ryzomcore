@@ -95,18 +95,32 @@ public:
 class CShapeInstanceReference
 {
 public:
-	CShapeInstanceReference (NL3D::UInstance instance, const string &text, const string &url, bool bbox_active=true)
+	CShapeInstanceReference (NL3D::UInstance instance, const string &text, const string &url, bool bbox_active=true, bool in_ig_zone = false)
 	{
 		Instance = instance;
 		ContextText = text;
 		ContextURL = url;
 		BboxActive = bbox_active;
+		Deleted = false;
+		LastDeleted = -1;
+		InIGZone = in_ig_zone;
+		Primitive = NULL;
+		PrimSize = CVector(1.f, 1.f, 1.f);
+		PrimHeight = 1.f;
+		PrimRelativePos = CVector(0.f, 0.f, 0.f);
 	}
 
 	NL3D::UInstance Instance;
+	NLPACS::UMovePrimitive *Primitive;
+	CVector PrimSize;
+	float PrimHeight;
+	CVector PrimRelativePos;
 	string ContextText;
 	string ContextURL;
 	bool BboxActive;
+	bool Deleted;
+	bool InIGZone;
+	sint32 LastDeleted;
 };
 
 /**
@@ -131,7 +145,10 @@ private:
 	std::vector<CEntityReference>	_VisibleEntities;
 
 	/// Shapes Instances caches
+	typedef std::map<uint16, std::vector<uint32>>	TIGZoneShapes;
+	TIGZoneShapes							_IgZoneShapes;
 	std::vector<CShapeInstanceReference>	_ShapeInstances;
+	sint32									_LastRemovedInstance;
 	bool									_InstancesRemoved;
 
 	typedef struct
@@ -213,10 +230,22 @@ public:
 	void reinit();
 
 
-	CShapeInstanceReference createInstance(const string& shape, const CVector &pos, const string &text, const string &url, bool active=true);
+	CShapeInstanceReference createInstance(const string& shape, const CVector &pos, const string &text, const string &url, bool haveCollisions, uint16 inIgZone, sint32 &idx);
+	bool deleteInstance(uint32 idx);
 	bool removeInstances();
-	bool instancesRemoved();
-	CShapeInstanceReference getShapeInstanceUnderPos(float x, float y);
+	void removeInstancesInIgZone(uint16 igZone);
+	CVector getInstancePos(uint32 idx);
+	bool setInstancePos(uint32 idx, CVector pos);
+	CVector getInstanceRot(uint32 idx);
+	CVector getInstanceScale(uint32 idx);
+	CVector getInstanceColPos(uint32 idx);
+	CVector getInstanceColScale(uint32 idx);
+	double getInstanceColOrient(uint32 idx);
+	CVector getInstanceBBoxMin(uint32 idx);
+	CVector getInstanceBBoxMax(uint32 idx);
+	bool setInstanceRot(uint32 idx, CVector pos);
+	bool setupInstance(uint32 idx, const std::vector<std::string> &keys, const std::vector<std::string> &values);
+	CShapeInstanceReference getShapeInstanceUnderPos(float x, float y, sint32 &idx);
 
 	/**
 	 * Create an entity according to the slot and the form.
@@ -277,7 +306,13 @@ public:
 	  * \param complete : if true, the name must match the full name of the entity.
 	  */
 	CEntityCL *getEntityByName (const ucstring &name, bool caseSensitive, bool complete) const;
-
+	/**
+	 * Case insensitive match against entity name. All listed keywords must match.
+	 * \param keywords to match
+	 * \param onlySelectable : if true, match only entity that can be selected
+	 */
+	CEntityCL *getEntityByKeywords (const std::vector<ucstring> &keywords, bool onlySelectable) const;
+	CEntityCL *getEntityBySheetName (const std::string &sheet) const;
 	/// Get an entity by dataset index. Returns NULL if the entity is not found.
 	CEntityCL *getEntityByCompressedIndex(TDataSetIndex compressedIndex) const;
 
@@ -344,7 +379,7 @@ public:
 	sint64 getLogStageChangeStartLocalTime() const;
 
 	/// Serialize entities.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 	// remove all attached fx of all entities (so that they can be reloaded)
 	virtual void removeAllAttachedFX();

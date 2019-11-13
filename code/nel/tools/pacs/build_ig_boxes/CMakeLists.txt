@@ -1,8 +1,10 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc)
+
+SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(build_ig_boxes ${SRC})
 
-ADD_DEFINITIONS(-DNL_BIB_CFG="\\"${NL_ETC_PREFIX}/\\"")
+ADD_DEFINITIONS(-DNL_BIB_CFG="${NL_ETC_PREFIX}/")
 
 TARGET_LINK_LIBRARIES(build_ig_boxes nelmisc nelpacs nel3d)
 NL_DEFAULT_PROPS(build_ig_boxes "NeL, Tools, PACS: build_ig_boxes")

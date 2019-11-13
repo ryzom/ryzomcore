@@ -154,13 +154,13 @@ void CGraphPlugin::refreshPrimitives()
 		// ok, we find a good node
 		try
 		{
-			
+
 
 			IPrimitive *rootNode = missionTreeRoot;
 			while (rootNode->getParent())
 				rootNode = rootNode->getParent();
 			string fileName = _PluginAccess->getRootFileName(rootNode);
-			
+
 			CMissionCompiler mc;
 			mc.compileMission(missionTreeRoot, NLMISC::CFile::getFilename(fileName));
 			TMissionDataPtr md = mc.getMission(0);
@@ -172,7 +172,7 @@ void CGraphPlugin::refreshPrimitives()
 			{
 				string msg("Can't write script file '");
 				msg += tmpPath+"/lang.dot'";
-				AfxMessageBox(msg.c_str());
+				AfxMessageBox(nlUtf8ToTStr(msg));
 			}
 			else
 			{
@@ -186,10 +186,10 @@ void CGraphPlugin::refreshPrimitives()
 
 				//currently using output.png as the input file...
 				if(!createBitmap(tmpPath))
-					AfxMessageBox("BEWARE: the image couldn't be loaded.");
+					AfxMessageBox(_T("BEWARE: the image couldn't be loaded."));
 			}
 
-			while (missionTreeRoot->getParent()!=NULL) 
+			while (missionTreeRoot->getParent()!=NULL)
 			{
 				missionTreeRoot=missionTreeRoot->getParent();
 			}
@@ -201,22 +201,22 @@ void CGraphPlugin::refreshPrimitives()
 			if (e.Primitive != NULL)
 			{
 				string primName;
-				
+
 				vectSel.push_back(e.Primitive);
 				e.Primitive->getPropertyByName("name", primName);
-				
+
 				err = toString("%s : %s", primName.c_str(), e.Why.c_str());
 			}
-			AfxMessageBox(err.c_str());
+			AfxMessageBox(nlUtf8ToTStr(err));
 		}
-		catch (exception e) //catch a possible exception from getRootFileName
+		catch (const exception &e) //catch a possible exception from getRootFileName
 		{
-			AfxMessageBox(e.what());
+			AfxMessageBox(nlUtf8ToTStr(e.what()));
 		}
 	}
 	else
 	{
-		refreshMachine();		
+		refreshMachine();
 	}
 
 	if(vectSel.size()>0)
@@ -244,8 +244,8 @@ void CGraphPlugin::refreshMachine()
 	if ((predFolder(missionTreeRoot))||
 		((missionTreeRoot=getPrimitiveParent((*first),predFolder))!=NULL))
 	{
-		
-	
+
+
 		string dot = generateDotScript(missionTreeRoot);
 
 		string tmpPath = string(::getenv("TEMP"));
@@ -254,7 +254,7 @@ void CGraphPlugin::refreshMachine()
 		{
 			string msg("Can't write script file '");
 			msg += tmpPath+"/lang.dot'";
-			AfxMessageBox(msg.c_str());
+			AfxMessageBox(nlUtf8ToTStr(msg));
 		}
 		else
 		{
@@ -268,19 +268,19 @@ void CGraphPlugin::refreshMachine()
 
 			//currently using output.png as the input file...
 			if(!createBitmap(tmpPath))
-				AfxMessageBox("BEWARE: the image couldn't be loaded.");
+				AfxMessageBox(_T("BEWARE: the image couldn't be loaded."));
 		}
-		
-			while (missionTreeRoot->getParent()!=NULL) 
+
+			while (missionTreeRoot->getParent()!=NULL)
 			{
 				missionTreeRoot=missionTreeRoot->getParent();
 			}
 			_rootFileName=_PluginAccess->getRootFileName(missionTreeRoot);
 
-		
+
 
 	}
-	else 
+	else
 	{
 		list<IPrimitive*>::const_iterator first(selection.begin()), last(selection.end()),curIte;
 		IPrimitive*	missionTreeRoot=(*first);
@@ -288,8 +288,8 @@ void CGraphPlugin::refreshMachine()
 		if ((predManager(missionTreeRoot))||
 		((missionTreeRoot=getPrimitiveParent((*first),predManager))!=NULL))
 		{
-			
-		
+
+
 			string dot = generateDotScript(missionTreeRoot);
 
 			string tmpPath = string(::getenv("TEMP"));
@@ -298,7 +298,7 @@ void CGraphPlugin::refreshMachine()
 			{
 				string msg("Can't write script file '");
 				msg += tmpPath+"/lang.dot'";
-				AfxMessageBox(msg.c_str());
+				AfxMessageBox(nlUtf8ToTStr(msg));
 			}
 			else
 			{
@@ -312,10 +312,10 @@ void CGraphPlugin::refreshMachine()
 
 				//currently using output.png as the input file...
 				if(!createBitmap(tmpPath))
-					AfxMessageBox("BEWARE: the image couldn't be loaded.");
-			}	
+					AfxMessageBox(_T("BEWARE: the image couldn't be loaded."));
+			}
 
-			while (missionTreeRoot->getParent()!=NULL) 
+			while (missionTreeRoot->getParent()!=NULL)
 			{
 				missionTreeRoot=missionTreeRoot->getParent();
 			}
@@ -323,14 +323,14 @@ void CGraphPlugin::refreshMachine()
 		}
 		else
 		{
-			AfxMessageBox("The selected node could not be processed.");
+			AfxMessageBox(_T("The selected node could not be processed."));
 		}
 
 	}
-	
 
 
-	
+
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -342,7 +342,7 @@ string CGraphPlugin::spaceTo_(string strInput)
 	explode(strInput,string(" "),strTmp);
 	if (strTmp.size()>1)
 	{
-	
+
 		for(uint i=0;i<strTmp.size();i++)
 		{
 			vector<string>	strTmpTmp;
@@ -394,10 +394,10 @@ string		CGraphPlugin::createNode(IPrimitive* managerNode,string strPredicate,uin
 		ret += NL ;
 		ret	+= "}" ;
 		ret	+= NL;
-		
+
 	}
 
-	
+
 	numClusters+=resSet.size();
 	return ret;
 }
@@ -433,13 +433,13 @@ string		CGraphPlugin::createParsedNode(IPrimitive* managerNode,string strPredica
 		ret += parseStateMachine(resSet[i],spaceTo_(strName),string(""),string("_")+spaceTo_(strName));
 		ret	+= "}" ;
 		ret	+= NL;
-		
+
 	}
 	for (uint i=0; i<resSet.size(); ++i)
 	{
 		string strName;
 		resSet[i]->getPropertyByName("name",strName);
-		
+
 		TPrimitiveClassPredicate predJump("npc_event_handler_action");
 		TPrimitiveSet resJump;
 		offsprings.buildSet(resSet[i],predJump,resJump);
@@ -460,7 +460,7 @@ string		CGraphPlugin::createParsedNode(IPrimitive* managerNode,string strPredica
 				if(primTail)
 					primTail->getPropertyByName("name", labelTail);
 			}
-			
+
 			vector<string> *jumpDest;
 			resJump[j]->getPropertyByName("action",strAction);
 			if (strAction.compare(string("begin_state"))==0)
@@ -471,7 +471,7 @@ string		CGraphPlugin::createParsedNode(IPrimitive* managerNode,string strPredica
 				ret +=spaceTo_(jumpDest->at(0));
 				ret +="[label=";
 				ret +=spaceTo_(labelTail);
-				ret +="]"; 
+				ret +="]";
 				ret += ";" ;
 				ret += NL;
 			}
@@ -479,7 +479,7 @@ string		CGraphPlugin::createParsedNode(IPrimitive* managerNode,string strPredica
 			{
 				vector<string>* jumpDest;
 				string strTmpTmpName;
-				
+
 				resJump[j]->getPropertyByName("parameters",jumpDest);
 				resJump[j]->getPropertyByName("name",strTmpTmpName);
 
@@ -496,13 +496,13 @@ string		CGraphPlugin::createParsedNode(IPrimitive* managerNode,string strPredica
 					ret +="_";
 					ret += spaceTo_(strName) ;
 					ret +="->";
-					
+
 					vector<string> resJump;
 					explode(jumpDest->at(k)," ",resJump);
 					ret +=resJump[1];
 					ret+= ";";
 					ret+=NL;
-					
+
 				}
 			}*/
 			if (strAction.compare(string("punctual_state"))==0)
@@ -513,7 +513,7 @@ string		CGraphPlugin::createParsedNode(IPrimitive* managerNode,string strPredica
 				ret +=spaceTo_(jumpDest->at(0));
 				ret +="[label=";
 				ret +=spaceTo_(labelTail);
-				ret +="]"; 
+				ret +="]";
 				ret += ";" ;
 				ret += NL;
 				ret +=spaceTo_(jumpDest->at(0));
@@ -521,12 +521,12 @@ string		CGraphPlugin::createParsedNode(IPrimitive* managerNode,string strPredica
 				ret += strName ;
 				ret +="[label=";
 				ret +=spaceTo_(labelTail);
-				ret +="]"; 
+				ret +="]";
 				ret += ";" ;
 				ret += NL;
 			}
 		}
-		
+
 	}
 	numClusters+=resSet.size();
 	return ret;
@@ -573,17 +573,17 @@ string	CGraphPlugin::parseStateMachine(NLLIGO::IPrimitive* currentNode,string em
 	uint numChild=currentNode->getNumChildren();
 	for(uint i=0;i<numChild;i++)
 	{
-		
+
 		IPrimitive* child;
 		currentNode->getChild(child,i);
 		child->getPropertyByName("class",strClassName);
 		child->getPropertyByName("name",strName);
 		child->getPropertyByName("action",strAction);
-		
+
 		if (strClassName.compare(string("npc_group"))==0)
 		{
 			child->getPropertyByName("name",strName);
-			
+
 			ret+=spaceTo_(strName);
 			ret+=tag;
 			ret += " [URL=\""+buildPrimPath(child)+"\"];"+NL;
@@ -670,7 +670,7 @@ string	CGraphPlugin::parseStateMachine(NLLIGO::IPrimitive* currentNode,string em
 					ret+=tag;
 					first=true;
 					}
-					
+
 				}
 				ret+="}";
 				ret+='"';
@@ -704,7 +704,7 @@ string	CGraphPlugin::parseStateMachine(NLLIGO::IPrimitive* currentNode,string em
 						&&	(strClassName.compare("random_select_state")==0))
 					{
 						vector<string>* jumpDest;
-						child->getPropertyByName("parameters",jumpDest);						
+						child->getPropertyByName("parameters",jumpDest);
 						for(uint k=0;k<jumpDest->size();k++)
 						{
 							ret+=spaceTo_(strName);
@@ -712,10 +712,10 @@ string	CGraphPlugin::parseStateMachine(NLLIGO::IPrimitive* currentNode,string em
 							ret+="->";
 							ret +=spaceTo_(jumpDest->at(k));
 							ret+= ";";
-							ret+=NL;							
+							ret+=NL;
 						}
 					}
-					
+
 				}
 				ret+=NL;
 			}
@@ -745,7 +745,7 @@ string	CGraphPlugin::parseStateMachine(NLLIGO::IPrimitive* currentNode,string em
 			vector<string>* jumpDest;
 			bool first=true;
 			child->getPropertyByName("parameters",jumpDest);
-			
+
 			ret += spaceTo_(strName) ;
 			ret +="_";
 			ret += emiterNode;
@@ -769,7 +769,7 @@ string	CGraphPlugin::parseStateMachine(NLLIGO::IPrimitive* currentNode,string em
 				ret +=resJump[1];
 				ret+= ";";
 				ret+=NL;
-				
+
 			}
 			ret+=emiterNode;
 			ret += "->";
@@ -782,11 +782,11 @@ string	CGraphPlugin::parseStateMachine(NLLIGO::IPrimitive* currentNode,string em
 		else
 		{
 			ret+=parseStateMachine(child,emiterNode,tailLabel,tag);
-			
+
 		}
-		
-		
-	}	
+
+
+	}
 	currentNode->getPropertyByName("class",strClassName);
 	currentNode->getPropertyByName("name",strName);
 	currentNode->getPropertyByName("action",strAction);
@@ -816,7 +816,7 @@ string	CGraphPlugin::parseStateMachine(NLLIGO::IPrimitive* currentNode,string em
 		ret+=NL;
 	}
 	return ret;
-	
+
 }
 
 bool CGraphPlugin::createBitmap (const string &tmpPath)
@@ -831,10 +831,10 @@ bool CGraphPlugin::createBitmap (const string &tmpPath)
 	}
 
 	WORD retour;
- 
-	if(retour=bitmap.load(pngLocation))	
-	{	
-		
+
+	if(retour=bitmap.load(pngLocation))
+	{
+
 		HBITMAP &_Hbmp=GraphDlg->_Hbmp;
 
 		HBITMAP &_Hdib=GraphDlg->_Hdib;
@@ -842,7 +842,7 @@ bool CGraphPlugin::createBitmap (const string &tmpPath)
 		BITMAPINFO &_DibBitmapInfo=GraphDlg->_DibBitmapInfo;;
 
 		uint8* &_DibBits=GraphDlg->_DibBits;
-		
+
 		_DibBitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFO);
 		_DibBitmapInfo.bmiHeader.biWidth = bitmap.getWidth();
 		_DibBitmapInfo.bmiHeader.biHeight = bitmap.getHeight();
@@ -857,8 +857,8 @@ bool CGraphPlugin::createBitmap (const string &tmpPath)
 
 		// Create the bitmap
 		HWND desktop = ::GetDesktopWindow();
-		HDC dc = ::GetDC (desktop);	
-		
+		HDC dc = ::GetDC (desktop);
+
 		nlverify(_Hdib = CreateDIBSection(dc, &_DibBitmapInfo, DIB_RGB_COLORS,
 		(void**)&_DibBits, NULL, 0));
 
@@ -920,7 +920,6 @@ void CGraphPlugin::unsetDlgGraph()
 	_PluginActive=false;
 }
 
-
 void CGraphPlugin::doSelection(const string& primPath)
 {
 	IPrimitive	*rootNode;
@@ -930,7 +929,7 @@ void CGraphPlugin::doSelection(const string& primPath)
 
 	if(_PluginAccess->getCurrentSelection().size()>0)
 	{
-		
+
 		try
 		{
 			rootNode=(IPrimitive*)_PluginAccess->getRootNode(_rootFileName);
@@ -938,9 +937,10 @@ void CGraphPlugin::doSelection(const string& primPath)
 			selectPrimByPath(rootNode,primPath,resSet);
 
 			_PluginAccess->setCurrentSelection(resSet);
-
-		}catch(exception e){
-			GraphDlg->MessageBox(e.what());
+		}
+		catch(const exception &e)
+		{
+			GraphDlg->MessageBox(nlUtf8ToTStr(e.what()));
 		}
 	}
 }

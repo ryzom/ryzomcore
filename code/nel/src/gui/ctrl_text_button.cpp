@@ -30,6 +30,9 @@ using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 NLMISC_REGISTER_OBJECT(CViewBase, CCtrlTextButton, std::string, "text_button");
 
@@ -43,8 +46,9 @@ namespace NLGUI
 		_BmpLeftW= _BmpMiddleW= _BmpRightW= _BmpH= 0;
 		_WMargin= 0;
 		_WMin= 0;
-		_TextX= -2;
-		_TextY= -2;
+		_HMin= 0;
+		_TextX= 0;
+		_TextY= 0;
 		_Setuped= false;
 		_ViewText= NULL;
 		_IsViewTextId= false;
@@ -119,6 +123,11 @@ namespace NLGUI
 		if( name == "wmin" )
 		{
 			return toString( _WMin );
+		}
+		else
+		if( name == "hmin" )
+		{
+			return toString( _HMin );
 		}
 		else
 		if( name == "hardtext" )
@@ -290,6 +299,14 @@ namespace NLGUI
 			sint32 i;
 			if( fromString( value, i ) )
 				_WMin = i;
+			return;
+		}
+		else
+		if( name == "hmin" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_HMin = i;
 			return;
 		}
 		else
@@ -466,6 +483,7 @@ namespace NLGUI
 
 		xmlNewProp( node, BAD_CAST "wmargin", BAD_CAST toString( _WMargin ).c_str() );
 		xmlNewProp( node, BAD_CAST "wmin", BAD_CAST toString( _WMin ).c_str() );
+		xmlNewProp( node, BAD_CAST "hmin", BAD_CAST toString( _HMin ).c_str() );
 		xmlNewProp( node, BAD_CAST "hardtext", BAD_CAST _ViewText->getText().toString().c_str() );
 		xmlNewProp( node, BAD_CAST "text_y", BAD_CAST toString( _TextY ).c_str() );
 		xmlNewProp( node, BAD_CAST "text_x", BAD_CAST toString( _TextX ).c_str() );
@@ -515,7 +533,6 @@ namespace NLGUI
 			nlinfo(tmp.c_str());
 			return false;
 		}
-
 
 		// *** Read Textures.
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_normal" );
@@ -601,8 +618,17 @@ namespace NLGUI
 		// _WMin is at least the size of All W Bitmaps
 		_WMin= max(_WMin, _BmpLeftW + _BmpMiddleW + _BmpRightW);
 
+		// hmin
+		_HMin= 0;
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"hmin" );
+		if (prop)
+		{
+			fromString((const char *) prop, _HMin);
+		}
+		_HMin= max(_HMin, _BmpH);
+
 		// TextY
-		_TextY= -2;
+		_TextY= 0;
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"text_y" );
 		if (prop)
 		{
@@ -700,6 +726,43 @@ namespace NLGUI
 		if (prop)	_TextHeaderColor= convertBool(prop);
 
 		return true;
+	}
+
+	// ***************************************************************************
+	void CCtrlTextButton::setTexture(const std::string &l, const std::string &m, const std::string &r, bool updateHeight)
+	{
+		nlctassert(NumTexture==3);
+		_TextureIdNormal[0].setTexture(l.c_str());
+		_TextureIdNormal[1].setTexture(m.c_str());
+		_TextureIdNormal[2].setTexture(r.c_str());
+
+		sint32 newH;
+
+		// Compute Bmp Sizes
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
+		rVR.getTextureSizeFromId(_TextureIdNormal[0], _BmpLeftW, newH);
+		rVR.getTextureSizeFromId(_TextureIdNormal[1], _BmpMiddleW, newH);
+		rVR.getTextureSizeFromId(_TextureIdNormal[2], _BmpRightW, newH);
+
+		if (updateHeight) _BmpH = newH;
+	}
+
+	// ***************************************************************************
+	void CCtrlTextButton::setTexturePushed(const std::string &l, const std::string &m, const std::string &r)
+	{
+		nlctassert(NumTexture==3);
+		_TextureIdPushed[0].setTexture(l.c_str());
+		_TextureIdPushed[1].setTexture(m.c_str());
+		_TextureIdPushed[2].setTexture(r.c_str());
+	}
+
+	// ***************************************************************************
+	void CCtrlTextButton::setTextureOver(const std::string &l, const std::string &m, const std::string &r)
+	{
+		nlctassert(NumTexture==3);
+		_TextureIdOver[0].setTexture(l.c_str());
+		_TextureIdOver[1].setTexture(m.c_str());
+		_TextureIdOver[2].setTexture(r.c_str());
 	}
 
 	// ***************************************************************************
@@ -896,7 +959,8 @@ namespace NLGUI
 		}
 		if (!(_SizeRef & 2))
 		{
-			_H= _BmpH;
+			_H= max(_BmpH, _ViewText->getH());
+			_H= max(_H, _HMin);
 		}
 
 		CViewBase::updateCoords();

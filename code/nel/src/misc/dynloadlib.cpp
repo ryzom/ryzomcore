@@ -32,7 +32,7 @@ NL_LIB_HANDLE nlLoadLibrary(const std::string &libName)
 {
 	NL_LIB_HANDLE res = 0;
 #ifdef NL_OS_WINDOWS
-	res = LoadLibraryW(utf8ToWide(libName));
+	res = LoadLibraryW(nlUtf8ToWide(libName));
 #elif defined(NL_OS_UNIX)
 	res = dlopen(libName.c_str(), RTLD_NOW);
 #else
@@ -255,7 +255,7 @@ void CLibrary::freeLibrary()
 		_PureNelLibrary = NULL;
 		_LibHandle = NULL;
 		_Ownership = false;
-		_LibFileName = "";
+		_LibFileName.clear();
 	}
 }
 

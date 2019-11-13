@@ -25,6 +25,10 @@
 
 #include <memory>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 static NLMISC::CRGBA GradientB2W[] = {NLMISC::CRGBA(0, 0, 0, 0), NLMISC::CRGBA(255, 255, 255, 255) };
@@ -33,7 +37,7 @@ static NLMISC::CRGBA GradientB2W[] = {NLMISC::CRGBA(0, 0, 0, 0), NLMISC::CRGBA(2
 static ITexture *CreateGradientTexture()
 {
 	NL_PS_FUNC(CreateGradientTexture)
-	std::auto_ptr<CTextureMem> tex(new CTextureMem((uint8 *) &GradientB2W,
+	CUniquePtr<CTextureMem> tex(new CTextureMem((uint8 *) &GradientB2W,
 												   sizeof(GradientB2W),
 												   false, /* dont delete */
 												   false, /* not a file */
@@ -75,7 +79,7 @@ CPSTailDot::~CPSTailDot()
 }
 
 //=======================================================
-void CPSTailDot::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSTailDot::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSTailDot_serial)
 

@@ -22,6 +22,10 @@
 #include "resource.h"
 #include "generate_dlg.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 // CGenerateDlg dialog
 
@@ -71,7 +75,7 @@ BOOL CGenerateDlg::OnInitDialog()
 	
 	// TODO: Add extra initialization here
 	for (uint32 i = 0; i < AllMaterials.size(); ++i)
-		ComboMaterial.InsertString(-1, AllMaterials[i].c_str());
+		ComboMaterial.InsertString(-1, nlUtf8ToTStr(AllMaterials[i]));
 
 	ComboMaterial.SetCurSel (0);
 
@@ -86,12 +90,12 @@ void CGenerateDlg::OnOK()
 
 	if (MinX > MaxX)
 	{
-		MessageBox ("MinX > MaxX", "Error", MB_OK|MB_ICONSTOP);
+		MessageBox (_T("MinX > MaxX"), _T("Error"), MB_OK|MB_ICONSTOP);
 		return;
 	}
 	if (MinY > MaxY)
 	{
-		MessageBox ("MinY > MaxY", "Error", MB_OK|MB_ICONSTOP);
+		MessageBox (_T("MinY > MaxY"), _T("Error"), MB_OK|MB_ICONSTOP);
 		return;
 	}
 	CDialog::OnOK();

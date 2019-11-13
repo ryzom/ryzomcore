@@ -37,7 +37,7 @@ namespace NLGUI
 	class CViewText : public CViewBase
 	{
 	public:
-		enum TTextMode { ClipWord, DontClipWord, Justified };
+		enum TTextMode { ClipWord, DontClipWord, Justified, Centered };
 	public:
 
 		DECLARE_UI_CLASS(CViewText)
@@ -70,6 +70,7 @@ namespace NLGUI
 		virtual void checkCoords();
 		virtual void updateCoords();
 		virtual	void onAddToGroup();
+		virtual void onInterfaceScaleChanged();
 
 		/// From CInterfaceElement
 		sint32	getMaxUsedW() const;
@@ -80,20 +81,27 @@ namespace NLGUI
 		/// Set
 
 		void setText (const ucstring &text);
-		void setFontSize (sint nFontSize);
+		void setFontName (const std::string &name);
+		void setFontSize (sint nFontSize, bool coef = true);
 		void setEmbolden (bool nEmbolden);
 		void setOblique (bool nOblique);
 		void setColor (const NLMISC::CRGBA &color);
 		void setShadow (bool bShadow);
 		void setShadowOutline (bool bShadowOutline);
 		void setShadowColor (const NLMISC::CRGBA &color);
+		void setShadowOffset (sint x, sint y);
 		void setLineMaxW (sint nMaxW, bool invalidate=true);
+		void setOverflowText(const ucstring &text) { _OverflowText = text; }
 		void setMultiLine (bool bMultiLine);
 		void setMultiLineSpace (sint nMultiLineSpace);
 		void setMultiLineMaxWOnly (bool state);
 		void setMultiLineClipEndSpace (bool state);	// use it for multiline edit box for instance
-		void setFirstLineX (uint firstLineX);
+		void setFirstLineX (sint firstLineX);
 		void setMultiMaxLine(uint l) { _MultiMaxLine = l; }
+		void setMultiMinLine(uint l) { _MultiMinLine = l; }
+
+		// Override chars used to compute font size
+		void setFontSizing(const std::string &chars, const std::string &fallback);
 
 		// Force only a subset of letter to be displayed. Default is 0/0xFFFFFFFF
 		void enableStringSelection(uint start, uint end);
@@ -103,17 +111,22 @@ namespace NLGUI
 
 		ucstring		getText() const		{ return _Text; }
 		sint			getFontSize() const;
+		std::string		getFontName() const { return _FontName; }
 		bool			getEmbolden() 		{ return _Embolden; }
 		bool			getOblique() 		{ return _Oblique; }
 		NLMISC::CRGBA	getColor()			{ return _Color; }
 		bool			getShadow()			{ return _Shadow; }
 		bool			getShadowOutline()	{ return _ShadowOutline; }
 		NLMISC::CRGBA	getShadowColor()	{ return _ShadowColor; }
+		void			getShadowOffset(sint &x, sint &y) { x = _ShadowX; y = _ShadowY; }
 		sint			getLineMaxW()		const { return _LineMaxW; }
+		ucstring		getOverflowText()	const { return _OverflowText; }
 		bool			getMultiLine() const		{ return _MultiLine; }
 		sint			getMultiLineSpace()	const	{ return _MultiLineSpace; }
 		bool			getMultiLineMaxWOnly()	const	{ return _MultiLineMaxWOnly; }
 		uint32			getMultiMaxLine() const { return _MultiMaxLine; }
+		uint32			getMultiMinLine() const { return _MultiMinLine; }
+		uint32			getMultiMinOffsetY() const;
 
 		// get current Hint font width, in pixels
 		uint            getFontWidth() const;
@@ -121,6 +134,8 @@ namespace NLGUI
 		uint            getFontHeight() const;
 		// get current font leg height, in pixels
 		uint            getFontLegHeight() const;
+		// get current line height, in pixels
+		float           getLineHeight() const;
 		// Set the display mode (supported with multiline only for now)
 		void			setTextMode(TTextMode mode);
 		TTextMode		getTextMode() const	{ return _TextMode; }
@@ -141,11 +156,11 @@ namespace NLGUI
 		  *  When looking at standard edit box, we see that if a line is split accross to line with no
 		  * This also returns the height of the line
 		  */
-		void getCharacterPositionFromIndex(sint index, bool lineEnd, sint &x, sint &y, sint &height) const;
+		void getCharacterPositionFromIndex(sint index, bool lineEnd, float &x, float &y, float &height) const;
 		/** From a coordinate relative to the BR BR corner of the text, return the index of a character.
 		  * If no character is found at the given position, the closest character is returned (first or last character, for the line or the whole text)
 		  */
-		void getCharacterIndexFromPosition(sint x, sint y, uint &index, bool &lineEnd) const;
+		void getCharacterIndexFromPosition(float x, float y, uint &index, bool &lineEnd) const;
 		/** From a character index, get the index of the line it belongs to, or -1 if the index is invalid
 		  * \param cursorDisplayedAtEndOfPreviousLine true if the cursor is displayed at the end of the previous line that match its index
 		  */
@@ -224,22 +239,32 @@ namespace NLGUI
 		uint _Index;
 		/// info on the computed String associated to this text control
 		NL3D::UTextContext::CStringInfo _Info;
+		/// Font name to get TextContext
+		std::string _FontName;
 		/// the font size
 		sint	_FontSize;
+		bool	_FontSizeCoef;
 		bool	_Embolden;
 		bool	_Oblique;
 		// width of the font in pixel. Just a Hint for tabing format (computed with '_')
-		uint	_FontWidth;
+		float	_FontWidth;
+		// strings to use when computing font size
+		ucstring _FontSizingChars;
+		ucstring _FontSizingFallback;
 		// height of the font in pixel.
 		// use getFontHeight
-		uint	_FontHeight;
-		uint	_FontLegHeight;
+		float	_FontHeight;
+		float	_FontLegHeight;
 		float	_SpaceWidth;
+		/// last UI scale used to calculate font size
+		float	_Scale;
 		/// the text color
 		NLMISC::CRGBA _Color;
 		/// the shadow mode
 		bool	_Shadow;
 		bool	_ShadowOutline;
+		sint32	_ShadowX;
+		sint32	_ShadowY;
 		/// the case mode
 		TCaseMode	_CaseMode;
 		/// the text shadow color
@@ -249,6 +274,7 @@ namespace NLGUI
 		sint32		_LineMaxW;
 		/// For single line, true if the text is clamped (ie displayed with "...")
 		bool		_SingleLineTextClamped;
+		ucstring	_OverflowText;
 
 		/// Multiple lines handling
 		bool		 _MultiLine;
@@ -259,6 +285,7 @@ namespace NLGUI
 		sint		_MultiLineSpace;
 		sint		_LastMultiLineMaxW;
 		uint32		_MultiMaxLine;
+		uint32		_MultiMinLine;
 
 
 		/// FormatTag handling
@@ -316,7 +343,7 @@ namespace NLGUI
 				CFormatInfo							Format;
 			public:
 				// build from a string, using the current text context
-				void build(const ucstring &text, uint numSpaces= 0);
+				void build(const ucstring &text, NL3D::UTextContext &textContext, uint numSpaces= 0);
 		};
 		typedef std::vector<CWord> TWordVect;
 
@@ -327,10 +354,10 @@ namespace NLGUI
 				// ctor
 				CLine();
 				// Clear the line & remove text contexts
-				void clear();
+				void clear(NL3D::UTextContext &textContext);
 				// Add a new word (and its context) in the line + a number of spaces to append at the end of the line
-				void	addWord(const ucstring &word, uint numSpaces, const CFormatInfo &wordFormat, uint fontWidth);
-				void    addWord(const CWord &word, uint fontWidth);
+				void	addWord(const ucstring &word, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext);
+				void    addWord(const CWord &word, float fontWidth);
 				uint	getNumWords() const { return (uint)_Words.size(); }
 				CWord   &getWord(uint index) { return _Words[index]; }
 				float	getSpaceWidth() const { return _SpaceWidth; }
@@ -390,7 +417,7 @@ namespace NLGUI
 		uint	_TextSelectionEnd;
 
 		// First line X coordinate
-		uint	_FirstLineX;
+		float	_FirstLineX;
 
 		/// Dynamic tooltips
 		std::vector<CCtrlToolTip*>	_Tooltips;
@@ -415,9 +442,9 @@ namespace NLGUI
 		// Clear all the lines and free their datas
 		void clearLines();
 		// Update in the case of a multiline text
-		void updateTextContextMultiLine(uint nMaxWidth);
+		void updateTextContextMultiLine(float nMaxWidth);
 		// Update in the case of a multiline text with justification
-		void updateTextContextMultiLineJustified(uint nMaxWidth, bool expandSpaces);
+		void updateTextContextMultiLineJustified(float nMaxWidth, bool expandSpaces);
 		// Recompute font size info
 		void computeFontSize ();
 

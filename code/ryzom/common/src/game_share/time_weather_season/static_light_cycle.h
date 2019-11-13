@@ -41,7 +41,7 @@ public:
 		float NightToDayHour;
 
 		/// serialize
-		void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serial( DayHour );
 			f.serial( DayToDuskHour );
@@ -54,7 +54,7 @@ public:
 	std::vector< SLightCycle > LightCycles;
 
 	/// serialize
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serialCont( LightCycles );
 	}

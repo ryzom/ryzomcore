@@ -1938,6 +1938,10 @@ char *yytext;
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 /* Constantes */
 
 // WARNING!!!! DEBUG_PRINTF are commented using // so IT MUST HAVE NO INSTRUCTION AFTER A DEBUG_PRINTF OR THEY LL BE COMMENTED

@@ -58,7 +58,7 @@ void CAttackIDSheet::build(const NLGEORGES::UFormElm &item, const std::string &p
 }
 
 // *****************************************************************************************
-void CAttackIDSheet::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAttackIDSheet::serial(NLMISC::IStream &f)
 {
 	f.serialEnum(Type);
 	switch(Type)
@@ -96,7 +96,7 @@ void CAttackIDSheet::CSpellInfo::build(const NLGEORGES::UFormElm &item, const st
 }
 
 // *****************************************************************************************
-void CAttackIDSheet::CSpellInfo::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAttackIDSheet::CSpellInfo::serial(NLMISC::IStream &f)
 {
 	f.serialEnum(Mode);
 	f.serialEnum(ID);

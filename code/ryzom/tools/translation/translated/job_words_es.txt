@@ -1,0 +1,33 @@
+﻿*HASH_VALUE	job ID	name	* noms français	ia	da	p	pia	pda
+_7B0C6949087BEF17	IreFighter	Berserker	guerrier fou 	un	el	Berserkers	unos	los
+_DA264262C82FA5E4	Swashbuckler	Espadachín	bretteur	un	el	Espadachines	unos	los
+_FF1001FD1B8460C5	KamicFist	Puño Kámico	poing kamique	un	el	Puños Kámicos	unos	los
+_E9959ADC3E303D21	BladeBearer	Portacuchillos	porte lame	un	el	Portacuchillos	unos	los
+_AF5E35F1250C04D2	WindChild	Hijo del Viento	enfant des vents	un	el	Hijos del Viento	unos	los
+_2F47F87A6F381C99	Runner	Corredor	courreur	un	el	Corredores	unos	los
+_73AAF09AE4B710A3	Scout	Explorador	éclaireur	un	el	Exploradores	unos	los
+_C66185C2249CA8A6	FireLance	Lancero de Fuego	lance-feu	un	el	Lanceros de Fuego	unos	los
+_296AE474AB790894	Witherer	Marchitador	fletrisseur	un	el	Marchitadores	unos	los
+_AD68C069ED7714A0	Fouler	Pestilente	pestilent	un	el	Pestilentes	unos	los
+_B290F10227B8C8B3	Disturber	Perturbador	troubleur d'esprit	un	el	Perturbadores	unos	los
+_0250C5039B06F5C8	KamicFury	Furia Kámica	furie kamique	una	la	Furias Kámicas	unas	las
+_757B279C53FC9BAB	SpiritualShield	Escudo Espiritual	bouclier spirituel	un	el	Escudos Espirituales	unos	los
+_EE4990771C86D494	Faker	Farsante	trompeur	un	el	Farsantes	unos	los
+_A045250E026EC63E	WindGuardian	Guardián del Viento	gardien des vents	un	el	Guardianes del Viento	unos	los
+_0B806EC710885A48	KamicGuardian	Guardián Kamico	bouclier kamique	un	el	Guardianes Kamicos	unos	los
+_C4438A71C41C6642	SecondBreath	Segundo Aliento	second souffle	un	el	Segundos Alientos	unos	los
+_2FE51E469C502DFD	LifeStealer	Ladrón de Vida	voleur de vie	un	el	Ladrones de Vida	unos	los
+_FEBE4D8AEEBD5D18	SecondLife	Segunda Vida	seconde vie	una	la	Segundas Vidas	unas	las
+_B7AF21058A5F88E1	SapCristal	Cristal de Savia	cristal de sève	un	el	Cristales de Savia	unos	los
+_DE48CAEB05734249	ScarletHunter	Cazador Escarlata	chasseur écarlate	un	el	Cazadores Escarlata	unos	los
+_31D7E2E30551753A	GreenHunter	Cazador Verde	chasseur vert	un	el	Cazadores del Verdes	unos	los
+_06635A6B444DEE4C	ShadowHunter	Cazador de las Sombras	chasseur de l'ombre	un	el	Cazadores de las Sombras	unos	los
+_99D26A1506D4F24B	AtysGuardian	Guardián de Atys	gardien d'atys	un	el	Guardianes de Atys	unos	los
+_2BB7F7E25BC3D54D	SandCaravanner	Caravanero de las Arenas	caravanier des sables	un	el	Caravaneros de las Arenas	unos	los
+_7CD608D036D57BF2	ImperialSupplier	Proveedor Imperial	pourvoyeur impérial	un	el	Proveedores Imperiales	unos	los
+_6C49C893E6B9849D	Steward	Mayordomo	intendants	un	el	Mayordomos	unos	los
+_A8C84C6F6A9710A2	Hawker	Vendedor Ambulante	colporteurs	un	el	Vendedores Ambulantes	unos	los
+_44BE25E43BDAF009	FireMaster	Maestro del Fuego	maitre du feu	un	el	Maestros del Fuego	unos	los
+_0BF32E6C860E7A26	FlowerMaster	Maestro de las Flores	maitre des fleurs	un	el	Maestros de las Flores	unos	los
+_802D1DEA3BDAF002	LakeMaster	Maestro de los Lagos	maitre des lacs 	un	el	Maestros de los Lagos	unos	los
+_348DF50C62FA70BB	SapMaster	Maestro de la Savia	maitre de la sève	un	el	Maestros de la Savia	unos	los

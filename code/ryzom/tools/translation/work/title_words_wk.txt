@@ -1,0 +1,1912 @@
+﻿title_id	name	women_name
+gn_apprentice_tracer	Apprenti Traceur	
+gn_bandit_bountybeaches_1	Blood Rooters	
+gn_bandit_bountybeaches_2	Bounty Snatchers	
+gn_bandit_bountybeaches_3	Infamous Five	
+gn_bandit_citiesofintuition_1	Birds Of Omen	
+gn_bandit_citiesofintuition_2	Zora Kovans	
+gn_bandit_citiesofintuition_3	Eyes of Intuition	
+gn_bandit_dunesofexil_1	Ridge Ravagers	
+gn_bandit_dunesofexil_2	Waylayers	
+gn_bandit_dunesofexil_3	Dyron Dragons	
+gn_bandit_dunesofexil_4	Firebooters	
+gn_bandit_enchantedisle_1	Tyler's Rippers	
+gn_bandit_enchantedisle_2	Magicians of Malice	
+gn_bandit_enchantedisle_3	Bucking Mektoubs	
+gn_bandit_fleetinggarden_1	Green Ravishers	
+gn_bandit_fleetinggarden_2	Deadened Eyes	
+gn_bandit_fleetinggarden_3	High Watchers	
+gn_bandit_fleetinggarden_4	Fleeting Lords	
+gn_bandit_fleetinggarden_5	Seed Addicts	
+gn_bandit_forbidden_depths_1	Eva's Empalers	
+gn_bandit_forbidden_depths_2	Slicers	
+gn_bandit_forbidden_depths_3	Beastie Bandits	
+gn_bandit_forbidden_depths_4	Dragon Dodgers	
+gn_bandit_frahartowers_1	Canyon Creepers	
+gn_bandit_frahartowers_2	Stunning Stavons	
+gn_bandit_frahartowers_3	Swords of Fury	
+gn_bandit_frahartowers_4	Frahar Blazers	
+gn_bandit_gate_of_obscurity_1	Heart Breakers	
+gn_bandit_gate_of_obscurity_2	Merchants of Terror	
+gn_bandit_gate_of_obscurity_3	Valley Busters	
+gn_bandit_gate_of_obscurity_4	Scarlet Loafers	
+gn_bandit_groveofconfusion_1	Madding Maids	
+gn_bandit_groveofconfusion_2	Grove Tyrants	
+gn_bandit_groveofconfusion_3	Slashing Slathes	
+gn_bandit_groveofumbra_1	Killer Queens	
+gn_bandit_groveofumbra_2	Spleen Busters	
+gn_bandit_groveofumbra_3	Black Lams	
+gn_bandit_groveofumbra_4	Dare Doers	
+gn_bandit_havenofpurity_1	Skelter Punks	
+gn_bandit_havenofpurity_2	Homin Hounders	
+gn_bandit_havenofpurity_3	Flights of Fury	
+gn_bandit_hereticshovel_1	Channel Gaugers	
+gn_bandit_hereticshovel_2	Heathens of the Hovel	
+gn_bandit_hereticshovel_3	Hovel Spooks	
+gn_bandit_hiddensource_1	Spoilers	
+gn_bandit_hiddensource_2	Hell Raisers	
+gn_bandit_hiddensource_3	Jena's Cuss	
+gn_bandit_imperialdunes_1	Eye of the Dragon	
+gn_bandit_imperialdunes_2	Dune Stalkers	
+gn_bandit_imperialdunes_3	Pyr Crushers	
+gn_bandit_imperialdunes_4	Pagans of Pyr	
+gn_bandit_knollofdissent_1	Border Raiders	
+gn_bandit_knollofdissent_2	Casters of Dissent	
+gn_bandit_knollofdissent_3	Highcliff Riders	
+gn_bandit_knollofdissent_4	Cut-throats	
+gn_bandit_knollofdissent_5	Thrashers	
+gn_bandit_knollofdissent_6	Firebooters	
+gn_bandit_knotofdementia_1	Browbeat Brothers	
+gn_bandit_knotofdementia_2	Zora's Thorn	
+gn_bandit_knotofdementia_3	Zora Springers	
+gn_bandit_lagoonsofloria_1	Swamp Slouchers	
+gn_bandit_lagoonsofloria_2	Lagoon Fylers	
+gn_bandit_lagoonsofloria_3	Diller's Mates	
+gn_bandit_lagoonsofloria_4	Mire Mates	
+gn_bandit_lagoonsofloria_5	Damning Dames	
+gn_bandit_lagoonsofloria_6	Seven Swords of Sin	
+gn_bandit_libertylake_1	Liberty Pirates	
+gn_bandit_libertylake_2	Cristabell Skinners	
+gn_bandit_libertylake_3	Friends of Fury	
+gn_bandit_maidengrove_1	Shadow Bandits	
+gn_bandit_maidengrove_2	Plain Scourers	
+gn_bandit_maidengrove_3	Lake Loafers	
+gn_bandit_majesticgarden_1	Wrath of Natae	
+gn_bandit_majesticgarden_2	Turn of the Tide	
+gn_bandit_majesticgarden_3	Davae's Clutch	
+gn_bandit_majesticgarden_4	Avalae Charmers	
+gn_bandit_majesticgarden_5	Border Blights	
+gn_bandit_nexus_1	Rebels of the West	
+gn_bandit_nexus_2	Highwatchers	
+gn_bandit_nexus_3	Nexus Stranglers	
+gn_bandit_nexus_4	Casters of the Knot	
+gn_bandit_oflovaksoasis_1	Dragon Breath	
+gn_bandit_oflovaksoasis_2	Shadow Riders	
+gn_bandit_oflovaksoasis_3	Dragonfire Angels	
+gn_bandit_oflovaksoasis_4	Hothead Hackers	
+gn_bandit_outlawcanyon_1	Canyon Outlaws	
+gn_bandit_outlawcanyon_2	Fighting Flames	
+gn_bandit_outlawcanyon_3	Buccaneers	
+gn_bandit_sawdustmines_1	Vinni's Rapiers	
+gn_bandit_sawdustmines_2	Bone Breakers	
+gn_bandit_sawdustmines_3	Bandits of the Wooded Dunes	
+gn_bandit_the_abyss_of_ichor_1	Death Mongers	
+gn_bandit_the_abyss_of_ichor_2	Slayers of Ichor	
+gn_bandit_the_abyss_of_ichor_3	Sentinels of the Sap	
+gn_bandit_the_abyss_of_ichor_4	Marauders	
+gn_bandit_the_elusive_forest_1	Flaxen Fiends	
+gn_bandit_the_elusive_forest_2	Brown Braves	
+gn_bandit_the_elusive_forest_3	Green Grief	
+gn_bandit_the_land_of_continuty_1	Shadow Zoners	
+gn_bandit_the_land_of_continuty_2	Prime Root Princes	
+gn_bandit_the_land_of_continuty_3	Cavern Cranks	
+gn_bandit_the_land_of_continuty_4	Dragon Dudes	
+gn_bandit_the_land_of_continuty_5	Diehard Ditchers	
+gn_bandit_the_sunken_city_1	Soul Sisters	
+gn_bandit_the_sunken_city_2	Rattlers	
+gn_bandit_the_sunken_city_3	Ripping Jaks	
+gn_bandit_the_sunken_city_4	Loving Goo-drops	
+gn_bandit_the_trench_of_trials_1	Blasters	
+gn_bandit_the_trench_of_trials_2	Highland Heathens	
+gn_bandit_the_trench_of_trials_3	Bigmount Bandits	
+gn_bandit_the_under_spring_1	Underspring Lynchers	
+gn_bandit_the_under_spring_2	Cooky's Cranks	
+gn_bandit_the_under_spring_3	Spooky Stavons	
+gn_bandit_the_under_spring_4	Silencers	
+gn_bandit_the_windy_gate_1	Heartbreak Babes	
+gn_bandit_the_windy_gate_2	Windy Gate Wipers	
+gn_bandit_the_windy_gate_3	Spirit Catchers	
+gn_bandit_thefount_1	Prakkers	
+gn_bandit_thefount_2	Fount Gaffers	
+gn_bandit_thefount_3	Flibusters of the Fount	
+gn_bandit_thefount_4	Liberty Rangers	
+gn_bandit_thesavagedunes_1	Wicked of the Woods	
+gn_bandit_thesavagedunes_2	Savage Slashers	
+gn_bandit_thesavagedunes_3	Canal Daggers	
+gn_bandit_thesavagedunes_4	Thieves of Thesos	
+gn_bandit_thescorchedcorridor_1	Underground Slicers	
+gn_bandit_thescorchedcorridor_2	Tunnel Hounds	
+gn_bandit_thescorchedcorridor_3	Alleyway Strays	
+gn_bandit_thevoid_1	Underwood Rebels	
+gn_bandit_thevoid_2	Goo Grapplers	
+gn_bandit_thevoid_3	Villains of the Void	
+gn_bandit_upperbog_1	Sap Rakers	
+gn_bandit_upperbog_2	Bushwhacks	
+gn_bandit_upperbog_3	Stalia Rovers	
+gn_bandit_windsofmuse_1	Muse Tumblers	
+gn_bandit_windsofmuse_2	Cliff Tanners	
+gn_bandit_windsofmuse_3	Muse Muggers	
+gn_bandit_windsofmuse_4	Wicked Winds of the West	
+gn_class_apprentice_trader	Apprenti Négociant	
+gn_class_arcane_apprentice	Magicien d'Elite Initié	
+gn_class_arcane_master	Magicien d'Elite Chevronné	
+gn_class_archery_lord	Grand Tireur Chevronné	
+gn_class_archery_master	Grand Tireur Initié	
+gn_class_archery_recruit	Grand Tireur Novice	
+gn_class_assassin	Puissant Tireur Novice	
+gn_class_bodyguard	Escorteur	
+gn_class_bowmen	Tireur Régulier Novice	
+gn_class_captain	Guerrier Maître Initié	
+gn_class_charm_adept	Puissant Magicien Novice	
+gn_class_charm_expert	Puissant Magicien Initié	
+gn_class_cleric	Guérisseur d'Élite Chevronné	
+gn_class_conjurer	Grand Magicien Chevronné	
+gn_class_conscript	Guerrier Régulier Novice	
+gn_class_cure_adept	Guérisseur Maître Novice	
+gn_class_cure_expert	Guérisseur Maître Chevronné	
+gn_class_cure_master	Guérisseur Maître Initié	
+gn_class_elite	Guerrier d'Élite Novice	
+gn_class_executionner	Puissant Tireur Initié	
+gn_class_expert	Guerrier d'Elite Initié	
+gn_class_fighter	Puissant guerrier Initié	
+gn_class_forager	Récolteur	
+gn_class_healing_apprentice	Guérisseur Régulier Novice	
+gn_class_legionnaire	Puissant Guerrier Novice	
+gn_class_life_surgeon	Guérisseur d'Elite Initié	
+gn_class_magician	Magicien Maître Chevronné	
+gn_class_major	Guerrier Maître Novice	
+gn_class_medic	Grand Guérisseur Initié	
+gn_class_milician	Gardien	
+gn_class_mystical_adept	Magicien Maître Novice	
+gn_class_mystical_expert	Magicien Maître Initié	
+gn_class_noble	Compagnon	
+gn_class_priest	Guérisseur d'Elite Novice	
+gn_class_private	Grand Guerrier Initié	
+gn_class_professional	Puissant Tireur Chevronné	
+gn_class_range_adept	Tireur Régulier Chevronné	
+gn_class_range_master	Tireur d'Elite Chevronné	
+gn_class_recruit	Guerrier Régulier Initié	
+gn_class_ritual_master	Grand Guérisseur Chevronné	
+gn_class_sergent	Puissant Guerrier Chevronné	
+gn_class_shaman	Grand Guérisseur Novice	
+gn_class_shooting_elite	Tireur d'Elite Novice	
+gn_class_shooting_lord	Tireur d'Elite Initié	
+gn_class_soldier	Guerrier Régulier Chevronné	
+gn_class_sorcerer	Magicien d'Elite Novice	
+gn_class_sorcery_apprentice	Grand Magicien Novice	
+gn_class_sorcery_master	Grand Magicien Initié	
+gn_class_spellcaster	Grand Magicien Novice	
+gn_class_throwing_adept	Tireur Maître Novice	
+gn_class_throwing_expert	Tireur Maître Initié	
+gn_class_throwing_master	Tireur Maître Chevronné	
+gn_class_trader	Explorateur	
+gn_class_traveler	Voyageur	
+gn_class_treat_adept	Puissant Guérisseur Initié	
+gn_class_treat_apprentice	Puissant Guérisseur Novice	
+gn_class_trooper	Grand Guerrier Novice	
+gn_class_warchief	Guerrier Maître Chevronné	
+gn_class_warlock	Puissant Magicien Chevronné	
+gn_class_warlord	Guerrier d'Elite Chevronné	
+gn_class_warmaster	Maître de Guerre	
+gn_class_warrior	Grand Guerrier Chevronné	
+gn_darkeningsap_static_guard_5	Garde	
+gn_forager	Récolteur	
+gn_fraharhunters_guards_w_10	Puissant Garde	
+gn_fyros_defender	Défenseur Fyros	
+gn_fyros_officer	Officier Fyros	
+gn_green_seed_noble	Chef de Guerre Régulier	
+gn_green_seed_volunteer	Volontaire Régulier	
+gn_guard_inv_1	Garde	
+gn_guard_inv_2	Garde	
+gn_kami_sentinel	Sentinelle des Kamis	
+gn_karavan_guard_h_1	Gardien de la Karavan	
+gn_karavan_guardian	Gardien de la Karavan	
+gn_levier_volunteer	Volontaire Régulier	
+gn_leviers_noble	Chef de Guerre Régulier	
+gn_matis_officer	Officier Matis	
+gn_matis_voluteer	Défenseur Matis	
+gn_mystical__adept	Magicien Maître Novice	
+gn_professionnal	Puissant Tireur Chevronné	
+gn_zorai_officer	Officier Zoraï	
+gn_zorai_voluteer_f	Défenseur Zoraï	
+fct_steward	 (Régisseur)	
+fct_k_pactgiver	 (Donneur de Pactes Kamis)	
+fct_kv_pactgiver	 (Donneur de Pactes Karavans)	
+fct_kitin_mg_1	 (Observateur de la Menace Kitin)	
+fct_kitin_mg_2	 (Observateur de la Menace Kitin)	
+fct_kitin_mg_3	 (Observateur de la Menace Kitin)	
+fct_kitin_mg_4	 (Observateur de la Menace Kitin)	
+fct_goo_obs	 (Observateur de la Goo)	
+fct_bg	 (Garde du Corps)	
+fct_kami_adept	 (Adepte des Kamis)	
+fct_larmor_merchant	 (Marchand d'Armures Légères)	
+fct_marmor_merchant	 (Marchand d'Armures Moyennes)	
+fct_harmor_merchant	 (Marchand d'Armures Lourdes)	
+fct_ctool_merchant	 (Marchand d'Outils de Création)	
+fct_ttool_merchant	 (Marchand d'Outils de Dressage)	
+fct_htool_merchant	 (Marchand d'Outils de Récolte)	
+fct_shield_merchant	 (Marchand de Boucliers)	
+fct_ammo_merchant	 (Marchand de Munitions)	
+fct_rangeweapon_merchant	 (Marchand d'Armes de Tir)	
+fct_meleeweapon_merchant	 (Marchand d'Armes de Mêlée)	
+fct_stableboy_merchant	 (Palefrenier)	
+fct_rm_merchant	 (Marchand de Matières Premières)	
+fct_jewel_merchant	 (Marchand de Bijoux)	
+fct_tool_merchant	 (Marchand d'Outils)	
+fct_plarmor_merchant	 (Marchand de Composition d'Armures Légères)	
+fct_pmarmor_merchant	 (Marchand de Composition d'Armures Moyennes)	
+fct_pharmor_merchant	 (Marchand de Composition d'Armures Lourdes)	
+fct_parmor_merchant	 (Marchand de Composition d'Armures)	
+fct_pctool_merchant	 (Marchand de Composition d'Outils de Création)	
+fct_pttool_merchant	 (Marchand de Composition d'Outils de Dressage)	
+fct_phtool_merchant	 (Marchand de Composition d'Outils de Récolte)	
+fct_ptool_merchant	 (Marchand de Composition d'Outils)	
+fct_pshield_merchant	 (Marchand de Composition de Boucliers)	
+fct_pammo_merchant	 (Marchand de Composition de Munitions)	
+fct_prangeweapon_merchant	 (Marchand de Composition d'Armes de Tir)	
+fct_pmeleeweapon_merchant	 (Marchand de Composition d'Armes de Mêlée)	
+fct_prm_merchant	 (Marchand de Composition de Matières Premières)	
+fct_pjewel_merchant	 (Marchand de Composition de Bijoux)	
+fct_mf_welcomer	 (Hôte des Guildes de Combattants de Mêlée)	
+fct_rf_welcomer	 (Hôte des Guildes de Combattants à Distance)	
+fct_mh_welcomer	 (Hôte des Guildes de Guérisseurs)	
+fct_mb_welcomer	 (Hôte des Guildes de Buffers)	
+fct_ma_welcomer	 (Hôte des Guildes d'Attaquants)	
+fct_t_welcomer	 (Hôte des Guildes de Marchands)	
+fct_h_welcomer	 (Hôte des Guildes de Rangers)	
+fct_f_welcomer	 (Hôte des Guildes d'Artisans)	
+fct_welcomer	 (Hôte des Guildes)	
+fct_p_caretaker	 (Gardien d'Immeuble d'Homins)	
+fct_g_caretaker	 (Gardien d'Immeuble de Guildes)	
+fct_caretaker	 (Gardien d'Immeuble)	
+fct_mf_chief	 (Chef des Guildes de Combattants de Mêlée)	
+fct_rf_chief	 (Chef des Guildes de Combattants à Distance)	
+fct_mh_chief	 (Chef des Guildes de Guérisseurs)	
+fct_mb_chief	 (Chef des Guildes de Buffers)	
+fct_ma_chief	 (Chef des Guildes d'Attaquants)	
+fct_t_chief	 (Chef des Guildes de Marchands)	
+fct_h_chief	 (Chef des Guildes de Récolteurs)	
+fct_f_chief	 (Chef des Guildes d'Artisans)	
+fct_mission_officer	 (Officier de Missions)	
+fct_mv_guard	 (Garde d'Yrkanis)	
+fct_mv_guardchief	 (Chef des Gardes d'Yrkanis)	
+fct_ma_guard	 (Garde de Natae)	
+fct_ma_guardchief	 (Chef des Gardes de Natae)	
+fct_mb_guard	 (Garde de Davae)	
+fct_mb_guardchief	 (Chef des Gardes de Davae)	
+fct_mc_guard	 (Garde d'Avalae)	
+fct_mc_guardchief	 (Chef des Gardes d'Avalae)	
+fct_mf_guard	 (Garde des Frontières)	
+fct_tax_collector	 (Percepteur des impôts)	
+fct_tribe_chief	 (Chef de Tribu)	
+fct_barman	 (Barman)	
+fct_mayor	 (Maire)	
+fct_amayor	 (Assistant du Maire)	
+fct_natae_chief	 (Chef du Village de Natae)	
+fct_davae_chief	 (Chef du Village de Davae)	
+fct_avalae_chief	 (Chef du Village d'Avalae)	
+fct_counselor	 (Conseiller du Roi)	
+fct_cutthroat	 (Egorgeur Matis)	
+fct_bandit_chief	 (Chef des Bandits)	
+fct_mv_intendant	 (Intendant d'Yrkanis)	
+fct_ma_intendant	 (Intendant de Natae)	
+fct_mb_intendant	 (Intendant de Davae)	
+fct_mc_intendant	 (Intendant d'Avalae)	
+fct_zv_intendant	 (Intendant de Zora)	
+fct_za_intendant	 (Intendant de Jen-Laï)	
+fct_zb_intendant	 (Intendant de Min-Cho)	
+fct_zc_intendant	 (Intendant d'Hoï-Cho)	
+fct_fv_intendant	 (Intendant de Pyr)	
+fct_fa_intendant	 (Intendant de Thesos)	
+fct_fb_intendant	 (Intendant de Dyron)	
+fct_tv_intendant	 (Intendant de Fairhaven)	
+fct_ta_intendant	 (Intendant de Windermeer)	
+fct_tc_intendant	 (Intendant de Crystabell)	
+fct_tb_intendant	 (Intendant d'Avendale)	
+fct_zv_guard	 (Garde de Zora)	
+fct_zv_guardchief	 (Chef des Gardes de Zora)	
+fct_za_guard	 (Garde de Jen-Laï)	
+fct_za_guardchief	 (Chef des Gardes de Jen-Laï)	
+fct_zb_guard	 (Garde de Min-Cho)	
+fct_zb_guardchief	 (Chef des Gardes de Min-Cho)	
+fct_zc_guard	 (Garde d'Hoï-Cho)	
+fct_zc_guardchief	 (Chef des Gardes d'Hoï-Cho)	
+fct_fv_guard	 (Garde de Pyr)	
+fct_fv_guardchief	 (Chef des Gardes de Pyr)	
+fct_fv_rookieguard	 (Garde de Pyr Débutant)	
+fct_fa_guardchief	 (Chef des Gardes de Thesos)	
+fct_fa_guard	 (Garde de Thesos)	
+fct_fb_guardchief	 (Chef des Gardes de Dyron)	
+fct_fb_guard	 (Garde de Dyron)	
+fct_ff_guard	 (Garde des Frontières)	
+fct_tv_guard	 (Garde de Fairhaven)	
+fct_tv_guardchief	 (Chef des Gardes de Fairhaven)	
+fct_ta_guard	 (Garde de Windermeer)	
+fct_ta_guardchief	 (Chef des Gardes de Windermeer)	
+fct_tc_guard	 (Garde de Crystabell)	
+fct_tc_guardchief	 (Chef des Gardes de Crystabell)	
+fct_tb_guard	 (Garde d'Avendale)	
+fct_tb_guardchief	 (Chef des Gardes d'Avendale)	
+fct_zf_guard	 (Garde des Frontières)	
+fct_stablegirl_merchant	 (Palefrenière)	
+fct_barmaid	 (Barmaid)	
+fct_civil		
+fct_sage	 (Sage)	
+fct_craftsman	 (Artisan)	
+fct_supplier	 (Fournisseur)	
+fct_hunter	 (Chasseur)	
+fct_hunter_chief	 (Chef des Chasseurs)	
+fct_bandit	 (Bandit)	
+fct_actor	 (Acteur)	
+fct_actress	 (Actrice)	
+fct_kami_master	 (Maître Kami)	
+fct_karavan_officer	 (Officier de la Karavan)	
+fct_newb_welcomer	 (Hôte d'Accueil)	
+fct_newb_a	 (Garde de Stalli)	
+fct_newb_a_chief	 (Chef des Gardes de Stalli)	
+fct_newb_b	 (Garde de Borea)	
+fct_newb_b_chief	 (Chef des Gardes de Borea)	
+fct_newb_c	 (Garde de Nistia)	
+fct_newb_c_chief	 (Chef des Gardes de Nistia)	
+fct_newb_d	 (Garde de Rosilio)	
+fct_newb_d_chief	 (Chef des Gardes de Rosilio)	
+fct_newb_e	 (Garde de Miani)	
+fct_newb_e_chief	 (Chef des Gardes de Miani)	
+fct_newb_za	 (Garde de Qaï-Lo)	
+fct_newb_za_chief	 (Chef des Gardes de Qaï-Lo)	
+fct_newb_zc	 (Garde de Nen-Xing)	
+fct_newb_zc_chief	 (Chef des Gardes de Nen-Xing)	
+fct_newb_zb	 (Garde de Sheng-Wo)	
+fct_newb_zb_chief	 (Chef des Gardes de Sheng-Wo)	
+fct_newb_ze	 (Garde de Yin-Piang)	
+fct_newb_ze_chief	 (Chef des Gardes de Yin-Piang)	
+fct_newb_zd	 (Garde de Koï-Zun)	
+fct_newb_zd_chief	 (Chef des Gardes de Koï-Zun)	
+fct_newb_fa	 (Garde d'Aegus)	
+fct_newb_fa_chief	 (Chef des Gardes d'Aegus)	
+fct_newb_fc	 (Garde de Sekovix)	
+fct_newb_fc_chief	 (Chef des Gardes de Sekovix)	
+fct_newb_fb	 (Garde de Kaemon)	
+fct_newb_fb_chief	 (Chef des Gardes de Kaemon)	
+fct_newb_fe	 (Garde de Galemus)	
+fct_newb_fe_chief	 (Chef des Gardes de Galemus)	
+fct_newb_fd	 (Garde de Phyxon)	
+fct_newb_fd_chief	 (Chef des Gardes de Phyxon)	
+fct_newb_ta	 (Garde d'Aubermouth)	
+fct_newb_ta_chief	 (Chef des Gardes d'Aubermouth)	
+fct_newb_tb	 (Garde de Barkdell)	
+fct_newb_tb_chief	 (Chef des Gardes de Barkdell)	
+fct_newb_tc	 (Garde d'Hobwelly)	
+fct_newb_tc_chief	 (Chef des Gardes d'Hobwelly)	
+fct_newb_td	 (Garde de Waverton)	
+fct_newb_td_chief	 (Chef des Gardes de Waverton)	
+fct_newb_te	 (Garde de Dingleton)	
+fct_newb_te_chief	 (Chef des Gardes de Dingleton)	
+fct_registar	 (Clerc de Guildes)	
+fct_ins_f	 (Instructeur en Combat)	
+fct_ins_m	 (Instructeur en Magie)	
+fct_ins_r	 (Instructeur en Artisanat)	
+fct_ins_h	 (Instructeur en Récolte)	
+fct_mf_rolemaster	 (Maître de Rôle des Guildes de Combattants de Mêlée)	
+fct_rf_rolemaster	 (Maître de Rôle des Guildes de Combattants à Distance)	
+fct_c_rolemaster	 (Maître de Rôle des Guildes de Combattants)	
+fct_mh_rolemaster	 (Maître de Rôle des Guildes de Guérisseurs)	
+fct_mb_rolemaster	 (Maître de Rôle des Guildes de Buffers)	
+fct_ma_rolemaster	 (Maître de Rôle des Guildes d'Attaquants)	
+fct_m_rolemaster	 (Maître de Rôle des Guildes de Magie)	
+fct_t_rolemaster	 (Maître de Rôle des Guildes de Marchands)	
+fct_h_rolemaster	 (Maître de Rôle des Guildes de Récolteurs)	
+fct_f_rolemaster	 (Maître de Rôle des Guildes d'Artisans)	
+fct_f_trainer	 (Entraîneur de Combattants)	
+fct_m_trainer	 (Entraîneur de Magiciens)	
+fct_c_trainer	 (Entraîneur d'Artisans)	
+fct_h_trainer	 (Entraîneur de Récolteurs)	
+fct_f_guild_trainer	 (Entraîneur des Guildes de Combattants)	
+fct_m_guild_trainer	 (Entraîneur des Guildes de Magiciens)	
+fct_c_guild_trainer	 (Entraîneur des Guildes d'Artisans)	
+fct_h_guild_trainer	 (Entraîneur des Guildes de Récolteurs)	
+fct_guild_we	 (Hôte d'Accueil)	
+fct_guild_rm_craft	 (Maître de Rôle en Artisanat)	
+fct_guild_rm_fight	 (Maître de Rôle en Combat)	
+fct_guild_rm_magic	 (Maître de Rôle en Magie)	
+fct_scout	 (Eclaireur)	
+fct_ambassador	 (Ambassadeur)	
+fct_corporal	 (Caporal)	
+fct_sergent	 (Sergent)	
+fct_captain	 (Capitaine)	
+fct_city_welcomer	 (Hôte d'Accueil des Villes)	
+fct_village_welcomer	 (Hôte d'Accueil des Villages)	
+fct_foreman_apprentice	 (Apprenti Contremaître)	
+fct_foreman	 (Contremaître)	
+fct_foreman_master	 (Contremaître Expert)	
+fct_hawker	 (Colporteur)	
+fct_journeyman	 (Compagnon Artisan)	
+fct_kami_ambassador	 (Ambassadeur Kami)	
+fct_kami_welcomer	 (Hôte d'Accueil Kami)	
+fct_karavan_ambassador	 (Ambassadeur de la Karavan)	
+fct_karavan_agent	 (Agent de la Karavan)	
+fct_karavan_welcomer	 (Hôte d'Accueil de la Karavan)	
+fct_local_messenger	 (Messager Local)	
+fct_frontiers_messenger	 (Messager des Frontières)	
+fct_outlands_messenger	 (Messager des Terres Lointaines)	
+fct_patrolman	 (Patrouilleur)	
+fct_prospector	 (Prospecteur)	
+fct_tribe_welcomer	 (Hôte d'Accueil des Tribus)	
+fct_local_supplier	 (Fournisseur Local)	
+fct_frontiers_supplier	 (Fournisseur des Frontières)	
+fct_outlands_supplier	 (Fournisseur des Terres Lointaines)	
+fct_outpost_steward	 (Régisseur de l'Avant-Poste)	
+fct_outpost_steward_tribe	 (Régisseur Tribal de l'Avant-Poste)	
+fct_outpost_officer	 (Officier des Avant-Postes)	
+fct_outpost_officer_tribe	 (Officier Tribal des Avant-Postes)	
+Refugee	Réfugié	Réfugiée
+Homin	Homin	Homine
+Novice_Artisan	Artisan Débutant	Artisane Débutante
+Novice_Warrior	Guerrier Débutant	Guerrière Débutante
+Novice_Harvester	Récolteur Débutant	Récolteur Débutant
+Novice_Magician	Magicien Débutant	Magicienne Débutante
+Artisan_Apprentice	Apprenti Artisan 	Apprentie Artisane
+Warrior_Apprentice	Apprenti Guerrier 	Apprentie Guerrière
+Magician_Apprentice	Apprenti Magicien 	Apprentie Magicienne
+Fyros_Artisan_Apprentice	Apprenti Artisan Fyros 	Apprentie Artisane Fyros 
+Matis_Artisan_Apprentice	Apprenti Artisan Matis 	Apprentie Artisane Matis 
+Tryker_Artisan_Apprentice	Apprenti Artisan Tryker 	Apprentie Artisane Tryker 
+Zorai_Artisan_Apprentice	Apprenti Artisan Zoraï 	Apprentie Artisane Zoraï 
+Melee_Warrior_Apprentice	Apprenti Guerrier de Mêlée 	Apprentie Guerrière de Mêlée 
+Sniper_Apprentice	Apprenti Sniper 	Apprentie Sniper 
+Fyros_Armorer_Apprentice	Apprenti Armurier Fyros	Apprenti Armurier Fyros
+Fyros_Jeweler_Apprentice	Apprenti Bijoutier Fyros	Apprentie Bijoutière Fyros
+Fyros_Weapon_Smith_Apprentice	Apprenti Forgeron Fyros	Apprenti Forgeron Fyros
+Fyros_Munitioner_Apprentice	Apprenti Forgeron/Munitions Fyros	Apprenti Forgeron/Munitions Fyros
+Fyros_Gun_Smith_Apprentice	Apprenti Forgeron/Armes à Feu Fyros	Apprenti Forgeron/Armes à Feu Fyros
+Fyros_Shield_Smith_Apprentice	Apprenti Forgeron/Boucliers Fyros	Apprenti Forgeron/Boucliers Fyros
+Matis_Armorer_Apprentice	Apprenti Armurier Matis	Apprenti Armurier Matis
+Matis_Jeweler_Apprentice	Apprenti Bijoutier Matis	Apprentie Bijoutière Matis
+Matis_Weapon_Smith_Apprentice	Apprenti Forgeron/Armes Matis	Apprenti Forgeron/Armes Matis
+Matis_Munitioner_Apprentice	Apprenti Forgeron/Munitions Matis	Apprenti Forgeron/Munitions Matis
+Matis_Gun_Smith_Apprentice	Apprenti Forgeron/Armes à Feu Matis	Apprenti Forgeron/Armes à Feu Matis
+Matis_Shield_Smith_Apprentice	Apprenti Forgeron/Boucliers Matis	Apprenti Forgeron/Boucliers Matis
+Tryker_Armorer_Apprentice	Apprenti Armurier Tryker	Apprenti Armurier Tryker
+Tryker_Jeweler_Apprentice	Apprenti Bijoutier Tryker	Apprentie Bijoutière Tryker
+Tryker_Weapon_Smith_Apprentice	Apprenti Forgeron/Armes Trykers	Apprenti Forgeron/Armes Trykers
+Tryker_Munitioner_Apprentice	Apprenti Forgeron/Munitions Trykers	Apprenti Forgeron/Munitions Trykers
+Tryker_Gun_Smith_Apprentice	Apprenti Forgeron/Armes à Feu Trykers	Apprenti Forgeron/Armes à Feu Trykers
+Tryker_Shield_Smith_Apprentice	Apprenti Forgeron/Boucliers Trykers	Apprenti Forgeron/Boucliers Trykers
+Zorai_Armorer_Apprentice	Apprenti Armurier Zoraï	Apprenti Armurier Zoraï
+Zorai_Jeweler_Apprentice	Apprenti Bijoutier Zoraï	Apprentie Bijoutière Zoraï
+Zorai_Weapon_Smith_Apprentice	Apprenti Forgeron/Armes Zoraïs	Apprenti Forgeron/Armes Zoraïs
+Zorai_Munitioner_Apprentice	Apprenti Forgeron/Munitions Zoraïs	Apprenti Forgeron/Munitions Zoraïs
+Zorai_Gun_Smith_Apprentice	Apprenti Forgeron/Armes à Feu Zoraïs	Apprenti Forgeron/Armes à Feu Zoraïs
+Zorai_Shield_Smith_Apprentice	Apprenti Forgeron/Boucliers Zoraïs	Apprenti Forgeron/Boucliers Zoraïs
+Melee_Warrior	Guerrier de Mêlée	Guerrière de Mêlée
+Range_Fighter	Combattant à Distance	Combattante à Distance
+Light_Armsman	Maître d'Armes Légères	Maître d'Armes Légères
+Heavy_Armsman	Maître d'Armes Lourdes	Maître d'Armes Lourdes
+Gunman	Maître d'Armes à Feu	Maître d'Armes à Feu
+Heavy_Gunman	Maître d'Armes à Feu Lourdes	Maître d'Armes à Feu Lourdes
+Advanced_Gunman	Initié en Armes à Feu	Initiée en Armes à Feu
+Advanced_Heavy_Gunman	Initié en Armes à Feu Lourdes	Initiée en Armes à Feu Lourdes
+Bludgeoner	Matraqueur	Matraqueuse
+Skewerer	Embrocheur	Embrocheuse
+Slasher	Entailleur	Entailleuse
+Smasher	Cogneur	Cogneuse
+Impaler	Empaleur	Empaleuse
+Cleaver	Fendeur	Fendeuse
+Bowman	Archer	Archer
+Heavy_Bowman	Archer Lourd Maître	Archer Lourd Maître
+Pistoleer	Tireur Maître	Tireuse Maître
+Heavy_Artilleryman	Artilleur Lourd	Artilleur Lourd
+Crossbowman	Archer Croisé	Archer Croisé
+Artilleryman	Artilleur	Artilleur
+Rifleman	Fusilier	Fusilier
+Maceman	Expert en Massues	Experte en Massues
+Brute	Brute	Brute
+Knifeman	Expert en Couteaux	Experte en Couteaux
+Spearman	Hastaire	Hastaire
+Axeman	Expert en Hache	Experte en Hache
+Swordsman	Epéiste	Epéiste
+Heavy_Maceman	Expert en Massues Lourdes	Experte en Massues Lourdes
+Pikeman	Piquier	Piquier
+Heavy_Axeman	Expert en Haches Lourdes	Experte en Haches Lourdes
+Heavy_Swordsman	Expert en Epées Lourdes	Experte en Epées Lourdes
+Master_Bowman	Maître Archer	Maître Archer
+Master_Heavy_Bowman	Maître Archer Lourd	Maître Archer Lourd
+Master_Pistoleer	Maître Tireur	Maître Tireur
+Master_Heavy_Artilleryman	Maître Artilleur Lourd	Maître Artilleur Lourd
+Master_Crossbowman	Maître Fantassin à Arc	Maître Fantassin à Arc
+Master_Artilleryman	Maître Artilleur	Maître Artilleur
+Master_Rifleman	Maître Fusilier	Maître Fusilier
+Master_Maceman	Maître en Massues	Maître en Massues
+Master_Brute	Maître Brute	Maître Brute
+Master_Knifeman	Maître en Couteaux	Maître en Couteaux
+Master_Spearman	Maître Hastaire	Maître Hastaire
+Master_Axeman	Maître en Haches	Maître en Haches
+Master_Swordsman	Maître Epéiste	Maître Epéiste
+Master_Heavy_Maceman	Maître en Massues Lourdes	Maître en Massues Lourdes
+Master_Pikeman	Maître Piquier	Maître Piquier
+Master_Heavy_Axeman	Maître en Haches Lourdes	Maître en Haches Lourdes
+Master_Heavy_Swordsman	Maître Epéiste Lourd	Maître Epéiste Lourd
+Master_Hand_To_Hand_Fighter	Maître Combattant à Mains Nues	Maître Combattant à Mains Nues
+Hand_To_Hand_Fighter	Combattant à Mains Nues	Combattante à Mains Nues
+Close_Fighter	Combattant de Mêlée	Combattante de Mêlée
+Advanced_Close_Fighter	Combattant de Mêlée Initié	Combattante de Mêlée Initiée
+Defensive_Magician	Magicien Défensif	Magicienne Défensive
+Offensive_Magician	Magicien Offensif	Magicienne Offensive
+Elementalist_Apprentice	Apprenti Elémentaliste	Apprentie Elémentaliste
+Mentalist	Mentaliste	Mentaliste
+Enchanter	Enchanteur	Enchanteresse
+Summoner	Invoqueur	Invoqueur
+Master_Of_Illusion	Maître de l'Illusion	Maîtresse de l'Illusion
+Mind_Lord	Seigneur de l'Esprit	Seigneur de l'Esprit
+Healer	Guérisseur	Guérisseuse
+Shaman	Chaman	Chaman
+Priest	Prêtre	Prêtresse
+Master_Of_Life	Maître de la Vie	Maîtresse de la Vie
+Celestial_Guardian	Gardien Céleste	Gardienne Céleste
+Black_Mage	Mage Noir	Mage Noir
+Affliction_Bringer	Porteur d'Affliction	Porteuse d'Affliction
+Master_Of_Torment	Maître des Tourments	Maîtresse des Tourments
+Avatar_Of_Sorrow	Avatar des Regrets	Avatar des Regrets
+Destroyer	Destructeur	Destructrice
+Warlock	Sorcier	Sorcière
+Archmage	Archimage	Archimage
+Master_Of_Pain	Maître de la Souffrance	Maîtresse de la Souffrance
+Avatar_Of_Destruction	Avatar de Destruction	Avatar de Destruction
+Elementalist	Elémentaliste	Elémentaliste
+Alchemist	Alchimiste	Alchimiste
+Biomancer	Biomanceur	Biomanceur
+Master_Of_Energies	Maître des Energies	Maîtresse des Energies
+Chosen_Of_Atys	Elu d'Atys	Elue d'Atys
+Title00079	Wayfarer	Wayfarer
+FBT	Ancien d'Atys	Ancienne d'Atys
+SGM	Maître de Jeu Senior	Maître de Jeu Senior
+GM	Maître de Jeu	Maître de Jeu
+VG	Guide Vétéran	Guide Vétéran
+SG	Guide Senior	Guide Senior
+G	Guide	Guide
+Armorer_Apprentice	Apprenti Armurier	Apprenti Armurier
+Jeweler_Apprentice	Apprenti Bijoutier	Apprentie Bijoutière
+Melee_Weapon_Smith_Apprentice	Apprenti Forgeron/Armes de Mêlée	Apprenti Forgeron/Armes de Mêlée
+Range_Weapon_Smith_Apprentice	Apprenti Forgeron/Armes de Tir	Apprenti Forgeron/Armes de Tir
+Heavy_Armorer	Armurier Lourd	Armurier Lourd
+Light_Armorer	Armurier Léger	Armurier Léger
+Medium_Armorer	Armurier Moyen	Armurier Moyen
+Shield_Smith	Forgeron/Boucliers	Forgeron/Boucliers
+Jeweler	Bijoutier	Bijoutière
+Melee_Weapon_Smith	Forgeron/Armes de Mêlée	Forgeron/Armes de Mêlée
+Melee_Heavy_Weapon_Smith	Forgeron/Armes de Mêlée Lourdes	Forgeron/Armes de Mêlée Lourdes
+Melee_Light_Weapon_Smith	Forgeron/Armes de Mêlée Légères	Forgeron/Armes de Mêlée Légères
+Range_Weapon_Smith	Forgeron/Armes de Tir	Forgeron/Armes de Tir
+Range_Heavy_Weapon_Smith	Forgeron/Armes de Tir Lourdes	Forgeron/Armes de Tir Lourdes
+Advanced_Heavy_Armorer	Armurier Lourd Avancé	Armurier Lourd Avancé
+Advanced_Light_Armorer	Armurier Léger Avancé	Armurier Léger Avancé
+Advanced_Medium_Armorer	Armurier Moyen Avancé	Armurier Moyen Avancé
+Advanced_Shield_Smith	Forgeron Avancé/Boucliers	Forgeron Avancé/Boucliers
+Advanced_Jeweler	Bijoutier Avancé	Bijoutière Avancée
+Advanced_Melee_Weapon_Smith	Forgeron Avancé/Armes de Mêlée	Forgeron Avancé/Armes de Mêlée
+Advanced_Melee_Heavy_Weapon_Smith	Forgeron Avancé/Armes de Mêlée Lourdes	Forgeron Avancé/Armes de Mêlée Lourdes
+Advanced_Melee_Light_Weapon_Smith	Forgeron Avancé/Armes de Mêlée Légères 	Forgeron Avancé/Armes de Mêlée Légères 
+Advanced_Range_Weapon_Smith	Forgeron Avancé/Armes de Tir	Forgeron Avancé/Armes de Tir
+Advanced_Range_Heavy_Weapon_Smith	Forgeron Avancé/Armes de Tir Lourdes	Forgeron Avancé/Armes de Tir Lourdes
+Expert_Heavy_Armorer	Armurier Lourd Expert	Armurier Lourd Expert
+Expert_Light_Armorer	Armurier Léger Expert	Armurier Léger Expert
+Expert_Medium_Armorer	Armurier Moyen Expert	Armurier Moyen Expert
+Expert_Shield_Smith	Forgeron Expert/Boucliers	Forgeron Expert/Boucliers
+Expert_Jeweler	Bijoutier Expert	Bijoutière Experte
+Expert_Melee_Weapon_Smith	Forgeron Expert/Armes de Mêlée	Forgeron Expert/Armes de Mêlée
+Expert_Melee_Heavy_Weapon_Smith	Forgeron Expert/Armes de Mêlée Lourdes	Forgeron Expert/Armes de Mêlée Lourdes
+Expert_Melee_Light_Weapon_Smith	Forgeron Expert/Armes de Mêlée Légères 	Forgeron Expert/Armes de Mêlée Légères 
+Expert_Range_Weapon_Smith	Forgeron Expert/Armes de Tir 	Forgeron Expert/Armes de Tir 
+Expert_Range_Heavy_Weapon_Smith	Forgeron Expert/Armes de Tir Lourdes	Forgeron Expert/Armes de Tir Lourdes
+Heavy_Armorer_Master	Maître Armurier Lourd	Maître Armurier Lourd
+Light_Armorer_Master	Maître Armurier Léger	Maître Armurier Léger
+Medium_Armorer_Master	Maître Armurier Moyen	Maître Armurier Moyen
+Shield_Smith_Master	Maître Forgeron/Boucliers	Maître Forgeron/Boucliers
+Jeweler_Master	Maître Bijoutier	Maître Bijoutier
+Melee_Weapon_Smith_Master	Maître Forgeron/Armes de Mêlée	Maître Forgeron/Armes de Mêlée
+Melee_Heavy_Weapon_Smith_Master	Maître Forgeron/Armes de Mêlée Lourdes	Maître Forgeron/Armes de Mêlée Lourdes
+Melee_Light_Weapon_Smith_Master	Maître Forgeron/Armes de Mêlée Légères	Maître Forgeron/Armes de Mêlée Légères
+Range_Weapon_Smith_Master	Maître Forgeron/Armes de Tir	Maître Forgeron/Armes de Tir
+Range_Heavy_Weapon_Smith_Master	Maître Forgeron/Armes de Tir Lourdes	Maître Forgeron/Armes de Tir Lourdes
+Forager_Apprentice	Apprenti Foreur	Apprenti Foreur
+Forager	Foreur	Foreur
+Desert_Forager	Foreur du Désert	Foreur du Désert
+Forest_Forager	Foreur des Forêts	Foreur des Forêts
+Jungle_Forager	Foreur de la Jungle	Foreur de la Jungle
+Lacustre_Forager	Foreur des Lacs	Foreur des Lacs
+Prime_Roots_Forager	Foreur des Primes Racines	Foreur des Primes Racines
+Advanced_Desert_Forager	Foreur Avancé du Désert	Foreur Avancé du Désert
+Advanced_Forest_Forager	Foreur Avancé des Forêts	Foreur Avancé des Forêts
+Advanced_Jungle_Forager	Foreur Avancé de la Jungle	Foreur Avancé de la Jungle
+Advanced_Lacustre_Forager	Foreur Avancé des Lacs	Foreur Avancé des Lacs
+Advanced_Prime_Roots_Forager	Foreur Avancé des Primes Racines	Foreur Avancé des Primes Racines
+Expert_Desert_Forager	Foreur Expert du Désert	Foreur Expert du Désert
+Expert_Forest_Forager	Foreur Expert des Forêts	Foreur Expert des Forêts
+Expert_Jungle_Forager	Foreur Expert de la Jungle	Foreur Expert de la Jungle
+Expert_Lacustre_Forager	Foreur Expert des Lacs	Foreur Expert des Lacs
+Expert_Prime_Roots_Forager	Foreur Expert des Primes Racines	Foreur Expert des Primes Racines
+Master_Desert_Forager	Maître Foreur du Désert	Maître Foreur du Désert
+Master_Forest_Forager	Maître Foreur des Forêts	Maître Foreur des Forêts
+Master_Jungle_Forager	Maître Foreur de la Jungle	Maître Foreur de la Jungle
+Master_Lacustre_Forager	Maître Foreur des Lacs	Maître Foreur des Lacs
+Master_Prime_Roots_Forager	Maître Foreur des Primes Racines	Maître Foreur des Primes Racines
+gn_green_seed_comrade	Chef Régulier	
+gn_kitin_gatherers-magician_guard	Garde Maître	
+gn_kitin_gatheres_wander_guards	Garde Maître	
+gn_matis_defender	Défenseur Matis	
+gn_recoverers_guard_6	Garde Maître	
+gn_zorai_voluteer_m	Défenseur Zoraï	
+gn_antikamis_guard	Garde Maître	
+gn_arid_matis_guard	Garde Maître	
+gn_barkers_guard	Garde Puissant	
+gn_beachcombers_guard	Garde Maître	
+gn_black_circle_guard	Garde Maître	
+gn_cholorogoos_guard	Garde Puissant	
+gn_company_eternal_guard_havenofpurity	Garde Puissant	
+gn_company_eternal_guard_nexus	Garde Puissant	
+gn_corsairs_guard	Garde Régulier	
+gn_darkeningsap_guard	Garde Maître	
+gn_duneriders_guard	Garde Maître	
+gn_ecowarriors_guard	Garde Maître	
+gn_first_deserters_guard	Garde Puissant	
+gn_fraharhunters_guard	Garde Puissant	
+gn_fraharhunters_guards	Garde Puissant	
+gn_frahars_guard	Garde d'Elite	
+gn_gooheads_guard	Garde Maître	
+gn_green_seed_guard	Garde Régulier	
+gn_hamazans_guard	Grand Garde	
+gn_iconeworshipers_guard	Garde Régulier	
+gn_kitin_gatherers_guard	Garde Maître	
+gn_lawless_guard	Garde Maître	
+gn_leviers_guard	Garde Régulier	
+gn_matisian_border_guards_guard	Garde Puissant	
+gn_nightturner_guard	Garde Puissant	
+gn_oasis_diggers_guard	Garde Maître	
+gn_pyromancers_guard	Garde Maître	
+gn_recoverers_guard	Garde Maître	
+gn_renegades_guard	Garde Maître	
+gn_restorers_guard	Garde d'Elite	
+gn_sacredsap_guard	Grand Garde	
+gn_sap_gleaners_guard	Garde Maître	
+gn_sap_slaves_guard	Garde d'Elite	
+gn_scorchers_guard	Garde d'Elite	
+gn_shadowrunners_guard	Grand Garde	
+gn_siblings_guard	Grand Garde	
+gn_silt_sculptors_guard	Grand Garde	
+gn_slash_and_burn_guard	Garde Maître	
+gn_slavers_guard	Garde Maître	
+gn_smugglers_guard	Garde Puissant	
+gn_tutor_guard	Garde Puissant	
+gn_water_breakers_guard	Grand Garde	
+gn_woven_bridles_guard	Garde Maître	
+gn_zorai_kami_sentinel	Sentinelle Kami	
+Fighter	Combattant	
+Magician	Magicien	
+Craftsman	Artisan	
+MeleeFighter	Combattant de Mêlée	
+RangeFighter	Combattant à Distance	
+AttackCaster	Attaquant	
+BufferCaster	Buffer	
+HealerCaster	Guérisseur	
+Harvester	Récolteur	
+Shopkeeper	Marchand	
+Faber	Artisan	
+IreFighter	Combattant Agressif	
+Swashbuckler	Bretteur	
+KamicFist	Poing Kamic	
+BladeBearer	Porteur de Lames	
+WindChild	Enfant des Vents	
+Runner	Coureur	
+Scout	Eclaireur	
+FireLance	Lanceur de Flammes	
+ScarletHunter	Chasseur Ecarlate	
+GreenHunter	Chasseur Vert	
+AtysGuardian	Gardien d'Atys	
+ShadowHunter	Chasseur de L'Ombre	
+Witherer	Fletrisseur	
+Fouler	Contamineur	
+Disturber	Troubleur d'Esprits	
+KamicFury	Furie Kamique	
+SpiritualShield	Bouclier Spirituel	
+Faker	Feinteur	
+WindGuardian	Gardien des Vents	
+KamicGuardian	Gardien Kamic	
+Unknown	Inconnu	
+SecondBreath	Second Souffle	
+LifeStealer	Voleur de Vies	
+SecondLife	Seconde Vie	
+SapCristal	Cristal de Sève	
+SandCaravanner	Caravannier des Sables	
+ImperialSupplier	Fournisseur Impérial	
+Steward	Régisseur	
+Hawker	Colporteur	
+range_warrior	Guerrier à Distance	
+harvester	Récolteur	
+attack_magician	Attaquant	
+buffer_magician	Buffer	
+healer_magician	Guérisseur	
+faber	Artisan	
+FireMaster	Maître du Feu	
+LakeMaster	Maître des Lacs	
+gn_gibbay_guard	Garde d'Elite	
+gn_masters_of_the_goo_guard	Garde d'Elite	
+gn_tryker_tribe_slave	Esclave Tryker	
+CM	Administrateur de la Communauté	Administratrice de la Communauté
+EM	Administrateur des Evènements	Administratrice des Evènements
+EG	Guide des Evènements	Guide des Evènements
+OBSERVER	Observateur	Observatrice
+Kami_Ally	Champion Kami	
+Karavan_Ally	Champion Karavan	
+gn_aegus_kami_priest	Prêcheur Kami d'Aegus	
+gn_kaemon_kami_priest	Prêcheur Kami de Kaemon	
+gn_sekovix_kami_priest	Prêcheur Kami de Sekovix	
+gn_phyxon_kami_priest	Prêcheur Kami de Phyxon	
+gn_galemus_kami_priest	Prêcheur Kami de Galemus	
+gn_stalli_karavan_teleporter	Téléporteur Karavan de Stalli	
+gn_borea_karavan_teleporter	Téléporteur Karavan de Borea	
+gn_nistia_karavan_teleporter	Téléporteur Karavan de Nistia	
+gn_rosilio_karavan_teleporter	Téléporteur Karavan de Rosilio	
+gn_miani_karavan_teleporter	Téléporteur Karavan de Miani	
+gn_stalli_karavan_guide	Guide Karavan de Stalli	
+gn_borea_karavan_guide	Guide Karavan de Borea	
+gn_nistia_karavan_guide	Guide Karavan de Nistia	
+gn_rosilio_karavan_guide	Guide Karavan de Rosilio	
+gn_miani_karavan_guide	Guide Karavan de Miani	
+gn_qai_lo_kami_priest	Prêcheur Kami de Qai Lo	
+gn_sheng_wo_kami_priest	Prêcheur Kami de Sheng Wo	
+gn_men_xing_kami_priest	Prêcheur Kami de Men Xing	
+gn_koi_zun_kami_priest	Prêcheur Kami de Koi Zun	
+gn_yin_piang_kami_priest	Prêcheur Kami de Yin Piang	
+gn_aubermouth_karavan_teleporter	Téléporteur Karavan d'Aubermouth	
+gn_waverton_karavan_teleporter	Téléporteur Karavan de Waverton	
+gn_hobwelly_karavan_teleporter	Téléporteur Karavan d'Hobwelly	
+gn_dingleton_karavan_teleporter	Téléporteur Karavan de Dingleton	
+gn_barkdell_karavan_teleporter	Téléporteur Karavan de Barkdell	
+gn_aubermouth_karavan_guide	Guide Karavan d'Aubermouth	
+gn_waverton_karavan_guide	Guide Karavan de Waverton	
+gn_hobwelly_karavan_guide	Guide Karavan d'Hobwelly	
+gn_dingleton_karavan_guide	Guide Karavan de Dingleton	
+gn_barkdell_karavan_guide	Guide Karavan de Barkdell	
+gn_karavan_agent	Agent Karavan	
+gn_ancientdryads_kami_ambassador_m1	Ambassadeur Kami des Dryades	
+gn_beachcombers_kami_ambassador_t1	Ambassadeur Kami des Déferlants	
+gn_cockroaches_kami_ambassador_p1	Ambassadeur Kami des Cancrelats	
+gn_company_kami_ambassador_p1	Ambassadeur Kami de la Compagnie de l'Arbre Eternel	
+gn_company_kami_ambassador_z1	Ambassadeur Kami de la Compagnie de l'Arbre Eternel	
+gn_corsairs_kami_ambassador_t1	Ambassadeur Kami des Corsaires	
+gn_duneriders_kami_ambassador_f1	Ambassadeur Kami des Sauvages	
+gn_ecowarriors_kami_ambassador_m1	Ambassadeur Kami des Embourbés	
+gn_firstdeserters_kami_ambassador_m1	Ambassadeur Kami des Bagnards	
+gn_fraharhunters_kami_ambassador_f1	Ambassadeur Kami des Chasseurs de Frahars	
+gn_hamazans_kami_ambassador_z1	Ambassadeur Kami des Amazones Matis	
+gn_kami_welcomer_f1	Hôte Kami des Dunes de l'Exil	
+gn_kami_welcomer_f2	Hôte Kami des Tours de Frahar	
+gn_kami_welcomer_f3	Hôte Kami des Dunes Impériales	
+gn_kami_welcomer_f4	Hôte Kami de l'Oasis d'Oflovak	
+gn_kami_welcomer_f5	Hôte Kami du Canyon Interdit	
+gn_kami_welcomer_f6	Hôte Kami des Mines de Sciure	
+gn_kami_welcomer_f7	Hôte Kami des Dunes Sauvages	
+gn_kami_welcomer_f8	Hôte Kami du Couloir Brûlé	
+gn_kami_welcomer_m1	Hôte Kami du Jardin Fugace	
+gn_kami_welcomer_m2	Hôte Kami du Bosquet de la Confusion	
+gn_kami_welcomer_m3	Hôte Kami de la Masure de l'Hérétique	
+gn_kami_welcomer_m4	Hôte Kami de la Source Cachée	
+gn_kami_welcomer_m5	Hôte Kami du Monticule du Dissentiment	
+gn_kami_welcomer_m6	Hôte Kami des Jardins Majestueux	
+gn_kami_welcomer_m7	Hôte Kami du Marais Supérieur	
+gn_kami_welcomer_p1	Hôte Kami des Profondeurs Interdites	
+gn_kami_welcomer_p10	Hôte Kami de la Porte des Vents	
+gn_kami_welcomer_p2	Hôte Kami de la Porte de l'Obscurité	
+gn_kami_welcomer_p3	Hôte Kami du Nexus	
+gn_kami_welcomer_p4	Hôte Kami du Gouffre d'Ichor	
+gn_kami_welcomer_p5	Hôte Kami de la Forêt Insaisissable	
+gn_kami_welcomer_p6	Hôte Kami de la Terre de la Continuité	
+gn_kami_welcomer_p7	Hôte Kami de la Cité Engloutie	
+gn_kami_welcomer_p8	Hôte Kami de la Fosse aux Epreuves	
+gn_kami_welcomer_p9	Hôte Kami des Sources Interdites	
+gn_kami_welcomer_t1	Hôte Kami des Plages d'Abondance	
+gn_kami_welcomer_t2	Hôte Kami des Chutes de la Rosée	
+gn_kami_welcomer_t3	Hôte Kami de l'Ile Enchantée	
+gn_kami_welcomer_t4	Hôte Kami des Lagons de Loria	
+gn_kami_welcomer_t5	Hôte Kami du Lac de la Liberté	
+gn_kami_welcomer_t6	Hôte Kami de l'Eau du Repos	
+gn_kami_welcomer_t7	Hôte Kami de la Source	
+gn_kami_welcomer_t8	Hôte Kami des Vents du Songe	
+gn_kami_welcomer_z1	Hôte Kami des Cités de l'Intuition	
+gn_kami_welcomer_z2	Hôte Kami du Bosquet de l'Ombre	
+gn_kami_welcomer_z3	Hôte Kami du Havre de Pureté	
+gn_kami_welcomer_z4	Hôte Kami du Noeud de la Démence	
+gn_kami_welcomer_z5	Hôte Kami du Bosquet Vierge	
+gn_kami_welcomer_z6	Hôte Kami du Vide	
+gn_keepers_kami_ambassador_p1	Ambassadeur Kami des Mémoires	
+gn_lagoonbrothers_kami_ambassador_t1	Ambassadeur Kami des Frères de la Lagune	
+gn_leviers_kami_ambassador_f1	Ambassadeur Kami des Taxeurs	
+gn_pyromancers_kami_ambassador_p1	Ambassadeur Kami des Pyromanciennes	
+gn_recoverers_kami_ambassador_p1	Ambassadeur Kami des Recycleurs	
+gn_restorers_kami_ambassador_f1	Ambassadeur Kami des Veilleurs	
+gn_sacredsap_kami_ambassador_m1	Ambassadeur Kami de la Sève Sacrée	
+gn_sapgleaners_kami_ambassador_p1	Ambassadeur Kami des Sèves Sèches	
+gn_shadowrunners_kami_ambassador_z1	Ambassadeur Kami des Trafiquants des Ombres	
+gn_siblings_kami_ambassador_m1	Ambassadeur Kami des Frères des Plantes	
+gn_tutors_kami_ambassador_z1	Ambassadeur Kami des Tuteurs	
+gn_waterbreakers_kami_ambassador_f1	Ambassadeur Kami des Dresseurs d'Eau	
+gn_wovenbridles_kami_ambassador_m1	Ambassadeur Kami des Pillards du Désert	
+gn_zorai_kami_master	Maître Kami de la Montagne aux Cornes	
+gn_antikamis_karavan_ambassador_z1	Ambassadeur Karavan des Antekamis	
+gn_aridmatis_karavan_ambassador_m1	Ambassadeur Karavan des Matis Arides	
+gn_barkers_karavan_ambassador_f1	Ambassadeur Karavan des Percécorces	
+gn_blackcircle_karavan_ambassador_z1	Ambassadeur Karavan du Cercle Noir	
+gn_darkeningsap_karavan_ambassador_m1	Ambassadeur Karavan des Matisagoo	
+gn_gooheads_karavan_ambassador_z1	Ambassadeur Karavan des Illuminés	
+gn_greenseed_karavan_ambassador_m1	Ambassadeur Karavan des Graines Vertes	
+gn_karavan_welcomer_f1	Hôte Karavan des Dunes de l'Exil	
+gn_karavan_welcomer_f2	Hôte Karavan des Tours de Frahar	
+gn_karavan_welcomer_f3	Hôte Karavan des Dunes Impériales	
+gn_karavan_welcomer_f4	Hôte Karavan de l'Oasis d'Oflovak	
+gn_karavan_welcomer_f5	Hôte Karavan du Canyon Interdit 	
+gn_karavan_welcomer_f6	Hôte Karavan des Mines de Sciure 	
+gn_karavan_welcomer_f7	Hôte Karavan des Dunes Sauvages 	
+gn_karavan_welcomer_f8	Hôte Karavan du Couloir Brûlé 	
+gn_karavan_welcomer_m1	Hôte Karavan du Jardin Fugace 	
+gn_karavan_welcomer_m2	Hôte Karavan du Bosquet de la Confusion 	
+gn_karavan_welcomer_m3	Hôte Karavan de la Masure de l'Hérétique 	
+gn_karavan_welcomer_m4	Hôte Karavan de la Source Cachée 	
+gn_karavan_welcomer_m5	Hôte Karavan du Monticule du Dissentiment 	
+gn_karavan_welcomer_m6	Hôte Karavan des Jardins Majestueux 	
+gn_karavan_welcomer_m7	Hôte Karavan du Marais Supérieur 	
+gn_karavan_welcomer_p1	Hôte Karavan du Nexus	
+gn_karavan_welcomer_t1	Hôte Karavan des Plages d'Abondance 	
+gn_karavan_welcomer_t2	Hôte Karavan des Chutes de la Rosée 	
+gn_karavan_welcomer_t3	Hôte Karavan de l'Ile Enchantée 	
+gn_karavan_welcomer_t4	Hôte Karavan des Lagons de Loria 	
+gn_karavan_welcomer_t5	Hôte Karavan du Lac de la Liberté 	
+gn_karavan_welcomer_t6	Hôte Karavan de l'Eau du Repos 	
+gn_karavan_welcomer_t7	Hôte Karavan de la Source	
+gn_karavan_welcomer_t8	Hôte Karavan des Vents du Songe 	
+gn_karavan_welcomer_z1	Hôte Karavan des Cités de l'Intuition 	
+gn_karavan_welcomer_z2	Hôte Karavan du Bosquet de l'Ombre 	
+gn_karavan_welcomer_z3	Hôte Karavan du Havre de Pureté 	
+gn_karavan_welcomer_z4	Hôte Karavan du Noeud de la Démence 	
+gn_karavan_welcomer_z5	Hôte Karavan du Bosquet Vierge 	
+gn_karavan_welcomer_z6	Hôte Karavan du Vide	
+gn_kuilde_karavan_ambassador_p1	Ambassadeur Karavan de la Kuilde	
+gn_lawless_karavan_ambassador_f1	Amabassadeur Karavan des Sans Loi	
+gn_masters_karavan_ambassador_z1	Ambassadeur Karavan des Maîtres de la Goo	
+gn_matisianborder_karavan_ambassador_m1	Ambassadeur Karavan des Gardes-Frontières	
+gn_oasisdiggers_karavan_ambassador_m1	Ambassadeur Karavan des Puisatiers	
+gn_renegades_karavan_ambassador_f1	Ambassadeur Karavan des Renégats	
+gn_sapslaves_karavan_ambassador_m1	Ambassadeur Karavan des Esclaves de la Sève	
+gn_scorchers_karavan_ambassador_f1	Ambassadeur Karavan des Ecorchés	
+gn_siltsculptors_karavan_ambassador_t1	Ambassadeur Karavan des Sculpteurs de Vase	
+gn_slashandburn_karavan_ambassador_m1	Ambassadeur Karavan des Mercenaires Ecarlates	
+gn_slavers_karavan_ambassador_t1	Ambassadeur Karavan des Esclavagistes	
+gn_smugglers_karavan_ambassador_t1	Ambassadeur Karavan des Contrebandiers	
+gn_fairhaven_karavan_officer	Officier Karavan de Fairhaven	
+gn_iconworshipers_kami_ambassador_z1	Ambassadeur Kami des Inconodoules	
+gn_yrkanis_kami_master	Maître Kami d'Yrkanis	
+gn_yrkanis_karavan_officer	Officier Karavan d'Yrkanis	
+gn_r_10_17_kami_gentil	Gentil Kami	
+gn_cowardly_ragus	Ragus Lâche	
+gn_pyr_kami_master	Maître Kami de Pyr	
+gn_Black_Circle_Magician	Magicien du Cercle Noir	
+gn_Kami_Adept	Adepte des Kamis	
+gn_Kami_Envoy	Envoi Kami	
+gn_Kami_Preacher	Prêcheur Kami	
+gn_Kami_Seeker	Chercheur Kami	
+gn_Kami_Sentinel	Sentinelle Kami	
+gn_Karavan_Guardian	Gardien Karavan	
+gn_Karavan_Teleporter	Téléporteur Karavan	
+gn_Trophies_Trader	Chasseur de Trophées	
+gn_akiolulk	Mecaon Lyseus	
+gn_ancient_dryads_guard	Garde	
+gn_chichai	chichai	
+gn_cockroaches_guards	Garde	
+gn_e_01_fy_passeur_1	e_01_fy_passeur_1	
+gn_e_01_ma_gatherer_1	e_01_ma_gatherer_1	
+gn_e_01_ma_guard_1	Garde	
+gn_e_01_ma_guard_2	Garde	
+gn_e_01_ma_guard_3	Garde	
+gn_e_01_ma_guard_4	Garde	
+gn_e_01_ma_passeur_1	e_01_ma_passeur_1	
+gn_e_01_nx_passeur_1	e_01_nx_passeur_1	
+gn_e_01_tr_gatherer_1	e_01_tr_gatherer_1	
+gn_e_01_tr_guard_1	Garde	
+gn_e_01_tr_guard_2	Garde	
+gn_e_01_tr_guard_3	Garde	
+gn_e_01_tr_guard_4	Garde	
+gn_e_01_zo_guard_1	Garde	
+gn_e_01_zo_guard_2	Garde	
+gn_e_01_zo_guard_3	Garde	
+gn_e_01_zo_guard_4	Garde	
+gn_firebrand_guard	Garde	
+gn_keepers_guard	Garde	
+gn_lady_1	lady_1	
+gn_lagoon_brothers_guard	Garde	
+gn_leviers_warrior	leviers_warrior	
+gn_outpost_pr_29_fyros_steward_p1	Debus Mekops	
+gn_outpost_pr_29_tmg_steward_p1	Kyn Pelorus	
+gn_outpost_pr_29_tryker_steward_p1	Mac'Darssey Hathy	
+gn_roottappers_guard	Garde	
+gn_tribe_lagoon_brothers_guard	Garde	
+gn_firebrands_karavan_agent	Agent Karavan des Sanguins	
+gn_kitingatherers_karavan_agent	Agent Karavan des Kitiniers	
+gn_nightturner_karavan_agent	Agent Karavan des Façonneurs Nocturnes	
+gn_chlorogoos_karavan_agent	Agent Karavan des Chlorogoos	
+gn_roottappers_karavan_agent	Agent Karavan des Saigneurs de Racines	
+gn_forbidden_depths_karavan_agent	Agent Karavan des Profondeurs Interdites	
+gn_the_abyss_of_ichor_karavan_agent	Agent Karavan du Gouffre d'Ichor	
+gn_the_elusive_forest_karavan_agent	Agent Karavan de la Forêt Insaisissable	
+gn_the_land_of_continuty_karavan_agent	Agent Karavan de la Terre de la Continuité	
+gn_the_windy_gate_karavan_agent	Agent Karavan de la Porte des Vents	
+gn_gate_of_obscurity_karavan_agent	Agent Karavan de la Porte de l'Obscurité	
+gn_the_sunken_city_karavan_agent	Agent Karavan de la Cité Engloutie	
+gn_the_trench_of_trials_karavan_agent	Agent Karavan de la Fosse aux Epreuves	
+gn_the_under_spring_karavan_agent	Agent Karavan des Sources Interdites	
+gn_karavan_worshipper	Fidèle de la Karavan	
+gn_group_fde_boss_fyros	Aen la Lame du Désert	
+gn_group_fde_guardian_fyros_heal	Partisan de la Lame du Désert	Partisane de la Lame du Désert
+gn_group_fde_guardian_fyros_melee	Partisan de la Lame du Désert	Partisane de la Lame du Désert
+gn_group_fde_guardian_fyros_nuke	Partisan de la Lame du Désert	Partisane de la Lame du Désert
+gn_group_fde_guardian_fyros_range	Partisan de la Lame du Désert	Partisane de la Lame du Désert
+gn_group_fde_guardian_fyros_root	Partisan de la Lame du Désert	Partisane de la Lame du Désert
+gn_mhs_bandit_boss_matis	Sirgio le Scélérat	
+gn_mhs_bandit_guards_healer	Sbire du Scélérat	Sbire du Scélérat
+gn_mhs_bandit_guards_melee	Sbire du Scélérat	Sbire du Scélérat
+gn_mhs_bandit_guards_mezzer	Sbire du Scélérat	Sbire du Scélérat
+gn_mhs_bandit_guards_nuker	Sbire du Scélérat	Sbire du Scélérat
+gn_mhs_bandit_guards_range	Sbire du Scélérat	Sbire du Scélérat
+gn_tei_bandit_boss_tryker	Lixie la Furie	
+gn_tei_bandit_guards_healer	Complice de la Furie	Complice de la Furie
+gn_tei_bandit_guards_melee	Complice de la Furie	Complice de la Furie
+gn_tei_bandit_guards_mezzer	Complice de la Furie	Complice de la Furie
+gn_tei_bandit_guards_nuker	Complice de la Furie	Complice de la Furie
+gn_tei_bandit_guards_range	Complice de la Furie	Complice de la Furie
+gn_zkod_bandit_boss_zorai	Pei-Ziao le Délétère	
+gn_zkod_bandit_guards_healer	Disciple du Délétère	Disciple du Délétère
+gn_zkod_bandit_guards_melee	Disciple du Délétère	Disciple du Délétère
+gn_zkod_bandit_guards_mezzer	Disciple du Délétère	Disciple du Délétère
+gn_zkod_bandit_guards_nuker	Disciple du Délétère	Disciple du Délétère
+fct_h_tattooer	(Tatoueur pour Homin)	
+fct_h_hairdresser	(Coiffeur pour Homin)	
+fct_f_hairdresser	(Coiffeur pour Homine)	
+fct_f_tattooer	(Tatoueur pour Homine)	
+gn_kami_adept	Adepte des Kamis	
+gn_kami_guardian	kami Gardien	
+tribe_chief	Chef de tribu	
+gn_fairhaven_kami_master	Maître Kami de Fairhaven	
+gn_guard_company_caster	Garde	
+gn_guard_company_footman	Garde	
+gn_guard_company_sergent	Garde	
+gn_pyr_karavan_officer	Officier Karavan	
+gn_r_07_13_boss	Chef Mercenaire	
+gn_r_07_13_guard	Mercenaire de la Karavan	
+gn_tryker_kami_master	Maître Kami du Cercle Enchanté	
+gn_fyros_war_master_event	Maître de Guerre Fyros	
+gn_fyros_supply_master_event	Maître des Ressources Fyros	
+gn_fyros_craftsman_master_event	Maître Artisan Fyros	
+gn_fyros_armoury_master_event	Maître de l'Armurerie Fyros	
+gn_fyros_treasury_officer_event	Officier du Trésor Fyros	
+gn_matis_war_master_event	Maître de Guerre Matis	
+gn_matis_supply_master_event	Maître des Ressources Matis	
+gn_matis_craftsman_master_event	Maître Artisan Matis	
+gn_matis_armoury_master_event	Maître de l'Armurerie Matis	
+gn_matis_treasury_officer_event	Officier du Trésor Matis	
+gn_tryker_war_master_event	Maître de Guerre Tryker	
+gn_tryker_supply_master_event	Maître des Ressources Tryker	
+gn_tryker_craftsman_master_event	Maître Artisan Tryker	
+gn_tryker_armoury_master_event	Maître de l'Armurerie Tryker	
+gn_tryker_treasury_officer_event	Officier du Trésor Tryker	
+gn_zorai_war_master_event	Maître de Guerre Zoraï	
+gn_zorai_supply_master_event	Maître des Ressources Zoraï	
+gn_zorai_craftsman_master_event	Maître Artisan Zoraï	
+gn_zorai_armoury_master_event	Maître de l'Armurerie Zoraï	
+gn_zorai_treasury_officer_event	Officier du Trésor Zoraï	
+gn_femme_gibbai	Femme Gibbaï	
+gn_guerisseuse_gibbai	Guérisseur Gibbaï	
+gn_gibbai_welcomer	Vieux Gibbaï	
+gn_zora_kami_master	Maître Kami de Zora	
+gn_matis_kami_master	Maître Kami du Cercle Kamic	
+gn_prime_roots_kami_master	Maître Kami du Point du Milieu	
+gn_tribe_sacred_sap_tribe_lieutenant	Chef de guerre	
+gn_fyros_karavan_officer	Officier Karavan des Dunes de l'Exil	
+gn_matis_karavan_officer	Officier Karavan du Marais Supérieur	
+gn_nexus_karavan_officer	Officier Karavan du Nexus	
+gn_tryker_karavan_officer	Officier Karavan de la Source	
+gn_zora_karavan_officer	Officier Karavan de Zora	
+gn_zorai_karavan_officer	Officier Karavan du Bosquet de l'Ombre	
+gn_Goo_Spot	Point de Goo	
+gn_Tower	Tour	
+gn_kuilde_guard	Garde Maître	
+gn_tribe_company_of_the_eternal_tree_tribe_chief	Mac'Rippsey Lynle	
+gn_tribe_cutes_guards	Garde d'Elite	
+gn_fyros_kami_master	Maître Kami des Sources de Thesos	
+gn_kami_altar_bountybeaches	Autel Kami des Plages d'Abondance	
+gn_kami_altar_citiesofintuition_hoi_cho	Autel Kami d'Hoi Cho	
+gn_kami_altar_citiesofintuition_jen_lai	Autel Kami de Jen Lai	
+gn_kami_altar_citiesofintuition_min_cho	Autel Kami de Min Cho	
+gn_kami_altar_citiesofintuition_zora	Autel Kami de Zora	
+gn_kami_altar_dunesofexil_dyron	Autel Kami des Dunes de l'Exil	
+gn_kami_altar_enchantedisle	Autel Kami de l'Ile Enchantée	
+gn_kami_altar_fleetinggarden	Autel Kami du Jardin Fugace	
+gn_kami_altar_forbidden_depths	Autel Kami des Profondeurs Interdites	
+gn_kami_altar_frahartowers	Autel Kami des Tours de Frahars	
+gn_kami_altar_groveofconfusion	Autel Kami du Bosquet de la Confusion	
+gn_kami_altar_groveofumbra	Autel Kami du Bosquet de l'Ombre	
+gn_kami_altar_havenofpurity	Autel Kami du Havre de Pureté	
+gn_kami_altar_hereticshovel	Autel Kami de la Masure de l'Hérétique	
+gn_kami_altar_hiddensource	Autel Kami de la Source Cachée	
+gn_kami_altar_imperialdunes_pyr	Autel Kami des Dunes Impériales	
+gn_kami_altar_knollofdissent	Autel Kami du Tertre de la Dissidence	
+gn_kami_altar_knotofdementia	Autel Kami du Noeud de la Démence	
+gn_kami_altar_lagoonsofloria	Autel Kami des Lagons de Loria	
+gn_kami_altar_libertylake_fairhaven	Autel Kami de Fairhaven	
+gn_kami_altar_maidengrove	Autel Kami du Bosquet Vierge	
+gn_kami_altar_majesticgarden_yrkanis	Autel Kami des Jardins Majestueux	
+gn_kami_altar_nexus_terre	Autel Kami du Nexus	
+gn_kami_altar_oflovaksoasis	Autel Kami de l'Oasis d'Oflovak	
+gn_kami_altar_outlawcanyon	Autel Kami du Canyon Interdit	
+gn_kami_altar_restingwater	Autel Kami de l'Eau du Repos	
+gn_kami_altar_sawdustmines	Autel Kami des Mines de Sciures	
+gn_kami_altar_the_abyss_of_ichor	Autel Kami du Gouffre d'Ichor	
+gn_kami_altar_the_elusive_forest	Autel Kami de la Forêt Insaisissable	
+gn_kami_altar_the_land_of_continuity	Autel Kami de la Terre de la Continuité	
+gn_kami_altar_the_sunken_city	Autel Kami de la Cité Engloutie	
+gn_kami_altar_the_trench_of_trials_zorai	Autel Kami de la Fosse aux Epreuves	
+gn_kami_altar_the_under_spring_fyros	Autel Kami des Sources Interdites	
+gn_kami_altar_the_windy_gate	Autel Kami de la Porte des Vents	
+gn_kami_altar_thesavagedunes_thesos	Autel Kami des Dunes Sauvages	
+gn_kami_altar_thescorchedcorridor	Autel Kami du Couloir Brûlé	
+gn_kami_altar_thevoid	Autel Kami du Vide	
+gn_kami_altar_windsofmuse	Autel Kami des Vents du Songe	
+gn_kami_altar_upperbog	Autel Kami du Marais Supérieur	
+gn_kami_altar_dewdrops	Autel Kami des Chutes de la Rosée	
+gn_kami_altar_thefount	Autel Kami de la Source	
+gn_kami_altar_gate_of_obscurity	Autel Kami de la Porte de l'Obscurité	
+gn_karavan_altar_bountybeaches	Autel Karavan des Plages d'Abondance	
+gn_karavan_altar_citiesofintuition_zora	Autel Karavan de Zora	
+gn_karavan_altar_dewdrops	Autel Karavan des Chutes de la Rosée	
+gn_karavan_altar_dunesofexil_dyron	Autel Karavan des Dunes de l'Exil	
+gn_karavan_altar_enchantedisle	Autel Karavan de l'Ile Enchantée	
+gn_karavan_altar_fleetinggarden	Autel Karavan du Jardin Fugace	
+gn_karavan_altar_forbidden_depths	Autel Karavan des Profondeurs Interdites	
+gn_karavan_altar_frahartowers	Autel Karavan des Tours de Frahars	
+gn_karavan_altar_gate_of_obscurity	Autel Karavan de la Porte de l'Obscurité	
+gn_karavan_altar_groveofconfusion	Autel Karavan du Bosquet de la Confusion	
+gn_karavan_altar_groveofumbra	Autel Karavan du Bosquet de l'Ombre	
+gn_karavan_altar_hereticshovel	Autel Karavan de la Masure de l'Hérétique	
+gn_karavan_altar_hiddensource	Autel Karavan de la Source Cachée	
+gn_karavan_altar_imperialdunes_pyr	Autel Karavan des Dunes Impériales	
+gn_karavan_altar_knollofdissent	Autel Karavan du Tertre de la Dissidence	
+gn_karavan_altar_knotofdementia	Autel Karavan du Noeud de la Démence	
+gn_karavan_altar_lagoonsofloria	Autel Karavan des Lagons de Loria	
+gn_karavan_altar_libertylake_avendale	Autel Karavan d'Avendale	
+gn_karavan_altar_libertylake_crystabell	Autel Karavan de Crystabell	
+gn_karavan_altar_libertylake_fairhaven	Autel Karavan de Fairhaven	
+gn_karavan_altar_libertylake_windermeer	Autel Karavan de Windermeer	
+gn_karavan_altar_majesticgarden_avalae	Autel Karavan d'Avalae	
+gn_karavan_altar_majesticgarden_davae	Autel Karavan de Davae	
+gn_karavan_altar_majesticgarden_natae	Autel Karavan de Natae	
+gn_karavan_altar_majesticgarden_yrkanis	Autel Karavan d'Yrkanis	
+gn_karavan_altar_nexus_terre	Autel Karavan du Nexus	
+gn_karavan_altar_outlawcanyon	Autel Karavan du Canyon Interdit	
+gn_karavan_altar_restingwater	Autel Karavan de l'Eau du Repos	
+gn_karavan_altar_sawdustmines	Autel Karavan des Mines de Sciure	
+gn_karavan_altar_the_abyss_of_ichor_matis	Autel Karavan du Gouffre d'Ichor	
+gn_karavan_altar_the_elusive_forest	Autel Karavan de la Forêt Insaisissable	
+gn_karavan_altar_the_land_of_continuity	Autel Karavan de la Terre de la Continuité	
+gn_karavan_altar_the_trench_of_trials_zorai	Autel Karavan de la Fosse aux Epreuves	
+gn_karavan_altar_the_under_spring_fyros	Autel Karavan des Sources Interdites	
+gn_karavan_altar_the_windy_gate	Autel Karavan de la Porte des Vents	
+gn_karavan_altar_thefount	Autel Karavan de la Source	
+gn_karavan_altar_thesavagedunes_thesos	Autel Karavan des Dunes Sauvages	
+gn_karavan_altar_thescorchedcorridor	Autel Karavan du Couloir Brûlé	
+gn_karavan_altar_thevoid	Autel Karavan du Vide	
+gn_karavan_altar_upperbog	Autel Karavan du Marais Supérieur	
+gn_karavan_altar_windsofmuse	Autel Karavan des Vents du Songe	
+gn_karavan_altar_maidengrove	Autel Karavan du Bosquet Vierge	
+gn_karavan_altar_havenofpurity	Autel Karavan du Havre de Pureté	
+gn_karavan_altar_oflovaksoasis	Autel Karavan de l'Oasis d'Oflovak	
+gn_karavan_altar_the_sunken_city	Autel Karavan de la Cité Engloutie	
+gn_karavan_altar_oflovakoasis	Autel Karavan de l'Oasis d'Oflovak	
+gn_fyros_general_event	Général Fyros	
+gn_matis_general_event	Général Matis	
+gn_tryker_general_event	Général Tryker	
+gn_zorai_general_event	Général Zoraï	
+gn_fyros_officer_event	Officier Impérial Fyros	
+gn_matis_officer_event	Officier Royal Matis	
+gn_tryker_officer_event	Officier Fédéral Tryker	
+gn_zorai_officer_event	Officier Dynastique Zoraï	
+gn_matis_royal_guard_event	Garde Royal Matis	
+gn_matis_royal_soldier_event	Soldat Royal Matis	
+gn_fyros_imperial_guard_event	Garde Impérial Fyros	
+gn_fyros_imperial_soldier_event	Soldat Impérial Fyros	
+gn_zorai_dynastic_guard_event	Garde Dynastique Zoraï	
+gn_zorai_dynastic_soldier_event	Soldat Dynastique Zoraï	
+gn_tryker_federal_guard_event	Garde Fédéral Tryker	
+gn_tryker_federal_soldier_event	Soldat Fédéral Tryker	
+gn_karavan_commander_event	Commandant Karavan	
+gn_karavan_officer_event	Lieutenant Karavan	
+gn_karavan_ally_event	Allié de la Karavan	
+gn_karavan_commando_event	Commando Karavan	
+gn_karavan_ship_event	Vaisseau Karavan	
+gn_kami_warlord_event	Seigneur de Guerre Kami	
+gn_kami_keeper_event	Gardien des Terres Kami	
+gn_kami_ally_event	Allié des Kamis	
+gn_kami_fighter_event	Guerrier Kami	
+gn_kitin_commander_event	Chef d'Essaim Kitin	
+gn_kitin_leader_event	Chef Kitin	
+gn_kitin_protector_event	Protecteur Kitin	
+gn_kitin_guard_event	Garde Kitin	
+gn_kitin_raider_event	Agresseur Kitin	
+gn_kitin_patrol_event	Patrouille Kitin	
+gn_infected_frahar_high_chief_event	Chef de Horde Frahar Infecté	
+gn_infected_gibbai_high_chief_event	Chef de Horde Gibbaï Infecté	
+gn_infected_cute_high_chief_event	Chef de Horde Cute Infecté	
+gn_infected_frahar_hero_event	Chef Frahar Infecté	
+gn_infected_gibbai_hero_event	Chef Gibbaï Infecté	
+gn_infected_cute_hero_event	Chef Cute Infecté	
+gn_infected_frahar_defender_event	Protecteur Frahar Infecté	
+gn_infected_gibbai_defender_event	Protecteur Gibbaï Infecté	
+gn_infected_cute_defender_event	Protecteur Cute Infecté	
+gn_infected_frahar_guard_leader_event	Chef des Gardes Frahar Infecté	
+gn_infected_gibbai_guard_leader_event	Chef des Gardes Gibbaï Infecté	
+gn_infected_cute_guard_leader_event	Chef des Gardes Cute Infecté	
+gn_infected_frahar_guard_event	Garde Frahar Infecté	
+gn_infected_gibbai_guard_event	Garde Gibbaï Infecté	
+gn_infected_cute_guard_event	Garde Cute Infecté	
+gn_infected_frahar_raid_leader_event	Chef des Agresseurs Frahar Infecté	
+gn_infected_gibbai_raid_leader_event	Chef des Agresseurs Gibbaï Infecté	
+gn_infected_cute_raid_leader_event	Chef des Agresseurs Cute Infecté	
+gn_infected_frahar_raider_event	Agresseur Frahar Infecté	
+gn_infected_gibbai_raider_event	Agresseur Gibbaï Infecté	
+gn_infected_cute_raider_event	Agresseur Cute Infecté	
+gn_infected_frahar_hunt_leader_event	Chef de Patrouille Frahar Infecté	
+gn_infected_gibbai_hunt_leader_event	Chef de Patrouille Gibbaï Infecté	
+gn_infected_cute_hunt_leader_event	Chef de Patrouille Cute Infecté	
+gn_infected_frahar_patrol_event	Patrouille Frahar Infectée	
+gn_infected_gibbai_patrol_event	Patrouille Gibbaï Infectée	
+gn_infected_cute_patrol_event	Patrouille Cute Infectée	
+gn_frahar_high_chief_event	Grand Chef Frahar	
+gn_gibbai_high_chief_event	Grand Chef Gibbaï	
+gn_cute_high_chief_event	Grand Chef Cute	
+gn_frahar_hero_event	Héros Frahar	
+gn_gibbai_hero_event	Héros Gibbaï	
+gn_cute_hero_event	Héros Cute	
+gn_frahar_defender_event	Défenseur Frahar	
+gn_gibbai_defender_event	Défenseur Gibbaï	
+gn_cute_defender_event	Défenseur Cute	
+gn_frahar_shaman_event	Chaman Frahar	
+gn_gibbai_shaman_event	Chaman Gibbaï	
+gn_cute_shaman_event	Chaman Cute	
+gn_frahar_guard_leader_event	Chef des Gardes Frahar	
+gn_gibbai_guard_leader_event	Chef des Gardes Gibbaï	
+gn_cute_guard_leader_event	Chef des Gardes Cute	
+gn_frahar_guard_event	Garde Frahar	
+gn_gibbai_guard_event	Garde Gibbaï	
+gn_cute_guard_event	Garde Cute	
+gn_frahar_witch_doctor_event	Guérisseur Frahar	
+gn_gibbai_witch_doctor_event	Guérisseur Gibbaï	
+gn_cute_witch_doctor_event	Guérisseur Cute	
+gn_frahar_hunt_leader_event	Chef de Patrouille Frahar	
+gn_gibbai_hunt_leader_event	Chef de Patrouille Gibbaï	
+gn_cute_hunt_leader_event	Chef de Patrouille Cute	
+gn_frahar_patrol_event	Patrouille Frahar	
+gn_gibbai_patrol_event	Patrouille Gibbaï	
+gn_cute_patrol_event	Patrouille Cute	
+gn_frahar_raid_leader_event	Chef de Raid Frahar	
+gn_gibbai_raid_leader_event	Chef de Raid Gibbaï	
+gn_cute_raid_leader_event	Chef de Raid Cute	
+gn_frahar_raider_event	Assaillant Frahar	
+gn_gibbai_raider_event	Assaillant Gibbaï	
+gn_cute_raider_event	Assaillant Cute	
+gn_frahar_shaman_raider_event	Assaillant Chaman Frahar	
+gn_gibbai_shaman_raider_event	Assaillant Chaman Gibbaï	
+gn_cute_shaman_raider_event	Assaillant Chaman Cute	
+gn_cuthroat_high_chief_event	Grand Chef Egorgeur	
+gn_cuthroat_hero_event	Héros Egorgeur	
+gn_bandit_leader_event	Chef de Patrouille Egorgeur	
+gn_cuthroat_patrol_event	Patrouille des Egorgeurs	
+gn_cuthroat_raid_leader_event	Chef de Raid Egorgeur	
+gn_cuthroat_raider_event	Assaillant Egorgeur	
+gn_cuthroat_defender_event	Défenseur Egorgeur	
+gn_cuthroat_guard_leader_event	Chef des Gardes Egorgeur	
+gn_cuthroat_guard_event	Garde Egorgeur	
+gn_goo_warder_yelk_event	Yelk Gardien de la Goo	
+gn_goo_warder_slaveni_event	Slaveni Gardien de la Goo	
+gn_goo_warder_stinga_event	Stinga Gardienne de la Goo	
+gn_goo_warder_varinx_event	Varinx Gardien de la Goo	
+gn_goo_warder_torbak_event	Torbak Gardien de la Goo	
+gn_fyros_herald_event	Héraut Fyros	
+gn_matis_herald_event	Héraut Matis	
+gn_tryker_herald_event	Héraut Tryker	
+gn_zorai_herald_event	Héraut Zoraï	
+gn_kami_herald_event	Envoyé des Kamis	
+gn_karavan_herald_event	Envoyé Karavan	
+gn_fyros_representative_event	Représentant Fyros	
+gn_matis_representative_event	Représentant Matis	
+gn_tryker_representative_event	Représentant Tryker	
+gn_zorai_representative_event	Représentant Zoraï	
+gn_kami_representative_event	Représentant des Kamis	
+gn_karavan_representative_event	Emissaire Karavan	
+gn_fyros_recruiting_officer_event	Officier Recruteur Fyros	
+gn_matis_recruiting_officer_event	Officier Recruteur Matis	
+gn_tryker_recruiting_officer_event	Officier Recruteur Tryker	
+gn_zorai_recruiting_officer_event	Officier Recruteur Zoraï	
+gn_kami_recruiting_officer_event	Kami High Servant	
+gn_karavan_recruiting_officer_event	Officier Recruteur Karavan	
+gn_fyros_scout_event	Traqueur Fyros	
+gn_matis_scout_event	Traqueur Matis	
+gn_tryker_scout_event	Traqueur Tryker	
+gn_zorai_scout_event	Traqueur Zoraï	
+gn_kami_scout_event	Fureteur Kami	
+gn_karavan_scout_event	Eclaireur Karavan	
+gn_fyros_diplomat_event	Diplomate Fyros	
+gn_matis_diplomat_event	Diplomate Matis	
+gn_tryker_diplomat_event	Diplomate Tryker	
+gn_zorai_diplomat_event	Diplomate Zoraï	
+gn_fyros_citizen_event	Citoyen Fyros	
+gn_fyros_old_citizen_event	Vieux Citoyen Fyros	
+gn_matis_citizen_event	Citoyen Matis	
+gn_matis_old_citizen_event	Vieux Citoyen Matis	
+gn_tryker_citizen_event	Citoyen Tryker	
+gn_tryker_old_citizen_event	Vieux Citoyen Tryker	
+gn_zorai_citizen_event	Citoyen Zoraï	
+gn_zorai_old_citizen_event	Vieux Citoyen Zoraï	
+gn_r_09_19_convoi_escorte	Garde du Convoi	
+gn_r_09_19_convoi_foreur	Foreur du Convoi	
+gn_debug_bestiole	Bodoc robuste de debug	
+gn_debug_bestiole2	Bodoc robuste de debug	
+gn_assistant_escort_debug	Assistant debug d'escorte	
+gn_debug_ai	Assistant debug d'AI	
+gn_garde_escort_debug	Assistant debug de garde	
+gn_debug_black_circle_bandit	Bandit de debug tribu du cercle noir	
+gn_debug_black_circle_bandit2	Chef Bandit de debug tribu du cercle noir	
+gn_test_debug_kill	Bandit de debug	
+gn_test_debug_kill2	Chef Bandit de debug	
+gn_warchief_guard	Garde du chef de guerre	
+gn_r_05_15_gnoof_1	Weee'ly le gnoof	
+gn_r_07_05_bandit	Bandit de la Source	
+gn_r_07_05_chief	O'Darghan le Fou	
+gn_r_05_24_izam	Izam'el	
+gn_r_05_39_peon_leader	Soldat Fyros	
+gn_r_05_39_peon	Prospectrice Fyros	
+gn_r_05_41_foreuse	Foreuse Amazone	
+gn_r_05_39_big_varinx	Enorme Varinx	
+gn_r_03_38_bandit	Bandit	
+gn_r_03_38_chef_bandit	Chef des Bandits	
+gn_r_12_18_bandit	Bandit	
+gn_r_12_18_chef_bandit	Chef des bandits	
+gn_r_12_18_marchand	Marchand	
+gn_r_12_04_marchand	Selno le Marchand	
+gn_pyr_bar_serveuse	Serveur	Serveuse
+gn_pyr_bar_client	Client	Cliente
+gn_pyr_bar_garde	Garde	Garde
+gn_kami_warrior_event	Guerrier Kami	
+gn_kami_wizard_event	Mage Kami	
+gn_karavan_trooper_event	Soldat Karavan	
+gn_karavan_engineer_event	Ingénieur Karavan	
+gn_karavan_medic_event	Infirmier Karavan	
+gn_karavan_assault_ship_event	Vaisseau de guerre Karavan	
+gn_forge_apprentice_pyr	Apprenti Forgeron	
+gn_bot_squad_melee_fighter	Guerrier	
+gn_bot_squad_range_fighter	Tireur	
+gn_bot_squad_artilleryman	Artilleur	
+gn_bot_squad_defensive_affliction	Mentaliste	
+gn_bot_squad_healing_magic	Guérisseur	
+gn_bot_squad_offensive_affliction	Envoûteur	
+gn_bot_squad_elemental_magic	Destructeur	
+gn_bot_squad_melee_fighter_leader	Guerrier Chef d'Escouade	
+gn_bot_squad_range_fighter_leader	Tireur Chef d'Escouade	
+gn_bot_squad_artilleryman_leader	Artilleur Chef d'Escouade	
+gn_bot_squad_defensive_affliction_leader	Mentaliste Chef d'Escouade	
+gn_bot_squad_healing_magic_leader	Guérisseur Chef d'Escouade	
+gn_bot_squad_offensive_affliction_leader	Envoûteur Chef d'Escouade	
+gn_bot_squad_elemental_magic_leader	Destructeur Chef d'Escouade	
+gn_dyron_guard	Garde de Dyron	
+gn_fyros_kamist_combatant_event	Combattant Kamiste Fyros 	
+gn_fyros_kamist_gatherer_event	Récolteur Kamiste Fyros	
+gn_fyros_kamist_crafter_event	Artisan Kamiste Fyros	
+gn_matis_kamist_combatant_event	Combattant Kamiste Matis	
+gn_matis_kamist_gatherer_event	Récolteur Kamiste Matis	
+gn_matis_kamist_crafter_event	Artisan Kamiste Matis	
+gn_zorai_kamist_combatant_event	Combattant Kamiste Zorai	
+gn_zorai_kamist_gatherer_event	Récolteur Kamiste Zorai	
+gn_zorai_kamist_crafter_event	Artisan Kamiste Zorai	
+gn_tryker_kamist_combatant_event	Combattant Kamiste Tryker	
+gn_tryker_kamist_gatherer_event	Récolteur Kamiste Tryker	
+gn_tryker_kamist_crafter_event	Artisan Kamiste Tryker	
+gn_kami_master	Maître Kami	
+gn_kami_preacher_lord	Seigneur Prêcheur Kami	
+gn_kami_high_preacher	Grand Prêcheur Kami	
+gn_maduk_bonze	Bonze de Ma-Duk	
+gn_kamist_guard_event	Garde Kamiste	
+gn_kamist_sergeant_event	Sergent Kamiste	
+gn_kamist_captain_event	Capitaine Kamiste	
+gn_kamist_guard_sanctuary	Garde du Sanctuaire	
+gn_kamist_captain_sanctuary	Capitaine du Sanctuaire	
+gn_kami_tower	Tour de défense Kami	
+gn_kami_preacher_pyr	Prêcheur Kami de Pyr	
+gn_kami_preacher_yrkanis	Prêcheur Kami d'Yrkanis	
+gn_kami_preacher_zora	Prêcheur Kami de Zora	
+gn_kami_preacher_fairhaven	Prêcheur Kami de Fairhaven	
+gn_fyros_karavaneer_combatant_event	Combattant Karavanier Fyros 	
+gn_fyros_karavaneer_gatherer_event	Récolteur Karavanier Fyros	
+gn_fyros_karavaneer_crafter_event	Artisan Karavanier Fyros	
+gn_matis_karavaneer_combatant_event	Combattant Karavanier Matis	
+gn_matis_karavaneer_gatherer_event	Récolteur Karavanier Matis	
+gn_matis_karavaneer_crafter_event	Artisan Karavanier Matis	
+gn_zorai_karavaneer_combatant_event	Combattant Karavanier Zorai	
+gn_zorai_karavaneer_gatherer_event	Récolteur Karavanier Zorai	
+gn_zorai_karavaneer_crafter_event	Artisan Karavanier Zorai	
+gn_tryker_karavaneer_combatant_event	Combattant Karavanier Tryker	
+gn_tryker_karavaneer_gatherer_event	Récolteur Karavanier Tryker	
+gn_tryker_karavaneer_crafter_event	Artisan Karavanier Tryker	
+gn_karavan_high_guide	Haut Guide Karavan	
+gn_karavan_officer	Officier Karavan	
+gn_karavan_guide	Guide Karavan	
+gn_jena_priest	Prêtre de Jena	
+gn_karavan_teleporteur_pyr	Téléporteur Karavan vers Pyr	
+gn_karavan_teleporteur_yrkanis	Téléporteur Karavan vers Yrkanis	
+gn_karavan_teleporteur_fairhaven	Téléporteur Karavan vers Fairhaven	
+gn_karavan_teleporteur_zora	Téléporteur Karavan vers Zora	
+gn_karavaneer_guard_event	Garde Karavanier	
+gn_karavaneer_sergeant_event	Sergent Karavanier	
+gn_karavaneer_captain_event	Capitaine Karavanier	
+gn_karavaneer_guard_sanctuary	Garde du Temple	
+gn_karavaneer_captain_sanctuary	Capitaine du Temple	
+gn_karavan_tower	Tour de défense Karavan	
+gn_kami_altar	Autel Kami	
+gn_karavan_altar	Autel Karavan	
+gn_kami_hof	Stèle de valeur	
+gn_kami_frise	Racine du Savoir	
+gn_karavan_hof	Stèle de valeur	
+gn_karavan_frise	Colonne du Savoir	
+gn_psykopla_ally	Compagnion Psykopla	
+gn_cratcha_ally	Compagnion Cratcha	
+gn_driller_kami_lvl50	Petite Foreuse Kami	
+gn_driller_karavan_lvl50	Petite Foreuse Karavan	
+gn_driller_kami_lvl50_const	Construction d'une petite foreuse kami	
+gn_driller_karavan_lvl50_const	Construction d'une petite foreuse karavan	
+gn_driller_karavan_const	Grand Trépan en construction	
+gn_driller_kami_const	Arbre-Vrille en construction	
+gn_driller_karavan	Grand Trépan	
+gn_driller_kami	Arbre-Vrille	
+gn_placeholder_driller	Emplacement Constructible	
+fct_lodge_master	(Maître de Loge)	
+fct_artisan_trepans	(Artisan des Grands Trépans)	
+fct_artisan_arbres_vrilles	(Artisan des Arbres-Vrille)	
+gn_citizenship_flame_truth	Flamme de la Vérité	
+gn_citizenship_flame_honnor	Flamme de l'Honneur	
+gn_citizenship_flame_discipline	Flamme de la Discipline	
+gn_citizenship_flame_justice	Flamme de la Justice	
+fct_imperial_magistrate	(Magistrat Impérial)	
+fct_royal_magistrate	(Magistrat Royal)	
+fct_federal_magistrate	(Magistrat Fédéral)	
+fct_dynastic_magistrate	(Magistrat Dynastique)	
+fct_vagabond	(Vagabond)	
+gn_lenja_lunatic	Lenja la Démente	
+fct_imperial_magistrate_guild	(Magistrat Impérial de Guilde)	
+fct_royal_magistrate_guild	(Magistrat Royal de Guilde)	
+fct_federal_magistrate_guild	(Magistrat Fédéral de Guilde)	
+fct_dynastic_magistrate_guild	(Magistrat Dynastique de Guilde)	
+gn_fyros_karavan_aumonier	Aumônier Karavan du temple de Pyr	
+gn_matis_karavan_aumonier	Aumônier Karavan du temple d'Yrkanis	
+gn_tryker_karavan_aumonier	Aumônier Karavan du temple de Fairhaven	
+gn_zorai_karavan_aumonier	Aumônier Karavan du temple de Zora	
+fct_jena_priest	(Prêtre de Jena)	
+fct_jena_priestress	(Prêtresse de Jena)	
+fct_maduk_bonze	(Bonze de Ma-Duk)	
+fct_maduk_bonze_sup	(Bonze Supérieur de Ma-Duk)	
+fct_karavan_aumonier	(Aumônier Karavan)	
+vagabond_taciturne	Vagabond Taciturne	
+gn_rotoa_bravichi_tree	Rotoa de Bravichi	
+gn_bothaya_tree	Bothaya Brûlant	
+gn_outpost_townhall	Hall d'avant-poste	
+gn_outpost_flag	Bannière de Guerre	
+gn_outpost_info	Enseigne d'Avant-Poste	
+fct_rangers_master	Ranger Vétéran	
+fct_rangers_fighter	Ranger Combattant	
+fct_rangers_artisan	Ranger Artisan	
+fct_rangers_scout	Ranger Eclaireur	
+gn_newbieland_bandit_1	Pillard des Illuminés	
+gn_newbieland_bandit_1_lieutnant	Lieutenant des Illuminés	
+gn_newbieland_bandit_2	Pillard des Chlorogoos	
+gn_newbieland_bandit_2_lieutnant	Lieutenant des Chlorogoos	
+gn_newbieland_starting_city_karavan_officer	Officier de communication de la Karavan	
+gn_karavan_ardent	Membre de la lance ardente	
+gn_karavan_ardent_speaker	Porte-parole de la lance ardente	
+gn_chiang_the_strong	Chiang le Fort$fct_ranger_leader$	
+gn_ranger_guard	Protecteur Ranger	
+gn_Ranger_elite_guard	Gardien Ranger	
+fct_ranger_leader	Commandant Ranger	
+fct_fyros_commander	Commandant Fyros	
+fct_matis_master_artisan	Maître artisan Matis	
+fct_chief_explorer	Chef explorateur	
+gn_kami_master_newbieland_starting_city	Guide Kami	
+gn_ring_welcomer	Technicien Ring	
+gn_device_ring_warp	Terminal Ring	
+gn_spot_goo_mission_1	Eruption de Goo récente	
+gn_newbieland_bandit_2_mission	Bandit spécialiste	
+gn_kami_master_shining_lake	Maître Kami du lac	
+gn_tcm_extraction_engineer	Ingénieur en extraction	
+gn_tcm_extraction_guard	Commando d'élite	
+gn_tcm_trooper_engineer	Éclaireur Karavan	
+gn_tcm_engineer_guard	Escorte Karavan	
+gn_tcm_squad_leader_alpha	Chef d'escadron Alpha	
+gn_tcm_squad_leader_beta	Chef d'escadron Beta	
+gn_tcm_squad_leader_zeta	Chef d'escadron Zeta	
+gn_tcm_trooper_guard	Troupe d'élite Karavan	
+gn_tcm_trooper_static	Garde suprême Karavan	
+gn_tcm_trooper_wander	Réserviste Karavan	
+gn_tcm_training	Commando Karavan	
+gn_tcm_medic	Équipe médicale Karavan	
+gn_tcm_engineer	Ingénieur en mécanique Karavan	
+gn_tcm_chief_engineer	Ingénieur en chef	
+gn_tcm_coordinator	Coordinateur des opérations	
+gn_tcm_officer	Officier supérieur Karavan	
+gn_tcm_quartermaster	Quartier maître Karavan	
+gn_tcm_commander	Commandant en chef Karavan	
+fct_tcm_chief_forager	(Maître foreur)	
+fct_tcm_forager	(Disciple foreur)	
+fct_tcm_fighter_company	(Combattant Kamiste)	
+fct_explorer_company	(Explorateur Kamiste)	
+fct_harvest_company	(Récolteur Kamiste)	
+fct_keepers_squad_leader	(Chef d'équipe de prospection)	
+fct_keepers_squad	(Kamiste archéologue)	
+fct_tcm_company_guard	(Sentinelle de l'arbre éternel)	
+fct_tcm_tutor_praying	(Adorateur Kamiste)	
+fct_tcm_tutor_trader	(Colporteur expérimenté)	
+fct_tcm_tutor_sitting	(Disciple adorateur)	
+fct_tcm_tutor_chief_guard	(Fidèle protecteur)	
+fct_tcm_tutors_sitting2	(Apprenti prédicateur)	
+fct_tcm_tutors_storyteller	(Prédicateur itinérant)	
+fct_tcm_tutor_wander	(Disciple Tutor)	
+fct_tcm_keepers_chief_guard	(Gardien des reliques)	
+fct_tcm_keepers_sitting	(Apprenti archéologue)	
+fct_tcm_keepers_trader	(Disciple colporteur)	
+fct_tcm_keepers_guard	(Guetteur Kamiste)	
+fct_tcm_keepers_sitting2	(Apprenti guetteur)	
+fct_tcm_keepers_storyteller	(Conteur Kamiste)	
+fct_tcm_keepers_elder	(Détenteur des savoirs)	
+fct_tcm_keepers_walking	(Civil Keeper)	
+fct_tcm_keep_wander	(Archéologue Keeper)	
+fct_tcm_keep_wander2	(Historien Keeper)	
+fct_tcm_eternal_tree_chief_guard 	(Gardien de l'arbre éternel)	
+fct_tcm_eternal_tree_sitting	(Serviteur de Ma-Duk)	
+fct_tcm_eternal_tree_static	(Guardien des récoltes)	
+fct_tcm_eternal_tree_praying	(Prédicateur érudit)	
+fct_tcm_eternal_tree_spwan	(Gardien des portes)	
+fct_tcm_eternal_tree_wander	(Penseur Kamiste)	
+fct_tcm_eternal_tree_praying2	(Adorateur éternel)	
+fct_tcm_eternal_tree_walking	(Vagabond Kamiste)	
+fct_tcm_eternal_tree_walking2	(Civil de la Compagnie)	
+fct_tcm_healer	(Chef Soigneur de la Compagnie)	
+fct_tcm_armorer	(Armurier Expérimenté)	
+fct_tcm_intendant	(Intendant de la Compagnie)	
+fct_tcm_assistant_intendant	(Assistant de l'intendant)	
+fct_tcm_warchief	(Chef de Guerre)	
+fct_tcm_merchant	(Grand colporteur de la Compagnie)	
+fct_tcm_campchief	(Chef de camp de la Compagnie)	
+fct_tcm_warrior	(Grand guerrier vagabond)	
+fct_tcm_noble	(Noble penseur de la Compagnie)	
+gn_chad	Maître Chad	
+gn_chad_assist	Disciple de Chad	
+gn_tcm_officer_radar	Officier radar	
+gn_tcm_chlorogoo_shaman	Shaman	
+gn_tcm_chlorogoo_shaman_escort	Adepte	
+gn_tcm_chlorogoo_prisonners	Prisonnier	
+gn_tcm_chlorogoo_camp_ranger	Épieur	
+gn_tcm_chlorogoo_camp_caster	Sorcier	
+gn_tcm_chlorogoo_camp_fighter	Assassin gooifié	
+gn_tcm_chlorogoo_caster	Alchimiste	
+gn_tcm_chlorogoo_healer	Guérisseur	
+gn_tcm_chlorogoo_ranger	Fureteur	
+gn_tcm_chlorogoo_harvester	Récolteur de Goo	
+gn_tcm_chlorogoo_patrol_dill	Patrouilleur intoxiqué	
+fct_tcm_chlorogoo	Chlorogoo	
+fct_tcm_basile	Hermite mystérieux	
+gn_tcm_radar_trainee	Stagiaire Radar	
+gn_tcm_crate	Caisse de ravitaillement Karavan	
+gn_tcm_unknown_entity	Echo radar	
+gn_tcm_soulchest	Coffre aux âmes	
+gn_satooi_remains	Dépouille de Satooi	
+gn_tcm_reward_chest	Trésor perdu	
+title00001	Journeyer	Journeyer
+title00047	Mitrailleur	Mitrailleur
+title00048	Maître Mitrailleur	Maître Mitrailleur
+gn_landslide_3_target	Eboulis	
+gn_tcm_sacrified	Sacrifié	
+gn_boss_mainland_varinx	Gardien d'Aen	
+title00002	Chasseur de Kitin débutant	Chasseuse de Kitin débutante
+title00003	Chasseur de Kitin	Chasseuse de Kitin
+title00004	Maître Chasseur de Kitin	Maître Chasseur de Kitin
+title00005	Eradicateur de Kitin	Eradicatrice de Kitin
+title00006	Le Massacreur de Kitin	La Massacreuse de Kitin
+title00007	Gardien des Matis	Gardienne des Matis
+title00008	Gardien des Fyros	Gardienne des Fyros
+title00009	Gardien des Tryker	Gardienne des Tryker
+title00010	Gardien des Zoraï	Gardienne des Zoraï
+title00011	Gardien d'Atys	Gardienne d'Atys
+slaughter_week_mgiver_matis	Observateur Kitin de l'Est	
+slaughter_week_mgiver_fyros	Observateur Kitin du Nord	
+slaughter_week_mgiver_zorai	Observateur Kitin de l'Ouest	
+slaughter_week_mgiver_tryker	Observateur Kitin du Sud	
+slaughter_week_informer_name	Envoyé spécial	
+sw_boss_fyros	Exterminateur Fyros	Exterminatrice Fyros
+sw_boss_matis	Exterminateur Matis	Exterminatrice Matis
+sw_boss_zorai	Exterminateur Zoraï	Exterminatrice Zoraï
+sw_boss_tryker	Exterminateur Tryker	Exterminatrice Tryker
+gn_sirgio_fyros_dancer	Danseur Fyros	Danseuse Fyros
+gn_sirgio_matis_dancer	Danseur Matis	Danseuse Matis
+gn_sirgio_zorai_dancer	Danseur Zoraï	Danseuse Zoraï
+gn_sirgio_tryker_dancer	Danseur Tryker	Danseuse Tryker
+gn_bomber_boss	Poseur de bombes	Poseuse de bombes
+gn_bomber_random	Poseur de bombes	Poseuse de bombes
+gn_bomb_lixie	Bombe	
+gn_mine_lixie	Mine	
+fct_artisan_restaurateur	Artisan Restaurateur	
+gn_explosion_lixie	Explosion	
+gn_peipbae	Colère de Pei	
+fct_ranger_worker	manouvrier Ranger	
+fct_ranger_guard	garde Ranger	
+fct_ranger_intendant	intendant Ranger	
+fct_ranger_great_mage	Archimage Ranger	
+fct_ranger_guard_captain	capitaine des gardes	
+fct_ranger_explorer	explorateur ranger	
+fct_ranger_coord	coordonnateur Ranger	
+title00014	La chance	La chance
+title00015	La poisse	La poisse
+fct_confgu	Confrérie du Gubani Fortuné	
+eboulis	Eboulis	
+monticule	Monticule	
+title00020	Patriote fyros	Patriote fyros
+title00021	Sujet matis	Sujet matis
+title00022	Citoyen tryker	Citoyenne tryker
+title00023	Initié zoraï	Initiée zoraï
+title00024	Disciple des Kamis	Disciple des Kamis
+title00025	Suivant de la Karavan	Suivant de la Karavan
+title00026	Akenak fyros	Akenak fyros
+title00027	Noble matis	Noble matis
+title00028	Taliar tryker	Taliar tryker
+title00029	Eveillé zoraï	Eveillée zoraï
+title00030	Maraudeur	Maraudeur
+fct_camprangerguide	Guide du Camp	
+fct_ranger_kitiniere_welcomer	Observateur de la kitinière	Observatrice de la kitinière
+gn_Xmas_Event	Xmas Event	
+gn_Xmas_Super_Loot_1	Xmas Super Loot 1	
+gn_attack_gookitin_group	attack_gookitin_group	
+gn_axodus_garatus	Axodus Garatus	
+gn_ba_mirri_vichan	Be'Mirri Vichan	
+gn_ba_rima_dixie	Ba'Rima Dixie	
+gn_ballis_sothus	Ballis Sothus	
+gn_bandit_mastergoo_01	bandit_mastergoo_01	
+gn_base_gookitin_group	base_gookitin_group	
+gn_base_kitin_group	base_kitin_group	
+gn_be_liccha_niorda	Be'Licha Niorda	
+gn_be_sarsy_boxie	Be Sarsy Roxie	
+gn_be_valda_riddan	Be'Valda Riddan	
+gn_be_willy_virgen	Be'Willy Virgen	
+gn_cadan_tandus	Candan Tandus	
+gn_caisse	caisse	
+gn_campfire_4	campfire_4	
+gn_chio_sei_tung	Chio Sei Tung	
+gn_chlorogoo_caster	chlorogoo_caster	
+gn_chlorogoo_fighter	chlorogoo_fighter	
+gn_chlorogoo_harvester	chlorogoo_harvester	
+gn_chlorogoo_healer	chlorogoo_healer	
+gn_chlorogoo_ranger	chlorogoo_ranger	
+gn_chu_ni_rama	Chu Ni Rama	
+gn_ckdic1	ckdic1	
+gn_ckdic2	ckdic2	
+gn_ckdic3	ckdic3	
+gn_ckdic4	ckdic4	
+gn_ckdid1	ckdid1	
+gn_ckdid2	ckdid2	
+gn_ckdid3	ckdid3	
+gn_ckdid4	ckdid4	
+gn_ckdie1	ckdie1	
+gn_ckdie2	ckdie2	
+gn_ckdie3	ckdie3	
+gn_ckdie4	ckdie4	
+gn_ckdif1	ckdif1	
+gn_ckdif2	ckdif2	
+gn_ckdif3	ckdif3	
+gn_ckdif4	ckdif4	
+gn_ckfic1	ckfic1	
+gn_ckfic2	ckfic2	
+gn_ckfic3	ckfic3	
+gn_ckfic4	ckfic4	
+gn_ckfid1	ckfid1	
+gn_ckfid2	ckfid2	
+gn_ckfid3	ckfid3	
+gn_ckfid4	ckfid4	
+gn_ckfie1	ckfie1	
+gn_ckfie2	ckfie2	
+gn_ckfie3	ckfie3	
+gn_ckfie4	ckfie4	
+gn_ckfif1	ckfif1	
+gn_ckfif2	ckfif2	
+gn_ckfif3	ckfif3	
+gn_ckfif4	ckfif4	
+gn_damarus_vidorus	Damarus Vidorus	
+gn_daro_carera	Daro Carera	
+gn_egg	egg	
+gn_fang_cho_lin	Fang Cho Lin	
+gn_fi_cha_fuing	Fi Cha Fuing	
+gn_forcio_pani	Forcio Pani	
+gn_forti_amarri	Forti Amarri	
+gn_goloris_raeps	Goloris Raeps	
+gn_goo_kipucka_leader	goo_kipucka_leader	
+gn_goo_kitimandib	goo_kitimandib	
+gn_goo_mob_code1	goo_mob_code1	
+gn_goo_mob_code2	goo_mob_code2	
+gn_goo_mob_code3	goo_mob_code3	
+gn_goo_mob_code4	goo_mob_code4	
+gn_goomaster_boss	goomaster_boss	
+gn_guard_spire_zorai_karavan	guard_spire_zorai_karavan	
+gn_heal	heal	
+gn_healer_fyros_spire_kami	healer_fyros_spire_kami	
+gn_healer_fyros_spire_karavan	healer_fyros_spire_karavan	
+gn_healer_matis_spire_kami	healer_matis_spire_kami	
+gn_healer_matis_spire_karavan	healer_matis_spire_karavan	
+gn_healer_tryker_spire_kami	healer_tryker_spire_kami	
+gn_healer_tryker_spire_karavan	healer_tryker_spire_karavan	
+gn_healer_zorai_spire_kami	healer_zorai_spire_kami	
+gn_healer_zorai_spire_karavan	healer_zorai_spire_karavan	
+gn_hill	hill	
+gn_hole	hole	
+gn_horde_barrack_1	horde_barrack_1	
+gn_horde_etendard_1	horde_etendard_1	
+gn_horde_tower_1	horde_tower_1	
+gn_irolus_vadagaan	Irolus Vadagaan	
+gn_kami_device_1	kami_device_1	
+gn_kami_fighter_base	kami_fighter_base	
+gn_kami_hut_1	kami_hut_1	
+gn_kami_landkeeper_200	kami_landkeeper_200	
+gn_kami_patrol_base	kami_patrol_base	
+gn_kami_tower_1	kami_tower_1	
+gn_kami_trooper_code1	kami_trooper_code1	
+gn_kami_trooper_code2	kami_trooper_code2	
+gn_kami_trooper_code3	kami_trooper_code3	
+gn_kami_trooper_code4	kami_trooper_code4	
+gn_kami_wizard_base	kami_wizard_base	
+gn_karavan_barrack_1	karavan_barrack_1	
+gn_karavan_device_1	karavan_device_1	
+gn_karavan_gateway_1	karavan_gateway_1	
+gn_karavan_lieutenant_200	karavan_lieutenant_200	
+gn_karavan_medic_base	karavan_medic_base	
+gn_karavan_patrol_base	karavan_patrol_base	
+gn_karavan_tower_1	karavan_tower_1	
+gn_karavan_trooper_base	karavan_trooper_base	
+gn_karavan_trooper_code1	karavan_trooper_code1	
+gn_karavan_wall_1	karavan_wall_1	
+gn_kincherC1	kincherC1	
+gn_kincherC3	kincherC3	
+gn_kincherC4	kincherC4	
+gn_kincherCX	kincherCX	
+gn_kipucka_leader	kipucka_leader	
+gn_kirostaC1	kirostaC1	
+gn_kirostaC3	kirostaC3	
+gn_kirostaC4	kirostaC4	
+gn_kirostaCX	kirostaCX	
+gn_kitin_larva_event	kitin_larva_event	
+gn_kitin_pondeuse_event	kitin_pondeuse_event	
+gn_ladamis_valoris	Ladamis Valoris	
+gn_lani_lido	Lani Lido	
+gn_lano_fergoto	Lano Fergoto	
+gn_lardo_cicci	Lardo Cicci	
+gn_lasini_choci	Lasini Chochi	
+gn_lono_sigrefi	Lono Sigrefi	
+gn_lorio_malara	Lorio Malara	
+gn_ma_cho_sung	Ma Cho Sung	
+gn_mac_bargan_rochan	Mac Bargan Rochan	
+gn_mac_furdy_soroli	Mac Furdy Solori	
+gn_mac_liggon_dallen	Mac Liggon Dallen	
+gn_mac_silith_noksan	Mac Silith Noksan	
+gn_magic	magic	
+gn_malo_canda	Malo Canda	
+gn_maurauder_guard_magic	maurauder_guard_magic	
+gn_maurauder_guard_melee	maurauder_guard_melee	
+gn_maurauder_guard_range	maurauder_guard_range	
+gn_maurauder_hero	maurauder_hero	
+gn_me_balla_soufi	Me Balla Soufi	
+gn_ming_xi_ying	Ming Xi Ying	
+gn_mirador	mirador	
+gn_mong_chi_sa	Mong Chi Sa	
+gn_mora_falari	mora_falari	
+gn_morio_lario	Morio Lario	
+gn_noriko_suena	Noriko Suena	
+gn_o_carlan_tryxi	O'Carlan Tryxi	
+gn_o_lormy_berran	O'Lormy Berran	
+gn_ordis_nirosis	Ordis Nirosis	
+gn_prisonner	prisonner	
+gn_queen_guard	queen_guard	
+gn_range	range	
+gn_relaus_xogips	Relaus Xogips	
+gn_strangers_welcomer_t1	strangers_welcomer_t1	
+gn_target	jarre	
+gn_tcm_chlorogoo_patrol	tcm_chlorogoo_patrol	
+gn_tcm_chlorogoo_prisonner	tcm_chlorogoo_prisonner	
+gn_tcm_master_dummy	tcm_master_dummy	
+gn_tcm_trooper_training	tcm_trooper_training	
+gn_tini_solni	Tini Solni	
+gn_tower_1	tower_1	
+gn_tower_event	tower_event	
+gn_tower_kami	tower_kami	
+gn_tower_karavan	tower_karavan	
+gn_traitre_corsaire	traitre_corsaire	
+gn_warmap_marauder_chief_250	warmap_marauder_chief_250	
+gn_warmap_marauder_hero_200	warmap_marauder_hero_200	
+gn_warmap_marauder_leader_200	warmap_marauder_leader_200	
+gn_warrior_fyros_spire_kami	warrior_fyros_spire_kami	
+gn_warrior_fyros_spire_karavan	warrior_fyros_spire_karavan	
+gn_warrior_matis_spire_kami	warrior_matis_spire_kami	
+gn_warrior_matis_spire_karavan	warrior_matis_spire_karavan	
+gn_warrior_tryker_spire_kami	warrior_tryker_spire_kami	
+gn_warrior_tryker_spire_karavan	warrior_tryker_spire_karavan	
+gn_warrior_zorai_spire_kami	warrior_zorai_spire_kami	
+gn_warrior_zorai_spire_karavan	warrior_zorai_spire_karavan	
+gn_watchtower	watchtower	
+gn_xala_rokian	Xala Rokian	
+gn_xan_mi_chong	Xan Mi Chong	
+gn_xao_tun	Xao Tun	
+gn_xeim_wi_lo	Xeim Wi Lo	
+gn_magicpanel	Panneau sur la magie	
+gn_foragepanel	Panneau sur la récolte	
+gn_fightpanel	Panneau sur le combat	
+gn_craftpanel	Panneau sur l'artisanat	
+office_tourisme_f	Guide Touristique de Pyr	
+office_tourisme_m	Guide Touristique d'Yrkanis	
+office_tourisme_t	Guide Touristique de Fairhaven	
+office_tourisme_z	Guide Touristique de Zora	
+cwmf03_bandit	Bandit d'Avalae	
+cwzf03_goo	Ragus Contaminé	
+cwff03_termit	Termitière	
+cwff03_goari	Goari Pondeuse	
+stele_epee_bois	Stèle	
+corsaire_dechu_coffer	Coffre de Corsaire	
+kef0904observer100	Observateur Campement du Lac Nord (1)	
+kef0904observer150	Observateur Campement des Hautes Tours (2)	
+kef0904observer200	Observateur Campement de la Colonne du Dragon (3)	
+kef0904observer210	Observateur Campement de la Crête Eternelle (4)	
+kef0904observer250	Observateur Campement de la Forêt Enflammée (5)	
+kef0904observer260	Observateur Campement du Couloir Brûlé (6)	
+kem0904observer100	Observateur Campement de la Poussée (1)	
+kem0904observer150	Observateur Campement du Sentier des Torbaks (2)	
+kem0904observer200	Observateur Campement de la Petite Montagne (3)	
+kem0904observer210	Observateur Campement des Chutes des Deux Totems (4)	
+kem0904observer250	Observateur Campement du Bosquet de la Confusion (5)	
+kem0904observer260	Observateur Campement du Bosquet Ouest (6)	
+ket0904observer100	Observateur Campement des Criques Ensorcelées (1)	
+ket0904observer150	Observateur Campement de l'Eau du Repos (2)	
+ket0904observer200	Observateur Campement des Cimes Jumelles (3)	
+ket0904observer210	Observateur Campement de la Promenade Caverneuse (4)	
+ket0904observer250	Observateur Campement des Etangs de Loria (5)	
+ket0904observer260	Observateur Campement du Trou du Silence (6)	
+kez0904observer100	Observateur Campement de Sai-Shun (1)	
+kez0904observer150	Observateur Campement de l'Arc des Kinchers (2)	
+kez0904observer200	Observateur Campement de Gu-Qin (3)	
+kez0904observer210	Observateur Campement du Vallon des Espérances (4)	
+kez0904observer250	Observateur Campement de la Vallée Perdue (5)	
+kez0904observer260	Observateur Campement du Promontoire du Désespoir (6)	
+fct_dynastic_merchant	Marchand Dynastique	
+fct_federal_merchant	Marchand Fédéral	
+fct_imperial_merchant	Marchand Impérial	
+fct_royal_merchant	Marchand Royal	
+gn_autel	Autel	
+fct_tryker_governor	Tryker Governor	
+fct_fyros_emperor	Fyros Emperor	Fyros Empress
+fct_matis_king	Matis King	Matis Queen
+fct_zorai_grand_sage	Zoraï Grand Sage	
+fct_chronicler	Chronicler	
+fct_royal_adviser	Royal Adviser	
+fct_matis_minstrel	Matis Minstrel	
+fct_matis_herena	Matis Herena	
+fct_matis_prince	Matis Prince	Matis Princess
+fct_fyros_senator	Fyros Senator	
+fct_imperial_alchemist	Imperial Alchemist	
+fct_fyros_prince	Fyros Prince	Fyros Princess
+fct_tryker_vice_governor	Tryker Vice-Governor	
+fct_zorai_sage	Zoraï Sage	
+fct_marauder_scout	Marauder Scout	
+fct_marauder_chief	Marauder Chief	
+fct_spy	Spy	
+Title00050	Apprentice Butcher	Apprentice Butcher
+Title00051	Butcher	Butcher
+Title00052	Apprentice Florist	Apprentice Florist
+Title00053	Florist	Florist
+Title00054	Apprentice Water-Carrier	Apprentice Water-Carrier
+Title00055	Water-Carrier	Water-Carrier
+Title00056	Apprentice Magnetic Cartographe	Apprentice Magnetic Cartographe
+Title00057	Magnetic Cartographe	Magnetic Cartographe
+Title00058	Apprentice Toolmaker	Apprentice Toolmaker
+Title00059	Toolmaker	Toolmaker
+Title00060	Apprentice Rescuer	Apprentice Rescuer
+Title00061	Rescuer	Rescuer
+Title00062	Apprentice Larvester	Apprentice Larvester
+Title00063	Larvester	Larvester
+Title00064	Apprentice Scrollmaker	Apprentice Scrollmaker
+Title00065	Scrollmaker	Scrollmaker
+fyros_rpjob_herbihunter_title	Master Butcher	
+matis_rpjob_florist_title	Master florist	
+zorai_rpjob_rescuer_title	Master Rescuer	
+zorai_rpjob_magnecarto_title	Master Cartograph	
+tryker_rpjob_aquamin_title	Master Water Carrier	
+fyros_rpjob_tooler_title	Master Toolmaker	
+tryker_rpjob_larvicultor_title	Master Larvester	
+matis_rpjob_paper_title	Master Scrollmaker	
+gn_fyros_rpjob_herbihunter_convert	Butchering work	
+gn_matis_rpjob_florist_convert	Flower workshop	
+gn_zorai_rpjob_rescuer_convert	First Aid Post	
+gn_tryker_rpjob_aquamin_convert	Scoreboard shipments	
+gn_zorai_rpjob_magnecarto_convert	Map of magnetism	
+gn_fyros_rpjob_tooler_convert	Tooler workshop	
+gn_tryker_rpjob_larvicultor_convert	Lavae preparation table	
+gn_matis_rpjob_paper_convert	Scrollmaker workshop 	
+gn_tryker_aquamin_source	Water source	
+gn_tryker_aquamin_barrel	Water of lakes	
+gn_tryker_aquamin_silo	Silo recovery rainwater	
+gn_tryker_aquamin_well	Well	
+gn_tryker_aquamin_npc	Operator of the Water Company	
+gn_zorai_magnecarto_npc	Control Agent for magnetism	
+gn_zorai_magnecarto_npc_A	Cartograph (Goo Chase)	
+gn_zorai_magnecarto_npc_B	Cartograph (Win-Cho)	
+gn_zorai_magnecarto_npc_C	Cartograph (Daïsha)	
+gn_zorai_magnecarto_npc_D	Cartograph (West Hollow)	
+gn_rpjob_herbihunter_chest	Chest	
+gn_rpjob_florist_jar_4	Jar of Cratcha pistils	
+gn_rpjob_florist_jar_2	Jar of Psykopla pistils	
+gn_rpjob_florist_jar_3	Jar of Slaveni pistils	
+gn_rpjob_florist_jar_1	Jar of mixed pistils	
+gn_rpjob_florist_water	Well	
+gn_rpjob_florist_water_barrel	Barrel of water	
+gn_rpjob_florist_engrai	Fertilizer	
+gn_rpjob_florist_engrai_barrel	Barrel of fertilizer	
+gn_boss_tryker_light_boss	Dante the Teaser	
+gn_boss_tryker_light_melee_guard	Guard	
+gn_boss_tryker_light_healer_guard	Guard	
+gn_boss_tryker_light_off_guard	Guard	
+gn_boss_tryker_light_range_guard	Guard	
+gn_moving_guards_group_1	Elite Guard	
+gn_moving_guards_group_2	Elite Guard	
+gn_boss_tryker_light_stone	Teleportation stone	
+gn_boss_tryker_light_stone_back	Teleportation stone	
+gn_boss_tryker_light_loot_box	Dante's chest	
+gn_boss_tryker_light_start_boss	Dante the Teaser	
+gn_boss_tryker_light_start_stone	Teleportation stone	
+gn_boss_tryker_light_start_box	Dante's crate
+fct_consumable_merchant	(Consumable Merchant)	
+title00031	Fyros Ambassador	Fyros Ambassador
+title00032	Matis Ambassador	Matis Ambassador
+title00033	Tryker Ambassador	Tryker Ambassador
+title00034	Zoraï Ambassador	Zoraï Ambassador
+gn_boss_zorai_light_boss	Pei-Ruz the Rotten	
+gn_boss_zorai_light_tomb_out	Teleportation stone	
+gn_boss_zorai_light_tomb_in	Teleportation stone	
+gn_boss_zorai_light_dalton_1	Vao Do-Duang	
+gn_boss_zorai_light_dalton_2	Jeoi Do-Duang	
+gn_boss_zorai_light_dalton_3	Chaio Do-Duang	
+gn_boss_zorai_light_dalton_4	We Do-Duang	
+gn_kami_altar_almati	Almati Woods Kami Altar	
+gn_karavan_altar_almati	Almati Woods Karavan Altar	
+gn_kami_altar_nexus	Nexus Kami Altar	
+gn_karavan_altar_nexus	Nexus Karavan Altar	
+gn_gravats	Rubble
+gn_room_access	Access Terminal
+gn_karavan_altar_silan_ranger_camp	Ranger Camp Karavan Altar	
+gn_kami_altar_silan_ranger_camp	Ranger Camp Kami Altar	
+gn_karavan_altar_silan_shattered_ruins	Shattered Ruins Karavan Altar	
+gn_kami_altar_silan_shining_lake	Shining Lake Kami Altar	
+fct_ranger_instructor	Ranger Instructor
+fct_ranger_assistant	Assistant Instructor
+fct_ranger_veteran	Veteran Ranger

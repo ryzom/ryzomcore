@@ -28,6 +28,10 @@
 #include "streamable_ig.h"
 #include "continent_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 extern CContinentManager ContinentMngr;
 
 H_AUTO_DECL(RZ_StremableIG)

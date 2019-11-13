@@ -18,6 +18,7 @@
 
 #include "group_html_webig.h"
 #include "nel/misc/xml_auto_ptr.h"
+#include "nel/gui/lua_manager.h"
 #include "../client_cfg.h"
 #include "../user_entity.h"
 #include "../entities.h"
@@ -27,6 +28,9 @@
 // used for login cookie to be sent to the web server
 #include "../net_manager.h"
 #include "../connection.h"
+
+#include <curl/curl.h>
+#include "nel/gui/curl_certificates.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -52,7 +56,7 @@ REGISTER_ACTION_HANDLER( CHandlerBrowseHome, "browse_home");
 
 static string getWebAuthKey()
 {
-	if(!UserEntity) return "";
+	if(!UserEntity || !NetMngr.getLoginCookie().isValid()) return "";
 
 	// authkey = <sharid><name><cid><cookie>
 	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
@@ -68,6 +72,9 @@ static string getWebAuthKey()
 
 void addWebIGParams (string &url, bool trustedDomain)
 {
+	// no extras parameters added to url if not in trusted domains list
+	if (!trustedDomain) return;
+
 	if(!UserEntity || !NetMngr.getLoginCookie().isValid()) return;
 
 	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
@@ -81,7 +88,7 @@ void addWebIGParams (string &url, bool trustedDomain)
 	{
 		url += string("&cid=") + toString(cid) +
 		string("&authkey=") + getWebAuthKey();
-		
+
 		if (url.find('$') != string::npos)
 		{
 			strFindReplace(url, "$gender$", GSGENDER::toString(UserEntity->getGender()));
@@ -147,13 +154,32 @@ size_t writeDataFromCurl(void *buffer, size_t size, size_t nmemb, void *pcl)
 	return size*nmemb;
 }
 
-
-struct CWebigNotificationThread : public NLMISC::IRunnable
+class CWebigNotificationThread : public NLMISC::IRunnable
 {
+private:
 	CURL *Curl;
+	bool _Running;
+	IThread *_Thread;
+
+public:
 
 	CWebigNotificationThread()
 	{
+		_Running = false;
+		_Thread = NULL;
+		curl_global_init(CURL_GLOBAL_ALL);
+
+		Curl = NULL;
+		//nlinfo("ctor CWebigNotificationThread");
+	}
+
+	void init()
+	{
+		if (Curl)
+		{
+			return;
+		}
+
 		Curl = curl_easy_init();
 		if(!Curl) return;
 		curl_easy_setopt(Curl, CURLOPT_COOKIEFILE, "");
@@ -161,7 +187,8 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 		curl_easy_setopt(Curl, CURLOPT_USERAGENT, getUserAgent().c_str());
 		curl_easy_setopt(Curl, CURLOPT_FOLLOWLOCATION, 1);
 		curl_easy_setopt(Curl, CURLOPT_WRITEFUNCTION, writeDataFromCurl);
-		//nlinfo("ctor CWebigNotificationThread");
+
+		NLGUI::CCurlCertificates::useCertificates(Curl);
 	}
 
 	~CWebigNotificationThread()
@@ -169,7 +196,13 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 		if(Curl)
 		{
 			curl_easy_cleanup(Curl);
-			Curl = 0;
+			Curl = NULL;
+		}
+		if (_Thread)
+		{
+			_Thread->terminate();
+			delete _Thread;
+			_Thread = NULL;
 		}
 	}
 
@@ -184,61 +217,24 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 		curl_easy_getinfo(Curl, CURLINFO_RESPONSE_CODE, &r);
 		//nlwarning("result : '%s'", curlresult.c_str());
 
-		vector<string> notifs;
-		explode(curlresult, string("|"), notifs);
-
-		// Update the mail notification icon
-
-		uint32 nbmail = 0;
-		if(notifs.size() > 0 && fromString(notifs[0], nbmail))
+		char *ch;
+		std::string contentType;
+		res = curl_easy_getinfo(Curl, CURLINFO_CONTENT_TYPE, &ch);
+		if (res == CURLE_OK && ch != NULL)
 		{
-			//nlinfo("nb mail is a number %d", nbmail);
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			if(pIM)
-			{
-				CCDBNodeLeaf *_CheckMailNode = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIL_WAITING");
-				if(_CheckMailNode)
-				{
-					_CheckMailNode->setValue32(nbmail==0?0:1);
-					CInterfaceElement *elm = CWidgetManager::getInstance()->getElementFromId("ui:interface:compass:mail:mail_nb");
-					if (elm)
-					{
-						CViewText *vt = dynamic_cast<CViewText*>(elm);
-						vt->setText(toString("%d", nbmail));
-					}
-				}
-			}
+			contentType = ch;
+		}
+
+		// "text/lua; charset=utf8"
+		if (contentType.find("text/lua") == 0)
+		{
+			std::string script;
+			script = "\nlocal __WEBIG_NOTIF__= true\n" + curlresult;
+			CInterfaceManager::getInstance()->queueLuaScript(script);
 		}
 		else
 		{
-			nlwarning("this is not a number '%s'", curlresult.c_str());
-		}
-
-		// Update the forum notification icon
-
-		uint32 nbforum = 0;
-		if(notifs.size() > 1 && fromString(notifs[1], nbforum))
-		{
-			//nlinfo("nb forum this is a number %d", nbforum);
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			if(pIM)
-			{
-				CCDBNodeLeaf *_CheckForumNode = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FORUM_UPDATED");
-				if(_CheckForumNode)
-				{
-					_CheckForumNode->setValue32(nbforum==0?0:1);
-					CInterfaceElement *elm = CWidgetManager::getInstance()->getElementFromId("ui:interface:compass:forum:forum_nb");
-					if (elm)
-					{
-						CViewText *vt = dynamic_cast<CViewText*>(elm);
-						vt->setText(toString("%d", nbforum));
-					}
-				}
-			}
-		}
-		else
-		{
-			nlwarning("this is not a number '%s'", curlresult.c_str());
+			nlwarning("Invalid content-type '%s', expected 'text/lua'", contentType.c_str());
 		}
 	}
 
@@ -255,30 +251,95 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 
 	void run()
 	{
-		// first time, we wait a small amount of time to be sure everything is initialized
-		nlSleep(1*60*1000);
-		while (true)
+		if (ClientCfg.WebIgNotifInterval == 0)
 		{
-			string url = "http://"+ClientCfg.WebIgMainDomain+"/index.php?app=notif&rnd="+randomString();
+			_Running = false;
+			nlwarning("ClientCfg.WebIgNotifInterval == 0, notification thread not running");
+			return;
+		}
+
+		std::string domain = ClientCfg.WebIgMainDomain;
+		uint32 ms = ClientCfg.WebIgNotifInterval*60*1000;
+
+		_Running = true;
+		// first time, we wait a small amount of time to be sure everything is initialized
+		nlSleep(30*1000);
+		uint c = 0;
+		while (_Running)
+		{
+			string url = "https://"+domain+"/index.php?app=notif&format=lua&rnd="+randomString();
 			addWebIGParams(url, true);
 			get(url);
-			nlSleep(10*60*1000);
+
+			sleepLoop(ms);
 		}
+	}
+
+	void sleepLoop(uint ms)
+	{
+		// use smaller sleep time so stopThread() will not block too long
+		// tick == 100ms
+		uint32 ticks = ms / 100;
+		while (_Running && ticks > 0) {
+			nlSleep(100);
+			ticks--;
+		}
+	}
+
+	void startThread()
+	{
+		// initialize curl outside thread
+		init();
+
+		if (!_Thread)
+		{
+			_Thread = IThread::create(this);
+			nlassert(_Thread != NULL);
+			_Thread->start();
+			nlwarning("WebIgNotification thread started");
+		}
+		else
+		{
+			nlwarning("WebIgNotification thread already started");
+		}
+	}
+
+	void stopThread()
+	{
+		_Running = false;
+		if (_Thread)
+		{
+			_Thread->wait();
+			delete _Thread;
+			_Thread = NULL;
+			nlwarning("WebIgNotification thread stopped");
+		}
+		else
+		{
+			nlwarning("WebIgNotification thread already stopped");
+		}
+	}
+
+	bool isRunning() const
+	{
+		return _Running;
 	}
 };
 
-void startWebigNotificationThread()
+static CWebigNotificationThread webigThread;
+void startWebIgNotificationThread()
 {
-	static bool startedWebigNotificationThread = false;
-	if(!startedWebigNotificationThread)
+	if (!webigThread.isRunning())
 	{
-		curl_global_init(CURL_GLOBAL_ALL);
-		//nlinfo("startStatThread");
-		CWebigNotificationThread *webigThread = new CWebigNotificationThread();
-		IThread	*thread = IThread::create (webigThread);
-		nlassert (thread != NULL);
-		thread->start ();
-		startedWebigNotificationThread = true;
+		webigThread.startThread();
+	}
+}
+
+void stopWebIgNotificationThread()
+{
+	if (webigThread.isRunning())
+	{
+		webigThread.stopThread();
 	}
 }
 
@@ -302,6 +363,8 @@ CGroupHTMLAuth::~CGroupHTMLAuth()
 
 void CGroupHTMLAuth::addHTTPGetParams (string &url, bool trustedDomain)
 {
+	if(!UserEntity || !NetMngr.getLoginCookie().isValid()) return;
+
 	addWebIGParams(url, trustedDomain);
 }
 
@@ -309,7 +372,10 @@ void CGroupHTMLAuth::addHTTPGetParams (string &url, bool trustedDomain)
 
 void CGroupHTMLAuth::addHTTPPostParams (SFormFields &formfields, bool trustedDomain)
 {
-	if(!UserEntity) return;
+	// no extras parameters added to url if not in trusted domains list
+	if (!trustedDomain) return;
+
+	if(!UserEntity || !NetMngr.getLoginCookie().isValid()) return;
 
 	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
 	formfields.add("shardid", toString(CharacterHomeSessionId));
@@ -347,7 +413,6 @@ NLMISC_REGISTER_OBJECT(CViewBase, CGroupHTMLWebIG, std::string, "webig_html");
 CGroupHTMLWebIG::CGroupHTMLWebIG(const TCtorParam &param)
 : CGroupHTMLAuth(param)
 {
-	startWebigNotificationThread();
 }
 
 // ***************************************************************************

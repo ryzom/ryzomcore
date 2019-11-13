@@ -112,7 +112,8 @@ public:
 	// A BNP structure
 	struct BNP
 	{
-		BNP() : FileNames(NULL), ThreadFileId(0), CacheFileOnOpen(false), AlwaysOpened(false), InternalUse(false), OffsetFromBeginning(0) { }
+		BNP();
+		~BNP();
 
 		// FileName of the BNP. important to open it in getFile() (for other threads or if not always opened).
 		std::string						BigFileName;
@@ -163,6 +164,7 @@ private:
 	{
 	public:
 		CThreadFileArray();
+		~CThreadFileArray();
 
 		// Allocate a FileId for a BNP.
 		uint32			allocate();

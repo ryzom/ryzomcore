@@ -396,7 +396,7 @@ void CContinentManager::select(const CVectorD &pos, NLMISC::IProgressCallback &p
 	{
 		CContinent *pCont = it->second;
 		nlinfo("Looking into %s", pCont->SheetName.c_str());
-		if (pCont->Zone.VPoints.size() > 0) // Patch because some continent have not been done yet
+		if (!pCont->Zone.VPoints.empty()) // Patch because some continent have not been done yet
 		{
 			if (pCont->Zone.contains(fPos))
 			{
@@ -488,8 +488,177 @@ CContinent *CContinentManager::get(const std::string &contName)
 	return NULL;
 }
 
-void CContinentManager::serialUserLandMarks(NLMISC::IStream &f)
+void CContinentManager::writeTo(xmlNodePtr node) const
 {
+	// <landmarks continent="bagne" type="user" />
+	// <landmarks continent="tryker" type="user">
+	//    <landmark type="0" x="0" y="0" title="landmark title"/>
+	//    ...
+	// </landmarks>
+	for(TContinents::const_iterator it = _Continents.begin(); it != _Continents.end(); ++it)
+	{
+		std::string name = it->first;
+		xmlNodePtr contNode = xmlNewChild(node, NULL, (const xmlChar*)"landmarks", NULL);
+		xmlSetProp(contNode, (const xmlChar*)"continent", (const xmlChar*)name.c_str());
+		xmlSetProp(contNode, (const xmlChar*)"type", (const xmlChar*)"user");
+
+		if (it->second && it->second->UserLandMarks.size() > 0)
+		{
+			for(uint i = 0; i< it->second->UserLandMarks.size(); ++i)
+			{
+				const CUserLandMark& lm = it->second->UserLandMarks[i];
+
+				xmlNodePtr lmNode = xmlNewChild(contNode, NULL, (const xmlChar*)"landmark", NULL);
+				xmlSetProp(lmNode, (const xmlChar*)"type", (const xmlChar*)toString("%d", (uint32)lm.Type).c_str());
+				xmlSetProp(lmNode, (const xmlChar*)"x", (const xmlChar*)toString("%.2f", lm.Pos.x).c_str());
+				xmlSetProp(lmNode, (const xmlChar*)"y", (const xmlChar*)toString("%.2f", lm.Pos.y).c_str());
+
+				// sanitize ascii control chars
+				// libxml will encode other special chars itself
+				std::string title = lm.Title.toUtf8();
+				for(uint i = 0; i< title.size(); i++)
+				{
+					if (title[i] >= '\0' && title[i] < ' ' && title[i] != '\n' && title[i] != '\t')
+					{
+						title[i] = '?';
+					}
+				}
+				xmlSetProp(lmNode, (const xmlChar*)"title", (const xmlChar*)title.c_str());
+			}
+		}
+	}
+}
+
+void CContinentManager::readFrom(xmlNodePtr node)
+{
+	CXMLAutoPtr prop;
+
+	// <landmarks continent="bagne" type="user">
+	//   <landmark type="0" x="0" y="0" title="landmark title" />
+	//   ...
+	// </landmarks>
+	std::string continent;
+	prop = xmlGetProp(node, (xmlChar*)"continent");
+	if (!prop)
+	{
+		nlwarning("Ignore landmarks group 'continent' attribute.");
+		return;
+	}
+	continent = (const char*)prop;
+
+	TContinents::iterator itContinent = _Continents.find(continent);
+	if (itContinent == _Continents.end() || !itContinent->second)
+	{
+		nlwarning("Ignore landmarks group with unknown 'continent' '%s'", continent.c_str());
+		return;
+	}
+
+	std::string lmtype;
+	prop = xmlGetProp(node, (xmlChar*)"type");
+	if (!prop)
+	{
+		nlwarning("Ignore landmarks group without 'type' attribute.");
+		return;
+	}
+	lmtype = toLower((const char*)prop);
+	if (lmtype != "user")
+	{
+		nlwarning("Ignore landmarks group with type '%s', expected 'user'.", lmtype.c_str());
+		return;
+	}
+
+	node = node->children;
+	while(node)
+	{
+		if (stricmp((char*)node->name, "landmark") != 0)
+		{
+			nlwarning("Ignore invalid node '%s' under landmarks group", (const char*)node->name);
+
+			node = node->next;
+			continue;
+		}
+
+		bool add = true;
+		CUserLandMark lm;
+
+		prop = xmlGetProp(node, (xmlChar*)"type");
+		if (prop)
+			fromString((const char*)prop, lm.Type);
+		else
+			nlwarning("Using default value for landmark type");
+
+		prop = xmlGetProp(node, (xmlChar*)"x");
+		if (prop)
+		{
+			fromString((const char*)prop, lm.Pos.x);
+		}
+		else
+		{
+			nlwarning("Landmark missing 'x' attribute");
+			add = false;
+		}
+
+		prop = xmlGetProp(node, (xmlChar*)"y");
+		if (prop)
+		{
+			fromString((const char*)prop, lm.Pos.y);
+		}
+		else
+		{
+			nlwarning("Landmark missing 'y' attribute");
+			add = false;
+		}
+
+		prop = xmlGetProp(node, (xmlChar*)"title");
+		if (prop)
+		{
+			lm.Title.fromUtf8((const char*)prop);
+		}
+		else
+		{
+			nlwarning("Landmark missing 'title' attribute");
+			add = false;
+		}
+
+		if (add)
+		{
+			// before adding, check for duplicate
+			// duplicates might be read from .icfg before .xml is read
+			add = true;
+			for(uint i = 0; i< itContinent->second->UserLandMarks.size(); ++i)
+			{
+				const CUserLandMark& test = itContinent->second->UserLandMarks[i];
+				uint xdiff = fabs(test.Pos.x - lm.Pos.x) * 100.f;
+				uint ydiff = fabs(test.Pos.y - lm.Pos.y) * 100.f;
+				if (xdiff == 0 && ydiff == 0)
+				{
+					add = false;
+					break;
+				}
+			}
+
+			if (add)
+			{
+				itContinent->second->UserLandMarks.push_back(lm);
+			}
+			else
+			{
+				nlwarning("Ignore landmark with duplicate pos (continent:'%s', x:%.2f, y:%.2f, type:%d, title:'%s')", continent.c_str(), lm.Pos.x, lm.Pos.y, (uint8)lm.Type, lm.Title.toUtf8().c_str());
+			}
+		}
+		else
+		{
+			nlwarning("Landmark not added");
+		}
+
+		node = node->next;
+	}
+}
+
+uint32 CContinentManager::serialUserLandMarks(NLMISC::IStream &f)
+{
+	uint32 totalLandmarks = 0;
+
 	f.serialVersion(1);
 	if (!f.isReading())
 	{
@@ -502,6 +671,7 @@ void CContinentManager::serialUserLandMarks(NLMISC::IStream &f)
 			if (it->second)
 			{
 				f.serialCont(it->second->UserLandMarks);
+				totalLandmarks += it->second->UserLandMarks.size();
 			}
 			else
 			{
@@ -522,6 +692,7 @@ void CContinentManager::serialUserLandMarks(NLMISC::IStream &f)
 			if (it != _Continents.end() && it->second)
 			{
 				f.serialCont(it->second->UserLandMarks);
+				totalLandmarks += it->second->UserLandMarks.size();
 			}
 			else
 			{
@@ -530,6 +701,8 @@ void CContinentManager::serialUserLandMarks(NLMISC::IStream &f)
 			}
 		}
 	}
+
+	return totalLandmarks;
 }
 
 

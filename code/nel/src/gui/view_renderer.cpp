@@ -26,6 +26,10 @@ using namespace NLMISC;
 using namespace std;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -34,6 +38,7 @@ namespace NLGUI
 	NL3D::UTextContext* CViewRenderer::textcontext    = NULL;
 	std::set< std::string >* CViewRenderer::hwCursors = NULL;
 	float CViewRenderer::hwCursorScale                = 1.0f;
+	CViewRenderer::TFontsList CViewRenderer::fonts;
 
 	CViewRenderer::CViewRenderer()
 	{
@@ -91,21 +96,52 @@ namespace NLGUI
 		if(w!=0 && h!=0)
 		{
 			_IsMinimized= false;
-			_ScreenW = w;
-			_ScreenH = h;
-			if(_ScreenW>0)
-				_OneOverScreenW = 1.0f / (float)_ScreenW;
-			else
-				_OneOverScreenW = 1000;
-			if(_ScreenH>0)
-				_OneOverScreenH = 1.0f / (float)_ScreenH;
-			else
-				_OneOverScreenH = 1000;
+			if (w != _ScreenW || h != _ScreenH)
+			{
+				_ScreenW = w;
+				_ScreenH = h;
+
+				updateInterfaceScale();
+			}
 		}
 		else
 		{
 			// Keep old coordinates (suppose resolution won't change, even if typically false wen we swithch from outgame to ingame)
 			_IsMinimized= true;
+		}
+	}
+
+	void CViewRenderer::updateInterfaceScale()
+	{
+		if(_ScreenW>0)
+			_OneOverScreenW = 1.0f / (float)_ScreenW;
+		else
+			_OneOverScreenW = 1000;
+		if(_ScreenH>0)
+			_OneOverScreenH = 1.0f / (float)_ScreenH;
+		else
+			_OneOverScreenH = 1000;
+
+		_InterfaceScale = _InterfaceUserScale;
+		if (_InterfaceBaseW > 0 && _InterfaceBaseH > 0)
+		{
+			float wRatio = (float)_ScreenW / _InterfaceBaseW;
+			float rRatio = (float)_ScreenH / _InterfaceBaseH;
+			_InterfaceScale *= std::min(wRatio, rRatio);
+		}
+
+		if (_InterfaceScale != 1.0f)
+		{
+			_OneOverScreenW *= _InterfaceScale;
+			_OneOverScreenH *= _InterfaceScale;
+
+			_EffectiveScreenW = sint(_ScreenW / _InterfaceScale);
+			_EffectiveScreenH = sint(_ScreenH / _InterfaceScale);
+		}
+		else
+		{
+			_EffectiveScreenW = _ScreenW;
+			_EffectiveScreenH = _ScreenH;
 		}
 	}
 
@@ -115,8 +151,8 @@ namespace NLGUI
 	 */
 	void CViewRenderer::getScreenSize (uint32 &w, uint32 &h)
 	{
-		w = _ScreenW;
-		h = _ScreenH;
+		w = _EffectiveScreenW;
+		h = _EffectiveScreenH;
 	}
 
 	/*
@@ -128,6 +164,20 @@ namespace NLGUI
 		ooh= _OneOverScreenH;
 	}
 
+	void CViewRenderer::setInterfaceScale(float scale, sint32 width/*=0*/, sint32 height/*=0*/)
+	{
+		// prevent #div/0
+		if (sint(scale*100) > 0)
+			_InterfaceUserScale = scale;
+		else
+			_InterfaceUserScale = 1.0f;
+
+		_InterfaceBaseW = width;
+		_InterfaceBaseH = height;
+
+		updateInterfaceScale();
+	}
+
 	void CViewRenderer::setup()
 	{
 		_ClipX = _ClipY = 0;
@@ -135,8 +185,10 @@ namespace NLGUI
 		_ClipH = 600;
 		_ScreenW = 800;
 		_ScreenH = 600;
-		_OneOverScreenW= 1.0f / (float)_ScreenW;
-		_OneOverScreenH= 1.0f / (float)_ScreenH;
+		_InterfaceScale = 1.0f;
+		_InterfaceUserScale = 1.0f;
+		_InterfaceBaseW = 0;
+		_InterfaceBaseH = 0;
 		_IsMinimized= false;
 		_WFigurTexture= 0;
 		_HFigurTexture= 0;
@@ -152,6 +204,9 @@ namespace NLGUI
 			_EmptyLayer[i]= true;
 		}
 		_BlankGlobalTexture  = NULL;
+		_Bilinear = false;
+
+		updateInterfaceScale();
 	}
 
 
@@ -214,15 +269,63 @@ namespace NLGUI
 			ite++;
 		}
 
+		TFontsList::iterator iteFonts = fonts.begin();
+		while (iteFonts != fonts.end())
+		{
+			driver->deleteTextContext(iteFonts->second);
+			++iteFonts;
+		}
+
 		_GlobalTextures.clear();
 		_SImages.clear();
 		_SImageIterators.clear();
 		_TextureMap.clear();
 		_IndexesToTextureIds.clear();
+		fonts.clear();
 	}
 
 	NL3D::UDriver* CViewRenderer::getDriver(){
 		return driver;
+	}
+
+	// ***************************************************************************
+	NL3D::UTextContext* CViewRenderer::getTextContext(const std::string &name)
+	{
+		if (!name.empty() && fonts.count(name) > 0)
+			return fonts[name];
+
+		return textcontext;
+	}
+
+	// ***************************************************************************
+	bool CViewRenderer::registerFont(const std::string &name, const std::string &font)
+	{
+		nlassert(driver != NULL);
+
+		// free existing font
+		if (fonts.count(name) > 0)
+			driver->deleteTextContext(fonts[name]);
+
+		std::string fontFile = CPath::lookup(font, false);
+		if (fontFile.empty())
+		{
+			nlwarning("Font file '%s' not found", font.c_str());
+			return false;
+		}
+
+		NL3D::UTextContext *context;
+		context = driver->createTextContext(fontFile);
+		if (context == NULL)
+		{
+			nlwarning("Cannot create a TextContext with font '%s'.", font.c_str());
+			return false;
+		}
+
+		context->setKeep800x600Ratio(false);
+
+		fonts[name] = context;
+
+		return true;
 	}
 
 	void CViewRenderer::setTextContext(NL3D::UTextContext *textcontext)
@@ -446,7 +549,7 @@ namespace NLGUI
 	/*
 	 * drawBitmap
 	 */
-	void CViewRenderer::drawRotFlipBitmap (sint layerId, sint32 x, sint32 y, sint32 width, sint32 height,
+	void CViewRenderer::drawRotFlipBitmap (sint layerId, float x, float y, float width, float height,
 										   uint8 rot, bool flipv, sint32 nTxId, const CRGBA &col)
 	{
 		if (width <= 0 || height <= 0) return;
@@ -1230,7 +1333,7 @@ namespace NLGUI
 					_Material.setTexture(0, ite->Texture);
 
 					// Special Case if _WorldSpaceTransformation and _WorldSpaceScale, enable bilinear
-					if(_WorldSpaceTransformation && _WorldSpaceScale)
+					if(_Bilinear || (_WorldSpaceTransformation && _WorldSpaceScale))
 						ite->Texture->setFilterMode(UTexture::Linear, UTexture::LinearMipMapOff);
 
 					// draw quads and empty list
@@ -1247,7 +1350,7 @@ namespace NLGUI
 					}
 
 					// Special Case if _WorldSpaceTransformation and _WorldSpaceScale, reset
-					if(_WorldSpaceTransformation && _WorldSpaceScale)
+					if(_Bilinear || (_WorldSpaceTransformation && _WorldSpaceScale))
 						ite->Texture->setFilterMode(UTexture::Nearest, UTexture::NearestMipMapOff);
 				}
 				if (!layer.FilteredAlphaBlendedQuads.empty() ||
@@ -1830,6 +1933,16 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CViewRenderer::CTextureId::clear()
+	{
+		if (_TextureId >= 0)
+		{
+			CViewRenderer::getInstance()->deleteTexture(_TextureId);
+			_TextureId = -1;
+		}
+	}
+
+	// ***************************************************************************
 	void CViewRenderer::CTextureId::serial(NLMISC::IStream &f)
 	{
 		std::string texName;
@@ -1889,6 +2002,25 @@ namespace NLGUI
 
 	void CViewRenderer::drawText (sint layerId, float x, float y, uint wordIndex, float xmin, float ymin, float xmax, float ymax, UTextContext &textContext)
 	{
+		xmin = xmin * _OneOverScreenW;
+		ymin = ymin * _OneOverScreenH;
+		xmax = xmax * _OneOverScreenW;
+		ymax = ymax * _OneOverScreenH;
+
+		if (_InterfaceScale != 1.0f && _InterfaceScale != 2.0f)
+		{
+			// align to screen pixel
+			x *= _OneOverScreenW * _ScreenW;
+			y *= _OneOverScreenH * _ScreenH;
+			x = floorf(x) * 1.f / (float) _ScreenW;
+			y = floorf(y) * 1.f / (float) _ScreenH;
+		}
+		else
+		{
+			x = floorf(x) * _OneOverScreenW;
+			y = floorf(y) * _OneOverScreenH;
+		}
+
 		if (_WorldSpaceTransformation)
 		{
 			textContext.printClipAtUnProjected(*getStringRenderBuffer(layerId), _CameraFrustum, _WorldSpaceMatrix, x, y, _CurrentZ, wordIndex, xmin, ymin, xmax, ymax);

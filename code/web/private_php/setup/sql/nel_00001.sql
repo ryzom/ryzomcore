@@ -14,7 +14,7 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Database: `nel`
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `domain` (
   `web_host` varchar(255) NOT NULL DEFAULT '',
   `web_host_php` varchar(255) NOT NULL DEFAULT '',
   `description` varchar(200) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `permission` (
   `ShardId` int(10) NOT NULL DEFAULT '-1',
   `AccessPrivilege` set('OPEN','DEV','RESTRICTED') NOT NULL DEFAULT 'OPEN',
 `prim` int(10) unsigned NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `shard` (
   `State` enum('ds_close','ds_dev','ds_restricted','ds_open') NOT NULL DEFAULT 'ds_dev',
   `MOTD` text NOT NULL,
 `prim` int(10) unsigned NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='contains all shards information for login system';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='contains all shards information for login system';
 
 -- --------------------------------------------------------
 
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `ValidMerchantCode` varchar(13) NOT NULL DEFAULT '',
   `PBC` tinyint(1) NOT NULL DEFAULT '0',
   `ApiKeySeed` varchar(8) DEFAULT NULL
-) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8 COMMENT='contains all users information for login system';
+) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COMMENT='contains all users information for login system';
 
 --
 -- Indexes for dumped tables

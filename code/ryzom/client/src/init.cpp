@@ -46,9 +46,6 @@
 // Ligo.
 #include "nel/ligo/ligo_config.h"
 
-// Std.
-#include <fstream>
-#include <sstream>
 // Client
 #include "init.h"
 #include "input.h"
@@ -71,6 +68,8 @@
 
 #include "interface_v3/sbrick_manager.h"
 #include "nel/gui/widget_manager.h"
+#include "nel/gui/http_cache.h"
+#include "nel/gui/http_hsts.h"
 //
 #include "gabarit.h"
 #include "hair_set.h"
@@ -105,9 +104,19 @@ extern HINSTANCE HInstance;
 extern HWND SlashScreen;
 #endif // NL_OS_WINDOWS
 
+#ifdef NL_OS_MAC
+#include <stdio.h>
+#include <sys/resource.h>
+#include "nel/misc/dynloadlib.h"
+#endif
+
 #include "app_bundle_utils.h"
 
 #include <new>
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ///////////
 // USING //
@@ -254,7 +263,10 @@ static INT_PTR CALLBACK ExitClientErrorDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 		{
 			if (CI18N::hasTranslation("TheSagaOfRyzom"))
 			{
-				SetWindowTextW(hwndDlg, (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str ());
+				if (!SetWindowTextW(hwndDlg, (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str ()))
+				{
+					nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+				}
 			}
 			SetDlgItemTextW(hwndDlg, IDC_ERROR_MSG_TEXT, (WCHAR*) CurrentErrorMessage.c_str ());
 			if (CI18N::hasTranslation("uiRyzomErrorMsgBoxExit"))
@@ -364,7 +376,7 @@ void selectTipsOfTheDay (uint /* tips */)
 	TipsOfTheDay = title+CI18N::get ("uiTips"+toString (tips));*/
 	// todo tips of the day remove
 	//trap TipsOfTheDay = CI18N::get ("uiMessageOfTheDay");
-	TipsOfTheDay = ""; //trap
+	TipsOfTheDay.clear(); //trap
 }
 
 // ***************************************************************************
@@ -572,14 +584,12 @@ void listStereoDisplayDevices(std::vector<NL3D::CStereoDeviceInfo> &devices)
 	IStereoDisplay::listDevices(devices);
 	for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
 	{
-		std::stringstream name;
-		name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
-		std::stringstream fullname;
-		fullname << std::string("[") << name.str() << "] [" << it->Serial << "]";
-		nlinfo("VR [C]: Stereo Display: %s", name.str().c_str());
+		std::string name = toString("%s - %s - %s", IStereoDisplay::getLibraryName(it->Library), it->Manufacturer.c_str(), it->ProductName.c_str());
+		std::string fullname = toString("[%s] [%s]", name.c_str(), it->Serial.c_str());
+		nlinfo("VR [C]: Stereo Display: %s", name.c_str());
 		if (cache)
 		{
-			VRDeviceCache.push_back(std::pair<std::string, std::string>(name.str(), it->Serial)); // VR_CONFIG
+			VRDeviceCache.push_back(std::pair<std::string, std::string>(name, it->Serial)); // VR_CONFIG
 		}
 	}
 }
@@ -617,9 +627,8 @@ void initStereoDisplayDevice()
 		{
 			for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
 			{
-				std::stringstream name;
-				name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
-				if (name.str() == ClientCfg.VRDisplayDevice)
+				std::string name = toString("%s - %s - %s", IStereoDisplay::getLibraryName(it->Library), it->Manufacturer.c_str(), it->ProductName.c_str());
+				if (name == ClientCfg.VRDisplayDevice)
 					deviceInfo = &(*it);
 				if (ClientCfg.VRDisplayDeviceId == it->Serial)
 					break;
@@ -797,6 +806,68 @@ static bool addRyzomIconBitmap(const std::string &directory, vector<CBitmap> &bi
 #endif
 
 //---------------------------------------------------
+// initLog :
+// Initialize the client.log file
+//---------------------------------------------------
+void initLog()
+{
+	// Add a displayer for Debug Infos.
+	createDebug();
+
+	// Client.Log displayer
+	nlassert( !ErrorLog->getDisplayer("CLIENT.LOG") );
+	CFileDisplayer *ClientLogDisplayer = new CFileDisplayer(getLogDirectory() + "client.log", true, "CLIENT.LOG");
+	DebugLog->addDisplayer (ClientLogDisplayer);
+	InfoLog->addDisplayer (ClientLogDisplayer);
+	WarningLog->addDisplayer (ClientLogDisplayer);
+	ErrorLog->addDisplayer (ClientLogDisplayer);
+	AssertLog->addDisplayer (ClientLogDisplayer);
+
+	// Display the client version.
+	nlinfo("RYZOM VERSION: %s", getDebugVersion().c_str());
+	nlinfo("Memory: %s/%s", bytesToHumanReadable(CSystemInfo::availablePhysicalMemory()).c_str(), bytesToHumanReadable(CSystemInfo::totalPhysicalMemory()).c_str());
+	nlinfo("OS: %s", CSystemInfo::getOS().c_str());
+	nlinfo("Processor: %s", CSystemInfo::getProc().c_str());
+
+#ifdef NL_OS_MAC
+	struct rlimit rlp, rlp2, rlp3;
+
+	getrlimit(RLIMIT_NOFILE, &rlp);
+
+	rlim_t value = 1024;
+
+	rlp2.rlim_cur = std::min(value, rlp.rlim_max);
+	rlp2.rlim_max = rlp.rlim_max;
+	
+	if (setrlimit(RLIMIT_NOFILE, &rlp2))
+	{
+		if (errno == EINVAL)
+		{
+			nlwarning("Unable to set rlimit with error: the specified limit is invalid");
+		}
+		else if (errno == EPERM)
+		{
+			nlwarning("Unable to set rlimit with error: the limit specified would have raised the maximum limit value and the caller is not the super-user");
+		}
+		else
+		{
+			nlwarning("Unable to set rlimit with error: unknown error");
+		}
+	}
+
+	getrlimit(RLIMIT_NOFILE, &rlp3);
+	nlinfo("rlimit before %llu %llu", (uint64)rlp.rlim_cur, (uint64)rlp.rlim_max);
+	nlinfo("rlimit after %llu %llu", (uint64)rlp3.rlim_cur, (uint64)rlp3.rlim_max);
+
+	// add the bundle's plugins path as library search path (for nel drivers)
+	if (CFile::isExists(getAppBundlePath() + "/Contents/PlugIns/nel"))
+	{
+		CLibrary::addLibPath(getAppBundlePath() + "/Contents/PlugIns/nel/");
+	}
+#endif
+}
+
+//---------------------------------------------------
 // prelogInit :
 // Initialize the application before login
 // if the init fails, call nlerror
@@ -847,21 +918,6 @@ void prelogInit()
 		// Init XML Lib allocator
 		// Due to Bug #906, we disable the stl xml allocation
 		// nlverify (xmlMemSetup (XmlFree4NeL, XmlMalloc4NeL, XmlRealloc4NeL, XmlStrdup4NeL) == 0);
-
-		// Add a displayer for Debug Infos.
-		createDebug();
-
-		// Client.Log displayer
-		nlassert( !ErrorLog->getDisplayer("CLIENT.LOG") );
-		CFileDisplayer *ClientLogDisplayer = new CFileDisplayer(getLogDirectory() + "client.log", true, "CLIENT.LOG");
-		DebugLog->addDisplayer (ClientLogDisplayer);
-		InfoLog->addDisplayer (ClientLogDisplayer);
-		WarningLog->addDisplayer (ClientLogDisplayer);
-		ErrorLog->addDisplayer (ClientLogDisplayer);
-		AssertLog->addDisplayer (ClientLogDisplayer);
-
-		// Display the client version.
-		nlinfo("RYZOM VERSION : %s", getDebugVersion().c_str());
 
 		// Init the debug memory
 		initDebugMemory();
@@ -1043,23 +1099,21 @@ void prelogInit()
 
 		UDriver::CMode mode;
 
-		bool forceWindowed1024x768 = true;
-		
 		if (Driver->getCurrentScreenMode(mode))
 		{
-			// if screen mode lower than 1024x768, use same mode in fullscreen
-			if (mode.Width <= 1024 && mode.Height <= 768)
+			// use current mode if its smaller than 1024x768
+			// mode should be windowed already, but incase its not, use the mode as is
+			if (mode.Windowed && (mode.Width > 1024 && mode.Height > 768))
 			{
-				mode.Windowed = false;
-				forceWindowed1024x768 = false;
+				mode.Width		= 1024;
+				mode.Height		= 768;
 			}
 		}
-
-		if (forceWindowed1024x768)
+		else
 		{
-			mode.Width		= 1024;
-			mode.Height		= 768;
-			mode.Windowed	= true;
+			mode.Width = 1024;
+			mode.Height = 768;
+			mode.Windowed = true;
 		}
 
 		// Disable Hardware Vertex Program.
@@ -1071,12 +1125,6 @@ void prelogInit()
 		// Disable Hardware Texture Shader.
 		if(ClientCfg.DisableTextureShdr)
 			Driver->disableHardwareTextureShader();
-
-		// Enable or disable VSync
-		if(ClientCfg.WaitVBL)
-			Driver->setSwapVBLInterval(1);
-		else
-			Driver->setSwapVBLInterval(0);
 
 		if (StereoDisplay) // VR_CONFIG // VR_DRIVER
 		{
@@ -1102,6 +1150,12 @@ void prelogInit()
 			// ExitClientError() call exit() so the code after is never called
 			return;
 		}
+
+		// Enable or disable VSync
+		if (ClientCfg.WaitVBL)
+			Driver->setSwapVBLInterval(1);
+		else
+			Driver->setSwapVBLInterval(0);
 
 		// initialize system utils class
 		CSystemUtils::init();
@@ -1166,6 +1220,12 @@ void prelogInit()
 				// if found, skip other directories for this icon size
 				if (addRyzomIconBitmap(directory, bitmaps)) break;
 			}
+		}
+
+		if (bitmaps.empty())
+		{
+			// check if an icon is present in same directory as executable
+			addRyzomIconBitmap(Args.getProgramPath(), bitmaps);
 		}
 
 		if (bitmaps.empty())
@@ -1273,6 +1333,8 @@ void prelogInit()
 
 
 		CInterfaceManager::getInstance();
+		CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
+		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
 
 		// Yoyo: initialize NOW the InputHandler for Event filtering.
 		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
@@ -1311,6 +1373,12 @@ void prelogInit()
 			}
 			//nlinfo ("PROFILE: %d seconds for Add search paths Data", (uint32)(ryzomGetLocalTime ()-initPaths)/1000);
 		}
+
+		// Initialize HTTP cache
+		CHttpCache::getInstance()->setCacheIndex("cache/cache.index");
+		CHttpCache::getInstance()->init();
+
+		CStrictTransportSecurity::getInstance()->init("save/hsts-list.save");
 
 		// Register the reflected classes
 		registerInterfaceElements();
@@ -1470,19 +1538,6 @@ void postlogInit()
 		CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
 
 		{
-			H_AUTO(InitRZShIdI)
-
-			nmsg = "Initializing sheets...";
-			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
-
-			// Initialize Sheet IDs.
-			CSheetId::init (ClientCfg.UpdatePackedSheet);
-
-			initLast = initCurrent;
-			initCurrent = ryzomGetLocalTime();
-		}
-
-		{
 			H_AUTO(InitRZSound)
 
 			// Init the sound manager
@@ -1490,15 +1545,6 @@ void postlogInit()
 			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 			if(ClientCfg.SoundOn)
 			{
-				// tmp fix : it seems that, at this point, if the bg downloader window has focus and
-				// not the Ryzom one, then sound init fails
-				/*#ifdef NL_OS_WINDOWS
-					HWND hWnd = Driver->getDisplay ();
-					nlassert (hWnd);
-					ShowWindow(hWnd, SW_RESTORE);
-					SetForegroundWindow(hWnd);
-				#endif*/
-				// bg downloader not used anymore anyways
 				SoundMngr = new CSoundManager(&ProgressBar);
 				try
 				{
@@ -1507,8 +1553,8 @@ void postlogInit()
 				catch(const Exception &e)
 				{
 					nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
-					// leak the alocated sound manager...
-					SoundMngr = 0;
+					delete SoundMngr;
+					SoundMngr = NULL;
 				}
 
 				// Play Music just after the SoundMngr is inited
@@ -1541,7 +1587,13 @@ void postlogInit()
 		}
 
 		{
-			H_AUTO(InitRZSheetL)
+			H_AUTO(InitRZShIdI)
+
+			nmsg = "Initializing sheets...";
+			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
+
+			// Initialize Sheet IDs.
+			CSheetId::init (ClientCfg.UpdatePackedSheet);
 
 			// load packed sheets
 			nmsg = "Loading sheets...";
@@ -1604,7 +1656,7 @@ void postlogInit()
 		else
 		{
 			// To have the same number of newMessage in client light
-			nmsg = "";
+			nmsg.clear();
 			ProgressBar.newMessage (nmsg);
 			ProgressBar.newMessage (nmsg);
 			ProgressBar.newMessage (nmsg);

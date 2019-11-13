@@ -61,7 +61,7 @@ struct TMessageRecord
 	{
 		nlassert( stream.stringMode() );
 
-		uint32 len;
+		uint32 len = 0;
 		std::string s_event;
 		stream.serial( UpdateCounter );
 		if ( stream.isReading() )

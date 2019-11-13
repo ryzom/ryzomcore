@@ -286,14 +286,14 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 			// WARNING: READ THIS !!!!!!!!!!!!!!!! ///////////////////////////
 			// If at the release time, it freezes here, it's a microsoft bug:
 			// http://support.microsoft.com/support/kb/articles/q173/2/60.asp
-			OutputDebugStringW(utf8ToWide(str2));
+			OutputDebugStringW(nlUtf8ToWide(str2));
 		}
 		else
 		{
 			sint count = 0;
 			uint n = (uint)strlen(message);
 			std::string s(&str2.c_str()[0], (str2.size() - n));
-			OutputDebugStringW(utf8ToWide(s));
+			OutputDebugStringW(nlUtf8ToWide(s));
 
 			for(;;)
 			{
@@ -301,14 +301,14 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 				if((n - count) < maxOutString )
 				{
 					s = std::string(&message[count], (n - count));
-					OutputDebugStringW(utf8ToWide(s));
+					OutputDebugStringW(nlUtf8ToWide(s));
 					OutputDebugStringW(L"\n");
 					break;
 				}
 				else
 				{
 					s = std::string(&message[count] , count + maxOutString);
-					OutputDebugStringW(utf8ToWide(s));
+					OutputDebugStringW(nlUtf8ToWide(s));
 					OutputDebugStringW(L"\n\t\t\t");
 					count += maxOutString;
 				}
@@ -323,13 +323,13 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 			if (pos+1000 < args.CallstackAndLog.size ())
 			{
 				splited = args.CallstackAndLog.substr (pos, 1000);
-				OutputDebugStringW(utf8ToWide(splited));
+				OutputDebugStringW(nlUtf8ToWide(splited));
 				pos += 1000;
 			}
 			else
 			{
 				splited = args.CallstackAndLog.substr (pos);
-				OutputDebugStringW(utf8ToWide(splited));
+				OutputDebugStringW(nlUtf8ToWide(splited));
 				break;
 			}
 		}
@@ -495,15 +495,30 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 		if (_NeedHeader)
 		{
 			const char *hs = HeaderString();
-			fwrite (hs, strlen (hs), 1, _FilePointer);
+
+			if (fwrite(hs, strlen(hs), 1, _FilePointer) != 1)
+			{
+				printf("Unable to write header: %s\n", hs);
+			}
+
 			_NeedHeader = false;
 		}
 
-		if(!str.empty())
-			fwrite (str.c_str(), str.size(), 1, _FilePointer);
+		if (!str.empty())
+		{
+			if (fwrite(str.c_str(), str.size(), 1, _FilePointer) != 1)
+			{
+				printf("Unable to write string: %s\n", str.c_str());
+			}
+		}
 
-		if(!args.CallstackAndLog.empty())
-			fwrite (args.CallstackAndLog.c_str(), args.CallstackAndLog.size (), 1, _FilePointer);
+		if (!args.CallstackAndLog.empty())
+		{
+			if (fwrite(args.CallstackAndLog.c_str(), args.CallstackAndLog.size(), 1, _FilePointer) != 1)
+			{
+				printf("Unable to write call stack: %s\n", args.CallstackAndLog.c_str());
+			}
+		}
 
 		fflush (_FilePointer);
 	}

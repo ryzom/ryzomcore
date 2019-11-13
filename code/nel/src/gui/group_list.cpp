@@ -30,6 +30,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 NLMISC_REGISTER_OBJECT(CViewBase, CGroupList, std::string, "list");
 
 namespace NLGUI
@@ -363,7 +367,7 @@ namespace NLGUI
 			uint32 i;
 			if( fromString( value, i ) )
 				_TextId = i;
-			_HardText = "";
+			_HardText.clear();
 			onTextChanged();
 			return;
 		}
@@ -736,13 +740,11 @@ namespace NLGUI
 
 		CInterfaceGroup::updateCoords();
 
-		sint32 nCurrentX = 0; // Current offset of an element
-
 		EAlign addElt = _AddElt;
 		if ((addElt == Top) || (addElt == Bottom))
 		{
 			// Calculate size
-			sint32 newH = 0,   newW = 0;
+			sint32 newH = 0;
 			bool bFirst = true;
 
 			for (uint32 i = 0; i < _Elements.size(); ++i)
@@ -752,10 +754,7 @@ namespace NLGUI
 				if (!bFirst)
 					newH += _Space;
 				bFirst = false;
-				nCurrentX += _Elements[i].Element->getX();
-				newW = max (newW,   _Elements[i].Element->getW()+(sint32)abs(nCurrentX));
 			}
-			_W = max(newW,   _MinW);
 			_H = max(newH,   _MinH);
 			if (_DynamicDisplaySize)
 			{
@@ -763,10 +762,13 @@ namespace NLGUI
 				_MaxH = _H;
 			}
 			if (_H < _MaxH) setOfsY(0);
+
+			// if width is not from parent, then ensure minimum size
+			if ((_SizeRef & 1) == 0) _W = max(_W, _MinW);
 		}
 		else
 		{
-			sint32 newW = 0,   newH = 0;
+			sint32 newW = 0;
 			bool bFirst = true;
 
 			for (uint32 i = 0; i < _Elements.size(); ++i)
@@ -776,16 +778,17 @@ namespace NLGUI
 				if (!bFirst)
 					newW += _Space;
 				bFirst = false;
-				newH = max (newH,   _Elements[i].Element->getH());
 			}
 			_W = max(newW,   _MinW);
-			_H = max(newH,   _MinH);
 			if (_DynamicDisplaySize)
 			{
 				_MaxW = _W;
 				_MaxH = _H;
 			}
 			if (_W < _MaxW) setOfsX(0);
+
+			// if height is not from parent, then ensure minimum size
+			if ((_SizeRef & 2) == 0) _H = max(_H, _MinH);
 		}
 
 		CInterfaceElement::updateCoords();
@@ -1023,7 +1026,6 @@ namespace NLGUI
 		}
 		child->_Parent = this;
 		child->_ParentPos = NULL;
-		child->_Active = true;
 		child->_X = 0;
 		child->_Y = 0;
 		child->_RenderLayer = this->_RenderLayer;
@@ -1059,7 +1061,7 @@ namespace NLGUI
 		{
 			// update the list size
 			sint32 newH = _H + child->getH();
-			if (_Elements.size() > 0)
+			if (!_Elements.empty())
 				newH += _Space;
 			_H = newH;
 
@@ -1073,7 +1075,7 @@ namespace NLGUI
 		{
 			// Update the list coords
 			sint32 newW = _W + child->getW();
-			if (_Elements.size() > 0)
+			if (!_Elements.empty())
 				newW += _Space;
 			_W = newW;
 
@@ -1408,7 +1410,7 @@ namespace NLGUI
 
 	void CGroupList::onTextChanged()
 	{
-		if( _Elements.size() == 0 )
+		if( _Elements.empty() )
 			return;
 
 		CElementInfo &e = _Elements[ 0 ];

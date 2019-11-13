@@ -30,7 +30,7 @@ class CSelectString : public CDialog
 {
 // Construction
 public:
-	CSelectString(const std::vector<std::string>& vectString, const char* title, CWnd* pParent, bool empty);   // standard constructor
+	CSelectString(const std::vector<std::string>& vectString, const std::string &title, CWnd* pParent, bool empty);   // standard constructor
 
 // Dialog Data
 	//{{AFX_DATA(CSelectString)

@@ -84,7 +84,7 @@ CBufSock::~CBufSock()
 	delete Sock; // the socket disconnects automatically if needed
 
 	// destroy the structur to be sure that other people will not access to this anymore
-	AuthorizedCallback = "";
+	AuthorizedCallback.clear();
 	Sock = NULL;
 	_KnowConnected = false;
 	_LastFlushTime = 0;
@@ -131,7 +131,7 @@ string stringFromVectorPart( const vector<uint8>& v, uint32 pos, uint32 len )
  * (see CNonBlockingBufSock), if all the data could not be sent immediately,
  * the returned nbBytesRemaining value is non-zero.
  * \param nbBytesRemaining If the pointer is not NULL, the method sets the number of bytes still pending after the flush attempt.
- * \returns False if an error has occured (e.g. the remote host is disconnected).
+ * \returns False if an error has occurred (e.g. the remote host is disconnected).
  * To retrieve the reason of the error, call CSock::getLastError() and/or CSock::errorString()
  *
  * Note: this method works with both blocking and non-blocking sockets
@@ -155,7 +155,7 @@ bool CBufSock::flush( uint *nbBytesRemaining )
 		{
 			SendFifo.front( tmpbuffer, size );
 		}
-		while ( ! SendFifo.empty() && ( (_ReadyToSendBuffer.size()==0) || (_ReadyToSendBuffer.size() +size < MaxTCPPacketSize) ) )
+		while ( ! SendFifo.empty() && ( _ReadyToSendBuffer.empty() || (_ReadyToSendBuffer.size() +size < MaxTCPPacketSize) ) )
 		{
 			// Compute the size and add it into the beginning of the buffer
 			netlen = htonl( (TBlockSize)size );
@@ -252,7 +252,7 @@ bool CBufSock::flush( uint *nbBytesRemaining )
 		}
 
 	}
-	while ( !SendFifo.empty() && _ReadyToSendBuffer.size()==0 );
+	while ( !SendFifo.empty() && _ReadyToSendBuffer.empty() );
 
 	return true;
 }
@@ -270,7 +270,7 @@ void CBufSock::setTimeFlushTrigger( sint32 ms )
 
 
 /*
- * Update the network sending (call this method evenly). Returns false if an error occured.
+ * Update the network sending (call this method evenly). Returns false if an error occurred.
  */
 bool CBufSock::update()
 {

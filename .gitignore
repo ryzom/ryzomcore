@@ -160,7 +160,7 @@ code/build/*
 code/build-2010/*
 build/*
 install/*
-build_vc*
+build_*
 code/nel/tools/build_gamedata/configuration/buildsite.py
 
 # Linux nel compile
@@ -216,6 +216,7 @@ code/ryzom/server/src/ryzom_admin_service/ryzom_admin_service
 code/ryzom/server/src/ryzom_naming_service/ryzom_naming_service
 code/ryzom/server/src/ryzom_welcome_service/ryzom_welcome_service
 code/ryzom/server/src/tick_service/tick_service
+
 # WebTT temp dir
 code/ryzom/tools/server/www/webtt/app/tmp
 
@@ -236,13 +237,13 @@ code/ryzom/tools/server/ryzom_ams/old
 
 
 
-#tools and external dir's
+# Tools and external directories
 external
 external_stlport
 nel_tools*
 ryzom_tools*
 
-#Dumps
+# Dumps
 *.dmp
 
 code/nel/tools/build_gamedata/processes/ai_wmap/ai_build_wmap.cfg

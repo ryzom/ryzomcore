@@ -21,6 +21,12 @@
 #include "nel/3d/u_ps_sound_interface.h"
 #include "nel/3d/ps_attrib_maker.h"
 
+using namespace NLMISC;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
@@ -43,7 +49,7 @@ CPSSound::CPSSound() : _Gain(1.f),
 {
 	NL_PS_FUNC(CPSSound_CPSSound)
 	if (CParticleSystem::getSerializeIdentifierFlag()) _Name = std::string("sound");
-	_SoundName = NLMISC::CSheetId::Unknown /*NLMISC::CStringMapper::emptyId()*/;
+	_SoundName = NLMISC::CStringMapper::emptyId();
 }
 
 // ***************************************************************************************************
@@ -255,7 +261,7 @@ void	CPSSound::setPitchScheme(CPSAttribMaker<float> *pitch)
 }
 
 // ***************************************************************************************************
-void			CPSSound::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void			CPSSound::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSSound_serial)
 	CPSLocatedBindable::serial(f);
@@ -264,13 +270,18 @@ void			CPSSound::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 
 	// FIXME: CPSSound is reserialized from the _ParticleSystemProto
 	// cache when a non-_Shared particle system is instanced, this 
-	// causes unnecessary sheet id lookups from string.
-	// SLN1: Serialize as uint32, but this requires the editor to know
-	// the correct sheet id (and thus requires a built sheet_id.bin).
-	// SLN2: Create a tool that reserializes all ps with sound sheet id 
-	// instead of sheet names, based on a global flag, and serialize
-	// a flag that specifies if the ps is serialized with id or name.
-	_SoundName.serialString(f, "sound");
+	// causes unnecessary id lookups from string.
+	if (f.isReading())
+	{
+		std::string soundName;
+		f.serial(soundName);
+		_SoundName = NLMISC::CStringMapper::map(soundName);
+	}
+	else
+	{
+		std::string soundName = NLMISC::CStringMapper::unmap(_SoundName);
+		f.serial(soundName);
+	}
 
 	sint32 nbSounds;
 	bool hasScheme;

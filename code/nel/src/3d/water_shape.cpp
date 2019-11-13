@@ -26,6 +26,9 @@
 #include "nel/3d/water_height_map.h"
 #include <memory>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D {
 
@@ -520,7 +523,7 @@ const ITexture		*CWaterShape::getHeightMap(uint k) const
 }
 
 //============================================
-void CWaterShape::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CWaterShape::serial(NLMISC::IStream &f)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance
@@ -760,7 +763,7 @@ CWaveMakerShape::~CWaveMakerShape()
 }
 
 //============================================
-void CWaveMakerShape::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CWaveMakerShape::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(0);
 	f.serial(_Period, _Radius, _Intensity, _PoolID, _ImpulsionMode);

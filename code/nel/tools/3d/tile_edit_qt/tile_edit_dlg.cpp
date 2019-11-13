@@ -514,7 +514,7 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 							const std::string& bitmapPath=tileBank.getTile(tiles)->getRelativeFileName ((CTile::TBitmap)type);
 
 							// not empty ?
-							if (bitmapPath!="")
+							if (!bitmapPath.empty())
 							{
 								// Check the path
 								if ( CheckPath( bitmapPath, path.toUtf8() ) == false )
@@ -583,7 +583,7 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 								std::string bitmapPath=tileBank.getTile(tiles)->getRelativeFileName ((CTile::TBitmap)type);
 
 								// not empty ?
-								if (bitmapPath!="")
+								if (!bitmapPath.empty())
 								{
 									// Remove the absolute path
 									bool res=RemovePath (bitmapPath, path.toUtf8());
@@ -603,7 +603,7 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 						std::string bitmapPath=tileBank.getDisplacementMap (noise);
 
 						// not empty ?
-						if (bitmapPath!="")
+						if (!bitmapPath.empty())
 						{
 							// Remove the absolute path
 							bool res=RemovePath (bitmapPath, path.toUtf8());

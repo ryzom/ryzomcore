@@ -1,4 +1,6 @@
-FILE(GLOB SRC *.cpp *.h ${RZ_SERVER_SRC_DIR}/ai_data_service/pacs_scan.h ${RZ_SERVER_SRC_DIR}/ai_data_service/pacs_scan.cpp)
+FILE(GLOB SRC *.cpp *.h ${RZ_SERVER_SRC_DIR}/ai_data_service/pacs_scan.h ${RZ_SERVER_SRC_DIR}/ai_data_service/pacs_scan.cpp *.rc)
+
+SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(build_world_packed_col ${SRC})
 
@@ -16,6 +18,6 @@ NL_ADD_RUNTIME_FLAGS(build_world_packed_col)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(build_world_packed_col ${CMAKE_CURRENT_SOURCE_DIR}/std_header.h ${CMAKE_CURRENT_SOURCE_DIR}/std_header.cpp)
-ENDIF(WITH_PCH)
+ENDIF()
 
 INSTALL(TARGETS build_world_packed_col RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)

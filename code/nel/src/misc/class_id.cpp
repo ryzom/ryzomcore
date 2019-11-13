@@ -18,7 +18,10 @@
 
 #include "nel/misc/class_id.h"
 
+#include <sstream>
+#include <iomanip>
 
+#include "nel/misc/stream.h"
 
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
@@ -29,6 +32,39 @@ namespace	NLMISC
 
 
 const	CClassId	CClassId::Null(0);
+
+void CClassId::serial(NLMISC::IStream &s)
+{
+	// s.serial(Uid);
+	// Backwards.
+	uint32 va = a();
+	uint32 vb = b();
+	s.serial(va);
+	s.serial(vb);
+	setA(va);
+	setB(vb);
+}
+
+std::string CClassId::toString() const
+{
+	std::stringstream ss;
+	ss << "(0x";
+	{
+		std::stringstream ss1;
+		ss1 << std::hex << std::setfill('0');
+		ss1 << std::setw(8) << a();
+		ss << ss1.str();
+	}
+	ss << ", 0x";
+	{
+		std::stringstream ss1;
+		ss1 << std::hex << std::setfill('0');
+		ss1 << std::setw(8) << b();
+		ss << ss1.str();
+	}
+	ss << ")";
+	return ss.str();
+}
 
 
 }

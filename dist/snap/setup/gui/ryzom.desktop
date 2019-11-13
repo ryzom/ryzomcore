@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=Ryzom
+Type=Application
+GenericName=ryzom
+Exec=ryzom.ryzom
+Icon=${SNAP}/meta/gui/ryzom.png
+Terminal=false
+Hidden=false
+Keywords=ryzom,mmorpg,game
+Categories=Game;RolePlaying;

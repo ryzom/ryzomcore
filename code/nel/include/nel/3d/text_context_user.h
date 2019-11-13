@@ -80,7 +80,7 @@ public:
 	bool getShaded() const;
 	void setShadeOutline(bool b);
 	bool getShadeOutline() const;
-	void setShadeExtent(float shext) ;
+	void setShadeExtent(float x, float y);
 	void setShadeColor (NLMISC::CRGBA sc);
 	NLMISC::CRGBA getShadeColor () const;
 	void setKeep800x600Ratio(bool keep);

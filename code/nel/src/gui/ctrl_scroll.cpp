@@ -28,6 +28,10 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 NLMISC_REGISTER_OBJECT(CViewBase, CCtrlScroll, std::string, "scroll");
 
 namespace NLGUI
@@ -64,6 +68,7 @@ namespace NLGUI
 		_StepValue = 0;
 		_TileM = false;
 		_Frozen = false;
+		_Scale = false;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -102,6 +107,11 @@ namespace NLGUI
 		if( name == "tx_topright" )
 		{
 			return getTextureTopOrRight();
+		}
+		else
+		if( name == "scale" )
+		{
+			return toString( _Scale );
 		}
 		else
 		if( name == "vertical" )
@@ -237,6 +247,14 @@ namespace NLGUI
 		if( name == "tx_topright" )
 		{
 			setTextureTopOrRight( value );
+			return;
+		}
+		else
+		if( name =="scale" )
+		{
+			bool b;
+			if (fromString( value, b ) )
+				_Scale = b;
 			return;
 		}
 		else
@@ -404,6 +422,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "tx_bottomleft", BAD_CAST getTextureBottomOrLeft().c_str() );
 		xmlSetProp( node, BAD_CAST "tx_middle", BAD_CAST getTextureMiddle().c_str() );
 		xmlSetProp( node, BAD_CAST "tx_topright", BAD_CAST getTextureTopOrRight().c_str() );
+		xmlSetProp( node, BAD_CAST "scale", BAD_CAST toString( _Scale ).c_str() );
 		xmlSetProp( node, BAD_CAST "vertical", BAD_CAST toString( _Vertical ).c_str() );
 		
 		std::string align;
@@ -475,6 +494,10 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( node, (xmlChar*)"tx_topright" );
 		if(prop) setTextureTopOrRight(string((const char*)prop));
 		else setTextureTopOrRight ("w_scroll_l0_t.tga");
+
+		// Override texture size (w for vertical, h for horizontal)
+		prop = (char*) xmlGetProp( node, (xmlChar*)"scale" );
+		if (prop) _Scale = convertBool((const char*)prop);
 
 		// Read properties
 		prop = (char*) xmlGetProp( node, (xmlChar*)"vertical" );
@@ -602,13 +625,13 @@ namespace NLGUI
 
 				if (_Vertical)
 				{
-					_W = w;
+					if (!_Scale) _W = w;
 					_H = _Target->getMaxHReal();
 				}
 				else
 				{
 					_W = _Target->getMaxWReal();
-					_H = h;
+					if (!_Scale) _H = h;
 				}
 
 				CCtrlBase::updateCoords ();
@@ -881,7 +904,7 @@ namespace NLGUI
 			}
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel && _Vertical)
 			{
-				moveTrackY (eventDesc.getWheel() * 12);
+				moveTargetY (-(eventDesc.getWheel() * 12));
 				return true;
 			}
 		}
@@ -1221,6 +1244,12 @@ namespace NLGUI
 		sint32	hReal= _Target->getHReal();
 		if(hReal <= maxHReal)
 			return;
+
+		if (_TargetStepY > 1)
+		{
+			sint sign = (0 < dy) - (dy < 0);
+			dy = sign * max(1, (dy / _TargetStepY)) * _TargetStepY;
+		}
 
 		// compute the new ofsY.
 		sint32	ofsY= _Target->getOfsY();

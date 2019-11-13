@@ -484,7 +484,7 @@ NLMISC_COMMAND(dumpNPCIconCache, "Display descriptions of NPCs", "")
 
 NLMISC_COMMAND(queryMissionGiverData, "Query mission giver data for the specified alias", "<alias>")
 {
-	if (args.size() == 0)
+	if (args.empty())
 		return false;
 	uint32 alias;
 	NLMISC::fromString(args[0], alias);

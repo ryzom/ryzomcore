@@ -209,7 +209,7 @@ struct CCmpGroundIDPred
 void	CGroundFXManager::CInstance::getFXNameFromGroundType(uint32 groundID, std::string &fxName) const
 {
 	H_AUTO_USE(RZ_GroundFXManager)
-	fxName= "";
+	fxName.clear();
 	if (!Entity) return;
 	const CEntitySheet *es;
 	es = SheetMngr.get(Entity->sheetId());

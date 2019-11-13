@@ -1,6 +1,8 @@
-FILE(GLOB SRC *.cpp *.h *.def)
+FILE(GLOB SRC *.cpp *.h *.def *.rc *.rc2)
 
-ADD_LIBRARY(nel_vertex_tree_paint SHARED ${SRC} vertex_tree_paint.def vertex_tree_paint.rc)
+SOURCE_GROUP("" FILES ${SRC})
+
+ADD_LIBRARY(nel_vertex_tree_paint SHARED ${SRC})
 
 INCLUDE_DIRECTORIES(${MAXSDK_INCLUDE_DIR})
 
@@ -18,5 +20,7 @@ SET_TARGET_PROPERTIES(nel_vertex_tree_paint PROPERTIES SUFFIX ".dlm")
 NL_DEFAULT_PROPS(nel_vertex_tree_paint "MAX Plugin: NeL Vertex Tree Painter")
 NL_ADD_RUNTIME_FLAGS(nel_vertex_tree_paint)
 NL_ADD_LIB_SUFFIX(nel_vertex_tree_paint)
+
+ADD_DEFINITIONS(${MAXSDK_DEFINITIONS})
 
 INSTALL(TARGETS nel_vertex_tree_paint RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)

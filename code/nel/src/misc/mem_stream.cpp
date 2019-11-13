@@ -107,7 +107,7 @@ void CMemStream::serialBit(bool &bit)
  * (to prevent from an "inside serial" to increment it).
  * Then a seek(end) would get back to the pointer.
  */
-bool CMemStream::seek (sint32 offset, TSeekOrigin origin) const throw(EStream)
+bool CMemStream::seek (sint32 offset, TSeekOrigin origin) const
 {
 	switch (origin)
 	{

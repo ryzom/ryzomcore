@@ -38,6 +38,8 @@
 #include "nel/georges/u_form.h"
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/u_form_loader.h"
+// Gui
+#include "nel/gui/lua_manager.h"
 // Client
 #include "global.h"
 #include "continent.h"
@@ -108,7 +110,7 @@ extern UVisualCollisionManager	*CollisionManager;
 extern bool		   InitCloudScape;
 extern bool			FirstFrame;
 extern CContinentManager ContinentMngr;
-
+extern CEntityManager	EntitiesMngr;
 
 //-----------------------------------------------
 // CUserLandMark 
@@ -385,6 +387,23 @@ static uint getNumZones()
 	return (uint)zoneLoaded.size();
 }
 
+static uint16 getZoneIdFromName(const string &zoneName)
+{
+	uint16 zoneId = 0;
+	CVector2f pos;
+	if (getPosFromZoneName(zoneName, pos))
+	{
+		uint x = (uint)pos.x / 160;
+		uint y = -(uint)pos.y / 160;
+		zoneId = (x&255) + (y<<8);
+	}
+	else
+	{
+		nlinfo("no zone...");
+	}
+	return zoneId;
+}
+
 //-----------------------------------------------
 // select :
 // Update global parameters like the texture for the micro veget.
@@ -485,6 +504,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 
 		{
 			H_AUTO(InitRZWorldPacs)
+
 			releasePACS();
 			// Init PACS
 			std::string pacsRBankPath = CPath::lookup(PacsRBank, false);
@@ -716,6 +736,26 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 					vector<string>		zonesRemoved;
 					completeIsland = R2::CScenarioEntryPoints::getInstance().getCompleteIslandFromCoords(CVector2f((float) UserEntity->pos().x, (float) UserEntity->pos().y));
 					Landscape->refreshAllZonesAround(pos, ClientCfg.Vision + ExtraZoneLoadingVision, zonesAdded, zonesRemoved, progress, completeIsland ? &(completeIsland->ZoneIDs) : NULL);
+
+					for (uint i = 0; i < zonesRemoved.size(); i++)
+						EntitiesMngr.removeInstancesInIgZone(getZoneIdFromName(zonesRemoved[i]));
+
+					for (uint i = 0; i < zonesAdded.size(); i++)
+					{
+						CSString luaScript;
+						string luaScriptName = CPath::lookup(zonesAdded[i]+".lua", false);
+						if (!luaScriptName.empty())
+						{
+							luaScript.readFromFile(luaScriptName);
+							CLuaManager::getInstance().executeLuaScript(luaScript, true);
+							nlinfo("loading %s", luaScriptName.c_str());
+						}
+						else
+						{
+							nlinfo("file not found %s", luaScriptName.c_str());
+						}
+					}
+						
 					LandscapeIGManager.unloadArrayZoneIG(zonesRemoved);
 					LandscapeIGManager.loadArrayZoneIG(zonesAdded, &igAdded);
 				}
@@ -930,6 +970,9 @@ void CContinent::unselect()
 
 	// Remove the primitive for all entitites (new PACS coming soon and need new primitives).
 	EntitiesMngr.removeCollision();
+
+	// Remove the instances (shapes).
+	EntitiesMngr.removeInstances();
 
 	// release collision primitives
 	if (IGCallbacks)
@@ -1384,10 +1427,3 @@ void CContinent::releaseSky()
 	CurrentSky.release();
 }
 
-
-//=========================================================================
-/*static*/ uint CContinent::getMaxNbUserLandMarks()
-{
-	uint nbBonusLandmarks = (uint)IngameDbMngr.getProp( "INTERFACES:NB_BONUS_LANDMARKS" );
-	return STANDARD_NUM_USER_LANDMARKS + nbBonusLandmarks;
-}

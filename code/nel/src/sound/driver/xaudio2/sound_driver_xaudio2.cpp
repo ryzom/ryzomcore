@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2008  Jan Boon (Kaetemi)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,10 @@
 #include "source_xaudio2.h"
 #include "effect_xaudio2.h"
 #include "sound_driver_xaudio2.h"
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace std;
 using namespace NLMISC;
@@ -215,7 +219,7 @@ void CSoundDriverXAudio2::release()
 	// the created instances must still be released by the user!
 
 	// Release internal resources of all remaining ISource instances
-	if (_Sources.size())
+	if (!_Sources.empty())
 	{
 		nlwarning(NLSOUND_XAUDIO2_PREFIX "_Sources.size(): '%u'", (uint32)_Sources.size());
 		set<CSourceXAudio2 *>::iterator it(_Sources.begin()), end(_Sources.end());
@@ -223,7 +227,7 @@ void CSoundDriverXAudio2::release()
 		_Sources.clear();
 	}
 	// Release internal resources of all remaining IBuffer instances
-	if (_Buffers.size())
+	if (!_Buffers.empty())
 	{
 		nlwarning(NLSOUND_XAUDIO2_PREFIX "_Buffers.size(): '%u'", (uint32)_Buffers.size());
 		set<CBufferXAudio2 *>::iterator it(_Buffers.begin()), end(_Buffers.end());
@@ -231,7 +235,7 @@ void CSoundDriverXAudio2::release()
 		_Buffers.clear();
 	}
 	// Release internal resources of all remaining IEffect instances
-	if (_Effects.size())
+	if (!_Effects.empty())
 	{
 		nlwarning(NLSOUND_XAUDIO2_PREFIX "_Effects.size(): '%u'", (uint32)_Effects.size());
 		set<CEffectXAudio2 *>::iterator it(_Effects.begin()), end(_Effects.end());

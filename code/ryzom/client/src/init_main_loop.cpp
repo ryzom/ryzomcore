@@ -85,7 +85,7 @@
 #include "teleport.h"
 #include "movie_shooter.h"
 #include "interface_v3/input_handler_manager.h"
-
+#include "item_group_manager.h"
 #include "time_client.h"
 #include "auto_anim.h"
 #include "release.h"
@@ -184,8 +184,8 @@ struct CStatThread : public NLMISC::IRunnable
 		CURL *curl = curl_easy_init();
 		if(!curl) return;
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1);
-		curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10 (.NET CLR 3.5.30729)"); // FIXME
-		curl_easy_setopt(curl, CURLOPT_REFERER, string("http://www.ryzomcore.org/" + referer).c_str());
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10 (.NET CLR 3.5.30729)");
+		curl_easy_setopt(curl, CURLOPT_REFERER, string("http://www.ryzom.com/" + referer).c_str());
 		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 		CURLcode res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
@@ -240,7 +240,7 @@ struct CStatThread : public NLMISC::IRunnable
 		addParam(params, "page", "");
 		addParam(params, "pagetitle", referer);
 		addParam(params, "screen", toString("%dx%d", ClientCfg.ConfigFile.getVar("Width").asInt(), ClientCfg.ConfigFile.getVar("Height").asInt()));
-		addParam(params, "referer", "http%3A%2F%2Fwww.ryzomcore.org%2F" + referer);
+		addParam(params, "referer", "http%3A%2F%2Fwww.ryzom.com%2F" + referer);
 		time_t rawtime;
 		struct tm * timeinfo;
 		char buffer [80];
@@ -263,7 +263,7 @@ struct CStatThread : public NLMISC::IRunnable
 		default: shard= "unknown"; break;
 		}
 		addParam(params, "cv_Shard", shard);
-		/* get("http://ryzom.com.woopra-ns.com/visit/" + params); */// FIXME
+		get("http://ryzom.com.woopra-ns.com/visit/"+params);
 		return true;
 	}
 
@@ -273,7 +273,7 @@ struct CStatThread : public NLMISC::IRunnable
 		std::string params;
 		addParam(params, "cookie", cookie());
 		addParam(params, "ra", randomString());
-		/* get("http://ryzom.com.woopra-ns.com/ping/" + params); */// FIXME
+		get("http://ryzom.com.woopra-ns.com/ping/"+params);
 	}
 
 	void run()
@@ -593,6 +593,8 @@ void initMainLoop()
 		Scene->setGroupLoadMaxPolygon("Skin", ClientCfg.SkinNbMaxPoly);
 		Scene->setGroupLoadMaxPolygon("Fx", ClientCfg.FxNbMaxPoly);
 		Scene->setMaxSkeletonsInNotCLodForm(ClientCfg.NbMaxSkeletonNotCLod);
+		// separate group for mouse/target selection reticle
+		Scene->setGroupLoadMaxPolygon("SelectionFx", 10000);
 		// enable Scene Lighting
 		Scene->enableLightingSystem(true);
 		Scene->setAmbientGlobal(CRGBA::Black);
@@ -692,7 +694,7 @@ void initMainLoop()
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		//nlinfo("****** InGame Interface Parsing and Init START ******");
 		pIM->initInGame(); // must be called after waitForUserCharReceived() because Ring information is used by initInGame()
-
+		CItemGroupManager::getInstance()->init(); // Init at the same time keys.xml is loaded
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
 		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing ingame", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
@@ -797,10 +799,10 @@ void initMainLoop()
 
 	{
 		// setup good day / season before ig are added.
-		RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+		RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 		updateDayNightCycleHour();
 		StartupSeason =  CurrSeason = RT.getRyzomSeason();
-		RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+		RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 		updateDayNightCycleHour();
 		ManualSeasonValue = RT.getRyzomSeason();
 
@@ -1191,7 +1193,7 @@ void initMainLoop()
 	}
 	else
 	{
-		nmsg = "";
+		nmsg.clear();
 		ProgressBar.newMessage (nmsg);
 		ProgressBar.newMessage (nmsg);
 	}
@@ -1464,8 +1466,8 @@ void loadBackgroundBitmap (TBackground background)
 	case EndBackground:
 		filename = ClientCfg.End_BG;
 		break;
-	case IntroNevrax:
-		filename = ClientCfg.IntroNevrax_BG;
+	case CustomBackground: // SpecialCase
+		filename = LoadingBackgroundBG;
 		break;
 	case IntroNVidia:
 		filename = ClientCfg.IntroNVidia_BG;
@@ -1535,7 +1537,15 @@ void loadBackgroundBitmap (TBackground background)
 void beginLoading (TBackground background)
 {
 	LoadingContinent = NULL;
-	loadBackgroundBitmap (background);
+	if (!LoadingBackgroundBG.empty())
+	{
+		loadBackgroundBitmap(CustomBackground);
+		LoadingBackgroundBG = "";
+	}
+	else
+	{
+		loadBackgroundBitmap (background);
+	}
 }
 
 // ***************************************************************************
@@ -1619,6 +1629,7 @@ void initBloomConfigUI()
 	bool supportBloom = Driver->supportBloomEffect();
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
 	CCtrlBaseButton* button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:bloom:c"));
 	if(button)
 	{
@@ -1627,6 +1638,12 @@ void initBloomConfigUI()
 
 	button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:square_bloom:c"));
 	if(button)
+	{
+		button->setFrozen(!supportBloom);
+	}
+
+	button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:fxaa:c"));
+	if (button)
 	{
 		button->setFrozen(!supportBloom);
 	}

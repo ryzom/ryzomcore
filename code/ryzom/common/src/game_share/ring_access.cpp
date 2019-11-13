@@ -35,6 +35,9 @@
 #include "nel/misc/xml_auto_ptr.h"
 
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace std;
 using namespace R2;
@@ -349,7 +352,7 @@ std::string CRingAccess::upgradeRingAccess(const std::string& defaultValue, cons
 	}
 
 	// return the new value as string
-	std::string toRet ="";
+	std::string toRet;
 	{
 
 		std::map<std::string, int>::const_iterator first(defaultMap.begin()), last(defaultMap.end());

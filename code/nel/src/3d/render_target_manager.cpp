@@ -46,6 +46,10 @@
 using namespace std;
 // using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 struct CRenderTargetDescInt
@@ -146,6 +150,7 @@ void CRenderTargetManager::cleanup()
 				desc->TextureUser = NULL;
 				desc->TextureInterface = NULL; // CSmartPtr
 				m_RenderTargets.erase(m_RenderTargets.begin() + i);
+				delete desc;
 				--i;
 			}
 			else

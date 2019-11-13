@@ -19,6 +19,8 @@
 
 #include <limits>
 
+#include "nel/misc/common.h"
+
 // DtName must be the 1st one
 enum TDataCol { DtName, DtTitle, DtRMFamily, DtGroup, DtEcosystem, DtLevelZone, DtStatQuality, DtProp, DtCreature, DtCreaTitle, DtCraftSlotName, DtCraftCivSpec, DtColor, DtAverageEnergy, DtMaxLevel, DtCustomizedProperties, DtNbCols };
 const char *DataColStr [DtNbCols] = { "Code", "Name", "Family", "Group", "Ecosystem", "LevelZone", "Stat Quality", "Properties", "Creature sheets", "Creatures", "Item parts", "Craft civ spec", "Color", "Average energy", "Max level", "Customized" };
@@ -276,7 +278,7 @@ public:
 		if ( ! _Enabled )
 			return;
 
-		_File = fopen( filename.c_str(), "wt" );
+		_File = nlfopen( filename, "wt" );
 		if(!_File)
 		{
 			throw Exception("Could not open html: %s", filename.c_str());

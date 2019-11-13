@@ -492,6 +492,13 @@ void IService::setArgs (int argc, const char **argv)
 	}
 }
 
+void IService::setArgs(int argc, const wchar_t **argv)
+{
+	for (sint i = 0; i < argc; i++)
+	{
+		_Args.push_back(nlWideToUtf8(argv[i]));
+	}
+}
 
 void cbLogFilter (CConfigFile::CVar &var)
 {
@@ -1453,14 +1460,14 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 						}
 
 						if (dispName.empty())
-							str = "";
+							str.clear();
 						else
 							str = dispName + ": ";
 
 						mdDisplayVars.clear ();
 						ICommand::execute(varName, logDisplayVars, true);
 						const std::deque<std::string>	&strs = mdDisplayVars.lockStrings();
-						if (strs.size()>0)
+						if (!strs.empty())
 						{
 							str += strs[0].substr(0,strs[0].size()-1);
 						}

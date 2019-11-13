@@ -88,7 +88,7 @@ static CHashKeyMD5 getNewMD5(const std::string &filename)
 }
 
 #if defined(NL_OS_WINDOWS) && !defined(_CONSOLE)
-sint WINAPI WinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPSTR cmdline, int /* nCmdShow */)
+sint APIENTRY WinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPSTR cmdline, int /* nCmdShow */)
 {
 	// we can specify several shapes on command line
 	// so we need to process it
@@ -292,7 +292,7 @@ sint main(int argc, char **argv)
 			}
 			else
 			{
-				// an error occured, try to delete directory
+				// an error occurred, try to delete directory
 				nlwarning("can't export shape");
 				CFile::deleteDirectory(output_path);
 			}

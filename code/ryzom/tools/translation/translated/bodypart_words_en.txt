@@ -1,0 +1,43 @@
+﻿*HASH_VALUE	bodypartID	name	ia	da	p	pia	pda	description
+_ACB9BC721BA65099	HHead	head	a	the	heads	\d	the	
+_278A7C5D654814CD	HChest	chest	a	the	chests	\d	the	
+_A2D940906B29B889	HArms	arms	\d	the	arms	\d	the	
+_B1CAFC85DB767C9C	HHands	hands	\d	the	hands	\d	the	
+_20A8389BAC987C9F	HLegs	legs	\d	the	legs	\d	the	
+_E18820962C586494	HFeet	feet	\d	the	feet	\d	the	
+_ACB9BC7B1B375099	QHead	head	a	the	heads	\d	the	
+_E80BB4A21A9838B5	QBody	body	a	the	bodies	\d	the	
+_C96F0919D2F8DC71	QFrontPaws	forelegs	\d	the	forelegs	\d	the	
+_08A1A8FEABC3CD11	QFrontHooves	forelegs	\d	the	forelegs	\d	the	
+_23B95F02A87957B0	QRearPaws	hind legs	\d	the	hind legs	\d	the	
+_D880990C5BE9DCB7	QRearHooves	hind legs	\d	the	hind legs	\d	the	
+_2836645DDE8874AD	LKHead	head	a	the	heads	\d	the	
+_ED86C05FE298A4B9	LKBody	body	a	the	bodies	\d	the	
+_39BFC0EBE486B512	LKFrontPaws1	forelegs	\d	the	forelegs	\d	the	
+_79BFC0EBE486B512	LKFrontPaws2	forelegs	\d	the	forelegs	\d	the	
+_D92BB508D8F884A6	LKRearPaws1	hind legs	\d	the	hind legs	\d	the	
+_D93BB508D8F884A6	LKRearPaws2	hind legs	\d	the	hind legs	\d	the	
+_283664575C8874AD	FKHead	head	a	the	heads	\d	the	
+_ED86C0596098A4B9	FKBody	body	a	the	bodies	\d	the	
+_DBBA7473640310B0	FKPaws1	legs	\d	the	legs	\d	the	
+_1BBA7473641310B0	FKPaws2	legs	\d	the	legs	\d	the	
+_66B6A47A4A7ADCC2	FKWings1	wings	\d	the	wings	\d	the	
+_66B6A47ACA7ADCC2	FKWings2	wings	\d	the	wings	\d	the	
+_ACB9BC701B865099	FHead	head	a	the	heads	\d	the	
+_E80BB4971AE738B5	FBody	body	a	the	bodies	\d	the	
+_C40D15A82A36DF2C	FFrontFins1	fore fins	\d	the	fore fins	\d	the	
+_C41D15A82A36DF2C	FFrontFins2	fore fins	\d	the	fore fins	\d	the	
+_67B624EBAAF630A4	FRearFins1	hind fins	\d	the	hind fins	\d	the	
+_67B628EBAAF630A4	FRearFins2	hind fins	\d	the	hind fins	\d	the	
+_ACB9BC6C1B465099	BHead	head	a	the	heads	\d	the	
+_E80BB4931AA738B5	BBody	body	a	the	bodies	\d	the	
+_25897F8F25594780	BFeet1	feet	\d	the	feet	\d	the	
+_2589838F25594B80	BFeet2	feet	\d	the	feet	\d	the	
+_2C68746BA436D3C2	BWings1	wings	\d	the	wings	\d	the	
+_2C68746BA446D7C2	BWings2	wings	\d	the	wings	\d	the	
+_8061E6E18C3EA521	PUpperTrunk	upper trunk	an	the	upper trunks	\d	the	
+_ECEA3087A666CCC3	Ptrunk	trunk	a	the	trunks	\d	the	
+_E7469C4D9B5A0C9D	PLeaves1	leaf	a	the	leaves	\d	the	
+_E7469C4DDB5A0C9D	PLeaves2	leaf	a	the	leaves	\d	the	
+_C3EE9906771FB524	PLowerTrunk	lower trunk	a	the	lower trunks	\d	the	
+_DFA67A5CC7DECDE6	PVisibleRoots	visible root	a	the	visible roots	\d	the	

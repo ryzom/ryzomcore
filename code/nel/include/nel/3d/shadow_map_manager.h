@@ -29,7 +29,8 @@
 namespace NL3D {
 
 
-class	CTransform;
+class CTransform;
+class CScene;
 
 
 // ***************************************************************************

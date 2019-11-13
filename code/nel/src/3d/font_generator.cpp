@@ -58,6 +58,10 @@ const char*  err_msg;
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 FT_Library	CFontGenerator::_Library = NULL;
@@ -75,6 +79,11 @@ const char *CFontGenerator::getFT2Error(FT_Error fte)
 	}
 	smprintf (ukn, 1024, "Unknown freetype2 error, errcode: 0x%x", fte);
 	return ukn;
+}
+
+std::string CFontGenerator::getFontFileName() const
+{
+	return _FontFileName;
 }
 
 CFontGenerator *newCFontGenerator(const std::string &fontFileName)
@@ -267,7 +276,14 @@ void CFontGenerator::getSizes (ucchar c, uint32 size, uint32 &width, uint32 &hei
 	error = FT_Load_Glyph (_Face, glyph_index, FT_LOAD_DEFAULT);
 	if (error)
 	{
-		nlerror ("FT_Load_Glyph() failed: %s", getFT2Error(error));
+		// use fallback for glyph/character errors (composite char limit for example)
+		nlwarning ("FT_Load_Glyph() failed: %s", getFT2Error(error));
+
+		error = FT_Load_Glyph (_Face, 0, FT_LOAD_DEFAULT);
+		if (error)
+		{
+			nlerror("FT_Load_Glyph() fallback failed: %s", getFT2Error(error));
+		}
 	}
 
 	// convert 24.6 fixed point into integer
@@ -298,7 +314,14 @@ uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, bool embolden, bool obl
 	error = FT_Load_Glyph (_Face, glyph_index, FT_LOAD_DEFAULT);
 	if (error)
 	{
-		nlerror ("FT_Load_Glyph() failed: %s", getFT2Error(error));
+		// use fallback for glyph/character errors (composite char limit for example)
+		nlwarning ("FT_Load_Glyph() failed: %s", getFT2Error(error));
+
+		error = FT_Load_Glyph (_Face, 0, FT_LOAD_DEFAULT);
+		if (error)
+		{
+			nlerror("FT_Load_Glyph() fallback failed: %s", getFT2Error(error));
+		}
 	}
 
 	if (size == 0)
@@ -438,33 +461,6 @@ CFontGenerator::CFontGenerator (const std::string &fontFileName, const std::stri
 	SetTextAlign (hdcDib, TA_TOP | TA_LEFT | TA_NOUPDATECP);
 	SetBkColor (hdcDib, RGB (0,0,0));
 	SetTextColor (hdcDib, RGB (255, 255, 255));
-
-	/*FT_Error error;
-
-	if (!_LibraryInit)
-	{
-		error = FT_Init_FreeType (&_Library);
-		if (error)
-		{
-			nlerror ("FT_Init_FreeType() failed: %s", getFT2Error(error));
-		}
-		_LibraryInit = true;
-	}
-
-	error = FT_New_Face (_Library, fontFileName.c_str (), 0, &_Face);
-	if (error)
-	{
-		nlerror ("FT_New_Face() failed with file '%s': %s", fontFileName.c_str(), getFT2Error(error));
-	}
-
-	if (fontExFileName != "")
-	{
-		error = FT_Attach_File (_Face, fontExFileName.c_str ());
-		if (error)
-		{
-			nlwarning ("FT_Attach_File() failed with file '%s': %s", fontExFileName.c_str(), getFT2Error(error));
-		}
-	}*/
 }
 
 CFontGenerator::~CFontGenerator ()
@@ -476,28 +472,6 @@ CFontGenerator::~CFontGenerator ()
 
 void CFontGenerator::getSizes (ucchar c, uint32 size, uint32 &width, uint32 &height)
 {
-/*	FT_Error error;
-
-	error = FT_Set_Pixel_Sizes (_Face, size, size);
-	if (error)
-	{
-		nlerror ("FT_Set_Pixel_Sizes() failed: %s", getFT2Error(error));
-	}
-
-	// retrieve glyph index from character code
-	FT_UInt glyph_index = FT_Get_Char_Index (_Face, c);
-
-	// load glyph image into the slot (erase previous one)
-	error = FT_Load_Glyph (_Face, glyph_index, FT_LOAD_DEFAULT);
-	if (error)
-	{
-		nlerror ("FT_Load_Glyph() failed: %s", getFT2Error(error));
-	}
-
-	// convert 24.6 fixed point into integer
-	width = _Face->glyph->metrics.width >> 6;
-	height = _Face->glyph->metrics.height >> 6;
-	*/
 }
 
 HFONT hFont = NULL;
@@ -505,57 +479,6 @@ uint32 CurrentFontSize = 0;
 
 uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, bool embolden, bool oblique, uint32 &width, uint32 &height, uint32 &pitch, sint32 &left, sint32 &top, sint32 &advx, uint32 &glyphIndex)
 {
-/*	FT_Error error;
-
-	error = FT_Set_Pixel_Sizes (_Face, size, size);
-	if (error)
-	{
-		nlerror ("FT_Set_Pixel_Sizes() failed: %s", getFT2Error(error));
-	}
-
-	// retrieve glyph index from character code
-	FT_UInt glyph_index = FT_Get_Char_Index (_Face, c);
-
-	// load glyph image into the slot (erase previous one)
-	error = FT_Load_Glyph (_Face, glyph_index, FT_LOAD_DEFAULT);
-	if (error)
-	{
-		nlerror ("FT_Load_Glyph() failed: %s", getFT2Error(error));
-	}
-
-	if (size == 0)
-	{
-		width = 0;
-		height = 0;
-		pitch = 0;
-		left = 0;
-		top = 0;
-		advx = 0;
-		glyphIndex = glyph_index;
-		return NULL;
-	}
-
-	// convert to an anti-aliased bitmap
-	error = FT_Render_Glyph (_Face->glyph, ft_render_mode_normal);
-	if (error)
-	{
-		nlerror ("FT_Render_Glyph() failed: %s", getFT2Error(error));
-	}
-
-	width = _Face->glyph->bitmap.width;
-	height = _Face->glyph->bitmap.rows;
-	pitch = _Face->glyph->bitmap.pitch;
-
-	left = _Face->glyph->bitmap_left;
-	top = _Face->glyph->bitmap_top;
-
-	advx = _Face->glyph->advance.x >> 6;
-
-	glyphIndex = glyph_index;
-
-	return (uint8 *) _Face->glyph->bitmap.buffer;
-*/
-
 	if (size == 0)
 	{
 		width = 0;
@@ -682,12 +605,6 @@ uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, bool embolden, bool obl
 	advx = point.x;
 
 	WORD ag = 0;
-	/*uint t = GetGlyphIndices (hdcDib, &cc, 1, &ag, 0);
-	if (t == GDI_ERROR)
-	{
-		nlstop;
-	}
-*/
 	glyphIndex = ag;
 
 	top = -_top;
@@ -719,27 +636,12 @@ uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, bool embolden, bool obl
 
 void CFontGenerator::getKerning (ucchar left, ucchar right, sint32 &kernx)
 {
-/*	if (!FT_HAS_KERNING(_Face))
-	{
-		kernx = 0;
-	}
-	else
-	{
-		FT_Vector  kerning;
-		FT_Error error = FT_Get_Kerning (_Face, left, right, ft_kerning_default, &kerning);
-		if (error)
-		{
-			nlerror ("FT_Get_Kerning() failed: %s", getFT2Error(error));
-		}
-		kernx = kerning.x;
-	}*/
 }
 
 
 
 uint32	 CFontGenerator::getCharIndex (ucchar c)
 {
-//	return FT_Get_Char_Index (_Face, c);
 	return 0;
 }
 

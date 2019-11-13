@@ -46,7 +46,6 @@ using NLMISC::CVector;
 using NLMISC::CRGBA;
 using std::string;
 
-
 //---------------------------------------------------
 // CClientConfig :
 // Struct to manage a config file for the client.
@@ -146,6 +145,13 @@ struct CClientConfig
 	/// Monitor Gamma [-1 ~ 1], default 0
 	float			Gamma;
 
+	// UI scaling
+	float			InterfaceScale;
+	float			InterfaceScale_min;
+	float			InterfaceScale_max;
+	float			InterfaceScale_step;
+	bool			BilinearUI;
+
 	// VR
 	bool			VREnable;
 	std::string		VRDisplayDevice;
@@ -199,6 +205,7 @@ struct CClientConfig
 	uint			FreeLookAcceleration;
 	float			FreeLookSmoothingPeriod;
 	bool			FreeLookInverted;
+	bool			FreeLookTablet;
 	// true if camera is centered when user casts a spell
 	bool			AutomaticCamera;
 	bool			DblClickMode;
@@ -305,8 +312,10 @@ struct CClientConfig
 
 	std::string		WebIgMainDomain;
 	std::vector<string>	WebIgTrustedDomains;
+	uint			WebIgNotifInterval; // value in minutes for notification thread
 
 	sint32			CurlMaxConnections;
+	string			CurlCABundle;
 
 	///////////////
 	// ANIMATION //
@@ -356,6 +365,10 @@ struct CClientConfig
 	bool			UseADPCM;
 	/// The max number of track we want to use.
 	uint			MaxTrack;
+
+	// MP3 Player
+	string			MediaPlayerDirectory;
+	bool			MediaPlayerAutoPlay;
 
 	/// Pre Data Path.
 	std::vector<string>			PreDataPath;
@@ -570,6 +583,9 @@ struct CClientConfig
 	/// Makes entities transparent if they are under cursor
 	bool			TransparentUnderCursor;
 
+	/// Allow item group to move from / to guild room
+	bool			ItemGroupAllowGuild;
+
 
 	/////////////////
 	// PREFERENCES //
@@ -586,6 +602,13 @@ struct CClientConfig
 	float			CameraSpeedMin;
 	float			CameraSpeedMax;
 	float			CameraResetSpeed;
+
+	// Default values for CGroupMap
+	float			MaxMapScale;
+	float			R2EDMaxMapScale;
+
+	// If successfull /tar command should set compass or not
+	bool			TargetChangeCompass;
 
 	//////////////
 	// VERBOSES //
@@ -827,7 +850,7 @@ public:
 	static void setValuesOnFileChange ();	// called when cfg modified
 
 	/// Serialize CFG.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 	/// End process
 	void release ();

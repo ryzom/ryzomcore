@@ -37,7 +37,7 @@ void CAttackListSheetEntry::build(const NLGEORGES::UFormElm &item, const std::st
 }
 
 // *******************************************************************************************
-void CAttackListSheetEntry::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAttackListSheetEntry::serial(NLMISC::IStream &f)
 {
 	f.serial(ID);
 	f.serial(Attack);
@@ -65,7 +65,7 @@ void CAttackListSheet::build(const NLGEORGES::UFormElm &item)
 }
 
 // *******************************************************************************************
-void CAttackListSheet::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAttackListSheet::serial(NLMISC::IStream &f)
 {
 	f.serialCont(Attacks);
 }

@@ -19,8 +19,11 @@
 #ifndef NL_INTERFACE_MANAGER_H
 #define NL_INTERFACE_MANAGER_H
 
+#include <queue>
+
 #include "nel/misc/types_nl.h"
 #include "nel/misc/cdb_manager.h"
+#include "nel/misc/mutex.h"
 #include "nel/3d/u_texture.h"
 #include "nel/3d/u_text_context.h"
 #include "nel/gui/interface_group.h"
@@ -63,7 +66,7 @@ extern bool g_hidden;
 ///max botchat distance
 #define MAX_BOTCHAT_DISTANCE_SQUARE 25
 
-#define MAX_NUM_MODES 4
+#define MAX_NUM_MODES 6
 
 #define RZ_CATEGORY_EDIT "edit"
 
@@ -203,12 +206,29 @@ public:
 	/// Load a set of xml files
 	bool parseInterface (const std::vector<std::string> &xmlFileNames, bool reload, bool isFilename = true);
 
+	/// return new filename that can be used to backup original file
+	std::string getNextBackupName(std::string filename);
+	/// copy/rename filename for backup and show error in log
+	void createFileBackup(const std::string &message, const std::string &filename, bool useCopy = false);
+
+	/// select player/shared file name from 'save' folder'
+	std::string getSaveFileName(const std::string &module, const std::string &ext, bool useShared = true) const;
+
+	/// Load / save user landmarks in .xml format
+	bool loadLandmarks ();
+	bool saveLandmarks (bool verbose = false) const;
+	bool saveLandmarks (const std::string &filename) const;
+
 	// Load/Save position, size, etc.. of windows
 	bool loadConfig (const std::string &filename);
+	// Save config to default location, if verbose is true, display message in game sysinfo
+	bool saveConfig (bool verbose = false);
 	bool saveConfig (const std::string &filename);
 	// delete the user config (give the player ident fileName)
 	bool deletePlayerConfig (const std::string &playerFileIdent);
 
+	// Save keys to default location, if verbose is true, display message in game sysinfo
+	bool saveKeys (bool verbose = false);
 	// Save the keys config file
 	bool saveKeys (const std::string &filename);
 	// delete the user Keysconfig (give the player ident fileName)
@@ -316,6 +336,8 @@ public:
 	// Remove a group container from a virtual desktop image
 	// \param mode Index of the virtual desktop
 	void	removeGroupContainerImage(const std::string &groupName, uint8 mode);
+	// Remove group container from all virtual desktops
+	void	removeGroupContainerImageFromDesktops(const std::string &groupName);
 
 
 
@@ -407,6 +429,10 @@ public:
 
 	void	notifyMailAvailable();
 	void	notifyForumUpdated();
+
+	/** Queue up lua script to be run on next frame update
+	 */
+	void queueLuaScript(const std::string &script);
 
 	/** Return true if 12-hour clock should be used
 	 */
@@ -543,12 +569,19 @@ public:
 	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_FACTION_TYPE;
 
 	void updateDesktops( uint32 newScreenW, uint32 newScreenH );
+	void setInterfaceScale( float scale ) { _InterfaceScaleChanged = true; _InterfaceScale = scale; }
 
 private:
 
 	NLMISC::CCDBNodeLeaf *_CheckMailNode;
 	NLMISC::CCDBNodeLeaf *_CheckForumNode;
 	sint64 _UpdateWeatherTime;
+
+	// WebIG notify thread is pushing lua code here
+	std::queue<std::string> _ScriptQueue;
+	NLMISC::CMutex _ScriptQueueMutex;
+
+	void flushScriptQueue();
 
 	// @}
 
@@ -581,9 +614,11 @@ private:
 
 	uint32			_ScreenW, _ScreenH; // Change res detection
 	sint32			_LastInGameScreenW, _LastInGameScreenH; // Resolution used for last InGame interface
+	float			_InterfaceScale;
+	bool			_InterfaceScaleChanged;
 
 	// Modes
-	CInterfaceConfig::CDesktopImage	_Modes[MAX_NUM_MODES];
+	std::vector<CInterfaceConfig::CDesktopImage> _Modes;
 	uint8				_CurrentMode;
 
 	// true when interface manager is running 'ingame' content

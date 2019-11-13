@@ -35,6 +35,10 @@
 #include "dmc/idmc.h"
 #include "r2_config.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLPACS;
 using namespace NLMISC;
 
@@ -231,13 +235,11 @@ void CToolChoosePos::updateBeforeRender()
 	if (entity)
 	{
 		CMatrix mat;
-		bool shown = false;
 		if (worldViewRay.OnMiniMap && rayIntersectionType == NoIntersection)
 		{
 			entity->show(false);
 		}
-		else
-		if (!entity->skeleton())
+		else if (!entity->skeleton())
 		{
 			/*
 			nlwarning("Selected entity for the 'create' tool has no skeleton");
@@ -266,7 +268,6 @@ void CToolChoosePos::updateBeforeRender()
 				return;
 			}
 			entity->show(true);
-			shown = true;
 			//
 			CQuat frontQuat(CVector::K,  _CreateAngle - (float) (NLMISC::Pi / 2));
 			inst.setRotQuat(frontQuat);
@@ -277,7 +278,6 @@ void CToolChoosePos::updateBeforeRender()
 		else
 		{
 			entity->show(true);
-			shown = true;
 			//
 			entity->updateVisible(T1,  NULL);
 			entity->updatePos(T1,  NULL);
@@ -293,7 +293,6 @@ void CToolChoosePos::updateBeforeRender()
 			mat.setRot(frontQuat);
 			mat.setPos(entityPos);
 			*/
-			CMatrix skelMatrix = entity->skeleton()->getMatrix();
 			// relative position to skeleton root
 			CVector skelRootRelativePos = entity->skeleton()->getMatrix().getPos() - entity->pos().asVector();
 			// combine quat for front face xform & anim quat
@@ -419,21 +418,21 @@ void CToolChoosePos::updateBeforeRender()
 		{
 			if (_MultiPos && isShiftDown() && !_MultiPosLocked)
 			{
-				setMouseCursor(_CursValidMulti.c_str());
+				setMouseCursor(_CursValidMulti);
 			}
 			else
 			{
-				setMouseCursor(_CursValid.c_str());
+				setMouseCursor(_CursValid);
 			}
 		}
 		else
 		{
-			setMouseCursor(_CursInvalid.c_str());
+			setMouseCursor(_CursInvalid);
 		}
 	}
 	else
 	{
-		setMouseCursor(_CursValid.c_str());
+		setMouseCursor(_CursValid);
 	}
 }
 

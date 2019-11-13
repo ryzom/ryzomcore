@@ -20,12 +20,16 @@
 // client
 #include "chat_text_manager.h"
 #include "nel/gui/view_text.h"
+#include "nel/gui/group_paragraph.h"
 #include "interface_manager.h"
 
 using namespace std;
 using namespace NLMISC;
 
 CChatTextManager* CChatTextManager::_Instance = NULL;
+
+// last selected chat from 'copy_chat_popup' action handler
+static std::string LastSelectedChat;
 
 //=================================================================================
 CChatTextManager::CChatTextManager() :
@@ -149,34 +153,179 @@ static CInterfaceGroup *buildLineWithCommand(CInterfaceGroup *commandGroup, CVie
 	return group;
 }
 
-//=================================================================================
-CViewBase *CChatTextManager::createMsgText(const ucstring &cstMsg, NLMISC::CRGBA col, bool justified /*=false*/)
+static inline bool	isUrlTag(const ucstring &s, ucstring::size_type index, ucstring::size_type textSize)
 {
-	ucstring msg = cstMsg;
-	CInterfaceGroup *commandGroup = parseCommandTag(msg);
-	CViewText *vt = new CViewText(CViewText::TCtorParam());
-	// get parameters from config.xml
-	vt->setShadow(isTextShadowed());
-	vt->setShadowOutline(false);
-	vt->setFontSize(getTextFontSize());
-	vt->setMultiLine(true);
-	vt->setTextMode(justified ? CViewText::Justified : CViewText::DontClipWord);
-	vt->setMultiLineSpace(getTextMultiLineSpace());
-	vt->setModulateGlobalColor(false);
-
-	ucstring cur_time;
-	if (showTimestamps())
+	// Format http://, https://
+	// or markdown style (title)[http://..]
+	if(textSize > index+7)
 	{
-		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_CLOCK_12H", false);
-		if (node && node->getValueBool())
-			cur_time = CInterfaceManager::getTimestampHuman("[%I:%M:%S %p] ");
-		else
-			cur_time = CInterfaceManager::getTimestampHuman();
+		bool markdown = false;
+		ucstring::size_type i = index;
+		// advance index to url section if markdown style link is detected
+		if (s[i] == '(')
+		{
+			// scan for ')[http://'
+			while(i < textSize-9)
+			{
+				if (s[i] == ')' && s[i+1] == '[')
+				{
+					i += 2;
+					markdown = true;
+					break;
+				}
+				else
+				if (s[i] == ')')
+				{
+					i += 1;
+					break;
+				}
+				i++;
+			}
+		}
+
+		if (textSize > i + 7)
+		{
+			bool isUrl = (toLower(s.substr(i, 7)) == ucstring("http://") || toLower(s.substr(i, 8)) == ucstring("https://"));
+			// match "text http://" and not "texthttp://"
+			if (isUrl && i > 0 && !markdown)
+			{
+				// '}' is in the list because of color tags, ie "@{FFFF}http://..."
+#ifdef NL_ISO_CPP0X_AVAILABLE
+				const vector<ucchar> chars{ ' ', '"', '\'', '(', '[', '}' };
+#else
+				static std::vector<ucchar> chars;
+
+				if (chars.empty())
+				{
+					chars.push_back(' ');
+					chars.push_back('"');
+					chars.push_back('\'');
+					chars.push_back('(');
+					chars.push_back('[');
+					chars.push_back('}');
+				}
+#endif
+				isUrl = std::find(chars.begin(), chars.end(), s[i - 1]) != chars.end();
+			}
+			return isUrl;
+		}
 	}
 
-	// if text contain any color code, set the text formated and white,
-	// otherwise, set text normal and apply global color
-	size_t codePos = msg.find(ucstring("@{"));
+	return false;
+}
+
+// ***************************************************************************
+// isUrlTag must match
+static inline void getUrlTag(const ucstring &s, ucstring::size_type &index, ucstring &url, ucstring &title)
+{
+	bool isMarkdown = false;
+	ucstring::size_type textSize = s.size();
+	ucstring::size_type pos;
+
+	// see if we have markdown format
+	if (s[index] == '(')
+	{
+		index++;
+		pos = index;
+		while(pos < textSize-9)
+		{
+			if (s[pos] == ')' && s[pos + 1] == '[')
+			{
+				isMarkdown = true;
+				title = s.substr(index, pos - index);
+				index = pos + 2;
+				break;
+			}
+			else if (s[pos] == ')')
+			{
+				break;
+			}
+
+			pos++;
+		}
+	}
+
+	ucchar chOpen = ' ';
+	ucchar chClose = ' ';
+	if (isMarkdown)
+	{
+		chOpen = '[';
+		chClose = ']';
+	}
+	else if (index > 0)
+	{
+		chOpen = s[index - 1];
+		if (chOpen == '\'') chClose = '\'';
+		else if (chOpen == '"') chClose = '"';
+		else if (chOpen == '(') chClose = ')';
+		else if (chOpen == '[') chClose = ']';
+		else chClose = ' ';
+	}
+
+	if (chOpen == chClose)
+	{
+		pos = s.find_first_of(chClose, index);
+
+		// handle common special case: 'text http://.../, text'
+		if (pos != ucstring::npos && index > 0)
+		{
+			if (s[index-1] == ' ' && (s[pos-1] == ',' || s[pos-1] == '.'))
+			{
+				pos--;
+			}
+		}
+	}
+	else
+	{
+		// scan for nested open/close tags
+		pos = index;
+		sint nested = 0;
+		while(pos < textSize)
+		{
+			if (s[pos] == chOpen)
+			{
+				nested++;
+			}
+			else if (s[pos] == chClose)
+			{
+				if (nested == 0)
+				{
+					break;
+				}
+				else
+				{
+					nested--;
+				}
+			}
+
+			pos++;
+		}
+	}
+
+	// fallback to full string length as we did match http:// already and url spans to the end probably
+	if (pos == ucstring::npos)
+	{
+		pos = textSize;
+	}
+
+	url = s.substr(index, pos - index);
+	index = pos;
+
+	// skip ']' closing char
+	if (isMarkdown) index++;
+}
+
+//=================================================================================
+static void prependTimestamp(ucstring &msg)
+{
+	ucstring cur_time;
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_CLOCK_12H", false);
+	if (node && node->getValueBool())
+		cur_time = CInterfaceManager::getTimestampHuman("[%I:%M:%S %p] ");
+	else
+		cur_time = CInterfaceManager::getTimestampHuman();
+
+	ucstring::size_type codePos = msg.find(ucstring("@{"));
 	if (codePos != ucstring::npos)
 	{
 		// Prepend the current time (do it after the color if the color at first position.
@@ -189,13 +338,49 @@ CViewBase *CChatTextManager::createMsgText(const ucstring &cstMsg, NLMISC::CRGBA
 		{
 			msg = cur_time + msg;
 		}
-		
+	}
+	else
+	{
+		msg = cur_time + msg;
+	}
+}
+
+//=================================================================================
+CViewBase *CChatTextManager::createMsgText(const ucstring &cstMsg, NLMISC::CRGBA col, bool justified /*=false*/, bool plaintext /*=false*/)
+{
+	ucstring msg = cstMsg;
+	CInterfaceGroup *commandGroup = parseCommandTag(msg);
+
+	if (showTimestamps())
+		prependTimestamp(msg);
+
+	// must wrap all lines to CGroupParagraph because CGroupList will calculate
+	// width from previous line which ends up as CViewText otherwise
+	return createMsgTextComplex(msg, col, justified, plaintext, commandGroup);
+}
+
+//=================================================================================
+CViewBase *CChatTextManager::createMsgTextSimple(const ucstring &msg, NLMISC::CRGBA col, bool justified, CInterfaceGroup *commandGroup)
+{
+	CViewText *vt = new CViewText(CViewText::TCtorParam());
+	// get parameters from config.xml
+	vt->setShadow(isTextShadowed());
+	vt->setShadowOutline(false);
+	vt->setFontSize(getTextFontSize());
+	vt->setMultiLine(true);
+	vt->setTextMode(justified ? CViewText::Justified : CViewText::DontClipWord);
+	vt->setMultiLineSpace(getTextMultiLineSpace());
+	vt->setModulateGlobalColor(false);
+
+	// if text contain any color code, set the text formated and white,
+	// otherwise, set text normal and apply global color
+	if (msg.find(ucstring("@{")) != ucstring::npos)
+	{
 		vt->setTextFormatTaged(msg);
 		vt->setColor(NLMISC::CRGBA::White);
 	}
 	else
 	{
-		msg = cur_time + msg;
 		vt->setText(msg);
 		vt->setColor(col);
 	}
@@ -208,6 +393,116 @@ CViewBase *CChatTextManager::createMsgText(const ucstring &cstMsg, NLMISC::CRGBA
 	{
 		return buildLineWithCommand(commandGroup, vt);
 	}
+}
+
+//=================================================================================
+CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::CRGBA col, bool justified, bool plaintext, CInterfaceGroup *commandGroup)
+{
+	ucstring::size_type textSize = msg.size();
+
+	CGroupParagraph *para = new CGroupParagraph(CViewBase::TCtorParam());
+	para->setId("line");
+	para->setSizeRef("w");
+	para->setResizeFromChildH(true);
+
+	// use right click because left click might be used to activate chat window
+	para->setRightClickHandler("copy_chat_popup");
+	para->setRightClickHandlerParams(msg.toUtf8());
+
+	if (plaintext)
+	{
+		CViewBase *vt = createMsgTextSimple(msg, col, justified, NULL);
+		vt->setId("text");
+		para->addChild(vt);
+
+		return para;
+	}
+
+
+	// quickly check if text has links or not
+	bool hasUrl;
+	{
+		ucstring s = toLower(msg);
+		hasUrl = (s.find(ucstring("http://")) || s.find(ucstring("https://")));
+	}
+
+	ucstring::size_type pos = 0;
+	for (ucstring::size_type i = 0; i< textSize;)
+	{
+		if (hasUrl && isUrlTag(msg, i, textSize))
+		{
+			if (pos != i)
+			{
+				CViewBase *vt = createMsgTextSimple(msg.substr(pos, i - pos), col, justified, NULL);
+				para->addChild(vt);
+			}
+
+			ucstring url;
+			ucstring title;
+			getUrlTag(msg, i, url, title);
+			if (url.size() > 0)
+			{
+				CViewLink *vt = new CViewLink(CViewBase::TCtorParam());
+				vt->setId("link");
+				vt->setUnderlined(true);
+				vt->setShadow(isTextShadowed());
+				vt->setShadowOutline(false);
+				vt->setFontSize(getTextFontSize());
+				vt->setMultiLine(true);
+				vt->setTextMode(justified ? CViewText::Justified : CViewText::DontClipWord);
+				vt->setMultiLineSpace(getTextMultiLineSpace());
+				vt->setModulateGlobalColor(false);
+
+				//NLMISC::CRGBA color;
+				//color.blendFromui(col, CRGBA(255, 153, 0, 255), 100);
+				//vt->setColor(color);
+				vt->setColor(col);
+
+				if (title.size() > 0)
+				{
+					vt->LinkTitle = title.toUtf8();
+					vt->setText(title);
+				}
+				else
+				{
+					vt->LinkTitle = url.toUtf8();
+					vt->setText(url);
+				}
+
+				if (url.find_first_of('\'') != string::npos)
+				{
+					ucstring clean;
+					for(string::size_type i = 0; i< url.size(); ++i)
+					{
+						if (url[i] == '\'')
+							clean += ucstring("%27");
+						else
+							clean += url[i];
+					}
+					url = clean;
+				}
+				vt->setActionOnLeftClick("lua");
+				vt->setParamsOnLeftClick("game:chatUrl('" + url.toUtf8() + "')");
+
+				para->addChildLink(vt);
+
+				pos = i;
+			}
+		}
+		else
+		{
+			++i;
+		}
+	}
+
+	if (pos < textSize)
+	{
+		CViewBase *vt = createMsgTextSimple(msg.substr(pos, textSize - pos), col, justified, NULL);
+		vt->setId("text");
+		para->addChild(vt);
+	}
+
+	return para;
 }
 
 //=================================================================================
@@ -234,3 +529,41 @@ void CChatTextManager::reset ()
 	_TextShadowed = NULL;
 	_ShowTimestamps = NULL;
 }
+
+// ***************************************************************************
+// Called when we right click on a chat line
+class	CHandlerCopyChatPopup: public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &params )
+	{
+		if (pCaller == NULL) return;
+
+		LastSelectedChat = params;
+
+		CGroupParagraph *pGP = dynamic_cast<CGroupParagraph *>(pCaller);
+		if (pGP) pGP->enableTempOver();
+
+		CWidgetManager::getInstance()->enableModalWindow (pCaller, "ui:interface:chat_copy_action_menu");
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerCopyChatPopup, "copy_chat_popup");
+
+// ***************************************************************************
+// Called when we right click on a chat line and choose 'copy' from context menu
+class	CHandlerCopyChat: public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &params )
+	{
+		if (pCaller == NULL) return;
+
+		CGroupParagraph *pGP = dynamic_cast<CGroupParagraph *>(pCaller);
+		if (pGP) pGP->disableTempOver();
+
+		CAHManager::getInstance()->runActionHandler("copy_to_clipboard", NULL, LastSelectedChat);
+		CWidgetManager::getInstance()->disableModalWindow();
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerCopyChat, "copy_chat");
+

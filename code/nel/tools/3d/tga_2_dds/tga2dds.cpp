@@ -18,6 +18,7 @@
 #include <iostream>
 
 #include "nel/misc/file.h"
+#include "nel/misc/common.h"
 #include "nel/misc/bitmap.h"
 #include "nel/misc/path.h"
 #include "nel/misc/debug.h"
@@ -31,6 +32,9 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 #define	TGA8	8
 #define	TGA16	16
@@ -49,7 +53,7 @@ std::string getOutputFileName(const std::string &inputFileName);
 uint8 getType(const std::string &sFileNameDest)
 {
 	uint32 dds;
-	FILE *f = fopen(sFileNameDest.c_str(),"rb");
+	FILE *f = nlfopen(sFileNameDest, "rb");
 	if(f==NULL)
 	{
 		return NOT_DEFINED;
@@ -105,7 +109,7 @@ uint8 getType(const std::string &sFileNameDest)
 bool sameType(const std::string &sFileNameDest, uint8 &algo, bool wantMipMap)
 {
 	uint32 dds;
-	FILE *f = fopen(sFileNameDest.c_str(),"rb");
+	FILE *f = nlfopen(sFileNameDest, "rb");
 	if(f==NULL)
 	{
 		return false;
@@ -296,6 +300,7 @@ int main(int argc, char **argv)
 		"\n"
 		"  default : DXTC1 if 24 bits, DXTC5 if 32 bits."
 		);
+	args.addArg("g", "grayscale", "", "Don't load grayscape images as alpha but as grayscale");
 	args.addArg("m", "mipmap", "", "Create MipMap");
 	args.addArg("r", "reduce", "FACTOR", "Reduce the bitmap size before compressing\n  FACTOR is 0, 1, 2, 3, 4, 5, 6, 7 or 8");
 	args.addAdditionalArg("input", "PNG or TGA files to convert", false);
@@ -305,10 +310,17 @@ int main(int argc, char **argv)
 	string OptOutputFileName;
 	uint8 OptAlgo = NOT_DEFINED;
 	bool OptMipMap = false;
+	bool OptGrayscale = false;
 	uint Reduce = 0;
 
 	if (args.haveArg("o"))
 		OptOutputFileName = args.getArg("o").front();
+
+	if (args.haveArg("m"))
+		OptMipMap = true;
+
+	if (args.haveArg("g"))
+		OptGrayscale = true;
 
 	if (args.haveArg("a"))
 	{
@@ -358,12 +370,17 @@ int main(int argc, char **argv)
 		{
 			return 0;
 		}
+
 		NLMISC::CIFile input;
 		if(!input.open(inputFileName))
 		{
 			cerr<<"Can't open input file " << inputFileName << endl;
 			return 1;
 		}
+
+		// allow to load an image as grayscale instead of alpha
+		if (OptGrayscale) picTga.loadGrayscaleAsAlpha(false);
+
 		uint8 imageDepth = picTga.load(input);
 		if(imageDepth==0)
 		{

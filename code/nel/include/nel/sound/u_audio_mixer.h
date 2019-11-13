@@ -19,7 +19,6 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/string_mapper.h"
-#include "nel/misc/sheet_id.h"
 #include "nel/sound/u_source.h"
 #include "nel/sound/u_group_controller.h"
 #include "nel/ligo/primitive.h"
@@ -285,7 +284,7 @@ public:
 	//@}
 
 	/// Get a TSoundId from a name (returns NULL if not found)
-	virtual TSoundId	getSoundId( const NLMISC::CSheetId &name ) = 0;
+	virtual TSoundId	getSoundId( const NLMISC::TStringId &name ) = 0;
 
 	/// Gets the group controller for the given group tree path with separator '/', if it doesn't exist yet it will be created.
 	/// Examples: "music", "effects", "dialog", "music/background", "music/loading", "music/player", etcetera
@@ -297,7 +296,7 @@ public:
 	 * pass a callback function that will be called (if not NULL) just before deleting the spawned
 	 * source.
 	 */
-	virtual USource		*createSource(const NLMISC::CSheetId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *callbackUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context  = 0, UGroupController *groupController = NULL) = 0;
+	virtual USource		*createSource(const NLMISC::TStringId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *callbackUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context  = 0, UGroupController *groupController = NULL) = 0;
 	/// Add a logical sound source (by sound id). To remove a source, just delete it. See createSource(const char*)
 	virtual USource		*createSource(TSoundId id, bool spawn=false, TSpawnEndCallback cb=NULL, void *callbackUserParam  = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL) = 0;
 
@@ -321,7 +320,7 @@ public:
 	//@{
 	//@name Statistic and utility methods
 	/// Fill a vector with the names of all loaded sounds.
-	virtual void		getSoundNames( std::vector<NLMISC::CSheetId> &names ) const = 0;
+	virtual void		getSoundNames( std::vector<NLMISC::TStringId> &names ) const = 0;
 	/// Return the number of mixing tracks (voices)
 	virtual uint		getPolyphony() const = 0;
 	/// Return the number of sources
@@ -432,7 +431,7 @@ public:
 	/** Get the song title. Returns false if the song is not found or the function is not implemented.
 	 * If the song as no name, result is filled with the filename.
 	 */
-	virtual bool	getSongTitle(const std::string &filename, std::string &result) =0;
+	virtual bool	getSongTitle(const std::string &filename, std::string &result, float &length) =0;
 	/** enable or disable the background music system. disable it when you want to play your own mp3 for instance
 	 */
 	virtual void	enableBackgroundMusic(bool enable) =0;

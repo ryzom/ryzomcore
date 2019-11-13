@@ -14,7 +14,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "nel/misc/types_nl.h"
+#ifndef GAMESHARE_STDPCH_H
+#define GAMESHARE_STDPCH_H
+
+#if defined(_MSC_VER) && defined(_DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -38,6 +46,7 @@
 #include <memory>
 #include <functional>
 
+#include "nel/misc/types_nl.h"
 #include <nel/misc/common.h>
 #include <nel/misc/debug.h>
 
@@ -74,4 +83,6 @@
 #	endif
 #	include <WinSock2.h>
 #	include <Windows.h>
+#endif
+
 #endif

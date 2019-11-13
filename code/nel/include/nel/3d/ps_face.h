@@ -69,7 +69,7 @@ public:
 	 */
 	CPSFace(CSmartPtr<ITexture> tex = NULL);
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	NLMISC_DECLARE_CLASS(CPSFace);
 	/** Tells that all faces are turning in the same manner, and only have a rotationnal bias

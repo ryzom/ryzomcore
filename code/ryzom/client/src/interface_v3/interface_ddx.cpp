@@ -250,7 +250,6 @@ void CInterfaceDDX::CParam::backupDB()
 
 	if (Widget == ColorButton)
 	{
-		CRGBA col = CRGBA::White;
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
 		if (pNL != NULL)
 		{

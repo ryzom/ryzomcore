@@ -30,6 +30,7 @@
 #include "nel/misc/file.h"
 #include "nel/misc/rgba.h"
 #include "path_mesh_alloc.h"
+#include "../nel_3dsmax_shared/string_common.h"
 
 //#define USE_CACHE
 
@@ -434,8 +435,8 @@ class CBankManager
 public:
 	CBankManager ()
 	{
-		_lastPath="";
 	}
+
 	const NL3D::CTileBank& getBank (std::string& path=GetBankPathName ())
 	{
 		if (path!=_lastPath)
@@ -449,9 +450,9 @@ public:
 					_bank.serial (file);
 				}
 			}
-			catch (NLMISC::EStream& excp)
+			catch (const NLMISC::EStream& excp)
 			{
-				MessageBox (NULL, excp.what(), "Load error", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (NULL, MaxTStrFromUtf8(excp.what()).data(), _T("Load error"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 		return _bank;

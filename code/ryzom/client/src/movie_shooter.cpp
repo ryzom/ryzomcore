@@ -31,6 +31,9 @@
 #include "nel/misc/debug.h"
 #include "nel/misc/system_info.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ///////////
 // USING //
@@ -111,7 +114,7 @@ bool				CMovieShooter::addFrame(double time, UDriver	*pDriver)
 	nlassert(bitmap.getPixelFormat()==CBitmap::RGBA);
 
 	// add the frame.
-	if(bitmap.getPixels().size()==0)
+	if(bitmap.getPixels().empty())
 		return false;
 	return addFrame(time, (CRGBA*)(&bitmap.getPixels()[0]), bitmap.getWidth(), bitmap.getHeight());
 }

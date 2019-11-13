@@ -540,7 +540,48 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, uint index, uint color)
 	{
 		const CItemSheet *item = _Items[slot].Sheet;
 
-		std::string shapeName = _Gender == GSGENDER::female ? item->getShapeFemale():item->getShape();
+		std::string shapeName = "";
+		if(_Gender == GSGENDER::male)
+		{
+			switch(_PlayerSheet->People)
+			{
+				case EGSPD::CPeople::Fyros:
+					shapeName = item->getShapeFyros();
+					break;
+				case EGSPD::CPeople::Matis:
+					shapeName = item->getShapeMatis();
+					break;
+				case EGSPD::CPeople::Tryker:
+					shapeName = item->getShapeTryker();
+					break;
+				case EGSPD::CPeople::Zorai:
+					shapeName = item->getShapeZorai();
+					break;
+			}
+		}
+		else
+		{
+			switch(_PlayerSheet->People)
+			{
+				case EGSPD::CPeople::Fyros:
+					shapeName = item->getShapeFyrosFemale();
+					break;
+				case EGSPD::CPeople::Matis:
+					shapeName = item->getShapeMatisFemale();
+					break;
+				case EGSPD::CPeople::Tryker:
+					shapeName = item->getShapeTrykerFemale();
+					break;
+				case EGSPD::CPeople::Zorai:
+					shapeName = item->getShapeZoraiFemale();
+					break;
+			}
+			if (shapeName.empty())
+				shapeName = item->getShapeFemale();
+		}
+		if (shapeName.empty())
+			shapeName = item->getShape();
+
 
 		// use the right type of boots if wearing a caster dress
 		if ((slot == SLOTTYPE::FEET_SLOT) && (item->ItemType == ITEM_TYPE::LIGHT_BOOTS || item->ItemType == ITEM_TYPE::MEDIUM_BOOTS || item->ItemType == ITEM_TYPE::HEAVY_BOOTS))
@@ -733,8 +774,12 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 
 		// Invalidate instances cache
 		for (uint i = 0; i < _Instances.size(); ++i)
-			_Instances[i].CurrentName = _Instances[i].LoadingName = "";
-		_Face.CurrentName = _Face.LoadingName = "";
+		{
+			_Instances[i].CurrentName.clear();
+			_Instances[i].LoadingName.clear();
+		}
+		_Face.CurrentName.clear();
+		_Face.LoadingName.clear();
 	}
 	// Check the skeleton.
 	if(skeleton() && !ClientCfg.Light)
@@ -859,11 +904,11 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 			if (!_Face.Loading.empty())
 				Scene->deleteInstance(_Face.Loading);
 			_Face.Loading = NULL;
-			_Face.LoadingName = "";
+			_Face.LoadingName.clear();
 			if (!_Face.Current.empty())
 				Scene->deleteInstance(_Face.Current);
 			_Face.Current = NULL;
-			_Face.CurrentName = "";
+			_Face.CurrentName.clear();
 		}
 		// Now we have a skeleton, we can update VpB and VpC.
 		sint64 vB, vC;
@@ -1242,7 +1287,7 @@ void CPlayerCL::displayDebug(float x, float &y, float lineStep)	// virtual
 // readWrite :
 // Read/Write Variables from/to the stream.
 //---------------------------------------------------
-void CPlayerCL::readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPlayerCL::readWrite(NLMISC::IStream &f)
 {
 	CCharacterCL::readWrite(f);
 

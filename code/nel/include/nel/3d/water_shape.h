@@ -108,7 +108,7 @@ public:
 
 
 	/// serial this shape
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 	//@}
 
 
@@ -299,7 +299,7 @@ public:
 
 
 		/// serial this shape
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serial(NLMISC::IStream &f);
 	//@}
 
 

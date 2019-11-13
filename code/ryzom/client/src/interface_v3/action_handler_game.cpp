@@ -20,6 +20,7 @@
 #include "stdpch.h"
 
 #include <sstream>
+#include <locale>
 
 // Interface includes
 #include "interface_manager.h"
@@ -52,6 +53,7 @@
 #include "action_handler_tools.h"
 #include "../connection.h"
 #include "../client_chat_manager.h"
+#include "group_compas.h"
 
 // Game specific includes
 #include "../motion/user_controls.h"
@@ -927,7 +929,7 @@ public:
 			CEntityCL *pSel = EntitiesMngr.entity(UserEntity->selection());
 			if (pSel != NULL)
 				if (pSel->isForageSource())
-					UserEntity->moveToExtractionPhrase(UserEntity->selection(), 2.0f, ~0, ~0, true);
+					UserEntity->moveToExtractionPhrase(UserEntity->selection(), 2.0f, std::numeric_limits<uint>::max(), std::numeric_limits<uint>::max(), true);
 		}
 	}
 };
@@ -1531,7 +1533,8 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		// free with no confirm
-		beastOrder ("free", Params, false);
+		if (!UserEntity->isBusy())
+			beastOrder ("free", Params, false);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerDoBeastFree, "do_beast_free")
@@ -1553,6 +1556,8 @@ public:
 		CViewTextMenu *pFree = dynamic_cast<CViewTextMenu*>(pMenu->getView("free"));
 		CViewTextMenu *pEnterStable = dynamic_cast<CViewTextMenu*>(pMenu->getView("enter_stable"));
 		CViewTextMenu *pLeaveStable = dynamic_cast<CViewTextMenu*>(pMenu->getView("leave_stable"));
+		CViewTextMenu *pEnterBag = dynamic_cast<CViewTextMenu*>(pMenu->getView("enter_bag"));
+		CViewTextMenu *pLeaveBag = dynamic_cast<CViewTextMenu*>(pMenu->getView("leave_bag"));
 		CViewTextMenu *pMount = dynamic_cast<CViewTextMenu*>(pMenu->getView("mount"));
 		CViewTextMenu *pUnseat = dynamic_cast<CViewTextMenu*>(pMenu->getView("unseat"));
 
@@ -1579,7 +1584,7 @@ public:
 
 				// Enable menu items
 				testMenuOptionForPackAnimal(selectedAnimalInVision, i, (i==0),
-					pFollow, pStop, pFree, pEnterStable, pLeaveStable, pMount, pUnseat);
+					pFollow, pStop, pFree, pEnterStable, pLeaveStable, pMount, pUnseat, pEnterBag, pLeaveBag);
 			}
 		}
 		else if(selected>=1 && selected<=MAX_INVENTORY_ANIMAL)
@@ -1595,7 +1600,7 @@ public:
 
 			// Enable menu items
 			testMenuOptionForPackAnimal(selectedAnimalInVision, selected-1, true,
-				pFollow, pStop, pFree, pEnterStable, pLeaveStable, pMount, pUnseat);
+				pFollow, pStop, pFree, pEnterStable, pLeaveStable, pMount, pUnseat, pEnterBag, pLeaveBag);
 		}
 	}
 };
@@ -2064,6 +2069,7 @@ class CActionHandlerSetTargetName : public IActionHandler
 			}
 			// Set to target
 			CInterfaceExprValue evUCStr;
+			TargetName = STRING_MANAGER::CStringManagerClient::getLocalizedName(TargetName);
 			evUCStr.setUCString(TargetName);
 			CInterfaceLink::setTargetProperty(sNameTarget, evUCStr);
 			evUCStr.setUCString(TargetTitle);
@@ -2414,66 +2420,112 @@ class CAHTarget : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
-		// Get the entity name to target
 		ucstring entityName;
-		entityName.fromUtf8 (getParam (Params, "entity"));
-		bool preferCompleteMatch = (getParam (Params, "prefer_complete_match") != "0");
+		entityName.fromUtf8(getParam(Params, "entity"));
+		if (entityName.empty()) return;
 
-		if (!entityName.empty())
+		string completeMatch = getParam(Params, "prefer_complete_match");
+		bool quiet = (getParam (Params, "quiet") == "true");
+
+		vector<ucstring> keywords;
+		NLMISC::splitUCString(entityName, ucstring(" "), keywords);
+		if (!keywords.empty() && keywords[0].size() > 0 && keywords[0][0] == (ucchar)'"')
 		{
-			CEntityCL *entity = NULL;
-			if (preferCompleteMatch)
-			{
-				// Try to get the entity with complete match first
-				entity = EntitiesMngr.getEntityByName (entityName, false, true);
-			}
-			
-			if (entity == NULL)
-			{
-				// Get the entity with a partial match
-				entity = EntitiesMngr.getEntityByName (entityName, false, false);
-			}
-			
-			if (entity)
-			{
-				CCharacterCL *character = dynamic_cast<CCharacterCL*>(entity);
-				if (character != NULL)
-				{
-					if(character->isSelectableBySpace())
-					{
-						nldebug("isSelectableBySpace");
-					}
-					else
-					{
-						nldebug("is not isSelectableBySpace");
-					}
-				}
-				if(entity->properties().selectable())
-				{
-					nldebug("is prop selectable");
-				}
-				else
-				{
-					// to avoid campfire selection exploit #316
-					nldebug("is not prop selectable");
-					CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-					pIM->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
-					return;
-				}
+			// entity name is in quotes, do old style match with 'starts with' filter
+			// search for optional second parameter from old command for prefer_complete_match param
+			keywords.clear();
 
-				// Select the entity
-				UserEntity->selection(entity->slot());
-			}
-			else
+			ucstring::size_type lastOf = entityName.rfind(ucstring("\""));
+			if (lastOf == 0)
+				lastOf = ucstring::npos;
+
+			// override the value only when there is no 'prefer_complete_match' parameter set
+			if (completeMatch.empty() && lastOf < entityName.size())
+				completeMatch = trim(entityName.substr(lastOf+1).toUtf8());
+
+			entityName = entityName.substr(1, lastOf-1);
+		}
+
+		// late check because only possible if doing 'starts-with' search
+		bool preferCompleteMatch = (completeMatch != "0");
+
+		CEntityCL *entity = NULL;
+		if (preferCompleteMatch)
+		{
+			// Try to get the entity with complete match first
+			entity = EntitiesMngr.getEntityByName (entityName, false, true);
+		}
+
+		if (entity == NULL && !keywords.empty())
+		{
+			entity = EntitiesMngr.getEntityByKeywords(keywords, true);
+		}
+
+		if (entity == NULL)
+		{
+			// Get the entity with a partial match using 'starts with' search
+			entity = EntitiesMngr.getEntityByName(entityName, false, false);
+		}
+
+		if (entity == NULL)
+		{
+			//Get the entity with a sheetName
+			entity = EntitiesMngr.getEntityBySheetName(entityName.toUtf8());
+		}
+
+		if (entity && entity->properties().selectable() && !entity->getDisplayName().empty())
+		{
+			UserEntity->selection(entity->slot());
+			if (ClientCfg.TargetChangeCompass)
 			{
-				CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-				pIM->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
+				CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
+				if (gc)
+				{
+					CCompassTarget ct;
+					ct.setType(CCompassTarget::Selection);
+
+					gc->setActive(true);
+					gc->setTarget(ct);
+					gc->blink();
+					CWidgetManager::getInstance()->setTopWindow(gc);
+				}
 			}
+		}
+		else if (!quiet)
+		{
+			CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
 		}
 	}
 };
 REGISTER_ACTION_HANDLER (CAHTarget, "target");
 
+// ***************************************************************************
+class CAHTargetLandmark : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	{
+		string search = getParam(Params, "search");
+		if (search.empty()) return;
+
+		bool startsWith = false;
+		if (search.size() > 0 && (search[0] == '\'' || search[0] == '"') && search[0] == search[search.size()-1])
+		{
+			startsWith = true;
+			search = trimQuotes(search);
+		}
+
+		const std::string mapid = "ui:interface:map:content:map_content:actual_map";
+		CGroupMap* cgMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(mapid));
+		if (cgMap)
+		{
+			if (!cgMap->targetLandmarkByName(search, startsWith))
+			{
+				CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
+			}
+		}
+	}
+};
+REGISTER_ACTION_HANDLER (CAHTargetLandmark, "target_landmark");
 
 
 class CAHAddShape : public IActionHandler
@@ -2481,14 +2533,22 @@ class CAHAddShape : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		string sShape = getParam(Params, "shape");
-		if(sShape.empty())
+
+		if (sShape.empty())
 		{
 			nlwarning("Command 'add_shape': need at least the parameter shape.");
 			return;
 		}
+
 		if (!Scene)
 		{
 			nlwarning("No scene available");
+			return;
+		}
+
+		if (!UserEntity)
+		{
+			nlwarning("UserEntity not yet defined, possibly called runAH from Lua");
 			return;
 		}
 
@@ -2520,7 +2580,6 @@ class CAHAddShape : public IActionHandler
 		}
 
 		bool have_shapes = true;
-		bool first_shape = true;
 		while(have_shapes)
 		{
 			string shape;
@@ -2537,8 +2596,8 @@ class CAHAddShape : public IActionHandler
 				have_shapes = false;
 			}
 
-
-			CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector((float)x, (float)y, (float)z), c, u, first_shape);
+			sint32 idx;
+			CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector((float)x, (float)y, (float)z), c, u, false, 0, idx);
 			UInstance instance = instref.Instance;
 
 			if(!instance.empty())
@@ -2558,7 +2617,7 @@ class CAHAddShape : public IActionHandler
 						instance.getMaterial(j).setShininess( 1000.0f );
 					}
 
-					if (!texture_name.empty() && first_shape)
+					if (!texture_name.empty())
 					{
 						sint numStages = instance.getMaterial(j).getLastTextureStage() + 1;
 						for(sint l = 0; l < numStages; l++)
@@ -2570,8 +2629,6 @@ class CAHAddShape : public IActionHandler
 						}
 					}
 				}
-
-				first_shape = false;
 
 				if (transparency.empty())
 					::makeInstanceTransparent(instance, 255, false);
@@ -2605,6 +2662,9 @@ class CAHAddShape : public IActionHandler
 					instance.setPos(CVector((float)x, (float)y, (float)z));
 					instance.setRotQuat(dir.getRot());
 				}
+				
+				instance.setTransformMode(UTransformable::RotEuler);
+				
 				// if the shape is a particle system, additionnal parameters are user params
 				UParticleSystemInstance psi;
 				psi.cast (instance);
@@ -3187,17 +3247,20 @@ class CHandlerGameConfigMode : public IActionHandler
 				bool bFound = false;
 				string tmp = toString(VideoModes[i].Frequency);
 				for (j = 0; j < (sint)stringFreqList.size(); ++j)
+				{
 					if (stringFreqList[j] == tmp)
 					{
 						bFound = true;
 						break;
 					}
-					if (!bFound)
-					{
-						stringFreqList.push_back(tmp);
-						if (ClientCfg.Frequency == VideoModes[i].Frequency)
-							nFoundFreq = j;
-					}
+				}
+
+				if (!bFound)
+				{
+					stringFreqList.push_back(tmp);
+					if (ClientCfg.Frequency == VideoModes[i].Frequency)
+						nFoundFreq = j;
+				}
 			}
 		}
 		if (nFoundFreq == -1) nFoundFreq = 0;
@@ -3450,20 +3513,8 @@ class CHandlerGameConfigApply : public IActionHandler
 				{
 					uint32 width, height;
 					Driver->getWindowSize(width, height);
-
-					// window is too large
-					if (width >= screenMode.Width || height >= screenMode.Height)
-					{
-						// choose a smaller size
-						w = 1024;
-						h = 768;
-					}
-					else
-					{
-						// take previous mode
-						w = width;
-						h = height;
-					}
+					w = width;
+					h = height;
 				}
 
 				ClientCfg.Width = w;
@@ -3481,6 +3532,15 @@ class CHandlerGameConfigApply : public IActionHandler
 				}
 			}
 		}
+
+		// save user created channels options
+		CCtrlBaseButton *pCS = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromDefine("game_config_save_channel_cb"));
+		if (pCS)
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SAVE_CHANNEL")->setValue32(pCS->getPushed());
+
+		pCS = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromDefine("game_config_auto_channel_cb"));
+		if (pCS)
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:AUTO_CHANNEL")->setValue32(pCS->getPushed());
 
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_VR_ENABLE_BUTTON));
 		if (pBut) 
@@ -3722,6 +3782,34 @@ class CHandlerGameConfigChangeScreenRatioCustom : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CHandlerGameConfigChangeScreenRatioCustom, "game_config_change_screen_ratio_custom");
+
+// ***************************************************************************
+class CHandlerSetInterfaceScale : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	{
+		std::string s;
+		s = getParam(Params, "scale");
+		if (!s.empty()) {
+			float scale;
+			if (fromString(s, scale))
+			{
+				if (scale >= ClientCfg.InterfaceScale_min && scale <= ClientCfg.InterfaceScale_max)
+				{
+					ClientCfg.InterfaceScale = scale;
+					ClientCfg.writeDouble("InterfaceScale", ClientCfg.InterfaceScale);
+
+					ClientCfg.IsInvalidated = true;
+					return;
+				}
+			}
+		}
+
+		ucstring help("/setuiscale "+toString("%.1f .. %.1f", ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max));
+		CInterfaceManager::getInstance()->displaySystemInfo(help);
+	}
+};
+REGISTER_ACTION_HANDLER (CHandlerSetInterfaceScale, "set_ui_scale");
 
 
 // ***************************************************************************
@@ -4200,7 +4288,7 @@ public:
 		string fileName = getParam(sParams, "music");
 
 		// don't play if db is in init stage
-		if (IngameDbMngr.initInProgress()) return;
+		if (!ClientCfg.Local && IngameDbMngr.initInProgress()) return;
 
 		if(SoundMngr)
 			SoundMngr->playEventMusic(fileName, xFade, loop);
@@ -4222,7 +4310,7 @@ public:
 		string		fileName= getParam(sParams, "music");
 
 		// don't play if db is in init stage
-		if (IngameDbMngr.initInProgress()) return;
+		if (!ClientCfg.Local && IngameDbMngr.initInProgress()) return;
 
 		if(SoundMngr)
 			SoundMngr->stopEventMusic(fileName, xFade);
@@ -4503,3 +4591,77 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerEmote, "emote");
+
+//=================================================================================================================
+class CHandlerSortTribeFame : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	{
+		CGroupList * list = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:fame:content:tribes:list"));
+		if (list && list->getNumChildren() > 1)
+		{
+			uint nbChilds = list->getNumChildren();
+
+			// std::collate does not work with ucchar
+			std::vector<string> names;
+
+			for (uint i = 0; i < nbChilds; ++i)
+			{
+				CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(list->getChild(i));
+				if (!pIG) break;
+
+				CViewText *pVT = dynamic_cast<CViewText *>(pIG->getView("t"));
+				if (!pVT) break;
+
+				names.push_back(toUpper(pVT->getText().toUtf8()));
+			}
+
+			if (names.size() != nbChilds)
+			{
+				nlwarning("Failed to sort tribe fame list");
+				return;
+			}
+
+			std::locale loc("");
+			const std::collate<char>& coll = std::use_facet<std::collate<char> >(loc);
+
+			for(uint i = 0; i < nbChilds - 1; ++i)
+			{
+				uint imin = i;
+				for(uint j = i; j < nbChilds; j++)
+				{
+					// simple comparison fails with accented letters
+					if (coll.compare(names[j].c_str(), names[j].c_str() + names[j].size(),
+							names[imin].c_str(), names[imin].c_str() + names[imin].size()) < 0)
+					{
+						imin = j;
+					}
+				}
+				if (imin != i)
+				{
+					list->swapChildren(i, imin);
+					std::swap(names[i], names[imin]);
+				}
+			}
+
+			list->invalidateCoords();
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerSortTribeFame, "sort_tribefame");
+
+// ***************************************************************************
+class CHandlerTriggerIconBuffs : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	{
+		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_ICON_BUFFS", false);
+		// no node - show,
+		// node == false - hide
+		CDBCtrlSheet::setShowIconBuffs(!node || node->getValueBool());
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerTriggerIconBuffs, "trigger_show_icon_buffs");
+

@@ -1,0 +1,67 @@
+﻿*HASH_VALUE	faction	name	da	ia	member	mda	mia
+_A0EC3CB6728A80B6	fyros	Fyros	the		Fyros	the	a
+_E10CC4B36E98C09E	matis	Matis	the		Matis	the	a
+_2DCA2CC01F48D0B6	tryker	Tryker	the		Tryker	the	a
+_224B8CAE6DA920A2	zorai	Zoraï	the		Zoraï	the	a
+_A7882097E759D4B4	bandit	Bandit	the	a	Bandit	the	a
+_AC0AD4AB29494C9C	civil	Civil	the	a	Civil	the	a
+_2BF98095A428409F	degen	Degen	the	a	Degen	the	a
+_2A9A98AAE9E93894	fauna	Fauna	the	a	Fauna	the	a
+_21BC2EDA89B6328A	fauna_carnivore	Carnivore Fauna	the	a	Carnivore Fauna	the	a
+_A98B8F921E3796ED	fauna_herbivore	Herbivore Fauna	the	a	Herbivore Fauna	the	a
+_2B7ABCB32B386494	flora	Flora	the	a	Flora	the	a
+_68787495AA0A08B4	goo	Goo	the	a	Goo	the	a
+_64584CBE66D830B5	kami	Kami	the	a	Kami	the	a
+_2059C0A2A31898AB	karavan	Karavan	la	une	Karavan	les	des
+_2C0AD4B1ABA96CA6	kitin	Kitin	the	a	Kitin	the	a
+_A85CA3F578DB22EB	tribe_ancient_dryads	Ancient Dryads	the	a	Ancient Dryads	the	a
+_7C0E659682B06107	tribe_antikamis	Antikamis	the	a	Antikamis	the	a
+_EA50251B69C970B1	tribe_barkers	Barkers	the	a	Barkers	the	a
+_D4B497EF96E6E67A	tribe_beachcombers	Beachcombers	the	a	Beachcombers	the	a
+_55E63FD137476662	tribe_black_circle	Black Circle	the	a	Black Circle	the	a
+_2335228F01B5D68B	tribe_cholorogoos	Cholorogoos	the	a	Cholorogoos	the	a
+_1E76F678BC34C67F	tribe_cockroaches	Cockroaches	the	a	Cockroaches	the	a
+_F0A578C86AA340F4	tribe_company_of_the_eternal_tree	Company Of The Eternal Tree	the	a	Company Of The Eternal Tree	the	a
+_6A7F6D24ECA950AC	tribe_corsair	Corsairs	the	a	Corsairs	the	a
+_6769CCCA2D0A5CA7	tribe_cute	cuzans	the	a	cuzans	the	a
+_714BCB10D6E6D17B	tribe_darkening_sap	Darkening Sap	the	a	Darkening Sap	the	a
+_21262282C4C58D2F	tribe_dune_riders	Dune Riders	the	a	Dune Riders	the	a
+_E5364E93C206A68B	tribe_ecowarriors	Ecowarriors	the	a	Ecowarriors	the	a
+_9BA60696076E3DEE	tribe_firebrands	Firebrands	the	a	Firebrands	the	a
+_225D4E15B7DE07DF	tribe_first_deserter	First Deserter	the	a	First Deserter	the	a
+_C23F69132AF97CA3	tribe_frahar	fraiders	the	a	fraiders	the	a
+_BC59CBF1392D6798	tribe_frahar_hunters	Frahar Hunters	the	a	Frahar Hunters	the	a
+_EC39A49C646848A5	tribe_gibbay	gibads	the	a	gibads	the	a
+_7C8A398FF16F2105	tribe_goo_heads	Goo Heads	the	a	Goo Heads	the	a
+_4255EE7EC3CFAC1E	tribe_green_seed	Green Seed	the	a	Green Seed	the	a
+_3EBFC3C0B26EE729	tribe_hamazans_of_the_dead_seed	Hamazans Of The Dead Seed	the	a	Hamazans Of The Dead Seed	the	a
+_10AFBC69F669A864	tribe_icon_workshipers	Icon Worshippers	the	a	Icon Worshippers	the	a
+_2C7F491C279994B1	tribe_keepers	Keepers	the	a	Keepers	the	a
+_A1CBF2F936EDF3EB	tribe_kitin_gatheres	Kitin Gatherers	the	a	Kitin Gatherers	the	a
+_A8C2506C3688A3E1	tribe_lagoon_brothers	Lagoon Brothers	the	a	Lagoon Brothers	the	a
+_6BB0292BAA699CB1	tribe_lawless	Lawless	the	a	Lawless	the	a
+_6A902D276BA998B1	tribe_leviers	Leviers	the	a	Leviers	the	a
+_CBDDC37B8E22EAFF	tribe_master_of_the_goo	Master Of The Goo	the	a	Master Of The Goo	the	a
+_73A03E378438F5D8	tribe_matisian_border_guards	Matisian Border Guards	the	a	Matisian Border Guards	the	a
+_B48EF6BBA486E2F1	tribe_night_turners	Night Turners	the	a	Night Turners	the	a
+_2EBCBAC6DFB6A6C8	tribe_oasis_diggers	Oasis Diggers	the	a	Oasis Diggers	the	a
+_60888A91C5C57A8B	tribe_pyromancers	Pyromancers	the	a	Pyromancers	the	a
+_97374692C3C3C124	tribe_recoverers	Recoverers	the	a	Recoverers	the	a
+_7AFE3D838320090F	tribe_renegades	Renegades	the	a	Renegades	the	a
+_480FC9156DE175F8	tribe_restorers	Watchers	the	a	Watcher	the	a
+_1DE7F3E1A2C07A88	tribe_root_tappers	Root Tappers	the	a	Root Tappers	the	a
+_D8154282C49C2DAE	tribe_sacred_sap	Sacred Sap	the	a	Sacred Sap	the	a
+_154627EA1B979C8E	tribe_sap_gleaners	Sap Gleaners	the	a	Sap Gleaners	the	a
+_48A8B9A0053065FF	tribe_sap_slaves	Sap Slaves	the	a	Sap Slaves	the	a
+_7E9F917E85113918	tribe_scorchers	Scorchers	the	a	Scorchers	the	a
+_C019BFF3346E8FA5	tribe_shadow_runners	Shadow Runners	the	a	Shadow Runners	the	a
+_A38B863B1D9375D9	tribe_siblings_of_the_weeds	Siblings Of The Weeds	the	a	Siblings Of The Weeds	the	a
+_7F587FC63C5DB3E3	tribe_silt_sculptors	Silt Sculptors	the	a	Silt Sculptors	the	a
+_AD3F7D26E88AB4B1	tribe_slavers	Slavers	the	a	Slavers	the	a
+_BFA05535297B3923	tribe_smuglers	Smuglers	the	a	Smuglers	the	a
+_BBCBFECA67471BA4	tribe_the_arid_matis	The Arid Matis	the	a	The Arid Matis	the	a
+_CCF59D8A01B03907	tribe_the_kuilde	The Kuild	the	a	The Kuild	the	a
+_C299B3C282247727	tribe_the_slash_and_burn	The Slash And Burn	the	a	The Slash And Burn	the	a
+_6A2B10CEED2B78B2	tribe_tutors	Tutors	the	a	Tutors	the	a
+_E59F6A166AED3FDE	tribe_water_breakers	Water Breakers	the	a	Water Breakers	the	a
+_F3DC6ECB1DE61EDB	tribe_woven_bridles	Woven Bridles	the	a	Woven Bridles	the	a

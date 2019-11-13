@@ -248,7 +248,7 @@ void CGeorgesImpl::PutGroupText (const std::vector<std::string>& _vText, bool ap
 			bool parentVDfnArray;
 			CForm *form=doc->getFormPtr ();
 			CFormElm *elm = doc->getRootNode (subDoc->getSlot ());
-			nlverify ( elm->getNodeByName (subDoc->getFormName ().c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+			nlverify ( elm->getNodeByName (subDoc->getFormName (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 			// Is a type entry ?
 			if ((type == UFormDfn::EntryType) && array)
@@ -314,7 +314,7 @@ void CGeorgesImpl::PutText (const std::string& _sText)
 			bool parentVDfnArray;
 			CForm *form=doc->getFormPtr ();
 			CFormElm *elm = doc->getRootNode (subDoc->getSlot ());
-			nlverify ( elm->getNodeByName (subDoc->getFormName ().c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+			nlverify ( elm->getNodeByName (subDoc->getFormName (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 			// It is an array ?
 			if (array&&(type == UFormDfn::EntryType))
@@ -374,7 +374,7 @@ void CGeorgesImpl::LineUp ()
 			bool parentVDfnArray;
 			CForm *form=doc->getFormPtr ();
 			CFormElm *elm = doc->getRootNode (subDoc->getSlot ());
-			nlverify ( elm->getNodeByName (subDoc->getFormName ().c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+			nlverify ( elm->getNodeByName (subDoc->getFormName (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 			// Is a type entry ?
 			if ( (type == UFormDfn::EntryType) && !array )
@@ -417,7 +417,7 @@ void CGeorgesImpl::LineDown ()
 			bool parentVDfnArray;
 			CForm *form=doc->getFormPtr ();
 			CFormElm *elm = doc->getRootNode (subDoc->getSlot ());
-			nlverify ( elm->getNodeByName (subDoc->getFormName ().c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+			nlverify ( elm->getNodeByName (subDoc->getFormName (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 			// Is a type entry ?
 			if ( (type == UFormDfn::EntryType) && !array )
@@ -454,7 +454,7 @@ BOOL CGeorgesImpl::PreTranslateMessage (MSG *pMsg)
 	{
 		ploader->SetTypPredef( _sxfilename, vsx );
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		std::string tmp = std::string(e.what()) + "(" + _sxfilename + ")";
 		theApp.m_pMainWnd->MessageBox(tmp.c_str(), "Georges_Lib", MB_ICONERROR | MB_OK);
@@ -515,7 +515,7 @@ void CGeorgesImpl::MakeTyp( const std::string& filename, TType type, TUI ui, con
 			// Write
 			t.write (outputXml.getDocument ());
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			nlwarning ("Error during writing file '%s' : ", filename.c_str (), e.what ());
 		}
@@ -579,12 +579,12 @@ void CGeorgesImpl::LoadDocument( const std::string& _sxfullname )
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	try
 	{
-		theApp.OpenDocumentFile(_sxfullname.c_str());
+		theApp.OpenDocumentFile(nlUtf8ToTStr(_sxfullname));
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		std::string tmp = std::string(e.what()) + "(" + _sxfullname + ")";
-		theApp.m_pMainWnd->MessageBox(tmp.c_str(), "Georges_Lib", MB_ICONERROR | MB_OK);
+		theApp.m_pMainWnd->MessageBox(nlUtf8ToTStr(tmp), _T("Georges_Lib"), MB_ICONERROR | MB_OK);
 	}
 }
 
@@ -666,7 +666,7 @@ IGeorges* IGeorges::getInterface (int version)
 	// Check version number
 	if (version != GEORGES_VERSION)
 	{
-		MessageBox (NULL, "Bad version of georges.dll.", "Georges", MB_ICONEXCLAMATION|MB_OK);
+		MessageBox(NULL, _T("Bad version of georges.dll."), _T("Georges"), MB_ICONEXCLAMATION | MB_OK);
 		return NULL;
 	}
 	else

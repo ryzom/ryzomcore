@@ -46,6 +46,10 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
@@ -74,7 +78,7 @@ extern IDriver* createGlEsDriverInstance ();
 #endif
 
 // ***************************************************************************
-IDriver		*CDRU::createGlDriver() throw (EDru)
+IDriver		*CDRU::createGlDriver()
 {
 #ifdef NL_STATIC
 
@@ -128,7 +132,7 @@ IDriver		*CDRU::createGlDriver() throw (EDru)
 }
 
 // ***************************************************************************
-IDriver		*CDRU::createGl3Driver() throw (EDru)
+IDriver		*CDRU::createGl3Driver()
 {
 #ifdef NL_STATIC
 
@@ -182,7 +186,7 @@ IDriver		*CDRU::createGl3Driver() throw (EDru)
 }
 
 // ***************************************************************************
-IDriver		*CDRU::createGlEsDriver() throw (EDru)
+IDriver		*CDRU::createGlEsDriver()
 {
 #ifdef NL_STATIC
 
@@ -239,7 +243,7 @@ IDriver		*CDRU::createGlEsDriver() throw (EDru)
 
 #ifdef NL_OS_WINDOWS
 
-IDriver		*CDRU::createD3DDriver() throw (EDru)
+IDriver		*CDRU::createD3DDriver()
 {
 #ifdef NL_STATIC
 
@@ -583,7 +587,7 @@ void			CDRU::drawTrianglesUnlit(const NLMISC::CTriangleUV	*trilist, sint ntris, 
 // ***************************************************************************
 void			CDRU::drawTrianglesUnlit(const std::vector<NLMISC::CTriangleUV> &trilist, CMaterial &mat, IDriver& driver)
 {
-	if(trilist.size()==0)
+	if(trilist.empty())
 		return;
 
 	CDRU::drawTrianglesUnlit( &(*trilist.begin()), (uint)trilist.size(), mat, driver);
@@ -625,7 +629,7 @@ void			CDRU::drawLinesUnlit(const NLMISC::CLine	*linelist, sint nlines, CMateria
 // ***************************************************************************
 void			CDRU::drawLinesUnlit(const std::vector<NLMISC::CLine> &linelist, CMaterial &mat, IDriver& driver)
 {
-	if(linelist.size()==0)
+	if(linelist.empty())
 		return;
 	CDRU::drawLinesUnlit( &(*linelist.begin()), (sint)linelist.size(), mat, driver);
 }

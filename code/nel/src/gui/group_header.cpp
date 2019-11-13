@@ -24,6 +24,10 @@
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -159,7 +163,7 @@ namespace NLGUI
 		}
 
 		// resize H
-		if(entries.size()>0)
+		if (!entries.empty())
 		{
 			CInterfaceGroup *colEnclosing = entries[0]->getTargetColumn();
 			if (colEnclosing && !colEnclosing->getGroups().empty())

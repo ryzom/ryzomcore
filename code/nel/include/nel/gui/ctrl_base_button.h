@@ -124,9 +124,11 @@ namespace NLGUI
 		// Event part
 		void setActionOnLeftClick (const std::string &actionHandlerName) { _AHOnLeftClickString = actionHandlerName; _AHOnLeftClick = CAHManager::getInstance()->getAH(actionHandlerName, _AHLeftClickParams); }
 		void setActionOnLeftClickParams(const std::string &params) { _AHOnLeftClickStringParams = params; }
+		void setActionOnOver (const std::string &actionHandlerName) { _AHOnOver = CAHManager::getInstance()->getAH(actionHandlerName, _AHOverParams); }
 		void setActionOnRightClick (const std::string &actionHandlerName) { _AHOnRightClick = CAHManager::getInstance()->getAH(actionHandlerName, _AHRightClickParams); }
 		void setActionOnClockTick (const std::string &ahName) { _AHOnClockTick = CAHManager::getInstance()->getAH(ahName, _AHClockTickParams); }
 		void setParamsOnLeftClick (const std::string &paramsHandlerName) { _AHLeftClickParams = paramsHandlerName; }
+		void setParamsOnOver (const std::string &paramsHandlerName) { _AHOverParams = paramsHandlerName; }
 		void setParamsOnRightClick (const std::string &paramsHandlerName) { _AHRightClickParams = paramsHandlerName; }
 		void setParamsOnClockTick (const std::string &ahParamsName) { _AHClockTickParams = ahParamsName; }
 
@@ -141,14 +143,16 @@ namespace NLGUI
 		IActionHandler *getActionOnLeftClick () const { return _AHOnLeftClick; }
 		IActionHandler *getActionOnRightClick () const { return _AHOnRightClick; }
 		IActionHandler *getActionOnClockTick () const { return _AHOnClockTick; }
-		std::string         _getParamsOnOver() const{ return _AHOverParams.toString(); }
+		std::string			_getParamsOnOver() const{ return _AHOverParams.toString(); }
 		std::string			_getParamsOnLeftClick () const { return _AHLeftClickParams.toString(); }
+		std::string			_getParamsOnRightClick () const { return _AHRightClickParams.toString(); }
 		const std::string	&getParamsOnLeftClick () const { return _AHLeftClickParams; }
 		const std::string	&getParamsOnRightClick () const { return _AHRightClickParams; }
 		const std::string	&getParamsOnClockTick () const { return _AHClockTickParams; }
 
 		// run action on left click
 		void runLeftClickAction();
+		void runRightClickAction();
 
 		// Context menu accessor/ One for each button
 		void setListMenuLeft (const std::string &cm) { _ListMenuLeft = cm; }
@@ -161,6 +165,7 @@ namespace NLGUI
 
 
 		int luaRunLeftClickAction(CLuaState &ls);
+		int luaRunRightClickAction(CLuaState &ls);
 		REFLECT_EXPORT_START(CCtrlBaseButton, CCtrlBase)
 			REFLECT_BOOL("pushed", getPushed, setPushed);
 			REFLECT_STRING("col_normal", getColorAsString, setColorAsString);
@@ -174,6 +179,11 @@ namespace NLGUI
 			REFLECT_STRING("onclick_l", _getActionOnLeftClick, setActionOnLeftClick);
 			REFLECT_STRING("params_l", _getParamsOnLeftClick, setParamsOnLeftClick);
 			REFLECT_LUA_METHOD("runLeftClickAction", luaRunLeftClickAction);
+			REFLECT_STRING("onclick_r", _getActionOnRightClick, setActionOnRightClick);
+			REFLECT_STRING("params_r", _getParamsOnRightClick, setParamsOnRightClick);
+			REFLECT_LUA_METHOD("runRightClickAction", luaRunRightClickAction);
+			REFLECT_STRING("onover", _getActionOnOver, setActionOnOver);
+			REFLECT_STRING("params_over", _getParamsOnOver, setParamsOnOver);
 		REFLECT_EXPORT_END
 
 	protected:

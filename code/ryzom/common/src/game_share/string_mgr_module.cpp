@@ -449,7 +449,7 @@ void CStringManagerModule::unregisterTableRequested(TSessionId sessionId)
 static std::string formatString(std::string str,std::vector<float> args)
 {
 	uint32 size = (uint32)args.size();
-	std::string ret="";
+	std::string ret;
 	{
 		std::string::size_type pos = 0;
 		CSString cstring(str);
@@ -469,7 +469,7 @@ static std::string formatString(std::string str,std::vector<float> args)
 void CStringManagerModule::translateAndForwardWithArg(TDataSetRow senderId,CChatGroup::TGroupType groupType,std::string id,TSessionId sessionId,std::vector<float>& args)
 {
 	std::string text = getValue(sessionId.asInt(), id );
-	if (text!="")
+	if (!text.empty())
 	{
 		std::string toSend = formatString(text,args);
 		send(senderId,groupType,toSend);
@@ -479,14 +479,14 @@ void CStringManagerModule::translateAndForwardWithArg(TDataSetRow senderId,CChat
 void CStringManagerModule::translateAndForward(TDataSetRow senderId,CChatGroup::TGroupType groupType,std::string id,TSessionId sessionId)
 {
 	std::string toSend = getValue(sessionId.asInt(), id);
-	if(toSend != "")
+	if(!toSend.empty())
 		send(senderId,groupType,toSend);
 }
 
 
 void CStringManagerModule::send(TDataSetRow& senderId,CChatGroup::TGroupType groupType,const std::string& toSend)
 {
-	if(toSend != "")
+	if(!toSend.empty())
 	{
 		ucstring uStr;
 		uStr.fromUtf8(toSend);

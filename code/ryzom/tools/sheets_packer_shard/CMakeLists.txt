@@ -1,5 +1,11 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc)
+
+SOURCE_GROUP("" FILES ${SRC})
+
 FILE(GLOB EGSSHEETS ${CMAKE_SOURCE_DIR}/ryzom/server/src/entities_game_service/egs_sheets/*.cpp ${CMAKE_SOURCE_DIR}/ryzom/server/src/entities_game_service/egs_sheets/*.h)
+
+SOURCE_GROUP("" FILES ${SRC})
+SOURCE_GROUP("EGS Sheets" FILES ${EGSSHEETS})
 
 ADD_EXECUTABLE(sheets_packer_shard	${SRC} ${EGSSHEETS}
 				${CMAKE_SOURCE_DIR}/ryzom/server/src/input_output_service/string_manager_sheet.cpp
@@ -32,6 +38,6 @@ ADD_DEFINITIONS(-DNO_AI_COMP)
 
 IF(MSVC)
 	SET_TARGET_PROPERTIES(sheets_packer_shard PROPERTIES COMPILE_FLAGS "/bigobj")
-ENDIF(MSVC)
+ENDIF()
 
 INSTALL(TARGETS sheets_packer_shard RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)

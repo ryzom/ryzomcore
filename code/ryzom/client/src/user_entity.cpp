@@ -80,6 +80,10 @@
 // r2
 #include "r2/editor.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 ///////////
 // USING //
 ///////////
@@ -144,6 +148,8 @@ CUserEntity::CUserEntity()
 	_FrontVelocity		= 0.0f;
 	_LateralVelocity	= 0.0f;
 
+	_SpeedServerAdjust  = 1.0f;
+	
 	// \todo GUIGUI : do it more generic.
 	_First_Pos = false;
 
@@ -157,6 +163,7 @@ CUserEntity::CUserEntity()
 
 	// Your are not on a mount at the beginning.
 	_OnMount = false;
+	_HiddenMount = CLFECOMMON::INVALID_SLOT;
 
 	_AnimAttackOn = false;
 
@@ -789,10 +796,12 @@ bool CUserEntity::mode(MBEHAV::EMode m)
 	case MBEHAV::COMBAT:
 	case MBEHAV::COMBAT_FLOAT:
 	{
+		C64BitsParts rot;
+
 		// Compute the angle
 		const string propName = toString("SERVER:Entities:E%d:P%d", _Slot, CLFECOMMON::PROPERTY_ORIENTATION);
-		sint64 ang = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
-		_TargetAngle = *(float *)(&ang);
+		rot.i64[0] = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
+		_TargetAngle = rot.f[0];
 
 		// Initialize controls for the combat.
 		UserControls.startCombat();
@@ -1203,7 +1212,11 @@ void CUserEntity::applyMotion(CEntityCL *target)
 			speed = CVectorD::Null;
 	}
 	else
+	{
 		speed = getVelocity()*_SpeedFactor.getValue();
+		_SpeedFactor.addFactorValue(0.005f);
+	}
+	
 	// SPEED VECTOR NULL -> NO MOVE
 	if(speed == CVectorD::Null)
 		return;
@@ -1225,6 +1238,9 @@ void CUserEntity::applyMotion(CEntityCL *target)
 	// Third Person View
 	else
 	{
+		double modif = (100.0f/(float)NetMngr.getMsPerTick());
+		clamp(modif, 0.0, 1.0);
+		speed *= modif;
 		speed += pos();
 		sint64 x = (sint64)((sint32)(speed.x * 1000.0));
 		sint64 y = (sint64)((sint32)(speed.y * 1000.0));
@@ -1241,6 +1257,8 @@ void CUserEntity::applyMotion(CEntityCL *target)
 			mount->_Stages.addStage(NetMngr.getCurrentClientTick()+time, CLFECOMMON::PROPERTY_POSZ, z);
 		}
 	}
+
+
 }// applyMotion //
 
 
@@ -2381,7 +2399,7 @@ void CUserEntity::updateSound(const TTime &time)
 	H_AUTO_USE ( RZ_Client_Update_Sound );
 
 	// no sound manager, no need to update sound
-	if (SoundMngr == 0)
+	if (SoundMngr == NULL)
 		return;
 
 	if (!(StereoHMD && true)) // TODO: ClientCfg.Headphone
@@ -3076,8 +3094,29 @@ void CUserEntity::setAFK(bool b, string afkTxt)
 //-----------------------------------------------
 // rollDice
 //-----------------------------------------------
-void CUserEntity::rollDice(sint16 min, sint16 max)
+void CUserEntity::rollDice(sint16 min, sint16 max, bool local)
 {
+	if (local)
+	{
+		// no need to broadcast over network here
+		static NLMISC::CRandom* dice = (NLMISC::CRandom*)NULL;
+		if (!dice)
+		{
+			dice = new NLMISC::CRandom;
+			dice->srand(CTickEventHandler::getGameCycle());
+		}
+		sint16 roll = min + (sint16)dice->rand(max-min);
+
+		ucstring msg = CI18N::get("msgRollDiceLocal");
+		strFindReplace(msg, "%min", toString(min));
+		strFindReplace(msg, "%max", toString(max));
+		strFindReplace(msg, "%roll", toString(roll));
+
+		CInterfaceManager *pIM= CInterfaceManager::getInstance();
+
+		pIM->displaySystemInfo(msg, getStringCategory(msg, msg));
+		return;
+	}
 	const string msgName = "COMMAND:RANDOM";
 	CBitMemStream out;
 	if (GenericMsgHeaderMngr.pushNameToStream(msgName, out))
@@ -3150,6 +3189,8 @@ void CUserEntity::viewMode(CUserEntity::TView viewMode, bool changeView)
 			CEntityCL *mount = EntitiesMngr.entity(_Mount);
 			if(mount)
 				mount->displayable(false);
+
+			_HiddenMount = _Mount;
 		}
 		// Change Controls.
 		if( isRiding() )
@@ -3167,11 +3208,14 @@ void CUserEntity::viewMode(CUserEntity::TView viewMode, bool changeView)
 	case ThirdPV:
 		if(changeView)
 			ClientCfg.FPV = false;
-		if(_Mount != CLFECOMMON::INVALID_SLOT)
+
+		if(_HiddenMount != CLFECOMMON::INVALID_SLOT)
 		{
-			CEntityCL *mount = EntitiesMngr.entity(_Mount);
+			CEntityCL *mount = EntitiesMngr.entity(_HiddenMount);
 			if(mount)
 				mount->displayable(true);
+
+			_HiddenMount = CLFECOMMON::INVALID_SLOT;
 		}
 		// Change Controls.
 		UserControls.mode(CUserControls::ThirdMode);
@@ -3210,6 +3254,24 @@ void CUserEntity::toggleCamera()
 			UserEntity->viewMode(CUserEntity::FirstPV);
 	}
 }// toggleCamera //
+
+//-----------------------------------------------
+// forceCameraFirstPerson :
+// Force Camera to First Person View
+//-----------------------------------------------
+void CUserEntity::forceCameraFirstPerson()
+{
+	// You cannot change the camera view when dead.
+	if(isDead())
+		return;
+	// Only if not inside a building.
+	if(!UserEntity->forceIndoorFPV())
+	{
+		if (UserEntity->viewMode() != CUserEntity::FirstPV)
+			//Enter the 1st Person View Mode
+			UserEntity->viewMode(CUserEntity::FirstPV);
+	}
+}// forceCameraFirstPerson //
 
 //---------------------------------------------------
 // getScale :
@@ -3337,9 +3399,24 @@ void CUserEntity::updateVisualDisplay()
 	if(UserControls.isInternalView() || View.forceFirstPersonView())
 	{
 		// Hide the mount
-		CCharacterCL *mount = dynamic_cast<CCharacterCL *>(EntitiesMngr.entity(_Mount));
-		if(mount)
-			mount->displayable(false);
+		if (_Mount != CLFECOMMON::INVALID_SLOT)
+		{
+			CCharacterCL *mount = dynamic_cast<CCharacterCL *>(EntitiesMngr.entity(_Mount));
+			if(mount)
+				mount->displayable(false);
+
+			_HiddenMount = _Mount;
+		}
+		else if (_HiddenMount != CLFECOMMON::INVALID_SLOT)
+		{
+			// not on mount anymore, but still in FPV
+			CCharacterCL *mount = dynamic_cast<CCharacterCL *>(EntitiesMngr.entity(_HiddenMount));
+			if(mount)
+				mount->displayable(true);
+
+			_HiddenMount = CLFECOMMON::INVALID_SLOT;
+		}
+
 		// Hide all user body parts.
 		for(uint i=0; i<_Instances.size(); ++i)
 			if(!_Instances[i].Current.empty())
@@ -3459,6 +3536,7 @@ void CUserEntity::light()
 void CUserEntity::CSpeedFactor::init()
 {
 	_Value = 1.0f; // Default speed factor is 1.
+	_ServerFactor = 1.0f;
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();
 	CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:SPEED_FACTOR", false);
 	if(pNodeLeaf)
@@ -3676,7 +3754,7 @@ bool CUserEntity::isVisible() const	// virtual
 // readWrite :
 // Read/Write Variables from/to the stream.
 //---------------------------------------------------
-void CUserEntity::readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CUserEntity::readWrite(NLMISC::IStream &f)
 {
 	CPlayerCL::readWrite(f);
 

@@ -77,24 +77,24 @@ public:
 	/** validate a value against upper bound. (if an upper bound was set
 	 *  \return NULL if ok or an error message
 	 */
-	const char *validateUpperBound(T v)
+	const TCHAR *validateUpperBound(T v)
 	{
 		if (!_UpperBoundEnabled) return NULL;
 		if (_UpperBoundExcluded && v < _UpperBound) return NULL;
 		if (!_UpperBoundExcluded && v <= _UpperBound) return NULL;
-		return "value too high";
+		return _T("value too high");
 	}
 
 	
 	/** validate a value against lower bound. (if an lower bound was set
 	 *  \return NULL if ok or an error message
 	 */
-	const char *validateLowerBound(T v)
+	const TCHAR *validateLowerBound(T v)
 	{
 		if (!_LowerBoundEnabled) return NULL;
 		if (_LowerBoundExcluded && v > _LowerBound) return NULL;
 		if (!_LowerBoundExcluded && v >= _LowerBound) return NULL;
-		return "value too low";
+		return _T("value too low");
 	}
 
 	/// copy this bound checker object to another one

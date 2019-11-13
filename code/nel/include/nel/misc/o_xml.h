@@ -80,7 +80,6 @@ class COXml : public IStream
 {
 	friend int xmlOutputWriteCallbackForNeL ( void *context, const char *buffer, int len );
 	friend int xmlOutputCloseCallbackForNeL ( void *context );
-	friend void xmlGenericErrorFuncWrite (void *ctx, const char *msg, ...);
 public:
 
 	/** Stream ctor
@@ -95,12 +94,12 @@ public:
 	  * \param version is the version to write in the XML header. Default is 1.0.
 	  * \return true if initialisation is successful, false if the stream passed is not an output stream.
 	  */
-	bool init (IStream *stream, const char *version="1.0");
+	bool init (IStream *stream, const std::string &version = "1.0");
 
 	/** Return the error string.
 	  * if not empty, something wrong appends
 	  */
-	const char *getErrorString () const;
+	static std::string getErrorString ();
 
 	/** Default dstor
 	  *
@@ -120,7 +119,7 @@ public:
 
 	/** Return true if the string is valid to be stored in a XML property without modification.
 	  */
-	static bool		isStringValidForProperties (const char *str);
+	static bool		isStringValidForProperties (const std::string &str);
 
 private:
 
@@ -144,15 +143,15 @@ private:
 	virtual void	serialBuffer(uint8 *buf, uint len);
 	virtual void	serialBit(bool &bit);
 
-	virtual bool	xmlPushBeginInternal (const char *nodeName);
+	virtual bool	xmlPushBeginInternal (const std::string &nodeName);
 	virtual bool	xmlPushEndInternal ();
 	virtual bool	xmlPopInternal ();
-	virtual bool	xmlSetAttribInternal (const char *attribName);
+	virtual bool	xmlSetAttribInternal (const std::string &attribName);
 	virtual bool	xmlBreakLineInternal ();
-	virtual bool	xmlCommentInternal (const char *comment);
+	virtual bool	xmlCommentInternal (const std::string &comment);
 
 	// Internal functions
-	void			serialSeparatedBufferOut( const char *value );
+	void			serialSeparatedBufferOut( const std::string &value );
 	inline void		flushContentString ();
 
 	// Push mode
@@ -178,12 +177,6 @@ private:
 
 	// Current content string
 	std::string		_ContentString;
-
-	// Error message
-	std::string		_ErrorString;
-
-	// System dependant structure for locale
-	void*			_Locale;
 };
 
 

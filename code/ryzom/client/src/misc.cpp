@@ -234,10 +234,10 @@ void readStringArray(const std::string &filename, NLGEORGES::UFormLoader *formLo
 							if(elmt->getArrayValue(stringName, i))
 								container.insert(make_pair(nodeName, stringName));
 							else
-								nlwarning("readStringArray: no string associated to the node '%d(%s)'.", i, nodeName.c_str());
+								nlwarning("readStringArray: no string associated to the node '%u(%s)'.", i, nodeName.c_str());
 						}
 						else
-							nlwarning("readStringArray: node '%d', index valid.", i);
+							nlwarning("readStringArray: node '%u', index valid.", i);
 					}
 				}
 			}
@@ -298,7 +298,7 @@ bool mode2Anim(MBEHAV::EMode mode, string &result)
 			// No animset for the mode.
 			else
 			{
-				mode2AnimArray[i] = "";
+				mode2AnimArray[i].clear();
 				nlwarning("mode2Anim: no animset associated to the mode %d'%s'.", i, modeName.c_str());
 			}
 		}
@@ -1404,13 +1404,12 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 	// **** Init Video Modes
 	Driver->getModes(videoModes);
 
-	// Remove modes under 800x600 and get the unique strings
+	// Remove modes under 1024x768 (outgame ui limitation) and get the unique strings
 	sint i, j;
 	for (i = 0; i < (sint)videoModes.size(); ++i)
 	{
-		if ((videoModes[i].Width < 800) || (videoModes[i].Height < 600))
+		if ((videoModes[i].Width < 1024) || (videoModes[i].Height < 768))
 		{
-			// discard modes under 800x600
 			videoModes.erase(videoModes.begin()+i);
 			--i;
 		}
@@ -1506,4 +1505,45 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 	}
 
 	return nFoundStringMode > -1;
+}
+
+// Get float value from string. Return true if the value is relatif ( src = "+15.5" for example )
+bool getRelativeFloatFromString(const std::string src, float &dst)
+{
+	dst = 0;
+	if (src.empty())
+		return false;
+	
+	if (src[0] == '+')
+		return fromString(src.substr(1), dst);
+	else
+		fromString(src, dst);
+	
+	return false;
+}
+
+void updateVector(const string part, CVector &dst, float value, bool add /* = false */)
+{
+	string p = part;
+	if (part.size() > 1)
+		p = part.substr(part.size()-1, 1);
+		
+	if (add)
+	{
+		if (p == "x")
+			dst.x += value;
+		else if (p == "y")
+			dst.y += value;
+		else if (p == "z")
+			dst.z += value;
+	}
+	else 
+	{
+		if (p == "x")
+			dst.x = value;
+		else if (p == "y")
+			dst.y = value;
+		else if (p == "z")
+			dst.z = value;
+	}
 }

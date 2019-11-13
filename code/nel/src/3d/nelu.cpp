@@ -30,6 +30,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -48,7 +51,7 @@ CEventServer		CNELU::EventServer;
 CEventListenerAsync	CNELU::AsyncListener;
 
 
-bool			CNELU::initDriver (uint w, uint h, uint bpp, bool windowed, nlWindow systemWindow, bool offscreen, bool direct3d) throw(EDru)
+bool			CNELU::initDriver (uint w, uint h, uint bpp, bool windowed, nlWindow systemWindow, bool offscreen, bool direct3d)
 {
 	// Init debug system
 //	NLMISC::InitDebug();
@@ -180,7 +183,7 @@ void			CNELU::releaseDriver()
 	}
 }
 
-bool			CNELU::init (uint w, uint h, CViewport viewport, uint bpp, bool windowed, nlWindow systemWindow, bool offscreen, bool direct3d) throw(EDru)
+bool			CNELU::init (uint w, uint h, CViewport viewport, uint bpp, bool windowed, nlWindow systemWindow, bool offscreen, bool direct3d)
 {
 	NL3D::registerSerial3d();
 	if (initDriver(w,h,bpp,windowed,systemWindow,offscreen,direct3d))

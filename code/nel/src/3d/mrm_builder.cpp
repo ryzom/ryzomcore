@@ -18,9 +18,13 @@
 
 #include "nel/3d/mrm_builder.h"
 #include "nel/3d/mrm_parameters.h"
+
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -3119,7 +3123,7 @@ bool	CMRMBuilder::buildMRMSewingMeshes(const CMesh::CMeshBuild &mbuild, uint nWa
 {
 	nlassert(nWantedLods>=1);
 	nlassert(divisor>=1);
-	if(mbuild.Interfaces.size()==0)
+	if(mbuild.Interfaces.empty())
 		return false;
 	// must have same size
 	if(mbuild.InterfaceLinks.size()!=mbuild.Vertices.size())

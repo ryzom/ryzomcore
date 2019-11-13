@@ -77,7 +77,7 @@ void CTypeManagerDlg::OnAddtype()
 	if (typeDlg.DoModal() == IDOK)
 	{
 		SType typeTmp;
-		typeTmp.Name = (LPCSTR)typeDlg.EditName;
+		typeTmp.Name = NLMISC::tStrToUtf8(typeDlg.EditName);
 		typeTmp.Color = typeDlg.ButtonColorValue;
 		// Check if the name of the new type is the same as an existing one
 		bool bFound = false;
@@ -91,7 +91,7 @@ void CTypeManagerDlg::OnAddtype()
 		if (!bFound)
 		{
 			LocalTypes.push_back (typeTmp);
-			ListType.InsertString(-1, typeTmp.Name.c_str());
+			ListType.InsertString(-1, nlUtf8ToTStr(typeTmp.Name));
 		}
 	}
 }
@@ -111,11 +111,11 @@ void CTypeManagerDlg::OnEdittype()
 	if (typeDlg.DoModal() == IDOK)
 	{
 		SType typeTmp;
-		typeTmp.Name = (LPCSTR)typeDlg.EditName;
+		typeTmp.Name = NLMISC::tStrToUtf8(typeDlg.EditName);
 		typeTmp.Color = typeDlg.ButtonColorValue;
 		LocalTypes[cursel] = typeTmp;
 		ListType.DeleteString (ListType.GetCurSel());
-		ListType.InsertString (cursel, typeTmp.Name.c_str());
+		ListType.InsertString(cursel, nlUtf8ToTStr(typeTmp.Name));
 	}
 }
 
@@ -138,7 +138,7 @@ BOOL CTypeManagerDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 	for (uint32 i = 0; i < LocalTypes.size(); ++i)
 	{
-		ListType.InsertString(-1, LocalTypes[i].Name.c_str());
+		ListType.InsertString(-1, nlUtf8ToTStr(LocalTypes[i].Name));
 	}
 	
 	return TRUE;  // return TRUE unless you set the focus to a control

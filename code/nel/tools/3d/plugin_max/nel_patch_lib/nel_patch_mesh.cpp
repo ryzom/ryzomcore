@@ -53,7 +53,7 @@ float bindWhere[BIND_COUNT]=
 
 #define RK_APPDATA_TILEFILE 0
 #define RK_APPDATA_LAND 1
-#define REGKEY_TILEDIT "Software\\Nevrax\\Ryzom\\Tile_Edit"
+#define REGKEY_TILEDIT _T("Software\\Nevrax\\Ryzom\\Tile_Edit")
 
 //#define CHECK_VALIDITY		// check validity
 
@@ -103,12 +103,15 @@ std::string GetBankPathName ()
 	HKEY hKey;
 	if (RegOpenKeyEx(HKEY_CURRENT_USER, REGKEY_TILEDIT, 0, KEY_READ, &hKey)==ERROR_SUCCESS)
 	{
-		char path[256];
-		DWORD len=256;
+		TCHAR path[256];
+		DWORD len = 256 * sizeof(TCHAR);
 		DWORD type;
-		if (RegQueryValueEx(hKey, "Bank Path", 0, &type, (LPBYTE)path, &len)==ERROR_SUCCESS)
-			return std::string (path);
-		RegCloseKey (hKey);
+		if (RegQueryValueEx(hKey, _T("Bank Path"), 0, &type, (LPBYTE)path, &len)==ERROR_SUCCESS)
+		{
+			RegCloseKey(hKey);
+			return MCharStrToUtf8(path);
+		}
+		RegCloseKey(hKey);
 	}
 	return "";
 }
@@ -119,11 +122,14 @@ int GetBankTileSetSet ()
 	if (RegOpenKeyEx(HKEY_CURRENT_USER, REGKEY_TILEDIT, 0, KEY_READ, &hKey)==ERROR_SUCCESS)
 	{
 		int tileSetSet;
-		DWORD len=256;
+		DWORD len = 256;
 		DWORD type;
-		if (RegQueryValueEx(hKey, "Tileset Set", 0, &type, (LPBYTE)&tileSetSet, &len)==ERROR_SUCCESS)
+		if (RegQueryValueEx(hKey, _T("Tileset Set"), 0, &type, (LPBYTE)&tileSetSet, &len)==ERROR_SUCCESS)
+		{
+			RegCloseKey(hKey);
 			return tileSetSet;
-		RegCloseKey (hKey);
+		}
+		RegCloseKey(hKey);
 	}
 	return -1;
 }
@@ -133,7 +139,9 @@ void SetBankPathName (const std::string& path)
 	HKEY hKey;
 	if (RegCreateKey(HKEY_CURRENT_USER, REGKEY_TILEDIT, &hKey)==ERROR_SUCCESS)
 	{
-		RegSetValueEx(hKey, "Bank Path", 0, REG_SZ, (LPBYTE)path.c_str(), path.length()+1);
+		TCHAR buffer[MAX_PATH];
+		_tcscpy_s(buffer, MAX_PATH, MaxTStrFromUtf8(path).data());
+		RegSetValueEx(hKey, _T("Bank Path"), 0, REG_SZ, (LPBYTE)buffer, (_tcslen(buffer)+1)*sizeof(TCHAR));
 		RegCloseKey (hKey);
 	}
 }
@@ -143,7 +151,7 @@ void SetBankTileSetSet (int tileSetSet)
 	HKEY hKey;
 	if (RegCreateKey(HKEY_CURRENT_USER, REGKEY_TILEDIT, &hKey)==ERROR_SUCCESS)
 	{
-		RegSetValueEx(hKey, "Tileset Set", 0, REG_DWORD, (LPBYTE)&tileSetSet, 4);
+		RegSetValueEx(hKey, _T("Tileset Set"), 0, REG_DWORD, (LPBYTE)&tileSetSet, 4);
 		RegCloseKey (hKey);
 	}
 }
@@ -1972,7 +1980,7 @@ IOResult RPatchMesh::Load(ILoad *iload)
 			for (i=0; i<nSize; i++)
 			{
 				bool bBinded;
-				typeBind nType;
+				uint /* typeBind */ nType;
 				uint nEdge;
 				uint nPatch;
 				uint nBefore;
@@ -2113,7 +2121,7 @@ IOResult RPatchMesh::Save(ISave *isave)
 		uint nAfter=getUIVertex (i).Binding.nAfter;
 		uint nAfter2=getUIVertex (i).Binding.nAfter2;
 		uint nT=getUIVertex (i).Binding.nT;
-		typeBind nType=(typeBind)getUIVertex (i).Binding.nType;
+		uint /* typeBind */ nType=(uint /* typeBind */)getUIVertex (i).Binding.nType;
 		uint nPrimVert=getUIVertex (i).Binding.nPrimVert;
 
 		isave->Write(&bBinded, sizeof (bool), &nb);
@@ -2261,9 +2269,18 @@ BOOL RPatchMesh::SubObjectHitTest (GraphicsWindow *gw, Material *ma, HitRegion *
 		gw->setRndLimits(gw->getRndLimits() & ~GW_BACKCULL);
 		bRet=mesh.SubObjectHitTest (gw, ma, hr, nFlags, list);
 
+#if MAX_VERSION_MAJOR < 19
 		MeshSubHitRec *rec=list.First();
+
 		while (rec)
 		{
+#else
+		MeshSubHitRec::Iterator it = list.begin(), iend = list.end();
+
+		while(it != iend)
+		{
+			MeshSubHitRec *rec = &*it;
+#endif
 			if (flags&SUBHIT_PATCH_SELONLY)
 			{
 				int otot=0;
@@ -2284,7 +2301,11 @@ BOOL RPatchMesh::SubObjectHitTest (GraphicsWindow *gw, Material *ma, HitRegion *
 			hitList.AddHit (rec->dist, &patch, nRemapedIndex, PATCH_HIT_TILE);
 
 			// Next hit
-			rec=rec->Next();
+#if MAX_VERSION_MAJOR < 19
+			rec = rec->Next();
+#else
+			++it;
+#endif
 		}
 	}
 

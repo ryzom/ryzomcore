@@ -320,6 +320,9 @@
 				foreach($sline_vars as $sline_var)
 				{
 					$sline_parts = explode("=", $sline_var);
+					if (!isset($sline_parts[1])) {
+						$sline_parts[1] = '';
+					}
 
 					if ($sline_parts[0] == 'RunningState')
 					{
@@ -1023,6 +1026,7 @@
 	function tool_main_get_shards_info_from_db($application, $status, $filters, $ringsqlstring='')
 	{
 		$shard_list			= array();
+		$shard_list2		= array();
 		$shard_list_result	= array();
 
 		//nt_common_add_debug('in tool_main_get_shards_info_from_db()');
@@ -1034,7 +1038,7 @@
 			foreach($status as $sline)
 			{
 				$shard_name = trim($sline['ShardName']);
-				$shard_id	= trim($sline['ShardId']);
+				$shard_id	= isset($sline['ShardId']) ? trim($sline['ShardId']) : '';
 
 				if (($shard_name != '' && $shard_id != '') && (isset($filters[$shard_name]) || isset($filters['_all_'])))
 				{

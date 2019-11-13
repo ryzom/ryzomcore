@@ -23,6 +23,10 @@ using namespace NLMISC;
 // Define this to force white far texture (debug)
 // #define NEL_FORCE_WHITE_FAR_TEXTURE
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 
@@ -35,7 +39,7 @@ namespace NL3D {
 // ***************************************************************************
 const sint CTileFarBank::CTileFar::_Version=0x0;
 // ***************************************************************************
-void CTileFarBank::CTileFar::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTileFarBank::CTileFar::serial(NLMISC::IStream &f)
 {
 	// Serial version
 	(void)f.serialVersion(_Version);
@@ -101,7 +105,7 @@ CTileFarBank::CTileFarBank()
 // ***************************************************************************
 const sint CTileFarBank::_Version=0x0;
 // ***************************************************************************
-void CTileFarBank::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTileFarBank::serial(NLMISC::IStream &f)
 {
 	// Write/Check "FAR_BANK" in header of the stream
 	f.serialCheck (NELID("_RAF"));

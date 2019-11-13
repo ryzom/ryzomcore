@@ -1,0 +1,11 @@
+﻿*HASH_VALUE	damageTypeId	name	p	description
+_EC08606C264890AB	Slashing	Рубящий	Рубящие	
+_2D98306326487C9B	Piercing	Колющий	Колющие	
+_6CF60460721A84D2	Blunt	Дробящий	Дробящие	
+_26D818876787A4A9	Rot	Гниль	Гниль	
+_6476EC4AA5162881	Acid	Кислота	Кислоты	
+_28B6544E2AE66886	Cold	Холод	Холод	
+_A8483056EBB76C90	Fire	Огонь	Огни	
+_E5B98496A6B8D8A1	Poison	Яд	Яды	
+_5659CC92EA58A491	Electricity	Электрошок	Электрошоки	
+_E4569C6C6E78B4B4	Shock	Ударная волна	Ударные волны	

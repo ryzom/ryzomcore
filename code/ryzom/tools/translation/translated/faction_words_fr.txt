@@ -1,0 +1,67 @@
+﻿*HASH_VALUE	faction	name	da	ia	cc	member	mda	mia	mcc
+_A0EC3CB6728A80B6	fyros	Fyros	le	un	du	Fyros	les	des	des
+_E10CC4B36E98C09E	matis	Matis	le	un	du	Matis	les	des	des
+_2DCA2CC01F48D0B6	tryker	Tryker	le	un	du	Trykers	les	des	des
+_224BC0AE0EA920A2	zorai	Zoraï	le	un	du	Zoraïs	les	des	des
+_A7882077E757D4B4	bandit	Bandit	le	un	du	Bandits	les	des	des
+_AC0AD4AB2947CC7C	civil	Civil	le	un	du	Civils	les	des	des
+_2BF98095A426C07F	degen	Dégénéré	le	un	du	Dégénérés	les	des	des
+_2A9A98AAE9E7B874	fauna	Faune	la	une	de la	Faune	la	une	de la
+_A8F93F8ED3E7C6CD	fauna_carnivore	Faune carnivore	la	une	de la	Faune carnivore	la	une	de la
+_A9890F92163796CD	fauna_herbivore	Faune herbivore	la	une	de la	Faune herbivore	la	une	de la
+_2B7ABCB32B36E474	flora	Flore	la	une	de la	Flore	la	une	de la
+_58767495AA0A0894	goo	Goo	la	une	de la	Goo	la	une	de la
+_64584C9E66D83075	kami	Kami	le	un	du	Kamis	les	des	des
+_2059C0A2A31898AB	karavan	Karavan	la	une	de la	membres de la Karavan	les	des	de la
+_2C0AD4B1ABA7EC86	kitin	Kitin	le	un	du	Kitins	les	des	des
+_A85CA3F578D722AB	tribe_ancient_dryads	Dryades	les	des	des	Dryades	les	des	des
+_7C0E65967AB061E7	tribe_antikamis	Antékamis	les	des	des	Antékamis	les	des	des
+_EA5025FB69C9F0B1	tribe_barkers	Percécorces	les	des	des	Percécorces	les	des	des
+_D4B097EF96E6E67A	tribe_beachcombers	Déferlants	les	des	des	Déferlants	les	des	des
+_55E23F9137476662	tribe_black_circle	Cercle Noir	le	un	du	Cercle Noir	le	les	du
+_2335A26F01B5D68B	tribe_cholorogoos	Chlorogoos	les	des	des	Chlorogoos	les	des	des
+_1E767658BC34C67F	tribe_cockroaches	Cancrelats	les	des	des	Cancrelats	les	des	des
+_E8A578485AA340D4	tribe_company_of_the_eternal_tree	Compagnie de l'Arbre Éternel	la	une	de la	Compagnie de l'Arbre Éternel	la	une	de la
+_83BEF92D6C48E01E	tribe_corsair	Corsaires	les	des	des	Corsaires	les	des	des
+_6769CCCA2D0A5CA7	tribe_cute	Cuzans	les	des	des	Cuzans	les	des	des
+_694BCB10D6E4515B	tribe_darkening_sap	Matisagoo	les	des	des	Matisagoo	les	des	des
+_2126A262C4C30D2F	tribe_dune_riders	Sauvages	les	des	des	Sauvages	les	des	des
+_E536CE73C206A68B	tribe_ecowarriors	Embourbés	les	des	des	Embourbés	les	des	des
+_9BA60676076C3DEE	tribe_firebrands	Sanguins	les	des	des	Sanguins	les	des	des
+_225B4E15B7DC079F	tribe_first_deserter	Bagnards	les	des	des	Bagnards	les	des	des
+_C23F69132AF97CA3	tribe_frahar	Fraiders	les	des	des	Fraiders	les	des	des
+_B459CBF1392BE778	tribe_frahar_hunters	Chasseurs de Frahars	les	des	des	Chasseurs de Frahars	les	des	des
+_EC39A49C646848A5	tribe_gibbay	Gibads	les	des	des	Gibads	les	des	des
+_748A396FE96F21E5	tribe_goo_heads	Illuminés	les	des	des	Illuminés	les	des	des
+_4255EE5EC3CBACFE	tribe_green_seed	Graine Verte	la	une	de la	Graines Vertes	les	des	des
+_36BF4380A26E67C9	tribe_hamazans_of_the_dead_seed	Amazones Matis	les	des	des	Amazones Matis	les	des	des
+_08ADBC69EE67A864	tribe_icon_workshipers	Iconodoules	les	des	d'un	Iconodoules	les	des	des
+_2C7F49FC279914B1	tribe_keepers	Mémoires	les	des	des	Mémoires	les	des	des
+_B43A6B56730DC785	tribe_kitin_gatheres	Kitiniers	les	des	des	Kitiniers	les	des	des
+_A8C2504C2E8823C1	tribe_lagoon_brothers	Frères de la Lagune	les	des	des	Frères de la Lagune	les	des	des
+_6BB0290BAA691CB1	tribe_lawless	Sans Loi	les	des	des	Sans Loi	les	des	des
+_6A902D076BA918B1	tribe_leviers	Taxeurs	les	des	des	Taxeurs	les	des	des
+_C3DB437B861E6ADF	tribe_master_of_the_goo	Maîtres de la Goo	les	des	des	Maîtres de la Goo	les	des	des
+_73A03E377C347598	tribe_matisian_border_guards	Gardes-Frontières	les	des	des	Gardes-Frontières	les	des	des
+_AC8C76BBA486E2D1	tribe_night_turners	Façonneurs Nocturnes	les	des	des	Façonneurs Nocturnes	les	des	des
+_26BA3AC6DFB6A6A8	tribe_oasis_diggers	Puisatiers	les	des	des	Puisatiers	les	des	des
+_60880A71C5C57A8B	tribe_pyromancers	Pyromanciennes	les	des	des	Pyromanciennes	les	des	des
+_97374672C3C1C124	tribe_recoverers	Recycleurs	les	des	des	Recycleurs	les	des	des
+_7AFE3D837B2009EF	tribe_renegades	Renégats	les	des	des	Renégats	les	des	des
+_3D1FC91565CB65F5	tribe_restorers	Veilleurs	les	des	des	Veilleurs	les	des	des
+_1DE3F3E192C07A88	tribe_root_tappers	Saigneurs de Racines	les	des	des	Saigneurs de Racines	les	des	des
+_D8154262BC9AADAE	tribe_sacred_sap	Sève Sacrée	la	une	de la	Sèves Sacrées	les	des	des
+_154227EA1B939C8E	tribe_sap_gleaners	Sèves Sèches	les	des	des	Sèves Sèches	les	des	des
+_48A6B980052E65DF	tribe_sap_slaves	Esclaves de la Sève	les	des	des	Esclaves de la Sève	les	des	des
+_7E9F917E7D1139F8	tribe_scorchers	Écorchés	les	des	des	Écorchés	les	des	des
+_B819BFF3346C0F85	tribe_shadow_runners	Trafiquants des Ombres	les	des	des	Trafiquants des Ombres	les	des	des
+_938B861B1593F579	tribe_siblings_of_the_weeds	Frères des Plantes	les	des	des	Frères des Plantes	les	des	des
+_7758FFC63C5BB3C3	tribe_silt_sculptors	Sculpteurs de Vase	les	des	des	Sculpteurs de Vase	les	des	des
+_AD3F7D06E88A34B1	tribe_slavers	Esclavagistes	les	des	des	Esclavagistes	les	des	des
+_BF9E553529793923	tribe_smuglers	Contrebandiers	les	des	des	Contrebandiers	les	des	des
+_BBC9FEAA5F459B84	tribe_the_arid_matis	Matis Arides	les	des	des	Matis Arides	les	des	des
+_B07F6A1601F0E5E6	tribe_the_kuilde	Kuilde	la	une	de la	membres de la Kuilde	les	des	des
+_C295B382822077E7	tribe_the_slash_and_burn	Mercenaires Écarlates	les	des	des	Mercenaires Écarlates	les	des	des
+_6A2B10CEED297892	tribe_tutors	Tuteurs	les	des	des	Tuteurs	les	des	des
+_E59D6A166AEB3F9E	tribe_water_breakers	Dresseurs d'Eau	les	des	des	Dresseurs d'Eau	les	des	des
+_EBDAEECB1DE61EBB	tribe_woven_bridles	Pillards du Désert	les	des	des	Pillards du Désert	les	des	des

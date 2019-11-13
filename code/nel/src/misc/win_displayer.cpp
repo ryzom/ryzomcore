@@ -156,7 +156,7 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					string str;
 					while (*pos2 != '\0')
 					{
-						str = "";
+						str.clear();
 
 						// get the string
 						while (*pos2 != '\0' && *pos2 != '\n')
@@ -217,8 +217,13 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						ucstring ucs;
 						// convert the text from UTF-8 to unicode
 						ucs.fromUtf8(cwd->_History[cwd->_PosInHistory]);
+
 						// set the text as unicode string
-						SetWindowTextW(cwd->_HInputEdit, (LPCWSTR)ucs.c_str());
+						if (!SetWindowTextW(cwd->_HInputEdit, (LPCWSTR)ucs.c_str()))
+						{
+							nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+						}
+
 						SendMessageA (cwd->_HInputEdit, EM_SETSEL, (WPARAM)ucs.size(), (LPARAM)ucs.size());
 					}
 				}
@@ -234,8 +239,13 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						ucstring ucs;
 						// convert the text from UTF-8 to unicode
 						ucs.fromUtf8(cwd->_History[cwd->_PosInHistory]);
+
 						// set the text as unicode string
-						SetWindowTextW(cwd->_HInputEdit, (LPCWSTR)ucs.c_str());
+						if (!SetWindowTextW(cwd->_HInputEdit, (LPCWSTR)ucs.c_str()))
+						{
+							nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+						}
+
 						SendMessageA (cwd->_HInputEdit, EM_SETSEL, (WPARAM)ucs.size(), (LPARAM)ucs.size());
 					}
 				}
@@ -288,7 +298,7 @@ void CWinDisplayer::updateLabels ()
 					}
 				}
 
-				SendMessageW ((HWND)access.value()[i].Hwnd, WM_SETTEXT, 0, (LPARAM) utf8ToWide(n));
+				SendMessageW((HWND)access.value()[i].Hwnd, WM_SETTEXT, 0, (LPARAM)nlUtf8ToWide(n));
 				access.value()[i].NeedUpdate = false;
 			}
 		}
@@ -352,7 +362,10 @@ void CWinDisplayer::setTitleBar (const string &titleBar)
 
 	nldebug("SERVICE: Set title bar to '%s'", wn.c_str());
 
-	SetWindowTextW (_HWnd, (LPWSTR)ucstring::makeFromUtf8(wn).c_str());
+	if (!SetWindowTextW(_HWnd, (LPWSTR)ucstring::makeFromUtf8(wn).c_str()))
+	{
+		nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+	}
 }
 
 void CWinDisplayer::open (string titleBar, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log)
@@ -489,7 +502,7 @@ void CWinDisplayer::clear ()
 	SendMessageW (_HEdit, EM_SETSEL, 0, nIndex);
 
 	// clear all the text
-	SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) "");
+	SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) L"");
 
 	SendMessageW(_HEdit,EM_SETMODIFY,(WPARAM)TRUE,(LPARAM)0);
 
@@ -562,7 +575,7 @@ void CWinDisplayer::display_main ()
 						LRESULT oldIndex2 = SendMessageW (_HEdit, EM_LINEINDEX, nblineremove, 0);
 						//nlassert (oldIndex2 != -1);
 						SendMessageW (_HEdit, EM_SETSEL, oldIndex1, oldIndex2);
-						SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) "");
+						SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) L"");
 
 						// update the selection due to the erasing
 						sint dt = (sint)(oldIndex2 - oldIndex1);

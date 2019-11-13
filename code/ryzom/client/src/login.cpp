@@ -61,6 +61,7 @@
 #include "game_share/bg_downloader_msg.h"
 
 #include "misc.h"
+#include "user_agent.h"
 
 void ConnectToShard();
 
@@ -71,13 +72,17 @@ using namespace NLNET;
 using namespace NL3D;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // ***************************************************************************
 
 extern bool SetMousePosFirstTime;
 
 vector<CShard> Shards;
 
-string LoginLogin, LoginPassword, ClientApp, Salt;
+string LoginLogin, LoginPassword, ClientApp, Salt, LoginCustomParameters;
 uint32 LoginShardId = 0xFFFFFFFF;
 
 
@@ -298,9 +303,9 @@ void initCatDisplay()
 	// Check is good now ask the player if he wants to apply the patch
 	pPM->getInfoToDisp(InfoOnPatch);
 
-	if ((InfoOnPatch.NonOptCat.size() > 0) ||
-		(InfoOnPatch.OptCat.size() > 0) ||
-		(InfoOnPatch.ReqCat.size() > 0))
+	if ((!InfoOnPatch.NonOptCat.empty()) ||
+		(!InfoOnPatch.OptCat.empty()) ||
+		(!InfoOnPatch.ReqCat.empty()))
 	{
 		createOptionalCatUI();
 		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CATDISP);
@@ -525,9 +530,9 @@ void loginMainLoop()
 
 						AvailablePatchs = InfoOnPatch.getAvailablePatchsBitfield();
 
-						if ((InfoOnPatch.NonOptCat.size() > 0) ||
-							(InfoOnPatch.OptCat.size() > 0) ||
-							(InfoOnPatch.ReqCat.size() > 0))
+						if ((!InfoOnPatch.NonOptCat.empty()) ||
+							(!InfoOnPatch.OptCat.empty()) ||
+							(!InfoOnPatch.ReqCat.empty()))
 						{
 							LoginSM.pushEvent(CLoginStateMachine::ev_patch_needed);
 							//	createOptionalCatUI();
@@ -779,7 +784,17 @@ void initLoginScreen()
 
 	ClientApp = ClientCfg.ConfigFile.getVar("Application").asString(0);
 
-	string l = ClientCfg.LastLogin;
+	// version
+	std::string ext;
+	if (ClientApp.find("ryzom_") != ucstring::npos)
+		ext = " (" + ClientApp.substr(6) + ")";
+
+	CViewText *pV = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:ver_value"));
+	if (pV)
+		pV->setHardText(getDisplayVersion() + (ext.empty() ? "" : ext));
+
+	// give priority to login specified as argument
+	string l = !LoginLogin.empty() ? LoginLogin:ClientCfg.LastLogin;
 
 	if(!l.empty())
 	{
@@ -840,6 +855,55 @@ void initAutoLogin()
 			//		CAHManager::getInstance()->runActionHandler("login_connect_2", NULL);
 		}
 	}
+}
+
+void initAltLogin()
+{
+	// Check the alt param
+	if (!LoginCustomParameters.empty())
+	{
+		// don't use login and password for alternate login
+		string res = checkLogin("", "", ClientApp, LoginCustomParameters);
+		if (res.empty())
+		{
+			if (ClientCfg.R2Mode)
+			{
+				LoginSM.pushEvent(CLoginStateMachine::ev_login_ok);
+			}
+			else
+			{
+				// Select good shard
+				ShardSelected = -1;
+				for (uint32 i = 0; i < Shards.size(); ++i)
+				{
+					if (Shards[i].ShardId == LoginShardId)
+					{
+						ShardSelected = i;
+						break;
+					}
+				}
+
+				if (ShardSelected == -1)
+				{
+					CInterfaceManager *pIM = CInterfaceManager::getInstance();
+					pIM->messageBoxWithHelp(CI18N::get("uiErrServerLost"), "ui:login");
+					LoginSM.pushEvent(CLoginStateMachine::ev_quit);
+				}
+				else
+				{
+					LoginSM.pushEvent(CLoginStateMachine::ev_login_ok);
+				}
+			}
+
+			return;
+		}
+	}
+
+	// close the socket in case of error
+	HttpClient.disconnect();
+
+	// ignore error
+	LoginSM.pushEvent(CLoginStateMachine::ev_login_not_alt);
 }
 
 
@@ -977,7 +1041,7 @@ bool login()
 void removeSpace(string &s)
 {
 	uint i = 0;
-	while (s.size()>0)
+	while (!s.empty())
 	{
 		if (s[i] == ' ')
 			s.erase(i, 1);
@@ -1092,7 +1156,7 @@ void initShardDisplay()
 	for (uint fff = 0; fff < 20; ++fff)
 	{
 		CShard s (	toString("%05d",fff), fff%3, fff+32, toString("%s%d","pipo",fff),
-					32*fff%46546, "32.32.32.32", "http://www.ryzomcore.org" );
+					32*fff%46546, "32.32.32.32", "http://www.ryzom.com" );
 		Shards.push_back(s);
 	}*/
 
@@ -1169,7 +1233,7 @@ void onlogin(bool vanishScreen = true)
 	// Check the login/pass
 
 	// main menu page for r2mode
-	string res = checkLogin(LoginLogin, LoginPassword, ClientApp);
+	string res = checkLogin(LoginLogin, LoginPassword, ClientApp, LoginCustomParameters);
 	if (res.empty())
 	{
 		// if not in auto login, push login ok event
@@ -1219,7 +1283,7 @@ void onlogin(bool vanishScreen = true)
 //		for (uint fff = 0; fff < 20; ++fff)
 //		{
 //			CShard s (	toString("%05d",fff), fff%3, fff+32, toString("%s%d","pipo",fff),
-//						32*fff%46546, "32.32.32.32", "http://www.ryzomcore.org" );
+//						32*fff%46546, "32.32.32.32", "http://www.ryzom.com" );
 //			Shards.push_back(s);
 //		}*/
 //
@@ -1896,17 +1960,34 @@ class CAHOpenURL : public IActionHandler
 			return;
 		}
 
+		// modify existing languages
+		
+		// old site
 		string::size_type pos_lang = url.find("/en/");
 
-		if(pos_lang!=string::npos)
-			url.replace(pos_lang+1, 2, ClientCfg.getHtmlLanguageCode());
+		// or new forums
+		if (pos_lang == string::npos)
+			pos_lang = url.find("=en#");
 
-		if(url.find('?')!=string::npos)
-			url += "&";
+		if (pos_lang != string::npos)
+		{
+			url.replace(pos_lang + 1, 2, ClientCfg.getHtmlLanguageCode());
+		}
 		else
-			url += "?";
-		url += "language=" + ClientCfg.LanguageCode;
-		openURL(url.c_str());
+		{
+			// append language
+			if (url.find('?') != string::npos)
+				url += "&";
+			else
+				url += "?";
+
+			url += "language=" + ClientCfg.LanguageCode;
+
+			if (!LoginCustomParameters.empty())
+				url += LoginCustomParameters;
+		}
+
+		openURL(url);
 
 		nlinfo("openURL %s", url.c_str());
 	}
@@ -2328,6 +2409,10 @@ bool initCreateAccount()
 		CurlHttpClient.verifyServer(true); // set this to false if you need to connect to the test environment
 
 		std::string params = "language=" + lang;
+
+		if (!LoginCustomParameters.empty())
+			params += LoginCustomParameters;
+
 		if(!CurlHttpClient.sendGet(url, params, pPM->isVerboseLog()))
 		{
 			ucstring errorMessage("Can't send (error code 60)");
@@ -2518,6 +2603,9 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 			if(conditionsPushed)
 				params += "&TaC=1";
 
+			if (!LoginCustomParameters.empty())
+				params += LoginCustomParameters;
+
 			std::string md5 = results[0] + results[1] + "" + results[3];
 			md5 = NLMISC::getMD5((uint8*)md5.data(), (uint32)md5.size()).toString();
 
@@ -2587,7 +2675,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 					for(uint i=0; i<errors.size(); i++)
 					{
 						string comment = parseCommentError(res, errors[i]);
-						if(comment!="")
+						if(!comment.empty())
 							error += "- " + comment + "\n";
 					}
 
@@ -2702,7 +2790,7 @@ REGISTER_ACTION_HANDLER (CAHOnBackToLogin, "on_back_to_login");
 
 
 // ***************************************************************************
-string checkLogin(const string &login, const string &password, const string &clientApp)
+string checkLogin(const string &login, const string &password, const string &clientApp, const std::string &customParameters)
 {
 	CPatchManager *pPM = CPatchManager::getInstance();
 	Shards.clear();
@@ -2718,49 +2806,66 @@ string checkLogin(const string &login, const string &password, const string &cli
 
 	string res;
 
-	// ask server for salt
-	if(!HttpClient.sendGet(ClientCfg.ConfigFile.getVar("StartupPage").asString()+"?cmd=ask&login="+login+"&lg="+ClientCfg.LanguageCode, "", pPM->isVerboseLog()))
-		return "Can't send (error code 60)";
+	std::string url = ClientCfg.ConfigFile.getVar("StartupHost").asString() + ClientCfg.ConfigFile.getVar("StartupPage").asString();
 
-	if(pPM->isVerboseLog()) nlinfo("Sent request for password salt");
-
-	if(!HttpClient.receive(res, pPM->isVerboseLog()))
-		return "Can't receive (error code 61)";
-
-	if(pPM->isVerboseLog()) nlinfo("Received request login check");
-
-	if(res.empty())
-		return "Empty answer from server (error code 62)";
-
-	if(res[0] == '0')
+	// don't use login with alt method
+	if (!login.empty())
 	{
-		// server returns an error
-		nlwarning("server error: %s", res.substr(2).c_str());
-		return res.substr(2);
-	}
-	else if(res[0] == '1')
-	{
-		Salt = res.substr(2);
-	}
-	else
-	{
-		// server returns ???
-		nlwarning("%s", res.c_str());
-		return res;
-	}
+		// ask server for salt
+		if(!HttpClient.sendGet(url + "?cmd=ask&cp=2&login=" + login + "&lg=" + ClientCfg.LanguageCode, "", pPM->isVerboseLog()))
+			return "Can't send (error code 60)";
 
-	// send login + crypted password + client app and cp=1 (as crypted password)
-	if(!HttpClient.connectToLogin())
-		return "Can't connect (error code 63)";
+		if(pPM->isVerboseLog()) nlinfo("Sent request for password salt");
 
-	if(pPM->isVerboseLog()) nlinfo("Connected");
+		if(!HttpClient.receive(res, pPM->isVerboseLog()))
+			return "Can't receive (error code 61)";
+
+		if(pPM->isVerboseLog()) nlinfo("Received request login check");
+
+		if(res.empty())
+			return "Empty answer from server (error code 62)";
+
+		if(res[0] == '0')
+		{
+			// server returns an error
+			nlwarning("server error: %s", res.substr(2).c_str());
+			return res.substr(2);
+		}
+		else if(res[0] == '1')
+		{
+			Salt = res.substr(2);
+		}
+		else
+		{
+			// server returns ???
+			nlwarning("%s", res.c_str());
+			return res;
+		}
+
+		// send login + crypted password + client app and cp=2 (as crypted password)
+		if(!HttpClient.connectToLogin())
+			return "Can't connect (error code 63)";
+
+		if(pPM->isVerboseLog()) nlinfo("Connected");
+	}
 
 	if (ClientCfg.R2Mode)
 	{
 		// R2 login sequence
-		std::string	cryptedPassword = CCrypt::crypt(password, Salt);
-		if(!HttpClient.sendGet(ClientCfg.ConfigFile.getVar("StartupPage").asString()+"?cmd=login&login="+login+"&password="+cryptedPassword+"&clientApplication="+clientApp+"&cp=1"+"&lg="+ClientCfg.LanguageCode))
-			return "Can't send (error code 2)";
+
+		if (!login.empty())
+		{
+			std::string	cryptedPassword = CCrypt::crypt(password, Salt);
+
+			if(!HttpClient.sendGet(url + "?cmd=login&login=" + login + "&password=" + cryptedPassword + "&clientApplication=" + clientApp + "&cp=2" + "&lg=" + ClientCfg.LanguageCode + customParameters))
+				return "Can't send (error code 2)";
+		}
+		else
+		{
+			// don't send login and password if empty
+			if(!HttpClient.sendGet(url + "?cmd=login&clientApplication=" + clientApp + "&cp=2" + "&lg=" + ClientCfg.LanguageCode + customParameters))
+				return "Can't send (error code 2)";
+		}
 
 		// the response should contains the result code and the cookie value
 		if(pPM->isVerboseLog()) nlinfo("Sent request login check");
@@ -2838,7 +2943,8 @@ string checkLogin(const string &login, const string &password, const string &cli
 	{
 		// standard ryzom login sequence
 		std::string	cryptedPassword = CCrypt::crypt(password, Salt);
-		if(!HttpClient.sendGet(ClientCfg.ConfigFile.getVar("StartupPage").asString()+"?login="+login+"&password="+cryptedPassword+"&clientApplication="+clientApp+"&cp=1"))
+
+		if(!HttpClient.sendGet(url + "?login=" + login + "&password=" + cryptedPassword + "&clientApplication=" + clientApp + "&cp=2"))
 			return "Can't send (error code 2)";
 	/*
 		if(!send(ClientCfg.ConfigFile.getVar("StartupPage").asString()+"?login="+login+"&password="+password+"&clientApplication="+clientApp))
@@ -2933,7 +3039,8 @@ string checkLogin(const string &login, const string &password, const string &cli
 // ***************************************************************************
 string selectShard(uint32 shardId, string &cookie, string &addr)
 {
-	cookie = addr = "";
+	cookie.clear();
+	addr.clear();
 
 	if(!HttpClient.connectToLogin()) return "Can't connect (error code 7)";
 
@@ -2941,9 +3048,12 @@ string selectShard(uint32 shardId, string &cookie, string &addr)
 	if(LoginPassword.empty()) return "Empty Password (error code 9)";
 	if(ClientApp.empty()) return "Empty Client Application (error code 10)";
 
-	// send login + crypted password + client app and cp=1 (as crypted password)
+	// send login + crypted password + client app and cp=2 (as crypted password)
 	std::string	cryptedPassword = CCrypt::crypt(LoginPassword, Salt);
-	if(!HttpClient.sendGet(ClientCfg.ConfigFile.getVar("StartupPage").asString()+"?cmd=login&shardid="+toString(shardId)+"&login="+LoginLogin+"&password="+cryptedPassword+"&clientApplication="+ClientApp+"&cp=1"))
+
+	std::string url = ClientCfg.ConfigFile.getVar("StartupHost").asString() + ClientCfg.ConfigFile.getVar("StartupPage").asString();
+
+	if(!HttpClient.sendGet(url + "?cmd=login&shardid=" + toString(shardId) + "&login=" + LoginLogin + "&password=" + cryptedPassword + "&clientApplication=" + ClientApp + "&cp=2"))
 		return "Can't send (error code 11)";
 
 	string res;

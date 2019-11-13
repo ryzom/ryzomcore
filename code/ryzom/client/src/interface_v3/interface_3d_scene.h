@@ -83,7 +83,10 @@ public:
 	float getDistLimitMax() const { return _DistLimitMax;}
 	void  setDistLimitMax(float limitMax) { _DistLimitMax = limitMax;}
 
+	int luaGetElement(CLuaState &ls);
+	
 	REFLECT_EXPORT_START(CInterface3DScene, CInterfaceGroup)
+		REFLECT_LUA_METHOD ("getElement", luaGetElement);
 		REFLECT_STRING ("curcam", getCurrentCamera, setCurrentCamera);
 		REFLECT_STRING ("curcs", getCurrentClusterSystem, setCurrentClusterSystem);
 		REFLECT_FLOAT ("rotzfactor", getRotFactor, setRotFactor);
@@ -148,7 +151,7 @@ public:
 	CInterface3DCharacter();
 	virtual ~CInterface3DCharacter();
 
-	virtual bool parse (xmlNodePtr cur, CInterface3DScene *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 	virtual void checkCoords();
 
@@ -236,7 +239,7 @@ public:
 
 	virtual ~CInterface3DShape();
 
-	virtual bool parse (xmlNodePtr cur, CInterface3DScene *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 	NL3D::UInstance getShape() { return _Instance; }
 
@@ -259,7 +262,15 @@ public:
 	std::string getName() const;
 	void        setName (const std::string &ht);
 
+	float getBBoxSizeX () const;
+	float getBBoxSizeY () const;
+	float getBBoxSizeZ () const;
+
+
 	REFLECT_EXPORT_START(CInterface3DShape, CInterfaceElement)
+		REFLECT_FLOAT("getBBoxSizeX", getBBoxSizeX, setPosX);
+		REFLECT_FLOAT("getBBoxSizeY", getBBoxSizeY, setPosX);
+		REFLECT_FLOAT("getBBoxSizeZ", getBBoxSizeZ, setPosX);
 		REFLECT_FLOAT ("posx", getPosX, setPosX);
 		REFLECT_FLOAT ("posy", getPosY, setPosY);
 		REFLECT_FLOAT ("posz", getPosZ, setPosZ);
@@ -295,7 +306,7 @@ public:
 
 	virtual ~CInterface3DIG();
 
-	virtual bool parse (xmlNodePtr cur, CInterface3DScene *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 	NL3D::UInstanceGroup *getIG() { return _IG; }
 
@@ -357,7 +368,7 @@ public:
 		_Dist = 0;
 	}
 
-	virtual bool parse (xmlNodePtr cur, CInterface3DScene *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 	float getFOV()				{ return _FOV; }
 	NLMISC::CVector getPos()	{ return _Pos; }
 	NLMISC::CVector getTarget() { return _Target; }
@@ -436,7 +447,7 @@ public:
 
 	virtual ~CInterface3DLight();
 
-	virtual bool parse (xmlNodePtr cur, CInterface3DScene *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 	float getPosX() const	{ return _Pos.x; }
 	float getPosY() const	{ return _Pos.y; }
@@ -498,7 +509,7 @@ public:
 
 	virtual ~CInterface3DFX();
 
-	virtual bool parse (xmlNodePtr cur, CInterface3DScene *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 	virtual void checkCoords();
 

@@ -1,0 +1,5 @@
+﻿score_ID	name	point	ia	points
+HitPoints	health	hit point	an	hit points
+Stamina	stamina	stamina point	a	stamina points
+Sap	sap	sap point	a	sap points
+Focus	focus	focus point	a	focus points

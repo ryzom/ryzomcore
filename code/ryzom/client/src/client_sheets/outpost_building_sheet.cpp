@@ -75,7 +75,7 @@ void COutpostBuildingSheet::build(const NLGEORGES::UFormElm &root)
 			// Get Mps sheets
 			const UFormElm *pMp;
 			uint32 i = 0;
-			while (pDriller->getNodeByName(&pMp, ("mp" + NLMISC::toString(i)).c_str()) && pMp)
+			while (pDriller->getNodeByName(&pMp, "mp" + NLMISC::toString(i)) && pMp)
 			{
 				string sTmp;
 				pMp->getValueByName(sTmp, "name");
@@ -136,7 +136,7 @@ void COutpostBuildingSheet::build(const NLGEORGES::UFormElm &root)
 }
 
 // ****************************************************************************
-void COutpostBuildingSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void COutpostBuildingSheet::serial(NLMISC::IStream &f)
 {
 	f.serialEnum(OBType);
 	f.serial(CostDapper);

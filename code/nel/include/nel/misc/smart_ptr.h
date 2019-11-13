@@ -43,7 +43,7 @@ public:
 	/// Destructor which release pinfo if necessary.
 	~CRefCount();
 	/// Default constructor init crefs to 0.
-	CRefCount() { crefs = 0; pinfo=static_cast<CPtrInfo*>(&NullPtrInfo); }
+	CRefCount() { crefs = 0; pinfo = &NullPtrInfo; }
 
 	/*  The instance handle.
 		Can't put those to private since must be used by CRefPtr (and friend doesn't work with template).
@@ -56,6 +56,7 @@ public:
 		sint	RefCount;		// RefCount of ptrinfo (!= instance)
 		bool	IsNullPtrInfo;	// For dll problems, must use a flag to mark NullPtrInfo.
 	};
+
 	struct	CPtrInfo : public CPtrInfoBase
 	{
 		CPtrInfo(CRefCount const* p) {Ptr=p; RefCount=0; IsNullPtrInfo=false;}
@@ -75,13 +76,13 @@ public:
 	// Can't put this to private since must be used by CSmartPtr (and friend doesn't work with template).
 	// Provide incref()/decref() function doen't work since decref() can't do a delete this on a non virtual dtor.
 	// So Ptr gestion can only be used via CSmartPtr.
-	mutable	sint		crefs;	// The ref counter for SmartPtr use.
-	mutable	CPtrInfo	*pinfo;	// The ref ptr for RefPtr use.
+	mutable	sint			crefs;	// The ref counter for SmartPtr use.
+	mutable	CPtrInfoBase	*pinfo;	// The ref ptr for RefPtr use.
 
 	/// operator= must NOT copy crefs/pinfo!!
 	CRefCount &operator=(const CRefCount &) {return *this;}
 	/// copy cons must NOT copy crefs/pinfo!!
-	CRefCount(const CRefCount &) {crefs = 0; pinfo=static_cast<CPtrInfo*>(&NullPtrInfo);}
+	CRefCount(const CRefCount &) { crefs = 0; pinfo = &NullPtrInfo; }
 };
 
 // To use CVirtualRefPtr (or if you just want to have a RefCount with virtual destructor), derive from this class.
@@ -99,7 +100,7 @@ public:
 #define	SMART_TRACE(_s)	((void)0)
 #define	REF_TRACE(_s)	((void)0)
 //#define	SMART_TRACE(_s)	printf("%s: %d \n", _s, Ptr?Ptr->crefs:0)
-//#define	REF_TRACE(_s)	printf("%s: %d \n", _s, pinfo!=&CRefCount::NullPtrInfo?pinfo->RefCount:0)
+//#define	REF_TRACE(_s)	printf("%s: %d \n", _s, pinfo != &CRefCount::NullPtrInfo?pinfo->RefCount:0)
 
 
 /**
@@ -225,7 +226,7 @@ public:
 	std::string toString() { if(Ptr) return toString(*Ptr); else return "<null>"; }
 
 	// serial using serialPtr
-	void serialPtr(NLMISC::IStream &f) throw(NLMISC::EStream )
+	void serialPtr(NLMISC::IStream &f)
 	{
 		T*	obj= NULL;
 		if(f.isReading())
@@ -241,7 +242,7 @@ public:
 		}
 	}
 	// serial using serialPloyPtr
-	void serialPolyPtr(NLMISC::IStream &f) throw(NLMISC::EStream )
+	void serialPolyPtr(NLMISC::IStream &f)
 	{
 		T*	obj= NULL;
 		if(f.isReading())
@@ -294,7 +295,8 @@ template <class T>
 class CRefPtr
 {
 private:
-	CRefCount::CPtrInfo		*pinfo;		// A ptr to the handle of the object.
+	CRefCount::CPtrInfoBase	*pinfo;		// A ptr to the handle of the object.
+
 	mutable T				*Ptr;		// A cache for pinfo->Ptr. Useful to speed up  ope->()  and  ope*()
 
 	void	unRef()  const;				// Just release the handle pinfo, but do not update pinfo/Ptr, if deleted.
@@ -335,7 +337,7 @@ public:
 	void	kill();
 
 	// serial using serialPloyPtr
-	void serialPolyPtr(NLMISC::IStream &f) throw(NLMISC::EStream )
+	void serialPolyPtr(NLMISC::IStream &f)
 	{
 		T*	obj= NULL;
 		if(f.isReading())
@@ -380,7 +382,7 @@ template <class T>
 class CVirtualRefPtr
 {
 private:
-	CRefCount::CPtrInfo		*pinfo;		// A ptr to the handle of the object.
+	CRefCount::CPtrInfoBase	*pinfo;		// A ptr to the handle of the object.
     mutable T				*Ptr;		// A cache for pinfo->Ptr. Useful to speed up  ope->()  and  ope*()
 
 	void	unRef()  const;				// Just release the handle pinfo, but do not update pinfo/Ptr, if deleted.

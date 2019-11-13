@@ -25,7 +25,6 @@
 #include "game_share/generic_xml_msg_mngr.h"
 #include "game_share/msg_client_server.h"
 #include "game_share/bot_chat_types.h"
-#include "game_share/news_types.h"
 #include "game_share/mode_and_behaviour.h"
 #include "game_share/chat_group.h"
 #include "game_share/character_summary.h"
@@ -89,6 +88,9 @@
 // Std.
 #include <vector>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 #define OLD_STRING_SYSTEM
 #define BAR_STEP_TP 2
@@ -290,7 +292,7 @@ static void readPrivileges(NLMISC::CBitMemStream &impulse)
 	catch(const EStreamOverflow &)
 	{
 		nlwarning("User privileges not serialised, assuming none");
-		UserPrivileges = "";
+		UserPrivileges.clear();
 	}
 }
 
@@ -507,7 +509,7 @@ void impulseShardId(NLMISC::CBitMemStream &impulse)
 
 	string	webHost;
 	impulse.serial(webHost);
-	if (webHost != "")
+	if (!webHost.empty())
 	{
 		WebServer = webHost;
 	}
@@ -850,7 +852,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 						}
 					}
 				}
-				finalString = "";
+				finalString.clear();
 			}
 			else
 			{
@@ -1049,7 +1051,7 @@ string getInterfaceNameFromId (sint botType, sint interfaceId)
 	case BOTCHATTYPE::NeutralMainPage: interfaceName += "neutral_main"; break;
 	case BOTCHATTYPE::NastyMainPage: interfaceName += "nasty_main"; break;
 	case BOTCHATTYPE::MoreNewsPage: interfaceName += "more_news"; break;
-	case BOTCHATTYPE::Done: nlinfo ("end of bot chat"); interfaceName = ""; break;
+	case BOTCHATTYPE::Done: nlinfo ("end of bot chat"); interfaceName.clear(); break;
 	}
 	return interfaceName;
 }
@@ -1404,12 +1406,19 @@ void impulseCorrectPos(NLMISC::CBitMemStream &impulse)
 
 	if(UserEntity->mode() != MBEHAV::COMBAT_FLOAT)
 	{
-		// Compute the destination.
-		CVectorD dest = CVectorD((float)x/1000.0f, (float)y/1000.0f, (float)z/1000.0f);
-		// Update the position for the vision.
-		NetMngr.setReferencePosition(dest);
-		// Change the user poisition.
-		UserEntity->correctPos(dest);
+		if (x == 0) // Get SpeedAdjustement
+		{
+			UserEntity->setSpeedServerAdjust(-0.2f);
+		}
+		else
+		{
+			// Compute the destination.
+			CVectorD dest = CVectorD((float)x/1000.0f, (float)y/1000.0f, (float)z/1000.0f);
+			// Update the position for the vision.
+			NetMngr.setReferencePosition(dest);
+			// Change the user poisition.
+			UserEntity->correctPos(dest);
+		}
 	}
 }// impulseCorrectPos //
 
@@ -2499,7 +2508,7 @@ void impulseRemoteAdmin (NLMISC::CBitMemStream &impulse)
 	}
 	else
 	{
-		if (strs.size()>0)
+		if (!strs.empty())
 		{
 			str = strs[0].substr(0,strs[0].size()-1);
 			// replace all spaces into underscore because space is a reserved char
@@ -3187,8 +3196,10 @@ void impulseUserBars(NLMISC::CBitMemStream &impulse)
 void impulseOutpostChooseSide(NLMISC::CBitMemStream &impulse)
 {
 	// read message
+	bool outpostInFire;
 	bool playerGuildInConflict;
 	bool playerGuildIsAttacker;
+	impulse.serial(outpostInFire);
 	impulse.serial(playerGuildInConflict);
 	impulse.serial(playerGuildIsAttacker);
 	uint32 ownerGuildNameId;
@@ -3199,7 +3210,7 @@ void impulseOutpostChooseSide(NLMISC::CBitMemStream &impulse)
 	impulse.serial( declTimer );
 
 	// start
-	OutpostManager.startPvpJoinProposal(playerGuildInConflict, playerGuildIsAttacker,
+	OutpostManager.startPvpJoinProposal(outpostInFire, playerGuildInConflict, playerGuildIsAttacker,
 		ownerGuildNameId, attackerGuildNameId, declTimer);
 }
 
@@ -3285,7 +3296,7 @@ private:
 			}
 			else
 			{
-				contentStr = "";
+				contentStr.clear();
 				i = digitStart;
 			}
 		}

@@ -213,18 +213,14 @@ namespace NLNET
 		 *	Note that a module can be plugged in several socket at the same
 		 *	time, but not twice in the same socket.
 		 */
-		virtual void				plugModule(IModuleSocket *moduleSocket)
-			throw (EModuleAlreadyPluggedHere)
-			=0;
+		virtual void				plugModule(IModuleSocket *moduleSocket)	=0;
 		/** Unplug this module from the specified socket.
 		 *	Note that a module can be plugged in several socket at the same
 		 *	time, but not twice in the same socket.
 		 *	Throw an exception if the socket is not currently plug into
 		 *	the specified socket.
 		 */
-		virtual void				unplugModule(IModuleSocket *moduleSocket)
-			throw (EModuleNotPluggedHere)
-			=0;
+		virtual void				unplugModule(IModuleSocket *moduleSocket) =0;
 		/** Fill resultList vector with the list of socket into
 		 *	witch this module is currently plugged.
 		 *	This method don't clear the result vector before filling it.
@@ -265,9 +261,7 @@ namespace NLNET
 		 *	The call is blocking until receptions of the operation
 		 *	result message (or detection of the dest module module is down)
 		 */
-		virtual void		invokeModuleOperation(IModuleProxy *destModule, const NLNET::CMessage &opMsg, NLNET::CMessage &resultMsg)
-			throw (EInvokeFailed)
-			=0;
+		virtual void		invokeModuleOperation(IModuleProxy *destModule, const NLNET::CMessage &opMsg, NLNET::CMessage &resultMsg) =0;
 
 		//@}
 
@@ -448,9 +442,7 @@ namespace NLNET
 		 *	This method do the job of finding a valid socket to effectively send
 		 *	the message.
 		 */
-		virtual void		sendModuleMessage(IModule *senderModule, const NLNET::CMessage &message)
-			throw (EModuleNotReachable)
-			=0;
+		virtual void		sendModuleMessage(IModule *senderModule, const NLNET::CMessage &message) =0;
 
 		/** Return the first item of the security item list
 		 *	If no security data are available, the method
@@ -779,10 +771,10 @@ namespace NLNET
 		// Init base module, init module name
 		bool				initModule(const TParsedCommandLine &initInfo);
 
-		void				plugModule(IModuleSocket *moduleSocket) throw (EModuleAlreadyPluggedHere);
-		void				unplugModule(IModuleSocket *moduleSocket)  throw (EModuleNotPluggedHere);
+		void				plugModule(IModuleSocket *moduleSocket);
+		void				unplugModule(IModuleSocket *moduleSocket);
 		void				getPluggedSocketList(std::vector<IModuleSocket*> &resultList);
-		void				invokeModuleOperation(IModuleProxy *destModule, const NLNET::CMessage &opMsg, NLNET::CMessage &resultMsg) throw (EInvokeFailed);
+		void				invokeModuleOperation(IModuleProxy *destModule, const NLNET::CMessage &opMsg, NLNET::CMessage &resultMsg);
 		void				_onModuleUp(IModuleProxy *removedProxy);
 		void				_onModuleDown(IModuleProxy *removedProxy);
 
@@ -879,8 +871,7 @@ namespace NLNET
 
 		/** Send a message to the module.
 		 */
-		virtual void		sendModuleMessage(IModule *senderModule, const NLNET::CMessage &message)
-			throw (EModuleNotReachable);
+		virtual void		sendModuleMessage(IModule *senderModule, const NLNET::CMessage &message);
 
 		virtual const TSecurityData *getFirstSecurityData() const
 		{

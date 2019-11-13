@@ -1,0 +1,32 @@
+﻿powerType	name	ia	da	p	pia	pda	description
+Taunt	taunt	a	the			the	
+Shielding	shielding	a	the			the	
+SpeedingUp	speeding-up	a	the			the	
+MeditationLife	meditation life	a	the			the	
+MeditationStamina	meditation stamina	a	the			the	
+MeditationSap	meditation sap	a	the			the	
+ConvertStamina	convert stamina	a	the			the	
+ConvertSap	convert sap	a	the			the	
+Berserk	berserk	a	the			the	
+LifeAura	life aura	a	the			the	
+StaminaAura	stamina aura	a	the			the	
+SapAura	sap aura	a	the			the	
+Umbrella	range protection aura	an	the			the	Makes you and your teammates invulnerable to range attacks.
+MeleeProtection	melee protection aura	a	the			the	Makes you and your teammates invulnerable to melee attacks.
+AntiMagicShield	anti magic shield aura	an	the			the	Makes you and your teammates invulnerable to magic attacks.
+Invulnerability	invulnerability	an	the			the	Makes you invulnerable but you cannot use actions.
+FireWall	fire wall aura	a	the			the	
+ThornWall	thorn wall aura	a	the			the	
+WaterWall	water wall aura	a	the			the	
+LightningWall	lightning wall aura	a	the			the	
+WarCry	war cry	a	the			the	
+Heal	heal	a	the			the	
+BalanceHp	Balance HP	a	the			the	
+ChgCharac	boost characteristic	a	the			the	
+ModMagicProtection	modificateur de protection	un	le	modificateurs de protections	des	les	modifie la valeur de vos protections magiques.
+ModDefense	modificateur de taux de succès de défense	un	le	modificateurs de taux de succès de défense	des	les	modifie vos chances de réussite d'action de défense
+ModCraftSuccess	modificateur de succès d'artisannat	un	le	modificateurs de succès d'artisannat	des	les	modifie vos chances de réussite de vos actions d'artisannat
+ModMeleeSuccess	modificateur de succès d'action de combat au corps à corps	un	le	modificateurs de succès d'action de combat au corps à corps	des	les	modifie vos chances de réussite de vos actions de combat au corps à corps
+ModRangeSuccess	modificateur de succès d'action de combat à distance	un	le	modificateurs de succès d'action de combat à distance	des	les	modifie vos chances de réussite de vos actions de combat à distance
+ModMagicSuccess	modificateur de succès d'action de magie	un	le	modificateurs de succès d'action de magie	des	les	modifie vos chances de réussite de vos actions de magie
+ModForageSuccess	modificateur de succès d'action de forage	un	le	modificateurs de succès d'action de forage	des	les	modifie vos chances de réussite de vos actions de forage

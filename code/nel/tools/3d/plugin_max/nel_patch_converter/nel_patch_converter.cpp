@@ -35,17 +35,17 @@ enum { po2rpo_params };
 //TODO: Add enums for various parameters
 enum {	pb_spin,};
 
-static ParamBlockDesc2 po2rpo_param_blk ( po2rpo_params, _T("params"),  0, &PO2RPODesc, 
-	P_AUTO_CONSTRUCT + P_AUTO_UI, PBLOCK_REF, 
+static ParamBlockDesc2 po2rpo_param_blk ( po2rpo_params, _T("params"),  0, &PO2RPODesc,
+	P_AUTO_CONSTRUCT + P_AUTO_UI, PBLOCK_REF,
 	//rollout
 	IDD_PANEL, IDS_PARAMS, 0, 0, NULL,
 	// params
-	pb_spin, 			_T("spin"), 		TYPE_FLOAT, 	P_ANIMATABLE, 	IDS_SPIN, 
-		p_default, 		0.1f, 
-		p_range, 		0.0f,1000.0f, 
-		p_ui, 			TYPE_SPINNER,		EDITTYPE_FLOAT, IDC_EDIT,	IDC_SPIN, 0.01f, 
-		end,
-	end
+	pb_spin, 			_T("spin"), 		TYPE_FLOAT, 	P_ANIMATABLE, 	IDS_SPIN,
+		p_default, 		0.1f,
+		p_range, 		0.0f,1000.0f,
+		p_ui, 			TYPE_SPINNER,		EDITTYPE_FLOAT, IDC_EDIT,	IDC_SPIN, 0.01f,
+		nl_p_end,
+	nl_p_end
 	);
 
 IObjParam *PO2RPO::ip			= NULL;
@@ -67,11 +67,11 @@ PO2RPO::~PO2RPO()
 
 Interval PO2RPO::LocalValidity(TimeValue t)
 {
-	// if being edited, return NEVER forces a cache to be built 
+	// if being edited, return NEVER forces a cache to be built
 	// after previous modifier.
 	if (TestAFlag(A_MOD_BEING_EDITED))
 	{
-		return NEVER;  
+		return NEVER;
 	}
 	//TODO: Return the validity interval of the modifier
 	return NEVER;
@@ -81,7 +81,7 @@ Interval PO2RPO::LocalValidity(TimeValue t)
 
 RefTargetHandle PO2RPO::Clone(RemapDir& remap)
 {
-	PO2RPO* newmod = new PO2RPO();	
+	PO2RPO* newmod = new PO2RPO();
 	//TODO: Add the cloning code here
 	newmod->ReplaceReference(0,pblock->Clone(remap));
 	return(newmod);
@@ -90,7 +90,7 @@ RefTargetHandle PO2RPO::Clone(RemapDir& remap)
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 static int done=0;
-void PO2RPO::ModifyObject(TimeValue t, ModContext &mc, ObjectState * os, INode *node) 
+void PO2RPO::ModifyObject(TimeValue t, ModContext &mc, ObjectState * os, INode *node)
 {
 /*
 	if (!done)
@@ -121,19 +121,19 @@ void PO2RPO::ModifyObject(TimeValue t, ModContext &mc, ObjectState * os, INode *
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 extern HINSTANCE hInstance;
-INT_PTR CALLBACK DlgProc_Panel(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
+INT_PTR CALLBACK DlgProc_Panel(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	switch (message) 
+	switch (message)
 	{
 		// -----
-		case WM_INITDIALOG: 
+		case WM_INITDIALOG:
 		{
 			// Get the module path
 			HMODULE hModule = hInstance;
 			if (hModule)
 			{
 				// Get module file name
-				char moduldeFileName[512];
+				TCHAR moduldeFileName[512];
 				if (GetModuleFileName (hModule, moduldeFileName, 512))
 				{
 					// Get version info size
@@ -141,49 +141,49 @@ INT_PTR CALLBACK DlgProc_Panel(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 					uint versionInfoSize=GetFileVersionInfoSize (moduldeFileName, &doomy);
 					if (versionInfoSize)
 					{
-						// Alloc the buffer
-						char *buffer=new char[versionInfoSize];
+						// Alloc the buffer (size in bytes)
+						uint8 *buffer = new uint8[versionInfoSize];
 
 						// Find the verion resource
 						if (GetFileVersionInfo(moduldeFileName, 0, versionInfoSize, buffer))
 						{
 							uint *versionTab;
 							uint versionSize;
-							if (VerQueryValue (buffer, "\\", (void**)&versionTab,  &versionSize))
+							if (VerQueryValue (buffer, _T("\\"), (void**)&versionTab,  &versionSize))
 							{
 								// Get the pointer on the structure
 								VS_FIXEDFILEINFO *info=(VS_FIXEDFILEINFO*)versionTab;
 								if (info)
 								{
  									// Setup version number
-									char version[512];
-									sprintf (version, "Version %d.%d.%d.%d", 
-										info->dwFileVersionMS>>16, 
-										info->dwFileVersionMS&0xffff, 
-										info->dwFileVersionLS>>16,  
+									TCHAR version[512];
+									_stprintf (version, _T("Version %d.%d.%d.%d"),
+										info->dwFileVersionMS>>16,
+										info->dwFileVersionMS&0xffff,
+										info->dwFileVersionLS>>16,
 										info->dwFileVersionLS&0xffff);
 									SetWindowText (GetDlgItem (hWnd, IDC_VERSION), version);
 								}
 								else
-									SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "VS_FIXEDFILEINFO * is NULL");
+									SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("VS_FIXEDFILEINFO * is NULL"));
 							}
 							else
-								SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "VerQueryValue failed");
+								SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("VerQueryValue failed"));
 						}
 						else
-							SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "GetFileVersionInfo failed");
+							SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("GetFileVersionInfo failed"));
 
 						// Free the buffer
-						delete [] buffer;
+						delete[] buffer;
 					}
 					else
-						SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "GetFileVersionInfoSize failed");
+						SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("GetFileVersionInfoSize failed"));
 				}
 				else
-					SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "GetModuleFileName failed");
+					SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("GetModuleFileName failed"));
 			}
 			else
-				SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "hInstance NULL");
+				SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("hInstance NULL"));
 		}
 
 		// -----
@@ -214,14 +214,14 @@ void PO2RPO::BeginEditParams( IObjParam *ip, ULONG flags,Animatable *prev )
 void PO2RPO::EndEditParams( IObjParam *ip, ULONG flags,Animatable *next)
 {
 	//PO2RPODesc.EndEditParams(ip, this, flags, next);
-	ip->DeleteRollupPage(hRollup);		
+	ip->DeleteRollupPage(hRollup);
 	this->ip = NULL;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-//From ReferenceMaker 
-RefResult PO2RPO::NotifyRefChanged(Interval changeInt, RefTargetHandle hTarget,PartID& partID,  RefMessage message) 
+//From ReferenceMaker
+RefResult PO2RPO::NotifyRefChanged(NOTIFY_REF_PARAMS)
 {
 	//TODO: Add code to handle the various reference changed messages
 	return REF_SUCCEED;
@@ -230,21 +230,21 @@ RefResult PO2RPO::NotifyRefChanged(Interval changeInt, RefTargetHandle hTarget,P
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //From Object
-BOOL PO2RPO::HasUVW() 
-{ 
+BOOL PO2RPO::HasUVW()
+{
 	//TODO: Return whether the object has UVW coordinates or not
-	return TRUE; 
+	return TRUE;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void PO2RPO::SetGenUVW(BOOL sw) 
-{  
-	if (sw==HasUVW()) 
+void PO2RPO::SetGenUVW(BOOL sw)
+{
+	if (sw==HasUVW())
 	{
 		return;
 	}
-	//TODO: Set the plugin internal value to sw				
+	//TODO: Set the plugin internal value to sw
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------

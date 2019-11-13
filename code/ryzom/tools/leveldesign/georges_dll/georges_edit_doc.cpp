@@ -181,13 +181,9 @@ bool CGeorgesEditDocForm::initDocument (const char *dfnName, bool newElement)
 	}
 
 	// Set file name and title
-	char name[512];
-	char ext[512];
-	_splitpath (dfnName, NULL, NULL, name, ext);
-	string name2 = (const char*)(name);
-	name2 = strlwr (name2);
-	SetPathName ( ("*."+name2).c_str(), FALSE);
-	SetTitle ( ("New "+name2+" form").c_str() );
+	std::string name2 = toLower(NLMISC::CFile::getFilenameWithoutExtension(dfnName));
+	SetPathName(nlUtf8ToTStr("*." + name2), FALSE);
+	SetTitle(nlUtf8ToTStr("New " + name2 + " form"));
 
 	// TMp
 	if (newElement)
@@ -227,10 +223,10 @@ BOOL CGeorgesEditDocForm::OnNewDocument()
 		string defFilename = theApp.RootSearchPath;
 		defFilename += "*.dfn";
 
-		CFileDialog dlgFile (TRUE, "*.dfn", defFilename.c_str (), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, DfnFilter, theApp.m_pMainWnd);
+		CFileDialog dlgFile(TRUE, _T("*.dfn"), nlUtf8ToTStr(defFilename.c_str()), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, DfnFilter, theApp.m_pMainWnd);
 		if (dlgFile.DoModal () == IDOK)
 		{
-			if (initDocument (dlgFile.GetFileName (), true))
+			if (initDocument(tStrToUtf8(dlgFile.GetFileName()).c_str(), true))
 				return TRUE;
 		}
 	}
@@ -359,7 +355,7 @@ CGeorgesEditDocSub *CGeorgesEditDoc::addStruct (CGeorgesEditDocSub *parent, CFor
 							{
 								// Get the node by name
 								UFormElm *uNode;
-								if (formPtr->getParent (parent)->getRootNode ().getNodeByName (&uNode, entryName.c_str(), NULL, false) && uNode)
+								if (formPtr->getParent (parent)->getRootNode ().getNodeByName (&uNode, entryName, NULL, false) && uNode)
 								{
 									nextArray = safe_cast<CFormElmArray*> (uNode);
 								}
@@ -386,7 +382,7 @@ CGeorgesEditDocSub *CGeorgesEditDoc::addStruct (CGeorgesEditDocSub *parent, CFor
 							{
 								// Get the node by name
 								UFormElm *uNode;
-								if (formPtr->getParent (parent)->getRootNode ().getNodeByName (&uNode, entryName.c_str(), NULL, false) && uNode)
+								if (formPtr->getParent (parent)->getRootNode ().getNodeByName (&uNode, entryName, NULL, false) && uNode)
 								{
 									nextForm = safe_cast<CFormElmStruct*> (uNode);
 								}
@@ -418,7 +414,7 @@ CGeorgesEditDocSub *CGeorgesEditDoc::addStruct (CGeorgesEditDocSub *parent, CFor
 						{
 							// Get the node by name
 							UFormElm *uNode;
-							if (formPtr->getParent (parent)->getRootNode ().getNodeByName (&uNode, entryName.c_str(), NULL, false) && uNode)
+							if (formPtr->getParent (parent)->getRootNode ().getNodeByName (&uNode, entryName, NULL, false) && uNode)
 							{
 								nextArray = safe_cast<CFormElmArray*> (uNode);
 							}
@@ -495,7 +491,7 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		try
 		{
 			// Read the form with the loader
-			Type = FormLoader.loadType (lpszPathName);
+			Type = FormLoader.loadType(tStrToUtf8(lpszPathName));
 			if (!Type)
 			{
 				char msg[512];
@@ -508,7 +504,7 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 			return TRUE;
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			char message[512];
 			smprintf (message, 512, "Error while loading Type file: %s", e.what());
@@ -521,11 +517,11 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		try
 		{
 			// Read the form with the loader
-			Dfn = FormLoader.loadFormDfn (lpszPathName, true);
+			Dfn = FormLoader.loadFormDfn (tStrToUtf8(lpszPathName), true);
 			if (!Dfn)
 			{
 				char msg[512];
-				smprintf (msg, 512, "Error while loading Dfn file %s", lpszPathName);
+				smprintf (msg, 512, "Error while loading Dfn file %s", tStrToUtf8(lpszPathName).c_str());
 				theApp.outputError (msg);
 				return FALSE;
 			}
@@ -534,7 +530,7 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 			return TRUE;
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			char message[512];
 			smprintf (message, 512, "Error while loading Type file: %s", e.what());
@@ -547,24 +543,24 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		try
 		{
 			// Check form
-			char ext[MAX_PATH];
-			_splitpath (lpszPathName, NULL, NULL, NULL, ext);
-			string extLower = strlwr (string (ext));
+			std::string ext = NLMISC::CFile::getExtension(tStrToUtf8(lpszPathName));
+			string extLower = toLower(ext);
+
 			if (!extLower.empty ())
 			{
-				string dfnName = extLower.substr (1, string::npos)  + ".dfn";
+				string dfnName = extLower + ".dfn";
 
 				// Check if the file is handled
 				if (theApp.getFormDocTemplate (dfnName.c_str ()) == NULL)
 				{
 					char message[512];
-					smprintf (message, 512, "Can't open the file '%s'.", lpszPathName);
+					smprintf (message, 512, "Can't open the file '%s'.", tStrToUtf8(lpszPathName).c_str());
 					theApp.outputError (message);
 					return FALSE;
 				}
 				
 				// Read the form with the loader
-				if (!loadFormFile (lpszPathName))
+				if (!loadFormFile (tStrToUtf8(lpszPathName).c_str()))
 					return FALSE;
 
 				if (theApp.ExeStandalone)
@@ -623,7 +619,7 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 				return FALSE;
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			char message[512];
 			smprintf (message, 512, "Error while loading Type file: %s", e.what());
@@ -747,7 +743,7 @@ BOOL CGeorgesEditDoc::OnSaveDocument(LPCTSTR lpszPathName)
 
 	// Open the filt
 	COFile file;
-	if (file.open (lpszPathName))
+	if (file.open(tStrToUtf8(lpszPathName)))
 	{
 		try
 		{
@@ -782,7 +778,7 @@ BOOL CGeorgesEditDoc::OnSaveDocument(LPCTSTR lpszPathName)
 					Dfn->Header.MinorVersion++;
 					flushValueChange ();
 				}
-				Dfn->write (xmlStream.getDocument (), lpszPathName);
+				Dfn->write (xmlStream.getDocument (), tStrToUtf8(lpszPathName));
 				modify (NULL, NULL, false);
 				UpdateAllViews (NULL);
 				return TRUE;
@@ -797,11 +793,11 @@ BOOL CGeorgesEditDoc::OnSaveDocument(LPCTSTR lpszPathName)
 					((CForm*)(UForm*)Form)->Header.MinorVersion++;				
 					flushValueChange ();
 				}
-				((CForm*)(UForm*)Form)->write (xmlStream.getDocument (), lpszPathName);
-				if (strcmp (xmlStream.getErrorString (), "") != 0)
+				((CForm*)(UForm*)Form)->write (xmlStream.getDocument (), tStrToUtf8(lpszPathName));
+				if (strcmp(xmlStream.getErrorString().c_str(), "") != 0)
 				{
 					char message[512];
-					smprintf (message, 512, "Error while saving file: %s", xmlStream.getErrorString ());
+					smprintf (message, 512, "Error while saving file: %s", xmlStream.getErrorString().c_str());
 					theApp.outputError (message);
 				}
 				modify (NULL, NULL, false);
@@ -815,7 +811,7 @@ BOOL CGeorgesEditDoc::OnSaveDocument(LPCTSTR lpszPathName)
 			}
 
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			char message[512];
 			smprintf (message, 512, "Error while loading file: %s", e.what());
@@ -1090,10 +1086,7 @@ void CGeorgesEditDoc::getDfnFilename (std::string &dfnName)
 
 	// Get the DFN filename
 	CString str = GetPathName ();
-	char extension[512];
-	_splitpath (str, NULL, NULL, NULL, extension);
-	dfnName = extension+1;
-	dfnName += ".dfn";
+	dfnName = NLMISC::CFile::getExtension(tStrToUtf8(str)) + ".dfn";
 }
 
 // ***************************************************************************
@@ -1129,7 +1122,7 @@ void CGeorgesEditDoc::getFilename (std::string &pathname)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	pathname = (const char*)GetPathName ();
+	pathname = tStrToUtf8(GetPathName());
 }
 
 // ***************************************************************************
@@ -1138,7 +1131,7 @@ void CGeorgesEditDoc::getTitle (std::string &title)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	title = (const char*)GetTitle ();
+	title = tStrToUtf8(GetTitle());
 }
 
 // ***************************************************************************
@@ -1334,11 +1327,11 @@ void CGeorgesEditDoc::setModifiedState (bool modified)
 	}
 	else
 	{
-		string title = (const char*)GetTitle ();
+		string title = tStrToUtf8(GetTitle());
 		if ( (title.size ()>=2) && (title[title.size()-1] == '*') && (title[title.size()-2] == ' ') )
 		{
 			title.resize (title.size () - 2);
-			SetTitle (title.c_str());
+			SetTitle(nlUtf8ToTStr(title));
 		}
 	}
 }
@@ -1553,7 +1546,7 @@ int CGeorgesEditDocSub::getItemImage (CGeorgesEditDoc *doc) const
 			bool parentVDfnArray;
 			CForm *form=doc->getFormPtr ();
 			CFormElm *elm = doc->getRootNode (getSlot ());
-			nlverify ( elm->getNodeByName (getFormName ().c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+			nlverify ( elm->getNodeByName (getFormName (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 			
 			if (array)
 			{

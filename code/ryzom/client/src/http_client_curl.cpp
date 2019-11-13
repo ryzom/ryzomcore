@@ -19,11 +19,15 @@
 
 #include <curl/curl.h>
 
-#include <openssl/ssl.h>
+#include "nel/gui/curl_certificates.h"
 
 using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 #define _Curl (CURL *)_CurlStruct
 
@@ -59,102 +63,20 @@ bool CCurlHttpClient::authenticate(const std::string &user, const std::string &p
 	return true;
 }
 
-const char *CAFilename = "ssl_ca_cert.pem"; // this is the certificate "Thawte Server CA"
-
-// ***************************************************************************
-static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
-{
-	// look for certificate in search paths
-	string path = CPath::lookup(CAFilename);
-	nldebug("Cert path '%s'", path.c_str());
-
-	if (path.empty())
-	{
-		nlwarning("Unable to find %s", CAFilename);
-		return CURLE_SSL_CACERT;
-	}
-
-	CIFile file;
-
-	// open certificate
-	if (!file.open(path))
-	{
-		nlwarning("Unable to open %s", path.c_str());
-		return CURLE_SSL_CACERT;
-	}
-
-	CURLcode res = CURLE_OK;
-
-	// load certificate content into memory
-	std::vector<uint8> buffer(file.getFileSize());
-	file.serialBuffer(&buffer[0], file.getFileSize());
-
-	// get a BIO
-	BIO *bio = BIO_new_mem_buf(&buffer[0], file.getFileSize());
-
-	if (bio)
-	{
-		// get a pointer to the X509 certificate store (which may be empty!)
-		X509_STORE *store = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
-
-		// use it to read the PEM formatted certificate from memory into an X509
-		// structure that SSL can use
-		STACK_OF(X509_INFO) *info = PEM_X509_INFO_read_bio(bio, NULL, NULL, NULL);
-
-		if (info)
-		{
-			// iterate over all entries from the PEM file, add them to the x509_store one by one
-			for (sint i = 0; i < sk_X509_INFO_num(info); ++i)
-			{
-				X509_INFO *itmp = sk_X509_INFO_value(info, i);
-
-				if (itmp->x509)
-				{
-					// add our certificate to this store
-					if (X509_STORE_add_cert(store, itmp->x509) == 0)
-					{
-						nlwarning("Error adding certificate");
-						res = CURLE_SSL_CACERT;
-					}
-				}
-			}
-
-			// cleanup
-			sk_X509_INFO_pop_free(info, X509_INFO_free);
-		}
-		else
-		{
-			nlwarning("Unable to read PEM info");
-			res = CURLE_SSL_CACERT;
-		}
-
-		// decrease reference counts
-		BIO_free(bio);
-	}
-	else
-	{
-		nlwarning("Unable to allocate BIO buffer for certificates");
-		res = CURLE_SSL_CACERT;
-	}
-
-	// all set to go
-	return res;
-}
+static const std::string CAFilename = "ssl_ca_cert.pem"; // this is the certificate "Thawte Server CA"
 
 // ***************************************************************************
 bool CCurlHttpClient::verifyServer(bool verify)
 {
 	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYHOST, verify ? 2 : 0);
 	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYPEER, verify ? 1 : 0);
-	curl_easy_setopt(_Curl, CURLOPT_SSLCERTTYPE, "PEM");
-	// would allow to provide the CA in memory instead of using CURLOPT_CAINFO, but needs to include and link OpenSSL
-	if (curl_easy_setopt(_Curl, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function) == CURLE_NOT_BUILT_IN)
-	{
-		nlwarning("Unable to support CURLOPT_SSL_CTX_FUNCTION, curl not compiled with OpenSSL ?");
-	}
-	// don't use that anymore, because CA can't be loaded from BNP and doesn't support UTF-8 under Windows
-	// curl_easy_setopt(_Curl, CURLOPT_CAINFO, path.c_str());
-	curl_easy_setopt(_Curl, CURLOPT_CAPATH, NULL);
+
+	// specify custom CA certs
+	NLGUI::CCurlCertificates::addCertificateFile(CAFilename);
+
+	// if supported, use custom SSL context function to load certificates
+	NLGUI::CCurlCertificates::useCertificates(_Curl);
+
 	return true;
 }
 
@@ -175,7 +97,7 @@ bool CCurlHttpClient::sendRequest(const std::string& methodWB, const std::string
 	}
 
 	// Set POST params
-	if ((methodWB == "POST ") && (!postParams.empty()))
+	if ((methodWB == "POST") && (!postParams.empty()))
 	{
 		curl_easy_setopt(_Curl, CURLOPT_POSTFIELDS, postParams.c_str());
 	}
@@ -221,25 +143,25 @@ void CCurlHttpClient::pushReceivedData(uint8 *buffer, uint size)
 // ***************************************************************************
 bool CCurlHttpClient::sendGet(const string &url, const string& params, bool verbose)
 {
-	return sendRequest("GET ", url + (params.empty() ? "" : ("?" + params)), string(), string(), string(), verbose);
+	return sendRequest("GET", url + (params.empty() ? "" : ("?" + params)), string(), string(), string(), verbose);
 }
 
 // ***************************************************************************
 bool CCurlHttpClient::sendGetWithCookie(const string &url, const string &name, const string &value, const string& params, bool verbose)
 {
-	return sendRequest("GET ", url + (params.empty() ? "" : ("?" + params)), name, value, string(), verbose);
+	return sendRequest("GET", url + (params.empty() ? "" : ("?" + params)), name, value, string(), verbose);
 }
 
 // ***************************************************************************
 bool CCurlHttpClient::sendPost(const string &url, const string& params, bool verbose)
 {
-	return sendRequest("POST ", url, string(), string(), params, verbose);
+	return sendRequest("POST", url, string(), string(), params, verbose);
 }
 
 // ***************************************************************************
 bool CCurlHttpClient::sendPostWithCookie(const string &url, const string &name, const string &value, const string& params, bool verbose)
 {
-	return sendRequest("POST ", url, name, value, params, verbose);
+	return sendRequest("POST", url, name, value, params, verbose);
 }
 
 // ***************************************************************************
@@ -247,11 +169,11 @@ bool CCurlHttpClient::receive(string &res, bool verbose)
 {
 	if (verbose)
 	{
-		nldebug("Receiving %u bytes", _ReceiveBuffer.size());
+		nldebug("Receiving %u bytes", (uint)_ReceiveBuffer.size());
 	}
 
 	res.clear();
-	if (_ReceiveBuffer.size())
+	if (!_ReceiveBuffer.empty())
 		res.assign((const char*)&(*(_ReceiveBuffer.begin())), _ReceiveBuffer.size());
 	_ReceiveBuffer.clear();
 	return true;

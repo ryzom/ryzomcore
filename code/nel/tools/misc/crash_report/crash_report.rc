@@ -3,33 +3,40 @@
 
 IDI_MAIN_ICON ICON DISCARDABLE "nevraxpill.ico"
 
-VS_VERSION_INFO VERSIONINFO
-FILEVERSION NL_VERSION_RC
-PRODUCTVERSION NL_VERSION_RC
-FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
 #ifdef _DEBUG
-FILEFLAGS VS_FF_DEBUG
+#define NL_FILEEXT "_d"
 #else
-FILEFLAGS 0x0L
+#define NL_FILEEXT ""
 #endif
-FILEOS VOS__WINDOWS32
-FILETYPE VFT_APP
-FILESUBTYPE 0x0L
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION NL_VERSION_RC
+ PRODUCTVERSION NL_VERSION_RC
+ FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+#ifdef _DEBUG
+ FILEFLAGS VS_FF_DEBUG
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS VOS_NT_WINDOWS32
+ FILETYPE VFT_APP
+ FILESUBTYPE 0x0L
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "FileDescription", "Crash Report"
+            VALUE "CompanyName", AUTHOR
+            VALUE "FileDescription", "NeL Crash Report"
             VALUE "FileVersion", NL_VERSION
             VALUE "LegalCopyright", COPYRIGHT
-            VALUE "OriginalFilename", "crash_report.exe"
-            VALUE "ProductName", "Ryzom Core"
-            VALUE "ProductVersion", NL_VERSION
+            VALUE "OriginalFilename", "crash_report" NL_FILEEXT ".exe"
+            VALUE "ProductName", "NeL Tools"
+            VALUE "ProductVersion", NL_PRODUCT_VERSION
         END
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x409, 1252
+        VALUE "Translation", 0x9, 1200
     END
 END

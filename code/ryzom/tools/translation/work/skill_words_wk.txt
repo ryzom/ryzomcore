@@ -1,0 +1,732 @@
+﻿skill ID	name	ia	da	p	pia	pda	description
+AcurateBleedingShot	accurate bleeding shot 	an	the	accurate bleeding shots 		the	
+AcurateBreathlessShot	accurate breathless shot	an	the	accurate breathless shots		the	
+AnimalSlideslip	animal slideslip	an	the	animal slideslips		the	
+AnimalStalking	animal stalking	an	the	animal stalkings		the	
+Apothecary	apothecary	an	the	apothecaries		the	
+Area	area	an	the	areas		the	
+ArmorAndWeaponSmithing	armor and weapon smithing			armor and weapon smithing		the	
+ArtAndCraft	arts and crafts	an	the	arts and crafts		the	
+AttackKamisKnowledge	attack Kamis knowledge	an	the	attack Kamis knowledge		the	
+AtysianRegeneration	atysian regeneration	an	the	atysian regenerations		the	
+Axe	axe	an	the	axes		the	
+BackdraftStab	backdraft stab	a	the	backdraft stabs		the	
+BadLuck	bad luck	a	the	bad lucks		the	
+BarehandedCombat	barehanded combat	a	the	barehanded combats		the	
+BersekAttack	berserk attack	a	the	berserk attacks		the	
+BlackSmithing	black smithing			black smithing		
+Bleeding	bleeding			bleeding		the
+BlindingRage	blinding rage	a	the	blinding rages		the
+BlindShot	blind shot 	a	the	blind shots 		the
+BowGun	bowgun	a	the	bowguns		the
+BowPistol	bowpistol	a	the	bowpistols		the
+Building	building			building		the
+BullyraggingBlast	bullyragging blast	a	the	bullyragging blasts		the
+Camouflage	camouflage	a	the	camouflage		the
+Caravan	Karavan	a	the	Karavans		the
+CerebralFever	cerebral fever	a	the	cerebral fevers		the
+ClothTailoring	cloth tailoring			cloth tailoring		the
+Cooking	cooking			cooking		the
+CreatureHatred	creature hatred	a	the	creature hatreds		the
+Dagger	dagger	a	the	daggers		the
+Desert	desert	a	the	deserts		the
+DesertExoticRawMaterialKnowledge	desert exotic raw material knowledge	a	the	desert exotic raw material knowledge		the
+DesertKamisKnowledge	desert Kamis knowledge	a	the	desert Kamis knowledge		the
+DesertTravel	desert travel	a	the	desert travels		the
+Digging	digging			digging		the
+DiscreetApproach	discreet approach	a	the	discreet approaches		the
+Diving	diving			diving		the
+Dodging	dodging	a	the	dodgings		the
+Dragon	dragon	a	the	dragons		the
+Dryade	dryad	a	the	dryads		the
+DualWield	dual wield	a	the	dual wields		the
+Evaluate	evaluate			evaluate		the
+FarShot	far shot	a	the	far shots		the
+FarThrow	far throw	a	the	far throws		the
+FeverProtect	fever protect	a	the	fever protects		the
+FirstAid	first aid	a	the	first aid		the
+Fishing	fishing	a	the	fishing		the
+Forest	forest	a	the	forests		the
+ForestExoticRawMaterialKnowledge	forest exotic raw material knowledge	a	the 	forest exotic raw material knowledge		the
+ForestKamisKnowledge	forest Kamis knowledge	a	the	forest Kamis knowledge		the
+ForestTravel	forest travel	a	the	forest travels		the
+Frost	frost	a	the	frosts		the
+Fyros	Fyros	a	the	Fyros		the
+FyrosGoods	Fyros goods			Fyros goods		the
+Goo	goo		the	goo		
+GreatAxe	great axe	a	the	great axes		the
+GreatMass	great mass [mace ?]	a	the	great masses		the
+Grenade	grenade	a	the	grenades		the
+GroundExtract	ground extract	a	the	ground extracts		the
+HandToHand	hand to hand	a	the	hand to hand		the
+Harpoon	harpoon 	a	the	harpoons		the
+HarpoonHunting	harpoon hunting	a	the	harpoon huntings		the
+Harvest	harvest	a	the	harvests		the
+HealingKamisKnowledge	healing Kamis knowledge	a	the	healing Kamis knowledge		the
+HearWithering	hear withering	a	the	hear witherings		the
+HeavyArmourWear	heavy armor wear	a	the	heavy armor wears		the
+HeavyWeapon	heavy weapon	a	the	heavy weapons		the
+Hide	hide			hides		
+HominOpponentConsiderWeapon	homin opponent consider weapon	a	the	homin opponent consider weapons		the
+HuntingKamisKnowledge	hunting Kamis knowledge	a	the	hunting Kamis knowledge		the
+Jewellery	jewelry		the	jewelry		the
+Jungle	jungle	a	the	jungles		the
+JungleExoticRawMaterialKnowledge	jungle exotic raw material knowledge	a	the	jungle exotic raw material knowledge		the
+JungleKamisKnowledge	jungle Kamis knowledge	a	the	jungle Kamis knowledge		the
+JungleTravel	jungle travel	a	the	jungle travels		the
+Kami	Kami	a	the	Kamis		the
+KamicShield	Kamic shield	a	the	Kamic shields		the
+KamicShock	Kamic shock	a	the	Kamic shocks		the
+Kick	kick	a	the	kicks		the
+Kitin	kitin	a	the	kitin		the
+Lake	lake	a	the	lakes		the
+LakeArmor	lake armor		the	lake armor		the
+LakeExoticRawMaterialKnowledge	lake exotic raw material knowledge	a	the	lake exotic raw material knowledge		the
+LakeKamisKnowledge	lake Kamis knowledge	a	the	lake Kamis knowledge		the
+LakeTravel	lake travel	a	the	lake travels		the
+LeadAnimal	lead animal	a	the	lead animals		the
+LeatherTailoring	leather tailoring	a	the	leather tailorings		the
+LeftHandedAttack	left handed attack	a	the	left handed attacks		the
+LeftHandedParry	left handed parry	a	the	left handed parries		the
+LifeAlchemy	life alchemy	a	the	life alchemies		the
+LifeGift	life gift	a	the	life gifts		the
+LightArmourWear	light armor wear	a	the	light armor wears		the
+Madness	madness	a	the	madnesses		the
+MagicObjects	magic objects			magic objects		the
+MagicTransfert	magic transfer	a	the	magic transfers		the
+MajorDryade	major dryad	a	the	major dryads		the
+MajorHealLife	major heal life	a	the	major heal lifes		the
+MajorLifeRegeneration	major life regeneration	a	the	major life regenerations		the
+MajorMandragore	major mandragore	a	the	major mandragores		the
+MajorSapHeal	major sap heal	a	the	major sap heals		the
+MajorSapRegenearation	major sap regenearation	a	the	major sap regenearations		the
+MajorSylve	major sylve	a	the	major sylves		the
+MajorTirednessHeal	major tiredness heal	a	the	major tiredness heals		the
+MajorTirednessRegenearation	major tiredness regenearation	a	the	major tiredness regenearation		the
+MakeAnklet	make anklet	a	the	make anklet		the
+MakeAutolaunch	make autolaunch	a	the	make autolaunch		the
+MakeAutolaunchAmmo	make autolaunch ammo	a	the	make autolaunch ammo		the
+MakeAxe	make axe	a	the	make axe		the
+MakeBag	make bags	a	the	make bags		the
+MakeBowgun	make bowgun	a	the	make bowgun		the
+MakeBowgunAmmo	make bowgun ammo	a	the	make bowgun ammo		the
+MakeBracelet	make bracelet	a	the	make bracelet		the
+MakeBuckler	make buckler	a	the	make buckler		the
+MakeClothes	make clothes	a	the	make clothes		the
+MakeDagger	make dagger	a	the	make dagger		the
+MakeDiadem	make diadem	a	the	make diadem		the
+MakeEaring	make earing	a	the	make earing		the
+MakeFireAmmos	make fire ammo	a	the	make fire ammo		the
+MakeFireToughenedArmors	make fire toughened armor	a	the	make fire toughened armor		the
+MakeFireWeapons	make fire weapon	a	the	make fire weapons		the
+MakeFloralLivingJewels	make floral living jewels	a	the	make floral living jewels		the
+MakeFloralPatternLivingClothes	make floral pattern living clothes	a	the	make floral pattern living clothes		the
+MakeGrenade	make grenade	a	the	make grenade		the
+MakeHarpoonGun	make harpoon gun	a	the	make harpoon guns		the
+MakeHarpoonGunAmmo	make harpoon gun ammo	a	the	make harpoon gun ammo		the
+MakeHeavyArmors	make heavy armor	a	the	make heavy armor		the
+MakeHeavyBoots	make heavy boots	a	the	make heavy boots		the
+MakeHeavyGloves	make heavy gloves	a	the	make heavy gloves		the
+MakeHeavyHelmet	make heavy helmet	a	the	make heavy helmet		the
+MakeHeavyPants	make heavy pants	a	the	make heavy pants		the
+MakeHeavySleeves	make heavy sleeves	a	the	make heavy sleeves		the
+MakeHeavyVest	make heavy vest	a	the	make heavy vest		the
+MakeJewels	make jewels	a	the	make jewels		the
+MakeKamicClothes	make Kamic clothes	a	the	make Kamic clothes		the
+MakeKamicJewels	make Kamic jewels	a	the	make Kamic jewels		the
+MakeKamicWeapon	make Kamic weapon	a	the	make Kamic weapons		the
+MakeLance	make lance	a	the	make lance		the
+MakeLauncher	make launcher	a	the	make launcher		the
+MakeLauncherAmmo	make launcher ammo	a	the	make launcher ammo		the
+MakeLightBoots	make light boots	a	the	make light boots		the
+MakeLightGloves	make light gloves	a	the	make light gloves		the
+MakeLightHelmet	make light helmet	a	the	make light helmet		the
+MakeLightPants	make light pants	a	the	make light pants		the
+MakeLightSleeves	make light sleeves	a	the	make light sleeves		the
+MakeLightVest	make light vest	a	the	make light vest		the
+MakeLongAxe	make long axe	a	the	make long axe		the
+MakeLongMace	make long mace	a	the	make long mace		the
+MakeLongSword	make long sword	a	the	make long sword		the
+MakeMace	make mace	a	the	make mace		the
+MakeMediumArmors	make medium armor	a	the	make medium armor		the
+MakeMediumBoots	make medium boots	a	the	make medium boots		the
+MakeMediumGloves	make medium gloves	a	the	make medium gloves		the
+MakeMediumHelmet	make medium helmet	a	the	make medium helmet		the
+MakeMediumPants	make medium pants	a	the	make medium pants		the
+MakeMediumSleeves	make medium sleeves	a	the	make medium sleeves		the
+MakeMediumVest	make medium vest	a	the	make medium vest		the
+MakeMeleeWeapons	make melee weapon	a	the	make melee weapons		the
+MakePendant	make pendant	a	the	make pendant		the
+MakePike	make pike	a	the	make pike		the
+MakePistol	make pistol	a	the	make pistol		the
+MakePistolAmmo	make pistol ammo	a	the	make pistol ammo		the
+MakePistolarc	make pistolarc	a	the	make pistolarc		the
+MakePistolarcAmmo	make pistolarc ammo	a	the	make pistolarc ammo		the
+MakePoisonnousLivingWeapons	make poisonnous living weapon 	a	the	make poisonnous living weapons 		the
+MakeRangeWeaponAmmos	make range weapon ammo	a	the	make range weapon ammo		the
+MakeRangeWeapons	make range weapon	a	the	make range weapons		the
+MakeRifle	make rifle	a	the	make rifle		the
+MakeRifleAmmo	make rifle ammo	a	the	make rifle ammo		the
+MakeRing	make ring	a	the	make ring		the
+MakeShield	make shield	a	the	make shields		the
+MakeShiftRepair	make shift repair	a	the	make shift repairs		the
+MakeSurvivalTools	make survival tool	a	the	make survival tools		the
+MakeSurvivalWeapon	make survival weapon	a	the	make survival weapons		the
+MakeSword	make sword	a	the	make sword		the
+MakeThrowingWeapon	make throwing weapon	a	the	make throwing weapons		the
+MakeTools	make tool	a	the	make tools		the
+MakeTwo_handsMeleeWeapons	make two-hands melee weapon	a	the	make two-hands melee weapons		the
+MakeTwo_handsRangeWeaponAmmos	make two-hands range weapon ammo	a	the	make two-hands range weapon ammo		the
+MakeTwo_handsRangeWeapons	make two-hands range weapon	a	the	make two-hands range weapons		the
+Mandragore	mandragore	a	the	mandragores		the
+MandrakeFist	mandrake fist	a	the	mandrake fists		the
+Mass	mass	a	the	masses		the
+MassiveThrow	massive throw	a	the	massive throws		the
+Matis	Matis	a	the	Matis		the
+MatisGoods	Matis goods			Matis goods		the
+MatisMystery	Matis mystery	a	the	Matis mysteries		the
+Mechanic	mechanic	a	the	mechanics		the
+MediumArmourWear	medium armour wear	a	the	medium armour wears		the
+MinorLifeHeal	minor life heal	a	the	minor life heals		the
+MinorSapHeal	minor sap heal	a	the	minor sap heals		the
+MinorTirednessHeal	minor tiredness heal	a	the	minor tiredness heals		the
+Mirror	mirror	a	the	mirrors		the
+MuscularFever	muscular fever	a	the	muscular fevers		the
+NervousFever	nervous fever	a	the	nervous fevers		the
+NightShot	night shot	a	the	night shots		the
+Nunb	nunb	a	the	nunbs		the
+OnHorseBackMelee	on horse back melee	an	the	on horse back melees		the
+OnHorseBackShoot	on horse back shoot	an	the	on horse back shoots		the
+PainShare	pain share	a	the	pain shares		the
+Paralysis	paralysis	a	the	paralyses		the
+Pike	pike	a	the	pikes		the
+PikeHunting	pike hunting	a	the	pike huntings		the
+Pistol	pistol	a	the	pistols		the
+PlantHatred	plant hatred	a	the	plant hatreds		the
+PointBlankShot	point blank shot	a	the	point blank shots		the
+PrimaryRoots	primary roots	a	the	primary roots		the
+ProtectingKamisKnoledge	protecting Kamis knowledge	a	the	protecting Kamis knowledge		the
+Quartering	quartering	a	the	quarterings		the
+QuickShot	quick shot	a	the	quick shots		the
+QuickThrow	quick throw	a	the	quick throws		the
+Range	range	a	the	ranges		the
+RapidBurst	rapid burst	a	the	rapid bursts		the
+Resist	resist	a	the	resists		the
+Resistance	resistance	a	the	resistances		the
+RidePackers	ride packer	a	the	ride packers		the
+Riding	riding	a	the	ridings		the
+Rifle	rifle	a	the	rifles		the
+RifleHunting	rifle hunting	a	the	rifle huntings		the
+Rocket	rocket	a	the	rockets		the
+RockTabou	rock taboo	a	the	rock taboos		the
+Rondache	rondache	a	the	rondaches		the
+Rot	rot	a	the	rots		the
+Running	running	a	the	runnings		the
+SapAlchemy	sap alchemy	a	the	sap alchemies		the
+SapArmor	sap armor	a	the	sap armors		the
+SapGift	sap gift	a	the	sap gifts		the
+Shield	shield	a	the	shields		the
+ShootAndRun	shoot and run	a	the	shoot and runs		the
+ShotProtect	shot protect	a	the	shot protects		the
+SlowingBreath	slowing breath	a	the	slowing breaths		the
+SlowingLife	slowing life	a	the	slowing lives		the
+Spear	spear	a	the	spears		the
+SpellDeletion	spell deletion	a	the	spell deletions		the
+SpellProtect	spell protect	a	the	spell protects		the
+SpurtingFire	spurting fire	a	the	spurting fires		the
+Squandering	squandering	a	the	squanderings		the
+StallSetUp	stall set up	a	the	stall set ups		the
+StealBreath	steal breath	a	the	steal breaths		the
+StealLife	steal life	a	the	steal lives		the
+StealSap	steal sap	a	the	steal saps		the
+Stick	stick	a	the	sticks		the
+StrenghtGift	strength gift	a	the	strength gifts		the
+Swimming	swimming	a	the	swimmings		the
+Sword	sword	a	the	swords		the
+SylphicSlide	sylphic slide	a	the	sylphic slides		the
+Sylve	sylve	a	the	sylves		the
+TactileWithering	tactile withering	a	the	tactile witherings		the
+Target	target	a	the	targets		the
+Terror	terror	a	the	terrors		the
+TirednessAlchemy	tiredness alchemy	a	the	tiredness alchemies		the
+Tracking	tracking	a	the	trackings		the
+TradingCenterKnowledge	trading center knowledge	a	the	trading center knowledge		the
+TrainingAgility	training agility	a	the	training agilities		the
+TrainingAnimal	training animal	a	the	training animals		the
+TrainingCharisme	training charisma	a	the	training charismas		the
+TrainingConstitution	training constitution	a	the	training constitutions		the
+TrainingDiseaseResist	training disease resist	a	the	training disease resists		the
+TrainingEmpathie	training empathy	a	the	training empathies		the
+TrainingFearResist	training fear resist	a	the	training fear resists		the
+TrainingHp	training hp			training hp		
+TrainingHp2	training hp 2			training hp 2		
+TrainingHp3	training hp 3			training hp 3		
+TrainingHp4	training hp 4			training hp 4		
+TrainingImpactResist	training impact resist	a	the	training impact resists		the
+TrainingIntelligence	training intelligence	a	the	training intelligences		the
+TrainingMagicResist	training magic resist	a	the	training magic resists		the
+TrainingPerception	training perception	a	the	training perceptions		the
+TrainingSeve	training seve			training seve		
+TrainingSeve2	training seve 2			training seve 2		
+TrainingSeve3	training seve 3			training seve 3		
+TrainingSeve4	training seve 4			training seve 4		
+TrainingStamina	training stamina	a	the	training staminas		the
+TrainingStamina2	training stamina 2	a	the	training stamina 2		
+TrainingStamina3	training stamina 3	a	the	training stamina 3		
+TrainingStamina4	training stamina 4	a	the	training stamina 4		
+TrainingStrength	training strength	a	the	training strengths		the
+TrainingTechnoResist	training techno resist	a	the	training techno resists		the
+TrainingWellBalanced	training well balanced	a	the	training well balanceds		the
+TrainingWill	training will	a	the	training wills		the
+Tryker	Tryker	a	the	Trykers		the
+TrykerGoods	Tryker goods			Tryker goods		the
+TrykerMystery	Tryker mystery	a	the	Tryker mysteries		the
+TwoHandedCombat	two handed combat	a	the	two handed combats		the
+TwoHandsSword	two hands sword	a	the	two hands swords		the
+UnderwaterExtract	underwater extract	an	the	underwater extracts		the
+VisualWithering	visual withering	a	the	visual witherings		the
+VitalBurst	vital burst	a	the	vital bursts		the
+WarriorGift	warrior gift	a	the	warrior gifts		the
+WeaponsCutting	weapons cutting	a	the	weapons cuttings		the
+WindArmor	wind armor	a	the	wind armor		the
+WindGift	wind gift	a	the	wind gifts		the
+WindShear	wind shear	a	the	wind shear		the
+Zorai	Zoraï	a	the	Zoraïs		the
+ZoraiGoods	Zoraï goods			Zoraï goods		the
+ZoraiMystery	Zoraï mystery	a	the	Zoraï mysteries		the
+TrainingImpactResist2	training impact resist 2	a	the	training impact resists 2		the
+TrainingImpactResist3	training impact resist 3	a	the	training impact resists 3		the
+TrainingMagicResist2	training magic resist 2	a	the	training magic resists 2		the
+TrainingMagicResist3	training magic resist 3	a	the	training magic resists 3		the
+MakeEnchantedWeapons	make enchanted weapons	a	the	make enchanted weapons		the
+MakeEnchantedArmors	make enchanted armors	a	the	make enchanted armors		the
+MakeVampiricWeapons	make vampiric weapons	a	the	make vampiric weapons		the
+MakeEnchantedFloralPatternLivingClothes	make enchanted floral pattern living clothes	a	the	make enchanted floral pattern living clothes		the
+MakeDeadlyHarpoongun	make deadly harpoongun	a	the	make deadly harpoonguns		the	
+MakeHuntingArmors	make hunting armors	a	the	make hunting armors		the	
+MakeRitualClothes	make ritual clothes	a	the	make ritual clothes		the	
+MakeRitualJewels	make ritual jewels	a	the	make ritual jewels		the	
+SC	Craft	a	the	Craft		the	Craft
+SM	Magic	a	the	Magic		the	Magic
+SMT	Impact Magic	a	the	Magic targeted		the	Magic targeted
+SMTM	Missile Magic	a	the	Magic targeted missile		the	Magic targeted missile
+SMTMR	Primal Magic	a	the	Magic targeted missile - Primal		the	Magic targeted missile - Primal
+SMTMG	Atysian Magic	a	the	Magic targeted missile - Atysian		the	Magic targeted missile - Atysian
+SMTMB	Celestial Magic	a	the	Magic targeted missile - Celestial		the	Magic targeted missile - Celestial
+SMTO	Offensive Magic	a	the	Magic targeted offensive		the	Magic targeted offensive
+SMTOD	Physical Magic	a	the	Magic targeted offensive damage		the	Magic targeted offensive damage
+SMTODP	Piercing Magic	a	the	Magic targeted offensive damage - piercing		the	Magic targeted offensive damage - piercing
+SMTODB	Blunt Magic	a	the	Magic targeted offensive damage - blunt		the	Magic targeted offensive damage - blunt
+SMTODS	Slashing Magic	a	the	Magic targeted offensive damage - slashing		the	Magic targeted offensive damage - slashing
+SMTOE	Elemental Magic	a	the	Magic targeted offensive special damage		the	Magic targeted offensive special damage
+SMTOEC	Cold Magic	a	the	Magic targeted offensive special damage - cold		the	Magic targeted offensive special damage - cold
+SMTOEA	Acid Magic	a	the	Magic targeted offensive special damage - acid		the	Magic targeted offensive special damage - acid
+SMTOER	Rot Magic	a	the	Magic targeted offensive special damage - rot		the	Magic targeted offensive special damage - rot
+SMTOEF	Fire Magic	a	the	Magic targeted offensive special damage - fire		the	Magic targeted offensive special damage - fire
+SMTOES	Shockwave Magic	a	the	Magic targeted offensive special damage - shockwave		the	Magic targeted offensive special damage - shockwave
+SMTOEP	Poison Magic	a	the	Magic targeted offensive special damage - poison		the	Magic targeted offensive special damage - poison
+SMTOEE	Electric Magic	a	the	Magic targeted offensive special damage - electric		the	Magic targeted offensive special damage - electric
+SMTC	Curative Magic	a	the	Magic targeted curative		the	Magic targeted curative
+SMTCH	Healing Magic	a	the	Magic targeted curative heal		the	Magic targeted curative heal
+SMTCHP	HP Healing Magic	a	the	Magic targeted curative heal - HP		the	Magic targeted curative heal - HP
+SMTCHT	STA Healing Magic	a	the	Magic targeted curative heal - STA		the	Magic targeted curative heal - STA
+SMTCHA	SAP Healing Magic	a	the	Magic targeted curative heal - SAP		the	Magic targeted curative heal - SAP
+SMTCHC	Focus Healing Magic	a	the	Magic targeted curative heal - Focus		the	Magic targeted curative heal - Focus
+SMTCB	Break Link	a	the	Magic targeted curative break link		the	Magic targeted curative break link
+SMTCBD	Break Link Damage	a	the	Magic targeted curative break link - damage		the	Magic targeted curative break link - damage
+SMTCBS	Break Link Sickness	a	the	Magic targeted curative break link - sickness		the	Magic targeted curative break link - sickness
+SMTCBC	Break Link Curse	a	the	Magic targeted curative break link - curse		the	Magic targeted curative break link - curse
+SML	Magic Link	a	the	Magic link		the	Magic link
+SMLM	Missile Link	a	the	Magic link missile		the	Magic link missile
+SMLMR	Primal Link	a	the	Magic link missile - Primal		the	Magic link missile - Primal
+SMLMG	Atysian Link	a	the	Magic link missile - Atysian		the	Magic link missile - Atysian
+SMLMB	Celestial Link	a	the	Magic link missile - Celestial		the	Magic link missile - Celestial
+SMLO	Offensive Link	a	the	Magic link offensive		the	Magic link offensive
+SMLOS	Sickness Link	a	the	Magic link offensive sickness		the	Magic link offensive sickness
+SMLOSM	Madness Link	a	the	Magic link offensive sickness - madness		the	Magic link offensive sickness - madness
+SMLOSS	Speed Debuff Link	a	the	Magic link offensive sickness - speed debuff		the	Magic link offensive sickness - speed debuff
+SMLOSR	Resist Debuff Link	a	the	Magic link offensive sickness - resist debuff		the	Magic link offensive sickness - resist debuff
+SMLOSK	Skill Debuff Link	a	the	Magic link offensive sickness - skill debuff		the	Magic link offensive sickness - skill debuff
+SMLOC	Curse Link	a	the	Magic link offensive curse		the	Magic link offensive curse
+SMLOCI	Incapacity Link	a	the	Magic link offensive curse - incapacity		the	Magic link offensive curse - incapacity
+SMLOCM	Mental Disturbance Link	a	the	Magic link offensive curse - mental disturbance		the	Magic link offensive curse - mental disturbance
+SMLOCS	Misfortune Link	a	the	Magic link offensive curse - misfortune		the	Magic link offensive curse - misfortune
+SMLOCH	Hatred Link	a	the	Magic link offensive curse - hatred		the	Magic link offensive curse - hatred
+SMLOD	Physical Link	a	the	Magic link offensive damage		the	Magic link offensive damage
+SMLODP	Piercing Link	a	the	Magic link offensive damage - piercing		the	Magic link offensive damage - piercing
+SMLODB	Blunt Link	a	the	Magic link offensive damage - blunt		the	Magic link offensive damage - blunt
+SMLODS	Slashing Link	a	the	Magic link offensive damage - slashing		the	Magic link offensive damage - slashing
+SMLOE	Elemental Link	a	the	Magic link offensive special damage		the	Magic link offensive special damage
+SMLOEC	Cold Link	a	the	Magic link offensive special damage - cold		the	Magic link offensive special damage - cold
+SMLOEA	Acid Link	a	the	Magic link offensive special damage - acid		the	Magic link offensive special damage - acid
+SMLOER	Rot Link	a	the	Magic link offensive special damage - rot		the	Magic link offensive special damage - rot
+SMLOEF	Fire Link	a	the	Magic link offensive special damage - fire		the	Magic link offensive special damage - fire
+SMLOES	Shockwave Link	a	the	Magic link offensive special damage - shockwave		the	Magic link offensive special damage - shockwave
+SMLOEP	Poison Link	a	the	Magic link offensive special damage - poison		the	Magic link offensive special damage - poison
+SMLOEE	Electric Link	a	the	Magic link offensive special damage - electric		the	Magic link offensive special damage - electric
+SMLC	Curative Link	a	the	Magic link curative		the	Magic link curative
+SMLCH	Healing Link	a	the	Magic link curative heal		the	Magic link curative heal
+SMLCHP	HP Healing Link	a	the	Magic link curative heal - HP		the	Magic link curative heal - HP
+SMLCHT	STA Healing Link	a	the	Magic link curative heal - STA		the	Magic link curative heal - STA
+SMLCHA	SAP Healing Link	a	the	Magic link curative heal - SAP		the	Magic link curative heal - SAP
+SMLCHC	Focus Healing Link	a	the	Magic link curative heal - Focus		the	Magic link curative heal - Focus
+SMA	Autonomous Magic	a	the	Magic autonomous		the	Magic autonomous
+SMAE	Enchantment Magic	a	the	Magic enchantment		the	Magic enchantment
+SMAES	Spell Enchantment	a	the	Magic enchantment - spell		the	Magic enchantment - spell
+SMAEB	Bonus Enchantment	a	the	Magic enchantment - bonus		the	Magic enchantment - bonus
+SMAP	Potion Making Magic	a	the	Magic potion making		the	Magic potion making
+SD	Defense	a	the	Defense		the	Defense
+SDA	Armor defense	an	the	Armor defense		the	Armor defense
+SDAL	Light armor defense	a	the	Light armor defense		the	Light armor defense
+SDALF	Light armor defense - Fyros	a	the	Light armor defense - Fyros		the	Light armor defense - Fyros
+SDALFA	Advanced light armor defense - Fyros	an	the	Advanced light armor defense - Fyros		the	Advanced light armor defense - Fyros
+SDALFAE	Expert light armor defense - Fyros	an	the	Expert light armor defense - Fyros		the	Expert light armor defense - Fyros
+SDALM	Light armor defense - Matis	a	the	Light armor defense - Matis		the	Light armor defense - Matis
+SDALMA	Advanced light armor defense - Matis	an	the	Advanced light armor defense - Matis		the	Advanced light armor defense - Matis
+SDALMAE	Expert light armor defense - Matis	an	the	Expert light armor defense - Matis		the	Expert light armor defense - Matis
+SDALT	Light armor defense - Tryker	a	the	Light armor defense - Tryker		the	Light armor defense - Tryker
+SDALTA	Advanced light armor defense - Tryker	an	the	Advanced light armor defense - Tryker		the	Advanced light armor defense - Tryker
+SDALTAE	Expert light armor defense - Tryker	an	the	Expert light armor defense - Tryker		the	Expert light armor defense - Tryker
+SDALZ	Light armor defense - Zoraï	a	the	Light armor defense - Zoraï		the	Light armor defense - Zoraï
+SDALZA	Advanced light armor defense - Zoraï	an	the	Advanced light armor defense - Zoraï		the	Advanced light armor defense - Zoraï
+SDALZAE	Expert light armor defense - Zoraï	an	the	Expert light armor defense - Zoraï		the	Expert light armor defense - Zoraï
+SDAM	Medium armor defense	a	the	Medium armor defense		the	Medium armor defense
+SDAMF	Medium armor defense - Fyros	a	the	Medium armor defense - Fyros		the	Medium armor defense - Fyros
+SDAMFA	Advanced medium armor defense - Fyros	an	the	Advanced medium armor defense - Fyros		the	Advanced medium armor defense - Fyros
+SDAMFAE	Expert medium armor defense - Fyros	an	the	Expert medium armor defense - Fyros		the	Expert medium armor defense - Fyros
+SDAMM	Medium armor defense - Matis	a	the	Medium armor defense - Matis		the	Medium armor defense - Matis
+SDAMMA	Advanced medium armor defense - Matis	an	the	Advanced medium armor defense - Matis		the	Advanced medium armor defense - Matis
+SDAMMAE	Expert medium armor defense - Matis	an	the	Expert medium armor defense - Matis		the	Expert medium armor defense - Matis
+SDAMT	Medium armor defense - Tryker	a	the	Medium armor defense - Tryker		the	Medium armor defense - Tryker
+SDAMTA	Advanced medium armor defense - Tryker	an	the	Advanced medium armor defense - Tryker		the	Advanced medium armor defense - Tryker
+SDAMTAE	Expert medium armor defense - Tryker	an	the	Expert medium armor defense - Tryker		the	Expert medium armor defense - Tryker
+SDAMZ	Medium armor defense - Zoraï	a	the	Medium armor defense - Zoraï		the	Medium armor defense - Zoraï
+SDAMZA	Advanced medium armor defense - Zoraï	an	the	Advanced medium armor defense - Zoraï		the	Advanced medium armor defense - Zoraï
+SDAMZAE	Expert medium armor defense - Zoraï	an	the	Expert medium armor defense - Zoraï		the	Expert medium armor defense - Zoraï
+SDAH	Expert armor defense	an	the	Expert armor defense		the	Expert armor defense
+SDAHF	Expert armor defense - Fyros	an	the	Expert armor defense - Fyros		the	Expert armor defense - Fyros
+SDAHFA	Advanced expert armor defense - Fyros	an	the	Advanced expert armor defense - Fyros		the	Advanced expert armor defense - Fyros
+SDAHFAE	Expert expert armor defense - Fyros	an	the	Expert expert armor defense - Fyros		the	Expert expert armor defense - Fyros
+SDAHM	Expert armor defense - Matis	an	the	Expert armor defense - Matis		the	Expert armor defense - Matis
+SDAHMA	Advanced expert armor defense - Matis	an	the	Advanced expert armor defense - Matis		the	Advanced expert armor defense - Matis
+SDAHMAE	Expert expert armor defense - Matis	an	the	Expert expert armor defense - Matis		the	Expert expert armor defense - Matis
+SDAHT	Expert armor defense - Tryker	an	the	Expert armor defense - Tryker		the	Expert armor defense - Tryker
+SDAHTA	Advanced expert armor defense - Tryker	an	the	Advanced expert armor defense - Tryker		the	Advanced expert armor defense - Tryker
+SDAHTAE	Expert expert armor defense - Tryker	an	the	Expert expert armor defense - Tryker		the	Expert expert armor defense - Tryker
+SDAHZ	Expert armor defense - Zoraï	an	the	Expert armor defense - Zoraï		the	Expert armor defense - Zoraï
+SDAHZA	Advanced expert armor defense - Zoraï	an	the	Advanced expert armor defense - Zoraï		the	Advanced expert armor defense - Zoraï
+SDAHZAE	Expert expert armor defense - Zoraï	an	the	Expert expert armor defense - Zoraï		the	Expert expert armor defense - Zoraï
+SDS	Shield defense	a	the	Shield defense		the	Shield defense
+SDSB	Shield buckler defense 	a	the	Shield buckler defense 		the	Shield buckler defense 
+SDSBF	Shield buckler defense - Fyros	a	the	Shield buckler defense - Fyros		the	Shield buckler defense - Fyros
+SDSBFA	Advanced shield buckler defense - Fyros	an	the	Advanced shield buckler defense - Fyros		the	Advanced shield buckler defense - Fyros
+SDSBFAE	Expert shield buckler defense - Fyros	an	the	Expert shield buckler defense - Fyros		the	Expert shield buckler defense - Fyros
+SDSBM	Shield buckler defense - Matis	a	the	Shield buckler defense - Matis		the	Shield buckler defense - Matis
+SDSBMA	Advanced shield buckler defense - Matis	an	the	Advanced shield buckler defense - Matis		the	Advanced shield buckler defense - Matis
+SDSBMAE	Expert shield buckler defense - Matis	an	the	Expert shield buckler defense - Matis		the	Expert shield buckler defense - Matis
+SDSBT	Shield buckler defense - Tryker	a	the	Shield buckler defense - Tryker		the	Shield buckler defense - Tryker
+SDSBTA	Advanced shield buckler defense - Tryker	an	the	Advanced shield buckler defense - Tryker		the	Advanced shield buckler defense - Tryker
+SDSBTAE	Expert shield buckler defense - Tryker	an	the	Expert shield buckler defense - Tryker		the	Expert shield buckler defense - Tryker
+SDSBZ	Shield buckler defense - Zoraï	a	the	Shield buckler defense - Zoraï		the	Shield buckler defense - Zoraï
+SDSBZA	Advanced shield buckler defense - Zoraï	an	the	Advanced shield buckler defense - Zoraï		the	Advanced shield buckler defense - Zoraï
+SDSBZAE	Expert shield buckler defense - Zoraï	an	the	Expert shield buckler defense - Zoraï		the	Expert shield buckler defense - Zoraï
+SDSS	Shield large shield defense	a	the	Shield large shield defense		the	Shield large shield defense
+SDSSF	Shield large shield defense - Fyros	a	the	Shield large shield defense - Fyros		the	Shield large shield defense - Fyros
+SDSSFA	Advanced shield large shield defense - Fyros	an	the	Advanced shield large shield defense - Fyros		the	Advanced shield large shield defense - Fyros
+SDSSFAE	Expert shield large shield defense - Fyros	an	the	Expert shield large shield defense - Fyros		the	Expert shield large shield defense - Fyros
+SDSSM	Shield large shield defense - Matis	a	the	Shield large shield defense - Matis		the	Shield large shield defense - Matis
+SDSSMA	Advanced shield large shield defense - Matis	an	the	Advanced shield large shield defense - Matis		the	Advanced shield large shield defense - Matis
+SDSSMAE	Expert shield large shield defense - Matis	an	the	Expert shield large shield defense - Matis		the	Expert shield large shield defense - Matis
+SDSST	Shield large shield defense - Tryker	a	the	Shield large shield defense - Tryker		the	Shield large shield defense - Tryker
+SDSSTA	Advanced shield large shield defense - Tryker	an	the	Advanced shield large shield defense - Tryker		the	Advanced shield large shield defense - Tryker
+SDSSTAE	Expert shield large shield defense - Tryker	an	the	Expert shield large shield defense - Tryker		the	Expert shield large shield defense - Tryker
+SDSSZ	Shield large shield defense - Zoraï	a	the	Shield large shield defense - Zoraï		the	Shield large shield defense - Zoraï
+SDSSZA	Advanced shield large shield defense - Zoraï	an	the	Advanced shield large shield defense - Zoraï		the	Advanced shield large shield defense - Zoraï
+SDSSZAE	Expert shield large shield defense - Zoraï	an	the	Expert shield large shield defense - Zoraï		the	Expert shield large shield defense - Zoraï
+SDD	Defense dodge	a	the	Defense dodge		the	Defense dodge
+SDDA	Advanced defense dodge	an	the	Advanced defense dodge		the	Advanced defense dodge
+SDDAT	Technical advanced defense dodge	a	the	Technical advanced defense dodge		the	Technical advanced defense dodge
+SDDATM	Mastery defense dodge	a	the	Mastery defense dodge		the	Mastery defense dodge
+SDDATME	Expert advanced defense dodge	an	the	Expert advanced defense dodge		the	Expert advanced defense dodge
+uknown	Unknown Skill			Unknown Skill			Unknown Skill
+Unknown	Unknown Skill			Unknown Skill			Unknown Skill
+SH	Harvest	a	the	Harvest		the	Harvest
+SHF	Forage	a	the	Forage			
+SHFF	Forest forage	a	the	Forest forage			
+SHFFA	Advanced forest forage	a	the	Advanced forest forage			
+SHFFAE	Expert forest forage	a	the	Expert forest forage			
+SHFFAEM	Master forest forage	a	the	Master forest forage			
+SHFD	Desert forage	a	the	Desert forage			
+SHFDA	Advanced desert forage	a	the	Advanced desert forage			
+SHFDAE	Expert desert forage	a	the	Expert desert forage			
+SHFDAEM	Master desert forage	a	the	Master desert forage			
+SHFJ	Jungle forage	a	the	Jungle forage			
+SHFJA	Advanced jungle forage	a	the	Advanced jungle forage			
+SHFJAE	Expert jungle forage	a	the	Expert jungle forage			
+SHFJAEM	Master jungle forage	a	the	Master jungle forage			
+SHFL	Lake forage	a	the	Lake forage			
+SHFLA	Advanced lake forage	a	the	Advanced lake forage			
+SHFLAE	Expert lake forage	a	the	Expert lake forage			
+SHFLAEM	Master lake forage	a	the	Master lake forage			
+SHFP	Prime roots forage	a	the	Prime roots forage			
+SHFPA	Advanced prime roots forage	a	the	Advanced prime roots forage			
+SHFPAE	Expert prime roots forage	a	the	Expert prime roots forage			
+SHFPAEM	Master prime roots forage	a	the	Master prime roots forage			
+SMTOECA	Advanced Cold Magic	an	the	Advanced Magic Targeted Offensive special Damage - Cold		the	Advanced Magic Targeted Offensive special Damage - Cold
+SMTOEAA	Advanced Acid Magic	an	the	Advanced Magic Targeted Offensive Special Damage - Acid		the	Advanced Magic Targeted Offensive Special Damage - Acid
+SMTOERA	Advanced Rot Magic	an	the	Advanced Magic Targeted Offensive Special Damage - Rot		the	Advanced Magic Targeted Offensive Special Damage - Rot
+SMTOEFA	Advanced Fire Magic	an	the	Advanced Magic Targeted Offensive Special Damage - Fire		the	Advanced Magic Targeted Offensive Special Damage - Fire
+SMTOESA	Advanced Shockwave Magic	an	the	Advanced Magic Targeted Offensive Special Damage - Shockwave		the	Advanced Magic Targeted Offensive Special Damage - Shockwave
+SMTOEPA	Advanced Poison Magic	an	the	Advanced Magic Targeted Offensive Special Damage - Poison		the	Advanced Magic Targeted Offensive Special Damage - Poison
+SMTOEEA	Advanced Electric Magic	an	the	Advanced Magic Targeted Offensive Special Damage - Electric		the	Advanced Magic Targeted Offensive Special Damage - Electric
+SMTCHPA	Advanced HP Healing Magic	an	the	Advanced Magic Targeted Curative Heal - HP		the	Advanced Magic Targeted Curative Heal - HP
+SMTCHTA	Advanced STA Healing Magic	an	the	Advanced Magic Targeted Curative Heal - STA		the	Advanced Magic Targeted Curative Heal - STA
+SMTCHAA	Advanced SAP Healing Magic	an	the	Advanced Magic Targeted Curative Heal - SAP		the	Advanced Magic Targeted Curative Heal - SAP
+SMTCHCA	Advanced Focus Healing Magic	an	the	Advanced Magic Targeted Curative Heal - Focus		the	Advanced Magic Targeted Curative Heal - Focus
+SMLOSMA	Advanced Madness Link	an	the	Advanced Magic Link Offensive Sickness - Madness		the	Advanced Magic Link Offensive Sickness - Madness
+SMLOSSA	Advanced Speed Debuff Link	an	the	Advanced Magic Link Offensive Sickness - Speed Debuff		the	Advanced Magic Link Offensive Sickness - Speed Debuff
+SMLOCIA	Advanced Incapacity Link	an	the	Advanced Magic Link Offensive Curse - Incapacity		the	Advanced Magic Link Offensive Curse - Incapacity
+SMLOCSA	Advanced Misfortune Link	an	the	Advanced Magic Link Offensive Curse - Misfortune		the	Advanced Magic Link Offensive Curse - Misfortune
+SMLOECA	Advanced Cold Link	an	the	Advanced Magic Link Offensive Special Damage - Cold		the	Advanced Magic Link Offensive Special Damage - Cold
+SMLOEAA	Advanced Acid Link	an	the	Advanced Magic Link Offensive Special Damage - Acid		the	Advanced Magic Link Offensive Special Damage - Acid
+SMLOERA	Advanced Rot Link	an	the	Advanced Magic Link Offensive Special Damage - Rot		the	Advanced Magic Link Offensive Special Damage - Rot
+SMLOEFA	Advanced Fire Link	an	the	Advanced Magic Link Offensive Special Damage - Fire		the	Advanced Magic Link Offensive Special Damage - Fire
+SMLOESA	Advanced Shockwave Link	an	the	Advanced Magic Link Offensive Special Damage - Shockwave		the	Advanced Magic Link Offensive Special Damage - Shockwave
+SMLOEPA	Advanced Poison Link	an	the	Advanced Magic Link Offensive Special Damage - Poison		the	Advanced Magic Link Offensive Special Damage - Poison
+SMLOEEA	Advanced Electric Link	an	the	Advanced Magic Link Offensive Special Damage - Electric		the	Advanced Magic Link Offensive Special Damage - Electric
+SMD	Defensive Magic	a	the	Defensive Magic		the	Defensive Magic
+SMDA	Standard Defensive Affliction	a	the	Standard Defensive Affliction		the	Standard Defensive Affliction
+SMDAA	Advanced Defensive Affliction	an	the	Advanced Defensive Affliction		the	Advanced Defensive Affliction
+SMDAAE	Expert Defensive Affliction	an	the	Expert Defensive Affliction		the	Expert Defensive Affliction
+SMDAAEM	Master Defensive Affliction	a	the	Master Defensive Affliction		the	Master Defensive Affliction
+SMDH	Standard Healing Magic	a	the	Standard Healing Magic		the	Standard Healing Magic
+SMDHA	Advanced Healing Magic	an	the	Advanced Healing Magic		the	Advanced Healing Magic
+SMDHAE	Expert Healing Magic	an	the	Expert Healing Magic		the	Expert Healing Magic
+SMDHAEM	Master Healing Magic	a	the	Master Healing Magic		the	Master Healing Magic
+SMO	Offensive Magic	an	the	Offensive Magic		the	Offensive Magic
+SMOA	Standard Offensive Affliction	a	the	Standard Offensive Affliction		the	Standard Offensive Affliction
+SMOAA	Advanced Offensive Affliction	an	the	Advanced Offensive Affliction		the	Advanced Offensive Affliction
+SMOAAE	Expert Offensive Affliction	an	the	Expert Offensive Affliction		the	Expert Offensive Affliction
+SMOAAEM	Master Offensive Affliction	a	the	Master Offensive Affliction		the	Master Offensive Affliction
+SMOE	Standard Elemental Magic	a	the	Standard Elemental Magic		the	Standard Elemental Magic
+SMOEA	Advanced Elemental Magic	an	the	Advanced Elemental Magic		the	Advanced Elemental Magic
+SMOEAE	Expert Elemental Magic	an	the	Expert Elemental Magic		the	Expert Elemental Magic
+SMOEAEM	Master Elemental Magic	a	the	Master Elemental Magic		the	Master Elemental Magic
+SMS	Self Magic	a	the	Self Magic		the	Self Magic
+SMSS	Standard Self Magic	a	the	Standard Self Magic		the	Standard Self Magic
+SMSSA	Advanced Self Magic	an	the	Advanced Self Magic		the	Advanced Self Magic
+SMSSAE	Expert Self Magic	an	the	Expert Self Magic		the	Expert Self Magic
+SMSSAEM	Master Self Magic	a	the	Master Self Magic		the	Master Self Magic
+SF	Fight	a	the	Fight		the	
+SFM	Melee Fight	a	the	Melee Fight		the	
+SFM1	1 Hand Melee Fight	a	the	1 Hand Melee Fight		the	
+SFM1B	1 Hand Melee Blunt	a	the	1 Hand Melee Blunt		the	
+SFM1BM	Mace	a	the	Maces		the	
+SFM1BME	Electric Mace	an	the	Electric Maces		the	
+SFM1BMM	Master Mace	a	the	Master Mace		the	
+SFM1BS	Staff	a	the	Staffs		the	
+SFM1BSM	Master Staff	a	the	Master Staff		the	
+SFM1P	1 Hand Melee Piercing	a	the	1 Hand Melee Piercing		the
+SFM1PS	Spear	a	the	Spears		the
+SFM1PSE	Electric Spear	an	the	Electric Spears		the
+SFM1PSL	Living Spear	a	the	Living Spears		the
+SFM1PSM	Master Spear	a	the	Master Spear		the
+SFM1S	1 Hand Melee Slashing	a	the	1 Hand Melee Slashing		the
+SFM1SA	Axe	an	the	Axes		the
+SFM1SAB	Burning Axe	a	the	Burning Axes		the
+SFM1SAM	Master Axe	a	the	Master Axe		the
+SFM1SS	Sword	a	the	Swords		the
+SFM1SSM	Master Sword	a	the	Master Sword		the
+SFM1SSW	Waving Sword	a	the	Waving Swords		the
+SFM2	2 Hand Melee Fight	a	the	2 Hand Melee Fight		the
+SFM2B	2 Hand Melee Blunt	a	the	2 Hand Melee Blunt		the
+SFM2BM	2 Hand Mace	a	the	2 Hand Maces		the
+SFM2BME	Electric 2 Hand Mace	an	the	Electric 2 Hand Maces		the
+SFM2BMM	Master 2 Hand Mace	a	the	Master 2 Hand Mace		the
+SFM2P	2 Hand Melee Piercing	a	the	2 Hand Melee Piercing		the
+SFM2PP	Pike	a	the	Pikes		the
+SFM2PPL	Living Pike	a	the	Living Pikes		the
+SFM2PPM	Master Pike	a	the	Master Pike		the
+SFM2S	2 Hand Melee Slashing	a	the	2 Hand Melee Slashing		the
+SFM2SA	2 Hand Axe	a	the	2 Hand Axes		the
+SFM2SAB	Burning 2 Hand Axe	a	the	Burning 2 Hand Axes		the
+SFM2SAM	Master 2 Hand Axe	a	the	Master 2 Hand Axe		the
+SFM2SS	2 Hand Sword	a	the	2 Hand Swords		the
+SFM2SSB	Burning 2 Hand Sword	a	the	Burning 2 Hand Swords		the
+SFM2SSL	Living 2 Hand Sword	a	the	Living 2 Hand Swords		the
+SFM2SSM	Master 2 Hand Sword	a	the	Master 2 Hand Sword		the
+SFM2SSW	Waving 2 Hand Sword	a	the	Waving 2 Hand Swords		the
+SFMC	Close Combat	a	the	Close Combat		the
+SFMCA	Advanced Close Combat	an	the	Advanced Close Combat		the
+SFMCAD	Dagger	a	the	Daggers		the
+SFMCADL	Living Dagger	a	the	Living Daggers		the
+SFMCADM	Master Dagger	a	the	Master Dagger		the
+SFMCADW	Waving Dagger	a	the	Waving Daggers		the
+SFMCAH	Hand to Hand	a	the	Hand to Hand		the
+SFMCAHM	Master Hand to Hand	a	the	Master Hand to Hand		the
+SFR	Range Fight	a	the	Range Fight		the
+SFR1	1 Hand Range Fight	a	the	1 Hand Range Fight		the
+SFR1A	Advanced 1 Hand Range Fight	an	the	Advanced 1 Hand Range Fight		the
+SFR1AB	Bowpistol 	a	the	Bowpistols		the
+SFR1ABM	Master Bowpistol	a	the	Master Bowpistol		the
+SFR1ABW	Waving Bowpistol	a	the	Waving Bowpistols		the
+SFR1AP	Pistol	a	the	Pistols		the
+SFR1APL	Living Pistol	a	the	Living Pistols		the
+SFR1APM	Master Pistol	a	the	Master Pistol		the
+SFR2	2 Hand Range Fight	a	the	2 Hand Range Fight		the
+SFR2A	Advanced 2 Hand Range Fight	an	the	Advanced 2 Hand Range Fight		the	
+SFR2AA	Autolauncher	an	the	Autolaunchers		the	
+SFR2AAB	Burning Autolauncher	a	the	Burning Autolaunchers		the	
+SFR2AAM	Master Autolauncher	a	the	Master Autolauncher		the	
+SFR2AB	Bowrifle	a	the	Bowrifles		the	
+SFR2ABE	Electric Bowrifle	an	the	Electric Bowrifles		the	
+SFR2ABM	Master Bowrifle	a	the	Master Bowrifle		the	
+SFR2AL	Launcher	a	the	Launchers		the	
+SFR2ALB	Burning Launcher	a	the	Burning Launchers		the	
+SFR2ALE	Electric Launcher	an	the	Electric Launchers		the	
+SFR2ALM	Master Launcher	a	the	Master Launcher		the	
+SFR2AR	Rifle	a	the	Rifles		the	
+SFR2ARL	Living Rifle	a	the	Living Rifles		the	
+SFR2ARM	Master Rifle	a	the	Master Rifle		the	
+SCA	Armor Craft	an	the	Armor Craft		the	Armor Craft
+SCJ	Jewel Craft	a	the	Jewel Craft		the	Jewel Craft
+SCM	Melee Weapon Craft	a	the	Melee Weapon Craft		the	Melee Weapon Craft
+SCR	Range Weapon Craft	a	the	Range Weapon Craft		the	Range Weapon Craft
+SCAH	Heavy Armor Craft	a	the	Heavy Armor Craft		the	Heavy Armor Craft
+SCAL	Light Armor Craft	a	the	Light Armor Craft		the	Light Armor Craft
+SCAM	Medium Armor Craft	a	the	Medium Armor Craft		the	Medium Armor Craft
+SCAS	Shield Craft	a	the	Shield Craft		the	Shield Craft
+SCJA	Anklet Craft	an	the	Anklet Craft		the	Anklet Craft
+SCJB	Bracelet Craft	a	the	Bracelet Craft		the	Bracelet Craft
+SCJD	Diadem Craft	a	the	Diadem Craft		the	Diadem Craft
+SCJE	Earing Craft	an	the	Earing Craft		the	Earing Craft
+SCJP	Pendant Craft	a	the	Pendant Craft		the	Pendant Craft
+SCJR	Ring Craft	a	the	Ring Craft		the	Ring Craft
+SCM1	1H Melee Weapon Craft	a	the	1H Melee Weapon Craft		the	1H Melee Weapon Craft
+SCM2	2H Melee Weapon Craft	a	the	2H Melee Weapon Craft		the	2H Melee Weapon Craft
+SCR1	1H Range Weapon Craft	a	the	1H Range Weapon Craft		the	1H Range Weapon Craft
+SCR2	2H Range Weapon Craft	a	the	2H Range Weapon Craft		the	2H Range Weapon Craft
+SCAHB	Heavy Boots Craft	a	the	Heavy Boots Craft		the	Heavy Boots Craft
+SCAHG	Heavy Gloves Craft	a	the	Heavy Gloves Craft		the	Heavy Gloves Craft
+SCAHH	Heavy Helm Craft	a	the	Heavy Helm Craft		the	Heavy Helm Craft
+SCAHP	Heavy Pants Craft	a	the	Heavy Pants Craft		the	Heavy Pants Craft
+SCAHS	Heavy Sleeves Craft	a	the	Heavy Sleeves Craft		the	Heavy Sleeves Craft
+SCAHV	Heavy Vest Craft	a	the	Heavy Vest Craft		the	Heavy Vest Craft
+SCALB	Light Boots Craft	a	the	Light Boots Craft		the	Light Boots Craft
+SCALG	Light Gloves Craft	a	the	Light Gloves Craft		the	Light Gloves Craft
+SCALP	Light Pants Craft	a	the	Light Pants Craft		the	Light Pants Craft
+SCALS	Light Sleeves Craft	a	the	Light Sleeves Craft		the	Light Sleeves Craft
+SCALV	Light Vest Craft	a	the	Light Vest Craft		the	Light Vest Craft
+SCAMB	Medium Boots Craft	a	the	Medium Boots Craft		the	Medium Boots Craft
+SCAMG	Medium Gloves Craft	a	the	Medium Gloves Craft		the	Medium Gloves Craft
+SCAMP	Medium Pants Craft	a	the	Medium Pants Craft		the	Medium Pants Craft
+SCAMS	Medium Sleeves Craft	a	the	Medium Sleeves Craft		the	Medium Sleeves Craft
+SCAMV	Medium Vest Craft	a	the	Medium Vest Craft		the	Medium Vest Craft
+SCASS	Large Shield Craft	a	the	Large Shield Craft		the	Large Shield Craft
+SCASB	Buckler Craft	a	the	Buckler Craft		the	Buckler Craft
+SCJAA	Advanced Anklet Craft	an	the	Advanced Anklet Craft		the	Advanced Anklet Craft
+SCJBA	Advanced Bracelet Craft	an	the	Advanced Bracelet Craft		the	Advanced Bracelet Craft
+SCJDA	Advanced Diadem Craft	an	the	Advanced Diadem Craft		the	Advanced Diadem Craft
+SCJEA	Advanced Earing Craft	an	the	Advanced Earing Craft		the	Advanced Earing Craft
+SCJPA	Advanced Pendant Craft	an	the	Advanced Pendant Craft		the	Advanced Pendant Craft
+SCJRA	Advanced Ring Craft	an	the	Advanced Ring Craft		the	Advanced Ring Craft
+SCM1M	Mace craft	a	the	Mace craft		the	Mace craft
+SCM1T	Staff Craft	a	the	Staff Craft		the	Staff Craft
+SCM1P	Spear Craft	a	the	Spear Craft		the	Spear Craft
+SCM1A	Axe Craft	an	the	Axe Craft		the	Axe Craft
+SCM1S	Sword Craft	a	the	Sword Craft		the	Sword Craft
+SCM1D	Dagger Craft	a	the	Dagger Craft		the	Dagger Craft
+SCM2M	2H Mace Craft	a	the	2H Mace Craft		the	2H Mace Craft
+SCM2P	Pike Craft	a	the	Pike Craft		the	Pike Craft
+SCM2A	2H Axe Craft	a	the	2H Axe Craft		the	2H Axe Craft
+SCM2S	2H Sword Craft	a	the	2H Sword Craft		the	2H Sword Craft
+SCR1B	Bowpistol Craft	a	the	Bowpistol Craft		the	Bowpistol Craft
+SCR1P	Pistol Craft	a	the	Pistol Craft		the	Pistol Craft
+SCR2A	Autolauncher Craft	an	the	Autolauncher Craft		the	Autolauncher Craft
+SCR2B	Bowrifle Craft	a	the	Bowrifle Craft		the	Bowrifle Craft
+SCR2L	Launcher Craft	a	the	Launcher Craft		the	Launcher Craft
+SCR2R	Rifle Craft	a	the	Rifle Craft		the	Rifle Craft
+SCAHBE	Expert Heavy Boots Craft	an	the	Expert Heavy Boots Craft		the	Expert Heavy Boots Craft
+SCAHGE	Expert Heavy Gloves Craft	an	the	Expert Heavy Gloves Craft		the	Expert Heavy Gloves Craft
+SCAHHE	Expert Heavy Helm Craft	an	the	Expert Heavy Helm Craft		the	Expert Heavy Helm Craft
+SCAHPE	Expert Heavy Pants Craft	an	the	Expert Heavy Pants Craft		the	Expert Heavy Pants Craft
+SCAHSE	Expert Heavy Sleeves Craft	an	the	Expert Heavy Sleeves Craft		the	Expert Heavy Sleeves Craft
+SCAHVE	Expert Heavy Vest Craft	an	the	Expert Heavy Vest Craft		the	Expert Heavy Vest Craft
+SCALBE	Expert Light Boots Craft	an	the	Expert Light Boots Craft		the	Expert Light Boots Craft
+SCALGE	Expert Light Gloves Craft	an	the	Expert Light Gloves Craft		the	Expert Light Gloves Craft
+SCALPE	Expert Light Pants Craft	an	the	Expert Light Pants Craft		the	Expert Light Pants Craft
+SCALSE	Expert Light Sleeves Craft	an	the	Expert Light Sleeves Craft		the	Expert Light Sleeves Craft
+SCALVE	Expert Light Vest Craft	an	the	Expert Light Vest Craft		the	Expert Light Vest Craft
+SCAMBE	Expert Medium Boots Craft	an	the	Expert Medium Boots Craft		the	Expert Medium Boots Craft
+SCAMGE	Expert Medium Gloves Craft	an	the	Expert Medium Gloves Craft		the	Expert Medium Gloves Craft
+SCAMPE	Expert Medium Pants Craft	an	the	Expert Medium Pants Craft		the	Expert Medium Pants Craft
+SCAMSE	Expert Medium Sleeves Craft	an	the	Expert Medium Sleeves Craft		the	Expert Medium Sleeves Craft
+SCAMVE	Expert Medium Vest Craft	an	the	Expert Medium Vest Craft		the	Expert Medium Vest Craft
+SCASSE	Expert Shield Craft	an	the	Expert Shield Craft		the	Expert Shield Craft
+SCASBE	Expert Buckler Craft	an	the	Expert Buckler Craft		the	Expert Buckler Craft
+SCJAAE	Expert Anklet Craft	an	the	Expert Anklet Craft		the	Expert Anklet Craft
+SCJBAE	Expert Bracelet Craft	an	the	Expert Bracelet Craft		the	Expert Bracelet Craft
+SCJDAE	Expert Diadem Craft	an	the	Expert Diadem Craft		the	Expert Diadem Craft
+SCJEAE	Expert Earing Craft	an	the	Expert Earing Craft		the	Expert Earing Craft
+SCJPAE	Expert Pendant Craft	an	the	Expert Pendant Craft		the	Expert Pendant Craft
+SCJRAE	Expert Ring Craft	an	the	Expert Ring Craft		the	Expert Ring Craft
+SCM1ME	Expert Mace craft	an	the	Expert Mace craft		the	Expert Mace craft
+SCM1TE	Expert Staff Craft	an	the	Expert Staff Craft		the	Expert Staff Craft
+SCM1PE	Expert Spear Craft	an	the	Expert Spear Craft		the	Expert Spear Craft
+SCM1AE	Expert Axe Craft	an	the	Expert Axe Craft		the	Expert Axe Craft
+SCM1SE	Expert Sword Craft	an	the	Expert Sword Craft		the	Expert Sword Craft
+SCM1DE	Expert Dagger Craft	an	the	Expert Dagger Craft		the	Expert Dagger Craft
+SCM2ME	Expert 2H Mace Craft	an	the	Expert 2H Mace Craft		the	Expert 2H Mace Craft
+SCM2PE	Expert Pike Craft	an	the	Expert Pike Craft		the	Expert Pike Craft
+SCM2AE	Expert 2H Axe Craft	an	the	Expert 2H Axe Craft		the	Expert 2H Axe Craft
+SCM2SE	Expert 2H Sword Craft	an	the	Expert 2H Sword Craft		the	Expert 2H Sword Craft
+SCR1BE	Expert Bowpistol Craft	an	the	Expert Bowpistol Craft		the	Expert Bowpistol Craft
+SCR1PE	Expert Pistol Craft	an	the	Expert Pistol Craft		the	Expert Pistol Craft
+SCR2AE	Expert Autolauncher Craft	an	the	Expert Autolauncher Craft		the	Expert Autolauncher Craft
+SCR2BE	Expert Bowrifle Craft	an	the	Expert Bowrifle Craft		the	Expert Bowrifle Craft
+SCR2LE	Expert Launcher Craft	an	the	Expert Launcher Craft		the	Expert Launcher Craft
+SCR2RE	Expert Rifle Craft	an	the	Expert Rifle Craft		the	Expert Rifle Craft
+SCAHBEM	Master Heavy Boots Craft	a	the	Master Heavy Boots Craft		the	Master Heavy Boots Craft
+SCAHGEM	Master Heavy Gloves Craft	a	the	Master Heavy Gloves Craft		the	Master Heavy Gloves Craft
+SCAHHEM	Master Heavy Helm Craft	a	the	Master Heavy Helm Craft		the	Master Heavy Helm Craft
+SCAHPEM	Master Heavy Pants Craft	a	the	Master Heavy Pants Craft		the	Master Heavy Pants Craft
+SCAHSEM	Master Heavy Sleeves Craft	a	the	Master Heavy Sleeves Craft		the	Master Heavy Sleeves Craft
+SCAHVEM	Master Heavy Vest Craft	a	the	Master Heavy Vest Craft		the	Master Heavy Vest Craft
+SCALBEM	Master Light Boots Craft	a	the	Master Light Boots Craft		the	Master Light Boots Craft
+SCALGEM	Master Light Gloves Craft	a	the	Master Light Gloves Craft		the	Master Light Gloves Craft
+SCALPEM	Master Light Pants Craft	a	the	Master Light Pants Craft		the	Master Light Pants Craft
+SCALSEM	Master Light Sleeves Craft	a	the	Master Light Sleeves Craft		the	Master Light Sleeves Craft
+SCALVEM	Master Light Vest Craft	a	the	Master Light Vest Craft		the	Master Light Vest Craft
+SCAMBEM	Master Medium Boots Craft	a	the	Master Medium Boots Craft		the	Master Medium Boots Craft
+SCAMGEM	Master Medium Gloves Craft	a	the	Master Medium Gloves Craft		the	Master Medium Gloves Craft
+SCAMPEM	Master Medium Pants Craft	a	the	Master Medium Pants Craft		the	Master Medium Pants Craft
+SCAMSEM	Master Medium Sleeves Craft	a	the	Master Medium Sleeves Craft		the	Master Medium Sleeves Craft
+SCAMVEM	Master Medium Vest Craft	a	the	Master Medium Vest Craft		the	Master Medium Vest Craft
+SCASSEM	Master Shield Craft	a	the	Master Shield Craft		the	Master Shield Craft
+SCASBEM	Master Buckler Craft	a	the	Master Buckler Craft		the	Master Buckler Craft
+SCJAAEM	Master Anklet Craft	a	the	Master Anklet Craft		the	Master Anklet Craft
+SCJBAEM	Master Bracelet Craft	a	the	Master Bracelet Craft		the	Master Bracelet Craft
+SCJDAEM	Master Diadem Craft	a	the	Master Diadem Craft		the	Master Diadem Craft
+SCJEAEM	Master Earing Craft	a	the	Master Earing Craft		the	Master Earing Craft
+SCJPAEM	Master Pendant Craft	a	the	Master Pendant Craft		the	Master Pendant Craft
+SCJRAEM	Master Ring Craft	a	the	Master Ring Craft		the	Master Ring Craft
+SCM1MEM	Master Mace Craft	a	the	Master Mace Craft		the	Master Mace Craft
+SCM1TEM	Master Staff Craft	a	the	Master Staff Craft		the	Master Staff Craft
+SCM1PEM	Master Spear Craft	a	the	Master Spear Craft		the	Master Spear Craft
+SCM1AEM	Master Axe Craft	a	the	Master Axe Craft		the	Master Axe Craft
+SCM1SEM	Master Sword Craft	a	the	Master Sword Craft		the	Master Sword Craft
+SCM1DEM	Master Dagger Craft	a	the	Master Dagger Craft		the	Master Dagger Craft
+SCM2MEM	Master 2H Mace Craft	a	the	Master 2H Mace Craft		the	Master 2H Mace Craft
+SCM2PEM	Master Pike Craft	a	the	Master Pike Craft		the	Master Pike Craft
+SCM2AEM	Master 2H Axe Craft	a	the	Master 2H Axe Craft		the	Master 2H Axe Craft
+SCM2SEM	Master 2H Sword Craft	a	the	Master 2H Sword Craft		the	Master 2H Sword Craft
+SCR1BEM	Master Bowpistol Craft	a	the	Master Bowpistol Craft		the	Master Bowpistol Craft
+SCR1PEM	Master Pistol Craft	a	the	Master Pistol Craft		the	Master Pistol Craft
+SCR2AEM	Master Autolauncher Craft	a	the	Master Autolauncher Craft		the	Master Autolauncher Craft
+SCR2BEM	Master Bowrifle Craft	a	the	Master Bowrifle Craft		the	Master Bowrifle Craft
+SCR2LEM	Master Launcher Craft	a	the	Master Launcher Craft		the	Master Launcher Craft
+SCR2REM	Master Rifle Craft	a	the	Master Rifle Craft		the	Master Rifle Craft
+SCMC	Close Combat Weapon Crafting	a	the	Close Combat Weapon Crafting		the	Close Combat Weapon Crafting
+SCMCA	Advanced Magic Amplifier Crafting	a	the	Advanced Magic Amplifier Crafting		the	Advanced Magic Amplifier Crafting
+SCMCAE	Expert Magic Amplifier Crafting	a	the	Expert Magic Amplifier Crafting		the	Expert Magic Amplifier Crafting
+SCMCAEM	Master Magic Amplifier Crafting	a	the	Master Magic Amplifier Crafting		the	Master Magic Amplifier Crafting

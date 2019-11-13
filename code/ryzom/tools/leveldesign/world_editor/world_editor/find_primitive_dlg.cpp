@@ -26,6 +26,10 @@
 
 using namespace NLLIGO;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 CString CFindPrimitiveDlg::Property = _T("");
 CString CFindPrimitiveDlg::Value = _T("");
 CString CFindPrimitiveDlg::ReplaceText = _T("");
@@ -108,7 +112,7 @@ void CFindPrimitiveDlg::OnFindNext()
 //					||	(	_Locator.Primitive->getPropertyByName ("selected", property)
 					||	(	getPrimitiveEditor(_Locator.Primitive)->getSelected()))
 //						&&	property)	)
-				&&	_Locator.Primitive->getPropertyByName ((const char*)Property, property)
+				&&	_Locator.Primitive->getPropertyByName (NLMISC::tStrToUtf8(Property), property)
 				&&	property)
 			{
 				// Kind of primitive ?
@@ -116,7 +120,7 @@ void CFindPrimitiveDlg::OnFindNext()
 				if (propString)
 				{
 					// Good value ?
-					if	(propString->String.find(Value)!=std::string::npos)
+					if (propString->String.find(NLMISC::tStrToUtf8(Value)) != std::string::npos)
 					{
 						found = true;
 					}
@@ -131,7 +135,7 @@ void CFindPrimitiveDlg::OnFindNext()
 						uint i;
 						for (i=0; i<propStringArray->StringArray.size (); i++)
 						{
-							if	(propStringArray->StringArray[i].find(Value)!=std::string::npos)
+							if (propStringArray->StringArray[i].find(NLMISC::tStrToUtf8(Value)) != std::string::npos)
 							{
 								found = true;
 							}
@@ -175,11 +179,11 @@ void CFindPrimitiveDlg::OnFindNext()
 	}
 	else
 	{
-		MessageBox ("End of the document", "Find a primitive...", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (_T("End of the document"), _T("Find a primitive..."), MB_OK|MB_ICONEXCLAMATION);
 
 		// Init locator
 		_Locator.getRoot (0);
-		PrimitiveName = "";
+		PrimitiveName.Empty();
 	}
 	UpdateData (FALSE);
 }
@@ -226,7 +230,7 @@ void CFindPrimitiveDlg::replace(bool all)
 //					||	(	_Locator.Primitive->getPropertyByName ("selected", property)
 					||	(	getPrimitiveEditor(_Locator.Primitive)->getSelected()))
 //						&&	property)	)
-				&&	_Locator.Primitive->getPropertyByName ((const char*)Property, property)
+			    && _Locator.Primitive->getPropertyByName(NLMISC::tStrToUtf8(Property), property)
 				&&	property	)
 			{
 				// Kind of primitive ?
@@ -234,14 +238,14 @@ void CFindPrimitiveDlg::replace(bool all)
 				if	(propString)
 				{
 					// Good value ?
-					if	(propString->String.find(Value)!=std::string::npos)
+					if (propString->String.find(NLMISC::tStrToUtf8(Value)) != std::string::npos)
 					{
 						if	(!firstTime	&&	!all)
 							break;
 
 						CString	tmp(propString->String.c_str());
 						tmp.Replace(Value, ReplaceText);
-						doc->addModification (new CActionSetPrimitivePropertyString (_Locator,(const char*)Property,(const char*)tmp,false));
+						doc->addModification(new CActionSetPrimitivePropertyString(_Locator, NLMISC::tStrToUtf8(Property), NLMISC::tStrToUtf8(tmp), false));
 						doc->addModification (new CActionSelect (_Locator));
 						
 						firstTime=false;
@@ -261,7 +265,7 @@ void CFindPrimitiveDlg::replace(bool all)
 						for (i=0; i<propStringArray->StringArray.size (); i++)
 						{
 							//	todo.
-							if	(propStringArray->StringArray[i].find(Value)!=std::string::npos)
+							if (propStringArray->StringArray[i].find(NLMISC::tStrToUtf8(Value)) != std::string::npos)
 							{
 								if	(	!firstTime
 									&&	!all)
@@ -277,7 +281,7 @@ void CFindPrimitiveDlg::replace(bool all)
 										newStrings=propStringArray->StringArray;
 										firstChange=false;
 									}
-									newStrings[i]=std::string((const char*)tmp);
+									newStrings[i] = NLMISC::tStrToUtf8(tmp);
 								}
 								firstTime=false;
 							}
@@ -286,7 +290,7 @@ void CFindPrimitiveDlg::replace(bool all)
 
 						if (!firstChange)	//	have to make a change
 						{
-							doc->addModification (new CActionSetPrimitivePropertyStringArray (_Locator,(const char*)Property,newStrings,false));
+							doc->addModification(new CActionSetPrimitivePropertyStringArray(_Locator, NLMISC::tStrToUtf8(Property), newStrings, false));
 							doc->addModification (new CActionSelect (_Locator));
 						}
 
@@ -317,7 +321,7 @@ void CFindPrimitiveDlg::replace(bool all)
 
 	if (_End)
 	{
-		MessageBox ("End of the document", "Find a primitive...", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (_T("End of the document"), _T("Find a primitive..."), MB_OK|MB_ICONEXCLAMATION);
 		_Locator.getRoot (0);
 	}
 

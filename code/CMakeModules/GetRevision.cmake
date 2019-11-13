@@ -72,6 +72,49 @@ IF(EXISTS "${ROOT_DIR}/.hg/")
   ENDIF()
 ENDIF()
 
+IF(EXISTS "${ROOT_DIR}/.git/")
+  FIND_PACKAGE(Git)
+
+  IF(GIT_FOUND)
+    EXECUTE_PROCESS(COMMAND ${GIT_EXECUTABLE} rev-list HEAD --count
+      WORKING_DIRECTORY ${ROOT_DIR}
+      RESULT_VARIABLE git_exit_code
+      OUTPUT_VARIABLE REVISION)
+    IF(NOT ${git_exit_code} EQUAL 0)
+      MESSAGE(WARNING "git rev-list failed, unable to include version.")
+    ELSE()
+      STRING(STRIP ${REVISION} REVISION)
+    ENDIF()
+    EXECUTE_PROCESS(COMMAND ${GIT_EXECUTABLE} rev-parse --short=8 HEAD
+      WORKING_DIRECTORY ${ROOT_DIR}
+      RESULT_VARIABLE git_exit_code
+      OUTPUT_VARIABLE CHANGESET)
+    IF(NOT ${git_exit_code} EQUAL 0)
+      MESSAGE(WARNING "git rev-parse failed, unable to include version.")
+    ELSE()
+      STRING(STRIP ${CHANGESET} CHANGESET)
+    ENDIF()
+    EXECUTE_PROCESS(COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+      WORKING_DIRECTORY ${ROOT_DIR}
+      RESULT_VARIABLE git_exit_code
+      OUTPUT_VARIABLE BRANCH)
+    IF(NOT ${git_exit_code} EQUAL 0)
+      MESSAGE(WARNING "git rev-parse failed, unable to include git branch.")
+    ELSE()
+      STRING(STRIP ${BRANCH} BRANCH)
+    ENDIF()
+    EXECUTE_PROCESS(COMMAND ${GIT_EXECUTABLE} describe
+      WORKING_DIRECTORY ${ROOT_DIR}
+      RESULT_VARIABLE git_exit_code
+      OUTPUT_VARIABLE DESCRIBE)
+    IF(NOT ${git_exit_code} EQUAL 0)
+      MESSAGE(WARNING "git rev-parse failed, unable to include git branch.")
+    ELSE()
+      STRING(STRIP ${DESCRIBE} DESCRIBE)
+    ENDIF()
+  ENDIF()
+ENDIF()
+
 # if processing exported sources, use "revision" file if exists
 IF(SOURCE_DIR AND NOT DEFINED REVISION)
   SET(REVISION_FILE ${SOURCE_DIR}/revision)
@@ -83,4 +126,6 @@ ENDIF()
 
 IF(DEFINED REVISION)
   MESSAGE(STATUS "Found revision ${REVISION}")
+ELSE()
+  SET(REVISION 0)
 ENDIF()

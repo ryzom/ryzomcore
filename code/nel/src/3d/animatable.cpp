@@ -19,6 +19,9 @@
 #include "nel/3d/animatable.h"
 #include "nel/3d/channel_mixer.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

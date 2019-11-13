@@ -22,6 +22,10 @@
 #include "nel/gui/view_pointer.h"
 #include "nel/gui/group_editbox_decor.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	void ifexprufct_forcelink();

@@ -6,6 +6,12 @@ IF(WITH_NEL_TOOLS)
         mesh_utils
         mesh_export)
     ENDIF()
+    IF(WITH_LIBGSF)
+      SUBDIRS(
+        pipeline_max
+        pipeline_max_dump
+        pipeline_max_rewrite_assets)
+    ENDIF()
     SUBDIRS(
       anim_builder
       animation_set_builder
@@ -34,8 +40,10 @@ IF(WITH_NEL_TOOLS)
   ENDIF()
   SUBDIRS(
     build_interface
+    unbuild_interface
     get_neighbors
     textures_optimizer
+    textures_tool
     tga_cut
     tga_resize)
 ENDIF()
@@ -48,9 +56,9 @@ IF(WIN32 AND WITH_3D)
       IF(MAXSDK_FOUND)
         ADD_SUBDIRECTORY(plugin_max)
         ADD_SUBDIRECTORY(ligo)
-      ENDIF(MAXSDK_FOUND)
-    ENDIF(WITH_NEL_MAXPLUGIN)
-  ENDIF(MFC_FOUND)
+      ENDIF()
+    ENDIF()
+  ENDIF()
 ENDIF()
 
 IF(WITH_NEL_TOOLS AND WITH_3D)
@@ -59,8 +67,8 @@ IF(WITH_NEL_TOOLS AND WITH_3D)
     IF(MFC_FOUND)
       ADD_SUBDIRECTORY(object_viewer_exe)
       ADD_SUBDIRECTORY(tile_edit)
-    ENDIF(MFC_FOUND)
-  ENDIF(WIN32)
+    ENDIF()
+  ENDIF()
 
   IF(WITH_QT OR WITH_QT5)
     ADD_SUBDIRECTORY(tile_edit_qt)

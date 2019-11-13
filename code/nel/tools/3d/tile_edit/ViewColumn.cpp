@@ -19,10 +19,36 @@
 #include "ViewColumn.h"
 #include "Browse.h"
 
-char *WndRegKeys[4][5] = {{"POPUP BOTTOM RX","POPUP BOTTOM RY","POPUP BOTTOM CX","POPUP BOTTOM CY","POPUP BOTTOM N"},
-						{"POPUP TOP RX","POPUP TOP RY","POPUP TOP CX","POPUP TOP CY","POPUP TOP N"},
-						{"POPUP LEFT RX","POPUP LEFT RY","POPUP LEFT CX","POPUP LEFT CY","POPUP LEFT N"},
-						{"POPUP RIGHT RX","POPUP RIGHT RY","POPUP RIGHT CX","POPUP RIGHT CY","POPUP RIGHT N"}};
+TCHAR *WndRegKeys[4][5] = {
+	{
+		_T("POPUP BOTTOM RX"),
+		_T("POPUP BOTTOM RY"),
+		_T("POPUP BOTTOM CX"),
+		_T("POPUP BOTTOM CY"),
+		_T("POPUP BOTTOM N")
+	},
+	{
+		_T("POPUP TOP RX"),
+		_T("POPUP TOP RY"),
+		_T("POPUP TOP CX"),
+		_T("POPUP TOP CY"),
+		_T("POPUP TOP N")
+	},
+	{
+		_T("POPUP LEFT RX"),
+		_T("POPUP LEFT RY"),
+		_T("POPUP LEFT CX"),
+		_T("POPUP LEFT CY"),
+		_T("POPUP LEFT N")
+	},
+	{
+		_T("POPUP RIGHT RX"),
+		_T("POPUP RIGHT RY"),
+		_T("POPUP RIGHT CX"),
+		_T("POPUP RIGHT CY"),
+		_T("POPUP RIGHT N")
+	}
+};
 
 /////////////////////////////////////////////////////////////////////////////
 // ViewColumn dialog
@@ -164,11 +190,11 @@ BOOL ViewColumn::OnInitDialog()
 	if (RegOpenKey(HKEY_CURRENT_USER,REGKEY_TILEDIT,&regkey)==ERROR_SUCCESS)
 	{
 		unsigned long value; 
-		RegQueryValueEx(regkey,WndRegKeys[pos&3][0],0,&value,(unsigned char *)&rx,&value);
-		RegQueryValueEx(regkey,WndRegKeys[pos&3][1],0,&value,(unsigned char *)&ry,&value);
-		RegQueryValueEx(regkey,WndRegKeys[pos&3][2],0,&value,(unsigned char *)&cx,&value);
-		RegQueryValueEx(regkey,WndRegKeys[pos&3][3],0,&value,(unsigned char *)&cy,&value);		
-		RegQueryValueEx(regkey,WndRegKeys[pos&3][4],0,&value,(unsigned char *)&nTileInWnd,&value);
+		RegQueryValueEx(regkey, WndRegKeys[pos&3][0], 0, &value, (LPBYTE)&rx, &value);
+		RegQueryValueEx(regkey, WndRegKeys[pos&3][1], 0, &value, (LPBYTE)&ry, &value);
+		RegQueryValueEx(regkey, WndRegKeys[pos&3][2], 0, &value, (LPBYTE)&cx, &value);
+		RegQueryValueEx(regkey, WndRegKeys[pos&3][3], 0, &value, (LPBYTE)&cy, &value);
+		RegQueryValueEx(regkey, WndRegKeys[pos&3][4], 0, &value, (LPBYTE)&nTileInWnd, &value);
 		RegCloseKey(regkey);
 	}
 	EnableScrollBar(SB_VERT);
@@ -378,9 +404,9 @@ void ViewColumn::OnRButtonDown(UINT nFlags, CPoint point)
 	// TODO: Add your message handler code here and/or call default
 	CMenu popup;
 	popup.CreatePopupMenu();
-	popup.AppendMenu(MF_STRING | (nTileInWnd==1?MF_CHECKED:0),10,"*1");
-	popup.AppendMenu(MF_STRING | (nTileInWnd==4?MF_CHECKED:0),12,"*4");
-	popup.AppendMenu(MF_STRING,13,"Replace window");
+	popup.AppendMenu(MF_STRING | (nTileInWnd == 1 ? MF_CHECKED:0), 10, _T("*1"));
+	popup.AppendMenu(MF_STRING | (nTileInWnd == 4 ? MF_CHECKED:0), 12, _T("*4"));
+	popup.AppendMenu(MF_STRING, 13, _T("Replace window"));
 	
 	RECT rect; GetWindowRect(&rect);
 	popup.TrackPopupMenu(TPM_LEFTALIGN,MousePos.x+rect.left,MousePos.y+rect.top,this,NULL);

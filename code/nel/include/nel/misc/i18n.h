@@ -127,6 +127,9 @@ public:
 	/// Returns the code of the language ("fr", "en", ...) defined on system
 	static std::string getSystemLanguageCode ();
 
+	/// Define the code of the language ("fr", "en", ...) defined on system
+	static bool setSystemLanguageCode (const std::string &languageCode);
+
 	/// Find a string in the selected language and return his association.
 	static const ucstring &get (const std::string &label);
 
@@ -141,12 +144,10 @@ public:
 	 *	16 bits encoding can be recognized by the official header :
 	 *	FF, FE, witch can be reversed if the data are MSB first.
 	 *
-	 *	Optionally, you can force the reader to consider the file as
-	 *	UTF-8 encoded.
 	 *	Optionally, you can ask the reader to interpret #include commands.
 	 */
 	static void readTextFile(const std::string &filename,
-								ucstring &result, bool forceUtf8 = false,
+								ucstring &result,
 								bool fileLookup = true,
 								bool preprocess = false,
 								TLineFormat lineFmt = LINE_FMT_NO_CARE,
@@ -159,11 +160,8 @@ public:
 	 *	EF,BB, BF.
 	 *	16 bits encoding can be recognized by the official header :
 	 *	FF, FE, witch can be reversed if the data are MSB first.
-	 *
-	 *	Optionally, you can force the reader to consider the file as
-	 *	UTF-8 encoded.
 	 */
-	static void readTextBuffer(uint8 *buffer, uint size, ucstring &result, bool forceUtf8 = false);
+	static void readTextBuffer(uint8 *buffer, uint size, ucstring &result);
 
 	/** Remove any C style comment from the passed string.
 	 */
@@ -230,6 +228,7 @@ private:
 
 	static std::vector<std::string>								_LanguageCodes;
 	static std::vector<ucstring>								_LanguageNames;
+	static std::string											_SystemLanguageCode;
 
 	static bool													_LanguagesNamesLoaded;
 
@@ -258,7 +257,7 @@ private:
 
 	/// The internal read function, it does the real job of readTextFile
 	static void _readTextFile(const std::string &filename,
-								ucstring &result, bool forceUtf8,
+								ucstring &result,
 								bool fileLookup,
 								bool preprocess,
 								TLineFormat lineFmt,

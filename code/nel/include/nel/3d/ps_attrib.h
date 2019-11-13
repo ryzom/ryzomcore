@@ -202,7 +202,7 @@ public:
 	uint size() const { return _Size; }
 
 	/// serialization
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		if (f.isReading())
 		{
@@ -262,7 +262,7 @@ public:
 			CPSAttrib();
 
 			/// Serialization method
-			void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+			void serial(NLMISC::IStream &f);
 
 			// swap with another vector
 			void swap(CPSAttrib<T> &other);
@@ -429,7 +429,7 @@ void CPSAttrib<T>::remove(uint32 index)
 }
 
 template <typename T>
-void CPSAttrib<T>::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSAttrib<T>::serial(NLMISC::IStream &f)
 {
 	// version 4 to 5 => bug with size being > capacity
 	sint ver = f.serialVersion(5);

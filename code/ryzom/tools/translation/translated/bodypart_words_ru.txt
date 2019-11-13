@@ -1,0 +1,43 @@
+﻿*HASH_VALUE	bodypartID	name	p	description	prp
+_ACB9BC721BA65099	HHead	голове	головы		по
+_278A7C5D654814CD	HChest	грудь	груди		в
+_A2D940906B29B889	HArms	предплечью	предплечья		по
+_B1CAFC85DB767C9C	HHands	руке	руки		по
+_20A8389BAC987C9F	HLegs	ноге	ноги		по
+_E18820962C586494	HFeet	ступне	ступни		по
+_ACB9BC7B1B375099	QHead	голове	головы		по
+_E80BB4A21A9838B5	QBody	туловище	туловища		в
+_C96F0919D2F8DC71	QFrontPaws	передней лапе	передние лапы		по
+_08A1A8FEABC3CD11	QFrontHooves	передней ноге	передние ноги		по
+_23B95F02A87957B0	QRearPaws	задней лапе	задние лапы		по
+_D880990C5BE9DCB7	QRearHooves	задней ноге	задние ноги		по
+_2836645DDE8874AD	LKHead	голове	головы		по
+_ED86C05FE298A4B9	LKBody	туловище	туловища		по
+_39BFC0EBE486B512	LKFrontPaws1	передней лапе	передние лапы		по
+_79BFC0EBE486B512	LKFrontPaws2	передней лапе	передние лапы		по
+_D92BB508D8F884A6	LKRearPaws1	задней лапе	задние лапы		по
+_D93BB508D8F884A6	LKRearPaws2	задняя лапе	задние лапы		по
+_283664575C8874AD	FKHead	голове	головы		по
+_ED86C0596098A4B9	FKBody	туловище	туловища		в
+_DBBA7473640310B0	FKPaws1	лапе	лапы		по
+_1BBA7473641310B0	FKPaws2	ноге	ноги		по
+_66B6A47A4A7ADCC2	FKWings1	крылу	крылья		по
+_66B6A47ACA7ADCC2	FKWings2	крылу	крылья		по
+_ACB9BC701B865099	FHead	голове	головы		по
+_E80BB4971AE738B5	FBody	туловище	туловища		в
+_C40D15A82A36DF2C	FFrontFins1	переднему плавнику	передние плавники		по
+_C41D15A82A36DF2C	FFrontFins2	переднему плавнику	передние плавники		по
+_67B624EBAAF630A4	FRearFins1	заднему плавнику	задние плавники		по
+_67B628EBAAF630A4	FRearFins2	заднему плавнику	задние плавники		по
+_ACB9BC6C1B465099	BHead	голове	головы		по
+_E80BB4931AA738B5	BBody	туловище	туловища		в
+_25897F8F25594780	BFeet1	ноге	ноги		по
+_2589838F25594B80	BFeet2	ноге	ноги		по
+_2C68746BA436D3C2	BWings1	крылу	крылья		по
+_2C68746BA446D7C2	BWings2	крылу	крылья		по
+_8061E6E18C3EA521	PUpperTrunk	верху стебля	верхние стебли		по
+_ECEA3087A666CCC3	Ptrunk	стеблю	стебли		по
+_E7469C4D9B5A0C9D	PLeaves1	листу	листья		по
+_E7469C4DDB5A0C9D	PLeaves2	листу	листья		по
+_C3EE9906771FB524	PLowerTrunk	низу стебля	нижние стебли		по
+_DFA67A5CC7DECDE6	PVisibleRoots	корень	корни		в

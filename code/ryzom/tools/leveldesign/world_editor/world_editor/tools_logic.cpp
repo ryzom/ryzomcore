@@ -681,9 +681,9 @@ void CToolsLogicTree::OnMenuGroupCreatePoint()
 	dialog.MainFrame = _MainFrame;
 
 	if (dialog.DoModal () == IDOK)
-	if (strlen(dialog.Name) > 0)
+	if (_tcslen(dialog.Name) > 0)
 	{
-		HTREEITEM newItem = insertItemUTF8 (*this, dialog.Name, 2, 2, itemGroup);
+		HTREEITEM newItem = insertItemUTF8 (*this, tStrToUtf8(dialog.Name), 2, 2, itemGroup);
 		Expand (itemGroup, TVE_EXPAND);
 		// Create the newItem
 		for (i = 0; i < _RegionsInfo.size(); ++i)
@@ -715,9 +715,9 @@ void CToolsLogicTree::OnMenuGroupCreatePath()
 	dialog.MainFrame = _MainFrame;
 
 	if (dialog.DoModal () == IDOK)
-	if (strlen(dialog.Name) > 0)
+	if (_tcslen(dialog.Name) > 0)
 	{
-		HTREEITEM newItem = insertItemUTF8 (*this, dialog.Name, 4, 4, itemGroup);
+		HTREEITEM newItem = insertItemUTF8 (*this, tStrToUtf8(dialog.Name), 4, 4, itemGroup);
 		Expand (itemGroup, TVE_EXPAND);
 		// Create the newItem
 		for (i = 0; i < _RegionsInfo.size(); ++i)
@@ -749,9 +749,9 @@ void CToolsLogicTree::OnMenuGroupCreateZone()
 	dialog.MainFrame = _MainFrame;
 
 	if (dialog.DoModal () == IDOK)
-	if (strlen(dialog.Name) > 0)
+	if (_tcslen(dialog.Name) > 0)
 	{
-		HTREEITEM newItem = insertItemUTF8 (*this, dialog.Name, 6, 6, itemGroup);
+		HTREEITEM newItem = insertItemUTF8 (*this, tStrToUtf8(dialog.Name), 6, 6, itemGroup);
 		Expand (itemGroup, TVE_EXPAND);
 		// Create the newItem
 		for (i = 0; i < _RegionsInfo.size(); ++i)
@@ -814,7 +814,7 @@ void CToolsLogicTree::OnMenuGroupProperties()
 	es.Name = GetItemText (hItem);
 	if (es.DoModal() == IDOK)
 	{
-		setItemTextUTF8 (*this, hItem, es.Name);
+		setItemTextUTF8 (*this, hItem, tStrToUtf8(es.Name));
 
 		HTREEITEM hChildItem = GetChildItem(hItem);
 		while (hChildItem != NULL)
@@ -878,7 +878,7 @@ void CToolsLogicTree::OnMenuGroupTransfertAppend ()
 	{
 		HTREEITEM hNextItem = GetNextItem (hChildItem, TVGN_NEXT);
 
-		vTemp.push_back((LPCSTR)GetItemText(hChildItem));
+		vTemp.push_back(tStrToUtf8(GetItemText(hChildItem)));
 		
 		hChildItem = hNextItem;
 	}
@@ -898,7 +898,7 @@ void CToolsLogicTree::OnMenuGroupTransfertReplace ()
 	{
 		HTREEITEM hNextItem = GetNextItem (hChildItem, TVGN_NEXT);
 
-		vTemp.push_back((LPCSTR)GetItemText(hChildItem));
+		vTemp.push_back(tStrToUtf8(GetItemText(hChildItem)));
 		
 		hChildItem = hNextItem;
 	}
@@ -1198,9 +1198,9 @@ void CToolsLogic::OnNewGroup ()
 void CToolsLogic::OnNewPatat ()
 {
 	CComboBox *pCB = (CComboBox*)GetDlgItem(IDC_TYPE);
-	CString str;
+	std::string str;
 	getWindowTextUTF8 (*pCB, str);
-	string sStr = (LPCSTR)str;
+	// TODO: what to do with str?
 }
 
 // ***************************************************************************
@@ -1231,7 +1231,7 @@ BOOL CCreateDialog::OnInitDialog ()
 
 	for (uint32 i = 0; i < TypesForInit->size(); ++i)
 	{
-		ComboType.InsertString (-1, TypesForInit->operator[](i).Name.c_str());
+		ComboType.InsertString(-1, nlUtf8ToTStr(TypesForInit->operator[](i).Name));
 	}
 
 	if (TypesForInit->size()>0)
@@ -1239,7 +1239,7 @@ BOOL CCreateDialog::OnInitDialog ()
 		if (ComboType.SelectString (0, LayerName) == CB_ERR)
 			ComboType.SetCurSel (0);
 		UpdateData();
-		if (strlen(Name) == 0)
+		if (_tcslen(Name) == 0)
 			OnSelChange();
 	}
 	
@@ -1264,16 +1264,16 @@ void CCreateDialog::OnOK()
 	UpdateData ();
 
 	// If the "region_" do not exist add it
-	if (strncmp(RegionPost.c_str(), Name, strlen(RegionPost.c_str())) != 0)
+	if (_tcsnccmp(nlUtf8ToTStr(RegionPost), Name, strlen(RegionPost.c_str())) != 0)
 	{
-		char sTmp[128];
-		strcpy (sTmp, RegionPost.c_str());
-		strcat (sTmp, Name);
-		strcpy (Name, sTmp);
+		TCHAR sTmp[128];
+		_tcscpy(sTmp, nlUtf8ToTStr(RegionPost));
+		_tcscat (sTmp, Name);
+		_tcscpy (Name, sTmp);
 		UpdateData (false);
 	}
 
-	if (strcmp(PropName.c_str(), Name) == 0)
+	if (PropName == tStrToUtf8(Name))
 		CDialog::OnOK();
 	
 	CDialog::OnOK();
@@ -1301,15 +1301,15 @@ void CCreateDialog::OnSelChange ()
 	CString sTmp;
 	ComboType.GetLBText (cs, sTmp);
 
-	if (PropType == (LPCSTR)sTmp)
+	if (PropType == tStrToUtf8(sTmp))
 	{
-		strcpy (Name, PropName.c_str());
+		_tcscpy(Name, nlUtf8ToTStr(PropName));
 	}
 	else
 	{
-		strcpy (Name, RegionPost.c_str());
-		strcat (Name, (LPCSTR)sTmp);
-		strcat (Name, "-");
+		_tcscpy(Name, nlUtf8ToTStr(RegionPost));
+		_tcscat (Name, (LPCTSTR)sTmp);
+		_tcscat (Name, _T("-"));
 	}
 
 	UpdateData (false);
@@ -1617,7 +1617,7 @@ HTREEITEM CToolsLogic::addPrimitive (HTREEITEM parentItem, HTREEITEM lastBrother
 	const NLLIGO::CPrimitives *primitives = &(doc->getDatabaseElements (locator.getDatabaseIndex ()));
 
 	// Set the item data
-	_Tree->SetItemData (treeItem, (DWORD)new CPrimitiveTreeData (primitives, locator.Primitive));
+	_Tree->SetItemData (treeItem, (DWORD_PTR)new CPrimitiveTreeData (primitives, locator.Primitive));
 
 	// Expand parent ?
 	if (parentItem != TVI_ROOT)

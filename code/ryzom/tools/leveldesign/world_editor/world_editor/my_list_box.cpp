@@ -21,6 +21,10 @@
 #include "world_editor.h"
 #include "my_list_box.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 #define COMBO_REAL_HEIGHT 300
 
 // ***************************************************************************
@@ -62,10 +66,10 @@ BOOL CMyListBox::OnCommand(WPARAM wParam, LPARAM lParam)
 		{
 		case CBN_SELENDOK:
 			{
-				CString str;
+				std::string str;
 				getWindowTextUTF8 (StringSelectComboBox, str);
 				DeleteString(_EditingItem);
-				InsertString(_EditingItem, str);
+			    InsertString(_EditingItem, nlUtf8ToTStr(str));
 				SetCurSel (_SelectAfter);
 				_EditingItem = LB_ERR;
 				notifyParent ();
@@ -120,7 +124,7 @@ void CMyListBox::OnLButtonDblClk(UINT nFlags, CPoint point)
 	_SelectAfter = GetCurSel();
 	if ((_EditingItem == LB_ERR) || bOutside)
 	{
-		_EditingItem = InsertString (-1, "");
+		_EditingItem = InsertString (-1, _T(""));
 		_DeleteItIfCancel = true;
 	}
 	else

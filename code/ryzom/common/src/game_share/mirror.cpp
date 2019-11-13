@@ -21,6 +21,10 @@
 #include "synchronised_message.h"
 #include "tick_proxy_time_measure.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLMISC;
 using namespace NLNET;
 using namespace std;

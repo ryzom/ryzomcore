@@ -450,8 +450,8 @@ public:
 	}
 
 
-	void serial (NLMISC::IStream &f) throw (NLMISC::EStream)
-//	virtual void serial (NLMISC::IStream &f) throw (NLMISC::EStream)
+	void serial (NLMISC::IStream &f)
+//	virtual void serial (NLMISC::IStream &f)
 	{
 		if (f.isReading ())
 		{

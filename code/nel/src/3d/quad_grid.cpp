@@ -17,6 +17,10 @@
 #include "std3d.h"
 #include "nel/3d/quad_grid.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 	NLMISC::CPolygon2D CQuadGridBase::_ScaledPoly;

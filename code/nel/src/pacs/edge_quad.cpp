@@ -222,7 +222,7 @@ void			CEdgeQuad::build(const CExteriorMesh &em,
 
 			TCollisionSurfaceDescVector	cd = (*pcd);
 
-			if (edges[i].Link != -1 && cd.size() > 0)
+			if (edges[i].Link != -1 && !cd.empty())
 			{
 				nlwarning ("In NLPACS::CEdgeQuad::build()");
 				nlwarning ("ERROR: exterior edge %d with interior link crosses some surfaces", i);

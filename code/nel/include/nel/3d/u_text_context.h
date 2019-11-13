@@ -205,7 +205,7 @@ public:
 	 * set the shadow's size
 	 * \param the shade extent
 	 */
-	virtual	void			setShadeExtent (float shext) = 0;
+	virtual	void			setShadeExtent (float x, float y) = 0;
 	/**
 	 * set the shadow's color
 	 * The alpha of the shade is multiplied at each draw with the alpha of the color. Default: (0,0,0,255)

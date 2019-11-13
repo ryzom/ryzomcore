@@ -302,7 +302,7 @@ struct TSetLastFolder
 		if (!folders.empty())
 			str = folders.back();
 		else
-			str = "";
+			str.clear();
 	}
 };
 

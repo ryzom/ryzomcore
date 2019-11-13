@@ -18,6 +18,7 @@
 // misc
 #include <nel/misc/types_nl.h>
 #include <nel/misc/file.h>
+#include <nel/misc/common.h>
 #include <nel/misc/path.h>
 #include <nel/misc/config_file.h>
 
@@ -146,10 +147,8 @@ void readFormId( string& outputFileName )
 	{
 		// get the file type from form name
 		TFormId fid = (*itIF).first;
-		string fileType;
-		bool fileTypeGet = getFileType((*itIF).second, fileType);
 
-		if((*itIF).second.empty() || (*itIF).second=="." || (*itIF).second==".." || ((*itIF).second[0]=='_' && fileType != "sound") || (*itIF).second.find(".#")==0)
+		if ((*itIF).second.empty() || (*itIF).second=="." || (*itIF).second==".." || (*itIF).second[0]=='_' || (*itIF).second.find(".#")==0)
 		{
 			map<TFormId,string>::iterator itErase = itIF;
 			++itIF;
@@ -157,13 +156,16 @@ void readFormId( string& outputFileName )
 		}
 		else
 		{
-			if(fileTypeGet)
+			string fileType;
+			if (getFileType((*itIF).second, fileType))
 			{	
 				// insert the association (file type/file type id)
 				map<string,uint8>::iterator itFT = FileTypeToId.find(fileType);
 				if( itFT == FileTypeToId.end() )
 				{
-					FileTypeToId.insert( std::pair<std::string, uint8>(fileType,fid.FormIDInfos.Type) );
+					uint8 type = (uint8)fid.FormIDInfos.Type;
+
+					FileTypeToId.insert( std::pair<std::string, uint8>(fileType, type) );
 				}
 			}
 			else
@@ -291,18 +293,18 @@ void makeId( list<string>& dirs )
 //-----------------------------------------------
 void addId( string fileName )
 {
-	string extStr = CFile::getExtension( fileName );
-	if(fileName.empty() || fileName=="." || fileName==".." || (fileName[0]=='_' && extStr != "sound") || fileName.find(".#")==0)
+	if (fileName.empty() || fileName == "." || fileName == ".." || fileName[0] == '_' || fileName.find(".#") == 0)
 	{
-	  //nlinfo("Discarding file '%s'", fileName.c_str());
-	  NbFilesDiscarded++;
-	  return;
+		// nlinfo("Discarding file '%s'", fileName.c_str());
+		NbFilesDiscarded++;
+		return;
 	}
 	else
 	{
-		if( !ExtensionsAllowed.empty() )
+		if (!ExtensionsAllowed.empty())
 		{
-			if( ExtensionsAllowed.find(extStr) == ExtensionsAllowed.end() )
+			string extStr = CFile::getExtension(fileName);
+			if (ExtensionsAllowed.find(extStr) == ExtensionsAllowed.end())
 			{
 				NbFilesDiscarded++;
 				return;
@@ -528,9 +530,9 @@ int main( int argc, char ** argv )
 	readFormId( outputFileName );
 
 	// output path
-	sint lastSeparator = CFile::getLastSeparator(outputFileName);
+	std::string::size_type lastSeparator = CFile::getLastSeparator(outputFileName);
 	string outputPath;
-	if( lastSeparator != -1 )
+	if( lastSeparator != std::string::npos )
 	{
 		outputPath = outputFileName.substr(0,lastSeparator+1);
 	}
@@ -567,9 +569,9 @@ int main( int argc, char ** argv )
 	// dump the list of extensions in a txt file
 	if( dumpExtensions )
 	{
-		FILE *  extListOutput;
 		string extListFileName = outputPath + "sheet_ext.txt";
-		if( !(extListOutput = fopen(extListFileName.c_str(),"w")) )
+		FILE *extListOutput = nlfopen(extListFileName, "w");
+		if (!extListOutput)
 		{
 			nlwarning("Can't open output file %s",extListFileName.c_str());
 			return 1;

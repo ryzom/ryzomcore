@@ -190,6 +190,7 @@ void CCrashReportWidget::onLoad()
 	}
 
 	QTextStream ss( &f );
+	ss.setCodec("UTF-8");
 	m_ui.reportEdit->setPlainText( ss.readAll() );
 	f.close();
 }

@@ -66,6 +66,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 #define NL3D_SCENE_COARSE_MANAGER_TEXTURE	"nel_coarse_texture.tga"
 
 

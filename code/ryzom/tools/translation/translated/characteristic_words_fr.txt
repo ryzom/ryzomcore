@@ -1,0 +1,9 @@
+﻿*HASH_VALUE	characteristic_ID	name
+_B009C46E316AACBF	Constitution	Constitution
+_661AAC8EE6098C96	Metabolism	Métabolisme
+_E45ADC6364A9D4A6	Intelligence	Intelligence
+_E7DB9090281BA0A8	Wisdom	Sagesse
+_649C448C681C74B8	Strength	Force
+_6A880849E7D8DC86	WellBalanced	Équilibre
+_ADB8DC9A6C5A10B6	Dexterity	Dextérité
+_6C18945C6C1894DC	Will	Volonté

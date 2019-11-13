@@ -19,6 +19,9 @@
 #include "nel/3d/ps_int.h"
 #include "nel/3d/ps_register_int_attribs.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D {
 

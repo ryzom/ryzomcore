@@ -23,7 +23,9 @@
 #	include <tchar.h>
 #	include <imagehlp.h>
 #	pragma comment(lib, "imagehlp.lib")
-#	define getcwd(_a, _b) (_getcwd(_a,_b))
+#	ifndef getcwd
+#		define getcwd(_a, _b) (_getcwd(_a,_b))
+#	endif
 #	ifdef NL_OS_WIN64
 #		define DWORD_TYPE DWORD64
 #	else
@@ -178,7 +180,7 @@ void nlFatalError (const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, 256/*NLMISC::MaxCStringSize*/);
 
-	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer==0 );
+	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == NULL );
 
 	NLMISC::ErrorLog->displayNL (str);
 
@@ -197,7 +199,7 @@ void nlError (const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, 256/*NLMISC::MaxCStringSize*/);
 
-	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer==0 );
+	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == NULL );
 
 	NLMISC::ErrorLog->displayNL (str);
 
@@ -453,7 +455,7 @@ public:
 		string shortExc, longExc, subject;
 		string addr, ext;
 		ULONG_PTR skipNFirst = 0;
-		_Reason = "";
+		_Reason.clear();
 
 		if (m_pexp == NULL)
 		{
@@ -491,25 +493,25 @@ public:
 			case EXCEPTION_STACK_OVERFLOW            : shortExc="Stack Overflow"; longExc="Stack overflow. Can occur during errant recursion, or when a function creates a particularly large array on the stack"; break;
 			case EXCEPTION_INVALID_DISPOSITION       : shortExc="Invalid Disposition"; longExc="Whatever number the exception filter returned, it wasn't a value the OS knows about"; break;
 			case EXCEPTION_GUARD_PAGE                : shortExc="Guard Page"; longExc="Memory Allocated as PAGE_GUARD by VirtualAlloc() has been accessed"; break;
-			case EXCEPTION_INVALID_HANDLE            : shortExc="Invalid Handle"; longExc=""; break;
+			case EXCEPTION_INVALID_HANDLE            : shortExc="Invalid Handle"; longExc.clear(); break;
 			case CONTROL_C_EXIT                      : shortExc="Control-C"; longExc="Lets the debugger know the user hit Ctrl-C. Seemingly for console apps only"; break;
 			case STATUS_NO_MEMORY                    : shortExc="No Memory"; longExc="Called by HeapAlloc() if you specify HEAP_GENERATE_EXCEPTIONS and there is no memory or heap corruption";
 				ext = ", unable to allocate ";
 				ext += toString ("%d bytes", m_pexp->ExceptionRecord->ExceptionInformation [0]);
 				break;
-			case STATUS_WAIT_0                       : shortExc="Wait 0"; longExc=""; break;
-			case STATUS_ABANDONED_WAIT_0             : shortExc="Abandoned Wait 0"; longExc=""; break;
+			case STATUS_WAIT_0                       : shortExc="Wait 0"; longExc.clear(); break;
+			case STATUS_ABANDONED_WAIT_0             : shortExc="Abandoned Wait 0"; longExc.clear(); break;
 			case STATUS_USER_APC                     : shortExc="User APC"; longExc="A user APC was delivered to the current thread before the specified Timeout interval expired"; break;
-			case STATUS_TIMEOUT                      : shortExc="Timeout"; longExc=""; break;
-			case STATUS_PENDING                      : shortExc="Pending"; longExc=""; break;
-			case STATUS_SEGMENT_NOTIFICATION         : shortExc="Segment Notification"; longExc=""; break;
-			case STATUS_FLOAT_MULTIPLE_FAULTS        : shortExc="Float Multiple Faults"; longExc=""; break;
-			case STATUS_FLOAT_MULTIPLE_TRAPS         : shortExc="Float Multiple Traps"; longExc=""; break;
+			case STATUS_TIMEOUT                      : shortExc="Timeout"; longExc.clear(); break;
+			case STATUS_PENDING                      : shortExc="Pending"; longExc.clear(); break;
+			case STATUS_SEGMENT_NOTIFICATION         : shortExc="Segment Notification"; longExc.clear(); break;
+			case STATUS_FLOAT_MULTIPLE_FAULTS        : shortExc="Float Multiple Faults"; longExc.clear(); break;
+			case STATUS_FLOAT_MULTIPLE_TRAPS         : shortExc="Float Multiple Traps"; longExc.clear(); break;
 #ifdef NL_COMP_VC6
-			case STATUS_ILLEGAL_VLM_REFERENCE        : shortExc="Illegal VLM Reference"; longExc=""; break;
+			case STATUS_ILLEGAL_VLM_REFERENCE        : shortExc="Illegal VLM Reference"; longExc.clear(); break;
 #endif
 			case 0xE06D7363                          : shortExc="Microsoft C++ Exception"; longExc="Microsoft C++ Exception"; break;	// cpp exception
-			case 0xACE0ACE                           : shortExc=""; longExc="";
+			case 0xACE0ACE                           : shortExc.clear(); longExc.clear();
 				if (m_pexp->ExceptionRecord->NumberParameters == 1)
 					skipNFirst = m_pexp->ExceptionRecord->ExceptionInformation [0];
 				break;	// just want the stack
@@ -824,7 +826,7 @@ public:
 		// replace param with the value of the stack for this param
 
 		string parse = str;
-		str = "";
+		str.clear();
 		uint pos2 = 0;
 		sint stop = 0;
 
@@ -943,7 +945,7 @@ public:
 						str += tmp;
 					}
 					str += parse[i];
-					type = "";
+					type.clear();
 				}
 				else
 				{
@@ -1429,22 +1431,27 @@ int getLastError()
 std::string formatErrorMessage(int errorCode)
 {
 #ifdef NL_OS_WINDOWS
-	LPVOID lpMsgBuf;
-	FormatMessage(
+	LPWSTR lpMsgBuf = NULL;
+	DWORD len = FormatMessageW(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER |
 		FORMAT_MESSAGE_FROM_SYSTEM |
 		FORMAT_MESSAGE_IGNORE_INSERTS,
 		NULL,
 		errorCode,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-		(LPTSTR) &lpMsgBuf,
+		(LPWSTR)(&lpMsgBuf),
 		0,
 		NULL
 	);
 
-	string ret = (char*)lpMsgBuf;
+	// empty buffer, an error occurred
+	if (len == 0) return toString("FormatMessage returned error %d", getLastError());
+
+	// convert wchar_t* to std::string
+	string ret = wideToUtf8(lpMsgBuf);
+
 	// Free the buffer.
-	LocalFree( lpMsgBuf );
+	LocalFree(lpMsgBuf);
 
 	return ret;
 #else
@@ -1497,7 +1504,7 @@ NLMISC_CATEGORISED_COMMAND(nel, displayMemlog, "displays the last N line of the 
 {
 	uint nbLines;
 
-	if (args.size() == 0) nbLines = 100;
+	if (args.empty()) nbLines = 100;
 	else if (args.size() == 1) NLMISC::fromString(args[0], nbLines);
 	else return false;
 
@@ -1521,7 +1528,7 @@ NLMISC_CATEGORISED_COMMAND(nel, displayMemlog, "displays the last N line of the 
 
 NLMISC_CATEGORISED_COMMAND(nel, resetFilters, "disable all filters on Nel loggers", "[debug|info|warning|error|assert]")
 {
-	if(args.size() == 0)
+	if(args.empty())
 	{
 		DebugLog->resetFilters();
 		InfoLog->resetFilters();
@@ -1561,7 +1568,7 @@ NLMISC_CATEGORISED_COMMAND(nel, addNegativeFilterDebug, "add a negative filter o
 
 NLMISC_CATEGORISED_COMMAND(nel, removeFilterDebug, "remove a filter on DebugLog", "[<filterstr>]")
 {
-	if(args.size() == 0)
+	if(args.empty())
 		DebugLog->removeFilter();
 	else if(args.size() == 1)
 		DebugLog->removeFilter( args[0].c_str() );
@@ -1571,7 +1578,7 @@ NLMISC_CATEGORISED_COMMAND(nel, removeFilterDebug, "remove a filter on DebugLog"
 
 NLMISC_CATEGORISED_COMMAND(nel, displayFilterDebug, "display filter on DebugLog", "")
 {
-	if(args.size() != 0) return false;
+	if(!args.empty()) return false;
 	DebugLog->displayFilter(log);
 	return true;
 }
@@ -1592,7 +1599,7 @@ NLMISC_CATEGORISED_COMMAND(nel, addNegativeFilterInfo, "add a negative filter on
 
 NLMISC_CATEGORISED_COMMAND(nel, removeFilterInfo, "remove a filter on InfoLog", "[<filterstr>]")
 {
-	if(args.size() == 0)
+	if(args.empty())
 		InfoLog->removeFilter();
 	else if(args.size() == 1)
 		InfoLog->removeFilter( args[0].c_str() );
@@ -1639,7 +1646,7 @@ NLMISC_CATEGORISED_COMMAND(nel, addNegativeFilterWarning, "add a negative filter
 
 NLMISC_CATEGORISED_COMMAND(nel, removeFilterWarning, "remove a filter on WarningLog", "[<filterstr>]")
 {
-	if(args.size() == 0)
+	if(args.empty())
 		WarningLog->removeFilter();
 	else if(args.size() == 1)
 		WarningLog->removeFilter( args[0].c_str() );
@@ -1649,7 +1656,7 @@ NLMISC_CATEGORISED_COMMAND(nel, removeFilterWarning, "remove a filter on Warning
 
 NLMISC_CATEGORISED_COMMAND(nel, displayFilterWarning, "display filter on WarningLog", "")
 {
-	if(args.size() != 0) return false;
+	if(!args.empty()) return false;
 	WarningLog->displayFilter(log);
 	return true;
 }

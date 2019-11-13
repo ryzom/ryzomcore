@@ -318,7 +318,7 @@ void CDisplay::init (CMainFrame *pMF)
 		}
 	}
 
-	SetCurrentDirectory (pMF->_ExeDir.c_str());
+	SetCurrentDirectory (nlUtf8ToTStr(pMF->_ExeDir));
 }
 
 // ***************************************************************************
@@ -3400,7 +3400,7 @@ void CDisplay::updateCursor ()
 
 		// Moved with middle click ?
 		case DragView:
-			cursor = theApp.LoadCursor (MAKEINTRESOURCE(IDC_HAND));
+			cursor = theApp.LoadCursor (MAKEINTRESOURCE(IDC_HAND1));
 			break;
 
 		// Moved with left click ?
@@ -3554,7 +3554,7 @@ void CDisplay::DrawCollisionTexture(sint32 count, float x1, float y1)
 				string dir = getDocument ()->getDataDir ();
 				if (dir.empty()) dir = _MainFrame->_ExeDir;
 				dir += "\\collisionmap\\";
-				SetCurrentDirectory (dir.c_str());
+				SetCurrentDirectory(nlUtf8ToTStr(dir));
 
 				if(NLMISC::CFile::fileExists(Name+".tga") || NLMISC::CFile::fileExists(Name+".png"))
 				{
@@ -3875,7 +3875,7 @@ void CPrimTexture::buildFromFile(const std::string &filename)
 			_Width = (uint) width;
 			_Height = (uint) height;
 		}
-		catch (NLMISC::EStream)
+		catch (const NLMISC::EStream &)
 		{
 			nlwarning("Couldn't retrieve size for %s", filename.c_str());
 		}

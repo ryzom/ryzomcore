@@ -896,11 +896,8 @@ bool CChatGroupWindow::removeFreeTeller(const std::string &containerID)
 	if (i == _FreeTellers.size())
 		return false;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	// Create the free teller in all the desktops images
-	for (uint m = 0; m < MAX_NUM_MODES; ++m)
-	{
-		pIM->removeGroupContainerImage(_FreeTellers[i]->getId(), m);
-	}
+	pIM->removeGroupContainerImageFromDesktops(_FreeTellers[i]->getId());
+
 	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 	CWidgetManager::getInstance()->unMakeWindow(_FreeTellers[i]);
 	pRoot->delGroup (_FreeTellers[i]);
@@ -1145,6 +1142,15 @@ CChatWindow *CChatWindowManager::createChatGroupWindow(const CChatWindowDesc &de
 		if (!desc.HeaderColor.empty())
 			w->setHeaderColor(desc.HeaderColor);
 
+
+		// because root group was created from template, element from scrollbar target attribute was not created yet
+		CInterfaceGroup *pIG = w->getContainer()->getGroup("header_opened:channel_select");
+		if (pIG)
+		{
+			CCtrlScroll *sb = dynamic_cast<CCtrlScroll*>(w->getContainer()->getCtrl("channel_scroll"));
+			if (sb) sb->setTarget(pIG);
+		}
+
 		return w;
 	}
 	else
@@ -1265,7 +1271,7 @@ public:
 		if (pEB == NULL) return;
 		ucstring text = pEB->getInputString();
 		// If the line is empty, do nothing
-		if(text.size() == 0)
+		if(text.empty())
 			return;
 
 

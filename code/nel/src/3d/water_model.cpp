@@ -36,6 +36,9 @@
 
 using NLMISC::CVector2f;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D {
 
@@ -500,7 +503,7 @@ void	CWaterModel::traverseRender()
 		sint startY;
 		projPoly.computeBorders(rasters, startY);
 
-		if (rasters.size())
+		if (!rasters.empty())
 		{
 			//===========================//
 			// perform Water animation   //

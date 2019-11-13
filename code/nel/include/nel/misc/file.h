@@ -108,9 +108,9 @@ public:		// Advanced Usage.
 	/// flush the file.
 	void	flush();
 	/// Seek the file
-	bool	seek (sint32 offset, IStream::TSeekOrigin origin) const throw(EStream);
+	bool	seek (sint32 offset, IStream::TSeekOrigin origin) const;
 	/// Get the location of the file pointer
-	sint32	getPos () const throw(EStream);
+	sint32	getPos () const;
 
 	// Imp the Name of the stream as the name of the file.
 	virtual std::string		getStreamName() const;
@@ -119,13 +119,18 @@ public:		// Advanced Usage.
 	// return a string separated by \n or eof, used to parsing text file
 	void getline (char *buffer, uint32 bufferSize);
 
+	// read whole file into a string. resulting buffer may contain NULL chars.
+	// internal read position is modified.
+	// return true on success, false on failure.
+	bool readAll(std::string &buffer);
+
 	// return the size of the file
 	uint32 getFileSize () const { return _FileSize; }
 
 	// return true if there's nothing more to read (same as ifstream)
 	bool eof ();
 
-	virtual void		serialBuffer(uint8 *buf, uint len)throw(EReadError);
+	virtual void serialBuffer(uint8 *buf, uint len);
 
 	/// \name Statistics
 
@@ -148,7 +153,7 @@ public:		// Advanced Usage.
 	static void		clearDump ();
 
 protected:
-	virtual void		serialBit(bool &bit) throw(EReadError);
+	virtual void		serialBit(bool &bit);
 
 	virtual uint		getDbgStreamSize() const;
 
@@ -223,20 +228,20 @@ public:		// Advanced Usage.
 	/// flush the file.
 	void	flush();
 	/// Seek the file
-	bool	seek (sint32 offset, IStream::TSeekOrigin origin) const throw(EStream);
+	bool	seek (sint32 offset, IStream::TSeekOrigin origin) const;
 	/// Get the location of the file pointer
-	sint32	getPos () const throw(EStream);
+	sint32	getPos () const;
 
 	// Imp the Name of the stream as the name of the file.
 	virtual std::string		getStreamName() const;
 
 	// very useful to serialize string in text mode (without the size)
-	virtual void		serialBuffer(uint8 *buf, uint len) throw(EWriteError);
+	virtual void		serialBuffer(uint8 *buf, uint len);
 
 protected:
 	/// Internal close.
 	void	internalClose(bool success);
-	virtual void		serialBit(bool &bit) throw(EWriteError);
+	virtual void		serialBit(bool &bit);
 
 private:
 	FILE	*_F;

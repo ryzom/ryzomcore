@@ -14,6 +14,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef RYZOMCLIENT_STDPCH_H
+#define RYZOMCLIENT_STDPCH_H
+
+#if defined(_MSC_VER) && defined(_DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
+
 #include <nel/misc/types_nl.h>
 
 #include <stddef.h>
@@ -29,7 +39,6 @@
 #include <map>
 #include <set>
 #include <algorithm>
-//#include <sstream>
 #include <exception>
 #include <utility>
 #include <deque>
@@ -127,3 +136,5 @@
 #	include <WinSock2.h>
 #	include <windows.h>
 #endif // NL_OS_WINDOWS
+
+#endif

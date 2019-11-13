@@ -312,6 +312,18 @@ void CGroupInSceneBubbleManager::release ()
 
 	_CurrentBubble = 0;
 	_PopupCount = 0;
+
+	//
+	for (i=0; i<_DynBubbles.size(); i++)
+	{
+		CWidgetManager::getInstance()->unMakeWindow(_DynBubbles[i].Bubble);
+		if (_DynBubbles[i].Bubble->getParent())
+			_DynBubbles[i].Bubble->getParent()->delGroup(_DynBubbles[i].Bubble);
+		else
+			delete _DynBubbles[i].Bubble;
+	}
+	_DynBubbles.clear();
+	_GroupToDelete.clear();
 }
 
 // ***************************************************************************
@@ -473,7 +485,7 @@ void CGroupInSceneBubbleManager::update ()
 
 CGroupInSceneBubble *CGroupInSceneBubbleManager::newBubble (const ucstring &text)
 {
-	if (!text.empty() && _Bubbles.size ())
+	if (!text.empty() && !_Bubbles.empty())
 	{
 		// Get a bubble
 		CGroupInSceneBubble *bubble = _Bubbles[_CurrentBubble];
@@ -668,9 +680,8 @@ CGroupInSceneBubbleManager::CPopupContext *CGroupInSceneBubbleManager::buildCont
 	if (target)
 	{
 		// Find a position
-		NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
-		const uint width = Driver->getWindowWidth();
-		const uint height = Driver->getWindowHeight();
+		uint32 width, height;
+		CViewRenderer::getInstance()->getScreenSize(width, height);
 		h = (target->getXReal() < ((sint)width-target->getXReal()-target->getWReal()))?"l":"r";
 		v = (target->getYReal() < ((sint)height-target->getYReal()-target->getHReal()))?"b":"t";
 		target->setActive(true);

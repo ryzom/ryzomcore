@@ -1,0 +1,21 @@
+﻿*HASH_VALUE	classification_type	name	ia	da	p	pia	pda	description
+_3A05A61DFA348A48	TypeHumanoid	humanoid	a	the	humanoids		the	humanoids
+_45506C09EB15E8F6	TypeHomin	homin	a	the	homins		the	homins
+_8E983B69E6751B5B	TypeDegenerated	degenerate homin	a	the	degenerate homins		the	degenerate homins
+_A9DA837C2389848E	TypeFauna	fauna	a	the	faunas		the	faunas
+_EB29AF7C2428C08C	TypeFlora	flora	a	the	floras		the	floras
+_418079E7A7FCBDE4	TypeDog	canine	a	the	canines		the	canines
+_2ADE76E9CAEF61FD	TypeRunner	runner	a	the	runners		the	runners
+_E66DB1300A4F65FE	TypeHorse	equine	an	the	equines		the	equines
+_41C17C16195279E3	TypeBird	bird	a	the	birds		the	birds
+_86208D03AB86D000	TypeKitin	Kitin	a	the	Kitins		the	Kitins
+_6BA9A101DCF285C2	TypeLandKitin	Kitin	a	the	Kitins		the	Kitins
+_084D91AFD5E36708	TypeFlyingKitin	flying Kitin	a	the	flying Kitins		the	flying Kitins
+_473159828751A1F6	TypeFish	fish	a	the	fish		the	fish
+_2117AAF84DF7627F	TypeRyzomian	ryzomian	a	the	ryzomians		the	ryzomians
+_367CB4F6AA3221AE	TypeGreatRyzomian	large ryzomian	a	the	large ryzomians		the	large ryzomians
+_FABC37E2BA5ACB87	TypePachyderm	pachyderm	a	the	pachyderms		the	pachyderms
+_20C7038A1FE556FD	TypeShellfish	crustacian	a	the	crustacians		the	crustacians
+_15EA8409E9C8749E	TypeKami	Kami	a	the	Kamis		the	Kamis
+_84632E6705B131E4	TypeKaravan	Karavan	a	the	Karavans		the	Karavans
+_66BC409E659A149E	TypeAll	all			all			all

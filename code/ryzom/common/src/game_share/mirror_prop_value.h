@@ -847,7 +847,7 @@ public:
 private:
 
 	/** The previous value known is stored. If we stored the timestamp instead, we could not see a change
-	 * if it occured after but at the same cycle as resetChangeFlag().
+	 * if it occurred after but at the same cycle as resetChangeFlag().
 	 */
 	T							_PreviousValue;
 };
@@ -911,7 +911,7 @@ public:
 private:
 
 	/** The previous value known is stored. If we stored the timestamp instead, we could not see a change
-	 * if it occured after but at the same cycle as resetChangeFlag().
+	 * if it occurred after but at the same cycle as resetChangeFlag().
 	 */
 	T							_PreviousValue;
 };

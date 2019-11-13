@@ -205,7 +205,7 @@ inline bool			CMirroredDataSet::propIsList( TPropertyIndex propIndex ) const
  * Display the values of one property for all entities
  */
 template <class T, class CPropLocationClass>
-inline void			CMirroredDataSet::displayPropValues( TPropertyIndex propIndex, T* pt, NLMISC::CLog& log ) const
+inline void			CMirroredDataSet::displayPropValues( TPropertyIndex propIndex, T* /* pt */, NLMISC::CLog& log ) const
 {
 //	std::stringstream ss;
 //	ss << "Mirror property " << propIndex << ":" << endl;

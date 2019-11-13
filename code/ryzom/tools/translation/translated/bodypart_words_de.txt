@@ -1,0 +1,43 @@
+﻿*HASH_VALUE	bodypartID	name	pro	daa	ia	da	p	pia	pda	description
+_ACB9BC721BA65099	HHead	Kopf	deinen	den	ein	der	Köpfe		die	
+_278A7C5D654814CD	HChest	Oberkörper	deinen	den	ein	der	Oberkörper		die	
+_A2D940906B29B889	HArms	Arme	deine	die		die	Arme		die	
+_B1CAFC85DB767C9C	HHands	Hände	deine	die		die	Hände		die	
+_20A8389BAC987C9F	HLegs	Beine	deine	die		die	Beine		die	
+_E18820962C586494	HFeet	Füße	deine	die		die	Füße		die	
+_ACB9BC7B1B375099	QHead	Kopf	deinen	den	ein	der	Köpfe		die	
+_E80BB4A21A9838B5	QBody	Körper	deinen	den	ein	der	Körper		die	
+_C96F0919D2F8DC71	QFrontPaws	Vorderbeine	deinen	die		die	Vorderbeine		die	
+_08A1A8FEABC3CD11	QFrontHooves	Vorderbeine	deine	die		die	Vorderbeine		die	
+_23B95F02A87957B0	QRearPaws	Hinterbeine	deine	die		die	Hinterbeine		die	
+_D880990C5BE9DCB7	QRearHooves	Hinterbeine	deine	die		die	Hinterbeine		die	
+_2836645DDE8874AD	LKHead	Kopf	deinen	den	ein	der	Köpfe		die	
+_ED86C05FE298A4B9	LKBody	Körper	deinen	den	ein	der	Körper		die	
+_39BFC0EBE486B512	LKFrontPaws1	Vorderbeine	deine	die		die	Vorderbeine		die	
+_79BFC0EBE486B512	LKFrontPaws2	Vorderbeine	deine	die		die	Vorderbeine		die	
+_D92BB508D8F884A6	LKRearPaws1	Hinterbeine	deine	die		die	Hinterbeine		die	
+_D93BB508D8F884A6	LKRearPaws2	Hinterbeine	deine	die		die	Hinterbeine		die	
+_283664575C8874AD	FKHead	Kopf	deinen	den	ein	der	Köpfe		die	
+_ED86C0596098A4B9	FKBody	Körper	deinen	den	ein	der	Körper		die	
+_DBBA7473640310B0	FKPaws1	Beine	deine	die		die	Beine		die	
+_1BBA7473641310B0	FKPaws2	Beine	deine	die		die	Beine		die	
+_66B6A47A4A7ADCC2	FKWings1	Flügel	deine	die		die	Flügel		die	
+_66B6A47ACA7ADCC2	FKWings2	Flügel	deine	die		die	Flügel		die	
+_ACB9BC701B865099	FHead	Kopf	deinen	den	ein	der	Köpfe		die	
+_E80BB4971AE738B5	FBody	Körper	deinen	den	ein	der	Körper		die	
+_C40D15A82A36DF2C	FFrontFins1	Vorderflossen	deine	die		die	Vorderflossen		die	
+_C41D15A82A36DF2C	FFrontFins2	Vorderflossen	deine	die		die	Vorderflossen		die	
+_67B624EBAAF630A4	FRearFins1	Hinterflossen	deine	die		die	Hinterflossen		die	
+_67B628EBAAF630A4	FRearFins2	Hinterflossen	deine	die		die	Hinterflossen		die	
+_ACB9BC6C1B465099	BHead	Kopf	deinen	den	ein	der	Köpfe		die	
+_E80BB4931AA738B5	BBody	Körper	deinen	den	ein	der	Körper		die	
+_25897F8F25594780	BFeet1	Füße	deine	die		die	Füße		die	
+_2589838F25594B80	BFeet2	Füße	deine	die		die	Füße		die	
+_2C68746BA436D3C2	BWings1	Flügel	deine	die		die	Flügel		die	
+_2C68746BA446D7C2	BWings2	Flügel	deine	die		die	Flügel		die	
+_8061E6E18C3EA521	PUpperTrunk	Stiel	deinen	den	ein	die	Stiele		die	
+_ECEA3087A666CCC3	Ptrunk	Rüssel	deinen	den	ein	die	Rüssel		die	
+_E7469C4D9B5A0C9D	PLeaves1	Blatt	dein	das	ein	die	Blätter		die	
+_E7469C4DDB5A0C9D	PLeaves2	Blatt	dein	das	ein	die	Blätter		die	
+_C3EE9906771FB524	PLowerTrunk	Stamm	deinen	den	ein	die	Stämme		die	
+_DFA67A5CC7DECDE6	PVisibleRoots	Wurzel	deine	die	eine	die	Wurzeln		die	

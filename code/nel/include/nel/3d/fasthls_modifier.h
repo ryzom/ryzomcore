@@ -48,7 +48,7 @@ public:
 	static void releaseInstance();
 
 	/// convert a HLS (0..255) to a RGBA.
-	CRGBA		convert(uint H, uint L, uint S);
+	NLMISC::CRGBA		convert(uint H, uint L, uint S);
 
 	/// convert a RGBA bitmap into another RGBA, with HLS decal (0..255, -255..+255, -255..+255).
 	void		convertRGBABitmap(NLMISC::CBitmap &dst, const NLMISC::CBitmap &src, uint8 dh, sint dl, sint ds);
@@ -75,7 +75,7 @@ private:
 		uint8	H,L,S,A;
 	};
 
-	CRGBA		_HueTable[HueTableSize];
+	NLMISC::CRGBA		_HueTable[HueTableSize];
 	CHLSA		_Color16ToHLS[65536];
 
 	/// Constructor

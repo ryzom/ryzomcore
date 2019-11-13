@@ -102,6 +102,26 @@ NEL3D_APPDATA_COLLISION				= 1423062613
 NEL3D_APPDATA_COLLISION_EXTERIOR	= 1423062614
 NEL3D_APPDATA_AUTOMATIC_ANIMATION	= 1423062617
 
+-- Lower case
+fn lowercase instring =
+(  
+	local upper, lower, outstring
+	upper="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	lower="abcdefghijklmnopqrstuvwxyz" 
+
+	outstring = copy instring 
+
+	for iii = 1 to outstring.count do 
+	(  
+		jjj = findString upper outstring[iii]
+		if (jjj != undefined) then
+			outstring[iii] = lower[jjj] 
+		else
+			outstring[iii] = instring[iii]
+	)
+	return outstring     -- value of outstring will be returned as function result 
+)
+
 -- This node is n accelerator ?
 fn isAccelerator node =
 (
@@ -363,9 +383,9 @@ fn runNelMaxExportSub inputMaxFile retryCount =
 				(
 					-- Output directory
 					if (haveCoarseMesh node) == true then
-						output = ("%OutputDirectoryWithCoarseMesh%/" + (node.name) + ".shape")
+						output = ("%OutputDirectoryWithCoarseMesh%/" + lowercase(node.name) + ".shape")
 					else
-						output = ("%OutputDirectoryWithoutCoarseMesh%/" + (node.name) + ".shape")
+						output = ("%OutputDirectoryWithoutCoarseMesh%/" + lowercase(node.name) + ".shape")
 					
 					-- Compare file date
 					if (NeLTestFileDate output inputMaxFile) == true then
@@ -451,7 +471,7 @@ fn runNelMaxExportSub inputMaxFile retryCount =
 				(
 					-- Error
 					nlerror("ERROR exporting 'shape': can't open the file " + inputMaxFile)
-					nlerror("FAIL Mysterious error occured")
+					nlerror("FAIL Mysterious error occurred")
 					NelForceQuitRightNow()
 				)
 			)
@@ -559,7 +579,7 @@ catch
 (
 	-- Error
 	nlerror("ERROR Fatal error exporting 'shape' in folder %MaxSourceDirectory%")
-	nlerror("FAIL Fatal error occured")
+	nlerror("FAIL Fatal error occurred")
 	NelForceQuitRightNow()
 	removeRunningTag = false
 )
@@ -584,7 +604,7 @@ if (removeRunningTag) then
 )
 else
 (
-	nlerror("FAIL One or more issues occured")
+	nlerror("FAIL One or more issues occurred")
 	NelForceQuitRightNow()
 )
 

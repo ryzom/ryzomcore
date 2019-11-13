@@ -33,9 +33,12 @@
 #include "nel/misc/stream.h"
 
 // From ligo library
-#include "nel/../../src/ligo/zone_template.h"
+#include "nel/ligo/zone_template.h"
 #include "nel/ligo/ligo_config.h"
-#include "nel/../../src/ligo/ligo_error.h"
+#include "nel/ligo/ligo_error.h"
+#include "nel/misc/path.h"
+
+#include "../../plugin_max/nel_3dsmax_shared/string_common.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -124,27 +127,24 @@ bool CMaxToLigo::loadLigoConfigFile (CLigoConfig& config, Interface& it, bool di
 	if (hModule)
 	{
 		// Get the path
-		char sModulePath[256];
-		int res=GetModuleFileName(hModule, sModulePath, 256);
+		TCHAR sModulePath[256];
+		int res = GetModuleFileName(hModule, sModulePath, 256);
 
 		// Success ?
 		if (res)
 		{
 			// Path
-			char sDrive[256];
-			char sDir[256];
-			_splitpath (sModulePath, sDrive, sDir, NULL, NULL);
-			_makepath (sModulePath, sDrive, sDir, "ligoscape", ".cfg");
+			std::string path = NLMISC::CFile::getPath(MCharStrToUtf8(sModulePath)) + "ligoscape.cfg";
 
 			try
 			{
 				// Load the config file
-				config.readConfigFile (sModulePath, false);
+				config.readConfigFile (path, false);
 
 				// ok
 				return true;
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				// Print an error message
 				char msg[512];
@@ -160,22 +160,25 @@ bool CMaxToLigo::loadLigoConfigFile (CLigoConfig& config, Interface& it, bool di
 
 // ***************************************************************************
 
-void CMaxToLigo::errorMessage (const char *msg, const char *title, Interface& it, bool dialog)
+void CMaxToLigo::errorMessage(const std::string &msg, const std::string &title, Interface& it, bool dialog)
 {
 	// Text or dialog ?
 	if (dialog)
 	{
 		// Dialog message
-		MessageBox (it.GetMAXHWnd(), msg, title, MB_OK|MB_ICONEXCLAMATION);
+		ucstring ucmsg, uctitle;
+		ucmsg.fromUtf8(msg);
+		uctitle.fromUtf8(title);
+		MessageBoxW(it.GetMAXHWnd(), (LPCWSTR)ucmsg.c_str(), (LPCWSTR)uctitle.c_str(), MB_OK | MB_ICONEXCLAMATION);
 	}
 	else
 	{
 		// Text message
-		mprintf ((string(msg) + "\n").c_str());
+		mprintf(_M("%s\n"), MaxTStrFromUtf8(msg).data());
 	}
 
 	// Output in log
-	nlwarning ("LIGO ERROR : %s", msg);
+	nlwarning("LIGO ERROR : %s", msg.c_str());
 }
 
 // ***************************************************************************

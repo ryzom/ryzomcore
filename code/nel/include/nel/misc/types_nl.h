@@ -79,6 +79,9 @@
 #		elif _MSC_VER >= 1600
 #			define NL_COMP_VC10
 #			define NL_COMP_VC_VERSION 100
+#			ifdef _HAS_CPP0X
+#				undef _HAS_CPP0X	// VC++ 2010 doesn't implement C++11 stuff we need
+#			endif
 #		elif _MSC_VER >= 1500
 #			define NL_COMP_VC9
 #			define NL_COMP_VC_VERSION 90
@@ -162,8 +165,18 @@
 #	define NL_COMP_GCC
 #endif
 
-#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__)
+#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__) || (defined(NL_COMP_VC_VERSION) && NL_COMP_VC_VERSION >= 110)
 #	define NL_ISO_CPP0X_AVAILABLE
+#endif
+
+#if defined(NL_COMP_GCC) && (__cplusplus >= 201103L)
+#	define NL_NO_EXCEPTION_SPECS
+#endif
+
+#if defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 140)
+#define nlmove(v) std::move(v)
+#else
+#define nlmove(v) (v)
 #endif
 
 // gcc 3.4 introduced ISO C++ with tough template rules
@@ -213,6 +226,7 @@
 #	if defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
 #		pragma warning (disable : 4005)			// don't warn on redefinitions caused by xp platform sdk
 #	endif // NL_COMP_VC8 || NL_COMP_VC9
+#	pragma warning (disable : 26495)		// Variable is uninitialized. Always initialize a member variable. (On purpose for performance.)
 #endif // NL_OS_WINDOWS
 
 
@@ -386,17 +400,17 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 #include <stdlib.h>
 #include <intrin.h>
 #include <malloc.h>
-inline void *aligned_malloc(size_t size, size_t alignment) { return _aligned_malloc(size, alignment); }
-inline void aligned_free(void *ptr) { _aligned_free(ptr); }
+#define aligned_malloc(size, alignment) _aligned_malloc(size, alignment)
+#define aligned_free(ptr) _aligned_free(ptr)
 #elif defined(NL_OS_MAC)
 #include <stdlib.h>
 // under Mac OS X, malloc is already aligned for SSE and Altivec (16 bytes alignment)
-inline void *aligned_malloc(size_t size, size_t /* alignment */) { return malloc(size); }
-inline void aligned_free(void *ptr) { free(ptr); }
+#define aligned_malloc(size, alignment) malloc(size)
+#define aligned_free(ptr) free(ptr)
 #else
 #include <malloc.h>
-inline void *aligned_malloc(size_t size, size_t alignment) { return memalign(alignment, size); }
-inline void aligned_free(void *ptr) { free(ptr); }
+#define aligned_malloc(size, alignment) memalign(alignment, size)
+#define aligned_free(ptr) free(ptr)
 #endif /* NL_COMP_ */
 
 
@@ -405,13 +419,30 @@ inline void aligned_free(void *ptr) { free(ptr); }
 #define NL_DEFAULT_MEMORY_ALIGNMENT 16
 #define NL_ALIGN_SSE2 NL_ALIGN(NL_DEFAULT_MEMORY_ALIGNMENT)
 
-#ifndef NL_CPU_X86_64
+#ifdef NL_CPU_X86_64
 // on x86_64, new and delete are already aligned on 16 bytes
+#elif (defined(NL_COMP_VC) && defined(NL_DEBUG))
+// don't use aligned memory if debugging with VC++ in 32 bits
+#else
+// use aligned memory in all other cases
+#define NL_USE_ALIGNED_MEMORY_OPERATORS
+#endif
+
+#ifdef NL_USE_ALIGNED_MEMORY_OPERATORS
+
+#ifdef NL_NO_EXCEPTION_SPECS
+extern void *operator new(size_t size);
+extern void *operator new[](size_t size);
+extern void operator delete(void *p) noexcept;
+extern void operator delete[](void *p) noexcept;
+#else
 extern void *operator new(size_t size) throw(std::bad_alloc);
 extern void *operator new[](size_t size) throw(std::bad_alloc);
 extern void operator delete(void *p) throw();
 extern void operator delete[](void *p) throw();
-#endif
+#endif /* NL_NO_EXCEPTION_SPECS */
+
+#endif /* NL_USE_ALIGNED_MEMORY_OPERATORS */
 
 #else /* NL_HAS_SSE2 */
 
@@ -430,30 +461,40 @@ extern void operator delete[](void *p) throw();
 #		define CHashSet ::std::hash_set
 #		define CHashMultiMap ::std::hash_multimap
 #	endif // _STLP_HASH_MAP
+#	define CUniquePtr ::std::auto_ptr
+#	define CUniquePtrMove
+#elif defined(NL_ISO_CPP0X_AVAILABLE) || (defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 100))
+#	include <unordered_map>
+#	include <unordered_set>
+#	define CHashMap ::std::unordered_map
+#	define CHashSet ::std::unordered_set
+#	define CHashMultiMap ::std::unordered_multimap
+#	define CUniquePtr ::std::unique_ptr
+#	define CUniquePtrMove ::std::move
 #elif defined(NL_ISO_STDTR1_AVAILABLE) // use std::tr1 for CHash* classes, if available (gcc 4.1+ and VC9 with TR1 feature pack)
 #	include NL_ISO_STDTR1_HEADER(unordered_map)
 #	include NL_ISO_STDTR1_HEADER(unordered_set)
 #	define CHashMap NL_ISO_STDTR1_NAMESPACE::unordered_map
 #	define CHashSet NL_ISO_STDTR1_NAMESPACE::unordered_set
 #	define CHashMultiMap NL_ISO_STDTR1_NAMESPACE::unordered_multimap
+#	define CUniquePtr ::std::auto_ptr
+#	define CUniquePtrMove
 #elif defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 70 && NL_COMP_VC_VERSION <= 90) // VC7 through 9
 #	include <hash_map>
 #	include <hash_set>
 #	define CHashMap stdext::hash_map
 #	define CHashSet stdext::hash_set
 #	define CHashMultiMap stdext::hash_multimap
-#elif defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 100)
-#	include <unordered_map>
-#	include <unordered_set>
-#	define CHashMap ::std::unordered_map
-#	define CHashSet ::std::unordered_set
-#	define CHashMultiMap ::std::unordered_multimap
+#	define CUniquePtr ::std::auto_ptr
+#	define CUniquePtrMove
 #elif defined(NL_COMP_GCC) // GCC4
 #	include <ext/hash_map>
 #	include <ext/hash_set>
 #	define CHashMap ::__gnu_cxx::hash_map
 #	define CHashSet ::__gnu_cxx::hash_set
 #	define CHashMultiMap ::__gnu_cxx::hash_multimap
+#	define CUniquePtr ::std::auto_ptr
+#	define CUniquePtrMove
 
 namespace __gnu_cxx {
 
@@ -485,6 +526,15 @@ template<> struct hash<uint64>
  */
 typedef	uint16	ucchar;
 
+#if defined(NL_OS_WINDOWS) && (defined(UNICODE) || defined(_UNICODE))
+#define nltmain wmain
+#define nltWinMain wWinMain
+#else
+#define nltmain main
+#if defined(NL_OS_WINDOWS)
+#define nltWinMain WinMain
+#endif
+#endif
 
 // To define a 64bits constant; ie: UINT64_CONSTANT(0x123456781234)
 #ifdef NL_COMP_VC

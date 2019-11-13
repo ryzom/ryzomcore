@@ -37,6 +37,7 @@
 #include "nel/misc/entity_id.h"
 #include "nel/misc/sheet_id.h"
 #include "nel/misc/sstring.h"
+#include "nel/misc/common.h"
 #include "utils.h"
 
 #include <vector>

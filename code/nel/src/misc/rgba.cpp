@@ -48,9 +48,10 @@ const CRGBA CRGBA::Blue(0, 0, 255) ;
 const CRGBA CRGBA::Magenta(255, 0, 255) ;
 const CRGBA CRGBA::Cyan(0, 255, 255) ;
 const CRGBA CRGBA::White(255, 255, 255) ;
+const CRGBA CRGBA::Transparent(0, 0, 0, 0);
 
 // ***************************************************************************
-void CRGBA::serial(class NLMISC::IStream &f)
+void CRGBA::serial(NLMISC::IStream &f)
 {
 	f.serial (R);
 	f.serial (G);
@@ -581,7 +582,7 @@ void CRGBA::subtractColors(CRGBA *dest, const CRGBA *src1, const CRGBA *src2, ui
 
 
 // ***************************************************************************
-void CBGRA::serial(class NLMISC::IStream &f)
+void CBGRA::serial(NLMISC::IStream &f)
 {
 	f.serial (B);
 	f.serial (G);
@@ -748,6 +749,17 @@ CRGBA CRGBA::stringToRGBA( const char *ptr )
 	
 			return CRGBA( r,g,b,a );
 		}
+
+		// we need at least 3 hexadecimal values to consider string is valid
+		if (sscanf(ptr, "#%02x%02x%02x%02x", &r, &g, &b, &a) >= 3)
+		{
+			clamp(r, 0, 255);
+			clamp(g, 0, 255);
+			clamp(b, 0, 255);
+			clamp(a, 0, 255);
+
+			return CRGBA(r, g, b, a);
+		}
 	}
 
 	return NLMISC::CRGBA::White;
@@ -781,7 +793,7 @@ bool CRGBA::fromString( const std::string &s )
 
 
 // ***************************************************************************
-void CRGBAF::serial(class NLMISC::IStream &f)
+void CRGBAF::serial(NLMISC::IStream &f)
 {
 	f.serial (R);
 	f.serial (G);

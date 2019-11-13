@@ -34,6 +34,7 @@ class CPatchThread;
 class CCheckThread;
 class CScanDataThread;
 class CInstallThread;
+class CDownloadThread;
 
 
 // Useful for using an external downloader (BitTorrent) use of interface with CGameDownloader from client_background_rd.exe using as install program
@@ -238,7 +239,7 @@ public:
 
 	CProductDescriptionForClient &getDescFile() { return DescFile; }
 
-	NLMISC::IThread *getCurrThread() const { return thread; }
+	NLMISC::IThread *getCurrThread() const { return Thread; }
 	// set an external state listener (enable to log) infos
 	void setStateListener(IPatchManagerStateListener* stateListener);
 
@@ -370,7 +371,7 @@ private:
 			ServerPath = serverPath;
 			Available = true;
 
-			if (ServerPath.size()>0 && ServerPath[ServerPath.size()-1] != '/')
+			if (!ServerPath.empty() && ServerPath[ServerPath.size()-1] != '/')
 				ServerPath += '/';
 
 			std::string::size_type pos = ServerPath.find ("@");
@@ -410,7 +411,8 @@ private:
 	CCheckThread	*CheckThread;
 	CScanDataThread	*ScanDataThread;
 	CInstallThread	*InstallThread;
-	NLMISC::IThread	*thread;
+	CDownloadThread	*DownloadThread;
+	NLMISC::IThread	*Thread;
 
 	// State
 	struct CState

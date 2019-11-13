@@ -205,7 +205,7 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 	if (_ExportCB != NULL)
 		_ExportCB->dispPass ("Loading height map");
 	_HeightMap = NULL;
-	if (_Options->HeightMapFile != "")
+	if (!_Options->HeightMapFile.empty())
 	{
 		_HeightMap = new CBitmap;
 		try
@@ -236,7 +236,7 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 	if (_ExportCB != NULL)
 		_ExportCB->dispPass ("Loading height map");
 	_HeightMap2 = NULL;
-	if (_Options->HeightMapFile2 != "")
+	if (!_Options->HeightMapFile2.empty())
 	{
 		_HeightMap2 = new CBitmap;
 		try
@@ -267,7 +267,7 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 	if (_ExportCB != NULL)
 		_ExportCB->dispPass ("Loading color map");
 	_ColorMap = NULL;
-	if (_Options->ColorMapFile != "")
+	if (!_Options->ColorMapFile.empty())
 	{
 		_ColorMap = new CBitmap;
 		try
@@ -314,12 +314,12 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 	try
 	{
 		// Add zone files
-		if (_Options->OutZoneDir != "")
+		if (!_Options->OutZoneDir.empty())
 			NLMISC::CPath::getPathContent(_Options->OutZoneDir, true, false, true, allFiles);
 
 		// Add ig files
 		vector<string> allOtherFiles;
-		if (_Options->OutIGDir != "")
+		if (!_Options->OutIGDir.empty())
 			NLMISC::CPath::getPathContent(_Options->OutIGDir, true, false, true, allOtherFiles);
 		allFiles.insert(allFiles.end(), allOtherFiles.begin(), allOtherFiles.end());
 	}
@@ -386,7 +386,7 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 	_ZoneMaxX = nMaxX;
 	_ZoneMaxY = nMaxY;
 
-	if ((_Options->ZoneMin != "") && (_Options->ZoneMax != ""))
+	if (!_Options->ZoneMin.empty() && !_Options->ZoneMax.empty())
 	{
 		_Options->ZoneMin = strupr (_Options->ZoneMin);
 		_Options->ZoneMax = strupr (_Options->ZoneMax);
@@ -1234,7 +1234,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 
 	zeZone.retrieve (PatchInfos, BorderVertices);
 
-	nlassert (BorderVertices.size() == 0);
+	nlassert (BorderVertices.empty());
 
 	CMatrix Transfo;
 	Transfo.setRot (CQuat(CVector::K, (float)(nRot * Pi / 2.0f)));
@@ -1445,7 +1445,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 
 	zeZone.retrieve (PatchInfos, BorderVertices);
 
-	nlassert (BorderVertices.size() == 0);
+	nlassert (BorderVertices.empty());
 
 	CMatrix Transfo;
 	Transfo.setRot (CQuat(CVector::K, (float)(nRot * Pi / 2.0f)));

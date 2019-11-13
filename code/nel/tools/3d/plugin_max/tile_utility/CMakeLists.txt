@@ -1,6 +1,8 @@
-FILE(GLOB SRC *.cpp *.h *.def)
+FILE(GLOB SRC *.cpp *.h *.def *.rc *.rc2)
 
-ADD_LIBRARY(tile_utility SHARED ${SRC} tile_utility.rc)
+SOURCE_GROUP("" FILES ${SRC})
+
+ADD_LIBRARY(tile_utility SHARED ${SRC})
 
 INCLUDE_DIRECTORIES(${MAXSDK_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(tile_utility 
@@ -17,5 +19,7 @@ SET_TARGET_PROPERTIES(tile_utility PROPERTIES SUFFIX ".dlu")
 NL_DEFAULT_PROPS(tile_utility "MAX Plugin: Tile Utility")
 NL_ADD_RUNTIME_FLAGS(tile_utility)
 NL_ADD_LIB_SUFFIX(tile_utility)
+
+ADD_DEFINITIONS(${MAXSDK_DEFINITIONS})
 
 INSTALL(TARGETS tile_utility RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)

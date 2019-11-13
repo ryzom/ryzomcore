@@ -35,6 +35,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 
 /// Input stream class for 7zip archive
 class CNel7ZipInStream : public ISeekInStream
@@ -51,7 +55,7 @@ public:
 	}
 
 	// the read function called by 7zip to read data
-	static SRes readFunc(void *object, void *buffer, size_t *size)
+	static SRes readFunc(const ISeekInStream *object, void *buffer, size_t *size)
 	{
 		try
 		{
@@ -67,7 +71,7 @@ public:
 	}
 
 	// the seek function called by seven zip to seek inside stream
-	static SRes seekFunc(void *object, Int64 *pos, ESzSeek origin)
+	static SRes seekFunc(const ISeekInStream *object, Int64 *pos, ESzSeek origin)
 	{
 		try
 		{
@@ -106,10 +110,25 @@ bool unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName
 	CIFile input(sevenZipFile);
 	CNel7ZipInStream inStr(&input);
 
-	CLookToRead lookStream;
+	CLookToRead2 lookStream;
 	lookStream.realStream = &inStr;
-	LookToRead_CreateVTable(&lookStream, False);
-	LookToRead_Init(&lookStream);
+	LookToRead2_CreateVTable(&lookStream, False);
+
+	size_t bufferSize = 1024;
+
+	{
+		lookStream.buf = (Byte*)ISzAlloc_Alloc(&allocImp, bufferSize);
+
+		if (!lookStream.buf)
+		{
+			nlerror("Unable to allocate %zu bytes", bufferSize);
+			return false;
+		}
+
+		lookStream.bufSize = bufferSize;
+		lookStream.realStream = &inStr;
+		LookToRead2_Init(&lookStream);
+	}
 
 	CrcGenerateTable();
 
@@ -117,7 +136,7 @@ bool unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName
 	SzArEx_Init(&db);
 
 	// unpack the file using the 7zip API
-	SRes res = SzArEx_Open(&db, &lookStream.s, &allocImp, &allocTempImp);
+	SRes res = SzArEx_Open(&db, &lookStream.vt, &allocImp, &allocTempImp);
 
 	if (res != SZ_OK)
 	{
@@ -139,10 +158,7 @@ bool unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName
 	size_t outSizeProcessed = 0;
 
 	// get the first file
-	res = SzArEx_Extract(&db, &lookStream.s, 0,
-		&blockIndex, &outBuffer, &outBufferSize,
-		&offset, &outSizeProcessed,
-		&allocImp, &allocTempImp);
+	res = SzArEx_Extract(&db, &lookStream.vt, 0, &blockIndex, &outBuffer, &outBufferSize, &offset, &outSizeProcessed, &allocImp, &allocTempImp);
 
 	// get the length of first file
 	size_t nameLen = SzArEx_GetFileNameUtf16(&db, 0, NULL);
@@ -196,26 +212,26 @@ bool unpackLZMA(const std::string &lzmaFile, const std::string &destFileName)
 	}
 
 	// allocate input buffer for props
-	auto_ptr<uint8> propsBuffer = auto_ptr<uint8>(new uint8[LZMA_PROPS_SIZE]);
+	std::vector<uint8> propsBuffer(LZMA_PROPS_SIZE);
 
 	// size of LZMA content
 	inSize -= LZMA_PROPS_SIZE + 8;
 
 	// allocate input buffer for lzma data
-	auto_ptr<uint8> inBuffer = auto_ptr<uint8>(new uint8[inSize]);
+	std::vector<uint8> inBuffer(inSize);
 
 	uint64 fileSize = 0;
 
 	try
 	{
 		// read props
-		inStream.serialBuffer(propsBuffer.get(), LZMA_PROPS_SIZE);
+		inStream.serialBuffer(&propsBuffer[0], LZMA_PROPS_SIZE);
 
 		// read uncompressed size
 		inStream.serial(fileSize);
 
 		// read lzma content
-		inStream.serialBuffer(inBuffer.get(), inSize);
+		inStream.serialBuffer(&inBuffer[0], inSize);
 	}
 	catch(const EReadError &e)
 	{
@@ -224,14 +240,14 @@ bool unpackLZMA(const std::string &lzmaFile, const std::string &destFileName)
 	}
 
 	// allocate the output buffer
-	auto_ptr<uint8> outBuffer = auto_ptr<uint8>(new uint8[fileSize]);
+	std::vector<uint8> outBuffer(fileSize);
 
 	// in and out file sizes
 	SizeT outProcessed = (SizeT)fileSize;
 	SizeT inProcessed = (SizeT)inSize;
 
 	// decompress the file in memory
-	sint res = LzmaUncompress(outBuffer.get(), &outProcessed, inBuffer.get(), &inProcessed, propsBuffer.get(), LZMA_PROPS_SIZE);
+	sint res = LzmaUncompress(&outBuffer[0], &outProcessed, &inBuffer[0], &inProcessed, &propsBuffer[0], LZMA_PROPS_SIZE);
 
 	if (res != 0 || outProcessed != fileSize)
 	{
@@ -245,7 +261,7 @@ bool unpackLZMA(const std::string &lzmaFile, const std::string &destFileName)
 	try
 	{
 		// write content
-		outStream.serialBuffer(outBuffer.get(), (uint)fileSize);
+		outStream.serialBuffer(&outBuffer[0], (uint)fileSize);
 	}
 	catch(const EFile &e)
 	{
@@ -273,12 +289,12 @@ bool packLZMA(const std::string &srcFileName, const std::string &lzmaFileName)
 	}
 
 	// allocate input buffer
-	auto_ptr<uint8> inBuffer = auto_ptr<uint8>(new uint8[inSize]);
+	std::vector<uint8> inBuffer(inSize);
 
 	try
 	{
 		// read file in buffer
-		inStream.serialBuffer(inBuffer.get(), inSize);
+		inStream.serialBuffer(&inBuffer[0], inSize);
 	}
 	catch(const EReadError &e)
 	{
@@ -288,14 +304,14 @@ bool packLZMA(const std::string &srcFileName, const std::string &lzmaFileName)
 
 	// allocate output buffer
 	size_t outSize = (11 * inSize / 10) + 65536; // worst case = 1.1 * size + 64K
-	auto_ptr<uint8> outBuffer = auto_ptr<uint8>(new uint8[outSize]);
+	std::vector<uint8> outBuffer(outSize);
 
 	// allocate buffer for props
 	size_t outPropsSize = LZMA_PROPS_SIZE;
-	auto_ptr<uint8> outProps = auto_ptr<uint8>(new uint8[outPropsSize]);
+	std::vector<uint8> outProps(outPropsSize);
 
 	// compress with best compression and other default settings
-	sint res = LzmaCompress(outBuffer.get(), &outSize, inBuffer.get(), inSize, outProps.get(), &outPropsSize, 9, 1 << 24, 3, 0, 2, 32, 1);
+	sint res = LzmaCompress(&outBuffer[0], &outSize, &inBuffer[0], inSize, &outProps[0], &outPropsSize, 9, 1 << 27, -1, -1, -1, -1, 1);
 
 	switch(res)
 	{
@@ -314,14 +330,14 @@ bool packLZMA(const std::string &srcFileName, const std::string &lzmaFileName)
 			try
 			{
 				// write props
-				outStream.serialBuffer(outProps.get(), (uint)outPropsSize);
+				outStream.serialBuffer(&outProps[0], (uint)outPropsSize);
 
 				// write uncompressed size
 				uint64 uncompressSize = inSize;
 				outStream.serial(uncompressSize);
 
 				// write content
-				outStream.serialBuffer(outBuffer.get(), (uint)outSize);
+				outStream.serialBuffer(&outBuffer[0], (uint)outSize);
 			}
 			catch(const EFile &e)
 			{

@@ -59,7 +59,7 @@ afx_msg void CLAEdit::OnKeyDown( UINT nChar, UINT nRepCnt, UINT nFlags )
 				int start, end;
 				GetSel( start, end );
 				str = str.Mid( start, end-start );
-				int lineNum = atoi( str );
+				int lineNum = atoi(nlTStrToUtf8(str));
 				if ( ! ((lineNum != 0) || (str == "0")) )
 					break;
 
@@ -188,7 +188,7 @@ BOOL CLog_analyserDlg::OnInitDialog()
 		cf.load( "log_analyser.cfg" );
 		LogDateString = cf.getVar( "LogDateString" ).asString().c_str();
 	}
-	catch ( EConfigFile& )
+	catch (const EConfigFile& )
 	{*/
 	LogDateString = "Log Starting [";
 	AnalyseFunc = NULL;
@@ -203,7 +203,7 @@ BOOL CLog_analyserDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// Add files given in command-line
-	string cmdLine = string(theApp.m_lpCmdLine);
+	string cmdLine = NLMISC::tStrToUtf8(theApp.m_lpCmdLine);
 	vector<CString> v;
 	/*int pos = cmdLine.find_first_of(' '); // TODO: handle "" with blank characters
 	while ( pos != string::npos )
@@ -285,9 +285,9 @@ void CLog_analyserDlg::OnDropFiles( HDROP hDropInfo )
 		DragQueryFile( hDropInfo, i, filename.GetBufferSetLength( 200 ), 200 );
 
 		// Plug-in DLL or log file
-		if ( getFileExtension( string(filename) ) == "dll" )
+		if ( getFileExtension( NLMISC::tStrToUtf8(filename) ) == "dll" )
 		{
-			if ( addPlugIn( string(filename) ) )
+			if (addPlugIn(NLMISC::tStrToUtf8(filename)))
 				AfxMessageBox( CString("Plugin added: ") + filename );
 			else
 				AfxMessageBox( CString("Plugin already registered: ") + filename );
@@ -310,16 +310,16 @@ bool CLog_analyserDlg::addPlugIn( const std::string& dllName )
 {
 	int i = 0;
 	char pluginN [10] = "Plugin0";
-	CString pn = theApp.GetProfileString( _T(""), _T(pluginN) );
+	CString pn = theApp.GetProfileString(_T(""), nlUtf8ToTStr(pluginN));
 	while ( ! pn.IsEmpty() )
 	{
-		if ( string(pn) == dllName )
+		if (NLMISC::tStrToUtf8(pn) == dllName)
 			return false; // already registered
 		++i;
 		smprintf( pluginN, 10, "Plugin%d", i );
-		pn = theApp.GetProfileString( _T(""), _T(pluginN) );
+		pn = theApp.GetProfileString(_T(""), nlUtf8ToTStr(pluginN));
 	}
-	theApp.WriteProfileString( _T(""), _T(pluginN), dllName.c_str() );
+	theApp.WriteProfileString(_T(""), nlUtf8ToTStr(pluginN), nlUtf8ToTStr(dllName));
 	Plugins.push_back( dllName.c_str() );
 	return true;
 }
@@ -342,7 +342,7 @@ void CLog_analyserDlg::loadPluginConfiguration()
 		Plugins.push_back( pn );
 		++i;
 		smprintf( pluginN, 10, "Plugin%d", i );
-		pn = theApp.GetProfileString( _T(""), _T(pluginN) );
+		pn = theApp.GetProfileString( _T(""), nlUtf8ToTStr(pluginN) );
 	}
 }
 
@@ -373,7 +373,7 @@ void CLog_analyserDlg::addView( std::vector<CString>& pathNames )
 {
 	if ( pathNames.empty() )
 	{
-		CFileDialog openDialog( true, NULL, "log.log", OFN_HIDEREADONLY | OFN_ALLOWMULTISELECT, "Log files (*.log)|*.log|All files|*.*||", this );
+		CFileDialog openDialog( true, NULL, _T("log.log"), OFN_HIDEREADONLY | OFN_ALLOWMULTISELECT, _T("Log files (*.log)|*.log|All files|*.*||"), this );
 		CString filenameList;
 		openDialog.m_ofn.lpstrFile = filenameList.GetBufferSetLength( 8192 );
 		openDialog.m_ofn.nMaxFile = 8192;
@@ -402,7 +402,7 @@ void CLog_analyserDlg::addView( std::vector<CString>& pathNames )
 		for ( i=0; i!=pathNames.size(); ++i )
 		{
 			// Ensure that a log file without number comes *after* the ones with a number
-			string name = string(pathNames[i]);
+			string name = NLMISC::tStrToUtf8(pathNames[i]);
 			string::size_type dotpos = name.find_last_of('.');
 			if ( (dotpos!=string::npos) && (dotpos > 2) )
 			{
@@ -417,7 +417,7 @@ void CLog_analyserDlg::addView( std::vector<CString>& pathNames )
 		for ( i=0; i!=pathNames.size(); ++i )
 		{
 			// Set the original names back
-			string name = pathNames[i];
+			string name = NLMISC::tStrToUtf8(pathNames[i]);
 			string::size_type tokenpos = name.find( "ZZZ." );
 			if ( tokenpos != string::npos )
 			{
@@ -434,7 +434,7 @@ void CLog_analyserDlg::addView( std::vector<CString>& pathNames )
 	else
 		names += "Loading files:\r\n";
 	for ( i=0; i!=pathNames.size(); ++i )
-		names += string(pathNames[i]) + "\r\n";
+		names += NLMISC::tStrToUtf8(pathNames[i]) + "\r\n";
 	displayCurrentLine( names.c_str() );
 	
 	// Add view and browse sessions if needed
@@ -457,7 +457,7 @@ void CLog_analyserDlg::addView( std::vector<CString>& pathNames )
  */
 void CLog_analyserDlg::OnAddtraceview() 
 {
-	CFileDialog openDialog( true, NULL, "log.log", OFN_HIDEREADONLY, "Log files (*.log)|*.log|All files|*.*||", this );
+	CFileDialog openDialog( true, NULL, _T("log.log"), OFN_HIDEREADONLY, _T("Log files (*.log)|*.log|All files|*.*||"), this );
 	if ( openDialog.DoModal() == IDOK )
 	{
 		vector<CString> pathNames;
@@ -517,7 +517,7 @@ CViewDialog *CLog_analyserDlg::onAddCommon( const vector<CString>& filenames )
 		view->Filenames = filenames;
 	}
 
-	view->LogSessionStartDate = "";
+	view->LogSessionStartDate.Empty();
 	LogSessionsDialog.clear();
 
 	if ( ((CButton*)GetDlgItem( IDC_CheckSessions ))->GetCheck() == 1 )
@@ -534,7 +534,7 @@ CViewDialog *CLog_analyserDlg::onAddCommon( const vector<CString>& filenames )
 				while ( ! ifs.eof() )
 				{
 					ifs.getline( line, 1024 );
-					if ( strstr( line, LogDateString ) != NULL )
+					if ( strstr( line, nlTStrToUtf8(LogDateString) ) != NULL )
 					{
 						LogSessionsDialog.addLogSession( line );
 						++nbsessions;
@@ -554,19 +554,19 @@ CViewDialog *CLog_analyserDlg::onAddCommon( const vector<CString>& filenames )
 		case 1:
 			{
 			// 1 'Log Starting' => no choice if it's at the beginning (1st line, or 2nd line with blank 1st)
-			ifstream ifs( view->Filenames[0] ); // 1 session => ! Filename.empty()
-			char line [1024];
-			ifs.getline( line, 1024 );
-			if ( ! ifs.fail() )
+			ifstream ifs(view->Filenames[0]); // 1 session => ! Filename.empty()
+			char line[1024];
+			ifs.getline(line, 1024);
+			if (!ifs.fail())
 			{
-				if ( strstr( line, LogDateString ) != NULL )
+				if (strstr(line, nlTStrToUtf8(LogDateString)) != NULL)
 					needToChooseSession = false;
 				else if ( string(line).empty() )
 				{
-					if ( ! ifs.fail() )
+					if (!ifs.fail())
 					{
-						ifs.getline( line, 1024 );
-						needToChooseSession = (strstr( line, LogDateString ) == NULL);
+						ifs.getline(line, 1024);
+						needToChooseSession = (strstr(line, nlTStrToUtf8(LogDateString)) == NULL);
 					}
 					else
 						needToChooseSession = true;
@@ -575,7 +575,7 @@ CViewDialog *CLog_analyserDlg::onAddCommon( const vector<CString>& filenames )
 			else
 				needToChooseSession = true;
 			}
-			break;
+		    break;
 		default:
 			// Several 'Log Starting' => always choice
 			needToChooseSession = true;
@@ -620,7 +620,7 @@ void CLog_analyserDlg::getLogSeries( const CString& filenameStr, std::vector<CSt
 {
 	if ( isLogSeriesEnabled() )
 	{
-		string filename = filenameStr;
+		string filename = NLMISC::tStrToUtf8(filenameStr);
 		unsigned int dotpos = filename.find_last_of ('.');
 		if ( dotpos != string::npos )
 		{
@@ -1012,13 +1012,13 @@ void CLog_analyserDlg::OnAnalyse()
 	{
 		if ( Views.empty() )
 		{
-			AfxMessageBox( "This plug-in needs to be applied on the first open view" );
+			AfxMessageBox(_T("This plug-in needs to be applied on the first open view"));
 			return;
 		}
 
 		if ( ! PlugInSelectorDialog.AnalyseFunc )
 		{
-			AfxMessageBox( "Could not load function doAnalyse in dll" );
+			AfxMessageBox(_T("Could not load function doAnalyse in dll"));
 			return;
 		}
 
@@ -1028,7 +1028,7 @@ void CLog_analyserDlg::OnAnalyse()
 		if ( ! logstr.empty() )
 		{
 			vector<CString> pl;
-			pl.push_back( "Analyse log" );
+			pl.push_back(_T("Analyse log"));
 			onAddCommon( pl );
 			Views.back()->addText( logstr.c_str() );
 			Views.back()->commitAddedLines();
@@ -1041,7 +1041,7 @@ void CLog_analyserDlg::OnAnalyse()
 		if ( nEndChar != (int)resstr.size() )
 		{
 			CString s;
-			s.Format( "Error: plug-in returned %u characters, only %d displayed", resstr.size(), nEndChar+1 );
+			s.Format(_T("Error: plug-in returned %u characters, only %d displayed"), (uint)resstr.size(), nEndChar+1 );
 			AfxMessageBox( s );
 		}
 	}

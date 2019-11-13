@@ -32,7 +32,7 @@ struct SContLoc
 
 	SContLoc ();
 	void build (const NLGEORGES::UFormElm *pItem);
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };
 
 // Hierarchical map node
@@ -48,13 +48,13 @@ struct SMap
 		std::string ZoneName;	// Click Zone to be found in the region_*.primitive
 		// -----------------------
 		void build (const NLGEORGES::UFormElm *pItem);
-		void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serial(NLMISC::IStream &f);
 	};
 	std::vector<SChild>	Children;
 	// ---------------------------------------------------------------------------------
 	SMap();
 	void build (const NLGEORGES::UFormElm *pItem);
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };
 
 /** Class that manage .world sheets
@@ -74,7 +74,7 @@ public:
 	CWorldSheet();
 	// from CEntitySheet;
 	virtual void build(const NLGEORGES::UFormElm &item);
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 };
 
 #endif

@@ -1,0 +1,732 @@
+﻿*HASH_VALUE	skill ID	name	ia	da	p	pia	pda	description
+_5179F57B8293F93C	AcurateBleedingShot	Tir précis sanglant	un	le	Tirs précis sanglants	des	les	
+_0779B6D36895A032	AcurateBreathlessShot	Tir précis à couper le souffle	un	le	Tirs précis à couper le souffle	des	les	
+_B436B3C3EBDAAAC5	AnimalSlideslip	Glissade / Flanc d'un animal	une	la	Glissades / Flanc d'animaux	des	les	
+_789A7B66E3228290	AnimalStalking	Traque d'animaux	une	la	Traques d'animaux	des	les	
+_CBCEF9DCFCDF911F	Apothecary	Apothicaire	un	l'\d	Apothicaires	des	les	
+_E50B5464278A586C	Area	Zone	une	la	Zones	des	les	
+_A02E8E8B369FED60	ArmorAndWeaponSmithing	Forge d'armure et d'armes	une	la	Forges d'armures et d'armes	des	les	
+_E2731A39AAE9816C	ArtAndCraft	Artisanat d'art		l'\d	Artisanat d'art			
+_8455814A9EE48079	AttackKamisKnowledge	Connaissance des attaques kamis	une	la	Connaissances des attaques kamis	des	les	
+_8A04698DCE729817	AtysianRegeneration	Régénération atysienne	une	la	Régénérations atysiennes	des	les	
+_D807D07E6A5B34BA	Axe	Hache	une	l	Haches	des	les	
+_53C7C27B0C319674	BackdraftStab	Coup explosif	un	le	Coups explosifs	des	les	
+_9254448C8BC44CBF	BadLuck	Malchance	une	la	Malchance	des	les	
+_AAB7A4D2689BB7D6	BarehandedCombat	Combat à mains nues	un	le	Combats à mains nues	des	les	
+_51B5E2642040F92E	BersekAttack	Attaque démente	une	l'\d	Attaques démentes	des	les	
+_034E41F4E84E6D05	BlackSmithing	Forgeron	un		Forgerons	des	les	
+_6488E439E408A06E	Bleeding	Hémorragie			Hémorragies	des	les	
+_9F068632FF7DBDFA	BlindingRage	Rage aveuglante	une	la	Rages aveuglantes	des	les	
+_B570F9CF2243C4FF	BlindShot	Tir à l'aveugle	un	le	Tirs à l'aveugle	des	les	
+_2069AC63EC3860C2	BowGun	Arbalète	une	l'\d	Arbalètes	des	les	
+_EA6FD908AF68C4B5	BowPistol	Pistolet-arbalète	un	le	Pistolets-arbalètes	des	les	
+_AA485039A648C46E	Building	Construction			Constructions	des	les	
+_826324376D59B61B	BullyraggingBlast	Explosion déchaînée	une	l'\d	Explosions déchaînées	des	les	
+_819DB9C0A269C01D	Camouflage	Camouflage	un	le	Camouflages	des	les	
+_6738B07AE379D0AE	Caravan	Karavan	une	la	Karavans	des	les	
+_5399A67402334998	CerebralFever	Fièvre cérébrale	une	la	Fièvres cérébrales	des	les	
+_08214E7346C2C666	ClothTailoring	Couture	une	la	Coutures	des	les	
+_A938E464D4A6E0A7	Cooking	Cuisiner			Cuisiner			
+_5B0CD28FD6511A84	CreatureHatred	Haine des créatures	une	la	Haine des créatures			
+_A6863C576A570092	Dagger	Dague	une	la	Dagues	des	les	
+_28D95463EC2808B8	Desert	Désert	un	le	Déserts	des	les	
+_542E1C74316D24D5	DesertExoticRawMaterialKnowledge	Connaissance des matières premières exotiques du Désert	une	la	Connaissances des matières premières exotiques du Désert	des	les	
+_5044C0743C307578	DesertKamisKnowledge	Connaissance des Kamis du Désert	une	la	Connaissances des Kamis du Désert	des	les	
+_C8543E4DC74F5A49	DesertTravel	Voyage dans le Désert	un	le	Voyages dans le Désert	des	les	
+_A718F0795EE7C8A5	Digging	Excavation			Excavations	des	les	
+_3365C89800F89E01	DiscreetApproach	Approche discrète	une	l'\d	Approches discrètes	des	les	
+_296A8C9E68567C5E	Diving	Plongeon			Plongeons	des	les	
+_2847B082E21804A0	Dodging	Esquive	une	l'\d	Esquives	des	les	
+_E966C451ADF7E0A0	Dragon	Dragon	un	le	Dragons	des	les	
+_218AFC73A2649CAF	Dryade	Dryade	une	la	Dryades	des	les	
+_EDC0E9E6A1776BF3	DualWield	Double maniement	un	le	Doubles maniements	des	les	
+_6D8940BC243CECB4	Evaluate	Évaluation	une	l'\d	Évaluations	des	les	
+_15C6AC834EE6E4A5	FarShot	Tir à longue portée	un	le	Tirs à longues portée	des	les	
+_D31B758B716A6090	FarThrow	Lancer à longue portée	un	le	Lancers à longue portée	des	les	
+_5D22C96802811266	FeverProtect	Protection contre la fièvre	une	la	Protections contre la fièvre	des	les	
+_229735CB2C772FB6	FirstAid	Premier soin	un	le	Premiers soins	des	les	
+_EBE92C87DE07C8A6	Fishing	Pêche			Pêches	des	les	
+_AAE9A4666E5808B9	Forest	Forêt	une	la	Forêts	des	les	
+_0B3E491A816D958B	ForestExoticRawMaterialKnowledge	Connaissance des matières premières exotiques des Forêts	une	la	Connaissances des matières premières exotiques des Forêts	des	les	
+_5034EC77FCC0A57B	ForestKamisKnowledge	Connaissance des Kamis des Forêts	une	la	Connaissances des Kamis des Forêts	des	les	
+_C8446A5087DF8A4C	ForestTravel	Voyage en Forêt	un	le	Voyages en Forêt	des	les	
+_F28A249AE4D71896	Frost	Gel	un	le	Gels	des	les	
+_A6AB2C9934550CBC	Fyros	Fyros	un	le	Fyros	des	les	
+_23D9DDD45B0AB0C7	FyrosGoods	Biens fyros			Biens fyros	des	les	
+_A45654621F97C4BA	Goo	Goo		la	Goo	des	les	
+_1AF57DBCEDF937C5	GreatAxe	Grande hache	une	la	Grandes haches	des	les	
+_4030D5F2D884DCCE	GreatMass	Grande massue	une	la	Grandes massues	des	les	
+_A9F7C08660A9FC8F	Grenade	Grenade	une	la	Grenades	des	les	
+_08065EDC9EB37D73	GroundExtract	Extraction des sols	une	l'\d	Extractions des sols	des	les	
+_79F6AB61B9E5010C	HandToHand	Corps à corps	un	le	Corps à corps	des	les	
+_26BBA88C9D73D4A7	Harpoon	Harpon 	un	le	Harpons	des	les	
+_2BCE3B7A5BDACBB6	HarpoonHunting	Chasse au harpon	une	la	Chasses au harpon	des	les	
+_6859B085A7C998AF	Harvest	Récolte	une	la	Récoltes	des	les	
+_EB948CF094239D1E	HealingKamisKnowledge	Connaissance des Kamis de guérison	une	la	Connaissances des Kamis de guérison	des	les	
+_F92866BFE38BCB95	HearWithering	Affaiblissement de l'ouïe	un	l'\d	Affaiblissements de l'ouïe	des	les	
+_640B62BEC91C82E5	HeavyArmourWear	Vêtement pour armure lourde	un	le	Vêtements pour armures lourdes	des	les	
+_71544EE048F0E123	HeavyWeapon	Arme lourde	une	l'\d	Armes lourdes	des	les	
+_A8888C626796B06B	Hide	Cachette	une	la	Cachettes	des	les	
+_61E7E149D27F1BCF	HominOpponentConsiderWeapon	Considération homine	une	la	Considérations homines	des	les	
+_EDE50008D7249D1E	HuntingKamisKnowledge	Connaissance des Kamis chasseurs	une	la	Connaissances des Kamis chasseurs	des	les	
+_E26A44A9F229689B	Jewellery	Bijoux			Bijoux	des	les	
+_6836DC6A2C2798A7	Jungle	Jungle	une	la	Jungles	des	les	
+_D43BDC86316D70C3	JungleExoticRawMaterialKnowledge	Connaissance des matières premières exotiques de la Jungle	une	la	Connaissances des matières premières exotiques de la Jungle	des	les	
+_D002AC767BE09178	JungleKamisKnowledge	Connaissance des Kamis de la Jungle	une	la	Connaissances des Kamis de la Jungle	des	les	
+_48122A4F06FF7649	JungleTravel	Voyage dans la Jungle	un	le	Voyages dans la Jungle	des	les	
+_66B8AC6A67086042	Kami	Kami	un	le	Kamis	des	les	
+_B2D412D83E3E19EF	KamicShield	Bouclier kamique	un	le	Boucliers kamiques	des	les	
+_BFCCBDCE2A8BD517	KamicShock	Choc kamique	un	le	Chocs kamiques	des	les	
+_6678EC6AE728C042	Kick	Coup de pied	un	le	Coups de pied	des	les	
+_6629A89C6C9428A7	Kitin	Kitin	un	le	Kitins	des	les	
+_6478AC6C64A86045	Lake	Lac	un	le	Lacs	des	les	
+_F97BD9096BA49380	LakeArmor	Armure des Lacs		l'\d	Armures des Lacs	des	les	
+_B07CB462F9A9C8D8	LakeExoticRawMaterialKnowledge	Connaissance des matières premières exotiques des Lacs	une	la	Connaissances des matières premières exotiques des Lacs	des	les	
+_28CFFC31CA6B47F2	LakeKamisKnowledge	Connaissance des Kamis des Lacs	une	la	Connaissances des Kamis des Lacs	des	les	
+_FF4DC5E9C12A3403	LakeTravel	Voyage dans les Lacs	un	le	Voyages dans les Lacs	des	les	
+_8B21013F85EEE200	LeadAnimal	Animal de tête	un	l'\d	Animaux de tête	des	les	
+_404CCCFC606DB7A4	LeatherTailoring	Traitement du cuir	un	le	Traitements du cuir	des	les	
+_04D81F0172B9CF5A	LeftHandedAttack	Attaque de la main gauche	une	l'\d	Attaques de la main gauche	des	les	
+_21775CB4E56D5B7C	LeftHandedParry	Parade de la main gauche	une	la	Parades de la main gauche	des	les	
+_0C452E1ADB0F4DDD	LifeAlchemy	Alchimie de la vie	une	l'\d	Alchimies de la vie	des	les	
+_2687E4D96CC9C432	LifeGift	Don de vie	un	le	Dons de vie	des	les	
+_61EA3687978923C4	LightArmourWear	Vêtement pour armure légère	un	le	Vêtements pour armures légères	des	les	
+_69374089A477E8A4	Madness	Folie	une	la	Folie	des	les	
+_455DACCC024CA8F0	MagicObjects	Objet magique			Objets magiques	des	les	
+_4A1563AB5D130552	MagicTransfert	Transfert magique	un	la	Transferts magiques	des	les	
+_3C8E85DF39A1D502	MajorDryade	Dryade majeure	une	la	Dryades majeures	des	les	
+_29D697CA61F99ED6	MajorHealLife	Guérison majeure de vie	une	la	Guérisons majeures de vie	des	les	
+_221426D45905F8BD	MajorLifeRegeneration	Régénération majeure de vie	une	la	Régénérations majeures de vie	des	les	
+_F38A5F79563A0FA9	MajorMandragore	Mandragore majeure	une	la	Mandragores majeures	des	les	
+_B2D6DE9C984FBAD2	MajorSapHeal	Guérison majeure de sève	une	la	Guérisons majeures de sève	des	les	
+_6A3765DA24F200B7	MajorSapRegenearation	Régénération majeure de sève	une	la	Régénérations majeures de sève	des	les	
+_C3BDE5F46A8D2923	MajorSylve	Sylve majeure	une	la	Sylves majeures	des	les	
+_2271748AD8753575	MajorTirednessHeal	Guérison majeure de fatigue	une	la	Guérisons majeures de fatigue	des	les	
+_CD60785A66010F6E	MajorTirednessRegenearation	Régénération majeure de fatigue	une	la	Régénérations majeures de Fatigue	des	les	
+_01BCE9F0799924F8	MakeAnklet	Fabrication d'un anneau de cheville	une	la	Fabrications d'anneaux de cheville	des	les	
+_E6E88B9DA26BDFC1	MakeAutolaunch	Fabrication d'une mitrailleuse	une	la	Fabrications de mitrailleuses	des	les	
+_58A84D5F4AF94B44	MakeAutolaunchAmmo	Fabrication de munitions pour mitrailleuse	une	la	Fabrications de munitions pour mitrailleuses	des	les	
+_90B8B46306581057	MakeAxe	Fabrication d'une hache	une	la	Fabrications de haches	des	les	
+_90D8586406985859	MakeBag	Fabrication d'un sac	une	la	Fabrications de sacs	des	les	
+_836DED0DB76A28F3	MakeBowgun	Fabrication d'une arbalète	une	la	Fabrications d'arbalètes	des	les	
+_6E7182DF96ED29C9	MakeBowgunAmmo	Fabrication de munitions pour arbalète	une	la	Fabrications de munitions pour arbalètes	des	les	
+_A1D515107FFE3A20	MakeBracelet	Fabrication d'un bracelet	une	la	Fabrications de bracelets	des	les	
+_B3F506251E3059DC	MakeBuckler	Fabrication d'une rondache	une	la	Fabrications de rondaches	des	les	
+_392FB217A21035D5	MakeClothes	Fabrication de vêtements	une	la	Fabrications de vêtements	des	les	
+_806CBDDFB589F0F9	MakeDagger	Fabrication d'une dague	une	la	Fabrications de dagues	des	les	
+_3F3C85E1F72910F4	MakeDiadem	Fabrication d'un diadème	une	la	Fabrications de diadèmes	des	les	
+_BDACDE4D3678E9F7	MakeEaring	Fabrication d'une boucle d'oreille	une	la	Fabrications de boucles d'oreille	des	les	
+_99CF9A08F5CB4324	MakeFireAmmos	Fabrication de munitions incendiaires	une	la	Fabrications de munitions incendiaires	des	les	
+_6BFA2687EB3F65CE	MakeFireToughenedArmors	Fabrication d'une armure forgée par le feu	une	la	Fabrications d'armures forgées par le feu	des	les	
+_5DDB274FBD6D6B60	MakeFireWeapons	Fabrication d'une arme à feu	une	la	Fabrications d'armes à feu	des	les	
+_7A25B19EE3EF09CE	MakeFloralLivingJewels	Fabrication d'un bijou floral vivant	une	la	Fabrications de bijoux floraux vivants	des	les	
+_D61E921DB8BE7F70	MakeFloralPatternLivingClothes	Fabrication de vêtements floraux vivants	une	la	Fabrications de vêtements floraux vivants	des	les	
+_3564EA24DFAE45CB	MakeGrenade	Fabrication d'une grenade	une	la	Fabrications de grenades	des	les	
+_5DB2A7D44F1CA3D5	MakeHarpoonGun	Fabrication d'un pistolet-harpon	une	la	Fabrications de pistolets-harpons	des	les	
+_24321D769D476015	MakeHarpoonGunAmmo	Fabrication de munitions pour pistolet-harpon	une	la	Fabrication de munitions pour pistolets-harpons	des	les	
+_24DAAAC9894A7EBA	MakeHeavyArmors	Fabrication d'une armure lourde	une	la	Fabrications d'armures lourdes	des	les	
+_F12613925D5F5285	MakeHeavyBoots	Fabrication de bottes lourdes	une	la	Fabrications de bottes lourdes	des	les	
+_61897E8DECF7D3AB	MakeHeavyGloves	Fabrication de gants lourds	une	la	Fabrications de gants lourds	des	les	
+_DF9876EB2FC8ABA0	MakeHeavyHelmet	Fabrication d'un casque lourd	une	la	Fabrications de casques lourds	des	les	
+_716683921D7F8A85	MakeHeavyPants	Fabrication d'un pantalon lourd	une	la	Fabrications de pantalons lourds	des	les	
+_67688CED00A9176B	MakeHeavySleeves	Fabrication de manches lourdes	une	la	Fabrications de manches lourdes	des	les	
+_99D5FEB80CE66203	MakeHeavyVest	Fabrication d'un gilet lourd	une	la	Fabrications de gilets lourds	des	les	
+_42CD65D02155B99E	MakeJewels	Fabrication de bijoux	une	la	Fabrications de bijoux	des	les	
+_34A8590FAE27CB85	MakeKamicClothes	Fabrication de vêtements kamis	une	la	Fabrications de vêtements kamis	des	les	
+_95699B664F72967A	MakeKamicJewels	Fabrication d'un bijou kami	une	la	Fabrications de bijoux kamis	des	les	
+_9ACACF60BF7A2F6B	MakeKamicWeapon	Fabrication d'une arme kami	une	la	Fabrications d'armes kamis	des	les	
+_ADBFC1E65BE62BD6	MakeLance	Fabrication d'une lance kamie	une	la	Fabrications de lances kamies	des	les	
+_E164250C41DF1A49	MakeLauncher	Fabrication d'un lance-grenades kami	une	la	Fabrications de lance-grenades Kamis	des	les	
+_DFDDC01F39E70A29	MakeLauncherAmmo	Fabrication de munitions pour lance-grenades kamis	une	la	Fabrications de munitions pour lance-grenades kamis	des	les	
+_B1452B919ADE7A8D	MakeLightBoots	Fabrication de bottes légères	une	la	Fabrications de bottes légères	des	les	
+_E2C98E83E6B7DFA5	MakeLightGloves	Fabrication de gants légers	une	la	Fabrications de gants légers	des	les	
+_60D886E12988B79A	MakeLightHelmet	Fabrication d'un casque léger	une	la	Fabrications de casques légers	des	les	
+_31859B915AFEB28D	MakeLightPants	Fabrication d'un pantalon léger	une	la	Fabrications de pantalons légers	des	les	
+_686878DABD684F73	MakeLightSleeves	Fabrication de manches légères	une	la	Fabrications de manches légères	des	les	
+_9A15EAA50A364A0D	MakeLightVest	Fabrication d'un gilet léger	une	la	Fabrications de gilets légers	des	les	
+_93B5F2C0B18D74E6	MakeLongAxe	Fabrication d'une hache à deux mains	une	la	Fabrications de haches à deux mains	des	les	
+_D630EAD54340E14A	MakeLongMace	Fabrication d'une massue à deux mains	une	la	Fabrications de massues à deux mains	des	les	
+_1FD845A457C05A0E	MakeLongSword	Fabrication d'une épée à deux mains	une	la	Fabrications d'épées à deux mains	des	les	
+_2487A4CC28998435	MakeMace	Fabrication d'une massue	une	la	Fabrications de massues	des	les	
+_249833D77C3DF353	MakeMediumArmors	Fabrication d'une armure moyenne	une	la	Fabrications d'armures moyennes	des	les	
+_5B045F5B9D1CE3A1	MakeMediumBoots	Fabrication. de bottes moyennes	une	la	Fabrications de bottes moyennes	des	les	
+_609817297DA8535F	MakeMediumGloves	Fabrication de gants moyens	une	la	Fabrications de gants moyens	des	les	
+_35E84B28BD78EF5A	MakeMediumHelmet	Fabrication d'un casque moyen	une	la	Fabrication de casques moyens	des	les	
+_5CD527699D1CDF92	MakeMediumPants	Fabrication d'un pantalon moyen	une	la	Fabrications de pantalons moyens	des	les	
+_0371DC2A30794373	MakeMediumSleeves	Fabrication de manches moyennes	une	la	Fabrications de manches moyennes	des	les	
+_302346DAD82D72D8	MakeMediumVest	Fabrication d'un gilet moyen	une	la	Fabrications de gilets moyens	des	les	
+_6EF52BF62AAC8F82	MakeMeleeWeapons	Fabrication d'une arme de mêlée	une	la	Fabrications d'armes de mêlée	des	les	
+_3175AA365D2061D4	MakePendant	Fabrication d'un pendentif	une	la	Fabrications de pendentifs	des	les	
+_26B8A4CC2A99B040	MakePike	Fabrication d'une pique	une	la	Fabrications de piques	des	les	
+_81DD09FDFE0B10FF	MakePistol	Fabrication d'un pistolet	une	la	Fabrications de pistolets	des	les	
+_70426AD1DC7E01CF	MakePistolAmmo	Fabrication de munitions pistolet	une	la	Fabrications de munitions de pistolets	des	les	
+_0B53EDC45CF7C64C	MakePistolarc	Fabrication d'un pistolet-arbalète	une	la	Fabrications de pistolets-arbalètes	des	les	
+_1931C00DE17507E4	MakePistolarcAmmo	Fabrication de munitions pour pistolet-arbalète	une	la	Fabrications de munitions pour pistolets-arbalètes	des	les	
+_9E16DA9899F07C63	MakePoisonnousLivingWeapons	Fabrication d'une arme empoisonnée vivante 	une	la	Fabrications d'armes empoisonnées vivantes	des	les	
+_E763C9DD6B1E8891	MakeRangeWeaponAmmos	Fabrication de munitions pour arme de tir	une	la	Fabrications de munitions pour armes de tir	des	les	
+_6D462BF82A8C9B89	MakeRangeWeapons	Fabrication d'une arme de tir	une	la	Fabrications d'armes de tir	des	les	
+_ADBFE5DEE3476BE2	MakeRifle	Fabrication d'un fusil	une	la	Fabrications de fusils	des	les	
+_923F6E790CE45A15	MakeRifleAmmo	Fabrication de munitions pour fusil	une	la	Fabrications de munitions pour fusils	des	les	
+_26D8A4CE6BC9C045	MakeRing	Fabrication d'une bague	une	la	Fabrications de bagues	des	les	
+_BFBC85EFBA9A0CFA	MakeShield	Fabrication d'un bouclier	une	la	Fabrications de boucliers	des	les	
+_B99BAF7F594C2772	MakeShiftRepair	Réparation de fortune	une	la	Réparations de fortune	des	les	
+_80F17C40F5C78AB9	MakeSurvivalTools	Fabrication d'un outil de survie	une	la	Fabrications d'outils de survie	des	les	
+_106EFD8DAB1A104A	MakeSurvivalWeapon	Fabrication d'une arme de survie	une	la	Fabrications d'armes de survie	des	les	
+_ADAFFDE56877DBE4	MakeSword	Fabrication d'une épée	une	la	Fabrications d'épées	des	les	
+_D45CC9816B7A4431	MakeThrowingWeapon	Fabrication d'une arme de lancer	une	la	Fabrications d'armes de lancer	des	les	
+_653AA10E2AD58F90	MakeTools	Fabrication d'un outil	une	la	Fabrications d'outils	des	les	
+_1BFFE53F570A7174	MakeTwo_handsMeleeWeapons	Fabrication d'une arme de mêlée à deux mains	une	la	Fabrications d'armes de mêlée à deux mains	des	les	
+_C76F960C986F940D	MakeTwo_handsRangeWeaponAmmos	Fabrication de munitions pour armes de tir à deux mains	une	la	Fabrications de munitions pour armes de mêlée à deux mains	des	les	
+_1B7F0D41D7CA8578	MakeTwo_handsRangeWeapons	Fabrication d'une arme de tir à deux mains	une	la	Fabrications d'armes de tir à deux mains	des	les	
+_00FEF1E56799011B	Mandragore	Mandragore	une	la	Mandragores	des	les	
+_A067CE5043AC6D11	MandrakeFist	Poing de mandragore	un	le	Poings de mandragores	des	les	
+_E779AC6EE7296048	Mass	Massue	une	la	Massues	des	les	
+_51682E7744501AF7	MassiveThrow	Lancer massif	un	le	Lancers massifs	des	les	
+_E7CB9C9EA95430A4	Matis	Matis	un	le	Matis	des	les	
+_9C697DD5DC89B4C9	MatisGoods	Biens matis			Biens matis	des	les	
+_5FE1918848E72E85	MatisMystery	Mystère matis	un	le	Mystères matis	des	les	
+_6588B45C23E8D882	Mechanic	Mécanicien	un	le	Mécaniciens	des	les	
+_68CB5BE6FC3A1365	MediumArmourWear	Vêtement pour armure moyenne	un	le	Vêtements armures moyennes	des	les	
+_E8D6A7C3A3B9BEE5	MinorLifeHeal	Guérison mineure de vie	une	la	Guérisons mineures de vie	des	les	
+_B396FE9C988FDAD2	MinorSapHeal	Guérison mineure de sève	une	la	Guérisons mineures de sève	des	les	
+_24B1948AD9F53579	MinorTirednessHeal	Guérison mineure de Fatigue	une	la	Guérisons mineures de fatigue	des	les	
+_2E18A8746C872CB1	Mirror	Miroir	un	le	Miroirs	des	les	
+_9728368C469559AB	MuscularFever	Fièvre musculaire	une	la	Fièvres musculaires	des	les	
+_54894E6FC071E6F0	NervousFever	Fièvre nerveuse	une	la	Fièvres nerveuses	des	les	
+_822005071D640CD5	NightShot	Tir de nuit	un	le	Tirs de nuits	des	les	
+_E2C84C702118504B	Nunb	Engourdissement	un	l'\d	Engourdissements	des	les	
+_CC6FA50836A1CB1A	OnHorseBackMelee	Combat à dos de mektoub	un	le	Combats à dos de mektoubs	des	les	
+_4D6FC117BC020B1D	OnHorseBackShoot	Fusillade à dos de mektoub	une	la	Fusillades à dos de mektoubs	des	les	
+_6F2F01DC66B763ED	PainShare	Partage de la douleur	un	le	Partages de la douleur	des	les	
+_6F19AD06AB0AC0A8	Paralysis	Paralysie	une	la	Paralysies	des	les	
+_6478EC7464A8C051	Pike	Pique	une	la	Piques	des	les	
+_C34AEBC50B046254	PikeHunting	Chasse à la pique	une	la	Chasses à la pique	des	les	
+_AF69B07BEBB804B2	Pistol	Pistolet	un	le	Pistolets	des	les	
+_FD34CAEA8B6E5530	PlantHatred	Haine des plantes	une	la	Haine des plantes	des	les	
+_6A99BAAB0D732AD0	PointBlankShot	Tir à bout portant	un	le	Tirs à bout portant	des	les	
+_D12926744140D9ED	PrimaryRoots	Prime Racine	une	la	Primes Racines	des	les	
+_467A5E4B9A8EF117	ProtectingKamisKnoledge	Connaissance des Kamis protecteurs	une	la	Connaissances des Kamis protecteurs	des	les	
+_8B5E89F0661B5912	Quartering	Dépeçage	un	le	Dépeçages	des	les	
+_7EB14916DE64E8C7	QuickShot	Tir rapide	un	le	Tirs rapides	des	les	
+_471F61E12C0BE121	QuickThrow	Lancer rapide	un	le	Lancers rapides	des	les	
+_2BC8708860770493	Range	Portée	une	la	Portées	des	les	
+_C7A03DE1A76C9524	RapidBurst	Explosion rapide	une	l'\d	Explosions rapides	des	les	
+_2ACA647FEC1918BA	Resist	Résister			Résister			
+_83000DCBACE9AD22	Resistance	Résistance	une	la	Résistances	des	les	
+_4FD3CA66BDF4AA0F	RidePackers	Premier animal de bât	un	le	Premiers animaux de bât	des	les	
+_E7978470A9C8B0A1	Riding	Monte	une	la	Montes	des	les	
+_6D98848DA2772493	Rifle	Fusil	un	le	Fusils	des	les	
+_01AE6100A8B9388D	RifleHunting	Fusillade	une	la	Fusillades	des	les	
+_ACE7BC6F6E38208E	Rocket	Roquette	une	la	Roquettes	des	les	
+_2C1F1D07A2E72BEC	RockTabou	Rocher tabou	un	le	Rochers tabous	des	les	
+_E4D8D8662478A887	Rondache	Rondache	une	la	Rondaches	des	les	
+_20B83C93ACDB2CA4	Rot	Pourriture	une	la	Pourritures	des	les	
+_6C38F096E77958AA	Running	Course	une	la	Courses	des	les	
+_797EED5580EE64DA	SapAlchemy	Alchimie de la sève	une	l'\d	Alchimies de la sève	des	les	
+_CD7C29A0B0199487	SapArmor	Armure de sève	une	l'\d	Armures de sève	des	les	
+_52A68091D1E694A7	SapGift	Don de sève	un	le	Dons de sève	des	les	
+_E5276C77A9B888A2	Shield	Bouclier	un	le	Boucliers	des	les	
+_D6A39908094E2C18	ShootAndRun	Tirer en se déplaçant			Tirer en se déplaçant			
+_FFD5024061125DEA	ShotProtect	Protection de tir	une	la	Protections de tir	des	les	
+_A2050EE042021A3B	SlowingBreath	Ralentisseur de souffle	un	le	Ralentisseurs de Souffle	des	les	
+_ABFCC680FB10A513	SlowingLife	Ralentisseur de vie	un	le	Ralentisseurs de vie	des	les	
+_EDA9A489A1E844A1	Spear	Lance	une	la	Lances	des	les	
+_553066C79AA68E41	SpellDeletion	Suppression d'un sort	une	la	Suppressions de sorts	des	les	
+_1F11DD768021726D	SpellProtect	Protection d'un sort	une	la	Protections de sorts	des	les	
+_A078F656C83EE11B	SpurtingFire	Feu jaillissant	un	le	Feux jaillissants	des	les	
+_7DBF715287AF5529	Squandering	Gaspillage	un	le	Gaspillages	des	les	
+_650EE61E672F31D8	StallSetUp	Montage d'une stalle	un	le	Montages de stalles	des	les	
+_C84416CD93116660	StealBreath	Souffle voleur	un	le	Souffles voleurs	des	les	
+_3BEE7169875ED501	StealLife	Vie voleuse	une	la	Vies voleuses	des	les	
+_402E0D3927BE0919	StealSap	Sève voleuse	une	la	Sève voleuse	des	les	
+_AB38E88EE2E8549A	Stick	Bâton	un	le	Bâtons	des	les	
+_E4C8224705FEED16	StrenghtGift	Don de force	un	le	Dons de force	des	les	
+_E898307466E8F8A0	Swimming	Nage	une	la	Nages	des	les	
+_AE79F4AB28F86093	Sword	Épée	une	l'\d	Épées	des	les	
+_8966EA607EEFD5F8	SylphicSlide	Glissement sylphique	un	le	Glissements sylphiques	des	les	
+_EF9904AEEAE86894	Sylve	Sylve	un	le	Sylves	des	les	
+_7A6DD413630B1B9C	TactileWithering	Affaiblissement du toucher	un	l'\d	Affaiblissements du toucher	des	les	
+_27E93C82EB58109D	Target	Cible	une	la	Cibles	des	les	
+_2D8988826BF82CB1	Terror	Terreur	une	la	Terreurs	des	les	
+_7131134C39C66BD8	TirednessAlchemy	Alchimie de la fatigue	une	l'\d	Alchimies de la fatigue	des	les	
+_E2980874E368E49D	Tracking	Pistage	un	le	Pistages	des	les	
+_C88B1DCCE81365DE	TradingCenterKnowledge	Connaissance du centre de troc	une	la	Connaissances du centre de troc	des	les	
+_A13AB38E5D3CF3CF	TrainingAgility	Entraînement de l'agilité	un	l'\d	Entraînements de l'agilité	des	les	
+_B3296EA39520E67B	TrainingAnimal	Entraînement sur les animaux	un	l'\d	Entraînements sur les animaux	des	les	
+_393BDC9EF56B12F0	TrainingCharisme	Entraînement du charisme	un	l'\d	Entraînements du charisme	des	les	
+_F3C965A093712C73	TrainingConstitution	Entraînement de la constitution	un	l'\d	Entraînements de la constitution	des	les	
+_0606975DBF5A2C72	TrainingDiseaseResist	Entraînement de résistance aux maladies	un	l'\d	Entraînements de résistance aux maladies	des	les	
+_B4FBA3A2F91B678A	TrainingEmpathie	Entraînement de l'empathie	un	l'\d	Entraînements de l'empathie	des	les	
+_97E386D1D4F59184	TrainingFearResist	Entraînement de résistance à la peur	un	l'\d	Entraînements de résistance à la peur	des	les	
+_9BDE0556D5C0A57B	TrainingHp	Entraînement des points de vie	un	l'\d	Entraînements des points de vie	des	les	
+_9128BB373BA1825C	TrainingHp2	Entraînement des points de vie 2	un	l'\d	Entraînements des points de vie 2	des	les	
+_9138BB377BA1825D	TrainingHp3	Entraînement des points de vie 3	un	l'\d	Entraînements des points de vie 3	des	les	
+_9148BB37BCA1825E	TrainingHp4	Entraînement des points de vie 4	un	l'\d	Entraînements des points de vie 4	des	les	
+_EB3991FDC7FD6AAE	TrainingImpactResist	Entraînement de résistance aux impacts	un	l'\d	Entraînements de résistance aux impacts	des	les	
+_2C19F97A8F6FDC52	TrainingIntelligence	Entraînement de l'Intelligence	un	l'\d	Entraînements de l'Intelligence	des	les	
+_ACADA57565D32514	TrainingMagicResist	Entraînement de résistance à la magie	un	l'\d	Entraînements de résistance à la magie	des	les	
+_093CFB3110027055	TrainingPerception	Entraînement de la perception	un	l'\d	Entraînements de la perception	des	les	
+_028F198928F86050	TrainingSeve	Entraînement de la sève	un	l'\d	Entraînements de la sève	des	les	
+_6BAC501B2CDF80CC	TrainingSeve2	Entraînement de la sève 2	un	l'\d	Entraînements de la sève 2	des	les	
+_6BBC501C2CDF80CD	TrainingSeve3	Entraînement de la sève 3	un	l'\d	Entraînements de la sève 3	des	les	
+_6BCC501D2CDF80CE	TrainingSeve4	Entraînement de la sève 4	un	l'\d	Entraînements de la sève 4	des	les	
+_E5BA03B24434BBD6	TrainingStamina	Entraînement de l'endurance 2	un	l'\d	Entraînements de l'endurance	des	les	
+_385BA21092115FF6	TrainingStamina2	Entraînement de l'endurance 2	un	l'\d	Entraînements de l'endurance 2	des	les	
+_385BA61012115FF6	TrainingStamina3	Entraînement de l'endurance 3	un	l'\d	Entraînements de l'endurance 3	des	les	
+_385BAA1094115FF6	TrainingStamina4	Entraînement de l'endurance 4	un	l'\d	Entraînements de l'endurance 4	des	les	
+_375D18C67B1C12EF	TrainingStrength	Entraînement de la force	un	l'\d	Entraînements de la force	des	les	
+_70179D0A46ED4EB1	TrainingTechnoResist	Entraînement de résistance aux technologies	un	l'\d	Entraînements de résistance aux technologies	des	les	
+_1E629490CAB05722	TrainingWellBalanced	Entraînement du bon équilibre	un	l'\d	Entraînements du bon équilibre	des	les	
+_20D6025A002E3116	TrainingWill	Entraînement de la volonté	un	l'\d	Entraînements de la volonté	des	les	
+_ECC9D489AE5810A4	Tryker	Tryker	un	le	Trykers	des	les	
+_402F501624D55420	TrykerGoods	Biens trykers			Biens trykers	des	les	
+_CBB743E46993B57A	TrykerMystery	Mystère tryker	un	le	Mystères trykers	des	les	
+_248432101928BBBE	TwoHandedCombat	Combat à deux mains	un	le	Combats à deux mains	des	les	
+_E2FC6B5410562272	TwoHandsSword	Épée à deux mains	une	l'\d	Épées à deux mains	des	les	
+_B76D4C20B7AD6450	UnderwaterExtract	Extraction sous-marine	une	l'\d	Extractions sous-marines	des	les	
+_B87B8EF095D9B2F0	VisualWithering	Affaiblissement de la vue	un	l'\d	Affaiblissements de la vue	des	les	
+_C8A06DE5A7EC9528	VitalBurst	Explosion vitale	une		Explosions vitales	des	les	
+_E81EF286B90381FD	WarriorGift	Don guerrier	un	le	Dons guerriers	des	les	
+_7A1C339955F3BD9B	WeaponsCutting	Coupe des armes	une	la	Coupes des armes	des	les	
+_2E3045112716B3BF	WindArmor	Armure des vents	une	l'\d	Armures des vents	des	les	
+_A687E4EE6EC9F032	WindGift	Don de vent	un	le	Dons de vents	des	les	
+_2E300D099F3763E3	WindShear	Puissance du vent	une	la	Puissances du vent	des	les	
+_AB51CA9C65185C9F	Zorai	Zoraï	un	le	Zoraïs	des	les	
+_1D1AA7DA5B30C8BD	ZoraiGoods	Biens zoraïs			Biens zoraïs	des	les	
+_5DC1BB09C5A79A88	ZoraiMystery	Mystère zoraï	un	le	Mystères zoraïs	des	les	
+_38BF105E6F762063	TrainingImpactResist2	Entraînement de résistance aux impacts 2	un	l'\d	Entraînements de résistance aux impacts 2	des	les	
+_38BF145E6F762065	TrainingImpactResist3	Entraînement de résistance Impacts 3	un	l'\d	Entraînements de résistance aux impacts 3	des	les	
+_172111EF5712135D	TrainingMagicResist2	Entraînement de résistance Impacts 2	un	l'\d	Entraînements de résistance aux impacts 2	des	les	
+_573111EF5722135D	TrainingMagicResist3	Entraînement de résistance Impacts 3	un	l	Entraînements de résistance aux impacts 3	des	les	
+_9E1F915ACB35C52D	MakeEnchantedWeapons	Fabrication d'armes enchantées	une	la	Fabrications d'armes enchantées	des	les	
+_9572881FC4B3A0FF	MakeEnchantedArmors	Fabrication d'armures enchantées	une	la	Fabrications d'armures enchantées	des	les	
+_5E4664F242913805	MakeVampiricWeapons	Fabrication d'armes vampiriques	une	la	Fabrications d'armes vampiriques	des	les	
+_F08B51C1E52ECB1C	MakeEnchantedFloralPatternLivingClothes	Fabrication de vêtements floraux vivants	une	la	Fabrication de vêtements floraux vivants	des	les	
+_E1010856D5D5F588	MakeDeadlyHarpoongun	Fabrication d'un pistolet-harpon mortel	une	la	Fabrications de pistolets-harpons mortels	des	les	
+_49D2F4340178168F	MakeHuntingArmors	Fabrication d'armure de chasse	une	la	Fabrications d'armures de chasse	des	les	
+_C31F80337ECA6372	MakeRitualClothes	Fabrication de vêtements rituels	une	la	Fabrications de vêtements rituels	des	les	
+_1DE8C3273B0B137B	MakeRitualJewels	Fabrication de bijoux rituels	une	la	Fabrications de bijoux rituels	des	les	
+_D8145C8EEA5A3CA6	SC	Artisanat		l'\d	Artisanat	des	les	Artisanat
+_5654AC8E60988490	SM	Magie	une	la	Magie	des	les	Magie
+_4A528987D8F5BA5B	SMT	Magie d'impact	une	la	Magies d'impacts	des	les	Magie Ciblée
+_29D259A451019CA9	SMTM	Magie de missile	une	la	Magies de missiles	des	les	Magie de Missile Ciblée
+_5C0F8F5DAF790C9D	SMTMR	Magie fondamentale	une	la	Magies fondamentales	des	les	Magie de Missile Ciblée - Fondamentale
+_0AD18AB0336B9683	SMTMG	Magie atysienne	une	la	Magies atysiennes	des	les	Magie de Missile Ciblée - Atysienne
+_D597B4747E2BAA66	SMTMB	Magie céleste	une	la	Magies célestes	des	les	Magie de Missile Ciblée - Céleste
+_9F35DAC8D1B39346	SMTO	Magie offensive	une	la	Magies offensives	des	les	Magie Offensive Ciblée
+_CB82E2397BAB1530	SMTOD	Magie physique	une	la	Magies physiques	des	les	Magie Offensive Ciblée sur les Dégâts
+_D9108D1AEB774F37	SMTODP	Magie perforante	une	la	Magies perforantes	des	les	Magie Offensive Ciblée sur les Dégâts - Perforante
+_1CA0811AACF71B33	SMTODB	Magie contondante	une	la	Magies contondantes	des	les	Magie Offensive Ciblée sur les Dégâts - Contondant
+_DCA081196CF75F33	SMTODS	Magie tranchante	une	la	Magies tranchantes	des	les	Magie Offensive Ciblée sur les Dégâts - Tranchante
+_4D659DBE6F770808	SMTOE	Magie élémentaire	une	la	Magies élémentaires	des	les	Magie Offensive Ciblée sur les Dégâts Spéciaux
+_B35ED2172BAE8E5E	SMTOEC	Magie du froid	une	la	Magies du froid	des	les	Magie Offensive Ciblée sur les Dégâts Spéciaux - Froid
+_B35EC605A56E865E	SMTOEA	Magie de l'acide	une	la	Magies de l'acide	des	les	Magie Offensive Ciblée sur les Dégâts Spéciaux - Acide
+_F117FF29E7251AB6	SMTOER	Magie de la pourriture	une	la	Magies de la pourriture	des	les	Magie Offensive Ciblée sur les Dégâts Spéciaux - Pourriture
+_B36EF21DEA0E9A5E	SMTOEF	Magie du feu	une	la	Magies du feu	des	les	Magie Offensive Ciblée sur les Dégâts Spéciaux - Feu
+_4EBA8627BCE9FB22	SMTOES	Magie des ondes de choc	une	la	Magies des ondes de choc	des	les	Magie Offensive Ciblée sur les Dégâts Spéciaux - Ondes de choc
+_3067100BD3BAF278	SMTOEP	Magie du poison	une	la	Magies du poison	des	les	Magie Offensive Ciblée sur les Dégâts Spéciaux - Poison
+_D21C1B9D62E4E80B	SMTOEE	Magie électrique	une	la	Magies électriques	des	les	Magie Offensive Ciblée sur les Dégâts Spéciaux - Electricité
+_98C6999187B4ECD5	SMTC	Magie curative	une	la	Magies curatives	des	les	Magie Curative Ciblée
+_1C592673394B71F2	SMTCH	Magie de guérison	une	la	Magies de guérison	des	les	Magie Curative Ciblée sur la Guérison
+_4DB24B824181B32C	SMTCHP	Magie de guérison de la vie	une	la	Magies de guérison de la vie	des	les	Magie Curative Ciblée sur la Guérison - Vie
+_AB6C41A608125261	SMTCHT	Magie de guérison de l'endurance	une	la	Magies de guérison de l'endurance	des	les	Magie Curative Ciblée sur la Guérison - Sta
+_E66C7DA243120670	SMTCHA	Magie de guérison de la sève	une	la	Magies de guérison de la sève	des	les	Magie Curative Ciblée sur la Guérison - Sève
+_9AE1FE031A7EE557	SMTCHC	Magie de guérison de la concentration	une	la	Magies de guérison de la concentration	des	les	Magie Curative Ciblée sur la Guérison - Concentration
+_46B77B460102495E	SMTCB	Rupture de lien	une	la	Ruptures de liens	des	les	Magie Curative Ciblée sur la Rupture de Lien
+_462522C946AAA84C	SMTCBD	Dégât de rupture de lien	un	le	Dégâts de ruptures de liens	des	les	Magie Curative Ciblée sur la Rupture de Lien - Dégâts
+_BAED0EEFDA4CAF03	SMTCBS	Maladie de rupture de lien	une	la	Maladies de ruptures de liens	des	les	Magie Curative Ciblée sur la Rupture de Lien - Maladie
+_7DF1A856845BD4A4	SMTCBC	Malédiction de rupture de lien	une	la	Malédictions de ruptures de liens	des	les	Magie Curative Ciblée sur la Rupture de Lien - Malédiction
+_EC5CF9A83799E909	SML	Lien de magie	un	le	Liens de magies	des	les	Lien de Magie
+_49BDA32074154396	SMLM	Lien de missile	un	le	Liens de missiles	des	les	Lien de Magie relatif aux Missiles
+_A5889DC6411B4045	SMLMR	Lien fondamental	un	le	Liens fondamentaux	des	les	Lien de Magie relatif aux Missiles - Fondamental
+_7F38346ED5250EB1	SMLMG	Lien atysien	un	le	Liens atysiens	des	les	Lien de Magie relatif aux Missiles - Atysien
+_F154BD51B879CEA6	SMLMB	Lien céleste	un	le	Liens célestes	des	les	Lien de Magie relatif aux Missiles - Céleste
+_BCBB4C69BD7DC709	SMLO	Lien offensif	un	le	Liens offensifs	des	les	Lien de Magie Offensive
+_DBDAA3F080A8CDEA	SMLOS	Lien de maladie	un	le	Liens de maladies	des	les	Lien de Magie Offensive relatif aux Maladies
+_2AD6ADF15F54B9A9	SMLOSM	Lien de folie	un	le	Liens de folie	des	les	Lien de Magie Offensive relatif aux Maladies - folie
+_9E70C9DEE9FF46B5	SMLOSS	Lien de diminution de la vitesse	un	le	Liens de diminution de la vitesse	des	les	Lien de Magie Offensive relatif aux Maladies - diminution de la vitesse
+_7E7703067DE75B7F	SMLOSR	Lien de diminution de la résistance	un	le	Liens de diminution de la résistance	des	les	Lien de Magie Offensive relatif aux Maladies - diminution de la résistance
+_5CF0E5E2A9EF52B4	SMLOSK	Lien de diminution des compétences	un	le	Liens de diminution des compétences	des	les	Lien de Magie Offensive relatif aux Maladies - diminution des compétences
+_1A9E72A457E6332F	SMLOC	Lien de malédiction	un	le	Liens de malédictions	des	les	Lien de Magie Offensive relatif aux Malédictions
+_A24F5221B08315C8	SMLOCI	Lien d'Incapacité	un	le	Liens d'incapacité	des	les	Lien de Magie Offensive relatif aux Malédictions - incapacité
+_7AB2ED7B34EF2467	SMLOCM	Lien de perturbation mentale	un	le	Liens de perturbation mentale	des	les	Lien de Magie Offensive relatif aux Malédictions - perturbation mentale
+_6B2E163F2752E1E9	SMLOCS	Lien de malchance	un	le	Liens de malchance	des	les	Lien de Magie Offensive relatif aux Malédictions - malchance
+_69C1EA4113DCAA84	SMLOCH	Lien de haine	un	le	Liens de haine	des	les	Lien de Magie Offensive relatif aux Malédictions - haine
+_A366797FAB86DDB9	SMLOD	Lien physique	un	le	Liens physiques	des	les	Lien de Magie Offensive relatif aux Dégâts
+_D4930C23EB04A3FB	SMLODP	Lien perforant	un	le	Liens perforants	des	les	Lien de Magie Offensive relatif aux Dégâts - Perforant
+_D433281CECA477FB	SMLODB	Lien contondant	un	le	Liens contondants	des	les	Lien de magie offensive relatif aux dégâts - contondant
+_D433281C6C94BBFB	SMLODS	Lien tranchant	un	le	Liens tranchants	des	les	Lien de Magie Offensive relatif aux Dégâts - Tranchant
+_CB32B9D795344045	SMLOE	Lien élémentaire	un	le	Liens élémentaires	des	les	Lien de Magie Offensive relatif aux Dégâts Spéciaux
+_AC052ACEDC879E4D	SMLOEC	Lien du froid	un	le	Liens du froid	des	les	Lien de Magie Offensive relatif aux Dégâts Spéciaux - Froid
+_EB4522C8D647964D	SMLOEA	Lien d'acide	un	le	Liens d'acide	des	les	Lien de Magie Offensive relatif aux Dégâts Spéciaux - Acide
+_A77ED7C6453198F2	SMLOER	Lien de pourriture	un	le	Liens de pourriture	des	les	Lien de Magie Offensive relatif aux Dégâts Spéciaux - Pourriture
+_2DA53EDADAE7AA4E	SMLOEF	Lien de feu	un	le	Liens de feu	des	les	Lien de Magie Offensive relatif aux Dégâts Spéciaux - Feu
+_A794EB51965BCCCC	SMLOES	Lien d'ondes de choc	un	le	Liens d'ondes de choc	des	les	Lien de Magie Offensive relatif aux Dégâts Spéciaux - Ondes de choc
+_59AA2974CC81CA3D	SMLOEP	Lien de poison	un	le	Liens de poison	des	les	Lien de Magie Offensive relatif aux Dégâts Spéciaux - Poison
+_3A2202E09E2FB961	SMLOEE	Lien électrique	un	le	Liens électriques	des	les	Lien de Magie Offensive relatif aux Dégâts Spéciaux - Electricité
+_F6CE98E462BC4BE7	SMLC	Lien curatif	un	le	Liens curatifs	des	les	Lien de Magie Curative
+_C03EED1A18979456	SMLCH	Lien de guérison	un	le	Liens de guérison	des	les	Lien de Magie Curative relatif aux Guérisons
+_47BAADEFB7F6F367	SMLCHP	Lien de guérison de la vie	un	le	Liens de guérison de la vie	des	les	Lien de Magie Curative relatif aux Guérisons - Vie
+_ED574D3D8E3C6092	SMLCHT	Lien de guérison de l'endurance	un	le	Liens de guérison de l'endurance	des	les	Lien de Magie Curative relatif aux Guérisons - Sta
+_ED574D5BC80B1492	SMLCHA	Lien de guérison de la sève	un	le	Liens de guérison de la sève	des	les	Lien de Magie Curative relatif aux Guérisons - Sève
+_D170317EE36037EE	SMLCHC	Lien de guérison de la concentration	un	le	Liens de guérison de la concentration	des	les	Lien de Magie Curative relatif aux Guérisons - Concentration
+_6BE71C3763BA2EC0	SMA	Magie autonome	une	la	Magies autonomes	des	les	Magie Autonome
+_038C64191738E825	SMAE	Magie d'enchantement	une	la	Magies d'enchantements	des	les	Magie d'Enchantement
+_11B74D99C76C41BB	SMAES	Enchantement de sorts	un	l'\d	Magies d'enchantements - Sorts	des	les	Magie d'Enchantement - Sort
+_D0178DABC8BB21B3	SMAEB	Enchantement de bonus	un	l'\d	Magies d'enchantements - Bonus	des	les	Magie d'Enchantement - Bonus
+_167E8049BBAE1327	SMAP	Magie de création de potions	une	la	Magies de création de potions	des	les	Magie de Fabrication de Potions
+_6718E88297C7DCB2	SD	Auto-défense	une	l'\d	Auto-défenses	des	les	Auto-Défense
+_47FC9798E127AA6B	SDA	Porter armure			Porter armure			Porter armure
+_DF240440B31A8CFA	SDAL	Porter armure légère			Porter armure légère			Porter armure légère
+_2579E5B65A42F5E0	SDALF	Porter armure légère fyros			Porter armure légère fyros			Porter armure légère fyros
+_3A4A70B02FCE757E	SDALFA	Expert en port d'armure légère fyros	un	l'\d	Experts en port d'armure légère fyros	des	les	Expert en port d'armure légère fyros
+_092D87890ABD27A8	SDALFAE	Maître en port d'armure légère fyros	un	le	Maîtres en port d'armure légère fyros	des	les	Maître en port d'armure légère fyros
+_600985BD5AE2E5D1	SDALM	Porter armure légère matis			Porter armure légère matis			Porter armure légère matis
+_3A4A58A62B3CAD85	SDALMA	Expert en port d'armure légère matis	un	l'\d	Experts en port d'armure légère matis	des	les	Expert en port d'armure légère matis
+_4A4D2790897DCF9E	SDALMAE	Maître en port d'armure légère matis	un	le	Maîtres en port d'armure légère matis	des	les	Maître en port d'armure légère matis
+_1356288C143BE4EB	SDALT	Porter armure légère tryker			Porter armure légère tryker			Porter armure légère tryker
+_BA6BD0D36826EDDC	SDALTA	Expert en port d'armure légère tryker	un	l'\d	Experts en port d'armure légère tryker	des	les	Expert en port d'armure légère tryker
+_6BDFC5F35AA8E5CB	SDALTAE	Maître en port d'armure légère tryker	un	le	Maîtres en port d'armure légère tryker	des	les	Maître en port d'armure légère tryker
+_24BABDCA7929BD66	SDALZ	Porter armure légère zoraï			Porter armure légère zoraï			Porter armure légère zoraï
+_3A111C94ACCD1592	SDALZA	Expert en port d'armure légère zoraï	un	l'\d	Experts en port d'armure légère zoraï	des	les	Expert en port d'armure légère zoraï
+_8B2D5F19A6DDFF42	SDALZAE	Maître en port d'armure légère zoraï	un	le	Maîtres en port d'armure légère zoraï	des	les	Maître en port d'armure légère zoraï
+_C61C242303F92188	SDAM	Porter armure moyenne			Porter armure moyenne			Porter armure moyenne
+_1A130B6E81DBBC22	SDAMF	Porter armure moyenne fyros			Porter armure moyenne fyros			Porter armure moyenne fyros
+_F684003775869139	SDAMFA	Expert en port d'armure moyenne fyros	un	l'\d	Experts en port d'armure moyenne fyros	des	les	Expert en port d'armure moyenne fyros
+_3874F6C7BF6AF50E	SDAMFAE	Maître en port d'armure moyenne fyros	un	le	Maîtres en port d'armure moyenne fyros	des	les	Maître en port d'armure moyenne fyros
+_DC130B6E7FBB041F	SDAMM	Porter armure moyenne matis			Porter armure moyenne matis			Porter armure moyenne matis
+_F4C428476FF69140	SDAMMA	Expert en port d'armure moyenne matis	un	l'\d	Experts en port d'armure moyenne matis	des	les	Expert en port d'armure moyenne matis
+_FA74F6BBC10835FD	SDAMMAE	Maître en port d'armure moyenne matis	un	le	Maîtres en port d'armure moyenne matis	des	les	Maître en port d'armure moyenne matis
+_6C1ADF5A0499E469	SDAMT	Porter armure moyenne tryker			Porter armure moyenne tryker			Porter armure moyenne tryker
+_83F88DBB25238239	SDAMTA	Expert en port d'armure moyenne tryker	un	l'\d	Experts en port d'armure moyenne tryker	des	les	Expert en port d'armure moyenne tryker
+_BB346CA339E33BB8	SDAMTAE	Maître en port d'armure moyenne tryker	un	le	Maîtres en port d'armure moyenne tryker	des	les	Maître en port d'armure moyenne tryker
+_1F130B669AFB6C54	SDAMZ	Porter armure moyenne zoraï			Porter armure moyenne zoraï			Porter armure moyenne zoraï
+_F04B785FF2C79145	SDAMZA	Expert en port d'armure moyenne zoraï	un	l'\d	Experts en port d'armure moyenne zoraï	des	les	Expert en port d'armure moyenne zoraï
+_3D74DAABDE489518	SDAMZAE	Maître en port d'armure moyenne zoraï	un	le	Maîtres en port d'armure moyenne zoraï	des	les	Maître en port d'armure moyenne zoraï
+_65CEFF6A2003977E	SDAH	Porter armure lourde			Porter armure lourde			Porter armure lourde
+_C479F639145D6001	SDAHF	Porter armure lourde fyros			Porter armure lourde fyros			Porter armure lourde fyros
+_3EAC30A425CE7583	SDAHFA	Expert en port d'armure lourde fyros	un	l'\d	Experts en port d'armure lourde fyros	des	les	Expert en port d'armure lourde fyros
+_073BD391888D4FA2	SDAHFAE	Maître en port d'armure lourde fyros	un	le	Maîtres en port d'armure lourde fyros	des	les	Maître en port d'armure lourde fyros
+_C9F81239149D70D2	SDAHM	Porter armure lourde matis			Porter armure lourde matis			Porter armure lourde matis
+_3EAC189A213CAD8A	SDAHMA	Expert en port d'armure lourde matis	un	l'\d	Experts en port d'armure lourde matis	des	les	Expert en port d'armure lourde matis
+_485B7398074DF798	SDAHMAE	Maître en port d'armure lourde matis	un	le	Maîtres en port d'armure lourde matis	des	les	Maître en port d'armure lourde matis
+_B6A20C403649A4AE	SDAHT	Porter armure lourde tryker			Porter armure lourde tryker			Porter armure lourde tryker
+_F8CC18CF672615F8	SDAHTA	Expert en port d'armure lourde tryker	un	l'\d	Experts en port d'armure lourde tryker	des	les	Expert en port d'armure lourde tryker
+_6A7F35ECDBC8D5A7	SDAHTAE	Maître en port d'armure lourde tryker	un	le	Maîtres en port d'armure lourde tryker	des	les	Maître en port d'armure lourde tryker
+_CED84639529D52F3	SDAHZ	Porter armure lourde zoraï			Porter armure lourde zoraï			Porter armure lourde zoraï
+_3E73DC88A2CD1597	SDAHZA	Expert en port d'armure lourde zoraï	un	l'\d	Experts en port d'armure lourde zoraï	des	les	Expert en port d'armure lourde zoraï
+_893BAB2124AD273C	SDAHZAE	Maître en port d'armure lourde zoraï	un	le	Maîtres en port d'armure lourde zoraï	des	les	Maître en port d'armure lourde zoraï
+_DE59E2BD5DB342FF	SDS	Manier un bouclier			Manier des boucliers			Manier Boucliers
+_665F9EF3CB6AFB1B	SDSB	Manier une rondache			Manier ondache			Manier rondache
+_D6918DC8D2A2E5CE	SDSBF	Manier rondache fyros			Manier rondache fyros			Manier rondache fyros
+_C86A36DA0E32349A	SDSBFA	Expert en maniement de rondache fyros	un	l'\d	Experts en maniement de rondache fyros	des	les	Expert en maniement de rondache fyros
+_A4548401996016AB	SDSBFAE	Maître en maniement de rondache fyros	un	le	Maîtres en maniement de rondache fyros	des	les	Maître en maniement de rondache fyros
+_D63031D1CC12E5CF	SDSBM	Manier rondache matis			Manier rondache matis			Manier rondache matis
+_478ABEE387C2D4A8	SDSBMA	Expert en maniement de rondache matis	un	l'\d	Experts en maniement de rondache matis	des	les	Expert en maniement de rondache matis
+_A6F2C4E95B6016A6	SDSBMAE	Maître en maniement de rondache matis	un	le	Maîtres en maniement de rondache matis	des	les	Maître en maniement de rondache matis
+_51FB4C92F22370C2	SDSBT	Manier rondache tryker			Manier rondache tryker			Manier rondache tryker
+_F5FC35CF01993F77	SDSBTA	Expert en maniement de rondache tryker	un	l'\d	Experts en maniement de rondache tryker	des	les	Expert en maniement de rondache tryker
+_CB8B716BE2BDD2E5	SDSBTAE	Maître en maniement de rondache tryker	un	le	Maîtres en maniement de rondache tryker	des	les	Maître en maniement de rondache tryker
+_53B77DDC4FE3D750	SDSBZ	Manier rondache zoraï			Manier rondache zoraï			Manier rondache zoraï
+_4531D66A08730C3E	SDSBZA	Expert en maniement de rondache zoraï	un	l'\d	Experts en maniement de rondache zoraï	des	les	Expert en maniement de rondache zoraï
+_C33224F79E60FAA3	SDSBZAE	Maître en maniement de rondache zoraï	un	le	Maîtres en maniement de rondache zoraï	des	les	Maître en maniement de rondache zoraï
+_5FD3FF521B70122A	SDSS	Manier grand bouclier			Manier grands bouclier			Manier grands Bouclier
+_258E3057B65FB8DE	SDSSF	Manier grand bouclier fyros			Manier grands bouclier fyros			Manier grands Bouclier fyros
+_9F6C03EC2EAA8BE4	SDSSFA	Expert en maniement de grand bouclier fyros	un	l'\d	Experts en maniement de grands bouclier fyros	des	les	Expert en maniement de grands Bouclier fyros
+_1D4FFD6D6A2C3E8D	SDSSFAE	Maître en maniement de grand bouclier fyros	un	le	Maîtres en maniement de grands bouclier fyros	des	les	Maître en maniement de grands Bouclier fyros
+_601ED05EB6FFA8CF	SDSSM	Manier grand bouclier matis			Manier grands bouclier matis			Manier grands Bouclier matis
+_9F6CEBE22A18C3EB	SDSSMA	Expert en maniement de grand bouclier matis	un	l'\d	Experts en maniement de grands bouclier matis	des	les	Expert en maniement de grands Bouclier matis
+_5E6F9D74E9ECE683	SDSSMAE	Maître en maniement de grand bouclier matis	un	le	Maîtres en maniement de grands bouclier matis	des	les	Maître en maniement de grands Bouclier matis
+_51DBC6685ABE9FD1	SDSST	Manier grand bouclier tryker			Manier grands bouclier tryker			Manier grands Bouclier tryker
+_2F803FE71B4DC937	SDSSTA	Expert en maniement de grand bouclier tryker	un	l'\d	Experts en maniement de grands bouclier tryker	des	les	Expert en maniement de grands Bouclier tryker
+_CF74B5C12A6BB8B9	SDSSTAE	Maître en maniement de grand bouclier tryker	un	le	Maîtres en maniement de grands bouclier tryker	des	les	Maître en maniement de grands Bouclier tryker
+_24CF086BD5468064	SDSSZ	Manier grand bouclier zoraï			Manier grands bouclier zoraï			Manier grands Bouclier zoraï
+_9F33AFD0ABA92BF8	SDSSZA	Expert en maniement de grand bouclier zoraï	un	l'\d	Experts en maniement de grands bouclier zoraï	des	les	Expert en maniement de grands Bouclier zoraï
+_9F4FD5FD064C1627	SDSSZAE	Maître en maniement de grand bouclier zoraï	un	le	Maîtres en maniement de grands bouclier zoraï	des	les	Maître en maniement de grands Bouclier zoraï
+_E4FEE2CD5824CE04	SDD	Esquive	une	l'\d	Esquives	des	les	Esquive
+_B2FD6E00FC67D675	SDDA	Esquive rapide	une	l'\d	Esquives rapides	des	les	Esquive Rapide
+_0FC86202AE2E2D7F	SDDAT	Esquive instinctive	une	l'\d	Esquives Instinctives	des	les	Esquive Instinctive
+_2ABBBA0B2EA265E1	SDDATM	Expert en esquive	une	l'\d	Experts en esquive	des	les	Expert en Esquive
+_56D22F619ED6AB31	SDDATME	Maître en esquive	une	l'\d	Maîtres en esquive	des	les	Maître en Esquive
+_97F03668731C6899	uknown	Compétence inconnue			Compétences inconnues			Compétence Inconnue
+_CDE48A297AAB6A68	Unknown	Compétence inconnue			Compétences inconnues			Compétence Inconnue
+_E869049E9CF76CBE	SH	Extraire les matières premières			Extraire les matières premières			Extraire les Matières Premières
+_60170C8820B7888C	SHF	Prospection	une	la	Prospections	des	les	
+_442BD9F7265A5C60	SHFF	Prospection forestière	une	la	Prospections forestières	des	les	
+_ABAB732E8EFA5E6D	SHFFA	Initié en prospection forestière	un	l'\d	Initiés en prospection forestière	des	les	
+_E6CB0BDADA2125AF	SHFFAE	Expert en prospection forestière	un	l'\d	Experts en prospection forestière	des	les	
+_B10C1FBB94DEE8D9	SHFFAEM	Maître en prospection forestière	un	le	Maîtres en prospection forestière	des	les	
+_C42BD5F666CA2C5E	SHFD	Prospection désertique	une	la	Prospections désertiques	des	les	
+_6BFB6B2F0CDA5A6D	SHFDA	Initié en prospection désertique	un	l'\d	Initiés en prospection désertique	des	les	
+_66BB07DB98611DAF	SHFDAE	Expert en prospection désertique	un	l'\d	Experts en prospection désertique	des	les	
+_31EC1FBD909EE8D9	SHFDAEM	Maître en prospection désertique	un	le	Maîtres en prospection désertique	des	les	
+_453A81F2A57A8464	SHFJ	Prospection dans la Jungle	une	la	Prospections	des	les	
+_E79B8B2A1049426F	SHFJA	Initié en prospection de la Jungle	un	l'\d	Initiés en prospection de la Jungle	des	les	
+_2369F7D85BC235AF	SHFJAE	Expert en prospection de la Jungle	un	l'\d	Experts en prospection de la Jungle	des	les	
+_2A2A2FB3985EE8D9	SHFJAEM	Maître en prospection de la Jungle 	un	le	Maîtres en prospection de la Jungle 	des	les	
+_1AD7982D8D996475	SHFL	Prospection lacustre	une	la	Prospections lacustres	des	les	
+_FAF5BBC2525D3127	SHFLA	Initié en prospection lacustre	un	l'\d	Initiés en prospection lacustre	des	les	
+_C973D10EA27302E5	SHFLAE	Expert en prospection lacustre	un	l'\d	Experts en prospection lacustre	des	les	
+_BB11B61895D0B534	SHFLAEM	Maître en prospection lacustre	un	le	Maîtres en prospection Lacustre	des	les	
+_2A44FD62F20871D7	SHFP	Prospection dans les Primes Racines	une	la	Prospections des Primes Racines	des	les	
+_6FEB58CC68A3038F	SHFPA	Initié en prospection des Primes Racines	un	l'\d	Initiés en prospection des Primes Racines	des	les	
+_035B83115B7A3738	SHFPAE	Expert en prospection des Primes Racines	un	l'\d	Experts en prospection des Primes Racines	des	les	
+_F79E37D8A4C77E67	SHFPAEM	Maître en prospection des Primes Racines	un	le	Maîtres en prospection des Primes Racines	des	les	
+_BA3DD7D26A7885B0	SMTOECA	Initié en magie du froid	un	l'\d	Initiés en magie du froid	des	les	Magie offensive avancée ciblée sur les dégâts spéciaux - Froid
+_AFEDA7D06A484DAB	SMTOEAA	Initié en magie d'acide	un	l'\d	Initiés en magie d'acide	des	les	Magie offensive avancée ciblée sur les dégâts spéciaux - Acide
+_01CD9DBDADC47BC9	SMTOERA	Initié en magie de la pourriture	un	l'\d	Initiés en magie de la pourriture	des	les	Magie offensive avancée ciblée sur les dégâts spéciaux - Pourriture
+_71CEBFD5AAD97DB9	SMTOEFA	Initié en magie du feu	un	l'\d	Initiés en magie du feu	des	les	Magie offensive avancée ciblée sur les dégâts spéciaux - Feu
+_318D06154CC1104A	SMTOESA	Initié en magie des ondes de choc	un	l'\d	Initiés en magie des ondes de choc	des	les	Magie offensive avancée ciblée sur les dégâts spéciaux - Onde de choc
+_73261D03FCFBFD13	SMTOEPA	Initié en magie du poison	un	l'\d	Initiés en magie du poison	des	les	Magie offensive avancée ciblée sur les dégâts spéciaux - Poison
+_E6D785444091E28C	SMTOEEA	Initié en magie électrique	un	l'\d	Initiés en magie électrique	des	les	Magie offensive avancée ciblée sur les dégâts spéciaux - Electricité
+_D7E6E2B1D5A97148	SMTCHPA	Initié en magie de guérison vie	un	l'\d	Initiés en magie de guérison vie	des	les	Magie Curative Avancée Ciblée sur la Guérison - Vie
+_0918DB0BE0F94381	SMTCHTA	Initié en magie de guérison endurance	un	l'\d	Initiés en magie de guérison endurance	des	les	Magie Curative Avancée Ciblée sur la Guérison - Sta
+_F3EB3786D6F24AAC	SMTCHAA	Initié en magie de guérison sève	un	l'\d	Initiés en magie de guérison sève	des	les	Magie Curative Avancée Ciblée sur la Guérison - Sève
+_E9A9A59BE96CEC2F	SMTCHCA	Initié en magie de guérison concentration	un	l'\d	Initiés en magie de guérison concentration	des	les	Magie curative avancée ciblée sur la guérison - Concentration
+_5E798E3F74FE345E	SMLOSMA	Initié en lien de folie	un	l'\d	Initiés en lien de folie	des	les	Lien avancé de magie offensive relatif aux maladies - Folie
+_26EEA5D39E743F06	SMLOSSA	Initié en lien de diminution de la vitesse	un	l'\d	Initiés en lien de diminution de la Vitesse	des	les	Lien avancé de magie offensive relatif aux maladies - Diminution de la Vitesse
+_5172DB6301F6E8D5	SMLOCIA	Initié en lien d'incapacité	un	l'\d	Initiés en lien d'Incapacité	des	les	Lien avancé de magie offensive relatif aux malédictions - Incapacité
+_9163A3774C6560F0	SMLOCSA	Initié en lien de malchance	un	l'\d	Initiés en lien de malchance	des	les	Lien avancé de magie offensive relatif aux malédictions - Malchance
+_6AD31D5BA8BF214B	SMLOECA	Initié en lien du froid	un	l'\d	Initiés en lien du froid	des	les	Lien avancé de magie offensive relatif aux dégâts spéciaux - Froid
+_EAA3ED59E7FF053F	SMLOEAA	Initié en lien d'acide	un	l'\d	Initiés en lien d'acide	des	les	Lien avancé de magie offensive relatif aux dégâts spéciaux - Acide
+_A7C460984F98020C	SMLOERA	Initié en lien de pourriture	un	l'\d	Initiés en lien de pourriture	des	les	Lien avancé de magie offensive relatif aux dégâts spéciaux - Pourriture
+_6B34055F296F5145	SMLOEFA	Initié en lien de feu	un	l'\d	Initiés en lien de feu	des	les	Lien avancé de magie offensive relatif aux dégâts spéciaux - Feu
+_D4F777BB9FE1FFC6	SMLOESA	Initié en lien d'ondes de choc	un	l'\d	Initiés en lien d'ondes de choc	des	les	Lien avancé de magie offensive relatif aux dégâts spéciaux - Ondes de choc
+_663E8A6237DAFF8F	SMLOEPA	Initié en lien de poison	un	l	Initiés en lien de poison	des	les	Lien avancé de magie offensive relatif aux dégâts spéciaux - Poison
+_F03F1412EF9651DB	SMLOEEA	Initié en lien électrique	un	l'\d	Initiés en lien électrique	des	les	Lien avancé de magie offensive relatif aux dégâts spéciaux - Electricité
+_6E57968BCB587F8E	SMD	Magie salvatrice	une	la	Magies salvatrices	des	les	Magie Salvatrice
+_E4EAEA05C036B3CB	SMDA	Magie neutralisante	une	la	Magies neutralisantes	des	les	Magie Neutralisante
+_8BE8FBCCF2B753CD	SMDAA	Initié en magie neutralisante	un	l'\d	Initiés en magie neutralisante	des	les	Initié en Magie Neutralisante
+_EF9774F6512DD4CE	SMDAAE	Expert en magie neutralisante	un	l'\d	Experts en magie neutralisante	des	les	Expert en Magie Neutralisante
+_ED65F0BA7B50E721	SMDAAEM	Maître en magie neutralisante	un	le	Maîtres en magie neutralisante	des	les	Maître en Magie Neutralisante
+_397B66BC32CD0D7C	SMDH	Magie curative	une	la	Magies curatives	des	les	Magie Curative
+_35B7302DA7A9A4E6	SMDHA	Initié en magie curative	un	l'\d	Initiés en magie curative	des	les	Initié en Magie Curative
+_ED96DA1DA02EF778	SMDHAE	Expert en magie curative	un	l'\d	Experts en magie curative	des	les	Expert en Magie Curative
+_E4A67EED911AA10F	SMDHAEM	Maître en magie curative	un	le	Maîtres en magie curative	des	les	Maître en Magie Curative
+_27450790EC3DF79C	SMO	Magie destructrice	une	la	Magies destructrices	des	les	Magie Destructrice
+_E49AEA05C036BFEC	SMOA	Magie débilitante	une	la	Magies débilitantes	des	les	Magie Débilitante
+_8B9803E2326753CD	SMOAA	Initié en magie débilitante	un	l'\d	Initiés en magie débilitante	des	les	Initié en Magie Débilitante
+_B14774F6514D2CCF	SMOAAE	Expert en magie débilitante	un	l'\d	Experts en magie débilitante	des	les	Expert en Magie Débilitante
+_AF15F0BABB101322	SMOAAEM	Maître en magie débilitante	un	le	Maîtres en magie débilitante	des	les	Maître en Magie Débilitante
+_AEBEAF4BCABFFB1C	SMOE	Magie élémentaire	une	la	Magies élémentaires	des	les	Magie Elémentaire
+_8C6B9F1DA778E81E	SMOEA	Initié en magie élémentaire	un	l'\d	Initiés en magie élémentaire	des	les	Initié en Magie Elémentaire
+_FC649D9073CA8292	SMOEAE	Expert en magie élémentaire	un	l'\d	Experts en magie élémentaire	des	les	Expert en Magie Elémentaire
+_32E3FD659EAB950B	SMOEAEM	Maître en magie élémentaire	un	le	Maîtres en magie élémentaire	des	les	Maître en Magie Elémentaire
+_B93945D8AB4CE8F7	SMS	Magie sur soi	une	la	Magies sur soi	des	les	Magie sur Soi
+_83F4433CC9AD94E4	SMSS	Magie sur soi instinctive	une	la	Magies sur soi Instinctive	des	les	Magie sur Soi Instinctive
+_779EFD45D0FE3F50	SMSSA	Initié en magie sur soi	un	l'\d	Initiés en magie sur soi	des	les	Initié en Magie sur Soi
+_319B0363794BC094	SMSSAE	Expert en magie sur soi	un	l'\d	Experts en magie sur soi	des	les	Expert en Magie sur Soi
+_2C19F048303A87DB	SMSSAEM	Maître en magie sur soi	un	le	Maîtres en magie sur soi	des	les	Maître en Magie sur Soi
+_DC262CA3A8C7EC7E	SF	Combat	un	le	Combats	des	les	
+_9FB46C869809E4AD	SFM	Mêlée	une	la	Mêlées	des	les	
+_529007CD20C0A474	SFM1	Manier armes à une main			Manier armes à une main			
+_13BDE7BA6940A996	SFM1B	Manier armes à une main contondantes			Manier armes à une main contondantes			
+_D94507669A13E45F	SFM1BM	Manier massue			Manier massue			
+_73DA5D3CEA2FF9DB	SFM1BME	Manier massue électrique			Manier massues électriques			
+_78CE19EFDB927FA1	SFM1BMM	Maître en maniement des massues			Maîtres en maniement des massues	des	les	
+_8974507B67460C6B	SFM1BS	Manier bâton			Manier bâtons			
+_322EE5D7E0EA8F0E	SFM1BSM	Maître en maniement des bâtons	un	le	Maîtres en maniement des bâtons	des	les	
+_D1ADF7B1698099A1	SFM1P	Manier armes à une main perforantes			Manier armes à une main perforantes			
+_8CE54C7B65460C87	SFM1PS	Manier lance			Manier lances			
+_093C6256AECD9909	SFM1PSE	Manier lance électrique			Manier lances électriques			
+_B64ED5EF5EDA8F06	SFM1PSL	Manier lance vivante			Manier lances vivantes			
+_32B0BDDFDEEA8F1C	SFM1PSM	Maître en maniement des lances	un	le	Maîtres en maniement des lances	des	les	
+_13BDE7B96940A5A7	SFM1S	Manier armes à une main tranchantes			Manier armes à une main tranchantes			
+_D315B84E2AA27C98	SFM1SA	Manier hache			Manier haches			
+_78ADFD175B5EB7F5	SFM1SAB	Manier hache ardente			Manier haches ardentes			
+_C7DFA10129549B6B	SFM1SAM	Maître en maniement des haches	un	le	Maîtres en maniement des haches	des	les	
+_0915B88CE7460C8D	SFM1SS	Manier épée			Manier épées			
+_32EE45F360EA8F1F	SFM1SSM	Maître en maniement des épées	un	le	Maîtres en maniement des épées	des	les	
+_B68C5DF3648B8F09	SFM1SSW	Manier épée ondulante			Manier épées ondulantes			
+_929007CD20C0A476	SFM2	Manier armes à deux mains			Manier armes à deux mains			
+_53BDE7BB6940AD96	SFM2B	Manier armes à deux mains contondantes			Manier armes à deux mains contondantes			
+_F15CD1694847CDF2	SFM2BM	Manier massue à deux mains			Manier massues à deux mains			
+_5704967E575AEBA6	SFM2BME	Manier massue à deux mains électrique 			Manier massues à deux mains électriques			
+_301A7FEFCE1033BC	SFM2BMM	Maître en maniement des massues à deux mains	un	le	Maîtres en maniement des massues à deux mains	des	les	
+_11ADF7B269809DA1	SFM2P	Manier armes à deux mains perforantes			Manier armes à deux mains perforantes			
+_DA260B769EF51070	SFM2PP	Manier pique			Manier piques			
+_37ADF902A12397A4	SFM2PPL	Manier pique vivante			Manier piques vivantes			
+_B8CE19F7DF4397AF	SFM2PPM	Maître en maniement de la pique	un	le	Maîtres en maniement de la pique	des	les	
+_53BDE7BA6940A9A7	SFM2S	Manier armes à deux mains tranchantes			Manier armes à deux mains tranchantes			
+_F8ED4DD3B04A51ED	SFM2SA	Manier hache à deux mains			Manier haches à deux mains			
+_2CFAC7993848E3D5	SFM2SAB	Manier hache ardente à deux mains			Manier haches ardentes à deux mains			
+_EDAB73465D5509C0	SFM2SAM	Maître en maniement des haches à deux mains	un	le	Maître en maniement des haches à deux mains	des	les	
+_F1DCBDCC6B38D1F9	SFM2SS	Manier épée à deux mains			Manier épées à deux mains			
+_AAB855AC86495BC6	SFM2SSB	Manier épée à deux mains ardente			Manier épées à deux mains ardentes			
+_2B882A40FCA567C1	SFM2SSL	Manier épée à deux mains vivante			Manier épées à deux mains vivantes			
+_2DD80E41FC666FC3	SFM2SSM	Maître en maniement des épées à deux mains	un	le	Maîtres en maniement des épées à deux mains	des	les	
+_2B08364BFC5667C1	SFM2SSW	Manier épée à deux mains ondulante			Manier épées à deux mains ondulantes			
+_3848BBF1F2187460	SFMC	Combat rapproché	un	le	Combats rapprochés	des	les	
+_60988398DCA6C997	SFMCA	Initié en combat rapproché	un	l'\d	Initiés en combat rapproché	des	les	
+_D6D5D066DF15B854	SFMCAD	Manier dague			Manier dagues			
+_BA9DD135EFD7CCE9	SFMCADL	Manier dague vivante			Manier dagues vivantes			
+_3B1EA52E2FE7F8EB	SFMCADM	Maître en maniement de la dague	un	le	Maîtres en maniement de la dague	des	les	
+_BA9DB138B188CCE9	SFMCADW	Manier dague ondulante			Manier dagues ondulantes			
+_34255D0B60104BEF	SFMCAH	Expert en combat à mains nues	un	l'\d	Experts en combat à mains nues	des	les	
+_EC1526CB91DCF82F	SFMCAHM	Maître en combat à mains nues	un	le	Maîtres en combat à mains nues	des	les	
+_DF566C869829F4AB	SFR	Tir	un	le	Tirs	des	les	
+_52E107D12040CC74	SFR1	Tir à une main	un	le	Tirs à une main	des	les	
+_5D0320E36D6B5C49	SFR1A	Initié au tir à une main	un	l'\d	Initiés au tir à une main	des	les	
+_5C8878F919A85063	SFR1AB	Tir au pistolet-arbalète	un	le	Tir au pistolet-arbalète	des	les	
+_8B428585BBF17573	SFR1ABM	Maître en tir au pistolet-arbalète	un	le	Maîtres en tir au pistolet-arbalète	des	les	
+_4F91917A7FE18168	SFR1ABW	Tir au pistolet-arbalète ondulant	un	le	Tirs au pistolet-arbalète ondulant	des	les	
+_1587247EE4D68763	SFR1AP	Tir au pistolet	un	le	Tirs au pistolet	des	les	
+_375F3549F498FCE3	SFR1APL	Tir au pistolet vivant	un	le	Tirs au pistolet vivant	des	les	
+_B8E0094234A828E5	SFR1APM	Maître en tir au pistolet 	un	le	Maîtres en tir au pistolet 	des	les	
+_92E107D12040CC76	SFR2	Tir à deux mains	un	le	Tirs à deux mains	des	les	
+_9D0320E46D7B5C49	SFR2A	Initié au tir à deux mains	un	l'\d	Initiés au tir à deux mains	des	les	
+_761E05099FDCD5FF	SFR2AA	Tir à la mitrailleuse	un	le	Tirs à la mitrailleuse	des	les	
+_AA2B77F770A02BC7	SFR2AAB	Tir à la mitrailleuse ardente	un	le	Tirs à la mitrailleuse ardente	des	les	
+_6DFBBBE198CF6583	SFR2AAM	Maître en tir à la mitrailleuse	un	le	Maîtres en tir à la mitrailleuse	des	les	
+_1D160C9E2205FC8C	SFR2AB	Tir au fusil-arbalète	un	le	Tirs au fusil-arbalète	des	les	
+_52D653A403717150	SFR2ABE	Tir au fusil-arbalète électrique	un	le	Tirs au fusil-arbalète électrique	des	les	
+_CD131A1802CA9469	SFR2ABM	Maître en tir au fusil-arbalète	un	le	Maîtres en tir au fusil-arbalète	des	les	
+_1B56309520454883	SFR2AL	Tir au lance-grenades	un	le	Tirs au lance-grenades	des	les	
+_3D708A732D6FA261	SFR2ALB	Tir au lance-grenades ardent	un	le	Tirs au lance-grenades ardent	des	les	
+_D2560BACC3A1D543	SFR2ALE	Tir au lance-grenades électrique	un	le	Tirs au lance-grenades électrique	des	les	
+_CED33223BD8AD85E	SFR2ALM	Maître en tir au lance-grenades	un	le	Maîtres en tir au lance-grenades	des	les	
+_C9667C75A1260469	SFR2AR	Tir au fusil	un	le	Tirs au fusil	des	les	
+_F6FD2DF1DABA8BF7	SFR2ARL	Tir au fusil vivant	un	le	Tirs au fusil vivant	des	les	
+_725F15E15ACA8B0D	SFR2ARM	Maître en tir au fusil 	un	le	Maîtres en tir au fusil 	des	les	
+_DDBA87931433927E	SCA	Créer armure			Créer armure			Créer armure
+_D2364393A262BA4D	SCJ	Créer bijou			Créer bijou			Créer Bijou
+_5884EFEF58C66171	SCM	Créer arme de mêlée			Créer arme de mêlée			Créer arme de mêlée
+_99D5EFEF58264977	SCR	Créer arme de tir			Créer arme de tir			Créer arme de tir
+_5FD19B322A25F58F	SCAH	Créer armure lourde			Créer armure lourde			Créer armure lourde
+_61D19B28E3042D9B	SCAL	Créer armure légère			Créer armure légère			Créer armure légère
+_77DF38E12DB84933	SCAM	Créer armure moyenne			Créer armure moyenne			Créer armure moyenne
+_64C5AB99E1F93AE4	SCAS	Créer bouclier			Créer bouclier			Créer Bouclier
+_A37377C336061BC0	SCJA	Créer anneau de cheville			Créer anneau de cheville			Créer Anneau de cheville
+_093FE329F1ECAFD4	SCJB	Créer bracelet			Créer bracelet			Créer Bracelet
+_DD557393DE0922DD	SCJD	Créer diadème			Créer diadème			Créer Diadème
+_601FBCF9F83DCB49	SCJE	Créer boucle d'oreille			Créer boucle d'oreille			Créer boucle d'oreille
+_8B9BF406615BCBA0	SCJP	Créer pendentif			Créer pendentif			Créer Pendentif
+_58C1D9845E363A44	SCJR	Créer bague			Créer bague			Créer Bague
+_DA2E7E3FCA164940	SCM1	Créer arme de mêlée à une main			Créer arme de mêlée à une main			Créer arme de mêlée à une Main
+_1ACEA244CA56914A	SCM2	Créer arme de mêlée à deux mains			Créer arme de mêlée à deux mains			Créer arme de mêlée à deux mains
+_1BBF8E374C36513C	SCR1	Créer arme de tir à une main			Créer arme de tir à une main			Créer arme de tir à une Main
+_5B5FB23C4C769946	SCR2	Créer arme de tir à deux mains			Créer arme de tir à deux mains			Créer arme de tir à deux mains
+_C96D90091C99697C	SCAHB	Créer bottes lourdes			Créer bottes lourdes			Créer Bottes lourdes
+_697ECD0831C40D56	SCAHG	Créer gants lourds			Créer gants lourds			Créer Gants lourds
+_AA7ED509ADD3C952	SCAHH	Créer casque lourd			Créer casque lourd			Créer Casque lourd
+_4E4E90091C99616D	SCAHP	Créer pantalon lourd			Créer pantalon lourd			Créer Pantalon Lourd
+_33A56AD5E544A4A6	SCAHS	Créer manches lourdes			Créer manches lourdes			Créer manches lourdes
+_20CE8C7C23CF983B	SCAHV	Créer gilet lourd			Créer gilet lourd			Créer Gilet Lourd
+_CA6D68E89B799980	SCALB	Créer bottes légères			Créer bottes légères			Créer Bottes légères
+_6ADE4906B4841D56	SCALG	Créer gants légers			Créer gants légers			Créer Gants légers
+_4F4E68E89B799171	SCALP	Créer pantalon léger			Créer pantalon léger			Créer Pantalon Léger
+_70247ECF6784B4A1	SCALS	Créer manches légères			Créer manches légères			Créer manches légères
+_220E7869211F8045	SCALV	Créer gilet léger			Créer gilet léger			Créer Gilet Léger
+_87D2551F32F3D1D9	SCAMB	Créer bottes moyennes			Créer bottes moyennes			Créer Bottes moyennes
+_64D88EDE5F5F3CBE	SCAMG	Créer gants moyens			Créer gants moyens			Créer Gants moyens
+_87D2551FB22309F5	SCAMP	Créer pantalon moyen			Créer pantalon moyen			Créer Pantalon Moyen
+_5ACABAE0F7050ABC	SCAMS	Créer manches moyennes			Créer manches moyennes			Créer manches moyennes
+_B4F3A5EBDDB93D59	SCAMV	Créer gilet moyen			Créer gilet moyen			Créer Gilet Moyen
+_4FD0C50DE565E120	SCASS	Créer grand bouclier			Créer grand bouclier			Créer grand bouclier
+_7511B0F0F4FDBB1F	SCASB	Créer rondache			Créer rondache			Créer rondache
+_9179C666C8DB74C1	SCJAA	Initié en création d'anneau de cheville	un	l'\d	Initiés en création d'anneau de cheville	des	les	Initié en création d'anneau de cheville
+_4F6173BE58DD91EA	SCJBA	Initié en création de bracelet	un	l'\d	Initiés en création de bracelet	des	les	Initié en création de bracelet
+_8F79864B46BB4CBC	SCJDA	Initié en création de diadème	un	l'\d	Initiés en création de diadème	des	les	Initié en création de diadème
+_A802E327352F5D1A	SCJEA	Initié en création de boucle d'oreille	un	l'\d	Initiés en création de boucle d'oreille	des	les	Initié en création de boucle d'oreille
+_E812BB26B3706D2A	SCJPA	Initié en création de pendentif	un	l'\d	Initiés en création de pendentif	des	les	Initié en création de pendentif
+_7667998865D69400	SCJRA	Initié en création de bague	un	l'\d	Initiés en création de bague	des	les	Initié en création de bague
+_C20EC6BE1CD10262	SCM1M	Créer massue			Créer massue			Créer massue
+_9BA51FB096E46E95	SCM1T	Créer bâton			Créer bâton			Créer Bâton
+_5D954FA797A46E9D	SCM1P	Créer lance			Créer lance			Créer Lance
+_CF83C9346095DA3B	SCM1A	Créer hache			Créer hache			Créer Hache
+_1E465BBF19146E92	SCM1S	Créer épée			Créer épée			Créer Épée
+_D328F3D3EF169B83	SCM1D	Créer dague			Créer dague			Créer Dague
+_A9427FC01B1BA614	SCM2M	Créer massue à deux mains			Créer massue à deux mains			Créer massue à deux mains
+_020EC6CE22B30E65	SCM2P	Créer pique			Créer pique			Créer Pique
+_0E465ABD275ADD87	SCM2A	Créer hache à deux mains			Créer hache à deux mains			Créer Hache à deux mains
+_509D1AE6B27DF93B	SCM2S	Créer épée à deux mains			Créer épée à deux mains			Créer Épéee à deux mains
+_844F549E45B094DA	SCR1B	Créer pistolet-arbalète			Créer pistolet-arbalète			Créer Pistolet-arbalète
+_199A3BEC7136E7A5	SCR1P	Créer pistolet 			Créer pistolet 			Créer Pistolet 
+_188BF14452C8A940	SCR2A	Créer mitrailleuse			Créer mitrailleuse			Créer Mitrailleuse
+_7F6A7C4CF7D8573B	SCR2B	Créer fusil-arbalète			Créer fusil-arbalète			Créer Fusil-arbalète
+_BBCA883F7538A349	SCR2L	Créer lance-grenades			Créer lance-grenades			Créer Lance-grenades
+_1DA603AA97336A92	SCR2R	Créer fusil 			Créer fusil 			Créer Fusil 
+_9C7ED03161F4F41B	SCAHBE	Expert en création de bottes lourdes	un	l'\d	Experts en création de bottes lourdes	des	les	Expert en création de bottes lourdes
+_52495B88B6E6EF2A	SCAHGE	Expert en création de gants lourds	un	l'\d	Experts en création de gants lourds	des	les	Expert en création de gants lourds
+_D4495F8A7494BB1E	SCAHHE	Expert en création de casque lourd	un	l'\d	Experts en création de casque lourd	des	les	Expert en création de casque lourd
+_649E083161F4EC0D	SCAHPE	Expert en création de pantalon lourd	un	l'\d	Experts en création de pantalon lourd	des	les	Expert en création de pantalon Lourd
+_87692DF1685048F1	SCAHSE	Expert en création de manches lourdes	un	l'\d	Experts en création de manches lourdes	des	les	Expert en création de manches lourdes
+_4C83FF8E482B1F01	SCAHVE	Expert en création de gilet lourd	un	l'\d	Experts en création de gilet lourd	des	les	Expert en création de gilet Lourd
+_9E7EA81522932C1F	SCALBE	Expert en création de bottes légères	un	l'\d	Experts en création de bottes légères	des	les	Expert en création de bottes légères
+_53F9FB72B9A60F2A	SCALGE	Expert en création de gants légers	un	l'\d	Experts en création de gants légers	des	les	Expert en création de gants légers
+_669EE01522932411	SCALPE	Expert en création de pantalon léger	un	l'\d	Experts en création de pantalon léger	des	les	Expert en création de pantalon Léger
+_06A749EBEB9058F1	SCALSE	Expert en création de manches légères	un	l'\d	Experts en création de manches légères	des	les	Expert en création de manches légères
+_CEC3FB7B46CB2BF7	SCALVE	Expert en création de gilet léger	un	l'\d	Experts en création de gilet léger	des	les	Expert en création de gilet léger
+_54B10780FE546FAA	SCAMBE	Expert en création de bottes moyennes	un	l'\d	Experts en création de bottes moyennes	des	les	Expert en création de bottes moyennes
+_FA9B35F82F4CDE5A	SCAMGE	Expert en création de gants moyens	un	l'\d	Experts en création de gants moyens	des	les	Expert en création de gants moyens
+_54B10780BE5437D4	SCAMPE	Expert en création de pantalon moyen	un	l'\d	Experts en création de pantalon moyen	des	les	Expert en création de pantalon Moyen
+_B2CDB9C4123825D5	SCAMSE	Expert en création de manches moyennes	un	l'\d	Experts en création de manches moyennes	des	les	Expert en création de manches moyennes
+_8C9527646403DCFC	SCAMVE	Expert en création de gilet moyen	un	l'\d	Experts en création de gilet moyen	des	les	Expert en création de gilet moyen
+_75DADE911E49E29A	SCASSE	Expert en création de bouclier	un	l'\d	Experts en création de bouclier	des	les	Expert en création de bouclier
+_2FF9F3E350EEBA56	SCASBE	Expert en création de rondache	un	l'\d	Experts en création de rondache	des	les	Expert en création de rondache
+_33EB92869EAABE88	SCJAAE	Expert en création d'anneau de cheville	un	l'\d	Experts en création d'anneau de cheville	des	les	Expert en création d'anneau de cheville
+_0AFE3E719386C9F8	SCJBAE	Expert en création de bracelet	un	l'\d	Experts en création de bracelet	des	les	Expert en création de bracelet
+_708A8A811CE9AE80	SCJDAE	Expert en création de diadème	un	l'\d	Experts en création de diadème	des	les	Expert en création de diadème
+_6ED8C7F390AEF648	SCJEAE	Expert en création de boucle d'oreille	un	l'\d	Experts en création de boucle d'oreille	des	les	Expert en création de boucle d'oreille
+_371807E5D10DF23E	SCJPAE	Expert en création de pendentif	un	l'\d	Experts en création de pendentif	des	les	Expert en création de pendentif
+_2A3E882CEE431405	SCJRAE	Expert en création de bague	un	l'\d	Experts en création de bague	des	les	Expert en création de bague
+_E26E801D66F2EC11	SCM1ME	Expert en création de massue	un	l'\d	Experts en création de massue	des	les	Expert en création de massue
+_AB7962D09D5F4546	SCM1TE	Expert en création de bâton	un	l'\d	Experts en création de bâton	des	les	Expert en création de bâton
+_B1D9B2C39E1F4542	SCM1PE	Expert en création de lance	un	l'\d	Experts en création de lance	des	les	Expert en création de lance
+_1944FD254D6185DB	SCM1AE	Expert en création de hache	un	l'\d	Experts en création de hache	des	les	Expert en création de hache
+_ABFBCAE2208F4545	SCM1SE	Expert en création d'épée	un	l'\d	Experts en création d'épée	des	les	Expert en création d'épée
+_ECEB6A849DBAC286	SCM1DE	Expert en création de dague	un	l'\d	Experts en création de dague	des	les	Expert en création de dague
+_285BCAB50A3ABC3A	SCM2ME	Expert en création de massue à deux mains	un	l'\d	Experts en création de massue à deux mains	des	les	Expert en création de massue à deux mains
+_226E80256C230414	SCM2PE	Expert en création de pique	un	l'\d	Experts en création de pique	des	les	Expert en création de pique
+_935915645B8CD569	SCM2AE	Expert en création de hache à deux mains	un	l'\d	Experts en création de hache à deux mains	des	les	Expert en création de hache à deux mains
+_1C316126C159F7E0	SCM2SE	Expert en création d'épée en deux mains	un	l'\d	Experts en création d'épée en deux mains	des	les	Expert en création d'épée en deux mains
+_4D32DB99CD0B97C0	SCR1BE	Expert en création de pistolet-arbalète	un	l'\d	Experts en création de pistolet-arbalète	des	les	Expert en création de pistolet-arbalète
+_331CE29DA0D902A9	SCR1PE	Expert en création de pistolet	un	l'\d	Experts en création de pistolet	des	les	Expert en création de pistolet
+_34B1D38BC1F65F56	SCR2AE	Expert en création de mitrailleuse	un	l'\d	Experts en création de mitrailleuse	des	les	Expert en création de mitrailleuse
+_C9BF22961B6405F1	SCR2BE	Expert en création de fusil-arbalète 	un	l'\d	Experts en création de fusil-arbalète 	des	les	Expert en création de fusil-arbalète 
+_C29F26879C444513	SCR2LE	Expert en création de lance-grenades	un	l'\d	Experts en création de lance-grenades	des	les	Expert en création de lance-grenades
+_6B8A86C05EAE4144	SCR2RE	Expert en création de fusil 	un	l'\d	Experts en création de fusil 	des	les	Expert en création de fusil 
+_139FBB5D95B2BF43	SCAHBEM	Maître en création de bottes lourdes	un	le	Maîtres en création de bottes lourdes	des	les	Maître en création de bottes lourdes
+_F24C383D2FC22E66	SCAHGEM	Maître en création de gants lourds	un	le	Maîtres en création de gants lourds	des	les	Maître en création de gants lourds
+_334C403EABD1EA62	SCAHHEM	Maître en création de casque lourd	un	le	Maîtres en création de casque lourd	des	les	Maître en création de casque lourd
+_57BFF35D95A28351	SCAHPEM	Maître en création de pantalon lourd	un	le	Maîtres en création de pantalon lourd	des	les	Maître en création de pantalon Lourd
+_382355F9D6AEF7D4	SCAHSEM	Maître en création de manches lourdes	un	le	Maîtres en création de manches lourdes	des	les	Maître en création de manches lourdes
+_F4A9075C9437CE39	SCAHVEM	Maître en création de gilet lourd	un	le	Maîtres en création de gilet lourd	des	les	Maître en création de gilet Lourd
+_154F6F55D651E747	SCALBEM	Maître en création de bottes légères	un	le	Maîtres en création de bottes légères	des	les	Maître en création de bottes légères
+_F3ACB43BB2823E66	SCALGEM	Maître en création de gants légers	un	le	Maîtres en création de gants légers	des	les	Maître en création de gants légers
+_596FA755D641AB55	SCALPEM	Maître en création de pantalon léger	un	le	Maîtres en création de pantalon léger	des	les	Maître en création de pantalon Léger
+_B7114D07D9EEF7D4	SCALSEM	Maître en création de manches légères	un	le	Maîtres en création de manches légères	des	les	Maître en création de manches légères
+_7699DF5D12D7CA2F	SCALVEM	Maître en création de gilet léger	un	le	Maîtres en création de gilet léger	des	les	Maître en création de gilet léger
+_10A0C05430F1F2E9	SCAMBEM	Maître en création de bottes moyennes	un	le	Maîtres en création de bottes moyennes	des	les	Maître en création de bottes moyennes
+_CA4139105ECAC92F	SCAMGEM	Maître en création de gants moyens	un	le	Maîtres en création de gants moyens	des	les	Maître en création de gants moyens
+_10A0C054B0212A05	SCAMPEM	Maître en création de pantalon moyens	un	le	Maîtres en création de pantalon moyens	des	les	Maître en création de pantalons moyens
+_D14C5191C5C624E9	SCAMSEM	Maître en création de manches moyennes	un	le	Maîtres en création de manches moyennes	des	les	Maître en création de manches moyennes
+_DEA2EEA15581571B	SCAMVEM	Maître en création de gilet moyen	un	le	Maîtres en création de gilet moyen	des	les	Maître en création de gilet moyen
+_7E39467851982DE1	SCASSEM	Maître en création de bouclier	un	le	Maîtres en création de bouclier	des	les	Maître en création de bouclier
+_21BAE7BA91D79C0C	SCASBEM	Maître en création de rondache	un	le	Maîtres en création de rondache	des	les	Maître en création de rondache
+_40D93268D27851CF	SCJAAEM	Maître en création d'anneau de cheville	un	le	Maîtres en création d'anneau de cheville	des	les	Maître en création d'anneau de cheville
+_4CFC9672F4A2B91F	SCJBAEM	Maître en création de bracelet	un	le	Maîtres en création de bracelet	des	les	Maître en création de bracelet
+_BBE90A61913735C7	SCJDAEM	Maître en création de diadème	un	le	Maîtres en création de diadème	des	les	Maître en création de diadème
+_65D9E3D20808CCF3	SCJEAEM	Maître en création de boucle d'oreille	un	le	Maîtres en création de boucle d'oreille	des	les	Maître en création de boucle d'oreille
+_EA990BCE4BD89CF6	SCJPAEM	Maître en création de pendentif	un	le	Maîtres en création de pendentif	des	les	Maître en création de pendentif
+_93AC410BE1F13766	SCJRAEM	Maître en création de bague	un	le	Maîtres en création de bague	des	les	Maître en création de bague
+_4BDC31F31ACF2372	SCM1MEM	Maître en création de massue	un	le	Maîtres en création de massue	des	les	Maître en création de massue
+_28CDCED7137DAC42	SCM1TEM	Maître en création de bâton	un	le	Maîtres en création de bâton	des	les	Maître en création de bâton
+_2EEEDAD3127DAC3E	SCM1PEM	Maître en création de lance	un	le	Maîtres en création de lance	des	les	Maître en création de lance
+_18D0F45804CF6C30	SCM1AEM	Maître en création de hache	un	le	Maîtres en création de hache	des	les	Maître en création de hache
+_282F6EEBD37DAC41	SCM1SEM	Maître en création d'épée	un	le	Maîtres en création d'épée	des	les	Maître en création d'épée
+_78F9F6678F8849CD	SCM1DEM	Maître en création de dague	un	le	Maîtres en création de dague	des	les	Maître en création de dague
+_99FC85A9D93452ED	SCM2MEM	Maître en création de massue à deux mains	un	le	Maîtres en création de massue à deux mains	des	les	Maître en création de massue à deux mains
+_8BDC310320B12F75	SCM2PEM	Maître en création de pique	un	le	Maîtres en création de pique	des	les	Maître en création de pique
+_99D9D068E10A18BA	SCM2AEM	Maître en création de hache à deux mains	un	le	Maîtres en création de hache à deux mains	des	les	Maître en création de hache à deux mains
+_98904438F1565B2E	SCM2SEM	Maître en création d'épée en deux mains	un	le	Maîtres en création d'épée en deux mains	des	les	Maître en création d'épée en deux mains
+_88910F507D1DA21D	SCR1BEM	Maître en création de pistolet-arbalète	un	le	Maîtres en création de pistolet-arbalète	des	les	Maître en création de pistolet-arbalète
+_3E2B7A7F91E859F0	SCR1PEM	Maître en création de pistolet	un	le	Maîtres en création de pistolet	des	les	Maître en création de pistolet
+_98CFC45BF682F2BE	SCR2AEM	Maître en création de mitrailleuse	un	le	Maîtres en création de mitrailleuse	des	les	Maître en création de mitrailleuse
+_C75DA69E36B1B92E	SCR2BEM	Maître en création de fusil-arbalète 	un	le	Maîtres en création de fusil-arbalète 	des	les	Maître en création de fusil-arbalète 
+_03BDB291B411053C	SCR2LEM	Maître en création de lance-grenades	un	le	Maîtres en création de lance-grenades	des	les	Maître en création de lance-grenades
+_E8CE0EC6D06DAC40	SCR2REM	Maître en création de fusil 	un	le	Maîtres en création de fusil 	des	les	Maître en création de fusil 
+_2562F2A1E5A6ECCE	SCMC	Créer arme de combat rapproché			Créer armes de combat rapproché			Créer arme de combat rapproché
+_80C9965548175036	SCMCA	Initié en création d'arme de combat rapproché	un	l'\d	Initiés en création d'arme de combat rapproché	des	les	Initié en création d'arme de combat rapproché
+_7CF7AC665E6FB8A3	SCMCAE	Expert en création d'arme de combat rapproché	un	l'\d	Experts en création d'arme de combat rapproché	des	les	Expert en création d'arme de combat rapproché
+_5FDB6AB40ED68708	SCMCAEM	Maître en création d'arme de combat rapproché	un	le	Maîtres en création d'arme de combat rapproché	des	les	Maître en création d'arme de combat rapproché

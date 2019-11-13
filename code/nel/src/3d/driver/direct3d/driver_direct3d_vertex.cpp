@@ -26,6 +26,10 @@
 
 #include "driver_direct3d.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 
@@ -125,7 +129,7 @@ uint8	*CVBDrvInfosD3D::lock (uint begin, uint end, bool readOnly)
 				}
 				else
 				{
-					nlinfo("Buffer %s at %x is Locked", (*it)->VertexBufferPtr->getName().c_str(), (int) *it);
+					nlinfo("Buffer %s at %p is Locked", (*it)->VertexBufferPtr->getName().c_str(), *it);
 				}
 			}
 		}

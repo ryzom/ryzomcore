@@ -313,7 +313,7 @@ void	NLPACS::CGlobalRetriever::getBorders(const CAABBox &sbox, std::vector<std::
 					chainType = 3;
 			}
 
-			if (retriever.getFullOrderedChains().size() > 0)
+			if (!retriever.getFullOrderedChains().empty())
 			{
 				const COrderedChain3f	&ochain = retriever.getFullOrderedChain(entry.OChainId);
 
@@ -1221,7 +1221,7 @@ void	NLPACS::CGlobalRetriever::findCollisionChains(CCollisionSurfaceTemp &cst, c
 
 		if (!localRetriever.isLoaded())
 		{
-			nlwarning("local retriever %d in %s not loaded, findCollisionChains in this retriever aborted", localRetrieverId, _RetrieverBank->getNamePrefix().c_str());
+			nldebug("local retriever %d in %s not loaded, findCollisionChains in this retriever aborted", localRetrieverId, _RetrieverBank->getNamePrefix().c_str());
 			continue;
 		}
 

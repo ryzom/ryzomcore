@@ -24,6 +24,10 @@
 #include "nel/georges/form.h"
 #include "nel/georges/form_loader.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLMISC;
 
 namespace NLGEORGES
@@ -104,10 +108,10 @@ CForm::~CForm ()
 
 // ***************************************************************************
 
-void CForm::write (xmlDocPtr doc, const char *filename)
+void CForm::write (xmlDocPtr doc, const std::string &filename)
 {
 	// Save the filename
-	if (filename)
+	if (!filename.empty())
 		_Filename = CFile::getFilename (filename);
 
 	// Create the first node
@@ -176,7 +180,7 @@ void CForm::readParent (const char *parent, CFormLoader &loader)
 
 // ***************************************************************************
 
-void CForm::read (xmlNodePtr node, CFormLoader &loader, CFormDfn *dfn, const char *filename)
+void CForm::read (xmlNodePtr node, CFormLoader &loader, CFormDfn *dfn, const std::string &filename)
 {
 	// Save the filename
 	_Filename = CFile::getFilename (filename);
@@ -188,8 +192,8 @@ void CForm::read (xmlNodePtr node, CFormLoader &loader, CFormDfn *dfn, const cha
 	if ( ((const char*)node->name == NULL) || (strcmp ((const char*)node->name, "FORM") != 0) )
 	{
 		// Make an error message
-		warning (true, "read", "XML Syntax error in block line %p, node (%s) should be FORM.",
-			node->content, node->name);
+		warning (true, "read", "XML Syntax error in block line %d, node (%s) should be FORM.",
+			(sint)node->line, node->name);
 	}
 
 	// Get first struct node
@@ -197,8 +201,8 @@ void CForm::read (xmlNodePtr node, CFormLoader &loader, CFormDfn *dfn, const cha
 	if (child == NULL)
 	{
 		// Throw exception
-		warning (true, "read", "Syntax error in block line %p, node (%s) should have a STRUCT child node.",
-			node->content, node->name);
+		warning (true, "read", "Syntax error in block line %d, node (%s) should have a STRUCT child node.",
+			(sint)node->line, node->name);
 	}
 
 	// Read the struct
@@ -259,7 +263,7 @@ const std::string &CForm::getComment () const
 
 // ***************************************************************************
 
-void CForm::write (class NLMISC::IStream &stream)
+void CForm::write (NLMISC::IStream &stream)
 {
 	// Xml stream
 	COXml xmlStream;
@@ -271,7 +275,7 @@ void CForm::write (class NLMISC::IStream &stream)
 
 // ***************************************************************************
 
-bool CForm::insertParent (uint before, const char *filename, CForm *parent)
+bool CForm::insertParent (uint before, const std::string &filename, CForm *parent)
 {
 	// Set or reset ?
 	nlassert (parent);
@@ -289,7 +293,7 @@ bool CForm::insertParent (uint before, const char *filename, CForm *parent)
 	else
 	{
 		// Output an error
-		warning (false, "insertParent", "Can't insert parent form (%s) that has not the same DFN.", filename);
+		warning (false, "insertParent", "Can't insert parent form (%s) that has not the same DFN.", filename.c_str());
 	}
 
 	return false;
@@ -346,7 +350,7 @@ const std::string &CForm::getFilename () const
 
 // ***************************************************************************
 
-void CForm::warning (bool exception, const char *function, const char *format, ... ) const
+void CForm::warning (bool exception, const std::string &function, const char *format, ... ) const
 {
 	// Make a buffer string
 	va_list args;
@@ -356,7 +360,7 @@ void CForm::warning (bool exception, const char *function, const char *format, .
 	va_end( args );
 
 	// Set the warning
-	NLGEORGES::warning (exception, "(CForm::%s) in form (%s) : %s", function, _Filename.c_str (), buffer);
+	NLGEORGES::warning (exception, "(CForm::%s) in form (%s) : %s", function.c_str(), _Filename.c_str (), buffer);
 }
 
 // ***************************************************************************

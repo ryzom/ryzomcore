@@ -532,7 +532,7 @@ void CPeopleInterraction::createTeamList()
 	// NB: use an intermediate temp var, to avoid show of the window each time a new team member enters
 	string sExpr = "@UI:VARIABLES:IS_TEAM_PRESENT";
 	string sAction = "set";
-	string sCond = "";
+	string sCond;
 	string sParams = "target_property=ui:interface:team_list:active|value=@UI:VARIABLES:IS_TEAM_PRESENT";
 
 	if (TeamChat)
@@ -794,7 +794,6 @@ void CPeopleInterraction::createTheUserChat()
 	chatDesc.Id = "user_chat";
 	chatDesc.ChatTemplate = "filtered_chat_id";
 	chatDesc.AHOnActive = "user_chat_active";
-	chatDesc.AHOnActiveParams = "";
 	chatDesc.AHOnCloseButton = "set";
 	chatDesc.AHOnCloseButtonParams = "dblink=UI:SAVE:ISDETACHED:USER_CHAT|value=0";
 
@@ -845,7 +844,7 @@ void CPeopleInterraction::createChatGroup()
 	CChatWindowDesc chatDesc;
 	chatDesc.FatherContainer = "ui:interface";
 	chatDesc.Listener = NULL;
-	chatDesc.Title= "";		// NB: the chatgroup is the only one that can be not named (because of uniqueness title test)
+	chatDesc.Title.clear();		// NB: the chatgroup is the only one that can be not named (because of uniqueness title test)
 	chatDesc.Localize = true;
 	chatDesc.Savable = true;
 	chatDesc.ChatTemplate = "main_chat_group";
@@ -2635,7 +2634,13 @@ public:
 					{
 						ucstring title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-						pMenu->addLineAtIndex(5 + insertion_index, title+" @{T8}/"+s, "chat_target_selected", "dyn"+s, "dyn"+s);
+
+						// replace dynamic channel name and shortcut
+						ucstring res = CI18N::get("uiFilterMenuDynamic");
+						strFindReplace(res, "%channel", title);
+						strFindReplace(res, "%shortcut", s);
+
+						pMenu->addLineAtIndex(5 + insertion_index, res, "chat_target_selected", "dyn"+s, "dyn"+s);
 						insertion_index++;
 					}
 				}

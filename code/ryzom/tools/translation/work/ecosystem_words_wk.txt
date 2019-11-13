@@ -1,0 +1,6 @@
+﻿ecosysteme ID	name	* nom en français	ia	da	p	pia	pda
+desert	Desert	désert			Desert		
+forest	Forest	forêt			Forest		
+lake	Lake	lacustre			Lake		
+jungle	Jungle	jungle			Jungle		
+primeroots	Prime Roots	primes racines			Prime Roots		

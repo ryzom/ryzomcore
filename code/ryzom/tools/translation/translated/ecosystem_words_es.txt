@@ -1,0 +1,6 @@
+﻿*HASH_VALUE	ecosysteme ID	name	* nom en français	ia	da	p	pia	pda
+_28DB5483EC2808B8	desert	Desierto	désert	un	el	Desiertos	unos	los
+_AAEBA4866E5808B9	forest	Bosque	forêt	un	el	Bosques	unos	los
+_6478AC8C64A86065	lake	Lago	lacustre	un	el	Lagos	unos	los
+_6838DC8A2C2798A7	jungle	Jungla	Jungla	una	la	Junglas	unas	las
+_4AFF510A91EB3922	primeroots	Raíces Primarias	primes racines	unas	las	Raíces Primarias	unas	las

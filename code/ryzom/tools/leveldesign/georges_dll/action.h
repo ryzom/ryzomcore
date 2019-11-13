@@ -182,4 +182,5 @@ protected:
 	virtual bool	doAction (CGeorgesEditDoc &doc, bool redo, bool &modified, bool firstTime);
 };
 
-#endif GEORGES_EDIT_ACTION_H
+#endif /* GEORGES_EDIT_ACTION_H */
+

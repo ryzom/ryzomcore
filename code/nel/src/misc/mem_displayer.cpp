@@ -85,7 +85,7 @@ static string getFuncInfo (DWORD_TYPE funcAddr, DWORD_TYPE stackAddr)
 	// replace param with the value of the stack for this param
 
 	string parse = str;
-	str = "";
+	str.clear();
 	uint pos = 0;
 	sint stop = 0;
 

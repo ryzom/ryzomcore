@@ -31,6 +31,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 NLMISC_REGISTER_OBJECT(CViewBase, CCtrlLink, std::string, "button_link");
 
 namespace NLGUI
@@ -48,6 +52,7 @@ namespace NLGUI
 		_MinW= 0;
 		_MinH= 0;
 		_Over = false;
+		_TempOver = false;
 		_OverColor = CRGBA(255,255,255,32);
 		_OverElt = -1;
 		_LastW = 0;
@@ -55,7 +60,6 @@ namespace NLGUI
 		_TopSpace = 0;
 		_Indent = 0;
 		_FirstViewIndentView = false;
-		_BrowseGroup = NULL;
 		_TextId = 0;
 	}
 
@@ -337,7 +341,7 @@ namespace NLGUI
 			if( fromString( value, i ) )
 			{
 				_TextId = i;
-				_HardText = "";
+				_HardText.clear();
 			}
 			onTextChanged();
 			return;
@@ -864,11 +868,8 @@ namespace NLGUI
 								ctrl->setParentPosRef (Hotspot_TL);
 								ctrl->setPosRef (Hotspot_TL);
 								ctrl->setActive(true);
-								if (_BrowseGroup)
-								{
-									ctrl->setActionOnLeftClick("browse");
-									ctrl->setParamsOnLeftClick("name="+_BrowseGroup->getId()+"|url="+link.Link->Link);
-								}
+								ctrl->setActionOnLeftClick(link.Link->getActionOnLeftClick());
+								ctrl->setParamsOnLeftClick(link.Link->getParamsOnLeftClick());
 								ctrl->setScale(true);
 								addCtrl(ctrl);
 							}
@@ -967,7 +968,7 @@ namespace NLGUI
 		// TEMP TEMP
 		//CViewRenderer &rVR = *CViewRenderer::getInstance();
 		//rVR.drawRotFlipBitmap _RenderLayer, (_XReal, _YReal, _WReal, _HReal, 0, false, rVR.getBlankTextureId(), CRGBA(0,255,0,255) );
-		if (_Over)
+		if (_Over || _TempOver)
 		{
 			CViewRenderer &rVR = *CViewRenderer::getInstance();
 
@@ -1052,7 +1053,10 @@ namespace NLGUI
 
 			_OverElt = -1;
 			if (!isIn(eventDesc.getX(), eventDesc.getY()))
+			{
+				_TempOver = false;
 				return false;
+			}
 
 			for (uint32 i = 0; i < _Elements.size(); ++i)
 			if (_Elements[i].Element->getActive())
@@ -1208,7 +1212,7 @@ namespace NLGUI
 		{
 			// update the list size
 			sint32 newH = _H + child->getH();
-			if (_Elements.size() > 0)
+			if (!_Elements.empty())
 				newH += _Space;
 			_H = newH;
 
@@ -1222,7 +1226,7 @@ namespace NLGUI
 		{
 			// Update the list coords
 			sint32 newW = _W + child->getW();
-			if (_Elements.size() > 0)
+			if (!_Elements.empty())
 				newW += _Space;
 			_W = newW;
 
@@ -1410,7 +1414,7 @@ namespace NLGUI
 			// Get the child width
 			maxWidth += _Elements[k].Element->getMaxUsedW();
 		}
-		return maxWidth;
+		return maxWidth + _MarginLeft;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -1425,7 +1429,7 @@ namespace NLGUI
 			if (width > minWidth)
 				minWidth = width;
 		}
-		return minWidth;
+		return minWidth + _MarginLeft;
 	}
 
 
@@ -1452,7 +1456,7 @@ namespace NLGUI
 
 	void CGroupParagraph::onTextChanged()
 	{
-		if( _Elements.size() == 0 )
+		if( _Elements.empty() )
 			return;
 
 		CElementInfo &e = _Elements[ 0 ];

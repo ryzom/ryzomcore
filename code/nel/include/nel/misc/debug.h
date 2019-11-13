@@ -151,8 +151,8 @@ void	setCrashAlreadyReported(bool state);
  *  Note 2 : To show a warning under GCC, use #warning "Your warning here",
  *           see nel/net/net_manager.h for an example on how to use these correctly.
  */
-#define NL_LOC_MSG __FILE__"("NL_MACRO_TO_STR(__LINE__)") : Message: "
-#define NL_LOC_WRN __FILE__"("NL_MACRO_TO_STR(__LINE__)") : Warning Msg: "
+#define NL_LOC_MSG __FILE__ "(" NL_MACRO_TO_STR(__LINE__) ") : Message: "
+#define NL_LOC_WRN __FILE__ "(" NL_MACRO_TO_STR(__LINE__) ") : Warning Msg: "
 
 
 /**

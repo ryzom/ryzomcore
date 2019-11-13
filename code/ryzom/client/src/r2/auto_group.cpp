@@ -21,6 +21,10 @@
 //
 #include "nel/misc/i18n.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLMISC;
 
 
@@ -264,7 +268,7 @@ void CAutoGroup::group(CObject *newEntityDesc, const NLMISC::CVectorD &createPos
 	else
 	{
 		// other is a standalone entity -> create a new group
-		std::auto_ptr<CObject> newGroup(getEditor().getDMC().newComponent("NpcGrpFeature"));
+		CUniquePtr<CObject> newGroup(getEditor().getDMC().newComponent("NpcGrpFeature"));
 		if (!newGroup.get())
 		{
 			nlwarning("Syntax error in r2_features_npc_group.lua.");

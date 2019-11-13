@@ -136,7 +136,8 @@ uint8 CBitmap::load(NLMISC::IStream &f, uint mipMapSkip)
 	}
 
 #ifdef USE_JPEG
-	if (fileType == JPG_HEADER)
+	// only compare fist word
+	if (memcmp(&fileType, &JPG_HEADER, 2) == 0)
 	{
 #ifdef NEL_ALL_BITMAP_WHITE
 		uint8 result = readJPG(f);
@@ -364,6 +365,51 @@ void	CBitmap::makeOpaque()
 				*data = 255;
 				data += pixelSize;
 			}
+		}
+	}
+}
+
+
+/*-------------------------------------------------------------------*\
+					makeTransparentPixelsBlack
+\*-------------------------------------------------------------------*/
+void	CBitmap::makeTransparentPixelsBlack()
+{
+	if (_Width*_Height == 0) return;
+
+	uint pixelSize;
+
+	switch (PixelFormat)
+	{
+		case RGBA: pixelSize = 4; break;
+		case AlphaLuminance: pixelSize = 2; break;
+		default: return;
+	}
+
+	uint colorsSize = pixelSize - 1;
+
+	for (uint8 m = 0; m < _MipMapCount; ++m)
+	{
+		// get a pointer on original data
+		uint8 *data = _Data[m].getPtr();
+
+		// end of data
+		uint8 *endData = data + _Data[m].size();
+
+		// first alpha
+		data += pixelSize - 1;
+
+		// replace all alpha values by 255
+		while (data < endData)
+		{
+			// fully transparent pixel
+			if (*data == 0)
+			{
+				// make colors black
+				memset(data - colorsSize, 0, colorsSize);
+			}
+
+			data += pixelSize;
 		}
 	}
 }
@@ -1310,10 +1356,14 @@ bool CBitmap::decompressDXT1(bool alpha)
 			{
 				for(k=0; k<4; k++)
 				{
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k]= c[bits&3].R;
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k+1]= c[bits&3].G;
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k+2]= c[bits&3].B;
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k+3]= c[bits&3].A;
+					uint32 index = pixelsCount + (j*wtmp+k)*4;
+					// incase input image does not have proper width/height
+					if (index+3 > mipMapSz) break;
+
+					dataTmp[m][index+0]= c[bits&3].R;
+					dataTmp[m][index+1]= c[bits&3].G;
+					dataTmp[m][index+2]= c[bits&3].B;
+					dataTmp[m][index+3]= c[bits&3].A;
 					bits>>=2;
 				}
 			}
@@ -1420,10 +1470,14 @@ bool CBitmap::decompressDXT3()
 			{
 				for(k=0; k<4; k++)
 				{
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k]= c[bits&3].R;
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k+1]= c[bits&3].G;
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k+2]= c[bits&3].B;
-					dataTmp[m][pixelsCount + j*wtmp*4 + 4*k+3]= alpha[4*j+k];
+					uint32 index = pixelsCount + (j*wtmp+k)*4;
+					// incase input image does not have proper width/height
+					if (index+3 > mipMapSz) break;
+
+					dataTmp[m][index+0]= c[bits&3].R;
+					dataTmp[m][index+1]= c[bits&3].G;
+					dataTmp[m][index+2]= c[bits&3].B;
+					dataTmp[m][index+3]= alpha[4*j+k];
 					bits>>=2;
 				}
 			}
@@ -1556,10 +1610,14 @@ bool CBitmap::decompressDXT5()
 			{
 				for(k=0; k<4; k++)
 				{
-					dataTmp[m][pixelsCount + (j*wtmp+k)*4 +0]= c[bits&3].R;
-					dataTmp[m][pixelsCount + (j*wtmp+k)*4 +1]= c[bits&3].G;
-					dataTmp[m][pixelsCount + (j*wtmp+k)*4 +2]= c[bits&3].B;
-					dataTmp[m][pixelsCount + (j*wtmp+k)*4 +3]= (uint8) alpha[codeAlpha[4*j+k]];
+					uint32 index = pixelsCount + (j*wtmp+k)*4;
+					// incase input image does not have proper width/height
+					if (index+3 > mipMapSz) break;
+
+					dataTmp[m][index+0]= c[bits&3].R;
+					dataTmp[m][index+1]= c[bits&3].G;
+					dataTmp[m][index+2]= c[bits&3].B;
+					dataTmp[m][index+3]= (uint8) alpha[codeAlpha[4*j+k]];
 					bits>>=2;
 				}
 			}
@@ -1792,7 +1850,7 @@ void CBitmap::releaseMipMaps()
 \*-------------------------------------------------------------------*/
 void CBitmap::resample(sint32 nNewWidth, sint32 nNewHeight)
 {
-	nlassert(PixelFormat == RGBA || PixelFormat == Luminance);
+	nlassert(PixelFormat == RGBA || PixelFormat == Luminance || PixelFormat == AlphaLuminance);
 	bool needRebuild = false;
 
 	// Deleting mipmaps
@@ -1831,6 +1889,58 @@ void CBitmap::resample(sint32 nNewWidth, sint32 nNewHeight)
 
 		resamplePicture8 (&_Data[0][0], pDestGray, _Width, _Height, nNewWidth, nNewHeight);
 		//logResample("Resample: 60");
+	}
+	else if (PixelFormat == AlphaLuminance)
+	{
+		pDestui.resize(nNewWidth*nNewHeight*2);
+
+		uint16 *pSrc = (uint16*)&_Data[0][0];
+		uint16 *pDest = (uint16*)&pDestui[0];
+
+		size_t srcSize = _Width*_Width;
+		uint8 *pSrcGray = new uint8[srcSize];
+		uint8 *pSrcAlpha = new uint8[srcSize];
+
+		// set iterators
+		uint16 *i = (uint16*)pSrc;
+		uint16 *iEnd = (uint16*)i + srcSize;
+		uint8 *iGray = pSrcGray;
+		uint8 *iAlpha = pSrcAlpha;
+
+		// copy alpha and gray in distinct arrays
+		while (i < iEnd)
+		{
+			*(iGray++) = (*i) & 0xff;
+			*(iAlpha++) = ((*i) >> 8) & 0xff;
+			++i;
+		}
+
+		size_t destSize = nNewWidth*nNewHeight;
+
+		// resample gray values array
+		uint8 *pDestGray = new uint8[destSize];
+		resamplePicture8(pSrcGray, pDestGray, _Width, _Height, nNewWidth, nNewHeight);
+		delete[] pSrcGray;
+
+		// resample alpha values array
+		uint8 *pDestAlpha = new uint8[destSize];
+		resamplePicture8(pSrcAlpha, pDestAlpha, _Width, _Height, nNewWidth, nNewHeight);
+		delete[] pSrcAlpha;
+
+		// set iterators
+		i = (uint16*)pDest;
+		iEnd = (uint16*)i + destSize;
+		iGray = pDestGray;
+		iAlpha = pDestAlpha;
+
+		// merge alpha and gray in destination array
+		while (i < iEnd)
+		{
+			*(i++) = *(iGray++) | (*(iAlpha++) << 8);
+		}
+
+		delete[] pDestGray;
+		delete[] pDestAlpha;
 	}
 
 	NLMISC::contReset(_Data[0]); // free memory
@@ -2148,7 +2258,7 @@ void CBitmap::resamplePicture32Fast (const NLMISC::CRGBA *pSrc, NLMISC::CRGBA *p
 
 
 /*-------------------------------------------------------------------*\
-							resamplePicture32
+							resamplePicture8
 \*-------------------------------------------------------------------*/
 void CBitmap::resamplePicture8 (const uint8 *pSrc, uint8 *pDest,
 								 sint32 nSrcWidth, sint32 nSrcHeight,
@@ -3106,11 +3216,17 @@ bool CBitmap::blit(const CBitmap *src, sint32 x, sint32 y)
 // Private :
 float CBitmap::getColorInterp (float x, float y, float colorInXY00, float colorInXY10, float colorInXY01, float colorInXY11) const
 {
+	if (colorInXY00 == colorInXY10
+		&& colorInXY00 == colorInXY01
+		&& colorInXY00 == colorInXY11)
+		return colorInXY00; // Fix rounding error for alpha 255...
+
 	float res =	colorInXY00*(1.0f-x)*(1.0f-y) +
 				colorInXY10*(     x)*(1.0f-y) +
 				colorInXY01*(1.0f-x)*(     y) +
 				colorInXY11*(     x)*(     y);
-	clamp (res, 0.0f, 255.0f);
+	clamp(res, 0.0f, 255.0f);
+
 	return res;
 }
 
@@ -4406,6 +4522,20 @@ CRGBA CBitmap::getPixelColor(sint x, sint y, uint32 numMipMap /*=0*/) const
 	return CRGBA::Black;
 }
 
+//-----------------------------------------------
+void  CBitmap::setPixelColor(sint x, sint y, CRGBA c, uint32 numMipMap)
+{
+	nlassert(PixelFormat == RGBA);
+
+	uint w = getWidth(numMipMap);
+	uint h = getHeight(numMipMap);
+
+	if (w == 0 || x < 0 || y < 0 || x >= (sint)w || y >= (sint)h) return;
+
+	uint8 *pix = &getPixels(numMipMap)[(x + y * w) << 2];
+
+	memcpy(pix, &c, sizeof(CRGBA));
+}
 
 //-----------------------------------------------
 void CBitmap::swap(CBitmap &other)

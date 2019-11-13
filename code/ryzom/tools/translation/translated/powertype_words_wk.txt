@@ -1,0 +1,32 @@
+﻿*HASH_VALUE	powerType	name	ia	da	p	pia	pda	description
+_6DCA609CECFAD8BE	Taunt	Taunt	a	the			the	
+_2AB8588D6969889E	Shielding	Shielding	a	the			the	
+_2BE5F07BA6C9808C	SpeedingUp	Speeding-Up	a	the			the	
+_FE6D75A5685A44B3	MeditationLife	Meditation Life	a	the			the	
+_F0CD0E578A5F7D25	MeditationStamina	Meditation Stamina	a	the			the	
+_2798390098D998C1	MeditationSap	Meditation Sap	a	the			the	
+_872EA1EBE6FB53A8	ConvertStamina	Convert Stamina	a	the			the	
+_29D9CF7D27CAE486	ConvertSap	Convert Sap	a	the			the	
+_29CC88822D49149E	Berserk	Berserk	a	the			the	
+_25797465A52B0007	LifeAura	Life Aura	a	the			the	
+_AC84C0AA1F379CBA	StaminaAura	Stamina Aura	a	the			the	
+_61B6EC98A877F4B3	SapAura	Sap Aura	a	the			the	
+_FD34B2AD8A847302	Umbrella	Range Protection Aura	an	the			the	Makes you and your teammates invulnerable to range attacks.
+_92F0C1BB89BC5683	MeleeProtection	melee protection aura	a	the			the	Makes you and your teammates invulnerable to melee attacks.
+_861BFEEC2099F545	AntiMagicShield	Anti Magic Shield Aura	an	the			the	Makes you and your teammates invulnerable to magic attacks.
+_8758671230A5AB28	Invulnerability	Invulnerability	an	the			the	Makes you invulnerable but you cannot use actions.
+_29AB5F80EF88004E	FireWall	fire wall aura	a	the			the	
+_D8C8F48265958CB5	ThornWall	thorn wall aura	a	the			the	
+_D7A9E48525959CAC	WaterWall	water wall aura	a	the			the	
+_F0BE55DDA9AB7D23	LightningWall	lightning wall aura	a	the			the	
+_1D5ABBA0DE1B6FB4	WarCry	war cry	a	the			the	
+_ABB88C82DEB650A9	Heal	heal	a	the			the	
+_2305443A60C86CAF	BalanceHp	Balance HP	a	the			the	
+_B6604DDCE6C6ACA1	ChgCharac	boost characteristic	a	the			the	
+_16F116141048A371	ModMagicProtection	modificateur de protection	un	le	modificateurs de protections	des	les	modifie la valeur de vos protections magiques.
+_3A7CADB6DF38F847	ModDefense	modificateur de taux de succès de défense	un	le	modificateurs de taux de succès de défense	des	les	modifie vos chances de réussite d'action de défense
+_A25E08467860F1F2	ModCraftSuccess	modificateur de succès d'artisannat	un	le	modificateurs de succès d'artisannat	des	les	modifie vos chances de réussite de vos actions d'artisannat
+_24BA6F597234C2DA	ModMeleeSuccess	modificateur de succès d'action de combat au corps à corps	un	le	modificateurs de succès d'action de combat au corps à corps	des	les	modifie vos chances de réussite de vos actions de combat au corps à corps
+_8F7EEBA94B68D5F8	ModRangeSuccess	modificateur de succès d'action de combat à distance	un	le	modificateurs de succès d'action de combat à distance	des	les	modifie vos chances de réussite de vos actions de combat à distance
+_9CAFEDAD47AFE1C5	ModMagicSuccess	modificateur de succès d'action de magie	un	le	modificateurs de succès d'action de magie	des	les	modifie vos chances de réussite de vos actions de magie
+_A043E58C54A010EF	ModForageSuccess	modificateur de succès d'action de forage	un	le	modificateurs de succès d'action de forage	des	les	modifie vos chances de réussite de vos actions de forage

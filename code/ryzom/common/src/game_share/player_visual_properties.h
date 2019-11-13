@@ -82,7 +82,7 @@ struct SPropVisualA
 
 	bool operator != ( const SPropVisualA& p ) const { return PropertyA != p.PropertyA; }
 
-	void serial (NLMISC::IStream &f) throw (NLMISC::EStream)
+	void serial (NLMISC::IStream &f)
 	{
 		f.serial( PropertyA );
 	}
@@ -132,7 +132,7 @@ struct SPropVisualB
 
 	bool operator != ( const SPropVisualB& p ) const { return PropertyB != p.PropertyB; }
 
-	void serial (NLMISC::IStream &f) throw (NLMISC::EStream)
+	void serial (NLMISC::IStream &f)
 	{
 		f.serial( PropertyB );
 	}
@@ -200,7 +200,7 @@ struct SPropVisualC
 
 	bool operator != ( const SPropVisualC& p ) const { return PropertyC != p.PropertyC; }
 
-	void serial (NLMISC::IStream &f) throw (NLMISC::EStream)
+	void serial (NLMISC::IStream &f)
 	{
 		f.serial( PropertyC );
 	}
@@ -286,7 +286,7 @@ struct SAltLookProp
 	//@}
 
 	// Serial
-	void serial (NLMISC::IStream &f) throw (NLMISC::EStream)
+	void serial (NLMISC::IStream &f)
 	{
 		f.serial( Summary );
 	}
@@ -321,7 +321,7 @@ struct SAltLookProp2
 	//@}
 
 	// Serial
-	void serial (NLMISC::IStream &f) throw (NLMISC::EStream)
+	void serial (NLMISC::IStream &f)
 	{
 		f.serial( Summary );
 	}

@@ -28,6 +28,8 @@
 #include "nel/3d/shadow_map_manager.h"
 #include "nel/3d/u_scene.h"
 #include "nel/3d/vertex_program.h"
+#include "nel/3d/transform.h"
+
 #include <vector>
 
 

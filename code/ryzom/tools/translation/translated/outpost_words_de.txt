@@ -1,0 +1,714 @@
+﻿*HASH_VALUE	outpost ID	name	description
+_5B321558ABD3F7D2	fyros_outpost_04.outpost	Malmont-Hof	Dieser Außenposten wurde 2489 gegründet\n Herausforderung für Gilden mit einem Expertenrang\n Die Aufmerksamkeit dieses Außenpostens südlich vom Malmont und dem Drachenschwanz konzentrierte sich schon immer auf die Minenressourcen der gefahrvollen Region. Teile der Ressourcen wurden früher nach Dyron und zu den beiden nahe gelegenen Werkstätten gebracht. Das restliche Material wurde mit einer schwerbewaffneten Eskorte bis nach Pyr transportiert. 
+_50ED8AA90BF8EFF5	fyros_outpost_09.outpost	Hochtürme-Hof	Dieser Außenposten wurde 2491 gegründet\n Herausforderung für Gilden mit einem fortgeschrittenen Rang\n Der Betrieb des Außenpostens entwickelte sich ursprünglich unter dem Einfluss der Frahar-Jäger, die die Ressourcen der Gegend verwerten wollten. Durch häufige Patrouillen von Kriegern dieses Stammes wurde die Förderung weitgehend gesichert, und es ermöglichte den Rohstoffabbauern, hier ihrer Beschäftigung ohne Angst vor Angriffen nachzugehen.
+_53FC998C546B1C65	fyros_outpost_13.outpost	West-Schwarzbrand-Grenzposten	Dieser Außenposten wurde 2490 gegründet\n Herausforderung für Gilden mit einem bestätigten Rang\n Der Außenposten wurde auf einem Nexus am Rande des Flammenden Waldes errichtet und wurde früher genutzt, um die lodernden Feuer des Waldes stets im Auge zu behalten, damit eine Ausbreitung auf die Oasenregion verhindert werden konnte. Für die Soldaten des Imperiums war es eine Ehre, hier an der Westfront zu dienen. 
+_89C748F535AAF4B7	fyros_outpost_14.outpost	Schwarzbrand-Handelsposten	Dieser Außenposten wurde 2489 gegründet\n Herausforderung für Gilden mit einem Lehrlingsrang\n Hier war eine der ersten Außenposten-Gründungen und Treffpunkte in der Brennenden Wüste. Reisende aus dem Süden machten regelmäßig Halt, um sich auszuruhen und Geschäfte abzuschließen, ehe sie die Hauptstadt erreichten. Der Name des Außenpostens wurde vom Flammenden Wald abgeleitet, der südwestlich liegt. 
+_6BA8D5A58D8A1A4E	fyros_outpost_25.outpost	Hof der Entlegenen Dünen	Dieser Außenposten wurde 2490 gegründet\n Herausforderung für Gilden mit einem Expertenrang\n Der Nexus hier im Süden der Region, auf dem dieser Außenposten errichtet wurde, wurde zuerst von den Kamis als entdeckt, und sorgte für einen Streit zwischen den Autoritäten von Pyr und einigen Fyros-Clans, die sich weigerten, dem Imperium Treue zu schwören. Ein hoher Tribut musste gezahlt werden, bis die Anführer der Barbaren die Existenz des Hofes endlich tolerierten. 
+_CA34A30E77B90623	fyros_outpost_27.outpost	Magischer Ort am Holzbrand	Dieser Außenposten wurde 2490 gegründet\n Herausforderung für Gilden mit einem Meisterrang\n Der Außenposten hier im Herzen des Flammenden Waldes wurde einst von imperialen Elementarmagiern kontrolliert, die danach strebten, sich die Macht des Feuers zu Nutze zu machen. Dank der Experimente, die die Magier durchführten, entstanden neue Magiesprüche und verhalfen den magischen Künsten in der Fyros-Gesellschaft zum Status einer wertvollen Kriegskunst. 
+_BDE3EE74BFBEBE61	fyros_outpost_28.outpost	Holzbrand-Festung	Dieser Außenposten wurde 2491 gegründet\n Herausforderung für Gilden mit einem Meister-Rang\n Der Außenposten wurde ursprünglich auf Befehl von Regentin Leanon hin befestigt. Er schützte einst den Flammenden Wald vor Plünderern und Feinden des Imperiums. Als der Außenposten bemannt war, musste die Garnison, die für seine Verteidigung zuständig war, regelmäßig gegen den Stamm der Enthäuteten kämpfen - Magier, die an die Quelle des verzauberten Feuers wollten. 
+_FD20D1D4049E722D	tryker_outpost_06.outpost	Grünes Tal - Handelsposten	Dieser Außenposten wurde 2489 gegründet\n Herausforderung für Gilden mit einem Lehrlingsrang\n In ein kleines geschütztes Tal mit Bäumen und Felsen westlich von Fairhaven eingebettet, entwickelte sich schnell reger Handel auf diesem Außenposten, insbesonder mit dem Dorf Windermeer. Jedoch wurde er häufig von Banditen angegriffen. 
+_5B18CB8946250B0A	tryker_outpost_10.outpost	Quellhalle-Handelsposten	Dieser Außenposten wurde 2486 gegründet\n Herausforderung für Gilden mit einem fortgeschrittenen Rang\n Der Stamm der Schmuggler betrieb hier als erstes Handel. Die Handelsgilden der Tryker-Föderation versuchten mehrmals, die Transaktionen zu kontrollieren, die in der Region über die Bühne gingen, doch das blieb erfolglos. Es war ein verbreiteter Spruch, dass man in Quellhalle alles finden könne, auch das Unmögliche. 
+_4EFEA1E7C0439509	tryker_outpost_16.outpost	Friedhofspforte-Forschungszentrum	Dieser Außenposten wurde 2489 gegründet\n Herausforderung für Gilden mit einem Expertenrang\n Als ein Rohstoffabbauer eigenartige Knochen in der Nähe dieses Außenpostens fand, wurden sie von Wissenschaftlern der Föderation untersucht. Sie konnten die Herkunft der Knochen nicht bestimmen. Ein Forschungszentrum wurde hier eingerichtet, trotz des Protests der Gischtläufer, die nicht begeistert waren, Unmengen an Bohrern in der Gegend um den Friedhofsweg auftauchen zu sehen. Sie sahen das Gebiet als heilig an, da es sich um einen rituellen Pfad zum Friedhof des Stammes handelte. 
+_D8762257F536008A	tryker_outpost_22.outpost	Zwillingsgipfel-Werkstatt	Dieser Außenposten wurde 2487 gegründet\n Herausforderung für Gilden mit einem Expertenrang\n Hier wurde einst eine Werkstatt gegründet, die unter dem Einfluss eines reichen Tryker-Handwerkers wuchs. Ein Skandal brach aus, als bekannt wurde, dass er seinen Reichtum einer engen Zusammenarbeit mit dem Stamm der Sklaventreiber zu verdanken hatte. Der Handwerker wurde festgenommen und der Außenposten wurde ab da von einer föderalen Gilde geführt. 
+_B11ACD519839AD43	tryker_outpost_24.outpost	Weg der Winde - Werkstatt	Dieser Außenposten wurde 2484 gegründet\n Herausforderung für Gilden mit einem bestätigten Rang\n Der Außenposten hier wurde um den ersten großen Trepan herum errichtet, den der Karavan in den Neuen Landen installierte. Dank jener von Jena gesegneten Maschine waren die Handwerker der Lehmbildhauer unter den ersten, die mit den neuen Materialien aus den Tiefen von Atys experimentierten. Sie waren die Vorläufer für den Handwerks-Markt mit Außenposten-Ressourcen. 
+_D35FE6C01736C84C	tryker_outpost_29.outpost	Lorias Festung	Dieser Außenposten wurde 2490 gegründet\n Herausforderung für Gilden mit einem Meisterrang\n Nachdem hier ein großer Trepan installiert worden war, wurde dieser Außenposten von den Lagunenbrüdern angegriffen, die die wertvollen Ressourcen an sich nahmen, welche der Bohrer abgebaut hatte. Ein Regiment der föderalen Armee wurde entsandt, um den Außenposten zurückzuerobern. Die Soldaten besiegten die Piraten und errichteten danach an diesem Ort eine Festung, die sie Loria widmeten, der berühmten Tryker-Heldin.
+_14719DD3A0341BBF	tryker_outpost_31.outpost	Wirbelwind-Festung	Dieser Außenposten wurde 2489 gegründet\n Herausforderung für Gilden mit einem Meisterrang\n Durch seine strategische Lage in der Nähe des Wirbels zu den Seen der Freiheit war dieser Außenposten lange ein beliebtes Angriffsziel von Banditen und Piraten, die in den Lagunen von Loria herumlungerten. Es kam oft zu Auseinandersetzungen vor den Befestigungen. 
+_A8E93FA99BDB4436	zorai_outpost_02.outpost	Gu-Qin-Werkstatt	Dieser Außenposten wurde 2490 gegründet\n Herausforderung für Gilden mit Expertenrang\n Hier entstand einst eine Werkstatt, die sich unter dem Einfluss eines Zoraï-Handwerkers namens Gu-Qin entwickelte, der beschlossen hatte, dem Goo die Stirn zu bieten. Doch unglücklicherweise wurde er von der violetten Seuche infiziert. Trotz der Fürsorge seiner Lehrlinge verfiel er dem Wahnsinn. Eines Nachts im Winter verschwand er. Bis zum Verlassen des Außenpostens ein paar Jahre später schworen die Handwerker dort, der Dschungelwind hätte ihnen zuweilen das verrückte Gelächter von Gu-Qin zu Ohren getragen. 
+_CAD14424711A6CBD	zorai_outpost_08.outpost	Qai-Du-Werkstatt	Dieser Außenposten wurde 2490 gegründet\n Herausforderung für Gilden mit Lehrlingsrang\n Hier wurde einst eine Werkstatt vom Meisterjuwelier Qai-Du gegründet, einem gefeierten Mitglied des Stammes der Ikonenschnitzer. Sein Wissen und seine Frömmigkeit trugen viel zur Anerkennung der Zoraï-Handwerkstätigkeiten bei den Traditionalisten bei, die das Anfertigen von profanen Gegenständen lange als reine Zeitverschwendung angesehen hatten. 
+_9AF53CB170CAA29D	zorai_outpost_10.outpost	Sai-Shun-Festung	Dieser Außenposten wurde 2490 gegründet\n Herausforderung für Gilden mit bestätigtem Rang\n Inmitten des jungfräulichen Wäldchens errichtet, war die Festung Sai-Shun an vorderster Front im Kitinbekämpfungs-Feldzug, der 2490 begann. General Sai-Shun ließ sich auf dem Außenposten nieder und schwor, die Gegend nicht zu verlassen, ehe die Bedrohung durch den Großen Schwarm nachgelassen habe. Er hielt Wort und kämpfte zwei Jahre lang an der Seite des Ordens der Bruderschaft, zusammengesetzt aus Homins aller Länder. 
+_E344209D01FD73B5	zorai_outpost_15.outpost	Zo-Kian Ruinen - Werkstatt	Dieser Außenposten wurde 2492 gegründet\n Herausforderung für Gilden mit Meisterrang\n Südwestlich von hier liegen die Ruinen von Zo-Kian; einst ein kleines Dorf, das von Zoraï-Jägern errichtet worden war. Die Jäger verfolgten Gibbaïs, die es zu jener Zeit in diesem Teil des Dschungels in großer Zahl gab, und sie machten sich über ihr Volk lustig, das glaubte, es würde Unglück bringen, diese Wesen zu töten, die Homins so ähnelten. Eines Nachts wurde das Dorf von unbekannten Horden angegriffen und vollständig zerstört. Jahre später fanden Entdecker weiterentwickelte Gibbaïs in der Region. Viele nahmen nun an, dass diese für das Ende von Zo-Kian verantwortlich waren und damit auf Angriffe der Jäger reagiert hatten. 
+_A9B1E17037E0BF79	zorai_outpost_16.outpost	Vergessenes Tal - Festung	Dieser Außenposten wurde 2491 gegründet\n Herausforderung für Gilden mit einem Meisterrang\n Dieser Posten wurde nach wiederholten Attacken Goo-infizierter Tiere befestigt. Infektionsherde wurden im Nordwesten, im Verlorenen Tal, entdeckt. Es wurden mehrere Expeditionen entsandt, um diese zu zerstören, doch ohne Erfolg. Als der Baumbohrer des Außenpostens durch eine Infektion mit der violetten Seuche zu verwelken begann, läutete dies den Verfall der einst so starken Festung ein.
+_E897424AD4725452	zorai_outpost_22.outpost	Diplomatischer Außenposten der Dämonenkreuzung	Dieser Außenposten wurde 2492 gegründet\n Herausforderung für Gilden mit fortgeschrittenem Rang\n Kurz nach der Installation eines Baumbohrers auf diesem Außenposten zogen die kamistischen Aktivitäten einen Dschungeldämon an, der in der Umgebung umherzog. Er schäumte vor Zorn, denn er war siech vom Goo. Ein Zoraï-Weiser, Mitglied der Gemeinschaft des Ewigen Baumes, fand ihn und heilte seine Krankheit. Der Dämon verwandelte sich in ein leuchtendes Wesen, der den Zoraï segnete, der zu einem Erleuchteten unter Erleuchteten wurde. Nach diesem Wunder entwickelte sich der Außenposten zu einem Treffpunkt für Kamisten der ganzen Region.
+_0F508D96CC6A8DA7	zorai_outpost_29.outpost	Werkstatt des Großen Buschlandes	Dieser Außenposten wurde 2491 gegründet\n Herausforderung für Gilden mit Expertenrang\n Die Nutzung dieses Außenpostens in der Wüstenregion des Knoten der Demenz wurde von Cardarus Vekian begonnen, einem Fyros-Feuerwaffenschmied. Dank der nur spärlichen Vegetation konnte der Handwerker die auf Feuer beruhenden Techniken seines Volkes anwenden, ohne eine Feuersbrunst zu entfachen. Obwohl die Händler aus Zora anfangs besorgt waren, interessierten sie sich bald doch für die Arbeit des Fyros. Vekian wurde ein bekannter Handwerker in den verdorrenden Landen und viele Zoraï-Krieger waren stolz, Waffen aus seiner Schmiede zu tragen.
+_6FE48772D9E253F3	matis_outpost_03.outpost	Hof am Gefürchteten Sumpf	Dieser Außenposten wurde 2492 gegründet\n Herausforderung für Gilden mit Expertenrang\n In der Nähe des gefürchteten Sumpfes gegründet, konzentrierte sich der Außenposten auf den Rohstoffabbau und auf das Säubern der Goo-infizierten Sümpfe. Es kam zu Auseinandersetzungen mit dem Stamm der Ökokrieger, als diese herausfanden, dass das verseuchte Material nicht zerstört, sondern nach Yrkanis oder in den Südosten gesandt wurde, um verschiedene Experimente damit durchzuführen. Daraufhin beschuldigten sie die Matis, Goo zu verbreiten. Die königlichen Forscher dementierten diese Beschuldigungen kategorisch und beteuerten, es werde alles daran gesetzt, um Infektionen zu vermeiden.
+_640FA7D9C6414BD7	matis_outpost_07.outpost	Hof des Entdeckers	Dieser Außenposten wurde 2491 gegründet\n Herausforderung für Gilden mit einem bestätigten Rang\n Ein Matis-Gelehrter, der auf der Suche nach göttlicher Eingebung war, beschloss, sich auf dem Außenposten niederzulassen, um vom großen Trepan zu profitieren und sich Zugang zu den seltenen Materialien zu verschaffen, die der Göttin heilig sind. Er führte zahlreiche Experimente durch und entdeckte dabei ein neues Bohrpulver, durch das mehrere Quellen gleichzeitig aus dem Boden geschossen kamen. Der Außenposten wurde zum Treffpunkt für Rohstoffabbauer, die dieses Wunderpulver ausprobieren wollten. 
+_D6CD5001FB9E622C	matis_outpost_15.outpost	Handelsposten am Psykopla-Hügel	Dieser Außenposten wurde 2491 gegründet\n Herausforderung für Gilden mit einem Lehrlingsrang\n Durch eine kleine Händlergilde entstand ein Handelsplatz auf diesem Außenposten. Anfangs betrieben viele Rohstoffabbauer Tauschhandel mit ihrem Material an diesem Ort, wo der Karavan einen großen Trepan errichtete. Ein Tryker-Hausierer hatte die Idee, dort eine Struktur einzurichten, um den Tauschhandel zu vereinfachen, und das gegen eine geringe Kommission. Er gründete eine Gilde mit Matis-Händlern, deren Geschäft dort florierte. 
+_DCD910ED7E62A2C2	matis_outpost_17.outpost	Wooky-Werkstatt	Dieser Außenposten wurde 2490 gegründet\n Herausforderung für Gilden mit einem fortgeschrittenen Rang\n Hier neben einem Portal zu den Tiefen der Urwurzeln war eine Werkstatt errichtet worden. Dies war der erste Außenposten der grünen Anhöhen. Der Name ("Wooky" heißt "Erwachen") spielt auf eine Zeit an, in der das Matis-Volk begann, intensiven Tätigkeiten nachzugehen, wie der Errichtung von Außenposten, dem Führen von Schlachten gegen die Kitins und dem Anlegen neuer Handelsstraßen. 
+_34B4FC4C6451CC84	matis_outpost_24.outpost	Westwald-Festung	Dieser Außenposten wurde 2492 gegründet\n Herausforderung für Gilden mit einem Meisterrang\n Hier in den bewaldeten Tiefen des Kapwaldes war ein alter Außenposten errichtet worden. Er wurde befestigt, um den Stamm der Dryaden zu bekämpfen, fanatische Homins, die sich als Beschützer der Pflanzen ansehen. Viele Matis-Botaniker, die von den Dryaden beschuldigt wurden, die Atysianische Flora zu quälen, fanden durch die Hände der Dryaden ihr Ende. 
+_0C19BCC74DB35B36	matis_outpost_27.outpost	Ginti-Werkstatt	Dieser Außenposten wurde 2491 gegründet\n Herausforderung für Gilden mit einem Meisterrang\n Sevalda Ginti, Bravichi Lenardis Schülerin, war eine der renommiertesten Matis-Botaniker des 25. Jahrhunderts. Als der Karavan große Trepane im Kapwald errichtete, verließ Sevalda Ginti das Gewächshaus von Yrkanis, um im dichten Wald zu arbeiten. Sie stellte viele Nachforschungen an und perfektionierte die Rüstungsherstellung dank ihrer Entdeckungen in Bezug auf Harze. Schließlich verschwand sie unter mysteriösen Umständen. 
+_F1B1343B89EF309D	matis_outpost_30.outpost	Berello-Schlucht-Grenzposten	Dieser Außenposten wurde 2491 gegründet\n Herausforderung für Gilden mit einem Expertenrang\n Unter dem Kommando des Matis-Hauptmanns Arcando Berello wurde dieser Grenzposten befestigt. Er war der Schauplatz zahlreicher Auseinandersetzungen mit dem Stamm der Wüstenplünderer. Es stand viel auf dem Spiel, denn wer auch immer die Kontrolle über den Außenposten übernehmen würde, besäße damit auch die Kontrolle über den Durchgang zwischen den Oasen im Norden und den Plateaus im Süden der Region. Berello bewies Hartnäckigkeit und taktische Fähigkeit, sodass sogar die barbarischen Fyros ihren Feind zu respektieren lernten.
+_431F0D331FF1DD57	marauder_light_melee_fighter_b.outpost_squad	Marodeur-Kriegertruppe	
+_431F0D331FF1E157	marauder_light_melee_fighter_c.outpost_squad	Marodeur-Kriegertruppe	
+_431F0D331FF1E557	marauder_light_melee_fighter_d.outpost_squad	Marodeur-Kriegertruppe	
+_431F0D331FF1E957	marauder_light_melee_fighter_e.outpost_squad	Marodeur-Kriegertruppe	
+_431F0D331FF1ED57	marauder_light_melee_fighter_f.outpost_squad	Marodeur-Kriegertruppe	
+_243AE24310D10D5D	marauder_light_range_fighter_b.outpost_squad	Marodeur-Fernkampftruppe	
+_243AE24310D1115D	marauder_light_range_fighter_c.outpost_squad	Marodeur-Fernkampftruppe	
+_243AE24310D1155D	marauder_light_range_fighter_d.outpost_squad	Marodeur-Fernkampftruppe	
+_243AE24310D1195D	marauder_light_range_fighter_e.outpost_squad	Marodeur-Fernkampftruppe	
+_243AE24310D11D5D	marauder_light_range_fighter_f.outpost_squad	Marodeur-Fernkampftruppe	
+_302F323E1AB2D6B3	marauder_light_mixed_fighter_b.outpost_squad	Marodeur-Kampftruppe	
+_302F323E1AB2DAB3	marauder_light_mixed_fighter_c.outpost_squad	Marodeur-Kampftruppe	
+_302F323E1AB2DEB3	marauder_light_mixed_fighter_d.outpost_squad	Marodeur-Kampftruppe	
+_302F323E1AB2E2B3	marauder_light_mixed_fighter_e.outpost_squad	Marodeur-Kampftruppe	
+_302F323E1AB2E6B3	marauder_light_mixed_fighter_f.outpost_squad	Marodeur-Kampftruppe	
+_CA7E8470D81A655E	free_squad_light_melee_fighter_b.outpost_squad	Milizentruppe	Eine Truppe von acht Söldnern, die aus Kämpfern und Heilern besteht, die mit schnellen Waffen und leichten Rüstungen ausgerüstet sind. 
+_EA0D947415F96160	free_squad_light_melee_fighter_c.outpost_squad	Milizentruppe	Eine Truppe von acht Söldnern, die aus Kämpfern und Heilern besteht, die mit schnellen Waffen und leichten Rüstungen ausgerüstet sind. 
+_0EDB1B3AD99DEBE8	free_squad_light_melee_fighter_d.outpost_squad	Milizentruppe	Eine Truppe von acht Söldnern, die aus Kämpfern und Heilern besteht, die mit schnellen Waffen und leichten Rüstungen ausgerüstet sind. 
+_0EDB4543550E13E4	free_squad_light_melee_fighter_e.outpost_squad	Milizentruppe	Eine Truppe von acht Söldnern, die aus Kämpfern und Heilern besteht, die mit schnellen Waffen und leichten Rüstungen ausgerüstet sind. 
+_0EDB094359F5B7EC	free_squad_light_melee_fighter_f.outpost_squad	Milizentruppe	Eine Truppe von acht Söldnern, die aus Kämpfern und Heilern besteht, die mit schnellen Waffen und leichten Rüstungen ausgerüstet sind. 
+_AEFD62A80D8439DC	outpost_squad_light_melee_fighter_b.outpost_squad	Kampftruppe	Eine Truppe von acht Lehrlingssöldnern mit Kämpfern und zwei Heilern, die mit schnellen Waffen und leichten Rüstungen ausgerüstet sind. 
+_2E1546AC0EC331DB	outpost_squad_light_melee_fighter_c.outpost_squad	Kampftruppe	Eine Truppe von acht bestätigten Söldnern mit Kämpfern und zwei Heilern, die mit schnellen Waffen und leichten Rüstungen ausgerüstet sind. 
+_916FBA4FBDE5DA3D	outpost_squad_light_melee_fighter_d.outpost_squad	Kampftruppe	Eine Truppe von acht erfahrenen Söldnern mit Kämpfern und zwei Heilern, die mit schnellen Waffen und leichten Rüstungen ausgerüstet sind. 
+_907FBADAFFF4F647	outpost_squad_light_melee_fighter_e.outpost_squad	Kampftruppe	Eine Truppe von acht Expertensöldnern mit Kämpfern und zwei Heilern, die mit schnellen Waffen und leichten Rüstungen ausgerüstet sind. 
+_928FBACBFFE5F030	outpost_squad_light_melee_fighter_f.outpost_squad	Kampftruppe	Eine Truppe von acht Meistersöldnern mit Kämpfern und zwei Heilern, die mit schnellen Waffen und leichten Rüstungen ausgerüstet sind. 
+_DA9562D33825667D	outpost_squad_medium_melee_fighter_b.outpost_squad	Kampftruppe	Eine Truppe von acht Lehrlingssöldnern bestehend aus Kämpfern in mittleren Rüstungen, die mit leichten Waffen und teilweise mit einem Schild ausgerüstet sind, sowie einem Heiler.
+_99846A5376667671	outpost_squad_medium_melee_fighter_c.outpost_squad	Kampftruppe	Eine Truppe von acht bestätigten Söldnern bestehend aus Kämpfern in mittleren Rüstungen, die mit leichten Waffen und teilweise mit einem Schild ausgerüstet sind, sowie einem Heiler.
+_C8A275AF3AE0C006	outpost_squad_medium_melee_fighter_d.outpost_squad	Kampftruppe	Eine Truppe von acht erfahrenen Söldnern bestehend aus Kämpfern in mittleren Rüstungen, die mit leichten Waffen und teilweise mit einem Schild ausgerüstet sind, sowie einem Heiler.
+_CA4365AF3A89E4F7	outpost_squad_medium_melee_fighter_e.outpost_squad	Kampftruppe	Eine Truppe von acht Expertensöldnern bestehend aus Kämpfern in mittleren Rüstungen, die mit leichten Waffen und teilweise mit einem Schild ausgerüstet sind, sowie einem Heiler.
+_A9D285AF3A98E406	outpost_squad_medium_melee_fighter_f.outpost_squad	Kampftruppe	Eine Truppe von acht Meistersöldnern bestehend aus Kämpfern in mittleren Rüstungen, die mit leichten Waffen und teilweise mit einem Schild ausgerüstet sind, sowie einem Heiler.
+_31917ACDA8B6D507	outpost_squad_heavy_melee_fighter_b.outpost_squad	Truppe von schweren Kämpfern	Eine Truppe von acht Lehrlingssöldnern, die aus Kämpfern mit schweren Rüstungen und Zweihandwaffen, sowie einem Heiler besteht. 
+_74E072CC28BEB902	outpost_squad_heavy_melee_fighter_c.outpost_squad	Truppe von schweren Kämpfern	Eine Truppe von acht bestätigten Söldnern, die aus Kämpfern mit schweren Rüstungen und Zweihandwaffen, sowie einem Heiler besteht. 
+_5F9729077C762AA3	outpost_squad_heavy_melee_fighter_d.outpost_squad	Truppe von schweren Kämpfern	Eine Truppe von acht erfahrenen Söldnern, die aus Kämpfern mit schweren Rüstungen und Zweihandwaffen, sowie einem Heiler besteht. 
+_A1B645117B762A2E	outpost_squad_heavy_melee_fighter_e.outpost_squad	Truppe von schweren Kämpfern	Eine Truppe von acht Expertensöldnern, die aus Kämpfern mit schweren Rüstungen und Zweihandwaffen, sowie einem Heiler besteht. 
+_A1B73FFA7D762A1F	outpost_squad_heavy_melee_fighter_f.outpost_squad	Truppe von schweren Kämpfern	Eine Truppe von acht Meistersöldnern, die aus Kämpfern mit schweren Rüstungen und Zweihandwaffen, sowie einem Heiler besteht. 
+_2B09BFC50EF80C5E	outpost_squad_tank_b.outpost_squad	Truppe von Beschützern	Eine Truppe von acht Lehrlingssöldnern, die aus Kämpfern mit schweren Rüstungen und leichten Waffen und Schilden, sowie einem Heiler besteht. 
+_2A29C1BE0F38DC5C	outpost_squad_tank_c.outpost_squad	Truppe von Beschützern	Eine Truppe von acht bestätigten Söldnern, die aus Kämpfern mit schweren Rüstungen und leichten Waffen und Schilden, sowie einem Heiler besteht. 
+_F8B55F7529227DE0	outpost_squad_tank_d.outpost_squad	Truppe von Beschützern	Eine Truppe von acht erfahrenen Söldnern, die aus Kämpfern mit schweren Rüstungen und leichten Waffen und Schilden, sowie einem Heiler besteht. 
+_BB755F75CCB341E7	outpost_squad_tank_e.outpost_squad	Truppe von Beschützern	Eine Truppe von acht Expertensöldnern, die aus Kämpfern mit schweren Rüstungen und leichten Waffen und Schilden, sowie einem Heiler besteht. 
+_35F55F7508B37D65	outpost_squad_tank_f.outpost_squad	Truppe von Beschützern	Eine Truppe von acht Meistersöldnern, die aus Kämpfern mit schweren Rüstungen und leichten Waffen und Schilden, sowie einem Heiler besteht. 
+_5601C36FA8D20761	outpost_squad_light_range_fighter_b.outpost_squad	Truppe von Waffenkämpfern	Eine Truppe von acht Lehrlingssöldnern, die aus Schützen in mittleren Rüstungen mit Pistolen, sowie einem Heiler besteht. 
+_76A0D373A5B10363	outpost_squad_light_range_fighter_c.outpost_squad	Truppe von Waffenkämpfern	Eine Truppe von acht bestätigten Söldnern, die aus Schützen in mittleren Rüstungen mit Pistolen, sowie einem Heiler besteht. 
+_A5F22FBC0B41E9D0	outpost_squad_light_range_fighter_d.outpost_squad	Truppe von Waffenkämpfern	Eine Truppe von acht erfahrenen Söldnern, die aus Schützen in mittleren Rüstungen mit Pistolen, sowie einem Heiler besteht. 
+_A50259C547B211CC	outpost_squad_light_range_fighter_e.outpost_squad	Truppe von Waffenkämpfern	Eine Truppe von acht Expertensöldnern, die aus Schützen in mittleren Rüstungen mit Pistolen, sowie einem Heiler besteht. 
+_A5121DC50B99B5D4	outpost_squad_light_range_fighter_f.outpost_squad	Truppe von Waffenkämpfern	Eine Truppe von acht Meistersöldnern, die aus Schützen in mittleren Rüstungen mit Pistolen, sowie einem Heiler besteht. 
+_C403E2D6AEC519C7	outpost_squad_medium_range_fighter_b.outpost_squad	Truppe von Pistolenschützen	Eine Truppe von acht Lehrlingssöldnern bestehend aus Schützen in mittleren Rüstungen mit Gewehren, sowie einem Heiler. 
+_C323E4CFAF05E9C5	outpost_squad_medium_range_fighter_c.outpost_squad	Truppe von Pistolenschützen	Eine Truppe von acht bestätigten Söldnern bestehend aus Schützen in mittleren Rüstungen mit Gewehren, sowie einem Heiler. 
+_89DC33F311346898	outpost_squad_medium_range_fighter_d.outpost_squad	Truppe von Pistolenschützen	Eine Truppe von acht erfahrenen Söldnern bestehend aus Schützen in mittleren Rüstungen mit Gewehren, sowie einem Heiler. 
+_4C9C33F3B4C52C9F	outpost_squad_medium_range_fighter_e.outpost_squad	Truppe von Pistolenschützen	Eine Truppe von acht Expertensöldnern bestehend aus Schützen in mittleren Rüstungen mit Gewehren, sowie einem Heiler. 
+_C61C33F3F0C5681D	outpost_squad_medium_range_fighter_f.outpost_squad	Truppe von Pistolenschützen	Eine Truppe von acht Meistersöldnern bestehend aus Schützen in mittleren Rüstungen mit Gewehren, sowie einem Heiler. 
+_1043FDD2C7CB4EF4	outpost_squad_heavy_range_fighter_b.outpost_squad	Truppe von Artillerieschützen	Eine Truppe von acht Lehrlingssöldnern bestehend aus Schützen mit Maschinengewehren und Granatenwerfern, sowie einem Heiler. 
+_1192F5D147D332F8	outpost_squad_heavy_range_fighter_c.outpost_squad	Truppe von Artillerieschützen	Eine Truppe von acht bestätigten Söldnern bestehend aus Schützen mit Maschinengewehren und Granatenwerfern, sowie einem Heiler. 
+_99F2301FEE875442	outpost_squad_heavy_range_fighter_d.outpost_squad	Truppe von Artillerieschützen	Eine Truppe von acht erfahrenen Söldnern bestehend aus Schützen mit Maschinengewehren und Granatenwerfern, sowie einem Heiler. 
+_DB114C29ED8754CD	outpost_squad_heavy_range_fighter_e.outpost_squad	Truppe von Artillerieschützen	Eine Truppe von acht Expertensöldnern bestehend aus Schützen mit Maschinengewehren und Granatenwerfern, sowie einem Heiler. 
+_DB124612EF8754BE	outpost_squad_heavy_range_fighter_f.outpost_squad	Truppe von Artillerieschützen	Eine Truppe von acht Meistersöldnern bestehend aus Schützen mit Maschinengewehren und Granatenwerfern, sowie einem Heiler. 
+_70CFDE9FE7F12A5B	outpost_squad_light_mixed_fighter_b.outpost_squad	Truppe von Geländeläufern	Eine Truppe von acht Lehrlingssöldnern bestehend aus Kämpfern und Schützen mit schnellen Waffen und Pistolen, sowie einem Heiler.
+_6DBEDAA107803A5F	outpost_squad_light_mixed_fighter_c.outpost_squad	Truppe von Geländeläufern	Eine Truppe von acht bestätigten Söldnern bestehend aus Kämpfern und Schützen mit schnellen Waffen und Pistolen, sowie einem Heiler.
+_BBDA84BDC96B2A68	outpost_squad_light_mixed_fighter_d.outpost_squad	Truppe von Geländeläufern	Eine Truppe von acht erfahrenen Söldnern bestehend aus Kämpfern und Schützen mit schnellen Waffen und Pistolen, sowie einem Heiler.
+_F75BACB9C96B5471	outpost_squad_light_mixed_fighter_e.outpost_squad	Truppe von Geländeläufern	Eine Truppe von acht Expertensöldnern bestehend aus Kämpfern und Schützen mit schnellen Waffen und Pistolen, sowie einem Heiler.
+_BB5250C1C96B1871	outpost_squad_light_mixed_fighter_f.outpost_squad	Truppe von Geländeläufern	Eine Truppe von acht Meistersöldnern bestehend aus Kämpfern und Schützen mit schnellen Waffen und Pistolen, sowie einem Heiler.
+_314148BBFC1D44FA	outpost_squad_medium_mixed_fighter_b.outpost_squad	Truppe von Kriegern	Eine Truppe von acht Lehrlingssöldnern bestehend aus Kämpfern und Schützen, die mit leichten Waffen und Gewehren gerüstet sind und teilweise mit einem Schild, sowie einem Heiler. 
+_30614AB4FD5D14F8	outpost_squad_medium_mixed_fighter_c.outpost_squad	Truppe von Kriegern	Eine Truppe von acht bestätigten Söldnern bestehend aus Kämpfern und Schützen, die mit leichten Waffen und Gewehren gerüstet sind und teilweise mit einem Schild, sowie einem Heiler. 
+_AE1C15053C1DCD73	outpost_squad_medium_mixed_fighter_d.outpost_squad	Truppe von Kriegern	Eine Truppe von acht erfahrenen Söldnern bestehend aus Kämpfern und Schützen, die mit leichten Waffen und Gewehren gerüstet sind und teilweise mit einem Schild, sowie einem Heiler. 
+_71DC1505DFAE917A	outpost_squad_medium_mixed_fighter_e.outpost_squad	Truppe von Kriegern	Eine Truppe von acht Expertensöldnern bestehend aus Kämpfern und Schützen, die mit leichten Waffen und Gewehren gerüstet sind und teilweise mit einem Schild, sowie einem Heiler. 
+_EB5C15051BAECDF8	outpost_squad_medium_mixed_fighter_f.outpost_squad	Truppe von Kriegern	Eine Truppe von acht Meistersöldnern bestehend aus Kämpfern und Schützen, die mit leichten Waffen und Gewehren gerüstet sind und teilweise mit einem Schild, sowie einem Heiler. 
+_83F65F3F71561BD2	outpost_squad_nukers_b.outpost_squad	Truppe von Elementalisten	Eine Truppe von acht Lehrlingssöldnern bestehend aus Magiern, die in Zerstörungssprüchen spezialisiert sind, und einem Heiler. 
+_84362F3D307621CB	outpost_squad_nukers_c.outpost_squad	Truppe von Elementalisten	Eine Truppe von acht bestätigten Söldnern bestehend aus Magiern, die in Zerstörungssprüchen spezialisiert sind, und einem Heiler. 
+_58207E496F02F1FB	outpost_squad_nukers_d.outpost_squad	Truppe von Elementalisten	Eine Truppe von acht erfahrenen Söldnern bestehend aus Magiern, die in Zerstörungssprüchen spezialisiert sind, und einem Heiler. 
+_FBB14250F2C2F5FB	outpost_squad_nukers_e.outpost_squad	Truppe von Elementalisten	Eine Truppe von acht Expertensöldnern bestehend aus Magiern, die in Zerstörungssprüchen spezialisiert sind, und einem Heiler. 
+_37B17ECE2C42F9FB	outpost_squad_nukers_f.outpost_squad	Truppe von Elementalisten	Eine Truppe von acht Meistersöldnern bestehend aus Magiern, die in Zerstörungssprüchen spezialisiert sind, und einem Heiler. 
+_A60073A524657344	outpost_squad_offensive_linkers_b.outpost_squad	Truppe von Störenfrieden	Eine Truppe von acht Lehrlingssöldnern bestehend aus Magiern, die im Offensivzauber spezialisiert sind (Schwäche- und Elementarzauber), sowie einem Heiler. 
+_E441839AA3547BC4	outpost_squad_offensive_linkers_c.outpost_squad	Truppe von Störenfrieden	Eine Truppe von acht bestätigten Söldnern bestehend aus Magiern, die im Offensivzauber spezialisiert sind (Schwäche- und Elementarzauber), sowie einem Heiler. 
+_C95D4E469B8A51DF	outpost_squad_offensive_linkers_d.outpost_squad	Truppe von Störenfrieden	Eine Truppe von acht erfahrenen Söldnern bestehend aus Magiern, die im Offensivzauber spezialisiert sind (Schwäche- und Elementarzauber), sowie einem Heiler. 
+_C90672385D2B41DF	outpost_squad_offensive_linkers_e.outpost_squad	Truppe von Störenfrieden	Eine Truppe von acht Expertensöldnern bestehend aus Magiern, die im Offensivzauber spezialisiert sind (Schwäche- und Elementarzauber), sowie einem Heiler. 
+_C9157248FCBA61DF	outpost_squad_offensive_linkers_f.outpost_squad	Truppe von Störenfrieden	Eine Truppe von acht Meistersöldnern bestehend aus Magiern, die im Offensivzauber spezialisiert sind (Schwäche- und Elementarzauber), sowie einem Heiler. 
+_0CA62202F8B8D9E1	outpost_squad_mixed_casters_b.outpost_squad	Truppe von Magiern	Eine Truppe von acht Lehrlingssöldnern bestehend aus Magiern verschiedener Schulen (zerstörerisch und helfend).
+_8B952A8236F9E9D6	outpost_squad_mixed_casters_c.outpost_squad	Truppe von Magiern	Eine Truppe von acht bestätigten Söldnern bestehend aus Magiern verschiedener Schulen (zerstörerisch und helfend).
+_660DE14ACBEFDAD3	outpost_squad_mixed_casters_d.outpost_squad	Truppe von Magiern	Eine Truppe von acht erfahrenen Söldnern bestehend aus Magiern verschiedener Schulen (zerstörerisch und helfend).
+_28AED14ACB98FEC5	outpost_squad_mixed_casters_e.outpost_squad	Truppe von Magiern	Eine Truppe von acht Expertensöldnern bestehend aus Magiern verschiedener Schulen (zerstörerisch und helfend).
+_C73DF14ACBA7FED5	outpost_squad_mixed_casters_f.outpost_squad	Truppe von Magiern	Eine Truppe von acht Meistersöldnern bestehend aus Magiern verschiedener Schulen (zerstörerisch und helfend).
+_27C70004295AFD33	driller_bountybeaches_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_27C700046A5AFD33	driller_bountybeaches_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_27C70004296AFD33	driller_bountybeaches_kami_u1_200a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_5223406B8AC3F2A5	driller_bountybeaches_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_B43AE8DBD548D9F4	driller_bountybeaches_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_5223406B8AD3F2A5	driller_bountybeaches_kami_u2_200a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_B285735D1C570E40	driller_bountybeaches_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_B285735D5D570E40	driller_bountybeaches_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_B285735D1C670E40	driller_bountybeaches_kami_u3_200a.outpost_building	Angebot für gehärteten Baumbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_D8CA151470F9417D	driller_bountybeaches_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_D8CA1514B1F9417D	driller_bountybeaches_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_D8CA15147009417D	driller_bountybeaches_kami_u4_200a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_40213497BD469797	driller_bountybeaches_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_40713497BD469797	driller_bountybeaches_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_40213897BD469797	driller_bountybeaches_karavan_u1_200a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_57B84C949990AB65	driller_bountybeaches_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_344B6E0E2EE83210	driller_bountybeaches_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_57B850949990AB65	driller_bountybeaches_karavan_u2_200a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_155C215B40A809FB	driller_bountybeaches_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_15AC215B40A809FB	driller_bountybeaches_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_155C255B40A809FB	driller_bountybeaches_karavan_u3_200a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_83F0DA2890B1565B	driller_bountybeaches_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_8340DA2890B1565B	driller_bountybeaches_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_83F0DE2890B1565B	driller_bountybeaches_karavan_u4_200a.outpost_building	Angebot für großen besseren Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_03912D6F5054EBF7	driller_citiesofintuition_kami_u1_50a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_1A28456DEC9EFFC5	driller_citiesofintuition_kami_u2_50a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_594C2A3553B65953	driller_citiesofintuition_kami_u3_50a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_4660D30362BFAABB	driller_citiesofintuition_kami_u4_50a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_1BA9D853164E187F	driller_citiesofintuition_karavan_u1_50a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_DACEA81747D13C04	driller_citiesofintuition_karavan_u2_50a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_CB67AF2F6E83263A	driller_citiesofintuition_karavan_u3_50a.outpost_building	Angebot für großen schnellen Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_402BF182855E8B68	driller_citiesofintuition_karavan_u4_50a.outpost_building	Angebot für großen besseren Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_83B6EBF2A31BB739	driller_couloirbrule_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_83B6EBF3A31BB739	driller_couloirbrule_kami_u1_150b.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_83B6EBF2A3CBBB39	driller_couloirbrule_kami_u1_200a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_83B6EBF3A3CBBB39	driller_couloirbrule_kami_u1_200b.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_83B6EBF2A31BBB39	driller_couloirbrule_kami_u1_250a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_83B6EBF3A31BBB39	driller_couloirbrule_kami_u1_250b.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_5F00FFC0BAB2CF36	driller_couloirbrule_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_5F00FFC1BAB2CF36	driller_couloirbrule_kami_u2_150b.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_5F00FFC0BA62D336	driller_couloirbrule_kami_u2_200a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_5F00FFC1BA62D336	driller_couloirbrule_kami_u2_200b.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_5F00FFC0BAB2D336	driller_couloirbrule_kami_u2_250a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_5F00FFC1BAB2D336	driller_couloirbrule_kami_u2_250b.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_0618594EF9D6B4FD	driller_couloirbrule_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_0618594FF9D6B4FD	driller_couloirbrule_kami_u3_150b.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_0618594EF986B8FD	driller_couloirbrule_kami_u3_200a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_0618594FF986B8FD	driller_couloirbrule_kami_u3_200b.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_0618594EF9D6B8FD	driller_couloirbrule_kami_u3_250a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_0618594FF9D6B8FD	driller_couloirbrule_kami_u3_250b.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_5621AAB6E6EA5DCA	driller_couloirbrule_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_5621AAB7E6EA5DCA	driller_couloirbrule_kami_u4_150b.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_5621AAB6E69A61CA	driller_couloirbrule_kami_u4_200a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_5621AAB7E69A61CA	driller_couloirbrule_kami_u4_200b.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_5621AAB6E6EA61CA	driller_couloirbrule_kami_u4_250a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_5621AAB7E6EA61CA	driller_couloirbrule_kami_u4_250b.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_9DFD943F87EF73E0	driller_couloirbrule_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_DDFD943F87EF73E0	driller_couloirbrule_karavan_u1_150b.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_9DFD804087EF73E0	driller_couloirbrule_karavan_u1_200a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_DDFD804087EF73E0	driller_couloirbrule_karavan_u1_200b.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_9DFD944087EF73E0	driller_couloirbrule_karavan_u1_250a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_DDFD944087EF73E0	driller_couloirbrule_karavan_u1_250b.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_CE80B8C4062443A4	driller_couloirbrule_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_0E80B8C4062443A4	driller_couloirbrule_karavan_u2_150b.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_CE80A4C5062443A4	driller_couloirbrule_karavan_u2_200a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_0E80A4C5062443A4	driller_couloirbrule_karavan_u2_200b.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_CE80B8C5062443A4	driller_couloirbrule_karavan_u2_250a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_0E80B8C5062443A4	driller_couloirbrule_karavan_u2_250b.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_F532A2FAB7CD4ABC	driller_couloirbrule_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_3532A2FAB7CD4ABC	driller_couloirbrule_karavan_u3_150b.outpost_building	Angebot für großen schnellen Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_F5328EFBB7CD4ABC	driller_couloirbrule_karavan_u3_200a.outpost_building	Angebot für großen schnellen Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_35328EFBB7CD4ABC	driller_couloirbrule_karavan_u3_200b.outpost_building	Angebot für großen schnellen Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_F532A2FBB7CD4ABC	driller_couloirbrule_karavan_u3_250a.outpost_building	Angebot für großen schnellen Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_3532A2FBB7CD4ABC	driller_couloirbrule_karavan_u3_250b.outpost_building	Angebot für großen schnellen Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_0C0D0728EBA18C0F	driller_couloirbrule_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_4C0D0728EBA18C0F	driller_couloirbrule_karavan_u4_150b.outpost_building	Angebot für großen besseren Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_0C0DF329EBA18C0F	driller_couloirbrule_karavan_u4_200a.outpost_building	Angebot für großen besseren Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_4C0DF329EBA18C0F	driller_couloirbrule_karavan_u4_200b.outpost_building	Angebot für großen besseren Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_0C0D0729EBA18C0F	driller_couloirbrule_karavan_u4_250a.outpost_building	Angebot für großen besseren Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_4C0D0729EBA18C0F	driller_couloirbrule_karavan_u4_250b.outpost_building	Angebot für großen besseren Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_077EFFE25C972BFC	driller_dunesofexil_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_077EFFE25C973FFC	driller_dunesofexil_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_077EFFE25C972BFD	driller_dunesofexil_kami_u1_200a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_E499E608F912E1CA	driller_dunesofexil_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_86B3CFA68D1A6381	driller_dunesofexil_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_86B3CFA68D1A4F82	driller_dunesofexil_kami_u2_200a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_375CD6BDB22C59BB	driller_dunesofexil_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_375CD6BDB22C6DBB	driller_dunesofexil_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_375CD6BDB22C59BC	driller_dunesofexil_kami_u3_200a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_6B301811CBA79EE5	driller_dunesofexil_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_6B301811CBA7B2E5	driller_dunesofexil_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_6B301811CBA79EE6	driller_dunesofexil_kami_u4_200a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_B0C28F47AFCE74AB	driller_dunesofexil_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_B0C28F4CAFCE74AB	driller_dunesofexil_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_B0C28F47EFCE74AB	driller_dunesofexil_karavan_u1_200a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_7868EEF4634679E4	driller_dunesofexil_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_20CC2FD450AE3E5E	driller_dunesofexil_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_20CC2FCF90AE3E5E	driller_dunesofexil_karavan_u2_200a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_E716DB0A9C1AAAE0	driller_dunesofexil_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer 	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_E716DB0F9C1AAAE0	driller_dunesofexil_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_E716DB0ADC1AAAE0	driller_dunesofexil_karavan_u3_200a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_BB1ED26327E89E71	driller_dunesofexil_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_BB1ED26827E89E71	driller_dunesofexil_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_BB1ED26367E89E71	driller_dunesofexil_karavan_u4_200a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_6857140A297BD112	driller_enchantedisle_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_6857140A6A7BD112	driller_enchantedisle_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_6857140A298BD112	driller_enchantedisle_kami_u1_200a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_F5CAFCE19469ADD3	driller_enchantedisle_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_93B35471CBE4C684	driller_enchantedisle_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_93B354718AF4C684	driller_enchantedisle_kami_u2_200a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_F31587631C78E21F	driller_enchantedisle_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_F31587635D78E21F	driller_enchantedisle_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_F31587631C88E21F	driller_enchantedisle_kami_u3_200a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_195A291A701A155C	driller_enchantedisle_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_195A291AB11A155C	driller_enchantedisle_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_195A291A702A155C	driller_enchantedisle_kami_u4_200a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_81B1489DBD676B76	driller_enchantedisle_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_8101489DBD676B76	driller_enchantedisle_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_81B14C9DBD676B76	driller_enchantedisle_karavan_u1_200a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_758B82142E0906EF	driller_enchantedisle_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_9898609A99B17F44	driller_enchantedisle_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_9848649A99B17F44	driller_enchantedisle_karavan_u2_200a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_56EC356140C9DDDA	driller_enchantedisle_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_563C356140C9DDDA	driller_enchantedisle_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_56EC396140C9DDDA	driller_enchantedisle_karavan_u3_200a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_C480EE2E90D22A3A	driller_enchantedisle_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_C4D0EE2E90D22A3A	driller_enchantedisle_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_C480F22E90D22A3A	driller_enchantedisle_karavan_u4_200a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_F1DB7B25F42C7CB2	driller_fleetinggarden_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_1F08FC026C3B4069	driller_fleetinggarden_kami_u1_50a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_61E51BAD950C4665	driller_fleetinggarden_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_4A643C69CDA439DA	driller_fleetinggarden_kami_u2_50a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_E7AFDFF0E278B2E7	driller_fleetinggarden_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_AAC66F5B5F385974	driller_fleetinggarden_kami_u3_50a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_FC37BE416C46A678	driller_fleetinggarden_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_D00B1112B3DA90B0	driller_fleetinggarden_kami_u4_50a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_4BB0CA779F970E16	driller_fleetinggarden_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_03C01D62D0E3CF7C	driller_fleetinggarden_karavan_u1_50a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_AC19BFE9CAF34E7D	driller_fleetinggarden_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_1A5735606C2DE34A	driller_fleetinggarden_karavan_u2_50a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_3C6DDB842A65A169	driller_fleetinggarden_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_D8FB0A28D34541E0	driller_fleetinggarden_karavan_u3_50a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_924F0EC1509A2326	driller_fleetinggarden_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_468FC3F6E24E8E40	driller_fleetinggarden_karavan_u4_50a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_05D6B7FAE6EBDB2B	driller_frahartowers_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_05D6B7FAE63BDB2B	driller_frahartowers_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_42538BEDDFB8730C	driller_frahartowers_kami_u1_50a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_E120CBC8FD82F328	driller_frahartowers_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_E120CBC8FDD2F328	driller_frahartowers_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_01785BB1103B9791	driller_frahartowers_kami_u2_50a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_883825563CA6D8EF	driller_frahartowers_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_883825563CF6D8EF	driller_frahartowers_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_F21162C8354DA1CB	driller_frahartowers_kami_u3_50a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_D84176BE29BA81BC	driller_frahartowers_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_D84176BE290A81BC	driller_frahartowers_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_67D5A41C4EC8E6F5	driller_frahartowers_kami_u4_50a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_1F1D4C47CA0F97D2	driller_frahartowers_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_1F1D6047CA0F97D2	driller_frahartowers_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_3A83C73800BCB977	driller_frahartowers_karavan_u1_50a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_50A070CC49446796	driller_frahartowers_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_50A084CC49446796	driller_frahartowers_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_AA8D67C0A1AC7F2A	driller_frahartowers_karavan_u2_50a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_77525A02FAED6EAE	driller_frahartowers_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_77526E02FAED6EAE	driller_frahartowers_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_71D713FBED28E7AC	driller_frahartowers_karavan_u3_50a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_8E2DBF302EC1B001	driller_frahartowers_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_8E2DD3302EC1B001	driller_frahartowers_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_45DF0A547806D73D	driller_frahartowers_karavan_u4_50a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_768BE32AB63C64AD	driller_groveconfusion_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_769BE32AB63C64AD	driller_groveconfusion_kami_u1_150b.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_768BE325F63C64AD	driller_groveconfusion_kami_u1_200a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_769BE325F63C64AD	driller_groveconfusion_kami_u1_200b.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_768BE32AF63C64AD	driller_groveconfusion_kami_u1_250a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_769BE32AF63C64AD	driller_groveconfusion_kami_u1_250b.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_E69583B2571C2E60	driller_groveconfusion_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_E6A583B2571C2E60	driller_groveconfusion_kami_u2_150b.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_E69583AD971C2E60	driller_groveconfusion_kami_u2_200a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_E6A583AD971C2E60	driller_groveconfusion_kami_u2_200b.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_E69583B2971C2E60	driller_groveconfusion_kami_u2_250a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_E6A583B2971C2E60	driller_groveconfusion_kami_u2_250b.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_6C5F47F5A4889AE2	driller_groveconfusion_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_6C6F47F5A4889AE2	driller_groveconfusion_kami_u3_150b.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_6C5F47F0E4889AE2	driller_groveconfusion_kami_u3_200a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_6C6F47F0E4889AE2	driller_groveconfusion_kami_u3_200b.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_6C5F47F5E4889AE2	driller_groveconfusion_kami_u3_250a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_6C6F47F5E4889AE2	driller_groveconfusion_kami_u3_250b.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_81E726462E568E73	driller_groveconfusion_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_81F726462E568E73	driller_groveconfusion_kami_u4_150b.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_81E726416E568E73	driller_groveconfusion_kami_u4_200a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_81F726416E568E73	driller_groveconfusion_kami_u4_200b.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_81E726466E568E73	driller_groveconfusion_kami_u4_250a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_81F726466E568E73	driller_groveconfusion_kami_u4_250b.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_1160327761A7F611	driller_groveconfusion_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_1160327761A7FA11	driller_groveconfusion_karavan_u1_150b.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_D070327761A7F611	driller_groveconfusion_karavan_u1_200a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_D070327761A7FA11	driller_groveconfusion_karavan_u1_200b.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_1170327761A7F611	driller_groveconfusion_karavan_u1_250a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_1170327761A7FA11	driller_groveconfusion_karavan_u1_250b.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_72C927E98C033678	driller_groveconfusion_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_72C927E98C033A78	driller_groveconfusion_karavan_u2_150b.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_31D927E98C033678	driller_groveconfusion_karavan_u2_200a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_31D927E98C033A78	driller_groveconfusion_karavan_u2_200b.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_72D927E98C033678	driller_groveconfusion_karavan_u2_250a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_72D927E98C033A78	driller_groveconfusion_karavan_u2_250b.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_021D4384EC758964	driller_groveconfusion_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_021D4384EC758D64	driller_groveconfusion_karavan_u3_150b.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_C12D4384EC758964	driller_groveconfusion_karavan_u3_200a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_C12D4384EC758D64	driller_groveconfusion_karavan_u3_200b.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_022D4384EC758964	driller_groveconfusion_karavan_u3_250a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_022D4384EC758D64	driller_groveconfusion_karavan_u3_250b.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_58FF76C112AA0B21	driller_groveconfusion_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_58FF76C112AA0F21	driller_groveconfusion_karavan_u4_150b.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_170F76C112AA0B21	driller_groveconfusion_karavan_u4_200a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_170F76C112AA0F21	driller_groveconfusion_karavan_u4_200b.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_580F76C112AA0B21	driller_groveconfusion_karavan_u4_250a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_580F76C112AA0F21	driller_groveconfusion_karavan_u4_250b.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_04B6ABF1680ACF2F	driller_groveofumbra_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_04B6ABF1685ACF2F	driller_groveofumbra_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_04B6ABF1680AD32F	driller_groveofumbra_kami_u1_200a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_E000BFBF7FA1E72C	driller_groveofumbra_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_7558466A5C3409A6	driller_groveofumbra_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_E000BFBF7FA1EB2C	driller_groveofumbra_kami_u2_200a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_8718194DBEC5CCF3	driller_groveofumbra_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_8718194DBE15CCF3	driller_groveofumbra_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_8718194DBEC5D0F3	driller_groveofumbra_kami_u3_200a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_D7216AB5ABD975C0	driller_groveofumbra_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_D7216AB5AB2975C0	driller_groveofumbra_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_D7216AB5ABD979C0	driller_groveofumbra_kami_u4_200a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_1EFD403E4C2E8BD6	driller_groveofumbra_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_1EFD543E4C2E8BD6	driller_groveofumbra_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_1EFD403F4C2E8BD6	driller_groveofumbra_karavan_u1_200a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_4F8064C3CB635B9A	driller_groveofumbra_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_BB780A0C294972FC	driller_groveofumbra_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_4F8064C4CB635B9A	driller_groveofumbra_karavan_u2_200a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_76324EF97C0C62B2	driller_groveofumbra_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_763262F97C0C62B2	driller_groveofumbra_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_76324EFA7C0C62B2	driller_groveofumbra_karavan_u3_200a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_8D0DB327B0E0A405	driller_groveofumbra_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_8D0DC727B0E0A405	driller_groveofumbra_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_8D0DB328B0E0A405	driller_groveofumbra_karavan_u4_200a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_A9E7041EEC9AD533	driller_havenofpurity_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_A9E7041E2D9AD533	driller_havenofpurity_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_9634CFFE24FA5824	driller_havenofpurity_kami_u1_50a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_D44344854D03CAA5	driller_havenofpurity_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_D44344858E03CAA5	driller_havenofpurity_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_327EE3CC3B917022	driller_havenofpurity_kami_u2_50a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_34A57777DF97E640	driller_havenofpurity_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_34A577772097E640	driller_havenofpurity_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_99963D5A7AB555EA	driller_havenofpurity_kami_u3_50a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_5AEA192E3339197D	driller_havenofpurity_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_5AEA192E7439197D	driller_havenofpurity_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_A89F8EC267C9FEB8	driller_havenofpurity_kami_u4_50a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_C24138B180866F97	driller_havenofpurity_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_C29138B180866F97	driller_havenofpurity_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_5C2EFC863C120308	driller_havenofpurity_karavan_u1_50a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_D9D850AE5CD08365	driller_havenofpurity_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_D92850AE5CD08365	driller_havenofpurity_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_8DB1200BFB37D3CC	driller_havenofpurity_karavan_u2_50a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_977C257503E8E1FB	driller_havenofpurity_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_97CC257503E8E1FB	driller_havenofpurity_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_B4630A41ECD0DAE4	driller_havenofpurity_karavan_u3_50a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_0510DE4253F12E5B	driller_havenofpurity_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_0560DE4253F12E5B	driller_havenofpurity_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_CB3E6F6F61941C37	driller_havenofpurity_karavan_u4_50a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_8115C7FAE6DBCB2F	driller_hiddensource_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_8115C7FAE62BCB2F	driller_hiddensource_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_8115C7FAE6DBCF2F	driller_hiddensource_kami_u1_200a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_F2B76273DAB505A6	driller_hiddensource_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_5D5FDBC8FDC2E32C	driller_hiddensource_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_5D5FDBC8FD72E72C	driller_hiddensource_kami_u2_200a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_047735563C96C8F3	driller_hiddensource_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_047735563CE6C8F3	driller_hiddensource_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_047735563C96CCF3	driller_hiddensource_kami_u3_200a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_548086BE29AA71C0	driller_hiddensource_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_548086BE29FA71C0	driller_hiddensource_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_548086BE29AA75C0	driller_hiddensource_kami_u4_200a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_9B5C5C47CAFF87D6	driller_hiddensource_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_9B5C7047CAFF87D6	driller_hiddensource_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_9B5C5C48CAFF87D6	driller_hiddensource_karavan_u1_200a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_38D71215A71A6EFC	driller_hiddensource_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_CCDF94CC4934579A	driller_hiddensource_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_CCDF80CD4934579A	driller_hiddensource_karavan_u2_200a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_F3916A02FADD5EB2	driller_hiddensource_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_F3917E02FADD5EB2	driller_hiddensource_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_F3916A03FADD5EB2	driller_hiddensource_karavan_u3_200a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_0A6CCF302EB1A005	driller_hiddensource_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_0A6CE3302EB1A005	driller_hiddensource_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_0A6CCF312EB1A005	driller_hiddensource_karavan_u4_200a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_D2240BEE23AA4022	driller_imperialdunes_kami_u1_50a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_6E6E1FBC3A415820	driller_imperialdunes_kami_u2_50a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_D586794A79653DE8	driller_imperialdunes_kami_u3_50a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_E48FCAB26679E6B6	driller_imperialdunes_kami_u4_50a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_981E38763BC2EB06	driller_imperialdunes_karavan_u1_50a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_C9A15CFBFAE7BBCA	driller_imperialdunes_karavan_u2_50a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_F0534631EB80C2E2	driller_imperialdunes_karavan_u3_50a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_072EAB5F60440435	driller_imperialdunes_karavan_u4_50a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_F38BCB2C34ACACB3	driller_knollofdissent_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_F38BCB3134ACACB3	driller_knollofdissent_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_21B84C09ACBB706A	driller_knollofdissent_kami_u1_50a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_63956BB4D58C7666	driller_knollofdissent_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_63956BB9D58C7666	driller_knollofdissent_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_4C148C700D2469DB	driller_knollofdissent_kami_u2_50a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_E95F2FF722F8E2E8	driller_knollofdissent_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_E95F2FFC22F8E2E8	driller_knollofdissent_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_AC76BF629FB88975	driller_knollofdissent_kami_u3_50a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_FEE70E48ACC6D679	driller_knollofdissent_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_FEE70E4DACC6D679	driller_knollofdissent_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_D2BB6119F35AC0B1	driller_knollofdissent_kami_u4_50a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_4D601A7EDF173E17	driller_knollofdissent_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_8E601A7EDF173E17	driller_knollofdissent_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_05706D691063FF7D	driller_knollofdissent_karavan_u1_50a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_AEC90FF00A737E7E	driller_knollofdissent_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_EFC90FF00A737E7E	driller_knollofdissent_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_1C078567ACAD134B	driller_knollofdissent_karavan_u2_50a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_3E1D2B8B6AE5D16A	driller_knollofdissent_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_7F1D2B8B6AE5D16A	driller_knollofdissent_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_DAAB5A2F13C571E1	driller_knollofdissent_karavan_u3_50a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_94FF5EC8901A5327	driller_knollofdissent_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_D5FF5EC8901A5327	driller_knollofdissent_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_483F13FD22CEBE41	driller_knollofdissent_karavan_u4_50a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_B93A9330748C3CB1	driller_knotofdementia_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_B93A9335748C3CB1	driller_knotofdementia_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_B93A9330B48C3CB1	driller_knotofdementia_kami_u1_200a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_81E0F2DD280441EA	driller_knotofdementia_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_294433BD156C0664	driller_knotofdementia_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_294433B8556C0664	driller_knotofdementia_kami_u2_200a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_AF0EF7FB62D872E6	driller_knotofdementia_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_AF0EF70062D872E6	driller_knotofdementia_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_AF0EF7FBA2D872E6	driller_knotofdementia_kami_u3_200a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_C496D64CECA66677	driller_knotofdementia_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_C496D651ECA66677	driller_knotofdementia_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_C496D64C2CA66677	driller_knotofdementia_kami_u4_200a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_130FE2821FF7CE15	driller_knotofdementia_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_540FE2821FF7CE15	driller_knotofdementia_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_131FE2821FF7CE15	driller_knotofdementia_karavan_u1_200a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_7EFDBE43AC6AB6EC	driller_knotofdementia_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_B578D7F44A530E7C	driller_knotofdementia_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_7488D7F44A530E7C	driller_knotofdementia_karavan_u2_200a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_04CCF38FAAC56168	driller_knotofdementia_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_45CCF38FAAC56168	driller_knotofdementia_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_04DCF38FAAC56168	driller_knotofdementia_karavan_u3_200a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_5AAE26CCD0FAE325	driller_knotofdementia_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_9BAE26CCD0FAE325	driller_knotofdementia_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_5ABE26CCD0FAE325	driller_knotofdementia_karavan_u4_200a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_F6CA7B2FF67D5CB1	driller_lagoonsofloria_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_F6DA7B2FF67D5CB1	driller_lagoonsofloria_kami_u1_150b.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_F6CA7B2A367D5CB1	driller_lagoonsofloria_kami_u1_200a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_F6DA7B2A367D5CB1	driller_lagoonsofloria_kami_u1_200b.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_F6CA7B2F367D5CB1	driller_lagoonsofloria_kami_u1_250a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_F6DA7B2F367D5CB1	driller_lagoonsofloria_kami_u1_250b.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_66D41BB7975D2664	driller_lagoonsofloria_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_66E41BB7975D2664	driller_lagoonsofloria_kami_u2_150b.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_66D41BB2D75D2664	driller_lagoonsofloria_kami_u2_200a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_66E41BB2D75D2664	driller_lagoonsofloria_kami_u2_200b.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_66D41BB7D75D2664	driller_lagoonsofloria_kami_u2_250a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_66E41BB7D75D2664	driller_lagoonsofloria_kami_u2_250b.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_EC9EDFFAE4C992E6	driller_lagoonsofloria_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_ECAEDFFAE4C992E6	driller_lagoonsofloria_kami_u3_150b.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_EC9EDFF524C992E6	driller_lagoonsofloria_kami_u3_200a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_ECAEDFF524C992E6	driller_lagoonsofloria_kami_u3_200b.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_EC9EDFFA24C992E6	driller_lagoonsofloria_kami_u3_250a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_ECAEDFFA24C992E6	driller_lagoonsofloria_kami_u3_250b.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_0126BE4B6E978677	driller_lagoonsofloria_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_0136BE4B6E978677	driller_lagoonsofloria_kami_u4_150b.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_0126BE46AE978677	driller_lagoonsofloria_kami_u4_200a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_0136BE46AE978677	driller_lagoonsofloria_kami_u4_200b.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_0126BE4BAE978677	driller_lagoonsofloria_kami_u4_250a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_0136BE4BAE978677	driller_lagoonsofloria_kami_u4_250b.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_919FCA7CA1E8EE15	driller_lagoonsofloria_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_919FCA7CA1E8F215	driller_lagoonsofloria_karavan_u1_150b.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_50AFCA7CA1E8EE15	driller_lagoonsofloria_karavan_u1_200a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_50AFCA7CA1E8F215	driller_lagoonsofloria_karavan_u1_200b.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_91AFCA7CA1E8EE15	driller_lagoonsofloria_karavan_u1_250a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_91AFCA7CA1E8F215	driller_lagoonsofloria_karavan_u1_250b.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_F208BFEECC442E7C	driller_lagoonsofloria_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_F208BFEECC44327C	driller_lagoonsofloria_karavan_u2_150b.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_B118BFEECC442E7C	driller_lagoonsofloria_karavan_u2_200a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_B118BFEECC44327C	driller_lagoonsofloria_karavan_u2_200b.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_F218BFEECC442E7C	driller_lagoonsofloria_karavan_u2_250a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_F218BFEECC44327C	driller_lagoonsofloria_karavan_u2_250b.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_825CDB892CB68168	driller_lagoonsofloria_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_825CDB892CB68568	driller_lagoonsofloria_karavan_u3_150b.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_416CDB892CB68168	driller_lagoonsofloria_karavan_u3_200a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_416CDB892CB68568	driller_lagoonsofloria_karavan_u3_200b.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_826CDB892CB68168	driller_lagoonsofloria_karavan_u3_250a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_826CDB892CB68568	driller_lagoonsofloria_karavan_u3_250b.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_D83E0EC652EB0325	driller_lagoonsofloria_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_D83E0EC652EB0725	driller_lagoonsofloria_karavan_u4_150b.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_974E0EC652EB0325	driller_lagoonsofloria_karavan_u4_200a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_974E0EC652EB0725	driller_lagoonsofloria_karavan_u4_200b.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_D84E0EC652EB0325	driller_lagoonsofloria_karavan_u4_250a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_D84E0EC652EB0725	driller_lagoonsofloria_karavan_u4_250b.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_405AB588D9C6B2E1	driller_libertylake_kami_u1_50a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_E14A7B3B49D05269	driller_libertylake_kami_u2_50a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_2EC6E3BDCF9A16AC	driller_libertylake_kami_u3_50a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_B8A4D34EE422F5FD	driller_libertylake_kami_u4_50a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_DA980217AC4E3472	driller_libertylake_karavan_u1_50a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_05F4427E0DB72DE3	driller_libertylake_karavan_u2_50a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_6566956A9D0B4D7D	driller_libertylake_karavan_u3_50a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_8B9B1727F3ED84B9	driller_libertylake_karavan_u4_50a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_C7BEE3E29FA727EE	driller_maidengrove_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_00CAC1975AA59AD4	driller_maidengrove_kami_u1_50a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_46F3B3A6D02A4B73	driller_maidengrove_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_A1BA874ACAAF3A5C	driller_maidengrove_kami_u2_50a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_F79CBABDF53C55AD	driller_maidengrove_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_EE36EFCC5079FE9F	driller_maidengrove_kami_u3_50a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_2B70FC110EB79AD7	driller_maidengrove_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_7814DF5D6501DDF0	driller_maidengrove_kami_u4_50a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_70027347F2DE709D	driller_maidengrove_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_9A080E262D2D1C65	driller_maidengrove_karavan_u1_50a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_E00C13CF93BE3A50	driller_maidengrove_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_C5644E8D8E9615D6	driller_maidengrove_karavan_u2_50a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_A756BF0ADF2AA6D2	driller_maidengrove_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_25D6A1791EEA3570	driller_maidengrove_karavan_u3_50a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_7B5EB6636AF89A63	driller_maidengrove_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_4B0B233674CC6CAC	driller_maidengrove_karavan_u4_50a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_1F58D0096BEB6C68	driller_majesticgarden_kami_u1_50a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_4AB41070CC5465D9	driller_majesticgarden_kami_u2_50a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_AA1643625EE88573	driller_majesticgarden_kami_u3_50a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_D05BE519B28ABCAF	driller_majesticgarden_kami_u4_50a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_0310F169CF93FB7B	driller_majesticgarden_karavan_u1_50a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_1AA709676BDD0F49	driller_majesticgarden_karavan_u2_50a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_D84BDE2FD2F56DDF	driller_majesticgarden_karavan_u3_50a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_46DF97FDE1FEBA3F	driller_majesticgarden_karavan_u4_50a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_C6F5BFEDE65A9740	driller_oflovakoasis_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_037293E0DF272F21	driller_oflovakoasis_kami_u1_50a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_A23FD3BBFDF1AF3D	driller_oflovakoasis_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_C29763A410AA53A6	driller_oflovakoasis_kami_u2_50a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_49572D493C159404	driller_oflovakoasis_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_B3306ABB35BC5DE0	driller_oflovakoasis_kami_u3_50a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_99607EB129293DD1	driller_oflovakoasis_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_28F4AC0F4E37A20A	driller_oflovakoasis_kami_u4_50a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_E03C543ACA7E53E7	driller_oflovakoasis_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_FBA2CF2B002B758C	driller_oflovakoasis_karavan_u1_50a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_11BF78BF49B323AB	driller_oflovakoasis_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_6BAC6FB3A11B3B3F	driller_oflovakoasis_karavan_u2_50a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_387162F5FA5C2AC3	driller_oflovakoasis_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_32F61BEEED97A3C1	driller_oflovakoasis_karavan_u3_50a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_4F4CC7232E306C16	driller_oflovakoasis_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_06FE124778759352	driller_oflovakoasis_karavan_u4_50a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_E869E736E810FA94	driller_thefount_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_E8B9E736E810FA94	driller_thefount_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_E1367F17258DCE87	driller_thefount_kami_u1_50a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_FF00FF33C45A0E62	driller_thefount_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_FF50FF33C45A0E62	driller_thefount_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_12B9A39CE4B29E4B	driller_thefount_kami_u2_50a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_3E24E4FA6B7268F0	driller_thefount_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_3E74E4FA6B7268F0	driller_thefount_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_37CBADD6D54BA562	driller_thefount_kami_u3_50a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_2B388DC7BB7BB958	driller_thefount_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_2B888DC7BB7BB958	driller_thefount_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_5046F2004A0FE7B6	driller_thefount_kami_u4_50a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_CC8DA3DD02578FE1	driller_thefount_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_CC8DA3DD0257A3E1	driller_thefount_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_023AC5821DBD0AD2	driller_thefount_karavan_u1_50a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_4BC273A133DAB366	driller_thefount_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_4BC273A133DAC766	driller_thefount_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_A32A8B358DC7AA5A	driller_thefount_karavan_u2_50a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_FC6B7AB95A8C9D9C	driller_thefount_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_FC6B7AB95A8CB19C	driller_thefount_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_EFA6F3B754115695	driller_thefount_karavan_u3_50a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_303FBC0C716702CA	driller_thefount_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_303FBC0C716716CA	driller_thefount_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_7A84E34828194DEE	driller_thefount_karavan_u4_50a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_F60B7731F45CC49F	driller_thesavagedunes_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_F60B7736F45CC49F	driller_thesavagedunes_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_F60B7731345CC49F	driller_thesavagedunes_kami_u1_200a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_661517B9953C8E52	driller_thesavagedunes_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_BEB1D6E3A8D4C9D8	driller_thesavagedunes_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_661517B9D53C8E52	driller_thesavagedunes_kami_u2_200a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_ECDFDBFCE2A8FAD4	driller_thesavagedunes_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_ECDFDB01E2A8FAD4	driller_thesavagedunes_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_ECDFDBFC22A8FAD4	driller_thesavagedunes_kami_u3_200a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_0167BA4D6C76EE65	driller_thesavagedunes_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_0167BA526C76EE65	driller_thesavagedunes_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_0167BA4DAC76EE65	driller_thesavagedunes_kami_u4_200a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_50E0C6839FC75603	driller_thesavagedunes_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_91E0C6839FC75603	driller_thesavagedunes_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_50F0C6839FC75603	driller_thesavagedunes_karavan_u1_200a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_B149BBF5CA23966A	driller_thesavagedunes_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_FCCEA2442C3A3EDA	driller_thesavagedunes_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_B159BBF5CA23966A	driller_thesavagedunes_karavan_u2_200a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_419DD7902A95E956	driller_thesavagedunes_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_829DD7902A95E956	driller_thesavagedunes_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_41ADD7902A95E956	driller_thesavagedunes_karavan_u3_200a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_977F0ACD50CA6B13	driller_thesavagedunes_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_D87F0ACD50CA6B13	driller_thesavagedunes_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_978F0ACD50CA6B13	driller_thesavagedunes_karavan_u4_200a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_E4F657F56AA9F67D	driller_thevoid_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_24F657F56AA9F67D	driller_thevoid_kami_u1_150b.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_E4F643F66AA9F67D	driller_thevoid_kami_u1_200a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_24F643F66AA9F67D	driller_thevoid_kami_u1_200b.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_E4F657F66AA9F67D	driller_thevoid_kami_u1_250a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_24F657F66AA9F67D	driller_thevoid_kami_u1_250b.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_15797B7AE9DEC641	driller_thevoid_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_55797B7AE9DEC641	driller_thevoid_kami_u2_150b.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_1579677BE9DEC641	driller_thevoid_kami_u2_200a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_5579677BE9DEC641	driller_thevoid_kami_u2_200b.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_15797B7BE9DEC641	driller_thevoid_kami_u2_250a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_55797B7BE9DEC641	driller_thevoid_kami_u2_250b.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_3A8B85B49A87CD58	driller_thevoid_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_7A8B85B49A87CD58	driller_thevoid_kami_u3_150b.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_3A8B71B59A87CD58	driller_thevoid_kami_u3_200a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_7A8B71B59A87CD58	driller_thevoid_kami_u3_200b.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_3A8B85B59A87CD58	driller_thevoid_kami_u3_250a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_7A8B85B59A87CD58	driller_thevoid_kami_u3_250b.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_5306CADECE5B0FAC	driller_thevoid_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_9306CADECE5B0FAC	driller_thevoid_kami_u4_150b.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_5306B6DFCE5B0FAC	driller_thevoid_kami_u4_200a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_9306B6DFCE5B0FAC	driller_thevoid_kami_u4_200b.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_5306CADFCE5B0FAC	driller_thevoid_kami_u4_250a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_9306CADFCE5B0FAC	driller_thevoid_kami_u4_250b.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_372D8CA413ED86E7	driller_thevoid_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_372D8CA413FD86E7	driller_thevoid_karavan_u1_150b.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_772D8CA413ED86E2	driller_thevoid_karavan_u1_200a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_772D8CA413FD86E2	driller_thevoid_karavan_u1_200b.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_772D8CA413ED86E7	driller_thevoid_karavan_u1_250a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_772D8CA413FD86E7	driller_thevoid_karavan_u1_250b.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_D80D565783F7266F	driller_thevoid_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_D80D56578307266F	driller_thevoid_karavan_u2_150b.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_180D565783F7266A	driller_thevoid_karavan_u2_200a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_180D56578307266A	driller_thevoid_karavan_u2_200b.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_180D565783F7266F	driller_thevoid_karavan_u2_250a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_180D56578307266F	driller_thevoid_karavan_u2_250b.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_2479C2D94A41D2AA	driller_thevoid_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_2479C2D94A51D2AA	driller_thevoid_karavan_u3_150b.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_6479C2D94A41D2A5	driller_thevoid_karavan_u3_200a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_6479C2D94A51D2A5	driller_thevoid_karavan_u3_200b.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_6479C2D94A41D2AA	driller_thevoid_karavan_u3_250a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_6479C2D94A51D2AA	driller_thevoid_karavan_u3_250b.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_AF47B66A1E49C903	driller_thevoid_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_AF47B66A1E59C903	driller_thevoid_karavan_u4_150b.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_EF47B66A1E49C9FE	driller_thevoid_karavan_u4_200a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_EF47B66A1E59C9FE	driller_thevoid_karavan_u4_200b.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_EF47B66A1E49C903	driller_thevoid_karavan_u4_250a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_EF47B66A1E59C903	driller_thevoid_karavan_u4_250b.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_A81A0737A420AE97	driller_upperbog_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_A86A0737A420AE97	driller_upperbog_kami_u1_150a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_A81A0B37A420AE97	driller_upperbog_kami_u1_200a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_BFB11F34806AC265	driller_upperbog_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_9C4441AE15C24910	driller_upperbog_kami_u2_150a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_BFB12334806AC265	driller_upperbog_kami_u2_200a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_FED504FB27821CF3	driller_upperbog_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_FE2504FB27821CF3	driller_upperbog_kami_u3_150a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_FED508FB27821CF3	driller_upperbog_kami_u3_200a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_EBE9ADC8778B6D5B	driller_upperbog_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_EB39ADC8778B6D5B	driller_upperbog_kami_u4_150a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_EBE9B1C8778B6D5B	driller_upperbog_kami_u4_200a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_8C3EC3DEBE6743E4	driller_upperbog_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_8C3EC3DEBE6757E4	driller_upperbog_karavan_u1_150a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_8C3EC3DEBE6743E5	driller_upperbog_karavan_u1_200a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_0B7393A2EFEA6769	driller_upperbog_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_6959AA045BE20DB2	driller_upperbog_karavan_u2_150a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut
+_0B7393A2EFEA676A	driller_upperbog_karavan_u2_200a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_BC1C9ABA169C519F	driller_upperbog_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_BC1C9ABA169C659F	driller_upperbog_karavan_u3_150a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_BC1C9ABA169C51A0	driller_upperbog_karavan_u3_200a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_F0F0DC0D2D77B6CD	driller_upperbog_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_F0F0DC0D2D77CACD	driller_upperbog_karavan_u4_150a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_F0F0DC0D2D77B6CE	driller_upperbog_karavan_u4_200a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_C70EF7F25E972BFC	driller_windsofmuse_kami_u1_100a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_001AD5A719959EE2	driller_windsofmuse_kami_u1_50a.outpost_building	Angebot für Baumbohrer	Rohmaterial Handwerk + Konsumgut 
+_4643C7B68F1A4F81	driller_windsofmuse_kami_u2_100a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_A10A9B5A899F3E6A	driller_windsofmuse_kami_u2_50a.outpost_building	Angebot für Kristall-Baumbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_F7ECCECDB42C59BB	driller_windsofmuse_kami_u3_100a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_EE8603DC0F6902AD	driller_windsofmuse_kami_u3_50a.outpost_building	Angebot für gehärteten Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_2BC01021CDA79EE5	driller_windsofmuse_kami_u4_100a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_7864F36D24F1E1FE	driller_windsofmuse_kami_u4_50a.outpost_building	Angebot für besseren Baumbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_70528757B1CE74AB	driller_windsofmuse_karavan_u1_100a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_9A582236EC1D2073	driller_windsofmuse_karavan_u1_50a.outpost_building	Angebot für großen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut 
+_E05C27DF52AE3E5E	driller_windsofmuse_karavan_u2_100a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_C5B4629D4D8619E4	driller_windsofmuse_karavan_u2_50a.outpost_building	Angebot für großen Kristall-Tiefenbohrer	Rohmaterial Handwerk + Doppelportion Konsumgut 
+_A7A6D31A9E1AAAE0	driller_windsofmuse_karavan_u3_100a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_2526B589DDDA397E	driller_windsofmuse_karavan_u3_50a.outpost_building	Angebot für großen schnellen Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x1.5) 
+_7BAECA7329E89E71	driller_windsofmuse_karavan_u4_100a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_4B5B374633BC70BA	driller_windsofmuse_karavan_u4_50a.outpost_building	Angebot für großen besseren Tiefenbohrer	Rohmaterial Handwerk + Konsumgut (Geschwindigkeit x2) 
+_274A8C626D2AC980	placeholder_bountybeaches_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_8120C2FAF16B6046	placeholder_citiesofintuition_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_1B67A0193668832F	placeholder_couloirbrule_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_1B67A4193668832F	placeholder_couloirbrule_b.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_43563FF2E5492BD3	placeholder_dunesofexil_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_276B6041AEBADD86	placeholder_enchantedisle_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_30BB492FF0FF3FBF	placeholder_fleetinggarden_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_5E87C40BB8884F37	placeholder_frahartowers_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_F2CB312A75AFA7BF	placeholder_groveconfusion_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_32CB312A75AFA7BF	placeholder_groveconfusion_b.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_E0A6B80FB768432E	placeholder_groveofumbra_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_EA8A6462EF4ACD9A	placeholder_havenofpurity_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_5E77B40F34C75F37	placeholder_hiddensource_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_E93A4C602B3A098A	placeholder_imperialdunes_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_703B7930F2AF8FC6	placeholder_knollofdissent_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_B01B092EB85E57CA	placeholder_knotofdementia_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_320C292EF5EE3FC4	placeholder_lagoonsofloria_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_720C292EF5EE3FC4	placeholder_lagoonsofloria_b.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_058753F1E51903C4	placeholder_libertylake_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_86663BE4A5890FD3	placeholder_maidengrove_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_2F6B752EF04F13C6	placeholder_majesticgarden_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_5EF6802079A7572A	placeholder_oflovakoasis_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_73786B38884FF7AF	placeholder_thefount_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_30EB911CF52F3BCB	placeholder_thesavagedunes_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_202AFBD5F3FF7E84	placeholder_thevoid_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_202AFBD5F3FF7E85	placeholder_thevoid_b.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_2F881F3B480017B0	placeholder_upperbog_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_45563FF2A5D923E3	placeholder_windsofmuse_a.outpost_building	Bebaubarer Ort	Zurücksetzen zu einem leeren Platz
+_3B0E370CEE023CAD	town_hall.outpost_building	Außenposten Halle	Außenposten Haupthalle

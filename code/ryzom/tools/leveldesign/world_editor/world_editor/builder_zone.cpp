@@ -130,10 +130,10 @@ bool CDataBase::init (const string &Path, CZoneBank &zb)
 	string sDirBackup = NLMISC::CPath::getCurrentPath();
 
 	// "Path" can be relative to the doc path so we have to be first in the doc path
-	string s2 = NLMISC::CFile::getPath ((LPCTSTR)getMainFrame()->getDocument()->GetPathName());
+	string s2 = NLMISC::CFile::getPath(NLMISC::tStrToUtf8(getMainFrame()->getDocument()->GetPathName()));
 	NLMISC::CPath::setCurrentPath(s2.c_str());
 	string ss = NLMISC::CPath::getFullPath(Path);
-	NLMISC::CPath::setCurrentPath (ss.c_str());
+	NLMISC::CPath::setCurrentPath(ss.c_str());
 
 	uint32 i, m, n, o, p;
 	uint8 k, l;
@@ -355,7 +355,7 @@ NLMISC::CBitmap *CDataBase::loadBitmap (const std::string &fileName)
 			nlwarning ("Bitmap not found : %s", fileName.c_str());
 		}
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		pBitmap->makeDummy();
 		theApp.errorMessage ("Error while loading bitmap %s : %s", fileName.c_str(), e.what());
@@ -380,7 +380,7 @@ void CBuilderZone::calcMask()
 	_MinY = _MinX = 1000000;
 	_MaxY = _MaxX = -1000000;
 
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return;
 
 	CWorldEditorDoc *doc = getDocument ();
@@ -428,10 +428,10 @@ void CBuilderZone::calcMask()
 CBuilderZone::CBuilderZone (uint bitmapSize) : _DataBase (bitmapSize)
 {
 	// Set Current Filter
-	_FilterType1 = STRING_UNUSED; _FilterValue1 = "";
-	_FilterType2 = STRING_UNUSED; _FilterValue2 = "";
-	_FilterType3 = STRING_UNUSED; _FilterValue3 = "";
-	_FilterType4 = STRING_UNUSED; _FilterValue4 = "";
+	_FilterType1 = STRING_UNUSED;
+	_FilterType2 = STRING_UNUSED;
+	_FilterType3 = STRING_UNUSED;
+	_FilterType4 = STRING_UNUSED;
 	_FilterOperator2 = 0;
 	_FilterOperator3 = 0;
 	_FilterOperator4 = 0;
@@ -450,7 +450,6 @@ CBuilderZone::CBuilderZone (uint bitmapSize) : _DataBase (bitmapSize)
 	_ApplyCycleSelection = 0;
 	_NotPropagate = false;
 	_Force = false;
-	_LastPathName = "";
 	_ToolsZone = NULL;
 }
 
@@ -556,7 +555,7 @@ void CBuilderZone::updateToolsZone ()
 		_ToolsZone->getListCtrl()->addItem (pElt->getName());
 	}
 	_ToolsZone->getListCtrl()->setImages (vIL);
-	if (_CurrentSelection.size() > 0)
+	if (!_CurrentSelection.empty())
 	{
 		_ToolsZone->getListCtrl()->SetCurSel (0);
 		_CurSelectedZone = 0;
@@ -610,8 +609,7 @@ bool CBuilderZone::refresh ()
 								if ((sZone != STRING_UNUSED)&&(sZone != STRING_OUT_OF_BOUND))
 								{
 									unload (_ZoneRegionSelected);
-									MessageBox (NULL, "Cannot add this zone because it overlaps existing ones", 
-												"Error", MB_ICONERROR|MB_OK);
+									MessageBox (NULL, _T("Cannot add this zone because it overlaps existing ones"), _T("Error"), MB_ICONERROR|MB_OK);
 									return false;
 								}
 							}
@@ -624,8 +622,8 @@ bool CBuilderZone::refresh ()
 			if (!_ZoneRegions[_ZoneRegionSelected]->init (&_ZoneBank, this, error))
 			{
 				unload (_ZoneRegionSelected);
-				MessageBox (NULL, ("Cannot add this zone :\n"+error).c_str(), 
-							"Error", MB_ICONERROR|MB_OK);
+				std::string msg = NLMISC::toString("Cannot add this zone :\n%s", error.c_str());
+				MessageBox (NULL, nlUtf8ToTStr(msg), _T("Error"), MB_ICONERROR|MB_OK);
 				return false;
 			}
 
@@ -669,7 +667,7 @@ void CBuilderZone::newZone (bool bDisplay)
 void CBuilderZone::unload (uint32 pos)
 {
 	uint32 i = 0;
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return;
 
 	delete _ZoneRegions[pos];
@@ -686,7 +684,7 @@ void CBuilderZone::unload (uint32 pos)
 // ---------------------------------------------------------------------------
 void CBuilderZone::move (sint32 x, sint32 y)
 {
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return;
 	_ZoneRegions[_ZoneRegionSelected]->move(x, y);
 }
@@ -694,13 +692,13 @@ void CBuilderZone::move (sint32 x, sint32 y)
 // ---------------------------------------------------------------------------
 uint32 CBuilderZone::countZones ()
 {
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return 0;
 	return _ZoneRegions[_ZoneRegionSelected]->countZones ();
 }
 
 // ---------------------------------------------------------------------------
-void CBuilderZone::snapshot (const char *fileName, uint sizeSource, bool grayscale)
+void CBuilderZone::snapshot (const std::string &fileName, uint sizeSource, bool grayscale)
 {
 	const CZoneRegion *pBZR = &(getDocument ()->getZoneRegion (_ZoneRegionSelected));
 	sint32 nMinX = pBZR->getMinX();
@@ -714,9 +712,9 @@ void CBuilderZone::snapshot (const char *fileName, uint sizeSource, bool graysca
 }
 
 // ---------------------------------------------------------------------------
-void CBuilderZone::snapshotCustom (const char *fileName, uint width, uint height, bool keepRatio, uint sizeSource, bool grayscale)
+void CBuilderZone::snapshotCustom (const std::string &fileName, uint width, uint height, bool keepRatio, uint sizeSource, bool grayscale)
 {
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return;
 
 	// Some bitmaps
@@ -1436,12 +1434,12 @@ void CBuilderZone::add (const CVector &worldPos)
 	sint32 y = (sint32)floor (worldPos.y / _Display->_CellSize);
 	uint8 rot, flip;
 
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return;
 
 	if (_RandomSelection)
 	{
-		if (_CurrentSelection.size() > 0)
+		if (!_CurrentSelection.empty())
 		{
 			uint32 nSel = (uint32)(NLMISC::frand (1.0) * _CurrentSelection.size());
 			NLMISC::clamp (nSel, (uint32)0, (uint32)(_CurrentSelection.size()-1));
@@ -1517,7 +1515,7 @@ void CBuilderZone::addTransition (const NLMISC::CVector &worldPos)
 	sint32 y = (sint32)floor (worldPos.y / _Display->_CellSize);
 	sint32 k;
 
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return;
 
 	// Detect if we are in a transition square to switch
@@ -1588,7 +1586,7 @@ void CBuilderZone::del (const CVector &worldPos)
 	sint32 x = (sint32)floor (worldPos.x / _Display->_CellSize);
 	sint32 y = (sint32)floor (worldPos.y / _Display->_CellSize);
 
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return;
 
 	CBuilderZoneRegion *pBZR = _ZoneRegions[_ZoneRegionSelected];
@@ -1600,26 +1598,27 @@ void CBuilderZone::del (const CVector &worldPos)
 // ---------------------------------------------------------------------------
 bool CBuilderZone::initZoneBank (const string &sPathName)
 {
-	char sDirBackup[512];
-	GetCurrentDirectory (512, sDirBackup);
-	SetCurrentDirectory (sPathName.c_str());
+	// TODO: replace by NeL methods
+	TCHAR sDirBackup[512];
+	GetCurrentDirectory(512, sDirBackup);
+	SetCurrentDirectory(nlUtf8ToTStr(sPathName));
 	WIN32_FIND_DATA findData;
 	HANDLE hFind;
-	hFind = FindFirstFile ("*.ligozone", &findData);
-	
+	hFind = FindFirstFile(_T("*.ligozone"), &findData);
+
 	while (hFind != INVALID_HANDLE_VALUE)
 	{
 		// If the name of the file is not . or .. then its a valid entry in the DataBase
-		if (!((strcmp (findData.cFileName, ".") == 0) || (strcmp (findData.cFileName, "..") == 0)))
+		if (!((_tcscmp(findData.cFileName, _T(".")) == 0) || (_tcscmp(findData.cFileName, _T("..")) == 0)))
 		{
 			string error;
-			if (!_ZoneBank.addElement (findData.cFileName, error))
-				theApp.errorMessage (error.c_str());
+			if (!_ZoneBank.addElement(NLMISC::tStrToUtf8(findData.cFileName), error))
+				theApp.errorMessage(error.c_str());
 		}
-		if (FindNextFile (hFind, &findData) == 0)
+		if (FindNextFile(hFind, &findData) == 0)
 			break;
 	}
-	SetCurrentDirectory (sDirBackup);
+	SetCurrentDirectory(sDirBackup);
 	return true;
 }
 
@@ -1647,7 +1646,7 @@ string CBuilderZone::getZoneName (sint32 x, sint32 y)
 			return sRet;
 		}
 	}
-	sRet = "";
+	sRet.clear();
 	return sRet;
 }
 
@@ -1694,7 +1693,7 @@ uint8 CBuilderZone::getFlip (sint32 x, sint32 y)
 // ---------------------------------------------------------------------------
 CBuilderZoneRegion*	CBuilderZone::getPtrCurZoneRegion ()
 {
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return NULL;
 	return _ZoneRegions[_ZoneRegionSelected];
 }

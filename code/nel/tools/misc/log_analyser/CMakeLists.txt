@@ -1,6 +1,8 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc *.rc2)
 
-ADD_EXECUTABLE(log_analyser WIN32 ${SRC} log_analyser.rc)
+SOURCE_GROUP("" FILES ${SRC})
+
+ADD_EXECUTABLE(log_analyser WIN32 ${SRC})
 
 TARGET_LINK_LIBRARIES(log_analyser nelmisc)
 NL_DEFAULT_PROPS(log_analyser "NeL, Tools, Misc: log_analyser")

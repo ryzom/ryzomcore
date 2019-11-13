@@ -250,7 +250,7 @@ void CAutomatonStateSheet::build(const NLGEORGES::UFormElm &item, const string &
 // serial :
 // Serialize a CAutomatonStateSheet.
 //-----------------------------------------------
-void CAutomatonStateSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAutomatonStateSheet::serial(NLMISC::IStream &f)
 {
 	f.serialEnum(MoveState);
 	f.serialEnum(NextState);
@@ -402,7 +402,7 @@ void CAutomatonSheet::build(const NLGEORGES::UFormElm &item)
 
 //-----------------------------------------------
 //-----------------------------------------------
-void CAutomatonSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAutomatonSheet::serial(NLMISC::IStream &f)
 {
 	f.serialCont(_States);
 }// serial //
@@ -540,7 +540,7 @@ void CAutomatonListSheet::build(const NLGEORGES::UFormElm &rootList)
 // version 1 : base  version
 
 //-----------------------------------------------
-void CAutomatonListSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAutomatonListSheet::serial(NLMISC::IStream &f)
 {
 	if (f.isReading())
 	{

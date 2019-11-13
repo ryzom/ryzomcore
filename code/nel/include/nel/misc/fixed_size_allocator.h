@@ -45,7 +45,7 @@ public:
 	/// alloc a block
 	void *alloc();
 	/// destroy and dealloc a block
-	void free(void *block);
+	void freeBlock(void *block);
 	//
 	uint getNumBytesPerBlock() const { return _NumBytesPerBlock; }
 	uint getNumBlockPerChunk() const { return _NumBlockPerChunk; }
@@ -53,7 +53,7 @@ public:
 	uint getNumAllocatedBlocks() const { return _NumAlloc; }
 private:
 	class CChunk;
-	
+
 	class NL_ALIGN(NL_DEFAULT_MEMORY_ALIGNMENT) CNode
 	{
 	public:

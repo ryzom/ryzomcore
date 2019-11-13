@@ -92,6 +92,10 @@ Compilation is VERY SLOW
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // declare ostream << operator for ucstring -> registration of ucstring iin luabind will build a 'tostring' function from it
 std::ostream &operator<<(std::ostream &str, const ucstring &value)
 {
@@ -107,11 +111,11 @@ namespace NLGUI
 		{
 			return NLMISC::CPath::lookup(fileName,   false);
 		}
-		static void shellExecute(const char *operation,   const char *fileName,   const char *parameters)
+		static void shellExecute(const std::string &operation, const std::string &fileName, const std::string &parameters)
 		{
 		#if !FINAL_VERSION
 			#ifdef NL_OS_WINDOWS
-				ShellExecute(NULL,   operation,   fileName,   parameters,  NULL,   SW_SHOWDEFAULT);
+				ShellExecuteW(NULL, nlUtf8ToWide(operation), nlUtf8ToWide(fileName), nlUtf8ToWide(parameters), NULL, SW_SHOWDEFAULT);
 			#endif
 		#endif
 		}
@@ -791,6 +795,35 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	int CLuaIHM::getOnDraw(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_getOnDraw
+		CLuaStackChecker lsc(&ls, 1);
+
+		// params: CInterfaceElement*.
+		// return: "script" (nil if empty)
+		CLuaIHM::checkArgCount(ls, "getOnDraw", 1);
+		CLuaIHM::check(ls, CLuaIHM::isUIOnStack(ls, 1), "getOnDraw() requires a UI object in param 1");
+
+		// retrieve arguments
+		CInterfaceElement *pIE = CLuaIHM::getUIOnStack(ls, 1);
+		if (pIE)
+		{
+			// must be a group
+			CInterfaceGroup *group = dynamic_cast<CInterfaceGroup*>(pIE);
+			if (group)
+			{
+				if (!group->getLuaScriptOnDraw().empty()) {
+					ls.push(group->getLuaScriptOnDraw());
+					return 1;
+				}
+			}
+		}
+		ls.pushNil();
+		return 1;
+	}
+
+	// ***************************************************************************
 	int	CLuaIHM::addOnDbChange(CLuaState &ls)
 	{
 		//H_AUTO(Lua_CLuaIHM_addOnDbChange)
@@ -1430,7 +1463,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CLuaIHM::luaValueToReflectedProperty(CLuaState &ls, int stackIndex, CReflectable &target, const CReflectedProperty &property) throw(ELuaIHMException)
+	void CLuaIHM::luaValueToReflectedProperty(CLuaState &ls, int stackIndex, CReflectable &target, const CReflectedProperty &property)
 	{
 		//H_AUTO(Lua_property_throw)
 		if(ls.isNil(stackIndex))
@@ -1516,7 +1549,7 @@ namespace NLGUI
 		CSString s = str;
 		// Create table recursively (ex: 'game.TPVPClan' will check/create the table 'game' and 'game.TPVPClan')
 		p = s.splitTo('.', true);
-		while (p.size() > 0)
+		while (!p.empty())
 		{
 			if (path.empty() )
 				path = p;
@@ -1585,6 +1618,7 @@ namespace NLGUI
 
 		// *** Register Functions
 		ls.registerFunc("setOnDraw",    setOnDraw);
+		ls.registerFunc("getOnDraw", getOnDraw);
 		ls.registerFunc("setCaptureKeyboard", setCaptureKeyboard);
 		ls.registerFunc("resetCaptureKeyboard", resetCaptureKeyboard);
 		ls.registerFunc("setTopWindow", setTopWindow);
@@ -1701,8 +1735,20 @@ namespace NLGUI
 			void	*ptr= ls.newUserData(sizeof(CReflectableLuaRef));
 			nlassert(ptr);
 			//ls.dumpStack();
-			// initialize it,    and copy the given element
+
+// disable memory leaks detection for placement new
+#ifdef new
+	#undef new
+#endif
+
+			// initialize it, and copy the given element
 			new (ptr) CReflectableLuaRef(pRPT);
+
+// reenable memory leaks detection for placement new
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 			// Assign to this user data the __ui_metatable
 			//ls.dumpStack();
 			ls.push(IHM_LUA_METATABLE);			// userdata   "__ui_metatable"
@@ -1801,9 +1847,7 @@ namespace NLGUI
 	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const ucstring &search,   const ucstring &replace)
 	{
 		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
-		ucstring	ret= str;
-		while(strFindReplace(ret,   search,   replace));
-		return ret;
+		return strFindReplaceAll(str, search, replace);
 	}
 
 	// ***************************************************************************

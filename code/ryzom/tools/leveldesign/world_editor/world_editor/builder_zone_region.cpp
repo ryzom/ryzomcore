@@ -1178,7 +1178,7 @@ void CBuilderZoneRegion::putTransitions (sint32 inX, sint32 inY, const SPiece &r
 			_ZeBank->addAndSwitch ("size", "1x1");
 			vector<CZoneBankElement*> vElts;
 			_ZeBank->getSelection (vElts);
-			if (vElts.size() == 0)
+			if (vElts.empty())
 				return;
 			sint32 nRan = (sint32)(NLMISC::frand((float)vElts.size()));
 			NLMISC::clamp (nRan, (sint32)0, (sint32)(vElts.size()-1));
@@ -1446,7 +1446,7 @@ void CBuilderZoneRegion::updateTrans (sint32 x, sint32 y, CZoneBankElement *pElt
 			_ZeBank->addAndSwitch ("size", "1x1");
 			vector<CZoneBankElement*> vElts;
 			_ZeBank->getSelection (vElts);
-			if (vElts.size() == 0)
+			if (vElts.empty())
 				return;
 			sint32 nRan = (sint32)(NLMISC::frand((float)vElts.size()));
 			NLMISC::clamp (nRan, (sint32)0, (sint32)(vElts.size()-1));
@@ -1478,7 +1478,7 @@ void CBuilderZoneRegion::updateTrans (sint32 x, sint32 y, CZoneBankElement *pElt
 	_ZeBank->addOrSwitch ("transname", sMatA + "-" + sMatB);
 	vector<CZoneBankElement*> selection;
 	_ZeBank->getSelection (selection);
-	if (selection.size() == 0)
+	if (selection.empty())
 	{
 		string sTmp = sMatA;
 		sMatA = sMatB;
@@ -1488,7 +1488,7 @@ void CBuilderZoneRegion::updateTrans (sint32 x, sint32 y, CZoneBankElement *pElt
 		_ZeBank->getSelection (selection);
 	}
 
-	if (selection.size() == 0)
+	if (selection.empty())
 		return;
 
 	// Convert the sharingCutEdges and SharingNames to the num and type of transition
@@ -1569,7 +1569,7 @@ void CBuilderZoneRegion::updateTrans (sint32 x, sint32 y, CZoneBankElement *pElt
 	_ZeBank->addAndSwitch ("transnum", NLMISC::toString(Trans.Num));
 	_ZeBank->getSelection (selection);
 
-	if (selection.size() > 0)
+	if (!selection.empty())
 	{
 		if (pElt != NULL)
 		{
@@ -1650,7 +1650,7 @@ void CBuilderZoneRegion::tryPath (uint32 posA, uint32 posB, vector<uint32> &vPat
 	queue<SNode> qNodes;
 	qNodes.push (vNodes[posA]);
 
-	while (qNodes.size() > 0)
+	while (!qNodes.empty())
 	{
 		SNode node = qNodes.front ();
 		qNodes.pop ();

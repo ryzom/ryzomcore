@@ -1052,6 +1052,7 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 			}
 		}
 
+		senderName = STRING_MANAGER::CStringManagerClient::getLocalizedName(senderName);
 		switch(type)
 		{
 			case CChatGroup::shout:
@@ -1375,8 +1376,24 @@ class CHandlerTalk : public IActionHandler
 			}
 			else
 			{
-				ChatMngr.setChatMode((CChatGroup::TGroupType)mode);
-				ChatMngr.chat(text, mode == CChatGroup::team);
+				if (mode == CChatGroup::dyn_chat)
+				{
+					uint channel;
+					fromString(getParam (sParams, "channel"), channel);
+					if (channel < CChatGroup::MaxDynChanPerPlayer)
+					{
+						PeopleInterraction.talkInDynamicChannel(channel, text);
+					}
+					else
+					{
+						nlwarning("/ah talk: invalid dyn_chat channel %d\n", channel);
+					}
+				}
+				else
+				{
+					ChatMngr.setChatMode((CChatGroup::TGroupType)mode);
+					ChatMngr.chat(text, mode == CChatGroup::team);
+				}
 			}
 		}
 	}
@@ -1391,9 +1408,21 @@ class CHandlerEnterTalk : public IActionHandler
 	{
 		// Param
 		uint mode;
+		uint channel = 0;
+
 		fromString(getParam (sParams, "mode"), mode);
 
-		ChatMngr.updateChatModeAndButton(mode);
+		if (mode == CChatGroup::dyn_chat)
+		{
+			fromString(getParam(sParams, "channel"), channel);
+
+			if (channel >= CChatGroup::MaxDynChanPerPlayer)
+			{
+				channel = 0;
+			}
+		}
+
+		ChatMngr.updateChatModeAndButton(mode, channel);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerEnterTalk, "enter_talk");

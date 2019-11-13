@@ -60,7 +60,7 @@ public:
 
 		nlinfo ("init() was called");
 
-//		fp = fopen (NLMISC::CFile::findNewFile("stat.csv").c_str(), "wt");
+//		fp = nlfopen (NLMISC::CFile::findNewFile("stat.csv"), "wt");
 	}
 
 	bool update ()

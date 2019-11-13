@@ -32,6 +32,10 @@
 
 #include "driver_direct3d.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 
@@ -1243,29 +1247,29 @@ bool CDriverD3D::init (uintptr_t windowIcon, emptyProc exitFunc)
 
 	createCursors();
 
-	_WindowClass = "NLD3D" + toString(windowIcon);
+	_WindowClass = utf8ToWide("NLD3D" + toString(windowIcon));
 
 	// Register a window class
-	WNDCLASSA		wc;
+	WNDCLASSW		wc;
 
 	memset(&wc,0,sizeof(wc));
 	wc.style			= 0; // CS_HREDRAW | CS_VREDRAW ;//| CS_DBLCLKS;
 	wc.lpfnWndProc		= (WNDPROC)WndProc;
 	wc.cbClsExtra		= 0;
 	wc.cbWndExtra		= 0;
-	wc.hInstance		= GetModuleHandleA(NULL);
+	wc.hInstance		= GetModuleHandleW(NULL);
 	wc.hIcon			= (HICON)windowIcon;
 	wc.hCursor			= _DefaultCursor;
 	wc.hbrBackground	= WHITE_BRUSH;
 	wc.lpszClassName	= _WindowClass.c_str();
 	wc.lpszMenuName		= NULL;
-	if (!RegisterClassA(&wc))
+	if (!RegisterClassW(&wc))
 	{
 		DWORD error = GetLastError();
 		if (error != ERROR_CLASS_ALREADY_EXISTS)
 		{
 			nlwarning("CDriverD3D::init: Can't register window class %s (error code %i)", _WindowClass.c_str(), (sint)error);
-			_WindowClass = "";
+			_WindowClass.clear();
 			return false;
 		}
 	}
@@ -1324,7 +1328,7 @@ const D3DFORMAT FinalPixelFormat[ITexture::UploadFormatCount][CDriverD3D::FinalP
 
 // ***************************************************************************
 
-bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay)
+bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 {
 	H_AUTO_D3D(CDriver3D_setDisplay);
 
@@ -1412,8 +1416,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 		AdjustWindowRect(&WndRect,WndFlags,FALSE);
 
 		// Create
-		ucstring ustr(_WindowClass);
-		_HWnd = CreateWindowW((LPCWSTR)ustr.c_str(), L"", WndFlags, CW_USEDEFAULT,CW_USEDEFAULT, WndRect.right-WndRect.left,WndRect.bottom-WndRect.top, NULL, NULL,
+		_HWnd = CreateWindowW(_WindowClass.c_str(), L"", WndFlags, CW_USEDEFAULT,CW_USEDEFAULT, WndRect.right-WndRect.left,WndRect.bottom-WndRect.top, NULL, NULL,
 			GetModuleHandleW(NULL), NULL);
 		if (!_HWnd)
 		{
@@ -1806,7 +1809,7 @@ emptyProc CDriverD3D::getWindowProc()
 
 IDriver::TMessageBoxId CDriverD3D::systemMessageBox (const char* message, const char* title, TMessageBoxType type, TMessageBoxIcon icon)
 {
-	switch (::MessageBoxW (_HWnd, utf8ToWide(message), utf8ToWide(title), ((type==retryCancelType)?MB_RETRYCANCEL:
+	switch (::MessageBoxW(_HWnd, nlUtf8ToWide(message), nlUtf8ToWide(title), ((type == retryCancelType) ? MB_RETRYCANCEL :
 		(type==yesNoCancelType)?MB_YESNOCANCEL:
 		(type==okCancelType)?MB_OKCANCEL:
 		(type==abortRetryIgnoreType)?MB_ABORTRETRYIGNORE:
@@ -2267,7 +2270,10 @@ bool CDriverD3D::getCurrentScreenMode(GfxMode &gfxMode)
 // ***************************************************************************
 void CDriverD3D::setWindowTitle(const ucstring &title)
 {
-	SetWindowTextW(_HWnd,(WCHAR*)title.c_str());
+	if (!SetWindowTextW(_HWnd, (WCHAR*)title.c_str()))
+	{
+		nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+	}
 }
 
 // ***************************************************************************

@@ -45,8 +45,16 @@ void CBigFile::releaseInstance()
 // ***************************************************************************
 CBigFile::CThreadFileArray::CThreadFileArray()
 {
-	_CurrentId= 0;
+	_CurrentId = 0;
 }
+
+// ***************************************************************************
+CBigFile::CThreadFileArray::~CThreadFileArray()
+{
+	vector<CHandleFile>		*ptr = (vector<CHandleFile>*)_TDS.getPointer();
+	if (ptr) delete ptr;
+}
+
 // ***************************************************************************
 uint32						CBigFile::CThreadFileArray::allocate()
 {
@@ -186,8 +194,21 @@ void CBigFile::remove (const std::string &sBigFileName)
 			fclose (handle.File);
 			handle.File= NULL;
 		}
-		delete [] rbnp.FileNames;
+
 		_BNPs.erase (it);
+	}
+}
+
+CBigFile::BNP::BNP() : FileNames(NULL), ThreadFileId(0), CacheFileOnOpen(false), AlwaysOpened(false), InternalUse(false), OffsetFromBeginning(0)
+{
+}
+
+CBigFile::BNP::~BNP()
+{
+	if (FileNames)
+	{
+		delete[] FileNames;
+		FileNames = NULL;
 	}
 }
 
@@ -317,6 +338,9 @@ bool CBigFile::BNP::readHeader(FILE *file)
 			nNb++;
 			it++;
 		}
+
+		if (FileNames)
+			delete[] FileNames;
 
 		FileNames = new char[nSize];
 		memset(FileNames, 0, nSize);
@@ -629,7 +653,7 @@ bool CBigFile::getFileInternal (const std::string &sFileName, BNP *&zeBnp, BNPFi
 	}
 
 	BNP &rbnp = _BNPs.find (zeBigFileName)->second;
-	if (rbnp.Files.size() == 0)
+	if (rbnp.Files.empty())
 	{
 		return false;
 	}
@@ -722,7 +746,7 @@ char *CBigFile::getFileNamePtr(const std::string &sFileName, const std::string &
 	{
 		BNP &rbnp = _BNPs.find (bigfilenamealone)->second;
 		vector<BNPFile>::iterator itNBPFile;
-		if (rbnp.Files.size() == 0)
+		if (rbnp.Files.empty())
 			return NULL;
 		string lwrFileName = toLower(sFileName);
 

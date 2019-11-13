@@ -109,14 +109,14 @@ void CLeftView::getSubObject (CGeorgesEditDocSub *subObject, HTREEITEM parent, H
 	if (!item)
 	{
 		int itemImage = subObject->getItemImage (GetDocument());
-		item = TreeCtrl.InsertItem (subObject->getName ().c_str(), itemImage, itemImage, parent);
+		item = TreeCtrl.InsertItem(nlUtf8ToTStr(subObject->getName()), itemImage, itemImage, parent);
 	}
 
 	// Set name
-	TreeCtrl.SetItemText (item, subObject->getName ().c_str());
+	TreeCtrl.SetItemText(item, nlUtf8ToTStr(subObject->getName()));
 
 	// Set item data
-	TreeCtrl.SetItemData (item, (DWORD)subObject);
+	TreeCtrl.SetItemData (item, (DWORD_PTR)subObject);
 
 	// For each children
 	HTREEITEM child = TreeCtrl.GetChildItem (item);
@@ -289,7 +289,7 @@ BOOL CLeftView::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 								bool parentVDfnArray;
 								CForm *form=doc->getFormPtr ();
 								CFormElm *elm = (CFormElm *)doc->getRootNode (subObject->getSlot ());
-								nlverify ( elm->getNodeByName (parent->getFormName ().c_str (), &parentDfn, indexDfn, 
+								nlverify ( elm->getNodeByName (parent->getFormName (), &parentDfn, indexDfn, 
 									&nodeDfn, &nodeType, &parentNode, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 								// Is a non empty array ?
@@ -343,7 +343,7 @@ BOOL CLeftView::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 								bool parentVDfnArray;
 								CForm *form=doc->getFormPtr ();
 								CFormElm *elm = (CFormElm *)doc->getRootNode (subObject->getSlot ());
-								nlverify ( elm->getNodeByName (parent->getFormName ().c_str (), &parentDfn, indexDfn, 
+								nlverify ( elm->getNodeByName (parent->getFormName (), &parentDfn, indexDfn, 
 									&nodeDfn, &nodeType, &parentNode, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 								// Is a non empty array ?
@@ -351,8 +351,8 @@ BOOL CLeftView::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 								{
 									// Change the node name
 									TreeCtrl.SetItemText (ptvdi->item.hItem, ptvdi->item.pszText);
-									doc->modify (new CActionString (IAction::FormArrayRename, ptvdi->item.pszText, *doc, 
-										subObject->getFormName ().c_str (), toString (subObject->getIdInParent ()).c_str(), 
+									doc->modify (new CActionString(IAction::FormArrayRename, tStrToUtf8(ptvdi->item.pszText).c_str(), *doc, 
+										subObject->getFormName().c_str(), toString (subObject->getIdInParent()).c_str(), 
 										doc->getLeftView ()->getCurrentSelectionId (), subObject->getSlot ()));
 									return TRUE;
 								}
@@ -430,7 +430,7 @@ BOOL CLeftView::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 								bool parentVDfnArray;
 								CForm *form=doc->getFormPtr ();
 								CFormElm *elm = (CFormElm *)doc->getRootNode (subObject->getSlot ());
-								nlverify ( elm->getNodeByName (parent->getFormName ().c_str (), &parentDfn, indexDfn, 
+								nlverify ( elm->getNodeByName (parent->getFormName (), &parentDfn, indexDfn, 
 									&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 								// Is the parent array ?
@@ -849,7 +849,7 @@ void CLeftView::OnInsert()
 						bool parentVDfnArray;
 						CForm *form=doc->getFormPtr ();
 						CFormElm *elm = (CFormElm *)doc->getRootNode (subObject->getSlot ());
-						nlverify ( elm->getNodeByName (parent->getFormName ().c_str (), &parentDfn, indexDfn, 
+						nlverify ( elm->getNodeByName (parent->getFormName (), &parentDfn, indexDfn, 
 							&nodeDfn, &nodeType, &parentNode, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 						// Is a non empty array ?
@@ -878,7 +878,7 @@ void CLeftView::OnDelete()
 		CEdit *edit = TreeCtrl.GetEditControl();
 		if (edit)
 		{
-			edit->SetWindowText ("");
+			edit->SetWindowText (_T(""));
 		}
 		else
 		{
@@ -911,7 +911,7 @@ void CLeftView::OnDelete()
 							bool parentVDfnArray;
 							CForm *form=doc->getFormPtr ();
 							CFormElm *elm = (CFormElm *)doc->getRootNode (subObject->getSlot ());
-							nlverify ( elm->getNodeByName (parent->getFormName ().c_str (), &parentDfn, indexDfn, 
+							nlverify ( elm->getNodeByName (parent->getFormName (), &parentDfn, indexDfn, 
 								&nodeDfn, &nodeType, &parentNode, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 							// Is a non empty array ?

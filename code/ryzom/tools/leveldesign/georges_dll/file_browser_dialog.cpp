@@ -79,8 +79,8 @@ BOOL CFileBrowserDialog::OnInitDialog()
 	int tabCount = 0;
 	if (theApp.Superuser)
 	{
-		TabFile->InsertItem (0, "Type");
-		TabFile->InsertItem (1, "Dfn");
+		TabFile->InsertItem (0, _T("Type"));
+		TabFile->InsertItem (1, _T("Dfn"));
 		tabCount += 2;
 
 		TreeCtrlType.create( sz, TabFile, 0);
@@ -96,7 +96,7 @@ BOOL CFileBrowserDialog::OnInitDialog()
 		TreeCtrlDfn.setNotifyWindow (m_hWnd, 1);
 	}
 
-	TabFile->InsertItem (tabCount, "Form");
+	TabFile->InsertItem (tabCount, _T("Form"));
 	TabFile->SetCurSel (tabCount);
 
 	TreeCtrlForm.create( sz, TabFile, 2);
@@ -279,7 +279,7 @@ void CFileBrowserDialog::openDocument ()
 			string pathName = CPath::lookup (filename.c_str (), false, false);
 			if (pathName.empty ())
 				pathName = filename;
-			theApp.OpenDocumentFile (pathName.c_str());
+			theApp.OpenDocumentFile(nlUtf8ToTStr(pathName));
 		}
 	}
 	else if (IsWindow (TreeCtrlType) && TreeCtrlDfn.IsWindowVisible ())
@@ -289,7 +289,7 @@ void CFileBrowserDialog::openDocument ()
 			string pathName = CPath::lookup (filename.c_str (), false, false);
 			if (pathName.empty ())
 				pathName = filename;
-			theApp.OpenDocumentFile (pathName.c_str());
+			theApp.OpenDocumentFile(nlUtf8ToTStr(pathName));
 		}
 	}
 	else if (TreeCtrlForm.IsWindowVisible ())
@@ -299,7 +299,7 @@ void CFileBrowserDialog::openDocument ()
 			string pathName = CPath::lookup (filename.c_str (), false, false);
 			if (pathName.empty ())
 				pathName = filename;
-			theApp.OpenDocumentFile (pathName.c_str());
+			theApp.OpenDocumentFile(nlUtf8ToTStr(pathName));
 		}
 	}
 }

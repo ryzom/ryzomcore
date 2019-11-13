@@ -111,7 +111,7 @@ public:
 	void doGenerate(bool async = false);
 
 	/// serialization
-	virtual void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void	serial(NLMISC::IStream &f);
 
 
 	/// a group of 4 uvs

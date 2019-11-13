@@ -1,0 +1,6 @@
+﻿*HASH_VALUE	ecosysteme ID	name	named	* nom en français	ia	da	p	pd	pia	pda
+_28DB5483EC2808B8	desert	Wüste	Wüste	désert	eine	die	Wüsten	Wüsten		die
+_AAEBA4866E5808B9	forest	Wald	Wald	forêt	ein	der	Wälder	Wälder		die
+_6478AC8C64A86065	lake	Seenland	Seenland	lacustre	ein	der	Seenländer	Seenländer		die
+_6838DC8A2C2798A7	jungle	Dschungel	Dschungel	jungle	ein	der	Dschungel	Dschungel		die
+_4AFF510A91EB3922	primeroots	Urwurzeln	Urwurzeln	primes racines		die	Urwurzeln	Urwurzeln		die

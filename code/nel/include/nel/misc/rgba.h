@@ -86,7 +86,7 @@ public:
 	 * Serialisation.
 	 * \param f Stream used for serialisation.
 	 */
-	void    serial (class NLMISC::IStream &f);
+	void    serial (NLMISC::IStream &f);
 
 	/**
 	 * Blend two colors.
@@ -377,6 +377,7 @@ public:
 	static const CRGBA Magenta ;
 	static const CRGBA Cyan ;
 	static const CRGBA White ;
+	static const CRGBA Transparent ;
 };
 
 
@@ -451,7 +452,7 @@ public:
 	 * Serialisation.
 	 * \param f Stream used for serialisation.
 	 */
-	void    serial(class NLMISC::IStream &f);
+	void    serial(NLMISC::IStream &f);
 
 	/**
 	 * Blend two colors.
@@ -676,7 +677,7 @@ public:
 	 * Serialisation.
 	 * \param f Stream used for serialisation.
 	 */
-	void    serial(class NLMISC::IStream &f);
+	void    serial(NLMISC::IStream &f);
 
 	/**
 	 * Set colors.

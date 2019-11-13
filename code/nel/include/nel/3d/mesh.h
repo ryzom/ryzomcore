@@ -85,7 +85,7 @@ public:
 		// This is slow but doesn't matter since used at mesh building....
 		CCorner();
 
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serial(NLMISC::IStream &f);
 	};
 
 	/// A Triangle face.
@@ -94,7 +94,7 @@ public:
 		CCorner		Corner[3];
 		sint32		MaterialId;
 		sint32      SmoothGroup;
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serial(NLMISC::IStream &f);
 	};
 
 
@@ -118,7 +118,7 @@ public:
 			}
 		}
 
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serial(NLMISC::IStream &f);
 	};
 
 	struct CVertLink
@@ -203,7 +203,7 @@ public:
 		CMeshBuild();
 
 		// Serialization
-		//void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		//void serial(NLMISC::IStream &f);
 
 	};
 	//@}
@@ -257,7 +257,7 @@ public:
 	virtual void	render(IDriver *drv, CTransformShape *trans, bool opaquePass);
 
 	/// serial this mesh.
-	virtual void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void	serial(NLMISC::IStream &f);
 	NLMISC_DECLARE_CLASS(CMesh);
 
 	/// get trinagle count.
@@ -370,7 +370,7 @@ public:
 	virtual float	getNumTriangles (float distance);
 
 	/// serial this mesh.
-	virtual void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void	serial(NLMISC::IStream &f);
 	NLMISC_DECLARE_CLASS(CMeshGeom);
 
 	// profile

@@ -110,7 +110,7 @@ namespace NLGUI
 		/** create a sub table for this object, with a string as a key
 		  * This object must be a table or an exception if thrown
 		  */
-		CLuaObject newTable(const char *tableName) throw(ELuaNotATable);
+		CLuaObject newTable(const char *tableName);
 
 
 		/** Set a value in a table.
@@ -118,29 +118,29 @@ namespace NLGUI
 		  * NB : value should came from the same lua environment
 		  * \TODO other type of keys
 		  */
-		void       setValue(const char *key, const CLuaObject &value) throw(ELuaNotATable);
-		void	   setValue(const std::string &key, const CLuaObject &value) throw(ELuaNotATable) { setValue(key.c_str(), value); }
-		void       setValue(const char *key, const std::string &value) throw(ELuaNotATable);
-		void       setValue(const char *key, const char *value) throw(ELuaNotATable);
-		void       setValue(const char *key, bool value) throw(ELuaNotATable);
-		void       setValue(const char *key, TLuaWrappedFunction value) throw(ELuaNotATable);
-		void       setValue(const char *key, double value) throw(ELuaNotATable);
-		void       setValue(const char *key, uint32 value) throw(ELuaNotATable);
-		void       setValue(const char *key, sint32 value) throw(ELuaNotATable);
-		void       setValue(const char *key, sint64 value) throw(ELuaNotATable);
-		void	   setValue(const std::string &key, const std::string &value) throw(ELuaNotATable) { setValue(key.c_str(), value); }
-		void       setNil(const char *key) throw(ELuaNotATable);
-		void       setNil(const std::string &key) throw(ELuaNotATable) { setNil(key.c_str()); }
+		void       setValue(const char *key, const CLuaObject &value);
+		void	   setValue(const std::string &key, const CLuaObject &value) { setValue(key.c_str(), value); }
+		void       setValue(const char *key, const std::string &value);
+		void       setValue(const char *key, const char *value);
+		void       setValue(const char *key, bool value);
+		void       setValue(const char *key, TLuaWrappedFunction value);
+		void       setValue(const char *key, double value);
+		void       setValue(const char *key, uint32 value);
+		void       setValue(const char *key, sint32 value);
+		void       setValue(const char *key, sint64 value);
+		void	   setValue(const std::string &key, const std::string &value) { setValue(key.c_str(), value); }
+		void       setNil(const char *key);
+		void       setNil(const std::string &key) { setNil(key.c_str()); }
 		/** Erase a value in a table by its key.
 		  * If this object is not a table then an exception is thrown.
 		  * \TODO other type of keys
 		  */
-		void       eraseValue(const char *key) throw(ELuaNotATable);
-		void       eraseValue(const std::string &key) throw(ELuaNotATable) { eraseValue(key.c_str()); }
+		void       eraseValue(const char *key);
+		void       eraseValue(const std::string &key) { eraseValue(key.c_str()); }
 		// test is this object is enumerable
 		bool	   isEnumerable() const;
 		// Enumeration of a table. If the object is not a table, an exception is thrown.
-		CLuaEnumeration enumerate() throw(ELuaNotATable);
+		CLuaEnumeration enumerate();
 		// retrieve metatable of an object (or nil if object has no metatable)
 		CLuaObject getMetaTable() const;
 		// set metatable for this object
@@ -155,7 +155,7 @@ namespace NLGUI
 		CLuaObject      operator[](const std::string &key) const { return operator[](key.c_str()); }
 		/** Checked access to a sub element of a table. An exception is thrown is the element is not a table.
 		  */
-		CLuaObject      at(const char *key) const throw (ELuaNotATable);
+		CLuaObject      at(const char *key) const;
 		CLuaObject      at(const std::string &key) const { return at(key.c_str()); }
 
 		// Test is that table has the given key. The object must be a table or an exception is thrown

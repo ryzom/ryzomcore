@@ -1,8 +1,10 @@
-FILE(GLOB SRC *.cpp *.h *.def)
+FILE(GLOB SRC *.cpp *.h *.def *.rc *.rc2)
 
-LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/nel_paint.cpp)
+LIST(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/nel_paint.cpp)
 
-ADD_LIBRARY(nel_patch_paint SHARED ${SRC} nel_patch_paint.rc)
+SOURCE_GROUP("" FILES ${SRC})
+
+ADD_LIBRARY(nel_patch_paint SHARED ${SRC})
 
 INCLUDE_DIRECTORIES(${MAXSDK_INCLUDE_DIR})
 
@@ -21,6 +23,8 @@ SET_TARGET_PROPERTIES(nel_patch_paint PROPERTIES SUFFIX ".dlm")
 NL_DEFAULT_PROPS(nel_patch_paint "MAX Plugin: NeL Patch Painter")
 NL_ADD_RUNTIME_FLAGS(nel_patch_paint)
 NL_ADD_LIB_SUFFIX(nel_patch_paint)
+
+ADD_DEFINITIONS(${MAXSDK_DEFINITIONS})
 
 INSTALL(TARGETS nel_patch_paint RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)
 INSTALL(FILES keys.cfg DESTINATION maxplugin/plugins )

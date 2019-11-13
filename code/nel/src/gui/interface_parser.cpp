@@ -42,6 +42,11 @@
 #ifdef LUA_NEVRAX_VERSION
 	#include "lua_ide_dll_nevrax/include/lua_ide_dll/ide_interface.h" // external debugger
 #endif
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 const uint32 UI_CACHE_SERIAL_CHECK = NELID("IUG_");
 
 using namespace NLMISC;
@@ -193,7 +198,7 @@ namespace NLGUI
 		xmlKeepBlanksDefault(0);
 		//parse all interface files and build a single xml document
 		xmlNodePtr globalEnclosing;
-		nlassert (strings.size());
+		nlassert (!strings.empty());
 		CIXml read;
 		string nextFileName;
 		static const char *SCRIPT_AS_STRING = "<script as string>";
@@ -665,10 +670,10 @@ namespace NLGUI
 			if (strchr(ptr, '#') != NULL)
 			{
 				string LastProp = ptr.str();
-				string NewProp ="";
+				string NewProp;
 				string RepProp;
 
-				while (LastProp.size() > 0)
+				while (!LastProp.empty())
 				{
 					string::size_type diesPos = LastProp.find("#");
 					if (diesPos != string::npos)
@@ -709,7 +714,7 @@ namespace NLGUI
 					else
 					{
 						NewProp += LastProp;
-						LastProp = "";
+						LastProp.clear();
 					}
 				}
 				xmlSetProp(node,props->name, (const xmlChar*)NewProp.c_str());

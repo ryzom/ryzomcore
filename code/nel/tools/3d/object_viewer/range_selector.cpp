@@ -32,8 +32,8 @@ CRangeSelector::CRangeSelector(const CString &lowerBound, const CString &upperBo
 	: CDialog(CRangeSelector::IDD, pParent), _EditableRange(er)
 {
 	//{{AFX_DATA_INIT(CRangeSelector)
-	m_LowerBound = _T(lowerBound);
-	m_UpperBound = _T(upperBound);
+	m_LowerBound = lowerBound;
+	m_UpperBound = upperBound;
 	//}}AFX_DATA_INIT
 }
 

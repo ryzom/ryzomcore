@@ -27,6 +27,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace
 {
 	const uint KEY_REPEAT_MIN = 100;
@@ -988,6 +992,28 @@ namespace NLGUI
 		CLuaIHM::checkArgCount(ls, funcName, 0);
 
 		runLeftClickAction();
+
+		return 0;
+	}
+
+		// ***************************************************************************
+	void CCtrlBaseButton::runRightClickAction()
+	{
+		if(_AHOnRightClick != NULL)
+		{
+
+			CAHManager::getInstance()->submitEvent( "button_click:" + getId() );
+			CAHManager::getInstance()->runActionHandler (_AHOnRightClick, this, _AHRightClickParams);
+		}
+	}
+
+	// ***************************************************************************
+	int CCtrlBaseButton::luaRunRightClickAction(CLuaState &ls)
+	{
+		const char *funcName = "onRightClick";
+		CLuaIHM::checkArgCount(ls, funcName, 0);
+
+		runRightClickAction();
 
 		return 0;
 	}

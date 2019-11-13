@@ -235,7 +235,7 @@ public:
 	 * the returned nbBytesRemaining value is non-zero.
 	 * \param destid The identifier of the destination connection.
 	 * \param nbBytesRemaining If the pointer is not NULL, the method sets the number of bytes still pending after the flush attempt.
-	 * \returns False if an error has occured (e.g. the remote host is disconnected).
+	 * \returns False if an error has occurred (e.g. the remote host is disconnected).
 	 * To retrieve the reason of the error, call CSock::getLastError() and/or CSock::errorString()
 	 */
 	bool	flush( TSockId destid, uint *nbBytesRemaining=NULL );

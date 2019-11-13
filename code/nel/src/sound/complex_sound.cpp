@@ -19,7 +19,6 @@
 #include "nel/misc/path.h"
 #include "nel/misc/common.h"
 #include "nel/sound/audio_mixer_user.h"
-#include "nel/misc/sheet_id.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -64,11 +63,11 @@ void CComplexSound::parseSequence(const std::string &str, std::vector<uint32> &s
 void CComplexSound::getSubSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const
 {
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
-	std::vector<NLMISC::CSheetId>::const_iterator first(_Sounds.begin()), last(_Sounds.end());
+	std::vector<NLMISC::TStringId>::const_iterator first(_Sounds.begin()), last(_Sounds.end());
 	for (; first != last; ++first)
 	{
 		CSound *sound = mixer->getSoundId(*first);
-		subsounds.push_back(make_pair((*first).toString()/*CStringMapper::unmap(*first)*/, sound));
+		subsounds.push_back(make_pair(CStringMapper::unmap(*first), sound));
 	}
 }
 
@@ -84,7 +83,7 @@ uint32 CComplexSound::getDuration()
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
 
 	vector<sint32>	durations;
-	std::vector<NLMISC::CSheetId>::iterator first(_Sounds.begin()), last(_Sounds.end());
+	std::vector<NLMISC::TStringId>::iterator first(_Sounds.begin()), last(_Sounds.end());
 	for (; first != last; ++first)
 	{
 		CSound *sound = mixer->getSoundId(*first);
@@ -205,7 +204,7 @@ float CComplexSound::getMaxDistance() const
 		CComplexSound *This = const_cast<CComplexSound*>(this);
 
 		This->_MaxDist = 0.0f;
-		std::vector<NLMISC::CSheetId>::const_iterator first(_Sounds.begin()), last(_Sounds.end());
+		std::vector<NLMISC::TStringId>::const_iterator first(_Sounds.begin()), last(_Sounds.end());
 
 		for (; first != last; ++first)
 		{
@@ -237,7 +236,7 @@ void	CComplexSound::serial(NLMISC::IStream &s)
 		{
 			std::string name;
 			s.serial(name);
-			_Sounds.push_back(NLMISC::CSheetId(name, "sound"));
+			_Sounds.push_back(CStringMapper::map(name));
 		}
 	}
 	else
@@ -246,7 +245,7 @@ void	CComplexSound::serial(NLMISC::IStream &s)
 		s.serial(nb);
 		for (uint i=0; i<nb; ++i)
 		{
-			std::string name = _Sounds[i].toString();
+			std::string name = CStringMapper::unmap(_Sounds[i]);
 			s.serial(name);
 		}
 	}
@@ -301,8 +300,8 @@ void	CComplexSound::importForm(const std::string& filename, NLGEORGES::UFormElm&
 			string soundname;
 			if (psoundsArray->getArrayValue(soundname, i))
 			{
-				nlassert(soundname.find(".sound") != std::string::npos);
-				_Sounds.push_back(NLMISC::CSheetId(soundname));
+				soundname = CFile::getFilenameWithoutExtension(soundname);
+				_Sounds.push_back(CStringMapper::map(soundname));
 			}
 		}
 	}

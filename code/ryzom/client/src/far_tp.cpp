@@ -44,6 +44,12 @@
 #include "bg_downloader_access.h"
 #include "login_progress_post_thread.h"
 #include "interface_v3/action_handler_base.h"
+#include "item_group_manager.h"
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -189,7 +195,7 @@ const std::string& CLoginStateMachine::toString(CLoginStateMachine::TEvent event
 			break;						\
 		}								\
 
-extern std::string LoginLogin, LoginPassword;
+extern std::string LoginLogin, LoginPassword, LoginCustomParameters;
 extern bool noUserChar;
 extern bool userChar;
 extern bool serverReceivedReady;
@@ -246,14 +252,26 @@ void CLoginStateMachine::run()
 
 			if (!ClientCfg.TestBrowser)
 			{
-				if (LoginLogin.empty())
+				if (LoginPassword.empty())
 				{
-					// standard procedure
-					SM_BEGIN_EVENT_TABLE
-						SM_EVENT(ev_init_done, st_login);
-						SM_EVENT(ev_skip_all_login, st_ingame);
-						SM_EVENT(ev_quit, st_end);
-					SM_END_EVENT_TABLE
+					if (!LoginCustomParameters.empty() && LoginLogin.empty())
+					{
+						// alternate login procedure
+						SM_BEGIN_EVENT_TABLE
+							SM_EVENT(ev_init_done, st_alt_login);
+							SM_EVENT(ev_skip_all_login, st_ingame);
+							SM_EVENT(ev_quit, st_end);
+						SM_END_EVENT_TABLE
+					}
+					else
+					{
+						// standard procedure
+						SM_BEGIN_EVENT_TABLE
+							SM_EVENT(ev_init_done, st_login);
+							SM_EVENT(ev_skip_all_login, st_ingame);
+							SM_EVENT(ev_quit, st_end);
+						SM_END_EVENT_TABLE
+					}
 				}
 				else
 				{
@@ -327,6 +345,27 @@ void CLoginStateMachine::run()
 //					SM_END_EVENT_TABLE
 //				}
 			break;
+		case st_alt_login:
+			initAltLogin();
+
+//				if (ClientCfg.R2Mode)
+			{
+				// r2 mode
+				SM_BEGIN_EVENT_TABLE
+					SM_EVENT(ev_login_not_alt, st_login);
+					SM_EVENT(ev_login_ok, st_check_patch);
+					SM_EVENT(ev_quit, st_end);
+				SM_END_EVENT_TABLE
+			}
+//				else
+//				{
+//					// legacy mode
+//					SM_BEGIN_EVENT_TABLE
+//						SM_EVENT(ev_login_ok, st_check_patch);
+//						SM_EVENT(ev_quit, st_end);
+//					SM_END_EVENT_TABLE
+//				}
+			break;
 		case st_shard_list:
 			/// display the shard list
 			initShardDisplay();
@@ -362,7 +401,7 @@ void CLoginStateMachine::run()
 			}
 			else
 			{
-				// return to login menu if an error occured
+				// return to login menu if an error occurred
 				_CurrentState = st_login;
 			}
 
@@ -1212,10 +1251,10 @@ void CFarTP::sendReady()
 	else
 	{
 		// Set season
-		RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+		RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 		DayNightCycleHour	= (float)RT.getRyzomTime();
 		CurrSeason = RT.getRyzomSeason();
-		RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+		RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 		DayNightCycleHour	= (float)RT.getRyzomTime();
 		ManualSeasonValue = RT.getRyzomSeason();
 
@@ -1248,6 +1287,8 @@ void CFarTP::sendReady()
 			// Instead of doing it in disconnectFromPreviousShard(), we do it here, only when it's needed
 			ClientCfg.R2EDEnabled = ! ClientCfg.R2EDEnabled;
 			pIM->uninitInGame0();
+			CItemGroupManager::getInstance()->uninit();
+
 			ClientCfg.R2EDEnabled = ! ClientCfg.R2EDEnabled;
 			ActionsContext.removeAllCombos();
 
@@ -1257,6 +1298,7 @@ void CFarTP::sendReady()
 				pIM->loadKeys();
 				CWidgetManager::getInstance()->hideAllWindows();
 				pIM->loadInterfaceConfig();
+				pIM->loadLandmarks();
 			}
 			else
 			{

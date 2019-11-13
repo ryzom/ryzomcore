@@ -18,6 +18,9 @@
 
 #include "nel/3d/play_list_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

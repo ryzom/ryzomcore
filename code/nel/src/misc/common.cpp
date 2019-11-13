@@ -80,8 +80,33 @@ extern "C" long _ftol2( double dblSource ) { return _ftol( dblSource ); }
 #endif // !NL_COMP_MINGW
 
 
-#if defined(NL_HAS_SSE2) && !defined(NL_CPU_X86_64)
+#ifdef NL_USE_ALIGNED_MEMORY_OPERATORS
 
+#ifdef NL_NO_EXCEPTION_SPECS
+void *operator new(size_t size)
+{
+	void *p = aligned_malloc(size, NL_DEFAULT_MEMORY_ALIGNMENT);
+	if (p == NULL) throw std::bad_alloc();
+	return p;
+}
+
+void *operator new[](size_t size)
+{
+	void *p = aligned_malloc(size, NL_DEFAULT_MEMORY_ALIGNMENT);
+	if (p == NULL) throw std::bad_alloc();
+	return p;
+}
+
+void operator delete(void *p) noexcept
+{
+	aligned_free(p);
+}
+
+void operator delete[](void *p) noexcept
+{
+	aligned_free(p);
+}
+#else
 void *operator new(size_t size) throw(std::bad_alloc)
 {
 	void *p = aligned_malloc(size, NL_DEFAULT_MEMORY_ALIGNMENT);
@@ -105,6 +130,7 @@ void operator delete[](void *p) throw()
 {
 	aligned_free(p);
 }
+#endif
 
 #endif /* NL_HAS_SSE2 */
 
@@ -523,7 +549,7 @@ std::string timestampToHumanReadable(uint32 timestamp)
 
 uint32 fromHumanReadable (const std::string &str)
 {
-	if (str.size() == 0)
+	if (str.empty())
 		return 0;
 
 	uint32 val;
@@ -565,6 +591,22 @@ NLMISC_CATEGORISED_COMMAND(nel,stohr, "Convert a second number into an human rea
 	return true;
 }
 
+std::string toLower(const char *str)
+{
+	if (!str) return "";
+
+	uint len = strlen(str);
+	string res;
+	res.reserve(len);
+	for(uint i = 0; i < len; i++)
+	{
+		if( (str[i] >= 'A') && (str[i] <= 'Z') )
+			res += str[i] - 'A' + 'a';
+		else
+			res += str[i];
+	}
+	return res;
+}
 
 std::string	toLower(const std::string &str)
 {
@@ -607,7 +649,7 @@ void toLower(char *str)
 	}
 }
 
-std::string	toUpper(const std::string &str)
+std::string toUpper(const std::string &str)
 {
 	string res;
 	res.reserve(str.size());
@@ -621,7 +663,7 @@ std::string	toUpper(const std::string &str)
 	return res;
 }
 
-void		toUpper(char *str)
+void toUpper(char *str)
 {
 	if (str == 0)
 		return;
@@ -634,6 +676,109 @@ void		toUpper(char *str)
 		}
 		str++;
 	}
+}
+
+std::string toHexa(const uint8 &b)
+{
+	return toString("%02hhx", b);
+}
+
+std::string toHexa(const uint8 *data, uint size)
+{
+	std::string res;
+
+	// hexadecimal string will be always twice the original size
+	res.reserve(size * 2);
+
+	// process each byte
+	for (uint i = 0; i < size; ++i)
+	{
+		res += toHexa(data[i]);
+	}
+
+	return res;
+}
+
+std::string toHexa(const std::string &str)
+{
+	return toHexa((uint8*)str.c_str(), (uint)str.length());
+}
+
+std::string toHexa(const char *str)
+{
+	return toHexa((uint8*)str, (uint)strlen(str));
+}
+
+bool fromHexa(const std::string &hexa, uint8 &b)
+{
+	return fromHexa(hexa.c_str(), b);
+}
+
+bool fromHexa(const std::string &hexa, uint8 *data)
+{
+	return fromHexa(hexa.c_str(), data);
+}
+
+bool fromHexa(const std::string &hexa, std::string &str)
+{
+	return fromHexa(hexa.c_str(), str);
+}
+
+bool fromHexa(const char *hexa, uint8 &b)
+{
+	char c1 = *hexa;
+	char c2 = *(hexa+1);
+	uint8 x1, x2;
+	if (!fromHexa(c1, x1)) return false;
+	if (!fromHexa(c2, x2)) return false;
+	
+	b = (x1 << 4) | x2;
+
+	return true;
+}
+
+bool fromHexa(const char *hexa, uint8 *data)
+{
+	// length of the string
+	uint len = strlen(hexa);
+
+	// process each byte
+	for (uint i = 0; i < len; i += 2)
+	{
+		if (!fromHexa(hexa + i, *(data++))) return false;
+	}
+
+	return true;
+}
+
+bool fromHexa(const char *hexa, std::string &str)
+{
+	str.resize(strlen(hexa) * 2);
+
+	return fromHexa(hexa, (uint8*)str.c_str());
+}
+
+bool fromHexa(const char hexa, uint8 &b)
+{
+	if (hexa >= '0' && hexa <= '9')
+	{
+		b = hexa - '0';
+		return true;
+	}
+	
+	if (hexa >= 'A' && hexa <= 'F')
+	{
+		b = hexa - 'A' + 10;
+		return true;
+	}
+	
+	if (hexa >= 'a' && hexa <= 'f')
+	{
+		b = hexa - 'a' + 10;
+		return true;
+	}
+
+	return false;
 }
 
 std::string formatThousands(const std::string& s)
@@ -761,10 +906,12 @@ static bool createProcess(const std::string &programName, const std::string &arg
 		sProgramName = new wchar_t[MAX_PATH];
 		wcscpy(sProgramName, (wchar_t*)ucProgramName.c_str());
 
-		args = arguments;
+		// important! we need to specify the executable full path as first argument
+		args = toString("\"%s\" ", programName.c_str()) + arguments;
 	}
 
-	BOOL res = CreateProcessW(sProgramName, utf8ToWide(args), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+	// or 0 for a window
+	BOOL res = CreateProcessW(sProgramName, (LPWSTR)nlUtf8ToWide(args), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL /* current dir */, &si, &pi);
 
 	if (sProgramName)
 	{
@@ -866,8 +1013,8 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 	
 	int status = vfork ();
 	/////////////////////////////////////////////////////////
-	/// WARNING : NO MORE INSTRUCTION AFTER VFORK !
-	/// READ VFORK manual
+	// WARNING : NO MORE INSTRUCTION AFTER VFORK !
+	// READ VFORK manual
 	/////////////////////////////////////////////////////////
 	if (status == -1)
 	{
@@ -972,8 +1119,8 @@ bool launchProgramArray (const std::string &programName, const std::vector<std::
 	
 	int status = vfork ();
 	/////////////////////////////////////////////////////////
-	/// WARNING : NO MORE INSTRUCTION AFTER VFORK !
-	/// READ VFORK manual
+	// WARNING : NO MORE INSTRUCTION AFTER VFORK !
+	// READ VFORK manual
 	/////////////////////////////////////////////////////////
 	if (status == -1)
 	{
@@ -1011,20 +1158,32 @@ sint launchProgramAndWaitForResult(const std::string &programName, const std::st
 	if (!createProcess(programName, arguments, log, pi)) return -1;
 
 	// Successfully created the process.  Wait for it to finish.
-	WaitForSingleObject(pi.hProcess, INFINITE);
+	DWORD ret = WaitForSingleObject(pi.hProcess, INFINITE);
 
-	// Get the exit code.
-	DWORD exitCode = 0;
-	BOOL ok = GetExitCodeProcess(pi.hProcess, &exitCode);
+	if (ret == WAIT_OBJECT_0)
+	{
+		// Get the exit code.
+		DWORD exitCode = 0;
+		BOOL ok = GetExitCodeProcess(pi.hProcess, &exitCode);
 
-	//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
+		//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
 
-	if (ok) return (sint)exitCode;
+		if (ok) return (sint)exitCode;
+	}
 
 	if (log)
-		nlwarning("LAUNCH: Failed launched '%s' with arg '%s'", programName.c_str(), arguments.c_str());
+	{
+		std::string error = toString((uint)ret);
+
+		if (ret == WAIT_FAILED)
+		{
+			error += "(" + formatErrorMessage(getLastError()) +")";
+		}
+
+		nlwarning("LAUNCH: Failed launched '%s' with arg '%s' and error: %s", programName.c_str(), arguments.c_str(), error.c_str());
+	}
 
 	return -1;
 #else
@@ -1207,6 +1366,41 @@ std::string joinArguments(const std::vector<std::string> &args)
 	return res;
 }
 
+std::string escapeArgument(const std::string &arg)
+{
+#ifdef NL_OS_WINDOWS
+	// we can't escape %VARIABLE% on command-line under Windows
+	return arg;
+#else
+	// characters to escape, only " and $ (to prevent a $something replaced by an environment variable)
+	static const char s_charsToEscape[] = "\"$";
+
+	std::string res;
+	std::string::size_type pos = 0, lastPos = 0;
+
+	// to avoid reallocations
+	res.reserve(arg.size() * 2);
+
+	while ((pos = arg.find_first_of(s_charsToEscape, lastPos)) != std::string::npos)
+	{
+		// add previous part
+		res += arg.substr(lastPos, pos - lastPos);
+		
+		// not already escaped
+		if (!pos || arg[pos - 1] != '\\') res += '\\';
+
+		// add escaped character
+		res += arg[pos];
+
+		lastPos = pos+1;
+	}
+
+	res += arg.substr(lastPos);
+
+	return res;
+#endif
+}
+
 /*
  * Display the bits (with 0 and 1) composing a byte (from right to left)
  */
@@ -1259,7 +1453,7 @@ void displayDwordBits( uint32 b, uint nbits, sint beginpos, bool displayBegin, N
 FILE* nlfopen(const std::string &filename, const std::string &mode)
 {
 #ifdef NL_OS_WINDOWS
-	return _wfopen(utf8ToWide(filename), utf8ToWide(mode));
+	return _wfopen(nlUtf8ToWide(filename), nlUtf8ToWide(mode));
 #else
 	return fopen(filename.c_str(), mode.c_str());
 #endif
@@ -1416,17 +1610,17 @@ NLMISC_CATEGORISED_COMMAND(nel, killProgram, "kill a program given the pid", "<p
 }
 
 #ifdef NL_OS_WINDOWS
-LONG GetRegKey(HKEY key, LPCSTR subkey, LPSTR retdata)
+LONG GetRegKey(HKEY key, LPCWSTR subkey, LPWSTR retdata)
 {
 	HKEY hkey;
-	LONG retval = RegOpenKeyExA(key, subkey, 0, KEY_QUERY_VALUE, &hkey);
+	LONG retval = RegOpenKeyExW(key, subkey, 0, KEY_QUERY_VALUE, &hkey);
 
 	if (retval == ERROR_SUCCESS)
 	{
 		long datasize = MAX_PATH;
-		char data[MAX_PATH];
-		RegQueryValueA(hkey, NULL, data, &datasize);
-		lstrcpyA(retdata,data);
+		wchar_t data[MAX_PATH];
+		RegQueryValueW(hkey, NULL, data, &datasize);
+		lstrcpyW(retdata, data);
 		RegCloseKey(hkey);
 	}
 
@@ -1434,52 +1628,56 @@ LONG GetRegKey(HKEY key, LPCSTR subkey, LPSTR retdata)
 }
 #endif // NL_OS_WINDOWS
 
-static bool openDocWithExtension (const char *document, const char *ext)
+static bool openDocWithExtension (const std::string &document, const std::string &ext)
 {
 #ifdef NL_OS_WINDOWS
 	// First try ShellExecute()
-	HINSTANCE result = ShellExecuteA(NULL, "open", document, NULL, NULL, SW_SHOWDEFAULT);
+	HINSTANCE result = ShellExecuteW(NULL, L"open", nlUtf8ToWide(document), NULL, NULL, SW_SHOWDEFAULT);
 
 	// If it failed, get the .htm regkey and lookup the program
 	if ((uintptr_t)result <= HINSTANCE_ERROR)
 	{
-		char key[MAX_PATH + MAX_PATH];
+		wchar_t key[MAX_PATH + MAX_PATH];
 
-		if (GetRegKey(HKEY_CLASSES_ROOT, ext, key) == ERROR_SUCCESS)
+		// get the type of the extension
+		if (GetRegKey(HKEY_CLASSES_ROOT, nlUtf8ToWide("." + ext), key) == ERROR_SUCCESS)
 		{
-			lstrcatA(key, "\\shell\\open\\command");
+			lstrcatW(key, L"\\shell\\open\\command");
 
+			// get the command used to open a file with this extension
 			if (GetRegKey(HKEY_CLASSES_ROOT, key, key) == ERROR_SUCCESS)
 			{
-				char *pos = strstr(key, "\"%1\"");
+				std::string program = wideToUtf8(key);
 
-				if (pos == NULL)
+				// empty program
+				if (program.empty()) return false;
+
+				if (program[0] == '"')
 				{
-					// No quotes found
-					// Check for %1, without quotes
-					pos = strstr(key, "%1");
-		
-					if (pos == NULL)
+					// program is quoted
+					std::string::size_type pos = program.find('"', 1);
+
+					if (pos != std::string::npos)
 					{
-						// No parameter at all...
-						pos = key+lstrlenA(key)-1;
-					}
-					else
-					{
-						// Remove the parameter
-						*pos = '\0';
+						// take part before next quote
+						program = program.substr(1, pos - 1);
 					}
 				}
 				else
 				{
-					// Remove the parameter
-					*pos = '\0';
+					// program has a parameter
+					std::string::size_type pos = program.find(' ', 1);
+
+					if (pos != std::string::npos)
+					{
+						// take part before first space
+						program = program.substr(0, pos);
+					}
 				}
 
-				lstrcatA(pos, " ");
-				lstrcatA(pos, document);
-				int res = WinExec(key, SW_SHOWDEFAULT);
-				return (res>31);
+				// create process
+				PROCESS_INFORMATION pi;
+				return createProcess(program, document, false, pi);
 			}
 		}
 	}
@@ -1488,7 +1686,7 @@ static bool openDocWithExtension (const char *document, const char *ext)
 		return true;
 	}
 #elif defined(NL_OS_MAC)
-	CFURLRef url = CFURLCreateWithBytes(NULL, (const UInt8 *)document, strlen(document), kCFStringEncodingUTF8, NULL);
+	CFURLRef url = CFURLCreateWithBytes(NULL, (const UInt8 *)document.c_str(), document.length(), kCFStringEncodingUTF8, NULL);
 
 	if (url)
 	{
@@ -1497,7 +1695,7 @@ static bool openDocWithExtension (const char *document, const char *ext)
 
 		if (res != 0)
 		{
-			nlwarning("LSOpenCFURLRef %s returned %d", document, (sint)res);
+			nlwarning("LSOpenCFURLRef %s returned %d", document.c_str(), (sint)res);
 			return false;
 		}
 
@@ -1505,7 +1703,7 @@ static bool openDocWithExtension (const char *document, const char *ext)
 	}
 	else
 	{
-		nlwarning("Unable to create URL from %s", document);
+		nlwarning("Unable to create URL from %s", document.c_str());
 		return false;
 	}
 #else
@@ -1513,7 +1711,7 @@ static bool openDocWithExtension (const char *document, const char *ext)
 
 	if (!CFile::fileExists(command))
 	{
-		if (strcmp(ext, "htm") == 0)
+		if (ext == "htm")
 		{
 			command = "/etc/alternatives/x-www-browser";
 
@@ -1530,7 +1728,7 @@ static bool openDocWithExtension (const char *document, const char *ext)
 
 	if (command.empty())
 	{
-		nlwarning("Unable to open %s", document);
+		nlwarning("Unable to open %s", document.c_str());
 		return false;
 	}
 
@@ -1538,12 +1736,12 @@ static bool openDocWithExtension (const char *document, const char *ext)
 	const char *previousEnv = getenv("LD_LIBRARY_PATH");
 
 	// clear LD_LIBRARY_PATH to avoid problems with Steam Runtime
-	setenv("LD_LIBRARY_PATH", "", 1);
+	if (previousEnv) setenv("LD_LIBRARY_PATH", "", 1);
 
 	bool res = launchProgram(command, document);
 
 	// restore previous LD_LIBRARY_PATH
-	setenv("LD_LIBRARY_PATH", previousEnv, 1);
+	if (previousEnv) setenv("LD_LIBRARY_PATH", previousEnv, 1);
 
 	return res;
 #endif // NL_OS_WINDOWS
@@ -1551,18 +1749,18 @@ static bool openDocWithExtension (const char *document, const char *ext)
 	return false;
 }
 
-bool openURL (const char *url)
+bool openURL(const std::string &url)
 {
 	return openDocWithExtension(url, "htm");
 }
 
-bool openDoc (const char *document)
+bool openDoc(const std::string &document)
 {
 	// get extension from document fullpath
 	string ext = CFile::getExtension(document);
 
 	// try to open document
-	return openDocWithExtension(document, ext.c_str());
+	return openDocWithExtension(document, ext);
 }
 
 } // NLMISC

@@ -50,10 +50,21 @@ namespace NLGUI
 		void	setHTMLView( CGroupHTML *html);
 		bool	getMouseOverShape(std::string &texName, uint8 &rot, NLMISC::CRGBA &col);
 
+		void setActionOnLeftClick(const std::string &actionHandler) { _AHOnLeftClick = actionHandler; };
+		void setParamsOnLeftClick(const std::string &actionParams) { _AHOnLeftClickParams = actionParams; };
+
+		const std::string &getActionOnLeftClick() const { return _AHOnLeftClick; }
+		const std::string &getParamsOnLeftClick() const { return _AHOnLeftClickParams; }
 	protected:
 
 		// The main HTML group
 		CGroupHTML		*HTML;
+
+		// Left mouse click action
+		// Don't use CStringShared as URLs change past values would be permanently remembered.
+		std::string		_AHOnLeftClick;
+		std::string		_AHOnLeftClickParams;
+
 	};
 
 }

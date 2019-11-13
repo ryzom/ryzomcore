@@ -63,6 +63,10 @@ typedef int SOCKET;
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLNET {
 
 
@@ -149,7 +153,7 @@ void CSock::releaseNetwork()
 }
 
 
-/* Returns the code of the last error that has occured.
+/* Returns the code of the last error that has occurred.
  * Note: This code is platform-dependant. On Unix, it is errno; on Windows it is the Winsock error code.
  * See also errorString()
  */
@@ -497,9 +501,9 @@ CSock::TSockResult CSock::receive( uint8 *buffer, uint32& len, bool throw_except
 	if ( _NonBlocking )
 	{
 		// Receive incoming message (only the received part)
-
 		TTicks before = CTime::getPerformanceTime();
-		len = ::recv( _Sock, (char*)buffer, len, 0 );
+
+		sint retLen = ::recv( _Sock, (char*)buffer, len, 0 );
 
 		//nlinfo ("CSock::receive(): NBM Received %d bytes to %d res: %d (%d)", realLen, _Sock, len, ERROR_NUM);
 
@@ -509,7 +513,8 @@ CSock::TSockResult CSock::receive( uint8 *buffer, uint32& len, bool throw_except
 		}
 
 		_MaxReceiveTime = max( (uint32)(CTime::ticksToSecond(CTime::getPerformanceTime()-before)*1000.0f), _MaxReceiveTime );
-		switch ( len )
+
+		switch (retLen)
 		{
 			// Graceful disconnection
 			case 0 :
@@ -546,12 +551,14 @@ CSock::TSockResult CSock::receive( uint8 *buffer, uint32& len, bool throw_except
 				}
 			}
 		}
+
+		len = (uint32)retLen;
 	}
 	else // Blocking Mode
 	{
 		// Receive incoming message, waiting until a complete message has arrived
 		uint total = 0;
-		uint brecvd;
+		sint brecvd;
 
 		while ( total < len )
 		{

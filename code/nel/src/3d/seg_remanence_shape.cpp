@@ -24,6 +24,9 @@
 #include "nel/misc/bsphere.h"
 
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -44,7 +47,7 @@ CSegRemanenceShape::CSegRemanenceShape() : _GeomTouched(true),
 }
 
 //===========================================================
-void CSegRemanenceShape::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CSegRemanenceShape::serial(NLMISC::IStream &f)
 {
 	// version 2 : added default tracks
 	// version 1 : rollup ratio

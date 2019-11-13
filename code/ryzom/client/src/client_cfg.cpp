@@ -300,6 +300,12 @@ CClientConfig::CClientConfig()
 	Luminosity			= 0.f;						// Default Monitor Luminosity.
 	Gamma				= 0.f;						// Default Monitor Gamma.
 
+	InterfaceScale		= 1.0f;                     // Resize UI
+	InterfaceScale_min	= 0.8f;
+	InterfaceScale_max	= 2.0f;
+	InterfaceScale_step	= 0.05;
+	BilinearUI			= true;
+
 	VREnable			= false;
 	VRDisplayDevice		= "Auto";
 	VRDisplayDeviceId	= "";
@@ -324,13 +330,9 @@ CClientConfig::CClientConfig()
 	TexturesLoginInterface.push_back("texture_interfaces_v3_login");
 
 	DisplayAccountButtons = true;
-	CreateAccountURL	= "http://shard.ryzomcore.org/ams/index.php?page=register";
-	ConditionsTermsURL	= "http://www.gnu.org/licenses/agpl-3.0.html";
-	EditAccountURL		= "http://shard.ryzomcore.org/ams/index.php?page=settings";
-	BetaAccountURL		= "http://shard.ryzomcore.org/ams/index.php?page=settings";
-	ForgetPwdURL		= "http://shard.ryzomcore.org/ams/index.php?page=forgot_password";
-	FreeTrialURL		= "http://shard.ryzomcore.org/ams/index.php?page=register";
-	LoginSupportURL		= "http://shard.ryzomcore.org/ams/index.php";
+	CreateAccountURL	= "https://account.ryzom.com/signup/from_client.php";
+	EditAccountURL		= "https://account.ryzom.com/payment_profile/index.php";
+	ForgetPwdURL		= "https://account.ryzom.com/payment_profile/lost_secure_password.php";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
 	EyesHeight			= 1.5f;						// Default User Eyes Height.
@@ -354,6 +356,7 @@ CClientConfig::CClientConfig()
 	FreeLookAcceleration    = 0;					// Default FreeLookAcceleration
 	FreeLookSmoothingPeriod = 0.f;                  // when in absolute mode, free look factor is used instead of speed, the mouse gives the absolute angle
 	FreeLookInverted		= false;
+	FreeLookTablet			= false;                // Mouse reports absolute coordinates, so avoid mouse recentering
 	AutomaticCamera			= true;
 	DblClickMode			= true;					// when in dbl click mode, a double click is needed to execute default contextual action
 	AutoEquipTool			= true;					// when true player will auto-equip last used weapon or forage tool when doing an action
@@ -425,10 +428,12 @@ CClientConfig::CClientConfig()
 	PatchletUrl.clear();
 	PatchVersion.clear();
 
-	WebIgMainDomain = "shard.ryzomcore.org";
+	WebIgMainDomain = "atys.ryzom.com";
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
+	WebIgNotifInterval = 10; // time in minutes
 
-	CurlMaxConnections = 2;
+	CurlMaxConnections = 5;
+	CurlCABundle.clear();
 
 	RingReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes_ring/index.php";
 	ReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes/index.php";
@@ -462,6 +467,10 @@ CClientConfig::CClientConfig()
 
 	ColorShout			= CRGBA(150,0,0,255);		// Default Shout color.
 	ColorTalk			= CRGBA(255,255,255,255);	// Default Talk color.
+
+	// MP3 player
+	MediaPlayerDirectory	= "music";
+	MediaPlayerAutoPlay		= false;
 
 //	PreDataPath.push_back("data/gamedev/language/");	// Default Path for the language data
 
@@ -588,7 +597,7 @@ CClientConfig::CClientConfig()
 	FollowOnAtk			= true;
 	AtkOnSelect			= false;
 	TransparentUnderCursor = false;
-
+	ItemGroupAllowGuild = false;
 	// PREFERENCES
 	FPV					= false;
 	CameraHeight		= 2.5f;
@@ -601,6 +610,11 @@ CClientConfig::CClientConfig()
 	CameraSpeedMin		= 0.2f;
 	CameraSpeedMax		= 1.0f;
 	CameraResetSpeed	= 2.0f;
+
+	MaxMapScale			= 2.0f;
+	R2EDMaxMapScale		= 8.0f;
+
+	TargetChangeCompass	= true;
 
 	// VERBOSES
 	VerboseVP				= false;
@@ -833,6 +847,13 @@ void CClientConfig::setValues()
 	READ_FLOAT_FV(Luminosity)
 	// Gamma
 	READ_FLOAT_FV(Gamma)
+	// UI scaling
+	READ_FLOAT_FV(InterfaceScale);
+	READ_FLOAT_FV(InterfaceScale_min);
+	READ_FLOAT_FV(InterfaceScale_max);
+	READ_FLOAT_FV(InterfaceScale_step);
+	clamp(ClientCfg.InterfaceScale, ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max);
+	READ_BOOL_FV(BilinearUI);
 	// 3D Driver
 	varPtr = ClientCfg.ConfigFile.getVarPtr ("Driver3D");
 	if (varPtr)
@@ -860,6 +881,7 @@ void CClientConfig::setValues()
 	READ_INT_FV(FreeLookAcceleration)
 	READ_FLOAT_FV(FreeLookSmoothingPeriod)
 	READ_BOOL_FV(FreeLookInverted)
+	READ_BOOL_FV(FreeLookTablet)
 	READ_BOOL_FV(AutomaticCamera)
 	READ_BOOL_FV(DblClickMode)
 	READ_BOOL_FV(AutoEquipTool)
@@ -876,19 +898,13 @@ void CClientConfig::setValues()
 	READ_BOOL_DEV(DisplayAccountButtons)
 	READ_STRING_DEV(CreateAccountURL)
 	READ_STRING_DEV(EditAccountURL)
-	READ_STRING_DEV(ConditionsTermsURL)
-	READ_STRING_DEV(BetaAccountURL)
 	READ_STRING_DEV(ForgetPwdURL)
+	READ_STRING_DEV(BetaAccountURL)
 	READ_STRING_DEV(FreeTrialURL)
-	READ_STRING_DEV(LoginSupportURL)
 
-	READ_STRING_FV(CreateAccountURL)
-	READ_STRING_FV(EditAccountURL)
+	// defined in client_default.cfg
 	READ_STRING_FV(ConditionsTermsURL)
 	READ_STRING_FV(NamingPolicyURL)
-	READ_STRING_FV(BetaAccountURL)
-	READ_STRING_FV(ForgetPwdURL)
-	READ_STRING_FV(FreeTrialURL)
 	READ_STRING_FV(LoginSupportURL)
 
 #ifndef RZ_NO_CLIENT
@@ -1057,7 +1073,7 @@ void CClientConfig::setValues()
 
 	/////////////////////////
 	// NEW PATCHING SYSTEM //
-	READ_BOOL_DEV(PatchWanted)
+	READ_BOOL_FV(PatchWanted)
 
 #ifdef RZ_USE_CUSTOM_PATCH_SERVER
 	READ_STRING_FV(PatchUrl)
@@ -1079,10 +1095,19 @@ void CClientConfig::setValues()
 	// WEBIG //
 	READ_STRING_FV(WebIgMainDomain);
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
+	READ_INT_FV(WebIgNotifInterval);
 	READ_INT_FV(CurlMaxConnections);
 	if (ClientCfg.CurlMaxConnections < 0)
 		ClientCfg.CurlMaxConnections = 2;
 
+	READ_STRING_FV(CurlCABundle);
+	if (!ClientCfg.CurlCABundle.empty() && ClientCfg.CurlCABundle[0] == '%') // Path is relative to client_default.cfg path (used by ryzom patch)
+	{
+		string defaultConfigFileName;
+		if (ClientCfg.getDefaultConfigLocation(defaultConfigFileName))
+			ClientCfg.CurlCABundle = CFile::getPath(defaultConfigFileName)+ClientCfg.CurlCABundle.substr(1);
+	}
+		
 	///////////////
 	// ANIMATION //
 	// AnimatedAngleThreshold
@@ -1224,6 +1249,10 @@ void CClientConfig::setValues()
 	READ_BOOL_DEV(UseADPCM)
 	// Max track
 	READ_INT_FV(MaxTrack)
+
+	// MP3 Player
+	READ_STRING_FV(MediaPlayerDirectory);
+	READ_BOOL_FV(MediaPlayerAutoPlay);
 
 	/////////////////
 	// USER COLORS //
@@ -1439,6 +1468,8 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(FollowOnAtk);
 	READ_BOOL_FV(AtkOnSelect);
 	READ_BOOL_DEV(TransparentUnderCursor);
+	//
+	READ_BOOL_FV(ItemGroupAllowGuild);
 
 
 	/////////////////
@@ -1463,6 +1494,12 @@ void CClientConfig::setValues()
 		READ_FLOAT_FV(CameraDistance)
 	}
 
+	// Default values for CGroupMap
+	READ_FLOAT_FV(MaxMapScale);
+	READ_FLOAT_FV(R2EDMaxMapScale);
+
+	// /tar to update compass or not
+	READ_BOOL_FV(TargetChangeCompass);
 
 	/////////////
 	// SHADOWS //
@@ -1862,7 +1899,7 @@ void CClientConfig::setValues()
 // serial :
 // Serialize CFG.
 //-----------------------------------------------
-void CClientConfig::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CClientConfig::serial(NLMISC::IStream &f)
 {
 	// Start the opening of a new node named ClientCFG.
 	f.xmlPush("ClientCFG");
@@ -1988,30 +2025,43 @@ void CClientConfig::init(const string &configFileName)
 
 	// now we can continue loading and parsing the config file
 
-
 	// if the config file will be modified, it calls automatically the function setValuesOnFileChange()
 	ClientCfg.ConfigFile.setCallback (CClientConfig::setValuesOnFileChange);
 
 	// load the config files
 	ClientCfg.ConfigFile.load (configFileName);
 
+	CConfigFile::CVar *pCV;
+	// check language code is supported
+	pCV = ClientCfg.ConfigFile.getVarPtr("LanguageCode");
+	if (pCV)
+	{
+		std::string lang = pCV->asString();
+		if (!CI18N::isLanguageCodeSupported(lang))
+		{
+			nlinfo("Unsupported language code \"%s\" fallback on default", lang.c_str());
+			// fallback to default language
+			ClientCfg.LanguageCode = CI18N::getSystemLanguageCode();
+			// update ConfigFile variable
+			pCV->setAsString(ClientCfg.LanguageCode);
+			ClientCfg.ConfigFile.save();
+		}
+	}
 
 	// update the ConfigFile variable in the config file
-	CConfigFile::CVar *varPtr = ClientCfg.ConfigFile.getVarPtr ("ClientVersion");
-	if (varPtr)
+	pCV = ClientCfg.ConfigFile.getVarPtr("ClientVersion");
+	if (pCV)
 	{
-		string str = varPtr->asString ();
+		std::string str = pCV->asString ();
 		if (str != getVersion() && ClientCfg.SaveConfig)
 		{
 			nlinfo ("Update and save the ClientVersion variable in config file %s -> %s", str.c_str(), getVersion().c_str());
-			varPtr->setAsString (getVersion());
-			ClientCfg.ConfigFile.save ();
+			pCV->setAsString(getVersion());
+			ClientCfg.ConfigFile.save();
 		}
 	}
 	else
-	{
 		nlwarning ("There's no ClientVersion variable in the config file!");
-	}
 
 }// init //
 
@@ -2042,13 +2092,9 @@ void CClientConfig::release ()
 				// Are we in window mode ?
 				if (ClientCfg.Windowed /* && !isWindowMaximized() */)
 				{
-					// Save windows position
+					// Save windows position. width/height are saved when leaving ingame.
 					writeInt("PositionX", x);
 					writeInt("PositionY", y);
-
-					// Save windows size
-					writeInt("Width", std::max((sint)width, 800));
-					writeInt("Height", std::max((sint)height, 600));
 				}
 			}
 
@@ -2224,6 +2270,7 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 #endif
 
 	std::string currentPath = CPath::standardizePath(CPath::getCurrentPath());
+	std::string etcPath = CPath::standardizePath(getRyzomEtcPrefix());
 
 	// look in the current working directory first
 	if (CFile::isExists(currentPath + defaultConfigFileName))
@@ -2233,13 +2280,14 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 	else if (CFile::isExists(Args.getStartupPath() + defaultConfigFileName))
 		p_name = Args.getStartupPath() + defaultConfigFileName;
 
-	// look in prefix path
+	// look in application directory
 	else if (CFile::isExists(defaultConfigPath + defaultConfigFileName))
 		p_name = defaultConfigPath + defaultConfigFileName;
 
-	// if some client_default.cfg was found return true
-	if (p_name.size())
-		return true;
+	// look in etc prefix path
+	else if (!etcPath.empty() && CFile::isExists(etcPath + defaultConfigFileName))
+		p_name = etcPath + defaultConfigFileName;
 
-	return false;
+	// if some client_default.cfg was found return true
+	return !p_name.empty();
 }

@@ -60,13 +60,13 @@ NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupListAscensor, std::string, "list_sheet
 #define WIN_GUILD							"ui:interface:guild"
 #define WIN_GUILD_CHAT						"ui:interface:guild_chat"
 #define WIN_GUILD_FORUM						"ui:interface:guild_forum"
-#define VIEW_TEXT_GUILD_QUIT				"ui:interface:guild:content:tab_guild:quit_guild"
-#define CTRL_SHEET_GUILD_BLASON				"ui:interface:guild:content:tab_guild:blason"
-#define VIEW_TEXT_GUILD_MEMBER_COUNT		"ui:interface:guild:content:tab_guild:member_count"
+#define VIEW_TEXT_GUILD_QUIT				"ui:interface:guild:content:tab_guild_info:quit_guild"
+#define CTRL_SHEET_GUILD_BLASON				"ui:interface:guild:content:tab_guild_info:blason"
+#define VIEW_TEXT_GUILD_MEMBER_COUNT		"ui:interface:guild:content:tab_guild_info:member_count"
 
 
 #define LIST_GUILD_MEMBERS					"ui:interface:guild:content:tab_guild:list_member:guild_members"
-#define CTRL_QUIT_GUILD						"ui:interface:guild:content:tab_guild:quit_guild"
+#define CTRL_QUIT_GUILD						"ui:interface:guild:content:tab_guild_info:quit_guild"
 #define TEMPLATE_GUILD_MEMBER				"member_template"
 #define TEMPLATE_GUILD_MEMBER_NAME			"name"
 #define TEMPLATE_GUILD_MEMBER_GRADE			"grade"
@@ -278,7 +278,7 @@ void CGuildManager::update()
 		// Guild stuff
 		uint32 oldName = _Guild.NameID;
 		_Guild.NameID = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:NAME")->getValue32();
-		_Guild.Name = "";
+		_Guild.Name.clear();
 		_InGuild = (_Guild.NameID != 0);
 		if (!_InGuild)
 			closeAllInterfaces();
@@ -409,7 +409,7 @@ void CGuildManager::update()
 			}
 
 			// Search for UserEntity to find our own grade
-			if ((UserEntity != NULL) && (_GuildMembers.size() > 0))
+			if ((UserEntity != NULL) && (!_GuildMembers.empty()))
 			{
 				uint i;
 				_Grade = EGSPD::CGuildGrade::Member;
@@ -867,6 +867,10 @@ class CAHGuildSheetOpen : public IActionHandler
 						break;
 					}
 				}
+				
+				CCtrlBase *inviteButton = pLine->getCtrl("invite_button");
+				if (inviteButton != NULL)
+					inviteButton->setActive(rGuildMembers[i].Online != ccs_offline && rGuildMembers[i].Name != UserEntity->getEntityName());
 
 				// Enter Date
 				CViewText *pViewEnterDate = dynamic_cast<CViewText*>(pLine->getView(TEMPLATE_GUILD_MEMBER_ENTER_DATE));

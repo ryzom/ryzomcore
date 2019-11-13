@@ -215,7 +215,7 @@ catch
 (
 	-- Error
 	nlerror("ERROR Fatal error exporting 'pacs_prim' in folder %MaxSourceDirectory%")
-	nlerror("FAIL Fatal error occured")
+	nlerror("FAIL Fatal error occurred")
 	NelForceQuitRightNow()
 	removeRunningTag = false
 )
@@ -240,7 +240,7 @@ if (removeRunningTag) then
 )
 else
 (
-	nlerror("FAIL One or more issues occured")
+	nlerror("FAIL One or more issues occurred")
 	NelForceQuitRightNow()
 )
 

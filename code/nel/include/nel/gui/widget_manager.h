@@ -26,6 +26,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/gui/interface_common.h"
 #include "nel/gui/interface_options.h"
+#include "nel/gui/interface_group.h"
 #include "nel/gui/event_descriptor.h"
 #include "nel/3d/u_camera.h"
 #include "nel/gui/parser.h"
@@ -49,6 +50,7 @@ namespace NLGUI
 	class CProcedure;
 	class IEditorSelectionWatcher;
 	class IWidgetAdditionWatcher;
+	class IInterfaceScaleWatcher;
 
 	/**
 	 GUI Widget Manager
@@ -71,7 +73,7 @@ namespace NLGUI
 		class IOnWidgetsDrawnHandler
 		{
 		public:
-			virtual ~IOnWidgetsDrawnHandler(){};
+			virtual ~IOnWidgetsDrawnHandler(){}
 			virtual void process() = 0;
 		};
 
@@ -442,6 +444,7 @@ namespace NLGUI
 			OptionTimeoutMessages,
 			OptionTimeoutContext,
 			OptionTimeoutContextHtml,
+			OptionMonospaceFont,
 			NumSystemOptions
 		};
 		
@@ -501,7 +504,7 @@ namespace NLGUI
 
 		const CEventDescriptorKey& getLastKeyEvent() const{ return lastKeyEvent; }
 
-		IParser* getParser() const{ return parser; }
+		IParser* getParser() const{ return _Parser; }
 
 		/// Retrieves the Id of the currently selected widgets
 		void getEditorSelection( std::vector< std::string > &selection );
@@ -529,13 +532,18 @@ namespace NLGUI
 		bool unGroupSelection();
 		void setMultiSelection( bool b ){ multiSelection = b; }
 
+		float getInterfaceScale() const { return _InterfaceScale; }
+		void notifyInterfaceScaleWatchers();
+		void registerInterfaceScaleWatcher(IInterfaceScaleWatcher *watcher);
+		void unregisterInterfaceScaleWatcher(IInterfaceScaleWatcher *watcher);
+
 		bool createNewGUI( const std::string &project, const std::string &window );
 				
 	private:
 		CWidgetManager();
 		~CWidgetManager();
 
-		IParser *parser;
+		IParser *_Parser;
 
 		static CWidgetManager *instance;
 		std::vector< SMasterGroup > _MasterGroups;
@@ -614,6 +622,7 @@ namespace NLGUI
 
 		uint32 _ScreenH;
 		uint32 _ScreenW;
+		float  _InterfaceScale;
 		
 		std::vector< CInterfaceAnim* > activeAnims;
 
@@ -621,6 +630,7 @@ namespace NLGUI
 		std::vector< IOnWidgetsDrawnHandler* > onWidgetsDrawnHandlers;
 		std::vector< IEditorSelectionWatcher* > selectionWatchers;
 		std::vector< IWidgetWatcher* > widgetWatchers;
+		std::vector< IInterfaceScaleWatcher* > scaleWatchers;
 		
 		std::vector< std::string > editorSelection;
 		bool _GroupSelection;

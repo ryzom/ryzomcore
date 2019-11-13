@@ -27,23 +27,63 @@ ELSE()
   ENDIF()
 ENDIF()
 
+MACRO(APPEND_DEFINITION _NAME _VAL)
+  IF(CMAKE_VERSION VERSION_LESS "2.8.12")
+    # don't support logical expressions, append definition
+    LIST(APPEND ${_NAME} "-D${_VAL}")
+  ELSE()
+    # support logical expressions, use them
+    LIST(APPEND ${_NAME} "$<$<BOOL:${_VAL}>:-D$<JOIN:${_VAL},-D>>")
+  ENDIF()
+ENDMACRO()
+
 # Set PCH_FLAGS for common flags, PCH_ARCH_XXX_FLAGS for specific archs flags and PCH_ARCHS for archs
 MACRO(PCH_SET_COMPILE_FLAGS _target)
   SET(PCH_FLAGS)
   SET(PCH_ARCHS)
+  SET(PCH_INCLUDES)
 
-  SET(_FLAGS)
-  LIST(APPEND _FLAGS ${CMAKE_CXX_FLAGS})
+  # Append target for clang if defined
+  IF(CMAKE_CXX_COMPILER_TARGET)
+    LIST(APPEND PCH_FLAGS "--target=${CMAKE_CXX_COMPILER_TARGET}")
+  ENDIF()
 
+  IF(CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN)
+    LIST(APPEND PCH_FLAGS "--gcc-toolchain=${CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN}")
+  ENDIF()
+
+  IF(CMAKE_SYSROOT)
+    LIST(APPEND PCH_FLAGS "--sysroot=${CMAKE_SYSROOT}")
+  ENDIF()
+
+  IF(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES)
+    FOREACH(item ${CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES})
+      LIST(APPEND PCH_FLAGS "-isystem ${item}")
+    ENDFOREACH()
+  ENDIF()
+
+  # C++ flags
+  SET(_FLAGS ${CMAKE_CXX_FLAGS})
+  SEPARATE_ARGUMENTS(_FLAGS)
+
+  LIST(APPEND PCH_FLAGS ${_FLAGS})
+
+  # C++ config flags
   STRING(TOUPPER "${CMAKE_BUILD_TYPE}" _UPPER_BUILD)
-  LIST(APPEND _FLAGS " ${CMAKE_CXX_FLAGS_${_UPPER_BUILD}}")
+
+  SET(_FLAGS ${CMAKE_CXX_FLAGS_${_UPPER_BUILD}})
+  SEPARATE_ARGUMENTS(_FLAGS)
+
+  LIST(APPEND PCH_FLAGS ${_FLAGS})
 
   GET_TARGET_PROPERTY(_targetType ${_target} TYPE)
 
   SET(_USE_PIC OFF)
 
   IF(${_targetType} STREQUAL "SHARED_LIBRARY" OR ${_targetType} STREQUAL "MODULE_LIBRARY")
-    LIST(APPEND _FLAGS " ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+    SET(_FLAGS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS})
+    SEPARATE_ARGUMENTS(_FLAGS)
+    LIST(APPEND PCH_FLAGS ${_FLAGS})
   ELSE()
     GET_TARGET_PROPERTY(_pic ${_target} POSITION_INDEPENDENT_CODE)
     IF(_pic)
@@ -53,68 +93,88 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
 
   GET_DIRECTORY_PROPERTY(DIRINC INCLUDE_DIRECTORIES)
   FOREACH(item ${DIRINC})
-    LIST(APPEND _FLAGS " -I\"${item}\"")
+    LIST(APPEND PCH_INCLUDES "${item}")
   ENDFOREACH()
+
+  # NOTE: As cmake files (eg FindQT4) may now use generator expressions around their defines that evaluate
+  #       to an empty string, wrap all "items" in an expression that outputs a -D IFF the generated
+  #       expression is not empty.
 
   # Required for CMake 2.6
   SET(GLOBAL_DEFINITIONS)
   GET_DIRECTORY_PROPERTY(DEFINITIONS COMPILE_DEFINITIONS)
   IF(DEFINITIONS)
     FOREACH(item ${DEFINITIONS})
-      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+      APPEND_DEFINITION(GLOBAL_DEFINITIONS ${item})
     ENDFOREACH()
   ENDIF()
 
   GET_DIRECTORY_PROPERTY(DEFINITIONS COMPILE_DEFINITIONS_${_UPPER_BUILD})
   IF(DEFINITIONS)
     FOREACH(item ${DEFINITIONS})
-      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+      APPEND_DEFINITION(GLOBAL_DEFINITIONS ${item})
     ENDFOREACH()
   ENDIF()
 
-  GET_DIRECTORY_PROPERTY(DEFINITIONS DIRECTORY ${CMAKE_SOURCE_DIR} COMPILE_DEFINITIONS)
+  GET_DIRECTORY_PROPERTY(DEFINITIONS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPILE_DEFINITIONS)
   IF(DEFINITIONS)
     FOREACH(item ${DEFINITIONS})
-      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+      APPEND_DEFINITION(GLOBAL_DEFINITIONS ${item})
     ENDFOREACH()
   ENDIF()
 
-  GET_DIRECTORY_PROPERTY(DEFINITIONS DIRECTORY ${CMAKE_SOURCE_DIR} COMPILE_DEFINITIONS_${_UPPER_BUILD})
+  GET_DIRECTORY_PROPERTY(DEFINITIONS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPILE_DEFINITIONS_${_UPPER_BUILD})
   IF(DEFINITIONS)
     FOREACH(item ${DEFINITIONS})
-      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+      APPEND_DEFINITION(GLOBAL_DEFINITIONS ${item})
     ENDFOREACH()
   ENDIF()
 
   GET_TARGET_PROPERTY(oldProps ${_target} COMPILE_FLAGS)
   IF(oldProps)
-    LIST(APPEND _FLAGS " ${oldProps}")
+    SET(_FLAGS ${oldProps})
+    SEPARATE_ARGUMENTS(_FLAGS)
+    LIST(APPEND PCH_FLAGS ${_FLAGS})
   ENDIF()
 
   GET_TARGET_PROPERTY(oldPropsBuild ${_target} COMPILE_FLAGS_${_UPPER_BUILD})
   IF(oldPropsBuild)
-    LIST(APPEND _FLAGS " ${oldPropsBuild}")
+    SET(_FLAGS ${oldPropsBuild})
+    SEPARATE_ARGUMENTS(_FLAGS)
+    LIST(APPEND PCH_FLAGS ${_FLAGS})
   ENDIF()
 
   GET_TARGET_PROPERTY(DIRINC ${_target} INCLUDE_DIRECTORIES)
   IF(DIRINC)
     FOREACH(item ${DIRINC})
-      LIST(APPEND _FLAGS " -I\"${item}\"")
+      LIST(APPEND PCH_INCLUDES "${item}")
     ENDFOREACH()
   ENDIF()
 
   GET_TARGET_PROPERTY(DEFINITIONS ${_target} COMPILE_DEFINITIONS)
   IF(DEFINITIONS)
     FOREACH(item ${DEFINITIONS})
-      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+      APPEND_DEFINITION(GLOBAL_DEFINITIONS ${item})
     ENDFOREACH()
   ENDIF()
 
   GET_TARGET_PROPERTY(DEFINITIONS ${_target} COMPILE_DEFINITIONS_${_UPPER_BUILD})
   IF(DEFINITIONS)
     FOREACH(item ${DEFINITIONS})
-      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+      APPEND_DEFINITION(GLOBAL_DEFINITIONS ${item})
     ENDFOREACH()
+  ENDIF()
+
+  GET_TARGET_PROPERTY(OPTIONS ${_target} COMPILE_OPTIONS)
+  IF(OPTIONS)
+    SEPARATE_ARGUMENTS(OPTIONS)
+    LIST(APPEND PCH_FLAGS ${OPTIONS})
+  ENDIF()
+
+  GET_TARGET_PROPERTY(OPTIONS ${_target} COMPILE_OPTIONS_${_UPPER_BUILD})
+  IF(OPTIONS)
+    SEPARATE_ARGUMENTS(OPTIONS)
+    LIST(APPEND PCH_FLAGS ${OPTIONS})
   ENDIF()
 
   GET_TARGET_PROPERTY(_LIBS ${_target} INTERFACE_LINK_LIBRARIES)
@@ -126,7 +186,7 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
 
         IF(_DIRS)
           FOREACH(item ${_DIRS})
-            LIST(APPEND GLOBAL_DEFINITIONS " -I\"${item}\"")
+            LIST(APPEND PCH_INCLUDES "${item}")
           ENDFOREACH()
         ENDIF()
 
@@ -135,10 +195,7 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
 
         IF(_DEFINITIONS)
           FOREACH(item ${_DEFINITIONS})
-            # don't use dynamic expressions
-            IF(NOT item MATCHES "\\$<")
-              LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
-            ENDIF()
+            APPEND_DEFINITION(GLOBAL_DEFINITIONS ${item})
           ENDFOREACH()
         ENDIF()
       ENDIF()
@@ -149,7 +206,7 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
   IF(GLOBAL_DEFINITIONS MATCHES "QT_CORE_LIB")
     # Hack to define missing QT_NO_DEBUG with Qt 5.2
     IF(_UPPER_BUILD STREQUAL "RELEASE")
-      LIST(APPEND GLOBAL_DEFINITIONS " -DQT_NO_DEBUG")
+      LIST(APPEND GLOBAL_DEFINITIONS "-DQT_NO_DEBUG")
     ENDIF()
 
     # Qt5_POSITION_INDEPENDENT_CODE should be true if Qt was compiled with PIC
@@ -158,86 +215,88 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
     ENDIF()
 
     IF(_USE_PIC)
-      LIST(APPEND _FLAGS " ${CMAKE_CXX_COMPILE_OPTIONS_PIC}")
+      LIST(APPEND PCH_FLAGS ${CMAKE_CXX_COMPILE_OPTIONS_PIC})
     ENDIF()
   ENDIF()
-
-  LIST(APPEND _FLAGS " ${GLOBAL_DEFINITIONS}")
 
   IF(CMAKE_VERSION VERSION_LESS "3.3.0")
-    GET_DIRECTORY_PROPERTY(_directory_flags DEFINITIONS)
-    GET_DIRECTORY_PROPERTY(_directory_definitions DIRECTORY ${CMAKE_SOURCE_DIR} DEFINITIONS)
-    LIST(APPEND _FLAGS " ${_directory_flags}")
-    LIST(APPEND _FLAGS " ${_directory_definitions}")
-  ENDIF()
+    GET_DIRECTORY_PROPERTY(_DIRECTORY_FLAGS DEFINITIONS)
 
-  # Format definitions
-  IF(MSVC)
-    # Fix path with space
-    SEPARATE_ARGUMENTS(_FLAGS UNIX_COMMAND "${_FLAGS}")
-  ELSE()
-    STRING(REGEX REPLACE " +" " " _FLAGS ${_FLAGS})
-    SEPARATE_ARGUMENTS(_FLAGS)
-  ENDIF()
-
-  IF(CLANG)
-    # Determining all architectures and get common flags
-    SET(_ARCH_NEXT)
-    SET(_XARCH_NEXT)
-    FOREACH(item ${_FLAGS})
-      IF(_ARCH_NEXT)
-        LIST(FIND PCH_ARCHS ${item} ITEM_FOUND)
-        IF(ITEM_FOUND EQUAL -1)
-          LIST(APPEND PCH_ARCHS ${item})
-          STRING(TOUPPER "${item}" _UPPER_ARCH)
-          SET(PCH_ARCH_${_UPPER_ARCH}_FLAGS "-arch" ${item})
-        ENDIF()
-        SET(_ARCH_NEXT OFF)
-      ELSEIF(_XARCH_NEXT)
-        SET(_XARCH_NEXT OFF)
-      ELSE()
-        IF(item MATCHES "^-arch")
-          SET(_ARCH_NEXT ON)
-        ELSEIF(item MATCHES "^-Xarch_")
-          STRING(REGEX REPLACE "-Xarch_([a-z0-9_]+)" "\\1" item ${item})
-          LIST(FIND PCH_ARCHS ${item} ITEM_FOUND)
-          IF(ITEM_FOUND EQUAL -1)
-            LIST(APPEND PCH_ARCHS ${item})
-            STRING(TOUPPER "${item}" _UPPER_ARCH)
-            SET(PCH_ARCH_${_UPPER_ARCH}_FLAGS "-arch" ${item})
-          ENDIF()
-          SET(_XARCH_NEXT ON)
-        ELSE()
-          LIST(APPEND PCH_FLAGS ${item})
-        ENDIF()
-      ENDIF()
-    ENDFOREACH()
-
-    # Get architcture specific flags
-    SET(_XARCH_NEXT)
-    FOREACH(item ${_FLAGS})
-      IF(_XARCH_NEXT)
-        STRING(TOUPPER "${_XARCH_NEXT}" _UPPER_XARCH)
-        LIST(APPEND PCH_ARCH_${_UPPER_XARCH}_FLAGS ${item})
-        SET(_XARCH_NEXT OFF)
-      ELSE()
-        IF(item MATCHES "^-Xarch_")
-          STRING(SUBSTRING "${item}" 7 -1 _XARCH_NEXT)
-        ENDIF()
-      ENDIF()
-    ENDFOREACH()
-
-    # Remove duplicated architectures
-    IF(_ARCHS AND PCH_ARCHS)
-      LIST(REMOVE_DUPLICATES PCH_ARCHS)
+    IF(_DIRECTORY_FLAGS)
+      SEPARATE_ARGUMENTS(_DIRECTORY_FLAGS)
+      FOREACH(item ${_DIRECTORY_FLAGS})
+        LIST(APPEND PCH_FLAGS "${item}")
+      ENDFOREACH()
     ENDIF()
-  ELSE()
-    SET(PCH_FLAGS ${_FLAGS})
+
+    GET_DIRECTORY_PROPERTY(_DIRECTORY_DEFINITIONS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DEFINITIONS)
+
+    IF(_DIRECTORY_DEFINITIONS)
+      SEPARATE_ARGUMENTS(_DIRECTORY_DEFINITIONS)
+      FOREACH(item ${_DIRECTORY_DEFINITIONS})
+        LIST(APPEND PCH_FLAGS "${item}")
+      ENDFOREACH()
+    ENDIF()
   ENDIF()
 
-  IF(PCH_FLAGS)
-    LIST(REMOVE_DUPLICATES PCH_FLAGS)
+  IF(CMAKE_CXX11_EXTENSION_COMPILE_OPTION)
+    LIST(APPEND PCH_FLAGS "${CMAKE_CXX11_EXTENSION_COMPILE_OPTION}")
   ENDIF()
+
+  # Already in list form and items may contain non-leading spaces that should not be split on
+  LIST(APPEND PCH_FLAGS "${GLOBAL_DEFINITIONS}")
+
+  IF(WIN32)
+    SET(SYSTEM_FLAG "[-/$]")
+  ELSE()
+    SET(SYSTEM_FLAG "[-$]")
+  ENDIF()
+
+  SET(_FINAL_FLAGS)
+  SET(_PREVIOUS_FLAG)
+
+  FOREACH(_FLAG ${PCH_FLAGS})
+    # If parameter is really a flag (starts with -)
+    IF(_FLAG MATCHES "^${SYSTEM_FLAG}")
+      IF(_PREVIOUS_FLAG)
+        # Append previous flag
+        LIST(APPEND _FINAL_FLAGS ${_PREVIOUS_FLAG})
+      ENDIF()
+
+      SET(_PREVIOUS_FLAG ${_FLAG})
+    ELSE()
+      IF(_PREVIOUS_FLAG)
+        # Append previous flag and its parameter
+        # TODO: escape them only if there is an space
+        LIST(APPEND _FINAL_FLAGS "${_PREVIOUS_FLAG} \"${_FLAG}\"")
+        SET(_PREVIOUS_FLAG)
+      ELSE()
+        # Shouldn't happen
+        MESSAGE(FATAL_ERROR "No previous flag before ${_FLAG}")
+      ENDIF()
+    ENDIF()
+  ENDFOREACH()
+
+  IF(_PREVIOUS_FLAG)
+    LIST(APPEND _FINAL_FLAGS ${_PREVIOUS_FLAG})
+  ENDIF()
+
+  SET(PCH_FLAGS ${_FINAL_FLAGS})
+
+  # Remove flags that don't work with PCH
+  LIST(REMOVE_ITEM PCH_FLAGS "-Wa,--noexecstack")
+
+  # Remove all empty parameters
+  LIST(REMOVE_ITEM PCH_FLAGS "")
+
+  # Remove duplicate parameters
+  LIST(REMOVE_DUPLICATES PCH_FLAGS)
+
+  # create a command-line string
+  STRING(REGEX REPLACE ";" " " PCH_FLAGS "${PCH_FLAGS}")
+
+  # and separate arguments
+  SEPARATE_ARGUMENTS(PCH_FLAGS)
 ENDMACRO()
 
 MACRO(GET_PDB_FILENAME _out_filename _target)
@@ -247,21 +306,21 @@ MACRO(GET_PDB_FILENAME _out_filename _target)
     SET(_targetOutput ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
   ELSEIF(${_targetType} STREQUAL STATIC_LIBRARY)
     SET(_targetOutput ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
-  ELSE(${_targetType} STREQUAL EXECUTABLE)
+  ELSE()
     SET(_targetOutput ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-  ENDIF(${_targetType} STREQUAL EXECUTABLE)
+  ENDIF()
 
   # determine target postfix
   STRING(TOUPPER "${CMAKE_BUILD_TYPE}_POSTFIX" _postfix_var_name)
   GET_TARGET_PROPERTY(_targetPostfix ${_target} ${_postfix_var_name})
   IF(${_targetPostfix} MATCHES NOTFOUND)
     SET(_targetPostfix "")
-  ENDIF(${_targetPostfix} MATCHES NOTFOUND)
+  ENDIF()
 
   SET(${_out_filename} "${_targetOutput}/${_target}${_targetPostfix}.pdb")
 ENDMACRO(GET_PDB_FILENAME)
 
-MACRO(PCH_SET_COMPILE_COMMAND _inputcpp _compile_FLAGS)
+MACRO(PCH_SET_COMPILE_COMMAND _inputcpp _compile_FLAGS _includes)
   IF(CMAKE_CXX_COMPILER_ARG1)
     # remove leading space in compiler argument
     STRING(REGEX REPLACE "^ +" "" pchsupport_compiler_cxx_arg1 ${CMAKE_CXX_COMPILER_ARG1})
@@ -270,18 +329,34 @@ MACRO(PCH_SET_COMPILE_COMMAND _inputcpp _compile_FLAGS)
   ENDIF()
 
   IF(MSVC)
-    GET_PDB_FILENAME(PDB_FILE ${_PCH_current_target})
-    SET(PCH_COMMAND ${CMAKE_CXX_COMPILER} ${pchsupport_compiler_cxx_arg1} ${_compile_FLAGS} /Yc /Fp"${PCH_OUTPUT}" ${_inputcpp} /Fd"${PDB_FILE}" /c /Fo"${PCH_OUTPUT}.obj")
+    GET_PDB_FILENAME(_PDB_FILE ${_PCH_current_target})
+
+    SET(PCH_TEMP_CONTENT)
+
+    FOREACH(_include ${_includes})
+      SET(PCH_TEMP_CONTENT "${PCH_TEMP_CONTENT} -I \"${_include}\"")
+    ENDFOREACH()
+
+    SET(PCH_TEMP_FILE ${CMAKE_CURRENT_BINARY_DIR}/pch_command.txt)
+    FILE(WRITE ${PCH_TEMP_FILE} "${PCH_TEMP_CONTENT}")
+
+    SET(PCH_COMMAND ${CMAKE_CXX_COMPILER} /nologo @${PCH_TEMP_FILE} ${pchsupport_compiler_cxx_arg1} ${_compile_FLAGS} /Yc /Fp"${PCH_OUTPUT}" ${_inputcpp} /Fd"${_PDB_FILE}" /c /Fo"${PCH_OUTPUT}.obj")
+
     # Ninja PCH Support
     # http://public.kitware.com/pipermail/cmake-developers/2012-March/003653.html
     SET_SOURCE_FILES_PROPERTIES(${_inputcpp} PROPERTIES OBJECT_OUTPUTS "${PCH_OUTPUT}.obj")
   ELSE()
     SET(HEADER_FORMAT "c++-header")
-    SET(_FLAGS "")
+    SET(_FLAGS)
     IF(APPLE)
       SET(HEADER_FORMAT "objective-${HEADER_FORMAT}")
-      SET(_FLAGS -fobjc-abi-version=2 -fobjc-legacy-dispatch)
+      LIST(APPEND _FLAGS ${OBJC_FLAGS})
     ENDIF()
+
+    FOREACH(_include ${_includes})
+      LIST(APPEND _FLAGS -I "${_include}")
+    ENDFOREACH()
+
     SET(PCH_COMMAND ${CMAKE_CXX_COMPILER} ${pchsupport_compiler_cxx_arg1} ${_compile_FLAGS} ${_FLAGS} -x ${HEADER_FORMAT} -o ${PCH_OUTPUT} -c ${PCH_INPUT})
   ENDIF()
 ENDMACRO()
@@ -366,7 +441,8 @@ MACRO(ADD_PRECOMPILED_HEADER_TO_TARGET _targetName)
     ENDIF()
 
     IF(APPLE)
-      SET(PCH_ADDITIONAL_COMPILER_FLAGS "-fobjc-abi-version=2 -fobjc-legacy-dispatch -x objective-c++ ${PCH_ADDITIONAL_COMPILER_FLAGS}")
+      STRING(REPLACE ";" " " OBJC_FLAGS_STR "${OBJC_FLAGS}")
+      SET(PCH_ADDITIONAL_COMPILER_FLAGS "${OBJC_FLAGS_STR} -x objective-c++ ${PCH_ADDITIONAL_COMPILER_FLAGS}")
     ENDIF()
 
     IF(WITH_PCH_DEBUG)
@@ -422,7 +498,7 @@ MACRO(ADD_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
       PCH_SET_PRECOMPILED_HEADER_OUTPUT(${_targetName} ${_inputh} ${_ARCH} "")
       LIST(APPEND PCH_OUTPUTS ${PCH_OUTPUT})
 
-      PCH_SET_COMPILE_COMMAND(${_inputcpp} "${PCH_ARCH_${_UPPER_ARCH}_FLAGS};${PCH_FLAGS}")
+      PCH_SET_COMPILE_COMMAND(${_inputcpp} "${PCH_ARCH_${_UPPER_ARCH}_FLAGS};${PCH_FLAGS}" "${PCH_INCLUDES}")
       PCH_CREATE_TARGET(${_targetName} ${_targetName}_pch_${_ARCH})
 
       ADD_PRECOMPILED_HEADER_TO_TARGET_ARCH(${_targetName} ${_ARCH})
@@ -431,7 +507,7 @@ MACRO(ADD_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
     PCH_SET_PRECOMPILED_HEADER_OUTPUT(${_targetName} ${_inputh} "" "")
     LIST(APPEND PCH_OUTPUTS ${PCH_OUTPUT})
 
-    PCH_SET_COMPILE_COMMAND(${_inputcpp} "${PCH_FLAGS}")
+    PCH_SET_COMPILE_COMMAND(${_inputcpp} "${PCH_FLAGS}" "${PCH_INCLUDES}")
     PCH_CREATE_TARGET(${_targetName} ${_targetName}_pch)
   ENDIF()
 
@@ -480,7 +556,13 @@ MACRO(ADD_NATIVE_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
       SET_TARGET_PROPERTIES(${_targetName} PROPERTIES XCODE_ATTRIBUTE_GCC_PRECOMPILE_PREFIX_HEADER "YES")
     ELSE()
       #Fallback to the "old" precompiled suppport
-      ADD_PRECOMPILED_HEADER(${_targetName} ${_inputh} ${_inputcpp})
+      IF(CMAKE_OSX_ARCHITECTURES AND TARGETS_COUNT GREATER 1)
+        FOREACH(_ARCH ${CMAKE_OSX_ARCHITECTURES})
+          ADD_PRECOMPILED_HEADER(${_targetName}_${_ARCH} ${_inputh} ${_inputcpp})
+        ENDFOREACH()
+      ELSE()
+        ADD_PRECOMPILED_HEADER(${_targetName} ${_inputh} ${_inputcpp})
+      ENDIF()
     ENDIF()
 
     IF(TARGET ${_targetName}_static)

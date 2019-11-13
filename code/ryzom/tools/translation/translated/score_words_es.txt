@@ -1,0 +1,5 @@
+﻿*HASH_VALUE	score_ID	name	point	ia	points
+_BE6C89EE2F599BBE	HitPoints	Salud	Punto de Salud	un	Puntos de Salud
+_B0DF4A6ECA004C1B	Stamina	Resistencia	Punto de Resistencia	un	Puntos de Resistencia
+_174A57AA672A04AA	Sap	Savia	Punto de Savia	un	Puntos de Savia
+_DB69E9025629B0BA	Focus	Concentración	Punto de Concentración	un	Puntos de Concentración

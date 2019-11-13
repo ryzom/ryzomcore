@@ -106,7 +106,7 @@ public:
 class ITexture : public CBitmap, public NLMISC::CRefCount, public NLMISC::IStreamable
 {
 public:
-	NL_USES_DEFAULT_ARENA_OBJECT_ALLOCATOR // for fast alloc
+//	NL_USES_DEFAULT_ARENA_OBJECT_ALLOCATOR // for fast alloc
 	// Those enums MUST be the same than in UTexture!!
 	enum	TWrapMode
 	{
@@ -359,7 +359,7 @@ public:
 	virtual bool allowDegradation() const { return false; }
 
 	/// serial ITexture basic infos (clamp ...).
-	virtual void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void	serial(NLMISC::IStream &f);
 
 	/** Select a texture among several other (if this texture is a set of texture such as CTextureMultiFile)
 	  * The default does nothing

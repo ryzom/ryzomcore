@@ -35,6 +35,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -747,7 +750,7 @@ void						CVegetableManager::deleteClipBlock(CVegetableClipBlock *clipBlock)
 	_EmptyClipBlockList.remove(clipBlock);
 
 	// delete
-	_ClipBlockMemory.free(clipBlock);
+	_ClipBlockMemory.freeBlock(clipBlock);
 }
 
 
@@ -782,7 +785,7 @@ void						CVegetableManager::deleteSortBlock(CVegetableSortBlock *sortBlock)
 	sortBlock->_Owner->_SortBlockList.remove(sortBlock);
 
 	// delete
-	_SortBlockMemory.free(sortBlock);
+	_SortBlockMemory.freeBlock(sortBlock);
 }
 
 
@@ -878,7 +881,7 @@ void						CVegetableManager::deleteIg(CVegetableInstanceGroup *ig)
 
 	// unlink from sortBlock, and delete.
 	sortBlock->_InstanceGroupList.remove(ig);
-	_InstanceGroupMemory.free(ig);
+	_InstanceGroupMemory.freeBlock(ig);
 
 
 	// decRef the clipBlock
@@ -1019,12 +1022,12 @@ void			CVegetableManager::reserveIgCompile(CVegetableInstanceGroup *ig, const CV
 	{
 		CVegetableInstanceGroup::CVegetableRdrPass	&vegetRdrPass= ig->_RdrPass[rdrPass];
 		nlassert(vegetRdrPass.TriangleIndices.getNumIndexes()==0);
-		nlassert(vegetRdrPass.TriangleLocalIndices.size()==0);
-		nlassert(vegetRdrPass.Vertices.size()==0);
-		nlassert(vegetRdrPass.LightedInstances.size()==0);
+		nlassert(vegetRdrPass.TriangleLocalIndices.empty());
+		nlassert(vegetRdrPass.Vertices.empty());
+		nlassert(vegetRdrPass.LightedInstances.empty());
 	}
 	// Do the same for all quadrants of the zsort rdrPass.
-	nlassert(ig->_TriangleQuadrantOrderArray.size()==0);
+	nlassert(ig->_TriangleQuadrantOrderArray.empty());
 	nlassert(ig->_TriangleQuadrantOrderNumTriangles==0);
 
 
@@ -2553,7 +2556,7 @@ bool		CVegetableManager::updateLightingIGPart()
 		}
 		CVegetableInstanceGroup::CVegetableRdrPass	&vegetRdrPass= _ULRootIg->_RdrPass[_ULCurrentIgRdrPass];
 
-		// if all instances are processed for this pass (especially if size()==0 !!)
+		// if all instances are processed for this pass (especially if empty() !!)
 		if(_ULCurrentIgInstance>= vegetRdrPass.LightedInstances.size())
 		{
 			// skip to the next rdrPass.

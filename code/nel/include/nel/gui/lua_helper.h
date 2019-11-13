@@ -90,7 +90,7 @@ namespace NLGUI
 		virtual std::string luaWhat() const throw() {return NLMISC::toString("LUAError: %s", what());}
 	};
 
-	// A parse error occured
+	// A parse error occurred
 	class ELuaParseError : public ELuaError
 	{
 	public:
@@ -117,7 +117,7 @@ namespace NLGUI
 		std::string	_Reason;
 	};
 
-	// A execution error occured
+	// A execution error occurred
 	class ELuaExecuteError : public ELuaError
 	{
 	public:
@@ -128,7 +128,7 @@ namespace NLGUI
 		virtual std::string luaWhat() const throw() {return NLMISC::toString("ELuaExecuteError: %s", what());}
 	};
 
-	// A bad cast occured when using lua_checkcast
+	// A bad cast occurred when using lua_checkcast
 	class ELuaBadCast : public ELuaError
 	{
 	public:

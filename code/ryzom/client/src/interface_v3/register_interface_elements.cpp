@@ -34,6 +34,7 @@ void registerInterfaceElements()
 	CViewPointerRyzom::forceLinking();
 
 	REGISTER_REFLECTABLE_CLASS(CViewRadar, CViewBase);
+	REGISTER_REFLECTABLE_CLASS(CGroupMap, CInterfaceGroup);
 	REGISTER_REFLECTABLE_CLASS(CDBCtrlSheet, CCtrlDraggable);
 	REGISTER_REFLECTABLE_CLASS(IListSheetBase, CInterfaceGroup);
 	REGISTER_REFLECTABLE_CLASS(CInterface3DScene, CInterfaceGroup);

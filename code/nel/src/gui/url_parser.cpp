@@ -14,12 +14,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <string>
-#include "nel/misc/types_nl.h"
+#include "stdpch.h"
+#include "nel/misc/common.h"
 #include "nel/gui/url_parser.h"
 
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NLGUI
 {
@@ -63,22 +66,40 @@ namespace NLGUI
 			}
 		}
 
-		// scan for domain
+		// scan for authority
 		if (uri.substr(0, 2) == "//")
 		{
-			pos = uri.find("/", 3);
-			domain = uri.substr(0, pos);
+			pos = uri.find_first_of("/?", 2);
+			authority = uri.substr(0, pos);
 			if (pos != npos)
 				uri = uri.substr(pos);
 			else
 				uri.clear();
+
+			// strip empty port from authority
+			if (authority.find_last_of(":") == authority.length() - 1)
+				authority = authority.substr(0, authority.length() - 1);
+
+			// extract host from user:pass@host:port
+			pos = authority.find("@");
+			if (pos != npos)
+				host = authority.substr(pos + 1);
+			else
+				host = authority.substr(2);
+
+			// case-insensitive
+			host = NLMISC::toLower(host);
+
+			pos = host.find(":");
+			if (pos != npos)
+				host = host.substr(0, pos);
 		}
 
 		// scan for query
 		pos = uri.find("?");
 		if (pos != npos)
 		{
-			query = uri.substr(pos + 1);
+			query = uri.substr(pos);
 			uri = uri.substr(0, pos);
 		}
 
@@ -99,11 +120,11 @@ namespace NLGUI
 
 		scheme = base.scheme;
 
-		// if we already have domain, then ignore base path
-		if (!domain.empty())
+		// if we already have authority, then ignore base path
+		if (!authority.empty())
 			return;
 
-		domain = base.domain;
+		authority = base.authority;
 		if (path.empty())
 		{
 			path = base.path;
@@ -190,7 +211,7 @@ namespace NLGUI
 
 	bool CUrlParser::isAbsolute() const
 	{
-		return !scheme.empty() && !domain.empty();
+		return !scheme.empty() && !authority.empty();
 	}
 
 	// serialize URL back to string
@@ -200,20 +221,28 @@ namespace NLGUI
 		if (!scheme.empty())
 			result += scheme + ":";
 
-		if (!domain.empty())
+		if (!authority.empty())
 		{
-			result += domain;
+			result += authority;
 		}
 
 		// path already has leading slash
 		if (!path.empty())
+		{
 			result += path;
+		}
 
 		if (!query.empty())
-			result += "?" + query;
+		{
+			if (query.find_first_of("?") != 0) result += "?";
+
+			result += query;
+		}
 
 		if (!hash.empty())
+		{
 			result += "#" + hash;
+		}
 
 		return result;
 	}

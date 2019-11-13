@@ -79,7 +79,7 @@ public:
 	/**
 	 * serial
 	 */
-	//void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	//void serial(NLMISC::IStream &f);
 
 	void write (xmlNodePtr node) const;
 	void read (xmlNodePtr node);
@@ -160,7 +160,7 @@ public:
 	/**
 	 * serial
 	 */
-	//void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	//void serial(NLMISC::IStream &f);
 
 	void write (xmlNodePtr node) const;
 	void read (xmlNodePtr node);
@@ -239,7 +239,7 @@ public:
 	/**
 	 * serial
 	 */
-	//void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	//void serial(NLMISC::IStream &f);
 
 	/**
 	 * Destructor
@@ -323,7 +323,7 @@ public:
 	/**
 	 * serial
 	 */
-	//void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	//void serial(NLMISC::IStream &f);
 
 	void write (xmlNodePtr node) const;
 	void read (xmlNodePtr node);
