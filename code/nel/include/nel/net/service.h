@@ -54,7 +54,17 @@ struct HINSTANCE__;
 typedef struct HINSTANCE__ *HINSTANCE;
 
 typedef char CHAR;
+typedef wchar_t WCHAR;
+
 typedef CHAR *LPSTR;
+typedef WCHAR *LPWSTR;
+
+#if defined(UNICODE) || defined(_UNICODE)
+typedef LPWSTR LPTSTR;
+#else
+typedef LPSTR LPTSTR;
+#endif
+
 #endif
 
 namespace NLNET
@@ -117,14 +127,14 @@ class IServiceUpdatable;
 #if defined(NL_OS_WINDOWS) && defined(_WINDOWS)
 #define NLNET_SERVICE_MAIN(__ServiceClassName, __ServiceShortName, __ServiceLongName, __ServicePort, __ServiceCallbackArray, __ConfigDir, __LogDir) \
  \
-int APIENTRY WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) \
+int APIENTRY nltWinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow) \
 { \
 	NLMISC::CApplicationContext	serviceContext; \
 	__ServiceClassName *scn = new __ServiceClassName; \
-	scn->setArgs (lpCmdLine); \
+	scn->setArgs (nlTStrToUtf8(lpCmdLine)); \
 	createDebug(NULL,!scn->haveLongArg("nolog"));\
 	scn->setCallbackArray (__ServiceCallbackArray, sizeof(__ServiceCallbackArray)/sizeof(__ServiceCallbackArray[0])); \
-    sint retval = scn->main (__ServiceShortName, __ServiceLongName, __ServicePort, __ConfigDir, __LogDir, __DATE__" "__TIME__); \
+    sint retval = scn->main (__ServiceShortName, __ServiceLongName, __ServicePort, __ConfigDir, __LogDir, __DATE__ " " __TIME__); \
 	delete scn; \
 	return retval; \
 }
@@ -132,14 +142,14 @@ int APIENTRY WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 #else
 #define NLNET_SERVICE_MAIN(__ServiceClassName, __ServiceShortName, __ServiceLongName, __ServicePort, __ServiceCallbackArray, __ConfigDir, __LogDir) \
  \
-int main(int argc, const char **argv) \
+int nltmain(int argc, const NLMISC::tchar **argv) \
 { \
 	NLMISC::CApplicationContext serviceContext; \
 	__ServiceClassName *scn = new __ServiceClassName; \
 	scn->setArgs (argc, argv); \
 	createDebug(NULL,!scn->haveLongArg("nolog"));\
 	scn->setCallbackArray (__ServiceCallbackArray, sizeof(__ServiceCallbackArray)/sizeof(__ServiceCallbackArray[0])); \
-	sint retval = scn->main (__ServiceShortName, __ServiceLongName, __ServicePort, __ConfigDir, __LogDir, __DATE__" "__TIME__); \
+	sint retval = scn->main (__ServiceShortName, __ServiceLongName, __ServicePort, __ConfigDir, __LogDir, __DATE__ " " __TIME__); \
 	delete scn; \
 	return retval; \
 }
@@ -339,6 +349,9 @@ public:
 
 	/// Sets the command line and init _Args variable. You must call this before calling main()
 	void setArgs (int argc, const char **argv);
+
+	/// Sets the command line and init _Args variable. You must call this before calling main()
+	void setArgs (int argc, const wchar_t **argv);
 
 	/// Sets the command line and init _Args variable. You must call this before calling main()
 	void setArgs (const char *args);

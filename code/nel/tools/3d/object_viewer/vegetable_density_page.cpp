@@ -100,7 +100,7 @@ void CVegetableDensityPage::setVegetableToEdit(NL3D::CVegetable *vegetable)
 	{
 		// Init ShapeName
 		// ----------
-		StaticVegetableShape.SetWindowText(_Vegetable->ShapeName.c_str());
+		StaticVegetableShape.SetWindowText(nlUtf8ToTStr(_Vegetable->ShapeName));
 
 		// init Creation Distance.
 		// ----------
@@ -198,8 +198,9 @@ void		CVegetableDensityPage::updateViewAngleMin()
 	sint	pos= (sint)(angle/(NLMISC::Pi/2) * NL_VEGETABLE_EDIT_ANGLE_SLIDER_SIZE);
 	NLMISC::clamp(pos, -NL_VEGETABLE_EDIT_ANGLE_SLIDER_SIZE, NL_VEGETABLE_EDIT_ANGLE_SLIDER_SIZE);
 	AngleMinSlider.SetPos(pos);
-	char	stmp[256];
-	sprintf(stmp, "%.2f", (double)(angle*180/NLMISC::Pi));
+
+	CString	stmp;
+	stmp.Format(_T("%.2f"), (double)(angle*180/NLMISC::Pi));
 	AngleMinEdit.SetWindowText(stmp);
 }
 
@@ -213,8 +214,9 @@ void		CVegetableDensityPage::updateViewAngleMax()
 	sint	pos= (sint)(angle/(NLMISC::Pi/2) * NL_VEGETABLE_EDIT_ANGLE_SLIDER_SIZE);
 	NLMISC::clamp(pos, -NL_VEGETABLE_EDIT_ANGLE_SLIDER_SIZE, NL_VEGETABLE_EDIT_ANGLE_SLIDER_SIZE);
 	AngleMaxSlider.SetPos(pos);
-	char	stmp[256];
-	sprintf(stmp, "%.2f", (double)(angle*180/NLMISC::Pi));
+
+	CString	stmp;
+	stmp.Format(_T("%.2f"), (double)(angle * 180 / NLMISC::Pi));
 	AngleMaxEdit.SetWindowText(stmp);
 }
 
@@ -223,10 +225,10 @@ void		CVegetableDensityPage::updateViewAngleMax()
 void		CVegetableDensityPage::updateAngleMinFromEditText()
 {
 	// get angles edited.
-	char	stmp[256];
+	TCHAR	stmp[256];
 	AngleMinEdit.GetWindowText(stmp, 256);
 	float	angleMin;
-	NLMISC::fromString(stmp, angleMin);
+	NLMISC::fromString(NLMISC::tStrToUtf8(stmp), angleMin);
 	NLMISC::clamp(angleMin, -90, 90);
 	// make a sinus, because 90 => 1, and -90 =>-1
 	float	cosAngleMin= (float)sin(angleMin*NLMISC::Pi/180.f);
@@ -247,10 +249,10 @@ void		CVegetableDensityPage::updateAngleMinFromEditText()
 void		CVegetableDensityPage::updateAngleMaxFromEditText()
 {
 	// get angles edited.
-	char	stmp[256];
+	TCHAR	stmp[256];
 	AngleMaxEdit.GetWindowText(stmp, 256);
 	float	angleMax;
-	NLMISC::fromString(stmp, angleMax);
+	NLMISC::fromString(NLMISC::tStrToUtf8(stmp), angleMax);
 	NLMISC::clamp(angleMax, -90, 90);
 	// make a sinus, because 90 => 1, and -90 =>-1
 	float	cosAngleMax= (float)sin(angleMax*NLMISC::Pi/180.f);
@@ -320,7 +322,7 @@ BOOL CVegetableDensityPage::OnInitDialog()
 
 	
 	// Init ShapeName
-	StaticVegetableShape.SetWindowText("");
+	StaticVegetableShape.SetWindowText(_T(""));
 
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -477,12 +479,12 @@ static	void concatEdit2Lines(CEdit &edit)
 	const	uint lineLen= 1000;
 	uint	n;
 	// retrieve the 2 lines.
-	char	tmp0[2*lineLen];
-	char	tmp1[lineLen];
+	TCHAR	tmp0[2*lineLen];
+	TCHAR	tmp1[lineLen];
 	n= edit.GetLine(0, tmp0, lineLen);	tmp0[n]= 0;
 	n= edit.GetLine(1, tmp1, lineLen);	tmp1[n]= 0;
 	// concat and update the CEdit.
-	edit.SetWindowText(strcat(tmp0, tmp1));
+	edit.SetWindowText(_tcscat(tmp0, tmp1));
 }
 
 void CVegetableDensityPage::OnChangeEditAngleMin() 
@@ -515,27 +517,25 @@ void CVegetableDensityPage::OnChangeEditAngleMax()
 // ***************************************************************************
 void CVegetableDensityPage::OnButtonVegetableBrowse() 
 {
-	CFileDialog fd(TRUE, "veget", "*.veget", 0, NULL, this) ;
-	fd.m_ofn.lpstrTitle= "Open Vegetable Shape";
+	CFileDialog fd(TRUE, _T("veget"), _T("*.veget"), 0, NULL, this) ;
+	fd.m_ofn.lpstrTitle = _T("Open Vegetable Shape");
+
 	if (fd.DoModal() == IDOK)
 	{
 		// Add to the path
-		char drive[256];
-		char dir[256];
-		char path[256];
+		std::string fileName = NLMISC::tStrToUtf8(fd.GetFileName());
 
 		// Add search path for the .veget
-		_splitpath (fd.GetPathName(), drive, dir, NULL, NULL);
-		_makepath (path, drive, dir, NULL, NULL);
+		std::string path = NLMISC::CFile::getPath(NLMISC::tStrToUtf8(fd.GetPathName()));
 		NLMISC::CPath::addSearchPath (path);
 
 		try
 		{
 			// verify the file can be opened.
-			NLMISC::CPath::lookup((const char*)fd.GetFileName());
+			NLMISC::CPath::lookup(fileName);
 
 			// update shapeName and view
-			_Vegetable->ShapeName= std::string(fd.GetFileName());
+			_Vegetable->ShapeName = fileName;
 			StaticVegetableShape.SetWindowText(fd.GetFileName());
 
 			// update the name in the list-box
@@ -544,9 +544,9 @@ void CVegetableDensityPage::OnButtonVegetableBrowse()
 			// update 3D view
 			_VegetableDlg->refreshVegetableDisplay();
 		}
-		catch (NLMISC::EPathNotFound &ep)
+		catch (const NLMISC::EPathNotFound &ep)
 		{
-			MessageBox(ep.what(), "Can't open file");
+			MessageBox(nlUtf8ToTStr(ep.what()), _T("Can't open file"));
 		}
 	}
 }

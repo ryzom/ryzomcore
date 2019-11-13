@@ -199,14 +199,17 @@ void		CSkeletonScaleDlg::setSkeletonToEdit(NL3D::CSkeletonModel *skel, const std
 	{
 		for(uint i=0;i<_SkeletonModel->Bones.size();i++)
 		{
-			const std::string		tabStr= "   ";
-			std::string		name= _SkeletonModel->Bones[i].getBoneName();
+			const std::string tabStr = "   ";
+			std::string name = _SkeletonModel->Bones[i].getBoneName();
+
 			// append a tab for easy hierarchy
-			uint	boneId= i;
+			uint boneId = i;
+
 			while((boneId=_SkeletonModel->Bones[boneId].getFatherId())!=-1)
-				name= tabStr + name;
+				name = tabStr + name;
+
 			// append to the list
-			_BoneList.AddString(name.c_str());
+			_BoneList.AddString(nlUtf8ToTStr(name));
 		}
 	}
 
@@ -216,8 +219,8 @@ void		CSkeletonScaleDlg::setSkeletonToEdit(NL3D::CSkeletonModel *skel, const std
 	{
 		_ScaleSliders[i]->SetRange(0, NL_SSD_SLIDER_SIZE);
 		_ScaleSliders[i]->SetPos(NL_SSD_SLIDER_SIZE/2);
-		*_ScaleEdits[i]= "";
-		_StaticScaleMarkers[i]->SetWindowText("100%");
+		_ScaleEdits[i]->Empty();
+		_StaticScaleMarkers[i]->SetWindowText(_T("100%"));
 	}
 	// ensure no problem with scale and ALT-TAB
 	_SliderEdited= SidNone;
@@ -338,7 +341,7 @@ void		CSkeletonScaleDlg::onSliderReleased(TScaleId sid)
 	
 	// And reset the slider
 	_ScaleSliders[_SliderEdited]->SetPos(NL_SSD_SLIDER_SIZE/2);
-	_StaticScaleMarkers[_SliderEdited]->SetWindowText("100%");
+	_StaticScaleMarkers[_SliderEdited]->SetWindowText(_T("100%"));
 	_SliderEdited= SidNone;
 
 	// push an undo/redo only at release of slide. push the value of scale before slide
@@ -400,9 +403,8 @@ void		CSkeletonScaleDlg::applyScaleSlider(sint scrollValue)
 	refreshTextViews();
 
 	// update marker text
-	char	str[256];
-	sprintf(str, "%d%%", (sint)(factor*100));
-	_StaticScaleMarkers[_SliderEdited]->SetWindowText(str);
+	std::string	str = NLMISC::toString("%d%%", (sint)(factor*100));
+	_StaticScaleMarkers[_SliderEdited]->SetWindowText(nlUtf8ToTStr(str));
 }
 
 // ***************************************************************************
@@ -503,7 +505,7 @@ void		CSkeletonScaleDlg::refreshTextViewWithScale(TScaleId sid, float scale, flo
 	// if different values selected, diff
 	if(diff)
 	{
-		*_ScaleEdits[sid]= "";
+		_ScaleEdits[sid]->Empty();
 	}
 	// else display text
 	else
@@ -592,12 +594,12 @@ static	void concatEdit2Lines(CEdit &edit)
 	const	uint lineLen= 1000;
 	uint	n;
 	// retrieve the 2 lines.
-	char	tmp0[2*lineLen];
-	char	tmp1[lineLen];
+	TCHAR	tmp0[2*lineLen];
+	TCHAR	tmp1[lineLen];
 	n= edit.GetLine(0, tmp0, lineLen);	tmp0[n]= 0;
 	n= edit.GetLine(1, tmp1, lineLen);	tmp1[n]= 0;
 	// concat and update the CEdit.
-	edit.SetWindowText(strcat(tmp0, tmp1));
+	edit.SetWindowText(_tcscat(tmp0, tmp1));
 }
 
 
@@ -715,7 +717,7 @@ void CSkeletonScaleDlg::updateScalesFromText(UINT ctrlId)
 		return;
 
 	// get the scale info
-	std::string	str= (const char*)(*_ScaleEdits[sid]);
+	std::string str = NLMISC::tStrToUtf8(*_ScaleEdits[sid]);
 	if(str.empty())
 		return;
 	float	f;
@@ -833,7 +835,7 @@ void CSkeletonScaleDlg::OnSsdButtonSave()
 	}
 	else
 	{
-		MessageBox("Failed to open file for write!");
+		MessageBox(_T("Failed to open file for write!"));
 	}
 }
 
@@ -844,13 +846,13 @@ void CSkeletonScaleDlg::OnSsdButtonSaveas()
 		return;
 
 	// choose the file
-	CFileDialog fd(FALSE, "skel", _SkeletonFileName.c_str(), OFN_OVERWRITEPROMPT, "SkelFiles (*.skel)|*.skel|All Files (*.*)|*.*||", this) ;
-	fd.m_ofn.lpstrTitle= "Save As Skeleton";
+	CFileDialog fd(FALSE, _T("skel"), nlUtf8ToTStr(_SkeletonFileName), OFN_OVERWRITEPROMPT, _T("SkelFiles (*.skel)|*.skel|All Files (*.*)|*.*||"), this);
+	fd.m_ofn.lpstrTitle = _T("Save As Skeleton");
 	if (fd.DoModal() == IDOK)
 	{
 		NLMISC::COFile	f;
 		
-		if( f.open((const char*)fd.GetPathName()) )
+		if (f.open(NLMISC::tStrToUtf8(fd.GetPathName())))
 		{
 			if(saveCurrentInStream(f))
 			{
@@ -860,13 +862,13 @@ void CSkeletonScaleDlg::OnSsdButtonSaveas()
 			}
 
 			// bkup the valid fileName (new file edited)
-			_SkeletonFileName= (const char*)fd.GetPathName();
+			_SkeletonFileName = NLMISC::tStrToUtf8(fd.GetPathName());
 			_StaticFileName= _SkeletonFileName.c_str();
 			UpdateData(FALSE);
 		}
 		else
 		{
-			MessageBox("Failed to open file for write!");
+			MessageBox(_T("Failed to open file for write!"));
 		}
 	}
 }
@@ -905,9 +907,9 @@ bool CSkeletonScaleDlg::saveCurrentInStream(NLMISC::IStream &f)
 		ss.serial(f);
 		delete skelShape;
 	}
-	catch(NLMISC::EStream &)
+	catch(const NLMISC::EStream &)
 	{
-		MessageBox("Failed to save file!");
+		MessageBox(_T("Failed to save file!"));
 		return false;
 	}
 
@@ -1223,20 +1225,22 @@ void CSkeletonScaleDlg::OnSsdButtonSaveScale()
 		return;
 	
 	// choose the file
-	std::string	defaultFileName= _SkeletonFileName;
+	std::string	defaultFileName = _SkeletonFileName;
 	NLMISC::strFindReplace(defaultFileName, ".skel", ".scale");
-	CFileDialog fd(FALSE, "scale", defaultFileName.c_str(), OFN_OVERWRITEPROMPT, "SkelScaleFiles (*.scale)|*.scale|All Files (*.*)|*.*||", this) ;
-	fd.m_ofn.lpstrTitle= "Save As Skeleton Scale File";
+
+	CFileDialog fd(FALSE, _T("scale"), nlUtf8ToTStr(defaultFileName), OFN_OVERWRITEPROMPT, _T("SkelScaleFiles (*.scale)|*.scale|All Files (*.*)|*.*||"), this);
+	fd.m_ofn.lpstrTitle = _T("Save As Skeleton Scale File");
+
 	if (fd.DoModal() == IDOK)
 	{
 		NLMISC::COFile	f;
-		if( f.open((const char*)fd.GetPathName()) )
+		if (f.open(NLMISC::tStrToUtf8(fd.GetPathName())))
 		{
 			saveSkelScaleInStream(f);
 		}
 		else
 		{
-			MessageBox("Failed to open file for write!");
+			MessageBox(_T("Failed to open file for write!"));
 		}
 	}
 }
@@ -1251,18 +1255,20 @@ void CSkeletonScaleDlg::OnSsdButtonLoadScale()
 	// choose the file
 	std::string	defaultFileName= _SkeletonFileName;
 	NLMISC::strFindReplace(defaultFileName, ".skel", ".scale");
-	CFileDialog fd(TRUE, "scale", defaultFileName.c_str(), 0, "SkelScaleFiles (*.scale)|*.scale|All Files (*.*)|*.*||", this) ;
-	fd.m_ofn.lpstrTitle= "Load a Skeleton Scale File";
+
+	CFileDialog fd(TRUE, _T("scale"), nlUtf8ToTStr(defaultFileName), 0, _T("SkelScaleFiles (*.scale)|*.scale|All Files (*.*)|*.*||"), this);
+	fd.m_ofn.lpstrTitle= _T("Load a Skeleton Scale File");
+
 	if (fd.DoModal() == IDOK)
 	{
 		NLMISC::CIFile	f;
-		if( f.open((const char*)fd.GetPathName()) )
+		if (f.open(NLMISC::tStrToUtf8(fd.GetPathName())))
 		{
 			loadSkelScaleFromStream(f);
 		}
 		else
 		{
-			MessageBox("Failed to open file for read!");
+			MessageBox(_T("Failed to open file for read!"));
 		}
 	}
 }
@@ -1307,9 +1313,9 @@ bool	CSkeletonScaleDlg::saveSkelScaleInStream(NLMISC::IStream &f)
 		sint32	ver= f.serialVersion(0);
 		f.serialCont(boneScales);
 	}
-	catch(NLMISC::EStream &)
+	catch(const NLMISC::EStream &)
 	{
-		MessageBox("Failed to save file!");
+		MessageBox(_T("Failed to save file!"));
 		return false;
 	}
 	
@@ -1353,9 +1359,9 @@ bool	CSkeletonScaleDlg::loadSkelScaleFromStream(NLMISC::IStream &f)
 		// and update display
 		refreshTextViews();
 	}
-	catch(NLMISC::EStream &)
+	catch(const NLMISC::EStream &)
 	{
-		MessageBox("Failed to save file!");
+		MessageBox(_T("Failed to save file!"));
 		return false;
 	}
 	

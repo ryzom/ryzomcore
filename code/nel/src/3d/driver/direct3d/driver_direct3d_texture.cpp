@@ -26,6 +26,10 @@
 
 #include "driver_direct3d.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 
@@ -270,7 +274,7 @@ uint getPixelFormatSize (D3DFORMAT destFormat)
 	case D3DFMT_DXT3: bits=8; break;
 	case D3DFMT_DXT4: bits=8; break;
 	case D3DFMT_DXT5: bits=8; break;
-	default: nlstop; break;	// unkown pixel format
+	default: nlstop; break;	// unknown pixel format
 	}
 	return bits;
 }

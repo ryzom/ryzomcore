@@ -33,10 +33,16 @@
 #include "nel/3d/water_env_map_user.h"
 #include "nel/3d/water_pool_manager.h"
 #include "nel/3d/u_camera.h"
+#include "nel/3d/debug_vb.h"
+
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/event_emitter.h"
 
 using namespace NLMISC;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -1481,6 +1487,20 @@ void			CDriverUser::setAnisotropicFilter(sint filter)
 	_Driver->setAnisotropicFilter(filter);
 }
 
+uint			CDriverUser::getAnisotropicFilter() const
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	return _Driver->getAnisotropicFilter();
+}
+
+uint			CDriverUser::getAnisotropicFilterMaximum() const
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	return _Driver->getAnisotropicFilterMaximum();
+}
+
 void			CDriverUser::forceTextureResize(uint divisor)
 {
 	NL3D_HAUTO_UI_DRIVER;
@@ -1519,6 +1539,12 @@ const char*		CDriverUser::getVideocardInformation ()
 	NL3D_HAUTO_UI_DRIVER;
 
 	return _Driver->getVideocardInformation ();
+}
+sint			CDriverUser::getTotalVideoMemory () const
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	return _Driver->getTotalVideoMemory ();
 }
 uint			CDriverUser::getNbTextureStages()
 {

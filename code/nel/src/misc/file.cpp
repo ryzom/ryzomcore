@@ -158,6 +158,14 @@ bool		CIFile::open(const std::string &path, bool text)
 
 	close();
 
+	if ((_IsInBigFile || _IsInXMLPackFile) && path.find('@') == string::npos)
+	{
+		// CIFile can be reused to load file from bnp and from regular files.
+		// Last open happened to be inside bnp and close() may not set _F to NULL.
+		// Opening regular file will fail as _F points to bnp file.
+		_F = NULL;
+	}
+
 	// can't open empty filename
 	if(path.empty ())
 		return false;
@@ -272,13 +280,15 @@ bool		CIFile::open(const std::string &path, bool text)
 			}
 		}
 	}
-	else
+
+	// not in bnp, but may have '@' in the name
+	if (_F == NULL)
 	{
 		_IsInBigFile = false;
 		_IsInXMLPackFile = false;
 		_BigFileOffset = 0;
 		_AlwaysOpened = false;
-		_F = fopen (path.c_str(), mode);
+		_F = nlfopen (path, mode);
 		if (_F != NULL)
 		{
 			/*
@@ -387,6 +397,37 @@ void		CIFile::flush()
 }
 
 // ======================================================================================================
+bool	CIFile::readAll(std::string &buffer)
+{
+	try
+	{
+		uint32 remaining = _FileSize;
+
+		buffer.clear();
+		buffer.reserve(_FileSize);
+		while(!eof() && remaining > 0)
+		{
+			const static uint bufsize = 1024;
+			char buf[bufsize];
+			uint32 readnow = bufsize;
+			if (readnow > remaining)
+				readnow = remaining;
+
+			serialBuffer((uint8 *)&buf[0], readnow);
+			buffer.append(buf, readnow);
+			remaining -= readnow;
+		}
+	}
+	catch (const EFile &)
+	{
+		// buffer state is unknown
+		return false;
+	}
+
+	return true;
+}
+
+// ======================================================================================================
 void		CIFile::getline (char *buffer, uint32 bufferSize)
 {
 	if (bufferSize == 0)
@@ -436,7 +477,7 @@ bool		CIFile::eof ()
 }
 
 // ======================================================================================================
-void		CIFile::serialBuffer(uint8 *buf, uint len) throw(EReadError)
+void		CIFile::serialBuffer(uint8 *buf, uint len)
 {
 	if (len == 0)
 		return;
@@ -479,7 +520,7 @@ void		CIFile::serialBuffer(uint8 *buf, uint len) throw(EReadError)
 }
 
 // ======================================================================================================
-void		CIFile::serialBit(bool &bit) throw(EReadError)
+void		CIFile::serialBit(bool &bit)
 {
 	// Simple for now.
 	uint8	v=bit;
@@ -488,7 +529,7 @@ void		CIFile::serialBit(bool &bit) throw(EReadError)
 }
 
 // ======================================================================================================
-bool		CIFile::seek (sint32 offset, IStream::TSeekOrigin origin) const throw(EStream)
+bool		CIFile::seek (sint32 offset, IStream::TSeekOrigin origin) const
 {
 	if ((_CacheFileOnOpen) && (_Cache == NULL))
 		return false;
@@ -520,7 +561,7 @@ bool		CIFile::seek (sint32 offset, IStream::TSeekOrigin origin) const throw(EStr
 }
 
 // ======================================================================================================
-sint32		CIFile::getPos () const throw(EStream)
+sint32		CIFile::getPos () const
 {
 	return _ReadPos;
 }
@@ -585,7 +626,6 @@ uint	CIFile::getDbgStreamSize() const
 COFile::COFile() : IStream(false)
 {
 	_F=NULL;
-	_FileName = "";
 }
 
 // ======================================================================================================
@@ -633,7 +673,7 @@ bool	COFile::open(const std::string &path, bool append, bool text, bool useTempF
 			return false;
 	}
 
-	_F=fopen(fileToOpen.c_str(), mode);
+	_F = nlfopen(fileToOpen, mode);
 
 	return _F!=NULL;
 }
@@ -662,7 +702,7 @@ void	COFile::internalClose(bool success)
 					if (CFile::fileExists(_FileName))
 						CFile::deleteFile (_FileName);
 
-					if (CFile::moveFile (_FileName.c_str(), _TempFileName.c_str()))
+					if (CFile::moveFile(_FileName, _TempFileName))
 						break;
 					nlSleep (0);
 				}
@@ -688,7 +728,7 @@ void	COFile::flush()
 
 
 // ======================================================================================================
-void		COFile::serialBuffer(uint8 *buf, uint len) throw(EWriteError)
+void		COFile::serialBuffer(uint8 *buf, uint len)
 {
 	if(!_F)
 		throw	EFileNotOpened(_FileName);
@@ -703,14 +743,14 @@ void		COFile::serialBuffer(uint8 *buf, uint len) throw(EWriteError)
 	}
 }
 // ======================================================================================================
-void		COFile::serialBit(bool &bit) throw(EWriteError)
+void		COFile::serialBit(bool &bit)
 {
 	// Simple for now.
 	uint8	v=bit;
 	serialBuffer(&v, 1);
 }
 // ======================================================================================================
-bool		COFile::seek (sint32 offset, IStream::TSeekOrigin origin) const throw(EStream)
+bool		COFile::seek (sint32 offset, IStream::TSeekOrigin origin) const
 {
 	if (_F)
 	{
@@ -737,7 +777,7 @@ bool		COFile::seek (sint32 offset, IStream::TSeekOrigin origin) const throw(EStr
 	return false;
 }
 // ======================================================================================================
-sint32		COFile::getPos () const throw(EStream)
+sint32		COFile::getPos () const
 {
 	if (_F)
 	{
@@ -826,7 +866,7 @@ NLMISC_CATEGORISED_COMMAND(nel, iFileAccessLogDisplay, "Display file access logs
 		while (atIt!=atItEnd)
 		{
 			uint64 delta= (*atIt-IFileAccessLogStartTime);
-			log.display("%"NL_I64"u,",delta);
+			log.display("%" NL_I64 "u,",delta);
 			++atIt;
 		}
 		log.displayNL("");

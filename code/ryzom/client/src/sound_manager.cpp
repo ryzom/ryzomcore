@@ -53,6 +53,10 @@
 # include "view.h"
 #endif
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 extern CLightCycleManager	LightCycleManager;
 extern NL3D::UDriver		*Driver;
 extern NL3D::UCamera		MainCam;
@@ -624,17 +628,17 @@ void CSoundManager::init(IProgressCallback *progressCallBack)
 // add a new source to the world, attached to the specified entity
 // return 0 if creation failed, sound id if creation was successful
 //-----------------------------------------------
-CSoundManager::TSourceId CSoundManager::addSource( const NLMISC::CSheetId &soundName, const NLMISC::CVector &position, bool play, bool loop,  const CEntityId &id)
+CSoundManager::TSourceId CSoundManager::addSource(const NLMISC::TStringId &soundName, const NLMISC::CVector &position, bool play, bool loop,  const CEntityId &id)
 {
 	uint32	retValue = 0;
 
 	// Create a source
-	USource *pSource = _AudioMixer->createSource( soundName );
+	USource *pSource = _AudioMixer->createSource(soundName);
 
 	// If the source is valid.
 	if(pSource == 0)
 	{
-		nlwarning("Sound '%s' not found !", /*CStringMapper::unmap(soundName).c_str()*/soundName.toString().c_str());
+		nlwarning("Sound '%s' not found !", CStringMapper::unmap(soundName).c_str());
 		return retValue;
 	}
 
@@ -672,7 +676,7 @@ CSoundManager::TSourceId CSoundManager::addSource( const NLMISC::CSheetId &sound
 // spawn a new source to the world
 // return false if creation failed, true if creation was successful
 //-----------------------------------------------
-bool CSoundManager::spawnSource(const NLMISC::CSheetId &soundName, CSoundContext &context)
+bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, CSoundContext &context)
 {
 	if (!_PlaySound) return false;
 
@@ -683,7 +687,7 @@ bool CSoundManager::spawnSource(const NLMISC::CSheetId &soundName, CSoundContext
 	// If the source is valid.
 	if(pSource == 0)
 	{
-		nlwarning("Sound '%s' not found !", soundName.toString().c_str());
+		nlwarning("Sound '%s' not found !", soundName);
 		return false;
 	}
 
@@ -702,7 +706,7 @@ bool CSoundManager::spawnSource(const NLMISC::CSheetId &soundName, CSoundContext
 // spawn a new source to the world
 // return false if creation failed, true if creation was successful
 //-----------------------------------------------
-bool CSoundManager::spawnSource(const NLMISC::CSheetId &soundName, const NLMISC::CVector &position)
+bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, const NLMISC::CVector &position)
 {
 	if (!_PlaySound) return false;
 
@@ -712,7 +716,7 @@ bool CSoundManager::spawnSource(const NLMISC::CSheetId &soundName, const NLMISC:
 	// If the source is valid.
 	if(pSource == 0)
 	{
-		nlwarning("Sound '%s' not found !", /*CStringMapper::unmap(soundName).c_str ()*/soundName.toString().c_str());
+		nlwarning("Sound '%s' not found !", CStringMapper::unmap(soundName).c_str ());
 		return false;
 	}
 
@@ -1028,17 +1032,18 @@ void CSoundManager::loadProperties(const string &soundName, USource *source)
 
 	// Search for the file.
 	string filePath = CPath::lookup(soundName+".sdf");
-	ifstream file(filePath.c_str(), ios::in);
+
+	CIFile file;
 
 	// Try to open the file.
-	if(file.is_open())
+	if (file.open(filePath))
 	{
 		char tmpBuff[260];
 		char delimiterBox[] = "\t ";
 		// While the end of the file is not reached.
 		while(!file.eof())
 		{
-			// Get a line (teh line should not be more than _MAX_LINE_SIZE).
+			// Get a line (the line should not be more than _MAX_LINE_SIZE).
 			file.getline(tmpBuff, 260);
 			char *token = strtok(tmpBuff, delimiterBox);
 			while(token != NULL)

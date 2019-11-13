@@ -108,6 +108,7 @@ namespace NLMISC
 	{
 	public:
 		CApplicationContext();
+		virtual ~CApplicationContext();
 
 		virtual void *getSingletonPointer(const std::string &singletonName);
 		virtual void setSingletonPointer(const std::string &singletonName, void *ptr);

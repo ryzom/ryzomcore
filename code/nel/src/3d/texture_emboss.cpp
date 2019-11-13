@@ -17,6 +17,12 @@
 #include "std3d.h"
 #include "nel/3d/texture_emboss.h"
 
+using namespace NLMISC;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 // ***********************************************************************************************************
@@ -41,7 +47,7 @@ void CTextureEmboss::setHeightMap(ITexture *heightMap)
 }
 
 // ***********************************************************************************************************
-void CTextureEmboss::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTextureEmboss::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(0);
 	ITexture::serial(f);

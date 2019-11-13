@@ -23,11 +23,11 @@
 
 using namespace std;
 
-const string DefaultColTitle = "name";
-
 #ifdef DEBUG_NEW
-	#define new DEBUG_NEW
+#define new DEBUG_NEW
 #endif
+
+const string DefaultColTitle = "name";
 
 namespace NLMISC {
 

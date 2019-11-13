@@ -27,6 +27,10 @@ using namespace NLLIGO;
 using namespace NL3D;
 using namespace NLGEORGES;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // ***************************************************************************
 
 /*
@@ -738,14 +742,14 @@ IPrimitive *CPrimNodeEditor::copy () const
 	return new CPrimNodeEditor (*this);
 }
 
-bool CPrimNodeEditor::read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config)
+bool CPrimNodeEditor::read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config)
 {
 	bool ret = CPrimNode::read(xmlNode, filename, version, config);
 	IPrimitiveEditor::postReadCallback(this);
 	return ret;
 }
 
-void CPrimNodeEditor::write (xmlNodePtr xmlNode, const char *filename) const
+void CPrimNodeEditor::write (xmlNodePtr xmlNode, const std::string &filename) const
 {
 	IPrimitiveEditor::preWriteCallback(this);
 	CPrimNode::write(xmlNode, filename);
@@ -766,14 +770,14 @@ IPrimitive *CPrimPointEditor::copy () const
 	return new CPrimPointEditor (*this);
 }
 
-bool CPrimPointEditor::read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config)
+bool CPrimPointEditor::read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config)
 {
 	bool ret = CPrimPoint::read(xmlNode, filename, version, config);
 	IPrimitiveEditor::postReadCallback(this);
 	return ret;
 }
 
-void CPrimPointEditor::write (xmlNodePtr xmlNode, const char *filename) const
+void CPrimPointEditor::write (xmlNodePtr xmlNode, const std::string &filename) const
 {
 	IPrimitiveEditor::preWriteCallback(this);
 	CPrimPoint::write(xmlNode, filename);
@@ -793,14 +797,14 @@ IPrimitive *CPrimPathEditor::copy () const
 	return new CPrimPathEditor (*this);
 }
 
-bool CPrimPathEditor::read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config)
+bool CPrimPathEditor::read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config)
 {
 	bool ret = CPrimPath::read(xmlNode, filename, version, config);
 	IPrimitiveEditor::postReadCallback(this);
 	return ret;
 }
 
-void CPrimPathEditor::write (xmlNodePtr xmlNode, const char *filename) const
+void CPrimPathEditor::write (xmlNodePtr xmlNode, const std::string &filename) const
 {
 	IPrimitiveEditor::preWriteCallback(this);
 	CPrimPath::write(xmlNode, filename);
@@ -821,14 +825,14 @@ IPrimitive *CPrimZoneEditor::copy () const
 	return new CPrimZoneEditor (*this);
 }
 
-bool CPrimZoneEditor::read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config)
+bool CPrimZoneEditor::read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config)
 {
 	bool ret = CPrimZone::read(xmlNode, filename, version, config);
 	IPrimitiveEditor::postReadCallback(this);
 	return ret;
 }
 
-void CPrimZoneEditor::write (xmlNodePtr xmlNode, const char *filename) const
+void CPrimZoneEditor::write (xmlNodePtr xmlNode, const std::string &filename) const
 {
 	IPrimitiveEditor::preWriteCallback(this);
 	CPrimZone::write(xmlNode, filename);
@@ -853,14 +857,14 @@ NLLIGO::IPrimitive *CPrimAliasEditor::copy () const
 	return new CPrimAliasEditor(*this);
 }
 
-bool CPrimAliasEditor::read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config)
+bool CPrimAliasEditor::read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config)
 {
 	bool ret = CPrimAlias::read(xmlNode, filename, version, config);
 	IPrimitiveEditor::postReadCallback(this);
 	return ret;
 }
 
-void CPrimAliasEditor::write (xmlNodePtr xmlNode, const char *filename) const
+void CPrimAliasEditor::write (xmlNodePtr xmlNode, const std::string &filename) const
 {
 	IPrimitiveEditor::preWriteCallback(this);
 	CPrimAlias::write(xmlNode, filename);
@@ -882,7 +886,7 @@ CPrimBitmap::CPrimBitmap ()
 
 // ***************************************************************************
 
-void CPrimBitmap::init (const char *filename)
+void CPrimBitmap::init (const std::string &filename)
 {
 	// Set the name
 	removePropertyByName ("filename");
@@ -922,12 +926,12 @@ NL3D::CTextureBlank *CPrimBitmap::getTexture () const
 				}
 				else
 				{
-					theApp.errorMessage ("Can't read bitmap %s", filename.c_str ());
+					theApp.errorMessage ("Can't read bitmap %s", filename.c_str());
 				}
 			}
-			catch (Exception &e)
+			catch (const Exception &e)
 			{
-				theApp.errorMessage ("Error reading bitmap %s : %s", filename.c_str (), e.what ());
+				theApp.errorMessage ("Error reading bitmap %s : %s", filename.c_str(), e.what ());
 			}
 		}
 	}

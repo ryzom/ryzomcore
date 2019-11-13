@@ -304,7 +304,7 @@ public:
 	/**
 	 * Connects to the front-end (using or not the login system, depending on what was specified at init())
 	 * \param result the message returned in case of an error
-	 * Returns true if no error occured.
+	 * Returns true if no error occurred.
 	 */
 	bool			connect(std::string &result);
 

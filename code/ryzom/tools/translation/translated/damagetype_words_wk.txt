@@ -1,0 +1,11 @@
+﻿*HASH_VALUE	damageTypeId	name	ia	da	p	pia	pda	description
+_7058C48C649894A0	Slashing	Slashing			Slashings			
+_705894806498948C	Piercing	Piercing			Piercings			
+_3029E090A388C4B9	Blunt	Blunt			Blunts			
+_28A994A76F8B28C4	Rot	Rot			Rots			
+_6458344464583464	Acid	Acid			Acids			
+_6418F44C6418F46C	Cold	Cold			Colds			
+_649C9458649C9478	Fire	Fire			Fires			
+_2E2700982D9AFCB7	Poison	Poison			Poisons			
+_DB59CC922F3888B8	Electricity	Electric			Electrics			
+_A7E9D889A167A8B0	Shock	Shock			Shocks			

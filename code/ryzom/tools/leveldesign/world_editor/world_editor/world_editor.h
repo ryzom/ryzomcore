@@ -36,7 +36,7 @@
 #include "nel/ligo/ligo_config.h"
 
 // Base registry key
-#define BASE_REGISTRY_KEY "Software\\Nevrax\\NeL World Editor"
+#define BASE_REGISTRY_KEY _T("Software\\Nevrax\\NeL World Editor")
 
 /////////////////////////////////////////////////////////////////////////////
 // CWorldEditorApp:
@@ -59,8 +59,8 @@ public:
 	bool		yesNoMessage (const char *format, ... );
 	void		errorMessage (const char *format, ... );
 	void		infoMessage (const char *format, ... );
-	void		syntaxError (const char *filename, xmlNodePtr, const char *format, ...);
-	bool		getPropertyString (std::string &result, const char *filename, xmlNodePtr xmlNode, const char *propName);
+	void		syntaxError (const std::string &filename, xmlNodePtr, const char *format, ...);
+	bool		getPropertyString (std::string &result, const std::string &filename, xmlNodePtr xmlNode, const std::string &propName);
 
 	// The image list
 	CImageListEx	ImageList;
@@ -110,7 +110,7 @@ public:
 private:
 
 	// Read the path config file
-	bool initPath (const char *filename, class CSplashScreen &splashScreen);
+	bool initPath (const std::string &filename, class CSplashScreen &splashScreen);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -135,8 +135,8 @@ public:
 extern CWorldEditorApp theApp;
 	class CMainFrame *getMainFrame ();
 void invalidateLeftView ();
-std::string standardizePath (const char *str);
-std::string formatString (const char *str);
+std::string standardizePath (const std::string &str);
+std::string formatString (const std::string &str);
 inline void transformVector (NLMISC::CVector &toTransform, float angle, const NLMISC::CVector &pivot)
 {
 	float cosa = (float)cos (angle);
@@ -147,21 +147,17 @@ inline void transformVector (NLMISC::CVector &toTransform, float angle, const NL
 	toTransform.x = temp;
 	toTransform += pivot;
 }
-std::string numberize (const char *oldString, uint value);
+std::string numberize (const std::string &oldString, uint value);
 bool getZoneNameFromXY (sint32 x, sint32 y, std::string &zoneName);
-bool openFile (const char *url);
 uint getRegKey(HKEY key, LPCTSTR subkey, LPTSTR retdata);
-void setEditTextMultiLine (CEdit &edit, const char *text);
+void setEditTextMultiLine (CEdit &edit, const std::string &text);
 void setEditTextMultiLine (CEdit &edit, const std::vector<std::string> &vect);
-//void setEditTextMultiLine (ColorEditWnd &edit, const char *text);
-//void setEditTextMultiLine (ColorEditWnd &edit, const std::vector<std::string> &vect);
-//void setEditTextMultiLine (CListBox &listBox, const char *text);
 void setEditTextMultiLine (CListBox &listBox, const std::vector<std::string> &vect);
-bool setWindowTextUTF8 (HWND hwnd, const char *textUtf8);
-bool getWindowTextUTF8 (HWND hwnd, CString &textUtf8);
-HTREEITEM insertItemUTF8 (HWND hwnd, const char *textUtf8, HTREEITEM hParent = TVI_ROOT, HTREEITEM hInsertAfter = TVI_LAST);
-HTREEITEM insertItemUTF8 (HWND hwnd, const char *textUtf8, int nImage, int nSelectedImage, HTREEITEM hParent = TVI_ROOT, HTREEITEM hInsertAfter = TVI_LAST);
-bool setItemTextUTF8 ( HWND hwnd, HTREEITEM hItem, LPCTSTR lpszItem );
+bool setWindowTextUTF8 (HWND hwnd, const std::string &textUtf8);
+bool getWindowTextUTF8 (HWND hwnd, std::string &textUtf8);
+HTREEITEM insertItemUTF8 (HWND hwnd, const std::string &textUtf8, HTREEITEM hParent = TVI_ROOT, HTREEITEM hInsertAfter = TVI_LAST);
+HTREEITEM insertItemUTF8 (HWND hwnd, const std::string &textUtf8, int nImage, int nSelectedImage, HTREEITEM hParent = TVI_ROOT, HTREEITEM hInsertAfter = TVI_LAST);
+bool setItemTextUTF8 ( HWND hwnd, HTREEITEM hItem, const std::string &item );
 bool isPrimitiveVisible (const NLLIGO::IPrimitive *primitive);
 
 std::string getTextureFile(const std::string &filename);

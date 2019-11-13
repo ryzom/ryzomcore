@@ -31,7 +31,7 @@ class GetVal : public CDialog
 {
 // Construction
 public:
-	char *name;
+	TCHAR *name;
 	int NameOk;
 	GetVal(CWnd* pParent = NULL);   // standard constructor
 

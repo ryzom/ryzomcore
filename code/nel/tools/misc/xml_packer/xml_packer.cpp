@@ -17,6 +17,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/app_context.h"
 #include "nel/misc/path.h"
+#include "nel/misc/common.h"
 #include "nel/misc/sstring.h"
 #include "nel/misc/algo.h"
 
@@ -228,7 +229,7 @@ int main(int argc, char *argv[])
 						// read the index file
 						set<string> fileInIndex;
 						char lineBuffer[1024];
-						FILE *fp = fopen(indexFileName.c_str(), "rt");
+						FILE *fp = nlfopen(indexFileName, "rt");
 						while (fgets(lineBuffer, 1024, fp))
 							fileInIndex.insert(CSString(lineBuffer).strip());
 
@@ -263,8 +264,8 @@ int main(int argc, char *argv[])
 				if (!validFiles.empty() && needRepack)
 				{
 					// open the pack file
-					//				FILE *fp = fopen(filename.c_str(), "wt");
-					FILE *fp = fopen(packFileName.c_str(), "wt");
+					//				FILE *fp = nlfopen(filename, "wt");
+					FILE *fp = nlfopen(packFileName, "wt");
 					
 					fprintf(fp, "<nel:packed_xml>\n");
 					
@@ -275,7 +276,7 @@ int main(int argc, char *argv[])
 						printf("Adding file '%s'...\n", CFile::getFilename(subFileName).c_str());
 						fprintf(fp, "	<nel:xml_file name=\"%s\">\n", CFile::getFilename(subFileName).c_str());
 						
-						FILE *subFp = fopen(subFileName.c_str(), "rt");
+						FILE *subFp = nlfopen(subFileName, "rt");
 						nlassert(subFp != NULL);
 						char buffer[MaxLineSize];
 						char *result;
@@ -304,7 +305,7 @@ int main(int argc, char *argv[])
 					fclose(fp);
 
 					// write the disposable index file used by pack to check for erased file
-					fp = fopen(indexFileName.c_str(), "wt");
+					fp = nlfopen(indexFileName, "wt");
 					for (uint i=0; i<validFiles.size(); ++i)
 					{
 						fprintf(fp, "%s\n", CFile::getFilename(validFiles[i]).c_str());
@@ -327,8 +328,8 @@ int main(int argc, char *argv[])
 			{
 				printf("Unpacking directory '%s'...\n", dirName.c_str());
 				// open the pack file
-//				FILE *fp = fopen((dirName+"/tmp."+DefaultExt).c_str(), "rt");
-				FILE *fp = fopen(filename.c_str(), "rt");
+//				FILE *fp = nlfopen(dirName+"/tmp."+DefaultExt, "rt");
+				FILE *fp = nlfopen(filename, "rt");
 				if (!recursive)
 				{
 					// if we are not recursive, we MUST have a file here

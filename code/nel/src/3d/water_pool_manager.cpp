@@ -23,6 +23,9 @@
 #include "nel/3d/water_height_map.h"
 
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D {
 
@@ -211,7 +214,7 @@ void	CWaterPoolManager::removePool(uint32 ID)
 }
 
 //===============================================================================================
-void CWaterPoolManager::serial(NLMISC::IStream &f)  throw(NLMISC::EStream)
+void CWaterPoolManager::serial(NLMISC::IStream &f)
 {
 	f.xmlPush("WaterPoolManager");
 	(void)f.serialVersion(0);

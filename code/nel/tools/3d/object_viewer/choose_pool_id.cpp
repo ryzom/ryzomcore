@@ -52,25 +52,28 @@ void CChoosePoolID::OnOK()
 {
 	CString val;
 	GetDlgItem(IDC_POOL_ID)->GetWindowText(val);
-	if (::sscanf((LPCTSTR) val, "%d", &PoolID) == 1)
+
+	if (NLMISC::fromString(NLMISC::tStrToUtf8(val), PoolID))
 	{
 		GetDlgItem(IDC_POOL_NAME)->GetWindowText(val);
-		Name = (LPCTSTR) val;
+		Name = NLMISC::tStrToUtf8(val);
 		CDialog::OnOK();
 	}
 	else
 	{
-		MessageBox("Invalid value", "error", MB_OK);
+		MessageBox(_T("Invalid value"), _T("error"), MB_OK);
 	}
 }
 
 BOOL CChoosePoolID::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
-	char val[128];
-	sprintf(val, "%d", PoolID);
-	GetDlgItem(IDC_POOL_ID)->SetWindowText(val);
-	GetDlgItem(IDC_POOL_NAME)->SetWindowText(Name.c_str());
+
+	std::string val = NLMISC::toString(PoolID);
+
+	GetDlgItem(IDC_POOL_ID)->SetWindowText(nlUtf8ToTStr(val));
+	GetDlgItem(IDC_POOL_NAME)->SetWindowText(nlUtf8ToTStr(Name));
+
 	if (_FreezeID)
 	{
 		GetDlgItem(IDC_POOL_ID)->EnableWindow(FALSE);

@@ -87,6 +87,7 @@ struct	CGlExtensions
 	bool	GLXEXTSwapControl;
 	bool	GLXSGISwapControl;
 	bool	GLXMESASwapControl;
+	bool	GLXMESAQueryRenderer;
 
 	// ATI Extensions.
 	bool	ATIVertexArrayObject;
@@ -122,6 +123,9 @@ struct	CGlExtensions
 
 	// WGL_AMD_gpu_association
 	bool	WGLAMDGPUAssociation;
+
+	// WGL_NV_gpu_affinity
+	bool	WGLNVGPUAffinity;
 
 public:
 
@@ -161,6 +165,7 @@ public:
 		GLXEXTSwapControl= false;
 		GLXSGISwapControl= false;
 		GLXMESASwapControl= false;
+		GLXMESAQueryRenderer= false;
 		EXTBlendColor= false;
 		ATIVertexArrayObject= false;
 		ATIEnvMapBumpMap = false;
@@ -261,6 +266,7 @@ public:
 		result += GLXEXTSwapControl ? "GLXEXTSwapControl " : "";
 		result += GLXSGISwapControl ? "GLXSGISwapControl " : "";
 		result += GLXMESASwapControl ? "GLXMESASwapControl " : "";
+		result += GLXMESAQueryRenderer ? "GLXMESAQueryRenderer " : "";
 #endif
 
 		result += "\n  Array/VBO: ";
@@ -793,6 +799,13 @@ extern PFNWGLMAKEASSOCIATEDCONTEXTCURRENTAMDPROC	nwglMakeAssociatedContextCurren
 extern PFNWGLGETCURRENTASSOCIATEDCONTEXTAMDPROC		nwglGetCurrentAssociatedContextAMD;
 extern PFNWGLBLITCONTEXTFRAMEBUFFERAMDPROC			nwglBlitContextFramebufferAMD;
 
+// WGL_NV_gpu_affinity
+//====================
+extern PFNWGLENUMGPUSNVPROC							nwglEnumGpusNV;
+extern PFNWGLENUMGPUDEVICESNVPROC					nwglEnumGpuDevicesNV;
+extern PFNWGLCREATEAFFINITYDCNVPROC					nwglCreateAffinityDCNV;
+extern PFNWGLENUMGPUSFROMAFFINITYDCNVPROC			nwglEnumGpusFromAffinityDCNV;
+extern PFNWGLDELETEDCNVPROC							nwglDeleteDCNV;
 
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)
@@ -805,6 +818,10 @@ extern PFNGLXSWAPINTERVALSGIPROC			nglXSwapIntervalSGI;
 
 extern PFNGLXSWAPINTERVALMESAPROC			nglXSwapIntervalMESA;
 extern PFNGLXGETSWAPINTERVALMESAPROC		nglXGetSwapIntervalMESA;
+
+// GLX_MESA_query_renderer
+// =======================
+extern PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC	nglXQueryCurrentRendererIntegerMESA;
 
 #endif
 

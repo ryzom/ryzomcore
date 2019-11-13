@@ -52,7 +52,7 @@ public:
 		Pos.y = 0.0f;
 	}
 
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serialVersion(1);
 		f.serialEnum(Type);
@@ -64,7 +64,7 @@ public:
 	static NLMISC::CVector2f getZoneCenter(const NLLIGO::CPrimZone &z)
 	{
 		NLMISC::CVector2f vMin, vMax;
-		if (z.VPoints.size() == 0)
+		if (z.VPoints.empty())
 			return NLMISC::CVector2f(0,0);
 		vMin = vMax = z.VPoints[0];
 		for (uint32 i = 1; i < z.VPoints.size(); ++i)

@@ -1,0 +1,67 @@
+﻿faction	name	da	ia	member	mda	mia
+fyros	Fyros	the		Fyros	the	a
+matis	Matis	the		Matis	the	a
+tryker	Tryker	the		Tryker	the	a
+zorai	Zorai	the		Zorai	the	a
+bandit	bandit	the	a	bandit	the	a
+civil	civil	the	a	civil	the	a
+degen	degen	the	a	degen	the	a
+fauna	fauna	the	a	fauna	the	a
+fauna_carnivore	carnivor fauna	the	a	carnivor fauna	the	a
+fauna_herbivore	herbivore fauna	the	a	herbivore fauna	the	a
+flora	flora	the	a	flora	the	a
+goo	goo	the	a	goo	the	a
+kami	kami	the	a	kami	the	a
+karavan	Karavan	la	une	Karavan	les	des
+kitin	kitin	the	a	kitin	the	a
+tribe_ancient_dryads	ancient dryads	the	a	ancient dryads	the	a
+tribe_antikamis	antikamis	the	a	antikamis	the	a
+tribe_barkers	barkers	the	a	barkers	the	a
+tribe_beachcombers	beachcombers	the	a	beachcombers	the	a
+tribe_black_circle	black circle	the	a	black circle	the	a
+tribe_cholorogoos	cholorogoos	the	a	cholorogoos	the	a
+tribe_cockroaches	cockroaches	the	a	cockroaches	the	a
+tribe_company_of_the_eternal_tree	company of the eternal tree	the	a	company of the eternal tree	the	a
+tribe_corsair	corsair	the	a	corsair	the	a
+tribe_cute	cuzans	the	a	cuzans	the	a
+tribe_darkening_sap	darkening sap	the	a	darkening sap	the	a
+tribe_dune_riders	dune riders	the	a	dune riders	the	a
+tribe_ecowarriors	ecowarriors	the	a	ecowarriors	the	a
+tribe_firebrands	firebrands	the	a	firebrands	the	a
+tribe_first_deserter	first deserter	the	a	first deserter	the	a
+tribe_frahar	fraiders	the	a	fraiders	the	a
+tribe_frahar_hunters	frahar hunters	the	a	frahar hunters	the	a
+tribe_gibbay	gibads	the	a	gibads	the	a
+tribe_goo_heads	goo heads	the	a	goo heads	the	a
+tribe_green_seed	green seed	the	a	green seed	the	a
+tribe_hamazans_of_the_dead_seed	hamazans of the dead seed	the	a	hamazans of the dead seed	the	a
+tribe_icon_workshipers	icon worshippers	the	a	icon worshippers	the	a
+tribe_keepers	keepers	the	a	keepers	the	a
+tribe_kitin_gatheres	kitin gatheres	the	a	kitin gatheres	the	a
+tribe_lagoon_brothers	lagoon brothers	the	a	lagoon brothers	the	a
+tribe_lawless	lawless	the	a	lawless	the	a
+tribe_leviers	leviers	the	a	leviers	the	a
+tribe_master_of_the_goo	master of the goo	the	a	master of the goo	the	a
+tribe_matisian_border_guards	matisian border guards	the	a	matisian border guards	the	a
+tribe_night_turners	night turners	the	a	night turners	the	a
+tribe_oasis_diggers	oasis diggers	the	a	oasis diggers	the	a
+tribe_pyromancers	pyromancers	the	a	pyromancers	the	a
+tribe_recoverers	recoverers	the	a	recoverers	the	a
+tribe_renegades	renegades	the	a	renegades	the	a
+tribe_restorers	watchers	the	a	watchers	the	a
+tribe_root_tappers	root tappers	the	a	root tappers	the	a
+tribe_sacred_sap	sacred sap	the	a	sacred sap	the	a
+tribe_sap_gleaners	sap gleaners	the	a	sap gleaners	the	a
+tribe_sap_slaves	sap slaves	the	a	sap slaves	the	a
+tribe_scorchers	scorchers	the	a	scorchers	the	a
+tribe_shadow_runners	shadow runners	the	a	shadow runners	the	a
+tribe_siblings_of_the_weeds	siblings of the weeds	the	a	siblings of the weeds	the	a
+tribe_silt_sculptors	silt sculptors	the	a	silt sculptors	the	a
+tribe_slavers	slavers	the	a	slavers	the	a
+tribe_smuglers	smuglers	the	a	smuglers	the	a
+tribe_the_arid_matis	the arid matis	the	a	the arid matis	the	a
+tribe_the_kuilde	the kuilde	the	a	the kuilde	the	a
+tribe_the_slash_and_burn	the slash and burn	the	a	the slash and burn	the	a
+tribe_tutors	tutors	the	a	tutors	the	a
+tribe_water_breakers	water breakers	the	a	water breakers	the	a
+tribe_woven_bridles	woven bridles	the	a	woven bridles	the	a

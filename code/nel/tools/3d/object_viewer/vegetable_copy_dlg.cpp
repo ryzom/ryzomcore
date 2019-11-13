@@ -249,7 +249,7 @@ BOOL CVegetableCopyDlg::OnInitDialog()
 	uint	num= _VegetableDlg->getNumVegetables();
 	for(uint i=0; i<num; i++)
 	{
-		VegetableList.AddString(_VegetableDlg->getVegetableName(i).c_str());
+		VegetableList.AddString(nlUtf8ToTStr(_VegetableDlg->getVegetableName(i)));
 	}
 	
 
@@ -289,7 +289,7 @@ void CVegetableCopyDlg::OnOK()
 	}
 	else
 	{
-		MessageBox("Select a  vegetable to copy first", "Error", MB_OK | MB_ICONWARNING);
+		MessageBox(_T("Select a  vegetable to copy first"), _T("Error"), MB_OK | MB_ICONWARNING);
 	}
 }
 

@@ -34,7 +34,7 @@ using namespace NLMISC;
 static std::string uint64ToHex(uint64 size)
 {
 	char data[256];
-	sprintf(data, "%"NL_I64"X", size);
+	sprintf(data, "%" NL_I64 "X", size);
 	return std::string(data);
 }
 
@@ -99,7 +99,7 @@ static uint64 getVideoDriverVersion()
 {
 	static std::string ret;
 	uint64 version=0;
-	ret = "";
+	ret.clear();
 	bool ok = CSystemInfo::getVideoInfo(ret, version);
 	if (ok)
 	{
@@ -337,9 +337,6 @@ void CLoginProgressPostThread::init(NLMISC::CConfigFile &configFile)
 	std::string installStartupPage;
 	std::string installStartupHost;
 	static std::string httpStr = "http://";
-	// The url where the stats system are has changed from
-	// http://r2linux03:80/login2/client_install.php (using InstallStartupPage and StartupPage )
-	// http://r2linux03:80/stats/stats.php (using InstallStatsUrl
 
 	if (configFile.getVarPtr("InstallStatsUrl") )
 	{
@@ -348,21 +345,20 @@ void CLoginProgressPostThread::init(NLMISC::CConfigFile &configFile)
 		static std::string::size_type httpStrSize = httpStr.size();
 		std::string tmp = configFile.getVarPtr("InstallStatsUrl")->asString(0);
 		std::string::size_type it= tmp.find(httpStr);
-		if (it != std::string::npos)
-		{
-			std::string::size_type hostPageSeparator = tmp.find("/", httpStrSize);
-			if (hostPageSeparator != std::string::npos)
-			{
-				installStartupPage = tmp.substr(hostPageSeparator); //keep the leading slash
-				installStartupHost = tmp.substr(httpStrSize, hostPageSeparator  - httpStrSize); // dont keep the last slah
-			}
-		}
+		if (it == std::string::npos) return;
+
+		std::string::size_type hostPageSeparator = tmp.find("/", httpStrSize);
+		if (hostPageSeparator == std::string::npos) return;
+
+		installStartupPage = tmp.substr(hostPageSeparator); //keep the leading slash
+		installStartupHost = tmp.substr(httpStrSize, hostPageSeparator  - httpStrSize); // dont keep the last slah
+
+		init(installStartupHost, installStartupPage);
 	}
 	else
 	{
-		nlwarning("Error the InstallStatsUrl is not in the client_default.cfg.");
+//		nlwarning("Error the InstallStatsUrl is not in the client_default.cfg.");
 	}
-	init(installStartupHost, installStartupPage);
 }
 
 

@@ -1,0 +1,9 @@
+﻿*HASH_VALUE	career ID	name	named	* noms français	ia	da	p	pd	pia	pda
+_1700C956C37FB64F	MeleeFighter	Nahkämpfer	Nahkämpfer	Combattant Contact	ein	der	Nahkämpfer	die		die
+_9720B95DC35FBA54	RangeFighter	Fernkämpfer	Fernkämpfer	Combattant Distance	ein	der	Fernkämpfer	die		die
+_D32171700AD23D57	AttackCaster	Kampfmagier	Kampfmagier	Caster Attaque	ein	der	Kampfmagier	die		die
+_9A511D668371AE04	BufferCaster	Schutzmagier	Schutzmagier	Caster Buffer	ein	der	Schutzmagier	die		die
+_1C01F56701816E0A	HealerCaster	Heiler	Heiler	Caster Healer	ein	der	Heiler	die		die
+_A6473C7A6A380099	Ranger	Ranger	Ranger	Ranger	ein	der	Ranger	die		die
+_EA665D00EAE788B3	Shopkeeper	Händler	Händler	Marchand	ein	der	Händler	die		die
+_2D28B08D636AEC9E	Artisan	Handwerker	Handwerker	Crafter	ein	der	Handwerker	die		die

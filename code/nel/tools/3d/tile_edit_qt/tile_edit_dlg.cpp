@@ -14,14 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <QtCore/QString>
-#include <QtGui/QListWidgetItem>
-#include <QtGui/QMessageBox>
-#include <QtCore/QDir>
-#include <string>
-#include <nel/3d/tile_bank.h>
-#include <nel/misc/stream.h>
-#include <nel/misc/file.h>
+#include "common.h"
 #include "tile_edit_dlg.h"
 #include "items_edit_dlg.h"
 #include "tile_browser_dlg.h"
@@ -521,7 +514,7 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 							const std::string& bitmapPath=tileBank.getTile(tiles)->getRelativeFileName ((CTile::TBitmap)type);
 
 							// not empty ?
-							if (bitmapPath!="")
+							if (!bitmapPath.empty())
 							{
 								// Check the path
 								if ( CheckPath( bitmapPath, path.toUtf8() ) == false )
@@ -590,7 +583,7 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 								std::string bitmapPath=tileBank.getTile(tiles)->getRelativeFileName ((CTile::TBitmap)type);
 
 								// not empty ?
-								if (bitmapPath!="")
+								if (!bitmapPath.empty())
 								{
 									// Remove the absolute path
 									bool res=RemovePath (bitmapPath, path.toUtf8());
@@ -610,7 +603,7 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 						std::string bitmapPath=tileBank.getDisplacementMap (noise);
 
 						// not empty ?
-						if (bitmapPath!="")
+						if (!bitmapPath.empty())
 						{
 							// Remove the absolute path
 							bool res=RemovePath (bitmapPath, path.toUtf8());

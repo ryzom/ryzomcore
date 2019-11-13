@@ -74,7 +74,7 @@ void CPlayerSheet::build(const NLGEORGES::UFormElm &item)
 		debug("Key 'AnimSetBaseName' not found.");
 	// Force the CASE in UPPER to not be CASE SENSITIVE.
 	else
-		NLMISC::strlwr(AnimSetBaseName);
+		AnimSetBaseName = NLMISC::toLower(AnimSetBaseName);
 
 	// Load Lod character name
 	if(!item.getValueByName(LodCharacterName, "LodCharacterName"))
@@ -181,7 +181,7 @@ void CPlayerSheet::buildCharac(const NLGEORGES::UFormElm &item)
 // serial :
 // Serialize player sheet into binary data file.
 //-----------------------------------------------
-void CPlayerSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPlayerSheet::serial(NLMISC::IStream &f)
 {
 	// Serialize class components.
 	f.serial(SkelFilename);
@@ -240,7 +240,7 @@ void CPlayerSheet::CEquipment::build(const std::string &key,const NLGEORGES::UFo
 	if(!item.getValueByName(itemName, string(key + ".Item").c_str() ))
 		debug(NLMISC::toString("Key '%s.Item' not found.", key.c_str()));
 	else
-		Item = NLMISC::strlwr(itemName);
+		Item = NLMISC::toLower(itemName);
 
 	// Get the color.
 	if(!item.getValueByName(Color, string(key + ".Color").c_str() ))

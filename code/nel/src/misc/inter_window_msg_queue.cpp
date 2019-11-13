@@ -96,7 +96,7 @@ namespace NLMISC
 		nlassert(_Id == 0); // init done twice
 		release();
 		// create a system wide mutex
-		_SharedMemMutex = CreateMutex(NULL, FALSE, toString("NL_MUTEX_%d", (int) id).c_str());
+		_SharedMemMutex = CreateMutexA(NULL, FALSE, toString("NL_MUTEX_%d", (int) id).c_str());
 		if (!_SharedMemMutex) return false;
 		_Id = id;
 		return true;
@@ -197,7 +197,7 @@ namespace NLMISC
 					cds.lpData = (PVOID) msgOut.buffer();
 					for(;;)
 					{
-						LRESULT result = ::SendMessage(targetWindow, WM_COPYDATA, (WPARAM) _Parent->_LocalWindow.getWnd(), (LPARAM) &cds);
+						LRESULT result = ::SendMessageA(targetWindow, WM_COPYDATA, (WPARAM) _Parent->_LocalWindow.getWnd(), (LPARAM) &cds);
 						if (result) break;
 						// retry ...
 						Sleep(30);
@@ -268,7 +268,7 @@ namespace NLMISC
 			typedef CSynchronized<TMessageQueueMap>::CAccessor TAccessor;
 			// NB : use a 'new' instead of an automatic object here, because I got an 'INTERNAL COMPILER ERROR' compiler file 'msc1.cpp', line 1794
 			// else, this is one of the way recommended by microsoft to solve the problem.
-			std::auto_ptr<TAccessor> messageQueueMap(new TAccessor(&_MessageQueueMap));
+			CUniquePtr<TAccessor> messageQueueMap(new TAccessor(&_MessageQueueMap));
 			CMsgQueueIdent msgQueueIdent(ownerWindow, localId, foreignId);
 			if (messageQueueMap->value().count(msgQueueIdent))
 			{
@@ -368,7 +368,7 @@ namespace NLMISC
 			typedef CSynchronized<TMessageQueueMap>::CAccessor TAccessor;
 			// NB : use a 'new' instead of an automatic object here, because I got an 'INTERNAL COMPILER ERROR' compiler file 'msc1.cpp', line 1794
 			// else, this is one of the way recommended by microsoft to solve the problem.
-			std::auto_ptr<TAccessor> messageQueueMap(new TAccessor(&_MessageQueueMap));
+			CUniquePtr<TAccessor> messageQueueMap(new TAccessor(&_MessageQueueMap));
 			TMessageQueueMap::iterator it = messageQueueMap->value().find(CMsgQueueIdent(_LocalWindow.getWnd(), _LocalWindow.getId(), _ForeignWindow.getId()));
 			nlassert(it != messageQueueMap->value().end());
 			messageQueueMap->value().erase(it);
@@ -408,7 +408,7 @@ namespace NLMISC
 					typedef CSynchronized<TMessageQueueMap>::CAccessor TAccessor;
 					// NB : use a 'new' instead of an automatic object here, because I got an 'INTERNAL COMPILER ERROR' compiler file 'msc1.cpp', line 1794
 					// else, this is one of the way recommended by microsoft to solve the problem.
-					std::auto_ptr<TAccessor> messageQueueMap(new TAccessor(&_MessageQueueMap));
+					CUniquePtr<TAccessor> messageQueueMap(new TAccessor(&_MessageQueueMap));
 					TMessageQueueMap::iterator it = messageQueueMap->value().find(CMsgQueueIdent(hwnd, toId, fromId));
 					if (it != messageQueueMap->value().end())
 					{

@@ -33,6 +33,10 @@
 #include "nel/3d/ps_face_look_at.h"
 #include "nel/3d/ps_force.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 
@@ -113,7 +117,7 @@ CParticleSystemShape::CParticleSystemShape() : _MaxViewDist(100.f),
 }
 
 ///===========================================================================
-void	CParticleSystemShape::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CParticleSystemShape::serial(NLMISC::IStream &f)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance

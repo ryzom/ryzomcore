@@ -90,7 +90,7 @@ public:
 	/*
 	 * Free all the elements allocated since last free(). Memory is kept for next allocations.
 	 */
-	void	free ()
+	void	freeBlock ()
 	{
 		typename std::list< std::vector<T> >::iterator ite=_BlockList.begin();
 		while (ite!=_BlockList.end())

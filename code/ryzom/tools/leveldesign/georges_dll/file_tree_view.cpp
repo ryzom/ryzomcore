@@ -51,7 +51,7 @@ bool CFileTreeCtrl::create( const RECT& rect, CWnd* pParentWnd, UINT nID )
 	LPCTSTR className = AfxRegisterWndClass( 0 ); 
 	// Create this window
 
-	if (CWnd::Create (className, "empty", WS_CHILD, rect, pParentWnd, nID ))
+	if (CWnd::Create (className, _T("empty"), WS_CHILD, rect, pParentWnd, nID ))
 
 
 #if defined(NL_COMP_VC) && NL_COMP_VC_VERSION >= 80
@@ -77,8 +77,8 @@ struct CTreeItemInfo
 		pParentFolder=NULL;
 		dwFlags=NULL;
 	}
-	ITEMIDLIST*   pidlSelf;
-	ITEMIDLIST*   pidlFullyQual;
+	LPITEMIDLIST  pidlSelf;
+	LPITEMIDLIST  pidlFullyQual;
 	IShellFolder* pParentFolder;
 	DWORD		  dwFlags;
 	std::string	  displayName;
@@ -97,8 +97,8 @@ bool CFileTreeCtrl::setRootDirectory (const char *dir)
 			_TreeCtrl.DeleteAllItems ();
 
 			IShellFolder* pDesktop;
-			ITEMIDLIST*   pidl;
-			ITEMIDLIST*   pidlDir;
+			LPITEMIDLIST  pidl;
+			LPITEMIDLIST  pidlDir;
 			TV_ITEM tvItem={0};
 			TV_INSERTSTRUCT   tvInsert={0};
 
@@ -318,11 +318,11 @@ BOOL CFileTreeCtrl::OnNotify ( WPARAM wParam, LPARAM lParam, LRESULT* pResult )
 	return CWnd::OnNotify ( wParam, lParam, pResult );
 }
 
-inline ITEMIDLIST* Pidl_GetNextItem(LPCITEMIDLIST pidl)
+inline LPITEMIDLIST Pidl_GetNextItem(LPCITEMIDLIST pidl)
 {
 	if(pidl)
 	{
-	   return (ITEMIDLIST*)(BYTE*)(((BYTE*)pidl) + pidl->mkid.cb);
+	   return (LPITEMIDLIST)(BYTE*)(((BYTE*)pidl) + pidl->mkid.cb);
 	}
 	else
 	   return NULL;
@@ -347,7 +347,7 @@ return pidl;
 UINT Pidl_GetSize(LPCITEMIDLIST pidl)
 {
 	UINT           cbTotal = 0;
-	ITEMIDLIST*   pidlTemp = (ITEMIDLIST*) pidl;
+	LPITEMIDLIST   pidlTemp = (LPITEMIDLIST)pidl;
 
 	if(pidlTemp)
 	{
@@ -403,11 +403,9 @@ int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			return stricmp (pItemInfo1->displayName.c_str(), pItemInfo2->displayName.c_str());
 		if (pfileTreeCtrl->_ArrangeMode == CFileTreeCtrl::ByType)
 		{
-			char ext1[_MAX_EXT];
-			_splitpath (pItemInfo1->displayName.c_str(), NULL, NULL, NULL, ext1);
-			char ext2[_MAX_EXT];
-			_splitpath (pItemInfo2->displayName.c_str(), NULL, NULL, NULL, ext2);
-			int res = stricmp (ext1, ext2);
+			std::string ext1 = NLMISC::CFile::getExtension(pItemInfo1->displayName);
+			std::string ext2 = NLMISC::CFile::getExtension(pItemInfo2->displayName);
+			int res = stricmp (ext1.c_str(), ext2.c_str());
 			if ( res == 0)
 				return stricmp (pItemInfo1->displayName.c_str(), pItemInfo2->displayName.c_str());
 			else
@@ -417,12 +415,12 @@ int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	return 0;
 }
 
-bool CFileTreeCtrl::enumObjects(HTREEITEM hParentItem,IShellFolder* pParentFolder, ITEMIDLIST* pidlParent)
+bool CFileTreeCtrl::enumObjects(HTREEITEM hParentItem,IShellFolder* pParentFolder, LPITEMIDLIST pidlParent)
 {
 	IEnumIDList* pEnum;
 	if(SUCCEEDED(pParentFolder->EnumObjects(NULL, SHCONTF_NONFOLDERS |SHCONTF_FOLDERS|SHCONTF_INCLUDEHIDDEN, &pEnum)))
 	{
-		ITEMIDLIST* pidl;
+		LPITEMIDLIST pidl;
 		DWORD  dwFetched = 1;
 		TV_ITEM tvItem={0};
 		TV_INSERTSTRUCT   tvInsert={0};
@@ -443,11 +441,11 @@ bool CFileTreeCtrl::enumObjects(HTREEITEM hParentItem,IShellFolder* pParentFolde
 			pParentFolder->GetAttributesOf(1, (LPCITEMIDLIST*)&pidl, &pItemInfo->dwFlags);
 
 			// Convert display name in file system path
-			char name[MAX_PATH];
+			TCHAR name[MAX_PATH];
 			nlverify ( SHGetPathFromIDList ( pidl, name ) );
 
 			// Save it
-			pItemInfo->displayName = name;
+			pItemInfo->displayName = NLMISC::tStrToUtf8(name);
 
 			// Is a folder ?
 			bool folder = (pItemInfo->dwFlags&SFGAO_FOLDER) !=0;
@@ -722,7 +720,7 @@ bool CFileTreeCtrl::getCurrentFilename (std::string &result)
 	if (curSel)
 	{
 		CString str = _TreeCtrl.GetItemText (curSel);
-		result = str;
+		result = NLMISC::tStrToUtf8(str);
 		return true;
 	}
 	return false;

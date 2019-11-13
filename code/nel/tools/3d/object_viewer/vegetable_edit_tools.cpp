@@ -33,7 +33,7 @@ void	CDirectEditableRangeFloat::init(uint32 x, uint32 y, CWnd *pParent)
 
 	CRect	rect;
 	rect.SetRect(x, y+10, x+dx, y+25);
-	_StaticText.Create(_Title.c_str(), WS_CHILD | WS_VISIBLE, rect, pParent);
+	_StaticText.Create(nlUtf8ToTStr(_Title), WS_CHILD | WS_VISIBLE, rect, pParent);
 	_StaticText.SetFont(pParent->GetFont());
 }
 

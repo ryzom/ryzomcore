@@ -1,6 +1,17 @@
 
 IF(WITH_NEL_TOOLS)
   IF(WITH_3D)
+    IF(WITH_ASSIMP)
+      SUBDIRS(
+        mesh_utils
+        mesh_export)
+    ENDIF()
+    IF(WITH_LIBGSF)
+      SUBDIRS(
+        pipeline_max
+        pipeline_max_dump
+        pipeline_max_rewrite_assets)
+    ENDIF()
     SUBDIRS(
       anim_builder
       animation_set_builder
@@ -27,10 +38,12 @@ IF(WITH_NEL_TOOLS)
       zone_dump
       zviewer)
   ENDIF()
-    
   SUBDIRS(
     build_interface
+    unbuild_interface
     get_neighbors
+    textures_optimizer
+    textures_tool
     tga_cut
     tga_resize)
 ENDIF()
@@ -43,34 +56,41 @@ IF(WIN32 AND WITH_3D)
       IF(MAXSDK_FOUND)
         ADD_SUBDIRECTORY(plugin_max)
         ADD_SUBDIRECTORY(ligo)
-      ENDIF(MAXSDK_FOUND)
-    ENDIF(WITH_NEL_MAXPLUGIN)
-  ENDIF(MFC_FOUND)
+      ENDIF()
+    ENDIF()
+  ENDIF()
 ENDIF()
 
 IF(WITH_NEL_TOOLS AND WITH_3D)
   IF(WIN32)
-#    ADD_SUBDIRECTORY(lightmap_optimizer)  
+#    ADD_SUBDIRECTORY(lightmap_optimizer)
     IF(MFC_FOUND)
       ADD_SUBDIRECTORY(object_viewer_exe)
       ADD_SUBDIRECTORY(tile_edit)
-    ENDIF(MFC_FOUND)
-  ENDIF(WIN32)
-  
-  IF(WITH_QT)
+    ENDIF()
+  ENDIF()
+
+  IF(WITH_QT OR WITH_QT5)
     ADD_SUBDIRECTORY(tile_edit_qt)
     ADD_SUBDIRECTORY(object_viewer_widget)
-  ENDIF(WITH_QT)
-  
+  ENDIF()
+
+  IF(WITH_QT5)
+    ADD_SUBDIRECTORY(shared_widgets)
+    ADD_SUBDIRECTORY(panoply_preview)
+  ENDIF()
+
+  IF(WITH_NEL_TOOLS)
+    FIND_PACKAGE(Squish)
+  ENDIF()
+
   IF(SQUISH_FOUND)
     ADD_SUBDIRECTORY(s3tc_compressor_lib)
     ADD_SUBDIRECTORY(panoply_maker)
     ADD_SUBDIRECTORY(tga_2_dds)
     ADD_SUBDIRECTORY(hls_bank_maker)
-  ENDIF(SQUISH_FOUND)
+  ENDIF()
 
   #crash_log_analyser
-  #shapes_exporter
-
 ENDIF()
 

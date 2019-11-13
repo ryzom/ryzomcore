@@ -20,6 +20,7 @@
 #ifndef RCERROR_WIDGET
 #define RCERROR_WIDGET
 
+#include "crash_report_data.h"
 
 #include "ui_crash_report_widget.h"
 #include <vector>

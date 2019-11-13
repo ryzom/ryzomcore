@@ -385,7 +385,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 		}
 	}
 
-	if(NeededToRecompute.size() > 0)
+	if(!NeededToRecompute.empty())
 		nlinfo ("%d seconds to recompute %d sheets", (uint32)(NLMISC::CTime::getLocalTime()-start)/1000, NeededToRecompute.size());
 
 	// free the georges loader if necessary
@@ -748,7 +748,7 @@ void loadForm2(const std::vector<std::string> &sheetFilters, const std::string &
 		}
 	}
 
-	if(NeededToRecompute.size() > 0)
+	if(!NeededToRecompute.empty())
 		nlinfo ("%d seconds to recompute %d sheets", (uint32)(NLMISC::CTime::getLocalTime()-start)/1000, NeededToRecompute.size());
 
 	// free the georges loader if necessary
@@ -1304,7 +1304,7 @@ void loadFormNoPackedSheet (const std::vector<std::string> &sheetFilters, std::m
 		}
 	}
 
-	if(NeededToRecompute.size() > 0)
+	if(!NeededToRecompute.empty())
 		nlinfo ("%d seconds to recompute %d sheets", (uint32)(NLMISC::CTime::getLocalTime()-start)/1000, NeededToRecompute.size());
 
 	// free the georges loader if necessary
@@ -1393,7 +1393,7 @@ void loadFormNoPackedSheet2 (const std::vector<std::string> &sheetFilters, std::
 		}
 	}
 
-	if(NeededToRecompute.size() > 0)
+	if(!NeededToRecompute.empty())
 		nlinfo ("%d seconds to recompute %d sheets", (uint32)(NLMISC::CTime::getLocalTime()-start)/1000, NeededToRecompute.size());
 
 	// free the georges loader if necessary

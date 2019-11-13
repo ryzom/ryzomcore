@@ -21,12 +21,16 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/smart_ptr.h"
 #include "nel/3d/animatable.h"
+
 #include "nel/3d/track.h"
+
 #include <map>
 
 
 namespace NL3D
 {
+
+class CScene;
 
 // ***************************************************************************
 /**

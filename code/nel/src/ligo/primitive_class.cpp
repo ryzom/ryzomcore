@@ -183,8 +183,8 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 	//	init default parameters
 	AutoInit = false;
 	Deletable = true;
-	FileExtension = "";
-	FileType = "";
+	FileExtension.clear();
+	FileType.clear();
 	Collision = false;
 	LinkBrothers = false;
 	ShowArrow = true;
@@ -346,21 +346,21 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 
 		// Lookup
 		parameter.WidgetHeight = 100;
-		int temp;
+		int temp = 0;
 		if (ReadInt ("WIDGET_HEIGHT", temp, paramNode))
 			parameter.WidgetHeight = (uint)temp;
 
 		// Read the file extension
-		parameter.FileExtension = "";
+		parameter.FileExtension.clear();
 		CIXml::getPropertyString (parameter.FileExtension, paramNode, "FILE_EXTENSION");
 		parameter.FileExtension = toLower(parameter.FileExtension);
 
 		// Autonaming preference
-		parameter.Autoname = "";
+		parameter.Autoname.clear();
 		CIXml::getPropertyString (parameter.Autoname, paramNode, "AUTONAME");
 
 		// Read the file extension
-		parameter.Folder = "";
+		parameter.Folder.clear();
 		CIXml::getPropertyString (parameter.Folder, paramNode, "FOLDER");
 		parameter.Folder = toLower(parameter.Folder);
 
@@ -650,7 +650,7 @@ void	CPrimitiveClass::CParameter::CConstStringValue::getPrimitivesForPrimPath	(s
 
 bool CPrimitiveClass::CParameter::translateAutoname (std::string &result, const IPrimitive &primitive, const CPrimitiveClass &primitiveClass) const
 {
-	result = "";
+	result.clear();
 	string::size_type strBegin = 0;
 	string::size_type strEnd = 0;
 	while (strBegin != Autoname.size())
@@ -745,7 +745,7 @@ bool CPrimitiveClass::CParameter::translateAutoname (std::string &result, const 
 
 bool CPrimitiveClass::CParameter::getDefaultValue (std::string &result, const IPrimitive &primitive, const CPrimitiveClass &primitiveClass, std::string *fromWhere) const
 {
-	result = "";
+	result.clear();
 	if (!Autoname.empty())
 	{
 		if (fromWhere)

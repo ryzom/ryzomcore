@@ -346,7 +346,7 @@ void CLightCycleManager::setHour(float hour, const CWeatherManagerClient &wm, NL
 
 
 	// Set the Sun color only if not indoor
-	if (ContinentMngr.cur()->Indoor)
+	if (ContinentMngr.cur() && ContinentMngr.cur()->Indoor)
 	{
 		Scene->setSunAmbient(CRGBA(150, 150, 150, 255));
 	}
@@ -354,11 +354,17 @@ void CLightCycleManager::setHour(float hour, const CWeatherManagerClient &wm, NL
 	{
 		CRGBA color;
 		color.add(_LastDiffuse, lightningColor);
-		Scene->setLightGroupColor (LightGroupDay, color);
+		Scene->setLightGroupColor(LightGroupLandscapeDiffuse, color);
+		color.add(_LastAmbient, lightningColor);
+		Scene->setLightGroupColor(LightGroupLandscapeAmbient, color);
 		float nightLevel = _LightLevel*255.f;
 		clamp (nightLevel, 0, 255);
-		color.set ((uint8)nightLevel, (uint8)nightLevel, (uint8)nightLevel);
-		Scene->setLightGroupColor (LightGroupNight, color);
+		uint8 nightLevelColor = (uint8)nightLevel;
+		color.set (nightLevelColor, nightLevelColor, nightLevelColor);
+		Scene->setLightGroupColor (LightGroupNightCycle, color);
+		uint8 dayLevelColor = 255 - nightLevel;
+		color.set (dayLevelColor, dayLevelColor, dayLevelColor);
+		Scene->setLightGroupColor (LightGroupDayCycle, color);
 	}
 
 	if (Landscape)

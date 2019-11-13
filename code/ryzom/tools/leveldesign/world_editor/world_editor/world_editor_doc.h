@@ -23,7 +23,6 @@
 
 #include <nel/ligo/primitive_class.h>
 #include <nel/ligo/zone_region.h>
-#include <hash_set>
 
 #if _MSC_VER > 1000
 #pragma once
@@ -159,7 +158,7 @@ public:
 	void				getFilePath(uint primIndex,std::string&);
 
 	// Set the data directory
-	void				setDataDir (const char *dir);
+	void				setDataDir (const std::string &dir);
 
 	// Get the path of selected primitive
 	const std::string	&getPathOfSelectedPrimitive() const;
@@ -264,7 +263,7 @@ private:
 	void insertPrimitive (const CDatabaseLocator &locator, NLLIGO::IPrimitive *primitive);
 
 	// Create a primitive, for actions only
-	const NLLIGO::IPrimitive *createPrimitive (const CDatabaseLocator &locator, const char *className, const char *primName, 
+	const NLLIGO::IPrimitive *createPrimitive (const CDatabaseLocator &locator, const std::string &className, const std::string &primName, 
 		const NLMISC::CVector &initPos, float deltaPos, const std::vector<NLLIGO::CPrimitiveClass::CInitParameters> &initParameters);
 
 	// Init a primitive parameters
@@ -280,7 +279,7 @@ public:
 
 	// *** File modification
 	void				updateFiles ();
-	static bool			checkFileDate (const char *filename, uint32 date);
+	static bool			checkFileDate(const std::string &filename, uint32 date);
 
 /*	// Get ligo data at a specific locator
 	void				getLigoData (CLigoData &data, const CDatabaseLocator &locator);
@@ -295,7 +294,7 @@ public:
 	}
 
 	// Get document context
-	void setContext (const char *context)
+	void setContext (const std::string &context)
 	{
 		_Context = context;
 	}
@@ -442,7 +441,7 @@ public:
 
 private:
 	bool	newDocument ();
-	bool	loadDocument (const char *filename);
+	bool	loadDocument (const std::string &filename);
 
 // Implementation
 public:

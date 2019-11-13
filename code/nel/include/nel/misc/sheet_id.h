@@ -146,8 +146,8 @@ public :
 	/**
 	 *	Serial
 	 */
-	void serial(NLMISC::IStream	&f) throw(NLMISC::EStream);
-	void serialString(NLMISC::IStream &f, const std::string &defaultType = "") throw(NLMISC::EStream);
+	void serial(NLMISC::IStream	&f);
+	void serialString(NLMISC::IStream &f, const std::string &defaultType = "");
 
 	/**
 	 *  Display the list of valid sheet ids with their associated file names
@@ -248,7 +248,7 @@ private :
 class CSheetIdHashMapTraits
 {
 public:
-	enum { bucket_size = 4, min_buckets = 8, };
+	enum { bucket_size = 4, min_buckets = 8 };
 	inline size_t operator() ( const CSheetId& sheetId ) const
 	{
 		return sheetId.asInt() >> 5;

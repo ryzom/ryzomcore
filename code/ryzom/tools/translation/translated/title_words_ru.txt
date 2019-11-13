@@ -1,0 +1,1904 @@
+﻿*HASH_VALUE	title_id	name	women_name
+_C27F65FEE99C5036	gn_apprentice_tracer	Apprentice Tracer	
+_7F3E91DD23C6651F	gn_bandit_bountybeaches_1	Кровавые Корчевщики	
+_C53D8D3533B1790F	gn_bandit_bountybeaches_2	Охотники за головами	
+_3E7B70E3ECBA5115	gn_bandit_bountybeaches_3	Отъявленная пятерка	
+_37A9127C4ABCBCE0	gn_bandit_citiesofintuition_1	Птицы Предзнаменования	
+_3F5B0C14CB0E21F1	gn_bandit_citiesofintuition_2	Клинки Зоры	
+_57E4B19BC9AF260B	gn_bandit_citiesofintuition_3	Очи Озарений	
+_448EF90B66A614CE	gn_bandit_dunesofexil_1	Опустошители предгорий	
+_A788B0A2E6C760B4	gn_bandit_dunesofexil_2	Подстерегающие	
+_C69E51219ED7DC5B	gn_bandit_dunesofexil_3	Драконы Дайрона	
+_E718611C1F0788AA	gn_bandit_dunesofexil_4	Истребители Пламени	
+_C4BE65A0844B690C	gn_bandit_enchantedisle_1	Потрошители Тайлера	
+_9ADF725B7C1C1806	gn_bandit_enchantedisle_2	Аколиты Зла	
+_3F3E09153DEF6D16	gn_bandit_enchantedisle_3	Своенравные Мектубы	
+_01AC1C6DF31F1510	gn_bandit_fleetinggarden_1	Осквернители Зелени	
+_B5172C0DEA700512	gn_bandit_fleetinggarden_2	Мутноглазые	
+_7F8B7009241C4904	gn_bandit_fleetinggarden_3	Смотрящие с Вершин	
+_3937401685703D0C	gn_bandit_fleetinggarden_4	Владыки Призрачного сада	
+_3C9C380C9FE53D11	gn_bandit_fleetinggarden_5	Подсевшие на Семена	
+_F18AE58CB2BF35EC	gn_bandit_forbidden_depths_1	Пики Евы	
+_D66D610C6879888A	gn_bandit_forbidden_depths_2	Резчики плоти	
+_1EC30E8485DFF1BB	gn_bandit_forbidden_depths_3	Банда Зверообразных 	
+_68381E88C26F31EA	gn_bandit_forbidden_depths_4	Танцующие с Драконами	
+_070E0D04128AA908	gn_bandit_frahartowers_1	Змеи Каньонов	
+_807011C2371D8918	gn_bandit_frahartowers_2	Великолепные Стэйвоны	
+_862C50089D53D90A	gn_bandit_frahartowers_3	Клинки Ярости	
+_008F41019353BD07	gn_bandit_frahartowers_4	Поджигатели фрахаров	
+_EF311E8103FE91EB	gn_bandit_gate_of_obscurity_1	Разбивающие Сердца	
+_5353A573E4E0A660	gn_bandit_gate_of_obscurity_2	Продавцы Ужаса	
+_67C6E27B09DF09BD	gn_bandit_gate_of_obscurity_3	Разорители Долин	
+_5875CA8281BE599C	gn_bandit_gate_of_obscurity_4	Алые Бездельники	
+_23CC358CC1AF71D0	gn_bandit_groveofconfusion_1	Безбашенные Девки	
+_B99BFC8849AFB5EF	gn_bandit_groveofconfusion_2	Тираны Рощи	
+_5092C28CC3AF65A9	gn_bandit_groveofconfusion_3	Длинные Ножи	
+_825D4501D593E01A	gn_bandit_groveofumbra_1	Королевы Убийц	
+_7E4E990951939D19	gn_bandit_groveofumbra_2	Гуляки	
+_A45789F0595597AD	gn_bandit_groveofumbra_3	Черные Овцы	
+_25685DF79B872862	gn_bandit_groveofumbra_4	Смельчаки	
+_80DF8592A819BD17	gn_bandit_havenofpurity_1	Шайка Безобразников	
+_00AEEDE21EFCA10E	gn_bandit_havenofpurity_2	Охотники на Хоминов	
+_EEFECD94463195ED	gn_bandit_havenofpurity_3	Ярость с Небес	
+_819D2D8F82D0311E	gn_bandit_hereticshovel_1	Измерители Канала	
+_5A43C5037F2F0642	gn_bandit_hereticshovel_2	Язычники из Логова	
+_43EDE1E15F559421	gn_bandit_hereticshovel_3	Страшилы из Логова	
+_E8C8B4A11DB87494	gn_bandit_hiddensource_1	Наводящие Порчу	
+_85BF1D09DBA72848	gn_bandit_hiddensource_2	Восставшие из Ада	
+_E6EF550D9193AC4F	gn_bandit_hiddensource_3	Проклятие Джены	
+_B1BE56506C2069A3	gn_bandit_imperialdunes_1	Глаз Дракона	
+_44DEA9CFA8D93016	gn_bandit_imperialdunes_2	Охотники в Дюнах	
+_88BEC9E2E8CBF0D2	gn_bandit_imperialdunes_3	Громилы Пайра	
+_3DE9C1DF93DB6519	gn_bandit_imperialdunes_4	Язычники Пайра	
+_447BD4C0CA6F2519	gn_bandit_knollofdissent_1	Пограничные Рейдеры	
+_1D51A486CADEE1D6	gn_bandit_knollofdissent_2	Маги Раскола	
+_712BF97BC66E45FC	gn_bandit_knollofdissent_3	Наездники Высоких Утесов	
+_898B54126C39B32A	gn_bandit_knollofdissent_4	Головорезы	
+_29BD64056C2984B5	gn_bandit_knollofdissent_5	Мусорщики	
+_05FB700F2D189428	gn_bandit_knollofdissent_6	Истребители пламени	
+_B8DE2964BE3FF51F	gn_bandit_knotofdementia_1	Братство Запугивающих	
+_42ACE4BE27449922	gn_bandit_knotofdementia_2	Шип Зоры	
+_02BC600EFBFB7517	gn_bandit_knotofdementia_3	Прыгуны из Зоры	
+_454C6873F12F95FB	gn_bandit_lagoonsofloria_1	Сутулые Трясинники	
+_7E7CD4CDE8FFC503	gn_bandit_lagoonsofloria_2	Кинжалы Лагун	
+_B8678CD4C57EC104	gn_bandit_lagoonsofloria_3	Команда Диллера 	
+_414B940EA0D4D4A9	gn_bandit_lagoonsofloria_4	Болотная Бригада	
+_BBA94714E89F8D11	gn_bandit_lagoonsofloria_5	Смертельные Красотки 	
+_5A81286630BAA17F	gn_bandit_lagoonsofloria_6	Семь Грешных клинков	
+_853D39269E827D01	gn_bandit_libertylake_1	Пираты Свободы	
+_C33DD9A4BBCC0DF2	gn_bandit_libertylake_2	Живодеры Кристабелла	
+_C48B0C2CE3A27DFE	gn_bandit_libertylake_3	Приятели Ярости 	
+_859D151821D34719	gn_bandit_maidengrove_1	Банда Тени	
+_C4AD4D23E4F514C2	gn_bandit_maidengrove_2	Чистильщики равнин 	
+_954E7508A1E5847B	gn_bandit_maidengrove_3	Озерные бродяги	
+_77B82012736F81FF	gn_bandit_majesticgarden_1	Ярость Нэтея	
+_BFCDA06D471A1814	gn_bandit_majesticgarden_2	Волны Прилива	
+_BBB90F16F55F3528	gn_bandit_majesticgarden_3	Хватка Дэвея	
+_3DDBA036073F4510	gn_bandit_majesticgarden_4	Чародеи из Эвелея	
+_7D2BA0C38A701116	gn_bandit_majesticgarden_5	Губители Пограничья	
+_A67AE5E00EB6D4A6	gn_bandit_nexus_1	Мятежники Запада	
+_66C7F870257908B4	gn_bandit_nexus_2	Смотрящие с Вершин	
+_AA4738F5A1D50CB5	gn_bandit_nexus_3	Душители Нексуса	
+_F24DB97A15FAC4C1	gn_bandit_nexus_4	Заклинатели Узла	
+_395EDDB991CA791B	gn_bandit_oflovaksoasis_1	Дыхание Дракона	
+_3AADF5CA915BA516	gn_bandit_oflovaksoasis_2	Всадники-из-Тени	
+_E95EAA4E7B4091E8	gn_bandit_oflovaksoasis_3	Ангелы Драконова Огня	
+_7EED459A7E214513	gn_bandit_oflovaksoasis_4	Бесшабашные Рубаки 	
+_097D11F65653A92A	gn_bandit_outlawcanyon_1	Бандиты Каньона	
+_C50D79A49C6E5D25	gn_bandit_outlawcanyon_2	Пламя Боя	
+_2B075DF25CA7DCA5	gn_bandit_outlawcanyon_3	Буканьеры	
+_80AF15F78A007C0B	gn_bandit_sawdustmines_1	Рапиры Винни	
+_80FE55F21BB920D0	gn_bandit_sawdustmines_2	Костоломы	
+_1A275BDD3C0FFD72	gn_bandit_sawdustmines_3	Бандиты Лесистых Дюн	
+_2D263E7D7E7B50E1	gn_bandit_the_abyss_of_ichor_1	Торговцы смертью	
+_DBF5AE38007CE076	gn_bandit_the_abyss_of_ichor_2	Плачущие убийцы	
+_DD01CFF581BFE161	gn_bandit_the_abyss_of_ichor_3	Стражи Сэпа	
+_3EC02929A45C68F9	gn_bandit_the_abyss_of_ichor_4	Мародеры	
+_07960A91C4FC90AA	gn_bandit_the_elusive_forest_1	Белокурые бестии	
+_74EF4296893C44CC	gn_bandit_the_elusive_forest_2	Смуглокожие Наемники	
+_74EF2D8D450C48D1	gn_bandit_the_elusive_forest_3	Зеленое Бедствие	
+_D933A2426C500E77	gn_bandit_the_land_of_continuty_1	Обитатели Тени	
+_8A6C2BBB9371E25E	gn_bandit_the_land_of_continuty_2	Принцы Изначальных Корней	
+_60F36E2D6CBF1A71	gn_bandit_the_land_of_continuty_3	Чудаки-Пещерники	
+_D9347E2F6CBF417B	gn_bandit_the_land_of_continuty_4	Драконистые Парни 	
+_9EF3BA7F1956AA6C	gn_bandit_the_land_of_continuty_5	Крепкие орешки	
+_3EDC0515DC1061F9	gn_bandit_the_sunken_city_1	Сестры по оружию	
+_E1EC2927EF5A9486	gn_bandit_the_sunken_city_2	Гремучие змеи	
+_73C7FD302E5131EF	gn_bandit_the_sunken_city_3	Потрошители	
+_3B80A1980BEF5003	gn_bandit_the_sunken_city_4	Любители Гуу	
+_001E69F6F50F5505	gn_bandit_the_trench_of_trials_1	Запальщики	
+_96D47E8F0D24E671	gn_bandit_the_trench_of_trials_2	Язычники с холмов	
+_1A94661692153A64	gn_bandit_the_trench_of_trials_3	Оседлавшие Гигантов	
+_49451A6B8CA7FE5F	gn_bandit_the_under_spring_1	Линчеватели из Подземелий	
+_1D8FD191C4D07DBF	gn_bandit_the_under_spring_2	Фанатики Кукки	
+_295A1A8605213D00	gn_bandit_the_under_spring_3	Зловещие Стэйвоны	
+_32AEF51BA88A9CFF	gn_bandit_the_under_spring_4	Банда Глушителей	
+_BC6DED7F3D618DAE	gn_bandit_the_windy_gate_1	Крошки Сердцееды	
+_3CC6DD543131A9BB	gn_bandit_the_windy_gate_2	Чистильщики Ветреных Врат	
+_C21EA03BC6F025F9	gn_bandit_the_windy_gate_3	Ловцы Призраков	
+_DA589CB42947D47D	gn_bandit_thefount_1	Праккеры 	
+_96A58730EEE9A872	gn_bandit_thefount_2	Старики с Родника 	
+_F1060D99053850E3	gn_bandit_thefount_3	Флибустьеры Родника	
+_C7FFA120E9487C64	gn_bandit_thefount_4	Рейнджеры Cвободы	
+_46631112F45E8D85	gn_bandit_thesavagedunes_1	Грешники из Чащоб	
+_7B8DE82EC87E6524	gn_bandit_thesavagedunes_2	Беспощадные Рубаки	
+_FC3C24DFDBAF8D0E	gn_bandit_thesavagedunes_3	Кинжалы Каналов	
+_7E04E081859F25C4	gn_bandit_thesavagedunes_4	Мошенники Фессоса	
+_5660570DDCB1FE6F	gn_bandit_thescorchedcorridor_1	Маньяки Подземелий	
+_1B34DAA9C1191008	gn_bandit_thescorchedcorridor_2	Туннельные Псы	
+_9C85EA7E293CE28C	gn_bandit_thescorchedcorridor_3	Бродяги из Подворотни	
+_207C211BE8E86C54	gn_bandit_thevoid_1	Мятежники Подземного леса	
+_9F6638B16165E4A1	gn_bandit_thevoid_2	Хватающие Гуу	
+_E4A80110294A810D	gn_bandit_thevoid_3	Злодеи Великой Пустоты	
+_59F7589C95EAA096	gn_bandit_upperbog_1	Загребающие Сэп	
+_185774C1A71AF07E	gn_bandit_upperbog_2	Засадный полк	
+_14435826A9D9F893	gn_bandit_upperbog_3	Разбойники Сталии	
+_B2404D2220669C88	gn_bandit_windsofmuse_1	Акробаты Муз	
+_4350251BA0B61854	gn_bandit_windsofmuse_2	Дубильщики утесов	
+_D650811B61269C81	gn_bandit_windsofmuse_3	Грабители Муз	
+_04B29E80817EAD6C	gn_bandit_windsofmuse_4	Злые Ветры Запада	
+_974EBE71857F49AB	gn_class_apprentice_trader	Подмастерье торговца	
+_0FFBE24C1B17562E	gn_class_arcane_apprentice	Старший элитный маг	
+_1DB612296E4B0E7A	gn_class_arcane_master	Опытный элитный маг	
+_7BE6B973CA02D906	gn_class_archery_lord	Опытный сильный стрелок	
+_AD3FF465C4B1B9B1	gn_class_archery_master	Старший сильный стрелок	
+_BF35F2474E2FA8CA	gn_class_archery_recruit	Младший сильный стрелок	
+_05BE38C86D31411B	gn_class_assassin	Младший мощный стрелок	
+_A666A89D6CEB5CB6	gn_class_bodyguard	Телохранитель	
+_449DB905FE446315	gn_class_bowmen	Младший обычный стрелок	
+_680D09761B791F2F	gn_class_captain	Старший воин-мастер	
+_1C34927CC4BCC4BC	gn_class_charm_adept	Младший мощный маг	
+_1B641E863959B414	gn_class_charm_expert	Старший мощный маг	
+_6EFAA6800280817F	gn_class_cleric	Опытный элитный целитель	
+_40FEA1C52B2C3D1F	gn_class_conjurer	Опытный сильный маг	
+_6C880A670543357B	gn_class_conscript	Младший обычный воин	
+_FB6632F5443E62D8	gn_class_cure_adept	Младший мастер исцеления	
+_61183C6503FFD960	gn_class_cure_expert	Опытный мастер исцеления	
+_7FB6706CBE4120F2	gn_class_cure_master	Старший мастер исцеления	
+_BE3E17C1E5AF781E	gn_class_elite	Младший элитный воин	
+_C16D0E8E440040D5	gn_class_executionner	Старший мощный стрелок	
+_C88D38E8BDFB5B0C	gn_class_expert	Старший элитный воин	
+_810C44A8689F7522	gn_class_fighter	Старший мощный воин	
+_2607968AB1F9A49C	gn_class_forager	Добытчик	
+_AC5AE7D73951AFFB	gn_class_healing_apprentice	Младший обычный целитель	
+_D924028287EEB4B7	gn_class_legionnaire	Младший мощный воин	
+_60020157C3426C76	gn_class_life_surgeon	Старший элитный целитель	
+_3B7BD730818039A2	gn_class_magician	Опытный мастер магии	
+_C1AF9702679197A5	gn_class_major	Младший воин-мастер	
+_AC0F99FE664BB07A	gn_class_medic	Старший сильный целитель	
+_6796449BAB5A3CA5	gn_class_milician	Надзиратель	
+_9ABCE64F229C1585	gn_class_mystical_adept	Младший мастер магии	
+_04045EE8F440D490	gn_class_mystical_expert	Старший мастер магии	
+_6437B0A16788A4A7	gn_class_noble	Товарищ	
+_306D211280A075FF	gn_class_priest	Младший элитный целитель	
+_81A0B1E0E4F45394	gn_class_private	Старший сильный воин	
+_DD65628AC5908F40	gn_class_professional	Опытный мощный стрелок	
+_C721327A4500FD3C	gn_class_range_adept	Опытный обычный стрелок	
+_77B5B2678B6CA8D5	gn_class_range_master	Опытный элитный стрелок	
+_C0D3209F684F812E	gn_class_recruit	Старший обычный воин	
+_0FA6226535F72A71	gn_class_ritual_master	Опытный сильный целитель	
+_C30AB1164AC0411D	gn_class_sergent	Опытный мощный воин	
+_7FFF6DF82F9B91C1	gn_class_shaman	Младший сильный целитель	
+_A1F32251304D271B	gn_class_shooting_elite	Младший элитный стрелок	
+_837DE27F7C6A9D8D	gn_class_shooting_lord	Старший элитный стрелок	
+_82B1DD0D48A0591C	gn_class_soldier	Опытный обычный воин	
+_F12BBB0B04C0FDF3	gn_class_sorcerer	Младший элитный маг	
+_15424D1C22F66692	gn_class_sorcery_apprentice	Младший сильный маг	
+_3C131E697F2F64D1	gn_class_sorcery_master	Старший сильный маг	
+_B8289067014F7DF5	gn_class_spellcaster	Младший сильный маг	
+_43642EED81DEDCD2	gn_class_throwing_adept	Младший стрелок-мастер	
+_01D5384B828A4025	gn_class_throwing_expert	Старший стрелок-мастер	
+_9CE6404780F73596	gn_class_throwing_master	Опытный стрелок-мастер	
+_A65814B3DE6B2CA1	gn_class_trader	Исследователь	
+_65F880AA6E6968A6	gn_class_traveler	Путешественник	
+_64D602589240C40B	gn_class_treat_adept	Старший мощный целитель	
+_DDBB2EEB2064F6B7	gn_class_treat_apprentice	Младший мощный целитель	
+_80EFF5E168038F09	gn_class_trooper	Младший сильный воин	
+_7EBCE72C828089A5	gn_class_warchief	Опытный воин-мастер	
+_4389D91207102D19	gn_class_warlock	Опытный мощный маг	
+_BA59B0BB85F1552C	gn_class_warlord	Опытный элитный воин	
+_D43585BDEEEBB00E	gn_class_warmaster	Военачальник	
+_05AFBDDA1F892C16	gn_class_warrior	Опытный сильный воин	
+_286E452F6126AF9C	gn_darkeningsap_static_guard_5	Гвардеец	
+_45B7DCA3A9E04CB2	gn_forager	Добытчик	
+_B59C8E8683909DC8	gn_fraharhunters_guards_w_10	Мощный гвардеец	
+_5CEB24AD6A6904BC	gn_fyros_defender	Защитник файросов	
+_28582835AF18C8B4	gn_fyros_officer	Офицер файросов	
+_4DC81556748F111A	gn_green_seed_noble	Военный вождь	
+_644C556B01400116	gn_green_seed_volunteer	Волонтер	
+_2677B899A5787FAB	gn_guard_inv_1	Гвардеец	
+_2677B899A57883AB	gn_guard_inv_2	Гвардеец	
+_09592DFADF44F498	gn_kami_sentinel	Страж Ками	
+_5F79285F42CDEDF3	gn_karavan_guard_h_1	Страж Каравана	
+_39E8DDB6035F70FD	gn_karavan_guardian	Страж Каравана	
+_81DF25198B97A80A	gn_levier_volunteer	Волонтер	
+_06ED994C4EDB1DCF	gn_leviers_noble	Военный вождь	
+_6BD74435AFB8D096	gn_matis_officer	Офицер матисов	
+_628B6CAD6AB92C9C	gn_matis_voluteer	Защитник матисов	
+_B875480402405716	gn_mystical__adept	Младший мастер магии	
+_0C0D4D76346F8D2A	gn_professionnal	Опытный мощный стрелок	
+_2DB778352D38BA9C	gn_zorai_officer	Офицер Зораи	
+_66A8630CEAB89CED	gn_zorai_voluteer_f	Защитник Зораи	
+_14B9F493A7FD7884	fct_steward	 (Распорядитель)	
+_A60BCD9FF551E100	fct_k_pactgiver	 (Телепортатор Ками)	
+_C835544345DE31D6	fct_kv_pactgiver	 (Телепортатор Каравана)	
+_87E51509F5291577	fct_kitin_mg_1	 (Дозорный)	
+_87E51509F5291977	fct_kitin_mg_2	 (Дозорный)	
+_87E51509F5291D77	fct_kitin_mg_3	 (Дозорный)	
+_87E51509F5292177	fct_kitin_mg_4	 (Дозорный)	
+_3FCD2DC92075146F	fct_goo_obs	 (часовой Гуу)	
+_2459F030D15C6A9E	fct_bg	 (Телохранитель)	
+_1EE570945970A0B0	fct_kami_adept	 (Адепт Ками)	
+_6CE520262C272D41	fct_larmor_merchant	 (Торговец легкими доспехами)	
+_8B063650BE46513E	fct_marmor_merchant	 (Торговец средними доспехами)	
+_CEC636262C272D2F	fct_harmor_merchant	 (Торговец тяжелыми доспехами)	
+_E8C2E2AB12F1C516	fct_ctool_merchant	 (Торговец инструментами ремесла)	
+_C7C2E6A21071C139	fct_ttool_merchant	 (Торговец инструментами приручения)	
+_46397A6690A2A529	fct_htool_merchant	(Торговец инструментами добычи)	
+_32214E28C1BED0C7	fct_shield_merchant	(Торговец щитами)	
+_EBFB3438BF0A71F2	fct_ammo_merchant	 (Торговец зарядами)	
+_919CA19DDAA4D948	fct_rangeweapon_merchant	(Торговец оружием дальнего боя)	
+_DBF2A497BA13E943	fct_meleeweapon_merchant	(Торговец оружием ближнего боя)	
+_ADE0C9FD9644E8C0	fct_stableboy_merchant	(Конюх)	
+_7996632501A4593B	fct_rm_merchant	(Торговец сырьем)	
+_2EAB05EA910C19BE	fct_jewel_merchant	(Торговец украшениями)	
+_AA2B200E2D36C3C5	fct_tool_merchant	(Торговец инструментами)	
+_70F01D08DCBDE22A	fct_plarmor_merchant	 (Light Armor Composition Merchant)	
+_8F1133326EDC0A26	fct_pmarmor_merchant	 (Medium Armor Composition Merchant)	
+_D2D13308DCBDD21C	fct_pharmor_merchant	 (Heavy Armor Composition Merchant)	
+_67DC179F14F41E56	fct_parmor_merchant	 (Armor Composition Merchant)	
+_6042CC304B5EAAC5	fct_pctool_merchant	 (Crafting Tool Composition Merchant)	
+_3F42D02749DEEAD7	fct_pttool_merchant	 (Taming Tool Composition Merchant)	
+_BEB964EBC90F9ED3	fct_phtool_merchant	 (Collecting Tool Composition Merchant)	
+_53877FC88D83DD4B	fct_ptool_merchant	 (Tool Composition Merchant)	
+_364B7705315585A9	fct_pshield_merchant	 (Shield Composition Merchant)	
+_945793F5DF57478B	fct_pammo_merchant	 (Ammo Composition Merchant)	
+_34E7EFB6CA0DB3F8	fct_prangeweapon_merchant	 (Range Weapon Composition Merchant)	
+_7E3DF2AEAADC9FF8	fct_pmeleeweapon_merchant	 (Melee Weapon Composition Merchant)	
+_E83DEC0A055E761D	fct_prm_merchant	 (Raw Material Composition Merchant)	
+_A62BEF654E075666	fct_pjewel_merchant	 (Jewel Composition Merchant)	
+_AA2319C048ABD076	fct_mf_welcomer	(Представитель гильдии фехтовальщиков)	
+_FD25F4C9262CF297	fct_rf_welcomer	(Представитель гильдии стрелков)	
+_61BD0474ED26592D	fct_mh_welcomer	(Представитель гильдии целителей)	
+_61ADF43F30FF58F1	fct_mb_welcomer	(Представитель гильдии магов поддержки)	
+_909C344AEF81E95D	fct_ma_welcomer	(Представитель гильдии боевых магов)	
+_061720C2F34C9125	fct_t_welcomer	(Представитель гильдии торговцев)	
+_376864BFF40BEDAB	fct_h_welcomer	(Представитель гильдии рейнджеров)	
+_7F8454BBF7BB39C9	fct_f_welcomer	(Представитель гильдии ремесленников)	
+_A5657CBE7FDECF61	fct_welcomer	(Представитель гильдии)	
+_015226EF338D0839	fct_p_caretaker	(Управляющий частным владением)	
+_3E3226F7299DCE6C	fct_g_caretaker	(Управляющий владениями гильдии)	
+_E519A4C75ED1939F	fct_caretaker	(Управляющий)	
+_B52DAAA1521B7120	fct_mf_chief	(Предводитель гильдии фехтовальщиков)	
+_B7B61AEE5A87959D	fct_rf_chief	(Предводитель гильдии стрелков)	
+_9B308580B8C348B3	fct_mh_chief	(Предводитель гильдии целителей)	
+_FF89948078835CBD	fct_mb_chief	(Предводитель гильдии магов поддержки)	
+_09E3463D348484B8	fct_ma_chief	(Предводитель гильдии боевых магов)	
+_2DE15522C48C2BE5	fct_t_chief	(Предводитель гильдии торговцев)	
+_B30E653382BD3BE5	fct_h_chief	(Предводитель гильдии добытчиков)	
+_EB801C08755C0FE7	fct_f_chief	(Предводитель гильдии ремесленников)	
+_EB80452EC33FA0E9	fct_mission_officer	(Рекрутер на задания)	
+_52AA28B8A564B964	fct_mv_guard	 (Стража Ирканиса)	
+_BDBFAD6B2D3FF9CF	fct_mv_guardchief	 (Начальник стражи Ирканиса)	
+_51DA74AEE1A1531A	fct_ma_guard	 (Стража Нэтея)	
+_2B7F797EABFCC0E4	fct_ma_guardchief	 (Начальник стражи Нэтея)	
+_51DA7CAE5FA1571A	fct_mb_guard	 (Стража Дэвея)	
+_2B7F7980AB5CC4E4	fct_mb_guardchief	 (Начальник стражи Дэвея)	
+_51DA54AEEBB3621A	fct_mc_guard	 (Стража Эвэлея)	
+_2B7F7976AB7F4DA6	fct_mc_guardchief	 (Начальник стражи Эвэлея)	
+_934C39F8D52E7365	fct_mf_guard	 (Пограничная стража)	
+_BE7B1B4740912E20	fct_tax_collector	 (Сборщик податей)	
+_A42A681392D4B3A5	fct_tribe_chief	 (Вождь племени)	
+_D2B1C889DEC55B75	fct_barman	 (Бармен)	
+_51016F702E6A647A	fct_mayor	 (Мэр)	
+_D6755C68AE259788	fct_amayor	 (Помощник мэра)	
+_6DEFA5986EB0A4F7	fct_natae_chief	 (Староста Нэтея)	
+_6DEFA5986EF0A4E3	fct_davae_chief	 (Староста Дэвэя)	
+_ECAD5722C19AA1DB	fct_avalae_chief	 (Староста Эвэлея)	
+_688A5BE31E95375E	fct_counselor	 (Советник короля)	
+_62AB98824E56CEAF	fct_cutthroat	 (Матис головорез)	
+_590498C825847C90	fct_bandit_chief	 (Главарь банды)	
+_6F5E3CC02C56331C	fct_mv_intendant	 (Интендант Ирканиса)	
+_6E8E88B623C334D2	fct_ma_intendant	 (Интендант Нэтея)	
+_6E8E90B6A1C338D2	fct_mb_intendant	 (Интендант Дэвея)	
+_6E8E68B62DD543D2	fct_mc_intendant	 (Интендант Эвэлея)	
+_5F8E80C426C388B6	fct_zv_intendant	 (Интендант Зоры)	
+_284A70BA2255F317	fct_za_intendant	 (Интендант Джен-Лай)	
+_E54A70BEE355F51E	fct_zb_intendant	 (Интендант Мин-Хо)	
+_2FAC6B446B45E725	fct_zc_intendant	 (Интендант Хоа-Шо)	
+_150A80CEA4C388A2	fct_fv_intendant	 (Интендант Пайра)	
+_F0AF4CBDA5C3D815	fct_fa_intendant	 (Интендант Фессоса)	
+_B06E80CEA1C338CB	fct_fb_intendant	 (Интендант Дайрона)	
+_2F9F5CDFBC196111	fct_tv_intendant	 (Интендант Фэрхевена)	
+_6EBE1430BE19E922	fct_ta_intendant	 (Интендант Виндермеера)	
+_32AF40337B19C511	fct_tc_intendant	 (Интендант Кристабелла)	
+_6DBE70BA2D67D41C	fct_tb_intendant	 (Интендант Эвендейла)	
+_42DA6CBC9EB29B64	fct_zv_guard	 (Стража Зоры)	
+_E1BB797C2EBD14F1	fct_zv_guardchief	 (Начальник стражи Зоры)	
+_0B965CB25CFD795F	fct_za_guard	 (Стража Джен-Лай)	
+_39EDA878ACBC64E0	fct_za_guardchief	 (Начальник стражи Джен-Лай)	
+_C8965CB61DFD7B66	fct_zb_guard	 (Стража Мин-Хо)	
+_FB5DA878ADEC6860	fct_zb_guardchief	 (Начальник стражи Мин-Хо)	
+_12F8573CE4536D6D	fct_zc_guard	 (Стража Хоа-Шо)	
+_BCAF01374E0E69DC	fct_zc_guardchief	 (Начальник стражи Хоа-Шо)	
+_91566CC6DE60DF4D	fct_fv_guard	 (Стража Пайра)	
+_E129987CB11D14DD	fct_fv_guardchief	 (Начальник стражи  Пайра)	
+_2CE3104044200DA7	fct_fv_rookieguard	 (Новобранец стражи Пайра)	
+_BD1FC16F6D5DC006	fct_fa_guardchief	 (Начальник стражи Фессоса)	
+_D3FB38B51ED15E5D	fct_fa_guard	 (Стража Зоры)	
+_2B0FB17CB15CC4DD	fct_fb_guardchief	 (Начальник стражи Дайрона)	
+_93BA6CC65FA15713	fct_fb_guard	 (Стража Дайрона)	
+_934C39F8D52E735E	fct_ff_guard	(Пограничная стража)	
+_12EB48D75DC1E759	fct_tv_guard	(Стража Фэрхевена)	
+_39AFBD73F562A961	fct_tv_guardchief	 (Начальник стражи Фэрхевена)	
+_510A00285FC16F6A	fct_ta_guard	 (Стража Виндермеера)	
+_7D7F85A149E35558	fct_ta_guardchief	 (Начальник стражи Виндермеера)	
+_15FB2C2B1CC14B59	fct_tc_guard	 (Стража Кристабелла)	
+_3970C1AC0A125D4D	fct_tc_guardchief	(Начальник стражи Кристабелла)	
+_500A5CB2670F5A64	fct_tb_guard	(Стража Эвендейла)	
+_FC3F8578AC7FED12	fct_tb_guardchief	(Начальник стражи Эвендейла)	
+_934C39F8D52E7372	fct_zf_guard	(Пограничная стража)	
+_0297D1CD54797810	fct_stablegirl_merchant	(Конюх)	
+_943940932D09AC20	fct_barmaid	(Официантка)	
+_65A97CB129288099	fct_civil		
+_E4874B11D2C45BA0	fct_sage	 (Мудрец)	
+_E3A8FCAF9F9087A4	fct_craftsman	 (Ремесленник)	
+_A5E99FB9B1F8BF7A	fct_supplier	 (Фуражир)	
+_18F78C9D1E59A448	fct_hunter	 (Охотник)	
+_759998B5AB7598C6	fct_hunter_chief	 (Предводитель охотников)	
+_D421E8995A435B7B	fct_bandit	 (Разбойник)	
+_07566EBE2DE9E060	fct_actor	 (Актер)	
+_55EA849CB2EAC024	fct_actress	 (Актриса)	
+_C849FC3887897C7C	fct_kami_master	 (Мастер Ками)	
+_61E66A3EFC6060BF	fct_karavan_officer	 (Офицер Каравана)	
+_DC332A0753F9F828	fct_newb_welcomer	 (Глашатай)	
+_84254396E02CF43B	fct_newb_a	 (Стража Сталли)	
+_3D4EB029FB5CE9BC	fct_newb_a_chief	 (Начальник стражи Сталли)	
+_D3211B8FE889F438	fct_newb_b	 (Стража Бореи)	
+_F34A88223F0BA5BC	fct_newb_b_chief	 (Начальник стражи Бореи)	
+_84A53F9E647BE03B	fct_newb_c	 (Стража Нистии)	
+_3DCEAC317FABD5BC	fct_newb_c_chief	 (Начальник стражи Нистии)	
+_15254F93AACAFCFE	fct_newb_d	 (Стража Росилио)	
+_CE4EBC267F0BE5E5	fct_newb_d_chief	 (Начальник стражи Росилио)	
+_D3214798A4292038	fct_newb_e	 (Стража Миани)	
+_F34AB42BFBABD1BC	fct_newb_e_chief	 (Начальник стражи Миани)	
+_D323BF18A9D8CB24	fct_newb_za	 (Стража Квай-Ло)	
+_7ADC0CE36AAFD00E	fct_newb_za_chief	 (Начальник стражи Квай-Ло)	
+_5204BF972603CF69	fct_newb_zc	 (Стража Нен-Ксинга)	
+_F9BD0C626B106D53	fct_newb_zc_chief	 (Начальник стражи Нен-Ксинга)	
+_43E5C48EE754EF52	fct_newb_zb	 (Стража Шенг-Во)	
+_EA9E11592C618D3C	fct_newb_zb_chief	 (Начальник стражи Шенг-Во)	
+_52A4BF97D898EB5C	fct_newb_ze	 (Стража Йин-Панга)	
+_F95D0C62B6A58946	fct_newb_ze_chief	 (Начальник стражи Йин-Панга)	
+_5534BF18E7A7D669	fct_newb_zd	 (Стража Кои-Зуна)	
+_FCED0CE3ED4E7453	fct_newb_zd_chief	 (Начальник стражи Кои-Зуна)	
+_91F1889EA8D88820	fct_newb_fa	 (Стража Аэгуса)	
+_9FAAD569EBF055A7	fct_newb_fa_chief	 (Начальник стражи Аэгуса)	
+_52E678946528D673	fct_newb_fc	 (Стража Сековикса)	
+_F99FC55F6BCF745D	fct_newb_fc_chief	 (Начальник стражи Сековикса)	
+_9365708EA977CB24	fct_newb_fb	 (Стража Каэмона)	
+_3A1EBD596A4ED00E	fct_newb_fb_chief	 (Начальник стражи Каэмона)	
+_557550956467D66E	fct_newb_fe	 (Стража Галэмуса)	
+_FC2E9D606A0E7458	fct_newb_fe_chief	 (Начальник стражи Галэмуса)	
+_93859CA26BC8CB24	fct_newb_fd	 (Стража Фиксона)	
+_3A3EE96D2C9FD00E	fct_newb_fd_chief	 (Начальник стражи Фиксона)	
+_D335BC8E166A8832	fct_newb_ta	 (Стража Обермаута)	
+_7AEE0959F477261C	fct_newb_ta_chief	 (Начальник стражи Обермаута)	
+_51B5A09B2543E367	fct_newb_tb	 (Стража Баркделла)	
+_F86EED666A508151	fct_newb_tb_chief	 (Начальник стражи Баркделла)	
+_134588A0A4E97736	fct_newb_tc	 (Стража Хобвэлли)	
+_BAFED56BAA901520	fct_newb_tc_chief	 (Начальник стражи Хобвэлли)	
+_15B6889F2594EB6A	fct_newb_td	 (Стража Уэвертона)	
+_BC6FD56A6AA18954	fct_newb_td_chief	 (Начальник стражи Уэвертона)	
+_51659097D8B7EF6F	fct_newb_te	 (Стража Динглтона)	
+_F81EDD62B6C48D59	fct_newb_te_chief	 (Начальник стражи Динглтона)	
+_9459CCB3DF3E975B	fct_registar	 (Секретарь гильдии)	
+_5D441AD8E996D8B9	fct_ins_f	 (Инструктор по ведению боя)	
+_DAE41AB616D6F4B3	fct_ins_m	 (Инструктор по магии)	
+_686B9F2924B7F4C0	fct_ins_r	 (Инструктор по ремеслу)	
+_FC35BE16E9460CAF	fct_ins_h	 (Инструктор по добыче ресурсов)	
+_41F4E0488729241C	fct_mf_rolemaster	 (Melee Fighter Guild Rolemaster)	
+_1F750264DA2BFF2A	fct_rf_rolemaster	 (Range Fighter Guild Rolemaster)	
+_2900034FE35E71B7	fct_c_rolemaster	 (Fighter Guild Rolemaster)	
+_E66F61FF3EC317D0	fct_mh_rolemaster	 (Healer Caster Guild Rolemaster)	
+_294878C33EB3EF9B	fct_mb_rolemaster	 (Buffer Caster Guild Rolemaster)	
+_E8CA0D2F6DA22BA6	fct_ma_rolemaster	 (Attack Caster Guild Rolemaster)	
+_A169FAEB8B1744C5	fct_m_rolemaster	 (Magic Guild Rolemaster)	
+_1F1A9E5EA4FD25CF	fct_t_rolemaster	 (Merchant Guild Rolemaster)	
+_22BBE962E86D71C7	fct_h_rolemaster	 (Harvester Guild Rolemaster)	
+_238946101D6A59BA	fct_f_rolemaster	 (Crafter Guild Rolemaster)	
+_FEE10832815C7C47	fct_f_trainer	 (Наставник воинов)	
+_3A30101023C7B85B	fct_m_trainer	 (Наставник магов)	
+_2D80081AA4667F2D	fct_c_trainer	 (Наставник ремесленников)	
+_3AE134166CF4C85D	fct_h_trainer	 (Наставник добытчиков)	
+_B9C8045A62476B86	fct_f_guild_trainer	(Наставник ведения боя гильдии)	
+_39A61F0126172F82	fct_m_guild_trainer	(Наставник по магии гильдии)	
+_B94727EB93D56E7D	fct_c_guild_trainer	(Наставник по ремеслам гильдии)	
+_7C06B3D327882F88	fct_h_guild_trainer	(Наставник по добыче ресурсов гильдии)	
+_645634B34D8613D7	fct_guild_we	 (Глашатай)	
+_06ABAA82B32B6C54	fct_guild_rm_craft	 (Craft Rolemaster)	
+_CB8A8E7D2973F30F	fct_guild_rm_fight	 (Fight Rolemaster)	
+_F8CA6678A6930FE6	fct_guild_rm_magic	 (Magic Rolemaster)	
+_9F566FABDE44A874	fct_scout	 (Лазутчик)	
+_92AAE47F5285D8A9	fct_ambassador	 (Посланник)	
+_25BA90B9E8B7C261	fct_corporal	 (Капрал)	
+_98CAA891AF99102B	fct_sergent	 (Сержант)	
+_1138D4932AF6E85A	fct_captain	 (Капитан)	
+_11CFB773732E88B9	fct_city_welcomer	 (Глашатай города)	
+_992106B23D12F5C0	fct_village_welcomer	 (Глашатай деревни)	
+_DBB854FAB4CD3968	fct_foreman_apprentice	 (Помощник смотрителя)	
+_12E97FAC6BCA0263	fct_foreman	 (Смотритель)	
+_2C8C85CA36B29969	fct_foreman_master	 (Старший смотритель)	
+_5485F09DE885E881	fct_hawker	 (Коробейник)	
+_EAC803F3D976B8A0	fct_journeyman	 (Рабочий)	
+_2A91C9AAE63A90C1	fct_kami_ambassador	 (Посланник Ками)	
+_34E7060715EA8D92	fct_kami_welcomer	 (Глашатай Ками)	
+_7F448DC446CEEA84	fct_karavan_ambassador	 (Посланник Каравана)	
+_A31BECD1E2F7F500	fct_karavan_agent	 (Агент Каравана)	
+_50AF2F01EA1319AA	fct_karavan_welcomer	 (Глашатай Каравана)	
+_DB80A90FAAA63F79	fct_local_messenger	 (Местный гонец)	
+_9DD66D7FCD23A90E	fct_frontiers_messenger	 (Пограничный гонец)	
+_E7CD1B8DD473CB65	fct_outlands_messenger	 (Гонец в пустоши)	
+_546BE49BA2D637B9	fct_patrolman	 (Патрульный)	
+_1A9AC08BDA75B4B5	fct_prospector	 (Старатель)	
+_005ABA2BBA2C2763	fct_tribe_welcomer	 (Глашатай племени)	
+_72ED35F1567AB4F3	fct_local_supplier	 (Местный поставщик)	
+_0C691BA0822BEE84	fct_frontiers_supplier	 (Пограничный поставщик)	
+_71BA1712ED73F5EA	fct_outlands_supplier	 (Поставщик из пустошей)	
+_B3D62478D0A96233	fct_outpost_steward	 (Управляющий заставы)	
+_6E218F06F6C4C35A	fct_outpost_steward_tribe	 (Управляющий заставы племени)	
+_C996B964B332B13E	fct_outpost_officer	 (Предводитель заставы)	
+_E07DCF51AA67A79E	fct_outpost_officer_tribe	 (Предводитель заставы племени)	
+_E9A9D807003E1A1E	Refugee	Выживший	Выжившая
+_6AB4EC6268B88CB6	Homin	Хомин	Хомин
+_5B0936F36CAAED6F	Novice_Artisan	Начинающий ремесленник	Начинающая ремесленница
+_5FD1130608EF5476	Novice_Warrior	Начинающий боец	Начинающая воительница
+_A77AD8BADDD4704B	Novice_Harvester	Начинающий добытчик	Начинающая добытчица
+_2B787170835462F5	Novice_Magician	Начинающий маг	Начинающая волшебница
+_A6121B911E679EAF	Artisan_Apprentice	Подмастерье ремесленника	Подмастерье ремесленника
+_E1D997A261BCDE41	Warrior_Apprentice	Ученик воина	Ученица воина
+_5E3BBF1E7588AF84	Magician_Apprentice	Ученик мага	Ученица мага
+_F72B78A052A04DDB	Fyros_Artisan_Apprentice	Подмастерье ремесленника файросов	Подмастерье ремесленника файросов
+_F13A34A752A035D7	Matis_Artisan_Apprentice	Подмастерье ремесленника матисов	Подмастерье ремесленника матисов
+_D7157CC15C0669CB	Tryker_Artisan_Apprentice	Подмастерье ремесленника трайкеров	Подмастерье ремесленника трайкеров
+_F1CBA0B4526707C3	Zorai_Artisan_Apprentice	Подмастерье ремесленника Зораи	Подмастерье ремесленника Зораи
+_BA5834306E2070B0	Melee_Warrior_Apprentice	Подмастерье бойца ближнего боя	Подмастерье бойца ближнего боя
+_1C02198C57B42A8E	Sniper_Apprentice	Подмастерье снайпера	Подмастерье снайпера
+_76CA54C7B85E21F4	Fyros_Armorer_Apprentice	Доспехи файросов: Ученик	Доспехи файросов: Ученица
+_E534877171A78595	Fyros_Jeweler_Apprentice	Украшения файросов: Ученик	Украшения файросов: Ученица
+_687F1E242A40234E	Fyros_Weapon_Smith_Apprentice	Оружие файросов: Ученик	Оружие файросов: Ученица
+_65BF28B111BF9A58	Fyros_Munitioner_Apprentice	Заряды файросов: Ученик	Заряды файросов: Ученица
+_53283BB2978F818B	Fyros_Gun_Smith_Apprentice	Стрелковое оружие файросов: Ученик	Стрелковое оружие файросов: Ученица
+_B608DB98443FEF1B	Fyros_Shield_Smith_Apprentice	Щиты файросов: Ученик	Щиты файросов: Ученица
+_70D910CEB85E09F0	Matis_Armorer_Apprentice	Доспехи матисов: Ученик	Доспехи матисов: Ученица
+_26542772F2C6A97D	Matis_Jeweler_Apprentice	Украшения матисов: Ученик	Украшения матисов: Ученица
+_822A4EA8BDBEFE33	Matis_Weapon_Smith_Apprentice	Оружие матисов: Ученик	Оружие матисов: Ученица
+_639F70A7D3BF9A58	Matis_Munitioner_Apprentice	Заряды матисов: Ученик	Заряды матисов: Ученица
+_13687BC0972F8973	Matis_Gun_Smith_Apprentice	Стрелковое оружие матисов: Ученик	Стрелковое оружие матисов: Ученица
+_B017979F443FD717	Matis_Shield_Smith_Apprentice	Щиты матисов: Ученик	Щиты матисов: Ученица
+_69EEDB1B180601DA	Tryker_Armorer_Apprentice	Доспехи трайкеров: Ученик	Доспехи трайкеров: Ученица
+_831CA520595281FE	Tryker_Jeweler_Apprentice	Украшения трайкеров: Ученик	Украшения трайкеров: Ученица
+_401C5CE185F60D3B	Tryker_Weapon_Smith_Apprentice	Оружие трайкеров: Ученик	Оружие трайкеров: Ученица
+_B76AAD020B48B78F	Tryker_Munitioner_Apprentice	Заряды трайкеров: Ученик	Заряды трайкеров: Ученица
+_1C698F11A7FE97D5	Tryker_Gun_Smith_Apprentice	Стрелковое оружие трайкеров: Ученик	Стрелковое оружие трайкеров: Ученица
+_CDCD2F3DAD72A8AB	Tryker_Shield_Smith_Apprentice	Щиты трайкеров: Ученик	Щиты трайкеров: Ученица
+_706A7CDBB825DBDC	Zorai_Armorer_Apprentice	Доспехи Зораи: Ученик	Доспехи Зораи: Ученица
+_673451779026D581	Zorai_Jeweler_Apprentice	Украшения Зораи: Ученик	Украшения Зораи: Ученица
+_39FFFDFF77507EE9	Zorai_Weapon_Smith_Apprentice	Оружие Зораи: Ученик	Оружие Зораи: Ученица
+_09CB7CB49F3105B2	Zorai_Munitioner_Apprentice	Заряды Зораи: Ученик	Заряды Зораи: Ученица
+_7C8DEC74BB6B633F	Zorai_Gun_Smith_Apprentice	Стрелковое оружие Зораи: Ученик	Стрелковое оружие Зораи: Ученица
+_2E2688E2772531E4	Zorai_Shield_Smith_Apprentice	Щиты Зораи: Ученик	Щиты Зораи: Ученица
+_55C9BA1AC87A2904	Melee_Warrior	Боец ближнего боя	Боец ближнего боя
+_BE09EA16D611D6DE	Range_Fighter	Боец дальнего боя	Боец дальнего боя
+_181A65577BF81C9B	Light_Armsman	Легкий фехтовальщик	Легкий фехтовальщик
+_FCBA5545DDF858AE	Heavy_Armsman	Тяжелый фехтовальщик	Тяжелый фехтовальщик
+_C9AB444C6EC52866	Gunman	Стрелок	Стрелок
+_97E711B3BC2F4476	Heavy_Gunman	Тяжелый стрелок	Тяжелый стрелок
+_E92EA28E3C2E54F7	Advanced_Gunman	Продвинутый стрелок	Продвинутый стрелок
+_CA6BE5AF4CC52861	Advanced_Heavy_Gunman	Продвинутый тяжелый стрелок	Продвинутый тяжелый стрелок
+_66D9D47D23A9B09D	Bludgeoner	Боец с дубиной	Боец с дубиной
+_B027C07526886C9B	Skewerer	Дырокол	Дырокол
+_AC496C98A5599C88	Slasher	Потрошитель	Потрошитель
+_EBD8D88ADF8600C2	Smasher	Крушитель	Крушитель
+_E63AEC6C4CACD4A2	Impaler	Пронзатель	Пронзатель
+_6759807BA0150CD0	Cleaver	Рубака	Рубака
+_EC27F04BED74007E	Bowman	Лучник	Лучник
+_6710339D5689E95C	Heavy_Bowman	Тяжелый лучник	Тяжелый лучник
+_0B39E16F13969BAB	Pistoleer	Стрелок из пистолета	Стрелок из пистолета
+_8C40965B20B52E76	Heavy_Artilleryman	Тяжелый артиллерист	Тяжелый артиллерист
+_BEDC54D580B584A2	Crossbowman	Арбалетчик	Арбалетчик
+_AB79E08FAFD84894	Artilleryman	Артиллерист	Артиллерист
+_EA3AF4306ED8B4A2	Rifleman	Стрелок из винтовки	Стрелок из винтовки
+_7DABE2F42D1F7827	Maceman	Сокрушитель	Сокрушитель
+_6FE93C8DA6F83890	Brute	Громила	Громила
+_E391104CC68BF954	Knifeman	Кинжальщик	Кинжальщик
+_EA1A8C36E87AB4A6	Spearman	Копейщик	Копейщик
+_053049A64AA7F86B	Axeman	Жнец	Жнец
+_89C2707D208920B3	Swordsman	Дуэлист	Дуэлист
+_C9C490904BB5CB60	Heavy_Maceman	Крушитель	Крушитель
+_A7B9F48FA5983494	Pikeman	Пикейщик	Пикейщик
+_03FC743C726229DC	Heavy_Axeman	Палач	Палач
+_583588BDA81F3653	Heavy_Swordsman	Живодер	Живодер
+_AD5EF9B5BE8F2D6A	Master_Bowman	Мастер лучник	Мастер лучник
+_28DCA65EF3DA8166	Master_Heavy_Bowman	Мастер тяжелый лучник	Мастер тяжелый лучник
+_7A183255D98ACD09	Master_Pistoleer	Благородный стрелок	Благородный стрелок
+_17E9565DE31F4BB9	Master_Heavy_Artilleryman	Мастер тяжелый артиллерист	Мастер тяжелый артиллерист
+_E9918E776489D0A0	Master_Crossbowman	Мастер арбалетчик	Мастер арбалетчик
+_162985C01C361E7B	Master_Artilleryman	Бомбардир	Бомбардир
+_1EC700E1786AB02E	Master_Rifleman	Элитный снайпер	Элитный снайпер
+_2548586A7D920133	Master_Maceman	Дробящий головы	Дробящий головы
+_7CB549F0962CB896	Master_Brute	Повелитель древка	Повелитель древка
+_FA79B57A7EE4018E	Master_Knifeman	Виртуоз клинка	Виртуоз клинка
+_A467FCF3B349842E	Master_Spearman	Благородный копейщик	Благородный копейщик
+_37C5C66FEA25A583	Master_Axeman	Алый жнец	Алый жнец
+_E1500CD892E8BDDE	Master_Swordsman	Виртуоз меча	Виртуоз меча
+_9F0755B55BAB0B94	Master_Heavy_Maceman	Разрушитель	Разрушитель
+_810C06F03FA40D9C	Master_Pikeman	Благородный пикейщик	Благородный пикейщик
+_670CE3818BE4005E	Master_Heavy_Axeman	Алый палач	Алый палач
+_B714102DCEAB442E	Master_Heavy_Swordsman	Владыка лезвия	Владычица лезвия
+_10DAC64F5D008F77	Master_Hand_To_Hand_Fighter	Джаггернаут	Джаггернаут
+_451911F73690DC2E	Hand_To_Hand_Fighter	Забияка	Забияка
+_9E50AB0BC1885AE7	Close_Fighter	Боец в партере	Боец в партере
+_621BB90A9BF07755	Advanced_Close_Fighter	Драчун	Драчун
+_E44253B13E88A654	Defensive_Magician	Маг защиты	Маг защиты
+_A64257BC5D38A6D1	Offensive_Magician	Боевой маг	Боевой маг
+_35720B8BACA0403C	Elementalist_Apprentice	Подмастерье стихий	Подмастерье стихий
+_28C940A029F9249F	Mentalist	Псионик	Псионик
+_DF99748A27EA989C	Enchanter	Искусник	Искусница
+_30587C83EDF908BC	Summoner	Заклинатель	Заклинательница
+_41EB54751CD7B6A2	Master_Of_Illusion	Мастер иллюзий	Мастер иллюзий
+_D4719D915781293F	Mind_Lord	Владыка разума	Владыка разума
+_A5A000EDABC8B0A6	Healer	Целитель	Целительница
+_6B77B0582A94C866	Shaman	Шаман	Шаман
+_A23BFC11AF21869A	Priest	Жрец	Жрица
+_D94DBEC4EDAED128	Master_Of_Life	Владыка жизни	Владыка жизни
+_F4FA92C59F5516FF	Celestial_Guardian	Небесный страж	Небесный страж
+_1FA7A866CB426075	Black_Mage	Черный маг 	Черный маг 
+_9F8FBBF2BC268FDC	Affliction_Bringer	Приносящий беду	Приносящая беду
+_A54EB0364137A3F4	Master_Of_Torment	Маг страданий	Маг страданий
+_FE14EF539780121A	Avatar_Of_Sorrow	Лик Печали	Лик Печали
+_B21A109CA75BC09C	Destroyer	Уничтожитель	Уничтожитель
+_87E98CAAA35638B1	Warlock	Чародей	Чародей
+_A8A72C4EE23880A1	Archmage	Архимаг	Архимаг
+_068EBFBEFDE98CC3	Master_Of_Pain	Владыка боли	Владыка боли
+_B7FE98E4ACFFE429	Avatar_Of_Destruction	Лик Разрушения	Лик Разрушения
+_2630D5DCED0239F7	Elementalist	Маг стихий	Маг стихий
+_5F892C9568B8EC9E	Alchemist	Алхимик	Алхимик
+_23091087648804A9	Biomancer	Биомаг	Биомаг
+_72DA28EC8CB7D72C	Master_Of_Energies	Владыка энергии	Владыка энергии
+_1BDE34D71A52E83F	Chosen_Of_Atys	Избранный Атиса	Избранная Атиса
+_25761B555085A3CB	Title00079	Странник	Странница
+_C333D3151F4AFC88	FBT	Старейшина Атиса	Старейшина Атиса
+_40348BC240606E6F	SGM	Старший гейм-мастер	Старший гейм-мастер
+_59C7AAE85D981BE4	GM	Гейм-мастер	Гейм-мастер
+_CB17320A534E8C51	VG	Гид ветеран	Гид ветеран
+_90E50C7ED846C472	SG	Старший проводник	Старший проводник
+_DE4A708A6014D456	G	Проводник	Проводник
+_D706CFA21E18566A	Armorer_Apprentice	Подмастерье кузнеца	Подмастерье кузнеца
+_B488ABA5780CA4B9	Jeweler_Apprentice	Подмастерье ювелира	Подмастерье ювелира
+_3AF7ECD6AAD82953	Melee_Weapon_Smith_Apprentice	Подмастерье оружейника	Подмастерье оружейника
+_3DAEABE942DF5DDB	Range_Weapon_Smith_Apprentice	Подмастерье стрелкового оружейника	Подмастерье стрелкового оружейника
+_A740796C0AAD741B	Heavy_Armorer	Кузнец: тяжелый доспех	Кузнец: тяжелый доспех
+_2481557066CC5E16	Light_Armorer	Кузнец: легкий доспех	Кузнец: легкий доспех
+_870F6272FAD745A0	Medium_Armorer	Кузнец: средний доспех	Кузнец: средний доспех
+_1EF53269518F722B	Shield_Smith	Кузнец: щиты	Кузнец: щиты
+_EAB77867BFD9A0CC	Jeweler	Ювелир	Ювелир
+_B274ABE8E1B9A2B3	Melee_Weapon_Smith	Оружейник	Оружейник
+_74ECC282139428F6	Melee_Heavy_Weapon_Smith	Оружейник: тяжелое оружие	Оружейник: тяжелое оружие
+_95223C0214D42804	Melee_Light_Weapon_Smith	Оружейник: легкое оружие	Оружейник: легкое оружие
+_F56A1486E04AFEE1	Range_Weapon_Smith	Оружейник: стрелковое оружие	Оружейник: стрелковое оружие
+_61ABE21384D00C19	Range_Heavy_Weapon_Smith	Оружейник: тяжелое стрелковое оружие	Оружейник: тяжелое стрелковое оружие
+_B4DAB32922AC34ED	Advanced_Heavy_Armorer	Продвинутый кузнец: тяжелый доспех	Продвинутый кузнец: тяжелый доспех
+_B8498BB1DFCB0ADF	Advanced_Light_Armorer	Продвинутый кузнец: легкий доспех	Продвинутый кузнец: легкий доспех
+_A70F18C178408FF7	Advanced_Medium_Armorer	Продвинутый кузнец: средний доспех	Продвинутый кузнец: средний доспех
+_4B78417B8C5DEB07	Advanced_Shield_Smith	Продвинутый кузнец: щиты	Продвинутый кузнец: щиты
+_D81FAEF19AF41E94	Advanced_Jeweler	Продвинутый ювелир	Продвинутый ювелир
+_8D7D2FCA01DD6349	Advanced_Melee_Weapon_Smith	Продвинутый оружейник	Продвинутый оружейник
+_3554AE0FE215004F	Advanced_Melee_Heavy_Weapon_Smith	Продвинутый оружейник: тяжелое оружие	Продвинутый оружейник: тяжелое оружие
+_304442DFF101C324	Advanced_Melee_Light_Weapon_Smith	Продвинутый оружейник: легкое оружие	Продвинутый оружейник: легкое оружие
+_8F4121D90AB790AE	Advanced_Range_Weapon_Smith	Продвинутый оружейник: стрелковое оружие	Продвинутый оружейник: стрелковое оружие
+_B8A99E663016B610	Advanced_Range_Heavy_Weapon_Smith	Продвинутый оружейник: тяжелое стрелковое оружие	Продвинутый оружейник: тяжелое стрелковое оружие
+_CF0ECB28241AF406	Expert_Heavy_Armorer	Опытный кузнец: тяжелый доспех	Опытный кузнец: тяжелый доспех
+_2D2D1B1FA1A3C0F8	Expert_Light_Armorer	Опытный кузнец: легкий доспех	Опытный кузнец: легкий доспех
+_7BDD3CFC73CF3749	Expert_Medium_Armorer	Опытный кузнец: средний доспех	Опытный кузнец: средний доспех
+_7B75B199C9E25C14	Expert_Shield_Smith	Опытный кузнец: щиты	Опытный кузнец: щиты
+_23992EE300D26C80	Expert_Jeweler	Опытный ювелир	Опытный ювелир
+_602177F7CAB5A035	Expert_Melee_Weapon_Smith	Опытный оружейник	Опытный оружейник
+_5C43FA82BD66C2C9	Expert_Melee_Heavy_Weapon_Smith	Опытный оружейник: тяжелое оружие	Опытный оружейник: тяжелое оружие
+_B81EFA836624B202	Expert_Melee_Light_Weapon_Smith	Опытный оружейник: легкое оружие	Опытный оружейник: легкое оружие
+_38FE3140F7AD6419	Expert_Range_Weapon_Smith	Опытный оружейник: стрелковое оружие	Опытный оружейник: стрелковое оружие
+_055D71B8EA8EBDCD	Expert_Range_Heavy_Weapon_Smith	Опытный оружейник: тяжелое стрелковое оружие	Опытный оружейник: тяжелое стрелковое оружие
+_5F9E7CC8ED30F04E	Heavy_Armorer_Master	Мастер-кузнец: тяжелый доспех	Мастер-кузнец: тяжелый доспех
+_58A68CDAAA4F123C	Light_Armorer_Master	Мастер-кузнец: легкий доспех	Мастер-кузнец: легкий доспех
+_81FEC3FDCB6FE089	Medium_Armorer_Master	Мастер-кузнец: средний доспех	Мастер-кузнец: средний доспех
+_05BFA0C15199FE7E	Shield_Smith_Master	Мастер-кузнец: щиты	Мастер-кузнец: щиты
+_DC8A6651BBFB02DB	Jeweler_Master	Мастер-ювелир	Мастер-ювелир
+_7EA226004EE26728	Melee_Weapon_Smith_Master	Мастер-оружейник	Мастер-оружейник
+_8B4278913507CA8F	Melee_Heavy_Weapon_Smith_Master	Мастер-оружейник: тяжелое оружие	Мастер-оружейник: тяжелое оружие
+_8BD31A977366B48F	Melee_Light_Weapon_Smith_Master	Мастер  оружейник: легкое оружие	Мастер  оружейник: легкое оружие
+_CCC8BD2311896DAF	Range_Weapon_Smith_Master	Мастер  оружейник: стрелковое оружие	Мастер  оружейник: стрелковое оружие
+_9EDC1ABECD5C1ADA	Range_Heavy_Weapon_Smith_Master	Мастер  оружейник: тяжелое стрелковое оружие	Мастер  оружейник: тяжелое стрелковое оружие
+_98AF3D39E2570A8F	Forager_Apprentice	Подмастерье-добытчик	Подмастерье-добытчик
+_2108247FA28A0CBA	Forager	Добытчик	Добытчик
+_1C69D61F576B5EFB	Desert_Forager	Добытчик пустыни	Добытчик пустыни
+_A2447D290E7327C6	Forest_Forager	Добытчик лесов	Добытчик лесов
+_F01303CEF4F0FD2C	Jungle_Forager	Добытчик джунглей	Добытчик джунглей
+_1A6F7138F8FC117F	Lacustre_Forager	Добытчик озер	Добытчик озер
+_9FA430B4C90BD63E	Prime_Roots_Forager	Добытчик Изначальных Корней	Добытчик Изначальных Корней
+_FCF277C36AFCA736	Advanced_Desert_Forager	Продвинутый добытчик пустыни	Продвинутый добытчик пустыни
+_32889DC60406B332	Advanced_Forest_Forager	Продвинутый добытчик лесов	Продвинутый добытчик лесов
+_439BA194FD33422B	Advanced_Jungle_Forager	Продвинутый добытчик джунглей	Продвинутый добытчик джунглей
+_0491B10D39DDF983	Advanced_Lacustre_Forager	Продвинутый добытчик озер	Продвинутый добытчик озер
+_EC139AD0939151D8	Advanced_Prime_Roots_Forager	Продвинутый добытчик Изначальных Корней	Продвинутый добытчик Изначальных Корней
+_3AB280B42CB557F0	Expert_Desert_Forager	Опытный добытчик пустыни	Опытный добытчик пустыни
+_0A810DB27857DC92	Expert_Forest_Forager	Опытный добытчик лесов	Опытный добытчик лесов
+_95F2D1D38C924361	Expert_Jungle_Forager	Опытный добытчик джунглей	Опытный добытчик джунглей
+_0078ED237D1B07FC	Expert_Lacustre_Forager	Опытный добытчик озер	Опытный добытчик озер
+_691AA42CFC954B50	Expert_Prime_Roots_Forager	Опытный добытчик Изначальных Корней	Опытный добытчик Изначальных Корней
+_3E11DCC9D0BC17E2	Master_Desert_Forager	Мастер-добытчик пустыни	Мастер-добытчик пустыни
+_CE0F89DEB6D7C487	Master_Forest_Forager	Мастер-добытчик лесов	Мастер-добытчик лесов
+_177253E12AE23348	Master_Jungle_Forager	Мастер-добытчик джунглей	Мастер-добытчик джунглей
+_82F86F311B6BF7E3	Master_Lacustre_Forager	Мастер-добытчик озер	Мастер-добытчик озер
+_2708503476F5D33B	Master_Prime_Roots_Forager	Мастер-добытчик Изначальных Корней	Мастер-добытчик Изначальных Корней
+_C58698FE29D8F4A2	gn_green_seed_comrade	Предводитель регулярной стражи	
+_61208066BB6B6D62	gn_kitin_gatherers-magician_guard	Мастер стражник	
+_0075026D1C60BDD1	gn_kitin_gatheres_wander_guards	Мастер стражник	
+_E0EB24AD6AA9148C	gn_matis_defender	Защитник матисов	
+_6293E0F632C9E26F	gn_recoverers_guard_6	Мастер стражник	
+_6618630CEAB89CED	gn_zorai_voluteer_m	Защитник Зораи	
+_A9ED8487D5B994B1	gn_antikamis_guard	Мастер стражник	
+_3E983C556658B4BA	gn_arid_matis_guard	Мастер стражник	
+_E248D8896A589FA9	gn_barkers_guard	Могучий стражник	
+_1FE3E0FA29CA268F	gn_beachcombers_guard	Мастер стражник	
+_23A3B0F6E9E90E94	gn_black_circle_guard	Мастер стражник	
+_29974C212519DC87	gn_cholorogoos_guard	Могучий стражник	
+_2658DBEAD9554281	gn_company_eternal_guard_havenofpurity	Могучий стражник	
+_4D711E7A405F711D	gn_company_eternal_guard_nexus	Могучий стражник	
+_66993C1D6176C8A3	gn_corsairs_guard	Регулярная стража	
+_E1F3C805681A2699	gn_darkeningsap_guard	Мастер стражник	
+_41A748512B68C8BD	gn_duneriders_guard	Мастер стражник	
+_A58687B3A3BAE00A	gn_ecowarriors_guard	Мастер стражник	
+_BF9E69E8ECAA6816	gn_first_deserters_guard	Могучий стражник	
+_B1DF0D1D68B780A8	gn_fraharhunters_guard	Могучий стражник	
+_80FF8D0C5F3BECEC	gn_fraharhunters_guards	Могучий стражник	
+_A8A7BC6511D927B1	gn_frahars_guard	Элита стражи	
+_E889228D1F84C49F	gn_gooheads_guard	Мастер стражник	
+_DC2F98B9AAA88CAC	gn_green_seed_guard	Регулярная стража	
+_A299588D2523D49D	gn_hamazans_guard	Сильный стражник	
+_82FE9DFE4539300A	gn_iconeworshipers_guard	Регулярная стража	
+_424E796D65B86BAB	gn_kitin_gatherers_guard	Мастер стражник	
+_6638DC0FE5B69BA2	gn_lawless_guard	Мастер стражник	
+_67D7E0878758A7A4	gn_leviers_guard	Регулярная стража	
+_5CA21A7C39811D2D	gn_matisian_border_guards_guard	Могучий стражник	
+_AC48642367D9B87E	gn_nightturner_guard	Могучий стражник	
+_14380D092D1F7887	gn_oasis_diggers_guard	Мастер стражник	
+_E62677A2A639EC20	gn_pyromancers_guard	Мастер стражник	
+_C4A7804D2C089CAD	gn_recoverers_guard	Мастер стражник	
+_EDAD6087D4797CA8	gn_renegades_guard	Мастер стражник	
+_EBE47BAF144ACC9F	gn_restorers_guard	Элита стражи	
+_ADA69C8490AA8086	gn_sacredsap_guard	Сильный стражник	
+_6623B803E889628B	gn_sap_gleaners_guard	Мастер стражник	
+_57149854EBF8ACA1	gn_sap_slaves_guard	Элита стражи	
+_2BE47BA5112ABC9D	gn_scorchers_guard	Элита стражи	
+_D7E9D8036C08308F	gn_shadowrunners_guard	Сильный стражник	
+_64993C9AA3D3A8A5	gn_siblings_guard	Сильный стражник	
+_6DA8DD23E099685A	gn_silt_sculptors_guard	Сильный стражник	
+_ABED4D0942EA0C4C	gn_slash_and_burn_guard	Мастер стражник	
+_2738DC0EA65743AD	gn_slavers_guard	Мастер стражник	
+_EC26B495560988B1	gn_smugglers_guard	Могучий стражник	
+_9A886CABEDF5F09E	gn_tutor_guard	Могучий стражник	
+_AC78D90FA5086443	gn_water_breakers_guard	Сильный стражник	
+_97C90509EC0EA092	gn_woven_bridles_guard	Мастер стражник	
+_8A4D35C26548A80B	gn_zorai_kami_sentinel	Страж Ками	
+_E308306C5FDA08B1	Fighter	Воин	
+_68D814346CD8948C	Magician	Маг	
+_6C7A9C62E6D834BA	Craftsman	Ремесленник	
+_0737B77BDDC44E82	MeleeFighter	Воин ближнего боя	
+_A91938A081542C8A	RangeFighter	Воин дальнего боя	
+_5F69048626095079	AttackCaster	Боевой маг	
+_AF17F45DEA140072	BufferCaster	Маг поддержки	
+_ACF9E4856A8DEC64	HealerCaster	Целитель	
+_61702CA3A9DAE42F	Harvester	Добытчик	
+_2A55BC8BA5B96899	Shopkeeper	Торговец	
+_6A89DC672E8A5C93	Faber	Ремесленник	
+_E3A7E4872F39505C	IreFighter	Берсерк	
+_EC1AAC9A6D19E068	Swashbuckler	Головорез	
+_68F8948362647C90	KamicFist	Кулак Ками	
+_D676A49662A7D7A5	BladeBearer	Меченосец	
+_5599AC929A49FC5E	WindChild	Дитя ветра	
+_2588FCAA6B08A0B4	Runner	Бегун	
+_A3BB9C95AA771C9F	Scout	Лазутчик	
+_8DCAFC38E2A9945E	FireLance	Пылающее копье	
+_AA79DC9C1A56B7C4	ScarletHunter	Алый охотник	
+_8AFAFC672F0C5C9A	GreenHunter	Зеленый охотник	
+_9CA7D8872FC5C36B	AtysGuardian	Страж Атиса	
+_ACB7A3801546D834	ShadowHunter	Охотник теней	
+_9DEBC0746D5AD4AC	Witherer	Иссушитель	
+_2BAA60956197BCA7	Fouler	Осквернитель	
+_EDA7649DEB5A0C55	Disturber	Нарушитель спокойствия	
+_E3F9F89257A40CB6	KamicFury	Ярость Ками	
+_ADE8A4ED491BE8A0	SpiritualShield	Щит духа	
+_67D4E88E1EDA80B8	Faker	Притворщик	
+_D9C8747A580A4C65	WindGuardian	Страж ветра	
+_A576488A20B90C5E	KamicGuardian	Страж Ками	
+_7088B89D60D790A0	Unknown	Неизвестный	
+_22B4409229A6B893	SecondBreath	Второе дыхание	
+_E069EB9D67892847	LifeStealer	Похититель жизни	
+_A116638D1F56349F	SecondLife	Вторая жизнь	
+_E1970385EEA2883E	SapCristal	Кристалл сэпа	
+_41CFC00F61268789	SandCaravanner	Караванщик песков	
+_34A2C1B90DAAA495	ImperialSupplier	Имперский поставщик	
+_72D8DC78603ABCA8	Steward	Управляющий	
+_ECDA8C68EE16BCB2	Hawker	Коробейник	
+_2A49BC9A1212D3AA	range_warrior	Воин дальнего боя	
+_61722CC3A9DAE42F	harvester	Добытчик	
+_E43A109723B664A4	attack_magician	Боевой маг	
+_A189A09EDEA85CAD	buffer_magician	Маг поддержки	
+_A5297AB06058B0AD	healer_magician	Целитель	
+_6A89DCA72E8A5CB3	faber	Ремесленник	
+_0CA8C83460FCB8E2	FireMaster	Мастер Огня	
+_67F610442A8ABCC0	LakeMaster	Мастер Озер	
+_E8F8A4AD53D39C51	gn_gibbay_guard	Элита стражи	
+_33185DBF82913503	gn_masters_of_the_goo_guard	Элита стражи	
+_AFE00123666AD460	gn_tryker_tribe_slave	Раб трайкеров	
+_B3EF601A05BBAC70	CM	Community Manager	Community Manager
+_090C14DD8E0A2524	EM	Event Manager	Event Manager
+_A3E59E30A3E581EB	EG	Event Guide	Event Guide
+_19DAEC7920168C8F	OBSERVER	Observer	Observer
+_5A05B79F1EA71CA5	Kami_Ally	Герой Ками	
+_ECF9B45D2639D824	Karavan_Ally	Герой Каравана	
+_35DF10730898A57F	gn_aegus_kami_priest	Аэгусский проповедник Ками	
+_1F4FD67C615A7B19	gn_kaemon_kami_priest	Каэмонский проповедник Ками	
+_0D9252F0B695727B	gn_sekovix_kami_priest	Сековиксский проповедник Ками	
+_614F0290235CCB20	gn_phyxon_kami_priest	Фиксонский проповедник Ками	
+_C8F242F871F56283	gn_galemus_kami_priest	Галэмусский проповедник Ками	
+_72985B38F3CD25F5	gn_stalli_karavan_teleporter	Сталлийский телепортатор Каравана	
+_3509DECE961A2B66	gn_borea_karavan_teleporter	Борейский телепортатор Каравана	
+_F0985B2871CFB5DF	gn_nistia_karavan_teleporter	Нистийский телепортатор Каравана	
+_2C7E1C358044C3CE	gn_rosilio_karavan_teleporter	Росилиосский телепортатор Каравана	
+_77B9DECE982A0B4F	gn_miani_karavan_teleporter	Мианийский телепортатор Каравана	
+_A0930267E8EFFEFB	gn_stalli_karavan_guide	Сталлийский проводник Каравана	
+_F6F4E273380951E3	gn_borea_karavan_guide	Борейский проводник Каравана	
+_61B4D65A277026ED	gn_nistia_karavan_guide	Нистийский проводник Каравана	
+_9CD2D20A9D82EC81	gn_rosilio_karavan_guide	Росилиосский проводник Каравана	
+_BB849E6DFD990DDD	gn_miani_karavan_guide	Мианийский проводник Каравана	
+_E11DA181A1DA8B19	gn_qai_lo_kami_priest	Проповедник Ками из Квай-Ло	
+_1C74283532F5CD24	gn_sheng_wo_kami_priest	Проповедник Ками из Шенг-Во	
+_0884F83975751612	gn_men_xing_kami_priest	Проповедник Ками из Мен-Ксинга	
+_049E2206B5944291	gn_koi_zun_kami_priest	Проповедник Ками из Кои-Зуна	
+_A13CB337E1755122	gn_yin_piang_kami_priest	Проповедник Ками из Йин-Панга	
+_8DB42643D552074B	gn_aubermouth_karavan_teleporter	Обермаутский телепортатор Каравана	
+_0F302872195B6F17	gn_waverton_karavan_teleporter	Уэвертонский телепортатор Каравана	
+_3F60046A168C7FDF	gn_hobwelly_karavan_teleporter	Хобвэллийский телепортатор Каравана	
+_4B5FF4BF37909B44	gn_dingleton_karavan_teleporter	Динглтонский телепортатор Каравана	
+_0A1FE46995BB0B15	gn_barkdell_karavan_teleporter	Баркделлский телепортатор Каравана	
+_A7E8075CE1348AFE	gn_aubermouth_karavan_guide	Обермаутский проводник Каравана	
+_DAA31AEB153E166E	gn_waverton_karavan_guide	Уэвертонский проводник Каравана	
+_57D5F6AFD0FEC67D	gn_hobwelly_karavan_guide	Хобвэллийский проводник Каравана	
+_B094E3A53C95D26F	gn_dingleton_karavan_guide	Динглтонский проводник Каравана	
+_953206D9CEBD1E6A	gn_barkdell_karavan_guide	Баркделлский проводник Каравана	
+_25A7947BE9967BAA	gn_karavan_agent	Агент Каравана	
+_340E740DE26E9C5B	gn_ancientdryads_kami_ambassador_m1	Посланник Ками у Древних дриад	
+_4F9A5B34C23DE732	gn_beachcombers_kami_ambassador_t1	Посланник Ками у Прочесывающих Берег	
+_C8716716D18ED704	gn_cockroaches_kami_ambassador_p1	Посланник Ками у Тараканов	
+_E4072AE7BEBFD0CD	gn_company_kami_ambassador_p1	Посланник Ками у Общества Вечного Древа	
+_66072AE7BEBFD0CD	gn_company_kami_ambassador_z1	Посланник Ками у Общества Вечного Древа	
+_FE6C5F3533E7DEEC	gn_corsairs_kami_ambassador_t1	Посланник Ками у Корсаров	
+_7D9F14ECEC8ADB18	gn_duneriders_kami_ambassador_f1	Посланник Ками у Наездников Дюн	
+_4D01DB0DF35F29FB	gn_ecowarriors_kami_ambassador_m1	Посланник Ками у Эковоинов	
+_BED02C6E419264EF	gn_firstdeserters_kami_ambassador_m1	Посланник Ками у Первых Дезертиров	
+_2D0B05EBD586BD89	gn_fraharhunters_kami_ambassador_f1	Посланник Ками у Охотников на Фрахаров	
+_EC4D1BA5567D0B2F	gn_hamazans_kami_ambassador_z1	Посланник Ками у Амазонок Мертвого Семени 	
+_82C1FD0D8B307A8E	gn_kami_welcomer_f1	Глашатай Ками в Дюнах Изгнания	
+_170E3D0D0CB03AB7	gn_kami_welcomer_f2	Глашатай Ками в Башнях Фрахаров	
+_55B93E8802601EB2	gn_kami_welcomer_f3	Глашатай Ками в Имперских дюнах	
+_0FBCA4C3E3362EC3	gn_kami_welcomer_f4	Глашатай Ками в Оазисе Офловака	
+_1820C239D5E22AB7	gn_kami_welcomer_f5	Глашатай Ками в Каньоне Беззакония	
+_91BF210DC9C16EB2	gn_kami_welcomer_f6	Глашатай Ками в Древесной Шахте	
+_11C252092BD12EB0	gn_kami_welcomer_f7	Глашатай Ками в Диких дюнах	
+_542AF20D8BC0713C	gn_kami_welcomer_f8	Глашатай Ками в Выжженном коридоре	
+_0FE1AA47149B85B2	gn_kami_welcomer_m1	Глашатай Ками в Ускользающем саду	
+_7144739C66FA9E23	gn_kami_welcomer_m2	Глашатай Ками в Роще Смятения	
+_E7AA56428AB80FCE	gn_kami_welcomer_m3	Глашатай Ками в Логове Еретика	
+_4A0A8D59B45D42B6	gn_kami_welcomer_m4	Глашатай Ками у Потаенного источника	
+_B5F65A2115DC1FD6	gn_kami_welcomer_m5	Глашатай Ками в Холмах раскола	
+_54A7BB2D90C53EAD	gn_kami_welcomer_m6	Глашатай Ками в Садах Величия	
+_12C9CE4AF3F22EB6	gn_kami_welcomer_m7	Глашатай Ками в Верховых топях	
+_2F3873728D9B43DE	gn_kami_welcomer_p1	Глашатай Ками в Запретных Глубинах	
+_7A773E509B05FA44	gn_kami_welcomer_p10	Глашатай Ками у Врат Ветров	
+_D663378774710228	gn_kami_welcomer_p2	Глашатай Ками у Врат Неопределенности	
+_7B4B29D68399CC57	gn_kami_welcomer_p3	Глашатай Ками в Нексусе	
+_8FBFED338B1652B2	gn_kami_welcomer_p4	Глашатай Ками в Кровоточащей бездне	
+_23E20B87FA7DCF20	gn_kami_welcomer_p5	Глашатай Ками в Эфемерном лесу	
+_9593636CC957EF23	gn_kami_welcomer_p6	Глашатай Ками в Землях Непрерывности	
+_097CD29EE57D72BC	gn_kami_welcomer_p7	Глашатай Ками в Погребенном городе	
+_26D4737978D6AEE6	gn_kami_welcomer_p8	Глашатай Ками у Рва Испытаний	
+_98379B3C8D3422BB	gn_kami_welcomer_p9	Глашатай Ками у Подземного источника	
+_0ED40E7AB7151ABA	gn_kami_welcomer_t1	Глашатай Ками на Пляжах Изобилия	
+_9692ED7F3AF4E1B9	gn_kami_welcomer_t2	Глашатай Ками в Каплях Росы	
+_D46EE1571E42F3BD	gn_kami_welcomer_t3	Глашатай Ками на Зачарованном острове	
+_0AEC6A0CB7654EC2	gn_kami_welcomer_t4	Глашатай Ками в Лагунах Лории	
+_80DEA91EBBC2F6AA	gn_kami_welcomer_t5	Глашатай Ками у Озера Свободы	
+_929E8914E0DE19C8	gn_kami_welcomer_t6	Глашатай Ками у Вод Спокойствия	
+_F20629595BBFA153	gn_kami_welcomer_t7	Глашатай Ками у Родника	
+_949F7D1D70F036C6	gn_kami_welcomer_t8	Глашатай Ками у Ветров Муз	
+_DF961A76CDE15284	gn_kami_welcomer_z1	Глашатай Ками в Городах Провидцев	
+_95EDA3A023B69E80	gn_kami_welcomer_z2	Глашатай Ками в Сумеречной роще	
+_568282F0DC7D1DAE	gn_kami_welcomer_z3	Глашатай Ками в Прибежище Благочестия	
+_8396B76435B5F38C	gn_kami_welcomer_z4	Глашатай Ками в Узловине Безумия	
+_16711E208BE0F6C0	gn_kami_welcomer_z5	Глашатай Ками в Роще Дев	
+_773A61DE8399CCE4	gn_kami_welcomer_z6	Глашатай Ками в Великой Пустоте	
+_55264B0272BCEEA4	gn_keepers_kami_ambassador_p1	Посланник Ками у Хранителей	
+_972A9AD04625984E	gn_lagoonbrothers_kami_ambassador_t1	Посланник Ками у Братства Лагун 	
+_F1977E10720C0AAF	gn_leviers_kami_ambassador_f1	Посланник Ками у Мытарей	
+_2676847A13EE1B1D	gn_pyromancers_kami_ambassador_p1	Посланник Ками у Пиромантов	
+_00EF54EB6842740A	gn_recoverers_kami_ambassador_p1	Посланник Ками у Восстановителей	
+_C1CED855DE196722	gn_restorers_kami_ambassador_f1	Посланник Ками у Пожарной Стражи	
+_8C3310B6F5BFBB17	gn_sacredsap_kami_ambassador_m1	Посланник Ками у Священного Сэпа	
+_BA313C79703E29EA	gn_sapgleaners_kami_ambassador_p1	Посланник Ками у Жнецов Сэпа	
+_9CFB26E3C4563618	gn_shadowrunners_kami_ambassador_z1	Посланник Ками у Бегущих Теней	
+_99A3A3A5516BF8C8	gn_siblings_kami_ambassador_m1	Посланник Ками у Потомства Сорных Трав	
+_2DABDF97E7FBEB80	gn_tutors_kami_ambassador_z1	Посланник Ками у Наставников	
+_C223D074C1867594	gn_waterbreakers_kami_ambassador_f1	Посланник Ками у Рассекающих Воду	
+_E2CC5411CD04E032	gn_wovenbridles_kami_ambassador_m1	Посланник Ками у Плетеных Поводьев	
+_2B7D1365632C5EC4	gn_zorai_kami_master	Мастер Ками на горе Бигхорн	
+_D2F413B7CA90DA46	gn_antikamis_karavan_ambassador_z1	Посланник Каравана у Антиками	
+_A813537EFBC18BAF	gn_aridmatis_karavan_ambassador_m1	Посланник Каравана у Матисов Засушливых Равнин	
+_E5B6FD7C33B20CAC	gn_barkers_karavan_ambassador_f1	Посланник Каравана у Искусники коры	
+_5112D4916ACFF996	gn_blackcircle_karavan_ambassador_z1	Посланник Каравана у Черного круга	
+_A6D6B91A0C120542	gn_darkeningsap_karavan_ambassador_m1	Посланник Каравана у Затмения Сэпа	
+_8A3101B0120100C0	gn_gooheads_karavan_ambassador_z1	Посланник Каравана у Рабов Гуу	
+_EA42CEC268D67FA9	gn_greenseed_karavan_ambassador_m1	Посланник Каравана у Зеленого Семени	
+_73BFAAEB6B3E167B	gn_karavan_welcomer_f1	Глашатай Каравана в Дюнах Изгнания	
+_6F52F3BF6F3E3273	gn_karavan_welcomer_f2	Глашатай Каравана в Башнях Фрахаров	
+_AD01D7687FF5967E	gn_karavan_welcomer_f3	Глашатай Каравана в Имперских дюнах	
+_AE1273A8E4A898DB	gn_karavan_welcomer_f4	Глашатай Каравана в Оазисе Офловака	
+_6E5103DDC7003C96	gn_karavan_welcomer_f5	Глашатай Каравана в Каньоне Беззакония	
+_B2019BC6AD400E84	gn_karavan_welcomer_f6	Глашатай Каравана в Древесной Шахте	
+_AEE193F5C0FEB985	gn_karavan_welcomer_f7	Глашатай Каравана в Диких дюнах	
+_DBA9B77AC93E2374	gn_karavan_welcomer_f8	Глашатай Каравана в Выжженном коридоре	
+_1C0173DD83E1A029	gn_karavan_welcomer_m1	Глашатай Каравана в Ускользающем саду	
+_B51898121F36482E	gn_karavan_welcomer_m2	Глашатай Каравана в Роще Заблуждений	
+_CCC3F0774EA20E0A	gn_karavan_welcomer_m3	Глашатай Каравана в Логове Еретика	
+_F041276DB204B554	gn_karavan_welcomer_m4	Глашатай Каравана у Потаенного источника	
+_BD43CC4A968ECE4C	gn_karavan_welcomer_m5	Глашатай Каравана в Холмах раскола	
+_AFB1474494408ADB	gn_karavan_welcomer_m6	Глашатай Каравана в Садах Величия	
+_AE41A365C613B59E	gn_karavan_welcomer_m7	Глашатай Каравана в Верховых топях	
+_794C2A82ABCA870C	gn_karavan_welcomer_p1	Глашатай Каравана в Нексусе	
+_6D81E31C0714D9D7	gn_karavan_welcomer_t1	Глашатай Каравана на Пляжах Изобилия	
+_DA725BF7F56515C5	gn_karavan_welcomer_t2	Глашатай Каравана в Каплях Росы	
+_FBB2BFB435E2C8AA	gn_karavan_welcomer_t3	Глашатай Каравана на Зачарованном острове	
+_B001238BBE30E5DC	gn_karavan_welcomer_t4	Глашатай Каравана в Лагунах Лории	
+_2B817AB9BA5E19A2	gn_karavan_welcomer_t5	Глашатай Каравана у Озера Свободы	
+_5D629BB4AFAE7084	gn_karavan_welcomer_t6	Глашатай Каравана у Вод Спокойствия	
+_D60BA22AAA022C72	gn_karavan_welcomer_t7	Глашатай Каравана у Родника	
+_2E42CBC2EF3F0185	gn_karavan_welcomer_t8	Глашатай Каравана у Ветров Муз	
+_F82D7F4847D43A9A	gn_karavan_welcomer_z1	Глашатай Каравана в Городах Провидцев	
+_A5DECBBDDF7794F7	gn_karavan_welcomer_z2	Глашатай Каравана в Сумеречной роще	
+_9EC1E7F5BE6CA463	gn_karavan_welcomer_z3	Глашатай Каравана в Прибежище Благочестия	
+_FB9F2A3520B2BDE7	gn_karavan_welcomer_z4	Глашатай Каравана в Узловине Безумия	
+_2BE2E3E2876F17AA	gn_karavan_welcomer_z5	Глашатай Каравана в Роще Дев	
+_7915EA6EAC4B9B16	gn_karavan_welcomer_z6	Глашатай Каравана в Великой Пустоте	
+_4A287CFEEBEFCF4D	gn_kuilde_karavan_ambassador_p1	Посланник Каравана у Куилд	
+_92BE343DC9BFB7B5	gn_lawless_karavan_ambassador_f1	Посланник Каравана у Беззаконников	
+_0848EDE97A399896	gn_masters_karavan_ambassador_z1	Посланник Каравана у Повелителей Гуу	
+_BC445624F8A5F197	gn_matisianborder_karavan_ambassador_m1	Посланник Каравана у Пограничной стражи матисов	
+_E997711ACC9A652A	gn_oasisdiggers_karavan_ambassador_m1	Посланник Каравана у Копателей Оазиса	
+_D48E17AAC910D437	gn_renegades_karavan_ambassador_f1	Посланник Каравана у Изменников	
+_4D4DACC2A85766F2	gn_sapslaves_karavan_ambassador_m1	Посланник Каравана у Рабов Сэпа	
+_938E1B268AA1FA36	gn_scorchers_karavan_ambassador_f1	Посланник Каравана у Поджигателей	
+_B55C44C3C81FC814	gn_siltsculptors_karavan_ambassador_t1	Посланник Каравана у Скульпторов Ила	
+_FF3C778C451EC2BB	gn_slashandburn_karavan_ambassador_m1	Посланник Каравана у Огнем и Мечом	
+_C5D56D77706414A2	gn_slavers_karavan_ambassador_t1	Посланник Каравана у Работорговцев	
+_AF54D3B1A608AFA8	gn_smugglers_karavan_ambassador_t1	Посланник Каравана у Контрабандистов	
+_3EB9FB0AA6DCEB16	gn_fairhaven_karavan_officer	Офицер Каравана в Фэрхевена	
+_9837517501107C54	gn_iconworshipers_kami_ambassador_z1	Посланник Ками у Служителей Образа	
+_77C501027D4C21B1	gn_yrkanis_kami_master	Мастер Ками в Ирканисе	
+_736D43BDE135E227	gn_yrkanis_karavan_officer	Офицер Каравана в Ирканисе	
+_AE66FBD662235749	gn_r_10_17_kami_gentil	Благородный Ками	
+_E1284020E483E8BD	gn_cowardly_ragus	Трусливый Рагус	
+_420CA56DA9999F3D	gn_pyr_kami_master	Мастер Ками в Пайре	
+_7BD0F6ECBF46BA47	gn_Black_Circle_Magician	Маг Черного круга	
+_5077A0630FF9ECAC	gn_Kami_Adept	Адепт Ками	
+_D71294899E0724A8	gn_Kami_Envoy	Посланник Ками	
+_5D0F7827E6298895	gn_Kami_Preacher	Проповедник Ками	
+_20579C6ACBE60C92	gn_Kami_Seeker	Искатель Ками	
+_DEC37879E6D8DC94	gn_Kami_Sentinel	Страж Ками	
+_46D269F7AD99E098	gn_Karavan_Guardian	Страж Каравана	
+_783D29400B77390D	gn_Karavan_Teleporter	Телепортатор Каравана	
+_99E8A1192899A0F1	gn_Trophies_Trader	Торговец трофеями	
+_6164A3B1ED596CAE	gn_akiolulk	Мекаон Лицеус	
+_27A6D0A99BE7F4A8	gn_ancient_dryads_guard	Стража	
+_A1A780996488789C	gn_chichai	chichai	
+_A6C858AFE9B704A6	gn_cockroaches_guards	Стража	
+_6F9DD50658848FC6	gn_e_01_fy_passeur_1	e_01_fy_passeur_1	
+_BA0EE5DF59B740C2	gn_e_01_ma_gatherer_1	e_01_ma_gatherer_1	
+_61B47FA124859A76	gn_e_01_ma_guard_1	Стража	
+_61B483A124859A76	gn_e_01_ma_guard_2	Стража	
+_61B487A124859A76	gn_e_01_ma_guard_3	Стража	
+_61B48BA124859A76	gn_e_01_ma_guard_4	Стража	
+_6F1C910D58848FC6	gn_e_01_ma_passeur_1	e_01_ma_passeur_1	
+_6F8DF10E58848FC6	gn_e_01_nx_passeur_1	e_01_nx_passeur_1	
+_FE7F29E659B740C2	gn_e_01_tr_gatherer_1	e_01_tr_gatherer_1	
+_61B4C3A8E6859A76	gn_e_01_tr_guard_1	Стража	
+_61B4C7A8E6859A76	gn_e_01_tr_guard_2	Стража	
+_61B4CBA8E6859A76	gn_e_01_tr_guard_3	Стража	
+_61B4CFA8E6859A76	gn_e_01_tr_guard_4	Стража	
+_61B4B7AE67859A76	gn_e_01_zo_guard_1	Стража	
+_61B4BBAE67859A76	gn_e_01_zo_guard_2	Стража	
+_61B4BFAE67859A76	gn_e_01_zo_guard_3	Стража	
+_61B4C3AE67859A76	gn_e_01_zo_guard_4	Стража	
+_64B54CB965298CAC	gn_firebrand_guard	Стража	
+_E867A08B204B80A4	gn_keepers_guard	Стража	
+_EA176C729715B79D	gn_lady_1	дама_1	
+_A937888E248990AA	gn_lagoon_brothers_guard	Стража	
+_A927CC2D2AA910AE	gn_leviers_warrior	мытари_воин	
+_9F447643741679B0	gn_outpost_pr_29_fyros_steward_p1	Дэбус Мекопс	
+_FDE9669EF07A8D0A	gn_outpost_pr_29_tmg_steward_p1	Кин Пелорус	
+_E3095E02875FC88F	gn_outpost_pr_29_tryker_steward_p1	МакДарси Хэтти	
+_E5099CA22C59CC9A	gn_roottappers_guard	Стража	
+_6BAE61F964A788BB	gn_tribe_lagoon_brothers_guard	Стража	
+_6D8B0F571C347EA5	gn_firebrands_karavan_agent	Агент Каравана у Заклейменных Пламенем	
+_FA9AA009B09C4F4E	gn_kitingatherers_karavan_agent	Агент Каравана у Охотников на китинов	
+_14EEAFF111DF6B2E	gn_nightturner_karavan_agent	Агент Каравана у Повернувших Ночь	
+_ACFB1B5CA07BE3A0	gn_chlorogoos_karavan_agent	Агент Каравана у Хлорогуу	
+_4DDAD7A43DF03B3E	gn_roottappers_karavan_agent	Агент Каравана у Осушителей Корней	
+_E5A26D3EDAAC35B1	gn_forbidden_depths_karavan_agent	Агент Каравана в Запретных Глубинах	
+_284AAD17890E131A	gn_the_abyss_of_ichor_karavan_agent	Агент Каравана у Кровоточащей бездны	
+_16815695E0B00987	gn_the_elusive_forest_karavan_agent	Агент Каравана в Эфемерном лесу	
+_621881039555B50B	gn_the_land_of_continuty_karavan_agent	Агент Каравана в Землях непрерывности	
+_545BBD6B3AC2506D	gn_the_windy_gate_karavan_agent	Агент Каравана у Врат Ветров	
+_DD0070D38973F884	gn_gate_of_obscurity_karavan_agent	Агент Каравана у Врат неопределенности	
+_7C4E8D0D38BFD22F	gn_the_sunken_city_karavan_agent	Агент Каравана в Погребенном городе	
+_5AB25ADE67B2F4C4	gn_the_trench_of_trials_karavan_agent	Агент Каравана у Рва испытаний	
+_DC7E95B74BFAB4B2	gn_the_under_spring_karavan_agent	Агент Каравана у Подземного источника	
+_70FB64E8434CC518	gn_karavan_worshipper	Последователь Каравана	
+_E1CCB27E1A8C0319	gn_group_fde_boss_fyros	Аэн Клинок пустыни	
+_37BBA6079810AB02	gn_group_fde_guardian_fyros_heal	Сторонник Клинка пустыни	Сторонница Клинка пустыни
+_35321DC3C5E1DD09	gn_group_fde_guardian_fyros_melee	Сторонник Клинка пустыни	Сторонница Клинка пустыни
+_37BBA607D6B0EB08	gn_group_fde_guardian_fyros_nuke	Сторонник Клинка пустыни	Сторонница Клинка пустыни
+_35321DC34501CD0E	gn_group_fde_guardian_fyros_range	Сторонник Клинка пустыни	Сторонница Клинка пустыни
+_37BBA6079AF0D30C	gn_group_fde_guardian_fyros_root	Сторонник Клинка пустыни	Сторонница Клинка пустыни
+_C18C35540651898F	gn_mhs_bandit_boss_matis	Сирджио Коварный	
+_3F82516FD752F3D7	gn_mhs_bandit_guards_healer	Соратник Сирджио	Соратница Сирджио
+_F66C846D06A2A1BC	gn_mhs_bandit_guards_melee	Соратник Сирджио	Соратница Сирджио
+_3F82517D1D5207D7	gn_mhs_bandit_guards_mezzer	Соратник Сирджио	Соратница Сирджио
+_F66CB86DC5A3A5BC	gn_mhs_bandit_guards_nuker	Соратник Сирджио	Соратница Сирджио
+_F66C846F8662B5BC	gn_mhs_bandit_guards_range	Соратник Сирджио	Соратница Сирджио
+_0F2AF00EE7294126	gn_tei_bandit_boss_tryker	Ликси Бешеная	
+_BEC1CCA4B8DABF47	gn_tei_bandit_guards_healer	Гвардия Ликси	Гвардия Ликси
+_959A544C52DA5BF6	gn_tei_bandit_guards_melee	Гвардия Ликси	Гвардия Ликси
+_BEC1CCB2FEDAD347	gn_tei_bandit_guards_mezzer	Гвардия Ликси	Гвардия Ликси
+_959A884C11DB5FF6	gn_tei_bandit_guards_nuker	Гвардия Ликси	Гвардия Ликси
+_959A544ED29A6FF6	gn_tei_bandit_guards_range	Гвардия Ликси	Гвардия Ликси
+_DDBC9DF93A96C500	gn_zkod_bandit_boss_zorai	Пэй-Жао Разрушитель	
+_7899B52415024CCC	gn_zkod_bandit_guards_healer	Ученик Пэй-Жао	Ученица Пэй-Жао
+_71DA25B8AA93D855	gn_zkod_bandit_guards_melee	Ученик Пэй-Жао	Ученица Пэй-Жао
+_7899ED3D15524CCC	gn_zkod_bandit_guards_mezzer	Ученик Пэй-Жао	Ученица Пэй-Жао
+_71AB25B7AEA3D855	gn_zkod_bandit_guards_nuker	Ученик Пэй-Жао	Ученица Пэй-Жао
+_AB1CA514D0E63C52	fct_h_tattooer	(Мужской татуировщик)	
+_C4997CFE124A5C13	fct_h_hairdresser	(Мужской парикмахер)	
+_C4997CFE12DC4D11	fct_f_hairdresser	(Женский парикмахер)	
+_F5E0A514D0E63C50	fct_f_tattooer	(Женский татуировщик)	
+_5877A0830FF9ECAC	gn_kami_adept	Адепт Ками	
+_6B37B89DE8B7304C	gn_kami_guardian	Страж Ками	
+_1D94BCB599F834A4	tribe_chief	Вождь племени	
+_CBCCEE400FED266A	gn_fairhaven_kami_master	Мастер Ками в Фэрхевена	
+_69479C86212958C0	gn_guard_company_caster	Стража	
+_2808646CE9095CBE	gn_guard_company_footman	Стража	
+_E968986C6BD93CB1	gn_guard_company_sergent	Стража	
+_88ED89F520E0CD05	gn_pyr_karavan_officer	Офицер Каравана в Пайре	
+_9666D3651A47B78D	gn_r_07_13_boss	Предводитель наемникоа	
+_0229DC773D8C57FF	gn_r_07_13_guard	Наемник Каравана	
+_2F3FC3A8F944664D	gn_tryker_kami_master	Мастер Ками Зачарованного круга	
+_F6AE7577F7167298	gn_fyros_war_master_event	Мастер-воин файросов	
+_410682F316DF1BE7	gn_fyros_supply_master_event	Мастер-добытчик файросов	
+_DD1C99E0DD332078	gn_fyros_craftsman_master_event	Мастер-ремесленник файросов	
+_5F072F8E5FA88F22	gn_fyros_armoury_master_event	Мастер-оружейник файросов	
+_736472ED875FEDF2	gn_fyros_treasury_officer_event	Казначей файросов	
+_B21E7577F7B66282	gn_matis_war_master_event	Мастер-воин матисов	
+_FD7682F3167F0BD1	gn_matis_supply_master_event	Мастер-добытчик матисов	
+_9F1C81E2D7432860	gn_matis_craftsman_master_event	Мастер-ремесленник матисов	
+_E3072F8E5FE89FF2	gn_matis_armoury_master_event	Мастер-оружейник матисов	
+_2FD472ED87FFDDDC	gn_matis_treasury_officer_event	Казначей матисов	
+_86EEFEBE582682EA	gn_tryker_war_master_event	Мастер-воин трайкеров	
+_EA27EF3A82CDBF0F	gn_tryker_supply_master_event	Мастер-добытчик трайкеров	
+_3B40BFDCD41EE6FB	gn_tryker_craftsman_master_event	Мастер-ремесленник трайкеров	
+_67D923E2244B73A1	gn_tryker_armoury_master_event	Мастер-оружейник трайкеров	
+_64E5D7007C13EBDC	gn_tryker_treasury_officer_event	Казначей трайкеров	
+_78EF757775FD3A8E	gn_zorai_war_master_event	Мастер-воин Зораи	
+_C34782F394C6E3DD	gn_zorai_supply_master_event	Мастер-добытчик Зораи	
+_E2E361E0D894206E	gn_zorai_craftsman_master_event	Мастер-ремесленник Зораи	
+_69072F8EFCE88F0E	gn_zorai_armoury_master_event	Мастер-оружейник Зораи	
+_F5A572ED0546B5E8	gn_zorai_treasury_officer_event	Казначей Зораи	
+_635F908DDB68D455	gn_femme_gibbai	Самка гиббай	
+_02CE59FCB59ADB17	gn_guerisseuse_gibbai	Целитель гиббаев	
+_24F7A47C5619AA9B	gn_gibbai_welcomer	Старый гиббай	
+_7E4BD3106875630E	gn_zora_kami_master	Мастер Ками Зоры	
+_4C192174745CF64A	gn_matis_kami_master	Мастер Ками круга Ками	
+_3535EE417CC7BE84	gn_prime_roots_kami_master	Мастер Ками Срединного пика	
+_4B14339E56F54E67	gn_tribe_sacred_sap_tribe_lieutenant	Военачальник	
+_D4DB285EAEEB3E8C	gn_fyros_karavan_officer	Офицер Каравана в Дюнах Изгнания	
+_FE9DDC863E33FBB1	gn_matis_karavan_officer	Офицер Каравана в Верховых топях	
+_CE447A27A7B65A41	gn_nexus_karavan_officer	Офицер Каравана в Нексусе	
+_F458ADECC36667A8	gn_tryker_karavan_officer	Офицер Каравана у Родника	
+_16418A569146C696	gn_zora_karavan_officer	Офицер Каравана в Зоре	
+_71614C503F279415	gn_zorai_karavan_officer	Офицер Каравана в Сумеречной роще	
+_C8068465E6069C94	gn_Goo_Spot	Пятно гуу	
+_62970C91E9F83099	gn_Tower	Башня	
+_6907C8A102D82064	gn_kuilde_guard	Мастер стражник	
+_EDBF4C858F925029	gn_tribe_company_of_the_eternal_tree_tribe_chief	МакРипси Линли	
+_6C75F51328F7A471	gn_tribe_cutes_guards	Элита стражи	
+_4D088BDA0AA9D2BA	gn_fyros_kami_master	Мастер Ками у Ручьев Фессоса	
+_FF7DAFB9F3AA72D6	gn_kami_altar_bountybeaches	Алтарь Ками у Пляжей изобилия	
+_E650933956EA1376	gn_kami_altar_citiesofintuition_hoi_cho	Алтарь Ками в Хоа-Шо	
+_D0C0FB18E94A6357	gn_kami_altar_citiesofintuition_jen_lai	Алтарь Ками в Джен-Лай	
+_5130E71BE9EA8B4E	gn_kami_altar_citiesofintuition_min_cho	Алтарь Ками в Мин-Хо	
+_B6A8A1FB159187CB	gn_kami_altar_citiesofintuition_zora	Алтарь Ками в Зоре	
+_41137715B1A5C60E	gn_kami_altar_dunesofexil_dyron	Алтарь Ками в  Дюнах Изгнания	
+_22B6274CEA6E7EFF	gn_kami_altar_enchantedisle	Алтарь Ками на  Зачарованном Острове	
+_B088A9A057A767C2	gn_kami_altar_fleetinggarden	Алтарь Ками в  Ускользающем саду	
+_82F8252C5160F8D4	gn_kami_altar_forbidden_depths	Алтарь Ками в  Запретных глубинах	
+_7E962EDE65A783AE	gn_kami_altar_frahartowers	Алтарь Ками в  Башнях Фрахар	
+_5A471070187CE807	gn_kami_altar_groveofconfusion	Алтарь Ками в  Роще заблуждений	
+_3BB5340CBB1CFF69	gn_kami_altar_groveofumbra	Алтарь Ками в  Сумеречной роще	
+_B2EA9E4CD6586EFB	gn_kami_altar_havenofpurity	Алтарь Ками в  Прибежище Благочестия	
+_D29EAE0F0252FA3A	gn_kami_altar_hereticshovel	Алтарь Ками в  Логове Еретика	
+_B0B21AAB0E548BAC	gn_kami_altar_hiddensource	Алтарь Ками у  Потаенного источника	
+_FA831F6411FAF7E5	gn_kami_altar_imperialdunes_pyr	Алтарь Ками в  Имперских дюнах	
+_3D6E0E79023A2829	gn_kami_altar_knollofdissent	Алтарь Ками в  Холмах раскола	
+_49483657BFF59610	gn_kami_altar_knotofdementia	Алтарь Ками в  Узловине безумия	
+_E9C4424BF3F73775	gn_kami_altar_lagoonsofloria	Алтарь Ками у  Лагун Лории	
+_ACDB10AA74AA9E05	gn_kami_altar_libertylake_fairhaven	Алтарь Ками в  Фэрхевена	
+_28BD17CFC36852CD	gn_kami_altar_maidengrove	Алтарь Ками в  Роще Дев	
+_606D38B809EE9083	gn_kami_altar_majesticgarden_yrkanis	Алтарь Ками в  Садах Величия	
+_0AB7DA6B31A74D10	gn_kami_altar_nexus_terre	Алтарь Ками в  Нексусе	
+_DBD4E868B5AACEE3	gn_kami_altar_oflovaksoasis	Алтарь Ками в  Оазисе Офловака	
+_C078AFA7F4D83B9D	gn_kami_altar_outlawcanyon	Алтарь Ками в  Каньоне Беззакония	
+_F8666E77BA3582B2	gn_kami_altar_restingwater	Алтарь Ками у  Вод Спокойствия	
+_384802E720A8AFA9	gn_kami_altar_sawdustmines	Алтарь Ками у  Древесных копей	
+_0D7C200860782067	gn_kami_altar_the_abyss_of_ichor	Алтарь Ками у  Кровоточащей бездны	
+_E9134D2F895D0AE8	gn_kami_altar_the_elusive_forest	Алтарь Ками в  Эфемерном лесу	
+_278F7CD42AB38456	gn_kami_altar_the_land_of_continuity	Алтарь Ками в  Землях непрерывности	
+_43A5323EE61AB6EA	gn_kami_altar_the_sunken_city	Алтарь Ками в  Погребенном городе	
+_E2567AB12291DBCF	gn_kami_altar_the_trench_of_trials_zorai	Алтарь Ками у  Рва Испытаний	
+_DAAF30B347BF84A3	gn_kami_altar_the_under_spring_fyros	Алтарь Ками у  Подземного источника	
+_8ABDBA3E6BB54B74	gn_kami_altar_the_windy_gate	Алтарь Ками у  Врат Ветров	
+_5090DFFBBBE22340	gn_kami_altar_thesavagedunes_thesos	Алтарь Ками на  Диких дюнах	
+_23E1424557AFB3E9	gn_kami_altar_thescorchedcorridor	Алтарь Ками в  Выжженном коридоре	
+_F336C9F616207D01	gn_kami_altar_thevoid	Алтарь Ками в  Великой Пустоте	
+_EA3C977244E342DC	gn_kami_altar_windsofmuse	Алтарь Ками в  Ветрах Муз	
+_4AD9879E9E9C9A4F	gn_kami_altar_upperbog	Алтарь Ками в  Верховых топях	
+_D4DB36A85FA4CD85	gn_kami_altar_dewdrops	Алтарь Ками в  Каплях Росы	
+_7775FE307CC90D5D	gn_kami_altar_thefount	Алтарь Ками у  Родника	
+_8704F06F3041ABA9	gn_kami_altar_gate_of_obscurity	Алтарь Ками у  Врат неопределенности	
+_6DFEE550424DB022	gn_karavan_altar_bountybeaches	Алтарь Каравана на Пляжах Изобилия	
+_18EEC42C622C5B5A	gn_karavan_altar_citiesofintuition_zora	Алтарь Каравана в Зоре	
+_6C2CDB25A18353E4	gn_karavan_altar_dewdrops	Алтарь Каравана в  Каплях Росы	
+_FE55DC9528BD98DF	gn_karavan_altar_dunesofexil_dyron	Алтарь Каравана в  Дюнах Изгнания	
+_6CBE5C05FE357859	gn_karavan_altar_enchantedisle	Алтарь Каравана на  Зачарованном Острове	
+_CE6F7423591777A4	gn_karavan_altar_fleetinggarden	Алтарь Каравана в  Ускользающем саду	
+_AEF0C114DD6C99A2	gn_karavan_altar_forbidden_depths	Алтарь Каравана в  Запретных глубинах	
+_07A8F0112D4F14EF	gn_karavan_altar_frahartowers	Алтарь Каравана в  Башнях Фрахаров	
+_DFDF80B68C23F0A7	gn_karavan_altar_gate_of_obscurity	Алтарь Каравана у  Врат неопределенности	
+_2DB457F3D4BFA986	gn_karavan_altar_groveofconfusion	Алтарь Каравана в  Роще заблуждений	
+_C004A4F51920865B	gn_karavan_altar_groveofumbra	Алтарь Каравана в  Сумеречной роще	
+_35538677B4007C96	gn_karavan_altar_hereticshovel	Алтарь Каравана в  Логове Еретика	
+_85D724BF2F9B9FB7	gn_karavan_altar_hiddensource	Алтарь Каравана у  Потаенного источника	
+_DD73BC8F7070C635	gn_karavan_altar_imperialdunes_pyr	Алтарь Каравана в  Имперских дюнах	
+_6DA6288DBBC4F5DE	gn_karavan_altar_knollofdissent	Алтарь Каравана в  Холмах раскола	
+_C354793EF831E19D	gn_karavan_altar_knotofdementia	Алтарь Каравана в  Узловине безумия	
+_884A2CF03D613CCC	gn_karavan_altar_lagoonsofloria	Алтарь Каравана у  Лагун Лории	
+_4466343503AEBBE3	gn_karavan_altar_libertylake_avendale	Алтарь Каравана в Эвендейле	
+_4D4F9D8B42F2E4AA	gn_karavan_altar_libertylake_crystabell	Алтарь Каравана в Кристабелле	
+_EA1F0850D21CA806	gn_karavan_altar_libertylake_fairhaven	Алтарь Каравана в Фэрхевена	
+_4DAF55897F725C9B	gn_karavan_altar_libertylake_windermeer	Алтарь Каравана в Виндермеере	
+_ECEE6836BCA8B2A6	gn_karavan_altar_majesticgarden_avalae	Алтарь Каравана в Эвелее	
+_ABD7382A7C0A4AC1	gn_karavan_altar_majesticgarden_davae	Алтарь Каравана в Дэвея	
+_ABB738327CAA4AC1	gn_karavan_altar_majesticgarden_natae	Алтарь Каравана в Нэтея	
+_114EE44BAC182CAD	gn_karavan_altar_majesticgarden_yrkanis	Алтарь Каравана в Ирканисе	
+_5E61C1DB2525FA15	gn_karavan_altar_nexus_terre	Алтарь Каравана в Нексусе	
+_0A180021402A9211	gn_karavan_altar_outlawcanyon	Алтарь Каравана в  Каньоне Беззакония	
+_36D8700E294762DD	gn_karavan_altar_restingwater	Алтарь Каравана у  Вод Спокойствия	
+_8CD694166B2830FC	gn_karavan_altar_sawdustmines	Алтарь Каравана у  Древесных копей	
+_9BB39B222B1FB183	gn_karavan_altar_the_abyss_of_ichor_matis	Алтарь Каравана у  Кровоточащей бездны	
+_4F6F767BED52E960	gn_karavan_altar_the_elusive_forest	Алтарь Каравана в  Эфемерном лесу	
+_AE57DEB9A9FA8A73	gn_karavan_altar_the_land_of_continuity	Алтарь Каравана в  Землях непрерывности	
+_664C9ABB481B0AD5	gn_karavan_altar_the_trench_of_trials_zorai	Алтарь Каравана у  Рва Испытаний	
+_F54A3A7DEBE70925	gn_karavan_altar_the_under_spring_fyros	Алтарь Каравана у  Подземного источника	
+_0A29B561BC21285C	gn_karavan_altar_the_windy_gate	Алтарь Каравана у  Врат Ветров	
+_9DF91ED31C7D0E19	gn_karavan_altar_thefount	Алтарь Каравана у  Родника	
+_06B441A57D71E8A4	gn_karavan_altar_thesavagedunes_thesos	Алтарь Каравана на  Диких дюнах	
+_914CD9A57D145496	gn_karavan_altar_thescorchedcorridor	Алтарь Каравана в  Выжженном коридоре	
+_55B4F6FA07BC5782	gn_karavan_altar_thevoid	Алтарь Каравана в  Великой Пустоте	
+_7C89ABF934821B53	gn_karavan_altar_upperbog	Алтарь Каравана в  Верховых топях	
+_385EAE4BB03716BB	gn_karavan_altar_windsofmuse	Алтарь Каравана в  Ветрах Муз	
+_B70D5656F84CEB24	gn_karavan_altar_maidengrove	Алтарь Каравана в  Роще Дев	
+_EB21B032A1B5CAE9	gn_karavan_altar_havenofpurity	Алтарь Каравана в  Прибежище Благочестия	
+_308E80D2D697002C	gn_karavan_altar_oflovaksoasis	Алтарь Каравана в  Оазисе Офловака	
+_F4008DEE7A626E18	gn_karavan_altar_the_sunken_city	Алтарь Каравана в  Погребенном городе	
+_C7883CFA5F71C65E	gn_karavan_altar_oflovakoasis	Алтарь Каравана в  Оазисе Офловака	
+_E5104F05CFE4E3B8	gn_fyros_general_event	Генерал файросов	
+_A7103707C9F4EBA0	gn_matis_general_event	Генерал матисов	
+_081551A09726E418	gn_tryker_general_event	Генерал трайкеров	
+_EAD71705CA45E3AE	gn_zorai_general_event	Генерал Зораи	
+_5CBD563E6B087591	gn_fyros_officer_event	Имперский офицер файросов	
+_C20E6263C2F82DBD	gn_matis_officer_event	Королевский офицер матисов	
+_7FB4BC4B9520267D	gn_tryker_officer_event	Федеральный офицер трайкеров	
+_A1B3E969FD771A91	gn_zorai_officer_event	Офицер династии Зораи	
+_82543A6F6E1C28FF	gn_matis_royal_guard_event	Королевская стража матисов	
+_E12FCE2C455CBA52	gn_matis_royal_soldier_event	Королевский солдат матисов	
+_075FCED71EAD1E66	gn_fyros_imperial_guard_event	Имперская стража файросов	
+_BBBB79FC4DFF0D84	gn_fyros_imperial_soldier_event	Имперский солдат файросов	
+_9F6F5FD8DE74B583	gn_zorai_dynastic_guard_event	Стража династии Зораи	
+_C28CE39898D5E4DF	gn_zorai_dynastic_soldier_event	Солдат династии Зораи	
+_142BD2E1198DD606	gn_tryker_federal_guard_event	Федеральная стража трайкеров	
+_3AAB3503F463C487	gn_tryker_federal_soldier_event	Федеральный солдат трайкеров	
+_E1703269857FF5BC	gn_karavan_commander_event	Командующий Каравана	
+_3D376A48878E5512	gn_karavan_officer_event	Лейтенант Каравана	
+_82581FB6824FD807	gn_karavan_ally_event	Союзник Каравана	
+_3C8A9087018F6114	gn_karavan_commando_event	Коммандо Каравана	
+_01FD9D1226E74720	gn_karavan_ship_event	Корабль Каравана	
+_A0F5721569CE1428	gn_kami_warlord_event	Военачальник Каравана	
+_B7D4C26623EB65D6	gn_kami_keeper_event	Хранитель земли Ками	
+_5B06D00D92717477	gn_kami_ally_event	Союзник Ками	
+_E857A5115FC8E7BB	gn_kami_fighter_event	Воин Ками	
+_813222557C88FCD9	gn_kitin_commander_event	Предводитель нашествия китинов	
+_2755C391A42918B5	gn_kitin_leader_event	Предводитель китинов	
+_FD09D5FAC98F5921	gn_kitin_protector_event	Защитник китинов	
+_A9E66BA1E6988C96	gn_kitin_guard_event	Страж китинов	
+_C32EF9F9E03534B6	gn_kitin_raider_event	Китин агрессор	
+_46FFB5E897C88029	gn_kitin_patrol_event	Патруль китинов	
+_379CD8D1CFB93045	gn_infected_frahar_high_chief_event	Предводитель орды зараженных фрахаров	
+_770BB8D14DA00C40	gn_infected_gibbai_high_chief_event	Предводитель орды зараженных гиббаев	
+_DEA7540F68D792B1	gn_infected_cute_high_chief_event	Предводитель орды зараженных кьютов	
+_1BD0952738456673	gn_infected_frahar_hero_event	Предводитель зараженных фрахаров	
+_D9E0712715552A75	gn_infected_gibbai_hero_event	Предводитель зараженных гиббаев	
+_70660A476F3FA5C8	gn_infected_cute_hero_event	Предводитель зараженных кьютов	
+_56A7324E37BACBC6	gn_infected_frahar_defender_event	Защитник зараженных фрахаров	
+_56A7044E33DA83C8	gn_infected_gibbai_defender_event	Защитник зараженных гиббаев	
+_F5B832FE4D82EDE6	gn_infected_cute_defender_event	Защитник зараженных кьютов	
+_3A3D08A34441DBFD	gn_infected_frahar_guard_leader_event	Начальник стражи зараженных фрахаров	
+_3A14E49D02C0BBFE	gn_infected_gibbai_guard_leader_event	Начальник стражи зараженных гиббаев	
+_E3BE44161269383C	gn_infected_cute_guard_leader_event	Начальник стражи зараженных кьютов	
+_BDEFADE255731A6B	gn_infected_frahar_guard_event	Стража зараженных фрахаров	
+_BDEF7FE25193D26D	gn_infected_gibbai_guard_event	Стража зараженных гиббаев	
+_DB029983F5BBC072	gn_infected_cute_guard_event	Стража зараженных кьютов	
+_2A250157B1ACAF47	gn_infected_frahar_raid_leader_event	Командующий атакой зараженных фрахаров	
+_A835B9582FBC8148	gn_infected_gibbai_raid_leader_event	Командующий атакой зараженных гиббаев	
+_7F3617C90DACFB41	gn_infected_cute_raid_leader_event	Командующий атакой зараженных кьютов	
+_F7692F7E3F15ABD8	gn_infected_frahar_raider_event	Агрессор зараженных фрахаров	
+_37D80F7EBDFC87D3	gn_infected_gibbai_raider_event	Агрессор зараженных гиббаев	
+_87D25FDCCDA28A67	gn_infected_cute_raider_event	Агрессор зараженных кьютов	
+_19D4C18583DB1F08	gn_infected_frahar_hunt_leader_event	Командир патруля зараженных фрахаров	
+_1974A17C41EBFB86	gn_infected_gibbai_hunt_leader_event	Командир патруля зараженных гиббаев	
+_CE7B0225934F8403	gn_infected_cute_hunt_leader_event	Командир патруля зараженных кьютов	
+_FAF70AF312FDBFD5	gn_infected_frahar_patrol_event	Патруль зараженных фрахаров	
+_B807E6F3EF0D83D7	gn_infected_gibbai_patrol_event	Патруль зараженных гиббаев	
+_168C07B9C6B542A8	gn_infected_cute_patrol_event	Патруль зараженных кьютов	
+_C1C2D25AE94F8DB9	gn_frahar_high_chief_event	Верховный вождь фрахаров	
+_0199D24B295E95B0	gn_gibbai_high_chief_event	Верховный вождь гиббаев	
+_B67859E0684C4423	gn_cute_high_chief_event	Верховный вождь кьютов	
+_ABC54BC228B88A8D	gn_frahar_hero_event	Герой фрахаров	
+_A9D54BB987587685	gn_gibbai_hero_event	Герой гиббаев	
+_86E7F48010E9DCAD	gn_cute_hero_event	Герой кьютов	
+_40FA26F487BE1D1D	gn_frahar_defender_event	Защитник фрахаров	
+_3E0A26EBE65E0915	gn_gibbai_defender_event	Защитник гиббаев	
+_BFEF4DD3F51708B6	gn_cute_defender_event	Защитник кьютов	
+_A7D0050165F72461	gn_frahar_shaman_event	Шаман фрахаров	
+_E7A705F2A5062C58	gn_gibbai_shaman_event	Шаман гиббаев	
+_20F3A8B164B7FC8E	gn_cute_shaman_event	Шаман кьютов	
+_10F44FA0D7439EE1	gn_frahar_guard_leader_event	Начальник стражи фрахаров	
+_50F4459755F37ED9	gn_gibbai_guard_leader_event	Начальник стражи гиббаев	
+_58CB3D75FBCBDA72	gn_cute_guard_leader_event	Начальник стражи кьютов	
+_22C3A4142368F0B9	gn_frahar_guard_event	Стража фрахаров	
+_A2C3A48823A8F8A7	gn_gibbai_guard_event	Стража гиббаев	
+_62A95453A4D8B49F	gn_cute_guard_event	Стража кьютов	
+_DE45DA8EB5A17983	gn_frahar_witch_doctor_event	Лекарь фрахаров	
+_1EE5DE7CF5417DF7	gn_gibbai_witch_doctor_event	Лекарь гиббаев	
+_45FD958704F0B945	gn_cute_witch_doctor_event	Лекарь кьютов	
+_EAE64FDD8FC2B980	gn_frahar_hunt_leader_event	Командир патруля фрахаров	
+_89E637D54D72BD77	gn_gibbai_hunt_leader_event	Командир патруля гиббаев	
+_4AF42233D6E66D54	gn_cute_hunt_leader_event	Командир патруля кьютов	
+_FF80ADCC246E5525	gn_frahar_patrol_event	Патруль фрахаров	
+_7FEFB1C324E55916	gn_gibbai_patrol_event	Патруль гиббаев	
+_AC0E79319C949CA0	gn_cute_patrol_event	Патруль кьютов	
+_C8C1D24D207D9677	gn_frahar_raid_leader_event	Командующий фрахаров	
+_86D1AE45201D906E	gn_gibbai_raid_leader_event	Командующий рейдом гиббаев	
+_7B4EBE45807C5B03	gn_cute_raid_leader_event	Командующий рейдом кьютов	
+_BD4069CBEDFDF11D	gn_frahar_raider_event	Налетчик фрахаров	
+_3DAF6DC2ED74F50E	gn_gibbai_raider_event	Налетчик гиббаев	
+_668D552D58843889	gn_cute_raider_event	Налетчик кьютов	
+_76FAA3B33F4346DF	gn_frahar_shaman_raider_event	Налетчик-шаман фрахаров	
+_B69AA7A17FE34A53	gn_gibbai_shaman_raider_event	Налетчик-шаман гиббаев	
+_12C41ED2A142614F	gn_cute_shaman_raider_event	Налетчик-шаман кьютов	
+_19039D76FB304653	gn_cuthroat_high_chief_event	Верховный вождь головорезов	
+_AC31250E8D27D490	gn_cuthroat_hero_event	Герой головорезов	
+_9B9042A51EF1E970	gn_bandit_leader_event	Командир патруля головорезов	
+_96A1C6689D726294	gn_cuthroat_patrol_event	Командир патруля головорезов	
+_D48291D998550A4E	gn_cuthroat_raid_leader_event	Командующий рейдом головорезов	
+_B1917A4F03EF592D	gn_cuthroat_raider_event	Налетчик головорезов	
+_69540A7EC62F2DE3	gn_cuthroat_defender_event	Защитник  головорезов	
+_2C277BCE987C1EF8	gn_cuthroat_guard_leader_event	Начальник стражи головорезов	
+_022E210DE45974D3	gn_cuthroat_guard_event	Стража головорезов	
+_D14EEE5DF7DE3A06	gn_goo_warder_yelk_event	Йелк хранитель гуу 	
+_66D28F81A0F5857C	gn_goo_warder_slaveni_event	Славини хранитель гуу 	
+_37F4DB4D9E25AD72	gn_goo_warder_stinga_event	Стинга хранитель гуу 	
+_4CF2635718019E82	gn_goo_warder_varinx_event	Варинкс хранитель гуу 	
+_8B02475757118282	gn_goo_warder_torbak_event	Торбак хранитель гуу 	
+_D8E808FF2A018094	gn_fyros_herald_event	Глашатай файросов	
+_9AE808FFA9C12883	gn_matis_herald_event	Глашатай матисов	
+_EC60E5154A278C72	gn_tryker_herald_event	Глашатай трайкеров	
+_DDE8087B2521589E	gn_zorai_herald_event	Глашатай Зораи	
+_449A3F1FDDF4CC77	gn_kami_herald_event	Посланник Ками	
+_479D4D0C6127CB82	gn_karavan_herald_event	Посланник Каравана	
+_2452537FC3260EA8	gn_fyros_representative_event	Представитель файросов	
+_E0C2537FC3C6FE92	gn_matis_representative_event	Представитель матисов	
+_186A1EED9895C29B	gn_tryker_representative_event	Представитель трайкеров	
+_A693537F410DD69E	gn_zorai_representative_event	Представитель Зораи	
+_64D59335DFE45E22	gn_kami_representative_event	Представитель Ками	
+_A873562DD857924E	gn_karavan_representative_event	Эмиссар Каравана	
+_199A62503F5C4BD1	gn_fyros_recruiting_officer_event	Рекрутер файросов	
+_DB9A6250BE1CF3C0	gn_matis_recruiting_officer_event	Рекрутер матисов	
+_B4CC2C68BA5E837E	gn_tryker_recruiting_officer_event	Рекрутер трайкеров	
+_1E9A62CC3A7C23DB	gn_zorai_recruiting_officer_event	Рекрутер Зораи	
+_5D20B9D39A058244	gn_kami_recruiting_officer_event	Высший слуга Ками	
+_FAE18C4CFC09FE37	gn_karavan_recruiting_officer_event	Рекрутер Каравана	
+_2D687D202D987C62	gn_fyros_scout_event	Следопыт файрос	
+_EF687D1AAEB7A04A	gn_matis_scout_event	Следопыт матис	
+_892E912824698BC7	gn_tryker_scout_event	Следопыт трайкер	
+_32686F12AB17CC58	gn_zorai_scout_event	Следопыт Зораи	
+_D059D4A4EB188095	gn_kami_scout_event	Разведчик Ками	
+_030E11DE9ACEB10D	gn_karavan_scout_event	Лазутчик Каравана	
+_C93EA1C39E5A9126	gn_fyros_diplomat_event	Дипломат файрос	
+_0CBDBDC39EFA9908	gn_matis_diplomat_event	Дипломат матис	
+_877C2CE38AFE8D40	gn_tryker_diplomat_event	Дипломат трайкер	
+_CE9DF1C31C7A830E	gn_zorai_diplomat_event	Дипломат Зораи	
+_68C0550B2FE403BE	gn_fyros_citizen_event	Гражданин файрос	
+_5DE4BA2662605588	gn_fyros_old_citizen_event	Старый гражданин файрос	
+_2AC03D0D29F40BA6	gn_matis_citizen_event	Гражданин матис	
+_9E045A2D62005D70	gn_matis_old_citizen_event	Старый гражданин матис	
+_CB2D692297A6FC22	gn_tryker_citizen_event	Гражданин трайкер	
+_A196F2F20916EE87	gn_tryker_old_citizen_event	Старый гражданин трайкер	
+_6D871D0B2A4503B4	gn_zorai_citizen_event	Гражданин Зораи	
+_DFE4923AE08055FA	gn_zorai_old_citizen_event	Старый гражданин Зораи	
+_C78AB7DB4219A403	gn_r_09_19_convoi_escorte	Охрана конвоя	
+_83AB57BCC149B023	gn_r_09_19_convoi_foreur	Добытчик конвоя	
+_43DE54FFA9C7251E	gn_debug_bestiole	Bodoc robuste de debug	
+_46975C01DD304515	gn_debug_bestiole2	Bodoc robuste de debug	
+_9ACD03B3DE87DA77	gn_assistant_escort_debug	Assistant debug d'escorte	
+_9F7360AF26D7EC1F	gn_debug_ai	Assistant debug d'AI	
+_5817BE5F2D1CF92A	gn_garde_escort_debug	Assistant debug de garde	
+_2F9B73404B20CBD6	gn_debug_black_circle_bandit	Bandit de debug tribu du cercle noir	
+_58308253FF410168	gn_debug_black_circle_bandit2	Chef Bandit de debug tribu du cercle noir	
+_DA9590BEABB9709E	gn_test_debug_kill	Bandit de debug	
+_BC6A04DE52DB85FF	gn_test_debug_kill2	Chef Bandit de debug	
+_C71D6B0E417795F6	gn_warchief_guard	Охрана военачальника	
+_27256ADF66A1AF52	gn_r_05_15_gnoof_1	Уилли-гнуф	
+_4338F4E414359E85	gn_r_07_05_bandit	Разбойник с Источника	
+_25F4A95425451B59	gn_r_07_05_chief	О'Дарген Безумный	
+_CBB5D772D1C27373	gn_r_05_24_izam	Изамиэль	
+_EE1690E125055F49	gn_r_05_39_peon_leader	Солдат файрос	
+_DC77E7E862A7EF6F	gn_r_05_39_peon	Старатель файрос	
+_6B6292D8ABF607A1	gn_r_05_41_foreuse	Добытчик амазон	
+_D7D6FCDBA955F796	gn_r_05_39_big_varinx	Огромный варинкс	
+_A6271F7CD6B5EA54	gn_r_03_38_bandit	Разбойник	
+_001870C258CFC009	gn_r_03_38_chef_bandit	Предводитель разбойников	
+_A6271F7A56A5EA55	gn_r_12_18_bandit	Разбойник	
+_001870C060BFC409	gn_r_12_18_chef_bandit	Предводитель разбойников	
+_23760B5AE2B6D38F	gn_r_12_18_marchand	Торговец	
+_EC6C7880A466C372	gn_r_12_04_marchand	Сельно-торговец	
+_2575AD25A71934B5	gn_pyr_bar_serveuse	Официант	Официантка
+_E90634A89E08BCBE	gn_pyr_bar_client	Посетитель	Посетительница
+_A9879C7329E8709E	gn_pyr_bar_garde	Охрана	Охрана
+_6A0885225FC80FB0	gn_kami_warrior_event	Воин Ками	
+_AA98207460E76889	gn_kami_wizard_event	Маг Ками	
+_06BBC1E1A8F4A50B	gn_karavan_trooper_event	Солдат Каравана	
+_B5F9AE77C9AEC17E	gn_karavan_engineer_event	Инженер Каравана	
+_419F31D8184D4513	gn_karavan_medic_event	Медик Каравана	
+_B2090B778CCB620D	gn_karavan_assault_ship_event	Боевое судно Каравана	
+_BEA049E5690FDD24	gn_forge_apprentice_pyr	Подмастерье кузнеца	
+_A774B5076EF8EC9C	gn_bot_squad_melee_fighter	Воин	
+_A445ECA430E8CCA9	gn_bot_squad_range_fighter	Стрелок	
+_27F80D24AAB8ECA9	gn_bot_squad_artilleryman	Артиллерист	
+_00B4E684029C4D1B	gn_bot_squad_defensive_affliction	Псионик	
+_83BC5520E9F7F016	gn_bot_squad_healing_magic	Целитель	
+_02EEBE86012DE316	gn_bot_squad_offensive_affliction	Колдун	
+_C3BD9518AD0E81D8	gn_bot_squad_elemental_magic	Маг стихий	
+_B0B79E12F8C5DFE2	gn_bot_squad_melee_fighter_leader	Предводитель воинов	
+_F7D76BCC46C6B382	gn_bot_squad_range_fighter_leader	Предводитель стрелков	
+_AF491AEE7CB6EBE1	gn_bot_squad_artilleryman_leader	Предводитель артиллеристов	
+_870AB89A807F5C34	gn_bot_squad_defensive_affliction_leader	Предводитель псиоников	
+_782CD405382A7FBA	gn_bot_squad_healing_magic_leader	Предводитель целителей	
+_8BA0AB54D3AAC4D7	gn_bot_squad_offensive_affliction_leader	Предводитель колдунов	
+_70B2344A30A38F30	gn_bot_squad_elemental_magic_leader	Предводитель магов стихий	
+_1498B0B11D61A8B6	gn_dyron_guard	Стража Дайрона	
+_377555E5DE1E53FB	gn_fyros_kamist_combatant_event	Файросский Воин-камист	
+_B97CA780D935D600	gn_fyros_kamist_gatherer_event	Файросский Добытчик-камист	
+_1CD46FCF9E38760A	gn_fyros_kamist_crafter_event	Файросский Ремесленник-камист	
+_F3E555E5D6BE43E5	gn_matis_kamist_combatant_event	Матисский Воин-камист	
+_FA9C4787D9D5DEE8	gn_matis_kamist_gatherer_event	Матисский Добытчик-камист	
+_DED46FC91F579AF2	gn_matis_kamist_crafter_event	Матисский Ремесленник-камист	
+_B9B655E5549D1BF1	gn_zorai_kamist_combatant_event	Зорайский Воин-камист	
+_3B7C7F945755D6EC	gn_zorai_kamist_gatherer_event	Зорайский Добытчик-камист	
+_21D447C11CB7C600	gn_zorai_kamist_crafter_event	Зорайский Ремесленник-камист	
+_A870B73D78AD0FEB	gn_tryker_kamist_combatant_event	Трайкерский Воин-камист	
+_034A5BD35820CFF4	gn_tryker_kamist_gatherer_event	Трайкерский Добытчик-камист	
+_37FD4FF1A2502C86	gn_tryker_kamist_crafter_event	Трайкерский Ремесленник-камист	
+_2739AC2BE4563051	gn_kami_master	Мастер Ками	
+_84B32EE83B49EC0F	gn_kami_preacher_lord	Старший проповедник Ками	
+_691A5103FCF0C3EF	gn_kami_high_preacher	Верховный проповедник Ками	
+_5B85DF95DF6358AA	gn_maduk_bonze	Бонза Ма-Дук	
+_A4C339182B885097	gn_kamist_guard_event	Стража Ками	
+_BF1E21E7596F7121	gn_kamist_sergeant_event	Сержант Ками	
+_472DA1CAB820B100	gn_kamist_captain_event	Капитан Ками	
+_5CC3FD9DC53B7508	gn_kamist_guard_sanctuary	Страж приюта	
+_8BC53BD012F63A34	gn_kamist_captain_sanctuary	Капитан приюта	
+_E5E9AF1B2840C413	gn_kami_tower	Сторожевая башня Ками	
+_C37F580742478D54	gn_kami_preacher_pyr	Проповедник Ками из Пайра	
+_97EC26FFB456C964	gn_kami_preacher_yrkanis	Проповедник Ками из Ирканиса	
+_44993678606C97FC	gn_kami_preacher_zora	Проповедник Ками из Зоры	
+_26C00BD58B45DEE2	gn_kami_preacher_fairhaven	Проповедник Ками из Фэрхевена	
+_06A3F4F7F86A8371	gn_fyros_karavaneer_combatant_event	Файросский Воин-караванер файрос	
+_60B0B852F0A9C7B3	gn_fyros_karavaneer_gatherer_event	Файросский Добытчик-караванер файрос	
+_A4BD570FBCCBCFB2	gn_fyros_karavaneer_crafter_event	Файросский Ремесленник-караванер файрос	
+_492210F7F8088B53	gn_matis_karavaneer_combatant_event	Матисский Воин-караванер	
+_2250C03AB249CF9B	gn_matis_karavaneer_gatherer_event	Матисский Добытчик-караванер	
+_66BD570F3B8B77A1	gn_matis_karavaneer_crafter_event	Матисский Ремесленник-караванер	
+_0B0244F776885B59	gn_zorai_karavaneer_combatant_event	Зорайский Воин-караванер	
+_E3D0B84873C9C7A9	gn_zorai_karavaneer_gatherer_event	Зорайский Добытчик-караванер	
+_A9BD5705B7EBA7BC	gn_zorai_karavaneer_crafter_event	Зорайский Ремесленник-караванер	
+_17D0FF53C4CCBC3C	gn_tryker_karavaneer_combatant_event	Трайкерский Воин-караванер	
+_0F73503D2ABC9C8C	gn_tryker_karavaneer_gatherer_event	Трайкерский Добытчик-караванер	
+_3D9C2762707007A8	gn_tryker_karavaneer_crafter_event	Трайкерский Ремесленник-караванер	
+_C21B4CEED9EE9D0E	gn_karavan_high_guide	Верховный проводник Каравана	
+_20E0BDF36CF8D08E	gn_karavan_officer	Офицер Каравана	
+_24E7CC8125F68BA9	gn_karavan_guide	Проводник Каравана	
+_A498E80B1566D45F	gn_jena_priest	Священник Джены	
+_933527066183B300	gn_karavan_teleporteur_pyr	Телепортатор Карвана в Пайре	
+_127F3C679C650063	gn_karavan_teleporteur_yrkanis	Телепортатор Карвана в Ирканисе	
+_4E41B34CDB42943F	gn_karavan_teleporteur_fairhaven	Телепортатор Карвана в Фэрхевена	
+_63DB5FDB3A2A3354	gn_karavan_teleporteur_zora	Телепортатор Карвана в Зоре	
+_43BD2170C07A6DFD	gn_karavaneer_guard_event	Стража Каравана	
+_0AB4E28B8090FA44	gn_karavaneer_sergeant_event	Сержант Каравана	
+_51A47A5F4B75462B	gn_karavaneer_captain_event	Капитан Каравана	
+_186F666EC7CD6834	gn_karavaneer_guard_sanctuary	Страж храма	
+_0F95B79392D6C657	gn_karavaneer_captain_sanctuary	Капитан храма	
+_44CE5BCB49FE89D4	gn_karavan_tower	Сторожевая башня Каравана	
+_5CF4989B257814A1	gn_kami_altar	Алтарь Ками	
+_E398CC7B68C6B7A7	gn_karavan_altar	Алтарь Каравана	
+_5127D064E4388AAA	gn_kami_hof	Стелла доблести	
+_18D714975A94709C	gn_kami_frise	Корень знаний	
+_5996D4112E3394A6	gn_karavan_hof	Стелла доблести	
+_22B204E1589900A2	gn_karavan_frise	Колонна знаний	
+_23F991F96E1818A8	gn_psykopla_ally	Союзник псикопл	
+_2425730D9DAAC0A6	gn_cratcha_ally	Союзник кратча	
+_505CF916C2AFDD94	gn_driller_kami_lvl50	Малый бур Ками	
+_6292624D27330291	gn_driller_karavan_lvl50	Малый бур Каравана	
+_7A0213BE42C21380	gn_driller_kami_lvl50_const	Постройка малого бура Ками	
+_2CC2515A622275AC	gn_driller_karavan_lvl50_const	Постройка малого бура Каравана	
+_78E727345195053A	gn_driller_karavan_const	Постройка большого трепана	
+_5C1F25E71BD5623C	gn_driller_kami_const	Постройка древо-бура	
+_ABFC04815B98E095	gn_driller_karavan	Большой трепан	
+_2567BCAA61C9306E	gn_driller_kami	Древо-бур	
+_5D12D99A04724A6B	gn_placeholder_driller	Место для постройки	
+_FD35D457C748F4C2	fct_lodge_master	 (Lodge Master)	
+_B367C066EDAF8A4C	fct_artisan_trepans	(Создатель большого трепана)	
+_66939FDFD93089A7	fct_artisan_arbres_vrilles	(Создатель древо-бура)	
+_8B52F2B5828A9DE7	gn_citizenship_flame_truth	Пламя Истины	
+_8E55ED7A3FC93232	gn_citizenship_flame_honnor	Пламя Чести	
+_23BB9390D5F496B1	gn_citizenship_flame_discipline	Пламя Дисциплины	
+_99915A391FF41150	gn_citizenship_flame_justice	Пламя Справедливости	
+_4340B563EEC1B30C	fct_imperial_magistrate	(Имперский магистрат)	
+_3FC1411CE2E6688B	fct_royal_magistrate	(Королевский магистрат)	
+_FB6899F53E6A41A4	fct_federal_magistrate	(Федеральный магистрат)	
+_5C35F56CB0B0C12E	fct_dynastic_magistrate	(Магистрат династии)	
+_E38A509DE4180769	fct_vagabond	(Бродяга)	
+_ABD01032E149C38C	gn_lenja_lunatic	Лениа Лунатик	
+_486054DC9F3ADAB8	fct_imperial_magistrate_guild	(Имперский магистрат гильдии)	
+_6A444BEE66256547	fct_royal_magistrate_guild	(Королевский магистрат  гильдии)	
+_B45366A06811179A	fct_federal_magistrate_guild	(Федеральный магистрат гильдии)	
+_4D1FD0322177E1FB	fct_dynastic_magistrate_guild	(Магистрат династии  гильдии)	
+_A8096A60F0F7FF33	gn_fyros_karavan_aumonier	Капеллан Каравана в храме Пайра	
+_C4EF2652782A0E8E	gn_matis_karavan_aumonier	Капеллан Каравана в храме Ирканиса	
+_0F354493BC03591C	gn_tryker_karavan_aumonier	Капеллан Каравана в храме Фэрхевена	
+_AD1F6A56F017FF29	gn_zorai_karavan_aumonier	Капеллан Каравана в храме Зоры	
+_A7C0977A14C17CAF	fct_jena_priest	(Священник Джены)	
+_B232D9BC6A214FE5	fct_jena_priestress	(Жрица Джены)	
+_9B69FC330A98C384	fct_maduk_bonze	(Бонза Ма-Дук)	
+_7E14E86F7FAB0B5C	fct_maduk_bonze_sup	(Верховный бонза Ма-Дук)	
+_FB80F5B0E60883D4	fct_karavan_aumonier	(Капеллан Каравана)	
+_F6D94526ADF9A093	vagabond_taciturne	Молчаливый странник	
+_F2E00115DDE94111	gn_rotoa_bravichi_tree	Древо Бравичи ротоа	
+_6536FEC11354BCC8	gn_bothaya_tree	Пылающее древо ботайя	
+_C4FD940F48FA180B	gn_outpost_townhall	Зал собраний поселения	
+_9FD2D8040FFAB43E	gn_outpost_flag	Боевое знамя	
+_498BB0FC7F9ADC10	gn_outpost_info	Дежурный по заставе	
+_234178502D897036	fct_rangers_master	Рейнджер ветеран	
+_3ABFF02569E86CA6	fct_rangers_fighter	Рейнджер боец	
+_DE785B1EE4DAACA8	fct_rangers_artisan	Рейнджер умелец	
+_A15A2CF69B5970B5	fct_rangers_scout	Рейнджер разведчик	
+_0A82D387BF6D73F8	gn_newbieland_bandit_1	Порабощенный гуу мародер	
+_41A7B7C970ADBED8	gn_newbieland_bandit_1_lieutnant	Порабощенный гуу лейтенант	
+_E5E1E98040BE5FF8	gn_newbieland_bandit_2	Мародер Хлорогуу	
+_8246B738ED05A6DE	gn_newbieland_bandit_2_lieutnant	Лейтенант Хлорогуу	
+_E3EB4B88AE1942CA	gn_newbieland_starting_city_karavan_officer	Офицер связи Каравана	
+_B0EE9A7CF1CE6CF7	gn_karavan_ardent	Соратник Пламенных копий	
+_A9392AF9FB060EE1	gn_karavan_ardent_speaker	Представитель Пламенных копий	
+_7432ABE2E002916E	gn_chiang_the_strong	Chiang the Strong$fct_ranger_leader$	
+_AAD773BD6668F093	gn_ranger_guard	Стража рейнджеров	
+_E6DE450B67F8F04E	gn_Ranger_elite_guard	Элита стражи рейнджеров	
+_5579E50324F81496	fct_ranger_leader	Предводитель рейнджеров	
+_1DF1ED1D2C77CFB6	fct_fyros_commander	Военачальник файросов	
+_215EB6583CB7711C	fct_matis_master_artisan	Мастер ремесла матисов	
+_EA975D1EA7D570AA	fct_chief_explorer	Старшина добытчиков	
+_9FC4DAE99395F615	gn_kami_master_newbieland_starting_city	Проводник Ками	
+_22F39C97A678CCAF	gn_ring_welcomer	Техник Кольца	
+_90E9849BE847E48A	gn_device_ring_warp	Терминал Кольца	
+_99A4DA2C4189C09C	gn_spot_goo_mission_1	Свежей источник гуу	
+_E584FE7438B37520	gn_newbieland_bandit_2_mission	Бандит исследователь	
+_54E2907783C97B65	gn_kami_master_shining_lake	Повелитель озера Ками	
+_0B5476FD1BEF5C5C	gn_tcm_extraction_engineer	Ingénieur en extraction	
+_450658200C1DB1FE	gn_tcm_extraction_guard	Commando d'élite	
+_CAADF1CA1F7E8100	gn_tcm_trooper_engineer	Éclaireur Karavan	
+_48FECD0CA4698C4C	gn_tcm_engineer_guard	Escorte Karavan	
+_DAB40222B28EE555	gn_tcm_squad_leader_alpha	Chef d'escadron Alpha	
+_17E5E634EDEA49B6	gn_tcm_squad_leader_beta	Chef d'escadron Beta	
+_17E5E64CEDEA49CE	gn_tcm_squad_leader_zeta	Chef d'escadron Zeta	
+_3D16DE934ABCB7A4	gn_tcm_trooper_guard	Troupe d'élite Karavan	
+_4136DE7FEC3D2501	gn_tcm_trooper_static	Garde suprême Karavan	
+_44BF7DEADEC41D23	gn_tcm_trooper_wander	Réserviste Karavan	
+_68887893CE4784B0	gn_tcm_training	Commando Karavan	
+_58C91513E5099060	gn_tcm_medic	Équipe médicale Karavan	
+_108DB243F75D0671	gn_tcm_engineer	Ingénieur en mécanique Karavan	
+_826D508FE3C3D10E	gn_tcm_chief_engineer	Ingénieur en chef	
+_E08F368CC07AA793	gn_tcm_coordinator	Coordinateur des opérations	
+_8775E5C88758B5F7	gn_tcm_officer	Officier supérieur Karavan	
+_7A0402AD631E8D84	gn_tcm_quartermaster	Quartier maître Karavan	
+_FBA54E4D83DD4801	gn_tcm_commander	Commandant en chef Karavan	
+_2CA1598EA606436C	fct_tcm_chief_forager	(Maître foreur)	
+_A39B883084EAB8A9	fct_tcm_forager	(Disciple foreur)	
+_77FD1254EC71610B	fct_tcm_fighter_company	(Combattant Kamiste)	
+_84C0C5FA8722E5C9	fct_explorer_company	(Explorateur Kamiste)	
+_32B28905ECE70DF4	fct_harvest_company	(Récolteur Kamiste)	
+_31BEF6084B5271F2	fct_keepers_squad_leader	(Chef d'équipe de prospection)	
+_FFBE33006C824413	fct_keepers_squad	(Kamiste archéologue)	
+_843BDF8E98D404F3	fct_tcm_company_guard	(Sentinelle de l'arbre éternel)	
+_C41095F5DE6E5025	fct_tcm_tutor_praying	(Adorateur Kamiste)	
+_2FB0627EEF1091E5	fct_tcm_tutor_trader	(Colporteur expérimenté)	
+_C1E17D4E7FAAD42D	fct_tcm_tutor_sitting	(Disciple adorateur)	
+_08A62D2C031E1725	fct_tcm_tutor_chief_guard	(Fidèle protecteur)	
+_BE5A4A186F6B5546	fct_tcm_tutors_sitting2	(Apprenti prédicateur)	
+_F76412B39FBFE4B3	fct_tcm_tutors_storyteller	(Prédicateur itinérant)	
+_B312551F68289B73	fct_tcm_tutor_wander	(Disciple Tutor)	
+_B825B6990837C25B	fct_tcm_keepers_chief_guard	(Gardien des reliques)	
+_DD69AA142DC06F38	fct_tcm_keepers_sitting	(Apprenti archéologue)	
+_82413E86202C991D	fct_tcm_keepers_trader	(Disciple colporteur)	
+_C4907DFEDD155426	fct_tcm_keepers_guard	(Guetteur Kamiste)	
+_89F3154AB0B07519	fct_tcm_keepers_sitting2	(Apprenti guetteur)	
+_EB372E88401F69E0	fct_tcm_keepers_storyteller	(Conteur Kamiste)	
+_BB37C6770BDF5023	fct_tcm_keepers_elder	(Détenteur des savoirs)	
+_C3200DF011378FD7	fct_tcm_keepers_walking	(Civil Keeper)	
+_F4E00969940AD1E0	fct_tcm_keep_wander	(Archéologue Keeper)	
+_32F2090E2084E8D2	fct_tcm_keep_wander2	(Historien Keeper)	
+_CA1F22162B980D91	fct_tcm_eternal_tree_chief_guard 	(Gardien de l'arbre éternel)	
+_56F4F1B75AE1060B	fct_tcm_eternal_tree_sitting	(Serviteur de Ma-Duk)	
+_491DDEAAD796F617	fct_tcm_eternal_tree_static	(Guardien des récoltes)	
+_5A36183C66884E41	fct_tcm_eternal_tree_praying	(Prédicateur érudit)	
+_0FBE627401EB197A	fct_tcm_eternal_tree_spwan	(Gardien des portes)	
+_2897627B7F6E09DC	fct_tcm_eternal_tree_wander	(Penseur Kamiste)	
+_5E45661071C4DD46	fct_tcm_eternal_tree_praying2	(Adorateur éternel)	
+_5D06FA78FA7C6C32	fct_tcm_eternal_tree_walking	(Vagabond Kamiste)	
+_D22996EF17FEE544	fct_tcm_eternal_tree_walking2	(Civil de la Compagnie)	
+_BFB28A77E04B59E4	fct_tcm_healer	(Chef Soigneur de la Compagnie)	
+_A5C1ED8DD8E9906A	fct_tcm_armorer	(Armurier Expérimenté)	
+_F8F3C4737FEA0927	fct_tcm_intendant	(Intendant de la Compagnie)	
+_E8C99793D9A511A7	fct_tcm_assistant_intendant	(Assistant de l'intendant)	
+_614B3C2513C87BB4	fct_tcm_warchief	(Chef de Guerre)	
+_57B8D1848B10C23D	fct_tcm_merchant	(Grand colporteur de la Compagnie)	
+_58C33769BDF82A32	fct_tcm_campchief	(Chef de camp de la Compagnie)	
+_00C141EA25BB4C15	fct_tcm_warrior	(Grand guerrier vagabond)	
+_2774F56A82B8181A	fct_tcm_noble	(Noble penseur de la Compagnie)	
+_CAC83A8DCD565BA0	gn_chad	Maître Chad	
+_68F693A0E5027CA8	gn_chad_assist	Disciple de Chad	
+_2DF751F2EA66E037	gn_tcm_officer_radar	Officier radar	
+_6947BC965EB774AD	gn_tcm_chlorogoo_shaman	Shaman	
+_45EEC5F8A3E5A8B1	gn_tcm_chlorogoo_shaman_escort	Adepte	
+_80DFAD012908B429	gn_tcm_chlorogoo_prisonners	Prisonnier	
+_B0575D1164A8900B	gn_tcm_chlorogoo_camp_ranger	Épieur	
+_B07E5D0AE3488C95	gn_tcm_chlorogoo_camp_caster	Sorcier	
+_21E50A65C4FE540B	gn_tcm_chlorogoo_camp_fighter	Assassin gooifié	
+_EF8784FF20498CB3	gn_tcm_chlorogoo_caster	Alchimiste	
+_6B68B215E168B4B1	gn_tcm_chlorogoo_healer	Guérisseur	
+_7157FCA31D39BC9E	gn_tcm_chlorogoo_ranger	Fureteur	
+_D74D6667BEEA390F	gn_tcm_chlorogoo_harvester	Récolteur de Goo	
+_2943F1961EE50A6F	gn_tcm_chlorogoo_patrol_dill	Patrouilleur intoxiqué	
+_A5F9F8A7638990C9	fct_tcm_chlorogoo	Chlorogoo	
+_EAB298ADAC8737AE	fct_tcm_basile	Hermite mystérieux	
+_AE1E0DFE2557D77A	gn_tcm_radar_trainee	Stagiaire Radar	
+_9F81E690018E9894	gn_tcm_crate	Caisse de ravitaillement Karavan	
+_6D98B7B2A94708B7	gn_tcm_unknown_entity	Echo radar	
+_46232C8E2A6574AA	gn_tcm_soulchest	Coffre aux âmes	
+_C4B29923E957ABA2	gn_satooi_remains	Dépouille de Satooi	
+_2759E3A36AB96AAB	gn_tcm_reward_chest	Trésor perdu	
+_2468E3821B5703BD	title00001	Journeyer	Journeyer
+_ED07B7861F0653B7	title00047	Machinegunner	Machinegunner
+_D8D0950FF5D535F0	title00048	Assault Machinegunner	Assault Machinegunner
+_A947D8A9EF56539B	gn_landslide_3_target	Eboulis	
+_304784824BD6A895	gn_tcm_sacrified	Sacrifié	
+_C43DE5BBDAA6C4A9	gn_boss_mainland_varinx	Страж Аэна	
+_898DAB7DC3B94701	title00002	Начинающий охотник на китинов	Начинающий охотник на китинов
+_D1E1593DA37B2321	title00003	Охотник на китинов	Охотник на китинов
+_2D87019AB2295667	title00004	Мастер охотник на китинов	Мастер охотник на китинов
+_2205425D8D0EDB67	title00005	Истребитель китинов	Истребитель китинов
+_EC4F658FFCF5A29B	title00006	Палач китинов	Палач китинов
+_1334940BF309F834	title00007	Страж матисов	Страж матисов
+_92B59409F999F83A	title00008	Страж файросов	Страж файросов
+_9F82CB670FA1836F	title00009	Страж трайкеров	Страж трайкеров
+_92DB8C0A76DAEA2C	title00010	Страж Зораи	Страж Зораи
+_1E6EEEBFB8AD88C2	title00011	Страж Атиса	Страж Атиса
+_B25C6A0B82C0F2A9	slaughter_week_mgiver_matis	Страж востока	
+_EF2FA3EB8851F235	slaughter_week_mgiver_fyros	Страж севера	
+_335B4A0905D8BF9A	slaughter_week_mgiver_zorai	Страж запада	
+_3BFE4BA20E27A960	slaughter_week_mgiver_tryker	Страж юга	
+_875BA49BBF0043EE	slaughter_week_informer_name	Особый посланник	
+_ED58CFD255937A9E	sw_boss_fyros	Файрос-истребитель	Файрос-истребитель
+_2E1877C117338286	sw_boss_matis	Матис-истребитель	Матис-истребитель
+_8E78A7DC79B37A8A	sw_boss_zorai	Зораи-истребитель	Зораи-истребитель
+_6E6BE3AEA0BCE7E2	sw_boss_tryker	Трайкер-истребитель	Трайкер-истребитель
+_882412021BB36D59	gn_sirgio_fyros_dancer	Танцор файрос	Танцовщица файрос
+_8294FA049443F562	gn_sirgio_matis_dancer	Танцор матис	Танцовщица матис
+_052CDA7E15530D6D	gn_sirgio_zorai_dancer	Танцор Зораи	Танцовщица Зораи
+_3DECA7F453506591	gn_sirgio_tryker_dancer	Танцор трайкер	Танцовщица трайкер
+_DE95A6417003F52E	gn_bomber_boss	Бомбардир	Бомбардир
+_15B2C5B50AF01AA3	gn_bomber_random	Бомбардир	Бомбардир
+_E7B870971D68ECAB	gn_bomb_lixie	Бомба	
+_AAF8AC9725A628A4	gn_mine_lixie	Мина	
+_1929DA4173E24D1B	fct_artisan_restaurateur	Мастер восстановления	
+_EB25B0ACF3A8A0B5	gn_explosion_lixie	Взрыв	
+_58865C5622EA9E8A	gn_peipbae	Гнев Пэя	
+_5779690BA7E9A8A2	fct_ranger_worker	Рейнджер рабочий	
+_65B978A0217917B2	fct_ranger_guard	Стража рейнджеров	
+_858E090B25A88FBD	fct_ranger_intendant	Интендант рейнджеров	
+_3A9E69F36225B422	fct_ranger_great_mage	Архимаг рейнджеров	
+_5BF5796480AF9442	fct_ranger_guard_captain	Начальник стражи рейнджеров	
+_3B2029102B74D049	fct_ranger_explorer	Разведчик рейнджеров	
+_44DE81FDE5187FB7	fct_ranger_coord	Координатор рейнджеров	
+_DF97BB749906725A	title00014	Удачливый	Удачливая
+_DF9813815C47A65A	title00015	Проклятый	Проклятая
+_F03E6126BF73AB87	fct_confgu	Братство счастливого губани	
+_AEA9CCAB21A910AD	eboulis	Эбулис	
+_E60838B3AA6ABCBA	monticule	Монтикул	
+_442C188A1CD6DC2A	title00020	Патриот файросов	Патриот файросов
+_2DC5BF788A3773A3	title00021	Вассал матисов	Вассал матисов
+_885012BC382C6C44	title00022	Гражданин трайкеров	Гражданин трайкеров
+_CC65B0A1FCD4D094	title00023	Посвященный Зораи	Посвященный Зораи
+_1EFFADFCAE281D0A	title00024	Ученик Ками	Ученица Ками
+_742C7CA0382DCDF2	title00025	Последователь Каравана	Последовательница Каравана
+_6B089C9A5CC4DF59	title00026	Акенак файросов	Акенак файросов
+_AB749B7F88E57B9B	title00027	Дворянин матисов	Дворянка матисов
+_C59FB4A059877AAE	title00028	Тальяр трайкеров	Тальяр трайкеров
+_06FF5B7F801D9197	title00029	Пробужденный Зораи	Пробужденная Зораи
+_6299CF709DB7B3AC	title00030	Мародер	Мародер
+_89DA3461EE687880	fct_camprangerguide	Проводник по лагерю	
+_4322291BFA7A68F0	fct_ranger_kitiniere_welcomer	Наблюдатель за китинами	Наблюдатель за китинами
+_A9248F8D59496CA7	gn_Xmas_Event	Xmas Event	
+_DF8F69B8A11380CD	gn_Xmas_Super_Loot_1	Xmas Super Loot 1	
+_1B534672C1DE8D9C	gn_attack_gookitin_group	attack_gookitin_group	
+_E319C0949BFBECC2	gn_axodus_garatus	Эксодус Гаратус	
+_5DB1E01A6828E467	gn_ba_mirri_vichan	Бе'Мирри Вишан	
+_9FE3685A92B9B098	gn_ba_rima_dixie	Ба'Рима Дикси	
+_EB788C8BE105BCB1	gn_ballis_sothus	Баллис Сотус	
+_BD7E195536CDC0D2	gn_bandit_mastergoo_01	bandit_mastergoo_01	
+_FDED4D8481BEE515	gn_base_gookitin_group	base_gookitin_group	
+_E491AD1BE698949E	gn_base_kitin_group	base_kitin_group	
+_88A7FD032B167777	gn_be_liccha_niorda	Бе'Лиха Ньорда	
+_52070FB7673B6492	gn_be_sarsy_boxie	Бе'Сарси Бокси	
+_5C318806E4090C67	gn_be_valda_riddan	Бе'Вальда Риддан	
+_5DB20812A7AA486B	gn_be_willy_virgen	Бе'Вилли Вирген	
+_A7A8D4959B879F9A	gn_cadan_tandus	Кандан Тандус	
+_66D7489DA93AD4B0	gn_caisse	Ящик	
+_A31798AE27C68067	gn_campfire_4	campfire_4	
+_2578403DE1186463	gn_chio_sei_tung	Хио Сай Тунг	
+_662F1D2DF0187C8E	gn_chlorogoo_caster	chlorogoo_caster	
+_83FE8517AAB8680B	gn_chlorogoo_fighter	chlorogoo_fighter	
+_48702D92827FA5F8	gn_chlorogoo_harvester	chlorogoo_harvester	
+_662F1D1DE898A48E	gn_chlorogoo_healer	chlorogoo_healer	
+_662F1D136E18F48E	gn_chlorogoo_ranger	chlorogoo_ranger	
+_61E653A6E7964458	gn_chu_ni_rama	Чу Ни Рама	
+_252770699855879B	gn_ckdic1	ckdic1	
+_2527706AD8658B9B	gn_ckdic2	ckdic2	
+_2527706B18758F9B	gn_ckdic3	ckdic3	
+_2527706C5985939B	gn_ckdic4	ckdic4	
+_25277069D9658B9C	gn_ckdid1	ckdid1	
+_2527706A19758F9C	gn_ckdid2	ckdid2	
+_2527706B5985939C	gn_ckdid3	ckdid3	
+_2527706C9A95979C	gn_ckdid4	ckdid4	
+_2527706919758F9D	gn_ckdie1	ckdie1	
+_2527706A5985939D	gn_ckdie2	ckdie2	
+_2527706B9995979D	gn_ckdie3	ckdie3	
+_2527706CDAA59B9D	gn_ckdie4	ckdie4	
+_252770695985939E	gn_ckdif1	ckdif1	
+_2527706A9995979E	gn_ckdif2	ckdif2	
+_2527706BD9A59B9E	gn_ckdif3	ckdif3	
+_2527706C1AB59F9E	gn_ckdif4	ckdif4	
+_A547706998558F9D	gn_ckfic1	ckfic1	
+_A547706AD865939D	gn_ckfic2	ckfic2	
+_A547706B1875979D	gn_ckfic3	ckfic3	
+_A547706C59859B9D	gn_ckfic4	ckfic4	
+_A5477069D965939E	gn_ckfid1	ckfid1	
+_A547706A1975979E	gn_ckfid2	ckfid2	
+_A547706B59859B9E	gn_ckfid3	ckfid3	
+_A547706C9A959F9E	gn_ckfid4	ckfid4	
+_A54770691975979F	gn_ckfie1	ckfie1	
+_A547706A59859B9F	gn_ckfie2	ckfie2	
+_A547706B99959F9F	gn_ckfie3	ckfie3	
+_A547706CDAA5A39F	gn_ckfie4	ckfie4	
+_A547706959859BA0	gn_ckfif1	ckfif1	
+_A547706A99959FA0	gn_ckfif2	ckfif2	
+_A547706BD9A5A3A0	gn_ckfif3	ckfif3	
+_A547706C1AB5A7A0	gn_ckfif4	ckfif4	
+_6893D337F25A889B	gn_damarus_vidorus	Дамарус Видорус	
+_1904989DA6B79C98	gn_daro_carera	Даро Карера	
+_A4C7909AE4984C99	gn_egg	Яйцо	
+_5147B877C8B87C7E	gn_fang_cho_lin	Фенг Шо Линг	
+_E9056F9A627633A1	gn_fi_cha_fuing	Фи Ха Фуин	
+_A37860B1A8D76C63	gn_forcio_pani	Форчио Панни	
+_24A8D0A71E19146F	gn_forti_amarri	Форти Амарри	
+_6C06C869571A88B5	gn_goloris_raeps	Голорис Рэпс	
+_7E7E5DF328BD0125	gn_goo_kipucka_leader	goo_kipucka_leader	
+_AA97DC9B2AF7C893	gn_goo_kitimandib	goo_kitimandib	
+_E126BCA05557A87C	gn_goo_mob_code1	goo_mob_code1	
+_E126BCA09557A87D	gn_goo_mob_code2	goo_mob_code2	
+_E126BCA0D557A87E	gn_goo_mob_code3	goo_mob_code3	
+_E126BCA01657A87F	gn_goo_mob_code4	goo_mob_code4	
+_E836F0B22A3A98AA	gn_goomaster_boss	goomaster_boss	
+_F4EDE7E61E54E2ED	gn_guard_spire_zorai_karavan	guard_spire_zorai_karavan	
+_A497908C661854A0	gn_heal	heal	
+_6235DAF15B14EA6B	gn_healer_fyros_spire_kami	healer_fyros_spire_kami	
+_B7DD1308926C93EF	gn_healer_fyros_spire_karavan	healer_fyros_spire_karavan	
+_DD24F6F15B14D267	gn_healer_matis_spire_kami	healer_matis_spire_kami	
+_B14D1308118C1BF8	gn_healer_matis_spire_karavan	healer_matis_spire_karavan	
+_20BDB7CB9E228EA0	gn_healer_tryker_spire_kami	healer_tryker_spire_kami	
+_788C8F387ABB97F5	gn_healer_tryker_spire_karavan	healer_tryker_spire_karavan	
+_DFD52AF15B738A5D	gn_healer_zorai_spire_kami	healer_zorai_spire_kami	
+_341E13FE0FCB3303	gn_healer_zorai_spire_karavan	healer_zorai_spire_karavan	
+_68D7BC9B2A5880AF	gn_hill	hill	
+_E9C7A0A1AB4864AE	gn_hole	hole	
+_2DB88BB8E1886CB4	gn_horde_barrack_1	horde_barrack_1	
+_E6A9DDEDEAB8B4BA	gn_horde_etendard_1	horde_etendard_1	
+_E739DCA55768AC6A	gn_horde_tower_1	horde_tower_1	
+_670648C9E9A990A6	gn_irolus_vadagaan	Irolus Vadagaan	
+_6588609F97C77854	gn_kami_device_1	kami_device_1	
+_024E05EDA4E9A00D	gn_kami_fighter_base	kami_fighter_base	
+_667888A625B48473	gn_kami_hut_1	kami_hut_1	
+_F3CC413A310B40CF	gn_kami_landkeeper_200	kami_landkeeper_200	
+_EC2F5D09DE16CCA0	gn_kami_patrol_base	kami_patrol_base	
+_E315A8AE62D66CB5	gn_kami_tower_1	kami_tower_1	
+_85AE391962ED49D5	gn_kami_trooper_code1	kami_trooper_code1	
+_85AE391962FD49D6	gn_kami_trooper_code2	kami_trooper_code2	
+_85AE3919620D49D7	gn_kami_trooper_code3	kami_trooper_code3	
+_85AE3919621D49D8	gn_kami_trooper_code4	kami_trooper_code4	
+_64EF9D17DE168CA6	gn_kami_wizard_base	kami_wizard_base	
+_6C7B3102E98B9CC0	gn_karavan_barrack_1	karavan_barrack_1	
+_E60525F3EA58448C	gn_karavan_device_1	karavan_device_1	
+_AD5C61162BDAA4C5	gn_karavan_gateway_1	karavan_gateway_1	
+_5CF3421DFCFF4546	gn_karavan_lieutenant_200	karavan_lieutenant_200	
+_440B61F12A6E89EB	gn_karavan_medic_base	karavan_medic_base	
+_C16D3D7F04103502	gn_karavan_patrol_base	karavan_patrol_base	
+_2AE7B3C668FAC0B9	gn_karavan_tower_1	karavan_tower_1	
+_48418E61484CD5FA	gn_karavan_trooper_base	karavan_trooper_base	
+_5B42466FB36F3159	gn_karavan_trooper_code1	karavan_trooper_code1	
+_6E16FC58E805D08F	gn_karavan_wall_1	karavan_wall_1	
+_CE36BC9F9929906D	gn_kincherC1	kincherC1	
+_4E36BC9F9929906F	gn_kincherC3	kincherC3	
+_8F36BC9F99299070	gn_kincherC4	kincherC4	
+_9836BC9F99299094	gn_kincherCX	kincherCX	
+_69D69CA3627A68A7	gn_kipucka_leader	kipucka_leader	
+_D166B4B95E19DC78	gn_kirostaC1	kirostaC1	
+_5166B4B95E19DC7A	gn_kirostaC3	kirostaC3	
+_9266B4B95E19DC7B	gn_kirostaC4	kirostaC4	
+_9B66B4B95E19DC9F	gn_kirostaCX	kirostaCX	
+_860D550F25E8D430	gn_kitin_larva_event	kitin_larva_event	
+_8975165D89805DF6	gn_kitin_pondeuse_event	kitin_pondeuse_event	
+_6813D31FAB098492	gn_ladamis_valoris	Ладамис Валорис	
+_69B7145F21F88C7B	gn_lani_lido	Лани Лидо	
+_D508D89D1BD99C84	gn_lano_fergoto	Лано Фергото	
+_D26774A124679873	gn_lardo_cicci	Лардо Чиччи	
+_2A4790A0E35593A0	gn_lasini_choci	Ласини Чоччи	
+_98F7B0AE61C87495	gn_lono_sigrefi	Лоно Сигрефи	
+_EAB70096E488445E	gn_lorio_malara	Лорио Малара	
+_6A98E05DE556EC5C	gn_ma_cho_sung	Ма Хо Шунг	
+_7F2E35DC0F5448EB	gn_mac_bargan_rochan	Мак Барган Рохан	
+_6AADC52FE1E33441	gn_mac_furdy_soroli	Мак Фарди Сороли	
+_03FD5DE98C7348F9	gn_mac_liggon_dallen	Мак Лиггон Дэллен	
+_C59E89FD521330F8	gn_mac_silith_noksan	Мак Силит Ноксан	
+_AA5750AA61A8A486	gn_magic	magic	
+_24E53BA7A317349C	gn_malo_canda	Мало Канда	
+_A583629AB8A0AD46	gn_maurauder_guard_magic	maurauder_guard_magic	
+_A4D3729A3960C14C	gn_maurauder_guard_melee	maurauder_guard_melee	
+_65F3629F3980C948	gn_maurauder_guard_range	maurauder_guard_range	
+_6E56C8B0E6CAC497	gn_maurauder_hero	maurauder_hero	
+_15961F9DE5D9588F	gn_me_balla_soufi	Ме Болла Суффи	
+_9AD6D0B1DAC49498	gn_ming_xi_ying	Минг Кси Инг	
+_E7D8DCAC6599BCB1	gn_mirador	mirador	
+_D97394995F32A0B7	gn_mong_chi_sa	Монг Хи Са	
+_1BA360A8A627DCAF	gn_mora_falari	Мора Фалари	
+_D6E7ACA76AB8C891	gn_morio_lario	Морио Ларио	
+_ABD8B8AAA5C77FB1	gn_noriko_suena	Норико Суэна	
+_1E92FBAAEB0900AD	gn_o_carlan_tryxi	О'Карлан Трикси	
+_22B2E4622BD9C8A5	gn_o_lormy_berran	О'Лорми Берран	
+_2B08F887E9F67BC7	gn_ordis_nirosis	Ордис Нирозис	
+_EDC7F4B4E799C4C3	gn_prisonner	prisonner	
+_6218888FEDD9D0BF	gn_queen_guard	queen_guard	
+_E93758B26688E88A	gn_range	range	
+_EBD8689B2605C0B4	gn_relaus_xogips	Релаус Хогипс	
+_DF85227CF9FF4D50	gn_strangers_welcomer_t1	strangers_welcomer_t1	
+_AE48FC9BAB28ACA1	gn_target	Сосуд	
+_89B23A7289BD810B	gn_tcm_chlorogoo_patrol	tcm_chlorogoo_patrol	
+_A2167AE198E30288	gn_tcm_chlorogoo_prisonner	tcm_chlorogoo_prisonner	
+_ECB1BD03707664AA	gn_tcm_master_dummy	tcm_master_dummy	
+_0EE1327C0EEC7915	gn_tcm_trooper_training	tcm_trooper_training	
+_ED3773B127B768AC	gn_tini_solni	Тини Сойни	
+_EC359769684A0CC9	gn_tower_1	tower_1	
+_246980B16B6A44B6	gn_tower_event	tower_event	
+_2D47AC992909F8B0	gn_tower_kami	tower_kami	
+_6AE9A8AC6608D0B0	gn_tower_karavan	tower_karavan	
+_EA8B751DEA9A9CC2	gn_traitre_corsaire	traitre_corsaire	
+_98529AC61B56E2A6	gn_warmap_marauder_chief_250	warmap_marauder_chief_250	
+_9E91C57590462E70	gn_warmap_marauder_hero_200	warmap_marauder_hero_200	
+_A66727F41609A666	gn_warmap_marauder_leader_200	warmap_marauder_leader_200	
+_A0194FC520244E98	gn_warrior_fyros_spire_kami	warrior_fyros_spire_kami	
+_778A1B4DBAECA304	gn_warrior_fyros_spire_karavan	warrior_fyros_spire_karavan	
+_24194FC520645E68	gn_warrior_matis_spire_kami	warrior_matis_spire_kami	
+_398A034FB4FCABEC	gn_warrior_matis_spire_karavan	warrior_matis_spire_karavan	
+_7E29B7E059186A00	gn_warrior_tryker_spire_kami	warrior_tryker_spire_kami	
+_F8618065F86CC7FE	gn_warrior_tryker_spire_karavan	warrior_tryker_spire_karavan	
+_AA194FC51C644E84	gn_warrior_zorai_spire_kami	warrior_zorai_spire_kami	
+_7CE9E34DB54DA3FA	gn_warrior_zorai_spire_karavan	warrior_zorai_spire_karavan	
+_692A94AC2DF9D0BE	gn_watchtower	watchtower	
+_E39398B3DFF79CA9	gn_xala_rokian	Ксала Рокиан	
+_64A3A8A0E3266FA7	gn_xan_mi_chong	Ксан Ми Шонг	
+_6346E4BE66327FA9	gn_xao_tun	Ксао Тун	
+_ECE65BB9E717EC5D	gn_xeim_wi_lo	Ксайм Вай Ло	
+_190784CA6979305A	gn_magicpanel	Панель магии	
+_3D6E641B66F0C369	gn_foragepanel	Панель добычи ресурсов	
+_574755C6ECC96858	gn_fightpanel	Панель боя	
+_03793DC630696470	gn_craftpanel	Панель ремесла	
+_810DF59AC3E83012	office_tourisme_f	Проводник по Пайру	
+_5DA3AE903F0A15D4	office_tourisme_m	Проводник по Ирканису	
+_D993BE9FBD2DC588	office_tourisme_t	Проводник по Фэрхевену	
+_810D7AAE40883012	office_tourisme_z	Проводник по Зоре	
+_5479EC8969F54E6B	cwmf03_bandit	Разбойник из Эвелея	
+_AC29E4FE53F5165E	cwzf03_goo	Зараженный рагус	
+_59E9E4ACEAE863BF	cwff03_termit	Термитник	
+_ABC877AE9E64B34B	cwff03_goari	Яйценосный гоари	
+_286786B1A3D888AC	stele_epee_bois	Стелла	
+_6D7079069A6AE508	corsaire_dechu_coffer	Сундук корсаров	
+_13A4529EB7A07482	kef0904observer100	Часовой с Северного озера (1)	
+_5FB8B6B91D8A7DB0	kef0904observer150	Часовой с Высоких башен (2)	
+_06FDE3E3A46CE026	kef0904observer200	Часовой с Драконьего хребта (3)	
+_367AAFB1A918F404	kef0904observer210	Часовой с Бегущего хребта (4)	
+_957BA930A758DC04	kef0904observer250	Часовой из Пылающего леса (5)	
+_A2C3F2BEB998E7DA	kef0904observer260	Часовой из Выжженного коридора (6)	
+_8D0516CD4B9323BF	kem0904observer100	Часовой с Возвышения (1)	
+_3DF6BF3A9D57762E	kem0904observer150	Часовой с Холма торбаков (2)	
+_078B7340248958DF	kem0904observer200	Часовой с Малой горы (3)	
+_2B8EB867EBACF229	kem0904observer210	Часовой с Водопада двух тотемов (4)	
+_46C820287320E968	kem0904observer250	Часовой из Рощи Смятения (5)	
+_A533FABADE5A85DD	kem0904observer260	Часовой из Вестгроува (6)	
+_23932F3E63103A6A	ket0904observer100	Часовой из Колдовских пещер (1)	
+_A7185AC75C29CD9B	ket0904observer150	Часовой с Вод покоя (2)	
+_671A9607D8A801DC	ket0904observer200	Часовой с Вершин-близнецов (3)	
+_11FE185565BD9161	ket0904observer210	Часовой с Кладбищенской тропы (4)	
+_218CBB0DDA7848CB	ket0904observer250	Часовой с Прудов Лории (5)	
+_EB43F3FC07B9350A	ket0904observer260	Часовой из Пещер тишины (6)	
+_D4851E97F8708C82	kez0904observer100	Часовой из Сай Шуна (1)	
+_8B4B7BE0234BD5B3	kez0904observer150	Часовой с Арки кинчеров (2)	
+_9521C99DBE21D797	kez0904observer200	Часовой из Го Киана (3)	
+_884F502EF77CE13B	kez0904observer210	Часовой из Хоупделла (4)	
+_7493CF045859B8A2	kez0904observer250	Часовой из Затерянной долины (5)	
+_E8007F8774ADE278	kez0904observer260	Часовой с Мыса уныния (6)	
+_0240250D47ED1404	fct_dynastic_merchant	Торговый представитель династии	
+_FFEFE5912232C840	fct_federal_merchant	Торговый представитель федерации	
+_82B01B0EEC07D001	fct_imperial_merchant	Торговый представитель империи	
+_1CF36CAE23B9BCC5	fct_royal_merchant	Торговый представитель королевства	
+_A5F9146E2CEAF8AC	gn_autel	Алтарь	
+_A0D75C1A6ACA1CCB	fct_tryker_governor	Правитель трайкеров	
+_72F86E8F01BBC5F9	fct_fyros_emperor	Император файросов	Императрица файросов
+_9361C9FFE8164799	fct_matis_king	Король матисов	Королева матисов
+_C11D94848FDAEC96	fct_zorai_grand_sage	Верховный мудрец Зораи	
+_23AA7CAC6CD8BC8E	fct_chronicler	Хронист	
+_2AE92CA8D936DCAE	fct_royal_adviser	Придворный советник	
+_65D7608B191BC0C3	fct_matis_minstrel	Матисский менестрель	
+_E2FA2498E2F827B8	fct_matis_herena	Матис Херена	
+_C2D0957502FFFCFF	fct_matis_prince	Матисский принц	Матисская принцесса
+_E92BDCB062D600B2	fct_fyros_senator	Сенатор файросов	
+_FFE0E91CF99A6109	fct_imperial_alchemist	Имперский алхимик	
+_43B0F56E04BFBCF1	fct_fyros_prince	Файросский принц	Файросская принцесса
+_8E8622613B4C95FB	fct_tryker_vice_governor	Вице-губернатор трайкеров	
+_0EC31CA7E46994AE	fct_zorai_sage	Мудрец Зораи	
+_9F73B8B5690B94A1	fct_marauder_scout	Лазутчик мародеров	
+_9B7380A5645A3CA6	fct_marauder_chief	Предводитель мародеров	
+_E14B80C29F7BB0BD	fct_spy	Шпион	
+_A064353AF0B9B1FE	Title00050	Подмастерье мясника	Подмастерье мясника
+_B009174F0DE2AEA1	Title00051	Мясник	Мясник
+_61362D40AF28C90C	Title00052	Подмастерье флориста	Подмастерье флориста
+_2CB82F5111D3EEAB	Title00053	Флорист	Флористка
+_A57FE30530299E47	Title00054	Подмастерье водоноса	Подмастерье водоноса
+_478F749FC867F76F	Title00055	Водонос	Водонос
+_5B37A8849FA2AB0A	Title00056	Ученик картографа	Подмастерье картографа
+_57D0EE89488C2D65	Title00057	Картограф	Картограф
+_E0F3C25ED1AFFD3A	Title00058	Подмастерье по изготовлению инструментов	Подмастерье по изготовлению инструментов
+_A709CB55DAE6D397	Title00059	Изготовитель инструментов	Изготовитель инструментов
+_E364652BB3B8F1FE	Title00060	Ученик медика	Подмастерье спасателя
+_6B0957500DB3E2A0	Title00061	Медик	Спасатель
+_E4346A69D5F0BD44	Title00062	Подмастерье сборщика личинок	Подмастерье сборщика личинок
+_2288D7715C07078C	Title00063	Сборщик личинок	Сборщик личинок
+_3576D67D5422CE83	Title00064	Ученик каллиграфа	Подмастерье каллиграфа
+_A7F8AF665F5577AA	Title00065	Каллиграф	Каллиграф
+_703912893FD2B1F6	fyros_rpjob_herbihunter_title	Мастер-мясник	
+_80C0F50BDBD2352A	matis_rpjob_florist_title	Мастер-флорист	
+_BAC1D91017F3E138	zorai_rpjob_rescuer_title	Мастер-медик	
+_10416A7ECC100D60	zorai_rpjob_magnecarto_title	Мастер-картограф	
+_DC34E23282FA8260	tryker_rpjob_aquamin_title	Мастер-водонос	
+_473FADF1413B8116	fyros_rpjob_tooler_title	Мастер по изготовлению инструментов	
+_A5E64EA2C8EBDA21	tryker_rpjob_larvicultor_title	Мастер по сбору личинок	
+_FFC1498EF96FB836	matis_rpjob_paper_title	Мастер каллиграфии	
+_9B218ADF61B44A53	gn_fyros_rpjob_herbihunter_convert	Колода мясника	
+_1F66A27B04DAD945	gn_matis_rpjob_florist_convert	Цветочный стол	
+_1317925C30AA91F6	gn_zorai_rpjob_rescuer_convert	Пункт первой помощи	
+_A1EEC6D2D0F58E79	gn_tryker_rpjob_aquamin_convert	Информация о поставках воды	
+_23A456E452843E34	gn_zorai_rpjob_magnecarto_convert	Магнетическая карта	
+_4C354E82893EDD45	gn_fyros_rpjob_tooler_convert	Горн для ковки инструментов	
+_B4CE3C1E316C1B99	gn_tryker_rpjob_larvicultor_convert	Препарационный стол для работы с личинками	
+_E07646A092C5AA60	gn_matis_rpjob_paper_convert	Мольберт каллиграфа	
+_06BF0113E7F9B3CE	gn_tryker_aquamin_source	Источник воды	
+_048EE9BE67D88030	gn_tryker_aquamin_barrel	Вода из озера	
+_D022BE8F454D399C	gn_tryker_aquamin_silo	Бочка для сбора дождевой воды	
+_6DF864B36A28ECB2	gn_tryker_aquamin_well	Колодец	
+_99C0B7AC1AA6394B	gn_tryker_aquamin_npc	Специалист по водоснабжению	
+_E044F7A1C8C1FE48	gn_zorai_magnecarto_npc	Специалист по анализу магнитных колебаний	
+_4A231AFA00808E5A	gn_zorai_magnecarto_npc_A	Картограф (Проход Гуу)	
+_CD231A08C08E3910	gn_zorai_magnecarto_npc_B	Картограф (Вин-Хо)	
+_3CB3AE4F200EEDE7	gn_zorai_magnecarto_npc_C	Картограф (Дэйсиа)	
+_CD218D7ADE44EA53	gn_zorai_magnecarto_npc_D	Картограф (Западная лощина)	
+_EED5FCA72749A896	gn_rpjob_herbihunter_chest	Сундук	
+_E013AD7F418EEC81	gn_rpjob_florist_jar_4	Сосуд бутонов кратчи	
+_E2640975C50FD735	gn_rpjob_florist_jar_2	Сосуд бутонов псикоплы	
+_E273B581412D2881	gn_rpjob_florist_jar_3	Сосуд бутонов словини	
+_C8C9D96885AE94CA	gn_rpjob_florist_jar_1	Сосуд разнообразных бутонов	
+_2F47E091A8A9E0A6	gn_rpjob_florist_water	Колодец	
+_91145E59C63AB922	gn_rpjob_florist_water_barrel	Бочка с водой	
+_AAE8B0FC9F6A78C0	gn_rpjob_florist_engrai	Удобрение	
+_244593C48AE3F242	gn_rpjob_florist_engrai_barrel	Бочка с удобрениями	
+_3F2AC591445B390C	gn_boss_tryker_light_boss	Веселый Данте	
+_041D89F026A9D00C	gn_boss_tryker_light_melee_guard	Телохранитель	
+_BE90D114E6989D0C	gn_boss_tryker_light_healer_guard	Телохранитель	
+_E7AF8504E806E4A5	gn_boss_tryker_light_off_guard	Телохранитель	
+_041D89F2A669E40C	gn_boss_tryker_light_range_guard	Телохранитель	
+_B06E4DD32045E3AA	gn_moving_guards_group_1	Охрана	
+_B06E4DD36045E3AA	gn_moving_guards_group_2	Охрана	
+_A0635697B060B56D	gn_boss_tryker_light_stone	Камень телепортации	
+_DE539FF915B78623	gn_boss_tryker_light_stone_back	Камень телепортации	
+_46AA029FC1BEE5CB	gn_boss_tryker_light_loot_box	Сундук Данте	
+_D8A4FA37B4579635	gn_boss_tryker_light_start_boss	Веселый Данте	
+_9FB90FDADDB75D85	gn_boss_tryker_light_start_stone	Камень телепортации	
+_F0B392853EEDC415	gn_boss_tryker_light_start_box	Ящик Данте	
+_02C21650F36E890A	fct_consumable_merchant	(Торговец снадобьями)	
+_875B65074E9DD42F	title00031	Посланник файросов	Посланница файросов
+_7B3B69074E9DA433	title00032	Посланник матисов	Посланница матисов
+_5B9344FE357DA413	title00033	Посланник трайкеров	Посланница трайкеров
+_81DD71074E2B642F	title00034	Посланник Зораи	Посланница Зораи
+_1A4F0671322299DE	gn_boss_zorai_light_boss	Пэй-Руз Гнилушка	
+_1E181185FD852670	gn_boss_zorai_light_tomb_out	Камень телепортации	
+_0FD75236801FF293	gn_boss_zorai_light_tomb_in	Камень телепортации	
+_242A8DFB2F9FD907	gn_boss_zorai_light_dalton_1	Вао До-Дуанг	
+_9E4EE13E43CF39CA	gn_boss_zorai_light_dalton_2	Джой До-Дуанг	
+_6E9CED94003081AC	gn_boss_zorai_light_dalton_3	Хайо До-Дуанг	
+_319C84265F3B1DF4	gn_boss_zorai_light_dalton_4	Вии До-Дуанг	
+_BB5BE2556F8EA5A3	gn_kami_altar_almati	Алтарь Ками в лесах Алмати	
+_CCCAF6639D638564	gn_karavan_altar_almati	Алтарь Каравана в лесах Алмати	
+_20B0F1D427E793A1	gn_kami_altar_nexus	Алтарь Ками в Нексусе	
+_605D8587427E9DCE	gn_karavan_altar_nexus	Алтарь Каравана в Нексусе	
+_294880982226786E	gn_room_access	Доступ к терминалу	

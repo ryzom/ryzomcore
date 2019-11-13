@@ -20,7 +20,9 @@
 
 #include "mysql_helper.h"
 
-#include "mysql_version.h"
+#ifndef LIBMARIADB
+#include <mysql_version.h>
+#endif
 
 
 //
@@ -157,7 +159,7 @@ static void cbDatabaseVar(CConfigFile::CVar &var)
 #endif
 
 
-	sqlQuery("set names utf8");
+	sqlQuery("set names utf8mb4");
 }
 
 void sqlInit()

@@ -45,7 +45,7 @@ bool CFXStickMode::build(const NLGEORGES::UFormElm &item, const std::string &pre
 //-----------------------------------------------
 // serial
 //-----------------------------------------------
-void CFXStickMode::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CFXStickMode::serial(NLMISC::IStream &f)
 {
 	f.serialEnum(Mode);
 	NLMISC::CStringMapper::serialString(f, UserBoneName);

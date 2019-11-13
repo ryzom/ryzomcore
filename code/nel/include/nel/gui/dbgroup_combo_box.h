@@ -63,6 +63,8 @@ namespace NLGUI
 		uint			getTextId(uint i) const;
 		uint			getTextPos(uint nId) const;
 		const ucstring	&getTexture(uint i) const;
+		void			setGrayed(uint i, bool g);
+		bool			getGrayed(uint i) const;
 		void			removeText(uint nPos);
 		uint			getNumTexts() const {return (uint)_Texts.size();}
 		void			sortText();
@@ -83,6 +85,7 @@ namespace NLGUI
 		// view text
 		void			setViewText(const ucstring & text);
 		ucstring		getViewText() const;
+		CViewText		*getViewText();
 
 		void			setTexture(uint i, const ucstring &texture);
 
@@ -132,6 +135,7 @@ namespace NLGUI
 		sint32					_NotLinkedToDBSelection;
 		std::vector<std::pair<uint, ucstring> >	_Texts;
 		std::vector<ucstring>	_Textures;
+		std::vector<bool>	_Grayed;
 
 		// Action Handler called on combo click
 		std::string				_AHOnSelectStart;

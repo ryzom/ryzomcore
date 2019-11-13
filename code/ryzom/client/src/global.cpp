@@ -65,6 +65,7 @@ bool						InitCloudScape = true; // tells that the cloud scape must be reinitial
 CEntityAnimationManager		*EAM = NULL;
 CProgress					ProgressBar;
 TBackground					LoadingBackground = StartBackground;
+string						LoadingBackgroundBG;
 string						LoadingMusic;
 CContinent					*LoadingContinent = NULL;
 bool						ConnectionReadySent= false;

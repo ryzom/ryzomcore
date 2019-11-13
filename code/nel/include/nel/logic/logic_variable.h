@@ -104,7 +104,7 @@ public:
 	/**
 	 * serial
 	 */
-	//virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	//virtual void serial(NLMISC::IStream &f);
 
 	virtual void write (xmlNodePtr node) const;
 	virtual void read (xmlNodePtr node);
@@ -186,7 +186,7 @@ public:
 	/**
 	 * serial
 	 */
-	//void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	//void serial(NLMISC::IStream &f);
 
 	virtual void write (xmlNodePtr node) const;
 	virtual void read (xmlNodePtr node);

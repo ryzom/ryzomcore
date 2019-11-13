@@ -56,10 +56,10 @@ bool CNelExport::exportInstanceGroup(string filename, vector<INode*>& vectNode)
 				pIG->serial (file);
 				// All is good
 			}
-			catch (Exception &c)
+			catch (const Exception &c)
 			{
 				// Cannot save the file
-				MessageBox (NULL, c.what(), "NeL export", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox(NULL, MaxTStrFromUtf8(c.what()).data(), _T("NeL export"), MB_OK|MB_ICONEXCLAMATION);
 				return false;
 			}
 		}

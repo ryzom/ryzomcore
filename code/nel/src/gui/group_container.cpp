@@ -39,6 +39,10 @@ using namespace std;
 using namespace NL3D;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace
 {
 	const sint SIZE_W_LEFT = 16;
@@ -64,7 +68,7 @@ namespace NLGUI
 			rVR.getClipWindow(x, y, w, h);
 			uint32 sw, sh;
 			rVR.getScreenSize(sw, sh);
-			rVR.setClipWindow(0, 0, (sint32) sw, (sint32) sh);
+			rVR.setClipWindow(0, 0, (sint32)sw, (sint32)sh);
 			rVR.drawRotFlipBitmap (renderLayer, xreal, yreal, wreal, hreal, 0, false, rVR.getBlankTextureId(), color );
 			rVR.setClipWindow(x, y, w ,h);
 		}
@@ -350,7 +354,7 @@ namespace NLGUI
 		{
 			if (_ResizerPos & Hotspot_xR)
 			{
-				clippedNewW = std::min((sint32) sw + _Parent->getW() - _Parent->getXReal(), clippedNewW);
+				clippedNewW = std::min((sint32)sw + _Parent->getW() - _Parent->getXReal(), clippedNewW);
 			}
 			else
 			{
@@ -365,7 +369,7 @@ namespace NLGUI
 			}
 			else
 			{
-				clippedNewW = std::min((sint32) sw - _Parent->getXReal(), clippedNewW);
+				clippedNewW = std::min((sint32)sw - _Parent->getXReal(), clippedNewW);
 			}
 		}
 		//
@@ -2381,7 +2385,7 @@ namespace NLGUI
 			{
 				_W = _Parent->getW();
 			}
-			setMaxH (16384); // No scrollbar for container of layer > 0
+			setMaxH (std::numeric_limits<sint32>::max()); // No scrollbar for container of layer > 0
 			newH = (pLayer->H_T - pLayer->InsetT);
 		}
 
@@ -2464,12 +2468,12 @@ namespace NLGUI
 			else
 			{
 				if (_List != NULL)
-					_List->setMaxH (16384);
+					_List->setMaxH (std::numeric_limits<sint32>::max());
 			}
 
 			if (_LayerSetup == 0)
 			{
-				_List->forceSizeW(_W - pLayer->W_M_Open);
+				_List->forceSizeW(_W - (pLayer->W_M_Open + pLayer->W_R) );
 			}
 			else
 			{
@@ -2743,6 +2747,9 @@ namespace NLGUI
 
 			if (_Content != NULL)
 				h += _Content->getHReal();
+
+			if (_List != NULL)
+				h += _List->getHReal();
 
 			h -= _ContentYOffset;
 		}
@@ -4749,6 +4756,7 @@ namespace NLGUI
 			if (_Resizer[k]) _Resizer[k]->HMax = maxH;
 		}
 	}
+
 	// ***************************************************************************
 	int CGroupContainer::luaSetHeaderColor(CLuaState &ls)
 	{
@@ -4756,6 +4764,16 @@ namespace NLGUI
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 		_HeaderColor.link(ls.toString(1));
+		return 0;
+	}
+	
+	// ***************************************************************************
+	int CGroupContainer::luaSetModalParentList(CLuaState &ls)
+	{
+		const char *funcName = "setModalParentList";
+		CLuaIHM::checkArgCount(ls, funcName, 1);
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		setModalParentList(ls.toString(1));
 		return 0;
 	}
 
@@ -4820,7 +4838,7 @@ namespace NLGUI
 		const char *funcName = "blink";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		enableBlink((uint) ls.toNumber(1));
+		enableBlink((uint) ls.toInteger(1));
 		return 0;
 	}
 

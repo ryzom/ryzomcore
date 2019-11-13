@@ -43,9 +43,9 @@ class RPOClassDesc:public ClassDesc
 	{
 		return new RPO;
 	}
-	const TCHAR *	ClassName() 
+	const MCHAR *	ClassName() 
 	{
-		return "RklPatch";
+		return _M("RklPatch");
 	}
 	SClass_ID		SuperClassID() 
 	{
@@ -55,9 +55,9 @@ class RPOClassDesc:public ClassDesc
 	{
 		return RYKOLPATCHOBJ_CLASS_ID;
 	}
-	const TCHAR* 	Category() 
+	const MCHAR* 	Category() 
 	{
-		return "Rykol Tools";
+		return _M("Rykol Tools");
 	}
 };
 
@@ -117,7 +117,7 @@ RPO::RPO(PatchObject& pPO) : PatchObject(pPO)
 
 RPO::~RPO()
 {
-	if (((~GetChannelLocks()))&PART_TOPO)
+	if ( (~((PartID)GetChannelLocks())) & PART_TOPO )
 	{
 		delete rpatch;
 		rpatch=NULL;
@@ -304,10 +304,10 @@ void RPO::GetDeformBBox(TimeValue t, Box3& box, Matrix3 *tm, BOOL useSel )
 // ------------------------------------------------------------------------------------------------------------------------------------------------
 
 //From ReferenceMaker
-RefResult RPO::NotifyRefChanged( Interval changeInt, RefTargetHandle hTarget,PartID& partID, RefMessage message )
+RefResult RPO::NotifyRefChanged(NOTIFY_REF_PARAMS)
 {
 	//TODO: Implement, if the object makes references to other things
-	//return PatchObject::NotifyRefChanged( changeInt, hTarget, partID, message);
+	//return PatchObject::NotifyRefChanged( changeInt, hTarget, partID, message, propagate);
 	return(REF_SUCCEED);
 }
 
@@ -381,7 +381,7 @@ void RPO::GetCollapseTypes(Tab<Class_ID> &clist,Tab<TSTR*> &nlist)
 	//TODO: Append any any other collapse type the plugin supports
 	
     Class_ID id = RYKOLPATCHOBJ_CLASS_ID;
-    TSTR *name = new TSTR("Rykol Patch Mesh");
+    TSTR *name = new TSTR(_T("Rykol Patch Mesh"));
     clist.Append(1,&id);
     nlist.Append(1,&name);
 }

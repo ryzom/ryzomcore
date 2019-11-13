@@ -1,11 +1,14 @@
 FILE(GLOB SRC main.cpp
 	${CMAKE_SOURCE_DIR}/ryzom/client/src/app_bundle_utils.cpp
-	${CMAKE_SOURCE_DIR}/ryzom/client/src/client_cfg.cpp
+	${CMAKE_SOURCE_DIR}/ryzom/client/src/user_agent.cpp
 	${CMAKE_SOURCE_DIR}/ryzom/client/src/login_patch.cpp
 	${CMAKE_SOURCE_DIR}/ryzom/client/src/login_xdelta.cpp
 	${CMAKE_SOURCE_DIR}/ryzom/client/src/stdpch.cpp
 	${CMAKE_SOURCE_DIR}/ryzom/client/src/stdpch.h
 )
+
+# always enable custom patch server
+ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 ADD_EXECUTABLE(ryzom_client_patcher ${SRC})
 
@@ -20,22 +23,20 @@ TARGET_LINK_LIBRARIES(ryzom_client_patcher
 				nelmisc
 				nelnet
 				ryzom_gameshare
-				nel_sevenzip
-				${ZLIB_LIBRARIES}
+				ryzom_sevenzip
 				${CURL_LIBRARIES})
 
 IF(APPLE)
-  FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
-  TARGET_LINK_LIBRARIES(ryzom_client_patcher ${FOUNDATION_LIBRARY})
-ENDIF(APPLE)
+  TARGET_LINK_LIBRARIES(ryzom_client_patcher ${FOUNDATION_FRAMEWORK})
+ENDIF()
 
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} ${CURL_DEFINITIONS} -DRZ_NO_CLIENT -DNL_USE_SEVENZIP)
+ADD_DEFINITIONS(${CURL_DEFINITIONS})
 
 NL_DEFAULT_PROPS(ryzom_client_patcher "Ryzom, Tools: Ryzom Client Patcher")
 NL_ADD_RUNTIME_FLAGS(ryzom_client_patcher)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(ryzom_client_patcher ${CMAKE_SOURCE_DIR}/ryzom/client/src/stdpch.h ${CMAKE_SOURCE_DIR}/ryzom/client/src/stdpch.cpp)
-ENDIF(WITH_PCH)
+ENDIF()
 
-INSTALL(TARGETS ryzom_client_patcher RUNTIME DESTINATION ${RYZOM_GAMES_PREFIX} COMPONENT client BUNDLE DESTINATION /Applications)
+INSTALL(TARGETS ryzom_client_patcher RUNTIME DESTINATION ${RYZOM_GAMES_PREFIX} COMPONENT client)

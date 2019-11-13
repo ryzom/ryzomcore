@@ -1,8 +1,0 @@
-# test file
-HELLO "Hello"
-
-OPS_CHEATER	"&RG&Cheating is bad, you know..."
-
-
-
-

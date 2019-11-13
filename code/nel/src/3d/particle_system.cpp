@@ -45,6 +45,9 @@
 	#define CHECK_INTEGRITY
 #endif
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 
@@ -101,57 +104,57 @@ const float PSDefaultMaxViewDist = 300.f;
  * Constructor
  */
 CParticleSystem::CParticleSystem() : _Driver(NULL),
-									 _FontGenerator(NULL),
-									 _FontManager(NULL),
-									 _UserCoordSystemInfo(NULL),
-									 _Date(0),
-									 _LastUpdateDate(-1),
-									 _CurrEditedElementLocated(NULL),
-									 _CurrEditedElementIndex(0),
-									 _Scene(NULL),
-									 _TimeThreshold(0.15f),
-									 _SystemDate(0.f),
-									 _MaxNbIntegrations(2),
-									 _LODRatio(0.5f),
-									 _OneMinusCurrentLODRatio(0),
-									 _MaxViewDist(PSDefaultMaxViewDist),
-									 _MaxDistLODBias(0.05f),
-									 _InvMaxViewDist(1.f / PSDefaultMaxViewDist),
-									 _InvCurrentViewDist(1.f / PSDefaultMaxViewDist),
-									 _AutoLODEmitRatio(0.f),
-									 _DieCondition(none),
-									 _DelayBeforeDieTest(-1.f),
-									 _NumWantedTris(0),
-									 _AnimType(AnimInCluster),
-									 _UserParamGlobalValue(NULL),
-									 _BypassGlobalUserParam(0),
-									 _PresetBehaviour(UserBehaviour),
-									 _AutoLODStartDistPercent(0.1f),
-									 _AutoLODDegradationExponent(1),
-									 _ColorAttenuationScheme(NULL),
-									 _GlobalColor(NLMISC::CRGBA::White),
-									 _GlobalColorLighted(NLMISC::CRGBA::White),
-									 _LightingColor(NLMISC::CRGBA::White),
-									 _UserColor(NLMISC::CRGBA::White),
-									 _ComputeBBox(true),
-									 _BBoxTouched(true),
-									 _AccurateIntegration(true),
-									 _CanSlowDown(true),
-									 _DestroyModelWhenOutOfRange(false),
-									 _DestroyWhenOutOfFrustum(false),
-									 _Sharing(false),
-									 _AutoLOD(false),
-									 _KeepEllapsedTimeForLifeUpdate(false),
-									 _AutoLODSkipParticles(false),
-									 _EnableLoadBalancing(true),
-									 _EmitThreshold(true),
-									 _BypassIntegrationStepLimit(false),
-									 _ForceGlobalColorLighting(false),
-									 _AutoComputeDelayBeforeDeathTest(true),
-									 _AutoCount(false),
-									 _HiddenAtCurrentFrame(true),
-									 _HiddenAtPreviousFrame(true)
-
+	_FontGenerator(NULL),
+	_FontManager(NULL),
+	_UserCoordSystemInfo(NULL),
+	_Date(0),
+	_LastUpdateDate(-1),
+	_CurrEditedElementLocated(NULL),
+	_CurrEditedElementLocatedBindable(NULL),
+	_CurrEditedElementIndex(0),
+	_Scene(NULL),
+	_TimeThreshold(0.15f),
+	_SystemDate(0.f),
+	_MaxNbIntegrations(2),
+	_LODRatio(0.5f),
+	_OneMinusCurrentLODRatio(0),
+	_MaxViewDist(PSDefaultMaxViewDist),
+	_MaxDistLODBias(0.05f),
+	_InvMaxViewDist(1.f / PSDefaultMaxViewDist),
+	_InvCurrentViewDist(1.f / PSDefaultMaxViewDist),
+	_AutoLODEmitRatio(0.f),
+	_DieCondition(none),
+	_DelayBeforeDieTest(-1.f),
+	_NumWantedTris(0),
+	_AnimType(AnimInCluster),
+	_UserParamGlobalValue(NULL),
+	_BypassGlobalUserParam(0),
+	_PresetBehaviour(UserBehaviour),
+	_ColorAttenuationScheme(NULL),
+	_GlobalColor(NLMISC::CRGBA::White),
+	_GlobalColorLighted(NLMISC::CRGBA::White),
+	_LightingColor(NLMISC::CRGBA::White),
+	_UserColor(NLMISC::CRGBA::White),
+	_ComputeBBox(true),
+	_BBoxTouched(true),
+	_AccurateIntegration(true),
+	_CanSlowDown(true),
+	_DestroyModelWhenOutOfRange(false),
+	_DestroyWhenOutOfFrustum(false),
+	_Sharing(false),
+	_AutoLOD(false),
+	_KeepEllapsedTimeForLifeUpdate(false),
+	_AutoLODSkipParticles(false),
+	_EnableLoadBalancing(true),
+	_EmitThreshold(true),
+	_BypassIntegrationStepLimit(false),
+	_ForceGlobalColorLighting(false),
+	_AutoComputeDelayBeforeDeathTest(true),
+	_AutoCount(false),
+	_HiddenAtCurrentFrame(true),
+	_HiddenAtPreviousFrame(true),
+	_AutoLODStartDistPercent(0.1f),
+	_AutoLODDegradationExponent(1)
 {
 	NL_PS_FUNC_MAIN(CParticleSystem_CParticleSystem)
 	std::fill(_UserParam, _UserParam + MaxPSUserParam, 0.0f);
@@ -317,7 +320,7 @@ void CParticleSystem::setViewMat(const NLMISC::CMatrix &m)
 }
 
 ///=======================================================================================
-bool CParticleSystem::hasEmitters(void) const
+bool CParticleSystem::hasEmitters() const
 {
 	NL_PS_FUNC_MAIN(CParticleSystem_hasEmitters)
 	for (TProcessVect::const_iterator it = _ProcessVect.begin(); it != _ProcessVect.end(); ++it)
@@ -749,7 +752,7 @@ void CParticleSystem::step(TPass pass, TAnimationTime ellapsedTime, CParticleSys
 
 
 ///=======================================================================================
-void CParticleSystem::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CParticleSystem::serial(NLMISC::IStream &f)
 {
 	CHECK_INTEGRITY
 	NL_PS_FUNC_MAIN(CParticleSystem_serial)

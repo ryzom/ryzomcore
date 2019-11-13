@@ -196,7 +196,7 @@ class CCreateDialog : public CDialog
 	
 public:
 
-	char			Name[128], 
+	TCHAR			Name[128], 
 					LayerName[128];
 
 	std::vector<SType>	*TypesForInit;

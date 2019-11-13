@@ -24,6 +24,10 @@
 //#include "../entities_game_service/egs_variables.h"
 //#include "pvp_clan.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 using namespace STRING_MANAGER;
@@ -359,8 +363,7 @@ void CStaticFames::loadStaticFame( const string& filename )
 		// 1st, build the index table
 		for (uint i=1; i<ws.size(); ++i)
 		{
-			string name = ws.getData(i, 0).toString();
-			name = strlwr(name);
+			string name = toLower(ws.getData(i, 0).toString());
 			if (name.empty())
 				break;
 			_FactionNameIndex.insert(make_pair(CStringMapper::map(name), i-1));
@@ -376,8 +379,7 @@ void CStaticFames::loadStaticFame( const string& filename )
 		// 2nd check the table structure
 		for (uint i=2; i<ws.ColCount; ++i)
 		{
-			string name = ws.getData(0, i).toString();
-			name = strlwr(name);
+			string name = toLower(ws.getData(0, i).toString());
 
 			if (name.empty())
 			{
@@ -608,8 +610,7 @@ uint	CStaticFames::getFactionIndex(NLMISC::TStringId factionName)
 //----------------------------------------------------------------------------
 uint	CStaticFames::getFactionIndex(const std::string &factionName)
 {
-	string n = strlwr(factionName);
-	return getFactionIndex(CStringMapper::map(n));
+	return getFactionIndex(CStringMapper::map(toLower(factionName)));
 }
 
 //----------------------------------------------------------------------------
@@ -667,11 +668,7 @@ sint32 CStaticFames::getStaticFame(NLMISC::TStringId faction1, NLMISC::TStringId
 //----------------------------------------------------------------------------
 sint32	CStaticFames::getStaticFame(const std::string &faction1, const std::string &faction2)
 {
-	string n1, n2;
-	n1 = strlwr(faction1);
-	n2 = strlwr(faction2);
-
-	return getStaticFame(CStringMapper::map(n1), CStringMapper::map(n2));
+	return getStaticFame(CStringMapper::map(toLower(faction1)), CStringMapper::map(toLower(faction2)));
 }
 
 //----------------------------------------------------------------------------
@@ -712,7 +709,7 @@ sint32	CFameInterface::getFameIndexed(const CEntityId &entityId, uint32 factionI
 		if (!returnUnknownValue && fame == NO_FAME)
 			fame = 0;
 
-		return sint32(fame);
+		return fame;
 	}
 }
 

@@ -19,6 +19,9 @@
 #ifndef XML_AUTO_PTR_H
 #define XML_AUTO_PTR_H
 
+#include "nel/misc/types_nl.h"
+#include "nel/misc/debug.h"
+
 #include <string>
 
 /** Simple auto pointer for xml pointers
@@ -28,7 +31,7 @@ class CXMLAutoPtr
 public:
 	CXMLAutoPtr(const char *value = NULL) : _Value(value) {}
 	CXMLAutoPtr(const unsigned char *value) : _Value((const char *) value) {}
-	~CXMLAutoPtr() { destroy(); }
+	~CXMLAutoPtr();
 	operator const char *() const { return _Value; }
 	operator bool() const { return _Value != NULL; }
 	inline std::string str() const { return _Value; }
@@ -36,13 +39,7 @@ public:
 	operator const unsigned char *() const { return (const unsigned char *)  _Value; }
 	char operator * ()  const { nlassert(_Value); return *_Value; }
 	/// NB : This remove previous owned pointer with xmlFree
-	CXMLAutoPtr &operator = (const char *other)
-	{
-		if (other == _Value) return *this;
-		destroy();
-		_Value = other;
-		return *this;
-	}
+	CXMLAutoPtr &operator = (const char *other);
 
 	CXMLAutoPtr &operator = (const unsigned char *other)
 	{
@@ -54,14 +51,7 @@ public:
 private:
 	const char *_Value;
 private:
-	void destroy()
-	{
-		if (_Value)
-		{
-			xmlFree(const_cast<char *>(_Value));
-			_Value = NULL;
-		}
-	}
+	void destroy();
 
 	// We'd rather avoid problems
 	CXMLAutoPtr(const CXMLAutoPtr &/* other */)

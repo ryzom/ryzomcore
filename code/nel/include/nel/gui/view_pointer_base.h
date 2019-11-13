@@ -38,14 +38,17 @@ namespace NLGUI
 
 		void resetPointerPos ();
 		void setPointerDown (bool pd);
+		void setPointerMiddleDown (bool pd);
+		void setPointerRightDown (bool pd);
 		void setPointerDownString (const std::string &s);
 
 		void getPointerPos (sint32 &x, sint32 &y);
 		void getPointerDispPos (sint32 &x, sint32 &y);
 
 		void getPointerOldPos (sint32 &x, sint32 &y);
-		void getPointerDownPos (sint32 &x, sint32 &y);
-		bool getPointerDown ();
+		bool getPointerDown (sint32 &x, sint32 &y);
+		bool getPointerMiddleDown (sint32 &x, sint32 &y);
+		bool getPointerRightDown (sint32 &x, sint32 &y);
 		std::string getPointerDownString ();
 		bool getPointerDrag ();
 
@@ -70,6 +73,12 @@ namespace NLGUI
 		bool		_PointerDown;			// Is the pointer down ?
 		sint32		_PointerDownX;			// Pointer down position
 		sint32		_PointerDownY;
+		bool		_PointerMiddleDown;			// Is the middle pointer down ?
+		sint32		_PointerMiddleDownX;			// Pointer middle down position
+		sint32		_PointerMiddleDownY;
+		bool		_PointerRightDown;			// Is the right pointer down ?
+		sint32		_PointerRightDownX;			// Pointer right down position
+		sint32		_PointerRightDownY;
 		std::string	_PointerDownString;		// What is under the pointer at the down position
 		bool		_PointerDrag;			// Is the pointer down and we have moved ?
 		bool		_PointerVisible;		// Is the pointer visible or hidden ?

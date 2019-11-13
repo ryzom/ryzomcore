@@ -43,19 +43,19 @@ public:
 	  *
 	  * The pointer on the form must be held in a CSmartPtr<UForm>. Returns NULL if the form can't be loaded.
 	  */
-	virtual UForm *loadForm (const char *filename) = 0;
+	virtual UForm *loadForm (const std::string &filename) = 0;
 
 	/** Load a DFN, use NMISC::CPath to find the file.
 	  *
 	  * The pointer on the form must be held in a CSmartPtr<UFormDfn>. Returns NULL if the DFN can't be loaded.
 	  */
-	virtual UFormDfn *loadFormDfn (const char *filename) = 0;
+	virtual UFormDfn *loadFormDfn (const std::string &filename) = 0;
 
 	/** Load a type, use NMISC::CPath to find the file.
 	  *
 	  * The pointer on the form must be held in a CSmartPtr<UType>. Returns NULL if the type can't be loaded.
 	  */
-	virtual UType *loadFormType (const char *filename) = 0;
+	virtual UType *loadFormType (const std::string &filename) = 0;
 
 	/// Create a form loader
 	static UFormLoader *createLoader ();

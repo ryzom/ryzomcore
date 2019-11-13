@@ -43,12 +43,16 @@
 #include "nel/gui/ctrl_base_button.h"
 #include "../connection.h"
 #include "nel/gui/view_bitmap.h"
-
+#include "../item_group_manager.h"
 extern CSheetManager SheetMngr;
 extern NLMISC::CLog	g_log;
 
 using namespace std;
 using namespace NLMISC;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 CInterfaceItemEdition *CInterfaceItemEdition::_Instance = NULL;
 
@@ -148,27 +152,35 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 						// Select all the text for easier selection
 						editBoxShort->setSelectionAll();
 					}
+					group->setActive(true);
 				}
 				else
 				{
+					ucstring localDesc = ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
 					if (itemInfo.CustomText.empty())
-						display->setTextFormatTaged(ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id)));
+						display->setTextFormatTaged(localDesc);
 					else
 					{
 						ucstring text = itemInfo.CustomText;
-						string::size_type delimiter = text.find(' ');
-						if(text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
+						if (text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
 						{
 							CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 							if (pGH)
-								pGH->browse(ucstring(text.substr(4, delimiter-4)).toString().c_str());
-							if (delimiter == string::npos)
-								group->setActive(false);
-							else
-								text = text.substr(delimiter, text.size()-delimiter);
+								pGH->browse(text.substr(4, text.size()-4).toString().c_str());
+							text = localDesc;
 						}
-						
-						display->setTextFormatTaged(text);		
+						else if (text.size() > 3 && text[0]=='@' && text[1]=='L' && text[2]=='U' && text[3]=='A')
+						{
+							string code = text.substr(4, text.size()-4).toString();
+							if (!code.empty())
+								CLuaManager::getInstance().executeLuaScript(code);
+							text = localDesc;
+						}
+						if (!text.empty())
+						{
+							display->setTextFormatTaged(text);
+							group->setActive(true);
+						}
 					}
 				}
 			}
@@ -279,7 +291,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 					display->setActive(true);
 					editButtons->setActive(false);
 					closeButton->setActive(true);
-					group->setActive(true);
+					group->setActive(false);
 
 					editBoxShort->setInputString(ucstring());
 					editBoxLarge->setInputString(ucstring());
@@ -288,24 +300,28 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 					// Finish the display or add the waiter
 					if (getInventory().isItemInfoUpToDate(ItemSlotId))
 					{
-						// If we already have item info
+						ucstring localDesc = ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
 						if (itemInfo.CustomText.empty())
-							display->setTextFormatTaged(ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id)));
+							display->setTextFormatTaged(localDesc);
 						else
 						{
 							ucstring text = itemInfo.CustomText;
-							string::size_type delimiter = text.find(' ');
-							if(text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
+							if (text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
 							{
 								CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 								if (pGH)
-									pGH->browse(ucstring(text.substr(4, delimiter-4)).toString().c_str());
-								if (delimiter == string::npos)
-									group->setActive(false);
-								else
-									text = text.substr(delimiter, text.size()-delimiter);
+									pGH->browse(text.substr(4, text.size()-4).toString().c_str());
+								text = localDesc;
 							}
-							display->setTextFormatTaged(text);
+							else if (text.size() > 3 && text[0]=='@' && text[1]=='L' && text[2]=='U' && text[3]=='A')
+							{
+								string code = text.substr(4, text.size()-4).toString();
+								if (!code.empty())
+									CLuaManager::getInstance().executeLuaScript(code);
+								text = localDesc;
+							}
+							if (!text.empty())
+								display->setTextFormatTaged(text);
 						}
 					}
 					else
@@ -329,7 +345,7 @@ void CInterfaceItemEdition::CItemEditionWindow::end()
 		// remove infos waiter (if not already canceled)
 		getInventory().removeItemInfoWaiter(this);
 		_CurrItemSheet = NULL;
-		WindowName = "";
+		WindowName.clear();
 
 		// hide the dialog
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -425,10 +441,8 @@ static	CDBCtrlSheet	*CurrentStackDst= NULL;
 static	TStackMode		CurrentStackMode;
 
 
-static void putStackableInventoryItemToExchange(CDBCtrlSheet *src, CDBCtrlSheet *dest, uint quantity);
-static void putStackableExchangedItemToInventory(CDBCtrlSheet *src, CDBCtrlSheet *dest, uint quantity);
 static void validateStackItem(CDBCtrlSheet *src, CDBCtrlSheet *dest, sint32 quantity, TStackMode stackMode);
-
+static void checkItemCommand(const CItemSheet *itemSheet);
 
 //=====================================================================================================================
 /** Send a swap item msg to the server
@@ -1670,6 +1684,10 @@ class CHandlerItemCristalReload : public IActionHandler
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCS == NULL) return;
 
+		const CItemSheet *pIS = pCS->asItemSheet();
+		if (pIS && pIS->Scroll.Label.empty())
+			checkItemCommand(pIS);
+
 		sendToServerEnchantMessage((uint8)pCS->getInventoryIndex(), (uint16)pCS->getIndexInDB());
 	}
 };
@@ -1747,6 +1765,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 		CViewTextMenu	*pCrisReload = dynamic_cast<CViewTextMenu*>(pMenu->getView("cris_reload"));
 		CViewTextMenu	*pTeleportUse = dynamic_cast<CViewTextMenu*>(pMenu->getView("teleport_use"));
 		CViewTextMenu	*pItemConsume = dynamic_cast<CViewTextMenu*>(pMenu->getView("item_consume"));
+		CViewTextMenu	*pItemExecute = dynamic_cast<CViewTextMenu*>(pMenu->getView("item_execute"));
 		CViewTextMenu	*pXpCatalyserUse = dynamic_cast<CViewTextMenu*>(pMenu->getView("xp_catalyser_use"));
 		CViewTextMenu	*pDrop = dynamic_cast<CViewTextMenu*>(pMenu->getView("drop"));
 		CViewTextMenu	*pDestroy = dynamic_cast<CViewTextMenu*>(pMenu->getView("destroy"));
@@ -1774,6 +1793,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 		if(pCrisReload)	pCrisReload->setActive(false);
 		if(pTeleportUse) pTeleportUse->setActive(false);
 		if(pItemConsume) pItemConsume->setActive(false);
+		if(pItemExecute) pItemExecute->setActive(false);
 		if(pXpCatalyserUse) pXpCatalyserUse->setActive(false);
 		if(pItemTextDisplay) pItemTextDisplay->setActive(false);
 		if(pItemTextEdition) pItemTextEdition->setActive(false);
@@ -1847,6 +1867,61 @@ class CHandlerItemMenuCheck : public IActionHandler
 			else
 			{
 				pItemInfos->setActive(true);
+			}
+			// item has a label?
+			if (!pIS->Scroll.Label.empty())
+			{
+				CGroupMenu *menu = dynamic_cast<CGroupMenu *>(
+					CWidgetManager::getInstance()->getElementFromId("ui:interface:item_menu_in_bag")
+				);
+				// add the label to default menu
+				if (!pIS->Scroll.LuaCommand.empty() || !pIS->Scroll.WebCommand.empty())
+					menu->setActionHandler(4, menu->getActionHandler(4));
+				else
+				{
+					// replace default menu and redirect action handler
+					if (pCrisEnchant && pCrisEnchant->getActive())
+					{
+						pCrisEnchant->setActive(false);
+						menu->setActionHandler(4, menu->getActionHandler(0));
+					}
+					if (pCrisReload && pCrisReload->getActive())
+					{
+						pCrisReload->setActive(false);
+						menu->setActionHandler(4, menu->getActionHandler(1));
+					}
+					if (pTeleportUse && pTeleportUse->getActive())
+					{
+						pTeleportUse->setActive(false);
+						menu->setActionHandler(4, menu->getActionHandler(2));
+					}
+					if (pItemConsume && pItemConsume->getActive())
+					{
+						pItemConsume->setActive(false);
+						menu->setActionHandler(4, menu->getActionHandler(3));
+					}
+					if (pXpCatalyserUse && pXpCatalyserUse->getActive())
+					{
+						pXpCatalyserUse->setActive(false);
+						menu->setActionHandler(4, menu->getActionHandler(5));
+					}
+					if (pItemTextDisplay && pItemTextDisplay->getActive())
+					{
+						pItemTextDisplay->setActive(false);
+						menu->setActionHandler(4, menu->getActionHandler(6));
+						menu->setActionHandlerParam(4, menu->getActionHandlerParam(6));
+					}
+				}
+				if (!bIsLockedByOwner)
+				{
+					if (pCS->getInventoryIndex() == INVENTORIES::bag)
+						pItemExecute->setActive(true);
+					// enchant and reload can be used from anywhere
+					if (pIS->Family == ITEMFAMILY::CRYSTALLIZED_SPELL || pIS->Family == ITEMFAMILY::ITEM_SAP_RECHARGE)
+						pItemExecute->setActive(true);
+
+					pItemExecute->setText(CI18N::get(pIS->Scroll.Label));
+				}
 			}
 		}
 
@@ -1978,6 +2053,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			if(pCrisReload)		pCrisReload->setGrayed(true);
 			if(pTeleportUse)	pTeleportUse->setGrayed(true);
 			if(pItemConsume)	pItemConsume->setGrayed(true);
+			if(pItemExecute)	pItemExecute->setGrayed(true);
 			if(pXpCatalyserUse)	pXpCatalyserUse->setGrayed(true);
 			if(pDrop)			pDrop->setGrayed(true);
 			if(pDestroy)		pDestroy->setGrayed(true);
@@ -1997,6 +2073,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			if(pCrisReload)		pCrisReload->setGrayed(false);
 			if(pTeleportUse)	pTeleportUse->setGrayed(false);
 			if(pItemConsume)	pItemConsume->setGrayed(false);
+			if(pItemExecute)	pItemExecute->setGrayed(false);
 			if(pXpCatalyserUse)	pXpCatalyserUse->setGrayed(false);
 			if(pDrop)			pDrop->setGrayed(false);
 			if(pDestroy)		pDestroy->setGrayed(false);
@@ -2012,6 +2089,80 @@ class CHandlerItemMenuCheck : public IActionHandler
 			}
 		}
 
+		//Item GROUP logic
+		CGroupMenu   *pGroupRootMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:item_menu_in_bag:item_group_menu"));
+		if(pGroupRootMenu)
+		{
+			CGroupSubMenu *pGroupMenu = pGroupRootMenu->getRootMenu();
+			std::vector<std::string> groupNames = CItemGroupManager::getInstance()->getGroupNames(pCS);
+			CViewText *pGroup = dynamic_cast<CViewText*>(pMenu->getView("item_group"));
+			//First, hide/show the menu if pertinent (we need to hide the action due to it beeing a submenu)
+			if(pGroup)
+			{
+				if(groupNames.empty())
+				{
+					pGroup->setActive(false);
+				}
+				else
+				{
+					pGroup->setActive(true);
+				}
+			}
+			//Reset everything and recreate the submenu for current item
+			// We do it the lazy way : active/gray options matching regular options (when you do things on a single item)
+			// Same for translated name of interface
+			pGroupMenu->reset();
+			for(i=0; i<groupNames.size(); i++)
+			{
+				std::string name = groupNames[i];
+				std::string ahParams = "name=" + name;
+				//Use ucstring because group name can contain accentued characters (and stuff like that)
+				ucstring nameUC;
+				nameUC.fromUtf8(name);
+				pGroupMenu->addLine(nameUC, "", "", name);
+				CGroupSubMenu* pNewSubMenu = new CGroupSubMenu(CViewBase::TCtorParam());
+				pGroupMenu->setSubMenu(pGroupMenu->getNumLine()-1, pNewSubMenu);
+				if(pNewSubMenu)
+				{
+					if(pEquip)
+						pNewSubMenu->addLine(pEquip->getHardText(), "item_group_equip", ahParams, name + "_equip");
+					// Add move sub menu
+					if (pMoveSubMenu)
+					{
+						pNewSubMenu->addLine(pMoveSubMenu->getHardText(), "", "", name + "_move");
+						CGroupSubMenu* tmp = new CGroupSubMenu(CViewBase::TCtorParam());
+						pNewSubMenu->setSubMenu(pNewSubMenu->getNumLine() - 1, tmp);
+						pNewSubMenu = tmp;
+					}
+					if(pMoveToBag && pMoveToBag->getActive())
+					{
+						CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToBag->getHardText(),"item_group_move",  "destination=bag|" + ahParams, name + "_bag");
+						if(tmp) tmp->setGrayed(pMoveToBag->getGrayed());
+					}
+					for(int j=0;j< MAX_INVENTORY_ANIMAL; j++)
+					{
+						if(pMoveToPa[j] && pMoveToPa[j]->getActive())
+						{
+							//there is an offset of 1 because TInventory names are pet_animal1/2/3/4
+							std::string dst = toString("destination=pet_animal%d|", j + 1);
+							CViewTextMenu* tmp = pNewSubMenu->addLine(ucstring(pMoveToPa[j]->getHardText()),"item_group_move",  dst + ahParams, name + toString("_pa%d", j + 1));
+							if(tmp) tmp->setGrayed(pMoveToPa[j]->getGrayed());
+						}
+					}
+					if(pMoveToRoom && pMoveToRoom->getActive())
+					{
+						CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToRoom->getHardText(), "item_group_move",  "destination=player_room|" + ahParams, name + "_room");
+						if(tmp) tmp->setGrayed(pMoveToRoom->getGrayed());
+					}
+					if(pMoveToGuild && pMoveToGuild->getActive() && ClientCfg.ItemGroupAllowGuild)
+					{
+						CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToGuild->getHardText(),"item_group_move",  "destination=guild|" + ahParams, name + "_guild");
+						if(tmp) tmp->setGrayed(pMoveToRoom->getGrayed());
+					}
+				}
+			}
+
+		}
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerItemMenuCheck, "item_menu_check" );
@@ -2103,6 +2254,24 @@ static void sendMsgStopUseXpCat( bool isRingCatalyser )
 	}
 }
 
+// ***************************************************************************
+static void checkItemCommand(const CItemSheet *itemSheet)
+{
+	if (itemSheet)
+	{
+		if (!itemSheet->Scroll.LuaCommand.empty())
+			CLuaManager::getInstance().executeLuaScript(itemSheet->Scroll.LuaCommand);
+		// webig
+		if (!itemSheet->Scroll.WebCommand.empty())
+		{
+			CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(
+				CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html")
+			);
+			if (pGH) pGH->browse(itemSheet->Scroll.WebCommand.c_str());
+		}
+	}
+	return;
+}
 
 // ***************************************************************************
 class CHandlerTeleportUse : public IActionHandler
@@ -2131,6 +2300,8 @@ class CHandlerTeleportUse : public IActionHandler
 					LoadingBackground = TeleportKaravanBackground;
 				break;
 			}
+			if (pIS->Scroll.Label.empty())
+				checkItemCommand(pIS);
 		}
 	}
 };
@@ -2145,12 +2316,28 @@ class CHandlerItemConsume : public IActionHandler
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCS == NULL) return;
 
+		const CItemSheet *pIS = pCS->asItemSheet();
+		if (pIS && pIS->Scroll.Label.empty())
+			checkItemCommand(pIS);
+
 		// use the item
 		sendMsgUseItem(uint16(pCS->getIndexInDB()));
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerItemConsume, "item_consume" );
 
+// ***************************************************************************
+class CHandlerItemExecute : public IActionHandler
+{
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	{
+		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
+		if (pCS)
+			checkItemCommand(pCS->asItemSheet());
+		return;
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerItemExecute, "item_execute" );
 
 // ***************************************************************************
 class CHandlerValidateItemTextEdition : public IActionHandler
@@ -2173,6 +2360,10 @@ class CHandlerItemTextDisplay : public IActionHandler
 		CDBCtrlSheet *pCSItem = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCSItem == NULL || windowName.empty()) 
 			return;
+
+		const CItemSheet *pIS = pCSItem->asItemSheet();
+		if (pIS && pIS->Scroll.Label.empty())
+			checkItemCommand(pIS);
 
 		CInterfaceItemEdition::getInstance()->setCurrWindow(pCSItem, windowName, false);
 	}
@@ -2215,6 +2406,10 @@ class CHandlerXpCatalyserUse : public IActionHandler
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCS == NULL) return;
 
+		const CItemSheet *pIS = pCS->asItemSheet();
+		if (pIS && pIS->Scroll.Label.empty())
+			checkItemCommand(pIS);
+
 		// use the item
 		sendMsgUseItem(uint16(pCS->getIndexInDB()));
 	}
@@ -2245,4 +2440,39 @@ class CHandlerRingXpCatalyserStopUse : public IActionHandler
 REGISTER_ACTION_HANDLER( CHandlerRingXpCatalyserStopUse, "ring_xp_catalyser_stop_use" );
 
 
+// ***************************************************************************
+// item groups
+class CHandlerItemGroupMove : public IActionHandler
+{
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	{
+		std::string destination = getParam(sParams, "destination");
+		std::string name = getParam(sParams, "name");
+		if(name.empty())
+		{
+			nlinfo("Trying to move a group with a caller not part of any group");
+			return;
+		}
 
+		CItemGroupManager::getInstance()->moveGroup(name, INVENTORIES::toInventory(destination));
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerItemGroupMove, "item_group_move");
+
+
+// ***************************************************************************
+class CHandlerItemGroupEquip : public IActionHandler
+{
+	void execute (CCtrlBase * /* pCaller */, const std::string & sParams)
+	{
+		std::string name = getParam(sParams, "name");
+		if(name.empty())
+		{
+			nlinfo("Trying to move a group with a caller not part of any group");
+			return;
+		}
+
+		CItemGroupManager::getInstance()->equipGroup(name);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerItemGroupEquip, "item_group_equip");

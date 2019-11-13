@@ -95,9 +95,9 @@ BOOL CPageComtext::OnCommand(WPARAM wParam, LPARAM lParam)
 		if (EDIT_ARG_IDX.find(id) != EDIT_ARG_IDX.end())
 		{
 			// need to update the var.
-			char tmp[1024];
+			TCHAR tmp[1024];
 			GetDlgItem(id)->GetWindowText(tmp, 1024);
-			SoundContext.Args[EDIT_ARG_IDX[id]] = atoi(tmp);
+			SoundContext.Args[EDIT_ARG_IDX[id]] = atoi(nlTStrToUtf8(tmp));
 		}
 	}
 	

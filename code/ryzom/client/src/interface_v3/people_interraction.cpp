@@ -228,16 +228,6 @@ struct CDebugConsoleEntryHandler : public IChatWindowListener
 	}
 };
 
-// handler to manager user entry in a Yubo Chat
-struct CYuboChatEntryHandler : public IChatWindowListener
-{
-	virtual void msgEntered(const ucstring &msg, CChatWindow * /* chatWindow */)
-	{
-		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		pIM->sendStringToYuboChat(msg);
-	}
-};
-
 // handler to manager user entry in a Dynamic Chat
 struct CDynamicChatEntryHandler : public IChatWindowListener
 {
@@ -272,7 +262,6 @@ static CGuildChatEntryHandler			GuildChatEntryHandler;
 static CTeamChatEntryHandler			TeamChatEntryHandler;
 static CFriendTalkEntryHandler			FriendTalkEntryHandler;
 static CDebugConsoleEntryHandler		DebugConsoleEntryHandler;
-static CYuboChatEntryHandler			YuboChatEntryHandler;
 static CDynamicChatEntryHandler			DynamicChatEntryHandler[CChatGroup::MaxDynChanPerPlayer];
 
 
@@ -302,7 +291,6 @@ CPeopleInterraction::CPeopleInterraction() : Region(NULL),
 											 SystemInfo(NULL),
 											 TellWindow(NULL),
 											 DebugInfo(NULL),
-											 YuboChat(NULL),
 											 CurrPartyChatID(0)
 {
 	for(uint i=0;i<CChatGroup::MaxDynChanPerPlayer;i++)
@@ -329,7 +317,6 @@ void CPeopleInterraction::release()
 	if (SystemInfo) cwm.removeChatWindow(SystemInfo);
 	TheUserChat.release();
 	if (DebugInfo) cwm.removeChatWindow(DebugInfo);
-	if (YuboChat) cwm.removeChatWindow(YuboChat);
 	//	if (TellWindow) cwm.removeChatWindow(TellWindow);
 	TeamList.reset();
 	FriendList.reset();
@@ -342,7 +329,6 @@ void CPeopleInterraction::release()
 	SystemInfo = NULL;
 	TellWindow = NULL;
 	DebugInfo = NULL;
-	YuboChat = NULL;
 //	TellWindow = NULL;
 
 	for(uint i=0;i<CChatGroup::MaxDynChanPerPlayer;i++)
@@ -421,7 +407,6 @@ void CPeopleInterraction::init()
 	createGuildChat();
 	createSystemInfo();
 	createTheUserChat();
-	createYuboChat();
 	createDynamicChats();
 
 	createDebugInfo();
@@ -463,7 +448,6 @@ void CPeopleInterraction::initStdInputs()
 	ChatInput.Guild.addListeningWindow		(ChatGroup.Window);
 	ChatInput.Tell.addListeningWindow		(ChatGroup.Window);
 	ChatInput.SystemInfo.addListeningWindow	(ChatGroup.Window);
-	ChatInput.YuboChat.addListeningWindow	(ChatGroup.Window);
 	ChatInput.Universe.addListeningWindow	(ChatGroup.Window);
 
 	if (AroundMe.Window)
@@ -486,9 +470,6 @@ void CPeopleInterraction::initStdInputs()
 
 	if (DebugInfo)
 		ChatInput.DebugInfo.addListeningWindow(DebugInfo);
-
-	if (YuboChat)
-		ChatInput.YuboChat.addListeningWindow(YuboChat);
 
 	if (TheUserChat.Window)
 	{
@@ -551,7 +532,7 @@ void CPeopleInterraction::createTeamList()
 	// NB: use an intermediate temp var, to avoid show of the window each time a new team member enters
 	string sExpr = "@UI:VARIABLES:IS_TEAM_PRESENT";
 	string sAction = "set";
-	string sCond = "";
+	string sCond;
 	string sParams = "target_property=ui:interface:team_list:active|value=@UI:VARIABLES:IS_TEAM_PRESENT";
 
 	if (TeamChat)
@@ -774,26 +755,6 @@ void CPeopleInterraction::createGuildChat()
 	GuildChat->setMenu(STD_CHAT_SOURCE_MENU);
 }
 
-//===========================================================================================================
-void CPeopleInterraction::createYuboChat()
-{
-	CChatWindowDesc chatDesc;
-	chatDesc.FatherContainer = "ui:interface";
-	chatDesc.Title = "uiYuboChat";
-	chatDesc.Listener = &YuboChatEntryHandler;
-	chatDesc.Localize = true;
-	chatDesc.Savable = true;
-	chatDesc.Id = "yubo_chat";
-	chatDesc.AHOnCloseButton = "proc";
-	chatDesc.AHOnCloseButtonParams = "yubo_chat_proc_close";
-	chatDesc.HeaderColor = "UI:SAVE:WIN:COLORS:MEM";
-
-	YuboChat = getChatWndMgr().createChatWindow(chatDesc);
-	if (!YuboChat) return;
-	YuboChat->setMenu(STD_CHAT_SOURCE_MENU);
-}
-
-
 //=================================================================================================================
 void CPeopleInterraction::createDynamicChats()
 {
@@ -833,7 +794,6 @@ void CPeopleInterraction::createTheUserChat()
 	chatDesc.Id = "user_chat";
 	chatDesc.ChatTemplate = "filtered_chat_id";
 	chatDesc.AHOnActive = "user_chat_active";
-	chatDesc.AHOnActiveParams = "";
 	chatDesc.AHOnCloseButton = "set";
 	chatDesc.AHOnCloseButtonParams = "dblink=UI:SAVE:ISDETACHED:USER_CHAT|value=0";
 
@@ -884,7 +844,7 @@ void CPeopleInterraction::createChatGroup()
 	CChatWindowDesc chatDesc;
 	chatDesc.FatherContainer = "ui:interface";
 	chatDesc.Listener = NULL;
-	chatDesc.Title= "";		// NB: the chatgroup is the only one that can be not named (because of uniqueness title test)
+	chatDesc.Title.clear();		// NB: the chatgroup is the only one that can be not named (because of uniqueness title test)
 	chatDesc.Localize = true;
 	chatDesc.Savable = true;
 	chatDesc.ChatTemplate = "main_chat_group";
@@ -926,7 +886,6 @@ class CHandlerChatGroupFilter : public IActionHandler
 			rCTF.setTargetGroup(CChatGroup::system);
 			writeRight= false;
 		}
-		else if (sParams == "yubo_chat")	rCTF.setTargetGroup(CChatGroup::yubo_chat);
 		else if (sParams.compare(0, dynChatId.size(), dynChatId)==0)
 		{
 			// get the number of this tab
@@ -985,7 +944,6 @@ class CHandlerChatGroupFilter : public IActionHandler
 							pUserBut->setHardText(title.toUtf8());
 						}
 						break;
-					// NB: user chat cannot have yubo_chat target
 				}
 
 				pUserBut->setActive(true);
@@ -2676,7 +2634,13 @@ public:
 					{
 						ucstring title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-						pMenu->addLineAtIndex(5 + insertion_index, title+" @{T8}/"+s, "chat_target_selected", "dyn"+s, "dyn"+s);
+
+						// replace dynamic channel name and shortcut
+						ucstring res = CI18N::get("uiFilterMenuDynamic");
+						strFindReplace(res, "%channel", title);
+						strFindReplace(res, "%shortcut", s);
+
+						pMenu->addLineAtIndex(5 + insertion_index, res, "chat_target_selected", "dyn"+s, "dyn"+s);
 						insertion_index++;
 					}
 				}

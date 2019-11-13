@@ -41,6 +41,10 @@
 #include "game_share/player_visual_properties.h"
 #include "game_share/visual_slot_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLPACS;
 using namespace NLMISC;
 using namespace std;
@@ -227,7 +231,7 @@ std::string CToolCreateEntity::cloneEntityIntoScenario(CEntityCL *clonee,
 		getDMC().newAction(NLMISC::CI18N::get("uiR2EDCreateAction") + readableName);
 	}
 	// send network commands to create entity on server
-	std::auto_ptr<CObject> desc(getDMC().newComponent(className));
+	CUniquePtr<CObject> desc(getDMC().newComponent(className));
 
 	if (desc.get())
 	{
@@ -596,7 +600,7 @@ void CToolCreateEntity::updateBeforeRender()
 	}
 	CGroupMap *worldMap = getWorldMap();
 	if (worldMap) worldMap->setSelectionAxis(_ValidArray);
-	setMouseCursor(_ValidArray ? _CursValid.c_str() : _CursInvalid.c_str());
+	setMouseCursor(_ValidArray ? _CursValid : _CursInvalid);
 }
 
 // ***************************************************************

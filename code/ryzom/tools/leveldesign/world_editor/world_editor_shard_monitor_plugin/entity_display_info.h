@@ -46,12 +46,12 @@ class CEntityDisplayInfo
 {
 public:
 	uint				Value;
-	const char			*Name;
+	const TCHAR			*Name;
 	CEntityIcon			Icon;	
 	NLMISC::CRGBA		Color;
 	bool				Visible;
 	CEntityDisplayInfo() {}
-	CEntityDisplayInfo(uint value, const char *name, NLMISC::CRGBA color, sint iconX = -1, sint iconY = -1) 
+	CEntityDisplayInfo(uint value, const TCHAR *name, NLMISC::CRGBA color, sint iconX = -1, sint iconY = -1) 
 		              : Value(value), Name(name), Color(color), Visible(true), Icon(iconX, iconY) {}
 };
 

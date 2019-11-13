@@ -34,6 +34,7 @@ class CPatchThread;
 class CCheckThread;
 class CScanDataThread;
 class CInstallThread;
+class CDownloadThread;
 
 
 // Useful for using an external downloader (BitTorrent) use of interface with CGameDownloader from client_background_rd.exe using as install program
@@ -100,13 +101,6 @@ public:
 		std::string			ExtractPath;		// Used during patching to extract a bnp file to a specific directory
 		uint32				FinalFileSize;		// just for info, the final size after patch
 		uint32				SZFileSize;			// Size of the SZ file
-	};
-
-	struct SBNPFile
-	{
-		std::string	Name;
-		uint32		Size;
-		uint32		Pos;
 	};
 
 	struct SPatchInfo
@@ -245,7 +239,7 @@ public:
 
 	CProductDescriptionForClient &getDescFile() { return DescFile; }
 
-	NLMISC::IThread *getCurrThread() const { return thread; }
+	NLMISC::IThread *getCurrThread() const { return Thread; }
 	// set an external state listener (enable to log) infos
 	void setStateListener(IPatchManagerStateListener* stateListener);
 
@@ -326,7 +320,6 @@ private:
 
 	void getPatchFromDesc(SFileToPatch &ftpOut, const CBNPFile &fIn, bool forceCheckSumTest);
 
-	bool readBNPHeader(const std::string &Filename, std::vector<SBNPFile> &FilesOut);
 	bool bnpUnpack(const std::string &srcBigfile, const std::string &dstPath, std::vector<std::string> &vFilenames);
 
 	// stop the threads (called when knowing the thread ended)
@@ -339,10 +332,6 @@ private:
 	void clearDataScanLog();
 	static void getCorruptedFileInfo(const SFileToPatch &ftp, ucstring &sTranslate);
 
-	// utility func to decompress a monofile 7zip archive
-	static bool unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName);
-	// utility func to decompress a single LZMA packed file
-	static bool unpackLZMA(const std::string &sevenZipFile, const std::string &destFileName);
 	static bool downloadAndUnpack(const std::string& patchPath, const std::string& sourceFilename, const std::string& extractPath, const std::string& tmpDirectory, uint32 timestamp);
 	// Forward message to Installation Software
 	void onFileInstallFinished();
@@ -382,7 +371,7 @@ private:
 			ServerPath = serverPath;
 			Available = true;
 
-			if (ServerPath.size()>0 && ServerPath[ServerPath.size()-1] != '/')
+			if (!ServerPath.empty() && ServerPath[ServerPath.size()-1] != '/')
 				ServerPath += '/';
 
 			std::string::size_type pos = ServerPath.find ("@");
@@ -422,7 +411,8 @@ private:
 	CCheckThread	*CheckThread;
 	CScanDataThread	*ScanDataThread;
 	CInstallThread	*InstallThread;
-	NLMISC::IThread	*thread;
+	CDownloadThread	*DownloadThread;
+	NLMISC::IThread	*Thread;
 
 	// State
 	struct CState
@@ -445,6 +435,7 @@ private:
 	/// Now deprecated : the launcher is the client ryzom
 	std::string RyzomFilename;
 	std::string UpdateBatchFilename;
+	std::string UpgradeBatchFilename;
 
 	// Where the client get all delta and desc file
 	std::string ClientPatchPath; // Temporary path
@@ -471,6 +462,7 @@ private:
 	// The date to apply when file is buggy: use default of year 2001, just to have a coherent date
 	enum	{DefaultResetDate= 31 * 366 * 24 * 3600};
 	// The file size of a an empty BNP
+	// If the BNP Header format change, please modify 'EmptyBnpFileSize' as needed
 	enum	{EmptyBnpFileSize= 8};
 	// Use an external downloader: (BitTorrent)
 	IAsyncDownloader* _AsyncDownloader;

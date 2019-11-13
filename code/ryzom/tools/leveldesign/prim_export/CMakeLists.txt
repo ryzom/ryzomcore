@@ -1,15 +1,14 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc)
+
+SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(prim_export ${SRC})
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(prim_export	
 					nelmisc
 					nelligo
 					nel3d
-					nelgeorges
-					${LIBXML2_LIBRARIES})
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+					nelgeorges)
 
 NL_DEFAULT_PROPS(prim_export "Ryzom, Tools, World: Primitive Export")
 NL_ADD_RUNTIME_FLAGS(prim_export)

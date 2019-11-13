@@ -17,12 +17,12 @@
 #ifndef NL_EXT_AL_H
 #define NL_EXT_AL_H
 
-#ifdef NL_OS_WINDOWS
-#	define EFX_CREATIVE_AVAILABLE 1
-#	define EAX_AVAILABLE 0
-#else
-#	define EFX_CREATIVE_AVAILABLE 0
-#	define EAX_AVAILABLE 0
+#ifndef EFX_CREATIVE_AVAILABLE
+#define EFX_CREATIVE_AVAILABLE 0
+#endif
+
+#ifndef EAX_AVAILABLE
+#define EAX_AVAILABLE 0
 #endif
 
 #if EAX_AVAILABLE

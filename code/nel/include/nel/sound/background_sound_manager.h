@@ -229,7 +229,7 @@ private:
 	struct TSoundData
 	{
 		/// The name of the sound.
-		NLMISC::CSheetId	SoundName;
+		NLMISC::TStringId	SoundName;
 		/// The reference to the sound.
 		CSound				*Sound;
 		/// A source instance of the sound (may be NULL).

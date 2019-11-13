@@ -1,0 +1,5 @@
+﻿*HASH_VALUE	score_ID	name	point	ia	points
+_BE6C89EE2F599BBE	HitPoints	Lebenskraft	Trefferpunkt	ein	Trefferpunkte
+_B0DF4A6ECA004C1B	Stamina	Ausdauer	Ausdauerpunkt	ein	Ausdauerpunkte
+_174A57AA672A04AA	Sap	Sap	Sappunkt	ein	Sappunkte
+_DB69E9025629B0BA	Focus	Fokus	Fokuspunkt	ein	Fokuspunkte

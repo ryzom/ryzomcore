@@ -108,7 +108,7 @@ template <class TPtr, class TKey, class TResourceFinder>
 class CResourcePtr
 {
 private:
-	CRefCount::CPtrInfo		*pinfo;		// A ptr to the handle of the object.
+	CRefCount::CPtrInfoBase	*pinfo;		// A ptr to the handle of the object.
 	TKey					Key;		// The key used to find the pointer
     mutable TPtr			*Ptr;		// A cache for pinfo->Ptr. Useful to speed up  ope->()  and  ope*()
 

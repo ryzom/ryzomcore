@@ -25,8 +25,13 @@
 #pragma once
 
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
+#define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
+#ifdef _WIN64
+#define _WIN32_WINNT 0x0600
+#else
 #define _WIN32_WINNT 0x0500
+#endif
 
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
@@ -110,6 +115,7 @@
 
 extern bool	DontUse3D;
 
+#include <libxml/parser.h>
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

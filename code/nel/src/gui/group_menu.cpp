@@ -32,6 +32,9 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace
 {
@@ -237,6 +240,7 @@ namespace NLGUI
 			_GroupList->setY (4);
 			_GroupList->setSpace (_GroupMenu->_Space);
 			_GroupList->setSerializable( false );
+			_GroupList->setResizeFromChildW(true);
 			addGroup (_GroupList);
 		}
 	}
@@ -266,7 +270,7 @@ namespace NLGUI
 			else
 			if (stricmp((char*)cur->name, "action") == 0)
 			{
-				string		strId,  strAh,  strParams,  strCond, strTexture="";
+				string		strId,  strAh,  strParams,  strCond, strTexture;
 				ucstring	ucstrName;
 
 				if (id)		strId = (const char*)id;
@@ -381,6 +385,22 @@ namespace NLGUI
 		return true;
 	}
 
+	// ------------------------------------------------------------------------------------------------
+	CViewBitmap *CGroupSubMenu::createIcon(CInterfaceElement *parentPos, const string &texture)
+	{
+		// Add an icon to the line
+		CViewBitmap *pVB = new CViewBitmap(CViewBase::TCtorParam());
+		pVB->setSerializable( false );
+		pVB->setParent (this);
+		pVB->setParentPos (parentPos);
+		pVB->setParentPosRef (Hotspot_ML);
+		pVB->setPosRef (Hotspot_MR);
+		pVB->setTexture(texture);
+		pVB->setModulateGlobalColor(false);
+		pVB->setX (-2);
+		addView (pVB);
+		return pVB;
+	}
 
 	// ------------------------------------------------------------------------------------------------
 	CViewBitmap *CGroupSubMenu::createCheckBox(bool checked)
@@ -1018,6 +1038,18 @@ namespace NLGUI
 				}
 			}
 
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
+			{
+				// If a line is selected and the line is not grayed and has right click action handler
+				if ((_Selected != -1) && (!_Lines[i].ViewText->getGrayed()) && !_Lines[_Selected].AHRightClick.empty())
+				{
+					CAHManager::getInstance()->runActionHandler (	_Lines[_Selected].AHRightClick,
+											CWidgetManager::getInstance()->getCtrlLaunchingModal(),
+											_Lines[_Selected].AHRightClickParams );
+					return true;
+				}
+			}
+
 			if (event.getType() == NLGUI::CEventDescriptor::mouse)
 			{
 				const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
@@ -1077,7 +1109,7 @@ namespace NLGUI
 				for (uint32 i = 0; i < pCurGSM->_Lines.size(); ++i)
 					if (sRest == pCurGSM->_Lines[i].Id)
 						return pCurGSM->_Lines[i].ViewText;
-				sRest = "";
+				sRest.clear();
 			}
 			else // no a lot of token left
 			{
@@ -1201,7 +1233,7 @@ namespace NLGUI
 			pV->setText (name);
 		}
 		pV->setColor (_GroupMenu->_Color);
-		pV->setFontSize (_GroupMenu->_FontSize);
+		pV->setFontSize (_GroupMenu->_FontSize, _GroupMenu->_FontSizeCoef);
 		pV->setShadow (_GroupMenu->_Shadow);
 		pV->setShadowOutline (_GroupMenu->_ShadowOutline);
 		pV->setCheckable(checkable);
@@ -1226,13 +1258,22 @@ namespace NLGUI
 			pV->setCheckBox(checkBox);
 		}
 
+		CViewBitmap *icon = NULL;
+		if (!texture.empty())
+		{	
+			if (_GroupList->getNumChildren() == 1)
+				pV->setX(20);
+			icon = createIcon(pV, texture);
+		}
+		
+
 		tmp.ViewText = pV;
 		tmp.Separator = NULL;
 		tmp.AHName = ah;
 		tmp.AHParams = params;
 		tmp.Cond = cond;
 		tmp.CheckBox = checkBox;
-		tmp.RightArrow = NULL;
+		tmp.RightArrow = icon;
 		if (id.empty())
 			tmp.Id = NLMISC::toString (_Lines.size());
 		else
@@ -1281,7 +1322,7 @@ namespace NLGUI
 		}
 
 		pV->setColor (_GroupMenu->_Color);
-		pV->setFontSize (_GroupMenu->_FontSize);
+		pV->setFontSize (_GroupMenu->_FontSize, _GroupMenu->_FontSizeCoef);
 		pV->setShadow (_GroupMenu->_Shadow);
 		pV->setShadowOutline (_GroupMenu->_ShadowOutline);
 		pV->setCheckable(checkable);
@@ -1635,6 +1676,50 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	void CGroupSubMenu::setActionHandler(uint lineIndex, const std::string &ah)
+	{
+		if (lineIndex > _Lines.size())
+		{
+			nlwarning("Bad index");
+			return;
+		}
+		_Lines[lineIndex].AHName = ah;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CGroupSubMenu::setActionHandlerParam(uint lineIndex, const std::string &params)
+	{
+		if (lineIndex > _Lines.size())
+		{
+			nlwarning("Bad index");
+			return;
+		}
+		_Lines[lineIndex].AHParams = params;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CGroupSubMenu::setRightClickHandler(uint lineIndex, const std::string &ah)
+	{
+		if (lineIndex > _Lines.size())
+		{
+			nlwarning("Bad index");
+			return;
+		}
+		_Lines[lineIndex].AHRightClick = ah;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CGroupSubMenu::setRightClickHandlerParam(uint lineIndex, const std::string &params)
+	{
+		if (lineIndex > _Lines.size())
+		{
+			nlwarning("Bad index");
+			return;
+		}
+		_Lines[lineIndex].AHRightClickParams = params;
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	void CGroupSubMenu::setSelectable(uint lineIndex, bool selectable)
 	{
 		if (lineIndex > _Lines.size())
@@ -1702,7 +1787,7 @@ namespace NLGUI
 	int CGroupSubMenu::luaGetNumLine(CLuaState &ls)
 	{
 		CLuaIHM::checkArgCount(ls, "getNumLine", 0);
-		ls.push((double) getNumLine());
+		ls.push(getNumLine());
 		return 1;
 	}
 
@@ -1712,7 +1797,7 @@ namespace NLGUI
 		const char *funcName = "getSubMenu";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		CLuaIHM::pushUIOnStack(ls, getSubMenu((uint) ls.toNumber(1)));
+		CLuaIHM::pushUIOnStack(ls, getSubMenu((uint) ls.toInteger(1)));
 		return 1;
 	}
 
@@ -1722,8 +1807,8 @@ namespace NLGUI
 		const char *funcName = "addSubMenu";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		setSubMenu((uint) ls.toNumber(1), new CGroupSubMenu(CViewText::TCtorParam()));
-		CLuaIHM::pushUIOnStack(ls, getSubMenu((uint) ls.toNumber(1)));
+		setSubMenu((uint) ls.toInteger(1), new CGroupSubMenu(CViewText::TCtorParam()));
+		CLuaIHM::pushUIOnStack(ls, getSubMenu((uint) ls.toInteger(1)));
 		return 1;
 	}
 
@@ -1733,7 +1818,7 @@ namespace NLGUI
 		const char *funcName = "getLineId";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		std::string id = getLineId((uint) ls.toNumber(1));
+		std::string id = getLineId((uint) ls.toInteger(1));
 		CLuaIHM::push(ls, id);
 		return 1;
 	}
@@ -1744,7 +1829,7 @@ namespace NLGUI
 		const char *funcName = "getLineFromId";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
-		ls.push((double) getLineFromId(ls.toString(1)));
+		ls.push(getLineFromId(ls.toString(1)));
 		return 1;
 	}
 
@@ -1754,7 +1839,7 @@ namespace NLGUI
 		const char *funcName = "isSeparator";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		ls.push(isSeparator((uint) ls.toNumber(1)));
+		ls.push(isSeparator((uint) ls.toInteger(1)));
 		return 1;
 	}
 
@@ -1774,6 +1859,22 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	int CGroupSubMenu::luaAddIconLine(CLuaState &ls)
+	{
+		const char *funcName = "addIconLine";
+		CLuaIHM::checkArgCount(ls, funcName, 5);
+		CLuaIHM::checkArgTypeUCString(ls, funcName, 1);
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
+		CLuaIHM::checkArgType(ls, funcName, 4, LUA_TSTRING);
+		CLuaIHM::checkArgType(ls, funcName, 5, LUA_TSTRING);
+		ucstring arg1;
+		nlverify(CLuaIHM::getUCStringOnStack(ls, 1, arg1));
+		addLine(arg1, ls.toString(2), ls.toString(3), ls.toString(4), string(), ls.toString(5));
+		return 0;
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	int CGroupSubMenu::luaAddLineAtIndex(CLuaState &ls)
 	{
 		const char *funcName = "addLineAtIndex";
@@ -1785,7 +1886,7 @@ namespace NLGUI
 		CLuaIHM::checkArgType(ls, funcName, 5, LUA_TSTRING);
 		ucstring arg2;
 		nlverify(CLuaIHM::getUCStringOnStack(ls, 2, arg2));
-		addLineAtIndex((uint) ls.toNumber(1), arg2, ls.toString(3), ls.toString(4), ls.toString(5));
+		addLineAtIndex((uint) ls.toInteger(1), arg2, ls.toString(3), ls.toString(4), ls.toString(5));
 		return 0;
 	}
 
@@ -1803,7 +1904,7 @@ namespace NLGUI
 		const char *funcName = "addSeparatorAtIndex";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		addSeparatorAtIndex((uint) ls.toNumber(1));
+		addSeparatorAtIndex((uint) ls.toInteger(1));
 		return 0;
 	}
 
@@ -1813,7 +1914,7 @@ namespace NLGUI
 		const char *funcName = "removeLine";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		removeLine((uint) ls.toNumber(1));
+		removeLine((uint) ls.toInteger(1));
 		return 0;
 	}
 
@@ -1833,7 +1934,7 @@ namespace NLGUI
 		{
 			CLuaIHM::fails(ls, "%s :  Group required as argument 2", funcName);
 		}
-		setUserGroupRight((uint) ls.toNumber(1), group, true);
+		setUserGroupRight((uint) ls.toInteger(1), group, true);
 		return 0;
 	}
 
@@ -1853,7 +1954,7 @@ namespace NLGUI
 		{
 			CLuaIHM::fails(ls, "%s :  Group required as argument 2", funcName);
 		}
-		setUserGroupLeft((uint) ls.toNumber(1), group, true);
+		setUserGroupLeft((uint) ls.toInteger(1), group, true);
 		return 0;
 	}
 
@@ -1864,7 +1965,7 @@ namespace NLGUI
 		const char *funcName = "getUserGroupRight";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		CLuaIHM::pushUIOnStack(ls, getUserGroupRight((uint) ls.toNumber(1)));
+		CLuaIHM::pushUIOnStack(ls, getUserGroupRight((uint) ls.toInteger(1)));
 		return 1;
 	}
 
@@ -1875,7 +1976,7 @@ namespace NLGUI
 		const char *funcName = "getUserGroupLeft";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		CInterfaceElement *pIE = getUserGroupLeft((uint) ls.toNumber(1));
+		CInterfaceElement *pIE = getUserGroupLeft((uint) ls.toInteger(1));
 		if (pIE)
 		{
 			CLuaIHM::pushUIOnStack(ls, pIE);
@@ -1890,7 +1991,7 @@ namespace NLGUI
 		const char *funcName = "setMaxVisibleLine";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		setMaxVisibleLine((uint) ls.toNumber(1));
+		setMaxVisibleLine((uint) ls.toInteger(1));
 		return 0;
 	}
 
@@ -1923,6 +2024,7 @@ namespace NLGUI
 		_ShadowColorGrayed = CRGBA::Black;
 		_HighLightOver.set(128, 0, 0, 255);
 		_FontSize = 12;
+		_FontSizeCoef = true;
 		_Shadow = false;
 		_ShadowOutline = false;
 		_ResizeFromChildH = _ResizeFromChildW = true;
@@ -2497,12 +2599,30 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	void CGroupMenu::setMinH(sint32 minH)
+	{
+		if ( _RootMenu )
+		{
+			_RootMenu->_GroupList->setMinH(minH-_RootMenu->getResizeFromChildHMargin());
+			_RootMenu->_GroupList->setH(minH-_RootMenu->getResizeFromChildHMargin());
+			_RootMenu->setH(minH-_RootMenu->getResizeFromChildHMargin());
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	void CGroupMenu::setGrayedLine(uint line,  bool g)
 	{
 		if ( _RootMenu )
 		{
 			_RootMenu->setGrayedLine(line, g);
 		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CGroupMenu::setFontSize(uint fontSize, bool coef)
+	{
+		_FontSize = fontSize;
+		_FontSizeCoef = coef;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -2532,6 +2652,34 @@ namespace NLGUI
 	const std::string CGroupMenu::getActionHandlerParam(uint lineIndex) const
 	{
 		return _RootMenu ? _RootMenu->getActionHandlerParam(lineIndex) : "";
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CGroupMenu::setActionHandler(uint lineIndex, const std::string &ah)
+	{
+		if (_RootMenu)
+			_RootMenu->setActionHandler(lineIndex, ah);
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CGroupMenu::setActionHandlerParam(uint lineIndex, const std::string &params)
+	{
+		if (_RootMenu)
+			_RootMenu->setActionHandlerParam(lineIndex, params);
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CGroupMenu::setRightClickHandler(uint lineIndex, const std::string &ah)
+	{
+		if (_RootMenu)
+			_RootMenu->setRightClickHandler(lineIndex, ah);
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CGroupMenu::setRightClickHandlerParam(uint lineIndex, const std::string &params)
+	{
+		if (_RootMenu)
+			_RootMenu->setRightClickHandlerParam(lineIndex, params);
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -2566,7 +2714,7 @@ namespace NLGUI
 		const char *funcName = "setMinW";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		setMinW((sint32) ls.toNumber(1));
+		setMinW((sint32) ls.toInteger(1));
 		return 0;
 	}
 }

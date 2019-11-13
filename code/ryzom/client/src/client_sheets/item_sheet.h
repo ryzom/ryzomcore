@@ -255,10 +255,16 @@ public:
 	struct CScroll
 	{
 		std::string Texture;
+		std::string LuaCommand;
+		std::string WebCommand;
+		std::string Label;
 
 		void	serial(NLMISC::IStream &f)
 		{
 			f.serial(Texture);
+			f.serial(LuaCommand);
+			f.serial(WebCommand);
+			f.serial(Label);
 		}
 	};
 
@@ -288,6 +294,22 @@ public:
 	NLMISC::TSStringId					IdShape;
 	/// Female shape file name
 	NLMISC::TSStringId					IdShapeFemale;
+	/// shape file name for fyros
+	NLMISC::TSStringId					IdShapeFyros;
+	/// Female shape file name for fyros
+	NLMISC::TSStringId					IdShapeFyrosFemale;
+	/// shape file name for matis
+	NLMISC::TSStringId					IdShapeMatis;
+	/// Female shape file name for matis
+	NLMISC::TSStringId					IdShapeMatisFemale;
+	/// shape file name for tryker
+	NLMISC::TSStringId					IdShapeTryker;
+	/// Female shape file name for tryker
+	NLMISC::TSStringId					IdShapeTrykerFemale;
+	/// shape file name for zorai
+	NLMISC::TSStringId					IdShapeZorai;
+	/// Female shape file name for zorai
+	NLMISC::TSStringId					IdShapeZoraiFemale;
 	/// Equipment slot. This is a bitField matching each bit to SLOTTYPE::TSlotType
 	uint64								SlotBF;
 	/// texture variant.
@@ -385,6 +407,14 @@ public:
 
 	std::string getShape() const { return ClientSheetsStrings.get(IdShape); }
 	std::string getShapeFemale() const { return ClientSheetsStrings.get(IdShapeFemale); }
+	std::string getShapeFyros() const { return ClientSheetsStrings.get(IdShapeFyros); }
+	std::string getShapeFyrosFemale() const { return ClientSheetsStrings.get(IdShapeFyrosFemale); }
+	std::string getShapeMatis() const { return ClientSheetsStrings.get(IdShapeMatis); }
+	std::string getShapeMatisFemale() const { return ClientSheetsStrings.get(IdShapeMatisFemale); }
+	std::string getShapeTryker() const { return ClientSheetsStrings.get(IdShapeTryker); }
+	std::string getShapeTrykerFemale() const { return ClientSheetsStrings.get(IdShapeTrykerFemale); }
+	std::string getShapeZorai() const { return ClientSheetsStrings.get(IdShapeZorai); }
+	std::string getShapeZoraiFemale() const { return ClientSheetsStrings.get(IdShapeZoraiFemale); }
 	std::string getIconBack() const { return ClientSheetsStrings.get(IdIconBack); }
 	std::string getIconMain() const { return ClientSheetsStrings.get(IdIconMain); }
 	std::string getIconOver() const { return ClientSheetsStrings.get(IdIconOver); }
@@ -401,7 +431,7 @@ public:
 	virtual void build(const NLGEORGES::UFormElm &item);
 
 	/// Serialize character sheet into binary data file.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 	/// true if the item can put in the slot e
 	bool		hasSlot(SLOTTYPE::TSlotType e) const {return (SlotBF&(SINT64_CONSTANT(1)<<e))!=0;}

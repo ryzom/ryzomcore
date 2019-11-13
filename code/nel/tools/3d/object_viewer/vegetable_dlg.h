@@ -144,10 +144,10 @@ protected:
 	// clear all vegetables.
 	void			clearVegetables();
 	// load a vegetSet with a FileDialog
-	bool			loadVegetableSet(NL3D::CTileVegetableDesc &vegetSet, const char *title);
+	bool			loadVegetableSet(NL3D::CTileVegetableDesc &vegetSet, const TCHAR *title);
 	/** build the vegetSet from the current _Vegetables
 	 * NB: transform Rotate Angle in Radians.
-	 * \param keepDefaultShapeName if true, then vegetables with a ShapeName=="" are kept.
+	 * \param keepDefaultShapeName if true, then vegetables with a ShapeName.empty() are kept.
 	 * \param keepHiden if true, then vegetables maked as hiden in ObjectViewer are kept.
 	 */
 	void			buildVegetableSet(NL3D::CTileVegetableDesc &vegetSet, bool keepDefaultShapeName= true, bool keepHiden= true );

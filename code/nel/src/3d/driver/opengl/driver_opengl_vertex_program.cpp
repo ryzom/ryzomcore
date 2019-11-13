@@ -28,6 +28,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 //#define DEBUG_SETUP_EXT_VERTEX_SHADER
 
 namespace NL3D {
@@ -178,7 +182,7 @@ bool CDriverGL::compileNVVertexProgram(CVertexProgram *program)
 		// Setup not ok
 		delete drvInfo;
 		program->m_DrvInfo = NULL;
-		_GPUPrgDrvInfos.erase(it);
+		//_GPUPrgDrvInfos.erase(it); // not needed as ~IProgramDrvInfos() already does it
 		return false;
 	}
 
@@ -1270,7 +1274,7 @@ static void ARBVertexProgramDumpWriteMask(uint mask, std::string &out)
 	H_AUTO_OGL(ARBVertexProgramDumpWriteMask)
 	if (mask == 0xf)
 	{
-		out = "";
+		out.clear();
 		return;
 	}
 	out = ".";
@@ -1286,7 +1290,7 @@ static void ARBVertexProgramDumpSwizzle(const CVPSwizzle &swz, std::string &out)
 	H_AUTO_OGL(ARBVertexProgramDumpSwizzle)
 	if (swz.isIdentity())
 	{
-		out = "";
+		out.clear();
 		return;
 	}
 	out = ".";
@@ -1568,7 +1572,7 @@ bool CDriverGL::compileARBVertexProgram(NL3D::CVertexProgram *program)
 	{
 		delete drvInfo;
 		program->m_DrvInfo = NULL;
-		_GPUPrgDrvInfos.erase(it);
+		//_GPUPrgDrvInfos.erase(it); // not needed as ~IProgramDrvInfos() already does it
 		return false;
 	}
 
@@ -1672,7 +1676,7 @@ bool CDriverGL::compileEXTVertexShader(CVertexProgram *program)
 	}
 
 	/*
-	FILE *f = fopen(getLogDirectory() + "test.txt", "wb");
+	FILE *f = nlfopen(getLogDirectory() + "test.txt", "wb");
 	if (f)
 	{
 		std::string vpText;
@@ -1695,7 +1699,7 @@ bool CDriverGL::compileEXTVertexShader(CVertexProgram *program)
 	{
 		delete drvInfo;
 		program->m_DrvInfo = NULL;
-		_GPUPrgDrvInfos.erase(it);
+		//_GPUPrgDrvInfos.erase(it); // not needed as ~IProgramDrvInfos() already does it
 		return false;
 	}
 

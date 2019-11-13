@@ -1,0 +1,1 @@
+﻿*HASH_VALUE	damageTypeId	name	named	ia	da	p	pd	pia	pda	description

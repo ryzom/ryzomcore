@@ -45,7 +45,7 @@ inline uint64 wangHash64Inv(uint64 key)
 	key = key^tmp >> 28;
 
 	// Invert key *= 21
-	key *= 14933078535860113213u;
+	key *= UINT64_CONSTANT(14933078535860113213);
 
 	// Invert key = key ^ (key >> 14)
 	tmp = key^key >> 14;
@@ -54,7 +54,7 @@ inline uint64 wangHash64Inv(uint64 key)
 	key = key^tmp >> 14;
 
 	// Invert key *= 265
-	key *= 15244667743933553977u;
+	key *= UINT64_CONSTANT(15244667743933553977);
 
 	// Invert key = key ^ (key >> 24)
 	tmp = key^key >> 24;

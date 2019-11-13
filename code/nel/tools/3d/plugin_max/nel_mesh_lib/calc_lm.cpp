@@ -128,7 +128,7 @@ void SLightBuild::convertFromMaxLight (INode *node,TimeValue tvTime)
 	if (maxLight->EvalLightState(tvTime, valid, &ls)!=REF_SUCCEED)
 		return;
 
-	this->Name = node->GetName();
+	this->Name = MCharStrToUtf8(node->GetName());
 
 	// Retrieve the correct light Group Name
 	this->AnimatedLight = CExportNel::getAnimatedLight (node);
@@ -295,7 +295,7 @@ void SLightBuild::convertFromMaxLight (INode *node,TimeValue tvTime)
 		INode *exclNode = exclusionList[i];
 		if (exclNode) // Crashfix // FIXME: Why is this NULL?
 		{
-			string tmp = exclNode->GetName();
+			string tmp = MCharStrToUtf8(exclNode->GetName());
 			this->setExclusion.insert(tmp);
 		}
 	}
@@ -1930,7 +1930,7 @@ void supprLightNoInteractOne( vector<SLightBuild> &vLights, CMesh::CMeshBuild* p
 	{
 		bool bInteract = false;
 
-		if( vLights[i].setExclusion.find( node.GetName() ) != vLights[i].setExclusion.end() )
+		if( vLights[i].setExclusion.find(MCharStrToUtf8(node.GetName()) ) != vLights[i].setExclusion.end() )
 		{
 			bInteract = false;
 		}
@@ -2005,7 +2005,7 @@ void CExportNel::deleteLM(INode& ZeNode)
 		string sSaveName;
 		sSaveName = _Options.sExportLighting;
 		if( sSaveName[sSaveName.size()-1] != '\\' ) sSaveName += "\\";
-		sSaveName += ZeNode.GetName();
+		sSaveName += MCharStrToUtf8(ZeNode.GetName());
 		char tmp[32];
 		sprintf( tmp, "%d", i );
 		sSaveName += tmp;
@@ -2063,7 +2063,7 @@ void sans_majuscule_au_debut_LinkToObjectAround (CMesh::CMeshBuild *pMB, CMeshBa
 				}
 			}
 			
-			if (ivert.size() > 0)
+			if (!ivert.empty())
 			{
 				// Get all faces that contains at least one shared vertex
 				for (k = 0; k < wrt.vMB[i]->Faces.size(); ++k)
@@ -2128,7 +2128,7 @@ void appendLightmapLog (COFile &outputLog, const char *lightmapName, const vecto
 		
 		outputLog.serialBuffer ((uint8*)text.c_str(), text.size());
 	}
-	catch (exception &e)
+	catch (const exception &e)
 	{
 		nlwarning ("Error writing the file : %s", e.what());
 	}
@@ -2258,7 +2258,7 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 
 		// Bubble sort pointer to the faces (Material sorting)
 		ClearFaceWithNoLM( pMB, pMBB, AllFaces );
-		if( AllFaces.size() == 0 )
+		if( AllFaces.empty() )
 		{
 			if (InfoLog)
 				InfoLog->display("CalculateLM : %d ms\n", timeGetTime()-t);
@@ -2276,7 +2276,7 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 		{
 			string thetext;
 			thetext = "Warning ";
-			thetext += ZeNode.GetName();
+			thetext += MCharStrToUtf8(ZeNode.GetName());
 			thetext = "have all faces NOT mapped (UV2)";
 			if (gOptions.FeedBack != NULL)
 			{
@@ -2325,11 +2325,11 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 				{
 					// Make an error message
 					string sTmp = "Warning : ";
-					sTmp += ZeNode.GetName();
+					sTmp += MCharStrToUtf8(ZeNode.GetName());
 					sTmp += " has mapping problem";
 
 					// Script trace
-					mprintf ((sTmp+"\n").c_str());
+					mprintf(_M("%s\n"), MaxTStrFromUtf8(sTmp).data());
 
 					// Feedback is here ?
 					if (gOptions.FeedBack != NULL)
@@ -2436,7 +2436,7 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 		{
 			string sTmp = "Placement";
 			gOptions.FeedBack->setLine (3, sTmp);
-			sTmp = "";
+			sTmp.clear();
 			for(i=4;i<10;++i)
 				gOptions.FeedBack->setLine (i, sTmp);
 			gOptions.FeedBack->update ();
@@ -2524,13 +2524,13 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 		// Assign the name of the lightmap and get the complete save name
 			
 		// Get the name of the max project
-		char projectName[512];
-		_splitpath (_Ip->GetCurFileName(), NULL, NULL, projectName, NULL);
+		ucchar projectName[512];
+		_wsplitpath(WStr(_Ip->GetCurFileName()), NULL, NULL, (wchar_t *)projectName, NULL);
 
 		// Add lightmap information in the lightmap log
 		COFile outputLog;
 		if (outputLightmapLog)
-			createLightmapLog (outputLog, gOptions.sExportLighting.c_str(), projectName, ZeNode.GetName());
+			createLightmapLog(outputLog, gOptions.sExportLighting.c_str(), ucstring(projectName).toUtf8().c_str(), MaxTStrToUtf8(ZeNode.GetName()).c_str());
 
 		// Update UV coords to Texture space
 		PutFaceUV1InTextureCoord( LightMap.w, LightMap.h, AllFaces.begin(), AllFaces.size() );
@@ -2559,7 +2559,7 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 			{
 				CTextureFile *pLightMap = new CTextureFile();
 				//string sSaveName = AllMeshBuilds[nNode].second->GetName();
-				string sSaveName = ZeNode.GetName();
+				string sSaveName = MCharStrToUtf8(ZeNode.GetName());
 				char tmp[32];
 				sSaveName += "_";
 				sprintf( tmp, "%d", nLightMapNb );
@@ -2628,13 +2628,12 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 						pLightMap->writeTGA (f, 32);
 					}
 				}
-				catch(Exception &e)
+				catch(const Exception &e)
 				{
 					if (gOptions.FeedBack != NULL)
 					{
-						char message[512];
-						sprintf (message, "Can't write the file %s : %s", sSaveName, e.what());
-						mprintf (message);
+						std::string message = toString("Can't write the file %s : %s", sSaveName.c_str(), e.what());
+						mprintf(_M("%s\n"), MaxTStrFromUtf8(message).data());
 					}
 				}
 

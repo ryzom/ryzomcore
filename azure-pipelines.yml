@@ -1,0 +1,42 @@
+jobs:
+  - job: ubuntu16
+    timeoutInMinutes: 120
+    pool:
+      vmImage: 'Ubuntu-16.04'
+    steps:
+    - script: |
+        sudo apt-get update
+        sudo apt-get install -y software-properties-common
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt-get update
+        sudo apt-get install cmake build-essential -y
+        sudo apt-get install gcc-8 g++-8 -y
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60
+        sudo apt-get install bison autoconf automake -y
+        sudo apt-get install libpng12-dev -y
+        sudo apt-get install libjpeg-dev -y
+        sudo apt-get install libgif-dev libfreetype6-dev -y
+        sudo apt-get install freeglut3-dev -y
+        sudo apt-get install liblua5.1-dev libluabind-dev libcpptest-dev -y
+        sudo apt-get install libogg-dev libvorbis-dev libopenal-dev -y
+        sudo apt-get install libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev -y
+        sudo apt-get install libmysqlclient-dev -y
+        sudo apt-get install libxml2-dev -y
+        sudo apt-get install libcurl4-openssl-dev libssl-dev -y
+        sudo apt-get install libsquish-dev -y
+        sudo apt-get install liblzma-dev -y
+        sudo apt-get install libgsf-1-dev -y
+        sudo apt-get install qtbase5-dev qttools5-dev qttools5-dev-tools
+      displayName: 'Dependencies'
+    - script: |
+        mkdir build
+        cmake --version
+        cd build
+        cmake -DWITH_STATIC=ON -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=ON -DWITH_LUA51=ON -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=ON -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_TOOLS=ON -DWITH_NEL_TOOLS=ON -DWITH_NELNS=ON -DWITH_NELNS_LOGIN_SYSTEM=ON -DWITH_NELNS_SERVER=ON -DWITH_QT5=ON -DWITH_LIBGSF=ON ../code
+        cat CMakeCache.txt
+      displayName: 'CMake'
+    - script: |
+        cd build
+        make -j`nproc`
+      displayName: 'Make'

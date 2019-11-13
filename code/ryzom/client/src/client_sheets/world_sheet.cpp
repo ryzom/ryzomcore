@@ -84,7 +84,7 @@ void CWorldSheet::build(const NLGEORGES::UFormElm &item)
 }
 
 //===============================================================================
-void CWorldSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CWorldSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(Name);
 	f.serialCont(ContLocs);
@@ -112,7 +112,7 @@ void SContLoc::build (const UFormElm *pItem)
 }
 
 //-----------------------------------------------
-void SContLoc::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void SContLoc::serial(NLMISC::IStream &f)
 {
 	f.serial(SelectionName);
 	f.serial(ContinentName);
@@ -156,7 +156,7 @@ void SMap::build(const NLGEORGES::UFormElm *pItem)
 }
 
 //-----------------------------------------------
-void SMap::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void SMap::serial(NLMISC::IStream &f)
 {
 	f.serial(Name);
 	f.serial(ContinentName);
@@ -176,7 +176,7 @@ void SMap::SChild::build(const NLGEORGES::UFormElm *pItem)
 }
 
 //-----------------------------------------------
-void SMap::SChild::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void SMap::SChild::serial(NLMISC::IStream &f)
 {
 	f.serial(Name);
 	f.serial(ZoneName);

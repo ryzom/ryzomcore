@@ -47,7 +47,7 @@ using namespace NLLIGO;
 
 #define DEPTH_SEARCH_MAX 8
 
-#define REGKEY_EDIT_PATCH "Software\\Nevrax\\Ryzom\\edit_patch"
+#define REGKEY_EDIT_PATCH _T("Software\\Nevrax\\Ryzom\\edit_patch")
 
 // Bank bitmaps
 CBankCont*	bankCont;
@@ -77,8 +77,7 @@ void WarningInvalidTileSet ()
 	if (!bWarningInvalidTileSet)
 	{
 		bWarningInvalidTileSet=true;
-		MessageBox (NULL, "The tile bank is not compatible with your zone.\nPlease use the good bank or erase and repaint the zone.", 
-			"Tile paint", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (NULL, _T("The tile bank is not compatible with your zone.\nPlease use the good bank or erase and repaint the zone."), _T("Tile paint"), MB_OK|MB_ICONEXCLAMATION);
 	}
 }
 
@@ -105,13 +104,13 @@ void enterPainter (CTileBank& banktoLoad)
 	{
 		DWORD len=4;
 		DWORD type;
-		RegQueryValueEx (hKey, "Background", 0, &type, (LPBYTE)&backGround, &len);
-		RegQueryValueEx (hKey, "Color1", 0, &type, (LPBYTE)&color1, &len);
-		RegQueryValueEx (hKey, "Color2", 0, &type, (LPBYTE)&color2, &len);
-		RegQueryValueEx (hKey, "Opa1", 0, &type, (LPBYTE)&opa1, &len);
-		RegQueryValueEx (hKey, "Opa2", 0, &type, (LPBYTE)&opa2, &len);
-		RegQueryValueEx (hKey, "Hard1", 0, &type, (LPBYTE)&hard1, &len);
-		RegQueryValueEx (hKey, "Hard2", 0, &type, (LPBYTE)&hard2, &len);
+		RegQueryValueEx (hKey, _T("Background"), 0, &type, (LPBYTE)&backGround, &len);
+		RegQueryValueEx (hKey, _T("Color1"), 0, &type, (LPBYTE)&color1, &len);
+		RegQueryValueEx (hKey, _T("Color2"), 0, &type, (LPBYTE)&color2, &len);
+		RegQueryValueEx (hKey, _T("Opa1"), 0, &type, (LPBYTE)&opa1, &len);
+		RegQueryValueEx (hKey, _T("Opa2"), 0, &type, (LPBYTE)&opa2, &len);
+		RegQueryValueEx (hKey, _T("Hard1"), 0, &type, (LPBYTE)&hard1, &len);
+		RegQueryValueEx (hKey, _T("Hard2"), 0, &type, (LPBYTE)&hard2, &len);
 		RegCloseKey (hKey);
 	}
 }
@@ -126,13 +125,13 @@ void exitPainter ()
 	HKEY hKey;
 	if (RegCreateKey(HKEY_CURRENT_USER, REGKEY_EDIT_PATCH, &hKey)==ERROR_SUCCESS)
 	{
-		RegSetValueEx(hKey, "Background", 0, REG_DWORD, (LPBYTE)&backGround, 4);
-		RegSetValueEx(hKey, "Color1", 0, REG_DWORD, (LPBYTE)&color1, 4);
-		RegSetValueEx(hKey, "Color2", 0, REG_DWORD, (LPBYTE)&color2, 4);
-		RegSetValueEx(hKey, "Opa1", 0, REG_DWORD, (LPBYTE)&opa1, 4);
-		RegSetValueEx(hKey, "Opa2", 0, REG_DWORD, (LPBYTE)&opa2, 4);
-		RegSetValueEx(hKey, "Hard1", 0, REG_DWORD, (LPBYTE)&hard1, 4);
-		RegSetValueEx(hKey, "Hard2", 0, REG_DWORD, (LPBYTE)&hard2, 4);
+		RegSetValueEx(hKey, _T("Background"), 0, REG_DWORD, (LPBYTE)&backGround, 4);
+		RegSetValueEx(hKey, _T("Color1"), 0, REG_DWORD, (LPBYTE)&color1, 4);
+		RegSetValueEx(hKey, _T("Color2"), 0, REG_DWORD, (LPBYTE)&color2, 4);
+		RegSetValueEx(hKey, _T("Opa1"), 0, REG_DWORD, (LPBYTE)&opa1, 4);
+		RegSetValueEx(hKey, _T("Opa2"), 0, REG_DWORD, (LPBYTE)&opa2, 4);
+		RegSetValueEx(hKey, _T("Hard1"), 0, REG_DWORD, (LPBYTE)&hard1, 4);
+		RegSetValueEx(hKey, _T("Hard2"), 0, REG_DWORD, (LPBYTE)&hard2, 4);
 		RegCloseKey (hKey);
 	}
 }
@@ -154,7 +153,7 @@ void drawVertexColorBox (float x0, float y0, float x1, float y1, CRGBA color, fl
 {
 	// Draw a white frame behind
 	CDRU::drawQuad (x0, y0, x1, y1, driver, CRGBA (0x40, 0x40, 0x40), CViewport());
-			
+
 	// Compute the colors with alpha to show the hardness
 	CRGBA fullFull=color;
 	CRGBA full=color;
@@ -223,9 +222,9 @@ void drawInterface (TModeMouse select, TModePaint mode, PaintPatchMod *pobj, IDr
 						CDRU::drawBitmap ( (float)(t%MOD_WIDTH)/(float)MOD_WIDTH, (float)(t/MOD_WIDTH)/(float)MOD_HEIGHT, 1.f/(float)MOD_WIDTH,
 							1.f/(float)MOD_HEIGHT, *texture, driver, CViewport(), false);
 					else
-						CDRU::drawQuad ( (float)(t%MOD_WIDTH)/(float)MOD_WIDTH, (float)(t/MOD_WIDTH)/(float)MOD_HEIGHT, 
+						CDRU::drawQuad ( (float)(t%MOD_WIDTH)/(float)MOD_WIDTH, (float)(t/MOD_WIDTH)/(float)MOD_HEIGHT,
 							(float)(t%MOD_WIDTH)/(float)MOD_WIDTH+1.f/(float)MOD_WIDTH,
-							(float)(t/MOD_WIDTH)/(float)MOD_HEIGHT+1.f/(float)MOD_HEIGHT, driver, 
+							(float)(t/MOD_WIDTH)/(float)MOD_HEIGHT+1.f/(float)MOD_HEIGHT, driver,
 							CRGBA (128, 128, 128), CViewport());
 				}
 			}
@@ -395,7 +394,7 @@ void drawInterface (TModeMouse select, TModePaint mode, PaintPatchMod *pobj, IDr
 		if ((pobj->CurrentTileSet!=-1)&&(mode==ModeTile))
 		{
 			// *** Draw the current group
-			ITexture* group[NL3D_CTILE_NUM_GROUP+1]={bankCont->allBitmap, bankCont->_0Bitmap, bankCont->_1Bitmap, bankCont->_2Bitmap, bankCont->_3Bitmap, 
+			ITexture* group[NL3D_CTILE_NUM_GROUP+1]={bankCont->allBitmap, bankCont->_0Bitmap, bankCont->_1Bitmap, bankCont->_2Bitmap, bankCont->_3Bitmap,
 								bankCont->_4Bitmap, bankCont->_5Bitmap, bankCont->_6Bitmap, bankCont->_7Bitmap, bankCont->_8Bitmap, bankCont->_9Bitmap,
 								bankCont->_10Bitmap, bankCont->_11Bitmap};
 
@@ -451,7 +450,7 @@ void makeVectMesh (std::vector<EPM_Mesh>& vectMesh, INodeTab& nodes, ModContextL
 
 	for (int i = 0; i < mcList.Count (); i++)
 	{
-		// 
+		//
 		PaintPatchData *patchData = (PaintPatchData*)mcList[i]->localData;
 		if (!patchData)
 			continue;
@@ -497,7 +496,7 @@ void transformDesc (tileDesc &desc, bool symmetry, uint rotate, uint mesh, uint 
 		CTileBank::TTileType type;
 		bank.getTileXRef (tile, tileSet, number, type);
 
-		// Transform the transfo		
+		// Transform the transfo
 		CPatchInfo::getTileSymmetryRotate (bank, desc.getLayer(0).Tile, tileSymmetry, tileRotate);
 
 		// Get the state of the layer 0
@@ -580,7 +579,7 @@ void transformInvDesc (tileDesc &desc, bool symmetry, uint rotate, uint mesh, ui
 	transformDesc (desc, symmetry, 0, mesh, tile, vectMesh);
 }
 
-void EPM_PaintMouseProc::SetTile (int mesh, int tile, const tileDesc& desc, std::vector<EPM_Mesh>& vectMesh, CLandscape* land, 
+void EPM_PaintMouseProc::SetTile (int mesh, int tile, const tileDesc& desc, std::vector<EPM_Mesh>& vectMesh, CLandscape* land,
 								  CNelPatchChanger& nelPatchChg, std::vector<CBackupValue>* backupStack, bool undo, bool updateDisplace)
 {
 	// Undo: get old value
@@ -601,7 +600,7 @@ void EPM_PaintMouseProc::SetTile (int mesh, int tile, const tileDesc& desc, std:
 		maxDesc.setDisplace (oldDesc.getDisplace());
 	}
 
-	// Transform tile 
+	// Transform tile
 	tileDesc copyDesc=maxDesc;
 	transformInvDesc (maxDesc, vectMesh[mesh].Symmetry, 4-vectMesh[mesh].Rotate, mesh, tile, vectMesh);
 	transformInvDesc (copyDesc, vectMesh[mesh].Symmetry, 0, mesh, tile, vectMesh);
@@ -806,7 +805,7 @@ bool EPM_PaintMouseProc::isLocked256 (PaintPatchMod *pobj, EPM_PaintTile* pTile)
 	return false;
 }
 
-bool EPM_PaintMouseProc::ClearATile ( EPM_PaintTile* pTile, std::vector<EPM_Mesh>& vectMesh, 
+bool EPM_PaintMouseProc::ClearATile ( EPM_PaintTile* pTile, std::vector<EPM_Mesh>& vectMesh,
 								   CLandscape* land, CNelPatchChanger& nelPatchChg, bool _256, bool _force128)
 {
 	// ** 1) Backup of the tile
@@ -865,7 +864,7 @@ bool EPM_PaintMouseProc::ClearATile ( EPM_PaintTile* pTile, std::vector<EPM_Mesh
 		// Check locked
 		if (isLocked (pobj, pTile))
 			return false;
-		
+
 		// Cleared descriptor
 		tileDesc desc;
 		desc.setTile (0, 0, 0, tileIndex (0,0), tileIndex (0,0), tileIndex (0,0));
@@ -883,8 +882,8 @@ bool EPM_PaintMouseProc::ClearATile ( EPM_PaintTile* pTile, std::vector<EPM_Mesh
 	return true;
 }
 
-bool EPM_PaintMouseProc::PutATile ( EPM_PaintTile* pTile, int tileSet, int curRotation, const CTileBank& bank, 
-								   bool selectCycle, std::set<EPM_PaintTile*>& visited, std::vector<EPM_Mesh>& vectMesh, 
+bool EPM_PaintMouseProc::PutATile ( EPM_PaintTile* pTile, int tileSet, int curRotation, const CTileBank& bank,
+								   bool selectCycle, std::set<EPM_PaintTile*>& visited, std::vector<EPM_Mesh>& vectMesh,
 								   CLandscape* land, CNelPatchChanger& nelPatchChg, bool _256)
 {
 	// If tile 256, must have delta pos aligned on 2x2
@@ -913,7 +912,7 @@ bool EPM_PaintMouseProc::PutATile ( EPM_PaintTile* pTile, int tileSet, int curRo
 	int patch=pTile->tile/NUM_TILE_SEL;
 
 	// Check if we are in patch subobject and if this patch is selected
-	
+
 	if ((vectMesh[pTile->Mesh].PMesh->selLevel==EP_PATCH)&&(!vectMesh[pTile->Mesh].PMesh->patchSel[patch]))
 		return false;
 
@@ -987,7 +986,7 @@ bool EPM_PaintMouseProc::PutATile ( EPM_PaintTile* pTile, int tileSet, int curRo
 			desc.setTile (1, 1+((-curRotation-1)&3), 0, tileIndex (nTile, (curRotation-nRot)&3), tileIndex (0,0), tileIndex (0,0));
 			nlassert (other);
 			SetTile (other->Mesh, other->tile, desc, vectMesh, land, nelPatchChg, &backupStack);
-			
+
 			// Add to visited tile set
 			visited.insert (other);
 
@@ -996,7 +995,7 @@ bool EPM_PaintMouseProc::PutATile ( EPM_PaintTile* pTile, int tileSet, int curRo
 			desc.setTile (1, 1+((-curRotation+1)&3), 0, tileIndex (nTile, (curRotation-nRot)&3), tileIndex (0,0), tileIndex (0,0));
 			nlassert (other);
 			SetTile (other->Mesh, other->tile, desc, vectMesh, land, nelPatchChg, &backupStack);
-			
+
 			// Add to visited tile set
 			visited.insert (other);
 
@@ -1006,7 +1005,7 @@ bool EPM_PaintMouseProc::PutATile ( EPM_PaintTile* pTile, int tileSet, int curRo
 			nlassert (other);
 			nlassert (other==pTile->getBottomRight256 (0, nRot));
 			SetTile (other->Mesh, other->tile, desc, vectMesh, land, nelPatchChg, &backupStack);
-			
+
 			// Add to visited tile set
 			visited.insert (other);
 		}
@@ -1038,14 +1037,14 @@ bool EPM_PaintMouseProc::PutATile ( EPM_PaintTile* pTile, int tileSet, int curRo
 			case 0:
 				// Main
 				if (pTile->voisins[3])
-					if (!PropagateBorder (pTile->voisins[3], (pTile->rotate[3]+curRotation)&3, tileSet, visited, bank, 
+					if (!PropagateBorder (pTile->voisins[3], (pTile->rotate[3]+curRotation)&3, tileSet, visited, bank,
 							vectMesh, land, nelPatchChg, backupStack))
 					{
 						bContinue=false;
 						goto zap;
 					}
 				if (pTile->voisins[0])
-					if (!PropagateBorder (pTile->voisins[0], (pTile->rotate[0]+curRotation)&3, tileSet, visited, bank, 
+					if (!PropagateBorder (pTile->voisins[0], (pTile->rotate[0]+curRotation)&3, tileSet, visited, bank,
 							vectMesh, land, nelPatchChg, backupStack))
 					{
 						bContinue=false;
@@ -1213,13 +1212,13 @@ zap:;
 			for (uint corner=0; corner<4; corner++)
 			{
 				finalCorner[corner].TileSet = -1;
-				
+
 				// All the same or empty ?
 				for (uint layer=0; layer<4; layer++)
 				{
 					// Compatible ?
-					if ( ( finalCorner[corner].TileSet == -1 ) 
-						|| ( tileSetCases[layer][corner].TileSet == -1 ) 
+					if ( ( finalCorner[corner].TileSet == -1 )
+						|| ( tileSetCases[layer][corner].TileSet == -1 )
 						|| ( tileSetCases[layer][corner] == finalCorner[corner] ) )
 					{
 						// Copy the tile
@@ -1266,7 +1265,7 @@ zap:;
 							bFind=true;
 					}
 				}
-				
+
 				// no, ok push it back.
 				if (!bFind)
 					setIndex.push_back (finalCorner[v]);
@@ -1370,7 +1369,7 @@ zap:;
 					finalIndex[l].Tile=tileTrans->getTile();
 				}
 			}
-			
+
 			// Set the border desc
 			tileDesc desc;
 			GetTile (pTile->Mesh, pTile->tile, desc, vectMesh, land);
@@ -1404,8 +1403,8 @@ zap:;
 
 /*-------------------------------------------------------------------*/
 
-void EPM_PaintMouseProc::PutADisplacetile ( EPM_PaintTile* pTile, const CTileBank& bank, 
-								   std::vector<EPM_Mesh>& vectMesh, 
+void EPM_PaintMouseProc::PutADisplacetile ( EPM_PaintTile* pTile, const CTileBank& bank,
+								   std::vector<EPM_Mesh>& vectMesh,
 								   CLandscape* land, CNelPatchChanger& nelPatchChg)
 {
 	// Get tile description
@@ -1432,8 +1431,8 @@ void EPM_PaintMouseProc::PutADisplacetile ( EPM_PaintTile* pTile, const CTileBan
 
 /*-------------------------------------------------------------------*/
 
-bool EPM_PaintMouseProc::GetBorderDesc (EPM_PaintTile* tile, tileSetIndex *pVoisinCorner, CTileSet::TFlagBorder pBorder[4][3], 
-										tileDesc *pVoisinIndex, const CTileBank& bank, std::vector<EPM_Mesh>& vectMesh, 
+bool EPM_PaintMouseProc::GetBorderDesc (EPM_PaintTile* tile, tileSetIndex *pVoisinCorner, CTileSet::TFlagBorder pBorder[4][3],
+										tileDesc *pVoisinIndex, const CTileBank& bank, std::vector<EPM_Mesh>& vectMesh,
 										CNelPatchChanger& nelPatchChg, CLandscape *land)
 {
 	// Tile info
@@ -1446,7 +1445,7 @@ bool EPM_PaintMouseProc::GetBorderDesc (EPM_PaintTile* tile, tileSetIndex *pVois
 	tileIndex pIndexx[3];
 	for (int nL=0; nL<nLayer; nL++)
 	{
-		// GetTileIndex 
+		// GetTileIndex
 		tileIndex index=backup.getLayer (nL);
 		pIndexx[nL]=index;
 
@@ -1516,7 +1515,7 @@ const CTileSetTransition* EPM_PaintMouseProc::FindTransition (int nTileSet, int 
 	}
 
 	// Look for good tile..
-	CTileSet::TTransition nTransition=CTileSet::getTransitionTile 
+	CTileSet::TTransition nTransition=CTileSet::getTransitionTile
 		(pBorderConverted[3], pBorderConverted[1], pBorderConverted[0], pBorderConverted[2]);
 	//nlassert (nTransition!=CTileSet::notfound);
 	if (nTransition==CTileSet::notfound)
@@ -1538,7 +1537,7 @@ int EPM_PaintMouseProc::getLayer (EPM_PaintTile* tile, int border, int tileSet, 
 		tileIndex index=desc.getLayer(o);
 		index.Rotate-=tile->rotate[border];
 		index.Rotate&=3;
-		
+
 		CTileBank::TTileType type;
 		int TileSet, number;
 
@@ -1555,8 +1554,8 @@ int EPM_PaintMouseProc::getLayer (EPM_PaintTile* tile, int border, int tileSet, 
 
 /*-------------------------------------------------------------------*/
 
-bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, int curTileSet, std::set<EPM_PaintTile*>& visited, 
-										  const CTileBank& bank, std::vector<EPM_Mesh>& vectMesh, 
+bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, int curTileSet, std::set<EPM_PaintTile*>& visited,
+										  const CTileBank& bank, std::vector<EPM_Mesh>& vectMesh,
 										  CLandscape* land, CNelPatchChanger& nelPatchChg, std::vector<CBackupValue>& backupStack, bool recurseNoDiff)
 {
 	// 1) Already visited
@@ -1699,7 +1698,7 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 							}
 							extraOrdinary[v]++;
 							bDiff=true;
-						}					
+						}
 					}
 					else
 					{
@@ -1800,7 +1799,7 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 					(desc1.isEmpty())||
 					(desc1.getCase()!=(1+((nCase+3)&3)))||
 					(desc1.getLayer(0).Tile!=backup.getLayer(0).Tile)||
-					(desc1.getLayer(0).Rotate!=((backup.getLayer(0).Rotate-rot)&3))					
+					(desc1.getLayer(0).Rotate!=((backup.getLayer(0).Rotate-rot)&3))
 					)
 					bDiff=true;
 			}
@@ -1869,7 +1868,7 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 					bFind=true;
 			}
 		}
-		
+
 		// no, ok push it back.
 		if (!bFind)
 			setIndex.push_back (nCorner[v]);
@@ -1878,7 +1877,7 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 	std::sort (setIndex.begin(), setIndex.end());
 
 	// Check validity
-	
+
 	// A) Check for more than 3 materials
 	if (setIndex.size()>3)
 		return false;
@@ -1982,18 +1981,18 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 							// Last on the stack ?
 							if (*ite<nCorner[c])
 							{
-								// no, 
+								// no,
 								wanted=CTileSet::_1000;
 								invWanted=CTileSet::_1110;
 							}
 							else
 							{
-								// yes, 
+								// yes,
 								wanted=CTileSet::_1110;
 								invWanted=CTileSet::_1000;
 							}
 							border[c]=wanted;
-							
+
 							// If voisin already visited, force his transition to 3/4
 							if (tile->voisins[c])
 							{
@@ -2035,7 +2034,7 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 												return false;
 
 											// Set the tile..
-											SetTile (tile->voisins[c]->Mesh, tile->voisins[c]->tile, pVoisinIndex, vectMesh, 
+											SetTile (tile->voisins[c]->Mesh, tile->voisins[c]->tile, pVoisinIndex, vectMesh,
 												land, nelPatchChg, &backupStack);
 										}
 										/*if (pBorder[edge][nLayer]==CTileSet::_0001)
@@ -2046,11 +2045,11 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 								}
 							}
 						}
-						// Normal, 
+						// Normal,
 						else
 						{
 							// Voisin visited or frozen ?
-							if (tile->voisins[c]&&((visited.find (tile->voisins[c])!=visited.end()) /*|| 
+							if (tile->voisins[c]&&((visited.find (tile->voisins[c])!=visited.end()) /*||
 								(vectMesh[tile->voisins[c]->Mesh].Node->IsFrozen())*/ ))
 							{
 								// Yes, visited. Copy the border
@@ -2058,7 +2057,7 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 								CTileSet::TFlagBorder pBorder[4][3];
 								tileDesc pVoisinIndex;
 								bool bOk=GetBorderDesc (tile->voisins[c], pVoisinCorner, pBorder, &pVoisinIndex, bank, vectMesh, nelPatchChg, land);
-								
+
 								// Should not be empty
 								nlassert (bOk);
 								int edge=(2+c+tile->rotate[c])&3;
@@ -2076,7 +2075,7 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 							else
 							{
 								// No, not yet visited
-								
+
 								// Choose transition by random
 								bool bComputed=false;
 								if ((bVisited[c]||!recurseNoDiff)&&bSameEdge[c])
@@ -2087,7 +2086,7 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 									CTileSet::TFlagBorder pBorder[4][3];
 									tileDesc pVoisinIndex;
 									bool bOk=GetBorderDesc (tile->voisins[c], pVoisinCorner, pBorder, &pVoisinIndex, bank, vectMesh, nelPatchChg, land);
-								
+
 									// ok voisin is here ?
 									if (bOk)
 									{
@@ -2141,18 +2140,18 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 							// Last on the stack ?
 							if (*ite<nCorner[c])
 							{
-								// no, 
+								// no,
 								wanted=CTileSet::_0001;
 								invWanted=CTileSet::_0111;
 							}
 							else
 							{
-								// yes, 
+								// yes,
 								wanted=CTileSet::_0111;
 								invWanted=CTileSet::_0001;
 							}
 							border[c]=wanted;
-							
+
 							// If voisin already visited, force his transition to 3/4
 							if (tile->voisins[c])//&&visited.find (tile->voisins[c])!=visited.end())
 							{
@@ -2194,7 +2193,7 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 												return false;
 
 											// Set the tile..
-											SetTile (tile->voisins[c]->Mesh, tile->voisins[c]->tile, pVoisinIndex, vectMesh, 
+											SetTile (tile->voisins[c]->Mesh, tile->voisins[c]->tile, pVoisinIndex, vectMesh,
 												land, nelPatchChg, &backupStack);
 										}
 										/*if (pBorder[edge][nLayer]==CTileSet::_1000)
@@ -2206,7 +2205,7 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 							}
 
 						}
-						// Normal, 
+						// Normal,
 						else
 						{
 							// Voisin visited ?
@@ -2217,7 +2216,7 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 								CTileSet::TFlagBorder pBorder[4][3];
 								tileDesc pVoisinIndex;
 								bool bOk=GetBorderDesc (tile->voisins[c], pVoisinCorner, pBorder, &pVoisinIndex, bank, vectMesh, nelPatchChg, land);
-								
+
 								// Should not be empty
 								nlassert (bOk);
 								int edge=(2+c+tile->rotate[c])&3;
@@ -2236,7 +2235,7 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 							else
 							{
 								// No, not yet visited
-								
+
 								// Choose transition by random
 								bool bComputed=false;
 								if ((bVisited[c]||!recurseNoDiff)&&bSameEdge[c])
@@ -2247,7 +2246,7 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 									CTileSet::TFlagBorder pBorder[4][3];
 									tileDesc pVoisinIndex;
 									bool bOk=GetBorderDesc (tile->voisins[c], pVoisinCorner, pBorder, &pVoisinIndex, bank, vectMesh, nelPatchChg, land);
-								
+
 									// ok voisin is here ?
 									if (bOk)
 									{
@@ -2294,7 +2293,7 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 		}
 		ite++;
 	}
-	
+
 	// Set the border desc
 	tileDesc desc;
 	GetTile (tile->Mesh, tile->tile, desc, vectMesh, land);
@@ -2342,22 +2341,22 @@ bool EPM_PaintMouseProc::PropagateBorder (EPM_PaintTile* tile, int curRotation, 
 	{
 		// Voisin not already visited and not frozen ?
 		if ((tile->voisins[v]) && (visited.find (tile->voisins[v])==visited.end()) /* && (vectMesh[tile->voisins[v]->Mesh].Node->IsFrozen()==0)*/)
-		{	
+		{
 			// ok.. not visited, border with modified corner ?
 			if (bModified[v]||bModified[(v+1)&3]||(!bSameEdge[v]))
-			if (!PropagateBorder (tile->voisins[v], (tile->rotate[v]+curRotation)&3, curTileSet, visited, bank, vectMesh, land, nelPatchChg, 
+			if (!PropagateBorder (tile->voisins[v], (tile->rotate[v]+curRotation)&3, curTileSet, visited, bank, vectMesh, land, nelPatchChg,
 									backupStack, false))
 			{
 				bContinue=false;
 				break;
-			}				
+			}
 		}
 	}
 	if (!bContinue)
-	{		
+	{
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -2414,8 +2413,8 @@ uint8 EPM_PaintMouseProc::CalcRotPath (EPM_PaintTile* from, EPM_PaintTile* to, i
 static TModePaint nModeTexture=ModeTile;
 static TModeMouse modeSelect=ModePaint;
 
-void EPM_PaintMouseProc::RecursTile (EPM_PaintTile* pTile, const CTileBank& bank, int tileSet, std::vector<EPM_Mesh>& vectMesh, CLandscape* land, 
-									 int recurs, std::set<EPM_PaintTile*>& alreadyRecursed, bool first, int rotation, 
+void EPM_PaintMouseProc::RecursTile (EPM_PaintTile* pTile, const CTileBank& bank, int tileSet, std::vector<EPM_Mesh>& vectMesh, CLandscape* land,
+									 int recurs, std::set<EPM_PaintTile*>& alreadyRecursed, bool first, int rotation,
 									 CNelPatchChanger& nelPatchChg, bool _256)
 {
 	if (alreadyRecursed.find (pTile)==alreadyRecursed.end())
@@ -2438,20 +2437,20 @@ void EPM_PaintMouseProc::RecursTile (EPM_PaintTile* pTile, const CTileBank& bank
 			if (_256)
 			{
 				if (pTile->get2Voisin(i))
-					RecursTile (pTile->get2Voisin(i), bank, tileSet, vectMesh, land, recurs-2, alreadyRecursed, false, 
+					RecursTile (pTile->get2Voisin(i), bank, tileSet, vectMesh, land, recurs-2, alreadyRecursed, false,
 						(rotation+pTile->get2VoisinRotate(i))&3, nelPatchChg, true);
 			}
 			else
 			{
 				if (pTile->voisins[i])
-					RecursTile (pTile->voisins[i], bank, tileSet, vectMesh, land, recurs-1, alreadyRecursed, false, (rotation+pTile->rotate[i])&3, 
+					RecursTile (pTile->voisins[i], bank, tileSet, vectMesh, land, recurs-1, alreadyRecursed, false, (rotation+pTile->rotate[i])&3,
 						nelPatchChg, false);
 			}
 		}
 	}
 }
 
-BOOL EPM_PaintMouseProc::PutDisplace (int tile, int mesh, const CTileBank& bank, std::vector<EPM_Mesh>& vectMesh, CLandscape* land, 
+BOOL EPM_PaintMouseProc::PutDisplace (int tile, int mesh, const CTileBank& bank, std::vector<EPM_Mesh>& vectMesh, CLandscape* land,
 								  int recurs, std::set<EPM_PaintTile*>& alreadyRecursed, CNelPatchChanger& nelPatchChg)
 {
 	static sint32 MeshOld=-1;
@@ -2461,7 +2460,7 @@ BOOL EPM_PaintMouseProc::PutDisplace (int tile, int mesh, const CTileBank& bank,
 	EPM_PaintTile* pTile=&metaTile[mesh][tile];
 
 	// Ok recurse tiles
-	RecursTile (pTile, bank, 0, vectMesh, land, brushValue[PaintPatchMod::brushSize], alreadyRecursed, true, 
+	RecursTile (pTile, bank, 0, vectMesh, land, brushValue[PaintPatchMod::brushSize], alreadyRecursed, true,
 		EPM_PaintMouseProc::Rotation, nelPatchChg, false);
 
 	MeshOld=mesh;
@@ -2470,7 +2469,7 @@ BOOL EPM_PaintMouseProc::PutDisplace (int tile, int mesh, const CTileBank& bank,
 	return TRUE;
 }
 
-BOOL EPM_PaintMouseProc::PutTile (int tile, int mesh, bool first, const CTileBank& bank, int tileSet, std::vector<EPM_Mesh>& vectMesh, CLandscape* land, 
+BOOL EPM_PaintMouseProc::PutTile (int tile, int mesh, bool first, const CTileBank& bank, int tileSet, std::vector<EPM_Mesh>& vectMesh, CLandscape* land,
 								  int recurs, std::set<EPM_PaintTile*>& alreadyRecursed, CNelPatchChanger& nelPatchChg, bool _256)
 {
 	static sint32 MeshOld=-1;
@@ -2524,7 +2523,7 @@ BOOL EPM_PaintMouseProc::PutTile (int tile, int mesh, bool first, const CTileBan
 			std::set<EPM_PaintTile*> alreadyRecursed;
 
 			// Ok recurse tiles
-			RecursTile (pTile, bank, tileSet, vectMesh, land, brushValue[PaintPatchMod::brushSize], alreadyRecursed, first, 
+			RecursTile (pTile, bank, tileSet, vectMesh, land, brushValue[PaintPatchMod::brushSize], alreadyRecursed, first,
 				EPM_PaintMouseProc::Rotation, nelPatchChg, _256);
 		}
 		MeshOld=mesh;
@@ -2816,12 +2815,12 @@ void	mainproc(CScene& scene, CEventListenerAsync& AsyncListener, CEvent3dMouseLi
 	if (AsyncListener.isKeyPushed ((TKey)PainterKeys[SelectColorBrush]))
 	{
 		// Create a dialog filter
-		static char szFilter[] = 
-			"Targa Files (*.tga)\0*.tga\0"
-			"All Files (*.*)\0*.*\0\0";
+		static TCHAR szFilter[] =
+			_T("Targa Files (*.tga)\0*.tga\0")
+			_T("All Files (*.*)\0*.*\0\0");
 
 		// Filename buffer
-		char buffer[65535];
+		TCHAR buffer[65535];
 		buffer[0]=0;
 
 		// Fill the (big) struct
@@ -2834,13 +2833,13 @@ void	mainproc(CScene& scene, CEventListenerAsync& AsyncListener, CEvent3dMouseLi
 		openFile.lpstrFile = buffer;
 		openFile.nMaxFile = 65535;
 		openFile.Flags = OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_EXPLORER;
-		openFile.lpstrDefExt = "*.tga";
+		openFile.lpstrDefExt = _T("*.tga");
 
 		// Open the dialog
 		if (GetOpenFileName(&openFile))
-		{		
+		{
 			// Load the file
-			paintColor.loadBrush (buffer);
+			paintColor.loadBrush (MCharStrToUtf8(buffer));
 			paintColor.setBrushMode (true);
 		}
 	}
@@ -2992,7 +2991,7 @@ void	mainproc(CScene& scene, CEventListenerAsync& AsyncListener, CEvent3dMouseLi
 
 		t0= t1;
 	}
-		
+
 	// Draw interface
 	drawInterface (modeSelect, nModeTexture, pData->pobj, driver, landscape, paintColor);
 
@@ -3017,7 +3016,7 @@ public:
 	bool					WindowActive;
 	CPaintColor				PaintColor;
 public:
-	MouseListener (IObjParam *ip, CCamera *camera, CViewport *viewport, PaintPatchMod *pobj, EPM_PaintMouseProc *eproc, CLandscape* land, 
+	MouseListener (IObjParam *ip, CCamera *camera, CViewport *viewport, PaintPatchMod *pobj, EPM_PaintMouseProc *eproc, CLandscape* land,
 					CEventListenerAsync* async, CEvent3dMouseListener* mouseList, std::vector<EPM_Mesh>& vectMesh, TimeValue t)
 		: PaintColor (pobj, land, &bankCont->Undo, eproc), _FillTile (pobj, land, &bankCont->Undo, eproc), _VectMesh(vectMesh)
 	{
@@ -3064,7 +3063,7 @@ private:
 				if (pressed&&((mouse->Button&rightButton)&&((mouse->Button&(ctrlButton|shiftButton|altButton))==0)))
 				{
 					pressed=false;
-								
+
 					// Undo step
 					bankCont->Undo.pushUndo ();
 
@@ -3100,13 +3099,13 @@ private:
 									if (nModeTexture==ModeTile)
 									{
 										// Put the tile
-										_Eproc->PutTile (tile1, mesh1, true, bank, _Pobj->CurrentTileSet, _VectMesh, _Land, brushValue[PaintPatchMod::brushSize], 
+										_Eproc->PutTile (tile1, mesh1, true, bank, _Pobj->CurrentTileSet, _VectMesh, _Land, brushValue[PaintPatchMod::brushSize],
 											alreadyRecursed, nelPatchChg, _Pobj->tileSize!=0);
 									}
 									else // (nModeTexture==ModeDisplace)
-									{										
+									{
 										// Put the tile
-										_Eproc->PutDisplace (tile1, mesh1, bank, _VectMesh, _Land, brushValue[PaintPatchMod::brushSize], 
+										_Eproc->PutDisplace (tile1, mesh1, bank, _VectMesh, _Land, brushValue[PaintPatchMod::brushSize],
 											alreadyRecursed, nelPatchChg);
 									}
 
@@ -3142,7 +3141,7 @@ private:
 							// Paint mode
 							if (nModeTexture==ModeTile)
 								// Fill this patch with the current tile
-								_FillTile.fillTile (mesh1, patch, _VectMesh, _Pobj->CurrentTileSet, _Pobj->TileFillRotation, _Pobj->TileGroup, _Pobj->tileSize!=0, 
+								_FillTile.fillTile (mesh1, patch, _VectMesh, _Pobj->CurrentTileSet, _Pobj->TileFillRotation, _Pobj->TileGroup, _Pobj->tileSize!=0,
 													bank);
 							else if (nModeTexture==ModeColor)
 								// Fill this patch with the current color
@@ -3189,7 +3188,7 @@ private:
 				{
 					pressed = false;
 					_Pobj->ShowCurrentState = false;
-					
+
 					// Undo step
 					bankCont->Undo.pushUndo ();
 				}
@@ -3223,13 +3222,13 @@ private:
 									if (nModeTexture==ModeTile)
 									{
 										// Put the tile
-										_Eproc->PutTile (tile2, mesh2, false, bank, _Pobj->CurrentTileSet, _VectMesh, _Land, 
+										_Eproc->PutTile (tile2, mesh2, false, bank, _Pobj->CurrentTileSet, _VectMesh, _Land,
 											brushValue[PaintPatchMod::brushSize], alreadyRecursed, nelPatchChg, _Pobj->tileSize!=0);
 									}
 									else // (nModeTexture==ModeDisplace)
-									{										
+									{
 										// Put the tile
-										_Eproc->PutDisplace (tile2, mesh2, bank, _VectMesh, _Land, brushValue[PaintPatchMod::brushSize], 
+										_Eproc->PutDisplace (tile2, mesh2, bank, _VectMesh, _Land, brushValue[PaintPatchMod::brushSize],
 											alreadyRecursed, nelPatchChg);
 									}
 
@@ -3300,7 +3299,7 @@ private:
 							_Pobj->CurrentTileSet=tileSetSelector.getTileSet (tile-1);
 							_Pobj->DisplaceTileSet=_Pobj->CurrentTileSet;
 						}
-					}			
+					}
 				}
 
 				// Mode displace ?
@@ -3309,7 +3308,7 @@ private:
 					if ((tile>=0)&&(tile<CTileSet::CountDisplace))
 					{
 						_Pobj->DisplaceTile=tile;
-					}			
+					}
 				}
 			}
 		}
@@ -3346,7 +3345,7 @@ void MouseListener::pick (int mesh, int tile, const CVector& hit, TModePaint mod
 			// Pickup a displace ?
 			else
 			{
-				// Get the displace tile index 
+				// Get the displace tile index
 				_Pobj->DisplaceTile=desc.getDisplace ();
 				_Pobj->DisplaceTileSet=tileSet;
 			}
@@ -3523,7 +3522,7 @@ void EPM_PaintCMode::DoPaint ()
 	static float best = 10000.f;
 
 	// Set local to english
-	setlocale (LC_NUMERIC, "English");
+	setlocale (LC_NUMERIC, "C");
 
 	if (pobj->hOpsPanel)
 	{
@@ -3578,7 +3577,7 @@ void EPM_PaintCMode::DoPaint ()
 				int nV=1<<rpatch->getUIPatch (p).NbTilesV;
 				for (int u=0; u<=nU; u++)
 				for (int v=0; v<=nV; v++)
-				{					
+				{
 					Point3 pos=patch->patches[p].interp (patch, (float)u/(float)(nU), (float)v/(float)(nV));
 					pos=pos*(vectMesh[i].Node->GetObjectTM (t));
 					if (fMaxX<pos.x)
@@ -3644,7 +3643,7 @@ void EPM_PaintCMode::DoPaint ()
 					pTile->rotate[2]=0;
 					pTile->u=u;
 					pTile->v=v;
-					
+
 					// Compute bouding box of the tile
 					fMinX=FLT_MAX;
 					fMinY=FLT_MAX;
@@ -3666,7 +3665,7 @@ void EPM_PaintCMode::DoPaint ()
 					pTile->Center=(maxToNel (pos[0])+maxToNel (pos[1])+maxToNel (pos[2])+maxToNel (pos[3]))/4.f;
 
 					// Store its radius
-					pTile->Radius=std::max 
+					pTile->Radius=std::max
 									(
 										std::max ( (maxToNel (pos[0])-pTile->Center).norm(), (maxToNel (pos[1])-pTile->Center).norm() ),
 										std::max ( (maxToNel (pos[2])-pTile->Center).norm(), (maxToNel (pos[3])-pTile->Center).norm() )
@@ -3721,7 +3720,7 @@ void EPM_PaintCMode::DoPaint ()
 					{
 					 	std::string error = NLMISC::toString("Invalid edge '%i' with value '%i' in patch '%i' in PatchMesh", p, mYedge, e);
 					 	nlwarning(error.c_str());
-					 	MessageBox(NULL, error.c_str(), "NeL Patch Painter", MB_OK | MB_ICONSTOP);
+					 	MessageBox(NULL, MaxTStrFromUtf8(error).data(), _T("NeL Patch Painter"), MB_OK | MB_ICONSTOP);
 					 	return;
 					}
 #if (MAX_RELEASE < 4000)
@@ -3884,8 +3883,8 @@ void EPM_PaintCMode::DoPaint ()
 					}
 					if (patchVoisin.patch!=-1)
 					{
-						std::string first = vectMesh[i].Node->GetName();
-						std::string second = vectMesh[patchVoisin.Mesh].Node->GetName();
+						std::string first = MCharStrToUtf8(vectMesh[i].Node->GetName());
+						std::string second = MCharStrToUtf8(vectMesh[patchVoisin.Mesh].Node->GetName());
 						int rot = (2-((vectMesh[i].Symmetry)?(2-e):e)+((vectMesh[patchVoisin.Mesh].Symmetry)?(2-edgeVoisin):edgeVoisin))&3;
 						int nU = 1 << rpatch->getUIPatch (p).NbTilesU;
 						int nV = 1 << rpatch->getUIPatch (p).NbTilesV;
@@ -3959,7 +3958,7 @@ void EPM_PaintCMode::DoPaint ()
 					pTile->locked = 0;
 
 					// Check that neighbor tiles are not frozen
-					uint neighbor;					
+					uint neighbor;
 					for (neighbor=0; neighbor<4; neighbor++)
 					{
 						// Neighbor exist ?
@@ -3979,7 +3978,7 @@ void EPM_PaintCMode::DoPaint ()
 
 
 		std::string sName=GetBankPathName ();
-		if (sName!="")
+		if (!sName.empty())
 		{
 			CIFile file;
 			if (file.open (sName))
@@ -3990,9 +3989,9 @@ void EPM_PaintCMode::DoPaint ()
 					bank.serial (file);
 					bank.computeXRef ();
 				}
-				catch (EStream& stream)
+				catch (const EStream& stream)
 				{
-					MessageBox (NULL, stream.what(), "Error", MB_OK|MB_ICONEXCLAMATION);
+					MessageBox (NULL, MaxTStrFromUtf8(stream.what()).data(), _T("Error"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 		}
@@ -4010,7 +4009,7 @@ void EPM_PaintCMode::DoPaint ()
 		pData->pobj=pobj;
 		pData->center=center;
 		pData->T=t;
-		
+
 		myThread (pData);		// Do it without thread
 
 		// Invalidate all objects
@@ -4035,7 +4034,7 @@ void EPM_PaintCMode::DoPaint ()
 			patchData->SetFlag(EPD_BEENDONE, TRUE);
 		}
 
-		theHold.Accept("Patch change");
+		theHold.Accept(_M("Patch change"));
 
 		nodes.DisposeTemporary();
 		pobj->ClearPatchDataFlag(mcList, EPD_BEENDONE);
@@ -4058,38 +4057,34 @@ bool loadLigoConfigFile (CLigoConfig& config, Interface& it)
 	if (hModule)
 	{
 		// Get the path
-		char sModulePath[256];
+		TCHAR sModulePath[256];
 		int res=GetModuleFileName(hModule, sModulePath, 256);
 		// Success ?
 		if (res)
 		{
 			// Path
-			char sDrive[256];
-			char sDir[256];
-			_splitpath (sModulePath, sDrive, sDir, NULL, NULL);
-			_makepath (sModulePath, sDrive, sDir, "ligoscape", ".cfg");
+			std::string modulePath = NLMISC::CFile::getPath(MCharStrToUtf8(sModulePath)) + "ligoscape.cfg";
+
 			try
 			{
 				// Load the config file
-				config.readConfigFile (sModulePath, false);
+				config.readConfigFile (modulePath, false);
 				// ok
 				return true;
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				// Print an error message
-				char msg[512];
-				smprintf (msg, 512, "Error loading the config file ligoscape.cfg: %s", e.what());
-				nlwarning (msg);
+				nlwarning("Error loading the config file ligoscape.cfg: %s", e.what());
 			}
 		}
 	}
 	// Can't found the module
 	return false;
 }
-	
+
 DWORD WINAPI myThread (LPVOID vData)
-{	
+{
 	// Mega try
 	try
 	{
@@ -4100,10 +4095,13 @@ DWORD WINAPI myThread (LPVOID vData)
 		nlassert (pData->eproc->ip);
 
 		// Viewport parameters
-		ViewExp*	vp;
 		Matrix3		affineTM;
 		float		minx,maxx,miny,maxy;
-		vp=pData->eproc->ip->GetActiveViewport();
+#if MAX_VERSION_MAJOR >= 19
+		ViewExp *vp = &pData->eproc->ip->GetActiveViewExp();
+#else
+		ViewExp *vp = pData->eproc->ip->GetActiveViewport();
+#endif
 		vp->GetAffineTM(affineTM);
 		if ( vp->IsPerspView() )
 		{
@@ -4111,7 +4109,7 @@ DWORD WINAPI myThread (LPVOID vData)
 		}
 
 		// The scene
-		
+
 		// Loaf cfg files
 		LoadKeyCfg ();
 		LoadVarCfg ();
@@ -4157,7 +4155,7 @@ DWORD WINAPI myThread (LPVOID vData)
 					{
 						// Build skined ?
 						bool skined=false;
-						
+
 						// Export the shape
 						IShape *pShape;
 						pShape=export_.buildShape (*pNode, pData->T, NULL, true);
@@ -4195,7 +4193,7 @@ DWORD WINAPI myThread (LPVOID vData)
 			CMatrix	mat;
 			mat.identity();
 			CVector	I,J,K,P;
-			
+
 			Matrix3 matInvert;
 			matInvert.SetRow (0, Point3(1.f, 0.f, 0.f));
 			matInvert.SetRow (1, Point3(0.f, 0.f, 1.f));
@@ -4261,9 +4259,8 @@ DWORD WINAPI myThread (LPVOID vData)
 				}
 				else
 				{
-					char message[512];
-					smprintf (message, 512, "Can't build the zone named %s", pData->VectMesh[i].Node->GetName());
-					MessageBox (pData->eproc->ip->GetMAXHWnd(), message, "NeL Painter", MB_OK|MB_ICONEXCLAMATION);
+					std::string message = toString("Can't build the zone named %s", MCharStrToUtf8(pData->VectMesh[i].Node->GetName()).c_str());
+					MessageBox (pData->eproc->ip->GetMAXHWnd(), MaxTStrFromUtf8(message).data(), _T("NeL Painter"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 
@@ -4278,7 +4275,7 @@ DWORD WINAPI myThread (LPVOID vData)
 			// Go.
 			//========
 			CEvent3dMouseListener	mouseListener;
-			MouseListener			listener (pData->eproc->ip, CNELU::Camera, &viewport, pData->pobj, pData->eproc, &TheLand->Landscape, 
+			MouseListener			listener (pData->eproc->ip, CNELU::Camera, &viewport, pData->pobj, pData->eproc, &TheLand->Landscape,
 				&CNELU::AsyncListener, &mouseListener, pData->VectMesh, pData->T);
 
 			// Mouse listener
@@ -4306,7 +4303,7 @@ DWORD WINAPI myThread (LPVOID vData)
 			{
 				// For all the tileset selected
 				for (sint tss=0; tss<(sint)tileSetSelector.getTileCount (); tss++)
-				{			
+				{
 					// Get the tileset index
 					sint ts=tileSetSelector.getTileSet (tss);
 
@@ -4363,16 +4360,16 @@ DWORD WINAPI myThread (LPVOID vData)
 			//========
 			CNELU::release();
 		}
-		catch (EDru& druExcept)
+		catch (const EDru& druExcept)
 		{
-			MessageBox (NULL, druExcept.what(), "NeL driver utility", MB_OK|MB_ICONEXCLAMATION);
+			MessageBox (NULL, MaxTStrFromUtf8(druExcept.what()).data(), _T("NeL driver utility"), MB_OK|MB_ICONEXCLAMATION);
 		}
 
 		delete pData;
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
-		MessageBox (NULL, e.what(), "NeL Painter", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (NULL, MaxTStrFromUtf8(e.what()).data(), _T("NeL Painter"), MB_OK|MB_ICONEXCLAMATION);
 	}
 
 	return 0;
@@ -4437,7 +4434,7 @@ BOOL EPM_PaintMouseProc::HitATile(ViewExp *vpt, IPoint2 *p, int *tile, int *mesh
 	return FALSE;
 }
 
-BOOL EPM_PaintMouseProc::HitATile(const CViewport& viewport, const CCamera& camera, float x, float y, int *tile, int *mesh, TimeValue t, 
+BOOL EPM_PaintMouseProc::HitATile(const CViewport& viewport, const CCamera& camera, float x, float y, int *tile, int *mesh, TimeValue t,
 								  std::vector<EPM_Mesh>& vectMesh, NLMISC::CVector& hit, NLMISC::CVector &topVector)
 {
 	// Get a world ray with the mouse 2d point
@@ -4584,13 +4581,17 @@ bool EPM_PaintTile::intersect (const Ray& ray, std::vector<EPM_Mesh>& vectMesh, 
 /*-------------------------------------------------------------------*/
 
 int EPM_PaintMouseProc::proc(
-			HWND hwnd, 
-			int msg, 
-			int point, 
-			int flags, 
+			HWND hwnd,
+			int msg,
+			int point,
+			int flags,
 			IPoint2 m)
 {
-	ViewExp *vpt = ip->GetViewport(hwnd);	
+#if MAX_VERSION_MAJOR >= 19
+	ViewExp *vpt = &ip->GetViewExp(hwnd);
+#else
+	ViewExp *vpt = ip->GetViewport(hwnd);
+#endif
 	int res = TRUE;
 	static PatchMesh *shape1 = NULL;
 	static int poly1, tile1, tile2, mesh1, mesh2, seg1;
@@ -4610,17 +4611,19 @@ int EPM_PaintMouseProc::proc(
 
 		case MOUSE_MOVE:
 			break;
-					
+
 		case MOUSE_FREEMOVE:
 			break;
-		
+
 		case MOUSE_ABORT:
 			ip->SetStdCommandMode(CID_OBJMOVE);
 			break;
 	}
 
+#if MAX_VERSION_MAJOR < 19
 	if (vpt)
 		ip->ReleaseViewport(vpt);
+#endif
 
 	return res;
 }

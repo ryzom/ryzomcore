@@ -33,6 +33,9 @@
 #include <string>
 #include <fstream>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ///////////
 // USING //
@@ -81,7 +84,7 @@ void initAutoAnimation()
 			file.getline(line, 512);
 
 			// Read the animation file
-			string animName = strlwr (CFile::getFilenameWithoutExtension(line));
+			string animName = toLower(CFile::getFilenameWithoutExtension(line));
 			uint id = AutoAnimSet->addAnimation (line, animName.c_str ());
 			if (id == UAnimationSet::NotFound)
 			{

@@ -21,7 +21,6 @@
 #include "nel/misc/string_mapper.h"
 #include "nel/3d/ps_located.h"
 #include "nel/3d/ps_attrib.h"
-#include "nel/misc/sheet_id.h"
 
 
 
@@ -50,7 +49,7 @@ public:
 	/// dtor
 								~CPSSound();
 	/// serialisation. Derivers must override this, and call their parent version
-	virtual void				serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void				serial(NLMISC::IStream &f);
 	//@}
 
 	/// return this bindable type
@@ -64,13 +63,13 @@ public:
 	virtual void				step(TPSProcessPass pass);
 
 	/// set the name of the sound
-	void						setSoundName(const NLMISC::CSheetId &soundName)
+	void						setSoundName(const NLMISC::TStringId &soundName)
 	{
 		_SoundName = soundName;
 	}
 
 	/// get the name of the sound
-	const NLMISC::CSheetId		&getSoundName(void) const
+	const NLMISC::TStringId		&getSoundName(void) const
 	{
 		return _SoundName;
 	}
@@ -162,7 +161,7 @@ protected:
 	void					removeAllSources();
 
 	CPSAttrib<UPSSoundInstance *>	_Sounds;
-	NLMISC::CSheetId				_SoundName;
+	NLMISC::TStringId				_SoundName;
 	float							_Gain;
 	CPSAttribMaker<float> *			_GainScheme;
 	float							_Pitch;

@@ -25,9 +25,13 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 #pragma warning (disable : 4786)
 
-BOOL CALLBACK EnumResLangProc(HMODULE hModule, LPCSTR lpszType, LPCSTR lpszName, WORD wIDLanguage, 
+BOOL CALLBACK EnumResLangProc(HMODULE hModule, LPCTSTR lpszType, LPCTSTR lpszName, WORD wIDLanguage, 
 							  LONG_PTR lParam)
 {
 	set<HRSRC> *iconNames = (set<HRSRC>*)lParam;
@@ -96,17 +100,15 @@ void CImageListEx::addResourceIcon (const char *filename)
 		int height = imageInfo.rcImage.bottom - imageInfo.rcImage.top;
 		
 		// Load the icon
-		HICON handle = (HICON) LoadImage (NULL, filename, IMAGE_ICON, width, height, LR_COLOR|LR_LOADFROMFILE);
+		HICON handle = (HICON) LoadImage (NULL, nlUtf8ToTStr(filename), IMAGE_ICON, width, height, LR_COLOR|LR_LOADFROMFILE);
 		if (handle)
 		{
 			// Copy the icon
 			index = ImageList.Replace( index, handle);
 		
 			// Add in the map
-			char name[MAX_PATH];
-			_splitpath (filename, NULL, NULL, name, NULL);
-			string llwr = strlwr (string (name));
-			_IconMapString.insert (std::map<string, int>::value_type (llwr, index));
+			std::string name = toLower(NLMISC::CFile::getFilenameWithoutExtension(filename));
+			_IconMapString.insert (std::map<string, int>::value_type (name, index));
 
 			// Release the icon
 			DestroyIcon (handle);
@@ -131,10 +133,8 @@ int CImageListEx::getImage (int resource) const
 
 int CImageListEx::getImage (const char *filename) const
 {
-	char name[MAX_PATH];
-	_splitpath (filename, NULL, NULL, name, NULL);
-	string llwr = strlwr (string (name));
-	std::map<string, int>::const_iterator ite = _IconMapString.find (llwr);
+	std::string name = toLower(NLMISC::CFile::getFilenameWithoutExtension(filename));
+	std::map<string, int>::const_iterator ite = _IconMapString.find (name);
 	if (ite == _IconMapString.end())
 		return -1;
 	else

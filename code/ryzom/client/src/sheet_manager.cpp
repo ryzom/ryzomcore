@@ -40,6 +40,9 @@
 // Game Share
 #include "game_share/visual_slot_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ///////////
 // USING //
@@ -90,14 +93,16 @@ public:
 	CTypeVersion(std::string type, uint version) {Type=type; Version=version;}
 };
 
+// if you change these values please rebuild the packed_sheets with an updated sheets_packer binary.
+//   This is the only way to have correct version in both client and packed_sheets
 CTypeVersion TypeVersion [] =
 {
 	CTypeVersion("creature",                17),
 //	CTypeVersion("player",                  0),
 	CTypeVersion("fx",                      0),
 	CTypeVersion("building",                2),
-	CTypeVersion("sitem",                   42),
-	CTypeVersion("item",                    42),
+	CTypeVersion("sitem",                   44),
+	CTypeVersion("item",                    44),
 	CTypeVersion("plant",                   5),
 	CTypeVersion("death_impact",            0),
 //	CTypeVersion("mission",                 0),
@@ -785,7 +790,7 @@ void CSheetManager::computeVS()
 						if(it == ProcessedItem.end())
 						{
 							uint itemNumber;
-							if(vs[visualSlot].Element.size() == 0)
+							if(vs[visualSlot].Element.empty())
 								itemNumber = 1;
 							else
 								itemNumber = vs[visualSlot].Element[vs[visualSlot].Element.size()-1].Index+1;
@@ -1020,7 +1025,7 @@ void CSheetManager::dumpVisualSlots()
 // ***************************************************************************
 void CSheetManager::dumpVisualSlotsIndex()
 {
-	FILE * vsIndexFile = fopen(std::string(getLogDirectory() + "vs_index.txt").c_str(),"w");
+	FILE * vsIndexFile = nlfopen(getLogDirectory() + "vs_index.txt", "w");
 	if( vsIndexFile )
 	{
 		for (uint i=0; i < SLOTTYPE::NB_SLOT; ++i)

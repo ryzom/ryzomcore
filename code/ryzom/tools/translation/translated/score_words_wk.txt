@@ -1,0 +1,5 @@
+﻿*HASH_VALUE	score_ID	name	point	ia	points
+_BE6C89EE2F599BBE	HitPoints	health	hit point	an	hit points
+_B0DF4A6ECA004C1B	Stamina	stamina	stamina point	a	stamina points
+_174A57AA672A04AA	Sap	sap	sap point	a	sap points
+_DB69E9025629B0BA	Focus	focus	focus point	a	focus points

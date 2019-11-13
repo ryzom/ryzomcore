@@ -33,6 +33,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -265,6 +269,14 @@ namespace NLGUI
 		}
 		Children.insert(Children.begin() + index,  pNode);
 		pNode->setFather(this);
+	}
+
+	// ----------------------------------------------------------------------------
+	void CGroupTree::SNode::openAll()
+	{
+		Opened = true;
+		for (uint i = 0; i < Children.size(); ++i)
+			Children[i]->openAll();
 	}
 
 	// ----------------------------------------------------------------------------
@@ -765,7 +777,7 @@ namespace NLGUI
 			rVR.getTextureSizeFromId(id,  _XExtend,  dummy);
 		else
 			// if not found,  reset,  to avoid errors
-			_ArboXExtend= "";
+			_ArboXExtend.clear();
 	}
 
 	// ----------------------------------------------------------------------------
@@ -1078,7 +1090,9 @@ namespace NLGUI
 				}
 			}
 
-			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
+			bool toggleOne = (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown);
+			bool toggleAll = (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown);
+			if (toggleOne || toggleAll)
 			{
 				// line selection
 				if (bText)
@@ -1114,6 +1128,13 @@ namespace NLGUI
 						{
 							// open/close the node
 							changedNode->Opened = !changedNode->Opened;
+							if (toggleAll)
+							{
+								if (changedNode->Opened)
+									changedNode->openAll();
+								else
+									changedNode->closeAll();
+							}
 						}
 						// else must close all necessary nodes.
 						else
@@ -1815,7 +1836,7 @@ namespace NLGUI
 		const char *funcName = "CGroupTree::SNode::luaAddChildAtIndex";
 		CLuaIHM::checkArgCount(ls, funcName, 2);
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER);
-		addChildAtIndex(luaGetNodeOnStack(ls, funcName), (sint) ls.toNumber(2));
+		addChildAtIndex(luaGetNodeOnStack(ls, funcName), (sint) ls.toInteger(2));
 		return 0;
 	}
 
@@ -1836,7 +1857,7 @@ namespace NLGUI
 	{
 		const char *funcName = "CGroupTree::SNode::luaGetNumChildren";
 		CLuaIHM::checkArgCount(ls, funcName, 0);
-		ls.push((double) Children.size());
+		ls.push((uint)Children.size());
 		return 1;
 	}
 
@@ -1847,7 +1868,7 @@ namespace NLGUI
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
 		//
-		sint index = (sint) ls.toNumber(1);
+		sint index = (sint) ls.toInteger(1);
 		if (index < 0 || index >= (sint) Children.size())
 		{
 			std::string range = Children.empty() ? "<empty>" : toString("[0, %d]", Children.size() - 1);
@@ -1890,7 +1911,7 @@ namespace NLGUI
 	{
 		CLuaIHM::checkArgType(ls, "CGroupTree::selectLine", 1, LUA_TNUMBER);
 		CLuaIHM::checkArgType(ls, "CGroupTree::selectLine", 2, LUA_TBOOLEAN);
-		selectLine((uint) ls.toNumber(1), ls.toBoolean(2));
+		selectLine((uint) ls.toInteger(1), ls.toBoolean(2));
 		return 0;
 	}
 

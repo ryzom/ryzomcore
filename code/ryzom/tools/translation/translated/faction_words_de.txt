@@ -1,0 +1,67 @@
+﻿*HASH_VALUE	faction	name	da	daa	ia	member	mda	mia
+_A0EC3CB6728A80B6	fyros	Fyros	die	den	ein	Fyros	die	einige
+_E10CC4B36E98C09E	matis	Matis	die	den	ein	Matis	die	einige
+_2DCA2CC01F48D0B6	tryker	Tryker	die	den	ein	Tryker	die	einige
+_224BC0AE0EA920A2	zorai	Zoraï	die	den	ein	Zoraï	die	einige
+_A7882077E757D4B4	bandit	Banditen	die	den	einer der	Banditen	die	einige
+_AC0AD4AB2947CC7C	civil	Zivilisten	die	den	einer der	Zivilisten	die	einige
+_2BF98095A426C07F	degen	Degenerierte	der	den	ein	Degenerierte	die	einige
+_2A9A98AAE9E7B874	fauna	Tiere	die	der	eines der	Tiere	die	einige
+_A8F93F8ED3E7C6CD	fauna_carnivore	Fleischfresser	die	der	ein	Fleischfresser	die	einige
+_A9890F92163796CD	fauna_herbivore	Pflanzenfresser	die	der	ein	Pflanzenfresser	die	einige
+_2B7ABCB32B36E474	flora	Pflanzen	die	der	eine der	Pflanzen	die	einige
+_58767495AA0A0894	goo	Goovorkommen	das	den	ein	Goovorkommen	die	einige
+_64584C9E66D83075	kami	Kami	die	den	ein	Kamis	die	einige
+_2059C0A2A31898AB	karavan	Karavan	die	den	ein	Karavan	die	einige
+_2C0AD4B1ABA7EC86	kitin	Kitins	die	den	ein	Kitins	die	einige
+_A85CA3F578D722AB	tribe_ancient_dryads	Alte Dryaden	die	den	eine der	Mitglieder der Alten Dryaden	die	einige
+_7C0E65967AB061E7	tribe_antikamis	Antikami	die	den	ein	Antikami	die	einige
+_EA5025FB69C9F0B1	tribe_barkers	Rindengräber	die	den	ein	Rindengräber	die	einige
+_D4B097EF96E6E67A	tribe_beachcombers	Gischtläufer	die	den	ein	Gischtläufer	die	einige
+_55E23F9137476662	tribe_black_circle	Schwarze Kreis	der	den	einer vom	Mitglieder des Schwarzen Kreises	die	einige
+_2335A26F01B5D68B	tribe_cholorogoos	Cholorogoos	die	den	einer der	Cholorogoos	die	einige
+_1E767658BC34C67F	tribe_cockroaches	Kakerlaken	die	den	einer der	Mitglieder der Kakerlaken	die	einige
+_E8A578485AA340D4	tribe_company_of_the_eternal_tree	Gemeinschaft des Ewigen Baumes	die	der	einer der	Mitglieder des Ewigen Baumes	die	einige
+_83BEF92D6C48E01E	tribe_corsair	Korsaren	die	den	einer der	Korsaren	die	einige
+_6769CCCA2D0A5CA7	tribe_cute	Cuzane	die	den	einer der	Cuzane	die	einige
+_694BCB10D6E4515B	tribe_darkening_sap	Matiagoo Verdunkelnder Sap	der	den	ein	Matiagoo-Mitglieder	die	einige
+_2126A262C4C30D2F	tribe_dune_riders	Dünenreiter	die	den	ein	Dünenreiter	die	einige
+_E536CE73C206A68B	tribe_ecowarriors	Ökokrieger	die	den	ein	Ökokrieger	die	einige
+_9BA60676076C3DEE	tribe_firebrands	Heißsporne	die	den	einer der	Heißsporne	die	einige
+_225B4E15B7DC079F	tribe_first_deserter	Erste Deserteure	die	den	einer der	Mitglieder der Ersten Deserteure	die	einige
+_C23F69132AF97CA3	tribe_frahar	Fraiders	die	den	einer der	Fraider	die	einige
+_B459CBF1392BE778	tribe_frahar_hunters	Frahar-Jäger	die	den	ein	Frahar-Jäger	die	einige
+_EC39A49C646848A5	tribe_gibbay	Gibads	die	den	einer der	Gibads	die	einige
+_748A396FE96F21E5	tribe_goo_heads	Erleuchtete des Goo	die	den	einer der	Erleuchteten des Goo	die	einige
+_4255EE5EC3CBACFE	tribe_green_seed	Grüne Samen	die	den	einer der	Mitglieder der Grünen Samen	die	einige
+_36BF4380A26E67C9	tribe_hamazans_of_the_dead_seed	Matis-Amazonen Hamazans	die	den	eine der	Matis-Amazonen Hamazans	die	einige
+_08ADBC69EE67A864	tribe_icon_workshipers	Ikonenschnitzer	die	den	ein	Ikonenschnitzer	die	einige
+_2C7F49FC279914B1	tribe_keepers	Erinnerer	die	den	ein	Erinnerer	die	einige
+_B43A6B56730DC785	tribe_kitin_gatheres	Kitin-Jäger	die	den	ein	Kitin-Jäger	die	einige
+_A8C2504C2E8823C1	tribe_lagoon_brothers	Lagunenbrüder	die	den	einer der	Lagunenbrüder	die	einige
+_6BB0290BAA691CB1	tribe_lawless	Gesetzlose	die	den	einer der	Mitglieder der Gesetzlosen	die	einige
+_6A902D076BA918B1	tribe_leviers	Zöllner	die	den	ein	Zöllner	die	einige
+_C3DB437B861E6ADF	tribe_master_of_the_goo	Meister des Goo	die	den	einer der 	Meister des Goo	die	einige
+_73A03E377C347598	tribe_matisian_border_guards	Matisianische Grenzwächter	die	den	einer der	Mitglieder der Matisianischen Grenzwächter	die	einige
+_AC8C76BBA486E2D1	tribe_night_turners	Nachtwender	die	den	ein	Nachtwender	die	einige
+_26BA3AC6DFB6A6A8	tribe_oasis_diggers	Brunnengräber	die	den	ein	Brunnengräber	die	einige
+_60880A71C5C57A8B	tribe_pyromancers	Feuermagierinnen	die	den	eine der	Feuermagierinnen	die	einige
+_97374672C3C1C124	tribe_recoverers	Recycler	die	den	ein	Recycler	die	einige
+_7AFE3D837B2009EF	tribe_renegades	Abtrünnigen	die	den	einer der	Mitglieder der Abtrünnigen	die	einige
+_3D1FC91565CB65F5	tribe_restorers	Aufpasser	die	den	ein	Aufpasser	die	einige
+_1DE3F3E192C07A88	tribe_root_tappers	Unterwasserwurzel-Extrahierer	die	den	ein	Unterwasserwurzel-Extrahierer	die	einige
+_D8154262BC9AADAE	tribe_sacred_sap	Heiliger Sap	der	dem	einer des	Mitglieder des Heiligen Saps	die	einige
+_154227EA1B939C8E	tribe_sap_gleaners	Sapsammler	die	den	ein	Sapsammler	die	einige
+_48A6B980052E65DF	tribe_sap_slaves	Sapsklaven	die	den	einer der	Sapsklaven	die	einige
+_7E9F917E7D1139F8	tribe_scorchers	Enthäutete	die	den	einer der	Mitglieder der Enthäuteten	die	einige
+_B819BFF3346C0F85	tribe_shadow_runners	Schattenschmuggler	die	den	ein	Schattenschmuggler	die	einige
+_938B861B1593F579	tribe_siblings_of_the_weeds	Geschwister der Pflanzen	die	den	einer der	Mitglieder der Geschwister der Pflanzen	die	einige
+_7758FFC63C5BB3C3	tribe_silt_sculptors	Lehmbildhauer	die	den	ein	Lehmbildhauer	die	einige
+_AD3F7D06E88A34B1	tribe_slavers	Sklaventreiber	die	den	ein	Sklaventreiber	die	einige
+_BF9E553529793923	tribe_smuglers	Schmuggler	die	den	ein	Schmuggler	die	einige
+_BBC9FEAA5F459B84	tribe_the_arid_matis	Dörre Matis	die	den	einer der	Mitglieder von Dörre Matis	die	einige
+_B07F6A1601F0E5E6	tribe_the_kuilde	Kuilde	die	den	einer der	Mitglieder der Kuilde	die	einige
+_C295B382822077E7	tribe_the_slash_and_burn	Scharlachrote Söldner	die	den	einer der	Mitglieder der Scharlachroten Söldner	die	einige
+_6A2B10CEED297892	tribe_tutors	Tutoren	die	den	einer der	Mitglieder der Tutoren	die	einige
+_E59D6A166AEB3F9E	tribe_water_breakers	Wasserbrecher	die	den	ein	Wasserbrecher	die	einige
+_EBDAEECB1DE61EBB	tribe_woven_bridles	Wüstenplünderer	die	den	ein	Wüstenplünderer	die	einige

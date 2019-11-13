@@ -284,7 +284,6 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 
 	// If some free window possible, search which to take
 	sint	newIndexWindow= -1;
-	bool	mustPlace= true;
 	bool	mustAddToActiveWindows= true;
 	// if an active window is not in KeepMode, get it.
 	for(i=0;i<_ActiveWindows.size();i++)
@@ -293,7 +292,6 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 		if(!_InfoWindows[_ActiveWindows[i]].KeepMode && forceKeepWindow!=(sint)_ActiveWindows[i])
 		{
 			newIndexWindow= _ActiveWindows[i];
-			mustPlace= false;
 			mustAddToActiveWindows= false;
 			break;
 		}
@@ -782,7 +780,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 		if (pTU != NULL)
 		{
 			sSkillsNeeded = CI18N::get("uiTitleSkillHeader");
-			if (pTU->SkillsNeeded.size() == 0 || reservedTitle)
+			if (pTU->SkillsNeeded.empty() || reservedTitle)
 			{
 				sSkillsNeeded += CI18N::get("uiTitleSkillNoNeed");
 			}
@@ -823,7 +821,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 		if (pTU != NULL)
 		{
 			sBricksNeeded = CI18N::get("uiTitleBrickHeader");
-			if (pTU->BricksNeeded.size() == 0 || reservedTitle)
+			if (pTU->BricksNeeded.empty() || reservedTitle)
 			{
 				sBricksNeeded += CI18N::get("uiTitleBrickNoNeed");
 			}
@@ -1105,20 +1103,18 @@ REGISTER_ACTION_HANDLER( CHandlerBrowseRefresh, "browse_refresh");
 
 
 // ***************************************************************************
-/** Build the help window for a pact/item/brick and open it.
- */
 class CHandlerHTMLSubmitForm : public IActionHandler
 {
 	void execute (CCtrlBase *pCaller, const std::string &sParams)
 	{
 		string container = getParam (sParams, "name");
 
-		uint form;
-		fromString(getParam (sParams, "form"), form);
-
-		string submit_button = getParam (sParams, "submit_button");
-		string type = getParam (sParams, "submit_button_type");
-		string value = getParam (sParams, "submit_button_value");
+		uint button;
+		if (!fromString(getParam(sParams, "button"), button))
+		{
+			nlwarning("Invalid button index: '%s', expected integer", getParam(sParams, "button").c_str());
+			return;
+		}
 
 		sint32 x = pCaller->getEventX();
 		sint32 y = pCaller->getEventY();
@@ -1129,8 +1125,7 @@ class CHandlerHTMLSubmitForm : public IActionHandler
 			CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(element);
 			if (groupHtml)
 			{
-				// Submit the form the url
-				groupHtml->submitForm (form, type.c_str(), submit_button.c_str(), value.c_str(), x, y);
+				groupHtml->submitForm(button, x, y);
 			}
 		}
 	}
@@ -1604,7 +1599,7 @@ void	getMagicBonus(CDBCtrlSheet *item, ucstring &itemText)
 	}
 
 	// append a \n before
-	if(mbInfo.size())
+	if(!mbInfo.empty())
 	{
 		// add spell level header
 		ucstring	spellRuleFmt= CI18N::get("uihelpItemMagicBonusHeader");
@@ -2341,11 +2336,11 @@ void setupCosmetic(CSheetHelpSetup &setup, CItemSheet *pIS)
 void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 {
 	nlassert(pIS);
-	
+
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CCDBNodeBranch *dbBranch = NLGUI::CDBManager::getInstance()->getDbBranch( setup.SrcSheet->getSheet() );
-	
-	
+
+
 	CInterfaceElement *elt = setup.HelpWindow->getElement(setup.HelpWindow->getId()+setup.PrefixForExtra+INFO_ITEM_PREVIEW);
 	if (elt == NULL)
 		return;
@@ -2359,12 +2354,12 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 
 	static sint32 helpWidth = setup.HelpWindow->getW();
 	bool scene_inactive = ! NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_3D_ITEM_PREVIEW")->getValueBool();
-	if (scene_inactive || 
-		(pIS->Family != ITEMFAMILY::ARMOR && 
-		 pIS->Family != ITEMFAMILY::MELEE_WEAPON && 
-		 pIS->Family != ITEMFAMILY::RANGE_WEAPON && 
+	if (scene_inactive ||
+		(pIS->Family != ITEMFAMILY::ARMOR &&
+		 pIS->Family != ITEMFAMILY::MELEE_WEAPON &&
+		 pIS->Family != ITEMFAMILY::RANGE_WEAPON &&
 		 pIS->Family != ITEMFAMILY::SHIELD))
-	{			
+	{
 		setup.HelpWindow->setW(helpWidth);
 		ig->setActive(false);
 		return;
@@ -2374,7 +2369,7 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 		setup.HelpWindow->setW(helpWidth + ITEM_PREVIEW_WIDTH);
 		ig->setActive(true);
 	}
-	
+
 	CInterface3DScene *sceneI = dynamic_cast<CInterface3DScene *>(ig->getGroup("scene_item_preview"));
 	if (!sceneI)
 	{
@@ -2460,7 +2455,7 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 			cs.VisualPropA.PropertySubData.HatColor = color->getValue32();
 			SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
 			camHeight = -0.35f;
-		}	
+		}
 	}
 	else if (pIS->Family == ITEMFAMILY::SHIELD)
 	{
@@ -3937,13 +3932,15 @@ public:
 		s += getSystemInformation();
 
 		string progname;
-		char name[1024] = "";
+		std::string moduleName;
 #ifdef NL_OS_WINDOWS
-		GetModuleFileName (NULL, name, 1023);
+		wchar_t name[1024];
+		GetModuleFileNameW(NULL, name, 1023);
+		moduleName = wideToUtf8(name);
 #else
 		// TODO for Linux
 #endif
-		progname = CFile::getFilename(name);
+		progname = CFile::getFilename(moduleName);
 		progname += " ";
 		progname += "Statistic Report";
 

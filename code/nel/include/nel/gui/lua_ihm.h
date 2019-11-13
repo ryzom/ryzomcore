@@ -118,7 +118,7 @@ namespace NLGUI
 		/** read/write between values on a lua stack & a property exported from a 'CReflectable' derived object
 		  * (throws on error)
 		  */
-		static void luaValueToReflectedProperty(CLuaState &ls, int stackIndex, CReflectable &target, const CReflectedProperty &property) throw(ELuaIHMException);
+		static void luaValueToReflectedProperty(CLuaState &ls, int stackIndex, CReflectable &target, const CReflectedProperty &property);
 
 		// push a reflected property on the stack
 		// NB : no check is done that 'property' is part of the class info of 'reflectedObject'
@@ -161,6 +161,7 @@ namespace NLGUI
 		static int luaMethodCall(lua_State *ls);
 		
 		static int	setOnDraw(CLuaState &ls);		// params: CInterfaceGroup*, "script". return: none
+		static int	getOnDraw(CLuaState &ls);		// params: CInterfaceGroup*. return: "script" (nil if none)
 		static int	addOnDbChange(CLuaState &ls);	// params: CInterfaceGroup*, "dblist", "script". return: none
 		static int	removeOnDbChange(CLuaState &ls);// params: CInterfaceGroup*. return: none
 		static int  setCaptureKeyboard(CLuaState &ls);

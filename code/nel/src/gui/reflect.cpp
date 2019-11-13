@@ -18,6 +18,10 @@
 #include "stdpch.h"
 #include "nel/gui/reflect.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	// Yoyo: Act like a singleton, else registerClass may crash.

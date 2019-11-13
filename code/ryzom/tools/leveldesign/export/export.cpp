@@ -110,7 +110,7 @@ void CExport::delAllIGZoneUnderPoint (float fCellSize, CPrimPoint *pPoint, const
 void CExport::delAllIGZoneUnderPath (float fCellSize, CPrimPath *pPath, const string &sIGOutputDir)
 {
 	if (pPath == NULL) return;
-	if (pPath->VPoints.size() == 0) return;
+	if (pPath->VPoints.empty()) return;
 	uint32 i, j;
 	CVector vMin, vMax;
 
@@ -195,7 +195,7 @@ void CExport::delAllIGZoneUnderPath (float fCellSize, CPrimPath *pPath, const st
 void CExport::delAllIGZoneUnderPatat (float fCellSize, CPrimZone *pPatat, const string &sIGOutputDir)
 {
 	if (pPatat == NULL) return;
-	if (pPatat->VPoints.size() == 0) return;
+	if (pPatat->VPoints.empty()) return;
 	uint32 i, j;
 	CVector vMin, vMax;
 
@@ -294,7 +294,7 @@ bool CExport::isPatatNeedUpdate (float fCellSize, CPrimZone *pPatat, const strin
 	CVector vMin, vMax;
 
 	CTools::chdir (sIGOutputDir);
-	if (pPatat->VPoints.size() == 0)
+	if (pPatat->VPoints.empty())
 		return false;
 	vMin = vMax = pPatat->VPoints[0];
 	for (i = 0; i < pPatat->VPoints.size(); ++i)
@@ -394,7 +394,7 @@ bool CExport::isPathNeedUpdate (float fCellSize, CPrimPath *pPath, const string 
 	CVector vMin, vMax;
 
 	CTools::chdir (sIGOutputDir);
-	if (pPath->VPoints.size() == 0)
+	if (pPath->VPoints.empty())
 		return false;
 	vMin = vMax = pPath->VPoints[0];
 	for (i = 0; i < pPath->VPoints.size(); ++i)
@@ -561,13 +561,13 @@ bool SExportOptions::loadcf (CConfigFile &cf)
 bool SExportOptions::save (FILE *f)
 {
 	fprintf (f,"\n// Export Options\n");
-	fprintf (f, "EXP_OutIGDir = \"%s\";\n",		OutIGDir);
-	fprintf (f, "EXP_ZoneWDir = \"%s\";\n",		InLandscapeDir);
-	fprintf (f, "EXP_SmallBank = \"%s\";\n",	LandBankFile);
-	fprintf (f, "EXP_FarBank = \"%s\";\n",		LandFarBankFile);
-	fprintf (f, "EXP_DisplaceDir = \"%s\";\n",	LandTileNoiseDir);
+	fprintf (f, "EXP_OutIGDir = \"%s\";\n",		OutIGDir.c_str());
+	fprintf (f, "EXP_ZoneWDir = \"%s\";\n",		InLandscapeDir.c_str());
+	fprintf (f, "EXP_SmallBank = \"%s\";\n",	LandBankFile.c_str());
+	fprintf (f, "EXP_FarBank = \"%s\";\n",		LandFarBankFile.c_str());
+	fprintf (f, "EXP_DisplaceDir = \"%s\";\n",	LandTileNoiseDir.c_str());
 	fprintf (f, "EXP_CellSize = %f;\n",			CellSize);
-	fprintf (f, "EXP_PrimFloraDir = \"%s\";\n", PrimFloraDir);
+	fprintf (f, "EXP_PrimFloraDir = \"%s\";\n", PrimFloraDir.c_str());
 	return true;
 }
 
@@ -642,42 +642,42 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 
 	// Ok set parameters from options first and with CFG if no options set
 
-	if (_Options->OutIGDir == "")
+	if (_Options->OutIGDir.empty())
 		_OutIGDir = CTools::normalizePath (ContinentCFG.OutIGDir);
 	else
 		_OutIGDir = CTools::normalizePath (_Options->OutIGDir);
 
-	if (_Options->LandFile == "")
+	if (_Options->LandFile.empty())
 		_LandFile			= ContinentCFG.LandFile;
 	else
 		_LandFile			= _Options->LandFile;
 
-	if (_Options->DfnDir == "")
+	if (_Options->DfnDir.empty())
 		_DfnDir				= ContinentCFG.DfnDir;
 	else
 		_DfnDir				= _Options->DfnDir;
 
-	if (_Options->GameElemDir == "")
+	if (_Options->GameElemDir.empty())
 		_GameElemDir		= ContinentCFG.GameElemDir;
 	else
 		_GameElemDir		= _Options->GameElemDir;
 
-	if (_Options->InLandscapeDir == "")
+	if (_Options->InLandscapeDir.empty())
 		_InLandscapeDir		= ContinentCFG.LandZoneWDir;		// Directory where to get .zonew files
 	else
 		_InLandscapeDir		= _Options->InLandscapeDir;
 
-	if (_Options->LandFarBankFile == "")
+	if (_Options->LandFarBankFile.empty())
 		_LandBankFile		= ContinentCFG.LandBankFile;		// The .smallbank file associated with the landscape
 	else
 		_LandBankFile		= _Options->LandBankFile;
 
-	if (_Options->LandFarBankFile == "")
+	if (_Options->LandFarBankFile.empty())
 		_LandFarBankFile	= ContinentCFG.LandFarBankFile;		// The .farbank file
 	else
 		_LandFarBankFile	= _Options->LandFarBankFile;
 
-	if (_Options->LandTileNoiseDir == "")
+	if (_Options->LandTileNoiseDir.empty())
 		_LandTileNoiseDir	= ContinentCFG.LandTileNoiseDir;	// Directory where to get displacement map
 	else
 		_LandTileNoiseDir	= _Options->LandTileNoiseDir;
@@ -1245,7 +1245,7 @@ bool CExport::doExport (SExportOptions &opt, IExportCB *expCB, vector<SExportPri
 	_ExportCB = expCB;
 
 	// Does we have something to export
-	if ((selection != NULL) && (selection->size() == 0))
+	if ((selection != NULL) && (selection->empty()))
 	{
 		if (_ExportCB)
 			_ExportCB->dispInfo ("Nothing to export");
@@ -1983,7 +1983,7 @@ void CExport::writeFloraIG (const string &LandFile, bool bTestForWriting)
 {
 	sint32 i, j, k;
 
-	if (_FloraInsts.size() == 0)
+	if (_FloraInsts.empty())
 		return;
 
 	CZoneRegion zoneRegion;

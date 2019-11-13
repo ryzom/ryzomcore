@@ -25,6 +25,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -745,7 +749,7 @@ namespace NLGUI
 		std::string str;
 		for (;;)
 		{
-			if (expr == '\0')
+			if (*expr == '\0')
 			{
 				nlwarning("CInterfaceExprValue::evalString : end of buffer encountered in a string");
 				return NULL;

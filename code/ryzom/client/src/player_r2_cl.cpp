@@ -121,9 +121,6 @@ CPlayerR2CL::~CPlayerR2CL()
 
 CGenderInfo * CPlayerR2CL::getGenderInfo()
 {
-	string propName = toString("SERVER:Entities:E%d:P%d", _Slot, CLFECOMMON::PROPERTY_VPB);
-	sint64 vA = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
-	SPropVisualA visualA = *(SPropVisualA *)(&vA);
 	EGSPD::CPeople::TPeople ePeople = _Sheet->Race;
 	bool bMale = (_Sheet->Gender == GSGENDER::male);
 
@@ -403,7 +400,7 @@ void CPlayerR2CL::equip(SLOTTYPE::EVisualSlot slot, uint index, uint color)
 	// Default equipment.
 	else
 	{
-		nlwarning("PL:equip(2):%d: VS '%d' default equipement used.", _Slot, slot);
+		nldebug("PL:equip(2):%d: VS '%d' default equipement used.", _Slot, slot);
 		//sint idx = SheetMngr.getVSIndex(_PlayerSheet->GenderInfos[_Gender].Items[slot], slot);
 		sint idx = SheetMngr.getVSIndex(getGenderInfo()->Items[slot], slot);
 
@@ -474,8 +471,13 @@ void CPlayerR2CL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle
 
 		// Invalidate instances cache
 		for (uint i = 0; i < _Instances.size(); ++i)
-			_Instances[i].CurrentName = _Instances[i].LoadingName = "";
-		_Face.CurrentName = _Face.LoadingName = "";
+		{
+			_Instances[i].CurrentName.clear();
+			_Instances[i].LoadingName.clear();
+		}
+
+		_Face.CurrentName.clear();
+		_Face.LoadingName.clear();
 	}
 	// Check the skeleton.
 	if(skeleton() && !ClientCfg.Light)
@@ -614,11 +616,11 @@ void CPlayerR2CL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle
 			if (!_Face.Loading.empty())
 				Scene->deleteInstance(_Face.Loading);
 			_Face.Loading = NULL;
-			_Face.LoadingName = "";
+			_Face.LoadingName.clear();
 			if (!_Face.Current.empty())
 				Scene->deleteInstance(_Face.Current);
 			_Face.Current = NULL;
-			_Face.CurrentName = "";
+			_Face.CurrentName.clear();
 		}
 		// Now we have a skeleton, we can update VpB and VpC.
 		sint64 vB, vC;
@@ -985,7 +987,7 @@ void CPlayerR2CL::displayDebug(float x, float &y, float lineStep)	// virtual
 // readWrite :
 // Read/Write Variables from/to the stream.
 //---------------------------------------------------
-void CPlayerR2CL::readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPlayerR2CL::readWrite(NLMISC::IStream &f)
 {
 	CCharacterCL::readWrite(f);
 

@@ -25,7 +25,6 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <fstream>
 
 
 /**
@@ -55,10 +54,10 @@ public:
 private:
 
 	/// cst file
-	std::ifstream * _File;
+	FILE *_File;
 
 	/// name of the cst file (used for debug information)
-	std::string		_FileName;
+	std::string	_FileName;
 
 	/// separators
 	std::string _Seps;
@@ -101,7 +100,7 @@ public:
 	 * \param fileName the name of the file
 	 * \param fileFormat the name of the columns and their data type
 	 */
-	void buildTableFormat( std::string fileName, std::list<std::pair< std::string,TDataType> >& tableFormat );
+	void buildTableFormat( const std::string &fileName, std::list<std::pair< std::string,TDataType> >& tableFormat );
 
 
 	/**
@@ -117,7 +116,7 @@ public:
 	 * \param fileName the name of the file
 	 * \param fileFormat the name of the columns and their data type
 	 */
-	void init( std::string fileName, const std::map<std::string,TDataType>& fileFormat);
+	void init( const std::string &fileName, const std::map<std::string,TDataType>& fileFormat);
 
 
 	/**
@@ -213,77 +212,50 @@ public:
 	/// close file
 	void close()
 	{
-		_File->close();
-		delete _File;
+		fclose(_File);
+		_File = NULL;
 	}
 
 
-	void Load(std::string fileName,std::ofstream &script_file)
+	void Load(const std::string &fileName)
 	{
 		// Generates the base class
 		std::list< std::pair<std::string,TDataType> > format;
 		buildTableFormat( fileName, format );
-		generateBaseClass( script_file, format);
+		generateBaseClass( format);
 
 		// Generates a derived class for each type of object
 		std::list< std::list<std::string> > data;
 		readData( data );
-		generateDerivedClasses( script_file, format, data );
+		generateDerivedClasses( format, data );
 	}
 
-	void generateBaseClass(std::ofstream &file, std::list< std::pair<std::string,TDataType> > &/* format */)
+	void generateBaseClass(const std::list< std::pair<std::string,TDataType> > &/* format */)
 	{
-		file << "From Agent : Define Item" << std::endl;
-		file << "{" << std::endl;
-/*		file << "\tComponent:" << std::endl;
+		std::string content;
+		content += "From Agent : Define Item\n";
+		content += "{\n";
+/*		content += "\tComponent:\n";
 
 		std::list< std::pair<std::string,TDataType> >::iterator it_obj = format.begin();
 		it_obj++;
 		while ( it_obj != format.end() )
 		{
-			file << "\t\t";
-			switch ( (*it_obj).second )
-			{
-				case UINT8:
-					file << "uint8";
-					break;
-				case SINT8:
-					file << "sint8";
-					break;
-				case UINT16:
-					file << "uint16";
-					break;
-				case SINT16:
-					file << "sint16";
-					break;
-				case UINT32:
-					file << "uint32";
-					break;
-				case SINT32:
-					file << "sint32";
-					break;
-				case FLOAT:
-					file << "Float";
-					break;
-				case STRING:
-					file << "String";
-					break;
-				case BOOL:
-					file << "Bool";
-					break;
-			}
-			file << "<'" << (*it_obj).first << "', Static>;" << std::endl;
+			content += "\t\t" + convertFromType((*it_obj).second);
+			content += "<'" + (*it_obj).first + "', Static>;\n";
 			it_obj++;
 		}
 
-		file << "\tEnd" << std::endl;*/
-		file << "}" << std::endl;
-		file << std::endl;
+		content += "\tEnd\n"; */
+		content += "}\n";
+		content += "\n";
+
+		fwrite(content.c_str(), 1, content.length(), _File);
 	}
 
-	void generateDerivedClasses(std::ofstream &, std::list< std::pair<std::string, TDataType> > &, std::list< std::list< std::string> > &);
+	void generateDerivedClasses(const std::list< std::pair<std::string, TDataType> > &, const std::list< std::list< std::string> > &);
 
-	TDataType convertType(std::string type_str)
+	TDataType convertType(const std::string &type_str)
 	{
 		if ( type_str == "UINT8")
 			return UINT8;
@@ -306,11 +278,13 @@ public:
 		return (TDataType)0;
 	}
 
-	std::string convertName(std::string &name)
+	std::string convertFromType(TDataType type);
+
+	std::string convertName(const std::string &name) const
 	{
 		int i = 0;
 		char buffer[1024];
-		std::string::iterator it_c = name.begin();
+		std::string::const_iterator it_c = name.begin();
 		while ( it_c != name.end() )
 		{
 			char c = *it_c;

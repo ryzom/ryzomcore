@@ -75,6 +75,15 @@ CItemSheet::CItemSheet()
 {
 	IdShape = 0;
 	IdShapeFemale = 0;
+	IdShapeFyros = 0;
+	IdShapeFyrosFemale = 0;
+	IdShapeMatis = 0;
+	IdShapeMatisFemale = 0;
+	IdShapeTryker = 0;
+	IdShapeTrykerFemale = 0;
+	IdShapeZorai = 0;
+	IdShapeZoraiFemale = 0;
+	
 	MapVariant = 0;
 	ItemType = ITEM_TYPE::UNDEFINED;
 	Family = ITEMFAMILY::UNDEFINED;
@@ -173,32 +182,83 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 		debug("key '3d.shape_female' not found.");
 	IdShapeFemale = ClientSheetsStrings.add(ShapeFemale);
 
+	// Load the name fyros.
+	string ShapeFyros;
+	if(!item.getValueByName(ShapeFyros, "3d.shape_fyros"))
+		debug("key '3d.shape_fyros' not found.");
+	IdShapeFyros = ClientSheetsStrings.add(ShapeFyros);
+
+	// Load the name fyros .
+	string ShapeFyrosFemale;
+	if(!item.getValueByName(ShapeFyrosFemale, "3d.shape_fyros_female"))
+		debug("key '3d.shape_fyros_female' not found.");
+	IdShapeFyrosFemale = ClientSheetsStrings.add(ShapeFyrosFemale);
+
+	// Load the name matis.
+	string ShapeMatis;
+	if(!item.getValueByName(ShapeMatis, "3d.shape_matis"))
+		debug("key '3d.shape_matis' not found.");
+	IdShapeMatis = ClientSheetsStrings.add(ShapeMatis);
+
+	// Load the name matis .
+	string ShapeMatisFemale;
+	if(!item.getValueByName(ShapeMatisFemale, "3d.shape_matis_female"))
+		debug("key '3d.shape_matis_female' not found.");
+	IdShapeMatisFemale = ClientSheetsStrings.add(ShapeMatisFemale);
+
+
+	// Load the name tryker.
+	string ShapeTryker;
+	if(!item.getValueByName(ShapeTryker, "3d.shape_tryker"))
+		debug("key '3d.shape_tryker' not found.");
+	IdShapeTryker = ClientSheetsStrings.add(ShapeTryker);
+
+	// Load the name tryker .
+	string ShapeTrykerFemale;
+	if(!item.getValueByName(ShapeTrykerFemale, "3d.shape_tryker_female"))
+		debug("key '3d.shape_tryker_female' not found.");
+	IdShapeTrykerFemale = ClientSheetsStrings.add(ShapeTrykerFemale);
+
+
+	// Load the name zorai.
+	string ShapeZorai;
+	if(!item.getValueByName(ShapeZorai, "3d.shape_zorai"))
+		debug("key '3d.shape_zorai' not found.");
+	IdShapeZorai = ClientSheetsStrings.add(ShapeZorai);
+
+	// Load the name zorai .
+	string ShapeZoraiFemale;
+	if(!item.getValueByName(ShapeZoraiFemale, "3d.shape_zorai_female"))
+		debug("key '3d.shape_zorai_female' not found.");
+	IdShapeZoraiFemale = ClientSheetsStrings.add(ShapeZoraiFemale);
+
+
 	// Get the icon associated.
 	string IconMain;
 	if(!item.getValueByName (IconMain, "3d.icon"))
 		debug("key '3d.icon' not found.");
-	IconMain = strlwr (IconMain);
+	IconMain = toLower(IconMain);
 	IdIconMain = ClientSheetsStrings.add(IconMain);
 
 	// Get the icon associated.
 	string IconBack;
 	if(!item.getValueByName (IconBack, "3d.icon background"))
 		debug("key '3d.icon background' not found.");
-	IconBack = strlwr (IconBack);
+	IconBack = toLower(IconBack);
 	IdIconBack = ClientSheetsStrings.add(IconBack);
 
 	// Get the icon associated.
 	string IconOver;
 	if(!item.getValueByName (IconOver, "3d.icon overlay"))
 		debug("key '3d.icon overlay' not found.");
-	IconOver = strlwr (IconOver);
+	IconOver = toLower(IconOver);
 	IdIconOver = ClientSheetsStrings.add(IconOver);
 
 	// Get the icon associated.
 	string IconOver2;
 	if(!item.getValueByName (IconOver2, "3d.icon overlay2"))
 		debug("key '3d.icon overlay2' not found.");
-	IconOver2 = strlwr (IconOver2);
+	IconOver2 = toLower(IconOver2);
 	IdIconOver2 = ClientSheetsStrings.add(IconOver2);
 
 	// Get Special modulate colors
@@ -211,7 +271,7 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	string IconText;
 	if(!item.getValueByName (IconText, "3d.text overlay"))
 		debug("key '3d.text overlay' not found.");
-	IconText = strlwr (IconText);
+	IconText = toLower(IconText);
 	IdIconText = ClientSheetsStrings.add(IconText);
 
 	// See if this item can be hiden when equipped
@@ -303,7 +363,7 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 		debug("key '3d.anim_set' not found.");
 	// Force the CASE in UPPER to not be CASE SENSITIVE.
 	else
-		NLMISC::strlwr(AnimSet);
+		AnimSet = NLMISC::toLower(AnimSet);
 	IdAnimSet = ClientSheetsStrings.add(AnimSet);
 
 	// Get the Trail Shape
@@ -318,28 +378,28 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	string Effect1;
 	if(!item.getValueByName(Effect1, "Effects.Effect1"))
 		debug("key 'Effects.Effect1' not found.");
-	Effect1 = strlwr(Effect1);
+	Effect1 = toLower(Effect1);
 	IdEffect1 = ClientSheetsStrings.add(Effect1);
 
 	// Get special Effect2
 	string Effect2;
 	if(!item.getValueByName(Effect2, "Effects.Effect2"))
 		debug("key 'Effects.Effect2' not found.");
-	Effect2 = strlwr(Effect2);
+	Effect2 = toLower(Effect2);
 	IdEffect2 = ClientSheetsStrings.add(Effect2);
 
 	// Get special Effect3
 	string Effect3;
 	if(!item.getValueByName(Effect3, "Effects.Effect3"))
 		debug("key 'Effects.Effect3' not found.");
-	Effect3 = strlwr(Effect3);
+	Effect3 = toLower(Effect3);
 	IdEffect3 = ClientSheetsStrings.add(Effect3);
 
 	// Get special Effect4
 	string Effect4;
 	if(!item.getValueByName(Effect4, "Effects.Effect4"))
 		debug("key 'Effects.Effect4' not found.");
-	Effect4 = strlwr(Effect4);
+	Effect4 = toLower(Effect4);
 	IdEffect4 = ClientSheetsStrings.add(Effect4);
 
 	// Get its bulk
@@ -366,6 +426,11 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	TRANSLATE_VAL( val, "basics.CraftPlan" );
 	if (!val.empty())
 		CraftPlan = CSheetId(val);
+
+	// commands and menu label
+	TRANSLATE_VAL( Scroll.LuaCommand, "basics.Scroll.LuaCommand" );
+	TRANSLATE_VAL( Scroll.WebCommand, "basics.Scroll.WebCommand" );
+	TRANSLATE_VAL( Scroll.Label, "basics.Scroll.Label" );
 
 	// Special according to Family;
 	switch(Family)
@@ -611,10 +676,18 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 // serial :
 // Serialize character sheet into binary data file.
 //-----------------------------------------------
-void CItemSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CItemSheet::serial(NLMISC::IStream &f)
 {
 	ClientSheetsStrings.serial(f, IdShape);
 	ClientSheetsStrings.serial(f, IdShapeFemale);
+	ClientSheetsStrings.serial(f, IdShapeFyros);
+	ClientSheetsStrings.serial(f, IdShapeFyrosFemale);
+	ClientSheetsStrings.serial(f, IdShapeMatis);
+	ClientSheetsStrings.serial(f, IdShapeMatisFemale);
+	ClientSheetsStrings.serial(f, IdShapeTryker);
+	ClientSheetsStrings.serial(f, IdShapeTrykerFemale);
+	ClientSheetsStrings.serial(f, IdShapeZorai);
+	ClientSheetsStrings.serial(f, IdShapeZoraiFemale);
 	f.serial(SlotBF);			// Serialize Slots used.
 	f.serial(MapVariant);		// Serialize Map Variant.
 	f.serialEnum(Family);		// Serialize Family.
@@ -658,6 +731,9 @@ void CItemSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 	// **** Serial Help Infos
 	f.serialEnum(ItemOrigin);
 
+	// item commands
+	f.serial(Scroll);
+
 	// Different Serial according to family
 	switch(Family)
 	{
@@ -697,8 +773,9 @@ void CItemSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 	case ITEMFAMILY::TELEPORT:
 		f.serial(Teleport);
 		break;
+	// keep for readability
 	case ITEMFAMILY::SCROLL:
-		f.serial(Scroll);
+		//f.serial(Scroll);
 		break;
 	case ITEMFAMILY::CONSUMABLE:
 		f.serial(Consumable);

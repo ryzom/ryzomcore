@@ -95,7 +95,7 @@ bool CXDPFileReader::init(const std::string &sFilename, sint32 nLowerBound, sint
 	{
 		// First open the file with a normal function
 #ifdef NL_OS_WINDOWS
-		int fd = _open(sFilename.c_str(), _O_BINARY | _O_RDONLY);
+		int fd = _wopen(nlUtf8ToWide(sFilename), _O_BINARY | _O_RDONLY);
 #else
 		int fd = open(sFilename.c_str(), O_RDONLY);
 #endif
@@ -143,7 +143,7 @@ bool CXDPFileReader::init(const std::string &sFilename, sint32 nLowerBound, sint
 	}
 	else
 	{
-		_File = fopen(sFilename.c_str(), "rb");
+		_File = nlfopen(sFilename, "rb");
 		if (_File == NULL)
 			return false;
 		fseek(_File, nLowerBound, SEEK_SET);
@@ -246,7 +246,7 @@ bool CXDPFileReader::readBool(bool &val)
 bool CXDPFileReader::readString(std::string &s)
 {
 	uint32 nLen;
-	s = "";
+	s.clear();
 	if (!readUInt(nLen)) return false;
 	for (uint32 i = 0; i < nLen; ++i)
 	{
@@ -452,8 +452,8 @@ bool CXDeltaPatch::load(const string &sFilename)
 	uint32 nFromNameLen = vHeader[1] >> 16;
 	uint32 nToNameLen = vHeader[1] & 0xffff;
 
-	_FromName = "";
-	_ToName = "";
+	_FromName.clear();
+	_ToName.clear();
 
 	for (i = 0; i < nFromNameLen; ++i)
 	{
@@ -512,7 +512,7 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 		return ApplyResult_UnsupportedXDeltaFormat;
 	}
 
-	if (_Ctrl.SourceInfo.size() == 0)
+	if (_Ctrl.SourceInfo.empty())
 	{
 		errorMsg = "no source info";
 		return ApplyResult_Error;
@@ -525,15 +525,15 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 	}
 
 	SXDeltaCtrl::SSourceInfo *pFromSource = NULL;
-	SXDeltaCtrl::SSourceInfo *pDataSource = NULL;
+//	SXDeltaCtrl::SSourceInfo *pDataSource = NULL;
 
-	if (_Ctrl.SourceInfo.size() > 0)
+	if (!_Ctrl.SourceInfo.empty())
     {
 		SXDeltaCtrl::SSourceInfo &rInfo = _Ctrl.SourceInfo[0];
 
 		if (rInfo.IsData)
 		{
-			pDataSource = &rInfo;
+//			pDataSource = &rInfo;
 		}
 		else
 		{
@@ -560,7 +560,7 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 		errorMsg = toString("output file %s already exists", sFileOutput.c_str());
 		return ApplyResult_Error;
 	}
-	FILE *outFILE = fopen(sFileOutput.c_str(), "wb");
+	FILE *outFILE = nlfopen(sFileOutput, "wb");
 	if (outFILE == NULL)
 	{
 		errorMsg = toString("cant create %s", sFileOutput.c_str());
@@ -572,7 +572,7 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 	bool ftpPresent = false;
 	if (pFromSource)
 	{
-		ftpFILE = fopen(sFileToPatch.c_str(), "rb");
+		ftpFILE = nlfopen(sFileToPatch, "rb");
 		if (ftpFILE == NULL)
 		{
 			errorMsg = toString("expecting file %s", sFileToPatch.c_str());
@@ -738,7 +738,7 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 		*/
 		return ApplyResult_Error;
 	}
-	errorMsg = "";
+	errorMsg.clear();
 	return ApplyResult_Ok;
 }
 

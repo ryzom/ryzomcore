@@ -21,6 +21,10 @@
 #include "nel/3d/texture_bump.h"
 #include "nel/3d/material.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 #ifdef NL_STATIC
@@ -532,7 +536,7 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		}
 		else
 		{
-			// Restaure fog state to its current value
+			// Restore fog state to its current value
 			_DriverGLStates.enableFog(_FogEnabled);
 		}
 
@@ -1421,6 +1425,11 @@ void			CDriverGL::setupSpecularPass(uint pass)
 		}
 		else
 		{
+// Disabled because of Intel GPU texture bug (issue 310)
+// CMake options to debug
+// -DDEBUG_OGL_SPECULAR_FALLBACK=ON enables this
+// -DDEBUG_OGL_COMBINE43_DISABLE=ON disables GL_NV_texture_env_combine4/GL_ATI_texture_env_combine3
+#ifdef DEBUG_OGL_SPECULAR_FALLBACK
 			// Multiply texture1 by alpha_texture0 and display with add
 			_DriverGLStates.enableBlend(true);
 			_DriverGLStates.blendFunc(GL_ONE, GL_ONE);
@@ -1453,6 +1462,7 @@ void			CDriverGL::setupSpecularPass(uint pass)
 			}
 
 			activateTexEnvMode(1, env);
+#endif // DEBUG_OGL_SPECULAR_FALLBACK
 		}
 	}
 }

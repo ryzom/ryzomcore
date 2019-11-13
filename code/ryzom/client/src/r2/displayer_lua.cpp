@@ -20,6 +20,10 @@
 #include "../interface_v3/lua_ihm_ryzom.h"
 #include "editor.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace R2
 {
 

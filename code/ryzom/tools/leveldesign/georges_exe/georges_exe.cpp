@@ -31,11 +31,7 @@
 
 using namespace std;
 
-
-int APIENTRY WinMain(HINSTANCE hInstance,
-                     HINSTANCE hPrevInstance,
-                     LPSTR     lpCmdLine,
-                     int       nCmdShow)
+int APIENTRY nltWinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPTSTR lpCmdLine, int nCmdShow)
 {
 	// Init the NeL application context
 	NLMISC::CApplicationContext context;
@@ -48,7 +44,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		// Init ui
 		pGeorges->initUI(nCmdShow, true);
 
- 		string cmd = lpCmdLine;
+ 		string cmd = NLMISC::tStrToUtf8(lpCmdLine);
  		if(!cmd.empty())
  		{
  			nlinfo("Using command line '%s'", cmd.c_str());

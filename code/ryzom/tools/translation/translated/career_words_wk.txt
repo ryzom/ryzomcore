@@ -1,0 +1,9 @@
+﻿*HASH_VALUE	career ID	name	* noms français	ia	da	p	pia	pda
+_1700C956C37FB64F	MeleeFighter	Melee Fighter	Combattant Contact	a	the	Melee Fighters		the
+_9720B95DC35FBA54	RangeFighter	Range Fighter	Combattant Distance	a	the	Range Fighters		the
+_D32171700AD23D57	AttackCaster	Attack Caster 	Caster Attaque	an	the	Attack Casters		the
+_9A511D668371AE04	BufferCaster	Buffer Caster 	Caster Buffer	a	the	Buffer Casters		the
+_1C01F56701816E0A	HealerCaster	Healer Caster 	Caster Healer	a	the	Healer Casters		the
+_A6473C7A6A380099	Ranger	Ranger	Ranger	a	the	Rangers		the
+_EA665D00EAE788B3	Shopkeeper	Merchant	Marchand	a	the	Merchants		the
+_EC38FC89E25AE8AD	Artisan	Crafter	Crafter	a	the	Crafters		the

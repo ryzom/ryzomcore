@@ -19,6 +19,9 @@
 #include "nel/3d/u_visual_collision_mesh.h"
 #include "nel/3d/visual_collision_mesh.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

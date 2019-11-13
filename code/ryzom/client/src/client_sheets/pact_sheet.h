@@ -34,7 +34,7 @@ public:
 		float	    Duration;
 		std::string Name;
 
-		void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serial( LoseHitPointsLevel);
 			f.serial( LoseStaminaLevel );
@@ -54,7 +54,7 @@ public:
 		/// Build the sheet from an external script.
 		virtual void build(const NLGEORGES::UFormElm &item);
 		/// Serialize plant sheet into binary data file.
-		virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+		virtual void serial(NLMISC::IStream &f);
 	//@}
 };
 

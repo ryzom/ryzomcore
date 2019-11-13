@@ -37,7 +37,7 @@ public:
 		/// dtor
 		~CPSTailDot();
 		/// serialisation. Derivers must override this, and call their parent version
-		virtual void		serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		virtual void		serial(NLMISC::IStream &f);
 		//
 		NLMISC_DECLARE_CLASS(CPSTailDot);
 	///@}

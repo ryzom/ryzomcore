@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2008  Jan Boon (Kaetemi)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -41,6 +41,8 @@ private:
 	CSoundDriverXAudio2 *_SoundDriver;
 	/// Buffer that should be playing.
 	CBufferXAudio2 *_StaticBuffer;
+	/// Last buffer that was prepared for playing.
+	CBufferXAudio2 *_LastPreparedBuffer;
 	
 	// -- Pointers --
 	/// Source voice, can be NULL!

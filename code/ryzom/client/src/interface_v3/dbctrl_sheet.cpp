@@ -73,54 +73,56 @@ REGISTER_UI_CLASS(CDBCtrlSheet)
 
 const uint64 NOTIFY_ANIM_MS_DURATION = 1000;
 
+// state kept and changed by UI:SAVE:SHOW_ICON_BUFFS
+bool CDBCtrlSheet::_ShowIconBuffs = true;
+
 // ***************************************************************************
 
-
-
-// **********************************************************************************************************
-class CControlSheetTooltipInfoWaiter : public IItemInfoWaiter
+void CControlSheetInfoWaiter::sendRequest()
 {
-public:
-	// The item used to open this window
-	CDBCtrlSheet* CtrlSheet;
-	string LuaMethodName;
-public:
-	ucstring infoValidated(CDBCtrlSheet* ctrlSheet, string luaMethodName);
-	virtual void infoReceived();
-};
-static CControlSheetTooltipInfoWaiter ControlSheetTooltipUpdater;
+	Requesting = true;
+	getInventory().addItemInfoWaiter(this);
+}
 
-void CControlSheetTooltipInfoWaiter::infoReceived()
+void CControlSheetInfoWaiter::infoReceived()
 {
-	getInventory().removeItemInfoWaiter(&ControlSheetTooltipUpdater);
-	infoValidated(CtrlSheet, LuaMethodName);
+	if (!Requesting) {
+		return;
+	}
+
+	getInventory().removeItemInfoWaiter(this);
+	infoValidated();
+	CtrlSheet->infoReceived();
+	Requesting = false;
 }
 
 
-ucstring CControlSheetTooltipInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet, string luaMethodName)
+ucstring CControlSheetInfoWaiter::infoValidated() const
 {
 	ucstring help;
-
-	// delegate setup of context he help ( & window ) to lua		
-	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CLuaState *ls= CLuaManager::getInstance().getLuaState();
+	if (CtrlSheet && !LuaMethodName.empty())
 	{
-		CLuaStackRestorer lsr(ls, 0);
-
-		CLuaIHM::pushReflectableOnStack(*ls, (CReflectableRefPtrTarget *)ctrlSheet);
-		ls->pushGlobalTable();
-		CLuaObject game(*ls);
-		game = game["game"];		
-		game.callMethodByNameNoThrow(luaMethodName.c_str(), 1, 1);
-
-		// retrieve result from stack
-		if (!ls->empty())
+		// delegate setup of context he help ( & window ) to lua
+		CInterfaceManager *im = CInterfaceManager::getInstance();
+		CLuaState *ls= CLuaManager::getInstance().getLuaState();
 		{
-			CLuaIHM::pop(*ls, help);
-		}
-		else
-		{
-			nlwarning(toString("Ucstring result expected when calling '%s', possible script error", luaMethodName.c_str()).c_str());
+			CLuaStackRestorer lsr(ls, 0);
+
+			CLuaIHM::pushReflectableOnStack(*ls, (CReflectableRefPtrTarget *)CtrlSheet);
+			ls->pushGlobalTable();
+			CLuaObject game(*ls);
+			game = game["game"];
+			game.callMethodByNameNoThrow(LuaMethodName.c_str(), 1, 1);
+
+			// retrieve result from stack
+			if (!ls->empty())
+			{
+				CLuaIHM::pop(*ls, help);
+			}
+			else
+			{
+				nlwarning(toString("Ucstring result expected when calling '%s', possible script error", LuaMethodName.c_str()).c_str());
+			}
 		}
 	}
 
@@ -135,53 +137,39 @@ int CDBCtrlSheet::luaGetDraggedSheet(CLuaState &ls)
 }
 
 // ***************************************************************************
-int CDBCtrlSheet::luaGetHpBuff(CLuaState &ls)
+int CDBCtrlSheet::luaGetItemInfo(CLuaState &ls)
 {
-	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
-	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
+	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet *>(this);
+	uint32 itemSlotId = getInventory().getItemSlotId(ctrlSheet);
 	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
 
-	ls.push((double)itemInfo.HpBuff);
+	ls.newTable();
+	CLuaObject out(ls);
+	// for now all but magic
+	out.setValue("CurrentDamage", itemInfo.CurrentDamage);
+	out.setValue("MaxDamage", itemInfo.MaxDamage);
+	out.setValue("DodgeModifier", itemInfo.DodgeModifier);
+	out.setValue("ParryModifier", itemInfo.ParryModifier);
+	out.setValue("AdversaryDodgeModifier", itemInfo.AdversaryDodgeModifier);
+	out.setValue("AdversaryParryModifier", itemInfo.AdversaryParryModifier);
+	out.setValue("Hp", itemInfo.Hp);
+	out.setValue("HpMax", itemInfo.HpMax);
+	out.setValue("Range", itemInfo.Range);
+	out.setValue("HpBuff", itemInfo.HpBuff);
+	out.setValue("SapBuff", itemInfo.SapBuff);
+	out.setValue("StaBuff", itemInfo.StaBuff);
+	out.setValue("FocusBuff", itemInfo.FocusBuff);
+	out.setValue("SapLoadCurrent", itemInfo.SapLoadCurrent);
+	out.setValue("SapLoadMax", itemInfo.SapLoadMax);
+	out.setValue("ProtectionFactor", itemInfo.ProtectionFactor);
+	out.setValue("MaxSlashingProtection", itemInfo.MaxSlashingProtection);
+	out.setValue("MaxPiercingProtection", itemInfo.MaxPiercingProtection);
+	out.setValue("MaxBluntProtection", itemInfo.MaxBluntProtection);
+	out.setValue("WearEquipmentMalus", itemInfo.WearEquipmentMalus);
+	out.push();
 
 	return 1;
 }
-
-// ***************************************************************************
-int CDBCtrlSheet::luaGetSapBuff(CLuaState &ls)
-{
-	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
-	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
-	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
-
-	ls.push((double)itemInfo.SapBuff);
-	
-	return 1;
-}
-
-// ***************************************************************************
-int CDBCtrlSheet::luaGetFocusBuff(CLuaState &ls)
-{
-	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
-	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
-	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
-
-	ls.push((double)itemInfo.FocusBuff);
-
-	return 1;
-}
-
-// ***************************************************************************
-int CDBCtrlSheet::luaGetStaBuff(CLuaState &ls)
-{
-	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
-	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
-	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
-
-	ls.push((double)itemInfo.StaBuff);
-
-	return 1;
-}
-
 
 // ***************************************************************************
 int CDBCtrlSheet::luaGetName(CLuaState &ls)
@@ -217,7 +205,7 @@ int CDBCtrlSheet::luaGetCreatorName(CLuaState &ls)
 	ucstring creatorName;
 	STRING_MANAGER::CStringManagerClient::instance()->getString(itemInfo.CreatorName, creatorName);
 	CLuaIHM::push(ls, creatorName);
-	
+
 	return 1;
 }
 
@@ -250,7 +238,6 @@ int CDBCtrlSheet::luaWaitInfo(CLuaState &ls)
 // ***************************************************************************
 int CDBCtrlSheet::luaBuildCrystallizedSpellListBrick(CLuaState &ls)
 {
-	
 
 	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
 	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
@@ -271,7 +258,7 @@ int CDBCtrlSheet::luaBuildCrystallizedSpellListBrick(CLuaState &ls)
 		}
 	}
 
-	
+
 	// Reset other to 0.
 	for(;;currentBrick++)
 	{
@@ -333,29 +320,29 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"nature" );
 	if (prop)
 	{
-		if (NLMISC::strlwr(prop.str()) == "item")
+		if (NLMISC::toLower(prop.str()) == "item")
 			_Type = CCtrlSheetInfo::SheetType_Item;
-		else if (NLMISC::strlwr(prop.str()) == "pact")
+		else if (NLMISC::toLower(prop.str()) == "pact")
 			_Type = CCtrlSheetInfo::SheetType_Pact;
-		else if (NLMISC::strlwr(prop.str()) == "skill")
+		else if (NLMISC::toLower(prop.str()) == "skill")
 			_Type = CCtrlSheetInfo::SheetType_Skill;
-		else if (NLMISC::strlwr(prop.str()) == "auto")
+		else if (NLMISC::toLower(prop.str()) == "auto")
 			_Type = CCtrlSheetInfo::SheetType_Auto;
-		else if (NLMISC::strlwr(prop.str()) == "macro")
+		else if (NLMISC::toLower(prop.str()) == "macro")
 			_Type = CCtrlSheetInfo::SheetType_Macro;
-		else if (NLMISC::strlwr(prop.str()) == "guild_flag")
+		else if (NLMISC::toLower(prop.str()) == "guild_flag")
 			_Type = CCtrlSheetInfo::SheetType_GuildFlag;
-		else if (NLMISC::strlwr(prop.str()) == "mission")
+		else if (NLMISC::toLower(prop.str()) == "mission")
 			_Type = CCtrlSheetInfo::SheetType_Mission;
-		else if (NLMISC::strlwr(prop.str()) == "sbrick")
+		else if (NLMISC::toLower(prop.str()) == "sbrick")
 			_Type = CCtrlSheetInfo::SheetType_SBrick;
-		else if (NLMISC::strlwr(prop.str()) == "sphraseid")
+		else if (NLMISC::toLower(prop.str()) == "sphraseid")
 			_Type = CCtrlSheetInfo::SheetType_SPhraseId;
-		else if (NLMISC::strlwr(prop.str()) == "sphrase")
+		else if (NLMISC::toLower(prop.str()) == "sphrase")
 			_Type = CCtrlSheetInfo::SheetType_SPhrase;
-		else if (NLMISC::strlwr(prop.str()) == "elevator_destination")
+		else if (NLMISC::toLower(prop.str()) == "elevator_destination")
 			_Type = CCtrlSheetInfo::SheetType_ElevatorDestination;
-		else if (NLMISC::strlwr(prop.str()) == "outpost_building")
+		else if (NLMISC::toLower(prop.str()) == "outpost_building")
 			_Type = CCtrlSheetInfo::SheetType_OutpostBuilding;
 	}
 
@@ -363,8 +350,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_noitem" );
 	if (prop)
 	{
-		string TxName = (const char *) prop;
-		TxName = strlwr (TxName);
+		string TxName = toLower((const char *) prop);
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		_DispNoSheetBmpId = rVR.getTextureIdFromName (TxName);
 	}
@@ -410,27 +396,23 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_l" );
 	if (prop)
 	{
-		string tmp = (const char *) prop;
-		_ListMenuLeft = strlwr(tmp);
+		_ListMenuLeft = toLower((const char *) prop);
 	}
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r" );
 	if (prop)
 	{
-		string tmp = (const char *) prop;
-		_ListMenuRight = strlwr(tmp);
+		_ListMenuRight = toLower((const char *) prop);
 	}
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r_empty_slot" );
 	if (prop)
 	{
-		string tmp = (const char *) prop;
-		_ListMenuRightEmptySlot = strlwr(tmp);
+		_ListMenuRightEmptySlot = toLower((const char *) prop);
 	}
 	// list menu on both clicks
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_b" );
 	if (prop)
 	{
-		string tmp = (const char *) prop;
-		setListMenuBoth(strlwr(tmp));
+		setListMenuBoth(toLower((const char *) prop));
 	}
 
 	// _BrickTypeBitField
@@ -449,13 +431,13 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 		for(uint i=0;i<strList.size();i++)
 		{
 			BRICK_TYPE::EBrickType	brickType= BRICK_TYPE::toBrickType(strList[i]);
-			if(brickType==BRICK_TYPE::UNKNOWN)
+			if (brickType==BRICK_TYPE::UNKNOWN)
 			{
 				nlwarning("<CCtrlSheetInfo::parseCtrlInfo> %s has an unvalid Brick Type", (const char *) prop);
 			}
 			else
 			{
-				// must not have so much brick type, else must change code!
+				// must not have so much brick type else must change code!
 				// nlassert(brickType<32);
 
 				// Ok set the bit associated
@@ -524,6 +506,7 @@ CCtrlDraggable(param)
 	_Useable= true;
 	_GrayedLink= NULL;
 	_NeedSetup= true;
+	_ItemInfoChanged = true;
 	_IconW = 0;
 	_IconH = 0;
 	_SetupInit= false;
@@ -547,12 +530,22 @@ CCtrlDraggable(param)
 	_ItemRMClassType= NULL;
 	_ItemRMFaberStatType= NULL;
 	_NotifyAnimEndTime = 0;
+
+	_HpBuffIcon = "ico_heal.tga";
+	_SapBuffIcon = "ico_sap.tga";
+	_StaBuffIcon = "ico_stamina.tga";
+	_FocusBuffIcon = "ico_focus.tga";
 }
 
 // ----------------------------------------------------------------------------
 CDBCtrlSheet::~CDBCtrlSheet()
 {
 	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
+
+	if (_ItemInfoWaiter.Requesting)
+	{
+		getInventory().removeItemInfoWaiter(&_ItemInfoWaiter);
+	}
 
 	if (_GuildBack)
 	{
@@ -632,6 +625,22 @@ bool CDBCtrlSheet::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"slot" );
 	if(prop)	_DrawSlot= CInterfaceElement::convertBool(prop);
 
+	//
+	_HpBuffIcon = "ico_heal.tga";
+	prop = (char*) xmlGetProp( cur, (xmlChar*)"hp_buff_icon" );
+	if (prop)	_HpBuffIcon = string((const char *)prop);
+
+	_SapBuffIcon = "ico_sap.tga";
+	prop = (char*) xmlGetProp( cur, (xmlChar*)"sap_buff_icon" );
+	if (prop)	_SapBuffIcon = string((const char *)prop);
+
+	_StaBuffIcon = "ico_stamina.tga";
+	prop = (char*) xmlGetProp( cur, (xmlChar*)"sta_buff_icon" );
+	if (prop)	_StaBuffIcon = string((const char *)prop);
+
+	_FocusBuffIcon = "ico_focus.tga";
+	prop = (char*) xmlGetProp( cur, (xmlChar*)"focus_buff_icon" );
+	if (prop)	_FocusBuffIcon = string((const char *)prop);
 
 	updateActualType();
 	// Init size for Type
@@ -644,8 +653,8 @@ void CDBCtrlSheet::initSheet(const std::string &dbBranchId, const CCtrlSheetInfo
 {
 	H_AUTO ( RZ_CDBCtrlSheet_initSheet )
 
-	nlassert((ctrlInfo._Type == SheetType_Macro) || (dbBranchId.size()>0));
-	nlassert((ctrlInfo._Type == SheetType_Macro) || (_Id.size()>0));
+	nlassert((ctrlInfo._Type == SheetType_Macro) || !dbBranchId.empty());
+	nlassert((ctrlInfo._Type == SheetType_Macro) || !_Id.empty());
 
 	// init
 	*static_cast<CCtrlSheetInfo*>(this)= ctrlInfo;
@@ -907,7 +916,7 @@ uint CDBCtrlSheet::getInventorySlot( const string &dbBranchId )
 				return INVENTORIES::bag;
 			break;
 		case 'P':
-			nlctassert(MAX_INVENTORY_ANIMAL==4);
+			nlctassert(MAX_INVENTORY_ANIMAL==7);
 			if( strncmp( "PACK_ANIMAL", szName2, 11 ) )
 				break;
 			switch( szName2[11] )
@@ -920,6 +929,12 @@ uint CDBCtrlSheet::getInventorySlot( const string &dbBranchId )
 				return INVENTORIES::pet_animal3;
 			case '3':
 				return INVENTORIES::pet_animal4;
+			case '4':
+				return INVENTORIES::pet_animal5;
+			case '5':
+				return INVENTORIES::pet_animal6;
+			case '6':
+				return INVENTORIES::pet_animal7;
 			default:
 				break;
 			}
@@ -996,11 +1011,10 @@ void CDBCtrlSheet::updateCoords ()
 {
 	if (getActive())
 	{
-		if(!_SetupInit)
-			setupInit();
-
 		if (_Type != CCtrlSheetInfo::SheetType_Macro)
 		{
+			if (!_SetupInit) setupInit();
+
 			if (_LastSheetId != _SheetId.getSInt32())
 			{
 				updateActualType();
@@ -1054,6 +1068,72 @@ void CDBCtrlSheet::updateIconSize()
 	}
 }
 
+// ***************************************************************************
+void CDBCtrlSheet::clearIconBuffs()
+{
+	_EnchantIcons.clear();
+	_BuffIcons.clear();
+}
+
+// ***************************************************************************
+void CDBCtrlSheet::infoReceived()
+{
+	if (!_ItemSheet)
+	{
+		clearIconBuffs();
+		return;
+	}
+
+	const CClientItemInfo *itemInfo = getInventory().getItemInfoCache(getItemSerial(), getItemCreateTime());
+	if (itemInfo == NULL)
+	{
+		// schedule for recheck on next draw()
+		_ItemInfoChanged = true;
+		return;
+	}
+
+	clearIconBuffs();
+
+	// crystallized spell
+	{
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
+		CSBrickManager *pBM= CSBrickManager::getInstance();
+		for(uint i=0; i<itemInfo->Enchantment.Bricks.size(); ++i)
+		{
+			const CSBrickSheet *brick = pBM->getBrick(itemInfo->Enchantment.Bricks[i]);
+			if (brick)
+			{
+				if (!brick->isRoot() && !brick->isCredit() && !brick->isParameter())
+				{
+					_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIcon()), brick->IconColor));
+					rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
+				}
+				else if (brick->isRoot())
+				{
+					// there should be single root icon and it should be first one
+					_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIconBack()), brick->IconBackColor));
+					rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
+				}
+			}
+		}
+	}
+
+	// buff icons
+	{
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
+
+		if (itemInfo->HpBuff > 0) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(_HpBuffIcon)));
+		if (itemInfo->SapBuff > 0) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(_SapBuffIcon)));
+		if (itemInfo->StaBuff > 0) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(_StaBuffIcon)));
+		if (itemInfo->FocusBuff > 0) _BuffIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(_FocusBuffIcon)));
+
+		// update sizes
+		for(uint i = 0; i < _BuffIcons.size(); ++i)
+		{
+			rVR.getTextureSizeFromId(_BuffIcons[i].TextureId, _BuffIcons[i].IconW, _BuffIcons[i].IconH);
+		}
+	}
+}
 
 // ***************************************************************************
 void CDBCtrlSheet::setupPact()
@@ -1096,6 +1176,20 @@ void CDBCtrlSheet::setupPact()
 	}
 }
 
+// ***************************************************************************
+bool CDBCtrlSheet::useItemInfoForFamily(ITEMFAMILY::EItemFamily family) const
+{
+	return family == ITEMFAMILY::CRYSTALLIZED_SPELL
+		|| family == ITEMFAMILY::JEWELRY
+		|| family == ITEMFAMILY::ARMOR
+		|| family == ITEMFAMILY::MELEE_WEAPON
+		|| family == ITEMFAMILY::RANGE_WEAPON
+		|| family == ITEMFAMILY::SHIELD
+		|| family == ITEMFAMILY::CRAFTING_TOOL
+		|| family == ITEMFAMILY::HARVEST_TOOL
+		|| family == ITEMFAMILY::TAMING_TOOL
+		|| family == ITEMFAMILY::TRAINING_TOOL;
+}
 
 // ***************************************************************************
 void CDBCtrlSheet::setupItem ()
@@ -1103,6 +1197,7 @@ void CDBCtrlSheet::setupItem ()
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	sint32 sheet = _SheetId.getSInt32();
+
 	// If this is the same sheet, need to resetup
 	if (_LastSheetId != sheet || _NeedSetup)
 	{
@@ -1203,6 +1298,9 @@ void CDBCtrlSheet::setupItem ()
 
 			// Special Item requirement
 			updateItemCharacRequirement(_LastSheetId);
+
+			// update item info markers
+			_ItemInfoChanged = true;
 		}
 		else
 		{
@@ -1277,6 +1375,13 @@ void CDBCtrlSheet::setupItem ()
 			_Useable = CSkillManager::getInstance()->checkBaseSkillMetRequirement(_ItemSheet->RequiredSkill, _ItemSheet->RequiredSkillLevel);
 	}
 */
+
+	// at each frame, update item info icon if changed
+	if (_ItemInfoChanged)
+	{
+		_ItemInfoChanged = false;
+		setupItemInfoWaiter();
+	}
 }
 
 
@@ -1553,10 +1658,46 @@ void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bri
 
 	// Get the best SBrick to display.
 	CSheetId	rootBrickSheetId= bricks[0];
-
 	{
 		CSheetId	bestBrickSheetId= pBM->getSabrinaCom().getPhraseBestDisplayBrick(bricks);
 		setupDisplayAsSBrick (rootBrickSheetId.asInt(), bestBrickSheetId.asInt() );
+	}
+
+	// Override background if type is forace extraction/prospection and ecosystem brick is used
+	{
+		BRICK_FAMILIES::TBrickFamily family = pBM->getSabrinaCom().getPhraseForageFamily(bricks);
+		std::string icon;
+		switch(family)
+		{
+			case BRICK_FAMILIES::BHFEMA:
+			case BRICK_FAMILIES::BHFPMA:
+				icon = "bk_matis_brick.tga";
+				break;
+			case BRICK_FAMILIES::BHFEMB:
+			case BRICK_FAMILIES::BHFPMB:
+				icon = "bk_fyros_brick.tga";
+				break;
+			case BRICK_FAMILIES::BHFEMC:
+			case BRICK_FAMILIES::BHFPMC:
+				icon = "bk_zorai_brick.tga";
+				break;
+			case BRICK_FAMILIES::BHFEMD:
+			case BRICK_FAMILIES::BHFPMD:
+				icon = "bk_tryker_brick.tga";
+				break;
+			case BRICK_FAMILIES::BHFEME:
+			case BRICK_FAMILIES::BHFPME:
+				icon = "bk_generic_brick.tga";
+				break;
+			default:
+				icon = "";
+				break;
+		}
+		if (!icon.empty())
+		{
+			CViewRenderer &rVR = *CViewRenderer::getInstance();
+			_DispBackBmpId = rVR.getTextureIdFromName(icon);
+		}
 	}
 
 	// not so beautiful to display .sphrase name in progression, and in botchat
@@ -1745,7 +1886,7 @@ void CDBCtrlSheet::resetCharBitmaps()
 void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar, bool topDown)
 {
 	// Use the optString for the Macro name
-	_OptString = strlwr(_OptString);
+	_OptString = toLower(_OptString);
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
@@ -1821,7 +1962,6 @@ void CDBCtrlSheet::draw()
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
-	CRGBA color = CRGBA(255,255,255,255);
 
 	if (_Type != SheetType_Macro)
 	{
@@ -1914,13 +2054,13 @@ void CDBCtrlSheet::draw()
 
 			rVR.getTextureSizeFromId(frontTex, texWidth, texHeight);
 			CQuadUV regenTris[5];
-			uint numTris = buildPie(regenTris, 0.f, amount, texWidth);	
+			uint numTris = buildPie(regenTris, 0.f, amount, texWidth);
 			nlassert(numTris <= sizeofarray(regenTris));
 			for (uint tri = 0; tri < numTris; ++tri)
 			{
 				rVR.drawQuad(_RenderLayer + 1, regenTris[tri], frontTex, CRGBA::White, false);
 			}
-			numTris = buildPie(regenTris, amount, 1.f, texWidth);	
+			numTris = buildPie(regenTris, amount, 1.f, texWidth);
 			nlassert(numTris <= sizeofarray(regenTris));
 			for (uint tri = 0; tri < numTris; ++tri)
 			{
@@ -1942,7 +2082,7 @@ void CDBCtrlSheet::draw()
 			if (texId != -1)
 			{
 				sint32 texWidth, texHeight;
-				rVR.getTextureSizeFromId(texId, texWidth, texHeight);			
+				rVR.getTextureSizeFromId(texId, texWidth, texHeight);
 				const float freq0 = 1.f;
 				const float phase0 = 0.f;
 				const float freq1 = -1.f;
@@ -1959,20 +2099,20 @@ void CDBCtrlSheet::draw()
 // ----------------------------------------------------------------------------
 void CDBCtrlSheet::drawRotatedQuad(CViewRenderer &vr, float angle, float scale, uint renderLayer, uint32 texId, sint32 texWidth, sint32 texHeight)
 {
-	NLMISC::CQuadUV quv;	
+	NLMISC::CQuadUV quv;
 	float cosA =  cosf(angle);
 	float sinA =  sinf(angle);
 	//
-	quv.V0.set(_XReal + 0.5f * _WReal + 0.5f * scale * texWidth * (- cosA + sinA), 
+	quv.V0.set(_XReal + 0.5f * _WReal + 0.5f * scale * texWidth * (- cosA + sinA),
 			   _YReal + 0.5f * _HReal + 0.5f * scale * texHeight * (- sinA - cosA), 0.5f);
 	//
-	quv.V1.set(_XReal + 0.5f * _WReal + 0.5f * scale * texWidth * (cosA + sinA), 
+	quv.V1.set(_XReal + 0.5f * _WReal + 0.5f * scale * texWidth * (cosA + sinA),
 			   _YReal + 0.5f * _HReal + 0.5f * scale * texHeight * (sinA - cosA), 0.5f);
 	//
-	quv.V2.set(_XReal + 0.5f * _WReal + 0.5f * scale * texWidth * (cosA - sinA), 
-			   _YReal + 0.5f * _HReal + 0.5f * scale * texHeight * (sinA + cosA), 0.5f);	
+	quv.V2.set(_XReal + 0.5f * _WReal + 0.5f * scale * texWidth * (cosA - sinA),
+			   _YReal + 0.5f * _HReal + 0.5f * scale * texHeight * (sinA + cosA), 0.5f);
 	//
-	quv.V3.set(_XReal + 0.5f * _WReal + 0.5f * scale * texWidth * (- cosA - sinA), 
+	quv.V3.set(_XReal + 0.5f * _WReal + 0.5f * scale * texWidth * (- cosA - sinA),
 			   _YReal + 0.5f * _HReal + 0.5f * scale * texHeight * (- sinA + cosA), 0.5f);
 	//
 	quv.Uv0.set(0.f, 0.f);
@@ -1987,13 +2127,13 @@ void CDBCtrlSheet::drawRotatedQuad(CViewRenderer &vr, float angle, float scale, 
 // ----------------------------------------------------------------------------
 inline void CDBCtrlSheet::uvToScreen(float x, float y, CVector &screenPos, uint texSize) const
 {
-	screenPos.set(_XReal + texSize * x, _YReal + texSize * (1.f - y), 0.5f);	
+	screenPos.set(_XReal + texSize * x, _YReal + texSize * (1.f - y), 0.5f);
 }
 
 
 // ----------------------------------------------------------------------------
 void CDBCtrlSheet::buildPieCorner(float angle, CUV &uv, CVector &pos, uint texSize) const
-{	
+{
 	float radAngle = angle * 2.f * float(NLMISC::Pi);
 	// angle origin is at 12'o'clock
 	float x = cosf(0.5f * float(NLMISC::Pi) - radAngle);
@@ -2026,33 +2166,33 @@ void CDBCtrlSheet::buildPieCorner(float angle, CUV &uv, CVector &pos, uint texSi
 			y /= -x;
 			x = -1.f;
 		}
-	}	
+	}
 	// remap to unit quad
 	// (well we could have worked with tan() too, I find it simpler this way ....)
 	uv.set(0.5f * x + 0.5f, 0.5f - 0.5f * y);
-	uvToScreen(uv.U, uv.V, pos, texSize);		
+	uvToScreen(uv.U, uv.V, pos, texSize);
 }
 
 // ----------------------------------------------------------------------------
 uint CDBCtrlSheet::buildPie(CQuadUV *triPtr, float startAngle, float endAngle, uint texSize)
-{			
+{
 	static volatile bool exit1 = false;
 	nlassert(startAngle <= endAngle);
-	const sint32 factor = 65536; 
-	const float invFactor = 1.f / factor; 
+	const sint32 factor = 65536;
+	const float invFactor = 1.f / factor;
 	sint32 iCurr = (uint32) (startAngle * factor) ;
 	sint32 iEnd = (uint32) (endAngle * factor);
 	clamp(iCurr, 0, factor);
 	clamp(iEnd, 0, factor);
 	uint triCount = 0;
 	CVector quadCenter;
-	uvToScreen(0.5f, 0.5f, quadCenter, texSize);	
+	uvToScreen(0.5f, 0.5f, quadCenter, texSize);
 
 	while (iCurr != iEnd)
 	{
 		sint32 iNext = iCurr + (factor / 4);
-		iNext -= ((iNext - factor / 8) % (factor / 4)); // snap to nearest corner		
-		iNext = std::min(iNext, iEnd);	
+		iNext -= ((iNext - factor / 8) % (factor / 4)); // snap to nearest corner
+		iNext = std::min(iNext, iEnd);
 		// well, not really a quad, but we don't have yet simple triangles rendering in the ui
 		triPtr->Uv0.set(0.5f, 0.5f);
 		triPtr->V0 = quadCenter;
@@ -2185,6 +2325,69 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					rVR.draw11RotFlipBitmap (_RenderLayer+1, x, y, 0, false, _DispOver2BmpId, fastMulRGB(curSheetColor, _IconOver2Color));
 				}
 
+				if (_ShowIconBuffs && !_BuffIcons.empty())
+				{
+					// there is max 4 icons
+					sint32 hArea = (hSheet / 4);
+					sint32 xIcon = x;
+					sint32 yIcon = y;
+					for (uint i = 0; i < _BuffIcons.size(); ++i)
+					{
+						sint32 wIcon = _BuffIcons[i].IconW;
+						sint32 hIcon = _BuffIcons[i].IconH;
+						if (hIcon > hArea)
+						{
+							wIcon = wIcon * ((float)hArea / hIcon);
+							hIcon = hArea;
+						}
+						rVR.drawRotFlipBitmap (_RenderLayer+1, xIcon, yIcon, wIcon, hIcon, 0, false, _BuffIcons[i].TextureId, fastMulRGB(curSheetColor, _BuffIcons[i].Color));
+						xIcon += wIcon;
+						// move up the row for 3rd/4th icon
+						if (i % 3 == 1) {
+							xIcon = x;
+							yIcon += hIcon;
+						}
+					}
+				}
+
+				// Is the item enchanted ?
+				sint32 enchant = _Enchant.getSInt32();
+				if (enchant > 0)
+				{
+					// Yes draw the additionnal bitmap and the charge (number of enchanted spell we can launch with the enchanted item)
+					enchant--;
+					rVR.draw11RotFlipBitmap (_RenderLayer+1, x, y, 0, false, rVR.getSystemTextureId(CViewRenderer::ItemEnchantedTexture), curSheetColor);
+					drawNumber(x+1, y-2+hSheet-rVR.getFigurTextureH(), wSheet, hSheet, numberColor, enchant, false);
+				}
+
+				if (_ShowIconBuffs && !_EnchantIcons.empty())
+				{
+					// should only only 2 icons at most
+					// draw them in single line, top-right
+					sint32 hArea = (hSheet / 3);
+					sint32 xIcon = x + wSheet - 1;
+					sint32 yIcon = y + hSheet - 1/* - hArea*/;
+					// 0 is expected to be background
+					for (uint i = 1; i < _EnchantIcons.size(); ++i)
+					{
+						sint32 wIcon = _EnchantIcons[i].IconW;
+						sint32 hIcon = _EnchantIcons[i].IconH;
+						if (hIcon > hArea)
+						{
+							wIcon = wIcon * ((float)hArea / hIcon);
+							hIcon = hArea;
+						}
+						// need to move x before draw because of right aligned
+						if (i == 1)
+						{
+							xIcon -= wIcon;
+						}
+						yIcon -= hIcon;
+						rVR.drawRotFlipBitmap(_RenderLayer + 1, xIcon, yIcon, wIcon, hIcon, 0, false, _EnchantIcons[0].TextureId, fastMulRGB(curSheetColor, _EnchantIcons[0].Color));
+						rVR.drawRotFlipBitmap(_RenderLayer+1, xIcon, yIcon, wIcon, hIcon, 0, false, _EnchantIcons[i].TextureId, fastMulRGB(curSheetColor, _EnchantIcons[i].Color));
+					}
+				}
+
 				// Draw Quality. -1 for lookandfeel. Draw it with global color
 				if (_DispQuality != -1)
 				{
@@ -2206,15 +2409,6 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 						quantity -= getLockValuePtr()->getValue32();
 					}
 					drawNumber(x+1+crossW, y+1, wSheet, hSheet, curSheetColor, quantity, false);
-				}
-				// Is the item enchanted ?
-				sint32 enchant = _Enchant.getSInt32();
-				if (enchant > 0)
-				{
-					// Yes draw the additionnal bitmap and the charge (number of enchanted spell we can launch with the enchanted item)
-					enchant--;
-					rVR.draw11RotFlipBitmap (_RenderLayer+2, x, y, 0, false, rVR.getSystemTextureId(CViewRenderer::ItemEnchantedTexture), curSheetColor);
-					drawNumber(x+1, y-2+hSheet-rVR.getFigurTextureH(), wSheet, hSheet, numberColor, enchant, false);
 				}
 
 				// if a raw material for example, must add special icon text.
@@ -2313,8 +2507,8 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 				case SheetType_SPhrase : setupSPhrase(); break;
 				default: nlassert(true); break;
 			}
-				
-			
+
+
 			bool showOutOfRangeSymbol = false;
 			bool forceGrayed = false;
 
@@ -2326,15 +2520,15 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 				{
 					CSPhraseManager	*pPM= CSPhraseManager::getInstance();
 					const CSPhraseCom	&phrase= pPM->getPhrase(phraseId);
-					// get the phrase Data version, to check if it had changed.					
+					// get the phrase Data version, to check if it had changed.
 					uint32 totalActionMalus = pPM->getTotalActionMalus(phrase);
 					uint8 targetSlot = UserEntity->targetSlot();
 					if (targetSlot < CLFECOMMON::INVALID_SLOT)
 					{
 						CEntityCL *target = EntitiesMngr.entity(targetSlot);
 						if (target && UserEntity)
-						{							
-							double dist2 = (target->pos() - UserEntity->pos()).sqrnorm();							
+						{
+							double dist2 = (target->pos() - UserEntity->pos()).sqrnorm();
 							CSBrickManager	*pBM= CSBrickManager::getInstance();
 							CSBrickSheet	*rootBrick= NULL;
 							if(phrase.Bricks.size())
@@ -2361,7 +2555,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 											break;
 										}
 									}
-									
+
 									if (!isPrimalMagic)
 									{
 										forceGrayed = !(target->isPlayer() && target->isFriend());
@@ -2370,21 +2564,21 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 									{
 										forceGrayed = false;
 									}
-									
+
 								}
-			
+
 								if (!forceGrayed)
 								{
 									sint phraseRange;
 									sint rangeMalus;
 									pPM->getPhraseMagicRange(phrase, totalActionMalus, phraseRange, rangeMalus);
-									double rangeDist = (float) (phraseRange + rangeMalus);							
+									double rangeDist = (float) (phraseRange + rangeMalus);
 									if (phraseRange != 0) // if range is '0' then it is a 'self' action
 									{
-										rangeDist += 0.5 + target->getSheetScale() * target->getSheetColRadius(); // player radius							
+										rangeDist += 0.5 + target->getSheetScale() * target->getSheetColRadius(); // player radius
 										if (dist2 > rangeDist * rangeDist)
 										{
-											showOutOfRangeSymbol = true;										
+											showOutOfRangeSymbol = true;
 										}
 									}
 								}
@@ -2416,11 +2610,11 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 
 								if (isTaunt && !forceGrayed)
 								{
-										double rangeDist = (float) maxRange;							
-										rangeDist += 0.5 + target->getSheetScale() * target->getSheetColRadius(); // player radius							
+										double rangeDist = (float) maxRange;
+										rangeDist += 0.5 + target->getSheetScale() * target->getSheetColRadius(); // player radius
 										if (dist2 > rangeDist * rangeDist)
 										{
-											showOutOfRangeSymbol = true;										
+											showOutOfRangeSymbol = true;
 										}
 								}
 							}
@@ -2487,15 +2681,15 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 				// if the pointer is over the button
 				if (_Over)
 					// Draw -1,-1 because the slot over is 26x26
-					rVR.draw11RotFlipBitmap (_RenderLayer+1,  x-1, y-1, 0, false, _TextureIdOver, curSheetColor );			
+					rVR.draw11RotFlipBitmap (_RenderLayer+1,  x-1, y-1, 0, false, _TextureIdOver, curSheetColor );
 			}
 
 			if (showOutOfRangeSymbol)
-			{				
+			{
 				rVR.draw11RotFlipBitmap (_RenderLayer+1,  x, y, 0, false, rVR.getSystemTextureId(CViewRenderer::OutOfRangeTexture), CRGBA::White);
-			}	
+			}
 		}
-		break;			
+		break;
 		case CCtrlSheetInfo::SheetType_OutpostBuilding:
 			setupOutpostBuilding();
 			if (_DispBackBmpId != -1)
@@ -2966,6 +3160,8 @@ void	CDBCtrlSheet::swapSheet(CDBCtrlSheet *other)
 		swapDBProps(getItemRMClassTypePtr(), other->getItemRMClassTypePtr());
 		swapDBProps(getItemRMFaberStatTypePtr(), other->getItemRMFaberStatTypePtr());
 		swapDBProps(getItemPrerequisitValidPtr(), other->getItemPrerequisitValidPtr());
+		swapDBProps(getItemSerialPtr(), other->getItemSerialPtr());
+		swapDBProps(getItemCreateTimePtr(), other->getItemCreateTimePtr());
 	}
 }
 
@@ -3078,6 +3274,62 @@ const COutpostBuildingSheet *CDBCtrlSheet::asOutpostBuildingSheet() const
 }
 
 // ***************************************************************************
+void	CDBCtrlSheet::setupItemInfoWaiter()
+{
+	const CItemSheet *item = asItemSheet();
+	if(!item)
+	{
+		clearIconBuffs();
+		return;
+	}
+
+	if (!useItemInfoForFamily(item->Family))
+	{
+		clearIconBuffs();
+		return;
+	}
+
+	if (getItemSerial() == 0 || getItemCreateTime() == 0)
+	{
+		clearIconBuffs();
+		return;
+	}
+
+	string luaMethodName = ((item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) ? "updateCrystallizedSpellTooltip" : "updateBuffItemTooltip");
+	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
+	uint itemSlotId = getInventory().getItemSlotId(ctrlSheet);
+
+	// Prepare the waiter for tooltips
+	_ItemInfoWaiter.ItemSheet= ctrlSheet->getSheetId();
+	_ItemInfoWaiter.LuaMethodName = luaMethodName;
+	_ItemInfoWaiter.ItemSlotId= itemSlotId;
+	_ItemInfoWaiter.CtrlSheet = ctrlSheet;
+
+	// send out request only if cache is not set
+	const CClientItemInfo *itemInfo = getInventory().getItemInfoCache(getItemSerial(), getItemCreateTime());
+	if (itemInfo)
+	{
+		infoReceived();
+	}
+	else
+	{
+		// Using isInventoryPresent/Available() will fail for packers when out of range
+		// Getting server item however will work correctly for packer/room/guild
+		const CItemImage *itemImage = getInventory().getServerItem(itemSlotId);
+		if (itemImage)
+		{
+			_ItemInfoWaiter.sendRequest();
+		}
+		else
+		{
+			// schedule for next draw() - if inventory should not be available (ie guild),
+			// but user opens it anyway, then this will loop back here on every draw()
+			_ItemInfoChanged = true;
+		}
+	}
+}
+
+// ***************************************************************************
 void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 {
 	if (getType() == CCtrlSheetInfo::SheetType_Skill)
@@ -3088,36 +3340,73 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 	}
 	else if(getType() == CCtrlSheetInfo::SheetType_Macro)
 	{
-		// TODO Find the name + params of the action
 		help = _ContextHelp;
+		const CMacroCmd *macro = CMacroCmdManager::getInstance()->getMacroFromMacroID(getMacroId());
+		if (!macro)
+			return;
+
+		ucstring macroName = macro->Name;
+		if (macroName.empty())
+			macroName = CI18N::get("uiNotAssigned");
+
+		ucstring assignedTo = macro->Combo.toUCString();
+		if (assignedTo.empty())
+			assignedTo = CI18N::get("uiNotAssigned");
+
+		ucstring dispText;
+		ucstring dispCommands;
+		const CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
+
+		uint nb = 0;
+		for (uint i = 0; i < macro->Commands.size(); ++i)
+		{
+			ucstring commandName;
+			for (uint j = 0; j < pMCM->ActionManagers.size(); ++j)
+			{
+				CAction::CName c(macro->Commands[i].Name.c_str(), macro->Commands[i].Params.c_str());
+				if (pMCM->ActionManagers[j]->getBaseAction(c) != NULL)
+				{
+					commandName = pMCM->ActionManagers[j]->getBaseAction(c)->getActionLocalizedText(c);
+					// display a few commands
+					if (nb < 5)
+						dispCommands += "\n" + commandName;
+					++nb;
+					break;
+				}
+			}
+		}
+		// formats
+		dispText = ucstring("%n (@{6F6F}%k@{FFFF})\n%c");
+		if (nb > 5) // more?
+			dispCommands += toString(" ... @{6F6F}%i@{FFFF}+", nb-5);
+
+		strFindReplace(dispText, ucstring("%n"), macroName);
+		strFindReplace(dispText, ucstring("%k"), assignedTo);
+		strFindReplace(dispText, ucstring("%c"), dispCommands);
+		help = dispText;
 	}
 	else if(getType() == CCtrlSheetInfo::SheetType_Item)
 	{
 		const CItemSheet	*item= asItemSheet();
 		if(item)
 		{
-			if (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL || item->Family == ITEMFAMILY::JEWELRY || item->Family == ITEMFAMILY::ARMOR)
+			if (useItemInfoForFamily(item->Family))
 			{
-				string luaMethodName = ( (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) ? "updateCrystallizedSpellTooltip" : "updateBuffItemTooltip");
-				CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
-				if ( ! getInventory().isItemInfoUpToDate(getInventory().getItemSlotId(ctrlSheet)))
-				{
-					// Prepare the waiter
-					ControlSheetTooltipUpdater.ItemSheet= ctrlSheet->getSheetId();
-					ControlSheetTooltipUpdater.LuaMethodName = luaMethodName;
-					ControlSheetTooltipUpdater.ItemSlotId= getInventory().getItemSlotId(ctrlSheet);
-					ControlSheetTooltipUpdater.CtrlSheet = ctrlSheet;
-
-					// Add the waiter
-					getInventory().addItemInfoWaiter(&ControlSheetTooltipUpdater);
-				}
-
-				help = ControlSheetTooltipUpdater.infoValidated(ctrlSheet, luaMethodName);
-
+				// call lua function to update tooltip window
+				_ItemInfoWaiter.sendRequest();
+				help = _ItemInfoWaiter.infoValidated();
+				// its expected to get at least item name back
+				if (help.empty())
+					help = getItemActualName();
+			}
+			else if (!_ContextHelp.empty())
+			{
+				help = _ContextHelp;
 			}
 			else
-				help= getItemActualName();
-
+			{
+				help = getItemActualName();
+			}
 		}
 		else
 			help= _ContextHelp;
@@ -3160,18 +3449,18 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		}
 		else
 		{
-			// delegate setup of context he help ( & window ) to lua		
+			// delegate setup of context he help ( & window ) to lua
 			CInterfaceManager *im = CInterfaceManager::getInstance();
 			CLuaState *ls= CLuaManager::getInstance().getLuaState();
 			{
 				CLuaStackRestorer lsr(ls, 0);
-				CSPhraseManager	*pPM= CSPhraseManager::getInstance();					
+				CSPhraseManager	*pPM= CSPhraseManager::getInstance();
 				_PhraseAdapter = new CSPhraseComAdpater;
 				_PhraseAdapter->Phrase = pPM->getPhrase(phraseId);
 				CLuaIHM::pushReflectableOnStack(*ls, _PhraseAdapter);
-				ls->pushGlobalTable();	
+				ls->pushGlobalTable();
 				CLuaObject game(*ls);
-				game = game["game"];		
+				game = game["game"];
 				game.callMethodByNameNoThrow("updatePhraseTooltip", 1, 1);
 				// retrieve result from stack
 				help = ucstring();
@@ -3233,24 +3522,10 @@ void	CDBCtrlSheet::getContextHelpToolTip(ucstring &help) const
 		const CItemSheet *item = asItemSheet();
 		if (item)
 		{
-			if (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL 
-				|| item->Family == ITEMFAMILY::JEWELRY || item->Family == ITEMFAMILY::ARMOR)
-			{				
-				string luaMethodName = (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) ? "updateCrystallizedSpellTooltip" : "updateBuffItemTooltip";
-				CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
-				if ( ! getInventory().isItemInfoUpToDate(getInventory().getItemSlotId(ctrlSheet)))
-				{					
-					// Prepare the waiter
-					ControlSheetTooltipUpdater.ItemSheet= ctrlSheet->getSheetId();
-					ControlSheetTooltipUpdater.LuaMethodName = luaMethodName;
-					ControlSheetTooltipUpdater.ItemSlotId= getInventory().getItemSlotId(ctrlSheet);
-					ControlSheetTooltipUpdater.CtrlSheet = ctrlSheet;
-					
-					// Add the waiter
-					getInventory().addItemInfoWaiter(&ControlSheetTooltipUpdater);
-				}
-				
-				help = ControlSheetTooltipUpdater.infoValidated(ctrlSheet, luaMethodName);
+			if (useItemInfoForFamily(item->Family))
+			{
+				_ItemInfoWaiter.sendRequest();
+				help = _ItemInfoWaiter.infoValidated();
 				return;
 			}
 		}
@@ -3465,6 +3740,10 @@ void CDBCtrlSheet::resetAllTexIDs()
 	_Stackable= 1;
 	_IconW = 0;
 	_IconH = 0;
+
+	_ItemInfoChanged = true;
+	_EnchantIcons.clear();
+	_BuffIcons.clear();
 }
 
 
@@ -3545,6 +3824,10 @@ void CDBCtrlSheet::copyAspect(CDBCtrlSheet *dest)
 		dest->setItemRMFaberStatType(getItemRMFaberStatType());
 		// copy prerequisit valid flag
 		dest->setItemPrerequisitValid(getItemPrerequisitValid());
+		// copy item serial
+		dest->setItemSerial(getItemSerial());
+		// copy item create time
+		dest->setItemCreateTime(getItemCreateTime());
 	}
 	// if brick, sphrase or sphraseId
 	if(isSBrick() || isSPhrase() || isSPhraseId())
@@ -4052,7 +4335,6 @@ void CDBCtrlSheet::setItemPrice(sint32 price)
 	node->setValue32(price);
 }
 
-
 // ***************************************************************************
 sint32 CDBCtrlSheet::getItemResaleFlag() const
 {
@@ -4073,6 +4355,54 @@ CCDBNodeLeaf *CDBCtrlSheet::getItemResaleFlagPtr() const
 void CDBCtrlSheet::setItemResaleFlag(sint32 rf)
 {
 	CCDBNodeLeaf *node = getItemResaleFlagPtr();
+	if (!node) return;
+	node->setValue32(rf);
+}
+
+// ***************************************************************************
+sint32 CDBCtrlSheet::getItemCreateTime() const
+{
+	CCDBNodeLeaf *node = getItemCreateTimePtr();
+	if (!node) return 0;
+	return node->getValue32();
+}
+
+// ***************************************************************************
+CCDBNodeLeaf *CDBCtrlSheet::getItemCreateTimePtr() const
+{
+	CCDBNodeBranch *root = getRootBranch();
+	if (!root) return NULL;
+	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("CREATE_TIME"), false));
+}
+
+// ***************************************************************************
+void CDBCtrlSheet::setItemCreateTime(sint32 ct)
+{
+	CCDBNodeLeaf *node = getItemCreateTimePtr();
+	if (!node) return;
+	node->setValue32(ct);
+}
+
+// ***************************************************************************
+sint32 CDBCtrlSheet::getItemSerial() const
+{
+	CCDBNodeLeaf *node = getItemSerialPtr();
+	if (!node) return 0;
+	return node->getValue32();
+}
+
+// ***************************************************************************
+CCDBNodeLeaf *CDBCtrlSheet::getItemSerialPtr() const
+{
+	CCDBNodeBranch *root = getRootBranch();
+	if (!root) return NULL;
+	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("SERIAL"), false));
+}
+
+// ***************************************************************************
+void CDBCtrlSheet::setItemSerial(sint32 rf)
+{
+	CCDBNodeLeaf *node = getItemSerialPtr();
 	if (!node) return;
 	node->setValue32(rf);
 }
@@ -4338,13 +4668,13 @@ std::string CDBCtrlSheet::getContextHelpWindowName() const
 	if (getType() == CCtrlSheetInfo::SheetType_Item)
 	{
 		const CItemSheet	*item= asItemSheet();
-		if(item)
+		if(item && useItemInfoForFamily(item->Family))
 		{
 			if (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL)
 			{
 				return "crystallized_spell_context_help";
 			}
-			else if (item->Family == ITEMFAMILY::JEWELRY || item->Family == ITEMFAMILY::ARMOR)
+			else
 			{
 				return "buff_item_context_help";
 			}
@@ -4365,8 +4695,4 @@ void CDBCtrlSheet::startNotifyAnim()
 {
 	_NotifyAnimEndTime = T1 + NOTIFY_ANIM_MS_DURATION;
 }
-
-
-
-
 

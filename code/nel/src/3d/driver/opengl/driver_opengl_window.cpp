@@ -44,6 +44,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 #ifdef NL_STATIC
@@ -312,7 +316,7 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 		wc.lpfnWndProc		= (WNDPROC)WndProc;
 		wc.cbClsExtra		= 0;
 		wc.cbWndExtra		= 0;
-		wc.hInstance		= GetModuleHandle(NULL);
+		wc.hInstance		= GetModuleHandleW(NULL);
 		wc.hIcon			= (HICON)windowIcon;
 		wc.hCursor			= _DefaultCursor;
 		wc.hbrBackground	= WHITE_BRUSH;
@@ -326,10 +330,10 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 	}
 
 	// Backup monitor color parameters
-	HDC dc = CreateDC ("DISPLAY", NULL, NULL, NULL);
+	HDC dc = CreateDCA ("DISPLAY", NULL, NULL, NULL);
 	if (dc)
 	{
-		_NeedToRestaureGammaRamp = GetDeviceGammaRamp (dc, _GammaRampBackuped) != FALSE;
+		_NeedToRestoreGammaRamp = GetDeviceGammaRamp (dc, _GammaRampBackuped) != FALSE;
 
 		// Release the DC
 		ReleaseDC (NULL, dc);
@@ -343,8 +347,13 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 	retrieveATIDriverVersion();
 #elif defined(NL_OS_MAC)
 
-	// nothing to do
 	nlunreferenced(windowIcon);
+
+	// autorelease pool for memory management
+	_autoreleasePool = [[NSAutoreleasePool alloc] init];
+
+	// init the application object
+	[NSApplication sharedApplication];
 
 #elif defined (NL_OS_UNIX)
 
@@ -465,35 +474,38 @@ bool CDriverGL::unInit()
 	}
 	_Registered = 0;
 
-	// Restaure monitor color parameters
-	if (_NeedToRestaureGammaRamp)
+	// Restore monitor color parameters
+	if (_NeedToRestoreGammaRamp)
 	{
-		HDC dc = CreateDC ("DISPLAY", NULL, NULL, NULL);
+		HDC dc = CreateDCA("DISPLAY", NULL, NULL, NULL);
 		if (dc)
 		{
-			if (!SetDeviceGammaRamp (dc, _GammaRampBackuped))
-				nlwarning ("(CDriverGL::release): SetDeviceGammaRamp failed");
+			if (!SetDeviceGammaRamp(dc, _GammaRampBackuped))
+				nlwarning("(CDriverGL::release): SetDeviceGammaRamp failed");
 
 			// Release the DC
-			ReleaseDC (NULL, dc);
+			ReleaseDC(NULL, dc);
 		}
 		else
 		{
-			nlwarning ("(CDriverGL::release): can't create DC");
+			nlwarning("(CDriverGL::release): can't create DC");
 		}
 	}
 
 #elif defined(NL_OS_MAC)
 
-	// nothing to do
+	[_autoreleasePool release];
 
 #elif defined (NL_OS_UNIX)
 
 	// restore default X errors handler
 	XSetErrorHandler(NULL);
 
-	XCloseDisplay(_dpy);
-	_dpy = NULL;
+	if (_dpy)
+	{
+		XCloseDisplay(_dpy);
+		_dpy = NULL;
+	}
 
 #endif // NL_OS_UNIX
 
@@ -558,13 +570,13 @@ void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 
 	if (winIconBig)
 	{
-		SendMessage(_win, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
-		SendMessage(_win, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconBig);
+		SendMessageA(_win, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
+		SendMessageA(_win, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconBig);
 	}
 	else
 	{
-		SendMessage(_win, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
-		SendMessage(_win, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconSmall);
+		SendMessageA(_win, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
+		SendMessageA(_win, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconSmall);
 	}
 
 #elif defined(NL_OS_MAC)
@@ -599,7 +611,7 @@ void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 }
 
 // --------------------------------------------------
-bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool resizeable) throw(EBadDisplay)
+bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool resizeable)
 {
 	H_AUTO_OGL(CDriverGL_setDisplay)
 
@@ -1454,7 +1466,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 		pos = 0;
 		hwndParent = NULL;
 	}
-	window = CreateWindowW(L"NLClass", L"NeL Window", dwStyle, 
+	window = CreateWindowW(L"NLClass", L"NeL Window", dwStyle,
 		pos, pos, mode.Width, mode.Height, hwndParent, NULL, GetModuleHandle(NULL), NULL);
 
 	if (window == EmptyWindow)
@@ -1465,6 +1477,12 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 	}
 
 #elif defined(NL_OS_MAC)
+
+	// create the menu in the top screen bar
+	setupApplicationMenu();
+
+	// finish the application launching
+	[NSApp finishLaunching];
 
 	// describe how the window should look like and behave
 	unsigned int styleMask = NSTitledWindowMask | NSClosableWindowMask |
@@ -1486,7 +1504,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 		[[CocoaApplicationDelegate alloc] initWithDriver:this];
 
 	// set the application delegate, this will handle window/app close events
-	[NSApp setDelegate:(id<NSFileManagerDelegate>)appDelegate];
+	[NSApp setDelegate:(id<NSApplicationDelegate>)appDelegate];
 
 	// bind the close button of the window to applicationShouldTerminate
 	id closeButton = [cocoa_window standardWindowButton:NSWindowCloseButton];
@@ -1629,7 +1647,7 @@ bool CDriverGL::destroyWindow()
 	if (_hDC)
 		wglMakeCurrent(_hDC, NULL);
 
-	if (_DestroyWindow && _hRC)
+	if (_hRC)
 	{
 		wglDeleteContext(_hRC);
 		_hRC = NULL;
@@ -1642,9 +1660,10 @@ bool CDriverGL::destroyWindow()
 	}
 
 #elif defined(NL_OS_MAC)
+
 #elif defined(NL_OS_UNIX)
 
-	if (_DestroyWindow && _ctx)
+	if (_DestroyWindow && _ctx) // FIXME: _DestroyWindow may need to be removed here as well
 		glXDestroyContext(_dpy, _ctx);
 
 	_ctx = NULL;
@@ -1738,7 +1757,9 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 	}
 	else if (windowStyle == EWSFullscreen)
 	{
+#ifndef _DEBUG
 		dwNewStyle |= WS_POPUP;
+#endif
 		isVisible = true;
 	}
 
@@ -1756,14 +1777,14 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 #elif defined(NL_OS_MAC)
 
 	// leave fullscreen mode, enter windowed mode
-	if(windowStyle == EWSWindowed && [containerView() isInFullScreenMode])
+	if (windowStyle == EWSWindowed && [containerView() isInFullScreenMode])
 	{
 		// disable manual setting of back buffer size, cocoa handles this
 		// automatically as soon as the view gets resized
 		CGLError error = CGLDisable((CGLContextObj)[_ctx CGLContextObj],
 			kCGLCESurfaceBackingSize);
 
-		if(error != kCGLNoError)
+		if (error != kCGLNoError)
 			nlerror("cannot disable kCGLCESurfaceBackingSize (%s)",
 				CGLErrorString(error));
 
@@ -1778,20 +1799,20 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 	}
 
 	// enter fullscreen, leave windowed mode
-	else if(windowStyle == EWSFullscreen && ![containerView() isInFullScreenMode])
+	else if (windowStyle == EWSFullscreen && ![containerView() isInFullScreenMode])
 	{
 		// enable manual back buffer size for mode setting in fullscreen
 		CGLError error = CGLEnable((CGLContextObj)[_ctx CGLContextObj],
 			kCGLCESurfaceBackingSize);
 
-		if(error != kCGLNoError)
+		if (error != kCGLNoError)
 			nlerror("cannot enable kCGLCESurfaceBackingSize (%s)",
 				CGLErrorString(error));
 
 		// put the view in fullscreen mode, hiding the dock but enabling the menubar
 		// to pop up if the mouse hits the top screen border.
 		// NOTE: withOptions:nil disables <CMD>+<Tab> application switching!
-#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#ifdef NL_MAC_VERSION_10_6_UP
 		[containerView() enterFullScreenMode:[NSScreen mainScreen] withOptions:
 			[NSDictionary dictionaryWithObjectsAndKeys:
 				[NSNumber numberWithInt:
@@ -1915,8 +1936,9 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	return true;
 }
 
-#if defined(NL_OS_MAC) && defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#ifdef NL_OS_MAC
 
+#ifdef NL_MAC_VERSION_10_6_UP
 
 /// helper to extract bits per pixel value from screen mode, only 16 or 32 bits
 static int bppFromDisplayMode(CGDisplayModeRef mode)
@@ -1934,7 +1956,7 @@ static int bppFromDisplayMode(CGDisplayModeRef mode)
 	return 0;
 }
 
-#elif defined(NL_OS_MAC)
+#else
 
 long GetDictionaryLong(CFDictionaryRef theDict, const void* key)
 {
@@ -1951,7 +1973,9 @@ long GetDictionaryLong(CFDictionaryRef theDict, const void* key)
 #define GetModeHeight(mode) GetDictionaryLong((mode), kCGDisplayHeight)
 #define GetModeBitsPerPixel(mode) GetDictionaryLong((mode), kCGDisplayBitsPerPixel)
 
-#endif // defined(NL_OS_MAC)
+#endif
+
+#endif // NL_OS_MAC
 
 // --------------------------------------------------
 bool CDriverGL::getModes(std::vector<GfxMode> &modes)
@@ -1998,7 +2022,7 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 	{
 		CGDirectDisplayID dspy = display[i];
 
-#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#ifdef NL_MAC_VERSION_10_6_UP
 		CFArrayRef modeList = CGDisplayCopyAllDisplayModes(dspy, NULL);
 #else
 		CFArrayRef modeList = CGDisplayAvailableModes(dspy);
@@ -2012,7 +2036,7 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 
 		for (CFIndex j = 0; j < CFArrayGetCount(modeList); ++j)
 		{
-#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#ifdef NL_MAC_VERSION_10_6_UP
 			CGDisplayModeRef mode = (CGDisplayModeRef)CFArrayGetValueAtIndex(modeList, j);
 			uint8 bpp = bppFromDisplayMode(mode);
 #else
@@ -2022,7 +2046,7 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 
 			if (bpp >= 16)
 			{
-#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#ifdef NL_MAC_VERSION_10_6_UP
 				uint16 w = CGDisplayModeGetWidth(mode);
 				uint16 h = CGDisplayModeGetHeight(mode);
 #else
@@ -2045,9 +2069,19 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 				// nldebug(" Display 0x%x: Mode %dx%d, %d BPP", dspy, w, h, bpp);
 			}
 		}
+
+#ifdef NL_MAC_VERSION_10_6_UP
+		CFRelease(modeList);
+#endif
 	}
 
 #elif defined (NL_OS_UNIX)
+
+	if (!_dpy)
+	{
+		nlwarning("3D: Unable to list modes because Display is NULL, did you forget to call init() ?");
+		return false;
+	}
 
 	bool found = false;
 	int screen = DefaultScreen(_dpy);
@@ -2072,6 +2106,7 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 					GfxMode mode;
 					mode.Width = sizes[i].width;
 					mode.Height = sizes[i].height;
+					mode.Depth = 32;
 					mode.Frequency = 0;
 					modes.push_back(mode);
 //					nldebug("3D:   Mode %d: %dx%d", i, mode.Width, mode.Height);
@@ -2283,7 +2318,10 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 
 #ifdef NL_OS_WINDOWS
 
-	SetWindowTextW(_win, (WCHAR*)title.c_str());
+	if (!SetWindowTextW(_win, (WCHAR*)title.c_str()))
+	{
+		nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+	}
 
 #elif defined(NL_OS_MAC)
 
@@ -2606,7 +2644,7 @@ IDriver::TMessageBoxId CDriverGL::systemMessageBox (const char* message, const c
 {
 	H_AUTO_OGL(CDriverGL_systemMessageBox)
 #ifdef NL_OS_WINDOWS
-	switch (::MessageBox (NULL, message, title, ((type==retryCancelType)?MB_RETRYCANCEL:
+	switch (::MessageBoxW(NULL, nlUtf8ToWide(message), nlUtf8ToWide(title), ((type == retryCancelType) ? MB_RETRYCANCEL :
 										(type==yesNoCancelType)?MB_YESNOCANCEL:
 										(type==okCancelType)?MB_OKCANCEL:
 										(type==abortRetryIgnoreType)?MB_ABORTRETRYIGNORE:
@@ -2716,7 +2754,7 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 		setWindowStyle(EWSFullscreen);
 
 		// set the back buffer manually to match the desired rendering resolution
-		GLint dim[2]   = { width, height };
+		GLint dim[2]   = { (GLint)width, (GLint)height };
 		CGLError error = CGLSetParameter(
 			(CGLContextObj)[_ctx CGLContextObj],
 			kCGLCPSurfaceBackingSize, dim);
@@ -2831,7 +2869,7 @@ bool CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &proper
 #ifdef NL_OS_WINDOWS
 
 	// Get a DC
-	HDC dc = CreateDC ("DISPLAY", NULL, NULL, NULL);
+	HDC dc = CreateDCA ("DISPLAY", NULL, NULL, NULL);
 	if (dc)
 	{
 		// The ramp

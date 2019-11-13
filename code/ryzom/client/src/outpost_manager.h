@@ -40,7 +40,7 @@ public:
 	COutpostManager();
 
 	/// Called when the server ask to join for PVP in a Outpost Zone
-	void	startPvpJoinProposal(bool playerGuildInConflict, bool playerGuildIsAttacker,
+	void	startPvpJoinProposal(bool outpostInFire, bool playerGuildInConflict, bool playerGuildIsAttacker,
 		uint32 ownerGuildNameId, uint32 attackerGuildNameId, uint32 declTimer);
 
 	/// Called when the client answer to the join for PVP in a Outpost Zone

@@ -183,7 +183,7 @@ bool CEntityCL::SInstanceCL::createLoading(const string &strShapeName, const str
 	if(!Loading.empty())
 	{
 		Scene->deleteInstance(Loading);
-		LoadingName = "";
+		LoadingName.clear();
 	}
 
 	// if the new instance is NULL, then clean ALL
@@ -193,7 +193,7 @@ bool CEntityCL::SInstanceCL::createLoading(const string &strShapeName, const str
 		{
 			releaseStaticFXs();
 			Scene->deleteInstance(Current);
-			CurrentName = "";
+			CurrentName.clear();
 		}
 	}
 	// else setup into loading
@@ -347,7 +347,7 @@ void CEntityCL::SInstanceCL::updateCurrentFromLoading(NL3D::USkeleton Skeleton)
 	if (!Current.empty())
 	{
 		Scene->deleteInstance(Current);
-		CurrentName = "";
+		CurrentName.clear();
 	}
 
 
@@ -355,7 +355,7 @@ void CEntityCL::SInstanceCL::updateCurrentFromLoading(NL3D::USkeleton Skeleton)
 	Current = Loading;
 	CurrentName = LoadingName;
 	Loading = NULL;
-	LoadingName = "";
+	LoadingName.clear();
 
 
 	// If there is a skeleton, bind the skin to the skeleton.
@@ -533,7 +533,6 @@ CEntityCL::CEntityCL()
 	_SelectionFX = NULL;
 	_MouseOverFX = NULL;
 	_StateFX = NULL;
-	_StateFXName = "";
 	_GMTitle = _InvalidGMTitleCode;
 	_LastLocalSelectBoxComputeTime = 0;
 	_InSceneInterfaceEnabled = true;
@@ -603,7 +602,7 @@ CEntityCL::~CEntityCL()
 	if (!_StateFX.empty() && Scene)
 	{
 		Scene->deleteInstance(_StateFX);
-		_StateFXName = "";
+		_StateFXName.clear();
 	}
 	if (!_SelectionFX.empty() && Scene)
 	{
@@ -751,7 +750,7 @@ void CEntityCL::init()
 	_GroundTypeCache= 0;
 
 	_StateFX = NULL;
-	_StateFXName = "";
+	_StateFXName.clear();
 	_SelectionFX = NULL;
 	_MouseOverFX = NULL;
 
@@ -2104,11 +2103,8 @@ void CEntityCL::setEntityName(const ucstring &name)
 //---------------------------------------------------
 void CEntityCL::displayDebug(float x, float &y, float lineStep)	// virtual
 {
-	// Type
-	TextContext->printfAt(x, y, "Type: %d", Type);
-	y += lineStep;
-	// Slot
-	TextContext->printfAt(x, y, "Slot: %d", _Slot);
+	// Type and slot
+	TextContext->printfAt(x, y, "Type: %d - Slot: %d", Type, _Slot);
 	y += lineStep;
 	// Outpost
 	TextContext->printfAt(x, y, "Outpost id:%d side:%s",this->getOutpostId(),OUTPOSTENUMS::toString(this->getOutpostSide()).c_str() );
@@ -2119,11 +2115,8 @@ void CEntityCL::displayDebug(float x, float &y, float lineStep)	// virtual
 	else
 		TextContext->printfAt(x, y, "Name not received");
 	y += lineStep;
-	// Target
-	TextContext->printfAt(x, y, "Target: %d", _TargetSlot);
-	y += lineStep;
-	// DataSet Id
-	TextContext->printfAt(x, y, "DataSet Id: %u", _DataSetId);
+	// Target and DataSet Id
+	TextContext->printfAt(x, y, "Target: %d - DataSet Id: %u", _TargetSlot, _DataSetId);
 	y += lineStep;
 	// Sheet Id
 	TextContext->printfAt(x, y, "Sheet: %d(%s)", _SheetId.asInt(), _SheetId.toString().c_str());
@@ -2183,7 +2176,7 @@ void CEntityCL::displayDebugPropertyStages(float /* x */, float &y, float /* lin
 // serial :
 // Serialize entity.
 //-----------------------------------------------
-void CEntityCL::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CEntityCL::serial(NLMISC::IStream &f)
 {
 	readWrite(f);
 	if(f.isReading())
@@ -2194,7 +2187,7 @@ void CEntityCL::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 // readWrite :
 // Read/Write Variables from/to the stream.
 //-----------------------------------------------
-void CEntityCL::readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream)	// virtual
+void CEntityCL::readWrite(NLMISC::IStream &f)	// virtual
 {
 	f.serialVersion(4);
 
@@ -2303,7 +2296,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 				if (pos != ucstring::npos)
 				{
 					ucstring sn = replacement;
-					_EntityName = sn.substr(0, pos);
+					_EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(sn.substr(0, pos));
 					ucstring::size_type pos2 = sn.find('$', pos + 1);
 					_TitleRaw = sn.substr(pos+1, pos2 - pos - 1);
 					replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
@@ -2316,7 +2309,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 			{
 				// build the final name
 				p1 = _EntityName.find('$');
-				_EntityName   = _EntityName.substr(0, p1);	// + _Name.substr(p2+1)
+				_EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(_EntityName.substr(0, p1));	// + _Name.substr(p2+1)
 				// Get extended name
 				_NameEx = replacement;
 				newtitle = _NameEx;
@@ -2333,6 +2326,10 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 				if ( titleEnum == CHARACTER_TITLE::FBT )
 					_HasReservedTitle = true;
 			}
+		}
+		else
+		{
+			_EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(_EntityName);
 		}
 	}
 
@@ -3062,6 +3059,7 @@ void	CEntityCL::updateVisiblePostPos(const NLMISC::TTime &/* currentTimeInMs */,
 			if (!instance.empty())
 			{
 				_SelectionFX.cast (instance);
+				_SelectionFX.setLoadBalancingGroup("SelectionFx");
 				if (_SelectionFX.empty())
 				{
 					// shape found, but not a particle system
@@ -3090,6 +3088,7 @@ void	CEntityCL::updateVisiblePostPos(const NLMISC::TTime &/* currentTimeInMs */,
 			if (!instance.empty())
 			{
 				_MouseOverFX.cast (instance);
+				_MouseOverFX.setLoadBalancingGroup("SelectionFx");
 				if (_MouseOverFX.empty())
 				{
 					// shape found, but not a particle system
@@ -3605,7 +3604,7 @@ void CEntityCL::removeStateFx()
 	if (!_StateFX.empty() && Scene)
 	{
 		Scene->deleteInstance(_StateFX);
-		_StateFXName = "";
+		_StateFXName.clear();
 	}
 }
 

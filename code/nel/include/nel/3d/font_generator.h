@@ -21,8 +21,12 @@
 #undef NL_DONT_USE_EXTERNAL_CODE
 
 #ifndef NL_DONT_USE_EXTERNAL_CODE
-#include <ft2build.h>
-#include FT_FREETYPE_H
+
+// forward declarations to avoid including freetype.h in headers
+typedef int FT_Error;
+typedef struct FT_LibraryRec_ *FT_Library;
+typedef struct FT_FaceRec_* FT_Face;
+
 #else // NL_DONT_USE_EXTERNAL_CODE
 
 #endif // NL_DONT_USE_EXTERNAL_CODE
@@ -73,6 +77,8 @@ public:
 	uint32	getCharIndex (ucchar c);
 
 	uint32	getUID() { return _UID; }
+
+	std::string getFontFileName() const;
 
 private:
 

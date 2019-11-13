@@ -79,7 +79,7 @@ BOOL CMissionCompilerFeApp::InitInstance()
 #endif
 
 	// look at the command line parameters for command line mode
-	string cmdLine = m_lpCmdLine;
+	string cmdLine = NLMISC::tStrToUtf8(m_lpCmdLine);
 	if (cmdLine.find("-c") != string::npos)
 	{
 		NLMISC::createDebug();
@@ -121,7 +121,7 @@ BOOL CMissionCompilerFeApp::InitInstance()
 			mc.installCompiledMission(dlg.LigoConfig, fileName);
 			nbMission += mc.getMissionsCount();
 		}
-		catch(EParseException e)
+		catch(const EParseException &e)
 		{
 			string msg;
 			msg + "\r\n";

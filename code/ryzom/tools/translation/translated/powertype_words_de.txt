@@ -1,0 +1,32 @@
+﻿*HASH_VALUE	powerType	name	ia	da	p	pia	pda	description
+_6DCA609CECF858BE	Taunt	Spott	ein	der	Verspottungen	mehrere	die	
+_2AB8D88D6969889E	Shielding	Schutzschild	ein	das	Schutzschilde	mehrere	die	
+_23E3F07BA6C9808C	SpeedingUp	Geschwindigkeitserhöhung	eine	die	Geschwindigkeitserhöhungen	mehrere	die	
+_FE6DF5A5685844B3	MeditationLife	Lebensmeditation	eine	die	Lebensmeditationen	mehrere	die	
+_F0CD8E578A5F7D05	MeditationStamina	Ausdauermeditation	eine	die	Ausdauermeditationen	mehrere	die	
+_279839E098D918C1	MeditationSap	Sapmeditation	eine	die	Sapmeditationen	mehrere	die	
+_872EA1EBE6F753A8	ConvertStamina	Ausdauer-Konvertierung	eine	die	Ausdauer-Konvertierungen	mehrere	die	
+_29D5CF7D27CAE486	ConvertSap	Sap-Konvertierung	eine	die	Sap-Konvertierungen	mehrere	die	
+_29CC88822549147E	Berserk	Wutausbruch	ein	der	Wutausbrüche	mehrere	die	
+_25797445A52B8007	LifeAura	Lebens-Aura	eine	die	Lebens-Auren	mehrere	die	
+_9C84C0AA1F379CBA	StaminaAura	Ausdauer-Aura	eine	die	Ausdauer Auren	mehrere	die	
+_59B6EC98A07774B3	SapAura	Sap-Aura	eine	die	Sap-Auren	mehrere	die	
+_FD34328D8A827302	Umbrella	Fernkampf-Schutzaura	eine	die	Fernkampfschutz-Auren	mehrere	die	macht dich und deine Teammitglieder unverwundbar gegenüber Fernangriffen.
+_92F0C1BB89BC5683	MeleeProtection	Nahkampf-Schutzaura	eine	die	Nahkampfschutz-Auren	mehrere	die	macht dich und deine Teammitglieder unverwundbar gegenüber Nahkampfangriffen.
+_86197EEC1899F525	AntiMagicShield	Antimagie-Schildaura	eine	die	Anti-Magie-Schild-Auren	mehrere	die	macht dich und deine Teammitglieder unverwundbar gegenüber magischen Angriffen.
+_8758671228A5AB28	Invulnerability	Unverwundbarkeit	eine	die	Unverwundbarkeiten	mehrere	die	macht dich unverwundbar aber du kannst keine Aktionen ausführen.
+_29AB5F80EF88004E	FireWall	Brandmauer-Aura	eine	die	Brandmauer-Auren	mehrere	die	
+_D8C8F48265958CB5	ThornWall	Dornenwand-Aura	eine	die	Dornenwand-Auren	mehrere	die	
+_D7A9E48525959CAC	WaterWall	Wasserwand-Aura	eine	die	Wasserwand-Auren	mehrere	die	
+_F0BE55DDA9AB7D23	LightningWall	Blitzmauer-Aura	eine	die	Blitzmauer-Auren	mehrere	die	
+_1D5ABBA0DE1B6FB4	WarCry	Kriegsschrei	ein 	der	Kriegsschreie	mehrere	die	
+_ABB88C82DEB650A9	Heal	Heilung	eine	die	Heilungen	mehrere	die	
+_2305443A60C86CAF	BalanceHp	Gesundheits-Balance	eine	die	Gesundheits-Balancierungen	mehrere	die	
+_B6604DDCE6C6ACA1	ChgCharac	Eigenschafts-Boost	ein	der	Eigenschafts-Steigerungen	mehrere	die	
+_16F116141048A371	ModMagicProtection	Schutzmodifikator	ein	der	Schutzmodifikatoren	mehrere	die	erhöht den Wert deines Zauberschutzes
+_3A7CADB6DF38F847	ModDefense	Modifikator der Verteidigungserfolgsrate	ein	der	Modifikatoren der Verteidigungserfolgsrate	mehrere	die	erhöht deine Erfolgschancen bei Verteidigungsaktionen
+_A25E08467860F1F2	ModCraftSuccess	Bonus auf Handwerk	ein	der	Boni auf Handwerk	mehrere	die	erhöht deine Erfolgschance bei Handwerksaktionen
+_24BA6F597234C2DA	ModMeleeSuccess	Bonus auf Nahkampf	ein	der	Boni auf Nahkampf	mehrere	die	erhöht deine Trefferchance für den Nahkampf
+_8F7EEBA94B68D5F8	ModRangeSuccess	Bonus auf Fernkampf	ein	der	Boni auf Fernkampf	mehrere	die	erhöht deine Trefferchance für den Fernkampf
+_9CAFEDAD47AFE1C5	ModMagicSuccess	Bonus auf Magie	ein	der	Boni auf Magie	mehrere	die	erhöht deine Erfolgschance bei Magie Aktionen
+_A043E58C54A010EF	ModForageSuccess	Bonus auf Abbau	ein	der	Boni auf Abbau	mehrere	die	erhöht deine Erfolgschance beim Abbau

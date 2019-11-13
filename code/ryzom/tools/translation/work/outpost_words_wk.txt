@@ -1,0 +1,722 @@
+﻿outpost ID	name	description
+fyros_outpost_04.outpost	Ferme de Malmontagne	Avant-poste fondé en 2489, abandonné en 2494\n Défi pour guildes de rang expert\n Un avant-poste construit au sud de Malmontagne et de la Queue du Dragon, son activité se concentrait sur l'exploitation des ressources dans cette région hostile. Une partie de ces ressources était acheminée vers le village de Dyron et les deux ateliers des environs. Le reste des matériaux prenait la route de Pyr sous bonne escorte.
+fyros_outpost_09.outpost	Ferme des Hautes Tours	Avant-poste fondé en 2491, abandonné en 2494\n Défi pour guildes de rang initié\n Un avant-poste dont l'activité s'est développé sous l'influence des Chasseurs de Frahars, qui désiraient exploiter les ressources de la région. Les patrouilles fréquentes des guerriers de cette tribu contribuèrent grandement à sécuriser les gisements, permettant aux récolteurs de prospecter sans crainte d'être attaqués.
+fyros_outpost_13.outpost	Poste Frontière Ouest de la Combustion	Avant-poste fondé en 2490, abandonné en 2494\n Défi pour guildes de rang confirmé\n Construit sur un nexus localisé aux frontières de la Forêt Enflammée, cet avant-poste a été utilisé pour maintenir une surveillance constante des brasiers de la forêt, afin d'éviter qu'ils ne s'étendent à la région des oasis. Les soldats de l'empire considéraient comme un honneur l'affectation au Poste Frontière Ouest.
+fyros_outpost_14.outpost	Poste d'Echange de la Combustion	Avant-poste fondé en 2489, abandonné en 2494\n Défi pour guildes de rang apprenti\n Cet avant-poste fut l'un des premiers point de rencontre établi dans le Désert Brûlant. Les voyageurs venant du sud s'y arrêtaient fréquemment pour se reposer et faire du commerce avant de rejoindre la capitale. Il tire son nom de la Forêt Enflammée qui se trouve au sud-ouest.
+fyros_outpost_25.outpost	Ferme des Dunes du Bas	Avant-poste fondé en 2490, abandonné en 2494\n Défi pour guildes de rang expert\n Cet avant-poste, installé sur un nexus détecté par les Kamis au sud de la région, a été la cause de frictions entre les autorités de Pyr et des clans de Fyros refusant toute allégeance à l'Empire. Les chefs de ces barbares ont fini par tolérer l'existence de la ferme, après le versement d'un tribut conséquent.
+fyros_outpost_27.outpost	Pôle Magique des Bois Calcifiés	Avant-poste fondé en 2490, abandonné en 2494\n Défi pour guildes de rang maître\n Cet avant-poste, établi au coeur de la Forêt Enflammée, fut contrôlé par des élémentalistes impériaux qui désiraient exploiter la puissance du feu. De nouveaux sortilèges furent créés grâce aux expérimentations de ces magiciens, imposant l'art des arcanes comme un véritable art de la guerre au sein de la société fyros.
+fyros_outpost_28.outpost	Forteresse des Bois Calcifiés	Avant-poste fondé en 2491, abandonné en 2494\n Défi pour guildes de rang maître\n Avant-poste qui devint une place fortifiée sur ordre de la Régente Leanon. Il protégeait la Forêt Enflammée des pillards et des ennemis de l'empire. Pendant toute la durée de son activité, la garnison qui le défendait dut affronter régulièrement la tribu des Écorcheurs, des magiciens qui convoitaient les sources de feu enchanté.
+
+tryker_outpost_06.outpost	Poste d'Échange de Vertval	Avant-poste fondé en 2489, abandonné en 2493\n Défi pour guildes de rang apprenti\n Construit à l'ouest de Fairhaven dans une petite vallée verdoyante entourée de falaises, cet avant-poste a développé très rapidement de nombreuses activités commerciales, notamment avec le village de Windermeer. Il a néanmoins dû faire face à d'incessantes attaques de bandits.
+tryker_outpost_10.outpost	Poste d'Échange du Porche des Sources	Avant-poste fondé en 2486, abandonné en 2493\n Défi pour guildes de rang initié\n L'activité commerciale de ce poste d'échange fut développée par la tribu des Contrebandiers. Les guildes marchandes de la fédération tryker tentèrent à plusieurs reprises de contrôler les transactions qui se déroulaient dans la région, mais sans grand succès. Un dicton populaire prétendait que l'on pouvait tout trouver au Porche des Sources, même l'introuvable.
+tryker_outpost_16.outpost	Centre de Recherche de la Promenade Caverneuse	Avant-poste fondé en 2489, abandonné en 2493\n Défi pour guildes de rang expert\n Lorsque un prospecteur découvrit d'étranges ossements au voisinage de l'avant-poste, des savants de la Fédération les examinèrent, mais ne parvinrent pas à identifier leur origine. Un centre de recherche fut installé malgré les protestations des Déferlants, qui n'appréciaient guère de voir des hordes de foreurs envahir les abords de la Promenade Caverneuse. Cet endroit était en effet sacré pour eux, étant considéré comme un chemin rituel vers le cimetière de la tribu.
+tryker_outpost_22.outpost	Atelier des Cimes Jumelles	Avant-poste fondé en 2487, abandonné en 2493\n Défi pour guildes de rang expert\n Un atelier qui prit de l'expansion sous l'influence d'un riche artisan tryker. Un scandale éclata quand on découvrit qu'il devait sa fortune à une étroite collaboration avec la tribu des Esclavagistes. L'artisan fut arrêté, et l'avant-poste fut alors géré par une guilde fédérale jusqu'à son abandon.
+tryker_outpost_24.outpost	Atelier de la Route des Vents	Avant-poste fondé en 2484, abandonné en 2493\n Défi pour guildes de rang confirmé\n Cet avant-poste fut construit autour du premier grand trépan installé par la Karavan sur les nouvelles terres. Grâce à cette machine bénie par Jena, les artisans de la tribu des Sculpteurs de Vase ont très tôt pu expérimenter de nouveaux matériaux issus des profondeurs d'Atys. Ils sont les pères de l'artisanat des avant-postes.
+tryker_outpost_29.outpost	Forteresse de Loria	Avant-poste fondé en 2490, abandonné en 2493\n Défi pour guildes de rang maître\n Après l'installation de son grand trépan, cet avant-poste fut attaqué par les Frères de la Lagune, qui s'approprièrent les précieuses ressources extraites par la foreuse. Un régiment de l'armée fédérale fut envoyé sur place pour reconquérir l'avant-poste. Les soldats écrasèrent les pirates puis édifièrent une forteresse qu'ils dédièrent à Loria, la célèbre héroïne tryker.
+tryker_outpost_31.outpost	Forteresse du Tourbillon	Avant-poste fondé en 2489, abandonné en 2493\n Défi pour guildes de rang maître\n L'emplacement stratégique de cet avant-poste, proche du vortex conduisant au Lac de la Liberté, en a fait longtemps une cible privilégiée pour les bandits et autres pirates qui hantent le Lagon de Loria. Un fort a donc été construit afin de repousser les attaques. De nombreux affrontements ont eu lieu devant ses murs, avant que l'avant-poste ne soit abandonné.
+
+zorai_outpost_02.outpost	Atelier de Gu-Qin	Avant-poste fondé en 2490, abandonné en 2494\n Défi pour guildes de rang expert\n Un atelier qui se développa sous l'influence d'un compagnon artisan zoraï nommé Gu-Qin, qui avait décidé de braver la menace de la Goo. Malheureusement, il fut contaminé par le fléau pourpre. Malgré les soins de ses apprentis, Gu-Qin sombra dans la folie. Il disparut une nuit d'hiver ; jusqu'à l'abandon de l'avant-poste quelques années plus tard, les artisans de l'atelier juraient qu'ils entendaient parfois son rire dément porté par les vents de la jungle.
+zorai_outpost_08.outpost	Atelier de Qai-Du	Avant-poste fondé en 2490, abandonné en 2494\n Défi pour guildes de rang apprenti\n Cet atelier fut mis en place par le maître joaillier Qai-Du, illustre membre de la tribu des Iconodoules. Son savoir-faire et sa piété firent beaucoup dans la reconnaissance de l'artisanat zoraï auprès des traditionalistes, qui ont longtemps considéré la fabrication d'objets profanes comme une perte de temps.
+zorai_outpost_10.outpost	Forteresse de Sai-Shun	Avant-poste fondé en 2490, abandonné en 2494\n Défi pour guildes de rang confirmé\n Construite au milieu de la jungle du Bosquet Vierge, la forteresse de Sai-Shun fut en première ligne dans la campagne contre les kitins qui démarra en 2490. Le général Sai-Shun établit ses quartiers dans l'avant-poste, et jura de ne quitter l'endroit que lorsque la menace de l'Essaim serait écartée. Il tint parole et combattit durant deux ans aux côtés de la Force de la Fraternité.
+zorai_outpost_15.outpost	Atelier des Ruines de Zo-Kian	Avant-poste fondé en 2492, abandonné en 2494\n Défi pour guildes de rang maître\n Cet avant-poste fut établi au nord-est des ruines de Zo-Kian, à l'origine un petit village fondé par des chasseurs zoraïs. Ces chasseurs pistaient les gibbaïs qui étaient alors nombreux dans cette partie de la jungle, faisant fi des superstitions de leur peuple prétendant que tuer ces animaux proches des homins portait malheur. Une nuit, le village fut attaqué par des hordes de créatures inconnues et complètement détruit. Quelques années plus tard, des explorateurs découvrirent l'existence de gibbaïs supérieurs dans la région. Beaucoup pensent qu'ils seraient responsables de la fin de Zo-Kian : ils auraient réagi aux attaques des chasseurs.
+zorai_outpost_16.outpost	Forteresse de la Vallée Perdue	Avant-poste fondé en 2491, abandonné en 2494\n Défi pour guildes de rang maître\n Cet avant-poste a été fortifié suite à des attaques répétées d'animaux contaminés par la Goo. Des foyers d'infection furent découverts au nord-ouest, dans la Vallée Perdue. Plusieurs expéditions furent envoyés pour tenter de les détruire, mais sans grand succès. Lorsque l'arbre-vrille présent sur l'avant-poste commença à se faner, contaminé par le fléau pourpre, cela sonne le glas de la forteresse qui fut rapidement abandonnée.
+zorai_outpost_22.outpost	Avant-Poste Diplomatique du Croisement du Démon	Avant-poste fondé en 2492, abandonné en 2494\n Défi pour guildes de rang initié\n Peu après l'installation d'un arbre-vrille sur cet avant-poste, un démon de la jungle fut attiré par l'activité kamique et rôda dans les environs. Il était plein de rage, la Goo rongeait son essence. Un sage zoraï, membre de la Compagnie de l'Arbre Éternel, le trouva et parvint à le guérir de son mal. Le démon se transforma en esprit lumineux puis bénit le Zoraï, qui devint un saint parmi les saints. Après ce miracle, l'avant-poste servit de lieu de rencontre entre tous les kamistes de toute la région.
+zorai_outpost_29.outpost	Atelier de l'Arrière-pays	Avant-poste fondé en 2491, abandonné en 2494\n Défi pour guildes de rang expert\n L'activité de cet avant-poste fut développée dans la région désertique du Noeud de la Démence par Cardarus Vekian, un armurier fyros. L'absence de végétation exubérante permit à l'artisan d'utiliser les techniques de fabrication de son peuple, basées sur l'emploi du feu, sans risquer de déclencher un incendie. Méfiants de prime abord, des commerçants de Zora finirent par s'intéresser au travail de ce Fyros. Vekian devint un artisan renommé dans tout le Pays Malade, et de nombreux guerriers zoraïs étaient fiers de porter des armes sorties de sa forge.
+
+matis_outpost_03.outpost	Ferme du Marécage de l'Angoisse	Avant-poste fondé en 2492, abandonné en 2493\n Défi pour guildes de rang expert\n Établi à proximité des Marécages de l'Angoisse, l'activité de cet avant-poste s'est centrée sur la récolte de ressources et le nettoyage des marais envahis par la Goo. Des heurts ont eu lieu avec la tribu des Embourbés quand ces derniers ont découvert que les matières contaminées n'étaient pas détruites, mais envoyées à Yrkanis ou dans le sud-est pour différentes expérimentations. Ils ont alors accusé les Matis de propager la Goo. Les scientifiques royaux ont nié catégoriquement ces allégations, assurant que toutes les précautions étaient prises pour empêcher toute contamination.
+matis_outpost_07.outpost	Ferme de l'Inventeur	Avant-poste fondé en 2491, abandonné en 2493\n Défi pour guildes de rang confirmé\n Un savant matis, cherchant l'inspiration divine, décida de s'installer sur l'avant-poste pour profiter du grand trépan et avoir accès à des matériaux rares sanctifiés par la Déesse. Il fit de nombreuses expérimentations, et découvrit notamment une nouvelle poudre de forage permettant de faire surgir de l'Écorce plusieurs sources à la fois. L'avant-poste devint alors le rendez-vous des prospecteurs désireux d'essayer cette poudre miracle.
+matis_outpost_15.outpost	Poste d'Échange du Monticule des Psykoplas	Avant-poste fondé en 2491, abandonné en 2493\n Défi pour guildes de rang apprenti\n C'est une petite guilde marchande qui développa le commerce sur cet avant-poste. Initialement, de nombreux prospecteurs se retrouvaient sur le site du grand trépan installé par la Karavan pour troquer leurs matériaux. Un colporteur tryker eut l'idée d'installer sur place une structure pour faciliter ces échanges, moyennant une modeste commission. Il créa une guilde avec des négociants matis, qui prospéra jusqu'à la fermeture de l'avant-poste.
+matis_outpost_17.outpost	Atelier du Réveil	Avant-poste fondé en 2490, abandonné en 2493\n Défi pour guildes de rang initié\n Un atelier construit non loin d'un vortex menant aux profondeurs des Primes Racines. Il a été le premier mis en place sur le Sommet Verdoyant. Son nom fait référence au début d'une période d'intense activité pour le peuple matis : la mise en place des avant-postes, la lutte contre les kitins, et le tracé de nouvelles routes commerciales.
+matis_outpost_24.outpost	Forteresse du Bosquet Ouest	Avant-poste fondé en 2492, abandonné en 2493\n Défi pour guildes de rang maître\n Un avant-poste construit dans les profondeurs sylvestres du Bosquet de la Confusion. Il a été fortifié pour combattre la tribu des Dryades, des homins fanatiques qui se considèrent comme les défenseurs des plantes. De nombreux botanistes matis ont péri entre leurs mains, accusés de torture envers la flore atysienne.
+matis_outpost_27.outpost	Atelier de Ginti	Avant-poste fondé en 2491, abandonné en 2493\n Défi pour guildes de rang maître\n Sevalda Ginti fut l'une des plus illustres botanistes matis de la fin du XXVe siècle. Elle fut la disciple de Bravichi Lenardi. Lorsque la Karavan posa des grands trépans dans le Bosquet de la Confusion, elle quitta la serre d'Yrkanis pour aller travailler au coeur de la jungle. Elle fit de nombreuses recherches et perfectionna l'artisanat des armures grâce à ses découvertes sur les résines. Elle disparut dans des circonstances mystérieuses.
+matis_outpost_30.outpost	Poste Frontière de la Gorge de Berello	Avant-poste fondé en 2491, abandonné en 2493\n Défi pour guildes de rang expert\n Fortifié sous le commandement du capitaine matis Arcando Berello, ce poste frontière fut le théâtre de nombreux affrontements avec la tribu des Pillards du désert. L'enjeu était de taille, car celui qui contrôlait l'avant-poste contrôlait le passage entre les oasis du nord et les plateaux arides au sud de la région. Berello s'illustra par sa ténacité et son sens tactique, et même les barbares fyros en vinrent à respecter leur ennemi.
+
+
+marauder_light_melee_fighter_b.outpost_squad	Escouade de guerriers maraudeurs
+marauder_light_melee_fighter_c.outpost_squad	Escouade de guerriers maraudeurs
+marauder_light_melee_fighter_d.outpost_squad	Escouade de guerriers maraudeurs
+marauder_light_melee_fighter_e.outpost_squad	Escouade de guerriers maraudeurs
+marauder_light_melee_fighter_f.outpost_squad	Escouade de guerriers maraudeurs
+marauder_light_range_fighter_b.outpost_squad	Escouade de tireurs maraudeurs
+marauder_light_range_fighter_c.outpost_squad	Escouade de tireurs maraudeurs
+marauder_light_range_fighter_d.outpost_squad	Escouade de tireurs maraudeurs
+marauder_light_range_fighter_e.outpost_squad	Escouade de tireurs maraudeurs
+marauder_light_range_fighter_f.outpost_squad	Escouade de tireurs maraudeurs
+marauder_light_mixed_fighter_b.outpost_squad	Escouade de combattants maraudeurs
+marauder_light_mixed_fighter_c.outpost_squad	Escouade de combattants maraudeurs
+marauder_light_mixed_fighter_d.outpost_squad	Escouade de combattants maraudeurs
+marauder_light_mixed_fighter_e.outpost_squad	Escouade de combattants maraudeurs
+marauder_light_mixed_fighter_f.outpost_squad	Escouade de combattants maraudeurs
+free_squad_light_melee_fighter_b.outpost_squad	Escouade de miliciens	Une escouade de huit recrues mercenaires de rang apprenti, composée de guerriers et de deux guérisseurs, équipés d'armes rapides et d'armures légères.
+free_squad_light_melee_fighter_c.outpost_squad	Escouade de miliciens	Une escouade de huit recrues mercenaires de rang confirmé, composée de guerriers et de deux guérisseurs, équipés d'armes rapides et d'armures légères.
+free_squad_light_melee_fighter_d.outpost_squad	Escouade de miliciens	Une escouade de huit recrues mercenaires de rang initié, composée de guerriers et de deux guérisseurs, équipés d'armes rapides et d'armures légères.
+free_squad_light_melee_fighter_e.outpost_squad	Escouade de miliciens	Une escouade de huit recrues mercenaires de rang expert, composée de guerriers et de deux guérisseurs, équipés d'armes rapides et d'armures légères.
+free_squad_light_melee_fighter_f.outpost_squad	Escouade de miliciens	Une escouade de huit recrues mercenaires de rang maître, composée de guerriers et de deux guérisseurs, équipés d'armes rapides et d'armures légères.
+
+outpost_squad_light_melee_fighter_b.outpost_squad	Escouade d'escarmoucheurs	Une escouade de huit mercenaires de rang apprenti, composée de guerriers et de deux guérisseurs, équipés d'armes rapides et d'armures légères.
+outpost_squad_light_melee_fighter_c.outpost_squad	Escouade d'escarmoucheurs	Une escouade de huit mercenaires de rang confirmé, composée de guerriers et de deux guérisseurs, équipés d'armes rapides et d'armures légères.
+outpost_squad_light_melee_fighter_d.outpost_squad	Escouade d'escarmoucheurs	Une escouade de huit mercenaires de rang initié, composée de guerriers et de deux guérisseurs, équipés d'armes rapides et d'armures légères.
+outpost_squad_light_melee_fighter_e.outpost_squad	Escouade d'escarmoucheurs	Une escouade de huit mercenaires de rang expert, composée de guerriers et de deux guérisseurs, équipés d'armes rapides et d'armures légères.
+outpost_squad_light_melee_fighter_f.outpost_squad	Escouade d'escarmoucheurs	Une escouade de huit mercenaires de rang maître, composée de guerriers et de deux guérisseurs, équipés d'armes rapides et d'armures légères.
+outpost_squad_medium_melee_fighter_b.outpost_squad	Escouade de spadassins	Une escouade de huit mercenaires de rang apprenti, composée de guerriers en armures moyennes équipés d'armes légères, certains portant un bouclier, et d'un guérisseur.
+outpost_squad_medium_melee_fighter_c.outpost_squad	Escouade de spadassins	Une escouade de huit mercenaires de rang confirmé, composée de guerriers en armures moyennes équipés d'armes légères, certains portant un bouclier, et d'un guérisseur.
+outpost_squad_medium_melee_fighter_d.outpost_squad	Escouade de spadassins	Une escouade de huit mercenaires de rang initié, composée de guerriers en armures moyennes équipés d'armes légères, certains portant un bouclier, et d'un guérisseur.
+outpost_squad_medium_melee_fighter_e.outpost_squad	Escouade de spadassins	Une escouade de huit mercenaires de rang expert, composée de guerriers en armures moyennes équipés d'armes légères, certains portant un bouclier, et d'un guérisseur.
+outpost_squad_medium_melee_fighter_f.outpost_squad	Escouade de spadassins	Une escouade de huit mercenaires de rang maître, composée de guerriers en armures moyennes équipés d'armes légères, certains portant un bouclier, et d'un guérisseur.
+outpost_squad_heavy_melee_fighter_b.outpost_squad	Escouade de hastaires	Une escouade de huit mercenaires de rang apprenti, composée de guerriers en armures lourdes équipés d'armes à deux mains, et d'un guérisseur.
+outpost_squad_heavy_melee_fighter_c.outpost_squad	Escouade de hastaires	Une escouade de huit mercenaires de rang confrimé, composée de guerriers en armures lourdes équipés d'armes à deux mains, et d'un guérisseur.
+outpost_squad_heavy_melee_fighter_d.outpost_squad	Escouade de hastaires	Une escouade de huit mercenaires de rang initié, composée de guerriers en armures lourdes équipés d'armes à deux mains, et d'un guérisseur.
+outpost_squad_heavy_melee_fighter_e.outpost_squad	Escouade de hastaires	Une escouade de huit mercenaires de rang expert, composée de guerriers en armures lourdes équipés d'armes à deux mains, et d'un guérisseur.
+outpost_squad_heavy_melee_fighter_f.outpost_squad	Escouade de hastaires	Une escouade de huit mercenaires de rang maître, composée de guerriers en armures lourdes équipés d'armes à deux mains, et d'un guérisseur.
+outpost_squad_tank_b.outpost_squad	Escouade de protecteurs	Une escouade de huit mercenaires de rang apprenti, composée de guerriers en armures lourdes équipés d'armes légères et de boucliers, ainsi qu'un guérisseur.
+outpost_squad_tank_c.outpost_squad	Escouade de protecteurs	Une escouade de huit mercenaires de rang confirmé, composée de guerriers en armures lourdes équipés d'armes légères et de boucliers, ainsi qu'un guérisseur.
+outpost_squad_tank_d.outpost_squad	Escouade de protecteurs	Une escouade de huit mercenaires de rang initié, composée de guerriers en armures lourdes équipés d'armes légères et de boucliers, ainsi qu'un guérisseur.
+outpost_squad_tank_e.outpost_squad	Escouade de protecteurs	Une escouade de huit mercenaires de rang expert, composée de guerriers en armures lourdes équipés d'armes légères et de boucliers, ainsi qu'un guérisseur.
+outpost_squad_tank_f.outpost_squad	Escouade de protecteurs	Une escouade de huit mercenaires de rang maître, composée de guerriers en armures lourdes équipés d'armes légères et de boucliers, ainsi qu'un guérisseur.
+outpost_squad_light_range_fighter_b.outpost_squad	Escouade de francs-tireurs	Une escouade de huit mercenaires de rang apprenti, composée de tireurs en armures moyennes équipés de pistolets, et d'un guérisseur.
+outpost_squad_light_range_fighter_c.outpost_squad	Escouade de francs-tireurs	Une escouade de huit mercenaires de rang confirmé, composée de tireurs en armures moyennes équipés de pistolets, et d'un guérisseur.
+outpost_squad_light_range_fighter_d.outpost_squad	Escouade de francs-tireurs	Une escouade de huit mercenaires de rang initié, composée de tireurs en armures moyennes équipés de pistolets, et d'un guérisseur.
+outpost_squad_light_range_fighter_e.outpost_squad	Escouade de francs-tireurs	Une escouade de huit mercenaires de rang expert, composée de tireurs en armures moyennes équipés de pistolets, et d'un guérisseur.
+outpost_squad_light_range_fighter_f.outpost_squad	Escouade de francs-tireurs	Une escouade de huit mercenaires de rang maître, composée de tireurs en armures moyennes équipés de pistolets, et d'un guérisseur.
+outpost_squad_medium_range_fighter_b.outpost_squad	Escouade de tirailleurs	Une escouade de huit mercenaires de rang apprenti, composée de tireurs en armures moyennes équipés de fusils, et d'un guérisseur.
+outpost_squad_medium_range_fighter_c.outpost_squad	Escouade de tirailleurs	Une escouade de huit mercenaires de rang confirmé, composée de tireurs en armures moyennes équipés de fusils, et d'un guérisseur.
+outpost_squad_medium_range_fighter_d.outpost_squad	Escouade de tirailleurs	Une escouade de huit mercenaires de rang initié, composée de tireurs en armures moyennes équipés de fusils, et d'un guérisseur.
+outpost_squad_medium_range_fighter_e.outpost_squad	Escouade de tirailleurs	Une escouade de huit mercenaires de rang expert, composée de tireurs en armures moyennes équipés de fusils, et d'un guérisseur.
+outpost_squad_medium_range_fighter_f.outpost_squad	Escouade de tirailleurs	Une escouade de huit mercenaires de rang maître, composée de tireurs en armures moyennes équipés de fusils, et d'un guérisseur.
+outpost_squad_heavy_range_fighter_b.outpost_squad	Escouade d'artilleurs	Une escouade de huit mercenaires de rang apprenti, composée de tireurs équipés de mitrailleuses et de lance-grenades, et d'un guérisseur.
+outpost_squad_heavy_range_fighter_c.outpost_squad	Escouade d'artilleurs	Une escouade de huit mercenaires de rang confirmé, composée de tireurs équipés de mitrailleuses et de lance-grenades, et d'un guérisseur.
+outpost_squad_heavy_range_fighter_d.outpost_squad	Escouade d'artilleurs	Une escouade de huit mercenaires de rang initié, composée de tireurs équipés de mitrailleuses et de lance-grenades, et d'un guérisseur.
+outpost_squad_heavy_range_fighter_e.outpost_squad	Escouade d'artilleurs	Une escouade de huit mercenaires de rang expert, composée de tireurs équipés de mitrailleuses et de lance-grenades, et d'un guérisseur.
+outpost_squad_heavy_range_fighter_f.outpost_squad	Escouade d'artilleurs	Une escouade de huit mercenaires de rang maître, composée de tireurs équipés de mitrailleuses et de lance-grenades, et d'un guérisseur.
+outpost_squad_light_mixed_fighter_b.outpost_squad	Escouade de harceleurs	Une escouade de huit mercenaires de rang apprenti, composée de guerriers et de tireurs équipés d'armes rapides et de pistolets, ainsi qu'un guérisseur.
+outpost_squad_light_mixed_fighter_c.outpost_squad	Escouade de harceleurs	Une escouade de huit mercenaires de rang confirmé, composée de guerriers et de tireurs équipés d'armes rapides et de pistolets, ainsi qu'un guérisseur.
+outpost_squad_light_mixed_fighter_d.outpost_squad	Escouade de harceleurs	Une escouade de huit mercenaires de rang initié, composée de guerriers et de tireurs équipés d'armes rapides et de pistolets, ainsi qu'un guérisseur.
+outpost_squad_light_mixed_fighter_e.outpost_squad	Escouade de harceleurs	Une escouade de huit mercenaires de rang expert, composée de guerriers et de tireurs équipés d'armes rapides et de pistolets, ainsi qu'un guérisseur.
+outpost_squad_light_mixed_fighter_f.outpost_squad	Escouade de harceleurs	Une escouade de huit mercenaires de rang maître, composée de guerriers et de tireurs équipés d'armes rapides et de pistolets, ainsi qu'un guérisseur.
+outpost_squad_medium_mixed_fighter_b.outpost_squad	Escouade de combattants	Une escouade de huit mercenaires de rang apprenti, composée de guerriers et de tireurs équipés d'armes légères et de fusils, certains portant un bouclier, ainsi qu'un guérisseur.
+outpost_squad_medium_mixed_fighter_c.outpost_squad	Escouade de combattants	Une escouade de huit mercenaires de rang confirmé, composée de guerriers et de tireurs équipés d'armes légères et de fusils, certains portant un bouclier, ainsi qu'un guérisseur.
+outpost_squad_medium_mixed_fighter_d.outpost_squad	Escouade de combattants	Une escouade de huit mercenaires de rang initié, composée de guerriers et de tireurs équipés d'armes légères et de fusils, certains portant un bouclier, ainsi qu'un guérisseur.
+outpost_squad_medium_mixed_fighter_e.outpost_squad	Escouade de combattants	Une escouade de huit mercenaires de rang expert, composée de guerriers et de tireurs équipés d'armes légères et de fusils, certains portant un bouclier, ainsi qu'un guérisseur.
+outpost_squad_medium_mixed_fighter_f.outpost_squad	Escouade de combattants	Une escouade de huit mercenaires de rang maître, composée de guerriers et de tireurs équipés d'armes légères et de fusils, certains portant un bouclier, ainsi qu'un guérisseur.
+outpost_squad_nukers_b.outpost_squad	Escouade d'élémentalistes	Une escouade de huit mercenaires de rang apprenti, composée de magiciens adeptes des sorts de destruction, et d'un guérisseur.
+outpost_squad_nukers_c.outpost_squad	Escouade d'élémentalistes	Une escouade de huit mercenaires de rang confirmé, composée de magiciens adeptes des sorts de destruction, et d'un guérisseur.
+outpost_squad_nukers_d.outpost_squad	Escouade d'élémentalistes	Une escouade de huit mercenaires de rang initié, composée de magiciens adeptes des sorts de destruction, et d'un guérisseur.
+outpost_squad_nukers_e.outpost_squad	Escouade d'élémentalistes	Une escouade de huit mercenaires de rang expert, composée de magiciens adeptes des sorts de destruction, et d'un guérisseur.
+outpost_squad_nukers_f.outpost_squad	Escouade d'élémentalistes	Une escouade de huit mercenaires de rang maître, composée de magiciens adeptes des sorts de destruction, et d'un guérisseur.
+outpost_squad_offensive_linkers_b.outpost_squad	Escouade d'envoûteurs	Une escouade de huit mercenaires de rang apprenti, composée de magiciens adeptes des sorts de lien offensifs (débilitants et élémentaires), et d'un guérisseur.
+outpost_squad_offensive_linkers_c.outpost_squad	Escouade d'envoûteurs	Une escouade de huit mercenaires de rang confirmé, composée de magiciens adeptes des sorts de lien offensifs (débilitants et élémentaires), et d'un guérisseur.
+outpost_squad_offensive_linkers_d.outpost_squad	Escouade d'envoûteurs	Une escouade de huit mercenaires de rang initié, composée de magiciens adeptes des sorts de lien offensifs (débilitants et élémentaires), et d'un guérisseur.
+outpost_squad_offensive_linkers_e.outpost_squad	Escouade d'envoûteurs	Une escouade de huit mercenaires de rang expert, composée de magiciens adeptes des sorts de lien offensifs (débilitants et élémentaires), et d'un guérisseur.
+outpost_squad_offensive_linkers_f.outpost_squad	Escouade d'envoûteurs	Une escouade de huit mercenaires de rang maître, composée de magiciens adeptes des sorts de lien offensifs (débilitants et élémentaires), et d'un guérisseur.
+outpost_squad_mixed_casters_b.outpost_squad	Escouade de magiciens	Une escouade de huit mercenaires de rang apprenti, composée de magiciens adeptes des différentes écoles de magie (destructrices et salvatrices).
+outpost_squad_mixed_casters_c.outpost_squad	Escouade de magiciens	Une escouade de huit mercenaires de rang confirmé, composée de magiciens adeptes des différentes écoles de magie (destructrices et salvatrices).
+outpost_squad_mixed_casters_d.outpost_squad	Escouade de magiciens	Une escouade de huit mercenaires de rang initié, composée de magiciens adeptes des différentes écoles de magie (destructrices et salvatrices).
+outpost_squad_mixed_casters_e.outpost_squad	Escouade de magiciens	Une escouade de huit mercenaires de rang expert, composée de magiciens adeptes des différentes écoles de magie (destructrices et salvatrices).
+outpost_squad_mixed_casters_f.outpost_squad	Escouade de magiciens	Une escouade de huit mercenaires de rang maître, composée de magiciens adeptes des différentes écoles de magie (destructrices et salvatrices).
+
+
+driller_bountybeaches_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_bountybeaches_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_bountybeaches_kami_u1_200a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_bountybeaches_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_bountybeaches_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Doubles consommables
+driller_bountybeaches_kami_u2_200a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_bountybeaches_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_bountybeaches_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_bountybeaches_kami_u3_200a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_bountybeaches_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_bountybeaches_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_bountybeaches_kami_u4_200a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_bountybeaches_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_bountybeaches_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_bountybeaches_karavan_u1_200a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_bountybeaches_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_bountybeaches_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Doubles consommables
+driller_bountybeaches_karavan_u2_200a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_bountybeaches_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_bountybeaches_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_bountybeaches_karavan_u3_200a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_bountybeaches_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_bountybeaches_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_bountybeaches_karavan_u4_200a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_citiesofintuition_kami_u1_50a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_citiesofintuition_kami_u2_50a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_citiesofintuition_kami_u3_50a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_citiesofintuition_kami_u4_50a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_citiesofintuition_karavan_u1_50a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_citiesofintuition_karavan_u2_50a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_citiesofintuition_karavan_u3_50a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_citiesofintuition_karavan_u4_50a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_couloirbrule_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_couloirbrule_kami_u1_150b.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_couloirbrule_kami_u1_200a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_couloirbrule_kami_u1_200b.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_couloirbrule_kami_u1_250a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_couloirbrule_kami_u1_250b.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_couloirbrule_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_couloirbrule_kami_u2_150b.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_couloirbrule_kami_u2_200a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_couloirbrule_kami_u2_200b.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_couloirbrule_kami_u2_250a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_couloirbrule_kami_u2_250b.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_couloirbrule_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_couloirbrule_kami_u3_150b.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_couloirbrule_kami_u3_200a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_couloirbrule_kami_u3_200b.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_couloirbrule_kami_u3_250a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_couloirbrule_kami_u3_250b.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_couloirbrule_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_couloirbrule_kami_u4_150b.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_couloirbrule_kami_u4_200a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_couloirbrule_kami_u4_200b.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_couloirbrule_kami_u4_250a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_couloirbrule_kami_u4_250b.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_couloirbrule_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_couloirbrule_karavan_u1_150b.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_couloirbrule_karavan_u1_200a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_couloirbrule_karavan_u1_200b.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_couloirbrule_karavan_u1_250a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_couloirbrule_karavan_u1_250b.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_couloirbrule_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_couloirbrule_karavan_u2_150b.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_couloirbrule_karavan_u2_200a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_couloirbrule_karavan_u2_200b.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_couloirbrule_karavan_u2_250a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_couloirbrule_karavan_u2_250b.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_couloirbrule_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_couloirbrule_karavan_u3_150b.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_couloirbrule_karavan_u3_200a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_couloirbrule_karavan_u3_200b.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_couloirbrule_karavan_u3_250a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_couloirbrule_karavan_u3_250b.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_couloirbrule_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_couloirbrule_karavan_u4_150b.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_couloirbrule_karavan_u4_200a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_couloirbrule_karavan_u4_200b.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_couloirbrule_karavan_u4_250a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_couloirbrule_karavan_u4_250b.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_dunesofexil_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_dunesofexil_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_dunesofexil_kami_u1_200a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_dunesofexil_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Doubles consommables
+driller_dunesofexil_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_dunesofexil_kami_u2_200a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_dunesofexil_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_dunesofexil_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_dunesofexil_kami_u3_200a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_dunesofexil_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_dunesofexil_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_dunesofexil_kami_u4_200a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_dunesofexil_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_dunesofexil_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_dunesofexil_karavan_u1_200a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_dunesofexil_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Doubles consommables
+driller_dunesofexil_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_dunesofexil_karavan_u2_200a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_dunesofexil_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_dunesofexil_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_dunesofexil_karavan_u3_200a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_dunesofexil_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_dunesofexil_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_dunesofexil_karavan_u4_200a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_enchantedisle_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_enchantedisle_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_enchantedisle_kami_u1_200a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_enchantedisle_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Doubles consommables
+driller_enchantedisle_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_enchantedisle_kami_u2_200a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_enchantedisle_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_enchantedisle_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_enchantedisle_kami_u3_200a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_enchantedisle_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_enchantedisle_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_enchantedisle_kami_u4_200a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_enchantedisle_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_enchantedisle_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_enchantedisle_karavan_u1_200a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_enchantedisle_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Doubles consommables
+driller_enchantedisle_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_enchantedisle_karavan_u2_200a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_enchantedisle_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_enchantedisle_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_enchantedisle_karavan_u3_200a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_enchantedisle_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_enchantedisle_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_enchantedisle_karavan_u4_200a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_fleetinggarden_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_fleetinggarden_kami_u1_50a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_fleetinggarden_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_fleetinggarden_kami_u2_50a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_fleetinggarden_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_fleetinggarden_kami_u3_50a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_fleetinggarden_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_fleetinggarden_kami_u4_50a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_fleetinggarden_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_fleetinggarden_karavan_u1_50a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_fleetinggarden_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_fleetinggarden_karavan_u2_50a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_fleetinggarden_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_fleetinggarden_karavan_u3_50a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_fleetinggarden_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_fleetinggarden_karavan_u4_50a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_frahartowers_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_frahartowers_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_frahartowers_kami_u1_50a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_frahartowers_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_frahartowers_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_frahartowers_kami_u2_50a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_frahartowers_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_frahartowers_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_frahartowers_kami_u3_50a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_frahartowers_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_frahartowers_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_frahartowers_kami_u4_50a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_frahartowers_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_frahartowers_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_frahartowers_karavan_u1_50a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_frahartowers_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_frahartowers_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_frahartowers_karavan_u2_50a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_frahartowers_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_frahartowers_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_frahartowers_karavan_u3_50a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_frahartowers_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_frahartowers_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_frahartowers_karavan_u4_50a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveconfusion_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_groveconfusion_kami_u1_150b.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_groveconfusion_kami_u1_200a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_groveconfusion_kami_u1_200b.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_groveconfusion_kami_u1_250a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_groveconfusion_kami_u1_250b.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_groveconfusion_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveconfusion_kami_u2_150b.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveconfusion_kami_u2_200a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveconfusion_kami_u2_200b.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveconfusion_kami_u2_250a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveconfusion_kami_u2_250b.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveconfusion_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveconfusion_kami_u3_150b.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveconfusion_kami_u3_200a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveconfusion_kami_u3_200b.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveconfusion_kami_u3_250a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveconfusion_kami_u3_250b.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveconfusion_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveconfusion_kami_u4_150b.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveconfusion_kami_u4_200a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveconfusion_kami_u4_200b.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveconfusion_kami_u4_250a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveconfusion_kami_u4_250b.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveconfusion_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_groveconfusion_karavan_u1_150b.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_groveconfusion_karavan_u1_200a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_groveconfusion_karavan_u1_200b.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_groveconfusion_karavan_u1_250a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_groveconfusion_karavan_u1_250b.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_groveconfusion_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveconfusion_karavan_u2_150b.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveconfusion_karavan_u2_200a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveconfusion_karavan_u2_200b.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveconfusion_karavan_u2_250a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveconfusion_karavan_u2_250b.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveconfusion_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveconfusion_karavan_u3_150b.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveconfusion_karavan_u3_200a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveconfusion_karavan_u3_200b.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveconfusion_karavan_u3_250a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveconfusion_karavan_u3_250b.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveconfusion_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveconfusion_karavan_u4_150b.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveconfusion_karavan_u4_200a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveconfusion_karavan_u4_200b.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveconfusion_karavan_u4_250a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveconfusion_karavan_u4_250b.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveofumbra_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_groveofumbra_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_groveofumbra_kami_u1_200a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_groveofumbra_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveofumbra_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Doubles consommables
+driller_groveofumbra_kami_u2_200a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveofumbra_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveofumbra_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveofumbra_kami_u3_200a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveofumbra_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveofumbra_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveofumbra_kami_u4_200a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveofumbra_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_groveofumbra_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_groveofumbra_karavan_u1_200a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_groveofumbra_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveofumbra_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Doubles consommables
+driller_groveofumbra_karavan_u2_200a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_groveofumbra_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveofumbra_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveofumbra_karavan_u3_200a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_groveofumbra_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveofumbra_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_groveofumbra_karavan_u4_200a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_havenofpurity_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_havenofpurity_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_havenofpurity_kami_u1_50a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_havenofpurity_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_havenofpurity_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_havenofpurity_kami_u2_50a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_havenofpurity_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_havenofpurity_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_havenofpurity_kami_u3_50a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_havenofpurity_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_havenofpurity_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_havenofpurity_kami_u4_50a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_havenofpurity_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_havenofpurity_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_havenofpurity_karavan_u1_50a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_havenofpurity_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_havenofpurity_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_havenofpurity_karavan_u2_50a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_havenofpurity_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_havenofpurity_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_havenofpurity_karavan_u3_50a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_havenofpurity_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_havenofpurity_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_havenofpurity_karavan_u4_50a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_hiddensource_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_hiddensource_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_hiddensource_kami_u1_200a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_hiddensource_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Doubles consommables
+driller_hiddensource_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_hiddensource_kami_u2_200a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_hiddensource_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_hiddensource_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_hiddensource_kami_u3_200a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_hiddensource_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_hiddensource_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_hiddensource_kami_u4_200a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_hiddensource_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_hiddensource_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_hiddensource_karavan_u1_200a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_hiddensource_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Doubles consommables
+driller_hiddensource_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_hiddensource_karavan_u2_200a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_hiddensource_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_hiddensource_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_hiddensource_karavan_u3_200a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_hiddensource_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_hiddensource_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_hiddensource_karavan_u4_200a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_imperialdunes_kami_u1_50a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_imperialdunes_kami_u2_50a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_imperialdunes_kami_u3_50a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_imperialdunes_kami_u4_50a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_imperialdunes_karavan_u1_50a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_imperialdunes_karavan_u2_50a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_imperialdunes_karavan_u3_50a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_imperialdunes_karavan_u4_50a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_knollofdissent_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_knollofdissent_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_knollofdissent_kami_u1_50a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_knollofdissent_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_knollofdissent_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_knollofdissent_kami_u2_50a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_knollofdissent_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_knollofdissent_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_knollofdissent_kami_u3_50a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_knollofdissent_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_knollofdissent_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_knollofdissent_kami_u4_50a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_knollofdissent_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_knollofdissent_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_knollofdissent_karavan_u1_50a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_knollofdissent_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_knollofdissent_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_knollofdissent_karavan_u2_50a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_knollofdissent_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_knollofdissent_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_knollofdissent_karavan_u3_50a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_knollofdissent_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_knollofdissent_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_knollofdissent_karavan_u4_50a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_knotofdementia_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_knotofdementia_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_knotofdementia_kami_u1_200a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_knotofdementia_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Doubles consommables
+driller_knotofdementia_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_knotofdementia_kami_u2_200a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_knotofdementia_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_knotofdementia_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_knotofdementia_kami_u3_200a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_knotofdementia_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_knotofdementia_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_knotofdementia_kami_u4_200a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_knotofdementia_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_knotofdementia_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_knotofdementia_karavan_u1_200a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_knotofdementia_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Doubles consommables
+driller_knotofdementia_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_knotofdementia_karavan_u2_200a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_knotofdementia_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_knotofdementia_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_knotofdementia_karavan_u3_200a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_knotofdementia_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_knotofdementia_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_knotofdementia_karavan_u4_200a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_lagoonsofloria_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_lagoonsofloria_kami_u1_150b.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_lagoonsofloria_kami_u1_200a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_lagoonsofloria_kami_u1_200b.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_lagoonsofloria_kami_u1_250a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_lagoonsofloria_kami_u1_250b.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_lagoonsofloria_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_lagoonsofloria_kami_u2_150b.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_lagoonsofloria_kami_u2_200a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_lagoonsofloria_kami_u2_200b.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_lagoonsofloria_kami_u2_250a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_lagoonsofloria_kami_u2_250b.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_lagoonsofloria_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_lagoonsofloria_kami_u3_150b.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_lagoonsofloria_kami_u3_200a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_lagoonsofloria_kami_u3_200b.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_lagoonsofloria_kami_u3_250a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_lagoonsofloria_kami_u3_250b.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_lagoonsofloria_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_lagoonsofloria_kami_u4_150b.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_lagoonsofloria_kami_u4_200a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_lagoonsofloria_kami_u4_200b.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_lagoonsofloria_kami_u4_250a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_lagoonsofloria_kami_u4_250b.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_lagoonsofloria_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_lagoonsofloria_karavan_u1_150b.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_lagoonsofloria_karavan_u1_200a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_lagoonsofloria_karavan_u1_200b.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_lagoonsofloria_karavan_u1_250a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_lagoonsofloria_karavan_u1_250b.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_lagoonsofloria_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_lagoonsofloria_karavan_u2_150b.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_lagoonsofloria_karavan_u2_200a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_lagoonsofloria_karavan_u2_200b.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_lagoonsofloria_karavan_u2_250a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_lagoonsofloria_karavan_u2_250b.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_lagoonsofloria_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_lagoonsofloria_karavan_u3_150b.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_lagoonsofloria_karavan_u3_200a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_lagoonsofloria_karavan_u3_200b.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_lagoonsofloria_karavan_u3_250a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_lagoonsofloria_karavan_u3_250b.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_lagoonsofloria_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_lagoonsofloria_karavan_u4_150b.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_lagoonsofloria_karavan_u4_200a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_lagoonsofloria_karavan_u4_200b.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_lagoonsofloria_karavan_u4_250a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_lagoonsofloria_karavan_u4_250b.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_libertylake_kami_u1_50a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_libertylake_kami_u2_50a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_libertylake_kami_u3_50a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_libertylake_kami_u4_50a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_libertylake_karavan_u1_50a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_libertylake_karavan_u2_50a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_libertylake_karavan_u3_50a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_libertylake_karavan_u4_50a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_maidengrove_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_maidengrove_kami_u1_50a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_maidengrove_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_maidengrove_kami_u2_50a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_maidengrove_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_maidengrove_kami_u3_50a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_maidengrove_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_maidengrove_kami_u4_50a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_maidengrove_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_maidengrove_karavan_u1_50a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_maidengrove_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_maidengrove_karavan_u2_50a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_maidengrove_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_maidengrove_karavan_u3_50a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_maidengrove_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_maidengrove_karavan_u4_50a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_majesticgarden_kami_u1_50a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_majesticgarden_kami_u2_50a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_majesticgarden_kami_u3_50a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_majesticgarden_kami_u4_50a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_majesticgarden_karavan_u1_50a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_majesticgarden_karavan_u2_50a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_majesticgarden_karavan_u3_50a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_majesticgarden_karavan_u4_50a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_oflovakoasis_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_oflovakoasis_kami_u1_50a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_oflovakoasis_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_oflovakoasis_kami_u2_50a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_oflovakoasis_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_oflovakoasis_kami_u3_50a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_oflovakoasis_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_oflovakoasis_kami_u4_50a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_oflovakoasis_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_oflovakoasis_karavan_u1_50a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_oflovakoasis_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_oflovakoasis_karavan_u2_50a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_oflovakoasis_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_oflovakoasis_karavan_u3_50a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_oflovakoasis_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_oflovakoasis_karavan_u4_50a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thefount_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_thefount_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_thefount_kami_u1_50a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_thefount_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thefount_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thefount_kami_u2_50a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thefount_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_thefount_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_thefount_kami_u3_50a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_thefount_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thefount_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thefount_kami_u4_50a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thefount_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_thefount_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_thefount_karavan_u1_50a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_thefount_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thefount_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thefount_karavan_u2_50a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thefount_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_thefount_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_thefount_karavan_u3_50a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_thefount_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thefount_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thefount_karavan_u4_50a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thesavagedunes_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_thesavagedunes_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_thesavagedunes_kami_u1_200a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_thesavagedunes_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thesavagedunes_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Doubles consommables
+driller_thesavagedunes_kami_u2_200a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thesavagedunes_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_thesavagedunes_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_thesavagedunes_kami_u3_200a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_thesavagedunes_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thesavagedunes_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thesavagedunes_kami_u4_200a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thesavagedunes_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_thesavagedunes_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_thesavagedunes_karavan_u1_200a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_thesavagedunes_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thesavagedunes_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Doubles consommables
+driller_thesavagedunes_karavan_u2_200a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thesavagedunes_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_thesavagedunes_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_thesavagedunes_karavan_u3_200a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_thesavagedunes_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thesavagedunes_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thesavagedunes_karavan_u4_200a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thevoid_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_thevoid_kami_u1_150b.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_thevoid_kami_u1_200a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_thevoid_kami_u1_200b.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_thevoid_kami_u1_250a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_thevoid_kami_u1_250b.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_thevoid_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thevoid_kami_u2_150b.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thevoid_kami_u2_200a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thevoid_kami_u2_200b.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thevoid_kami_u2_250a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thevoid_kami_u2_250b.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thevoid_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_thevoid_kami_u3_150b.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_thevoid_kami_u3_200a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_thevoid_kami_u3_200b.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_thevoid_kami_u3_250a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_thevoid_kami_u3_250b.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_thevoid_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thevoid_kami_u4_150b.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thevoid_kami_u4_200a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thevoid_kami_u4_200b.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thevoid_kami_u4_250a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thevoid_kami_u4_250b.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thevoid_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_thevoid_karavan_u1_150b.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_thevoid_karavan_u1_200a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_thevoid_karavan_u1_200b.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_thevoid_karavan_u1_250a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_thevoid_karavan_u1_250b.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_thevoid_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thevoid_karavan_u2_150b.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thevoid_karavan_u2_200a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thevoid_karavan_u2_200b.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thevoid_karavan_u2_250a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thevoid_karavan_u2_250b.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_thevoid_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_thevoid_karavan_u3_150b.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_thevoid_karavan_u3_200a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_thevoid_karavan_u3_200b.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_thevoid_karavan_u3_250a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_thevoid_karavan_u3_250b.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_thevoid_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thevoid_karavan_u4_150b.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thevoid_karavan_u4_200a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thevoid_karavan_u4_200b.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thevoid_karavan_u4_250a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_thevoid_karavan_u4_250b.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_upperbog_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_upperbog_kami_u1_150a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_upperbog_kami_u1_200a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_upperbog_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_upperbog_kami_u2_150a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Doubles consommables
+driller_upperbog_kami_u2_200a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_upperbog_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_upperbog_kami_u3_150a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_upperbog_kami_u3_200a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_upperbog_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_upperbog_kami_u4_150a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_upperbog_kami_u4_200a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_upperbog_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_upperbog_karavan_u1_150a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_upperbog_karavan_u1_200a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_upperbog_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_upperbog_karavan_u2_150a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Doubles consommables
+driller_upperbog_karavan_u2_200a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_upperbog_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_upperbog_karavan_u3_150a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_upperbog_karavan_u3_200a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_upperbog_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_upperbog_karavan_u4_150a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_upperbog_karavan_u4_200a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_windsofmuse_kami_u1_100a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_windsofmuse_kami_u1_50a.outpost_building	Offrande pour Arbre-Vrille	MP artisanat + Consommables 
+driller_windsofmuse_kami_u2_100a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_windsofmuse_kami_u2_50a.outpost_building	Offrande pour Arbre-Vrille à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_windsofmuse_kami_u3_100a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_windsofmuse_kami_u3_50a.outpost_building	Offrande pour Arbre-Vrille Vivace	MP artisanat + Consommables (vitesse x1.5) 
+driller_windsofmuse_kami_u4_100a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_windsofmuse_kami_u4_50a.outpost_building	Offrande pour Arbre-Vrille Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_windsofmuse_karavan_u1_100a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_windsofmuse_karavan_u1_50a.outpost_building	Offrande pour Grand Trépan	MP artisanat + Consommables 
+driller_windsofmuse_karavan_u2_100a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_windsofmuse_karavan_u2_50a.outpost_building	Offrande pour Grand Trépan à Cristaux	MP artisanat + Consommables + Cristaux d'élevation 
+driller_windsofmuse_karavan_u3_100a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_windsofmuse_karavan_u3_50a.outpost_building	Offrande pour Grand Trépan Rapide	MP artisanat + Consommables (vitesse x1.5) 
+driller_windsofmuse_karavan_u4_100a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+driller_windsofmuse_karavan_u4_50a.outpost_building	Offrande pour Grand Trépan Supérieur	MP artisanat + Consommables (vitesse x2) 
+placeholder_bountybeaches_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_citiesofintuition_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_couloirbrule_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_couloirbrule_b.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_dunesofexil_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_enchantedisle_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_fleetinggarden_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_frahartowers_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_groveconfusion_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_groveconfusion_b.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_groveofumbra_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_havenofpurity_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_hiddensource_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_imperialdunes_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_knollofdissent_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_knotofdementia_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_lagoonsofloria_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_lagoonsofloria_b.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_libertylake_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_maidengrove_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_majesticgarden_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_oflovakoasis_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_thefount_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_thesavagedunes_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_thevoid_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_thevoid_b.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_upperbog_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+placeholder_windsofmuse_a.outpost_building	Emplacement constructible	Revenir à un emplacement vide
+town_hall.outpost_building	Hall d'avant-poste	Bâtiment principal de l'avant-poste

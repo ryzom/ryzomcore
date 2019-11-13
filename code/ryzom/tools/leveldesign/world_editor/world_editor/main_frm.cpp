@@ -46,6 +46,7 @@
 #include "editor_primitive.h"
 #include "file_dialog_ex.h"
 #include "nel/misc/mem_stream.h"
+#include "nel/misc/common.h"
 
 #include <string>
 
@@ -568,12 +569,10 @@ void CMainFrame::stopPositionControl(IPluginCallback *plugin)
 }
 
 // ***************************************************************************
-void CMainFrame::setExeDir (const char* str)
+void CMainFrame::setExeDir (const std::string &str)
 {
 //	AFX_MANAGE_STATE (AfxGetStaticModuleState());
-	_ExeDir = str;
-	if ((str[strlen(str)-1] != '\\') || (str[strlen(str)-1] != '/'))
-		_ExeDir += "\\";
+	_ExeDir = CPath::standardizePath(str);
 }
 
 // ***************************************************************************
@@ -760,11 +759,11 @@ void CMainFrame::displayStatusBarInfo ()
 	string text;
 	if (dispWnd->getActionHelp (text))
 	{
-		m_wndStatusBar.SetPaneText (0, text.c_str());
+		m_wndStatusBar.SetPaneText(0, nlUtf8ToTStr(text));
 	}
 	else
 	{
-		m_wndStatusBar.SetPaneText (0, sTmp.c_str());
+		m_wndStatusBar.SetPaneText(0, nlUtf8ToTStr(sTmp));
 	}
 	//for (uint32 i = sTmp.size(); i < 10; ++i)
 	//	sTmp += " ";
@@ -772,12 +771,12 @@ void CMainFrame::displayStatusBarInfo ()
 	// Write zone reference name 
 	if (dispWnd->getActionText (text))
 	{
-		m_wndStatusBar.SetPaneText (1, text.c_str());
+		m_wndStatusBar.SetPaneText(1, nlUtf8ToTStr(text));
 	}
 	else
 	{
 		sTmp = _ZoneBuilder->getZoneName (x, y);
-		m_wndStatusBar.SetPaneText (1, sTmp.c_str());
+		m_wndStatusBar.SetPaneText(1, nlUtf8ToTStr(sTmp));
 	}
 
 	// Write coordinates
@@ -785,15 +784,15 @@ void CMainFrame::displayStatusBarInfo ()
 	sprintf(temp, "(%.3f , %.3f)", v.x, v.y);
 	sTmp = temp;
 //	sTmp = "( " + toString(v.x) + " , " + toString(v.y) + " )";
-	m_wndStatusBar.SetPaneText (2, sTmp.c_str());
+	m_wndStatusBar.SetPaneText(2, nlUtf8ToTStr(sTmp));
 
 	// Write rot
 	sTmp = "Rot(" + toString(_ZoneBuilder->getRot(x, y)) + ")";
-	m_wndStatusBar.SetPaneText (3, sTmp.c_str());
+	m_wndStatusBar.SetPaneText(3, nlUtf8ToTStr(sTmp));
 
 	// Write flip
 	sTmp = "Flip(" + toString(_ZoneBuilder->getFlip(x, y)) + ")";
-	m_wndStatusBar.SetPaneText (4, sTmp.c_str());
+	m_wndStatusBar.SetPaneText(4, nlUtf8ToTStr(sTmp));
 
 	// Write selection
 	if (Selection.size ())
@@ -805,22 +804,22 @@ void CMainFrame::displayStatusBarInfo ()
 	}
 	else
 		sTmp = "No selected primitive";
-	m_wndStatusBar.SetPaneText (5, sTmp.c_str());
+	m_wndStatusBar.SetPaneText(5, nlUtf8ToTStr(sTmp));
 
 	// Write path of selected primitive
 	if (Selection.size())
 		sTmp = getDocument()->getPathOfSelectedPrimitive();
 	else
-		sTmp = "";
+		sTmp.clear();
 	
-	m_wndStatusBar.SetPaneText (6, sTmp.c_str());
+	m_wndStatusBar.SetPaneText(6, nlUtf8ToTStr(sTmp));
 }
 
 // ***************************************************************************
 
-void CMainFrame::displayInfo (const char *info)
+void CMainFrame::displayInfo (const std::string &info)
 {
-	m_wndStatusBar.SetPaneText (6, info);
+	m_wndStatusBar.SetPaneText(6, nlUtf8ToTStr(info));
 }
 
 // ***************************************************************************
@@ -857,9 +856,9 @@ void CMainFrame::uninit ()
 		fileOut.serial(_Environnement);
 		fileOut.close();
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
-		MessageBox (e.what(), "Warning");
+		MessageBox(nlUtf8ToTStr(e.what()), _T("Warning"));
 	}
 }
 
@@ -870,10 +869,10 @@ void CMainFrame::uninit ()
 // ***************************************************************************
 void CMainFrame::onMenuFileOpenLogic ()
 {
-	CFileDialogEx dialog (BASE_REGISTRY_KEY, "prim", TRUE, "prim", NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, "Primitives Files (*.prim)|*.prim||", this);
+	CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("prim"), TRUE, _T("prim"), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, _T("Primitives Files (*.prim)|*.prim||"), this);
 	if (dialog.DoModal() == IDOK)
 	{
-		launchLoadingDialog(string("loading prim zone ") + (LPCSTR)dialog.GetFileName());
+		launchLoadingDialog(string("loading prim zone ") + tStrToUtf8(dialog.GetFileName()));
 		// todo primitive load
 		primZoneModified ();
 		terminateLoadingDialog();
@@ -1292,7 +1291,6 @@ struct CViewerConfig
 		LandscapeTileNear = 50.0f;
 		LandscapeThreshold = 0.001f;
 
-		HeightFieldName= "";
 		HeightFieldMaxZ= 100;
 		HeightFieldOriginX= 16000;
 		HeightFieldOriginY= -24000;
@@ -1440,7 +1438,7 @@ struct CViewerConfig
 			}
 
 		}
-		catch (EConfigFile &e)
+		catch (const EConfigFile &e)
 		{
 			printf ("Problem in config file : %s\n", e.what ());
 		}
@@ -1453,7 +1451,7 @@ struct CViewerConfig
 
 		if(f==NULL)
 		{
-			fprintf(stderr,"can't open file '%s'\n",configFileName);
+			fprintf(stderr,"can't open file '%s'\n",configFileName.c_str());
 		}
 
 		fprintf(f,"FullScreen = %d;\n",this->Windowed?0:1);
@@ -1495,17 +1493,17 @@ struct CViewerConfig
 		fprintf(f,"Zones = {\n");
 		for (i = 0; i < Zones.size(); ++i)
 			if (i < (Zones.size()-1))
-				fprintf(f,"\"%s\",\n", Zones[i]);
+				fprintf(f,"\"%s\",\n", Zones[i].c_str());
 			else
-				fprintf(f,"\"%s\"\n", Zones[i]);
+				fprintf(f,"\"%s\"\n", Zones[i].c_str());
 		fprintf(f,"};\n");
 
 		fprintf(f,"Ig = {\n");
 		for (i = 0; i < Igs.size(); ++i)
 			if (i < (Igs.size()-1))
-				fprintf(f,"\"%s\",\n", Igs[i]);
+				fprintf(f,"\"%s\",\n", Igs[i].c_str());
 			else
-				fprintf(f,"\"%s\"\n", Igs[i]);
+				fprintf(f,"\"%s\"\n", Igs[i].c_str());
 		fprintf(f,"};\n");
 
 		fclose(f);
@@ -1618,12 +1616,12 @@ void CMainFrame::viewLand(bool withIgs)
 
 void CMainFrame::onProjectAddlandscape() 
 {
-	CFileDialogEx dialog (BASE_REGISTRY_KEY, "land", TRUE, "land", NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, "NeL Ligo Landscape Files (*.land)|*.land|All Files (*.*)|*.*||", this);
+	CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("land"), TRUE, _T("land"), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, _T("NeL Ligo Landscape Files (*.land)|*.land|All Files (*.*)|*.*||"), this);
 	if (dialog.DoModal() == IDOK)
 	{
 		// Add the landscape in the project
 		getDocument ()->beginModification ();
-		getDocument ()->addModification (new CActionAddLandscape (dialog.GetPathName()));
+		getDocument ()->addModification (new CActionAddLandscape (tStrToUtf8(dialog.GetPathName())));
 		getDocument ()->endModification ();
 
 		// Update data
@@ -1633,7 +1631,7 @@ void CMainFrame::onProjectAddlandscape()
 		if (getDocument()->getDataDir() != "")
 			return;
 
-		string path = dialog.GetPathName();
+		string path = tStrToUtf8(dialog.GetPathName());
 
 		uint pos = path.rfind("\\");
 		if (pos == string::npos)
@@ -1750,9 +1748,9 @@ void CMainFrame::onProjectSettings()
 
 		// Get the new data path
 		std::string	oldDataDir = standardizePath (getDocument ()->getDataDir ().c_str ());
-		std::string	newDataDir = standardizePath (projectSettings.DataDirectory);
+		std::string	newDataDir = standardizePath (tStrToUtf8(projectSettings.DataDirectory));
 		initLandscape |= (oldDataDir != newDataDir);
-		getDocument ()->setDataDir (projectSettings.DataDirectory);
+		getDocument ()->setDataDir (tStrToUtf8(projectSettings.DataDirectory));
 
 		// Init the landscape
 		if (initLandscape)
@@ -1802,12 +1800,12 @@ void CMainFrame::OnUpdateEditLogic(CCmdUI* pCmdUI)
 
 void CMainFrame::OnProjectImportPrim() 
 {
-	CFileDialogEx dialog (BASE_REGISTRY_KEY, "prim", TRUE, "prim", NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, "Old NeL Ligo Prim Files (*.prim)|*.prim|All Files (*.*)|*.*||", this);
+	CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("prim"), TRUE, _T("prim"), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, _T("Old NeL Ligo Prim Files (*.prim)|*.prim|All Files (*.*)|*.*||"), this);
 	if (dialog.DoModal() == IDOK)
 	{
 		// Add the landscape in the project
 		getDocument ()->beginModification ();
-		getDocument ()->addModification (new CActionImportPrimitive (dialog.GetPathName()));
+		getDocument ()->addModification (new CActionImportPrimitive (tStrToUtf8(dialog.GetPathName())));
 		getDocument ()->endModification ();
 
 		// Update data
@@ -1819,8 +1817,8 @@ void CMainFrame::OnProjectImportPrim()
 
 void CMainFrame::OnProjectAddPrimitive() 
 {
-	static char	buffer[32000];
-	CFileDialogEx dialog (BASE_REGISTRY_KEY, "primitive", TRUE, "primitive", NULL, OFN_ALLOWMULTISELECT|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, "NeL Ligo Primitive Files (*.primitive)|*.primitive|All Files (*.*)|*.*||", this);
+	static TCHAR	buffer[32000];
+	CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("primitive"), TRUE, _T("primitive"), NULL, OFN_ALLOWMULTISELECT|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, _T("NeL Ligo Primitive Files (*.primitive)|*.primitive|All Files (*.*)|*.*||"), this);
 	// increase result buffer size (for multi select)
 	memset(buffer, 0, 32000);
 	dialog.m_ofn.lpstrFile = buffer;
@@ -1835,7 +1833,7 @@ void CMainFrame::OnProjectAddPrimitive()
 
 			while (pos!=NULL)
 			{
-				string path = dialog.GetNextPathName(pos);
+				string path = tStrToUtf8(dialog.GetNextPathName(pos));
 				if (!getDocument()->isPrimitiveLoaded(path))
 					getDocument ()->addModification (new CActionLoadPrimitive (path.c_str()));
 				else
@@ -2209,7 +2207,7 @@ void CMainFrame::setTransformMode (TTransformMode mode)
 
 // ***************************************************************************
 
-void CMainFrame::deletePrimitive (bool subDelete, const char *actionName)
+void CMainFrame::deletePrimitive (bool subDelete, const std::string &actionName)
 {
 	list<NLLIGO::IPrimitive*> oldSelection;
 
@@ -2629,7 +2627,7 @@ void CMainFrame::OnOpenFile (UINT nID)
 	nlassert (nID<files.size ());
 
 	// Open the file
-	if	(!openFile (files[nID].c_str ()))
+	if	(!openDoc (files[nID]))
 		theApp.errorMessage ("Can't open the file %s", files[nID].c_str ());
 }
 
@@ -2647,14 +2645,14 @@ void CMainFrame::createContextMenu (CWnd *parent, const CPoint &point, bool tran
 		if (_Mode == 1)
 		{
 			// Add commands
-			pMenu->AppendMenu (MF_STRING, ID_EDIT_SELECT, "&Select\tF5");
-			pMenu->AppendMenu (MF_STRING, ID_EDIT_TRANSLATE, "&Move\tF6");
-			pMenu->AppendMenu (MF_STRING, ID_EDIT_ROTATE, "&Rotate\tF7");
-			pMenu->AppendMenu (MF_STRING, ID_EDIT_TURN, "&Turn\tF8");
-			pMenu->AppendMenu (MF_STRING, ID_EDIT_SCALE, "&Scale\tF9");
-			pMenu->AppendMenu (MF_STRING, ID_EDIT_RADIUS, "&Radius\tF10");
+			pMenu->AppendMenu (MF_STRING, ID_EDIT_SELECT, _T("&Select\tF5"));
+			pMenu->AppendMenu (MF_STRING, ID_EDIT_TRANSLATE, _T("&Move\tF6"));
+			pMenu->AppendMenu (MF_STRING, ID_EDIT_ROTATE, _T("&Rotate\tF7"));
+			pMenu->AppendMenu (MF_STRING, ID_EDIT_TURN, _T("&Turn\tF8"));
+			pMenu->AppendMenu (MF_STRING, ID_EDIT_SCALE, _T("&Scale\tF9"));
+			pMenu->AppendMenu (MF_STRING, ID_EDIT_RADIUS, _T("&Radius\tF10"));
 			if (isSelectionLocked ())
-				pMenu->AppendMenu (MF_STRING, ID_EDIT_ADD_POINT, "&Add points\tF11");
+				pMenu->AppendMenu (MF_STRING, ID_EDIT_ADD_POINT, _T("&Add points\tF11"));
 
 			// Check the good one
 			pMenu->CheckMenuRadioItem (ID_EDIT_SELECT, isSelectionLocked ()?ID_EDIT_ADD_POINT:ID_EDIT_SCALE, ID_EDIT_SELECT+getTransformMode (),
@@ -2666,35 +2664,35 @@ void CMainFrame::createContextMenu (CWnd *parent, const CPoint &point, bool tran
 	}
 
 	// Always a delete menu
-	pMenu->AppendMenu (MF_STRING, ID_EDIT_DELETE, "&Delete\tDel");
+	pMenu->AppendMenu (MF_STRING, ID_EDIT_DELETE, _T("&Delete\tDel"));
 
 	// Add properties menu
-	pMenu->AppendMenu (MF_STRING, ID_EDIT_PROPERTIES, "&Properties\tAlt+Enter");
+	pMenu->AppendMenu (MF_STRING, ID_EDIT_PROPERTIES, _T("&Properties\tAlt+Enter"));
 
 	// Select Children
-	pMenu->AppendMenu (MF_STRING, ID_EDIT_SELECT_CHILDREN, "&Select Children\tC");
+	pMenu->AppendMenu (MF_STRING, ID_EDIT_SELECT_CHILDREN, _T("&Select Children\tC"));
 
 	// Tree help
-	pMenu->AppendMenu (MF_STRING, ID_HELP_FINDER, "&Help\tF1");
+	pMenu->AppendMenu (MF_STRING, ID_HELP_FINDER, _T("&Help\tF1"));
 
 	// Add separator
 	pMenu->AppendMenu (MF_SEPARATOR);
-	pMenu->AppendMenu (MF_STRING, ID_RENAME_SELECTED, "&Rename All Selected");
-	pMenu->AppendMenu (MF_STRING, ID_REPAIR_SELECTED, "&Repair All Selected");
+	pMenu->AppendMenu (MF_STRING, ID_RENAME_SELECTED, _T("&Rename All Selected"));
+	pMenu->AppendMenu (MF_STRING, ID_REPAIR_SELECTED, _T("&Repair All Selected"));
 
 	// Add separator
 	pMenu->AppendMenu (MF_SEPARATOR);
 
 	// Add properties menu
-	pMenu->AppendMenu (MF_STRING, ID_VIEW_SHOW, "&Show\tS");
-	pMenu->AppendMenu (MF_STRING, ID_VIEW_HIDE, "&Hide\tH");
+	pMenu->AppendMenu (MF_STRING, ID_VIEW_SHOW, _T("&Show\tS"));
+	pMenu->AppendMenu (MF_STRING, ID_VIEW_HIDE, _T("&Hide\tH"));
 
 	// Add separator
 	pMenu->AppendMenu (MF_SEPARATOR);
 
 	// Add expand / collapse menu
-	pMenu->AppendMenu (MF_STRING, ID_EDIT_EXPAND, "&Expand\tE");
-	pMenu->AppendMenu (MF_STRING, ID_EDIT_COLLAPSE, "&Collapse\tR");
+	pMenu->AppendMenu (MF_STRING, ID_EDIT_EXPAND, _T("&Expand\tE"));
+	pMenu->AppendMenu (MF_STRING, ID_EDIT_COLLAPSE, _T("&Collapse\tR"));
 
 	// Only one selection ?
 	if (Selection.size () == 1)
@@ -2712,7 +2710,7 @@ void CMainFrame::createContextMenu (CWnd *parent, const CPoint &point, bool tran
 				// For each child, add a create method
 				for (uint i=0; i<primClass->DynamicChildren.size (); i++)
 				{
-					pMenu->AppendMenu (MF_STRING, ID_EDIT_CREATE_BEGIN+i, ("Add "+primClass->DynamicChildren[i].ClassName).c_str ());
+					pMenu->AppendMenu(MF_STRING, ID_EDIT_CREATE_BEGIN + i, nlUtf8ToTStr("Add " + primClass->DynamicChildren[i].ClassName));
 				}
 			}
 
@@ -2725,7 +2723,7 @@ void CMainFrame::createContextMenu (CWnd *parent, const CPoint &point, bool tran
 				// For each child, add a create method
 				for (uint i=0; i<primClass->GeneratedChildren.size (); i++)
 				{
-					pMenu->AppendMenu (MF_STRING, ID_EDIT_GENERATE_BEGIN+i, ("Generate "+primClass->GeneratedChildren[i].ClassName).c_str ());
+					pMenu->AppendMenu(MF_STRING, ID_EDIT_GENERATE_BEGIN + i, nlUtf8ToTStr("Generate " + primClass->GeneratedChildren[i].ClassName));
 				}
 			}
 
@@ -2749,7 +2747,7 @@ void CMainFrame::createContextMenu (CWnd *parent, const CPoint &point, bool tran
 					for (i=0; i<filenames.size (); i++)
 					{
 						// Add a menu entry
-						pMenu->AppendMenu (MF_STRING, ID_EDIT_OPEN_FILE_BEGIN+i, ("Open "+NLMISC::CFile::getFilename (filenames[i])).c_str ());
+						pMenu->AppendMenu(MF_STRING, ID_EDIT_OPEN_FILE_BEGIN + i, nlUtf8ToTStr("Open " + NLMISC::CFile::getFilename(filenames[i])));
 					}
 				}
 			}
@@ -3375,9 +3373,9 @@ void CMainFrame::OnHelpFinder()
 			{
 				//string filename = theApp.ExePath+"doc/"+className+".html";
 				string filename = theApp.DocPath+"/"+className+".html";
-				if (!NLMISC::CFile::fileExists(filename) || !openFile (filename.c_str ()))
+				if (!NLMISC::CFile::fileExists(filename) || !openDoc (filename))
 				{
-					//openFile ((theApp.ExePath+"world_editor.html").c_str ());
+					//openDoc (theApp.ExePath+"world_editor.html");
 					theApp.errorMessage ("Can't open the file %s", filename.c_str ());
 				}
 			}
@@ -3385,7 +3383,7 @@ void CMainFrame::OnHelpFinder()
 	}
 	else
 	{
-		openFile ((theApp.ExePath+"world_editor.html").c_str ());
+		openDoc((theApp.ExePath+"world_editor.html"));
 	}
 }
 
@@ -3719,7 +3717,7 @@ void CMainFrame::OnProjectForceiduniqueness()
 	// End modifications
 	doc->endModification ();
 
-	AfxMessageBox(NLMISC::toString("%u ids checked, %u non unique ID regenerated", ids.size()+nonUnique.size(), nonUnique.size()).c_str(), MB_OK);
+	AfxMessageBox(nlUtf8ToTStr(NLMISC::toString("%u ids checked, %u non unique ID regenerated", ids.size() + nonUnique.size(), nonUnique.size())), MB_OK);
 }
 
 // ***************************************************************************
@@ -3795,7 +3793,7 @@ void CMainFrame::OnViewCollisions()
 // ***************************************************************************
 
 // routines for the plugin
-NLLIGO::IPrimitive *CMainFrame::createRootPluginPrimitive (const char *name)
+NLLIGO::IPrimitive *CMainFrame::createRootPluginPrimitive (const std::string &name)
 {
 	AFX_MANAGE_STATE(AfxGetAppModuleState());
 	
@@ -3861,8 +3859,8 @@ void CMainFrame::getAllRootPluginPrimitive (std::vector<NLLIGO::IPrimitive*> &pr
 
 const NLLIGO::IPrimitive *CMainFrame::createPluginPrimitive
 (
- const char *className, 
- const char *primName, 
+ const std::string &className, 
+ const std::string &primName, 
  const NLMISC::CVector &initPos, 
  float deltaPos, 
  const std::vector<CPrimitiveClass::CInitParameters> &initParameters,
@@ -3982,7 +3980,7 @@ void CMainFrame::getWindowCoordinates(NLMISC::CVector &vmin, NLMISC::CVector &vm
 void CMainFrame::OnHelpHistory() 
 {
 	string filename = theApp.ExePath+"history.txt";
-	if (!openFile (filename.c_str()))
+	if (!openDoc(filename))
 	{
 		theApp.errorMessage ("Can't open the file %s", filename.c_str ());
 	}
@@ -3995,13 +3993,13 @@ void CMainFrame::OnExportSnapshot()
 	CCustomSnapshot snapShot (this);
 	if (snapShot.DoModal () == IDOK)
 	{
-		CFileDialogEx dialog (BASE_REGISTRY_KEY, "image", FALSE, "tga", NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, "Targa Files (*.tga)|*.tga|All Files (*.*)|*.*||", this);
+		CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("image"), FALSE, _T("tga"), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, _T("Targa Files (*.tga)|*.tga|All Files (*.*)|*.*||"), this);
 		if (dialog.DoModal() == IDOK)
 		{
 			if (snapShot.FixedSize == 0)
-				_ZoneBuilder->snapshot (dialog.GetPathName(), (uint)theApp.Config.CellSize, snapShot.OutputRGB == 1);
+				_ZoneBuilder->snapshot (tStrToUtf8(dialog.GetPathName()), (uint)theApp.Config.CellSize, snapShot.OutputRGB == 1);
 			else
-				_ZoneBuilder->snapshotCustom (dialog.GetPathName(), snapShot.Width, snapShot.Height, snapShot.KeepRatio != FALSE, 
+				_ZoneBuilder->snapshotCustom (tStrToUtf8(dialog.GetPathName()), snapShot.Width, snapShot.Height, snapShot.KeepRatio != FALSE,
 					(uint)theApp.Config.CellSize, snapShot.OutputRGB == 1);
 		}
 	}
@@ -4162,7 +4160,7 @@ bool CMainFrame::buildNLBitmapFromTGARsc(HRSRC bm, HMODULE hm, NLMISC::CBitmap &
 		ms.seek(0, NLMISC::IStream::begin);
 		tmpBitmap.load(ms);
 	}
-	catch(EStream &)
+	catch(const EStream &)
 	{
 		return false;
 	}
@@ -4241,14 +4239,14 @@ void CMainFrame::OnSavePosition()
 	x = (sint32)floor(v.x / dispWnd->_CellSize);
 	y = (sint32)floor(v.y / dispWnd->_CellSize);
 	
-	str.Format( "[%s] X = %.3f, Y = %.3f\r\n", t.Format( "%m/%d/%y, %H:%M:%S" ), v.x, v.y );
+	str.Format( _T("[%s] X = %.3f, Y = %.3f\r\n"), t.Format( "%m/%d/%y, %H:%M:%S" ), v.x, v.y );
 	
-	file.Open( "position.txt", ::CFile::modeCreate|::CFile::modeNoTruncate|::CFile::modeWrite|::CFile::typeText );
+	file.Open( _T("position.txt"), ::CFile::modeCreate|::CFile::modeNoTruncate|::CFile::modeWrite|::CFile::typeText );
 	file.SeekToEnd();
 	file.WriteString( str );
 	file.Close();
 
-	MessageBox( "Current coordinates saved in file position.txt", "Position saved", MB_OK );
+	MessageBox( _T("Current coordinates saved in file position.txt"), _T("Position saved"), MB_OK );
 }
 
 // ***************************************************************************
@@ -4266,9 +4264,9 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 		for (uint i=0 ; i<numFiles ; i++)
 		{
 			// Get the path of this file
-			char* pFilename = Filename.GetBuffer(_MAX_PATH);
+			TCHAR* pFilename = Filename.GetBuffer(_MAX_PATH);
             DragQueryFile(hDropInfo, i, pFilename, _MAX_PATH);
-			string path(pFilename);
+			string path(tStrToUtf8(pFilename));
 			
 			// Add it if it's a primitive not already loaded
 			if (path.find(".primitive") != string::npos)
@@ -4327,14 +4325,14 @@ void CMainFrame::OnMissionCompiler()
 	}
 	
 	// write filenames to a temp file for the mission compiler
-	if (files.size() > 0)
+	if (!files.empty())
 	{
 		// use system temp directory
-		char tmpPath[MAX_PATH];
-		GetEnvironmentVariable("TMP", tmpPath, MAX_PATH);
-		strcat(tmpPath, "\\tmptool.txt");
+		TCHAR tmpPath[MAX_PATH];
+		GetEnvironmentVariable(_T("TMP"), tmpPath, MAX_PATH);
+		_tcscat(tmpPath, _T("\\tmptool.txt"));
 
-		FILE *f = fopen(tmpPath, "w");
+		FILE *f = nlfopen(tStrToUtf8(tmpPath), "w");
 		if (f==NULL)
 			infoMessage("Can't open file for writing !\n%s", tmpPath);
 
@@ -4352,8 +4350,8 @@ void CMainFrame::OnMissionCompiler()
 		return;
 	}
 	
-	char path[MAX_PATH];
-	strcpy(path, var->asString().c_str());
+	TCHAR path[MAX_PATH];
+	_tcscpy(path, nlUtf8ToTStr(var->asString()));
 
 	SHELLEXECUTEINFO ExecuteInfo;    
 	memset(&ExecuteInfo, 0, sizeof(ExecuteInfo));
@@ -4361,8 +4359,8 @@ void CMainFrame::OnMissionCompiler()
 	ExecuteInfo.cbSize       = sizeof(ExecuteInfo);
 	ExecuteInfo.fMask        = 0;
 	ExecuteInfo.hwnd         = 0;
-	ExecuteInfo.lpVerb       = "open";
-	ExecuteInfo.lpFile       = "mission_compiler_fe_r.exe";
+	ExecuteInfo.lpVerb       = _T("open");
+	ExecuteInfo.lpFile       = _T("mission_compiler_fe_r.exe");
 	ExecuteInfo.lpParameters = 0;
 	ExecuteInfo.lpDirectory  = path;
 	ExecuteInfo.nShow        = SW_SHOW;

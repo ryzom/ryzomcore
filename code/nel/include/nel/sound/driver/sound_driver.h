@@ -192,7 +192,7 @@ public:
 	 *  \param artist returns the song artist (empty if not available)
 	 *  \param title returns the title (empty if not available)
 	 */
-	virtual bool getMusicInfo(const std::string &/* filepath */, std::string &artist, std::string &title) { artist.clear(); title.clear(); return false; }
+	virtual bool getMusicInfo(const std::string &/* filepath */, std::string &artist, std::string &title, float &length) { artist.clear(); title.clear(); length = 0.f; return false; }
 	/// Get audio/container extensions that are supported natively by the driver implementation.
 	virtual void getMusicExtensions(std::vector<std::string> &extensions) const = 0;
 	/// Return if a music extension is supported by the driver's music channel.

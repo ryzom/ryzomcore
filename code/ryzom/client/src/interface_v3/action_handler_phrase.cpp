@@ -1620,6 +1620,23 @@ public:
 };
 REGISTER_ACTION_HANDLER(CHandlerPhraseSelectShortcutBar, "select_shortcut_bar");
 
+// ***************************************************************************
+class CHandlerPhraseSelectShortcutBar2 : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	{
+		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:SELECT_MEMORY_2", false);
+		if(node)
+		{
+			sint32 val;
+			fromString(Params, val);
+			node->setValue32(val);
+		}
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerPhraseSelectShortcutBar2, "select_shortcut_bar_2");
 
 // ***************************************************************************
 // ***************************************************************************
@@ -1639,7 +1656,7 @@ DECLARE_INTERFACE_CONSTANT(getPhraseBrickSelectionMax, CDBGroupBuildPhrase::MaxS
 // Get the UC name of a phraseId
 static DECLARE_INTERFACE_USER_FCT(getSPhraseName)
 {
-	if (args.size() > 0)
+	if (!args.empty())
 	{
 		if(!args[0].toInteger())
 			return false;

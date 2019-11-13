@@ -19,6 +19,10 @@
 #include "nel/3d/particle_system_process.h"
 #include "nel/3d/particle_system.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 uint PSEnterLeaveDepth = 0;
 uint PSEnterLeaveMaxDepth = 1;
 std::string PSCurrName;
@@ -125,7 +129,7 @@ const CFontManager *CParticleSystemProcess::getFontManager(void) const
 
 
 // ***********************************************************************************************************
-void CParticleSystemProcess::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CParticleSystemProcess::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CParticleSystemProcess_serial)
 	// version 2 : added matrix mode (just not fx world matrix or identity)

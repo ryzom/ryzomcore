@@ -79,7 +79,7 @@ public:
 
 	/** Set the userPos (relative to the height map coordinates). This is needed because a height map can't be used with large surface (such as a sea).
 	  * As a consequence, the height map is only valid below the user (e.g from user.x - 0.5 * size to user.x + 0.5 *size).
-	  * When setPos is called, and if a move has occured, new area of the height field are set to 0
+	  * When setPos is called, and if a move has occurred, new area of the height field are set to 0
 	  * The pos set will be taken in account when buffers have been swapped (e.g when the propagation time as ellapsed)
 	  */
 	void					setUserPos(sint x, sint y);
@@ -168,7 +168,7 @@ public:
 	sint64					Date;
 
 	/// serial the pools data's
-	void					serial(NLMISC::IStream &f)  throw(NLMISC::EStream);
+	void					serial(NLMISC::IStream &f);
 
 	/// Set this pool name.
 	void					setName(const std::string &name) { _Name = name; }

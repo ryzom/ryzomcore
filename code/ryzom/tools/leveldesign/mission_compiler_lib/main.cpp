@@ -29,8 +29,17 @@ class IStep;
 
 int main(int argc, char *argv[])
 {
-	new NLMISC::CApplicationContext;
-	CPath::addSearchPath("L:\\primitives\\", true, false);
+	NLMISC::CApplicationContext appContext;
+
+	const char *leveldesignPath = getenv("RYZOM_LEVELDESIGN");
+	
+	if (leveldesignPath == NULL)
+	{
+		printf("Error: You need to define RYZOM_LEVELDESIGN environment variable that points to previous L:\\ equivalent under Windows\n");
+		return -1;
+	}
+
+	CPath::addSearchPath(NLMISC::CPath::standardizePath(leveldesignPath), true, false);
 
 	bool test = false;
 	if (argc == 4 && string(argv[3]) == "-test")
@@ -42,35 +51,35 @@ int main(int argc, char *argv[])
 		printf("%s <world_edit_class> <primitive_file> [-test]", argv[0]);
 		return -1;
 	}
-	
+
 	string sourceDocName;
 	if (!test)
 		sourceDocName = argv[2];
 	else
 		sourceDocName = "test_compilateur.primitive";
-	
+
 	// remove the path
 	sourceDocName = CFile::getFilename(sourceDocName);
 	// init ligo
 	NLLIGO::CLigoConfig LigoConfig;
 
 	CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
-	
+
 	nlinfo("Reading ligo configuration file...");
 	if (!LigoConfig.readPrimitiveClass (argv[1], false))
 	{
 		nlwarning("Can't read '%s' !", argv[1]);
 		return -1;
 	}
-	
+
 	NLLIGO::Register();
 
 	nlinfo("Reading primitive file...");
-	
+
 	CPrimitives		primDoc;
 	CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
 	loadXmlPrimitiveFile(primDoc, sourceDocName, LigoConfig);
-	
+
 	CMissionCompiler	mc;
 
 	if (test)
@@ -89,13 +98,19 @@ int main(int argc, char *argv[])
 			script += testMission->generateDotScript();
 			script = script.replace(NL.c_str(), "\n");
 
-			char *tmp = ::getenv("TEMP");
-		
+			const char *tmp = ::getenv("TEMP");
+
 			FILE *fp = ::fopen((string(tmp)+"/compiled_mission.script").c_str(), "w");
 			::fwrite(script.data(), script.size(), 1, fp);
 			::fclose(fp);
 
-			system((string("\"C:\\Program Files\\Beyond Compare 2\\bc2.exe\" ")+string(tmp)+"/compiled_mission.script test_compilateur.script").c_str());
+			// TODO: set diff program in .cfg
+			std::string compareApp;
+			std::string command = NLMISC::toString("%s %s/compiled_mission.script test_compilateur.script", compareApp.c_str(), tmp);
+			sint error = system(command.c_str());
+
+			if (error)
+				nlwarning("'%s' failed with error code %d", "", error);
 		}
 		catch(const EParseException &e)
 		{
@@ -104,7 +119,7 @@ int main(int argc, char *argv[])
 		}
 		return 0;
 	}
-	
+
 	nlinfo("Compiling missions...");
 	try
 	{
@@ -151,14 +166,14 @@ int main(int argc, char *argv[])
 				TPrimitiveSet scripts;
 				CPrimitiveSet<TPrimitiveClassPredicate> filter;
 				filter.buildSet(primDoc->RootNode, TPrimitiveClassPredicate("mission"), scripts);
-				
+
 				// for each script, check if it was generated, and if so, check the name
 				// of the source primitive file.
 				for (uint i=0; i<scripts.size(); ++i)
 				{
 					vector<string> *script;
 					if (scripts[i]->getPropertyByName("script", script) && !script->empty())
-					{						
+					{
 						// Format should be : #compiled from <source_primitive_name>
 						if (script->front().find("compiled from"))
 						{
@@ -193,14 +208,14 @@ int main(int argc, char *argv[])
 
 				if (bots.empty())
 				{
-					nlwarning("Can't find bot '%s' in primitive '%s' !", 
+					nlwarning("Can't find bot '%s' in primitive '%s' !",
 						mission.getGiverName().c_str(),
 						fileName.c_str());
 					throw EParseException(NULL, "Can't find giver in primitive");
 				}
 				else if (bots.size() > 1)
 				{
-					nlwarning("Found more than one bot named '%s' in primitive '%s' !", 
+					nlwarning("Found more than one bot named '%s' in primitive '%s' !",
 						mission.getGiverName().c_str(),
 						fileName.c_str());
 					throw EParseException(NULL, "More than one bot with giver name in primitive");
@@ -265,6 +280,8 @@ int main(int argc, char *argv[])
 	}
 
 	CPrimitiveContext::instance().CurrentLigoConfig = NULL;
+
+	return 0;
 }
 
 

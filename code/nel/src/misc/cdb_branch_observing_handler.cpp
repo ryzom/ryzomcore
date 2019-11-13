@@ -17,6 +17,10 @@
 #include "stdmisc.h"
 #include "nel/misc/cdb_branch_observing_handler.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLMISC{
 	CCDBBranchObservingHandler::CCDBBranchObservingHandler()
 	{

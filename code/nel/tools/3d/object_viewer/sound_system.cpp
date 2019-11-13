@@ -67,7 +67,7 @@ void CSoundSystem::initSoundSystem ()
 		_AudioMixer->setPackedSheetOption(_PackedSheetPath, true);
 		_AudioMixer->init(32, true, false, NULL, true);
 	}
-	catch(NLMISC::Exception &e)
+	catch(const NLMISC::Exception &e)
 	{
 		// in case of exeption during mixer init, the mixer is destroyed !
 		string mess = string("Unable to init sound :") + e.what();
@@ -82,7 +82,7 @@ void CSoundSystem::initSoundSystem ()
 		// TODO : boris : Hum, as far as I know, throwing exeption in constructor is a very BAD idea...
 		_AnimManager = new CSoundAnimManager(_AudioMixer);
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		string mess = string("Unable to init sound :") + e.what();
 		nlwarning ("Init sound: %s", mess.c_str());
@@ -109,7 +109,7 @@ void CSoundSystem::initSoundSystem ()
 			//_AudioMixer->loadSampleBank(NLMISC::CPath::lookup(*it).c_str());
 			_AudioMixer->loadSampleBank(false, (*it1));
 		}
-		catch (NLMISC::Exception &e)
+		catch (const NLMISC::Exception &e)
 		{
 			string mess = "Unable to load sound file :" + *it1
 						+ "\n" + e.what();
@@ -126,7 +126,7 @@ void CSoundSystem::initSoundSystem ()
 			//_AudioMixer->loadSoundBank(NLMISC::CPath::lookup(*it).c_str());
 			_AudioMixer->loadSoundBank((*it2).c_str());
 		}
-		catch (NLMISC::Exception &e)
+		catch (const NLMISC::Exception &e)
 		{
 			string mess = "Unable to load sound file :" + *it2
 						+ "\n" + e.what();
@@ -168,7 +168,7 @@ void CSoundSystem::play(const string &soundName)
 {
 	if (_AudioMixer)
 	{
-		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CSheetId(soundName, "sound"), true);
+		NLSOUND::USource *src = _AudioMixer->createSource(CStringMapper::map(soundName), true);
 		if (src)
 		{
 			src->setLooping(false);
@@ -178,7 +178,7 @@ void CSoundSystem::play(const string &soundName)
 		}
 		else
 		{
-			MessageBox(NULL, "Can't play the sound (perhaps it's contextual sound)", "warning", MB_OK|MB_ICONWARNING );			
+			MessageBox(NULL, _T("Can't play the sound (perhaps it's contextual sound)"), _T("warning"), MB_OK|MB_ICONWARNING );			
 		}
 	}	
 }
@@ -187,7 +187,7 @@ USource *CSoundSystem::create(const std::string &soundName)
 {
 	if (_AudioMixer)
 	{
-		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CSheetId(soundName, "sound"), false);
+		NLSOUND::USource *src = _AudioMixer->createSource(CStringMapper::map(soundName), false);
 		if (src)
 		{
 			src->setLooping(false);
@@ -198,7 +198,7 @@ USource *CSoundSystem::create(const std::string &soundName)
 		}	
 		else
 		{
-			MessageBox(NULL, "Can't play the sound (perhaps it's contextual sound)", "warning", MB_OK|MB_ICONWARNING );			
+			MessageBox(NULL, _T("Can't play the sound (perhaps it's contextual sound)"), _T("warning"), MB_OK|MB_ICONWARNING );
 		}	return NULL;
 	}
 	return NULL;

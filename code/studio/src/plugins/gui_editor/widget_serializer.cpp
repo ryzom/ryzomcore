@@ -19,6 +19,9 @@
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
 
+#include <libxml/xmlstring.h>
+#include <libxml/tree.h>
+
 namespace GUIEditor
 {
 	bool WidgetSerializer::serialize( const std::string &masterGroup )

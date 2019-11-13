@@ -31,7 +31,7 @@ namespace NLMISC{
 class CCDBNodeBranch;
 }
 class CDBCtrlSheet;
-
+class IItermInfoWaiter;
 
 const uint MAX_TEMPINV_ENTRIES = INVENTORIES::NbTempInvSlots;
 const uint MAX_BAGINV_ENTRIES = INVENTORIES::NbBagSlots;
@@ -60,6 +60,8 @@ public:
 	NLMISC::CCDBNodeLeaf *Sheet;
 	NLMISC::CCDBNodeLeaf *Quality;
 	NLMISC::CCDBNodeLeaf *Quantity;
+	NLMISC::CCDBNodeLeaf *CreateTime;
+	NLMISC::CCDBNodeLeaf *Serial;
 	NLMISC::CCDBNodeLeaf *UserColor;
 	NLMISC::CCDBNodeLeaf *Price;
 	NLMISC::CCDBNodeLeaf *Weight;
@@ -72,10 +74,13 @@ public:
 	CItemImage();
 	// build from a branch
 	void build(NLMISC::CCDBNodeBranch *branch);
+	uint64 getItemId() const;
 	// shortcuts to avoid NULL pointer tests
 	uint32 getSheetID() const						{ return (uint32)			(Sheet ? Sheet->getValue32() : 0); }
 	uint16 getQuality() const						{ return (uint16)			(Quality ? Quality->getValue16() : 0); }
 	uint16 getQuantity() const						{ return (uint16)			(Quantity ? Quantity->getValue16() : 0); }
+	uint32 getCreateTime() const					{ return (uint32)			(CreateTime ? CreateTime->getValue32() : 0); }
+	uint32 getSerial() const						{ return (uint32)			(Serial ? Serial->getValue32() : 0); }
 	uint8  getUserColor() const						{ return (uint8)			(UserColor ? UserColor->getValue16() : 0); }
 	uint32 getPrice() const							{ return (uint32)			(Price ? Price->getValue32() : 0); }
 	uint32 getWeight() const						{ return (uint32)			(Weight ? Weight->getValue32() : 0); }
@@ -87,6 +92,8 @@ public:
 	void   setSheetID(uint32 si)					{ if (Sheet) Sheet->setValue32((sint32) si); }
 	void   setQuality(uint16 quality)				{ if (Quality) Quality->setValue16((sint16) quality); }
 	void   setQuantity(uint16 quantity)				{ if (Quantity) Quantity->setValue16((sint16) quantity); }
+	void   setCreateTime(uint32 create_time)		{ if (CreateTime) CreateTime->setValue32((sint32) create_time); }
+	void   setSerial(uint32 serial)					{ if (Serial) Serial->setValue32((sint32) serial); }
 	void   setUserColor(uint8 uc)					{ if (UserColor) UserColor->setValue8((sint8) uc); }
 	void   setPrice(uint32 price)					{ if (Price) Price->setValue32((sint32) price); }
 	void   setWeight(uint32 wgt)					{ if (Weight) Weight->setValue32((sint32) wgt); }
@@ -108,11 +115,15 @@ public:
 	// This is the InfoVersionFromSlot when last request was sent to server
 	uint16				InfoVersionSlotServerWaiting;
 
+	// Used to track cache age (reset on use, +1 on every save)
+	uint32				CacheCycle;
+
 	CClientItemInfo()
 	{
 		InfoVersionFromMsg= 0;
 		InfoVersionFromSlot= 0;
 		InfoVersionSlotServerWaiting= 0;
+		CacheCycle= 0;
 	}
 
 	/// Set InfoVersion from Info message (info requested by the player)
@@ -122,21 +133,25 @@ public:
 	void			refreshInfoVersion(uint8 infoVersion) { InfoVersionFromMsg= infoVersion; }
 };
 
-
-class	IItemInfoWaiter
+class CItemInfoCache
 {
 public:
-	IItemInfoWaiter() {ItemSlotId= 0; ItemSheet= 0;}
-	virtual ~IItemInfoWaiter() {}
-	// The item SheetId. If differ from current sheet in the SlotId, the infos are not updated / requested
-	uint			ItemSheet;
-	// The item SlotId to retrieve info.
-	uint			ItemSlotId;
+	void load(const std::string &filename);
+	void save(const std::string &filename);
+	void serial(NLMISC::IStream &s);
 
-	// Called when the info is received for this slot.
-	virtual void	infoReceived() =0;
+	// retrieve pointer to item info or null if error
+	const CClientItemInfo *getItemInfo(uint32 serial, uint32 createTime) const;
+	const CClientItemInfo *getItemInfo(uint64 itemId) const;
+
+	// set/update item info in cache
+	void readFromImpulse(uint64 itemId, CItemInfos itemInfo);
+	void debugItemInfoCache() const;
+
+private:
+	typedef std::map<uint64, CClientItemInfo> TItemInfoCacheMap;
+	TItemInfoCacheMap _ItemInfoCacheMap;
 };
-
 
 // ***************************************************************************
 /** This manager gives direct access to inventory slots (bag, temporary inventory, hands, and equip inventory)
@@ -189,8 +204,10 @@ public:
 	// SERVER INVENTORY
 		// get item of bag (local inventory)
 		CItemImage &getServerBagItem(uint index);
+		const CItemImage &getServerBagItem(uint index) const;
 		// get temporary item (local inventory)
 		CItemImage &getServerTempItem(uint index);
+		const CItemImage &getServerTempItem(uint index) const;
 		// get hand item (local inventory)
 		CItemImage *getServerHandItem(uint index);
 		// get equip item (local inventory)
@@ -200,8 +217,11 @@ public:
 		void		setServerMoney(uint64 value);
 		// get item of pack animal (server inventory). beastIndex ranges from 0 to MAX_INVENTORY_ANIMAL-1
 		CItemImage &getServerPAItem(uint beastIndex, uint index);
+		const CItemImage &getServerPAItem(uint beastIndex, uint index) const;
 		// get the item Image for the given inventory. assert if bad inventory
 		CItemImage &getServerItem(uint inv, uint index);
+		// get the item Image for the given slotId or NULL if bad
+		const CItemImage *getServerItem(uint slotId) const;
 
 	// Drag'n'Drop Management
 		enum TFrom { Slot, TextList, IconList, Nowhere };
@@ -267,9 +287,13 @@ public:
 		uint16				getItemSlotId(CDBCtrlSheet *ctrl);
 		uint16				getItemSlotId(const std::string &itemDb, uint slotIndex);
 		const	CClientItemInfo	&getItemInfo(uint slotId) const;
+		// get item info from cache
+		const	CClientItemInfo *getItemInfoCache(uint32 serial, uint32 createTime) const;
 		uint				getItemSheetForSlotId(uint slotId) const;
+		// Returns true if the item info is already in slot cache
+		bool				isItemInfoAvailable(uint slotId) const;
 		// Returns true if the item info version already matches
-		bool				isItemInfoUpToDate(uint slotId);
+		bool				isItemInfoUpToDate(uint slotId) const;
 		// Add a Waiter on ItemInfo (ItemHelp opening). no-op if here, but reorder (returns true if the version already matches or if waiter is NULL)
 		void				addItemInfoWaiter(IItemInfoWaiter *waiter);
 		// remove a Waiter on ItemInfo (ItemHelp closing). no-op if not here. NB: no delete
@@ -279,6 +303,7 @@ public:
 		void				onRefreshItemInfoVersion(uint16 slotId, uint8 infoVersion);
 		// Log for debug
 		void				debugItemInfoWaiters();
+		void				debugItemInfoCache() const;
 
 		void				sortBag();
 
@@ -291,8 +316,11 @@ public:
 		bool				isInventoryEmpty (INVENTORIES::TInventory invId);
 
 
-		enum TInvType { InvBag, InvPA0, InvPA1, InvPA2, InvPA3, InvGuild, InvRoom, InvUnknown };
+		enum TInvType { InvBag, InvPA0, InvPA1, InvPA2, InvPA3, InvPA4, InvPA5, InvPA6, InvGuild, InvRoom, InvUnknown };
 		static TInvType invTypeFromString(const std::string &str);
+
+		// inventory and slot from slotId
+		void				getSlotInvIndex(uint slotId, uint &inv, uint &index) const;
 
 
 private:
@@ -318,7 +346,9 @@ private:
 		CDBCtrlSheet	*DNDCurrentItem;
 
 	// ItemExtraInfo management.
-		typedef std::map<uint, CClientItemInfo>		TItemInfoMap;
+		std::string								_ItemInfoCacheFilename;
+		CItemInfoCache							_ItemInfoCache;
+		typedef std::map<uint, CClientItemInfo>	TItemInfoMap;
 		TItemInfoMap							_ItemInfoMap;
 		typedef std::list<IItemInfoWaiter*>		TItemInfoWaiters;
 		TItemInfoWaiters						_ItemInfoWaiters;
@@ -509,6 +539,7 @@ struct SBagOptions
 	NLMISC::CCDBNodeLeaf *DbFilterArmor;
 	NLMISC::CCDBNodeLeaf *DbFilterWeapon;
 	NLMISC::CCDBNodeLeaf *DbFilterTool;
+	NLMISC::CCDBNodeLeaf *DbFilterPet;
 	NLMISC::CCDBNodeLeaf *DbFilterMP;
 	NLMISC::CCDBNodeLeaf *DbFilterMissMP;
 	NLMISC::CCDBNodeLeaf *DbFilterTP;
@@ -516,20 +547,33 @@ struct SBagOptions
 	bool LastDbFilterArmor;
 	bool LastDbFilterWeapon;
 	bool LastDbFilterTool;
+	bool LastDbFilterPet;
 	bool LastDbFilterMP;
 	bool LastDbFilterMissMP;
 	bool LastDbFilterTP;
+
+	bool SearchFilterChanged;
+	uint16 SearchQualityMin;
+	uint16 SearchQualityMax;
+	std::vector<ucstring> SearchFilter;
+
 	// -----------------------
 	SBagOptions()
 	{
 		InvType = CInventoryManager::InvUnknown;
-		DbFilterArmor = DbFilterWeapon = DbFilterTool = DbFilterMP = DbFilterMissMP = DbFilterTP = NULL;
-		LastDbFilterArmor = LastDbFilterWeapon = LastDbFilterTool = LastDbFilterMP = LastDbFilterMissMP = LastDbFilterTP = false;
+		DbFilterArmor = DbFilterWeapon = DbFilterTool = DbFilterPet = DbFilterMP = DbFilterMissMP = DbFilterTP = NULL;
+		LastDbFilterArmor = LastDbFilterWeapon = LastDbFilterTool = LastDbFilterPet = LastDbFilterMP = LastDbFilterMissMP = LastDbFilterTP = false;
+		SearchFilterChanged = false;
+		SearchQualityMin = 0;
+		SearchQualityMax = 999;
 	}
 
 	bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 	bool isSomethingChanged(); // From last call ?
+
+	bool isSearchFilterChanged() const { return SearchFilterChanged; }
+	void setSearchFilter(const ucstring &s);
 
 	bool getFilterArmor() const
 	{
@@ -547,6 +591,12 @@ struct SBagOptions
 	{
 		if (DbFilterTool == NULL) return true;
 		return (DbFilterTool->getValue8()!=0);
+	}
+
+	bool getFilterPet() const
+	{
+		if (DbFilterPet == NULL) return true;
+		return (DbFilterPet->getValue8()!=0);
 	}
 
 	bool getFilterMP() const
@@ -621,6 +671,8 @@ public:
 	// Return true if the sheet can be displayed due to filters
 	bool canDisplay(CDBCtrlSheet *pCS) { return _BO.canDisplay(pCS); }
 
+	void setSearchFilter(const ucstring &s) { _BO.setSearchFilter(s); }
+
 private:
 
 	SBagOptions	_BO;
@@ -651,6 +703,8 @@ public:
 
 	// Return true if the sheet can be displayed due to filters
 	bool canDisplay(CDBCtrlSheet *pCS) const { return _BO.canDisplay(pCS); }
+
+	void setSearchFilter(const ucstring &s) { _BO.setSearchFilter(s); }
 
 	//////////////////////////////////////////////////////////////////////////
 

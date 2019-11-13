@@ -55,7 +55,7 @@ public:
 			UsableFromClientUI = true;
 		}
 
-		void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serial(Path);
 			f.serial(Anim);
@@ -77,7 +77,7 @@ public:
 	virtual void build(const NLGEORGES::UFormElm &item);
 
 	/// Serialize sheet into binary data file.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 };
 
 

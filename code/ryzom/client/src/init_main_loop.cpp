@@ -85,7 +85,7 @@
 #include "teleport.h"
 #include "movie_shooter.h"
 #include "interface_v3/input_handler_manager.h"
-
+#include "item_group_manager.h"
 #include "time_client.h"
 #include "auto_anim.h"
 #include "release.h"
@@ -97,7 +97,6 @@
 // Sound
 #include "nel/sound/sound_anim_manager.h"
 // Game share
-#include "game_share/ryzom_version.h"
 #include "game_share/light_cycle.h"
 #include "sound_manager.h"
 #include "precipitation_clip_grid.h"
@@ -153,8 +152,10 @@ bool						UseEscapeDuringLoading = USE_ESCAPE_DURING_LOADING;
 #define	ENTITY_TEXTURE_NORMAL_LEVEL		1
 #define	ENTITY_TEXTURE_HIGH_LEVEL		0
 // Size in MB of the cache for entity texturing.
-#define	ENTITY_TEXTURE_NORMAL_MEMORY	40
-#define	ENTITY_TEXTURE_HIGH_MEMORY		160
+#define	ENTITY_TEXTURE_LOW_MEMORY		10	// 64, 32 or less
+#define	ENTITY_TEXTURE_NORMAL_MEMORY	40	// 128
+#define	ENTITY_TEXTURE_HIGH_MEMORY		80	// 256
+#define	ENTITY_TEXTURE_VERY_HIGH_MEMORY	160	// 512 and more
 // Size in KB of max upload per frame
 #define ENTITY_TEXTURE_LOW_MAXUP		64
 #define ENTITY_TEXTURE_NORMAL_MAXUP		128
@@ -183,9 +184,8 @@ struct CStatThread : public NLMISC::IRunnable
 		CURL *curl = curl_easy_init();
 		if(!curl) return;
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1);
-//		curl_easy_setopt(curl, CURLOPT_USERAGENT, "unknown");
-		curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10 (.NET CLR 3.5.30729)"); // FIXME
-		curl_easy_setopt(curl, CURLOPT_REFERER, string("http://www.ryzomcore.org/" + referer).c_str());
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10 (.NET CLR 3.5.30729)");
+		curl_easy_setopt(curl, CURLOPT_REFERER, string("http://www.ryzom.com/" + referer).c_str());
 		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 		CURLcode res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
@@ -240,7 +240,7 @@ struct CStatThread : public NLMISC::IRunnable
 		addParam(params, "page", "");
 		addParam(params, "pagetitle", referer);
 		addParam(params, "screen", toString("%dx%d", ClientCfg.ConfigFile.getVar("Width").asInt(), ClientCfg.ConfigFile.getVar("Height").asInt()));
-		addParam(params, "referer", "http%3A%2F%2Fwww.ryzomcore.org%2F" + referer);
+		addParam(params, "referer", "http%3A%2F%2Fwww.ryzom.com%2F" + referer);
 		time_t rawtime;
 		struct tm * timeinfo;
 		char buffer [80];
@@ -263,7 +263,7 @@ struct CStatThread : public NLMISC::IRunnable
 		default: shard= "unknown"; break;
 		}
 		addParam(params, "cv_Shard", shard);
-		/* get("http://ryzom.com.woopra-ns.com/visit/" + params); */// FIXME
+		get("http://ryzom.com.woopra-ns.com/visit/"+params);
 		return true;
 	}
 
@@ -273,7 +273,7 @@ struct CStatThread : public NLMISC::IRunnable
 		std::string params;
 		addParam(params, "cookie", cookie());
 		addParam(params, "ra", randomString());
-		/* get("http://ryzom.com.woopra-ns.com/ping/" + params); */// FIXME
+		get("http://ryzom.com.woopra-ns.com/ping/"+params);
 	}
 
 	void run()
@@ -593,6 +593,8 @@ void initMainLoop()
 		Scene->setGroupLoadMaxPolygon("Skin", ClientCfg.SkinNbMaxPoly);
 		Scene->setGroupLoadMaxPolygon("Fx", ClientCfg.FxNbMaxPoly);
 		Scene->setMaxSkeletonsInNotCLodForm(ClientCfg.NbMaxSkeletonNotCLod);
+		// separate group for mouse/target selection reticle
+		Scene->setGroupLoadMaxPolygon("SelectionFx", 10000);
 		// enable Scene Lighting
 		Scene->enableLightingSystem(true);
 		Scene->setAmbientGlobal(CRGBA::Black);
@@ -692,7 +694,7 @@ void initMainLoop()
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		//nlinfo("****** InGame Interface Parsing and Init START ******");
 		pIM->initInGame(); // must be called after waitForUserCharReceived() because Ring information is used by initInGame()
-
+		CItemGroupManager::getInstance()->init(); // Init at the same time keys.xml is loaded
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
 		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing ingame", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
@@ -743,7 +745,7 @@ void initMainLoop()
 			nmsg = "Creating Landscape ...";
 			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 			Landscape = Scene->createLandscape();
-			if(Landscape == 0)
+			if(Landscape == NULL)
 				nlerror("initMainLoop : Cannot create a Landscape.");
 
 			if (!ClientCfg.Light)
@@ -797,10 +799,10 @@ void initMainLoop()
 
 	{
 		// setup good day / season before ig are added.
-		RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+		RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 		updateDayNightCycleHour();
 		StartupSeason =  CurrSeason = RT.getRyzomSeason();
-		RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+		RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 		updateDayNightCycleHour();
 		ManualSeasonValue = RT.getRyzomSeason();
 
@@ -831,7 +833,7 @@ void initMainLoop()
 		H_AUTO(InitRZWorld)
 
 		// Initialize World and select the right continent.
-			nmsg = "Loading World ...";
+		nmsg = "Loading World ...";
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		ContinentMngr.load();
 		ContinentMngr.select(UserEntity->pos(), ProgressBar);
@@ -882,27 +884,81 @@ void initMainLoop()
 			{
 				nlwarning("Can't load HLSBank: %s", e.what());
 			}
+
 			// setup according to client
-			if(ClientCfg.HDTextureInstalled)
+			if (ClientCfg.HDTextureInstalled)
 			{
-				if(ClientCfg.HDEntityTexture)
+				sint videoMemory;
+
+				// only detect amount of video memory if using HD textures
+				if (ClientCfg.HDEntityTexture)
 				{
-					// setup "v2 texture" (or 512*512)
-					Driver->setupAsyncTextureLod(ENTITY_TEXTURE_COARSE_LEVEL, ENTITY_TEXTURE_HIGH_LEVEL);
-					// Allow a big cache for them (should be on 512 Mo card only)
-					Driver->setupMaxTotalAsyncTextureSize(ENTITY_TEXTURE_HIGH_MEMORY*1024*1024);
-					// Allow high upload
-					Driver->setupAsyncTextureMaxUploadPerFrame(ENTITY_TEXTURE_HIGH_MAXUP*1024);
+					if (ClientCfg.VideoMemory <= 0)
+					{
+						// determine video memory using 3D driver
+						videoMemory = Driver->getTotalVideoMemory();
+
+						// if unable to determine, use plaform methods
+						if (videoMemory <= 0) videoMemory = CSystemUtils::getTotalVideoMemory();
+
+						// in the worst case, use default value of 128 MiB
+						if (videoMemory <= 0) videoMemory = 128 * 1024;
+
+						videoMemory /= 1024; // size in MiB
+
+						nlinfo("Video memory detected: %d MiB", videoMemory);
+					}
+					else
+					{
+						// force video memory (at least 32 MiB)
+						videoMemory = ClientCfg.VideoMemory < 32 ? 32:ClientCfg.VideoMemory;
+
+						nlinfo("Video memory forced: %d MiB", videoMemory);
+					}
 				}
 				else
 				{
-					// setup "v1 texture" (or 256*256)
-					Driver->setupAsyncTextureLod(ENTITY_TEXTURE_COARSE_LEVEL, ENTITY_TEXTURE_NORMAL_LEVEL);
-					// Allow a big cache for them
-					Driver->setupMaxTotalAsyncTextureSize(ENTITY_TEXTURE_NORMAL_MEMORY*1024*1024);
-					// Allow normal upload
-					Driver->setupAsyncTextureMaxUploadPerFrame(ENTITY_TEXTURE_NORMAL_MAXUP*1024);
+					// 32 MiB of VRAM if DivideTextureSizeBy2 else 64 MiB
+					videoMemory = ClientCfg.DivideTextureSizeBy2 ? 32:64;
 				}
+
+				uint maxText, maxLevel, maxup;
+
+				if (videoMemory > 256)
+				{
+					// 512 MB or higher
+					maxLevel = ENTITY_TEXTURE_HIGH_LEVEL;
+					maxText = ENTITY_TEXTURE_VERY_HIGH_MEMORY;
+					maxup = ENTITY_TEXTURE_HIGH_MAXUP;
+				}
+				else if (videoMemory > 128)
+				{
+					// 256 MB
+					maxLevel = ENTITY_TEXTURE_HIGH_LEVEL;
+					maxText = ENTITY_TEXTURE_HIGH_MEMORY;
+					maxup = ENTITY_TEXTURE_HIGH_MAXUP;
+				}
+				else if (videoMemory > 64)
+				{
+					// 128 MB
+					maxLevel = ENTITY_TEXTURE_NORMAL_LEVEL;
+					maxText = ENTITY_TEXTURE_NORMAL_MEMORY;
+					maxup = ENTITY_TEXTURE_HIGH_MAXUP;
+				}
+				else
+				{
+					// 64 MB or lower
+					maxLevel = ENTITY_TEXTURE_NORMAL_LEVEL;
+					maxText = ENTITY_TEXTURE_LOW_MEMORY;
+					maxup = ENTITY_TEXTURE_NORMAL_MAXUP;
+				}
+
+				// setup "v2 texture" (or 512*512) or "v1 texture" (or 256*256)
+				Driver->setupAsyncTextureLod(ENTITY_TEXTURE_COARSE_LEVEL, maxLevel);
+				// Allow a big cache for them
+				Driver->setupMaxTotalAsyncTextureSize(maxText*1024*1024);
+				// Allow normal or high upload
+				Driver->setupAsyncTextureMaxUploadPerFrame(maxup*1024);
 			}
 			else
 			{
@@ -911,7 +967,7 @@ void initMainLoop()
 				*/
 				Driver->setupAsyncTextureLod(ENTITY_TEXTURE_COARSE_LEVEL-1, ENTITY_TEXTURE_NORMAL_LEVEL-1);
 				// Allow a big cache for them
-				Driver->setupMaxTotalAsyncTextureSize(ENTITY_TEXTURE_NORMAL_MEMORY*1024*1024);
+				Driver->setupMaxTotalAsyncTextureSize(ENTITY_TEXTURE_LOW_MEMORY*1024*1024);
 				// Allow low upload
 				Driver->setupAsyncTextureMaxUploadPerFrame(ENTITY_TEXTURE_LOW_MAXUP*1024);
 			}
@@ -1137,7 +1193,7 @@ void initMainLoop()
 	}
 	else
 	{
-		nmsg = "";
+		nmsg.clear();
 		ProgressBar.newMessage (nmsg);
 		ProgressBar.newMessage (nmsg);
 	}
@@ -1341,10 +1397,10 @@ void initMainLoop()
 	// init CSessionBrowserImpl
 	CSessionBrowserImpl::getInstance().init(CLuaManager::getInstance().getLuaState());
 
-	// active/desactive welcome window
+	// enable/disable welcome window
 	initWelcomeWindow();
 
-	// active/desactive bloom config interface
+	// enable/disable bloom config interface
 	initBloomConfigUI();
 
 	// popup to offer hardware cursor activation
@@ -1365,7 +1421,7 @@ void destroyLoadingBitmap ()
 		// Destroy the Loading Background.
 		Driver->deleteTextureFile(LoadingBitmap);
 		LoadingBitmap = NULL;
-		LoadingBitmapFilename = "";
+		LoadingBitmapFilename.clear();
 		LoadingMaterial.setTexture (0, NULL);
 	}
 	if (LoadingBitmapFull && Driver)
@@ -1410,8 +1466,8 @@ void loadBackgroundBitmap (TBackground background)
 	case EndBackground:
 		filename = ClientCfg.End_BG;
 		break;
-	case IntroNevrax:
-		filename = ClientCfg.IntroNevrax_BG;
+	case CustomBackground: // SpecialCase
+		filename = LoadingBackgroundBG;
 		break;
 	case IntroNVidia:
 		filename = ClientCfg.IntroNVidia_BG;
@@ -1481,7 +1537,15 @@ void loadBackgroundBitmap (TBackground background)
 void beginLoading (TBackground background)
 {
 	LoadingContinent = NULL;
-	loadBackgroundBitmap (background);
+	if (!LoadingBackgroundBG.empty())
+	{
+		loadBackgroundBitmap(CustomBackground);
+		LoadingBackgroundBG = "";
+	}
+	else
+	{
+		loadBackgroundBitmap (background);
+	}
 }
 
 // ***************************************************************************
@@ -1565,6 +1629,7 @@ void initBloomConfigUI()
 	bool supportBloom = Driver->supportBloomEffect();
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
 	CCtrlBaseButton* button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:bloom:c"));
 	if(button)
 	{
@@ -1573,6 +1638,12 @@ void initBloomConfigUI()
 
 	button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:square_bloom:c"));
 	if(button)
+	{
+		button->setFrozen(!supportBloom);
+	}
+
+	button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:fxaa:c"));
+	if (button)
 	{
 		button->setFrozen(!supportBloom);
 	}

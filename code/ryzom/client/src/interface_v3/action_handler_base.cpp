@@ -23,6 +23,7 @@
 
 #include "nel/gui/group_container.h"
 #include "nel/gui/group_editbox.h"
+#include "nel/gui/group_menu.h"
 #include "dbctrl_sheet.h"
 #include "interface_3d_scene.h"
 #include "character_3d.h"
@@ -74,7 +75,31 @@ class CAHActiveMenu : public IActionHandler
 		// open the menu
 		if (CDBCtrlSheet::getDraggedSheet() == NULL)
 		{
-			CWidgetManager::getInstance()->enableModalWindow (pCaller, getParam(Params, "menu"));
+			std::string menuId = getParam(Params, "menu");
+			CGroupMenu *groupMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId(menuId));
+			if (groupMenu)
+			{
+				bool pushModal;
+				// default = false
+				fromString(getParam(Params, "pushmodal"), pushModal);
+
+				if (pushModal)
+				{
+					// if false, then close all modal window when groupMenu deactivates
+					bool popModal;
+					if (!fromString(getParam(Params, "popmodal"), popModal))
+					{
+						popModal = true;
+					}
+					groupMenu->setCloseSubMenuUsingPopModal(popModal);
+					CWidgetManager::getInstance()->pushModalWindow(pCaller, groupMenu);
+				}
+				else
+				{
+					groupMenu->setCloseSubMenuUsingPopModal(false);
+					CWidgetManager::getInstance()->enableModalWindow(pCaller, groupMenu);
+				}
+			}
 		}
 	}
 };
@@ -311,8 +336,7 @@ class CAHMilkoMenuDoResetInterface : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string& Params)
 	{
 		// get param
-		string mode;
-		fromString(getParam(Params, "mode"), mode);
+		string mode = getParam(Params, "mode");
 
 		// run procedure
 		vector<string> v;

@@ -44,16 +44,16 @@ public:
 
 public:
 	/// Target controled or direction controled. Default to DirectionMode
-	TMode			Mode;
+	TMode				Mode;
 
 	/// \name Target and Direction specific
 	// @{
 	/// For TargetMode, the world Position of the target.
-	CVector			WorldTarget;
+	NLMISC::CVector		WorldTarget;
 	/// For TargetMode only, the Pos of eyes relative to the bone controlled. Default to (0,0,0)
-	CVector			EyePos;
+	NLMISC::CVector		EyePos;
 	/// For DirectionMode, the WorldRotation to apply to the bone. NB: modified in execute() if TargetMode
-	CQuat			CurrentWorldDirection;
+	NLMISC::CQuat		CurrentWorldDirection;
 	// @}
 
 	/// \name Common
@@ -61,13 +61,13 @@ public:
 	/** This enable or disable the ctrl. When disabled or enabled, the ctrl ensure
 	 *	that the movement does not "pop", respecting MaxAngularVelocity. Default to true.
 	 */
-	bool			Enabled;
+	bool				Enabled;
 	/// This give The World Orientation when the Mesh is in bind Pos (default to "LookBack").
-	CQuat			DefaultWorldDirection;
+	NLMISC::CQuat		DefaultWorldDirection;
 	///	The Maximum angle of rotation that can be performed between the Default Direction and Current Direction. Default to Pi/3
-	float			MaxAngle;
+	float				MaxAngle;
 	/// The Maximum Angular Velocity the ctrl can perform. Default to 2*Pi per second.
-	float			MaxAngularVelocity;
+	float				MaxAngularVelocity;
 	// @}
 
 
@@ -77,19 +77,19 @@ public:
 	virtual ~CTargetAnimCtrl();
 
 	/// Called at compute() time.
-	virtual	void	execute(CSkeletonModel *model, CBone *bone);
+	virtual	void		execute(CSkeletonModel *model, CBone *bone);
 
 
 private:
 
 	/// The last rotation computed (in LocalSkeleton Space). Used to smooth transition
-	CQuat			_LastLSRotation;
+	NLMISC::CQuat		_LastLSRotation;
 
 	/// This tells that a Enable/Disable transition is in progress.
-	bool			_LastEnabled;
-	bool			_EnableToDisableTransition;
+	bool				_LastEnabled;
+	bool				_EnableToDisableTransition;
 
-	CQuat			getCurrentLSRotationFromBone(CSkeletonModel *model, CBone *bone);
+	NLMISC::CQuat		getCurrentLSRotationFromBone(CSkeletonModel *model, CBone *bone);
 };
 
 

@@ -175,7 +175,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 
 		// Get the bank name
 		std::string sName=GetBankPathName ();
-		if (sName!="")
+		if (!sName.empty())
 		{
 			// Open the bank
 			CIFile file;
@@ -191,9 +191,9 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 					// Ok
 					loaded = true;
 				}
-				catch (EStream& stream)
+				catch (const EStream& e)
 				{
-					MessageBox (NULL, stream.what(), "Error", MB_OK|MB_ICONEXCLAMATION);
+					MessageBox (NULL, MaxTStrFromUtf8(e.what()).data(), _T("Error"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 		}
@@ -202,7 +202,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 		if (loaded == false)
 		{
 			nlwarning ("Can't load any tile bank. Select on with the tile_utility plug-in");
-			mprintf ("Can't load any tile bank. Select on with the tile_utility plug-in");
+			mprintf (_T("Can't load any tile bank. Select on with the tile_utility plug-in"));
 			return false;
 		}
 	}
@@ -253,25 +253,22 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 	if (!patchError.empty())
 	{
 		// Make an error message
-		char error[2098];
-		smprintf (error, 2098, "Error: triple edge detected in ");
+		std::string error = "Error: triple edge detected in ";
 
 		// For each error
 		set<uint>::iterator ite=patchError.begin();
 		while (ite!=patchError.end())
 		{
 			// Sub error message
-			char subError[512];
-			smprintf (subError, 512, "patch %d ", (*ite)+1);
-			strcat (error, subError);
+			error += toString("patch %d ", (*ite)+1);
 
 			// Next error
 			ite++;
 		}
 
 		// Show the message
-		mprintf (error);
-		nlwarning (error);
+		mprintf(_M("%s\n"), MaxTStrFromUtf8(error).data());
+		nlwarning("%s", error.c_str());
 
 		// Error
 		return false;
@@ -398,8 +395,8 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 					icv=getCommonVertex(pPM,idstpatch,isrcpatch,&orderdstvtx);			
 					if (icv==-1)
 					{
-						mprintf ("Invalid bind");
-						nlwarning ("Invalid bind");
+						mprintf(_M("Invalid bind\n"));
+						nlwarning("Invalid bind");
 						return false;
 					}
 					if (idstedge==orderdstvtx) 
@@ -422,7 +419,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 						icv=getCommonVertex(pPM,idstpatch,isrcpatch);			
 						if (icv==-1)
 						{
-							mprintf ("Invalid bind");
+							mprintf(_M("Invalid bind\n"));
 							nlwarning ("Invalid bind");
 							return false;
 						}
@@ -439,7 +436,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 						icv=getCommonVertex(pPM,idstpatch,isrcpatch);			
 						if (icv==-1)
 						{
-							mprintf ("Invalid bind");
+							mprintf(_M("Invalid bind\n"));
 							nlwarning ("Invalid bind");
 							return false;
 						}
@@ -451,8 +448,8 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 					isrcedge=getEdge(pPM,srcpatch,srcpatch->v[nv],icv);
 					if (isrcedge==-1)
 					{
-						mprintf ("Invalid edge");
-						nlwarning ("Invalid bind");
+						mprintf(_M("Invalid edge\n"));
+						nlwarning("Invalid edge");
 						return false;
 					}
 					// let's fill the dst patch (n is important here... it's the order)
@@ -595,8 +592,8 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 		sym.invert ();
 		if (!CPatchInfo::transform (patchinfo, zoneSymmetry, bank, symmetry, rotate, snapCell, weldThreshold, sym))
 		{
-			mprintf ("Can't transform the zone");
-			nlwarning ("Invalid bind");
+			mprintf(_M("Can't transform the zone\n"));
+			nlwarning("Can't transform the zone");
 			return false;
 		}
 	}
@@ -612,7 +609,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 			uint i;
 			for (i=0; i<error.Errors.size (); i++)
 			{
-				mprintf (error.Errors[i].c_str ());
+				mprintf(_M("%s\n"), MaxTStrFromUtf8(error.Errors[i]));
 			}
 			return false;
 		}

@@ -68,6 +68,9 @@
 
 #include <zlib.h>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 using namespace std;
@@ -132,7 +135,7 @@ namespace R2 {
 			client->onScenarioUploaded(server, _Value.get());
 		}
 	private:
-		std::auto_ptr<R2::CObject> _Value;
+		CUniquePtr<R2::CObject> _Value;
 	};
 
 	class CServerAnswerMsgSet: public IServerAnswerMsg
@@ -148,7 +151,7 @@ namespace R2 {
 	private:
 		std::string _InstanceId;
 		std::string _AttrName;
-		std::auto_ptr<R2::CObject> _Value;
+		CUniquePtr<R2::CObject> _Value;
 	};
 
 	class CServerAnswerMsgInserted: public IServerAnswerMsg
@@ -166,7 +169,7 @@ namespace R2 {
 		std::string _AttrName;
 		sint32 _Position;
 		std::string _Key;
-		std::auto_ptr<R2::CObject> _Value;
+		CUniquePtr<R2::CObject> _Value;
 	};
 
 	class CServerAnswerMsgErased: public IServerAnswerMsg
@@ -539,7 +542,7 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 
 	if (operationName == "ADV_CONN")
 	{
-		CEditor::connexionMsg("");
+		CEditor::connectionMsg("");
 		CClientMessageAdventureUserConnection  bodyConnection;
 		nlRead(message,serial,bodyConnection);
 		onRingAccessUpdated(0, bodyConnection.RingAccess);
@@ -1048,7 +1051,7 @@ void CClientEditionModule::startScenario(class NLNET::IModuleProxy * proxy, bool
 
 			this->connectAnimationModePlay();
 
-			CEditor::connexionMsg("");
+			CEditor::connectionMsg("");
 
 			if (_CharMode == TCharMode::Dm)
 			{
@@ -1069,7 +1072,7 @@ void CClientEditionModule::startScenario(class NLNET::IModuleProxy * proxy, bool
 	}
 	else
 	{
-		CEditor::connexionMsg("uiR2EDR2StartTestError");
+		CEditor::connectionMsg("uiR2EDR2StartTestError");
 		requestReconnection();
 	}
 
@@ -1140,7 +1143,7 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 			_Factory->setMaxId("RtEntryText", 0);
 			_Factory->setMaxId("RtPlotItem", 0);
 
-			std::auto_ptr<CObject> rtDataPtr(  _Client->getComLuaModule().translateFeatures(hlScenario , errorMsg) );
+			CUniquePtr<CObject> rtDataPtr(  _Client->getComLuaModule().translateFeatures(hlScenario , errorMsg) );
 			rtData.setData(rtDataPtr.get());
 
 			if (rtDataPtr.get())
@@ -1190,12 +1193,8 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 
 		}
 
-
-
-		CEditor::connexionMsg(connectionState);
-
+		CEditor::connectionMsg(connectionState);
 	}
-
 }
 
 bool CClientEditionModule::requestStartScenario()
@@ -1204,7 +1203,7 @@ bool CClientEditionModule::requestStartScenario()
 
 	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return false);
 
-	CEditor::connexionMsg("uimR2EDGoToDMMode");
+	CEditor::connectionMsg("uimR2EDGoToDMMode");
 
 	R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"save/r2_buffer.dat\")");
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
@@ -1313,8 +1312,8 @@ void CClientEditionModule::onUserComponentDownloaded(NLNET::IModuleProxy *sender
 
 	if (decompressionState != Z_OK)
 	{
-		delete  component;
-		nlwarning("Error: the downloaded user component is corrupted '%s' ", component->Filename.c_str());
+		nlwarning("Error: the downloaded user component is corrupted '%s'", component->Filename.c_str());
+		delete component;
 		return;
 	}
 	component->UncompressedData[component->UncompressedDataLength] = '\0';
@@ -1384,7 +1383,7 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 	uint32 timeStamp = 0;
 	if (! compressed)
 	{
-		FILE* file = fopen(filename.c_str(),"rb");
+		FILE* file = nlfopen(filename, "rb");
 		if (!file)
 		{
 			nlwarning("Try to open an invalid file %s (access error)", filename.c_str());
@@ -1491,7 +1490,7 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 	else
 	{
 		// Get Uncompressed File length (4 last byte of a gz)
-		FILE* file = fopen(filename.c_str(),"rb");
+		FILE* file = nlfopen(filename, "rb");
 		if (!file)
 		{
 			nlwarning("Try to open an invalid file %s (access error)", filename.c_str());
@@ -1510,6 +1509,10 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 		{
 			nlwarning("Error while reading %s", filename.c_str());
 		}
+
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(uncompressedFileLength);
+#endif
 
 		fclose(file);
 
@@ -1649,10 +1652,14 @@ void CClientEditionModule::saveUserComponentFile(const std::string& filename, bo
 		if (!mustCompress)
 		{
 			{
-				FILE* output = fopen(uncompressedName.c_str(), "wb");
+				FILE* output = nlfopen(uncompressedName, "wb");
 				if (output)
 				{
-					fwrite(component->UncompressedData, sizeof(char) , component->UncompressedDataLength, output);
+					if (fwrite(component->UncompressedData, sizeof(char), component->UncompressedDataLength, output) != component->UncompressedDataLength)
+					{
+						nlwarning("Unable to write %s", component->UncompressedData);
+					}
+
 					fclose(output);
 				}
 			}
@@ -1869,8 +1876,8 @@ void CClientEditionModule::onKicked(NLNET::IModuleProxy * /* sender */, uint32 t
 {
 	//H_AUTO(R2_CClientEditionModule_onKicked)
 
-	R2::getEditor().getLua().push((double)timeBeforeDisconnection);
-	R2::getEditor().getLua().push((bool)mustKick);
+	R2::getEditor().getLua().push(timeBeforeDisconnection);
+	R2::getEditor().getLua().push(mustKick);
 	R2::getEditor().callEnvFunc( "onKicked", 2, 0);
 
 }
@@ -2019,9 +2026,9 @@ void CClientEditionModule::onAnimationModePlayConnected(NLNET::IModuleProxy * /*
 void CClientEditionModule::scheduleStartAct(NLNET::IModuleProxy * /* sender */, uint32 errorId, uint32 actId, uint32 nbSeconds)
 {
 	//H_AUTO(R2_CClientEditionModule_scheduleStartAct)
-	R2::getEditor().getLua().push((double)errorId);
-	R2::getEditor().getLua().push((double)actId);
-	R2::getEditor().getLua().push((double)nbSeconds);
+	R2::getEditor().getLua().push(errorId);
+	R2::getEditor().getLua().push(actId);
+	R2::getEditor().getLua().push(nbSeconds);
 	R2::getEditor().callEnvFunc( "onScheduleStartAct", 3, 0);
 
 }
@@ -2351,7 +2358,7 @@ void CClientEditionModule::loadUserComponentFileAccepted(NLNET::IModuleProxy * /
 		return;
 	}
 
-	auto_ptr<CUserComponentValidator> userComponentToLoad(found->second);
+	CUniquePtr<CUserComponentValidator> userComponentToLoad(found->second);
 	_UserComponentToLoad.erase(found);
 
 	if (!ok)
@@ -2383,7 +2390,7 @@ void CClientEditionModule::saveScenarioFileAccepted(NLNET::IModuleProxy *senderM
 		return;
 	}
 
-	auto_ptr<CScenarioValidator> scenarioToSave(found->second);
+	CUniquePtr<CScenarioValidator> scenarioToSave(found->second);
 	_ScenarioToSave.erase(found);
 
 	if (ok)
@@ -2475,7 +2482,7 @@ void CClientEditionModule::loadScenarioSucceded(const std::string& filename, con
 	}
 	if (CFile::fileExists(filename))
 	{
-		CFile::copyFile("save/r2_buffer.dat", filename.c_str());
+		CFile::copyFile("save/r2_buffer.dat", filename);
 	}
 }
 
@@ -2498,7 +2505,7 @@ void CClientEditionModule::loadScenarioFileAccepted(NLNET::IModuleProxy * /* sen
 		return;
 	}
 
-	auto_ptr<CScenarioValidator> scenarioToLoad(found->second);
+	CUniquePtr<CScenarioValidator> scenarioToLoad(found->second);
 	_ScenarioToLoad.erase(found);
 
 	if (!ok)

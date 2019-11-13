@@ -1,0 +1,33 @@
+﻿*HASH_VALUE	job ID	name	* noms français	p
+_7B0C6949087BEF17	IreFighter	Берсерк	guerrier fou 	Берсерки
+_DA264262C82FA5E4	Swashbuckler	Головорез	bretteur	Головорезы
+_FF1001FD1B8460C5	KamicFist	Кулак Ками	poing kamique	Кулаки Ками
+_E9959ADC3E303D21	BladeBearer	Меченосец	porte lame	Меченосцы
+_AF5E35F1250C04D2	WindChild	Дитя ветра	enfant des vents	Дети ветра
+_2F47F87A6F381C99	Runner	Бегун	courreur	Бегуны
+_73AAF09AE4B710A3	Scout	Лазутчик	éclaireur	Лазутчики
+_C66185C2249CA8A6	FireLance	Копье пламени	lance-feu	Копья пламени
+_296AE474AB790894	Witherer	Иссушитель	fletrisseur	Иссушители
+_AD68C069ED7714A0	Fouler	Осквернитель	pestilent	Осквернители
+_B290F10227B8C8B3	Disturber	Нарушитель спокойствия	troubleur d'esprit	Нарушители спокойствия
+_0250C5039B06F5C8	KamicFury	Ярость Ками	furie kamique	Ярость Ками
+_757B279C53FC9BAB	SpiritualShield	Щит духа	bouclier spirituel	Щиты духа
+_EE4990771C86D494	Faker	Притворщик	trompeur	Притворщики
+_A045250E026EC63E	WindGuardian	Страж ветра	gardien des vents	Стражи ветра
+_0B806EC710885A48	KamicGuardian	Страж Ками	bouclier kamique	Стражи Ками
+_C4438A71C41C6642	SecondBreath	Второе дыхание	second souffle	Второе дыхание
+_2FE51E469C502DFD	LifeStealer	Похититель жизни	voleur de vie	Похитители жизни
+_FEBE4D8AEEBD5D18	SecondLife	Вторая жизнь	seconde vie	Вторая жизнь
+_B7AF21058A5F88E1	SapCristal	Кристалл сэп	cristal de sève	Кристаллы сэп
+_DE48CAEB05734249	ScarletHunter	Алый охотник	chasseur écarlate	Алые охотники
+_31D7E2E30551753A	GreenHunter	Зеленый охотник	chasseur vert	Зеленые охотники
+_06635A6B444DEE4C	ShadowHunter	Охотник теней	chasseur de l'ombre	Охотники теней
+_99D26A1506D4F24B	AtysGuardian	Страж Атиса	gardien d'atys	Стражи Атиса
+_2BB7F7E25BC3D54D	SandCaravanner	Песчаный караванщик	caravanier des sables	Песчаные караванщики
+_7CD608D036D57BF2	ImperialSupplier	Имперский поставщик	pourvoyeur impérial	Имперские поставщики
+_6C49C893E6B9849D	Steward	Управляющий	intendants	Управляющие
+_A8C84C6F6A9710A2	Hawker	Коробейник	colporteurs	Коробейники
+_44BE25E43BDAF009	FireMaster	Мастер Огня	maitre du feu	Мастера Огня
+_0BF32E6C860E7A26	FlowerMaster	Мастер Цветов	maitre des fleurs	Мастера Цветов
+_802D1DEA3BDAF002	LakeMaster	Мастер Озер	maitre des lacs 	Мастера Озер
+_348DF50C62FA70BB	SapMaster	Мастер Сэп	maitre de la sève	Мастера Сэп

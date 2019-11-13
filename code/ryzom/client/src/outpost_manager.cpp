@@ -37,7 +37,7 @@ COutpostManager::COutpostManager()
 
 
 // ***************************************************************************
-void	COutpostManager::startPvpJoinProposal(bool playerGuildInConflict, bool playerGuildIsAttacker,
+void	COutpostManager::startPvpJoinProposal(bool outpostInFire, bool playerGuildInConflict, bool playerGuildIsAttacker,
 							 uint32 ownerGuildNameId, uint32 attackerGuildNameId, uint32 declTimer)
 {
 	// reset counter that force player to be neutral (eg: 10 seconds)
@@ -55,9 +55,17 @@ void	COutpostManager::startPvpJoinProposal(bool playerGuildInConflict, bool play
 	node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_DEFENDER");
 	if(node)	node->setValue32(ownerGuildNameId);
 	node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_TICK_END");
-	if(node)	node->setValue32(_EndTickForPvpJoinProposal);
+	if(node)	node->setValue32(_EndTickForPvpJoinProposal); 
 
 	// open Popup
+
+	CCtrlBase *ctrl = dynamic_cast<CCtrlBase *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal:content:random"));
+	if (ctrl)
+		ctrl->setActive(outpostInFire);
+	ctrl = dynamic_cast<CCtrlBase *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal:content:neutral"));
+	if (ctrl)
+		ctrl->setActive(!outpostInFire);
+
 	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal"));
 	if (pGC)
 	{

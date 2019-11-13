@@ -39,6 +39,16 @@ namespace NLGUI
 	class CGroupParagraph;
 
 	/**
+	 * Interface for UI scale change event
+	 */
+	class IInterfaceScaleWatcher
+	{
+		public:
+			virtual ~IInterfaceScaleWatcher(){}
+			virtual void onInterfaceScaleChanged()=0;
+	};
+
+	/**
 	 * A visitor to walk a tree of interface elements and apply a teartment on them.
 	 *
 	 * For each vsited element, visitElement() is called
@@ -66,7 +76,7 @@ namespace NLGUI
 	 * \author Nevrax France
 	 * \date 2002
 	 */
-	class CInterfaceElement : public CReflectableRefPtrTarget, public NLMISC::IStreamable
+	class CInterfaceElement : public IInterfaceScaleWatcher, public CReflectableRefPtrTarget, public NLMISC::IStreamable
 	{
 	public:
 
@@ -74,9 +84,9 @@ namespace NLGUI
 		class IDeletionWatcher
 		{
 		public:
-			IDeletionWatcher(){}
-			virtual ~IDeletionWatcher(){}
-			virtual void onDeleted( const std::string &name ){}
+			IDeletionWatcher() {}
+			virtual ~IDeletionWatcher() {}
+			virtual void onDeleted( const std::string &/* name */) {}
 		};
 
 		enum EStrech
@@ -94,6 +104,7 @@ namespace NLGUI
 			_XReal = _YReal = _WReal = _HReal = 0;
 			_X = _Y = _W = _H = 0;
 			//_Snap = 1;
+			_MarginLeft = 0;
 
 			_PosRef = Hotspot_BL;
 			_ParentPosRef = Hotspot_BL;
@@ -177,6 +188,12 @@ namespace NLGUI
 
 		sint32 getH() const { return (_Active?_H:0); }
 		sint32 getH(bool bTestActive) const { return (bTestActive?(_Active?_H:0):_H); }
+
+		void   setMarginLeft(sint32 m) { _MarginLeft = m; }
+		sint32 getMarginLeft() const { return _MarginLeft; }
+
+		// Return inner width for child elements
+		virtual sint32 getInnerWidth() const;
 
 		/**
 		  * Get the max width used by the window.
@@ -402,6 +419,10 @@ namespace NLGUI
 		 */
 		virtual void	onInvalidateContent() {}
 
+		/* Element UI scale change event callback
+		 */
+		virtual void	onInterfaceScaleChanged() {}
+
 		// called by interfaceManager for master window only
 		void			resetInvalidCoords();
 
@@ -567,6 +588,8 @@ namespace NLGUI
 		sint32 _Y;
 		sint32 _W;
 		sint32 _H;
+
+		sint32 _MarginLeft;
 
 		//sint32 _Snap;
 

@@ -1,0 +1,9 @@
+﻿*HASH_VALUE	career ID	name	* noms français	p
+_1700C956C37FB64F	MeleeFighter	Боец ближнего боя	Combattant Contact	Бойцы ближнего боя
+_9720B95DC35FBA54	RangeFighter	Боец дальнего боя	Combattant Distance	Бойцы дальнего боя
+_D32171700AD23D57	AttackCaster	Боевой маг	Caster Attaque	Боевые маги
+_9A511D668371AE04	BufferCaster	Маг поддержки	Caster Buffer	Маги поддержки
+_1C01F56701816E0A	HealerCaster	Целитель	Caster Healer	Целители
+_A6473C7A6A380099	Ranger	Охотник	Ranger	Охотники
+_EA665D00EAE788B3	Shopkeeper	Торговец	Marchand	Торговцы
+_2D28B08D636AEC9E	Artisan	Ремесленник	Crafter	Ремесленники

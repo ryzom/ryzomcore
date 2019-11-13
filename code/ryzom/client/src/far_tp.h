@@ -81,6 +81,8 @@ public:
 		st_rate_session,
 		/// create account
 		st_create_account,
+		/// try to login with alternate login system
+		st_alt_login,
 		/// pseudo state to leave the state machine
 		st_end,
 		///
@@ -156,6 +158,8 @@ public:
 		ev_create_account,
 		/// the client push the 'create account' button
 		ev_close_create_account,
+		/// the client want to use alternate login system
+		ev_login_not_alt,
 		///
 		ev_unknown
 	};
@@ -203,6 +207,7 @@ void initEula();
 void initPatchCheck();
 void initCatDisplay();
 void initAutoLogin();
+void initAltLogin();
 void initPatch();
 //void initWebBrowser();
 void initReboot();

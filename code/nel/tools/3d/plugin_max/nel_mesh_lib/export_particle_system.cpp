@@ -51,7 +51,7 @@ IShape* CExportNel::buildParticleSystem(INode& node, TimeValue time)
 			iF.serial(ss);
 			if (!dynamic_cast<CParticleSystemShape *>(ss.getShapePointer()))
 			{
-				mprintf("Error : Object shape %s isn't a particle system", shapeName.c_str());
+				mprintf(_M("Error : Object shape %s isn't a particle system\n"), MaxTStrFromUtf8(shapeName).data());
 				return NULL;
 			}
 
@@ -78,7 +78,7 @@ IShape* CExportNel::buildParticleSystem(INode& node, TimeValue time)
 		}
 		else
 		{
-			mprintf("Error : Can't find %s while exporting a particle system \n", shapeName.c_str());
+			mprintf(_M("Error : Can't find %s while exporting a particle system\n"), MaxTStrFromUtf8(shapeName).data());
 			return NULL;
 		}				
 	}

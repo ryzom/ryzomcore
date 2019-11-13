@@ -134,14 +134,14 @@ class	CDRU
 public:
 
 	/// Portable Function which create a GL Driver (using gl dll...).
-	static IDriver		*createGlDriver() throw(EDru);
+	static IDriver		*createGlDriver();
 
 	/// Portable Function which create a GL ES Driver (using gl dll...).
-	static IDriver		*createGlEsDriver() throw(EDru);
+	static IDriver		*createGlEsDriver();
 
 #ifdef NL_OS_WINDOWS
 	/// Windows Function which create a Direct3d Driver.
-	static IDriver		*createD3DDriver() throw(EDru);
+	static IDriver		*createD3DDriver();
 #endif // NL_OS_WINDOWS
 
 	/// \name 2D render.

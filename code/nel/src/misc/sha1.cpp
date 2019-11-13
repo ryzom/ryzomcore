@@ -147,7 +147,7 @@ CHashKey getSHA1(const string &filename, bool forcePath)
 		return CHashKey();
 	}
 
-	//FILE *fp = fopen (filename.c_str(), "rb");
+	//FILE *fp = nlfopen (filename, "rb");
 	//if (fp == NULL) return CHashKey();
 
 	err = SHA1Reset(&sha);

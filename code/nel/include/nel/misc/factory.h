@@ -14,12 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
-
-
-
 #ifndef FACTORY_H
 #define FACTORY_H
 
@@ -78,8 +72,11 @@ public:
 	 */
 	void registerClass(const KeyType &key, IFactoryRegister<BaseClass> *factoryRegister)
 	{
-		nlassert(_FactoryRegisters.find(key) == _FactoryRegisters.end());
-		_FactoryRegisters.insert(std::make_pair(key, factoryRegister));
+		// TODO: Removed assert because of crash of fes in 2019. We need found why... (ulukyn)
+		//nlassert(_FactoryRegisters.find(key) == _FactoryRegisters.end());
+		//_FactoryRegisters.insert(std::make_pair(key, factoryRegister));
+		if (_FactoryRegisters.find(key) == _FactoryRegisters.end())
+			_FactoryRegisters.insert(std::make_pair(key, factoryRegister));
 	}
 
 	/** Create a new instance of a factorable object.

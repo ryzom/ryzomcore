@@ -18,6 +18,10 @@
 #include "nel/gui/view_base.h"
 #include "nel/misc/factory.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	CViewBase* CInterfaceFactory::createClass( const std::string &name )

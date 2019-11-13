@@ -20,6 +20,11 @@
 #include "nel/3d/particle_system.h"
 #include "nel/3d/ps_macro.h"
 #include "nel/3d/driver.h"
+#include "nel/3d/debug_vb.h"
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -56,7 +61,7 @@ CPSRibbonLookAt::~CPSRibbonLookAt()
 }
 
 //=======================================================
-void CPSRibbonLookAt::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSRibbonLookAt::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSRibbonLookAt_serial)
 	/** Version 4 : added CPSRibbonBase has a base class instead of CPSParticle

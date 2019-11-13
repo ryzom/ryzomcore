@@ -60,6 +60,9 @@
 
 //#include "server_admin_module.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace std;
 using namespace NLMISC;
@@ -486,7 +489,7 @@ using namespace R2;
 //----------------- <CKeysHolder> --------------------------------------------
 void CKeysHolder::resetPolicies()
 {
-	_CurrentKey = "";
+	_CurrentKey.clear();
 	_Keys.clear();
 }
 
@@ -728,12 +731,12 @@ void CEditionSession::swap(CEditionSession& other)
 void CEditionSession::update(uint32 currentTime)
 {
 
-	if (getCurrentChars().size() == 0 && DateSinceNoPlayer == 0 )
+	if (getCurrentChars().empty() && DateSinceNoPlayer == 0 )
 	{
 		DateSinceNoPlayer = currentTime;
 	}
 
-	if (getCurrentChars().size() != 0 && DateSinceNoPlayer != 0 )
+	if (!getCurrentChars().empty() && DateSinceNoPlayer != 0 )
 	{
 		DateSinceNoPlayer = 0;
 	}
@@ -1096,7 +1099,7 @@ public:
 			}
 			else
 			{
-				if (tokens.size() == 0)
+				if (tokens.empty())
 				{
 
 				}
@@ -2128,7 +2131,7 @@ void CServerEditionModule::onScenarioUploadAsked(NLNET::IModuleProxy *senderModu
 	TSessionId sessionId = found->second;
 
 	scenario->setHighLevel( scenarioHl );
-	getSession(sessionId)->RingAccess = "";
+	getSession(sessionId)->RingAccess.clear();
 	scenario->setInitialActIndex(1);
 	if (mustBroadCast)
 	{
@@ -2215,7 +2218,7 @@ void CServerEditionModule::onNodeSetAsked(NLNET::IModuleProxy *senderModuleProxy
 
 	value2.uncompress();
 	CObject* value = value2.getData();
-	std::auto_ptr<CObject> autoDelete(value);
+	CUniquePtr<CObject> autoDelete(value);
 
 
 	bool ok = checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv);
@@ -2813,13 +2816,13 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 				else if (first->first == "Rules" ) { info.setDMLess( first->second != "Mastered"); }
 				else if (first->first == "NevraxScenario" && first->second == "1") { nevraxScenario = true; }
 				else if (first->first == "TrialAllowed" && first->second == "1") { trialAllowed = true; }
-				else if (first->first == "MissionTag" && first->second != "") { missionTag = first->second; }
+				else if (first->first == "MissionTag" && !first->second.empty()) { missionTag = first->second; }
 			}
 //			info.setMissionTag(missionTag);
 			info.setSessionAnimatorCharId( ownerCharId);
 			if ( !nevraxScenario )
 			{
-				missionTag = "";
+				missionTag.clear();
 				trialAllowed = false;
 			}
 
@@ -2976,11 +2979,11 @@ void CServerEditionModule::resetSession(NLNET::IModuleProxy *sender, TSessionId 
 		return;
 	}
 
-	session->RingAccess = "";
+	session->RingAccess.clear();
 	if (!reconnect) // reset
 	{
 		scenario->setHighLevel( 0 );
-		getSession(sessionId)->RingAccess = "";
+		getSession(sessionId)->RingAccess.clear();
 
 		scenario->setMode(0);
 
@@ -3645,7 +3648,7 @@ bool CServerEditionModule::checkScenario(CObject* scenario)
 		uint32 max = acts->getSize();
 		for(uint32 i = 0;i<max;i++)
 		{
-			CObject * act = acts->getValue(i);
+			CObject * act = acts->getValueAtPos(i);
 			CObject * npcs = act->findAttr("Npcs");
 			CObject * states = act->findAttr("AiStates");
 			if (states && states->isTable())
@@ -3863,13 +3866,13 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 					else if (first->first == "Rules" ) { info.setDMLess( first->second != "Mastered"); }
 					else if (first->first == "NevraxScenario" && first->second == "1") { nevraxScenario = true; }
 					else if (first->first == "TrialAllowed" && first->second == "1") { trialAllowed = true; }
-					else if (first->first == "MissionTag" && first->second != "") { missionTag = first->second; }
+					else if (first->first == "MissionTag" && !first->second.empty()) { missionTag = first->second; }
 				}
 
 				info.setSessionAnimatorCharId( charId);
 				if ( !nevraxScenario )
 				{
-					missionTag = "";
+					missionTag.clear();
 					trialAllowed = false;
 				}
 
@@ -4022,14 +4025,14 @@ bool CServerEditionModule::getPosition(TSessionId sessionId, double& x, double& 
 	CObject* acts = hl->getAttr("Acts");
 	BOMB_IF(!acts || !acts->isTable() || actIndex >= acts->getSize(), "Invalid acts.", return false);
 
-	CObject* selectedAct = acts->getValue(actIndex);
+	CObject* selectedAct = acts->getValueAtPos(actIndex);
 	BOMB_IF(!selectedAct || !selectedAct->isString("LocationId"), "Invalid act.", return false);
 	std::string locationInstanceId = selectedAct->toString("LocationId");
 
 	uint32 firstLocationIndex = 0, lastLocationIndex = locations->getSize();
 	for (; firstLocationIndex != lastLocationIndex; ++firstLocationIndex)
 	{
-		CObject* location = locations->getValue(firstLocationIndex);
+		CObject* location = locations->getValueAtPos(firstLocationIndex);
 		if ( location && location->isString("InstanceId") && location->toString("InstanceId") == locationInstanceId )
 		{
 			locationId = firstLocationIndex;
@@ -4043,7 +4046,7 @@ bool CServerEditionModule::getPosition(TSessionId sessionId, double& x, double& 
 
 
 
-	CObject* firstLocation = locations->getValue(locationId);
+	CObject* firstLocation = locations->getValueAtPos(locationId);
 	BOMB_IF(!firstLocation || !firstLocation->isTable(), "Invalid location.", return false);
 
 	CObject* entryPointObj = firstLocation->getAttr("EntryPoint");
@@ -5116,7 +5119,7 @@ bool CServerEditionModule::wakeUpSession(TSessionId sessionId, TCharId ownerChar
 
 void CServerEditionModule::wakeUpSessionImpl(CEditionSession* session)
 {
-	std::auto_ptr<CEditionSession> sessionPtr(session);
+	CUniquePtr<CEditionSession> sessionPtr(session);
 	TSessionId sessionId = sessionPtr->SessionId;
 
 	TSessions::iterator found = _Sessions.find(sessionId);
@@ -5320,7 +5323,6 @@ bool CServerEditionModule::hibernateSessionImpl  (TSessionId sessionId, std::str
 	//(*) Remove animation Session and kill AI Instance
 	if (animationSessionExist)
 	{
-
 		stopTest(sessionId);
 	}
 
@@ -5582,7 +5584,7 @@ const NLNET::TModuleProxyPtr * CServerEditionModule::getClientProxyPtr(TCharId c
 
 void CServerEditionModule::getTpContext(TCharId charId, std::string& tpCancelTextId, R2::TTeleportContext& tpContext)
 {
-	tpCancelTextId = "";
+	tpCancelTextId.clear();
 	tpContext = R2::TPContext_Unknown;
 
 	TSessionId sessionId = getSessionIdByCharId(charId);
@@ -5968,13 +5970,13 @@ void CServerEditionModule::addKeyPolicy(NLNET::IModuleProxy *sender, const std::
 	std::string key = keyName;
 	if (key == "EMPTY")
 	{
-		key = "";
+		key.clear();
 	}
 
 	std::string privateKey = privateKeyValue;
 	if (privateKey == "EMPTY")
 	{
-		privateKey = "";
+		privateKey.clear();
 	}
 
 	_KeysHolder->addKeyPolicy(key, privateKey, p);

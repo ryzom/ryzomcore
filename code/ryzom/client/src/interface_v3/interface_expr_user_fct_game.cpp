@@ -148,10 +148,10 @@ static DECLARE_INTERFACE_USER_FCT(getCompassText)
 
 	//get the direction
 	// sint64 in the databae.
-	sint64	angleInt= args[0].getInteger();
+	C64BitsParts angle;
+	angle.i64[0] = args[0].getInteger();
 	// cast as double now.
-	double	angle= (double&)angleInt;
-	sint direction =(sint) floor( 0.5 + ( 8.0 * (angle + NLMISC::Pi)/(NLMISC::Pi) ) );
+	sint direction =(sint) floor( 0.5 + ( 8.0 * (angle.d[0] + NLMISC::Pi)/(NLMISC::Pi) ) );
 	direction = ((direction%16)+16)%16;
 	static const string txts[]=
 	{
@@ -879,6 +879,23 @@ static DECLARE_INTERFACE_USER_FCT(isAnimalStatusInStable)
 REGISTER_INTERFACE_USER_FCT("isAnimalStatusInStable", isAnimalStatusInStable)
 
 // ***************************************************************************
+static DECLARE_INTERFACE_USER_FCT(isAnimalStatusInBag)
+{
+	if (args.size() != 1)
+	{
+		nlwarning("<isAnimalStatusInStable> Expecting 1 args.");
+		return false;
+	}
+
+	// According to server status, change the inventory text
+	uint	status= (uint)args[0].getInteger();
+	result.setBool(ANIMAL_STATUS::isInBag(status));
+
+	return true;
+}
+REGISTER_INTERFACE_USER_FCT("isAnimalStatusInBag", isAnimalStatusInBag)
+
+// ***************************************************************************
 static DECLARE_INTERFACE_USER_FCT(isSkillAtMax)
 {
 	CSkillManager	*pSM= CSkillManager::getInstance();
@@ -1148,7 +1165,7 @@ static DECLARE_INTERFACE_USER_FCT(getOutpostBuildingDesc)
 	if (pOBS && pOBS->OBType == COutpostBuildingSheet::OB_Empty)
 	{
 		// Don't display description if the building is an empty slot
-		name = "";
+		name.clear();
 	}
 	else
 	{

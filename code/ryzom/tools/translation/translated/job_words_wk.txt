@@ -1,0 +1,33 @@
+﻿*HASH_VALUE	job ID	name	* noms français	ia	da	p	pia	pda
+_7B0C6949087BEF17	IreFighter	Ire Fighter	guerrier fou 	an	the	Ire Fighters		the
+_DA264262C82FA5E4	Swashbuckler	Swashbuckler	bretteur	a	the	Swashbucklers		the
+_FF1001FD1B8460C5	KamicFist	Kamic Fist	poing kamique	a	the	Kamic Fists		the
+_E9959ADC3E303D21	BladeBearer	Blade Bearer	porte lame	a	the	Blade Bearers		the
+_AF5E35F1250C04D2	WindChild	Wind Child	enfant des vents	a	the	Wind Children		the
+_2F47F87A6F381C99	Runner	Runner	courreur	a	the	Runners		the
+_73AAF09AE4B710A3	Scout	Scout	éclaireur	a	the	Scouts		the
+_C66185C2249CA8A6	FireLance	Fire Lancer	lance-feu	a	the	Fire Lancers		the
+_296AE474AB790894	Witherer	Witherer	fletrisseur	a	the	Witherers		the
+_AD68C069ED7714A0	Fouler	Fouler	pestilent	a	the	Foulers		the
+_B290F10227B8C8B3	Disturber	Disturber	troubleur d'esprit	a	the	Disturbers		the
+_0250C5039B06F5C8	KamicFury	Kamic Fury	furie kamique	a	the	Kamic Furies		the
+_757B279C53FC9BAB	SpiritualShield	Spiritual Shield	bouclier spirituel	a	the	Spiritual Shields		the
+_EE4990771C86D494	Faker	Faker	trompeur	a	the	Fakers		the
+_A045250E026EC63E	WindGuardian	Wind Guardian	gardien des vents	a	the	Wind Guardians		the
+_0B806EC710885A48	KamicGuardian	Kamic Guardian	bouclier kamique	a	the	Kamic Guardians		the
+_C4438A71C41C6642	SecondBreath	Second Breath	second souffle	a	the	Second Breaths		the
+_2FE51E469C502DFD	LifeStealer	Life Stealer	voleur de vie	a	the	Life Stealers		the
+_FEBE4D8AEEBD5D18	SecondLife	Second Life	seconde vie	a	the	Second Lives		the
+_B7AF21058A5F88E1	SapCristal	Sap Crystal	cristal de sève	a	the	Sap Crystals		the
+_DE48CAEB05734249	ScarletHunter	Scarlet Hunter	chasseur écarlate	a	the	Scarlet Hunters		the
+_31D7E2E30551753A	GreenHunter	Green Hunter	chasseur vert	a	the	Green Hunters		the
+_06635A6B444DEE4C	ShadowHunter	Shadow Hunter	chasseur de l'ombre	a	the	Shadow Hunters		the
+_99D26A1506D4F24B	AtysGuardian	Atys Guardian	gardien d'atys	an	the	Atys Guardians		the
+_2BB7F7E25BC3D54D	SandCaravanner	Sand Karavanner	caravanier des sables	a	the	Sand Karavanners		the
+_7CD608D036D57BF2	ImperialSupplier	Imperial Supplier	pourvoyeur impérial	an	the	Imperial Suppliers		the
+_6C49C893E6B9849D	Steward	Steward	intendants	a	the	Stewards		the
+_A8C84C6F6A9710A2	Hawker	Hawker	colporteurs	a	the	Hawkers		the
+_44BE25E43BDAF009	FireMaster	Fire Master	maitre du feu	a	the	Fire Masters		the
+_0BF32E6C860E7A26	FlowerMaster	Flower Master	maitre des fleurs	a	the	Flower Masters		the
+_802D1DEA3BDAF002	LakeMaster	Lake Master	maitre des lacs 	a	the	Lake Masters		the
+_348DF50C62FA70BB	SapMaster	Sap Master	maitre de la sève	a	the	Sap Masters		the

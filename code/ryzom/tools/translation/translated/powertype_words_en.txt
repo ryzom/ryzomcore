@@ -1,0 +1,32 @@
+﻿*HASH_VALUE	powerType	name	ia	da	p	pia	pda	description
+_6DCA609CECF858BE	Taunt	Taunt	a	the			the	
+_2AB8D88D6969889E	Shielding	Shielding	a	the			the	
+_23E3F07BA6C9808C	SpeedingUp	Speeding-Up	a	the			the	
+_FE6DF5A5685844B3	MeditationLife	Meditation Life	a	the			the	
+_F0CD8E578A5F7D05	MeditationStamina	Meditation Stamina	a	the			the	
+_279839E098D918C1	MeditationSap	Meditation Sap	a	the			the	
+_872EA1EBE6F753A8	ConvertStamina	Convert Stamina	a	the			the	
+_29D5CF7D27CAE486	ConvertSap	Convert Sap	a	the			the	
+_29CC88822549147E	Berserk	Berserker	a	the			the	
+_25797445A52B8007	LifeAura	Life Aura	a	the			the	
+_9C84C0AA1F379CBA	StaminaAura	Stamina Aura	a	the			the	
+_59B6EC98A07774B3	SapAura	Sap Aura	a	the			the	
+_FD34328D8A827302	Umbrella	Range Protection Aura	an	the			the	Makes you and your nearby teammates invulnerable to range attacks.
+_92F0C1BB89BC5683	MeleeProtection	Melee Protection Aura	a	the			the	Makes you and your nearby teammates invulnerable to melee attacks.
+_86197EEC1899F525	AntiMagicShield	Anti Magic Shield Aura	an	the			the	Makes you and your nearby teammates invulnerable to magic attacks.
+_8758671228A5AB28	Invulnerability	Invulnerability	an	the			the	Makes you invulnerable but incapable of using actions.
+_29AB5F80EF88004E	FireWall	Fire Wall Aura	a	the			the	
+_D8C8F48265958CB5	ThornWall	Thorn Wall Aura	a	the			the	
+_D7A9E48525959CAC	WaterWall	Water Wall Aura	a	the			the	
+_F0BE55DDA9AB7D23	LightningWall	Lightning Wall Aura	a	the			the	
+_1D5ABBA0DE1B6FB4	WarCry	War Cry	a	the			the	
+_ABB88C82DEB650A9	Heal	Heal	a	the			the	
+_2305443A60C86CAF	BalanceHp	Balance HP	a	the			the	
+_B6604DDCE6C6ACA1	ChgCharac	Boost Characteristic	a	the			the	
+_16F116141048A371	ModMagicProtection	Protection Modifier	a	the	Protection Modifiers	of the	the	Modifies the value of your magic protection
+_3A7CADB6DF38F847	ModDefense	Defence Success Rate Modifier	a	the	Defence Success Rate Modifiers	of the	the	Modifies your chance for success in defending yourself
+_A25E08467860F1F2	ModCraftSuccess	Crafting Bonus	a	the	Crafting Bonuses		the	Improves your crafting skill
+_24BA6F597234C2DA	ModMeleeSuccess	Close Combat Bonus	a	the	Close Combat Bonuses		the	Improves your close-combat skill
+_8F7EEBA94B68D5F8	ModRangeSuccess	Range Combat Bonus	a	the	Range Combat Bonuses		the	Improves your rang combat skill
+_9CAFEDAD47AFE1C5	ModMagicSuccess	Magic Bonus	a	the	Magic Bonuses		the	Improves your magic skill
+_A043E58C54A010EF	ModForageSuccess	Digging Bonus	a	the	Digging Bonuses		the	Improves your digging skill

@@ -25,8 +25,12 @@
 #include "types_nl.h"
 #include "stream.h"
 
-// Include from libxml2
-#include <libxml/parser.h>
+// Forward declarations for libxml2
+typedef struct _xmlNode xmlNode;
+typedef xmlNode *xmlNodePtr;
+
+typedef struct _xmlParserCtxt xmlParserCtxt;
+typedef xmlParserCtxt *xmlParserCtxtPtr;
 
 namespace NLMISC {
 
@@ -106,6 +110,11 @@ public:
 	  */
 	bool			init (IStream &stream);
 
+	/** Return the error string.
+	 * if not empty, something wrong appends
+	 */
+	static std::string getErrorString();
+
 	/** Release the resources used by the stream.
 	  */
 	void			release ();
@@ -116,49 +125,49 @@ public:
 
 	/** Get the first child node pointer named childName. NULL if no node named childName.
 	  */
-	static xmlNodePtr getFirstChildNode (xmlNodePtr parent, const char *childName);
+	static xmlNodePtr getFirstChildNode (xmlNodePtr parent, const std::string &childName);
 
 	/** Get the next child node pointer name childName, brother of previous. NULL if no node named childName.
 	  */
-	static xmlNodePtr getNextChildNode (xmlNodePtr last, const char *childName);
+	static xmlNodePtr getNextChildNode (xmlNodePtr last, const std::string &childName);
 
 	/** Get the first child node pointer of type. NULL if no node of type.
 	  */
-	static xmlNodePtr getFirstChildNode (xmlNodePtr parent, xmlElementType type);
+	static xmlNodePtr getFirstChildNode (xmlNodePtr parent, sint /* xmlElementType */ type);
 
 	/** Get the next child node pointer of type. NULL if no node of type.
 	  */
-	static xmlNodePtr getNextChildNode (xmlNodePtr last, xmlElementType type);
+	static xmlNodePtr getNextChildNode (xmlNodePtr last, sint /* xmlElementType */ type);
 
 	/** Count number of sub node named with a given name for a given node.
 	  */
-	static uint		countChildren (xmlNodePtr node, const char *childName);
+	static uint		countChildren (xmlNodePtr node, const std::string &childName);
 
 	/** Count number of sub node of type for a given node.
 	  */
-	static uint		countChildren (xmlNodePtr node, xmlElementType type);
+	static uint		countChildren (xmlNodePtr node, sint /* xmlElementType */ type);
 
 	/**
 	  * Read a property string
 	  *
 	  * Returns true and the result if the property has been found, else false.
 	  */
-	static bool		getPropertyString (std::string &result, xmlNodePtr node, const char *property);
+	static bool		getPropertyString (std::string &result, xmlNodePtr node, const std::string &property);
 
 	/**
 	  *	Read an integer property - if the property is not found the default value is returned
 	  */
-	static int		getIntProperty(xmlNodePtr node, const char *property, int defaultValue);
+	static int		getIntProperty(xmlNodePtr node, const std::string &property, int defaultValue);
 
 	/**
 	  *	Read a floating point property - if the property is not found the default value is returned
 	  */
-	static double	getFloatProperty(xmlNodePtr node, const char *property, float defaultValue);
+	static double	getFloatProperty(xmlNodePtr node, const std::string &property, float defaultValue);
 
 	/**
 	  *	Read a string property - if the property is not found the default value is returned
 	  */
-	static std::string getStringProperty(xmlNodePtr node, const char *property, const std::string& defaultValue);
+	static std::string getStringProperty(xmlNodePtr node, const std::string &property, const std::string& defaultValue);
 
 	/**
 	  * Read the content of the node as a string
@@ -166,6 +175,16 @@ public:
 	  * Returns true and the result if some text has been found, else false.
 	  */
 	static bool		getContentString (std::string &result, xmlNodePtr node);
+
+	/**
+	  * Init all structures used by libxml2, to only call once.
+	  */
+	static void		initLibXml();
+
+	/**
+	  * Release memory used by libxml2, to only call before exit.
+	  */
+	static void		releaseLibXml();
 
 private:
 
@@ -189,12 +208,12 @@ private:
 	virtual void	serialBuffer(uint8 *buf, uint len);
 	virtual void	serialBit(bool &bit);
 
-	virtual bool	xmlPushBeginInternal (const char *nodeName);
+	virtual bool	xmlPushBeginInternal (const std::string &nodeName);
 	virtual bool	xmlPushEndInternal ();
 	virtual bool	xmlPopInternal ();
-	virtual bool	xmlSetAttribInternal (const char *attribName);
+	virtual bool	xmlSetAttribInternal (const std::string &attribName);
 	virtual bool	xmlBreakLineInternal ();
-	virtual bool	xmlCommentInternal (const char *comment);
+	virtual bool	xmlCommentInternal (const std::string &comment);
 
 	// Internal functions
 	void			serialSeparatedBufferIn ( std::string &value, bool checkSeparator = true );
@@ -225,16 +244,16 @@ private:
 	uint			_ContentStringIndex;
 
 	// Error message
-	std::string		_ErrorString;
+	static std::string	_ErrorString;
 
 	// Try binary mode
 	bool			_TryBinaryMode;
 
 	// If not NULL, binary mode detected, use this stream in serials
 	IStream			*_BinaryStream;
-
-	// System dependant structure for locale
-	void*			_Locale;
+	
+	// LibXml has been initialized
+	static bool		_LibXmlIntialized;
 };
 
 

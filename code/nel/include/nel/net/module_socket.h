@@ -42,15 +42,11 @@ namespace NLNET
 		 *	If the destination module is not accessible through this socket,
 		 *	an exception is thrown.
 		 */
-		virtual void sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message )
-			throw (EModuleNotPluggedHere)
-			=0;
+		virtual void sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message) =0;
 		/** A plugged module send a message to all the module reachable
 		 *	with this socket.
 		 */
-		virtual void broadcastModuleMessage(IModule *senderModule, const NLNET::CMessage &message)
-			throw (EModuleNotPluggedHere)
-			=0;
+		virtual void broadcastModuleMessage(IModule *senderModule, const NLNET::CMessage &message) =0;
 
 		/** Fill the resultList with the list of module that are
 		 *	reachable with this socket.
@@ -95,21 +91,15 @@ namespace NLNET
 		virtual void _onModulePlugged(const TModulePtr &pluggedModule);
 		virtual void _onModuleUnplugged(const TModulePtr &pluggedModule);
 
-		virtual void _sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message )
-			throw (EModuleNotPluggedHere, NLNET::EModuleNotReachable)
-			=0;
+		virtual void _sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message) =0;
 
-		virtual void _broadcastModuleMessage(IModule *senderModule, const NLNET::CMessage &message)
-			throw (EModuleNotPluggedHere)
-			=0;
+		virtual void _broadcastModuleMessage(IModule *senderModule, const NLNET::CMessage &message) =0;
 
-		virtual void sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message )
-			throw (EModuleNotPluggedHere);
+		virtual void sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message);
 		/** A plugged module send a message to all the module reachable
 		 *	with this socket.
 		 */
-		virtual void broadcastModuleMessage(IModule *senderModule, const NLNET::CMessage &message)
-			throw (EModuleNotPluggedHere);
+		virtual void broadcastModuleMessage(IModule *senderModule, const NLNET::CMessage &message);
 
 	};
 

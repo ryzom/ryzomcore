@@ -56,6 +56,9 @@ using namespace std;
 
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NLMISC{
 
@@ -207,7 +210,7 @@ void CCDBNodeBranch::init( xmlNodePtr node, IProgressCallback &progressCallBack,
 	}
 	else
 	{
-		if ( _Nodes.size() > 0 )
+		if (!_Nodes.empty())
 			for ( _IdBits=1; _Nodes.size() > unsigned(1<<_IdBits) ; _IdBits++ ) {}
 		else
 			_IdBits = 0;
@@ -278,7 +281,7 @@ ICDBNode * CCDBNodeBranch::getNode (const CTextId& id, bool bCreate)
 		{
 			// Yoyo: must not be SERVER or LOCAL, cause definied through xml.
 			// This may cause some important crash error
-			//nlassert(id.size()>0);
+			//nlassert(!id.empty());
 			//nlassert(id.getElement(0)!="SERVER");
 			//nlassert(id.getElement(0)!="LOCAL");
 			ICDBNode *newNode;

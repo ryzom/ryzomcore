@@ -22,7 +22,7 @@
 #include "form_elm.h"
 #include "header.h"
 
-extern bool convertFormFile (const char *oldFileName, const char *newFileName);
+extern bool convertFormFile (const std::string &oldFileName, const std::string &newFileName);
 
 namespace NLGEORGES
 {
@@ -35,7 +35,7 @@ class UFormElm;
 class CForm : public UForm
 {
 	friend class CFormLoader;
-	friend bool convertFormFile (const char *oldFileName, const char *newFileName);
+	friend bool convertFormFile (const std::string &oldFileName, const std::string &newFileName);
 public:
 
 	enum { HeldElementCount = 4 };
@@ -73,12 +73,12 @@ public:
 
 	// ** IO functions
 	// Set the filename before saving the form
-	void				write (xmlDocPtr doc, const char *filename);
+	void				write (xmlDocPtr doc, const std::string &filename);
 
 	// ** Parent access
 
 	// Insert parent before parent indexed "before".
-	bool				insertParent (uint before, const char *filename, CForm *parent);
+	bool				insertParent (uint before, const std::string &filename, CForm *parent);
 
 	// Remove a parent from parent list
 	void				removeParent (uint parent);
@@ -97,7 +97,7 @@ public:
 	const std::string	&getFilename () const;
 
 	// Error handling
-	void				warning (bool exception, const char *function, const char *format, ... ) const;
+	void				warning (bool exception, const std::string &function, const char *format, ... ) const;
 
 private:
 
@@ -114,7 +114,7 @@ private:
 
 	// CFormLoader call it
 	// Set the filename before reading the form
-	void				read (xmlNodePtr node, CFormLoader &loader, CFormDfn *dfn, const char *filename);
+	void				read (xmlNodePtr node, CFormLoader &loader, CFormDfn *dfn, const std::string &filename);
 
 	// Called by read
 	void				readParent (const char *parent, CFormLoader &loader);

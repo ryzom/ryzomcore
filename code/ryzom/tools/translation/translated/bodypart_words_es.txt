@@ -1,0 +1,43 @@
+﻿*HASH_VALUE	bodypartID	name	ia	da	p	pia	pda	description
+_ACB9BC721BA65099	HHead	cabeza	una	la	cabezas		las	
+_278A7C5D654814CD	HChest	torso	un	el	torsos		los	
+_A2D940906B29B889	HArms	brazo	un	el	brazos		los	
+_B1CAFC85DB767C9C	HHands	mano	una	la	manos		las	
+_20A8389BAC987C9F	HLegs	pierna	una	la	piernas		las	
+_E18820962C586494	HFeet	pie	un	el	pies		los	
+_ACB9BC7B1B375099	QHead	cabeza	una	la	cabezas		las	
+_E80BB4A21A9838B5	QBody	cuerpo	un	el	cuerpos		los	
+_C96F0919D2F8DC71	QFrontPaws	pata delantera	una	la	patas delanteras		las	
+_08A1A8FEABC3CD11	QFrontHooves	pezuña delantera	una	la	pezuñas delanteras		las	
+_23B95F02A87957B0	QRearPaws	pata trasera	una	la	patas traseras		las	
+_D880990C5BE9DCB7	QRearHooves	pezuña trasera	una	la	pezuñas traseras		las	
+_2836645DDE8874AD	LKHead	cabeza	una	la	cabezas		las	
+_ED86C05FE298A4B9	LKBody	cuerpo	un	el	cuerpos		los	
+_39BFC0EBE486B512	LKFrontPaws1	pata delantera	una	la	patas delanteras		las	
+_79BFC0EBE486B512	LKFrontPaws2	pata delantera	una	la	pata delanteras		las	
+_D92BB508D8F884A6	LKRearPaws1	pata trasera	una	la	patas traseras		las	
+_D93BB508D8F884A6	LKRearPaws2	pata trasera	una	la	patas traseras		las	
+_283664575C8874AD	FKHead	cabeza	una	la	cabezas		las	
+_ED86C0596098A4B9	FKBody	cuerpo	un	el	cuerpos		los	
+_DBBA7473640310B0	FKPaws1	pierna	una	la	piernas		las	
+_1BBA7473641310B0	FKPaws2	pierna	una	la	piernas		las	
+_66B6A47A4A7ADCC2	FKWings1	ala	un	el	alas		las	
+_66B6A47ACA7ADCC2	FKWings2	ala	un	el	alas		las	
+_ACB9BC701B865099	FHead	cabeza	una	la	cabezas		las	
+_E80BB4971AE738B5	FBody	cuerpo	un	el	cuerpos		los	
+_C40D15A82A36DF2C	FFrontFins1	aleta delantera	una	la	aletas delanteras		las	
+_C41D15A82A36DF2C	FFrontFins2	aleta delantera	una	la	aletas delanteras		las	
+_67B624EBAAF630A4	FRearFins1	aleta trasera	una	la	aletas traseras		las	
+_67B628EBAAF630A4	FRearFins2	aleta trasera	una	la	aletas traseras		las	
+_ACB9BC6C1B465099	BHead	cabeza	una	la	cabezas		las	
+_E80BB4931AA738B5	BBody	cuerpo	un	el	cuerpos		los	
+_25897F8F25594780	BFeet1	pie	un	el	pies		los	
+_2589838F25594B80	BFeet2	pie	un	el	pies		los	
+_2C68746BA436D3C2	BWings1	ala	un	el	alas		las	
+_2C68746BA446D7C2	BWings2	ala	un	el	alas		las	
+_8061E6E18C3EA521	PUpperTrunk	tronco superior	un	el	troncos superiores		los	
+_ECEA3087A666CCC3	Ptrunk	tronco	un	el	troncos		los	
+_E7469C4D9B5A0C9D	PLeaves1	hoja	una	la	hojas		las	
+_E7469C4DDB5A0C9D	PLeaves2	hoja	una	la	hojas		las	
+_C3EE9906771FB524	PLowerTrunk	tronco inferior	un	el	troncos inferiores		los	
+_DFA67A5CC7DECDE6	PVisibleRoots	raíz visible	una	la	raíces visibles		las	

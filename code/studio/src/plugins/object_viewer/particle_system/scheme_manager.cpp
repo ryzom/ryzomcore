@@ -47,7 +47,7 @@ void CSchemeManager::getSchemes(const std::string &type, std::vector<TSchemeInfo
 	}
 }
 
-void CSchemeManager::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CSchemeManager::serial(NLMISC::IStream &f)
 {
 
 	f.serialCheck(NELID("_GNM"));

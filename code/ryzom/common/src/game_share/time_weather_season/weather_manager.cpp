@@ -35,7 +35,7 @@ void CWeatherManager::init(const std::vector<const CWeatherSetupSheetBase *> &sh
 	{
 		if (sheets[k])
 		{
-			std::string id = NLMISC::strlwr(NLMISC::CFile::getFilenameWithoutExtension(sheetNames[k]));
+			std::string id = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(sheetNames[k]));
 			CWeatherSetup *ws = newWeatherSetup();
 			if (ws)
 			{
@@ -70,7 +70,7 @@ void CWeatherManager::release()
 //================================================================================================
 const CWeatherSetup *CWeatherManager::getSetup(const char *name) const
 {
-	std::string id = NLMISC::strlwr(CFile::getFilenameWithoutExtension(name));
+	std::string id = NLMISC::toLower(CFile::getFilenameWithoutExtension(name));
 	TWeatherSetupMap::const_iterator it = _WeatherSetupMap.find(id);
 	if (it == _WeatherSetupMap.end()) return NULL;
 	return it->second;

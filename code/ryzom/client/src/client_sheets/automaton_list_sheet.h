@@ -60,7 +60,7 @@ public:
 		}
 
 		/// Serialize a CNextStateInf.
-		void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serialEnum (NextStateKey);
 			f.serial(Breakable);
@@ -151,7 +151,7 @@ public:
 	void build(const NLGEORGES::UFormElm &item, const std::string &baseKeyStr);
 
 	/// Serialize a CMovingAutomatonState.
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	/** Return if there is a connection with the mode in parameter from the current automaton and filled the transition to use.
 	 * \param mode : is there a connection for this mode.
@@ -182,7 +182,7 @@ public:
 	void build(const NLGEORGES::UFormElm &item);
 
 	/// Serialize sheet into binary data file.
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	/**
 	 * Return a pointer on the information about the state corresponding to the key.
@@ -227,7 +227,7 @@ public:
 	virtual void build(const NLGEORGES::UFormElm &item);
 
 	/// Serialize sheet into binary data file.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 	/// Tool to read a dfn composed with an array of string
 	static void readDfnStringArray(std::vector<std::string> &states, const std::string &dfnName);

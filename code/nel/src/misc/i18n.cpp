@@ -20,6 +20,12 @@
 #include "nel/misc/path.h"
 #include "nel/misc/i18n.h"
 
+#include <locale.h>
+
+#ifdef NL_OS_MAC
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
 using namespace std;
 
 #ifdef DEBUG_NEW
@@ -37,6 +43,7 @@ string					CI18N::_SelectedLanguageCode;
 CI18N::ILoadProxy		*CI18N::_LoadProxy = 0;
 vector<string>			CI18N::_LanguageCodes;
 vector<ucstring>		CI18N::_LanguageNames;
+std::string				CI18N::_SystemLanguageCode;
 bool CI18N::noResolution = false;
 
 void CI18N::setLoadProxy(ILoadProxy *loadProxy)
@@ -52,11 +59,13 @@ void CI18N::initLanguages()
 		_LanguageCodes.push_back("fr");
 		_LanguageCodes.push_back("de");
 		_LanguageCodes.push_back("ru");
+		_LanguageCodes.push_back("es");
 
 		_LanguageNames.push_back(ucstring("English"));
 		_LanguageNames.push_back(ucstring("French"));
 		_LanguageNames.push_back(ucstring("German"));
 		_LanguageNames.push_back(ucstring("Russian"));
+		_LanguageNames.push_back(ucstring("Spanish"));
 
 		_LanguagesNamesLoaded = true;
 	}
@@ -226,6 +235,216 @@ string CI18N::getCurrentLanguageCode ()
 	return _SelectedLanguageCode;
 }
 
+bool CI18N::isLanguageCodeSupported(const std::string &lang)
+{
+	initLanguages();
+
+	for (sint i = 0, ilen = _LanguageCodes.size(); i < ilen; ++i)
+	{
+		if (lang == _LanguageCodes[i]) return true;
+	}
+
+	return false;
+}
+
+std::string CI18N::getSystemLanguageCode ()
+{
+	if (!_SystemLanguageCode.empty())
+		return _SystemLanguageCode;
+
+#ifdef NL_OS_MAC
+	// under OS X, locale is only defined in console, not in UI
+	// so we need to use CoreFoundation API to retrieve it
+
+	// get an array with all preferred languages
+	CFArrayRef langs = CFLocaleCopyPreferredLanguages();
+
+	if (langs)
+	{
+		// get languages count
+		sint languagesCount = CFArrayGetCount(langs);
+
+		// process each language
+		for (sint i = 0; i < languagesCount; ++i)
+		{
+			std::string lang;
+
+			// get language CFString
+			CFStringRef langCF = (CFStringRef)CFArrayGetValueAtIndex(langs, i);
+
+			if (langCF)
+			{
+				// get a C string from CFString
+				const char *langStr = CFStringGetCStringPtr(langCF, kCFStringEncodingASCII);
+
+				if (!langStr)
+				{
+					// get length of the CFString
+					CFIndex length = CFStringGetLength(langCF);
+
+					// allocate a temporary buffer to hold converted string
+					char *tmp = new char[length+1];
+
+					// use alternative function to get a C string from CFString
+					if (CFStringGetCString(langCF, tmp, length+1, kCFStringEncodingASCII))
+					{
+						lang = std::string(tmp, length);
+					}
+					else
+					{
+						nlwarning("Unable to convert CFStringRef to string");
+					}
+
+					delete [] tmp;
+				}
+				else
+				{
+					lang = std::string(langStr);
+				}
+
+				CFRelease(langCF);
+			}
+
+			if (!lang.empty())
+			{
+				// fix language code if country is specified
+				std::string::size_type pos = lang.find('-');
+
+				if (pos != std::string::npos)
+					lang = lang.substr(0, pos);
+
+				// only keep language code if supported by NeL
+				if (isLanguageCodeSupported(lang))
+				{
+					_SystemLanguageCode = lang;
+					break;
+				}
+			}
+		}
+
+		// don't need languages array anymore
+		CFRelease(langs);
+	}
+#endif
+
+#ifdef NL_OS_WINDOWS
+	// use user locale under Windows (since Vista)
+	if (_SystemLanguageCode.empty())
+	{
+		// GetUserDefaultLocaleName prototype
+		typedef int (WINAPI* GetUserDefaultLocaleNamePtr)(LPWSTR lpLocaleName, int cchLocaleName);
+
+		// get pointer on GetUserDefaultLocaleName, kernel32.dll is always in memory so no need to call LoadLibrary
+		GetUserDefaultLocaleNamePtr nlGetUserDefaultLocaleName = (GetUserDefaultLocaleNamePtr)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetUserDefaultLocaleName");
+
+		// only use it if found
+		if (nlGetUserDefaultLocaleName)
+		{
+			// get user locale
+			wchar_t buffer[LOCALE_NAME_MAX_LENGTH];
+			sint res = nlGetUserDefaultLocaleName(buffer, LOCALE_NAME_MAX_LENGTH);
+
+			// convert wide string to std::string
+			std::string lang = wideToUtf8(buffer);
+
+			// only keep 2 first characters
+			if (lang.size() > 1)
+				_SystemLanguageCode = lang.substr(0, 2);
+		}
+	}
+#endif
+
+	// use system locale (works under OS X, Linux and Windows)
+	if (_SystemLanguageCode.empty())
+	{
+		// get default locale
+		char *locale = setlocale(LC_CTYPE, "");
+
+		if (locale)
+		{
+			std::string lang(locale);
+
+#ifdef NL_OS_WINDOWS
+			// be sure supported languages are initialized
+			initLanguages();
+
+			// locales names are different under Windows, for example: French_France.1252
+			for(uint i = 0; i < _LanguageNames.size(); ++i)
+			{
+				std::string name = _LanguageNames[i].toUtf8();
+
+				// so we compare the language name with the supported ones
+				if (lang.compare(0, name.length(), name) == 0)
+				{
+					// found, so use its code
+					_SystemLanguageCode = _LanguageCodes[i];
+					break;
+				}
+			}
+#else
+			if (lang.size() > 1)
+			{
+				// only keep 2 first characters
+				lang = NLMISC::toLower(lang).substr(0, 2);
+
+				// language code supported?
+				if (isLanguageCodeSupported(lang))
+					_SystemLanguageCode = lang;
+			}
+#endif
+		}
+	}
+
+	// english is default language
+	if (_SystemLanguageCode.empty())
+		_SystemLanguageCode = "en";
+
+	return _SystemLanguageCode;
+}
+
+bool CI18N::setSystemLanguageCode (const std::string &languageCode)
+{
+	// be sure supported languages are initialized
+	initLanguages();
+
+	std::string lang = NLMISC::toLower(languageCode);
+
+	// specified language is really a code (2 characters)
+	if (lang.length() == 2)
+	{
+		// check if language code is supported
+		for(uint i = 0; i < _LanguageCodes.size(); ++i)
+		{
+			std::string code = NLMISC::toLower(_LanguageCodes[i]);
+
+			if (lang == code)
+			{
+				// found, so use it
+				_SystemLanguageCode = lang;
+				return true;
+			}
+		}
+	}
+	// specified language is something else
+	else
+	{
+		// check if language name is supported
+		for(uint i = 0; i < _LanguageNames.size(); ++i)
+		{
+			std::string name = NLMISC::toLower(_LanguageNames[i].toUtf8());
+
+			if (name == lang)
+			{
+				// found, so use its code
+				_SystemLanguageCode = _LanguageCodes[i];
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 void CI18N::removeCComment(ucstring &commentedString)
 {
 	ucstring temp;
@@ -289,25 +508,39 @@ void CI18N::skipWhiteSpace(ucstring::const_iterator &it, ucstring::const_iterato
 		if (storeComments && *it == '/' && it+1 != last && *(it+1) == '/')
 		{
 			// found a one line C comment. Store it until end of line.
-			while (it != last && *it != '\n')
+			while (it != last && (*it != '\n' && *it != '\r'))
 				storeComments->push_back(*it++);
+
 			// store the final '\n'
 			if (it != last)
-				storeComments->push_back(*it++);
+				storeComments->push_back('\n');
 		}
 		else if (storeComments && *it == '/' && it+1 != last && *(it+1) == '*')
 		{
 			// found a multi line C++ comment. store until we found the closing '*/'
-			while (it != last && !(*it == '*' && it+1 != last && *(it+1) == '/'))
-				storeComments->push_back(*it++);
+			while (it != last && !(*it == '*' && it + 1 != last && *(it + 1) == '/'))
+			{
+				// don't put \r
+				if (*it == '\r')
+				{
+					// skip it
+					++it;
+				}
+				else
+				{
+					storeComments->push_back(*it++);
+				}
+			}
+
 			// store the final '*'
 			if (it != last)
 				storeComments->push_back(*it++);
+
 			// store the final '/'
 			if (it != last)
 				storeComments->push_back(*it++);
+
 			// and a new line.
-			storeComments->push_back('\r');
 			storeComments->push_back('\n');
 		}
 		else
@@ -443,7 +676,6 @@ bool CI18N::parseMarkedString(ucchar openMark, ucchar closeMark, ucstring::const
 
 void CI18N::readTextFile(const string &filename,
 						 ucstring &result,
-						 bool forceUtf8,
 						 bool fileLookup,
 						 bool preprocess,
 						 TLineFormat lineFmt,
@@ -453,11 +685,11 @@ void CI18N::readTextFile(const string &filename,
 	TReadContext readContext;
 
 	// call the inner function
-	_readTextFile(filename, result, forceUtf8, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
+	_readTextFile(filename, result, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
 
 	if (!readContext.IfStack.empty())
 	{
-		nlwarning("Preprocess: Missing %u closing #endif after parsing %s", readContext.IfStack.size(), filename.c_str() );
+		nlwarning("Preprocess: Missing %u closing #endif after parsing %s", (uint)readContext.IfStack.size(), filename.c_str() );
 	}
 }
 
@@ -496,7 +728,6 @@ void CI18N::skipLine(ucstring::const_iterator &it, ucstring::const_iterator end,
 
 void CI18N::_readTextFile(const string &filename,
 						 ucstring &result,
-						 bool forceUtf8,
 						 bool fileLookup,
 						 bool preprocess,
 						 TLineFormat lineFmt,
@@ -530,7 +761,7 @@ void CI18N::_readTextFile(const string &filename,
 
 	// Transform the string in ucstring according to format header
 	if (!text.empty())
-		readTextBuffer((uint8*)&text[0], (uint)text.size(), result, forceUtf8);
+		readTextBuffer((uint8*)&text[0], (uint)text.size(), result);
 
 	if (preprocess)
 	{
@@ -606,7 +837,7 @@ void CI18N::_readTextFile(const string &filename,
 									subFilename.c_str());
 
 								ucstring inserted;
-								_readTextFile(subFilename, inserted, forceUtf8, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
+								_readTextFile(subFilename, inserted, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
 								final += inserted;
 							}
 						}
@@ -660,7 +891,7 @@ void CI18N::_readTextFile(const string &filename,
 									subFilename.c_str());
 
 								ucstring inserted;
-								_readTextFile(subFilename, inserted, forceUtf8, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
+								_readTextFile(subFilename, inserted, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
 								final += inserted;
 							}
 						}
@@ -896,7 +1127,7 @@ void CI18N::_readTextFile(const string &filename,
 			temp.append(result.begin()+lastPos, result.end());
 			result.swap(temp);
 
-			temp = "";
+			temp.clear();
 
 			// second loop with the '\n'
 			pos = 0;
@@ -924,28 +1155,13 @@ void CI18N::_readTextFile(const string &filename,
 	}
 }
 
-void CI18N::readTextBuffer(uint8 *buffer, uint size, ucstring &result, bool forceUtf8)
+void CI18N::readTextBuffer(uint8 *buffer, uint size, ucstring &result)
 {
 	static uint8 utf16Header[] = { 0xffu, 0xfeu };
 	static uint8 utf16RevHeader[] = { 0xfeu, 0xffu };
 	static uint8 utf8Header[] = { 0xefu, 0xbbu, 0xbfu };
 
-	if (forceUtf8)
-	{
-		if (size>=3 &&
-			buffer[0]==utf8Header[0] &&
-			buffer[1]==utf8Header[1] &&
-			buffer[2]==utf8Header[2]
-			)
-		{
-			// remove utf8 header
-			buffer+= 3;
-			size-=3;
-		}
-		string text((char*)buffer, size);
-		result.fromUtf8(text);
-	}
-	else if (size>=3 &&
+	if (size>=3 &&
 			 buffer[0]==utf8Header[0] &&
 			 buffer[1]==utf8Header[1] &&
 			 buffer[2]==utf8Header[2]
@@ -998,10 +1214,9 @@ void CI18N::readTextBuffer(uint8 *buffer, uint size, ucstring &result, bool forc
 	}
 	else
 	{
-		// hum.. ascii read ?
-		// so, just do a direct conversion
+		// all text files without BOM are now parsed as UTF-8 by default
 		string text((char*)buffer, size);
-		result = text;
+		result.fromUtf8(text);
 	}
 }
 

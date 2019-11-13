@@ -85,7 +85,7 @@ static string getFuncInfo (DWORD_TYPE funcAddr, DWORD_TYPE stackAddr)
 	// replace param with the value of the stack for this param
 
 	string parse = str;
-	str = "";
+	str.clear();
 	uint pos = 0;
 	sint stop = 0;
 
@@ -99,7 +99,7 @@ static string getFuncInfo (DWORD_TYPE funcAddr, DWORD_TYPE stackAddr)
 		if (stop==0 && (parse[i] == ',' || parse[i] == ')'))
 		{
 			char tmp[32];
-			sprintf(tmp, "=0x%p", *((DWORD_TYPE*)(stackAddr) + 2 + pos++));
+			sprintf(tmp, "=0x%p", (void *)(*((DWORD_TYPE*)(stackAddr) + 2 + pos++)));
 			str += tmp;
 		}
 		str += parse[i];
@@ -138,9 +138,8 @@ static string getSourceInfo (DWORD_TYPE addr)
 		{
 			str = "<NoModule>";
 		}
-		char tmp[32];
-		sprintf (tmp, "!0x%X", addr);
-		str += tmp;
+
+		str += toString("!0x%p", (void*)addr);
 	}
 
 	return str;
@@ -166,16 +165,15 @@ static DWORD __stdcall GetModuleBase(HANDLE hProcess, DWORD dwReturnAddress)
 			DWORD cch = 0;
 			char szFile[MAX_PATH] = { 0 };
 
-		 cch = GetModuleFileNameA((HINSTANCE)memoryBasicInfo.AllocationBase,
-								 szFile, MAX_PATH);
+			cch = GetModuleFileNameA((HINSTANCE)memoryBasicInfo.AllocationBase, szFile, MAX_PATH);
 
-		if (cch && (lstrcmp(szFile, "DBFN")== 0))
-		{
-			char mn[] = { 'M', 'N', 0x00 };
+			if (cch && (lstrcmpA(szFile, "DBFN")== 0))
+			{
+				char mn[] = { 'M', 'N', 0x00 };
 #ifdef NL_OS_WIN64
-			if (!SymLoadModule64(
+				if (!SymLoadModule64(
 #else
-			if (!SymLoadModule(
+				if (!SymLoadModule(
 #endif
 					hProcess,
 					NULL, mn,
@@ -228,28 +226,28 @@ static void displayCallStack (CLog *log)
 
 	if (symbolPath.empty())
 	{
-		CHAR tmpPath[stringSize];
+		wchar_t tmpPath[stringSize];
 
 		symbolPath = ".";
 
-		if (GetEnvironmentVariable ("_NT_SYMBOL_PATH", tmpPath, stringSize))
+		if (GetEnvironmentVariableW (L"_NT_SYMBOL_PATH", tmpPath, stringSize))
 		{
 			symbolPath += ";";
-			symbolPath += tmpPath;
+			symbolPath += wideToUtf8(tmpPath);
 		}
 
-		if (GetEnvironmentVariable ("_NT_ALTERNATE_SYMBOL_PATH", tmpPath, stringSize))
+		if (GetEnvironmentVariableW (L"_NT_ALTERNATE_SYMBOL_PATH", tmpPath, stringSize))
 		{
 			symbolPath += ";";
-			symbolPath += tmpPath;
+			symbolPath += wideToUtf8(tmpPath);
 		}
 
-		if (GetEnvironmentVariable ("SYSTEMROOT", tmpPath, stringSize))
+		if (GetEnvironmentVariableW (L"SYSTEMROOT", tmpPath, stringSize))
 		{
 			symbolPath += ";";
-			symbolPath += tmpPath;
+			symbolPath += wideToUtf8(tmpPath);
 			symbolPath += ";";
-			symbolPath += tmpPath;
+			symbolPath += wideToUtf8(tmpPath);
 			symbolPath += "\\system32";
 		}
 	}

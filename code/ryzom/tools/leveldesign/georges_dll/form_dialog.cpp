@@ -165,7 +165,7 @@ CWnd* CFormDialog::addTypeWidget (const NLGEORGES::CType &type, uint elmIndex, c
 
 			// Create a reg key
 			string tfn = typeFilename;
-			string key = GEORGES_EDIT_BASE_REG_KEY"\\"+strlwr (typeFilename)+" MemCombo";
+			tstring key = utf8ToTStr(GEORGES_EDIT_BASE_REG_KEY"\\"+strlwr (typeFilename)+" MemCombo");
 
 			// Create the widget
 			memCombo->create (WS_CHILD|WS_TABSTOP, currentPos, this, WidgetIndexCount, title, key.c_str(), type.UIType==CType::EditSpin, type.UIType==CType::FileBrowser, filenameExt);
@@ -251,7 +251,7 @@ void CFormDialog::getVirtualDfnFromDocument (const NLGEORGES::CFormDfn *_dfn, co
 
 			// Create the widget
 			memCombo->create (WS_CHILD|WS_TABSTOP, currentPos, this, WidgetIndexCount, "Dfn:", 
-				GEORGES_EDIT_BASE_REG_KEY"\\Virtual Dfn MemCombo", false, true, "*.dfn");
+				_T(GEORGES_EDIT_BASE_REG_KEY) _T("\\Virtual Dfn MemCombo"), false, true, "*.dfn");
 
 			// Get from document
 			memCombo->getFromDocument (*doc->getFormPtr ());
@@ -462,7 +462,7 @@ void CFormDialog::getArrayFromDocument (const char *structName, uint structId, u
 
 			// Create the widget
 			memCombo->create (WS_CHILD|WS_TABSTOP, currentPos, this, WidgetIndexCount, "Array size:", 
-				GEORGES_EDIT_BASE_REG_KEY"\\Array Size MemCombo", true, false, NULL);
+				_T(GEORGES_EDIT_BASE_REG_KEY) _T("\\Array Size MemCombo"), true, false, NULL);
 
 			// Get from document
 			memCombo->getFromDocument (*doc->getFormPtr ());
@@ -770,7 +770,7 @@ BOOL CFormDialog::OnCommand(WPARAM wParam, LPARAM lParam)
 					colorEdit->Edit.GetWindowText (str);
 
 					sint r, g, b;
-					if (sscanf (str, "%d,%d,%d", &r, &g, &b) == 3)
+					if (_stscanf (str, _T("%d,%d,%d"), &r, &g, &b) == 3)
 					{
 						clamp (r, 0, 255);
 						clamp (g, 0, 255);
@@ -832,11 +832,11 @@ BOOL CFormDialog::OnCommand(WPARAM wParam, LPARAM lParam)
 							smprintf (filter, 512, "%s Files (%s)|%s|All Files(*.*)|*.*|", typeName+i, ext.c_str(), ext.c_str());
 
 							// Open the dialog
-							CFileDialog dlgFile (TRUE, ext.c_str (), ext.c_str (), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter, theApp.m_pMainWnd);
+						    CFileDialog dlgFile(TRUE, nlUtf8ToTStr(ext), nlUtf8ToTStr(ext), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, nlUtf8ToTStr(filter), theApp.m_pMainWnd);
 							if (dlgFile.DoModal () == IDOK)
 							{
 								combo->Combo.UpdateData ();
-								combo->Combo.SetWindowText (dlgFile.GetFileName ());
+								combo->Combo.SetWindowText(dlgFile.GetFileName());
 								combo->Combo.UpdateData (FALSE);
 								setToDocument (widgetId);
 								PostMessage (CBN_CHANGED, 0, 0);
@@ -850,7 +850,7 @@ BOOL CFormDialog::OnCommand(WPARAM wParam, LPARAM lParam)
 						if (colorEdit && IsWindow (colorEdit->Color))
 						{
 							colorEdit->Empty = true;
-							colorEdit->Edit.SetWindowText("");
+							colorEdit->Edit.SetWindowText(_T(""));
 							setToDocument (getWidget (wParam));
 							updateValues ();
 						}
@@ -864,12 +864,8 @@ BOOL CFormDialog::OnCommand(WPARAM wParam, LPARAM lParam)
 						CGeorgesEditDoc *doc = View->GetDocument ();
 						if (doc)
 						{
-							// Build the filter string
-							char filter[512];
-							smprintf (filter, 512, "Dfn Files (*.dfn)|*.dfn|All Files(*.*)|*.*|");
-
 							// Open the dialog
-							CFileDialog dlgFile (TRUE, "*.dfn", "*.dfn", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter, theApp.m_pMainWnd);
+							CFileDialog dlgFile (TRUE, _T("*.dfn"), _T("*.dfn"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("Dfn Files (*.dfn)|*.dfn|All Files(*.*)|*.*|"), theApp.m_pMainWnd);
 							if (dlgFile.DoModal () == IDOK)
 							{
 								combo->Combo.UpdateData ();
@@ -930,7 +926,7 @@ BOOL CFormDialog::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 					CString str;
 					combo->Combo.UpdateData ();
 					combo->Combo.GetWindowText (str);
-					if (sscanf (str, "%f", &value) == 1)
+					if (_stscanf (str, _T("%f"), &value) == 1)
 					{
 						CGeorgesEditDoc *doc = View->GetDocument();
 						if (doc)
@@ -947,7 +943,7 @@ BOOL CFormDialog::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 
 							// Search for the node
 							nlverify ((const CFormElm*)(doc->getRootNode (Widgets[i]->getSlot ()))->getNodeByName 
-								(Widgets[i]->getFormName ().c_str (), &parentDfn, lastElement, &nodeDfn, &nodeType, 
+								(Widgets[i]->getFormName (), &parentDfn, lastElement, &nodeDfn, &nodeType, 
 								&node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 
 							// Todo: multiply here by the spinner precision
@@ -958,8 +954,8 @@ BOOL CFormDialog::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 							value -= (float)(lpnmud->iDelta) * increment;
 
 							// Print the result
-							char result[512];
-							sprintf (result, "%g", value);
+							TCHAR result[512];
+							_stprintf (result, _T("%g"), value);
 							
 							// Set the windnow text
 							combo->Combo.SetWindowText (result);
@@ -1101,7 +1097,7 @@ void CFormDialog::getFromDocument ()
 		UFormDfn::TEntryType type;
 
 		// Search for the node
-		nlverify (((const CFormElm*)(doc->getRootNode (subObject->getSlot ())))->getNodeByName (subObject->getFormName ().c_str (), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
+		nlverify (((const CFormElm*)(doc->getRootNode (subObject->getSlot ())))->getNodeByName (subObject->getFormName (), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 
 		// Should have a parent DFN, else it is the root element
 		if (parentDfn)
@@ -1170,19 +1166,17 @@ void CFormDialog::getFromDocument ()
 
 // ***************************************************************************
 
-void CFormDialog::getDfnName (string &result) const
+void CFormDialog::getDfnName(string &result) const
 {
 	CGeorgesEditDoc *doc = View->GetDocument ();
 	if (doc)
 	{
 		// Get the DFN filename
-		CString str = doc->GetPathName ();
-		char extension[512];
-		_splitpath (str, NULL, NULL, NULL, extension);
-		result = (*extension == '.') ? extension+1 : extension;
+		CString str = doc->GetPathName();
+		result = NLMISC::CFile::getExtension(tStrToUtf8(str));
 	}
 	else
-		result = "";
+		result.clear();
 }
 
 // ***************************************************************************
@@ -1298,14 +1292,14 @@ void IFormWidget::updateLabel ()
 					UFormElm::TWhereIsValue where;
 					CForm *form=doc->getFormPtr ();
 					CFormElm *elm = doc->getRootNode (getSlot ());
-					nlverify (elm->getValueByName (result, FormName.c_str (), UFormElm::NoEval, &where));
+					nlverify (elm->getValueByName (result, FormName, UFormElm::NoEval, &where));
 
 					// Get the value evaluated
 					std::string resultEvaluated;
 #ifdef TEST_EVAL_FORMULA
-					bool error = !elm->getValueByName (resultEvaluated, FormName.c_str (), UFormElm::Formula, &where);
+					bool error = !elm->getValueByName (resultEvaluated, FormName, UFormElm::Formula, &where);
 #else // TEST_EVAL_FORMULA
-					bool error = !elm->getValueByName (resultEvaluated, FormName.c_str (), UFormElm::Eval, &where);
+					bool error = !elm->getValueByName (resultEvaluated, FormName, UFormElm::Eval, &where);
 #endif // TEST_EVAL_FORMULA
 
 					// Complete the array ?
@@ -1322,16 +1316,16 @@ void IFormWidget::updateLabel ()
 					switch (where)
 					{
 					case UFormElm::ValueForm:
-						Label.SetWindowText ((SavedLabel+comp).c_str());
+						Label.SetWindowText(nlUtf8ToTStr(SavedLabel + comp));
 						break;
 					case UFormElm::ValueParentForm:
-						Label.SetWindowText ((SavedLabel+" (in parent form)"+comp).c_str());
+						Label.SetWindowText(nlUtf8ToTStr(SavedLabel + " (in parent form)" + comp));
 						break;
 					case UFormElm::ValueDefaultDfn:
-						Label.SetWindowText ((SavedLabel+" (default DFN value)"+comp).c_str());
+						Label.SetWindowText(nlUtf8ToTStr(SavedLabel + " (default DFN value)" + comp));
 						break;
 					case UFormElm::ValueDefaultType:
-						Label.SetWindowText ((SavedLabel+" (default TYPE value)"+comp).c_str());
+						Label.SetWindowText(nlUtf8ToTStr(SavedLabel + " (default TYPE value)" + comp));
 						break;
 					}
 				}
@@ -1348,7 +1342,7 @@ void IFormWidget::updateLabel ()
 					bool parentVDfnArray;
 					CForm *form=doc->getFormPtr ();
 					CFormElm *elm = doc->getRootNode (getSlot ());
-					nlverify ( elm->getNodeByName (FormName.c_str (), &parentDfn, indexDfn, 
+					nlverify ( elm->getNodeByName (FormName, &parentDfn, indexDfn, 
 						&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 					// Does the node exist ?
@@ -1358,18 +1352,18 @@ void IFormWidget::updateLabel ()
 						if (node->getForm () == doc->getFormPtr ())
 						{
 							// The node exist
-							Label.SetWindowText (SavedLabel.c_str());
+							Label.SetWindowText(nlUtf8ToTStr(SavedLabel));
 						}
 						else
 						{
 							// The node exist in the parent form
-							Label.SetWindowText ((SavedLabel+" (in parent form)").c_str());
+							Label.SetWindowText(nlUtf8ToTStr(SavedLabel + " (in parent form)"));
 						}
 					}	
 					else
 					{
 						// The node is empty
-						Label.SetWindowText ((SavedLabel+" (undefined)").c_str());
+						Label.SetWindowText(nlUtf8ToTStr(SavedLabel + " (undefined)"));
 					}
 				}
 
@@ -1407,7 +1401,7 @@ bool IFormWidget::getNode (const CFormDfn **parentDfn, uint &lastElement, const 
 		bool parentVDfnArray;
 		CForm *form=doc->getFormPtr ();
 		CFormElm *elm = doc->getRootNode (getSlot ());
-		return (elm->getNodeByName (FormName.c_str (), parentDfn, 
+		return (elm->getNodeByName (FormName, parentDfn, 
 			lastElement, nodeDfn, nodeType, node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 	}
 	return false;
@@ -1515,10 +1509,10 @@ void IFormWidget::onOpenSelected ()
 	string str;
 	getValue (str);
 
-	std::string str2=CPath::lookup (str.c_str (), false, false);
+	std::string str2 = CPath::lookup (str, false, false);
 	if (str2.empty())
-		str2 = str.c_str ();
-	theApp.OpenDocumentFile (str2.c_str ());
+		str2 = str;
+	theApp.OpenDocumentFile(nlUtf8ToTStr(str2));
 }
 
 // ***************************************************************************
@@ -1547,7 +1541,7 @@ CFormMemCombo::~CFormMemCombo ()
 
 // ***************************************************************************
 
-void CFormMemCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, uint &dialog_index, const char *label, const char *reg, bool useSpinner, bool fileBrowser, const char *filenameExt)
+void CFormMemCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, uint &dialog_index, const char *label, const TCHAR *reg, bool useSpinner, bool fileBrowser, const char *filenameExt)
 {
 	// Get the doc
 	CGeorgesEditDoc *doc = Dialog->View->GetDocument ();
@@ -1564,7 +1558,7 @@ void CFormMemCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent,
 	bool parentVDfnArray;
 	CForm *form=doc->getFormPtr ();
 	CFormElm *elm = doc->getRootNode (getSlot ());
-	nlverify ( elm->getNodeByName (FormName.c_str (), &parentDfn, indexDfn, 
+	nlverify ( elm->getNodeByName (FormName, &parentDfn, indexDfn, 
 		&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 	FirstId = dialog_index;
@@ -1575,7 +1569,7 @@ void CFormMemCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent,
 
 	// Create the type combo
 	parent->setStaticSize (currentPos);
-	Label.Create (label, WS_VISIBLE, currentPos, parent);
+	Label.Create(nlUtf8ToTStr(label), WS_VISIBLE, currentPos, parent);
 	parent->initWidget (Label);
 	parent->getNextPosLabel (currentPos);
 
@@ -1609,7 +1603,7 @@ void CFormMemCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent,
 		RECT spinPos = currentPos;
 		parent->getNextBrowsePos (spinPos);
 		parent->setBrowseSize (spinPos);
-		Browse.Create ("...", WS_CHILD|WS_VISIBLE|WS_TABSTOP, spinPos, parent, dialog_index+1);
+		Browse.Create (_T("..."), WS_CHILD|WS_VISIBLE|WS_TABSTOP, spinPos, parent, dialog_index+1);
 		parent->initWidget (Browse);
 		parent->getNextPos (currentPos);
 
@@ -1681,7 +1675,7 @@ void CFormMemCombo::getValue (std::string &result)
 	Combo.UpdateData (FALSE);
 	
 	// Set the atom value
-	result = (const char*)str;
+	result = tStrToUtf8(str);
 }
 
 // ***************************************************************************
@@ -1694,10 +1688,10 @@ void CFormMemCombo::getFromDocument (CForm &form)
 	if ((SrcType == TypeForm) || (SrcType == TypeType))
 	{
 		string result;
-		if (doc->getRootNode(getSlot ())->getValueByName (result, FormName.c_str(), UFormElm::NoEval, NULL))
+		if (doc->getRootNode(getSlot ())->getValueByName (result, FormName, UFormElm::NoEval, NULL))
 		{
 			Combo.UpdateData ();
-			Combo.SetWindowText (result.c_str());
+			Combo.SetWindowText(nlUtf8ToTStr(result));
 			Combo.UpdateData (FALSE);
 			updateLabel ();
 		}
@@ -1716,7 +1710,7 @@ void CFormMemCombo::getFromDocument (CForm &form)
 		UFormDfn::TEntryType type;
 		bool array;
 		bool parentVDfnArray;
-		nlverify (((const CFormElm*)doc->getRootNode(getSlot ()))->getNodeByName (FormName.c_str(), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
+		nlverify (((const CFormElm*)doc->getRootNode(getSlot ()))->getNodeByName (FormName, &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 		nlassert (array);
 
 		// Node exist ?
@@ -1726,16 +1720,16 @@ void CFormMemCombo::getFromDocument (CForm &form)
 			CFormElmArray *arrayNode = safe_cast<CFormElmArray*> (node);
 			char label[512];
 			smprintf (label, 512, "%d", arrayNode->Elements.size ());
-			Combo.SetWindowText (label);
+			Combo.SetWindowText(nlUtf8ToTStr(label));
 
 			if (arrayNode->getForm () == &form)
-				Label.SetWindowText ("Array size:");
+				Label.SetWindowText (_T("Array size:"));
 			else
-				Label.SetWindowText ("Array size: (in parent form)");
+				Label.SetWindowText (_T("Array size: (in parent form)"));
 		}
 		else
 		{
-			Combo.SetWindowText ("0");
+			Combo.SetWindowText (_T("0"));
 		}
 		Combo.UpdateData (FALSE);
 	}
@@ -1749,7 +1743,7 @@ void CFormMemCombo::getFromDocument (CForm &form)
 		UFormDfn::TEntryType type;
 		bool array;
 		bool parentVDfnArray;
-		nlverify (((const CFormElm*)doc->getRootNode (getSlot ()))->getNodeByName (FormName.c_str(), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
+		nlverify (((const CFormElm*)doc->getRootNode (getSlot ()))->getNodeByName (FormName, &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 		nlassert (!array);
 
 		// Node exist ?
@@ -1757,11 +1751,11 @@ void CFormMemCombo::getFromDocument (CForm &form)
 		if (node)
 		{
 			CFormElmVirtualStruct *virtualNode = safe_cast<CFormElmVirtualStruct*> (node);
-			Combo.SetWindowText (virtualNode->DfnFilename.c_str());
+			Combo.SetWindowText(nlUtf8ToTStr(virtualNode->DfnFilename));
 		}
 		else
 		{
-			Combo.SetWindowText ("");
+			Combo.SetWindowText (_T(""));
 		}
 		Combo.UpdateData (FALSE);
 	}
@@ -1909,7 +1903,7 @@ void CFormCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, ui
 
 	// Create the type combo
 	parent->setStaticSize (currentPos);
-	Label.Create (label, WS_VISIBLE, currentPos, parent);
+	Label.Create(nlUtf8ToTStr(label), WS_VISIBLE, currentPos, parent);
 	parent->initWidget (Label);
 	parent->getNextPosLabel (currentPos);
 
@@ -1924,10 +1918,10 @@ void CFormCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, ui
 	// Get predefs
 	if (nodeType)
 	{
-		Combo.InsertString (0, "");
+		Combo.InsertString (0, _T(""));
 		for (uint predef=0; predef<nodeType->Definitions.size(); predef++)
 		{
-			Combo.InsertString (predef+1, nodeType->Definitions[predef].Label.c_str());
+			Combo.InsertString(predef + 1, nlUtf8ToTStr(nodeType->Definitions[predef].Label));
 		}
 	}
 
@@ -1979,7 +1973,7 @@ void CFormCombo::getValue (std::string &result)
 	Combo.UpdateData (FALSE);
 
 	// Set the atom value
-	result = (const char*)str;
+	result = tStrToUtf8(str);
 }
 
 // ***************************************************************************
@@ -2094,13 +2088,13 @@ void CFormBigEdit::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, 
 
 	// Create the type combo
 	parent->setStaticSize (currentPos);
-	Label.Create (label, WS_VISIBLE, currentPos, parent);
+	Label.Create(nlUtf8ToTStr(label), WS_VISIBLE, currentPos, parent);
 	parent->initWidget (Label);
 	parent->getNextPosLabel (currentPos);
 
 	// Create the mem combobox
 	parent->setBigEditSize (currentPos, parent->SmallWidget);
-	Edit.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), "", WS_VSCROLL|ES_OEMCONVERT|ES_MULTILINE|ES_WANTRETURN|WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_AUTOHSCROLL|ES_AUTOVSCROLL, currentPos, parent, dialog_index);
+	Edit.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), _T(""), WS_VSCROLL|ES_OEMCONVERT|ES_MULTILINE|ES_WANTRETURN|WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_AUTOHSCROLL|ES_AUTOVSCROLL, currentPos, parent, dialog_index);
 	parent->initWidget (Edit);
 	parent->getNextPos (currentPos);
 
@@ -2152,7 +2146,7 @@ void CFormBigEdit::getValue (std::string &result)
 	Edit.UpdateData (FALSE);
 	
 	// Set the atom value
-	result = (const char*)str;
+	result = tStrToUtf8(str);
 }
 
 // ***************************************************************************
@@ -2268,7 +2262,7 @@ void CColorEdit::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, ui
 
 	// Create the type combo
 	parent->setStaticSize (currentPos);
-	Label.Create (label, WS_VISIBLE, currentPos, parent);
+	Label.Create(nlUtf8ToTStr(label), WS_VISIBLE, currentPos, parent);
 	parent->initWidget (Label);
 	parent->getNextPosLabel (currentPos);
 
@@ -2281,13 +2275,13 @@ void CColorEdit::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, ui
 	RECT resetPos = currentPos;
 	parent->getNextColorPos (resetPos);
 	parent->setResetColorSize (resetPos);
-	Reset.Create ("Reset", WS_CHILD|WS_VISIBLE|WS_TABSTOP, resetPos, parent, dialog_index+1);
+	Reset.Create (_T("Reset"), WS_CHILD|WS_VISIBLE|WS_TABSTOP, resetPos, parent, dialog_index+1);
 	parent->initWidget (Reset);
 	parent->getNextPosLabel (currentPos);
 
 	// Create the Edit
 	parent->setBigEditSize (currentPos, parent->SmallWidget);
-	Edit.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), "", ES_OEMCONVERT|ES_WANTRETURN|WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_AUTOHSCROLL, currentPos, parent, dialog_index+2);
+	Edit.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), _T(""), ES_OEMCONVERT|ES_WANTRETURN|WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_AUTOHSCROLL, currentPos, parent, dialog_index+2);
 	parent->initWidget (Edit);
 	parent->getNextPos (currentPos);
 
@@ -2350,7 +2344,7 @@ void CColorEdit::getValue (std::string &result)
 	}
 	else
 	{
-		result = "";
+		result.clear();
 	}
 }
 
@@ -2498,7 +2492,7 @@ void CListWidget::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, u
 
 	// Create the type combo
 	parent->setStaticSize (currentPos);
-	Label.Create (label, WS_VISIBLE, currentPos, parent);
+	Label.Create(nlUtf8ToTStr(label), WS_VISIBLE, currentPos, parent);
 	parent->initWidget (Label);
 	parent->getNextPosLabel (currentPos);
 
@@ -2510,7 +2504,7 @@ void CListWidget::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, u
 
 	// Create the assign parent
 	parent->setButtonSize (currentPos, parent->SmallWidget);
-	Button.Create ("Assign parents", WS_CHILD|WS_VISIBLE|WS_TABSTOP, currentPos, parent, dialog_index+1);
+	Button.Create (_T("Assign parents"), WS_CHILD|WS_VISIBLE|WS_TABSTOP, currentPos, parent, dialog_index+1);
 	parent->initWidget (Button);
 	parent->getNextPos (currentPos);
 
@@ -2521,7 +2515,7 @@ void CListWidget::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, u
 
 void CListWidget::addColumn (const char *name)
 {
-	ListCtrl.insertColumn (0, name);
+	ListCtrl.insertColumn(0, nlUtf8ToTStr(name));
 	ListCtrl.recalcColumn ();
 }
 
@@ -2572,7 +2566,7 @@ void CListWidget::getFromDocument (NLGEORGES::CForm &form)
 		string filename = form.getParentFilename (parent);
 
 		// Insert in the list
-		ListCtrl.ListCtrl.InsertItem (parent, filename.c_str ());
+		ListCtrl.ListCtrl.InsertItem(parent, nlUtf8ToTStr(filename));
 
 		ListCtrl.ListCtrl.UpdateData (FALSE);
 		updateLabel ();
@@ -2591,7 +2585,7 @@ uint CListWidget::getNumValue ()
 void CListWidget::getValue (std::string &result, uint value)
 {
 	CString str = ListCtrl.ListCtrl.GetItemText (value, 0);
-	result = str;
+	result = tStrToUtf8(str);
 }
 
 // ***************************************************************************
@@ -2715,12 +2709,12 @@ void CListWidget::onOpenSelected ()
 		if (str != "")
 		{
 			// Look for the file
-			string name = CPath::lookup ((const char*)str, false, false);
-			if (name.empty ())
+			CString name = nlUtf8ToTStr(CPath::lookup(tStrToUtf8(str), false, false));
+			if (name.IsEmpty())
 				name = str;
 
 			// Open the file
-			theApp.OpenDocumentFile (name.c_str ());
+			theApp.OpenDocumentFile(name);
 		}
 	}
 }
@@ -2756,7 +2750,7 @@ void CIconWidget::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent, u
 
 	// Create the type combo
 	parent->setStaticSize (currentPos);
-	Label.Create (label, WS_VISIBLE, currentPos, parent);
+	Label.Create(nlUtf8ToTStr(label), WS_VISIBLE, currentPos, parent);
 	parent->initWidget (Label);
 	parent->getNextPosLabel (currentPos);
 
@@ -2807,7 +2801,7 @@ void CIconWidget::onOk ()
 
 void CIconWidget::getValue (std::string &result)
 {
-	result = "";
+	result.clear();
 }
 
 // ***************************************************************************

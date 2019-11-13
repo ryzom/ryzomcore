@@ -28,6 +28,9 @@
 using	namespace NLMISC;
 using	namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 //#define NEL_DUMP_UPLOAD_TIME
 
@@ -97,7 +100,7 @@ CTextureDrvInfosGL::~CTextureDrvInfosGL()
 
 CDepthStencilFBO::CDepthStencilFBO(CDriverGL *driver, uint width, uint height)
 {
-	nldebug("3D: Init shared FBO");
+	//nldebug("3D: Init shared FBO");
 
 	m_Driver = driver;
 	Width = width;
@@ -139,7 +142,7 @@ CDepthStencilFBO::~CDepthStencilFBO()
 
 	if (DepthFBOId)
 	{
-		nldebug("3D: Release shared FBO");
+		//nldebug("3D: Release shared FBO");
 		nglDeleteRenderbuffersEXT(1, &DepthFBOId);
 		if (StencilFBOId == DepthFBOId)
 			StencilFBOId = 0;
@@ -188,10 +191,10 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 			}
 			nglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
 										 GL_RENDERBUFFER_EXT, DepthStencilFBO->DepthFBOId);
-			nldebug("3D: glFramebufferRenderbufferExt(depth:24) = %X", nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
+			//nldebug("3D: glFramebufferRenderbufferExt(depth:24) = %X", nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
 			nglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT,
 										 GL_RENDERBUFFER_EXT, DepthStencilFBO->StencilFBOId);
-			nldebug("3D: glFramebufferRenderbufferExt(stencil:8) = %X", nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
+			//nldebug("3D: glFramebufferRenderbufferExt(stencil:8) = %X", nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
 		}
 
 		// check status
@@ -2126,6 +2129,22 @@ void		CDriverGL::setAnisotropicFilter(sint filtering)
 		// set specified value for anisotropic filter
 		_AnisotropicFilter = filtering;
 	}
+}
+
+// ***************************************************************************
+uint		CDriverGL::getAnisotropicFilter() const
+{
+	H_AUTO_OGL(CDriverGL_getAnisotropicFilter);
+
+	return (uint)_AnisotropicFilter;
+}
+
+// ***************************************************************************
+uint		CDriverGL::getAnisotropicFilterMaximum() const
+{
+	H_AUTO_OGL(CDriverGL_getAnisotropicFilterMaximum);
+
+	return (uint)_Extensions.EXTTextureFilterAnisotropicMaximum;
 }
 
 // ***************************************************************************

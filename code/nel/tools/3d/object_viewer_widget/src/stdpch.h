@@ -20,7 +20,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef NL_STDPCH_H
 #define NL_STDPCH_H
 
-#include <nel/misc/types_nl.h>
+#if defined(_MSC_VER) && defined(_DEBUG)
+	#define _CRTDBG_MAP_ALLOC
+	#include <stdlib.h>
+	#include <crtdbg.h>
+	#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+	#undef realloc
+	#undef free
+#endif
+
+#include <QtCore/QtCore>
+#include <QtGui/QtGui>
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#define USE_QT5
+#endif
+
+#ifdef USE_QT5
+#include <QtWidgets/QtWidgets>
+#include <QtConcurrent/QtConcurrent>
+#endif
 
 #include <map>
 #include <memory>
@@ -28,6 +47,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 
+#include <nel/misc/types_nl.h>
 #include <nel/misc/common.h>
+
+#if defined(NL_OS_WINDOWS)
+#define NOMINMAX
+#include <Windows.h>
+#elif defined(NL_OS_MAC)
+#else
+#include <X11/Xlib.h>
+#endif
 
 #endif

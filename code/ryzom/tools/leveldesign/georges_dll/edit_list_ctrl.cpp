@@ -45,7 +45,7 @@ bool CEditListCtrl::create (DWORD wStyle, RECT &rect, CWnd *parent, uint dialog_
 	LPCTSTR className = AfxRegisterWndClass( 0 ); 
 
 	// Create this window
-	if (CWnd::Create (className, "empty", WS_CHILD|wStyle, rect, parent, dialog_index))
+	if (CWnd::Create (className, _T("empty"), WS_CHILD|wStyle, rect, parent, dialog_index))
 	{
 		RECT subRect;
 		subRect.left = 0;
@@ -69,7 +69,7 @@ bool CEditListCtrl::create (DWORD wStyle, RECT &rect, CWnd *parent, uint dialog_
 			Edit.SetFont (ListCtrl.GetFont());
 			Combo.Create (WS_BORDER|CBS_DROPDOWNLIST, rect, &ListCtrl, IdCombo);
 			Combo.SetFont (ListCtrl.GetFont());
-			MemCombo.create (WS_CHILD, rect, &ListCtrl, IdMemCombo, "", theApp.RememberListSize);
+			MemCombo.create (WS_CHILD, rect, &ListCtrl, IdMemCombo, _T(""), theApp.RememberListSize);
 			MemCombo.SetFont (ListCtrl.GetFont());
 			return true;
 		}
@@ -122,11 +122,11 @@ BOOL CEditListCtrl::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 				// Insert an item at the end
 				string text;
 				getNewItemText (ListCtrl.GetItemCount (), 0, text);
-				ListCtrl.InsertItem (ListCtrl.GetItemCount (), text.c_str ());
+			    ListCtrl.InsertItem(ListCtrl.GetItemCount(), nlUtf8ToTStr(text));
 				for (uint i=1; i<ColumnCount; i++)
 				{
 					getNewItemText (ListCtrl.GetItemCount ()-1, i, text);
-					ListCtrl.SetItemText (ListCtrl.GetItemCount ()-1, i, text.c_str ());
+				    ListCtrl.SetItemText(ListCtrl.GetItemCount() - 1, i, nlUtf8ToTStr(text));
 				}
 				ListCtrl.SetItemState (ListCtrl.GetItemCount ()-1, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
 
@@ -151,22 +151,22 @@ BOOL CEditListCtrl::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 						item = ListCtrl.GetNextSelectedItem(pos);
 						string text;
 						getNewItemText (item, 0, text);
-						ListCtrl.InsertItem (item, text.c_str ());
+				        ListCtrl.InsertItem(item, nlUtf8ToTStr(text));
 						for (uint i=1; i<ColumnCount; i++)
 						{
 							getNewItemText (item, i, text);
-							ListCtrl.SetItemText (item, i, text.c_str ());
+					        ListCtrl.SetItemText(item, i, nlUtf8ToTStr(text));
 						}
 					}
 					else
 					{
 						string text;
 						getNewItemText (0, 0, text);
-						ListCtrl.InsertItem (0, text.c_str ());
+				        ListCtrl.InsertItem(0, nlUtf8ToTStr(text));
 						for (uint i=1; i<ColumnCount; i++)
 						{
 							getNewItemText (0, i, text);
-							ListCtrl.SetItemText (0, i, text.c_str ());
+					        ListCtrl.SetItemText(0, i, nlUtf8ToTStr(text));
 						}
 						ListCtrl.SetItemState (0, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
 					}
@@ -311,8 +311,11 @@ LRESULT CMyListCtrl::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 				std::string		defDir;
 				Ctrl->getBrowseInfo (Ctrl->Item, Ctrl->SubItem, defExt, defFilename, defDir, filter);
 
-				CFileDialog dlgFile (TRUE, defExt.c_str (), defFilename.c_str (), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter.c_str (), theApp.m_pMainWnd);
-				dlgFile.m_ofn.lpstrInitialDir = defDir.c_str ();
+				TCHAR buffer[MAX_PATH];
+			    _tcscpy_s(buffer, MAX_PATH, nlUtf8ToTStr(defDir));
+
+				CFileDialog dlgFile(TRUE, nlUtf8ToTStr(defExt), nlUtf8ToTStr(defFilename), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, nlUtf8ToTStr(filter), theApp.m_pMainWnd);
+				dlgFile.m_ofn.lpstrInitialDir = buffer;
 				Ctrl->OnBrowse = true;
 				if (dlgFile.DoModal () == IDOK)
 				{
@@ -431,7 +434,7 @@ void CEditListCtrl::editItem (uint item, uint subitem)
 	{
 		// Move the editbox
 		Edit.SetWindowPos (NULL, subItemRect.left, subItemRect.top, subItemRect.right-subItemRect.left, subItemRect.bottom-subItemRect.top, SWP_SHOWWINDOW);
-		char tmp[512];
+		TCHAR tmp[512];
 		ListCtrl.GetItemText (Item, SubItem, tmp, 512);
 		Edit.SetWindowText (tmp);
 		Edit.SetSel( 0, -1);
@@ -440,7 +443,7 @@ void CEditListCtrl::editItem (uint item, uint subitem)
 	else if (editMode == EditFixedCombo)
 	{
 		// Get item string
-		char tmp[512];
+		TCHAR tmp[512];
 		ListCtrl.GetItemText (Item, SubItem, tmp, 512);
 
 		// Get the combo string
@@ -450,8 +453,8 @@ void CEditListCtrl::editItem (uint item, uint subitem)
 		getComboBoxStrings (Item, SubItem, retStrings);
 		for (uint i=0; i<retStrings.size (); i++)
 		{
-			Combo.InsertString (-1, retStrings[i].c_str());
-			if (retStrings[i] == tmp)
+			Combo.InsertString(-1, nlUtf8ToTStr(retStrings[i]));
+			if (retStrings[i] == NLMISC::tStrToUtf8(tmp))
 				Combo.SetCurSel (i);
 		}
 
@@ -465,14 +468,14 @@ void CEditListCtrl::editItem (uint item, uint subitem)
 	else if (editMode == EditMemCombo)
 	{
 		// Get item string
-		char tmp[512];
+		TCHAR tmp[512];
 		ListCtrl.GetItemText (Item, SubItem, tmp, 512);
 
 		// Get the combo strings
 		string retString;
 		bool browse;
 		getMemComboBoxProp (Item, SubItem, retString, browse);
-		MemCombo.setRegisterAdress (retString.c_str ());
+		MemCombo.setRegisterAdress(nlUtf8ToTStr(retString));
 		MemCombo.clearCommand ();
 		if (browse)
 			MemCombo.addCommand (GEORGES_EDIT_BROWSE_LABEL, CmdBrowse);
@@ -508,7 +511,7 @@ void CEditListCtrl::OnSetFocus( CWnd* pOldWnd )
 	}
 }
 
-void CEditListCtrl::insertColumn (uint id, const char *name)
+void CEditListCtrl::insertColumn (uint id, const TCHAR *name)
 {
 	ListCtrl.InsertColumn (id, name);
 	ColumnCount++;

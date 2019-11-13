@@ -85,7 +85,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CAnimationDlg message handlers
 
-void CAnimationDlg::OnEnd() 
+void CAnimationDlg::OnEnd()
 {
 	UpdateData ();
 	CurrentFrame=End;
@@ -95,7 +95,7 @@ void CAnimationDlg::OnEnd()
 	updateBar ();
 }
 
-void CAnimationDlg::OnPlay() 
+void CAnimationDlg::OnPlay()
 {
 	// play
 	UpdateData ();
@@ -111,7 +111,7 @@ void CAnimationDlg::OnPlay()
 	Main->enableFXs(true);
 }
 
-void CAnimationDlg::OnStop() 
+void CAnimationDlg::OnStop()
 {
 	// Is checked ?
 	UpdateData ();
@@ -124,7 +124,7 @@ void CAnimationDlg::OnStop()
 	Main->enableFXs(false);
 }
 
-void CAnimationDlg::OnChangeCurrentFrame() 
+void CAnimationDlg::OnChangeCurrentFrame()
 {
 	// TODO: If this is a RICHEDIT control, the control will not
 	// send this notification unless you override the CDialog::OnInitDialog()
@@ -133,7 +133,7 @@ void CAnimationDlg::OnChangeCurrentFrame()
 
 	// Update values
 	UpdateData ();
-	
+
 	// Clamp current frame
 	clamp (UICurrentFrame, (int)Start, (int)End);
 	CurrentFrame=(float)UICurrentFrame;
@@ -141,21 +141,21 @@ void CAnimationDlg::OnChangeCurrentFrame()
 
 	// Update
 	updateBar ();
-	UpdateData (FALSE);	
+	UpdateData (FALSE);
 }
 
-void CAnimationDlg::OnChangeEndEdit() 
+void CAnimationDlg::OnChangeEndEdit()
 {
 	// TODO: If this is a RICHEDIT control, the control will not
 	// send this notification unless you override the CDialog::OnInitDialog()
 	// function and call CRichEditCtrl().SetEventMask()
 	// with the ENM_CHANGE flag ORed into the mask.
-	
+
 	// TODO: Add your control notification handler code here
 
 	// Update values
 	UpdateData ();
-	
+
 	// Clamp current frame
 	if (End<Start)
 		Start=End;
@@ -167,17 +167,17 @@ void CAnimationDlg::OnChangeEndEdit()
 	UICurrentFrame=(int)CurrentFrame;
 
 	// Update
-	UpdateData (FALSE);	
+	UpdateData (FALSE);
 	Main->setAnimTime (Start, End);
 }
 
-void CAnimationDlg::OnChangeSpeed() 
+void CAnimationDlg::OnChangeSpeed()
 {
 	// TODO: If this is a RICHEDIT control, the control will not
 	// send this notification unless you override the CDialog::OnInitDialog()
 	// function and call CRichEditCtrl().SetEventMask()
 	// with the ENM_CHANGE flag ORed into the mask.
-	
+
 	UpdateData();
 	if (Speed<=0.001f)
 		Speed=0.001f;
@@ -187,7 +187,7 @@ void CAnimationDlg::OnChangeSpeed()
 	Main->setAnimTime (Start, End);
 }
 
-void CAnimationDlg::OnStart() 
+void CAnimationDlg::OnStart()
 {
 	UpdateData ();
 	CurrentFrame=Start;
@@ -197,16 +197,16 @@ void CAnimationDlg::OnStart()
 	updateBar ();
 }
 
-void CAnimationDlg::OnChangeStartEdit() 
+void CAnimationDlg::OnChangeStartEdit()
 {
 	// TODO: If this is a RICHEDIT control, the control will not
 	// send this notification unless you override the CDialog::OnInitDialog()
 	// function and call CRichEditCtrl().SetEventMask()
 	// with the ENM_CHANGE flag ORed into the mask.
-	
+
 	// Update values
 	UpdateData ();
-	
+
 	// Clamp current frame
 	if (End<Start)
 		End=Start;
@@ -218,11 +218,11 @@ void CAnimationDlg::OnChangeStartEdit()
 	UICurrentFrame=(int)CurrentFrame;
 
 	// Update
-	UpdateData (FALSE);	
+	UpdateData (FALSE);
 	Main->setAnimTime (Start, End);
 }
 
-void CAnimationDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+void CAnimationDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	// TODO: Add your message handler code here and/or call default
 
@@ -290,7 +290,7 @@ void CAnimationDlg::handle ()
 			float backup = CurrentFrame;
 			CurrentFrame=(float)fmod ((CurrentFrame-Start), End-Start)+Start;
 			if (backup!=CurrentFrame)
-			{			
+			{
 				LastFrame = CurrentFrame;
 				Main->enableFXs(false);
 				Main->enableFXs(true);
@@ -306,7 +306,7 @@ void CAnimationDlg::handle ()
 
 			// Stop animation
 			OnStop ();
-			
+
 		}
 		if (CurrentFrame<Start)
 		{
@@ -331,10 +331,10 @@ void CAnimationDlg::handle ()
 	LastTime=newTime;
 }
 
-BOOL CAnimationDlg::OnInitDialog() 
+BOOL CAnimationDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	// Stop
 	LastTime=NLMISC::CTime::getLocalTime ();
 	StopCtrl.SetCheck (1);
@@ -345,7 +345,7 @@ BOOL CAnimationDlg::OnInitDialog()
 
 	// Update the time line
 	updateBar ();
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -363,7 +363,7 @@ void CAnimationDlg::updateBar ()
 {
 	// Update value
 	UpdateData();
-	
+
 	// Set cursor position
 	int position;
 	if (fabs (End-Start)<0.00001f)
@@ -389,7 +389,7 @@ NL3D::TAnimationTime CAnimationDlg::getLastTime ()
 	return LastFrame/Speed;
 }
 
-void CAnimationDlg::OnDestroy() 
+void CAnimationDlg::OnDestroy()
 {
 	setRegisterWindowState (this, REGKEY_OBJ_VIEW_ANIMATION_DLG);
 
@@ -412,9 +412,9 @@ void CAnimationDlg::setCurrentFrame (float currentFrame)
 }
 
 BOOL CAnimationDlg::EnableWindow(BOOL enable /*=TRUE*/)
-{	
+{
 	PlayCtrl.EnableWindow(Playing && enable);
-	StopCtrl.EnableWindow(FALSE);		
+	StopCtrl.EnableWindow(FALSE);
 	FRWCtrl.EnableWindow(enable);
 	FFWCtrl.EnableWindow(enable);
 	TimeLineCtrl.EnableWindow(enable);

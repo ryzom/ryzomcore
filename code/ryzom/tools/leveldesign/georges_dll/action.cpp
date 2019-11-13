@@ -145,7 +145,9 @@ CActionString::CActionString (IAction::TTypeAction type, const char *newValue, C
 			CType *type = doc.getTypePtr ();
 			_OldValue = toString ((int)(type->Type));
 			setLabel ("Type Type", doc);
-			_Log[1] = type->getTypeName ((UType::TType)atoi (newValue));
+			uint ttype;
+			fromString(newValue, ttype);
+			_Log[1] = type->getTypeName ((UType::TType)ttype);
 		}
 		break;
 	case TypeUI:
@@ -153,7 +155,9 @@ CActionString::CActionString (IAction::TTypeAction type, const char *newValue, C
 			CType *type = doc.getTypePtr ();
 			_OldValue = toString ((int)(type->UIType));
 			setLabel ("Type UI", doc);
-			_Log[1] = type->getUIName ((CType::TUI)atoi (newValue));
+			uint ttype;
+			fromString(newValue, ttype);
+			_Log[1] = type->getUIName ((CType::TUI)ttype);
 		}
 		break;
 	case TypeDefault:
@@ -616,7 +620,7 @@ bool CActionStringVector::doAction (CGeorgesEditDoc &doc, bool redo, bool &modif
 
 					modified = true;
 				}
-				catch (Exception &e)
+				catch (const Exception &e)
 				{
 					ok = false;
 					char message[512];

@@ -24,6 +24,9 @@
 #include "stage.h"
 #include "game_share/entity_types.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ///////////
 // USING //
@@ -149,7 +152,7 @@ bool CStage::getPos(NLMISC::CVectorD &pos) const
 // serial :
 // Serialize entities.
 //-----------------------------------------------
-void CStage::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CStage::serial(NLMISC::IStream &f)
 {
 	f.serial(_Time);
 	f.serialCont(_Stage);
@@ -269,7 +272,7 @@ CStage *CStageSet::addStage(NLMISC::TGameCycle gameCycle, uint property, sint64 
 // serial :
 // Serialize entities.
 //-----------------------------------------------
-void CStageSet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CStageSet::serial(NLMISC::IStream &f)
 {
 	// Serialize the map.
 	f.serialCont(_StageSet);

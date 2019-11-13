@@ -26,6 +26,10 @@
 
 #include "driver_direct3d.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 
@@ -63,7 +67,7 @@ CVBDrvInfosD3D::~CVBDrvInfosD3D()
 {
 	H_AUTO_D3D(CVBDrvInfosD3D_CVBDrvInfosD3D)
 	CDriverD3D *driver = static_cast<CDriverD3D*>(_Driver);
-	// Restaure non resident memory
+	// Restore non resident memory
 	if (VertexBufferPtr)
 	{
 		VertexBufferPtr->setLocation(CVertexBuffer::NotResident);
@@ -125,7 +129,7 @@ uint8	*CVBDrvInfosD3D::lock (uint begin, uint end, bool readOnly)
 				}
 				else
 				{
-					nlinfo("Buffer %s at %x is Locked", (*it)->VertexBufferPtr->getName().c_str(), (int) *it);
+					nlinfo("Buffer %s at %p is Locked", (*it)->VertexBufferPtr->getName().c_str(), *it);
 				}
 			}
 		}

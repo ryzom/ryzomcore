@@ -23,6 +23,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -170,7 +173,7 @@ bool CZoneManager::isWorkComplete (CZoneManager::SZoneManagerWork &rWork)
 			rWork.NameZoneAdded = ite->ZoneToAddName;
 			rWork.ZoneRemoved = false;
 			rWork.IdZoneToRemove = 0;
-			rWork.NameZoneRemoved = "";
+			rWork.NameZoneRemoved.clear();
 			rWork.Zone = const_cast<CZone*>(ite->Zone);
 			_LoadedZones.push_back (ite->ZoneToAddId);
 
@@ -187,7 +190,7 @@ bool CZoneManager::isWorkComplete (CZoneManager::SZoneManagerWork &rWork)
 	{
 		_RemovingZone = false;
 		rWork.ZoneAdded = false;
-		rWork.NameZoneAdded = "";
+		rWork.NameZoneAdded.clear();
 		rWork.ZoneRemoved = true;
 		rWork.IdZoneToRemove = _IdZoneToRemove;
 		rWork.NameZoneRemoved = getZoneNameFromId(_IdZoneToRemove);
@@ -211,7 +214,7 @@ bool CZoneManager::isWorkComplete (CZoneManager::SZoneManagerWork &rWork)
 // ------------------------------------------------------------------------------------------------
 void CZoneManager::clear()
 {
-	nlassert(_LoadingZones.size() == 0);
+	nlassert(_LoadingZones.empty());
 	_LoadedZones.clear();
 	_RemovingZone = false;
 }

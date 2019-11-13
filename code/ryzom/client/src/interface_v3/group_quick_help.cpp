@@ -25,6 +25,7 @@
 #include "nel/gui/group_list.h"
 #include "nel/gui/group_paragraph.h"
 #include "nel/gui/libwww.h"
+#include "nel/gui/html_element.h"
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
 #include "nel/misc/xml_auto_ptr.h"
@@ -215,33 +216,29 @@ void CGroupQuickHelp::setGroupTextSize (CInterfaceGroup *group, bool selected)
 
 extern CActionsContext ActionsContext;
 
-void CGroupQuickHelp::beginElement (uint element_number, const BOOL *present, const char **value)
+void CGroupQuickHelp::beginElement(CHtmlElement &elm)
 {
-	CGroupHTML::beginElement (element_number, present, value);
+	CGroupHTML::beginElement (elm);
 
 	// Paragraph ?
-	switch(element_number)
+	switch(elm.ID)
 	{
 	case HTML_A:
 			// Quick help
-			if (_TrustedDomain && present[MY_HTML_A_Z_ACTION_SHORTCUT] && value[MY_HTML_A_Z_ACTION_SHORTCUT])
+			if (_TrustedDomain && elm.hasNonEmptyAttribute("z_action_shortcut"))
 			{
 				// Get the action category
-				string category;
-				if (present[MY_HTML_A_Z_ACTION_CATEGORY] && value[MY_HTML_A_Z_ACTION_CATEGORY])
-					category = value[MY_HTML_A_Z_ACTION_CATEGORY];
+				string category = elm.getAttribute("z_action_category");
 
 				// Get the action params
-				string params;
-				if (present[MY_HTML_A_Z_ACTION_PARAMS] && value[MY_HTML_A_Z_ACTION_PARAMS])
-					params = value[MY_HTML_A_Z_ACTION_PARAMS];
+				string params = elm.getAttribute("z_action_params");
 
 				// Get the action descriptor
 				CActionsManager *actionManager = ActionsContext.getActionsManager (category);
 				if (actionManager)
 				{
 					const CActionsManager::TActionComboMap &actionCombo = actionManager->getActionComboMap ();
-					CActionsManager::TActionComboMap::const_iterator ite = actionCombo.find (CAction::CName (value[MY_HTML_A_Z_ACTION_SHORTCUT], params.c_str()));
+					CActionsManager::TActionComboMap::const_iterator ite = actionCombo.find (CAction::CName (elm.getAttribute("z_action_shortcut").c_str(), params.c_str()));
 					if (ite != actionCombo.end())
 					{
 						addString (ite->second.toUCString());
@@ -252,7 +249,7 @@ void CGroupQuickHelp::beginElement (uint element_number, const BOOL *present, co
 
 	case HTML_P:
 		// Get the action name
-		if (present[MY_HTML_P_QUICK_HELP_EVENTS])
+		if (elm.hasAttribute("quick_help_events"))
 		{
 			// This page is a quick help
 			_IsQuickHelp = true;
@@ -260,41 +257,75 @@ void CGroupQuickHelp::beginElement (uint element_number, const BOOL *present, co
 			_Steps.push_back (CStep());
 			CStep &step = _Steps.back();
 
-			if (value[MY_HTML_P_QUICK_HELP_EVENTS])
+			// Get the event names
+			string events = elm.getAttribute("quick_help_events");
+			if (!events.empty())
 			{
-				// Get the event names
-				string events = value[MY_HTML_P_QUICK_HELP_EVENTS];
-				if (!events.empty())
+				uint first = 0;
+				while (first < events.size())
 				{
-					uint first = 0;
-					while (first < events.size())
-					{
-						// String end
-						string::size_type last = events.find_first_of(" ", first);
-						if (last == string::npos)
-							last = events.size();
+					// String end
+					string::size_type last = events.find_first_of(" ", first);
+					if (last == string::npos)
+						last = events.size();
 
-						// Extract the string
-						step.EventToComplete.insert (events.substr (first, last-first));
-						first = (uint)last+1;
-					}
+					// Extract the string
+					step.EventToComplete.insert (events.substr (first, last-first));
+					first = (uint)last+1;
 				}
 			}
 
 			// Get the condition
-			if (present[MY_HTML_P_QUICK_HELP_CONDITION] && value[MY_HTML_P_QUICK_HELP_CONDITION])
-			{
-				step.Condition = value[MY_HTML_P_QUICK_HELP_CONDITION];
-			}
+			step.Condition = elm.getAttribute("quick_help_condition");
 
 			// Get the action handlers to run
-			if (present[MY_HTML_P_QUICK_HELP_LINK] && value[MY_HTML_P_QUICK_HELP_LINK])
-			{
-				step.URL = value[MY_HTML_P_QUICK_HELP_LINK];
-			}
+			step.URL = elm.getAttribute("quick_help_link");
 		}
 		break;
 	}
+}
+
+// ***************************************************************************
+std::string CGroupQuickHelp::getLanguageUrl(const std::string &href, std::string lang) const
+{
+	std::string uri = href;
+
+	if (uri.size() < 5 || uri.substr(0, 5) == "http://" || uri.substr(0, 6) == "https://")
+	{
+		return uri;
+	}
+
+	// modify uri such that '_??.html' ending contains current user language
+	if (uri.substr(uri.size()-5) == ".html")
+	{
+		if (uri.rfind("_") == uri.size() - 8)
+		{
+			uri = uri.substr(0, uri.size() - 8);
+		}
+		else
+		{
+			uri = uri.substr(0, uri.size() - 5);
+		}
+		uri += "_" + lang + ".html";
+
+		// files inside bnp (file:/gamedev.bnp@help_en.html) will always match with CPath::lookup()
+		std::string fname;
+		size_t pos = uri.find("@");
+		if (pos != std::string::npos)
+		{
+			fname = uri.substr(pos+1);
+		}
+		else
+		{
+			fname = uri;
+		}
+		if (CPath::lookup(fname, false) == "" && lang != "en")
+		{
+			uri = getLanguageUrl(href, "en");
+		}
+	}
+
+	return uri;
 }
 
 // ***************************************************************************
@@ -307,12 +338,7 @@ void CGroupQuickHelp::browse (const char *url)
 
 	_IsQuickHelp = false;
 
-	string completeURL = url;
-	if (completeURL.substr(completeURL.size()-5, 5) == ".html")
-	{
-		completeURL = completeURL.substr(0, completeURL.size()-5); // Substract the ".html"
-		completeURL += "_" + ClientCfg.getHtmlLanguageCode() + ".html";
-	}
+	string completeURL = getLanguageUrl(url, ClientCfg.getHtmlLanguageCode());
 
 	CGroupHTML::browse (completeURL.c_str());
 }
@@ -321,9 +347,7 @@ void CGroupQuickHelp::browse (const char *url)
 
 std::string	CGroupQuickHelp::home()
 {
-	string completeURL = Home;
-	completeURL = completeURL.substr(0, completeURL.size()-5); // Substract the ".html"
-	completeURL += "_" + ClientCfg.getHtmlLanguageCode() + ".html";
+	string completeURL = getLanguageUrl(Home, ClientCfg.getHtmlLanguageCode());
 
 	return completeURL;
 }

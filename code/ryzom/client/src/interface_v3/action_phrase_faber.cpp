@@ -35,6 +35,10 @@
 #include "skill_manager.h"
 #include "game_share/bot_chat_types.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 
@@ -105,7 +109,8 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 
 	// get the family of item plan (for selection) from the rootBrick. It is stored in the Property0.
 	_FaberPlanBrickFamilies.clear();
-	if(rootBrick->Properties.size()>0)
+
+	if (!rootBrick->Properties.empty())
 	{
 		string prop= NLMISC::toUpper(rootBrick->Properties[0].Text);
 		vector<string>	strList;

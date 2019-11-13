@@ -24,6 +24,10 @@
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -159,7 +163,7 @@ namespace NLGUI
 		}
 
 		// resize H
-		if(entries.size()>0)
+		if (!entries.empty())
 		{
 			CInterfaceGroup *colEnclosing = entries[0]->getTargetColumn();
 			if (colEnclosing && !colEnclosing->getGroups().empty())
@@ -202,7 +206,7 @@ namespace NLGUI
 		const char *funcName = "enlargeColumns";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		enlargeColumns((sint32) ls.toNumber(1));
+		enlargeColumns((sint32) ls.toInteger(1));
 		return 0;
 	}
 
@@ -212,7 +216,7 @@ namespace NLGUI
 		const char *funcName = "resizeColumnsAndContainer";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		resizeColumnsAndContainer((sint32) ls.toNumber(1));
+		resizeColumnsAndContainer((sint32) ls.toInteger(1));
 		return 0;
 	}
 

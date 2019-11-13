@@ -7,7 +7,7 @@
 #include "nel/3d/texture_mem.h"
 #include "nel/misc/config_file.h"
 
-#define REGKEY_EDIT_PATCH "Software\\Nevrax\\Ryzom\\edit_patch"
+#define REGKEY_EDIT_PATCH _T("Software\\Nevrax\\Ryzom\\edit_patch")
 
 /*-------------------------------------------------------------------*/
 
@@ -168,7 +168,7 @@ void CTileSetCont::build (CTileBank& bank, uint tileSet)
 		std::string fileName=bank.getAbsPath()+bank.getTile (set->getTile128(0))->getRelativeFileName (CTile::diffuse);
 
 		// Valid name?
-		if (fileName!="")
+		if (!fileName.empty())
 		{
 			// Create it
 			MainBitmap=new CTextureFile (fileName);
@@ -193,7 +193,7 @@ void CTileSetCont::build (CTileBank& bank, uint tileSet)
 				std::string fileName=bank.getAbsPath()+pTile->getRelativeFileName (CTile::diffuse);
 
 				// Valid name?
-				if (fileName!="")
+				if (!fileName.empty())
 				{
 					// Create it
 					if (GroupBitmap[group]==NULL)
@@ -218,7 +218,7 @@ void CTileSetCont::build (CTileBank& bank, uint tileSet)
 				std::string fileName=bank.getAbsPath()+pTile->getRelativeFileName (CTile::diffuse);
 
 				// Valid name?
-				if (fileName!="")
+				if (!fileName.empty())
 				{
 					// Create it
 					if (GroupBitmap[group]==NULL)
@@ -242,7 +242,7 @@ void CTileSetCont::build (CTileBank& bank, uint tileSet)
 			if (!dmwarn)
 			{
 				dmwarn = true;
-				MessageBox(NULL, "Tile bank not loaded, or bad tile bank. Missing a displacement tile. Use the tile bank utility to load the correct tilebank.", "NeL Patch Paint", MB_OK | MB_ICONWARNING);
+				MessageBox(NULL, _T("Tile bank not loaded, or bad tile bank. Missing a displacement tile. Use the tile bank utility to load the correct tilebank."), _T("NeL Patch Paint"), MB_OK | MB_ICONWARNING);
 			}
 			continue; // with next displace
 		}
@@ -250,10 +250,10 @@ void CTileSetCont::build (CTileBank& bank, uint tileSet)
 		// Get the name
 		std::string fileName = bank.getDisplacementMap(dispTile);
 		if (fileName=="EmptyDisplacementMap")
-			fileName="";
+			fileName.clear();
 
 		// Valid name?
-		if (fileName!="")
+		if (!fileName.empty())
 		{
 			// Create it
 			DisplaceBitmap[displace]=new CTextureFile (bank.getAbsPath()+fileName);
@@ -318,9 +318,8 @@ void getColors (COLORREF *array)
 		{
 			DWORD len=4;
 			DWORD type;
-			char regName[100];
-			smprintf (regName, 100, "Color%d", i);
-			RegQueryValueEx (hKey, regName, 0, &type, (LPBYTE)(array+i), &len);
+			std::string regName = toString("Color%u", i);
+			RegQueryValueEx (hKey, MaxTStrFromUtf8(regName).data(), 0, &type, (LPBYTE)(array+i), &len);
 		}
 		RegCloseKey (hKey);
 	}
@@ -337,9 +336,8 @@ void setColors (const COLORREF *array)
 		for (uint i=0; i<16; i++)
 		{
 			DWORD len=4;
-			char regName[100];
-			smprintf (regName, 100, "Color%d", i);
-			RegSetValueEx (hKey, regName, 0, REG_DWORD, (LPBYTE)(array+i), 4);
+			std::string regName = toString("Color%u", i);
+			RegSetValueEx (hKey, MaxTStrFromUtf8(regName).data(), 0, REG_DWORD, (LPBYTE)(array+i), 4);
 		}
 		RegCloseKey (hKey);
 	}
@@ -409,24 +407,17 @@ void LoadKeyCfg ()
 	HMODULE hModule = hInstance;
 	if (hModule)
 	{
-		char sModulePath[256];
+		TCHAR sModulePath[256];
 		int res=GetModuleFileName(hModule, sModulePath, 256);
 		if (res)
 		{
-			// split path
-			char drive[256];
-			char dir[256];
-			_splitpath (sModulePath, drive, dir, NULL, NULL);
-
 			// Make a new path
-			char cgfPath[256];
-			_makepath (cgfPath, drive, dir, "keys", ".cfg");
-
+			std::string cfgPath = NLMISC::CFile::getPath(MCharStrToUtf8(sModulePath)) + "keys.cfg";
 	
 			CConfigFile cf;
 
 			// Load and parse "test.txt" file
-			cf.load (cgfPath);
+			cf.load (cfgPath);
 			
 			// For each keys
 			for (uint key=0; key<KeyCounter; key++)
@@ -440,7 +431,7 @@ void LoadKeyCfg ()
 					// Get value
 					PainterKeys[key]=value.asInt ();
 				}
-				catch (EConfigFile &e)
+				catch (const EConfigFile &e)
 				{
 					// Something goes wrong... catch that
 					const char* what=e.what();
@@ -458,23 +449,18 @@ void LoadVarCfg ()
 	HMODULE hModule = hInstance;
 	if (hModule)
 	{
-		char sModulePath[256];
+		TCHAR sModulePath[256];
 		int res=GetModuleFileName(hModule, sModulePath, 256);
 		if (res)
 		{
-			// split path
-			char drive[256];
-			char dir[256];
-			_splitpath (sModulePath, drive, dir, NULL, NULL);
-
 			// Make a new path
 			char cgfPath[256];
-			_makepath (cgfPath, drive, dir, "keys", ".cfg");
+			std::string cfgPath = NLMISC::CFile::getPath(MCharStrToUtf8(sModulePath)) + "keys.cfg";
 	
 			CConfigFile cf;
 
 			// Load and parse "test.txt" file
-			cf.load (cgfPath);
+			cf.load (cfgPath);
 			
 			// go
 			try
@@ -489,7 +475,7 @@ void LoadVarCfg ()
 					LightDirection.z = light_direction.asFloat (2);
 				}
 			}
-			catch (EConfigFile &)
+			catch (const EConfigFile &)
 			{
 			}
 
@@ -504,7 +490,7 @@ void LoadVarCfg ()
 					LightDiffuse.B = light_diffuse.asInt (2);
 				}
 			}
-			catch (EConfigFile &)
+			catch (const EConfigFile &)
 			{
 			}
 
@@ -519,7 +505,7 @@ void LoadVarCfg ()
 					LightAmbiant.B = light_ambiant.asInt (2);
 				}
 			}
-			catch (EConfigFile &)
+			catch (const EConfigFile &)
 			{
 			}
 
@@ -529,7 +515,7 @@ void LoadVarCfg ()
 				CConfigFile::CVar &light_multiply= cf.getVar ("LightMultiply");
 				LightMultiply = light_multiply.asFloat ();
 			}
-			catch (EConfigFile &)
+			catch (const EConfigFile &)
 			{
 			}
 
@@ -539,7 +525,7 @@ void LoadVarCfg ()
 				CConfigFile::CVar &zoom_speed= cf.getVar ("ZoomSpeed");
 				ZoomSpeed = zoom_speed.asFloat ();
 			}
-			catch (EConfigFile &)
+			catch (const EConfigFile &)
 			{
 			}
 		}

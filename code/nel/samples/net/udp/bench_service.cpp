@@ -33,6 +33,7 @@
 #endif
 
 
+#include "nel/misc/common.h"
 #include "nel/misc/debug.h"
 #include "nel/misc/mem_stream.h"
 #include "nel/misc/path.h"
@@ -276,11 +277,11 @@ void CClient::updatePong (sint64 pingTime, sint64 pongTime, uint32 pongNumber, u
 	}
 	string fn = StatPathName + ConnectionName + "_" + ha + "_" + getDate() + ".pong";
 	
-	FILE *fp = fopen (fn.c_str(), "rt");
+	FILE *fp = nlfopen (fn, "rt");
 	if (fp == NULL)
 	{
 		// new file, add the header
-		FILE *fp = fopen (fn.c_str(), "wt");
+		FILE *fp = nlfopen (fn, "wt");
 		if (fp != NULL)
 		{
 			fprintf (fp, "#%s\t%s\t%s\t%s\n", "PingTime", "PongTime", "Delta", "PingNumber");
@@ -292,14 +293,14 @@ void CClient::updatePong (sint64 pingTime, sint64 pongTime, uint32 pongNumber, u
 		fclose (fp);
 	}
 
-	fp = fopen (fn.c_str(), "at");
+	fp = nlfopen (fn, "at");
 	if (fp == NULL)
 	{
 		nlwarning ("Can't open pong file name '%s'", fn.c_str());
 	}
 	else
 	{
-		fprintf (fp, "%"NL_I64"d\t%"NL_I64"d\t%"NL_I64"d\t%d\n", pongTime, pingTime, (pongTime-pingTime), pongNumber);
+		fprintf (fp, "%" NL_I64 "d\t%" NL_I64 "d\t%" NL_I64 "d\t%d\n", pongTime, pingTime, (pongTime-pingTime), pongNumber);
 		fclose (fp);
 	}
 }
@@ -578,7 +579,7 @@ void handleReceivedPong (CClient *client, sint64 pongTime)
 		uint32 blockNumber = 0;
 		msgin.serial(blockNumber);
 
-//		nlinfo ("receive a pong from %s pongnb %d %"NL_I64"d", CurrentInMsg->AddrFrom.asString().c_str(), pongNumber, pongTime - pingTime);
+//		nlinfo ("receive a pong from %s pongnb %d %" NL_I64 "d", CurrentInMsg->AddrFrom.asString().c_str(), pongNumber, pongTime - pingTime);
 
 		client->updatePong (pingTime, pongTime, pongNumber, blockNumber);
 	}

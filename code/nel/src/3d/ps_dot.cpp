@@ -21,7 +21,13 @@
 #include "nel/3d/ps_iterator.h"
 #include "nel/3d/driver.h"
 #include "nel/3d/particle_system.h"
+#include "nel/3d/debug_vb.h"
+
 #include "nel/misc/fast_mem.h"
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -284,7 +290,7 @@ void CPSDot::resize(uint32 size)
 }
 
 ///===================================================================
-void CPSDot::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSDot::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSDot_IStream )
 

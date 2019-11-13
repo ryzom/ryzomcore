@@ -422,8 +422,7 @@ class PaintPatchMod : public Modifier
 		static bool		automaticLighting;
 		static bool		lockBorders;
 
-		RefResult NotifyRefChanged( Interval changeInt,RefTargetHandle hTarget, 
-		   PartID& partID, RefMessage message ) { return REF_SUCCEED; }
+		RefResult NotifyRefChanged(NOTIFY_REF_PARAMS) { return REF_SUCCEED; }
 
 		bool includeMeshes;
 		bool preloadTiles;
@@ -482,7 +481,7 @@ class PaintPatchMod : public Modifier
 		void BeginEditParams( IObjParam  *ip, ULONG flags, Animatable *prev );
 		void EndEditParams( IObjParam *ip, ULONG flags, Animatable *next );
 		RefTargetHandle Clone(RemapDir& remap = DefaultRemapDir());
-		TCHAR *GetObjectName() { return "NeL Patch Painter"; }
+		GET_OBJECT_NAME_CONST MCHAR *GetObjectName() { return _M("NeL Patch Painter"); }
 		
 		void RescaleWorldUnits(float f);
 
@@ -500,10 +499,10 @@ class EditPatchClassDesc:public ClassDesc {
 	{ 
 		return new PaintPatchMod; 
 	}
-	const TCHAR *	ClassName() { return "NeL Painter"; }
+	const MCHAR *	ClassName() { return _M("NeL Painter"); }
 	SClass_ID		SuperClassID() { return OSM_CLASS_ID; }
 	Class_ID		ClassID() { return Class_ID(0xc49560f, 0x3c3d68e7); }
-	const TCHAR* 	Category() { return "NeL Tools";}
+	const MCHAR* 	Category() { return _M("NeL Tools");}
 	void			ResetClassParams(BOOL fileReset);
 	};
 

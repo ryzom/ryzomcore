@@ -44,7 +44,6 @@
 #include "nel/3d/texture_grouped.h"
 #include "nel/3d/nelu.h"
 #include "nel/3d/font_manager.h"
-#include "nel/3d/font_generator.h"
 //
 #include "nel/misc/file.h"
 #include "start_stop_particle_system.h"
@@ -420,7 +419,7 @@ bool CParticleDlg::savePSAs(HWND parent, CParticleWorkspace::CNode &psNode ,cons
 		psNode.setModified(false);
 		setStatusBarText(CString(fullPath.c_str()) + " " + getStrRsc(IDS_SAVED));
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		if (askToContinueWhenError)
 		{		
@@ -429,7 +428,7 @@ bool CParticleDlg::savePSAs(HWND parent, CParticleWorkspace::CNode &psNode ,cons
 		}
 		else
 		{
-			::MessageBox(parent, e.what(), getStrRsc(IDS_ERROR), MB_ICONEXCLAMATION);
+			::MessageBox(parent, nlUtf8ToTStr(e.what()), getStrRsc(IDS_ERROR), MB_ICONEXCLAMATION);
 			return false;
 		}
 	}
@@ -469,13 +468,13 @@ bool CParticleDlg::loadPS(HWND parent, CParticleWorkspace::CNode &psNode, TLoadP
 			setStatusBarText(CString(psNode.getFullPath().c_str()) + " " + getStrRsc(IDS_LOADED));
 		}
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		switch(behav)
 		{
 			case Silent: return false; // no op
 			case ReportError:	
-				::MessageBox(parent, e.what(), getStrRsc(IDS_ERROR), MB_OK|MB_ICONEXCLAMATION);				
+				::MessageBox(parent, nlUtf8ToTStr(e.what()), getStrRsc(IDS_ERROR), MB_OK | MB_ICONEXCLAMATION);
 				return true;
 			break;
 			case ReportErrorSkippable:
@@ -548,9 +547,9 @@ void CParticleDlg::OnCreateNewPsWorkspace()
 			{		
 				newPW->save();
 			}
-			catch(NLMISC::EStream &e)
+			catch(const NLMISC::EStream &e)
 			{
-				MessageBox(e.what(), getStrRsc(IDS_ERROR), MB_ICONEXCLAMATION);
+				MessageBox(nlUtf8ToTStr(e.what()), getStrRsc(IDS_ERROR), MB_ICONEXCLAMATION);
 			}
 			closeWorkspace();			
 			_PW = newPW;
@@ -564,18 +563,18 @@ void CParticleDlg::OnCreateNewPsWorkspace()
 void CParticleDlg::OnLoadPSWorkspace() 
 {
 	checkModifiedWorkSpace();
-	static const char BASED_CODE szFilter[] = "particle workspaces(*.pws)|*.pws||";
-	CFileDialog fd( TRUE, ".pws", "*.pws", 0, szFilter);
+	static const TCHAR BASED_CODE szFilter[] = _T("particle workspaces(*.pws)|*.pws||");
+	CFileDialog fd( TRUE, _T(".pws"), _T("*.pws"), 0, szFilter);
 	INT_PTR result = fd.DoModal();
 	if (result != IDOK) return;
-	loadWorkspace((LPCTSTR) fd.GetPathName());
+	loadWorkspace(NLMISC::tStrToUtf8(fd.GetPathName()));
 }
 
 //**************************************************************************************************************************
 void CParticleDlg::loadWorkspace(const std::string &fullPath)
 {
 	// Add to the path
-	std::auto_ptr<CParticleWorkspace> newPW(new CParticleWorkspace);
+	CUniquePtr<CParticleWorkspace> newPW(new CParticleWorkspace);
 	newPW->init(_ObjView, fullPath, _ObjView->getFontManager(), _ObjView->getFontGenerator());
 	newPW->setModificationCallback(ParticleTreeCtrl);
 	// save empty workspace
@@ -584,9 +583,9 @@ void CParticleDlg::loadWorkspace(const std::string &fullPath)
 		newPW->load();
 		setStatusBarText(CString(newPW->getFilename().c_str()) + " " + getStrRsc(IDS_LOADED));
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
-		MessageBox(e.what(), getStrRsc(IDS_ERROR), MB_ICONEXCLAMATION);
+		MessageBox(nlUtf8ToTStr(e.what()), getStrRsc(IDS_ERROR), MB_ICONEXCLAMATION);
 		setStatusBarText(CString(e.what()));
 		return;
 	}	
@@ -634,9 +633,9 @@ void CParticleDlg::saveWorkspaceStructure()
 		_PW->save();		
 		setStatusBarText(CString(_PW->getFilename().c_str()) + " " + getStrRsc(IDS_SAVED));
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
-		localizedMessageBox(*this, e.what(), IDS_ERROR, MB_ICONEXCLAMATION);
+		localizedMessageBox(*this, nlUtf8ToTStr(e.what()), IDS_ERROR, MB_ICONEXCLAMATION);
 		setStatusBarText(CString(e.what()));
 	}
 }

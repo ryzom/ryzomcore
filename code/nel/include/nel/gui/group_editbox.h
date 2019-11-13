@@ -264,6 +264,7 @@ namespace NLGUI
 												// because of multiline, thz parent container will be moved to top
 												// The good position can be restored by a press on enter then
 		bool	_WantReturn				   : 1; // Want return char, don't call the enter action handler
+		bool	_ClearOnEscape             : 1; // clear content when ESC is pressed?
 		bool	_Savable				   : 1; // should content be saved ?
 		bool	_DefaultInputString		   : 1; // Is the current input string the default one (should not be edited)
 		bool	_Frozen					   : 1;	// is the control frozen? (cannot edit in it)

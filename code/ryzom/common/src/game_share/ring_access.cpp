@@ -35,6 +35,9 @@
 #include "nel/misc/xml_auto_ptr.h"
 
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace std;
 using namespace R2;
@@ -349,7 +352,7 @@ std::string CRingAccess::upgradeRingAccess(const std::string& defaultValue, cons
 	}
 
 	// return the new value as string
-	std::string toRet ="";
+	std::string toRet;
 	{
 
 		std::map<std::string, int>::const_iterator first(defaultMap.begin()), last(defaultMap.end());
@@ -421,7 +424,7 @@ bool CRingAccess::verifyRtScenario(CObject* rtScenario, const std::string& charR
 
 	for ( ;firstLocation != lastLocation; ++firstLocation)
 	{
-		CObject* location = locations->getValue(firstLocation);
+		CObject* location = locations->getValueAtPos(firstLocation);
 		if (!location || !location->isString("Island"))
 		{
 			err = new CVerfiyRightRtScenarioError(CVerfiyRightRtScenarioError::InvalidData);
@@ -445,7 +448,7 @@ bool CRingAccess::verifyRtScenario(CObject* rtScenario, const std::string& charR
 	uint32 lastActIndex = acts->getSize();
 	for ( ;firstActIndex != lastActIndex; ++firstActIndex)
 	{
-		CObject* act = acts->getValue(firstActIndex);
+		CObject* act = acts->getValueAtPos(firstActIndex);
 		if (!act || !act->isTable() || !act->isTable("Npcs"))
 		{
 			err = new CVerfiyRightRtScenarioError(CVerfiyRightRtScenarioError::InvalidData);
@@ -457,7 +460,7 @@ bool CRingAccess::verifyRtScenario(CObject* rtScenario, const std::string& charR
 		uint32 lastNpcIndex = npcs->getSize();
 		for (; firstNpcIndex != lastNpcIndex; ++firstNpcIndex)
 		{
-			CObject* npc = npcs->getValue(firstNpcIndex);
+			CObject* npc = npcs->getValueAtPos(firstNpcIndex);
 			if (npc && npc->isTable() && npc->isString("SheetClient") && npc->isString("Sheet"))
 			{
 				std::string botName;

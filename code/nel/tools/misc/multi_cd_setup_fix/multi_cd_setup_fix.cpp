@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <windows.h>
+#include <tchar.h>
 #include <stdio.h>
 #include "resource.h"
 
@@ -39,11 +40,7 @@ void pump ()
 		DispatchMessage(&msg);
 	}
 }
-
-int APIENTRY WinMain(HINSTANCE hInstance,
-                     HINSTANCE hPrevInstance,
-                     LPSTR     lpCmdLine,
-                     int       nCmdShow)
+int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPTSTR /* lpCmdLine */, int /* nCmdShow */)
 {
 	// Windows
 	HWND hwnd = CreateDialog (hInstance, MAKEINTRESOURCE(IDD_WAIT), NULL, MyDialogProc);
@@ -57,68 +54,68 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	pump ();
 
  	// Get the temp directory
-	char tempPath[1024];
+	TCHAR tempPath[1024];
 	if (GetTempPath(1024, tempPath))
 	{
-		char pathToDelete[1024];
-		strcpy (pathToDelete, tempPath);
-		strcat (pathToDelete, "Ryzom");
+		TCHAR pathToDelete[1024];
+		_tcscpy (pathToDelete, tempPath);
+		_tcscat (pathToDelete, _T("Ryzom"));
 
 		CreateDirectory(tempPath, NULL);
-		strcat (tempPath, "Ryzom\\");
+		_tcscat (tempPath, _T("Ryzom\\"));
 		CreateDirectory(tempPath, NULL);
 
 		// Copy the files
 
 		pump ();
 		// Setup.dat
-		char setupFile[1024];
-		strcpy (setupFile, tempPath);
-		strcat (setupFile, "setup.exe");
+		TCHAR setupFile[1024];
+		_tcscpy (setupFile, tempPath);
+		_tcscat(setupFile, _T("setup.exe"));
 		SetFileAttributes(setupFile, GetFileAttributes(setupFile)&~FILE_ATTRIBUTE_READONLY);
 		BOOL deleted = DeleteFile (setupFile);
-		if (!CopyFile ("setup.dat", setupFile, FALSE) && deleted)
-			MessageBox (NULL, "Not enough disk space", "Setup", MB_OK|MB_ICONERROR);
+		if (!CopyFile (_T("setup.dat"), setupFile, FALSE) && deleted)
+			MessageBox (NULL, _T("Not enough disk space"), _T("Setup"), MB_OK|MB_ICONERROR);
 		SetFileAttributes(setupFile, GetFileAttributes(setupFile)&~FILE_ATTRIBUTE_READONLY);
 
 		pump ();
 		// Ryzom.msi
-		char msiFile[1024];
-		strcpy (msiFile, tempPath);
-		strcat (msiFile, "Ryzom.msi");
+		TCHAR msiFile[1024];
+		_tcscpy(msiFile, tempPath);
+		_tcscat(msiFile, _T("Ryzom.msi"));
 		SetFileAttributes(msiFile, GetFileAttributes(msiFile)&~FILE_ATTRIBUTE_READONLY);
 		deleted = DeleteFile (msiFile); 
-		if (!CopyFile ("Ryzom.msi", msiFile, FALSE) && deleted)
-			MessageBox (NULL, "Not enough disk space", "Setup", MB_OK|MB_ICONERROR);
+		if (!CopyFile (_T("Ryzom.msi"), msiFile, FALSE) && deleted)
+			MessageBox (NULL, _T("Not enough disk space"), _T("Setup"), MB_OK|MB_ICONERROR);
 		SetFileAttributes(msiFile, GetFileAttributes(msiFile)&~FILE_ATTRIBUTE_READONLY);
 
 		pump ();
 		// Generate the remove bat file
-		char batFile[1024];
-		strcpy (batFile, tempPath);
-		strcat (batFile, "remove.bat");
-		FILE *file = fopen (batFile, "w");
-		fprintf (file, "@echo off\nrmdir /S /Q \"%s\" > NUL\ndeltree /Y \"%s\" > NUL\n", pathToDelete, pathToDelete);
+		TCHAR batFile[1024];
+		_tcscpy (batFile, tempPath);
+		_tcscat(batFile, _T("remove.bat"));
+		FILE *file = _tfopen (batFile, _T("w"));
+		_ftprintf (file, _T("@echo off\nrmdir /S /Q \"%s\" > NUL\ndeltree /Y \"%s\" > NUL\n"), pathToDelete, pathToDelete);
 		fclose (file);
 
 		// Register the remove bat file
 		HKEY hKey;
-		RegCreateKey (HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Runonce", &hKey);
-		char batFileReg[1024];
-		sprintf (batFileReg, "\"%s\"", batFile);
-		RegSetValueEx(hKey, "RyzomSetupClean", 0, REG_SZ, (const unsigned char*)batFileReg, (DWORD)strlen (batFileReg)+1);
+		RegCreateKey (HKEY_CURRENT_USER, _T("Software\\Microsoft\\Windows\\CurrentVersion\\Runonce"), &hKey);
+		TCHAR batFileReg[1024];
+		_stprintf (batFileReg, _T("\"%s\""), batFile);
+		RegSetValueEx(hKey, _T("RyzomSetupClean"), 0, REG_SZ, (const unsigned char *)batFileReg, (DWORD)(_tcslen(batFileReg) + 1) * sizeof(TCHAR));
 
 		pump ();
 		// Get the current path
-		char currentPath[1024];
+		TCHAR currentPath[1024];
 		GetCurrentDirectory (1024, currentPath);
-		if (currentPath[strlen(currentPath)-1] == '\\')
-			currentPath[strlen(currentPath)-1] = 0;
+		if (currentPath[_tcslen(currentPath) - 1] == '\\')
+			currentPath[_tcslen(currentPath) - 1] = 0;
 
 		pump ();
 		// Build the command line : /z"f:\"
-		char option[1024];
-		sprintf (option, "\"%s\" /z\"%s\"", setupFile, currentPath);
+		TCHAR option[1024];
+		_stprintf(option, _T("\"%s\" /z\"%s\""), setupFile, currentPath);
 
 		pump ();
 		// Execute the setup

@@ -316,6 +316,13 @@ CConfigFile::~CConfigFile ()
 
 void CConfigFile::load (const string &fileName, bool lookupPaths )
 {
+	char *locale = setlocale(LC_NUMERIC, NULL);
+
+	if (!locale || strcmp(locale, "C"))
+	{
+		nlerror("Numeric locale not defined to C, an external library possibly redefined it!");
+	}
+
 	if(fileName.empty())
 	{
 		nlwarning ("CF: Can't load a empty file name configfile");
@@ -405,7 +412,7 @@ void CConfigFile::reparse (bool lookupPaths)
 		if (!CPath::lookup(fn, false).empty())
 		{
 			ucstring content;
-			CI18N::readTextFile(fn, content, true, true, true);
+			CI18N::readTextFile(fn, content, true, true);
 			string utf8 = content.toUtf8();
 
 			CMemStream stream;
@@ -597,10 +604,14 @@ bool CConfigFile::exists (const std::string &varName)
 
 void CConfigFile::save () const
 {
-	// Avoid any problem, Force Locale to default
-	setlocale(LC_ALL, "C");
+	char *locale = setlocale(LC_NUMERIC, NULL);
 
-	FILE *fp = fopen (getFilename().c_str (), "w");
+	if (!locale || strcmp(locale, "C"))
+	{
+		nlerror("Numeric locale not defined to C, an external library possibly redefined it!");
+	}
+
+	FILE *fp = nlfopen (getFilename(), "w");
 	if (fp == NULL)
 	{
 		nlwarning ("CF: Couldn't create %s file", getFilename().c_str ());

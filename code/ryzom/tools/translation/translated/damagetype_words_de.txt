@@ -1,0 +1,11 @@
+﻿*HASH_VALUE	damageTypeId	name	ia	da	p	pia	pda	description
+_EC08606C264890AB	Slashing	Schneide	ein	der	Schneide	 	die	
+_2D98306326487C9B	Piercing	Durchbohrungs	ein	der	Durchbohrungs	 	die	
+_6CF60460721A84D2	Blunt	Zertrümmerungs	ein	der	Zertrümmerungs	 	die	
+_26D818876787A4A9	Rot	Verrottungs	ein	der	Verrottungs	 	die	
+_6476EC4AA5162881	Acid	Säure	ein	der	Säure	 	die	
+_28B6544E2AE66886	Cold	Kälte	ein	der	Kälte	 	die	
+_A8483056EBB76C90	Fire	Feuer	ein	der	Feuer	 	die	
+_E5B98496A6B8D8A1	Poison	Gift	ein	der	Gift	 	die	
+_5659CC92EA58A491	Electricity	Elektrizitäts	ein	der	Elektrizitäts	 	die	
+_E4569C6C6E78B4B4	Shock	Schockwellen	ein	der	Schockwellen	 	die	

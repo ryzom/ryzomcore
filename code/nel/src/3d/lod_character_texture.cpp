@@ -18,6 +18,9 @@
 #include "std3d.h"
 #include "nel/3d/lod_character_texture.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D {
 

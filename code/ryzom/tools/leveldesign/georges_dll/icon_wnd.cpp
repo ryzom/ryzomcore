@@ -28,7 +28,7 @@
 using namespace NLMISC;
 using namespace std;
 
-string CIconWnd::IconPath = "";
+string CIconWnd::IconPath;
 
 
 CIconWnd::CIconWnd()
@@ -85,7 +85,7 @@ void CIconWnd::create (DWORD wStyle, RECT &pos, CWnd *parent, uint dialogIndex)
 	LPCTSTR className = AfxRegisterWndClass(CS_OWNDC); 
 
 	// Create this window
-	CWnd::Create(className, "empty", wStyle, pos, parent, dialogIndex);
+	CWnd::Create(className, _T("empty"), wStyle, pos, parent, dialogIndex);
 }
 
 bool CIconWnd::updateStr()
@@ -283,14 +283,15 @@ void CIconWnd::addIconLayer(NLMISC::CBitmap &dst, const std::string iconStr, con
 
 bool CIconWnd::updateWnd(CWnd *pWnd, std::string &str)
 {
-	char buffer[512];
+	TCHAR buffer[512];
 
 	if (pWnd)
 	{
 		pWnd->GetWindowText(buffer, 512);
-		if (buffer != str)
+		std::string buf = tStrToUtf8(buffer);
+		if (buf != str)
 		{
-			str = buffer;
+			str = buf;
 			return true;
 		}
 	}

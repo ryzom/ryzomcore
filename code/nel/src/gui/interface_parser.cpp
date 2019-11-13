@@ -42,6 +42,11 @@
 #ifdef LUA_NEVRAX_VERSION
 	#include "lua_ide_dll_nevrax/include/lua_ide_dll/ide_interface.h" // external debugger
 #endif
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 const uint32 UI_CACHE_SERIAL_CHECK = NELID("IUG_");
 
 using namespace NLMISC;
@@ -193,7 +198,7 @@ namespace NLGUI
 		xmlKeepBlanksDefault(0);
 		//parse all interface files and build a single xml document
 		xmlNodePtr globalEnclosing;
-		nlassert (strings.size());
+		nlassert (!strings.empty());
 		CIXml read;
 		string nextFileName;
 		static const char *SCRIPT_AS_STRING = "<script as string>";
@@ -356,7 +361,7 @@ namespace NLGUI
 				string	backup = nextFileName+".backup";
 				if (CFile::fileExists(backup))
 					CFile::deleteFile(backup);
-				CFile::moveFile(backup.c_str(), nextFileName.c_str());
+				CFile::moveFile(backup, nextFileName);
 			}
 			return false;
 		}
@@ -665,10 +670,10 @@ namespace NLGUI
 			if (strchr(ptr, '#') != NULL)
 			{
 				string LastProp = ptr.str();
-				string NewProp ="";
+				string NewProp;
 				string RepProp;
 
-				while (LastProp.size() > 0)
+				while (!LastProp.empty())
 				{
 					string::size_type diesPos = LastProp.find("#");
 					if (diesPos != string::npos)
@@ -709,7 +714,7 @@ namespace NLGUI
 					else
 					{
 						NewProp += LastProp;
-						LastProp = "";
+						LastProp.clear();
 					}
 				}
 				xmlSetProp(node,props->name, (const xmlChar*)NewProp.c_str());
@@ -1359,6 +1364,9 @@ namespace NLGUI
 	{
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 		if (!ptr) return false;
+
+		string stmp2 = toLower(string((const char*)ptr));
+
 		CInterfaceElement *pEltFound = NULL;
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 		for (uint32 i = 0; i < _MasterGroups.size(); ++i)
@@ -1367,8 +1375,8 @@ namespace NLGUI
 			for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 			{
 				CInterfaceGroup *pIG = rMG.Group->getGroups()[j];
-				string stmp = strlwr(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
-				string stmp2 = strlwr(string((const char*)ptr));
+				string stmp = toLower(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
+
 				if (stmp == stmp2)
 				{
 					pEltFound = pIG;
@@ -1408,6 +1416,9 @@ namespace NLGUI
 	{
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 		if (!ptr) return false;
+
+		string stmp2 = toLower(string((const char*)ptr));
+
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 		CInterfaceElement *pEltFound = NULL;
 		for (uint32 i = 0; i < _MasterGroups.size(); ++i)
@@ -1416,8 +1427,7 @@ namespace NLGUI
 			for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 			{
 				CInterfaceGroup *pIG = rMG.Group->getGroups()[j];
-				string stmp = strlwr(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
-				string stmp2 = strlwr(string((const char*)ptr));
+				string stmp = toLower(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
 				if (stmp == stmp2)
 				{
 					pEltFound = pIG;
@@ -1600,6 +1610,9 @@ namespace NLGUI
 	{
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 		if (!ptr) return false;
+
+		string stmp2 = toLower(string((const char*)ptr));
+
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 		CInterfaceElement *pEltFound = NULL;
 		for (uint32 i = 0; i < _MasterGroups.size(); ++i)
@@ -1608,8 +1621,8 @@ namespace NLGUI
 			for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 			{
 				CInterfaceGroup *pIG = rMG.Group->getGroups()[j];
-				string stmp = strlwr(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
-				string stmp2 = strlwr(string((const char*)ptr));
+				string stmp = toLower(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
+
 				if (stmp == stmp2)
 				{
 					pEltFound = pIG;

@@ -33,6 +33,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 #ifdef NL_STATIC
@@ -491,7 +495,7 @@ void CDriverGL::showCursor(bool b)
 	}
 	else
 	{
-		_CurrName = "";
+		_CurrName.clear();
 	}
 
 	// update current hardware icon to avoid to have the plain arrow

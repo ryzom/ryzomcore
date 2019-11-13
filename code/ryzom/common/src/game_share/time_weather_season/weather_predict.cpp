@@ -27,24 +27,16 @@
 //
 #include "weather_function_params_sheet_base.h"
 #include "nel/misc/algo.h"
-#include "nel/misc/random.h"
-#include "nel/misc/noise_value.h"
-#include "nel/misc/fast_floor.h"
+#include "nel/misc/wang_hash.h"
 //
 
 
-static NLMISC::CNoiseValue nv;
 
 float CPredictWeather::getCycleWeatherValue(uint64 cycle, const CWeatherFunction &wf)
 {
 	uint numWS = wf.getNumWeatherSetups();
 	if (!numWS) return 0.f;
-	NLMISC::CRandom rnd;
-	NLMISC::OptFastFloorBegin();
-	float noiseValue = nv.eval(NLMISC::CVector(cycle * 0.99524f, cycle * 0.85422f, cycle * -0.45722f));
-	NLMISC::OptFastFloorEnd();
-	noiseValue = fmodf(noiseValue * 10.f, 1.f); // make distribution more uniform
-	uint32 value = (uint32) (noiseValue * (float) wf.getWeatherSetupsTotalWeight());
+	uint32 value = NLMISC::wangHash64(cycle) % wf.getWeatherSetupsTotalWeight();
 	uint32 currWeight = 0;
 	for(uint k = 0; k < numWS; ++k)
 	{

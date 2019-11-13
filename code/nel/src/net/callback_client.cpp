@@ -311,7 +311,7 @@ void CCallbackClient::connect( const CInetAddress& addr )
 			throw ESocketConnectionFailed( addr );
 			//break;
 		default :
-			nlwarning( "LNETL3C: No connection event in replay data, at update #%"NL_I64"u", _MR_UpdateCounter );
+			nlwarning( "LNETL3C: No connection event in replay data, at update #%" NL_I64 "u", _MR_UpdateCounter );
 		}
 	}
 #endif
@@ -346,7 +346,7 @@ void CCallbackClient::disconnect( TSockId hostid )
 			// Read (skip) disconnection in the file
 			if ( ! (_MR_Recorder.checkNextOne( _MR_UpdateCounter ) == Disconnecting) )
 			{
-				nlwarning( "LNETL3C: No disconnection event in the replay data, at update #%"NL_I64"u", _MR_UpdateCounter );
+				nlwarning( "LNETL3C: No disconnection event in the replay data, at update #%" NL_I64 "u", _MR_UpdateCounter );
 			}
 		}
 		// Record or replay disconnection (because disconnect() in the client does not push a disc. event)

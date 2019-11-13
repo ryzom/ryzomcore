@@ -28,8 +28,8 @@ namespace NLMISC
 {
 
 // get a string and add \r before \n if necessary
-std::string addSlashR (std::string str);
-std::string removeSlashR (std::string str);
+std::string addSlashR (const std::string &str);
+std::string removeSlashR (const std::string &str);
 
 /**
  * \def MaxCStringSize
@@ -186,8 +186,8 @@ inline std::string toString(const uint16 &val) { return toString("%hu", val); }
 inline std::string toString(const sint16 &val) { return toString("%hd", val); }
 inline std::string toString(const uint32 &val) { return toString("%u", val); }
 inline std::string toString(const sint32 &val) { return toString("%d", val); }
-inline std::string toString(const uint64 &val) { return toString("%"NL_I64"u", val); }
-inline std::string toString(const sint64 &val) { return toString("%"NL_I64"d", val); }
+inline std::string toString(const uint64 &val) { return toString("%" NL_I64 "u", val); }
+inline std::string toString(const sint64 &val) { return toString("%" NL_I64 "d", val); }
 
 #ifdef NL_COMP_GCC
 #	if GCC_VERSION == 40102
@@ -195,24 +195,27 @@ inline std::string toString(const sint64 &val) { return toString("%"NL_I64"d", v
 // error fix for size_t? gcc 4.1.2 requested this type instead of size_t ...
 inline std::string toString(const long unsigned int &val)
 {
-	if (sizeof(long unsigned int) == 8)
-		return toString((uint64)val);
+#ifdef _LP64
+	return toString((uint64)val);
+#else
 	return toString((uint32)val);
+#endif
 }
 
 #	endif
 #endif
 
 #if (SIZEOF_SIZE_T) == 8
-inline std::string toString(const size_t &val) { return toString("%"NL_I64"u", val); }
+inline std::string toString(const size_t &val) { return toString("%" NL_I64 "u", val); }
 #else
 #ifdef NL_OS_MAC
 inline std::string toString(const size_t &val) { return toString("%u", val); }
 #endif
 #endif
+
 inline std::string toString(const float &val) { return toString("%f", val); }
 inline std::string toString(const double &val) { return toString("%lf", val); }
-inline std::string toString(const bool &val) { return toString("%u", val?1:0); }
+inline std::string toString(const bool &val) { return val ? "1":"0"; }
 inline std::string toString(const std::string &val) { return val; }
 
 // stl vectors of bool use bit reference and not real bools, so define the operator for bit reference
@@ -234,70 +237,16 @@ inline bool fromString(const std::string &str, uint8 &val) { char *end; long v; 
 inline bool fromString(const std::string &str, sint8 &val) { char *end; long v; errno = 0; v = strtol(str.c_str(), &end, 10); if (errno || v > SCHAR_MAX || v < SCHAR_MIN || end == str.c_str()) { val = 0; return false; } else { val = (sint8)v; return true; } }
 inline bool fromString(const std::string &str, uint16 &val) { char *end; long v; errno = 0; v = strtol(str.c_str(), &end, 10); if (errno || v > USHRT_MAX || v < 0 || end == str.c_str()) { val = 0; return false; } else { val = (uint16)v; return true; } }
 inline bool fromString(const std::string &str, sint16 &val) { char *end; long v; errno = 0; v = strtol(str.c_str(), &end, 10); if (errno || v > SHRT_MAX || v < SHRT_MIN || end == str.c_str()) { val = 0; return false; } else { val = (sint16)v; return true; } }
-inline bool fromString(const std::string &str, uint64 &val) { bool ret = sscanf(str.c_str(), "%"NL_I64"u", &val) == 1; if (!ret) val = 0; return ret; }
-inline bool fromString(const std::string &str, sint64 &val) { bool ret = sscanf(str.c_str(), "%"NL_I64"d", &val) == 1; if (!ret) val = 0; return ret; }
+inline bool fromString(const std::string &str, uint64 &val) { bool ret = sscanf(str.c_str(), "%" NL_I64 "u", &val) == 1; if (!ret) val = 0; return ret; }
+inline bool fromString(const std::string &str, sint64 &val) { bool ret = sscanf(str.c_str(), "%" NL_I64 "d", &val) == 1; if (!ret) val = 0; return ret; }
 inline bool fromString(const std::string &str, float &val) { bool ret = sscanf(str.c_str(), "%f", &val) == 1; if (!ret) val = 0.0f; return ret; }
 inline bool fromString(const std::string &str, double &val) { bool ret = sscanf(str.c_str(), "%lf", &val) == 1; if (!ret) val = 0.0; return ret; }
 
-inline bool fromString(const std::string &str, bool &val)
-{
-	if( str.length() == 1 )
-	{
-		if( str[ 0 ] == '1' )
-			val = true;
-		else
-		if( str[ 0 ] == '0' )
-			val = false;
-		else
-			return false;
-	}
-	else
-	{
-		if( str == "true" )
-			val = true;
-		else
-		if( str == "false" )
-			val = false;
-		else
-			return false;
-	}
+// Fast string to bool, reliably defined for strings starting with 0, 1, t, T, f, F, y, Y, n, N, anything else is undefined.
+// (str[0] == '1' || (str[0] & 0xD2) == 0x50)
+//  - Kaetemi
 
-	return true;
-}
-
-inline bool fromString(const char *str, uint32 &val) { if (strstr(str, "-") != NULL) { val = 0; return false; } char *end; unsigned long v; errno = 0; v = strtoul(str, &end, 10); if (errno || v > UINT_MAX || end == str) { val = 0; return false; } else { val = (uint32)v; return true; } }
-inline bool fromString(const char *str, sint32 &val) { char *end; long v; errno = 0; v = strtol(str, &end, 10); if (errno || v > INT_MAX || v < INT_MIN || end == str) { val = 0; return false; } else { val = (sint32)v; return true; } }
-inline bool fromString(const char *str, uint8 &val) { char *end; long v; errno = 0; v = strtol(str, &end, 10); if (errno || v > UCHAR_MAX || v < 0 || end == str) { val = 0; return false; } else { val = (uint8)v; return true; } }
-inline bool fromString(const char *str, sint8 &val) { char *end; long v; errno = 0; v = strtol(str, &end, 10); if (errno || v > SCHAR_MAX || v < SCHAR_MIN || end == str) { val = 0; return false; } else { val = (sint8)v; return true; } }
-inline bool fromString(const char *str, uint16 &val) { char *end; long v; errno = 0; v = strtol(str, &end, 10); if (errno || v > USHRT_MAX || v < 0 || end == str) { val = 0; return false; } else { val = (uint16)v; return true; } }
-inline bool fromString(const char *str, sint16 &val) { char *end; long v; errno = 0; v = strtol(str, &end, 10); if (errno || v > SHRT_MAX || v < SHRT_MIN || end == str) { val = 0; return false; } else { val = (sint16)v; return true; } }
-inline bool fromString(const char *str, uint64 &val) { bool ret = sscanf(str, "%"NL_I64"u", &val) == 1; if (!ret) val = 0; return ret; }
-inline bool fromString(const char *str, sint64 &val) { bool ret = sscanf(str, "%"NL_I64"d", &val) == 1; if (!ret) val = 0; return ret; }
-inline bool fromString(const char *str, float &val) { bool ret = sscanf(str, "%f", &val) == 1; if (!ret) val = 0.0f; return ret; }
-inline bool fromString(const char *str, double &val) { bool ret = sscanf(str, "%lf", &val) == 1; if (!ret) val = 0.0; return ret; }
-
-inline bool fromString(const char *str, bool &val)
-{
-	switch (str[0])
-	{
-	case '1':
-	case 't':
-	case 'y':
-	case 'T':
-	case 'Y':
-		val = true;
-		return true;
-	case '0':
-	case 'f':
-	case 'n':
-	case 'F':
-	case 'N':
-		val = false;
-		return true;
-	}
-
-	return false;
-}
+bool fromString(const std::string &str, bool &val);
 
 inline bool fromString(const std::string &str, std::string &val) { val = str; return true; }
 
@@ -308,6 +257,105 @@ inline bool fromString(const std::string &str, uint &val) { return sscanf(str.c_
 inline bool fromString(const std::string &str, sint &val) { return sscanf(str.c_str(), "%d", &val) == 1; }
 #endif // NL_COMP_VC6
 
+// Convert local codepage to UTF-8
+// On Windows, the local codepage is undetermined
+// On Linux, the local codepage is always UTF-8 (no-op)
+std::string mbcsToUtf8(const char *str, size_t len = 0);
+std::string mbcsToUtf8(const std::string &str);
+
+// Convert wide codepage to UTF-8
+// On Windows, the wide codepage is UTF-16
+// On Linux, the wide codepage is UTF-32
+std::string wideToUtf8(const wchar_t *str, size_t len = 0);
+std::string wideToUtf8(const std::wstring &str);
+
+// Convert UTF-8 to wide character set
+std::wstring utf8ToWide(const char *str, size_t len = 0);
+std::wstring utf8ToWide(const std::string &str);
+
+// Convert UTF-8 to local multibyte character set
+std::string utf8ToMbcs(const char *str, size_t len = 0);
+std::string utf8ToMbcs(const std::string &str);
+
+// Convert wide to local multibyte character set
+std::string wideToMbcs(const wchar_t *str, size_t len = 0);
+std::string wideToMbcs(const std::wstring &str);
+
+// Convert local multibyte to wide character set
+std::wstring mbcsToWide(const char *str, size_t len = 0);
+std::wstring mbcsToWide(const std::string &str);
+
+inline const char *asCStr(const char *str) { return str; }
+inline const char *asCStr(const std::string &str) { return str.c_str(); }
+inline const wchar_t *asCStr(const wchar_t *str) { return str; }
+inline const wchar_t *asCStr(const std::wstring &str) { return str.c_str(); }
+
+#if defined(NL_OS_WINDOWS)
+#define nlUtf8ToMbcs(str) (NLMISC::utf8ToMbcs(str).c_str())
+#define nlMbcsToUtf8(str) (NLMISC::mbcsToUtf8(str).c_str())
+#else
+#define nlUtf8ToMbcs(str) (NLMISC::asCStr(str))
+#define nlMbcsToUtf8(str) (NLMISC::asCStr(str))
+#endif
+#define nlWideToUtf8(str) (NLMISC::wideToUtf8(str).c_str())
+#define nlUtf8ToWide(str) (NLMISC::utf8ToWide(str).c_str())
+#define nlWideToMbcs(str) (NLMISC::wideToMbcs(str).c_str())
+#define nlMbcsToWide(str) (NLMISC::mbcsToWide(str).c_str())
+
+// On Windows, tstring is either local multibyte or utf-16 wide
+// On Linux, tstring is always utf-8
+
+#if defined(NL_OS_WINDOWS) && (defined(UNICODE) || defined(_UNICODE))
+typedef std::wstring tstring;
+typedef wchar_t tchar;
+inline std::string tStrToUtf8(const tchar *str) { return wideToUtf8((const wchar_t *)str); }
+inline std::string tStrToUtf8(const tstring &str) { return wideToUtf8((const std::wstring &)str); }
+inline std::wstring tStrToWide(const tchar *str) { return (const wchar_t *)str; }
+inline std::wstring tStrToWide(const tstring &str) { return (const std::wstring &)str; }
+inline std::string tStrToMbcs(const tchar *str) { return wideToMbcs((const wchar_t *)str); }
+inline std::string tStrToMbcs(const tstring &str) { return wideToMbcs((const std::wstring &)str); }
+#define nlTStrToUtf8(str) (NLMISC::tStrToUtf8(str).c_str())
+#define nlTStrToWide(str) ((const wchar_t *)NLMISC::asCStr(str))
+#define nlTStrToMbcs(str) (NLMISC::tStrToMbcs(str).c_str())
+inline tstring utf8ToTStr(const char *str) {return (const tstring &)utf8ToWide(str); }
+inline tstring utf8ToTStr(const std::string &str) { return (const tstring &)utf8ToWide(str); }
+inline tstring wideToTStr(const wchar_t *str) { return (const tchar *)str; }
+inline tstring wideToTStr(const std::wstring &str) { return (const tstring &)str; }
+inline tstring mbcsToTStr(const char *str) { return (const tstring &)mbcsToWide(str); }
+inline tstring mbcsToTStr(const std::string &str) { return (const tstring &)mbcsToWide(str); }
+#define nlUtf8ToTStr(str) (NLMISC::utf8ToTStr(str).c_str())
+#define nlWideToTStr(str) ((const tchar *)NLMISC::asCStr(str))
+#define nlMbcsToTStr(str) (NLMISC::mbcsToTStr(str).c_str())
+#else
+typedef std::string tstring;
+typedef char tchar;
+inline std::string tStrToUtf8(const tchar *str) { return mbcsToUtf8((const char *)str); }
+inline std::string tStrToUtf8(const tstring &str) { return mbcsToUtf8((const std::string &)str); }
+inline std::wstring tStrToWide(const tchar *str) { return mbcsToWide((const char *)str); }
+inline std::wstring tStrToWide(const tstring &str) { return mbcsToWide((const std::string &)str); }
+inline std::string tStrToMbcs(const tchar *str) { return (const char *)str; }
+inline std::string tStrToMbcs(const tstring &str) { return (const std::string &)str; }
+#if defined(NL_OS_WINDOWS)
+#define nlTStrToUtf8(str) (NLMISC::tStrToUtf8(str).c_str())
+#else
+#define nlTStrToUtf8(str) ((const char *)NLMISC::asCStr(str))
+#endif
+#define nlTStrToWide(str) (NLMISC::tStrToWide(str).c_str())
+#define nlTStrToMbcs(str) ((const char *)NLMISC::asCStr(str))
+inline tstring utf8ToTStr(const char *str) { return (const tstring &)utf8ToMbcs(str); }
+inline tstring utf8ToTStr(const std::string &str) { return (const tstring &)utf8ToMbcs(str); }
+inline tstring wideToTStr(const wchar_t *str) { return (const tstring &)wideToMbcs(str); }
+inline tstring wideToTStr(const std::wstring &str) { return (const tstring &)wideToMbcs(str); }
+inline tstring mbcsToTStr(const char *str) { return (const tchar *)str; }
+inline tstring mbcsToTStr(const std::string &str) { return (const tstring &)str; }
+#if defined(NL_OS_WINDOWS)
+#define nlUtf8ToTStr(str) (NLMISC::utf8ToTStr(str).c_str())
+#else
+#define nlUtf8ToTStr(str) ((const tchar *)NLMISC::asCStr(str))
+#endif
+#define nlWideToTStr(str) (NLMISC::wideToTStr(str).c_str())
+#define nlMbcsToTStr(str) ((const tchar *)NLMISC::asCStr(str))
+#endif
 
 } // NLMISC
 

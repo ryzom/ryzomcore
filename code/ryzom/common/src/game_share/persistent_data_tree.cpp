@@ -77,6 +77,9 @@
 #include "stdpch.h"
 #include "persistent_data_tree.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 //-----------------------------------------------------------------------------
 // Namespaces
@@ -816,7 +819,7 @@ bool CPersistentDataTree::writeToPdr(CPersistentDataRecord& pdr) const
 		ok= _Child->getChildren()[i]->writeToPdr(pdr);
 	}
 
-	// if an error occured during write then clear out the result pdr and return false
+	// if an error occurred during write then clear out the result pdr and return false
 	if (!ok)
 		pdr.clear();
 

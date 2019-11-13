@@ -32,6 +32,10 @@
 using namespace std;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 #define IG_UNIQUE_ID(this) ((void*)&((this)->_GroupSizeRef)) // NB nico : use some pointer *inside* CInterfaceGroup as a unique id for lua registry (any field but
 														     // the first), instead of using 'this'. 'this' is already used by
 		                                                     //  CLuaIHM::pushReflectableOnStack as unique id to CInterfaceElement's ref pointers
@@ -47,14 +51,14 @@ namespace NLGUI
 	CInterfaceGroup::CInterfaceGroup(const TCtorParam &param) : CCtrlBase(param)
 	{
 		_ParentSizeMax = NULL;
-		_MaxW = _MaxH = 16384;
+		_MaxW = _MaxH = std::numeric_limits<sint32>::max();
 		_OffsetX = _OffsetY = 0;
 		_Overlappable= true;
 		_ResizeFromChildW= false;
 		_ResizeFromChildH= false;
 		_ResizeFromChildWMargin= 0;
 		_ResizeFromChildHMargin= 0;
-		_MaxWReal = _MaxHReal = 16384;
+		_MaxWReal = _MaxHReal = std::numeric_limits<sint32>::max();
 		_GroupSizeRef = 0;
 		_Escapable= false;
 		_Priority= WIN_PRIORITY_NORMAL;
@@ -312,8 +316,7 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"max_sizeparent" );
 		if (ptr)
 		{
-			string idparent = ptr.str();
-			idparent = NLMISC::strlwr(idparent);
+			string idparent = NLMISC::toLower(ptr.str());
 			if (idparent != "parent")
 			{
 				if (parentGroup)
@@ -826,7 +829,7 @@ namespace NLGUI
 
 		const std::map< uint32, SLinkData > &linkMap =
 			CWidgetManager::getInstance()->getParser()->getLinkMap();
-		
+
 		xmlNodePtr node = NULL;
 
 		std::map< uint32, SLinkData >::const_iterator itr;
@@ -844,17 +847,17 @@ namespace NLGUI
 			xmlAddChild( parentNode, node );
 
 			xmlSetProp( node, BAD_CAST "expr", BAD_CAST data.expr.c_str() );
-			
+
 			if( !data.target.empty() )
 				xmlSetProp( node, BAD_CAST "target", BAD_CAST data.target.c_str() );
-			
+
 			if( !data.action.empty() )
 			{
 				xmlSetProp( node, BAD_CAST "action", BAD_CAST data.action.c_str() );
-				
+
 				if( !data.params.empty() )
 					xmlSetProp( node, BAD_CAST "params", BAD_CAST data.params.c_str() );
-				
+
 				if( !data.cond.empty() )
 					xmlSetProp( node, BAD_CAST "cond", BAD_CAST data.cond.c_str() );
 			}
@@ -1000,7 +1003,7 @@ namespace NLGUI
 	{
 		string idTmp = id, lidTmp = lid;
 	//	bool isFound = true;
-		while (idTmp.size() > 0)
+		while (!idTmp.empty())
 		{
 			string tokid, toklid;
 
@@ -1032,12 +1035,12 @@ namespace NLGUI
 			if (posid > 0)
 				idTmp = idTmp.substr (0, posid);
 			else
-				idTmp = "";
+				idTmp.clear();
 
 			if (poslid > 0)
 				lidTmp = lidTmp.substr (0, poslid);
 			else
-				lidTmp = "";
+				lidTmp.clear();
 		}
 		return true;
 	}
@@ -1174,7 +1177,7 @@ namespace NLGUI
 	int CInterfaceGroup::luaGetNumGroups(CLuaState &ls)
 	{
 		CLuaIHM::checkArgCount(ls, "CInterfaceGroup::getNumGroups", 0);
-		ls.push((double) _ChildrenGroups.size());
+		ls.push((uint)_ChildrenGroups.size());
 		return 1;
 	}
 
@@ -1184,7 +1187,7 @@ namespace NLGUI
 		const char *funcName = "CInterfaceGroup::getGroup";
 		CLuaIHM::checkArgCount(ls, "CInterfaceGroup::getGroup", 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		uint index = (uint) ls.toNumber(1);
+		uint index = (uint) ls.toInteger(1);
 		if (index >= _ChildrenGroups.size())
 		{
 			CLuaIHM::fails(ls, "getGroup : try to index group %s, but there are only %d son groups", ls.toString(1), (int) _ChildrenGroups.size());
@@ -1302,7 +1305,7 @@ namespace NLGUI
 					CInterfaceGroup *currParent = _Parent;
 					while (currParent)
 					{
-						if (currParent->moveSBTrackY (this, eventDesc.getWheel()*12))
+						if (currParent->moveSBTargetY (this, -(eventDesc.getWheel()*12)))
 							return true;
 						currParent = currParent->getParent();
 					}
@@ -1395,8 +1398,18 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	sint32 CInterfaceGroup::getInnerWidth() const
+	{
+		sint width = CInterfaceElement::getInnerWidth();
+		return std::min(width, _MaxWReal - _MarginLeft);
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	void CInterfaceGroup::checkCoords()
 	{
+		// Make XReal same as in updateCoords() as some elements (CViewText) depends on it
+		_XReal += _MarginLeft;
+
 		//update all children elements
 		vector<CViewBase*>::const_iterator ite;
 		for (ite = _EltOrder.begin() ; ite != _EltOrder.end(); ite++)
@@ -1405,7 +1418,9 @@ namespace NLGUI
 			if(pIE->getActive())
 				pIE->checkCoords();
 		}
-		executeLuaScriptOnDraw();	
+
+		_XReal -= _MarginLeft;
+		executeLuaScriptOnDraw();
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -1454,7 +1469,7 @@ namespace NLGUI
 		}
 
 		CViewBase::updateCoords();
-		_XReal += _OffsetX;
+		_XReal += _OffsetX + _MarginLeft;
 		_YReal += _OffsetY;
 
 		//update all children elements
@@ -1465,7 +1480,7 @@ namespace NLGUI
 			pIE->updateCoords();
 		}
 
-		_XReal -= _OffsetX;
+		_XReal -= (_OffsetX + _MarginLeft);
 		_YReal -= _OffsetY;
 	}
 
@@ -1527,12 +1542,8 @@ namespace NLGUI
 				// \todo yoyo: do not know why but don't work if this==scroll_text
 				if(sonGroup && !isGroupScrollText())
 				{
-					sint32	oldSciX= -16384;
-					sint32	oldSciY= -16384;
-					sint32	oldSciW= 32768;
-					sint32	oldSciH= 32768;
 					sint32	w, h;
-					sonGroup->computeCurrentClipContribution(oldSciX, oldSciY, oldSciW, oldSciH, x0, y0, w, h);
+					sonGroup->computeClipContribution(x0, y0, w, h);
 					x1= x0 + w;
 					y1= y0 + h;
 				}
@@ -1777,9 +1788,9 @@ namespace NLGUI
 			CInterfaceGroup *pChild = *itg;
 			if (pChild->getActive())
 			{
-	//		bool bUnder = 
+	//		bool bUnder =
 				pChild->getViewsUnder (x, y, clipX, clipY, clipW, clipH, vVB);
-	//			if (bUnder && (vICL.size() > 0))
+	//			if (bUnder && !vICL.empty())
 	//				return true;
 			}
 		}
@@ -1832,9 +1843,9 @@ namespace NLGUI
 			CInterfaceGroup *pChild = *itg;
 			if (pChild->getActive())
 			{
-	//		bool bUnder = 
+	//		bool bUnder =
 				pChild->getCtrlsUnder (x, y, clipX, clipY, clipW, clipH, vICL);
-	//			if (bUnder && (vICL.size() > 0))
+	//			if (bUnder && !vICL.empty())
 	//				return true;
 			}
 		}
@@ -1888,9 +1899,9 @@ namespace NLGUI
 			CInterfaceGroup *pChild = *itg;
 			if (pChild->getActive())
 			{
-	//		bool bUnder = 
+	//		bool bUnder =
 				pChild->getGroupsUnder (x, y, clipX, clipY, clipW, clipH, vIGL);
-	//			if (bUnder && (vICL.size() > 0))
+	//			if (bUnder && !vICL.empty())
 	//				return true;
 			}
 		}
@@ -1911,8 +1922,7 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CInterfaceGroup::computeCurrentClipContribution(sint32 oldSciX, sint32 oldSciY, sint32 oldSciW, sint32 oldSciH,
-														 sint32 &newSciXDest, sint32 &newSciYDest, sint32 &newSciWDest, sint32 &newSciHDest) const
+	void CInterfaceGroup::computeClipContribution(sint32 &newSciXDest, sint32 &newSciYDest, sint32 &newSciWDest, sint32 &newSciHDest) const
 	{
 		sint32 newSciX = _XReal;
 		sint32 newSciY = _YReal;
@@ -1932,6 +1942,21 @@ namespace NLGUI
 				newSciY = _YReal + _HReal - _MaxHReal;
 			newSciH = _MaxHReal;
 		}
+		// Don't apply margins because HTML list marker is drawn outside group paragraph inner content.
+		// Should not be an issue because horizontal scolling not used.
+		newSciXDest = newSciX/* + _MarginLeft*/;
+		newSciYDest = newSciY;
+		newSciWDest = newSciW/* - _MarginLeft*/;
+		newSciHDest = newSciH;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CInterfaceGroup::computeCurrentClipContribution(sint32 oldSciX, sint32 oldSciY, sint32 oldSciW, sint32 oldSciH,
+														 sint32 &newSciXDest, sint32 &newSciYDest, sint32 &newSciWDest, sint32 &newSciHDest) const
+	{
+		sint32 newSciX, newSciY, newSciW, newSciH;
+		computeClipContribution(newSciX, newSciY, newSciW, newSciH);
+
 		// Clip Left
 		if (newSciX < oldSciX)
 		{
@@ -1955,9 +1980,11 @@ namespace NLGUI
 			newSciH = newSciH - ((newSciY+newSciH)-(oldSciY+oldSciH));
 		}
 
-		newSciXDest = newSciX;
+		// Don't apply margins because HTML list marker is drawn outside group paragraph inner content.
+		// Should not be an issue because horizontal scolling not used.
+		newSciXDest = newSciX/* + _MarginLeft*/;
 		newSciYDest = newSciY;
-		newSciWDest = newSciW;
+		newSciWDest = newSciW/* - _MarginLeft*/;
 		newSciHDest = newSciH;
 
 	}
@@ -2132,7 +2159,34 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CInterfaceGroup::dumpGroups()
+	int CInterfaceGroup::luaDumpSize(CLuaState &ls)
+	{
+		const char *funcName = "dumpSize";
+		CLuaIHM::checkArgCount(ls, funcName, 0);
+		dumpSize();
+		return 0;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	int CInterfaceGroup::luaDumpEltsOrder(CLuaState &ls)
+	{
+		const char *funcName = "dumpEltsOrder";
+		CLuaIHM::checkArgCount(ls, funcName, 0);
+		dumpEltsOrder();
+		return 0;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	int CInterfaceGroup::luaDumpGroups(CLuaState &ls)
+	{
+		const char *funcName = "dumpGroups";
+		CLuaIHM::checkArgCount(ls, funcName, 0);
+		dumpGroups();
+		return 0;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CInterfaceGroup::dumpGroups() const
 	{
 		nlinfo("Num groups = %d", (int) _ChildrenGroups.size());
 		for(uint k = 0; k < _ChildrenGroups.size(); ++k)
@@ -2140,7 +2194,8 @@ namespace NLGUI
 			std::string typeName = "???";
 			if (_ChildrenGroups[k])
 			{
-				const type_info &ti = typeid(*_ChildrenGroups[k]);
+				NLGUI::CInterfaceGroup *group = _ChildrenGroups[k];
+				const type_info &ti = typeid(*group);
 				typeName = ti.name();
 			}
 			nlinfo("Group %d, name = %s, type=%s", k,  _ChildrenGroups[k] ? _ChildrenGroups[k]->getId().c_str() : "???", typeName.c_str());
@@ -2148,20 +2203,18 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CInterfaceGroup::dumpEltsOrder()
+	void CInterfaceGroup::dumpEltsOrder() const
 	{
-		nlinfo("Num elements = %d", (int) _EltOrder.size());
+		nlinfo("Num elements = %d, num groups = %d", (int) _EltOrder.size(), _ChildrenGroups.size());
 		for(uint k = 0; k < _EltOrder.size(); ++k)
 		{
-			std::string typeName = "???";
-			if (_ChildrenGroups[k])
-			{
-				const type_info &ti = typeid(*_EltOrder[k]);
-				typeName = ti.name();
-			}
 			CInterfaceElement *el = _EltOrder[k];
 			if (el)
 			{
+				std::string typeName;
+				NLGUI::CViewBase *view = _EltOrder[k];
+				const type_info &ti = typeid(*view);
+				typeName = ti.name();
 				nlinfo("Element %d, name = %s, type=%s, x=%d, y=%d, parent_name=%s parentposname=%s xreal=%d, yreal=%d, wreal=%d, hreal=%d",
 					   k, el->getId().c_str(), typeName.c_str(), el->getX(), el->getY(), el->getParent() ? el->getParent()->getId().c_str() : "no parent",
 					   el->getParentPos() ? el->getParentPos()->getId().c_str() : "parent",
@@ -2545,13 +2598,13 @@ namespace NLGUI
 			(*itr)->onWidgetDeleted( e );
 	}
 
-	void CInterfaceGroup::moveBy( sint32 x, sint32 y )
+	void CInterfaceGroup::moveBy(sint32 x, sint32 y)
 	{
-		CInterfaceElement::moveBy( x, y );
+		CInterfaceElement::moveBy(x, y);
 
-		for( int i = 0; i < _EltOrder.size(); i++ )
+		for(uint i = 0; i < _EltOrder.size(); ++i)
 		{
-			CViewBase *v = _EltOrder[ i ];
+			CViewBase *v = _EltOrder[i];
 			v->updateCoords();
 		}
 	}
@@ -2565,26 +2618,26 @@ namespace NLGUI
 		std::string oldId;
 
 		// Reparent children
-		for( sint32 i = 0; i < _EltOrder.size(); i++ )
+		for(uint i = 0; i < _EltOrder.size(); ++i)
 		{
-			CInterfaceElement *e = _EltOrder[ i ];
+			CInterfaceElement *e = _EltOrder[i];
 
 			oldId = e->getId();
 
-			e->setW( e->getWReal() );
-			e->setH( e->getHReal() );
-			e->setSizeRef( "" );
+			e->setW(e->getWReal());
+			e->setH(e->getHReal());
+			e->setSizeRef("");
 
-			e->setParent( p );
-			
-			e->setParentPos( p );
-			e->setParentSize( p );
-			e->alignTo( p );
+			e->setParent(p);
 
-			p->addElement( e );
-			e->setIdRecurse( e->getShortId() );
+			e->setParentPos(p);
+			e->setParentSize(p);
+			e->alignTo(p);
 
-			CWidgetManager::getInstance()->onWidgetMoved( oldId, e->getId() );
+			p->addElement(e);
+			e->setIdRecurse(e->getShortId());
+
+			CWidgetManager::getInstance()->onWidgetMoved(oldId, e->getId());
 		}
 
 		_EltOrder.clear();
@@ -2602,29 +2655,29 @@ namespace NLGUI
 		sint32 maxx = std::numeric_limits< sint32 >::min();
 		sint32 maxy = std::numeric_limits< sint32 >::min();
 
-		sint32 tlx,tly,brx,bry;
+		sint32 tlx, tly, brx, bry;
 
 		// Find the min and max coordinates of the elements
-		for( int i = 0; i < _EltOrder.size(); i++ )
+		for(uint i = 0; i < _EltOrder.size(); ++i)
 		{
-			CViewBase *v = _EltOrder[ i ];
+			CViewBase *v = _EltOrder[i];
 
-			v->getHSCoords( Hotspot_TL, tlx, tly );
-			v->getHSCoords( Hotspot_BR, brx, bry );
+			v->getHSCoords(Hotspot_TL, tlx, tly);
+			v->getHSCoords(Hotspot_BR, brx, bry);
 
-			if( tlx < minx )
+			if (tlx < minx)
 				minx = tlx;
-			if( brx > maxx )
+			if (brx > maxx)
 				maxx = brx;
-			if( bry < miny )
+			if (bry < miny)
 				miny = bry;
-			if( tly > maxy )
+			if (tly > maxy)
 				maxy = tly;
 		}
 
 		// Set the position and the width and height based on these coords
-		setW( maxx - minx );
-		setH( maxy - miny );
+		setW(maxx - minx);
+		setH(maxy - miny);
 		_WReal = getW();
 		_HReal = getH();
 		_XReal = minx;
@@ -2633,10 +2686,10 @@ namespace NLGUI
 
 	void CInterfaceGroup::alignElements()
 	{
-		for( int i = 0; i < _EltOrder.size(); i++ )
+		for(uint i = 0; i < _EltOrder.size(); ++i)
 		{
-			CViewBase *v = _EltOrder[ i ];
-			v->alignTo( this );
+			CViewBase *v = _EltOrder[i];
+			v->alignTo(this);
 		}
 	}
 

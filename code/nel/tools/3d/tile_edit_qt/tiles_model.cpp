@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "common.h"
 #include <QtGui/QtGui>
 #include "tiles_model.h"
 #include "tile_widget.h"
@@ -52,29 +53,31 @@ tiles_model::tiles_model(QObject *parent)
 
 QVariant tiles_model::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid())
-        return QVariant();
+	if (!index.isValid())
+		return QVariant();
 
-    if (role == Qt::DecorationRole || role == Qt::UserRole)
+	if (role == Qt::DecorationRole || role == Qt::UserRole)
 	{
-		CTile_Widget* wiwi = new CTile_Widget;
-		wiwi->initWidget( tiles.value(index.row()).getPixmap(), tiles.value(index.row()).getPixmapSide(), tiles.value(index.row()).getTileLabel() );
-		QPixmap pixpix = QPixmap::grabWidget(wiwi, wiwi->contentsRect());
-		delete wiwi;
+		CTile_Widget wiwi;
+		wiwi.initWidget(tiles.value(index.row()).getPixmap(), tiles.value(index.row()).getPixmapSide(), tiles.value(index.row()).getTileLabel());
+#ifdef USE_QT5
+		QPixmap pixpix = wiwi.grab(wiwi.contentsRect());
+#else
+		QPixmap pixpix = QPixmap::grabWidget(&wiwi, wiwi.contentsRect());
+#endif
 		return pixpix;
 	}
-    else if (role == Qt::UserRole + 1)
+	else if (role == Qt::UserRole + 1)
 	{
-        return tiles.value(index.row()).getIndex();
+		return tiles.value(index.row()).getIndex();
 	}
 
-    return QVariant();
+	return QVariant();
 }
 
 void tiles_model::sort ( int column, Qt::SortOrder order)
 {
 	qSort(tiles.begin(), tiles.end(), caseInsensitiveLessThan);
-
 }
 
 
