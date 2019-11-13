@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # 
 # \file 0_setup.py
-# \brief Setup sound
+# \brief Setup samplebank
 # \date 2009-06-03 10:47GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
-# Setup sound
+# Setup samplebank
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 # Copyright (C) 2009-2014  by authors
@@ -38,29 +38,25 @@ from directories import *
 
 printLog(log, "")
 printLog(log, "-------")
-printLog(log, "--- Setup sound")
+printLog(log, "--- Setup samplebank")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 # Setup source directories
 printLog(log, ">>> Setup source directories <<<")
-mkPath(log, LeveldesignDirectory)
-mkPath(log, LeveldesignDfnDirectory)
-mkPath(log, DatabaseDirectory + "/" + SoundSamplebanksSourceDirectory)
+mkPath(log, SoundDirectory + "/" + SoundSamplebanksSourceDirectory)
 
 # Setup export directories
 printLog(log, ">>> Setup export directories <<<")
 
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
-mkPath(log, ExportBuildDirectory + "/" + SoundSheetsBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + SoundSamplebanksBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")
-mkPath(log, InstallDirectory + "/" + SoundSheetsInstallDirectory)
-mkPath(log, InstallDirectory + "/" + SoundSamplebanksInstallDirectory)
+mkPath(log, InstallDirectory + "/" + SoundInstallDirectory)
 
 log.close()
 

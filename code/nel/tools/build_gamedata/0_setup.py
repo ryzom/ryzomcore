@@ -84,6 +84,18 @@ if not args.noconf:
 	except NameError:
 		DatabaseDirectory = "W:/database"
 	try:
+		SoundDirectory
+	except NameError:
+		SoundDirectory = "V:"
+	try:
+		SoundSheetsDirectory
+	except NameError:
+		SoundSheetsDirectory = "V:"
+	try:
+		SoundSheetsDfnDirectory
+	except NameError:
+		SoundSheetsDfnDirectory = "V:/DFN"
+	try:
 		ExportBuildDirectory
 	except NameError:
 		ExportBuildDirectory = "T:/export"
@@ -218,6 +230,9 @@ if not args.noconf:
 	ScriptDirectory = askVar(log, "[IN] Script Directory", os.getcwd().replace("\\", "/")).replace("\\", "/")
 	WorkspaceDirectory = askVar(log, "[IN] Workspace Directory", WorkspaceDirectory).replace("\\", "/")
 	DatabaseDirectory = askVar(log, "[IN] Database Directory", DatabaseDirectory).replace("\\", "/")
+	SoundDirectory = askVar(log, "[IN] Sound Directory", SoundDirectory).replace("\\", "/")
+	SoundSheetsDirectory = askVar(log, "[IN] Sound Sheets Directory", SoundSheetsDirectory).replace("\\", "/")
+	SoundSheetsDfnDirectory = askVar(log, "[IN] Sound Sheets DFN Directory", SoundSheetsDfnDirectory).replace("\\", "/")
 	ExportBuildDirectory = askVar(log, "[OUT] Export Build Directory", ExportBuildDirectory).replace("\\", "/")
 	InstallDirectory = askVar(log, "[OUT] Install Directory", InstallDirectory).replace("\\", "/")
 	ClientDevDirectory = askVar(log, "[OUT] Client Dev Directory", ClientDevDirectory).replace("\\", "/")
@@ -301,6 +316,9 @@ if not args.noconf:
 	sf.write("\n")
 	sf.write("# Data build directories\n")
 	sf.write("DatabaseDirectory = \"" + str(DatabaseDirectory) + "\"\n")
+	sf.write("SoundDirectory = \"" + str(SoundDirectory) + "\"\n")
+	sf.write("SoundSheetsDirectory = \"" + str(SoundSheetsDirectory) + "\"\n")
+	sf.write("SoundSheetsDfnDirectory = \"" + str(SoundSheetsDfnDirectory) + "\"\n")
 	sf.write("ExportBuildDirectory = \"" + str(ExportBuildDirectory) + "\"\n")
 	sf.write("\n")
 	sf.write("# Install directories\n")
@@ -415,6 +433,9 @@ if not args.noverify:
 	findTool(log, ToolDirectories, MakeSheetIdTool, ToolSuffix)
 	# findTool(log, ToolDirectories, BuildSheetsTool, ToolSuffix) # kaetemi stuff, ignore this
 	# findTool(log, ToolDirectories, BuildSoundTool, ToolSuffix) # kaetemi stuff, ignore this
+	# findTool(log, ToolDirectories, BuildSoundTool, ToolSuffix)
+	findTool(log, ToolDirectories, BuildSoundbankTool, ToolSuffix)
+	findTool(log, ToolDirectories, BuildSamplebankTool, ToolSuffix)
 	findTool(log, ToolDirectories, BuildCoarseMeshTool, ToolSuffix)
 	findTool(log, ToolDirectories, LightmapOptimizerTool, ToolSuffix)
 	findTool(log, ToolDirectories, BuildClodtexTool, ToolSuffix)

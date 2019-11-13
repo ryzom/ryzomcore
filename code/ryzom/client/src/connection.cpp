@@ -2017,7 +2017,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		string sName = getParam(Params, "name");
-		CSheetId id = CSheetId(sName, "sound");
+		TStringId id = CStringMapper::map(sName);
 		if (SoundMngr != NULL)
 			SoundMngr->spawnSource(id,CVector(0,0,0));
 	}

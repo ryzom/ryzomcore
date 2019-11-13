@@ -62,7 +62,6 @@ static void initSample()
 {
 	if (!INelContext::isContextInitialised())
 		new CApplicationContext();
-	CSheetId::initWithoutSheet();
 	CPath::addSearchPath(NL_SOUND_DATA"/data", true, false);
 	
 	printf("Sample demonstrating OGG playback using stream file .sound sheets.");
@@ -98,7 +97,7 @@ static void initSample()
 	
 	//NLMISC::CHTimer::startBench();
 
-	s_Source = s_AudioMixer->createSource(CSheetId("stream_file.sound"));
+	s_Source = s_AudioMixer->createSource(CStringMapper::map("stream_file"));
 	nlassert(s_Source);
 	s_StreamFileSource = dynamic_cast<CStreamFileSource *>(s_Source);
 	nlassert(s_StreamFileSource);

@@ -606,7 +606,6 @@ bool CObjectViewer::initUI (HWND parent)
 	{
 		new NLMISC::CApplicationContext();
 		nldebug("NeL Object Viewer: initUI");
-		NLMISC::CSheetId::initWithoutSheet();
 	}
 
 	// The fonts manager

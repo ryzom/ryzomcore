@@ -23,7 +23,6 @@
 #include "nel/misc/command.h"
 #include "nel/misc/file.h"
 #include "nel/misc/path.h"
-#include "nel/misc/sheet_id.h"
 
 #include "nel/georges/u_form_loader.h"
 #include "nel/georges/u_form_elm.h"
@@ -769,8 +768,11 @@ std::string UAudioMixer::buildSampleBank(const std::vector<std::string> &sampleL
 		}
 
 		// Sample number MUST be even
-		nlassert(mono16Data.size() == (mono16Data.size() & 0xfffffffe));
-		nlassert(adpcmData.size() == mono16Data.size() / 2);
+		// nlassert(mono16Data.size() == (mono16Data.size() & 0xfffffffe));
+		if (mono16Data.size() & 1)
+			nlwarning("Uneven sample numbers, ADPCM will miss a sample. File: %s, Samples: %i, ADPCM Size: %i",
+				sampleList[j].c_str(), (int)mono16Data.size(), (int)adpcmData.size());
+		nlassert(adpcmData.size() == (mono16Data.size() >> 1));
 
 		adpcmBuffers[j].swap(adpcmData);
 		mono16Buffers[j].swap(mono16Data);
@@ -1058,8 +1060,9 @@ public:
 			for (uint i=0; i<size; ++i)
 			{
 				items->getArrayValue(soundName, i);
-				nlassert(soundName.find(".sound") != std::string::npos);
-				cs.SoundNames.push_back(CSheetId(soundName));
+				soundName = soundName.substr(0, soundName.find(".sound"));
+
+				cs.SoundNames.push_back(CStringMapper::map(soundName));
 			}
 
 			if (!cs.SoundNames.empty())
@@ -1109,7 +1112,7 @@ void CAudioMixerUser::initUserVar()
 		TUserVarControlsContainer::iterator first(_UserVarControls.begin()), last(_UserVarControls.end());
 		for(;  first != last; ++first)
 		{
-			std::vector<NLMISC::CSheetId>::iterator first2(first->second.SoundNames.begin()), last2(first->second.SoundNames.end());
+			std::vector<NLMISC::TStringId>::iterator first2(first->second.SoundNames.begin()), last2(first->second.SoundNames.end());
 			for (; first2 != last2; ++first2)
 			{
 				CSound *sound = getSoundId(*first2);
@@ -1140,7 +1143,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 		for (uint i=0; i<size; ++i)
 		{
 			s.serial(soundName);
-			SoundNames.push_back(CSheetId(soundName, "sound"));
+			SoundNames.push_back(CStringMapper::map(soundName));
 		}
 	}
 	else
@@ -1154,7 +1157,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 
 		for (uint i=0; i<size; ++i)
 		{
-			soundName = SoundNames[i].toString();;
+			soundName = CStringMapper::unmap(SoundNames[i]);
 			s.serial(soundName);
 		}
 	}
@@ -1788,7 +1791,7 @@ void				CAudioMixerUser::update()
 
 // ******************************************************************
 
-TSoundId			CAudioMixerUser::getSoundId( const NLMISC::CSheetId &name )
+TSoundId			CAudioMixerUser::getSoundId( const NLMISC::TStringId &name )
 {
 	return _SoundBank->getSound(name);
 }
@@ -1902,7 +1905,7 @@ retrySound:
 
 			if (invalid)
 			{
-				nlwarning("The sound %s contain an infinite recursion !", id->getName().toString().c_str()/*CStringMapper::unmap(id->getName()).c_str()*/);
+				nlwarning("The sound %s contain an infinite recursion !", CStringMapper::unmap(id->getName()).c_str());
 				return NULL;
 			}
 
@@ -2043,7 +2046,7 @@ retrySound:
 
 // ******************************************************************
 
-USource				*CAudioMixerUser::createSource( const NLMISC::CSheetId &name, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context, UGroupController *groupController)
+USource				*CAudioMixerUser::createSource( const NLMISC::TStringId &name, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context, UGroupController *groupController)
 {
 	return createSource( getSoundId( name ), spawn, cb, userParam, cluster, context, groupController);
 }
@@ -2170,7 +2173,7 @@ bool CAudioMixerUser::unloadSampleBank(const std::string &name)
 
 // ******************************************************************
 
-void			CAudioMixerUser::getSoundNames( std::vector<NLMISC::CSheetId> &names ) const
+void			CAudioMixerUser::getSoundNames( std::vector<NLMISC::TStringId> &names ) const
 {
 	_SoundBank->getNames(names);
 }
@@ -2318,6 +2321,7 @@ void			CAudioMixerUser::getLoadedSampleBankInfo(std::vector<std::pair<std::strin
 {
 	_SampleBankManager->getLoadedSampleBankInfo(result);
 }
+
 
 
 void CAudioMixerUser::setListenerPos (const NLMISC::CVector &pos)

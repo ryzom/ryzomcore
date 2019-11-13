@@ -1,3 +1,5 @@
+title Ryzom Core: 0_setup.py --noconf
+0_setup.py --noconf
 title Ryzom Core: 1_export.py
 1_export.py
 title Ryzom Core: 2_build.py

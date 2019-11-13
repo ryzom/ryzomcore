@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # 
-# \file 1_export.py
-# \brief Export sound
+# \file 3_install.py
+# \brief Install samplebank
 # \date 2009-06-03 10:47GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
-# Export sound
+# Install samplebank
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 # Copyright (C) 2009-2014  by authors
@@ -38,11 +38,17 @@ from directories import *
 
 printLog(log, "")
 printLog(log, "-------")
-printLog(log, "--- Export sound")
+printLog(log, "--- Install samplebank")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
+printLog(log, ">>> Install samplebank <<<")
+mkPath(log, ExportBuildDirectory + "/" + SoundSamplebanksBuildDirectory)
+mkPath(log, InstallDirectory + "/" + SoundInstallDirectory)
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SoundSamplebanksBuildDirectory, InstallDirectory + "/" + SoundInstallDirectory, ".sample_bank")
+
+printLog(log, "")
 log.close()
 
 

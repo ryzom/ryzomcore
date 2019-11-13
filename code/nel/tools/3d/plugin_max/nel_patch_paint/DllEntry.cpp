@@ -4,7 +4,6 @@
 #include "nel/misc/app_context.h"
 #include "../nel_3dsmax_shared/nel_3dsmax_shared.h"
 #include <maxversion.h>
-#include "nel/misc/sheet_id.h"
 
 HINSTANCE hInstance;
 int controlsInit = FALSE;
@@ -23,7 +22,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 	{
 		new NLMISC::CLibraryContext(GetSharedNelContext());
 		nldebug("NeL Patch Paint: DllMain");
-		NLMISC::CSheetId::initWithoutSheet();
 	}
 
 	hInstance = hinstDLL;
