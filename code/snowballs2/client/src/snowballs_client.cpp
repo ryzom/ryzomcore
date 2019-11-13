@@ -302,8 +302,6 @@ void initCore()
 		LoadedCore = true;
 		// Seed the randomizer
 		srand(uint(time(0)));
-		// Sheet Id
-		CSheetId::initWithoutSheet(); // Temporary for sound
 		// Load configuration file, set paths, extension remapping
 		CConfiguration::init();
 		// Load language file
@@ -524,8 +522,6 @@ void releaseCore()
 		CInternationalization::release();
 		// Release the configuration
 		CConfiguration::release();
-		// Release sheet id
-		CSheetId::uninit(); // Temporary for sound
 	}
 }
 

@@ -628,17 +628,17 @@ void CSoundManager::init(IProgressCallback *progressCallBack)
 // add a new source to the world, attached to the specified entity
 // return 0 if creation failed, sound id if creation was successful
 //-----------------------------------------------
-CSoundManager::TSourceId CSoundManager::addSource( const NLMISC::CSheetId &soundName, const NLMISC::CVector &position, bool play, bool loop,  const CEntityId &id)
+CSoundManager::TSourceId CSoundManager::addSource(const NLMISC::TStringId &soundName, const NLMISC::CVector &position, bool play, bool loop,  const CEntityId &id)
 {
 	uint32	retValue = 0;
 
 	// Create a source
-	USource *pSource = _AudioMixer->createSource( soundName );
+	USource *pSource = _AudioMixer->createSource(soundName);
 
 	// If the source is valid.
 	if(pSource == 0)
 	{
-		nlwarning("Sound '%s' not found !", /*CStringMapper::unmap(soundName).c_str()*/soundName.toString().c_str());
+		nlwarning("Sound '%s' not found !", CStringMapper::unmap(soundName).c_str());
 		return retValue;
 	}
 
@@ -676,7 +676,7 @@ CSoundManager::TSourceId CSoundManager::addSource( const NLMISC::CSheetId &sound
 // spawn a new source to the world
 // return false if creation failed, true if creation was successful
 //-----------------------------------------------
-bool CSoundManager::spawnSource(const NLMISC::CSheetId &soundName, CSoundContext &context)
+bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, CSoundContext &context)
 {
 	if (!_PlaySound) return false;
 
@@ -687,7 +687,7 @@ bool CSoundManager::spawnSource(const NLMISC::CSheetId &soundName, CSoundContext
 	// If the source is valid.
 	if(pSource == 0)
 	{
-		nlwarning("Sound '%s' not found !", soundName.toString().c_str());
+		nlwarning("Sound '%s' not found !", soundName);
 		return false;
 	}
 
@@ -706,7 +706,7 @@ bool CSoundManager::spawnSource(const NLMISC::CSheetId &soundName, CSoundContext
 // spawn a new source to the world
 // return false if creation failed, true if creation was successful
 //-----------------------------------------------
-bool CSoundManager::spawnSource(const NLMISC::CSheetId &soundName, const NLMISC::CVector &position)
+bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, const NLMISC::CVector &position)
 {
 	if (!_PlaySound) return false;
 
@@ -716,7 +716,7 @@ bool CSoundManager::spawnSource(const NLMISC::CSheetId &soundName, const NLMISC:
 	// If the source is valid.
 	if(pSource == 0)
 	{
-		nlwarning("Sound '%s' not found !", /*CStringMapper::unmap(soundName).c_str ()*/soundName.toString().c_str());
+		nlwarning("Sound '%s' not found !", CStringMapper::unmap(soundName).c_str ());
 		return false;
 	}
 

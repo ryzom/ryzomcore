@@ -19,7 +19,6 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/string_mapper.h"
-#include "nel/misc/sheet_id.h"
 #include <vector>
 #include <map>
 
@@ -254,9 +253,9 @@ private:
 	/// The current cluster playing source indexed with sound group id
 	TClusterSoundCont		_Sources;
 
-	typedef CHashMap<NLMISC::TStringId, NLMISC::CSheetId, NLMISC::CStringIdHashMapTraits> TStringSheetMap;
+	typedef CHashMap<NLMISC::TStringId, NLMISC::TStringId, NLMISC::CStringIdHashMapTraits> TStringStringMap;
 	/// The sound_group to sound assoc
-	TStringSheetMap	_SoundGroupToSound;
+	TStringStringMap	_SoundGroupToSound;
 };
 
 } // NLSOUND

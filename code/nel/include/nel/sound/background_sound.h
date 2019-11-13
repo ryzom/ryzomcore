@@ -64,12 +64,22 @@ public:
 	/// Associtation clas for storage of sound / filter.
 	struct TSoundInfo
 	{
-		NLMISC::CSheetId		SoundName;
+		NLMISC::TStringId		SoundName;
 		UAudioMixer::TBackgroundFlags		Filter;
 
 		void serial(NLMISC::IStream &s)
 		{
-			SoundName.serialString(s, "sound");
+			std::string soundName;
+			if (s.isReading())
+			{
+				s.serial(soundName);
+				SoundName = NLMISC::CStringMapper::map(soundName);
+			}
+			else
+			{
+				soundName = NLMISC::CStringMapper::unmap(SoundName);
+				s.serial(soundName);
+			}
 			s.serial(Filter);
 		}
 	};
