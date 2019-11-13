@@ -1,5 +1,13 @@
+/**
+* Build Sound
+* \file build_sound.cpp
+* \brief Build Sound
+* \date 2009-06-02 21:25GMT
+* \author Jan Boon (Kaetemi)
+*/
+
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2009  Jan Boon (Kaetemi)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
