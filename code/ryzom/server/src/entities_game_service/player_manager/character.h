@@ -1696,6 +1696,7 @@ public:
  	/// validate dynamic mission step sending url
  	void validateDynamicMissionStep(const std::string &url);
 
+#ifdef RYZOM_FORGE
 	/// add web command validation check
 	void addWebCommandCheck(const std::string &url, const std::string &data, const std::string &salt);
 
@@ -1704,6 +1705,7 @@ public:
 
 	/// validate web command. Return web command item index in bag if command is valid or INVENTORIES::NbBagSlots if not
 	uint checkWebCommand(const std::string &url, const std::string &data, const std::string &hmac, const std::string &salt);
+#endif
 
 	/// get the available phrases
 	void getAvailablePhrasesList(const std::string &brickFilter, std::vector<NLMISC::CSheetId> &selectedPhrases, EGSPD::CPeople::TPeople people = EGSPD::CPeople::Common, bool bypassBrickRequirements = false, bool includeNonRolemasterBricks = true );

@@ -3739,7 +3739,7 @@ void CCharacter::setTargetBotchatProgramm( CEntityBase * target, const CEntityId
 			string defaultSalt = toString(getLastConnectedDate());
 			nlinfo(defaultSalt.c_str());
 			nlinfo(url.c_str());
-			string control = "&hmac="+getHMacSHA1((uint8*)&url[0], (uint32)url.size(), (uint8*)&defaultSalt[0], (uint32)defaultSalt.size()).toString();
+			string control = "&hmac="+NLMISC::getHMacSHA1((uint8*)&url[0], (uint32)url.size(), (uint8*)&defaultSalt[0], (uint32)defaultSalt.size()).toString();
 
 			params[0].Literal= url+control;
 
@@ -13891,12 +13891,12 @@ void CCharacter::sendUrl(const string &url, const string &salt)
 	string control;
 	if (!salt.empty())
 	{
-		control = "&hmac="+getHMacSHA1((uint8*)&url[0], (uint32)url.size(), (uint8*)&salt[0], (uint32)salt.size()).toString();
+		control = "&hmac="+NLMISC::getHMacSHA1((uint8*)&url[0], (uint32)url.size(), (uint8*)&salt[0], (uint32)salt.size()).toString();
 	}
 	else
 	{
 		string defaultSalt = toString(getLastConnectedDate());
-		control = "&hmac="+getHMacSHA1((uint8*)&url[0], (uint32)url.size(), (uint8*)&defaultSalt[0], (uint32)defaultSalt.size()).toString();
+		control = "&hmac="+NLMISC::getHMacSHA1((uint8*)&url[0], (uint32)url.size(), (uint8*)&defaultSalt[0], (uint32)defaultSalt.size()).toString();
 	}
 
 	nlinfo(url.c_str());
@@ -13967,7 +13967,7 @@ string CCharacter::getCustomMissionText(const string &missionName)
 	return "";
 }
 
-
+#ifdef RYZOM_FORGE
 // !!! Deprecated !!!
 void CCharacter::addWebCommandCheck(const string &url, const string &data, const string &salt)
 {
@@ -14076,11 +14076,12 @@ uint CCharacter::checkWebCommand(const string &url, const string &data, const st
 	if (slot == INVENTORIES::NbBagSlots)
 		return slot;
 	string checksum = url + data + getId().toString();
-	string realhmac = getHMacSHA1((uint8*)&checksum[0], (uint32)checksum.size(), (uint8*)&salt[0], (uint32)salt.size()).toString();
+	string realhmac = NLMISC::getHMacSHA1((uint8*)&checksum[0], (uint32)checksum.size(), (uint8*)&salt[0], (uint32)salt.size()).toString();
 	if (realhmac == hmac)
 		return slot;
 	return INVENTORIES::NbBagSlots;
 }
+#endif
 
 
 //-----------------------------------------------

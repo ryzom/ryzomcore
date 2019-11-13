@@ -4646,6 +4646,7 @@ NLMISC_COMMAND (setSalt, "Set Salt", "<dev_eid> <salt>")
 	return true;
 }
 
+#ifdef RYZOM_FORGE
 // !!! Deprecated !!!
 NLMISC_COMMAND (webAddCommandsIds, "Add ids of commands will be run from webig", "<user id> <bot_name> <web_app_url> <indexes>")
 {
@@ -4688,6 +4689,7 @@ NLMISC_COMMAND (webDelCommandsIds, "Del ids of commands", "<user id> <web_app_ur
 	c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=deleted", getSalt());
 	return true;
 }
+#endif
 
 CInventoryPtr getInv(CCharacter *c, const string &inv)
 {
@@ -4717,6 +4719,7 @@ CInventoryPtr getInv(CCharacter *c, const string &inv)
 	return inventoryPtr;
 }
 
+#ifdef RYZOM_FORGE
 NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url> <index> <command> <hmac> [<new_check=0|1|2|3>] [<next_step=0|1>] [<send_url=0|1|2>]")
 {
 
@@ -4757,7 +4760,8 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 	uint32 iindex;
 	NLMISC::fromString(index, iindex);
 	string command = args[3];
-	string hmac = args[4];
+	std::string hmac = args[4];
+	NLMISC::CHashKey hmacBin = NLMISC::CHashKey(hmac);
 
 	vector<string> infos;
 	CGameItemPtr item;
@@ -4785,9 +4789,9 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 
 		string checksumRowId = web_app_url + toString(c->getLastConnectedDate()) + index + command + toString(c->getEntityRowId().getIndex());
 
-		string realhmacEid = getHMacSHA1((uint8*)&checksumEid[0], checksumEid.size(), (uint8*)&salt[0], salt.size()).toString();
-		string realhmacRowId = getHMacSHA1((uint8*)&checksumRowId[0], checksumRowId.size(), (uint8*)&salt[0], salt.size()).toString();
-		if (realhmacEid != hmac && realhmacRowId != hmac && command != "is_valid_index")
+		NLMISC::CHashKey realhmacEid = NLMISC::getHMacSHA1((uint8*)&checksumEid[0], checksumEid.size(), (uint8*)&salt[0], salt.size());
+		NLMISC::CHashKey realhmacRowId = NLMISC::getHMacSHA1((uint8*)&checksumRowId[0], checksumRowId.size(), (uint8*)&salt[0], salt.size());
+		if (realhmacEid != hmacBin && realhmacRowId != hmacBin && command != "is_valid_index")
 		{
 			if (send_url)
 				c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=bad_auth", getSalt());
@@ -6765,6 +6769,7 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 
 	return true;
 }
+#endif
 
 //----------------------------------------------------------------------------
 ENTITY_VARIABLE (PriviledgePVP, "Priviledge Pvp Mode")

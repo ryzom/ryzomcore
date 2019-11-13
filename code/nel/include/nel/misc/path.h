@@ -279,8 +279,8 @@ private:
 	struct CMCFileEntry
 	{
 		char *Name;				// Normal case (the search is done by using nlstricmp)
-		uint32	idPath	 : 20;	// Path (not with file at the end) - look in the SSMpath (1048576 different path allowed)
-		uint32	idExt	 : 11;	// real extension of the file if remapped - look in the SSMext (2048 different extension allowed)
+		uint32	idPath	 : 16;	// Path (not with file at the end) - look in the SSMpath (65536 different path allowed)
+		uint32	idExt	 : 15;	// real extension of the file if remapped - look in the SSMext (32768 different extension allowed)
 		uint32	Remapped : 1;	// true if the file is remapped
 	};
 

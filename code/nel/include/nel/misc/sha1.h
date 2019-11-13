@@ -92,6 +92,11 @@ struct CHashKey
 		return HashKeyString == v.HashKeyString;
 	}
 
+	bool	operator!=(const CHashKey &v) const
+	{
+		return !(*this == v);
+	}
+
 	// this string is always 20 bytes long and is the code in binary format (can't print it directly)
 	std::string HashKeyString;
 };
