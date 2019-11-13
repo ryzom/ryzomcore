@@ -82,7 +82,9 @@ int main(int nNbArg, char **ppArgs)
 	
 	// add search paths
 	CPath::addSearchPath(leveldesignDir, true, false);
-	CPath::addSearchPath(dfnDir, true, false);
+	std::string relativeDfnDir = dfnDir; // only add dfn if not a subdir of leveldesignDir
+	if (!CPath::makePathRelative(leveldesignDir, dfnDir) || relativeDfnDir.size() < 2 || (relativeDfnDir[0] == '.' && relativeDfnDir[1] == '.'))
+		CPath::addSearchPath(dfnDir, true, false);
 
 	// build the sound bank
 	UAudioMixer::buildSoundBank(exportDir);
