@@ -48,6 +48,7 @@
 #include "nel/misc/big_file.h"
 #include "nel/misc/i18n.h"
 #include "nel/misc/cmd_args.h"
+#include "nel/misc/seven_zip.h"
 
 #include "game_share/bg_downloader_msg.h"
 
@@ -55,7 +56,6 @@
 #include "login.h"
 #include "user_agent.h"
 
-#include "seven_zip/seven_zip.h"
 
 #ifndef RY_BG_DOWNLOADER
 	#include "client_cfg.h"

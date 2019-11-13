@@ -72,7 +72,7 @@ public:
 	uint32 get7ZFileSize() const;
 	uint32 getFileSize() const;
 	uint32 getPatchSize() const;
-	CHashKey getHashKey() const;
+	NLMISC::CHashKey getHashKey() const;
 
 	// == operator
 	bool operator==(const CBNPFileVersion& other) const;
