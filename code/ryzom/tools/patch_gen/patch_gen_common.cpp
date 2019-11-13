@@ -26,8 +26,8 @@
 #include "nel/misc/file.h"
 #include "nel/misc/command.h"
 #include "nel/misc/sstring.h"
+#include "nel/misc/seven_zip.h"
 #include "game_share/singleton_registry.h"
-#include "seven_zip.h"
 
 using namespace std;
 using namespace NLMISC;
