@@ -768,8 +768,11 @@ std::string UAudioMixer::buildSampleBank(const std::vector<std::string> &sampleL
 		}
 
 		// Sample number MUST be even
-		nlassert(mono16Data.size() == (mono16Data.size() & 0xfffffffe));
-		nlassert(adpcmData.size() == mono16Data.size() / 2);
+		// nlassert(mono16Data.size() == (mono16Data.size() & 0xfffffffe));
+		if (mono16Data.size() & 1)
+			nlwarning("Uneven sample numbers, ADPCM will miss a sample. File: %s, Samples: %i, ADPCM Size: %i",
+				sampleList[j].c_str(), (int)mono16Data.size(), (int)adpcmData.size());
+		nlassert(adpcmData.size() == (mono16Data.size() >> 1));
 
 		adpcmBuffers[j].swap(adpcmData);
 		mono16Buffers[j].swap(mono16Data);

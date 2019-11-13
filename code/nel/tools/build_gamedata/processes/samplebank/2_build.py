@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # 
 # \file 2_build.py
-# \brief Build sound
+# \brief Build samplebank
 # \date 2009-06-03 10:47GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
-# Build sound
+# Build samplebank
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 # Copyright (C) 2009-2014  by authors
@@ -38,28 +38,33 @@ from directories import *
 
 printLog(log, "")
 printLog(log, "-------")
-printLog(log, "--- Build sound")
+printLog(log, "--- Build samplebank")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 # Find tools
-BuildSound = findTool(log, ToolDirectories, BuildSoundTool, ToolSuffix)
+BuildSamplebank = findTool(log, ToolDirectories, BuildSamplebankTool, ToolSuffix)
 printLog(log, "")
 
-# For each sound directory
-printLog(log, ">>> Build sound <<<")
-if BuildSound == "":
-	toolLogFail(log, BuildSoundTool, ToolSuffix)
+# For each samplebank directory
+printLog(log, ">>> Build samplebank <<<")
+if BuildSamplebank == "":
+	toolLogFail(log, BuildSamplebankTool, ToolSuffix)
 else:
-	mkPath(log, LeveldesignDirectory)
-	mkPath(log, LeveldesignDfnDirectory)
-	mkPath(log, DatabaseDirectory + "/" + SoundSamplebanksSourceDirectory)
-	mkPath(log, ExportBuildDirectory + "/" + SoundSheetsBuildDirectory)
-	mkPath(log, ExportBuildDirectory + "/" + SoundSamplebanksBuildDirectory)
-	subprocess.call([ BuildSound, LeveldesignDirectory, LeveldesignDfnDirectory, DatabaseDirectory + "/" + SoundSamplebanksSourceDirectory, ExportBuildDirectory + "/" + SoundSheetsBuildDirectory ])
-	moveFilesExtNoTree(log, DatabaseDirectory + "/" + SoundSamplebanksSourceDirectory, ExportBuildDirectory + "/" + SoundSamplebanksBuildDirectory, ".sample_bank")
-printLog(log, "")
+	sourcePath = SoundDirectory + "/" + SoundSamplebanksSourceDirectory
+	buildPath = ExportBuildDirectory + "/" + SoundSamplebanksBuildDirectory
+	mkPath(log, sourcePath)
+	mkPath(log, buildPath)
+	for dir in os.listdir(sourcePath):
+		dirPath = sourcePath + "/" + dir
+		if (os.path.isdir(dirPath)) and dir != ".svn" and dir != "*.*":
+			samplebankPath = buildPath + "/" + dir + ".sample_bank"
+			if needUpdateDirNoSubdirFile(log, dirPath, samplebankPath):
+				# build_samplebank  <source_samplebank> <build_samplebank> <samplebank_name>
+				subprocess.call([ BuildSamplebank, dirPath, buildPath, dir ])
+			else:
+				printLog(log, "SKIP " + samplebankPath)
 
 log.close()
 
