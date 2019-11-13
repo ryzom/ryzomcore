@@ -141,7 +141,11 @@ public:
 	void	set(uint i, uint j, sint value)	{ nlassert(i<16 && j<16); Array[i][j] = value; }
 
 protected:
-	void	serial(NLMISC::IStream &f)	{ for (uint i=0; i<16*16; ++i)	f.serial(Array[0][i]); }
+	void	serial(NLMISC::IStream &f)	{
+		for (uint i=0; i<16; ++i)
+			for (uint j=0; j<16; ++j)
+				f.serial(Array[i][j]);
+	}
 };
 
 /**
@@ -166,8 +170,9 @@ protected:
 	void	serial(NLMISC::IStream &f)
 	{
 		f.serial(Mean);
-		for (uint i=0; i<16*16; ++i)
-			f.serial(Array[0][i]);
+		for (uint i=0; i<16; ++i)
+			for(uint j=0; j<16; ++j)
+				f.serial(Array[i][j]);
 	}
 };
 
@@ -193,8 +198,9 @@ protected:
 	void	serial(NLMISC::IStream &f)
 	{
 		f.serial(Mean);
-		for (uint i=0; i<16*2; ++i)
-			f.serial(Array[0][i]);
+		for (uint i=0; i<16; ++i)
+			for (uint j=0; j<2; ++j)
+				f.serial(Array[i][j]);
 	}
 };
 
