@@ -36,6 +36,7 @@ void prelogInit();
 // Initialize the application after login step
 void postlogInit();
 
+void initStreamedPackageManager(NLMISC::IProgressCallback &progress);
 void addSearchPaths(NLMISC::IProgressCallback &progress);
 void addPreDataPaths(NLMISC::IProgressCallback &progress);
 

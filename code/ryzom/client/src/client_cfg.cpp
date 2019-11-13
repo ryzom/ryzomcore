@@ -468,6 +468,8 @@ CClientConfig::CClientConfig()
 	ColorShout			= CRGBA(150,0,0,255);		// Default Shout color.
 	ColorTalk			= CRGBA(255,255,255,255);	// Default Talk color.
 
+	StreamedPackagePath = "stream";
+
 	// MP3 player
 	MediaPlayerDirectory	= "music";
 	MediaPlayerAutoPlay		= false;
@@ -1281,17 +1283,24 @@ void CClientConfig::setValues()
 
 	//////////
 	// MISC //
+
 	// Pre Data Path.
 	READ_STRINGVECTOR_FV(PreDataPath);
 
 	// Data Path.
 	READ_STRINGVECTOR_FV(DataPath);
 
-	// List of files that trigger R2ED reload when touched
-	READ_STRINGVECTOR_FV(R2EDReloadFiles);
-
 	// Data Path no recurse.
 	READ_STRINGVECTOR_FV(DataPathNoRecurse);
+
+	// Streamed package path
+	READ_STRING_FV(StreamedPackagePath);
+
+	// Streamed package hosts
+	READ_STRINGVECTOR_FV(StreamedPackageHosts);
+
+	// List of files that trigger R2ED reload when touched
+	READ_STRINGVECTOR_FV(R2EDReloadFiles);
 
 	// Update packed sheet Path
 	READ_STRINGVECTOR_FV(UpdatePackedSheetPath);

@@ -34,6 +34,7 @@
 #include "nel/misc/system_info.h"
 #include "nel/misc/block_memory.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/streamed_package_manager.h"
 #include "nel/misc/cmd_args.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
@@ -156,6 +157,8 @@ bool					LastScreenSaverEnabled = false;
 
 extern void				registerInterfaceElements();
 extern CContinentManager ContinentMngr;
+
+extern NLMISC::CCmdArgs Args;
 
 // Tips of the day count
 #define RZ_NUM_TIPS 17
@@ -660,8 +663,6 @@ void initStereoDisplayDevice()
 }
 
 // we want to get executable directory
-extern NLMISC::CCmdArgs Args;
-
 static void addPaths(IProgressCallback &progress, const std::vector<std::string> &paths, bool recurse)
 {
 	// all prefixes for paths
@@ -734,6 +735,14 @@ static void addPaths(IProgressCallback &progress, const std::vector<std::string>
 
 		++it;
 	}
+}
+
+void initStreamedPackageManager(NLMISC::IProgressCallback &progress)
+{
+	CStreamedPackageManager &spm = CStreamedPackageManager::getInstance();
+	spm.Path = ClientCfg.StreamedPackagePath;
+	for (uint i = 0; i < ClientCfg.StreamedPackageHosts.size(); i++)
+		spm.Hosts.push_back(ClientCfg.StreamedPackageHosts[i]);
 }
 
 void addSearchPaths(IProgressCallback &progress)
@@ -976,6 +985,7 @@ void prelogInit()
 		CPath::remapExtension ("png", "tga", true);
 		FPU_CHECKER_ONCE
 
+		initStreamedPackageManager(ProgressBar);
 		addPreDataPaths(ProgressBar);
 
 		FPU_CHECKER_ONCE
