@@ -70,7 +70,7 @@ float EAX_MATERIAL_PARAM[] =
 class CSoundGroupSerializer
 {
 public:
-	std::vector<std::pair<NLMISC::TStringId, NLMISC::CSheetId> >	_SoundGroupAssoc;
+	std::vector<std::pair<NLMISC::TStringId, NLMISC::TStringId> >	_SoundGroupAssoc;
 
 	// load the values using the george sheet (called by GEORGE::loadForm)
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const std::string &/* name */)
@@ -95,9 +95,15 @@ public:
 				item->getValueByName(soundGroup, ".SoundGroup");
 				item->getValueByName(sound, ".Sound");
 
-				nlassert(sound.find(".sound") != std::string::npos);
+				string::size_type n = sound.rfind(".sound");
 
-				_SoundGroupAssoc.push_back(make_pair(CStringMapper::map(soundGroup), CSheetId(sound)));
+				if (n != string::npos)
+				{
+					// remove the tailing .sound
+					sound = sound.substr(0, n);
+				}
+
+				_SoundGroupAssoc.push_back(make_pair(CStringMapper::map(soundGroup), CStringMapper::map(sound)));
 			}
 		}
 		catch(...)
@@ -119,18 +125,24 @@ public:
 		{
 			if (s.isReading())
 			{
-				TStringId soundGroup;
-				CSheetId sound;
+				std::string soundGroup;
+				std::string sound;
 
-				CStringMapper::serialString(s, soundGroup);
-				sound.serialString(s, "sound");
+				s.serial(soundGroup);
+				s.serial(sound);
 
-				_SoundGroupAssoc.push_back(make_pair(soundGroup, sound));
+				_SoundGroupAssoc.push_back(make_pair(CStringMapper::map(soundGroup), CStringMapper::map(sound)));
 			}
 			else
 			{
-				CStringMapper::serialString(s, _SoundGroupAssoc[i].first);
-				_SoundGroupAssoc[i].second.serialString(s, "sound");
+				std::string soundGroup;
+				std::string sound;
+
+				soundGroup = CStringMapper::unmap(_SoundGroupAssoc[i].first);
+				sound = CStringMapper::unmap(_SoundGroupAssoc[i].second);
+
+				s.serial(soundGroup);
+				s.serial(sound);
 			}
 		}
 	}
@@ -277,10 +289,10 @@ void CClusteredSound::update(const CVector &listenerPos, const CVector &/* view 
 
 //				nldebug("Searching sound assoc for group [%s]", CStringMapper::unmap(soundGroup).c_str());
 
-				TStringSheetMap::iterator it2(_SoundGroupToSound.find(soundGroup));
+				TStringStringMap::iterator it2(_SoundGroupToSound.find(soundGroup));
 				if (it2 != _SoundGroupToSound.end())
 				{
-					NLMISC::CSheetId soundName = it2->second;
+					NLMISC::TStringId soundName = it2->second;
 					CClusterSound cs;
 
 //					nldebug("Found the sound [%s] for sound group [%s]", CStringMapper::unmap(soundName).c_str(), CStringMapper::unmap(soundGroup).c_str());

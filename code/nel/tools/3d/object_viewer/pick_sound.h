@@ -23,7 +23,7 @@
 #endif // _MSC_VER > 1000
 // pick_sound.h : header file
 //
-#include "nel/misc/sheet_id.h"
+#include "nel/misc/string_mapper.h"
 #include <vector>
 #include <string>
 
@@ -40,11 +40,11 @@ class CPickSound : public CDialog
 {
 // Construction
 public:
-	typedef std::vector<NLMISC::CSheetId> TNameVect;
+	typedef std::vector<NLMISC::TStringId> TNameVect;
 	CPickSound(const TNameVect &names, CWnd* pParent = NULL);   // standard constructor
 
 
-	const NLMISC::CSheetId &getName(void) const { return _CurrName; }
+	const NLMISC::TStringId &getName(void) const { return _CurrName; }
 
 // Dialog Data
 	//{{AFX_DATA(CPickSound)
@@ -63,7 +63,7 @@ public:
 // Implementation
 protected:
 	TNameVect			_Names;
-	NLMISC::CSheetId	_CurrName;
+	NLMISC::TStringId	_CurrName;
 
 	UINT_PTR _Timer;
 

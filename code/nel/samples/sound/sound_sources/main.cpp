@@ -49,7 +49,6 @@ void Init()
 {
 	try
 	{
-		CSheetId::initWithoutSheet();
 
 		CPath::addSearchPath(NL_SOUND_DATA"/data", true, false);
 
@@ -101,7 +100,7 @@ USource *OnAddSource( const char *name, float x, float y, float z )
 	/*
 	 * Create a source with sound 'name', and set some of its initial properties, if successful
 	 */
-	USource *source = AudioMixer->createSource(CSheetId(name, "sound"));
+	USource *source = AudioMixer->createSource( CStringMapper::map(name) );
 	if ( source != NULL )
 	{
 		source->setPos( CVector(x,y,z) );

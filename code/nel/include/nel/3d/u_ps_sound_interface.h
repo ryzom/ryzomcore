@@ -19,7 +19,6 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/string_mapper.h"
-#include "nel/misc/sheet_id.h"
 #include <string>
 
 namespace NLMISC
@@ -51,7 +50,7 @@ struct UPSSoundServer
 	  * \param spawn     true if the sound must be spawned e.g it continues after this interface is removed
 	  * \param cb		 useful only for spawned sound, it tells when a spawned sound has been removed
 	  */
-	virtual UPSSoundInstance *createSound(const NLMISC::CSheetId &soundName, bool spawn = false) = 0;
+	virtual UPSSoundInstance *createSound(const NLMISC::TStringId &soundName, bool spawn = false) = 0;
 };
 
 

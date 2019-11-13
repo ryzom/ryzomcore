@@ -20,7 +20,6 @@
 #include "nel/misc/string_mapper.h"
 #include "nel/3d/cluster.h"
 #include "nel/sound/u_source.h"
-#include "nel/misc/sheet_id.h"
 
 
 namespace NLMISC
@@ -32,7 +31,7 @@ namespace NLMISC
 namespace NLSOUND {
 
 
-typedef std::set<NLMISC::CSheetId> TMarkerSoundSet;
+typedef std::set<NLMISC::TStringId> TMarkerSoundSet;
 
 class UAudioMixer;
 
@@ -51,13 +50,13 @@ public:
 	virtual float			getTime()	const			{ return _Time; }
 
 	/** Add a new sound in the set of to-be-played sounds for this marker */
-	virtual void			addSound(const NLMISC::CSheetId &soundName);
+	virtual void			addSound(const NLMISC::TStringId &soundName);
 
 	/** Remove a sound */
-	virtual void			removeSound(const NLMISC::CSheetId &soundName);
+	virtual void			removeSound(const NLMISC::TStringId &soundName);
 
 	/** Return the set of sounds of this marker */
-	virtual void			getSounds(std::vector<NLMISC::CSheetId> &sounds);
+	virtual void			getSounds(std::vector<NLMISC::TStringId> &sounds);
 
 	/** Play all the sounds of this marker */
 	virtual void			play(UAudioMixer* mixer, NL3D::CCluster *cluster, CSoundContext &context);

@@ -1535,19 +1535,6 @@ void postlogInit()
 		CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
 
 		{
-			H_AUTO(InitRZShIdI)
-
-			nmsg = "Initializing sheets...";
-			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
-
-			// Initialize Sheet IDs.
-			CSheetId::init (ClientCfg.UpdatePackedSheet);
-
-			initLast = initCurrent;
-			initCurrent = ryzomGetLocalTime();
-		}
-
-		{
 			H_AUTO(InitRZSound)
 
 			// Init the sound manager
@@ -1597,7 +1584,13 @@ void postlogInit()
 		}
 
 		{
-			H_AUTO(InitRZSheetL)
+			H_AUTO(InitRZShIdI)
+
+			nmsg = "Initializing sheets...";
+			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
+
+			// Initialize Sheet IDs.
+			CSheetId::init (ClientCfg.UpdatePackedSheet);
 
 			// load packed sheets
 			nmsg = "Loading sheets...";
