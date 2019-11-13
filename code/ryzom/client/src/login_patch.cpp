@@ -1882,6 +1882,7 @@ bool CPatchManager::bnpUnpack(const string &srcBigfile, const string &dstPath, v
 		return false;
 	}
 
+	// Unpack
 	if (!bnpFile.unpack(DestPath))
 		return false;
 
