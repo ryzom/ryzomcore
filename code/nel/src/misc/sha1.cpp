@@ -53,6 +53,8 @@ typedef unsigned int uint32_t;
 typedef unsigned char uint8_t;
 typedef short int_least16_t;
 
+namespace NLMISC {
+
 //
 // Constantes
 //
@@ -67,27 +69,6 @@ enum
     shaInputTooLong,    /* input data too long */
     shaStateError       /* called Input after Result */
 };
-
-#define SHA1HashSize 20
-
-/*
- *  This structure will hold context information for the SHA-1
- *  hashing operation
- */
-typedef struct SHA1Context
-{
-    uint32_t Intermediate_Hash[SHA1HashSize/4]; /* Message Digest  */
-
-    uint32_t Length_Low;            /* Message length in bits      */
-    uint32_t Length_High;           /* Message length in bits      */
-
-                               /* Index into message block array   */
-    int_least16_t Message_Block_Index;
-    uint8_t Message_Block[64];      /* 512-bit message blocks      */
-
-    int Computed;               /* Is the digest computed?         */
-    int Corrupted;             /* Is the message digest corrupted? */
-} SHA1Context;
 
 //
 //  Function Prototypes
@@ -187,7 +168,50 @@ CHashKey getSHA1(const string &filename, bool forcePath)
 		return CHashKey();
 	}
 
-	CHashKey hk (Message_Digest);
+	CHashKey hk(Message_Digest);
+	return hk;
+}
+
+// Begin calculating a SHA1 hash
+bool resetSHA1(SHA1Context *context)
+{
+	int err;
+	err = SHA1Reset(context);
+	if (err)
+	{
+		nlwarning("SHA: SHA1Reset Error %d.\n", err );
+		return false;
+	}
+	return true;
+}
+
+// Add data to a SHA1 hash calculation
+bool inputSHA1(SHA1Context *context, const uint8 *buffer, uint32 size)
+{
+	int err;
+	err = SHA1Input(context, buffer, size);
+	if (err)
+	{
+		nlwarning ("SHA: SHA1Input Error %d.\n", err);
+		return false;
+	}
+	return true;
+}
+
+// Get the SHA1 result
+CHashKey getSHA1(SHA1Context *context)
+{
+	int err;
+	uint8_t messageDigest[20];
+
+	err = SHA1Result(context, messageDigest);
+	if (err)
+	{
+		nlwarning("SHA: SHA1Result Error %d, could not compute message digest.\n", err );
+		return CHashKey();
+	}
+
+	CHashKey hk(messageDigest);
 	return hk;
 }
 
@@ -618,3 +642,6 @@ void SHA1PadMessage(SHA1Context *context)
 
 	SHA1ProcessMessageBlock(context);
 }
+
+}
+

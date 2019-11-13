@@ -23,6 +23,8 @@
 
 #include <string>
 
+namespace NLMISC {
+
 struct CHashKey
 {
 	CHashKey () { HashKeyString.resize(20); }
@@ -99,6 +101,27 @@ inline bool operator <(const struct CHashKey &a,const struct CHashKey &b)
 	return a.HashKeyString<b.HashKeyString;
 }
 
+#define SHA1HashSize 20
+
+/*
+*  This structure will hold context information for the SHA-1
+*  hashing operation
+*/
+typedef struct SHA1Context
+{
+	uint32_t Intermediate_Hash[SHA1HashSize/4]; /* Message Digest  */
+
+	uint32_t Length_Low;            /* Message length in bits      */
+	uint32_t Length_High;           /* Message length in bits      */
+
+									/* Index into message block array   */
+	int_least16_t Message_Block_Index;
+	uint8_t Message_Block[64];      /* 512-bit message blocks      */
+
+	int Computed;               /* Is the digest computed?         */
+	int Corrupted;             /* Is the message digest corrupted? */
+} SHA1Context;
+
 // This function get a filename (it works with big files) and returns his SHA hash key
 // when forcePath is true, it doesn't use NLMISC::lookup
 CHashKey getSHA1(const std::string &filename, bool forcePath = false);
@@ -108,5 +131,16 @@ CHashKey getSHA1(const uint8 *buffer, uint32 size);
 
 // This function get a buffer and key with size and returns his HMAC-SHA1 hash key
 CHashKey getHMacSHA1(const uint8 *text, uint32 text_len, const uint8 *key, uint32 key_len);
+
+// Begin calculating a SHA1 hash
+bool resetSHA1(SHA1Context *context);
+
+// Add data to a SHA1 hash calculation
+bool inputSHA1(SHA1Context *context, const uint8 *buffer, uint32 size);
+
+// Get the SHA1 result
+CHashKey getSHA1(SHA1Context *context);
+
+}
 
 #endif // NL_SHA1_H

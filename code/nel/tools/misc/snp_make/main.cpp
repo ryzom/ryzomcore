@@ -33,6 +33,7 @@
 #include "nel/misc/algo.h"
 #include "nel/misc/common.h"
 #include "nel/misc/streamed_package.h"
+#include "nel/misc/seven_zip.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -83,19 +84,22 @@ bool keepFile (const char *fileName)
 void usage()
 {
 	printf ("USAGE : \n");
-	printf ("   snp_make /p <directory_name> <package_file> <stream_directory> [option] ... [option]\n");
+	printf ("   snp_make -p <directory_name> <package_file> <stream_directory> [option] ... [option]\n");
 	printf ("   option : \n");
 	printf ("      -if wildcard : add the file if it matches the wilcard (at least one 'if' conditions must be met for a file to be adding)\n");
 	printf ("      -ifnot wildcard : add the file if it doesn't match the wilcard (all the 'ifnot' conditions must be met for a file to be adding)\n");
 	printf (" Pack the directory to a snp file\n");
-	printf ("   snp_make /l <package_file>\n");
+	printf ("   snp_make -l <package_file>\n");
 	printf (" List the files contained in the snp file\n");
 }
 
 // ---------------------------------------------------------------------------
 
-void generateLZMA(const std::string sourceFile, const std::string &outputFile)
+void generateLZMA(const std::string &sourceFile, const std::string &outputFile)
 {
+	NLMISC::packLZMA(sourceFile, outputFile);
+
+	/*
 	std::string cmd="lzma e ";
 	cmd+=" "+sourceFile+" "+outputFile;
 	nlinfo("executing system command: %s",cmd.c_str());
@@ -106,6 +110,7 @@ void generateLZMA(const std::string sourceFile, const std::string &outputFile)
 	if (error)
 		nlwarning("'%s' failed with error code %d", cmd.c_str(), error);
 #endif // NL_OS_WINDOWS
+	*/
 }
 
 // ---------------------------------------------------------------------------

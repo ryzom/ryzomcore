@@ -144,14 +144,14 @@ else:
 			if (needUpdateBnp):
 				if (category["StreamedPackages"]):
 					printLog(log, "SNP " + targetBnp)
-					cwDir = os.getcwd().replace("\\", "/")
-					toolDir = os.path.dirname(Lzma).replace("\\", "/")
-					os.chdir(toolDir)
-					subprocess.call([ SnpMake, "/p", sourcePath, targetBnp, ClientPatchDirectory + "/stream" ] + package[1][1:])
-					os.chdir(cwDir)
+					# cwDir = os.getcwd().replace("\\", "/")
+					# toolDir = os.path.dirname(Lzma).replace("\\", "/")
+					# os.chdir(toolDir)
+					subprocess.call([ SnpMake, "-p", sourcePath, targetBnp, ClientPatchDirectory + "/stream" ] + package[1][1:])
+					# os.chdir(cwDir)
 				else:
 					printLog(log, "BNP " + targetBnp)
-					subprocess.call([ BnpMake, "-p", sourcePath, "-o", targetPath ] + package[1][1:])
+					subprocess.call([ BnpMake, "-p", sourcePath, "-o", targetBnp ] + package[1][1:])
 			else:
 				printLog(log, "SKIP " + targetBnp)
 	printLog(log, "")

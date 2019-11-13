@@ -14,17 +14,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "seven_zip.h"
+#include <nel/misc/seven_zip.h>
 
-#include "nel/misc/types_nl.h"
-#include "nel/misc/file.h"
-#include "nel/misc/path.h"
+#include <nel/misc/types_nl.h>
+#include <nel/misc/file.h>
+#include <nel/misc/path.h>
 
-#include "7z.h"
-#include "7zAlloc.h"
-#include "7zCrc.h"
-#include "7zVersion.h"
-#include "LzmaLib.h"
+#include <seven_zip/7z.h>
+#include <seven_zip/7zAlloc.h>
+#include <seven_zip/7zCrc.h>
+#include <seven_zip/7zVersion.h>
+#include <seven_zip/LzmaLib.h>
+#include <seven_zip/LzmaDec.h>
 
 #include <memory>
 
@@ -39,6 +40,7 @@ using namespace NLMISC;
 #define new DEBUG_NEW
 #endif
 
+namespace NLMISC {
 
 /// Input stream class for 7zip archive
 class CNel7ZipInStream : public ISeekInStream
@@ -273,6 +275,85 @@ bool unpackLZMA(const std::string &lzmaFile, const std::string &destFileName)
 	return true;
 }
 
+bool unpackLZMA(const std::string &lzmaFile, const std::string &destFileName, CHashKey &sha1)
+{
+	nldebug("unpackLZMA: decompress LZMA file '%s' to '%s", lzmaFile.c_str(), destFileName.c_str());
+
+	// open input file
+	CIFile inStream(lzmaFile);
+	uint32 inSize = inStream.getFileSize();
+
+	if (inSize < LZMA_PROPS_SIZE + 8)
+	{
+		nlwarning("unpackLZMA: Invalid file size, too small file '%s'", lzmaFile.c_str());
+		return false;
+	}
+
+	// allocate input buffer for props
+	std::vector<uint8> propsBuffer(LZMA_PROPS_SIZE);
+
+	// size of LZMA content
+	inSize -= LZMA_PROPS_SIZE + 8;
+
+	// allocate input buffer for lzma data
+	std::vector<uint8> inBuffer(inSize);
+
+	uint64 fileSize = 0;
+
+	try
+	{
+		// read props
+		inStream.serialBuffer(&propsBuffer[0], LZMA_PROPS_SIZE);
+
+		// read uncompressed size
+		inStream.serial(fileSize);
+
+		// read lzma content
+		inStream.serialBuffer(&inBuffer[0], inSize);
+	}
+	catch(const EReadError &e)
+	{
+		nlwarning("unpackLZMA: Error while reading '%s': %s", lzmaFile.c_str(), e.what());
+		return false;
+	}
+
+	// allocate the output buffer
+	std::vector<uint8> outBuffer(fileSize);
+
+	// in and out file sizes
+	SizeT outProcessed = (SizeT)fileSize;
+	SizeT inProcessed = (SizeT)inSize;
+
+	// decompress the file in memory
+	sint res = LzmaUncompress(&outBuffer[0], &outProcessed, &inBuffer[0], &inProcessed, &propsBuffer[0], LZMA_PROPS_SIZE);
+
+	if (res != 0 || outProcessed != fileSize)
+	{
+		nlwarning("unpackLZMA: Failed to decode lzma file '%s' with status %d", lzmaFile.c_str(), res);
+		return false;
+	}
+
+	// get hash
+	sha1 = getSHA1(&outBuffer[0], outBuffer.size());
+
+	// store on output buffer
+	COFile outStream(destFileName);
+
+	try
+	{
+		// write content
+		outStream.serialBuffer(&outBuffer[0], (uint)fileSize);
+	}
+	catch(const EFile &e)
+	{
+		nlwarning("unpackLZMA: Error while writing '%s': %s", destFileName.c_str(), e.what());
+		CFile::deleteFile(destFileName);
+		return false;
+	}
+
+	return true;
+}
+
 bool packLZMA(const std::string &srcFileName, const std::string &lzmaFileName)
 {
 	nldebug("packLZMA: compress '%s' to LZMA file '%s", srcFileName.c_str(), lzmaFileName.c_str());
@@ -370,4 +451,6 @@ bool packLZMA(const std::string &srcFileName, const std::string &lzmaFileName)
 	}
 
 	return false;
+}
+
 }
