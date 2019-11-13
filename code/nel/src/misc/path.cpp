@@ -23,6 +23,7 @@
 #include "nel/misc/progress_callback.h"
 #include "nel/misc/file.h"
 #include "nel/misc/xml_pack.h"
+#include "nel/misc/streamed_package_manager.h"
 
 #ifdef NL_OS_WINDOWS
 #	include <sys/types.h>
@@ -288,6 +289,7 @@ void CFileContainer::clearMap ()
 	nlassert(!_MemoryCompressed);
 	_Files.clear ();
 	CBigFile::getInstance().removeAll ();
+	CStreamedPackageManager::getInstance().unloadAll ();
 	NL_DISPLAY_PATH("PATH: CPath::clearMap(): map directory cleared");
 }
 
@@ -336,7 +338,7 @@ void CFileContainer::remapExtension (const string &ext1, const string &ext2, boo
 		nlwarning ("PATH: CPath::remapExtension(%s, %s, %d): can't remap empty extension", ext1lwr.c_str(), ext2lwr.c_str(), substitute);
 	}
 
-	if (ext1lwr == "bnp" || ext2lwr == "bnp")
+	if (ext1lwr == "bnp" || ext2lwr == "bnp" || ext1lwr == "snp" || ext2lwr == "snp")
 	{
 		nlwarning ("PATH: CPath::remapExtension(%s, %s, %d): you can't remap a big file", ext1lwr.c_str(), ext2lwr.c_str(), substitute);
 	}
@@ -1162,16 +1164,26 @@ void CFileContainer::addSearchFile (const string &file, bool remap, const string
 		return;
 	}
 
+	std::string fileExtension = CFile::getExtension(newFile);
+
 	// check if it s a big file
-	if (CFile::getExtension(newFile) == "bnp")
+	if (fileExtension == "bnp")
 	{
 		NL_DISPLAY_PATH ("PATH: CPath::addSearchFile(%s, %d, '%s'): '%s' is a big file, add it", file.c_str(), remap, virtual_ext.c_str(), newFile.c_str());
 		addSearchBigFile(file, false, false, progressCallBack);
 		return;
 	}
 
+	// check if it s a streamed package
+	if (fileExtension == "snp")
+	{
+		NL_DISPLAY_PATH ("PATH: CPath::addSearchStreamedPackage(%s, %d, '%s'): '%s' is a streamed package, add it", file.c_str(), remap, virtual_ext.c_str(), newFile.c_str());
+		addSearchStreamedPackage(file, false, false, progressCallBack);
+		return;
+	}
+
 	// check if it s an xml pack file
-	if (CFile::getExtension(newFile) == "xml_pack")
+	if (fileExtension == "xml_pack")
 	{
 		NL_DISPLAY_PATH ("PATH: CPath::addSearchFile(%s, %d, '%s'): '%s' is an xml pack file, add it", file.c_str(), remap, virtual_ext.c_str(), newFile.c_str());
 		addSearchXmlpackFile(file, false, false, progressCallBack);
@@ -1390,6 +1402,64 @@ void CFileContainer::addSearchBigFile (const string &sBigFilename, bool recurse,
 	}
 
 	fclose (Handle);
+}
+
+void CPath::addSearchStreamedPackage (const string &filename, bool recurse, bool alternative, NLMISC::IProgressCallback *progressCallBack)
+{
+	getInstance()->_FileContainer.addSearchBigFile(filename, recurse, alternative, progressCallBack);
+}
+
+void CFileContainer::addSearchStreamedPackage (const string &filename, bool recurse, bool alternative, NLMISC::IProgressCallback *progressCallBack)
+{
+	// Check if filename is not empty
+	if (filename.empty())
+	{
+		nlwarning ("PATH: CPath::addSearchStreamedPackage(%s, %d, %d): can't add empty file, skip it", filename.c_str(), recurse, alternative);
+		return;
+	}
+	// Check if the file exists
+	if (!CFile::isExists(filename))
+	{
+		nlwarning ("PATH: CPath::addSearchStreamedPackage(%s, %d, %d): '%s' is not found, skip it", filename.c_str(), recurse, alternative, filename.c_str());
+		return;
+	}
+	// Check if it s a file
+	if (CFile::isDirectory(filename))
+	{
+		nlwarning ("PATH: CPath::addSearchStreamedPackage(%s, %d, %d): '%s' is not a file, skip it", filename.c_str(), recurse, alternative, filename.c_str());
+		return;
+	}
+
+	// Add the file itself
+	std::string packname = NLMISC::toLower(CFile::getFilename(filename));
+	insertFileInMap(packname, filename, false, CFile::getExtension(filename));
+
+	// Add the package to the package manager
+	if (CStreamedPackageManager::getInstance().loadPackage(filename))
+	{
+		std::vector<std::string> fileNames;
+		CStreamedPackageManager::getInstance().list(fileNames, packname);
+
+		for (std::vector<std::string>::iterator it(fileNames.begin()), end(fileNames.end()); it != end; ++it)
+		{
+			// Add the file to the lookup
+			std::string filePackageName = packname + "@" + (*it);
+			// nldebug("Insert '%s'", filePackageName.c_str());
+			insertFileInMap((*it), filePackageName, false, CFile::getExtension(*it));
+
+			// Remapped extensions
+			std::string ext = CFile::getExtension(*it);
+			for (uint j = 0; j < _Extensions.size (); j++)
+			{
+				if (_Extensions[j].first == ext)
+				{
+					// Need to remap
+					insertFileInMap(CFile::getFilenameWithoutExtension(*it) + "." + _Extensions[j].second,
+						filePackageName, true, _Extensions[j].first);
+				}
+			}
+		}
+	}
 }
 
 // WARNING : recurse is not used
@@ -1679,7 +1749,7 @@ void CFileContainer::memoryCompress()
 	while (it != _Files.end())
 	{
 		string sTmp = SSMpath.get(it->second.idPath);
-		if ((sTmp.find("@@") == string::npos) && (sTmp.find('@') != string::npos) && !it->second.Remapped)
+		if ((sTmp.find("@@") == string::npos) && (sTmp.find('@') != string::npos) && (sTmp.find("snp@") == string::npos) && !it->second.Remapped)
 		{
 			// This is a file included in a bigfile (so the name is in the bigfile manager)
 		}
@@ -1702,7 +1772,7 @@ void CFileContainer::memoryCompress()
 	{
 		CFileEntry &rFE = it->second;
 		string sTmp = SSMpath.get(rFE.idPath);
-		if (sTmp.find("@") == string::npos || sTmp.find("@@") != string::npos || rFE.Remapped)
+		if ((sTmp.find("@") == string::npos) || (sTmp.find("@@") != string::npos) || (sTmp.find("snp@") != string::npos) || rFE.Remapped)
 		{
 			strcpy(_AllFileNames+nSize, rFE.Name.c_str());
 			_MCFiles[nNb].Name = _AllFileNames+nSize;
@@ -1999,6 +2069,7 @@ string CFile::findNewFile (const string &filename)
 // \warning doesn't work with big file
 uint32	CFile::getFileSize (const std::string &filename)
 {
+	std::string::size_type pos;
 	if (filename.find("@@") != string::npos)
 	{
 		uint32 fs = 0, bfo;
@@ -2006,12 +2077,21 @@ uint32	CFile::getFileSize (const std::string &filename)
 		CXMLPack::getInstance().getFile (filename, fs, bfo, c, d);
 		return fs;
 	}
-	else if (filename.find('@') != string::npos)
+	else if ((pos = filename.find('@')) != string::npos)
 	{
-		uint32 fs = 0, bfo;
-		bool c, d;
-		CBigFile::getInstance().getFile (filename, fs, bfo, c, d);
-		return fs;
+		if (pos > 3 && filename[pos-3] == 's' && filename[pos-2] == 'n' && filename[pos-1] == 'p')
+		{
+			uint32 fs = 0;
+			CStreamedPackageManager::getInstance().getFileSize (fs, filename.substr(pos+1));
+			return fs;
+		}
+		else
+		{
+			uint32 fs = 0, bfo;
+			bool c, d;
+			CBigFile::getInstance().getFile (filename, fs, bfo, c, d);
+			return fs;
+		}
 	}
 	else
 	{

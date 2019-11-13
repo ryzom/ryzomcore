@@ -5,7 +5,7 @@
 
 #include <string.h>
 
-#define _7ZIP_ST
+/* #define _7ZIP_ST */
 
 #include "Lzma2Enc.h"
 

@@ -142,7 +142,6 @@ moc_*.cpp
 *.cache
 *.patch
 *.7z
-3rdParty
 .svn
 thumbs.db
 Thumbs.db

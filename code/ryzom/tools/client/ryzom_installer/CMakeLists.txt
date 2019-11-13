@@ -1,5 +1,5 @@
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR} ${NEL_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/ryzom/client/src/seven_zip ${ZLIB_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/nel/3rdparty/seven_zip ${ZLIB_INCLUDE_DIR})
 
 FILE(GLOB SRC src/*.cpp src/*.h res/*.rc)
 FILE(GLOB CLIENT_INSTALL_HDR src/*.h)
@@ -74,7 +74,7 @@ ENDIF()
 NL_DEFAULT_PROPS(ryzom_installer_qt "Ryzom, Tools: Ryzom Installer" )
 NL_ADD_RUNTIME_FLAGS(ryzom_installer_qt)
 NL_ADD_LIB_SUFFIX(ryzom_installer_qt)
-TARGET_LINK_LIBRARIES(ryzom_installer_qt nelmisc ryzom_sevenzip ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(ryzom_installer_qt nelmisc nel_sevenzip ${QT_LIBRARIES})
 
 IF(WIN32)
   TARGET_LINK_LIBRARIES(ryzom_installer_qt nelmisc ${WINSDK_LIBRARY_DIR}/Version.lib)

@@ -93,8 +93,10 @@ CStreamableIG::~CStreamableIG()
 	H_AUTO_USE(RZ_StremableIG)
 	if (!_Linked)
 	{
+		#ifdef NL_DEBUG
 		if(!ClientCfg.Light)
 			nlwarning("Loading async %p", this);
+		#endif
 		#ifdef NL_DEBUG
 				//nlinfo("Loading async : %s", Name.c_str());
 		#endif

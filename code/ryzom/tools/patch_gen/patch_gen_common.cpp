@@ -26,8 +26,8 @@
 #include "nel/misc/file.h"
 #include "nel/misc/command.h"
 #include "nel/misc/sstring.h"
+#include "nel/misc/seven_zip.h"
 #include "game_share/singleton_registry.h"
-#include "seven_zip.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -454,7 +454,8 @@ void CPackageDescription::buildDefaultFileList()
 	std::vector<std::string> fileList;
 	NLMISC::CPath::getPathContent(_BnpDirectory,false,false,true,fileList);
 	for (uint32 i=0;i<fileList.size();++i)
-		if (NLMISC::toLower(NLMISC::CFile::getExtension(fileList[i]))=="bnp")
+		if (NLMISC::toLower(NLMISC::CFile::getExtension(fileList[i]))=="bnp"
+			|| NLMISC::toLower(NLMISC::CFile::getExtension(fileList[i]))=="snp")
 			_Categories.addFile("main",NLMISC::toLower(NLMISC::CFile::getFilename(fileList[i])));
 
 	_Categories.addFile("unpacked","root.bnp");

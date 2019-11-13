@@ -74,7 +74,7 @@ bool CBNPFileVersion::setup(const std::string &fileName, uint32 versionNumber)
 	BOMB_IF(!NLMISC::CFile::fileExists(fileName),("File not found: "+fileName).c_str(),return false);
 
 	// generate a hash key for the file and store it in a vector of uint32
-	CHashKey hashKey= getSHA1(fileName);
+	NLMISC::CHashKey hashKey= NLMISC::getSHA1(fileName);
 	nlassert(hashKey.HashKeyString.size()==20);
 	_HashKey.clear();
 	for (uint32 i=0;i<5;++i)
@@ -137,10 +137,10 @@ uint32 CBNPFileVersion::getPatchSize() const
 	return _PatchSize;
 }
 
-CHashKey CBNPFileVersion::getHashKey() const
+NLMISC::CHashKey CBNPFileVersion::getHashKey() const
 {
 	nlassert(_HashKey.size()==5);
-	CHashKey hashKey;
+	NLMISC::CHashKey hashKey;
 	for (uint32 i=0;i<5;++i)
 	{
 		*(uint32*)&hashKey.HashKeyString[4*i]=_HashKey[i];
