@@ -88,13 +88,9 @@ if not args.noconf:
 	except NameError:
 		SoundDirectory = "V:"
 	try:
-		SoundSheetsDirectory
+		SoundDfnDirectory
 	except NameError:
-		SoundSheetsDirectory = "V:"
-	try:
-		SoundSheetsDfnDirectory
-	except NameError:
-		SoundSheetsDfnDirectory = "V:/DFN"
+		SoundDfnDirectory = "V:/DFN"
 	try:
 		ExportBuildDirectory
 	except NameError:
@@ -231,8 +227,7 @@ if not args.noconf:
 	WorkspaceDirectory = askVar(log, "[IN] Workspace Directory", WorkspaceDirectory).replace("\\", "/")
 	DatabaseDirectory = askVar(log, "[IN] Database Directory", DatabaseDirectory).replace("\\", "/")
 	SoundDirectory = askVar(log, "[IN] Sound Directory", SoundDirectory).replace("\\", "/")
-	SoundSheetsDirectory = askVar(log, "[IN] Sound Sheets Directory", SoundSheetsDirectory).replace("\\", "/")
-	SoundSheetsDfnDirectory = askVar(log, "[IN] Sound Sheets DFN Directory", SoundSheetsDfnDirectory).replace("\\", "/")
+	SoundDfnDirectory = askVar(log, "[IN] Sound DFN Directory", SoundDfnDirectory).replace("\\", "/")
 	ExportBuildDirectory = askVar(log, "[OUT] Export Build Directory", ExportBuildDirectory).replace("\\", "/")
 	InstallDirectory = askVar(log, "[OUT] Install Directory", InstallDirectory).replace("\\", "/")
 	ClientDevDirectory = askVar(log, "[OUT] Client Dev Directory", ClientDevDirectory).replace("\\", "/")
@@ -317,8 +312,7 @@ if not args.noconf:
 	sf.write("# Data build directories\n")
 	sf.write("DatabaseDirectory = \"" + str(DatabaseDirectory) + "\"\n")
 	sf.write("SoundDirectory = \"" + str(SoundDirectory) + "\"\n")
-	sf.write("SoundSheetsDirectory = \"" + str(SoundSheetsDirectory) + "\"\n")
-	sf.write("SoundSheetsDfnDirectory = \"" + str(SoundSheetsDfnDirectory) + "\"\n")
+	sf.write("SoundDfnDirectory = \"" + str(SoundDfnDirectory) + "\"\n")
 	sf.write("ExportBuildDirectory = \"" + str(ExportBuildDirectory) + "\"\n")
 	sf.write("\n")
 	sf.write("# Install directories\n")
