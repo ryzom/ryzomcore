@@ -18,19 +18,19 @@
 #include "nel/sound/stream_sound.h"
 
 #if NLSOUND_SHEET_VERSION_BUILT < 2
-#	include "nel/sound/group_controller_root.h"
+#include "nel/sound/group_controller_root.h"
 #endif
 
-namespace NLSOUND {
+namespace NLSOUND
+{
 
 CStreamSound::CStreamSound()
+    : m_Alpha(1.0f)
 {
-	
 }
 
 CStreamSound::~CStreamSound()
 {
-	
 }
 
 void CStreamSound::importForm(const std::string &filename, NLGEORGES::UFormElm &root)
@@ -49,7 +49,7 @@ void CStreamSound::importForm(const std::string &filename, NLGEORGES::UFormElm &
 	CSound::importForm(filename, root);
 
 	// MaxDistance
- 	root.getValueByName(_MaxDist, ".SoundType.MaxDistance");
+	root.getValueByName(_MaxDist, ".SoundType.MaxDistance");
 
 	// MinDistance
 	root.getValueByName(_MinDist, ".SoundType.MinDistance");
@@ -60,7 +60,6 @@ void CStreamSound::importForm(const std::string &filename, NLGEORGES::UFormElm &
 #if NLSOUND_SHEET_VERSION_BUILT < 2
 	_GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_STREAM_GROUP_CONTROLLER);
 #endif
-
 }
 
 void CStreamSound::serial(NLMISC::IStream &s)
@@ -71,9 +70,9 @@ void CStreamSound::serial(NLMISC::IStream &s)
 	s.serial(m_Alpha);
 
 #if NLSOUND_SHEET_VERSION_BUILT < 2
-	if (s.isReading()) _GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_STREAM_GROUP_CONTROLLER);
+	if (s.isReading())
+		_GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_STREAM_GROUP_CONTROLLER);
 #endif
-
 }
 
 } /* namespace NLSOUND */
