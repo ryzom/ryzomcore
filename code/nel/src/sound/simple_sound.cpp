@@ -38,6 +38,7 @@ CSimpleSound::CSimpleSound() :
 	_Registered(false),
 	_Buffer(NULL),
 	// _Detailed(false), // not used?
+	_Alpha(1.0),
 	_NeedContext(false)
 {
 	// init with NULL in case of unexecpted access

@@ -41,7 +41,7 @@ using namespace std;
 
 namespace NLSOUND {
 
-CStreamFileSound::CStreamFileSound()
+CStreamFileSound::CStreamFileSound() : m_Async(true)
 {
 	
 }
