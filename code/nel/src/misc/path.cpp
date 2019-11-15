@@ -900,9 +900,9 @@ void CFileContainer::getPathContent (const string &path, bool recurse, bool want
 		if (isdirectory(de))
 		{
 			// skip CVS, .svn and .hg directory
-			if ((!showEverything) && (fn == "CVS" || fn == ".svn" || fn == ".hg"))
+			if ((!showEverything) && (fn == "CVS" || fn == ".svn" || fn == ".hg" || fn == ".git"))
 			{
-				NL_DISPLAY_PATH("PATH: CPath::getPathContent(%s, %d, %d, %d): skip CVS, .svn and .hg directory", path.c_str(), recurse, wantDir, wantFile);
+				NL_DISPLAY_PATH("PATH: CPath::getPathContent(%s, %d, %d, %d): skip '%s' directory", path.c_str(), recurse, wantDir, wantFile, fn.c_str());
 				continue;
 			}
 
