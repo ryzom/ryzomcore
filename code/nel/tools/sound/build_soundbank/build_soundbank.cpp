@@ -88,6 +88,8 @@ int main(int nNbArg, char **ppArgs)
 
 	// build the sound bank
 	UAudioMixer::buildSoundBank(exportDir);
+	UAudioMixer::buildClusteredSoundGroupSheets(exportDir);
+	UAudioMixer::buildUserVarBindingSheets(exportDir);
 	
 	// and that's all folks
 	return EXIT_SUCCESS;
