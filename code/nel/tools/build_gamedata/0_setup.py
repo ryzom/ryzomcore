@@ -188,6 +188,18 @@ if not args.noconf:
 	except NameError:
 		PatchmanBridgeServerDirectory = "T:/bridge_server"
 	try:
+		SignToolExecutable
+	except NameError:
+		SignToolExecutable = "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Bin/signtool.exe"
+	try:
+		SignToolSha1
+	except NameError:
+		SignToolSha1 = ""
+	try:
+		SignToolTimestamp
+	except NameError:
+		SignToolTimestamp = "http://timestamp.comodoca.com/authenticode"
+	try:
 		MaxAvailable
 	except NameError:
 		MaxAvailable = 1
@@ -258,6 +270,9 @@ if not args.noconf:
 	PatchmanCfgAdminDirectory = askVar(log, "[IN] Patchman Cfg Admin Directory", PatchmanCfgAdminDirectory).replace("\\", "/")
 	PatchmanCfgDefaultDirectory = askVar(log, "[IN] Patchman Cfg Default Directory", PatchmanCfgDefaultDirectory).replace("\\", "/")
 	PatchmanBridgeServerDirectory = askVar(log, "[OUT] Patchman Bridge Server Patch Directory", PatchmanBridgeServerDirectory).replace("\\", "/")
+	SignToolExecutable = askVar(log, "Sign Tool Executable", SignToolExecutable).replace("\\", "/")
+	SignToolSha1 = askVar(log, "Sign Tool Signature SHA1", SignToolSha1)
+	SignToolTimestamp = askVar(log, "Sign Tool Timestamp Authority", SignToolTimestamp)
 	MaxAvailable = int(askVar(log, "3dsMax Available", str(MaxAvailable)))
 	if MaxAvailable:
 		MaxDirectory = askVar(log, "3dsMax Directory", MaxDirectory).replace("\\", "/")
@@ -345,6 +360,11 @@ if not args.noconf:
 	sf.write("PatchmanCfgAdminDirectory = \"" + str(PatchmanCfgAdminDirectory) + "\"\n")
 	sf.write("PatchmanCfgDefaultDirectory = \"" + str(PatchmanCfgDefaultDirectory) + "\"\n")
 	sf.write("PatchmanBridgeServerDirectory = \"" + str(PatchmanBridgeServerDirectory) + "\"\n")
+	sf.write("\n")
+	sf.write("# Sign tool\n")
+	sf.write("SignToolExecutable = \"" + str(SignToolExecutable) + "\"\n")
+	sf.write("SignToolSha1 = \"" + str(SignToolSha1) + "\"\n")
+	sf.write("SignToolTimestamp = \"" + str(SignToolTimestamp) + "\"\n")
 	sf.write("\n")
 	sf.write("# 3dsMax directives\n")
 	sf.write("MaxAvailable = " + str(MaxAvailable) + "\n")
