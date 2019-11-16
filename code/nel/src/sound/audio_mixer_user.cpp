@@ -974,37 +974,6 @@ void CAudioMixerUser::buildSampleBankList()
 		CPath::addSearchPath(sbp);
 }
 
-/// Build the sound bank packed sheets file from georges sound sheet files with .sound extension in the search path, and return the path to the written file.
-std::string UAudioMixer::buildSoundBank(const std::string &packedSheetDir)
-{
-	CGroupControllerRoot *tempRoot = NULL;
-	if (!CGroupControllerRoot::isInitialized())
-		tempRoot = new CGroupControllerRoot();
-	std::string dir = CPath::standardizePath(packedSheetDir, true);
-	CSoundBank *soundBank = new CSoundBank();
-	soundBank->load(dir, true);
-	delete soundBank;
-	delete tempRoot;
-	return dir + "sounds.packed_sheets";
-}
-
-/// Build the cluster sound_group sheets.
-std::string UAudioMixer::buildClusteredSoundGroupSheets(const std::string &packedSheetDir)
-{
-	std::string dir = CPath::standardizePath(packedSheetDir, true);
-	CClusteredSound::buildSheets(dir);
-	return dir + "sound_groups.packed_sheets";
-}
-
-/// Build the user var binding sheets.
-std::string UAudioMixer::buildUserVarBindingSheets(const std::string &packedSheetDir)
-{
-	std::string dir = CPath::standardizePath(packedSheetDir, true);
-	std::map<std::string, CUserVarSerializer> container;
-	::loadForm("user_var_binding", dir + "user_var_binding.packed_sheets", container, true, false);
-	return dir + "user_var_binding.packed_sheets";
-}
-
 void				CAudioMixerUser::setBackgroundFlagName(uint flagIndex, const std::string &flagName)
 {
 	if (flagIndex < TBackgroundFlags::NB_BACKGROUND_FLAGS)
@@ -1142,6 +1111,37 @@ void CAudioMixerUser::initUserVar()
 		}
 	}
 
+}
+
+/// Build the sound bank packed sheets file from georges sound sheet files with .sound extension in the search path, and return the path to the written file.
+std::string UAudioMixer::buildSoundBank(const std::string &packedSheetDir)
+{
+	CGroupControllerRoot *tempRoot = NULL;
+	if (!CGroupControllerRoot::isInitialized())
+		tempRoot = new CGroupControllerRoot();
+	std::string dir = CPath::standardizePath(packedSheetDir, true);
+	CSoundBank *soundBank = new CSoundBank();
+	soundBank->load(dir, true);
+	delete soundBank;
+	delete tempRoot;
+	return dir + "sounds.packed_sheets";
+}
+
+/// Build the cluster sound_group sheets.
+std::string UAudioMixer::buildClusteredSoundGroupSheets(const std::string &packedSheetDir)
+{
+	std::string dir = CPath::standardizePath(packedSheetDir, true);
+	CClusteredSound::buildSheets(dir);
+	return dir + "sound_groups.packed_sheets";
+}
+
+/// Build the user var binding sheets.
+std::string UAudioMixer::buildUserVarBindingSheets(const std::string &packedSheetDir)
+{
+	std::string dir = CPath::standardizePath(packedSheetDir, true);
+	std::map<std::string, CUserVarSerializer> container;
+	::loadForm("user_var_binding", dir + "user_var_binding.packed_sheets", container, true, false);
+	return dir + "user_var_binding.packed_sheets";
 }
 
 // ******************************************************************

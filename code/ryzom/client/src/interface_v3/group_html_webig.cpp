@@ -267,7 +267,7 @@ public:
 		uint c = 0;
 		while (_Running)
 		{
-			string url = "https://"+domain+"/index.php?app=notif&format=lua&rnd="+randomString();
+			string url = domain + "/index.php?app=notif&format=lua&rnd=" + randomString();
 			addWebIGParams(url, true);
 			get(url);
 

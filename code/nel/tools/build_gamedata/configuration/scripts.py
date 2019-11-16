@@ -541,9 +541,10 @@ def needUpdateDirNoSubdirLogExtMultidir(log, all_dir_base, all_dir_source, dir_s
 def findFileMultiDir(log, dirs_where, file_name):
 	try:
 		for dir in dirs_where:
-			file = findFile(log, dir, file_name)
-			if file != "":
-				return file
+			if dir != "":
+				file = findFile(log, dir, file_name)
+				if file != "":
+					return file
 	except Exception, e:
 		printLog(log, "EXCEPTION " + str(e))
 	printLog(log, "FILE NOT FOUND " + file_name)
@@ -552,10 +553,11 @@ def findFileMultiDir(log, dirs_where, file_name):
 def findTool(log, dirs_where, file_name, suffix):
 	try:
 		for dir in dirs_where:
-			tool = findFile(log, dir, file_name + suffix)
-			if tool != "":
-				printLog(log, "TOOL " + tool)
-				return tool
+			if dir != "":
+				tool = findFile(log, dir, file_name + suffix)
+				if tool != "":
+					printLog(log, "TOOL " + tool)
+					return tool
 	except Exception, e:
 		printLog(log, "EXCEPTION " + str(e))
 	printLog(log, "TOOL NOT FOUND " + file_name + suffix)
