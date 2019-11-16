@@ -784,6 +784,7 @@ void CInterfaceManager::initOutGame()
 	}
 	//NLMEMORY::CheckHeap (true);
 
+#ifdef RYZOM_FORGE
 	// Initialize the web browser
 	{
 		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>( CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
@@ -794,6 +795,7 @@ void CInterfaceManager::initOutGame()
 			pGH->browse(ClientCfg.PatchletUrl.c_str());
 		}
 	}
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------
