@@ -151,8 +151,6 @@ void CBankAccessor_<xsl:value-of select="@name"/>::init()
 	<!-- ######################################################### -->
 	<xsl:template match="database_description" mode="header-server">
 
-#ifndef INCLUDED_<xsl:value-of select="concat($filename, '_', $bank)"/>_H
-#define INCLUDED_<xsl:value-of select="concat($filename, '_', $bank)"/>_H
 // Ryzom - MMORPG Framework &lt;http://dev.ryzom.com/projects/ryzom/&gt;
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -183,6 +181,9 @@ void CBankAccessor_<xsl:value-of select="@name"/>::init()
 //
 //
 /////////////////////////////////////////////////////////////////
+
+#ifndef INCLUDED_DATABASE_<xsl:value-of select="concat($filename, '_', $bank)"/>_H
+#define INCLUDED_DATABASE_<xsl:value-of select="concat($filename, '_', $bank)"/>_H
 
 #include "nel/misc/string_common.h"
 #include "cdb_group.h"
@@ -343,7 +344,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	</xsl:for-each>
 <xsl:call-template name="myApplyTemplate"/>
 
-#endif // INCLUDED_<xsl:value-of select="concat($filename, '_', $bank)"/><xsl:text>_H
+#endif // INCLUDED_DATABASE_<xsl:value-of select="concat($filename, '_', $bank)"/><xsl:text>_H
 </xsl:text>
 
 	</xsl:template>
