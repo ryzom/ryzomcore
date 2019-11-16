@@ -8383,11 +8383,18 @@ void CCharacter::setStartStatistics( const CCreateCharMsg& createCharMsg )
 	{
 		// FIXME: There's no safety on player race for starting zone. -Kaetemi
 		// See checkCreateParams for fixing this.
-		if(UseNewNewbieLandStartingPoint)
+#ifdef RYZOM_FORGE
+		if (UseNewNewbieLandStartingPoint)
+		{
 			sp = RYZOM_STARTING_POINT::starting_city;
+		}
 		else
-//			sp = RYZOM_STARTING_POINT::stalli;
+#else
+		{
+			// sp = RYZOM_STARTING_POINT::stalli;
 			sp = RYZOM_STARTING_POINT::starting_city;
+		}
+#endif
 		nlwarning( "Invalid start point %d", sp );
 	}
 

@@ -399,7 +399,9 @@ extern NLMISC::CVariable<NLMISC::TGameCycle>	OutpostLeavePeriod;
 extern NLMISC::CVariable<bool>					VerboseFactionPoint;
 
 // Newbieland
+#ifdef RYZOM_FORGE
 extern NLMISC::CVariable<bool>					UseNewNewbieLandStartingPoint;
+#endif
 
 
 // New fame system
