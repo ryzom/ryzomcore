@@ -321,15 +321,9 @@ CClientConfig::CClientConfig()
 	TexturesLoginInterface.push_back("texture_interfaces_v3_login");
 
 	DisplayAccountButtons = true;
-#ifdef RYZOM_FORGE
-	CreateAccountURL	= "https://account.ryzom.com/signup/from_client.php";
-	EditAccountURL		= "https://account.ryzom.com/payment_profile/index.php";
-	ForgetPwdURL		= "https://account.ryzom.com/payment_profile/lost_secure_password.php";
-#else
 	CreateAccountURL	= "https://classic.ryzom.dev/signup/from_client.php";
 	EditAccountURL		= "https://classic.ryzom.dev/payment_profile/index.php";
 	ForgetPwdURL		= "https://classic.ryzom.dev/payment_profile/lost_secure_password.php";
-#endif
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
 	EyesHeight			= 1.5f;						// Default User Eyes Height.
@@ -425,15 +419,15 @@ CClientConfig::CClientConfig()
 	PatchletUrl.clear();
 	PatchVersion.clear();
 
-	WebIgMainDomain = "classic.ryzom.dev";
-	WebIgTrustedDomains.push_back(WebIgMainDomain);
+	WebIgMainDomain = "https://classic.ryzom.dev";
+	WebIgTrustedDomains.push_back("classic.ryzom.dev");
 	WebIgNotifInterval = 10; // time in minutes
 
 	CurlMaxConnections = 5;
 	CurlCABundle.clear();
 
-	RingReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes_ring/index.php";
-	ReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes/index.php";
+	RingReleaseNotePath = WebIgMainDomain + "/releasenotes_ring/index.php";
+	ReleaseNotePath = WebIgMainDomain + "/releasenotes/index.php";
 
 
 	///////////////
@@ -449,7 +443,7 @@ CClientConfig::CClientConfig()
 	SoundOn				= true;						// Default is with sound.
 	DriverSound			= SoundDrvAuto;
 	SoundForceSoftwareBuffer = true;
-	SoundOutGameMusic	= "Main Menu Loop.ogg";
+	SoundOutGameMusic	= "main menu loop.ogg";
 	SoundSFXVolume		= 1.f;
 	SoundGameMusicVolume	= 1.f;
 	SoundTPFade			= 500;
@@ -1092,6 +1086,9 @@ void CClientConfig::setValues()
 	///////////
 	// WEBIG //
 	READ_STRING_FV(WebIgMainDomain);
+	if (ClientCfg.WebIgMainDomain.find("http://") == std::string::npos
+		|| ClientCfg.WebIgMainDomain.find("https://") == std::string::npos)
+		ClientCfg.WebIgMainDomain = "http://" + ClientCfg.WebIgMainDomain;
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
 	READ_INT_FV(WebIgNotifInterval);
 	READ_INT_FV(CurlMaxConnections);

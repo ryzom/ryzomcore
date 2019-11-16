@@ -156,7 +156,8 @@ CLoginStateMachine LoginSM;
 
 bool CStartupHttpClient::connectToLogin()
 {
-	return connect(ClientCfg.ConfigFile.getVar("StartupHost").asString(0));
+	return connect(ClientCfg.ConfigFile.getVar("StartupHost").asString(0))
+		&& verifyServer(ClientCfg.ConfigFile.getVar("StartupVerify").asBool(0));
 }
 
 CStartupHttpClient HttpClient;
@@ -2827,7 +2828,36 @@ string checkLogin(const string &login, const string &password, const string &cli
 		if(res.empty())
 			return "Empty answer from server (error code 62)";
 
-		if(res[0] == '0')
+		size_t first = res.find("\n\n");
+		if (first == std::string::npos)
+		{
+			first = res.find("\r\r");
+			if (first == std::string::npos)
+			{
+				first = res.find("\r\n\r\n");
+				if (first != std::string::npos)
+				{
+					res = res.substr(first + 4);
+				}
+			}
+			else
+			{
+				res = res.substr(first + 2);
+			}
+		}
+		else
+		{
+			res = res.substr(first + 2);
+		}
+
+		nldebug("res1: %s", res.c_str());
+
+		if (res[0] == 'H')
+		{
+			nlwarning("missing response body: %s", res.c_str());
+			return "missing response body (error code 64)";
+		}
+		else if(res[0] == '0')
 		{
 			// server returns an error
 			nlwarning("server error: %s", res.substr(2).c_str());
@@ -2880,7 +2910,36 @@ string checkLogin(const string &login, const string &password, const string &cli
 		if(res.empty())
 			return "Empty answer from server (error code 4)";
 
-		if(res[0] == '0')
+		size_t first = res.find("\n\n");
+		if (first == std::string::npos)
+		{
+			first = res.find("\r\r");
+			if (first == std::string::npos)
+			{
+				first = res.find("\r\n\r\n");
+				if (first != std::string::npos)
+				{
+					res = res.substr(first + 4);
+				}
+			}
+			else
+			{
+				res = res.substr(first + 2);
+			}
+		}
+		else
+		{
+			res = res.substr(first + 2);
+		}
+
+		nldebug("res2: %s", res.c_str());
+
+		if (res[0] == 'H')
+		{
+			nlwarning("missing response body: %s", res.c_str());
+			return "missing response body (error code 65)";
+		}
+		else if(res[0] == '0')
 		{
 			// server returns an error
 			nlwarning("server error: %s", res.substr(2).c_str());
@@ -2962,7 +3021,36 @@ string checkLogin(const string &login, const string &password, const string &cli
 		if(res.empty())
 			return "Empty answer from server (error code 4)";
 
-		if(res[0] == '0')
+		size_t first = res.find("\n\n");
+		if (first == std::string::npos)
+		{
+			first = res.find("\r\r");
+			if (first == std::string::npos)
+			{
+				first = res.find("\r\n\r\n");
+				if (first != std::string::npos)
+				{
+					res = res.substr(first + 4);
+				}
+			}
+			else
+			{
+				res = res.substr(first + 2);
+			}
+		}
+		else
+		{
+			res = res.substr(first + 2);
+		}
+
+		nldebug("res2: %s", res.c_str());
+
+		if (res[0] == 'H')
+		{
+			nlwarning("missing response body: %s", res.c_str());
+			return "missing response body (error code 66)";
+		}
+		else if(res[0] == '0')
 		{
 			// server returns an error
 			nlwarning("server error: %s", res.substr(2).c_str());
@@ -3067,7 +3155,36 @@ string selectShard(uint32 shardId, string &cookie, string &addr)
 	if(res.empty())
 		return "Empty result (error code 13)";
 
-	if(res[0] == '0')
+	size_t first = res.find("\n\n");
+	if (first == std::string::npos)
+	{
+		first = res.find("\r\r");
+		if (first == std::string::npos)
+		{
+			first = res.find("\r\n\r\n");
+			if (first != std::string::npos)
+			{
+				res = res.substr(first + 4);
+			}
+		}
+		else
+		{
+			res = res.substr(first + 2);
+		}
+	}
+	else
+	{
+		res = res.substr(first + 2);
+	}
+
+	nldebug("res2: %s", res.c_str());
+
+	if (res[0] == 'H')
+	{
+		nlwarning("missing response body: %s", res.c_str());
+		return "missing response body (error code 66)";
+	}
+	else if(res[0] == '0')
 	{
 		// server returns an error
 		nlwarning("server error: %s", res.substr(2).c_str());

@@ -317,6 +317,10 @@ int main(int argc, char **argv)
 		LoginCustomParameters = "&steam_auth_session_ticket=" + steamClient.getAuthSessionTicket();
 #endif
 
+#if !FINAL_VERSION
+	LoginCustomParameters += "&dbg=1";
+#endif
+
 	// initialize patch manager and set the ryzom full path, before it's used
 	CPatchManager *pPM = CPatchManager::getInstance();
 	pPM->setRyzomFilename(Args.getProgramPath() + Args.getProgramName());
