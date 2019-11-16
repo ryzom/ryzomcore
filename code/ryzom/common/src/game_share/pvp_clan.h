@@ -44,9 +44,7 @@ namespace PVP_CLAN
 			Zorai,
 
 		EndCivs = Zorai, // end of civs
-
-		Marauder,
-		EndClans = Marauder, // end of clans
+		EndClans = Zorai, // end of clans
 
 		Unknown,
 		NbClans = Unknown,

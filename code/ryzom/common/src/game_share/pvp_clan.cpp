@@ -37,7 +37,6 @@ namespace PVP_CLAN
 		NL_STRING_CONVERSION_TABLE_ENTRY(Matis)
 		NL_STRING_CONVERSION_TABLE_ENTRY(Tryker)
 		NL_STRING_CONVERSION_TABLE_ENTRY(Zorai)
-		NL_STRING_CONVERSION_TABLE_ENTRY(Marauder)
 	NL_END_STRING_CONVERSION_TABLE(TPVPClan, PVPClanConversion, Unknown)
 
 	TPVPClan fromString(const std::string & str)
@@ -70,7 +69,6 @@ namespace PVP_CLAN
 			factionIndexes[Matis]	= CStaticFames::getInstance().getFactionIndex("matis");
 			factionIndexes[Tryker]	= CStaticFames::getInstance().getFactionIndex("tryker");
 			factionIndexes[Zorai]	= CStaticFames::getInstance().getFactionIndex("zorai");
-			factionIndexes[Marauder]	= CStaticFames::getInstance().getFactionIndex("black_kami");
 
 			for (uint i = BeginClans; i <= EndClans; i++)
 				nlassert( factionIndexes[i] != CStaticFames::INVALID_FACTION_INDEX );
@@ -86,7 +84,7 @@ namespace PVP_CLAN
 	{
 		// These names are in order of the enum TPVPClan
 		// The first two clans, "None" and "Neutral", don't count.  Subtract 2 from the lookup.
-		std::string FactionNames[] = { "kami","karavan","fyros","matis","tryker","zorai","marauder" };
+		std::string FactionNames[] = { "kami","karavan","fyros","matis","tryker","zorai" };
 
 		for (int looper = BeginClans; looper <= EndClans; looper += 1)
 		{
@@ -113,7 +111,6 @@ namespace PVP_CLAN
 			factionSheetIds[Matis]		= "matis.faction";
 			factionSheetIds[Tryker]		= "tryker.faction";
 			factionSheetIds[Zorai]		= "zorai.faction";
-			factionSheetIds[Marauder]	= "marauder.faction";
 
 			for (uint i = BeginClans; i <= EndClans; i++)
 				nlassert( factionSheetIds[i] != NLMISC::CSheetId::Unknown );
