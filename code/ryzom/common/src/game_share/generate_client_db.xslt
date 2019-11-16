@@ -75,18 +75,7 @@
 // along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 
 /////////////////////////////////////////////////////////////////
-//
-//
-//
-//
-//
-//		WARNING : this is a generated file, don't change it !
-//
-//
-//
-//
-//
-//
+// WARNING : this is a generated file, don't change it !
 /////////////////////////////////////////////////////////////////
 
 #include "stdpch.h"
@@ -168,18 +157,7 @@ void CBankAccessor_<xsl:value-of select="@name"/>::init()
 // along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 
 /////////////////////////////////////////////////////////////////
-//
-//
-//
-//
-//
-//		WARNING : this is a generated file, don't change it !
-//
-//
-//
-//
-//
-//
+// WARNING : this is a generated file, don't change it !
 /////////////////////////////////////////////////////////////////
 
 #ifndef INCLUDED_DATABASE_<xsl:value-of select="concat($filename, '_', $bank)"/>_H
