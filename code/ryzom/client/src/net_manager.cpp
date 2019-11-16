@@ -3292,7 +3292,7 @@ private:
 			if(i != digitMaxEnd)
 			{
 				ucstring web_app = contentStr.substr(digitStart, i-digitStart);
-				contentStr = ucstring("http://"+ClientCfg.WebIgMainDomain+"/")+web_app+ucstring("/index.php?")+contentStr.substr(i+1);
+				contentStr = ucstring(ClientCfg.WebIgMainDomain + "/") + web_app + ucstring("/index.php?") + contentStr.substr((size_t)i + 1);
 			}
 			else
 			{
