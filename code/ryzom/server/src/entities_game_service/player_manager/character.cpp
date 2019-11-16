@@ -8381,6 +8381,7 @@ void CCharacter::setStartStatistics( const CCreateCharMsg& createCharMsg )
 	RYZOM_STARTING_POINT::TStartPoint sp = createCharMsg.StartPoint;
 	if( sp < RYZOM_STARTING_POINT::stalli || sp >= RYZOM_STARTING_POINT::NB_START_POINTS )
 	{
+		// FIXME: There's no safety on player race for starting zone. -Kaetemi
 		if(UseNewNewbieLandStartingPoint)
 			sp = RYZOM_STARTING_POINT::starting_city;
 		else

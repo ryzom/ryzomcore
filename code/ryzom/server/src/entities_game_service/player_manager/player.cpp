@@ -490,11 +490,13 @@ CEntityId CPlayer::createCharacter( const std::string& characterName, EGSPD::CPe
 	msg.Name = characterName;
 	msg.People = people;
 	msg.Sex = gender;
+#ifdef RYZOM_FORGE
 	if(UseNewNewbieLandStartingPoint)
 	{
 		msg.StartPoint = RYZOM_STARTING_POINT::starting_city;
 	}
 	else
+#endif
 	{
 		msg.StartPoint = RYZOM_STARTING_POINT::aegus;
 	}
