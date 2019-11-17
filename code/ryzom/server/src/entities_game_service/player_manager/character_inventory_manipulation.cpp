@@ -2902,15 +2902,6 @@ void CCharacter::useItem(uint32 slot)
 
 	if ( form->Family  == ITEMFAMILY::TELEPORT )
 	{
-		pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegeance = getAllegiance();
-		if ((form->TpType == TELEPORT_TYPES::KAMI) && (allegeance.first == PVP_CLAN::Karavan)
-			|| (form->TpType == TELEPORT_TYPES::KARAVAN) && (allegeance.first == PVP_CLAN::Kami)
-			|| getOrganization() == 5 ) //marauder
-		{
-			CCharacter::sendDynamicSystemMessage(_Id, "ALTAR_RESTRICTION");
-			return;
-		}
-
 		if( CPVPManager2::getInstance()->isTPValid(this, item) && IsRingShard == false )
 		{
 			// teleport dont work in the same way if the user is dead or alive
