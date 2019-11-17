@@ -136,6 +136,12 @@ bool CStreamedPackageManager::getFile(std::string &filePath, const std::string &
 		if (curl)
 		{
 			curl_easy_setopt(curl, CURLOPT_URL, downloadUrl.c_str());
+			if (downloadUrl.length() > 8 && downloadUrl[4] == 's') // 01234 https
+			{
+				// Don't need to verify, since we check the hash
+				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+			}
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 			curl_easy_setopt(curl, CURLOPT_FILE, fp);
 			res = curl_easy_perform(curl);
@@ -178,8 +184,10 @@ bool CStreamedPackageManager::getFile(std::string &filePath, const std::string &
 	CHashKey outHash;
 	if (!unpackLZMA(downloadPath, unpackPath, outHash))
 	{
+		CFile::deleteFile(downloadPath);
 		return false;
 	}
+	CFile::deleteFile(downloadPath);
 
 	if (!(outHash == entry->Hash))
 	{
