@@ -822,13 +822,6 @@ void CCharacter::moveItem(INVENTORIES::TInventory srcInvId, uint32 srcSlot, INVE
 	if (!srcItem->getMovable() && (srcItem->getUnMovable() || (!srcForm->DropOrSell && !canPutNonDropableItemInInventory(dstInvId)) || isAnActiveXpCatalyser(srcItem)))
 		return;
 
-	// You cannot exchange genesis named items
-	if (srcItem->getPhraseId().find("genesis_") == 0 && !canPutNonDropableItemInInventory(dstInvId))
-	{
-		nlwarning("Character %s tries to move '%s' to inv %u", _Id.toString().c_str(), srcItem->getPhraseId().c_str(), dstInvId );
-		return;
-	}
-
 	// cannot move a pet animal ticket
 	if (srcForm->Family == ITEMFAMILY::PET_ANIMAL_TICKET)
 		return;
