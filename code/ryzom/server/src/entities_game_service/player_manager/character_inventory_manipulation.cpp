@@ -2525,10 +2525,15 @@ void CCharacter::createCrystallizedActionItem(const std::vector<NLMISC::CSheetId
 // ****************************************************************************
 void CCharacter::createRechargeItem(uint32 sapRecharge)
 {
+#ifndef RYZOM_FORGE
+	static const CSheetId rechargeSheetId("item_sap_recharge.sitem");
+#endif
+
 	if (!EnchantSystemEnabled)
 		return;
 
-	/*** OLD METHOD **********************************************
+#ifndef RYZOM_FORGE
+
 	if (!enterTempInventoryMode(TEMP_INV_MODE::Crystallize))
 		return;
 
@@ -2537,7 +2542,9 @@ void CCharacter::createRechargeItem(uint32 sapRecharge)
 	{
 		item->setSapLoad(sapRecharge);
 		addItemToInventory(INVENTORIES::temporary, item);
-	}******/
+	}
+
+#else
 
 	CInventoryPtr handlingInv = getInventory(INVENTORIES::handling);
 	if (handlingInv == NULL)
@@ -2573,6 +2580,8 @@ void CCharacter::createRechargeItem(uint32 sapRecharge)
 	params[1].Int = rightHandItem->sapLoad();
 	params[2].Int = rightHandItem->maxSapLoad();
 	sendDynamicSystemMessage(_EntityRowId, "ITEM_IS_RECHARGED", params);
+
+#endif
 }
 
 // check if enchant or recharge an item 
