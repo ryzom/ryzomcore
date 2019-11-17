@@ -2441,28 +2441,8 @@ void CCharacter::sendItemInfos( uint16 slotId )
 		infos.RequiredCharacLevel = item->getRequiredCharacLevel();
 
 		infos.TypeSkillMods = item->getTypeSkillMods();
-		
-		// Special case of web missions items
-		if (item->getStaticForm()->Name == "Web Transaction")
-		{
-			string cText = item->getCustomText().toString();
-			string::size_type sPos = cText.find(" ");
-			string::size_type ePos = cText.find("\n---\n");
-			if (sPos != string::npos && sPos != (cText.length()-1) && ePos != string::npos && ePos != (cText.length()-1))
-			{
-				string cUrl = cText.substr(sPos, ePos-sPos);
-				infos.CustomText = ucstring("@WEBIG "+cUrl);
-			}
-		}
-		else
-		{
-			infos.CustomText = item->getCustomText();
-		}
-		
-		if (item->getPetIndex() < MAX_INVENTORY_ANIMAL)
-		{
-			infos.PetNumber = item->getPetIndex() + 1;
-		}
+
+		infos.CustomText = item->getCustomText();
 
 		CMessage msgout( "IMPULSION_ID" );
 		CBitMemStream bms;
