@@ -660,9 +660,7 @@ void CCharacterVersionAdapter::adaptToVersion11(CCharacter &character) const
 		case EGSPD::CPeople::Zorai :
 			mission = CAIAliasTranslator::getInstance()->getMissionUniqueIdFromName( "ZORAI_NEWB_WELCOME_SHENG_WO_1" );
 			CAIAliasTranslator::getInstance()->getNPCAliasesFromName("welcomer_sheng_wo_1", bots);
-			break;
-		default:
-			break;
+			break;	
 		}
 	}
 	// other give him a rite intro mission
@@ -1022,6 +1020,7 @@ void CCharacterVersionAdapter::adaptToVersion22(CCharacter &character) const
 //---------------------------------------------------
 void CCharacterVersionAdapter::adaptToVersion23(CCharacter &character) const
 {
+#ifdef RYZOM_FORGE
 	nlinfo("Start");
 	//check if phrase is already known and Fix marauder sbricks + sp craft
 	uint16 sp = 0;
@@ -1059,12 +1058,13 @@ void CCharacterVersionAdapter::adaptToVersion23(CCharacter &character) const
 		nlinfo("Adding %d SP Craft !", sp);
 		character._SpType[EGSPD::CSPType::Craft] += sp;
 	}
-
+#endif
 }
 
 //---------------------------------------------------
 void CCharacterVersionAdapter::adaptToVersion24(CCharacter &character) const
 {
+#ifdef RYZOM_FORGE
 	// HP
 	uint32 bonus;
 	vector<string> bricks;
@@ -1170,13 +1170,14 @@ void CCharacterVersionAdapter::adaptToVersion24(CCharacter &character) const
 		nlinfo("RITE BONUS FIX: Player %s need %d (stamina) but have %d !", character.getName().toString().c_str(),bonus, character.getScorePermanentModifiers(SCORES::stamina));
 		character.setScorePermanentModifiers(SCORES::stamina, bonus);
 	}
+#endif
 }
 
 
 //---------------------------------------------------
 void CCharacterVersionAdapter::adaptToVersion25(CCharacter &character) const
 {
-
+#ifdef RYZOM_FORGE
 	const uint sizeInv = INVENTORIES::NUM_INVENTORY;
 	for ( uint i = 0; i < sizeInv ; ++i )
 	if (character._Inventory[i] != NULL)
@@ -1343,4 +1344,5 @@ void CCharacterVersionAdapter::adaptToVersion25(CCharacter &character) const
 	}
 
 	character.unequipCharacter( INVENTORIES::handling, INVENTORIES::left );
+#endif
 }
