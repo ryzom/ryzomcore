@@ -1187,6 +1187,29 @@ TLogContext_Item_OutpostDriller::~TLogContext_Item_OutpostDriller()
 	
 }
 
+const std::string TLogContext_Item_EnchantPhrase::_ContextName("Item_EnchantPhrase");
+/// The constructor push a log context in the logger system
+TLogContext_Item_EnchantPhrase::TLogContext_Item_EnchantPhrase(const NLMISC::CEntityId &charId)
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->pushLogContext(_ContextName);
+
+	// stack the context param in the context class object
+	ItemDesc.pushContextVar_charId(charId);
+
+}
+
+/// The destructor pop a context in the logger system
+TLogContext_Item_EnchantPhrase::~TLogContext_Item_EnchantPhrase()
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->popLogContext(_ContextName);
+
+	// pop the context param in the context class object
+	ItemDesc.popContextVar_charId();
+
+}
+
 
 /// No context context. Use this to disable any contextual log underneath
 TLogNoContext_Item::TLogNoContext_Item()
