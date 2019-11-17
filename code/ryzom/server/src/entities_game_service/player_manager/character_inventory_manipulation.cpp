@@ -2936,6 +2936,7 @@ void CCharacter::useItem(uint32 slot)
 				_TpTicketSlot = slot;
 				lockItem( INVENTORIES::bag, slot, 1 );
 
+#ifdef RYZOM_FORGE
 				// add fx
 				CMirrorPropValue<TYPE_VISUAL_FX> visualFx( TheDataset, _EntityRowId, DSPropertyVISUAL_FX );
 				CVisualFX fx;
@@ -2964,6 +2965,7 @@ void CCharacter::useItem(uint32 slot)
 				sint64 prop;
 				fx.pack(prop);
 				visualFx = (sint16)prop;
+#endif
 
 				// add tp phrase in manager
 				static CSheetId tpBrick("bapa01.sbrick");
@@ -3041,6 +3043,7 @@ void CCharacter::useTeleport(const CStaticItem & form)
 	}
 	else
 	{	
+#ifdef RYZOM_FORGE
 		CMirrorPropValue<TYPE_VISUAL_FX> visualFx( TheDataset, _EntityRowId, DSPropertyVISUAL_FX );
 		CVisualFX fx;
 		fx.unpack(visualFx.getValue());
@@ -3048,6 +3051,7 @@ void CCharacter::useTeleport(const CStaticItem & form)
 		sint64 prop;
 		fx.pack(prop);
 		visualFx = (sint16)prop;
+#endif
 		sint32 x,y,z;
 		float theta;
 		zone->getRandomPoint( x,y,z,theta );
