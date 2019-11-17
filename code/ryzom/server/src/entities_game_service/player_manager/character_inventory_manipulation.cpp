@@ -3017,7 +3017,8 @@ void CCharacter::stopUseItem( bool isRingCatalyser )
 	{
 		CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( getId() ));
 		BOMB_IF(p == NULL,"Failed to find player record for character: "<<getId().toString(),return);
-		if (p->isTrialPlayer()) {		
+		if (p->isTrialPlayer())
+		{		
 			PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, "XP_CATALYSER_NO_MORE_ACTIVE");
 			_RingXpCatalyserSlot = INVENTORIES::INVALID_INVENTORY_SLOT;
 	//		_PropertyDatabase.setProp( "CHARACTER_INFO:RING_XP_CATALYSER:Level", 0 );
