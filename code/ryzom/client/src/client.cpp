@@ -158,8 +158,8 @@ int main(int argc, char **argv)
 	// init the Nel context
 	CApplicationContext *appContext = new CApplicationContext;
 
-	// disable nldebug messages in logs in Release
-#ifdef NL_RELEASE
+	// disable nldebug messages in logs in FV
+#if FINAL_VERSION && defined(NL_RELEASE)
 	DisableNLDebug = true;
 #endif
 
