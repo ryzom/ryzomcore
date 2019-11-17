@@ -6876,6 +6876,7 @@ void CCharacter::sendAnimalCommand( uint8 petIndexCode, uint8 command )
 	}
 }
 
+#ifdef RYZOM_FORGE_PET_NAME
 void CCharacter::setAnimalName( uint8 petIndex, ucstring customName )
 {
 	if (petIndex < 0 || petIndex >= MAX_INVENTORY_ANIMAL)
@@ -6911,6 +6912,7 @@ void CCharacter::sendPetCustomNameToClient(uint8 petIndex)
 	}
 	CBankAccessor_PLR::getPACK_ANIMAL().getBEAST(petIndex).setNAME(_PropertyDatabase, textId);
 }
+#endif
 
 
 //-----------------------------------------------

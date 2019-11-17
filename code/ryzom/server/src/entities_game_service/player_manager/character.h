@@ -298,7 +298,9 @@ struct CPetAnimal
 	bool				IsMounted;
 	bool				IsTpAllowed;
 	bool				spawnFlag;
+#ifdef RYZOM_FORGE_PET_NAME
 	ucstring			CustomName;
+#endif
 	
 	// ctor
 	CPetAnimal();
@@ -1016,10 +1018,12 @@ public:
 	// return the index of a player pet, or -1 if not found
 	sint32 getPlayerPet( const TDataSetRow& petRowId ) const;
 
+#ifdef RYZOM_FORGE_PET_NAME
 	// Set the name of the animal
 	void setAnimalName( uint8 petIndex, ucstring customName );
 
 	void sendPetCustomNameToClient(uint8 petIndex);
+#endif
 
 	// near character's pets are TP with player (continent tp)
 	void allowNearPetTp();
