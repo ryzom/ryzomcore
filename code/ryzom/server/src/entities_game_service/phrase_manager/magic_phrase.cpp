@@ -1857,7 +1857,7 @@ void CMagicPhrase::setPrimaryTarget( const TDataSetRow &entityRowId )	// virtual
 void CMagicPhrase::enchantPhrase(CCharacter * user,float successFactor)
 {
 	H_AUTO(CMagicPhrase_enchantPhrase);
-	TLogContext_Item_EnchantPhrase(user->getId());
+	TLogContext_Item_EnchantPhrase logItemContext(user->getId());
 	
 	MBEHAV::CBehaviour behav;
 	uint moneyCost = uint( getSabrinaCost() * CristalMoneyFactor );

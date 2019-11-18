@@ -52,7 +52,7 @@ public:
 	CItemDesc()
 		:	_NoContextCount(0)
 	{
-		_LogDefs.resize(34);
+		_LogDefs.resize(35);
 		
 		{
 			LGS::TLogDefinition  &logDef = _LogDefs[0];
@@ -548,6 +548,15 @@ public:
 			logDef.getParams()[1].setName("otherEntityId");
 			logDef.getParams()[1].setType(LGS::TSupportedParamType::spt_entityId);
 				
+		}
+
+		{
+			LGS::TLogDefinition  &logDef = _LogDefs[34];
+
+			logDef.setLogName("Item_EnchantPhrase");
+			logDef.setLogText("Player character crystallizes a spell phrase");
+
+			logDef.setContext(true);
 		}
 		
 
