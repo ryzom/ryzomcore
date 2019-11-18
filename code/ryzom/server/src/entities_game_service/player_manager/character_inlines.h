@@ -904,6 +904,7 @@ inline uint32 CCharacter::getPlayedTime() const
 	return _PlayedTime; 
 }
 
+#ifdef RYZOM_FORGE
 //------------------------------------------------------------------------------
 inline const std::string& CCharacter::getLangChannel() const
 
@@ -917,7 +918,9 @@ inline const std::string& CCharacter::getNewTitle() const
 {
 	return _NewTitle;
 }
+#endif
 
+#ifdef RYZOM_FORGE
 //------------------------------------------------------------------------------
 inline std::string CCharacter::getTagA() const
 
@@ -954,8 +957,9 @@ inline std::string CCharacter::getTagPvPB() const
 		return "_";
 	return _TagPvPB;
 }
+#endif
 
-
+#ifdef RYZOM_FORGE
 //------------------------------------------------------------------------------
 inline std::string CCharacter::getFullTitle() const
 {
@@ -964,7 +968,9 @@ inline std::string CCharacter::getFullTitle() const
 	else
 		return _NewTitle;
 }
+#endif
 
+#ifdef RYZOM_FORGE
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getOrganization() const
@@ -977,7 +983,7 @@ inline uint32 CCharacter::getOrganizationStatus() const
 {
 	return _OrganizationStatus; 
 }
-
+#endif
 
 //------------------------------------------------------------------------------
 

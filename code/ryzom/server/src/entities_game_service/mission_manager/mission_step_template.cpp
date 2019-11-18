@@ -102,60 +102,37 @@ uint32 IMissionStepTemplate::sendRpStepText(CCharacter * user,const std::vector<
 	uint nbSteps = 0;
 	const std::string* textPtr = NULL;
 
-	_User = user;
-
-	if (_RoleplayText.compare(0, 6, "WEBIG_") == 0)
+	if ( !_RoleplayText.empty() )
 	{
-		TVectorParamCheck params;
-		string name = _RoleplayText;
-		if (user)
+		// build the param list
+		getTextParams(nbSteps,(const std::string *&)textPtr,params,stepStates);
+
+		params.reserve(params.size() + _AdditionalParams.size());
+		params.insert(params.end(), _AdditionalParams.begin(), _AdditionalParams.end());
+		if ( textPtr && !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
 		{
-			uint32 userId = PlayerManager.getPlayerId(user->getId());
-			string text = user->getCustomMissionText(_RoleplayText);
-			if (text.empty())
-				return 0;
-			name = _RoleplayText+"_"+toString(userId);
-			ucstring phrase = ucstring(name+"(){["+text+"]}");
-			NLNET::CMessage	msgout("SET_PHRASE");
-			msgout.serial(name);
-			msgout.serial(phrase);
-			sendMessageViaMirror("IOS", msgout);
-		}
-		return STRING_MANAGER::sendStringToClient( user->getEntityRowId(), name, params );
-	}
-	else
-	{
-		if ( !_RoleplayText.empty() )
-		{
-			// build the param list
-			getTextParams(nbSteps,(const std::string *&)textPtr,params,stepStates);
-
-			params.reserve(params.size() + _AdditionalParams.size());
-			params.insert(params.end(), _AdditionalParams.begin(), _AdditionalParams.end());
-			if ( textPtr && !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
-			{
-				buffer = _RoleplayText + "_";
-				textPtr = &buffer;
-			}
-			else
-				textPtr = &_RoleplayText;
-		}
-
-		if( !textPtr )
-			return 0;
-
-		// solve dynamic names
-		CMissionParser::solveEntitiesNames(params,user->getEntityRowId(),giver);
-
-		// if the text was generated, compute its suffix
-		if ( !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
-		{
-			std::string text = NLMISC::toString( "%s%u", textPtr->c_str(),nbSteps );
-			return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),text,params);
+			buffer = _RoleplayText + "_";
+			textPtr = &buffer;
 		}
 		else
-			return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),*textPtr,params);
+			textPtr = &_RoleplayText;
 	}
+
+	if( !textPtr )
+		return 0;
+
+	// solve dynamic names
+	CMissionParser::solveEntitiesNames(params,user->getEntityRowId(),giver);
+
+	// if the text was generated, compute its suffix
+	if ( !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
+	{
+		std::string text = NLMISC::toString( "%s%u", textPtr->c_str(),nbSteps );
+		return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),text,params);
+	}
+	else
+		return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),*textPtr,params);
+
 }// IMissionStepTemplate::sendRpStepText
 
 
@@ -166,48 +143,30 @@ uint32 IMissionStepTemplate::sendStepText(CCharacter * user,const std::vector<ui
 	uint nbSteps = 0;
 	const std::string* textPtr = NULL;
 
-	_User = user;
-
 	// build the param list
 	getTextParams(nbSteps,(const std::string *&)textPtr,params,stepStates);
 	
 	// If the text is overriden, add the overide parameters
 	if ( !_OverridenText.empty() )
 	{
-		if (_OverridenText.compare(0, 6, "WEBIG_") == 0)
+		if ( _AddDefaultParams )
 		{
-			string text = _OverridenText;
-			if (user)
+			params.reserve(params.size() + _AdditionalParams.size());
+			params.insert(params.end(), _AdditionalParams.begin(), _AdditionalParams.end());
+			if ( textPtr && !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
 			{
-				uint32 userId = PlayerManager.getPlayerId(user->getId());
-				text = user->getCustomMissionText(_OverridenText);
-				if (text.empty())
-					text = _OverridenText;
+				buffer = _OverridenText + "_";
+				textPtr = &buffer;
 			}
-			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
-			params[0].Literal.fromUtf8(text);
-			return STRING_MANAGER::sendStringToClient( user->getEntityRowId(), "LITERAL", params );
+			else
+				textPtr = &_OverridenText;
 		}
 		else
 		{
-			if ( _AddDefaultParams )
-			{
-				params.reserve(params.size() + _AdditionalParams.size());
-				params.insert(params.end(), _AdditionalParams.begin(), _AdditionalParams.end());
-				if ( textPtr && !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
-				{
-					buffer = _OverridenText + "_";
-					textPtr = &buffer;
-				}
-				else
-					textPtr = &_OverridenText;
-			}
-			else
-			{
-				params = _AdditionalParams;
-				textPtr = &_OverridenText;
-			}
+			params = _AdditionalParams;
+			textPtr = &_OverridenText;
 		}
+		
 	}
 
 	if( !textPtr )

@@ -48,7 +48,6 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 {
 	struct CSubStep
 	{
-		string		Dynamic;
 		CSheetId	Sheet;
 		uint16		Quantity;
 	};
@@ -69,36 +68,24 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 			_SubSteps.reserve( subs.size() );
 			for ( uint i = 0; i < subs.size(); i++ )
 			{
-				CSubStep subStep;
-
 				std::vector< std::string > args;
 				CMissionParser::tokenizeString( subs[i]," \t", args );
 
-				//// Dynamic Mission Args : #dynamic# <quantity>
-				if ((args.size() == 2) && (args[0] == "#dynamic#"))
+				if ( args.size() != 2 )
 				{
-					subStep.Dynamic = missionData.Name;
-					subStep.Quantity = atoi(args[1].c_str());
+					MISLOGSYNTAXERROR("<creature> <quantity> *[; <creature> <quantity>] [: <place>]");
+					return false;
 				}
-				////
-				else
+				missionData.ChatParams.push_back( make_pair(args[0],STRING_MANAGER::creature_model) );
+
+				CSubStep subStep;
+				subStep.Sheet = CSheetId( args[0] + ".creature");
+				if ( subStep.Sheet == CSheetId::Unknown )
 				{
-					if ( args.size() != 2 )
-					{
-						MISLOGSYNTAXERROR("<creature> <quantity> *[; <creature> <quantity>] [: <place>]");
-						return false;
-					}
-					missionData.ChatParams.push_back( make_pair(args[0],STRING_MANAGER::creature_model) );
-				
-					subStep.Dynamic = "";
-					subStep.Sheet = CSheetId( args[0] + ".creature");
-					if ( subStep.Sheet == CSheetId::Unknown )
-					{
-						ret = false;
-						MISLOGERROR1("invalid sheet '%s'", args[0].c_str());
-					}
-					NLMISC::fromString(args[1], subStep.Quantity);
+					ret = false;
+					MISLOGERROR1("invalid sheet '%s'", args[0].c_str());
 				}
+				NLMISC::fromString(args[1], subStep.Quantity);
 				_SubSteps.push_back(subStep);
 			}
 			if ( script.size() == 3 )
@@ -119,53 +106,16 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 	}
 	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
 	{
-		string webAppUrl;
-		bool ret = true;
-		_User = PlayerManager.getChar(getEntityIdFromRow(userRow));
-
 		if ( event.Type == CMissionEvent::Kill )
 		{
 			CMissionEventKill & eventSpe = (CMissionEventKill&)event;
 			CCreature * c = CreatureManager.getCreature( event.TargetEntity );
-			CSheetId faunaSheet;
-
-			//// Dynamic Mission Args
-			if (_SubSteps[subStepIndex].Dynamic.empty()) {
-				faunaSheet = _SubSteps[subStepIndex].Sheet;
-			}
-			else
-			{
-				vector<string> params = _User->getCustomMissionParams(_SubSteps[subStepIndex].Dynamic);
-				if (params.size() < 2)
-				{
-					LOGMISSIONSTEPERROR("kill_fauna : invalid dynamic creature");
-					return 0;
-				}
-				else
-				{
-					webAppUrl = params[0];
-					faunaSheet = CSheetId(params[1]);
-					
-					if (params.size() > 2) {
-						string placeStr = CMissionParser::getNoBlankString( params[2] );
-						CPlace * place = CZoneManager::getInstance().getPlaceFromName( placeStr );
-						if ( !place )
-						{
-							ret = false;
-							LOGMISSIONSTEPERROR("kill_fauna : invalid place "+params[2]);
-						}
-						else
-							_Place = place->getId();
-					}
-				}
-				////
-			}
 
 			if ( !c )
 			{
 				LOGMISSIONSTEPERROR("kill_fauna : invalid creature " + toString(event.TargetEntity.getIndex()));
 			}
-			else if ( faunaSheet == c->getType() )
+			else if ( _SubSteps[subStepIndex].Sheet == c->getType() )
 			{
 				if ( _Place != 0xFFFF )
 				{
@@ -179,8 +129,6 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 
 					if ( region && region->getId() == _Place )
 					{
-						if (!webAppUrl.empty())
-							_User->validateDynamicMissionStep(webAppUrl);
 						LOGMISSIONSTEPSUCCESS("kill_fauna");
 						return 1;
 					}
@@ -189,8 +137,6 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 					{
 						if ( places[i] && places[i]->getId() == _Place )
 						{
-							if (!webAppUrl.empty())
-								_User->validateDynamicMissionStep(webAppUrl);
 							LOGMISSIONSTEPSUCCESS("kill_fauna");
 							return 1;
 						}
@@ -199,8 +145,6 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 				}
 				else
 				{
-					if (!webAppUrl.empty())
-						_User->validateDynamicMissionStep(webAppUrl);
 					LOGMISSIONSTEPSUCCESS("kill_fauna");
 					return 1;
 				}
@@ -215,87 +159,48 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 		ret.clear();
 		ret.resize( _SubSteps.size() );
 		for ( uint i = 0; i < _SubSteps.size(); i++ )
+		{
 			ret[i] = _SubSteps[i].Quantity;
+		}
 	}
 
 	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
 	{
-		static const std::string stepTextReact = "MIS_NEED_REACTIVATION";
 		static const std::string stepText = "MIS_KILL_FAUNA_";
 		static const std::string stepTextLoc = "MIS_KILL_FAUNA_LOC_";
 		nlassert( _SubSteps.size() == subStepStates.size() );
-		CSheetId faunaSheet;
 		for ( uint i  = 0; i < subStepStates.size(); i++ )
 		{
 			if( subStepStates[i] != 0 )
 			{
-				if (_SubSteps[i].Dynamic.empty())
-				{
-					faunaSheet = _SubSteps[i].Sheet;
-				}
-				else
-				{
-					//// Dynamic Mission Args
-					vector<string> params = _User->getCustomMissionParams(_SubSteps[i].Dynamic);
-					if (params.size() < 2)
-					{
-						faunaSheet = CSheetId::Unknown;
-					}
-					else
-					{
-						faunaSheet = CSheetId(params[1]);
-					}
-
-					if ((_Place == 0xFFFF) && (params.size() > 2))
-					{
-						string placeStr = CMissionParser::getNoBlankString( params[2] );
-						CPlace * place = CZoneManager::getInstance().getPlaceFromName( placeStr );
-						if ( !place )
-						{
-							MISLOG("sline:%u ERROR : kill_fauna : Invalid place %u", _SourceLine, _Place);
-						}
-						else
-							_Place = place->getId();
-					}
-					////
-				}
-				
 				nbSubSteps++;
-				if (faunaSheet != CSheetId::Unknown)
-				{
-					retParams.push_back(STRING_MANAGER::TParam());
-					retParams.back().Type = STRING_MANAGER::creature_model;
-					retParams.back().SheetId = faunaSheet;
+				retParams.push_back(STRING_MANAGER::TParam());
+				retParams.back().Type = STRING_MANAGER::creature_model;
+				retParams.back().SheetId = _SubSteps[i].Sheet;
 					
-					retParams.push_back(STRING_MANAGER::TParam());
-					retParams.back().Type = STRING_MANAGER::integer;
-					retParams.back().Int = subStepStates[i];
-				}
+				retParams.push_back(STRING_MANAGER::TParam());
+				retParams.back().Type = STRING_MANAGER::integer;
+				retParams.back().Int = subStepStates[i];
 			}
 		}
-		if (faunaSheet != CSheetId::Unknown)
+		if ( _Place != 0xFFFF )
 		{
-			if ( _Place != 0xFFFF )
+			STRING_MANAGER::TParam param;
+			param.Type = STRING_MANAGER::place;
+			CPlace * place = CZoneManager::getInstance().getPlaceFromId(_Place);
+			if ( !place )
 			{
-				STRING_MANAGER::TParam param;
-				param.Type = STRING_MANAGER::place;
-				CPlace * place = CZoneManager::getInstance().getPlaceFromId(_Place);
-				if ( !place )
-				{
-					MISLOG("sline:%u ERROR : kill_fauna : Invalid place %u", _SourceLine, _Place);
-				}
-				else
-				{
-					param.Identifier = place->getName();
-					retParams.push_back(param);
-				}
-				textPtr = &stepTextLoc;
+				MISLOG("sline:%u ERROR : kill_fauna : Invalid place %u", _SourceLine, _Place);
 			}
 			else
-				textPtr = &stepText;
+			{
+				param.Identifier = place->getName();
+				retParams.push_back(param);
+			}
+			textPtr = &stepTextLoc;
 		}
 		else
-			textPtr = &stepTextReact;
+			textPtr = &stepText;
 	}
 
 	std::vector< CSubStep > _SubSteps;
@@ -480,7 +385,6 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 {
 	struct CSubStep
 	{
-		string		Dynamic;
 		TAIAlias	Alias;
 //		NLMISC::TStringId	NpcName;
 	};
@@ -501,17 +405,9 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 			for ( uint i = 0; i < subs.size(); i++ )
 			{
 				CSubStep subStep;
-				//// Dynamic Mission Args : #dynamic#
-				if (trim(subs[i]) == "#dynamic#") {
-					subStep.Dynamic = missionData.Name;
-				} 
-				////
-				else 
-				{
-					subStep.Alias = CAIAliasTranslator::Invalid;
-					if ( !CMissionParser::parseBotName(subs[i],subStep.Alias,missionData) )
-						ret = false;
-				}
+				subStep.Alias = CAIAliasTranslator::Invalid;
+				if ( !CMissionParser::parseBotName(subs[i],subStep.Alias,missionData) )
+					ret = false;
 				_SubSteps.push_back( subStep );
 			}
 			return ret;
@@ -519,9 +415,6 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 	}
 	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
 	{
-		string webAppUrl;
-		CCharacter * user = PlayerManager.getChar(getEntityIdFromRow(userRow));
-
 		if ( event.Type == CMissionEvent::Kill )
 		{
 			CMissionEventKill & eventSpe = (CMissionEventKill&)event;
@@ -532,44 +425,18 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 			}
 			else
 			{
-				if (_SubSteps[subStepIndex].Dynamic.empty())
+				if ( _SubSteps[subStepIndex].Alias != CAIAliasTranslator::Invalid )
 				{
-					if ( _SubSteps[subStepIndex].Alias != CAIAliasTranslator::Invalid )
-					{
-						if ( _SubSteps[subStepIndex].Alias == c->getAlias() )
-						{
-							LOGMISSIONSTEPSUCCESS("kill_npc");
-							return 1;
-						}
-					}
-					else if (  event.TargetEntity == giverRow )
+					if ( _SubSteps[subStepIndex].Alias == c->getAlias() )
 					{
 						LOGMISSIONSTEPSUCCESS("kill_npc");
 						return 1;
 					}
 				}
-				else
+				else if (  event.TargetEntity == giverRow )
 				{
-					//// Dynamic Mission Args								
-					vector<string> params = user->getCustomMissionParams(_SubSteps[subStepIndex].Dynamic);
-					if (params.size() < 2) {
-						LOGMISSIONSTEPERROR("kill_npc : invalid dynamic npc");
-						return 0;
-					}
-					else
-					{
-						webAppUrl = params[0];
-						string name;
-						
-						CAIAliasTranslator::getInstance()->getNPCNameFromAlias(c->getAlias(), name);
-						if ( name == params[1] )
-						{
-							user->validateDynamicMissionStep(webAppUrl);
-							LOGMISSIONSTEPSUCCESS("kill_npc");
-							return 1;
-						}
-					}
-					////
+					LOGMISSIONSTEPSUCCESS("kill_npc");
+					return 1;
 				}
 			}
 		}
@@ -588,7 +455,6 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 
 	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
 	{
-		static const std::string stepTextReact = "MIS_NEED_REACTIVATION";
 		static const std::string stepText = "MIS_KILL_NPC_";
 		textPtr = &stepText;
 		nlassert( _SubSteps.size() == subStepStates.size() );
@@ -599,34 +465,10 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 				nbSubSteps++;
 				retParams.push_back(STRING_MANAGER::TParam());
 				retParams.back().Type = STRING_MANAGER::bot;
-				if (_SubSteps[i].Dynamic.empty())
-				{
-					if ( _SubSteps[i].Alias != CAIAliasTranslator::Invalid )
-						retParams.back().Int = _SubSteps[i].Alias;
-					else
-						retParams.back().Identifier = "giver";
-				}
+				if ( _SubSteps[i].Alias != CAIAliasTranslator::Invalid )
+					retParams.back().Int = _SubSteps[i].Alias;
 				else
-				{
-					vector<string> params = _User->getCustomMissionParams(_SubSteps[i].Dynamic);
-					if (params.size() < 2)
-					{
-						nlinfo("kill_npc : invalid dynamic npc");
-						textPtr = &stepTextReact;
-						return;
-					}
-					else
-					{
-						vector<TAIAlias> aliases;
-						CAIAliasTranslator::getInstance()->getNPCAliasesFromName( params[1] , aliases );
-						if ( aliases.empty() )
-						{
-							retParams.back().Int = CAIAliasTranslator::Invalid;
-							return;
-						}
-						retParams.back().Int = aliases[0];
-					}
-				}
+					retParams.back().Identifier = "giver";
 			}
 		}
 	}

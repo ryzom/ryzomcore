@@ -588,12 +588,12 @@ CRingRewardPoints::TGenerateRewardResult CRingRewardPointsImpl::generateReward(R
 	}
 
 	// in any case, generate a mission event
-//#pragma message (NL_LOC_WRN "give the correct scenario tag")
+#pragma message (NL_LOC_WRN "give the correct scenario tag")
 	// TODO: give the correct scenario tag
 	CMissionEventTaggedRingScenarioDone event("blabla");
 	_ParentCharacter->processMissionEvent(event);
 	
-//#pragma message (NL_LOC_WRN "Implements 'rare' item reward generation")
+#pragma message (NL_LOC_WRN "Implements 'rare' item reward generation")
 	// TODO: Implements 'rare' item reward generation
 	// make sure the reward level is valid
 	BOMB_IF(rewardLevel>R2::TSessionLevel::last_enum_item,"Ignoring attempting to generate reward of invalid level for character "<<_ParentCharacter->getId().toString(),return CRingRewardPoints::grr_invalid);
@@ -615,8 +615,8 @@ CRingRewardPoints::TGenerateRewardResult CRingRewardPointsImpl::generateReward(R
 
 		*/
 		/* *** todo *** */
-//#pragma message (NL_LOC_WRN "Implements mission step validation")
-//#pragma message (NL_LOC_WRN "Implements 'rare' item reward generation")
+#pragma message (NL_LOC_WRN "Implements mission step validation")
+#pragma message (NL_LOC_WRN "Implements 'rare' item reward generation")
 		// TODO: Implements mission step validation and 'rare' item reward generation
 
 		// NB : need to return grr_ok_rare if rare item were gained
@@ -687,7 +687,7 @@ CRingRewardPoints::TGenerateRewardResult CRingRewardPointsImpl::generateReward(R
 		/*
 			This is where we add some code to validate the mission step if player is in newbyland and has the 'complete a ring scenario' mission
 		*/
-//#pragma message (NL_LOC_WRN "Implements mission step validation")
+#pragma message (NL_LOC_WRN "Implements mission step validation")
 		// TODO: Implements mission step validation
 		/* *** todo *** */
 
@@ -781,7 +781,7 @@ CRingRewardPoints::TGenerateRewardResult CRingRewardPointsImpl::generateReward(R
 		}
 
 		// NB : need to return grr_ok_rare if rare item were gained
-//#pragma message (NL_LOC_WRN "Implements 'rare' item reward generation")
+#pragma message (NL_LOC_WRN "Implements 'rare' item reward generation")
 		// TODO: Implements 'rare' item reward generation
 	}
 

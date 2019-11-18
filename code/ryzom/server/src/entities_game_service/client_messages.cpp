@@ -1956,7 +1956,7 @@ void cbClientSendCustomEmote( NLNET::CMessage& msgin, const std::string &service
 		return;
 	}
 
-	if(behaviour >= 140 && behaviour <= 169)
+	if (behaviour >= (MBEHAV::EMOTE_BEGIN + 80) && behaviour <= (MBEHAV::EMOTE_BEGIN + 109))
 	{
 		string name = CEntityIdTranslator::getInstance()->getByEntity(id).toString();
 		nlwarning("HACK: %s %s tries to launch a firework %d", id.toString().c_str(), name.c_str(), behaviour);
@@ -2737,7 +2737,8 @@ void cbClientSetCharacterTitle( NLNET::CMessage& msgin, const std::string & serv
 	}
 
 	// kxu: TODO: check validity of title chosen by player
-	c->setNewTitle(CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)title));
+	// TODO: Checking validity here is important! This can be easily hacked clientside. -Kaetemi
+	c->setTitle((CHARACTER_TITLE::ECharacterTitle)title);
 	c->registerName();
 }
 
@@ -3072,6 +3073,7 @@ void cbClientQuitGameRequest( NLNET::CMessage& msgin, const std::string & servic
 				if (player)
 					securityCheck.setCookie(player->getLoginCookie()); // if not set (null player), the check won't pass
 
+				// TODO_RYZOMCLASSIC: There used to be a value here. -Kaetemi
 				securityCheck.check("");
 			}
 		}
@@ -3618,6 +3620,10 @@ TUnifiedCallbackItem CbClientArray[]=
 	{ "CLIENT:DUEL:REFUSE",						cbClientDuelRefuse },
 	{ "CLIENT:DUEL:ABANDON",					cbClientDuelAbandon },
 
+	// TODO_RYZOMCLASSIC: Revert this, add additional client messages for 'League'. -Kaetemi
+	// { "CLIENT:PVP_CHALLENGE:ASK",				cbClientPVPChallengeAsked },
+	// { "CLIENT:PVP_CHALLENGE:ACCEPT",			cbClientPVPChallengeAccept },
+	// { "CLIENT:PVP_CHALLENGE:REFUSE",			cbClientPVPChallengeRefuse },
 	{ "CLIENT:PVP_CHALLENGE:ASK",				cbClientLeagueJoinProposal },
 	{ "CLIENT:PVP_CHALLENGE:ACCEPT",			cbClientLeagueJoin },
 	{ "CLIENT:PVP_CHALLENGE:REFUSE",			cbClientLeagueJoinProposalDecline },

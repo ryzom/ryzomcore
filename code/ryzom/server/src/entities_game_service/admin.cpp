@@ -4585,6 +4585,7 @@ NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <chan
 
 }
 
+#ifdef RYZOM_FORGE
 NLMISC_COMMAND (connectLangChannel, "Connect to lang channel", "<user id> <lang> <leave:0|1>")
 {
 	if ((args.size() < 2) || (args.size() > 3))
@@ -4625,6 +4626,7 @@ NLMISC_COMMAND (connectLangChannel, "Connect to lang channel", "<user id> <lang>
 	CCharacter::sendDynamicSystemMessage( eid, "EGS_CHANNEL_INVALID_NAME", params );
 	return false;
 }
+#endif
 
 NLMISC_COMMAND (updateTarget, "Update current target", "<user id>")
 {
@@ -6994,6 +6996,7 @@ NLMISC_COMMAND(listGuildMembers, "display guild members list", "<csr eid> <guild
 	return true;
 }
 
+#ifdef RYZOM_FORGE_ROOM
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(roomInvite, "send a room invite to a player character", "<eid> <member name>")
 {
@@ -7077,6 +7080,7 @@ NLMISC_COMMAND(roomKick, "kick player from room", "<eid> <member name>")
 
 	return true;
 }
+#endif
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(guildInvite, "send a guild invite to a player character", "<eid> <member name>")
@@ -7960,6 +7964,7 @@ NLMISC_COMMAND(addGuildBuilding, "sadd a building to guild", "<player eid> <buil
 	return true;
 }
 
+#ifdef RYZOM_FORGE
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(setOrganization, "set the organization of a player to the given faction", "<player eid> <faction>")
 {
@@ -8006,6 +8011,7 @@ NLMISC_COMMAND(setOrganizationStatus, "set the organization status of a player",
 
 	return true;
 }
+#endif
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <nbBots> <sheet> [<dispersionRadius=10m>] [<spawnBots=true>] [<orientation=random|self|-360..360>] [<name>] [<x>] [<y>] [client_sheet] [inVIllage?inOutpost?inStable?inAtys?]")

@@ -1028,6 +1028,7 @@ void CBSAIDeathReport::callback(const std::string &name, NLNET::TServiceId id)
 						playerAggroable.push_back(aggroIt->first);
 					}
 					
+#ifdef RYZOM_FORGE
 					NLNET::CMessage	msgout("TRIGGER_WEBIG");
 					if (!eventBotKilled.empty())
 						msgout.serial(eventBotKilled);
@@ -1041,6 +1042,7 @@ void CBSAIDeathReport::callback(const std::string &name, NLNET::TServiceId id)
 						msgout.serial(playerAggroable[i]);
 					}
 					sendMessageViaMirror("EGS", msgout);
+#endif
 				}
 			}
 			break;

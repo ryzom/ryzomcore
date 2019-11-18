@@ -359,9 +359,11 @@ private:
 	/// \return the applied delta (a negative delta may have been modified up to zero to keep faction points positive)
 	sint32 changePlayerFactionPoints(CCharacter * playerChar, PVP_CLAN::TPVPClan faction, sint32 fpDelta);
 
+#ifdef RYZOM_FORGE
 	/// add/remove pvp points to a player
 	/// \return the applied delta (a negative delta may have been modified up to zero to keep pvp points positive)
 	sint32 changePlayerPvpPoints(CCharacter * playerChar, sint32 fpDelta);
+#endif
 
 	/// add/remove HoF points to a player and his guild if his SDB PvP path is defined
 	void changePlayerHoFPoints(CCharacter * playerChar, sint32 hofpDelta);

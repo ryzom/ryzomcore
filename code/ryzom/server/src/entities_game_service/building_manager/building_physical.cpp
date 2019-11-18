@@ -545,11 +545,15 @@ bool CBuildingPhysicalPlayer::isUserAllowed(CCharacter * user, uint16 ownerId, u
 	if (user->isDead())
 		return false;
 
+#ifdef RYZOM_FORGE_ROOM
 	CCharacter * owner = PlayerManager.getChar( _Players[ownerId] );
 	if (owner)
 		return ( (user->getId() == _Players[ownerId]) || owner->playerHaveRoomAccess(user->getId()) );
 	else
 		return false;
+#else
+	return (user->getId() == _Players[ownerId]);
+#endif
 }
 
 //----------------------------------------------------------------------------
