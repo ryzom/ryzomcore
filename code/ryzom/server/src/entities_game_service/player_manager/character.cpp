@@ -9048,9 +9048,7 @@ void CCharacter::setDatabase()
 	_IneffectiveAuras.activate();
 	_ConsumableOverdoseEndDates.activate();
 	// init the RRPs
-#ifdef RYZOM_RING_REACTIVATE
 	RingRewardPoints.initDb();
-#endif
 
 }// setDatabase //
 
