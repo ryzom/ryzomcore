@@ -232,7 +232,7 @@ void _log_Command_Exec(const std::string &cmdName, const std::string &cmdArg, co
 		NLMISC::CEntityId	charId;
 	if (!CommandDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(CommandDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Command'");
 		return;
 	}
@@ -267,7 +267,7 @@ void _log_Command_ExecOnTarget(const NLMISC::CEntityId &targetId, const std::str
 		NLMISC::CEntityId	charId;
 	if (!CommandDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(CommandDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Command'");
 		return;
 	}

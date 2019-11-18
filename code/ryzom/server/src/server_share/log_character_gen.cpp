@@ -534,7 +534,7 @@ void _log_Character_UpdateSP(const std::string &spName, float spBefore, float sp
 		NLMISC::CEntityId	charId;
 	if (!CharacterDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(CharacterDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Character'");
 		return;
 	}
@@ -571,7 +571,7 @@ void _log_Character_LearnPhrase(const NLMISC::CSheetId &phraseId, const char *_f
 		NLMISC::CEntityId	charId;
 	if (!CharacterDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(CharacterDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Character'");
 		return;
 	}
@@ -604,7 +604,7 @@ void _log_Character_AddKnownBrick(const NLMISC::CSheetId &brickId, const char *_
 		NLMISC::CEntityId	charId;
 	if (!CharacterDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(CharacterDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Character'");
 		return;
 	}
@@ -637,7 +637,7 @@ void _log_Character_RemoveKnownBrick(const NLMISC::CSheetId &brickId, const char
 		NLMISC::CEntityId	charId;
 	if (!CharacterDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(CharacterDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Character'");
 		return;
 	}

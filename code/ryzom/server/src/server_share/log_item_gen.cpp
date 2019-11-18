@@ -1249,7 +1249,7 @@ void _log_Item_Create(INVENTORIES::TItemId itemId, const NLMISC::CSheetId &sheet
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1288,7 +1288,7 @@ void _log_Item_UpdateQuantity(INVENTORIES::TItemId itemId, uint32 quantity, uint
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1325,7 +1325,7 @@ void _log_Item_Move(INVENTORIES::TItemId itemId, INVENTORIES::TInventory srcInve
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1362,7 +1362,7 @@ void _log_Item_PutInSaleStore(INVENTORIES::TItemId itemId, const char *_filename
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1395,7 +1395,7 @@ void _log_Item_RemoveFromSaleStore(INVENTORIES::TItemId itemId, const char *_fil
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1428,7 +1428,7 @@ void _log_Item_Delete(INVENTORIES::TItemId itemId, const NLMISC::CSheetId &sheet
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1467,7 +1467,7 @@ void _log_Item_FailedAddBoughtItem(INVENTORIES::TItemId itemId, INVENTORIES::TIn
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1502,7 +1502,7 @@ void _log_Item_Money(uint64 moneyBefore, uint64 moneyAfter, const char *_filenam
 		NLMISC::CEntityId	charId;
 	if (!ItemDesc.getContextVar_charId(charId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1537,7 +1537,7 @@ void _log_Item_ExchangeWithChar(const char *_filename_, uint _lineNo_)
 		NLMISC::CEntityId	validatorCharId;
 	if (!ItemDesc.getContextVar_validatorCharId(validatorCharId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1549,7 +1549,7 @@ void _log_Item_ExchangeWithChar(const char *_filename_, uint _lineNo_)
 		NLMISC::CEntityId	otherEntityId;
 	if (!ItemDesc.getContextVar_otherEntityId(otherEntityId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1580,7 +1580,7 @@ void _log_Item_ExchangeWithNPC(const char *_filename_, uint _lineNo_)
 		NLMISC::CEntityId	validatorCharId;
 	if (!ItemDesc.getContextVar_validatorCharId(validatorCharId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
@@ -1592,7 +1592,7 @@ void _log_Item_ExchangeWithNPC(const char *_filename_, uint _lineNo_)
 		NLMISC::CEntityId	otherEntityId;
 	if (!ItemDesc.getContextVar_otherEntityId(otherEntityId))
 	{
-		// If this bomb is thrown, you need to add a log context (or eventualy a 'noContext').
+		// If this bomb is thrown, you need to add a log context (or otherwise a 'noContext').
 		STOP_IF(ItemDesc.getNoContextCount() == 0, _filename_<<"("<<_lineNo_<<") : Missing log context for log 'Item'");
 		return;
 	}
