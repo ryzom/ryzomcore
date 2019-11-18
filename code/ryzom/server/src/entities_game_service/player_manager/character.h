@@ -314,7 +314,9 @@ struct CPetAnimal
 	// get the max bulk of the animal inventory
 	uint32 getAnimalMaxBulk();
 
+#ifdef RYZOM_FORGE_PET_NAME
 	void setCustomName(const ucstring& customName) { CustomName = customName; }
+#endif
 };
 
 /**

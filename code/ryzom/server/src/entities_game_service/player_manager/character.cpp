@@ -2904,7 +2904,9 @@ void CCharacter::postLoadTreatment()
 				_PlayerPets[ i ].Slot = INVENTORIES::INVALID_INVENTORY_SLOT;
 			}
 
+#ifdef RYZOM_FORGE_PET_NAME
 			sendPetCustomNameToClient(i);
+#endif
 			uint32 slot = _PlayerPets[ i ].initLinkAnimalToTicket( this, i );
 			if( slot < INVENTORIES::NbPackerSlots )
 			{
@@ -5584,7 +5586,9 @@ bool CCharacter::spawnWaitingCharacterAnimalNear( uint index, const SGameCoordin
 	msg.CharacterMirrorRow = _EntityRowId;
 	msg.PetSheetId = _PlayerPets[ index ].PetSheetId;
 	msg.PetIdx = index;
+#ifdef RYZOM_FORGE_PET_NAME
 	msg.CustomName = _PlayerPets[ index ].CustomName;
+#endif
 	msg.AIInstanceId = (uint16)destAIInstance;
 	CWorldInstances::instance().msgToAIInstance( msg.AIInstanceId, msg);
 	// The row will be received in AnimalSpawned()
@@ -5696,7 +5700,9 @@ bool CCharacter::spawnCharacterAnimal(uint index )
 			msg.CharacterMirrorRow = _EntityRowId;
 			msg.PetSheetId = _PlayerPets[ index ].PetSheetId;
 			msg.PetIdx = index;
+#ifdef RYZOM_FORGE_PET_NAME
 			msg.CustomName = _PlayerPets[ index ].CustomName;
+#endif
 
 			CVector pos;
 			pos.x = msg.Coordinate_X * 0.001f;
@@ -18716,7 +18722,9 @@ uint32 CPetAnimal::initLinkAnimalToTicket( CCharacter * c, uint8 index )
 		{
 //			Slot = ItemPtr->getLocSlot();
 			ItemPtr->setPetIndex(index);
+#ifdef RYZOM_FORGE_PET_NAME
 			ItemPtr->setCustomName(CustomName);
+#endif
 			Slot = ItemPtr->getInventorySlot();
 			return Slot;
 		}
@@ -18730,7 +18738,9 @@ uint32 CPetAnimal::initLinkAnimalToTicket( CCharacter * c, uint8 index )
 //				Slot = ItemPtr->getLocSlot();
 				Slot = ItemPtr->getInventorySlot();
 				ItemPtr->setPetIndex(index);
+#ifdef RYZOM_FORGE_PET_NAME
 				ItemPtr->setCustomName(CustomName);
+#endif
 				return Slot;
 			}
 			else

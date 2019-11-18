@@ -700,7 +700,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	LPROP(bool,IsMounted,if(IsMounted))\
 	PROP(bool,IsTpAllowed)\
 	PROP(TSatiety,Satiety)\
-	PROP2(CustomName, ucstring, CustomName, CustomName = val)\
+	/*PROP2(CustomName, ucstring, CustomName, CustomName = val)*/\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
