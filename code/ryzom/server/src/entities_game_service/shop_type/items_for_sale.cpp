@@ -107,6 +107,7 @@ void CItemsForSale::serial(NLMISC::IStream &f)
 //-----------------------------------------------------------------------------
 void CItemsForSale::checkSellStore( CEntityId charId )
 {
+	TLogContext_Item_CheckSaleStore itemStoreContext(charId);
 	std::vector< TItemTradePtr > itemsForSaleOfCharacter;
 	std::vector< TItemTradePtr > itemsOfCharacterMustBeRemoved;
 	CDynamicItems::getInstance()->getItemsOfCharacter( charId, itemsForSaleOfCharacter );

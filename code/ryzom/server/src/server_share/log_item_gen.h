@@ -235,6 +235,21 @@ private:
 
 };
 
+struct TLogContext_Item_CheckSaleStore
+{
+	/// The constructor push a log context in the logger system
+	TLogContext_Item_CheckSaleStore(const NLMISC::CEntityId &charId);
+
+	/// The desstructor pop a context in the logger system
+	~TLogContext_Item_CheckSaleStore();
+
+private:
+	/// The name of the context
+	static const std::string _ContextName;
+
+
+};
+
 struct TLogContext_Item_ConsumeAmmo
 {
 	/// The constructor push a log context in the logger system

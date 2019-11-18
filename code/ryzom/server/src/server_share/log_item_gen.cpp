@@ -52,7 +52,7 @@ public:
 	CItemDesc()
 		:	_NoContextCount(0)
 	{
-		_LogDefs.resize(35);
+		_LogDefs.resize(36);
 		
 		{
 			LGS::TLogDefinition  &logDef = _LogDefs[0];
@@ -558,6 +558,15 @@ public:
 
 			logDef.setContext(true);
 		}
+
+		{
+			LGS::TLogDefinition  &logDef = _LogDefs[35];
+
+			logDef.setLogName("Item_CheckSaleStore");
+			logDef.setLogText("Check coherency between player and sale store");
+
+			logDef.setContext(true);
+		}
 		
 
 		// Register the log definitions
@@ -962,6 +971,29 @@ TLogContext_Item_SaleStoreTimeout::~TLogContext_Item_SaleStoreTimeout()
 	// pop the context param in the context class object
 	ItemDesc.popContextVar_charId();
 	
+}
+
+const std::string TLogContext_Item_CheckSaleStore::_ContextName("Item_CheckSaleStore");
+/// The constructor push a log context in the logger system
+TLogContext_Item_CheckSaleStore::TLogContext_Item_CheckSaleStore(const NLMISC::CEntityId &charId)
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->pushLogContext(_ContextName);
+
+	// stack the context param in the context class object
+	ItemDesc.pushContextVar_charId(charId);
+
+}
+
+/// The destructor pop a context in the logger system
+TLogContext_Item_CheckSaleStore::~TLogContext_Item_CheckSaleStore()
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->popLogContext(_ContextName);
+
+	// pop the context param in the context class object
+	ItemDesc.popContextVar_charId();
+
 }
 
 const std::string TLogContext_Item_ConsumeAmmo::_ContextName("Item_ConsumeAmmo");
