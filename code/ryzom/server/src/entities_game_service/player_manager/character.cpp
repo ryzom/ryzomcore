@@ -10838,6 +10838,8 @@ CCreature *  CCharacter::startBotChat(BOTCHATTYPE::TBotChatFlags chatType)
 //-----------------------------------------------
 void CCharacter::endBotChat(bool newBotChat, bool closeDynChat)
 {
+	TLogContext_Item_EndBotChat logContext(_Id);
+
 	_TradePagesToUpdate.clear();
 
 	if( _ShoppingList != 0 )
