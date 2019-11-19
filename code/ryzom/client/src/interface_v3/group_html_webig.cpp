@@ -30,7 +30,7 @@
 #include "../connection.h"
 
 #include <curl/curl.h>
-#include "nel/gui/curl_certificates.h"
+#include "nel/misc/curl_certificates.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -188,7 +188,7 @@ public:
 		curl_easy_setopt(Curl, CURLOPT_FOLLOWLOCATION, 1);
 		curl_easy_setopt(Curl, CURLOPT_WRITEFUNCTION, writeDataFromCurl);
 
-		NLGUI::CCurlCertificates::useCertificates(Curl);
+		NLMISC::CCurlCertificates::useCertificates(Curl);
 	}
 
 	~CWebigNotificationThread()

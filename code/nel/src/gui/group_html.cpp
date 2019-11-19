@@ -47,7 +47,7 @@
 #include "nel/gui/url_parser.h"
 #include "nel/gui/http_cache.h"
 #include "nel/gui/http_hsts.h"
-#include "nel/gui/curl_certificates.h"
+#include "nel/misc/curl_certificates.h"
 #include "nel/gui/html_parser.h"
 #include "nel/gui/html_element.h"
 #include "nel/gui/css_style.h"
