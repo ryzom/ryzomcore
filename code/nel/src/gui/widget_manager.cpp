@@ -433,6 +433,8 @@ namespace NLGUI
 			if (pIEL != NULL)
 				return pIEL;
 		}
+
+		nlwarning("Could not find UI element from Id '%s'", sEltId.c_str());
 		return NULL;
 	}
 

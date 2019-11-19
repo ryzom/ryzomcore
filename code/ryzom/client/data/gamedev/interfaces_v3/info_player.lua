@@ -283,14 +283,17 @@ function game:onDrawNpcWebPage()
 			local utf8Url = ucUrl:toUtf8()
 			local isRing = string.find(utf8Url, "ring_access_point=1") ~= nil
 			if isRing then
+				-- when in ring mode, add the parameters ourselves. 60 sec timeout because of zope...
+				-- browseNpcWebPage(uiStr, utf8Url .. game.RingAccessPointFilter:getURLParameters(), false, 60)
+				-- Use new window after revamp
+				--RingAccessPoint:getWindow().active = 1
+				--RingAccessPoint:getWindow():center()
+				--RingAccessPoint:getWindow():blink(1)
+				--RingAccessPoint:show()
 				getUI("ui:interface:npc_web_browser").active = false
 				runAH(nil, "context_ring_sessions", "")
 				return
 			else
-				local hideWindow = string.find(utf8Url, "_hideWindow=1") ~= nil
-				if hideWindow then
-					getUI("ui:interface:npc_web_browser").active = false
-				end
 				self.NpcWebPage.BrowseDone= true;
 				browseNpcWebPage(uiStr, utf8Url, true, 10); -- 'true' is for 'add parameters' here. 10 is standard timeout
 			end
@@ -299,9 +302,9 @@ function game:onDrawNpcWebPage()
 			-- if this is a ring window, then only the refresh button to access to filter will be available
 			local isRing = string.find(utf8Url, "ring_access_point=1") ~= nil
 			local browser = getUI("ui:interface:npc_web_browser")
-			browser:find("browse_redo").active = true
-			browser:find("browse_undo").active = true
-			browser:find("browse_refresh").active = true
+			browser:find("browse_redo").active = not isRing
+			browser:find("browse_undo").active = not isRing
+			browser:find("browse_refresh").active = isRing
 		end
 	end
 end
@@ -1010,27 +1013,6 @@ function RingPlayerInfo:getLevelRatingAndImprovementRate(val)
 	return level, progress
 end
 
---------------------------------------------------------------------------------------------------------------
---
-function game:updateOrganization(path, uiOrgText, uiStatusText, uiPointsText)
-
-	local org = getDbProp(path.."1:VALUE")
-	getUICaller()[uiOrgText].uc_hardtext =  i18n.get('uiOrganization_' .. org)
-
-	local status = getDbProp(path.."2:VALUE")
-	getUICaller()[uiStatusText].uc_hardtext= status
-
-	local points = getDbProp(path.."3:VALUE")
-	getUICaller()[uiPointsText].uc_hardtext= points
-
-end
-
-------------------------------------------------------------------------------------------------------------
-function game:organizationTooltip()
-	-- set the tooltip in InterfaceManager
-	setContextHelpText( i18n.get('uittOrganization') );
-end
-
 
 --------------------------------------------------------------------------------------------------------------
 function game:popMissionList()
@@ -1435,13 +1417,6 @@ function game:onInGameDbInitialized()
 	runAH(nil, "sort_tribefame", "")
 end
 
-function game:onWebIgReady()
-	-- Call init webig
-	getUI("ui:interface:web_transactions:content:html"):browse("home")
-	getUI("ui:interface:webig:content:html"):browse("home")
-
-end
-
 --------------------------------------------------------------------------------------------------------------
 -- handler called by C++ at the start of a far TP (log to char selection or far tp)
 function game:onFarTpStart()
@@ -1602,164 +1577,3 @@ end
 function game:onNewMissionAdded(missionIndex)
 	debugInfo("Mission " .. missionIndex .. " has been added")
 end
-
---------------------------------------------------------------------------------------------------------------
--- RPJOBS
-
-function game:addRpJob(jobtype, id, value, rpjobs)
-	local base_path = "ui:interface:info_player_skills:content:rpjobs:rpjob_"..jobtype.."_"..id..":rpjob_"..jobtype.."_infos_"..id
-
-	local group = getUI("ui:interface:info_player_skills:content:rpjobs:rpjob_"..jobtype.."_"..id)
-
-	if (value == nil) then
-		group.active = false
-	else
-		local name = "rpjob_" .. string.format("%03d", value)
-		local sitem = name..".sitem"
-		if (rpjobs[sitem] == nil) then
-			group.active = false
-		else
-			group.active = true
-
-			local echelon_value = rpjobs[sitem][1]
-			local quantity = rpjobs[sitem][2]
-
-			local maxlevel = (echelon_value*6)-30
-
-			if (quantity > maxlevel) then
-				quantity = maxlevel
-			end
-
-			local base = getUI(base_path..":t")
-			base.hardtext = i18n.get(name):toUtf8()
-			local ui = getUI(base_path..":icon")
-			ui.texture = name..".tga"
-			local echelon = getUI(base_path..":echelon_value")
-			echelon.hardtext = tostring(echelon_value/10)
-			local bar = getUI(base_path..":bar3d:level")
-			local t = getUI(base_path..":bar3d:t")
-			if (echelon_value >= 60) then
-				bar.color = "255 0 0 255"
-				bar.w = "368"
-				t.hardtext = i18n.get("uiRpjobMaxLevel"):toUtf8()
-				t.color = "255 255 0 255"
-			else
-				bar.color = tostring(math.floor((105*quantity)/maxlevel)).." "..tostring(100+math.floor((155*quantity)/maxlevel)).." "..tostring(math.floor((105*quantity)/maxlevel)).." 255"
-				bar.w = tostring((368*quantity)/maxlevel)
-				t.hardtext = tostring(quantity).." / "..tostring(maxlevel)
-				t.color = tostring(255*math.floor(3*(maxlevel-quantity)/maxlevel)).." "..tostring(255*math.floor(3*(maxlevel-quantity)/maxlevel)).." "..tostring(255*math.floor(3*(maxlevel-quantity)/maxlevel)).." 255"
-			end
-		end
-	end
-end
-
-
-function game:getRPJobs()
-	rpjobs_advanced = {}
-	rpjobs_elementary = {}
-	rpjobs_roleplay = {}
-	rpjobs = {}
-
-	for i = 0, 499, 1 do
-		local sheet =  getDbProp("SERVER:INVENTORY:BAG:"..tostring(i)..":SHEET")
-		if (sheet ~= 0) then
-			local name = getSheetName(sheet)
-			if (string.sub(name, 0, 6) == "rpjob_") then
-				local quality =  getDbProp("SERVER:INVENTORY:BAG:"..tostring(i)..":QUALITY")
-				local quantity =  getDbProp("SERVER:INVENTORY:BAG:"..tostring(i)..":QUANTITY")
-
-				if (name == "rpjob_advanced.sitem") then
-					table.insert(rpjobs_advanced, quality)
-				else
-					if (name == "rpjob_elementary.sitem") then
-						table.insert(rpjobs_elementary, quality)
-					else
-						if (name == "rpjob_roleplay.sitem") then
-							table.insert(rpjobs_roleplay, quality)
-						else
-							if rpjobs[name] == nil then
-								rpjobs[name] = {quality, quantity}
-							else
-								if rpjobs[name][1] < quality then
-									rpjobs[name] = {quality, quantity}
-								end
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-
-	for id=1,2,1 do
-		game:addRpJob("advanced", id, rpjobs_advanced[id], rpjobs)
-	end
-
-	for id=1,3,1 do
-		game:addRpJob("elementary", id, rpjobs_elementary[id], rpjobs)
-	end
-
-
-end
-
---------------------------------------------------------------------------------------------------------------
-function game:setInfoPlayerCharacterRace()
-	getUI("ui:interface:info_player_skills:content:basics_skills:character_race_name").uc_hardtext = i18n.get("io"..getUserRace())
-end
-
-
--- --------------------------------------------------------------------------------------------------------------
--- game.preInitTimer = 0
--- function game:preInitWebIgAppsLoop()
-	-- if game.preInitTimer == nil then game.preInitTimer = 0 end
-
-	-- game.preInitTimer = game.preInitTimer - 1
-	-- if (not game.preWebIgAppsInitialized) and game.preInitTimer < 0 then
-		-- debugInfo("initWebIgAppsLoop(): calling app_ig_preinit.php")
-		-- getUI("ui:interface:web_transactions:content:html"):browse("http://atys.ryzom.com/start/app_ig_preinit.php")
-		-- game.preInitTimer = getDbProp("UI:SAVE:WEBIG_RETRY_DELAY")
-	-- end
-
-	-- if game.preWebIgAppsInitialized then
-		-- debugInfo("preInitWebIgAppsLoop(): Calling removeOnDbChange()")
-		-- removeOnDbChange(getUI("ui:interface"), "@UI:VARIABLES:CURRENT_SERVER_TICK")
-	-- end
--- end
-
--- --------------------------------------------------------------------------------------------------------------
--- function game:preInitWebIgApps()
-	-- debugInfo("game:preInitWebIgApps()")
-	-- addOnDbChange(getUI("ui:interface"), "@UI:VARIABLES:CURRENT_SERVER_TICK", "game:preInitWebIgAppsLoop()")
--- end
-
--- --------------------------------------------------------------------------------------------------------------
--- game.postInitTimer = 0
--- function game:postInitWebIgAppsLoop()
-	-- if game.postInitTimer == nil then game.postInitTimer = 0 end
-
-	-- game.postInitTimer = game.postInitTimer - 1
-	-- if game.postInitTimer < 0 then
-		-- debugInfo("initWebIgAppsLoop(): calling app_ig_postinit.php")
-		-- getUI("ui:interface:web_transactions:content:html"):browse("http://atys.ryzom.com/start/app_ig_postinit.php")
-		-- game.postInitTimer = getDbProp("UI:SAVE:WEBIG_RETRY_DELAY")
-	-- end
-
-	-- if game.postWebIgAppsInitialized then
-		-- debugInfo("postInitWebIgAppsLoop(): Calling removeOnDbChange()")
-		-- removeOnDbChange(getUI("ui:interface:milko_pad"), "@UI:VARIABLES:CURRENT_SERVER_TICK")
-	-- end
--- end
-
--- --------------------------------------------------------------------------------------------------------------
--- function game:postInitWebIgApps()
-	-- debugInfo("game:postInitWebIgApps()")
-	-- addOnDbChange(getUI("ui:interface:milko_pad"), "@UI:VARIABLES:CURRENT_SERVER_TICK", "game:postInitWebIgAppsLoop()")
--- end
-
--- --------------------------------------------------------------------------------------------------------------
--- function game:deinitWebIgApps()
-	-- debugInfo("game:deinitWebIgApps()")
-	-- game.preWebIgAppsInitialized = nil
-	-- game.postWebIgAppsInitialized = nil
-	-- titleSetted = nil
--- end

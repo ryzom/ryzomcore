@@ -2432,34 +2432,35 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		NLGUI::CDBManager *pCDBM = NLGUI::CDBManager::getInstance();
 
-		CEntityCL::_EntitiesColor[CEntityCL::User] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:USER")->getValueRGBA();
-		CEntityCL::_EntitiesColor[CEntityCL::Player] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:PLAYER")->getValueRGBA();
-		CEntityCL::_EntitiesColor[CEntityCL::NPC] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:NPC")->getValueRGBA();
-		CEntityCL::_EntitiesColor[CEntityCL::Fauna] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:FAUNA")->getValueRGBA();
-		CEntityCL::_EntitiesColor[CEntityCL::ForageSource] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:SOURCE")->getValueRGBA();
-		CEntityCL::_DeadColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:DEAD")->getValueRGBA();
-		CEntityCL::_TargetColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:TARGET")->getValueRGBA();
-		CEntityCL::_GroupColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:GROUP")->getValueRGBA();
-		CEntityCL::_GuildColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:GUILD")->getValueRGBA();
-		CEntityCL::_UserMountColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:MOUNT")->getValueRGBA();
-		CEntityCL::_UserPackAnimalColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:BEAST")->getValueRGBA();
-		CEntityCL::_PvpEnemyColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:PVPENEMY")->getValueRGBA();
-		CEntityCL::_PvpAllyColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:PVPALLY")->getValueRGBA();
-		CEntityCL::_PvpAllyInTeamColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:PVPALLYINTEAM")->getValueRGBA();
-		CEntityCL::_PvpNeutralColor = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:COLORS:PVPNEUTRAL")->getValueRGBA();
+		CEntityCL::_EntitiesColor[CEntityCL::User] = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:USER")->getValueRGBA();
+		CEntityCL::_EntitiesColor[CEntityCL::Player] = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:PLAYER")->getValueRGBA();
+		CEntityCL::_EntitiesColor[CEntityCL::NPC] = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:NPC")->getValueRGBA();
+		CEntityCL::_EntitiesColor[CEntityCL::Fauna] = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:FAUNA")->getValueRGBA();
+		CEntityCL::_EntitiesColor[CEntityCL::ForageSource] = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:SOURCE")->getValueRGBA();
+		CEntityCL::_DeadColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:DEAD")->getValueRGBA();
+		CEntityCL::_TargetColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:TARGET")->getValueRGBA();
+		CEntityCL::_GroupColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:GROUP")->getValueRGBA();
+		CEntityCL::_GuildColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:GUILD")->getValueRGBA();
+		CEntityCL::_UserMountColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:MOUNT")->getValueRGBA();
+		CEntityCL::_UserPackAnimalColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:BEAST")->getValueRGBA();
+		CEntityCL::_PvpEnemyColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:PVPENEMY")->getValueRGBA();
+		CEntityCL::_PvpAllyColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:PVPALLY")->getValueRGBA();
+		CEntityCL::_PvpAllyInTeamColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:PVPALLYINTEAM")->getValueRGBA();
+		CEntityCL::_PvpNeutralColor = pCDBM->getDbProp("UI:SAVE:ENTITY:COLORS:PVPNEUTRAL")->getValueRGBA();
 
 		// don't save these colors in .icfg because players can't change them
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::SGM - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:SGM")->getValueRGBA();
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::GM - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:GM")->getValueRGBA();
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::VG - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:VG")->getValueRGBA();
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::SG - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:SG")->getValueRGBA();
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::G - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:G")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::SGM - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:SGM")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::GM - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:GM")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::VG - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:VG")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::SG - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:SG")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::G - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:G")->getValueRGBA();
 
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::CM - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:CM")->getValueRGBA();
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::EM - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:EM")->getValueRGBA();
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::EG - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:EG")->getValueRGBA();
-		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::OBSERVER - CHARACTER_TITLE::BeginGmTitle ] = NLGUI::CDBManager::getInstance()->getDbProp("UI:INTERFACE:ENTITY:COLORS:OBSERVER")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::CM - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:CM")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::EM - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:EM")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::EG - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:EG")->getValueRGBA();
+		CEntityCL::_GMTitleColor[ CHARACTER_TITLE::OBSERVER - CHARACTER_TITLE::BeginGmTitle ] = pCDBM->getDbProp("UI:INTERFACE:ENTITY:COLORS:OBSERVER")->getValueRGBA();
 	}
 };
 REGISTER_ACTION_HANDLER (CUpdateEntitiesColor, "update_entities_color");

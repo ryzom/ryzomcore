@@ -919,9 +919,8 @@ This MUST follow the Enum MISSION_DESC::TIconId
 	<param name="ctrl_sheet_greenify_color" value="140 255 140 150" />
 	<param name="ctrl_text_greenify_color" value="140 255 140 150" />
 	<param name="text_over_back_color" value="64 64 64 255" />
-	<!--    <param name="font" value="basic.ttf" /> -->
-	<param name="font" value="ryzom.ttf" />
-	<param name="monospace_font" value="ryzom_monospace.ttf" />
+	<param name="font" value="noto_sans_display.ttf" />
+	<param name="monospace_font" value="noto_mono.ttf" />
 	<param name="add_coef_font" value="1" />
 	<param name="mul_coef_anim" value="0.8" />
 	<param name="bubbles_timeout" value="10" />
