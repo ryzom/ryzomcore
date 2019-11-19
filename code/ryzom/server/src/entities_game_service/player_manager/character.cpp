@@ -7966,7 +7966,7 @@ void CCharacter::endHarvest(bool sendCloseTempImpulsion)
 	
 	if (sendCloseTemp && sendCloseTempImpulsion)
 	{
-		sendCloseTempInventoryImpulsion();
+		sendCloseTempInventoryImpulsion(true);
 	}
 
 } // endHarvest //
@@ -14477,17 +14477,35 @@ bool CCharacter::pickUpRawMaterial( uint32 indexInTempInv, bool * lastMaterial )
 //-----------------------------------------------
 // sendCloseTempInventoryImpulsion
 //-----------------------------------------------
-void CCharacter::sendCloseTempInventoryImpulsion()
+void CCharacter::sendCloseTempInventoryImpulsion(bool onlyIfEmpty)
 {
 	// Sage: May 9 2007
 	// The live servers are crashing due to an infinite indirect recursion loop
 	// itemTempInventoryToBag() calls endHarvest() calls sendCloseTempInventoryImpulsion() calls getAllTempInventoryItems() calls itemTempInventoryToBag() ...
 	// the following anti bug is a temporaray fix to prevent inifinte recursion and stack overflow
-	static bool isRecursing= false;																	// **** Temp Fix 1/4 **** //
-	BOMB_IF(isRecursing,"CCharacter::sendCloseTempInventoryImpulsion is recursing!",return);		// **** Temp Fix 2/4 **** //
-	isRecursing= true;																				// **** Temp Fix 3/4 **** //
+	static bool isRecursing = false;																	// **** Temp Fix 1/4 **** //
+	
+	if (onlyIfEmpty)
+	{
+		CInventoryPtr tempInv = getInventory(INVENTORIES::temporary);
+		nlassert(tempInv != NULL);
+		if (tempInv->getUsedSlotCount())
+		{
+			nldebug("Temporary inventory is not empty, do not send impulsion to close");
+			return;
+		}
+	}
+	
+	if (!onlyIfEmpty)
+	{
+		BOMB_IF(isRecursing, "CCharacter::sendCloseTempInventoryImpulsion is recursing!", return);		// **** Temp Fix 2/4 **** //
+		isRecursing = true;																				// **** Temp Fix 3/4 **** //
 
-	getAllTempInventoryItems(); // false);
+		// Take all items
+		getAllTempInventoryItems();
+
+		isRecursing= false;																				// **** Temp Fix 4/4 **** //
+	}
 
 	CMessage msgout( "IMPULSION_ID" );
 	msgout.serial( _Id );
@@ -14500,7 +14518,6 @@ void CCharacter::sendCloseTempInventoryImpulsion()
 	msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 	CUnifiedNetwork::getInstance()->send( NLNET::TServiceId(_Id.getDynamicId()), msgout );
 
-	isRecursing= false;																				// **** Temp Fix 4/4 **** //
 } // sendCloseTempInventoryImpulsion //
 
 //-----------------------------------------------
