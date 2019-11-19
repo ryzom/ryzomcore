@@ -636,6 +636,8 @@ namespace NLGUI
 		bool _GroupSelection;
 		bool multiSelection;
 		uint32 _WidgetCount;
+
+		std::set<std::string> m_LoggedMissingElement;
 	};
 
 }
