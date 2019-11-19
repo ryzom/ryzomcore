@@ -136,7 +136,7 @@ bool CStreamedPackageManager::getFile(std::string &filePath, const std::string &
 		if (curl)
 		{
 			curl_easy_setopt(curl, CURLOPT_URL, downloadUrl.c_str());
-			if (downloadUrl.length() > 8 && downloadUrl[4] == 's') // 01234 https
+			if (downloadUrl.length() > 8 && (downloadUrl[4] == 's' || downloadUrl[4] == 'S')) // 01234 https
 			{
 				// Don't need to verify, since we check the hash
 				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);

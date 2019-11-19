@@ -51,7 +51,7 @@
 #include "global.h"
 #include "input.h"
 #include "nel/gui/libwww.h"
-#include "http_client_curl.h"
+#include "nel/misc/http_client_curl.h"
 #include "login_progress_post_thread.h"
 
 #include "init.h"

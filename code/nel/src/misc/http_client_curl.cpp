@@ -14,15 +14,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdpch.h"
-#include "http_client_curl.h"
+#include "stdmisc.h"
+#include <nel/misc/http_client_curl.h>
+#include <nel/misc/debug.h>
 
 #include <curl/curl.h>
 
-#include "nel/gui/curl_certificates.h"
+#include <nel/misc/curl_certificates.h>
 
 using namespace NLMISC;
-using namespace NLNET;
 using namespace std;
 
 #ifdef DEBUG_NEW
@@ -31,6 +31,8 @@ using namespace std;
 
 #define _Curl (CURL *)_CurlStruct
 
+namespace NLMISC
+{
 
 // Ugly CURL callback
 size_t CCurlHttpClient::writeDataFromCurl(void *buffer, size_t size, size_t nmemb, void *pHttpClient)
@@ -72,10 +74,10 @@ bool CCurlHttpClient::verifyServer(bool verify)
 	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYPEER, verify ? 1 : 0);
 
 	// specify custom CA certs
-	NLGUI::CCurlCertificates::addCertificateFile(CAFilename);
+	CCurlCertificates::addCertificateFile(CAFilename);
 
 	// if supported, use custom SSL context function to load certificates
-	NLGUI::CCurlCertificates::useCertificates(_Curl);
+	CCurlCertificates::useCertificates(_Curl);
 
 	return true;
 }
@@ -88,6 +90,11 @@ bool CCurlHttpClient::sendRequest(const std::string& methodWB, const std::string
 
 	// Set URL
 	curl_easy_setopt(_Curl, CURLOPT_URL, url.c_str());
+	if (url.length() > 8 && (url[4] == 's' || url[4] == 'S')) // 01234 https
+	{
+		curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYPEER, 1L);
+		curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYHOST, 2L);
+	}
 
 	// Authentication
 	if (!_Auth.empty())
@@ -188,5 +195,6 @@ void CCurlHttpClient::disconnect()
 
 CCurlHttpClient CurlHttpClient;
 
+}
 
-
+/* end of file */

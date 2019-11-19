@@ -28,6 +28,7 @@
 #include "nel/misc/path.h"
 #include "nel/misc/sheet_id.h"
 #include "nel/misc/big_file.h"
+#include "nel/misc/curl_certificates.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
 #include "nel/3d/u_driver.h"
@@ -191,6 +192,13 @@ struct CStatThread : public NLMISC::IRunnable
 		curl_easy_setopt(curl, CURLOPT_REFERER, string("https://ryzom.dev/" + referer).c_str());
 #endif
 		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+		if (url.length() > 8 && (url[4] == 's' || url[4] == 'S')) // 01234 https
+		{
+			NLMISC::CCurlCertificates::addCertificateFile("cacert.pem");
+			NLMISC::CCurlCertificates::useCertificates(curl);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+		}
 		CURLcode res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
 		//curl_global_cleanup();

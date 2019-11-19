@@ -113,7 +113,7 @@
 #include "nel/gui/lua_helper.h"
 using namespace NLGUI;
 #include "nel/gui/lua_ihm.h"
-#include "nel/gui/curl_certificates.h"
+#include "nel/misc/curl_certificates.h"
 
 #include "lua_ihm_ryzom.h"
 
@@ -480,7 +480,7 @@ CInterfaceManager::CInterfaceManager()
 	if (!ClientCfg.CurlCABundle.empty())
 	{
 		// specify custom CA certs, lookup will be made in this function
-		NLGUI::CCurlCertificates::addCertificateFile(ClientCfg.CurlCABundle);
+		NLMISC::CCurlCertificates::addCertificateFile(ClientCfg.CurlCABundle);
 	}
 
 	NLGUI::CDBManager::getInstance()->resizeBanks( NB_CDB_BANKS );

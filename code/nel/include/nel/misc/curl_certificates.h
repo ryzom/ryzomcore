@@ -22,7 +22,7 @@
 // forward declaration to avoid curl.h inclusion everywhere
 typedef void CURL;
 
-namespace NLGUI
+namespace NLMISC
 {
 	class CCurlCertificates
 	{
@@ -36,3 +36,5 @@ namespace NLGUI
 
 } // namespace
 #endif
+
+/* end of file */
