@@ -1834,7 +1834,7 @@ CGameItemPtr CCharacter::createItemInInventoryFreeSlot(INVENTORIES::TInventory i
 }
 
 // ****************************************************************************
-void CCharacter::itemTempInventoryToBag(uint32 srcSlot, bool sendCloseTempImpulsion)
+void CCharacter::itemTempInventoryToBag(uint32 srcSlot) // , bool sendCloseTempImpulsion)
 {
 	H_AUTO(CCharacter_itemTempInventoryToBag);
 	
@@ -1859,7 +1859,7 @@ void CCharacter::itemTempInventoryToBag(uint32 srcSlot, bool sendCloseTempImpuls
 				endForageSession();
 				if (lastMaterial)
 				{
-					endHarvest(sendCloseTempImpulsion);
+					endHarvest(); // sendCloseTempImpulsion);
 
 					// inform IA that everything was looted
 					CCreatureDespawnMsg msg;
@@ -2008,7 +2008,7 @@ void CCharacter::itemTempInventoryToBag(uint32 srcSlot, bool sendCloseTempImpuls
 						CWorldInstances::instance().msgToAIInstance(getInstanceNumber(), msg);
 					}
 					
-					endHarvest(sendCloseTempImpulsion);
+					endHarvest(); // sendCloseTempImpulsion);
 					
 					leaveTempInventoryMode();
 				}
@@ -2101,12 +2101,12 @@ void CCharacter::itemTempInventoryToBag(uint32 srcSlot, bool sendCloseTempImpuls
 }
 
 // ****************************************************************************
-void CCharacter::getAllTempInventoryItems(bool sendCloseTempImpulsion)
+void CCharacter::getAllTempInventoryItems() // bool sendCloseTempImpulsion)
 {
 	H_AUTO(CCharacter_getAllTempInventoryItems);
 
 	for (uint i = 0 ; i < INVENTORIES::NbTempInvSlots; ++i)
-		itemTempInventoryToBag(i, sendCloseTempImpulsion);
+		itemTempInventoryToBag(i); // , sendCloseTempImpulsion);
 }
 
 // ****************************************************************************

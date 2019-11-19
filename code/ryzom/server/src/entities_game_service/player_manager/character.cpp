@@ -7936,13 +7936,11 @@ void CCharacter::endHarvest(bool sendCloseTempImpulsion)
 	_DepositSearchSkill = SKILLS::unknown;
 	_MpIndex = 0xff;
 	_DepositHarvestInformation.DepositIndex = 0xffffffff;
+	bool sendCloseTemp = false;
 
 	if ( _DepositHarvestInformation.Sheet != CSheetId::Unknown/*_DepositHarvestInformation.EndCherchingTime != 0xffffffff && _DepositHarvestInformation.EndCherchingTime > CTickEventHandler::getGameCycle()*/ )
 	{
-		if ( sendCloseTempImpulsion )
-		{
-			sendCloseTempInventoryImpulsion();
-		}
+		sendCloseTemp = true;
 	}
 
 	if ( _MpSourceId != CEntityId::Unknown || _MpSourceSheetId != CSheetId::Unknown )
@@ -7953,8 +7951,7 @@ void CCharacter::endHarvest(bool sendCloseTempImpulsion)
 		{
 			creature->resetHarvesterRowId();
 			// only send interupt message if some rm remains on the corpse
-			if ( sendCloseTempImpulsion )
-				sendCloseTempInventoryImpulsion();
+			sendCloseTemp = true;
 		}
 
 		// send end loot behaviour
@@ -7966,6 +7963,11 @@ void CCharacter::endHarvest(bool sendCloseTempImpulsion)
 	}
 
 	clearHarvestDB();
+	
+	if (sendCloseTemp && sendCloseTempImpulsion)
+	{
+		sendCloseTempInventoryImpulsion();
+	}
 
 } // endHarvest //
 
@@ -14485,7 +14487,7 @@ void CCharacter::sendCloseTempInventoryImpulsion()
 	BOMB_IF(isRecursing,"CCharacter::sendCloseTempInventoryImpulsion is recursing!",return);		// **** Temp Fix 2/4 **** //
 	isRecursing= true;																				// **** Temp Fix 3/4 **** //
 
-	getAllTempInventoryItems(false);
+	getAllTempInventoryItems(); // false);
 
 	CMessage msgout( "IMPULSION_ID" );
 	msgout.serial( _Id );
