@@ -1859,7 +1859,7 @@ void CCharacter::itemTempInventoryToBag(uint32 srcSlot, bool sendCloseTempImpuls
 				endForageSession();
 				if (lastMaterial)
 				{
-					endHarvest();
+					endHarvest(sendCloseTempImpulsion);
 
 					// inform IA that everything was looted
 					CCreatureDespawnMsg msg;
