@@ -1335,8 +1335,7 @@ void prelogInit()
 
 
 		// Create a text context. We need to put the full path because we not already add search path
-//		resetTextContext ("bremenb.ttf", false);
-		resetTextContext ("ryzom.ttf", false);
+		resetTextContext("noto_sans_display.ttf", true);
 
 
 		CInterfaceManager::getInstance();
