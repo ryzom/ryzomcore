@@ -58,6 +58,7 @@ CCharacterShoppingList::CCharacterShoppingList( CSmartPtr<CMerchant>& merchant, 
 //-----------------------------------------------------------------------------
 CCharacterShoppingList::~CCharacterShoppingList()
 {
+	TLogNoContext_Item noLog;
 	_CurrentTradeListNpc.clear();
 	_CurrentTradeListPlayer.clear();
 	_CurrentTradeListYours.clear();

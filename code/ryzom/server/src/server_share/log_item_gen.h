@@ -250,6 +250,21 @@ private:
 
 };
 
+struct TLogContext_Item_SaleStoreSold
+{
+	/// The constructor push a log context in the logger system
+	TLogContext_Item_SaleStoreSold(const NLMISC::CEntityId &charId);
+
+	/// The desstructor pop a context in the logger system
+	~TLogContext_Item_SaleStoreSold();
+
+private:
+	/// The name of the context
+	static const std::string _ContextName;
+
+
+};
+
 struct TLogContext_Item_ConsumeAmmo
 {
 	/// The constructor push a log context in the logger system
@@ -407,21 +422,6 @@ struct TLogContext_Item_EnchantPhrase
 
 	/// The desstructor pop a context in the logger system
 	~TLogContext_Item_EnchantPhrase();
-
-private:
-	/// The name of the context
-	static const std::string _ContextName;
-
-
-};
-
-struct TLogContext_Item_EndBotChat
-{
-	/// The constructor push a log context in the logger system
-	TLogContext_Item_EndBotChat(const NLMISC::CEntityId &charId);
-
-	/// The desstructor pop a context in the logger system
-	~TLogContext_Item_EndBotChat();
 
 private:
 	/// The name of the context

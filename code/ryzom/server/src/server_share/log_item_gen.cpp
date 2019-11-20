@@ -571,8 +571,8 @@ public:
 		{
 			LGS::TLogDefinition  &logDef = _LogDefs[36];
 
-			logDef.setLogName("Item_EndBotChat");
-			logDef.setLogText("Bot chat ended. Check why this is causing item log");
+			logDef.setLogName("Item_SaleStoreSold");
+			logDef.setLogText("An item was sold through the store and money is received");
 
 			logDef.setContext(true);
 		}
@@ -1005,6 +1005,29 @@ TLogContext_Item_CheckSaleStore::~TLogContext_Item_CheckSaleStore()
 
 }
 
+const std::string TLogContext_Item_SaleStoreSold::_ContextName("Item_SaleStoreSold");
+/// The constructor push a log context in the logger system
+TLogContext_Item_SaleStoreSold::TLogContext_Item_SaleStoreSold(const NLMISC::CEntityId &charId)
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->pushLogContext(_ContextName);
+
+	// stack the context param in the context class object
+	ItemDesc.pushContextVar_charId(charId);
+
+}
+
+/// The destructor pop a context in the logger system
+TLogContext_Item_SaleStoreSold::~TLogContext_Item_SaleStoreSold()
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->popLogContext(_ContextName);
+
+	// pop the context param in the context class object
+	ItemDesc.popContextVar_charId();
+
+}
+
 const std::string TLogContext_Item_ConsumeAmmo::_ContextName("Item_ConsumeAmmo");
 /// The constructor push a log context in the logger system
 TLogContext_Item_ConsumeAmmo::TLogContext_Item_ConsumeAmmo(const NLMISC::CEntityId &charId)
@@ -1251,30 +1274,6 @@ TLogContext_Item_EnchantPhrase::TLogContext_Item_EnchantPhrase(const NLMISC::CEn
 
 /// The destructor pop a context in the logger system
 TLogContext_Item_EnchantPhrase::~TLogContext_Item_EnchantPhrase()
-{
-	if (LGS::ILoggerServiceClient::isInitialized())
-		LGS::ILoggerServiceClient::getInstance()->popLogContext(_ContextName);
-
-	// pop the context param in the context class object
-	ItemDesc.popContextVar_charId();
-
-}
-
-
-const std::string TLogContext_Item_EndBotChat::_ContextName("Item_EndBotChat");
-/// The constructor push a log context in the logger system
-TLogContext_Item_EndBotChat::TLogContext_Item_EndBotChat(const NLMISC::CEntityId &charId)
-{
-	if (LGS::ILoggerServiceClient::isInitialized())
-		LGS::ILoggerServiceClient::getInstance()->pushLogContext(_ContextName);
-
-	// stack the context param in the context class object
-	ItemDesc.pushContextVar_charId(charId);
-
-}
-
-/// The destructor pop a context in the logger system
-TLogContext_Item_EndBotChat::~TLogContext_Item_EndBotChat()
 {
 	if (LGS::ILoggerServiceClient::isInitialized())
 		LGS::ILoggerServiceClient::getInstance()->popLogContext(_ContextName);

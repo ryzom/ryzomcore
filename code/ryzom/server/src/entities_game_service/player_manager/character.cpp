@@ -10149,6 +10149,8 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 //-----------------------------------------------------------------------------
 void CCharacter::itemSolded( uint32 identifier, uint32 quantity, uint32 sellPrice, uint32 basePrice, const CEntityId& buyer, bool sellOffline )
 {
+	// TODO_RYZOMCLASSIC: Log buyer, etc? Item store logging seems lacking. -Kaetemi
+	TLogContext_Item_SaleStoreSold logContext(_Id);
 	CSmartPtr< IItemTrade > itemTrade = _ItemsInShopStore->removeItem( identifier, quantity, sellOffline );
 	if( itemTrade != 0 )
 	{
@@ -10840,8 +10842,6 @@ CCreature *  CCharacter::startBotChat(BOTCHATTYPE::TBotChatFlags chatType)
 //-----------------------------------------------
 void CCharacter::endBotChat(bool newBotChat, bool closeDynChat)
 {
-	TLogContext_Item_EndBotChat logContext(_Id);
-
 	_TradePagesToUpdate.clear();
 
 	if( _ShoppingList != 0 )
