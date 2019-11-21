@@ -205,6 +205,7 @@
 	 	group_params_r="menu=ui:interface:base_menu_with_color" >
 	</group>
 	
+	<!--
 	<group id="header_opened" x="0" y="0" w="100" h="48" posref="TL TL" 
 		group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color">
 
@@ -216,11 +217,13 @@
 		<view type="bitmap" id="sep" posparent="info_player_skills_tabs" posref="BR BL" sizeparent="parent" sizeref="w" w="0" h="1" scale="true" texture="blank.tga" color="166 166 166 255" />
 		
 	</group>
+	-->
 	
 		
-	<group id="content" x="0" y="0" h="585" posref="TL TL" >
+	<group id="header_opened" x="0" y="0" w="400" h="552" posref="TL TL"
+		group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color">
 		
-		<group id="basics_skills" sizeref="wh" w="0" y="0" h="0" posref="TL TL">
+		<!-- <group id="basics_skills" sizeref="wh" w="0" y="0" h="0" posref="TL TL"> -->
 
 			<group id="title" posref="TL TL" sizeref="w" w="-1" h="24" y="-22" >
 				<view type="text" id="player_title_txt" posref="TL TL" x="0" y="-4" hardtext="uiPlayerTitle" shadow="true" color="255 255 255 255" global_color="false" fontsize="12"/>			
@@ -337,7 +340,7 @@
 				<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
 			</group>
 
-			<group id="resists" posref="TL TL" sizeref="w5" w="-1" h="155" y="-347" >
+			<group id="resists" posref="TL TL" sizeref="w5" w="-1" h="155" y="-351" >
 				<view type="text" id="resists_t" posref="TL TL" x="0" y="0" hardtext="uiResistsTable" shadow="true" color="255 255 255 255" global_color="false" fontsize="12"/>
 				<instance template="text_tt" posparent="resists_t" tooltip="uittMagicResistTable" />
 				<group id="black" posref="TL TL" x="0" sizeref="w" y="-14" w="0" h="141" inherit_gc_alpha="true" >
@@ -356,7 +359,7 @@
 				<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
 			</group>
 
-			<group id="magic_protect" posref="TM TL" sizeref="w5" w="-1" h="155" y="-347" >
+			<group id="magic_protect" posref="TM TL" sizeref="w5" w="-1" x="1" h="155" y="-351" >
 				<view type="text" id="protections_t" posref="TL TL" x="0" y="0" hardtext="uiMagicProtectTable" shadow="true" color="255 255 255 255" global_color="false" fontsize="12"/>
 				<instance template="text_tt" posparent="protections_t" tooltip="uittMagicProtectTable" />
 				<group id="black" posref="TL TL" x="0" sizeref="w" y="-14" w="0" h="141" inherit_gc_alpha="true" >
@@ -382,7 +385,7 @@
 				<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
 			</group>
 
-			<group id="dodge" posref="TL TL" sizeref="w5" w="-1" h="40" y="-510" >
+			<group id="dodge" posref="TL TL" sizeref="w5" w="-1" h="40" y="-512" >
 				<view type="text" id="defense_t" posref="TL TL" x="0" y="0" hardtext="uiDefenseTitle" shadow="true" color="255 255 255 255" global_color="false" fontsize="12"/>
 				<group id="black" posref="TL TL" x="0" sizeref="w" y="-14" w="0" h="26" inherit_gc_alpha="true" >
 					<instance template="tipc_scoreEP" id="dodge" posref="TL TL" x="8" y="-10" w="-8"
@@ -391,17 +394,21 @@
 				<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
 			</group>
 
-			<group id="parry" posref="TM TL" sizeref="w5" w="-1" h="40" y="-510" >
+			<group id="parry" posref="TM TL" sizeref="w5" w="-1" x="1" h="40" y="-512" >
 				<group id="black" posref="TL TL" x="0" sizeref="w" y="-14" w="0" h="26" inherit_gc_alpha="true" >
 					<instance template="tipc_scoreEP" id="parry" posref="TL TL" x="8" y="-10" w="-8"
 												text="uiParry" val="%player_parry_current" maxval="%player_parry_base" baseval="%player_parry_base" tooltip="uittIdentityParry" level="%player_parry_current" mod="%player_parry_success_mod"/>
 				</group>
 				<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
 			</group>
-
+			
+			<!--
 			<instance template="faction_points_widget" id="fp" posref="TL TL" x="0" y="-555" />
+			-->
 
-		</group>
+		<!-- </group> -->
+
+		<!--
 
 		<group id="ring_skills" sizeref="wh" w="0" y="0" h="0" posref="TL TL">
 			
@@ -431,7 +438,6 @@
 			<view type="text" id="ecosystem_points_title" posparent="ecosystem_points" posref="TL BL" x="0" y="0" hardtext="uiR2EDEcosystemPointsTitle" shadow="true" color="255 255 255 255" global_color="false" fontsize="12"/>
 			
 
-			<!--
 			<group id="level_rrps" posref="TR TL" posparent="ecosystem_points" y="0" x="8" sizeref="w" w="-4" child_resize_h="true" child_resize_hmargin="16"> 
 				
 				<instance template="inner_thin_border_group" />		
@@ -456,9 +462,7 @@
 
 			</group>
 			<view type="text" id="level_rrps_title" posparent="level_rrps" posref="TL BL" x="0" y="0" hardtext="uiR2EDRrpsLevelTitle" shadow="true" color="255 255 255 255" global_color="false" fontsize="12"/>
-			-->
-
-			<!--
+			
 			<group id="ring_rating" posref="BL TL" sizeparent="parent" posparent="ecosystem_points" y="-30" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="16"> 
 				
 				<instance template="inner_thin_border_group" />		
@@ -473,8 +477,9 @@
 				 text="uiR2EDMasterlessRingRating" />
 			</group>
 			<view type="text" id="ring_rating_title" posparent="ring_rating" posref="TL BL" x="0" y="0" hardtext="uiR2EDRingRatingTitle" shadow="true" color="255 255 255 255" global_color="false" fontsize="12"/>
-			-->
+
 		</group>
+		-->
 
 	</group>
 </group>
