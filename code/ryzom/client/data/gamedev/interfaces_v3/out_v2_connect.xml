@@ -41,11 +41,11 @@
 
 	
 	<!-- Quit Button -->
-	<ctrl style="valid_txt_button" id="finish_but" posref="BR BR" x="-40" y="130" hardtext="uiQuit"
+	<ctrl style="valid_txt_button" id="finish_but" posref="BR BR" x="-40" y="24" hardtext="uiQuit"
 					onover="play_sound" params_over="name=charsel_quit_over"
 					onclick_l="proc" params_l="proc_con_quit"/>
 
-	<view type="text" id="title" posref="MM MM" y="24" hardtext="uiConnecting" fontsize="20"/>
+	<view type="text" id="title" posref="BM BM" y="24" hardtext="uiConnecting" fontsize="20"/>
 
 	
 	<!-- BLACK SCREEN FADE -->
