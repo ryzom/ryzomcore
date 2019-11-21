@@ -8207,6 +8207,8 @@ NLMISC_COMMAND(eScript, "executes a script on an event npc group", "<player eid>
 			pos = arg.find("(eid:");
 		}
 
+		strFindReplace(arg, "#item:", "");
+		strFindReplace(arg, "#rrp:", "");
 		msgout.serial(arg);
 	}
 	CWorldInstances::instance().msgToAIInstance2(instanceNumber, msgout);

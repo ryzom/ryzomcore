@@ -69,6 +69,7 @@
 #include "player_manager/player.h"
 #include "team_manager/team_manager.h"
 #include "pvp_manager/pvp.h"
+#include "shop_type/named_items.h"
 #include "pvp_manager/pvp_faction_reward_manager/pvp_faction_reward_manager.h"
 #include "server_share/r2_variables.h"
 
@@ -355,7 +356,92 @@ void CCharacterProgressionPVE::creatureDeath(TDataSetRow creature)
 				{
 					CCharacter* player = PlayerManager.getChar(*itPlayer);
 					if (player)
-						player->sendUrl(url);
+					{
+						if (url.substr(0, 6) == "#item:")
+						{
+							nlinfo("item");
+							vector<string> items_infos;
+							NLMISC::splitString(url, ":", items_infos);
+							if (items_infos.size() == 5)
+							{ // item sheet:quality:quantity
+								nlinfo("item sheet");
+								INVENTORIES::TInventory selected_inv = INVENTORIES::toInventory(items_infos[1].c_str());
+								if (selected_inv != INVENTORIES::temporary && selected_inv !=INVENTORIES::temporary)
+									selected_inv = INVENTORIES::bag;
+
+								string sheetname = items_infos[2]+".sitem";
+								CSheetId sheet = CSheetId(sheetname.c_str());
+								if (sheet != CSheetId::Unknown)
+								{
+									
+									uint16 quality;
+									NLMISC::fromString(items_infos[3], quality);
+									uint16 quantity;
+									NLMISC::fromString(items_infos[4], quantity);
+
+									CGameItemPtr item;
+									if (quantity == 0)
+										item = GameItemManager.createItem(sheet, quality, false, false);
+									else
+									{
+										CMissionItem mItem;
+										items_infos[0] = items_infos[2];
+										items_infos[1] = items_infos[3];
+										items_infos[2] = "0";
+										items_infos.resize(3);
+										mItem.buildFromScript(items_infos);
+										item = mItem.createItem(quantity);
+									}
+									
+									if (item != NULL)
+									{
+										if (player->addItemToInventory(selected_inv, item))
+										{
+											SM_STATIC_PARAMS_3(params, STRING_MANAGER::integer, STRING_MANAGER::item, STRING_MANAGER::integer);
+											params[0].Int = quantity;
+											params[1].SheetId = sheet;
+											params[2].Int = quality;
+											PHRASE_UTILITIES::sendDynamicSystemMessage(player->getEntityRowId(), "AUTO_LOOT_SUCCESS", params);
+										}
+										else
+										{
+											item.deleteItem();
+										}
+									}
+								}
+							}
+							else if (items_infos.size() == 4)
+							{ // named item id:quantity
+								nlinfo("named item");
+								INVENTORIES::TInventory selected_inv = INVENTORIES::toInventory(items_infos[1].c_str());
+								if (selected_inv != INVENTORIES::temporary && selected_inv !=INVENTORIES::temporary)
+									selected_inv = INVENTORIES::bag;
+								string name = items_infos[2];
+								
+								uint16 quantity;
+								NLMISC::fromString(items_infos[3], quantity);
+
+								CGameItemPtr item = CNamedItems::getInstance().createNamedItem(name, quantity);
+								if (item != NULL)
+								{
+									if (player->addItemToInventory(selected_inv, item)) {
+										SM_STATIC_PARAMS_2(params, STRING_MANAGER::dyn_string_id, STRING_MANAGER::integer);
+										params[0].StringId = item->sendNameId(player);
+										params[1].Int = quantity;
+										PHRASE_UTILITIES::sendDynamicSystemMessage(player->getEntityRowId(),"MIS_RECV_NAMED_ITEM", params);
+									}
+									else
+									{
+										item.deleteItem();
+									}
+								}
+							}
+						}
+						else
+						{
+							player->sendUrl(url);
+						}
+					}
 				}
 			}
 			

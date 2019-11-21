@@ -1049,6 +1049,15 @@ inline uint32 CCharacter::getLastExchangeMount() const
 	return _LastExchangeMount; 
 }
 
+inline bool CCharacter::getRespawnMainLandInTown() const
+{
+	return _RespawnMainLandInTown;
+}
+
+inline void CCharacter::setRespawnMainLandInTown(bool status) 
+{
+	_RespawnMainLandInTown = status;
+}
 //------------------------------------------------------------------------------
 
 inline const std::list<TCharacterLogTime>& CCharacter::getLastLogStats() const

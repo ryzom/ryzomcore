@@ -36,6 +36,7 @@
 #include "team_manager/team.h"
 #include "team_manager/team_manager.h"
 #include "weather_everywhere.h"
+#include "death_penalties.h"
 #include "mission_manager/mission_team.h"
 #include "mission_manager/mission_step_ai.h"
 #include "mission_manager/mission_guild.h"
@@ -3103,6 +3104,30 @@ NLMISC_COMMAND(getPlayerPets, "get player pets", "<uid>")
 	return true;
 }
 
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(spawnPlayerPet, "spawn player pet", "<uid> <slot>")
+{
+	if (args.size() < 2)
+		return false;
+	
+	GET_ACTIVE_CHARACTER
+
+	uint32 index;
+	fromString(args[0], index);
+	
+	c->setRespawnMainLandInTown(true);
+	c->spawnCharacterAnimal(index);
+	c->setRespawnMainLandInTown(false);
+	
+	log.displayNL("OK");
+	return true;
+}
+
+
+
+
+
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(setPlayerPetName, "change the name of a player pet", "<uid> <index> <name>")
 {
@@ -3113,7 +3138,10 @@ NLMISC_COMMAND(setPlayerPetName, "change the name of a player pet", "<uid> <inde
 	uint8 index;
 	fromString(args[1], index);
 	ucstring customName;
-	customName.fromUtf8(args[2]);
+	if (args[2] != "-")
+		customName.fromUtf8(args[2]);
+	else
+		customName = "";
 	c->setAnimalName(index, customName);
 	log.displayNL("OK");
 	return true;
@@ -3531,6 +3559,30 @@ NLMISC_COMMAND(addXp, "Gain experience in a given skills", "<uid> <xp> <skill> [
 
 	return true;
 }
+
+NLMISC_COMMAND(removeDp, "Update the DP", "<uid> <dp>")
+{
+	if (args.size() < 2) return false;
+
+	GET_ACTIVE_CHARACTER
+
+
+	double dpToGain = c->getDeathPenalties().getDeathXPToGain();
+	log.displayNL("%d", dpToGain);
+
+	uint32 remove;
+	NLMISC::fromString(args[1], remove);
+
+	if (remove <= 100 && remove >0)
+	{
+		dpToGain = remove * (dpToGain / 100);
+		c->getDeathPenalties().addDeathXP(c, dpToGain);
+	}
+	log.displayNL("%d", dpToGain);
+	
+	return true;
+}
+
 
 NLMISC_COMMAND(addBricks, "Specified player learns given brick", "<uid> <brick1,brick2>")
 {

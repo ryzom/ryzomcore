@@ -2997,6 +2997,7 @@ void setEventCode_sss_(CStateInstance* entity, CScriptStack& stack)
 		strFindReplace(code, "http://", "");
 		strFindReplace(code, "https://", "");
 		strFindReplace(code, "/index.php?", " ");
+		strFindReplace(code, "&nbsp&", " ");
 		
 		CGroup* group = entity->getGroup();
 		FOREACH(botIt, CCont<CBot>,	group->bots())
