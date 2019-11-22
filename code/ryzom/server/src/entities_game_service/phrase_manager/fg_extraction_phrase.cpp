@@ -544,6 +544,7 @@ bool CFgExtractionPhrase::validate()
 		return false; // has disappeared
 	}
 
+#ifdef RYZOM_FORGE_CRAFT_TOOL
 	// test if tool have enough quality
 	sint depositQ = (sint)harvestSource->forageSite()->deposit()->maxQuality();
 
@@ -552,6 +553,7 @@ bool CFgExtractionPhrase::validate()
 		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "FORAGE_TOOL_QUALITY_TOO_LOW");
 		return false;
 	}
+#endif
 
 	// Check the distance from the player to the source (ignoring Z because for tunnel case, player couldn't target the source)
 	const CEntityState& state = player->getState();
