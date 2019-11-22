@@ -580,8 +580,8 @@ public:
 		{
 			LGS::TLogDefinition  &logDef = _LogDefs[37];
 
-			logDef.setLogName("Item_EnchantItem");
-			logDef.setLogText("A player character enchants an item with a crystallized spell phrase");
+			logDef.setLogName("Item_EnchantOrRecharge");
+			logDef.setLogText("A player character enchants an item with a crystallized spell phrase or recharges the sap load");
 
 			logDef.setContext(true);
 		}
@@ -589,8 +589,8 @@ public:
 		{
 			LGS::TLogDefinition  &logDef = _LogDefs[38];
 
-			logDef.setLogName("Item_RechargeSapLoad");
-			logDef.setLogText("A player character recharges the sap load of an item");
+			logDef.setLogName("Item_SapRechargeSpell");
+			logDef.setLogText("A player character creates a sap load recharge");
 
 			logDef.setContext(true);
 		}
@@ -1301,9 +1301,9 @@ TLogContext_Item_EnchantPhrase::~TLogContext_Item_EnchantPhrase()
 
 }
 
-const std::string TLogContext_Item_EnchantItem::_ContextName("Item_EnchantItem");
+const std::string TLogContext_Item_EnchantOrRecharge::_ContextName("Item_EnchantOrRecharge");
 /// The constructor push a log context in the logger system
-TLogContext_Item_EnchantItem::TLogContext_Item_EnchantItem(const NLMISC::CEntityId &charId)
+TLogContext_Item_EnchantOrRecharge::TLogContext_Item_EnchantOrRecharge(const NLMISC::CEntityId &charId)
 {
 	if (LGS::ILoggerServiceClient::isInitialized())
 		LGS::ILoggerServiceClient::getInstance()->pushLogContext(_ContextName);
@@ -1314,7 +1314,7 @@ TLogContext_Item_EnchantItem::TLogContext_Item_EnchantItem(const NLMISC::CEntity
 }
 
 /// The destructor pop a context in the logger system
-TLogContext_Item_EnchantItem::~TLogContext_Item_EnchantItem()
+TLogContext_Item_EnchantOrRecharge::~TLogContext_Item_EnchantOrRecharge()
 {
 	if (LGS::ILoggerServiceClient::isInitialized())
 		LGS::ILoggerServiceClient::getInstance()->popLogContext(_ContextName);
@@ -1324,9 +1324,9 @@ TLogContext_Item_EnchantItem::~TLogContext_Item_EnchantItem()
 
 }
 
-const std::string TLogContext_Item_RechargeSapLoad::_ContextName("Item_RechargeSapLoad");
+const std::string TLogContext_Item_SapRechargeSpell::_ContextName("Item_SapRechargeSpell");
 /// The constructor push a log context in the logger system
-TLogContext_Item_RechargeSapLoad::TLogContext_Item_RechargeSapLoad(const NLMISC::CEntityId &charId)
+TLogContext_Item_SapRechargeSpell::TLogContext_Item_SapRechargeSpell(const NLMISC::CEntityId &charId)
 {
 	if (LGS::ILoggerServiceClient::isInitialized())
 		LGS::ILoggerServiceClient::getInstance()->pushLogContext(_ContextName);
@@ -1337,7 +1337,7 @@ TLogContext_Item_RechargeSapLoad::TLogContext_Item_RechargeSapLoad(const NLMISC:
 }
 
 /// The destructor pop a context in the logger system
-TLogContext_Item_RechargeSapLoad::~TLogContext_Item_RechargeSapLoad()
+TLogContext_Item_SapRechargeSpell::~TLogContext_Item_SapRechargeSpell()
 {
 	if (LGS::ILoggerServiceClient::isInitialized())
 		LGS::ILoggerServiceClient::getInstance()->popLogContext(_ContextName);

@@ -2605,6 +2605,7 @@ void CCharacter::enchantOrRechargeItem(INVENTORIES::TInventory invId, uint32 slo
 	if (item == NULL)
 		return;
 
+	TLogContext_Item_EnchantOrRecharge logContext(_Id);
 	if (item->getSheetId() == crystalSheetId)
 	{
 		enchantItem(invId, slot);
@@ -2724,8 +2725,6 @@ void CCharacter::enchantItem(INVENTORIES::TInventory invId, uint32 slot)
 {
 	if (checkSlotsForEnchantOrRecharge(invId, slot, true))
 	{
-		TLogContext_Item_EnchantItem logContext(_Id);
-
 		CInventoryPtr inv = getInventory(invId);
 		CInventoryPtr handlingInv = getInventory(INVENTORIES::handling);
 		nlassert(inv != NULL);

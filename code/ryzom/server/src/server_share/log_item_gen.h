@@ -430,13 +430,13 @@ private:
 
 };
 
-struct TLogContext_Item_EnchantItem
+struct TLogContext_Item_EnchantOrRecharge
 {
 	/// The constructor push a log context in the logger system
-	TLogContext_Item_EnchantItem(const NLMISC::CEntityId &charId);
+	TLogContext_Item_EnchantOrRecharge(const NLMISC::CEntityId &charId);
 
 	/// The desstructor pop a context in the logger system
-	~TLogContext_Item_EnchantItem();
+	~TLogContext_Item_EnchantOrRecharge();
 
 private:
 	/// The name of the context
@@ -445,13 +445,13 @@ private:
 
 };
 
-struct TLogContext_Item_RechargeSapLoad
+struct TLogContext_Item_SapRechargeSpell
 {
 	/// The constructor push a log context in the logger system
-	TLogContext_Item_RechargeSapLoad(const NLMISC::CEntityId &charId);
+	TLogContext_Item_SapRechargeSpell(const NLMISC::CEntityId &charId);
 
 	/// The desstructor pop a context in the logger system
-	~TLogContext_Item_RechargeSapLoad();
+	~TLogContext_Item_SapRechargeSpell();
 
 private:
 	/// The name of the context
