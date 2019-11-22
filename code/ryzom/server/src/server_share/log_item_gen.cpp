@@ -52,7 +52,7 @@ public:
 	CItemDesc()
 		:	_NoContextCount(0)
 	{
-		_LogDefs.resize(37);
+		_LogDefs.resize(38);
 		
 		{
 			LGS::TLogDefinition  &logDef = _LogDefs[0];
@@ -573,6 +573,15 @@ public:
 
 			logDef.setLogName("Item_SaleStoreSold");
 			logDef.setLogText("An item was sold through the store and money is received");
+
+			logDef.setContext(true);
+		}
+
+		{
+			LGS::TLogDefinition  &logDef = _LogDefs[37];
+
+			logDef.setLogName("Item_EnchantItem");
+			logDef.setLogText("A player character enchants an item with a crystallized spell phrase");
 
 			logDef.setContext(true);
 		}
@@ -1274,6 +1283,29 @@ TLogContext_Item_EnchantPhrase::TLogContext_Item_EnchantPhrase(const NLMISC::CEn
 
 /// The destructor pop a context in the logger system
 TLogContext_Item_EnchantPhrase::~TLogContext_Item_EnchantPhrase()
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->popLogContext(_ContextName);
+
+	// pop the context param in the context class object
+	ItemDesc.popContextVar_charId();
+
+}
+
+const std::string TLogContext_Item_EnchantItem::_ContextName("Item_EnchantItem");
+/// The constructor push a log context in the logger system
+TLogContext_Item_EnchantItem::TLogContext_Item_EnchantItem(const NLMISC::CEntityId &charId)
+{
+	if (LGS::ILoggerServiceClient::isInitialized())
+		LGS::ILoggerServiceClient::getInstance()->pushLogContext(_ContextName);
+
+	// stack the context param in the context class object
+	ItemDesc.pushContextVar_charId(charId);
+
+}
+
+/// The destructor pop a context in the logger system
+TLogContext_Item_EnchantItem::~TLogContext_Item_EnchantItem()
 {
 	if (LGS::ILoggerServiceClient::isInitialized())
 		LGS::ILoggerServiceClient::getInstance()->popLogContext(_ContextName);

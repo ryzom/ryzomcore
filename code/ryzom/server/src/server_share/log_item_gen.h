@@ -430,6 +430,21 @@ private:
 
 };
 
+struct TLogContext_Item_EnchantItem
+{
+	/// The constructor push a log context in the logger system
+	TLogContext_Item_EnchantItem(const NLMISC::CEntityId &charId);
+
+	/// The desstructor pop a context in the logger system
+	~TLogContext_Item_EnchantItem();
+
+private:
+	/// The name of the context
+	static const std::string _ContextName;
+
+
+};
+
 
 /// No context context. Use this to disable any contextual log underneath
 struct TLogNoContext_Item
