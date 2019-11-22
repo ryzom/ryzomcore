@@ -47,7 +47,7 @@
     <view type="text" id="txt_pas" posparent="txt_log" posref="TM TM" hardtext="uiPassword" fontsize="10" y="-48" color="255 255 255 255" />
     -->
     
-    <view type="text" id="tit_login" posparent="log" posref="TL BL" hardtext="uiLogin" fontsize="24" x="62" y="-166" color="208 212 182 255" />
+    <view type="text" id="tit_login" posparent="log" posref="TL BL" hardtext="uiLogin" fontsize="24" x="62" y="-163" color="208 212 182 255" />
 
     <instance template="edit_box_widget_2" id="eb_login" posparent="log" posref="TM BM" w="292" h="48" fontsize="26" x="-4" y="-226"
     text_ref="BM BM" text_y="0"
@@ -55,7 +55,7 @@
     onenter="set_keyboard_focus" params="target=ui:login:checkpass:content:submit_gr:eb_password:eb|select_all=false"
     prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="12" color="135 243 28 255" />
 
-    <view type="text" id="tit_password" posref="TL BL" posparent="log" hardtext="uiPassword" fontsize="24" x="62" y="-288" color="208 212 182 255" />
+    <view type="text" id="tit_password" posref="TL BL" posparent="log" hardtext="uiPassword" fontsize="24" x="62" y="-290" color="208 212 182 255" />
 
     <instance template="edit_box_widget_2" id="eb_password" posparent="log" posref="TM BM" w="292" h="48"  fontsize="26" x="0" y="-354" 
     text_ref="BM BM" text_y="0"
