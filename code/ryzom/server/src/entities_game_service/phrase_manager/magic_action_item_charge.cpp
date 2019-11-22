@@ -97,6 +97,8 @@ protected:
 		if ( !user )
 			return;
 
+		TLogContext_Item_RechargeSapLoad logContext(user->getId());
+
 		uint moneyCost = uint( phrase->getSabrinaCost() * RechargeMoneyFactor );
 		if ( ! moneyCost )
 			moneyCost = 1;
