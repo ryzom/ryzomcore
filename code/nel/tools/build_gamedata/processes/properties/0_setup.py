@@ -84,7 +84,7 @@ for line in ps:
 	try:
 		ContinentSheet
 	except NameError:
-		ContinentSheet = "_invalid"
+		ContinentSheet = ContinentName
 	try:
 		BankTileBankName
 	except NameError:
