@@ -880,6 +880,7 @@ void	NLPACS::CZoneTessellation::checkSameLandscapeHmBinds(const NL3D::CLandscape
 					// or at least the welding of zones should just keep the same welding as the non heightmapped one
 					nlwarning("ERROR: The zone %s has a different bind strucutre in the landscape and in the landscape_with_No_Heightmap", zoneName.c_str());
 					nlwarning("ERROR: Hint: Check your heightmap: it may be too precise or has too much noise, causing the zonewelder to behav differently...");
+					nlwarning("ERROR: Use the 'zone_heightmap' tool to resolve this!");
 					nlwarning("More Details (information landscape / information landscape_with_No_Heightmap):");
 					for(uint j=0;j<errors.size();j++)
 					{
