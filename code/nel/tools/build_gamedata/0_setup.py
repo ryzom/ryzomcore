@@ -434,6 +434,7 @@ if not args.noverify:
 	findTool(log, ToolDirectories, BuildFarbankTool, ToolSuffix)
 	findTool(log, ToolDirectories, ZoneDependenciesTool, ToolSuffix)
 	findTool(log, ToolDirectories, ZoneWelderTool, ToolSuffix)
+	findTool(log, ToolDirectories, ZoneElevationTool, ToolSuffix)
 	findTool(log, ToolDirectories, BuildRbankTool, ToolSuffix)
 	findTool(log, ToolDirectories, BuildIndoorRbankTool, ToolSuffix)
 	findTool(log, ToolDirectories, BuildIgBoxesTool, ToolSuffix)
