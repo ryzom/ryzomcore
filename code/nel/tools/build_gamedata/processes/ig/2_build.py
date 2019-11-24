@@ -54,6 +54,8 @@ mkPath(log, configDir)
 
 def igElevation(inputIgDir, outputIgDir):
 	printLog(log, ">>> IG Elevation <<<")
+	mkPath(log, inputIgDir)
+	mkPath(log, outputIgDir)
 	needUpdateIg = needUpdateDirByTagLog(log, inputIgDir, ".ig", outputIgDir, ".ig")
 	if needUpdateIg:
 		printLog(log, "DETECT UPDATE IG->Elevated")
@@ -100,7 +102,7 @@ def igElevation(inputIgDir, outputIgDir):
 		os.remove(configFile)
 		
 		# Copy remaining IG files
-		copyFilesLogless(log, inputIgDir, outputIgDir)
+		#BUG:copyFilesLogless(log, inputIgDir, outputIgDir)
 	else:
 		printLog(log, "DETECT DECIDE SKIP")
 		printLog(log, "SKIP *")
