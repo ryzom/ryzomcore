@@ -191,7 +191,7 @@ struct CClientPatcherTranslations : public NLMISC::CI18N::ILoadProxy
 };
 
 // hardcoded URL to not depend on external files
-static const std::string PatchUrl = "https://cdn.ryzom.dev/open/patch";
+static const std::string PatchUrl = RYZOM_CLIENT_PATCH_URL; // "https://cdn.ryzom.dev/open/patch";
 
 int main(int argc, char *argv[])
 {

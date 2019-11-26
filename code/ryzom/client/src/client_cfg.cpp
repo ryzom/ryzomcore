@@ -42,6 +42,10 @@
 // Game Share.
 #include "game_share/time_weather_season/time_and_season.h"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #ifdef NL_OS_MAC
 #include "app_bundle_utils.h"
 #endif // NL_OS_MAC
@@ -330,9 +334,9 @@ CClientConfig::CClientConfig()
 	TexturesLoginInterface.push_back("texture_interfaces_v3_login");
 
 	DisplayAccountButtons = true;
-	CreateAccountURL	= "https://open.ryzom.dev/ams/";
-	EditAccountURL		= "https://open.ryzom.dev/ams/";
-	ForgetPwdURL		= "https://open.ryzom.dev/ams/";
+	CreateAccountURL	= RYZOM_CLIENT_CREATE_ACCOUNT_URL;	// "https://open.ryzom.dev/ams/";
+	EditAccountURL		= RYZOM_CLIENT_EDIT_ACCOUNT_URL;	// "https://open.ryzom.dev/ams/";
+	ForgetPwdURL		= RYZOM_CLIENT_FORGET_PASSWORD_URL;	// "https://open.ryzom.dev/ams/";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
 	EyesHeight			= 1.5f;						// Default User Eyes Height.
@@ -428,8 +432,8 @@ CClientConfig::CClientConfig()
 	PatchletUrl.clear();
 	PatchVersion.clear();
 
-	WebIgMainDomain = "https://open.ryzom.dev";
-	WebIgTrustedDomains.push_back("open.ryzom.dev");
+	WebIgMainDomain = RYZOM_WEBIG_MAIN_URL;						// https://open.ryzom.dev/"
+	WebIgTrustedDomains.push_back(RYZOM_WEBIG_TRUSTED_DOMAIN);	// open.ryzom.dev
 	WebIgNotifInterval = 10; // time in minutes
 
 	CurlMaxConnections = 5;
