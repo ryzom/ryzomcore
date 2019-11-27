@@ -22,7 +22,7 @@
 // forward declaration to avoid curl.h inclusion everywhere
 typedef void CURL;
 
-namespace NLMISC
+namespace NLWEB
 {
 	class CCurlCertificates
 	{

@@ -20,7 +20,7 @@
 #include "nel/misc/types_nl.h"
 #include <string>
 
-namespace NLMISC
+namespace NLWEB
 {
 
 /**

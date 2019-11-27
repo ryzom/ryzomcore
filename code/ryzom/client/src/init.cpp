@@ -35,7 +35,7 @@
 #include "nel/misc/block_memory.h"
 #include "nel/misc/system_utils.h"
 #include "nel/misc/streamed_package_manager.h"
-#include "nel/misc/http_package_provider.h"
+#include "nel/web/http_package_provider.h"
 #include "nel/misc/cmd_args.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
@@ -743,7 +743,7 @@ void initStreamedPackageManager(NLMISC::IProgressCallback &progress)
 	CStreamedPackageManager &spm = CStreamedPackageManager::getInstance();
 	nlassert(!spm.Provider); // If this asserts, init was called twice without release
 	nlassert(!HttpPackageProvider); // Idem
-	CHttpPackageProvider *hpp = new CHttpPackageProvider();
+	NLWEB::CHttpPackageProvider *hpp = new NLWEB::CHttpPackageProvider();
 	hpp->Path = ClientCfg.StreamedPackagePath;
 	for (uint i = 0; i < ClientCfg.StreamedPackageHosts.size(); i++)
 		hpp->Hosts.push_back(ClientCfg.StreamedPackageHosts[i]);

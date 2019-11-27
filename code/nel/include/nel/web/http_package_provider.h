@@ -14,15 +14,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef NLMISC_HTTP_PACKAGE_PROVIDER_H
-#define NLMISC_HTTP_PACKAGE_PROVIDER_H
+#ifndef NLWEB_HTTP_PACKAGE_PROVIDER_H
+#define NLWEB_HTTP_PACKAGE_PROVIDER_H
 
 #include <nel/misc/types_nl.h>
 #include <nel/misc/i_streamed_package_provider.h>
 
-namespace NLMISC {
+namespace NLWEB {
 
-class CHttpPackageProvider : public IStreamedPackageProvider
+class CHttpPackageProvider : public NLMISC::IStreamedPackageProvider
 {
 public:
 	CHttpPackageProvider();
@@ -31,7 +31,7 @@ public:
 	/// Download a file. This call is blocking
 	/// filePath: [out] ex. /games/nel/stream/00/00/000000000..
 	/// hash: [in]
-	virtual bool getFile(std::string &filePath, const CHashKey &hash, const std::string &name) NL_OVERRIDE;
+	virtual bool getFile(std::string &filePath, const NLMISC::CHashKey &hash, const std::string &name) NL_OVERRIDE;
 	
 public:
 	/// Set storage path (ex. stream/)
@@ -45,6 +45,6 @@ public:
 
 } /* namespace NLMISC */
 
-#endif /* #ifndef NLMISC_STREAMED_PACKAGE_MANAGER_H */
+#endif /* #ifndef NLWEB_HTTP_PACKAGE_PROVIDER_H */
 
 /* end of file */

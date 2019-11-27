@@ -25,7 +25,7 @@ using namespace NLMISC;
 
 // ***************************************************************************
 // Data
-NLMISC::CHttpPackageProvider *HttpPackageProvider = NULL;
+NLWEB::CHttpPackageProvider *HttpPackageProvider = NULL;
 
 // Main System
 NL3D::UDriver				*Driver = NULL;		// The main 3D Driver

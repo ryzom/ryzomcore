@@ -19,7 +19,7 @@
 #define CL_LOGIN_H
 
 #include <nel/misc/types_nl.h>
-#include <nel/misc/http_client_curl.h>
+#include <nel/web/http_client_curl.h>
 #include <string>
 #include <vector>
 
@@ -74,7 +74,7 @@ extern sint32		ShardSelected;
 /*
  * HTTP client preconfigured to connect to the startup login host
  */
-class CStartupHttpClient : public NLMISC::CCurlHttpClient
+class CStartupHttpClient : public NLWEB::CCurlHttpClient
 {
 public:
 

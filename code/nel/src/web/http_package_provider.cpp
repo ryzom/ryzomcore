@@ -14,20 +14,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdmisc.h"
-
-// 3rd Party includes
-#include <curl/curl.h>
+#include "stdweb.h"
+#include <nel/web/http_package_provider.h>
 
 // Project includes
-#include <nel/misc/http_package_provider.h>
 #include <nel/misc/streamed_package.h>
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
 #include <nel/misc/seven_zip.h>
 #include <nel/misc/sha1.h>
 
-namespace NLMISC
+using namespace std;
+using namespace NLMISC;
+using namespace NLWEB;
+
+namespace NLWEB
 {
 
 CHttpPackageProvider::CHttpPackageProvider()

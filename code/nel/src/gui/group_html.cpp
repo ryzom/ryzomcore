@@ -47,7 +47,7 @@
 #include "nel/gui/url_parser.h"
 #include "nel/gui/http_cache.h"
 #include "nel/gui/http_hsts.h"
-#include "nel/misc/curl_certificates.h"
+#include "nel/web/curl_certificates.h"
 #include "nel/gui/html_parser.h"
 #include "nel/gui/html_element.h"
 #include "nel/gui/css_style.h"
@@ -550,7 +550,7 @@ namespace NLGUI
 		if (toLower(download.url.substr(0, 8)) == "https://")
 		{
 			// if supported, use custom SSL context function to load certificates
-			CCurlCertificates::useCertificates(curl);
+			NLWEB::CCurlCertificates::useCertificates(curl);
 		}
 
 		download.data = new CCurlWWWData(curl, download.url);
@@ -3823,7 +3823,7 @@ namespace NLGUI
 		if (toLower(url.substr(0, 8)) == "https://")
 		{
 			// if supported, use custom SSL context function to load certificates
-			CCurlCertificates::useCertificates(curl);
+			NLWEB::CCurlCertificates::useCertificates(curl);
 		}
 
 		// do not follow redirects, we have own handler
