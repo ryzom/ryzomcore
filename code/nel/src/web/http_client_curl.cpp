@@ -14,16 +14,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdmisc.h"
-#include <nel/misc/http_client_curl.h>
+#include "stdweb.h"
+#include <nel/web/http_client_curl.h>
+
 #include <nel/misc/debug.h>
+#include <nel/web/curl_certificates.h>
 
-#include <curl/curl.h>
-
-#include <nel/misc/curl_certificates.h>
-
-using namespace NLMISC;
 using namespace std;
+using namespace NLMISC;
+using namespace NLWEB;
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -31,7 +30,7 @@ using namespace std;
 
 #define _Curl (CURL *)_CurlStruct
 
-namespace NLMISC
+namespace NLWEB
 {
 
 // Ugly CURL callback

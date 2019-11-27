@@ -49,7 +49,7 @@
 #include "nel/misc/i18n.h"
 #include "nel/misc/cmd_args.h"
 #include "nel/misc/seven_zip.h"
-#include "nel/misc/curl_certificates.h"
+#include "nel/web/curl_certificates.h"
 
 #include "game_share/bg_downloader_msg.h"
 
@@ -1431,8 +1431,8 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 		curl_easy_setopt(curl, CURLOPT_URL, source.c_str());
 		if (source.length() > 8 && (source[4] == 's' || source[4] == 'S')) // 01234 https
 		{
-			NLMISC::CCurlCertificates::addCertificateFile("cacert.pem");
-			NLMISC::CCurlCertificates::useCertificates(curl);
+			NLWEB::CCurlCertificates::addCertificateFile("cacert.pem");
+			NLWEB::CCurlCertificates::useCertificates(curl);
 			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
 			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
 		}

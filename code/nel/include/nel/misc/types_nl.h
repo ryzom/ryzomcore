@@ -479,6 +479,7 @@ extern void operator delete[](void *p) throw();
 #	define CHashMultiMap NL_ISO_STDTR1_NAMESPACE::unordered_multimap
 #	define CUniquePtr ::std::auto_ptr
 #	define CUniquePtrMove
+#	define NL_OVERRIDE
 #elif defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 70 && NL_COMP_VC_VERSION <= 90) // VC7 through 9
 #	include <hash_map>
 #	include <hash_set>
@@ -487,6 +488,7 @@ extern void operator delete[](void *p) throw();
 #	define CHashMultiMap stdext::hash_multimap
 #	define CUniquePtr ::std::auto_ptr
 #	define CUniquePtrMove
+#	define NL_OVERRIDE
 #elif defined(NL_COMP_GCC) // GCC4
 #	include <ext/hash_map>
 #	include <ext/hash_set>
@@ -525,6 +527,10 @@ template<> struct hash<uint64>
  * An Unicode character (16 bits)
  */
 typedef	uint16	ucchar;
+
+#ifndef NL_OVERRIDE
+#define NL_OVERRIDE override
+#endif
 
 #if defined(NL_OS_WINDOWS) && (defined(UNICODE) || defined(_UNICODE))
 #define nltmain wmain

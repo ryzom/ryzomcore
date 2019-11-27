@@ -1,5 +1,5 @@
-// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// NeL - MMORPG Framework <https://wiki.ryzom.dev/>
+// Copyright (C) 2019  Jan BOON (jan.boon@kaetemi.be)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,27 +14,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CL_CURL_CERTIFICATES_HTML_H
-#define CL_CURL_CERTIFICATES_HTML_H
+#include "stdmisc.h"
 
-#include "nel/misc/types_nl.h"
-
-// forward declaration to avoid curl.h inclusion everywhere
-typedef void CURL;
+// Project includes
+#include <nel/misc/i_streamed_package_provider.h>
 
 namespace NLMISC
 {
-	class CCurlCertificates
-	{
-	public:
-		// allow to use custom PEM certificates
-		static void addCertificateFile(const std::string &cert);
 
-		// set all CURL options to use custom SSL context function
-		static void useCertificates(CURL *curl);
-	};
+IStreamedPackageProvider::IStreamedPackageProvider()
+{
+	// init
+}
 
-} // namespace
-#endif
+IStreamedPackageProvider::~IStreamedPackageProvider()
+{
+	// release
+}
+
+} /* namespace NLMISC */
 
 /* end of file */

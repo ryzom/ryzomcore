@@ -51,7 +51,7 @@
 #include "global.h"
 #include "input.h"
 #include "nel/gui/libwww.h"
-#include "nel/misc/http_client_curl.h"
+#include "nel/web/http_client_curl.h"
 #include "login_progress_post_thread.h"
 
 #include "init.h"
@@ -69,6 +69,7 @@ void ConnectToShard();
 // ***************************************************************************
 
 using namespace NLMISC;
+using namespace NLWEB;
 using namespace NLNET;
 using namespace NL3D;
 using namespace std;

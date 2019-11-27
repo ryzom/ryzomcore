@@ -668,6 +668,8 @@ void release()
 	NLMISC::CBigFile::getInstance().removeAll();
 	NLMISC::CBigFile::releaseInstance();
 	NLMISC::CStreamedPackageManager::releaseInstance();
+	delete HttpPackageProvider;
+	HttpPackageProvider = NULL;
 	NL3D::CFastHLSModifier::releaseInstance();
 	CLandscapePolyDrawer::releaseInstance();
 	NL3D::CParticleSystemShape::releaseInstance();

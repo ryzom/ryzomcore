@@ -1,5 +1,5 @@
-// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2014  Jan BOON (jan.boon@kaetemi.be)
+// NeL - MMORPG Framework <https://wiki.ryzom.dev/>
+// Copyright (C) 2019  Jan BOON (jan.boon@kaetemi.be)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,46 +14,31 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef NLMISC_STREAMED_PACKAGE_H
-#define NLMISC_STREAMED_PACKAGE_H
+#ifndef NLMISC_STREAMED_PACKAGE_PROVIDER_H
+#define NLMISC_STREAMED_PACKAGE_PROVIDER_H
 
 #include <nel/misc/types_nl.h>
 #include <nel/misc/sha1.h>
+#include <string>
 
 namespace NLMISC {
 
-class CStreamedPackage
+class IStreamedPackageProvider
 {
 public:
-	struct CEntry
-	{
-		std::string Name;
-		CHashKey Hash;
-		uint32 Size;
-		uint32 LastModified;
+	IStreamedPackageProvider();
+	virtual ~IStreamedPackageProvider();
 
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
-
-	};
-
-public:
-	CStreamedPackage();
-	~CStreamedPackage();
-
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
-
-	/// result: [out] ex. /00/00/000000000..
+	/// Download a file. This call is blocking
+	/// filePath: [out] ex. /games/nel/stream/00/00/000000000..
 	/// hash: [in]
-	static void makePath(std::string &result, const CHashKey &hash);
-
-public:
-	typedef std::vector<CEntry> TEntries;
-	TEntries Entries;
+	/// name: [in] name for debugging purposes
+	virtual bool getFile(std::string &filePath, const CHashKey &hash, const std::string &name = "") = 0;
 	
-}; /* class CStreamedPackage */
+}; /* class IStreamedPackageProvider */
 
 } /* namespace NLMISC */
 
-#endif /* #ifndef NLMISC_STREAMED_PACKAGE_H */
+#endif /* #ifndef NLMISC_STREAMED_PACKAGE_PROVIDER_H */
 
 /* end of file */

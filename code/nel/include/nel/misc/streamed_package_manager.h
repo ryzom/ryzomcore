@@ -20,6 +20,7 @@
 #include <nel/misc/types_nl.h>
 #include <nel/misc/app_context.h>
 #include <nel/misc/streamed_package.h>
+#include <nel/misc/i_streamed_package_provider.h>
 
 namespace NLMISC {
 
@@ -40,21 +41,19 @@ public:
 	/// Unload all packages
 	void unloadAll();
 
-	/// Get an existing file or download if necessary
+	/// Get an existing file or download if necessary. This call is blocking
 	/// filePath: [out] ex. /games/nel/stream/00/00/000000000..
-	/// fileName: ex. fy_hof_underwear.dds
+	/// fileName: [in] ex. fy_hof_underwear.dds
 	bool getFile(std::string &filePath, const std::string &fileName);
 
 	/// Get file size
+	/// fileSize: [out]
+	/// fileName: [in] ex. fy_hof_underwear.dds
 	bool getFileSize(uint32 &fileSize, const std::string &fileName);
 
 public:
-	/// Set storage path (ex. stream/)
-	std::string Path;
-
-	/// Loads a package into the package manager (ex. http://patch.live.polyverse.org/stream/)
-	typedef std::vector<std::string> THosts;
-	THosts Hosts;
+	/// Streamed package provider. This downloads the files
+	IStreamedPackageProvider *Provider;
 
 private:
 	typedef std::map<std::string, CStreamedPackage> TPackages;
