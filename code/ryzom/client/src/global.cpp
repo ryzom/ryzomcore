@@ -24,6 +24,9 @@
 using namespace NLMISC;
 
 // ***************************************************************************
+// Data
+NLMISC::CHttpPackageProvider *HttpPackageProvider = NULL;
+
 // Main System
 NL3D::UDriver				*Driver = NULL;		// The main 3D Driver
 NL3D::IStereoDisplay		*StereoDisplay = NULL; // Stereo display

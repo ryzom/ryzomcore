@@ -35,6 +35,7 @@
 #include "nel/misc/block_memory.h"
 #include "nel/misc/system_utils.h"
 #include "nel/misc/streamed_package_manager.h"
+#include "nel/misc/http_package_provider.h"
 #include "nel/misc/cmd_args.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
@@ -740,9 +741,14 @@ static void addPaths(IProgressCallback &progress, const std::vector<std::string>
 void initStreamedPackageManager(NLMISC::IProgressCallback &progress)
 {
 	CStreamedPackageManager &spm = CStreamedPackageManager::getInstance();
-	spm.Path = ClientCfg.StreamedPackagePath;
+	nlassert(!spm.Provider); // If this asserts, init was called twice without release
+	nlassert(!HttpPackageProvider); // Idem
+	CHttpPackageProvider *hpp = new CHttpPackageProvider();
+	hpp->Path = ClientCfg.StreamedPackagePath;
 	for (uint i = 0; i < ClientCfg.StreamedPackageHosts.size(); i++)
-		spm.Hosts.push_back(ClientCfg.StreamedPackageHosts[i]);
+		hpp->Hosts.push_back(ClientCfg.StreamedPackageHosts[i]);
+	spm.Provider = hpp;
+	HttpPackageProvider = hpp;
 }
 
 void addSearchPaths(IProgressCallback &progress)

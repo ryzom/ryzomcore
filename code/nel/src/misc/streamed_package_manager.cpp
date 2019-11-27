@@ -16,14 +16,10 @@
 
 #include "stdmisc.h"
 
-// 3rd Party includes
-#include <curl/curl.h>
-
 // Project includes
 #include <nel/misc/streamed_package_manager.h>
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
-#include <nel/misc/seven_zip.h>
 #include <nel/misc/sha1.h>
 
 namespace NLMISC
@@ -96,105 +92,21 @@ bool CStreamedPackageManager::getFile(std::string &filePath, const std::string &
 {
 	// nldebug("Get file path for streamed file '%s'", fileName.c_str());
 
+	IStreamedPackageProvider *provider = Provider;
+	if (!provider)
+	{
+		nlerrornoex("No streamed package provider was set");
+		return false;
+	}
+
 	TEntries::iterator it = m_Entries.find(fileName);
 	if (it == m_Entries.end())
+	{
 		return false;
+	}
 	const CStreamedPackage::CEntry *entry = it->second;
 
-	CStreamedPackage::makePath(filePath, entry->Hash);
-	std::string downloadUrlFile = filePath + ".lzma";
-	filePath = Path + filePath;
-	std::string downloadPath = filePath + ".download." + toString(rand() * rand());
-
-	std::string storageDirectory = CFile::getPath(downloadPath);
-	CFile::createDirectoryTree(storageDirectory);
-	/*if (!CFile::isDirectory(storageDirectory) || !CFile::createDirectoryTree(storageDirectory))
-	{
-		nldebug("Unable to create directory '%s'", storageDirectory.c_str());
-		return false;
-	}*/
-
-	// download
-	for (;;)
-	{
-		if (CFile::fileExists(filePath))
-			return true;
-
-		std::string downloadUrl = Hosts[rand() % Hosts.size()] + downloadUrlFile;
-		nldebug("Download streamed package '%s' from '%s'", fileName.c_str(), downloadUrl.c_str());
-
-		FILE *fp = fopen(downloadPath.c_str(), "wb");
-		if (fp == NULL)
-		{
-			nldebug("Unable to create file '%s' for '%s'", downloadPath.c_str(), fileName.c_str());
-			return false;
-		}
-
-		CURL *curl;
-		CURLcode res;
-		curl = curl_easy_init();
-		if (curl)
-		{
-			curl_easy_setopt(curl, CURLOPT_URL, downloadUrl.c_str());
-			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-			curl_easy_setopt(curl, CURLOPT_FILE, fp);
-			res = curl_easy_perform(curl);
-			long r;
-			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &r);
-			curl_easy_cleanup(curl);
-
-			bool diskFull = ferror(fp) && errno == 28 /*ENOSPC*/;
-			fclose(fp);
-
-			if (diskFull)
-			{
-				CFile::deleteFile(downloadPath);
-				throw EDiskFullError(downloadPath);
-			}
-
-			if (res != CURLE_OK || r < 200 || r >= 300)
-			{
-				CFile::deleteFile(downloadPath);
-				nldebug("Download failed '%s', retry in 1s", downloadUrl.c_str());
-				nlSleep(1000);
-				continue;
-			}
-		}
-		else
-		{
-			nldebug("Curl initialize failed");
-			fclose(fp);
-			CFile::deleteFile(downloadPath);
-			return false;
-		}
-
-		// ok!
-		break;
-	}
-
-	// extract into file
-	std::string unpackPath = filePath + ".extract." + toString(rand() * rand());
-
-	CHashKey outHash;
-	if (!unpackLZMA(downloadPath, unpackPath, outHash))
-	{
-		return false;
-	}
-
-	if (!(outHash == entry->Hash))
-	{
-		std::string wantHashS = entry->Hash.toString();
-		std::string outHashS = outHash.toString();
-		nlwarning("Invalid SHA1 hash for file '%s', download has hash '%s'", wantHashS.c_str(), outHashS.c_str());
-		return false;
-	}
-
-	if (!CFile::moveFile(filePath.c_str(), unpackPath.c_str()))
-	{
-		nldebug("Failed moving '%s' to '%s'", unpackPath.c_str(), filePath.c_str());
-		// in case downloaded from another thread
-		return CFile::fileExists(filePath);
-	}
+	return provider->getFile(filePath, entry->Hash, fileName);
 
 	return true;
 }
