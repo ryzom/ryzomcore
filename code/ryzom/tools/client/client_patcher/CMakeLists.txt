@@ -23,7 +23,7 @@ TARGET_LINK_LIBRARIES(ryzom_client_patcher
 				nelmisc
 				nelnet
 				ryzom_gameshare
-				ryzom_sevenzip
+				nel_sevenzip
 				${CURL_LIBRARIES})
 
 IF(APPLE)

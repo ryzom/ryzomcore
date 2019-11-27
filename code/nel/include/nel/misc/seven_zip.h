@@ -14,35 +14,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef SEVEN_ZIP_H
+#define SEVEN_ZIP_H
 
+#include <string>
+#include <nel/misc/sha1.h>
 
-#ifndef CL_INIT_H
-#define CL_INIT_H
+namespace NLMISC {
 
-#include "nel/misc/types_nl.h"
-#include "nel/misc/progress_callback.h"
+// utility func to decompress a monofile 7zip archive
+bool unpack7Zip(const std::string &sevenZipFileName, const std::string &destFileName);
 
-namespace NLMISC
-{
-	class IProgressCallback;
+// utility func to decompress a single LZMA packed file
+bool unpackLZMA(const std::string &lzmaFileName, const std::string &destFileName);
+
+// utility func to decompress a single LZMA packed file
+bool unpackLZMA(const std::string &lzmaFileName, const std::string &destFileName, CHashKey &sha1);
+
+// utility func to compress a single file to LZMA packed file
+bool packLZMA(const std::string &srcFileName, const std::string &lzmaFileName);
+
 }
 
-// Initialize the log
-void initLog();
-
-// Initialize the application before login step
-void prelogInit();
-
-// Initialize the application after login step
-void postlogInit();
-
-void initStreamedPackageManager(NLMISC::IProgressCallback &progress);
-void addSearchPaths(NLMISC::IProgressCallback &progress);
-void addPreDataPaths(NLMISC::IProgressCallback &progress);
-
-void ExitClientError (const char *format, ...);
-
-
-#endif // CL_INIT_H
-
-/* End of init.h */
+#endif

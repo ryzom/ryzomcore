@@ -1,5 +1,5 @@
-// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// NeL - MMORPG Framework <https://wiki.ryzom.dev/>
+// Copyright (C) 2019  Jan BOON (jan.boon@kaetemi.be)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,18 +14,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SEVEN_ZIP_H
-#define SEVEN_ZIP_H
+#include "stdmisc.h"
 
-#include <string>
+// Project includes
+#include <nel/misc/i_streamed_package_provider.h>
 
-// utility func to decompress a monofile 7zip archive
-bool unpack7Zip(const std::string &sevenZipFileName, const std::string &destFileName);
+namespace NLMISC
+{
 
-// utility func to decompress a single LZMA packed file
-bool unpackLZMA(const std::string &lzmaFileName, const std::string &destFileName);
+IStreamedPackageProvider::IStreamedPackageProvider()
+{
+	// init
+}
 
-// utility func to compress a single file to LZMA packed file
-bool packLZMA(const std::string &srcFileName, const std::string &lzmaFileName);
+IStreamedPackageProvider::~IStreamedPackageProvider()
+{
+	// release
+}
 
-#endif
+} /* namespace NLMISC */
+
+/* end of file */

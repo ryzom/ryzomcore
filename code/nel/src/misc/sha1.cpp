@@ -35,30 +35,39 @@ using namespace NLMISC;
 	#define new DEBUG_NEW
 #endif
 
-//
-// Types
-//
-
-/*
- * If you do not have the ISO standard stdint.h header file, then you
- * must typedef the following:
- *    name              meaning
- *  uint32_t         unsigned 32 bit integer
- *  uint8_t          unsigned 8 bit integer (i.e., unsigned char)
- *  int_least16_t    integer of >= 16 bits
- *
- */
-
-typedef unsigned int uint32_t;
-typedef unsigned char uint8_t;
-typedef short int_least16_t;
+namespace NLMISC {
 
 //
 // Constantes
 //
 
 static const int bufferSize = 100000;
-static uint8_t buffer[bufferSize];
+static uint8 buffer[bufferSize];
+
+#define SHA1HashSize 20
+
+//
+// Types
+//
+
+/*
+*  This structure will hold context information for the SHA-1
+*  hashing operation
+*/
+typedef struct SHA1Context
+{
+	uint32 Intermediate_Hash[SHA1HashSize/4]; /* Message Digest  */
+
+	uint32 Length_Low;            /* Message length in bits      */
+	uint32 Length_High;           /* Message length in bits      */
+
+								  /* Index into message block array   */
+	sint16 Message_Block_Index;
+	uint8 Message_Block[64];      /* 512-bit message blocks      */
+
+	int Computed;               /* Is the digest computed?         */
+	int Corrupted;             /* Is the message digest corrupted? */
+} SHA1Context;
 
 enum
 {
@@ -68,34 +77,13 @@ enum
     shaStateError       /* called Input after Result */
 };
 
-#define SHA1HashSize 20
-
-/*
- *  This structure will hold context information for the SHA-1
- *  hashing operation
- */
-typedef struct SHA1Context
-{
-    uint32_t Intermediate_Hash[SHA1HashSize/4]; /* Message Digest  */
-
-    uint32_t Length_Low;            /* Message length in bits      */
-    uint32_t Length_High;           /* Message length in bits      */
-
-                               /* Index into message block array   */
-    int_least16_t Message_Block_Index;
-    uint8_t Message_Block[64];      /* 512-bit message blocks      */
-
-    int Computed;               /* Is the digest computed?         */
-    int Corrupted;             /* Is the message digest corrupted? */
-} SHA1Context;
-
 //
 //  Function Prototypes
 //
 
 int SHA1Reset (SHA1Context *);
-int SHA1Input (SHA1Context *, const uint8_t *, unsigned int);
-int SHA1Result (SHA1Context *, uint8_t Message_Digest[SHA1HashSize]);
+int SHA1Input (SHA1Context *, const uint8 *, unsigned int);
+int SHA1Result (SHA1Context *, uint8 Message_Digest[SHA1HashSize]);
 
 //
 // Functions
@@ -105,7 +93,7 @@ CHashKey getSHA1(const uint8 *buffer, uint32 size)
 {
     SHA1Context sha;
     int err;
-    uint8_t Message_Digest[20];
+    uint8 Message_Digest[20];
 
 	err = SHA1Reset(&sha);
 	if (err)
@@ -114,7 +102,7 @@ CHashKey getSHA1(const uint8 *buffer, uint32 size)
 		return CHashKey();
 	}
 
-	err = SHA1Input(&sha, (const uint8_t*)buffer, size);
+	err = SHA1Input(&sha, (const uint8*)buffer, size);
 	if (err)
 	{
 		nlwarning ("SHA: SHA1Input Error %d.\n", err);
@@ -136,7 +124,7 @@ CHashKey getSHA1(const string &filename, bool forcePath)
 {
     SHA1Context sha;
     int err;
-    uint8_t Message_Digest[20];
+    uint8 Message_Digest[20];
 
 	//printf("reading '%s'\n", findData.cFileName);
 	CIFile ifile;
@@ -201,9 +189,9 @@ CHashKey getHMacSHA1(const uint8 *text, uint32 text_len, const uint8 *key, uint3
 {
 	SHA1Context sha;
 
-	uint8_t SHA1_Key[64];
-	uint8_t SHA1_Key1[20];
-	uint8_t SHA1_Key2[20];
+	uint8 SHA1_Key[64];
+	uint8 SHA1_Key1[20];
+	uint8 SHA1_Key2[20];
 
 	string buffer1;
 	string buffer2;
@@ -214,9 +202,9 @@ CHashKey getHMacSHA1(const uint8 *text, uint32 text_len, const uint8 *key, uint3
 
 	// If lenght of key > 64 use sha1 hash
 	if (key_len > 64) {
-		uint8_t SHA1_Key0[20];
+		uint8 SHA1_Key0[20];
 		SHA1Reset(&sha);
-		SHA1Input(&sha, (const uint8_t*)key, key_len);
+		SHA1Input(&sha, (const uint8*)key, key_len);
 		SHA1Result(&sha, SHA1_Key0);
 		CHashKey hk0 (SHA1_Key0);
 		for (uint i = 0; i <  20; i++)
@@ -236,7 +224,7 @@ CHashKey getHMacSHA1(const uint8 *text, uint32 text_len, const uint8 *key, uint3
 
 	// Get hash
 	SHA1Reset(&sha);
-	SHA1Input(&sha, (const uint8_t*)buffer1.c_str(), (uint)buffer1.size());
+	SHA1Input(&sha, (const uint8*)buffer1.c_str(), (uint)buffer1.size());
 	SHA1Result(&sha, SHA1_Key1);
 	CHashKey hk1 (SHA1_Key1);
 
@@ -250,7 +238,7 @@ CHashKey getHMacSHA1(const uint8 *text, uint32 text_len, const uint8 *key, uint3
 
 	// Get new hash
 	SHA1Reset(&sha);
-	SHA1Input(&sha, (const uint8_t*)buffer2.c_str(), (uint)buffer2.size());
+	SHA1Input(&sha, (const uint8*)buffer2.c_str(), (uint)buffer2.size());
 	SHA1Result(&sha, SHA1_Key2);
 	CHashKey hk (SHA1_Key2);
 
@@ -330,7 +318,7 @@ int SHA1Reset(SHA1Context *context)
  *
  */
 int SHA1Result( SHA1Context *context,
-                uint8_t Message_Digest[SHA1HashSize])
+                uint8 Message_Digest[SHA1HashSize])
 {
     int i;
 
@@ -360,7 +348,7 @@ int SHA1Result( SHA1Context *context,
 
     for(i = 0; i < SHA1HashSize; ++i)
     {
-        Message_Digest[i] = uint8_t((context->Intermediate_Hash[i>>2]
+        Message_Digest[i] = uint8((context->Intermediate_Hash[i>>2]
                             >> 8 * ( 3 - ( i & 0x03 ) ) ) & 0xff );
     }
 
@@ -388,7 +376,7 @@ int SHA1Result( SHA1Context *context,
  *
  */
 int SHA1Input(    SHA1Context    *context,
-                  const uint8_t  *message_array,
+                  const uint8  *message_array,
                   unsigned       length)
 {
     if (!length)
@@ -462,16 +450,16 @@ int SHA1Input(    SHA1Context    *context,
  */
 void SHA1ProcessMessageBlock(SHA1Context *context)
 {
-    const uint32_t K[] =    {       /* Constants defined in SHA-1   */
+    const uint32 K[] =    {       /* Constants defined in SHA-1   */
                             0x5A827999,
                             0x6ED9EBA1,
                             0x8F1BBCDC,
                             0xCA62C1D6
                             };
     int           t;                 /* Loop counter                */
-    uint32_t      temp;              /* Temporary word value        */
-    uint32_t      W[80];             /* Word sequence               */
-    uint32_t      A, B, C, D, E;     /* Word buffers                */
+    uint32      temp;              /* Temporary word value        */
+    uint32      W[80];             /* Word sequence               */
+    uint32      A, B, C, D, E;     /* Word buffers                */
 
     /*
      *  Initialize the first 16 words in the array W
@@ -607,14 +595,17 @@ void SHA1PadMessage(SHA1Context *context)
 	/*
 	*  Store the message length as the last 8 octets
 	*/
-	context->Message_Block[56] = uint8_t((context->Length_High >> 24)&0xff);
-	context->Message_Block[57] = uint8_t((context->Length_High >> 16)&0xff);
-	context->Message_Block[58] = uint8_t((context->Length_High >> 8)&0xff);
-	context->Message_Block[59] = uint8_t((context->Length_High)&0xff);
-	context->Message_Block[60] = uint8_t((context->Length_Low >> 24)&0xff);
-	context->Message_Block[61] = uint8_t((context->Length_Low >> 16)&0xff);
-	context->Message_Block[62] = uint8_t((context->Length_Low >> 8)&0xff);
-	context->Message_Block[63] = uint8_t((context->Length_Low)&0xff);
+	context->Message_Block[56] = uint8((context->Length_High >> 24)&0xff);
+	context->Message_Block[57] = uint8((context->Length_High >> 16)&0xff);
+	context->Message_Block[58] = uint8((context->Length_High >> 8)&0xff);
+	context->Message_Block[59] = uint8((context->Length_High)&0xff);
+	context->Message_Block[60] = uint8((context->Length_Low >> 24)&0xff);
+	context->Message_Block[61] = uint8((context->Length_Low >> 16)&0xff);
+	context->Message_Block[62] = uint8((context->Length_Low >> 8)&0xff);
+	context->Message_Block[63] = uint8((context->Length_Low)&0xff);
 
 	SHA1ProcessMessageBlock(context);
 }
+
+}
+

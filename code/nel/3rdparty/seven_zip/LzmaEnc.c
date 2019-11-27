@@ -5,8 +5,6 @@
 
 #include <string.h>
 
-#define _7ZIP_ST
-
 /* #define SHOW_STAT */
 /* #define SHOW_STAT2 */
 

@@ -28,6 +28,11 @@
 
 
 // ***************************************************************************
+namespace NLMISC
+{
+	class CHttpPackageProvider;
+}
+
 namespace NL3D
 {
 	class UDriver;
@@ -78,6 +83,9 @@ const float		ExtraZoneLoadingVision	= 100.f;
 
 
 // ***************************************************************************
+// Data
+extern NLMISC::CHttpPackageProvider *HttpPackageProvider; // Http provider from on-the-fly downloaded game data
+
 // Main System
 extern NL3D::UDriver				*Driver;		// The main 3D Driver
 extern NL3D::IStereoDisplay			*StereoDisplay; // Stereo display

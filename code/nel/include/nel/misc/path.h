@@ -74,6 +74,9 @@ public:
 
 	/** Same as AddSearchPath but with a big file "c:/test.nbf" all files name contained in the big file will be included  (the extention (Nel Big File) is used to know that it's a big file) */
 	void			addSearchBigFile (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
+	
+	/** Sale but for .snp (Streamed NeL Package) */
+	void			addSearchStreamedPackage (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
 
 	/** Same as AddSearchPath but with a xml pack file "c:/test.xml_pack" all files name contained in the xml pack will be included   */
 	void			addSearchXmlpackFile (const std::string &sXmlpackFilename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
@@ -276,8 +279,8 @@ private:
 	struct CMCFileEntry
 	{
 		char *Name;				// Normal case (the search is done by using nlstricmp)
-		uint32	idPath	 : 16;	// Path (not with file at the end) - look in the SSMpath (65536 different path allowed)
-		uint32	idExt	 : 15;	// real extension of the file if remapped - look in the SSMext (32768 different extension allowed)
+		uint32	idPath	 : 20;	// Path (not with file at the end) - look in the SSMpath (1048576 different path allowed)
+		uint32	idExt	 : 11;	// real extension of the file if remapped - look in the SSMext (2048 different extension allowed)
 		uint32	Remapped : 1;	// true if the file is remapped
 	};
 
@@ -370,6 +373,9 @@ public:
 
 	/** Same as AddSearchPath but with a big file "c:/test.nbf" all files name contained in the big file will be included  (the extention (Nel Big File) is used to know that it's a big file) */
 	static void			addSearchBigFile (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
+
+	/** Same but Streamed Package */
+	static void			addSearchStreamedPackage (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
 
 	/** Same as AddSearchPath but with a xml pack file "c:/test.xml_pack" all files name contained in the xml pack will be included   */
 	static void			addSearchXmlpackFile (const std::string &sXmlpackFilename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
