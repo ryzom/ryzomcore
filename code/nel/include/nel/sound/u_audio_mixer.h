@@ -169,6 +169,10 @@ public:
 	static std::string buildSampleBank(const std::vector<std::string> &sampleList, const std::string &bankDir, const std::string &bankName);
 	/// Build the sound bank packed sheets file from georges sound sheet files with .sound extension in the search path, and return the path to the written file.
 	static std::string buildSoundBank(const std::string &packedSheetDir);
+	/// Build the cluster sound_group sheets.
+	static std::string buildClusteredSoundGroupSheets(const std::string &packedSheetDir);
+	/// Build the user var binding sheets.
+	static std::string buildUserVarBindingSheets(const std::string &packedSheetDir);
 	/** Set the global path to the sample banks
 	 *	If you have specified some sample bank to load in the
 	 *	mixer config file, you MUST set the sample path

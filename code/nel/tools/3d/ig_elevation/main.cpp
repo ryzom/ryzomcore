@@ -259,13 +259,13 @@ int main(int nNbArg, char**ppArgs)
 		printf ("ZFactor2 = 0.5;\n");
 		printf ("LandFile = \"w:/matis.land\";\n");
 
-		return -1;
+		return EXIT_FAILURE;
 	}
 
 	SExportOptions options;
 	if (!options.load(ppArgs[1]))
 	{
-		return -1;
+		return EXIT_FAILURE;
 	}
 
 	// Get all ig files in the input directory and elevate to the z of the double heightmap
@@ -358,7 +358,7 @@ int main(int nNbArg, char**ppArgs)
 
 	for (uint32 i = 0; i < vAllFiles.size(); ++i)
 	{
-		CInstanceGroup *pIG = LoadInstanceGroup (CPath::standardizePath(options.InputIGDir) + vAllFiles[i]);
+		CInstanceGroup *pIG = LoadInstanceGroup (vAllFiles[i]);
 
 		if (pIG != NULL)
 		{
@@ -430,11 +430,13 @@ int main(int nNbArg, char**ppArgs)
 			pIGout->build (vGlobalPos, IA, Clusters, Portals, PLN);
 			pIGout->enableRealTimeSunContribution(realTimeSunContribution);
 
-			SaveInstanceGroup (CPath::standardizePath(options.OutputIGDir) + vAllFiles[i], pIGout);
+			std::string outFilePath = CPath::standardizePath(options.OutputIGDir, true) + CFile::getFilename(vAllFiles[i]);
+			nldebug("Writing %s...", outFilePath.c_str());
+			SaveInstanceGroup(outFilePath, pIGout);
 
 			delete pIG;
 		}
 	}
 
-	return 1;
+	return EXIT_SUCCESS;
 }

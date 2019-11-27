@@ -171,6 +171,8 @@ CComplexSound::CComplexSound() :
 	_PatternMode(CComplexSound::MODE_UNDEFINED),
 	_TicksPerSeconds(1.0f),
 	_XFadeLength(3000),		// default to 3000 sec.
+	_DoFadeIn(true),
+	_DoFadeOut(true),
 	_MaxDistValid(false),
 	_Duration(0),
 	_DurationValid(false)
@@ -314,7 +316,8 @@ void	CComplexSound::importForm(const std::string& filename, NLGEORGES::UFormElm&
 	if (mode == "Chained" || mode == "Sparse")
 	{
 		// XFade length
-		formRoot.getValueByName(_XFadeLength, ".SoundType.XFadeLength");
+		if (!formRoot.getValueByName(_XFadeLength, ".SoundType.XFadeLength"))
+			formRoot.getValueByName(_XFadeLength, ".SoundType.XFadeLenght"); // WORKAROUND: Typo in sound assets
 		// Fade in/out flag.
 		formRoot.getValueByName(_DoFadeIn, ".SoundType.DoFadeIn");
 		formRoot.getValueByName(_DoFadeOut, ".SoundType.DoFadeOut");

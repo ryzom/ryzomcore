@@ -457,7 +457,9 @@ bool CFileTreeCtrl::enumObjects(HTREEITEM hParentItem,IShellFolder* pParentFolde
 			string ext5 = pItemInfo->displayName.substr(displayNameSize-5);
 
 			bool cvs = ext3 == "CVS" || ext4 == "CVS\\" || ext4 == "CVS/" ||
-				ext4 == ".svn" || ext5 == ".svn\\" || ext5 == ".svn/";
+				ext4 == ".svn" || ext5 == ".svn\\" || ext5 == ".svn/" ||
+				ext4 == ".hg" || ext5 == ".hg\\" || ext5 == ".hg/" ||
+				ext4 == ".git" || ext5 == ".git\\" || ext5 == ".git/";
 
 /*			bool cvs = ( pItemInfo->displayName[displayNameSize-3] == 'C') &&
 				(pItemInfo->displayName[displayNameSize-2] == 'V') &&

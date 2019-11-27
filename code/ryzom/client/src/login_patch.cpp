@@ -49,6 +49,7 @@
 #include "nel/misc/i18n.h"
 #include "nel/misc/cmd_args.h"
 #include "nel/misc/seven_zip.h"
+#include "nel/misc/curl_certificates.h"
 
 #include "game_share/bg_downloader_msg.h"
 
@@ -239,12 +240,10 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 		cf = &ClientCfg.ConfigFile;
 #endif
 
-		std::string appName = "ryzom_live";
-
-		if (cf->getVarPtr("Application"))
-		{
-			appName = cf->getVar("Application").asString(0);
-		}
+		// App name matches Domain on the SQL server
+		std::string appName = cf->getVarPtr("Application") 
+			? cf->getVar("Application").asString(0)
+			: "default";
 
 		std::string versionFileName = appName + ".version";
 		getServerFile(versionFileName);
@@ -252,7 +251,7 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 		// ok, we have the file, extract version number (aka build number) and the
 		// version name if present
 
-		CIFile versionFile(ClientPatchPath+versionFileName);
+		CIFile versionFile(ClientPatchPath + versionFileName);
 		char buffer[1024];
 		versionFile.getline(buffer, 1024);
 		CSString line(buffer);
@@ -266,8 +265,12 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 		}
 #endif
 
-		ServerVersion = line.firstWord(true);
-		VersionName = line.firstWord(true);
+		// Use the version specified in this file, if the file does not contain an asterisk
+		if (line[0] != '*')
+		{
+			ServerVersion = line.firstWord(true);
+			VersionName = line.firstWord(true);
+		}
 
 		// force the R2ServerVersion
 		R2ServerVersion = ServerVersion;
@@ -1258,19 +1261,18 @@ void CPatchManager::readDescFile(sint32 nVersion)
 
 	if (foundPlatformPatchCategory)
 	{
-		std::vector<std::string> forceRemovePatchCategories;
+		std::set<std::string> forceRemovePatchCategories;
 
 		// only download binaries for current platform
-		forceRemovePatchCategories.push_back("main_exedll");
-		forceRemovePatchCategories.push_back("main_exedll_win32");
-		forceRemovePatchCategories.push_back("main_exedll_win64");
-		forceRemovePatchCategories.push_back("main_exedll_linux32");
-		forceRemovePatchCategories.push_back("main_exedll_linux64");
-		forceRemovePatchCategories.push_back("main_exedll_osx");
+		forceRemovePatchCategories.insert("main_exedll");
+		forceRemovePatchCategories.insert("main_exedll_win32");
+		forceRemovePatchCategories.insert("main_exedll_win64");
+		forceRemovePatchCategories.insert("main_exedll_linux32");
+		forceRemovePatchCategories.insert("main_exedll_linux64");
+		forceRemovePatchCategories.insert("main_exedll_osx");
 
 		// remove current platform category from remove list
-		forceRemovePatchCategories.erase(std::remove(forceRemovePatchCategories.begin(),
-			forceRemovePatchCategories.end(), platformPatchCategory), forceRemovePatchCategories.end());
+		forceRemovePatchCategories.erase(platformPatchCategory);
 
 		CBNPFileSet &bnpFS = const_cast<CBNPFileSet &>(DescFile.getFiles());
 
@@ -1427,6 +1429,13 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, downloadProgressFunc);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, (void *) progress);
 		curl_easy_setopt(curl, CURLOPT_URL, source.c_str());
+		if (source.length() > 8 && (source[4] == 's' || source[4] == 'S')) // 01234 https
+		{
+			NLMISC::CCurlCertificates::addCertificateFile("cacert.pem");
+			NLMISC::CCurlCertificates::useCertificates(curl);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+		}
 
 		// create the local file
 		if (NLMISC::CFile::fileExists(dest))
@@ -1525,12 +1534,14 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 void CPatchManager::downloadFile (const string &source, const string &dest, NLMISC::IProgressCallback *progress)
 {
 	// For the moment use only curl
-	const string sHeadHttp = toLower(source.substr(0,5));
-	const string sHeadFtp = toLower(source.substr(0,4));
-	const string sHeadFile = toLower(source.substr(0,5));
+	const string sourceLower = toLower(source.substr(0, 6));
 
-	if ((sHeadHttp == "http:") || (sHeadFtp == "ftp:") || (sHeadFile == "file:"))
+	if (startsWith(sourceLower, "http:")
+		|| startsWith(sourceLower, "https:")
+		|| startsWith(sourceLower, "ftp:")
+		|| startsWith(sourceLower, "file:"))
 	{
+		nldebug("Download patch file %s", source.c_str());
 		downloadFileWithCurl(source, dest, progress);
 	}
 	else

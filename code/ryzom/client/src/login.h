@@ -18,8 +18,8 @@
 #ifndef CL_LOGIN_H
 #define CL_LOGIN_H
 
-#include "nel/misc/types_nl.h"
-#include "game_share/http_client.h"
+#include <nel/misc/types_nl.h>
+#include <nel/misc/http_client_curl.h>
 #include <string>
 #include <vector>
 
@@ -74,7 +74,7 @@ extern sint32		ShardSelected;
 /*
  * HTTP client preconfigured to connect to the startup login host
  */
-class CStartupHttpClient : public CHttpClient
+class CStartupHttpClient : public NLMISC::CCurlHttpClient
 {
 public:
 

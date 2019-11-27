@@ -257,6 +257,20 @@ inline bool fromString(const std::string &str, uint &val) { return sscanf(str.c_
 inline bool fromString(const std::string &str, sint &val) { return sscanf(str.c_str(), "%d", &val) == 1; }
 #endif // NL_COMP_VC6
 
+inline bool startsWith(const char *str, const char *prefix)
+{
+	for (int i = 0;; ++i)
+	{
+		if (str[i] != prefix[i] || str[i] == '\0')
+		{
+			return prefix[i] == '\0';
+		}
+	}
+}
+
+inline bool startsWith(const std::string &str, const char *prefix) { return startsWith(str.c_str(), prefix); }
+inline bool startsWith(const std::string &str, const std::string &prefix) { return startsWith(str.c_str(), prefix.c_str()); }
+
 // Convert local codepage to UTF-8
 // On Windows, the local codepage is undetermined
 // On Linux, the local codepage is always UTF-8 (no-op)

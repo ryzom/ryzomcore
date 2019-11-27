@@ -158,8 +158,8 @@ int main(int argc, char **argv)
 	// init the Nel context
 	CApplicationContext *appContext = new CApplicationContext;
 
-	// disable nldebug messages in logs in Release
-#ifdef NL_RELEASE
+	// disable nldebug messages in logs in FV
+#if FINAL_VERSION && defined(NL_RELEASE)
 	DisableNLDebug = true;
 #endif
 
@@ -315,6 +315,10 @@ int main(int argc, char **argv)
 
 	if (steamClient.init())
 		LoginCustomParameters = "&steam_auth_session_ticket=" + steamClient.getAuthSessionTicket();
+#endif
+
+#if !FINAL_VERSION
+	LoginCustomParameters += "&dbg=1";
 #endif
 
 	// initialize patch manager and set the ryzom full path, before it's used

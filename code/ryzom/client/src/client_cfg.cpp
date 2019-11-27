@@ -42,6 +42,10 @@
 // Game Share.
 #include "game_share/time_weather_season/time_and_season.h"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #ifdef NL_OS_MAC
 #include "app_bundle_utils.h"
 #endif // NL_OS_MAC
@@ -330,9 +334,9 @@ CClientConfig::CClientConfig()
 	TexturesLoginInterface.push_back("texture_interfaces_v3_login");
 
 	DisplayAccountButtons = true;
-	CreateAccountURL	= "https://account.ryzom.com/signup/from_client.php";
-	EditAccountURL		= "https://account.ryzom.com/payment_profile/index.php";
-	ForgetPwdURL		= "https://account.ryzom.com/payment_profile/lost_secure_password.php";
+	CreateAccountURL	= RYZOM_CLIENT_CREATE_ACCOUNT_URL;	// "https://open.ryzom.dev/ams/";
+	EditAccountURL		= RYZOM_CLIENT_EDIT_ACCOUNT_URL;	// "https://open.ryzom.dev/ams/";
+	ForgetPwdURL		= RYZOM_CLIENT_FORGET_PASSWORD_URL;	// "https://open.ryzom.dev/ams/";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
 	EyesHeight			= 1.5f;						// Default User Eyes Height.
@@ -428,15 +432,15 @@ CClientConfig::CClientConfig()
 	PatchletUrl.clear();
 	PatchVersion.clear();
 
-	WebIgMainDomain = "atys.ryzom.com";
-	WebIgTrustedDomains.push_back(WebIgMainDomain);
+	WebIgMainDomain = RYZOM_WEBIG_MAIN_URL;						// https://open.ryzom.dev/"
+	WebIgTrustedDomains.push_back(RYZOM_WEBIG_TRUSTED_DOMAIN);	// open.ryzom.dev
 	WebIgNotifInterval = 10; // time in minutes
 
 	CurlMaxConnections = 5;
 	CurlCABundle.clear();
 
-	RingReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes_ring/index.php";
-	ReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes/index.php";
+	RingReleaseNotePath = WebIgMainDomain + "/releasenotes_ring/index.php";
+	ReleaseNotePath = WebIgMainDomain + "/releasenotes/index.php";
 
 
 	///////////////
@@ -452,7 +456,7 @@ CClientConfig::CClientConfig()
 	SoundOn				= true;						// Default is with sound.
 	DriverSound			= SoundDrvAuto;
 	SoundForceSoftwareBuffer = true;
-	SoundOutGameMusic	= "Main Menu Loop.ogg";
+	SoundOutGameMusic	= "main menu loop.ogg";
 	SoundSFXVolume		= 1.f;
 	SoundGameMusicVolume	= 1.f;
 	SoundTPFade			= 500;
@@ -1095,6 +1099,9 @@ void CClientConfig::setValues()
 	///////////
 	// WEBIG //
 	READ_STRING_FV(WebIgMainDomain);
+	if (ClientCfg.WebIgMainDomain.find("http://") == std::string::npos
+		|| ClientCfg.WebIgMainDomain.find("https://") == std::string::npos)
+		ClientCfg.WebIgMainDomain = "http://" + ClientCfg.WebIgMainDomain;
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
 	READ_INT_FV(WebIgNotifInterval);
 	READ_INT_FV(CurlMaxConnections);

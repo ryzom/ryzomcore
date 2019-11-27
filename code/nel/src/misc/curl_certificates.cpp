@@ -14,16 +14,25 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//#include <crtdbg.h>
-
-#include "stdpch.h"
-#include "nel/gui/curl_certificates.h"
+#include "stdmisc.h"
+#include <nel/misc/curl_certificates.h>
+#include <nel/misc/common.h>
+#include <nel/misc/debug.h>
+#include <nel/misc/path.h>
+#include <nel/misc/file.h>
 
 #include <openssl/x509.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
 #include <curl/curl.h>
+
+#ifdef NL_OS_WINDOWS
+#include <wincrypt.h>
+#ifdef X509_NAME
+#undef X509_NAME
+#endif
+#endif
 
 // for compatibility with older versions
 #ifndef CURL_AT_LEAST_VERSION
@@ -40,7 +49,7 @@ using namespace NLMISC;
 #define new DEBUG_NEW
 #endif
 
-namespace NLGUI
+namespace NLMISC
 {
 	//
 	// x509CertList lifetime manager
@@ -385,3 +394,4 @@ namespace NLGUI
 
 }// namespace
 
+/* end of file */

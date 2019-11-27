@@ -1048,9 +1048,9 @@ void getCallStack(std::string &result, sint skipNFirst)
 }
 
 
-void getCallStackAndLog (string &result, sint /* skipNFirst */)
+void getCallStackAndLog (string &result, sint skipNFirst)
 {
-	//getCallStack(result, skipNFirst);
+	getCallStack(result, skipNFirst);
 //#ifdef NL_OS_WINDOWS
 //	try
 //	{

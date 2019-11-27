@@ -189,7 +189,7 @@ public:
 
 	const std::vector<std::pair<NLMISC::CVector, NLMISC::CVector> >	&getAudioPath() { return _AudioPath;}
 
-
+	static void buildSheets(const std::string &packedSheetPath);
 
 private:
 
