@@ -51,6 +51,7 @@ public:
 	/// Download a file. This call is blocking
 	/// filePath: [out] ex. /games/nel/stream/00/00/000000000..
 	/// hash: [in]
+	/// name: [in] name for debugging purposes
 	virtual bool getFile(std::string &filePath, const NLMISC::CHashKey &hash, const std::string &name) NL_OVERRIDE;
 	
 public:

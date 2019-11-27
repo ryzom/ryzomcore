@@ -32,7 +32,7 @@ public:
 	/// Download a file. This call is blocking
 	/// filePath: [out] ex. /games/nel/stream/00/00/000000000..
 	/// hash: [in]
-	/// name: [in] name for debugging
+	/// name: [in] name for debugging purposes
 	virtual bool getFile(std::string &filePath, const CHashKey &hash, const std::string &name = "") = 0;
 	
 }; /* class IStreamedPackageProvider */
