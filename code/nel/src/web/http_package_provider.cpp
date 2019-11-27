@@ -78,6 +78,12 @@ bool CHttpPackageProvider::getFile(std::string &filePath, const CHashKey &hash, 
 		if (curl)
 		{
 			curl_easy_setopt(curl, CURLOPT_URL, downloadUrl.c_str());
+			if (downloadUrl.length() > 8 && (downloadUrl[4] == 's' || downloadUrl[4] == 'S')) // 01234 https
+			{
+				// Don't need to verify, since we check the hash
+				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+			}
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 			curl_easy_setopt(curl, CURLOPT_FILE, fp);
 			res = curl_easy_perform(curl);
@@ -120,8 +126,10 @@ bool CHttpPackageProvider::getFile(std::string &filePath, const CHashKey &hash, 
 	CHashKey outHash;
 	if (!unpackLZMA(downloadPath, unpackPath, outHash))
 	{
+		CFile::deleteFile(downloadPath);
 		return false;
 	}
+	CFile::deleteFile(downloadPath);
 
 	if (!(outHash == hash))
 	{
