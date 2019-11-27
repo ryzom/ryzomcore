@@ -20,6 +20,26 @@
 #include <nel/misc/types_nl.h>
 #include <nel/misc/i_streamed_package_provider.h>
 
+/// NeL Streamed Packages are like NeL Big Packages, but storing only
+/// the file hash, allowing to load the file from a remote source instead.
+
+/// Technically, this works, because NeL 3D already loads resources
+/// asynchronously. However, NeL 3D will not simultaneously load more
+/// than one file, so on connections with high latency a backlog builds up.
+/// It will need further changes in NeL 3D to be practical.
+
+/// Alternatively, it could be modified to plug in dynamic data packages
+/// at runtime, for example to load in user models for Ring. It would
+/// need an adjustment to download all files as soon as the package is
+/// enabled. Advantage is that existing files are automatically matched
+/// by their hash, so will only be downloaded once, and that files are
+/// accessed in the same way as files inside bnp packages.
+
+/// The extension `.snp` is used for streamed packages.
+
+/// This class uses an HTTP server with LZMA compressed resources as
+/// the package data source.
+
 namespace NLWEB {
 
 class CHttpPackageProvider : public NLMISC::IStreamedPackageProvider
