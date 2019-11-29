@@ -222,7 +222,9 @@ def remap_author(blob, commit, author):
 	# them, remap here, limit by authored_date if needed.
 	if short_author == "ulukyn" or short_author == "ace":
 		short_author = "winch_gate"
-	if short_author == "riasan" or short_author == "sircotare":
+	if short_author == "riasan":
+		short_author = "winch_gate"
+	if short_author == "sircotare" and authored_date.year >= 2012:
 		short_author = "winch_gate"
 	if short_author == "inky":
 		short_author = "winch_gate"
