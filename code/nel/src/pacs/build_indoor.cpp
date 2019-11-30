@@ -17,6 +17,8 @@
 #include "stdpacs.h"
 #include "nel/pacs/build_indoor.h"
 
+#include <sstream>
+
 #include "nel/pacs/collision_mesh_build.h"
 #include "nel/pacs/local_retriever.h"
 #include "nel/pacs/exterior_mesh.h"
@@ -518,24 +520,26 @@ void	linkExteriorToInterior(CLocalRetriever &lr)
 
 		for (i=0; i<bchains.size(); ++i)
 		{
-			static char	buf[512], w[256];
+			char	w[256];
+			std::stringstream ss;
 			const CChain	&chain = chains[bchains[i]];
-			sprintf(buf, "chain=%d ", bchains[i]);
+			sprintf(w, "chain=%d ", bchains[i]);
+			ss << w;
 			uint	och;
 			for (och=0; och<chain.getSubChains().size(); ++och)
 			{
 				const COrderedChain3f	&ochain = ochains[chain.getSubChain(och)];
 				sprintf(w, "subchain=%d", chain.getSubChain(och));
-				strcat(buf, w);
+				ss << w;
 				uint	v;
 				for (v=0; v<ochain.getVertices().size(); ++v)
 				{
 					sprintf(w, " (%.2f,%.2f)", ochain[v].x, ochain[v].y);
-					strcat(buf, w);
+					ss << w;
 				}
 			}
 
-			nlinfo("%s", buf);
+			nlinfo("%s", ss.str().c_str());
 		}
 	}
 
