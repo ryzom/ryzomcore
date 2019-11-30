@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -18,6 +21,10 @@
 #include "../zone_lib/zone_utility.h"
 
 #include <iostream>
+#include <sstream>
+#include <vector>
+#include <set>
+
 #include "nel/misc/types_nl.h"
 #include "nel/misc/file.h"
 #include "nel/misc/common.h"
@@ -27,8 +34,6 @@
 #include "nel/3d/zone_smoother.h"
 #include "nel/3d/zone_tgt_smoother.h"
 #include "nel/3d/zone_corner_smoother.h"
-#include <vector>
-#include <set>
 
 
 using namespace NL3D;
@@ -579,7 +584,8 @@ void weldZones(const char *center)
 				if (adjZonePatchs[patchIndex].BindEdges[edgeIndex].NPatchs!=0)
 				{
 					// Build an error message
-					char error[8000];
+					char buf[2048];
+					stringstream sserror;
 
 					// Zone name
 					string nameCenter, nameAdj;
@@ -587,10 +593,11 @@ void weldZones(const char *center)
 					getZoneNameByCoord (adjZonesId[i]&0xff, (adjZonesId[i]>>8)+1, nameAdj);
 
 					// Main message
-					smprintf (error, 2048,
+					smprintf(buf, 2048,
 						"Bind Error: try to bind the patch n %d in zone n %s with patch n %d in zone %s\n"
 						"This patch is already binded with the following patches : ", ptch+1, nameAdj.c_str(), 
 						patchIndex+1, nameCenter.c_str() );
+					sserror << buf;
 
 					// Sub message
 					for (uint i=0; i<adjZonePatchs[patchIndex].BindEdges[edgeIndex].NPatchs; i++)
@@ -599,16 +606,15 @@ void weldZones(const char *center)
 						bool last=(i==(uint)(adjZonePatchs[patchIndex].BindEdges[edgeIndex].NPatchs-1));
 
 						// Sub message
-						char subMessage[512];
-						smprintf ( subMessage, 512,
+						smprintf(buf, 2048,
 							"patch n %d%s", adjZonePatchs[patchIndex].BindEdges[edgeIndex].Next[i]+1, last?"\n":",");
 
 						// Concat the message
-						strcat (error, subMessage);
+						sserror << buf;
 					}
 
 					// Add an error message
-					errorMessage.push_back (error);
+					errorMessage.push_back(sserror.str());
 				}
 				else
 				{
