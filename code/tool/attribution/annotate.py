@@ -202,6 +202,7 @@ override_author["ff4a521b07a4983140d82f27fc2f0468a507d095"] = "-" # Header
 override_author["43452ea27c6e92488d8bd1417b2aee60d75d8a68"] = "-" # Header
 override_author["8e21fed1e6b79bf92f6364c7cb4f0c56e1dda103"] = "-" # Header cleanup
 override_author["c8e562f37781d62ebc54b68ef74f7693de79a907"] = "-" # Header cleanup
+override_author["dc734ed66226b257becae9fcd140898e14510e6a"] = "-" # Header cleanup
 
 # Exclude some paths
 exclude_paths = { }
