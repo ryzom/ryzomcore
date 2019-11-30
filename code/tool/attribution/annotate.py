@@ -50,19 +50,22 @@ repo = Repo("../../..")
 # Mapping for author short name to full display name
 authors = { }
 authors["winch_gate"] = "Winch Gate Property Limited"
-authors["sfb"] = "Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>"
-authors["ace"] = "Vianney LECROART (ace) <vl@ryzom.com>"
-authors["rti"] = "Robert TIMM (rti) <mail@rtti.de>"
-authors["botanic"] = "Matthew LAGOE (Botanic) <cyberempires@gmail.com>"
-authors["rtsan"] = "Henri KUUSTE <al-rtsan@totl.net>"
+authors["nevrax"] = "Nevrax Ltd."
+authors["sfb"] = "Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>" # OpenNeL
+authors["ace"] = "Vianney LECROART (ace) <vl@ryzom.com>" # Nevrax, Winch Gate
+authors["rti"] = "Robert TIMM (rti) <mail@rtti.de>" # OpenNeL
+authors["botanic"] = "Matthew LAGOE (Botanic) <cyberempires@gmail.com>" # OpenNeL
+authors["rtsan"] = "Henri KUUSTE <al-rtsan@totl.net>" # OpenNeL
 authors["kaetemi"] = "Jan BOON (Kaetemi) <jan.boon@kaetemi.be>"
 authors["kervala"] = "Cédric OCHS (kervala) <kervala@gmail.com>"
 authors["glorf"] = "Guillaume DUPUY (glorf) <glorf@glorf.fr>"
 authors["ulukyn"] = "Nuno GONCALVES (Ulukyn) <ulukyn@ryzom.com>"
 authors["nimetu"] = "Meelis MAGI (Nimetu) <nimetu@gmail.com>"
-authors["dfighter"] = "Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>"
-authors["dnk-88"] = "Dzmitry KAMIAHIN (dnk-88) <dnk-88@tut.by>"
-authors["fhenon"] = "Fabien HENON"
+authors["dfighter"] = "Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>" # GSoC
+authors["dnk-88"] = "Dzmitry KAMIAHIN (dnk-88) <dnk-88@tut.by>" # GSoC
+authors["fhenon"] = "Fabien HENON" # GSoC
+authors["adrianj"] = "Adrian JAEKEL <aj@elane2k.com>" # GSoC
+authors["cemycc"] = "Emanuel COSTEA <cemycc@gmail.com>" # GSoC
 authors["inky"] = "Inky <jnk@mailoo.org>"
 authors["riasan"] = "Riasan <riasan@ryzom.com>"
 authors["karu"] = "karu"
@@ -79,8 +82,7 @@ authors["liria"] = "liria <liria@gmx.fr>"
 authors["etrange"] = "StudioEtrange <nomorgan@gmail.com>"
 authors["sircotare"] = "SirCotare"
 authors["rolandw"] = "Roland WINKLMEIER <roland.m.winklmeier@gmail.com>"
-authors["adrianj"] = "Adrian JAEKEL <aj@elane2k.com>"
-authors["cemycc"] = "Emanuel COSTEA <cemycc@gmail.com>"
+authors["thibg"] = "Thibaut GIRKA (ThibG) <thib@sitedethib.com>" # LibVR support
 
 # Mapping from git author name to short name, dash to ignore author
 short_authors = { }
@@ -160,6 +162,8 @@ short_authors["Adrian Jaekel <aj at elane2k dot com>"] = "adrianj"
 short_authors["Emanuel Costea <cemycc@gmail.com>"] = "cemycc"
 short_authors["cemycc <cemycc@gmail.com>"] = "cemycc"
 short_authors["cemycc"] = "cemycc"
+short_authors["Thibaut Girka <thib@sitedethib.com>"] = "thibg"
+short_authors["Thibaut Girka (ThibG)"] = "thibg"
 # short_authors["\"picomancer ext:(%22) <pico-bitbucketpub-4mcdxm39-onlyham@picomancer.com>"] = "-"
 # short_authors["Quitta"] = "-"
 # short_authors["Krolock"] = "-"
@@ -167,7 +171,6 @@ short_authors["cemycc"] = "cemycc"
 # short_authors["Piotr Kaczmarek <kaczorek@gmail.com>"] = "-"
 # short_authors["kerozcak"] = "-"
 # short_authors["thorbjorn"] = "-"
-# short_authors["Thibaut Girka <thib@sitedethib.com>"] = "-"
 # short_authors["DJanssens <daan.codes@gmail.com>"] = "-"
 # short_authors["Michael Witrant <mike@lepton.fr>"] = "-"
 
@@ -204,6 +207,9 @@ override_author["c8e562f37781d62ebc54b68ef74f7693de79a907"] = "-" # Header clean
 exclude_paths = { }
 exclude_paths["code/nel/3rdparty"] = True
 exclude_paths["code/nel/src/3d/driver/opengl/GL"] = True
+exclude_paths["code/nel/src/3d/driver/opengl/EGL"] = True
+exclude_paths["code/nel/src/3d/driver/opengl/GLES"] = True
+exclude_paths["code/nel/src/3d/driver/opengl/KHR"] = True
 exclude_paths["code/studio/src/3rdparty"] = True
 
 # Programmatical remappings
@@ -281,7 +287,7 @@ def list_unknown_authors():
 #		print(commit.hexsha + ": " + str(count_tree_size(commit.tree)))
 
 assert not repo.bare
-assert not repo.is_dirty()
+#assert not repo.is_dirty()
 
 # repo.untracked_files
 # assert repo.head.ref == repo.heads.develop
