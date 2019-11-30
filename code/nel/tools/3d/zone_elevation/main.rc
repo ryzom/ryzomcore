@@ -27,10 +27,10 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", AUTHOR
-            VALUE "FileDescription", "NeL Zone Heightmap"
+            VALUE "FileDescription", "NeL Zone Elevation"
             VALUE "FileVersion", NL_VERSION
             VALUE "LegalCopyright", COPYRIGHT
-            VALUE "OriginalFilename", "zone_heightmap" NL_FILEEXT ".exe"
+            VALUE "OriginalFilename", "zone_elevation" NL_FILEEXT ".exe"
             VALUE "ProductName", "NeL Tools"
             VALUE "ProductVersion", NL_PRODUCT_VERSION
         END
