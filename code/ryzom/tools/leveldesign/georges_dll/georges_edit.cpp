@@ -1091,27 +1091,27 @@ bool CGeorgesEditApp::SerialIntoMemStream (const char *formName, CGeorgesEditDoc
 			{
 				if (array)
 				{
-					(safe_cast<const CFormElmArray*> (node))->write (nodeXml, doc->getFormPtr(), NULL);
+					(safe_cast<const CFormElmArray*> (node))->write (nodeXml, doc->getFormPtr(), std::string());
 				}
 				else
 				{
 					if (type == UFormDfn::EntryDfn)
 					{
-						(safe_cast<const CFormElmStruct*> (node))->write (nodeXml, doc->getFormPtr(), NULL);
+						(safe_cast<const CFormElmStruct*> (node))->write (nodeXml, doc->getFormPtr(), std::string());
 					}
 					else if (type == UFormDfn::EntryVirtualDfn)
 					{
-						(safe_cast<const CFormElmVirtualStruct*> (node))->write (nodeXml, doc->getFormPtr(), NULL);
+						(safe_cast<const CFormElmVirtualStruct*> (node))->write (nodeXml, doc->getFormPtr(), std::string());
 					}
 					else if (type == UFormDfn::EntryType)
 					{
-						(safe_cast<const CFormElmAtom*> (node))->write (nodeXml, doc->getFormPtr(), NULL);
+						(safe_cast<const CFormElmAtom*> (node))->write (nodeXml, doc->getFormPtr(), std::string());
 					}
 				}
 			}
 			else
 			{
-				(safe_cast<const CFormElmVirtualStruct*> (node))->write (nodeXml, doc->getFormPtr(), NULL);
+				(safe_cast<const CFormElmVirtualStruct*> (node))->write (nodeXml, doc->getFormPtr(), std::string());
 			}
 		}
 
