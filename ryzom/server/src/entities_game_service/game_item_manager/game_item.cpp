@@ -1220,7 +1220,9 @@ CGameItemPtr CGameItem::getItemCopy()
 //-----------------------------------------------
 uint32 CGameItem::sendNameId(CCharacter * user)
 {
-	nlassert( _Form != 0 );
+	if (!_Form)
+		return 0;
+
 	if( _Form->Family != ITEMFAMILY::SCROLL_R2 )
 	{
 		if ( ! _PhraseId.empty() )
