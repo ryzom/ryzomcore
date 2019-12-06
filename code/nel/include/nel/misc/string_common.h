@@ -275,6 +275,21 @@ inline bool startsWith(const char *str, const char *prefix)
 inline bool startsWith(const std::string &str, const char *prefix) { return startsWith(str.c_str(), prefix); }
 inline bool startsWith(const std::string &str, const std::string &prefix) { return startsWith(str.c_str(), prefix.c_str()); }
 
+inline bool endsWith(const char *str, size_t strLen, const char *suffix, size_t suffixLen)
+{
+	if (strLen < suffixLen)
+		return false;
+	int minLen = strLen < suffixLen ? strLen : suffixLen;
+	for (int i = 1; i <= minLen; ++i)
+		if (str[strLen - i] != suffix[suffixLen - i])
+			return false;
+	return true;
+}
+
+inline bool endsWith(const char *str, const char *suffix) { return endsWith(str, strlen(str), suffix, strlen(suffix)); }
+inline bool endsWith(const std::string &str, const char *suffix) { return endsWith(str.c_str(), str.size(), suffix, strlen(suffix)); }
+inline bool endsWith(const std::string &str, const std::string &suffix) { return endsWith(str.c_str(), str.size(), suffix.c_str(), suffix.size()); }
+
 // Convert local codepage to UTF-8
 // On Windows, the local codepage is undetermined
 // On Linux, the local codepage is always UTF-8 (no-op)
