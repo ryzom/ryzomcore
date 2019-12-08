@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1765,7 +1765,7 @@ void CZoneLighter::addTriangles (const CMeshBase &meshBase, const CMeshGeom &mes
 							alphaTestThreshold));
 					}
 				}
-				else
+				else if (iba.getFormat() == CIndexBuffer::Indices16)
 				{
 					const uint16* triIndex=(const uint16*)iba.getPtr ();
 					uint numTri=primitive.getNumIndexes ()/3;
@@ -1796,6 +1796,10 @@ void CZoneLighter::addTriangles (const CMeshBase &meshBase, const CMeshGeom &mes
 						triangleArray.push_back (CTriangle (NLMISC::CTriangle (v0, v1, v2), doubleSided, texture, clampU, clampV, u, v,
 							alphaTestThreshold));
 					}
+				}
+				else
+				{
+					nlerror("Invalid index buffer format");
 				}
 			}
 		}
@@ -1901,34 +1905,73 @@ void CZoneLighter::addTriangles (const CMeshBase &meshBase, const CMeshMRMGeom &
 			// Dump triangles
 			CIndexBufferRead iba;
 			primitive.lock (iba);
-			const uint32* triIndex= (const uint32 *) iba.getPtr ();
-			uint numTri=primitive.getNumIndexes ()/3;
-			uint tri;
-			for (tri=0; tri<numTri; tri++)
+			if (iba.getFormat() == CIndexBuffer::Indices32)
 			{
-				// Vertex
-				CVector v0=modelMT*(*vba.getVertexCoordPointer (triIndex[tri*3]));
-				CVector v1=modelMT*(*vba.getVertexCoordPointer (triIndex[tri*3+1]));
-				CVector v2=modelMT*(*vba.getVertexCoordPointer (triIndex[tri*3+2]));
-
-				// UV
-				float u[3] = { 0.f };
-				float v[3] = { 0.f };
-				for (uint i=0; i<3; i++)
+				const uint32 *triIndex = (const uint32 *)iba.getPtr();
+				uint numTri = primitive.getNumIndexes() / 3;
+				uint tri;
+				for (tri = 0; tri < numTri; tri++)
 				{
-					// Get UV coordinates
-					float *uv = (float*)vba.getTexCoordPointer (triIndex[tri*3+i], 0);
-					if (uv)
-					{
-						// Copy it
-						u[i] = uv[0];
-						v[i] = uv[1];
-					}
-				}
+					// Vertex
+					CVector v0 = modelMT * (*vba.getVertexCoordPointer(triIndex[tri * 3]));
+					CVector v1 = modelMT * (*vba.getVertexCoordPointer(triIndex[tri * 3 + 1]));
+					CVector v2 = modelMT * (*vba.getVertexCoordPointer(triIndex[tri * 3 + 2]));
 
-				// Make a triangle
-				triangleArray.push_back (CTriangle (NLMISC::CTriangle (v0, v1, v2), doubleSided, texture, clampU, clampV, u, v,
-					alphaTestThreshold));
+					// UV
+					float u[3] = { 0.f };
+					float v[3] = { 0.f };
+					for (uint i = 0; i < 3; i++)
+					{
+						// Get UV coordinates
+						float *uv = (float *)vba.getTexCoordPointer(triIndex[tri * 3 + i], 0);
+						if (uv)
+						{
+							// Copy it
+							u[i] = uv[0];
+							v[i] = uv[1];
+						}
+					}
+
+					// Make a triangle
+					triangleArray.push_back(CTriangle(NLMISC::CTriangle(v0, v1, v2), doubleSided, texture, clampU, clampV, u, v,
+						alphaTestThreshold));
+				}
+			}
+			else if (iba.getFormat() == CIndexBuffer::Indices16)
+			{
+				const uint16 *triIndex = (const uint16 *)iba.getPtr();
+				uint numTri = primitive.getNumIndexes() / 3;
+				uint tri;
+				for (tri = 0; tri < numTri; tri++)
+				{
+					// Vertex
+					CVector v0 = modelMT * (*vba.getVertexCoordPointer(triIndex[tri * 3]));
+					CVector v1 = modelMT * (*vba.getVertexCoordPointer(triIndex[tri * 3 + 1]));
+					CVector v2 = modelMT * (*vba.getVertexCoordPointer(triIndex[tri * 3 + 2]));
+
+					// UV
+					float u[3] = { 0.f };
+					float v[3] = { 0.f };
+					for (uint i = 0; i < 3; i++)
+					{
+						// Get UV coordinates
+						float *uv = (float *)vba.getTexCoordPointer(triIndex[tri * 3 + i], 0);
+						if (uv)
+						{
+							// Copy it
+							u[i] = uv[0];
+							v[i] = uv[1];
+						}
+					}
+
+					// Make a triangle
+					triangleArray.push_back(CTriangle(NLMISC::CTriangle(v0, v1, v2), doubleSided, texture, clampU, clampV, u, v,
+						alphaTestThreshold));
+				}
+			}
+			else
+			{
+				nlerror("Invalid index buffer format");
 			}
 		}
 	}
