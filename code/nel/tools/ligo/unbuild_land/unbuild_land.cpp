@@ -49,6 +49,8 @@ namespace /* anonymous */
 sint32 s_ZoneMinX, s_ZoneMinY, s_ZoneMaxX, s_ZoneMaxY;
 float s_CellSize = 160.0f;
 
+bool s_Height = false;
+
 std::string s_ZoneBricksDirIn; // UTF-8 path
 std::string s_ZoneRuntimeDirIn; // UTF-8 path
 std::string s_LandFileOut; // UTF-8 path
@@ -111,9 +113,9 @@ Fail:
 	return false;
 }
 
-void centerVertices(std::vector<CVector2f> &vertices)
+void centerVertices(std::vector<CVector> &vertices)
 {
-	CVector2f avg = CVector2f(0, 0);
+	CVector avg = CVector(0.0f, 0.0f, 0.0f);
 	for (ptrdiff_t i = 0; i < vertices.size(); ++i)
 		avg += vertices[i];
 	avg /= (float)vertices.size();
@@ -122,19 +124,19 @@ void centerVertices(std::vector<CVector2f> &vertices)
 		vertices[i] -= avg;
 }
 
-void offsetVertices(std::vector<CVector2f> &vertices, int x, int y)
+void offsetVertices(std::vector<CVector> &vertices, int x, int y)
 {
-	CVector2f off = CVector2f((float)x * s_CellSize, (float)y * s_CellSize);
+	CVector off = CVector((float)x * s_CellSize, (float)y * s_CellSize, 0.0f);
 	for (ptrdiff_t i = 0; i < vertices.size(); ++i)
 		vertices[i] -= off;
 }
 
-float ratePoints(const std::vector<CVector2f> &zone, const std::vector<CVector2f> &ref, float xx, float xy, float yx, float yy)
+float ratePoints(const std::vector<CVector> &zone, const std::vector<CVector> &ref, float xx, float xy, float yx, float yy)
 {
 	// Rudimentary distance rating of vertices (not very reliable, but good enough!)
 
 	float md = 0.f;
-	// std::vector<CVector2f> refcpy = ref;
+	// std::vector<CVector> refcpy = ref;
 	std::vector<bool> usedref;
 	usedref.resize(ref.size(), false);
 	for (ptrdiff_t i = 0; i < zone.size(); ++i)
@@ -142,10 +144,10 @@ float ratePoints(const std::vector<CVector2f> &zone, const std::vector<CVector2f
 		if (ref.size())
 		{
 			int lowj = 0;
-			float lowv = (CVector2f(ref[0].x * xx + ref[0].y * xy, ref[0].x * yx + ref[0].y * yy) - zone[i]).sqrnorm();
+			float lowv = (CVector(ref[0].x * xx + ref[0].y * xy, ref[0].x * yx + ref[0].y * yy, ref[0].z) - zone[i]).sqrnorm();
 			for (ptrdiff_t j = 1; j < ref.size(); ++j)
 			{
-				float v = (CVector2f(ref[j].x * xx + ref[j].y * xy, ref[j].x * yx + ref[j].y * yy) - zone[i]).sqrnorm();
+				float v = (CVector(ref[j].x * xx + ref[j].y * xy, ref[j].x * yx + ref[j].y * yy, ref[j].z) - zone[i]).sqrnorm();
 				if (v < lowv)
 				{
 					lowj = j;
@@ -240,10 +242,10 @@ float ratePoints(const std::vector<CVector2f> &zone, const std::vector<CVector2f
 	return md;
 }
 
-void findBestBrick(std::string &brick, int &rotate, int &flip, float &es, std::vector<CVector2f> &zoneVertices, const std::map<std::string, std::vector<CVector2f>> &brickVertices)
+void findBestBrick(std::string &brick, int &rotate, int &flip, float &es, std::vector<CVector> &zoneVertices, const std::map<std::string, std::vector<CVector>> &brickVertices)
 {
 	float bestPoints = (float)(uint32)~0;
-	for (std::map<std::string, std::vector<CVector2f>>::const_iterator it = brickVertices.begin(), end = brickVertices.end(); it != end; ++it)
+	for (std::map<std::string, std::vector<CVector>>::const_iterator it = brickVertices.begin(), end = brickVertices.end(); it != end; ++it)
 	{
 		float rating;
 		rating = ratePoints(zoneVertices, it->second, 1.0, 0.0, 0.0, 1.0);
@@ -323,7 +325,7 @@ bool unbuildLand()
 	// Read in all the bricks
 	std::vector<std::string> brickFiles;
 	CPath::getPathContent(s_ZoneBricksDirIn, false, false, true, brickFiles);
-	std::map<std::string, std::vector<CVector2f>> brickVertices;
+	std::map<std::string, std::vector<CVector>> brickVertices;
 	for (std::vector<std::string>::const_iterator it = brickFiles.begin(), end = brickFiles.end(); it != end; ++it)
 	{
 		if (CFile::getExtension(*it) != "zone")
@@ -352,9 +354,9 @@ bool unbuildLand()
 		std::vector<CBorderVertex> zoneBorderVertices;
 		zone.retrieve(zonePatches, zoneBorderVertices);
 
-		brickVertices[CFile::getFilenameWithoutExtension(*it)] = std::vector<CVector2f>();
-		std::vector<CVector2f> &vec = brickVertices[CFile::getFilenameWithoutExtension(*it)];
-		CVector2f off = CVector2f(s_CellSize * 0.5f, s_CellSize * 0.5f);
+		brickVertices[CFile::getFilenameWithoutExtension(*it)] = std::vector<CVector>();
+		std::vector<CVector> &vec = brickVertices[CFile::getFilenameWithoutExtension(*it)];
+		CVector off = CVector(s_CellSize * 0.5f, s_CellSize * 0.5f, 0.0f);
 		for (ptrdiff_t i = 0; i < zonePatches.size(); ++i)
 		{
 			for (ptrdiff_t j = 0; j < 4; ++j)
@@ -369,7 +371,7 @@ bool unbuildLand()
 			{
 				float rx = zonePatches[i].Patch.Vertices[j].x - off.x;
 				float ry = zonePatches[i].Patch.Vertices[j].y - off.y;
-				vec.push_back(CVector2f(rx, ry));
+				vec.push_back(CVector(rx, ry, s_Height ? zonePatches[i].Patch.Vertices[j].z : 0.0f));
 			}
 		SkipA:;
 		}
@@ -403,8 +405,8 @@ bool unbuildLand()
 		std::vector<CBorderVertex> zoneBorderVertices;
 		zone.retrieve(zonePatches, zoneBorderVertices);
 
-		std::vector<CVector2f> vec;
-		CVector2f off = CVector2f((float)x * s_CellSize, (float)y * s_CellSize) + CVector2f(s_CellSize * 0.5f, s_CellSize * 0.5f);
+		std::vector<CVector> vec;
+		CVector off = CVector((float)x * s_CellSize, (float)y * s_CellSize, 0.0f) + CVector(s_CellSize * 0.5f, s_CellSize * 0.5f, 0.0f);
 		for (ptrdiff_t i = 0; i < zonePatches.size(); ++i)
 		{
 			for (ptrdiff_t j = 0; j < 4; ++j)
@@ -419,7 +421,7 @@ bool unbuildLand()
 			{
 				float rx = zonePatches[i].Patch.Vertices[j].x - off.x;
 				float ry = zonePatches[i].Patch.Vertices[j].y - off.y;
-				vec.push_back(CVector2f(rx, ry));
+				vec.push_back(CVector(rx, ry, s_Height ? zonePatches[i].Patch.Vertices[j].z : 0.0f));
 			}
 		SkipB:;
 		}
@@ -457,6 +459,7 @@ int main(int argc, char **argv)
 	args.addAdditionalArg("zonemin", "Zone boundary");
 	args.addAdditionalArg("zonemax", "Zone boundary");
 	args.addArg("", "cellsize", "meters", "Zone cell size");
+	args.addArg("", "height", "", "Take Z coordinate into account");
 
 	if (!args.parse(argc, argv))
 	{
@@ -478,6 +481,8 @@ int main(int argc, char **argv)
 	s_ZoneMaxX = max(zoneMinX, zoneMaxX);
 	s_ZoneMinY = min(zoneMinY, zoneMaxY);
 	s_ZoneMaxY = max(zoneMinY, zoneMaxY);
+
+	s_Height = args.haveLongArg("height");
 
 	if (args.haveLongArg("cellsize"))
 	{
