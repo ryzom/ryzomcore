@@ -1179,36 +1179,43 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 	// Set the thread state
 	_LastPatchComputed.resize (_ProcessCount);
 
-	// Launch threads
-	uint process;
-	for (process=0; process<_ProcessCount; process++)
+	if (patchCount)
 	{
-		// Last patch
-		uint lastPatch=firstPatch+patchCountByThread;
-		lastPatch %= patchCount;
+		// Launch threads
+		uint process;
+		for (process = 0; process < _ProcessCount; process++)
+		{
+			// Last patch
+			uint lastPatch = firstPatch + patchCountByThread;
+			lastPatch %= patchCount;
 
-		// Last patch computed
-		_LastPatchComputed[process] = firstPatch;
+			// Last patch computed
+			_LastPatchComputed[process] = firstPatch;
 
-		// Create a thread
-		CLightRunnable *runnable = new CLightRunnable (process, this, &description);
-		IThread *pThread=IThread::create (runnable);
-		runnable->Thread = pThread;
+			// Create a thread
+			CLightRunnable *runnable = new CLightRunnable(process, this, &description);
+			IThread *pThread = IThread::create(runnable);
+			runnable->Thread = pThread;
 
-		// New first patch
-		firstPatch=lastPatch;
+			// New first patch
+			firstPatch = lastPatch;
 
-		// Launch
-		pThread->start();
+			// Launch
+			pThread->start();
+		}
+
+		// Wait for others processes
+		while (_ProcessExited != _ProcessCount)
+		{
+			nlSleep(1000);
+
+			// Call the progress callback
+			progress("Lighting patches", (float)_NumberOfPatchComputed / (float)_PatchInfo.size());
+		}
 	}
-
-	// Wait for others processes
-	while (_ProcessExited!=_ProcessCount)
+	else
 	{
-		nlSleep (1000);
-
-		// Call the progress callback
-		progress ("Lighting patches", (float)_NumberOfPatchComputed/(float)_PatchInfo.size());
+		nlwarning("Empty zone");
 	}
 
 	// Reset old thread mask
