@@ -467,7 +467,7 @@ void CTickProxy::init( void (*updateFunc)(),
 } // init
 
 
-NLMISC_DYNVARIABLE(string, WaitingForServices, "Services that haven't tocked yet")
+NLMISC_CATEGORISED_DYNVARIABLE(tick_proxy, string, WaitingForServices, "Services that haven't tocked yet")
 {
 	// we can only read the value
 	if (get)
@@ -478,14 +478,14 @@ NLMISC_DYNVARIABLE(string, WaitingForServices, "Services that haven't tocked yet
 }
 
 
-NLMISC_DYNVARIABLE(NLMISC::TGameCycle, TickGameCycleProxy, "game cycle (in tick)")
+NLMISC_CATEGORISED_DYNVARIABLE(tick_proxy, NLMISC::TGameCycle, TickGameCycleProxy, "game cycle (in tick)")
 {
 	// we can only read the value
 	if (get)
 		*pointer = CTickProxy::getGameCycle ();
 }
 
-NLMISC_DYNVARIABLE(NLMISC::TGameTime, TickGameTimeProxy, "game time (in second)")
+NLMISC_CATEGORISED_DYNVARIABLE(tick_proxy, NLMISC::TGameTime, TickGameTimeProxy, "game time (in second)")
 {
 	// we can only read the value
 	if (get)
@@ -493,7 +493,7 @@ NLMISC_DYNVARIABLE(NLMISC::TGameTime, TickGameTimeProxy, "game time (in second)"
 }
 
 
-NLMISC_COMMAND(displayTickProxyRecentHistory,"Display the history of tick events","")
+NLMISC_CATEGORISED_COMMAND(tick_proxy, displayTickProxyRecentHistory,"Display the history of tick events","")
 {
 	RecentHistory.write( &log );
 	return true;

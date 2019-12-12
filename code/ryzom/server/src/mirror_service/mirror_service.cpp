@@ -3877,7 +3877,7 @@ NLNET_SERVICE_MAIN (CMirrorService, "MS", "mirror_service", 0, MirrorCallbackArr
 /*
  * displayMSTrackers command
  */
-NLMISC_COMMAND( displayMSTrackers, "Display the trackers for one of all dataset(s)", "[<dataset>]" )
+NLMISC_CATEGORISED_COMMAND( ms, displayMSTrackers, "Display the trackers for one of all dataset(s)", "[<dataset>]" )
 {
 	if ( args.size() > 0 )
 	{
@@ -3902,7 +3902,7 @@ NLMISC_COMMAND( displayMSTrackers, "Display the trackers for one of all dataset(
 }
 
 
-NLMISC_COMMAND( changeWeightOfProperty, "Change the weight of a property", "<propName> <weight>" )
+NLMISC_CATEGORISED_COMMAND( ms, changeWeightOfProperty, "Change the weight of a property", "<propName> <weight>" )
 {
 	if ( args.size() == 2 )
 	{
@@ -3915,7 +3915,7 @@ NLMISC_COMMAND( changeWeightOfProperty, "Change the weight of a property", "<pro
 }
 
 
-NLMISC_COMMAND( displayWeights, "Display the weights of the properties", "" )
+NLMISC_CATEGORISED_COMMAND( ms, displayWeights, "Display the weights of the properties", "" )
 {
 	TNDataSetsMS::const_iterator ids;
 	for ( ids=MSInstance->NDataSets.begin(); ids!=MSInstance->NDataSets.end(); ++ids )
@@ -3924,14 +3924,14 @@ NLMISC_COMMAND( displayWeights, "Display the weights of the properties", "" )
 }
 
 
-NLMISC_COMMAND( displayRemoteMS, "Display the list of remote MS", "" )
+NLMISC_CATEGORISED_COMMAND( ms, displayRemoteMS, "Display the list of remote MS", "" )
 {
 	MSInstance->displayRemoteMSList( log );
 	return true;
 }
 
 
-NLMISC_COMMAND( displayClientServices, "Display the list of client services", "" )
+NLMISC_CATEGORISED_COMMAND( ms, displayClientServices, "Display the list of client services", "" )
 {
 	MSInstance->displayClientServices( log );
 	return true;
@@ -3939,7 +3939,7 @@ NLMISC_COMMAND( displayClientServices, "Display the list of client services", ""
 
 #ifdef COUNT_MIRROR_PROP_CHANGES
 
-NLMISC_DYNVARIABLE( sint32, TotalNbChangesPerTickRowMgt, "Number of distinct changes per tick for non-local row management" )
+NLMISC_CATEGORISED_DYNVARIABLE( ms, sint32, TotalNbChangesPerTickRowMgt, "Number of distinct changes per tick for non-local row management" )
 {
 	// We can only read the value
 	if ( get )
@@ -3952,7 +3952,7 @@ NLMISC_DYNVARIABLE( sint32, TotalNbChangesPerTickRowMgt, "Number of distinct cha
 	}
 }
 
-NLMISC_DYNVARIABLE( sint32, TotalNbChangesPerTickProps, "Number of distinct changes per tick for non-local prop changes" )
+NLMISC_CATEGORISED_DYNVARIABLE( ms, sint32, TotalNbChangesPerTickProps, "Number of distinct changes per tick for non-local prop changes" )
 {
 	// We can only read the value
 	if ( get )
@@ -3967,7 +3967,7 @@ NLMISC_DYNVARIABLE( sint32, TotalNbChangesPerTickProps, "Number of distinct chan
 
 #endif
 
-NLMISC_DYNVARIABLE( sint32, TotalNbChangesSentPerTickRowMgt, "Number of changes emitted to other MS for row management" )
+NLMISC_CATEGORISED_DYNVARIABLE( ms, sint32, TotalNbChangesSentPerTickRowMgt, "Number of changes emitted to other MS for row management" )
 {
 	// We can only read the value
 	if ( get )
@@ -3976,7 +3976,7 @@ NLMISC_DYNVARIABLE( sint32, TotalNbChangesSentPerTickRowMgt, "Number of changes 
 	}
 }
 
-NLMISC_DYNVARIABLE( sint32, TotalNbChangesSentPerTickProps, "Number of changes emitted to other MS for props" )
+NLMISC_CATEGORISED_DYNVARIABLE( ms, sint32, TotalNbChangesSentPerTickProps, "Number of changes emitted to other MS for props" )
 {
 	// We can only read the value
 	if ( get )
@@ -3986,7 +3986,7 @@ NLMISC_DYNVARIABLE( sint32, TotalNbChangesSentPerTickProps, "Number of changes e
 }
 
 
-NLMISC_DYNVARIABLE( sint32, TotalRemainingChangesProps, "Number of remaining prop changes not sent to other MS" )
+NLMISC_CATEGORISED_DYNVARIABLE( ms, sint32, TotalRemainingChangesProps, "Number of remaining prop changes not sent to other MS" )
 {
 	// We can only read the value
 	if ( get )
@@ -3996,7 +3996,7 @@ NLMISC_DYNVARIABLE( sint32, TotalRemainingChangesProps, "Number of remaining pro
 }
 
 
-NLMISC_COMMAND( verboseMessagesSent, "Turn on/off the display of msgs sent to other MSes", "1/0" )
+NLMISC_CATEGORISED_COMMAND( ms, verboseMessagesSent, "Turn on/off the display of msgs sent to other MSes", "1/0" )
 {
 	if ( args.size() < 1 )
 		return false;
@@ -4006,7 +4006,7 @@ NLMISC_COMMAND( verboseMessagesSent, "Turn on/off the display of msgs sent to ot
 }
 
 
-NLMISC_DYNVARIABLE( string, Status, "Mirrors online status" )
+NLMISC_CATEGORISED_DYNVARIABLE( ms, string, Status, "Mirrors online status" )
 {
 	if ( get )
 	{
@@ -4023,27 +4023,27 @@ NLMISC_DYNVARIABLE( string, Status, "Mirrors online status" )
 static string MainNbEntities = "?";
 
 // This command must be here to prevent to compile the same one in mirror.cpp (which would crash)
-NLMISC_VARIABLE( string, MainNbEntities, "Not available on MS" );
+NLMISC_CATEGORISED_VARIABLE( ms, string, MainNbEntities, "Not available on MS" );
 
-NLMISC_DYNVARIABLE( float, EmittedKBPerSec, "Output rate for mirror deltas & messages" )
+NLMISC_CATEGORISED_DYNVARIABLE( ms, float, EmittedKBPerSec, "Output rate for mirror deltas & messages" )
 {
 	if ( get )
 		*pointer = MSInstance->getEmittedKBytesPerSecond();
 }
 
-NLMISC_DYNVARIABLE( sint8, MainMTRTag, "Main MTR Tag" )
+NLMISC_CATEGORISED_DYNVARIABLE( ms, sint8, MainMTRTag, "Main MTR Tag" )
 {
 	if ( get )
 		*pointer = MSInstance->mainTag().rawTag();
 }
 
-NLMISC_DYNVARIABLE( bool, IsPureReceiver, "IsPureReceiver" )
+NLMISC_CATEGORISED_DYNVARIABLE( ms, bool, IsPureReceiver, "IsPureReceiver" )
 {
 	if ( get )
 		*pointer = MSInstance->isPureReceiver();
 }
 
-NLMISC_DYNVARIABLE( string, MirrorServiceVersion, "Version of MS" )
+NLMISC_CATEGORISED_DYNVARIABLE( ms, string, MirrorServiceVersion, "Version of MS" )
 {
 	if ( get )
 		*pointer = MirrorServiceVersion;
