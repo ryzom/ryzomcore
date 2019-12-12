@@ -1537,7 +1537,7 @@
             type="I4" />
       <!-- see ANIMAL_TYPE -->
       <leaf name="STATUS"
-            type="I4" />
+            type="I5" />
       <!-- see ANIMAL_STATUS -->
       <leaf name="HP"
             type="I7" />
