@@ -2317,8 +2317,9 @@ void impulseReloadCache(NLMISC::CBitMemStream &impulse)
 {
 	uint32 timestamp;;
 	impulse.serial(timestamp);
+	nlwarning("TODO_SHARD_ID  %u", (unsigned int)timestamp);
 	if (PermanentlyBanned) return;
-	STRING_MANAGER::CStringManagerClient::instance()->loadCache(timestamp);
+	STRING_MANAGER::CStringManagerClient::instance()->loadCache(timestamp, 1999); // TODO_SHARD_ID
 }
 
 //-----------------------------------------------

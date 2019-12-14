@@ -243,8 +243,8 @@ void	releaseMainLoopReselect()
 	// Pause any user played music
 	MusicPlayer.pause();
 
-	// only really needed at exit
-	// --STRING_MANAGER::CStringManagerClient::instance()->flushStringCache();
+	// flush the server string cache
+	STRING_MANAGER::CStringManagerClient::instance()->flushStringCache();
 
 	// Remove all entities.
 	if (Driver)

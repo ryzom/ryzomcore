@@ -1149,6 +1149,9 @@ void CFarTP::disconnectFromPreviousShard()
 	}
 	else
 	{
+		// flush the server string cache
+		STRING_MANAGER::CStringManagerClient::instance()->flushStringCache();
+
 		// String manager: remove all waiting callbacks and removers
 		// (if some interface stuff has not received its string yet, its remover will get useless)
 		STRING_MANAGER::CStringManagerClient::release( false );
@@ -1204,7 +1207,7 @@ void CFarTP::connectToNewShard()
 	}
 
 	// Reinit the string manager cache.
-	STRING_MANAGER::CStringManagerClient::instance()->initCache(FSAddr, ClientCfg.LanguageCode);
+	STRING_MANAGER::CStringManagerClient::instance()->initCache(ClientCfg.LanguageCode);
 
 	// reset the chat mode
 	ChatMngr.resetChatMode();
