@@ -867,7 +867,7 @@ void initAutoLogin()
 void initAltLogin()
 {
 	// Check the alt param
-	if (!LoginCustomParameters.empty())
+	if (!LoginCustomParameters.empty() && LoginCustomParameters != "&dbg=1")
 	{
 		// don't use login and password for alternate login
 		string res = checkLogin("", "", ClientApp, LoginCustomParameters);
