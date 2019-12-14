@@ -184,11 +184,11 @@
 
 // https://docs.microsoft.com/en-us/cpp/overview/visual-cpp-language-conformance?view=vs-2019
 // https://gcc.gnu.org/projects/cxx-status.html
-#if (defined(_MSC_VER) && (_MSC_VER >= 1910)) || (defined(__GNUC__ ) && (__GNUC__ >= 8))
+#if (defined(_MSC_VER) && (_MSC_VER >= 1910) && (!defined(_HAS_CXX17) || _HAS_CXX17)) || (defined(__GNUC__ ) && (__GNUC__ >= 8) && (__cplusplus >=  201703L))
 #	define NL_CPP17
 #endif
 
-#if (defined(_MSC_VER) && (_MSC_VER >= 1900)) || (defined(__GNUC__ ) && (__GNUC__ >= 6))
+#if (defined(_MSC_VER) && (_MSC_VER >= 1900)) || (defined(__GNUC__ ) && (__GNUC__ >= 6) && (__cplusplus >=  201402L))
 #	define NL_CPP14
 #endif
 
