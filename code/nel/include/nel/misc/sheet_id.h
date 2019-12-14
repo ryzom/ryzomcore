@@ -59,9 +59,19 @@ public :
 	explicit CSheetId( uint32 sheetRef = 0 );
 
 	/**
+	*	Constructor
+	*/
+	explicit CSheetId( int sheetRef );
+
+	/**
 	 *	Constructor
 	 */
 	explicit CSheetId( const std::string& sheetName );
+
+	/**
+	*	Operator=
+	*/
+	explicit CSheetId( const char *sheetName );
 
 	/**
 	 * Constructor, uses defaultType as extension when sheetName
@@ -69,8 +79,22 @@ public :
 	 */
 	explicit CSheetId( const std::string& sheetName, const std::string &defaultType );
 
+	/**
+	* Constructor, uses defaultType as extension when sheetName
+	* contains no file extension.
+	*/
+	explicit CSheetId( const std::string& sheetName, const char *defaultType );
+
+	/**
+	* Constructor, uses defaultType as extension when sheetName
+	* contains no file extension.
+	*/
+	explicit CSheetId( const char *sheetName, const char *defaultType );
+
 	// build from a string and returns true if the build succeed
-	bool	 buildSheetId(const std::string& sheetName);
+	bool buildSheetId(const char *sheetName, size_t sheetNameLen);
+	inline bool buildSheetId(const char *sheetName) { return buildSheetId(sheetName, strlen(sheetName)); }
+	inline bool buildSheetId(const std::string &sheetName) { return buildSheetId(sheetName.c_str(), sheetName.size()); }
 
 	// build from a SubSheetId and a type
 	void	 buildSheetId(uint32 shortId, uint32 type);
@@ -93,17 +117,22 @@ public :
 	/**
 	 * Return the **whole** sheet id (id+type)
 	 */
-	uint32 asInt() const { return _Id.Id; }
+	inline uint32 asInt() const { return _Id.Id; }
 
 	/**
 	 * Return the sheet type (sub part of the sheetid)
 	 */
-	uint32 getSheetType() const { return _Id.IdInfos.Type; }
+	inline uint32 getSheetType() const { return _Id.IdInfos.Type; }
 
 	/**
 	 * Return the sheet sub id (sub part of the sheetid)
 	 */
-	uint32 getShortId() const { return _Id.IdInfos.Id; }
+	inline uint32 getShortId() const { return _Id.IdInfos.Id; }
+
+	/**
+	*	Operator bool
+	*/
+	inline operator bool() const { return _Id.Id; }
 
 	/**
 	 *	Operator=
@@ -116,9 +145,19 @@ public :
 	CSheetId& operator=( const std::string& sheetName );
 
 	/**
+	*	Operator=
+	*/
+	CSheetId& operator=( const char *sheetName );
+
+	/**
 	 *	Operator=
 	 */
 	CSheetId& operator=( uint32 sheetRef );
+
+	/**
+	*	Operator=
+	*/
+	CSheetId& operator=( int sheetRef );
 
 	/**
 	 *	Operator<
@@ -218,9 +257,12 @@ private :
 		}
 	};
 
+	typedef CStaticMap<uint32, CChar> TSheetIdToNameMap;
+	typedef CStaticMap<CChar, uint32, CCharComp> TSheetNameToIdMap;
+
 	static CChar _AllStrings;
-	static CStaticMap<uint32, CChar> _SheetIdToName;
-	static CStaticMap<CChar,uint32, CCharComp> _SheetNameToId;
+	static TSheetIdToNameMap _SheetIdToName;
+	static TSheetNameToIdMap _SheetNameToId;
 
 	static std::vector<std::string> _FileExtensions;
 	static bool _Initialised;

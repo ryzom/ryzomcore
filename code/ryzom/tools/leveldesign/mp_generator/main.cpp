@@ -307,6 +307,11 @@ bool endsWith( const CSString& s, const CSString& substring )
 	return (s.right( (uint)substring.size() ) == substring);
 }
 
+bool endsWith( const CSString& s, const char *substring )
+{
+	return endsWith(s, CSString(substring));
+}
+
 
 // Generate item names
 void GenerateItemNames( const CSString& nomMP, char eco, int level, bool mission, bool creature, CSString& outStr )
