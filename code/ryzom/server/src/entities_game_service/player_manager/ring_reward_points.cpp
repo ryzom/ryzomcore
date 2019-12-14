@@ -638,7 +638,7 @@ CRingRewardPoints::TGenerateRewardResult CRingRewardPointsImpl::generateReward(R
 		}
 
 		// setup parameters for the reward items
-		NLMISC::CSheetId itemSheetId	= NLMISC::CSheetId(RingRPRewardItemSheet);
+		NLMISC::CSheetId itemSheetId	= NLMISC::CSheetId(RingRPRewardItemSheet.get());
 		uint16 quantity					= (uint16)RingRPRewardItemQuantity;
 		uint16 itemLevel				= (uint16)rewardLevel.asLevel();
 
@@ -715,7 +715,7 @@ CRingRewardPoints::TGenerateRewardResult CRingRewardPointsImpl::generateReward(R
 			insufficientRRP= false;
 
 			// setup parameters for the reward items
-			NLMISC::CSheetId itemSheetId	= NLMISC::CSheetId(RingRPRewardItemSheet);
+			NLMISC::CSheetId itemSheetId	= NLMISC::CSheetId(RingRPRewardItemSheet.get());
 			uint16 quantity					= (uint16)RingRPRewardItemQuantity;
 			uint16 itemLevel				= (uint16)rewardLevel.asLevel();
 
