@@ -70,7 +70,13 @@
 #	endif
 #	ifdef _MSC_VER
 #		define NL_COMP_VC
-#		if _MSC_VER >= 1900
+#		if _MSC_VER >= 1920
+#			define NL_COMP_VC14
+#			define NL_COMP_VC_VERSION 142
+#		elif _MSC_VER >= 1910
+#			define NL_COMP_VC14
+#			define NL_COMP_VC_VERSION 141
+#		elif _MSC_VER >= 1900
 #			define NL_COMP_VC14
 #			define NL_COMP_VC_VERSION 140
 #		elif _MSC_VER >= 1800
@@ -174,6 +180,16 @@
 
 #if defined(NL_COMP_GCC) && (__cplusplus >= 201103L)
 #	define NL_NO_EXCEPTION_SPECS
+#endif
+
+// https://docs.microsoft.com/en-us/cpp/overview/visual-cpp-language-conformance?view=vs-2019
+// https://gcc.gnu.org/projects/cxx-status.html
+#if (defined(_MSC_VER) && (_MSC_VER >= 1910)) || (defined(__GNUC__ ) && (__GNUC__ >= 8))
+#	define NL_CPP17
+#endif
+
+#if (defined(_MSC_VER) && (_MSC_VER >= 1900)) || (defined(__GNUC__ ) && (__GNUC__ >= 6))
+#	define NL_CPP14
 #endif
 
 #if defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 140)
