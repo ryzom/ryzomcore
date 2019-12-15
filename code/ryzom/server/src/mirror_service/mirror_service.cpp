@@ -166,6 +166,15 @@ void	CMirrorService::init()
 		_IsPureReceiver = true;
 		nlinfo( "\tThis MS is in pure receiver mode" );
 	}
+	CConfigFile::CVar *varS = ConfigFile.getVarPtr("ShardId");
+	if (varS)
+	{
+		m_ShardId = varS->asInt();
+		if ((m_ShardId & 0xFFF) != m_ShardId)
+			nlwarning("\tConfigured ShardId %u is too large", (unsigned int)m_ShardId);
+		m_ShardId &= 0xFFF;
+		nlinfo("\tShardId for shared memory namespace is %u", (unsigned int)m_ShardId);
+	}
 
 	// Register to ServiceUp and ServiceDown
 	CUnifiedNetwork::getInstance()->setServiceUpCallback( "*", cbServiceUp, 0 );
@@ -540,8 +549,8 @@ void	CMirrorService::deleteTracker( CChangeTrackerMS& tracker, std::vector<CChan
 
 	if ( tracker.destroy() )
 	{
-		_SMIdPool.releaseId( tracker.smid() );
-		_MutIdPool.releaseId( tracker.mutid() );
+		_SMIdPool.releaseId( tracker.smid() & 0xFFF );
+		_MutIdPool.releaseId( tracker.mutid() & 0xFFF );
 	}
 
 	// Delete the tracker object
@@ -1454,6 +1463,8 @@ void	CMirrorService::allocateProperty( CMessage& msgin, NLNET::TServiceId servic
 					}
 
 					// Allocate shared memory
+					nlassert((propinfo.SMId & 0xFFF) == propinfo.SMId);
+					propinfo.SMId ^= (m_ShardId << 12);
 					propinfo.Segment = CSharedMemory::createSharedMemory( toSharedMemId(propinfo.SMId), segmentSize );
 					if ( (propinfo.Segment == NULL) && DestroyGhostSharedMemSegments )
 					{
@@ -1600,7 +1611,7 @@ void	CMirrorService::destroyPropertySegments()
 			CSharedMemory::closeSharedMemory( GET_PROPERTY_INFO(ip).Segment );
 			GET_PROPERTY_INFO(ip).Segment = NULL;
 			CSharedMemory::destroySharedMemory( toSharedMemId(GET_PROPERTY_INFO(ip).SMId) );
-			_SMIdPool.releaseId( GET_PROPERTY_INFO(ip).SMId );
+			_SMIdPool.releaseId( GET_PROPERTY_INFO(ip).SMId & 0xFFF );
 		}
 	}
 
@@ -1619,8 +1630,8 @@ void	CMirrorService::destroyPropertySegments()
 				CChangeTrackerMS& tracker = (*isl);
 				if ( tracker.destroy() )
 				{
-					_SMIdPool.releaseId( tracker.smid() );
-					_MutIdPool.releaseId( tracker.mutid() );
+					_SMIdPool.releaseId( tracker.smid() & 0xFFF );
+					_MutIdPool.releaseId( tracker.mutid() & 0xFFF );
 				}
 			}
 		}
@@ -1635,8 +1646,8 @@ void	CMirrorService::destroyPropertySegments()
 				CChangeTrackerMS& tracker = (*isl);
 				if ( tracker.destroy() )
 				{
-					_SMIdPool.releaseId( tracker.smid() );
-					_MutIdPool.releaseId( tracker.mutid() );
+					_SMIdPool.releaseId( tracker.smid() & 0xFFF );
+					_MutIdPool.releaseId( tracker.mutid() & 0xFFF );
 				}
 			}
 		}
@@ -2177,7 +2188,8 @@ void	CMirrorService::allocateEntityTrackers( CDataSetMS& dataset, NLNET::TServic
 				smidAdd = _SMIdPool.getNewId();
 			if ( ! pEntityTrackerRemoving )
 				smidRemove = _SMIdPool.getNewId();
-			if ( (smidAdd == InvalidSMId) || (smidRemove == InvalidSMId) )
+			if ((!pEntityTrackerAdding && (smidAdd == InvalidSMId)) 
+				|| (!pEntityTrackerRemoving && (smidRemove == InvalidSMId)))
 			{
 				nlwarning( "ROWMGT: No more free shared memory ids (entity tracker)" );
 				beep( 660, 150 ); // TODO: error handling
@@ -2186,11 +2198,15 @@ void	CMirrorService::allocateEntityTrackers( CDataSetMS& dataset, NLNET::TServic
 
 			if ( ! pEntityTrackerAdding )
 			{
+				nlassert((smidAdd & 0xFFF) == smidAdd);
+				smidAdd ^= (m_ShardId << 12);
 				CChangeTrackerMS& entityTrackerAdding = dataset.addEntityTracker( ADDING, serviceId, local, smidAdd );
 				pEntityTrackerAdding = &entityTrackerAdding;
 			}
 			if ( ! pEntityTrackerRemoving )
 			{
+				nlassert((smidRemove & 0xFFF) == smidRemove);
+				smidRemove ^= (m_ShardId << 12);
 				CChangeTrackerMS& entityTrackerRemoving = dataset.addEntityTracker( REMOVING, serviceId, local, smidRemove );
 				pEntityTrackerRemoving = &entityTrackerRemoving;
 			}
@@ -2563,6 +2579,8 @@ void	CMirrorService::processPropSubscription( CDataSetMS& dataset, TPropertyInde
 						beep( 660, 150 ); // TODO: error handling
 						return;
 					}
+					nlassert((smid & 0xFFF) == smid);
+					smid ^= (m_ShardId << 12);
 					if ( ! newtracker->allocate( smid, ds->maxNbRows() ) )
 						smid = InvalidSMId;
 				}
@@ -3283,7 +3301,7 @@ void	CMirrorService::receiveSyncMirrorInformation( CMessage& msgin, TServiceId s
 				if ( ! propInfo.allocated() )
 				{
 					// Reaccess shared memory
-					_SMIdPool.reacquireId( propInfoClient.SMId );
+					_SMIdPool.reacquireId( propInfoClient.SMId & 0xFFF );
 					_PropertiesInMirror[propName].reaccess( propInfoClient.SMId );
 
 					// Set property pointers but don't init values

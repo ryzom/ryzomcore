@@ -695,7 +695,7 @@ public:
 
 	/// Constructor
 	CMirrorService() :
-		_NumberOfOnlineMS(1),
+		m_ShardId(DEFAULT_SHARD_ID), _NumberOfOnlineMS(1),
 		_RangeManagerReady(false), _MirrorsOnline(false), _DeltaSent(false), _BlockedAwaitingATAck(false),
 		_EmittedKBytesPerSecond(0.0f), _EmittedBytesPartialSum(0), _TimeOfLatestEmittedBytesAvg(0),
 		_NbDeltaUpdatesReceived(0), _NbExpectedDeltaUpdates(0), _IsPureReceiver(false)
@@ -1053,6 +1053,9 @@ private:
 
 	/// Properties in the local mirror
 	TPropertiesInMirrorMS			_PropertiesInMirror;
+
+	/// Shard id as in the config file, DEFAULT_SHARD_ID otherwise. Used for pool namespacing
+	uint32							m_ShardId;
 
 	/// Shared memory id pool, to generate new ids
 	CSMIdPool						_SMIdPool;
