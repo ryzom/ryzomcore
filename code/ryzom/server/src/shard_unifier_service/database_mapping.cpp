@@ -1,3 +1,4 @@
+
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -99,7 +100,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CKnownUserPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -107,7 +108,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_RelationId != NOPE::INVALID_OBJECT_ID 
+		if (_RelationId != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -478,7 +479,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -578,7 +579,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -638,7 +639,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -756,7 +757,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CSessionParticipantPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -764,7 +765,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_Id != NOPE::INVALID_OBJECT_ID 
+		if (_Id != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -1131,7 +1132,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -1230,7 +1231,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -1288,7 +1289,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -1412,7 +1413,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CCharacterPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -1420,7 +1421,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_CharId != NOPE::INVALID_OBJECT_ID 
+		if (_CharId != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -1873,7 +1874,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -1992,7 +1993,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -2082,7 +2083,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -2167,7 +2168,7 @@ namespace RSMGR
 
 		// allocate the container
 		_Sessions = new std::vector < CSessionPtr >;
-		
+
 		// load the childs
 		ret &= CSession::loadChildrenOfCCharacter(connection, getObjectId(), *_Sessions, filename, lineNum);
 		return ret;
@@ -2186,7 +2187,7 @@ namespace RSMGR
 		nlassert(index < _Sessions->size());
 		return const_cast< CSessionPtr & >(_Sessions->operator[](index));
 	}
-	
+
 	CSessionPtr &CCharacter::getSessionsById(uint32 id) const
 	{
 		nlassert(_Sessions != NULL);
@@ -2218,7 +2219,7 @@ namespace RSMGR
 
 		// allocate the container
 		_SessionParticipants = new std::vector < CSessionParticipantPtr >;
-		
+
 		// load the childs
 		ret &= CSessionParticipant::loadChildrenOfCCharacter(connection, getObjectId(), *_SessionParticipants, filename, lineNum);
 		return ret;
@@ -2237,7 +2238,7 @@ namespace RSMGR
 		nlassert(index < _SessionParticipants->size());
 		return const_cast< CSessionParticipantPtr & >(_SessionParticipants->operator[](index));
 	}
-	
+
 	CSessionParticipantPtr &CCharacter::getSessionParticipantsById(uint32 id) const
 	{
 		nlassert(_SessionParticipants != NULL);
@@ -2269,7 +2270,7 @@ namespace RSMGR
 
 		// allocate the container
 		_KnownBy = new std::vector < CKnownUserPtr >;
-		
+
 		// load the childs
 		ret &= CKnownUser::loadChildrenOfCCharacter(connection, getObjectId(), *_KnownBy, filename, lineNum);
 		return ret;
@@ -2288,7 +2289,7 @@ namespace RSMGR
 		nlassert(index < _KnownBy->size());
 		return const_cast< CKnownUserPtr & >(_KnownBy->operator[](index));
 	}
-	
+
 	CKnownUserPtr &CCharacter::getKnownByById(uint32 id) const
 	{
 		nlassert(_KnownBy != NULL);
@@ -2320,7 +2321,7 @@ namespace RSMGR
 
 		// allocate the container
 		_PlayerRatings = new std::vector < CPlayerRatingPtr >;
-		
+
 		// load the childs
 		ret &= CPlayerRating::loadChildrenOfCCharacter(connection, getObjectId(), *_PlayerRatings, filename, lineNum);
 		return ret;
@@ -2339,7 +2340,7 @@ namespace RSMGR
 		nlassert(index < _PlayerRatings->size());
 		return const_cast< CPlayerRatingPtr & >(_PlayerRatings->operator[](index));
 	}
-	
+
 	CPlayerRatingPtr &CCharacter::getPlayerRatingsById(uint32 id) const
 	{
 		nlassert(_PlayerRatings != NULL);
@@ -2442,7 +2443,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CRingUserPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -2450,7 +2451,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_UserId != NOPE::INVALID_OBJECT_ID 
+		if (_UserId != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -2638,7 +2639,7 @@ namespace RSMGR
 				{
 					// cascading deletion for single child GMStatus
 					nlassert(loadGMStatus(connection, __FILE__, __LINE__));
-					
+
 					if (getGMStatus() != NULL)
 						getGMStatus()->remove(connection);
 				}
@@ -2863,7 +2864,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -2982,7 +2983,7 @@ namespace RSMGR
 
 		// allocate the container
 		_KnownUsers = new std::vector < CKnownUserPtr >;
-		
+
 		// load the childs
 		ret &= CKnownUser::loadChildrenOfCRingUser(connection, getObjectId(), *_KnownUsers, filename, lineNum);
 		return ret;
@@ -3001,7 +3002,7 @@ namespace RSMGR
 		nlassert(index < _KnownUsers->size());
 		return const_cast< CKnownUserPtr & >(_KnownUsers->operator[](index));
 	}
-	
+
 	CKnownUserPtr &CRingUser::getKnownUsersById(uint32 id) const
 	{
 		nlassert(_KnownUsers != NULL);
@@ -3033,7 +3034,7 @@ namespace RSMGR
 
 		// allocate the container
 		_Characters = new std::map < uint32,  CCharacterPtr >;
-		
+
 		// load the childs
 		ret &= CCharacter::loadChildrenOfCRingUser(connection, getObjectId(), *_Characters, filename, lineNum);
 		return ret;
@@ -3073,7 +3074,7 @@ namespace RSMGR
 
 		// allocate the container
 		_Folders = new std::vector < CFolderPtr >;
-		
+
 		// load the childs
 		ret &= CFolder::loadChildrenOfCRingUser(connection, getObjectId(), *_Folders, filename, lineNum);
 		return ret;
@@ -3092,7 +3093,7 @@ namespace RSMGR
 		nlassert(index < _Folders->size());
 		return const_cast< CFolderPtr & >(_Folders->operator[](index));
 	}
-	
+
 	CFolderPtr &CRingUser::getFoldersById(uint32 id) const
 	{
 		nlassert(_Folders != NULL);
@@ -3124,7 +3125,7 @@ namespace RSMGR
 
 		// allocate the container
 		_FolderAccess = new std::vector < CFolderAccessPtr >;
-		
+
 		// load the childs
 		ret &= CFolderAccess::loadChildrenOfCRingUser(connection, getObjectId(), *_FolderAccess, filename, lineNum);
 		return ret;
@@ -3143,7 +3144,7 @@ namespace RSMGR
 		nlassert(index < _FolderAccess->size());
 		return const_cast< CFolderAccessPtr & >(_FolderAccess->operator[](index));
 	}
-	
+
 	CFolderAccessPtr &CRingUser::getFolderAccessById(uint32 id) const
 	{
 		nlassert(_FolderAccess != NULL);
@@ -3264,7 +3265,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CSessionPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -3272,7 +3273,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_SessionId != NOPE::INVALID_OBJECT_ID 
+		if (_SessionId != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -3770,7 +3771,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -3940,7 +3941,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -4092,7 +4093,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -4239,7 +4240,7 @@ namespace RSMGR
 
 		// allocate the container
 		_SessionParticipants = new std::vector < CSessionParticipantPtr >;
-		
+
 		// load the childs
 		ret &= CSessionParticipant::loadChildrenOfCSession(connection, getObjectId(), *_SessionParticipants, filename, lineNum);
 		return ret;
@@ -4258,7 +4259,7 @@ namespace RSMGR
 		nlassert(index < _SessionParticipants->size());
 		return const_cast< CSessionParticipantPtr & >(_SessionParticipants->operator[](index));
 	}
-	
+
 	CSessionParticipantPtr &CSession::getSessionParticipantsById(uint32 id) const
 	{
 		nlassert(_SessionParticipants != NULL);
@@ -4290,7 +4291,7 @@ namespace RSMGR
 
 		// allocate the container
 		_GuildInvites = new std::vector < CGuildInvitePtr >;
-		
+
 		// load the childs
 		ret &= CGuildInvite::loadChildrenOfCSession(connection, getObjectId(), *_GuildInvites, filename, lineNum);
 		return ret;
@@ -4309,7 +4310,7 @@ namespace RSMGR
 		nlassert(index < _GuildInvites->size());
 		return const_cast< CGuildInvitePtr & >(_GuildInvites->operator[](index));
 	}
-	
+
 	CGuildInvitePtr &CSession::getGuildInvitesById(uint32 id) const
 	{
 		nlassert(_GuildInvites != NULL);
@@ -4341,7 +4342,7 @@ namespace RSMGR
 
 		// allocate the container
 		_JournalEntries = new std::vector < CJournalEntryPtr >;
-		
+
 		// load the childs
 		ret &= CJournalEntry::loadChildrenOfCSession(connection, getObjectId(), *_JournalEntries, filename, lineNum);
 		return ret;
@@ -4360,7 +4361,7 @@ namespace RSMGR
 		nlassert(index < _JournalEntries->size());
 		return const_cast< CJournalEntryPtr & >(_JournalEntries->operator[](index));
 	}
-	
+
 	CJournalEntryPtr &CSession::getJournalEntriesById(uint32 id) const
 	{
 		nlassert(_JournalEntries != NULL);
@@ -4457,7 +4458,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CShardPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -4465,7 +4466,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_ShardId != NOPE::INVALID_OBJECT_ID 
+		if (_ShardId != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -4777,7 +4778,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -4870,7 +4871,7 @@ namespace RSMGR
 
 		// allocate the container
 		_Guilds = new std::map < uint32,  CGuildPtr >;
-		
+
 		// load the childs
 		ret &= CGuild::loadChildrenOfCShard(connection, getObjectId(), *_Guilds, filename, lineNum);
 		return ret;
@@ -4977,7 +4978,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CGuildPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -4985,7 +4986,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_GuildId != NOPE::INVALID_OBJECT_ID 
+		if (_GuildId != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -5342,7 +5343,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -5435,7 +5436,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -5480,7 +5481,7 @@ namespace RSMGR
 
 		// allocate the container
 		_Characters = new std::vector < CCharacterPtr >;
-		
+
 		// load the childs
 		ret &= CCharacter::loadChildrenOfCGuild(connection, getObjectId(), *_Characters, filename, lineNum);
 		return ret;
@@ -5499,7 +5500,7 @@ namespace RSMGR
 		nlassert(index < _Characters->size());
 		return const_cast< CCharacterPtr & >(_Characters->operator[](index));
 	}
-	
+
 	CCharacterPtr &CGuild::getCharactersById(uint32 id) const
 	{
 		nlassert(_Characters != NULL);
@@ -5531,7 +5532,7 @@ namespace RSMGR
 
 		// allocate the container
 		_Invites = new std::vector < CGuildInvitePtr >;
-		
+
 		// load the childs
 		ret &= CGuildInvite::loadChildrenOfCGuild(connection, getObjectId(), *_Invites, filename, lineNum);
 		return ret;
@@ -5550,7 +5551,7 @@ namespace RSMGR
 		nlassert(index < _Invites->size());
 		return const_cast< CGuildInvitePtr & >(_Invites->operator[](index));
 	}
-	
+
 	CGuildInvitePtr &CGuild::getInvitesById(uint32 id) const
 	{
 		nlassert(_Invites != NULL);
@@ -5645,7 +5646,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CGuildInvitePtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -5653,7 +5654,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_Id != NOPE::INVALID_OBJECT_ID 
+		if (_Id != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -6012,7 +6013,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -6105,7 +6106,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -6155,7 +6156,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -6263,7 +6264,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CPlayerRatingPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -6271,7 +6272,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_Id != NOPE::INVALID_OBJECT_ID 
+		if (_Id != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -6650,7 +6651,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -6748,7 +6749,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -6808,7 +6809,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -6926,7 +6927,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CJournalEntryPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -6934,7 +6935,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_Id != NOPE::INVALID_OBJECT_ID 
+		if (_Id != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -7278,7 +7279,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -7378,7 +7379,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -7500,7 +7501,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CFolderPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -7508,7 +7509,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_Id != NOPE::INVALID_OBJECT_ID 
+		if (_Id != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -7871,7 +7872,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -7965,7 +7966,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -8012,7 +8013,7 @@ namespace RSMGR
 
 		// allocate the container
 		_FolderAccess = new std::vector < CFolderAccessPtr >;
-		
+
 		// load the childs
 		ret &= CFolderAccess::loadChildrenOfCFolder(connection, getObjectId(), *_FolderAccess, filename, lineNum);
 		return ret;
@@ -8031,7 +8032,7 @@ namespace RSMGR
 		nlassert(index < _FolderAccess->size());
 		return const_cast< CFolderAccessPtr & >(_FolderAccess->operator[](index));
 	}
-	
+
 	CFolderAccessPtr &CFolder::getFolderAccessById(uint32 id) const
 	{
 		nlassert(_FolderAccess != NULL);
@@ -8063,7 +8064,7 @@ namespace RSMGR
 
 		// allocate the container
 		_Sessions = new std::vector < CSessionPtr >;
-		
+
 		// load the childs
 		ret &= CSession::loadChildrenOfCFolder(connection, getObjectId(), *_Sessions, filename, lineNum);
 		return ret;
@@ -8082,7 +8083,7 @@ namespace RSMGR
 		nlassert(index < _Sessions->size());
 		return const_cast< CSessionPtr & >(_Sessions->operator[](index));
 	}
-	
+
 	CSessionPtr &CFolder::getSessionsById(uint32 id) const
 	{
 		nlassert(_Sessions != NULL);
@@ -8177,7 +8178,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CFolderAccessPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -8185,7 +8186,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_Id != NOPE::INVALID_OBJECT_ID 
+		if (_Id != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -8544,7 +8545,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -8637,7 +8638,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -8687,7 +8688,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -8799,7 +8800,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CScenarioPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -8807,7 +8808,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_Id != NOPE::INVALID_OBJECT_ID 
+		if (_Id != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -9170,7 +9171,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -9278,7 +9279,7 @@ namespace RSMGR
 
 		// allocate the container
 		_SessionLogs = new std::vector < CSessionLogPtr >;
-		
+
 		// load the childs
 		ret &= CSessionLog::loadChildrenOfCScenario(connection, getObjectId(), *_SessionLogs, filename, lineNum);
 		return ret;
@@ -9297,7 +9298,7 @@ namespace RSMGR
 		nlassert(index < _SessionLogs->size());
 		return const_cast< CSessionLogPtr & >(_SessionLogs->operator[](index));
 	}
-	
+
 	CSessionLogPtr &CScenario::getSessionLogsById(uint32 id) const
 	{
 		nlassert(_SessionLogs != NULL);
@@ -9329,7 +9330,7 @@ namespace RSMGR
 
 		// allocate the container
 		_PlayerRatings = new std::vector < CPlayerRatingPtr >;
-		
+
 		// load the childs
 		ret &= CPlayerRating::loadChildrenOfCScenario(connection, getObjectId(), *_PlayerRatings, filename, lineNum);
 		return ret;
@@ -9348,7 +9349,7 @@ namespace RSMGR
 		nlassert(index < _PlayerRatings->size());
 		return const_cast< CPlayerRatingPtr & >(_PlayerRatings->operator[](index));
 	}
-	
+
 	CPlayerRatingPtr &CScenario::getPlayerRatingsById(uint32 id) const
 	{
 		nlassert(_PlayerRatings != NULL);
@@ -9443,7 +9444,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CSessionLogPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -9451,7 +9452,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_Id != NOPE::INVALID_OBJECT_ID 
+		if (_Id != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -9810,7 +9811,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -9909,7 +9910,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -10029,7 +10030,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CGmStatusPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -10037,7 +10038,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_UserId != NOPE::INVALID_OBJECT_ID 
+		if (_UserId != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -10361,7 +10362,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -10453,7 +10454,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		// check that the data description is consistent with database content
 		nlassert(result->getNumRows() <= 1);
@@ -10483,7 +10484,7 @@ namespace RSMGR
 			childPtr = ret;
 			return true;
 		}
-	
+
 		// no result, but no error
 		childPtr = CGmStatusPtr();
 		return true;
