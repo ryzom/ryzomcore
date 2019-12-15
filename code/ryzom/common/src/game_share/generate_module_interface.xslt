@@ -527,7 +527,7 @@ namespace <xsl:value-of select="@name"/>
 	<xsl:text>const std::vector&lt;</xsl:text><xsl:value-of select="@type"/>&gt; &amp;<xsl:value-of select="@name"/><xsl:if test="position() != last()">, </xsl:if>
 					</xsl:when>
 					<xsl:otherwise>
-	<xsl:if test="@byref = 'true' or @enum='smart'">const </xsl:if><xsl:value-of select="@type"/><xsl:text> </xsl:text><xsl:if test="@byref = 'true' or @enum = 'smart'">&amp;</xsl:if><xsl:value-of select="@name"/><xsl:if test="position() != last()">, </xsl:if>
+	<xsl:if test="@byref = 'true' or @enum='smart' or @enum='bitset'">const </xsl:if><xsl:value-of select="@type"/><xsl:text> </xsl:text><xsl:if test="@byref = 'true' or @enum = 'smart' or @enum = 'bitset'">&amp;</xsl:if><xsl:value-of select="@name"/><xsl:if test="position() != last()">, </xsl:if>
 					</xsl:otherwise>
 				</xsl:choose>
 			</xsl:for-each>
@@ -1001,6 +1001,12 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:for-each select="property[@name != $uniqueId and @db_col]">
 			<xsl:choose>
 				<xsl:when test="@enum='true' or @enum='smart'">
+		qs += _<xsl:value-of select="@name"/><xsl:text>.isValid()
+			? "'"+_</xsl:text><xsl:value-of select="@name"/><xsl:text>.toString()+"'"
+			: "DEFAULT(</xsl:text><xsl:value-of select="@db_col"/><xsl:text>)";
+</xsl:text>
+				</xsl:when>
+				<xsl:when test="@enum='bitset'">
 		qs += "'"+_<xsl:value-of select="@name"/><xsl:text>.toString()+"'";
 </xsl:text>
 				</xsl:when>
@@ -1024,6 +1030,12 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:for-each select="property[@db_col]">
 			<xsl:choose>
 				<xsl:when test="@enum='true' or @enum='smart'">
+		qs += _<xsl:value-of select="@name"/><xsl:text>.isValid()
+			? "'"+_</xsl:text><xsl:value-of select="@name"/><xsl:text>.toString()+"'"
+			: "DEFAULT(</xsl:text><xsl:value-of select="@db_col"/><xsl:text>)";
+</xsl:text>
+				</xsl:when>
+				<xsl:when test="@enum='bitset'">
 		qs += "'"+_<xsl:value-of select="@name"/><xsl:text>.toString()+"'";
 </xsl:text>
 				</xsl:when>
@@ -1050,7 +1062,14 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:for-each select="property[@db_col]">
 			<xsl:choose>
 				<xsl:when test="@enum='true' or @enum='smart'">
-			qs += "'"+_<xsl:value-of select="@name"/>.toString()+"'";
+			qs += _<xsl:value-of select="@name"/><xsl:text>.isValid()
+			? "'"+_</xsl:text><xsl:value-of select="@name"/><xsl:text>.toString()+"'"
+			: "DEFAULT(</xsl:text><xsl:value-of select="@db_col"/><xsl:text>)";
+</xsl:text>
+				</xsl:when>
+				<xsl:when test="@enum='bitset'">
+			qs += "'"+_<xsl:value-of select="@name"/><xsl:text>.toString()+"'";
+</xsl:text>
 				</xsl:when>
 				<xsl:when test="@date='true'">
 			qs += "'"+MSW::encodeDate(_<xsl:value-of select="@name"/>)<xsl:text>+"'";
@@ -1075,6 +1094,12 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:for-each select="property[@name != $uniqueId and @db_col]">
 			<xsl:choose>
 				<xsl:when test="@enum='true' or @enum='smart'">
+		qs += "<xsl:value-of select="@db_col"/> = " + (_<xsl:value-of select="@name"/><xsl:text>.isValid()
+			? "'"+_</xsl:text><xsl:value-of select="@name"/><xsl:text>.toString()+"'"
+			: "DEFAULT(</xsl:text><xsl:value-of select="@db_col"/><xsl:text>)");
+</xsl:text>
+				</xsl:when>
+				<xsl:when test="@enum='bitset'">
 		qs += "<xsl:value-of select="@db_col"/> = '"+_<xsl:value-of select="@name"/><xsl:text>.toString()+"'";
 </xsl:text>
 				</xsl:when>
@@ -1098,6 +1123,12 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:for-each select="property[@db_col]">
 			<xsl:choose>
 				<xsl:when test="@enum='true' or @enum='smart'">
+		qs += "<xsl:value-of select="@db_col"/> = " + (_<xsl:value-of select="@name"/><xsl:text>.isValid()
+			? "'"+_</xsl:text><xsl:value-of select="@name"/><xsl:text>.toString()+"'"
+			: "DEFAULT(</xsl:text><xsl:value-of select="@db_col"/><xsl:text>)");
+</xsl:text>
+				</xsl:when>
+				<xsl:when test="@enum='bitset'">
 		qs += "<xsl:value-of select="@db_col"/> = '"+_<xsl:value-of select="@name"/><xsl:text>.toString()+"'";
 </xsl:text>
 				</xsl:when>
@@ -2086,7 +2117,7 @@ namespace <xsl:value-of select="@name"/>
 
 </xsl:text>	<xsl:for-each select="property[@db_col]">
 				<xsl:choose>
-					<xsl:when test="@enum='true' or @enum='smart'">
+					<xsl:when test="@enum='true' or @enum='smart' or @enum='bitset'">
 <xsl:text>			{
 				std::string s;
 				result->getField(</xsl:text><xsl:value-of select="position()-1"/>, s);
@@ -2154,7 +2185,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 			result->fetchRow();
 			<xsl:for-each select="../property[@db_col]">
 				<xsl:choose>
-					<xsl:when test="@enum='true' or @enum='smart'">
+					<xsl:when test="@enum='true' or @enum='smart' or @enum='bitset'">
 			{
 				std::string s;
 				result->getField(<xsl:value-of select="position()-1"/>, s);
@@ -2235,7 +2266,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 			result->fetchRow();
 			<xsl:for-each select="../property[@db_col]">
 				<xsl:choose>
-					<xsl:when test="@enum='true' or @enum='smart'">
+					<xsl:when test="@enum='true' or @enum='smart' or @enum='bitset'">
 			{
 				std::string s;
 				result->getField(<xsl:value-of select="position()-1"/>, s);
@@ -2810,7 +2841,8 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 <xsl:if test=".//param[@type != 'uint32'
 				and @type != 'uint8'
 				and @type != 'std::string'
-				and @enum != 'smart']">
+				and @enum != 'smart'
+				and @enum != 'bitset']">
 	<xsl:message terminate="yes">
 		ERROR : PHP interface only support uint8, uint32, enum and std::string parameter in callback interface '<xsl:value-of select="@name"/>.<xsl:value-of select=".//param[@type != 'uint32' and @type != 'uint8' and @type != 'std::string']/../@name"/>'
 	</xsl:message>

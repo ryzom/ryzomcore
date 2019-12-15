@@ -193,11 +193,11 @@
 			<property type="std::string"	name="Lang"					db_col="lang"			byref="true"/>
 			<property type="std::string"	name="Icone"				db_col="icone"			byref="true"/>
 			<property type="TAnimMode"		name="AnimMode"				db_col="anim_mode"		enum="smart"	default="TAnimMode::am_dm"/>
-			<property type="TRaceFilter"	name="RaceFilter"			db_col="race_filter"	enum="smart"/> <!-- FIXME -->
-			<property type="TReligionFilter"	name="ReligionFilter"	db_col="religion_filter"	enum="smart"/> <!-- FIXME -->
+			<property type="TRaceFilter"	name="RaceFilter"			db_col="race_filter"	enum="bitset"/>
+			<property type="TReligionFilter"	name="ReligionFilter"	db_col="religion_filter"	enum="bitset"/>
 			<property type="TGuildFilter"	name="GuildFilter"			db_col="guild_filter"	enum="smart"	default="TGuildFilter::gf_only_my_guild"/>
-			<property type="TShardFilter"	name="ShardFilter"			db_col="shard_filter"	enum="smart"/> <!-- FIXME -->
-			<property type="TLevelFilter"	name="LevelFilter"			db_col="level_filter"	enum="smart"/> <!-- FIXME -->
+			<property type="TShardFilter"	name="ShardFilter"			db_col="shard_filter"	enum="bitset"/>
+			<property type="TLevelFilter"	name="LevelFilter"			db_col="level_filter"	enum="bitset"/>
 			<property type="bool"			name="SubscriptionClosed"	db_col="subscription_closed"			default="0"/>
 			<property type="bool"			name="Newcomer"				db_col="newcomer"						default="1"/>
 

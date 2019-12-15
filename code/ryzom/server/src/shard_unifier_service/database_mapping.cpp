@@ -160,7 +160,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_TargetCharacter), connection)+"'";
 		qs += ", ";
-		qs += "'"+_Relation.toString()+"'";
+		qs += _Relation.isValid()
+			? "'"+_Relation.toString()+"'"
+			: "DEFAULT(relation_type)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Comments), connection)+"'";
 
@@ -225,7 +227,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "targer_character = '"+MSW::escapeString(NLMISC::toString(_TargetCharacter), connection)+"'";
 		qs += ", ";
-		qs += "relation_type = '"+_Relation.toString()+"'";
+		qs += "relation_type = " + (_Relation.isValid()
+			? "'"+_Relation.toString()+"'"
+			: "DEFAULT(relation_type)");
 		qs += ", ";
 		qs += "comments = '"+MSW::escapeString(NLMISC::toString(_Comments), connection)+"'";
 
@@ -815,7 +819,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_CharId), connection)+"'";
 		qs += ", ";
-		qs += "'"+_Status.toString()+"'";
+		qs += _Status.isValid()
+			? "'"+_Status.toString()+"'"
+			: "DEFAULT(status)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Kicked), connection)+"'";
 
@@ -878,7 +884,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "char_id = '"+MSW::escapeString(NLMISC::toString(_CharId), connection)+"'";
 		qs += ", ";
-		qs += "status = '"+_Status.toString()+"'";
+		qs += "status = " + (_Status.isValid()
+			? "'"+_Status.toString()+"'"
+			: "DEFAULT(status)");
 		qs += ", ";
 		qs += "kicked = '"+MSW::escapeString(NLMISC::toString(_Kicked), connection)+"'";
 
@@ -1482,11 +1490,17 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_RingAccess), connection)+"'";
 		qs += ", ";
-		qs += "'"+_Race.toString()+"'";
+		qs += _Race.isValid()
+			? "'"+_Race.toString()+"'"
+			: "DEFAULT(race)";
 		qs += ", ";
-		qs += "'"+_Civilisation.toString()+"'";
+		qs += _Civilisation.isValid()
+			? "'"+_Civilisation.toString()+"'"
+			: "DEFAULT(civilisation)";
 		qs += ", ";
-		qs += "'"+_Cult.toString()+"'";
+		qs += _Cult.isValid()
+			? "'"+_Cult.toString()+"'"
+			: "DEFAULT(cult)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_CurrentSession), connection)+"'";
 		qs += ", ";
@@ -1568,11 +1582,17 @@ namespace RSMGR
 		qs += ", ";
 		qs += "ring_access = '"+MSW::escapeString(NLMISC::toString(_RingAccess), connection)+"'";
 		qs += ", ";
-		qs += "race = '"+_Race.toString()+"'";
+		qs += "race = " + (_Race.isValid()
+			? "'"+_Race.toString()+"'"
+			: "DEFAULT(race)");
 		qs += ", ";
-		qs += "civilisation = '"+_Civilisation.toString()+"'";
+		qs += "civilisation = " + (_Civilisation.isValid()
+			? "'"+_Civilisation.toString()+"'"
+			: "DEFAULT(civilisation)");
 		qs += ", ";
-		qs += "cult = '"+_Cult.toString()+"'";
+		qs += "cult = " + (_Cult.isValid()
+			? "'"+_Cult.toString()+"'"
+			: "DEFAULT(cult)");
 		qs += ", ";
 		qs += "current_session = '"+MSW::escapeString(NLMISC::toString(_CurrentSession), connection)+"'";
 		qs += ", ";
@@ -2506,19 +2526,29 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_CurrentSession), connection)+"'";
 		qs += ", ";
-		qs += "'"+_CurrentActivity.toString()+"'";
+		qs += _CurrentActivity.isValid()
+			? "'"+_CurrentActivity.toString()+"'"
+			: "DEFAULT(current_activity)";
 		qs += ", ";
-		qs += "'"+_CurrentStatus.toString()+"'";
+		qs += _CurrentStatus.isValid()
+			? "'"+_CurrentStatus.toString()+"'"
+			: "DEFAULT(current_status)";
 		qs += ", ";
-		qs += "'"+_PublicLevel.toString()+"'";
+		qs += _PublicLevel.isValid()
+			? "'"+_PublicLevel.toString()+"'"
+			: "DEFAULT(public_level)";
 		qs += ", ";
-		qs += "'"+_AccountType.toString()+"'";
+		qs += _AccountType.isValid()
+			? "'"+_AccountType.toString()+"'"
+			: "DEFAULT(account_type)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_ContentAccessLevel), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Description), connection)+"'";
 		qs += ", ";
-		qs += "'"+_Lang.toString()+"'";
+		qs += _Lang.isValid()
+			? "'"+_Lang.toString()+"'"
+			: "DEFAULT(lang)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Cookie), connection)+"'";
 		qs += ", ";
@@ -2561,19 +2591,29 @@ namespace RSMGR
 		qs += ", ";
 		qs += "current_session = '"+MSW::escapeString(NLMISC::toString(_CurrentSession), connection)+"'";
 		qs += ", ";
-		qs += "current_activity = '"+_CurrentActivity.toString()+"'";
+		qs += "current_activity = " + (_CurrentActivity.isValid()
+			? "'"+_CurrentActivity.toString()+"'"
+			: "DEFAULT(current_activity)");
 		qs += ", ";
-		qs += "current_status = '"+_CurrentStatus.toString()+"'";
+		qs += "current_status = " + (_CurrentStatus.isValid()
+			? "'"+_CurrentStatus.toString()+"'"
+			: "DEFAULT(current_status)");
 		qs += ", ";
-		qs += "public_level = '"+_PublicLevel.toString()+"'";
+		qs += "public_level = " + (_PublicLevel.isValid()
+			? "'"+_PublicLevel.toString()+"'"
+			: "DEFAULT(public_level)");
 		qs += ", ";
-		qs += "account_type = '"+_AccountType.toString()+"'";
+		qs += "account_type = " + (_AccountType.isValid()
+			? "'"+_AccountType.toString()+"'"
+			: "DEFAULT(account_type)");
 		qs += ", ";
 		qs += "content_access_level = '"+MSW::escapeString(NLMISC::toString(_ContentAccessLevel), connection)+"'";
 		qs += ", ";
 		qs += "description = '"+MSW::escapeString(NLMISC::toString(_Description), connection)+"'";
 		qs += ", ";
-		qs += "lang = '"+_Lang.toString()+"'";
+		qs += "lang = " + (_Lang.isValid()
+			? "'"+_Lang.toString()+"'"
+			: "DEFAULT(lang)");
 		qs += ", ";
 		qs += "cookie = '"+MSW::escapeString(NLMISC::toString(_Cookie), connection)+"'";
 		qs += ", ";
@@ -3319,7 +3359,9 @@ namespace RSMGR
 		qs += "session_type, title, owner, plan_date, start_date, description, orientation, level, rule_type, access_type, state, host_shard_id, subscription_slots, reserved_slots, estimated_duration, final_duration, folder_id, lang, icone, anim_mode, race_filter, religion_filter, guild_filter, shard_filter, level_filter, subscription_closed, newcomer";
 		qs += ") VALUES (";
 		
-		qs += "'"+_SessionType.toString()+"'";
+		qs += _SessionType.isValid()
+			? "'"+_SessionType.toString()+"'"
+			: "DEFAULT(session_type)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Title), connection)+"'";
 		qs += ", ";
@@ -3331,15 +3373,25 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Description), connection)+"'";
 		qs += ", ";
-		qs += "'"+_Orientation.toString()+"'";
+		qs += _Orientation.isValid()
+			? "'"+_Orientation.toString()+"'"
+			: "DEFAULT(orientation)";
 		qs += ", ";
-		qs += "'"+_Level.toString()+"'";
+		qs += _Level.isValid()
+			? "'"+_Level.toString()+"'"
+			: "DEFAULT(level)";
 		qs += ", ";
-		qs += "'"+_RuleType.toString()+"'";
+		qs += _RuleType.isValid()
+			? "'"+_RuleType.toString()+"'"
+			: "DEFAULT(rule_type)";
 		qs += ", ";
-		qs += "'"+_AccessType.toString()+"'";
+		qs += _AccessType.isValid()
+			? "'"+_AccessType.toString()+"'"
+			: "DEFAULT(access_type)";
 		qs += ", ";
-		qs += "'"+_State.toString()+"'";
+		qs += _State.isValid()
+			? "'"+_State.toString()+"'"
+			: "DEFAULT(state)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_HostShardId), connection)+"'";
 		qs += ", ";
@@ -3347,7 +3399,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_ReservedSlots), connection)+"'";
 		qs += ", ";
-		qs += "'"+_EstimatedDuration.toString()+"'";
+		qs += _EstimatedDuration.isValid()
+			? "'"+_EstimatedDuration.toString()+"'"
+			: "DEFAULT(estimated_duration)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_FinalDuration), connection)+"'";
 		qs += ", ";
@@ -3357,13 +3411,17 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Icone), connection)+"'";
 		qs += ", ";
-		qs += "'"+_AnimMode.toString()+"'";
+		qs += _AnimMode.isValid()
+			? "'"+_AnimMode.toString()+"'"
+			: "DEFAULT(anim_mode)";
 		qs += ", ";
 		qs += "'"+_RaceFilter.toString()+"'";
 		qs += ", ";
 		qs += "'"+_ReligionFilter.toString()+"'";
 		qs += ", ";
-		qs += "'"+_GuildFilter.toString()+"'";
+		qs += _GuildFilter.isValid()
+			? "'"+_GuildFilter.toString()+"'"
+			: "DEFAULT(guild_filter)";
 		qs += ", ";
 		qs += "'"+_ShardFilter.toString()+"'";
 		qs += ", ";
@@ -3428,7 +3486,9 @@ namespace RSMGR
 		std::string qs;
 		qs = "UPDATE sessions SET ";
 		
-		qs += "session_type = '"+_SessionType.toString()+"'";
+		qs += "session_type = " + (_SessionType.isValid()
+			? "'"+_SessionType.toString()+"'"
+			: "DEFAULT(session_type)");
 		qs += ", ";
 		qs += "title = '"+MSW::escapeString(NLMISC::toString(_Title), connection)+"'";
 		qs += ", ";
@@ -3440,15 +3500,25 @@ namespace RSMGR
 		qs += ", ";
 		qs += "description = '"+MSW::escapeString(NLMISC::toString(_Description), connection)+"'";
 		qs += ", ";
-		qs += "orientation = '"+_Orientation.toString()+"'";
+		qs += "orientation = " + (_Orientation.isValid()
+			? "'"+_Orientation.toString()+"'"
+			: "DEFAULT(orientation)");
 		qs += ", ";
-		qs += "level = '"+_Level.toString()+"'";
+		qs += "level = " + (_Level.isValid()
+			? "'"+_Level.toString()+"'"
+			: "DEFAULT(level)");
 		qs += ", ";
-		qs += "rule_type = '"+_RuleType.toString()+"'";
+		qs += "rule_type = " + (_RuleType.isValid()
+			? "'"+_RuleType.toString()+"'"
+			: "DEFAULT(rule_type)");
 		qs += ", ";
-		qs += "access_type = '"+_AccessType.toString()+"'";
+		qs += "access_type = " + (_AccessType.isValid()
+			? "'"+_AccessType.toString()+"'"
+			: "DEFAULT(access_type)");
 		qs += ", ";
-		qs += "state = '"+_State.toString()+"'";
+		qs += "state = " + (_State.isValid()
+			? "'"+_State.toString()+"'"
+			: "DEFAULT(state)");
 		qs += ", ";
 		qs += "host_shard_id = '"+MSW::escapeString(NLMISC::toString(_HostShardId), connection)+"'";
 		qs += ", ";
@@ -3456,7 +3526,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "reserved_slots = '"+MSW::escapeString(NLMISC::toString(_ReservedSlots), connection)+"'";
 		qs += ", ";
-		qs += "estimated_duration = '"+_EstimatedDuration.toString()+"'";
+		qs += "estimated_duration = " + (_EstimatedDuration.isValid()
+			? "'"+_EstimatedDuration.toString()+"'"
+			: "DEFAULT(estimated_duration)");
 		qs += ", ";
 		qs += "final_duration = '"+MSW::escapeString(NLMISC::toString(_FinalDuration), connection)+"'";
 		qs += ", ";
@@ -3466,13 +3538,17 @@ namespace RSMGR
 		qs += ", ";
 		qs += "icone = '"+MSW::escapeString(NLMISC::toString(_Icone), connection)+"'";
 		qs += ", ";
-		qs += "anim_mode = '"+_AnimMode.toString()+"'";
+		qs += "anim_mode = " + (_AnimMode.isValid()
+			? "'"+_AnimMode.toString()+"'"
+			: "DEFAULT(anim_mode)");
 		qs += ", ";
 		qs += "race_filter = '"+_RaceFilter.toString()+"'";
 		qs += ", ";
 		qs += "religion_filter = '"+_ReligionFilter.toString()+"'";
 		qs += ", ";
-		qs += "guild_filter = '"+_GuildFilter.toString()+"'";
+		qs += "guild_filter = " + (_GuildFilter.isValid()
+			? "'"+_GuildFilter.toString()+"'"
+			: "DEFAULT(guild_filter)");
 		qs += ", ";
 		qs += "shard_filter = '"+_ShardFilter.toString()+"'";
 		qs += ", ";
@@ -4517,7 +4593,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_WSOnline), connection)+"'";
 		qs += ", ";
-		qs += "'"+_RequiredState.toString()+"'";
+		qs += _RequiredState.isValid()
+			? "'"+_RequiredState.toString()+"'"
+			: "DEFAULT(RequiredState)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_MOTD), connection)+"'";
 
@@ -4552,7 +4630,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "WSOnline = '"+MSW::escapeString(NLMISC::toString(_WSOnline), connection)+"'";
 		qs += ", ";
-		qs += "RequiredState = '"+_RequiredState.toString()+"'";
+		qs += "RequiredState = " + (_RequiredState.isValid()
+			? "'"+_RequiredState.toString()+"'"
+			: "DEFAULT(RequiredState)");
 		qs += ", ";
 		qs += "MOTD = '"+MSW::escapeString(NLMISC::toString(_MOTD), connection)+"'";
 
@@ -6985,7 +7065,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Author), connection)+"'";
 		qs += ", ";
-		qs += "'"+_Type.toString()+"'";
+		qs += _Type.isValid()
+			? "'"+_Type.toString()+"'"
+			: "DEFAULT(type)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Text), connection)+"'";
 		qs += ", ";
@@ -7037,7 +7119,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "author = '"+MSW::escapeString(NLMISC::toString(_Author), connection)+"'";
 		qs += ", ";
-		qs += "type = '"+_Type.toString()+"'";
+		qs += "type = " + (_Type.isValid()
+			? "'"+_Type.toString()+"'"
+			: "DEFAULT(type)");
 		qs += ", ";
 		qs += "text = '"+MSW::escapeString(NLMISC::toString(_Text), connection)+"'";
 		qs += ", ";
@@ -8864,13 +8948,19 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_RRPTotal), connection)+"'";
 		qs += ", ";
-		qs += "'"+_AnimMode.toString()+"'";
+		qs += _AnimMode.isValid()
+			? "'"+_AnimMode.toString()+"'"
+			: "DEFAULT(anim_mode)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Language), connection)+"'";
 		qs += ", ";
-		qs += "'"+_Orientation.toString()+"'";
+		qs += _Orientation.isValid()
+			? "'"+_Orientation.toString()+"'"
+			: "DEFAULT(orientation)";
 		qs += ", ";
-		qs += "'"+_Level.toString()+"'";
+		qs += _Level.isValid()
+			? "'"+_Level.toString()+"'"
+			: "DEFAULT(level)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_AllowFreeTrial), connection)+"'";
 
@@ -8913,13 +9003,19 @@ namespace RSMGR
 		qs += ", ";
 		qs += "rrp_total = '"+MSW::escapeString(NLMISC::toString(_RRPTotal), connection)+"'";
 		qs += ", ";
-		qs += "anim_mode = '"+_AnimMode.toString()+"'";
+		qs += "anim_mode = " + (_AnimMode.isValid()
+			? "'"+_AnimMode.toString()+"'"
+			: "DEFAULT(anim_mode)");
 		qs += ", ";
 		qs += "language = '"+MSW::escapeString(NLMISC::toString(_Language), connection)+"'";
 		qs += ", ";
-		qs += "orientation = '"+_Orientation.toString()+"'";
+		qs += "orientation = " + (_Orientation.isValid()
+			? "'"+_Orientation.toString()+"'"
+			: "DEFAULT(orientation)");
 		qs += ", ";
-		qs += "level = '"+_Level.toString()+"'";
+		qs += "level = " + (_Level.isValid()
+			? "'"+_Level.toString()+"'"
+			: "DEFAULT(level)");
 		qs += ", ";
 		qs += "allow_free_trial = '"+MSW::escapeString(NLMISC::toString(_AllowFreeTrial), connection)+"'";
 
