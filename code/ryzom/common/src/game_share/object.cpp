@@ -801,9 +801,9 @@ void CObjectNumber::doSerialize(std::string& out,  CSerializeContext& /* context
 {
 	//H_AUTO(R2_CObjectNumber_doSerialize)
 	nlassert(!getGhost());
-	if (m_IsInteger)
+	if (doIsInteger())
 	{
-		out += NLMISC::toString(m_Value.Integer);
+		out += NLMISC::toString(getIntegerValue());
 	}
 	else
 	{
@@ -852,15 +852,20 @@ bool CObjectNumber::set(const std::string& key,  const std::string & value)
 	BOMB_IF(!key.empty(), "Try to set an element of a table on an object that is not a table", return false);
 	double num;
 	sint64 i;
+	if (NLMISC::fromString(value, i))
+	{
+		if (NLMISC::toString(i) == value)
+		{
+			m_IsInteger = true;
+			m_Value.Integer = i;
+			return true;
+		}
+	}
 	if (NLMISC::fromString(value, num))
 	{
 		m_IsInteger = false;
 		m_Value.Number = num;
-	}
-	if (NLMISC::fromString(value, i))
-	{
-		m_IsInteger = true;
-		m_Value.Number = i;
+		return true;
 	}
 	return false;
 }
@@ -905,9 +910,8 @@ bool CObjectNumber::setObject(const std::string& /* key */,  CObject* value)
 bool CObjectNumber::equal(const CObject* other) const
 {
 	if (!other) return false;
-	if (isInteger())
+	if (isInteger() && other->isInteger())
 	{
-		if (!other->isInteger()) return false;
 		return (getIntegerValue() == other->toInteger());
 	}
 
