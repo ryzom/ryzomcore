@@ -365,10 +365,6 @@ namespace NLGUI
 		void		setModulateGlobalColor(bool state) {_ModulateGlobalColor= state;}
 		bool		getModulateGlobalColor() const {return _ModulateGlobalColor;}
 
-
-		void dummySet(sint32 value);
-		void dummySet(const std::string &value);
-
 		// lua methods
 		int luaUpdateCoords(CLuaState &ls);
 		int luaInvalidateCoords(CLuaState &ls);
@@ -381,6 +377,11 @@ namespace NLGUI
 		void setSizeRef(const std::string &sizeref);
 		std::string getSizeRefAsString() const;
 		std::string getSizeRefAsString(  const sint32 &sizeRef, const sint32 &sizeDivW, const sint32 &sizeDivH  ) const;
+
+		void dummySet(sint32 value);
+		void dummySet(const std::string &value);
+
+	public:
 
 		// export some properties
 		REFLECT_EXPORT_START(CInterfaceElement, CReflectable)

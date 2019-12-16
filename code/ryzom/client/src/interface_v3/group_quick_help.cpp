@@ -348,7 +348,7 @@ void CGroupQuickHelp::browse (const char *url)
 
 // ***************************************************************************
 
-std::string	CGroupQuickHelp::home()
+std::string	CGroupQuickHelp::home() const
 {
 	string completeURL = getLanguageUrl(Home, ClientCfg.getHtmlLanguageCode());
 

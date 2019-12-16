@@ -4318,7 +4318,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	string	CGroupHTML::home ()
+	string	CGroupHTML::home () const
 	{
 		return Home;
 	}

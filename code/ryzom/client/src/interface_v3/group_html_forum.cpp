@@ -108,10 +108,10 @@ void CGroupHTMLForum::addHTTPPostParams (SFormFields &formfields, bool /*trusted
 
 // ***************************************************************************
 
-string	CGroupHTMLForum::home ()
+string	CGroupHTMLForum::home () const
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FORUM_UPDATED")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FORUM_UPDATED")->setValue32(0); // FIXME: How is this const?!
 	return Home;
 }
 

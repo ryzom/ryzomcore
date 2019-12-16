@@ -181,7 +181,7 @@ namespace NLGUI
 				REFLECT_STRING("AHParamsClose", getAHParamsClose, setAHParamsClose);
 				REFLECT_BOOL("Opened", getOpened, setOpened);
 				REFLECT_BOOL("Show", getShow, setShow);
-				REFLECT_UCSTRING("Text", getText, setText);
+				REFLECT_UCSTRING_REF("Text", getText, setText);
 				// lua
 				REFLECT_LUA_METHOD("getNumChildren", luaGetNumChildren);
 				REFLECT_LUA_METHOD("getChild", luaGetChild);

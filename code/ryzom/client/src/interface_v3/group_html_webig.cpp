@@ -396,7 +396,7 @@ void CGroupHTMLAuth::addHTTPPostParams (SFormFields &formfields, bool trustedDom
 
 // ***************************************************************************
 
-string CGroupHTMLAuth::home ()
+string CGroupHTMLAuth::home () const
 {
 	return Home;
 }
@@ -442,7 +442,7 @@ void CGroupHTMLWebIG::addHTTPPostParams (SFormFields &formfields, bool trustedDo
 
 // ***************************************************************************
 
-string CGroupHTMLWebIG::home ()
+string CGroupHTMLWebIG::home () const
 {
 	return Home;
 }

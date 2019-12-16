@@ -1435,6 +1435,20 @@ namespace NLGUI
 	#endif
 			}
 			break;
+			case CReflectedProperty::UCStringRef:
+			{
+				ucstring str = (reflectedObject.*(property.GetMethod.GetUCStringRef))();
+	#if LUABIND_VERSION > 600
+				luabind::detail::push(ls.getStatePointer(), str);
+	#else
+				luabind::object obj(ls.getStatePointer(), str);
+				obj.pushvalue();
+	#endif
+			}
+			break;
+			case CReflectedProperty::StringRef:
+				ls.push( (reflectedObject.*(property.GetMethod.GetStringRef))() );
+			break;
 			case CReflectedProperty::RGBA:
 			{
 				CRGBA color = (reflectedObject.*(property.GetMethod.GetRGBA))();
@@ -1499,6 +1513,7 @@ namespace NLGUI
 					return;
 				}
 			case CReflectedProperty::String:
+			case CReflectedProperty::StringRef:
 				{
 					std::string val;
 					ls.toString(stackIndex,    val);
@@ -1506,6 +1521,7 @@ namespace NLGUI
 					return;
 				}
 			case CReflectedProperty::UCString:
+			case CReflectedProperty::UCStringRef:
 				{
 					ucstring val;
 					// Additionaly return of CInterfaceExpr may be std::string... test std string too

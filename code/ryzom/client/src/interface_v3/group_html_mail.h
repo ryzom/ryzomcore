@@ -45,7 +45,7 @@ public:
 	// From CGroupHTML
 	virtual void addHTTPGetParams (std::string &url, bool trustedDomain);
 	virtual void addHTTPPostParams (SFormFields &formfields, bool trustedDomain);
-	virtual std::string	home();
+	virtual std::string	home() const NL_OVERRIDE;
 	virtual void handle ();
 
 private:
