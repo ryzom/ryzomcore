@@ -1243,6 +1243,7 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 #if LUA_VERSION_NUM >= 503
 			if (lua_isinteger(state, -1) != 0)
 			{
+				nlctassert(sizeof(lua_Integer) == sizeof(sint64));
 				sint64 value = lua_tointeger(state, -1);
 				lua_pop(state, 1);
 				return new CObjectNumber(value);
@@ -1250,6 +1251,7 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 			else
 #endif
 			{
+				nlctassert(sizeof(lua_Number) == sizeof(double));
 				double value = lua_tonumber(state, -1);
 				lua_pop(state, 1);
 				return new CObjectNumber(value);
