@@ -106,6 +106,7 @@ namespace NLGUI
 				}
 			break;
 			case CReflectedProperty::String:
+			case CReflectedProperty::StringRef:
 				if (valueToAffect.toString())
 				{
 					(destElem.*(property.SetMethod.SetString))(valueToAffect.getString());
@@ -117,6 +118,7 @@ namespace NLGUI
 				}
 			break;
 			case CReflectedProperty::UCString:
+			case CReflectedProperty::UCStringRef:
 				if (valueToAffect.toString())
 				{
 					(destElem.*(property.SetMethod.SetUCString))(valueToAffect.getUCString());

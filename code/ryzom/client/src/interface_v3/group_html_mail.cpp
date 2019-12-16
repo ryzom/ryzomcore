@@ -77,10 +77,10 @@ void CGroupHTMLMail::addHTTPPostParams (SFormFields &formfields, bool /*trustedD
 
 // ***************************************************************************
 
-string	CGroupHTMLMail::home ()
+string	CGroupHTMLMail::home () const
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIL_WAITING")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIL_WAITING")->setValue32(0); // FIXME: How is this const?!
 	return Home;
 }
 

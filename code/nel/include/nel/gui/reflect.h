@@ -42,6 +42,8 @@ namespace NLGUI
 					 Float,
 					 String,
 					 UCString,
+					 StringRef,
+					 UCStringRef,
 					 RGBA,
 					 LuaMethod
 					}; // other types will be added when needed
@@ -52,6 +54,8 @@ namespace NLGUI
 		typedef float			(CReflectable::* TGetFloat) () const;
 		typedef std::string		(CReflectable::* TGetString) () const;
 		typedef ucstring		(CReflectable::* TGetUCString) () const;
+		typedef const std::string &		(CReflectable::* TGetStringRef) () const;
+		typedef const ucstring &		(CReflectable::* TGetUCStringRef) () const;
 		typedef NLMISC::CRGBA	(CReflectable::* TGetRGBA) () const;
 		//
 		typedef void   (CReflectable::* TSetBool) (bool);
@@ -75,6 +79,8 @@ namespace NLGUI
 			TGetFloat		GetFloat;
 			TGetString		GetString;
 			TGetUCString	GetUCString;
+			TGetStringRef	GetStringRef;
+			TGetUCStringRef	GetUCStringRef;
 			TGetRGBA		GetRGBA;
 			TLuaMethod		GetLuaMethod; // lua method can only be obtained, not written ...
 		} GetMethod;
@@ -108,7 +114,7 @@ namespace NLGUI
 	public:
 		virtual ~CReflectable() {}
 		virtual const char *getReflectedClassName() const { return "CReflectable"; }
-		virtual const char *getRflectedParentClassName() const { return ""; }
+		virtual const char *getReflectedParentClassName() const { return ""; }
 
 		/** When registering classes, the reflect system will call this function on each class
 		  * to know which properties they exports.
@@ -211,8 +217,8 @@ namespace NLGUI
 	  * Should be placed inside the class
 	  */
 	#define REFLECT_EXPORT_START(className, parentName)                                        \
-		virtual const char *getReflectedClassName() const { return #className; }			   \
-		virtual const char *getReflectedParentClassName() const { return #parentName; }		   \
+		virtual const char *getReflectedClassName() const NL_OVERRIDE { return #className; }			   \
+		virtual const char *getReflectedParentClassName() const NL_OVERRIDE { return #parentName; }		   \
 		static void getReflectedProperties(TReflectedProperties &props)                        \
 		{                                                                                      \
 			typedef className A;                                                               \
@@ -222,6 +228,8 @@ namespace NLGUI
 			typedef float			(className::* TGetFloata) () const;                        \
 			typedef std::string		(className::* TGetStringa) () const;                       \
 			typedef ucstring		(className::* TGetUCStringa) () const;                     \
+			typedef const std::string &		(className::* TGetStringRefa) () const;                       \
+			typedef const ucstring &		(className::* TGetUCStringRefa) () const;                     \
 			typedef NLMISC::CRGBA	(className::* TGetRGBAa) () const;                         \
 			typedef void   (className::* TSetBoola) (bool);                                    \
 			typedef void   (className::* TSetSInt32a) (sint32);                                \
@@ -240,8 +248,8 @@ namespace NLGUI
 		CReflectedProperty prop;                                            \
 		prop.Name = exportName;                                             \
 		prop.Type = CReflectedProperty::Boolean;                            \
-		prop.GetMethod.GetBool = (CReflectedProperty::TGetBool) (TGetBoola) &A::getMethod; \
-		prop.SetMethod.SetBool = (CReflectedProperty::TSetBool) (TSetBoola) &A::setMethod; \
+		prop.GetMethod.GetBool = (CReflectedProperty::TGetBool) static_cast<TGetBoola>(&A::getMethod); \
+		prop.SetMethod.SetBool = (CReflectedProperty::TSetBool) static_cast<TSetBoola>(&A::setMethod); \
 		props.push_back(prop);                                              \
 	}
 
@@ -251,8 +259,8 @@ namespace NLGUI
 		CReflectedProperty prop;                                                       \
 		prop.Name = exportName;                                                        \
 		prop.Type = CReflectedProperty::SInt32;                                        \
-		prop.GetMethod.GetSInt32 = (CReflectedProperty::TGetSInt32) (TGetSInt32a) &A::getMethod;        \
-		prop.SetMethod.SetSInt32 = (CReflectedProperty::TSetSInt32) (TSetSInt32a) &A::setMethod;        \
+		prop.GetMethod.GetSInt32 = (CReflectedProperty::TGetSInt32) static_cast<TGetSInt32a>(&A::getMethod); \
+		prop.SetMethod.SetSInt32 = (CReflectedProperty::TSetSInt32) static_cast<TSetSInt32a>(&A::setMethod); \
 		props.push_back(prop);                                                         \
 	}
 
@@ -262,8 +270,8 @@ namespace NLGUI
 		CReflectedProperty prop;                                                       \
 		prop.Name = exportName;                                                        \
 		prop.Type = CReflectedProperty::UInt32;                                        \
-		prop.GetMethod.GetUInt32 = (CReflectedProperty::TGetUInt32) (TGetUInt32a) &A::getMethod;        \
-		prop.SetMethod.SetUInt32 = (CReflectedProperty::TSetUInt32) (TSetUInt32a) &A::setMethod;        \
+		prop.GetMethod.GetUInt32 = (CReflectedProperty::TGetUInt32) static_cast<TGetUInt32a>(&A::getMethod); \
+		prop.SetMethod.SetUInt32 = (CReflectedProperty::TSetUInt32) static_cast<TSetUInt32a>(&A::setMethod); \
 		props.push_back(prop);                                                         \
 	}
 
@@ -273,8 +281,8 @@ namespace NLGUI
 		CReflectedProperty prop;                                                       \
 		prop.Name = exportName;                                                        \
 		prop.Type = CReflectedProperty::Float;                                         \
-		prop.GetMethod.GetFloat = (CReflectedProperty::TGetFloat) (TGetFloata) &A::getMethod;          \
-		prop.SetMethod.SetFloat = (CReflectedProperty::TSetFloat) (TSetFloata) &A::setMethod;          \
+		prop.GetMethod.GetFloat = (CReflectedProperty::TGetFloat) static_cast<TGetFloata>(&A::getMethod); \
+		prop.SetMethod.SetFloat = (CReflectedProperty::TSetFloat) static_cast<TSetFloata>(&A::setMethod); \
 		props.push_back(prop);                                                         \
 	}
 
@@ -284,8 +292,8 @@ namespace NLGUI
 		CReflectedProperty prop;                                                       \
 		prop.Name = exportName;                                                        \
 		prop.Type = CReflectedProperty::String;                                        \
-		prop.GetMethod.GetString = (CReflectedProperty::TGetString) (TGetStringa) &A::getMethod;        \
-		prop.SetMethod.SetString = (CReflectedProperty::TSetString) (TSetStringa) &A::setMethod;        \
+		prop.GetMethod.GetString = (CReflectedProperty::TGetString) static_cast<TGetStringa>(&A::getMethod); \
+		prop.SetMethod.SetString = (CReflectedProperty::TSetString) static_cast<TSetStringa>(&A::setMethod); \
 		props.push_back(prop);                                                         \
 	}
 
@@ -295,8 +303,30 @@ namespace NLGUI
 		CReflectedProperty prop;                                                       \
 		prop.Name = exportName;                                                        \
 		prop.Type = CReflectedProperty::UCString;                                      \
-		prop.GetMethod.GetUCString = (CReflectedProperty::TGetUCString) (TGetUCStringa) &A::getMethod;    \
-		prop.SetMethod.SetUCString = (CReflectedProperty::TSetUCString) (TSetUCStringa) &A::setMethod;    \
+		prop.GetMethod.GetUCString = (CReflectedProperty::TGetUCString) static_cast<TGetUCStringa>(&A::getMethod); \
+		prop.SetMethod.SetUCString = (CReflectedProperty::TSetUCString) static_cast<TSetUCStringa>(&A::setMethod); \
+		props.push_back(prop);                                                         \
+	}
+
+	// export a string value, by giving the name of the get and the set method
+	#define REFLECT_STRING_REF(exportName, getMethod, setMethod)                           \
+	{                                                                                  \
+		CReflectedProperty prop;                                                       \
+		prop.Name = exportName;                                                        \
+		prop.Type = CReflectedProperty::StringRef;                                     \
+		prop.GetMethod.GetStringRef = (CReflectedProperty::TGetStringRef) static_cast<TGetStringRefa>(&A::getMethod); \
+		prop.SetMethod.SetString = (CReflectedProperty::TSetString) static_cast<TSetStringa>(&A::setMethod); \
+		props.push_back(prop);                                                         \
+	}
+
+	// export a unicode string value, by giving the name of the get and the set method
+	#define REFLECT_UCSTRING_REF(exportName, getMethod, setMethod)                         \
+	{                                                                                  \
+		CReflectedProperty prop;                                                       \
+		prop.Name = exportName;                                                        \
+		prop.Type = CReflectedProperty::UCStringRef;                                   \
+		prop.GetMethod.GetUCStringRef = (CReflectedProperty::TGetUCStringRef) static_cast<TGetUCStringRefa>(&A::getMethod); \
+		prop.SetMethod.SetUCString = (CReflectedProperty::TSetUCString) static_cast<TSetUCStringa>(&A::setMethod); \
 		props.push_back(prop);                                                         \
 	}
 
@@ -307,8 +337,8 @@ namespace NLGUI
 		CReflectedProperty prop;                                                       \
 		prop.Name = exportName;                                                        \
 		prop.Type = CReflectedProperty::RGBA;										   \
-		prop.GetMethod.GetRGBA = (CReflectedProperty::TGetRGBA) (TGetRGBAa) &A::getMethod;		       \
-		prop.SetMethod.SetRGBA = (CReflectedProperty::TSetRGBA) (TSetRGBAa) &A::setMethod;			   \
+		prop.GetMethod.GetRGBA = (CReflectedProperty::TGetRGBA) static_cast<TGetRGBAa>(&A::getMethod); \
+		prop.SetMethod.SetRGBA = (CReflectedProperty::TSetRGBA) static_cast<TSetRGBAa>(&A::setMethod); \
 		props.push_back(prop);                                                         \
 	}
 
@@ -318,7 +348,7 @@ namespace NLGUI
 		CReflectedProperty prop;                                                       \
 		prop.Name = exportName;                                                        \
 		prop.Type = CReflectedProperty::LuaMethod;									   \
-		prop.GetMethod.GetLuaMethod = (CReflectedProperty::TLuaMethod) (TLuaMethoda) &A::method;		   \
+		prop.GetMethod.GetLuaMethod = (CReflectedProperty::TLuaMethod) static_cast<TLuaMethoda>(&A::method); \
 		props.push_back(prop);                                                         \
 	}
 

@@ -555,6 +555,12 @@ namespace NLGUI
 			case CReflectedProperty::UCString:
 				result.setUCString ((elem->*(pRP->GetMethod.GetUCString))());
 			break;
+			case CReflectedProperty::StringRef:
+				result.setString ((elem->*(pRP->GetMethod.GetStringRef))());
+			break;
+			case CReflectedProperty::UCStringRef:
+				result.setUCString ((elem->*(pRP->GetMethod.GetUCStringRef))());
+			break;
 			case CReflectedProperty::RGBA:
 				result.setRGBA ((elem->*(pRP->GetMethod.GetRGBA))());
 			break;

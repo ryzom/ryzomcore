@@ -88,7 +88,7 @@ void CGroupHTMLCS::addHTTPPostParams (SFormFields &formfields, bool /*trustedDom
 
 // ***************************************************************************
 
-string	CGroupHTMLCS::home ()
+string	CGroupHTMLCS::home () const
 {
 	return Home;
 }

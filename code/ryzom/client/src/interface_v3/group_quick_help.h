@@ -53,7 +53,7 @@ private:
 	virtual void beginElement (NLGUI::CHtmlElement &elm);
 	virtual void endBuild ();
 	virtual void browse (const char *url);
-	virtual std::string	home();
+	virtual std::string	home() const NL_OVERRIDE;
 
 	// Modify uri with '.html' or '_??.html' ending to have current user language,
 	// If the uri is not found locally, then try "en" as fallback language

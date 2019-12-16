@@ -215,7 +215,7 @@ namespace NLGUI
 		// Browser home
 		std::string		Home;
 		// Get Home URL
-		virtual std::string	home();
+		virtual std::string	home() const;
 
 		// Undo browse: Browse the precedent url browsed. no op if none
 		void browseUndo ();

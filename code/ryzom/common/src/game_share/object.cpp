@@ -175,12 +175,6 @@ void CObject::inPlaceCopy(const CObjectNumber &src)
 	copyMismatchMsg(src);
 }
 
-void CObject::inPlaceCopy(const CObjectInteger &src)
-{
-	//H_AUTO(R2_CObject_inPlaceCopy)
-	copyMismatchMsg(src);
-}
-
 void CObject::inPlaceCopy(const CObjectTable &src)
 {
 	//H_AUTO(R2_CObject_inPlaceCopy)
@@ -764,7 +758,15 @@ void CObjectRefId::doSerialize(std::string& out,  CSerializeContext& /* context 
 //----------------------- CObjectNumber ----------------------------------------
 
 
-CObjectNumber::CObjectNumber(double value) : CObject(), _Value(value){}
+CObjectNumber::CObjectNumber(double value) : CObject(), m_IsInteger(false) 
+{
+	m_Value.Number = value;
+}
+
+CObjectNumber::CObjectNumber(sint64 value) : CObject(), m_IsInteger(true) 
+{
+	m_Value.Integer = value;
+}
 
 const char *CObjectNumber::getTypeAsString() const
 {
@@ -787,28 +789,49 @@ void CObjectNumber::inPlaceCopyTo(CObject &dest) const
 void CObjectNumber::inPlaceCopy(const CObjectNumber &src)
 {
 	//H_AUTO(R2_CObjectNumber_inPlaceCopy)
-	_Value = src._Value;
+	m_IsInteger = src.m_IsInteger;
+	m_Value.Integer = src.m_Value.Integer;
 	setGhost(src.getGhost());
 }
 
 
-std::string CObjectNumber::doToString() const { return NLMISC::toString("%lf", _Value);}
+std::string CObjectNumber::doToString() const { return m_IsInteger ? NLMISC::toString(m_Value.Integer) : NLMISC::toString("%lf", m_Value.Number);}
 
 void CObjectNumber::doSerialize(std::string& out,  CSerializeContext& /* context */) const
 {
 	//H_AUTO(R2_CObjectNumber_doSerialize)
 	nlassert(!getGhost());
-	//out.precision(15);
-	std::string value = NLMISC::toString(double(sint64(_Value * 1000.0 + (_Value>=0.0?0.5:-0.5)))/1000.0);
-	// search for first not 0 value from the end
-	std::string::size_type pos = value.find_last_not_of('0');
-	if (pos != std::string::npos)
+	if (doIsInteger())
 	{
-		// don't remove character at pos if it's another digit
-		if (value[pos] != '.') ++pos;
-		value.erase(pos);
+		out += NLMISC::toString(getIntegerValue());
 	}
-	out += value;
+	else
+	{
+		//out.precision(15);
+		double num = getNumberValue();
+		// TODO: WTF is this for?!
+		std::string value = NLMISC::toString(double(sint64(num * 1000.0 + (num>=0.0?0.5:-0.5)))/1000.0);
+		// search for first not 0 value from the end
+		std::string::size_type pos = value.find_last_not_of('0');
+		if (pos != std::string::npos)
+		{
+			// don't remove character at pos if it's another digit
+			if (value[pos] != '.') ++pos;
+			value.erase(pos);
+		}
+		out += value;
+	}
+}
+
+bool CObjectNumber::set(const std::string& key, sint64 value)
+{
+	//H_AUTO(R2_CObjectNumber_set)
+
+	BOMB_IF(!key.empty(), "Try to set an element of a table on an object that is not a table", return false);
+
+	m_IsInteger = true;
+	m_Value.Integer = value;
+	return true;
 }
 
 bool CObjectNumber::set(const std::string& key,  double value)
@@ -817,154 +840,89 @@ bool CObjectNumber::set(const std::string& key,  double value)
 
 	BOMB_IF(!key.empty(), "Try to set an element of a table on an object that is not a table", return false);
 
-	_Value = value;
+	m_IsInteger = false;
+	m_Value.Number = value;
 	return true;
 }
-
 
 bool CObjectNumber::set(const std::string& key,  const std::string & value)
 {
 	//H_AUTO(R2_CObjectNumber_set)
 	//XXX
 	BOMB_IF(!key.empty(), "Try to set an element of a table on an object that is not a table", return false);
-	NLMISC::fromString(value, _Value);
-	return true;
+	double num;
+	sint64 i;
+	if (NLMISC::fromString(value, i))
+	{
+		if (NLMISC::toString(i) == value)
+		{
+			m_IsInteger = true;
+			m_Value.Integer = i;
+			return true;
+		}
+	}
+	if (NLMISC::fromString(value, num))
+	{
+		m_IsInteger = false;
+		m_Value.Number = num;
+		return true;
+	}
+	return false;
 }
-
-
-double CObjectNumber::doToNumber() const {  return _Value; }
 
 CObject* CObjectNumber::clone() const
 {
 	//H_AUTO(R2_CObjectNumber_clone)
-	CObjectNumber *result = new CObjectNumber(_Value);
+	CObjectNumber *result = m_IsInteger 
+		? new CObjectNumber(m_Value.Integer) 
+		: new CObjectNumber(m_Value.Number);
 	result->setGhost(getGhost());
 	return result;
 }
 
-bool CObjectNumber::doIsNumber() const  { return true;}
+bool CObjectNumber::doIsNumber() const  { return !m_IsInteger || (sint64)getNumberValue() == m_Value.Integer;}
 
+double CObjectNumber::doToNumber() const {  return getNumberValue(); }
 
+bool CObjectNumber::doIsInteger() const  { return m_IsInteger || (double)getIntegerValue() == m_Value.Number;}
+
+sint64 CObjectNumber::doToInteger() const {  return getIntegerValue(); }
 
 bool CObjectNumber::setObject(const std::string& /* key */,  CObject* value)
 {
 	//H_AUTO(R2_CObjectNumber_setObject)
-	BOMB_IF(!value->isNumber(), NLMISC::toString("Try to set an element of a type '%s' with  a value of type '%s' on an object that is not a number", this->getTypeAsString(), value->getTypeAsString()), return false);
+	BOMB_IF(!value->isNumber() && !value->isInteger(), NLMISC::toString("Try to set an element of a type '%s' with  a value of type '%s' on an object that is not a number", this->getTypeAsString(), value->getTypeAsString()), return false);
 
-	_Value = value->toNumber();
+	if (value->isInteger())
+	{
+		m_IsInteger = true;
+		m_Value.Integer = value->toInteger();
+	}
+	else
+	{
+		m_IsInteger = false;
+		m_Value.Number = value->toNumber();
+	}
 	setGhost(value->getGhost());
 	return true;
 }
-
-
 
 bool CObjectNumber::equal(const CObject* other) const
 {
-	//H_AUTO(R2_CObjectNumber_equal)
-	if (!other || !other->isNumber()) return false;
+	if (!other) return false;
+	if (isInteger() && other->isInteger())
+	{
+		return (getIntegerValue() == other->toInteger());
+	}
+
+	if (!other->isNumber()) return false;
+	double value = getNumberValue();
 	double otherValue = other->toNumber();
-	if (_Value == otherValue) return true;
+	if (value == otherValue) return true;
 
 	// if difference between 2 values less than epsilon, we consider they are equals
-	return fabs(_Value - otherValue) <= std::numeric_limits<double>::epsilon();
+	return fabs(value - otherValue) <= std::numeric_limits<double>::epsilon();
 }
-
-
-//----------------------- CObjectInteger ----------------------------------------
-
-
-CObjectInteger::CObjectInteger(sint64 value) : CObject(), _Value(value){}
-
-const char *CObjectInteger::getTypeAsString() const
-{
-	return "Integer";
-}
-
-void CObjectInteger::visitInternal(IObjectVisitor &visitor)
-{
-	//H_AUTO(R2_CObjectInteger_visit)
-	visitor.visit(*this);
-}
-
-
-void CObjectInteger::inPlaceCopyTo(CObject &dest) const
-{
-	//H_AUTO(R2_CObjectInteger_inPlaceCopyTo)
-	dest.inPlaceCopy(*this);
-}
-
-void CObjectInteger::inPlaceCopy(const CObjectInteger &src)
-{
-	//H_AUTO(R2_CObjectInteger_inPlaceCopy)
-	_Value = src._Value;
-	setGhost(src.getGhost());
-}
-
-
-std::string CObjectInteger::doToString() const { return NLMISC::toString(_Value); }
-
-void CObjectInteger::doSerialize(std::string& out,  CSerializeContext& /* context */) const
-{
-	//H_AUTO(R2_CObjectInteger_doSerialize)
-	nlassert(!getGhost());
-	out += NLMISC::toString(_Value);
-}
-
-bool CObjectInteger::set(const std::string& key,  sint64 value)
-{
-	//H_AUTO(R2_CObjectInteger_set)
-
-	BOMB_IF(!key.empty(), "Try to set an element of a table on an object that is not a table", return false);
-
-	_Value = value;
-	return true;
-}
-
-
-bool CObjectInteger::set(const std::string& key,  const std::string & value)
-{
-	//H_AUTO(R2_CObjectInteger_set)
-	//XXX
-	BOMB_IF(!key.empty(), "Try to set an element of a table on an object that is not a table", return false);
-	NLMISC::fromString(value, _Value);
-	return true;
-}
-
-
-sint64 CObjectInteger::doToInteger() const {  return _Value; }
-
-CObject* CObjectInteger::clone() const
-{
-	//H_AUTO(R2_CObjectInteger_clone)
-	CObjectInteger *result = new CObjectInteger(_Value);
-	result->setGhost(getGhost());
-	return result;
-}
-
-bool CObjectInteger::doIsInteger() const  { return true;}
-
-
-
-bool CObjectInteger::setObject(const std::string& /* key */,  CObject* value)
-{
-	//H_AUTO(R2_CObjectInteger_setObject)
-	BOMB_IF(!value->isInteger(), NLMISC::toString("Try to set an element of a type '%s' with  a value of type '%s' on an object that is not an integer", this->getTypeAsString(), value->getTypeAsString()), return false);
-
-	_Value = value->toInteger();
-	setGhost(value->getGhost());
-	return true;
-}
-
-
-
-bool CObjectInteger::equal(const CObject* other) const
-{
-	//H_AUTO(R2_CObjectInteger_equal)
-	if (!other || !other->isInteger()) return false;
-	sint64 otherValue = other->toInteger();
-	return _Value == otherValue;
-}
-
 
 //----------------------- CObjectTable ----------------------------------------
 
@@ -1686,7 +1644,7 @@ CObject* CObjectFactory::newBasic(const std::string & type)
 	}
 	else if (type == "Number")
 	{
-		return new CObjectNumber(0);
+		return new CObjectNumber((sint64)0);
 	}
 	else if (type == "Table")
 	{
@@ -1976,15 +1934,10 @@ void CObjectNumber::dump(const std::string prefix, uint depth) const
 {
 	//H_AUTO(R2_CObjectNumber_dump)
 	std::string result(depth * 4, ' ');
-	result += NLMISC::toString("%sNumber, ptr = 0x%p, value = %lf, ghost = %s", prefix.c_str(), this, _Value, _Ghost ? "true" : "false");
-	nlwarning(result.c_str());
-}
-
-void CObjectInteger::dump(const std::string prefix, uint depth) const
-{
-	//H_AUTO(R2_CObjectInteger_dump)
-	std::string result(depth * 4, ' ');
-	result += NLMISC::toString("%sInteger, ptr = 0x%p, value = %" NL_I64 "d, ghost = %s", prefix.c_str(), this, _Value, _Ghost ? "true" : "false");
+	if (m_IsInteger)
+		result += NLMISC::toString("%sNumber, ptr = 0x%p, isNumber, value = %lf, ghost = %s", prefix.c_str(), this, m_Value.Integer, _Ghost ? "true" : "false");
+	else
+		result += NLMISC::toString("%sNumber, ptr = 0x%p, isInteger, value = %lf, ghost = %s", prefix.c_str(), this, m_Value.Number, _Ghost ? "true" : "false");
 	nlwarning(result.c_str());
 }
 
@@ -3330,13 +3283,13 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 			{
 				double value;
 				stream.serial(value);
-				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber(0);
+				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber((sint64)0);
 				((CObjectNumber *) data)->set("", value);
 				return;
 			}
 			case ObjectNumberZero:
 			{
-				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber(0);
+				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber((sint64)0);
 				((CObjectNumber *) data)->set("", 0.0);
 				return;
 			}
@@ -3344,8 +3297,8 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 			{
 				sint32 value;
 				stream.serial(value);
-				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber(0);
-				((CObjectNumber *) data)->set("", value);
+				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber((sint64)0);
+				((CObjectNumber *) data)->set("", (sint64)value);
 				return;
 			}
 
@@ -3353,8 +3306,8 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 			{
 				uint32 value;
 				stream.serial(value);
-				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber(0);
-				((CObjectNumber *) data)->set("", value);
+				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber((sint64)0);
+				((CObjectNumber *) data)->set("", (sint64)value);
 				return;
 			}
 
@@ -3362,8 +3315,8 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 			{
 				sint16 value;
 				stream.serial(value);
-				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber(0);
-				((CObjectNumber *) data)->set("", value);
+				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber((sint64)0);
+				((CObjectNumber *) data)->set("", (sint64)value);
 				return;
 			}
 
@@ -3371,8 +3324,8 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 			{
 				uint16 value;
 				stream.serial(value);
-				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber(0);
-				((CObjectNumber *) data)->set("", value);
+				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber((sint64)0);
+				((CObjectNumber *) data)->set("", (sint64)value);
 				return;
 			}
 
@@ -3380,8 +3333,8 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 			{
 				sint8 value;
 				stream.serial(value);
-				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber(0);
-				((CObjectNumber *) data)->set("", value);
+				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber((sint64)0);
+				((CObjectNumber *) data)->set("", (sint64)value);
 				return;
 			}
 
@@ -3389,8 +3342,8 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 			{
 				uint8 value;
 				stream.serial(value);
-				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber(0);
-				((CObjectNumber *) data)->set("", value);
+				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber((sint64)0);
+				((CObjectNumber *) data)->set("", (sint64)value);
 				return;
 			}
 			// Do not remove this or it would be impossible to load old session
@@ -3398,8 +3351,8 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 			{
 				float value;
 				stream.serial(value);
-				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber(0);
-				((CObjectNumber *) data)->set("", value);
+				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber((sint64)0);
+				((CObjectNumber *) data)->set("", (double)value);
 				return;
 			}
 
@@ -3407,7 +3360,7 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 			{
 				double value;
 				stream.serial(value);
-				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber(0);
+				data = serializer->Factory ? serializer->Factory->newBasic("Number") : new CObjectNumber((sint64)0);
 				((CObjectNumber *) data)->set("", value);
 				return;
 			}
