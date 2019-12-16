@@ -1245,7 +1245,7 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 			{
 				sint64 value = lua_tointeger(state, -1);
 				lua_pop(state, 1);
-				return new CObjectInteger(value);
+				return new CObjectNumber(value);
 			}
 			else
 #endif
