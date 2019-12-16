@@ -960,11 +960,11 @@ r2.WidgetStyles.Number =
 			local prop = r2:getPropertyDefinition('%s', getUICaller())
 			assert(prop)
 			local clamped = false						
-			if prop.Min and newValue &lt; tonumber(prop.Min) then
+			if prop.Min and newValue < tonumber(prop.Min) then
 				newValue = tonumber(prop.Min)
 				clamped = true
 			end			
-			if prop.Max and newValue &gt; tonumber(prop.Max) then
+			if prop.Max and newValue > tonumber(prop.Max) then
 				newValue = tonumber(prop.Max)
 				clamped = true
 			end			
