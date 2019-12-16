@@ -760,7 +760,7 @@ void CObjectRefId::doSerialize(std::string& out,  CSerializeContext& /* context 
 
 CObjectNumber::CObjectNumber(double value) : CObject(), m_IsInteger(false) 
 {
-	m_Value.Integer = value;
+	m_Value.Number = value;
 }
 
 CObjectNumber::CObjectNumber(sint64 value) : CObject(), m_IsInteger(true) 

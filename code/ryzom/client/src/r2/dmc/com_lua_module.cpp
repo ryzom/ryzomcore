@@ -1261,7 +1261,7 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 
 		case LUA_TBOOLEAN:
 		{
-			double value = static_cast<double>(lua_toboolean(state, -1));
+			sint64 value = lua_toboolean(state, -1);
 			lua_pop(state, 1);
 			return new CObjectNumber(value);
 		}
