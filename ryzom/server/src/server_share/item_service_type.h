@@ -28,6 +28,9 @@ namespace ITEM_SERVICE_TYPE
 		StableFeedAnimal2,
 		StableFeedAnimal3,
 		StableFeedAnimal4,
+		StableFeedAnimal5,
+		StableFeedAnimal6,
+		StableFeedAnimal7,
 		StableFeedAllAnimals,
 		SpeedUpDPLoss,
 
