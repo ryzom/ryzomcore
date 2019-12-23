@@ -978,6 +978,9 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 					CCharacterInfos *senderChar = IOS->getCharInfos(TheDataset.getEntityId(sender));
 					CCharacterInfos *receiverChar = IOS->getCharInfos(TheDataset.getEntityId(*itM));
 
+					if (senderChar == NULL || receiverChar == NULL)
+						continue;
+
 					// set GM mode if either speaker of listener is a GM
 					bool isGM= senderChar->HavePrivilege || receiverChar->HavePrivilege;
 
