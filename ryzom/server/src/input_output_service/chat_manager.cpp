@@ -655,7 +655,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 						if (sender_lang == "wk")
 							receiver_lang = sender_lang;
 						
-						if (ucstr[0] != '>' && (client.haveDisabledTranslation(sender_lang))
+						if (ucstr[0] != '>' && client.haveDisabledTranslation(sender_lang))
 							receiver_lang = sender_lang;
 						
 						if (ucstr[0] == '>') // Sent directly when prefixed by '>', it's the anti-translation code
