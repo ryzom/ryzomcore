@@ -155,6 +155,9 @@ private:
 	CViewTextMenuPtr _TextOutpostBanishPlayer;
 	CViewTextMenuPtr _TextOutpostBanishGuild;
 	CViewTextMenuPtr _TextWebPage;
+	CViewTextMenuPtr _TextInvisible;
+	CViewTextMenuPtr _TextInvulnerable;
+	CViewTextMenuPtr _TextGod;
 	CViewTextMenuPtr _TextMissionRing[BOTCHATTYPE::MaxR2MissionEntryDatabase];
 
 	// Forage source

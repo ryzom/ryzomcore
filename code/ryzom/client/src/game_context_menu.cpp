@@ -34,6 +34,7 @@
 #include "interface_v3/inventory_manager.h"
 #include "motion/user_controls.h"
 #include "sheet_manager.h"
+#include "connection.h"
 // GAME SHARE
 #include "game_share/constants.h"
 #include "game_share/properties.h"
@@ -141,6 +142,9 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 	_TextQuitTeam = "ui:interface:" + menuId + ":quit_team";
 	_TextAddToFriendList = "ui:interface:" + menuId + ":add_to_friend_list";
 	_TextTalk = "ui:interface:" + menuId + ":talk";
+	_TextInvisible = "ui:interface:" + menuId + ":invisible";
+	_TextInvulnerable = "ui:interface:" + menuId + ":invulnerable";
+	_TextGod = "ui:interface:" + menuId + ":god";
 
 
 	// Mission DB and Text link
@@ -256,6 +260,18 @@ void		CGameContextMenu::update()
 	updateContextMenuMissionRing();
 
 	setupContextMenuCantTalk(); // can't talk by default
+
+	bool showGMOptions = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeEG() || hasPrivilegeOBSERVER());
+
+	if (_TextInvisible)
+		_TextInvisible->setActive(showGMOptions);
+
+	if (_TextInvulnerable)
+		_TextInvulnerable->setActive(showGMOptions);
+
+	if (_TextGod)
+		_TextGod->setActive(showGMOptions);
+
 
 	// If mode Combat (no talk, no give, no mount, no extract_rm)
 	if(UserEntity->isFighting())
@@ -391,7 +407,7 @@ void		CGameContextMenu::update()
 		if(_TextExchange)
 		{
 			// Action possible only if the client is not already busy and the selection is able to do this with you..
-			if(selection && selection->properties().canExchangeItem())
+			if(selection && selection->isPlayer() && selection->properties().canExchangeItem())
 				_TextExchange->setActive(!UserEntity->isBusy());
 			else
 				_TextExchange->setActive(false);
@@ -414,6 +430,9 @@ void		CGameContextMenu::update()
 	// Enable attack mode
 	if (_TextAttack)
 		_TextAttack->setActive(canAttack());
+
+	if (_TextNews)
+		_TextNews->setActive(!canAttack());
 
 	if (_TextDuel && _TextUnDuel)
 	{
@@ -494,7 +513,7 @@ void		CGameContextMenu::update()
 	{
 		bool invitable = false;
 		// User should not be flagged as invitable by himself, so no need to check that selection is not the user
-		if(selection && selection->properties().invitable() && propValidation.invitable() )
+		if(selection && selection->isPlayer() && selection->properties().invitable() && propValidation.invitable() )
 		{
 			invitable = true;
 		}
@@ -605,6 +624,7 @@ void		CGameContextMenu::update()
 
 	// Apply real activation of Talk Texts.
 	applyTextTalk();
+
 }
 
 // ***************************************************************************
@@ -715,8 +735,15 @@ void CGameContextMenu::updateContextMenuMissionsOptions( bool forceHide )
 					{
 						result = NLMISC::CI18N::get("uiMissionOptionNotReceived");
 					}
-					pVTM->setText(result);
-					pVTM->setActive(true);
+					if (result == ucstring("Qui etes-vous ?"))
+					{
+						pVTM->setActive(false);
+					}
+					else
+					{
+						pVTM->setText(result);
+						pVTM->setActive(true);
+					}
 				}
 				else
 				{
@@ -856,7 +883,7 @@ void CGameContextMenu::updateContextMenuTalkEntries(uint options)
 		options = std::numeric_limits<uint>::max(); // in local mode, force all options to be shown (for debug)
 	}
 	// news
-	_OkTextNews= ((options & (1 << BOTCHATTYPE::NewsFlag)));
+	_OkTextNews= true; //((options & (1 << BOTCHATTYPE::NewsFlag)));
 	// trade
 	_OkTextTradeItem= ((options & (1 << BOTCHATTYPE::TradeItemFlag)) != 0);
  	_OkTextTradeTeleport= ((options & (1 << BOTCHATTYPE::TradeTeleportFlag)) != 0);
@@ -907,7 +934,6 @@ void CGameContextMenu::setupContextMenuTalkWithPlayer()
 // ***************************************************************************
 void CGameContextMenu::applyTextTalk()
 {
-	if (_TextNews) _TextNews->setActive(_OkTextNews);
 	if (_TextTradeItem) _TextTradeItem->setActive(_OkTextTradeItem);
 	if (_TextTradeTeleport) _TextTradeTeleport->setActive(_OkTextTradeTeleport);
 	if (_TextTradeFaction) _TextTradeFaction->setActive(_OkTextTradeFaction);
