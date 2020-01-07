@@ -112,6 +112,7 @@
 #include "../entities.h"
 #include "../misc.h"
 #include "../gabarit.h"
+#include "../view.h"
 
 #include "bot_chat_page_all.h"
 #include "bot_chat_page_ring_sessions.h"
@@ -442,6 +443,8 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("enableModalWindow", enableModalWindow);
 	ls.registerFunc("getPlayerPos", getPlayerPos);
 	ls.registerFunc("getGroundAtMouse", getGroundAtMouse),
+	ls.registerFunc("moveCam", moveCam),
+	ls.registerFunc("setCamMode", setCamMode),
 	ls.registerFunc("getMousePos", getMousePos),
 	ls.registerFunc("getMouseDown", getMouseDown),
 	ls.registerFunc("getMouseMiddleDown", getMouseMiddleDown),
@@ -1330,6 +1333,39 @@ int CLuaIHMRyzom::getGroundAtMouse(CLuaState &ls)
 
 	return 3;
 }
+
+int CLuaIHMRyzom::moveCam(CLuaState &ls)
+{
+	const char *funcName = "moveCam";
+	CLuaIHM::checkArgCount(ls, funcName, 3);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER);
+	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TNUMBER);
+
+	float x = (float)ls.toNumber(1);
+	float y = (float)ls.toNumber(2);
+	float z = (float)ls.toNumber(3);
+	CVector moves(x, y, z);
+	UserEntity->setCameraMoves(moves);
+	
+	return 0;
+}
+
+int CLuaIHMRyzom::setCamMode(CLuaState &ls)
+{
+	const char *funcName = "setCamMode";
+	CLuaIHM::checkArgCount(ls, funcName, 1);
+
+	bool aiMode = ls.toBoolean(1);
+
+	if(aiMode)
+		UserControls.mode(CUserControls::AIMode);
+	else
+		UserEntity->viewMode(UserEntity->viewMode());
+
+	return 0;
+}
+
 
 // ***************************************************************************
 int CLuaIHMRyzom::getPlayerPos(CLuaState &ls)
@@ -2303,8 +2339,8 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 			NLMISC::CAABBox bbox;
 			instance.getShapeAABBox(bbox);
 
-			primitive->setReactionType(UMovePrimitive::Slide);
-			primitive->setTriggerType(UMovePrimitive::NotATrigger);
+			primitive->setReactionType(UMovePrimitive::DoNothing);
+			primitive->setTriggerType(UMovePrimitive::OverlapStairsTrigger);
 			primitive->setAbsorbtion(0);
 			
 			primitive->setPrimitiveType(UMovePrimitive::_2DOrientedBox);
@@ -2313,10 +2349,10 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 
 			primitive->setCollisionMask(MaskColPlayer | MaskColNpc | MaskColDoor);
 			primitive->setOcclusionMask(MaskColPlayer | MaskColNpc | MaskColDoor);
-			primitive->setObstacle(true);
+			primitive->setObstacle(false);
 			
 			
-			primitive->setGlobalPosition(instance.getPos(), dynamicWI);
+			primitive->setGlobalPosition(instance.getPos()+CVector(0, 0, 0.5f), dynamicWI);
 			
 			primitive->insertInWorldImage(dynamicWI);
 		}
