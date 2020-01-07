@@ -2339,8 +2339,8 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 			NLMISC::CAABBox bbox;
 			instance.getShapeAABBox(bbox);
 
-			primitive->setReactionType(UMovePrimitive::Slide);
-			primitive->setTriggerType(UMovePrimitive::NotATrigger);
+			primitive->setReactionType(UMovePrimitive::DoNothing);
+			primitive->setTriggerType(UMovePrimitive::OverlapStairsTrigger);
 			primitive->setAbsorbtion(0);
 			
 			primitive->setPrimitiveType(UMovePrimitive::_2DOrientedBox);
@@ -2349,10 +2349,10 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 
 			primitive->setCollisionMask(MaskColPlayer | MaskColNpc | MaskColDoor);
 			primitive->setOcclusionMask(MaskColPlayer | MaskColNpc | MaskColDoor);
-			primitive->setObstacle(true);
+			primitive->setObstacle(false);
 			
 			
-			primitive->setGlobalPosition(instance.getPos(), dynamicWI);
+			primitive->setGlobalPosition(instance.getPos()+CVector(0, 0, 0.5f), dynamicWI);
 			
 			primitive->insertInWorldImage(dynamicWI);
 		}
