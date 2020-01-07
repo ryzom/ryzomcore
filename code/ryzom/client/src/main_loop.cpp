@@ -1411,8 +1411,23 @@ bool mainLoop()
 		// Update Camera Position/Orientation.
 		CVector currViewPos = View.currentViewPos();
 		MainCam.setTransformMode(UTransformable::RotQuat);
+
+		CVector cameraMoves = UserEntity->getCameraMoves();
+		
+		currViewPos.z += cameraMoves.z;
 		MainCam.setPos(currViewPos);
 		MainCam.setRotQuat(View.currentViewQuat());
+
+		if (cameraMoves.x)
+		{
+			CMatrix viewMatrix;
+			viewMatrix = MainCam.getMatrix();
+			viewMatrix.rotateZ(cameraMoves.x);
+			MainCam.setRotQuat(viewMatrix.getRot());
+		}
+
+		UserEntity->setCameraMoves(CVector(0, 0, 0));
+		
 		if (StereoHMD)
 		{
 			CMatrix camMatrix;
