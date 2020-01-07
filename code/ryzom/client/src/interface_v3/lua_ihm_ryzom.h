@@ -232,6 +232,8 @@ private:
 	static std::string getRegionByAlias(uint32 alias);
 	static float getGroundZ(float x, float y);
 	static int getGroundAtMouse(CLuaState &ls);
+	static int moveCam(CLuaState &ls);
+	static int setCamMode(CLuaState &ls);
 	static int getMousePos(CLuaState &ls);
 	static int getMouseDown(CLuaState &ls);
 	static int getMouseMiddleDown(CLuaState &ls);
