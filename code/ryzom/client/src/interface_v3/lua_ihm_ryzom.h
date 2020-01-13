@@ -259,6 +259,7 @@ private:
 	// because it would be too easy to write a key recorder ...)
 	static bool	isCtrlKeyDown(); 							     
 	static std::string encodeURLUnicodeParam(const ucstring &text);
+	static std::string encodeURLParam(const std::string &text);
 
 	static sint32 getPlayerLevel();		// get max level among player skills (magi, combat, crafting ,foraging)
 	static std::string getPlayerVpaHex();

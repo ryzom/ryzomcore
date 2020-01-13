@@ -591,6 +591,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(updateTooltipCoords),
 		LUABIND_FUNC(isCtrlKeyDown),
 		LUABIND_FUNC(encodeURLUnicodeParam),
+		LUABIND_FUNC(encodeURLParam),
 		LUABIND_FUNC(getPlayerLevel),
 		LUABIND_FUNC(getPlayerVpa),
 		LUABIND_FUNC(getPlayerVpb),
@@ -3770,6 +3771,13 @@ std::string CLuaIHMRyzom::encodeURLUnicodeParam(const ucstring &text)
 {
 	//H_AUTO(Lua_CLuaIHM_encodeURLUnicodeParam)
 	return convertToHTML(text.toUtf8());
+}
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::encodeURLParam(const string &text)
+{
+	//H_AUTO(Lua_CLuaIHM_encodeURLUnicodeParam)
+	return convertToHTML(text);
 }
 
 // ***************************************************************************
