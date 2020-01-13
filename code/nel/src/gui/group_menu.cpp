@@ -592,11 +592,14 @@ namespace NLGUI
 			{
 				// compute max height of widgets on the left of text
 				sint32 widgetMaxH = 0;
-				if (_Lines[k].UserGroupRight)	widgetMaxH = _Lines[k].UserGroupRight->getHReal();
-				if (_Lines[k].UserGroupLeft)	widgetMaxH = std::max(widgetMaxH, _Lines[k].UserGroupLeft->getHReal());
-				if (_Lines[k].CheckBox)		widgetMaxH = std::max(widgetMaxH, _Lines[k].CheckBox->getHReal());
-				if (_Lines[k].RightArrow)	widgetMaxH = std::max(widgetMaxH, _Lines[k].RightArrow->getHReal());
-				widgetMaxH = std::max(widgetMaxH, _Lines[k].ViewText->getHReal());
+				if (_Lines[k].ViewText->getActive())
+				{
+					if (_Lines[k].UserGroupRight)	widgetMaxH = _Lines[k].UserGroupRight->getHReal();
+					if (_Lines[k].UserGroupLeft)	widgetMaxH = std::max(widgetMaxH, _Lines[k].UserGroupLeft->getHReal());
+					if (_Lines[k].CheckBox)		widgetMaxH = std::max(widgetMaxH, _Lines[k].CheckBox->getHReal());
+					if (_Lines[k].RightArrow)	widgetMaxH = std::max(widgetMaxH, _Lines[k].RightArrow->getHReal());
+					widgetMaxH = std::max(widgetMaxH, _Lines[k].ViewText->getHReal());
+				}
 				_GroupList->setMaxH(widgetMaxH*_MaxVisibleLine+_GroupList->getSpace()*(_MaxVisibleLine-1));
 				if (_ScrollBar == NULL)
 				{
@@ -639,16 +642,21 @@ namespace NLGUI
 			{
 				// compute max height of widgets on the left of text
 				sint32 widgetMaxH = 0;
-				if (_Lines[k].UserGroupRight) widgetMaxH = _Lines[k].UserGroupRight->getHReal();
-				if (_Lines[k].UserGroupLeft) widgetMaxH = std::max(widgetMaxH, _Lines[k].UserGroupLeft->getHReal());
-				if (_Lines[k].CheckBox)  widgetMaxH = std::max(widgetMaxH, _Lines[k].CheckBox->getHReal());
-				if (_Lines[k].RightArrow)  widgetMaxH = std::max(widgetMaxH, _Lines[k].RightArrow->getHReal());
+				sint32	textHReal = 0;
+				if (_Lines[k].ViewText->getActive())
+				{
+					if (_Lines[k].UserGroupRight) widgetMaxH = _Lines[k].UserGroupRight->getHReal();
+					if (_Lines[k].UserGroupLeft) widgetMaxH = std::max(widgetMaxH, _Lines[k].UserGroupLeft->getHReal());
+					if (_Lines[k].CheckBox)  widgetMaxH = std::max(widgetMaxH, _Lines[k].CheckBox->getHReal());
+					if (_Lines[k].RightArrow)  widgetMaxH = std::max(widgetMaxH, _Lines[k].RightArrow->getHReal());
 
-				sint32	textHReal= _Lines[k].ViewText->getHReal();
-				_Lines[k].HReal= max(widgetMaxH, textHReal);
-				_Lines[k].TextDY= textDYPos;
+					textHReal = _Lines[k].ViewText->getHReal();
+				}
+
+				_Lines[k].HReal = max(widgetMaxH, textHReal);
+				_Lines[k].TextDY = textDYPos;
 				if(widgetMaxH>textHReal)
-					_Lines[k].TextDY+= (widgetMaxH-textHReal) / 2;
+					_Lines[k].TextDY += (widgetMaxH-textHReal) / 2;
 			}
 		}
 
@@ -1244,7 +1252,7 @@ namespace NLGUI
 		pV->setCaseMode(_GroupMenu->getCaseMode());
 		if (formatted)
 		{
-			pV->setMultiLine (true);
+			pV->setMultiLine (true);	
 			pV->setMultiLineMaxWOnly (true);
 			pV->setTextFormatTaged (name);
 		}
@@ -1299,9 +1307,9 @@ namespace NLGUI
 			uint lineIndex = _Lines.size()-1;
 			vparams.push_back(TTmplParams("id", toString("icon%d", lineIndex)));
 			vparams.push_back(TTmplParams("sizeref", ""));
-			vparams.push_back(TTmplParams("icon_texture", texture.c_str()));
+			vparams.push_back(TTmplParams("icon_texture", texture));
 			//vparams.push_back(TTmplParams("icon_color", options.ColorNormal.toString()));
-			string lineId = toString("%s:icon%d", _GroupMenu->getId().c_str(), lineIndex);
+			string lineId = toString("%s:icon", pV->getId().c_str());
 			
 			CInterfaceGroup *pUGLeft = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_row_icon", lineId, vparams);
 			if (pUGLeft)
