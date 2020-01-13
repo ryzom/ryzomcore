@@ -432,8 +432,8 @@ void		CGameContextMenu::update()
 		_TextAttack->setActive(canAttack());
 
 	if (_TextNews)
-		_TextNews->setActive(!canAttack());
-
+		_TextNews->setActive(selection && !canAttack());
+        
 	if (_TextDuel && _TextUnDuel)
 	{
 		if ((!UserEntity->isRiding()) && (_ServerInDuel->getValue8() != 0))
