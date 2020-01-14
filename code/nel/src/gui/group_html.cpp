@@ -659,10 +659,12 @@ namespace NLGUI
 
 		if (download.type == StylesheetType)
 		{
-			// no tmpfile if file was already in cache
-			if (CFile::fileExists(tmpfile) && CFile::fileExists(download.dest))
+			if (CFile::fileExists(tmpfile))
 			{
-				CFile::deleteFile(download.dest);
+				if (CFile::fileExists(download.dest))
+				{
+					CFile::deleteFile(download.dest);
+				}
 				CFile::moveFile(download.dest, tmpfile);
 			}
 			cssDownloadFinished(download.url, download.dest);
@@ -2586,6 +2588,7 @@ namespace NLGUI
 		// go
 		_URL = uri.toString();
 		_BrowseNextTime = true;
+		_WaitingForStylesheet = false;
 
 		// if a BrowseTree is bound to us, try to select the node that opens this URL (auto-locate)
 		if(!_BrowseTree.empty())
@@ -4162,7 +4165,7 @@ namespace NLGUI
 
 	void CGroupHTML::renderDocument()
 	{
-		if (!_StylesheetQueue.empty())
+		if (!Curls.empty() && !_StylesheetQueue.empty())
 		{
 			// waiting for stylesheets to finish downloading
 			return;
@@ -4218,6 +4221,8 @@ namespace NLGUI
 			removeContent();
 
 			endBuild();
+
+			success = false;
 		}
 		else
 		{
