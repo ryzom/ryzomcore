@@ -3053,7 +3053,7 @@ void getSabrinaBrickText(CSBrickSheet *pBR, ucstring &brickText)
 
 				// Display the part this slot build.
 				mpInfo+= "@{T4}";
-				mpInfo+= RM_FABER_TYPE::toLocalString(mpSlot.FaberTypeFilter);
+				mpInfo+= toString("%dx ", mpSlot.Quantity) + RM_FABER_TYPE::toLocalString(mpSlot.FaberTypeFilter);
 				mpInfo+= "\n";
 			}
 			// replace in brickText
@@ -3074,7 +3074,7 @@ void getSabrinaBrickText(CSBrickSheet *pBR, ucstring &brickText)
 
 				// Display the required item
 				mpInfo+= "@{T4}";
-				mpInfo+= STRING_MANAGER::CStringManagerClient::getItemLocalizedName(mpSlot.ItemRequired);
+				mpInfo+= toString("%dx ", mpSlot.Quantity) + STRING_MANAGER::CStringManagerClient::getItemLocalizedName(mpSlot.ItemRequired);
 				mpInfo+= "\n";
 			}
 			// replace in brickText
