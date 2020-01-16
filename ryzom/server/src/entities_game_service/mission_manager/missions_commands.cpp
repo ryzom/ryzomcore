@@ -61,6 +61,8 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 
+extern CCharacterBotChatBeginEnd CharacterBotChatBeginEnd;
+
 NLMISC_COMMAND(forceMissionProgress,"debug command used to trigger debug commands","<user>")
 {
 	if (args.empty() || args.size() > 3)
@@ -2518,7 +2520,7 @@ NLMISC_COMMAND(getServerStats,"get server stats","<uid> <stat1,stat2,stat3..> [<
 			log.displayNL("%f", CTimeDateSeasonManager::getRyzomTimeReference().getRyzomTime ());
 		else if (stats[i] == "date") // Atys date
 			log.displayNL("%d", CTimeDateSeasonManager::getRyzomTimeReference().getRyzomDay ());
-		else if (stats[i] == "season") // Atys date
+		else if (stats[i] == "season") // Atys season
 			log.displayNL("%s", EGSPD::CSeason::toString(CTimeDateSeasonManager::getRyzomTimeReference().getRyzomSeason()).c_str());
 		else if (stats[i] == "weather") // Atys weather
 		{
@@ -3612,7 +3614,7 @@ NLMISC_COMMAND(delBrick, "Specified player unlearns given brick", "<uid> <brick1
 }
 
 
-NLMISC_COMMAND(execAiAction, "Specified player unlearns given brick", "<uid> <brick1> <target?>")
+NLMISC_COMMAND(execAiAction, "Exec Ai Action", "<uid> <brick1> <target?>")
 {
 	if (args.size() < 2) return false;
 
@@ -3725,4 +3727,345 @@ NLMISC_COMMAND(spawnToxic, "Spawn a toxic cloud", "<uid> <posX> <posY> <fx> <Rad
 		log.displayNL("ERR");
 	}
 	return true;
+}
+
+
+
+NLMISC_COMMAND(searchEntity, "Search an Entity (Player, Creature or Npc)", "<uid> <type=creature|bot|race|player> <name>")
+{
+
+	if ( args.size() < 3 )
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	float x = (float)c->getX() / 1000.f;
+	float y = (float)c->getY() / 1000.f;
+	
+	if ( args[1] == "creature" )
+	{
+		CSheetId creatureSheetId(args[2]);
+		if( creatureSheetId != CSheetId::Unknown )
+		{
+			double minDistance = -1.;
+			CCreature * creature = NULL;
+
+			TMapCreatures::const_iterator it;
+			const TMapCreatures& creatures = CreatureManager.getCreature();
+			for( it = creatures.begin(); it != creatures.end(); ++it )
+			{
+				CSheetId sheetId = (*it).second->getType();
+				if( sheetId == creatureSheetId )
+				{
+					double distance = PHRASE_UTILITIES::getDistance( c->getEntityRowId(), (*it).second->getEntityRowId() );
+					if( !creature || (creature && distance < minDistance) )
+					{
+						creature = (*it).second;
+						minDistance = distance;
+					}
+				}
+			}
+			if( creature )
+			{
+				float fx = 0, fy = 0, fz = 0;
+				fx = creature->getState().X() / 1000.0f;
+				fy = creature->getState().Y() / 1000.0f;
+				fz = creature->getState().Z() / 1000.0f;
+				log.displayNL("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f", fx, fy, fz, minDistance, x-fx, y-fy);
+				return true;
+			}
+		}
+		else
+		{
+			log.displayNL("ERR: sheet not found");
+		}
+	}
+	else if ( args[1] == "race" )
+	{
+		EGSPD::CPeople::TPeople race;
+		race = EGSPD::CPeople::fromString(args[2]);
+		if ( race != EGSPD::CPeople::EndPeople )
+		{
+			double minDistance = -1.;
+			CCreature * creature = NULL;
+
+			TMapCreatures::const_iterator it;
+			const TMapCreatures& creatures = CreatureManager.getCreature();
+			for( it = creatures.begin(); it != creatures.end(); ++it )
+			{
+				if( race == (*it).second->getRace() )
+				{
+					double distance = PHRASE_UTILITIES::getDistance( c->getEntityRowId(), (*it).second->getEntityRowId() );
+					if( !creature || (creature && distance < minDistance) )
+					{
+						creature = (*it).second;
+						minDistance = distance;
+					}
+				}
+			}
+			
+			if( creature )
+			{
+				float fx = 0, fy = 0, fz = 0;
+				fx = creature->getState().X() / 1000.0f;
+				fy = creature->getState().Y() / 1000.0f;
+				fz = creature->getState().Z() / 1000.0f;
+				log.displayNL("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f", fx, fy, fz, minDistance, x-fx, y-fy);
+				return true;
+			}
+		}
+		else
+		{
+			log.displayNL("ERR: race not found");
+		}
+	}
+	else if ( args[1] == "player" )
+	{
+		CEntityBase *entityBase = PlayerManager.getCharacterByName(CShardNames::getInstance().makeFullNameFromRelative(c->getHomeMainlandSessionId(), args[2]));
+		if (entityBase != NULL)
+		{
+			double minDistance = PHRASE_UTILITIES::getDistance( c->getEntityRowId(), entityBase->getEntityRowId() );
+			float fx = 0, fy = 0, fz = 0;
+			fx = entityBase->getState().X / 1000.0f;
+			fy = entityBase->getState().Y / 1000.0f;
+			fz = entityBase->getState().Z / 1000.0f;
+			log.displayNL("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f", fx, fy, fz, minDistance, x-fx, y-fy);
+			return true;
+		}
+		else
+		{
+			log.displayNL("ERR: player not found");
+		}
+	} else {
+		// try to find the bot name
+		vector<TAIAlias> aliases;
+		CAIAliasTranslator::getInstance()->getNPCAliasesFromName( args[2], aliases );
+		if ( !aliases.empty() )
+		{
+			TAIAlias alias = aliases[0];
+			const CEntityId & botId = CAIAliasTranslator::getInstance()->getEntityId(alias);
+			if ( botId != CEntityId::Unknown )
+			{
+				CEntityBase *entityBase = CreatureManager.getCreature(botId);
+				if (entityBase != NULL)
+				{
+					double minDistance = PHRASE_UTILITIES::getDistance( c->getEntityRowId(), entityBase->getEntityRowId() );
+					float fx = 0, fy = 0, fz = 0;
+					fx = entityBase->getState().X / 1000.0f;
+					fy = entityBase->getState().Y / 1000.0f;
+					fz = entityBase->getState().Z / 1000.0f;
+					log.displayNL("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f", fx, fy, fz, minDistance, x-fx, y-fy);
+					return true;
+				}
+			}
+		}
+		else
+		{
+			log.displayNL("ERR: bot not found");
+		}
+	}
+	log.displayNL("0,0,0,0,0,0");
+	return true;
+}
+
+NLMISC_COMMAND(setBehaviour," change entity behaviour","<uid|*> <behaviour> [<target|eid>]")
+{
+	if ( args.size() < 2 )
+		return false;
+
+	CEntityId id;
+	CEntityBase *e = NULL;
+	
+	bool isChar = false;
+	if (args[0] != "*")
+	{
+		CCharacter *c = NULL;
+		GET_ACTIVE_CHARACTER2
+		
+		if ( args.size() > 2 && args[2] == "target")
+		{
+			id = c->getTarget();
+			if( id.getType() == 0 )
+			{
+				CCharacter *c = PlayerManager.getChar(id);
+				if (c && c->getEnterFlag())
+					e = c;
+			}
+			else
+			{
+				e = CreatureManager.getCreature(id);
+			}
+		}
+		else
+			e = c;
+	}
+	else
+	{
+		if ( args.size() < 3 )
+			return false;
+	
+		id.fromString( args[2].c_str() );
+		e = CreatureManager.getCreature(id);
+	}
+	
+	if (e)
+	{
+		sint behav;
+		NLMISC::fromString(args[1], behav);
+		MBEHAV::EBehaviour behaviour = MBEHAV::EBehaviour(behav);
+		e->setBehaviour( behaviour );
+		log.displayNL("%s", toString( e->getBehaviour() ).c_str() );
+	}
+	else
+	{
+		log.displayNL("ERR: entity not found");
+	}
+
+	return true;
+}
+
+NLMISC_COMMAND(getBehaviour," get entity behaviour","<uid|*> [<target|eid>]")
+{
+	if ( args.size() < 1 )
+		return false;
+
+	CEntityId id;
+	CEntityBase *e = NULL;
+	
+	bool isChar = false;
+	if (args[0] != "*")
+	{
+		CCharacter *c = NULL;
+		GET_ACTIVE_CHARACTER2
+
+		if ( args.size() > 2 && args[2] == "target")
+		{
+			id = c->getTarget();
+			if( id.getType() == 0 )
+			{
+				CCharacter *c = PlayerManager.getChar(id);
+				if (c && c->getEnterFlag())
+					e = c;
+			}
+			else
+			{
+				e = CreatureManager.getCreature(id);
+			}
+		}
+		else
+			e = c;
+	}
+	else
+	{
+		if ( args.size() < 2 )
+			return false;
+	
+		id.fromString( args[2].c_str() );
+		e = CreatureManager.getCreature(id);
+	}
+	
+	if (e)
+	{
+		log.displayNL("%s", toString( e->getBehaviour() ).c_str() );
+	}
+	else
+	{
+		log.displayNL("ERR: entity not found");
+	}
+
+	return true;
+}
+
+
+NLMISC_COMMAND(stopMoveBot,"stop move of a bot","<uid|*> [<target|eid>]")
+{
+	if ( args.size() < 1 )
+		return false;
+
+	TDataSetRow TargetRowId;
+	CEntityBase *e = NULL;
+	
+	bool isChar = false;
+	if (args[0] != "*")
+	{
+		CCharacter *c = NULL;
+		GET_ACTIVE_CHARACTER2
+
+		if (c)
+			CharacterBotChatBeginEnd.BotChatStart.push_back(c->getEntityRowId());
+		
+		const CEntityId &target = c->getTarget();
+		if (target == CEntityId::Unknown)
+		{
+			log.displayNL("ERR: target");
+			return true;
+		}
+		
+		TargetRowId = TheDataset.getDataSetRow(target);
+	}
+	else
+	{
+		if ( args.size() < 2 )
+			return false;
+	
+		CEntityId target;
+		target.fromString( args[2].c_str() );
+		if (target == CEntityId::Unknown)
+		{
+			log.displayNL("ERR: target");
+			return true;
+		}
+		
+		TargetRowId = TheDataset.getDataSetRow(target);
+	}
+
+	CharacterBotChatBeginEnd.BotChatStart.push_back(TargetRowId);
+}
+
+
+NLMISC_COMMAND(startMoveBot,"start move of a bot","<uid|*> [<target|eid>]")
+{
+	if ( args.size() < 1 )
+		return false;
+
+	TDataSetRow TargetRowId;
+	CEntityBase *e = NULL;
+	
+	bool isChar = false;
+	if (args[0] != "*")
+	{
+		CCharacter *c = NULL;
+		GET_ACTIVE_CHARACTER2
+
+		if (c)
+			CharacterBotChatBeginEnd.BotChatEnd.push_back(c->getEntityRowId());
+		
+		const CEntityId &target = c->getTarget();
+		if (target == CEntityId::Unknown)
+		{
+			log.displayNL("ERR: target");
+			return true;
+		}
+
+		log.displayNL("%s", target.toString().c_str());
+		TargetRowId = TheDataset.getDataSetRow(target);
+	}
+	else
+	{
+		if ( args.size() < 2 )
+			return false;
+	
+		CEntityId target;
+		target.fromString( args[2].c_str() );
+		if (target == CEntityId::Unknown)
+		{
+			log.displayNL("ERR: target");
+			return true;
+		}
+		
+		TargetRowId = TheDataset.getDataSetRow(target);
+	}
+
+	CharacterBotChatBeginEnd.BotChatEnd.push_back(TargetRowId);
+	log.displayNL("OK");
 }

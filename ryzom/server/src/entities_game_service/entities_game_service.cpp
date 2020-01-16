@@ -665,6 +665,20 @@ void updateConvertFile()
 	}
 }
 
+string getServerInfos(float x, float y)
+{
+	CVector pos;
+	pos.x = x;
+	pos.y = y;
+	pos.z = 0;
+	CRyzomTime::EWeather weather = WeatherEverywhere.getWeather(pos, CTimeDateSeasonManager::getRyzomTimeReference());
+	
+	return toString("%f|%d|%s|%u",
+		CTimeDateSeasonManager::getRyzomTimeReference().getRyzomTime(),
+		CTimeDateSeasonManager::getRyzomTimeReference().getRyzomDay(),
+		EGSPD::CSeason::toString(CTimeDateSeasonManager::getRyzomTimeReference().getRyzomSeason()).c_str(),
+		(uint)weather);
+}
 
 
 //---------------------------------------------------
