@@ -4255,8 +4255,9 @@ ENTITY_VARIABLE(Invisible, "Invisibility of a player")
 		CCharacter *c = dynamic_cast<CCharacter*>(e);
 
 		uint64 val;
+		bool isVisible = R2_VISION::isEntityVisibleToPlayers(e->getWhoSeesMe());
 
-		if (value=="1" || value=="on" || strlwr(value)=="true" )
+		if (value=="1" || value=="on" || strlwr(value)=="true" || (strlwr(value)=="toggle" && isVisible))
 		{
 			if (c != NULL)
 				c->setInvisibility(true);
@@ -4283,7 +4284,7 @@ ENTITY_VARIABLE(Invisible, "Invisibility of a player")
 				val=0;
 			}
 		}
-		else if (value=="0" || value=="off" || strlwr(value)=="false" )
+		else if (value=="0" || value=="off" || strlwr(value)=="false" || strlwr(value)=="toggle")
 		{
 			if (c != NULL)
 				c->setInvisibility(false);
@@ -4443,15 +4444,17 @@ ENTITY_VARIABLE (God, "God mode, invulnerability")
 	}
 	else
 	{
-		if (value=="1" || value=="on" || strlwr(value)=="god" || strlwr(value)=="true" )
+		if (value=="1" || value=="on" || strlwr(value)=="god" || strlwr(value)=="true" || (strlwr(value)=="toggle" && !c->godMode()))
 		{
 			c->setGodModeSave(true);
 			c->setGodMode(true);
+			c->setBonusMalusName("god", c->addEffectInDB(CSheetId("berserk.sbrick"), true));
 		}
-		else if (value=="0" || value=="off" || strlwr(value)=="false" )
+		else if (value=="0" || value=="off" || strlwr(value)=="false" || strlwr(value)=="toggle")
 		{
 			c->setGodModeSave(false);
 			c->setGodMode(false);
+			c->removeEffectInDB(c->getBonusMalusName("god"), true);
 		}
 		nlinfo ("%s %s now in god mode", entity.toString().c_str(), c->godMode()?"is":"isn't");
 	}
@@ -4468,13 +4471,15 @@ ENTITY_VARIABLE (Invulnerable, "Invulnerable mode, invulnerability too all")
 	}
 	else
 	{
-		if (value=="1" || value=="on" || strlwr(value)=="invulnerable" || strlwr(value)=="true" )
+		if (value=="1" || value=="on" || strlwr(value)=="invulnerable" || strlwr(value)=="true" || (strlwr(value)=="toggle" && !c->invulnerableMode()))
 		{
 			c->setInvulnerableMode(true);
+			c->setBonusMalusName("invulnerability", c->addEffectInDB(CSheetId("invulnerability.sbrick"), true));
 		}
-		else if (value=="0" || value=="off" || strlwr(value)=="false" )
+		else if (value=="0" || value=="off" || strlwr(value)=="false" || strlwr(value)=="toggle")
 		{
 			c->setInvulnerableMode(false);
+			c->removeEffectInDB(c->getBonusMalusName("invulnerability"), true);
 		}
 		nlinfo ("%s %s now in invulnerable mode", entity.toString().c_str(), c->invulnerableMode()?"is":"isn't");
 	}

@@ -727,6 +727,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	LPROP(bool,IsFollowing,if(IsFollowing))\
 	LPROP(bool,IsMounted,if(IsMounted))\
 	PROP(bool,IsTpAllowed)\
+	PROP(bool,IsInBag)\
 	PROP(TSatiety,Satiety)\
 	PROP2(CustomName, ucstring, CustomName, CustomName = val)\
 

@@ -313,7 +313,7 @@ struct CPetAnimal
 
 	DECLARE_PERSISTENCE_METHODS
 
-	enum TStatus { db_unknown = -1, not_present = 0, waiting_spawn, landscape, stable, death, tp_continent };
+	enum TStatus { db_unknown = -1, not_present = 0, waiting_spawn, landscape, stable, death, tp_continent, in_bag };
 
 	TStatus PetStatus;
 	NLMISC::CSheetId TicketPetSheetId;

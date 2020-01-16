@@ -919,6 +919,21 @@ public:
 	void setEventSpeedVariationModifier(float value) { _EventSpeedVariationModifier = value; }
 	float getEventSpeedVariationModifier() { return _EventSpeedVariationModifier; }
 
+	void setBonusMalusName(const std::string& name, sint8 id)
+	{
+		if (id == -1)
+			_BonusMalusNames.erase(name);
+		else
+			_BonusMalusNames[name] = id;
+	}
+	
+	sint8 getBonusMalusName(const std::string& name)
+	{
+		if (_BonusMalusNames.find(name) != _BonusMalusNames.end())
+			return _BonusMalusNames[name];
+		return -1;
+	}
+
 	/// change the outpost alias
 	virtual void setOutpostAlias( uint32 id );
 	/// get the outpost alias
@@ -1072,6 +1087,8 @@ protected:
 		} IdAndSide;
 	};
 	CMirrorPropValueAlice< uint16, CPropLocationPacked<2> >	_OutpostInfos;
+
+	std::map<std::string, uint16> _BonusMalusNames;
 };	
 
 

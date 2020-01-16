@@ -327,7 +327,7 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 			CEntityId id = botPet->getSpawn()->getEntityId();
 			float t = 0;
 			uint8 cont = 0;
-			uint8 one = 1;
+			uint8 one = 0;
 			sint32 x = position.x();
 			sint32 y = position.y();
 			sint32 z = position.h();

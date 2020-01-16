@@ -704,6 +704,14 @@ void finalizeClientReady( uint32 userId, uint32 index )
 		delete CmdDisplayer;
 		delete CmdLogger;
 	}
+
+	if (c->godMode())
+		c->setBonusMalusName("god", c->addEffectInDB(CSheetId("berserk.sbrick"), true));
+
+	if (c->invulnerableMode())
+		c->setBonusMalusName("invulnerability", c->addEffectInDB(CSheetId("invulnerability.sbrick"), true));
+
+	
 	c->setFinalized(true);
 
 } // finalizeClientReady //
