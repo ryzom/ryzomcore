@@ -592,6 +592,8 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(isCtrlKeyDown),
 		LUABIND_FUNC(encodeURLUnicodeParam),
 		LUABIND_FUNC(encodeURLParam),
+		LUABIND_FUNC(encodeToHexa),
+		LUABIND_FUNC(decodeFromHexa),
 		LUABIND_FUNC(getPlayerLevel),
 		LUABIND_FUNC(getPlayerVpa),
 		LUABIND_FUNC(getPlayerVpb),
@@ -3779,6 +3781,24 @@ std::string CLuaIHMRyzom::encodeURLParam(const string &text)
 	//H_AUTO(Lua_CLuaIHM_encodeURLUnicodeParam)
 	return convertToHTML(text);
 }
+
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::encodeToHexa(const string &text)
+{
+	return toHexa(text);
+}
+
+
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::decodeFromHexa(const string &text)
+{
+	string hexa;
+	fromHexa(text, hexa);
+	return hexa;
+}
+
 
 // ***************************************************************************
 sint32 CLuaIHMRyzom::getPlayerLevel()

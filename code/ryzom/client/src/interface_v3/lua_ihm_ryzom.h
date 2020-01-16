@@ -261,6 +261,9 @@ private:
 	static std::string encodeURLUnicodeParam(const ucstring &text);
 	static std::string encodeURLParam(const std::string &text);
 
+	static std::string encodeToHexa(const std::string &text);
+	static std::string decodeFromHexa(const std::string &text);
+
 	static sint32 getPlayerLevel();		// get max level among player skills (magi, combat, crafting ,foraging)
 	static std::string getPlayerVpaHex();
 	static std::string getPlayerVpbHex();
