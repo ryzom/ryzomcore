@@ -232,6 +232,8 @@ private:
 	static std::string getRegionByAlias(uint32 alias);
 	static float getGroundZ(float x, float y);
 	static int getGroundAtMouse(CLuaState &ls);
+	static int moveCam(CLuaState &ls);
+	static int setCamMode(CLuaState &ls);
 	static int getMousePos(CLuaState &ls);
 	static int getMouseDown(CLuaState &ls);
 	static int getMouseMiddleDown(CLuaState &ls);
@@ -257,6 +259,10 @@ private:
 	// because it would be too easy to write a key recorder ...)
 	static bool	isCtrlKeyDown(); 							     
 	static std::string encodeURLUnicodeParam(const ucstring &text);
+	static std::string encodeURLParam(const std::string &text);
+
+	static std::string encodeToHexa(const std::string &text);
+	static std::string decodeFromHexa(const std::string &text);
 
 	static sint32 getPlayerLevel();		// get max level among player skills (magi, combat, crafting ,foraging)
 	static std::string getPlayerVpaHex();
