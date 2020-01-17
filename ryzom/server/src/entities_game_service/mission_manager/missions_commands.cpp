@@ -3116,19 +3116,16 @@ NLMISC_COMMAND(spawnPlayerPet, "spawn player pet", "<uid> <slot>")
 	GET_ACTIVE_CHARACTER
 
 	uint32 index;
-	fromString(args[0], index);
-	
-	c->setRespawnMainLandInTown(true);
-	c->spawnCharacterAnimal(index);
-	c->setRespawnMainLandInTown(false);
-	
-	log.displayNL("OK");
+	fromString(args[1], index);
+
+	c->removeAnimalIndex(index, CPetCommandMsg::DESPAWN);
+	c->setAnimalPosition(index, c->getState().X, c->getState().Y);
+	if (!c->spawnCharacterAnimal(index))
+		log.displayNL("ERR: invalid spawn");
+	else
+		log.displayNL("OK");
 	return true;
 }
-
-
-
-
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(setPlayerPetName, "change the name of a player pet", "<uid> <index> <name>")
@@ -3731,7 +3728,7 @@ NLMISC_COMMAND(spawnToxic, "Spawn a toxic cloud", "<uid> <posX> <posY> <fx> <Rad
 
 
 
-NLMISC_COMMAND(searchEntity, "Search an Entity (Player, Creature or Npc)", "<uid> <type=creature|bot|race|player> <name>")
+NLMISC_COMMAND(searchEntity, "Search an Entity (Player, Creature or Npc)", "<uid> <type=creature|bot|race|player> <name> [<all_levels?>]")
 {
 
 	if ( args.size() < 3 )
@@ -3744,27 +3741,65 @@ NLMISC_COMMAND(searchEntity, "Search an Entity (Player, Creature or Npc)", "<uid
 	
 	if ( args[1] == "creature" )
 	{
-		CSheetId creatureSheetId(args[2]);
-		if( creatureSheetId != CSheetId::Unknown )
+		CSheetId creatureSheetId1;
+		CSheetId creatureSheetId2;
+		CSheetId creatureSheetId3;
+		CSheetId creatureSheetId4;
+		if ( args.size() > 3 && args[3] == "1")
+		{
+			creatureSheetId1 = CSheetId(args[2]+"1.creature");
+			creatureSheetId2 = CSheetId(args[2]+"2.creature");
+			creatureSheetId3 = CSheetId(args[2]+"3.creature");
+			creatureSheetId4 = CSheetId(args[2]+"4.creature");
+		}
+		else
+		{
+			creatureSheetId1 = CSheetId(args[2]);
+		}
+			
+		if( creatureSheetId1 != CSheetId::Unknown )
 		{
 			double minDistance = -1.;
 			CCreature * creature = NULL;
 
 			TMapCreatures::const_iterator it;
 			const TMapCreatures& creatures = CreatureManager.getCreature();
-			for( it = creatures.begin(); it != creatures.end(); ++it )
+			nlinfo("creature size : %d", creatures.size());
+			if( creatureSheetId2 != CSheetId::Unknown )
 			{
-				CSheetId sheetId = (*it).second->getType();
-				if( sheetId == creatureSheetId )
+				for( it = creatures.begin(); it != creatures.end(); ++it )
 				{
-					double distance = PHRASE_UTILITIES::getDistance( c->getEntityRowId(), (*it).second->getEntityRowId() );
-					if( !creature || (creature && distance < minDistance) )
+					CSheetId sheetId = (*it).second->getType();
+					
+					if( sheetId == creatureSheetId1 || creatureSheetId2 == creatureSheetId1 || creatureSheetId3 == creatureSheetId1 || creatureSheetId4 == creatureSheetId1 )
 					{
-						creature = (*it).second;
-						minDistance = distance;
+						double distance = PHRASE_UTILITIES::getDistance( c->getEntityRowId(), (*it).second->getEntityRowId() );
+						if( !creature || (creature && distance < minDistance) )
+						{
+							creature = (*it).second;
+							minDistance = distance;
+						}
 					}
 				}
 			}
+			else
+			{
+				for( it = creatures.begin(); it != creatures.end(); ++it )
+				{
+					CSheetId sheetId = (*it).second->getType();
+					
+					if( sheetId == creatureSheetId1 )
+					{
+						double distance = PHRASE_UTILITIES::getDistance( c->getEntityRowId(), (*it).second->getEntityRowId() );
+						if( !creature || (creature && distance < minDistance) )
+						{
+							creature = (*it).second;
+							minDistance = distance;
+						}
+					}
+				}
+			}
+			
 			if( creature )
 			{
 				float fx = 0, fy = 0, fz = 0;
