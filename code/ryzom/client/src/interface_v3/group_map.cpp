@@ -4303,6 +4303,17 @@ class CUpdateLandMarksColor : public IActionHandler{public:	virtual void execute
 }};
 REGISTER_ACTION_HANDLER (CUpdateLandMarksColor, "update_landmarks_color");
 
+NLMISC_COMMAND( setMap, "Change the map", "" )
+{
+	if (args.size() != 1) return false;
+
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (pMap != NULL)
+		pMap->setMap(args[0]);
+
+	return true;
+}
 
 ////////////////////
 // DEBUG COMMANDS //
@@ -4360,18 +4371,6 @@ NLMISC_COMMAND( testRespawn, "Debug : test respawn map", "" )
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":BIND_POINT")->setValue64((((sint64) 4687 * 1000) << 32 )| (sint64) (uint32) ((sint64) -3561 * 1000));
 */
-	return true;
-}
-
-NLMISC_COMMAND( setMap, "Debug : test respawn map", "" )
-{
-	if (args.size() != 1) return false;
-
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
-	if (pMap != NULL)
-		pMap->setMap(args[0]);
-
 	return true;
 }
 
