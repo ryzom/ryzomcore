@@ -436,6 +436,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getDesktopIndex", getDesktopIndex);
 	ls.registerFunc("setLuaBreakPoint", setLuaBreakPoint);
 	ls.registerFunc("getMainPageURL", getMainPageURL);
+	ls.registerFunc("setNewsAtProgress", setNewsAtProgress);
 	ls.registerFunc("getCharSlot", getCharSlot);
 	ls.registerFunc("getServerSeason", getServerSeason);
 	ls.registerFunc("computeCurrSeason", computeCurrSeason);
@@ -1143,6 +1144,16 @@ int CLuaIHMRyzom::getMainPageURL(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 0);
 	ls.push(RingMainURL);
 	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::setNewsAtProgress(CLuaState &ls)
+{
+	//H_AUTO(Lua_CLuaIHM_getMainPageURL)
+	const char *funcName = "NewsAtProgress";
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+	NewsAtProgress = ls.toString(1);
+	return 0;
 }
 
 // ***************************************************************************
