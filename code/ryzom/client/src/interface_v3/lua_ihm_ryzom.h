@@ -63,6 +63,7 @@ private:
 	static int	displayChatMessage(CLuaState &ls);
 	static int	setWeatherValue(CLuaState &ls); // first value is a boolean to say automatic, second value ranges from of to 1 and gives the weather
 	static int	getWeatherValue(CLuaState &ls); // get current real weather value (blend between server driven value & predicted value). Manual weather value is ignored
+	static int	getContinentSheet(CLuaState &ls);
 	static int	disableContextHelpForControl(CLuaState &ls);	// params: CCtrlBase*. return: none
 	static int  disableContextHelp(CLuaState &ls);
 	static int  getServerSeason(CLuaState &ls); // get the last season sent by the server

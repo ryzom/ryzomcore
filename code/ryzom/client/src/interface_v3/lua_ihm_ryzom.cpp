@@ -470,6 +470,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("disableContextHelp", disableContextHelp);
 	ls.registerFunc("setWeatherValue", setWeatherValue);
 	ls.registerFunc("getWeatherValue", getWeatherValue);
+	ls.registerFunc("getContinentSheet", getContinentSheet);
 	ls.registerFunc("getCompleteIslands", getCompleteIslands);
 	ls.registerFunc("displayBubble", displayBubble);
 	ls.registerFunc("getIslandId", getIslandId);
@@ -1786,6 +1787,21 @@ int CLuaIHMRyzom::getWeatherValue(CLuaState &ls)
 	ls.push(weather);
 	return 1;
 }
+
+int CLuaIHMRyzom::getContinentSheet(CLuaState &ls)
+{
+	const char *funcName = "getContinentSheet";
+	CLuaIHM::checkArgCount(ls, funcName, 0);
+	if (ContinentMngr.cur())
+	{
+		ls.push(ContinentMngr.cur()->SheetName);
+		return 1;
+	}
+
+	ls.push("");
+	return 1;
+}
+
 
 int	CLuaIHMRyzom::getUICaller(CLuaState &ls)
 {
