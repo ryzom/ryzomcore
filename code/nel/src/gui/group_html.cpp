@@ -718,6 +718,14 @@ namespace NLGUI
 		std::string finalUrl;
 		img->setModulateGlobalColor(style.GlobalColor);
 
+		// data:image/png;base64,AA...==
+		if (startsWith(url, "data:image/"))
+		{
+			setImage(img, decodeURIComponent(url), type);
+			setImageSize(img, style);
+			return;
+		}
+
 		// load the image from local files/bnp
 		std::string image = CFile::getPath(url) + CFile::getFilenameWithoutExtension(url) + ".tga";
 		if (lookupLocalFile(finalUrl, image.c_str(), false))
@@ -3137,45 +3145,67 @@ namespace NLGUI
 			ctrlButton->setId(name);
 		}
 
-		// Load only tga files.. (conversion in dds filename is done in the lookup procedure)
-		string normal = normalBitmap.empty()?"":CFile::getPath(normalBitmap) + CFile::getFilenameWithoutExtension(normalBitmap) + ".tga";
-
-		// if the image doesn't exist on local, we check in the cache
-	//	if(!CFile::fileExists(normal))
-		if(!CPath::exists(normal))
+		std::string normal;
+		if (startsWith(normalBitmap, "data:image/"))
 		{
-			// search in the compressed texture
-			CViewRenderer &rVR = *CViewRenderer::getInstance();
-			sint32 id = rVR.getTextureIdFromName(normal);
-			if(id == -1)
+			normal = decodeURIComponent(normalBitmap);
+		}
+		else
+		{
+			// Load only tga files.. (conversion in dds filename is done in the lookup procedure)
+			normal = normalBitmap.empty()?"":CFile::getPath(normalBitmap) + CFile::getFilenameWithoutExtension(normalBitmap) + ".tga";
+
+			// if the image doesn't exist on local, we check in the cache
+			if(!CPath::exists(normal))
 			{
-				normal = localImageName(normalBitmap);
-				addImageDownload(normalBitmap, ctrlButton, style);
+				// search in the compressed texture
+				CViewRenderer &rVR = *CViewRenderer::getInstance();
+				sint32 id = rVR.getTextureIdFromName(normal);
+				if(id == -1)
+				{
+					normal = localImageName(normalBitmap);
+					addImageDownload(normalBitmap, ctrlButton, style);
+				}
 			}
 		}
 
-		string pushed = pushedBitmap.empty()?"":CFile::getPath(pushedBitmap) + CFile::getFilenameWithoutExtension(pushedBitmap) + ".tga";
-		// if the image doesn't exist on local, we check in the cache, don't download it because the "normal" will already setuped it
-	//	if(!CFile::fileExists(pushed))
-		if(!CPath::exists(pushed))
+		std::string pushed;
+		if (startsWith(pushedBitmap, "data:image/"))
 		{
-			// search in the compressed texture
-			CViewRenderer &rVR = *CViewRenderer::getInstance();
-			sint32 id = rVR.getTextureIdFromName(pushed);
-			if(id == -1)
+			pushed = decodeURIComponent(pushedBitmap);
+		}
+		else
+		{
+			pushed = pushedBitmap.empty()?"":CFile::getPath(pushedBitmap) + CFile::getFilenameWithoutExtension(pushedBitmap) + ".tga";
+			// if the image doesn't exist on local, we check in the cache, don't download it because the "normal" will already setuped it
+			if(!CPath::exists(pushed))
 			{
-				pushed = localImageName(pushedBitmap);
+				// search in the compressed texture
+				CViewRenderer &rVR = *CViewRenderer::getInstance();
+				sint32 id = rVR.getTextureIdFromName(pushed);
+				if(id == -1)
+				{
+					pushed = localImageName(pushedBitmap);
+				}
 			}
 		}
 
-		string over = overBitmap.empty()?"":CFile::getPath(overBitmap) + CFile::getFilenameWithoutExtension(overBitmap) + ".tga";
-		// schedule mouseover bitmap for download if its different from normal
-		if (!over.empty() && !CPath::exists(over))
+		std::string over;
+		if (startsWith(overBitmap, "data:image/"))
 		{
-			if (overBitmap != normalBitmap)
+			over = decodeURIComponent(overBitmap);
+		}
+		else
+		{
+			over = overBitmap.empty()?"":CFile::getPath(overBitmap) + CFile::getFilenameWithoutExtension(overBitmap) + ".tga";
+			// schedule mouseover bitmap for download if its different from normal
+			if (!over.empty() && !CPath::exists(over))
 			{
-				over = localImageName(overBitmap);
-				addImageDownload(overBitmap, ctrlButton, style, OverImage);
+				if (overBitmap != normalBitmap)
+				{
+					over = localImageName(overBitmap);
+					addImageDownload(overBitmap, ctrlButton, style, OverImage);
+				}
 			}
 		}
 
