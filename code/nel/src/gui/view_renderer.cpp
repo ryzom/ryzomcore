@@ -24,6 +24,8 @@
 #include "nel/misc/file.h"
 #include "nel/misc/uv.h"
 #include "nel/misc/hierarchical_timer.h"
+#include "nel/misc/base64.h"
+#include "nel/misc/md5.h"
 
 using namespace NLMISC;
 using namespace std;
@@ -998,6 +1000,10 @@ namespace NLGUI
 										)
 	{
 		if (sGlobalTextureName.empty()) return -1;
+
+		if (startsWith(sGlobalTextureName, "data:image/"))
+			return createTextureFromDataURL(sGlobalTextureName, uploadDXTC, bReleasable);
+
 		// Look if already existing
 		string sLwrGTName = toLower(sGlobalTextureName);
 		TGlobalTextureList::iterator ite = _GlobalTextures.begin();
@@ -1058,6 +1064,93 @@ namespace NLGUI
 		// TMP TMP FIX NICO
 		//_TextureMap.insert( make_pair(iTmp.Name, TextID) );
 
+
+		return TextID;
+	}
+
+	sint32 CViewRenderer::createTextureFromDataURL(const std::string &data, bool uploadDXTC, bool bReleasable)
+	{
+		if (!startsWith(data, "data:image/"))
+			return -1;
+
+		size_t pos = data.find(";base64,");
+		if (pos == std::string::npos)
+		{
+			nlwarning("Failed to parse dataURL (not base64?) '%s'", data.c_str());
+			return -1;
+		}
+
+		std::string md5hash = getMD5((uint8 *)data.c_str(), (uint32)data.size()).toString();
+
+		TGlobalTextureList::iterator ite = _GlobalTextures.begin();
+		while (ite != _GlobalTextures.end())
+		{
+			if (md5hash == ite->Name)
+				break;
+			ite++;
+		}
+
+		// If global texture not exists create it
+		if (ite == _GlobalTextures.end())
+		{
+			std::string decoded = base64::decode(data.substr(pos + 8));
+			if (decoded.empty())
+			{
+				nlwarning("base64 decode failed '%s'", data.substr(pos + 8).c_str());
+				return -1;
+			}
+
+			//
+			CMemStream buf;
+			if (buf.isReading()) buf.invert();
+			buf.serialBuffer((uint8 *)(decoded.data()), decoded.size());
+			buf.invert();
+
+			CBitmap btm;
+			btm.load(buf);
+
+			SGlobalTexture gtTmp;
+			gtTmp.FromGlobaleTexture = false;
+
+			gtTmp.Width = gtTmp.DefaultWidth = btm.getWidth();;
+			gtTmp.Height = gtTmp.DefaultHeight = btm.getHeight();
+
+			if (gtTmp.Width == 0 || gtTmp.Height == 0)
+			{
+				nlwarning("Failed to load the texture '%s', please check image format", data.c_str());
+				return -1;
+			}
+
+			UTextureMem *texture = driver->createTextureMem(btm.getWidth(), btm.getHeight(), CBitmap::RGBA);
+			if (!texture)
+			{
+				nlwarning("Failed to create mem texture (%d,%d)", btm.getWidth(), btm.getHeight());
+				return -1;
+			}
+
+			memcpy(texture->getPointer(), btm.getPixels().getPtr(), btm.getSize() * 4);
+
+			gtTmp.Texture = texture;
+			gtTmp.Name = md5hash;
+			gtTmp.Texture->setFilterMode(UTexture::Nearest, UTexture::NearestMipMapOff);
+			gtTmp.Texture->setReleasable(bReleasable);
+			if(uploadDXTC)
+				gtTmp.Texture->setUploadFormat(UTexture::DXTC5);
+
+			_GlobalTextures.push_back(gtTmp);
+			ite = _GlobalTextures.end();
+			ite--;
+		}
+
+		// Add a texture with reference to the i th global texture
+		SImage iTmp;
+
+		// Set default parameters
+		iTmp.Name = data;
+		iTmp.GlobalTexturePtr = &(*ite);
+		iTmp.UVMin = CUV(0.f , 0.f);
+		iTmp.UVMax = CUV(1.f , 1.f);
+		sint32 TextID = addSImage(iTmp);
 
 		return TextID;
 	}
@@ -1158,6 +1251,11 @@ namespace NLGUI
 						if (tf)
 						{
 							driver->deleteTextureFile (tf);
+						}
+						else
+						{
+							UTextureMem *tf = dynamic_cast<NL3D::UTextureMem *>(iteGT->Texture);
+							if (tf) driver->deleteTextureMem(tf);
 						}
 						_GlobalTextures.erase (iteGT);
 						return;

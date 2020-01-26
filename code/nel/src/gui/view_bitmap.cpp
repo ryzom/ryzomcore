@@ -481,7 +481,7 @@ namespace NLGUI
 			}
 		}
 		else
-			_TextureId.setTexture (toLower(TxName).c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
+			_TextureId.setTexture (TxName.c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
 	}
 
 	// ----------------------------------------------------------------------------
