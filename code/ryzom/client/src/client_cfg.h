@@ -699,9 +699,7 @@ struct CClientConfig
 		uint FontSize;
 		std::string Text;
 	};
-	std::vector<SPrintfCommand> PrintfCommands;
-
-	std::vector<SPrintfCommand> PrintfCommandsFreeTrial;
+	std::vector<SPrintfCommand> loadingTexts;
 
 	// funny loading messages count
 	uint16 LoadingStringCount;
