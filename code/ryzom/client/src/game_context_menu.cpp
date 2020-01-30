@@ -454,7 +454,6 @@ void		CGameContextMenu::update()
 		if (pLeafFame != NULL)
 			fameValue = pLeafFame->getValue8();
 	}
-
 	if (_TextNews)
 		_TextNews->setActive(selection && !canAttack() && !selection->isForageSource() && fameValue >= -30);
 
