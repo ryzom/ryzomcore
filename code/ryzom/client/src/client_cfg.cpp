@@ -1413,35 +1413,27 @@ void CClientConfig::setValues()
 
 #ifndef RZ_NO_CLIENT
 	// printf commands in loading screens
-	ClientCfg.PrintfCommands.clear();
-	ClientCfg.PrintfCommandsFreeTrial.clear();
-	std::vector< std::string > printfCommands(2);
-	printfCommands[0] = "PrintfCommands";
-	printfCommands[1] = "PrintfCommandsFreeTrial";
-	for(uint p=0; p<2; p++)
+	ClientCfg.loadingTexts.clear();
+	CConfigFile::CVar *pc = ClientCfg.ConfigFile.getVarPtr("loadingTexts");
+	if (pc)
 	{
-		CConfigFile::CVar *pc = ClientCfg.ConfigFile.getVarPtr(printfCommands[p].c_str());
-		if (pc)
+		if( pc->size()%5 == 0 && pc->size() >= 5)
 		{
-			if( pc->size()%5 == 0 && pc->size() >= 5)
+			for (uint i = 0; i < pc->size(); i+=5)
 			{
-				for (uint i = 0; i < pc->size(); i+=5)
-				{
-					SPrintfCommand pcom;
-					pcom.X = pc->asInt(i);
-					pcom.Y = pc->asInt(i+1);
-					pcom.Color = CRGBA::stringToRGBA( pc->asString(i+2).c_str() );
-					pcom.FontSize = pc->asInt(i+3);
-					pcom.Text = pc->asString(i+4);
+				SPrintfCommand pcom;
+				pcom.X = pc->asInt(i);
+				pcom.Y = pc->asInt(i+1);
+				pcom.Color = CRGBA::stringToRGBA( pc->asString(i+2).c_str() );
+				pcom.FontSize = pc->asInt(i+3);
+				pcom.Text = pc->asString(i+4);
 
-					if(p==0) ClientCfg.PrintfCommands.push_back( pcom );
-					else ClientCfg.PrintfCommandsFreeTrial.push_back( pcom );
-				}
+				ClientCfg.loadingTexts.push_back( pcom );
 			}
-			else
-			{
-				cfgWarning(("Missing or too many parameters in " + printfCommands[p]).c_str());
-			}
+		}
+		else
+		{
+			cfgWarning("Missing or too many parameters in loadingTexts");
 		}
 	}
 #endif

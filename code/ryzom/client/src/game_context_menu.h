@@ -132,6 +132,7 @@ private:
 
 	// BotChat and player talk
 	CViewTextMenuPtr _TextNews;
+	CViewTextMenuPtr _TextNewsAgressive;
 	CViewTextMenuPtr _TextTradeItem;
 	CViewTextMenuPtr _TextTradeTeleport;
 	CViewTextMenuPtr _TextTradeFaction;

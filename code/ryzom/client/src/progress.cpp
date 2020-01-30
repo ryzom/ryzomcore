@@ -367,15 +367,14 @@ void CProgress::internalProgress (float value)
 				// apply text commands
 				if( ApplyTextCommands )
 				{
-					std::vector<CClientConfig::SPrintfCommand> printfCommands = ClientCfg.PrintfCommands;
-					if(FreeTrial) printfCommands = ClientCfg.PrintfCommandsFreeTrial;
+					std::vector<CClientConfig::SPrintfCommand> loadingTexts = ClientCfg.loadingTexts;
 
-					if( !printfCommands.empty() )
+					if( !loadingTexts.empty() )
 					{
 						TextContext->setHotSpot(UTextContext::MiddleBottom);
 
 						vector<CClientConfig::SPrintfCommand>::iterator itpc;
-						for( itpc = printfCommands.begin(); itpc != printfCommands.end(); ++itpc )
+						for( itpc = loadingTexts.begin(); itpc != loadingTexts.end(); ++itpc )
 						{
 							float x = 0.5f;//((*itpc).X / 1024.f);
 							float y = ((*itpc).Y / 768.f);
