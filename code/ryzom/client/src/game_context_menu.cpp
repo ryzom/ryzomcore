@@ -30,6 +30,7 @@
 #include "interface_v3/bot_chat_manager.h"
 #include "interface_v3/guild_manager.h"
 #include "interface_v3/people_interraction.h"
+#include "continent_manager.h"
 #include "main_loop.h"
 #include "interface_v3/inventory_manager.h"
 #include "motion/user_controls.h"
@@ -48,6 +49,7 @@ using namespace	NLMISC;
 using namespace std;
 
 
+extern CContinentManager ContinentMngr;
 
 // filter available programs depending on R2 mode
 static uint32 filterAvailablePrograms(uint32 src)
@@ -165,6 +167,7 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 	// BotChat menus
 
 	_TextNews = "ui:interface:" + menuId + ":news";
+	_TextNewsAgressive = "ui:interface:" + menuId + ":news_aggressive";
 	_TextTradeItem = "ui:interface:" + menuId + ":trade_item";
 	_TextTradeTeleport = "ui:interface:" + menuId + ":trade_teleport";
 	_TextTradeFaction = "ui:interface:" + menuId + ":trade_faction";
@@ -431,9 +434,35 @@ void		CGameContextMenu::update()
 	if (_TextAttack)
 		_TextAttack->setActive(canAttack());
 
+
+	// get current continent to check fame
+	string continent = ContinentMngr.cur()->SheetName;
+	sint8 fameValue = 0;
+	uint fameIndex;
+	nlinfo("continent = %s", continent.c_str());
+	if (continent == "matis.continent")
+		fameIndex = CStaticFames::getInstance().getFactionIndex("matis");
+	else if (continent == "fyros.continent")
+		fameIndex = CStaticFames::getInstance().getFactionIndex("fyros");
+	else if (continent == "tryker.continent")
+		fameIndex = CStaticFames::getInstance().getFactionIndex("tryker");
+	else if (continent == "zorai.continent")
+		fameIndex = CStaticFames::getInstance().getFactionIndex("zorai");
+
+	if (fameIndex != CStaticFames::INVALID_FACTION_INDEX)
+	{
+		CCDBNodeLeaf *pLeafFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", fameIndex), false);
+		if (pLeafFame != NULL)
+			fameValue = pLeafFame->getValue8();
+	}
+		nlinfo("fame = %d", fameValue);
 	if (_TextNews)
-		_TextNews->setActive(selection && !canAttack());
-        
+		_TextNews->setActive(selection && !canAttack() && !selection->isForageSource() && fameValue >= -30);
+
+	if (_TextNewsAgressive)
+		_TextNewsAgressive->setActive(selection && !canAttack() && !selection->isForageSource() && fameValue < -30);
+
+
 	if (_TextDuel && _TextUnDuel)
 	{
 		if ((!UserEntity->isRiding()) && (_ServerInDuel->getValue8() != 0))
@@ -735,7 +764,11 @@ void CGameContextMenu::updateContextMenuMissionsOptions( bool forceHide )
 					{
 						result = NLMISC::CI18N::get("uiMissionOptionNotReceived");
 					}
-					if (result == ucstring("Qui etes-vous ?"))
+					if (result == ucstring("Qui etes-vous ?")
+						|| result == ucstring("Wer bist Du?")
+						|| result == ucstring("Who are you?")
+						|| result == ucstring("Quién eres tú?")
+						|| result == ucstring("Кто ты?"))
 					{
 						pVTM->setActive(false);
 					}
