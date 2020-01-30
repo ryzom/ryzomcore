@@ -439,7 +439,6 @@ void		CGameContextMenu::update()
 	string continent = ContinentMngr.cur()->SheetName;
 	sint8 fameValue = 0;
 	uint fameIndex;
-	nlinfo("continent = %s", continent.c_str());
 	if (continent == "matis.continent")
 		fameIndex = CStaticFames::getInstance().getFactionIndex("matis");
 	else if (continent == "fyros.continent")
@@ -455,7 +454,6 @@ void		CGameContextMenu::update()
 		if (pLeafFame != NULL)
 			fameValue = pLeafFame->getValue8();
 	}
-		nlinfo("fame = %d", fameValue);
 	if (_TextNews)
 		_TextNews->setActive(selection && !canAttack() && !selection->isForageSource() && fameValue >= -30);
 
