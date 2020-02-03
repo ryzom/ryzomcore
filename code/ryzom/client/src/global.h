@@ -132,6 +132,7 @@ extern std::vector<std::pair<
 
 extern std::string					Cookie, FSAddr;
 extern std::string					RingMainURL;
+extern std::string					NewsAtProgress;
 extern bool							FreeTrial;
 
 void resetTextContext (const char *font, bool resetInterfaceManager);

@@ -132,6 +132,7 @@ private:
 
 	// BotChat and player talk
 	CViewTextMenuPtr _TextNews;
+	CViewTextMenuPtr _TextNewsAgressive;
 	CViewTextMenuPtr _TextTradeItem;
 	CViewTextMenuPtr _TextTradeTeleport;
 	CViewTextMenuPtr _TextTradeFaction;
@@ -155,6 +156,9 @@ private:
 	CViewTextMenuPtr _TextOutpostBanishPlayer;
 	CViewTextMenuPtr _TextOutpostBanishGuild;
 	CViewTextMenuPtr _TextWebPage;
+	CViewTextMenuPtr _TextInvisible;
+	CViewTextMenuPtr _TextInvulnerable;
+	CViewTextMenuPtr _TextGod;
 	CViewTextMenuPtr _TextMissionRing[BOTCHATTYPE::MaxR2MissionEntryDatabase];
 
 	// Forage source

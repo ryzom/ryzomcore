@@ -47,6 +47,7 @@ extern NL3D::UMaterial LoadingMaterialFull;
 extern std::vector<UTextureFile*> LogoBitmaps;
 extern uint TipsOfTheDayIndex;
 extern ucstring			TipsOfTheDay;
+extern string			NewsAtProgress;
 extern bool					UseEscapeDuringLoading;
 
 CProgress::CProgress ()
@@ -366,23 +367,27 @@ void CProgress::internalProgress (float value)
 				// apply text commands
 				if( ApplyTextCommands )
 				{
-					std::vector<CClientConfig::SPrintfCommand> printfCommands = ClientCfg.PrintfCommands;
-					if(FreeTrial) printfCommands = ClientCfg.PrintfCommandsFreeTrial;
+					std::vector<CClientConfig::SPrintfCommand> loadingTexts = ClientCfg.loadingTexts;
 
-					if( !printfCommands.empty() )
+					if( !loadingTexts.empty() )
 					{
 						TextContext->setHotSpot(UTextContext::MiddleBottom);
 
 						vector<CClientConfig::SPrintfCommand>::iterator itpc;
-						for( itpc = printfCommands.begin(); itpc != printfCommands.end(); ++itpc )
+						for( itpc = loadingTexts.begin(); itpc != loadingTexts.end(); ++itpc )
 						{
 							float x = 0.5f;//((*itpc).X / 1024.f);
 							float y = ((*itpc).Y / 768.f);
 							TextContext->setColor( (*itpc).Color );
-							TextContext->setFontSize( (uint)(16.f * fontFactor));
+							TextContext->setFontSize( (uint)((*itpc).FontSize * fontFactor));
 
 							// build the ucstr(s)
-							ucstring ucstr = CI18N::get((*itpc).Text);
+							string text = (*itpc).Text;
+							ucstring ucstr;
+							if (text == "NEWS")
+								ucstr.fromUtf8(NewsAtProgress);
+							else
+								ucstr = CI18N::get(text);
 							vector<ucstring> vucstr;
 							ucstring sep("\n");
 							splitUCString(ucstr,sep,vucstr);
