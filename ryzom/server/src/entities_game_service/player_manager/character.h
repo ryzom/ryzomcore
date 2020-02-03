@@ -2259,6 +2259,11 @@ public:
 	const TDataSetRow &getMonitoringCSR();
 	void setMonitoringCSR(const TDataSetRow &csr);
 
+	/// accessors to the stopped npc
+	const TDataSetRow &getStoppedNpc();
+	void setStoppedNpc(const TDataSetRow &npc);
+	void setStoppedNpcTick();
+
 	/// get death penalties
 	CDeathPenalties &getDeathPenalties();
 
@@ -3344,6 +3349,7 @@ private:
 
 	NLMISC::TGameCycle _LastTickSaved;
 	NLMISC::TGameCycle _LastTickCompassUpdated;
+	NLMISC::TGameCycle _LastTickNpcStopped;
 
 	/// permanent score modifiers (given by bricks)
 	sint32 _ScorePermanentModifiers[SCORES::NUM_SCORES];
@@ -3695,6 +3701,8 @@ private:
 
 	/// number of creatures attacking the player
 	uint8 _AggroCount;
+
+	TDataSetRow _StoppedNpc;
 
 	/// guild id of the player
 	uint32 _GuildId;

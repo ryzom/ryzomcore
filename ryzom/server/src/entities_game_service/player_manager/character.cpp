@@ -396,6 +396,7 @@ CCharacter::CCharacter()
 	_LastTickSufferGooDamage = CTickEventHandler::getGameCycle();
 	_LastTickSaved = CTickEventHandler::getGameCycle();
 	_LastTickCompassUpdated = CTickEventHandler::getGameCycle();
+	_LastTickNpcStopped = 0;
 	// harvest related
 	resetHarvestInfos();
 	_HarvestOpened = false;
@@ -1617,6 +1618,21 @@ uint32 CCharacter::tickUpdate()
 			removeMissionFromHistories(missionAlias);
 		}
 	}
+
+	if (_LastTickNpcStopped && CTickEventHandler::getGameCycle() > _LastTickNpcStopped)
+	{
+		nlinfo("ULU: CTickEventHandler::getGameCycle() > _LastTickNpcStopped");
+		TDataSetRow stoppedNpc = getStoppedNpc();
+		if (TheDataset.isAccessible(stoppedNpc))
+		{
+			nlinfo("ULU: stop bot");
+			CharacterBotChatBeginEnd.BotChatEnd.push_back(getEntityRowId());
+			CharacterBotChatBeginEnd.BotChatEnd.push_back(stoppedNpc);
+		}
+		_LastTickNpcStopped = 0;
+		setStoppedNpc(TDataSetRow());
+	}
+	
 	return nextUpdate;
 } // tickUpdate //
 
@@ -22519,6 +22535,22 @@ CAdminProperties &CCharacter::getAdminProperties()
 	nlassert(_AdminProperties != NULL);
 	return *_AdminProperties;
 }
+
+//------------------------------------------------------------------------------
+
+void CCharacter::setStoppedNpc(const TDataSetRow &npc)
+{
+	_StoppedNpc = npc;
+}
+
+//------------------------------------------------------------------------------
+
+void CCharacter::setStoppedNpcTick()
+{
+	nlinfo("ULU: setStopNpcTick in 60s");
+	_LastTickNpcStopped = CTickEventHandler::getGameCycle() + 10*60;
+}
+
 
 //------------------------------------------------------------------------------
 

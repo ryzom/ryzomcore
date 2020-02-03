@@ -9057,14 +9057,21 @@ NLMISC_COMMAND(openTargetApp, "open target app", "<user_id>")
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(openTargetUrl, "Open target url", "<user_id> <url>")
+// (ulukyn) Very special case to use with ARK.
+// !!! Never let user call openTargetUrl with a custom url or player 
+//   will able to sign any url with server salt.
+// It's why the url are hardcoded here
+NLMISC_COMMAND(openTargetUrl, "Open target url", "<user_id> [bullying]")
 {
-	if (args.size() < 2)
+	if (args.size() < 1)
 		return false;
 
 	GET_CHARACTER
 
-	c->sendUrl(args[1]);
+	if (args.size() > 1 && args[1] == "1")
+		c->sendUrl("app_arcc action=mScript_Run&script_name=TalkNpc&bullying=1&command=reset_all");
+	else
+		c->sendUrl("app_arcc action=mScript_Run&script_name=TalkNpc&command=reset_all");
 }
 
 

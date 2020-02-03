@@ -742,6 +742,13 @@ inline const TDataSetRow& CCharacter::getMonitoringCSR()
 
 //------------------------------------------------------------------------------
 
+inline const TDataSetRow& CCharacter::getStoppedNpc()
+{
+	return _StoppedNpc; 
+}
+
+//------------------------------------------------------------------------------
+
 inline float CCharacter::nextDeathPenaltyFactor() const
 {
 	return _NextDeathPenaltyFactor; 
