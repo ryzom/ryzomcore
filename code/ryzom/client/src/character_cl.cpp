@@ -5847,7 +5847,7 @@ void CCharacterCL::animEventsProcessing(double startTime, double stopTime)
 		}
 		// Sound Process.
 		CSoundAnimManager* sndMngr = CSoundAnimManager::instance();
-		if(sndMngr && (_SoundId[MOVE] != CSoundAnimationNoId))
+		if(_SoundContext.Args[2] != 999 && sndMngr && (_SoundId[MOVE] != CSoundAnimationNoId))
 		{
 			_SoundContext.Position = pos();
 			// Look for the cluster(s) containing this character...
