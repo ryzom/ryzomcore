@@ -439,15 +439,17 @@ void		CGameContextMenu::update()
 	string continent = ContinentMngr.cur()->SheetName;
 	sint8 fameValue = 0;
 	uint fameIndex;
-	if (continent == "matis.continent")
+	if (continent == "lesfalaises.continent")
 		fameIndex = CStaticFames::getInstance().getFactionIndex("matis");
 	else if (continent == "fyros.continent")
 		fameIndex = CStaticFames::getInstance().getFactionIndex("fyros");
 	else if (continent == "tryker.continent")
 		fameIndex = CStaticFames::getInstance().getFactionIndex("tryker");
-	else if (continent == "zorai.continent")
+	else if (continent == "lepaysmalade.continent")
 		fameIndex = CStaticFames::getInstance().getFactionIndex("zorai");
 
+	getFactionIndex("tryker"), CStaticFames::getInstance().getFactionIndex("zorai"));
+	
 	if (fameIndex != CStaticFames::INVALID_FACTION_INDEX)
 	{
 		CCDBNodeLeaf *pLeafFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", fameIndex), false);
