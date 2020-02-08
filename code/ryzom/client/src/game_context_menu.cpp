@@ -448,7 +448,6 @@ void		CGameContextMenu::update()
 	else if (continent == "lepaysmalade.continent")
 		fameIndex = CStaticFames::getInstance().getFactionIndex("zorai");
 
-	getFactionIndex("tryker"), CStaticFames::getInstance().getFactionIndex("zorai"));
 	
 	if (fameIndex != CStaticFames::INVALID_FACTION_INDEX)
 	{
