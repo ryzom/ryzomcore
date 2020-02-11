@@ -236,7 +236,10 @@ public:
 	// The Action Nature
 	ACTNATURE::TActionNature		ActionNature;
 
-	// For Progression, the required skill
+	// For Progression, the required skills (at least one)
+	std::vector<CSkillValue>		RequiredOneOfSkills;
+
+	// For Progression, the required skills (all of them)
 	std::vector<CSkillValue>		RequiredSkills;
 
 	// For Progression, the required Bricks
@@ -383,6 +386,8 @@ public:
 		s.serial(SPCost);
 
 		s.serialEnum(ActionNature);
+
+		s.serialCont(RequiredOneOfSkills);
 
 		s.serialCont(RequiredSkills);
 
