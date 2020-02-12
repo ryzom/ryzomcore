@@ -3697,12 +3697,20 @@ void				CSPhraseManager::computePhraseProgression()
 					CReqSkillFormula	brickFormula;
 
 					// get all its required Skill
+					for(uint j=0;j<brick->RequiredOneOfSkills.size();j++)
+					{
+						CSkillValue		sv;
+						sv.Skill= brick->RequiredOneOfSkills[j].Skill;
+						sv.Value= brick->RequiredOneOfSkills[j].Value;
+						brickFormula.orV(sv);
+					}
+
 					for(uint j=0;j<brick->RequiredSkills.size();j++)
 					{
 						CSkillValue		sv;
 						sv.Skill= brick->RequiredSkills[j].Skill;
 						sv.Value= brick->RequiredSkills[j].Value;
-						brickFormula.orV(sv);
+						brickFormula.andV(sv);
 					}
 
 					// if not empty

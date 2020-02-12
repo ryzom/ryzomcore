@@ -353,6 +353,27 @@ void CSBrickSheet::build (const NLGEORGES::UFormElm &root)
 	listSkill.clear();
 	splitString(skillReqStr," ",listSkill);
 	// build the req skill array
+	RequiredOneOfSkills.clear();
+	RequiredOneOfSkills.reserve(listSkill.size()/2);
+	for(i=0;i<listSkill.size()/2;i++)
+	{
+		CSkillValue		sv;
+		sv.Skill= SKILLS::toSkill(listSkill[i*2]);
+		fromString(listSkill[i*2+1], sv.Value);
+		// keep only whats work
+		if(sv.Skill!=SKILLS::unknown)
+		{
+			RequiredOneOfSkills.push_back(sv);
+		}
+	}
+
+	// parse the sheet str
+	skillReqStr.clear();
+	TRANSLATE_VAL(skillReqStr, "Basics.LearnRequiresSkills");
+	while(strFindReplace(skillReqStr, ":", " "));
+	listSkill.clear();
+	splitString(skillReqStr," ",listSkill);
+	// build the req skill array
 	RequiredSkills.clear();
 	RequiredSkills.reserve(listSkill.size()/2);
 	for(i=0;i<listSkill.size()/2;i++)
