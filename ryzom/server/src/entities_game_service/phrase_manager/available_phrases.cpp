@@ -56,6 +56,26 @@ inline bool	skillRequiredAreBelowSkillValueLimit( uint skillValueLimit, const ve
 
 
 /*
+ * Find in skillsRequiredList that all skills are lower (by value) than the provided limit value
+ */
+inline bool	skillsAreBelowSkillValueLimit( uint skillValueLimit, const vector<CPlayerSkill>& skillsRequiredList )
+{
+	H_AUTO(skillsAreBelowSkillValueLimit);
+	vector<CPlayerSkill>::const_iterator irs;
+	for ( irs=skillsRequiredList.begin(); irs!=skillsRequiredList.end(); ++irs )
+	{
+		const CPlayerSkill& requiredSkill = *irs;
+		if ( ! requiredSkill.isSkillValueLowerThan( skillValueLimit ) )
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+/*
  * Find in the player skill list has at least one skill that is higher than the provided skill.
  *
  * Precondition:
@@ -84,6 +104,26 @@ inline bool	skillRequiredMatchPlayerSkills( const vector<SSkill>& playerSkills, 
 			return true;
 	}
 	return false;
+}
+
+
+/*
+ * Find in skillsRequiredList that all skills match in player skills
+ *
+ * Precondition:
+ * - skillsRequiredList contains valid skills (not unknown)
+ */
+inline bool	skillsMatchPlayerSkills( const vector<SSkill>& playerSkills, const vector<CPlayerSkill>& skillsRequiredList )
+{
+	H_AUTO(skillsMatchPlayerSkills);
+	vector<CPlayerSkill>::const_iterator irs;
+	for ( irs=skillsRequiredList.begin(); irs!=skillsRequiredList.end(); ++irs )
+	{
+		const CPlayerSkill& requiredSkill = *irs;
+		if ( ! skillMatchesOneOfList( requiredSkill, playerSkills ) )
+			return false;
+	}
+	return true;
 }
 
 
@@ -173,6 +213,16 @@ bool	isPlayerAllowedToGetAllBricksFromPhrase( const CEntityId& eid,
 
 			// Check if one of the skills match one of the player's
 			if ( ! skillRequiredMatchPlayerSkills( playerSkills, staticBrick->LearnRequiresOneOfSkills ) )
+				return false;
+		}
+
+		if ( ! staticBrick->LearnRequiresSkills.empty() )
+		{
+			// Check if the brick is below or equal the skill value limit
+			if ( ! skillsAreBelowSkillValueLimit( skillValueLimit, staticBrick->LearnRequiresSkills ) )
+				return false;
+			// Check if all of the skills match one of the player's
+			if ( ! skillsMatchPlayerSkills( playerSkills, staticBrick->LearnRequiresSkills ) )
 				return false;
 		}
 

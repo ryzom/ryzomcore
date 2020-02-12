@@ -110,6 +110,7 @@ void CStaticBrick::serial(class NLMISC::IStream &f)
 	f.serial(ForbiddenExclude);
 
 	f.serialCont( LearnRequiresOneOfSkills );
+	f.serialCont( LearnRequiresSkills );
 	f.serialCont( LearnRequiresBricks );
 	f.serialEnum( CivRestriction );
 	f.serial( Faction );
@@ -419,6 +420,23 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 			LearnRequiresOneOfSkills.push_back( ps );
 		else
 			nlwarning( "<CStaticBrick::readGeorges> Invalid LearnRequiresOneOfSkills value '%s' in sheet %s", sav.c_str(), sheetId.toString().c_str() );
+	}
+
+	// LearnRequiresSkills
+	if ( ! root.getValueByName (value, "Basics.LearnRequiresSkills") )
+	{
+		nlwarning("<CStaticBrick::readGeorges> can't get the value 'LearnRequireSkills' for sheet %s", sheetId.toString().c_str() );
+	}
+	skillsAndValues.clear();
+	explode( value, string(":"), skillsAndValues, true );
+	for ( vector<string>::const_iterator isv=skillsAndValues.begin(); isv!=skillsAndValues.end(); ++isv )
+	{
+		const string& sav = *isv;
+		CPlayerSkill ps;
+		if ( ps.initFromString( sav ) ) // discard the skill if unknown
+			LearnRequiresSkills.push_back( ps );
+		else
+			nlwarning( "<CStaticBrick::readGeorges> Invalid LearnRequiresSkills value '%s' in sheet %s", sav.c_str(), sheetId.toString().c_str() );
 	}
 
 	// LearnRequiresBricks

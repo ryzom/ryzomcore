@@ -219,6 +219,7 @@ bool CFgExtractionPhrase::build( const TDataSetRow & actorRowId, const std::vect
 			case TBrickParam::FG_ECT_SPC:
 				INFOLOG("FG_ECT_SPC: %s",((CSBrickParamForageEcotypeSpec *)param)->Ecotype.c_str());
 				_Props.Extraction.EcotypeSpec = ECOSYSTEM::stringToEcosystem( ((CSBrickParamForageEcotypeSpec *)param)->Ecotype );
+				_Props.Extraction.EcotypeSpecBonus = true;
 				break;
 			case TBrickParam::FG_RMGRP_FILT:
 				INFOLOG("FG_RMGRP_FILT: %i",((CSBrickParamForageRMGroupFilter *)param)->Value);
@@ -294,7 +295,7 @@ bool CFgExtractionPhrase::build( const TDataSetRow & actorRowId, const std::vect
 			// else the phrase will be rejected in validate()
 		}
 
-		// Bonus: when using ecosystem specialization, decrease impact on some risks (TODO: linearly dependant on specialized skill value).
+		// when using ecosystem specialization
 		if ( _Props.Extraction.EcotypeSpec != ECOSYSTEM::common_ecosystem )
 		{
 			// Check if the ecotype specialization matches
@@ -303,6 +304,11 @@ bool CFgExtractionPhrase::build( const TDataSetRow & actorRowId, const std::vect
 				PHRASE_UTILITIES::sendDynamicSystemMessage( _ActorRowId, "FORAGE_ECOTYPE_SPEC_NOT_MATCHING" );
 				return false;
 			}
+		}
+
+		// Bonus: when using ecosystem/atys specialization, decrease impact on some risks (TODO: linearly dependant on specialized skill value).
+		if ( _Props.Extraction.EcotypeSpecBonus )
+		{
 			if ( _RequestedProps[CHarvestSource::A] != 0 )
 			{
 				// Extraction

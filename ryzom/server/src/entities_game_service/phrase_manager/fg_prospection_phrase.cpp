@@ -289,6 +289,7 @@ bool CFgSearchPhrase::build( const TDataSetRow & actorRowId, const std::vector< 
 			case TBrickParam::FG_ECT_SPC:
 				INFOLOG("FG_ECT_SPC: %s",((CSBrickParamForageEcotypeSpec *)param)->Ecotype.c_str());
 				_EcotypeSpec = ECOSYSTEM::stringToEcosystem( ((CSBrickParamForageEcotypeSpec *)param)->Ecotype );
+				_EcotypeSpecBonus = true;
 				break;
 			case TBrickParam::FG_RMGRP_FILT:
 				INFOLOG("FG_RMGRP_FILT: %i",((CSBrickParamForageRMGroupFilter *)param)->Value);
@@ -800,7 +801,7 @@ uint CFgProspectionPhrase::generateSources( CCharacter *player )
 				CVector2f pos2f = pos;
 				if ( hsource->init( _SourceIniProperties, pos2f, forageSite, depositForK, rawMaterial, quantityRatio ) )
 				{
-					if ( _EcotypeSpec != ECOSYSTEM::common_ecosystem )
+					if ( _EcotypeSpecBonus )
 						hsource->setBonusForA( 20 );
 					
 					if ( hsource->spawnBegin( _KnowledgePrecision, player->getEntityRowId(), false ) )
@@ -1030,7 +1031,7 @@ void CFgProspectionPhrase::startLocateDeposit( CCharacter *player )
 		CVector2f locatedPoint( retainedLoc->NearestPos );
 		TReportAction report;
 		sint32 effectFocusCostByUpdate = _FocusCost / ForageFocusRatioOfLocateDeposit.get();
-		if ( _EcotypeSpec != ECOSYSTEM::common_ecosystem )
+		if ( _EcotypeSpecBonus )
 			effectFocusCostByUpdate /= 2; // lower focus consumption with terrain specialization
 		CSEffectLocateDeposit *effect = new CSEffectLocateDeposit(
 			player->getEntityRowId(),

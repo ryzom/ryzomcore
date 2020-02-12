@@ -393,6 +393,9 @@ public:
 	/// Skills required to learn the brick (OR)
 	std::vector<CPlayerSkill>				LearnRequiresOneOfSkills;
 
+	/// Skills required to learn the brick (AND: all of them are required)
+	std::vector<CPlayerSkill>				LearnRequiresSkills;
+
 	/// Bricks required to learn the brick (AND: all of them are required)
 	std::vector<NLMISC::CSheetId>			LearnRequiresBricks;
 

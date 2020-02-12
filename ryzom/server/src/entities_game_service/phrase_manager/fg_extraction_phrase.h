@@ -136,6 +136,9 @@ private:
 			/// Factor for increase speed of quality
 			float						QualitySlowFactor;
 
+			/// True if terrain specialization or Atys specialization is used
+			bool						EcotypeSpecBonus;
+
 		} Extraction;
 
 		struct
