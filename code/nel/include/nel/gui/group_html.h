@@ -683,6 +683,8 @@ namespace NLGUI
 			std::vector<CEntry>	Entries;
 		};
 		std::vector<CForm>	_Forms;
+		// if <FORM> element has been closed or not
+		bool				_FormOpen;
 
 		// submit buttons added to from
 		struct SFormSubmitButton
@@ -953,6 +955,7 @@ namespace NLGUI
 		//void htmlEM(const CHtmlElement &elm);
 		void htmlFONT(const CHtmlElement &elm);
 		void htmlFORM(const CHtmlElement &elm);
+		void htmlFORMend(const CHtmlElement &elm);
 		void htmlH(const CHtmlElement &elm);
 		void htmlHend(const CHtmlElement &elm);
 		void htmlHEAD(const CHtmlElement &elm);
