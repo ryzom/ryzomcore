@@ -1189,7 +1189,7 @@ namespace NLGUI
 		case HTML_DT:       htmlDTend(elm); break;
 		case HTML_EM:       renderPseudoElement(":after", elm);break;
 		case HTML_FONT:     break;
-		case HTML_FORM:     renderPseudoElement(":after", elm);break;
+		case HTML_FORM:     htmlFORMend(elm); break;
 		case HTML_H1://no-break
 		case HTML_H2://no-break
 		case HTML_H3://no-break
@@ -1444,6 +1444,7 @@ namespace NLGUI
 		_RenderNextTime = false;
 		_WaitingForStylesheet = false;
 		_AutoIdSeq = 0;
+		_FormOpen = false;
 
 		// Register
 		CWidgetManager::getInstance()->registerClockMsgTarget(this);
@@ -3240,6 +3241,7 @@ namespace NLGUI
 		_Cells.clear();
 		_TR.clear();
 		_Forms.clear();
+		_FormOpen = false;
 		_FormSubmit.clear();
 		_Groups.clear();
 		_Divs.clear();
@@ -5545,6 +5547,11 @@ namespace NLGUI
 		std::string tooltip = elm.getAttribute("tooltip");
 		bool disabled = elm.hasAttribute("disabled");
 
+		if (formId.empty() && _FormOpen)
+		{
+			formId = _Forms.back().id;
+		}
+
 		if (!formAction.empty())
 		{
 			formAction = getAbsoluteUrl(formAction);
@@ -5817,6 +5824,8 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlFORM(const CHtmlElement &elm)
 	{
+		_FormOpen = true;
+
 		// Build the form
 		CGroupHTML::CForm form;
 		// id check is case sensitive and auto id's are uppercase
@@ -5839,6 +5848,12 @@ namespace NLGUI
 		_Forms.push_back(form);
 
 		renderPseudoElement(":before", elm);
+	}
+
+	void CGroupHTML::htmlFORMend(const CHtmlElement &elm)
+	{
+		_FormOpen = false;
+		renderPseudoElement(":after", elm);
 	}
 
 	// ***************************************************************************
