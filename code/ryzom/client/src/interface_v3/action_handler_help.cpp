@@ -1116,8 +1116,8 @@ class CHandlerHTMLSubmitForm : public IActionHandler
 			return;
 		}
 
-		sint32 x = pCaller->getEventX();
-		sint32 y = pCaller->getEventY();
+		sint32 x = pCaller ? pCaller->getEventX() : 0;
+		sint32 y = pCaller ? pCaller->getEventY() : 0;
 
 		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId(container);
 		{
@@ -1126,6 +1126,10 @@ class CHandlerHTMLSubmitForm : public IActionHandler
 			if (groupHtml)
 			{
 				groupHtml->submitForm(button, x, y);
+			}
+			else
+			{
+				nlwarning("CGroupHTML with id '%s' not found.", container.c_str());
 			}
 		}
 	}
