@@ -1443,6 +1443,7 @@ namespace NLGUI
 		_LastRefreshTime = 0.0;
 		_RenderNextTime = false;
 		_WaitingForStylesheet = false;
+		_AutoIdSeq = 0;
 
 		// Register
 		CWidgetManager::getInstance()->registerClockMsgTarget(this);
@@ -2531,6 +2532,7 @@ namespace NLGUI
 	{
 		// Add a new paragraph
 		CGroupParagraph *newParagraph = new CGroupParagraph(CViewBase::TCtorParam());
+		newParagraph->setId(getCurrentGroup()->getId() + ":PARAGRAPH" + toString(getNextAutoIdSeq()));
 		newParagraph->setResizeFromChildH(true);
 
 		newParagraph->setMarginLeft(getIndent());
@@ -3251,6 +3253,7 @@ namespace NLGUI
 		_ReadingHeadTag = false;
 		_IgnoreHeadTag = false;
 		_IgnoreBaseUrlTag = false;
+		_AutoIdSeq = 0;
 
 		paragraphChange ();
 
@@ -4327,6 +4330,7 @@ namespace NLGUI
 		if (!_GroupListAdaptor)
 		{
 			_GroupListAdaptor = new CGroupListAdaptor(CViewBase::TCtorParam()); // deleted by the list
+			_GroupListAdaptor->setId(getList()->getId() + ":GLA");
 			_GroupListAdaptor->setResizeFromChildH(true);
 			getList()->addChild (_GroupListAdaptor, true);
 		}
@@ -5643,6 +5647,8 @@ namespace NLGUI
 		{
 			string style = elm.getAttribute("style");
 			string id = elm.getAttribute("id");
+			if (id.empty())
+				id = "DIV" + toString(getNextAutoIdSeq());
 
 			typedef pair<string, string> TTmplParam;
 			vector<TTmplParam> tmplParams;
@@ -5675,10 +5681,10 @@ namespace NLGUI
 					parentId = _Paragraph->getId();
 				}
 
-				CInterfaceGroup *inst = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, this->_Id+":"+id, tmplParams);
+				CInterfaceGroup *inst = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, parentId, tmplParams);
 				if (inst)
 				{
-					inst->setId(this->_Id+":"+id);
+					inst->setId(parentId+":"+id);
 					inst->updateCoords();
 					if (haveParentDiv)
 					{
@@ -6607,6 +6613,10 @@ namespace NLGUI
 
 		CGroupTable *table = new CGroupTable(TCtorParam());
 		table->BgColor = _CellParams.back().BgColor;
+		if (elm.hasNonEmptyAttribute("id"))
+			table->setId(getCurrentGroup()->getId() + ":" + elm.getAttribute("id"));
+		else
+			table->setId(getCurrentGroup()->getId() + ":TABLE" + toString(getNextAutoIdSeq()));
 
 		// TODO: border-spacing: 2em;
 		{
@@ -6767,6 +6777,10 @@ namespace NLGUI
 		}
 
 		_Cells.back() = new CGroupCell(CViewBase::TCtorParam());
+		if (elm.hasNonEmptyAttribute("id"))
+			_Cells.back()->setId(getCurrentGroup()->getId() + ":TD" + elm.getAttribute("id"));
+		else
+			_Cells.back()->setId(getCurrentGroup()->getId() + ":TD" + toString(getNextAutoIdSeq()));
 
 		if (_Style.checkStyle("background-repeat", "repeat"))
 			_Cells.back()->setTextureTile(true);

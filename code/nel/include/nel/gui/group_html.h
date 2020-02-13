@@ -357,6 +357,10 @@ namespace NLGUI
 		// Delete page content and prepare next page
 		void removeContent ();
 
+		// Counter to number html elements without id attribute
+		uint32			getNextAutoIdSeq() { return _AutoIdSeq++; }
+		uint32			_AutoIdSeq;
+
 		// Current URL for relative links in page
 		std::string		_URL;
 		// Current URL
