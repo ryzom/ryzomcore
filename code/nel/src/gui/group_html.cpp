@@ -6827,9 +6827,11 @@ namespace NLGUI
 
 		_Cells.back() = new CGroupCell(CViewBase::TCtorParam());
 		if (elm.hasNonEmptyAttribute("id"))
-			_Cells.back()->setId(getCurrentGroup()->getId() + ":TD" + elm.getAttribute("id"));
+			_Cells.back()->setId(table->getId() + ":" + elm.getAttribute("id"));
 		else
-			_Cells.back()->setId(getCurrentGroup()->getId() + ":TD" + toString(getNextAutoIdSeq()));
+			_Cells.back()->setId(table->getId() + ":TD" + toString(getNextAutoIdSeq()));
+		// inner cell content
+		_Cells.back()->Group->setId(_Cells.back()->getId() + ":CELL");
 
 		if (_Style.checkStyle("background-repeat", "repeat"))
 			_Cells.back()->setTextureTile(true);
