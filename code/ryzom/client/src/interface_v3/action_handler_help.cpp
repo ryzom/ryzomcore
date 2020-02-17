@@ -2129,8 +2129,9 @@ static void	setupEnchantedItem(CSheetHelpSetup &setup, ucstring &itemText)
 		const CItemSheet	*pIS= ctrl->asItemSheet();
 		if(pIS && pIS->Family == ITEMFAMILY::CRYSTALLIZED_SPELL)
 			pPM->buildPhraseDesc(enchantInfo, itemInfo.Enchantment, 0, false, "uihelpPhraseCrystalSpellFormat");
-		else
+		else if(!pIS || pIS->Family != ITEMFAMILY::JEWELRY) {
 			pPM->buildPhraseDesc(enchantInfo, itemInfo.Enchantment, 0, false, "uihelpPhraseEnchantmentFormat");
+		}
 
 		// replace
 		strFindReplace(itemText, enchantTag, enchantInfo );
