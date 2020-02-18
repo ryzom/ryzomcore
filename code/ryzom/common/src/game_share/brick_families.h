@@ -660,7 +660,6 @@ namespace BRICK_FAMILIES
 					BSGMBP,
 					BSGMBR,
 					BSGMBS,
-				BSGMC, // jewels s2e0
 
 				BeginMagicPowerParameter,
 				BSMMA = BeginMagicPowerParameter, // sap aura
@@ -675,6 +674,8 @@ namespace BRICK_FAMILIES
 				BSCMC, // heal Sta
 				BSCMD, // heal Focus
 			EndPowerParameter = BSCMD,
+
+			BSGMC, // jewels s2e0
 
 			BeginMagicPowerCredit,
 				BSXCA = BeginMagicPowerCredit, // recast time
