@@ -1702,6 +1702,15 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*STRUCT CSBrickParamConsumeItem TBrickParam::TA_CONSUME
 		Params.push_back(new CSBrickParamConsumeItem(tail)); 
 		break;
+
+	case TBrickParam::JEWEL_ATTRS:
+		// $*STRUCT CSBrickParamJewelAttrs TBrickParam::JEWEL_ATTRS
+		// $*-s std::string		Attribute	// attribute name
+		// $*-s std::string		Value	// attribute value
+		// $*-i uint32			Charge		// initial charge of sapload
+		// $*-i uint32			Modifier		// onus on attribute
+		Params.push_back(new CSBrickParamJewelAttrs(tail)); 
+		break;
 	}
 } // addParam //
 

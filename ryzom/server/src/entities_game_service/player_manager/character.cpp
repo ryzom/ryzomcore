@@ -1621,11 +1621,9 @@ uint32 CCharacter::tickUpdate()
 
 	if (_LastTickNpcStopped && CTickEventHandler::getGameCycle() > _LastTickNpcStopped)
 	{
-		nlinfo("ULU: CTickEventHandler::getGameCycle() > _LastTickNpcStopped");
 		TDataSetRow stoppedNpc = getStoppedNpc();
 		if (TheDataset.isAccessible(stoppedNpc))
 		{
-			nlinfo("ULU: stop bot");
 			CharacterBotChatBeginEnd.BotChatEnd.push_back(getEntityRowId());
 			CharacterBotChatBeginEnd.BotChatEnd.push_back(stoppedNpc);
 		}
@@ -11705,6 +11703,74 @@ void CCharacter::setDontTranslate(const string &langs)
 	_DontTranslate = langs;
 }
 
+
+//-----------------------------------------------------------------------------
+CSBrickParamJewelAttrs *CCharacter::getJewelAttrs(const string &attribute, SLOT_EQUIPMENT::TSlotEquipment slot)
+{
+	
+	CInventoryPtr inv = getInventory(INVENTORIES::equipment);
+	if (inv)
+	{
+		if (slot == SLOT_EQUIPMENT::UNDEFINED)
+		{
+			for( uint8 s = 0; s < SLOT_EQUIPMENT::NB_SLOT_EQUIPMENT; ++s )
+			{
+				const CGameItemPtr item = inv->getItem(s);
+				if (item != NULL)
+				{
+					vector< CSheetId > enchant = item->getEnchantment();
+					for (uint i = 0; i < enchant.size(); i++)
+					{
+						const CStaticBrick * brick = CSheets::getSBrickForm(enchant[i]);
+						if (brick && brick->Family == BRICK_FAMILIES::BSGMC)
+						{
+							if (brick->Params.size() > 0)
+							{
+								const TBrickParam::IId* param = brick->Params[0];
+								CSBrickParamJewelAttrs *sbrickParam = (CSBrickParamJewelAttrs*)param;
+								if (param->id() == TBrickParam::JEWEL_ATTRS && sbrickParam->Attribute == attribute)
+								{
+									if (checkRequiredFaction(sbrickParam->RequiredFaction)) {
+										return sbrickParam;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			const CGameItemPtr item = inv->getItem(slot);
+			if (item != NULL)
+			{
+				vector< CSheetId > enchant = item->getEnchantment();
+				for (uint i = 0; i < enchant.size(); i++)
+				{
+					const CStaticBrick * brick = CSheets::getSBrickForm(enchant[i]);
+					if (brick && brick->Family == BRICK_FAMILIES::BSGMC)
+					{
+						if (brick->Params.size() > 0)
+						{
+							const TBrickParam::IId* param = brick->Params[0];
+							CSBrickParamJewelAttrs *sbrickParam = (CSBrickParamJewelAttrs*)param;
+							if (param->id() == TBrickParam::JEWEL_ATTRS && sbrickParam->Attribute == attribute)
+							{
+								if (checkRequiredFaction(sbrickParam->RequiredFaction)) {
+									return sbrickParam;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	return NULL;
+}
+
 //-----------------------------------------------------------------------------
 void CCharacter::setOrganization(uint32 org)
 {
@@ -11718,6 +11784,8 @@ void CCharacter::setOrganization(uint32 org)
 	CBankAccessor_PLR::getUSER().getRRPS_LEVELS(2).setVALUE(_PropertyDatabase, _OrganizationStatus);
 	CBankAccessor_PLR::getUSER().getRRPS_LEVELS(3).setVALUE(_PropertyDatabase, _OrganizationPoints);
 	CPVPManager2::getInstance()->updateFactionChannel(this);
+
+	updateJewelsTags(false);
 }
 
 //-----------------------------------------------------------------------------
@@ -20092,6 +20160,7 @@ bool CCharacter::setDeclaredCult(PVP_CLAN::TPVPClan newClan)
 			updatePVPClanVP();
 			// update ring database
 			IShardUnifierEvent::getInstance()->onUpdateCharAllegiance(_Id, _DeclaredCult, _DeclaredCiv);
+			updateJewelsTags(false);
 			return true;
 		}
 
@@ -20152,6 +20221,7 @@ bool CCharacter::setDeclaredCiv(PVP_CLAN::TPVPClan newClan)
 			updatePVPClanVP();
 			// update ring database
 			IShardUnifierEvent::getInstance()->onUpdateCharAllegiance(_Id, _DeclaredCult, _DeclaredCiv);
+			updateJewelsTags(false);
 			return true;
 		}
 
@@ -21121,6 +21191,37 @@ void CCharacter::updateParry(ITEMFAMILY::EItemFamily family, SKILLS::ESkills ski
 	//	_PropertyDatabase.setProp(_DataIndexReminder->CHARACTER_INFO.ParryCurrent, _CurrentParryLevel );
 	CBankAccessor_PLR::getCHARACTER_INFO().getPARRY().setCurrent(
 		_PropertyDatabase, checkedCast<uint16>(_CurrentParryLevel));
+}
+
+//----------------------------------------------------------------------------
+void CCharacter::updateJewelsTags(bool remove)
+{
+	if (!getEnterFlag())
+	return;
+
+	string tagA = getTagA();
+	string tagB = getTagB();
+
+	setTagA("");
+	setTagB("");
+
+	if (remove)
+		return;
+
+	CSBrickParamJewelAttrs *sbrickParam = getJewelAttrs("tag", SLOT_EQUIPMENT::HEADDRESS);
+	if (sbrickParam)
+	{
+		setTagA(sbrickParam->Value);
+	}
+
+	sbrickParam = getJewelAttrs("tag", SLOT_EQUIPMENT::NECKLACE);
+	if (sbrickParam)
+	{
+		setTagB(sbrickParam->Value);
+	}
+
+	if (getTagA() != tagA || getTagB() != tagB)
+		registerName();
 }
 
 //----------------------------------------------------------------------------
@@ -22547,7 +22648,6 @@ void CCharacter::setStoppedNpc(const TDataSetRow &npc)
 
 void CCharacter::setStoppedNpcTick()
 {
-	nlinfo("ULU: setStopNpcTick in 60s");
 	_LastTickNpcStopped = CTickEventHandler::getGameCycle() + 10*60;
 }
 

@@ -1013,6 +1013,40 @@ NLMISC_COMMAND(deleteInventoryItems, "Delete items from a characters inventory",
 	return true;
 }
 
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(enchantItem, "enchantItem", "<uid> <slotname> <sheet1>,[<sheet2> ...]")
+{
+	if (args.size () < 3)
+	{
+		log.displayNL("ERR: Invalid number of parameters. Parameters: <inventory> <sheetnames> <quality> <quantity>");
+		return false;
+	}
+
+	GET_ACTIVE_CHARACTER
+
+	string selected_slot = args[1];
+
+	std::vector<string> sheet_names;
+	NLMISC::splitString(args[2], ",", sheet_names);
+
+	std::vector<CSheetId> sheets;
+	for (uint32 i=0; i<sheet_names.size(); i++)
+	{
+		sheets.push_back(CSheetId(sheet_names[i]));
+	}
+	
+	CGameItemPtr itemPtr = c->getItem(INVENTORIES::equipment, SLOT_EQUIPMENT::stringToSlotEquipment(selected_slot));
+	if (itemPtr != NULL)
+	{
+		itemPtr->applyEnchantment(sheets);
+		log.displayNL("OK");
+		return true;
+	}
+	log.displayNL("KO");
+	return true;
+}
+
+
 
 
 //----------------------------------------------------------------------------

@@ -168,6 +168,7 @@ public:
 		TA_MOUNT,
 		TA_UNMOUNT,
 		TA_CONSUME,
+		JEWEL_ATTRS,
 		NUM_VALUES,
 		BAD_VALUE= NUM_VALUES
 	};
@@ -347,6 +348,7 @@ public:
 		if (copyOfStr=="ta_mount") {_Value=TA_MOUNT; return *this;}
 		if (copyOfStr=="ta_unmount") {_Value=TA_UNMOUNT; return *this;}
 		if (copyOfStr=="ta_consume") {_Value=TA_CONSUME; return *this;}
+		if (copyOfStr=="jewel_attrs") {_Value=JEWEL_ATTRS; return *this;}
 
 		_Value=BAD_VALUE;
 		return *this;
@@ -5170,6 +5172,58 @@ struct CSBrickParamCharacUpgrade : public TBrickParam::IId
 		Characteristic=args[0].c_str();
 		NLMISC::fromString(args[1], Modifier);
 
+		return *this;
+	}
+};
+
+struct CSBrickParamJewelAttrs : public TBrickParam::IId
+{
+	// attribute name
+	std::string Attribute;
+	// attribute value
+	std::string Value;
+	// initial charge of sapload
+	uint32 Charge;
+	// bonus on attribute
+	uint32 Modifier;
+	// required Faction
+	std::string  RequiredFaction;
+
+	CSBrickParamJewelAttrs():
+		Attribute(),
+		Value(),
+		Charge(),
+		Modifier(),
+		RequiredFaction()
+		
+	{
+		_Id = TBrickParam::JEWEL_ATTRS;
+	}
+
+	CSBrickParamJewelAttrs(const std::string&str)
+	{
+		*this=CSBrickParamJewelAttrs();
+		*this=str;
+	}
+
+	const CSBrickParamJewelAttrs& operator=(const std::string& input)
+	{
+		std::vector<std::string> args;
+		convertInput(args, input);
+
+		if (args.size() < 4)
+			return *this;
+
+		ParsedOk=true;
+		Attribute=args[0].c_str();
+		Value=args[1].c_str();
+		NLMISC::fromString(args[2], Charge);
+		NLMISC::fromString(args[3], Modifier);
+		if (args.size() > 4)
+			RequiredFaction = args[4].c_str();
+		else
+			RequiredFaction = "";
+			
 		return *this;
 	}
 };

@@ -22,6 +22,9 @@
 #include "player_manager/character.h"
 #include "egs_sheets/egs_sheets.h"
 
+using namespace NLMISC;
+using namespace std;
+
 extern NLMISC::CVariable<uint32>	MaxPlayerBulk;
 
 /////////////////////////////////////////////////////////////
@@ -118,6 +121,9 @@ void CEquipInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags cha
 			}
 		}
 	}
+
+	// Update tags
+	getCharacter()->updateJewelsTags(false);
 }
 
 // ****************************************************************************

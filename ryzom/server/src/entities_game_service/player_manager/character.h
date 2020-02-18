@@ -2422,6 +2422,9 @@ public:
 	/// update parry skill and level
 	void updateParry(ITEMFAMILY::EItemFamily family, SKILLS::ESkills skill);
 
+	// Jewel enchants used for Tags
+	void updateJewelsTags(bool remove);
+	
 	// Jewel equipment or skill or region are changed, recompute protection and resistances
 	void updateMagicProtectionAndResistance();
 
@@ -2582,6 +2585,8 @@ public:
 
 	std::string getFullTitle() const;
 
+	bool checkRequiredFaction(std::string faction) const;
+
 	std::string getTagA() const;
 	void setTagA(const std::string &tag);
 
@@ -2596,6 +2601,8 @@ public:
 
 	std::string getDontTranslate() const;
 	void setDontTranslate(const std::string &langs);
+
+	CSBrickParamJewelAttrs *getJewelAttrs(const std::string &attribute, SLOT_EQUIPMENT::TSlotEquipment slot);
 
 	uint32 getOrganization() const;
 	uint32 getOrganizationStatus() const;

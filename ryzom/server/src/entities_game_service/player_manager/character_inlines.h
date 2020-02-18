@@ -1013,6 +1013,28 @@ inline std::string CCharacter::getFullTitle() const
 		return _NewTitle;
 }
 
+inline bool CCharacter::checkRequiredFaction(std::string faction) const
+{
+	if (faction == "")
+		return true;
+
+	std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegeance = getAllegiance();
+	bool neutralcult = (allegeance.first == PVP_CLAN::Neutral || allegeance.first == PVP_CLAN::None);
+	bool neutralciv = (allegeance.second == PVP_CLAN::Neutral || allegeance.second == PVP_CLAN::None);
+	
+	return ((faction == "kami" && allegeance.first == PVP_CLAN::Kami && getOrganization() == 0) ||
+			(faction == "karavan" && allegeance.first == PVP_CLAN::Karavan && getOrganization() == 0) ||
+			(faction == "marauder" && neutralcult && neutralciv && getOrganization() == 5) ||
+			(faction == "ranger" && neutralcult && neutralciv && getOrganization() == 7) ||
+			(faction == "neutralcult" && neutralcult && getOrganization() == 0) ||
+			(faction == "neutralciv" && neutralciv && getOrganization() == 0) ||
+			(faction == "neutral" && neutralcult && neutralciv && getOrganization() == 0) ||
+			(faction == "fyros" && allegeance.second == PVP_CLAN::Fyros && getOrganization() == 0) ||
+			(faction == "matis" && allegeance.second == PVP_CLAN::Matis && getOrganization() == 0) ||
+			(faction == "tryker" && allegeance.second == PVP_CLAN::Tryker && getOrganization() == 0) ||
+			(faction == "zorai" && allegeance.second == PVP_CLAN::Zorai && getOrganization() == 0));
+}
+
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getOrganization() const
