@@ -660,6 +660,7 @@ namespace BRICK_FAMILIES
 					BSGMBP,
 					BSGMBR,
 					BSGMBS,
+				BSGMC, // jewels s2e0
 
 				BeginMagicPowerParameter,
 				BSMMA = BeginMagicPowerParameter, // sap aura
