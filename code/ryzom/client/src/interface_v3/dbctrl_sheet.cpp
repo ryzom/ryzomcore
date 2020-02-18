@@ -1101,6 +1101,7 @@ void CDBCtrlSheet::infoReceived()
 	{
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		CSBrickManager *pBM= CSBrickManager::getInstance();
+		bool haveRoot = false;
 		for(uint i=0; i<itemInfo->Enchantment.Bricks.size(); ++i)
 		{
 			const CSBrickSheet *brick = pBM->getBrick(itemInfo->Enchantment.Bricks[i]);
@@ -1108,11 +1109,17 @@ void CDBCtrlSheet::infoReceived()
 			{
 				if (!brick->isRoot() && !brick->isCredit() && !brick->isParameter())
 				{
+					if (!haveRoot)
+					{
+						_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIconBack()), brick->IconBackColor));
+						rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
+					}
 					_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIcon()), brick->IconColor));
 					rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
 				}
 				else if (brick->isRoot())
 				{
+					haveRoot = true;
 					// there should be single root icon and it should be first one
 					_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIconBack()), brick->IconBackColor));
 					rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
