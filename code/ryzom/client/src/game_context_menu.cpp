@@ -456,10 +456,10 @@ void		CGameContextMenu::update()
 			fameValue = pLeafFame->getValue8();
 	}
 	if (_TextNews)
-		_TextNews->setActive(selection && !canAttack() && !selection->isForageSource() && fameValue >= -30);
+		_TextNews->setActive(selection && !canAttack() && selection->isNPC() && fameValue >= -30);
 
 	if (_TextNewsAgressive)
-		_TextNewsAgressive->setActive(selection && !canAttack() && !selection->isForageSource() && fameValue < -30);
+		_TextNewsAgressive->setActive(selection && !canAttack() && selection->isNPC() && fameValue < -30);
 
 
 	if (_TextDuel && _TextUnDuel)
