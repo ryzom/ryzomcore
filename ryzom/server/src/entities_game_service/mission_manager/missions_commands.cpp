@@ -1014,7 +1014,7 @@ NLMISC_COMMAND(deleteInventoryItems, "Delete items from a characters inventory",
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(enchantItem, "enchantItem", "<uid> <slotname> <sheet1>,[<sheet2> ...]")
+NLMISC_COMMAND(enchantEquipedItem, "enchantEquipedItem", "<uid> <slotname> <sheet1>,[<sheet2> ...]")
 {
 	if (args.size () < 3)
 	{
