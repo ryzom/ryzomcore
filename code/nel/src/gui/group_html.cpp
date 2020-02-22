@@ -6425,6 +6425,12 @@ namespace NLGUI
 		if (_Forms.empty() || _Forms.back().Entries.empty())
 			return;
 
+		// use option text as value
+		if (!elm.hasAttribute("value"))
+		{
+			_Forms.back().Entries.back().SelectValues.back() = _SelectOptionStr.toUtf8();
+		}
+
 		// insert the parsed text into the select control
 		CDBGroupComboBox *cb = _Forms.back().Entries.back().ComboBox;
 		if (cb)
