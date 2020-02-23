@@ -1190,6 +1190,10 @@ namespace NLGUI
 				CViewText *vtDst = dynamic_cast<CViewText*>(groupOver->getView("text"));
 				if (vtDst != NULL)
 				{
+					groupOver->setParentPos(vtSrc);
+
+					sint32 backupX = groupOver->getX();
+
 					// Copy all aspects to the view
 					vtDst->setText (vtSrc->getText());
 					vtDst->setFontSize (vtSrc->getFontSize());
@@ -1212,42 +1216,36 @@ namespace NLGUI
 						pOutline->setModulateGlobalColor(vtSrc->getModulateGlobalColor());
 					}
 
-					// the group is the position of the overed text, but apply the delta of borders (vtDst X/Y)
-					sint32 x = vtSrc->getXReal() - vtDst->getX();
-					sint32 y = vtSrc->getYReal() - vtDst->getY();
-
 					// update one time only to get correct W/H
 					groupOver->updateCoords ();
 
-					if(!vtSrc->isClampRight())
+					// align and clamp to screen coords
+					sint32 x = -backupX;
+					if (vtSrc->isClampRight())
 					{
-						// clamped from the left part
-						x += vtSrc->getWReal() - vtDst->getWReal();
+						x += std::max(0, (groupOver->getXReal() + groupOver->getWReal()) - (groupOver->getParent()->getXReal() + groupOver->getParent()->getWReal()));
 					}
+					else
+					{
+						x +=  vtDst->getWReal() - vtSrc->getWReal();
+						if ( x > (groupOver->getXReal() - groupOver->getParent()->getXReal()) )
+						{
+							x -= x - (groupOver->getXReal() - groupOver->getParent()->getXReal());
+						}
+					}
+					if (x != 0) groupOver->setX(-x);
 
-					// clamp to screen coords, and set
-					if ((x+groupOver->getW()) > groupOver->getParent()->getWReal())
-						x = groupOver->getParent()->getWReal() - groupOver->getW();
-					if (x < 0)
-						x = 0;
-					if ((y+groupOver->getH()) > groupOver->getParent()->getHReal())
-						y = groupOver->getParent()->getHReal() - groupOver->getH();
-					if (y < 0)
-						y = 0;
+					// TODO: there should be no overflow on y, unless barely visible and next to screen border
 
-					// set pos
-					groupOver->setX (x);
-					groupOver->setY (y);
-
-					// update coords 3 times is required
-					groupOver->updateCoords ();
-					groupOver->updateCoords ();
-					groupOver->updateCoords ();
+					groupOver->updateCoords();
 
 					// draw
 					groupOver->draw ();
 					// flush layers
 					CViewRenderer::getInstance()->flush();
+
+					// restore backup values
+					if (x != 0) groupOver->setX(backupX);
 				}
 			}
 
