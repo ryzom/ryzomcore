@@ -92,6 +92,7 @@ private:
 	static int	getTargetName(CLuaState &ls);
 	static int	getTargetTitleRaw(CLuaState &ls);
 	static int	getTargetTitle(CLuaState &ls);
+	static int	moveToTarget(CLuaState &ls);
 	static int  addSearchPathUser(CLuaState &ls);
 	static int  getClientCfgVar(CLuaState &ls);
 	static int	isPlayerFreeTrial(CLuaState &ls);
