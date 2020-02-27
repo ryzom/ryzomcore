@@ -1531,10 +1531,14 @@ int CLuaIHMRyzom::getTargetTitle(CLuaState &ls)
 // ***************************************************************************
 int CLuaIHMRyzom::moveToTarget(CLuaState &ls)
 {
-	CLuaIHM::checkArgCount(ls, "moveToTarget", 0);
+	CLuaIHM::checkArgCount(ls, "moveToTarget", 1);
+	CLuaIHM::checkArgType(ls, "url", 1, LUA_TSTRING);
+
+	const std::string &url = ls.toString(1);
 	CEntityCL *target = getTargetEntity();
 	if (!target) return 0;
-
+	
+	CLuaManager::getInstance().executeLuaScript("ArkTargetUrl = [["+url+"]]", 0);
 	UserEntity->moveTo(UserEntity->selection(), 1.0, CUserEntity::OpenArkUrl);
 	return 0;
 }
