@@ -464,6 +464,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getTargetName", getTargetName);
 	ls.registerFunc("getTargetTitleRaw", getTargetTitleRaw);
 	ls.registerFunc("getTargetTitle", getTargetTitle);
+	ls.registerFunc("moveToTarget", moveToTarget);
 	ls.registerFunc("addSearchPathUser", addSearchPathUser);
 	ls.registerFunc("displaySystemInfo", displaySystemInfo);
 	ls.registerFunc("displayChatMessage", displayChatMessage);
@@ -1526,6 +1527,18 @@ int CLuaIHMRyzom::getTargetTitle(CLuaState &ls)
 	ls.push(target->getTitle().toUtf8());
 	return 1;
 }
+
+// ***************************************************************************
+int CLuaIHMRyzom::moveToTarget(CLuaState &ls)
+{
+	CLuaIHM::checkArgCount(ls, "moveToTarget", 0);
+	CEntityCL *target = getTargetEntity();
+	if (!target) return 0;
+
+	UserEntity->moveTo(UserEntity->selection(), 1.0, CUserEntity::OpenArkUrl);
+	return 0;
+}
+
 
 // ***************************************************************************
 int CLuaIHMRyzom::addSearchPathUser(CLuaState &ls)
