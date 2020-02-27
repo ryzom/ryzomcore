@@ -1688,7 +1688,7 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 		break;
 	// openArkUrl 
 	case CUserEntity::OpenArkUrl:
-		CLuaManager::getInstance().executeLuaScript("game:openTargetArkUrl()", 0);
+		CLuaManager::getInstance().executeLuaScript("getUI('ui:interface:web_transactions'):find('html'):browse(ArkTargetUrl)", 0);
 		break;
 	default:
 		break;
