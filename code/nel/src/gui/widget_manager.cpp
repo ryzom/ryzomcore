@@ -1254,7 +1254,125 @@ namespace NLGUI
 		}
 	}
 
+	// ----------------------------------------------------------------------------
+	void CWidgetManager::snapIfClose(CInterfaceGroup *group)
+	{
+		if (!group || _WindowSnapDistance == 0 || _WindowSnapInvert != lastKeyEvent.isShiftDown())
+			return;
 
+		uint hsnap = _WindowSnapDistance;
+		uint vsnap = _WindowSnapDistance;
+
+		sint32 newX = group->getX();
+		sint32 newY = group->getY();
+
+		// new coords for window without snap
+		// used to calculate distance from target
+		sint gLeft   = newX;
+		sint gRight  = newX + group->getWReal();
+		sint gTop    = newY;
+		sint gBottom = newY - group->getHReal();
+
+		// current window coords as if already snaped
+		// used to calculate target for snap
+		sint gLeftR   = group->getXReal();
+		sint gRightR  = gLeftR + group->getWReal();
+		sint gBottomR = group->getYReal();
+		sint gTopR    = gBottomR + group->getHReal();
+
+		for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			if (!rMG.Group->getActive()) continue;
+
+			for (uint8 nPriority = WIN_PRIORITY_MAX; nPriority > 0 ; nPriority--)
+			{
+				const std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority-1];
+				std::list<CInterfaceGroup*>::const_reverse_iterator itw;
+				for (itw = rList.rbegin(); itw != rList.rend(); itw++)
+				{
+					CInterfaceGroup *pIG = *itw;
+					// do not snap to self, inactive, or not using mouse interaction
+					if (group == pIG || !(pIG->getActive() && pIG->getUseCursor()))
+						continue;
+
+					// target
+					sint wLeft   = pIG->getXReal();
+					sint wRight  = pIG->getXReal() + pIG->getWReal();
+					sint wTop    = pIG->getYReal() + pIG->getHReal();
+					sint wBottom = pIG->getYReal();
+					sint delta;
+
+					if (gTopR >= wBottom && gBottomR <= wTop)
+					{
+						delta = abs(gRight - wLeft);
+						if (delta <= hsnap)
+						{
+							hsnap = delta;
+							newX = wLeft - group->getWReal();
+						}
+
+						delta = abs(gLeft - wRight);
+						if (delta <= hsnap)
+						{
+							hsnap = delta;
+							newX = wRight;
+						}
+
+						delta = abs(gLeft - wLeft);
+						if (delta <= hsnap)
+						{
+							hsnap = delta;
+							newX = wLeft;
+						}
+
+						delta = abs(gRight - wRight);
+						if (delta <= hsnap)
+						{
+							hsnap = delta;
+							newX = wRight - group->getWReal();
+						}
+					}
+
+					if (gLeftR <= wRight && gRightR >= wLeft)
+					{
+						delta = abs(gTop - wBottom);
+						if (delta <= vsnap)
+						{
+							vsnap = delta;
+							newY = wBottom;
+						}
+
+						delta = abs(gBottom - wTop);
+						if (delta <= vsnap)
+						{
+							vsnap = delta;
+							newY = wTop + group->getHReal();
+						}
+
+						delta = abs(gTop - wTop);
+						if (delta <= vsnap)
+						{
+							vsnap = delta;
+							newY = wTop;
+						}
+
+						delta = abs(gBottom - wBottom);
+						if (delta <= vsnap)
+						{
+							vsnap = delta;
+							newY = wBottom + group->getHReal();
+						}
+					}
+				}//windows
+			}//priority
+		}//master group
+
+		group->setX(newX);
+		group->setY(newY);
+	}
+
+	// ----------------------------------------------------------------------------
 	uint CWidgetManager::adjustTooltipPosition( CCtrlBase *newCtrl, CInterfaceGroup *win, THotSpot ttParentRef,
 												THotSpot ttPosRef, sint32 xParent, sint32 yParent,
 												sint32 wParent, sint32 hParent )
@@ -3770,6 +3888,9 @@ namespace NLGUI
 
 		setScreenWH(0, 0);
 		_InterfaceScale = 1.0f;
+
+		_WindowSnapDistance = 10;
+		_WindowSnapInvert = false;
 
 		_GroupSelection = false;
 		multiSelection = false;

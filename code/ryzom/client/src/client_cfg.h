@@ -157,6 +157,10 @@ struct CClientConfig
 	float			InterfaceScale_step;
 	bool			BilinearUI;
 
+	// Window snap
+	bool			WindowSnapInvert;
+	uint32			WindowSnapDistance;
+
 	// VR
 	bool			VREnable;
 	std::string		VRDisplayDevice;

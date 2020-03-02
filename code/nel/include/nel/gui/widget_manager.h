@@ -269,6 +269,14 @@ namespace NLGUI
 		CViewPointerBase* getPointer(){ return _Pointer; }
 		void setPointer( CViewPointerBase *pointer ){ _Pointer = pointer; }
 
+		// If > 0, snap window to others closer than distance
+		void setWindowSnapDistance(uint32 d) { _WindowSnapDistance = d; }
+		uint32 getWindowSnapDistance() const { return _WindowSnapDistance; }
+
+		// If true, only snap when shift is held down
+		void setWindowSnapInvert(bool b) { _WindowSnapInvert = b; }
+		bool getWindowSnapInvert() const { return _WindowSnapInvert; }
+
 		/**
 		 * get the window under a spot
 		 * \param : X coord of the spot
@@ -309,6 +317,9 @@ namespace NLGUI
 		CInterfaceGroup* getWindowForActiveMasterGroup( const std::string &windowName );
 		
 		void drawOverExtendViewText();
+
+		// Snap to closest visible window border if snapping is enabled
+		void snapIfClose(CInterfaceGroup *group);
 
 		// Internal : adjust a tooltip with respect to its parent. Returns the number of coordinate that were clamped
 		// against the screen border
@@ -623,6 +634,9 @@ namespace NLGUI
 		bool _MouseOverWindow;
 
 		CEventDescriptorKey lastKeyEvent;
+
+		uint32 _WindowSnapDistance;
+		bool   _WindowSnapInvert;
 
 		uint32 _ScreenH;
 		uint32 _ScreenW;

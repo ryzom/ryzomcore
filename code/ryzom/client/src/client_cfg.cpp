@@ -316,6 +316,9 @@ CClientConfig::CClientConfig()
 	InterfaceScale_step	= 0.05;
 	BilinearUI			= true;
 
+	WindowSnapInvert	= false;
+	WindowSnapDistance	= 10;
+
 	VREnable			= false;
 	VRDisplayDevice		= "Auto";
 	VRDisplayDeviceId	= "";
@@ -866,6 +869,8 @@ void CClientConfig::setValues()
 	READ_FLOAT_FV(InterfaceScale_step);
 	clamp(ClientCfg.InterfaceScale, ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max);
 	READ_BOOL_FV(BilinearUI);
+	READ_BOOL_FV(WindowSnapInvert);
+	READ_INT_FV(WindowSnapDistance);
 	// 3D Driver
 	varPtr = ClientCfg.ConfigFile.getVarPtr ("Driver3D");
 	if (varPtr)
