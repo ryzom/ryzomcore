@@ -78,6 +78,7 @@ std::vector<std::pair<
 
 /// Ring main page
 string						RingMainURL;
+string 						NewsAtProgress;
 
 void resetTextContext (const char *font, bool resetInterfaceManager)
 {

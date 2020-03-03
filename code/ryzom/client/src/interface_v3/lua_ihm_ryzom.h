@@ -58,6 +58,7 @@ private:
 	static int  getDesktopIndex(CLuaState &ls);
 	static int  setLuaBreakPoint(CLuaState &ls); // set a breakpoint in lua external debugger (file, line)
 	static int	getMainPageURL(CLuaState &ls);
+	static int	setNewsAtProgress(CLuaState &ls);
 	static int	getCharSlot(CLuaState &ls);
 	static int	displaySystemInfo(CLuaState &ls);
 	static int	displayChatMessage(CLuaState &ls);

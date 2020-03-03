@@ -1748,7 +1748,7 @@ void			CVegetableManager::swapIgRdrPassHardMode(CVegetableInstanceGroup *ig, uin
 // ***************************************************************************
 void		CVegetableManager::setGlobalDensity(float density)
 {
-	clamp(density, 0.f, 1.f);
+	clamp(density, 0.f, 100.f);
 	_GlobalDensity= density;
 }
 

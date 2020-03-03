@@ -535,6 +535,9 @@ CCtrlDraggable(param)
 	_SapBuffIcon = "ico_sap.tga";
 	_StaBuffIcon = "ico_stamina.tga";
 	_FocusBuffIcon = "ico_focus.tga";
+
+	_RegenText = NULL;
+	_RegenTextValue = 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -1098,6 +1101,7 @@ void CDBCtrlSheet::infoReceived()
 	{
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		CSBrickManager *pBM= CSBrickManager::getInstance();
+		bool haveRoot = false;
 		for(uint i=0; i<itemInfo->Enchantment.Bricks.size(); ++i)
 		{
 			const CSBrickSheet *brick = pBM->getBrick(itemInfo->Enchantment.Bricks[i]);
@@ -1105,11 +1109,17 @@ void CDBCtrlSheet::infoReceived()
 			{
 				if (!brick->isRoot() && !brick->isCredit() && !brick->isParameter())
 				{
+					if (!haveRoot)
+					{
+						_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIconBack()), brick->IconBackColor));
+						rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
+					}
 					_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIcon()), brick->IconColor));
 					rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
 				}
 				else if (brick->isRoot())
 				{
+					haveRoot = true;
 					// there should be single root icon and it should be first one
 					_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIconBack()), brick->IconBackColor));
 					rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
@@ -2040,6 +2050,12 @@ void CDBCtrlSheet::draw()
 		if (!_LastSheetId)
 		{
 			_RegenTickRange = CTickRange();
+			if (_RegenText)
+			{
+				delete _RegenText;
+				_RegenText = NULL;
+				_RegenTextValue = 0;
+			}
 		}
 		else
 		{
@@ -2066,6 +2082,36 @@ void CDBCtrlSheet::draw()
 			{
 				rVR.drawQuad(_RenderLayer + 1, regenTris[tri], backTex, CRGBA::White, false);
 			}
+
+			if (!_RegenText) {
+				_RegenText = new CViewText(CViewBase::TCtorParam());
+				_RegenText->setId(getId() + ":regen");
+				_RegenText->setParent(_Parent);
+				_RegenText->setOverflowText(ucstring(""));
+				_RegenText->setModulateGlobalColor(false);
+				_RegenText->setMultiLine(false);
+				_RegenText->setTextMode(CViewText::ClipWord);
+				_RegenText->setFontSizing("0", "0");
+				// TODO: font size / color hardcoded.
+				_RegenText->setFontSize(8);
+				_RegenText->setColor(CRGBA::White);
+				_RegenText->setShadow(true);
+				_RegenText->setActive(true);
+				_RegenText->updateTextContext();
+			}
+
+			// TODO: ticks in second hardcoded
+			uint32 nextValue = _RegenTickRange.EndTick > LastGameCycle ? (_RegenTickRange.EndTick - LastGameCycle) / 10 : 0;
+			if (_RegenTextValue != nextValue)
+			{
+				_RegenTextValue = nextValue;
+				_RegenText->setText(toString("%d", _RegenTextValue));
+				_RegenText->updateTextContext();
+			}
+			_RegenText->setXReal(_XReal+1);
+			_RegenText->setYReal(_YReal+2);
+			_RegenText->setRenderLayer(_RenderLayer+2);
+			_RegenText->draw();
 		}
 	}
 

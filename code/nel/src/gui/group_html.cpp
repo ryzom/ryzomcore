@@ -659,10 +659,12 @@ namespace NLGUI
 
 		if (download.type == StylesheetType)
 		{
-			// no tmpfile if file was already in cache
-			if (CFile::fileExists(tmpfile) && CFile::fileExists(download.dest))
+			if (CFile::fileExists(tmpfile))
 			{
-				CFile::deleteFile(download.dest);
+				if (CFile::fileExists(download.dest))
+				{
+					CFile::deleteFile(download.dest);
+				}
 				CFile::moveFile(download.dest, tmpfile);
 			}
 			cssDownloadFinished(download.url, download.dest);
@@ -1187,7 +1189,7 @@ namespace NLGUI
 		case HTML_DT:       htmlDTend(elm); break;
 		case HTML_EM:       renderPseudoElement(":after", elm);break;
 		case HTML_FONT:     break;
-		case HTML_FORM:     renderPseudoElement(":after", elm);break;
+		case HTML_FORM:     htmlFORMend(elm); break;
 		case HTML_H1://no-break
 		case HTML_H2://no-break
 		case HTML_H3://no-break
@@ -1441,6 +1443,8 @@ namespace NLGUI
 		_LastRefreshTime = 0.0;
 		_RenderNextTime = false;
 		_WaitingForStylesheet = false;
+		_AutoIdSeq = 0;
+		_FormOpen = false;
 
 		// Register
 		CWidgetManager::getInstance()->registerClockMsgTarget(this);
@@ -2529,6 +2533,7 @@ namespace NLGUI
 	{
 		// Add a new paragraph
 		CGroupParagraph *newParagraph = new CGroupParagraph(CViewBase::TCtorParam());
+		newParagraph->setId(getCurrentGroup()->getId() + ":PARAGRAPH" + toString(getNextAutoIdSeq()));
 		newParagraph->setResizeFromChildH(true);
 
 		newParagraph->setMarginLeft(getIndent());
@@ -2586,6 +2591,7 @@ namespace NLGUI
 		// go
 		_URL = uri.toString();
 		_BrowseNextTime = true;
+		_WaitingForStylesheet = false;
 
 		// if a BrowseTree is bound to us, try to select the node that opens this URL (auto-locate)
 		if(!_BrowseTree.empty())
@@ -3235,6 +3241,7 @@ namespace NLGUI
 		_Cells.clear();
 		_TR.clear();
 		_Forms.clear();
+		_FormOpen = false;
 		_FormSubmit.clear();
 		_Groups.clear();
 		_Divs.clear();
@@ -3248,6 +3255,7 @@ namespace NLGUI
 		_ReadingHeadTag = false;
 		_IgnoreHeadTag = false;
 		_IgnoreBaseUrlTag = false;
+		_AutoIdSeq = 0;
 
 		paragraphChange ();
 
@@ -4162,7 +4170,7 @@ namespace NLGUI
 
 	void CGroupHTML::renderDocument()
 	{
-		if (!_StylesheetQueue.empty())
+		if (!Curls.empty() && !_StylesheetQueue.empty())
 		{
 			// waiting for stylesheets to finish downloading
 			return;
@@ -4218,6 +4226,8 @@ namespace NLGUI
 			removeContent();
 
 			endBuild();
+
+			success = false;
 		}
 		else
 		{
@@ -4322,6 +4332,7 @@ namespace NLGUI
 		if (!_GroupListAdaptor)
 		{
 			_GroupListAdaptor = new CGroupListAdaptor(CViewBase::TCtorParam()); // deleted by the list
+			_GroupListAdaptor->setId(getList()->getId() + ":GLA");
 			_GroupListAdaptor->setResizeFromChildH(true);
 			getList()->addChild (_GroupListAdaptor, true);
 		}
@@ -5536,6 +5547,11 @@ namespace NLGUI
 		std::string tooltip = elm.getAttribute("tooltip");
 		bool disabled = elm.hasAttribute("disabled");
 
+		if (formId.empty() && _FormOpen)
+		{
+			formId = _Forms.back().id;
+		}
+
 		if (!formAction.empty())
 		{
 			formAction = getAbsoluteUrl(formAction);
@@ -5638,6 +5654,8 @@ namespace NLGUI
 		{
 			string style = elm.getAttribute("style");
 			string id = elm.getAttribute("id");
+			if (id.empty())
+				id = "DIV" + toString(getNextAutoIdSeq());
 
 			typedef pair<string, string> TTmplParam;
 			vector<TTmplParam> tmplParams;
@@ -5670,10 +5688,10 @@ namespace NLGUI
 					parentId = _Paragraph->getId();
 				}
 
-				CInterfaceGroup *inst = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, this->_Id+":"+id, tmplParams);
+				CInterfaceGroup *inst = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, parentId, tmplParams);
 				if (inst)
 				{
-					inst->setId(this->_Id+":"+id);
+					inst->setId(parentId+":"+id);
 					inst->updateCoords();
 					if (haveParentDiv)
 					{
@@ -5806,6 +5824,8 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlFORM(const CHtmlElement &elm)
 	{
+		_FormOpen = true;
+
 		// Build the form
 		CGroupHTML::CForm form;
 		// id check is case sensitive and auto id's are uppercase
@@ -5828,6 +5848,12 @@ namespace NLGUI
 		_Forms.push_back(form);
 
 		renderPseudoElement(":before", elm);
+	}
+
+	void CGroupHTML::htmlFORMend(const CHtmlElement &elm)
+	{
+		_FormOpen = false;
+		renderPseudoElement(":after", elm);
 	}
 
 	// ***************************************************************************
@@ -6602,6 +6628,10 @@ namespace NLGUI
 
 		CGroupTable *table = new CGroupTable(TCtorParam());
 		table->BgColor = _CellParams.back().BgColor;
+		if (elm.hasNonEmptyAttribute("id"))
+			table->setId(getCurrentGroup()->getId() + ":" + elm.getAttribute("id"));
+		else
+			table->setId(getCurrentGroup()->getId() + ":TABLE" + toString(getNextAutoIdSeq()));
 
 		// TODO: border-spacing: 2em;
 		{
@@ -6762,6 +6792,12 @@ namespace NLGUI
 		}
 
 		_Cells.back() = new CGroupCell(CViewBase::TCtorParam());
+		if (elm.hasNonEmptyAttribute("id"))
+			_Cells.back()->setId(table->getId() + ":" + elm.getAttribute("id"));
+		else
+			_Cells.back()->setId(table->getId() + ":TD" + toString(getNextAutoIdSeq()));
+		// inner cell content
+		_Cells.back()->Group->setId(_Cells.back()->getId() + ":CELL");
 
 		if (_Style.checkStyle("background-repeat", "repeat"))
 			_Cells.back()->setTextureTile(true);

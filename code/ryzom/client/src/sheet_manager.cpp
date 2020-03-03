@@ -113,7 +113,7 @@ CTypeVersion TypeVersion [] =
 	CTypeVersion("world",                   1),
 	CTypeVersion("weather_function_params", 2),
 	CTypeVersion("mission_icon",            0),
-	CTypeVersion("sbrick",                  32),
+	CTypeVersion("sbrick",                  33),
 	CTypeVersion("sphrase",                 4),
 	CTypeVersion("skill_tree",              5),
 	CTypeVersion("titles",					1),
