@@ -220,6 +220,8 @@ public:
 	void switchDynChatSpeaker(CCharacter * user, const NLMISC::CEntityId & successorId);
 	/// remove all the dynamic chats of a user
 	void removeAllUserDynChat(CCharacter * user);
+	/// precosse missions event end dyn chat of a user
+	void processMissionsEventEndDynChat(CCharacter * user);
 	/// remove a dynamic chat
 	void removeMissionDynChat(CCharacter * user, CMission * instance);
 	/// player selected a dyn chat answer
