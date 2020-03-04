@@ -4153,8 +4153,23 @@ NLMISC_COMMAND(startMoveBot,"start move bot or previous stopped bot","<uid|*> [<
 
 	CharacterBotChatBeginEnd.BotChatEnd.push_back(TargetRowId);
 	log.displayNL("OK");
+	return true;
 }
 
+NLMISC_COMMAND(closeDynChat, "close DynChat", "<uid> <process missions?>")
+{
+	if (args.size() < 1) return false;
+
+	GET_ACTIVE_CHARACTER
+
+	bool processMissions = true;
+	if (args.size() >= 2 && (args[1] == "false" || args[1] == "0"))
+		processMissions = false;
+	
+	c->endBotChat(false, false, processMissions);
+
+	return true;
+}
 
 NLMISC_COMMAND(manageBuilding, "Manage a building", "<uid> <action>")
 {

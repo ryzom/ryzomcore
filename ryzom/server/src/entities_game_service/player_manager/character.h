@@ -1175,7 +1175,7 @@ public:
 
 	/// end the bot chat. newBotChat must be set to true if the chat is canceled because of another bot chat.
 	/// closeDynChat must be true to close the current dynChat
-	void endBotChat(bool newBotChat = false, bool closeDynChat = false);
+	void endBotChat(bool newBotChat = false, bool closeDynChat = false, bool processMissions = false);
 
 	/// return the current bot chat type
 	uint8 getBotChatType() const;

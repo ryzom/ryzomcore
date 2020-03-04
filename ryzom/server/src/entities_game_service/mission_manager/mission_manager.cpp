@@ -1405,6 +1405,28 @@ void CMissionManager::removeAllUserDynChat(CCharacter * user)
 		user->processMissionEvent(event,aliases[i] );
 }
 
+void CMissionManager::processMissionsEventEndDynChat(CCharacter * user)
+{
+	// we first close all the concerned dyn chat interface on the client,then send EndDynchat event and finally remove the concerned entries from the map
+	// we have to do it in three passes because processMissionEvent can remove dyn chat entries. And we'd better avoid dereferencement on invalid iterators...
+	nlassert(user);
+	vector<TAIAlias> aliases;
+	// close all interfaces
+	CHashMultiMap<TDataSetRow,CDynChat,TDataSetRow::CHashCode>::iterator it = _DynChats.find( user->getEntityRowId() );
+	for (; it!= _DynChats.end() && (*it).first == user->getEntityRowId(); ++it )
+	{
+		aliases.push_back((*it).second.Mission->getTemplateId());
+	}
+
+	// For each concerned mission, send an end dyn chat event to the player, specifying the mission
+	// This must be after _DynChats.erase(user->getEntityRowId()), otherwise the event (e.g. jump
+	// back) can trigger a openDynChat() on the same bot that would lead to a reentrance bug.
+	CMissionEventEndDynChat event;
+	const uint eventCount = (uint)aliases.size();
+	for ( uint i = 0; i < eventCount; ++i )
+		user->processMissionEvent(event,aliases[i] );
+}
+
 void CMissionManager::removeMissionDynChat(CCharacter * user, CMission * instance)
 {
 	nlassert(user);
@@ -1495,6 +1517,7 @@ void CMissionManager::dynChatChoice( CCharacter * user, const TDataSetRow & botR
             uint i = 0;
             uint nbJumpPoints = (uint)templ->JumpPoints.size();
             bool updateJournal = false;
+            nlinfo("nbJumpPoints = %d", nbJumpPoints);
             for (; i < nbJumpPoints; i++ )
             {
                 if ( templ->JumpPoints[i].Name == jump )
@@ -1503,6 +1526,7 @@ void CMissionManager::dynChatChoice( CCharacter * user, const TDataSetRow & botR
                     closeDynChat( user, botRow );
 
 					std::list< CMissionEvent * > eventList;
+					nlinfo("Jump to %d", i);
                     inst->jump( templ->JumpPoints[i].Step,templ->JumpPoints[i].Action,eventList );
 
 					// Send to AIS (to stop the bot). Important: there must be the same number of items pushed in DynChatEnd that in DynChatStart for the bot to resume.
