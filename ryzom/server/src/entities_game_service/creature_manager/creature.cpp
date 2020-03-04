@@ -2142,7 +2142,6 @@ uint32 CCreature::tickUpdate()
 
 	if (_LockedLootTime != 0 && _LockedLootTime + 900 < CTickEventHandler::getGameCycle())
 	{
-		nlinfo("Boss unlocked : %s at %d", _Id.toString().c_str(), CTickEventHandler::getGameCycle());
 		_LockedLootTime = 0;
 		_NbOfGuardiansKillers = 0;
 		_GuardiansKillers.clear();
@@ -2169,7 +2168,6 @@ uint32 CCreature::tickUpdate()
 				if (!keepLock)
 				{
 					_LockedLoot = CTEAM::InvalidTeamId;
-					nlinfo("unlock me");
 				}
 			}
 		}
@@ -2199,7 +2197,6 @@ uint32 CCreature::tickUpdate()
 					}
 
 					if (_LockedLoot != CTEAM::InvalidTeamId) {
-						nlinfo("locked by guardians killers");
 						break;
 					}
 				}
@@ -2226,7 +2223,6 @@ uint32 CCreature::tickUpdate()
 					}
 
 					if (_LockedLoot != CTEAM::InvalidTeamId) {
-						nlinfo("locked by killers");
 						break;
 					}
 				}
