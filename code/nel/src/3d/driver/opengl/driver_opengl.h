@@ -723,6 +723,7 @@ private:
 	bool						_Maximized;
 	uint						_Interval;
 	bool						_Resizable;
+	bool						_WindowFocus;
 
 	sint32						_DecorationWidth;
 	sint32						_DecorationHeight;

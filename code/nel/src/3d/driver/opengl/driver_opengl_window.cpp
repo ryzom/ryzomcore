@@ -106,6 +106,13 @@ bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM
 			driver->_WndActive = true;
 		}
 	}
+	else if ((message == WM_SETFOCUS) || (message == WM_KILLFOCUS))
+	{
+		if (driver != NULL)
+		{
+			driver->_WindowFocus = (message == WM_SETFOCUS);
+		}
+	}
 
 	bool trapMessage = false;
 	if (driver->_EventEmitter.getNumEmitters() > 0)
@@ -290,6 +297,18 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 		}
 
 		break;
+
+		case FocusIn:
+		{
+			driver->_WindowFocus = true;
+			return driver->_EventEmitter.processMessage(e);
+		}
+
+		case FocusOut:
+		{
+			driver->_WindowFocus = false;
+			return driver->_EventEmitter.processMessage(e);
+		}
 
 		default:
 
