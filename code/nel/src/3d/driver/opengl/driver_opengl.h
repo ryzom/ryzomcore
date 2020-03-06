@@ -700,6 +700,7 @@ public:
 	GfxMode						_CurrentMode;
 	sint32						_WindowX;
 	sint32						_WindowY;
+	bool						_WindowFocus;
 
 #ifdef NL_OS_MAC
 	NLMISC::CCocoaEventEmitter _EventEmitter;
@@ -723,7 +724,6 @@ private:
 	bool						_Maximized;
 	uint						_Interval;
 	bool						_Resizable;
-	bool						_WindowFocus;
 
 	sint32						_DecorationWidth;
 	sint32						_DecorationHeight;

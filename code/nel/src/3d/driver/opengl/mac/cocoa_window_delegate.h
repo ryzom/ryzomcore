@@ -40,5 +40,7 @@ using NL3D::CDriverGL;
 
 - (id)initWithDriver:(CDriverGL*)driver;
 - (void)windowDidMove:(NSNotification*)notification;
+- (void)windowDidBecomeKey:(NSNotification *)notification;
+- (void)windowDidResignKey:(NSNotification *)notification;
 
 @end
