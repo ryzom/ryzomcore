@@ -1205,6 +1205,10 @@ namespace NLGUI
 				CViewText *vtDst = dynamic_cast<CViewText*>(groupOver->getView("text"));
 				if (vtDst != NULL)
 				{
+					groupOver->setParentPos(vtSrc);
+
+					sint32 backupX = groupOver->getX();
+
 					// Copy all aspects to the view
 					vtDst->setText (vtSrc->getText());
 					vtDst->setFontSize (vtSrc->getFontSize());
@@ -1227,42 +1231,36 @@ namespace NLGUI
 						pOutline->setModulateGlobalColor(vtSrc->getModulateGlobalColor());
 					}
 
-					// the group is the position of the overed text, but apply the delta of borders (vtDst X/Y)
-					sint32 x = vtSrc->getXReal() - vtDst->getX();
-					sint32 y = vtSrc->getYReal() - vtDst->getY();
-
 					// update one time only to get correct W/H
 					groupOver->updateCoords ();
 
-					if(!vtSrc->isClampRight())
+					// align and clamp to screen coords
+					sint32 x = -backupX;
+					if (vtSrc->isClampRight())
 					{
-						// clamped from the left part
-						x += vtSrc->getWReal() - vtDst->getWReal();
+						x += std::max(0, (groupOver->getXReal() + groupOver->getWReal()) - (groupOver->getParent()->getXReal() + groupOver->getParent()->getWReal()));
 					}
+					else
+					{
+						x +=  vtDst->getWReal() - vtSrc->getWReal();
+						if ( x > (groupOver->getXReal() - groupOver->getParent()->getXReal()) )
+						{
+							x -= x - (groupOver->getXReal() - groupOver->getParent()->getXReal());
+						}
+					}
+					if (x != 0) groupOver->setX(-x);
 
-					// clamp to screen coords, and set
-					if ((x+groupOver->getW()) > groupOver->getParent()->getWReal())
-						x = groupOver->getParent()->getWReal() - groupOver->getW();
-					if (x < 0)
-						x = 0;
-					if ((y+groupOver->getH()) > groupOver->getParent()->getHReal())
-						y = groupOver->getParent()->getHReal() - groupOver->getH();
-					if (y < 0)
-						y = 0;
+					// TODO: there should be no overflow on y, unless barely visible and next to screen border
 
-					// set pos
-					groupOver->setX (x);
-					groupOver->setY (y);
-
-					// update coords 3 times is required
-					groupOver->updateCoords ();
-					groupOver->updateCoords ();
-					groupOver->updateCoords ();
+					groupOver->updateCoords();
 
 					// draw
 					groupOver->draw ();
 					// flush layers
 					CViewRenderer::getInstance()->flush();
+
+					// restore backup values
+					if (x != 0) groupOver->setX(backupX);
 				}
 			}
 
@@ -1271,7 +1269,125 @@ namespace NLGUI
 		}
 	}
 
+	// ----------------------------------------------------------------------------
+	void CWidgetManager::snapIfClose(CInterfaceGroup *group)
+	{
+		if (!group || _WindowSnapDistance == 0 || _WindowSnapInvert != lastKeyEvent.isShiftDown())
+			return;
 
+		uint hsnap = _WindowSnapDistance;
+		uint vsnap = _WindowSnapDistance;
+
+		sint32 newX = group->getX();
+		sint32 newY = group->getY();
+
+		// new coords for window without snap
+		// used to calculate distance from target
+		sint gLeft   = newX;
+		sint gRight  = newX + group->getWReal();
+		sint gTop    = newY;
+		sint gBottom = newY - group->getHReal();
+
+		// current window coords as if already snaped
+		// used to calculate target for snap
+		sint gLeftR   = group->getXReal();
+		sint gRightR  = gLeftR + group->getWReal();
+		sint gBottomR = group->getYReal();
+		sint gTopR    = gBottomR + group->getHReal();
+
+		for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			if (!rMG.Group->getActive()) continue;
+
+			for (uint8 nPriority = WIN_PRIORITY_MAX; nPriority > 0 ; nPriority--)
+			{
+				const std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority-1];
+				std::list<CInterfaceGroup*>::const_reverse_iterator itw;
+				for (itw = rList.rbegin(); itw != rList.rend(); itw++)
+				{
+					CInterfaceGroup *pIG = *itw;
+					// do not snap to self, inactive, or not using mouse interaction
+					if (group == pIG || !(pIG->getActive() && pIG->getUseCursor()))
+						continue;
+
+					// target
+					sint wLeft   = pIG->getXReal();
+					sint wRight  = pIG->getXReal() + pIG->getWReal();
+					sint wTop    = pIG->getYReal() + pIG->getHReal();
+					sint wBottom = pIG->getYReal();
+					sint delta;
+
+					if (gTopR >= wBottom && gBottomR <= wTop)
+					{
+						delta = abs(gRight - wLeft);
+						if (delta <= hsnap)
+						{
+							hsnap = delta;
+							newX = wLeft - group->getWReal();
+						}
+
+						delta = abs(gLeft - wRight);
+						if (delta <= hsnap)
+						{
+							hsnap = delta;
+							newX = wRight;
+						}
+
+						delta = abs(gLeft - wLeft);
+						if (delta <= hsnap)
+						{
+							hsnap = delta;
+							newX = wLeft;
+						}
+
+						delta = abs(gRight - wRight);
+						if (delta <= hsnap)
+						{
+							hsnap = delta;
+							newX = wRight - group->getWReal();
+						}
+					}
+
+					if (gLeftR <= wRight && gRightR >= wLeft)
+					{
+						delta = abs(gTop - wBottom);
+						if (delta <= vsnap)
+						{
+							vsnap = delta;
+							newY = wBottom;
+						}
+
+						delta = abs(gBottom - wTop);
+						if (delta <= vsnap)
+						{
+							vsnap = delta;
+							newY = wTop + group->getHReal();
+						}
+
+						delta = abs(gTop - wTop);
+						if (delta <= vsnap)
+						{
+							vsnap = delta;
+							newY = wTop;
+						}
+
+						delta = abs(gBottom - wBottom);
+						if (delta <= vsnap)
+						{
+							vsnap = delta;
+							newY = wBottom + group->getHReal();
+						}
+					}
+				}//windows
+			}//priority
+		}//master group
+
+		group->setX(newX);
+		group->setY(newY);
+	}
+
+	// ----------------------------------------------------------------------------
 	uint CWidgetManager::adjustTooltipPosition( CCtrlBase *newCtrl, CInterfaceGroup *win, THotSpot ttParentRef,
 												THotSpot ttPosRef, sint32 xParent, sint32 yParent,
 												sint32 wParent, sint32 hParent )
@@ -3787,6 +3903,9 @@ namespace NLGUI
 
 		setScreenWH(0, 0);
 		_InterfaceScale = 1.0f;
+
+		_WindowSnapDistance = 10;
+		_WindowSnapInvert = false;
 
 		_GroupSelection = false;
 		multiSelection = false;

@@ -610,16 +610,12 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupCell::setTextureTile(bool tiled)
 	{
-		if (tiled)
-			nlinfo("Set texture is Tiled");
 		_TextureTiled = tiled;
 	}
 
 	// ----------------------------------------------------------------------------
 	void CGroupCell::setTextureScale(bool scaled)
 	{
-		if (scaled)
-			nlinfo("Set texture is Scaled : %s");
 		_TextureScaled = scaled;
 	}
 

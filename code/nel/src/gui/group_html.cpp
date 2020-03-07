@@ -718,6 +718,14 @@ namespace NLGUI
 		std::string finalUrl;
 		img->setModulateGlobalColor(style.GlobalColor);
 
+		// data:image/png;base64,AA...==
+		if (startsWith(url, "data:image/"))
+		{
+			setImage(img, decodeURIComponent(url), type);
+			setImageSize(img, style);
+			return;
+		}
+
 		// load the image from local files/bnp
 		std::string image = CFile::getPath(url) + CFile::getFilenameWithoutExtension(url) + ".tga";
 		if (lookupLocalFile(finalUrl, image.c_str(), false))
@@ -1193,7 +1201,7 @@ namespace NLGUI
 		case HTML_DT:       htmlDTend(elm); break;
 		case HTML_EM:       renderPseudoElement(":after", elm);break;
 		case HTML_FONT:     break;
-		case HTML_FORM:     renderPseudoElement(":after", elm);break;
+		case HTML_FORM:     htmlFORMend(elm); break;
 		case HTML_H1://no-break
 		case HTML_H2://no-break
 		case HTML_H3://no-break
@@ -1447,6 +1455,8 @@ namespace NLGUI
 		_LastRefreshTime = 0.0;
 		_RenderNextTime = false;
 		_WaitingForStylesheet = false;
+		_AutoIdSeq = 0;
+		_FormOpen = false;
 
 		// Register
 		CWidgetManager::getInstance()->registerClockMsgTarget(this);
@@ -2535,6 +2545,7 @@ namespace NLGUI
 	{
 		// Add a new paragraph
 		CGroupParagraph *newParagraph = new CGroupParagraph(CViewBase::TCtorParam());
+		newParagraph->setId(getCurrentGroup()->getId() + ":PARAGRAPH" + toString(getNextAutoIdSeq()));
 		newParagraph->setResizeFromChildH(true);
 
 		newParagraph->setMarginLeft(getIndent());
@@ -3137,45 +3148,67 @@ namespace NLGUI
 			ctrlButton->setId(name);
 		}
 
-		// Load only tga files.. (conversion in dds filename is done in the lookup procedure)
-		string normal = normalBitmap.empty()?"":CFile::getPath(normalBitmap) + CFile::getFilenameWithoutExtension(normalBitmap) + ".tga";
-
-		// if the image doesn't exist on local, we check in the cache
-	//	if(!CFile::fileExists(normal))
-		if(!CPath::exists(normal))
+		std::string normal;
+		if (startsWith(normalBitmap, "data:image/"))
 		{
-			// search in the compressed texture
-			CViewRenderer &rVR = *CViewRenderer::getInstance();
-			sint32 id = rVR.getTextureIdFromName(normal);
-			if(id == -1)
+			normal = decodeURIComponent(normalBitmap);
+		}
+		else
+		{
+			// Load only tga files.. (conversion in dds filename is done in the lookup procedure)
+			normal = normalBitmap.empty()?"":CFile::getPath(normalBitmap) + CFile::getFilenameWithoutExtension(normalBitmap) + ".tga";
+
+			// if the image doesn't exist on local, we check in the cache
+			if(!CPath::exists(normal))
 			{
-				normal = localImageName(normalBitmap);
-				addImageDownload(normalBitmap, ctrlButton, style);
+				// search in the compressed texture
+				CViewRenderer &rVR = *CViewRenderer::getInstance();
+				sint32 id = rVR.getTextureIdFromName(normal);
+				if(id == -1)
+				{
+					normal = localImageName(normalBitmap);
+					addImageDownload(normalBitmap, ctrlButton, style);
+				}
 			}
 		}
 
-		string pushed = pushedBitmap.empty()?"":CFile::getPath(pushedBitmap) + CFile::getFilenameWithoutExtension(pushedBitmap) + ".tga";
-		// if the image doesn't exist on local, we check in the cache, don't download it because the "normal" will already setuped it
-	//	if(!CFile::fileExists(pushed))
-		if(!CPath::exists(pushed))
+		std::string pushed;
+		if (startsWith(pushedBitmap, "data:image/"))
 		{
-			// search in the compressed texture
-			CViewRenderer &rVR = *CViewRenderer::getInstance();
-			sint32 id = rVR.getTextureIdFromName(pushed);
-			if(id == -1)
+			pushed = decodeURIComponent(pushedBitmap);
+		}
+		else
+		{
+			pushed = pushedBitmap.empty()?"":CFile::getPath(pushedBitmap) + CFile::getFilenameWithoutExtension(pushedBitmap) + ".tga";
+			// if the image doesn't exist on local, we check in the cache, don't download it because the "normal" will already setuped it
+			if(!CPath::exists(pushed))
 			{
-				pushed = localImageName(pushedBitmap);
+				// search in the compressed texture
+				CViewRenderer &rVR = *CViewRenderer::getInstance();
+				sint32 id = rVR.getTextureIdFromName(pushed);
+				if(id == -1)
+				{
+					pushed = localImageName(pushedBitmap);
+				}
 			}
 		}
 
-		string over = overBitmap.empty()?"":CFile::getPath(overBitmap) + CFile::getFilenameWithoutExtension(overBitmap) + ".tga";
-		// schedule mouseover bitmap for download if its different from normal
-		if (!over.empty() && !CPath::exists(over))
+		std::string over;
+		if (startsWith(overBitmap, "data:image/"))
 		{
-			if (overBitmap != normalBitmap)
+			over = decodeURIComponent(overBitmap);
+		}
+		else
+		{
+			over = overBitmap.empty()?"":CFile::getPath(overBitmap) + CFile::getFilenameWithoutExtension(overBitmap) + ".tga";
+			// schedule mouseover bitmap for download if its different from normal
+			if (!over.empty() && !CPath::exists(over))
 			{
-				over = localImageName(overBitmap);
-				addImageDownload(overBitmap, ctrlButton, style, OverImage);
+				if (overBitmap != normalBitmap)
+				{
+					over = localImageName(overBitmap);
+					addImageDownload(overBitmap, ctrlButton, style, OverImage);
+				}
 			}
 		}
 
@@ -3242,6 +3275,7 @@ namespace NLGUI
 		_Cells.clear();
 		_TR.clear();
 		_Forms.clear();
+		_FormOpen = false;
 		_FormSubmit.clear();
 		_Groups.clear();
 		_Divs.clear();
@@ -3255,6 +3289,7 @@ namespace NLGUI
 		_ReadingHeadTag = false;
 		_IgnoreHeadTag = false;
 		_IgnoreBaseUrlTag = false;
+		_AutoIdSeq = 0;
 
 		paragraphChange ();
 
@@ -4331,6 +4366,7 @@ namespace NLGUI
 		if (!_GroupListAdaptor)
 		{
 			_GroupListAdaptor = new CGroupListAdaptor(CViewBase::TCtorParam()); // deleted by the list
+			_GroupListAdaptor->setId(getList()->getId() + ":GLA");
 			_GroupListAdaptor->setResizeFromChildH(true);
 			getList()->addChild (_GroupListAdaptor, true);
 		}
@@ -5545,6 +5581,11 @@ namespace NLGUI
 		std::string tooltip = elm.getAttribute("tooltip");
 		bool disabled = elm.hasAttribute("disabled");
 
+		if (formId.empty() && _FormOpen)
+		{
+			formId = _Forms.back().id;
+		}
+
 		if (!formAction.empty())
 		{
 			formAction = getAbsoluteUrl(formAction);
@@ -5647,6 +5688,8 @@ namespace NLGUI
 		{
 			string style = elm.getAttribute("style");
 			string id = elm.getAttribute("id");
+			if (id.empty())
+				id = "DIV" + toString(getNextAutoIdSeq());
 
 			typedef pair<string, string> TTmplParam;
 			vector<TTmplParam> tmplParams;
@@ -5679,10 +5722,10 @@ namespace NLGUI
 					parentId = _Paragraph->getId();
 				}
 
-				CInterfaceGroup *inst = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, this->_Id+":"+id, tmplParams);
+				CInterfaceGroup *inst = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, parentId, tmplParams);
 				if (inst)
 				{
-					inst->setId(this->_Id+":"+id);
+					inst->setId(parentId+":"+id);
 					inst->updateCoords();
 					if (haveParentDiv)
 					{
@@ -5815,6 +5858,8 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlFORM(const CHtmlElement &elm)
 	{
+		_FormOpen = true;
+
 		// Build the form
 		CGroupHTML::CForm form;
 		// id check is case sensitive and auto id's are uppercase
@@ -5837,6 +5882,12 @@ namespace NLGUI
 		_Forms.push_back(form);
 
 		renderPseudoElement(":before", elm);
+	}
+
+	void CGroupHTML::htmlFORMend(const CHtmlElement &elm)
+	{
+		_FormOpen = false;
+		renderPseudoElement(":after", elm);
 	}
 
 	// ***************************************************************************
@@ -6374,6 +6425,12 @@ namespace NLGUI
 		if (_Forms.empty() || _Forms.back().Entries.empty())
 			return;
 
+		// use option text as value
+		if (!elm.hasAttribute("value"))
+		{
+			_Forms.back().Entries.back().SelectValues.back() = _SelectOptionStr.toUtf8();
+		}
+
 		// insert the parsed text into the select control
 		CDBGroupComboBox *cb = _Forms.back().Entries.back().ComboBox;
 		if (cb)
@@ -6611,6 +6668,10 @@ namespace NLGUI
 
 		CGroupTable *table = new CGroupTable(TCtorParam());
 		table->BgColor = _CellParams.back().BgColor;
+		if (elm.hasNonEmptyAttribute("id"))
+			table->setId(getCurrentGroup()->getId() + ":" + elm.getAttribute("id"));
+		else
+			table->setId(getCurrentGroup()->getId() + ":TABLE" + toString(getNextAutoIdSeq()));
 
 		// TODO: border-spacing: 2em;
 		{
@@ -6771,6 +6832,12 @@ namespace NLGUI
 		}
 
 		_Cells.back() = new CGroupCell(CViewBase::TCtorParam());
+		if (elm.hasNonEmptyAttribute("id"))
+			_Cells.back()->setId(table->getId() + ":" + elm.getAttribute("id"));
+		else
+			_Cells.back()->setId(table->getId() + ":TD" + toString(getNextAutoIdSeq()));
+		// inner cell content
+		_Cells.back()->Group->setId(_Cells.back()->getId() + ":CELL");
 
 		if (_Style.checkStyle("background-repeat", "repeat"))
 			_Cells.back()->setTextureTile(true);

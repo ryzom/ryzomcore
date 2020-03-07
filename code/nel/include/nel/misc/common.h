@@ -307,6 +307,10 @@ template <class T> T trimQuotes (const T &str)
 	return str.substr(1, size - 2);
 }
 
+// encode/decode uri component using %AB hex encoding
+std::string encodeURIComponent(const std::string &in);
+std::string decodeURIComponent(const std::string &in);
+
 //////////////////////////////////////////////////////////////////////////
 // ****  DEPRECATED *****: PLEASE DON'T USE THESE METHODS BUT FUNCTIONS ABOVE toLower() and toUpper()
 //////////////////////////////////////////////////////////////////////////

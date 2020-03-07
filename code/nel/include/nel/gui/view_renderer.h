@@ -267,6 +267,8 @@ namespace NLGUI
 							  bool bReleasable=true
 							 );
 
+		// Create texture from dataURL "data:image/png;base64," string
+		sint32 createTextureFromDataURL(const std::string &data, bool uploadDXTC=true, bool bReleasable=true);
 
 		// change position of a sub-texture (inside its big texture) from the sub-texture filename
 		void updateTexturePos(const std::string &texturefileName,

@@ -63,7 +63,7 @@ public:
 		keystring, // a string has been sent. The string is a ucstring
 		unknown, // uninitialized event
 	};
-	CEventDescriptorKey() : _KeyEvent(unknown)
+	CEventDescriptorKey() : _KeyEvent(unknown), _CtrlState(false), _ShiftState(false), _AltState(false), _Char(0)
 	{
 		_EventType = key;
 	}
@@ -105,6 +105,31 @@ public:
 	{
 		return _AltState;
 	}
+
+	// return true if key was pressed or held down at a time of this event
+	bool isShiftDown()
+	{
+		return (_KeyEvent == CEventDescriptorKey::keydown && (_Key == NLMISC::KeySHIFT || _ShiftState))
+			|| (_KeyEvent == CEventDescriptorKey::keyup   && (_Key != NLMISC::KeySHIFT && _ShiftState))
+			|| (_KeyEvent == CEventDescriptorKey::keychar && _ShiftState);
+	}
+
+	// return true if key was pressed or held down at a time of this event
+	bool isCtrlDown()
+	{
+		return (_KeyEvent == CEventDescriptorKey::keydown && (_Key == NLMISC::KeyCONTROL || _CtrlState))
+			|| (_KeyEvent == CEventDescriptorKey::keyup   && (_Key != NLMISC::KeyCONTROL && _CtrlState))
+			|| (_KeyEvent == CEventDescriptorKey::keychar && _CtrlState);
+	}
+
+	// return true if key was pressed or held down at a time of this event
+	bool isAltDown()
+	{
+		return (_KeyEvent == CEventDescriptorKey::keydown && (_Key == NLMISC::KeyMENU || _AltState))
+			|| (_KeyEvent == CEventDescriptorKey::keyup   && (_Key != NLMISC::KeyMENU && _AltState))
+			|| (_KeyEvent == CEventDescriptorKey::keychar && _AltState);
+	}
+
 	// init from a CEventKey obj
 	void init(const NLMISC::CEventKey &ev);
 

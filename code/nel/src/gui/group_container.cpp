@@ -819,6 +819,8 @@ namespace NLGUI
 						_Parent->setX(x);
 						_Parent->setY(y);
 
+						CWidgetManager::getInstance()->snapIfClose(_Parent);
+
 						// if some action handler to call when moving
 						if(gc->getAHOnMovePtr())
 						{

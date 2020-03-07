@@ -1353,6 +1353,9 @@ void prelogInit()
 		CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
 		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
 
+		CWidgetManager::getInstance()->setWindowSnapInvert(ClientCfg.WindowSnapInvert);
+		CWidgetManager::getInstance()->setWindowSnapDistance(ClientCfg.WindowSnapDistance);
+
 		// Yoyo: initialize NOW the InputHandler for Event filtering.
 		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
 		InputHandlerManager->addToServer (&Driver->EventServer);
