@@ -2681,8 +2681,11 @@ IDriver::TMessageBoxId CDriverGL::systemMessageBox (const char* message, const c
 										}
 	nlstop;
 #else // NL_OS_WINDOWS
-	// Call the console version!
-	IDriver::systemMessageBox (message, title, type, icon);
+	// TODO: if user did not launch from console, then program "freezes" without explanation or possibility to continue
+	//IDriver::systemMessageBox (message, title, type, icon);
+	// log only
+	printf("%s:%s\n", title, message);
+	nlwarning("%s: %s", title, message);
 #endif // NL_OS_WINDOWS
 	return okId;
 }
