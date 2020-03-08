@@ -375,6 +375,23 @@ namespace NLGUI
 					if (pUG)
 						setUserGroupRight((uint)_Lines.size()-1, pUG, true);
 				}
+				// usergroup from simple icon
+				CXMLAutoPtr icon((const char*) xmlGetProp (cur, (xmlChar*)"icon"));
+				if (icon)
+				{
+					typedef std::pair<std::string, std::string> TTmplParams;
+					std::vector<TTmplParams> vparams;
+					uint lineIndex = _Lines.size()-1;
+					vparams.push_back(TTmplParams("id", toString("icon%d", lineIndex)));
+					vparams.push_back(TTmplParams("sizeref", ""));
+					vparams.push_back(TTmplParams("icon_texture", (const char*)icon));
+					//vparams.push_back(TTmplParams("icon_color", options.ColorNormal.toString()));
+					string lineId = toString("%s:icon", pV->getId().c_str());
+
+					CInterfaceGroup *pUG = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_row_icon", lineId, vparams);
+					if (pUG)
+						setUserGroupLeft((uint)_Lines.size()-1, pUG, true);
+				}
 			}
 			cur = cur->next;
 		}
@@ -567,8 +584,6 @@ namespace NLGUI
 
 		CGroupFrame::updateCoords();
 
-		bool mustUpdate = false;
-
 		if (_MaxVisibleLine > 0 && sint32(_Lines.size())>_MaxVisibleLine)
 		{
 			for(k = 0; k < _Lines.size(); ++k)
@@ -599,7 +614,6 @@ namespace NLGUI
 					_SelectionView->setW (-8-8-2);
 					_ScrollBar->setSerializable( false );
 					addCtrl(_ScrollBar);
-					mustUpdate = true;
 				}
 				break;
 			}
@@ -648,13 +662,7 @@ namespace NLGUI
 			}
 		}
 
-
-
-		if (mustUpdate)
-		{
-			CGroupFrame::updateCoords();
-		}
-
+		CGroupFrame::updateCoords();
 
 		// *** Setup SubMenus and CheckBoxes Positions
 		sint32 maxViewW = 0;
