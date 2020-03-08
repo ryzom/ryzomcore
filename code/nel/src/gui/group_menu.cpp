@@ -115,19 +115,6 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CViewTextMenu::setActive (bool state)
-	{
-		if (_ParentMenu)
-			_ParentMenu->setActive(state);
-
-		if (_Active != state)
-		{
-			_Active = state;
-			invalidateCoords();
-		}
-	}
-
-	// ------------------------------------------------------------------------------------------------
 	// CGroupSubMenu
 	// ------------------------------------------------------------------------------------------------
 
@@ -303,9 +290,6 @@ namespace NLGUI
 				if (cond)	strCond = (const char*)cond;
 				CXMLAutoPtr params((const char*) xmlGetProp (cur,  (xmlChar*)"params"));
 				if (params)	strParams = (const char*)params;
-				CXMLAutoPtr icon((const char*) xmlGetProp (cur,  (xmlChar*)"icon"));
-				if (icon)
-					strTexture = (const char*)icon;
 				CXMLAutoPtr strCheckable((const char*) xmlGetProp (cur,  (xmlChar*)"checkable"));
 				bool bCheckable = false;
 				if (strCheckable)	bCheckable = convertBool (strCheckable);
@@ -391,6 +375,23 @@ namespace NLGUI
 					if (pUG)
 						setUserGroupRight((uint)_Lines.size()-1, pUG, true);
 				}
+				// usergroup from simple icon
+				CXMLAutoPtr icon((const char*) xmlGetProp (cur, (xmlChar*)"icon"));
+				if (icon)
+				{
+					typedef std::pair<std::string, std::string> TTmplParams;
+					std::vector<TTmplParams> vparams;
+					uint lineIndex = _Lines.size()-1;
+					vparams.push_back(TTmplParams("id", toString("icon%d", lineIndex)));
+					vparams.push_back(TTmplParams("sizeref", ""));
+					vparams.push_back(TTmplParams("icon_texture", (const char*)icon));
+					//vparams.push_back(TTmplParams("icon_color", options.ColorNormal.toString()));
+					string lineId = toString("%s:icon", pV->getId().c_str());
+
+					CInterfaceGroup *pUG = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_row_icon", lineId, vparams);
+					if (pUG)
+						setUserGroupLeft((uint)_Lines.size()-1, pUG, true);
+				}
 			}
 			cur = cur->next;
 		}
@@ -409,11 +410,11 @@ namespace NLGUI
 		pVB->setSerializable( false );
 		pVB->setParent (this);
 		pVB->setParentPos (parentPos);
-		pVB->setParentPosRef (Hotspot_BL);
-		pVB->setPosRef (Hotspot_BR);
+		pVB->setParentPosRef (Hotspot_ML);
+		pVB->setPosRef (Hotspot_MR);
 		pVB->setTexture(texture);
 		pVB->setModulateGlobalColor(false);
-		pVB->setX (MENU_WIDGET_X);
+		pVB->setX (-2);
 		addView (pVB);
 		return pVB;
 	}
@@ -583,8 +584,6 @@ namespace NLGUI
 
 		CGroupFrame::updateCoords();
 
-		bool mustUpdate = false;
-
 		if (_MaxVisibleLine > 0 && sint32(_Lines.size())>_MaxVisibleLine)
 		{
 			for(k = 0; k < _Lines.size(); ++k)
@@ -592,14 +591,11 @@ namespace NLGUI
 			{
 				// compute max height of widgets on the left of text
 				sint32 widgetMaxH = 0;
-				if (_Lines[k].ViewText->getActive())
-				{
-					if (_Lines[k].UserGroupRight)	widgetMaxH = _Lines[k].UserGroupRight->getHReal();
-					if (_Lines[k].UserGroupLeft)	widgetMaxH = std::max(widgetMaxH, _Lines[k].UserGroupLeft->getHReal());
-					if (_Lines[k].CheckBox)		widgetMaxH = std::max(widgetMaxH, _Lines[k].CheckBox->getHReal());
-					if (_Lines[k].RightArrow)	widgetMaxH = std::max(widgetMaxH, _Lines[k].RightArrow->getHReal());
-					widgetMaxH = std::max(widgetMaxH, _Lines[k].ViewText->getHReal());
-				}
+				if (_Lines[k].UserGroupRight)	widgetMaxH = _Lines[k].UserGroupRight->getHReal();
+				if (_Lines[k].UserGroupLeft)	widgetMaxH = std::max(widgetMaxH, _Lines[k].UserGroupLeft->getHReal());
+				if (_Lines[k].CheckBox)		widgetMaxH = std::max(widgetMaxH, _Lines[k].CheckBox->getHReal());
+				if (_Lines[k].RightArrow)	widgetMaxH = std::max(widgetMaxH, _Lines[k].RightArrow->getHReal());
+				widgetMaxH = std::max(widgetMaxH, _Lines[k].ViewText->getHReal());
 				_GroupList->setMaxH(widgetMaxH*_MaxVisibleLine+_GroupList->getSpace()*(_MaxVisibleLine-1));
 				if (_ScrollBar == NULL)
 				{
@@ -618,7 +614,6 @@ namespace NLGUI
 					_SelectionView->setW (-8-8-2);
 					_ScrollBar->setSerializable( false );
 					addCtrl(_ScrollBar);
-					mustUpdate = true;
 				}
 				break;
 			}
@@ -642,54 +637,39 @@ namespace NLGUI
 			{
 				// compute max height of widgets on the left of text
 				sint32 widgetMaxH = 0;
-				sint32	textHReal = 0;
-				if (_Lines[k].ViewText->getActive())
-				{
-					if (_Lines[k].UserGroupRight) widgetMaxH = _Lines[k].UserGroupRight->getHReal();
-					if (_Lines[k].UserGroupLeft) widgetMaxH = std::max(widgetMaxH, _Lines[k].UserGroupLeft->getHReal());
-					if (_Lines[k].CheckBox)  widgetMaxH = std::max(widgetMaxH, _Lines[k].CheckBox->getHReal());
-					if (_Lines[k].RightArrow)  widgetMaxH = std::max(widgetMaxH, _Lines[k].RightArrow->getHReal());
+				if (_Lines[k].UserGroupRight) widgetMaxH = _Lines[k].UserGroupRight->getHReal();
+				if (_Lines[k].UserGroupLeft) widgetMaxH = std::max(widgetMaxH, _Lines[k].UserGroupLeft->getHReal());
+				if (_Lines[k].CheckBox)  widgetMaxH = std::max(widgetMaxH, _Lines[k].CheckBox->getHReal());
+				if (_Lines[k].RightArrow)  widgetMaxH = std::max(widgetMaxH, _Lines[k].RightArrow->getHReal());
 
-					textHReal = _Lines[k].ViewText->getHReal();
-				}
-
-				_Lines[k].HReal = max(widgetMaxH, textHReal);
-				_Lines[k].TextDY = textDYPos;
+				sint32	textHReal= _Lines[k].ViewText->getHReal();
+				_Lines[k].HReal= max(widgetMaxH, textHReal);
+				_Lines[k].TextDY= textDYPos;
 				if(widgetMaxH>textHReal)
-					_Lines[k].TextDY += (widgetMaxH-textHReal) / 2;
+					_Lines[k].TextDY+= (widgetMaxH-textHReal) / 2;
 			}
 		}
 
 
 		// *** Update Text Positions
 	//	sint32 currX = 0;
-		sint32 maxTextW = 0;
 		for(k = 0; k < _Lines.size(); ++k)
 		{
 			if (_Lines[k].ViewText)
 			{
 				// Setup Y
 				_Lines[k].ViewText->setY(_Lines[k].TextDY);
-				maxTextW = max(maxTextW, _Lines[k].ViewText->getW());
 			}
 		}
 
-
-
-		if (mustUpdate)
-		{
-			CGroupFrame::updateCoords();
-		}
-
+		CGroupFrame::updateCoords();
 
 		// *** Setup SubMenus and CheckBoxes Positions
 		sint32 maxViewW = 0;
-
 		for (i = 1; i < _Views.size(); ++i)
 		{
 			CViewBitmap *pVB = dynamic_cast<CViewBitmap *>(_Views[i]);
 			if (pVB == NULL) continue;
-
 			if (pVB->getId() == ID_MENU_SUBMENU)
 			{
 				// Look for the next line of the menu that contains a sub menu
@@ -1252,7 +1232,7 @@ namespace NLGUI
 		pV->setCaseMode(_GroupMenu->getCaseMode());
 		if (formatted)
 		{
-			pV->setMultiLine (true);	
+			pV->setMultiLine (true);
 			pV->setMultiLineMaxWOnly (true);
 			pV->setTextFormatTaged (name);
 		}
@@ -1278,7 +1258,6 @@ namespace NLGUI
 		_GroupList->addChild (pV);
 
 		CViewBitmap *checkBox = NULL;
-		CViewBitmap *icon = NULL;
 
 		if (checkable)
 		{
@@ -1286,6 +1265,15 @@ namespace NLGUI
 			checkBox->setTexture(texture);
 			pV->setCheckBox(checkBox);
 		}
+
+		CViewBitmap *icon = NULL;
+		if (!texture.empty())
+		{	
+			if (_GroupList->getNumChildren() == 1)
+				pV->setX(20);
+			icon = createIcon(pV, texture);
+		}
+		
 
 		tmp.ViewText = pV;
 		tmp.Separator = NULL;
@@ -1300,38 +1288,11 @@ namespace NLGUI
 			tmp.Id = id;
 
 		pV->setId(_GroupMenu->getId()+":"+tmp.Id);
-		
-		{
-			typedef std::pair<std::string, std::string> TTmplParams;
-			std::vector<TTmplParams> vparams;
-			uint lineIndex = _Lines.size()-1;
-			vparams.push_back(TTmplParams("id", toString("icon%d", lineIndex)));
-			vparams.push_back(TTmplParams("sizeref", ""));
-			vparams.push_back(TTmplParams("icon_texture", texture));
-			//vparams.push_back(TTmplParams("icon_color", options.ColorNormal.toString()));
-			string lineId = toString("%s:icon", pV->getId().c_str());
-			
-			CInterfaceGroup *pUGLeft = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_row_icon", lineId, vparams);
-			if (pUGLeft)
-			{
-				tmp.UserGroupLeft = pUGLeft;
-				tmp.UserGroupLeftOwnership = true;
-				addGroup(pUGLeft);
-				pUGLeft->setParent(this);
-				pUGLeft->setParentPos(this);
-				pUGLeft->setParentPosRef (Hotspot_BL);
-				pUGLeft->setPosRef (Hotspot_BL);
-				pUGLeft->setX(LEFT_MENU_WIDGET_X);
-			}
-		}
-
 
 		_Lines.push_back (tmp);
 
-
 		// Add an empty sub menu by default
 		_SubMenus.push_back (NULL);
-
 
 		_GroupMenu->invalidateCoords();
 
