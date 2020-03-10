@@ -3926,9 +3926,9 @@ REGISTER_ACTION_HANDLER(CAHLandMarkSelected, "land_mark_selected");
 // Remove a user landmark
 class CAHRemoveUserLandMark : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
 	{
-		CCtrlButton *button = dynamic_cast<CCtrlButton *>(pCaller);
+		CCtrlButton *button = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (!button) return;
 		CGroupMap *map = dynamic_cast<CGroupMap *>(button->getParent());
 		if (!map) return;
@@ -3936,6 +3936,8 @@ class CAHRemoveUserLandMark : public IActionHandler
 		// close the rename window & create window
 		closeLandMarkNameDialog();
 		LastSelectedLandMark = NULL;
+		// close confirmation
+		CAHManager::getInstance()->runActionHandler("leave_modal", NULL);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHRemoveUserLandMark, "remove_user_landmark");
