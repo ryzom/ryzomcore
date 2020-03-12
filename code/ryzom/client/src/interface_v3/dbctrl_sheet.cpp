@@ -1888,24 +1888,30 @@ void CDBCtrlSheet::resetCharBitmaps()
 // ***************************************************************************
 void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, bool topDown)
 {
-	// Use the optString for the Macro name
-	_OptString = toLower(_OptString);
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = *CViewRenderer::getInstance();
-
 	_CharBitmaps.clear();
+	if(maxLine<=0) return;
 
-	if(maxLine<=0)
-		return;
+	std::string text(_OptString);
+	if (_Type != SheetType_Macro && text.size() > 4)
+	{
+		// check for icon text 'uiitLabel'
+		if (text[0] == 'u' && text[1] == 'i' && text[2] == 'i' && text[3] == 't' && CI18N::hasTranslation(text))
+		{
+			// NOTE: translated text is expected to be us-ascii only
+			text = CI18N::get(text).toUtf8();
+		}
+	}
+
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	uint h = rVR.getTypoTextureH('a');
 	sint lineNb = 0;
 	sint curLineSize = 0;
 	uint i;
 	uint xChar= 0;
-	for (i = 0; i < _OptString.size(); ++i)
+	for (i = 0; i < text.size(); ++i)
 	{
-		char c = _OptString[i];
+		char c = text[i];
 		sint32 w = rVR.getTypoTextureW(c);
 		if ((curLineSize + w) > maxW)
 		{
