@@ -2627,7 +2627,11 @@ void CGroupMap::createContinentLandMarks()
 			CLandMarkOptions options = getUserLandMarkOptions(k);
 			addLandMark(_UserLM, mapPos, _CurContinent->UserLandMarks[k].Title, options);
 
-			if (_LandmarkFilter.size() > 0)
+			if (!_UserLandMarkVisible)
+			{
+				_UserLM.back()->setActive(false);
+			}
+			else if (_LandmarkFilter.size() > 0)
 			{
 				if (filterLandmark(_CurContinent->UserLandMarks[k].Title))
 				{
