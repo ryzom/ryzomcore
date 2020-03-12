@@ -1293,10 +1293,10 @@ void CDBCtrlSheet::setupItem ()
 			// special icon text
 			if( _NeedSetup || _ItemSheet->getIconText() != _OptString )
 			{
-				// compute from OptString. Allow only 1 line and 4 chars
+				// compute from OptString. Allow only 1 line (-2 for padding)
 				_OptString= _ItemSheet->getIconText();
 				// Display Top Left
-				setupCharBitmaps(40, 1, 6, true);
+				setupCharBitmaps(40-2, 1, true);
 			}
 
 			// Special Item requirement
@@ -1410,8 +1410,8 @@ void CDBCtrlSheet::setupMacro()
 {
 	if (!_NeedSetup) return;
 
-	// compute from OptString
-	setupCharBitmaps(26, 4, 5);
+	// compute from OptString (-2 for padding)
+	setupCharBitmaps(26-2, 4);
 
 	_NeedSetup = false;
 
@@ -1713,8 +1713,8 @@ void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bri
 		{
 			// recompute text
 			_OptString= iconName;
-			// compute from OptString. Allow only 1 line and 5 chars
-			setupCharBitmaps(26, 1, 5);
+			// compute from OptString. Allow only 1 line (-2 for padding)
+			setupCharBitmaps(26-2, 1);
 		}
 	}
 }
@@ -1840,10 +1840,10 @@ void CDBCtrlSheet::setupOutpostBuilding()
 			// special icon text
 			if (pOBSheet->getIconText() != _OptString)
 			{
-				// compute from OptString. Allow only 1 line and 4 chars
+				// compute from OptString. Allow only 1 line, (-2 for padding)
 				_OptString= pOBSheet->getIconText();
 				// Display Top Left
-				setupCharBitmaps(40, 1, 6, true);
+				setupCharBitmaps(40-2, 1, true);
 			}
 		}
 		else
@@ -1886,7 +1886,7 @@ void CDBCtrlSheet::resetCharBitmaps()
 }
 
 // ***************************************************************************
-void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar, bool topDown)
+void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, bool topDown)
 {
 	// Use the optString for the Macro name
 	_OptString = toLower(_OptString);
@@ -1907,7 +1907,7 @@ void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar
 	{
 		char c = _OptString[i];
 		sint32 w = rVR.getTypoTextureW(c);
-		if ((curLineSize + w) > maxW || (sint32)xChar>=maxWChar)
+		if ((curLineSize + w) > maxW)
 		{
 			lineNb ++;
 			if (lineNb == maxLine) break;
