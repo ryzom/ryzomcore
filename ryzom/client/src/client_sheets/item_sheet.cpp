@@ -274,7 +274,6 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	string IconText;
 	if(!item.getValueByName (IconText, "3d.text overlay"))
 		debug("key '3d.text overlay' not found.");
-	IconText = toLowerAscii(IconText);
 	IdIconText = ClientSheetsStrings.add(IconText);
 
 	// See if this item can be hiden when equipped
