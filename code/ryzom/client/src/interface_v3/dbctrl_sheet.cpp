@@ -1892,14 +1892,11 @@ void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, bool topDown)
 	if(maxLine<=0) return;
 
 	std::string text(_OptString);
-	if (_Type != SheetType_Macro && text.size() > 4)
+	// check for icon text 'uiitLabel'
+	if (text.size() > 4 && text[0] == 'u' && text[1] == 'i' && text[2] == 'i' && text[3] == 't' && CI18N::hasTranslation(text))
 	{
-		// check for icon text 'uiitLabel'
-		if (text[0] == 'u' && text[1] == 'i' && text[2] == 'i' && text[3] == 't' && CI18N::hasTranslation(text))
-		{
-			// NOTE: translated text is expected to be us-ascii only
-			text = CI18N::get(text).toUtf8();
-		}
+		// NOTE: translated text is expected to be us-ascii only
+		text = CI18N::get(text).toUtf8();
 	}
 	text = toLower(text);
 
