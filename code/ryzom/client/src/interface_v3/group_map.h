@@ -299,6 +299,10 @@ public:
 
 	void updateClosestLandMarkMenu(const std::string &menu, const NLMISC::CVector2f &pos) const;
 
+	// show/hide all user landmarks
+	void setUserLandMarkVisible(bool state);
+	bool getUserLandMarkVisible() const { return _UserLandMarkVisible; };
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 private:
 		// A non rectangular button to click on zone of the map
@@ -472,6 +476,9 @@ private:
 	///////////////
 	// LANDMARKS //
 	///////////////
+
+		// if false, user landmarks are not drawn
+		bool				_UserLandMarkVisible;
 
 		// landmarks of continent
 		TLandMarkButtonVect	_ContinentLM;
