@@ -1901,6 +1901,7 @@ void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, bool topDown)
 			text = CI18N::get(text).toUtf8();
 		}
 	}
+	text = toLower(text);
 
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
