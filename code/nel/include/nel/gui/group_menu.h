@@ -31,7 +31,7 @@ namespace NLGUI
 	class CViewBitmap;
 	class CGroupList;
 	class CGroupMenu;
-	class CGroupSubMenu;
+
 
 	/**
 	 * CViewTextMenu is an element of a sub menu
@@ -50,7 +50,6 @@ namespace NLGUI
 			_Checked = false;
 			_Checkable = false;
 			_CheckBox = NULL;
-			_ParentMenu = NULL;
 			Over = false;
 		}
 
@@ -61,8 +60,6 @@ namespace NLGUI
 		bool getCheckable() const { return _Checkable; }
 		void setCheckable(bool c);
 		void setCheckBox(CViewBitmap *checkBox) { _CheckBox = checkBox; }
-		void setParentMenu(CGroupSubMenu *parentMenu) { _ParentMenu = parentMenu; };
-		void setActive (bool g);
 		CViewBitmap * getCheckBox() const { return _CheckBox; }
 		bool getFormatted () const { return getMultiLine (); }
 
@@ -89,7 +86,6 @@ namespace NLGUI
 		bool		_Grayed;
 		bool		_Checked;
 		bool		_Checkable;
-		CGroupSubMenu *_ParentMenu;
 	};
 
 	/**
