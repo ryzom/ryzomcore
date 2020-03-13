@@ -437,6 +437,7 @@ CGroupMap::CGroupMap(const TCtorParam &param)
 	_HomeLM = NULL;
 	_LandmarkFilter.clear();
 	_MatchedLandmarks.clear();
+	_UserLandMarkVisible = true;
 	//
 	_ScaleMax = 8.f;
 	_ScaleMaxR2 = 8.f;
@@ -2626,7 +2627,11 @@ void CGroupMap::createContinentLandMarks()
 			CLandMarkOptions options = getUserLandMarkOptions(k);
 			addLandMark(_UserLM, mapPos, _CurContinent->UserLandMarks[k].Title, options);
 
-			if (_LandmarkFilter.size() > 0)
+			if (!_UserLandMarkVisible)
+			{
+				_UserLM.back()->setActive(false);
+			}
+			else if (_LandmarkFilter.size() > 0)
 			{
 				if (filterLandmark(_CurContinent->UserLandMarks[k].Title))
 				{
@@ -2700,7 +2705,7 @@ void CGroupMap::updateUserLandMarks()
 		addLandMark(_UserLM, mapPos, _CurContinent->UserLandMarks[k].Title, getUserLandMarkOptions(k));
 
 		// hide landmark if not matching filter
-		if (!filterLandmark(_CurContinent->UserLandMarks[k].Title))
+		if (!_UserLandMarkVisible || !filterLandmark(_CurContinent->UserLandMarks[k].Title))
 			_UserLM.back()->setActive(false);
 	}
 	invalidateCoords();
@@ -2979,6 +2984,15 @@ CLandMarkOptions CGroupMap::getUserLandMarkOptions(uint32 lmindex) const
 
 }
 
+//============================================================================================================
+void CGroupMap::setUserLandMarkVisible(bool state)
+{
+	if (_UserLandMarkVisible != state)
+	{
+		_UserLandMarkVisible = state;
+		updateUserLandMarks();
+	}
+}
 
 //============================================================================================================
 void CGroupMap::updatePlayerPos()
@@ -3765,6 +3779,9 @@ void CGroupMap::updateClosestLandMarkMenu(const std::string &menu, const NLMISC:
 	// no continent selected (ie world map view)
 	if (!_CurContinent) return;
 
+	// user markers not visible
+	if (!_UserLandMarkVisible) return;
+
 	// sort landmarks, keep indices
 	typedef std::pair<uint, float> TSortedDistPair;
 	std::vector<TSortedDistPair> sortedIndices;
@@ -4314,6 +4331,33 @@ NLMISC_COMMAND( setMap, "Change the map", "" )
 	if (pMap != NULL)
 		pMap->setMap(args[0]);
 
+	return true;
+}
+
+//=========================================================================================================
+// toggle user landmarks visibility
+// no arguments - toggle show/hide
+// 0 - hide
+// 1 - show (any non "0" value)
+NLMISC_COMMAND( showHideUserLandMark, "Show/Hide user landmarks", "0|1")
+{
+	const std::string mapId("ui:interface:map:content:map_content:actual_map");
+
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	CGroupMap *map = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(mapId));
+	if (!map)
+	{
+		nlwarning("Unable to find map element '%s'", mapId.c_str());
+		return false;
+	}
+
+	bool state;
+	if (args.size() == 0)
+		state = !map->getUserLandMarkVisible();
+	else
+		state = !(args[0] == "0");
+
+	map->setUserLandMarkVisible(state);
 	return true;
 }
 

@@ -815,7 +815,7 @@ private:
 	// remove enchant and buff markers from item icon
 	void		clearIconBuffs();
 
-	void		setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar= 1000, bool topDown= false);
+	void		setupCharBitmaps(sint32 maxW, sint32 maxLine, bool topDown= false);
 	void		resetCharBitmaps();
 	void		displayCharBitmaps(sint32 rdrLayer, sint32 x, sint32 y, NLMISC::CRGBA color);
 
