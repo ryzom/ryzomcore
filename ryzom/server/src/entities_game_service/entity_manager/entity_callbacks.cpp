@@ -711,8 +711,6 @@ void finalizeClientReady( uint32 userId, uint32 index )
 	if (c->invulnerableMode())
 		c->setBonusMalusName("invulnerability", c->addEffectInDB(CSheetId("invulnerability.sbrick"), true));
 
-	c->updateJewelsTags(false);
-	
 	c->setFinalized(true);
 
 } // finalizeClientReady //

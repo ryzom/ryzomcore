@@ -37,6 +37,7 @@
 #include "team_manager/team_manager.h"
 #include "weather_everywhere.h"
 #include "death_penalties.h"
+#include "harvest_source.h"
 #include "mission_manager/mission_team.h"
 #include "mission_manager/mission_step_ai.h"
 #include "mission_manager/mission_guild.h"
@@ -1039,6 +1040,7 @@ NLMISC_COMMAND(enchantEquipedItem, "enchantEquipedItem", "<uid> <slotname> <shee
 	if (itemPtr != NULL)
 	{
 		itemPtr->applyEnchantment(sheets);
+		c->updateJewelsTags(false);
 		log.displayNL("OK");
 		return true;
 	}
@@ -4266,5 +4268,28 @@ NLMISC_COMMAND(manageBuilding, "Manage a building", "<uid> <action>")
 	}
 
 	log.displayNL("OK");
+	return true;
+}
+
+
+NLMISC_COMMAND(despawnTargetSource, "Despawn the target source", "<uid>")
+{
+	if (args.size() < 1) return false;
+
+	GET_ACTIVE_CHARACTER
+	const CEntityId &target = c->getTarget();
+	if (target.getType() == RYZOMID::forageSource)
+	{
+		TDataSetRow sourceRowId = c->getTargetDataSetRow();
+		CHarvestSource	*source = CHarvestSourceManager::getInstance()->getEntity( sourceRowId );
+		if (!source->wasProspected())
+		{
+			source->spawnEnd(false);
+			log.displayNL("OK");
+			return true;
+		}
+	}
+
+	log.displayNL("ERR");
 	return true;
 }
