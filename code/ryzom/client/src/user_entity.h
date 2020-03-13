@@ -95,6 +95,7 @@ public:
 		Outpost,
 		BuildTotem,
 		MissionRing,
+		OpenArkUrl,
 	};
 
 public:
