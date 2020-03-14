@@ -461,22 +461,29 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			if (rpTags)
 			{
 				CPlayerCL * pPlayer = dynamic_cast<CPlayerCL*>(entity);
-				CViewBitmap *bitmap;
+				CViewBitmap *rp1 = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_1"));
+				CViewBitmap *rp2 = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_2"));
+				CViewBitmap *rp3 = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_3"));
+				CViewBitmap *rp4 = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_4"));
+
 				if (pPlayer == NULL || (pPlayer != NULL && pPlayer->getPvpMode() & PVP_MODE::PvpFaction))
 				{
-					bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_1"));
-					if (bitmap)
-						bitmap->setTexture(entityTag1.toString());
-					bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_2"));
-					if (bitmap)
-						bitmap->setTexture(entityTag2.toString());
+					if (rp1) rp1->setTexture(entityTag1.toString());
+					if (rp2) rp2->setTexture(entityTag2.toString());
 				}
-				bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_3"));
-				if (bitmap)
-					bitmap->setTexture(entityTag3.toString());
-				bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_4"));
-				if (bitmap)
-					bitmap->setTexture(entityTag4.toString());
+				else
+				{
+					entityTag1.clear();
+					entityTag2.clear();
+				}
+				if (rp3) rp3->setTexture(entityTag3.toString());
+				if (rp4) rp4->setTexture(entityTag4.toString());
+
+				// hide if texture is empty
+				if (rp1) rp1->setActive(!entityTag1.empty());
+				if (rp2) rp2->setActive(!entityTag2.empty());
+				if (rp3) rp3->setActive(!entityTag3.empty());
+				if (rp4) rp4->setActive(!entityTag4.empty());
 			}
 
 			// Get the permanent content bitmap
