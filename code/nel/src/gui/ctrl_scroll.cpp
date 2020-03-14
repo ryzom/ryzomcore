@@ -45,7 +45,7 @@ namespace NLGUI
 		_Aligned = 1;
 		_TrackPos = 0;
 		_TrackDispPos = 0;
-		_TrackSize = _TrackSizeMin = 16;
+		_TrackSize = _TrackSizeMin = 8;
 		_Min = 0;
 		_Max = 100;
 		_Value = 0;

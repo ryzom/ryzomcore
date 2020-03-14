@@ -95,6 +95,7 @@ public:
 		Outpost,
 		BuildTotem,
 		MissionRing,
+		OpenArkUrl,
 	};
 
 public:
@@ -490,6 +491,16 @@ public:
 		return _LoginName;
 	}
 
+	CVector getCameraMoves()
+	{
+		return _CameraMoves;
+	}
+
+	void setCameraMoves(CVector moves)
+	{
+		_CameraMoves = moves;
+	}
+
 protected:
 	class CSpeedFactor : public NLMISC::ICDBNode::IPropertyObserver
 	{
@@ -601,6 +612,8 @@ protected:
 	uint32						_MoveToMissionId;		 // Used for both mission option and mission ring
 	/// Time in MS when the User started beiing in collision with anything that avoid him to do an Action (and still is).
 	sint64						_MoveToColStartTime;
+
+	CVector						_CameraMoves;
 
 
 	/// CSkill points observer

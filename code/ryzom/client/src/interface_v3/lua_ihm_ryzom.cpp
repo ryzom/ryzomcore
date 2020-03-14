@@ -112,6 +112,7 @@
 #include "../entities.h"
 #include "../misc.h"
 #include "../gabarit.h"
+#include "../view.h"
 
 #include "bot_chat_page_all.h"
 #include "bot_chat_page_ring_sessions.h"
@@ -443,6 +444,8 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("enableModalWindow", enableModalWindow);
 	ls.registerFunc("getPlayerPos", getPlayerPos);
 	ls.registerFunc("getGroundAtMouse", getGroundAtMouse),
+	ls.registerFunc("moveCam", moveCam),
+	ls.registerFunc("setCamMode", setCamMode),
 	ls.registerFunc("getMousePos", getMousePos),
 	ls.registerFunc("getMouseDown", getMouseDown),
 	ls.registerFunc("getMouseMiddleDown", getMouseMiddleDown),
@@ -461,6 +464,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getTargetName", getTargetName);
 	ls.registerFunc("getTargetTitleRaw", getTargetTitleRaw);
 	ls.registerFunc("getTargetTitle", getTargetTitle);
+	ls.registerFunc("moveToTarget", moveToTarget);
 	ls.registerFunc("addSearchPathUser", addSearchPathUser);
 	ls.registerFunc("displaySystemInfo", displaySystemInfo);
 	ls.registerFunc("displayChatMessage", displayChatMessage);
@@ -468,6 +472,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("disableContextHelp", disableContextHelp);
 	ls.registerFunc("setWeatherValue", setWeatherValue);
 	ls.registerFunc("getWeatherValue", getWeatherValue);
+	ls.registerFunc("getContinentSheet", getContinentSheet);
 	ls.registerFunc("getCompleteIslands", getCompleteIslands);
 	ls.registerFunc("displayBubble", displayBubble);
 	ls.registerFunc("getIslandId", getIslandId);
@@ -589,6 +594,9 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(updateTooltipCoords),
 		LUABIND_FUNC(isCtrlKeyDown),
 		LUABIND_FUNC(encodeURLUnicodeParam),
+		LUABIND_FUNC(encodeURLParam),
+		LUABIND_FUNC(encodeToHexa),
+		LUABIND_FUNC(decodeFromHexa),
 		LUABIND_FUNC(getPlayerLevel),
 		LUABIND_FUNC(getPlayerVpa),
 		LUABIND_FUNC(getPlayerVpb),
@@ -1342,6 +1350,39 @@ int CLuaIHMRyzom::getGroundAtMouse(CLuaState &ls)
 	return 3;
 }
 
+int CLuaIHMRyzom::moveCam(CLuaState &ls)
+{
+	const char *funcName = "moveCam";
+	CLuaIHM::checkArgCount(ls, funcName, 3);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER);
+	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TNUMBER);
+
+	float x = (float)ls.toNumber(1);
+	float y = (float)ls.toNumber(2);
+	float z = (float)ls.toNumber(3);
+	CVector moves(x, y, z);
+	UserEntity->setCameraMoves(moves);
+	
+	return 0;
+}
+
+int CLuaIHMRyzom::setCamMode(CLuaState &ls)
+{
+	const char *funcName = "setCamMode";
+	CLuaIHM::checkArgCount(ls, funcName, 1);
+
+	bool aiMode = ls.toBoolean(1);
+
+	if(aiMode)
+		UserControls.mode(CUserControls::AIMode);
+	else
+		UserEntity->viewMode(UserEntity->viewMode());
+
+	return 0;
+}
+
+
 // ***************************************************************************
 int CLuaIHMRyzom::getPlayerPos(CLuaState &ls)
 {
@@ -1486,6 +1527,22 @@ int CLuaIHMRyzom::getTargetTitle(CLuaState &ls)
 	ls.push(target->getTitle().toUtf8());
 	return 1;
 }
+
+// ***************************************************************************
+int CLuaIHMRyzom::moveToTarget(CLuaState &ls)
+{
+	CLuaIHM::checkArgCount(ls, "moveToTarget", 1);
+	CLuaIHM::checkArgType(ls, "url", 1, LUA_TSTRING);
+
+	const std::string &url = ls.toString(1);
+	CEntityCL *target = getTargetEntity();
+	if (!target) return 0;
+	
+	CLuaManager::getInstance().executeLuaScript("ArkTargetUrl = [["+url+"]]", 0);
+	UserEntity->moveTo(UserEntity->selection(), 1.0, CUserEntity::OpenArkUrl);
+	return 0;
+}
+
 
 // ***************************************************************************
 int CLuaIHMRyzom::addSearchPathUser(CLuaState &ls)
@@ -1758,6 +1815,21 @@ int CLuaIHMRyzom::getWeatherValue(CLuaState &ls)
 	ls.push(weather);
 	return 1;
 }
+
+int CLuaIHMRyzom::getContinentSheet(CLuaState &ls)
+{
+	const char *funcName = "getContinentSheet";
+	CLuaIHM::checkArgCount(ls, funcName, 0);
+	if (ContinentMngr.cur())
+	{
+		ls.push(ContinentMngr.cur()->SheetName);
+		return 1;
+	}
+
+	ls.push("");
+	return 1;
+}
+
 
 int	CLuaIHMRyzom::getUICaller(CLuaState &ls)
 {
@@ -3746,6 +3818,31 @@ std::string CLuaIHMRyzom::encodeURLUnicodeParam(const ucstring &text)
 	//H_AUTO(Lua_CLuaIHM_encodeURLUnicodeParam)
 	return convertToHTML(text.toUtf8());
 }
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::encodeURLParam(const string &text)
+{
+	//H_AUTO(Lua_CLuaIHM_encodeURLUnicodeParam)
+	return convertToHTML(text);
+}
+
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::encodeToHexa(const string &text)
+{
+	return toHexa(text);
+}
+
+
+
+// ***************************************************************************
+std::string CLuaIHMRyzom::decodeFromHexa(const string &text)
+{
+	string hexa;
+	fromHexa(text, hexa);
+	return hexa;
+}
+
 
 // ***************************************************************************
 sint32 CLuaIHMRyzom::getPlayerLevel()

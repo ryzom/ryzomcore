@@ -1682,9 +1682,13 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 	case CUserEntity::Outpost:
 		CLuaManager::getInstance().executeLuaScript("game:outpostBCOpenStateWindow()", 0);
 		break;
-	// BuildTotem
+	// BuildTotem 
 	case CUserEntity::BuildTotem:
 		buildTotem();
+		break;
+	// openArkUrl 
+	case CUserEntity::OpenArkUrl:
+		CLuaManager::getInstance().executeLuaScript("getUI('ui:interface:web_transactions'):find('html'):browse(ArkTargetUrl)", 0);
 		break;
 	default:
 		break;
