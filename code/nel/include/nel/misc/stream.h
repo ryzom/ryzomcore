@@ -78,7 +78,7 @@ struct EStream : public Exception
 
 	EStream( const IStream &f, const std::string& str );
 
-	virtual ~EStream() throw() {}
+	virtual ~EStream() NL_OVERRIDE {}
 
 	// May Not be Filled...
 	std::string	StreamName;

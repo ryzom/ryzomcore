@@ -100,8 +100,8 @@ public:
 
 public:
 	EBadBind() {}
-	~EBadBind() throw () {}
-	virtual const char	*what() const throw();
+	virtual ~EBadBind() NL_OVERRIDE {}
+	virtual const char	*what() const throw() NL_OVERRIDE;
 
 };
 
