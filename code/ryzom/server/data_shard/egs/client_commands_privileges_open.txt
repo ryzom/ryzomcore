@@ -1,0 +1,181 @@
+// List of required privileges for client commands
+// If present, the second column may contain a service name between [] to forward the command
+// Warning: leaving the second column blank means that everyone can use the command
+
+// R2 Commands
+dssTarget					::			audit		// ask DSS to perform a GM action on the player's target
+
+// Commands
+//
+addGuildMember				::			audit		// Add a new member to a guild: <guild name> <member name>
+addGuildXp					::			audit		// Add xp to a guild: <guild name> <xp (positive or negative)>
+addPetAnimal				::			audit		// Add pet animal to character: <PetTicket>
+addPosFlag					::			audit		// Add a new position flag: <flag name>
+addSkillPoints				::			audit		// Add skill points of given type (Fight=0, Magic=1, Craft=2, Harvest=3): <SP type [0..3]> <nb SP>
+addXPToSkill				::			audit		// Gain experience in the given skill: <xp> <skill> [<count>]
+broadcast					::			audit		// Broadcast a message: [repeat=<num repeat> or during=<time in seconds>] [every=<delay in secondes>] <message>
+changeHairCut				::			audit		// Change the haircut of a player: <sheet name>
+changeMode					::			audit		// Change mode of a player: <mode>
+changeVar					::			audit		// Change a variable of a player: <var> <val>
+checkTargetSP				::			audit		// Check target player skill points
+clearEventFaction			::			audit		// Clear the event faction of player: <player name>
+clearFriendsList			::			audit		// Clear the friend list of a player
+clearGuildMessage			::			audit		// Clear the guild message of the day
+clearIgnoreList				::			audit		// Clear the ignore list of a player
+clearIsFriendOfList			::			audit		// Clear the "is friend of" list of a player
+createItemInBag				::			audit		// Create an item and put it in the player bag: <sheetId>|<sheetName> <quantity> <quality>
+createItemInInv				::			audit		// Create an item and put it in the given player inventory: <invId> <sheetId>|<sheetName> <quantity> <quality>
+createItemInTmpInv			::			audit		// Create an item and put it in the player temp inventory: <sheetId>|<sheetName> <quantity> <quality>
+createNamedItemInBag		::			audit		// Create a named item and put it in the player bag: <item name> [<quantity>]
+createFullArmorSet			::			audit	// Create and equip player with chosen full armor set: <race (fyros/matis/zorai/tryker)> <type (light/medium/heavy)> <quality>
+delPosFlag					::			audit		// Delete a position flag: <flag name>
+dismiss						::			audit		// Teleport a player back to its former position (before last call to summonPlayer): <player name>
+displayForageRM				::			audit		// Display forageable raw materials near by or at the exact position of a player: <exactPos=1> <extendedInfo=0>
+displayInfosOnTarget		::			audit		// Display infos on entity target
+dodge						::			audit		// Set the defense mode to dodge
+execPhrase					::			audit		// Execute a phrase with given bricks: <cyclic 0/1> [<brick ids>...]
+executeSabrinaPhrase		::			audit		// Execute a sabrina phrase: <cyclic 0/1> <phraseId>
+failMission					::			audit		// Force mission failure: <mission idx>
+forceTargetToDie			::			audit		// Force entity target to die
+getEventFaction				::			audit		// Get the event faction of player: <player name>
+giveRespawnPoint			::			audit		// Give a respawn point to a player: <respawn point name>
+guildInvite					::			audit		// Send a guild invite to a player character without distance constrainte
+setLeague					::			audit		// Create a League 
+leagueInvite				::			audit		// Send a League invite to a Team Leader character without distance constrainte
+leagueKick					::			audit		// Kick a player or team from league
+roomInvite					::			audit		// Send a room invite
+roomKick					::			audit		// Remove a room invite
+guildMOTD					::			audit		// Set the guild message of the day, command effective only for officer and more graded guild members
+ignoreTells					::			audit		// Ignore incoming tell: <0/false/1/true>
+infos						::			audit		// Give info on character (GodMode, Invisible...)
+killMob						::			audit		// Kill a mob (/b killMob)
+learnAllBricks				::			audit		// Specified player learns all possible bricks for his skill values
+learnAllForagePhrases		::			audit		// Learn all forage phrases, begin at specified index: <index>
+learnAllPhrases				::			audit		// Specified player learns all possible phrases for his skill values
+learnBrick					::			audit		// Specified player learns given brick: <brick sheet>
+unlearnBrick				::			audit		// Specified player unlearns given brick: <brick sheet>
+learnPhrase					::			audit		// Specified player learns a phrase and set it at index knownPhraseIndex: <phrase Sheet>
+listGuildMembers			::			audit		// Display guild members list: <guild name>
+listPosFlags				::			audit		// List position flags (long format): [<radius in meters>]
+loadFromPDR					:DEV:		audit		// Load a character from a binary PDR file: <file name>
+loadFromXML					:DEV:		audit		// Load a character from an XML file: <file name>
+logXpGain					::			audit		// Log or not xp gain infos for specified player: <on/off>
+lPosFlags					::			audit		// List position flags (short format): [<radius in meters>]
+monitorMissions				::			audit		// Monitor missions of the given player: <player name>
+motd						::			audit		// Set the current message of the day: <message to be displayed>
+mute						::			audit		// Mute a user: <player name> <duration>
+muteUniverse				::			audit		// Mute the universe channel: <duration>
+outpostBanGuild				::			audit		// Ban a guild for an outpost conflit: <outpost_id> <guild_name> [<all|atk|def>]
+outpostBanPlayer			::			audit		// Ban a character for an outpost conflit: <outpost_id> <eid> [<all|atk|def>]
+outpostUnbanGuild			::			audit		// Unban a guild for an outpost conflit: <outpost_id> <guild_name> [<all|atk|def>]
+outpostUnbanPlayer			::			audit		// Unban a character for an outpost conflit: <outpost_id> <eid> [<all|atk|def>]
+parry						::			audit		// Set the defense mode to parry
+progressMission				::			audit		// Force mission progression: <mission idx> [repeat]
+renameGuild					::			audit		// Rename a guild: <guild name> <new guild name>
+renamePlayer		[SU]	::			audit		// Rename a player: <player name> <new playerName>
+renamePlayerForEvent		::			audit		// Rename a player temporarily for an event: <player name> <new playerName>
+resetPowerFlags				::			audit		// Reset the ineffective aura and the power flags for given character
+root						::			audit		// Root a player: <player name> <time in seconds>
+saveToPDR					:DEV:		audit		// Save a character to a binary PDR file: <file name>
+saveToXML					:DEV:		audit		// Save a character to an XML file: <file name>
+setEventFaction				::			audit		// Set the event faction of player: <player name> <event faction>
+setGMGuild					::			audit		// Set the current GM guild
+setGuildChargePoint			::			audit		// Set the charge points of a guild: <guild name> <points>
+setGuildDescription			::			audit		// Set a guild description: <guild name> <new guild description>
+setGuildLeader				::			audit		// Set the leader of a guild: <guild name> <member name>
+setGuildMemberGrade			::			audit		// Set the grade of a guild member: <guild name> <member name> <grade = Member/Officer/HighOfficer/Leader>
+setGuildMessage				::			audit		// Set the guild message of the day: <message>
+setItemSapLoad				::			audit		// Set an item sap load: <slot index in bag (starts at 0)> <float value>
+setPosFlag					::			audit		// Set a position flag: <flag name>
+setPvPTag					::			audit		// Set player character PvP tag to true or false
+setFamePlayer				::			audit		// Set the fame value of a player in the given faction: <faction> <fame>
+resetPVPTimers				::			audit		// Reset the pvp timers of a player: <player name>
+setSkillsToMaxValue			::			audit		// Set player skills to max value
+showCSR						::			audit		// Show CSR title if the player is a CSR
+showFBT						::			audit		// Show Focus Beta Tester title if the player is a FBT
+startEvent					::			audit		// Start an event with the given name: <event name>
+stopEvent					::			audit		// Stop previous started event
+stopMonitorMissions			::			audit		// Stop monitoring missions of the given player
+summon						::			audit		// Summon a player in front of the CSR: <player name>
+targetInfos					::			audit		// Give infos on the target
+teamInvite					::			audit		// Send a team invite to a player character
+connectUserChannel			::			audit		// Connect to User Channel Chat
+connectLangChannel			::			audit		// Connect to Lang Channel Chat
+webExecCommand				::			audit		// Execute web command (need HMAC signature)
+webDelCommandsIds			::			audit		// Delete web transactions for web_app
+webAddCommandsIds			::			audit		// Add web command transactions for web_app
+updateTarget				::			audit		// Update current target
+teleport					::			audit		// Teleport the CSR in front of a player: <player name>
+tpPosFlag					::			audit		// Teleport a player to a position flag: <flag name>
+universe					::			audit		// Chat in universe mode: <boolean>
+unmute						::			audit		// Unmute a user: <player name>
+unmuteUniverse				::			audit		// Unmute the universe channel
+unroot						::			audit		// Stop rooting a player: <player name>
+updateGuildMembersList		::			audit		// update guild members list on members clients: <guild name>
+//setPvpClan				::			audit		// choose a clan for pvp
+summonPet					::			audit		// player can summon it's pet one time only
+allowSummonPet				::			audit		// autorize player to summon it's pet one time per pet
+displayShopSelector			::			audit		// display shop selector for a NPC
+addFactionAttackableToTarget	::		audit		// add attackable possibility for player on target for specified faction
+forceMissionProgress		::			audit		// force mission step progression (for debug purpose only)
+savePlayerActiveChar		::			audit		// save immediatly a player active char, a specific filename can enter for backup a character in specific situation/context
+reloadPlayer				::			audit		// set next filename used for loading a character (must be offline and log later) or relaod an online character to previous backup or with a specified filename.
+farTPPush					:DEV:		audit		// used to tp on a specific session
+farTPReturn					::			audit		// used to tp back to your previous session
+characterMissionDump		::			audit		// Dump mission list for a character
+removeMission				::			audit		// Remove a mission of a character
+addMission					::			audit		// add a mission to a character
+characterInventoryDump		::			audit		// Dump character inventory info: <inventory> <from slot> <to slot>
+deleteInventoryItem			::			audit		// Delete an item from a characters inventory: <inventory> <slot> <sheetname> <quality> <quantity>
+lockItem					::			audit		// Lock/unlock item for trading, selling, destruction.
+setTeamLeader				::			audit		// Set the team leader
+setPetAnimalSatiety			::			audit		// Set the satiety of pet animal (petIndex in 0..3): <petIndex> full|<value> [<nameForAnswer>]
+getPetAnimalSatiety			::			audit		// Get the satiety of pet animal (petIndex in 0..3): <petIndex> [<nameForAnswer>]
+setPetAnimalName			::			audit		// Set the name of a pet animal (petIndex in 0..3): <petIndex> <name>
+setSimplePhrase				::			audit		// Set an IOS phrase: <id> <phrase> [<language code>]
+
+// Variables
+//
+Aggro						::			audit		// Mobs can aggro a player?
+CreateCharacterStartSkillsValue		::	audit		// Create character start skills, skill point and money
+FBT							::			audit		// Is a Focus Beta Tester?
+God							::			audit		// God mode, invulnerability
+Invulnerable				::			audit		// Invulnerable mode, invulnerability to all
+ShowFactionChannels			::			audit		// Show faction channel for moderation
+HP							::			audit		// Hit points of a player
+MaxHP						::			audit		// Max hit points of a bot
+Invisible					::			audit		// Invisibility of a player
+Money						::			audit		// Money of a player
+Name						::			audit		// Name of a player
+Position					::			audit		// Position of a player (in meters) <posx>,<posy>[,<posz>]] | <bot name> | <player name> | home
+Priv						:DEV:		audit		// User privilege
+PriviledgePVP				::			audit		// Turns PVP on/off on character (blame coder for typo)
+FullPVP						::			audit		// Turns Full PVP on/off on character
+RyzomDate					:DEV:		audit		// Current ryzom date
+RyzomTime					:DEV:		audit		// Current ryzom time
+
+// Event commands
+eventCreateNpcGroup			::			audit		// Create a npc group
+eScript						::			audit		// Execute a script on an event npc group (new version)
+eventNpcGroupScript			::			audit		// Execute a script on an event npc group
+eventSetBotName				::			audit		// Set the name of a bot
+eventSetBotScale			::			audit		// Set the scale of a bot
+eventSetNpcGroupAggroRange	::			audit		// Set the aggro range of a NPC group
+eventSetNpcGroupEmote		::			audit		// Set the emote for the NPC group to execute 
+eventSetFaunaBotAggroRange	::			audit		// Set the aggro ranges (not hungry, hungry and hunting) of a fauna creature
+eventResetFaunaBotAggroRange	::		audit		// Reset the aggro range of a fauna creature to sheet values
+eventSetBotCanAggro			::			audit		// Define if a creature can take aggro for another entity
+eventSetItemCustomText		::			audit		// Set the custom text of an item. For scroll-like items it's the text displayed in the help window.
+eventResetItemCustomText	::			audit		// Reset the custom text of an item to an empty string.
+eventSetBotSheet			::			audit		// Changes the sheet of a bot: <.creature sheet>
+eventSetBotFaction			::			audit		// Changes the faction of a bot: <faction name>
+eventSetBotFameByKill		::			audit		// Changes the amount of fame earned for bot faction when killing it: <fame value>
+eventSetBotURL				::			audit		// Set the url of a bot
+eventSetBotURLName			::			audit		// Set the url name of a bot
+eventSpawnToxic				::			audit		// Add toxic cloud
+eventNpcSay					::			audit		// Have an NPC say a text
+eventSetBotFacing			::			audit		// Set the direction in which a bot faces
+eventGiveControl			::			audit		// Give control of entity A to entity B : <master eid> <slave eid>
+eventLeaveControl			::			audit		// Leave control of entity : <master eid>
+resetName					::			audit		// Reset player's name; undo a temporary rename
+showOnline					::			audit		// Set friend visibility: <user id> <mode=0,1,2>
