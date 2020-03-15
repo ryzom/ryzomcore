@@ -1120,7 +1120,7 @@ CObject* CObjectTable::clone() const
 	TContainer::const_iterator first(_Value.begin()),  last(_Value.end());
 	for ( ;first != last; ++first )
 	{
-		BOMB_IF(!first->second, "Try to clone a table with an NULL component", return 0)
+		BOMB_IF(!first->second, "Try to clone a table with an NULL component", return 0);
 		nlassert(first->second->getGhost() == this->getGhost());
 		CObject* clone = first->second->clone();
 		if (clone) { clone->setParent(0); }
