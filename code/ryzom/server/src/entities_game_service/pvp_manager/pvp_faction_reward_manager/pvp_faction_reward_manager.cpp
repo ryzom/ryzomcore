@@ -971,7 +971,7 @@ NLMISC_COMMAND(buildSpire, "build a spire","<Eid> <region>")
 		else
 		{
 			log.displayNL( "buildSpire : Invalid region '%s'", args[1].c_str() );
-			return;
+			return true;
 		}
 			
 
@@ -1040,7 +1040,7 @@ NLMISC_COMMAND(destroySpire, "destroy a spire","<region>")
 		else
 		{
 			log.displayNL( "destroySpire : Invalid region '%s'", args[1].c_str() );
-			return;
+			return true;
 		}
 			
 		NLMISC::CVector vec( x, y, 0.0f );
