@@ -214,7 +214,7 @@ void	CMirrors::processMirrorUpdates()
 			//nlassert(entityIndex.getIndex() < client.Entites.size());
 			bool	wasPresent = (entityIndex.getIndex() < client.Entites.size() && (client.Entites[entityIndex.getIndex()].Flags & CMonitorClient::CEntityEntry::Present) != 0);
 			// See if position changed
-			if (propIndex == DSPropertyPOSX || propIndex == DSPropertyPOSX)
+			if (propIndex == DSPropertyPOSX || propIndex == DSPropertyPOSY)
 			{
 				if (pos.x > topleft.x && pos.x < bottomright.x && pos.y > topleft.y && pos.y < bottomright.y)
 				{

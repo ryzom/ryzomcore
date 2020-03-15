@@ -785,9 +785,9 @@ retry_pending_command:
 			if (buffer.FrameStart == buffer.FrameEnd)
 			{
 				// the buffer is empty
-				ret.push_back(0);
-				ret.push_back(0);
-				ret.push_back(0);
+				ret.push_back(std::string());
+				ret.push_back(std::string());
+				ret.push_back(std::string());
 			}
 			else
 			{

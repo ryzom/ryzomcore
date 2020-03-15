@@ -194,8 +194,11 @@ bool CCharacterShoppingList::passThruFilter(TItemTradePtr itemTrade, bool dynnam
 {
 	const CStaticItem * form = CSheets::getForm( itemTrade->getSheetId() );
 
+	if (!_Character)
+		return false;
+
 	// No filter on Faction trade
-	if(_Character && _Character->getBotChatType() == BOTCHATTYPE::TradeFactionFlag)
+	if(_Character->getBotChatType() == BOTCHATTYPE::TradeFactionFlag)
 		return true;
 
 	if( form != 0 )

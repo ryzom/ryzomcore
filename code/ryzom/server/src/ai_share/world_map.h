@@ -1673,6 +1673,7 @@ void CTopology::serial(NLMISC::IStream& f)
 		if (f.isReading())
 			DirectionMap = new CDirectionMap();
 		
+		nlassert(DirectionMap);
 		f.serial(*DirectionMap);
 	}
 	

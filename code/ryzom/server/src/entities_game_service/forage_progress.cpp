@@ -81,10 +81,8 @@ void CForageProgress::reportXP( CCharacter *extractor, const CHarvestSource *sou
 {
 	H_AUTO(CForageProgress_reportXP);
 	
-#if !FINAL_VERSION
 	nlassert(extractor);
 	nlassert(source);
-#endif
 
 	// Don't earn any XP for anyone if the quantity is 0
 	if ( amount() == 0 )

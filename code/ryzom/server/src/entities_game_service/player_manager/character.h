@@ -1510,7 +1510,7 @@ public:
 	uint8 interfaceCounter() const;
 
 	/// Register character name in IOS
-	void registerName(const ucstring &newName = std::string(""));
+	void registerName(const ucstring &newName = std::string());
 
 	/// Mount a mount
 	void mount( TDataSetRow PetRowId );

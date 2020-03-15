@@ -2067,7 +2067,7 @@ public:
 		CGrpFauna *grpFauna = safe_cast<CGrpFauna*>(group);
 
 		CGrpFauna::TPlaces place;
-		_Activity == fa_rest ? place = CGrpFauna::REST_PLACE : CGrpFauna::EAT_PLACE;
+		place = (_Activity == fa_rest ? CGrpFauna::REST_PLACE : CGrpFauna::EAT_PLACE);
 		// change the state of the fauna group if needed
 		// lookup for the cycle we want
 		uint32 i;

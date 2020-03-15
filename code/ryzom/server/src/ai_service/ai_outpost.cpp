@@ -1153,7 +1153,7 @@ NLMISC_COMMAND(displayOutposts, "list the available outpost", "")
 	if (args.size() > 0)
 		return false;
 	
-	uint32 instanceNumber = std::numeric_limits<uint32>::max();
+	static const uint32 instanceNumber = std::numeric_limits<uint32>::max();
 	for (uint i=0; i<CAIS::instance().AIList().size(); ++i)
 	{
 		CAIInstance	*const	aii = CAIS::instance().AIList()[i];

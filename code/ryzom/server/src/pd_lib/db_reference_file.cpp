@@ -343,12 +343,14 @@ bool	CDBReferenceFile::update(uint32 index, const uint8* rowdata)
 			if (!writeBuffer(tempRowBuffer, _Header.FullRowSize))
 			{
 				nlwarning("CDBReferenceFile::update(): failed, can't increase file '%s' size", filepath.c_str());
-				delete tempRowBuffer;
+				delete[] tempRowBuffer;
 				return false;
 			}
 
 			++_Header.EndIndex;
 		}
+
+		delete[] tempRowBuffer;
 	}
 
 	// seek to row in file

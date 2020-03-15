@@ -968,6 +968,11 @@ NLMISC_COMMAND(buildSpire, "build a spire","<Eid> <region>")
 			x = 11105.0f;
 			y = -4400.0f;
 		}
+		else
+		{
+			log.displayNL( "buildSpire : Invalid region '%s'", args[1].c_str() );
+			return;
+		}
 			
 
 		NLMISC::CVector vec( x, y, 0.0f );
@@ -1031,6 +1036,11 @@ NLMISC_COMMAND(destroySpire, "destroy a spire","<region>")
 		{
 			x = 11105.0f;
 			y = -4400.0f;
+		}
+		else
+		{
+			log.displayNL( "destroySpire : Invalid region '%s'", args[1].c_str() );
+			return;
 		}
 			
 		NLMISC::CVector vec( x, y, 0.0f );

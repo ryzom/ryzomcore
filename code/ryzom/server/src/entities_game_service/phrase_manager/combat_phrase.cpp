@@ -1668,7 +1668,7 @@ void  CCombatPhrase::execute()
 		if (entity)
 			entity->cancelStaticEffects();
 
-		if (entity->getId().getType() == RYZOMID::player)
+		if (entity && entity->getId().getType() == RYZOMID::player)
 		{
 			CCharacter* player = dynamic_cast<CCharacter*> (entity);
 			if (player)
