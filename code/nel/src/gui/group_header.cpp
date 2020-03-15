@@ -179,6 +179,7 @@ namespace NLGUI
 					while (limitingParent && (limitingParent->getResizeFromChildH() || dynamic_cast<CGroupList *>(limitingParent)))
 						limitingParent = limitingParent->getParent();
 
+					nlassert(limitingParent);
 					getParentContainer()->setH(col->getH() + getParentContainer()->getHReal() - limitingParent->getHReal());
 				}
 			}
