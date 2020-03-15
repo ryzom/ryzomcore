@@ -122,8 +122,8 @@ inline ucstring capitalize(const ucstring & s)
 #define GIVEUP_IF(condition,msg,action)		if (!(condition));else GIVEUP(msg,action)
 #define WARN_IF(condition,msg)				if (!(condition));else WARN(msg)
 #define DROP_IF(condition,msg,action)		if (!(condition));else DROP(msg,action)
-#define BOMB_IF(condition,msg,action)		if (!(condition));else BOMB(msg,action)
-#define STOP_IF(condition,msg)				if (!(condition));else STOP(msg)
+#define BOMB_IF(condition,msg,action)		if (!(condition));else BOMB(msg,action); do { nlassume(condition); } while (0)
+#define STOP_IF(condition,msg)				if (!(condition));else STOP(msg); do { nlassume(condition); } while (0)
 
 // testing for variable value changes
 #define ON_CHANGE(type,var,code)\

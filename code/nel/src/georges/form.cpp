@@ -134,13 +134,13 @@ void CForm::write (xmlDocPtr doc, const std::string &filename)
 	}
 
 	// Write elements
-	Elements.write (node, this, NULL, true);
+	Elements.write (node, this, std::string(), true);
 
 	// Write held elements
 	uint i;
 	for (i=0; i<HeldElementCount; i++)
 	{
-		HeldElements[i]->write (node, this, NULL, true);
+		HeldElements[i]->write (node, this, std::string(), true);
 	}
 
 	// Header
@@ -273,7 +273,7 @@ void CForm::write (NLMISC::IStream &stream)
 	xmlStream.init (&stream);
 
 	// Write the file
-	write (xmlStream.getDocument (), NULL);
+	write (xmlStream.getDocument (), std::string());
 }
 
 // ***************************************************************************

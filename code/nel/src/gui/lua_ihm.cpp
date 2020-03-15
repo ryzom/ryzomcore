@@ -741,7 +741,7 @@ namespace NLGUI
 		}
 		// because this is a method,    first parameter is the 'this'
 		CReflectableRefPtrTarget *pRPT = getReflectableOnStack(*state,    1);
-		if (pRPT == NULL)
+		if (!pRPT)
 		{
 			state->push(NLMISC::toString("Error while calling lua method %s:%s : 'self' pointer is nil or of bad type,    can't make the call.",
 									prop->ParentClass->ClassName.c_str(),    prop->Name.c_str())
@@ -752,19 +752,22 @@ namespace NLGUI
 		state->remove(1); // remove 'self' reference from parameters stack
 		//
 		sint numResults = 0;
-		sint initialStackSize = state->getTop();
-		try
+		if (pRPT)
 		{
-			// call the actual method
-			numResults = (pRPT->*(prop->GetMethod.GetLuaMethod))(*state);
-		}
-		catch(const std::exception &e)
-		{
-			// restore stack to its initial size
-			state->setTop(initialStackSize);
-			lua_pushstring(ls,      e.what());
-			// TODO : see if this is safe to call lua error there" ... (it does a long jump)
-			lua_error(ls);
+			sint initialStackSize = state->getTop();
+			try
+			{
+				// call the actual method
+				numResults = (pRPT->*(prop->GetMethod.GetLuaMethod))(*state);
+			}
+			catch (const std::exception & e)
+			{
+				// restore stack to its initial size
+				state->setTop(initialStackSize);
+				lua_pushstring(ls, e.what());
+				// TODO : see if this is safe to call lua error there" ... (it does a long jump)
+				lua_error(ls);
+			}
 		}
 		return numResults;
 	}
@@ -787,6 +790,7 @@ namespace NLGUI
 		CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
 		std::string			script;
 		ls.toString(2,    script);
+		nlassert(pIE);
 
 		// must be a group
 		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIE);
@@ -845,6 +849,7 @@ namespace NLGUI
 		std::string			dbList,    script;
 		ls.toString(2,    dbList);
 		ls.toString(3,    script);
+		nlassert(pIE);
 
 		// must be a group
 		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIE);
@@ -873,6 +878,7 @@ namespace NLGUI
 		CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
 		std::string			dbList;
 		ls.toString(2,    dbList);
+		nlassert(pIE);
 
 		// must be a group
 		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIE);

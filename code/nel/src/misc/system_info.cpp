@@ -1421,6 +1421,7 @@ bool CSystemInfo::hasHyperThreading()
 
 		// get vendor string from cpuid
 		char vendor_id[32];
+		vendor_id[31] = '\0';
 		memset(vendor_id, 0, sizeof(vendor_id));
 		nlcpuid(CPUInfo, 0);
 		memcpy(vendor_id, &CPUInfo[1], sizeof(sint32));

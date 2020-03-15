@@ -1540,6 +1540,7 @@ namespace NLGUI
 		for (ite = _EltOrder.begin() ; ite != _EltOrder.end(); ite++)
 		{
 			CViewBase *pIE = *ite;
+			nlassert(pIE);
 			if (pIE->getActive())
 			{
 				const CInterfaceElement *el = pIE->getParentPos() ? pIE->getParentPos() : pIE->getParent();

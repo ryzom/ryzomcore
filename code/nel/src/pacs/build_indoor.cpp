@@ -212,6 +212,7 @@ void	followBorder(CInteriorSurface &surface, uint first, uint edge, uint sens, v
 		else
 		{
 			// if the next element is inside the surface, then go to the next element
+			nlassert(next);
 			nlassert(next->InternalSurface == currentSurfId);
 
 			for (oedge=0; oedge<3 && next->Edge[oedge]!=currentFace; ++oedge)

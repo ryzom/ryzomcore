@@ -1480,7 +1480,7 @@ bool CObjectTable::canTake(sint32 position) const
 	{
 
 		CObject* parent = getParent();
-		if (parent) //try to take the root of a tree
+		if (!parent) //try to take the root of a tree
 		{
 			return true;
 		}

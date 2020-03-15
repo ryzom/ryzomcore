@@ -533,7 +533,7 @@ std::string rz_crypt(register const char *key, register const char *setting, cha
 		keyblock.b[i] = t;
 	}
 	if (rz_des_setkey((char *)keyblock.b))	/* also initializes "a64toi" */
-		return (NULL);
+		return std::string();
 
 	encp = &cryptresult[0];
 	switch (*setting) {
@@ -544,14 +544,14 @@ std::string rz_crypt(register const char *key, register const char *setting, cha
 		while (*key) {
 			if (rz_des_cipher((char *)&keyblock,
 			    (char *)&keyblock, 0L, 1))
-				return (NULL);
+				return std::string();
 			for (i = 0; i < 8; i++) {
 				if ((t = 2*(unsigned char)(*key)) != 0)
 					key++;
 				keyblock.b[i] ^= t;
 			}
 			if (rz_des_setkey((char *)keyblock.b))
-				return (NULL);
+				return std::string();
 		}
 
 		*encp++ = *setting++;
@@ -583,7 +583,7 @@ std::string rz_crypt(register const char *key, register const char *setting, cha
 	encp += salt_size;
 	if (rz_des_cipher((char *)&constdatablock, (char *)&rsltblock,
 	    salt, num_iter))
-		return "";
+		return std::string();
 
 	/*
 	 * Encode the 64 cipher bits as 11 ascii characters.

@@ -168,12 +168,12 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 							{
 								str += *pos2;
 							}
-							*pos2++;
+							pos2++;
 						}
 
 						// eat the \n
 						if (*pos2 == '\n')
-							*pos2++;
+							pos2++;
 
 						if (!str.empty())
 						{
