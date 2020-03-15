@@ -1348,6 +1348,7 @@ namespace NLGUI
 				}
 				else
 				{
+					hs[hsIndex] = Hotspot_Bx;
 					CLuaIHM::fails(ls, "%s : couldn't parse hotspot for vertical scrollbar", funcName);
 				}
 			}
@@ -1369,6 +1370,7 @@ namespace NLGUI
 				}
 				else
 				{
+					hs[hsIndex] = Hotspot_xL;
 					CLuaIHM::fails(ls, "%s : couldn't parse hotspot for horizontal scrollbar", funcName);
 				}
 			}
