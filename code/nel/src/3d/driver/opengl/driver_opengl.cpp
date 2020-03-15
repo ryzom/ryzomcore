@@ -234,6 +234,7 @@ CDriverGL::CDriverGL()
 	_win = EmptyWindow;
 	_WindowX = 0;
 	_WindowY = 0;
+	_WindowFocus = true;
 	_WindowVisible = true;
 	_DestroyWindow = false;
 	_Maximized = false;

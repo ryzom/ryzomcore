@@ -667,11 +667,12 @@ void CAttributeToProperty::setAiStateName(const std::string& prefix)
 	std::string name;
 
 	CObject* tmp=_Object->getAttr("Id");
-	if( !(tmp&&tmp->isString())&&((name = tmp->toString()).length()!=0))
+	if (!tmp || !tmp->isString())
 	{
 		nlwarning("R2Ani: invalide rtData");
 		return;
 	}
+	name = tmp->toString();
 
 	_Primitive->addPropertyByName("name", new CPropertyString(prefix + name));
 

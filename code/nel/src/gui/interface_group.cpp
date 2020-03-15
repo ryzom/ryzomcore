@@ -622,13 +622,30 @@ namespace NLGUI
 		{
 			std::string parentId;
 
-			if( value != "parent" ){
-				if( _Parent != NULL )
+			if (value != "parent")
+			{
+				if (_Parent != NULL)
+				{
 					parentId = _Parent->getId() + ":" + value;
+				}
 				else
-					parentId = _Parent->getId();
+				{
+					parentId = "ui:" + value;
+				}
 			}
-			CWidgetManager::getInstance()->getParser()->addParentSizeMaxAssociation( this, parentId );
+			else
+			{
+				if (_Parent)
+				{
+					parentId = _Parent->getId();
+				}
+				else
+				{
+					parentId = value;
+				}
+			}
+
+			CWidgetManager::getInstance()->getParser()->addParentSizeMaxAssociation(this, parentId);
 			return;
 		}
 		else
@@ -1523,6 +1540,7 @@ namespace NLGUI
 		for (ite = _EltOrder.begin() ; ite != _EltOrder.end(); ite++)
 		{
 			CViewBase *pIE = *ite;
+			nlassert(pIE);
 			if (pIE->getActive())
 			{
 				const CInterfaceElement *el = pIE->getParentPos() ? pIE->getParentPos() : pIE->getParent();

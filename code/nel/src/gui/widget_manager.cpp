@@ -2387,6 +2387,7 @@ namespace NLGUI
 					// make sure all parent windows are active
 					CCtrlBase *cb = getCaptureKeyboard();
 					CGroupContainer *lastContainer = NULL;
+					nlassert(cb);
 					for(;;)
 					{
 						CGroupContainer *gc = dynamic_cast<CGroupContainer *>(cb);
@@ -3241,6 +3242,7 @@ namespace NLGUI
 			for( j = 0; j < mg.Group->getNumGroup(); j++ )
 			{
 				CInterfaceGroup *g = mg.Group->getGroup( j );
+				nlassert(g);
 
 				if( dynamic_cast< CGroupModal* >( g ) != NULL )
 					continue;

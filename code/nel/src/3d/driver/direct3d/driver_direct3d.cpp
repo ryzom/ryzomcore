@@ -197,6 +197,7 @@ CDriverD3D::CDriverD3D()
 	_BackBuffer = NULL;
 	_Maximized = false;
 	_HandlePossibleSizeChangeNextSize = false;
+	_WindowFocus = true;
 	_Interval = 1;
 	_AGPMemoryAllocated = 0;
 	_VRAMMemoryAllocated = 0;
@@ -1164,6 +1165,14 @@ void D3DWndProc(CDriverD3D *driver, HWND hWnd, UINT message, WPARAM wParam, LPAR
 		}
 	}
 
+	if ((message == WM_SETFOCUS) || (message == WM_KILLFOCUS))
+	{
+		if (driver != NULL)
+		{
+			driver->_WindowFocus = (message == WM_SETFOCUS);
+		}
+	}
+
 	if (driver->_EventEmitter.getNumEmitters() > 0)
 	{
 		CWinEventEmitter *we = NLMISC::safe_cast<CWinEventEmitter *>(driver->_EventEmitter.getEmitter(0));
@@ -1370,6 +1379,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 	// Reset window state
 	_Maximized = false;
 	_HandlePossibleSizeChangeNextSize = false;
+	_WindowFocus = true;
 
 	if (_HWnd)
 	{

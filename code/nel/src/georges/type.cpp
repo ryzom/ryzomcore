@@ -599,7 +599,7 @@ bool CType::getValue (string &result, const CForm *form, const CFormElmAtom *nod
 	else if (evaluate == UFormElm::Eval)
 	{
 		// Evaluate numerical expression
-		if ((Type == Double) || (Type == SignedInt) || (Type == UnsignedInt) || (Type == UnsignedInt))
+		if ((Type == Double) || (Type == SignedInt) || (Type == UnsignedInt))
 		{
 			// Evaluate predefinition
 			uint i;

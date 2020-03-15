@@ -106,6 +106,13 @@ bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM
 			driver->_WndActive = true;
 		}
 	}
+	else if ((message == WM_SETFOCUS) || (message == WM_KILLFOCUS))
+	{
+		if (driver != NULL)
+		{
+			driver->_WindowFocus = (message == WM_SETFOCUS);
+		}
+	}
 
 	bool trapMessage = false;
 	if (driver->_EventEmitter.getNumEmitters() > 0)
@@ -290,6 +297,18 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 		}
 
 		break;
+
+		case FocusIn:
+		{
+			driver->_WindowFocus = true;
+			return driver->_EventEmitter.processMessage(e);
+		}
+
+		case FocusOut:
+		{
+			driver->_WindowFocus = false;
+			return driver->_EventEmitter.processMessage(e);
+		}
 
 		default:
 
@@ -2681,8 +2700,11 @@ IDriver::TMessageBoxId CDriverGL::systemMessageBox (const char* message, const c
 										}
 	nlstop;
 #else // NL_OS_WINDOWS
-	// Call the console version!
-	IDriver::systemMessageBox (message, title, type, icon);
+	// TODO: if user did not launch from console, then program "freezes" without explanation or possibility to continue
+	//IDriver::systemMessageBox (message, title, type, icon);
+	// log only
+	printf("%s:%s\n", title, message);
+	nlwarning("%s: %s", title, message);
 #endif // NL_OS_WINDOWS
 	return okId;
 }

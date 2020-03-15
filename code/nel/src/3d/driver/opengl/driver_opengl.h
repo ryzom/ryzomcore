@@ -700,6 +700,7 @@ public:
 	GfxMode						_CurrentMode;
 	sint32						_WindowX;
 	sint32						_WindowY;
+	bool						_WindowFocus;
 
 #ifdef NL_OS_MAC
 	NLMISC::CCocoaEventEmitter _EventEmitter;

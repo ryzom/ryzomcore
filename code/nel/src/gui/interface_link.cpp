@@ -667,6 +667,7 @@ namespace NLGUI
 		string elt = Target.substr(0,Target.rfind(':'));
 		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(elt);
 		CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pIE);
+		nlassert(pIE);
 		if (pIG == NULL)
 			pIG = pIE->getParent();
 

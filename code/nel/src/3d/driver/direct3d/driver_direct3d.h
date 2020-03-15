@@ -2324,6 +2324,7 @@ private:
 	sint32					_WindowY;
 	bool					_DestroyWindow;
 	bool					_Maximized;
+	bool					_WindowFocus;
 	bool					_HandlePossibleSizeChangeNextSize;
 	GfxMode					_CurrentMode;
 	uint					_Interval;

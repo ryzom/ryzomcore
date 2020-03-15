@@ -1763,6 +1763,7 @@ void				CMirroredDataSet::getValueToString( const TDataSetRow& entityIndex, TPro
 			}
 		default:
 			result = toString( "<Invalid type> (%s/E%d/P%hd)", name().c_str(), entityIndex.getIndex(), propIndex );
+			return;
 	}
 	result = string(tmpStr);
 }

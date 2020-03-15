@@ -1255,6 +1255,7 @@ const	IPrimitive	*IPrimitive::getPrimitive	(const	std::string	&absoluteOrRelativ
 		for	(childIndex=0;childIndex<cursor->getNumChildren();childIndex++)
 		{
 			cursor->getChild(child,childIndex);
+			nlassert(child);
 			string	name;
 			if	(	child->getPropertyByName("class", name)
 				&&	toUpper(name)==childName	)

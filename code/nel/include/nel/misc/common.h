@@ -368,8 +368,8 @@ public:
 	Exception();
 	Exception(const std::string &reason);
 	Exception(const char *format, ...);
-	virtual ~Exception() throw() {}
-	virtual const char	*what() const throw();
+	virtual ~Exception() NL_OVERRIDE {}
+	virtual const char	*what() const throw() NL_OVERRIDE;
 };
 
 

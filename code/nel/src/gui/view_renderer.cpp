@@ -887,7 +887,7 @@ namespace NLGUI
 		while (!iFile.eof())
 		{
 			iFile.getline (bufTmp, 256);
-			sscanf (bufTmp, "%s %f %f %f %f", tgaName, &uvMinU, &uvMinV, &uvMaxU, &uvMaxV);
+			sscanf (bufTmp, "%s %f %f %f %f", tgaName, &uvMinU, &uvMinV, &uvMaxU, &uvMaxV); // FIXME: Return value ignored, tgaName may be uninitialized
 			SImage image;
 			image.UVMin.U = uvMinU;
 			image.UVMin.V = uvMinV;
