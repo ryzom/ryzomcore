@@ -500,6 +500,15 @@ do { \
 
 #endif // NL_NO_DEBUG
 
+// Same as nlassert and nlverify, but only in DEV build
+#if !FINAL_VERSION
+#define nlassertverbose(exp) nlassert(exp)
+#define nlverifyverbose(exp) nlverify(exp)
+#else
+#define nlassertverbose(exp) nlassume(exp)
+#define nlverifyverbose(exp) do { exp; nlassume(exp); } while (0)
+#endif
+
 #define nlunreferenced(identifier) (void)identifier
 
 #define nlstop \
