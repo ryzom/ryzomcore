@@ -2767,7 +2767,7 @@ void updateInventoryFromStream (NLMISC::CBitMemStream &impulse, const CInventory
 			const string invBranchStr = CInventoryCategoryTemplate::getDbStr( (typename CInventoryCategoryTemplate::TInventoryId)invId );
 			ICDBNode::CTextId textId( invBranchStr );
 			ICDBNode *inventoryNode = IngameDbMngr.getNodePtr()->getNode( textId, false );
-			BOMB_IF( !inventoryNode, "Inventory missing in database", return )
+			BOMB_IF(!inventoryNode, "Inventory missing in database", return);
 
 			// List of updates
 			for ( uint c=0; c!=nbChanges; ++c )
