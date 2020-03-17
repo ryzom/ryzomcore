@@ -466,16 +466,13 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 				CViewBitmap *rp3 = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_3"));
 				CViewBitmap *rp4 = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_4"));
 
-				if (pPlayer == NULL || (pPlayer != NULL && pPlayer->getPvpMode() & PVP_MODE::PvpFaction))
-				{
-					if (rp1) rp1->setTexture(entityTag1.toString());
-					if (rp2) rp2->setTexture(entityTag2.toString());
-				}
-				else
-				{
-					entityTag1.clear();
-					entityTag2.clear();
-				}
+				if (entityTag1.toString() == "_") entityTag1.clear();
+				if (entityTag2.toString() == "_") entityTag2.clear();
+				if (entityTag3.toString() == "_") entityTag3.clear();
+				if (entityTag4.toString() == "_") entityTag4.clear();
+
+				if (rp1) rp1->setTexture(entityTag1.toString());
+				if (rp2) rp2->setTexture(entityTag2.toString());
 				if (rp3) rp3->setTexture(entityTag3.toString());
 				if (rp4) rp4->setTexture(entityTag4.toString());
 
@@ -661,7 +658,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 
 				if (pPlayer != NULL && needPvPLogo)
 				{
-					if (pvpFactionLogo) 
+					if (pvpFactionLogo)
 					{
 						pvpFactionLogo->setActive(true);
 						CViewBitmap * pvpFactionBitmap = dynamic_cast<CViewBitmap *>(pvpFactionLogo);
@@ -713,7 +710,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 							}
 						}
 					}
-									
+
 					if (pvpOutpostLogo)
 					{
 						if( pPlayer->getOutpostId() != 0 )
@@ -721,7 +718,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 						else
 							pvpOutpostLogo->setActive(false);
 					}
-	
+
 					if (pvpDuelLogo)
 					{
 						if( pPlayer->getPvpMode()&PVP_MODE::PvpDuel )
@@ -952,7 +949,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 		else if (pPlayer->getStateFx() == "sp_medit.ps")
 			pPlayer->removeStateFx();
 	}
-	
+
 	if (_Entity->isDead())
 			_Entity->setStateFx("misc_dead.ps");
 
