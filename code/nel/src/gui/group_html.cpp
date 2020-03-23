@@ -5178,7 +5178,7 @@ namespace NLGUI
 		if (low < min)
 			low = min;
 		if (high > max)
-			max = max;
+			high = max;
 	}
 
 	float CGroupHTML::HTMLMeterElement::getValueRatio() const
