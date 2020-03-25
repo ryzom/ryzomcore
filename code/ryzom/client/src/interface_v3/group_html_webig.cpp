@@ -1,6 +1,11 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -30,7 +35,7 @@
 #include "../connection.h"
 
 #include <curl/curl.h>
-#include "nel/gui/curl_certificates.h"
+#include "nel/web/curl_certificates.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -188,7 +193,7 @@ public:
 		curl_easy_setopt(Curl, CURLOPT_FOLLOWLOCATION, 1);
 		curl_easy_setopt(Curl, CURLOPT_WRITEFUNCTION, writeDataFromCurl);
 
-		NLGUI::CCurlCertificates::useCertificates(Curl);
+		NLWEB::CCurlCertificates::useCertificates(Curl);
 	}
 
 	~CWebigNotificationThread()
@@ -267,7 +272,7 @@ public:
 		uint c = 0;
 		while (_Running)
 		{
-			string url = "https://"+domain+"/index.php?app=notif&format=lua&rnd="+randomString();
+			string url = domain + "/index.php?app=notif&format=lua&rnd=" + randomString();
 			addWebIGParams(url, true);
 			get(url);
 
@@ -391,7 +396,7 @@ void CGroupHTMLAuth::addHTTPPostParams (SFormFields &formfields, bool trustedDom
 
 // ***************************************************************************
 
-string CGroupHTMLAuth::home ()
+string CGroupHTMLAuth::home () const
 {
 	return Home;
 }
@@ -437,7 +442,7 @@ void CGroupHTMLWebIG::addHTTPPostParams (SFormFields &formfields, bool trustedDo
 
 // ***************************************************************************
 
-string CGroupHTMLWebIG::home ()
+string CGroupHTMLWebIG::home () const
 {
 	return Home;
 }

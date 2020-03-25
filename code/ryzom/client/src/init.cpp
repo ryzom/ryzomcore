@@ -1,5 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2011  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
+// Copyright (C) 2010-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -34,6 +39,8 @@
 #include "nel/misc/system_info.h"
 #include "nel/misc/block_memory.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/streamed_package_manager.h"
+#include "nel/web/http_package_provider.h"
 #include "nel/misc/cmd_args.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
@@ -156,6 +163,8 @@ bool					LastScreenSaverEnabled = false;
 
 extern void				registerInterfaceElements();
 extern CContinentManager ContinentMngr;
+
+extern NLMISC::CCmdArgs Args;
 
 // Tips of the day count
 #define RZ_NUM_TIPS 17
@@ -660,8 +669,6 @@ void initStereoDisplayDevice()
 }
 
 // we want to get executable directory
-extern NLMISC::CCmdArgs Args;
-
 static void addPaths(IProgressCallback &progress, const std::vector<std::string> &paths, bool recurse)
 {
 	// all prefixes for paths
@@ -734,6 +741,19 @@ static void addPaths(IProgressCallback &progress, const std::vector<std::string>
 
 		++it;
 	}
+}
+
+void initStreamedPackageManager(NLMISC::IProgressCallback &progress)
+{
+	CStreamedPackageManager &spm = CStreamedPackageManager::getInstance();
+	nlassert(!spm.Provider); // If this asserts, init was called twice without release
+	nlassert(!HttpPackageProvider); // Idem
+	NLWEB::CHttpPackageProvider *hpp = new NLWEB::CHttpPackageProvider();
+	hpp->Path = ClientCfg.StreamedPackagePath;
+	for (uint i = 0; i < ClientCfg.StreamedPackageHosts.size(); i++)
+		hpp->Hosts.push_back(ClientCfg.StreamedPackageHosts[i]);
+	spm.Provider = hpp;
+	HttpPackageProvider = hpp;
 }
 
 void addSearchPaths(IProgressCallback &progress)
@@ -976,6 +996,7 @@ void prelogInit()
 		CPath::remapExtension ("png", "tga", true);
 		FPU_CHECKER_ONCE
 
+		initStreamedPackageManager(ProgressBar);
 		addPreDataPaths(ProgressBar);
 
 		FPU_CHECKER_ONCE
@@ -1333,6 +1354,9 @@ void prelogInit()
 		CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
 		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
 
+		CWidgetManager::getInstance()->setWindowSnapInvert(ClientCfg.WindowSnapInvert);
+		CWidgetManager::getInstance()->setWindowSnapDistance(ClientCfg.WindowSnapDistance);
+
 		// Yoyo: initialize NOW the InputHandler for Event filtering.
 		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
 		InputHandlerManager->addToServer (&Driver->EventServer);
@@ -1535,19 +1559,6 @@ void postlogInit()
 		CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
 
 		{
-			H_AUTO(InitRZShIdI)
-
-			nmsg = "Initializing sheets...";
-			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
-
-			// Initialize Sheet IDs.
-			CSheetId::init (ClientCfg.UpdatePackedSheet);
-
-			initLast = initCurrent;
-			initCurrent = ryzomGetLocalTime();
-		}
-
-		{
 			H_AUTO(InitRZSound)
 
 			// Init the sound manager
@@ -1597,7 +1608,13 @@ void postlogInit()
 		}
 
 		{
-			H_AUTO(InitRZSheetL)
+			H_AUTO(InitRZShIdI)
+
+			nmsg = "Initializing sheets...";
+			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
+
+			// Initialize Sheet IDs.
+			CSheetId::init (ClientCfg.UpdatePackedSheet);
 
 			// load packed sheets
 			nmsg = "Loading sheets...";

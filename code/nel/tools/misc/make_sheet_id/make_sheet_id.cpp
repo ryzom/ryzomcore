@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -147,10 +150,8 @@ void readFormId( string& outputFileName )
 	{
 		// get the file type from form name
 		TFormId fid = (*itIF).first;
-		string fileType;
-		bool fileTypeGet = getFileType((*itIF).second, fileType);
 
-		if((*itIF).second.empty() || (*itIF).second=="." || (*itIF).second==".." || ((*itIF).second[0]=='_' && fileType != "sound") || (*itIF).second.find(".#")==0)
+		if ((*itIF).second.empty() || (*itIF).second=="." || (*itIF).second==".." || (*itIF).second[0]=='_' || (*itIF).second.find(".#")==0)
 		{
 			map<TFormId,string>::iterator itErase = itIF;
 			++itIF;
@@ -158,7 +159,8 @@ void readFormId( string& outputFileName )
 		}
 		else
 		{
-			if(fileTypeGet)
+			string fileType;
+			if (getFileType((*itIF).second, fileType))
 			{	
 				// insert the association (file type/file type id)
 				map<string,uint8>::iterator itFT = FileTypeToId.find(fileType);
@@ -294,18 +296,18 @@ void makeId( list<string>& dirs )
 //-----------------------------------------------
 void addId( string fileName )
 {
-	string extStr = CFile::getExtension( fileName );
-	if(fileName.empty() || fileName=="." || fileName==".." || (fileName[0]=='_' && extStr != "sound") || fileName.find(".#")==0)
+	if (fileName.empty() || fileName == "." || fileName == ".." || fileName[0] == '_' || fileName.find(".#") == 0)
 	{
-	  //nlinfo("Discarding file '%s'", fileName.c_str());
-	  NbFilesDiscarded++;
-	  return;
+		// nlinfo("Discarding file '%s'", fileName.c_str());
+		NbFilesDiscarded++;
+		return;
 	}
 	else
 	{
-		if( !ExtensionsAllowed.empty() )
+		if (!ExtensionsAllowed.empty())
 		{
-			if( ExtensionsAllowed.find(extStr) == ExtensionsAllowed.end() )
+			string extStr = CFile::getExtension(fileName);
+			if (ExtensionsAllowed.find(extStr) == ExtensionsAllowed.end())
 			{
 				NbFilesDiscarded++;
 				return;

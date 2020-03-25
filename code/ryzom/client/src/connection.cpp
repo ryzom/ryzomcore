@@ -1,5 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -2022,7 +2027,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		string sName = getParam(Params, "name");
-		CSheetId id = CSheetId(sName, "sound");
+		TStringId id = CStringMapper::map(sName);
 		if (SoundMngr != NULL)
 			SoundMngr->spawnSource(id,CVector(0,0,0));
 	}

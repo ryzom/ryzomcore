@@ -1,5 +1,8 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2011  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -67,7 +70,13 @@
 #	endif
 #	ifdef _MSC_VER
 #		define NL_COMP_VC
-#		if _MSC_VER >= 1900
+#		if _MSC_VER >= 1920
+#			define NL_COMP_VC14
+#			define NL_COMP_VC_VERSION 142
+#		elif _MSC_VER >= 1910
+#			define NL_COMP_VC14
+#			define NL_COMP_VC_VERSION 141
+#		elif _MSC_VER >= 1900
 #			define NL_COMP_VC14
 #			define NL_COMP_VC_VERSION 140
 #		elif _MSC_VER >= 1800
@@ -173,6 +182,16 @@
 #	define NL_NO_EXCEPTION_SPECS
 #endif
 
+// https://docs.microsoft.com/en-us/cpp/overview/visual-cpp-language-conformance?view=vs-2019
+// https://gcc.gnu.org/projects/cxx-status.html
+#if (defined(_MSC_VER) && (_MSC_VER >= 1910) && (!defined(_HAS_CXX17) || _HAS_CXX17)) || (defined(__GNUC__ ) && (__GNUC__ >= 8) && (__cplusplus >=  201703L))
+#	define NL_CPP17
+#endif
+
+#if (defined(_MSC_VER) && (_MSC_VER >= 1900)) || (defined(__GNUC__ ) && (__GNUC__ >= 6) && (__cplusplus >=  201402L))
+#	define NL_CPP14
+#endif
+
 #if defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 140)
 #define nlmove(v) std::move(v)
 #else
@@ -227,6 +246,7 @@
 #		pragma warning (disable : 4005)			// don't warn on redefinitions caused by xp platform sdk
 #	endif // NL_COMP_VC8 || NL_COMP_VC9
 #	pragma warning (disable : 26495)		// Variable is uninitialized. Always initialize a member variable. (On purpose for performance.)
+#	pragma warning (disable : 26812)		// The enum type is unscoped. Prefer 'enum class' over 'enum' (Enum.3).
 #endif // NL_OS_WINDOWS
 
 
@@ -479,6 +499,7 @@ extern void operator delete[](void *p) throw();
 #	define CHashMultiMap NL_ISO_STDTR1_NAMESPACE::unordered_multimap
 #	define CUniquePtr ::std::auto_ptr
 #	define CUniquePtrMove
+#	define NL_OVERRIDE
 #elif defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 70 && NL_COMP_VC_VERSION <= 90) // VC7 through 9
 #	include <hash_map>
 #	include <hash_set>
@@ -487,6 +508,7 @@ extern void operator delete[](void *p) throw();
 #	define CHashMultiMap stdext::hash_multimap
 #	define CUniquePtr ::std::auto_ptr
 #	define CUniquePtrMove
+#	define NL_OVERRIDE
 #elif defined(NL_COMP_GCC) // GCC4
 #	include <ext/hash_map>
 #	include <ext/hash_set>
@@ -525,6 +547,10 @@ template<> struct hash<uint64>
  * An Unicode character (16 bits)
  */
 typedef	uint16	ucchar;
+
+#ifndef NL_OVERRIDE
+#define NL_OVERRIDE override
+#endif
 
 #if defined(NL_OS_WINDOWS) && (defined(UNICODE) || defined(_UNICODE))
 #define nltmain wmain

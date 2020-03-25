@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -102,6 +106,7 @@ namespace NLGUI
 				}
 			break;
 			case CReflectedProperty::String:
+			case CReflectedProperty::StringRef:
 				if (valueToAffect.toString())
 				{
 					(destElem.*(property.SetMethod.SetString))(valueToAffect.getString());
@@ -113,6 +118,7 @@ namespace NLGUI
 				}
 			break;
 			case CReflectedProperty::UCString:
+			case CReflectedProperty::UCStringRef:
 				if (valueToAffect.toString())
 				{
 					(destElem.*(property.SetMethod.SetUCString))(valueToAffect.getUCString());
@@ -661,6 +667,7 @@ namespace NLGUI
 		string elt = Target.substr(0,Target.rfind(':'));
 		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(elt);
 		CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pIE);
+		nlassert(pIE);
 		if (pIG == NULL)
 			pIG = pIE->getParent();
 

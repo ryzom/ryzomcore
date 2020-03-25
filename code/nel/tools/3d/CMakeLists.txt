@@ -32,6 +32,7 @@ IF(WITH_NEL_TOOLS)
       zone_ig_lighter
       zone_lighter
       zone_welder
+      zone_elevation
       shapes_exporter
       shape2obj
       zone_check_bind

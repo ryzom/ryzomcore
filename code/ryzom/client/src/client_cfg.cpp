@@ -1,5 +1,11 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
+// Copyright (C) 2010-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2011-2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -41,6 +47,10 @@
 #include "nel/3d/u_scene.h"
 // Game Share.
 #include "game_share/time_weather_season/time_and_season.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #ifdef NL_OS_MAC
 #include "app_bundle_utils.h"
@@ -306,6 +316,9 @@ CClientConfig::CClientConfig()
 	InterfaceScale_step	= 0.05;
 	BilinearUI			= true;
 
+	WindowSnapInvert	= false;
+	WindowSnapDistance	= 10;
+
 	VREnable			= false;
 	VRDisplayDevice		= "Auto";
 	VRDisplayDeviceId	= "";
@@ -330,9 +343,9 @@ CClientConfig::CClientConfig()
 	TexturesLoginInterface.push_back("texture_interfaces_v3_login");
 
 	DisplayAccountButtons = true;
-	CreateAccountURL	= "https://account.ryzom.com/signup/from_client.php";
-	EditAccountURL		= "https://account.ryzom.com/payment_profile/index.php";
-	ForgetPwdURL		= "https://account.ryzom.com/payment_profile/lost_secure_password.php";
+	CreateAccountURL	= RYZOM_CLIENT_CREATE_ACCOUNT_URL;	// "https://open.ryzom.dev/ams/";
+	EditAccountURL		= RYZOM_CLIENT_EDIT_ACCOUNT_URL;	// "https://open.ryzom.dev/ams/";
+	ForgetPwdURL		= RYZOM_CLIENT_FORGET_PASSWORD_URL;	// "https://open.ryzom.dev/ams/";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
 	EyesHeight			= 1.5f;						// Default User Eyes Height.
@@ -428,15 +441,15 @@ CClientConfig::CClientConfig()
 	PatchletUrl.clear();
 	PatchVersion.clear();
 
-	WebIgMainDomain = "atys.ryzom.com";
-	WebIgTrustedDomains.push_back(WebIgMainDomain);
+	WebIgMainDomain = RYZOM_WEBIG_MAIN_URL;						// https://open.ryzom.dev/"
+	WebIgTrustedDomains.push_back(RYZOM_WEBIG_TRUSTED_DOMAIN);	// open.ryzom.dev
 	WebIgNotifInterval = 10; // time in minutes
 
 	CurlMaxConnections = 5;
 	CurlCABundle.clear();
 
-	RingReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes_ring/index.php";
-	ReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes/index.php";
+	RingReleaseNotePath = WebIgMainDomain + "/releasenotes_ring/index.php";
+	ReleaseNotePath = WebIgMainDomain + "/releasenotes/index.php";
 
 
 	///////////////
@@ -452,7 +465,7 @@ CClientConfig::CClientConfig()
 	SoundOn				= true;						// Default is with sound.
 	DriverSound			= SoundDrvAuto;
 	SoundForceSoftwareBuffer = true;
-	SoundOutGameMusic	= "Main Menu Loop.ogg";
+	SoundOutGameMusic	= "main menu loop.ogg";
 	SoundSFXVolume		= 1.f;
 	SoundGameMusicVolume	= 1.f;
 	SoundTPFade			= 500;
@@ -467,6 +480,8 @@ CClientConfig::CClientConfig()
 
 	ColorShout			= CRGBA(150,0,0,255);		// Default Shout color.
 	ColorTalk			= CRGBA(255,255,255,255);	// Default Talk color.
+
+	StreamedPackagePath = "stream";
 
 	// MP3 player
 	MediaPlayerDirectory	= "music";
@@ -854,6 +869,8 @@ void CClientConfig::setValues()
 	READ_FLOAT_FV(InterfaceScale_step);
 	clamp(ClientCfg.InterfaceScale, ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max);
 	READ_BOOL_FV(BilinearUI);
+	READ_BOOL_FV(WindowSnapInvert);
+	READ_INT_FV(WindowSnapDistance);
 	// 3D Driver
 	varPtr = ClientCfg.ConfigFile.getVarPtr ("Driver3D");
 	if (varPtr)
@@ -1093,6 +1110,9 @@ void CClientConfig::setValues()
 	///////////
 	// WEBIG //
 	READ_STRING_FV(WebIgMainDomain);
+	if (ClientCfg.WebIgMainDomain.find("http://") == std::string::npos
+		|| ClientCfg.WebIgMainDomain.find("https://") == std::string::npos)
+		ClientCfg.WebIgMainDomain = "http://" + ClientCfg.WebIgMainDomain;
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
 	READ_INT_FV(WebIgNotifInterval);
 	READ_INT_FV(CurlMaxConnections);
@@ -1281,17 +1301,24 @@ void CClientConfig::setValues()
 
 	//////////
 	// MISC //
+
 	// Pre Data Path.
 	READ_STRINGVECTOR_FV(PreDataPath);
 
 	// Data Path.
 	READ_STRINGVECTOR_FV(DataPath);
 
-	// List of files that trigger R2ED reload when touched
-	READ_STRINGVECTOR_FV(R2EDReloadFiles);
-
 	// Data Path no recurse.
 	READ_STRINGVECTOR_FV(DataPathNoRecurse);
+
+	// Streamed package path
+	READ_STRING_FV(StreamedPackagePath);
+
+	// Streamed package hosts
+	READ_STRINGVECTOR_FV(StreamedPackageHosts);
+
+	// List of files that trigger R2ED reload when touched
+	READ_STRINGVECTOR_FV(R2EDReloadFiles);
 
 	// Update packed sheet Path
 	READ_STRINGVECTOR_FV(UpdatePackedSheetPath);
