@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -880,6 +883,7 @@ void	NLPACS::CZoneTessellation::checkSameLandscapeHmBinds(const NL3D::CLandscape
 					// or at least the welding of zones should just keep the same welding as the non heightmapped one
 					nlwarning("ERROR: The zone %s has a different bind strucutre in the landscape and in the landscape_with_No_Heightmap", zoneName.c_str());
 					nlwarning("ERROR: Hint: Check your heightmap: it may be too precise or has too much noise, causing the zonewelder to behav differently...");
+					nlwarning("TIP: Use the 'zone_elevation' tool on the welded no-heightmap zones to resolve this!");
 					nlwarning("More Details (information landscape / information landscape_with_No_Heightmap):");
 					for(uint j=0;j<errors.size();j++)
 					{

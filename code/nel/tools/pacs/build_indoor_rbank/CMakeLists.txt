@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(build_indoor_rbank ${SRC})
 
-ADD_DEFINITIONS(-DNL_BIRB_CFG="\\"${NL_ETC_PREFIX}/\\"")
+ADD_DEFINITIONS(-DNL_BIRB_CFG="${NL_ETC_PREFIX}/")
 
 TARGET_LINK_LIBRARIES(build_indoor_rbank nelmisc nelpacs)
 NL_DEFAULT_PROPS(build_indoor_rbank "NeL, Tools, PACS: build_indoor_rbank")

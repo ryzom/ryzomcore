@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -375,7 +378,10 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
 	{
 		if(!SoundMngr)
+		{
+			CInterfaceManager::getInstance()->messageBox (CI18N::get ("uiSoundDisabled"));
 			return;
+		}
 
 		if (Params == "play_songs")
 		{
@@ -383,19 +389,26 @@ public:
 			SoundMngr->getMixer()->getMusicExtensions(extensions);
 
 			// no format supported
-			if (extensions.empty()) return;
-
-			std::string message;
-			for(uint i = 0; i < extensions.size(); ++i)
+			if (extensions.empty())
 			{
-				message += " " + extensions[i];
+				// in the very unlikely scenario
+				const ucstring message("Sound driver has no support for music.");
+				CInterfaceManager::getInstance()->displaySystemInfo(message, "SYS");
+				nlinfo("%s", message.toUtf8().c_str());
+				return;
 			}
-			message += " m3u m3u8";
-			nlinfo("Media player supports: '%s'", message.substr(1).c_str());
+			std::string newPath = CPath::makePathAbsolute(CPath::standardizePath(ClientCfg.MediaPlayerDirectory), CPath::getCurrentPath(), true);
+			std::string extlist;
+			join(extensions, ", ", extlist);
+			extlist += ", m3u, m3u8";
+
+			std::string msg(CI18N::get("uiMk_system6").toUtf8());
+			msg += ": " + newPath + " (" + extlist + ")";
+			CInterfaceManager::getInstance()->displaySystemInfo(ucstring::makeFromUtf8(msg), "SYS");
+			nlinfo("%s", msg.c_str());
 
 			// Recursive scan for files from media directory
 			vector<string> filesToProcess;
-			string newPath = CPath::standardizePath(ClientCfg.MediaPlayerDirectory);
 			CPath::getPathContent (newPath, true, false, true, filesToProcess);
 
 			uint i;

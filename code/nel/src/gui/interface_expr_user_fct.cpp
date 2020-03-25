@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -551,6 +554,12 @@ namespace NLGUI
 			break;
 			case CReflectedProperty::UCString:
 				result.setUCString ((elem->*(pRP->GetMethod.GetUCString))());
+			break;
+			case CReflectedProperty::StringRef:
+				result.setString ((elem->*(pRP->GetMethod.GetStringRef))());
+			break;
+			case CReflectedProperty::UCStringRef:
+				result.setUCString ((elem->*(pRP->GetMethod.GetUCStringRef))());
 			break;
 			case CReflectedProperty::RGBA:
 				result.setRGBA ((elem->*(pRP->GetMethod.GetRGBA))());

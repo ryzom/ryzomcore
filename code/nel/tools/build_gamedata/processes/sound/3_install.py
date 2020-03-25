@@ -2,7 +2,7 @@
 # 
 # \file 3_install.py
 # \brief Install sound
-# \date 2009-06-03 10:47GMT
+# \date 2010-05-24 13:42GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Install sound
@@ -43,15 +43,12 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-printLog(log, ">>> Install sound packed_sheets <<<")
-mkPath(log, ExportBuildDirectory + "/" + SoundSheetsBuildDirectory)
-mkPath(log, InstallDirectory + "/" + SoundSheetsInstallDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SoundSheetsBuildDirectory, InstallDirectory + "/" + SoundSheetsInstallDirectory, ".packed_sheets")
-
-printLog(log, ">>> Install sound samplebanks <<<")
-mkPath(log, ExportBuildDirectory + "/" + SoundSamplebanksBuildDirectory)
-mkPath(log, InstallDirectory + "/" + SoundSamplebanksInstallDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SoundSamplebanksBuildDirectory, InstallDirectory + "/" + SoundSamplebanksInstallDirectory, ".sample_bank")
+printLog(log, ">>> Install sound <<<")
+srcDir = ExportBuildDirectory + "/" + SoundExportDirectory
+mkPath(log, srcDir)
+destDir = InstallDirectory + "/" + SoundInstallDirectory
+mkPath(log, destDir)
+copyFilesNoTreeIfNeeded(log, srcDir, destDir)
 
 printLog(log, "")
 log.close()

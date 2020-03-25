@@ -1,6 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -187,7 +191,7 @@ void CContextSound::init()
 				}
 				else
 				{
-					nlassertex(nbJoker < SoundContextNbArgs, ("Error will trying to play ContextSound '%s'", _Name.toString().c_str()/*CStringMapper::unmap(_Name).c_str()*/));
+					nlassertex(nbJoker < SoundContextNbArgs, ("Error will trying to play ContextSound '%s'", CStringMapper::unmap(_Name).c_str()));
 					fromString(index, contextArgIndex[nbJoker++]);
 					parseArg = false;
 					index.clear();
@@ -195,13 +199,13 @@ void CContextSound::init()
 			}
 			else if (*first == 'r')
 			{
-				nlassertex(useRandom == false, ("Error will trying to play ContextSound '%s'", _Name.toString().c_str()/*CStringMapper::unmap(_Name).c_str()*/));
+				nlassertex(useRandom == false, ("Error will trying to play ContextSound '%s'", CStringMapper::unmap(_Name).c_str()));
 				useRandom = true;
 			}
 		}
 		else if (*first == '%')
 		{
-			nlassertex(useRandom == false, ("Error will trying to play ContextSound '%s'", _Name.toString().c_str()/*CStringMapper::unmap(_Name).c_str()*/));
+			nlassertex(useRandom == false, ("Error will trying to play ContextSound '%s'", CStringMapper::unmap(_Name).c_str()));
 			parseArg = true;
 		}
 	}
@@ -215,7 +219,7 @@ void CContextSound::init()
 		}
 		else
 		{
-			nlassertex(nbJoker < SoundContextNbArgs, ("Error will trying to play ContextSound '%s'", _Name.toString().c_str()/*CStringMapper::unmap(_Name).c_str()*/));
+			nlassertex(nbJoker < SoundContextNbArgs, ("Error will trying to play ContextSound '%s'", CStringMapper::unmap(_Name).c_str()));
 			fromString(index, contextArgIndex[nbJoker++]);
 			parseArg = false;
 		}
@@ -247,7 +251,7 @@ void CContextSound::init()
 		LM_CASE_CONTAINER_CREATOR(9)
 		LM_CASE_CONTAINER_CREATOR(10)
 	default:
-		nlwarning("Unsuported number of context argument in context sound '%s'!", _Name.toString().c_str()/*CStringMapper::unmap(_Name).c_str()*/);
+		nlwarning("Unsuported number of context argument in context sound '%s'!", CStringMapper::unmap(_Name).c_str());
 		return;
 	}
 	// cleanup macro
@@ -257,14 +261,14 @@ void CContextSound::init()
 
 	// ok, we have the container, now fill it with the sound
 	{
-		std::vector<NLMISC::CSheetId> allSounds;
+		std::vector<NLMISC::TStringId> allSounds;
 //		CSoundBank::getSoundNames(allSounds);
 		CAudioMixerUser::instance()->getSoundNames(allSounds);
 
-		std::vector<NLMISC::CSheetId>::iterator first(allSounds.begin()), last(allSounds.end());
+		std::vector<NLMISC::TStringId>::iterator first(allSounds.begin()), last(allSounds.end());
 		for (; first != last; ++first)
 		{
-			const std::string &soundName = first->toString()/*CStringMapper::unmap(*first)*/;
+			const std::string &soundName = CStringMapper::unmap(*first);
 			if (soundName.size() > _BaseName.size())
 			{
 				uint i;

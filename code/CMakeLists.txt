@@ -48,20 +48,39 @@ CHECK_OUT_OF_SOURCE()
 IF(CMAKE_VERSION VERSION_GREATER "2.8.10")
   STRING(TIMESTAMP CURRENT_YEAR "%Y")
 ELSE()
-  SET(CURRENT_YEAR "2016")
+  SET(CURRENT_YEAR "2019")
 ENDIF()
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 1)
 SET(NL_VERSION_MINOR 0)
-SET(NL_VERSION_PATCH 1)
-SET(YEAR "2004-${CURRENT_YEAR}")
+SET(NL_VERSION_PATCH 2)
+SET(YEAR "2001-${CURRENT_YEAR}")
 SET(AUTHOR "Winch Gate and The Ryzom Core Community")
 
 SET(RYZOM_VERSION_MAJOR 3)
 SET(RYZOM_VERSION_MINOR 6)
 SET(RYZOM_VERSION_PATCH 0)
+
+SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL  "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Create Account URL")
+SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL    "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Edit Account URL")
+SET(RYZOM_CLIENT_FORGET_PASSWORD_URL "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Forget Password URL")
+SET(RYZOM_CLIENT_PATCH_URL           "https://cdn.ryzom.dev/open/patch/" CACHE STRING "Ryzom Client Patch URL")
+
+SET(RYZOM_WEBIG_MAIN_URL             "https://open.ryzom.dev/" CACHE STRING "Ryzom Client WebIG Main URL")
+SET(RYZOM_WEBIG_TRUSTED_DOMAIN       "open.ryzom.dev" CACHE STRING "Ryzom Client WebIG Trusted Domain")
+
+# urls when compiling ryzom live client
+IF(WITH_RYZOM_LIVE)
+  SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL  "https://account.ryzom.com/signup/from_client.php")
+  SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL    "https://account.ryzom.com/payment_profile/index.php")
+  SET(RYZOM_CLIENT_FORGET_PASSWORD_URL "https://account.ryzom.com/payment_profile/lost_secure_password.php")
+  SET(RYZOM_CLIENT_PATCH_URL           "http://dl.ryzom.com/patch_live")
+
+  SET(RYZOM_WEBIG_MAIN_URL             "https://app.ryzom.com/")
+  SET(RYZOM_WEBIG_TRUSTED_DOMAIN       "app.ryzom.com")
+ENDIF()
 
 #-----------------------------------------------------------------------------
 # Redirect output files
@@ -220,6 +239,8 @@ IF(WITH_NEL)
 
   IF(WITH_GUI)
     FIND_PACKAGE(Luabind REQUIRED)
+  ENDIF()
+
     FIND_PACKAGE(CURL REQUIRED)
 
     IF((WIN32 OR CURL_LIBRARIES MATCHES "\\.a") AND WITH_STATIC_CURL)
@@ -269,7 +290,6 @@ IF(WITH_NEL)
         ENDIF()
       ENDIF()
     ENDIF()
-  ENDIF()
 
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/nel/include)
   ADD_SUBDIRECTORY(nel)

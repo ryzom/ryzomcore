@@ -1,6 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -133,9 +137,18 @@ void	CSound::serial(NLMISC::IStream &s)
 	s.serial(_Direction);
 	s.serial(_Looping);
 	s.serial(_MaxDist);
-
-	_Name.serialString(s, "sound");
-
+	if (s.isReading())
+	{
+		std::string name;
+		s.serial(name);
+		_Name = CStringMapper::map(name);
+	}
+	else
+	{
+		std::string name = CStringMapper::unmap(_Name);
+		s.serial(name);
+	}
+	
 	nlassert(CGroupControllerRoot::isInitialized()); // not sure
 #if NLSOUND_SHEET_VERSION_BUILT < 2
 	if (s.isReading()) _GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER);
@@ -161,8 +174,7 @@ void	CSound::serial(NLMISC::IStream &s)
 void				CSound::importForm(const std::string& filename, NLGEORGES::UFormElm& root)
 {
 	// Name
-	nlassert(filename.find(".sound") != std::string::npos);
-	_Name = NLMISC::CSheetId(filename);
+	_Name = CStringMapper::map(CFile::getFilenameWithoutExtension(filename));
 
 	// InternalConeAngle
 	uint32 inner;

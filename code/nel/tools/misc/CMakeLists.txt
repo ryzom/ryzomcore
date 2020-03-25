@@ -4,7 +4,15 @@ IF(WITH_QT OR WITH_QT5)
 ENDIF()
 
 IF(WITH_NEL_TOOLS)
-  SUBDIRS(bnp_make disp_sheet_id extract_filename lock make_sheet_id xml_packer)
+  SUBDIRS(
+    bnp_make
+    snp_make
+    disp_sheet_id
+    extract_filename
+    lock
+    make_sheet_id
+    xml_packer
+  )
 
   IF(WITH_QT OR WITH_QT5)
     ADD_SUBDIRECTORY(words_dic_qt)

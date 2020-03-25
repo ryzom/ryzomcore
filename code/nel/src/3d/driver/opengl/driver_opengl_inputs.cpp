@@ -509,7 +509,7 @@ void CDriverGL::setMousePos(float x, float y)
 {
 	H_AUTO_OGL(CDriverGL_setMousePos)
 
-	if (_win == EmptyWindow)
+	if (_win == EmptyWindow || !_WindowFocus)
 		return;
 
 	sint x1 = (sint)((float)_CurrentMode.Width*x);
@@ -612,6 +612,7 @@ bool CDriverGL::isSystemCursorInClientArea()
 #ifdef NL_OS_WINDOWS
 		return IsWindowVisible(_win) != FALSE;
 #endif
+		return _WindowFocus;
 	}
 	else
 	{
@@ -650,7 +651,13 @@ bool CDriverGL::isSystemCursorInClientArea()
 		{
 			return false;
 		}
+#elif defined(NL_OS_MAC)
+		// TODO: implement this
+#elif defined (NL_OS_UNIX)
+		// TODO: implement this
 #endif
+		// TODO: probably wrong if NeL window is docked inside parent (ie QT widget)
+		return _WindowFocus;
 	}
 
 	return true;

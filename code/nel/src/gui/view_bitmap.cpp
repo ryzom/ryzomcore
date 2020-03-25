@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2018  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -478,7 +481,7 @@ namespace NLGUI
 			}
 		}
 		else
-			_TextureId.setTexture (toLower(TxName).c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
+			_TextureId.setTexture (TxName.c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
 	}
 
 	// ----------------------------------------------------------------------------

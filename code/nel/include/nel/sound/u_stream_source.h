@@ -1,5 +1,13 @@
-// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+/**
+* UStreamSource
+* \file u_stream_source.h
+* \brief UStreamSource
+* \date 2010-01-28 12:58GMT
+* \author Jan Boon (Kaetemi)
+*/
+
+// NeL - MMORPG Framework <https://wiki.ryzom.dev/>
+// Copyright (C) 2010  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as

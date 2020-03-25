@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2017  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -28,6 +32,7 @@
 #include "nel/misc/path.h"
 #include "nel/misc/sheet_id.h"
 #include "nel/misc/big_file.h"
+#include "nel/web/curl_certificates.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
 #include "nel/3d/u_driver.h"
@@ -187,6 +192,13 @@ struct CStatThread : public NLMISC::IRunnable
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10 (.NET CLR 3.5.30729)");
 		curl_easy_setopt(curl, CURLOPT_REFERER, string("http://www.ryzom.com/" + referer).c_str());
 		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+		if (url.length() > 8 && (url[4] == 's' || url[4] == 'S')) // 01234 https
+		{
+			NLWEB::CCurlCertificates::addCertificateFile("cacert.pem");
+			NLWEB::CCurlCertificates::useCertificates(curl);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+		}
 		CURLcode res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
 		//curl_global_cleanup();

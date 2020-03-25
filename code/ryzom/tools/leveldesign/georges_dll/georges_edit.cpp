@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -1088,27 +1091,27 @@ bool CGeorgesEditApp::SerialIntoMemStream (const char *formName, CGeorgesEditDoc
 			{
 				if (array)
 				{
-					(safe_cast<const CFormElmArray*> (node))->write (nodeXml, doc->getFormPtr(), NULL);
+					(safe_cast<const CFormElmArray*> (node))->write (nodeXml, doc->getFormPtr(), std::string());
 				}
 				else
 				{
 					if (type == UFormDfn::EntryDfn)
 					{
-						(safe_cast<const CFormElmStruct*> (node))->write (nodeXml, doc->getFormPtr(), NULL);
+						(safe_cast<const CFormElmStruct*> (node))->write (nodeXml, doc->getFormPtr(), std::string());
 					}
 					else if (type == UFormDfn::EntryVirtualDfn)
 					{
-						(safe_cast<const CFormElmVirtualStruct*> (node))->write (nodeXml, doc->getFormPtr(), NULL);
+						(safe_cast<const CFormElmVirtualStruct*> (node))->write (nodeXml, doc->getFormPtr(), std::string());
 					}
 					else if (type == UFormDfn::EntryType)
 					{
-						(safe_cast<const CFormElmAtom*> (node))->write (nodeXml, doc->getFormPtr(), NULL);
+						(safe_cast<const CFormElmAtom*> (node))->write (nodeXml, doc->getFormPtr(), std::string());
 					}
 				}
 			}
 			else
 			{
-				(safe_cast<const CFormElmVirtualStruct*> (node))->write (nodeXml, doc->getFormPtr(), NULL);
+				(safe_cast<const CFormElmVirtualStruct*> (node))->write (nodeXml, doc->getFormPtr(), std::string());
 			}
 		}
 

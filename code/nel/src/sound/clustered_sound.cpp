@@ -1,6 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -70,7 +74,7 @@ float EAX_MATERIAL_PARAM[] =
 class CSoundGroupSerializer
 {
 public:
-	std::vector<std::pair<NLMISC::TStringId, NLMISC::CSheetId> >	_SoundGroupAssoc;
+	std::vector<std::pair<NLMISC::TStringId, NLMISC::TStringId> >	_SoundGroupAssoc;
 
 	// load the values using the george sheet (called by GEORGE::loadForm)
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const std::string &/* name */)
@@ -95,9 +99,15 @@ public:
 				item->getValueByName(soundGroup, ".SoundGroup");
 				item->getValueByName(sound, ".Sound");
 
-				nlassert(sound.find(".sound") != std::string::npos);
+				string::size_type n = sound.rfind(".sound");
 
-				_SoundGroupAssoc.push_back(make_pair(CStringMapper::map(soundGroup), CSheetId(sound)));
+				if (n != string::npos)
+				{
+					// remove the tailing .sound
+					sound = sound.substr(0, n);
+				}
+
+				_SoundGroupAssoc.push_back(make_pair(CStringMapper::map(soundGroup), CStringMapper::map(sound)));
 			}
 		}
 		catch(...)
@@ -119,18 +129,24 @@ public:
 		{
 			if (s.isReading())
 			{
-				TStringId soundGroup;
-				CSheetId sound;
+				std::string soundGroup;
+				std::string sound;
 
-				CStringMapper::serialString(s, soundGroup);
-				sound.serialString(s, "sound");
+				s.serial(soundGroup);
+				s.serial(sound);
 
-				_SoundGroupAssoc.push_back(make_pair(soundGroup, sound));
+				_SoundGroupAssoc.push_back(make_pair(CStringMapper::map(soundGroup), CStringMapper::map(sound)));
 			}
 			else
 			{
-				CStringMapper::serialString(s, _SoundGroupAssoc[i].first);
-				_SoundGroupAssoc[i].second.serialString(s, "sound");
+				std::string soundGroup;
+				std::string sound;
+
+				soundGroup = CStringMapper::unmap(_SoundGroupAssoc[i].first);
+				sound = CStringMapper::unmap(_SoundGroupAssoc[i].second);
+
+				s.serial(soundGroup);
+				s.serial(sound);
 			}
 		}
 	}
@@ -148,10 +164,6 @@ public:
 
 };
 
-// this structure is fill by the loadForm() function and will contain all you need
-std::map<std::string, CSoundGroupSerializer> Container;
-
-
 CClusteredSound::CClusteredSound()
 :	_Scene(0),
 	_RootCluster(0),
@@ -161,21 +173,27 @@ CClusteredSound::CClusteredSound()
 	
 }
 
+void CClusteredSound::buildSheets(const std::string &packedSheetPath)
+{
+	std::map<std::string, CSoundGroupSerializer> container;
+	::loadForm("sound_group", packedSheetPath + "sound_groups.packed_sheets", container, true, false);
+}
 
 void CClusteredSound::init(NL3D::CScene *scene, float portalInterpolate, float maxEarDist, float minGain)
 {
 	// load the sound_group sheets
-	::loadForm("sound_group", CAudioMixerUser::instance()->getPackedSheetPath()+"sound_groups.packed_sheets", Container, CAudioMixerUser::instance()->getPackedSheetUpdate(), false);
+	std::map<std::string, CSoundGroupSerializer> container;
+	::loadForm("sound_group", CAudioMixerUser::instance()->getPackedSheetPath()+"sound_groups.packed_sheets", container, CAudioMixerUser::instance()->getPackedSheetUpdate(), false);
 
 	// copy the container data into internal structure
-	std::map<std::string, CSoundGroupSerializer>::iterator first(Container.begin()), last(Container.end());
+	std::map<std::string, CSoundGroupSerializer>::iterator first(container.begin()), last(container.end());
 	for (; first != last; ++first)
 	{
 		_SoundGroupToSound.insert(first->second._SoundGroupAssoc.begin(), first->second._SoundGroupAssoc.end());
 	}
 
 	// and clear the temporary Container
-	Container.clear();
+	container.clear();
 
 
 	_Scene = scene;
@@ -277,10 +295,10 @@ void CClusteredSound::update(const CVector &listenerPos, const CVector &/* view 
 
 //				nldebug("Searching sound assoc for group [%s]", CStringMapper::unmap(soundGroup).c_str());
 
-				TStringSheetMap::iterator it2(_SoundGroupToSound.find(soundGroup));
+				TStringStringMap::iterator it2(_SoundGroupToSound.find(soundGroup));
 				if (it2 != _SoundGroupToSound.end())
 				{
-					NLMISC::CSheetId soundName = it2->second;
+					NLMISC::TStringId soundName = it2->second;
 					CClusterSound cs;
 
 //					nldebug("Found the sound [%s] for sound group [%s]", CStringMapper::unmap(soundName).c_str(), CStringMapper::unmap(soundGroup).c_str());

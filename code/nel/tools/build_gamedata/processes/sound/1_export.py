@@ -2,7 +2,7 @@
 # 
 # \file 1_export.py
 # \brief Export sound
-# \date 2009-06-03 10:47GMT
+# \date 2010-05-24 13:42GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Export sound
@@ -41,6 +41,22 @@ printLog(log, "-------")
 printLog(log, "--- Export sound")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
+printLog(log, "")
+
+# For each sound directory
+printLog(log, ">>> Export sound <<<")
+mkPath(log, ExportBuildDirectory + "/" + SoundExportDirectory)
+mkPath(log, SoundDirectory)
+mkPath(log, SoundDfnDirectory)
+copyFilesExtNoTreeIfNeeded(log, SoundDfnDirectory, ExportBuildDirectory + "/" + SoundExportDirectory, ".dfn")
+copyFilesExtNoTreeIfNeeded(log, SoundDfnDirectory, ExportBuildDirectory + "/" + SoundExportDirectory, ".typ")
+copyFilesExtNoTreeIfNeeded(log, SoundDirectory, ExportBuildDirectory + "/" + SoundExportDirectory, ".mixer_config")
+copyFilesExtNoTreeIfNeeded(log, SoundDirectory, ExportBuildDirectory + "/" + SoundExportDirectory, ".mp3")
+copyFilesExtNoTreeIfNeeded(log, SoundDirectory, ExportBuildDirectory + "/" + SoundExportDirectory, ".ogg")
+copyFilesExtNoTreeIfNeeded(log, SoundDirectory, ExportBuildDirectory + "/" + SoundExportDirectory, ".flac")
+copyFilesExtNoTreeIfNeeded(log, SoundDirectory, ExportBuildDirectory + "/" + SoundExportDirectory, ".primitive")
+copyFilesExtNoTreeIfNeeded(log, SoundDirectory, ExportBuildDirectory + "/" + SoundExportDirectory, ".sound_anim")
+
 printLog(log, "")
 
 log.close()

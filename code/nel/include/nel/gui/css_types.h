@@ -26,11 +26,21 @@ namespace NLGUI
 	 * \date 2019-09-03 10:50 GMT
 	 * \author Meelis Mägi (Nimetu)
 	 */
-
 	// ie. border-style
-	enum CSSLineStyle { NONE = 0, HIDDEN, SOLID, INSET, OUTSET };
+	enum CSSLineStyle {
+		CSS_LINE_STYLE_NONE = 0,
+		CSS_LINE_STYLE_HIDDEN,
+		CSS_LINE_STYLE_SOLID,
+		CSS_LINE_STYLE_INSET,
+		CSS_LINE_STYLE_OUTSET
+	};
+
 	// ie, border-width (px)
-	enum CSSLineWidth { THIN = 1, MEDIUM = 3, THICK = 5 };
+	enum CSSLineWidth {
+		CSS_LINE_WIDTH_THIN = 1,
+		CSS_LINE_WIDTH_MEDIUM = 3,
+		CSS_LINE_WIDTH_THICK = 5
+	};
 
 }//namespace
 

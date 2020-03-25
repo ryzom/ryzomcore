@@ -1,6 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -19,7 +23,6 @@
 #include "nel/misc/path.h"
 #include "nel/misc/common.h"
 #include "nel/sound/audio_mixer_user.h"
-#include "nel/misc/sheet_id.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -64,11 +67,11 @@ void CComplexSound::parseSequence(const std::string &str, std::vector<uint32> &s
 void CComplexSound::getSubSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const
 {
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
-	std::vector<NLMISC::CSheetId>::const_iterator first(_Sounds.begin()), last(_Sounds.end());
+	std::vector<NLMISC::TStringId>::const_iterator first(_Sounds.begin()), last(_Sounds.end());
 	for (; first != last; ++first)
 	{
 		CSound *sound = mixer->getSoundId(*first);
-		subsounds.push_back(make_pair((*first).toString()/*CStringMapper::unmap(*first)*/, sound));
+		subsounds.push_back(make_pair(CStringMapper::unmap(*first), sound));
 	}
 }
 
@@ -84,7 +87,7 @@ uint32 CComplexSound::getDuration()
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
 
 	vector<sint32>	durations;
-	std::vector<NLMISC::CSheetId>::iterator first(_Sounds.begin()), last(_Sounds.end());
+	std::vector<NLMISC::TStringId>::iterator first(_Sounds.begin()), last(_Sounds.end());
 	for (; first != last; ++first)
 	{
 		CSound *sound = mixer->getSoundId(*first);
@@ -172,6 +175,8 @@ CComplexSound::CComplexSound() :
 	_PatternMode(CComplexSound::MODE_UNDEFINED),
 	_TicksPerSeconds(1.0f),
 	_XFadeLength(3000),		// default to 3000 sec.
+	_DoFadeIn(true),
+	_DoFadeOut(true),
 	_MaxDistValid(false),
 	_Duration(0),
 	_DurationValid(false)
@@ -205,7 +210,7 @@ float CComplexSound::getMaxDistance() const
 		CComplexSound *This = const_cast<CComplexSound*>(this);
 
 		This->_MaxDist = 0.0f;
-		std::vector<NLMISC::CSheetId>::const_iterator first(_Sounds.begin()), last(_Sounds.end());
+		std::vector<NLMISC::TStringId>::const_iterator first(_Sounds.begin()), last(_Sounds.end());
 
 		for (; first != last; ++first)
 		{
@@ -237,7 +242,7 @@ void	CComplexSound::serial(NLMISC::IStream &s)
 		{
 			std::string name;
 			s.serial(name);
-			_Sounds.push_back(NLMISC::CSheetId(name, "sound"));
+			_Sounds.push_back(CStringMapper::map(name));
 		}
 	}
 	else
@@ -246,7 +251,7 @@ void	CComplexSound::serial(NLMISC::IStream &s)
 		s.serial(nb);
 		for (uint i=0; i<nb; ++i)
 		{
-			std::string name = _Sounds[i].toString();
+			std::string name = CStringMapper::unmap(_Sounds[i]);
 			s.serial(name);
 		}
 	}
@@ -301,8 +306,8 @@ void	CComplexSound::importForm(const std::string& filename, NLGEORGES::UFormElm&
 			string soundname;
 			if (psoundsArray->getArrayValue(soundname, i))
 			{
-				nlassert(soundname.find(".sound") != std::string::npos);
-				_Sounds.push_back(NLMISC::CSheetId(soundname));
+				soundname = CFile::getFilenameWithoutExtension(soundname);
+				_Sounds.push_back(CStringMapper::map(soundname));
 			}
 		}
 	}
@@ -315,7 +320,8 @@ void	CComplexSound::importForm(const std::string& filename, NLGEORGES::UFormElm&
 	if (mode == "Chained" || mode == "Sparse")
 	{
 		// XFade length
-		formRoot.getValueByName(_XFadeLength, ".SoundType.XFadeLength");
+		if (!formRoot.getValueByName(_XFadeLength, ".SoundType.XFadeLength"))
+			formRoot.getValueByName(_XFadeLength, ".SoundType.XFadeLenght"); // WORKAROUND: Typo in sound assets
 		// Fade in/out flag.
 		formRoot.getValueByName(_DoFadeIn, ".SoundType.DoFadeIn");
 		formRoot.getValueByName(_DoFadeOut, ".SoundType.DoFadeOut");

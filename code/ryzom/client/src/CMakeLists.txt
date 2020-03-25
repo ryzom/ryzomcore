@@ -3,11 +3,6 @@ IF(WITH_RYZOM_TOOLS OR WITH_RYZOM_CLIENT)
   ADD_SUBDIRECTORY(client_sheets)
 ENDIF()
 
-IF(WITH_RYZOM_TOOLS OR WITH_RYZOM_CLIENT OR WITH_RYZOM_INSTALLER)
-  # Need seven_zip lib for patch_gen tool
-  ADD_SUBDIRECTORY(seven_zip)
-ENDIF()
-
 IF(WITH_RYZOM_CLIENT)
   IF(NOT WITH_GUI)
     MESSAGE(FATAL_ERROR "The client cannot be built without the NeL GUI Library (WITH_GUI)")
@@ -158,6 +153,8 @@ IF(WITH_RYZOM_CLIENT)
         ${OPENSSL_INCLUDE_DIR}
   )
 
+  INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/nel/3rdparty)
+
   IF(STEAM_FOUND)
     INCLUDE_DIRECTORIES(${STEAM_INCLUDE_DIRS})
   ENDIF()
@@ -170,7 +167,7 @@ IF(WITH_RYZOM_CLIENT)
               nel3d
               nelgui
               nelsound
-              ryzom_sevenzip
+              nel_sevenzip
               ryzom_clientsheets
               ryzom_gameshare
               nelpacs
