@@ -16,7 +16,7 @@
 
 
 #ifndef NL_BASE64_H
-#define NL_BASE64_h
+#define NL_BASE64_H
 
 namespace NLMISC
 {
