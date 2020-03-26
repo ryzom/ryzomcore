@@ -28,7 +28,7 @@
 #include "filesextractor.h"
 #include "filescleaner.h"
 
-#include "seven_zip.h"
+#include "nel/misc/seven_zip.h"
 
 #if defined(Q_OS_WIN32) && defined(QT_WINEXTRAS_LIB)
 #include <QtWinExtras/QWinTaskbarProgress>
