@@ -558,7 +558,7 @@ bool		CIFile::seek (sint32 offset, IStream::TSeekOrigin origin) const
 		return true;
 
 	// seek in the file. NB: if not in bigfile, _BigFileOffset==0.
-	if (nlfseek64(_F, _BigFileOffset+_ReadPos, SEEK_SET) != 0)
+	if (nlfseek64(_F, (sint64)_BigFileOffset + _ReadPos, SEEK_SET) != 0)
 		return false;
 	return true;
 }

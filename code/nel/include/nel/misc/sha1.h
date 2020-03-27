@@ -51,18 +51,18 @@ struct CHashKey
 		else if (str.size() == 40)
 		{
 			HashKeyString.clear();
-			for(uint i = 0; i < str.size(); i+=2)
+			for (size_t i = 0; i < str.size(); i += 2)
 			{
 				uint8 val;
-				if (isdigit((unsigned char)str[i+0]))
-					val = str[i+0]-'0';
+				if (isdigit((unsigned char)str[i + 0]))
+					val = str[i + 0] - '0';
 				else
-					val = 10+tolower(str[i+0])-'a';
+					val = 10 + tolower(str[i + 0]) - 'a';
 				val *= 16;
-				if (isdigit((unsigned char)str[i+1]))
-					val += str[i+1]-'0';
+				if (isdigit((unsigned char)str[i + 1]))
+					val += str[i + 1] - '0';
 				else
-					val += 10+tolower(str[i+1])-'a';
+					val += 10 + tolower(str[i + 1]) - 'a';
 
 				HashKeyString += val;
 			}
