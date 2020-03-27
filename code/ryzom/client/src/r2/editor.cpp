@@ -243,7 +243,12 @@ void CDynamicMapClientEventForwarder::nodeMoved(
 void CDynamicMapClientEventForwarder::scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialActIndex)
 {
 	//H_AUTO(R2_CDynamicMapClientEventForwarder_scenarioUpdated)
-	if (getEditor().getMode() != CEditor::EditionMode) return;
+	if (getEditor().getMode() != CEditor::EditionMode
+		&& getEditor().getMode() != CEditor::GoingToEditionMode)
+	{
+		nldebug("Scenario update received, but not in edition mode");
+		return;
+	}
 	getEditor().scenarioUpdated(highLevel, willTP, initialActIndex);
 }
 
@@ -5708,6 +5713,7 @@ void CEditor::scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialAct
 	if (_WaitScenarioScreenActive)
 	{
 		// defer scenario update to the end of the wait screen
+		nlassert(!_NewScenario);
 		_NewScenario = highLevel ? highLevel->clone() : NULL;
 		_NewScenarioInitialAct = initialActIndex;
 		_PostponeScenarioUpdated = true;
