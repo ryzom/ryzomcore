@@ -596,7 +596,7 @@ void makeStringDiff(const vector<TStringInfo> &addition, vector<TStringInfo> &re
 */
 }
 
-int makeStringDiff(int argc, char *argv[])
+int makeStringDiff(int argc, char *argv[], const std::string &baseName)
 {
 	// this will generate diff from 'addition' directory
 	// for the reference <lang>.uxt file
@@ -608,7 +608,7 @@ int makeStringDiff(int argc, char *argv[])
 
 	LOG("Generating string diffs\nLoading the working file for language %s\n", Languages[0].c_str());
 	// load the addition file
-	std::string addFile(Languages[0]+".uxt");
+	std::string addFile = baseName + Languages[0] + ".uxt";
 	if (!loadStringFile(addDir+addFile, addition, true))
 	{
 		LOG("Error loading file %s\n", (addDir+addFile).c_str());
@@ -624,7 +624,7 @@ int makeStringDiff(int argc, char *argv[])
 		{
 			addition.clear();
 
-			std::string addFile(Languages[0]+".uxt");
+			std::string addFile = baseName + Languages[0] + ".uxt";
 			if (!loadStringFile(transDir+addFile, addition, true))
 			{
 				LOG("Error loading file %s\n", (transDir+addFile).c_str());
@@ -634,7 +634,7 @@ int makeStringDiff(int argc, char *argv[])
 
 		vector<TStringInfo>	reference;
 		// load the reference file
-		std::string refFile(Languages[l]+".uxt");
+		std::string refFile = baseName + Languages[l] + ".uxt";
 		if (!loadStringFile(transDir+refFile, reference, false))
 		{
 			LOG("Error loading file %s\n", (transDir+refFile).c_str());
@@ -642,7 +642,7 @@ int makeStringDiff(int argc, char *argv[])
 		}
 
 		// load any not merged diff file
-		if (!mergeStringDiff(reference, Languages[l], "", ".uxt", false))
+		if (!mergeStringDiff(reference, Languages[l], baseName, ".uxt", false))
 		{
 			LOG("Error will mergin diff file(s)\n");
 			return 1;
@@ -664,7 +664,7 @@ int makeStringDiff(int argc, char *argv[])
 			// add the tag for non translation
 			str += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE") + nl + ucstring("// DIFF NOT TRANSLATED") + nl;
 
-			std::string diffName(diffDir+Languages[l]+"_diff_"+diffVersion+".uxt");
+			std::string diffName = diffDir + baseName + Languages[l] + "_diff_" + diffVersion + ".uxt";
 			CI18N::writeTextFile(diffName, str);
 
 		}
@@ -754,7 +754,7 @@ void cleanComment(const std::string & filename)
 /*
 REMOVE OLDVALUE: from a diff string file
 */
-int cleanStringDiff(int argc, char *argv[])
+int cleanStringDiff(int argc, char *argv[], const std::string &baseName)
 {
 
 	LOG("Cleaning string diffs\n");
@@ -766,7 +766,7 @@ int cleanStringDiff(int argc, char *argv[])
 
 		vector<string>	diffs;
 
-		getPathContentFiltered(diffDir+Languages[l]+"_diff_", ".uxt", diffs);
+		getPathContentFiltered(diffDir + baseName + Languages[l] + "_diff_", ".uxt", diffs);
 		for (i=0; i<diffs.size(); ++i)
 		{
 				cleanComment(diffs[i]);
@@ -775,7 +775,7 @@ int cleanStringDiff(int argc, char *argv[])
 	return 0;
 }
 
-int mergeStringDiff(int argc, char *argv[])
+int mergeStringDiff(int argc, char *argv[], const std::string &baseName)
 {
 	LOG("Merging string diffs\n");
 
@@ -784,7 +784,7 @@ int mergeStringDiff(int argc, char *argv[])
 	for (l=0; l<Languages.size(); ++l)
 	{
 		LOG("Merging for language %s...\n", Languages[l].c_str());
-		string filename = transDir+Languages[l]+".uxt";
+		string filename = transDir + baseName + Languages[l] + ".uxt";
 		// load the translated file
 		vector<TStringInfo>	translated;
 		if (!loadStringFile(filename, translated, false))
@@ -794,7 +794,7 @@ int mergeStringDiff(int argc, char *argv[])
 		}
 
 		// append the translated diffs
-		mergeStringDiff(translated, Languages[l], "", ".uxt", true, true);
+		mergeStringDiff(translated, Languages[l], baseName, ".uxt", true, true);
 
 		// prepare the addition string
 		ucstring str = prepareStringFile(translated, true);
@@ -3214,11 +3214,18 @@ int main(int argc, char *argv[])
 	}
 
 	if (strcmp(argv[1], "make_string_diff") == 0)
-		return makeStringDiff(argc, argv);
+		return makeStringDiff(argc, argv, "");
 	else if (strcmp(argv[1], "merge_string_diff") == 0)
-		return mergeStringDiff(argc, argv);
+		return mergeStringDiff(argc, argv, "");
 	else if (strcmp(argv[1], "clean_string_diff") == 0)
-		return cleanStringDiff(argc, argv);
+		return cleanStringDiff(argc, argv, "");
+
+	else if (strcmp(argv[1], "make_r2_string_diff") == 0)
+		return makeStringDiff(argc, argv, "r2_");
+	else if (strcmp(argv[1], "merge_r2_string_diff") == 0)
+		return mergeStringDiff(argc, argv, "r2_");
+	else if (strcmp(argv[1], "clean_r2_string_diff") == 0)
+		return cleanStringDiff(argc, argv, "r2_");
 
 	else if (argv1 == "make_phrase_diff_old")
 		return makePhraseDiff(argc, argv);
