@@ -915,6 +915,7 @@ bool mergePhraseDiff(vector<TPhrase> &phrases, const string &language, bool only
 				nlassertex(diffInfo.Index1 < phrases.size(),
 					("In KEEP, Index1 (%u) is not less than number of phrase (%u)", diffInfo.Index1, phrases.size()));
 				phrases[diffInfo.Index1].HashValue = diff[j].HashValue;
+				phrases[diffInfo.Index1].Comments = diff[j].Comments;
 				break;
 			default:
 				nlassert(false);
@@ -1394,6 +1395,10 @@ bool mergeWorksheetDiff(const std::string filename, TWorksheet &sheet, bool only
 			return false;
 		}
 
+		uint hashCol;
+		if (!diff.findCol(ucstring("*HASH_VALUE"), hashCol))
+			hashCol = ~0;
+
 		// we found a diff file for the addition file.
 		LOG("Adding %s diff as reference\n", fileList[i].c_str());
 
@@ -1460,7 +1465,14 @@ bool mergeWorksheetDiff(const std::string filename, TWorksheet &sheet, bool only
 					nlassertex(diffInfo.Index1 <= sheet.Data.size(),
 						("KEEP cmd in diff file reference row %u, but worksheet only contains %u entries",
 							diffInfo.Index1, sheet.Data.size()));
-					nlerror("diff_keep not implemented"); // TODO
+					if (hashCol == ~0)
+					{
+						nlerror("Hash column not available, keep not implemented");
+					}
+					else
+					{
+						sheet.setData(diffInfo.Index1, diff.Data[0][hashCol], diff.Data[j][hashCol]);
+					}
 				}
 				break;
 			default:
@@ -2089,6 +2101,7 @@ void mergePhraseDiff2Impl(vector<TPhrase>& reference, const vector<TPhrase>& add
 			{
 				nlassert( phrases.find(first->Identifier) != phrases.end() );
 				phrases[first->Identifier].HashValue = first->HashValue;
+				phrases[first->Identifier].Comments = first->Comments;
 			}
 			else
 			{
