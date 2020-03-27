@@ -244,7 +244,8 @@ void CDynamicMapClientEventForwarder::scenarioUpdated(CObject* highLevel, bool w
 {
 	//H_AUTO(R2_CDynamicMapClientEventForwarder_scenarioUpdated)
 	if (getEditor().getMode() != CEditor::EditionMode
-		&& getEditor().getMode() != CEditor::GoingToEditionMode)
+		&& getEditor().getMode() != CEditor::GoingToEditionMode /* New scenario */
+		&& getEditor().getMode() != CEditor::AnimationModeLoading /* Loading animation scenario from terminal */)
 	{
 		nldebug("Scenario update received, but not in edition mode");
 		return;
