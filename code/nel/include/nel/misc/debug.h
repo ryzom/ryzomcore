@@ -368,10 +368,10 @@ extern bool _assertex_stop_1(bool &ignoreNextTime);
 
 // removed because we always check assert (even in release mode) #if defined(NL_DEBUG)
 
-#if defined(_MSC_VER) && _MSC_VER >= 1900
+#if defined(_MSC_VER) && _MSC_VER >= 1500
 #define nlassume(exp) do { __analysis_assume(exp); } while (0) // __analysis_assume doesn't evaluate the expression at runtime
 #else
-#define nlassume(exp) do { ) while (0)
+#define nlassume(exp) do { } while (0)
 #endif
 
 #ifdef NL_NO_DEBUG
@@ -499,6 +499,15 @@ do { \
 #	endif // NL_OS_UNIX
 
 #endif // NL_NO_DEBUG
+
+// Same as nlassert and nlverify, but only in DEV build
+#if !FINAL_VERSION
+#define nlassertverbose(exp) nlassert(exp)
+#define nlverifyverbose(exp) nlverify(exp)
+#else
+#define nlassertverbose(exp) nlassume(exp)
+#define nlverifyverbose(exp) do { exp; nlassume(exp); } while (0)
+#endif
 
 #define nlunreferenced(identifier) (void)identifier
 
