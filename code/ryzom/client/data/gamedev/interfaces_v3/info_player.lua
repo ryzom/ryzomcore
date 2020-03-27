@@ -1412,8 +1412,6 @@ function game:onInGameDbInitialized()
 		self:setCurrentMission(game.PrevSessionMission)
 	end
 
-	game:setInfoPlayerCharacterRace()
-
 	runAH(nil, "sort_tribefame", "")
 end
 
