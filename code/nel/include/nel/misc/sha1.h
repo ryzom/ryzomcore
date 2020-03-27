@@ -30,19 +30,19 @@ namespace NLMISC {
 
 struct CHashKey
 {
-	CHashKey () { HashKeyString.resize(20); }
+	CHashKey() { HashKeyString.resize(20); }
 
-	CHashKey (const unsigned char Message_Digest[20])
+	CHashKey(const unsigned char Message_Digest[20])
 	{
 		HashKeyString.clear();
-		for(sint i = 0; i < 20 ; ++i)
+		for (sint i = 0; i < 20; ++i)
 		{
 			HashKeyString += Message_Digest[i];
 		}
 	}
 
 	// Init the hash key with a binary key format or a text key format
-	CHashKey (const std::string &str)
+	CHashKey(const std::string &str)
 	{
 		if (str.size() == 20)
 		{
@@ -69,7 +69,7 @@ struct CHashKey
 		}
 		else
 		{
-			nlwarning ("SHA: Bad hash key format");
+			nlwarning("SHA: Bad hash key format");
 		}
 	}
 
@@ -85,23 +85,28 @@ struct CHashKey
 	}
 
 	// serial the hash key in binary format
-	void serial (NLMISC::IStream &stream)
+	void serial(NLMISC::IStream &stream)
 	{
-		stream.serial (HashKeyString);
+		stream.serial(HashKeyString);
 	}
 
-	bool	operator==(const CHashKey &v) const
+	bool operator==(const CHashKey &v) const
 	{
 		return HashKeyString == v.HashKeyString;
+	}
+
+	bool operator!=(const CHashKey &v) const
+	{
+		return !(*this == v);
 	}
 
 	// this string is always 20 bytes long and is the code in binary format (can't print it directly)
 	std::string HashKeyString;
 };
 
-inline bool operator <(const struct CHashKey &a,const struct CHashKey &b)
+inline bool operator<(const struct CHashKey &a, const struct CHashKey &b)
 {
-	return a.HashKeyString<b.HashKeyString;
+	return a.HashKeyString < b.HashKeyString;
 }
 
 // This function get a filename (it works with big files) and returns his SHA hash key
