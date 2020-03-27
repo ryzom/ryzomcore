@@ -529,6 +529,7 @@ function r2.onScenarioUpdated(scenario, startingActIndex)
 
 	assert(startingActIndex);
 	assert( type(startingActIndex) == "number");
+	assert(scenario.Acts);
 
 	if  startingActIndex < table.getn(scenario.Acts) then
 		r2.DefaultActInstanceId = scenario.Acts[startingActIndex].InstanceId
