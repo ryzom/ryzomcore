@@ -111,7 +111,8 @@ enum TDiffCommand
 	diff_add,
 	diff_changed,
 	diff_removed,
-	diff_swap
+	diff_swap,
+	diff_keep
 };
 
 struct TDiffInfo
@@ -246,6 +247,8 @@ bool parseDiffCommandFromComment(const ucstring &comments, TDiffInfo &diffInfo)
 		diffInfo.Command = diff_changed;
 	else if (commandStr == "REMOVED")
 		diffInfo.Command = diff_removed;
+	else if (commandStr == "KEEP")
+		diffInfo.Command = diff_keep;
 	else
 	{
 		nlwarning("Invalid diff command '%s'", commandStr.c_str());
@@ -401,6 +404,10 @@ bool mergeStringDiff(vector<TStringInfo> &strings, const string &language, const
 			case diff_removed:
 				nlassert(diffInfo.Index1 < strings.size());
 				strings.erase(strings.begin()+diffInfo.Index1);
+				break;
+			case diff_keep:
+				nlassert(diffInfo.Index1 < strings.size());
+				strings[diffInfo.Index1].HashValue = diff[j].HashValue;
 				break;
 			default:
 				nlassert(false);
@@ -903,6 +910,11 @@ bool mergePhraseDiff(vector<TPhrase> &phrases, const string &language, bool only
 				nlassertex(diffInfo.Index1 < phrases.size(),
 					("In REMOVED, Index1 (%u) is not less than number of phrase (%u)", diffInfo.Index1, phrases.size()));
 				phrases.erase(phrases.begin()+diffInfo.Index1);
+				break;
+			case diff_keep:
+				nlassertex(diffInfo.Index1 < phrases.size(),
+					("In KEEP, Index1 (%u) is not less than number of phrase (%u)", diffInfo.Index1, phrases.size()));
+				phrases[diffInfo.Index1].HashValue = diff[j].HashValue;
 				break;
 			default:
 				nlassert(false);
@@ -1442,6 +1454,14 @@ bool mergeWorksheetDiff(const std::string filename, TWorksheet &sheet, bool only
 							diffInfo.Index1, sheet.Data.size()));
 //				nlassertex(diffInfo.Index2 > 0);
 				swap(sheet[diffInfo.Index1], sheet[diffInfo.Index2]);
+				break;
+			case diff_keep:
+				{
+					nlassertex(diffInfo.Index1 <= sheet.Data.size(),
+						("KEEP cmd in diff file reference row %u, but worksheet only contains %u entries",
+							diffInfo.Index1, sheet.Data.size()));
+					nlerror("diff_keep not implemented"); // TODO
+				}
 				break;
 			default:
 				nlassert(false);
@@ -2059,12 +2079,16 @@ void mergePhraseDiff2Impl(vector<TPhrase>& reference, const vector<TPhrase>& add
 			{
 				nlassert( phrases.find(first->Identifier) == phrases.end() );
 				phrases[first->Identifier] = *first;
-
 			}
 			else if ( first->Comments.find(ucstring("DIFF REMOVED")) != ucstring::npos)
 			{
 				nlassert( phrases.find(first->Identifier) != phrases.end() );
 				phrases.erase( phrases.find(first->Identifier));
+			}
+			else if ( first->Comments.find(ucstring("DIFF KEEP")) != ucstring::npos)
+			{
+				nlassert( phrases.find(first->Identifier) != phrases.end() );
+				phrases[first->Identifier].HashValue = first->HashValue;
 			}
 			else
 			{
