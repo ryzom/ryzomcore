@@ -697,7 +697,8 @@ static void addPaths(IProgressCallback &progress, const std::vector<std::string>
 	if (CFile::isDirectory(getRyzomSharePrefix())) directoryPrefixes.push_back(CPath::standardizePath(getRyzomSharePrefix()));
 #endif
 
-	std::map<std::string, sint> directoriesToProcess;
+	std::set<std::string> directoriesToProcessSet;
+	std::vector<std::string> directoriesToProcess;
 
 	// first pass, build a map with all existing directories to process in second pass
 	for (uint j = 0; j < directoryPrefixes.size(); j++)
@@ -710,36 +711,29 @@ static void addPaths(IProgressCallback &progress, const std::vector<std::string>
 
 			// only prepend prefix if path is relative
 			if (!directory.empty() && !directoryPrefix.empty() && !CPath::isAbsolutePath(directory))
-					directory = directoryPrefix + directory;
+				directory = directoryPrefix + directory;
 
 			// only process existing directories
 			if (CFile::isExists(directory))
-				directoriesToProcess[directory] = 1;
+			{
+				if (directoriesToProcessSet.find(directory) == directoriesToProcessSet.end())
+				{
+					directoriesToProcessSet.insert(directory);
+					directoriesToProcess.push_back(directory);
+				}
+			}
 		}
 	}
 
-	uint total = (uint)directoriesToProcess.size();
-	uint current = 0, next = 0;
-
-	std::map<std::string, sint>::const_iterator it = directoriesToProcess.begin(), iend = directoriesToProcess.end();
-
 	// second pass, add search paths
-	while (it != iend)
+	for (size_t i = 0; i < directoriesToProcess.size(); ++i)
 	{
-		// update next progress value
-		++next;
+		progress.progress((float)i / (float)directoriesToProcess.size());
+		progress.pushCropedValues((float)i / (float)directoriesToProcess.size(), (float)(i + 1) / (float)directoriesToProcess.size());
 
-		progress.progress((float)current/(float)total);
-		progress.pushCropedValues((float)current/(float)total, (float)next/(float)total);
-
-		// next is current value
-		current = next;
-
-		CPath::addSearchPath(it->first, recurse, false, &progress);
+		CPath::addSearchPath(directoriesToProcess[i], recurse, false, &progress);
 
 		progress.popCropedValues();
-
-		++it;
 	}
 }
 
