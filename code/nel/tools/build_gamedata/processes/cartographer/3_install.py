@@ -43,12 +43,21 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
+
 installPath = InstallDirectory + "/" + CartographerInstallDirectory
-mkPath(log, installPath)
+islandsInstallPath = InstallDirectory + "/" + IslandsInstallDirectory
+
 
 printLog(log, ">>> Install cartographer <<<")
+
+mkPath(log, ExportBuildDirectory + "/" + CartographerMapBuildDirectory)
+mkPath(log, installPath)
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + CartographerMapBuildDirectory, installPath, ".dds")
+
 mkPath(log, ExportBuildDirectory + "/" + CartographerBuildDirectory)
-copyFilesNoTreeIfNeeded(log, ExportBuildDirectory + "/" + CartographerBuildDirectory, installPath)
+mkPath(log, islandsInstallPath)
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + CartographerBuildDirectory, islandsInstallPath, ".xml")
+
 
 printLog(log, "")
 log.close()

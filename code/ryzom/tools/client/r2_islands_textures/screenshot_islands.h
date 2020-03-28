@@ -132,6 +132,7 @@ private:
 	NLMISC::CRGBA				_BackColor;
 	NLMISC::CBitmap				_BackBitmap;
 	std::string					_CompleteIslandsFile;
+	std::string					_EntryPointsFile;
 };
 
 
