@@ -290,27 +290,18 @@ bool CScreenshotIslands::getPosFromZoneName(const std::string &name, NLMISC::CVe
 //-------------------------------------------------------------------------------------------------
 void CScreenshotIslands::searchIslandsBorders()
 {
-	vector<string> filenames;
-	list<string> zonelFiles;
-
-	map< CVector2f, bool> islandsMap;
+	vector<string> zonelFiles;
+	map<CVector2f, bool> islandsMap;
 	
 	TContinentsData::iterator itCont(_ContinentsData.begin()), lastCont(_ContinentsData.end());
 	for( ; itCont != lastCont ; ++itCont)
 	{
 		// for each continent we recover a map of zonel files whith position of 
 		// left/bottom point of each zone for keys
-		filenames.clear();
 		zonelFiles.clear();
+		CPath::getFileList("zonel", zonelFiles); // MAYBE FIXME: Constrain to continent (although we only build one continent at a time...)
 
-		CPath::getFileList("zonel", filenames);
-
-		for(uint i=0; i<filenames.size(); i++)
-		{
-			zonelFiles.push_back(filenames[i]);
-		}
-
-		list<string>::iterator itZonel(zonelFiles.begin()), lastZonel(zonelFiles.end());
+		vector<string>::iterator itZonel(zonelFiles.begin()), lastZonel(zonelFiles.end());
 		for( ; itZonel != lastZonel ; ++itZonel)
 		{	
 			CVector2f position;
@@ -1203,6 +1194,16 @@ void CScreenshotIslands::loadIslands()
 	CScenarioEntryPoints::TCompleteIslands completeIslands; // Copy (empty if using separate xml files)
 	completeIslands.reserve(entryPoints.size());
 
+	vector<string> zonelFiles;
+	CPath::getFileList("zonel", zonelFiles);
+	map<string, CVector2f> zonePosMap;
+	for (vector<string>::iterator it(zonelFiles.begin()), end(zonelFiles.end()); it != end; ++it)
+	{
+		CVector2f pos;
+		if (getPosFromZoneName(*it, pos))
+			zonePosMap[CFile::getFilenameWithoutExtension(*it)] = pos;
+	}
+
 	for (uint e = 0; e < entryPoints.size(); e++)
 	{
 		const CScenarioEntryPoints::CEntryPoint &entry = entryPoints[e];
@@ -1234,8 +1235,16 @@ void CScreenshotIslands::loadIslands()
 						island.XMax = islandIt->second.getBoundXMax();
 						island.YMax = islandIt->second.getBoundYMax();
 
-						// TODO:
-						// FIXME: island.Zones
+						sint32 zonelXMin = ((uint)(island.XMin / 160)) * 160;
+						sint32 zonelYMin = ((uint)(island.YMin / 160) - 1) * 160;
+						sint32 zonelXMax = ((uint)(island.XMax / 160)) * 160;
+						sint32 zonelYMax = ((uint)(island.YMax / 160) - 1) * 160;
+
+						// List all zones
+						for (map<string, CVector2f>::iterator it(zonePosMap.begin()), end(zonePosMap.end()); it != end; ++it)
+							if (it->second.x >= zonelXMin && it->second.x <= zonelXMax
+								&& it->second.y >= zonelYMin && it->second.y <= zonelYMax)
+								island.Zones.push_back(NLMISC::toUpper(it->first));
 					}
 					break;
 				}
