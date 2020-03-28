@@ -1039,11 +1039,13 @@ void prelogInit()
 		switch(ClientCfg.Driver3D)
 		{
 #ifdef NL_OS_WINDOWS
+			case CClientConfig::DrvAuto:
 			case CClientConfig::Direct3D:
 				driver = UDriver::Direct3d;
 			break;
-#endif // NL_OS_WINDOWS
+#else
 			case CClientConfig::DrvAuto:
+#endif // NL_OS_WINDOWS
 			case CClientConfig::OpenGL:
 				driver = UDriver::OpenGl;
 			break;
