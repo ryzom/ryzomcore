@@ -111,7 +111,8 @@ enum TDiffCommand
 	diff_add,
 	diff_changed,
 	diff_removed,
-	diff_swap
+	diff_swap,
+	diff_keep
 };
 
 struct TDiffInfo
@@ -246,6 +247,8 @@ bool parseDiffCommandFromComment(const ucstring &comments, TDiffInfo &diffInfo)
 		diffInfo.Command = diff_changed;
 	else if (commandStr == "REMOVED")
 		diffInfo.Command = diff_removed;
+	else if (commandStr == "KEEP")
+		diffInfo.Command = diff_keep;
 	else
 	{
 		nlwarning("Invalid diff command '%s'", commandStr.c_str());
@@ -401,6 +404,10 @@ bool mergeStringDiff(vector<TStringInfo> &strings, const string &language, const
 			case diff_removed:
 				nlassert(diffInfo.Index1 < strings.size());
 				strings.erase(strings.begin()+diffInfo.Index1);
+				break;
+			case diff_keep:
+				nlassert(diffInfo.Index1 < strings.size());
+				strings[diffInfo.Index1].HashValue = diff[j].HashValue;
 				break;
 			default:
 				nlassert(false);
@@ -596,7 +603,7 @@ void makeStringDiff(const vector<TStringInfo> &addition, vector<TStringInfo> &re
 */
 }
 
-int makeStringDiff(int argc, char *argv[])
+int makeStringDiff(int argc, char *argv[], const std::string &baseName)
 {
 	// this will generate diff from 'addition' directory
 	// for the reference <lang>.uxt file
@@ -608,7 +615,7 @@ int makeStringDiff(int argc, char *argv[])
 
 	LOG("Generating string diffs\nLoading the working file for language %s\n", Languages[0].c_str());
 	// load the addition file
-	std::string addFile(Languages[0]+".uxt");
+	std::string addFile = baseName + Languages[0] + ".uxt";
 	if (!loadStringFile(addDir+addFile, addition, true))
 	{
 		LOG("Error loading file %s\n", (addDir+addFile).c_str());
@@ -624,7 +631,7 @@ int makeStringDiff(int argc, char *argv[])
 		{
 			addition.clear();
 
-			std::string addFile(Languages[0]+".uxt");
+			std::string addFile = baseName + Languages[0] + ".uxt";
 			if (!loadStringFile(transDir+addFile, addition, true))
 			{
 				LOG("Error loading file %s\n", (transDir+addFile).c_str());
@@ -634,7 +641,7 @@ int makeStringDiff(int argc, char *argv[])
 
 		vector<TStringInfo>	reference;
 		// load the reference file
-		std::string refFile(Languages[l]+".uxt");
+		std::string refFile = baseName + Languages[l] + ".uxt";
 		if (!loadStringFile(transDir+refFile, reference, false))
 		{
 			LOG("Error loading file %s\n", (transDir+refFile).c_str());
@@ -642,7 +649,7 @@ int makeStringDiff(int argc, char *argv[])
 		}
 
 		// load any not merged diff file
-		if (!mergeStringDiff(reference, Languages[l], "", ".uxt", false))
+		if (!mergeStringDiff(reference, Languages[l], baseName, ".uxt", false))
 		{
 			LOG("Error will mergin diff file(s)\n");
 			return 1;
@@ -664,7 +671,7 @@ int makeStringDiff(int argc, char *argv[])
 			// add the tag for non translation
 			str += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE") + nl + ucstring("// DIFF NOT TRANSLATED") + nl;
 
-			std::string diffName(diffDir+Languages[l]+"_diff_"+diffVersion+".uxt");
+			std::string diffName = diffDir + baseName + Languages[l] + "_diff_" + diffVersion + ".uxt";
 			CI18N::writeTextFile(diffName, str);
 
 		}
@@ -754,7 +761,7 @@ void cleanComment(const std::string & filename)
 /*
 REMOVE OLDVALUE: from a diff string file
 */
-int cleanStringDiff(int argc, char *argv[])
+int cleanStringDiff(int argc, char *argv[], const std::string &baseName)
 {
 
 	LOG("Cleaning string diffs\n");
@@ -766,7 +773,7 @@ int cleanStringDiff(int argc, char *argv[])
 
 		vector<string>	diffs;
 
-		getPathContentFiltered(diffDir+Languages[l]+"_diff_", ".uxt", diffs);
+		getPathContentFiltered(diffDir + baseName + Languages[l] + "_diff_", ".uxt", diffs);
 		for (i=0; i<diffs.size(); ++i)
 		{
 				cleanComment(diffs[i]);
@@ -775,7 +782,7 @@ int cleanStringDiff(int argc, char *argv[])
 	return 0;
 }
 
-int mergeStringDiff(int argc, char *argv[])
+int mergeStringDiff(int argc, char *argv[], const std::string &baseName)
 {
 	LOG("Merging string diffs\n");
 
@@ -784,7 +791,7 @@ int mergeStringDiff(int argc, char *argv[])
 	for (l=0; l<Languages.size(); ++l)
 	{
 		LOG("Merging for language %s...\n", Languages[l].c_str());
-		string filename = transDir+Languages[l]+".uxt";
+		string filename = transDir + baseName + Languages[l] + ".uxt";
 		// load the translated file
 		vector<TStringInfo>	translated;
 		if (!loadStringFile(filename, translated, false))
@@ -794,7 +801,7 @@ int mergeStringDiff(int argc, char *argv[])
 		}
 
 		// append the translated diffs
-		mergeStringDiff(translated, Languages[l], "", ".uxt", true, true);
+		mergeStringDiff(translated, Languages[l], baseName, ".uxt", true, true);
 
 		// prepare the addition string
 		ucstring str = prepareStringFile(translated, true);
@@ -903,6 +910,12 @@ bool mergePhraseDiff(vector<TPhrase> &phrases, const string &language, bool only
 				nlassertex(diffInfo.Index1 < phrases.size(),
 					("In REMOVED, Index1 (%u) is not less than number of phrase (%u)", diffInfo.Index1, phrases.size()));
 				phrases.erase(phrases.begin()+diffInfo.Index1);
+				break;
+			case diff_keep:
+				nlassertex(diffInfo.Index1 < phrases.size(),
+					("In KEEP, Index1 (%u) is not less than number of phrase (%u)", diffInfo.Index1, phrases.size()));
+				phrases[diffInfo.Index1].HashValue = diff[j].HashValue;
+				phrases[diffInfo.Index1].Comments = diff[j].Comments;
 				break;
 			default:
 				nlassert(false);
@@ -1382,6 +1395,10 @@ bool mergeWorksheetDiff(const std::string filename, TWorksheet &sheet, bool only
 			return false;
 		}
 
+		uint hashCol;
+		if (!diff.findCol(ucstring("*HASH_VALUE"), hashCol))
+			hashCol = ~0;
+
 		// we found a diff file for the addition file.
 		LOG("Adding %s diff as reference\n", fileList[i].c_str());
 
@@ -1442,6 +1459,21 @@ bool mergeWorksheetDiff(const std::string filename, TWorksheet &sheet, bool only
 							diffInfo.Index1, sheet.Data.size()));
 //				nlassertex(diffInfo.Index2 > 0);
 				swap(sheet[diffInfo.Index1], sheet[diffInfo.Index2]);
+				break;
+			case diff_keep:
+				{
+					nlassertex(diffInfo.Index1 <= sheet.Data.size(),
+						("KEEP cmd in diff file reference row %u, but worksheet only contains %u entries",
+							diffInfo.Index1, sheet.Data.size()));
+					if (hashCol == ~0)
+					{
+						nlerror("Hash column not available, keep not implemented");
+					}
+					else
+					{
+						sheet.setData(diffInfo.Index1, diff.Data[0][hashCol], diff.Data[j][hashCol]);
+					}
+				}
 				break;
 			default:
 				nlassert(false);
@@ -2059,12 +2091,17 @@ void mergePhraseDiff2Impl(vector<TPhrase>& reference, const vector<TPhrase>& add
 			{
 				nlassert( phrases.find(first->Identifier) == phrases.end() );
 				phrases[first->Identifier] = *first;
-
 			}
 			else if ( first->Comments.find(ucstring("DIFF REMOVED")) != ucstring::npos)
 			{
 				nlassert( phrases.find(first->Identifier) != phrases.end() );
 				phrases.erase( phrases.find(first->Identifier));
+			}
+			else if ( first->Comments.find(ucstring("DIFF KEEP")) != ucstring::npos)
+			{
+				nlassert( phrases.find(first->Identifier) != phrases.end() );
+				phrases[first->Identifier].HashValue = first->HashValue;
+				phrases[first->Identifier].Comments = first->Comments;
 			}
 			else
 			{
@@ -3214,11 +3251,18 @@ int main(int argc, char *argv[])
 	}
 
 	if (strcmp(argv[1], "make_string_diff") == 0)
-		return makeStringDiff(argc, argv);
+		return makeStringDiff(argc, argv, "");
 	else if (strcmp(argv[1], "merge_string_diff") == 0)
-		return mergeStringDiff(argc, argv);
+		return mergeStringDiff(argc, argv, "");
 	else if (strcmp(argv[1], "clean_string_diff") == 0)
-		return cleanStringDiff(argc, argv);
+		return cleanStringDiff(argc, argv, "");
+
+	else if (strcmp(argv[1], "make_r2_string_diff") == 0)
+		return makeStringDiff(argc, argv, "r2_");
+	else if (strcmp(argv[1], "merge_r2_string_diff") == 0)
+		return mergeStringDiff(argc, argv, "r2_");
+	else if (strcmp(argv[1], "clean_r2_string_diff") == 0)
+		return cleanStringDiff(argc, argv, "r2_");
 
 	else if (argv1 == "make_phrase_diff_old")
 		return makePhraseDiff(argc, argv);
