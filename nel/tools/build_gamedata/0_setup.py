@@ -66,7 +66,7 @@ if not args.noconf:
 	try:
 		ToolDirectories
 	except NameError:
-		ToolDirectories = [ 'R:/build/dev/bin/Release', 'D:/libraries/external/bin' ]
+		ToolDirectories = [ 'R:/build/dev/bin/Release', 'R:/external/bin' ]
 	try:
 		ToolSuffix
 	except NameError:
@@ -78,7 +78,7 @@ if not args.noconf:
 	try:
 		WorkspaceDirectory
 	except NameError:
-		WorkspaceDirectory = "R:/workspace"
+		WorkspaceDirectory = "R:/leveldesign/workspace"
 	try:
 		DatabaseDirectory
 	except NameError:
