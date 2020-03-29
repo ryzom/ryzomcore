@@ -368,7 +368,7 @@ void BNPManagerWindow::readSettings()
 	QSettings *settings = Core::ICore::instance()->settings();
 
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	m_DataPath = settings->value(Core::Constants::ASSETS_PATH, "w:/database").toString();
+	m_DataPath = settings->value(Core::Constants::ASSETS_PATH, "R:/graphics").toString();
 	settings->endGroup();
 }
 // ***************************************************************************

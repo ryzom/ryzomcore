@@ -67,7 +67,7 @@ namespace GeorgesQt
 		m_lastSheetDir = ".";
 		QSettings *settings = Core::ICore::instance()->settings();
 		settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-		m_lastSheetDir = settings->value(Core::Constants::LEVELDESIGN_PATH, "l:/leveldesign").toString();
+		m_lastSheetDir = settings->value(Core::Constants::LEVELDESIGN_PATH, "R:/leveldesign").toString();
 		settings->endGroup();
 
 		m_ui.setupUi(this);
