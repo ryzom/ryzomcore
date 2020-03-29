@@ -466,15 +466,21 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			if (rpTags)
 			{
 				CPlayerCL * pPlayer = dynamic_cast<CPlayerCL*>(entity);
-				CViewBitmap *rp1 = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_1"));
-				CViewBitmap *rp2 = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_2"));
-				CViewBitmap *rp3 = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_3"));
-				CViewBitmap *rp4 = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_4"));
+				CViewBitmap *rp1 = dynamic_cast<CViewBitmap*>(info->getView ("rp_logo_1"));
+				CViewBitmap *rp2 = dynamic_cast<CViewBitmap*>(info->getView ("rp_logo_2"));
+				CViewBitmap *rp3 = dynamic_cast<CViewBitmap*>(info->getView ("rp_logo_3"));
+				CViewBitmap *rp4 = dynamic_cast<CViewBitmap*>(info->getView ("rp_logo_4"));
 
 				if (entityTag1.toString() == "_") entityTag1.clear();
 				if (entityTag2.toString() == "_") entityTag2.clear();
 				if (entityTag3.toString() == "_") entityTag3.clear();
 				if (entityTag4.toString() == "_") entityTag4.clear();
+
+				if (pPlayer && !(pPlayer->getPvpMode() & PVP_MODE::PvpFaction))
+				{
+					entityTag3.clear();
+					entityTag4.clear();
+				}
 
 				if (rp1) rp1->setTexture(entityTag1.toString());
 				if (rp2) rp2->setTexture(entityTag2.toString());
