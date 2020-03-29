@@ -379,7 +379,10 @@ public:
 	{
 		if(!SoundMngr)
 		{
-			CInterfaceManager::getInstance()->messageBox (CI18N::get ("uiSoundDisabled"));
+			// Do not show warning on volume change as its restored at startup
+			if (Params.find("volume") == std::string::npos)
+				CInterfaceManager::getInstance()->messageBox (CI18N::get ("uiMP3SoundDisabled"));
+
 			return;
 		}
 
