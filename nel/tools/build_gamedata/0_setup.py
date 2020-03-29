@@ -78,63 +78,63 @@ if not args.noconf:
 	try:
 		WorkspaceDirectory
 	except NameError:
-		WorkspaceDirectory = "L:/workspace"
+		WorkspaceDirectory = "R:/workspace"
 	try:
 		DatabaseDirectory
 	except NameError:
-		DatabaseDirectory = "W:/database"
+		DatabaseDirectory = "R:/graphics"
 	try:
 		SoundDirectory
 	except NameError:
-		SoundDirectory = "V:"
+		SoundDirectory = "R:/sound"
 	try:
 		SoundDfnDirectory
 	except NameError:
-		SoundDfnDirectory = "V:/DFN"
+		SoundDfnDirectory = "R:/sound/DFN"
 	try:
 		ExportBuildDirectory
 	except NameError:
-		ExportBuildDirectory = "T:/export"
+		ExportBuildDirectory = "R:/pipeline/export"
 	try:
 		InstallDirectory
 	except NameError:
-		InstallDirectory = "T:/install"
+		InstallDirectory = "R:/pipeline/install"
 	try:
 		ClientDevDirectory
 	except NameError:
-		ClientDevDirectory = "T:/client_dev"
+		ClientDevDirectory = "R:/pipeline/client_dev"
 	try:
 		ClientPatchDirectory
 	except NameError:
-		ClientPatchDirectory = "T:/client_patch"
+		ClientPatchDirectory = "R:/pipeline/client_patch"
 	try:
 		ClientInstallDirectory
 	except NameError:
-		ClientInstallDirectory = "T:/client_install"
+		ClientInstallDirectory = "R:/pipeline/client_install"
 	try:
 		ShardInstallDirectory
 	except NameError:
-		ShardInstallDirectory = "T:/shard"
+		ShardInstallDirectory = "R:/pipeline/shard"
 	try:
 		WorldEditInstallDirectory
 	except NameError:
-		WorldEditInstallDirectory = "T:/worldedit"
+		WorldEditInstallDirectory = "R:/pipeline/worldedit"
 	try:
 		LeveldesignDirectory
 	except NameError:
-		LeveldesignDirectory = "L:/leveldesign"
+		LeveldesignDirectory = "R:/leveldesign"
 	try:
 		LeveldesignDfnDirectory
 	except NameError:
-		LeveldesignDfnDirectory = "L:/leveldesign/DFN"
+		LeveldesignDfnDirectory = "R:/leveldesign/DFN"
 	try:
 		LeveldesignWorldDirectory
 	except NameError:
-		LeveldesignWorldDirectory = "L:/leveldesign/world"
+		LeveldesignWorldDirectory = "R:/leveldesign/world"
 	try:
 		PrimitivesDirectory
 	except NameError:
-		PrimitivesDirectory = "L:/primitives"
+		PrimitivesDirectory = "R:/leveldesign/primitives"
 	try:
 		GamedevDirectory
 	except NameError:
@@ -150,15 +150,15 @@ if not args.noconf:
 	try:
 		LeveldesignDataShardDirectory
 	except NameError:
-		LeveldesignDataShardDirectory = "L:/shard"
+		LeveldesignDataShardDirectory = "R:/leveldesign/shard"
 	try:
 		LeveldesignDataCommonDirectory
 	except NameError:
-		LeveldesignDataCommonDirectory = "L:/common"
+		LeveldesignDataCommonDirectory = "R:/leveldesign/common"
 	try:
 		TranslationDirectory
 	except NameError:
-		TranslationDirectory = "L:/translation"
+		TranslationDirectory = "R:/leveldesign/translation"
 	try:
 		WorldEditorFilesDirectory
 	except NameError:
@@ -166,27 +166,27 @@ if not args.noconf:
 	try:
 		WindowsExeDllCfgDirectories
 	except NameError:
-		WindowsExeDllCfgDirectories = [ 'C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86', 'D:/libraries/external/bin', 'R:/build/dev/bin/Release', 'R:/code/ryzom/client', 'R:/code/nel/lib', 'R:/code/ryzom/bin', 'R:/code/ryzom/tools/client/client_config/bin' ]
+		WindowsExeDllCfgDirectories = [ 'C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86', 'R:/external/bin', 'R:/build/dev/bin/Release', 'R:/code/ryzom/client', 'R:/code/nel/lib', 'R:/code/ryzom/bin', 'R:/code/ryzom/tools/client/client_config/bin' ]
 	try:
 		LinuxServiceExecutableDirectory
 	except NameError:
-		LinuxServiceExecutableDirectory = "S:/devls_x64/bin"
+		LinuxServiceExecutableDirectory = "R:/build/gcc_server/bin"
 	try:
 		LinuxClientExecutableDirectory
 	except NameError:
-		LinuxClientExecutableDirectory = "S:/devl_x64/bin"
+		LinuxClientExecutableDirectory = "R:/build/gcc_client/bin"
 	try:
 		PatchmanCfgAdminDirectory
 	except NameError:
-		PatchmanCfgAdminDirectory = "R:/code/ryzom/server/patchman_cfg/admin_install"
+		PatchmanCfgAdminDirectory = "R:/patchman/admin_install"
 	try:
 		PatchmanCfgDefaultDirectory
 	except NameError:
-		PatchmanCfgDefaultDirectory = "R:/code/ryzom/server/patchman_cfg/default"
+		PatchmanCfgDefaultDirectory = "R:/patchman/default"
 	try:
 		PatchmanBridgeServerDirectory
 	except NameError:
-		PatchmanBridgeServerDirectory = "T:/bridge_server"
+		PatchmanBridgeServerDirectory = "R:/pipeline/bridge_server"
 	try:
 		SignToolExecutable
 	except NameError:
