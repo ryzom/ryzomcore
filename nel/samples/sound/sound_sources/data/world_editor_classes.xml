@@ -323,7 +323,7 @@
 		<PARAMETER NAME="Array3" TYPE="string_array" VISIBLE="true" FILENAME="false" AUTONAME="Autoname-$Array$-$Array2$-" WIDGET_HEIGHT="100">
 		</PARAMETER>-->
 		<PARAMETER NAME="ConstArray" TYPE="const_string_array" VISIBLE="true" FILENAME="true" WIDGET_HEIGHT="100" FILE_EXTENSION="flora" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/game_elem/plant/flora_template/forest"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/leveldesign/game_elem/plant/flora_template/forest"/>
 			<COMBO_VALUES CONTEXT_NAME="jungle">
 				<CONTEXT_VALUE VALUE="jungle0"/>
 			</COMBO_VALUES>
@@ -343,7 +343,7 @@
 		</PARAMETER>
 
 		<PARAMETER NAME="ConstArray2" TYPE="const_string_array" VISIBLE="true" FILENAME="true" WIDGET_HEIGHT="100" FILE_EXTENSION="flora" LOOKUP="true" AUTONAME="$ConstArray$">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/game_elem/plant/flora_template/forest"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/leveldesign/game_elem/plant/flora_template/forest"/>
 			<COMBO_VALUES CONTEXT_NAME="jungle">
 				<CONTEXT_VALUE VALUE="jungle0"/>
 			</COMBO_VALUES>

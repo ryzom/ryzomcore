@@ -5,8 +5,8 @@ size_x = 7680-320
 from_y = -25600+160
 size_y = 5120-320
 
-targetdir = "W:/database/landscape/ligo/asteroids/max"
-snapshotdir = "W:/database/landscape/ligo/asteroids/zonebitmaps"
+targetdir = "R:/graphics/landscape/ligo/asteroids/max"
+snapshotdir = "R:/graphics/landscape/ligo/asteroids/zonebitmaps"
 zonename = "anne"
 resumeonly = true
 

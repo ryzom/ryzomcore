@@ -256,9 +256,9 @@ int main(int nNbArg, char**ppArgs)
 		printf ("InputIGDir = \"ig_land_max\";\n");
 		printf ("OutputIGDir = \"ig_land_max_elev\";\n");
 		printf ("CellSize = 160.0;\n");
-		printf ("HeightMapFile1 = \"w:/database/landscape/ligo/jungle/big.tga\";\n");
+		printf ("HeightMapFile1 = \"R:/graphics/landscape/ligo/jungle/big.tga\";\n");
 		printf ("ZFactor1 = 1.0;\n");
-		printf ("HeightMapFile2 = \"w:/database/landscape/ligo/jungle/noise.tga\";\n");
+		printf ("HeightMapFile2 = \"R:/graphics/landscape/ligo/jungle/noise.tga\";\n");
 		printf ("ZFactor2 = 0.5;\n");
 		printf ("LandFile = \"w:/matis.land\";\n");
 
