@@ -110,6 +110,9 @@ void updateFromClientCfg()
 	if (ClientCfg.BilinearUI != LastClientCfg.BilinearUI)
 		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
 
+	CWidgetManager::getInstance()->setWindowSnapInvert(ClientCfg.WindowSnapInvert);
+	CWidgetManager::getInstance()->setWindowSnapDistance(ClientCfg.WindowSnapDistance);
+
 	//---------------------------------------------------
 	if (ClientCfg.WaitVBL != LastClientCfg.WaitVBL)
 	{
