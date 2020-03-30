@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -49,7 +52,7 @@ std::map<std::string, uint32> CSheetId::_DevTypeNameToId;
 std::vector<std::vector<std::string>> CSheetId::_DevSheetIdToName;
 std::map<std::string, uint32> CSheetId::_DevSheetNameToId;
 
-const CSheetId CSheetId::Unknown(0);
+const CSheetId CSheetId::Unknown((uint32)0);
 
 void CSheetId::cbFileChange(const std::string &filename)
 {
@@ -71,7 +74,35 @@ CSheetId::CSheetId(uint32 sheetRef)
 	// For now, all static CSheetId are 0 (eg: CSheetId::Unknown)
 	if (sheetRef)
 	{
-		CStaticMap<uint32, CChar>::iterator it(_SheetIdToName.find(sheetRef));
+		TSheetIdToNameMap::iterator it(_SheetIdToName.find(sheetRef));
+		if (it != _SheetIdToName.end())
+		{
+			_DebugSheetName = it->second.Ptr;
+		}
+		else
+			_DebugSheetName = NULL;
+	}
+	else
+	{
+		_DebugSheetName = NULL;
+	}
+#endif
+}
+
+//-----------------------------------------------
+//	CSheetId
+//
+//-----------------------------------------------
+CSheetId::CSheetId(int sheetRef)
+{
+	_Id.Id = (uint32)sheetRef;
+
+#ifdef NL_DEBUG_SHEET_ID
+	// Yoyo: don't access the static map, because of order of static ctor call.
+	// For now, all static CSheetId are 0 (eg: CSheetId::Unknown)
+	if (sheetRef)
+	{
+		TSheetIdToNameMap::iterator it(_SheetIdToName.find(sheetRef));
 		if (it != _SheetIdToName.end())
 		{
 			_DebugSheetName = it->second.Ptr;
@@ -92,7 +123,7 @@ CSheetId::CSheetId(uint32 sheetRef)
 //-----------------------------------------------
 CSheetId::CSheetId(const string &sheetName)
 {
-	if (!buildSheetId(sheetName))
+	if (!buildSheetId(sheetName.c_str(), sheetName.size()))
 	{
 		if (sheetName.empty())
 			nlwarning("SHEETID: Try to create an CSheetId with empty name. TODO: check why.");
@@ -105,6 +136,25 @@ CSheetId::CSheetId(const string &sheetName)
 		//nldebug("Dumping callstack :");
 		//for (uint i=0; i<contexts.size(); ++i)
 		//	nldebug("  %3u : %s", i, contexts[i].c_str());
+		*this = Unknown;
+	}
+
+	// nldebug("LIST_SHEET_ID: %s (%s)", toString().c_str(), sheetName.c_str());
+
+} // CSheetId //
+
+//-----------------------------------------------
+//	CSheetId
+//
+//-----------------------------------------------
+CSheetId::CSheetId(const char *sheetName)
+{
+	if (!buildSheetId(sheetName, strlen(sheetName)))
+	{
+		if (!sheetName[0])
+			nlwarning("SHEETID: Try to create an CSheetId with empty name. TODO: check why.");
+		else
+			nlwarning("SHEETID: The sheet '%s' is not in sheet_id.bin, setting it to Unknown", sheetName);
 		*this = Unknown;
 	}
 
@@ -129,11 +179,47 @@ CSheetId::CSheetId(const std::string &sheetName, const std::string &defaultType)
 	}
 }
 
+static std::string s_Dot = ".";
+
+CSheetId::CSheetId(const std::string &sheetName, const char *defaultType)
+{
+	// Don't use this function without defaultType, use the one above.
+	nlassert(defaultType[0]);
+
+	if (sheetName.rfind('.') == std::string::npos)
+	{
+		std::string withType = sheetName + s_Dot + defaultType;
+		*this = CSheetId(withType);
+		// nldebug("SHEETID: Constructing CSheetId from name '%s' without explicit type, defaulting as '%s' to '%s'", sheetName.c_str(), defaultType.c_str(), withType.c_str());
+	}
+	else
+	{
+		*this = CSheetId(sheetName);
+	}
+}
+
+CSheetId::CSheetId(const char *sheetName, const char *defaultType)
+{
+	// Don't use this function without defaultType, use the one above.
+	nlassert(defaultType[0]);
+
+	if (!strchr(sheetName, '.'))
+	{
+		std::string withType = sheetName + s_Dot + defaultType;
+		*this = CSheetId(withType);
+		// nldebug("SHEETID: Constructing CSheetId from name '%s' without explicit type, defaulting as '%s' to '%s'", sheetName.c_str(), defaultType.c_str(), withType.c_str());
+	}
+	else
+	{
+		*this = CSheetId(sheetName);
+	}
+}
+
 //-----------------------------------------------
 //	Build
 //
 //-----------------------------------------------
-bool CSheetId::buildSheetId(const std::string &sheetName)
+bool CSheetId::buildSheetId(const char *sheetName, size_t sheetNameLen)
 {
 	nlassert(_Initialised);
 
@@ -181,14 +267,23 @@ bool CSheetId::buildSheetId(const std::string &sheetName)
 	}
 
 	// try looking up the sheet name in _SheetNameToId
-	CStaticMap<CChar, uint32, CCharComp>::const_iterator itId;
+	TSheetNameToIdMap::const_iterator itId;
 	CChar c;
+#ifdef alloca
+#pragma warning(push)
+#pragma warning(disable : 6255)
+	c.Ptr = (char *)alloca(sheetNameLen + 1);
+#pragma warning(pop)
+#else
 	c.Ptr = new char[sheetName.size() + 1];
-	strcpy(c.Ptr, sheetName.c_str());
+#endif
+	strcpy(c.Ptr, sheetName);
 	toLower(c.Ptr);
 
 	itId = _SheetNameToId.find(c);
-	delete[] c.Ptr;
+#ifndef alloca
+	delete[] c.Ptr; // Don't delete alloca
+#endif
 	if (itId != _SheetNameToId.end())
 	{
 		_Id.Id = itId->second;
@@ -200,11 +295,10 @@ bool CSheetId::buildSheetId(const std::string &sheetName)
 	}
 
 	// we failed to find the sheet name in the sheetname map so see if the string is numeric
-	if (sheetName.size() > 1 && sheetName[0] == '#')
+	if (sheetName[0] == '#' && sheetName[1])
 	{
 		uint32 numericId;
-		NLMISC::fromString((const char *)(sheetName.c_str() + 1), numericId);
-		if (NLMISC::toString("#%u", numericId) == sheetName)
+		if (NLMISC::fromString((const char *)(sheetName + 1), numericId))
 		{
 			_Id.Id = numericId;
 			return true;
@@ -313,7 +407,7 @@ void CSheetId::loadSheetId()
 		{
 			uint32 nSize = (uint32)_SheetIdToName.size();
 			_SheetNameToId.reserve(nSize);
-			CStaticMap<uint32, CChar>::iterator itStr;
+			TSheetIdToNameMap::iterator itStr;
 			for (itStr = _SheetIdToName.begin(); itStr != _SheetIdToName.end(); ++itStr)
 			{
 				// add entry to the inverse map
@@ -425,10 +519,26 @@ CSheetId &CSheetId::operator=(const CSheetId &sheetId)
 CSheetId &CSheetId::operator=(const string &sheetName)
 {
 
-	if (!buildSheetId(sheetName))
+	if (!buildSheetId(sheetName.c_str(), sheetName.size()))
 		*this = Unknown;
 
 	// nldebug("LIST_SHEET_ID: %s (%s)", toString().c_str(), sheetName.c_str());
+
+	return *this;
+
+} // operator= //
+
+//-----------------------------------------------
+//	operator=
+//
+//-----------------------------------------------
+CSheetId &CSheetId::operator=(const char *sheetName)
+{
+
+	if (!buildSheetId(sheetName, strlen(sheetName)))
+		*this = Unknown;
+
+	// nldebug("LIST_SHEET_ID: %s (%s)", toString().c_str(), sheetName);
 
 	return *this;
 
@@ -444,6 +554,21 @@ CSheetId &CSheetId::operator=(uint32 sheetRef)
 		init(false);
 
 	_Id.Id = sheetRef;
+
+	return *this;
+
+} // operator= //
+
+//-----------------------------------------------
+//	operator=
+//
+//-----------------------------------------------
+CSheetId &CSheetId::operator=(int sheetRef)
+{
+	if (!_Initialised)
+		init(false);
+
+	_Id.Id = (uint32)sheetRef;
 
 	return *this;
 
@@ -496,7 +621,7 @@ string CSheetId::toString(bool ifNotFoundUseNumericId) const
 		}
 	}
 
-	CStaticMap<uint32, CChar>::const_iterator itStr = _SheetIdToName.find(_Id.Id);
+	TSheetIdToNameMap::const_iterator itStr = _SheetIdToName.find(_Id.Id);
 	if (itStr != _SheetIdToName.end())
 	{
 		return string((*itStr).second.Ptr);
@@ -525,7 +650,7 @@ void CSheetId::serial(NLMISC::IStream &f)
 	f.serial(_Id.Id);
 
 #ifdef NL_DEBUG_SHEET_ID
-	CStaticMap<uint32, CChar>::iterator it(_SheetIdToName.find(_Id.Id));
+	TSheetIdToNameMap::iterator it(_SheetIdToName.find(_Id.Id));
 	if (it != _SheetIdToName.end())
 		_DebugSheetName = it->second.Ptr;
 	else
@@ -561,7 +686,7 @@ void CSheetId::display()
 	if (!_Initialised)
 		init(false);
 
-	CStaticMap<uint32, CChar>::const_iterator itStr;
+	TSheetIdToNameMap::const_iterator itStr;
 	for (itStr = _SheetIdToName.begin(); itStr != _SheetIdToName.end(); ++itStr)
 	{
 		//nlinfo("%d %s",(*itStr).first,(*itStr).second.c_str());
@@ -579,7 +704,7 @@ void CSheetId::display(uint32 type)
 	if (!_Initialised)
 		init(false);
 
-	CStaticMap<uint32, CChar>::const_iterator itStr;
+	TSheetIdToNameMap::const_iterator itStr;
 	for (itStr = _SheetIdToName.begin(); itStr != _SheetIdToName.end(); ++itStr)
 	{
 		// work out the type value for this entry in the map
@@ -605,7 +730,7 @@ void CSheetId::buildIdVector(std::vector<CSheetId> &result)
 	if (!_Initialised)
 		init(false);
 
-	CStaticMap<uint32, CChar>::const_iterator itStr;
+	TSheetIdToNameMap::const_iterator itStr;
 	for (itStr = _SheetIdToName.begin(); itStr != _SheetIdToName.end(); ++itStr)
 	{
 		result.push_back((CSheetId)(*itStr).first);
@@ -623,7 +748,7 @@ void CSheetId::buildIdVector(std::vector<CSheetId> &result, uint32 type)
 		init(false);
 	nlassert(type < (1 << (NL_SHEET_ID_TYPE_BITS)));
 
-	CStaticMap<uint32, CChar>::const_iterator itStr;
+	TSheetIdToNameMap::const_iterator itStr;
 	for (itStr = _SheetIdToName.begin(); itStr != _SheetIdToName.end(); ++itStr)
 	{
 		// work out the type value for this entry in the map
@@ -649,7 +774,7 @@ void CSheetId::buildIdVector(std::vector<CSheetId> &result, std::vector<std::str
 		init(false);
 	nlassert(type < (1 << (NL_SHEET_ID_TYPE_BITS)));
 
-	CStaticMap<uint32, CChar>::const_iterator itStr;
+	TSheetIdToNameMap::const_iterator itStr;
 	for (itStr = _SheetIdToName.begin(); itStr != _SheetIdToName.end(); ++itStr)
 	{
 		// work out the type value for this entry in the map
@@ -734,7 +859,7 @@ void CSheetId::buildSheetId(uint32 shortId, uint32 type)
 	_Id.IdInfos.Type = type;
 
 #ifdef NL_DEBUG_SHEET_ID
-	CStaticMap<uint32, CChar>::iterator it(_SheetIdToName.find(_Id.Id));
+	TSheetIdToNameMap::iterator it(_SheetIdToName.find(_Id.Id));
 	if (it != _SheetIdToName.end())
 	{
 		_DebugSheetName = it->second.Ptr;

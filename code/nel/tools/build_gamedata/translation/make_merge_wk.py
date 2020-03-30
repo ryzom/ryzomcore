@@ -52,6 +52,7 @@ try:
 	subprocess.call([ TranslationTools, "merge_clause_diff" ])
 	subprocess.call([ TranslationTools, "merge_words_diff" ])
 	subprocess.call([ TranslationTools, "merge_string_diff" ])
+	subprocess.call([ TranslationTools, "merge_r2_string_diff" ])
 	subprocess.call([ TranslationTools, "merge_worksheet_diff", "bot_names.txt" ])
 except Exception, e:
 	printLog(log, "<" + processName + "> " + str(e))
@@ -64,6 +65,7 @@ try:
 	subprocess.call([ TranslationTools, "make_clause_diff" ])
 	subprocess.call([ TranslationTools, "make_words_diff" ])
 	subprocess.call([ TranslationTools, "make_string_diff" ])
+	subprocess.call([ TranslationTools, "make_r2_string_diff" ])
 	subprocess.call([ TranslationTools, "make_worksheet_diff", "bot_names.txt" ])
 except Exception, e:
 	printLog(log, "<" + processName + "> " + str(e))
@@ -92,6 +94,7 @@ try:
 	subprocess.call([ TranslationTools, "merge_clause_diff" ])
 	subprocess.call([ TranslationTools, "merge_words_diff" ])
 	subprocess.call([ TranslationTools, "merge_string_diff" ])
+	subprocess.call([ TranslationTools, "merge_r2_string_diff" ])
 	subprocess.call([ TranslationTools, "merge_worksheet_diff", "bot_names.txt" ])
 except Exception, e:
 	printLog(log, "<" + processName + "> " + str(e))

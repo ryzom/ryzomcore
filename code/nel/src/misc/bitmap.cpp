@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -2043,7 +2046,7 @@ void CBitmap::resamplePicture32 (const NLMISC::CRGBA *pSrc, NLMISC::CRGBA *pDest
 								 sint32 nDestWidth, sint32 nDestHeight)
 {
 	//logResample("RP32: 0 pSrc=%p pDest=%p, Src=%d x %d Dest=%d x %d", pSrc, pDest, nSrcWidth, nSrcHeight, nDestWidth, nDestHeight);
-	if ((nSrcWidth<=0)||(nSrcHeight<=0)||(nDestHeight<=0)||(nDestHeight<=0))
+	if ((nSrcWidth<=0)||(nSrcHeight<=0)||(nDestWidth<=0)||(nDestHeight<=0))
 		return;
 
 	// If we're reducing it by 2, call the fast resample
@@ -2265,7 +2268,7 @@ void CBitmap::resamplePicture8 (const uint8 *pSrc, uint8 *pDest,
 								 sint32 nDestWidth, sint32 nDestHeight)
 {
 	//logResample("RP8: 0 pSrc=%p pDest=%p, Src=%d x %d Dest=%d x %d", pSrc, pDest, nSrcWidth, nSrcHeight, nDestWidth, nDestHeight);
-	if ((nSrcWidth<=0)||(nSrcHeight<=0)||(nDestHeight<=0)||(nDestHeight<=0))
+	if ((nSrcWidth<=0)||(nSrcHeight<=0)||(nDestWidth<=0)||(nDestHeight<=0))
 		return;
 
 	// If we're reducing it by 2, call the fast resample

@@ -7,7 +7,7 @@
 */
 
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Jan Boon (Kaetemi)
+// Copyright (C) 2010-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -88,6 +88,8 @@ int main(int nNbArg, char **ppArgs)
 
 	// build the sound bank
 	UAudioMixer::buildSoundBank(exportDir);
+	UAudioMixer::buildClusteredSoundGroupSheets(exportDir);
+	UAudioMixer::buildUserVarBindingSheets(exportDir);
 	
 	// and that's all folks
 	return EXIT_SUCCESS;

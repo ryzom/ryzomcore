@@ -289,6 +289,8 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_RYZOM               "Build Ryzom Core."                             ON )
   OPTION(WITH_SNOWBALLS           "Build Snowballs."                              OFF)
   OPTION(WITH_TOOLS               "Build Tools"                                   OFF)
+
+  OPTION(WITH_RYZOM_LIVE          "Use ryzom.com urls"                            OFF)
 ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
@@ -297,6 +299,7 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   ###
   OPTION(WITH_NET                 "Build NLNET"                                   ON )
   OPTION(WITH_3D                  "Build NL3D"                                    ON )
+  OPTION(WITH_WEB                 "Build WEB"                                     ON )
   OPTION(WITH_GUI                 "Build GUI"                                     ON )
   OPTION(WITH_PACS                "Build NLPACS"                                  ON )
   OPTION(WITH_GEORGES             "Build NLGEORGES"                               ON )

@@ -1,6 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -171,6 +175,8 @@ CComplexSound::CComplexSound() :
 	_PatternMode(CComplexSound::MODE_UNDEFINED),
 	_TicksPerSeconds(1.0f),
 	_XFadeLength(3000),		// default to 3000 sec.
+	_DoFadeIn(true),
+	_DoFadeOut(true),
 	_MaxDistValid(false),
 	_Duration(0),
 	_DurationValid(false)
@@ -314,7 +320,8 @@ void	CComplexSound::importForm(const std::string& filename, NLGEORGES::UFormElm&
 	if (mode == "Chained" || mode == "Sparse")
 	{
 		// XFade length
-		formRoot.getValueByName(_XFadeLength, ".SoundType.XFadeLength");
+		if (!formRoot.getValueByName(_XFadeLength, ".SoundType.XFadeLength"))
+			formRoot.getValueByName(_XFadeLength, ".SoundType.XFadeLenght"); // WORKAROUND: Typo in sound assets
 		// Fade in/out flag.
 		formRoot.getValueByName(_DoFadeIn, ".SoundType.DoFadeIn");
 		formRoot.getValueByName(_DoFadeOut, ".SoundType.DoFadeOut");

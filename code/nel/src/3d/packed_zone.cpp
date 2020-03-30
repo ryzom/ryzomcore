@@ -492,7 +492,7 @@ static void computeRastersUnion(const CPolygon2D::TRasterVect &inRaster0, CPolyg
 	{
 		if (inRaster1.empty())
 		{
-			outRaster.empty();
+			outRaster.clear();
 			finalMinY = -1;
 			return;
 		}

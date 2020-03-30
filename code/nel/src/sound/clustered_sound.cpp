@@ -1,6 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -160,10 +164,6 @@ public:
 
 };
 
-// this structure is fill by the loadForm() function and will contain all you need
-std::map<std::string, CSoundGroupSerializer> Container;
-
-
 CClusteredSound::CClusteredSound()
 :	_Scene(0),
 	_RootCluster(0),
@@ -173,21 +173,27 @@ CClusteredSound::CClusteredSound()
 	
 }
 
+void CClusteredSound::buildSheets(const std::string &packedSheetPath)
+{
+	std::map<std::string, CSoundGroupSerializer> container;
+	::loadForm("sound_group", packedSheetPath + "sound_groups.packed_sheets", container, true, false);
+}
 
 void CClusteredSound::init(NL3D::CScene *scene, float portalInterpolate, float maxEarDist, float minGain)
 {
 	// load the sound_group sheets
-	::loadForm("sound_group", CAudioMixerUser::instance()->getPackedSheetPath()+"sound_groups.packed_sheets", Container, CAudioMixerUser::instance()->getPackedSheetUpdate(), false);
+	std::map<std::string, CSoundGroupSerializer> container;
+	::loadForm("sound_group", CAudioMixerUser::instance()->getPackedSheetPath()+"sound_groups.packed_sheets", container, CAudioMixerUser::instance()->getPackedSheetUpdate(), false);
 
 	// copy the container data into internal structure
-	std::map<std::string, CSoundGroupSerializer>::iterator first(Container.begin()), last(Container.end());
+	std::map<std::string, CSoundGroupSerializer>::iterator first(container.begin()), last(container.end());
 	for (; first != last; ++first)
 	{
 		_SoundGroupToSound.insert(first->second._SoundGroupAssoc.begin(), first->second._SoundGroupAssoc.end());
 	}
 
 	// and clear the temporary Container
-	Container.clear();
+	container.clear();
 
 
 	_Scene = scene;
