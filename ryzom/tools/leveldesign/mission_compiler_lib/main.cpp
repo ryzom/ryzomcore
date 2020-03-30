@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	
 	if (leveldesignPath == NULL)
 	{
-		printf("Error: You need to define RYZOM_LEVELDESIGN environment variable that points to previous L:\\ equivalent under Windows\n");
+		printf("Error: You need to define RYZOM_LEVELDESIGN environment variable that points to previous R:\\leveldesign\\ equivalent under Windows\n");
 		return -1;
 	}
 

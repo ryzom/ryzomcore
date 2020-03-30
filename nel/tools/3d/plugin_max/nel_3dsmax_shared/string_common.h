@@ -21,6 +21,7 @@
 #define NLMAX_STRING_COMMON_H
 
 #include <nel/misc/ucstring.h>
+#include <nel/misc/string_common.h>
 
 #if (MAX_VERSION_MAJOR < 15)
 #define GET_OBJECT_NAME_CONST
@@ -37,9 +38,7 @@ static TSTR MaxTStrFromUtf8(const std::string &src)
 {
 	TSTR dst;
 #if (MAX_VERSION_MAJOR < 15)
-	ucstring uc;
-	uc.fromUtf8(src);
-	dst = (const mwchar_t *)uc.c_str();
+	dst = nlUtf8ToTStr(src);
 #else
 	dst.FromUTF8(src.c_str());
 #endif
@@ -49,14 +48,7 @@ static TSTR MaxTStrFromUtf8(const std::string &src)
 static std::string MaxTStrToUtf8(const TSTR& src)
 {
 #if (MAX_VERSION_MAJOR < 15)
-#ifdef _UNICODE
-	ucstring uc(src.data());
-	return uc.toUtf8();
-#else
-	WStr ws = src;
-	ucstring uc((const ucchar *)ws.data());
-	return uc.toUtf8();
-#endif
+	return NLMISC::tStrToUtf8(src.data());
 #else
 	return src.ToUTF8().data();
 #endif
@@ -64,13 +56,7 @@ static std::string MaxTStrToUtf8(const TSTR& src)
 
 static std::string MCharStrToUtf8(const MCHAR *src)
 {
-#ifdef _UNICODE
-	ucstring uc((const ucchar *)src);
-	return uc.toUtf8();
-#else
-	ucstring uc((const ucchar *)WStr(src).data());
-	return uc.toUtf8();
-#endif
+	return NLMISC::tStrToUtf8(src);
 }
 
 #endif /* #ifndef NLMAX_STRING_COMMON_H */

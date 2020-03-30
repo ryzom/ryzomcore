@@ -4,7 +4,7 @@ NEL3D_APPDATA_INTERFACE_FILE = 1423062700
 -- Allocate 20 Me for the script
 heapSize += 15000000
 
-nlErrorFilename = "W:/database/conversion.log"
+nlErrorFilename = "R:/graphics/conversion.log"
 nlErrorStream = openFile nlErrorFilename mode:"w"
 if nlErrorStream == undefined then
 	nlErrorStream = createFile nlErrorFilename
@@ -171,7 +171,7 @@ rollout assets_resave_rollout "Properties"
 			ProgressText.text  = "In directory "+currentDirectory+", compute file \"" + (getFilenameFile file) + "\""
 			Progress.value = i*100/files.count
 			
-			if (UseTag.checked == false) or ((NeLTestFileDate file "W:/database/conversion.tag") == true) then
+			if (UseTag.checked == false) or ((NeLTestFileDate file "R:/graphics/conversion.tag") == true) then
 			(
 				resetMAXFile #noprompt
 				

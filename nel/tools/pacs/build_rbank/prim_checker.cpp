@@ -72,7 +72,7 @@ bool	CPrimChecker::build(const string &primitivesPath, const string &igLandPath,
 	// Init ligo
 	if (!LigoConfig.readPrimitiveClass ("world_editor_classes.xml", false))
 	{
-		// Should be in l:\leveldesign\world_edit_files
+		// Should be in R:\leveldesign\world_edit_files
 		nlwarning ("Can't load ligo primitive config file world_editor_classes.xml");
 		return false;
 	}
