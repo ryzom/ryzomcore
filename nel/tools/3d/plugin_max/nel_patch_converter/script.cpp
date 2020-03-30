@@ -1271,7 +1271,7 @@ Value* get_patch_vertex_cf (Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	const MCHAR *message= _M("NeLGetPatchVertex [NeLPatchMesh] [PatchId] [VertexId]");
+	MCHAR *message= _M("NeLGetPatchVertex [NeLPatchMesh] [PatchId] [VertexId]");
 	type_check(arg_list[0], MAXNode, message);
 	type_check(arg_list[1], Integer, message);
 	type_check(arg_list[2], Integer, message);
