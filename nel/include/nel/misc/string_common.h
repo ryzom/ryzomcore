@@ -290,6 +290,14 @@ inline bool endsWith(const char *str, const char *suffix) { return endsWith(str,
 inline bool endsWith(const std::string &str, const char *suffix) { return endsWith(str.c_str(), str.size(), suffix, strlen(suffix)); }
 inline bool endsWith(const std::string &str, const std::string &suffix) { return endsWith(str.c_str(), str.size(), suffix.c_str(), suffix.size()); }
 
+// ****************************************************************************
+// Conversion of strings between
+// - UTF-8
+// - Local codepage (UTF-8 on Linux)
+// - TString (Local codepage or wide on Windows)
+// - Wide (wchar_t *, UTF-16 on Windows, UTF-32 on Linux)
+// ****************************************************************************
+
 // Convert local codepage to UTF-8
 // On Windows, the local codepage is undetermined
 // On Linux, the local codepage is always UTF-8 (no-op)
