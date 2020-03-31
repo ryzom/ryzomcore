@@ -85,7 +85,7 @@ void CMusicPlayer::playSongs (const std::vector<CSongs> &songs)
 		rebuildPlaylist();
 
 	// If pause, stop, else play will resume
-	if (_State == Paused)
+	if (_State == Paused || _Songs.empty())
 		_State = Stopped;
 }
 
