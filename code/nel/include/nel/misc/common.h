@@ -1,5 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2018  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
+// Copyright (C) 2015-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -302,6 +307,10 @@ template <class T> T trimQuotes (const T &str)
 	return str.substr(1, size - 2);
 }
 
+// encode/decode uri component using %AB hex encoding
+std::string encodeURIComponent(const std::string &in);
+std::string decodeURIComponent(const std::string &in);
+
 //////////////////////////////////////////////////////////////////////////
 // ****  DEPRECATED *****: PLEASE DON'T USE THESE METHODS BUT FUNCTIONS ABOVE toLower() and toUpper()
 //////////////////////////////////////////////////////////////////////////
@@ -359,8 +368,8 @@ public:
 	Exception();
 	Exception(const std::string &reason);
 	Exception(const char *format, ...);
-	virtual ~Exception() throw() {}
-	virtual const char	*what() const throw();
+	virtual ~Exception() NL_OVERRIDE {}
+	virtual const char	*what() const throw() NL_OVERRIDE;
 };
 
 

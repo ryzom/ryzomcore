@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -457,7 +460,9 @@ bool CFileTreeCtrl::enumObjects(HTREEITEM hParentItem,IShellFolder* pParentFolde
 			string ext5 = pItemInfo->displayName.substr(displayNameSize-5);
 
 			bool cvs = ext3 == "CVS" || ext4 == "CVS\\" || ext4 == "CVS/" ||
-				ext4 == ".svn" || ext5 == ".svn\\" || ext5 == ".svn/";
+				ext4 == ".svn" || ext5 == ".svn\\" || ext5 == ".svn/" ||
+				ext4 == ".hg" || ext5 == ".hg\\" || ext5 == ".hg/" ||
+				ext4 == ".git" || ext5 == ".git\\" || ext5 == ".git/";
 
 /*			bool cvs = ( pItemInfo->displayName[displayNameSize-3] == 'C') &&
 				(pItemInfo->displayName[displayNameSize-2] == 'V') &&

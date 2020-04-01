@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -22,7 +25,6 @@
 #include "nel/misc/string_mapper.h"
 #include "nel/sound/u_source.h"
 #include "nel/georges/u_form_elm.h"
-#include "nel/misc/sheet_id.h"
 #include <string>
 
 namespace NLSOUND {
@@ -36,7 +38,7 @@ class CGroupController;
 
 /// Sound names hash map
 //typedef std::hash_map<std::string, CSound*> TSoundMap;
-typedef CHashMap<NLMISC::CSheetId, CSound*, NLMISC::CStringIdHashMapTraits> TSoundMap;
+typedef CHashMap<NLMISC::TStringId, CSound*, NLMISC::CStringIdHashMapTraits> TSoundMap;
 
 /// Sound names set (for ambiant sounds)
 typedef std::set<CSound*> TSoundSet;
@@ -54,7 +56,7 @@ class CSound
 	friend class CAudioMixerUser;
 public:
 	/// Factory for specialized sound.
-	static CSound *createSound(const std::string &name, NLGEORGES::UFormElm& formRoot);
+	static CSound *createSound(const std::string &filename, NLGEORGES::UFormElm& formRoot);
 
 	enum TSOUND_TYPE
 	{
@@ -100,7 +102,7 @@ public:
 	/// Return the length of the sound in ms
 	virtual uint32		getDuration() = 0;
 	/// Return the name (must be unique)
-	const NLMISC::CSheetId&	getName() const						{ return _Name; }
+	const NLMISC::TStringId&	getName() const						{ return _Name; }
 
 	/// Return the min distance (if detailed()) (default 1.0f if not implemented by sound type)
 	virtual float		getMinDistance() const				{ return _MinDist; }
@@ -122,8 +124,7 @@ public:
 
 	bool				operator<( const CSound& otherSound ) const
 	{
-		//return NLMISC::CStringMapper::unmap(_Name) < NLMISC::CStringMapper::unmap(otherSound._Name);
-		return _Name.toString() < otherSound._Name.toString();
+		return NLMISC::CStringMapper::unmap(_Name) < NLMISC::CStringMapper::unmap(otherSound._Name);
 	}
 
 protected:
@@ -144,7 +145,7 @@ protected:
 	float				_MaxDist;
 
 	// Sound name.
-	NLMISC::CSheetId	_Name;
+	NLMISC::TStringId	_Name;
 	/// An optional user var controler.
 	NLMISC::TStringId	_UserVarControler;
 

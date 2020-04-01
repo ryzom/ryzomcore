@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -19,7 +22,6 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/string_mapper.h"
-#include "nel/misc/sheet_id.h"
 #include <vector>
 #include <map>
 
@@ -190,7 +192,7 @@ public:
 
 	const std::vector<std::pair<NLMISC::CVector, NLMISC::CVector> >	&getAudioPath() { return _AudioPath;}
 
-
+	static void buildSheets(const std::string &packedSheetPath);
 
 private:
 
@@ -254,9 +256,9 @@ private:
 	/// The current cluster playing source indexed with sound group id
 	TClusterSoundCont		_Sources;
 
-	typedef CHashMap<NLMISC::TStringId, NLMISC::CSheetId, NLMISC::CStringIdHashMapTraits> TStringSheetMap;
+	typedef CHashMap<NLMISC::TStringId, NLMISC::TStringId, NLMISC::CStringIdHashMapTraits> TStringStringMap;
 	/// The sound_group to sound assoc
-	TStringSheetMap	_SoundGroupToSound;
+	TStringStringMap	_SoundGroupToSound;
 };
 
 } // NLSOUND

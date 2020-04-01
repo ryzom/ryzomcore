@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1330,15 +1334,18 @@ void CGroupMap::checkCoords()
 	{
 		if( _AnimalLM[i] )
 		{
+			// update pos
+			sint32	px, py;
+			_AnimalPosStates[i]->getPos(px, py);
+			updateLMPosFromDBPos(_AnimalLM[i], px, py);
+
 			if (_IsIsland)
 			{
 				_AnimalLM[i]->setActive(false);
 			}
-			else
+			else if (_AnimalLM[i]->getActive())
 			{
-				_AnimalLM[i]->setActive(true);
 				// update texture from animal status
-				CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 				CCDBNodeLeaf	*statusNode = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d", i) + ":STATUS", false);
 				if (statusNode && ANIMAL_STATUS::isInStable((ANIMAL_STATUS::EAnimalStatus)statusNode->getValue32()) )
 				{
@@ -1369,11 +1376,6 @@ void CGroupMap::checkCoords()
 					case ANIMAL_TYPE::Demon:  sPrefix = "uiPATitleDemon";  break;
 				}
 				_AnimalLM[i]->setDefaultContextHelp(NLMISC::CI18N::get(sPrefix+toString(i+1)));
-
-				// update pos
-				sint32	px, py;
-				_AnimalPosStates[i]->getPos(px, py);
-				updateLMPosFromDBPos(_AnimalLM[i], px, py);
 			}
 		}
 	}

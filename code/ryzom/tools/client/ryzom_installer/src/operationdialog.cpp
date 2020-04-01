@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,7 @@
 #include "filesextractor.h"
 #include "filescleaner.h"
 
-#include "seven_zip.h"
+#include "nel/misc/seven_zip.h"
 
 #if defined(Q_OS_WIN32) && defined(QT_WINEXTRAS_LIB)
 #include <QtWinExtras/QWinTaskbarProgress>

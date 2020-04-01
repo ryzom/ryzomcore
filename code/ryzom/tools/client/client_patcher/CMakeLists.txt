@@ -21,9 +21,10 @@ INCLUDE_DIRECTORIES(
 
 TARGET_LINK_LIBRARIES(ryzom_client_patcher
 				nelmisc
+				nelweb
 				nelnet
 				ryzom_gameshare
-				ryzom_sevenzip
+				nel_sevenzip
 				${CURL_LIBRARIES})
 
 IF(APPLE)

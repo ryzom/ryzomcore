@@ -1,5 +1,4 @@
 # Need clientsheets lib for sheets packer tool
-# Need seven_zip for patch_gen and ryzom_installer
 ADD_SUBDIRECTORY(src)
 
 IF(WITH_RYZOM_CLIENT)

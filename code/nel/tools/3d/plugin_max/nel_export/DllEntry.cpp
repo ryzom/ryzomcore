@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010-2011  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -20,7 +23,6 @@
 #include "nel/misc/app_context.h"
 #include "../nel_3dsmax_shared/nel_3dsmax_shared.h"
 #include <maxversion.h>
-#include "nel/misc/sheet_id.h"
 
 extern ClassDesc2* GetCNelExportDesc();
 
@@ -35,7 +37,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 	{
 		new NLMISC::CLibraryContext(GetSharedNelContext());
 		nldebug("NeL Export: DllMain");
-		NLMISC::CSheetId::initWithoutSheet();
 	}
 			
 	hInstance = hinstDLL;				// Hang on to this DLL's instance handle.

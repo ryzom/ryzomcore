@@ -1,6 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -191,9 +195,9 @@ void CComplexSource::playStuf()
 	case CComplexSound::MODE_ALL_IN_ONE:
 		{
 			// just spanw all the listed source.
-			const std::vector<NLMISC::CSheetId> &sounds = _PatternSound->getSounds();
+			const std::vector<NLMISC::TStringId> &sounds = _PatternSound->getSounds();
 
-			std::vector<NLMISC::CSheetId>::const_iterator first(sounds.begin()), last(sounds.end());
+			std::vector<NLMISC::TStringId>::const_iterator first(sounds.begin()), last(sounds.end());
 
 			if (_AllSources.empty())
 			{
@@ -525,7 +529,7 @@ void CComplexSource::onUpdate()
 			else
 			{
 				// no sound after, just set an event at end of current sound to stop the complex sound.
-				nldebug("Setting last event for sound %s in %u millisec.", _Source1->getSound()->getName().toString().c_str()/*CStringMapper::unmap(_Source1->getSound()->getName()).c_str()*/, _Source1->getSound()->getDuration());
+				nldebug("Setting last event for sound %s in %u millisec.", CStringMapper::unmap(_Source1->getSound()->getName()).c_str(), _Source1->getSound()->getDuration());
 				if (_PatternSound->doFadeOut())
 				{
 					// set the event to begin fade out.
