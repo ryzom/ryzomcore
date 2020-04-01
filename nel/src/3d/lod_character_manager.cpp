@@ -979,6 +979,9 @@ void			CLodCharacterManager::addTextureCompute(CLodCharacterInstance &instance, 
 
 	// get lookup ptr.
 	nlassert(lodTexture.Texture.size()==NL3D_CLOD_TEXT_SIZE);
+	if (lodTexture.Texture.size() < NL3D_CLOD_TEXT_SIZE)
+		return;
+
 	const CLodCharacterTexture::CTUVQ		*lookUpPtr= &lodTexture.Texture[0];
 
 	// apply the lodTexture, taking only better quality (ie nearer 0)

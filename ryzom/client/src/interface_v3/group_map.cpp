@@ -1293,15 +1293,18 @@ void CGroupMap::checkCoords()
 	{
 		if( _AnimalLM[i] )
 		{
+			// update pos
+			sint32	px, py;
+			_AnimalPosStates[i]->getPos(px, py);
+			updateLMPosFromDBPos(_AnimalLM[i], px, py);
+
 			if (_IsIsland)
 			{
 				_AnimalLM[i]->setActive(false);
 			}
-			else
+			else if (_AnimalLM[i]->getActive())
 			{
-				_AnimalLM[i]->setActive(true);
 				// update texture from animal status
-				CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 				CCDBNodeLeaf	*statusNode = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d", i) + ":STATUS", false);
 				if (statusNode && ANIMAL_STATUS::isInStable((ANIMAL_STATUS::EAnimalStatus)statusNode->getValue32()) )
 				{
@@ -1332,11 +1335,6 @@ void CGroupMap::checkCoords()
 					case ANIMAL_TYPE::Demon:  sPrefix = "uiPATitleDemon";  break;
 				}
 				_AnimalLM[i]->setDefaultContextHelp(NLMISC::CI18N::get(sPrefix+toString(i+1)));
-
-				// update pos
-				sint32	px, py;
-				_AnimalPosStates[i]->getPos(px, py);
-				updateLMPosFromDBPos(_AnimalLM[i], px, py);
 			}
 		}
 	}
