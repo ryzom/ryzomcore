@@ -909,18 +909,18 @@ function RingPlayerInfo:fill(ringPoints)
 --	tooltipUI.tooltip = self:tooltipRingRating(level, progress, "uiR2EDMasterlessRingRatingTooltip")
 
 	-- ecosystem Points
-	local ecosystems = {"Basic", "Desert", "Subtropic", "Forest", "Jungle", "PrimeRoot"}
-	for k, eco in pairs(ecosystems) do
-		local ecoVal = tostring(ringPoints[eco.."RingPoints"])
-		local ecoValMax = tostring(ringPoints["Max" .. eco.."RingPoints"])
-		local ecoUI = ui:find(string.lower(eco))
-		local maxUI = ecoUI:find("max")
-		local valUI = ecoUI:find("val")
-		tooltipUI = ecoUI:find("tt")
-		maxUI.hardtext = ecoValMax
-		valUI.hardtext = ecoVal
-		tooltipUI.tooltip = self:tooltipEcosystemPoints(ecoVal, ecoValMax, "uiR2ED" .. eco .. "PointsTooltip")
-	end
+--	local ecosystems = {"Basic", "Desert", "Subtropic", "Forest", "Jungle", "PrimeRoot"}
+--	for k, eco in pairs(ecosystems) do
+--		local ecoVal = tostring(ringPoints[eco.."RingPoints"])
+--		local ecoValMax = tostring(ringPoints["Max" .. eco.."RingPoints"])
+--		local ecoUI = ui:find(string.lower(eco))
+--		local maxUI = ecoUI:find("max")
+--		local valUI = ecoUI:find("val")
+--		tooltipUI = ecoUI:find("tt")
+--		maxUI.hardtext = ecoValMax
+--		valUI.hardtext = ecoVal
+--		tooltipUI.tooltip = self:tooltipEcosystemPoints(ecoVal, ecoValMax, "uiR2ED" .. eco .. "PointsTooltip")
+--	end
 end
 
 --------------------------------------------------------------------------------------------------------------
