@@ -42,12 +42,16 @@ public:
 	class CSongs
 	{
 	public:
+		CSongs(std::string file = std::string(), std::string title = std::string(), float length = 0.f)
+		: Filename(file), Title(title), Length(length)
+		{ }
+
 		std::string	Filename;
 		std::string	Title;
 		float       Length;
 	};
 
-	void playSongs (const std::vector<CSongs> &songs);
+	void playSongs (const std::vector<std::string> &filenames);
 	void play (sint index = -1);						// Play the song at current position, if playing, restart. If paused, resume.
 	void pause ();
 	void stop ();
@@ -68,12 +72,23 @@ public:
 	// Update playlist active row
 	void updatePlaylist(sint prevIndex = -1);
 
+	// Update single song title/duration on _Songs and on playlist
+	void updateSong(const CSongs &song);
+
+	// Update _Songs and playlist from _SongUpdateQueue
+	void updateSongs();
+
+	// update song from worker thread
+	void updateSong(const std::string filename, const std::string title, float length);
+
 private:
 
 	// The playlist
 	CSongs								_CurrentSong;
 	uint								_CurrentSongIndex;	// If (!_Songs.empty()) must always be <_Songs.size()
 	std::vector<CSongs>					_Songs;
+	// updated info from worker thread
+	std::vector<CSongs>					_SongUpdateQueue;
 
 	// State
 	enum TState { Stopped, Playing, Paused }	_State;

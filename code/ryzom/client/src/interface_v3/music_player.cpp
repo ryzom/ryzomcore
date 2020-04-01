@@ -28,6 +28,9 @@
 #include "interface_manager.h"
 #include "../client_cfg.h"
 
+#include "nel/misc/thread.h"
+#include "nel/misc/mutex.h"
+
 using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
@@ -48,6 +51,88 @@ extern UDriver	*Driver;
 #define MP3_SAVE_REPEAT "UI:SAVE:MP3_REPEAT"
 
 CMusicPlayer MusicPlayer;
+static NLMISC::CUnfairMutex MusicPlayerMutex;
+
+// ***************************************************************************
+class CMusicPlayerWorker : public NLMISC::IRunnable
+{
+private:
+	bool _Running;
+	IThread *_Thread;
+
+	std::vector<std::string> _Files;
+
+public:
+	CMusicPlayerWorker(): _Running(false), _Thread(NULL)
+	{
+	}
+
+	~CMusicPlayerWorker()
+	{
+		_Running = false;
+		if (_Thread)
+		{
+			_Thread->terminate();
+			delete _Thread;
+			_Thread = NULL;
+		}
+	}
+
+	bool isRunning() const { return _Running; }
+
+	void run()
+	{
+		_Running = true;
+
+		uint i = 0;
+		while(_Running && SoundMngr && i < _Files.size())
+		{
+			// get copy incase _Files changes
+			std::string filename(_Files[i]);
+
+			std::string title;
+			float length;
+
+			if (SoundMngr->getMixer()->getSongTitle(filename, title, length))
+			{
+				MusicPlayer.updateSong(filename, title, length);
+			}
+
+			++i;
+		}
+
+		_Running = false;
+		_Files.clear();
+	}
+
+	// called from GUI
+	void getSongsInfo(const std::vector<std::string> &filenames)
+	{
+		if (_Thread)
+		{
+			stopThread();
+		}
+
+		_Files = filenames;
+
+		_Thread = IThread::create(this);
+		nlassert(_Thread != NULL);
+		_Thread->start();
+	}
+
+	void stopThread()
+	{
+		_Running = false;
+		if (_Thread)
+		{
+			_Thread->wait();
+			delete _Thread;
+			_Thread = NULL;
+		}
+	}
+};
+
+static CMusicPlayerWorker MusicPlayerWorker;
 
 // ***************************************************************************
 
@@ -69,11 +154,14 @@ bool CMusicPlayer::isShuffleEnabled() const
 	return (NLGUI::CDBManager::getInstance()->getDbProp(MP3_SAVE_SHUFFLE)->getValue32() == 1);
 }
 
-
 // ***************************************************************************
-void CMusicPlayer::playSongs (const std::vector<CSongs> &songs)
+void CMusicPlayer::playSongs (const std::vector<std::string> &filenames)
 {
-	_Songs = songs;
+	_Songs.clear();
+	for (uint i=0; i<filenames.size(); i++)
+	{
+		_Songs.push_back(CSongs(filenames[i], CFile::getFilename(filenames[i]), 0.f));
+	}
 
 	// reset song index if out of bounds
 	if (_CurrentSongIndex > _Songs.size())
@@ -87,6 +175,9 @@ void CMusicPlayer::playSongs (const std::vector<CSongs> &songs)
 	// If pause, stop, else play will resume
 	if (_State == Paused || _Songs.empty())
 		_State = Stopped;
+
+	// get song title/duration using worker thread
+	MusicPlayerWorker.getSongsInfo(filenames);
 }
 
 // ***************************************************************************
@@ -105,6 +196,88 @@ void CMusicPlayer::updatePlaylist(sint prevIndex)
 	rowId = toString("%s:s%d:bg", MP3_PLAYER_PLAYLIST_LIST, _CurrentSongIndex);
 	pIE = dynamic_cast<CInterfaceElement*>(CWidgetManager::getInstance()->getElementFromId(rowId));
 	if (pIE) pIE->setActive(true);
+}
+
+// ***************************************************************************
+// called from worker thread
+void CMusicPlayer::updateSong(const std::string filename, const std::string title, float length)
+{
+	CAutoMutex<CUnfairMutex> mutex(MusicPlayerMutex);
+
+	_SongUpdateQueue.push_back(CSongs(filename, title, length));
+}
+
+// ***************************************************************************
+// called from GUI
+void CMusicPlayer::updateSongs()
+{
+	CAutoMutex<CUnfairMutex> mutex(MusicPlayerMutex);
+	if (!_SongUpdateQueue.empty())
+	{
+		for(uint i = 0; i < _SongUpdateQueue.size(); ++i)
+		{
+			updateSong(_SongUpdateQueue[i]);
+		}
+		_SongUpdateQueue.clear();
+	}
+}
+
+// ***************************************************************************
+void CMusicPlayer::updateSong(const CSongs &song)
+{
+	uint index = 0;
+	while(index < _Songs.size())
+	{
+		if (_Songs[index].Filename == song.Filename)
+		{
+			_Songs[index].Title = song.Title;
+			_Songs[index].Length = song.Length;
+			break;
+		}
+
+		++index;
+	}
+	if (index == _Songs.size())
+	{
+		nlwarning("Unknown song file '%s'", song.Filename.c_str());
+		return;
+	}
+
+	std::string rowId(toString("%s:s%d", MP3_PLAYER_PLAYLIST_LIST, index));
+	CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(rowId));
+	if (!pIG)
+	{
+		nlwarning("Playlist row '%s' not found", rowId.c_str());
+		return;
+	}
+
+	CViewText *pVT;
+	pVT = dynamic_cast<CViewText *>(pIG->getView(TEMPLATE_PLAYLIST_SONG_TITLE));
+	if (pVT)
+	{
+		pVT->setHardText(song.Title);
+	}
+	else
+	{
+		nlwarning("title element '%s' not found", TEMPLATE_PLAYLIST_SONG_TITLE);
+	}
+
+	pVT = dynamic_cast<CViewText *>(pIG->getView(TEMPLATE_PLAYLIST_SONG_DURATION));
+	if (pVT)
+	{
+		uint min = (sint32)(song.Length / 60) % 60;
+		uint sec = (sint32)(song.Length) % 60;
+		uint hour = song.Length / 3600;
+		std::string duration(toString("%02d:%02d", min, sec));
+		if (hour > 0)
+			duration = toString("%02d:", hour) + duration;
+
+		pVT->setHardText(duration);
+	}
+	else
+	{
+		nlwarning("duration element '%s' not found", TEMPLATE_PLAYLIST_SONG_DURATION);
+	}
 }
 
 // ***************************************************************************
@@ -131,12 +304,16 @@ void CMusicPlayer::rebuildPlaylist()
 				_CurrentSongIndex = i;
 			}
 
-			uint min = (sint32)(_Songs[i].Length / 60) % 60;
-			uint sec = (sint32)(_Songs[i].Length) % 60;
-			uint hour = _Songs[i].Length / 3600;
-			std::string duration(toString("%02d:%02d", min, sec));
-			if (hour > 0)
-				duration = toString("%02d:", hour) + duration;
+			std::string duration("--:--");
+			if (_Songs[i].Length > 0)
+			{
+				uint min = (sint32)(_Songs[i].Length / 60) % 60;
+				uint sec = (sint32)(_Songs[i].Length) % 60;
+				uint hour = _Songs[i].Length / 3600;
+				duration = toString("%02d:%02d", min, sec);
+				if (hour > 0)
+					duration = toString("%02d:", hour) + duration;
+			}
 
 			vector< pair<string, string> > vParams;
 			vParams.push_back(pair<string, string>("id", "s" + toString(i)));
@@ -289,6 +466,12 @@ void CMusicPlayer::update ()
 {
 	if(!SoundMngr)
 		return;
+
+	if (MusicPlayerWorker.isRunning() || !_SongUpdateQueue.empty())
+	{
+		updateSongs();
+	}
+
 	if (_State == Playing)
 	{
 		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:mp3_player:screen:text"));
@@ -331,7 +514,7 @@ void CMusicPlayer::update ()
 }
 
 // ***************************************************************************
-static void addFromPlaylist(const std::string &playlist, std::vector<std::string> &filenames)
+static void addFromPlaylist(const std::string &playlist, const std::vector<std::string> &extensions, std::vector<std::string> &filenames)
 {
 	static uint8 utf8Header[] = { 0xefu, 0xbbu, 0xbfu };
 
@@ -362,9 +545,19 @@ static void addFromPlaylist(const std::string &playlist, std::vector<std::string
 			// Not a comment line
 			if (lineStr[0] != '#')
 			{
-				std::string filepath = CFile::getPath(lineStr);
-				std::string filename = CFile::getFilename(lineStr);
-				filenames.push_back (CPath::makePathAbsolute(filepath, basePlaylist)+filename);
+				std::string filename = CPath::makePathAbsolute(CFile::getPath(lineStr), basePlaylist) + CFile::getFilename(lineStr);
+				std::string ext = toLower(CFile::getExtension(filename));
+				if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
+				{
+					if (CFile::fileExists(filename))
+						filenames.push_back(filename);
+					else
+						nlwarning("Ignore non-existing file '%s'", filename.c_str());
+				}
+				else
+				{
+					nlwarning("Ingnore invalid extension '%s'", filename.c_str());
+				}
 			}
 		}
 		fclose (file);
@@ -431,33 +624,16 @@ public:
 				}
 			}
 
-			// Sort songs by filename
-			sort (filenames.begin(), filenames.end());
-
 			// Add songs from playlists
 			for (i = 0; i < playlists.size(); ++i)
 			{
-				addFromPlaylist(playlists[i], filenames);
+				addFromPlaylist(playlists[i], extensions, filenames);
 			}
 
-			// Build the songs array
-			std::vector<CMusicPlayer::CSongs> songs;
-			for (i=0; i<filenames.size(); i++)
-			{
-				if (!CFile::fileExists(filenames[i])) {
-					nlwarning("Ignore non-existing file '%s'", filenames[i].c_str());
-					continue;
-				}
+			// Sort songs by filename
+			sort(filenames.begin(), filenames.end());
 
-				CMusicPlayer::CSongs song;
-				song.Filename = filenames[i];
-				// TODO: cache the result for next refresh
-				SoundMngr->getMixer()->getSongTitle(filenames[i], song.Title, song.Length);
-				if (song.Length > 0)
-					songs.push_back (song);
-			}
-
-			MusicPlayer.playSongs(songs);
+			MusicPlayer.playSongs(filenames);
 		}
 		else if (Params == "update_playlist")
 		{
