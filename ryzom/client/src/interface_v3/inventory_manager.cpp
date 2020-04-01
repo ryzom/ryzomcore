@@ -3665,8 +3665,6 @@ void			CInventoryManager::updateItemInfoQueue()
 	TItemInfoWaiters::iterator	it;
 	for(it= _ItemInfoWaiters.begin();it!=_ItemInfoWaiters.end();it++)
 	{
-		nlassert(ConnectionReadySent);
-
 		IItemInfoWaiter *waiter=*it;
 		uint	itemSlotId= waiter->ItemSlotId;
 		TItemInfoMap::iterator	it= _ItemInfoMap.find(itemSlotId);
