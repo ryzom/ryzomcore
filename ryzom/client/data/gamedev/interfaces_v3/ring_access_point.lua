@@ -240,9 +240,9 @@ local scratchUCStr = ucstring()
 --***********************************************************************
 function RingAccessPoint:newTemplate(name, cache)	
 	local group
-	if table.getn(cache) ~= 0 then
-		group = cache[table.getn(cache)]
-		table.remove(cache, table.getn(cache))
+	if #cache ~= 0 then
+		group = cache[#cache]
+		table.remove(cache, #cache)
 	else		
 		group = createGroupInstance(name, "", {})	
 	end
@@ -461,10 +461,10 @@ function RingAccessPoint:fill(list)
 	self:putInCache()
 	--
 	--	("***********************")
-	--debugInfo("TextCache size =  " .. table.getn(self.TextCache))
-	--debugInfo("CenteredTextCache size =  " .. table.getn(self.CenteredTextCache))
-	--debugInfo("NumberCache size =  " .. table.getn(self.NumberCache))
-	--debugInfo("BitmapCache size =  " .. table.getn(self.BitmapCache))	
+	--debugInfo("TextCache size =  " .. #self.TextCache)
+	--debugInfo("CenteredTextCache size =  " .. #self.CenteredTextCache)
+	--debugInfo("NumberCache size =  " .. #self.NumberCache)
+	--debugInfo("BitmapCache size =  " .. #self.BitmapCache)	
 	--self:clear()
 	self.CurrList = list
 	self.CurrActiveList = {}
@@ -555,7 +555,7 @@ end
 function RingAccessPoint:sort(list)
 	local sortDir = self.SortDir			
 	local function sorter(lhs, rhs)
-		for k = 1, table.getn(sortDir) do
+		for k = 1, #sortDir do
 			if lhs[sortDir[k].Var] ~= rhs[sortDir[k].Var] then
 				if sortDir[k].Up then
 					return not sortDir[k].Cmp(lhs[sortDir[k].Var], rhs[sortDir[k].Var])					
@@ -577,7 +577,7 @@ function RingAccessPoint:headerLeftClick(down, criterion)
 	parent.tup.active = not down		
 	-- insert 		
 	local sortDir = self.SortDir
-	for k = 1, table.getn(sortDir) do
+	for k = 1, #sortDir do
 		if sortDir[k].Var == criterion then			
 			sortDir[k].Up = not sortDir[k].Up			
 			table.insert(sortDir, 1, sortDir[k])			
