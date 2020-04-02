@@ -536,8 +536,10 @@ public:
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 		// Launch the modal to select the faber plan
-		extern void		fillFaberPlanSelection(const std::string &brickDB, uint maxSelection);
-		fillFaberPlanSelection(CDBGroupBuildPhrase::BrickSelectionDB, CDBGroupBuildPhrase::MaxSelection);
+		extern void		fillFaberPlanSelection(const std::string &brickDB, uint maxSelection, TOOL_TYPE::TCraftingToolType toolType);
+		// from sphrase_manager.cpp
+		extern TOOL_TYPE::TCraftingToolType getRightHandCraftToolType();
+		fillFaberPlanSelection(CDBGroupBuildPhrase::BrickSelectionDB, CDBGroupBuildPhrase::MaxSelection, getRightHandCraftToolType());
 
 		// setup the validation
 		CHandlerPhraseValidateBrick::BuildPhraseGroup= NULL;

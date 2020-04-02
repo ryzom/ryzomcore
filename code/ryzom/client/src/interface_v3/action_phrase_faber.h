@@ -25,6 +25,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "inventory_manager.h"
+#include "game_share/crafting_tool_type.h"
 #include "game_share/rm_family.h"
 #include "game_share/brick_families.h"
 #include "game_share/item_origin.h"
@@ -62,7 +63,7 @@ public:
 
 
 	/// Fill the Faber Plan selection DB (no window opened)
-	void		fillFaberPlanSelection(const std::string &brickDB, uint maxSelection);
+	void		fillFaberPlanSelection(const std::string &brickDB, uint maxSelection, TOOL_TYPE::TCraftingToolType toolType = TOOL_TYPE::Unknown);
 	/// Called when the user has selected the Plan. copy bag. the itemPlanBrick must have "FaberPlan" good infos.
 	void		validateFaberPlanSelection(CSBrickSheet *itemPlanBrick);
 
@@ -249,7 +250,7 @@ private:
 // Called when click a Faber phrase
 extern void		launchFaberCastWindow(sint32 memoryLine, uint memoryIndex, CSBrickSheet *rootBrick);
 // Called when select a Faber plan
-extern void		fillFaberPlanSelection(const std::string &brickDB, uint maxSelection);
+extern void		fillFaberPlanSelection(const std::string &brickDB, uint maxSelection, TOOL_TYPE::TCraftingToolType toolType = TOOL_TYPE::Unknown);
 // Called when the Faber plan is selected
 extern void		validateFaberPlanSelection(CSBrickSheet *itemPlanBrick);
 // Called when something needs to close the crafting window (does nothing if not open)

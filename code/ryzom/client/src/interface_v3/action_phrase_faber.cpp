@@ -257,7 +257,7 @@ void			CActionPhraseFaber::onCloseFaberCastWindow()
 
 
 // ***************************************************************************
-void			CActionPhraseFaber::fillFaberPlanSelection(const std::string &brickDB, uint maxSelection)
+void			CActionPhraseFaber::fillFaberPlanSelection(const std::string &brickDB, uint maxSelection, TOOL_TYPE::TCraftingToolType toolType)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CSBrickManager		*pBM= CSBrickManager::getInstance();
@@ -268,7 +268,21 @@ void			CActionPhraseFaber::fillFaberPlanSelection(const std::string &brickDB, ui
 	for(i=0;i<_FaberPlanBrickFamilies.size();i++)
 	{
 		const std::vector<NLMISC::CSheetId>		&famBricks= pBM->getFamilyBricks(_FaberPlanBrickFamilies[i]);
-		bricks.insert(bricks.end(), famBricks.begin(), famBricks.end());
+		if (toolType == TOOL_TYPE::Unknown)
+		{
+			bricks.insert(bricks.end(), famBricks.begin(), famBricks.end());
+		}
+		else
+		{
+			for(std::vector<CSheetId>::const_iterator it = famBricks.begin(); it != famBricks.end(); ++it)
+			{
+				CSBrickSheet *brick= pBM->getBrick(*it);
+				if (brick && brick->FaberPlan.ToolType == toolType)
+				{
+					bricks.push_back(*it);
+				}
+			}
+		}
 	}
 
 	// get only ones known
@@ -1257,10 +1271,10 @@ void		launchFaberCastWindow(sint32 memoryLine, uint memoryIndex, CSBrickSheet *r
 }
 
 // ***************************************************************************
-void		fillFaberPlanSelection(const std::string &brickDB, uint maxSelection)
+void		fillFaberPlanSelection(const std::string &brickDB, uint maxSelection, TOOL_TYPE::TCraftingToolType toolType)
 {
 	if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
-	ActionPhraseFaber->fillFaberPlanSelection(brickDB, maxSelection);
+	ActionPhraseFaber->fillFaberPlanSelection(brickDB, maxSelection, toolType);
 }
 
 // ***************************************************************************
