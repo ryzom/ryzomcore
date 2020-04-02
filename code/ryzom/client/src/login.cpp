@@ -165,6 +165,8 @@ bool CStartupHttpClient::connectToLogin()
 
 	if (ClientCfg.ConfigFile.exists("StartupVerify"))
 		checkConnect = checkConnect && verifyServer(ClientCfg.ConfigFile.getVar("StartupVerify").asBool(0));
+
+	return checkConnect;
 }
 
 CStartupHttpClient HttpClient;
