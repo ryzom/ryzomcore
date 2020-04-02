@@ -353,6 +353,17 @@ void CMusicPlayer::play (sint index)
 	if(!SoundMngr)
 		return;
 
+	if (_Songs.empty())
+	{
+		index = 0;
+		createPlaylistFromMusic();
+	}
+
+	if (_Songs.empty())
+	{
+		_State = Stopped;
+		return;
+	}
 
 	sint prevSongIndex = _CurrentSongIndex;
 
@@ -465,7 +476,10 @@ void CMusicPlayer::next ()
 void CMusicPlayer::update ()
 {
 	if(!SoundMngr)
+	{
+		_State = Stopped;
 		return;
+	}
 
 	if (MusicPlayerWorker.isRunning() || !_SongUpdateQueue.empty())
 	{
@@ -564,6 +578,63 @@ static void addFromPlaylist(const std::string &playlist, const std::vector<std::
 	}
 }
 
+void CMusicPlayer::createPlaylistFromMusic()
+{
+	std::vector<std::string> extensions;
+	SoundMngr->getMixer()->getMusicExtensions(extensions);
+
+	// no format supported
+	if (extensions.empty())
+	{
+		// in the very unlikely scenario
+		const ucstring message("Sound driver has no support for music.");
+		CInterfaceManager::getInstance()->displaySystemInfo(message, "SYS");
+		nlinfo("%s", message.toUtf8().c_str());
+		return;
+	}
+	std::string newPath = CPath::makePathAbsolute(CPath::standardizePath(ClientCfg.MediaPlayerDirectory), CPath::getCurrentPath(), true);
+	std::string extlist;
+	join(extensions, ", ", extlist);
+	extlist += ", m3u, m3u8";
+
+	std::string msg(CI18N::get("uiMk_system6").toUtf8());
+	msg += ": " + newPath + " (" + extlist + ")";
+	CInterfaceManager::getInstance()->displaySystemInfo(ucstring::makeFromUtf8(msg), "SYS");
+	nlinfo("%s", msg.c_str());
+
+	// Recursive scan for files from media directory
+	vector<string> filesToProcess;
+	CPath::getPathContent (newPath, true, false, true, filesToProcess);
+
+	uint i;
+	std::vector<std::string> filenames;
+	std::vector<std::string> playlists;
+
+	for (i = 0; i < filesToProcess.size(); ++i)
+	{
+		std::string ext = toLower(CFile::getExtension(filesToProcess[i]));
+		if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
+		{
+			filenames.push_back(filesToProcess[i]);
+		}
+		else if (ext == "m3u" || ext == "m3u8")
+		{
+			playlists.push_back(filesToProcess[i]);
+		}
+	}
+
+	// Add songs from playlists
+	for (i = 0; i < playlists.size(); ++i)
+	{
+		addFromPlaylist(playlists[i], extensions, filenames);
+	}
+
+	// Sort songs by filename
+	sort(filenames.begin(), filenames.end());
+
+	playSongs(filenames);
+}
+
 // ***************************************************************************
 class CMusicPlayerPlaySongs: public IActionHandler
 {
@@ -581,59 +652,7 @@ public:
 
 		if (Params == "play_songs")
 		{
-			std::vector<std::string> extensions;
-			SoundMngr->getMixer()->getMusicExtensions(extensions);
-
-			// no format supported
-			if (extensions.empty())
-			{
-				// in the very unlikely scenario
-				const ucstring message("Sound driver has no support for music.");
-				CInterfaceManager::getInstance()->displaySystemInfo(message, "SYS");
-				nlinfo("%s", message.toUtf8().c_str());
-				return;
-			}
-			std::string newPath = CPath::makePathAbsolute(CPath::standardizePath(ClientCfg.MediaPlayerDirectory), CPath::getCurrentPath(), true);
-			std::string extlist;
-			join(extensions, ", ", extlist);
-			extlist += ", m3u, m3u8";
-
-			std::string msg(CI18N::get("uiMk_system6").toUtf8());
-			msg += ": " + newPath + " (" + extlist + ")";
-			CInterfaceManager::getInstance()->displaySystemInfo(ucstring::makeFromUtf8(msg), "SYS");
-			nlinfo("%s", msg.c_str());
-
-			// Recursive scan for files from media directory
-			vector<string> filesToProcess;
-			CPath::getPathContent (newPath, true, false, true, filesToProcess);
-
-			uint i;
-			std::vector<std::string> filenames;
-			std::vector<std::string> playlists;
-
-			for (i = 0; i < filesToProcess.size(); ++i)
-			{
-				std::string ext = toLower(CFile::getExtension(filesToProcess[i]));
-				if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
-				{
-					filenames.push_back(filesToProcess[i]);
-				}
-				else if (ext == "m3u" || ext == "m3u8")
-				{
-					playlists.push_back(filesToProcess[i]);
-				}
-			}
-
-			// Add songs from playlists
-			for (i = 0; i < playlists.size(); ++i)
-			{
-				addFromPlaylist(playlists[i], extensions, filenames);
-			}
-
-			// Sort songs by filename
-			sort(filenames.begin(), filenames.end());
-
-			MusicPlayer.playSongs(filenames);
+			MusicPlayer.createPlaylistFromMusic();
 		}
 		else if (Params == "update_playlist")
 		{
