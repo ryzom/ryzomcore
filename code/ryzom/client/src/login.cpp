@@ -161,8 +161,10 @@ CLoginStateMachine LoginSM;
 
 bool CStartupHttpClient::connectToLogin()
 {
-	return connect(ClientCfg.ConfigFile.getVar("StartupHost").asString(0))
-		&& verifyServer(ClientCfg.ConfigFile.getVar("StartupVerify").asBool(0));
+	bool checkConnect = connect(ClientCfg.ConfigFile.getVar("StartupHost").asString(0));
+
+	if (ClientCfg.ConfigFile.exists("StartupVerify"))
+		checkConnect = checkConnect && verifyServer(ClientCfg.ConfigFile.getVar("StartupVerify").asBool(0));
 }
 
 CStartupHttpClient HttpClient;
@@ -1969,7 +1971,7 @@ class CAHOpenURL : public IActionHandler
 		}
 
 		// modify existing languages
-		
+
 		// old site
 		string::size_type pos_lang = url.find("/en/");
 

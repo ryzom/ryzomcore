@@ -326,17 +326,8 @@ CClientConfig::CClientConfig()
 	Local				= false;					// Default is Net Mode.
 	FSHost				= "";						// Default Host.
 
-#if 1 // Yubo hack
-	// The order is important here, because in a layer, global texture are rendered through this order
-	TexturesInterface.push_back("texture_interfaces_v3");
-	// DXTC contain all items and bricks bitmaps, they must come after standard texture
-	TexturesInterface.push_back("new_texture_interfaces_dxtc");
-	// Added icons by Yubo's Team 2009
-	TexturesInterface.push_back("texture_extra");
-#else
 	TexturesInterface.push_back("texture_interfaces_v3");
 	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc");
-#endif
 
 	TexturesOutGameInterface.push_back("texture_interfaces_v3_outgame_ui");
 
@@ -1126,7 +1117,7 @@ void CClientConfig::setValues()
 		if (ClientCfg.getDefaultConfigLocation(defaultConfigFileName))
 			ClientCfg.CurlCABundle = CFile::getPath(defaultConfigFileName)+ClientCfg.CurlCABundle.substr(1);
 	}
-		
+
 	///////////////
 	// ANIMATION //
 	// AnimatedAngleThreshold
