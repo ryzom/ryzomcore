@@ -81,6 +81,9 @@ public:
 	// update song from worker thread
 	void updateSong(const std::string filename, const std::string title, float length);
 
+	// scan music folder and rebuild playlist
+	void createPlaylistFromMusic();
+
 private:
 
 	// The playlist
