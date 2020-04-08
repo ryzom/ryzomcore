@@ -131,90 +131,91 @@ CVariable<bool>		DontUseLS("ws", "DontUseLS", "Don't use the login service", fal
 class COnlineServices
 {
 public:
-
 	/// Set expected instances. Ex: { "TICKS", "FS", "FS", "FS" }
-	void		setExpectedInstances( CConfigFile::CVar& var )
+	void setExpectedInstances(CConfigFile::CVar &var)
 	{
 		// Reset "expected" counters (but don't clear the map, keep the running instances)
 		CInstances::iterator ici;
-		for ( ici=_Instances.begin(); ici!=_Instances.end(); ++ici )
+		for (ici = m_Instances.begin(); ici != m_Instances.end(); ++ici)
 		{
 			(*ici).second.Expected = 0;
 		}
 		// Rebuild "expected" counters
-		for ( uint i=0; i!=var.size(); ++i )
+		for (uint i = 0; i != var.size(); ++i)
 		{
-			++_Instances[var.asString(i)].Expected;
+			++m_Instances[var.asString(i)].Expected;
 		}
 	}
 
 	/// Add a service instance
-	void		addInstance( const std::string& serviceName )
+	void addInstance(const std::string &serviceName, TServiceId sid)
 	{
-		++_Instances[serviceName].Running;
+		m_Instances[serviceName].Running.insert(sid);
 	}
 
 	/// Remove a service instance
-	void		removeInstance( const std::string& serviceName )
+	void removeInstance(const std::string &serviceName, TServiceId sid)
 	{
-		CInstances::iterator ici = _Instances.find( serviceName );
-		if ( ici != _Instances.end() )
+		CInstances::iterator ici = m_Instances.find(serviceName);
+		if (ici != m_Instances.end())
 		{
-			--(*ici).second.Running;
+			(*ici).second.Running.erase(sid);
 
 			// Remove from the map only if not part of the expected list
-			if ( ((*ici).second.Expected == 0) && ((*ici).second.Running == 0) )
+			if (((*ici).second.Expected == 0) && ((*ici).second.Running.size() == 0))
 			{
-				_Instances.erase( ici );
+				m_Instances.erase(ici);
 			}
 		}
 		else
 		{
-			nlwarning( "Can't remove instance of %s", serviceName.c_str() );
+			nlwarning("Can't remove instance of %s", serviceName.c_str());
 		}
 	}
 
 	/// Check if all expected instances are online
-	bool		getOnlineStatus() const
+	bool getOnlineStatus() const
 	{
 		CInstances::const_iterator ici;
-		for ( ici=_Instances.begin(); ici!=_Instances.end(); ++ici )
+		for (ici = m_Instances.begin(); ici != m_Instances.end(); ++ici)
 		{
-			if ( ! ici->second.isOnlineAsExpected() )
+			if (!ici->second.isOnlineAsExpected())
 				return false;
 		}
 		return true;
 	}
 
 	/// Display contents
-	void		display( NLMISC::CLog& log = *NLMISC::DebugLog )
+	void display(NLMISC::CLog &log = *NLMISC::DebugLog)
 	{
 		CInstances::const_iterator ici;
-		for ( ici=_Instances.begin(); ici!=_Instances.end(); ++ici )
+		for (ici = m_Instances.begin(); ici != m_Instances.end(); ++ici)
 		{
-			log.displayNL( "%s: %s (%u expected, %u running)",
-				(*ici).first.c_str(),
-				(*ici).second.Expected ? ((*ici).second.isOnlineAsExpected() ? "ONLINE" : "MISSING") : "OPTIONAL",
-				(*ici).second.Expected, (*ici).second.Running );
+			log.displayNL("%s: %s (%u expected, %u running)",
+			    (*ici).first.c_str(),
+			    (*ici).second.Expected ? ((*ici).second.isOnlineAsExpected() ? "ONLINE" : "MISSING") : "OPTIONAL",
+			    (*ici).second.Expected, (*ici).second.Running.size());
 		}
 	}
 
 private:
-
 	struct TInstanceCounters
 	{
-		TInstanceCounters() : Expected(0), Running(0) {}
+		TInstanceCounters()
+		    : Expected(0)
+		{
+		}
 
 		// If not expected, count as online as well
-		bool isOnlineAsExpected() const { return Running >= Expected; }
+		bool isOnlineAsExpected() const { return Running.size() >= Expected; }
 
-		uint	Expected;
-		uint	Running;
+		uint Expected;
+		std::set<TServiceId> Running;
 	};
 
-	typedef std::map< std::string, TInstanceCounters > CInstances;
+	typedef std::map<std::string, TInstanceCounters> CInstances;
 
-	CInstances	_Instances;
+	CInstances m_Instances;
 };
 
 /// Online services
@@ -816,11 +817,11 @@ void cbFESDisconnection (const std::string &serviceName, TServiceId  sid, void *
 
 
 //
-void cbServiceUp (const std::string &serviceName, TServiceId  sid, void *arg)
+void cbServiceUp(const std::string &serviceName, TServiceId sid, void *arg)
 {
-	OnlineServices.addInstance( serviceName );
+	OnlineServices.addInstance(serviceName, sid);
 	bool online = OnlineServices.getOnlineStatus();
-	reportOnlineStatus( online );
+	reportOnlineStatus(online);
 
 	// send shard id to service
 	sint32 shardId;
@@ -851,11 +852,11 @@ void cbServiceUp (const std::string &serviceName, TServiceId  sid, void *arg)
 
 
 //
-void cbServiceDown (const std::string &serviceName, TServiceId  sid, void *arg)
+void cbServiceDown(const std::string &serviceName, TServiceId sid, void *arg)
 {
-	OnlineServices.removeInstance( serviceName );
+	OnlineServices.removeInstance(serviceName , sid);
 	bool online = OnlineServices.getOnlineStatus();
-	reportOnlineStatus( online );
+	reportOnlineStatus(online);
 }
 
 
