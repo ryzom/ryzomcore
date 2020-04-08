@@ -555,11 +555,11 @@ void clearBuffers()
 		}
 
 		// Sky is used to clear the frame buffer now, but if in line or point polygon mode, we should draw it
-		if (Driver->getPolygonMode() != UDriver::Filled)
+		if (Driver->getPolygonMode() != UDriver::Filled || !Filter3D[FilterSky])
 		{
 			if (!Driver->isLost())
 			{
-				Driver->clearBuffers (CRGBA(127, 127, 127));
+				Driver->clearBuffers (ClientCfg.BGColor);
 			}
 		}
 	}

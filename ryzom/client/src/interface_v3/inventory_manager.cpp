@@ -3582,15 +3582,23 @@ void			CInventoryManager::onTradeChangeSession()
 // ***************************************************************************
 void			CInventoryManager::updateItemInfoQueue()
 {
+	if (!ConnectionReadySent) // CONNECTION:READY not yet sent, so we cannot send requests yet!
+	{
+		// Caused by CNetworkConnection::reinit, and NLMISC::CCDBNodeBranch::resetData
+		// TODO: Item sheets are effectively being set to 0, any way to detect this in particular?
+		//       Slots with sheet 0 won't have any info to request anyway!
+		//       Remove this check in favour of the assert lower down when properly implemented.
+		nlwarning("Update item info queue (%i), but connection not ready", (int)_ItemInfoWaiters.size());
+		return;
+	}
+
+	// CONNECTION:READY not yet sent, so we cannot send requests yet!
+	nlassert(ConnectionReadySent || !_ItemInfoWaiters.size());
+
 	// For All waiters, look if one need update.
 	TItemInfoWaiters::iterator	it;
 	for(it= _ItemInfoWaiters.begin();it!=_ItemInfoWaiters.end();it++)
 	{
-		/* \todo yoyo remove: temp patch to be sure that the client does not send messages before the
-			CONNECTION:READY is sent
-		*/
-		nlassert(ConnectionReadySent);
-
 		IItemInfoWaiter *waiter=*it;
 		uint	itemSlotId= waiter->ItemSlotId;
 		TItemInfoMap::iterator	it= _ItemInfoMap.find(itemSlotId);
