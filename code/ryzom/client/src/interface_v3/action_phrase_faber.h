@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -21,6 +25,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "inventory_manager.h"
+#include "game_share/crafting_tool_type.h"
 #include "game_share/rm_family.h"
 #include "game_share/brick_families.h"
 #include "game_share/item_origin.h"
@@ -58,7 +63,7 @@ public:
 
 
 	/// Fill the Faber Plan selection DB (no window opened)
-	void		fillFaberPlanSelection(const std::string &brickDB, uint maxSelection);
+	void		fillFaberPlanSelection(const std::string &brickDB, uint maxSelection, TOOL_TYPE::TCraftingToolType toolType = TOOL_TYPE::Unknown);
 	/// Called when the user has selected the Plan. copy bag. the itemPlanBrick must have "FaberPlan" good infos.
 	void		validateFaberPlanSelection(CSBrickSheet *itemPlanBrick);
 
@@ -245,7 +250,7 @@ private:
 // Called when click a Faber phrase
 extern void		launchFaberCastWindow(sint32 memoryLine, uint memoryIndex, CSBrickSheet *rootBrick);
 // Called when select a Faber plan
-extern void		fillFaberPlanSelection(const std::string &brickDB, uint maxSelection);
+extern void		fillFaberPlanSelection(const std::string &brickDB, uint maxSelection, TOOL_TYPE::TCraftingToolType toolType = TOOL_TYPE::Unknown);
 // Called when the Faber plan is selected
 extern void		validateFaberPlanSelection(CSBrickSheet *itemPlanBrick);
 // Called when something needs to close the crafting window (does nothing if not open)

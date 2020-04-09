@@ -2,7 +2,7 @@
 # 
 # \file 2_build.py
 # \brief Build sound
-# \date 2009-06-03 10:47GMT
+# \date 2010-05-24 13:42GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Build sound
@@ -41,24 +41,6 @@ printLog(log, "-------")
 printLog(log, "--- Build sound")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
-printLog(log, "")
-
-# Find tools
-BuildSound = findTool(log, ToolDirectories, BuildSoundTool, ToolSuffix)
-printLog(log, "")
-
-# For each sound directory
-printLog(log, ">>> Build sound <<<")
-if BuildSound == "":
-	toolLogFail(log, BuildSoundTool, ToolSuffix)
-else:
-	mkPath(log, LeveldesignDirectory)
-	mkPath(log, LeveldesignDfnDirectory)
-	mkPath(log, DatabaseDirectory + "/" + SoundSamplebanksSourceDirectory)
-	mkPath(log, ExportBuildDirectory + "/" + SoundSheetsBuildDirectory)
-	mkPath(log, ExportBuildDirectory + "/" + SoundSamplebanksBuildDirectory)
-	subprocess.call([ BuildSound, LeveldesignDirectory, LeveldesignDfnDirectory, DatabaseDirectory + "/" + SoundSamplebanksSourceDirectory, ExportBuildDirectory + "/" + SoundSheetsBuildDirectory ])
-	moveFilesExtNoTree(log, DatabaseDirectory + "/" + SoundSamplebanksSourceDirectory, ExportBuildDirectory + "/" + SoundSamplebanksBuildDirectory, ".sample_bank")
 printLog(log, "")
 
 log.close()

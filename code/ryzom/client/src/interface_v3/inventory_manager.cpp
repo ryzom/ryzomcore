@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2015-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -286,7 +290,7 @@ void CItemInfoCache::debugItemInfoCache() const
 {
 	nlinfo("ItemInfoCache: %d entries", _ItemInfoCacheMap.size());
 	uint count = 0;
-	for (auto it = _ItemInfoCacheMap.begin(); it != _ItemInfoCacheMap.end(); ++it)
+	for (TItemInfoCacheMap::const_iterator it = _ItemInfoCacheMap.begin(); it != _ItemInfoCacheMap.end(); ++it)
 	{
 		uint32 serial = (it->first >> 32) & 0xFFFFFFFF;
 		uint32 created = it->first & 0xFFFFFFFF;

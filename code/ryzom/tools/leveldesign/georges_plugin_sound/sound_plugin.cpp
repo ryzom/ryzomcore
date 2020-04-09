@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -67,9 +70,6 @@ CSoundPlugin::CSoundPlugin(IEdit *globalInterface)
 	_InvalidSound(false)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	// Initialize without sheet id bin
-	NLMISC::CSheetId::initWithoutSheet();
 
 	CVector dir;
 
@@ -340,7 +340,7 @@ void CSoundPlugin::setActiveDocument(IEditDocument *pdoc)
 		_Dialog.setName(_Filename);
 
 		// 1st, try to found the sound in the preloaded sound bank.
-		_Sound = _Mixer->getSoundId(CSheetId(_Filename, "sound"));
+		_Sound = _Mixer->getSoundId(CStringMapper::map(_Filename));
 		if (_Sound == NULL)
 		{
 			// not found, create a new one.
@@ -540,7 +540,7 @@ void CSoundPlugin::play(std::string &filename)
 //				point.Name = string("simulation-")+_Sound->getName()+"-000";
 
 				region.VPoints.push_back(point);
-				string name = string("simulation-")+NLMISC::CFile::getFilenameWithoutExtension(_Sound->getName().toString())+"-000";
+				string name = string("simulation-")+CStringMapper::unmap(_Sound->getName())+"-000";
 				if (region.VPoints.back().checkProperty("name"))
 					region.VPoints.back().removePropertyByName("name");
 

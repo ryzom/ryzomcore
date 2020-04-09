@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -4435,30 +4439,30 @@ int CLuaIHMRyzom::displayChatMessage(CLuaState &ls)
 	if (ls.type(2) == LUA_TSTRING)
 	{
 		std::string input = toLower(ls.toString(2));
-		std::unordered_map<std::string, std::string> sParam;
-		// input should match chat_group_filter sParam
-		sParam.insert(make_pair(string("around"), string(dbPath+":SAY")));
-		sParam.insert(make_pair(string("region"), string(dbPath+":REGION")));
-		sParam.insert(make_pair(string("guild"), string(dbPath+":CLADE")));
-		sParam.insert(make_pair(string("team"), string(dbPath+":GROUP")));
-		sParam.insert(make_pair(string("universe"), string(dbPath+":UNIVERSE_NEW")));
-		for (const auto& db : sParam)
+		if (input == "around")
 		{
-			if (db.first.c_str() == input)
-			{
-				prop.readRGBA(db.second.c_str(), " ");
-				if (input == "around")
-					ci.AroundMe.displayMessage(ucstring(msg), prop.getRGBA());
-				if (input == "region")
-					ci.Region.displayMessage(ucstring(msg), prop.getRGBA());
-				if (input == "universe")
-					ci.Universe.displayMessage(ucstring(msg), prop.getRGBA());
-				if (input == "guild")
-					ci.Guild.displayMessage(ucstring(msg), prop.getRGBA());
-				if (input == "team")
-					ci.Team.displayMessage(ucstring(msg), prop.getRGBA());
-				break;
-			}
+			prop.readRGBA(std::string(dbPath + ":SAY").c_str(), " ");
+			ci.AroundMe.displayMessage(ucstring(msg), prop.getRGBA());
+		}
+		else if (input == "region")
+		{
+			prop.readRGBA(std::string(dbPath + ":REGION").c_str(), " ");
+			ci.Region.displayMessage(ucstring(msg), prop.getRGBA());
+		}
+		else if (input == "universe")
+		{
+			prop.readRGBA(std::string(dbPath + ":UNIVERSE_NEW").c_str(), " ");
+			ci.Universe.displayMessage(ucstring(msg), prop.getRGBA());
+		}
+		else if (input == "guild")
+		{
+			prop.readRGBA(std::string(dbPath + ":CLADE").c_str(), " ");
+			ci.Guild.displayMessage(ucstring(msg), prop.getRGBA());
+		}
+		else if (input == "team")
+		{
+			prop.readRGBA(std::string(dbPath + ":GROUP").c_str(), " ");
+			ci.Team.displayMessage(ucstring(msg), prop.getRGBA());
 		}
 	}
 	if (ls.type(2) == LUA_TNUMBER)

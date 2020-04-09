@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -50,7 +53,7 @@ private:
 	virtual void beginElement (NLGUI::CHtmlElement &elm);
 	virtual void endBuild ();
 	virtual void browse (const char *url);
-	virtual std::string	home();
+	virtual std::string	home() const NL_OVERRIDE;
 
 	// Modify uri with '.html' or '_??.html' ending to have current user language,
 	// If the uri is not found locally, then try "en" as fallback language
