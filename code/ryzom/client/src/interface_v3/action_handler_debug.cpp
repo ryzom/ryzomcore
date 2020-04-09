@@ -112,6 +112,23 @@ class CAHToggleARKPACSBorders : public IActionHandler
 };
 REGISTER_ACTION_HANDLER (CAHToggleARKPACSBorders, "ark_pacs_borders");
 
+// ***************************************************************************
+class CAHToggleFly : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		// Change to AI Mode.
+		if(UserControls.mode() != CUserControls::AIMode)
+			UserControls.mode(CUserControls::AIMode);
+		// Leave the AI Mode.
+		else
+			UserEntity->viewMode(UserEntity->viewMode());
+	}
+};
+// ***************************************************************************
+REGISTER_ACTION_HANDLER (CAHToggleFly, "toggle_fly");
+
+
 #if !FINAL_VERSION
 // ------------------------------------------------------------------------------------------------
 class CAHProfile : public IActionHandler
@@ -269,22 +286,6 @@ class CAHSwitchConsoleDisplay : public IActionHandler
 };
 // ***************************************************************************
 REGISTER_ACTION_HANDLER (CAHSwitchConsoleDisplay, "switch_console_display");
-
-// ***************************************************************************
-class CAHToggleFly : public IActionHandler
-{
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
-	{
-		// Change to AI Mode.
-		if(UserControls.mode() != CUserControls::AIMode)
-			UserControls.mode(CUserControls::AIMode);
-		// Leave the AI Mode.
-		else
-			UserEntity->viewMode(UserEntity->viewMode());
-	}
-};
-// ***************************************************************************
-REGISTER_ACTION_HANDLER (CAHToggleFly, "toggle_fly");
 
 // ***************************************************************************
 class CAHReloadLandscapeIg : public IActionHandler
