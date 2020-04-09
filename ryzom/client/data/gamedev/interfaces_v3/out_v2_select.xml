@@ -76,7 +76,8 @@
 	<!-- Continue or Restart Default Outgame Music
 		MUST PLAY IT NOT ASYNCLY, else it don't works well during loading 
 	-->
-	<action handler="play_music_outgame"  params="async=0" />
+	<!-- Play character selection music -->
+	<!-- <action handler="play_music_outgame"  params="async=0" /> -->
 
 </proc>
 
@@ -186,7 +187,14 @@
 			value=switch(@UI:TEMP:CHAR3D:PEOPLE, 60, 60, 60, 60)" />
 	<action handler="set" params="target_property=ui:outgame:charsel:3d_select:y |
 								value=switch(@0, 0, -153, -306, -459, -612)" />	
-								
+	
+	<!-- Play character selection music -->
+	<action handler="play_music_outgame" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,0),not(isCharSelSlotEmpty(@0)))" params="name=character creation fyros.ogg|async=1" />
+	<action handler="play_music_outgame" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,1),not(isCharSelSlotEmpty(@0)))" params="name=character creation matis.ogg|async=1" />
+	<action handler="play_music_outgame" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,2),not(isCharSelSlotEmpty(@0)))" params="name=character creation trykers.ogg|async=1" />
+	<action handler="play_music_outgame" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,3),not(isCharSelSlotEmpty(@0)))" params="name=character creation zorai.ogg|async=1" />
+	<action handler="play_music_outgame" cond="isCharSelSlotEmpty(@0)" params="async=1" />
+	
 	<action handler="proc" params="proc_charsel_infos2" />
 </proc>
 

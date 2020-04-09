@@ -1037,10 +1037,11 @@
 
 
 	<!-- Music playing -->
-	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="name=Character Creation Fyros.ogg|async=1" />
-	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="name=Character Creation Matis.ogg|async=1" />
-	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="name=Character Creation Trykers.ogg|async=1" />
-	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="name=Character Creation Zorai.ogg|async=1" />
+	<!-- Play character creation music -->
+	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,0)" params="name=character creation fyros.ogg|async=1" />
+	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="name=character creation matis.ogg|async=1" />
+	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="name=character creation trykers.ogg|async=1" />
+	<action handler="play_music_outgame"  cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="name=character creation zorai.ogg|async=1" />
 
 </proc>
 
