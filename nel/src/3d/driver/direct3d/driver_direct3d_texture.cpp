@@ -1084,6 +1084,7 @@ void CDriverD3D::swapTextureHandle(ITexture &tex0, ITexture &tex1)
 	swap(t0->Height, t1->Height);
 	swap(t0->SrcCompressed, t1->SrcCompressed);
 	swap(t0->IsCube, t1->IsCube);
+	swap(t0->RenderTarget, t1->RenderTarget);
 	swap(t0->Levels, t1->Levels);
 	swap(t0->FirstMipMap, t1->FirstMipMap);
 	swap(t0->TextureMemory, t1->TextureMemory);
