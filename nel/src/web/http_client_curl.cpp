@@ -192,7 +192,7 @@ bool CCurlHttpClient::receive(string &res, bool verbose)
 void CCurlHttpClient::disconnect()
 {
 	curl_easy_cleanup(_Curl);
-	_Curl = NULL;
+	_CurlStruct = NULL;
 	curl_global_cleanup();
 }
 
