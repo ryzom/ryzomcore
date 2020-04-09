@@ -465,7 +465,12 @@ CClientConfig::CClientConfig()
 	SoundOn				= true;						// Default is with sound.
 	DriverSound			= SoundDrvAuto;
 	SoundForceSoftwareBuffer = true;
-	SoundOutGameMusic	= "main menu loop.ogg";
+	StartMusic = "main theme air.ogg"; // Use at game startup
+	LoadingMusic = "main menu loop.ogg"; // Use after leaving character selection, and when going back to character selection
+	KamiTeleportMusic = "kami teleport.ogg"; // Kami teleport
+	KaravanTeleportMusic = "karavan teleport.ogg"; // Karavan teleport
+	TeleportLoadingMusic = "loading music loop.ogg"; // Use after character select, and for generic teleportations
+	DeathMusic = "death.ogg"; // Player death
 	SoundSFXVolume		= 1.f;
 	SoundGameMusicVolume	= 1.f;
 	SoundTPFade			= 500;
@@ -1247,7 +1252,12 @@ void CClientConfig::setValues()
 	// SoundForceSoftwareBuffer
 	READ_BOOL_FV(SoundForceSoftwareBuffer);
 	// SoundOutGameMusic
-	READ_STRING_DEV(SoundOutGameMusic)
+	READ_STRING_DEV(StartMusic)
+	READ_STRING_DEV(LoadingMusic)
+	READ_STRING_DEV(KamiTeleportMusic)
+	READ_STRING_DEV(KaravanTeleportMusic)
+	READ_STRING_DEV(TeleportLoadingMusic)
+	READ_STRING_DEV(DeathMusic)
 	// SoundSFXVolume
 	READ_FLOAT_FV(SoundSFXVolume);
 	// SoundGameMusicVolume

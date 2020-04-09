@@ -348,8 +348,13 @@ struct CClientConfig
 	/// SoundForceSoftwareBuffer
 	bool			SoundForceSoftwareBuffer;
 
-	/// The outgame music file
-	string			SoundOutGameMusic;
+	/// Music files
+	string			StartMusic;
+	string			LoadingMusic;
+	string			KamiTeleportMusic;
+	string			KaravanTeleportMusic;
+	string			TeleportLoadingMusic;
+	string			DeathMusic;
 
 	/// The Sound SFX Volume (0-1)  (ie all but music)
 	float			SoundSFXVolume;

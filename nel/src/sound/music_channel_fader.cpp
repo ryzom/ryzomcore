@@ -147,7 +147,7 @@ void CMusicChannelFader::updateVolume()
  */
 bool CMusicChannelFader::play(const std::string &filepath, uint xFadeTime, bool async, bool loop)
 {
-	stop(xFadeTime);
+	bool stopped = stop(xFadeTime);
 
 	// Find the next best free music channel
 	uint nextFader = _MaxMusicFader;
@@ -164,7 +164,7 @@ bool CMusicChannelFader::play(const std::string &filepath, uint xFadeTime, bool 
 
 	// Play a song in it :)
 	_CMusicFader &fader = _MusicFader[_ActiveMusicFader];
-	if (xFadeTime) fader.fadeIn(xFadeTime);
+	if (xFadeTime && !stopped) fader.fadeIn(xFadeTime); // only fade in when fading out
 	else fader.XFadeVolume = 1.0f;
 	fader.Playing = true;
 	updateVolume(); // make sure at ok volume to start :)
@@ -173,12 +173,17 @@ bool CMusicChannelFader::play(const std::string &filepath, uint xFadeTime, bool 
 }
 
 /// Stop the music previously loaded and played (the Memory is also freed)
-void CMusicChannelFader::stop(uint xFadeTime)
+bool CMusicChannelFader::stop(uint xFadeTime)
 {
 	if (xFadeTime)
 	{
+		bool stopped = true;
 		for (uint i = 0; i < _MaxMusicFader; ++i) if (_MusicFader[i].Playing)
+		{
 			_MusicFader[i].fadeOut(xFadeTime);
+			stopped = false; // fading
+		}
+		return stopped;
 	}
 	else
 	{
@@ -188,6 +193,7 @@ void CMusicChannelFader::stop(uint xFadeTime)
 			_MusicFader[i].Fade = false;
 			_MusicFader[i].Playing = false;
 		}
+		return true;
 	}
 }
 

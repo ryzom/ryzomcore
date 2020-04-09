@@ -4309,20 +4309,19 @@ void	CUserEntity::updatePreCollision(const NLMISC::TTime &time, CEntityCL *targe
 	// test each frame if the mode has changed
 	if(SoundMngr)
 	{
-		string	deadMusic= "death.ogg";
 		// Play/stop music if comes from or goes to dead
-		bool	isDead= _Mode==MBEHAV::DEATH || _Mode==MBEHAV::SWIM_DEATH;
+		bool isDead = _Mode == MBEHAV::DEATH || _Mode == MBEHAV::SWIM_DEATH;
 
 		// must start music?
-		if( isDead && SoundMngr->getEventMusicPlayed()!=deadMusic )
+		if (isDead && SoundMngr->getEventMusicPlayed() != ClientCfg.DeathMusic)
 		{
-			SoundMngr->playEventMusic(deadMusic, 0, true);
+			SoundMngr->playEventMusic(ClientCfg.DeathMusic, 0, true);
 		}
 
 		// must end music?
-		if( !isDead && SoundMngr->getEventMusicPlayed()==deadMusic )
+		if (!isDead && SoundMngr->getEventMusicPlayed() == ClientCfg.DeathMusic)
 		{
-			SoundMngr->stopEventMusic(deadMusic, CSoundManager::LoadingMusicXFade);
+			SoundMngr->stopEventMusic(ClientCfg.DeathMusic, CSoundManager::LoadingMusicXFade);
 		}
 	}
 }

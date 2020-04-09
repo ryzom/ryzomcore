@@ -1483,32 +1483,33 @@ void impulseTPCommon(NLMISC::CBitMemStream &impulse, bool hasSeason)
 void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 {
 	// choose a default screen if not setuped
-	if( LoadingBackground!=ResurectKamiBackground && LoadingBackground!=ResurectKaravanBackground &&
-		LoadingBackground!=TeleportKamiBackground && LoadingBackground!=TeleportKaravanBackground)
-		LoadingBackground= TeleportKaravanBackground;
+	if (LoadingBackground != ResurectKamiBackground && LoadingBackground != ResurectKaravanBackground
+	    && LoadingBackground != TeleportKamiBackground && LoadingBackground != TeleportKaravanBackground)
+		LoadingBackground = ElevatorBackground;
 	// if resurect but user not dead, choose default. NB: this is a bug, the tp impulse should tell
 	// which background to choose. \todo yoyo: this is a temp fix
-	if( UserEntity && !UserEntity->isDead() &&
-		(LoadingBackground==ResurectKamiBackground || LoadingBackground==ResurectKaravanBackground) )
-		LoadingBackground= TeleportKaravanBackground;
+	if (UserEntity && !UserEntity->isDead() && (LoadingBackground == ResurectKamiBackground || LoadingBackground == ResurectKaravanBackground))
+		LoadingBackground = ElevatorBackground;
 
 	// Play music according to the background
-	if(SoundMngr)
+	if (SoundMngr)
 	{
 		LoadingMusic.clear();
-		if(LoadingBackground==TeleportKamiBackground)
-			LoadingMusic= "Kami Teleport.ogg";
-		else if(LoadingBackground==TeleportKaravanBackground)
-			LoadingMusic= "Karavan Teleport.ogg";
-		// if resurection, continue to play death music
-		else if(LoadingBackground==ResurectKamiBackground || LoadingBackground==ResurectKaravanBackground)
+		switch (LoadingBackground)
 		{
-			// noop
-		}
-		// default: loading music
-		else
-		{
-			LoadingMusic= "Loading Music Loop.ogg";
+		case TeleportKamiBackground:
+			LoadingMusic = ClientCfg.KamiTeleportMusic;
+			break;
+		case TeleportKaravanBackground:
+			LoadingMusic = ClientCfg.KaravanTeleportMusic;
+			break;
+		case ResurectKamiBackground:
+		case ResurectKaravanBackground:
+			// TODO: Resurrect music
+			break;
+		default:
+			LoadingMusic = ClientCfg.TeleportLoadingMusic;
+			break;
 		}
 
 		// start to play
