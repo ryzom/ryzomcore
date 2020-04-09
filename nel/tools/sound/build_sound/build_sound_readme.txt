@@ -3,8 +3,8 @@
 
 build_sound  <leveldesign> <dfn> <source_samplebanks> <build_packed_sheets> <build_samplebanks>
 
-leveldesign = L:\leveldesign\
-dfn = L:\leveldesign\dfn\
+leveldesign = R:\leveldesign\
+dfn = R:\leveldesign\dfn\
 source_samplebanks = L:\assets\sound\samplebanks\
 build_packed_sheets = L:\build\sound_sheets\
 build_samplebanks = L:\build\sound_samplebanks\

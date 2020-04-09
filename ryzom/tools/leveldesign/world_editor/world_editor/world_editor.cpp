@@ -598,7 +598,7 @@ bool CWorldEditorApp::initPath (const std::string &filename, CSplashScreen &spla
 	}
 	else
 	{
-		errorMessage ("Can't open the file %s for reading.", filename);
+		errorMessage ("Can't open the file %s for reading.", filename.c_str());
 	}
 
 failed:

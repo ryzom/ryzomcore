@@ -1112,15 +1112,6 @@ void CFarTP::disconnectFromPreviousShard()
 		beginLoading (StartBackground);
 		UseEscapeDuringLoading = false;
 
-		// Play music and fade out the Game Sound
-		if (SoundMngr)
-		{
-			// Loading Music Loop.ogg
-			LoadingMusic = ClientCfg.SoundOutGameMusic;
-			SoundMngr->playEventMusic(LoadingMusic, CSoundManager::LoadingMusicXFade, true);
-			SoundMngr->fadeOutGameSound(ClientCfg.SoundTPFade);
-		}
-
 		// Change the tips
 		selectTipsOfTheDay (rand());
 
@@ -1129,6 +1120,21 @@ void CFarTP::disconnectFromPreviousShard()
 		ucstring nmsg("Loading...");
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		ProgressBar.progress(0);
+
+		// Play music and fade out the Game Sound
+		if (SoundMngr)
+		{
+			SoundMngr->fadeOutGameSound(ClientCfg.SoundTPFade);
+
+			// Stop and enable music
+			SoundMngr->stopMusic(0);
+			SoundMngr->setupFadeSound(0.0f, 1.0f);
+
+			// Loading Music Loop.ogg
+			LoadingMusic = ClientCfg.LoadingMusic;
+			// SoundMngr->playEventMusic(LoadingMusic, CSoundManager::LoadingMusicXFade, true);
+			SoundMngr->playMusic(LoadingMusic, 0, false, true, true);
+		}
 	}
 
 	// Disconnect from the FS

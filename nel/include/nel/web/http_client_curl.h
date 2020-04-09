@@ -34,7 +34,7 @@ class CCurlHttpClient
 public:
 
 	/// Constructor
-	CCurlHttpClient() {}
+	CCurlHttpClient() : _CurlStruct(NULL) {}
 
 	/// Connect to an http server (string by val is intended). If you specify a whole URL, an attempt will be made to determine the server.
 	bool connect(const std::string &server);
