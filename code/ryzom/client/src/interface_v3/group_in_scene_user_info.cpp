@@ -463,6 +463,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			//else
 			//	stringSpace += textH;
 
+			bool have2pvptags = false;
 			if (rpTags)
 			{
 				CPlayerCL * pPlayer = dynamic_cast<CPlayerCL*>(entity);
@@ -476,10 +477,10 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 				if (entityTag3.toString() == "_") entityTag3.clear();
 				if (entityTag4.toString() == "_") entityTag4.clear();
 
-				if (pPlayer && !(pPlayer->getPvpMode() & PVP_MODE::PvpFaction))
+				if (pPlayer && (pPlayer->getPvpMode() == PVP_MODE::None))
 				{
-					entityTag3.clear();
-					entityTag4.clear();
+					entityTag1.clear();
+					entityTag2.clear();
 				}
 
 				if (rp1) rp1->setTexture(entityTag1.toString());
@@ -492,6 +493,8 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 				if (rp2) rp2->setActive(!entityTag2.empty());
 				if (rp3) rp3->setActive(!entityTag3.empty());
 				if (rp4) rp4->setActive(!entityTag4.empty());
+
+				have2pvptags = !entityTag1.empty() && !entityTag2.empty();
 			}
 
 			// Get the permanent content bitmap
@@ -660,6 +663,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 				}
 
 				CViewBase * pvpFactionLogo = info->getView ("pvp_faction_logo");
+				CViewBase * pvpFactionLogo2 = info->getView ("pvp_faction_logo2");
 				CViewBase * pvpOutpostLogo = info->getView ("pvp_outpost_logo");
 				CViewBase * pvpDuelLogo = info->getView ("pvp_duel_logo");
 
@@ -673,6 +677,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 					{
 						pvpFactionLogo->setActive(true);
 						CViewBitmap * pvpFactionBitmap = dynamic_cast<CViewBitmap *>(pvpFactionLogo);
+						CViewBitmap * pvpFactionBitmap2 = dynamic_cast<CViewBitmap *>(pvpFactionLogo2);
 						if( pvpFactionBitmap )
 						{
 							if (user)
@@ -720,6 +725,12 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 									pvpFactionLogo->setActive(false);
 							}
 						}
+
+						if( pvpFactionLogo && pvpFactionBitmap2 )
+						{
+							pvpFactionBitmap2->setTexture(pvpFactionBitmap->getTexture());
+							pvpFactionLogo2->setActive(have2pvptags);
+						}
 					}
 
 					if (pvpOutpostLogo)
@@ -737,13 +748,6 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 						else
 							pvpDuelLogo->setActive(false);
 					}
-
-				}
-				else
-				{
-					CInterfaceGroup* grp = info->getGroup("right_pvp");
-					if (grp)
-						info->delGroup(grp);
 				}
 			}
 
