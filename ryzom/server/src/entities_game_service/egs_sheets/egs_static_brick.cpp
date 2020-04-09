@@ -53,7 +53,7 @@ map< pair<uint16, uint16>, CSheetId > CStaticBrick::_Bricks;
 NL_INSTANCE_COUNTER_IMPL(CFaber);
 
 //--------------------------------------------------------------
-//						constructor  
+//						constructor
 //--------------------------------------------------------------
 CStaticBrick::CStaticBrick()
 {
@@ -79,7 +79,7 @@ CStaticBrick::CStaticBrick()
 
 
 //--------------------------------------------------------------
-//						destructor  
+//						destructor
 //--------------------------------------------------------------
 CStaticBrick::~CStaticBrick()
 {
@@ -88,7 +88,7 @@ CStaticBrick::~CStaticBrick()
 
 
 //--------------------------------------------------------------
-//					serial()  
+//					serial()
 //--------------------------------------------------------------
 void CStaticBrick::serial(class NLMISC::IStream &f)
 {
@@ -104,7 +104,7 @@ void CStaticBrick::serial(class NLMISC::IStream &f)
 	f.serial(MinCastTime);
 	f.serial(MaxCastTime);
 	f.serial(MinRange);
-	f.serial(MaxRange);	
+	f.serial(MaxRange);
 	f.serialCont( StringParams );
 	f.serial(ForbiddenDef);
 	f.serial(ForbiddenExclude);
@@ -137,11 +137,11 @@ void CStaticBrick::serial(class NLMISC::IStream &f)
 			addParam(StringParams[i], Params);
 		}
 
-	// Grammar		
+	// Grammar
 		// mandatory
 		f.serial(size);
 		for ( uint16 i = 0 ; i < size ; ++i)
-		{			
+		{
 			f.serial(str);
 
 			BRICK_FAMILIES::TBrickFamily family = BRICK_FAMILIES::toSBrickFamily(str);
@@ -156,7 +156,7 @@ void CStaticBrick::serial(class NLMISC::IStream &f)
 		// optional
 		f.serial(size);
 		for ( uint16 i = 0 ; i < size ; ++i)
-		{			
+		{
 			f.serial(str);
 
 			BRICK_FAMILIES::TBrickFamily family = BRICK_FAMILIES::toSBrickFamily(str);
@@ -171,7 +171,7 @@ void CStaticBrick::serial(class NLMISC::IStream &f)
 		// credit
 		f.serial(size);
 		for ( uint16 i = 0 ; i < size ; ++i)
-		{			
+		{
 			f.serial(str);
 
 			BRICK_FAMILIES::TBrickFamily family = BRICK_FAMILIES::toSBrickFamily(str);
@@ -217,7 +217,7 @@ void CStaticBrick::serial(class NLMISC::IStream &f)
 		}
 	}
 	else
-	{		
+	{
 	// family
 		string str = BRICK_FAMILIES::toString(Family);
 		f.serial( str );
@@ -225,7 +225,7 @@ void CStaticBrick::serial(class NLMISC::IStream &f)
 	// localisation
 		str = SLOT_EQUIPMENT::toString(ForcedLocalisation);
 		f.serial( str );
-		
+
 	// params
 		// nothing to do -> keep params and only serialize the param as strings
 
@@ -292,7 +292,7 @@ void CStaticBrick::serial(class NLMISC::IStream &f)
 
 
 //--------------------------------------------------------------
-//					readGeorges()  
+//					readGeorges()
 //--------------------------------------------------------------
 void CStaticBrick::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId)
 {
@@ -324,11 +324,11 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 	// FamilyId
 	//if( root.getValueByName (value, "Basics.FamilyId") )
 	//{
-	//Family = BRICK_FAMILIES::toSBrickFamily( sheetName.substr( 0, sheetName.size() - NB_LETTERS_AFTER_FAMILY ) );	
+	//Family = BRICK_FAMILIES::toSBrickFamily( sheetName.substr( 0, sheetName.size() - NB_LETTERS_AFTER_FAMILY ) );
 	//}
 	if( root.getValueByName (value, "Basics.FamilyId") )
 	{
-		Family = BRICK_FAMILIES::toSBrickFamily( value );	
+		Family = BRICK_FAMILIES::toSBrickFamily( value );
 		if(Family==BRICK_FAMILIES::Unknown)
 			nlwarning("CStaticBrick::readStaticBrick: Unknown Family %s in sheet %s", value.c_str(), sheetId.toString().c_str());
 /*
@@ -344,7 +344,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 */
 	}
 	else
-	{		
+	{
 		nlwarning("<CStaticBrick::readGeorges> can't get the value 'FamilyId' for sheet %s", sheetId.toString().c_str() );
 	}
 
@@ -374,7 +374,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 	{
 		nlwarning("<CStaticBrick::readGeorges> can't get the value 'Skill' for sheet %s", sheetId.toString().c_str() );
 	}
-	
+
 
 	// SabrinaValue
 	root.getValueByName (SabrinaValue, "Basics.SabrinaCost");
@@ -387,9 +387,9 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 
 	// power value
 	root.getValueByName (PowerValue, "Basics.PowerValue");
-	
+
 	// IndexInFamily
-	if( ! root.getValueByName (IndexInFamily, "Basics.IndexInFamily") )	
+	if( ! root.getValueByName (IndexInFamily, "Basics.IndexInFamily") )
 	{
 		nlwarning("<CStaticBrick::readGeorges> can't get the value 'IndexInFamily' for sheet %s", sheetId.toString().c_str() );
 	}
@@ -403,7 +403,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 	{
 		nlwarning("<CStaticBrick::readGeorges> can't get the value 'ForcedLocalisation' for sheet %s", sheetId.toString().c_str() );
 	}
-	
+
 	// LearnRequiresOneOfSkills
 	if ( ! root.getValueByName (value, "Basics.LearnRequiresOneOfSkills") )
 	{
@@ -464,7 +464,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 				brickSheet += string(".sbrick");
 			}
 		}
-		
+
 		CSheetId brickSheetId( NLMISC::strlwr( brickSheet ) );
 		if ( brickSheetId == CSheetId::Unknown )
 			nlwarning( "<CStaticBrick::readGeorges> LearnRequireBricks: unknown sheet %s in %s", brickSheet.c_str(), sheetId.toString().c_str() );
@@ -513,7 +513,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 	{
 		addParam(StringParams[i], Params);
 	}
-	
+
 	// Load Faber tools
 	if( Family >= BRICK_FAMILIES::BeginFaberRoot && Family <= BRICK_FAMILIES::EndFaberRoot )
 	{
@@ -521,7 +521,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 	}
 
 	// crafting duration
-	if ( !root.getValueByName(CraftingDuration , "faber.Crafting Duration" ) ) 
+	if ( !root.getValueByName(CraftingDuration , "faber.Crafting Duration" ) )
 	{
 		nlwarning("<CStaticBrick::readGeorges> can't get the value 'faber.Crafting Duration' for sheet %s", sheetId.toString().c_str() );
 	}
@@ -564,7 +564,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 				nlwarning("Unknown Mandatory family %s",value.c_str());
 		}
 	}
-	
+
 	// Optional families
 	OptionalFamilies.clear();
 	for( uint i = 0 ; i < SBRICK_MAX_OPTIONAL ; ++i )
@@ -580,7 +580,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 				nlwarning("Unknown optional family %s",value.c_str());
 		}
 	}
-	
+
 	// Parameter families
 //	ParameterFamilies.clear();
 	for( uint i = 0 ; i < SBRICK_MAX_PARAMETER ; ++i )
@@ -596,7 +596,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 				nlwarning("Unknown Parameter family %s",value.c_str());
 		}
 	}
-	
+
 	// Credit families
 	CreditFamilies.clear();
 	for( uint i = 0 ; i < SBRICK_MAX_CREDIT ; ++i )
@@ -610,12 +610,12 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 				CreditFamilies.insert( bf );
 		}
 	}
-	
+
 	root.getValueByName (ForbiddenDef, "Basics.ForbiddenDef" );
 	root.getValueByName (ForbiddenExclude, "Basics.ForbiddenExclude" );
 
 	root.getValueByName (UsableWithEmptyHands, "Basics.UsableWithEmptyHands");
-	
+
 } // readStaticBrick //
 
 
@@ -648,7 +648,7 @@ bool	CPlayerSkill::initFromString( const string& skillAndValue )
 // string if the brick properties.
 //
 //--------------------------------------------------------------
-//					addParam()  
+//					addParam()
 //--------------------------------------------------------------
 void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Params)
 {
@@ -665,52 +665,52 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 	case TBrickParam::SAP:
 		// $*STRUCT CSBrickParamSap TBrickParam::SAP
 		// $*-i unsigned Sap=0		// quantity of SAP to use
-		Params.push_back(new CSBrickParamSap(tail)); 
+		Params.push_back(new CSBrickParamSap(tail));
 		break;
 
 	case TBrickParam::HP:
 		// $*STRUCT CSBrickParamHp TBrickParam::HP
 		// $*-i unsigned Hp=0		// quantity of HP to use
-		Params.push_back(new CSBrickParamHp(tail)); 
+		Params.push_back(new CSBrickParamHp(tail));
 		break;
 
 	case TBrickParam::STA:
 		// $*STRUCT CSBrickParamSta TBrickParam::STA
 		// $*-i unsigned Sta=0		// quantity of STA to use
-		Params.push_back(new CSBrickParamSta(tail)); 
+		Params.push_back(new CSBrickParamSta(tail));
 		break;
 
 	case TBrickParam::STA_WEIGHT_FACTOR:
 		// $*STRUCT CSBrickParamStaWeightFactor TBrickParam::STA_WEIGHT_FACTOR
 		// $*-i float StaFactor=0		// quantity of STA FACTOR of WEIGHT to use
 		// $*-i unsigned StaConst=0		// quantity of STA Constante to use, used STA = StaFactor * (weight of equipped weapons) + StaConst
-		Params.push_back(new CSBrickParamStaWeightFactor(tail)); 
+		Params.push_back(new CSBrickParamStaWeightFactor(tail));
 		break;
 
 	case TBrickParam::FOCUS:
 		// $*STRUCT CSBrickParamFocus TBrickParam::FOCUS
 		// $*-i unsigned Focus=0		// quantity of FOCUS to use
-		Params.push_back(new CSBrickParamFocus(tail)); 
+		Params.push_back(new CSBrickParamFocus(tail));
 		break;
 
 	case TBrickParam::SET_BEHAVIOUR:
 		// $*STRUCT CSBrickParamSetBehaviour TBrickParam::SET_BEHAVIOUR
 		// $*-s std::string Behaviour	// the new behaviour to use
-		Params.push_back(new CSBrickParamSetBehaviour(tail)); 
+		Params.push_back(new CSBrickParamSetBehaviour(tail));
 		break;
 
 	case TBrickParam::DEFINE_FLAG:
 		// $*STRUCT CSBrickParamDefineFlag TBrickParam::DEFINE_FLAG
 		// $*-s std::string Flag	// the defined flag
-		Params.push_back(new CSBrickParamDefineFlag(tail)); 
+		Params.push_back(new CSBrickParamDefineFlag(tail));
 		break;
 
 	case TBrickParam::BYPASS_CHECK:
 		// $*STRUCT CSBrickParamBypassCheck TBrickParam::BYPASS_CHECK
 		// $*-s std::string FlagType	// the check flag to bypass
-		Params.push_back(new CSBrickParamBypassCheck(tail)); 
+		Params.push_back(new CSBrickParamBypassCheck(tail));
 		break;
-		
+
 	/************************************************************************/
 	/* COMBAT Params														*/
 	/************************************************************************/
@@ -719,7 +719,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*STRUCT CSBrickParamLatencyFactor TBrickParam::LATENCY_FACTOR
 		// $*-f float MinLatencyFactor = 1	// min factor on weapon latency
 		// $*-f float MaxLatencyFactor = 0.5	// max factor on weapon latency
-		Params.push_back(new CSBrickParamLatencyFactor(tail)); 
+		Params.push_back(new CSBrickParamLatencyFactor(tail));
 		}
 		break;
 
@@ -739,16 +739,16 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-f float Duration = 0.0	// duration in seconds
 		// $*-f float MinFactor = 0.0	// min factor of regen debuff
 		// $*-f float MaxFactor = 0.0	// max factor of regen debuff
-		Params.push_back(new CSBrickParamDebuffRegen(tail)); 
+		Params.push_back(new CSBrickParamDebuffRegen(tail));
 		}
 		break;
-		
+
 	case TBrickParam::SAP_LOSS_FACTOR:
 		{
 		// $*STRUCT CSBrickParamSapLossFactor TBrickParam::SAP_LOSS_FACTOR
 		// $*-f float MinFactor = 0.0	// min factor of damage also applied to sap
 		// $*-f float MaxFactor = 0.0	// max factor of damage also applied to sap
-		Params.push_back(new CSBrickParamSapLossFactor(tail)); 
+		Params.push_back(new CSBrickParamSapLossFactor(tail));
 		}
 		break;
 
@@ -757,7 +757,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*STRUCT CSBrickParamAim TBrickParam::AIM
 		// $*-s std::string BodyType // Homin, kitin (=land kitin), bird, flying_kitin....(see body.h)
 		// $*-s std::string AimedSlot // head, body, arms... (see slot_equipment.cpp)
-		Params.push_back(new CSBrickParamAim(tail)); 
+		Params.push_back(new CSBrickParamAim(tail));
 		}
 		break;
 
@@ -784,7 +784,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		{
 			// $*STRUCT CSBrickParamThrowOffBalance TBrickParam::THROW_OFF_BALANCE
 			// $*-f float	MinDuration = 0.0f	// effect min duration
-			// $*-f float	MaxDuration = 5.0f	// effect max duration 
+			// $*-f float	MaxDuration = 5.0f	// effect max duration
 			Params.push_back(new CSBrickParamThrowOffBalance(tail));
 		}
 		break;
@@ -794,7 +794,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*STRUCT CSBrickParamIncreaseDamage TBrickParam::INC_DMG
 		// $*-f float	MinFactor = 1.0f //min factor on damage
 		// $*-f float	MaxFactor = 2.0f //max factor on damage
-		Params.push_back(new CSBrickParamIncreaseDamage(tail)); 
+		Params.push_back(new CSBrickParamIncreaseDamage(tail));
 		}
 		break;
 
@@ -803,7 +803,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*STRUCT CSBrickParamIncDmgTypeRestriction TBrickParam::INC_DMG_TYPE_RSTR
 		// $*-s std::string	TypeRestriction //type restriction
 		// $*-f float		FactorModifier = 0.0f //bonus on damage factor
-		Params.push_back(new CSBrickParamIncDmgTypeRestriction(tail)); 
+		Params.push_back(new CSBrickParamIncDmgTypeRestriction(tail));
 		}
 		break;
 
@@ -812,7 +812,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*STRUCT CSBrickParamIncDmgRaceRestriction TBrickParam::INC_DMG_RACE_RSTR
 		// $*-s std::string	RaceRestriction //race restriction
 		// $*-f float		FactorModifier = 0.0f //bonus on damage factor
-		Params.push_back(new CSBrickParamIncDmgRaceRestriction(tail)); 
+		Params.push_back(new CSBrickParamIncDmgRaceRestriction(tail));
 		}
 		break;
 
@@ -821,7 +821,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*STRUCT CSBrickParamIncDmgEcosystemRestriction TBrickParam::INC_DMG_ECOS_RSTR
 		// $*-s std::string	EcosystemRestriction //Ecosystem restriction
 		// $*-f float		FactorModifier = 0.0f //bonus on damage factor
-		Params.push_back(new CSBrickParamIncDmgEcosystemRestriction(tail)); 
+		Params.push_back(new CSBrickParamIncDmgEcosystemRestriction(tail));
 		}
 		break;
 
@@ -830,7 +830,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*STRUCT CSBrickParamIncDmgSeasonRestriction TBrickParam::INC_DMG_SEASON_RSTR
 		// $*-s std::string	SeasonRestriction //Season restriction
 		// $*-f float		FactorModifier = 0.0f //bonus on damage factor
-		Params.push_back(new CSBrickParamIncDmgSeasonRestriction(tail)); 
+		Params.push_back(new CSBrickParamIncDmgSeasonRestriction(tail));
 		}
 		break;
 
@@ -840,7 +840,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 			// $*-s std::string	DamageType // damage type
 			// $*-f float		MinFactor = 0.0f //min factor of damage
 			// $*-f float		MaxFactor = 1.0f //max factor of damage
-			Params.push_back(new CSBrickParamSpecialDamage(tail)); 
+			Params.push_back(new CSBrickParamSpecialDamage(tail));
 		}
 		break;
 
@@ -850,7 +850,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-s std::string	ArmorType // affected armor type (light, medium, heavy, kitin etc..)
 		// $*-f float		MinFactor = 1.0f //max factor applied on armor absorption
 		// $*-f float		MaxFactor = 0.5f //max factor applied on armor absorption (< min as smaller is better)
-		Params.push_back(new CSBrickParamArmorMod(tail)); 
+		Params.push_back(new CSBrickParamArmorMod(tail));
 		}
 		break;
 
@@ -861,16 +861,16 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-f float Duration	// duration of the slow in seconds
 		// $*-f float MinFactor = 1.0f // min factor applied on cast time
 		// $*-f float MaxFactor = 2.0f // max factor applied on cast time
-		Params.push_back(new CSBrickParamSlowCast(tail)); 
+		Params.push_back(new CSBrickParamSlowCast(tail));
 		}
 		break;
-		
+
 
 	case TBrickParam::OPENING_1:
 		{
 		// $*STRUCT CSBrickParamOpening1 TBrickParam::OPENING_1
 		// $*-s std::string EventFlag
-		Params.push_back(new CSBrickParamOpening1(tail)); 
+		Params.push_back(new CSBrickParamOpening1(tail));
 		}
 		break;
 
@@ -879,7 +879,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*STRUCT CSBrickParamOpening2 TBrickParam::OPENING_2
 		// $*-s std::string EventFlag1
 		// $*-s std::string EventFlag2
-		Params.push_back(new CSBrickParamOpening2(tail)); 
+		Params.push_back(new CSBrickParamOpening2(tail));
 		}
 		break;
 
@@ -889,7 +889,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-s std::string EventFlag1
 		// $*-s std::string EventFlag2
 		// $*-s std::string EventFlag3
-		Params.push_back(new CSBrickParamOpening3(tail)); 
+		Params.push_back(new CSBrickParamOpening3(tail));
 		}
 		break;
 
@@ -899,7 +899,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-f float Duration	// duration of the effect in seconds
 		// $*-i sint32 MinFactor	// min factor applied on target attack latency (+50 = +50%)
 		// $*-i sint32 MaxFactor	// max factor applied on target attack latency (+50 = +50%)
-		Params.push_back(new CSBrickParamCombatSlowAttack(tail)); 
+		Params.push_back(new CSBrickParamCombatSlowAttack(tail));
 		break;
 
 	case TBrickParam::COMBAT_SLOW:
@@ -907,46 +907,46 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-f float Duration	// duration of the effect in seconds
 		// $*-i sint32 MinFactor	// min factor applied on target attack latency or casting time (+50 = +50%)
 		// $*-i sint32 MaxFactor	// max factor applied on target attack latency or casting time (+50 = +50%)
-		Params.push_back(new CSBrickParamCombatSlow(tail)); 
+		Params.push_back(new CSBrickParamCombatSlow(tail));
 		break;
-		
+
 	case TBrickParam::BLEED_FACTOR:
 		// $*STRUCT CSBrickParamBleedFactor TBrickParam::BLEED_FACTOR
 		// $*-f float Duration		// duration of the effect in seconds
 		// $*-f float MinFactor		// min factor of dealt damage also lost in bleed
 		// $*-f float MaxFactor		// max factor of dealt damage also lost in bleed
-		Params.push_back(new CSBrickParamBleedFactor(tail)); 
+		Params.push_back(new CSBrickParamBleedFactor(tail));
 		break;
 
 	case TBrickParam::SPECIAL_HIT:
 		// $*STRUCT CSBrickParamSpecialHit TBrickParam::SPECIAL_HIT
 		// no param
-		Params.push_back(new CSBrickParamSpecialHit(tail)); 
+		Params.push_back(new CSBrickParamSpecialHit(tail));
 		break;
 
 	case TBrickParam::HIT_ALL_AGGRESSORS:
 		// $*STRUCT CSBrickParamHitAllAggressors TBrickParam::HIT_ALL_AGGRESSORS
 		// $*-f float MinFactor		// min factor on dealt damage (total damage divided among targets)
 		// $*-f float MaxFactor		// max factor on dealt damage (total damage divided among targets)
-		Params.push_back(new CSBrickParamHitAllAggressors(tail)); 
+		Params.push_back(new CSBrickParamHitAllAggressors(tail));
 		break;
 
 	case TBrickParam::WEAPON_WEAR_MOD:
 		// $*STRUCT CSBrickParamWeaponWearMod TBrickParam::WEAPON_WEAR_MOD
 		// $*-f float MinModifier		// min weapon wear modifier
 		// $*-f float MaxModifier		// max weapon wear modifier
-		Params.push_back(new CSBrickParamWeaponWearMod(tail)); 
+		Params.push_back(new CSBrickParamWeaponWearMod(tail));
 		break;
 
 	case TBrickParam::CRITICAL_HIT_MOD:
 		// $*STRUCT CSBrickParamCriticalHitMod TBrickParam::CRITICAL_HIT_MOD
 		// $*-i uint8 MinModifier		// min critical hit chance modifier
 		// $*-i uint8 MaxModifier		// max critical hit chance  modifier
-		Params.push_back(new CSBrickParamCriticalHitMod(tail)); 
+		Params.push_back(new CSBrickParamCriticalHitMod(tail));
 		break;
-		
-		
-	
+
+
+
 	/************************************************************************/
 	/* MAGIC params                                                         */
 	/************************************************************************/
@@ -954,50 +954,50 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 	case TBrickParam::MA:
 		// $*STRUCT CSBrickParamMaType TBrickParam::MA
 		// $*-s std::string Type	// type name
-		Params.push_back(new CSBrickParamMaType(tail)); 
+		Params.push_back(new CSBrickParamMaType(tail));
 		break;
 
 	case TBrickParam::MA_END:
 		// $*STRUCT CSBrickParamMaEnd TBrickParam::MA_END
-		Params.push_back(new CSBrickParamMaEnd(tail)); 
+		Params.push_back(new CSBrickParamMaEnd(tail));
 		break;
 
 	case TBrickParam::MA_EFFECT:
 		// $*STRUCT CSBrickParamMagicEffect TBrickParam::MA_EFFECT
 		// $*-s std::string Effect	// effect name
-		Params.push_back(new CSBrickParamMagicEffect(tail)); 
+		Params.push_back(new CSBrickParamMagicEffect(tail));
 		break;
-		
+
 	case TBrickParam::MA_STAT:
 		// $*STRUCT CSBrickParamMagicStat TBrickParam::MA_STAT
 		// $*-s std::string Stat // affected stat
 		// $*-s std::string Type // affected stat type
-		Params.push_back(new CSBrickParamMagicStat(tail)); 
+		Params.push_back(new CSBrickParamMagicStat(tail));
 		break;
-		
+
 
 	case TBrickParam::MA_EFFECT_MOD:
 		// $*STRUCT CSBrickParamMagicEffectMod TBrickParam::MA_EFFECT_MOD
 		// $*-i sint32 EffectMod 	// effect modifier
-		Params.push_back(new CSBrickParamMagicEffectMod(tail)); 
+		Params.push_back(new CSBrickParamMagicEffectMod(tail));
 		break;
 
 	case TBrickParam::MA_EFFECT_MULT:
 		// $*STRUCT CSBrickParamMagicEffectMult TBrickParam::MA_EFFECT_MULT
 		// $*-f float EffectMult 	// effect modifier
-		Params.push_back(new CSBrickParamMagicEffectMult(tail)); 
+		Params.push_back(new CSBrickParamMagicEffectMult(tail));
 		break;
-	
+
 	case TBrickParam::MA_CASTING_TIME:
 		// $*STRUCT CSBrickParamCastingTime TBrickParam::MA_CASTING_TIME
 		// $*-f float CastingTime= 0	// casting modifier in seconds
-		Params.push_back(new CSBrickParamCastingTime(tail)); 
+		Params.push_back(new CSBrickParamCastingTime(tail));
 		break;
 
 	case TBrickParam::MA_DMG_TYPE:
 		// $*STRUCT CSBrickParamMagicDmgType TBrickParam::MA_DMG_TYPE
 		// $*-s std::string DmgType	// magic damage type
-		Params.push_back(new CSBrickParamMagicDmgType(tail)); 
+		Params.push_back(new CSBrickParamMagicDmgType(tail));
 		break;
 
 	case TBrickParam::MA_DMG:
@@ -1005,62 +1005,62 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-i sint32 Hp = 0	// fixed modifier on energy
 		// $*-i sint32 Sap = 0	// fixed modifier on energy
 		// $*-i sint32 Sta = 0	// fixed modifier on energy
-		Params.push_back(new CSBrickParamMagicDmg(tail)); 
+		Params.push_back(new CSBrickParamMagicDmg(tail));
 		break;
 	case TBrickParam::MA_HEAL:
 		// $*STRUCT CSBrickParamMagicHeal TBrickParam::MA_HEAL
 		// $*-i sint32 Hp = 0	// fixed modifier on energy
 		// $*-i sint32 Sap = 0	// fixed modifier on energy
 		// $*-i sint32 Sta = 0	// fixed modifier on energy
-		Params.push_back(new CSBrickParamMagicHeal(tail)); 
+		Params.push_back(new CSBrickParamMagicHeal(tail));
 		break;
 	case TBrickParam::MA_RANGE:
 		// $*STRUCT CSBrickParamMagicRanges TBrickParam::MA_RANGE
 		// $*-i sint8 RangeIndex
-		Params.push_back(new CSBrickParamMagicRanges(tail)); 
+		Params.push_back(new CSBrickParamMagicRanges(tail));
 		break;
 	case TBrickParam::MA_LINK_COST:
 		// $*STRUCT CSBrickParamMagicLinkCost TBrickParam::MA_LINK_COST
 		// $*-i sint32 Cost
-		Params.push_back(new CSBrickParamMagicLinkCost(tail)); 
+		Params.push_back(new CSBrickParamMagicLinkCost(tail));
 		break;
 	case TBrickParam::MA_LINK_PERIOD:
 		// $*STRUCT CSBrickParamMagicLinkPeriod TBrickParam::MA_LINK_PERIOD
 		// $*-i uint32 Period
-		Params.push_back(new CSBrickParamMagicLinkPeriod(tail)); 
+		Params.push_back(new CSBrickParamMagicLinkPeriod(tail));
 		break;
 
 	case TBrickParam::MA_CURE:
 		// $*STRUCT CSBrickParamMagicCure TBrickParam::MA_CURE
 		// $*-s std::string Cure
-		Params.push_back(new CSBrickParamMagicCure(tail)); 
+		Params.push_back(new CSBrickParamMagicCure(tail));
 		break;
 
 	case TBrickParam::MA_LINK_POWER:
 		// $*STRUCT CSBrickParamMagicLinkPower TBrickParam::MA_LINK_POWER
 		// $*-i uint16 Power
-		Params.push_back(new CSBrickParamMagicLinkPower(tail)); 
+		Params.push_back(new CSBrickParamMagicLinkPower(tail));
 		break;
 	case TBrickParam::MA_BREAK_RES:
 		// $*STRUCT CSBrickParamMagicBreakResist TBrickParam::MA_BREAK_RES
 		// $*-i uint16 BreakResist
 		// $*-i uint16 BreakResistPower
-		Params.push_back(new CSBrickParamMagicBreakResist(tail)); 
+		Params.push_back(new CSBrickParamMagicBreakResist(tail));
 		break;
 	case TBrickParam::MA_ARMOR_COMP:
 		// $*STRUCT CSBrickParamMagicArmorComp TBrickParam::MA_ARMOR_COMP
 		// $*-i uint16 ArmorComp
-		Params.push_back(new CSBrickParamMagicArmorComp(tail)); 
+		Params.push_back(new CSBrickParamMagicArmorComp(tail));
 		break;
 	case TBrickParam::MA_VAMPIRISE:
 		// $*STRUCT CSBrickParamMagicVampirise TBrickParam::MA_VAMPIRISE
 		// $*-i sint32 Vampirise
-		Params.push_back(new CSBrickParamMagicVampirise(tail)); 
+		Params.push_back(new CSBrickParamMagicVampirise(tail));
 		break;
 	case TBrickParam::MA_VAMPIRISE_RATIO:
 		// $*STRUCT CSBrickParamMagicVampiriseRatio TBrickParam::MA_VAMPIRISE_RATIO
 		// $*-f float VampiriseRatio
-		Params.push_back(new CSBrickParamMagicVampiriseRatio(tail)); 
+		Params.push_back(new CSBrickParamMagicVampiriseRatio(tail));
 		break;
 
 	/************************************************************************/
@@ -1070,67 +1070,67 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 	case TBrickParam::CR_RECOMMENDED:
 		// $*STRUCT CSBrickParamCraftRecommended TBrickParam::CR_RECOMMENDED
 		// $*-i uint32 Recommended
-		Params.push_back(new CSBrickParamCraftRecommended(tail)); 
+		Params.push_back(new CSBrickParamCraftRecommended(tail));
 		break;
 	case TBrickParam::CR_HP:
 		// $*STRUCT CSBrickParamCraftHP TBrickParam::CR_HP
 		// $*-i sint32 HitPoint
-		Params.push_back(new CSBrickParamCraftHP(tail)); 
+		Params.push_back(new CSBrickParamCraftHP(tail));
 		break;
 	case TBrickParam::CR_SAP:
 		// $*STRUCT CSBrickParamCraftSap TBrickParam::CR_SAP
 		// $*-i sint32 Sap
-		Params.push_back(new CSBrickParamCraftSap(tail)); 
+		Params.push_back(new CSBrickParamCraftSap(tail));
 		break;
 	case TBrickParam::CR_STA:
 		// $*STRUCT CSBrickParamCraftSta TBrickParam::CR_STA
 		// $*-i sint32 Stamina
-		Params.push_back(new CSBrickParamCraftSta(tail)); 
+		Params.push_back(new CSBrickParamCraftSta(tail));
 		break;
 	case TBrickParam::CR_FOCUS:
 		// $*STRUCT CSBrickParamCraftFocus TBrickParam::CR_FOCUS
 		// $*-i uint32 Focus
-		Params.push_back(new CSBrickParamCraftFocus(tail)); 
+		Params.push_back(new CSBrickParamCraftFocus(tail));
 		break;
 	case TBrickParam::CR_QUALITY:
 		// $*STRUCT CSBrickParamCraftQuality TBrickParam::CR_QUALITY
 		// $*-i sint32 Quality
-		Params.push_back(new CSBrickParamCraftQuality(tail)); 
+		Params.push_back(new CSBrickParamCraftQuality(tail));
 		break;
 	case TBrickParam::CR_DURABILITY:
 		// $*STRUCT CSBrickParamCraftDurability TBrickParam::CR_DURABILITY
 		// $*-f float Durability
-		Params.push_back(new CSBrickParamCraftDurability(tail)); 
+		Params.push_back(new CSBrickParamCraftDurability(tail));
 		break;
 	case TBrickParam::CR_DAMAGE:
 		// $*STRUCT CSBrickParamCraftDamage TBrickParam::CR_DAMAGE
 		// $*-f float Damage
-		Params.push_back(new CSBrickParamCraftDamage(tail)); 
+		Params.push_back(new CSBrickParamCraftDamage(tail));
 		break;
 	case TBrickParam::CR_HITRATE:
 		// $*STRUCT CSBrickParamCraftHitRate TBrickParam::CR_HITRATE
 		// $*-f float HitRate
-		Params.push_back(new CSBrickParamCraftHitRate(tail)); 
+		Params.push_back(new CSBrickParamCraftHitRate(tail));
 		break;
 	case TBrickParam::CR_RANGE:
 		// $*STRUCT CSBrickParamCraftRange TBrickParam::CR_RANGE
 		// $*-f float Range
-		Params.push_back(new CSBrickParamCraftRange(tail)); 
+		Params.push_back(new CSBrickParamCraftRange(tail));
 		break;
 	case TBrickParam::CR_DMG_PROTECTION:
 		// $*STRUCT CSBrickParamCraftDmgProtection TBrickParam::CR_DMG_PROTECTION
 		// $*-f float DmgProtection
-		Params.push_back(new CSBrickParamCraftDmgProtection(tail)); 
+		Params.push_back(new CSBrickParamCraftDmgProtection(tail));
 		break;
 	case TBrickParam::CR_SAPLOAD:
 		// $*STRUCT CSBrickParamCraftSapload TBrickParam::CR_SAPLOAD
 		// $*-f float Sapload
-		Params.push_back(new CSBrickParamCraftSapload(tail)); 
+		Params.push_back(new CSBrickParamCraftSapload(tail));
 		break;
 	case TBrickParam::CR_WEIGHT:
 		// $*STRUCT CSBrickParamCraftWeight TBrickParam::CR_WEIGHT
 		// $*-f float Weight
-		Params.push_back(new CSBrickParamCraftWeight(tail)); 
+		Params.push_back(new CSBrickParamCraftWeight(tail));
 		break;
 
 	/************************************************************************/
@@ -1301,7 +1301,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-i uint16 TauntPower	// entities of higher level cannot be taunt
 		// $*-f float Range			// effective range in meters
 		// $*-f float DisableTime	// disable taunt powers for x seconds
-		Params.push_back(new CSBrickParamPowerTaunt(tail)); 
+		Params.push_back(new CSBrickParamPowerTaunt(tail));
 		break;
 
 	case TBrickParam::SP_SHIELDING:
@@ -1313,8 +1313,8 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-i uint8	ShieldProtectionFactor	// granted protection in % with a shield
 		// $*-i uint16	ShieldProtectionMax		// max protection with a shield
 		// $*-f float	Duration					// power duration
-		// $*-f float	DisableTime				// disable power for x seconds	
-		Params.push_back(new CSBrickParamShielding(tail)); 
+		// $*-f float	DisableTime				// disable power for x seconds
+		Params.push_back(new CSBrickParamShielding(tail));
 		break;
 
 	case TBrickParam::SP_LIFE_AURA:
@@ -1324,7 +1324,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-f float	Radius				// aura radius in meters
 		// $*-f float	TargetDisableTime	// disable life aura for x seconds on targets
 		// $*-f float	UserDisableTime		// disable life aura for x seconds on user
-		Params.push_back(new CSBrickParamLifeAura(tail)); 
+		Params.push_back(new CSBrickParamLifeAura(tail));
 		break;
 
 	case TBrickParam::SP_LIFE_AURA2:
@@ -1344,7 +1344,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-f float	Radius				// aura radius in meters
 		// $*-f float	TargetDisableTime	// disable life aura for x seconds on targets
 		// $*-f float	UserDisableTime		// disable life aura for x seconds on user
-		Params.push_back(new CSBrickParamStaminaAura(tail)); 
+		Params.push_back(new CSBrickParamStaminaAura(tail));
 		break;
 
 	case TBrickParam::SP_STAMINA_AURA2:
@@ -1354,7 +1354,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-f float	Radius				// aura radius in meters
 		// $*-f float	TargetDisableTime	// disable life aura for x seconds on targets
 		// $*-f float	UserDisableTime		// disable life aura for x seconds on user
-		Params.push_back(new CSBrickParamStaminaAura2(tail)); 
+		Params.push_back(new CSBrickParamStaminaAura2(tail));
 		break;
 
 	case TBrickParam::SP_SAP_AURA:
@@ -1364,7 +1364,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-f float	Radius				// aura radius in meters
 		// $*-f float	TargetDisableTime	// disable life aura for x seconds on targets
 		// $*-f float	UserDisableTime		// disable life aura for x seconds on user
-		Params.push_back(new CSBrickParamSapAura(tail)); 
+		Params.push_back(new CSBrickParamSapAura(tail));
 		break;
 
 	case TBrickParam::SP_SAP_AURA2:
@@ -1374,21 +1374,21 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-f float	Radius				// aura radius in meters
 		// $*-f float	TargetDisableTime	// disable life aura for x seconds on targets
 		// $*-f float	UserDisableTime		// disable life aura for x seconds on user
-		Params.push_back(new CSBrickParamSapAura2(tail)); 
+		Params.push_back(new CSBrickParamSapAura2(tail));
 		break;
 
 	case TBrickParam::SP_SPEEDING_UP:
 		// $*STRUCT CSBrickParamSpeedingUp TBrickParam::SP_SPEEDING_UP
 		// $*-i uint16	SpeedMod			// speed modifier (in %)
 		// $*-f float	Duration			// duration in seconds
-		// $*-f float	DisableTime			// disable power for x seconds	
-		Params.push_back(new CSBrickParamSpeedingUp(tail)); 
+		// $*-f float	DisableTime			// disable power for x seconds
+		Params.push_back(new CSBrickParamSpeedingUp(tail));
 		break;
 
 	case TBrickParam::SP_INVULNERABILITY:
 		// $*STRUCT CSBrickParamInvulnerability TBrickParam::SP_INVULNERABILITY
 		// $*-f float	Duration			// duration in seconds
-		// $*-f float	DisableTime			// disable power for x seconds	
+		// $*-f float	DisableTime			// disable power for x seconds
 		Params.push_back(new CSBrickParamInvulnerability(tail));
 		break;
 
@@ -1435,7 +1435,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-f float	Duration			// duration in seconds
 		// $*-f float	TargetDisableTime	// disable aura for x seconds on targets
 		// $*-f float	UserDisableTime		// disable aura for x seconds on user
-		// $*-i sint16	Damage				// damage 
+		// $*-i sint16	Damage				// damage
 		Params.push_back(new CSBrickParamFireWall(tail));
 		break;
 
@@ -1445,7 +1445,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-f float	Duration			// duration in seconds
 		// $*-f float	TargetDisableTime	// disable aura for x seconds on targets
 		// $*-f float	UserDisableTime		// disable aura for x seconds on user
-		// $*-i sint16	Damage				// damage 
+		// $*-i sint16	Damage				// damage
 		Params.push_back(new CSBrickParamThornWall(tail));
 		break;
 
@@ -1455,7 +1455,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-f float	Duration			// duration in seconds
 		// $*-f float	TargetDisableTime	// disable aura for x seconds on targets
 		// $*-f float	UserDisableTime		// disable aura for x seconds on user
-		// $*-i sint16	Damage				// damage 
+		// $*-i sint16	Damage				// damage
 		Params.push_back(new CSBrickParamWaterWall(tail));
 		break;
 
@@ -1465,7 +1465,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-f float	Duration			// duration in seconds
 		// $*-f float	TargetDisableTime	// disable aura for x seconds on targets
 		// $*-f float	UserDisableTime		// disable aura for x seconds on user
-		// $*-i sint16	Damage				// damage 
+		// $*-i sint16	Damage				// damage
 		Params.push_back(new CSBrickParamLightningWall(tail));
 		break;
 
@@ -1478,7 +1478,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-i uint16	DamageBonus			// damage bonus (20 = +20 damage points before success factor)
 		Params.push_back(new CSBrickParamBerserk(tail));
 		break;
-		
+
 	case TBrickParam::SP_ENCHANT_WEAPON:
 		// $*STRUCT CSBrickParamEnchantWeapon TBrickParam::SP_ENCHANT_WEAPON
 		// $*-f float	DisableTime			// disable berserker power for x seconds
@@ -1497,25 +1497,25 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-f float		DisableTime			// duration in seconds
 		Params.push_back(new CSBrickParamCalmAnimal(tail));
 		break;
-			
+
 	case TBrickParam::NEEDED_BRICK_FLAG:
 		// $*STRUCT CSBrickParamNeededBrickFlag TBrickParam::NEEDED_BRICK_FLAG
 		// $*-s std::string Flag
-		Params.push_back(new CSBrickParamNeededBrickFlag(tail)); 
+		Params.push_back(new CSBrickParamNeededBrickFlag(tail));
 		break;
 
 	case TBrickParam::SP_BALANCE:
 		// $*STRUCT CSBrickParamBalance TBrickParam::SP_BALANCE
 		// $*-f float		DisableTime			// disable power for x seconds
-		// $*-s std::string AffectedScore		// affected score 
+		// $*-s std::string AffectedScore		// affected score
 		// $*-f float		Range				// power range
 		// $*-f float		LossFactor			// score loss factor in %
 		Params.push_back(new CSBrickParamBalance(tail));
 		break;
-		
+
 	case TBrickParam::SP_HEAL:
 		// $*STRUCT CSBrickParamHeal TBrickParam::SP_HEAL
-		// $*-s std::string AffectedScore		// affected score 
+		// $*-s std::string AffectedScore		// affected score
 		// $*-i sint32		HealValue			// value added to affected score
 		// $*-f float		HealFactorValue		// value added to affected score in % of max target score
 		// $*-f float		DisableTime			// disable power for x seconds
@@ -1626,27 +1626,27 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*STRUCT CSBrickParamAreaBomb TBrickParam::AREA_BOMB
 		// $*-f float Radius		// Radius
 		// $*-f float MinFactor		// MinFactor when we are at extreme range
-		Params.push_back(new CSBrickParamAreaBomb(tail)); 
+		Params.push_back(new CSBrickParamAreaBomb(tail));
 		break;
 	case TBrickParam::AREA_SPRAY:
 		// $*STRUCT CSBrickParamAreaSpray TBrickParam::AREA_SPRAY
 		// $*-i uint8 Angle			// angle in degree
 		// $*-f float Height		// height of the trapezoid
 		// $*-f float Base			// little base length
-		Params.push_back(new CSBrickParamAreaSpray(tail)); 
+		Params.push_back(new CSBrickParamAreaSpray(tail));
 		break;
 	case TBrickParam::AREA_CHAIN:
 		// $*STRUCT CSBrickParamAreaChain TBrickParam::AREA_CHAIN
 		// $*-f float Range			// range between 2 targets
 		// $*-i uint8 MaxTargets	// max nb targets
 		// $*-f float Factor		// damage factor
-		Params.push_back(new CSBrickParamAreaChain(tail)); 
+		Params.push_back(new CSBrickParamAreaChain(tail));
 		break;
 	case TBrickParam::AREA_TARGETS:
 		// $*STRUCT CSBrickParamAreaTargets TBrickParam::AREA_TARGETS
 		// $*-f float	TargetFactor	// each target count as 'TargetFactor' for damage or heal division among targets
 		// $*-i uint8	MaxTargets		// max nb targets
-		Params.push_back(new CSBrickParamAreaTargets(tail)); 
+		Params.push_back(new CSBrickParamAreaTargets(tail));
 		break;
 
 	/************************************************************************/
@@ -1655,7 +1655,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 	case TBrickParam::MA_RECHARGE:
 		// $*STRUCT CSBrickParamMagicRecharge TBrickParam::MA_RECHARGE
 		// $*-i uint32 SapLoad		// sap load
-		Params.push_back(new CSBrickParamMagicRecharge(tail)); 
+		Params.push_back(new CSBrickParamMagicRecharge(tail));
 		break;
 
 	/************************************************************************/
@@ -1665,14 +1665,14 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*STRUCT CSBrickParamCharacUpgrade TBrickParam::CHARAC_UPGRADE
 		// $*-s std::string		Characteristic	// affected characteristic
 		// $*-i uint32			Modifier		// bonus on charac
-		Params.push_back(new CSBrickParamCharacUpgrade(tail)); 
+		Params.push_back(new CSBrickParamCharacUpgrade(tail));
 		break;
-	
+
 	case TBrickParam::SCORE_UPGRADE:
 		// $*STRUCT CSBrickParamScoreUpgrade TBrickParam::SCORE_UPGRADE
 		// $*-s std::string		Score		// affected score
 		// $*-i sint32			Modifier	// modifier on score
-		Params.push_back(new CSBrickParamScoreUpgrade(tail)); 
+		Params.push_back(new CSBrickParamScoreUpgrade(tail));
 		break;
 
 	/************************************************************************/
@@ -1680,27 +1680,27 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 	/************************************************************************/
 	case TBrickParam::TA_TELEPORT:
 		// $*STRUCT CSBrickParamTeleport TBrickParam::TA_TELEPORT
-		Params.push_back(new CSBrickParamTeleport(tail)); 
+		Params.push_back(new CSBrickParamTeleport(tail));
 		break;
 
 	case TBrickParam::TA_DISCONNECT:
 		// $*STRUCT CSBrickParamDisconnect TBrickParam::TA_DISCONNECT
-		Params.push_back(new CSBrickParamDisconnect(tail)); 
+		Params.push_back(new CSBrickParamDisconnect(tail));
 		break;
 
 	case TBrickParam::TA_MOUNT:
 		// $*STRUCT CSBrickParamMount TBrickParam::TA_MOUNT
-		Params.push_back(new CSBrickParamMount(tail)); 
+		Params.push_back(new CSBrickParamMount(tail));
 		break;
 
 	case TBrickParam::TA_UNMOUNT:
 		// $*STRUCT CSBrickParamUnmount TBrickParam::TA_UNMOUNT
-		Params.push_back(new CSBrickParamUnmount(tail)); 
+		Params.push_back(new CSBrickParamUnmount(tail));
 		break;
 
 	case TBrickParam::TA_CONSUME:
 		// $*STRUCT CSBrickParamConsumeItem TBrickParam::TA_CONSUME
-		Params.push_back(new CSBrickParamConsumeItem(tail)); 
+		Params.push_back(new CSBrickParamConsumeItem(tail));
 		break;
 
 	case TBrickParam::JEWEL_ATTRS:
@@ -1708,26 +1708,28 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-s std::string		Attribute	// attribute name
 		// $*-s std::string		Value	// attribute value
 		// $*-i uint32			Charge		// initial charge of sapload
-		// $*-i uint32			Modifier		// onus on attribute
-		Params.push_back(new CSBrickParamJewelAttrs(tail)); 
+		// $*-i uint32			Modifier		// Bonus on attribute
+		// $*-i uint32			Faction		// Required faction
+		// $*-i uint32			Fame		// Required fame in faction (if fame >= 30, require the rite too)
+		Params.push_back(new CSBrickParamJewelAttrs(tail));
 		break;
 	}
 } // addParam //
 
 //--------------------------------------------------------------
-//						loadFaber()  
+//						loadFaber()
 //--------------------------------------------------------------
 void CStaticBrick::loadFaber( const UFormElm &root, const CSheetId &sheetId )
 {
 	if ( Faber == NULL) Faber = new CFaber();
-	
+
 	const UFormElm *faber = NULL;
-	
+
 	string value;
 	string groupFamily;
 	string propName;
 	uint16 quantity = 0;
-	
+
 	root.getValueByName( value, "faber.Create.Crafted Item" );
 	Faber->CraftedItem = CSheetId(value);
 
@@ -1777,12 +1779,12 @@ void CStaticBrick::loadFaber( const UFormElm &root, const CSheetId &sheetId )
 	root.getValueByName( Faber->FocusBonusPerLevel, "faber.FocusBonusPerLevel" );
 
 	root.getValueByName( Faber->AllowPartialSuccess, "faber.AllowPartialSuccess" );
-	
+
 	for (uint i = 1 ; i <= 5 ; ++i)
 	{
 		propName = "faber.Create.MP "+toString(i);
 		if (root.getValueByName( value, propName.c_str() ) && !value.empty() )
-		{			
+		{
 			propName = "faber.Create.Quantity "+toString(i);
 			if ( root.getValueByName( quantity, propName.c_str() ) && quantity > 0)
 			{
@@ -1798,9 +1800,9 @@ void CStaticBrick::loadFaber( const UFormElm &root, const CSheetId &sheetId )
 	{
 		propName = "faber.Create.MP formula "+toString(i);
 		if (root.getValueByName( value, propName.c_str() ) && !value.empty() )
-		{			
+		{
 			propName = "faber.Create.Quantity formula "+toString(i);
-			if( root.getValueByName( quantity, propName.c_str() ) && quantity > 0) 
+			if( root.getValueByName( quantity, propName.c_str() ) && quantity > 0)
 			{
 				CFaber::TRawMaterialFormula mpFormula;
 				mpFormula.MpType = CSheetId(value);
@@ -1813,7 +1815,7 @@ void CStaticBrick::loadFaber( const UFormElm &root, const CSheetId &sheetId )
 
 
 //--------------------------------------------------------------
-//						getBrickFromFamilyIndex()  
+//						getBrickFromFamilyIndex()
 //--------------------------------------------------------------
 const CStaticBrick *CStaticBrick::getBrickFromFamilyIndex(uint16 family, uint16 index)
 {

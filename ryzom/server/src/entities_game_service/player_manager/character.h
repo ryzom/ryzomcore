@@ -2592,6 +2592,7 @@ public:
 	std::string getFullTitle() const;
 
 	bool checkRequiredFaction(std::string faction) const;
+	bool checkRequiredFame(std::string faction, sint32 fame) const;
 
 	std::string getTagA() const;
 	void setTagA(const std::string &tag);

@@ -306,7 +306,7 @@ public:
 		if (copyOfStr=="sp_life_aura2") {_Value=SP_LIFE_AURA2; return *this;}
 		if (copyOfStr=="sp_stamina_aura") {_Value=SP_STAMINA_AURA; return *this;}
 		if (copyOfStr=="sp_stamina_aura2") {_Value=SP_STAMINA_AURA2; return *this;}
-		if (copyOfStr=="sp_sap_aura") {_Value=SP_SAP_AURA; return *this;} 
+		if (copyOfStr=="sp_sap_aura") {_Value=SP_SAP_AURA; return *this;}
 		if (copyOfStr=="sp_sap_aura2") {_Value=SP_SAP_AURA2; return *this;}
 		if (copyOfStr=="sp_speeding_up") {_Value=SP_SPEEDING_UP; return *this;}
 		if (copyOfStr=="sp_invulnerability") {_Value=SP_INVULNERABILITY; return *this;}
@@ -492,25 +492,25 @@ struct CSBrickParamStaWeightFactor : public TBrickParam::IId
 	{
 		_Id = TBrickParam::STA_WEIGHT_FACTOR;
 	}
-	
+
 	CSBrickParamStaWeightFactor(const std::string&str)
 	{
 		*this=CSBrickParamStaWeightFactor();
 		*this=str;
 	}
-	
+
 	const CSBrickParamStaWeightFactor& operator=(const std::string& input)
 	{
 		std::vector<std::string> args;
 		convertInput(args, input);
-		
+
 		if (args.size()!=2)
 			return *this;
-		
+
 		ParsedOk=true;
 		StaFactor=(float)atof(args[0].c_str());
 		NLMISC::fromString(args[1], StaConst);
-		
+
 		return *this;
 	}
 };
@@ -919,7 +919,7 @@ struct CSBrickParamThrowOffBalance : public TBrickParam::IId
 {
 	// effect min duration
 	float MinDuration;
-	// effect max duration 
+	// effect max duration
 	float MaxDuration;
 
 	CSBrickParamThrowOffBalance():
@@ -1262,7 +1262,7 @@ struct CSBrickParamSlowCast : public TBrickParam::IId
 
 struct CSBrickParamOpening1 : public TBrickParam::IId
 {
-	
+
 	std::string EventFlag;
 
 	CSBrickParamOpening1():
@@ -1295,9 +1295,9 @@ struct CSBrickParamOpening1 : public TBrickParam::IId
 
 struct CSBrickParamOpening2 : public TBrickParam::IId
 {
-	
+
 	std::string EventFlag1;
-	
+
 	std::string EventFlag2;
 
 	CSBrickParamOpening2():
@@ -1332,11 +1332,11 @@ struct CSBrickParamOpening2 : public TBrickParam::IId
 
 struct CSBrickParamOpening3 : public TBrickParam::IId
 {
-	
+
 	std::string EventFlag1;
-	
+
 	std::string EventFlag2;
-	
+
 	std::string EventFlag3;
 
 	CSBrickParamOpening3():
@@ -1982,7 +1982,7 @@ struct CSBrickParamMagicHeal : public TBrickParam::IId
 
 struct CSBrickParamMagicRanges : public TBrickParam::IId
 {
-	
+
 	sint8 RangeIndex;
 
 	CSBrickParamMagicRanges():
@@ -2015,7 +2015,7 @@ struct CSBrickParamMagicRanges : public TBrickParam::IId
 
 struct CSBrickParamMagicLinkCost : public TBrickParam::IId
 {
-	
+
 	sint32 Cost;
 
 	CSBrickParamMagicLinkCost():
@@ -2048,7 +2048,7 @@ struct CSBrickParamMagicLinkCost : public TBrickParam::IId
 
 struct CSBrickParamMagicLinkPeriod : public TBrickParam::IId
 {
-	
+
 	uint32 Period;
 
 	CSBrickParamMagicLinkPeriod():
@@ -2081,7 +2081,7 @@ struct CSBrickParamMagicLinkPeriod : public TBrickParam::IId
 
 struct CSBrickParamMagicCure : public TBrickParam::IId
 {
-	
+
 	std::string Cure;
 
 	CSBrickParamMagicCure():
@@ -2114,7 +2114,7 @@ struct CSBrickParamMagicCure : public TBrickParam::IId
 
 struct CSBrickParamMagicLinkPower : public TBrickParam::IId
 {
-	
+
 	uint16 Power;
 
 	CSBrickParamMagicLinkPower():
@@ -2147,9 +2147,9 @@ struct CSBrickParamMagicLinkPower : public TBrickParam::IId
 
 struct CSBrickParamMagicBreakResist : public TBrickParam::IId
 {
-	
+
 	uint16 BreakResist;
-	
+
 	uint16 BreakResistPower;
 
 	CSBrickParamMagicBreakResist():
@@ -2184,7 +2184,7 @@ struct CSBrickParamMagicBreakResist : public TBrickParam::IId
 
 struct CSBrickParamMagicArmorComp : public TBrickParam::IId
 {
-	
+
 	uint16 ArmorComp;
 
 	CSBrickParamMagicArmorComp():
@@ -2217,7 +2217,7 @@ struct CSBrickParamMagicArmorComp : public TBrickParam::IId
 
 struct CSBrickParamMagicVampirise : public TBrickParam::IId
 {
-	
+
 	sint32 Vampirise;
 
 	CSBrickParamMagicVampirise():
@@ -2250,7 +2250,7 @@ struct CSBrickParamMagicVampirise : public TBrickParam::IId
 
 struct CSBrickParamMagicVampiriseRatio : public TBrickParam::IId
 {
-	
+
 	float VampiriseRatio;
 
 	CSBrickParamMagicVampiriseRatio():
@@ -2283,7 +2283,7 @@ struct CSBrickParamMagicVampiriseRatio : public TBrickParam::IId
 
 struct CSBrickParamCraftRecommended : public TBrickParam::IId
 {
-	
+
 	uint32 Recommended;
 
 	CSBrickParamCraftRecommended():
@@ -2316,7 +2316,7 @@ struct CSBrickParamCraftRecommended : public TBrickParam::IId
 
 struct CSBrickParamCraftHP : public TBrickParam::IId
 {
-	
+
 	sint32 HitPoint;
 
 	CSBrickParamCraftHP():
@@ -2349,7 +2349,7 @@ struct CSBrickParamCraftHP : public TBrickParam::IId
 
 struct CSBrickParamCraftSap : public TBrickParam::IId
 {
-	
+
 	sint32 Sap;
 
 	CSBrickParamCraftSap():
@@ -2382,7 +2382,7 @@ struct CSBrickParamCraftSap : public TBrickParam::IId
 
 struct CSBrickParamCraftSta : public TBrickParam::IId
 {
-	
+
 	sint32 Stamina;
 
 	CSBrickParamCraftSta():
@@ -2415,7 +2415,7 @@ struct CSBrickParamCraftSta : public TBrickParam::IId
 
 struct CSBrickParamCraftFocus : public TBrickParam::IId
 {
-	
+
 	uint32 Focus;
 
 	CSBrickParamCraftFocus():
@@ -2448,7 +2448,7 @@ struct CSBrickParamCraftFocus : public TBrickParam::IId
 
 struct CSBrickParamCraftQuality : public TBrickParam::IId
 {
-	
+
 	sint32 Quality;
 
 	CSBrickParamCraftQuality():
@@ -2481,7 +2481,7 @@ struct CSBrickParamCraftQuality : public TBrickParam::IId
 
 struct CSBrickParamCraftDurability : public TBrickParam::IId
 {
-	
+
 	float Durability;
 
 	CSBrickParamCraftDurability():
@@ -2514,7 +2514,7 @@ struct CSBrickParamCraftDurability : public TBrickParam::IId
 
 struct CSBrickParamCraftDamage : public TBrickParam::IId
 {
-	
+
 	float Damage;
 
 	CSBrickParamCraftDamage():
@@ -2547,7 +2547,7 @@ struct CSBrickParamCraftDamage : public TBrickParam::IId
 
 struct CSBrickParamCraftHitRate : public TBrickParam::IId
 {
-	
+
 	float HitRate;
 
 	CSBrickParamCraftHitRate():
@@ -2580,7 +2580,7 @@ struct CSBrickParamCraftHitRate : public TBrickParam::IId
 
 struct CSBrickParamCraftRange : public TBrickParam::IId
 {
-	
+
 	float Range;
 
 	CSBrickParamCraftRange():
@@ -2613,7 +2613,7 @@ struct CSBrickParamCraftRange : public TBrickParam::IId
 
 struct CSBrickParamCraftDmgProtection : public TBrickParam::IId
 {
-	
+
 	float DmgProtection;
 
 	CSBrickParamCraftDmgProtection():
@@ -2646,7 +2646,7 @@ struct CSBrickParamCraftDmgProtection : public TBrickParam::IId
 
 struct CSBrickParamCraftSapload : public TBrickParam::IId
 {
-	
+
 	float Sapload;
 
 	CSBrickParamCraftSapload():
@@ -2679,7 +2679,7 @@ struct CSBrickParamCraftSapload : public TBrickParam::IId
 
 struct CSBrickParamCraftWeight : public TBrickParam::IId
 {
-	
+
 	float Weight;
 
 	CSBrickParamCraftWeight():
@@ -2712,7 +2712,7 @@ struct CSBrickParamCraftWeight : public TBrickParam::IId
 
 struct CSBrickParamForageRange : public TBrickParam::IId
 {
-	
+
 	float Range;
 
 	CSBrickParamForageRange():
@@ -2745,7 +2745,7 @@ struct CSBrickParamForageRange : public TBrickParam::IId
 
 struct CSBrickParamForageLocateDepositRange : public TBrickParam::IId
 {
-	
+
 	float Range;
 
 	CSBrickParamForageLocateDepositRange():
@@ -2778,7 +2778,7 @@ struct CSBrickParamForageLocateDepositRange : public TBrickParam::IId
 
 struct CSBrickParamForageAngle : public TBrickParam::IId
 {
-	
+
 	uint32 Angle;
 
 	CSBrickParamForageAngle():
@@ -2811,7 +2811,7 @@ struct CSBrickParamForageAngle : public TBrickParam::IId
 
 struct CSBrickParamForageMulti : public TBrickParam::IId
 {
-	
+
 	uint32 Limit;
 
 	CSBrickParamForageMulti():
@@ -2844,7 +2844,7 @@ struct CSBrickParamForageMulti : public TBrickParam::IId
 
 struct CSBrickParamForageKnowledge : public TBrickParam::IId
 {
-	
+
 	uint8 Know;
 
 	CSBrickParamForageKnowledge():
@@ -2877,7 +2877,7 @@ struct CSBrickParamForageKnowledge : public TBrickParam::IId
 
 struct CSBrickParamForageTime : public TBrickParam::IId
 {
-	
+
 	float Time;
 
 	CSBrickParamForageTime():
@@ -2910,7 +2910,7 @@ struct CSBrickParamForageTime : public TBrickParam::IId
 
 struct CSBrickParamForageSourceTime : public TBrickParam::IId
 {
-	
+
 	float Time;
 
 	CSBrickParamForageSourceTime():
@@ -2943,7 +2943,7 @@ struct CSBrickParamForageSourceTime : public TBrickParam::IId
 
 struct CSBrickParamForageStatEnergy : public TBrickParam::IId
 {
-	
+
 	float StatEnergy;
 
 	CSBrickParamForageStatEnergy():
@@ -2976,7 +2976,7 @@ struct CSBrickParamForageStatEnergy : public TBrickParam::IId
 
 struct CSBrickParamStatEnergyOnly : public TBrickParam::IId
 {
-	
+
 	uint8 StatEnergyExact;
 
 	CSBrickParamStatEnergyOnly():
@@ -3009,7 +3009,7 @@ struct CSBrickParamStatEnergyOnly : public TBrickParam::IId
 
 struct CSBrickParamForageVisDist : public TBrickParam::IId
 {
-	
+
 	float Dist;
 
 	CSBrickParamForageVisDist():
@@ -3042,7 +3042,7 @@ struct CSBrickParamForageVisDist : public TBrickParam::IId
 
 struct CSBrickParamForageVisStealth : public TBrickParam::IId
 {
-	
+
 	uint8 Mode;
 
 	CSBrickParamForageVisStealth():
@@ -3075,7 +3075,7 @@ struct CSBrickParamForageVisStealth : public TBrickParam::IId
 
 struct CSBrickParamForageSourceLocator : public TBrickParam::IId
 {
-	
+
 	uint8 Flag;
 
 	CSBrickParamForageSourceLocator():
@@ -3108,7 +3108,7 @@ struct CSBrickParamForageSourceLocator : public TBrickParam::IId
 
 struct CSBrickParamForageAttempts : public TBrickParam::IId
 {
-	
+
 	uint16 Nb;
 
 	CSBrickParamForageAttempts():
@@ -3141,7 +3141,7 @@ struct CSBrickParamForageAttempts : public TBrickParam::IId
 
 struct CSBrickParamForageAbsorptionS : public TBrickParam::IId
 {
-	
+
 	float Absorption;
 
 	CSBrickParamForageAbsorptionS():
@@ -3174,7 +3174,7 @@ struct CSBrickParamForageAbsorptionS : public TBrickParam::IId
 
 struct CSBrickParamForageAbsorptionA : public TBrickParam::IId
 {
-	
+
 	float Absorption;
 
 	CSBrickParamForageAbsorptionA():
@@ -3207,7 +3207,7 @@ struct CSBrickParamForageAbsorptionA : public TBrickParam::IId
 
 struct CSBrickParamForageAbsorptionQ : public TBrickParam::IId
 {
-	
+
 	float Absorption;
 
 	CSBrickParamForageAbsorptionQ():
@@ -3240,7 +3240,7 @@ struct CSBrickParamForageAbsorptionQ : public TBrickParam::IId
 
 struct CSBrickParamForagePeriod : public TBrickParam::IId
 {
-	
+
 	float Period;
 
 	CSBrickParamForagePeriod():
@@ -3273,7 +3273,7 @@ struct CSBrickParamForagePeriod : public TBrickParam::IId
 
 struct CSBrickParamForageAperture : public TBrickParam::IId
 {
-	
+
 	float Aperture;
 
 	CSBrickParamForageAperture():
@@ -3306,7 +3306,7 @@ struct CSBrickParamForageAperture : public TBrickParam::IId
 
 struct CSBrickParamForageQuality : public TBrickParam::IId
 {
-	
+
 	float Quality;
 
 	CSBrickParamForageQuality():
@@ -3339,7 +3339,7 @@ struct CSBrickParamForageQuality : public TBrickParam::IId
 
 struct CSBrickParamForagePreservation : public TBrickParam::IId
 {
-	
+
 	float Pres;
 
 	CSBrickParamForagePreservation():
@@ -3372,7 +3372,7 @@ struct CSBrickParamForagePreservation : public TBrickParam::IId
 
 struct CSBrickParamForageStability : public TBrickParam::IId
 {
-	
+
 	float Stab;
 
 	CSBrickParamForageStability():
@@ -3405,7 +3405,7 @@ struct CSBrickParamForageStability : public TBrickParam::IId
 
 struct CSBrickParamForageCreatureStealth : public TBrickParam::IId
 {
-	
+
 	float Stealth;
 
 	CSBrickParamForageCreatureStealth():
@@ -3438,7 +3438,7 @@ struct CSBrickParamForageCreatureStealth : public TBrickParam::IId
 
 struct CSBrickParamForageAbsorbSourceDmg : public TBrickParam::IId
 {
-	
+
 	uint8 Percent;
 
 	CSBrickParamForageAbsorbSourceDmg():
@@ -3471,7 +3471,7 @@ struct CSBrickParamForageAbsorbSourceDmg : public TBrickParam::IId
 
 struct CSBrickParamKamiOffering : public TBrickParam::IId
 {
-	
+
 	uint32 Num;
 
 	CSBrickParamKamiOffering():
@@ -3504,7 +3504,7 @@ struct CSBrickParamKamiOffering : public TBrickParam::IId
 
 struct CSBrickParamKamiAngerDecrease : public TBrickParam::IId
 {
-	
+
 	float Delta;
 
 	CSBrickParamKamiAngerDecrease():
@@ -3537,7 +3537,7 @@ struct CSBrickParamKamiAngerDecrease : public TBrickParam::IId
 
 struct CSBrickParamForageReduceDamage : public TBrickParam::IId
 {
-	
+
 	float Ratio;
 
 	CSBrickParamForageReduceDamage():
@@ -3570,7 +3570,7 @@ struct CSBrickParamForageReduceDamage : public TBrickParam::IId
 
 struct CSBrickParamForageEcotypeSpec : public TBrickParam::IId
 {
-	
+
 	std::string Ecotype;
 
 	CSBrickParamForageEcotypeSpec():
@@ -3603,7 +3603,7 @@ struct CSBrickParamForageEcotypeSpec : public TBrickParam::IId
 
 struct CSBrickParamForageRMGroupFilter : public TBrickParam::IId
 {
-	
+
 	uint32 Value;
 
 	CSBrickParamForageRMGroupFilter():
@@ -3636,7 +3636,7 @@ struct CSBrickParamForageRMGroupFilter : public TBrickParam::IId
 
 struct CSBrickParamForageRMFamilyFilter : public TBrickParam::IId
 {
-	
+
 	uint32 Value;
 
 	CSBrickParamForageRMFamilyFilter():
@@ -3669,7 +3669,7 @@ struct CSBrickParamForageRMFamilyFilter : public TBrickParam::IId
 
 struct CSBrickParamForageItemPartFilter : public TBrickParam::IId
 {
-	
+
 	uint32 ItemPartIndex;
 
 	CSBrickParamForageItemPartFilter():
@@ -3757,7 +3757,7 @@ struct CSBrickParamShielding : public TBrickParam::IId
 	uint16 ShieldProtectionMax;
 	// power duration
 	float Duration;
-	// disable power for x seconds	
+	// disable power for x seconds
 	float DisableTime;
 
 	CSBrickParamShielding():
@@ -4095,7 +4095,7 @@ struct CSBrickParamSpeedingUp : public TBrickParam::IId
 	uint16 SpeedMod;
 	// duration in seconds
 	float Duration;
-	// disable power for x seconds	
+	// disable power for x seconds
 	float DisableTime;
 
 	CSBrickParamSpeedingUp():
@@ -4134,7 +4134,7 @@ struct CSBrickParamInvulnerability : public TBrickParam::IId
 {
 	// duration in seconds
 	float Duration;
-	// disable power for x seconds	
+	// disable power for x seconds
 	float DisableTime;
 
 	CSBrickParamInvulnerability():
@@ -4361,7 +4361,7 @@ struct CSBrickParamFireWall : public TBrickParam::IId
 	float TargetDisableTime;
 	// disable aura for x seconds on user
 	float UserDisableTime;
-	// damage 
+	// damage
 	sint16 Damage;
 
 	CSBrickParamFireWall():
@@ -4410,7 +4410,7 @@ struct CSBrickParamThornWall : public TBrickParam::IId
 	float TargetDisableTime;
 	// disable aura for x seconds on user
 	float UserDisableTime;
-	// damage 
+	// damage
 	sint16 Damage;
 
 	CSBrickParamThornWall():
@@ -4459,7 +4459,7 @@ struct CSBrickParamWaterWall : public TBrickParam::IId
 	float TargetDisableTime;
 	// disable aura for x seconds on user
 	float UserDisableTime;
-	// damage 
+	// damage
 	sint16 Damage;
 
 	CSBrickParamWaterWall():
@@ -4508,7 +4508,7 @@ struct CSBrickParamLightningWall : public TBrickParam::IId
 	float TargetDisableTime;
 	// disable aura for x seconds on user
 	float UserDisableTime;
-	// damage 
+	// damage
 	sint16 Damage;
 
 	CSBrickParamLightningWall():
@@ -4688,7 +4688,7 @@ struct CSBrickParamCalmAnimal : public TBrickParam::IId
 
 struct CSBrickParamNeededBrickFlag : public TBrickParam::IId
 {
-	
+
 	std::string Flag;
 
 	CSBrickParamNeededBrickFlag():
@@ -4723,7 +4723,7 @@ struct CSBrickParamBalance : public TBrickParam::IId
 {
 	// disable power for x seconds
 	float DisableTime;
-	// affected score 
+	// affected score
 	std::string AffectedScore;
 	// power range
 	float Range;
@@ -4766,7 +4766,7 @@ struct CSBrickParamBalance : public TBrickParam::IId
 
 struct CSBrickParamHeal : public TBrickParam::IId
 {
-	// affected score 
+	// affected score
 	std::string AffectedScore;
 	// value added to affected score
 	sint32 HealValue;
@@ -4848,7 +4848,7 @@ struct CSBrickParamRecastTime : public TBrickParam::IId
 
 struct CSBrickParamBonusFgExtractionTimeGC : public TBrickParam::IId
 {
-	
+
 	float AdditionalTimeGC;
 
 	CSBrickParamBonusFgExtractionTimeGC():
@@ -4881,7 +4881,7 @@ struct CSBrickParamBonusFgExtractionTimeGC : public TBrickParam::IId
 
 struct CSBrickParamBonusCrDurability : public TBrickParam::IId
 {
-	
+
 	float Bonus;
 
 	CSBrickParamBonusCrDurability():
@@ -4914,7 +4914,7 @@ struct CSBrickParamBonusCrDurability : public TBrickParam::IId
 
 struct CSBrickParamBonusLandmarkNumber : public TBrickParam::IId
 {
-	
+
 	float Nb;
 
 	CSBrickParamBonusLandmarkNumber():
@@ -5188,14 +5188,17 @@ struct CSBrickParamJewelAttrs : public TBrickParam::IId
 	uint32 Modifier;
 	// required Faction
 	std::string  RequiredFaction;
+	// required Fame
+	sint32  RequiredFame;
 
 	CSBrickParamJewelAttrs():
 		Attribute(),
 		Value(),
 		Charge(),
 		Modifier(),
-		RequiredFaction()
-		
+		RequiredFaction(),
+		RequiredFame()
+
 	{
 		_Id = TBrickParam::JEWEL_ATTRS;
 	}
@@ -5223,7 +5226,12 @@ struct CSBrickParamJewelAttrs : public TBrickParam::IId
 			RequiredFaction = args[4].c_str();
 		else
 			RequiredFaction = "";
-			
+
+		if (!RequiredFaction.empty() && args.size() > 5)
+			NLMISC::fromString(args[5], RequiredFame);
+		else
+			RequiredFame = -200;
+
 		return *this;
 	}
 };
@@ -5413,7 +5421,7 @@ struct CSBrickParamConsumeItem : public TBrickParam::IId
 
 struct CSBrickParamChgCharac : public TBrickParam::IId
 {
-	// affected characteristic 
+	// affected characteristic
 	std::string AffectedCharac;
 	// coefficient to modify characteristic proportionally to item level
 	float ModifierCoefficient;
@@ -5421,7 +5429,7 @@ struct CSBrickParamChgCharac : public TBrickParam::IId
 	float ModifierConstant;
 	// duration in seconds
 	float Duration;
-	
+
 	CSBrickParamChgCharac():
 		AffectedCharac(),
 		ModifierCoefficient(),
@@ -5430,21 +5438,21 @@ struct CSBrickParamChgCharac : public TBrickParam::IId
 	{
 		_Id = TBrickParam::SP_CHG_CHARAC;
 	}
-	
+
 	CSBrickParamChgCharac(const std::string&str)
 	{
 		*this=CSBrickParamChgCharac();
 		*this=str;
 	}
-	
+
 	const CSBrickParamChgCharac& operator=(const std::string& input)
 	{
 		std::vector<std::string> args;
 		convertInput(args, input);
-		
+
 		if (args.size()!=4 && args.size()!=5)
 			return *this;
-		
+
 		ParsedOk=true;
 		AffectedCharac=args[0].c_str();
 		ModifierCoefficient=(float)atof(args[1].c_str());
@@ -5466,7 +5474,7 @@ struct CSBrickParamModDefense : public TBrickParam::IId
 	float ModifierConstant;
 	// duration in seconds
 	float Duration;
-	
+
 	CSBrickParamModDefense():
 		DefenseMode(),
 		ModifierCoefficient(),
@@ -5475,21 +5483,21 @@ struct CSBrickParamModDefense : public TBrickParam::IId
 	{
 		_Id = TBrickParam::SP_MOD_DEFENSE;
 	}
-	
+
 	CSBrickParamModDefense(const std::string&str)
 	{
 		*this=CSBrickParamModDefense();
 		*this=str;
 	}
-	
+
 	const CSBrickParamModDefense& operator=(const std::string& input)
 	{
 		std::vector<std::string> args;
 		convertInput(args, input);
-		
+
 		if (args.size()<4)
 			return *this;
-		
+
 		ParsedOk=true;
 		DefenseMode=args[0].c_str();
 		ModifierCoefficient=(float)atof(args[1].c_str());
@@ -5509,7 +5517,7 @@ struct CSBrickParamModCraftSuccess : public TBrickParam::IId
 	float ModifierConstant;
 	// duration in seconds
 	float Duration;
-	
+
 	CSBrickParamModCraftSuccess():
 		ModifierCoefficient(),
 		ModifierConstant(),
@@ -5517,21 +5525,21 @@ struct CSBrickParamModCraftSuccess : public TBrickParam::IId
 	{
 		_Id = TBrickParam::SP_MOD_CRAFT_SUCCESS;
 	}
-	
+
 	CSBrickParamModCraftSuccess(const std::string&str)
 	{
 		*this=CSBrickParamModCraftSuccess();
 		*this=str;
 	}
-	
+
 	const CSBrickParamModCraftSuccess& operator=(const std::string& input)
 	{
 		std::vector<std::string> args;
 		convertInput(args, input);
-		
+
 		if (args.size()<3)
 			return *this;
-		
+
 		ParsedOk=true;
 		ModifierCoefficient=(float)atof(args[0].c_str());
 		ModifierConstant=(float)atof(args[1].c_str());
@@ -5550,7 +5558,7 @@ struct CSBrickParamModMeleeSuccess : public TBrickParam::IId
 	float ModifierConstant;
 	// duration in seconds
 	float Duration;
-	
+
 	CSBrickParamModMeleeSuccess():
 		ModifierCoefficient(),
 		ModifierConstant(),
@@ -5558,21 +5566,21 @@ struct CSBrickParamModMeleeSuccess : public TBrickParam::IId
 	{
 		_Id = TBrickParam::SP_MOD_MELEE_SUCCESS;
 	}
-	
+
 	CSBrickParamModMeleeSuccess(const std::string&str)
 	{
 		*this=CSBrickParamModMeleeSuccess();
 		*this=str;
 	}
-	
+
 	const CSBrickParamModMeleeSuccess& operator=(const std::string& input)
 	{
 		std::vector<std::string> args;
 		convertInput(args, input);
-		
+
 		if (args.size()<3)
 			return *this;
-		
+
 		ParsedOk=true;
 		ModifierCoefficient=(float)atof(args[0].c_str());
 		ModifierConstant=(float)atof(args[1].c_str());
@@ -5591,7 +5599,7 @@ struct CSBrickParamModRangeSuccess : public TBrickParam::IId
 	float ModifierConstant;
 	// duration in seconds
 	float Duration;
-	
+
 	CSBrickParamModRangeSuccess():
 		ModifierCoefficient(),
 		ModifierConstant(),
@@ -5599,21 +5607,21 @@ struct CSBrickParamModRangeSuccess : public TBrickParam::IId
 	{
 		_Id = TBrickParam::SP_MOD_RANGE_SUCCESS;
 	}
-	
+
 	CSBrickParamModRangeSuccess(const std::string&str)
 	{
 		*this=CSBrickParamModRangeSuccess();
 		*this=str;
 	}
-	
+
 	const CSBrickParamModRangeSuccess& operator=(const std::string& input)
 	{
 		std::vector<std::string> args;
 		convertInput(args, input);
-		
+
 		if (args.size()<3)
 			return *this;
-		
+
 		ParsedOk=true;
 		ModifierCoefficient=(float)atof(args[0].c_str());
 		ModifierConstant=(float)atof(args[1].c_str());
@@ -5632,7 +5640,7 @@ struct CSBrickParamModMagicSuccess : public TBrickParam::IId
 	float ModifierConstant;
 	// duration in seconds
 	float Duration;
-	
+
 	CSBrickParamModMagicSuccess():
 		ModifierCoefficient(),
 		ModifierConstant(),
@@ -5640,21 +5648,21 @@ struct CSBrickParamModMagicSuccess : public TBrickParam::IId
 	{
 		_Id = TBrickParam::SP_MOD_MAGIC_SUCCESS;
 	}
-	
+
 	CSBrickParamModMagicSuccess(const std::string&str)
 	{
 		*this=CSBrickParamModMagicSuccess();
 		*this=str;
 	}
-	
+
 	const CSBrickParamModMagicSuccess& operator=(const std::string& input)
 	{
 		std::vector<std::string> args;
 		convertInput(args, input);
-		
+
 		if (args.size()<3)
 			return *this;
-		
+
 		ParsedOk=true;
 		ModifierCoefficient=(float)atof(args[0].c_str());
 		ModifierConstant=(float)atof(args[1].c_str());
@@ -5676,7 +5684,7 @@ struct CSBrickParamModForageSuccess : public TBrickParam::IId
 	float ModifierConstant;
 	// duration in seconds
 	float Duration;
-	
+
 	CSBrickParamModForageSuccess():
 		Ecosystem(),
 		ModifierCoefficient(),
@@ -5685,21 +5693,21 @@ struct CSBrickParamModForageSuccess : public TBrickParam::IId
 	{
 		_Id = TBrickParam::SP_MOD_FORAGE_SUCCESS;
 	}
-	
+
 	CSBrickParamModForageSuccess(const std::string&str)
 	{
 		*this=CSBrickParamModForageSuccess();
 		*this=str;
 	}
-	
+
 	const CSBrickParamModForageSuccess& operator=(const std::string& input)
 	{
 		std::vector<std::string> args;
 		convertInput(args, input);
-		
+
 		if (args.size()<4)
 			return *this;
-		
+
 		ParsedOk=true;
 		Ecosystem=args[0].c_str();
 		ModifierCoefficient=(float)atof(args[1].c_str());
@@ -5713,7 +5721,7 @@ struct CSBrickParamModForageSuccess : public TBrickParam::IId
 
 struct CSBrickParamModMagicProtection : public TBrickParam::IId
 {
-	// affected magic protection 
+	// affected magic protection
 	std::string AffectedProtection;
 	// coefficient to modify protection proportionally to item level
 	float ModifierCoefficient;
@@ -5722,7 +5730,7 @@ struct CSBrickParamModMagicProtection : public TBrickParam::IId
 	// duration in seconds
 	float Duration;
 
-	
+
 	CSBrickParamModMagicProtection():
 		AffectedProtection(),
 		ModifierCoefficient(),
@@ -5731,27 +5739,27 @@ struct CSBrickParamModMagicProtection : public TBrickParam::IId
 	{
 		_Id = TBrickParam::SP_MOD_MAGIC_PROTECTION;
 	}
-	
+
 	CSBrickParamModMagicProtection(const std::string&str)
 	{
 		*this=CSBrickParamModMagicProtection();
 		*this=str;
 	}
-	
+
 	const CSBrickParamModMagicProtection& operator=(const std::string& input)
 	{
 		std::vector<std::string> args;
 		convertInput(args, input);
-		
+
 		if (args.size()!=4)
 			return *this;
-		
+
 		ParsedOk=true;
 		AffectedProtection=args[0].c_str();
 		ModifierCoefficient=(float)atof(args[1].c_str());
 		ModifierConstant=(float)atof(args[2].c_str());
 		Duration=(float)atof(args[3].c_str());
-		
+
 		return *this;
 	}
 };
