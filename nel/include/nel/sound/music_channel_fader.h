@@ -108,7 +108,7 @@ public:
 	bool play(const std::string &filepath, uint xFadeTime = 0, bool async = true, bool loop = true); 
 
 	/// Stop the music previously loaded and played (the Memory is also freed)
-	void stop(uint xFadeTime = 0);
+	bool stop(uint xFadeTime = 0);
 
 	/// Pause the music previously loaded and played (the Memory is not freed)
 	void pause();

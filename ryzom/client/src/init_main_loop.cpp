@@ -485,6 +485,27 @@ void initMainLoop()
 
 	FPU_CHECKER_ONCE
 
+	if (SoundMngr)
+	{
+		// Loading Music
+		LoadingMusic = ClientCfg.LoadingMusic;
+
+		// SoundMngr->playEventMusic(LoadingMusic, CSoundManager::LoadingMusicXFade, true);
+		// no fadein, and not async because don't work well because of loading in the main thread
+		// Force use GameMusic volume
+		const uint fadeInTime = 500;
+		SoundMngr->playMusic(LoadingMusic, fadeInTime, false, true, true);
+		// Because of blocking loading, force the fadeIn
+		TTime t0 = ryzomGetLocalTime();
+		TTime t1;
+		do
+		{
+			ProgressBar.progress(0);
+			SoundMngr->updateAudioMixerOnly();
+			nlSleep(10);
+		} while ((t1 = ryzomGetLocalTime()) < t0 + fadeInTime);
+	}
+
 	// Get the interface manager
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
