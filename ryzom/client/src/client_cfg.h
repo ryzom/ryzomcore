@@ -350,6 +350,7 @@ struct CClientConfig
 
 	/// Music files
 	string			StartMusic;
+	string			EmptySlotMusic;
 	string			LoadingMusic;
 	string			KamiTeleportMusic;
 	string			KaravanTeleportMusic;

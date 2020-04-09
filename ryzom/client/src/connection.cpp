@@ -2057,7 +2057,7 @@ public:
 
 		// if empty name, return to default mode
 		if (sName.empty())
-			sName = ClientCfg.TeleportLoadingMusic;
+			sName = ClientCfg.EmptySlotMusic;
 
 		// change the music
 		SoundGlobalMenu.setMusic(sName, async);
