@@ -14892,6 +14892,28 @@ string CCharacter::getPositionInfos()
 	return toString("%.2f|%.2f|%.2f|%.4f|%d|%s|%s", x, y, z, h, cell, contName.c_str(), regionName.c_str());
 }
 
+string CCharacter::getEquipementInfos(INVENTORIES::TInventory invId)
+{
+	string item_stats;
+	CInventoryPtr childSrc = getInventory(invId);
+	if (childSrc != NULL)
+	{
+		uint32 k = 0;
+		for (uint j = 0; j < childSrc->getSlotCount(); j++)
+		{
+			CGameItemPtr itemPtr = childSrc->getItem(j);
+			if (itemPtr != NULL)
+			{
+				string sheet = itemPtr->getSheetId().toString();
+				uint32 item_quality = itemPtr->quality();
+				item_stats += toString("%3d:%s:%u|", j, sheet.c_str(), item_quality);
+			}
+		}
+	}
+
+	return item_stats;
+}
+
 string CCharacter::getTargetInfos()
 {
 

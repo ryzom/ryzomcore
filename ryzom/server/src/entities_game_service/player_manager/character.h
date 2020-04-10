@@ -992,7 +992,7 @@ public:
 	sint32 getMountOrFirstPetSlot();
 
 	// return a list of pets in text format (M=Mount, P=Packer, A=Animal, 0=None)
-	std::string getPets(); 
+	std::string getPets();
 
 	// return true if can add 'delta' pets to current player pets
 	bool checkAnimalCount(const NLMISC::CSheetId &PetTicket, bool sendMessage, sint32 delta);
@@ -1615,6 +1615,7 @@ public:
 
 	std::string getTargetInfos();
 	std::string getPositionInfos();
+	std::string getEquipementInfos(INVENTORIES::TInventory invId);
 
 	/// Mount a mount
 	void mount(TDataSetRow PetRowId);
@@ -2390,7 +2391,7 @@ public:
 	void setSpawnPetFlag(uint32 index);
 
 	uint8 getHairColor() const;
-	
+
 	uint8 getHair() const;
 
 	// return if hair cute price discount apply
@@ -2430,7 +2431,7 @@ public:
 
 	// Jewel enchants used for Tags
 	void updateJewelsTags(bool remove, bool update=true);
-	
+
 	// Jewel equipment or skill or region are changed, recompute protection and resistances
 	void updateMagicProtectionAndResistance();
 
@@ -2491,8 +2492,8 @@ public:
 	/// returns an invalid alias if the player is not in a outpost zone
 	TAIAlias getCurrentOutpostZone() const;
 	/// returns the state of the outpost where player are
-	OUTPOSTENUMS::TOutpostState getCurrentOutpostState() const; 
-	
+	OUTPOSTENUMS::TOutpostState getCurrentOutpostState() const;
+
 	/// player enters in a PVP zone, send appropriate client message
 	void enterPVPZone(uint32 pvpZoneType) const;
 	/// character enter in versus pvp zone, player must choose a clan
@@ -2621,7 +2622,7 @@ public:
 	uint32 getLastExchangeMount() const;
 	bool getRespawnMainLandInTown() const;
 	void setRespawnMainLandInTown(bool status);
-	
+
 	const std::list<TCharacterLogTime> &getLastLogStats() const;
 	void updateConnexionStat();
 	void setDisconnexionTime();
@@ -4084,7 +4085,7 @@ private:
 	bool _PowoCanTeleport;
 	bool _PowoCanSpeedUp;
 	bool _PowoCanDP;
-	
+
 	bool _PowoCanAccesRoomInv;
 	bool _PowoCanAccessGuildInv;
 
@@ -4094,7 +4095,7 @@ private:
 	uint32 _LastUnMountTick;
 	uint32 _LastFreeMount;
 	uint32 _LastExchangeMount;
-	
+
 public:
 	void setWebCommandIndex(uint32 index)
 	{
@@ -4113,7 +4114,7 @@ public:
 	{
 		return _ValideWebCommandIndex.find(index) != _ValideWebCommandIndex.end();
 	}
-	
+
 	uint32 getUrlIndex()
 	{
 		return _LastUrlIndex++;
@@ -4217,7 +4218,7 @@ public:
 		_GodModeSave = godMode;
 	}
 
-	
+
 	bool getUseWig() const
 	{
 		return _UseWig;
