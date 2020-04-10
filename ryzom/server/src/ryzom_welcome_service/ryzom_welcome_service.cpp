@@ -141,7 +141,7 @@ public:
 			(*ici).second.Expected = 0;
 		}
 		// Rebuild "expected" counters
-		for (uint i = 0; i != var.size(); ++i)
+		for (size_t i = 0; i != var.size(); ++i)
 		{
 			++m_Instances[var.asString(i)].Expected;
 		}
@@ -150,7 +150,7 @@ public:
 	/// Add a service instance
 	void addInstance(const std::string &serviceName, TServiceId sid)
 	{
-		m_Instances[serviceName].Running.insert(sid);
+		++m_Instances[serviceName].Running;
 	}
 
 	/// Remove a service instance
@@ -159,10 +159,10 @@ public:
 		CInstances::iterator ici = m_Instances.find(serviceName);
 		if (ici != m_Instances.end())
 		{
-			(*ici).second.Running.erase(sid);
+			--(*ici).second.Running;
 
 			// Remove from the map only if not part of the expected list
-			if (((*ici).second.Expected == 0) && ((*ici).second.Running.size() == 0))
+			if (((*ici).second.Expected == 0) && ((*ici).second.Running == 0))
 			{
 				m_Instances.erase(ici);
 			}
@@ -194,7 +194,7 @@ public:
 			log.displayNL("%s: %s (%u expected, %u running)",
 			    (*ici).first.c_str(),
 			    (*ici).second.Expected ? ((*ici).second.isOnlineAsExpected() ? "ONLINE" : "MISSING") : "OPTIONAL",
-			    (*ici).second.Expected, (*ici).second.Running.size());
+			    (*ici).second.Expected, (*ici).second.Running);
 		}
 	}
 
@@ -203,14 +203,15 @@ private:
 	{
 		TInstanceCounters()
 		    : Expected(0)
+		    , Running(0)
 		{
 		}
 
 		// If not expected, count as online as well
-		bool isOnlineAsExpected() const { return Running.size() >= Expected; }
+		bool isOnlineAsExpected() const { return Running >= Expected; }
 
-		uint Expected;
-		std::set<TServiceId> Running;
+		int Expected;
+		int Running;
 	};
 
 	typedef std::map<std::string, TInstanceCounters> CInstances;
