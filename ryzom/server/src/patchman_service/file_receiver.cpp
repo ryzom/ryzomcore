@@ -64,13 +64,22 @@ namespace PATCHMAN
 		_Parent=NULL;
 	}
 
-	void CFileReceiver::init(NLNET::IModule* parent,const std::string& fileSpec)
-	{
-		CFileReceiverSkel::init(parent);
-		_Parent= parent;
-		_FileSpec= fileSpec;
-		_AdministeredModuleWrapper.init(dynamic_cast<CAdministeredModuleBase*>(parent));
-	}
+    void CFileReceiver::init(NLNET::IModule *parent, const std::string &fileSpec)
+    {
+	    std::vector<std::string> fileSpecs;
+	    fileSpecs.push_back(fileSpec);
+	    init(parent, fileSpecs);
+    }
+
+    void CFileReceiver::init(NLNET::IModule *parent, const std::vector<std::string> &fileSpecs)
+    {
+	    CFileReceiverSkel::init(parent);
+	    _Parent = parent;
+	    _FileSpecs.clear();
+	    for (std::vector<std::string>::const_iterator it(fileSpecs.begin()), end(fileSpecs.end()); it != end; ++it)
+		    _FileSpecs.push_back(*it);
+	    _AdministeredModuleWrapper.init(dynamic_cast<CAdministeredModuleBase *>(parent));
+    }
 
 	bool CFileReceiver::haveIdleProxies() const
 	{
@@ -144,7 +153,8 @@ namespace PATCHMAN
 		if (NLMISC::CSString(module->getModuleManifest()).contains(ManifestEntryIsFileRepository))
 		{
 			CFileRepositoryProxy spr(module);
-			spr.subscribe(_Parent,_FileSpec);
+			for (std::vector<NLMISC::CSString>::const_iterator it(_FileSpecs.begin()), end(_FileSpecs.end()); it != end; ++it)
+				spr.subscribe(_Parent, *it);
 			_log("Repository up: "+module->getModuleName());
 			_Proxies[module].Proxy= module;
 		}
@@ -281,7 +291,8 @@ namespace PATCHMAN
 
 		// send the subscription request
 		CFileRepositoryProxy spr(sender);
-		spr.subscribe(_Parent,_FileSpec);
+		for (std::vector<NLMISC::CSString>::const_iterator it(_FileSpecs.begin()), end(_FileSpecs.end()); it != end; ++it)
+			spr.subscribe(_Parent, *it);
 		_log(NLMISC::toString("setupSubscriptions from: %s",sender->getModuleName().c_str()));
 	}
 

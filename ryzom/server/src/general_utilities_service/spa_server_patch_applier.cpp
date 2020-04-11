@@ -120,7 +120,7 @@ bool untar(const NLMISC::CSString& destFile)
 
 bool untarIfNeeded(const NLMISC::CSString& destFile)
 {
-	if (destFile.right(4)==".tgz" || destFile.right(7)==".tar.gz")
+	if (destFile.right(4)==".tgz" || destFile.right(7)==".tar.gz" || destFile.right(3)==".7z")
 	{
 		return untar(destFile);
 	}

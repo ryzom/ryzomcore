@@ -392,7 +392,10 @@ bool CServerPatchApplier::initModule(const TParsedCommandLine &initInfo)
 
 	// initialise the module base classes...
 	logMsg+= CAdministeredModuleBase::init(initInfo);
-	CFileReceiver::init(this,"*/*.tgz");
+	std::vector<std::string> fileSpecs;
+	fileSpecs.push_back("*/*.tgz");
+	fileSpecs.push_back("*/*.7z");
+	CFileReceiver::init(this, fileSpecs);
 	CDeploymentConfigurationSynchroniser::init(this);
 
 	// now that the base classes have been initialised, we can cumulate the module manifests
@@ -403,7 +406,7 @@ bool CServerPatchApplier::initModule(const TParsedCommandLine &initInfo)
 	registerProgress(string("SPA Initialised: ")+logMsg+" "+_Manifest);
 	setStateVariable("State","Initialised");
 	broadcastStateInfo();
-
+	
 	return true;
 }
 
@@ -865,7 +868,8 @@ bool CServerPatchApplier::_patchNextFile(const NLMISC::CSString& domainName,uint
 		NLMISC::CSString buildNumber= NLMISC::toString("%06u",nextVersion);
 		NLMISC::CSString baseFileName= *rit;
 		NLMISC::CSString tagFileName= baseFileName+".tag";
-		NLMISC::CSString tgzFileName= baseFileName+".tgz";
+		// NLMISC::CSString tgzFileName= baseFileName+".tgz";
+		NLMISC::CSString tgzFileName= baseFileName+".7z";
 
 		// if the archive file is missing then dispatch a request for it and give up
 		if (!NLMISC::CFile::fileExists(_Directories.getNextPatchDirectory(domainName)+tgzFileName))
