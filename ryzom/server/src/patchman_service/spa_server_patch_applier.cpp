@@ -205,7 +205,18 @@ static bool untar(const NLMISC::CSString& tarFile,const NLMISC::CSString& destin
 	DROP_IF(!ok,"Patching error - failed to change directory to: "+destinationDirectory,return false);
 
 	NLMISC::CSString cmd;
-	cmd+= "tar xzfv "+tarFile;
+	if (NLMISC::endsWith(tarFile.c_str(), ".7z")
+		|| NLMISC::endsWith(tarFile.c_str(), ".7Z"))
+	{
+		// sudo apt install p7zip-full
+		cmd += "7z x " + tarFile;
+	}
+	else
+	{
+		cmd += "tar xzfv " + tarFile;
+	}
+
+
 	nldebug("- system: %s",cmd.c_str());
 	ok= system(cmd.c_str())==0;
 
