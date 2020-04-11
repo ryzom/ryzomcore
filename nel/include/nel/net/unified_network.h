@@ -662,6 +662,7 @@ private:
 	std::vector<TCallbackArgItem>				_UpUniCallback;
 	TNameMappedCallback							_DownCallbacks;
 	std::vector<TCallbackArgItem>				_DownUniCallback;
+	std::set<std::pair<std::string, TServiceId>>	_NotifiedUpCallbacks;
 
 	/// Recording state
 	CCallbackNetBase::TRecordingState			_RecordingState;

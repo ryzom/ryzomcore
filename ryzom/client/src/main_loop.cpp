@@ -2510,9 +2510,6 @@ bool mainLoop()
 				Actions.enable(true);
 				EditActions.enable(true);
 
-				// For stoping the outgame music, start after 30 frames, and duration of 3 seconds
-				outgameFader = CMusicFader(60, 3);
-
 				// check for banned player
 				if (testPermanentBanMarkers())
 				{
@@ -2521,6 +2518,9 @@ bool mainLoop()
 					PermanentlyBanned = true;
 				}
 			}
+
+			// For stoping the outgame music, start after 30 frames, and duration of 3 seconds
+			outgameFader = CMusicFader(60, 3);
 
 			// Short reinit of the main loop after farTP or character reselection
 			Ping.init();
