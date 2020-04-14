@@ -1289,7 +1289,7 @@ struct CViewerConfig
 		ShapePath = "./";
 		MapsPath = "./";
 		Bank = "bank.bank";
-		FontPath = "\\\\server\\code\\fonts\\arialuni.ttf";
+		FontPath = "R:\\graphics\\fonts\\noto_sans.ttf";
 		ZFar = 1000;
 		LandscapeTileNear = 50.0f;
 		LandscapeThreshold = 0.001f;

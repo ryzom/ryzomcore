@@ -1342,7 +1342,7 @@ void prelogInit()
 
 
 		// Create a text context. We need to put the full path because we not already add search path
-		resetTextContext("noto_sans_display.ttf", true);
+		resetTextContext("noto_sans.ttf", true);
 
 
 		CInterfaceManager::getInstance();
