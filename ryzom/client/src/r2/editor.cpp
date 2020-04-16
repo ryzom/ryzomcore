@@ -7808,7 +7808,8 @@ NLMISC_COMMAND(saveScenarioRtData, "save scenario RtData to file", "<filename>")
 		output.open(fullFileName);
 		pRtData->serialize(ss);
 		//std::string str = ss.str();
-		output.serial(ss);
+		// output.serial(ss);
+		output.serialBuffer((uint8_t *)ss.c_str(), ss.length());
 		output.flush();
 		output.close();
 	}
