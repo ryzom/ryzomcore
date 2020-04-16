@@ -123,7 +123,9 @@ else:
 	printLog(log, "")
 	printLog(log, ">>> Make bnp <<<")
 	targetPath = ClientPatchDirectory + "/bnp"
+	tagPath = ClientPatchDirectory + "/bnp_tag"
 	mkPath(log, targetPath)
+	mkPath(log, tagPath)
 	for category in InstallClientData:
 		packExt = ".bnp"
 		if (category["StreamedPackages"]):
@@ -133,25 +135,32 @@ else:
 			sourcePath = InstallDirectory + "/" + package[0]
 			mkPath(log, sourcePath)
 			targetBnp = targetPath + "/" + package[0] + packExt
+			tagBnp = tagPath + "/" + package[0] + packExt + ".tag"
 			if (len(package[1]) > 0):
 				targetBnp = targetPath + "/" + package[1][0]
+				tagBnp = tagPath + "/" + package[1][0] + ".tag"
 				printLog(log, "TARGET " + package[1][0])
 			needUpdateBnp = 1
 			if (len(package) > 2):
-				needUpdateBnp = needUpdate(log, sourcePath + "/" + package[2], targetBnp)
+				needUpdateBnp = needUpdate(log, sourcePath + "/" + package[2], tagBnp)
 			else:
-				needUpdateBnp = needUpdateDirNoSubdirFile(log, sourcePath, targetBnp)
+				needUpdateBnp = needUpdateDirNoSubdirFile(log, sourcePath, tagBnp)
 			if (needUpdateBnp):
+				subRet = 0
+				open(tagBnp, 'a').close()
+				os.utime(tagBnp, None)
 				if (category["StreamedPackages"]):
 					printLog(log, "SNP " + targetBnp)
 					# cwDir = os.getcwd().replace("\\", "/")
 					# toolDir = os.path.dirname(Lzma).replace("\\", "/")
 					# os.chdir(toolDir)
-					subprocess.call([ SnpMake, "-p", sourcePath, targetBnp, ClientPatchDirectory + "/stream" ] + package[1][1:])
+					subRet = subprocess.call([ SnpMake, "-p", sourcePath, targetBnp, ClientPatchDirectory + "/stream" ] + package[1][1:])
 					# os.chdir(cwDir)
 				else:
 					printLog(log, "BNP " + targetBnp)
-					subprocess.call([ BnpMake, "-p", sourcePath, "-o", targetBnp ] + package[1][1:])
+					subRet = subprocess.call([ BnpMake, "-p", sourcePath, "-o", targetBnp ] + package[1][1:])
+				if (subRet != 0):
+					os.remove(tagBnp)
 			else:
 				printLog(log, "SKIP " + targetBnp)
 	printLog(log, "")
