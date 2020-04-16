@@ -425,7 +425,7 @@ component.create = function()
 		debugInfo("Cancel form for 'GetItemFromSceneryObject' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'GetItemFromSceneryObject' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of 'GetItemFromSceneryObject' at pos (%f, %f, %f)", x, y, z))
 		if r2.mustDisplayInfo("GetItemFromSceneryObject") == 1 then 
 			r2.displayFeatureHelp("GetItemFromSceneryObject")
 		end

@@ -498,7 +498,7 @@ component.create = function()
 		debugInfo("Cancel form for 'RequestItem' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'RequestItem' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of 'RequestItem' at pos (%f, %f, %f)", x, y, z))
 		if r2.mustDisplayInfo("RequestItem") == 1 then 
 			r2.displayFeatureHelp("RequestItem")
 		end

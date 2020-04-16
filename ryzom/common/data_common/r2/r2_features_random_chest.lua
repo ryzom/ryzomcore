@@ -418,7 +418,7 @@ function component.create()
 		debugInfo("Cancel form for 'RandomChest' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'RandomChest' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of 'RandomChest' at pos (%f, %f, %f)", x, y, z))
 		if r2.mustDisplayInfo("RandomChest") == 1 then 
 			r2.displayFeatureHelp("RandomChest")
 		end

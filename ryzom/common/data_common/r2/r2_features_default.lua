@@ -1495,7 +1495,7 @@ local registerFeature = function ()
 			debugInfo("Cancel form for 'User Component' creation")
 		end
 		local function posOk(x, y, z)
-			debugInfo(string.format("Validate creation of 'User Component' at pos (%d, %d, %d)", x, y, z))
+			debugInfo(string.format("Validate creation of 'User Component' at pos (%f, %f, %f)", x, y, z))
 			if r2.mustDisplayInfo("UserComponent") == 1 then 
 				r2.displayFeatureHelp("UserComponent")
 			end
@@ -1568,7 +1568,7 @@ local registerFeature = function ()
 			debugInfo("Cancel form for 'User Component' creation")
 		end
 		local function posOk(x, y, z)
-			debugInfo(string.format("Validate creation of 'User Component' at pos (%d, %d, %d)", x, y, z))
+			debugInfo(string.format("Validate creation of 'User Component' at pos (%f, %f, %f)", x, y, z))
 			if r2.mustDisplayInfo("UserComponent") == 1 then 
 				r2.displayFeatureHelp("UserComponent")
 			end

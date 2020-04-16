@@ -416,7 +416,7 @@ component.create = function()
 		debugInfo("Cancel form for 'KillNpc' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'KillNpc' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of 'KillNpc' at pos (%f, %f, %f)", x, y, z))
 		if r2.mustDisplayInfo("KillNpc") == 1 then 
 			r2.displayFeatureHelp("KillNpc")
 		end

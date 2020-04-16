@@ -641,7 +641,7 @@ component.create = function()
 		debugInfo("Cancel form for 'HuntTask' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'HuntTask' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of 'HuntTask' at pos (%f, %f, %f)", x, y, z))
 		if r2.mustDisplayInfo("HuntTask") == 1 then 
 			r2.displayFeatureHelp("HuntTask")
 		end

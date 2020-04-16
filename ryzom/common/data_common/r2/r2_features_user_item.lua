@@ -176,7 +176,7 @@ component.create = function()
 		debugInfo("Cancel form for 'UserItemFeature' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'UserItemFeature' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of 'UserItemFeature' at pos (%f, %f, %f)", x, y, z))
 		r2:doForm("UserItemFeatureForm", {X=x, Y=y}, paramsOk, paramsCancel)
 	end
 	local function posCancel()

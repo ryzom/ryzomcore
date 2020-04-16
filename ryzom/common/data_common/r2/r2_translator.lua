@@ -4403,7 +4403,7 @@ function Translator.CreateUserComponent(featureName)
 	end
 
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of '"..featureName.."' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of '"..featureName.."' at pos (%f, %f, %f)", x, y, z))
 		local component = r2.Features[featureName].createUserComponent( x, y)
 		component.Texts = nil
 		r2.requestInsertNode(r2:getCurrentAct().InstanceId, "Features", -1, "", component)

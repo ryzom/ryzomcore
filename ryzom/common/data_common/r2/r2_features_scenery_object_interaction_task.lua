@@ -487,7 +487,7 @@ component.create = function()
 	r2:checkAiQuota()
 
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'SceneryObjectInteractionTaskStep' at pos (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate creation of 'SceneryObjectInteractionTaskStep' at pos (%f, %f, %f)", x, y, z))
 		if r2.mustDisplayInfo("SceneryObjectInteractionTaskStep") == 1 then 
 			r2.displayFeatureHelp("SceneryObjectInteractionTaskStep")
 		end
