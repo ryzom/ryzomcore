@@ -497,7 +497,7 @@ void CEditor::requestSetLocalNode(const std::string& instanceId, const std::stri
 		CObject *src = _DMC->find(instanceId);
 		if (!src)
 		{
-			nlwarning("Can't find object with id %s", instanceId.c_str());
+			nlwarning("Can't find object with id '%s' (setting attribute '%s')", instanceId.c_str(), attrName.c_str());
 			return;
 		}
 		if (!attrName.empty())
