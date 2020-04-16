@@ -480,7 +480,7 @@ void CSourceXAudio2::setLooping(bool l)
 					_SourceVoice->GetState(&voice_state);
 					if (voice_state.BuffersQueued)
 					{
-						nlwarning(NLSOUND_XAUDIO2_PREFIX "Not playing but buffer already queued while switching loop mode!?! Flush and requeue");
+						// nlwarning(NLSOUND_XAUDIO2_PREFIX "Not playing but buffer already queued while switching loop mode!?! Flush and requeue");
 						if (FAILED(_SourceVoice->FlushSourceBuffers())) 
 							nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED FlushSourceBuffers");
 						// queue buffer with correct looping parameters
