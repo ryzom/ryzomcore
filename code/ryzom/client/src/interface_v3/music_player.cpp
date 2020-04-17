@@ -174,28 +174,30 @@ void CMusicPlayer::playSongs (const std::vector<std::string> &filenames)
 
 	// If pause, stop, else play will resume
 	if (_State == Paused || _Songs.empty())
-		_State = Stopped;
+		stop();
 
 	// get song title/duration using worker thread
 	MusicPlayerWorker.getSongsInfo(filenames);
 }
 
 // ***************************************************************************
+void CMusicPlayer::updatePlaylist(uint index, bool state)
+{
+	if (index >= _Songs.size()) return;
+
+	std::string rowId = toString("%s:s%d:bg", MP3_PLAYER_PLAYLIST_LIST, index);
+	CInterfaceElement *pIE = dynamic_cast<CInterfaceElement*>(CWidgetManager::getInstance()->getElementFromId(rowId));
+	if (pIE) pIE->setActive(state);
+}
+
 void CMusicPlayer::updatePlaylist(sint prevIndex)
 {
-	CInterfaceElement  *pIE;
-	std::string rowId;
-
 	if (prevIndex >= 0 && prevIndex < _Songs.size())
 	{
-		rowId = toString("%s:s%d:bg", MP3_PLAYER_PLAYLIST_LIST, prevIndex);
-		pIE = dynamic_cast<CInterfaceElement*>(CWidgetManager::getInstance()->getElementFromId(rowId));
-		if (pIE) pIE->setActive(false);
+		updatePlaylist(prevIndex, false);
 	}
 
-	rowId = toString("%s:s%d:bg", MP3_PLAYER_PLAYLIST_LIST, _CurrentSongIndex);
-	pIE = dynamic_cast<CInterfaceElement*>(CWidgetManager::getInstance()->getElementFromId(rowId));
-	if (pIE) pIE->setActive(true);
+	updatePlaylist(_CurrentSongIndex, true);
 }
 
 // ***************************************************************************
@@ -361,7 +363,7 @@ void CMusicPlayer::play (sint index)
 
 	if (_Songs.empty())
 	{
-		_State = Stopped;
+		stop();
 		return;
 	}
 
@@ -437,6 +439,8 @@ void CMusicPlayer::stop ()
 	_PlayStart = 0;
 	_PauseTime = 0;
 
+	clearPlayingInfo();
+
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MP3_PLAYING")->setValueBool(false);
 }
 
@@ -472,12 +476,31 @@ void CMusicPlayer::next ()
 }
 
 // ***************************************************************************
+void CMusicPlayer::updatePlayingInfo(const std::string info)
+{
+	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:mp3_player:screen:text"));
+	if (pVT)
+	{
+		pVT->setText(ucstring::makeFromUtf8(info));
+	}
+}
 
+// ***************************************************************************
+void CMusicPlayer::clearPlayingInfo()
+{
+	updatePlayingInfo("");
+}
+
+// ***************************************************************************
 void CMusicPlayer::update ()
 {
 	if(!SoundMngr)
 	{
-		_State = Stopped;
+		if (_State != Stopped)
+		{
+			_State = Stopped;
+			clearPlayingInfo();
+		}
 		return;
 	}
 
@@ -488,8 +511,6 @@ void CMusicPlayer::update ()
 
 	if (_State == Playing)
 	{
-		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:mp3_player:screen:text"));
-		if (pVT)
 		{
 			TTime dur = (CTime::getLocalTime() - _PlayStart) / 1000;
 			uint min = (dur / 60) % 60;
@@ -499,7 +520,7 @@ void CMusicPlayer::update ()
 			std::string title(toString("%02d:%02d", min, sec));
 			if (hour > 0) title = toString("%02d:", hour) + title;
 			title += " " + _CurrentSong.Title;
-			pVT->setText(ucstring::makeFromUtf8(title));
+			updatePlayingInfo(title);
 		}
 
 		if (SoundMngr->isMusicEnded ())
@@ -520,8 +541,13 @@ void CMusicPlayer::update ()
 			}
 			else
 			{
-				SoundMngr->stopMusic(0);
-				_State = Stopped;
+				// remove active highlight from playlist
+				updatePlaylist(_CurrentSongIndex, false);
+
+				stop();
+
+				// restart from top on next 'play'
+				_CurrentSongIndex = 0;
 			}
 		}
 	}
