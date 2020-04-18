@@ -488,7 +488,14 @@ void CMusicPlayer::updatePlayingInfo(const std::string info)
 // ***************************************************************************
 void CMusicPlayer::clearPlayingInfo()
 {
-	updatePlayingInfo("");
+	if (_Songs.empty())
+	{
+		updatePlayingInfo(CI18N::get("uiNoFiles").toUtf8());
+	}
+	else
+	{
+		updatePlayingInfo("");
+	}
 }
 
 // ***************************************************************************
