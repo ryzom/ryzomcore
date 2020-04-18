@@ -564,6 +564,11 @@ CDBCtrlSheet::~CDBCtrlSheet()
 			Driver->deleteTextureFile(_GuildSymb);
 		_GuildSymb = NULL;
 	}
+	if (_RegenText)
+	{
+		delete _RegenText;
+		_RegenText = NULL;
+	}
 
 	// ensure erase static
 	if(this==_CurrMenuSheet)		_CurrMenuSheet = NULL;
