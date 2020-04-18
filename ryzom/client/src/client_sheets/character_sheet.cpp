@@ -213,6 +213,21 @@ void CCharacterSheet::build(const NLGEORGES::UFormElm &item)
 	// IN LEFT HAND
 	readEquipment(item, "Basics.Equipment.HandL", ObjectInLeftHand);
 
+	if (!ObjectInRightHand.IdItem)
+	{
+		std::string	right;
+		item.getValueByName(right, "item_right");
+		if (!right.empty())
+			ObjectInRightHand.IdItem = ClientSheetsStrings.add(NLMISC::toLower(right));
+	}
+
+	if (!ObjectInLeftHand.IdItem)
+	{
+		std::string	left;
+		item.getValueByName(left, "item_left");
+		if (!left.empty())
+			ObjectInLeftHand.IdItem = ClientSheetsStrings.add(NLMISC::toLower(left));
+	}
 
 	// Get the animation set Base Name.
 	string AnimSetBaseName;

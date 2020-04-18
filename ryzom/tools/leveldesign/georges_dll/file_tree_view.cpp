@@ -187,7 +187,7 @@ BOOL CFileTreeCtrl::OnNotify ( WPARAM wParam, LPARAM lParam, LRESULT* pResult )
 {
 	LPNMHDR pnmh = (LPNMHDR) lParam;
 	// Tree ?
-	if (wParam == 0)
+	// if (wParam == 0)
 	{
 		switch (pnmh->code)
 		{

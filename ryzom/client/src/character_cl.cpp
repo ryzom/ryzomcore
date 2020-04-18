@@ -1120,7 +1120,7 @@ void CCharacterCL::computeAnimSet()
 	// Use the generic method to compute the animation set.
 	if(!::computeAnimSet(_CurrentAnimSet[MOVE], _Mode, _Sheet->getAnimSetBaseName(), _Items[SLOTTYPE::LEFT_HAND_SLOT].Sheet, _Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet, !modeWithHiddenItems()))
 	{
-		//nlwarning("CH:computeAnimSet:%d: pb when trying to compute the animset. Sheet Id '%u(%s)'.", _Slot, _SheetId.asInt(), _SheetId.toString().c_str());
+		nlwarning("CH:computeAnimSet:%d: pb when trying to compute the animset. Sheet Id '%u(%s)'.", _Slot, _SheetId.asInt(), _SheetId.toString().c_str());
 	}
 
 }// computeAnimSet //
@@ -3360,7 +3360,7 @@ void CCharacterCL::showOrHideBodyParts( bool objectsVisible )
 		lHandInstIdx = SLOTTYPE::LEFT_HAND_SLOT;
 
 		// hide gloves(armor) if player has magician amplifier
-		if( _Items[rHandInstIdx].Sheet && (_Items[rHandInstIdx].Sheet->ItemType == ITEM_TYPE::MAGICIAN_STAFF) )
+		if( _Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet && (_Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet->ItemType == ITEM_TYPE::MAGICIAN_STAFF) )
 		{
 			if( !_Instances[SLOTTYPE::HANDS_SLOT].Current.empty() )
 				_Instances[SLOTTYPE::HANDS_SLOT].Current.hide();
@@ -3378,8 +3378,9 @@ void CCharacterCL::showOrHideBodyParts( bool objectsVisible )
 	if( !objectsVisible )
 	{
 		// Right Hand
+		nlassert(SLOTTYPE::RIGHT_HAND_SLOT < _Items.size() && SLOTTYPE::LEFT_HAND_SLOT < _Items.size());
 		if(rHandInstIdx<_Instances.size())
-			if( !(_Items[rHandInstIdx].Sheet && _Items[rHandInstIdx].Sheet->NeverHideWhenEquipped ) )
+			if( !(_Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet && _Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet->NeverHideWhenEquipped ) )
 				if(!_Instances[rHandInstIdx].Current.empty())
 				{
 					_Instances[rHandInstIdx].Current.hide();
@@ -3387,7 +3388,7 @@ void CCharacterCL::showOrHideBodyParts( bool objectsVisible )
 				}
 		// Left Hand
 		if(lHandInstIdx <_Instances.size())
-			if( !(_Items[lHandInstIdx].Sheet && _Items[lHandInstIdx].Sheet->NeverHideWhenEquipped ) )
+			if( !(_Items[SLOTTYPE::LEFT_HAND_SLOT].Sheet && _Items[SLOTTYPE::LEFT_HAND_SLOT].Sheet->NeverHideWhenEquipped ) )
 				if(!_Instances[lHandInstIdx].Current.empty())
 				{
 					_Instances[lHandInstIdx].Current.hide();
@@ -9250,14 +9251,14 @@ const char *CCharacterCL::getBoneNameFromBodyPart(BODY::TBodyPart part, BODY::TS
 const CItemSheet *CCharacterCL::getRightHandItemSheet() const
 {
 	if (_RHandInstIdx == CEntityCL::BadIndex) return NULL;
-	return _Items[_RHandInstIdx].Sheet;
+	return _Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet;
 }
 
 // *********************************************************************************************
 const CItemSheet *CCharacterCL::getLeftHandItemSheet() const
 {
 	if (_LHandInstIdx == CEntityCL::BadIndex) return NULL;
-	return _Items[_LHandInstIdx].Sheet;
+	return _Items[SLOTTYPE::LEFT_HAND_SLOT].Sheet;
 }
 
 // ***************************************************************************
