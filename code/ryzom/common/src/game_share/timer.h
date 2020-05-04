@@ -424,7 +424,7 @@ inline void CTimerEvent::set(CTimer* owner,NLMISC::TGameCycle time,uint32 variat
 			_Time = time + i;
 		}
 	}
-	BOMB_IF(best==NULL,"BUG: This can never happen!",return)
+	BOMB_IF(best == NULL, "BUG: This can never happen!", return);
 	best->push_back(this);
 }
 
@@ -452,7 +452,7 @@ inline void CTimerEvent::clear()
 inline void CTimerEvent::processEvent()
 {
 	CTimer* owner=_Owner;
-	BOMB_IF(owner==NULL,"Attempt to process an event that no longer has a valid owner",return)
+	BOMB_IF(owner == NULL, "Attempt to process an event that no longer has a valid owner", return);
 
 	// mark the event as expired - the state may be chnaged during the timer callback...
 	// NOTE: This operation results in '_Owner' being set to NULL

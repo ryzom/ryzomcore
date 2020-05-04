@@ -1,6 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -84,8 +88,7 @@ void CBackgroundSound::importForm(const std::string& filename, NLGEORGES::UFormE
 					// Read the sound name.
 					std::string soundName;
 					psoundItem->getValueByName(soundName, "Sound");
-					nlassert(soundName.find(".sound") != std::string::npos);
-					sound.SoundName = NLMISC::CSheetId(soundName);
+					sound.SoundName = CStringMapper::map(CFile::getFilenameWithoutExtension(soundName));
 
 
 					// Read the environnement flag.
@@ -134,7 +137,7 @@ void CBackgroundSound::getSubSoundList(std::vector<std::pair<std::string, CSound
 	for (; first != last; ++first)
 	{
 		CSound *sound = mixer->getSoundId(first->SoundName);
-		subsounds.push_back(make_pair(first->SoundName.toString()/*CStringMapper::unmap(first->SoundName)*/, sound));
+		subsounds.push_back(make_pair(CStringMapper::unmap(first->SoundName), sound));
 	}
 }
 

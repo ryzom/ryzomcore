@@ -1,6 +1,8 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2011  Adrian JAEKEL <aj@elane2k.com>
+//
+// This source file has been modified by the following contributors:
 // Copyright (C) 2010  Winch Gate Property Limited
-// Copyright (C) 2011  Adrian Jaekel <aj at elane2k dot com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as

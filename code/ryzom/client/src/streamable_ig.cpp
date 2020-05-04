@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -93,8 +96,10 @@ CStreamableIG::~CStreamableIG()
 	H_AUTO_USE(RZ_StremableIG)
 	if (!_Linked)
 	{
+		#ifdef NL_DEBUG
 		if(!ClientCfg.Light)
 			nlwarning("Loading async %p", this);
+		#endif
 		#ifdef NL_DEBUG
 				//nlinfo("Loading async : %s", Name.c_str());
 		#endif

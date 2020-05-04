@@ -55,4 +55,19 @@ static void windowDidMove(NSWindow* window, CDriverGL* driver)
 	windowDidMove([notification  object], _driver);
 }
 
+- (void)windowDidBecomeKey:(NSNotification *)notification
+{
+	if (!_driver)
+		return;
+
+	_driver->_WindowFocus = true;
+}
+- (void)windowDidResignKey:(NSNotification *)notification;
+{
+	if(!_driver)
+		return;
+
+	_driver->_WindowFocus = false;
+}
+
 @end

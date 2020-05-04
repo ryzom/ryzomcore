@@ -1,5 +1,5 @@
-// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// NeL - MMORPG Framework <https://wiki.ryzom.dev/>
+// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -62,7 +62,6 @@ static void initSample()
 {
 	if (!INelContext::isContextInitialised())
 		new CApplicationContext();
-	CSheetId::initWithoutSheet();
 	CPath::addSearchPath(NL_SOUND_DATA"/data", true, false);
 	
 	printf("Sample demonstrating OGG playback using stream file .sound sheets.");
@@ -98,7 +97,7 @@ static void initSample()
 	
 	//NLMISC::CHTimer::startBench();
 
-	s_Source = s_AudioMixer->createSource(CSheetId("stream_file.sound"));
+	s_Source = s_AudioMixer->createSource(CStringMapper::map("stream_file"));
 	nlassert(s_Source);
 	s_StreamFileSource = dynamic_cast<CStreamFileSource *>(s_Source);
 	nlassert(s_StreamFileSource);

@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -31,7 +35,7 @@ namespace NLGUI
 	class CViewBitmap;
 	class CGroupList;
 	class CGroupMenu;
-	class CGroupSubMenu;
+
 
 	/**
 	 * CViewTextMenu is an element of a sub menu
@@ -50,7 +54,6 @@ namespace NLGUI
 			_Checked = false;
 			_Checkable = false;
 			_CheckBox = NULL;
-			_ParentMenu = NULL;
 			Over = false;
 		}
 
@@ -61,8 +64,6 @@ namespace NLGUI
 		bool getCheckable() const { return _Checkable; }
 		void setCheckable(bool c);
 		void setCheckBox(CViewBitmap *checkBox) { _CheckBox = checkBox; }
-		void setParentMenu(CGroupSubMenu *parentMenu) { _ParentMenu = parentMenu; };
-		void setActive (bool g);
 		CViewBitmap * getCheckBox() const { return _CheckBox; }
 		bool getFormatted () const { return getMultiLine (); }
 
@@ -89,7 +90,6 @@ namespace NLGUI
 		bool		_Grayed;
 		bool		_Checked;
 		bool		_Checkable;
-		CGroupSubMenu *_ParentMenu;
 	};
 
 	/**

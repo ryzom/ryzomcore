@@ -84,14 +84,6 @@ protected:
 	float						 *_NormalizationFactor;
 	bool						 _DisableSharing;
 	bool						 _ForceNormalize;
-	// Map that give the normalization factor for each map from its sharename. This avoid to generate several time the maps to get the normalization factor if a bumpmap is shared by severals CTextureBump instances;
-	struct CNormalizationInfo
-	{
-		uint  NumRefs;
-		float NormalizationFactor;
-	};
-	typedef std::map<std::string, CNormalizationInfo> TNameToNI; // sharename to the normalization factor
-	static TNameToNI	_NameToNF; // name to normalization factor
 private:
 	/// we don't allow for mipmap for bump so we redefine this to prevent the user from doing this on the base class Itexture
 	virtual         void setFilterMode(TMagFilter magf, TMinFilter minf);

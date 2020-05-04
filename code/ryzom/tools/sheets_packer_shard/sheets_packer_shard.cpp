@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://www.ryzomcore.org/>
-// Copyright (C) 2014  by authors
+// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as

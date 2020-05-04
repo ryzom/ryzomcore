@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -18,8 +21,8 @@
 #ifndef CL_LOGIN_H
 #define CL_LOGIN_H
 
-#include "nel/misc/types_nl.h"
-#include "game_share/http_client.h"
+#include <nel/misc/types_nl.h>
+#include <nel/web/http_client_curl.h>
 #include <string>
 #include <vector>
 
@@ -74,7 +77,7 @@ extern sint32		ShardSelected;
 /*
  * HTTP client preconfigured to connect to the startup login host
  */
-class CStartupHttpClient : public CHttpClient
+class CStartupHttpClient : public NLWEB::CCurlHttpClient
 {
 public:
 

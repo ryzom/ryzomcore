@@ -47,6 +47,9 @@ printLog(log, "")
 
 for category in InstallClientData:
 	printLog(log, "CATEGORY " + category["Name"])
+	packExt = ".bnp"
+	if (category["StreamedPackages"]):
+		packExt = ".snp"
 	if (category["UnpackTo"] != None):
 		targetPath = ClientInstallDirectory
 		if (category["UnpackTo"] != ""):
@@ -62,8 +65,8 @@ for category in InstallClientData:
 		mkPath(log, targetPath)
 		for package in category["Packages"]:
 			printLog(log, "PACKAGE " + package[0])
-			sourceBnp = sourcePath + "/" + package[0] + ".bnp"
-			targetBnp = targetPath + "/" + package[0] + ".bnp"
+			sourceBnp = sourcePath + "/" + package[0] + packExt
+			targetBnp = targetPath + "/" + package[0] + packExt
 			if (len(package[1]) > 0):
 				sourceBnp = sourcePath + "/" + package[1][0]
 				targetBnp = targetPath + "/" + package[1][0]

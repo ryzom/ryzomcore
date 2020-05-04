@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -65,7 +68,23 @@ class CStringMapper
 	class CCharComp
 	{
 	public:
-		bool operator()(std::string *x, std::string *y) const
+#ifdef NL_CPP14
+		// https://www.fluentcpp.com/2017/06/09/search-set-another-type-key/
+
+		using is_transparent = void;
+
+		bool operator()(const std::string *x, const char *y) const
+		{
+			return strcmp(x->c_str(), y) < 0;
+		}
+
+		bool operator()(const char *x, const std::string *y) const
+		{
+			return strcmp(x, y->c_str()) < 0;
+		}
+#endif
+
+		bool operator()(const std::string *x, const std::string *y) const
 		{
 			return (*x) < (*y);
 		}
@@ -73,53 +92,70 @@ class CStringMapper
 
 	class CAutoFastMutex
 	{
-		CFastMutex		*_Mutex;
+		CFastMutex *m_Mutex;
+
 	public:
-		CAutoFastMutex(CFastMutex *mtx) : _Mutex(mtx)	{_Mutex->enter();}
-		~CAutoFastMutex() {_Mutex->leave();}
+		CAutoFastMutex(CFastMutex *mtx)
+		    : m_Mutex(mtx)
+		{
+			m_Mutex->enter();
+		}
+		~CAutoFastMutex() { m_Mutex->leave(); }
 	};
 
 	// Local Data
-	std::set<std::string*,CCharComp>	_StringTable;
-	std::string*			_EmptyId;
-	CFastMutex				_Mutex;		// Must be thread-safe (Called by CPortal/CCluster, each of them called by CInstanceGroup)
+	typedef std::set<const std::string *, CCharComp> TStringTable;
+	TStringTable m_StringTable;
+	std::string *m_EmptyId;
+	CFastMutex m_Mutex; // Must be thread-safe (Called by CPortal/CCluster, each of them called by CInstanceGroup)
 
 	// The 'singleton' for static methods
-	static	CStringMapper	_GlobalMapper;
+	static CStringMapper s_GlobalMapper;
 
 	// private constructor.
 	CStringMapper();
 
 public:
-
 	~CStringMapper()
 	{
 		localClear();
+		delete m_EmptyId;
 	}
 
 	/// Globaly map a string into a unique Id. ** This method IS Thread-Safe **
-	static TStringId			map(const std::string &str) { return _GlobalMapper.localMap(str); }
+	static TStringId map(const std::string &str) { return s_GlobalMapper.localMap(str); }
+	/// Globaly map a string into a unique Id. ** This method IS Thread-Safe **
+	static TStringId map(const char *str) { return s_GlobalMapper.localMap(str); }
 	/// Globaly unmap a string. ** This method IS Thread-Safe **
-	static const std::string	&unmap(const TStringId &stringId) { return _GlobalMapper.localUnmap(stringId); }
+	static const std::string &unmap(const TStringId &stringId) { return s_GlobalMapper.localUnmap(stringId); }
 	/// Globaly helper to serial a string id. ** This method IS Thread-Safe **
-	static void					serialString(NLMISC::IStream &f, TStringId &id) {_GlobalMapper.localSerialString(f, id);}
+	static void serialString(NLMISC::IStream &f, TStringId &id) { s_GlobalMapper.localSerialString(f, id); }
 	/// Return the global id for the empty string (helper function). NB: Works with every instance of CStringMapper
-	static TStringId			emptyId() { return 0; }
+	static TStringId emptyId() { return NULL; }
 
 	// ** This method IS Thread-Safe **
-	static void					clear() { _GlobalMapper.localClear(); }
+	static void clear() { s_GlobalMapper.localClear(); }
 
 	/// Create a local mapper. You can dispose of it by deleting it.
-	static CStringMapper *	createLocalMapper();
+	static CStringMapper *createLocalMapper();
 	/// Localy map a string into a unique Id
-	TStringId				localMap(const std::string &str);
+	TStringId localMap(const std::string &str);
+#ifdef NL_CPP14
+	/**
+	\brief Localy map a string into a unique Id.
+	Lookup in string mapper using `const char *`
+	to avoid an std::string allocation when using literals.
+	\author Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+	\date 2019
+	*/
+	TStringId localMap(const char *str);
+#endif
 	/// Localy unmap a string
-	const std::string		&localUnmap(const TStringId &stringId) { return (stringId==0)?*_EmptyId:*((std::string*)stringId); }
+	const std::string &localUnmap(const TStringId &stringId) const { return (stringId == NULL) ? *m_EmptyId : *((const std::string *)stringId); }
 	/// Localy helper to serial a string id
-	void					localSerialString(NLMISC::IStream &f, TStringId &id);
+	void localSerialString(NLMISC::IStream &f, TStringId &id);
 
-	void					localClear();
-
+	void localClear();
 };
 
 // linear from 0 (0 is empty string) (The TSStringId returned by CStaticStringMapper

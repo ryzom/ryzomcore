@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -1239,13 +1243,15 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 #if LUA_VERSION_NUM >= 503
 			if (lua_isinteger(state, -1) != 0)
 			{
+				nlctassert(sizeof(lua_Integer) == sizeof(sint64));
 				sint64 value = lua_tointeger(state, -1);
 				lua_pop(state, 1);
-				return new CObjectInteger(value);
+				return new CObjectNumber(value);
 			}
 			else
 #endif
 			{
+				nlctassert(sizeof(lua_Number) == sizeof(double));
 				double value = lua_tonumber(state, -1);
 				lua_pop(state, 1);
 				return new CObjectNumber(value);
@@ -1255,7 +1261,7 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 
 		case LUA_TBOOLEAN:
 		{
-			double value = static_cast<double>(lua_toboolean(state, -1));
+			sint64 value = lua_toboolean(state, -1);
 			lua_pop(state, 1);
 			return new CObjectNumber(value);
 		}

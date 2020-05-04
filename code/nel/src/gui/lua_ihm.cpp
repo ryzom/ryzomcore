@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -737,7 +741,7 @@ namespace NLGUI
 		}
 		// because this is a method,    first parameter is the 'this'
 		CReflectableRefPtrTarget *pRPT = getReflectableOnStack(*state,    1);
-		if (pRPT == NULL)
+		if (!pRPT)
 		{
 			state->push(NLMISC::toString("Error while calling lua method %s:%s : 'self' pointer is nil or of bad type,    can't make the call.",
 									prop->ParentClass->ClassName.c_str(),    prop->Name.c_str())
@@ -748,19 +752,22 @@ namespace NLGUI
 		state->remove(1); // remove 'self' reference from parameters stack
 		//
 		sint numResults = 0;
-		sint initialStackSize = state->getTop();
-		try
+		if (pRPT)
 		{
-			// call the actual method
-			numResults = (pRPT->*(prop->GetMethod.GetLuaMethod))(*state);
-		}
-		catch(const std::exception &e)
-		{
-			// restore stack to its initial size
-			state->setTop(initialStackSize);
-			lua_pushstring(ls,      e.what());
-			// TODO : see if this is safe to call lua error there" ... (it does a long jump)
-			lua_error(ls);
+			sint initialStackSize = state->getTop();
+			try
+			{
+				// call the actual method
+				numResults = (pRPT->*(prop->GetMethod.GetLuaMethod))(*state);
+			}
+			catch (const std::exception & e)
+			{
+				// restore stack to its initial size
+				state->setTop(initialStackSize);
+				lua_pushstring(ls, e.what());
+				// TODO : see if this is safe to call lua error there" ... (it does a long jump)
+				lua_error(ls);
+			}
 		}
 		return numResults;
 	}
@@ -783,6 +790,7 @@ namespace NLGUI
 		CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
 		std::string			script;
 		ls.toString(2,    script);
+		nlassert(pIE);
 
 		// must be a group
 		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIE);
@@ -841,6 +849,7 @@ namespace NLGUI
 		std::string			dbList,    script;
 		ls.toString(2,    dbList);
 		ls.toString(3,    script);
+		nlassert(pIE);
 
 		// must be a group
 		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIE);
@@ -869,6 +878,7 @@ namespace NLGUI
 		CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
 		std::string			dbList;
 		ls.toString(2,    dbList);
+		nlassert(pIE);
 
 		// must be a group
 		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIE);
@@ -1431,6 +1441,20 @@ namespace NLGUI
 	#endif
 			}
 			break;
+			case CReflectedProperty::UCStringRef:
+			{
+				ucstring str = (reflectedObject.*(property.GetMethod.GetUCStringRef))();
+	#if LUABIND_VERSION > 600
+				luabind::detail::push(ls.getStatePointer(), str);
+	#else
+				luabind::object obj(ls.getStatePointer(), str);
+				obj.pushvalue();
+	#endif
+			}
+			break;
+			case CReflectedProperty::StringRef:
+				ls.push( (reflectedObject.*(property.GetMethod.GetStringRef))() );
+			break;
 			case CReflectedProperty::RGBA:
 			{
 				CRGBA color = (reflectedObject.*(property.GetMethod.GetRGBA))();
@@ -1495,6 +1519,7 @@ namespace NLGUI
 					return;
 				}
 			case CReflectedProperty::String:
+			case CReflectedProperty::StringRef:
 				{
 					std::string val;
 					ls.toString(stackIndex,    val);
@@ -1502,6 +1527,7 @@ namespace NLGUI
 					return;
 				}
 			case CReflectedProperty::UCString:
+			case CReflectedProperty::UCStringRef:
 				{
 					ucstring val;
 					// Additionaly return of CInterfaceExpr may be std::string... test std string too

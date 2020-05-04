@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -49,7 +52,7 @@ CPSSound::CPSSound() : _Gain(1.f),
 {
 	NL_PS_FUNC(CPSSound_CPSSound)
 	if (CParticleSystem::getSerializeIdentifierFlag()) _Name = std::string("sound");
-	_SoundName = NLMISC::CSheetId::Unknown /*NLMISC::CStringMapper::emptyId()*/;
+	_SoundName = NLMISC::CStringMapper::emptyId();
 }
 
 // ***************************************************************************************************
@@ -270,13 +273,18 @@ void			CPSSound::serial(NLMISC::IStream &f)
 
 	// FIXME: CPSSound is reserialized from the _ParticleSystemProto
 	// cache when a non-_Shared particle system is instanced, this 
-	// causes unnecessary sheet id lookups from string.
-	// SLN1: Serialize as uint32, but this requires the editor to know
-	// the correct sheet id (and thus requires a built sheet_id.bin).
-	// SLN2: Create a tool that reserializes all ps with sound sheet id 
-	// instead of sheet names, based on a global flag, and serialize
-	// a flag that specifies if the ps is serialized with id or name.
-	_SoundName.serialString(f, "sound");
+	// causes unnecessary id lookups from string.
+	if (f.isReading())
+	{
+		std::string soundName;
+		f.serial(soundName);
+		_SoundName = NLMISC::CStringMapper::map(soundName);
+	}
+	else
+	{
+		std::string soundName = NLMISC::CStringMapper::unmap(_SoundName);
+		f.serial(soundName);
+	}
 
 	sint32 nbSounds;
 	bool hasScheme;
