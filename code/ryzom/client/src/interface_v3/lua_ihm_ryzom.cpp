@@ -2298,13 +2298,28 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 
 	if(!instance.empty())
 	{
+
+		if (texture == "#season#" || texture.empty())
+		{
+			uint8 selectedTextureSet = (uint8)::computeCurrSeason();
+			instance.selectTextureSet(selectedTextureSet);
+			texture = "";
+		}
+		else if (texture[0] == '#')
+		{
+			uint8 selectedTextureSet;
+			fromString(texture.substr(1), selectedTextureSet);
+			instance.selectTextureSet(selectedTextureSet);
+			texture = "";
+		}
+
 		for(uint j=0;j<instance.getNumMaterials();j++)
 		{
 			if (!highlight)
 			{
-				instance.getMaterial(j).setAmbient(CRGBA(0,0,0,255));
+				/*instance.getMaterial(j).setAmbient(CRGBA(0,0,0,255));
 				instance.getMaterial(j).setEmissive(CRGBA(255,255,255,255));
-				instance.getMaterial(j).setShininess(10.0f);
+				instance.getMaterial(j).setShininess(10.0f);*/
 			}
 			else
 			{
