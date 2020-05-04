@@ -112,7 +112,7 @@ public:
 	virtual IMusicChannel *createMusicChannel();
 	
 	/** Get music info. Returns false if the song is not found or the function is not implemented.
-	 *  \param filepath path to file, CPath::lookup done by driver
+	 *  \param filepath full path to file
 	 *  \param artist returns the song artist (empty if not available)
 	 *  \param title returns the title (empty if not available)
 	 */
