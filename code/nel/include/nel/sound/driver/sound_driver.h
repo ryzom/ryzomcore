@@ -191,7 +191,7 @@ public:
 	/// Create a native music channel, only supported by the FMod driver.
 	virtual IMusicChannel *createMusicChannel() { return NULL; }
 	/** Get music info. Returns false if the song is not found or the function is not implemented.
-	 *  \param filepath path to file, CPath::lookup done by driver
+	 *  \param filepath full path to file
 	 *  \param artist returns the song artist (empty if not available)
 	 *  \param title returns the title (empty if not available)
 	 */
