@@ -62,6 +62,10 @@ public:
 
 	void update ();
 
+	// update currently playing song info/duration on main gui
+	void updatePlayingInfo(const std::string info);
+	void clearPlayingInfo();
+
 	bool isRepeatEnabled() const;
 	bool isShuffleEnabled() const;
 
@@ -71,6 +75,8 @@ public:
 	void shuffleAndRebuildPlaylist();
 	// Update playlist active row
 	void updatePlaylist(sint prevIndex = -1);
+	// set/remove playlist highlight
+	void updatePlaylist(uint index, bool state);
 
 	// Update single song title/duration on _Songs and on playlist
 	void updateSong(const CSongs &song);

@@ -240,8 +240,8 @@ void	releaseMainLoopReselect()
 	// alredy called from farTPMainLoop()
 	// --R2::getEditor().autoConfigRelease(IsInRingSession);
 
-	// Pause any user played music
-	MusicPlayer.pause();
+	// stop any user played music
+	MusicPlayer.stop();
 
 	// flush the server string cache
 	STRING_MANAGER::CStringManagerClient::instance()->flushStringCache();
@@ -390,8 +390,8 @@ void releaseMainLoop(bool closeConnection)
 	// Release R2 editor if applicable
 	R2::getEditor().autoConfigRelease(IsInRingSession);
 
-	// Pause any user played music
-	MusicPlayer.pause();
+	// stop any user played music
+	MusicPlayer.stop();
 
 	// flush the server string cache
 	STRING_MANAGER::CStringManagerClient::instance()->flushStringCache();
