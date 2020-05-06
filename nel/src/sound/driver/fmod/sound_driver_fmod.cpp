@@ -496,36 +496,20 @@ bool getTag (std::string &result, const char *tag, FSOUND_STREAM *stream)
 }
 
 /** Get music info. Returns false if the song is not found or the function is not implemented. 
- *  \param filepath path to file, CPath::lookup done by driver
+ *  \param filepath full path to file
  *  \param artist returns the song artist (empty if not available)
  *  \param title returns the title (empty if not available)
  */
 bool CSoundDriverFMod::getMusicInfo(const std::string &filepath, std::string &artist, std::string &title, float &length)
 {
-	/* Open a stream, get the tag if it exists, close the stream */
-	string pathName = CPath::lookup(filepath, false);
-	uint32 fileOffset = 0, fileSize = 0;
-	if (pathName.empty())
+	if (filepath.empty() || !CFile::fileExists(filepath))
 	{
 		nlwarning("NLSOUND FMod Driver: Music file %s not found!", filepath.c_str());
 		return false;
 	}
-	// if the file is in a bnp
-	if (pathName.find('@') != string::npos)
-	{
-		if (CBigFile::getInstance().getFileInfo(pathName, fileSize, fileOffset))
-		{
-			// set pathname to bnp
-			pathName = pathName.substr(0, pathName.find('@'));			
-		}
-		else
-		{
-			nlwarning("NLSOUND FMod Driver: BNP BROKEN");
-			return false;
-		}
-	}
 
-	FSOUND_STREAM *stream = FSOUND_Stream_Open((const char *)CPath::lookup(filepath, false).c_str(), FSOUND_2D, (sint)fileOffset, (sint)fileSize);
+	uint32 fileOffset = 0, fileSize = 0;
+	FSOUND_STREAM *stream = FSOUND_Stream_Open(filepath.c_str(), FSOUND_2D, (sint)fileOffset, (sint)fileSize);
 	if (stream)
 	{
 		getTag(artist, "ARTIST", stream);

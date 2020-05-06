@@ -1044,6 +1044,10 @@ void CInterfaceManager::initInGame()
 		gc->setTarget(gc->getSavedTarget());
 	}
 
+	// rebuild mp3 player playlist if user reselected a char (songs are already scanned)
+	CAHManager::getInstance()->runActionHandler("music_player", NULL, "update_playlist");
+	CAHManager::getInstance()->runActionHandler("music_player", NULL, "stop");
+
 	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHATLOG_STATE", false);
 	if (node)
 	{
