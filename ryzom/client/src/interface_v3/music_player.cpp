@@ -434,7 +434,9 @@ void CMusicPlayer::stop ()
 		return;
 
 	// stop the music only if we are really playing (else risk to stop a background music!)
-	SoundMngr->stopMusic(0);
+	if (_State != Stopped)
+		SoundMngr->stopMusic(0);
+
 	_State = Stopped;
 	_PlayStart = 0;
 	_PauseTime = 0;
