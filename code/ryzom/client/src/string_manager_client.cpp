@@ -390,7 +390,7 @@ restartLoop4:
 			else
 			{
 				result = it->second;
-				if (result.size() > 9 && result.substr(0, 9) == ucstring("<missing:")) 
+				if (result.size() > 9 && result.substr(0, 9) == ucstring("<missing:"))
 				{
 					map<ucstring, ucstring>::iterator itds = _DynStrings.find(result.substr(9, result.size()-10));
 					if (itds != _DynStrings.end())
@@ -745,6 +745,12 @@ restartLoop:
 						if ( ! str.empty() && pos != ucstring::npos)
 						{
 							str = CEntityCL::removeTitleFromName(str);
+						}
+
+						// if the string contains a special rename of creature, remove it
+						if (str.size() > 2 && str[0] == '<' && str[1] == '#')
+						{
+							str = str.substr(2);
 						}
 
 						// append this string
@@ -1625,7 +1631,7 @@ const ucchar *CStringManagerClient::getTitleLocalizedName(const ucstring &titleI
 		_TitleWords.push_back(listInfos[0]);
 		return getLocalizedName(_TitleWords.back());
 	}
-	
+
 	return getLocalizedName(titleId);
 }
 
