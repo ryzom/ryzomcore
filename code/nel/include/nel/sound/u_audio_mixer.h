@@ -1,6 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -19,7 +23,6 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/string_mapper.h"
-#include "nel/misc/sheet_id.h"
 #include "nel/sound/u_source.h"
 #include "nel/sound/u_group_controller.h"
 #include "nel/ligo/primitive.h"
@@ -170,6 +173,10 @@ public:
 	static std::string buildSampleBank(const std::vector<std::string> &sampleList, const std::string &bankDir, const std::string &bankName);
 	/// Build the sound bank packed sheets file from georges sound sheet files with .sound extension in the search path, and return the path to the written file.
 	static std::string buildSoundBank(const std::string &packedSheetDir);
+	/// Build the cluster sound_group sheets.
+	static std::string buildClusteredSoundGroupSheets(const std::string &packedSheetDir);
+	/// Build the user var binding sheets.
+	static std::string buildUserVarBindingSheets(const std::string &packedSheetDir);
 	/** Set the global path to the sample banks
 	 *	If you have specified some sample bank to load in the
 	 *	mixer config file, you MUST set the sample path
@@ -285,7 +292,7 @@ public:
 	//@}
 
 	/// Get a TSoundId from a name (returns NULL if not found)
-	virtual TSoundId	getSoundId( const NLMISC::CSheetId &name ) = 0;
+	virtual TSoundId	getSoundId( const NLMISC::TStringId &name ) = 0;
 
 	/// Gets the group controller for the given group tree path with separator '/', if it doesn't exist yet it will be created.
 	/// Examples: "music", "effects", "dialog", "music/background", "music/loading", "music/player", etcetera
@@ -297,7 +304,7 @@ public:
 	 * pass a callback function that will be called (if not NULL) just before deleting the spawned
 	 * source.
 	 */
-	virtual USource		*createSource(const NLMISC::CSheetId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *callbackUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context  = 0, UGroupController *groupController = NULL) = 0;
+	virtual USource		*createSource(const NLMISC::TStringId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *callbackUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context  = 0, UGroupController *groupController = NULL) = 0;
 	/// Add a logical sound source (by sound id). To remove a source, just delete it. See createSource(const char*)
 	virtual USource		*createSource(TSoundId id, bool spawn=false, TSpawnEndCallback cb=NULL, void *callbackUserParam  = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL) = 0;
 
@@ -321,7 +328,7 @@ public:
 	//@{
 	//@name Statistic and utility methods
 	/// Fill a vector with the names of all loaded sounds.
-	virtual void		getSoundNames( std::vector<NLMISC::CSheetId> &names ) const = 0;
+	virtual void		getSoundNames( std::vector<NLMISC::TStringId> &names ) const = 0;
 	/// Return the number of mixing tracks (voices)
 	virtual uint		getPolyphony() const = 0;
 	/// Return the number of sources

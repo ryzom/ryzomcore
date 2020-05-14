@@ -84,6 +84,14 @@ if not args.noconf:
 	except NameError:
 		DatabaseDirectory = "W:/database"
 	try:
+		SoundDirectory
+	except NameError:
+		SoundDirectory = "V:"
+	try:
+		SoundDfnDirectory
+	except NameError:
+		SoundDfnDirectory = "V:/DFN"
+	try:
 		ExportBuildDirectory
 	except NameError:
 		ExportBuildDirectory = "T:/export"
@@ -180,6 +188,18 @@ if not args.noconf:
 	except NameError:
 		PatchmanBridgeServerDirectory = "T:/bridge_server"
 	try:
+		SignToolExecutable
+	except NameError:
+		SignToolExecutable = "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Bin/signtool.exe"
+	try:
+		SignToolSha1
+	except NameError:
+		SignToolSha1 = ""
+	try:
+		SignToolTimestamp
+	except NameError:
+		SignToolTimestamp = "http://timestamp.comodoca.com/authenticode"
+	try:
 		MaxAvailable
 	except NameError:
 		MaxAvailable = 1
@@ -218,6 +238,8 @@ if not args.noconf:
 	ScriptDirectory = askVar(log, "[IN] Script Directory", os.getcwd().replace("\\", "/")).replace("\\", "/")
 	WorkspaceDirectory = askVar(log, "[IN] Workspace Directory", WorkspaceDirectory).replace("\\", "/")
 	DatabaseDirectory = askVar(log, "[IN] Database Directory", DatabaseDirectory).replace("\\", "/")
+	SoundDirectory = askVar(log, "[IN] Sound Directory", SoundDirectory).replace("\\", "/")
+	SoundDfnDirectory = askVar(log, "[IN] Sound DFN Directory", SoundDfnDirectory).replace("\\", "/")
 	ExportBuildDirectory = askVar(log, "[OUT] Export Build Directory", ExportBuildDirectory).replace("\\", "/")
 	InstallDirectory = askVar(log, "[OUT] Install Directory", InstallDirectory).replace("\\", "/")
 	ClientDevDirectory = askVar(log, "[OUT] Client Dev Directory", ClientDevDirectory).replace("\\", "/")
@@ -248,6 +270,9 @@ if not args.noconf:
 	PatchmanCfgAdminDirectory = askVar(log, "[IN] Patchman Cfg Admin Directory", PatchmanCfgAdminDirectory).replace("\\", "/")
 	PatchmanCfgDefaultDirectory = askVar(log, "[IN] Patchman Cfg Default Directory", PatchmanCfgDefaultDirectory).replace("\\", "/")
 	PatchmanBridgeServerDirectory = askVar(log, "[OUT] Patchman Bridge Server Patch Directory", PatchmanBridgeServerDirectory).replace("\\", "/")
+	SignToolExecutable = askVar(log, "Sign Tool Executable", SignToolExecutable).replace("\\", "/")
+	SignToolSha1 = askVar(log, "Sign Tool Signature SHA1", SignToolSha1)
+	SignToolTimestamp = askVar(log, "Sign Tool Timestamp Authority", SignToolTimestamp)
 	MaxAvailable = int(askVar(log, "3dsMax Available", str(MaxAvailable)))
 	if MaxAvailable:
 		MaxDirectory = askVar(log, "3dsMax Directory", MaxDirectory).replace("\\", "/")
@@ -301,6 +326,8 @@ if not args.noconf:
 	sf.write("\n")
 	sf.write("# Data build directories\n")
 	sf.write("DatabaseDirectory = \"" + str(DatabaseDirectory) + "\"\n")
+	sf.write("SoundDirectory = \"" + str(SoundDirectory) + "\"\n")
+	sf.write("SoundDfnDirectory = \"" + str(SoundDfnDirectory) + "\"\n")
 	sf.write("ExportBuildDirectory = \"" + str(ExportBuildDirectory) + "\"\n")
 	sf.write("\n")
 	sf.write("# Install directories\n")
@@ -333,6 +360,11 @@ if not args.noconf:
 	sf.write("PatchmanCfgAdminDirectory = \"" + str(PatchmanCfgAdminDirectory) + "\"\n")
 	sf.write("PatchmanCfgDefaultDirectory = \"" + str(PatchmanCfgDefaultDirectory) + "\"\n")
 	sf.write("PatchmanBridgeServerDirectory = \"" + str(PatchmanBridgeServerDirectory) + "\"\n")
+	sf.write("\n")
+	sf.write("# Sign tool\n")
+	sf.write("SignToolExecutable = \"" + str(SignToolExecutable) + "\"\n")
+	sf.write("SignToolSha1 = \"" + str(SignToolSha1) + "\"\n")
+	sf.write("SignToolTimestamp = \"" + str(SignToolTimestamp) + "\"\n")
 	sf.write("\n")
 	sf.write("# 3dsMax directives\n")
 	sf.write("MaxAvailable = " + str(MaxAvailable) + "\n")
@@ -402,6 +434,7 @@ if not args.noverify:
 	findTool(log, ToolDirectories, BuildFarbankTool, ToolSuffix)
 	findTool(log, ToolDirectories, ZoneDependenciesTool, ToolSuffix)
 	findTool(log, ToolDirectories, ZoneWelderTool, ToolSuffix)
+	findTool(log, ToolDirectories, ZoneElevationTool, ToolSuffix)
 	findTool(log, ToolDirectories, BuildRbankTool, ToolSuffix)
 	findTool(log, ToolDirectories, BuildIndoorRbankTool, ToolSuffix)
 	findTool(log, ToolDirectories, BuildIgBoxesTool, ToolSuffix)
@@ -415,6 +448,9 @@ if not args.noverify:
 	findTool(log, ToolDirectories, MakeSheetIdTool, ToolSuffix)
 	# findTool(log, ToolDirectories, BuildSheetsTool, ToolSuffix) # kaetemi stuff, ignore this
 	# findTool(log, ToolDirectories, BuildSoundTool, ToolSuffix) # kaetemi stuff, ignore this
+	# findTool(log, ToolDirectories, BuildSoundTool, ToolSuffix)
+	findTool(log, ToolDirectories, BuildSoundbankTool, ToolSuffix)
+	findTool(log, ToolDirectories, BuildSamplebankTool, ToolSuffix)
 	findTool(log, ToolDirectories, BuildCoarseMeshTool, ToolSuffix)
 	findTool(log, ToolDirectories, LightmapOptimizerTool, ToolSuffix)
 	findTool(log, ToolDirectories, BuildClodtexTool, ToolSuffix)

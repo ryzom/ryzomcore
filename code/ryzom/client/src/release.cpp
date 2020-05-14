@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -25,6 +29,7 @@
 #include "nel/misc/debug.h"
 #include "nel/misc/async_file_manager.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/streamed_package_manager.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
 #include "nel/3d/fxaa.h"
@@ -235,8 +240,8 @@ void	releaseMainLoopReselect()
 	// alredy called from farTPMainLoop()
 	// --R2::getEditor().autoConfigRelease(IsInRingSession);
 
-	// Pause any user played music
-	MusicPlayer.pause();
+	// stop any user played music
+	MusicPlayer.stop();
 
 	// only really needed at exit
 	// --STRING_MANAGER::CStringManagerClient::instance()->flushStringCache();
@@ -385,8 +390,8 @@ void releaseMainLoop(bool closeConnection)
 	// Release R2 editor if applicable
 	R2::getEditor().autoConfigRelease(IsInRingSession);
 
-	// Pause any user played music
-	MusicPlayer.pause();
+	// stop any user played music
+	MusicPlayer.stop();
 
 	// flush the server string cache
 	STRING_MANAGER::CStringManagerClient::instance()->flushStringCache();
@@ -666,6 +671,9 @@ void release()
 	R2::CObjectSerializer::releaseInstance();
 	NLMISC::CBigFile::getInstance().removeAll();
 	NLMISC::CBigFile::releaseInstance();
+	NLMISC::CStreamedPackageManager::releaseInstance();
+	delete HttpPackageProvider;
+	HttpPackageProvider = NULL;
 	NL3D::CFastHLSModifier::releaseInstance();
 	CLandscapePolyDrawer::releaseInstance();
 	NL3D::CParticleSystemShape::releaseInstance();

@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -552,11 +556,11 @@ void clearBuffers()
 		}
 
 		// Sky is used to clear the frame buffer now, but if in line or point polygon mode, we should draw it
-		if (Driver->getPolygonMode() != UDriver::Filled)
+		if (Driver->getPolygonMode() != UDriver::Filled || !Filter3D[FilterSky])
 		{
 			if (!Driver->isLost())
 			{
-				Driver->clearBuffers (CRGBA(127, 127, 127));
+				Driver->clearBuffers (ClientCfg.BGColor);
 			}
 		}
 	}
@@ -1411,8 +1415,23 @@ bool mainLoop()
 		// Update Camera Position/Orientation.
 		CVector currViewPos = View.currentViewPos();
 		MainCam.setTransformMode(UTransformable::RotQuat);
+
+		CVector cameraMoves = UserEntity->getCameraMoves();
+		
+		currViewPos.z += cameraMoves.z;
 		MainCam.setPos(currViewPos);
 		MainCam.setRotQuat(View.currentViewQuat());
+
+		if (cameraMoves.x)
+		{
+			CMatrix viewMatrix;
+			viewMatrix = MainCam.getMatrix();
+			viewMatrix.rotateZ(cameraMoves.x);
+			MainCam.setRotQuat(viewMatrix.getRot());
+		}
+
+		UserEntity->setCameraMoves(CVector(0, 0, 0));
+		
 		if (StereoHMD)
 		{
 			CMatrix camMatrix;

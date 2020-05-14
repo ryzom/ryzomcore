@@ -1,5 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2011  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -51,6 +56,7 @@ class COutpostBuildingSheet;
 namespace NLGUI
 {
 	class CViewRenderer;
+	class CViewText;
 }
 
 class CDBCtrlSheet;
@@ -291,14 +297,14 @@ public:
 		REFLECT_SINT32("symbol", getGuildSymbol, setGuildSymbol);
 		REFLECT_BOOL("invert_symbol", getInvertGuildSymbol, setInvertGuildSymbol);
 		REFLECT_BOOL("can_drop", getCanDrop, setCanDrop);
-		REFLECT_STRING ("left_click", getActionOnLeftClick, setActionOnLeftClick);
-		REFLECT_STRING ("right_click", getActionOnRightClick, setActionOnRightClick);
-		REFLECT_STRING ("left_click_params", getParamsOnLeftClick, setParamsOnLeftClick);
-		REFLECT_STRING ("right_click_params", getParamsOnRightClick, setParamsOnRightClick);
-		REFLECT_STRING ("on_drop", getActionOnDrop, setActionOnDrop);
-		REFLECT_STRING ("on_drop_params", getParamsOnDrop, setParamsOnDrop);
-		REFLECT_STRING ("on_can_drop", getActionOnCanDrop, setActionOnCanDrop);
-		REFLECT_STRING ("on_can_drop_params", getParamsOnCanDrop, setParamsOnCanDrop);
+		REFLECT_STRING_REF ("left_click", getActionOnLeftClick, setActionOnLeftClick);
+		REFLECT_STRING_REF ("right_click", getActionOnRightClick, setActionOnRightClick);
+		REFLECT_STRING_REF ("left_click_params", getParamsOnLeftClick, setParamsOnLeftClick);
+		REFLECT_STRING_REF ("right_click_params", getParamsOnRightClick, setParamsOnRightClick);
+		REFLECT_STRING_REF ("on_drop", getActionOnDrop, setActionOnDrop);
+		REFLECT_STRING_REF ("on_drop_params", getParamsOnDrop, setParamsOnDrop);
+		REFLECT_STRING_REF ("on_can_drop", getActionOnCanDrop, setActionOnCanDrop);
+		REFLECT_STRING_REF ("on_can_drop_params", getParamsOnCanDrop, setParamsOnCanDrop);
 		REFLECT_LUA_METHOD("getDraggedSheet", luaGetDraggedSheet);
 		REFLECT_LUA_METHOD("getItemInfo", luaGetItemInfo);
 		REFLECT_LUA_METHOD("getName", luaGetName);
@@ -731,6 +737,8 @@ protected:
 	sint8			_ArmourColorIndex;
 
 	CTickRange		_RegenTickRange;
+	NLGUI::CViewText	*_RegenText;
+	uint32			_RegenTextValue;
 
 	/// D'n'd
 	sint32		_DragX, _DragY;
@@ -812,7 +820,7 @@ private:
 	// remove enchant and buff markers from item icon
 	void		clearIconBuffs();
 
-	void		setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar= 1000, bool topDown= false);
+	void		setupCharBitmaps(sint32 maxW, sint32 maxLine, bool topDown= false);
 	void		resetCharBitmaps();
 	void		displayCharBitmaps(sint32 rdrLayer, sint32 x, sint32 y, NLMISC::CRGBA color);
 

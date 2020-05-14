@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -131,13 +134,13 @@ void CForm::write (xmlDocPtr doc, const std::string &filename)
 	}
 
 	// Write elements
-	Elements.write (node, this, NULL, true);
+	Elements.write (node, this, std::string(), true);
 
 	// Write held elements
 	uint i;
 	for (i=0; i<HeldElementCount; i++)
 	{
-		HeldElements[i]->write (node, this, NULL, true);
+		HeldElements[i]->write (node, this, std::string(), true);
 	}
 
 	// Header
@@ -270,7 +273,7 @@ void CForm::write (NLMISC::IStream &stream)
 	xmlStream.init (&stream);
 
 	// Write the file
-	write (xmlStream.getDocument (), NULL);
+	write (xmlStream.getDocument (), std::string());
 }
 
 // ***************************************************************************

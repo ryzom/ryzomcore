@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -302,8 +305,6 @@ void initCore()
 		LoadedCore = true;
 		// Seed the randomizer
 		srand(uint(time(0)));
-		// Sheet Id
-		CSheetId::initWithoutSheet(); // Temporary for sound
 		// Load configuration file, set paths, extension remapping
 		CConfiguration::init();
 		// Load language file
@@ -524,8 +525,6 @@ void releaseCore()
 		CInternationalization::release();
 		// Release the configuration
 		CConfiguration::release();
-		// Release sheet id
-		CSheetId::uninit(); // Temporary for sound
 	}
 }
 
@@ -1421,6 +1420,7 @@ public:
 		NLMISC::CAsyncFileManager::terminate();
 		NL3D::CParticleSystemManager::release();
 		NLMISC::CBigFile::releaseInstance();
+		NLMISC::CStreamedPackageManager::releaseInstance();
 		NLMISC::CClassRegistry::release();
 		delete &NLMISC::CObjectArenaAllocator::getDefaultAllocator();
 		cf_delete_buffer(_CfBufferState); _CfBufferState = NULL;

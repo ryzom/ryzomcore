@@ -1,5 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2011  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -535,6 +540,9 @@ CCtrlDraggable(param)
 	_SapBuffIcon = "ico_sap.tga";
 	_StaBuffIcon = "ico_stamina.tga";
 	_FocusBuffIcon = "ico_focus.tga";
+
+	_RegenText = NULL;
+	_RegenTextValue = 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -558,6 +566,11 @@ CDBCtrlSheet::~CDBCtrlSheet()
 		if (Driver)
 			Driver->deleteTextureFile(_GuildSymb);
 		_GuildSymb = NULL;
+	}
+	if (_RegenText)
+	{
+		delete _RegenText;
+		_RegenText = NULL;
 	}
 
 	// ensure erase static
@@ -1098,6 +1111,7 @@ void CDBCtrlSheet::infoReceived()
 	{
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		CSBrickManager *pBM= CSBrickManager::getInstance();
+		bool haveRoot = false;
 		for(uint i=0; i<itemInfo->Enchantment.Bricks.size(); ++i)
 		{
 			const CSBrickSheet *brick = pBM->getBrick(itemInfo->Enchantment.Bricks[i]);
@@ -1105,11 +1119,17 @@ void CDBCtrlSheet::infoReceived()
 			{
 				if (!brick->isRoot() && !brick->isCredit() && !brick->isParameter())
 				{
+					if (!haveRoot)
+					{
+						_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIconBack()), brick->IconBackColor));
+						rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
+					}
 					_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIcon()), brick->IconColor));
 					rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
 				}
 				else if (brick->isRoot())
 				{
+					haveRoot = true;
 					// there should be single root icon and it should be first one
 					_EnchantIcons.push_back(SBuffIcon(rVR.getTextureIdFromName(brick->getIconBack()), brick->IconBackColor));
 					rVR.getTextureSizeFromId(_EnchantIcons.back().TextureId, _EnchantIcons.back().IconW, _EnchantIcons.back().IconH);
@@ -1290,10 +1310,10 @@ void CDBCtrlSheet::setupItem ()
 			// special icon text
 			if( _NeedSetup || _ItemSheet->getIconText() != _OptString )
 			{
-				// compute from OptString. Allow only 1 line and 4 chars
+				// compute from OptString. Allow only 1 line (-2 for padding)
 				_OptString= _ItemSheet->getIconText();
 				// Display Top Left
-				setupCharBitmaps(40, 1, 6, true);
+				setupCharBitmaps(40-2, 1, true);
 			}
 
 			// Special Item requirement
@@ -1407,8 +1427,8 @@ void CDBCtrlSheet::setupMacro()
 {
 	if (!_NeedSetup) return;
 
-	// compute from OptString
-	setupCharBitmaps(26, 4, 5);
+	// compute from OptString (-2 for padding)
+	setupCharBitmaps(26-2, 4);
 
 	_NeedSetup = false;
 
@@ -1710,8 +1730,8 @@ void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bri
 		{
 			// recompute text
 			_OptString= iconName;
-			// compute from OptString. Allow only 1 line and 5 chars
-			setupCharBitmaps(26, 1, 5);
+			// compute from OptString. Allow only 1 line (-2 for padding)
+			setupCharBitmaps(26-2, 1);
 		}
 	}
 }
@@ -1837,10 +1857,10 @@ void CDBCtrlSheet::setupOutpostBuilding()
 			// special icon text
 			if (pOBSheet->getIconText() != _OptString)
 			{
-				// compute from OptString. Allow only 1 line and 4 chars
+				// compute from OptString. Allow only 1 line, (-2 for padding)
 				_OptString= pOBSheet->getIconText();
 				// Display Top Left
-				setupCharBitmaps(40, 1, 6, true);
+				setupCharBitmaps(40-2, 1, true);
 			}
 		}
 		else
@@ -1883,28 +1903,32 @@ void CDBCtrlSheet::resetCharBitmaps()
 }
 
 // ***************************************************************************
-void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar, bool topDown)
+void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, bool topDown)
 {
-	// Use the optString for the Macro name
-	_OptString = toLower(_OptString);
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = *CViewRenderer::getInstance();
-
 	_CharBitmaps.clear();
+	if(maxLine<=0) return;
 
-	if(maxLine<=0)
-		return;
+	std::string text(_OptString);
+	// check for icon text 'uiitLabel'
+	if (text.size() > 4 && text[0] == 'u' && text[1] == 'i' && text[2] == 'i' && text[3] == 't' && CI18N::hasTranslation(text))
+	{
+		// NOTE: translated text is expected to be us-ascii only
+		text = CI18N::get(text).toUtf8();
+	}
+	text = toLower(text);
+
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	uint h = rVR.getTypoTextureH('a');
 	sint lineNb = 0;
 	sint curLineSize = 0;
 	uint i;
 	uint xChar= 0;
-	for (i = 0; i < _OptString.size(); ++i)
+	for (i = 0; i < text.size(); ++i)
 	{
-		char c = _OptString[i];
+		char c = text[i];
 		sint32 w = rVR.getTypoTextureW(c);
-		if ((curLineSize + w) > maxW || (sint32)xChar>=maxWChar)
+		if ((curLineSize + w) > maxW)
 		{
 			lineNb ++;
 			if (lineNb == maxLine) break;
@@ -2040,6 +2064,12 @@ void CDBCtrlSheet::draw()
 		if (!_LastSheetId)
 		{
 			_RegenTickRange = CTickRange();
+			if (_RegenText)
+			{
+				delete _RegenText;
+				_RegenText = NULL;
+				_RegenTextValue = 0;
+			}
 		}
 		else
 		{
@@ -2066,6 +2096,36 @@ void CDBCtrlSheet::draw()
 			{
 				rVR.drawQuad(_RenderLayer + 1, regenTris[tri], backTex, CRGBA::White, false);
 			}
+
+			if (!_RegenText) {
+				_RegenText = new CViewText(CViewBase::TCtorParam());
+				_RegenText->setId(getId() + ":regen");
+				_RegenText->setParent(_Parent);
+				_RegenText->setOverflowText(ucstring(""));
+				_RegenText->setModulateGlobalColor(false);
+				_RegenText->setMultiLine(false);
+				_RegenText->setTextMode(CViewText::ClipWord);
+				_RegenText->setFontSizing("0", "0");
+				// TODO: font size / color hardcoded.
+				_RegenText->setFontSize(8);
+				_RegenText->setColor(CRGBA::White);
+				_RegenText->setShadow(true);
+				_RegenText->setActive(true);
+				_RegenText->updateTextContext();
+			}
+
+			// TODO: ticks in second hardcoded
+			uint32 nextValue = _RegenTickRange.EndTick > LastGameCycle ? (_RegenTickRange.EndTick - LastGameCycle) / 10 : 0;
+			if (_RegenTextValue != nextValue)
+			{
+				_RegenTextValue = nextValue;
+				_RegenText->setText(toString("%d", _RegenTextValue));
+				_RegenText->updateTextContext();
+			}
+			_RegenText->setXReal(_XReal+1);
+			_RegenText->setYReal(_YReal+2);
+			_RegenText->setRenderLayer(_RenderLayer+2);
+			_RegenText->draw();
 		}
 	}
 

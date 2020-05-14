@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -113,7 +113,7 @@ CTypeVersion TypeVersion [] =
 	CTypeVersion("world",                   1),
 	CTypeVersion("weather_function_params", 2),
 	CTypeVersion("mission_icon",            0),
-	CTypeVersion("sbrick",                  32),
+	CTypeVersion("sbrick",                  33),
 	CTypeVersion("sphrase",                 4),
 	CTypeVersion("skill_tree",              5),
 	CTypeVersion("titles",					1),

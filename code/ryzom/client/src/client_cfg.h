@@ -1,6 +1,11 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
+// Copyright (C) 2010-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2011-2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -151,6 +156,10 @@ struct CClientConfig
 	float			InterfaceScale_max;
 	float			InterfaceScale_step;
 	bool			BilinearUI;
+
+	// Window snap
+	bool			WindowSnapInvert;
+	uint32			WindowSnapDistance;
 
 	// VR
 	bool			VREnable;
@@ -376,6 +385,10 @@ struct CClientConfig
 	std::vector<string>			DataPath;
 	/// Data Path no recurse.
 	std::vector<string>			DataPathNoRecurse;
+	/// Streamed package path
+	std::string					StreamedPackagePath;
+	/// Streamed package hosts
+	std::vector<string>			StreamedPackageHosts; // TODO: From 'domain' SQL table
 	/// Update packed sheet Path.
 	std::vector<string>			UpdatePackedSheetPath;
 	/// True if we want the packed sheet to be updated if needed
@@ -699,9 +712,7 @@ struct CClientConfig
 		uint FontSize;
 		std::string Text;
 	};
-	std::vector<SPrintfCommand> PrintfCommands;
-
-	std::vector<SPrintfCommand> PrintfCommandsFreeTrial;
+	std::vector<SPrintfCommand> loadingTexts;
 
 	// funny loading messages count
 	uint16 LoadingStringCount;

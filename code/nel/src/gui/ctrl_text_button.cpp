@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -1070,6 +1073,69 @@ namespace NLGUI
 	CViewText*	CCtrlTextButton::getViewText()
 	{
 		return _ViewText;
+	}
+
+	// ***************************************************************************
+
+	void CCtrlTextButton::setTextureLua(const std::string &name)
+	{
+		_TextureIdNormal[0].setTexture(std::string(name + "_l.tga").c_str());
+		_TextureIdNormal[1].setTexture(std::string(name + "_m.tga").c_str());
+		_TextureIdNormal[2].setTexture(std::string(name + "_r.tga").c_str());
+	}
+
+	// ***************************************************************************
+
+	void CCtrlTextButton::setTexturePushedLua(const std::string &name)
+	{
+		_TextureIdPushed[0].setTexture(std::string(name + "_l.tga").c_str());
+		_TextureIdPushed[1].setTexture(std::string(name + "_m.tga").c_str());
+		_TextureIdPushed[2].setTexture(std::string(name + "_r.tga").c_str());
+	}
+
+	// ***************************************************************************
+
+	void CCtrlTextButton::setTextureOverLua(const std::string &name)
+	{
+		_TextureIdOver[0].setTexture(std::string(name + "_l.tga").c_str());
+		_TextureIdOver[1].setTexture(std::string(name + "_m.tga").c_str());
+		_TextureIdOver[2].setTexture(std::string(name + "_r.tga").c_str());
+	}
+
+	// ***************************************************************************
+
+	std::string CCtrlTextButton::getTexture() const
+	{
+		std::string tx = CViewRenderer::getInstance()->getTextureNameFromId(_TextureIdNormal[0]);
+		std::string::size_type i = tx.rfind("_l.tga");
+		if (i != std::string::npos)
+			tx = tx.substr(0, i);
+
+		return tx;
+	}
+
+	// ***************************************************************************
+
+	std::string CCtrlTextButton::getTexturePushed() const
+	{
+		std::string tx = CViewRenderer::getInstance()->getTextureNameFromId(_TextureIdOver[0]);
+		std::string::size_type i = tx.rfind("_l.tga");
+		if (i != std::string::npos)
+			tx = tx.substr(0, i);
+
+		return tx;
+	}
+
+	// ***************************************************************************
+
+	std::string CCtrlTextButton::getTextureOver() const
+	{
+		std::string tx = CViewRenderer::getInstance()->getTextureNameFromId(_TextureIdPushed[0]);
+		std::string::size_type i = tx.rfind("_l.tga");
+		if (i != std::string::npos)
+			tx = tx.substr(0, i);
+
+		return tx;
 	}
 
 	// ***************************************************************************

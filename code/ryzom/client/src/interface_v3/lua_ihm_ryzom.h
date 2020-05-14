@@ -58,11 +58,13 @@ private:
 	static int  getDesktopIndex(CLuaState &ls);
 	static int  setLuaBreakPoint(CLuaState &ls); // set a breakpoint in lua external debugger (file, line)
 	static int	getMainPageURL(CLuaState &ls);
+	static int	setNewsAtProgress(CLuaState &ls);
 	static int	getCharSlot(CLuaState &ls);
 	static int	displaySystemInfo(CLuaState &ls);
 	static int	displayChatMessage(CLuaState &ls);
 	static int	setWeatherValue(CLuaState &ls); // first value is a boolean to say automatic, second value ranges from of to 1 and gives the weather
 	static int	getWeatherValue(CLuaState &ls); // get current real weather value (blend between server driven value & predicted value). Manual weather value is ignored
+	static int	getContinentSheet(CLuaState &ls);
 	static int	disableContextHelpForControl(CLuaState &ls);	// params: CCtrlBase*. return: none
 	static int  disableContextHelp(CLuaState &ls);
 	static int  getServerSeason(CLuaState &ls); // get the last season sent by the server
@@ -90,6 +92,7 @@ private:
 	static int	getTargetName(CLuaState &ls);
 	static int	getTargetTitleRaw(CLuaState &ls);
 	static int	getTargetTitle(CLuaState &ls);
+	static int	moveToTarget(CLuaState &ls);
 	static int  addSearchPathUser(CLuaState &ls);
 	static int  getClientCfgVar(CLuaState &ls);
 	static int	isPlayerFreeTrial(CLuaState &ls);
@@ -232,6 +235,8 @@ private:
 	static std::string getRegionByAlias(uint32 alias);
 	static float getGroundZ(float x, float y);
 	static int getGroundAtMouse(CLuaState &ls);
+	static int moveCam(CLuaState &ls);
+	static int setCamMode(CLuaState &ls);
 	static int getMousePos(CLuaState &ls);
 	static int getMouseDown(CLuaState &ls);
 	static int getMouseMiddleDown(CLuaState &ls);
@@ -257,6 +262,10 @@ private:
 	// because it would be too easy to write a key recorder ...)
 	static bool	isCtrlKeyDown(); 							     
 	static std::string encodeURLUnicodeParam(const ucstring &text);
+	static std::string encodeURLParam(const std::string &text);
+
+	static std::string encodeToHexa(const std::string &text);
+	static std::string decodeFromHexa(const std::string &text);
 
 	static sint32 getPlayerLevel();		// get max level among player skills (magi, combat, crafting ,foraging)
 	static std::string getPlayerVpaHex();

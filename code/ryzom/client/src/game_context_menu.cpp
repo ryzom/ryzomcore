@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -30,10 +33,12 @@
 #include "interface_v3/bot_chat_manager.h"
 #include "interface_v3/guild_manager.h"
 #include "interface_v3/people_interraction.h"
+#include "continent_manager.h"
 #include "main_loop.h"
 #include "interface_v3/inventory_manager.h"
 #include "motion/user_controls.h"
 #include "sheet_manager.h"
+#include "connection.h"
 // GAME SHARE
 #include "game_share/constants.h"
 #include "game_share/properties.h"
@@ -47,6 +52,7 @@ using namespace	NLMISC;
 using namespace std;
 
 
+extern CContinentManager ContinentMngr;
 
 // filter available programs depending on R2 mode
 static uint32 filterAvailablePrograms(uint32 src)
@@ -141,6 +147,9 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 	_TextQuitTeam = "ui:interface:" + menuId + ":quit_team";
 	_TextAddToFriendList = "ui:interface:" + menuId + ":add_to_friend_list";
 	_TextTalk = "ui:interface:" + menuId + ":talk";
+	_TextInvisible = "ui:interface:" + menuId + ":invisible";
+	_TextInvulnerable = "ui:interface:" + menuId + ":invulnerable";
+	_TextGod = "ui:interface:" + menuId + ":god";
 
 
 	// Mission DB and Text link
@@ -161,6 +170,7 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 	// BotChat menus
 
 	_TextNews = "ui:interface:" + menuId + ":news";
+	_TextNewsAgressive = "ui:interface:" + menuId + ":news_aggressive";
 	_TextTradeItem = "ui:interface:" + menuId + ":trade_item";
 	_TextTradeTeleport = "ui:interface:" + menuId + ":trade_teleport";
 	_TextTradeFaction = "ui:interface:" + menuId + ":trade_faction";
@@ -256,6 +266,18 @@ void		CGameContextMenu::update()
 	updateContextMenuMissionRing();
 
 	setupContextMenuCantTalk(); // can't talk by default
+
+	bool showGMOptions = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeEG() || hasPrivilegeOBSERVER());
+
+	if (_TextInvisible)
+		_TextInvisible->setActive(showGMOptions);
+
+	if (_TextInvulnerable)
+		_TextInvulnerable->setActive(showGMOptions);
+
+	if (_TextGod)
+		_TextGod->setActive(showGMOptions);
+
 
 	// If mode Combat (no talk, no give, no mount, no extract_rm)
 	if(UserEntity->isFighting())
@@ -391,7 +413,7 @@ void		CGameContextMenu::update()
 		if(_TextExchange)
 		{
 			// Action possible only if the client is not already busy and the selection is able to do this with you..
-			if(selection && selection->properties().canExchangeItem())
+			if(selection && selection->isPlayer() && selection->properties().canExchangeItem())
 				_TextExchange->setActive(!UserEntity->isBusy());
 			else
 				_TextExchange->setActive(false);
@@ -414,6 +436,34 @@ void		CGameContextMenu::update()
 	// Enable attack mode
 	if (_TextAttack)
 		_TextAttack->setActive(canAttack());
+
+
+	// get current continent to check fame
+	string continent = ContinentMngr.cur()->SheetName;
+	sint8 fameValue = 0;
+	uint fameIndex;
+	if (continent == "lesfalaises.continent")
+		fameIndex = CStaticFames::getInstance().getFactionIndex("matis");
+	else if (continent == "fyros.continent")
+		fameIndex = CStaticFames::getInstance().getFactionIndex("fyros");
+	else if (continent == "tryker.continent")
+		fameIndex = CStaticFames::getInstance().getFactionIndex("tryker");
+	else if (continent == "lepaysmalade.continent")
+		fameIndex = CStaticFames::getInstance().getFactionIndex("zorai");
+
+	
+	if (fameIndex != CStaticFames::INVALID_FACTION_INDEX)
+	{
+		CCDBNodeLeaf *pLeafFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", fameIndex), false);
+		if (pLeafFame != NULL)
+			fameValue = pLeafFame->getValue8();
+	}
+	if (_TextNews)
+		_TextNews->setActive(selection && !canAttack() && selection->isNPC() && fameValue >= -30);
+
+	if (_TextNewsAgressive)
+		_TextNewsAgressive->setActive(selection && !canAttack() && selection->isNPC() && fameValue < -30);
+
 
 	if (_TextDuel && _TextUnDuel)
 	{
@@ -494,7 +544,7 @@ void		CGameContextMenu::update()
 	{
 		bool invitable = false;
 		// User should not be flagged as invitable by himself, so no need to check that selection is not the user
-		if(selection && selection->properties().invitable() && propValidation.invitable() )
+		if(selection && selection->isPlayer() && selection->properties().invitable() && propValidation.invitable() )
 		{
 			invitable = true;
 		}
@@ -605,6 +655,7 @@ void		CGameContextMenu::update()
 
 	// Apply real activation of Talk Texts.
 	applyTextTalk();
+
 }
 
 // ***************************************************************************
@@ -715,8 +766,19 @@ void CGameContextMenu::updateContextMenuMissionsOptions( bool forceHide )
 					{
 						result = NLMISC::CI18N::get("uiMissionOptionNotReceived");
 					}
-					pVTM->setText(result);
-					pVTM->setActive(true);
+					if (result == ucstring("Qui etes-vous ?")
+						|| result == ucstring("Wer bist Du?")
+						|| result == ucstring("Who are you?")
+						|| result == ucstring("Quién eres tú?")
+						|| result == ucstring("Кто ты?"))
+					{
+						pVTM->setActive(false);
+					}
+					else
+					{
+						pVTM->setText(result);
+						pVTM->setActive(true);
+					}
 				}
 				else
 				{
@@ -856,7 +918,7 @@ void CGameContextMenu::updateContextMenuTalkEntries(uint options)
 		options = std::numeric_limits<uint>::max(); // in local mode, force all options to be shown (for debug)
 	}
 	// news
-	_OkTextNews= ((options & (1 << BOTCHATTYPE::NewsFlag)));
+	_OkTextNews= true; //((options & (1 << BOTCHATTYPE::NewsFlag)));
 	// trade
 	_OkTextTradeItem= ((options & (1 << BOTCHATTYPE::TradeItemFlag)) != 0);
  	_OkTextTradeTeleport= ((options & (1 << BOTCHATTYPE::TradeTeleportFlag)) != 0);
@@ -907,7 +969,6 @@ void CGameContextMenu::setupContextMenuTalkWithPlayer()
 // ***************************************************************************
 void CGameContextMenu::applyTextTalk()
 {
-	if (_TextNews) _TextNews->setActive(_OkTextNews);
 	if (_TextTradeItem) _TextTradeItem->setActive(_OkTextTradeItem);
 	if (_TextTradeTeleport) _TextTradeTeleport->setActive(_OkTextTradeTeleport);
 	if (_TextTradeFaction) _TextTradeFaction->setActive(_OkTextTradeFaction);

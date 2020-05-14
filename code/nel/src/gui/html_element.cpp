@@ -188,11 +188,11 @@ namespace NLGUI
 					result += Value.substr(start, pos - start);
 					if (Value[pos] == '\n')
 					{
-						result += "⏎";
+						result += "\xE2\x8F\x8E"; // \u23CE
 					}
 					else if (Value[pos] == '\t')
 					{
-						result += "⇥";
+						result += "\xE2\x87\xA5"; // \u21E5
 					}
 
 					start = pos+1;

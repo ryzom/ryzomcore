@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2017  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -28,6 +31,11 @@
 
 
 // ***************************************************************************
+namespace NLWEB
+{
+	class CHttpPackageProvider;
+}
+
 namespace NL3D
 {
 	class UDriver;
@@ -78,6 +86,9 @@ const float		ExtraZoneLoadingVision	= 100.f;
 
 
 // ***************************************************************************
+// Data
+extern NLWEB::CHttpPackageProvider *HttpPackageProvider; // Http provider from on-the-fly downloaded game data
+
 // Main System
 extern NL3D::UDriver				*Driver;		// The main 3D Driver
 extern NL3D::IStereoDisplay			*StereoDisplay; // Stereo display
@@ -132,6 +143,7 @@ extern std::vector<std::pair<
 
 extern std::string					Cookie, FSAddr;
 extern std::string					RingMainURL;
+extern std::string					NewsAtProgress;
 extern bool							FreeTrial;
 
 void resetTextContext (const char *font, bool resetInterfaceManager);

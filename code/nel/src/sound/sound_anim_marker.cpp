@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -53,19 +56,19 @@ void CSoundAnimMarker::play(UAudioMixer* mixer, NL3D::CCluster *cluster, CSoundC
 
 // ********************************************************
 
-void CSoundAnimMarker::addSound(const NLMISC::CSheetId& soundName)
+void CSoundAnimMarker::addSound(const NLMISC::TStringId& soundName)
 {
 	pair<TMarkerSoundSet::iterator, bool> inserted;
 	inserted = _Sounds.insert(soundName);
 	if (inserted.second == false)
 	{
-		nlwarning("Duplicate sound (%s)",/* CStringMapper::unmap(soundName).c_str()*/soundName.toString().c_str());
+		nlwarning("Duplicate sound (%s)", CStringMapper::unmap(soundName).c_str());
 	}
 }
 
 // ********************************************************
 
-void CSoundAnimMarker::removeSound(const NLMISC::CSheetId &soundName)
+void CSoundAnimMarker::removeSound(const NLMISC::TStringId &soundName)
 {
 	TMarkerSoundSet::iterator iter = _Sounds.find(soundName);
     if (iter != _Sounds.end())
@@ -74,13 +77,13 @@ void CSoundAnimMarker::removeSound(const NLMISC::CSheetId &soundName)
 	}
 	else
 	{
-		nlwarning("No sound was removed (%s)", soundName.toString().c_str()/*CStringMapper::unmap(soundName).c_str()*/);
+		nlwarning("No sound was removed (%s)", CStringMapper::unmap(soundName).c_str());
 	}
 }
 
 // ********************************************************
 
-void CSoundAnimMarker::getSounds(vector<NLMISC::CSheetId> &sounds)
+void CSoundAnimMarker::getSounds(vector<NLMISC::TStringId> &sounds)
 {
 	sounds.insert(sounds.end(), _Sounds.begin(), _Sounds.end());
 

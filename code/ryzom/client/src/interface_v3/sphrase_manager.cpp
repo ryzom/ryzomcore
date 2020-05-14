@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -3697,12 +3701,20 @@ void				CSPhraseManager::computePhraseProgression()
 					CReqSkillFormula	brickFormula;
 
 					// get all its required Skill
+					for(uint j=0;j<brick->RequiredOneOfSkills.size();j++)
+					{
+						CSkillValue		sv;
+						sv.Skill= brick->RequiredOneOfSkills[j].Skill;
+						sv.Value= brick->RequiredOneOfSkills[j].Value;
+						brickFormula.orV(sv);
+					}
+
 					for(uint j=0;j<brick->RequiredSkills.size();j++)
 					{
 						CSkillValue		sv;
 						sv.Skill= brick->RequiredSkills[j].Skill;
 						sv.Value= brick->RequiredSkills[j].Value;
-						brickFormula.orV(sv);
+						brickFormula.andV(sv);
 					}
 
 					// if not empty

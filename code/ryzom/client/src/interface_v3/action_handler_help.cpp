@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -1116,8 +1120,8 @@ class CHandlerHTMLSubmitForm : public IActionHandler
 			return;
 		}
 
-		sint32 x = pCaller->getEventX();
-		sint32 y = pCaller->getEventY();
+		sint32 x = pCaller ? pCaller->getEventX() : 0;
+		sint32 y = pCaller ? pCaller->getEventY() : 0;
 
 		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId(container);
 		{
@@ -1126,6 +1130,10 @@ class CHandlerHTMLSubmitForm : public IActionHandler
 			if (groupHtml)
 			{
 				groupHtml->submitForm(button, x, y);
+			}
+			else
+			{
+				nlwarning("CGroupHTML with id '%s' not found.", container.c_str());
 			}
 		}
 	}
@@ -2129,8 +2137,9 @@ static void	setupEnchantedItem(CSheetHelpSetup &setup, ucstring &itemText)
 		const CItemSheet	*pIS= ctrl->asItemSheet();
 		if(pIS && pIS->Family == ITEMFAMILY::CRYSTALLIZED_SPELL)
 			pPM->buildPhraseDesc(enchantInfo, itemInfo.Enchantment, 0, false, "uihelpPhraseCrystalSpellFormat");
-		else
+		else if(!pIS || pIS->Family != ITEMFAMILY::JEWELRY) {
 			pPM->buildPhraseDesc(enchantInfo, itemInfo.Enchantment, 0, false, "uihelpPhraseEnchantmentFormat");
+		}
 
 		// replace
 		strFindReplace(itemText, enchantTag, enchantInfo );
@@ -3053,7 +3062,7 @@ void getSabrinaBrickText(CSBrickSheet *pBR, ucstring &brickText)
 
 				// Display the part this slot build.
 				mpInfo+= "@{T4}";
-				mpInfo+= RM_FABER_TYPE::toLocalString(mpSlot.FaberTypeFilter);
+				mpInfo+= toString("%dx ", mpSlot.Quantity) + RM_FABER_TYPE::toLocalString(mpSlot.FaberTypeFilter);
 				mpInfo+= "\n";
 			}
 			// replace in brickText
@@ -3074,7 +3083,7 @@ void getSabrinaBrickText(CSBrickSheet *pBR, ucstring &brickText)
 
 				// Display the required item
 				mpInfo+= "@{T4}";
-				mpInfo+= STRING_MANAGER::CStringManagerClient::getItemLocalizedName(mpSlot.ItemRequired);
+				mpInfo+= toString("%dx ", mpSlot.Quantity) + STRING_MANAGER::CStringManagerClient::getItemLocalizedName(mpSlot.ItemRequired);
 				mpInfo+= "\n";
 			}
 			// replace in brickText

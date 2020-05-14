@@ -27,13 +27,12 @@ using namespace std;
 namespace NLMISC
 {
 
-CStringMapper	CStringMapper::_GlobalMapper;
-
+CStringMapper CStringMapper::s_GlobalMapper;
 
 // ****************************************************************************
 CStringMapper::CStringMapper()
 {
-	_EmptyId = new string();
+	m_EmptyId = new string();
 }
 
 // ****************************************************************************
@@ -46,39 +45,54 @@ CStringMapper *CStringMapper::createLocalMapper()
 TStringId CStringMapper::localMap(const std::string &str)
 {
 	if (str.empty())
-		return 0;
+		return NULL;
 
-	CAutoFastMutex	automutex(&_Mutex);
+	CAutoFastMutex autoMutex(&m_Mutex);
 
-	string *pStr = new string;
-	*pStr = str;
+	TStringTable::const_iterator it = m_StringTable.find((const std::string *)&str);
 
-	std::set<string*,CCharComp>::iterator it = _StringTable.find(pStr);
-
-	if (it == _StringTable.end())
+	if (it == m_StringTable.end())
 	{
-		_StringTable.insert(pStr);
+		string *pStr = new string(str);
+		m_StringTable.insert(pStr);
+		return pStr;
 	}
-	else
-	{
-		delete pStr;
-		pStr = (*it);
-	}
-	return (TStringId)pStr;
+	return (TStringId)(*it);
 }
+
+#ifdef NL_CPP14
+// ****************************************************************************
+TStringId CStringMapper::localMap(const char *str)
+{
+	if (!str[0])
+		return NULL;
+
+	CAutoFastMutex autoMutex(&m_Mutex);
+
+	TStringTable::const_iterator it = m_StringTable.find(str);
+
+	if (it == m_StringTable.end())
+	{
+		string *pStr = new string(str);
+		m_StringTable.insert(pStr);
+		return pStr;
+	}
+	return (TStringId)(*it);
+}
+#endif
 
 // ***************************************************************************
 void CStringMapper::localSerialString(NLMISC::IStream &f, TStringId &id)
 {
-	std::string	str;
-	if(f.isReading())
+	std::string str;
+	if (f.isReading())
 	{
 		f.serial(str);
-		id= localMap(str);
+		id = localMap(str);
 	}
 	else
 	{
-		str= localUnmap(id);
+		str = localUnmap(id);
 		f.serial(str);
 	}
 }
@@ -86,17 +100,16 @@ void CStringMapper::localSerialString(NLMISC::IStream &f, TStringId &id)
 // ****************************************************************************
 void CStringMapper::localClear()
 {
-	CAutoFastMutex	automutex(&_Mutex);
+	CAutoFastMutex autoMutex(&m_Mutex);
 
-	std::set<string*,CCharComp>::iterator it = _StringTable.begin();
-	while (it != _StringTable.end())
+	TStringTable::iterator it = m_StringTable.begin();
+	while (it != m_StringTable.end())
 	{
-		string *ptrTmp = (*it);
+		const std::string *ptrTmp = (*it);
 		delete ptrTmp;
 		it++;
 	}
-	_StringTable.clear();
-	delete _EmptyId;
+	m_StringTable.clear();
 }
 
 // ****************************************************************************

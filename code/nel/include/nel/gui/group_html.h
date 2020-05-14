@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -212,7 +215,7 @@ namespace NLGUI
 		// Browser home
 		std::string		Home;
 		// Get Home URL
-		virtual std::string	home();
+		virtual std::string	home() const;
 
 		// Undo browse: Browse the precedent url browsed. no op if none
 		void browseUndo ();
@@ -356,6 +359,10 @@ namespace NLGUI
 
 		// Delete page content and prepare next page
 		void removeContent ();
+
+		// Counter to number html elements without id attribute
+		uint32			getNextAutoIdSeq() { return _AutoIdSeq++; }
+		uint32			_AutoIdSeq;
 
 		// Current URL for relative links in page
 		std::string		_URL;
@@ -676,6 +683,8 @@ namespace NLGUI
 			std::vector<CEntry>	Entries;
 		};
 		std::vector<CForm>	_Forms;
+		// if <FORM> element has been closed or not
+		bool				_FormOpen;
 
 		// submit buttons added to from
 		struct SFormSubmitButton
@@ -946,6 +955,7 @@ namespace NLGUI
 		//void htmlEM(const CHtmlElement &elm);
 		void htmlFONT(const CHtmlElement &elm);
 		void htmlFORM(const CHtmlElement &elm);
+		void htmlFORMend(const CHtmlElement &elm);
 		void htmlH(const CHtmlElement &elm);
 		void htmlHend(const CHtmlElement &elm);
 		void htmlHEAD(const CHtmlElement &elm);

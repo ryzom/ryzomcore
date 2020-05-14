@@ -1,5 +1,11 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
+// Copyright (C) 2010-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2011-2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -41,6 +47,10 @@
 #include "nel/3d/u_scene.h"
 // Game Share.
 #include "game_share/time_weather_season/time_and_season.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #ifdef NL_OS_MAC
 #include "app_bundle_utils.h"
@@ -306,6 +316,9 @@ CClientConfig::CClientConfig()
 	InterfaceScale_step	= 0.05;
 	BilinearUI			= true;
 
+	WindowSnapInvert	= false;
+	WindowSnapDistance	= 10;
+
 	VREnable			= false;
 	VRDisplayDevice		= "Auto";
 	VRDisplayDeviceId	= "";
@@ -313,26 +326,17 @@ CClientConfig::CClientConfig()
 	Local				= false;					// Default is Net Mode.
 	FSHost				= "";						// Default Host.
 
-#if 1 // Yubo hack
-	// The order is important here, because in a layer, global texture are rendered through this order
-	TexturesInterface.push_back("texture_interfaces_v3");
-	// DXTC contain all items and bricks bitmaps, they must come after standard texture
-	TexturesInterface.push_back("new_texture_interfaces_dxtc");
-	// Added icons by Yubo's Team 2009
-	TexturesInterface.push_back("texture_extra");
-#else
 	TexturesInterface.push_back("texture_interfaces_v3");
 	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc");
-#endif
 
 	TexturesOutGameInterface.push_back("texture_interfaces_v3_outgame_ui");
 
 	TexturesLoginInterface.push_back("texture_interfaces_v3_login");
 
 	DisplayAccountButtons = true;
-	CreateAccountURL	= "https://account.ryzom.com/signup/from_client.php";
-	EditAccountURL		= "https://account.ryzom.com/payment_profile/index.php";
-	ForgetPwdURL		= "https://account.ryzom.com/payment_profile/lost_secure_password.php";
+	CreateAccountURL	= RYZOM_CLIENT_CREATE_ACCOUNT_URL;	// "https://open.ryzom.dev/ams/";
+	EditAccountURL		= RYZOM_CLIENT_EDIT_ACCOUNT_URL;	// "https://open.ryzom.dev/ams/";
+	ForgetPwdURL		= RYZOM_CLIENT_FORGET_PASSWORD_URL;	// "https://open.ryzom.dev/ams/";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
 	EyesHeight			= 1.5f;						// Default User Eyes Height.
@@ -428,15 +432,15 @@ CClientConfig::CClientConfig()
 	PatchletUrl.clear();
 	PatchVersion.clear();
 
-	WebIgMainDomain = "atys.ryzom.com";
-	WebIgTrustedDomains.push_back(WebIgMainDomain);
+	WebIgMainDomain = RYZOM_WEBIG_MAIN_URL;						// https://open.ryzom.dev/"
+	WebIgTrustedDomains.push_back(RYZOM_WEBIG_TRUSTED_DOMAIN);	// open.ryzom.dev
 	WebIgNotifInterval = 10; // time in minutes
 
 	CurlMaxConnections = 5;
 	CurlCABundle.clear();
 
-	RingReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes_ring/index.php";
-	ReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes/index.php";
+	RingReleaseNotePath = WebIgMainDomain + "/app_releasenotes/index.php";
+	ReleaseNotePath = WebIgMainDomain + "/app_releasenotes/index.php";
 
 
 	///////////////
@@ -452,7 +456,7 @@ CClientConfig::CClientConfig()
 	SoundOn				= true;						// Default is with sound.
 	DriverSound			= SoundDrvAuto;
 	SoundForceSoftwareBuffer = true;
-	SoundOutGameMusic	= "Main Menu Loop.ogg";
+	SoundOutGameMusic	= "main menu loop.ogg";
 	SoundSFXVolume		= 1.f;
 	SoundGameMusicVolume	= 1.f;
 	SoundTPFade			= 500;
@@ -467,6 +471,8 @@ CClientConfig::CClientConfig()
 
 	ColorShout			= CRGBA(150,0,0,255);		// Default Shout color.
 	ColorTalk			= CRGBA(255,255,255,255);	// Default Talk color.
+
+	StreamedPackagePath = "stream";
 
 	// MP3 player
 	MediaPlayerDirectory	= "music";
@@ -854,6 +860,8 @@ void CClientConfig::setValues()
 	READ_FLOAT_FV(InterfaceScale_step);
 	clamp(ClientCfg.InterfaceScale, ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max);
 	READ_BOOL_FV(BilinearUI);
+	READ_BOOL_FV(WindowSnapInvert);
+	READ_INT_FV(WindowSnapDistance);
 	// 3D Driver
 	varPtr = ClientCfg.ConfigFile.getVarPtr ("Driver3D");
 	if (varPtr)
@@ -1093,6 +1101,9 @@ void CClientConfig::setValues()
 	///////////
 	// WEBIG //
 	READ_STRING_FV(WebIgMainDomain);
+	if (ClientCfg.WebIgMainDomain.find("http://") == std::string::npos
+		|| ClientCfg.WebIgMainDomain.find("https://") == std::string::npos)
+		ClientCfg.WebIgMainDomain = "http://" + ClientCfg.WebIgMainDomain;
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
 	READ_INT_FV(WebIgNotifInterval);
 	READ_INT_FV(CurlMaxConnections);
@@ -1106,7 +1117,7 @@ void CClientConfig::setValues()
 		if (ClientCfg.getDefaultConfigLocation(defaultConfigFileName))
 			ClientCfg.CurlCABundle = CFile::getPath(defaultConfigFileName)+ClientCfg.CurlCABundle.substr(1);
 	}
-		
+
 	///////////////
 	// ANIMATION //
 	// AnimatedAngleThreshold
@@ -1281,17 +1292,24 @@ void CClientConfig::setValues()
 
 	//////////
 	// MISC //
+
 	// Pre Data Path.
 	READ_STRINGVECTOR_FV(PreDataPath);
 
 	// Data Path.
 	READ_STRINGVECTOR_FV(DataPath);
 
-	// List of files that trigger R2ED reload when touched
-	READ_STRINGVECTOR_FV(R2EDReloadFiles);
-
 	// Data Path no recurse.
 	READ_STRINGVECTOR_FV(DataPathNoRecurse);
+
+	// Streamed package path
+	READ_STRING_FV(StreamedPackagePath);
+
+	// Streamed package hosts
+	READ_STRINGVECTOR_FV(StreamedPackageHosts);
+
+	// List of files that trigger R2ED reload when touched
+	READ_STRINGVECTOR_FV(R2EDReloadFiles);
 
 	// Update packed sheet Path
 	READ_STRINGVECTOR_FV(UpdatePackedSheetPath);
@@ -1413,35 +1431,27 @@ void CClientConfig::setValues()
 
 #ifndef RZ_NO_CLIENT
 	// printf commands in loading screens
-	ClientCfg.PrintfCommands.clear();
-	ClientCfg.PrintfCommandsFreeTrial.clear();
-	std::vector< std::string > printfCommands(2);
-	printfCommands[0] = "PrintfCommands";
-	printfCommands[1] = "PrintfCommandsFreeTrial";
-	for(uint p=0; p<2; p++)
+	ClientCfg.loadingTexts.clear();
+	CConfigFile::CVar *pc = ClientCfg.ConfigFile.getVarPtr("loadingTexts");
+	if (pc)
 	{
-		CConfigFile::CVar *pc = ClientCfg.ConfigFile.getVarPtr(printfCommands[p].c_str());
-		if (pc)
+		if( pc->size()%5 == 0 && pc->size() >= 5)
 		{
-			if( pc->size()%5 == 0 && pc->size() >= 5)
+			for (uint i = 0; i < pc->size(); i+=5)
 			{
-				for (uint i = 0; i < pc->size(); i+=5)
-				{
-					SPrintfCommand pcom;
-					pcom.X = pc->asInt(i);
-					pcom.Y = pc->asInt(i+1);
-					pcom.Color = CRGBA::stringToRGBA( pc->asString(i+2).c_str() );
-					pcom.FontSize = pc->asInt(i+3);
-					pcom.Text = pc->asString(i+4);
+				SPrintfCommand pcom;
+				pcom.X = pc->asInt(i);
+				pcom.Y = pc->asInt(i+1);
+				pcom.Color = CRGBA::stringToRGBA( pc->asString(i+2).c_str() );
+				pcom.FontSize = pc->asInt(i+3);
+				pcom.Text = pc->asString(i+4);
 
-					if(p==0) ClientCfg.PrintfCommands.push_back( pcom );
-					else ClientCfg.PrintfCommandsFreeTrial.push_back( pcom );
-				}
+				ClientCfg.loadingTexts.push_back( pcom );
 			}
-			else
-			{
-				cfgWarning(("Missing or too many parameters in " + printfCommands[p]).c_str());
-			}
+		}
+		else
+		{
+			cfgWarning("Missing or too many parameters in loadingTexts");
 		}
 	}
 #endif

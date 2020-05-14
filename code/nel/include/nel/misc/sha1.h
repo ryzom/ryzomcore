@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -22,6 +25,8 @@
 #include "stream.h"
 
 #include <string>
+
+namespace NLMISC {
 
 struct CHashKey
 {
@@ -108,5 +113,7 @@ CHashKey getSHA1(const uint8 *buffer, uint32 size);
 
 // This function get a buffer and key with size and returns his HMAC-SHA1 hash key
 CHashKey getHMacSHA1(const uint8 *text, uint32 text_len, const uint8 *key, uint32 key_len);
+
+}
 
 #endif // NL_SHA1_H

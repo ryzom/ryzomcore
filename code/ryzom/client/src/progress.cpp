@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -47,6 +51,7 @@ extern NL3D::UMaterial LoadingMaterialFull;
 extern std::vector<UTextureFile*> LogoBitmaps;
 extern uint TipsOfTheDayIndex;
 extern ucstring			TipsOfTheDay;
+extern string			NewsAtProgress;
 extern bool					UseEscapeDuringLoading;
 
 CProgress::CProgress ()
@@ -366,23 +371,27 @@ void CProgress::internalProgress (float value)
 				// apply text commands
 				if( ApplyTextCommands )
 				{
-					std::vector<CClientConfig::SPrintfCommand> printfCommands = ClientCfg.PrintfCommands;
-					if(FreeTrial) printfCommands = ClientCfg.PrintfCommandsFreeTrial;
+					std::vector<CClientConfig::SPrintfCommand> loadingTexts = ClientCfg.loadingTexts;
 
-					if( !printfCommands.empty() )
+					if( !loadingTexts.empty() )
 					{
 						TextContext->setHotSpot(UTextContext::MiddleBottom);
 
 						vector<CClientConfig::SPrintfCommand>::iterator itpc;
-						for( itpc = printfCommands.begin(); itpc != printfCommands.end(); ++itpc )
+						for( itpc = loadingTexts.begin(); itpc != loadingTexts.end(); ++itpc )
 						{
 							float x = 0.5f;//((*itpc).X / 1024.f);
 							float y = ((*itpc).Y / 768.f);
 							TextContext->setColor( (*itpc).Color );
-							TextContext->setFontSize( (uint)(16.f * fontFactor));
+							TextContext->setFontSize( (uint)((*itpc).FontSize * fontFactor));
 
 							// build the ucstr(s)
-							ucstring ucstr = CI18N::get((*itpc).Text);
+							string text = (*itpc).Text;
+							ucstring ucstr;
+							if (text == "NEWS")
+								ucstr.fromUtf8(NewsAtProgress);
+							else
+								ucstr = CI18N::get(text);
 							vector<ucstring> vucstr;
 							ucstring sep("\n");
 							splitUCString(ucstr,sep,vucstr);

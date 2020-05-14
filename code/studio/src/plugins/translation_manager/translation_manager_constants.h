@@ -1,5 +1,9 @@
 // Translation Manager Plugin - OVQT Plugin <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2011  Emanuel Costea <cemycc@gmail.com>
+// Copyright (C) 2011  Emanuel COSTEA <cemycc@gmail.com>
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2011  Dzmitry KAMIAHIN (dnk-88) <dnk-88@tut.by>
+// Copyright (C) 2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as

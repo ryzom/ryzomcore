@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -779,6 +782,94 @@ bool fromHexa(const char hexa, uint8 &b)
 	}
 
 	return false;
+}
+
+static std::vector<char> makeCharLookupTable(const std::string &chars)
+{
+	std::vector<char> out(256, -1);
+	for(uint i = 0; i< chars.size(); i++)
+		out[chars[i]] = i;
+
+	return out;
+}
+
+std::string encodeURIComponent(const std::string &in)
+{
+	static const char hexLookup[] = "0123456789ABCDEF";
+	static const std::vector<char> notEscaped(makeCharLookupTable(
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		"abcdefghijklmnopqrstuvwxyz"
+		"0123456789"
+		"-_.!~*'()"
+	));
+
+	if (in.empty())
+		return std::string();
+
+	std::string out;
+
+	size_t inSize = in.size();
+	size_t outSize = in.size();
+
+	// resize to worst case for smaller strings,
+	// give some replacements for free for larger strings
+	if (in.size() < 100)
+		out.reserve(in.size() * 3);
+	else
+		out.reserve(in.size() + 200);
+
+	for(size_t i = 0; i < inSize; i++)
+	{
+		char ch = in[i];
+		if (notEscaped[(uint8)ch] == -1)
+		{
+			out += '%';
+			out += hexLookup[(ch>>4)& 0x0F];
+			out += hexLookup[ch & 0x0F];
+			outSize += 2;
+		}
+		else
+		{
+			out += ch;
+		}
+	}
+	// resize back to correct size
+	out.resize(outSize);
+
+	return out;
+}
+
+std::string decodeURIComponent(const std::string &in)
+{
+	if (in.find("%") == std::string::npos)
+		return in;
+
+	std::string out;
+	out.resize(in.size());
+
+	size_t outIndex = 0, inSize = in.size();
+	for(size_t i = 0; i < inSize; i++, outIndex++)
+	{
+		if (in[i] == '%' && (i+2 < inSize))
+		{
+			uint8 a;
+			uint8 b;
+			if (fromHexa(in[i+1], a) && fromHexa(in[i+2], b))
+			{
+				out[outIndex] = (a << 4) | b;
+				i += 2;
+			} else {
+				// not hex chars
+				out[outIndex] = in[i];
+			}
+		}
+		else
+		{
+			out[outIndex] = in[i];
+		}
+	}
+	out.resize(outIndex);
+	return out;
 }
 
 std::string formatThousands(const std::string& s)

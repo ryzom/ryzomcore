@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -2043,7 +2046,7 @@ void CBitmap::resamplePicture32 (const NLMISC::CRGBA *pSrc, NLMISC::CRGBA *pDest
 								 sint32 nDestWidth, sint32 nDestHeight)
 {
 	//logResample("RP32: 0 pSrc=%p pDest=%p, Src=%d x %d Dest=%d x %d", pSrc, pDest, nSrcWidth, nSrcHeight, nDestWidth, nDestHeight);
-	if ((nSrcWidth<=0)||(nSrcHeight<=0)||(nDestHeight<=0)||(nDestHeight<=0))
+	if ((nSrcWidth<=0)||(nSrcHeight<=0)||(nDestWidth<=0)||(nDestHeight<=0))
 		return;
 
 	// If we're reducing it by 2, call the fast resample
@@ -2265,7 +2268,7 @@ void CBitmap::resamplePicture8 (const uint8 *pSrc, uint8 *pDest,
 								 sint32 nDestWidth, sint32 nDestHeight)
 {
 	//logResample("RP8: 0 pSrc=%p pDest=%p, Src=%d x %d Dest=%d x %d", pSrc, pDest, nSrcWidth, nSrcHeight, nDestWidth, nDestHeight);
-	if ((nSrcWidth<=0)||(nSrcHeight<=0)||(nDestHeight<=0)||(nDestHeight<=0))
+	if ((nSrcWidth<=0)||(nSrcHeight<=0)||(nDestWidth<=0)||(nDestHeight<=0))
 		return;
 
 	// If we're reducing it by 2, call the fast resample
@@ -3266,77 +3269,79 @@ CRGBAF CBitmap::getColor (float x, float y) const
 
 	uint32 i;
 
+	bool isValid = true;
 	for (i = 0; i < 4; ++i)
 	{
-		nlassert (nX[i] >= 0);
-		nlassert (nY[i] >= 0 );
-		nlassert (nX[i] < nWidth);
-		nlassert (nY[i] < nHeight);
+		if (nX[i] < 0 || nY[i] < 0 || nX[i] >= nWidth || nY[i] >= nHeight)
+			isValid = false;
 	}
 
-	// Decimal part of (x,y)
-	x = x - (float)nX[0];
-	y = y - (float)nY[0];
-
-	switch (this->PixelFormat)
+	if (isValid)
 	{
-		case RGBA:
-		case DXTC1:
-		case DXTC1Alpha:
-		case DXTC3:
-		case DXTC5:
+		// Decimal part of (x,y)
+		x = x - (float)nX[0];
+		y = y - (float)nY[0];
+
+		switch (this->PixelFormat)
 		{
-			CRGBAF finalVal;
-			CRGBA val[4];
-
-			if (this->PixelFormat == RGBA)
+			case RGBA:
+			case DXTC1:
+			case DXTC1Alpha:
+			case DXTC3:
+			case DXTC5:
 			{
-				for (i = 0; i < 4; ++i)
+				CRGBAF finalVal;
+				CRGBA val[4];
+
+				if (this->PixelFormat == RGBA)
 				{
-					val[i] = CRGBA (rBitmap[(nX[i]+nY[i]*nWidth)*4+0],
-									rBitmap[(nX[i]+nY[i]*nWidth)*4+1],
-									rBitmap[(nX[i]+nY[i]*nWidth)*4+2],
-									rBitmap[(nX[i]+nY[i]*nWidth)*4+3]);
+					for (i = 0; i < 4; ++i)
+					{
+						val[i] = CRGBA (rBitmap[(nX[i]+nY[i]*nWidth)*4+0],
+										rBitmap[(nX[i]+nY[i]*nWidth)*4+1],
+										rBitmap[(nX[i]+nY[i]*nWidth)*4+2],
+										rBitmap[(nX[i]+nY[i]*nWidth)*4+3]);
+					}
 				}
+				else
+				{
+					// slower version : get from DXT
+					for (i = 0; i < 4; ++i)
+					{
+						val[i] = getPixelColor(nX[i], nY[i]);
+					}
+				}
+
+				finalVal.R = getColorInterp (x, y, val[0].R, val[1].R, val[2].R, val[3].R);
+				finalVal.G = getColorInterp (x, y, val[0].G, val[1].G, val[2].G, val[3].G);
+				finalVal.B = getColorInterp (x, y, val[0].B, val[1].B, val[2].B, val[3].B);
+				finalVal.A = getColorInterp (x, y, val[0].A, val[1].A, val[2].A, val[3].A);
+				finalVal /= 255.f;
+
+				return finalVal;
 			}
-			else
+			break;
+			case Alpha:
+			case Luminance:
 			{
-				// slower version : get from DXT
+
+				float finalVal;
+				float val[4];
+
 				for (i = 0; i < 4; ++i)
-				{
-					val[i] = getPixelColor(nX[i], nY[i]);
-				}
+					val[i] = rBitmap[(nX[i]+nY[i]*nWidth)];
+
+				finalVal = getColorInterp (x, y, val[0], val[1], val[2], val[3]);
+				finalVal /= 255.f;
+
+				if (this->PixelFormat == Alpha)
+					return CRGBAF (1.f, 1.f, 1.f, finalVal);
+				else // Luminance
+					return CRGBAF (finalVal, finalVal, finalVal, 1.f);
 			}
-
-			finalVal.R = getColorInterp (x, y, val[0].R, val[1].R, val[2].R, val[3].R);
-			finalVal.G = getColorInterp (x, y, val[0].G, val[1].G, val[2].G, val[3].G);
-			finalVal.B = getColorInterp (x, y, val[0].B, val[1].B, val[2].B, val[3].B);
-			finalVal.A = getColorInterp (x, y, val[0].A, val[1].A, val[2].A, val[3].A);
-			finalVal /= 255.f;
-
-			return finalVal;
+			break;
+			default: break;
 		}
-		break;
-		case Alpha:
-		case Luminance:
-		{
-
-			float finalVal;
-			float val[4];
-
-			for (i = 0; i < 4; ++i)
-				val[i] = rBitmap[(nX[i]+nY[i]*nWidth)];
-
-			finalVal = getColorInterp (x, y, val[0], val[1], val[2], val[3]);
-			finalVal /= 255.f;
-
-			if (this->PixelFormat == Alpha)
-				return CRGBAF (1.f, 1.f, 1.f, finalVal);
-			else // Luminance
-				return CRGBAF (finalVal, finalVal, finalVal, 1.f);
-		}
-		break;
-		default: break;
 	}
 
 	return CRGBAF (0.0f, 0.0f, 0.0f, 0.0f);
@@ -3623,7 +3628,7 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 						{
 							uint8 imagePrecision = 0; // sample precision
 							uint32 imageSize = 0; // width and height
-							f.serial(imagePrecision); 
+							f.serial(imagePrecision);
 							f.serial(imageSize);
 							NLMISC_BSWAP32(imageSize);
 

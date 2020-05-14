@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -271,7 +271,6 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	string IconText;
 	if(!item.getValueByName (IconText, "3d.text overlay"))
 		debug("key '3d.text overlay' not found.");
-	IconText = toLower(IconText);
 	IdIconText = ClientSheetsStrings.add(IconText);
 
 	// See if this item can be hiden when equipped

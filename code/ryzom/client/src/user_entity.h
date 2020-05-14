@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -95,6 +98,7 @@ public:
 		Outpost,
 		BuildTotem,
 		MissionRing,
+		OpenArkUrl,
 	};
 
 public:
@@ -490,6 +494,16 @@ public:
 		return _LoginName;
 	}
 
+	CVector getCameraMoves()
+	{
+		return _CameraMoves;
+	}
+
+	void setCameraMoves(CVector moves)
+	{
+		_CameraMoves = moves;
+	}
+
 protected:
 	class CSpeedFactor : public NLMISC::ICDBNode::IPropertyObserver
 	{
@@ -601,6 +615,8 @@ protected:
 	uint32						_MoveToMissionId;		 // Used for both mission option and mission ring
 	/// Time in MS when the User started beiing in collision with anything that avoid him to do an Action (and still is).
 	sint64						_MoveToColStartTime;
+
+	CVector						_CameraMoves;
 
 
 	/// CSkill points observer

@@ -66,19 +66,17 @@ class CCallbackClientAdaptor : public CNelCallbackClientAdaptor
 
 	virtual void send(const NLNET::CMessage &buffer, NLNET::TSockId hostid = NLNET::InvalidSockId, bool log = true)
 	{
-		CAutoMutex<CUnfairMutex> mutex1(_Mutex);
+		CAutoMutex<CUnfairMutex> mutex(_Mutex);
 
 		if (!_PassThrue)
 		{
 			// queue the message for later sending.
 			nldebug("SB: Pushing a buffer into SendQueue (from %u elts)", _SendQueue.size());
-			CAutoMutex<CUnfairMutex> mutex(_Mutex);
 			_SendQueue.push(buffer);
 		}
 		else
 		{
 			// protect socket because update() can be called in the main thread while send() can be called with passthru=true in the session browser thread (by authenticate() for example)
-			CAutoMutex<CUnfairMutex> mutex(_Mutex);
 			_CallbackClient.send(buffer, hostid, log);
 		}
 	}
