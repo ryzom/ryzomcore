@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -136,7 +133,7 @@ public:
 				if (pCSDst->isShortCut())
 					pPM->CompositionPhraseMemoryLineDest= pPM->getSelectedMemoryLineDB();
 				else
-					pPM->CompositionPhraseMemoryLineDest= 0;
+				        pPM->CompositionPhraseMemoryLineDest= pPM->getSelectedMemoryAltLineDB();
 
 				pPM->CompositionPhraseMemorySlotDest= pCSDst->getIndexInDB();
 			}
@@ -536,10 +533,8 @@ public:
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 		// Launch the modal to select the faber plan
-		extern void		fillFaberPlanSelection(const std::string &brickDB, uint maxSelection, TOOL_TYPE::TCraftingToolType toolType);
-		// from sphrase_manager.cpp
-		extern TOOL_TYPE::TCraftingToolType getRightHandCraftToolType();
-		fillFaberPlanSelection(CDBGroupBuildPhrase::BrickSelectionDB, CDBGroupBuildPhrase::MaxSelection, getRightHandCraftToolType());
+		extern void		fillFaberPlanSelection(const std::string &brickDB, uint maxSelection);
+		fillFaberPlanSelection(CDBGroupBuildPhrase::BrickSelectionDB, CDBGroupBuildPhrase::MaxSelection);
 
 		// setup the validation
 		CHandlerPhraseValidateBrick::BuildPhraseGroup= NULL;
@@ -750,8 +745,8 @@ class CHandlerMemorizePhraseOrMacro : public IActionHandler
 {
 public:
 	virtual void execute (CCtrlBase *pCaller, const string &Params);
-	void memorizePhraseOrMacro(uint dstMemoryIndex, bool isMacro, sint32 phraseId, sint32 macroId);
-	void memorizePhraseSheet(uint dstMemoryIndex, uint32 sheetId);
+        void memorizePhraseOrMacro(sint32 memoryLine, uint dstMemoryIndex, bool isMacro, sint32 phraseId, sint32 macroId);
+        void memorizePhraseSheet(sint32 memoryLine, uint dstMemoryIndex, uint32 sheetId);
 };
 REGISTER_ACTION_HANDLER( CHandlerMemorizePhraseOrMacro, "memorize_phrase_or_macro");
 
@@ -771,7 +766,11 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 	// The dest must be a memory or a macro memory
 	if (!pCSDst->isSPhraseIdMemory() && !pCSDst->isMacroMemory())	return;
 	// get the memory line and memory index
-	sint32	dstMemoryLine= pPM->getSelectedMemoryLineDB();
+	sint32	dstMemoryLine;
+	if (pCSDst->isShortCut())
+	        dstMemoryLine = pPM->getSelectedMemoryLineDB();
+	else
+	        dstMemoryLine = pPM->getSelectedMemoryAltLineDB();
 	uint	dstMemoryIndex= pCSDst->getIndexInDB();
 
 	bool	srcIsMacro;
@@ -806,7 +805,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 			pPM->sendLearnToServer(newPhraseId);
 
 			// memorize the new phrase
-			memorizePhraseOrMacro(dstMemoryIndex, srcIsMacro, newPhraseId, srcMacroId);
+			memorizePhraseOrMacro(dstMemoryLine, dstMemoryIndex, srcIsMacro, newPhraseId, srcMacroId);
 		}
 	}
 	else
@@ -833,7 +832,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 			if(pCSSrc->isSPhrase())
 			{
 				// learn and memorize this phrase
-				memorizePhraseSheet(dstMemoryIndex, pCSSrc->getSheetId());
+			        memorizePhraseSheet(dstMemoryLine, dstMemoryIndex, pCSSrc->getSheetId());
 			}
 			else
 			{
@@ -842,7 +841,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 					pPM->fullDeletePhraseIfLast(dstMemoryLine, dstMemoryIndex);
 
 				// memorize the phrase or macro
-				memorizePhraseOrMacro(dstMemoryIndex, srcIsMacro, srcPhraseId, srcMacroId);
+				memorizePhraseOrMacro(dstMemoryLine, dstMemoryIndex, srcIsMacro, srcPhraseId, srcMacroId);
 			}
 		}
 		// Else the src is a memory too
@@ -868,7 +867,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 					pPM->sendLearnToServer(newPhraseId);
 
 					// memorize the new phrase
-					memorizePhraseOrMacro(dstMemoryIndex, srcIsMacro, newPhraseId, srcMacroId);
+					memorizePhraseOrMacro(dstMemoryLine, dstMemoryIndex, srcIsMacro, newPhraseId, srcMacroId);
 				}
 				else
 				{
@@ -876,7 +875,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 					pPM->fullDeletePhraseIfLast(dstMemoryLine, dstMemoryIndex);
 
 					// memorize the macro (still a reference)
-					memorizePhraseOrMacro(dstMemoryIndex, srcIsMacro, srcPhraseId, srcMacroId);
+					memorizePhraseOrMacro(dstMemoryLine, dstMemoryIndex, srcIsMacro, srcPhraseId, srcMacroId);
 				}
 			}
 			// else this is a swap!
@@ -887,17 +886,23 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 				{
 					// get the memory index for src
 					uint	srcMemoryIndex= pCSSrc->getIndexInDB();
-
+					// get the memory line for src
+					sint32 srcMemoryLine;
+					if (pCSSrc->isShortCut())
+					        srcMemoryLine = pPM->getSelectedMemoryLineDB();
+					else
+					        srcMemoryLine = pPM->getSelectedMemoryAltLineDB();
+					
 					// memorize dst into src
-					memorizePhraseOrMacro(srcMemoryIndex, dstIsMacro, dstPhraseId, dstMacroId);
+					memorizePhraseOrMacro(srcMemoryLine, srcMemoryIndex, dstIsMacro, dstPhraseId, dstMacroId);
 					// memorize src into dst
-					memorizePhraseOrMacro(dstMemoryIndex, srcIsMacro, srcPhraseId, srcMacroId);
+					memorizePhraseOrMacro(dstMemoryLine, dstMemoryIndex, srcIsMacro, srcPhraseId, srcMacroId);
 				}
 				// else, it's a move
 				else
 				{
 					// copy
-					memorizePhraseOrMacro(dstMemoryIndex, srcIsMacro, srcPhraseId, srcMacroId);
+				        memorizePhraseOrMacro(dstMemoryLine, dstMemoryIndex, srcIsMacro, srcPhraseId, srcMacroId);
 
 					// forget src (after shorctut change!)
 					CAHManager::getInstance()->runActionHandler("forget_phrase_or_macro", pCSSrc);
@@ -909,14 +914,13 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 
 
 // memorize a spell
-void CHandlerMemorizePhraseOrMacro::memorizePhraseOrMacro(uint memoryIndex, bool isMacro, sint32 phraseId, sint32 macroId)
+void CHandlerMemorizePhraseOrMacro::memorizePhraseOrMacro(sint32 memoryLine, uint memoryIndex, bool isMacro, sint32 phraseId, sint32 macroId)
 {
 	CSPhraseManager		*pPM= CSPhraseManager::getInstance();
 
-	sint32	memoryLine= pPM->getSelectedMemoryLineDB();
-	if(memoryLine<0)
-		return;
-
+	if (memoryLine<0)
+	        return;
+	
 	if(isMacro)
 	{
 		pPM->memorizeMacro(memoryLine, memoryIndex, macroId);
@@ -931,11 +935,10 @@ void CHandlerMemorizePhraseOrMacro::memorizePhraseOrMacro(uint memoryIndex, bool
 }
 
 // memorize a default spell
-void CHandlerMemorizePhraseOrMacro::memorizePhraseSheet(uint memoryIndex, uint32 sheetId)
+void CHandlerMemorizePhraseOrMacro::memorizePhraseSheet(sint32 memoryLine, uint memoryIndex, uint32 sheetId)
 {
 	CSPhraseManager		*pPM= CSPhraseManager::getInstance();
 
-	sint32	memoryLine= pPM->getSelectedMemoryLineDB();
 	if(memoryLine<0)
 		return;
 
@@ -989,7 +992,11 @@ public:
 			return;
 
 		// Ok, the user try to forget a phrase slot.
-		sint32	memoryLine= pPM->getSelectedMemoryLineDB();
+		sint32	memoryLine;
+		if (pCSDst->isShortCut())
+		        memoryLine = pPM->getSelectedMemoryLineDB();
+		else
+		        memoryLine = pPM->getSelectedMemoryAltLineDB();
 		if(memoryLine<0)
 			return;
 
@@ -1026,6 +1033,9 @@ public:
 		if (!pCSDst->isSPhraseIdMemory() && !pCSDst->isMacroMemory())
 			return;
 
+		// is alternative action bar
+		bool isMain = pCSDst->isShortCut();
+		
 		// get the memory index
 		uint memoryIndex = pCSDst->getIndexInDB();
 
@@ -1034,7 +1044,9 @@ public:
 
 		// build params string
 		string sParams;
-		sParams.append("memoryIndex=");
+		sParams.append("isMain=");
+		sParams.append(toString(isMain));
+		sParams.append("|memoryIndex=");
 		sParams.append(toString(memoryIndex));
 		sParams.append("|isMacro=");
 		sParams.append(toString(isMacro));
@@ -1066,11 +1078,10 @@ public:
 		// Ok, the user try to forget a phrase slot
 		CSPhraseManager	*pPM = CSPhraseManager::getInstance();
 
-		sint32 memoryLine = pPM->getSelectedMemoryLineDB();
-		if (memoryLine<0)
-			return;
-
+		
 		// get params
+		bool isMain;
+		fromString(getParam(Params, "isMain"), isMain);
 		uint memoryIndex;
 		fromString(getParam(Params, "memoryIndex"), memoryIndex);
 		bool isMacro;
@@ -1078,6 +1089,14 @@ public:
 		sint32 phraseId;
 		fromString(getParam(Params, "phraseId"),phraseId);
 
+		sint32 memoryLine;
+		if (isMain)
+		        memoryLine = pPM->getSelectedMemoryLineDB();
+		else
+		        memoryLine = pPM->getSelectedMemoryAltLineDB();
+		if (memoryLine<0)
+		        return;
+		
 		if (isMacro)
 		{
 			pPM->forgetMacro(memoryLine, memoryIndex);
@@ -1513,7 +1532,7 @@ public:
 		if (pCSDst->isShortCut())
 			memoryLine = pPM->getSelectedMemoryLineDB();
 		else
-			memoryLine = 0;
+		        memoryLine = pPM->getSelectedMemoryAltLineDB();
 		if(memoryLine<0)
 			return;
 
