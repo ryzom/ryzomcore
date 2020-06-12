@@ -147,6 +147,7 @@ extern bool CharNameValidArrived;
 extern bool CharNameValid;
 bool IsInRingSession = false;
 TSessionId HighestMainlandSessionId; // highest in the position stack
+ucstring lastUniversMessage;
 
 extern const char *CDBBankNames[INVALID_CDB_BANK+1];
 
@@ -770,7 +771,11 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		}
 		else if (mode == CChatGroup::universe)
 		{
-			PeopleInterraction.ChatInput.Universe.displayMessage(finalString, col, 2, &windowVisible);
+			if (lastUniversMessage != finalString)
+			{
+				PeopleInterraction.ChatInput.Universe.displayMessage(finalString, col, 2, &windowVisible);
+				lastUniversMessage = finalString;
+			}
 		}
 		else if (mode == CChatGroup::dyn_chat)
 		{

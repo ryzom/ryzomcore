@@ -422,6 +422,29 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 		return para;
 	}
 
+	ucstring::size_type pos = 0;
+
+	// Manage Translations
+	string::size_type startTr = msg.find(ucstring("{:"));
+	string::size_type endOfOriginal = msg.find(ucstring("}@{"));
+
+	// Original/Translated case, example: {:enHello the world!}@{ Bonjour le monde !
+	if (startTr != string::npos && endOfOriginal != string::npos)
+	{
+		CViewBase *vt = createMsgTextSimple(msg.substr(0, startTr), col, justified, NULL);
+		para->addChild(vt);
+
+		string texture = "flag-"+toLower(msg.substr(startTr+2, 2)).toString()+".tga";
+		ucstring original = msg.substr(startTr+5, endOfOriginal-startTr-5);
+		pos = endOfOriginal+3;
+		CCtrlButton *ctrlButton = new CCtrlButton(CViewBase::TCtorParam());
+		ctrlButton->setTexture(texture);
+		ctrlButton->setTextureOver(texture);
+		ctrlButton->setTexturePushed(texture);
+		ctrlButton->setDefaultContextHelp(original);
+		ctrlButton->setId("tr");
+		para->addChild(ctrlButton);
+	}
 
 	// quickly check if text has links or not
 	bool hasUrl;
@@ -430,8 +453,7 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 		hasUrl = (s.find(ucstring("http://")) || s.find(ucstring("https://")));
 	}
 
-	ucstring::size_type pos = 0;
-	for (ucstring::size_type i = 0; i< textSize;)
+	for (ucstring::size_type i = pos; i< textSize;)
 	{
 		if (hasUrl && isUrlTag(msg, i, textSize))
 		{
