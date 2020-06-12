@@ -1,7 +1,6 @@
 // Ryzom Core MMORPG framework - Error Reporter
 //
-// Copyright (C) 2015 Laszlo Kis-Adam
-// Copyright (C) 2010 Ryzom Core <http://ryzomcore.org/>
+// Copyright (C) 2010-2015  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as

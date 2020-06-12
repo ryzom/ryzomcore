@@ -1,5 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
+// Copyright (C) 2015-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -158,8 +162,8 @@ int main(int argc, char **argv)
 	// init the Nel context
 	CApplicationContext *appContext = new CApplicationContext;
 
-	// disable nldebug messages in logs in Release
-#ifdef NL_RELEASE
+	// disable nldebug messages in logs in FV
+#if FINAL_VERSION && defined(NL_RELEASE)
 	DisableNLDebug = true;
 #endif
 
@@ -315,6 +319,10 @@ int main(int argc, char **argv)
 
 	if (steamClient.init())
 		LoginCustomParameters = "&steam_auth_session_ticket=" + steamClient.getAuthSessionTicket();
+#endif
+
+#if !FINAL_VERSION
+	LoginCustomParameters += "&dbg=1";
 #endif
 
 	// initialize patch manager and set the ryzom full path, before it's used

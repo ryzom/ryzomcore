@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -456,10 +459,10 @@ void		CGameContextMenu::update()
 			fameValue = pLeafFame->getValue8();
 	}
 	if (_TextNews)
-		_TextNews->setActive(selection && !canAttack() && !selection->isForageSource() && fameValue >= -30);
+		_TextNews->setActive(selection && !canAttack() && selection->isNPC() && fameValue >= -30);
 
 	if (_TextNewsAgressive)
-		_TextNewsAgressive->setActive(selection && !canAttack() && !selection->isForageSource() && fameValue < -30);
+		_TextNewsAgressive->setActive(selection && !canAttack() && selection->isNPC() && fameValue < -30);
 
 
 	if (_TextDuel && _TextUnDuel)

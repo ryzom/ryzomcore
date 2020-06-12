@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -892,7 +896,7 @@ void CGroupInSceneBubbleManager::dynChatOpen (uint32 nBotUID, uint32 nBotName, c
 	uint32 pos, j;
 	for (pos = 0; pos < _DynBubbles.size(); ++pos)
 	{
-		if (_DynBubbles[pos].BotUID == nBotUID)
+		if (_DynBubbles[pos].BotUID == nBotUID && _DynBubbles[pos].BotName != 0)
 			break;
 	}
 
@@ -1005,7 +1009,7 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 	uint32 pos, j;
 	for (pos = 0; pos < _DynBubbles.size(); ++pos)
 	{
-		if (_DynBubbles[pos].BotUID == nBotUID)
+		if (_DynBubbles[pos].BotUID == nBotUID && _DynBubbles[pos].BotName == 0)
 			break;
 	}
 

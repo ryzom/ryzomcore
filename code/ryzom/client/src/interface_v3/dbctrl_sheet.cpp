@@ -1,5 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2011  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -561,6 +566,11 @@ CDBCtrlSheet::~CDBCtrlSheet()
 		if (Driver)
 			Driver->deleteTextureFile(_GuildSymb);
 		_GuildSymb = NULL;
+	}
+	if (_RegenText)
+	{
+		delete _RegenText;
+		_RegenText = NULL;
 	}
 
 	// ensure erase static
@@ -1300,10 +1310,10 @@ void CDBCtrlSheet::setupItem ()
 			// special icon text
 			if( _NeedSetup || _ItemSheet->getIconText() != _OptString )
 			{
-				// compute from OptString. Allow only 1 line and 4 chars
+				// compute from OptString. Allow only 1 line (-2 for padding)
 				_OptString= _ItemSheet->getIconText();
 				// Display Top Left
-				setupCharBitmaps(40, 1, 6, true);
+				setupCharBitmaps(40-2, 1, true);
 			}
 
 			// Special Item requirement
@@ -1417,8 +1427,8 @@ void CDBCtrlSheet::setupMacro()
 {
 	if (!_NeedSetup) return;
 
-	// compute from OptString
-	setupCharBitmaps(26, 4, 5);
+	// compute from OptString (-2 for padding)
+	setupCharBitmaps(26-2, 4);
 
 	_NeedSetup = false;
 
@@ -1720,8 +1730,8 @@ void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bri
 		{
 			// recompute text
 			_OptString= iconName;
-			// compute from OptString. Allow only 1 line and 5 chars
-			setupCharBitmaps(26, 1, 5);
+			// compute from OptString. Allow only 1 line (-2 for padding)
+			setupCharBitmaps(26-2, 1);
 		}
 	}
 }
@@ -1847,10 +1857,10 @@ void CDBCtrlSheet::setupOutpostBuilding()
 			// special icon text
 			if (pOBSheet->getIconText() != _OptString)
 			{
-				// compute from OptString. Allow only 1 line and 4 chars
+				// compute from OptString. Allow only 1 line, (-2 for padding)
 				_OptString= pOBSheet->getIconText();
 				// Display Top Left
-				setupCharBitmaps(40, 1, 6, true);
+				setupCharBitmaps(40-2, 1, true);
 			}
 		}
 		else
@@ -1893,28 +1903,32 @@ void CDBCtrlSheet::resetCharBitmaps()
 }
 
 // ***************************************************************************
-void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar, bool topDown)
+void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, bool topDown)
 {
-	// Use the optString for the Macro name
-	_OptString = toLower(_OptString);
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = *CViewRenderer::getInstance();
-
 	_CharBitmaps.clear();
+	if(maxLine<=0) return;
 
-	if(maxLine<=0)
-		return;
+	std::string text(_OptString);
+	// check for icon text 'uiitLabel'
+	if (text.size() > 4 && text[0] == 'u' && text[1] == 'i' && text[2] == 'i' && text[3] == 't' && CI18N::hasTranslation(text))
+	{
+		// NOTE: translated text is expected to be us-ascii only
+		text = CI18N::get(text).toUtf8();
+	}
+	text = toLower(text);
+
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	uint h = rVR.getTypoTextureH('a');
 	sint lineNb = 0;
 	sint curLineSize = 0;
 	uint i;
 	uint xChar= 0;
-	for (i = 0; i < _OptString.size(); ++i)
+	for (i = 0; i < text.size(); ++i)
 	{
-		char c = _OptString[i];
+		char c = text[i];
 		sint32 w = rVR.getTypoTextureW(c);
-		if ((curLineSize + w) > maxW || (sint32)xChar>=maxWChar)
+		if ((curLineSize + w) > maxW)
 		{
 			lineNb ++;
 			if (lineNb == maxLine) break;

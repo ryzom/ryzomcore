@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: nel-web
+Version: @NL_VERSION@
+Description: NeL @NL_VERSION@
+Requires:
+Libs: -L${libdir}
+Libs.private: @LIBS@ -lc -lpthread -lrt -ldl
+Cflags: -I${includedir} -lc -lpthread -lrt -ldl

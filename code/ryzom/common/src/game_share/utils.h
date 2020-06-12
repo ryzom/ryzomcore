@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -119,8 +122,8 @@ inline ucstring capitalize(const ucstring & s)
 #define GIVEUP_IF(condition,msg,action)		if (!(condition));else GIVEUP(msg,action)
 #define WARN_IF(condition,msg)				if (!(condition));else WARN(msg)
 #define DROP_IF(condition,msg,action)		if (!(condition));else DROP(msg,action)
-#define BOMB_IF(condition,msg,action)		if (!(condition));else BOMB(msg,action)
-#define STOP_IF(condition,msg)				if (!(condition));else STOP(msg)
+#define BOMB_IF(condition,msg,action)		if (!(condition));else BOMB(msg,action); do { nlassume(condition); } while (0)
+#define STOP_IF(condition,msg)				if (!(condition));else STOP(msg); do { nlassume(condition); } while (0)
 
 // testing for variable value changes
 #define ON_CHANGE(type,var,code)\

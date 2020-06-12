@@ -1,6 +1,10 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -20,7 +24,6 @@
 #include "nel/misc/string_mapper.h"
 #include "nel/3d/cluster.h"
 #include "nel/sound/u_source.h"
-#include "nel/misc/sheet_id.h"
 
 
 namespace NLMISC
@@ -32,7 +35,7 @@ namespace NLMISC
 namespace NLSOUND {
 
 
-typedef std::set<NLMISC::CSheetId> TMarkerSoundSet;
+typedef std::set<NLMISC::TStringId> TMarkerSoundSet;
 
 class UAudioMixer;
 
@@ -51,13 +54,13 @@ public:
 	virtual float			getTime()	const			{ return _Time; }
 
 	/** Add a new sound in the set of to-be-played sounds for this marker */
-	virtual void			addSound(const NLMISC::CSheetId &soundName);
+	virtual void			addSound(const NLMISC::TStringId &soundName);
 
 	/** Remove a sound */
-	virtual void			removeSound(const NLMISC::CSheetId &soundName);
+	virtual void			removeSound(const NLMISC::TStringId &soundName);
 
 	/** Return the set of sounds of this marker */
-	virtual void			getSounds(std::vector<NLMISC::CSheetId> &sounds);
+	virtual void			getSounds(std::vector<NLMISC::TStringId> &sounds);
 
 	/** Play all the sounds of this marker */
 	virtual void			play(UAudioMixer* mixer, NL3D::CCluster *cluster, CSoundContext &context);

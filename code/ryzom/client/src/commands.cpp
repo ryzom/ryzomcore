@@ -1,5 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2019  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -5165,14 +5170,14 @@ NLMISC_COMMAND(reloadFogMaps, "Force to reload all the fog maps", "<>")
 NLMISC_COMMAND(dumpSounds, "Dump names of all loaded sound", "<>")
 {
 	if (!args.empty()) return false;
-	std::vector<NLMISC::CSheetId> sounds;
+	std::vector<NLMISC::TStringId> sounds;
 	extern CSoundManager	*SoundMngr;
 	if (!SoundMngr) return false;
 	if (!SoundMngr->getMixer()) return false;
 	SoundMngr->getMixer()->getSoundNames(sounds);
 	for(uint k = 0; k < sounds.size(); ++k)
 	{
-		nlinfo(sounds[k].toString()/*NLMISC::CStringMapper::unmap(sounds[k])*/.c_str());
+		nlinfo(NLMISC::CStringMapper::unmap(sounds[k]).c_str());
 	}
 	return true;
 }

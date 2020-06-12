@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -124,6 +127,16 @@ namespace NLGUI
 		void setTexturePushed(const std::string &l, const std::string &m, const std::string &r);
 		void setTextureOver(const std::string &l, const std::string &m, const std::string &r);
 
+		// lua
+		void setTextureLua (const std::string &name);
+		void setTexturePushedLua (const std::string &name);
+		void setTextureOverLua (const std::string &name);
+
+		// return texture _l.tga
+		std::string getTexture () const;
+		std::string getTexturePushed () const;
+		std::string getTextureOver() const;
+
 		int luaGetViewText(CLuaState &ls);
 
 		REFLECT_EXPORT_START(CCtrlTextButton, CCtrlBaseButton)
@@ -134,6 +147,9 @@ namespace NLGUI
 			REFLECT_SINT32("wmin", getWMin, setWMin)
 			REFLECT_SINT32("hmin", getHMin, setHMin)
 			REFLECT_LUA_METHOD("getViewText", luaGetViewText)
+			REFLECT_STRING("texture", getTexture, setTextureLua);
+			REFLECT_STRING("texture_pushed", getTexturePushed, setTexturePushedLua);
+			REFLECT_STRING("texture_over", getTextureOver, setTextureOverLua);
 		REFLECT_EXPORT_END
 
 		void onRemoved();

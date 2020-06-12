@@ -374,7 +374,7 @@ void CDriverD3D::setMousePos(float x, float y)
 {
 	H_AUTO_D3D(CDriverD3D_setMousePos);
 
-	if (_HWnd == EmptyWindow)
+	if (_HWnd == EmptyWindow || !_WindowFocus)
 		return;
 
 	// convert position size from float to pixels

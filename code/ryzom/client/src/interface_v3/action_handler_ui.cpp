@@ -1,6 +1,10 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -416,7 +420,7 @@ class CAHUIShowHide : public IActionHandler
 					nlwarning("%s is not a group html", window.c_str());
 					return;
 				}
-				pGH->setURL("http://"+ClientCfg.WebIgMainDomain+"/index.php?app="+webapp);
+				pGH->setURL(ClientCfg.WebIgMainDomain + "/index.php?app=" + webapp);
 			}
 		}
 		else

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2015-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -15,6 +18,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpacs.h"
+
+#include <sstream>
 
 #include "nel/misc/plane.h"
 
@@ -266,15 +271,16 @@ void	NLPACS::CLocalRetriever::dumpSurface(uint surf, const CVector &vect) const
 	{
 		const CRetrievableSurface::TLoop	&loop = surface._Loops[i];
 		nlinfo("-- loop %d: %d chains length=%.2f", i, loop.size(), loop.Length);
-		static char	wbuffer[256];
-		static char	buffer[10240];
-		sprintf(buffer, "    chains:");
+		char	wbuffer[256];
+		stringstream ss;
+		sprintf(wbuffer, "    chains:");
+		ss << wbuffer;
 		for (j=0; j<loop.size(); ++j)
 		{
 			sprintf(wbuffer, " %d[%d]", loop[j], surface._Chains[loop[j]].Chain);
-			strcat(buffer, wbuffer);
+			ss << wbuffer;
 		}
-		nlinfo("%s", buffer);
+		nlinfo("%s", ss.str().c_str());
 	}
 }
 
