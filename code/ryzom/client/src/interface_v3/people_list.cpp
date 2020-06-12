@@ -199,7 +199,7 @@ bool CPeopleList::sortExByName(const CPeople& a, const CPeople& b)
 {
 	ucstring name_a = toUpper(a.getName());
 	ucstring name_b = toUpper(b.getName());
-	
+
 	return (name_a < name_b);
 }
 
@@ -208,7 +208,7 @@ bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
 {
 	ucstring name_a = toUpper(a.getName());
 	ucstring name_b = toUpper(b.getName());
-	
+
 	// We want order: online/alpha, offworld/alpha, offline/alpha
 	if (a.Online == b.Online)
 	{
@@ -249,7 +249,7 @@ void CPeopleList::sortEx(TSortOrder order)
 	{
 		_BaseContainer->detachContainer(_Peoples[k].Container);
 	}
-	
+
 	switch (order)
 	{
 		default:
@@ -480,17 +480,21 @@ void CPeopleList::displayLocalPlayerTell(const ucstring &receiver, uint index, c
 	ucstring s = CI18N::get("youTellPlayer");
 	strFindReplace(s, "%name", receiver);
 	strFindReplace(finalMsg, CI18N::get("youTell"), s);
-	gl->addChild(getChatTextMngr().createMsgText(finalMsg, prop.getRGBA()));
-	CInterfaceManager::getInstance()->log(finalMsg, CChatGroup::groupTypeToString(CChatGroup::tell));
+	CViewBase *child = getChatTextMngr().createMsgText(finalMsg, prop.getRGBA());
+	if (child)
+	{
+		gl->addChild(child);
+		CInterfaceManager::getInstance()->log(finalMsg, CChatGroup::groupTypeToString(CChatGroup::tell));
 
-	// if the group is closed, make it blink
-	if (!gc->isOpen())
-	{
-		if (numBlinks) gc->enableBlink(numBlinks);
-	}
-	if (_BaseContainer && !_BaseContainer->isOpen())
-	{
-		_BaseContainer->enableBlink(numBlinks);
+		// if the group is closed, make it blink
+		if (!gc->isOpen())
+		{
+			if (numBlinks) gc->enableBlink(numBlinks);
+		}
+		if (_BaseContainer && !_BaseContainer->isOpen())
+		{
+			_BaseContainer->enableBlink(numBlinks);
+		}
 	}
 }
 
@@ -539,8 +543,9 @@ void CPeopleList::displayMessage(uint index, const ucstring &msg, NLMISC::CRGBA 
 		nlwarning("<CPeopleList::displayMessage> can't get text_list.");
 		return;
 	}
-
-	gl->addChild(getChatTextMngr().createMsgText(msg, col));
+	CViewBase *child = getChatTextMngr().createMsgText(msg, col);
+	if (child)
+		gl->addChild(child);
 }
 
 
@@ -777,7 +782,7 @@ void CPeopleList::setOnline(uint index, TCharConnectionState online)
 		CCtrlBase *chatButton = hc->getCtrl("chat_button");
 		if (chatButton != NULL)
 			chatButton->setActive(online != ccs_offline);
-		
+
 		CCtrlBase *inviteButton = hc->getCtrl("invite_button");
 		if (inviteButton != NULL)
 			inviteButton->setActive(online != ccs_offline);
