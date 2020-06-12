@@ -215,29 +215,34 @@ void CChatWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGr
 	CChatTextManager &ctm = getChatTextMngr();
 
 	gl = dynamic_cast<CGroupList *>(_Chat->getGroup("cb:text_list"));
-	if (gl)	gl->addChild(ctm.createMsgText(msg, col));
 
-	// if the group is closed, make it blink
-	if (!_Chat->isOpen())
+	CViewBase *child = ctm.createMsgText(msg, col);
+	if (child)
 	{
-		if (numBlinks) _Chat->enableBlink(numBlinks);
-	}
-	if (_ParentBlink)
-	{
-		CGroupContainer *father = dynamic_cast<CGroupContainer *>(_Chat->getParent());
-		if (father && !father->isOpen())
+		if (gl)	gl->addChild(child);
+
+		// if the group is closed, make it blink
+		if (!_Chat->isOpen())
 		{
-			father->enableBlink(numBlinks);
+			if (numBlinks) _Chat->enableBlink(numBlinks);
 		}
+		if (_ParentBlink)
+		{
+			CGroupContainer *father = dynamic_cast<CGroupContainer *>(_Chat->getParent());
+			if (father && !father->isOpen())
+			{
+				father->enableBlink(numBlinks);
+			}
+		}
+		if (windowVisible != NULL)
+		{
+			*windowVisible = isVisible();
+		}
+		/*for(std::vector<IObserver *>::iterator it = _Observers.begin(); it != _Observers.end(); ++it)
+		{
+			(*it)->displayMessage(this, msg, col, numBlinks);
+		}*/
 	}
-	if (windowVisible != NULL)
-	{
-		*windowVisible = isVisible();
-	}
-	/*for(std::vector<IObserver *>::iterator it = _Observers.begin(); it != _Observers.end(); ++it)
-	{
-		(*it)->displayMessage(this, msg, col, numBlinks);
-	}*/
 }
 
 //=================================================================================
@@ -563,12 +568,17 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 	ucstring newmsg = msg;
 	ucstring prefix;
 
+	CViewBase *child = NULL;
 	if (gl != NULL)
 	{
-		gl->addChild(ctm.createMsgText(newmsg, col));
-		if (!gl->getParent()->getActive())
-			if (tab != NULL)
-				tab->setTextColorNormal(newMsgColor);
+		child = ctm.createMsgText(newmsg, col);
+		if (child)
+		{
+			gl->addChild(child);
+			if (!gl->getParent()->getActive())
+				if (tab != NULL)
+					tab->setTextColorNormal(newMsgColor);
+		}
 	}
 
 	// *** Display the message in the UserChat (special case)
@@ -590,7 +600,7 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 			case CChatGroup::guild:		if (ci.Guild.isListeningWindow(cw))			gl = gl2;	break;
 			case CChatGroup::system:	if (ci.SystemInfo.isListeningWindow(cw))	gl = gl2;	break;
 			case CChatGroup::universe:	if (ci.Universe.isListeningWindow(cw))		gl = gl2;	break;
-			case CChatGroup::dyn_chat:	
+			case CChatGroup::dyn_chat:
 				if (ci.DynamicChat[dynamicChatDbIndex].isListeningWindow(cw))
 				{
 					gl = gl2;
@@ -608,7 +618,7 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 						pos = newmsg.find(ucstring("}"));
 						prefix += " ";
 					}
-					
+
 					if (pos == ucstring::npos)
 						newmsg = prefix + newmsg;
 					else
@@ -635,31 +645,37 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 
 		if (gl != NULL)
 		{
-			gl->addChild(ctm.createMsgText(newmsg, col));
-			if (!gl->getParent()->getActive())
-				if (tab != NULL)
-					tab->setTextColorNormal(newMsgColor);
+			child = ctm.createMsgText(newmsg, col);
+			if (child)
+			{
+				gl->addChild(child);
+				if (!gl->getParent()->getActive())
+					if (tab != NULL)
+						tab->setTextColorNormal(newMsgColor);
+			}
 		}
 	}
 
-
-	// *** Blink and visibility event
-	// if the group is closed, make it blink
-	if (!_Chat->isOpen())
+	if (child)
 	{
-		if (numBlinks) _Chat->enableBlink(numBlinks);
-	}
-	if (_ParentBlink)
-	{
-		CGroupContainer *father = dynamic_cast<CGroupContainer *>(_Chat->getParent());
-		if (father && !father->isOpen())
+		// *** Blink and visibility event
+		// if the group is closed, make it blink
+		if (!_Chat->isOpen())
 		{
-			father->enableBlink(numBlinks);
+			if (numBlinks) _Chat->enableBlink(numBlinks);
 		}
-	}
-	if (windowVisible != NULL)
-	{
-		*windowVisible = isVisible();
+		if (_ParentBlink)
+		{
+			CGroupContainer *father = dynamic_cast<CGroupContainer *>(_Chat->getParent());
+			if (father && !father->isOpen())
+			{
+				father->enableBlink(numBlinks);
+			}
+		}
+		if (windowVisible != NULL)
+		{
+			*windowVisible = isVisible();
+		}
 	}
 }
 
@@ -685,8 +701,9 @@ void CChatGroupWindow::displayTellMessage(const ucstring &msg, NLMISC::CRGBA col
 		nlwarning("<CChatGroupWindow::displayTellMessage> can't get text_list.");
 		return;
 	}
-
-	gl->addChild(getChatTextMngr().createMsgText(msg, col));
+	CViewBase *child = getChatTextMngr().createMsgText(msg, col);
+	if (child)
+		gl->addChild(child);
 }
 
 //=================================================================================

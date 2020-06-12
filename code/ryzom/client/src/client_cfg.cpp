@@ -439,8 +439,8 @@ CClientConfig::CClientConfig()
 	CurlMaxConnections = 5;
 	CurlCABundle.clear();
 
-	RingReleaseNotePath = WebIgMainDomain + "/releasenotes_ring/index.php";
-	ReleaseNotePath = WebIgMainDomain + "/releasenotes/index.php";
+	RingReleaseNotePath = WebIgMainDomain + "/app_releasenotes/index.php";
+	ReleaseNotePath = WebIgMainDomain + "/app_releasenotes/index.php";
 
 
 	///////////////
