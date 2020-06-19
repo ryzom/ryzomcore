@@ -45,7 +45,7 @@ extern bool GrpHistoryRecordLog;
 
 /// This is a common parent for all grp classes (bot group classes)
 /// Group contains a container of Bots.
-class CSpawnGroup 
+class CSpawnGroup
 : public NLMISC::CDbgRefCount<CSpawnGroup>
 , public CSpawnable<CPersistent<CSpawnGroup> >
 , public CProfileOwner
@@ -53,45 +53,45 @@ class CSpawnGroup
 {
 public:
 	CSpawnGroup(CPersistent<CSpawnGroup>& owner);
-	
+
 	virtual	~CSpawnGroup();
-	
+
 	virtual void spawnBotOfGroup();
-	
+
 	void aggroLost(TDataSetRow const& aggroBot) const { }
-	
+
 	void aggroGain(TDataSetRow const& aggroBot) const { }
-	
+
 	virtual void spawnBots() = 0;
 	virtual void despawnBots(bool immediately) = 0;
-	
+
 	virtual void update() = 0;
-	
+
 	//	Update Rate feature.
 	virtual int getUpdatePriority() const { return 0; }
-	
+
 	virtual void recalcUpdatePriorityDelta() { }
-	
+
 	CGroup& getPersistent() const;
-	
+
 	CAliasCont<CBot> const& bots() const;
 	CAliasCont<CBot>& bots();
-	
+
 	CBot* findLeader();
-	
+
 	CProfilePtr& movingProfile() { return _MovingProfile; }
 	CProfilePtr& activityProfile() { return _ActivityProfile; }
 	CProfilePtr const& activityProfile() const { return _ActivityProfile; }
 	CProfilePtr& fightProfile() { return _FightProfile; }
-	
+
 	/// only for use by State Machine (or problems will occurs -> callStateChanged if same )
 	void setMoveProfileFromStateMachine(IAIProfileFactory* staticProfile);
 	/// only for use by State Machine (or problems will occurs -> callStateChanged if same )
 	void setActivityProfileFromStateMachine(IAIProfileFactory* staticProfile);
-	
-	
+
+
 	bool calcCenterPos(CAIVector& grp_pos, bool allowDeadBot = false);
-	
+
 	// Respawn bot list
 	class CBotToSpawn
 	{
@@ -123,32 +123,32 @@ public:
 		CAITimer _despawnTimer;
 		CAITimer _respawnTimer;
 	};
-	
+
 	void incSpawnedBot(CBot& spawnBot);
-	
+
 	void decSpawnedBot();
-	
-	void addBotToDespawnAndRespawnTime(CBot* faunaBot, uint32 despawnTime, uint32 respawnTime);	
-	
-	void checkDespawn();	
+
+	void addBotToDespawnAndRespawnTime(CBot* faunaBot, uint32 despawnTime, uint32 respawnTime);
+
+	void checkDespawn();
 	void checkRespawn();
-	
+
 	uint32 nbSpawnedBot() const { return _NbSpawnedBot; }
-	
+
 	uint32 nbBotToRespawn() const { return (uint32)_BotsToRespawn.size(); }
-	
+
 	uint32 nbBotToDespawn()	const { return (uint32)_BotsToDespawn.size(); }
-	
+
 	bool isGroupAlive(uint32 const nbMoreKilledBot = 0) const;
-	
+
 	CAIVector const& getCenterPos() const { return _CenterPos; }
-	
+
 	void setCenterPos(CAIVector const& pos) { _CenterPos = pos; }
-	
+
 	std::vector<std::string> getMultiLineInfoString() const;
-	
+
 	virtual NLMISC::CSmartPtr<CAIPlace const> buildFirstHitPlace(TDataSetRow const& aggroBot) const;
-	
+
 	void addAggroFor(TDataSetRow const& bot, float aggro, bool forceReturnAggro, NLMISC::CSmartPtr<CAIPlace const> place = NLMISC::CSmartPtr<CAIPlace const>(NULL));
 	void setAggroMinimumFor(TDataSetRow const& bot, float aggro, bool forceReturnAggro, NLMISC::CSmartPtr<CAIPlace const> place = NLMISC::CSmartPtr<CAIPlace const>(NULL));
 	bool haveAggro() const;
@@ -160,7 +160,7 @@ public:
 
 	const std::string getUrl() const { return _Url; }
 	void setUrl(const std::string &url) { _Url = url; }
-	
+
 protected:
 	CProfilePtr		_PunctualHoldMovingProfile;
 	CProfilePtr		_PunctualHoldActivityProfile;
@@ -173,7 +173,7 @@ private:
 
 	std::vector<CBotToSpawn>	_BotsToRespawn;
 	std::vector<CBotToSpawn>	_BotsToDespawn;
-	
+
 	CProfilePtr		_MovingProfile;
 	CProfilePtr		_ActivityProfile;
 	CProfilePtr		_FightProfile;
@@ -198,25 +198,25 @@ class CGroup
 {
 public:
 	friend class CSpawnGroup;
-	
+
 	CGroup(CManager* owner, RYAI_MAP_CRUNCH::TAStarFlag denyFlag, CAIAliasDescriptionNode* aliasTree = NULL);
 	CGroup(CManager* owner, RYAI_MAP_CRUNCH::TAStarFlag denyFlag, uint32 alias, std::string const& name);
 	virtual ~CGroup();
-	
+
 	void serviceEvent(CServiceEvent const& info);
-	
+
 	CBot* getLeader();
 	CBot* getSquadLeader(bool checkAliveStatus = true);
-		
+
 	void despawnBots();
-	
+
 	virtual CDynGrpBase* getGrpDynBase() = 0;
-	
+
 	CAliasTreeOwner* aliasTreeOwner() { return this; }
-	
+
 	bool _AutoDestroy;
 	void autoDestroy(bool ad) { _AutoDestroy = ad; }
-	
+
 	/// @name CChild implementation
 	//@{
 	virtual std::string getIndexString() const;
@@ -224,67 +224,67 @@ public:
 	virtual std::vector<std::string> getMultiLineInfoString() const;
 	virtual std::string getFullName() const;
 	//@}
-	
+
 	virtual void lastBotDespawned();
 	virtual void firstBotSpawned();
-	
+
 	virtual CPersistentStateInstance* getPersistentStateInstance() = 0;
-	
+
 	RYAI_MAP_CRUNCH::TAStarFlag getAStarFlag() const { return _DenyFlags; }
-	
+
 	virtual	CAIS::CCounter& getSpawnCounter() = 0;
 	virtual RYZOMID::TTypeId getRyzomType() = 0;
 	virtual void setEvent(uint eventId) = 0;
-	
+
 	virtual bool spawn();
-	
+
 	virtual NLMISC::CSmartPtr<CSpawnGroup> createSpawnGroup() = 0;
-	
+
 	virtual void despawnGrp();
-	
+
 	void despawnBots(bool immediately);
-	
+
 	CAliasCont<CBot> const& bots() const { return _Bots; }
 	CAliasCont<CBot>& bots() { return _Bots; }
-	
+
 	void display(CStringWriter& stringWriter);
-	
+
 	CBot* getBot(uint32 index);
-	
+
 	// debugging stuff
 	CDebugHistory* getDebugHistory() { return this; }
-	
+
 	CBot* getNextValidBotChild(CBot* child = NULL) { return _Bots.getNextValidChild(child); }
-	
+
 	CManager& getManager() { return *getOwner(); }
-	
+
 	void setEscortTeamId(uint16 teamId) { _EscortTeamId = teamId; }
 	uint16 getEscortTeamId() const { return _EscortTeamId; }
-	
+
 	void setEscortRange(float range) { _EscortRange = range; }
 	float getEscortRange() const { return _EscortRange; }
-	
+
 	virtual void setAutoSpawn(bool autoSpawn) { _AutoSpawn = autoSpawn; }
 	bool isAutoSpawn() const { return _AutoSpawn; }
-	
+
 	CAIInstance* getAIInstance() const { return getOwner()->getAIInstance(); }
-	
+
 	void setEventParams(const std::vector<std::string> &a) { _EventParams = a; }
 	std::string getEventParamString(uint32 i) { if (i >= _EventParams.size()) return ""; return _EventParams[i]; }
 	float getEventParamFloat(uint32 i) { if (i >= _EventParams.size()) return 0.0f; return (float)atof(_EventParams[i].c_str()); }
 
-	float				_AggroRange;
+	uint32				_AggroRange;
 	uint32				_UpdateNbTicks;
-	
+
 protected:
 	CAliasCont<CBot>	_Bots;
 	/// Team Id of the escort (if any).
 	uint16				_EscortTeamId;
 	/// The range of the escort, ie the maximal distance of any escorter player that alow the group to be escorted
-	float				_EscortRange;
+	uint8				_EscortRange;
 	/// The bots automaticaly spawn when the group is spawned.
 	bool				_AutoSpawn;
-	
+
 	RYAI_MAP_CRUNCH::TAStarFlag _DenyFlags;
 
 	std::vector<std::string> _EventParams;
@@ -299,7 +299,7 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 
 inline
-CSpawnGroup::CSpawnGroup(CPersistent<CSpawnGroup>& owner)	
+CSpawnGroup::CSpawnGroup(CPersistent<CSpawnGroup>& owner)
 : CSpawnable<CPersistent<CSpawnGroup> >(owner)
 , CProfileOwner()
 , _NbSpawnedBot(0)
@@ -351,10 +351,10 @@ bool CGroup::spawn()
 {
 	if (isSpawned())
 		return true;
-	
+
 	if (!getSpawnCounter().remainToMax())
 		return false;
-	
+
 	setSpawn(createSpawnGroup());
 	return true;
 }
@@ -373,7 +373,7 @@ inline
 void CGroup::despawnBots(bool immediately)
 {
 	if (!isSpawned())
-		return;		
+		return;
 	getSpawnObj()->despawnBots(immediately);
 }
 

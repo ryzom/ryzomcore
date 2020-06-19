@@ -55,7 +55,7 @@ IAiFactory<IFamilyProfile>	*_ProfileTribe=&_singleProfileTribe;
 //CPropertyId	act_nz_outpost_def("activity_npc_outpost_def");
 //CPropertyId	act_nz_outpost_atk("activity_npc_outpost_atk");
 //CPropertyId	act_nz_kami_wander("activity_npc_kami_wander");
-//CPropertyId	act_nz_escort("activity_npc_escort");		
+//CPropertyId	act_nz_escort("activity_npc_escort");
 //CPropertyId	act_nz_convoy("activity_npc_convoy");
 //CPropertyId	act_nz_contact("activity_npc_contact");
 //CPropertyId	act_nz_fight("activity_npc_fight");
@@ -71,7 +71,7 @@ IAiFactory<IFamilyProfile>	*_ProfileTribe=&_singleProfileTribe;
 //CPropertyId	act_fz_rest_kitin_invasion("act_fz_rest_kitin_invasion");
 //CPropertyId	act_fz_food_degen("act_fz_food_degen");
 //CPropertyId	act_fz_plant("act_fz_plant");
-//CPropertyId	act_fz_rest_kitin("act_fz_rest_kitin");	
+//CPropertyId	act_fz_rest_kitin("act_fz_rest_kitin");
 //CPropertyId	act_fz_rest_degen("act_fz_rest_degen");
 
 // Todo:
@@ -96,15 +96,15 @@ void	COutpostInfo::checkDespawnGroupList	()
 
 	while (_DespawnList.size()>0)
 	{
-		CGroupNpc	*grpNpc=_DespawnList.back();		
+		CGroupNpc	*grpNpc=_DespawnList.back();
 		_DespawnList.pop_back();
 
 		{
 			TGroupList::iterator	it=_FightGroup.begin();
 			const	TGroupList::iterator	itEnd=_FightGroup.end();
-			
+
 			for	(;(it!=itEnd) && ((*it).ptr()!=grpNpc);++it);
-			
+
 			if	(it!=itEnd)
 			{
 				(*it)->despawnGrp();
@@ -119,14 +119,14 @@ void	COutpostInfo::checkDespawnGroupList	()
 			const	TGroupList::iterator	itEnd=_ContactGroups.end();
 
 			for	(;(it!=itEnd) && ((*it).ptr()!=grpNpc);++it);
-			
+
 			if	(it!=itEnd)
 			{
 				(*it)->despawnGrp();
 				_ContactGroups.erase(it);
 				continue;
 			}
-			
+
 		}
 #ifdef NL_DEBUG
 		nlassert(true==false);	//	unknown group.
@@ -206,7 +206,7 @@ void	COutpostInfo::fightGroups(bool	exist)
 //			CGroupNpc		*const	grp	=	_FamilyProfileTribe->createNpcGroup(spawnZone,gd);
 //			if	(!grp)
 //				continue;
-//			
+//
 //			grp->setDiscardable			(false);
 //			// this group will run !
 //			grp->mergeProfileParameter	(CProfileParameters::TProfileParameter("running", "", 0));
@@ -224,7 +224,7 @@ void	COutpostInfo::fightGroups(bool	exist)
 //			return;
 //
 //		for	(TGroupList::iterator	it=_FightGroup.begin(), itEnd=_FightGroup.end();it!=itEnd;++it)
-//		{			
+//		{
 //			NLMISC::CDbgPtr<CGroupNpc>	&dbgPtr=*it;
 //#ifdef NL_DEBUG
 //			nlassert(!dbgPtr.isNULL());
@@ -273,11 +273,11 @@ void	COutpostInfo::contactGroups(bool exist)	//	contact groups ..
 //			const	CGroupDesc *gd = _FamilyBehavior->getOwner()->getOwner()->getProportionalGroupDesc(_FamilyBehavior, act_nz_contact+act_nz_contact_outpost, act_nz_escort+act_nz_convoy);
 //			if	(!gd)
 //				continue;
-//			
+//
 //			CGroupNpc	*const	grp=_FamilyProfileTribe->createNpcGroup(_FamilyProfileTribe->getCampZone(),gd);
 //			if	(!grp)
 //				continue;
-//			
+//
 //			grp->getSpawnObj()->activityProfile().setAIProfile(new	CGrpProfileDynContact(grp->getSpawnObj(),	_FamilyProfileTribe,	this));
 //			_ContactGroups.push_back(grp);
 //
@@ -290,7 +290,7 @@ void	COutpostInfo::contactGroups(bool exist)	//	contact groups ..
 //			return;
 //
 //		for	(TGroupList::iterator	it=_ContactGroups.begin(), itEnd=_ContactGroups.end();it!=itEnd;++it)
-//		{			
+//		{
 //			NLMISC::CDbgPtr<CGroupNpc>	&dbgPtr=*it;
 //			CGrpProfileDynFight	*dynFight=safe_cast<CGrpProfileDynFight*>(dbgPtr->getSpawnObj()->activityProfile().getAIProfile());
 //			dynFight->gotoZone(_FamilyProfileTribe->getCampZone(),CPropertySet());
@@ -356,7 +356,7 @@ void	CFamilyProfileTribe::outpostAdd(NLMISC::TStringId outpostName)
 			_FamilyBehavior->getName().c_str(),
 			_FamilyBehavior->getOwner()->getAliasFullName().c_str());
 
-	
+
 	CSmartPtr<COutpostInfo>	outPost=COutpostInfo::createOutpost(_FamilyBehavior,this,outpostName);
 	if	(!outPost)
 	{
@@ -402,7 +402,7 @@ void	CFamilyProfileTribe::spawnGroup()
 {
 	H_AUTO(FamilySpawnTribe)
 	static	CPropertyId	act_nz_spawn("activity_spawn");
-		
+
 	if	(getCampZone().isNull())
 		return;
 
@@ -411,11 +411,11 @@ void	CFamilyProfileTribe::spawnGroup()
 	if	(!spawn)
 		return;
 
-	
-	static	CPropertyId	act_nz_escort("activity_escort");		
+
+	static	CPropertyId	act_nz_escort("activity_escort");
 	static	CPropertyId	act_nz_contact("activity_contact");
 	static	CPropertyId	act_nz_fight_boss("act_nz_fight_boss");
-	
+
 //	CCellZone	&cellZone=_FamilyBehavior->getOwner();
 	const	CGroupDesc<CGroupFamily>	*const	gd = _FamilyBehavior->grpFamily()->getProportionalGroupDesc(_FamilyBehavior, CPropertySet(), act_nz_contact+act_nz_fight_boss+act_nz_escort);
 
@@ -473,7 +473,7 @@ void	CGrpProfileDynContact::endProfile()
 //	there's a coherence problem about the activity.
 void	CGrpProfileDynContact::updateProfile(uint ticksSinceLastUpdate)
 {
-	
+
 	// this is a contact group, special treatment
 	switch	(_Grp->movingProfile().getAIProfileType())
 	{
@@ -495,7 +495,7 @@ void	CGrpProfileDynContact::updateProfile(uint ticksSinceLastUpdate)
 
 		{
 			static	CPropertyId	act_nz_outpost("activity_outpost");
-			// time to go work childrens! 
+			// time to go work childrens!
 			const	CNpcZone *dest =	_FamilyProfile->getFamilyBehavior()->getOwner()->lookupNpcZone(/*_FamilyProfile->getFamilyBehavior()->getFamily(),*/ act_nz_outpost, _FamilyProfile->getFamilyBehavior()->grpFamily()->getSubstitutionId());
 			if	(dest)
 			{
@@ -512,7 +512,7 @@ void	CGrpProfileDynContact::updateProfile(uint ticksSinceLastUpdate)
 			//	if arrived.
 			if	(!profile->destinationReach())
 				break;
-			
+
 			if	(!_OutPostInfo->_ContactGroupExist)
 			{
 				_OutPostInfo->addToDespawnGroupList(_Grp);
@@ -583,26 +583,26 @@ void	CGrpProfileDynHarvest::checkTargetsAround	()
 		if	(std::find(aggroList.begin(), aggroList.end(), AISHEETS::CSheets::getInstance()->playerGroupIndex())==aggroList.end())
 			return;
 	}
-	
+
 	CAIVision<CPersistentOfPhysical>	Vision;
-	
+
 	breakable
 	{
 		CAIVector	centerPos;
 		if	(!_Grp->calcCenterPos(centerPos))	// true if there's some bots in the group.
 			break;
 
-		const	uint32	playerRadius=	uint(30);	//	_AggroRange);
-		const	uint32	botRadius=uint(0);		//	_AggroRange);
-		
+		const	uint32	playerRadius=30;	//	_AggroRange);
+		const	uint32	botRadius=0;		//	_AggroRange);
+
 		const	uint32	minRadius=playerRadius>botRadius?botRadius:playerRadius;
-		
+
 		Vision.updateBotsAndPlayers(_Grp->getPersistent().getAIInstance(), centerPos, playerRadius, botRadius);
 	}
 
 	{
 		const std::vector<NLMISC::CDbgPtr<CPersistentOfPhysical> > &players = Vision.players();
-		
+
 		std::vector<NLMISC::CDbgPtr<CPersistentOfPhysical> >::const_iterator	first(players.begin()), last(players.end());
 		for (; first != last; ++first)
 		{
@@ -617,7 +617,7 @@ void	CGrpProfileDynHarvest::checkTargetsAround	()
 			if	(	rootCell
 				&&	rootCell->getFlag()!=0	)	//	Safe Zone ?
 				continue;
-			
+
 			_Grp->setAggroMinimumFor(ep->dataSetRow(), 0.5f, false);
 		}
 	}
@@ -659,9 +659,9 @@ void	CGrpProfileDynHarvest::updateProfile(uint ticksSinceLastUpdate)
 
 	//	Moving -> Wandering(Harvesting)|Camping
 	case	MOVE_DYN_FOLLOW_PATH:
-		{			
+		{
 			CGrpProfileDynFollowPath const* const fp = safe_cast<CGrpProfileDynFollowPath*>(movingProfile.getAIProfile());
-			
+
 			if	(!fp->destinationReach())
 				break;
 
@@ -694,7 +694,7 @@ void	CGrpProfileDynHarvest::updateProfile(uint ticksSinceLastUpdate)
 
 			// send the group to a harvest point
 			const	CNpcZone	*dest=NULL;
-			
+
 			while	(	!dest
 					||	dest==profile->currentZone())
 			{
@@ -715,7 +715,7 @@ void	CGrpProfileDynHarvest::updateProfile(uint ticksSinceLastUpdate)
 #endif
 		break;
 	}
-	checkTargetsAround	();		
+	checkTargetsAround	();
 	CGrpProfileNormal::updateProfile(ticksSinceLastUpdate);
 }
 
@@ -735,7 +735,7 @@ void	CGrpProfileDynFight::beginProfile()
 	static	CPropertyId	act_nz_rest("activity_rest");
 	static	CPropertyId	act_nz_harvest("activity_harvest");
 	static	CPropertyId	act_nz_outpost("activity_outpost");
-	
+
 	const	CNpcZone	*const	dest = _FamilyProfile->getFamilyBehavior()->getOwner()->lookupNpcZone(/*_FamilyProfile->getFamilyBehavior()->getFamily(),*/ act_nz_harvest, _FamilyProfile->getFamilyBehavior()->grpFamily()->getSubstitutionId());
 	_Grp->movingProfile().setAIProfile(new CGrpProfileDynFollowPath(_Grp, _CurrentZone, dest, act_nz_outpost + act_nz_rest + act_nz_harvest));
 }
@@ -752,7 +752,7 @@ void	CGrpProfileDynFight::updateProfile(uint ticksSinceLastUpdate)
 {
 	static	CPropertyId	act_nz_outpost("activity_outpost");
 	CProfilePtr	&movingProfile=_Grp->movingProfile();
-	
+
 	// this is a contact group, special treatment
 	switch	(movingProfile.getAIProfileType())
 	{
@@ -772,14 +772,14 @@ void	CGrpProfileDynFight::updateProfile(uint ticksSinceLastUpdate)
 			// send the group to an harvest site.
 			movingProfile.setAIProfile(new CGrpProfileDynFollowPath(_Grp, profile->currentZone(), dest, CPropertySet()));
 			break;
-		}							
+		}
 		break;
 
 	//	Moving -> Wandering(Fighting)|Camping
 	case	MOVE_DYN_FOLLOW_PATH:
-		{			
+		{
 			CGrpProfileDynFollowPath const* const fp = safe_cast<CGrpProfileDynFollowPath*>(movingProfile.getAIProfile());
-			
+
 			_CurrentZone=fp->currentZone();
 
 			if	(!fp->destinationReach())
