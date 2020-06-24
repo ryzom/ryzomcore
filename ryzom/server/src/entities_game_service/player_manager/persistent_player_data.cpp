@@ -157,7 +157,7 @@ public:
 	typedef std::map<NLMISC::CSheetId, CFameContainerEntryPD>::const_iterator	TIterator;\
 	TIterator itBegin= target.getEntriesBegin();\
 	TIterator itEnd= target.getEntriesEnd();\
-	
+
 #define PERSISTENT_DATA\
 	FLAG0(CLEAR,while(target.getEntriesBegin()!=target.getEntriesEnd()) target.deleteFromEntries((*target.getEntriesBegin()).first))\
 	LSTRUCT_MAP2(_Fame,NLMISC::CSheetId,\
@@ -165,7 +165,7 @@ public:
 		(*it).first,\
 		CFameContainerEntryProxy().store(pdr,(*it).second),\
 		CFameContainerEntryProxy().apply(pdr,*target.addToEntries(key)))\
-	
+
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
@@ -371,7 +371,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 // when a character is 'EnterGame'.
 // Thus the following scheme is used:
 // - Load PositionStack
-// - When character connects, apply top position 
+// - When character connects, apply top position
 // - Evenly overwrite the top position with the current position, and save the stack
 // Hence the "return to mainland" feature does not change the current position but
 // only pops and locks the stack (to prevent from overwriting it) so that the new top
@@ -436,7 +436,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP(uint32,_GuildPoints)\
 	PROP(uint8,_TodayGuildPoints)\
 	PROP_GAME_CYCLE_COMP(_NextTodayGuildPointsReset)\
-	PROP2(_LangChannel,string,_LangChannel,_LangChannel=val)\
+	PROP2(_LangChannel,string,_LangChannel,_LangChannel="rf")\
 	PROP(uint32,_Organization)\
 	PROP(uint32,_OrganizationStatus)\
 	PROP(uint32,_OrganizationPoints)\
@@ -831,7 +831,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 #define PERSISTENT_DATA\
 	LPROP2(ActivationDate, NLMISC::TGameCycle, if(ActivationDate >= CTickEventHandler::getGameCycle()), ActivationDate - CTickEventHandler::getGameCycle(), ActivationDate = val)\
 	PROP2(Family,string,  CConsumable::getFamilyName(Family), Family=CConsumable::getFamilyIndex(val))\
-	
+
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
@@ -1058,7 +1058,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 
 static void displayInfo(const std::string& s)
 {
-	
+
 	egs_ppdinfo("%s",s.c_str());
 }
 
@@ -1410,7 +1410,7 @@ private:
 	PROP(bool, _Movable)\
 	PROP(bool, _UnMovable)\
 	PROP(bool, _LockedByOwner)\
-	
+
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
@@ -1630,7 +1630,7 @@ private:
 	PROP(uint32,LoginTime)\
 	PROP(uint32,Duration)\
 	PROP(uint32,LogoffTime)\
-	
+
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 

@@ -688,21 +688,54 @@ NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message>")
 		return false;
 	}
 
-	CChatGroup::TGroupType mode = CChatGroup::stringToGroupType(args[1]);
+	TChanID chanId = CEntityId::Unknown;
+	TGroupId groupId = CEntityId::Unknown;
+
+	CChatGroup::TGroupType mode;
+	if (args[1] == "FACTION_RF") // The current only translated dynamic chat
+	{
+		chanId = IOS->getChatManager().getChanId("FACTION_RF");
+		mode = CChatGroup::dyn_chat;
+	}
+	else if (args[1].substr(0, 7) == "region:")
+	{
+		mode = CChatGroup::region;
+		groupId.fromString(args[1].substr(7).c_str());
+	}
+	else
+	{
+		mode = CChatGroup::stringToGroupType(args[1]);
+	}
+
+	string chat_group = args[1];
 	ucstring ucstr;
 	ucstr.fromUtf8(args[2]);
 	TDataSetRow rowId = ci->DataSetIndex;
 	try
 	{
 		CChatGroup::TGroupType oldMode = IOS->getChatManager().getClient(rowId).getChatMode();
+		TChanID oldChanId = IOS->getChatManager().getClient(rowId).getDynChatChan();
+		TGroupId oldRegionId =IOS->getChatManager().getClient(rowId).getRegionChatGroup();
+
 		if (mode != oldMode)
-			IOS->getChatManager().getClient(rowId).setChatMode(mode);
+			IOS->getChatManager().getClient(rowId).setChatMode(mode, chanId);
+
+		if (mode == CChatGroup::region)
+			IOS->getChatManager().getClient(rowId).setRegionChatGroup(groupId);
+
 
 		IOS->getChatManager().getClient(rowId).updateAudience();
 		IOS->getChatManager().chat(rowId, ucstr);
 
 		if (oldMode != mode)
-			IOS->getChatManager().getClient(rowId).setChatMode(oldMode);
+		{
+			if (oldMode == CChatGroup::dyn_chat)
+				IOS->getChatManager().getClient(rowId).setChatMode(oldMode, oldChanId);
+			else if (oldMode == CChatGroup::region)
+				IOS->getChatManager().getClient(rowId).setRegionChatGroup(oldRegionId);
+			else
+				IOS->getChatManager().getClient(rowId).setChatMode(oldMode);
+		}
 	}
 	catch(const Exception &e)
 	{
@@ -710,6 +743,20 @@ NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message>")
 	}
 
 	return true;
+}
+
+NLMISC_COMMAND(farChat, "send far message chat", "<char_name> <chat_id> <message>")
+{
+	if (args.size() < 3)
+		return false;
+
+	uint32 id;
+	ucstring ucstr;
+
+	string name = args[0];
+	ucstr.fromUtf8(args[2]);
+
+	IOS->getChatManager().sendFarChat(name, ucstr, args[1]);
 }
 
 NLMISC_COMMAND(getRealName, "getRealName", "<char_name>")
@@ -724,7 +771,7 @@ NLMISC_COMMAND(getRealName, "getRealName", "<char_name>")
 		return true;
 	}
 
-	log.displayNL("%s", ci->ShortName.c_str());
+	log.displayNL("%s", ci->ShortRealName.c_str());
 
 	return true;
 }

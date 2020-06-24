@@ -40,7 +40,7 @@
 
 extern bool							ShowChat;
 
-extern uint8 MaxDistSay; 
+extern uint8 MaxDistSay;
 extern uint8 MaxDistShout;
 
 extern TPropertyIndex DSPropertyAI_INSTANCE;
@@ -60,7 +60,7 @@ extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 
 // typedef uint32 TSessionId;
 
- 
+
 /**
  * CCharacterInfos
  * \author Stephane Coutelas
@@ -81,6 +81,10 @@ public:
 	CMirrorPropValue< uint32, CPropLocationPacked<2> >		NameIndex;
 	/// Short name (ie name without the $title$ spec)
 	ucstring						ShortName;
+
+	/// Short rename (ie name without the $title$ spec)
+	ucstring						ShortRealName;
+
 	/// Short name index
 	uint32							ShortNameIndex;
 	/// The home mainland session id
@@ -97,7 +101,7 @@ public:
 	uint32							UntranslatedShortNameIndex;
 	/// The untranslated event faction index.
 	uint32							UntranslatedEventFactionId;
-	
+
 	/// Gender of the entity
 	CMirrorPropValueRO< SPropVisualA >	VisualPropertyA;
 
@@ -123,7 +127,7 @@ public:
 	/**
 	 * Default constructor
 	 */
-	CCharacterInfos() 
+	CCharacterInfos()
 		: /*FrontendId(0),*/
 			HomeSessionId(0),
 			HomeSessionNameId(0),
@@ -169,7 +173,7 @@ public:
 	bool is(uint32 alias) const;
 
 //	std::string getName(uint32 alias) const;
-	
+
 	uint32 getShortNameIndex(uint32 alias) const;
 
 	uint32 getTitleIndex(uint32 alias, CStringManager::TLanguages lang) const;
@@ -202,12 +206,8 @@ private:
 	/// infos on a character from his name
 	TCharInfoCont	_NameToInfos;
 
-	TIdRealNames _IdToRealName;
-
-	/// Original information about renamed characters
-	TCharInfoCont	_RenamedCharInfos;
-
 	typedef std::map<NLMISC::CEntityId, std::pair<NLMISC::TGameCycle, CCharacterInfos*> >	TTempCharInfoCont;
+
 	/// Temporary storage for removed entities, will survive here for 3000 ticks.
 	TTempCharInfoCont		_RemovedCharInfos;
 
@@ -239,21 +239,21 @@ public:
 	/// The list of named shard
 //	CShardNames		ChardNames;
 
-	/** 
+	/**
 	 * init the service
 	 */
 	void init();
 
 	/// Init after the mirror init
 	void initMirror();
-	
+
 	void release();
 
 	/**
 	 * main loop
 	 */
 	bool update();
-	
+
 	/**
 	 *	get the alias manager
 	 */
