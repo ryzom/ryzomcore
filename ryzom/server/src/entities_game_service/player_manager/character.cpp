@@ -13521,9 +13521,9 @@ void CCharacter::abandonMission(uint8 indexClient)
 	}
 
 	vector<string> params = getCustomMissionParams(toUpper(templ->getMissionName())+"_CALLBACK");
-	if (mission->getFinished() && params.size() >= 1)
+	if (params.size() >= 1)
 	{
-		if (mission->getMissionSuccess())
+		if (mission->getFinished() && mission->getMissionSuccess())
 			validateDynamicMissionStep(params[0]+"&result=SUCCESS");
 		else
 			validateDynamicMissionStep(params[0]+"&result=ABD");
@@ -14484,17 +14484,30 @@ void CCharacter::updateSavedMissions()
 				}
 				else
 				{
-					CPlace* place = CZoneManager::getInstance().getPlaceFromId((uint16)(*itCompass).second.getPlace());
-
-					if (place)
+					CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate((*it).second->getTemplateId());
+					string textName;
+					getPositionCheck(toUpper(templ->getMissionName()), x, y, textName);
+					if (x != 0 && y != 0)
 					{
-						x = place->getCenterX();
-						y = place->getCenterY();
-						params[0].Identifier = place->getName();
-						params[0].Type = STRING_MANAGER::place;
-						msg = "COMPASS_PLACE";
-						uint32 txt = STRING_MANAGER::sendStringToClient(_EntityRowId, msg, params);
+						SM_STATIC_PARAMS_1(textParams, STRING_MANAGER::literal);
+						textParams[0].Literal.fromUtf8(textName);
+						uint32 txt = STRING_MANAGER::sendStringToClient( c->getEntityRowId(), "LITERAL", textParams );
 						PlayerManager.sendImpulseToClient(_Id, "JOURNAL:ADD_COMPASS", x, y, txt);
+					}
+					else
+					{
+						CPlace* place = CZoneManager::getInstance().getPlaceFromId((uint16)(*itCompass).second.getPlace());
+
+						if (place)
+						{
+							x = place->getCenterX();
+							y = place->getCenterY();
+							params[0].Identifier = place->getName();
+							params[0].Type = STRING_MANAGER::place;
+							msg = "COMPASS_PLACE";
+							uint32 txt = STRING_MANAGER::sendStringToClient(_EntityRowId, msg, params);
+							PlayerManager.sendImpulseToClient(_Id, "JOURNAL:ADD_COMPASS", x, y, txt);
+						}
 					}
 				}
 			}

@@ -926,7 +926,14 @@ void CGrpProfileGuard::updateProfile(uint ticksSinceLastUpdate)
 	CFollowPathContext fpcGrpGuardProfileUpdate("GrpGuardProfileUpdate");
 
 	CAIVision<CPersistentOfPhysical>	GuardVision;
-	uint32	aggroSize = _Grp->getPersistent()._AggroRange;
+	uint32 aggroSize;
+
+	float f = 0.f;
+	if (_Grp->getPersistent().getProfileParameter("aggro_range", f)) // look for persistent aggro range
+		aggroSize = (uint32)f;
+	else
+		aggroSize = _Grp->getPersistent()._AggroRange;
+
 	if (aggroSize == 0)
 		aggroSize = 25;
 
@@ -994,15 +1001,22 @@ void CGrpProfileGuard::updateProfile(uint ticksSinceLastUpdate)
 	}
 
 	string s;
-	float f = 0.f;
+	f = 0.f;
 	if (_Grp->getProfileParameter("faction", s) && !s.empty())
 	{
 		factionIndex = CStaticFames::getInstance().getFactionIndex(s);
 	}
-	if (_Grp->getProfileParameter("fame_for_guard_attack", f))
+
+	if (_Grp->getPersistent().getProfileParameter("fame_for_guard_attack", f))
 	{
 		fameForGuardAttack = (sint32)f;
 	}
+	else if (_Grp->getProfileParameter("fame_for_guard_attack", f))
+	{
+		fameForGuardAttack = (sint32)f;
+	}
+
+
 
 	CGrpProfileNormal::updateProfile(ticksSinceLastUpdate);
 

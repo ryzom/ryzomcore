@@ -2518,7 +2518,7 @@ NLMISC_COMMAND(temporaryRename, "rename a player for the event", "<uid> <new nam
 
 	GET_ACTIVE_CHARACTER
 
-	ucstring newName(args[0]);
+	ucstring newName(args[1]);
 
 	c->registerName(newName);
 
