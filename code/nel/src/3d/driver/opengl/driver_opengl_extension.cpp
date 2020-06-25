@@ -1583,6 +1583,12 @@ static bool	setupATIMeminfo(const char *glext)
 void	registerGlExtensions(CGlExtensions &ext)
 {
 	H_AUTO_OGL(registerGlExtensions);
+	
+	CGLContextObj ctx = CGLGetCurrentContext();
+	if (ctx == NULL)
+	{
+		nlerror("No OpenGL context set");
+	}
 
 	// OpenGL 1.2 ??
 	const char	*nglVersion = (const char *)glGetString (GL_VERSION);
