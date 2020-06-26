@@ -547,7 +547,7 @@ private:
 
 	void run();
 	void processFile (CPatchManager::SFileToPatch &rFTP);
-	void xDeltaPatch(const std::string &patch, const std::string &src, const std::string &out);
+	bool xDeltaPatch(const std::string &patch, const std::string &src, const std::string &out);
 
 };
 /**
