@@ -436,7 +436,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP(uint32,_GuildPoints)\
 	PROP(uint8,_TodayGuildPoints)\
 	PROP_GAME_CYCLE_COMP(_NextTodayGuildPointsReset)\
-	PROP2(_LangChannel,string,_LangChannel,_LangChannel="rf")\
+	PROP2(_LangChannel,string,_LangChannel,_LangChannel=val)\
 	PROP(uint32,_Organization)\
 	PROP(uint32,_OrganizationStatus)\
 	PROP(uint32,_OrganizationPoints)\

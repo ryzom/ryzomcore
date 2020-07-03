@@ -65,7 +65,7 @@ void cbImpulsionReadyString( CMessage& msgin, const string &serviceName, TServic
 	msgin.serial(sender);
 	msgin.serial(nbBitsToSkip);
 	msgin.serialMemStream(bms);
-	
+
 	// Unpack bitmemstream
 	uint32 xmlcode;
 	bms.serial(xmlcode, nbBitsToSkip); // the XML code was already read by tbe sender service
@@ -179,7 +179,7 @@ void cbImpulsionChatTeam( CMessage& msgin, const string &serviceName, TServiceId
 	}
 
 	try
-	{		
+	{
 		TDataSetRow senderRow = TheDataset.getDataSetRow(sender);
 		// get current chat mode
 		const CChatGroup::TGroupType chatModeBck = IOS->getChatManager().getClient(senderRow).getChatMode();
@@ -189,7 +189,7 @@ void cbImpulsionChatTeam( CMessage& msgin, const string &serviceName, TServiceId
 		// send the message
 		IOS->getChatManager().chat( senderRow, ucstr );
 		// reset chat mode to old value
-		IOS->getChatManager().getClient(senderRow).setChatMode( chatModeBck );		
+		IOS->getChatManager().getClient(senderRow).setChatMode( chatModeBck );
 	}
 	catch(const Exception &e)
 	{
@@ -240,19 +240,19 @@ void cbImpulsionTell( CMessage& msgin, const string &serviceName, TServiceId ser
 static void updateIgnoreStatus(CMessage& msgin, const string &serviceName, TServiceId serviceId, bool ignored)
 {
 	CEntityId senderId;
-	CEntityId ignoredId;	
-	
+	CEntityId ignoredId;
+
 	try
 	{
 		msgin.serial(senderId);
 		msgin.serial(ignoredId);
-		IOS->getChatManager().getClient(TheDataset.getDataSetRow(senderId)).setIgnoreStatus(ignoredId, ignored);	
+		IOS->getChatManager().getClient(TheDataset.getDataSetRow(senderId)).setIgnoreStatus(ignoredId, ignored);
 	}
 	catch(const Exception &e)
 	{
 		nlwarning("<impulsionIgnore> %s",e.what());
 		return;
-	}	
+	}
 }
 
 //-----------------------------------------------
@@ -261,7 +261,7 @@ static void updateIgnoreStatus(CMessage& msgin, const string &serviceName, TServ
 //-----------------------------------------------
 void cbImpulsionIgnore( CMessage& msgin, const string &serviceName, TServiceId serviceId )
 {
-	updateIgnoreStatus(msgin, serviceName, serviceId, true);	
+	updateIgnoreStatus(msgin, serviceName, serviceId, true);
 } // impulsionIgnore //
 
 //-----------------------------------------------
@@ -281,7 +281,7 @@ void cbImpulsionUnignoreAll( CMessage& msgin, const string &serviceName, TServic
 {
 	CEntityId senderId;
 	vector<CEntityId> ignoredIds;
-	
+
 	try
 	{
 		msgin.serial(senderId);
@@ -366,7 +366,7 @@ void cbImpulsionChatMode( CMessage& msgin, const string &serviceName, TServiceId
 	msgin.serial(sender);
 
 	uint8 chatMode;
-	TChanID chanID;	
+	TChanID chanID;
 	try
 	{
 		msgin.serial( chatMode );
@@ -393,8 +393,8 @@ void cbImpulsionChatMode( CMessage& msgin, const string &serviceName, TServiceId
 				IOS->getChatManager().getClient(TheDataset.getDataSetRow(sender)).setChatMode( static_cast<CChatGroup::TGroupType>(chatMode));
 				nldebug("IOS: Chat mode --> %s", DebugChatModeName[chatMode]);
 				break;
-			case CChatGroup::dyn_chat:											
-				IOS->getChatManager().getClient(TheDataset.getDataSetRow(sender)).setChatMode( static_cast<CChatGroup::TGroupType>(chatMode), chanID);			
+			case CChatGroup::dyn_chat:
+				IOS->getChatManager().getClient(TheDataset.getDataSetRow(sender)).setChatMode( static_cast<CChatGroup::TGroupType>(chatMode), chanID);
 				break;
 			default:
 				if (chatMode < CChatGroup::nbChatMode)
@@ -542,7 +542,7 @@ static void cbChatMessage(CMessage& msgin, const string &serviceName, TServiceId
 		CChatGroup::TGroupType oldMode = IOS->getChatManager().getClient(entityId).getChatMode();
 		if ( oldMode != CChatGroup::say )
 			IOS->getChatManager().getClient(entityId).setChatMode(CChatGroup::say);
-		
+
 		IOS->getChatManager().getClient(entityId).updateAudience();
 		IOS->getChatManager().chat( entityId, str );
 
@@ -620,7 +620,7 @@ static void cbCharacterNameId(CMessage& msgin, const string &serviceName, TServi
 	{
 		// read character id
 		msgin.serial( chId );
-		
+
 		// character's string Id
 		msgin.serial( stringId );
 	}
@@ -630,7 +630,7 @@ static void cbCharacterNameId(CMessage& msgin, const string &serviceName, TServi
 		return;
 	}
 	IOS->addCharacterName( chId, SM->getString( stringId ), TSessionId(0) );
-	
+
 } // cbCharacterNameId //
 
 //-----------------------------------------------
@@ -777,7 +777,7 @@ static void cbAddNamedGroup( CMessage& msgin, const string &serviceName, TServic
 	IOS->getChatManager().addGroup( gId, (CChatGroup::TGroupType)gType, name );
 
 	if (VerboseChatManagement)
-		nldebug("IOS: cbAddGroup Adding named group %s with type '%s' as '%s'", 
+		nldebug("IOS: cbAddGroup Adding named group %s with type '%s' as '%s'",
 					gId.toString().c_str(),
 					CChatGroup::groupTypeToString((CChatGroup::TGroupType)gType).c_str(),
 					name.c_str());
@@ -913,7 +913,7 @@ static void cbRemoveFromGroup( CMessage& msgin, const string &serviceName, TServ
 //		{
 //			try
 //			{
-//				if( IOS->getChatManager().getClient(clientInfos->DataSetIndex).knowString(entityInfos->OldNameIndex) == false ) 
+//				if( IOS->getChatManager().getClient(clientInfos->DataSetIndex).knowString(entityInfos->OldNameIndex) == false )
 //				{
 //					IOS->getChatManager().addDynStr( clientId, entityInfos->OldNameIndex, serviceId );
 //				}
@@ -1022,13 +1022,13 @@ void cbNpcTellEx( CMessage& msgin, const string &serviceName, TServiceId service
 	TDataSetRow				sender;
 	TDataSetRow				receiver;
 	uint32					phraseId;
-	
+
 	msgin.serial(sender);
 	msgin.serial(receiver);
 	msgin.serial(phraseId);
-	
+
 	CChatManager &cm = IOS->getChatManager();
-	
+
 	try
 	{
 //		TDataSetRow dsr = TheDataset.getDataSetRow(sender);
@@ -1056,19 +1056,19 @@ void cbNpcChatEx( CMessage& msgin, const string &serviceName, TServiceId service
 	TDataSetRow				sender;
 	CChatGroup::TGroupType	type = CChatGroup::nbChatMode;
 	uint32					phraseId;
-	
+
 	msgin.serial(sender);
 	msgin.serialEnum(type);
 	msgin.serial(phraseId);
-	
+
 	CChatManager &cm = IOS->getChatManager();
-	
+
 	try
 	{
 	//	TDataSetRow dsr = TheDataset.getDataSetRow(sender);
 		if (sender == INVALID_DATASET_ROW)
 		{
-			nlwarning("cbNpcChatEx : ignoring chat because NPC %s:%x Invalid", 
+			nlwarning("cbNpcChatEx : ignoring chat because NPC %s:%x Invalid",
 				TheDataset.getEntityId(sender).toString().c_str(),
 				sender.getIndex());
 			return;
@@ -1106,7 +1106,7 @@ void cbNpcChat( CMessage& msgin, const string &serviceName, TServiceId serviceId
 //		TDataSetRow dsr = TheDataset.getDataSetRow(sender);
 		if ( !sender.isValid() || !TheDataset.isDataSetRowStillValid(sender) )
 		{
-			nlwarning("cbNpcChat : ignoring chat because NPC %x not yet/not anymore in mirror", 
+			nlwarning("cbNpcChat : ignoring chat because NPC %x not yet/not anymore in mirror",
 				sender.getIndex());
 			return;
 		}
@@ -1153,7 +1153,7 @@ void cbNpcChatParam( CMessage& msgin, const string &serviceName, NLNET::TService
 //		TDataSetRow dsr = TheDataset.getDataSetRow(sender);
 		if ( !sender.isValid() || !TheDataset.isDataSetRowStillValid(sender) )
 		{
-			nlwarning("cbNpcChat : ignoring chat because NPC %x not yet/not anymore in mirror", 
+			nlwarning("cbNpcChat : ignoring chat because NPC %x not yet/not anymore in mirror",
 				sender.getIndex());
 			return;
 		}
@@ -1190,7 +1190,7 @@ void cbNpcChatSentence( CMessage& msgin, const string &serviceName, TServiceId s
 //		TDataSetRow dsr = TheDataset.getDataSetRow(sender);
 		if ( !sender.isValid() || !TheDataset.isDataSetRowStillValid(sender) )
 		{
-			nlwarning("cbNpcChatSentence : ignoring chat because NPC %x not yet/not anymore in mirror", 
+			nlwarning("cbNpcChatSentence : ignoring chat because NPC %x not yet/not anymore in mirror",
 				sender.getIndex());
 			return;
 		}
@@ -1247,7 +1247,7 @@ void cbNpcChatSentenceChannel( CMessage& msgin, const string &serviceName, TServ
 	msgin.serial(id);
 	msgin.serial(sender);
 	msgin.serial(sentence);
-	
+
 	if(sender.isValid())
 	{
 		CChatManager &cm = IOS->getChatManager();
@@ -1287,7 +1287,7 @@ void cbGroupDynString( CMessage& msgin, const string &serviceName, TServiceId se
 			nlwarning("cbGroupDynString : ignoring group message because entity %x not yet in mirror", sender.getIndex());
 			return;
 		}
-		
+
 		list<CReceiver> receiverList;
 
 		CChatClient &client = cm.getClient(sender);
@@ -1297,7 +1297,7 @@ void cbGroupDynString( CMessage& msgin, const string &serviceName, TServiceId se
 		CChatGroup::TMemberCont::iterator itM;
 		for( itM = group.Members.begin(); itM != group.Members.end(); ++itM )
 		{
-			const CEntityId &id = TheDataset.getEntityId(*itM); 
+			const CEntityId &id = TheDataset.getEntityId(*itM);
 
 			// skip it if excluded
 			if ( std::find(excluded.begin(), excluded.end(), id) != excluded.end() )
@@ -1317,7 +1317,7 @@ void cbGroupDynString( CMessage& msgin, const string &serviceName, TServiceId se
 				msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 				CUnifiedNetwork::getInstance()->send( TServiceId(id.getDynamicId()), msgout );
 			}
-		}	
+		}
 	}
 	catch(const CChatManager::EChatClient &)
 	{
@@ -1476,9 +1476,9 @@ void cbEmoteCrowd( CMessage& msgin, const string &serviceName, TServiceId servic
 	string					phraseTextId;
 	TVectorParamCheck params;
 	vector<TDataSetRow>		ignored;
-	
+
 	CChatManager &cm = IOS->getChatManager();
-	
+
 	try
 	{
 		msgin.serial(sender);
@@ -1534,9 +1534,9 @@ void cbCustomEmote( CMessage& msgin, const string &serviceName, TServiceId servi
 {
 	TDataSetRow				sender;
 	ucstring				emoteCustomText;
-	
+
 	CChatManager &cm = IOS->getChatManager();
-	
+
 	try
 	{
 		msgin.serial(sender);
@@ -1544,7 +1544,7 @@ void cbCustomEmote( CMessage& msgin, const string &serviceName, TServiceId servi
 
 		// filter emote text
 		emoteCustomText = IOS->getChatManager().filterClientInputColorCode(emoteCustomText);
-		
+
 		// get the player
 		if ( sender == TDataSetRow::createFromRawIndex(INVALID_DATASET_ROW) )
 		{
@@ -1638,7 +1638,7 @@ void addSession(TDataSetRow client,TChanID chan,bool writeRight)
 			IOS->getChatManager().addClient( client );
 	}
 	CDynChatSession *session = IOS->getChatManager().getDynChat().addSession(chan, client);
-	if (!session) 
+	if (!session)
 	{
 		nlwarning("Couldn't create session");
 		return;
@@ -1665,7 +1665,7 @@ void cbDynChatAddSession(CMessage& msgin, const string &serviceName, TServiceId 
 			IOS->getChatManager().addClient( client );
 	}
 	CDynChatSession *session = IOS->getChatManager().getDynChat().addSession(chan, client);
-	if (!session) 
+	if (!session)
 	{
 		nlwarning("Couldn't create session");
 		return;
@@ -1691,7 +1691,7 @@ void cbDynChatAddSessionWithName(CMessage& msgin, const string &serviceName, TSe
 	msgin.serial(chan);
 	msgin.serial(clientName);
 	msgin.serial(writeRight);
-	
+
 	if(chan.isUnknownId())
 	{
 		nlwarning("unknown channel id! unable to add session!");
@@ -1707,7 +1707,7 @@ void cbDynChatAddSessionWithName(CMessage& msgin, const string &serviceName, TSe
 			IOS->getChatManager().addClient( client );
 
 		CDynChatSession *session = IOS->getChatManager().getDynChat().addSession(chan, client);
-		if (!session) 
+		if (!session)
 		{
 			nlwarning("Couldn't create session");
 			return;
@@ -1730,9 +1730,9 @@ void cbDynChatAddSessionWithName(CMessage& msgin, const string &serviceName, TSe
 void cbDynChatRemoveSession(CMessage& msgin, const string &serviceName, TServiceId serviceId)
 {
 	TChanID		chan;
-	TDataSetRow client;	
+	TDataSetRow client;
 	msgin.serial(chan);
-	msgin.serial(client);	
+	msgin.serial(client);
 	bool res = IOS->getChatManager().getDynChat().removeSession(chan, client);
 	if (!res) nlwarning("Couldn't remove session");
 }
@@ -1745,7 +1745,7 @@ void cbDynChatRemoveSessionWithName(CMessage& msgin, const string &serviceName, 
 {
 	TChanID		chan;
 	ucstring	clientName;
-	TDataSetRow client;	
+	TDataSetRow client;
 	msgin.serial(chan);
 	msgin.serial(clientName);
 	CCharacterInfos* cInfo = IOS->getCharInfos(clientName);
@@ -1760,9 +1760,9 @@ void cbDynChatRemoveSessionWithName(CMessage& msgin, const string &serviceName, 
 			return;
 		}*/
 		bool res = IOS->getChatManager().getDynChat().removeSession(chan, client);
-		if (!res) nlwarning("Couldn't remove session");	
+		if (!res) nlwarning("Couldn't remove session");
 	}
-	
+
 }
 
 //-----------------------------------------------
@@ -1772,10 +1772,10 @@ void cbDynChatRemoveSessionWithName(CMessage& msgin, const string &serviceName, 
 void cbDynChatSetWriteRight(CMessage& msgin, const string &serviceName, TServiceId serviceId)
 {
 	TChanID		chan;
-	TDataSetRow client;	
+	TDataSetRow client;
 	bool		writeRight;
 	msgin.serial(chan);
-	msgin.serial(client);	
+	msgin.serial(client);
 	msgin.serial(writeRight);
 	CDynChatSession *session = IOS->getChatManager().getDynChat().getSession(chan, client);
 	if (!session)
@@ -1794,7 +1794,7 @@ void cbDynChatSetHistoricSize(CMessage& msgin, const string &serviceName, TServi
 	TChanID		chanID;
 	uint32		historicSize;
 	msgin.serial(chanID);
-	msgin.serial(historicSize);	
+	msgin.serial(historicSize);
 	CDynChatChan *chan = IOS->getChatManager().getDynChat().getChan(chanID);
 	if (!chan)
 	{
@@ -1807,10 +1807,10 @@ void cbDynChatSetHideBubble(CMessage& msgin, const string &serviceName, TService
 {
 	TChanID		chanID;
 	bool hideBubble;
-	
+
 	msgin.serial(chanID);
 	msgin.serial(hideBubble);
-	
+
 	CChatManager &cm = IOS->getChatManager();
 	CDynChatChan *chan = cm.getDynChat().getChan(chanID);
 	if (!chan)
@@ -1825,10 +1825,10 @@ void cbDynChatSetUniversalChannel(CMessage& msgin, const string &serviceName, TS
 {
 	TChanID		chanID;
 	bool universalChannel;
-	
+
 	msgin.serial(chanID);
 	msgin.serial(universalChannel);
-	
+
 	CChatManager &cm = IOS->getChatManager();
 	CDynChatChan *chan = cm.getDynChat().getChan(chanID);
 	if (!chan)
@@ -1868,10 +1868,10 @@ void cbDynChatServiceChat(CMessage& msgin, const string &serviceName, TServiceId
 	if(!dcc) nlwarning(("nobody hears on channel "+chanID.toString()).c_str());
 
 	while (dcc)
-	{		
+	{
 		cm.sendChat(CChatGroup::dyn_chat, dcc->getClient()->getID(), text, TDataSetRow(), chanID, senderName);
 		dcc = dcc->getNextChannelSession(); // next session in this channel
-	}						
+	}
 }
 
 void cbDynChatServiceTell(CMessage& msgin, const string &serviceName, TServiceId serviceId)
@@ -1908,7 +1908,7 @@ void cbDynChatServiceTell(CMessage& msgin, const string &serviceName, TServiceId
 			break;
 		}
 		dcc = dcc->getNextChannelSession(); // next session in this channel
-	}						
+	}
 }
 
 //-----------------------------------------------
@@ -1921,7 +1921,7 @@ void cbDynChatReset(CMessage& msgin, const string &serviceName, TServiceId servi
 }
 
 //-----------------------------------------------
-//	update the alias list 
+//	update the alias list
 //
 //-----------------------------------------------
 void cbUpdateAIAlias(CMessage& msgin, const string &serviceName, TServiceId serviceId)
@@ -1932,22 +1932,22 @@ void cbUpdateAIAlias(CMessage& msgin, const string &serviceName, TServiceId serv
 	uint32 subcommand;
 	msgin.serial(subcommand);
 
-	
+
 	switch(subcommand)
-	{	
+	{
 
 	case Set:
 		IOS->getAIAliasManager().clear();
 
 	case Add:
 		{
-		
+
 			uint32 size;
 			msgin.serial(size);
 			uint first = 0;
 			uint last = size;
 			for ( ;first != last; ++first)
-			{				
+			{
 				uint32 alias;
 				std::string name;
 				msgin.serial(alias);
@@ -1956,7 +1956,7 @@ void cbUpdateAIAlias(CMessage& msgin, const string &serviceName, TServiceId serv
 			}
 		}
 		break;
-			
+
 		/*
 	case Add: break;
 	case Delete: break;
@@ -2006,7 +2006,7 @@ void cbUserDontTranslateLanguages( CMessage& msgin, const string &serviceName, T
 
 	if (player == INVALID_DATASET_ROW)
 	{
-		nlwarning("cbUserTranslateLanguage : ignoring chat because Player %s:%x Invalid", 
+		nlwarning("cbUserTranslateLanguage : ignoring chat because Player %s:%x Invalid",
 			TheDataset.getEntityId(player).toString().c_str(),
 			player.getIndex());
 		return;
@@ -2019,12 +2019,19 @@ void cbUserDontTranslateLanguages( CMessage& msgin, const string &serviceName, T
 
 	CChatClient &client = cm.getClient(player);
 
+	nlinfo("USER DISBALED TRANSLATIONS: %s", langs.c_str());
 	vector<string> vlangs;
 	NLMISC::splitString(langs, "|", vlangs);
 	client.resetDisabledTranslations();
 	for (uint i=0; i<vlangs.size(); i++)
 	{
-		client.disableTranslation(vlangs[i]);
+		if (vlangs[i].size() == 3)
+		{
+			if (vlangs[i][0] == '>')
+				client.disableSendTranslation(vlangs[i].substr(1));
+			else if (vlangs[i][0] == '<')
+				client.disableReceiveTranslation(vlangs[i].substr(1));
+		}
 	}
 }
 
@@ -2071,7 +2078,7 @@ TUnifiedCallbackItem CbIOSArray[]=
 //	{ "READY_STRING", cbImpulsionReadyString },
 	{ "CLIENT:STRING:CHAT", cbImpulsionChat },
 	{ "CLIENT:STRING:CHAT_TEAM", cbImpulsionChatTeam },
-	{ "CLIENT:STRING:TELL", cbImpulsionTell },	
+	{ "CLIENT:STRING:TELL", cbImpulsionTell },
 	{ "CLIENT:STRING:FILTER", cbImpulsionFilter },
 	{ "CLIENT:STRING:CHAT_MODE", cbImpulsionChatMode },
 	{ "CLIENT:STRING:AFK_TXT", cbImpulsionAfkTxt },
@@ -2092,8 +2099,8 @@ TUnifiedCallbackItem CbIOSArray[]=
 	{ "REMOVE_FROM_GROUP", cbRemoveFromGroup },
 //	{ "SEND_DYNAMIC_ID", cbSendDynamicId },
 	{ "CHAT", cbSysChat },					// talk to a user or a whole group
-	
-	{ "NPC_CHAT", cbNpcChat },				// Npc talk to a chat group	
+
+	{ "NPC_CHAT", cbNpcChat },				// Npc talk to a chat group
 	{ "NPC_CHAT_PARAM", cbNpcChatParam },				// Npc talk to a chat group	 (with parameter)
 
 	{ "NPC_TELL", cbNpcTell },				// Npc tell to a player
@@ -2104,7 +2111,7 @@ TUnifiedCallbackItem CbIOSArray[]=
 	{ "NPC_CHAT_SENTENCE", cbNpcChatSentence}, //Npc chat. receive the sentence to chat
 	{ "NPC_CHAT_SENTENCE_CHANNEL",cbNpcChatSentenceChannel},
 	{ "NPC_CHAT_SENTENCE_EX",cbNpcChatSentenceEx},//Npc chat. receive the name of the npc which talks, and the sentence
-	
+
 	{ "GROUP_DYN_STRING", cbGroupDynString },	// send a system dynamic string to a group
 	{ "PHRASE", cbPhrasePrepare },
 	{ "PHRASE_DEBUG", cbPhrasePrepareDebug },
@@ -2130,7 +2137,7 @@ TUnifiedCallbackItem CbIOSArray[]=
 	{ "EMOTE_CROWD", cbEmoteCrowd },			// EGS wants IOS to dispatch an emote texte to all users around the "emoting" player
 	{ "EMOTE_PLAYER", cbEmoteSolePlayer },	// EGS wants IOS to dispatch an emote texte to a unique player
 	{ "CUSTOM_EMOTE", cbCustomEmote },	// EGS wants IOS to dispatch an emote custom text to all users around
-	
+
 	{ "SET_PHRASE", cbSetPhrase },			// AIS wants IOS to change a phrase content
 	{ "SET_PHRASE_LANG", cbSetPhraseLang }, // AIS or EGS wants IOS to change a phrase content for a language
 

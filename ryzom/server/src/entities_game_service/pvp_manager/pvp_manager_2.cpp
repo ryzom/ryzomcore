@@ -221,20 +221,21 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 		NLMISC::splitString(user->getLangChannel(), " ", langChannels);
 		for ( uint i = 0; i < langChannels.size(); i++ )
 		{
-			TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find(langChannels[i]);
-			if (it != _ExtraFactionChannel.end())
+			if (langChannels[i] != "rf")
 			{
-				result.push_back((*it).second);
+				TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("usr_"+langChannels[i]);
+				if (it != _ExtraFactionChannel.end())
+				{
+					result.push_back((*it).second);
+				}
 			}
 		}
 	}
-	else
+
+	TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("rf");
+	if (it != _ExtraFactionChannel.end())
 	{
-		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("en");
-		if (it != _ExtraFactionChannel.end())
-		{
-			result.push_back((*it).second);
-		}
+		result.push_back((*it).second);
 	}
 
 	PVP_CLAN::TPVPClan faction = user->getAllegiance().first;
@@ -1184,11 +1185,18 @@ void CPVPManager2::onIOSMirrorUp()
 	createExtraFactionChannel("de", true);
 	createExtraFactionChannel("ru", true);
 	createExtraFactionChannel("es", true);
+
+	createExtraFactionChannel("usr_en", true);
+	createExtraFactionChannel("usr_fr", true);
+	createExtraFactionChannel("usr_de", true);
+	createExtraFactionChannel("usr_ru", true);
+	createExtraFactionChannel("usr_es", true);
+
 	createExtraFactionChannel("rf", true);
 	createExtraFactionChannel("rf-fr", true);
 	createExtraFactionChannel("rf-en", true);
 	createExtraFactionChannel("rf-es", true);
-	createExtraFactionChannel("rf-ed", true);
+	createExtraFactionChannel("rf-de", true);
 	createExtraFactionChannel("rf-ru", true);
 
 #ifdef HAVE_MONGO

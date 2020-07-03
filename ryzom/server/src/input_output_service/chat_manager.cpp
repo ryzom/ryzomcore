@@ -552,6 +552,9 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 	TClientInfoCont::iterator itCl = _Clients.find( sender );
 	if( itCl != _Clients.end() )
 	{
+		CChatManager &cm = IOS->getChatManager();
+		CChatClient &senderClient = cm.getClient(sender);
+
 //		if( itCl->second->isMuted() )
 		CEntityId eid = TheDataset.getEntityId(sender);
 		if(_MutedUsers.find( eid ) != _MutedUsers.end())
@@ -603,6 +606,8 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 		// clean up container
 		_DestUsers.clear();
 
+		string senderLang = SM->getLanguageCodeString(ci->Language);
+
 		switch( itCl->second->getChatMode() )
 		{
 			// dynamic group
@@ -616,8 +621,6 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 				bool have_ru = false;
 				bool have_es = false;
 				CChatGroup::TMemberCont::iterator itA;
-
-				string sender_lang = SM->getLanguageCodeString(ci->Language);
 
 				for( itA = itCl->second->getAudience().Members.begin();
 						itA != itCl->second->getAudience().Members.end();
@@ -639,16 +642,12 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 						receiver_lang = SM->getLanguageCodeString(co->Language);
 					}
 
-					if (EnableDeepL)
+					if (EnableDeepL && !senderClient.dontSendTranslation(senderLang))
 					{
 						CChatClient &client = getClient(*itA);
 
-						if (sender_lang == "wk")
-							receiver_lang = sender_lang;
-
-						if (ucstr[0] != '>' && client.haveDisabledTranslation(sender_lang))
-							receiver_lang = sender_lang;
-
+						if (senderLang == "wk")
+							receiver_lang = senderLang;
 
 						if (ucstr[0] == '>') // Sent directly when prefixed by '>', it's the anti-translation code
 						{
@@ -656,7 +655,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 							{
 								string usedlang = ucstr.toString().substr(2, 2);
 								//nlinfo("used: %s, user: %s", usedlang.c_str(), receiver_lang.c_str());
-								if (usedlang == receiver_lang && !client.haveDisabledTranslation(sender_lang))
+								if (usedlang == receiver_lang && !client.dontReceiveTranslation(usedlang))
 									sendChat( itCl->second->getChatMode(), *itA, ucstr.substr(5), sender );
 							}
 							else
@@ -664,7 +663,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 								sendChat( itCl->second->getChatMode(), *itA, ucstr.substr(1), sender );
 							}
 						}
-						else if (sender_lang == receiver_lang) // Sent directly if sender and receiver uses same lang
+						else if (senderLang == receiver_lang || client.dontReceiveTranslation(senderLang)) // Sent directly if sender and receiver uses same lang
 						{
 							sendChat( itCl->second->getChatMode(), *itA, ucstr, sender );
 						}
@@ -687,7 +686,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 						sendChat( itCl->second->getChatMode(), *itA, ucstr, sender );
 				}
 
-				string langs = sender_lang;
+				string langs = senderLang;
 				if (have_fr)
 					langs += "-fr";
 				if (have_de)
@@ -716,11 +715,12 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 
 				if (EnableDeepL)
 				{
-					string sender_lang = SM->getLanguageCodeString(ci->Language);
 					if (ucstr[0] == '>') // Sent directly when prefixed by '>', it's the anti-translation code
 						chatInGroup( grpId, ucstr.substr(1), sender );
+					else if (senderClient.dontSendTranslation(senderLang))
+						chatInGroup( grpId, ucstr, sender );
 					else
-						_Log.displayNL("region:%s|%s|*|%s-*|%s", grpId.toString().c_str(), fullName.c_str(), sender_lang.c_str(), ucstr.toString().c_str() );
+						_Log.displayNL("region:%s|%s|*|%s-*|%s", grpId.toString().c_str(), fullName.c_str(), senderLang.c_str(), ucstr.toUtf8().c_str() );
 				}
 				else
 					chatInGroup( grpId, ucstr, sender );
@@ -761,14 +761,16 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 
 				bool sendToMongo = true;
 				bool sendToAllUni = false;
-				string autosub = "1";
+				string autoSub = "1";
 				uint8 startPos = 0;
 				string mongoText = ucstr.toUtf8();
 				string chatId = "all";
 				string chatType = "univers";
-				string usedlang = SM->getLanguageCodeString(ci->Language);
 
-				if (EnableDeepL)
+
+				string usedlang = senderLang;
+
+				if (EnableDeepL  && !senderClient.dontSendTranslation(senderLang))
 				{
 					chatType = "dynamic";
 					if (ucstr[0] == '>') // Sent directly when prefixed by '>', it's the anti-translation code
@@ -788,7 +790,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 									source_lang = mongoText.substr(6, 2);
 								string sourceText = mongoText.substr(9, endOfOriginal-9);
 								strFindReplace(sourceText, ")", "}");
-								mongoText = "["+source_lang+"](http://chatdev.ryzom.com/channel/pub-universe-"+source_lang+"? "+sourceText+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
+								mongoText = "["+source_lang+"](http://chat.ryzom.com/channel/pub-universe-"+source_lang+"? "+sourceText+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
 							}
 							else
 							{
@@ -796,14 +798,14 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 								mongoText = mongoText.substr(4, mongoText.size()-4);
 							}
 
-							if (source_lang == "en") // in RC the icon are :us:
-								mongoText = ":us:"+mongoText;
+							if (source_lang == "en") // in RC the icon are :gb:
+								mongoText = ":gb:"+mongoText;
 							else
 								mongoText = ":"+source_lang+":"+mongoText;
 
 							chatId = "FACTION_"+toUpper(usedlang);
 							if (usedlang != SM->getLanguageCodeString(ci->Language))
-								autosub = "0";
+								autoSub = "0";
 
 						}
 						else
@@ -813,8 +815,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 					}
 					else
 					{
-						string sender_lang = SM->getLanguageCodeString(ci->Language);
-						_Log.displayNL("%s|%s|*|%s-*|%s", "universe", fullName.c_str(), sender_lang.c_str(), ucstr.toUtf8().c_str());
+						_Log.displayNL("%s|%s|*|%s-*|%s", "universe", fullName.c_str(), senderLang.c_str(), ucstr.toUtf8().c_str());
 						sendToMongo = false;
 					}
 				}
@@ -826,15 +827,14 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 				{
 					if (sendToAllUni)
 					{
-						string userlang = SM->getLanguageCodeString(ci->Language);
-						CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': '%s', 'chatId': 'FACTION_EN', 'date': %f, 'ig': true, 'autosub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatType.c_str(), date, userlang == "en"?"1":"0"));
-						CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': '%s', 'chatId': 'FACTION_DE', 'date': %f, 'ig': true, 'autosub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatType.c_str(), date, userlang == "de"?"1":"0"));
-						CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': '%s', 'chatId': 'FACTION_ES', 'date': %f, 'ig': true, 'autosub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatType.c_str(), date, userlang == "es"?"1":"0"));
-						CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': '%s', 'chatId': 'FACTION_FR', 'date': %f, 'ig': true, 'autosub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatType.c_str(), date, userlang == "fr"?"1":"0"));
-						CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': '%s', 'chatId': 'FACTION_RU', 'date': %f, 'ig': true, 'autosub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatType.c_str(), date, userlang == "ru"?"1":"0"));
+						CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': '%s', 'chatId': 'FACTION_EN', 'date': %f, 'ig': true, 'autoSub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatType.c_str(), date, senderLang == "en"?"1":"0"));
+						CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': '%s', 'chatId': 'FACTION_DE', 'date': %f, 'ig': true, 'autoSub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatType.c_str(), date, senderLang == "de"?"1":"0"));
+						CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': '%s', 'chatId': 'FACTION_ES', 'date': %f, 'ig': true, 'autoSub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatType.c_str(), date, senderLang == "es"?"1":"0"));
+						CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': '%s', 'chatId': 'FACTION_FR', 'date': %f, 'ig': true, 'autoSub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatType.c_str(), date, senderLang == "fr"?"1":"0"));
+						CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': '%s', 'chatId': 'FACTION_RU', 'date': %f, 'ig': true, 'autoSub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatType.c_str(), date, senderLang == "ru"?"1":"0"));
 					}
 					else
-						CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': '%s', 'chatId': '%s', 'date': %f, 'ig': true, 'autosub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatType.c_str(), chatId.c_str(), date, autosub.c_str()));
+						CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': '%s', 'chatId': '%s', 'date': %f, 'ig': true, 'autoSub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatType.c_str(), chatId.c_str(), date, autoSub.c_str()));
 				}
 #endif
 
@@ -866,7 +866,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 				double date = 1000.0*(double)CTime::getSecondsSince1970();
 
 #ifdef HAVE_MONGO
-				CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'guildId', 'chatId': '%s', 'date': %f, 'ig': true, 'autosub': 1 }", CMongo::quote(fullName).c_str(), CMongo::quote(ucstr.toUtf8()).c_str(), sGuildId.str().c_str(), date));
+				CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'guildId', 'chatId': '%s', 'date': %f, 'ig': true, 'autoSub': 1 }", CMongo::quote(fullName).c_str(), CMongo::quote(ucstr.toUtf8()).c_str(), sGuildId.str().c_str(), date));
 #endif
 				chatInGroup( grpId, ucstr, sender );
 			}
@@ -892,158 +892,186 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 						}
 					}
 
-				const std::string *tmpChatId = _ChanNames.getB(chanId);
-				string chatId;
-				if (tmpChatId)
-					chatId = *tmpChatId;
+					const std::string *tmpChatId = _ChanNames.getB(chanId);
+					string chatId;
+					if (tmpChatId)
+						chatId = *tmpChatId;
 
-				double date = 1000.0*(double)CTime::getSecondsSince1970();
+					double date = 1000.0*(double)CTime::getSecondsSince1970();
 
-				bool sendToMongo = true;
-				bool sendToAllForge = false;
-				uint8 startPos = 0;
 
-				string mongoText = ucstr.toUtf8();
-				string usedlang = "";
-				string autosub = "0";
+					string mongoText = ucstr.toUtf8();
 
-				if (EnableDeepL)
-				{
-					if (ucstr[0] == '>') // Sent directly when prefixed by '>', it's the anti-translation code
+					bool sendMessages = true;
+					bool sendToAllForge = false;
+					bool haveOriginMessage = false;
+					uint8 startPos = 0;
+
+					string originLang = senderLang;
+					string translatedLang = "";
+					string autoSub = "0";
+
+					if (EnableDeepL)
 					{
-						startPos = 1;
-						mongoText = mongoText.substr(1);
-						string::size_type endOfOriginal = mongoText.find("}@{");
-						if (mongoText.size() > 4 && mongoText[0] == ':' && mongoText[3] == ':')
+						if (senderClient.dontSendTranslation(senderLang))
 						{
-							startPos = 5;
-							usedlang = mongoText.substr(1, 2);
-							string source_lang = usedlang;
-
-							if (endOfOriginal != string::npos)
-							{
-								if (mongoText.size() > 9)
-									source_lang = mongoText.substr(6, 2);
-								string sourceText = mongoText.substr(9, endOfOriginal-9);
-								strFindReplace(sourceText, ")", "}");
-								mongoText = "["+source_lang+"](http://chatdev.ryzom.com/channel/pub-forge-"+source_lang+"? "+sourceText+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
-							}
-							else
-							{
-								usedlang = mongoText.substr(1, 2);
-								mongoText = mongoText.substr(4, mongoText.size()-4);
-							}
-
-							if (source_lang == "en") // in RC the icon are :us:
-								mongoText = ":us:"+mongoText;
-							else
-								mongoText = ":"+source_lang+":"+mongoText;
-						}
-						else if (chatId == "FACTION_RF")
 							sendToAllForge = true;
+						}
+						else if (ucstr[0] == '>') // Sent directly when prefixed by '>', it's the anti-translation code
+						{
+							startPos = 1;
+							mongoText = mongoText.substr(1);
+							string::size_type endOfOriginal = mongoText.find("}@{");
+							if (mongoText.size() > 4 && mongoText[0] == ':' && mongoText[3] == ':')
+							{
+								startPos = 5;
+								translatedLang = mongoText.substr(1, 2);
 
+								if (endOfOriginal != string::npos)
+								{
+									haveOriginMessage = true;
+									if (mongoText.size() > 9)
+										originLang = mongoText.substr(6, 2);
+									string originText = mongoText.substr(9, endOfOriginal-9);
+									strFindReplace(originText, ")", "}");
+									mongoText = "["+originLang+"](http://chat.ryzom.com/channel/pub-forge-"+originLang+"? "+originText+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
+								}
+								else
+								{
+									originLang = translatedLang;
+									mongoText = mongoText.substr(4, mongoText.size()-4);
+								}
+
+								if (originLang == "en") // in RC the icon are :gb:
+									mongoText = ":gb:"+mongoText;
+								else
+									mongoText = ":"+originLang+":"+mongoText;
+							}
+							else if (chatId == "FACTION_RF") // Only when it's a not translated text
+								sendToAllForge = true;
+
+						}
+						// Send for translation
+						else if (chatId == "FACTION_RF" || chatId == "FACTION_EN" || chatId == "FACTION_DE" || chatId == "FACTION_FR" || chatId == "FACTION_ES" || chatId == "FACTION_RU")
+						{
+							_Log.displayNL("%s|%s|*|%s-*|%s", string("#"+chatId).c_str(), fullName.c_str(), senderLang.c_str(), ucstr.toUtf8().c_str());
+							sendMessages = false; // We need translated it before
+						}
 					}
-					else if (chatId == "FACTION_RF" || chatId == "FACTION_EN" || chatId == "FACTION_DE" || chatId == "FACTION_FR" || chatId == "FACTION_ES" || chatId == "FACTION_RU")
+
+					if (sendMessages) // only send to mongo if it's not a message to translate
 					{
-						usedlang = SM->getLanguageCodeString(ci->Language);
-						_Log.displayNL("%s|%s|*|%s-*|%s", string("#"+chatId).c_str(), fullName.c_str(), usedlang.c_str(), ucstr.toUtf8().c_str());
-						sendToMongo = false;
-					}
-				}
-
 #ifdef HAVE_MONGO
-					if (sendToMongo) // only send to mongo if it's not a translated message
-					{
-						string userlang = SM->getLanguageCodeString(ci->Language);
+
 						if (sendToAllForge)
 						{
-							CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': 'FACTION_RF-EN', 'date': %f, 'ig': true, 'autosub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), date, userlang == "en"?"1":"0"));
-							CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': 'FACTION_RF-DE', 'date': %f, 'ig': true, 'autosub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), date, userlang == "de"?"1":"0"));
-							CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': 'FACTION_RF-ES', 'date': %f, 'ig': true, 'autosub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), date, userlang == "es"?"1":"0"));
-							CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': 'FACTION_RF-FR', 'date': %f, 'ig': true, 'autosub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), date, userlang == "fr"?"1":"0"));
-							CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': 'FACTION_RF-RU', 'date': %f, 'ig': true, 'autosub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), date, userlang == "ru"?"1":"0"));
-
+							CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': 'FACTION_RF-EN', 'date': %f, 'ig': true, 'autoSub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), date, senderLang == "en"?"1":"0"));
+							CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': 'FACTION_RF-DE', 'date': %f, 'ig': true, 'autoSub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), date, senderLang == "de"?"1":"0"));
+							CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': 'FACTION_RF-ES', 'date': %f, 'ig': true, 'autoSub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), date, senderLang == "es"?"1":"0"));
+							CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': 'FACTION_RF-FR', 'date': %f, 'ig': true, 'autoSub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), date, senderLang == "fr"?"1":"0"));
+							CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': 'FACTION_RF-RU', 'date': %f, 'ig': true, 'autoSub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), date, senderLang == "ru"?"1":"0"));
 						}
 						else
 						{
 							if (chatId == "FACTION_RF")
-								chatId = "FACTION_RF-"+toUpper(usedlang);
-							CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': '%s', 'date': %f, 'ig': true, 'autosub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatId.c_str(), date, userlang == usedlang?"1":"0"));
+							{
+								if (translatedLang.empty())
+									chatId = "FACTION_RF-"+toUpper(senderLang);
+								else
+									chatId = "FACTION_RF-"+toUpper(translatedLang);
+							}
+							CMongo::insert("ryzom_chats", toString("{ 'username': '%s', 'chat': '%s', 'chatType': 'dynamic', 'chatId': '%s', 'date': %f, 'ig': true, 'autoSub': %s }", CMongo::quote(fullName).c_str(), CMongo::quote(mongoText).c_str(), chatId.c_str(), date, (translatedLang.empty() || translatedLang == senderLang)?"1":"0"));
 						}
-					}
+
 #endif
 
-					if (!session->getChan()->getDontBroadcastPlayerInputs() && startPos != 0)
-					{
-						// add msg to the historic
-						CDynChatChan::CHistoricEntry entry;
-						entry.String = ucstr;
-						if (ci != NULL)
-							entry.SenderString = ci->Name;
-						else
-							entry.SenderString = "";
-
-						session->getChan()->Historic.push(entry);
-
-						ucstring content;
-						if (!session->getChan()->HideBubble)
-						{	//normal case
-							content = ucstr;
-						}
-						else
+						if (!session->getChan()->getDontBroadcastPlayerInputs())
 						{
-							// true for control channel (Ring)
-							ucstring tmp("{no_bubble}");
-							if (ucstr.find(tmp) == ucstring::npos)
-							{
-								tmp += ucstr;
-								content.swap(tmp);
+							// add msg to the historic
+							CDynChatChan::CHistoricEntry entry;
+							entry.String = ucstr;
+							if (ci != NULL)
+								entry.SenderString = ci->Name;
+							else
+								entry.SenderString = "";
+
+							session->getChan()->Historic.push(entry);
+
+							ucstring content;
+							if (!session->getChan()->HideBubble)
+							{	//normal case
+								content = ucstr;
 							}
 							else
 							{
-								content = ucstr;
+								// true for control channel (Ring)
+								ucstring tmp("{no_bubble}");
+								if (ucstr.find(tmp) == ucstring::npos)
+								{
+									tmp += ucstr;
+									content.swap(tmp);
+								}
+								else
+								{
+									content = ucstr;
+								}
+							}
+
+							// broadcast to other client in the channel
+							CDynChatSession *dcc = session->getChan()->getFirstSession();
+							while (dcc)
+							{
+								NLMISC::CEntityId receiverId = TheDataset.getEntityId(dcc->getClient()->getID());
+								CCharacterInfos* co = IOS->getCharInfos(receiverId);
+								CChatClient &receiverClient = getClient(dcc->getClient()->getID());
+
+								bool canSendChat = true;
+
+								if (EnableDeepL)
+								{
+									if (receiverClient.dontReceiveTranslation(originLang))
+									{
+										if (haveOriginMessage) // Only send untranslated message
+											canSendChat = false;
+									}
+									else if (!translatedLang.empty() && translatedLang != SM->getLanguageCodeString(co->Language))
+										canSendChat = false;
+								}
+
+								if (canSendChat)
+									sendChat(itCl->second->getChatMode(), dcc->getClient()->getID(), content.substr(startPos), sender, chanId);
+								dcc = dcc->getNextChannelSession(); // next session in this channel
 							}
 						}
-
-
-						// broadcast to other client in the channel
-						CDynChatSession *dcc = session->getChan()->getFirstSession();
-						while (dcc)
+						else
 						{
-							NLMISC::CEntityId receiverId = TheDataset.getEntityId(dcc->getClient()->getID());
-							CCharacterInfos* co = IOS->getCharInfos(receiverId);
-							if (!EnableDeepL || usedlang.empty() || usedlang == SM->getLanguageCodeString(co->Language))
-								sendChat(itCl->second->getChatMode(), dcc->getClient()->getID(), content.substr(startPos), sender, chanId);
-							dcc = dcc->getNextChannelSession(); // next session in this channel
+							// only send an echo to the sender
+							if (!EnableDeepL) // only send an echo to the sender
+								sendChat(itCl->second->getChatMode(), itCl->first, ucstr, sender, chanId);
 						}
-					}
-					else
-					{
-						// only send an echo to the sender
-						if (!EnableDeepL || usedlang.empty()) // only send an echo to the sender
-							sendChat(itCl->second->getChatMode(), itCl->first, ucstr, sender, chanId);
-					}
 
-					if (session->getChan()->getForwardPlayerIntputToOwnerService())
-					{
-						// send player input to service owner
-						NLNET::TServiceId serviceId(chanId.getCreatorId());
+						if (session->getChan()->getForwardPlayerIntputToOwnerService())
+						{
+							// send player input to service owner
+							NLNET::TServiceId serviceId(chanId.getCreatorId());
 
-						TPlayerInputForward	pif;
-						pif.ChanID = chanId;
-						pif.Sender = sender;
-						pif.Content = ucstr;
+							TPlayerInputForward	pif;
+							pif.ChanID = chanId;
+							pif.Sender = sender;
+							pif.Content = ucstr;
 
-						CMessage msgout( "DYN_CHAT:FORWARD");
-						msgout.serial(pif);
+							CMessage msgout( "DYN_CHAT:FORWARD");
+							msgout.serial(pif);
 
-						CUnifiedNetwork::getInstance()->send(serviceId, msgout);
-					}
-					if (session->getChan()->getUnifiedChannel())
-					{
-						// send the text to other shards
-						if (IChatUnifierClient::getInstance())
-							IChatUnifierClient::getInstance()->sendUnifiedDynChat(session->getChan()->getID(), senderName, ucstr);
+							CUnifiedNetwork::getInstance()->send(serviceId, msgout);
+						}
+
+						if (session->getChan()->getUnifiedChannel())
+						{
+							// send the text to other shards
+							if (IChatUnifierClient::getInstance())
+								IChatUnifierClient::getInstance()->sendUnifiedDynChat(session->getChan()->getID(), senderName, ucstr);
+						}
 					}
 				}
 			}
@@ -1098,11 +1126,20 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 		list<CEntityId>	logDest;
 
 		uint8 startPos = 0;
-		string usedlang;
-		if (EnableDeepL && ucstr.length() > 4 && ucstr[0] == ':' && ucstr[3] == ':') // check lang prefix
+		string usedlang = "";
+		string str = ucstr.toString();
+		if (EnableDeepL && str.length() > 4 && str[0] == ':' && str[3] == ':') // check lang prefix
 		{
-			usedlang = ucstr.toString().substr(1, 2);
+			usedlang = str.substr(1, 2);
 			startPos = 4;
+		}
+
+		bool areOriginal = true;
+		string originLang = usedlang;
+		if (EnableDeepL && str.length() > 8 && str[4] == '{' && str[5] == ':' && str[8] == ':') // check lang origin
+		{
+			areOriginal = false;
+			originLang = str.substr(6, 2);
 		}
 
 		for( itM = chatGrp.Members.begin(); itM != chatGrp.Members.end(); ++itM )
@@ -1113,7 +1150,14 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 			{
 				NLMISC::CEntityId receiverId = TheDataset.getEntityId(*itM);
 				CCharacterInfos* co = IOS->getCharInfos(receiverId);
-				if (usedlang != SM->getLanguageCodeString(co->Language))
+				CChatClient &client = getClient(*itM);
+
+				if (client.dontReceiveTranslation(originLang))
+				{
+					if (!areOriginal)
+						continue;
+				}
+				else if (usedlang != SM->getLanguageCodeString(co->Language))
 					continue;
 			}
 
@@ -1907,7 +1951,7 @@ void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const 
 					source_lang = mongoText.substr(6, 2);
 				string sourceText = mongoText.substr(9, endOfOriginal-9);
 				strFindReplace(sourceText, ")", "}");
-				mongoText = "["+source_lang+"](http://chatdev.ryzom.com/channel/"+rc_channel+source_lang+"? "+sourceText+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
+				mongoText = "["+source_lang+"](http://chat.ryzom.com/channel/"+rc_channel+source_lang+"? "+sourceText+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
 			}
 			else
 			{
@@ -1916,8 +1960,8 @@ void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const 
 			}
 
 
-			if (source_lang == "en") // in RC the icon are :us:
-				mongoText = ":us:"+mongoText;
+			if (source_lang == "en") // in RC the icon are :gb:
+				mongoText = ":gb:"+mongoText;
 			else
 				mongoText = ":"+source_lang+":"+mongoText;
 

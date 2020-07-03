@@ -33,21 +33,21 @@
 
 typedef uint8 TFilter;
 
- 
+
 /**
  * CChatClient
  * \author Stephane Coutelas
  * \author Nevrax France
  * \date 2002
  */
-class CChatClient 
+class CChatClient
 {
 public :
-	
+
 	/**
 	 *	Constructor
 	 */
-	CChatClient( const TDataSetRow& id ); 
+	CChatClient( const TDataSetRow& id );
 	/************************************************************************/
 	/* Destructor                                                                */
 	/************************************************************************/
@@ -62,7 +62,7 @@ public :
 	 */
 	const TDataSetRow &getDataSetIndex() const { return _DataSetIndex; }
 
-	/** 
+	/**
 	 * Mute or unmute this client, nobody will received chat from him
 	 * the player can be muted for a fixed period of time
 	 * If the player is unmuted, the delay is not taken into account
@@ -73,7 +73,7 @@ public :
 
 	/**
 	 *	Get the mute state of this client
-	 * 
+	 *
 	 * \return true if this client is muted
 	 */
 	bool isMuted();
@@ -101,7 +101,7 @@ public :
 	 * \param filterId the filter
 	 */
 	void filter( TFilter filterId );
-	
+
 	/**
 	 * Return true if the filter is on
 	 * \param filterId the filter
@@ -109,7 +109,7 @@ public :
 	bool isFilterOn( TFilter filterId ) const;
 
 	/**
-	 * Set the chat mode	 
+	 * Set the chat mode
 	 * \param mode the chat mode
 	 * \param dynChatChan If mode is dyn chat, then gives the channel
 	 */
@@ -132,32 +132,32 @@ public :
 	 */
 //	void setChatGroup( TGroupId gId) { _ChatGroup = gId; }
 
-	void setTeamChatGroup( TGroupId gId)	
-	{ 
+	void setTeamChatGroup( TGroupId gId)
+	{
 		_TeamChat = gId;
 	}
-	void setGuildChatGroup( TGroupId gId)	
-	{ 
+	void setGuildChatGroup( TGroupId gId)
+	{
 		_GuildChat = gId;
 	}
-	void setRegionChatGroup( TGroupId gId)	
-	{ 
+	void setRegionChatGroup( TGroupId gId)
+	{
 		_RegionChat = gId;
 	}
 
-	TGroupId getTeamChatGroup()	
-	{ 
+	TGroupId getTeamChatGroup()
+	{
 		return _TeamChat;
 	}
-	TGroupId getGuildChatGroup()	
-	{ 
+	TGroupId getGuildChatGroup()
+	{
 		return _GuildChat;
 	}
-	TGroupId getRegionChatGroup()	
-	{ 
+	TGroupId getRegionChatGroup()
+	{
 		return _RegionChat;
 	}
-	
+
 	/**
 	 * Get the chat group
 	 * \return the group's id
@@ -206,12 +206,14 @@ public :
 	// unsubscribe to all chat group
 	void unsubscribeAllChatGroup();
 
-	void disableTranslation( const std::string &lang );
+	void disableSendTranslation( const std::string &lang );
+	void disableReceiveTranslation( const std::string &lang );
 	void resetDisabledTranslations();
-	bool haveDisabledTranslation( const std::string &lang );
+	bool dontReceiveTranslation( const std::string &lang );
+	bool dontSendTranslation( const std::string &lang );
 
 private :
-	
+
 	/// CLient datasetrow
 	TDataSetRow			_DataSetIndex;
 	/// client character id
@@ -275,7 +277,8 @@ private :
 	/// keep infos about which string has been received by the client
 	std::vector<bool>	_KnownStrings;
 
-	std::vector<std::string>	_DontTranslate;
+	std::vector<std::string>	_DontReceiveTranslation;
+	std::vector<std::string>	_DontSendTranslation;
 
 	/**
 	 * Update the audience of this client

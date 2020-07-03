@@ -4577,17 +4577,20 @@ NLMISC_COMMAND (connectLangChannel, "Connect to lang channel", "<user id> <lang>
 
 	CPVPManager2 *inst = CPVPManager2::getInstance();
 
-	string action;
 	string lang = args[1];
-	if (lang != "en" && lang != "fr" && lang != "de" && lang != "ru" && lang != "es" && lang != "rf"
-		&& lang != "rf-en" && lang != "rf-fr" && lang != "rf-de" && lang != "rf-ru" && lang != "rf-es")
+	if (lang != "en" && lang != "fr" && lang != "de" && lang != "ru" && lang != "es" && lang != "rf" && !c->havePriv(":DEV:"))
 		return false;
 
-	bool leave = !c->havePriv(":DEV:"); // Since June 2020, no any lang channels, players only can leave it
-
+	bool leave = false;
 	if (args.size() > 2)
 		leave = args[2] == "1";
-	TChanID channel = inst->getFactionDynChannel(lang);
+
+	string channelName = lang;
+	// Convert langs to usr lang channels
+	if (lang == "en" || lang == "fr" || lang == "de" || lang == "ru" || lang == "es")
+		channelName = "usr_"+lang;
+
+	TChanID channel = inst->getFactionDynChannel(channelName);
 
 	if (channel != DYN_CHAT_INVALID_CHAN)
 	{
