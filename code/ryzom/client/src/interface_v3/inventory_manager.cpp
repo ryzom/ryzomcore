@@ -3769,6 +3769,21 @@ void CInventoryManager::sortBag()
 	if (pIconList != NULL) pIconList->needToSort();
 	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA3_TEXT));
 	if (pList != NULL) pList->needToSort();
+
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA4_ICONS));
+	if (pIconList != NULL) pIconList->needToSort();
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA4_TEXT));
+	if (pList != NULL) pList->needToSort();
+
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA5_ICONS));
+	if (pIconList != NULL) pIconList->needToSort();
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA5_TEXT));
+	if (pList != NULL) pList->needToSort();
+
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA6_ICONS));
+	if (pIconList != NULL) pIconList->needToSort();
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA6_TEXT));
+	if (pList != NULL) pList->needToSort();
 }
 
 // ***************************************************************************

@@ -822,6 +822,15 @@ private:
 #define LIST_PA3_TEXT				"ui:interface:inv_pa3:content:iil:bag_list"
 #define LIST_PA3_ICONS				"ui:interface:inv_pa3:content:iil:bag_icons"
 
+#define LIST_PA4_TEXT				"ui:interface:inv_pa4:content:iil:bag_list"
+#define LIST_PA4_ICONS				"ui:interface:inv_pa4:content:iil:bag_icons"
+
+#define LIST_PA5_TEXT				"ui:interface:inv_pa5:content:iil:bag_list"
+#define LIST_PA5_ICONS				"ui:interface:inv_pa5:content:iil:bag_icons"
+
+#define LIST_PA6_TEXT				"ui:interface:inv_pa6:content:iil:bag_list"
+#define LIST_PA6_ICONS				"ui:interface:inv_pa6:content:iil:bag_icons"
+
 // Theorically never used
 #define LIST_BAG2_TEXT				"ui:interface:inv_bag:content:iil:bag_list"
 #define LIST_BAG2_ICONS				"ui:interface:inv_bag:content:iil:bag_icons"
