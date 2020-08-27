@@ -151,13 +151,14 @@ public:
 private:
 	struct CPeople
 	{
-		CPeople() : Container(NULL), Chat(NULL), Online(ccs_offline), Blocked(false), ContactId(0) {}
+		CPeople() : Container(NULL), Chat(NULL), Online(ccs_offline), Blocked(false), ContactId(0), Group("") {}
 		NLMISC::CRefPtr<CGroupContainer> Container; // todo : replace this with a CChatWindow one day, for consistency
 		NLMISC::CRefPtr<CGroupContainer> Chat;
 		uint							GlobalID;
 		TCharConnectionState			Online;
 		bool							Blocked;
 		uint32							ContactId;
+		ucstring						Group;
 		bool operator < (const CPeople &other) const { return getName() < other.getName(); }
 		ucstring		getName() const { return Container->getUCTitle(); }
 	};

@@ -2307,6 +2307,62 @@ public:
 };
 REGISTER_ACTION_HANDLER( CHandlerMoveContact, "move_contact");
 
+uint lastPeopleIndexChangeGroup;
+//=================================================================================================================
+class CHandlerChangeContactGroupBegin : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	{
+		// retrieve the index of the people
+		CPeopleList *srcList;
+		if (PeopleInterraction.getPeopleFromCurrentMenu(srcList, lastPeopleIndexChangeGroup))
+		{
+			string	groupName= getParam(sParams, "group");
+			CInterfaceGroup *gc = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(groupName));
+			if (gc)
+				{
+					CGroupEditBox *geb = dynamic_cast<CGroupEditBox *>(gc->getGroup("change_contact_group_eb:eb"));
+					geb->setInputString(ucstring(""));
+				}
+			CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, sParams);
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerMoveContact, "change_contact_group_begin");
+
+//=================================================================================================================
+// Add a contact to the list
+class CHandlerChangeContactGroup : public IActionHandler
+{
+public:
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
+		if (pCaller)
+		{
+			// Get the modal edit box
+			CGroupEditBox *geb = dynamic_cast<CGroupEditBox *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:change_contact_group_eb:eb"));
+			if (geb && !geb->getInputString().empty())
+			{
+				// don't add if it is the player name
+				if (!ClientCfg.Local && (UserEntity->getEntityName() == geb->getInputString()))
+				{
+					displayVisibleSystemMsg(CI18N::get("uiCantAddYourSelfInContactList"));
+				}
+				else
+				{
+					PeopleInterraction.askAddContact(geb->getInputString(), peopleList);
+					geb->setInputString(ucstring(""));
+				}
+				geb->setInputString(ucstring(""));
+			}
+		}
+		CAHManager::getInstance()->runActionHandler("leave_modal", pCaller, "");
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerAddContact, "change_contact_group");
 
 //=================================================================================================================
 class CHandlerSortContacts : public IActionHandler
