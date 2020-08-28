@@ -5933,6 +5933,62 @@ string CCharacter::getPets()
 	return pets;
 }
 
+string CCharacter::getPetsInfos()
+{
+	string pets = "";
+
+	for (sint32 i = 0; i < (sint32)_PlayerPets.size(); ++i)
+	{
+		string sheet = _PlayerPets[i].PetSheetId.toString();
+		string ticketSheet = _PlayerPets[i].TicketPetSheetId.toString();
+
+		uint32 timeBeforeDespawn = 0;
+		if (CTickEventHandler::getGameCycle() <= _PlayerPets[i].DeathTick + 3 * 24 * 36000)
+			timeBeforeDespawn = (uint32)((_PlayerPets[i].DeathTick + 3 * 24 * 36000) - CTickEventHandler::getGameCycle());
+
+		string inBag = "0";
+		if (_PlayerPets[i].IsInBag)
+			inBag = "1";
+
+		string spawnFlag = "0";
+		if (_PlayerPets[i].spawnFlag)
+			spawnFlag = "1";
+
+		string name = _PlayerPets[i].CustomName.toUtf8();
+		string type = "X";
+		string state = "0";
+
+		if (_PlayerPets[i].TicketPetSheetId != CSheetId::Unknown)
+		{
+			const CStaticItem* form = CSheets::getForm(_PlayerPets[i].TicketPetSheetId);
+			if (form->Type == ITEM_TYPE::MEKTOUB_MOUNT_TICKET)
+				type = "M";
+			else if (form->Type == ITEM_TYPE::MEKTOUB_PACKER_TICKET)
+				type = "P";
+			else if (form->Type == ITEM_TYPE::ANIMAL_TICKET)
+				type = "A";
+		}
+
+		CPetAnimal::TStatus status = _PlayerPets[i].PetStatus;
+		if (status !=  CPetAnimal::db_unknown)
+			state = toString("%d", (uint32)(status));
+		else
+			state += "0";
+
+		uint32 packInv = INVENTORIES::pet_animal + i;
+		uint32 slots = _Inventory[packInv]->getUsedSlotCount();
+		uint32 bulk = _Inventory[packInv]->getInventoryBulk();
+		uint32 max_bulk = _Inventory[packInv]->getMaxBulk();
+		uint32 weight = _Inventory[packInv]->getInventoryWeight();
+		uint32 max_weight = _Inventory[packInv]->getMaxWeight();
+
+		pets += sheet+"|"+ticketSheet+"|"+type+"|"+state+"|"+toString("%d", _PlayerPets[i].Size)+"|"+toString("%d", _PlayerPets[i].StableId)+"|"+toString("%d,%d,%d", _PlayerPets[i].Landscape_X, _PlayerPets[i].Landscape_Y, _PlayerPets[i].Landscape_Z)+"|"+toString("%u", timeBeforeDespawn)+"|"+toString("%f/%f", _PlayerPets[i].Satiety, _PlayerPets[i].MaxSatiety)+"|"+toString("%u|%u/%u|%u/%u", slots, bulk, max_bulk, weight, max_weight)+"|"+inBag+"|"+spawnFlag+"|"+name+"\n";
+	}
+
+	return pets;
+}
+
+
 
 //-----------------------------------------------
 // CCharacter::checkAnimalCount return true if can add 'delta' pets to current player pets
@@ -6976,7 +7032,7 @@ void CCharacter::removeAnimal(CGameItemPtr item, CPetCommandMsg::TCommand mode)
 //-----------------------------------------------
 // remove pet from player corresponding to index and despawn it
 //-----------------------------------------------
-void CCharacter::removeAnimalIndex(uint32 beastIndex, CPetCommandMsg::TCommand commande)
+void CCharacter::removeAnimalIndex(uint32 beastIndex, CPetCommandMsg::TCommand commande, bool keepInventory)
 {
 	// make sure the index is in range
 	BOMB_IF(beastIndex >= _PlayerPets.size(),
@@ -7041,7 +7097,7 @@ void CCharacter::removeAnimalIndex(uint32 beastIndex, CPetCommandMsg::TCommand c
 	break;
 
 	case CPetCommandMsg::LIBERATE:
-		removePetCharacterAfterDeath((uint16)beastIndex);
+		removePetCharacterAfterDeath((uint16)beastIndex, keepInventory);
 		break;
 
 	default:
@@ -7212,7 +7268,7 @@ void CCharacter::updateAnimalDespawnDb(uint petIndex)
 //-----------------------------------------------
 // CCharacter::removePetCharacter Update database for spawned pets
 //-----------------------------------------------
-void CCharacter::removePetCharacterAfterDeath(uint32 index)
+void CCharacter::removePetCharacterAfterDeath(uint32 index, bool keepInventory)
 {
 	TLogContext_Item_PetDespawn logContext(_Id);
 
@@ -7224,7 +7280,7 @@ void CCharacter::removePetCharacterAfterDeath(uint32 index)
 		CBankAccessor_PLR::getPACK_ANIMAL().getBEAST(index).setDESPAWN(_PropertyDatabase, 0);
 		uint32 packInv = INVENTORIES::pet_animal + index;
 
-		if (packInv < INVENTORIES::max_pet_animal)
+		if (!keepInventory && packInv < INVENTORIES::max_pet_animal)
 		{
 			CInventoryPtr petInv = _Inventory[packInv];
 
@@ -7632,6 +7688,12 @@ void CCharacter::sendAnimalCommand(uint8 petIndexCode, uint8 command)
 			break;
 
 		case ANIMALS_ORDERS::FREE:
+			if (!checkPackAnimalEmptyInventory(petIndex))
+			{
+				CCharacter::sendDynamicSystemMessage(getId(), "PACK_ANIMAL_INVENTORY_MUST_BE_EMPTY");
+				continue;
+			}
+
 			if (_PlayerPets[petIndex].IsMounted)
 				continue;
 

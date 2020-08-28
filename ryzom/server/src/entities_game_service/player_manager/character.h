@@ -994,6 +994,9 @@ public:
 	// return a list of pets in text format (M=Mount, P=Packer, A=Animal, 0=None)
 	std::string getPets();
 
+	// return a list of pets informations (Sheet, Size, State, Position, Volume, Weight)
+	std::string getPetsInfos();
+
 	// return true if can add 'delta' pets to current player pets
 	bool checkAnimalCount(const NLMISC::CSheetId &PetTicket, bool sendMessage, sint32 delta);
 
@@ -1077,7 +1080,7 @@ public:
 	void removeAnimal(CGameItemPtr item, CPetCommandMsg::TCommand command);
 
 	// remove pet from player corresponding to index and despawn it
-	void removeAnimalIndex(uint32 beastIndex, CPetCommandMsg::TCommand command);
+	void removeAnimalIndex(uint32 beastIndex, CPetCommandMsg::TCommand command, bool keepInventory=false);
 
 	// update coordinate for spawned pets
 	void updatePetCoordinateAndDatabase();
@@ -1086,7 +1089,7 @@ public:
 	void updateAnimalDespawnDb(uint petIndex);
 
 	// remove Pet Character after his death
-	void removePetCharacterAfterDeath(uint32 index);
+	void removePetCharacterAfterDeath(uint32 index, bool keepInventory = false);
 
 	// Update database for spawned pets
 	void updatePetDatabase();

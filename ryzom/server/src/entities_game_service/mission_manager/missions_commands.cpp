@@ -565,6 +565,9 @@ CInventoryPtr getInventory(CCharacter *c, const string &inv)
 			case INVENTORIES::pet_animal2:
 			case INVENTORIES::pet_animal3:
 			case INVENTORIES::pet_animal4:
+			case INVENTORIES::pet_animal5:
+			case INVENTORIES::pet_animal6:
+			case INVENTORIES::pet_animal7:
 			case INVENTORIES::guild:
 			case INVENTORIES::player_room:
 				inventoryPtr = c->getInventory(selectedInv);
@@ -590,6 +593,9 @@ INVENTORIES::TInventory getTInventory(const string &inv)
 		case INVENTORIES::pet_animal2:
 		case INVENTORIES::pet_animal3:
 		case INVENTORIES::pet_animal4:
+		case INVENTORIES::pet_animal5:
+		case INVENTORIES::pet_animal6:
+		case INVENTORIES::pet_animal7:
 		case INVENTORIES::guild:
 		case INVENTORIES::player_room:
 			inventory = strinv;
@@ -802,6 +808,9 @@ NLMISC_COMMAND(getItemList, "get list of items of character by filter", "<uid> [
 		inventories.push_back(INVENTORIES::pet_animal2);
 		inventories.push_back(INVENTORIES::pet_animal3);
 		inventories.push_back(INVENTORIES::pet_animal4);
+		inventories.push_back(INVENTORIES::pet_animal5);
+		inventories.push_back(INVENTORIES::pet_animal6);
+		inventories.push_back(INVENTORIES::pet_animal7);
 		inventories.push_back(INVENTORIES::guild);
 		inventories.push_back(INVENTORIES::player_room);
 	}
@@ -902,6 +911,9 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 		inventories.push_back(INVENTORIES::pet_animal2);
 		inventories.push_back(INVENTORIES::pet_animal3);
 		inventories.push_back(INVENTORIES::pet_animal4);
+		inventories.push_back(INVENTORIES::pet_animal5);
+		inventories.push_back(INVENTORIES::pet_animal6);
+		inventories.push_back(INVENTORIES::pet_animal7);
 		inventories.push_back(INVENTORIES::guild);
 		inventories.push_back(INVENTORIES::player_room);
 	}
@@ -3215,6 +3227,16 @@ NLMISC_COMMAND(getPlayerPets, "get player pets", "<uid>")
 	return true;
 }
 
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(getPlayerPetsInfos, "get player pets infos", "<uid>")
+{
+	GET_ACTIVE_CHARACTER
+
+	string pets = c->getPetsInfos();
+
+	log.displayNL("%s", pets.c_str());
+	return true;
+}
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(spawnPlayerPet, "spawn player pet", "<uid> <slot>")
@@ -3235,6 +3257,24 @@ NLMISC_COMMAND(spawnPlayerPet, "spawn player pet", "<uid> <slot>")
 		log.displayNL("OK");
 	return true;
 }
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(removePlayerPet, "put player pet", "<uid> <slot> [<keepInventory=0|1>]")
+{
+	if (args.size() < 2)
+		return false;
+
+	GET_ACTIVE_CHARACTER
+
+	uint32 index;
+	fromString(args[1], index);
+
+	bool keepInventory =  args.size() > 2 && args[2] == "1";
+
+	c->removeAnimalIndex(index, CPetCommandMsg::LIBERATE, keepInventory);
+	return true;
+}
+
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(setPlayerPetName, "change the name of a player pet", "<uid> <index> <name>")
@@ -4355,7 +4395,7 @@ NLMISC_COMMAND(despawnTargetSource, "Despawn the target source", "<uid>")
 	{
 		TDataSetRow sourceRowId = c->getTargetDataSetRow();
 		CHarvestSource	*source = CHarvestSourceManager::getInstance()->getEntity( sourceRowId );
-		if (!source->wasProspected())
+		if (source && !source->wasProspected())
 		{
 			source->spawnEnd(false);
 			log.displayNL("OK");
@@ -4364,5 +4404,42 @@ NLMISC_COMMAND(despawnTargetSource, "Despawn the target source", "<uid>")
 	}
 
 	log.displayNL("ERR");
+	return true;
+}
+
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(setServerPhrase, "Set an IOS phrase", "<id> <phrase> [<language code>]")
+{
+	if (args.size() < 2)
+		return false;
+
+	string phraseName = args[0];
+	ucstring content;
+	content.fromUtf8(args[1]);
+	ucstring phraseContent = phraseName;
+	phraseContent += "(){[";
+	phraseContent += content;
+	phraseContent += "]}";
+
+	string msgname = "SET_PHRASE";
+	bool withLang = false;
+	string lang = "";
+	if (args.size() == 3)
+	{
+		lang = args[2];
+		if (lang != "all")
+		{
+			withLang = true;
+			msgname = "SET_PHRASE_LANG";
+		}
+	}
+
+	NLNET::CMessage	msgout(msgname);
+	msgout.serial(phraseName);
+	msgout.serial(phraseContent);
+	if (withLang)
+		msgout.serial(lang);
+	sendMessageViaMirror("IOS", msgout);
 	return true;
 }
