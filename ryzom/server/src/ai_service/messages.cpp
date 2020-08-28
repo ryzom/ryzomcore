@@ -1153,7 +1153,7 @@ void	sAggroGain(TDataSetRow playerBot, TDataSetRow targetBot)
 	CAIGainAggroMsg	msg(targetBot, playerBot, false);
 	msg.send("EGS");
 
-	if (entity->getActionFlags() & RYZOMACTIONFLAGS::InWater)
+	if (entity && entity->getRyzomType()==RYZOMID::player && (entity->getActionFlags() & RYZOMACTIONFLAGS::InWater))
 		return;
 
 	CAIEntityPhysical *botEntity = CAIEntityPhysicalLocator::getInstance()->getEntity(targetBot);
