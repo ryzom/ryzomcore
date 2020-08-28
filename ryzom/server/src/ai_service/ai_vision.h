@@ -53,12 +53,12 @@ public:
 	{}
 	virtual ~CAIVision()		{}
 
-	template <class VectorClass> 
-	void updateBotsAndPlayers(CAIInstance *aii, const VectorClass &xy,uint32 playerRadiusInMeters,uint32 botRadiusInMeters)
+	template <class VectorClass>
+	void updateBotsAndPlayers(CAIInstance *aii, const VectorClass &xy,uint32 playerRadiusInMeters,uint32 botRadiusInMeters, uint32 cell=0)
 	{
 //		_lastUpdate=CTimeInterface::gameCycle();
-		updatePlayers(aii, xy, playerRadiusInMeters);
-		updateBots(aii, xy, botRadiusInMeters);
+		updatePlayers(aii, xy, playerRadiusInMeters, cell);
+		updateBots(aii, xy, botRadiusInMeters, cell);
 	}
 
 	void clear ()
@@ -85,7 +85,7 @@ public:
 	{
 	public:
 		iterator(): _vect(NULL), _vision(NULL) {}
-		iterator(const CAIVision *vision): _vision(vision) 
+		iterator(const CAIVision *vision): _vision(vision)
 		{
 			if (!vision->players().empty())
 			{
@@ -116,7 +116,7 @@ public:
 			#endif
 			const NLMISC::CDbgPtr<T>	&dbgRef=*_it;
 			T*	objPtr=(T*)dbgRef;
-			
+
 			return	objPtr;
 		}
 		iterator operator++()
@@ -156,17 +156,17 @@ public:
 
 	private:
 		const CAIVision *_vision;
-		const std::vector<NLMISC::CDbgPtr<T> > *_vect; 
+		const std::vector<NLMISC::CDbgPtr<T> > *_vect;
 		typename std::vector<NLMISC::CDbgPtr<T> >::const_iterator _it;
 	};
 
 	//----------------------------------------------------------------------
 	// stl-like begin() and end()
-	iterator begin() 
+	iterator begin()
 	{
 		return iterator(this);
 	}
-	iterator end() 
+	iterator end()
 	{
 		return iterator();
 	}
@@ -190,17 +190,17 @@ private:
 
 
 
-	template <class VectorClass> 
-		void updateBots(CAIInstance *aii, const VectorClass &xy,uint32 botRadiusInMeters)
+	template <class VectorClass>
+		void updateBots(CAIInstance *aii, const VectorClass &xy, uint32 botRadiusInMeters, uint32 cell)
 	{
 		H_AUTO(VisionUpdateBots);
 
 		_botsVisionCenter = xy;
 		_botsVisionRadius = botRadiusInMeters;
-		
+
 		const CAIEntityMatrixIteratorTblLinear *tbl;
 		typename CAIEntityMatrix<T>::CEntityIteratorLinear it;
-		
+
 		_bots.clear();
 		if (botRadiusInMeters==0)
 			return;
@@ -211,24 +211,26 @@ private:
  		for (it = aii->botMatrix().beginEntities(tbl,xy); !it.end(); ++it)
 		{
 			CAIEntityPhysical const* phys = const_cast<T*>(&*it)->getSpawnObj();
-			if (phys && phys->aipos().quickDistTo(aiVectorXy) < botRadiusInMeters)
+
+			CMirrorPropValueRO<uint32> botCell( TheDataset, phys->dataSetRow(), DSPropertyCELL );
+			if ((cell >= 0 || botCell() == cell) && phys && phys->aipos().quickDistTo(aiVectorXy) < botRadiusInMeters)
 			{
 				_bots.push_back(const_cast<T*>(&*it));
 			}
 		}
 	}
-	
-	template <class VectorClass> 
-		void updatePlayers(CAIInstance *aii, const VectorClass &xy,uint32 playerRadiusInMeters)
+
+	template <class VectorClass>
+		void updatePlayers(CAIInstance *aii, const VectorClass &xy, uint32 playerRadiusInMeters, uint32 cell = 0)
 	{
 		H_AUTO(VisionUpdatePlayers);
-		
+
 		_playersVisionCenter = xy;
 		_playersVisionRadius = playerRadiusInMeters;
-		
+
 		const CAIEntityMatrixIteratorTblLinear *tbl;
 		typename CAIEntityMatrix<T>::CEntityIteratorLinear it;
-		
+
 		_players.clear();
 		if (playerRadiusInMeters==0)
 			return;
@@ -238,16 +240,14 @@ private:
 		for (it = aii->playerMatrix().beginEntities(tbl,xy); !it.end(); ++it)
 		{
 			CAIEntityPhysical const* phys = const_cast<T*>(&*it)->getSpawnObj();
-
-			CMirrorPropValueRO<uint32> cell( TheDataset, phys->dataSetRow(), DSPropertyCELL );
-
-			if (phys && phys->aipos().quickDistTo(aiVectorXy) < playerRadiusInMeters)
+			CMirrorPropValueRO<uint32> botCell( TheDataset, phys->dataSetRow(), DSPropertyCELL );
+			if ((cell >= 0 || botCell() == cell) && phys && phys->aipos().quickDistTo(aiVectorXy) < playerRadiusInMeters)
 			{
 				_players.push_back(const_cast<T*>(&*it));
 			}
 		}
 	}
-	
+
 	//----------------------------------------------------------------------
 	// private data
 

@@ -770,7 +770,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 
 				string usedlang = senderLang;
 
-				if (EnableDeepL  && !senderClient.dontSendTranslation(senderLang))
+				if (EnableDeepL)
 				{
 					chatType = "dynamic";
 					if (ucstr[0] == '>') // Sent directly when prefixed by '>', it's the anti-translation code
@@ -790,7 +790,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 									source_lang = mongoText.substr(6, 2);
 								string sourceText = mongoText.substr(9, endOfOriginal-9);
 								strFindReplace(sourceText, ")", "}");
-								mongoText = "["+source_lang+"](http://chat.ryzom.com/channel/pub-universe-"+source_lang+"? "+sourceText+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
+								mongoText = "["+source_lang+"](http://chat.ryzom.com/channel/pub-uni-"+source_lang+"? "+sourceText+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
 							}
 							else
 							{
@@ -812,6 +812,11 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 							sendToAllUni = true;
 
 						chatInGroup( grpId, ucstr.substr(1), sender );
+					}
+					else if (senderClient.dontSendTranslation(senderLang))
+					{
+						sendToAllUni = true;
+						chatInGroup( grpId, ucstr, sender );
 					}
 					else
 					{
@@ -1034,7 +1039,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 										if (haveOriginMessage) // Only send untranslated message
 											canSendChat = false;
 									}
-									else if (!translatedLang.empty() && translatedLang != SM->getLanguageCodeString(co->Language))
+									else if (!translatedLang.empty() && co && translatedLang != SM->getLanguageCodeString(co->Language))
 										canSendChat = false;
 								}
 
@@ -1157,7 +1162,7 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 					if (!areOriginal)
 						continue;
 				}
-				else if (usedlang != SM->getLanguageCodeString(co->Language))
+				else if (co == NULL || usedlang != SM->getLanguageCodeString(co->Language))
 					continue;
 			}
 
@@ -1921,6 +1926,7 @@ void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const 
 	{
 
 		string usedlang = "";
+		string source_lang = "";
 		string mongoText = ucstr.toUtf8();
 
 		string::size_type endOfOriginal = mongoText.find("}@{");
@@ -1940,15 +1946,17 @@ void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const 
 			else if (chan == "universe")
 			{
 				chatId = "FACTION_"+toUpper(usedlang);
-				rc_channel = "pub-universe-";
+				rc_channel = "pub-uni-";
 			}
 
-			string source_lang = usedlang;
+
 
 			if (endOfOriginal != string::npos)
 			{
 				if (mongoText.size() > 9)
 					source_lang = mongoText.substr(6, 2);
+				else
+					source_lang = usedlang;
 				string sourceText = mongoText.substr(9, endOfOriginal-9);
 				strFindReplace(sourceText, ")", "}");
 				mongoText = "["+source_lang+"](http://chat.ryzom.com/channel/"+rc_channel+source_lang+"? "+sourceText+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
@@ -1985,7 +1993,7 @@ void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const 
 
 				NLMISC::CEntityId receiverId = TheDataset.getEntityId(dcc->getClient()->getID());
 				CCharacterInfos* co = IOS->getCharInfos(receiverId);
-				if (!EnableDeepL || usedlang.empty() || usedlang == SM->getLanguageCodeString(co->Language))
+				if (!EnableDeepL || usedlang.empty() || (co != NULL && usedlang == SM->getLanguageCodeString(co->Language)))
 					sendFarChat((CChatGroup::TGroupType)12, dcc->getClient()->getID(), ucstr.substr(startPos), ucstring("~")+ucstring(name), *chanId);
 				dcc = dcc->getNextChannelSession(); // next session in this channel
 			}

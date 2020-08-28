@@ -41,13 +41,13 @@ CAIState const* CStateInstance::getActiveState() const
 	if (!this)
 		return NULL; // ugly! -> to remove  date = 19/05/2004.
 #endif
-	
+
 	if (_PunctualState)	// the puntual state is active !
 		return	_PunctualState;
-	
+
 	if (_state)	// the normal state is active !
 		return	_state;
-	
+
 	// no state is active !
 	return	NULL;
 }
@@ -110,7 +110,7 @@ void CStateInstance::callScriptCallBack(IScriptContext* caller, TStringId const&
 	AIVM::CByteCodeEntry const* const codeScript = getScriptCallBackPtr(funcName);
 	if (!codeScript || !codeScript->isValid())
 		return;
-	
+
 	interpretCode(caller, *codeScript);	//	effectively calls the call back.
 }
 
@@ -153,15 +153,15 @@ void CStateInstance::dumpVarsAndFunctions(CStringWriter& sw) const
 	sw.append("float variables:");
 	FOREACHC(varIt, TLogicVarList, _LogicVar)
 		sw.append(" "+CStringMapper::unmap(varIt->first)+" = "+NLMISC::toString(varIt->second));
-	
+
 	sw.append("string variables:");
 	FOREACHC(varIt, TStrLogicVarList, _StrLogicVar)
 		sw.append(" "+CStringMapper::unmap(varIt->first)+" = "+varIt->second);
-	
+
 	sw.append("context variables:");
 	FOREACHC(varIt, TCtxLogicVarList, _CtxLogicVar)
 		sw.append(" "+CStringMapper::unmap(varIt->first)+" = "+NLMISC::toStringPtr(varIt->second));
-	
+
 	sw.append("callBacks:");
 	FOREACHC(varIt, TCallBackList, _CallBacks)
 		sw.append(" "+CStringMapper::unmap(varIt->first));
@@ -183,7 +183,7 @@ void CStateInstance::interpretCodeOnChildren(CByteCodeEntry const& codeScriptEnt
 	vector<CSmartPtr<CGroup> > tmpList;
 	FOREACH(childIt, CPersistentStateInstance::TChildList, getPersistentStateInstance()->childs())
 		tmpList.push_back((*childIt)->getGroup());
-	
+
 	FOREACH(childIt, vector<CSmartPtr<CGroup> >, tmpList)
 		(*childIt)->getPersistentStateInstance()->interpretCode(this, codeScriptEntry);
 }
@@ -195,7 +195,7 @@ IScriptContext* CStateInstance::findContext(NLMISC::TStringId const strId)
 #endif
 	std::vector<CGroup*> grps;
 	this->getGroup()->getAIInstance()->findGroup(grps, CStringMapper::unmap(strId));
-	if (grps.size()==1)
+	if (grps.size() >= 1)
 		return grps.back()->getPersistentStateInstance();
 	else
 		return NULL;
@@ -213,7 +213,7 @@ void CStateInstance::init(CAIState* startState)
 	_state=
 	_PunctualState=
 	_NextPunctualState=NULL;
-	
+
 	_CancelPunctualState = false;
 	_NextState = startState;
 	_LogicVarChanged = false;
@@ -244,12 +244,12 @@ void CStateInstance::setGlobalNelVar(std::string const& varId, std::string value
 
 void CStateInstance::blockUserEvent(uint32 eventId)
 {
-	_UserEventBlocked |= (1 << eventId); 
+	_UserEventBlocked |= (1 << eventId);
 }
 
 void CStateInstance::unblockUserEvent(uint32 eventId)
 {
-	_UserEventBlocked &= ~(1 << eventId); 
+	_UserEventBlocked &= ~(1 << eventId);
 }
 
 bool CStateInstance::isUserEventBlocked(uint32 eventId) const
@@ -264,15 +264,15 @@ bool CStateInstance::isUserEventBlocked(uint32 eventId) const
 void CPersistentStateInstance::updateStateInstance()
 {
 	// deal with timer events -----------------------------------------
-	
+
 	// Event: State Timeout
 	if (_StateTimeout.testOnce())
 		processStateEvent(getEventContainer().EventPositionalStateTimeout);
-	
+
 	// Event: Punctual State Timeout
 	if (_PunctualStateTimeout.testOnce())
 		processStateEvent(getEventContainer().EventPunctualStateTimeout);
-	
+
 	// Event: User Timer n Triggered
 	for (uint i=0;i<4;++i)
 	{
@@ -280,7 +280,7 @@ void CPersistentStateInstance::updateStateInstance()
 			continue;
 		processStateEvent(getEventContainer().EventUserTimer[i]);
 	}
-	
+
 
 
 	// Event logic var changed
@@ -297,9 +297,9 @@ void CPersistentStateInstance::updateStateInstance()
 		}
 		_LogicVarChanged = false;
 	}
-	
+
 	// deal with positional state change ------------------------------
-	
+
 	// if state change requested (and not in punctual state) then setup new state
 	if	(_NextState)
 	{
@@ -310,27 +310,27 @@ void CPersistentStateInstance::updateStateInstance()
 			oldState = _state;
 			processStateEvent(getEventContainer().EventEndOfState);
 		}
-		
+
 		// switch state	& initalise state status flags
 		_state = _NextState;
 		_NextState = NULL;
 		_StateTimeout.disable();
-		
+
 		if (_PunctualState || _NextPunctualState)
 			return;
-		
+
 		removeExceptForState(_state);
 		processStateEvent(getEventContainer().EventStartOfState);
 		stateChange(oldState, _state);
 	}
-	
+
 	// deal with start of punctual state ------------------------------
-	
+
 	// if state change requested then setup new state
 	if (_NextPunctualState)
 	{
 		CAIState const* oldState = NULL;
-		
+
 		breakable
 		{
 			if (_PunctualState)
@@ -344,21 +344,21 @@ void CPersistentStateInstance::updateStateInstance()
 				break;
 			}
 		}
-		
+
 		// switch state	& initalize state status flags
 		_PunctualState = _NextPunctualState;
 		_NextPunctualState = NULL;
 		_CancelPunctualState = false;
 		_PunctualStateTimeout.disable();
-		
+
 		// initalize new state
 		CAIState const* const newState = _PunctualState;
-		
+
 		removeExceptForState(newState);
 		processStateEvent(getEventContainer().EventStartOfState, newState);
 		stateChange(oldState, newState);
 	}
-	
+
 	// must be done after start of state
 	if (_FirstBotSpawned)
 	{
@@ -366,29 +366,29 @@ void CPersistentStateInstance::updateStateInstance()
 		processStateEvent(getEventContainer().EventFirstBotSpawned);
 	}
 	// deal with end of punctual state --------------------------------
-	
+
 	if (!_CancelPunctualState)
 		return;
-	
+
 	_CancelPunctualState = false;
-	
+
 	// if there was an active punctual state then cancel it
 	if (!_PunctualState)
 		return;
-	
+
 	// switch state	& initalise state status flags
 	_PunctualStateTimeout.disable();
 	_StateTimeout.resume();	// this line just in case timeout suspended during punctual state
-	
+
 	// close down current state
 	CAIState const* const punctualState = _PunctualState;
-	
+
 	processStateEvent(getEventContainer().EventEndOfState, punctualState);
 	_PunctualState = NULL;
-	
+
 	//	this removes obj that depends on state affectation existence.
 	removeExceptForState(_state);
-	
+
 	// specialized virtual state change call.
 	stateChange(punctualState, _state);
 }

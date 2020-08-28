@@ -3926,7 +3926,21 @@ void CGrpProfileFaction::checkTargetsAround()
 		const	uint32	playerRadius=assistPlayers||attackPlayers?thisGrpNpc._AggroRange:0;
 		const	uint32	botRadius=assistBots||attackBots?thisGrpNpc._AggroRange:0;
 
-		Vision.updateBotsAndPlayers(thisGrpNpc.getAIInstance(), centerPos, playerRadius, botRadius);
+		CCont<CBot >::iterator itBot=_Grp->bots().begin();
+		uint32 cellValue = 0;
+		CBot* bot = *itBot;
+		if (bot)
+		{
+			CSpawnBot* spawnBot = bot->getSpawnObj();
+			if (spawnBot)
+			{
+				CMirrorPropValueRO<uint32> cell( TheDataset, spawnBot->dataSetRow(), DSPropertyCELL );
+				cellValue = cell();
+			} else
+				nlinfo("BOT NOT SPAWN TO GET CELL");
+		}
+
+		Vision.updateBotsAndPlayers(thisGrpNpc.getAIInstance(), centerPos, playerRadius, botRadius, cellValue);
 	}
 
 	// Assist players
@@ -4046,7 +4060,7 @@ void CGrpProfileFaction::checkTargetsAround()
 
 void CGrpProfileFaction::updateProfile(uint ticksSinceLastUpdate)
 {
-	checkTargetsAround	();
+	checkTargetsAround();
 	CGrpProfileNormal::updateProfile(ticksSinceLastUpdate);
 }
 

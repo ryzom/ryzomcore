@@ -88,7 +88,7 @@ class CCharacterBotChatBeginEndReceiver: public CCharacterBotChatBeginEnd
 			for (uint i=0;i<BotChatStart.size();i+=2)
 				CAIS::instance().beginBotChat(BotChatStart[i+1],BotChatStart[i]);
 		}
-		
+
 		// terminate ended bot chats
 		{
 			for (uint i=0;i<BotChatEnd.size();i+=2)
@@ -155,7 +155,7 @@ extern void cbSpawnEasterEgg( NLNET::CMessage& msgin, const std::string &service
 extern void cbDespawnEasterEgg( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
 
 
-TUnifiedCallbackItem CbArray[] = 
+TUnifiedCallbackItem CbArray[] =
 {
 	{	"ADDED_ENTITIES",					cbAddEntities,					},
 	{	"SRC_SPWN_VLD",						cbValidateSourceSpawn			},
@@ -273,7 +273,7 @@ public:
 
 	virtual void doOperation()
 	{
-			
+
 		nldebug("Tick %u, CTaskRingGoLive2 (Spawn) session %u instance %u %u", getTime(), _SessionId.asInt(), _AiInstance, _IsBase);
 		CAIActions::IExecutor* executer;
 		executer = CAIActions::getExecuter();
@@ -284,11 +284,11 @@ public:
 		dataRec.init(&Pdr);
 
 		dataRec.applyToExecutor(*executer);
-		{			
+		{
 			std::string cmd = toString("spawnManagers r2.%04d.%s", _SessionId.asInt(), _IsBase?"base":"act");
 			ICommand::execute(cmd, *InfoLog);
 		}
-		{			
+		{
 			std::string cmd = toString("spawnManagers r2.%04d.%s", _SessionId.asInt(), _IsBase?"base.zone_trigger":"act.zone_trigger");
 			ICommand::execute(cmd, *InfoLog);
 		}
@@ -300,7 +300,7 @@ public:
 private:
 	uint32 _AiInstance;
 	TSessionId _SessionId;
-	bool _IsBase;	
+	bool _IsBase;
 };
 
 
@@ -309,12 +309,12 @@ private:
 
 static void cbR2GoLive( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
 {
-	
+
 	TSessionId sessionId;
 	uint32 aiInstance;
 	bool isBase;
 	uint32 size;
-	
+
 	msgin.serial(sessionId);
 	msgin.serial(aiInstance);
 	msgin.serial(isBase);
@@ -322,7 +322,7 @@ static void cbR2GoLive( NLNET::CMessage& msgin, const std::string &serviceName, 
 	if (size != 0)
 	{
 		// case where we want to start an instance but (at start of an edition session) but animation not started
-	
+
 		uint32 tick = CTimeInterface::gameCycle();
 		CTaskRingGoLive1* task1 = new CTaskRingGoLive1( aiInstance, isBase);
 		CTaskRingGoLive2* task2 = new CTaskRingGoLive2( sessionId, aiInstance, isBase);
@@ -330,15 +330,15 @@ static void cbR2GoLive( NLNET::CMessage& msgin, const std::string &serviceName, 
 
 
 		uint8* buffer = new uint8[size];
-		msgin.serialBuffer(buffer, size);	
+		msgin.serialBuffer(buffer, size);
 		task2->Pdr.fromBuffer((const char*)buffer, size);
 		delete [] buffer;
-			
+
 
 		CAIS::instance().addTickedTask(tick + 1,task1);
 		CAIS::instance().addTickedTask(tick + 2, task2);
 
-		
+
 	}
 
 	if( isBase )
@@ -349,7 +349,7 @@ static void cbR2GoLive( NLNET::CMessage& msgin, const std::string &serviceName, 
 		CUnifiedNetwork::getInstance()->send("DSS",msgout);
 		nlinfo( "R2An: ack sent to DSS for anim session %u", aiInstance );
 	}
-	
+
 	return;
 }
 
@@ -367,7 +367,7 @@ public:
 	{
 		ICommand::execute(toString("createDynamicAIInstance %d", _AiInstance), *InfoLog);
 
-		
+
 		// load a primitiv.binprim from DSS
 		//ICommand::execute(toString("despawnManagers %s", isBase?"base":"act"), *InfoLog);
 		ICommand::execute(toString("unloadPrimitiveFile \"r2.%04d.act.primitive\"", _AiInstance), *InfoLog);
@@ -385,7 +385,7 @@ public:
 
 private:
 	uint32 _AiInstance;
-	bool _IsBase;	
+	bool _IsBase;
 };
 
 static void cbR2StopLive( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
@@ -397,7 +397,7 @@ static void cbR2StopLive( NLNET::CMessage& msgin, const std::string &serviceName
 	msgin.serial(isBase);
 
 	uint32 tick = CTimeInterface::gameCycle();
-	CTask<uint32>* task1 = new CTaskR2StopLive( aiInstance, isBase);	
+	CTask<uint32>* task1 = new CTaskR2StopLive( aiInstance, isBase);
 	CAIS::instance().addTickedTask(tick ,task1);
 
 }
@@ -425,15 +425,15 @@ private:
 };
 
 static void cbR2StartInstance( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
-{	
+{
 	uint32 aiInstance;
-	msgin.serial(aiInstance);	
+	msgin.serial(aiInstance);
 
 	uint32 tick = CTimeInterface::gameCycle();
-	CTask<uint32>* task1 = new CTaskR2StartInstance( aiInstance);	
+	CTask<uint32>* task1 = new CTaskR2StartInstance( aiInstance);
 	CAIS::instance().addTickedTask(tick ,task1);
 
-	
+
 }
 
 //--------------------------------------------------------------------------
@@ -492,7 +492,7 @@ void cbValidateSourceSpawn( NLNET::CMessage& msgin, const std::string &serviceNa
 			if ( canSpawnHere && (wPos.getFlags() & (RYAI_MAP_CRUNCH::Water | RYAI_MAP_CRUNCH::Interior)) )
 				canSpawnHere = false;
 				//continue;
-	
+
 			msgout.fastWrite( canSpawnHere );
 
 			// TODO: Browse the possible surfaces for the position (x,y), then keep only the one(s)
@@ -569,7 +569,7 @@ void CMsgAIOpenMgrs::callback (const std::string &serviceName, uint8 sid)
 			// failed to identify type so give up
 			nlwarning("Failed to translate '%s' into a known type - request to open manager %04d (%s) ignored",
 				Type[i].c_str(),MgrId[i],Name[i].c_str());
-			std::string msgStr("Failed to open "+Name[i]+" due to bad type: '"+Type[i]+"'"); 
+			std::string msgStr("Failed to open "+Name[i]+" due to bad type: '"+Type[i]+"'");
 			CMsgAIFeedback(msgStr).send("AIDS");
 		}
 	}
@@ -657,17 +657,17 @@ void CMessages::init()
 	TRANSPORT_CLASS_REGISTER( CHandledAIGroupDespawnedMsg );
 	TRANSPORT_CLASS_REGISTER( CGiveItemRequestMsg );
 	TRANSPORT_CLASS_REGISTER( CReceiveItemRequestMsg );
-	
+
 	//	Classes used for comms between AI and EGS
 	TRANSPORT_CLASS_REGISTER (CPetSpawnMsgImp);
 	TRANSPORT_CLASS_REGISTER (CPetSpawnConfirmationMsg);
 
 	TRANSPORT_CLASS_REGISTER (CPetCommandMsgImp);
 	TRANSPORT_CLASS_REGISTER (CPetCommandConfirmationMsg);
-	
+
 	TRANSPORT_CLASS_REGISTER (CBSAIDeathReport);
 	TRANSPORT_CLASS_REGISTER (CCAisActionMsg);
-	
+
 	TRANSPORT_CLASS_REGISTER (CEGSExecutePhraseMsg);
 	TRANSPORT_CLASS_REGISTER (CEGSExecuteAiActionMsg);
 
@@ -708,7 +708,7 @@ void CMessages::init()
 	TRANSPORT_CLASS_REGISTER (CChangeCreatureHPMsg);
 	TRANSPORT_CLASS_REGISTER (CChangeCreatureModeMsgImp);
 	TRANSPORT_CLASS_REGISTER (CQueryEgs);
-	
+
 	// setup the callback array
 	CUnifiedNetwork::getInstance()->addCallbackArray( CbArray, sizeof(CbArray)/sizeof(CbArray[0]) );
 
@@ -732,7 +732,7 @@ void	CEnableAggroOnPlayerImp::callback (const std::string &name, NLNET::TService
 		{
 			nlwarning("CEnableAggroOnPlayerImp::callback: unknow entity %s on this AIS !", EntityRowId.toString().c_str());
 		}
-		
+
 		return;
 	}
 
@@ -794,7 +794,7 @@ void	CChangeActionFlagMsgImp::callback (const std::string &name, NLNET::TService
 {
 	const uint32 size = (uint32)Entities.size();
 	nlassert( size == ActionFlags.size() && size == Values.size());
-	
+
 	for (uint32 i = 0 ; i < size ; ++i)
 	{
 		CAIEntityPhysical	*const	phys=CAIS::instance().getEntityPhysical(Entities[i]);
@@ -825,7 +825,7 @@ void	CChangeCreatureModeMsgImp::callback (const std::string &name, NLNET::TServi
 //{
 //public:
 //	TDataSetRow		EntityRowId;
-//	
+//
 //	virtual void description ()
 //	{
 //		className ("CAIAskForInfosOnEntityMsg");
@@ -842,7 +842,7 @@ void	CChangeCreatureModeMsgImp::callback (const std::string &name, NLNET::TServi
 //public:
 //	TDataSetRow					EntityRowId;
 //	std::vector<std::string>	Infos;
-//	
+//
 //	virtual void description ()
 //	{
 //		className ("CAIInfosOnEntityMsg");
@@ -972,7 +972,7 @@ void CBSAIDeathReport::callback(const std::string &name, NLNET::TServiceId id)
 			}
 
 		}
-		
+
 		switch(phys->getRyzomType())
 		{
 		case RYZOMID::npc:
@@ -982,10 +982,10 @@ void CBSAIDeathReport::callback(const std::string &name, NLNET::TServiceId id)
 				const	CMgrNpc			&mgr		=	spawnGrp.getPersistent().mgr();
 
 				spawnGrp.addBotToDespawnAndRespawnTime	(&(sb->getPersistent()), spawnGrp.getPersistent().despawnTime(), spawnGrp.getPersistent().respawnTime());
-				
+
 				if (spawnGrp.getPersistent().getSquadLeader(false)==&sb->getPersistent())
 					spawnGrp.getPersistent().processStateEvent(mgr.EventSquadLeaderKilled);
-				
+
 
 				CBotNpc* bot = NLMISC::safe_cast<CBotNpc*>(&(sb->getPersistent()));
 				spawnGrp.botHaveDied	(bot);
@@ -996,7 +996,7 @@ void CBSAIDeathReport::callback(const std::string &name, NLNET::TServiceId id)
 				{
 					nlinfo("NPC: TRIGGER EVENT BOT KILLED");
 				}
-				
+
 				spawnGrp.getPersistent().processStateEvent(mgr.EventBotKilled);
 
 				std::string eventGroupKilled;
@@ -1020,7 +1020,7 @@ void CBSAIDeathReport::callback(const std::string &name, NLNET::TServiceId id)
 
 					std::vector<TDataSetRow> playerAggroable;
 					for (; aggroIt != aggroEnd; ++aggroIt)
-					{		
+					{
 						if (CMirrors::getEntityId(aggroIt->first).getType() != RYZOMID::player)
 							continue;
 						CAIEntityPhysical* ep = CAIS::instance().getEntityPhysical(aggroIt->first);
@@ -1033,7 +1033,7 @@ void CBSAIDeathReport::callback(const std::string &name, NLNET::TServiceId id)
 							continue;
 						playerAggroable.push_back(aggroIt->first);
 					}
-					
+
 					NLNET::CMessage	msgout("TRIGGER_WEBIG");
 					if (!eventBotKilled.empty())
 						msgout.serial(eventBotKilled);
@@ -1107,7 +1107,7 @@ void	CAITauntImp::callback (const std::string &name, NLNET::TServiceId id)
 
 	if (!aggroOwner)
 		return;
-	
+
 	aggroOwner->maximizeAggroFor(PlayerRowId);
 }
 
@@ -1145,13 +1145,16 @@ void	sAggroLost(TDataSetRow playerBot, TDataSetRow targetBot)
 
 void	sAggroGain(TDataSetRow playerBot, TDataSetRow targetBot)
 {
-	CAIEntityPhysical	*entity=CAIS::instance().getEntityPhysical(playerBot);	//	necessary ?
+	CAIEntityPhysical	*entity=CAIS::instance().getEntityPhysical(playerBot);
 	if	(	!entity
 		||	CMirrors::getEntityId(playerBot).getType()!=RYZOMID::player)
 		return;
 
 	CAIGainAggroMsg	msg(targetBot, playerBot, false);
 	msg.send("EGS");
+
+	if (entity->getActionFlags() & RYZOMACTIONFLAGS::InWater)
+		return;
 
 	CAIEntityPhysical *botEntity = CAIEntityPhysicalLocator::getInstance()->getEntity(targetBot);
 	CSpawnBotNpc* bot = dynamic_cast<CSpawnBotNpc*>(botEntity);
@@ -1170,7 +1173,7 @@ void	sAggroGain(TDataSetRow playerBot, TDataSetRow targetBot)
 						CBot* bot = *itBot;
 						CSpawnBot *const sp = bot->getSpawnObj();
 						if	(sp && sp->isAlive())
-						{	
+						{
 							CAIGainAggroMsg	msg(sp->dataSetRow(), playerBot, true);
 							msg.send("EGS");
 						}
