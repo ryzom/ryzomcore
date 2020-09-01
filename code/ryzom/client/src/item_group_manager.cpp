@@ -733,6 +733,12 @@ std::string CItemGroupManager::toDbPath(INVENTORIES::TInventory inventory)
 		return LIST_PA2_TEXT; break;
 	case INVENTORIES::pet_animal4:
 		return LIST_PA3_TEXT; break;
+	case INVENTORIES::pet_animal5:
+		return LIST_PA4_TEXT; break;
+	case INVENTORIES::pet_animal6:
+		return LIST_PA5_TEXT; break;
+	case INVENTORIES::pet_animal7:
+		return LIST_PA6_TEXT; break;
 	case INVENTORIES::player_room:
 		return LIST_ROOM_TEXT;break;
 	case INVENTORIES::guild:
