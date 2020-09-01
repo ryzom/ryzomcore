@@ -281,9 +281,8 @@ void CPeopleList::sortEx(TSortOrder order)
 	}
 
 	CGroupContainer *group = _BaseContainer;
-	ucstring groupName = "";
 	uint groupIndex = 0;
-	
+
 	for(k = 0; k < _Peoples.size(); ++k)
 	{
 		bool newGroup = false;
@@ -296,10 +295,9 @@ void CPeopleList::sortEx(TSortOrder order)
 			newGroup = true;
 			++groupIndex;
 		}
-		if (newGroup && groupIndex < _GroupContainers.size())
+		if (newGroup && groupIndex < _GroupContainers.size() && _GroupContainers.size() > 1)
 		{
 			group = _GroupContainers[groupIndex].second;
-			groupName = _GroupContainers[groupIndex].first;
 			_BaseContainer->attachContainer(group);
 		}
 		group->attachContainer(_Peoples[k].Container);
@@ -556,7 +554,7 @@ void CPeopleList::readContactGroups()
 					if (index < _Peoples.size())
 					{
 						_Peoples[index].Group = propGroup.str();
-						if (_GroupContainers.empty() || _GroupContainers.back().first != propName.str()) {
+						if (_GroupContainers.empty() || _GroupContainers.back().first != propGroup.str()) {
 							vector<pair<string, string> > properties;
 							properties.push_back(make_pair(string("posparent"), string("parent")));
 							properties.push_back(make_pair(string("id"), _ContainerID + "_group_" + toString(_GroupContainers.size())));
