@@ -110,6 +110,11 @@ public:
 	void	setContactId(uint index, uint32 contactId);
 	sint	getIndexFromContactId(uint32 contactId);
 
+	// For Friend Groups management
+	void changeGroup(uint index, const ucstring &groupName);
+	void readContactGroups();
+	void saveContactGroups();
+
 	/** Display a message for the given people
 	  * If the window is closed, it causes it to blink (and also the parent window)
 	  */
@@ -165,6 +170,7 @@ private:
 	typedef std::vector<CPeople> TPeopleVect;
 private:
 	CGroupContainerPtr				_BaseContainer;
+	std::vector<std::pair<std::string, NLMISC::CRefPtr<CGroupContainer> > >				_GroupContainers;
 	NLMISC::CRefPtr<CChatWindow>	_ChatWindow;
 	TPeopleVect						_Peoples;
 	CPeopleListDesc::TContactType   _ContactType;
