@@ -528,6 +528,23 @@ void CPeopleList::changeGroup(uint index, const ucstring &groupName)
 void CPeopleList::readContactGroups()
 {
 	_GroupContainers.clear();
+
+	// Create default group even if no groups defined
+	vector<pair<string, string> > properties;
+	properties.push_back(make_pair(string("posparent"), string("parent")));
+	properties.push_back(make_pair(string("id"), _ContainerID + "_group_0"));
+	properties.push_back(make_pair(string("title"), "General"));
+	CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance("people_list_group_header", "ui:interface", properties, false);
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(group);
+	gc->setUCTitle(ucstring("General"));
+	gc->setSavable(false);
+	
+	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
+	pRoot->addGroup (gc);
+	_BaseContainer->attachContainer(gc);
+	
+	_GroupContainers.push_back(make_pair("", gc));
+	
 	const std::string filename = CInterfaceManager::getInstance()->getSaveFileName("contactgroups", "xml");
 	try
 	{
