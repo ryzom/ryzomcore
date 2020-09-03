@@ -546,8 +546,10 @@ void CPeopleList::readContactGroups()
 			uint nb = 0;
 			while (node)
 			{
-				CXMLAutoPtr propName = xmlGetProp(node, (xmlChar*)"name");
-				CXMLAutoPtr propGroup = xmlGetProp(node, (xmlChar*)"group");
+				CXMLAutoPtr propName;
+				propName = (char*) xmlGetProp(node, (xmlChar*)"name");
+				CXMLAutoPtr propGroup;
+				propGroup = (char*) xmlGetProp(node, (xmlChar*)"group");
 				if (propName && propGroup)
 				{
 				        sint index = getIndexFromName(propName.str());
