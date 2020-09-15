@@ -790,7 +790,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 									source_lang = mongoText.substr(6, 2);
 								string sourceText = mongoText.substr(9, endOfOriginal-9);
 								strFindReplace(sourceText, ")", "}");
-								mongoText = "["+source_lang+"](http://chat.ryzom.com/channel/pub-uni-"+source_lang+"? "+sourceText+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
+								mongoText = "["+source_lang+"](http://chat.ryzom.com/channel/pub-uni-"+source_lang+"?%20"+encodeURIComponent(sourceText)+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
 							}
 							else
 							{
@@ -939,7 +939,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 										originLang = mongoText.substr(6, 2);
 									string originText = mongoText.substr(9, endOfOriginal-9);
 									strFindReplace(originText, ")", "}");
-									mongoText = "["+originLang+"](http://chat.ryzom.com/channel/pub-forge-"+originLang+"? "+originText+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
+									mongoText = "["+originLang+"](http://chat.ryzom.com/channel/pub-forge-"+originLang+"?%20"+encodeURIComponent(sourceText)+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
 								}
 								else
 								{
@@ -1959,7 +1959,7 @@ void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const 
 					source_lang = usedlang;
 				string sourceText = mongoText.substr(9, endOfOriginal-9);
 				strFindReplace(sourceText, ")", "}");
-				mongoText = "["+source_lang+"](http://chat.ryzom.com/channel/"+rc_channel+source_lang+"? "+sourceText+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
+				mongoText = "["+source_lang+"](http://chat.ryzom.com/channel/"+rc_channel+source_lang+"?%20"+encodeURIComponent(sourceText)+") "+mongoText.substr(endOfOriginal+4, mongoText.size()-endOfOriginal-4);
 			}
 			else
 			{
