@@ -846,11 +846,26 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const ucstring &ucsText,
 
 
 	// Clean bubble from translation system
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TRANSLATION_ONLY_AS_TOOLTIP_CB", false);
+	bool originalFirst = node->getValueBool();
+
 	ucstring::size_type pos = 0;
+	ucstring::size_type textSize = ucsText.size();
+	string::size_type startTr = ucsText.find(ucstring("{:"));
 	string::size_type endOfOriginal = ucsText.find(ucstring("}@{"));
 	if (endOfOriginal != string::npos)
-		pos = endOfOriginal+4;
-
+	{
+		if (!originalFirst)
+		{
+			pos = endOfOriginal+4;
+		}
+		else
+		{
+			pos = startTr+5;
+			textSize = endOfOriginal;
+		}
+	}
+		
 	// Output the message in a bubble
 
 	bool show = false;
@@ -870,7 +885,7 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const ucstring &ucsText,
 				return;
 
 		// Get a bubble
-		CGroupInSceneBubble *bubble = newBubble (ucsText.substr(pos));
+		CGroupInSceneBubble *bubble = newBubble (ucsText.substr(pos, textSize-pos));
 		if (bubble)
 		{
 			// Link the bubble
