@@ -588,7 +588,8 @@ void CBotChatPageTrade::updateTradeModal()
 			if ((_BuyMean == MoneyGuildXP) || (_BuyMean == GuildMoney) || (_BuyMean == GuildMoneyGuildXP))
 			{
 				uint64 totalPrice = (uint64) priceWithoutFame * (uint64) quantity;
-				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:PRICE")->setValue64(totalPrice);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE")->setValue64(totalPrice);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_WITH_FAME")->setValue64(totalPrice);
 				uint64 totalXP = (uint64) getCurrItemXP() * (uint64) quantity;
 				CGuildManager *pGM = CGuildManager::getInstance();
 
