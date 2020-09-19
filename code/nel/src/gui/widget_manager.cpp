@@ -2296,7 +2296,7 @@ namespace NLGUI
 		// Hide menu if the key is pushed
 //		if ((eventDesc.getKeyEventType() == CEventDescriptorKey::keydown) && !_ModalStack.empty() && !eventDesc.getKeyAlt() && !eventDesc.getKeyCtrl() && !eventDesc.getKeyShift())
 		// Hide menu (or popup menu) is ESCAPE pressed
-		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == NLMISC::KeyESCAPE )
+		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keydown && eventDesc.getKey() == NLMISC::KeyESCAPE )
 		{
 			if( hasModal() )
 			{
@@ -2307,7 +2307,7 @@ namespace NLGUI
 		}
 
 		// Manage "quit window" If the Key is ESCAPE, no captureKeyboard
-		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == NLMISC::KeyESCAPE )
+		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keydown && eventDesc.getKey() == NLMISC::KeyESCAPE )
 		{
 			// Get the last escapable active top window. NB: this is ergonomically better.
 			CInterfaceGroup	*win= getLastEscapableTopWindow();
