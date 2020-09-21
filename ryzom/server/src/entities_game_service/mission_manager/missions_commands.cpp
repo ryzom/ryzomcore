@@ -2519,7 +2519,6 @@ NLMISC_COMMAND(setUrl, "changes the url of a bot", "<uid> <groupname> [<url>] [<
 	return true;
 }
 
-
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(temporaryRename, "rename a player for the event", "<uid> <new name>")
 {
@@ -2556,7 +2555,6 @@ NLMISC_COMMAND(getArkMissions,"dump character ark missions","<uid>")
 
 	return true;
 }
-
 
 //-----------------------------------------------
 NLMISC_COMMAND(getPlayerStats,"get player stats","<uid> <stat1,stat2,stat3..>")
@@ -2686,7 +2684,6 @@ NLMISC_COMMAND(addCheckPos,"add check pos","<uid> <x> <y> <radius> <mission_name
 
 	return true;
 }
-
 
 //-----------------------------------------------
 NLMISC_COMMAND(spawnArkMission,"spawn Mission","<uid> <bot_name> <mission_name>")
@@ -3146,11 +3143,11 @@ NLMISC_COMMAND(addPlayerPet, "add a pet to player", "<uid> <sheetid> [size] [nam
 	CSheetId ticket = CSheetId(args[1]);
 
 	uint8 size = 100;
-	if (args.size() == 3)
+	if (args.size() >= 3)
 		fromString(args[2], size);
 
 	ucstring customName;
-	if (args.size() == 4)
+	if (args.size() >= 4)
 		customName.fromUtf8(args[3]);
 
 	if (ticket != CSheetId::Unknown)
