@@ -1195,13 +1195,13 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 
 	if (get)
 	{
-		fx = e->getState().X() / 1000.f;
-		fy = e->getState().Y() / 1000.f;
-		fz = e->getState().Z() / 1000.f;
+		fx = e->getState().X() / 1000;
+		fy = e->getState().Y() / 1000;
+		fz = e->getState().Z() / 1000;
 		if (cell < 0)
-			value = toString ("%.2f,%.2f,%.2f@%d", fx, fy, fz, -cell);
-		else
-			value = toString ("%.2f,%.2f,%.2f", fx, fy, fz);
+                        value = toString ("%2.f,%2.f,%2.f@%d", fx, fy, fz, -cell);
+                else
+                        value = toString ("%2.f,%2.f,%2.f", fx, fy, fz);
 	}
 	else
 	{

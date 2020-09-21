@@ -193,7 +193,7 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 	case AttackRound: { switch (event) {
 		case StartOfState: // Init the round
 		{
-			OUTPOST_INF("Outpost %s: Starting attack round %d, level %d", _Name.c_str(), _FightData._CurrentCombatRound+1, _FightData._CurrentCombatLevel+1);
+			OUTPOST_INF("Outpost %s: Starting attack round %d, level %d", _Name.c_str(), _FightData._CurrentCombatRound+2, _FightData._CurrentCombatLevel+2);
 			actionSetTimer0(computeRoundTime());						//< Round timer
 			if (computeSquadCountB(_FightData._CurrentCombatLevel) > 0)
 				actionSetTimer1(computeSpawnDelay(_FightData._CurrentCombatLevel));	//< SpawnTimer
@@ -217,20 +217,22 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 			bool won;
 			if (_FightData._KilledSquads < (_FightData._SpawnedSquadsA+_FightData._SpawnedSquadsB))
 			{
-				if (_FightData._CurrentCombatLevel>0)
-					--_FightData._CurrentCombatLevel;
+				if (_FightData._CurrentCombatLevel > 1)
+					_FightData._CurrentCombatLevel -= 2;
+				if (_FightData._CurrentCombatLevel > 0)
+					_FightData._CurrentCombatLevel--;
 				won = false;
 			}
 			else
 			{
-				++_FightData._CurrentCombatLevel;
+				_FightData._CurrentCombatLevel += 2;
 				if (_FightData._CurrentCombatLevel > _FightData._MaxAttackLevel)
 					_FightData._MaxAttackLevel = _FightData._CurrentCombatLevel;
 				won = true;
 			}
 			actionPayBackAliveSquads(OUTPOSTENUMS::OutpostOwner);
 			actionDespawnAllSquads();
-			++_FightData._CurrentCombatRound;
+			_FightData._CurrentCombatRound += 2;
 			// If that was last round finish fight
 			if (_FightData._CurrentCombatRound>=computeRoundCount())
 			{
@@ -311,14 +313,15 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 		{
 			if (_FightData._MaxAttackLevel > _CurrentOutpostLevel)
 			{
-				if (!isBelongingToAGuild())
-				{
-					_CurrentOutpostLevel = _FightData._MaxAttackLevel;
-					actionChangeOwner();
-					actionPostNextState(Peace);
-				}
-				else
-					actionPostNextState(DefenseBefore);
+				// Changes Made By Ulukyn for Outpost Refactoring Project
+				//if (!isBelongingToAGuild())
+				//{
+				_CurrentOutpostLevel = _FightData._MaxAttackLevel;
+				actionChangeOwner();
+				actionPostNextState(Peace);
+				//}
+				//else
+				//	actionPostNextState(DefenseBefore);
 			}
 			else
 				actionPostNextState(Peace);

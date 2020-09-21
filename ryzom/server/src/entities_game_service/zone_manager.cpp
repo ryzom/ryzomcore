@@ -373,6 +373,7 @@ bool CPlace::build(const NLLIGO::CPrimZone * zone,uint16 id, bool reportAutorise
 					spawn->getType() == RESPAWN_POINT::KARAVAN ||
 					spawn->getType() == RESPAWN_POINT::RANGER ||
 					spawn->getType() == RESPAWN_POINT::NEWBIELAND ||
+					spawn->getType() == RESPAWN_POINT::RANGER ||
 					spawn->getType() == RESPAWN_POINT::RESPAWNABLE )
 				{
 					(const_cast<CTpSpawnZone *>(spawn))->setPlaceType(_PlaceType);

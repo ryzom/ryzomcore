@@ -65,11 +65,7 @@ public:
 	uint16 getMainPlace();
 	void updateTargetingChars();
 	const TDataSetRow & getEntityRowId();
-	void tpWanted(sint32 x, sint32 y, sint32 z, bool useHeading = false, float heading = 0.0f, uint8 continent = 0xFF, sint32 cell = 0);
-	sint32 getPowoCell() const;
-	const std::string &getPowoScope() const;
-	NLMISC::CVector getBuildingExitPos() const;
-	uint16 getBuildingExitZone() const;
+	void tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading = false, float heading = 0.0f , uint8 continent = 0xFF, sint32 cell = 0);
 	void updateOutpostAdminFlagInDB();
 	//@}
 };

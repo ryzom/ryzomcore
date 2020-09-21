@@ -170,27 +170,6 @@ void CGuildCharProxy::tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading, 
 	_ModuleCore->tpWanted(x,y,z,useHeading,heading,continent,cell);
 }
 
-sint32 CGuildCharProxy::getPowoCell() const
-{
-	return _ModuleCore->getPowoCell();
-}
-
-const std::string &CGuildCharProxy::getPowoScope() const
-{
-	return _ModuleCore->getPowoScope();
-}
-
-NLMISC::CVector CGuildCharProxy::getBuildingExitPos() const
-{
-	return _ModuleCore->getBuildingExitPos();
-}
-
-uint16 CGuildCharProxy::getBuildingExitZone() const
-{
-	return _ModuleCore->getBuildingExitZone();
-}
-
-
 //----------------------------------------------------------------------------
 void CGuildCharProxy::updateOutpostAdminFlagInDB()
 {
