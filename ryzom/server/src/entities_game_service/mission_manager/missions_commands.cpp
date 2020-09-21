@@ -1711,7 +1711,6 @@ NLMISC_COMMAND(accessPowo, "give access to the powo", "<uid> [playername] [insta
 							if (building)
 								c->setBuildingExitZone(building->getDefaultExitSpawn());
 						}
-					
 					}
 
 					log.displayNL("%d", cell);

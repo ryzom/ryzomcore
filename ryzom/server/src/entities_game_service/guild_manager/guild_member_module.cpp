@@ -581,6 +581,25 @@ void CGuildMemberModule::clearOnlineGuildProperties()
 				targetProxy.tpWanted(x,y,z,true,heading);
 			}
 		}
+		else if (targetProxy.getPowoCell() == cell && targetProxy.getPowoScope() == "guild")
+		{
+			CVector exitPos = targetProxy.getBuildingExitPos();
+			if (exitPos.x != 0)
+			{
+				targetProxy.tpWanted(exitPos.x, exitPos.y, exitPos.z);
+			}
+			else
+			{
+				const CTpSpawnZone* zone = CZoneManager::getInstance().getTpSpawnZone(targetProxy.getBuildingExitZone());
+				if (zone)
+				{
+					sint32 x, y, z;
+					float heading;
+					zone->getRandomPoint(x, y, z, heading);
+					targetProxy.tpWanted(x, y, z, true, heading);
+				}
+			}
+		}
 	}
 }
 
