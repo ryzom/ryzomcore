@@ -444,9 +444,13 @@ namespace NLGUI
 			SGlobalTexture ()
 			{
 				FromGlobaleTexture = true;
+				Scale = 1.f;
 			}
 			uint32				Width, Height;
 			uint32				DefaultWidth, DefaultHeight;
+			// used by texture atlas to unscale individual texture
+			// getTextureSizeFromId() calls to return 1x size for GUI.
+			float				Scale;
 			NL3D::UTexture		*Texture;
 			std::string			Name;
 			bool				FromGlobaleTexture;

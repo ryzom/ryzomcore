@@ -200,8 +200,37 @@ int main(int argc, char *argv[])
 
 	Args.setVersion(getDisplayVersion());
 	Args.setDescription("Ryzom client");
+	Args.addArg("p", "patch", "patch", "Name of the file to use tp xdelta the source file");
+	Args.addArg("s", "source", "source", "Name of source file to xdelta with patch file");
+	Args.addArg("d", "destination", "destination", "Name of destination operation (patch or unpack)");
+	Args.addArg("u", "unpack", "unpack", "Name of bnp file to unpack");
 
 	if (!Args.parse(argc, argv)) return 1;
+
+	if (Args.haveArg("p") && Args.haveArg("p") && Args.haveArg("p"))
+	{
+		string	patchName = Args.getArg("p").front();
+		string	sourceName = Args.getArg("s").front();
+		string	destinationName = Args.getArg("d").front();
+
+		std::string errorMsg;
+		CXDeltaPatch::TApplyResult ar = CXDeltaPatch::apply(patchName, sourceName, destinationName, errorMsg);
+		nlinfo("%s", errorMsg.c_str());
+		return ar;
+	}
+
+	// initialize patch manager and set the ryzom full path, before it's used
+	CPatchManager *pPM = CPatchManager::getInstance();
+
+	if (Args.haveArg("u") && Args.haveArg("d"))
+	{
+		string	bnpName = Args.getArg("u").front();
+		string	destinationName = Args.getArg("d").front();
+		vector<string> vFilenames;
+		if (pPM->bnpUnpack(bnpName, destinationName, vFilenames))
+			return 0;
+		return 1;
+	}
 
 	// create logs in temporary directory
 	createDebug(CPath::getTemporaryDirectory().c_str(), true, true);
@@ -244,8 +273,6 @@ int main(int argc, char *argv[])
 	printf("\n");
 	printf("Checking %s files to patch...\n", convert(CI18N::get("TheSagaOfRyzom")).c_str());
 
-	// initialize patch manager and set the ryzom full path, before it's used
-	CPatchManager *pPM = CPatchManager::getInstance();
 
 	// use PatchUrl
 	vector<string> patchURLs;
