@@ -721,7 +721,7 @@ CClientConfig::CClientConfig()
 
 	R2EDLoadDynamicFeatures	= 0;
 
-	CheckR2ScenarioMD5 = true;
+	CheckR2ScenarioMD5 = false;
 
 	DisplayTPReason = false;
 
