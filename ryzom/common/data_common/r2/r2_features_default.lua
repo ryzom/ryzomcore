@@ -859,10 +859,10 @@ local registerFeature = function ()
 					Enum= { "uiR2EDWalk", "uiR2EDRun"},
 					Visible=true
 				},
-				{Name="Level", Type="Number", WidgetStyle="EnumDropDown", Category="uiR2EDRollout_NpcCustom",
-					Enum= { "uiR2EDLowLevel", "uiR2EDAverageLevel", "uiR2EDHighLevel", "uiR2EDVeryHighLevel"}, SecondRequestFunc=function(value) r2.updateLevel(value, true) end,
-					Visible=function(this) return this:isGroupedAndLeader() or not this:isGrouped() and not this:isBotObject() end
-				},
+				--{Name="Level", Type="Number", WidgetStyle="EnumDropDown", Category="uiR2EDRollout_NpcCustom",
+				--	Enum= { "uiR2EDLowLevel", "uiR2EDAverageLevel", "uiR2EDHighLevel", "uiR2EDVeryHighLevel"}, SecondRequestFunc=function(value) r2.updateLevel(value, true) end,
+				--	Visible=function(this) return this:isGroupedAndLeader() or not this:isGrouped() and not this:isBotObject() end
+				--},
 			},
 			-- from "BaseClass"
 			getAvailableCommands = function(this, dest)
