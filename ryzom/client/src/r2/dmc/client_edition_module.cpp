@@ -2455,7 +2455,7 @@ void CClientEditionModule::loadScenarioSucceded(const std::string& filename, con
 
 	}
 
-	if (!modifiedByMD5.empty() && !locked.empty() && locked == "RunOnly")
+	if (ClientCfg.CheckR2ScenarioMD5 && !modifiedByMD5.empty() && !locked.empty() && locked == "RunOnly")
 	{
 		bool ok = hasCharacterSameCharacterIdMd5(modifiedByMD5);
 		if (!ok)
