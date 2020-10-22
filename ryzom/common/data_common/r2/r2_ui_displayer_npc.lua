@@ -399,7 +399,7 @@ function r2:initTypeUI(instance)
 			end
 		end
 
-		if instance.TypeNPC != place then
+		if instance.TypeNPC ~= place then
 			-- TypeNPC does not remain valid between versions, it actually shouldn't be saved...
 			debugInfo("Initialize or update TypeNPC");
 			r2.requestSetGhostNode(instance.InstanceId, "TypeNPC", place)
