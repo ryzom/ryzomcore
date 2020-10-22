@@ -382,7 +382,6 @@ namespace NLGUI
 		void dummySet(const std::string &value);
 
 	public:
-
 		// export some properties
 		REFLECT_EXPORT_START(CInterfaceElement, CReflectable)
 			REFLECT_BOOL ("active", getActive, setActive);
@@ -397,6 +396,7 @@ namespace NLGUI
 			REFLECT_SINT32 ("h_real", getHReal, dummySet);
 			REFLECT_STRING ("id", getIdByValue, dummySet);
 			REFLECT_STRING ("sizeref", getSizeRefAsString, setSizeRef);
+			REFLECT_STRING ("posparent", getPosParent, setPosParent);
 			REFLECT_LUA_METHOD("updateCoords", luaUpdateCoords);
 			REFLECT_LUA_METHOD("invalidateCoords", luaInvalidateCoords);
 			REFLECT_LUA_METHOD("invalidateContent", luaInvalidateContent);
@@ -523,6 +523,8 @@ namespace NLGUI
 		void parseSizeParent( const std::string &id );
 		void setSizeParent( const std::string &id );
 		void getSizeParent( std::string &id ) const;
+
+		std::string getPosParent() const;
 		
 		void setSerializable( bool b ){ serializable = b; }
 		bool IsSerializable() const{ return serializable; }

@@ -78,6 +78,13 @@ function r2.ScenarioWindow:initScenarioWindow()
 		for k, type in pairs(tmp) do
 			lockCB:addText(type)
 		end
+		
+		if config.CheckR2ScenarioMD5 == 0 then
+			local lockGrp = scenarioWnd:find("locked")
+			local titleGrp = scenarioWnd:find("title")
+			lockGrp.active = false -- Hide lock group
+			titleGrp.posparent = lockGrp.posparent -- Rearrange
+		end
 
 	end
 
