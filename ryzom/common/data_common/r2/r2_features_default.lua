@@ -405,7 +405,7 @@ local registerFeature = function ()
 				{Name="Aggro", Type="Number",  Min="0", Max="120", DefaultValue="30", DefaultInBase=1, 
 					Visible=function(this) return this:isGroupedAndLeader() or not this:isGrouped() and not this:isBotObject() end
 				},
-				{Name="TypeNPC", Type="Number", WidgetStyle="EnumDropDown", SecondRequestFunc=r2.updateType,
+				{Name="TypeNPC", Type="Number", WidgetStyle="EnumDropDown", SecondRequestFunc=function(value) r2:updateType(true) end,
 					Enum= {}, Visible=true, DefaultValue="-1",
 				},	
 
@@ -858,7 +858,7 @@ local registerFeature = function ()
 					Visible=true
 				},
 				{Name="Level", Type="Number", WidgetStyle="EnumDropDown", Category="uiR2EDRollout_NpcCustom",
-					Enum= { "uiR2EDLowLevel", "uiR2EDAverageLevel", "uiR2EDHighLevel", "uiR2EDVeryHighLevel"}, SecondRequestFunc=r2.updateLevel,
+					Enum= { "uiR2EDLowLevel", "uiR2EDAverageLevel", "uiR2EDHighLevel", "uiR2EDVeryHighLevel"}, SecondRequestFunc=function(value) r2.updateLevel(value, true) end,
 					Visible=function(this) return this:isGroupedAndLeader() or not this:isGrouped() and not this:isBotObject() end
 				},
 			},

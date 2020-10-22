@@ -401,7 +401,8 @@ function r2:initTypeUI(instance)
 
 		if tostring(instance.TypeNPC)=="-1" then
 			-- TypeNPC
-			r2:setNpcAttribute(instance.InstanceId, "TypeNPC", place)
+			debugInfo("FIXME: TypeNPC is not initialized, it should be a local value only as it's a convenience switch, verify against older versions");
+			r2.requestSetGhostNode(instance.InstanceId, "TypeNPC", place)
 		end
 	end
 end
@@ -1245,7 +1246,7 @@ function r2:updateSex()
 end
 
 -- UPDATE SEX ---------------------------------------------------------------------------------
-function r2:updateType()
+function r2:updateType(existingAction)
 	
 	local selection = r2:getSelectedInstance()
 	if selection == nil then return end
@@ -1256,7 +1257,9 @@ function r2:updateType()
 	local base = r2.sheetTypeCB[typeNPC].Id
 	local typeElement = r2.getPaletteElement(base)
 
-	r2.requestNewAction(i18n.get("uiR2EDUpdateNpcTypeAction"))
+	if not existingAction then
+		r2.requestNewAction(i18n.get("uiR2EDUpdateNpcTypeAction"))
+	end
 
 	-- TypeNPC
 	r2:setNpcAttribute(selection.InstanceId, "TypeNPC", typeNPC)
@@ -1350,7 +1353,9 @@ function r2:updateType()
 		end
 	end
 
-	r2.requestEndAction()
+	if not existingAction then
+		r2.requestEndAction()
+	end
 end
 
 -- UPDATE FUCNTION ----------------------------------------------------------------------------
@@ -1368,7 +1373,7 @@ function r2:updateFunction()
 end
 
 -- UPDATE LEVEL ------------------------------------------------------------------------------
-r2.updateLevel = function(value)
+r2.updateLevel = function(value, existingAction)
 
 	local selection = r2:getSelectedInstance()
 	assert(selection)
@@ -1380,7 +1385,9 @@ r2.updateLevel = function(value)
 	local firstPart = string.sub(sheet, 1, s-2)
 	local newSheet = firstPart .. level .. ".creature"
 
-	r2.requestNewAction(i18n.get("uiR2EDUpdateNpcLevelAction"))
+	if not existingAction then
+		r2.requestNewAction(i18n.get("uiR2EDUpdateNpcLevelAction"))
+	end
 	r2:setNpcAttribute(selection.InstanceId, "Sheet", newSheet)
 end
 
