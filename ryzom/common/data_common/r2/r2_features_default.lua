@@ -405,9 +405,11 @@ local registerFeature = function ()
 				{Name="Aggro", Type="Number",  Min="0", Max="120", DefaultValue="30", DefaultInBase=1, 
 					Visible=function(this) return this:isGroupedAndLeader() or not this:isGrouped() and not this:isBotObject() end
 				},
-				{Name="TypeNPC", Type="Number", WidgetStyle="EnumDropDown", SecondRequestFunc=function(value) r2:updateType(true) end,
-					Enum= {}, Visible=true, DefaultValue="-1",
-				},	
+				
+				-- FIXME: https://github.com/kaetemi/ryzomclassic/issues/154
+				--{Name="TypeNPC", Type="Number", WidgetStyle="EnumDropDown", SecondRequestFunc=function(value) r2:updateType(true) end,
+				--	Enum= {}, Visible=true, DefaultValue="-1",
+				--},	
 
 				--
 				--

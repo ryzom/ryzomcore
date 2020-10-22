@@ -692,7 +692,8 @@ function npcPropertySheetDisplayerTable:onSelect(instance, isSelected)
 
 	r2:activeLogicEntityPropertySheetDisplayer():onSelect(instance, isSelected)
 
-	r2:initTypeUI(instance)
+	-- FIXME: https://github.com/kaetemi/ryzomclassic/issues/154
+	-- r2:initTypeUI(instance)
 end
 
 ------------------------------------------------
@@ -1262,7 +1263,8 @@ function r2:updateType(existingAction)
 	end
 
 	-- TypeNPC
-	r2:setNpcAttribute(selection.InstanceId, "TypeNPC", typeNPC)
+	-- FIXME: https://github.com/kaetemi/ryzomclassic/issues/154
+	-- r2:setNpcAttribute(selection.InstanceId, "TypeNPC", typeNPC)
 
 	-- RingAccess
 	r2:setNpcAttribute(selection.InstanceId, "RingAccess", typeElement.RingAccess)
