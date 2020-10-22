@@ -263,8 +263,8 @@ inline lua_Integer CLuaState::toInteger(int index)
 	if (!isnum)
 	{
 		lua_Number d = lua_tonumber(_State, index);
-		nlwarning("Lua: Unable to convert Lua number %lf to integer", d);
 		res = (lua_Integer)d;
+		nlwarning("Lua: Converting lua_Number %lf to lua_Integer %i", d, (int)res);
 	}
 	return res;
 #else
