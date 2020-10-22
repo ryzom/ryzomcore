@@ -399,9 +399,9 @@ function r2:initTypeUI(instance)
 			end
 		end
 
-		if tostring(instance.TypeNPC)=="-1" then
-			-- TypeNPC
-			debugInfo("FIXME: TypeNPC is not initialized, it should be a local value only as it's a convenience switch, verify against older versions");
+		if instance.TypeNPC != place then
+			-- TypeNPC does not remain valid between versions, it actually shouldn't be saved...
+			debugInfo("Initialize or update TypeNPC");
 			r2.requestSetGhostNode(instance.InstanceId, "TypeNPC", place)
 		end
 	end
