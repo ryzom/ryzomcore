@@ -449,6 +449,7 @@ function r2.dialogs:updateElementEditor()
 		-- to who
 		local toWhoInst = r2:getInstanceFromId(tostring(instanceChat.Actions[0].Facing))
 		if toWhoInst then
+			uc_chat = ucstring()
 			uc_chat:fromUtf8(toWhoInst.Name)
 		else
 			uc_chat = i18n.get("uiR2EdNobody")
@@ -458,6 +459,7 @@ function r2.dialogs:updateElementEditor()
 		-- emote
 		local emoteName = self.fromEmoteIdToName[instanceChat.Actions[0].Emote]
 		if emoteName then
+			uc_chat = ucstring()
 			uc_chat:fromUtf8(emoteName)
 		else
 			uc_chat = i18n.get("uiR2EdNoElt")
@@ -469,8 +471,8 @@ function r2.dialogs:updateElementEditor()
 		uc_chat:fromUtf8(self.elementInitialName.." : ")
 		chatName.uc_hardtext = uc_chat
 
-		minutesText.uc_hardtext = tostring(0)
-		secondsText.uc_hardtext = tostring(0)
+		minutesText.uc_hardtext = "0"
+		secondsText.uc_hardtext = "0"
 
 		whoMenuText.uc_hardtext = ""
 

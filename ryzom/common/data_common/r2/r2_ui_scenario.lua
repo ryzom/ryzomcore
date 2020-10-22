@@ -598,9 +598,8 @@ function r2.ScenarioWindow:updateActProperties()
 					}			  
 	local season = actGr:find("season_name")
 	assert(season)
-	local uc_season = ucstring()
 	local seasonStr = seasons[location.Season]
-	uc_season:fromUtf8(i18n.get(seasonStr):toUtf8())
+	local uc_season = i18n.get(seasonStr)
 	season.uc_hardtext = uc_season
 
 	-- manual weather
