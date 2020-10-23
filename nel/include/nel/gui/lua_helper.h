@@ -379,6 +379,10 @@ namespace NLGUI
 		TSmallScriptCache			_SmallScriptCache;
 		static const char *			_NELSmallScriptTableName;
 
+#ifdef _WIN32
+		HMODULE m_LuaSocket;
+#endif
+
 	private:
 		// this object isn't intended to be copied
 		CLuaState(const CLuaState &/* other */):NLMISC::CRefCount() { nlassert(0); }

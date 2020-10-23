@@ -216,16 +216,55 @@ namespace NLGUI
 		// *** Load base libs
 		{
 			CLuaStackChecker lsc(this);
-	#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
+#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
 			luaL_openlibs(_State);
-	#else
+#else
 			luaopen_base (_State);
 			luaopen_table (_State);
 			luaopen_io (_State);
 			luaopen_string (_State);
 			luaopen_math (_State);
 			luaopen_debug (_State);
-	#endif
+#endif
+
+#ifdef _WIN32
+			// Lua socket library for MobDebug, optional
+			if (NLMISC::CFile::fileExists("socket\\core.dll"))
+			{
+				// Load socket\core.dll dynamically
+				m_LuaSocket = LoadLibraryW(L"socket\\core.dll");
+				if (!m_LuaSocket)
+				{
+					nlwarning("Lua socket library found, but failed to load");
+				}
+				else
+				{
+					void *luaopen_socket_core = (void *)GetProcAddress(m_LuaSocket, "luaopen_socket_core");
+					if (!luaopen_socket_core)
+					{
+						nlwarning("Lua socket library loaded, but `luaopen_socket_core` not found");
+						FreeLibrary(m_LuaSocket);
+						m_LuaSocket = NULL;
+					}
+					else
+					{
+						// preload['socket.core'] = luaopen_socket_core
+#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
+						lua_getglobal(_State, "package");
+						lua_getfield(_State, -1, "preload");
+						lua_pushcfunction(_State, (lua_CFunction)luaopen_socket_core);
+						lua_setfield(_State, -2, "socket.core");
+						lua_pop(_State, 2);
+						nlinfo("Lua socket library preloaded");
+#endif
+					}
+				}
+			}
+			else
+			{
+				m_LuaSocket = NULL;
+			}
+#endif
 
 			// open are buggy????
 			clear();
@@ -313,6 +352,14 @@ namespace NLGUI
 		// Clear Small Script Cache
 		_SmallScriptPool= 0;
 		_SmallScriptCache.clear();
+
+#ifdef _WIN32
+		if (m_LuaSocket)
+		{
+			FreeLibrary(m_LuaSocket);
+			m_LuaSocket = NULL;
+		}
+#endif
 	}
 
 	// ***************************************************************************
