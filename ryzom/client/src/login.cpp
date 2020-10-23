@@ -1211,9 +1211,10 @@ void initShardDisplay()
 	{
 		CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD ":s0:but"));
 		if (pCB != NULL)
+		{
 			pCB->setPushed(true);
-		CAHManager::getInstance()->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
-
+			CAHManager::getInstance()->runActionHandler(pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
+		}
 	}
 	pList->invalidateCoords();
 }
