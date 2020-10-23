@@ -53,7 +53,7 @@ public:
 	static void releaseInstance();
 
 public:
-	typedef struct
+	typedef struct TElement
 	{
 		uint32				Index;
 		NLMISC::CSheetId	SheetId;
@@ -66,7 +66,7 @@ public:
 		}
 	} TElement;
 
-	typedef struct
+	typedef struct TElementList
 	{
 		// elements list for a visual slot.
 		std::vector<TElement> Element;
