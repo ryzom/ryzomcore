@@ -17,6 +17,18 @@
 #include "stdmisc.h"
 #include "nel/misc/ucstring.h"
 
+void ucstring::toString(std::string &str) const
+{
+	str.resize(size());
+	for (uint i = 0; i < str.size (); i++)
+	{
+		if (operator[](i) > 255)
+			str[i] = '?';
+		else
+			str[i] = (char) operator[](i);
+	}
+}
+
 std::string ucstring::toUtf8() const
 {
 	std::string	res;

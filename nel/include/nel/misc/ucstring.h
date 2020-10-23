@@ -128,17 +128,7 @@ public:
 	}
 
 	/// Converts the controlled ucstring to a string str
-	void toString (std::string &str) const
-	{
-		str.resize (size ());
-		for (uint i = 0; i < str.size (); i++)
-		{
-			if (operator[](i) > 255)
-				str[i] = '?';
-			else
-				str[i] = (char) operator[](i);
-		}
-	}
+	void toString(std::string &str) const;
 
 	/// Converts the controlled ucstring and returns the resulting string
 	std::string toString () const
