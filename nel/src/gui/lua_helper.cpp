@@ -511,7 +511,23 @@ namespace NLGUI
 
 
 		// execute the script text,   with dbgSrc==filename (use @ for lua internal purpose)
-		executeScriptInternal(script,   string("@") + CFile::getFilename(pathName));
+#ifdef _WIN32
+		// Paths need to be correct for debugging to work
+		std::string pathNameStandardized = pathName;
+		if (pathNameStandardized.size() > 1)
+		{
+			if (pathNameStandardized[1] == ':' && pathNameStandardized[0] >= 'a' && pathNameStandardized[0] <= 'z')
+				pathNameStandardized[0] -= 'a' - 'A';
+			for (ptrdiff_t i = 0; i < (ptrdiff_t)pathNameStandardized.size(); ++i)
+			{
+				if (pathNameStandardized[i] == '/')
+					pathNameStandardized[i] = '\\';
+			}
+		}
+#else
+		const std::string &pathNameStandardized = pathName;
+#endif
+		executeScriptInternal(script, string("@") + pathNameStandardized);
 
 		return true;
 	}
