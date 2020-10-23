@@ -4325,7 +4325,7 @@ void CBitmap::blend(CBitmap &Bm0, CBitmap &Bm1, uint16 factor, bool inputBitmapI
 	else
 	#endif //#ifdef NL_OS_WINDOWS
 	{
-		uint8 *endPix			= dest + (numPix << 2);
+		uint8 *endPix			= dest + ((ptrdiff_t)numPix << 2);
 		// no mmx version
 		uint blendFact    = (uint) factor;
 		uint invblendFact = 256 - blendFact;

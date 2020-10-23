@@ -773,7 +773,7 @@ CEvalNumExpr::TReturnState CEvalNumExpr::evalExpression (double &finalResult, TT
 							case Exponent:
 								{
 									int exponent;
-									frexp( arg0, &exponent);
+									(void)frexp( arg0, &exponent);
 									value = (double)exponent;
 								}
 								break;
@@ -1032,13 +1032,13 @@ CEvalNumExpr::TReturnState CEvalNumExpr::evalExpression (double &finalResult, TT
 				v0 -= v1;
 				break;
 			case ULeftShift:
-				v0 = (double)(((uint)floor (v0 + 0.5))<<((uint)floor (v1 + 0.5)));
+				v0 = (double)(uint)(((uint)floor (v0 + 0.5))<<((uint)floor (v1 + 0.5)));
 				break;
 			case URightShift:
 				v0 = (double)(((uint)floor (v0 + 0.5))>>((uint)floor (v1 + 0.5)));
 				break;
 			case SLeftShift:
-				v0 = (double)(((sint)floor (v0 + 0.5))<<((sint)floor (v1 + 0.5)));
+				v0 = (double)(sint)(((sint)floor (v0 + 0.5))<<((sint)floor (v1 + 0.5)));
 				break;
 			case SRightShift:
 				v0 = (double)(((sint)floor (v0 + 0.5))>>((sint)floor (v1 + 0.5)));

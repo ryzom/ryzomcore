@@ -3576,13 +3576,12 @@ void				CSPhraseManager::updatePhraseProgressionDB()
 					break;
 				}
 			}
-		}
 
-
-		// if show, but only if full learnt, skip it if not fully learnt
-		if(phrase->ShowInAPOnlyIfLearnt && !known)
-		{
-			continue;
+			// if show, but only if full learnt, skip it if not fully learnt
+			if (phrase->ShowInAPOnlyIfLearnt && !known)
+			{
+				continue;
+			}
 		}
 
 

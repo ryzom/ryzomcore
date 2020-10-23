@@ -244,7 +244,7 @@ std::wstring utf8ToWide(const char *str, size_t len)
 #if defined(NL_OS_WINDOWS)
 	return winCpToWide(str, len, CP_UTF8);
 #else
-	// TODO: UTF-32 to UTF-8
+	// TODO: UTF-8 to UTF-32
 	nlassert(false);
 #endif
 }

@@ -37,7 +37,7 @@ CWeatherFunction::CWeatherFunction()
 void CWeatherFunction::buildFromSheet(const CWeatherFunctionSheet &sheet, const CWeatherManager &wm)
 {
 	// copy common part of objects (parameters)
-	*static_cast<CWeatherFunctionParameters *>(this) = *static_cast<const CWeatherFunctionParameters *>(&sheet);
+	static_cast<CWeatherFunctionParameters &>(*this) = static_cast<const CWeatherFunctionParameters &>(sheet);
 	// get pointer on the setup from their names
 	_WeatherSetups.resize(sheet.SetupNames.size());
 	nlassert(sheet.SetupWeights.size() == sheet.SetupNames.size());

@@ -1229,11 +1229,13 @@ class CHandlerEnterTell : public IActionHandler
 		{
 			CGroupContainer *pGC = pCGW->createFreeTeller(receiver);
 			if (pGC != NULL)
-				pGC->setActive(true);
-			CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(pGC->getGroup("eb"));
-			if (eb)
 			{
-				CWidgetManager::getInstance()->setCaptureKeyboard(eb);
+				pGC->setActive(true);
+				CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(pGC->getGroup("eb"));
+				if (eb)
+				{
+					CWidgetManager::getInstance()->setCaptureKeyboard(eb);
+				}
 			}
 		}
 	}

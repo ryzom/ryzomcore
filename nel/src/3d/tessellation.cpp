@@ -2678,6 +2678,8 @@ void		CTessFace::updateBindAndSplit()
 	}
 	else
 	{
+		nlassert(f0);
+		nlassert(f1);
 		// multipatch face case are detected when face->Patch==NULL !!!
 		if(f0->FLeft && f0->FLeft->Patch==NULL)
 		{
@@ -2710,6 +2712,8 @@ void		CTessFace::updateBindAndSplit()
 	}
 	else
 	{
+		nlassert(f0);
+		nlassert(f1);
 		if(f0->FLeft)
 		{
 			while(f0->FLeft->isLeaf())
@@ -2781,6 +2785,8 @@ void		CTessFace::updateBindAndSplit()
 	{
 		CTessFace	*f;
 		sint		i;
+		nlassert(f0);
+		nlassert(f1);
 
 		// Same reasoning for rectangular patchs, as above.
 		for(i=0;i<2;i++)

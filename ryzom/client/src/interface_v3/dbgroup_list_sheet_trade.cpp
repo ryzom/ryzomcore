@@ -475,7 +475,7 @@ bool CDBGroupListSheetTrade::CSheetChildTrade::isSheetValid(CDBGroupListSheetTex
 		if ((pIS != NULL) && (!pIS->DropOrSell))
 			return false;
 		// test if this whole family of items can be sold
-		if( !ITEMFAMILY::isSellableByPlayer(pIS->Family) )
+		if((pIS != NULL) && !ITEMFAMILY::isSellableByPlayer(pIS->Family) )
 			return false;
 	}
 

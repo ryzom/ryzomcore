@@ -173,8 +173,8 @@ bool unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName
 	filename.resize(nameLen);
 
 	// write filename into ucstring
-	SzArEx_GetFileNameUtf16(&db, 0, &filename[0]);
-
+	SzArEx_GetFileNameUtf16(&db, 0, reinterpret_cast<UInt16 *>(&filename[0]));
+	
 	// write the extracted file
 	FILE *outputHandle = nlfopen(destFileName, "wb+");
 

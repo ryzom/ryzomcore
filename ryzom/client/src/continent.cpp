@@ -917,6 +917,7 @@ void CContinent::unselect()
 		// Setup the Root scene.
 		if (BackgroundIG)
 		{
+			nlassert(SceneRoot);
 			BackgroundIG->removeFromScene (*SceneRoot);
 			SceneRoot->deleteInstanceGroup (BackgroundIG);
 			BackgroundIG = NULL;

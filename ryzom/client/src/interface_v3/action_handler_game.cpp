@@ -1334,7 +1334,7 @@ class CSelectItemSheet : public IActionHandler
 		// check if user has the level to use the item (applies to item & plans)
 		if (ctrlSheet->getSheetCategory() == CDBCtrlSheet::Item)
 		{
-			if (csg->getName() == "buy_selection")
+			if (csg && csg->getName() == "buy_selection")
 			{
 				const CItemSheet *is = ctrlSheet->asItemSheet();
 				if (is)

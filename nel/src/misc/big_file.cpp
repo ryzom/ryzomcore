@@ -75,7 +75,7 @@ CBigFile::CHandleFile		&CBigFile::CThreadFileArray::get(uint32 index)
 	// if the vector is not allocated, allocate it (empty entries filled with NULL => not opened FILE* in this thread)
 	if(index>=ptr->size())
 	{
-		ptr->resize(index+1);
+		ptr->resize((ptrdiff_t)index + 1);
 	}
 
 	return (*ptr)[index];
@@ -278,11 +278,13 @@ bool CBigFile::BNP::readHeader(FILE *file)
 		}
 
 		char sFileName[256];
-		if (fread (sFileName, 1, nStringSize, file) != nStringSize)
+		if (nStringSize)
 		{
-			return false;
+			if (fread(sFileName, 1, nStringSize, file) != nStringSize)
+			{
+				return false;
+			}
 		}
-
 		sFileName[nStringSize] = 0;
 
 		uint32 nFileSize2;

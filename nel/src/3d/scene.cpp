@@ -775,9 +775,9 @@ CTransformShape	*CScene::createInstance(const string &shapeName)
 
 	// Look if this instance get lightmap information
 #if defined(__GNUC__) && __GNUC__ < 3
-	CMeshBase *pMB = (CMeshBase*)((IShape*)(pTShp->Shape));
+	CMeshBase *pMB = pTShp ? (CMeshBase*)((IShape*)(pTShp->Shape)) : NULL;
 #else // not GNUC
-	CMeshBase *pMB = dynamic_cast<CMeshBase*>((IShape*)(pTShp->Shape));
+	CMeshBase *pMB = pTShp ? dynamic_cast<CMeshBase*>((IShape*)(pTShp->Shape)) : NULL;
 #endif // not GNUC
 	CMeshBaseInstance *pMBI = dynamic_cast<CMeshBaseInstance*>( pTShp );
 	if( ( pMB != NULL ) && ( pMBI != NULL ) )

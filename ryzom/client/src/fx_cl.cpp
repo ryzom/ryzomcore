@@ -75,7 +75,7 @@ bool CFxCL::build( const CEntitySheet *sheet )
 	if ( (! _FXSheet) || (_FXSheet->PSList.empty()) )
 	{
 		_BadBuild = true;
-		nlwarning( "Bad sheet %s for fx", sheet->Id.toString().c_str() );
+		nlwarning( "Bad sheet %s for fx", sheet ? sheet->Id.toString().c_str() : "NULL" );
 		return false;
 	}
 

@@ -101,7 +101,7 @@ bool CForageSourceCL::build( const CEntitySheet *sheet )
 	const CForageSourceSheet *forageSourceSheet = dynamic_cast<const CForageSourceSheet*>(sheet);
 	if ( ! forageSourceSheet )
 	{
-		nlwarning( "Bad sheet %s for forage source", sheet->Id.toString().c_str() );
+		nlwarning( "Bad sheet %s for forage source", sheet ? sheet->Id.toString().c_str() : "NULL" );
 		return false;
 	}
 	if ( ! setFx( forageSourceSheet->FxFilename ) )
