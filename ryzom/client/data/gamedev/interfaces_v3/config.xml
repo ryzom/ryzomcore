@@ -1639,7 +1639,6 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:VARIABLES:ISACTIVE:MACROS" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:ENCYCLOPEDIA" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:MP3PLAYER" type="sint32" value="0" />
-<variable entry="UI:VARIABLES:ISACTIVE:BG_DOWNLOADER" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:COSMETICS" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:MILKO_PAD" type="sint32" value="0" />
 

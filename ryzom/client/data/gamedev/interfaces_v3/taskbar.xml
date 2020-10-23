@@ -818,11 +818,6 @@
 	<instance template="mk_icon_text" id="sys6" hardtext="uiMk_system6" posparent="sys5" posref="BL TL"
 		onclick_l="show_hide" params_l="mp3_player" tooltip="uiMk_system6"
 		tx_normal="mp3.tga" tx_pushed="mp3.tga" c="%color_beige" />
-
-	<!-- Background downloader -->
-	<instance template="mk_icon_text" id="sys7" hardtext="uiMk_system8" posparent="sys6" posref="BL TL"
-		onclick_l="show_hide" params_l="bg_downloader" tooltip="uiMk_system8"
-		tx_normal="bg_downloader.tga" tx_pushed="bg_downloader.tga" c="%color_beige" />
 	
 </group>
 
@@ -1158,9 +1153,6 @@
 
 		<instance template="win_button" id="mp" color="UI:SAVE:WIN:COLORS:OPT" text="uimwTaskBar" posparent="mp3" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:MILKO_PAD" win_name="milko_pad" />
-
-<!--		<instance template="win_button" id="bg_downloader" color="UI:SAVE:WIN:COLORS:OPT" text="uimwBGDownloader" posparent="mp3" posref="BL TL" x="0" y="-4"
-			pushflag="UI:VARIABLES:ISACTIVE:BG_DOWNLOADER" win_name="bg_downloader" /> -->
 		
     <!--<instance template="win_button" id="cosm" color="UI:SAVE:WIN:COLORS:OPT" text="uimwCosmetics" posparent="mp3" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:COSMETICS" win_name="cosmetics" />-->
