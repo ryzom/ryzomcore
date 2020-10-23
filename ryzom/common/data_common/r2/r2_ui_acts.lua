@@ -1240,9 +1240,11 @@ function r2.acts:updatePaletteFromEcosystem()
 		-- search for ecosystem of current location
 		local islandEcosystem
 		for ecoName, v in pairs(self.islands) do
-			if self.islands[ecoName][self:getIslandNb(currentLocation.IslandName)].name==currentLocation.IslandName then
-				islandEcosystem = ecoName
-				break
+			if self.islands[ecoName][self:getIslandNb(currentLocation.IslandName)] then
+				if self.islands[ecoName][self:getIslandNb(currentLocation.IslandName)].name==currentLocation.IslandName then
+					islandEcosystem = ecoName
+					break
+				end
 			end
 		end
 
