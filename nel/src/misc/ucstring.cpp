@@ -31,6 +31,12 @@ void ucstring::toString(std::string &str) const
 
 std::string ucstring::toUtf8() const
 {
+#if defined(NL_OS_WINDOWS)
+	// Use OS implementation
+	nlctassert(sizeof(wchar_t) == sizeof(ucchar));
+	nlctassert(sizeof(wchar_t) == sizeof(uint16));
+	return NLMISC::wideToUtf8(static_cast<const std::wstring &>(*this));
+#else
 	std::string res;
 	ucstring::const_iterator first(begin()), last(end());
 	for (; first != last; ++first)
@@ -65,10 +71,20 @@ std::string ucstring::toUtf8() const
 		}
 	}
 	return res;
+#endif
 }
 
 void ucstring::fromUtf8(const std::string &stringUtf8)
 {
+#if defined(NL_OS_WINDOWS)
+	// Use OS implementation
+	nlctassert(sizeof(wchar_t) == sizeof(ucchar));
+	nlctassert(sizeof(wchar_t) == sizeof(uint16));
+	nlctassert(sizeof(std::wstring) == sizeof(ucstring)); // These can be swapped on Windows
+	static_cast<std::wstring &>(*this) = nlmove(NLMISC::utf8ToWide(stringUtf8));
+	if (stringUtf8.size() && !size())
+		rawCopy(stringUtf8);
+#else
 	// clear the string
 	erase();
 
@@ -146,6 +162,7 @@ void ucstring::fromUtf8(const std::string &stringUtf8)
 			push_back(code);
 		}
 	}
+#endif
 }
 
 void ucstring::rawCopy(const std::string &str)
