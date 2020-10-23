@@ -135,6 +135,9 @@ bool			CLodTextureBuilder::computeTexture(const CMeshMRM &meshMRM, NL3D::CLodCha
 	const uint8			*srcPos= (const uint8*)vba.getVertexCoordPointer();
 	const uint8			*srcNormal= (const uint8*)vba.getNormalCoordPointer();
 	const uint8			*srcUV= (const uint8*)vba.getTexCoordPointer();
+	nlassert(srcPos);
+	nlassert(srcNormal);
+	nlassert(srcUV);
 	uint				vertexSize = VB.getVertexSize();
 	// For the more precise lod
 	uint	lodId= meshMRM.getNbLod()-1;

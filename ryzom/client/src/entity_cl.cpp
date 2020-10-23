@@ -378,6 +378,8 @@ void CEntityCL::SInstanceCL::updateCurrentFromLoading(NL3D::USkeleton Skeleton)
 			sint stickID = Skeleton.getBoneIdByName(StickPoint);
 			if(stickID != -1)
 				Skeleton.stickObject(Current, stickID);
+			else
+				nlwarning("Skeleton '%s' is missing bone '%s' for object attachment.", Skeleton.getShapeName().c_str(), StickPoint.c_str());
 		}
 	}
 

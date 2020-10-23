@@ -418,13 +418,13 @@ void CMoveContainer::updateCells (CMovePrimitive *primitive, uint8 worldImage)
 /*	// Check BB width not too large
 	if (wI->getBBXMax() - wI->getBBXMin() > _CellWidth)
 	{
-		nlwarning ("Primitives have moved more than a cell.");
+		nlwarning ("Primitives have moved more than a cell, width: %f.", (float)(wI->getBBXMax() - wI->getBBXMin()));
 	}
 
 	// Check BB height not too large
 	if (wI->getBBYMax() - wI->getBBYMin() > _CellHeight)
 	{
-		nlwarning ("Primitives have moved more than a cell.");
+		nlwarning ("Primitives have moved more than a cell, height: %f.", (float)(wI->getBBYMax() - wI->getBBYMin()));
 	}
 */
 #endif

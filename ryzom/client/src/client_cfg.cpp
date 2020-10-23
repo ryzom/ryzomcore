@@ -465,7 +465,13 @@ CClientConfig::CClientConfig()
 	SoundOn				= true;						// Default is with sound.
 	DriverSound			= SoundDrvAuto;
 	SoundForceSoftwareBuffer = true;
-	SoundOutGameMusic	= "main menu loop.ogg";
+	StartMusic = "main theme air.ogg"; // Use at game startup (originally no music)
+	EmptySlotMusic = "loading music loop.ogg"; // Use in character selection for empty slots
+	LoadingMusic = "main menu loop.ogg"; // Main loading used after leaving character selection, and when going back to character selection
+	KamiTeleportMusic = "kami teleport.ogg"; // Kami teleport
+	KaravanTeleportMusic = "karavan teleport.ogg"; // Karavan teleport
+	TeleportLoadingMusic = "loading music loop.ogg"; // Use for generic teleportations
+	DeathMusic = "death.ogg"; // Player death
 	SoundSFXVolume		= 1.f;
 	SoundGameMusicVolume	= 1.f;
 	SoundTPFade			= 500;
@@ -476,7 +482,7 @@ CClientConfig::CClientConfig()
 	UserEntitySoundLevel = 0.5f;					// Default volume for sound in 1st person
 	UseEax				= true;						// Default to use EAX;
 	UseADPCM			= false;					// Defualt to PCM sample, NO ADPCM
-	MaxTrack			= 32;						// DEfault to 32 track
+	MaxTrack			= 32;						// Default to 32 track
 
 	ColorShout			= CRGBA(150,0,0,255);		// Default Shout color.
 	ColorTalk			= CRGBA(255,255,255,255);	// Default Talk color.
@@ -1248,7 +1254,13 @@ void CClientConfig::setValues()
 	// SoundForceSoftwareBuffer
 	READ_BOOL_FV(SoundForceSoftwareBuffer);
 	// SoundOutGameMusic
-	READ_STRING_DEV(SoundOutGameMusic)
+	READ_STRING_DEV(StartMusic)
+	READ_STRING_DEV(EmptySlotMusic)
+	READ_STRING_DEV(LoadingMusic)
+	READ_STRING_DEV(KamiTeleportMusic)
+	READ_STRING_DEV(KaravanTeleportMusic)
+	READ_STRING_DEV(TeleportLoadingMusic)
+	READ_STRING_DEV(DeathMusic)
 	// SoundSFXVolume
 	READ_FLOAT_FV(SoundSFXVolume);
 	// SoundGameMusicVolume

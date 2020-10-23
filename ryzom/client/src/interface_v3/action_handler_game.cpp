@@ -2822,24 +2822,6 @@ public:
 
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
-		/* // Previous version (multiple pressed on a desktop change a central window
-		uint desktop;
-		fromString(Params, desktop);
-		if (desktop <MAX_NUM_MODES)
-		{
-			CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-			const string procNames[MAX_NUM_MODES] = { "tb_setexp", "tb_setinfo", "tb_setlab", "tb_setkeys" };
-			const string dbNames[MAX_NUM_MODES] = { "", "UI:SAVE:CURRENT_INFO_MODE", "UI:SAVE:CURRENT_LAB_MODE", "UI:SAVE:CURRENT_KEY_MODE" };
-			string sValue;
-			CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(dbNames[desktop], false);
-			if (pNL != NULL)
-				sValue = NLMISC::toString((sint32)pNL->getValue64());
-			vector<string> vecStr;
-			vecStr.push_back(procNames[desktop]);
-			vecStr.push_back(sValue);
-			CWidgetManager::getInstance()->runProcedure(procNames[desktop], NULL, vecStr);
-		}*/
-
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:gestion_windows"));
 		if (pGC == NULL)
@@ -2850,11 +2832,14 @@ public:
 		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId("ui:interface:gestion_windows:close");
 		if (pIE != NULL) pIE->setActive(false);
 
+		bool switchDesktop = false;
+
 		CActionsManager *pAM = &Actions;
 		if (!pAM->valide(CAction::CName("set_desktop",Params.c_str())))
 		{
 			pGC->setActive(false);
 			_FirstTime = true;
+			switchDesktop = true;
 		}
 		else // Key is down
 		{
@@ -2862,11 +2847,7 @@ public:
 			if (_FirstTime)
 			{
 				_FirstTime = false;
-
-				vector<string> vecStr;
-				vecStr.push_back("tb_setdesktop");
-				vecStr.push_back(Params);
-				CWidgetManager::getInstance()->runProcedure("tb_setdesktop", NULL, vecStr);
+				switchDesktop = true;
 			}
 			else // Not the first time
 			{
@@ -2875,6 +2856,13 @@ public:
 				// Yoyo: important to setTopWindow ONLY if needed, else save of the TopWindow doesn't work when you switch it.
 				CWidgetManager::getInstance()->setTopWindow(pGC);
 			}
+		}
+		if (switchDesktop)
+		{
+			vector<string> vecStr;
+			vecStr.push_back("tb_setdesktop");
+			vecStr.push_back(Params);
+			CWidgetManager::getInstance()->runProcedure("tb_setdesktop", NULL, vecStr);
 		}
 	}
 private:

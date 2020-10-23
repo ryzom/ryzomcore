@@ -5785,7 +5785,7 @@ void CEditor::scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialAct
 	}
 	//
 	projectInLua(_Scenario); // push on the lua stack
-	getLua().push(float(initialActIndex)); // example reconnect after test in act4
+	getLua().push(initialActIndex); // example reconnect after test in act4
 	// update value in the framework
 	callEnvFunc("onScenarioUpdated", 2);
 	//nlwarning("Instance list now is :");

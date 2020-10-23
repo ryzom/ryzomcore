@@ -1584,6 +1584,14 @@ void	registerGlExtensions(CGlExtensions &ext)
 {
 	H_AUTO_OGL(registerGlExtensions);
 
+#ifdef NL_OS_MAC
+	CGLContextObj ctx = CGLGetCurrentContext();
+	if (ctx == NULL)
+	{
+		nlerror("No OpenGL context set");
+	}
+#endif
+
 	// OpenGL 1.2 ??
 	const char	*nglVersion = (const char *)glGetString (GL_VERSION);
 
