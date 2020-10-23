@@ -20,18 +20,18 @@
 void ucstring::toString(std::string &str) const
 {
 	str.resize(size());
-	for (uint i = 0; i < str.size (); i++)
+	for (uint i = 0; i < str.size(); i++)
 	{
 		if (operator[](i) > 255)
 			str[i] = '?';
 		else
-			str[i] = (char) operator[](i);
+			str[i] = (char)operator[](i);
 	}
 }
 
 std::string ucstring::toUtf8() const
 {
-	std::string	res;
+	std::string res;
 	ucstring::const_iterator first(begin()), last(end());
 	for (; first != last; ++first)
 	{
@@ -56,9 +56,9 @@ std::string ucstring::toUtf8() const
 			nbLoop = 2;
 		}
 
-		for (uint i=0; i<nbLoop; ++i)
+		for (uint i = 0; i < nbLoop; ++i)
 		{
-			ucchar	c = *first;
+			ucchar c = *first;
 			c = c >> ((nbLoop - i - 1) * 6);
 			c = c & 0x3F;
 			res += char(c) | 0x80;
@@ -77,7 +77,7 @@ void ucstring::fromUtf8(const std::string &stringUtf8)
 	sint iterations = 0;
 
 	std::string::const_iterator first(stringUtf8.begin()), last(stringUtf8.end());
-	for (; first != last; )
+	for (; first != last;)
 	{
 		c = *first++;
 		code = c;
@@ -131,7 +131,7 @@ void ucstring::fromUtf8(const std::string &stringUtf8)
 				}
 
 				uint8 ch;
-				ch = *first ++;
+				ch = *first++;
 
 				if ((ch & 0xC0) != 0x80)
 				{
@@ -155,7 +155,7 @@ void ucstring::rawCopy(const std::string &str)
 	resize(str.size());
 	std::string::const_iterator first(str.begin()), last(str.end());
 	iterator dest(begin());
-	for (;first != last; ++first, ++dest)
+	for (; first != last; ++first, ++dest)
 	{
 		*dest = uint8(*first);
 	}

@@ -35,95 +35,98 @@ typedef std::basic_string<ucchar> ucstringbase;
 class ucstring : public ucstringbase
 {
 public:
+	ucstring() { }
 
-	ucstring () {}
+	ucstring(const ucstringbase &str)
+	    : ucstringbase(str)
+	{
+	}
 
-	ucstring (const ucstringbase &str) : ucstringbase (str) {}
-
-	ucstring (const std::string &str) : ucstringbase ()
+	ucstring(const std::string &str)
+	    : ucstringbase()
 	{
 		rawCopy(str);
 	}
 
-	~ucstring () {}
+	~ucstring() { }
 
-	ucstring &operator= (ucchar c)
+	ucstring &operator=(ucchar c)
 	{
-		resize (1);
+		resize(1);
 		operator[](0) = c;
 		return *this;
 	}
 
-	ucstring &operator= (const char *str)
+	ucstring &operator=(const char *str)
 	{
-		resize (strlen (str));
-		for (uint i = 0; i < strlen (str); i++)
-		{
-			operator[](i) = uint8(str[i]);
-		}
-		return *this;
-	}
-
-	ucstring &operator= (const std::string &str)
-	{
-		resize (str.size ());
-		for (uint i = 0; i < str.size (); i++)
-		{
-			operator[](i) = uint8(str[i]);
-		}
-		return *this;
-	}
-
-	ucstring &operator= (const ucstringbase &str)
-	{
-		ucstringbase::operator =(str);
-		return *this;
-	}
-
-	ucstring& operator= (const ucchar *str)
-	{
-		ucstringbase::operator =(str);
-		return *this;
-	}
-	ucstring &operator+= (ucchar c)
-	{
-		resize (size() + 1);
-		operator[](size()-1) = c;
-		return *this;
-	}
-
-	ucstring &operator+= (const char *str)
-	{
-		size_t s = size();
-		resize (s + strlen(str));
+		resize(strlen(str));
 		for (uint i = 0; i < strlen(str); i++)
 		{
-			operator[](s+i) = uint8(str[i]);
+			operator[](i) = uint8(str[i]);
 		}
 		return *this;
 	}
 
-	ucstring &operator+= (const std::string &str)
+	ucstring &operator=(const std::string &str)
 	{
-		size_t s = size();
-		resize (s + str.size());
+		resize(str.size());
 		for (uint i = 0; i < str.size(); i++)
 		{
-			operator[](s+i) = uint8(str[i]);
+			operator[](i) = uint8(str[i]);
 		}
 		return *this;
 	}
 
-	ucstring &operator+= (const ucstringbase &str)
+	ucstring &operator=(const ucstringbase &str)
 	{
-		ucstringbase::operator +=(str);
+		ucstringbase::operator=(str);
+		return *this;
+	}
+
+	ucstring &operator=(const ucchar *str)
+	{
+		ucstringbase::operator=(str);
+		return *this;
+	}
+	ucstring &operator+=(ucchar c)
+	{
+		resize(size() + 1);
+		operator[](size() - 1) = c;
+		return *this;
+	}
+
+	ucstring &operator+=(const char *str)
+	{
+		size_t s = size();
+		resize(s + strlen(str));
+		for (uint i = 0; i < strlen(str); i++)
+		{
+			operator[](s + i) = uint8(str[i]);
+		}
+		return *this;
+	}
+
+	ucstring &operator+=(const std::string &str)
+	{
+		size_t s = size();
+		resize(s + str.size());
+		for (uint i = 0; i < str.size(); i++)
+		{
+			operator[](s + i) = uint8(str[i]);
+		}
+		return *this;
+	}
+
+	ucstring &operator+=(const ucstringbase &str)
+	{
+		ucstringbase::operator+=(str);
 		return *this;
 	}
 
 	const ucchar *c_str() const
 	{
 		const ucchar *tmp = ucstringbase::c_str();
-		const_cast<ucchar*>(tmp)[size()] = 0;
+		const_cast<ucchar *>(tmp)[size()] = 0;
 		return tmp;
 	}
 
@@ -131,7 +134,7 @@ public:
 	void toString(std::string &str) const;
 
 	/// Converts the controlled ucstring and returns the resulting string
-	std::string toString () const
+	std::string toString() const
 	{
 		std::string str;
 		toString(str);
@@ -165,70 +168,72 @@ public:
 
 private:
 	void rawCopy(const std::string &str);
-
 };
 
 inline ucstring operator+(const ucstringbase &ucstr, ucchar c)
 {
-	ucstring	ret;
-	ret= ucstr;
-	ret+= c;
+	ucstring ret;
+	ret = ucstr;
+	ret += c;
 	return ret;
 }
 
 inline ucstring operator+(const ucstringbase &ucstr, const char *c)
 {
-	ucstring	ret;
-	ret= ucstr;
-	ret+= c;
+	ucstring ret;
+	ret = ucstr;
+	ret += c;
 	return ret;
 }
 
 inline ucstring operator+(const ucstringbase &ucstr, const std::string &c)
 {
-	ucstring	ret;
-	ret= ucstr;
-	ret+= c;
+	ucstring ret;
+	ret = ucstr;
+	ret += c;
 	return ret;
 }
 
 inline ucstring operator+(ucchar c, const ucstringbase &ucstr)
 {
-	ucstring	ret;
-	ret= c;
+	ucstring ret;
+	ret = c;
 	ret += ucstr;
 	return ret;
 }
 
 inline ucstring operator+(const char *c, const ucstringbase &ucstr)
 {
-	ucstring	ret;
-	ret= c;
+	ucstring ret;
+	ret = c;
 	ret += ucstr;
 	return ret;
 }
 
 inline ucstring operator+(const std::string &c, const ucstringbase &ucstr)
 {
-	ucstring	ret;
-	ret= c;
+	ucstring ret;
+	ret = c;
 	ret += ucstr;
 	return ret;
 }
 
-namespace NLMISC
-{
+namespace NLMISC {
 
 // Traits for hash_map using CEntityId
 struct CUCStringHashMapTraits
 {
-	enum { bucket_size = 4, min_buckets = 8 };
+	enum
+	{
+		bucket_size = 4,
+		min_buckets = 8
+	};
 	CUCStringHashMapTraits() { }
-	size_t operator() (const ucstring &id ) const
+	size_t operator()(const ucstring &id) const
 	{
 		return id.size();
 	}
-	bool operator() (const ucstring &id1, const ucstring &id2) const
+	bool operator()(const ucstring &id1, const ucstring &id2) const
 	{
 		return id1 < id2;
 	}
@@ -239,18 +244,18 @@ struct CUCStringHashMapTraits
  * \param a string or a char to transform to lower case
  */
 
-ucstring	toLower (const ucstring &str);
-void		toLower (ucchar *str);
-ucchar		toLower (ucchar c);
+ucstring toLower(const ucstring &str);
+void toLower(ucchar *str);
+ucchar toLower(ucchar c);
 
 /** Convert an unicode string in upper case.
  * Characters with accent are converted in a uppercase character without accent
  * \param a string or a char to transform to upper case
  */
 
-ucstring	toUpper (const ucstring &str);
-void		toUpper (ucchar *str);
-ucchar		toUpper (ucchar c);
+ucstring toUpper(const ucstring &str);
+void toUpper(ucchar *str);
+ucchar toUpper(ucchar c);
 
 };
 
