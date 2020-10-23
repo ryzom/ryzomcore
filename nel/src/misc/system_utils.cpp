@@ -173,23 +173,25 @@ bool CSystemUtils::copyTextToClipboard(const ucstring &text)
 		{
 			// create a lock on this buffer
 			void *hLock = GlobalLock(mem);
+			if (hLock)
+			{
+				// copy text to this buffer
+				if (isUnicode)
+					wcscpy((wchar_t *)hLock, (const wchar_t *)text.c_str());
+				else
+					strcpy((char *)hLock, text.toString().c_str());
 
-			// copy text to this buffer
-			if (isUnicode)
-				wcscpy((wchar_t*)hLock, (const wchar_t*)text.c_str());
-			else
-				strcpy((char*)hLock, text.toString().c_str());
+				// unlock buffer
+				GlobalUnlock(mem);
 
-			// unlock buffer
-			GlobalUnlock(mem);
+				// empty clipboard
+				EmptyClipboard();
 
-			// empty clipboard
-			EmptyClipboard();
+				// set new data to clipboard in the right format
+				SetClipboardData(isUnicode ? CF_UNICODETEXT : CF_TEXT, mem);
 
-			// set new data to clipboard in the right format
-			SetClipboardData(isUnicode ? CF_UNICODETEXT:CF_TEXT, mem);
-
-			res = true;
+				res = true;
+			}
 		}
 
 		CloseClipboard();

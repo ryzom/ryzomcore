@@ -50,7 +50,7 @@ void xmlCheckNodeName (xmlNodePtr &node, const char *nodeName)
 		// Make an error message
 		char tmp[512];
 		smprintf (tmp, 512, "LogicStateMachine STATE_MACHINE XML Syntax error in block line %d, node %s should be %s",
-			node ? (int)node->line:-1, node->name, nodeName);
+			node ? (int)node->line:-1, node ? (const char *)node->name : "NULL", nodeName);
 
 		nlinfo (tmp);
 		nlstop;

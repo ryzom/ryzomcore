@@ -6302,7 +6302,7 @@ CInstance *CEditor::getInstanceUnderPos(float x, float y, float distSelection, b
 			objectSelected= precInstanceUnderPos->getDisplayerVisual();
 	}
 
-	if (objectSelected->getSelectionType() == ISelectableObject::GroundProjected)
+	if (objectSelected && objectSelected->getSelectionType() == ISelectableObject::GroundProjected)
 	{
 		if (borderSelected && borderSelected != objectSelected)
 		{

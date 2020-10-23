@@ -1173,7 +1173,7 @@ void D3DWndProc(CDriverD3D *driver, HWND hWnd, UINT message, WPARAM wParam, LPAR
 		}
 	}
 
-	if (driver->_EventEmitter.getNumEmitters() > 0)
+	if (driver && driver->_EventEmitter.getNumEmitters() > 0)
 	{
 		CWinEventEmitter *we = NLMISC::safe_cast<CWinEventEmitter *>(driver->_EventEmitter.getEmitter(0));
 		// Process the message by the emitter

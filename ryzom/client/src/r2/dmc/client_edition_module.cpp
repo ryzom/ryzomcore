@@ -2227,6 +2227,7 @@ void CClientEditionModule::addToSaveList(const std::string& filename, const std:
 	if (!ok)
 	{
 		delete sv;
+		return;
 	}
 	else
 	{

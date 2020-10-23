@@ -1373,10 +1373,11 @@ CVertexBufferHardARB::~CVertexBufferHardARB()
 		}
 	}
 	#ifdef NL_DEBUG
-		if (_VertexPtr)
-		{
-			_VertexArrayRange->_MappedVBList.erase(_IteratorInMappedVBList);
-		}
+	if (_VertexPtr)
+	{
+		nlassert(_VertexArrayRange);
+		_VertexArrayRange->_MappedVBList.erase(_IteratorInMappedVBList);
+	}
 	#endif
 
 #ifdef USE_OPENGLES

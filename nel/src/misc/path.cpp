@@ -1341,10 +1341,13 @@ void CFileContainer::addSearchBigFile (const string &sBigFilename, bool recurse,
 				fclose(Handle);
 				return;
 			}
-			if (fread (FileName, 1, nStringSize, Handle) != nStringSize)
+			if (nStringSize)
 			{
-				fclose(Handle);
-				return;
+				if (fread(FileName, 1, nStringSize, Handle) != nStringSize)
+				{
+					fclose(Handle);
+					return;
+				}
 			}
 			FileName[nStringSize] = 0;
 			uint32 nFileSize2;

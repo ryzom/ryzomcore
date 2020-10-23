@@ -339,21 +339,25 @@ std::string CI18N::getSystemLanguageCode ()
 		typedef int (WINAPI* GetUserDefaultLocaleNamePtr)(LPWSTR lpLocaleName, int cchLocaleName);
 
 		// get pointer on GetUserDefaultLocaleName, kernel32.dll is always in memory so no need to call LoadLibrary
-		GetUserDefaultLocaleNamePtr nlGetUserDefaultLocaleName = (GetUserDefaultLocaleNamePtr)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetUserDefaultLocaleName");
-
-		// only use it if found
-		if (nlGetUserDefaultLocaleName)
+		HMODULE hKernel32 = GetModuleHandleA("kernel32.dll");
+		if (hKernel32)
 		{
-			// get user locale
-			wchar_t buffer[LOCALE_NAME_MAX_LENGTH];
-			sint res = nlGetUserDefaultLocaleName(buffer, LOCALE_NAME_MAX_LENGTH);
+			GetUserDefaultLocaleNamePtr nlGetUserDefaultLocaleName = (GetUserDefaultLocaleNamePtr)GetProcAddress(hKernel32, "GetUserDefaultLocaleName");
 
-			// convert wide string to std::string
-			std::string lang = wideToUtf8(buffer);
+			// only use it if found
+			if (nlGetUserDefaultLocaleName)
+			{
+				// get user locale
+				wchar_t buffer[LOCALE_NAME_MAX_LENGTH];
+				sint res = nlGetUserDefaultLocaleName(buffer, LOCALE_NAME_MAX_LENGTH);
 
-			// only keep 2 first characters
-			if (lang.size() > 1)
-				_SystemLanguageCode = lang.substr(0, 2);
+				// convert wide string to std::string
+				std::string lang = wideToUtf8(buffer);
+
+				// only keep 2 first characters
+				if (lang.size() > 1)
+					_SystemLanguageCode = lang.substr(0, 2);
+			}
 		}
 	}
 #endif

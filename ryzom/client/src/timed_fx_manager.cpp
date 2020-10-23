@@ -204,7 +204,7 @@ CTimedFXManager::TFXGroupHandle CTimedFXManager::add(const std::vector<CTimedFX>
 		//sint32 debugDay;
 		if (!(fi.FXSheet && fi.FXSheet->Mode == CSeasonFXSheet::AlwaysStarted))
 		{
-			if (fi.FXSheet->Mode == CSeasonFXSheet::Spawn)
+			if (fi.FXSheet && fi.FXSheet->Mode == CSeasonFXSheet::Spawn)
 			{
 				// compute next spawn date
 				float cycleLength = fi.FXSheet ? fi.FXSheet->CycleDuration : _DayLength;

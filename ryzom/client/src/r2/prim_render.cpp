@@ -202,7 +202,7 @@ CCtrlPolygon *CPrimRender::newCtrlPolygon() const
 		{
 			CGroupMap *gm = CTool::getWorldMap();
 			if (!gm) dest = CVector::Null;
-			gm->worldToWindow(dest, src);
+			else gm->worldToWindow(dest, src);
 		}
 	};
 	CViewBase::TCtorParam param;

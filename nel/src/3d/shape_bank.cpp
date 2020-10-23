@@ -683,8 +683,7 @@ void CShapeBank::reset()
 	while( scmIt != ShapeCacheNameToShapeCache.end() )
 	{
 		CShapeCache *pShpCache = getShapeCachePtrFromShapeCacheName( scmIt->first );
-		if( pShpCache == NULL )
-			nlstop; // Should never happen
+		nlassert(pShpCache);
 		pShpCache->MaxSize = 0;
 		checkShapeCache( pShpCache );
 

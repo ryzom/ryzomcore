@@ -58,6 +58,8 @@ static string getFuncInfo (DWORD_TYPE funcAddr, DWORD_TYPE stackAddr)
 
 	DWORD symSize = 10000;
 	PIMAGEHLP_SYMBOL  sym = (PIMAGEHLP_SYMBOL) GlobalAlloc (GMEM_FIXED, symSize);
+	if (!sym) return str;
+
 	::ZeroMemory (sym, symSize);
 	sym->SizeOfStruct = symSize;
 	sym->MaxNameLength = symSize - sizeof(IMAGEHLP_SYMBOL);

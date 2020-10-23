@@ -2980,8 +2980,8 @@ void CInterfaceManager::log(const ucstring &str, const std::string &cat)
 		{
 			const string finalString = string(NLMISC::IDisplayer::dateToHumanString()) + " (" + NLMISC::toUpper(cat) + ") * " + str.toUtf8();
 			fprintf(f, "%s\n", finalString.c_str());
+			fclose(f);
 		}
-		fclose(f);
 	}
 }
 

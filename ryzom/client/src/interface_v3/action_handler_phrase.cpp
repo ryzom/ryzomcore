@@ -1191,56 +1191,59 @@ public:
 			if( pPM->avoidCyclicForPhrase(phraseCom) )
 				cyclic= false;
 
-			// **** Launch the cast
-			// Cast only if their is a target, or if it is not a combat action
-			CEntityCL	*target = EntitiesMngr.entity(UserEntity->targetSlot());
-			if(target || !rootBrick->isCombat())
+			if (UserEntity)
 			{
-				// combat (may moveTo before) ?
-				if(rootBrick->isCombat())
+				// **** Launch the cast
+				// Cast only if their is a target, or if it is not a combat action
+				CEntityCL *target = EntitiesMngr.entity(UserEntity->targetSlot());
+				if (target || !rootBrick->isCombat())
 				{
-					if( !UserEntity->canEngageCombat() )
-						return;
-
-					UserEntity->executeCombatWithPhrase(target, memoryLine, memoryIndex, cyclic);
-				}
-				// else can cast soon!
-				else if ( rootBrick->isForageExtraction() && (! UserEntity->isRiding()) ) // if mounted, send directly to server (without moving) to receive the error message
-				{
-					// Yoyo: TEMP if a target selected, must be a forage source
-					if(!target || target->isForageSource())
+					// combat (may moveTo before) ?
+					if (rootBrick->isCombat())
 					{
-						// Cancel any follow
-						UserEntity->disableFollow();
-						// reset any moveTo also (if target==NULL, moveToExtractionPhrase() and therefore resetAnyMoveTo() not called)
+						if (!UserEntity->canEngageCombat())
+							return;
+
+						UserEntity->executeCombatWithPhrase(target, memoryLine, memoryIndex, cyclic);
+					}
+					// else can cast soon!
+					else if (rootBrick->isForageExtraction() && (!UserEntity->isRiding())) // if mounted, send directly to server (without moving) to receive the error message
+					{
+						// Yoyo: TEMP if a target selected, must be a forage source
+						if (!target || target->isForageSource())
+						{
+							// Cancel any follow
+							UserEntity->disableFollow();
+							// reset any moveTo also (if target==NULL, moveToExtractionPhrase() and therefore resetAnyMoveTo() not called)
+							// VERY important if previous MoveTo was a SPhrase MoveTo (because cancelClientExecute() must be called)
+							UserEntity->resetAnyMoveTo();
+
+							// Move to targetted source
+							if (target)
+								UserEntity->moveToExtractionPhrase(target->slot(), MaxExtractionDistance, memoryLine, memoryIndex, cyclic);
+
+							// start client execution
+							pPM->clientExecute(memoryLine, memoryIndex, cyclic);
+
+							if (!target)
+							{
+								// inform Server of phrase cast
+								pPM->sendExecuteToServer(memoryLine, memoryIndex, cyclic);
+							}
+						}
+					}
+					else
+					{
+						// Cancel any moveTo(), because don't want to continue reaching the prec entity
 						// VERY important if previous MoveTo was a SPhrase MoveTo (because cancelClientExecute() must be called)
 						UserEntity->resetAnyMoveTo();
 
-						// Move to targetted source
-						if ( target )
-							UserEntity->moveToExtractionPhrase( target->slot(), MaxExtractionDistance, memoryLine, memoryIndex, cyclic );
-
-						// start client execution
+						// start client execution: NB: start client execution even if it
 						pPM->clientExecute(memoryLine, memoryIndex, cyclic);
 
-						if ( ! target )
-						{
-							// inform Server of phrase cast
-							pPM->sendExecuteToServer(memoryLine, memoryIndex, cyclic);
-						}
+						// inform Server of phrase cast
+						pPM->sendExecuteToServer(memoryLine, memoryIndex, cyclic);
 					}
-				}
-				else
-				{
-					// Cancel any moveTo(), because don't want to continue reaching the prec entity
-					// VERY important if previous MoveTo was a SPhrase MoveTo (because cancelClientExecute() must be called)
-					UserEntity->resetAnyMoveTo();
-
-					// start client execution: NB: start client execution even if it
-					pPM->clientExecute(memoryLine, memoryIndex, cyclic);
-
-					// inform Server of phrase cast
-					pPM->sendExecuteToServer(memoryLine, memoryIndex, cyclic);
 				}
 			}
 		}
