@@ -822,6 +822,7 @@ private:
 	void						sendSystemLogin();
 	bool						stateLogin();
 	NLMISC::TTime				_LatestLoginTime;
+	int                         m_LoginAttempts;
 
 	//
 	void						receiveSystemSync(NLMISC::CBitMemStream &msgin);
