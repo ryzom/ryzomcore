@@ -193,6 +193,10 @@ inline std::string toString(const sint32 &val) { return toString("%d", val); }
 inline std::string toString(const uint64 &val) { return toString("%" NL_I64 "u", val); }
 inline std::string toString(const sint64 &val) { return toString("%" NL_I64 "d", val); }
 
+#ifdef NL_OS_WINDOWS
+inline std::string toString(const wchar_t &val) { return toString(reinterpret_cast<const uint16 &>(val)); }
+#endif
+
 #ifdef NL_COMP_GCC
 #	if GCC_VERSION == 40102
 
@@ -245,6 +249,10 @@ inline bool fromString(const std::string &str, uint64 &val) { bool ret = sscanf(
 inline bool fromString(const std::string &str, sint64 &val) { bool ret = sscanf(str.c_str(), "%" NL_I64 "d", &val) == 1; if (!ret) val = 0; return ret; }
 inline bool fromString(const std::string &str, float &val) { bool ret = sscanf(str.c_str(), "%f", &val) == 1; if (!ret) val = 0.0f; return ret; }
 inline bool fromString(const std::string &str, double &val) { bool ret = sscanf(str.c_str(), "%lf", &val) == 1; if (!ret) val = 0.0; return ret; }
+
+#ifdef NL_OS_WINDOWS
+inline bool fromString(const std::string &str, wchar_t &val) { return fromString(str, reinterpret_cast<uint16 &>(val)); }
+#endif
 
 // Fast string to bool, reliably defined for strings starting with 0, 1, t, T, f, F, y, Y, n, N, anything else is undefined.
 // (str[0] == '1' || (str[0] & 0xD2) == 0x50)
