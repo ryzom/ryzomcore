@@ -1225,11 +1225,28 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		D3DWndProc (pDriver, hWnd, message, wParam, lParam);
 	}
 
+	if (message == WM_SYSCOMMAND)
+	{
+		switch (wParam)
+		{
 #ifdef NL_DISABLE_MENU
-	// disable menu (F10, ALT and ALT+SPACE key doesn't freeze or open the menu)
-	if(message == WM_SYSCOMMAND && wParam == SC_KEYMENU)
-		return 0;
+			// disable menu (F10, ALT and ALT+SPACE key doesn't freeze or open the menu)
+		case SC_KEYMENU:
 #endif // NL_DISABLE_MENU
+
+			// Screensaver Trying To Start?
+		case SC_SCREENSAVE:
+
+			// Monitor Trying To Enter Powersave?
+		case SC_MONITORPOWER:
+
+			// Prevent From Happening
+			return 0;
+
+		default:
+			break;
+		}
+	}
 
 	// ace: if we receive close, exit now or it'll assert after
 	if(message == WM_CLOSE)
