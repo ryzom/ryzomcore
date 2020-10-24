@@ -1027,9 +1027,9 @@ r2.displayFeatureHelp = function(className)
 		assert(nil)
 	end
 	
-	local checkBox = getUI("ui:interface:feature_help:content:custom_bbox_enabled")
+	local checkBox = getUI("ui:interface:feature_help:content:show_again")
 	assert(checkBox)
-	local chkBoxText = getUI("ui:interface:feature_help:content:text_custom")
+	local chkBoxText = getUI("ui:interface:feature_help:content:show_again_label")
 	assert(chkBoxText)
 	
 	if className == "Npc" then
@@ -1082,21 +1082,21 @@ end
 
 function r2.setFeatureDisplayHelp()
 	
-	local checkBox = getUI("ui:interface:feature_help:content:custom_bbox_enabled")
+	local checkBox = getUI("ui:interface:feature_help:content:show_again")
 	assert(checkBox)
-	local isChecked = checkBox.pushed
-	debugInfo("checked: " ..tostring(isChecked))
+	local showAgain = checkBox.pushed
+	--debugInfo("checked: " ..tostring(showAgain))
 
 	local ui = getUI("ui:interface:feature_help")
 	local name = ui.Env.uc_title
 	local len = string.len(name) - 10 - 6
 	local className = string.sub(name, -10-len, 6+len) --removing uiR2Ed and _HelpTitle
 	--formName = formName .."Form"
-	
+
 	assert(className)
 	--debugInfo("Form name: " ..formName)
 
-	if isChecked == false then 
+	if showAgain then
 			r2.setDisplayInfo(className, 1)
 	else r2.setDisplayInfo(className, 0) end
 

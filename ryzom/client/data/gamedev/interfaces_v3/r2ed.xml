@@ -3064,13 +3064,13 @@ text_y="-2"
 		<!--<view type="text" id="help_text" posref="TL TL" posparent="parent" x="0" y="-14" color="255 255 255 255" fontsize="12" shadow="true"
 			global_color="true" hardtext="" multi_line="true" multi_line_space="0" />
 		-->
-		<ctrl type="button" id="custom_bbox_enabled" button_type="toggle_button" posref="BL BL" posparent="tb_enclosing" x="0" y="-14"
+		<ctrl type="button" id="show_again" button_type="toggle_button" posref="BL BL" posparent="tb_enclosing" x="0" y="-14"
 				tx_normal="w_slot_on.tga" tx_pushed="w_opacity_on.tga" tx_over="w_slot_on.tga" pushed="true"
 				color="255 255 255 255"	col_pushed="255 255 255 255" col_over="255 255 255 0" 
 				onclick_l="lua" 
 				params_l="r2.CustomBBox:updateFromUI()"
 		/>
-		<view type="text" id="text_custom" posparent="custom_bbox_enabled" posref="MR ML" x="4" y="-3" global_color="true" fontsize="12" shadow="true" hardtext="uiR2showMessageAgain" auto_clamp="true"/>
+		<view type="text" id="show_again_label" posparent="show_again" posref="MR ML" x="4" y="-3" global_color="true" fontsize="12" shadow="true" hardtext="uiR2showMessageAgain" auto_clamp="true"/>
 
 		<ctrl style="button_ok" x="0" y="6" posref="BM BM" text_y="0"
 			onclick_l="proc" params_l="help_close" hardtext="uittOK" /> 
