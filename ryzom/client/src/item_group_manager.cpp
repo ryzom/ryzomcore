@@ -301,10 +301,18 @@ bool CItemGroupManager::loadGroups()
 	NLMISC::CIFile f;
 	f.open(userGroupFileName);
 	NLMISC::CIXml xmlStream;
-	xmlStream.init(f);
-	// Actual loading
 	xmlNodePtr globalEnclosing;
-	globalEnclosing = xmlStream.getRootNode();
+	try
+	{
+		xmlStream.init(f);
+		// Actual loading
+		globalEnclosing = xmlStream.getRootNode();
+	}
+	catch (const NLMISC::EXmlParsingError &ex)
+	{
+		nlwarning("Failed to parse '%s', skip", userGroupFileName.c_str());
+		return false;
+	}
 	if(!globalEnclosing)
 	{
 		nlwarning("no root element in item_group xml, skipping xml parsing");
