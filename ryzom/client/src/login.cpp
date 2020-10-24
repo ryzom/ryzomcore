@@ -1379,8 +1379,8 @@ class CAHOnLogin : public IActionHandler
 			return;
 		}
 
-		LoginLogin = pGEBLog->getInputStringAsStdString();
-		LoginPassword = pGEBPwd->getInputStringAsStdString();
+		LoginLogin = pGEBLog->getInputString().toString(); // FIXME: Unicode login
+		LoginPassword = pGEBPwd->getInputString().toString();
 
 		onlogin();
 	}

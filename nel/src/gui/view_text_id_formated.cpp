@@ -33,36 +33,35 @@ NLMISC_REGISTER_OBJECT(CViewBase, CViewTextIDFormated, std::string, "text_id_for
 namespace NLGUI
 {
 
-	std::string CViewTextIDFormated::getProperty( const std::string &name ) const
+	std::string CViewTextIDFormated::getProperty(const std::string &name) const
 	{
-		if( name == "format" )
+		if (name == "format")
 		{
-			return getFormatString().toString();
+			return getFormatString().toUtf8();
 		}
 		else
-		return CViewTextID::getProperty( name );
+			return CViewTextID::getProperty(name);
 	}
 
-
-	void CViewTextIDFormated::setProperty( const std::string &name, const std::string &value )
+	void CViewTextIDFormated::setProperty(const std::string &name, const std::string &value)
 	{
-		if( name == "format" )
+		if (name == "format")
 		{
-			setFormatString( value );
+			setFormatString(ucstring::makeFromUtf8(value));
 			return;
 		}
 		else
-			CViewTextID::setProperty( name, value );
+			CViewTextID::setProperty(name, value);
 	}
 
-	xmlNodePtr CViewTextIDFormated::serialize( xmlNodePtr parentNode, const char *type ) const
+	xmlNodePtr CViewTextIDFormated::serialize(xmlNodePtr parentNode, const char *type) const
 	{
-		xmlNodePtr node = CViewTextID::serialize( parentNode, type );
-		if( node == NULL )
+		xmlNodePtr node = CViewTextID::serialize(parentNode, type);
+		if (node == NULL)
 			return NULL;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_id_formated" );
-		xmlSetProp( node, BAD_CAST "format", BAD_CAST getFormatString().c_str() );
+		xmlSetProp( node, BAD_CAST "format", BAD_CAST getFormatString().toUtf8().c_str() );
 
 		return node;
 	}
@@ -73,7 +72,7 @@ namespace NLGUI
 		if (!CViewTextID::parse(cur, parentGroup)) return false;
 		CXMLAutoPtr prop((const char*) xmlGetProp( cur, (xmlChar*)"format" ));
 		if (prop)
-			setFormatString(ucstring((const char *) prop));
+			setFormatString(ucstring::makeFromUtf8((const char *)prop));
 		else
 			setFormatString(ucstring("$t"));
 		return true;

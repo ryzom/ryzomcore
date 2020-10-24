@@ -34,26 +34,26 @@ namespace NLGUI
 
 	CViewTextFormated::IViewTextFormatter *CViewTextFormated::textFormatter = NULL;
 
-	std::string CViewTextFormated::getProperty( const std::string &name ) const
-	{
-		if( name == "format" )
+	std::string CViewTextFormated::getProperty(const std::string &name) const
+    {
+		if (name == "format")
 		{
-			return getFormatString().toString();
+			return getFormatString().toUtf8();
 		}
 		else
-			return CViewText::getProperty( name );
-	}
+			return CViewText::getProperty(name);
+    }
 
-	void CViewTextFormated::setProperty( const std::string &name, const std::string &value )
-	{
-		if( name == "format" )
-		{
-			setFormatString( value );
-			return;
-		}
-		else
-			CViewText::setProperty( name, value );
-	}
+    void CViewTextFormated::setProperty(const std::string &name, const std::string &value)
+    {
+	    if (name == "format")
+	    {
+		    setFormatString(ucstring::makeFromUtf8(value));
+		    return;
+	    }
+	    else
+		    CViewText::setProperty(name, value);
+    }
 
 	xmlNodePtr CViewTextFormated::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
@@ -62,7 +62,7 @@ namespace NLGUI
 			return NULL;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_formated" );
-		xmlSetProp( node, BAD_CAST "format", BAD_CAST getFormatString().c_str() );
+		xmlSetProp( node, BAD_CAST "format", BAD_CAST getFormatString().toUtf8().c_str() );
 
 		return NULL;
 	}
@@ -73,7 +73,7 @@ namespace NLGUI
 		if (!CViewText::parse(cur, parentGroup)) return false;
 		CXMLAutoPtr prop((const char*) xmlGetProp( cur, (xmlChar*)"format" ));
 		if (prop)
-			setFormatString(ucstring((const char *) prop));
+			setFormatString(ucstring::makeFromUtf8((const char *)prop));
 		else
 			setFormatString(ucstring("$t"));
 		return true;

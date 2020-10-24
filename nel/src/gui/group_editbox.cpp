@@ -1229,7 +1229,7 @@ namespace NLGUI
 			{
 				makeTopWindow();
 				// for french, deutsch and russian, be aware of unicode
-				std::string command = ucstring(_InputString.substr(1)).toUtf8();
+				std::string command = _InputString.substr(1).toUtf8();
 				ICommand::expand(command);
 				// then back to ucstring
 				_InputString.fromUtf8(command);
@@ -1736,25 +1736,9 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CGroupEditBox::setInputStringAsStdString(const std::string &str)
-	{
-		setInputString(ucstring(str));
-	}
-
-	// ***************************************************************************
-	std::string CGroupEditBox::getInputStringAsStdString() const
-	{
-		std::string result;
-		_InputString.toString(result);
-		return result;
-	}
-
-	// ***************************************************************************
 	void	CGroupEditBox::setInputStringAsUtf8(const std::string &str)
 	{
-		ucstring	tmp;
-		tmp.fromUtf8(str);
-		setInputString(tmp);
+		setInputString(ucstring::makeFromUtf8(str));
 	}
 
 	// ***************************************************************************

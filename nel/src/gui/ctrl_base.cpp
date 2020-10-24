@@ -122,30 +122,26 @@ namespace NLGUI
 		CXMLAutoPtr prop;
 
 		// get static toolTip
-		prop = (char*) xmlGetProp( cur, (xmlChar*)"tooltip" );
-		if (prop)
+		prop = (char *)xmlGetProp(cur, (xmlChar *)"tooltip_i18n");
+		if ((bool)prop && strlen((const char *)prop) > 0)
 		{
-			const char *propPtr = prop;
-			if (strlen(propPtr) > 2 && propPtr[0] == 'u' && propPtr[1] == ':')
-				_ContextHelp = ucstring::makeFromUtf8(std::string(propPtr).substr(2));
+			// Force I18N tooltip
+			if (!editorMode)
+				_ContextHelp = CI18N::get((const char *)prop);
 			else
-				_ContextHelp = ucstring(propPtr);
-			
-
-			if( !editorMode && ( strlen(propPtr) > 2 ) )
-			{
-				if ((propPtr[0] == 'u') && (propPtr[1] == 'i'))
-					_ContextHelp = CI18N::get ((const char *) prop);
-			}
+				_ContextHelp.fromUtf8((const char *)prop);
 		}
-		// Force I18N tooltip
-		prop = (char*) xmlGetProp( cur, (xmlChar*)"tooltip_i18n" );
-		if ((bool)prop && strlen((const char*)prop)>0)
+		else
 		{
-			if( !editorMode )
-				_ContextHelp = CI18N::get ((const char *) prop);
-			else
-				_ContextHelp = (const char*)prop;
+			// get static toolTip
+			prop = (char *)xmlGetProp(cur, (xmlChar *)"tooltip");
+			if (prop)
+			{
+				if (!editorMode && NLMISC::startsWith((const char *)prop, "ui"))
+					_ContextHelp = CI18N::get((const char *)prop);
+				else
+					_ContextHelp.fromUtf8((const char *)prop);
+			}
 		}
 
 		// get dynamic toolTip ActionHandler
@@ -173,7 +169,7 @@ namespace NLGUI
 		_ToolTipSpecialParent= CStringShared();
 		if(prop)
 		{
-			_ToolTipSpecialParent= std::string((const char*)prop);
+			_ToolTipSpecialParent= (const char*)prop;
 		}
 
 		// Tooltip posref
@@ -201,12 +197,12 @@ namespace NLGUI
 	{
 		if( name == "tooltip" )
 		{
-			return _ContextHelp.toString();
+			return _ContextHelp.toUtf8();
 		}
 		else
 		if( name == "tooltip_i18n" )
 		{
-			return _ContextHelp.toString();
+			return _ContextHelp.toUtf8();
 		}
 		else
 		if( name == "on_tooltip" )
@@ -262,13 +258,19 @@ namespace NLGUI
 	{
 		if( name == "tooltip" )
 		{
-			_ContextHelp = ucstring::makeFromUtf8(value);
+			if (!editorMode && NLMISC::startsWith(value, "ui"))
+				_ContextHelp = CI18N::get(value);
+			else
+				_ContextHelp.fromUtf8(value);
 			return;
 		}
 		else
 		if( name == "tooltip_i18n" )
 		{
-			_ContextHelp = value;
+			if (!editorMode)
+				_ContextHelp = CI18N::get(value);
+			else
+				_ContextHelp.fromUtf8(value);
 			return;
 		}
 		else

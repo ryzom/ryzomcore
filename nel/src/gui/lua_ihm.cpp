@@ -1880,21 +1880,21 @@ namespace NLGUI
 	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const std::string &search,   const std::string &replace)
 	{
 		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
-		return findReplaceAll(str,   ucstring(search),   ucstring(replace));
+		return findReplaceAll(str,   ucstring::makeFromUtf8(search),   ucstring::makeFromUtf8(replace));
 	}
 
 	// ***************************************************************************
 	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const std::string &search,   const ucstring &replace)
 	{
 		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
-		return findReplaceAll(str,   ucstring(search),   ucstring(replace));
+		return findReplaceAll(str,   ucstring::makeFromUtf8(search),  replace);
 	}
 
 	// ***************************************************************************
 	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const ucstring &search,   const std::string &replace)
 	{
 		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
-		return findReplaceAll(str,   ucstring(search),   ucstring(replace));
+		return findReplaceAll(str,   search,   ucstring::makeFromUtf8(replace));
 	}
 
 

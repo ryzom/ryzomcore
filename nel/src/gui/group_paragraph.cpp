@@ -476,11 +476,10 @@ namespace NLGUI
 		{
 			_HardText = std::string( (const char*)ptr );
 			const char *propPtr = ptr;
-			ucstring Text = ucstring(propPtr);
-			if ((strlen(propPtr)>2) && (propPtr[0] == 'u') && (propPtr[1] == 'i'))
-				Text = CI18N::get (propPtr);
-
-			addTextChild(Text);
+			if (NLMISC::startsWith(propPtr, "ui"))
+				addTextChild(CI18N::get(propPtr));
+			else
+				addTextChild(ucstring::makeFromUtf8(propPtr));
 		}
 		else
 		{

@@ -167,7 +167,10 @@ bool CSystemUtils::copyTextToClipboard(const ucstring &text)
 		bool isUnicode = (IsClipboardFormatAvailable(CF_UNICODETEXT) == TRUE);
 
 		// allocates a buffer to copy text in global memory
-		HGLOBAL mem = GlobalAlloc(GHND|GMEM_DDESHARE, (text.size()+1) * (isUnicode ? 2:1));
+		std::string textLocal;
+		if (!isUnicode) textLocal = NLMISC::wideToMbcs(text);
+		if (text.size() && !textLocal.size()) textLocal = text.toString();
+		HGLOBAL mem = GlobalAlloc(GHND | GMEM_DDESHARE, isUnicode ? ((text.size() + 1) * sizeof(wchar_t)) : textLocal.size());
 
 		if (mem)
 		{
@@ -179,7 +182,7 @@ bool CSystemUtils::copyTextToClipboard(const ucstring &text)
 				if (isUnicode)
 					wcscpy((wchar_t *)hLock, (const wchar_t *)text.c_str());
 				else
-					strcpy((char *)hLock, text.toString().c_str());
+					strcpy((char *)hLock, textLocal.c_str());
 
 				// unlock buffer
 				GlobalUnlock(mem);
@@ -213,7 +216,7 @@ bool CSystemUtils::pasteTextFromClipboard(ucstring &text)
 
 		// get data from clipboard (if not of this type, they are converted)
 		// warning, this code can't be debuggued in VC++ IDE, hObj will be always NULL
-		HANDLE hObj = GetClipboardData(isUnicode ? CF_UNICODETEXT:CF_TEXT);
+		HANDLE hObj = GetClipboardData(isUnicode ? CF_UNICODETEXT : CF_TEXT);
 
 		if (hObj)
 		{
@@ -224,9 +227,15 @@ bool CSystemUtils::pasteTextFromClipboard(ucstring &text)
 			{
 				// retrieve clipboard data
 				if (isUnicode)
-					text = (const ucchar*)hLock;
-				else
-					text = (const char*)hLock;
+				{
+					text = (const ucchar *)hLock;
+				}
+				else 
+				{
+					static_cast<std::wstring &>(text) = NLMISC::mbcsToWide((const char *)hLock);
+					if (!text.size() && ((const char *)hLock)[0])
+						text = (const char *)hLock;
+				}
 
 				// unlock data
 				GlobalUnlock(hObj);

@@ -467,7 +467,7 @@ namespace NLGUI
 	void CDBGroupComboBox::setViewText(const ucstring & text)
 	{
 		_IsExternViewText = true;
-		_ExternViewText = ucstring(text);
+		_ExternViewText = text;
 		_ViewText->setText(_ExternViewText);
 	}
 

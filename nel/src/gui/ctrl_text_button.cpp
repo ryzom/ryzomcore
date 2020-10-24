@@ -596,9 +596,11 @@ namespace NLGUI
 			if (prop)
 			{
 				const char *propPtr = prop;
-				ucstring text = ucstring(propPtr);
-				if ((strlen(propPtr)>2) && (propPtr[0] == 'u') && (propPtr[1] == 'i'))
-					text = CI18N::get (propPtr);
+				ucstring text;
+				if (NLMISC::startsWith(propPtr, "ui"))
+					text = CI18N::get(propPtr);
+				else
+					text.fromUtf8(propPtr);
 				_ViewText->setText(text);
 			}
 		}

@@ -79,8 +79,6 @@ namespace NLGUI
 		sint64		getInputStringAsInt64() const;
 		void		setInputStringAsFloat(float val);
 		float		getInputStringAsFloat() const;
-		void		setInputStringAsStdString(const std::string &str);
-		std::string	getInputStringAsStdString() const;
 		void		setInputStringAsUtf8(const std::string &str);
 		std::string	getInputStringAsUtf8() const;
 		void		setColor(NLMISC::CRGBA col);
@@ -189,7 +187,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("setSelectionAll", luaSetSelectionAll);
 			REFLECT_LUA_METHOD("setFocusOnText", luaSetFocusOnText);
 			REFLECT_LUA_METHOD("cancelFocusOnText", luaCancelFocusOnText);
-			REFLECT_STRING("input_string", getInputStringAsStdString, setInputStringAsStdString);
+			REFLECT_STRING("input_string", getInputStringAsUtf8, setInputStringAsUtf8);
 			REFLECT_UCSTRING("uc_input_string", getInputString, setInputString);
 		REFLECT_EXPORT_END
 

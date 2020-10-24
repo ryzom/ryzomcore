@@ -147,9 +147,10 @@ namespace NLGUI
 		if(ptr)
 		{
 			const char *propPtr = ptr;
-			_EmptyText = ucstring(propPtr);
-			if ((strlen(propPtr)>2) && (propPtr[0] == 'u') && (propPtr[1] == 'i'))
-				_EmptyText = CI18N::get (propPtr);
+			if (NLMISC::startsWith(propPtr, "ui"))
+				_EmptyText = CI18N::get(propPtr);
+			else
+				_EmptyText.fromUtf8(propPtr);
 		}
 
 		// init cache.
