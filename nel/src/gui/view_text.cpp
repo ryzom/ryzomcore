@@ -982,11 +982,11 @@ namespace NLGUI
 		if (prop)
 		{
 			const char *propPtr = prop;
-			_Text = ucstring(propPtr);
-
-			if ((strlen(propPtr)>2) && (propPtr[0] == 'u') && (propPtr[1] == 'i'))
-				_Text = CI18N::get (propPtr);
-			setCase (_Text, _CaseMode);
+			if (NLMISC::startsWith(propPtr, "ui"))
+				_Text = CI18N::get(propPtr);
+			else
+				_Text.fromUtf8(propPtr);
+			setCase(_Text, _CaseMode);
 		}
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"hardtext_format" );
@@ -2152,7 +2152,7 @@ namespace NLGUI
 				float dotWidth = 0.f;
 				if (_OverflowText.size() > 0)
 				{
-					si = TextContext->getStringInfo (ucstring(_OverflowText));
+					si = TextContext->getStringInfo(_OverflowText);
 					dotWidth = si.StringWidth;
 				}
 

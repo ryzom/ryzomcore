@@ -306,9 +306,10 @@ namespace NLGUI
 			if (name)
 			{
 				const char *ptrName = (const char*)name;
-				Text = ucstring(ptrName);
-				if ((strlen(ptrName)>2) && (ptrName[0] == 'u') && (ptrName[1] == 'i'))
-					Text = CI18N::get (ptrName);
+				if (NLMISC::startsWith(ptrName, "ui"))
+					Text = CI18N::get(ptrName);
+				else
+					ucstring::makeFromUtf8(ptrName);
 			}
 
 			CXMLAutoPtr color((const char*) xmlGetProp (cur,   (xmlChar*)"color"));

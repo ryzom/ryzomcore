@@ -680,6 +680,7 @@ bool	CNetworkConnection::connect(string &result)
 	_LatestLoginTime = ryzomGetLocalTime ();
 	_LatestSyncTime = _LatestLoginTime;
 	_LatestProbeTime = _LatestLoginTime;
+	m_LoginAttempts = 0;
 
 	nlinfo("CNET[%p]: Client connected to shard, attempting login", this);
 	return true;
@@ -1091,6 +1092,17 @@ bool	CNetworkConnection::stateLogin()
 	{
 		sendSystemLogin();
 		_LatestLoginTime = _UpdateTime;
+		if (m_LoginAttempts > 24)
+		{
+			m_LoginAttempts = 0;
+			disconnect(); // will send disconnection message
+			nlwarning("CNET[%p]: Too many LOGIN attempts, connection problem", this);
+			return false; // exit now from loop, don't expect a new state
+		}
+		else
+		{
+			++m_LoginAttempts;
+		}
 	}
 
 	return false;
@@ -2308,6 +2320,7 @@ bool	CNetworkConnection::stateProbe()
 			else
 			{
 				nlwarning("CNET[%p]: received normal in state Probe", this);
+				_LatestProbeTime = _UpdateTime;
 			}
 		}
 	}

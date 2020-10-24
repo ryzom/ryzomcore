@@ -4716,7 +4716,7 @@ namespace NLGUI
 		const char *funcName = "addString";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
-		addString(ucstring(ls.toString(1)));
+		addString(ucstring::makeFromUtf8(ls.toString(1)));
 		return 0;
 	}
 
@@ -5470,7 +5470,7 @@ namespace NLGUI
 					}
 					else
 					{
-						ctrlButton->setDefaultContextHelp(ucstring(tooltip));
+						ctrlButton->setDefaultContextHelp(ucstring::makeFromUtf8(tooltip));
 					}
 				}
 

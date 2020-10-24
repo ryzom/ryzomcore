@@ -212,14 +212,24 @@ CDynamicMapClient(eid, clientGateway, luaState)
 void CDynamicMapClientEventForwarder::nodeErased(const std::string& instanceId, const std::string& attrName, sint32 position)
 {
 	//H_AUTO(R2_CDynamicMapClientEventForwarder_nodeErased)
-	if (getEditor().getMode() != CEditor::EditionMode) return;
+	if (getEditor().getMode() != CEditor::EditionMode)
+	{
+		nlassert(getEditor().getMode() != CEditor::AnimationModeLoading); /* Probably should not happen */
+		nldebug("Node erased, but not in edition mode");
+		return;
+	}
 	getEditor().nodeErased(instanceId, attrName, position);
 }
 
 void CDynamicMapClientEventForwarder::nodeSet(const std::string& instanceId, const std::string& attrName, CObject* value)
 {
 	//H_AUTO(R2_CDynamicMapClientEventForwarder_nodeSet)
-	if (getEditor().getMode() != CEditor::EditionMode) return;
+	if (getEditor().getMode() != CEditor::EditionMode
+		&& getEditor().getMode() != CEditor::AnimationModeLoading /* Loading animation scenario from terminal, ghost nodes created by translator */)
+	{
+		nldebug("Node set, but not in edition mode");
+		return;
+	}
 	getEditor().nodeSet(instanceId, attrName, value);
 }
 
@@ -227,7 +237,12 @@ void CDynamicMapClientEventForwarder::nodeInserted(const std::string& instanceId
 							  const std::string& key, CObject* value)
 {
 	//H_AUTO(R2_CDynamicMapClientEventForwarder_nodeInserted)
-	if (getEditor().getMode() != CEditor::EditionMode) return;
+	if (getEditor().getMode() != CEditor::EditionMode
+		&& getEditor().getMode() != CEditor::AnimationModeLoading /* Loading animation scenario from terminal, ghost nodes created by translator */)
+	{
+		nldebug("Node inserted, but not in edition mode");
+		return;
+	}
 	getEditor().nodeInserted(instanceId, attrName, position, key, value);
 }
 
@@ -236,7 +251,12 @@ void CDynamicMapClientEventForwarder::nodeMoved(
 				const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition)
 {
 	//H_AUTO(R2_CDynamicMapClientEventForwarder_nodeMoved)
-	if (getEditor().getMode() != CEditor::EditionMode) return;
+	if (getEditor().getMode() != CEditor::EditionMode)
+	{
+		nlassert(getEditor().getMode() != CEditor::AnimationModeLoading); /* Probably should not happen */
+		nldebug("Node moved, but not in edition mode");
+		return;
+	}
 	getEditor().nodeMoved(instanceId, attrName, position, destInstanceId, destAttrName, destPosition);
 }
 

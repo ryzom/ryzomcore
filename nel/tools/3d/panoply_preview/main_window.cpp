@@ -53,7 +53,7 @@ namespace {
 
 QString nli18n(const char *label)
 {
-	return QString::fromUtf16(CI18N::get(label).c_str());
+	return QString::fromUtf16((const ushort *)CI18N::get(label).c_str());
 }
 
 } /* anonymous namespace */

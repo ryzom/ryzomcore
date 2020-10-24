@@ -1154,6 +1154,15 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 			{
 				ok = true;
 				connectionState = "uiR2EDUploadScenario";
+
+#if !FINAL_VERSION
+				string filename = CFile::findNewFile("scenario.rt.txt");
+				COFile output(filename);
+				std::string ss;
+				rtDataPtr->serialize(ss);
+				output.serialBuffer((uint8*)ss.c_str(),(uint)ss.size());
+				output.flush();
+#endif
 			}
 			else
 			{

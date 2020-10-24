@@ -283,9 +283,10 @@ namespace NLGUI
 				if (name)
 				{
 					const char *ptrName = (const char*)name;
-					ucstrName = ucstring(ptrName);
-					if ((strlen(ptrName)>2) && (ptrName[0] == 'u') && (ptrName[1] == 'i'))
-						ucstrName = CI18N::get (ptrName);
+					if (NLMISC::startsWith(ptrName, "ui"))
+						ucstrName = CI18N::get(ptrName);
+					else
+						ucstrName.fromUtf8(ptrName);
 				}
 
 				CXMLAutoPtr ah((const char*) xmlGetProp (cur,  (xmlChar*)"handler"));
