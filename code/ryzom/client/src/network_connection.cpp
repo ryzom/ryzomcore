@@ -2320,6 +2320,7 @@ bool	CNetworkConnection::stateProbe()
 			else
 			{
 				nlwarning("CNET[%p]: received normal in state Probe", this);
+				_LatestProbeTime = _UpdateTime;
 			}
 		}
 	}
