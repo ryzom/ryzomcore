@@ -552,6 +552,14 @@ typedef	wchar_t ucchar;
 typedef	uint16	ucchar;
 #endif
 
+#ifdef NL_CPP14
+typedef char32_t u32char;
+typedef std::u32string u32string;
+#else
+typedef uint32 u32char;
+typedef std::basic_string<uint32> u32string;
+#endif
+
 #ifndef NL_OVERRIDE
 #define NL_OVERRIDE override
 #endif
