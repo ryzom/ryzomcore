@@ -307,11 +307,13 @@ uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, bool embolden, bool obl
 	// retrieve glyph index from character code
 	FT_UInt glyph_index = FT_Get_Char_Index (_Face, c);
 
+	/*
 	if (glyph_index == 0)
 	{
 		// no glyph available, replace with a dot
 		glyph_index = FT_Get_Char_Index (_Face, ucchar('.'));
 	}
+	*/
 
 	// load glyph image into the slot (erase previous one)
 	error = FT_Load_Glyph (_Face, glyph_index, FT_LOAD_DEFAULT);
