@@ -46,6 +46,11 @@ public:
 	{
 	}
 
+	ucstring(const ucchar *begin, const ucchar *end)
+		: ucstringbase(begin, end)
+	{
+	}
+
 	ucstring(const std::string &str)
 	    : ucstringbase()
 	{

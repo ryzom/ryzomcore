@@ -19,7 +19,6 @@
 
 #include <nel/misc/types_nl.h>
 #include <nel/misc/ucstring.h>
-#include <nel/misc/utf32_string.h>
 #include <string>
 
 namespace NLMISC {
@@ -27,7 +26,7 @@ namespace NLMISC {
 /// String view for UTF-8 and UTF-32 iteration as 32-bit codepoints.
 /// This string view keeps the string as a reference, it does not make a copy.
 /// Only use this for iterating a string's codepoints.
-/// Strings are not necessarily NUL-terminated.
+/// Strings are not required to be NUL-terminated, but must have at least one character extra.
 class CUtfStringView
 {
 public:
@@ -41,12 +40,13 @@ public:
 	inline CUtfStringView(const ucstring &utf16Str) : m_Str(utf16Str.c_str()), m_Size(utf16Str.size() << 1), m_Iterator(utf16Iterator) {}
 	inline CUtfStringView(const u32string &utf32Str) : m_Str(utf32Str.c_str()), m_Size(utf32Str.size() << 2), m_Iterator(utf32Iterator) {}
 
-	std::string toUtf8(); // Makes a copy
-	u32string toUtf32(); // Makes a copy
+	std::string toUtf8(bool reEncode = false) const; // Makes a copy
+	ucstring toUtf16(bool reEncode = false) const; // Makes a copy
+	u32string toUtf32() const; // Makes a copy
 
-	inline bool isUtf8() { return m_Iterator == utf8Iterator; }
-	inline bool isUtf16() { return m_Iterator == utf16Iterator; }
-	inline bool isUtf32() { return m_Iterator == utf32Iterator; }
+	inline bool isUtf8() const { return m_Iterator == utf8Iterator; }
+	inline bool isUtf16() const { return m_Iterator == utf16Iterator; }
+	inline bool isUtf32() const { return m_Iterator == utf32Iterator; }
 
 	struct const_iterator
 	{
@@ -82,8 +82,8 @@ private:
 	static u32char utf16Iterator(const void **addr);
 	static u32char utf32Iterator(const void **addr);
 
-	const void *const m_Str;
-	const size_t m_Size;
+	const void *const m_Str; // String
+	const size_t m_Size; // Size in bytes
 	const TIterator m_Iterator;
 	
 }; /* class CUtfStringView */
