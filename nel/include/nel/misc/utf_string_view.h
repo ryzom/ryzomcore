@@ -26,7 +26,7 @@ namespace NLMISC {
 /// String view for UTF-8 and UTF-32 iteration as 32-bit codepoints.
 /// This string view keeps the string as a reference, it does not make a copy.
 /// Only use this for iterating a string's codepoints.
-/// Strings are not required to be NUL-terminated, but must have at least one character extra.
+/// String must be NUL terminated, but its size may specify a substring.
 class CUtfStringView
 {
 public:
