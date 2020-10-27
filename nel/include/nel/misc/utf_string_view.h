@@ -35,6 +35,19 @@ public:
 	{
 		nlassert(len <= strlen(utf8Str));
 	}
+#if defined(NL_OS_WINDOWS)
+	inline CUtfStringView(const wchar_t *utf16Str) : m_Str(utf16Str), m_Size(wcslen(utf16Str)), m_Iterator(utf16Iterator) {}
+	inline CUtfStringView(const wchar_t *utf16Str, size_t len): m_Str(utf16Str), m_Size(len), m_Iterator(utf16Iterator)
+	{
+		nlassert(len <= wcslen(utf16Str));
+	}
+#else
+	inline CUtfStringView(const wchar_t *utf32Str) : m_Str(utf32Str), m_Size(wcslen(utf32Str)), m_Iterator(utf32Iterator) {}
+	inline CUtfStringView(const wchar_t *utf32Str, size_t len): m_Str(utf32Str), m_Size(len), m_Iterator(utf32Iterator)
+	{
+		nlassert(len <= wcslen(utf32Str));
+	}
+#endif
 
 	inline CUtfStringView(const std::string &utf8Str) : m_Str(utf8Str.c_str()), m_Size(utf8Str.size()), m_Iterator(utf8Iterator) {}
 	inline CUtfStringView(const ucstring &utf16Str) : m_Str(utf16Str.c_str()), m_Size(utf16Str.size() << 1), m_Iterator(utf16Iterator) {}
@@ -43,6 +56,8 @@ public:
 	std::string toUtf8(bool reEncode = false) const; // Makes a copy
 	ucstring toUtf16(bool reEncode = false) const; // Makes a copy
 	u32string toUtf32() const; // Makes a copy
+
+	std::wstring toWide() const; // Platform dependent, UTF-16 or UTF-32. Makes a copy.
 
 	inline bool isUtf8() const { return m_Iterator == utf8Iterator; }
 	inline bool isUtf16() const { return m_Iterator == utf16Iterator; }

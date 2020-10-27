@@ -106,6 +106,39 @@ u32string CUtfStringView::toUtf32() const
 	return res;
 }
 
+std::wstring CUtfStringView::toWide() const
+{
+#ifdef NL_OS_WINDOWS
+	if (m_Iterator == utf16Iterator)
+		return std::wstring((const wchar_t *)m_Str, (const wchar_t *)((ptrdiff_t)m_Str + m_Size));
+	std::wstring res;
+	res.reserve(m_Size << 1);
+	for (iterator it(begin()), end(end()); it != end; ++it)
+	{
+		u32char c = *it;
+		if (c < 0x10000)
+		{
+			res += c;
+		}
+		else
+		{
+			c -= 0x10000;
+			res += (c >> 10) | 0xD800;
+			res += (c & 0x3FF) | 0xDC00;
+		}
+	}
+	return res;
+#else
+	if (m_Iterator == utf32Iterator)
+		return std::wstring((const wchar_t *)m_Str, (const wchar_t *)((ptrdiff_t)m_Str + m_Size));
+	std::wstring res;
+	res.reserve(m_Size << 2);
+	for (iterator it(begin()), end(end()); it != end; ++it)
+		res += *it;
+	return res;
+#endif
+}
+
 u32char CUtfStringView::utf8Iterator(const void **addr)
 {
 	// Decode UTF-8
