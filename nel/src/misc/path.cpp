@@ -2790,16 +2790,13 @@ bool CPath::isAbsolutePath(const std::string &path)
 bool CFile::setRWAccess(const std::string &filename)
 {
 #ifdef NL_OS_WINDOWS
-	ucstring ucFile;
-	ucFile.fromUtf8(filename);
-
-	wchar_t *wideFile = (wchar_t*)ucFile.c_str();
+	std::wstring wideFile = NLMISC::utf8ToWide(filename);
 
 	// if the file exists and there's no write access
-	if (_waccess (wideFile, 00) == 0 && _waccess (wideFile, 06) == -1)
+	if (_waccess (wideFile.c_str(), 00) == 0 && _waccess (wideFile.c_str(), 06) == -1)
 	{
 		// try to set the read/write access
-		if (_wchmod (wideFile, _S_IREAD | _S_IWRITE) == -1)
+		if (_wchmod (wideFile.c_str(), _S_IREAD | _S_IWRITE) == -1)
 		{
 			if (INelContext::getInstance().getAlreadyCreateSharedAmongThreads())
 			{
@@ -2822,6 +2819,7 @@ bool CFile::setRWAccess(const std::string &filename)
 			return false;
 		}
 	}
+#endif
 	else
 	{
 		if (INelContext::getInstance().getAlreadyCreateSharedAmongThreads())
@@ -2830,7 +2828,6 @@ bool CFile::setRWAccess(const std::string &filename)
 		}
 //		return false;
 	}
-#endif
 	return true;
 }
 
