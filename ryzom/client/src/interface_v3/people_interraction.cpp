@@ -2199,7 +2199,7 @@ public:
 						if (gc)
 						{
 							CGroupEditBox *geb = dynamic_cast<CGroupEditBox *>(gc->getGroup("add_contact_eb:eb"));
-							geb->setInputString(ucstring(""));
+							geb->setInputString(u32string());
 						}
 						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, sParams);
 					}
@@ -2250,18 +2250,18 @@ public:
 						if (peopleList)
 						{
 							// don't add if it is the player name
-							if (!ClientCfg.Local && (UserEntity->getEntityName() == geb->getInputString()))
+							if (!ClientCfg.Local && (UserEntity->getEntityName() == geb->getInputStringAsUtf16()))
 							{
 								displayVisibleSystemMsg(CI18N::get("uiCantAddYourSelfInContactList"));
 							}
 							else
 							{
-								PeopleInterraction.askAddContact(geb->getInputString(), peopleList);
-								geb->setInputString(ucstring(""));
+								PeopleInterraction.askAddContact(geb->getInputStringAsUtf16(), peopleList);
+								geb->setInputString(u32string());
 							}
 						}
 					}
-					geb->setInputString(ucstring(""));
+					geb->setInputString(u32string());
 				}
 			}
 		}
@@ -2389,7 +2389,7 @@ public:
 		if (eb)
 		{
 			CWidgetManager::getInstance()->setCaptureKeyboard(eb);
-			eb->setInputString(ucstring(""));
+			eb->setInputString(u32string());
 		}
 		//
 		if (gc->getActive())
@@ -2416,7 +2416,7 @@ class CHandlerValidatePartyChatName : public IActionHandler
 		if (!gc) return;
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(gc->getGroup("eb"));
 		if (!eb) return;
-		ucstring title = eb->getInputString();
+		ucstring title = eb->getInputStringAsUtf16();
 
 		// TODO GAMEDEV : create (or join ?) a new channel. Each channel (party chat) should have a unique name in the game
 		// moreover, it should not have the name of another available chat window (for example, it shouldn't be named 'Around Me')

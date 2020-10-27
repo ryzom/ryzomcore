@@ -286,6 +286,13 @@ UTextContext::CStringInfo		CTextContextUser::getStringInfo(NLMISC::CUtfStringVie
 	_TextContext.computeStringInfo(sv, _CacheString);
 	return CStringInfo (_CacheString.StringWidth, _CacheString.StringHeight, _CacheString.StringLine);
 }
+UTextContext::CStringInfo		CTextContextUser::getStringInfo(NLMISC::CUtfStringView sv, size_t len)
+{
+	H_AUTO2;
+
+	_TextContext.computeStringInfo(sv, _CacheString, len);
+	return CStringInfo (_CacheString.StringWidth, _CacheString.StringHeight, _CacheString.StringLine);
+}
 void CTextContextUser::clear()
 {
 	H_AUTO2;

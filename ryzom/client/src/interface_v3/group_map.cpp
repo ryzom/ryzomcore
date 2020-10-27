@@ -141,12 +141,12 @@ static void popupLandMarkNameDialog()
 		const CUserLandMark userLM = map->getUserLandMark(LastSelectedLandMark);
 
 		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(userLM.Type));
-		eb->setInputString(userLM.Title);
+		eb->setInputStringAsUtf16(userLM.Title);
 	}
 	else
 	{
 		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(CUserLandMark::Misc));
-		eb->setInputString(ucstring());
+		eb->setInputStringAsUtf16(ucstring());
 	}
 
 	CWidgetManager::getInstance()->setCaptureKeyboard(eb);
@@ -3882,7 +3882,7 @@ class CAHLandMarkFilter : public IActionHandler
 			CGroupEditBox* eb = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(group));
 			if (!eb) return;
 
-			text = eb->getInputString().toUtf8();
+			text = eb->getInputStringAsUtf8();
 		}
 
 		map->setLandmarkFilter(text);
@@ -3988,7 +3988,7 @@ class CAHValidateUserLandMarkName : public IActionHandler
 			CGroupMap *map = dynamic_cast<CGroupMap *>(LastSelectedLandMark->getParent());
 			if (!map) return;
 			// update existing landmark
-			map->updateUserLandMark(LastSelectedLandMark, eb->getInputString(), landMarkType);
+			map->updateUserLandMark(LastSelectedLandMark, eb->getInputStringAsUtf16(), landMarkType);
 		}
 		else
 		{
@@ -3996,11 +3996,11 @@ class CAHValidateUserLandMarkName : public IActionHandler
 			if (!LastClickedMap) return;
 			if( UseUserPositionForLandMark )
 			{
-				LastClickedMap->addUserLandMark(LastClickedMap->getPlayerPos(), eb->getInputString(), landMarkType);
+				LastClickedMap->addUserLandMark(LastClickedMap->getPlayerPos(), eb->getInputStringAsUtf16(), landMarkType);
 			}
 			else
 			{
-				LastClickedMap->addUserLandMark(LastClickedMap->getRightClickLastPos(), eb->getInputString(), landMarkType);
+				LastClickedMap->addUserLandMark(LastClickedMap->getRightClickLastPos(), eb->getInputStringAsUtf16(), landMarkType);
 			}
 			LastClickedMap->invalidateCoords();
 		}

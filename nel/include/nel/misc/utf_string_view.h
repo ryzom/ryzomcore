@@ -30,6 +30,8 @@ namespace NLMISC {
 class CUtfStringView
 {
 public:
+	inline CUtfStringView() : m_Str(NULL), m_Size(0), m_Iterator(utf32Iterator) {}
+
 	inline CUtfStringView(const char *utf8Str) : m_Str(utf8Str), m_Size(strlen(utf8Str)), m_Iterator(utf8Iterator) {}
 	inline CUtfStringView(const char *utf8Str, size_t len): m_Str(utf8Str), m_Size(len), m_Iterator(utf8Iterator)
 	{
@@ -68,16 +70,31 @@ public:
 	public:
 		inline void operator++()
 		{ 
-			m_Char = m_View.m_Iterator(&m_Addr); 
+			m_Char = m_View.m_Iterator(&m_Addr);
 			if ((ptrdiff_t)m_Addr > ((ptrdiff_t)m_View.m_Str + m_View.m_Size))
 			{
 				m_Addr = 0;
 				m_Char = 0;
 			}
 		}
+		inline void operator+=(ptrdiff_t a)
+		{
+			while (m_Addr)
+			{
+				++(*this);
+			}
+		}
 		inline bool operator!=(const const_iterator &o) const { return m_Addr != o.m_Addr; }
 		inline bool operator==(const const_iterator &o) const { return m_Addr == o.m_Addr; }
 		inline const u32char &operator*() const {  return m_Char; }
+		const_iterator() : m_View(*(CUtfStringView *)NULL), m_Addr(NULL), m_Char(0) { }
+
+		const_iterator &operator=(const const_iterator &other) 
+		{  
+			if(this == &other) return *this;
+			this->~const_iterator();
+			return *new(this) const_iterator(other);
+		}
 	private:
 		friend class CUtfStringView;
 		inline const_iterator(const CUtfStringView &view, const void *addr) : m_View(view), m_Addr(addr), m_Char(addr ? view.m_Iterator(&m_Addr) : 0) { }
@@ -98,11 +115,27 @@ public:
 	inline bool empty() const { return !m_Size; }
 	const void *ptr() const { return m_Str; }
 
+	inline CUtfStringView substr(const iterator &begin, const iterator &end) const
+	{
+		return CUtfStringView(begin.m_Addr, (ptrdiff_t)end.m_Addr - (ptrdiff_t)begin.m_Addr, m_Iterator);
+	}
+	
+	inline bool endsWith(char c) { nlassert(c < 0x80); return *((char *)m_Str + m_Size - 1) == c; }
+
+	CUtfStringView &operator=(const CUtfStringView &other) 
+	{  
+		if(this == &other) return *this;
+		this->~CUtfStringView();
+		return *new(this) CUtfStringView(other);
+	}
+
 private:
 	typedef u32char (*TIterator)(const void **addr);
 	static u32char utf8Iterator(const void **addr);
 	static u32char utf16Iterator(const void **addr);
 	static u32char utf32Iterator(const void **addr);
+
+	inline CUtfStringView(const void *str, size_t len, TIterator it) : m_Str(str), m_Size(len), m_Iterator(it) { }
 
 	const void *const m_Str; // String
 	const size_t m_Size; // Size in bytes

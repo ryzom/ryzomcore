@@ -238,6 +238,22 @@ void CFontManager::computeStringInfo (	NLMISC::CUtfStringView sv,
 										CComputedString &output,
 										bool keep800x600Ratio	)
 {
+	computeStringInfo(sv, sv.largestSize(), fontGen, color, fontSize, embolden, oblique, driver, output, keep800x600Ratio);
+}
+
+
+// ***************************************************************************
+void CFontManager::computeStringInfo (	NLMISC::CUtfStringView sv,
+										size_t len,
+										CFontGenerator *fontGen,
+										const NLMISC::CRGBA &color,
+										uint32 fontSize,
+										bool embolden,
+										bool oblique,
+										IDriver *driver,
+										CComputedString &output,
+										bool keep800x600Ratio	)
+{
 	output.Color = color;
 
 	// save string info for later rebuild as needed
@@ -274,7 +290,8 @@ void CFontManager::computeStringInfo (	NLMISC::CUtfStringView sv,
 	CTextureFont::SLetterKey k;
 	CTextureFont::SLetterInfo *pLI;
 
-	for (NLMISC::CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it)
+	size_t idx = 0;
+	for (NLMISC::CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end && idx < len; ++it, ++idx)
 	{
 		// Creating font
 		k.Char = *it;

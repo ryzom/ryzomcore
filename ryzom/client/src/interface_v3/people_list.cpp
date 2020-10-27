@@ -876,7 +876,7 @@ class CHandlerContactEntry : public IActionHandler
 	{
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(pCaller);
 		if (pEB == NULL) return;
-		ucstring text = pEB->getInputString();
+		ucstring text = pEB->getInputStringAsUtf16();
 		// If the line is empty, do nothing
 		if(text.empty())
 			return;
@@ -884,7 +884,7 @@ class CHandlerContactEntry : public IActionHandler
 		// Parse any tokens in the text
 		if ( ! CInterfaceManager::parseTokens(text))
 		{
-			pEB->setInputString (string(""));
+			pEB->setInputString (u32string());
 			return;
 		}
 
@@ -895,7 +895,7 @@ class CHandlerContactEntry : public IActionHandler
 			// TODO : have NLMISC::ICommand accept unicode strings
 			std::string str = text.toUtf8().substr(1);
 			NLMISC::ICommand::execute( str, g_log );
-			pEB->setInputString (string(""));
+			pEB->setInputString (u32string());
 			return;
 		}
 		// Well, we could have used CChatWindow class to handle this, but CPeopleList was written earlier, so for now
@@ -908,7 +908,7 @@ class CHandlerContactEntry : public IActionHandler
 
 		// Simply do a tell on the player
 		ChatMngr.tell(playerName.toString(), text);
-		pEB->setInputString (string(""));
+		pEB->setInputString (u32string());
 		if (gc)
 		{
 			// Restore position of enclosing container if it hasn't been moved/scaled/poped by the user

@@ -808,7 +808,7 @@ void initLoginScreen()
 		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
 		if (pGEB != NULL && (pGEB->getInputString().empty()))
 		{
-			pGEB->setInputString(l);
+			pGEB->setInputStringAsUtf8(l);
 		}
 		CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
 	}
@@ -830,8 +830,8 @@ void initAutoLogin()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CGroupEditBox *pGEBLog = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
 	CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
-	pGEBLog->setInputString(LoginLogin);
-	pGEBPwd->setInputString(LoginPassword);
+	pGEBLog->setInputStringAsUtf8(LoginLogin);
+	pGEBPwd->setInputStringAsUtf8(LoginPassword);
 	CAHManager::getInstance()->runActionHandler("on_login", NULL, "");
 
 	if (ClientCfg.R2Mode)
@@ -1379,8 +1379,8 @@ class CAHOnLogin : public IActionHandler
 			return;
 		}
 
-		LoginLogin = pGEBLog->getInputString().toString(); // FIXME: Unicode login
-		LoginPassword = pGEBPwd->getInputString().toString();
+		LoginLogin = pGEBLog->getInputStringAsUtf8();
+		LoginPassword = pGEBPwd->getInputStringAsUtf8();
 
 		onlogin();
 	}
@@ -2394,7 +2394,7 @@ bool initCreateAccount()
 		{
 			CGroupEditBox * eb = dynamic_cast<CGroupEditBox*>(createAccountUI->findFromShortId(editBoxes[i] + ":eb"));
 			if(eb)
-				eb->setInputString(ucstring(""));
+				eb->setInputString(u32string());
 		}
 
 		// conditions button
@@ -2581,7 +2581,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 			{
 				CGroupEditBox * eb = dynamic_cast<CGroupEditBox*>(createAccountUI->findFromShortId(editBoxes[i] + ":eb"));
 				if(eb)
-					results[i] = eb->getInputString().toUtf8();
+					results[i] = eb->getInputStringAsUtf8();
 			}
 
 			// text
@@ -2735,11 +2735,11 @@ class CAHCreateAccountLogin : public IActionHandler
 		{
 			CGroupEditBox * eb = dynamic_cast<CGroupEditBox*>(createAccountUI->findFromShortId("eb_login:eb"));
 			if(eb)
-				LoginLogin = eb->getInputString().toUtf8();
+				LoginLogin = eb->getInputStringAsUtf8();
 
 			eb = dynamic_cast<CGroupEditBox*>(createAccountUI->findFromShortId("eb_password:eb"));
 			if(eb)
-				LoginPassword = eb->getInputString().toUtf8();
+				LoginPassword = eb->getInputStringAsUtf8();
 
 			onlogin(false);
 		}

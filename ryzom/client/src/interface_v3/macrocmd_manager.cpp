@@ -886,7 +886,7 @@ public:
 		if (pCS != NULL) pCS->readFromMacro(pMCM->CurrentEditMacro);
 		// Name
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(GROUP_NEWMACRO_EDIT_NAME));
-		if (pEB != NULL) pEB->setInputString(pMCM->CurrentEditMacro.Name);
+		if (pEB != NULL) pEB->setInputStringAsUtf8(pMCM->CurrentEditMacro.Name);
 		// Commands
 		CGroupList *pList = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId(GROUP_NEWMACRO_COMMANDS));
 		if (pList == NULL) return;

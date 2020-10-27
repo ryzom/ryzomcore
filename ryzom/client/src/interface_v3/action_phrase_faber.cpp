@@ -718,7 +718,7 @@ void		CActionPhraseFaber::startMpSelection(uint itemReqLine, uint mpSlot)
 			if (eb)
 			{
 				CWidgetManager::getInstance()->setCaptureKeyboard(eb);
-				eb->setInputString(toString(maxQuantity));
+				eb->setInputStringAsUtf8(toString(maxQuantity));
 				eb->setSelectionAll();
 			}
 		}

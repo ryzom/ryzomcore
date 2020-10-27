@@ -382,6 +382,11 @@ public:
 		_FontManager->computeStringInfo (sv, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, output, _Keep800x600Ratio);
 	}
 
+	void computeStringInfo (NLMISC::CUtfStringView sv, CComputedString& output, size_t len)
+	{
+		_FontManager->computeStringInfo (sv, len, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, output, _Keep800x600Ratio);
+	}
+
 	/// Debug : write to the disk the texture cache
 	void dumpCache (const char *filename)
 	{

@@ -141,6 +141,20 @@ public:
 	 * Same as computeString but do not make vertex buffers and primitives
 	 */
 	void computeStringInfo (NLMISC::CUtfStringView sv,
+							size_t len,
+							CFontGenerator *fontGen,
+							const NLMISC::CRGBA &color,
+							uint32 fontSize,
+							bool embolden,
+							bool oblique,
+							IDriver *driver,
+							CComputedString &output,
+							bool keep800x600Ratio= true);
+
+	/**
+	 * Same as computeString but do not make vertex buffers and primitives
+	 */
+	void computeStringInfo (NLMISC::CUtfStringView sv,
 							CFontGenerator *fontGen,
 							const NLMISC::CRGBA &color,
 							uint32 fontSize,

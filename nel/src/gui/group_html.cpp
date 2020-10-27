@@ -27,6 +27,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/rgba.h"
 #include "nel/misc/algo.h"
+#include "nel/misc/utf_string_view.h"
 #include "nel/gui/libwww.h"
 #include "nel/gui/group_html.h"
 #include "nel/gui/group_list.h"
@@ -3023,7 +3024,7 @@ namespace NLGUI
 				CGroupEditBox *eb = dynamic_cast<CGroupEditBox*>(textArea->getGroup("eb"));
 				if (eb)
 				{
-					eb->setInputString(decodeHTMLEntities(content));
+					eb->setInputString(CUtfStringView(decodeHTMLEntities(content)).toUtf32());
 					if (style.hasStyle("background-color"))
 					{
 						CViewBitmap *bg = dynamic_cast<CViewBitmap*>(eb->getView("bg"));

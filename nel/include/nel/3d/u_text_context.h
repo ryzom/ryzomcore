@@ -276,6 +276,11 @@ public:
 	 */
 	virtual	CStringInfo		getStringInfo (NLMISC::CUtfStringView sv) = 0;
 	/**
+	* Get a string information from the ucstring
+	*	The returned string info is in pixel size per default.
+	*/
+	virtual	CStringInfo		getStringInfo (NLMISC::CUtfStringView sv, size_t len) = 0;
+	/**
 	 * empty the map
 	 */
 	virtual	void			clear () = 0;

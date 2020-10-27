@@ -70,10 +70,10 @@ class CHandlerGuildCreate : public IActionHandler
 
 		CGroupEditBox *pDesc = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(guildDescWin));
 
-		ucstring guildName = pGEB->getInputString();
+		ucstring guildName = pGEB->getInputStringAsUtf16();
 
 		ucstring guildDesc;
-		if (pDesc != NULL) guildDesc = pDesc->getInputString();
+		if (pDesc != NULL) guildDesc = pDesc->getInputStringAsUtf16();
 
 		uint64 icon = CGuildManager::iconMake((uint8)pCS->getGuildBack(), (uint8)pCS->getGuildSymbol(),
 								pCS->getInvertGuildSymbol(), pCS->getGuildColor1(), pCS->getGuildColor2());

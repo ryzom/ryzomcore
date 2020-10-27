@@ -1148,7 +1148,7 @@ void CModalContainerEditCmd::onChangeAction()
 			CGroupEditBox *pEB= dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId( sWin ));
 			if( pEB )
 			{
-				pEB->setInputString(ucstring(""));
+				pEB->setInputString(u32string());
 			}
 			NLGUI::CDBManager::getInstance()->getDbProp( sDB )->setValue32(1);
 		}

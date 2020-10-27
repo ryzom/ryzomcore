@@ -2755,7 +2755,7 @@ class CHandlerInvSearchButton : public IActionHandler
 		{
 			CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 			eb->setSelectionAll();
-			filter = eb->getInputString();
+			filter = eb->getInputStringAsUtf16();
 		}
 
 		CDBGroupListSheetBag *pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(btn->getParent()->getId() + ":bag_list"));
@@ -2805,10 +2805,10 @@ class CHandlerInvSetSearch : public IActionHandler
 		std::string id = pCaller->getParent()->getParent()->getId();
 
 		CDBGroupListSheetBag *pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(id + ":bag_list"));
-		if (pList != NULL) pList->setSearchFilter(eb->getInputString());
+		if (pList != NULL) pList->setSearchFilter(eb->getInputStringAsUtf16());
 
 		CDBGroupIconListBag *pIcons = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(id + ":bag_icons"));
-		if (pIcons != NULL) pIcons->setSearchFilter(eb->getInputString());
+		if (pIcons != NULL) pIcons->setSearchFilter(eb->getInputStringAsUtf16());
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerInvSetSearch, "inv_set_search" );

@@ -104,6 +104,7 @@ public:
 	void erase(uint32 i)  ;
 	virtual	CStringInfo		getStringInfo (uint32 i);
 	virtual	CStringInfo		getStringInfo (NLMISC::CUtfStringView sv);
+	virtual	CStringInfo		getStringInfo (NLMISC::CUtfStringView sv, size_t len);
 
 	void clear()  ;
 	void printAt(float x, float y, uint32 i) ;
