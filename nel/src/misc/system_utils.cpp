@@ -168,7 +168,7 @@ bool CSystemUtils::copyTextToClipboard(const ucstring &text)
 
 		// allocates a buffer to copy text in global memory
 		std::string textLocal;
-		if (!isUnicode) textLocal = NLMISC::wideToMbcs(text);
+		if (!isUnicode) textLocal = NLMISC::wideToMbcs((const wchar_t *)text.c_str(), text.size());
 		if (text.size() && !textLocal.size()) textLocal = text.toString();
 		HGLOBAL mem = GlobalAlloc(GHND | GMEM_DDESHARE, isUnicode ? ((text.size() + 1) * sizeof(wchar_t)) : textLocal.size());
 
@@ -232,7 +232,7 @@ bool CSystemUtils::pasteTextFromClipboard(ucstring &text)
 				}
 				else 
 				{
-					static_cast<std::wstring &>(text) = NLMISC::mbcsToWide((const char *)hLock);
+					reinterpret_cast<std::wstring &>(text) = NLMISC::mbcsToWide((const char *)hLock);
 					if (!text.size() && ((const char *)hLock)[0])
 						text = (const char *)hLock;
 				}
