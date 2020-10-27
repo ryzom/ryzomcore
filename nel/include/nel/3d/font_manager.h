@@ -19,6 +19,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/smart_ptr.h"
+#include "nel/misc/utf_string_view.h"
 #include "nel/3d/texture.h"
 #include "nel/3d/material.h"
 #include "nel/3d/texture_font.h"
@@ -111,6 +112,7 @@ public:
 	 * \param output computed string
 	 * \param keep800x600Ratio true if you want that CFontManager look at Driver window size, and resize fontSize so it keeps same size...
 	 */
+	/*
 	void computeString (const std::string& s,
 						CFontGenerator *fontGen,
 						const NLMISC::CRGBA &color,
@@ -120,11 +122,12 @@ public:
 					    IDriver *driver,
 						CComputedString& output,
 						bool	keep800x600Ratio= true);
+						*/
 
 	/**
 	 * Same as computeString but works with a unicode string (ucstring)
 	 */
-	void computeString (const ucstring &s,
+	void computeString (NLMISC::CUtfStringView sv,
 						CFontGenerator *fontGen,
 						const NLMISC::CRGBA &color,
 						uint32 fontSize,
@@ -137,7 +140,21 @@ public:
 	/**
 	 * Same as computeString but do not make vertex buffers and primitives
 	 */
-	void computeStringInfo (const ucstring &s,
+	void computeStringInfo (NLMISC::CUtfStringView sv,
+							size_t len,
+							CFontGenerator *fontGen,
+							const NLMISC::CRGBA &color,
+							uint32 fontSize,
+							bool embolden,
+							bool oblique,
+							IDriver *driver,
+							CComputedString &output,
+							bool keep800x600Ratio= true);
+
+	/**
+	 * Same as computeString but do not make vertex buffers and primitives
+	 */
+	void computeStringInfo (NLMISC::CUtfStringView sv,
 							CFontGenerator *fontGen,
 							const NLMISC::CRGBA &color,
 							uint32 fontSize,

@@ -77,13 +77,11 @@ uint32 CTextContext::textPush (const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, NLMISC::MaxCStringSize);
 
-	ucstring uc;
-	uc.fromUtf8((const char *)str);
-	return textPush(uc);
+	return textPush(str);
 }
 
 // ------------------------------------------------------------------------------------------------
-uint32 CTextContext::textPush (const ucstring &str)
+uint32 CTextContext::textPush (NLMISC::CUtfStringView sv)
 {
 	nlassert(_FontGen);
 
@@ -103,7 +101,7 @@ uint32 CTextContext::textPush (const ucstring &str)
 	nlassert (index < _CacheStrings.size());
 	CComputedString &strToFill = _CacheStrings[index];
 
-	_FontManager->computeString (str, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, strToFill, _Keep800x600Ratio);
+	_FontManager->computeString (sv, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, strToFill, _Keep800x600Ratio);
 	// just compute letters, glyphs are rendered on demand before first draw
 	//_FontManager->computeStringInfo(str, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, strToFill, _Keep800x600Ratio);
 

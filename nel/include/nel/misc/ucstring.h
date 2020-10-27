@@ -30,11 +30,7 @@
  * An unicode string class (16 bits per character).
  * Add features to convert and assign \c ucstring to \c string and \c string to \c ucstring.
  */
-#if defined(NL_OS_WINDOWS)
-typedef std::wstring ucstringbase;
-#else
 typedef std::basic_string<ucchar> ucstringbase;
-#endif
 
 class ucstring : public ucstringbase
 {
@@ -43,6 +39,11 @@ public:
 
 	ucstring(const ucstringbase &str)
 	    : ucstringbase(str)
+	{
+	}
+
+	ucstring(const ucchar *begin, const ucchar *end)
+		: ucstringbase(begin, end)
 	{
 	}
 

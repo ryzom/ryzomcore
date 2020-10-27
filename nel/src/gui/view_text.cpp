@@ -2463,9 +2463,8 @@ namespace NLGUI
 							if ((uint) (index - charIndex) > currWord.NumSpaces)
 							{
 								// get the x position
-								ucstring subStr = currWord.Text.substr(0, index - charIndex - currWord.NumSpaces);
 								// compute the size
-								UTextContext::CStringInfo si = TextContext->getStringInfo(subStr);
+								UTextContext::CStringInfo si = TextContext->getStringInfo(currWord.Text, (ptrdiff_t)index - charIndex - currWord.NumSpaces);
 								fx = px + si.StringWidth + currWord.NumSpaces * currLine.getSpaceWidth();
 
 								x = fx / _Scale;
@@ -2493,9 +2492,8 @@ namespace NLGUI
 		else
 		{
 			// get the x position
-			ucstring subStr = _Text.substr(0, index);
 			// compute the size
-			UTextContext::CStringInfo si = TextContext->getStringInfo(subStr);
+			UTextContext::CStringInfo si = TextContext->getStringInfo(_Text, index);
 			y = 0;
 			x = (sint) ceilf(si.StringWidth / _Scale);
 		}
@@ -2508,12 +2506,13 @@ namespace NLGUI
 		float px = 0.f;
 
 		UTextContext::CStringInfo si;
-		ucstring singleChar(" ");
-		uint i;
-		for (i = 0; i < textValue.length(); ++i)
+		u32string singleChar(1, ' ');
+		uint i = 0;
+		NLMISC::CUtfStringView sv(textValue);
+		for (NLMISC::CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it, ++i)
 		{
 			// get character width
-			singleChar[0] = textValue[i];
+			singleChar[0] = *it;
 			si = textContext.getStringInfo(singleChar);
 			px += si.StringWidth;
 			 // the character is at the i - 1 position

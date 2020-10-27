@@ -69,7 +69,7 @@ public:
 	// Holds info for glyphs displayed on screen
 	struct SLetterInfo
 	{
-		ucchar Char;
+		u32char Char;
 		sint Size;
 		bool Embolden;
 		bool Oblique;
@@ -94,7 +94,7 @@ public:
 
 	struct SLetterKey
 	{
-		ucchar Char;
+		u32char Char;
 		sint Size;
 		bool Embolden;
 		bool Oblique;

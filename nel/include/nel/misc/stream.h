@@ -301,13 +301,6 @@ public:
 #ifndef NL_OS_CYGWIN
 	virtual void	serial(char &b) ;
 #endif
-#ifdef NL_OS_WINDOWS
-	inline void     serial(wchar_t &b)
-	{ 
-		nlctassert(sizeof(wchar_t) == sizeof(uint16)); 
-		serial(reinterpret_cast<uint16 &>(b));
-	}
-#endif
 	virtual void	serial(std::string &b) ;
 	virtual void	serial(ucstring &b) ;
 	//@}

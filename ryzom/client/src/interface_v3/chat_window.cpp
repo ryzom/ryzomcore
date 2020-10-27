@@ -363,7 +363,7 @@ void CChatWindow::setCommand(const ucstring &command,bool execute)
 void CChatWindow::setEntry(const ucstring &entry)
 {
 	if (!_EB) return;
-	_EB->setInputString(entry);
+	_EB->setInputStringAsUtf16(entry);
 }
 
 //=================================================================================
@@ -1273,7 +1273,7 @@ public:
 	{
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(pCaller);
 		if (pEB == NULL) return;
-		ucstring text = pEB->getInputString();
+		ucstring text = pEB->getInputStringAsUtf16();
 		// If the line is empty, do nothing
 		if(text.empty())
 			return;
@@ -1289,7 +1289,7 @@ public:
 		// Parse any tokens in the text
 		if ( ! CInterfaceManager::parseTokens(text))
 		{
-			pEB->setInputString (string(""));
+			pEB->setInputString (u32string());
 			return;
 		}
 
@@ -1329,7 +1329,7 @@ public:
 			}
 		}
 		// Clear input string
-		pEB->setInputString (ucstring(""));
+		pEB->setInputString (u32string());
 		CGroupContainer *gc = static_cast< CGroupContainer* >( pEB->getEnclosingContainer() );
 
 		if (gc)

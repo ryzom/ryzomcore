@@ -129,7 +129,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 				{
 					if ( pIS->Family == ITEMFAMILY::SCROLL)
 					{
-						editBoxLarge->setInputString(itemInfo.CustomText);
+						editBoxLarge->setInputStringAsUtf16(itemInfo.CustomText);
 						editLarge->setActive(true);
 						editBoxLarge->setActive(true);
 
@@ -147,7 +147,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 							strFindReplace(customText, "%mfc", ucstring());
 						}
 
-						editBoxShort->setInputString(customText);
+						editBoxShort->setInputStringAsUtf16(customText);
 						editShort->setActive(true);
 						editBoxShort->setActive(true);
 
@@ -231,8 +231,8 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 					closeButton->setActive(false);
 					group->setActive(true);
 
-					editBoxShort->setInputString(ucstring());
-					editBoxLarge->setInputString(ucstring());
+					editBoxShort->setInputString(u32string());
+					editBoxLarge->setInputString(u32string());
 					display->setTextFormatTaged(ucstring());
 
 
@@ -242,7 +242,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 						// If we already have item info
 						if ( pIS->Family == ITEMFAMILY::SCROLL)
 						{
-							editBoxLarge->setInputString(itemInfo.CustomText);
+							editBoxLarge->setInputStringAsUtf16(itemInfo.CustomText);
 							editLarge->setActive(true);
 							editBoxLarge->setActive(true);
 
@@ -261,7 +261,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 								strFindReplace(customText, "%mfc", ucstring());
 							}
 
-							editBoxShort->setInputString(customText);
+							editBoxShort->setInputStringAsUtf16(customText);
 							editShort->setActive(true);
 							editBoxShort->setActive(true);
 
@@ -289,8 +289,8 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 					closeButton->setActive(true);
 					group->setActive(true);
 
-					editBoxShort->setInputString(ucstring());
-					editBoxLarge->setInputString(ucstring());
+					editBoxShort->setInputString(u32string());
+					editBoxLarge->setInputString(u32string());
 					display->setTextFormatTaged(ucstring());
 
 					// Finish the display or add the waiter
@@ -394,11 +394,11 @@ void CInterfaceItemEdition::CItemEditionWindow::validate()
 		if (group && editShort && editBoxShort && editLarge && editBoxLarge && display && editButtons && closeButton && background)
 		{
 			bool textValid = editShort->getActive();
-			ucstring text = editBoxShort->getInputString();
+			ucstring text = editBoxShort->getInputStringAsUtf16();
 			if (!textValid)
 			{
 				textValid = editLarge->getActive();
-				text = editBoxLarge->getInputString();
+				text = editBoxLarge->getInputStringAsUtf16();
 			}
 			 
 			if (textValid)

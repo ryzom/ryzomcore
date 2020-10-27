@@ -63,16 +63,16 @@ namespace NLGUI
 		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
 
 		/// Accessors
-		ucstring getInputString() const { return _InputString; }
-		const ucstring &getInputStringRef() const { return _InputString; }
+		u32string getInputString() const { return _InputString; }
+		const u32string &getInputStringRef() const { return _InputString; }
 		const ucstring &getPrompt() const { return _Prompt; }
 
 		/** Set the prompt
 		  * NB : line returns are encoded as '\n', not '\r\n'
 		  */
 		void		setPrompt(const ucstring &s) { _Prompt = s; }
-		void		setInputString(const ucstring &str);
-		void		setInputStringRef(const ucstring &str) {_InputString = str; };
+		void		setInputString(const u32string &str);
+		void		setInputStringRef(const u32string &str) {_InputString = str; };
 		void		setInputStringAsInt(sint32 val);
 		sint32		getInputStringAsInt() const;
 		void		setInputStringAsInt64(sint64 val);
@@ -81,6 +81,8 @@ namespace NLGUI
 		float		getInputStringAsFloat() const;
 		void		setInputStringAsUtf8(const std::string &str);
 		std::string	getInputStringAsUtf8() const;
+		void		setInputStringAsUtf16(const ucstring &str);
+		ucstring    getInputStringAsUtf16() const;
 		void		setColor(NLMISC::CRGBA col);
 
 
@@ -119,7 +121,7 @@ namespace NLGUI
 		sint32	getMaxHistoric() const {return _MaxHistoric;}
 		sint32	getCurrentHistoricIndex () const {return _CurrentHistoricIndex;}
 		void	setCurrentHistoricIndex (sint32 index) {_CurrentHistoricIndex=index;}
-		const ucstring	&getHistoric(uint32 index) const {return _Historic[index];}
+		const u32string	&getHistoric(uint32 index) const {return _Historic[index];}
 		uint32	getNumHistoric() const {return (uint32)_Historic.size ();}
 
 		// Get on change action handler
@@ -188,7 +190,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("setFocusOnText", luaSetFocusOnText);
 			REFLECT_LUA_METHOD("cancelFocusOnText", luaCancelFocusOnText);
 			REFLECT_STRING("input_string", getInputStringAsUtf8, setInputStringAsUtf8);
-			REFLECT_UCSTRING("uc_input_string", getInputString, setInputString);
+			REFLECT_UCSTRING("uc_input_string", getInputStringAsUtf16, setInputStringAsUtf16);
 		REFLECT_EXPORT_END
 
 		/** Restore the original value of the edit box.
@@ -227,16 +229,16 @@ namespace NLGUI
 
 		// Text info
 		ucstring	_Prompt;
-		ucstring	_InputString;
+		u32string	_InputString;
 		CViewText	*_ViewText;
 
 		// undo / redo
-		ucstring	_StartInputString;  // value of the input string when focus was acuired first
-		ucstring	_ModifiedInputString;
+		u32string	_StartInputString;  // value of the input string when focus was acuired first
+		u32string	_ModifiedInputString;
 
 
 		// Historic info
-		typedef std::deque<ucstring>		THistoric;
+		typedef std::deque<u32string>		THistoric;
 		THistoric	_Historic;
 		uint32		_MaxHistoric;
 		sint32		_CurrentHistoricIndex;

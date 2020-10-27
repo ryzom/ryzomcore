@@ -21,6 +21,7 @@
 
 #include "nel/misc/string_common.h"
 #include "nel/misc/sstring.h"
+#include "nel/misc/utf_string_view.h"
 
 using namespace std;
 
@@ -228,8 +229,7 @@ std::string wideToUtf8(const wchar_t *str, size_t len)
 #if defined(NL_OS_WINDOWS)
 	return winWideToCp(str, len, CP_UTF8);
 #else
-	// TODO: UTF-32 to UTF-8
-	nlassert(false);
+	return CUtfStringView(str, len).toUtf8();
 #endif
 }
 
@@ -242,10 +242,9 @@ std::string wideToUtf8(const std::wstring &str)
 std::wstring utf8ToWide(const char *str, size_t len)
 {
 #if defined(NL_OS_WINDOWS)
-	return winCpToWide(str, len, CP_UTF8);
+	return winCpToWide(str, len, CP_UTF8); // UTF-16
 #else
-	// TODO: UTF-8 to UTF-32
-	nlassert(false);
+	return CUtfStringView(str, len).toWide(); // UTF-32
 #endif
 }
 

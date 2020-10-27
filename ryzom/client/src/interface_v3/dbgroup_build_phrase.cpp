@@ -279,7 +279,7 @@ void			CDBGroupBuildPhrase::clearBuildingPhrase()
 	// Empty the name
 	if(_UserSentenceName)
 	{
-		_UserSentenceName->setInputString(ucstring());
+		_UserSentenceName->setInputString(u32string());
 	}
 
 	// update Display
@@ -373,7 +373,7 @@ void			CDBGroupBuildPhrase::startComposition(const CSPhraseCom &phrase)
 
 	// set the editable name.
 	if(_UserSentenceName)
-		_UserSentenceName->setInputString(name);
+		_UserSentenceName->setInputStringAsUtf16(name);
 }
 
 
@@ -1790,7 +1790,7 @@ void			CDBGroupBuildPhrase::buildCurrentPhrase(CSPhraseCom &newPhrase)
 	// Set the Name
 	if(_UserSentenceName)
 	{
-		newPhrase.Name= _UserSentenceName->getInputString();
+		newPhrase.Name= _UserSentenceName->getInputStringAsUtf16();
 	}
 }
 

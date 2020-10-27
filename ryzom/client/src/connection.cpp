@@ -1684,7 +1684,7 @@ public:
 		ucstring sSurName = ucstring("NotSet");
 		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(sEditBoxPath));
 		if (pGEB != NULL)
-			sFirstName = pGEB->getInputString();
+			sFirstName = pGEB->getInputStringAsUtf16();
 		else
 			nlwarning ("can't get edit box name : %s",sEditBoxPath.c_str());
 
@@ -2560,7 +2560,7 @@ static void setTextField(CInterfaceGroup* scenarioWnd, const std::string &uiName
 			viewText->setText(text);
 		CGroupEditBox* editBox = dynamic_cast<CGroupEditBox*>(result);
 		if(editBox)
-			editBox->setInputString(text);
+			editBox->setInputStringAsUtf16(text);
 
 	}
 }
@@ -2824,7 +2824,7 @@ class CAHScenarioControl : public IActionHandler
 					{
 						CGroupEditBox* editBox = dynamic_cast<CGroupEditBox*>(result);
 						if(editBox)
-							editBox->setInputString(description);
+							editBox->setInputStringAsUtf16(description);
 					}
 				}
 			}
@@ -2975,7 +2975,7 @@ class CAHLoadScenario : public IActionHandler
 		{
 			CGroupEditBox* editBox = dynamic_cast<CGroupEditBox*>(result);
 			if(editBox)
-				description = editBox->getInputString().toString();
+				description = editBox->getInputStringAsUtf8();
 		}
 
 		// races

@@ -546,10 +546,14 @@ template<> struct hash<uint64>
  * \typedef ucchar
  * An Unicode character (16 bits)
  */
-#if defined(NL_OS_WINDOWS)
-typedef	wchar_t ucchar;
-#else
 typedef	uint16	ucchar;
+
+#ifdef NL_CPP14
+typedef char32_t u32char;
+typedef std::u32string u32string;
+#else
+typedef uint32 u32char;
+typedef std::basic_string<uint32> u32string;
 #endif
 
 #ifndef NL_OVERRIDE

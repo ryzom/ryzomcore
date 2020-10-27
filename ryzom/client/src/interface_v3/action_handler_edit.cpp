@@ -27,6 +27,7 @@ using namespace NLMISC;
 
 #include "nel/gui/action_handler.h"
 #include "nel/gui/group_editbox.h"
+#include "nel/misc/utf_string_view.h"
 #include "interface_manager.h"
 #include "../client_chat_manager.h"
 #include "people_interraction.h"
@@ -56,7 +57,7 @@ extern CClientChatManager		ChatMngr;
 // ***************************************************************************
 
 // used for character classifiction (when the user press Ctrl-arrow)
-static inline uint getCharacterCategory(ucchar c)
+static inline uint getCharacterCategory(u32char c)
 {
 	if (c == ' ') return 0;
 	if (c > 127 || isalpha((char) c)) return 1; // alpha & other characters
@@ -69,7 +70,7 @@ static inline uint getCharacterCategory(ucchar c)
 /** skip a block of character in a string, (same behaviour than when Ctrl-arrow is pressed)
   * It returns the new index
   */
-static uint skipUCCharsRight(uint startPos, const ucstring &str)
+static uint skipUCCharsRight(uint startPos, const u32string &str)
 {
 	uint pos = startPos;
 	uint endIndex = (uint)str.length();
@@ -86,7 +87,7 @@ static uint skipUCCharsRight(uint startPos, const ucstring &str)
 /** skip a block of character in a string, (same behaviour than when Ctrl-arrow is pressed)
   * It returns the new index
   */
-static uint skipUCCharsLeft(uint startPos, const ucstring &str)
+static uint skipUCCharsLeft(uint startPos, const u32string &str)
 {
 	uint pos = startPos;
 	-- pos;
@@ -362,7 +363,7 @@ class CAHEditPreviousLine : public CAHEdit
 		if (_GroupEdit->getMaxHistoric() && (! _GroupEdit->getViewText()->getMultiLine()))
 		{
 			// Get the start of the string.
-			ucstring	startStr= _GroupEdit->getInputStringRef().substr(0, _GroupEdit->getCursorPos());
+			u32string	startStr= _GroupEdit->getInputStringRef().substr(0, _GroupEdit->getCursorPos());
 
 			// Search all historic string that match startStr.
 			for(sint i=_GroupEdit->getCurrentHistoricIndex()+1;i<(sint)_GroupEdit->getNumHistoric();i++)
@@ -434,7 +435,7 @@ class CAHEditNextLine : public CAHEdit
 		if( (! _GroupEdit->getViewText()->getMultiLine()) && _GroupEdit->getMaxHistoric() && _GroupEdit->getCurrentHistoricIndex()>0)
 		{
 			// Get the start of the string.
-			ucstring	startStr= _GroupEdit->getInputStringRef().substr(0, _GroupEdit->getCursorPos());
+			u32string	startStr= _GroupEdit->getInputStringRef().substr(0, _GroupEdit->getCursorPos());
 
 			// Search all historic string that match startStr.
 			for(sint i=_GroupEdit->getCurrentHistoricIndex()-1;i>=0;i--)
@@ -520,8 +521,8 @@ protected:
 		// else cut forwards
 		else if(_GroupEdit->getCursorPos() < (sint32) _GroupEdit->getInputStringRef().length())
 		{
-			ucstring inputString = _GroupEdit->getInputStringRef();
-			ucstring::iterator it = inputString.begin() + _GroupEdit->getCursorPos();
+			u32string inputString = _GroupEdit->getInputStringRef();
+			u32string::iterator it = inputString.begin() + _GroupEdit->getCursorPos();
 			inputString.erase(it);
 			_GroupEdit->setInputStringRef (inputString);
 			if (!_GroupEdit->getAHOnChange().empty())
@@ -638,7 +639,7 @@ class CAHEditExpandOrCycleTell : public CAHEdit
 	void actionPart ()
 	{
 		// If the line starts with '/tell ', do not try to expand
-		static const ucstring TELL_STR("/tell ");
+		static const u32string TELL_STR(CUtfStringView("/tell ").toUtf32());
 		if (_GroupEdit->getInputString().substr(0, TELL_STR.length()) != TELL_STR)
 		{
 			if (_GroupEdit->expand()) return;

@@ -7484,7 +7484,7 @@ class CAHInviteCharacter : public IActionHandler
 				CGroupEditBox *geb = dynamic_cast<CGroupEditBox *>(fatherGC->getGroup("add_contact_eb:eb"));
 				if (geb && !geb->getInputString().empty())
 				{
-					string charName = geb->getInputString().toString();
+					string charName = geb->getInputStringAsUtf8();
 					CSessionBrowserImpl & sessionBrowser = CSessionBrowserImpl::getInstance();
 					sessionBrowser.inviteCharacterByName(sessionBrowser.getCharId(), charName);
 
@@ -7506,7 +7506,7 @@ class CAHInviteCharacter : public IActionHandler
 						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_newcomer");
 					}
 
-					geb->setInputString(ucstring(""));
+					geb->setInputString(u32string());
 				}
 			}
 		}
