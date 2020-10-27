@@ -63,27 +63,8 @@ CMaterial* CFontManager::getFontMaterial()
 	return _MatFont;
 }
 
-
 // ***************************************************************************
-void CFontManager::computeString (const std::string &s,
-								  CFontGenerator *fontGen,
-								  const NLMISC::CRGBA &color,
-								  uint32 fontSize,
-								  bool embolden,
-								  bool oblique,
-								  IDriver *driver,
-								  CComputedString &output,
-								  bool	keep800x600Ratio)
-{
-	// static to avoid reallocation
-	static ucstring	ucs;
-	ucs= s;
-	computeString(ucs, fontGen, color, fontSize, embolden, oblique, driver, output, keep800x600Ratio);
-}
-
-
-// ***************************************************************************
-void CFontManager::computeString (const ucstring &s,
+void CFontManager::computeString (NLMISC::CUtfStringView sv,
 								  CFontGenerator *fontGen,
 								  const NLMISC::CRGBA &color,
 								  uint32 fontSize,
@@ -109,7 +90,7 @@ void CFontManager::computeString (const ucstring &s,
 	}
 
 	// Setting vertices format
-	output.Vertices.setNumVertices (4 * (uint32)s.size());
+	output.Vertices.setNumVertices (4 * (uint32)sv.largestSize());
 
 	// 1 character <-> 1 quad
 	sint32 penx = 0, dx;
@@ -144,7 +125,8 @@ void CFontManager::computeString (const ucstring &s,
 	output.StringHeight = 0;
 
 	// save string info for later rebuild as needed
-	output.Text = s;
+	if (sv.ptr() != output.Text.c_str()) // don't resave if rebuilding
+		output.Text = sv.toUtf8();
 	output.CacheVersion = getCacheVersion();
 
 	uint j = 0;
@@ -156,10 +138,11 @@ void CFontManager::computeString (const ucstring &s,
 		hlfPixScrH = 0.f;
 
 		// For all chars
-		for (uint i = 0; i < s.size(); i++)
+		//for (uint i = 0; i < s.size(); i++)
+		for (NLMISC::CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it)
 		{
 			// Creating font
-			k.Char = s[i];
+			k.Char = *it;
 			k.FontGenerator = fontGen;
 			k.Size = fontSize;
 			k.Embolden = embolden;
@@ -245,7 +228,7 @@ void CFontManager::computeString (const ucstring &s,
 
 
 // ***************************************************************************
-void CFontManager::computeStringInfo (	const ucstring &s,
+void CFontManager::computeStringInfo (	NLMISC::CUtfStringView sv,
 										CFontGenerator *fontGen,
 										const NLMISC::CRGBA &color,
 										uint32 fontSize,
@@ -258,10 +241,11 @@ void CFontManager::computeStringInfo (	const ucstring &s,
 	output.Color = color;
 
 	// save string info for later rebuild as needed
-	output.Text = s;
+	if (sv.ptr() != output.Text.c_str()) // don't resave if rebuilding
+		output.Text = sv.toUtf8();
 	output.CacheVersion = 0;
 
-	if (s.empty())
+	if (sv.empty())
 	{
 		output.StringWidth = 0.f;
 		output.StringHeight = 0;
@@ -290,10 +274,10 @@ void CFontManager::computeStringInfo (	const ucstring &s,
 	CTextureFont::SLetterKey k;
 	CTextureFont::SLetterInfo *pLI;
 
-	for (uint i = 0; i < s.size(); i++)
+	for (NLMISC::CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it)
 	{
 		// Creating font
-		k.Char = s[i];
+		k.Char = *it;
 		k.FontGenerator = fontGen;
 		k.Size = fontSize;
 		k.Embolden = embolden;

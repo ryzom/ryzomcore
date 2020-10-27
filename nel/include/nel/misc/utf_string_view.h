@@ -91,6 +91,13 @@ public:
 	iterator begin() const { return iterator(*this, m_Str); }
 	inline iterator end() const { return iterator(*this, NULL); }
 
+	/// Largest possible number of characters in this string.
+	/// Number of actual characters may be less or equal.
+	inline size_t largestSize() const { return m_Size; }
+
+	inline bool empty() const { return !m_Size; }
+	const void *ptr() const { return m_Str; }
+
 private:
 	typedef u32char (*TIterator)(const void **addr);
 	static u32char utf8Iterator(const void **addr);

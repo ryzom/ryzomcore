@@ -256,7 +256,7 @@ CFontGenerator::~CFontGenerator ()
 	}
 }
 
-void CFontGenerator::getSizes (ucchar c, uint32 size, uint32 &width, uint32 &height)
+void CFontGenerator::getSizes (u32char c, uint32 size, uint32 &width, uint32 &height)
 {
 	FT_Error error;
 
@@ -272,7 +272,7 @@ void CFontGenerator::getSizes (ucchar c, uint32 size, uint32 &width, uint32 &hei
 	if (glyph_index == 0)
 	{
 		// no glyph available, replace with a dot
-		glyph_index = FT_Get_Char_Index (_Face, ucchar('.'));
+		glyph_index = FT_Get_Char_Index (_Face, u32char('.'));
 	}
 
 	// load glyph image into the slot (erase previous one)
@@ -294,7 +294,7 @@ void CFontGenerator::getSizes (ucchar c, uint32 size, uint32 &width, uint32 &hei
 	height = _Face->glyph->metrics.height >> 6;
 }
 
-uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, bool embolden, bool oblique, uint32 &width, uint32 &height, uint32 &pitch, sint32 &left, sint32 &top, sint32 &advx, uint32 &glyphIndex)
+uint8 *CFontGenerator::getBitmap (u32char c, uint32 size, bool embolden, bool oblique, uint32 &width, uint32 &height, uint32 &pitch, sint32 &left, sint32 &top, sint32 &advx, uint32 &glyphIndex)
 {
 	FT_Error error;
 
@@ -311,7 +311,7 @@ uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, bool embolden, bool obl
 	if (glyph_index == 0)
 	{
 		// no glyph available, replace with a dot
-		glyph_index = FT_Get_Char_Index (_Face, ucchar('.'));
+		glyph_index = FT_Get_Char_Index (_Face, u32char('.'));
 	}
 	*/
 
@@ -374,7 +374,7 @@ uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, bool embolden, bool obl
 
 
 
-void CFontGenerator::getKerning (ucchar left, ucchar right, sint32 &kernx)
+void CFontGenerator::getKerning (u32char left, u32char right, sint32 &kernx)
 {
 	if (!FT_HAS_KERNING(_Face))
 	{
@@ -394,14 +394,14 @@ void CFontGenerator::getKerning (ucchar left, ucchar right, sint32 &kernx)
 
 
 
-uint32	 CFontGenerator::getCharIndex (ucchar c)
+uint32	 CFontGenerator::getCharIndex (u32char c)
 {
 	uint32 ret = FT_Get_Char_Index(_Face, c);
 
 	if (ret == 0)
 	{
 		// no glyph available, replace with a dot
-		ret = FT_Get_Char_Index (_Face, ucchar('.'));
+		ret = FT_Get_Char_Index (_Face, u32char('.'));
 	}
 
 	return ret;
@@ -475,14 +475,14 @@ CFontGenerator::~CFontGenerator ()
 	DeleteDC (hdcDib);
 }
 
-void CFontGenerator::getSizes (ucchar c, uint32 size, uint32 &width, uint32 &height)
+void CFontGenerator::getSizes (u32char c, uint32 size, uint32 &width, uint32 &height)
 {
 }
 
 HFONT hFont = NULL;
 uint32 CurrentFontSize = 0;
 
-uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, bool embolden, bool oblique, uint32 &width, uint32 &height, uint32 &pitch, sint32 &left, sint32 &top, sint32 &advx, uint32 &glyphIndex)
+uint8 *CFontGenerator::getBitmap (u32char c, uint32 size, bool embolden, bool oblique, uint32 &width, uint32 &height, uint32 &pitch, sint32 &left, sint32 &top, sint32 &advx, uint32 &glyphIndex)
 {
 	if (size == 0)
 	{
@@ -529,7 +529,7 @@ uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, bool embolden, bool obl
 	SelectObject (hdcDib, hFont);
 	SelectObject (hdcDib, Dib);
 
-	const ucchar cc = /*(char)*/ c;
+	const u32char cc = /*(char)*/ c;
 
 	// prevent outputing white glyph if char is not available in font
 	DWORD glyphIndex;
@@ -639,13 +639,13 @@ uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, bool embolden, bool obl
 
 
 
-void CFontGenerator::getKerning (ucchar left, ucchar right, sint32 &kernx)
+void CFontGenerator::getKerning (u32char left, u32char right, sint32 &kernx)
 {
 }
 
 
 
-uint32	 CFontGenerator::getCharIndex (ucchar c)
+uint32	 CFontGenerator::getCharIndex (u32char c)
 {
 	return 0;
 }

@@ -231,11 +231,11 @@ uint32 CTextContextUser::textPush(const char *format, ...)
 
 	return _TextContext.textPush(ucstring(str)) ;
 }
-uint32 CTextContextUser::textPush(const ucstring &str)
+uint32 CTextContextUser::textPush(NLMISC::CUtfStringView sv)
 {
 	H_AUTO2;
 
-	return _TextContext.textPush(str) ;
+	return _TextContext.textPush(sv) ;
 }
 void CTextContextUser::setStringColor(uint32 i, CRGBA newCol)
 {
@@ -279,11 +279,11 @@ UTextContext::CStringInfo		CTextContextUser::getStringInfo(uint32 i)
 	else
 		return	CStringInfo(cstr->StringWidth, cstr->StringHeight, cstr->StringLine);
 }
-UTextContext::CStringInfo		CTextContextUser::getStringInfo(const ucstring &str)
+UTextContext::CStringInfo		CTextContextUser::getStringInfo(NLMISC::CUtfStringView sv)
 {
 	H_AUTO2;
 
-	_TextContext.computeStringInfo(str, _CacheString);
+	_TextContext.computeStringInfo(sv, _CacheString);
 	return CStringInfo (_CacheString.StringWidth, _CacheString.StringHeight, _CacheString.StringLine);
 }
 void CTextContextUser::clear()
@@ -319,11 +319,11 @@ void CTextContextUser::printClipAtOld (float x, float y, uint32 i, float xmin, f
 	printClipAt(rdrBuffer, x, y ,i, xmin, ymin, xmax, ymax);
 	flushRenderBuffer(&rdrBuffer);
 }
-void CTextContextUser::printAt(float x, float y, const ucstring &ucstr)
+void CTextContextUser::printAt(float x, float y, NLMISC::CUtfStringView sv)
 {
 	H_AUTO2;
 
-	_TextContext.printAt(x, y, ucstr);
+	_TextContext.printAt(x, y, sv);
 	_DriverUser->restoreMatrixContext();
 }
 void CTextContextUser::printfAt(float x, float y, const char * format, ...)
@@ -337,12 +337,12 @@ void CTextContextUser::printfAt(float x, float y, const char * format, ...)
 	_DriverUser->restoreMatrixContext();
 }
 
-void CTextContextUser::render3D(const CMatrix &mat, const ucstring &ucstr)
+void CTextContextUser::render3D(const CMatrix &mat, NLMISC::CUtfStringView sv)
 {
 	NL3D_HAUTO_RENDER_3D_TEXTCONTEXT;
 
 	CComputedString computedStr;
-	_TextContext.computeString(ucstr,computedStr);
+	_TextContext.computeString(sv,computedStr);
 
 	computedStr.render3D(*_Driver,mat);
 
@@ -355,7 +355,7 @@ void CTextContextUser::render3D(const CMatrix &mat, const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, NLMISC::MaxCStringSize);
 
-	render3D(mat, ucstring(str));
+	render3D(mat, str);
 
 	_DriverUser->restoreMatrixContext();
 }

@@ -181,7 +181,7 @@ public:
 	CVertexBuffer Vertices;
 	CMaterial	*Material;
 	CRGBA Color;
-	ucstring Text;
+	std::string Text;
 
 	uint32 CacheVersion;
 

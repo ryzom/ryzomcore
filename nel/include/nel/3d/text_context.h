@@ -134,7 +134,7 @@ public:
 	uint32 textPush (const char *format, ...);
 
 	/// computes an ucstring and adds the result to the cache (return the index)
-	uint32 textPush (const ucstring &str);
+	uint32 textPush (NLMISC::CUtfStringView sv);
 
 	/// remove a string from the cache
 	void erase (uint32 index);
@@ -262,12 +262,12 @@ public:
 	}
 
 	/// Directly print a string
-	void printAt (float x, float z, const ucstring &ucstr)
+	void printAt (float x, float z, NLMISC::CUtfStringView sv)
 	{
 		nlassert(_FontGen);
 
 		// compute the string just one time
-		_FontManager->computeString (ucstr, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, _TempString, _Keep800x600Ratio);
+		_FontManager->computeString (sv, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, _TempString, _Keep800x600Ratio);
 
 		// draw shaded
 		if (_Shaded)
@@ -372,14 +372,14 @@ public:
 	 * \param an ucstring
 	 * \param the computed string
 	 */
-	void computeString (const ucstring& s, CComputedString& output)
+	void computeString (NLMISC::CUtfStringView sv, CComputedString& output)
 	{
-		_FontManager->computeString (s, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, output, _Keep800x600Ratio);
+		_FontManager->computeString (sv, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, output, _Keep800x600Ratio);
 	}
 
-	void computeStringInfo (const ucstring& s, CComputedString& output)
+	void computeStringInfo (NLMISC::CUtfStringView sv, CComputedString& output)
 	{
-		_FontManager->computeStringInfo (s, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, output, _Keep800x600Ratio);
+		_FontManager->computeStringInfo (sv, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, output, _Keep800x600Ratio);
 	}
 
 	/// Debug : write to the disk the texture cache
