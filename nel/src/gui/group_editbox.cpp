@@ -96,7 +96,7 @@ namespace NLGUI
 									_ViewTextDeltaX(0)
 
 	{
-		_Prompt = ">";
+		_Prompt = u32string(1, '>');
 		_BackSelectColor= CRGBA::White;
 		_TextSelectColor= CRGBA::Black;
 	}
@@ -170,7 +170,7 @@ namespace NLGUI
 		else
 		if( name == "prompt" )
 		{
-			return _Prompt.toString();
+			return CUtfStringView(_Prompt).toUtf8();
 		}
 		else
 		if( name == "enter_type" )
@@ -354,7 +354,7 @@ namespace NLGUI
 		else
 		if( name == "prompt" )
 		{
-			_Prompt = value;
+			_Prompt = CUtfStringView(value).toUtf32();
 			return;
 		}
 		else
@@ -477,7 +477,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "max_chars_size", BAD_CAST toString( _MaxCharsSize ).c_str() );
 		xmlSetProp( node, BAD_CAST "enter_loose_focus", BAD_CAST toString( _LooseFocusOnEnter ).c_str() );
 		xmlSetProp( node, BAD_CAST "enter_recover_focus", BAD_CAST toString( _RecoverFocusOnEnter ).c_str() );
-		xmlSetProp( node, BAD_CAST "prompt", BAD_CAST _Prompt.toString().c_str() );
+		xmlSetProp( node, BAD_CAST "prompt", BAD_CAST CUtfStringView(_Prompt).toUtf8().c_str() );
 
 		std::string e;
 		switch( _EntryType )
@@ -606,7 +606,7 @@ namespace NLGUI
 		if (prop) _ResetFocusOnHide = convertBool(prop);
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"prompt" );
-		if (prop) _Prompt = (const char*)prop;
+		if (prop) _Prompt = CUtfStringView((const char*)prop).toUtf32();
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"entry_type" );
 		_EntryType = Text;
@@ -1436,13 +1436,13 @@ namespace NLGUI
 			ucstring usTmp;
 			if (_EntryType == Password)
 			{
-				usTmp = _Prompt;
+				usTmp = CUtfStringView(_Prompt).toUtf16();
 				for (uint32 i = 0; i < _InputString.size(); ++i)
 					usTmp += "*";
 			}
 			else
 			{
-				usTmp = _Prompt + CUtfStringView(_InputString).toUtf16();
+				usTmp = CUtfStringView(_Prompt + _InputString).toUtf16();
 			}
 			_ViewText->setText (usTmp);
 		}
@@ -1624,6 +1624,12 @@ namespace NLGUI
 	}
 
 
+	// ----------------------------------------------------------------------------
+	void CGroupEditBox::setPrompt(const std::string &s)
+	{ 
+		_Prompt = CUtfStringView(s).toUtf32(); 
+	}
+
 
 	// ----------------------------------------------------------------------------
 	void CGroupEditBox::setInputString(const std::string &str)
@@ -1740,6 +1746,12 @@ namespace NLGUI
 			CWidgetManager::getInstance()->resetCaptureKeyboard();
 
 		CInterfaceGroup::setActive(active);
+	}
+
+	// ***************************************************************************
+	std::string CGroupEditBox::getPrompt() const
+	{
+		return NLMISC::CUtfStringView(_Prompt).toUtf8();
 	}
 
 	// ***************************************************************************

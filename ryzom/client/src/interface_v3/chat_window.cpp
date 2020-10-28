@@ -262,7 +262,7 @@ void CChatWindow::setPrompt(const ucstring &prompt)
 	if (!_Chat) return;
 	CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(_Chat->getGroup("eb"));
 	if (!eb) return;
-	eb->setPrompt(prompt);
+	eb->setPrompt(prompt.toUtf8());
 }
 
 void CChatWindow::setPromptColor(NLMISC::CRGBA col)

@@ -64,13 +64,14 @@ namespace NLGUI
 
 		/// Accessors
 		std::string getInputString() const;
+		std::string getPrompt() const;
 		const u32string &getInputStringRef() const { return _InputString; }
-		const ucstring &getPrompt() const { return _Prompt; }
+		const u32string &getPromptRef() const { return _Prompt; }
 
 		/** Set the prompt
 		  * NB : line returns are encoded as '\n', not '\r\n'
 		  */
-		void		setPrompt(const ucstring &s) { _Prompt = s; }
+		void		setPrompt(const std::string &s);
 		void		setInputString(const std::string &str);
 		void		setInputStringRef(const u32string &str) {_InputString = str; };
 		void		setInputStringAsInt(sint32 val);
@@ -228,7 +229,7 @@ namespace NLGUI
 		NLMISC::CRGBA	_BackSelectColor;
 
 		// Text info
-		ucstring	_Prompt;
+		u32string	_Prompt;
 		u32string	_InputString;
 		CViewText	*_ViewText;
 
