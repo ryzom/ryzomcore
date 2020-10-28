@@ -143,7 +143,7 @@ void	CFlyingTextManager::addFlyingText(void *key, const ucstring &text, const NL
 	gi.UsedThisFrame= true;
 
 	// update infos
-	gi.ViewText->setText(text);
+	gi.ViewText->setText(text.toUtf8());
 	gi.ViewText->setColor(color);
 	gi.GroupInScene->Position= pos;
 	gi.GroupInScene->Scale= scale;

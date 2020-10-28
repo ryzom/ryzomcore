@@ -333,7 +333,7 @@ uint32 CBotChatPageTrade::getCurrItemQuantity() const
 			CGroupEditBox *ed = dynamic_cast<CGroupEditBox *>(ig->getGroup("header_opened:standard_price:quantity:edit:eb"));
 			if (!ed) return std::numeric_limits<uint32>::max();
 			uint32 intQuantity;
-			if (fromString(ed->getInputStringAsUtf8(), intQuantity))
+			if (fromString(ed->getInputString(), intQuantity))
 			{
 				return intQuantity;
 			}
@@ -865,7 +865,7 @@ void CBotChatPageTrade::startBuyDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCall
 	CViewText *priceLabel = dynamic_cast<CViewText*>(ig->getView( "standard_price:total_price_header" ));
 	if ( _BuyMean == Money && priceLabel )
 	{
-		priceLabel->setText( CI18N::get( "uiPrice" ) );
+		priceLabel->setText( CI18N::get( "uiPrice" ).toUtf8() );
 		priceLabel->setActive(true);
 	}
 	else
@@ -977,7 +977,7 @@ void CBotChatPageTrade::startSellDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCal
 	CViewText *priceLabel = dynamic_cast<CViewText*>(ig->getView( "standard_price:total_price_header" ));
 	if ( priceLabel )
 	{
-		priceLabel->setText( CI18N::get( "uiImmediatePrice" ) );
+		priceLabel->setText( CI18N::get( "uiImmediatePrice" ).toUtf8() );
 		priceLabel->setActive(true);
 	}
 
@@ -1012,7 +1012,7 @@ void CBotChatPageTrade::startSellDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCal
 	{
 		ucstring itemName;
 		itemName = sheet->getItemActualName();
-		itemNameView->setText(itemName);
+		itemNameView->setText(itemName.toUtf8());
 	}
 
 	// set help for item
@@ -1465,7 +1465,7 @@ void	CBotChatPageTrade::setupPriceGroupQuantity(CInterfaceGroup *priceGroup, sin
 			CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(quantityGroup->getGroup("edit:eb"));
 			if (eb)
 			{
-				eb->setInputStringAsUtf8(toString(defaultQuantity));
+				eb->setInputString(toString(defaultQuantity));
 			}
 		}
 	}
@@ -1569,7 +1569,7 @@ void	CBotChatPageTrade::setupResellGroup(bool sellMode, uint defaultQuantity, CI
 			{
 				sint32	resaleMargin= NLGUI::CDBManager::getInstance()->getDbProp( "UI:SAVE:TRADE_ITEM:RESALE_MARGIN" )->getValue32();
 				clamp(resaleMargin, 0, (sint32)MaxResaleMargin);
-				eb->setInputStringAsUtf8( toString( resaleMargin ) );
+				eb->setInputString( toString( resaleMargin ) );
 				eb->setPositiveIntegerMaxValue(MaxResaleMargin);
 			}
 		}
@@ -1679,14 +1679,14 @@ void	CBotChatPageTrade::setupFactionPointPrice(bool /* sellMode */, uint default
 		{
 			ucstring	fmt= CI18N::get("uiUnitFPPrice");
 			strFindReplace(fmt, "%fac", factionName);
-			vt->setText(fmt);
+			vt->setText(fmt.toUtf8());
 		}
 		vt= dynamic_cast<CViewText*>(fpGroup->getView("total_price_header"));
 		if(vt)
 		{
 			ucstring	fmt= CI18N::get("uiTotalFPPrice");
 			strFindReplace(fmt, "%fac", factionName);
-			vt->setText(fmt);
+			vt->setText(fmt.toUtf8());
 		}
 
 		// setup icon according to pvp clan
@@ -1725,8 +1725,8 @@ void	CBotChatPageTrade::startChangeBuyFilterDialog(const std::string &dbext, con
 	sint	rangeMax= 0;
 	if(dbRangeMin)	rangeMin= dbRangeMin->getValue32();
 	if(dbRangeMax)	rangeMax= dbRangeMax->getValue32();
-	if(edMin)	edMin->setInputStringAsUtf8(toString(rangeMin));
-	if(edMax)	edMax->setInputStringAsUtf8(toString(rangeMax));
+	if(edMin)	edMin->setInputString(toString(rangeMin));
+	if(edMax)	edMax->setInputString(toString(rangeMax));
 	if(edMin)	edMin->setPositiveIntegerMaxValue(maxValue);
 	if(edMax)	edMax->setPositiveIntegerMaxValue(maxValue);
 
@@ -1754,8 +1754,8 @@ void	CBotChatPageTrade::resetBuyFilterDialog()
 	sint	rangeMin= 0;
 	sint	rangeMax= _FilterBuyDlgMaxValue;
 	// write result in EditBox, and in db
-	if(edMin)	edMin->setInputStringAsUtf8(toString(rangeMin));
-	if(edMax)	edMax->setInputStringAsUtf8(toString(rangeMax));
+	if(edMin)	edMin->setInputString(toString(rangeMin));
+	if(edMax)	edMax->setInputString(toString(rangeMax));
 	if(dbRangeMin)	dbRangeMin->setValue32(rangeMin);
 	if(dbRangeMax)	dbRangeMax->setValue32(rangeMax);
 

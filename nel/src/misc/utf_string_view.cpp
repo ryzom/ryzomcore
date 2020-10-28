@@ -29,6 +29,41 @@
 namespace NLMISC
 {
 
+NL_FORCE_INLINE void appendUtf8(std::string &str, u32char c)
+{
+	if (c < 0x80)
+	{
+		// Encode as 1 byte
+		str += (char)c;
+	}
+	else if (c < 0x0800)
+	{
+		// Encode as 2 bytes
+		str += (char)((c & 0x07C0) >> 6) | 0xC0;
+		str += (char)(c & 0x3F) | 0x80;
+	}
+	else if (c < 0x010000)
+	{
+		// Encode as 3 bytes
+		str += (char)((c & 0xF000) >> 12) | 0xE0;
+		str += (char)((c & 0x0FC0) >> 6) | 0x80;
+		str += (char)(c & 0x3F) | 0x80;
+	}
+	else
+	{
+		// Encode as 4 bytes
+		str += (char)((c & 0x1C0000) >> 18) | 0xF0;
+		str += (char)((c & 0x03F000) >> 12) | 0x80;
+		str += (char)((c & 0x0FC0) >> 6) | 0x80;
+		str += (char)(c & 0x3F) | 0x80;
+	}
+}
+
+void CUtfStringView::append(std::string &str, u32char c)
+{
+	appendUtf8(str, c);
+}
+
 std::string CUtfStringView::toUtf8(bool reEncode) const
 {
 	// Decode UTF and encode UTF-8
@@ -39,33 +74,7 @@ std::string CUtfStringView::toUtf8(bool reEncode) const
 	res.reserve(m_Size);
 	for (iterator it(begin()), end(end()); it != end; ++it)
 	{
-		u32char c = *it;
-		if (c < 0x80)
-		{
-			// Encode as 1 byte
-			res += (char)c;
-		}
-		else if (c < 0x0800)
-		{
-			// Encode as 2 bytes
-			res += (char)((c & 0x07C0) >> 6) | 0xC0;
-			res += (char)(c & 0x3F) | 0x80;
-		}
-		else if (c < 0x010000)
-		{
-			// Encode as 3 bytes
-			res += (char)((c & 0xF000) >> 12) | 0xE0;
-			res += (char)((c & 0x0FC0) >> 6) | 0x80;
-			res += (char)(c & 0x3F) | 0x80;
-		}
-		else
-		{
-			// Encode as 4 bytes
-			res += (char)((c & 0x1C0000) >> 18) | 0xF0;
-			res += (char)((c & 0x03F000) >> 12) | 0x80;
-			res += (char)((c & 0x0FC0) >> 6) | 0x80;
-			res += (char)(c & 0x3F) | 0x80;
-		}
+		appendUtf8(res, *it);
 	}
 	return res;
 }
@@ -106,6 +115,21 @@ u32string CUtfStringView::toUtf32() const
 	return res;
 }
 
+std::string CUtfStringView::toAscii() const
+{
+	std::string res;
+	res.reserve(m_Size);
+	for (iterator it(begin()), end(end()); it != end; ++it)
+	{
+		u32char c = *it;
+		if (c < 0x80)
+			res += c;
+		else
+			res += '_';
+	}
+	return res;
+}
+
 std::wstring CUtfStringView::toWide() const
 {
 #ifdef NL_OS_WINDOWS
@@ -137,6 +161,14 @@ std::wstring CUtfStringView::toWide() const
 		res += *it;
 	return res;
 #endif
+}
+
+size_t CUtfStringView::count() const
+{
+	size_t res = 0;
+	for (iterator it(begin()), end(end()); it != end; ++it)
+		++res;
+	return res;
 }
 
 u32char CUtfStringView::utf8Iterator(const void **addr)

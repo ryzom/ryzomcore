@@ -2084,7 +2084,7 @@ void CDBCtrlSheet::draw()
 				_RegenText = new CViewText(CViewBase::TCtorParam());
 				_RegenText->setId(getId() + ":regen");
 				_RegenText->setParent(_Parent);
-				_RegenText->setOverflowText(ucstring(""));
+				_RegenText->setOverflowText(std::string());
 				_RegenText->setModulateGlobalColor(false);
 				_RegenText->setMultiLine(false);
 				_RegenText->setTextMode(CViewText::ClipWord);

@@ -106,7 +106,7 @@ namespace NLGUI
 			}
 			formatedResult = CViewTextFormated::formatString(_FormatString, result);
 			//
-			setText (formatedResult);
+			setText (formatedResult.toUtf8());
 			//
 			if (bValid)
 			{

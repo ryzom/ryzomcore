@@ -243,7 +243,7 @@ void createOptionalCatUI()
 			pVT = dynamic_cast<CViewText*>(pNewLine->getView("size"));
 			if (pVT != NULL)
 			{
-				pVT->setText(BGDownloader::getWrittenSize(InfoOnPatch.OptCat[i].Size));
+				pVT->setText(BGDownloader::getWrittenSize(InfoOnPatch.OptCat[i].Size).toUtf8());
 			}
 
 			// Add to the list
@@ -287,7 +287,7 @@ static void setDataScanLog(const ucstring &text)
 	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:datascan:content:log_txt:log"));
 	if (pVT != NULL)
 	{
-		pVT->setText(text);
+		pVT->setText(text.toUtf8());
 	}
 }
 
@@ -296,10 +296,10 @@ static void setDataScanState(const ucstring &text, ucstring progress= ucstring()
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:datascan:content:state"));
-	if (pVT != NULL) pVT->setText(text);
+	if (pVT != NULL) pVT->setText(text.toUtf8());
 
 	pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:datascan:content:progress"));
-	if (pVT != NULL) pVT->setText(progress);
+	if (pVT != NULL) pVT->setText(progress.toUtf8());
 }
 
 void initCatDisplay()
@@ -338,7 +338,7 @@ static void setPatcherStateText(const std::string &baseUIPath, const ucstring &s
 	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(baseUIPath + ":content:state"));
 	if (pVT != NULL)
 	{
-		pVT->setText(str);
+		pVT->setText(str.toUtf8());
 	}
 }
 
@@ -349,7 +349,7 @@ static void setPatcherProgressText(const std::string &baseUIPath, const ucstring
 	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(baseUIPath + ":content:progress"));
 	if (pVT != NULL)
 	{
-		pVT->setText(str);
+		pVT->setText(str.toUtf8());
 	}
 }
 
@@ -717,7 +717,7 @@ void loginMainLoop()
 			ucstring sTmp;
 			sTmp = BGDownloader::getWrittenSize(currentPatchingSize);
 			sTmp += " / " + BGDownloader::getWrittenSize(totalPatchSize);
-			if (pVT != NULL) pVT->setText(sTmp);
+			if (pVT != NULL) pVT->setText(sTmp.toUtf8());
 		}
 //		else if (screen == UI_VARIABLES_SCREEN_CATDISP) // If we are displaying patch info
 		else if (LoginSM.getCurrentState() == CLoginStateMachine::st_display_cat)
@@ -766,10 +766,10 @@ void loginMainLoop()
 			// Total size of the patches is optional cats + required cat (f(optCat)) + non opt cat
 
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TOTAL_SIZE));
-			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(TotalPatchSize));
+			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(TotalPatchSize).toUtf8());
 
 			pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_NON_OPTIONAL_SIZE));
-			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(nNonOptSize));
+			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(nNonOptSize).toUtf8());
 		}
 	}
 }
@@ -808,7 +808,7 @@ void initLoginScreen()
 		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
 		if (pGEB != NULL && (pGEB->getInputString().empty()))
 		{
-			pGEB->setInputStringAsUtf8(l);
+			pGEB->setInputString(l);
 		}
 		CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
 	}
@@ -830,8 +830,8 @@ void initAutoLogin()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CGroupEditBox *pGEBLog = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
 	CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
-	pGEBLog->setInputStringAsUtf8(LoginLogin);
-	pGEBPwd->setInputStringAsUtf8(LoginPassword);
+	pGEBLog->setInputString(LoginLogin);
+	pGEBPwd->setInputString(LoginPassword);
 	CAHManager::getInstance()->runActionHandler("on_login", NULL, "");
 
 	if (ClientCfg.R2Mode)
@@ -1379,8 +1379,8 @@ class CAHOnLogin : public IActionHandler
 			return;
 		}
 
-		LoginLogin = pGEBLog->getInputStringAsUtf8();
-		LoginPassword = pGEBPwd->getInputStringAsUtf8();
+		LoginLogin = pGEBLog->getInputString();
+		LoginPassword = pGEBPwd->getInputString();
 
 		onlogin();
 	}
@@ -2394,7 +2394,7 @@ bool initCreateAccount()
 		{
 			CGroupEditBox * eb = dynamic_cast<CGroupEditBox*>(createAccountUI->findFromShortId(editBoxes[i] + ":eb"));
 			if(eb)
-				eb->setInputString(u32string());
+				eb->setInputString(std::string());
 		}
 
 		// conditions button
@@ -2581,7 +2581,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 			{
 				CGroupEditBox * eb = dynamic_cast<CGroupEditBox*>(createAccountUI->findFromShortId(editBoxes[i] + ":eb"));
 				if(eb)
-					results[i] = eb->getInputStringAsUtf8();
+					results[i] = eb->getInputString();
 			}
 
 			// text
@@ -2735,11 +2735,11 @@ class CAHCreateAccountLogin : public IActionHandler
 		{
 			CGroupEditBox * eb = dynamic_cast<CGroupEditBox*>(createAccountUI->findFromShortId("eb_login:eb"));
 			if(eb)
-				LoginLogin = eb->getInputStringAsUtf8();
+				LoginLogin = eb->getInputString();
 
 			eb = dynamic_cast<CGroupEditBox*>(createAccountUI->findFromShortId("eb_password:eb"));
 			if(eb)
-				LoginPassword = eb->getInputStringAsUtf8();
+				LoginPassword = eb->getInputString();
 
 			onlogin(false);
 		}

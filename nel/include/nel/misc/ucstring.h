@@ -50,7 +50,7 @@ public:
 	ucstring(const std::string &str)
 	    : ucstringbase()
 	{
-		rawCopy(str);
+		fromUtf8(str);
 	}
 
 	~ucstring() { }
@@ -171,8 +171,6 @@ public:
 		return ret;
 	}
 
-private:
-	void rawCopy(const std::string &str);
 };
 
 inline ucstring operator+(const ucstringbase &ucstr, ucchar c)
@@ -261,6 +259,12 @@ ucchar toLower(ucchar c);
 ucstring toUpper(const ucstring &str);
 void toUpper(ucchar *str);
 ucchar toUpper(ucchar c);
+
+std::string toLowerAsUtf8(const char *str);
+std::string	toLowerAsUtf8(const std::string &str);
+
+std::string toUpperAsUtf8(const char *str);
+std::string	toUpperAsUtf8(const std::string &str);
 
 };
 

@@ -57,7 +57,7 @@ namespace NLGUI
 		CInterfaceProperty		_NumberMax;
 		sint32					_Cache;
 		sint32					_CacheMax;
-		ucstring			_EmptyText;
+		std::string			_EmptyText;
 
 		void	buildTextFromCache();
 	};

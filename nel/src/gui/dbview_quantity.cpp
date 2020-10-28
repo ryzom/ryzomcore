@@ -63,7 +63,7 @@ namespace NLGUI
 		else
 		if( name == "emptytext" )
 		{
-			return _EmptyText.toString();
+			return _EmptyText;
 		}
 		else
 			return CViewText::getProperty( name );
@@ -112,7 +112,7 @@ namespace NLGUI
 		else
 			xmlSetProp( node, BAD_CAST "valuemax", BAD_CAST "" );
 
-		xmlSetProp( node, BAD_CAST "emptytext", BAD_CAST _EmptyText.toString().c_str() );
+		xmlSetProp( node, BAD_CAST "emptytext", BAD_CAST _EmptyText.c_str() );
 
 		return node;
 	}
@@ -148,9 +148,9 @@ namespace NLGUI
 		{
 			const char *propPtr = ptr;
 			if (NLMISC::startsWith(propPtr, "ui"))
-				_EmptyText = CI18N::get(propPtr);
+				_EmptyText = CI18N::get(propPtr).toUtf8();
 			else
-				_EmptyText.fromUtf8(propPtr);
+				_EmptyText = propPtr;
 		}
 
 		// init cache.

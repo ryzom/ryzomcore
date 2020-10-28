@@ -636,7 +636,7 @@ public:
 
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(Params));
 		if (pCS == NULL) return;
-		pCS->setMacroText(pEB->getInputStringAsUtf8());
+		pCS->setMacroText(pEB->getInputString());
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerEBUpdateMacroText, "eb_update_macro_text");
@@ -703,10 +703,10 @@ public:
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_MACROICONCREATION_EDITTEXT));
 		if (pEB != NULL)
 		{
-			pEB->setInputStringAsUtf8(pMCM->CurrentEditMacro.DispText);
+			pEB->setInputString(pMCM->CurrentEditMacro.DispText);
 			CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_MACROICONCREATION_ICON));
 			if (pCS != NULL)
-				pCS->setMacroText(pEB->getInputStringAsUtf8());
+				pCS->setMacroText(pEB->getInputString());
 		}
 
 		CAHManager::getInstance()->runActionHandler("set_macro_back", NULL, string("target=")+CTRL_MACROICONCREATION_ICON+"|value="+toString(back));
@@ -827,7 +827,7 @@ void addCommandLine (CGroupList *pParent, uint cmdNb, const ucstring &cmdName)
 	if (pNewCmd == NULL) return;
 
 	CViewText *pVT = dynamic_cast<CViewText*>(pNewCmd->getView(TEMPLATE_NEWMACRO_COMMAND_TEXT));
-	if (pVT != NULL) pVT->setText(cmdName);
+	if (pVT != NULL) pVT->setText(cmdName.toUtf8());
 
 	pNewCmd->setParent (pParent);
 	pParent->addChild (pNewCmd);
@@ -862,11 +862,11 @@ public:
 		if (pEB == NULL) return;
 
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
-		pMCM->CurrentEditMacro.Name = pEB->getInputStringAsUtf8();
+		pMCM->CurrentEditMacro.Name = pEB->getInputString();
 		if ((pMCM->CurrentEditMacro.Name.size() >= 2) &&
 			(pMCM->CurrentEditMacro.Name[0] == 'u') && (pMCM->CurrentEditMacro.Name[1] == 'i'))
 			pMCM->CurrentEditMacro.Name[0] = 'U';
-		pEB->setInputStringAsUtf8(pMCM->CurrentEditMacro.Name);
+		pEB->setInputString(pMCM->CurrentEditMacro.Name);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerNewMacroEnterName, "new_macro_enter_name");
@@ -886,7 +886,7 @@ public:
 		if (pCS != NULL) pCS->readFromMacro(pMCM->CurrentEditMacro);
 		// Name
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(GROUP_NEWMACRO_EDIT_NAME));
-		if (pEB != NULL) pEB->setInputStringAsUtf8(pMCM->CurrentEditMacro.Name);
+		if (pEB != NULL) pEB->setInputString(pMCM->CurrentEditMacro.Name);
 		// Commands
 		CGroupList *pList = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId(GROUP_NEWMACRO_COMMANDS));
 		if (pList == NULL) return;
@@ -895,9 +895,9 @@ public:
 		if (pVT != NULL)
 		{
 			if (pMCM->CurrentEditMacro.Combo.Key == KeyCount)
-				pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT));
+				pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT).toUtf8());
 			else
-				pVT->setText(pMCM->CurrentEditMacro.Combo.toUCString());
+				pVT->setText(pMCM->CurrentEditMacro.Combo.toUCString().toUtf8());
 		}
 
 		pList->clearGroups();
@@ -1003,9 +1003,9 @@ void addMacroLine (CGroupList *pParent, uint macNb, const CMacroCmd &macro)
 	if (pVT != NULL)
 	{
 		if (macro.Combo.Key != KeyCount)
-			pVT->setText(macro.Combo.toUCString());
+			pVT->setText(macro.Combo.toUCString().toUtf8());
 		else
-			pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT));
+			pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT).toUtf8());
 	}
 
 	pNewMacro->setParent (pParent);

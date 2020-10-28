@@ -141,7 +141,7 @@ void				CDBGroupListSheetIconPhrase::setSectionGroupId(CInterfaceGroup	*pIG, uin
 		pPM->getPhraseLevelFromSection(sectionId, minLevel, maxLevel);
 		strFindReplace(sectionText, "%min", toString(minLevel));
 		strFindReplace(sectionText, "%max", toString(maxLevel));
-		name->setText (sectionText);
+		name->setText (sectionText.toUtf8());
 	}
 }
 

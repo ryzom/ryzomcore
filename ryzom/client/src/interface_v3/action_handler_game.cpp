@@ -3010,7 +3010,7 @@ void updateVRDevicesComboUI(bool enable)
 			{
 				std::stringstream displayname;
 				displayname << std::string("[") << VRDeviceCache[i].first << "] [" << VRDeviceCache[i].second << "]";
-				pCB->addText(ucstring(displayname.str()));
+				pCB->addText(displayname.str());
 				if (ClientCfg.VRDisplayDevice == VRDeviceCache[i].first)
 				{
 					if (selectedDevice == -1 || ClientCfg.VRDisplayDeviceId == VRDeviceCache[i].second)
@@ -3024,7 +3024,7 @@ void updateVRDevicesComboUI(bool enable)
 				// configured device not found, add a dummy
 				std::stringstream displayname;
 				displayname << std::string("[") << ClientCfg.VRDisplayDevice << "] [" << ClientCfg.VRDisplayDeviceId<< "] [DEVICE NOT FOUND]";
-				pCB->addText(ucstring(displayname.str()));
+				pCB->addText(displayname.str());
 				selectedDevice = VRDeviceCache.size();
 			}
 			NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_VR_DEVICE_DB)->setValue32(-1);
@@ -3059,7 +3059,7 @@ public:
 		{
 			pCB->resetTexts();
 			for (sint j = 0; j < (sint)stringModeList.size(); j++)
-				pCB->addText(ucstring(stringModeList[j]));
+				pCB->addText(stringModeList[j]);
 		}
 
 		// frequencies
@@ -3068,7 +3068,7 @@ public:
 		{
 			pCB->resetTexts();
 			for (sint j = 0; j < (sint)stringFreqList.size(); j++)
-				pCB->addText(ucstring(stringFreqList[j]));
+				pCB->addText(stringFreqList[j]);
 		}
 
 		// -1 is important to indicate we set this value in edit mode
@@ -3091,10 +3091,10 @@ public:
 		if( pCB )
 		{
 			pCB->resetTexts();
-			pCB->addText(CI18N::get("uigcLowTextureMode"));
-			pCB->addText(CI18N::get("uigcNormalTextureMode"));
+			pCB->addText(CI18N::get("uigcLowTextureMode").toUtf8());
+			pCB->addText(CI18N::get("uigcNormalTextureMode").toUtf8());
 			if(ClientCfg.HDTextureInstalled)
-				pCB->addText(CI18N::get("uigcHighTextureMode"));
+				pCB->addText(CI18N::get("uigcHighTextureMode").toUtf8());
 		}
 
 		// Anisotropic Filtering
@@ -3107,14 +3107,14 @@ public:
 			sint maxAnisotropic = (sint)Driver->getAnisotropicFilterMaximum();
 
 			pCB->resetTexts();
-			pCB->addText(CI18N::get("uigcFxAnisotropicFilterNone"));
+			pCB->addText(CI18N::get("uigcFxAnisotropicFilterNone").toUtf8());
 
 			sint anisotropic = 2;
 			uint i = 1;
 
 			while (anisotropic <= maxAnisotropic)
 			{
-				pCB->addText(ucstring(NLMISC::toString("%dx", anisotropic)));
+				pCB->addText(NLMISC::toString("%dx", anisotropic));
 
 				if (ClientCfg.AnisotropicFilter == anisotropic)
 					nAnisotropic = i;
@@ -3219,7 +3219,7 @@ class CHandlerGameConfigMode : public IActionHandler
 		// Get W, H
 		sint w,h;
 		{
-			string vidModeStr = pCB->getText(nVideModeNb).toString();
+			string vidModeStr = pCB->getText(nVideModeNb);
 			string tmp = vidModeStr.substr(0,vidModeStr.find('x')-1);
 			fromString(tmp, w);
 			tmp = vidModeStr.substr(vidModeStr.find('x')+2,vidModeStr.size());
@@ -3259,7 +3259,7 @@ class CHandlerGameConfigMode : public IActionHandler
 		{
 			pCB->resetTexts();
 			for (j = 0; j < (sint)stringFreqList.size(); j++)
-				pCB->addText(ucstring(stringFreqList[j]) + " Hz");
+				pCB->addText(stringFreqList[j] + " Hz");
 		}
 		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->setValue32(nFoundFreq);
 
@@ -3461,7 +3461,7 @@ class CHandlerGameConfigApply : public IActionHandler
 					CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
 					if( pCB != NULL )
 					{
-						string vidModeStr = pCB->getText(nVideModeNb).toString();
+						string vidModeStr = pCB->getText(nVideModeNb);
 						string tmp = vidModeStr.substr(0,vidModeStr.find('x')-1);
 						fromString(tmp, w);
 						tmp = vidModeStr.substr(vidModeStr.find('x')+2,vidModeStr.size());
@@ -3475,7 +3475,7 @@ class CHandlerGameConfigApply : public IActionHandler
 					CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
 					if( pCB != NULL )
 					{
-						string vidFreqStr = pCB->getText(nVideoFreqNb).toString();
+						string vidFreqStr = pCB->getText(nVideoFreqNb);
 						fromString(vidFreqStr, freq);
 					}
 				}
@@ -4594,7 +4594,7 @@ public:
 				CViewText *pVT = dynamic_cast<CViewText *>(pIG->getView("t"));
 				if (!pVT) break;
 
-				names.push_back(toUpper(pVT->getText().toUtf8()));
+				names.push_back(toUpper(pVT->getText()));
 			}
 
 			if (names.size() != nbChilds)

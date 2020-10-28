@@ -712,7 +712,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 		if (_Slot == 0)
 		{
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player:header_opened:player_title"));
-			if (pVT != NULL) pVT->setText(_Title);
+			if (pVT != NULL) pVT->setText(_Title.toUtf8());
 		}
 
 		// rebuild in scene interface

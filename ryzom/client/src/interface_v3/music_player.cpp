@@ -328,7 +328,7 @@ void CMusicPlayer::rebuildPlaylist()
 				{
 					ucstring title;
 					title.fromUtf8(_Songs[i].Title);
-					pVT->setText(title);
+					pVT->setText(title.toUtf8());
 				}
 
 				pVT = dynamic_cast<CViewText *>(pNew->getView(TEMPLATE_PLAYLIST_SONG_DURATION));
@@ -483,7 +483,7 @@ void CMusicPlayer::updatePlayingInfo(const std::string info)
 	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:mp3_player:screen:text"));
 	if (pVT)
 	{
-		pVT->setText(ucstring::makeFromUtf8(info));
+		pVT->setText(info);
 	}
 }
 

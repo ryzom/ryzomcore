@@ -470,7 +470,7 @@ void CGuildManager::update()
 			{
 				CViewText *pJoinPropPhraseView = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_JOIN_PROPOSAL_PHRASE));
 				if (pJoinPropPhraseView != NULL)
-					pJoinPropPhraseView->setText(_JoinPropPhrase);
+					pJoinPropPhraseView->setText(_JoinPropPhrase.toUtf8());
 
 				pJoinProp->setActive(true);
 				CWidgetManager::getInstance()->setTopWindow(pJoinProp);
@@ -724,7 +724,7 @@ bool CDBGroupListAscensor::CSheetChildAscensor::isInvalidated(CDBGroupListSheetT
 		ucstring name;
 		if (nameID && pSMC->getDynString(nameID, name))
 		{
-			Text->setText(name);
+			Text->setText(name.toUtf8());
 
 			uint64 icon = NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:" + toString(Index) + ":ICON")->getValue64();
 
@@ -830,20 +830,20 @@ class CAHGuildSheetOpen : public IActionHandler
 				// Set name
 				CViewText *pViewName = dynamic_cast<CViewText*>(pLine->getView(TEMPLATE_GUILD_MEMBER_NAME));
 				if (pViewName != NULL)
-					pViewName->setText (rGuildMembers[i].Name);
+					pViewName->setText (rGuildMembers[i].Name.toUtf8());
 
 				// Set Grade
 				CViewText *pViewGrade = dynamic_cast<CViewText*>(pLine->getView(TEMPLATE_GUILD_MEMBER_GRADE));
 				if (pViewGrade != NULL)
 				{
 					if (rGuildMembers[i].Grade == EGSPD::CGuildGrade::Leader)
-						pViewGrade->setText (CI18N::get("uiGuildLeader"));
+						pViewGrade->setText (CI18N::get("uiGuildLeader").toUtf8());
 					else if (rGuildMembers[i].Grade == EGSPD::CGuildGrade::HighOfficer)
-						pViewGrade->setText (CI18N::get("uiGuildHighOfficer"));
+						pViewGrade->setText (CI18N::get("uiGuildHighOfficer").toUtf8());
 					else if (rGuildMembers[i].Grade == EGSPD::CGuildGrade::Officer)
-						pViewGrade->setText (CI18N::get("uiGuildOfficer"));
+						pViewGrade->setText (CI18N::get("uiGuildOfficer").toUtf8());
 					else
-						pViewGrade->setText (CI18N::get("uiGuildMember"));
+						pViewGrade->setText (CI18N::get("uiGuildMember").toUtf8());
 				}
 
 				// online?
@@ -888,7 +888,7 @@ class CAHGuildSheetOpen : public IActionHandler
 					str += toString("%01d", rt.getRyzomCycle()+1) +", ";
 					str += CI18N::get("ui"+MONTH::toString( (MONTH::EMonth)rt.getRyzomMonthInCurrentCycle() )) + ", ";
 					str += toString("%02d", rt.getRyzomDayOfMonth()+1);
-					pViewEnterDate->setText(str);
+					pViewEnterDate->setText(str.toUtf8());
 				}
 
 				// Add to the list

@@ -1086,7 +1086,7 @@ void		CDBGroupListSheetText::CSheetChild::updateViewTextAsItem()
 		}
 
 		// set text
-		Text->setTextFormatTaged(text);
+		Text->setTextFormatTaged(text.toUtf8());
 	}
 }
 

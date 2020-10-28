@@ -1292,7 +1292,7 @@ namespace NLGUI
 				CViewText *pVT = new CViewText(TCtorParam());
 				line.TextOrTemplate = pVT;
 				pVT->setId("t"+toString(_Lines.size()));
-				pVT->setText(pNode->Text);
+				pVT->setText(pNode->Text.toUtf8());
 				pVT->setColor(pNode->Color);
 				if(pNode->FontSize==-1)
 					pVT->setFontSize(_FontSize);

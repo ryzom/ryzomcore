@@ -3373,7 +3373,7 @@ private:
 				// must set the text by hand
 				CViewText	*vt= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("server_message_box_content_view_text")));
 				if(vt)
-					vt->setTextFormatTaged(contentStr);
+					vt->setTextFormatTaged(contentStr.toUtf8());
 
 				// open
 				CWidgetManager::getInstance()->setTopWindow(pGC);

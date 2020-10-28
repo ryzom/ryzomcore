@@ -60,13 +60,15 @@ namespace NLGUI
 
 		// Combo Texts
 		void			resetTexts();
-		void			addText(const ucstring &text);
-		void			setText(uint i, const ucstring &text);
-		void			insertText(uint i, const ucstring &text);
-		const ucstring	&getText(uint i) const;
+		void			addText(const std::string &text);
+		void			setText(uint i, const std::string &text);
+		void			insertText(uint i, const std::string &text);
+		const std::string	&getText(uint i) const;
+		ucstring	getTextAsUtf16(uint i) const;
 		uint			getTextId(uint i) const;
 		uint			getTextPos(uint nId) const;
-		const ucstring	&getTexture(uint i) const;
+		const std::string	&getTexture(uint i) const;
+		ucstring	getTextureAsUtf16(uint i) const;
 		void			setGrayed(uint i, bool g);
 		bool			getGrayed(uint i) const;
 		void			removeText(uint nPos);
@@ -87,11 +89,13 @@ namespace NLGUI
 		std::string		getSelectionText() const;
 
 		// view text
-		void			setViewText(const ucstring & text);
-		ucstring		getViewText() const;
+		void			setViewText(const std::string & text);
+		std::string		getViewText() const;
+		void			setViewTextAsUtf16(const ucstring &text) { setViewText(text.toUtf8()); }
+		ucstring		getViewTextAsUtf16() const;
 		CViewText		*getViewText();
 
-		void			setTexture(uint i, const ucstring &texture);
+		void			setTexture(uint i, const std::string &texture);
 
 		sint32	evalContentWidth() const;
 
@@ -122,7 +126,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("resetTexts", luaResetTexts)
 			REFLECT_SINT32 ("selectionNb", getSelectionNb, setSelectionNb)
 			REFLECT_STRING ("selection_text", getSelectionText, setSelectionText)
-			REFLECT_UCSTRING ("view_text", getViewText, setViewText)
+			REFLECT_UCSTRING ("view_text", getViewTextAsUtf16, setViewTextAsUtf16) // FIXME: Better to have UTF-8
 		REFLECT_EXPORT_END
 
 
@@ -137,8 +141,8 @@ namespace NLGUI
 		// sint32
 		CInterfaceProperty		_Selection;
 		sint32					_NotLinkedToDBSelection;
-		std::vector<std::pair<uint, ucstring> >	_Texts;
-		std::vector<ucstring>	_Textures;
+		std::vector<std::pair<uint, std::string> >	_Texts;
+		std::vector<std::string>	_Textures;
 		std::vector<bool>	_Grayed;
 
 		// Action Handler called on combo click
@@ -155,7 +159,7 @@ namespace NLGUI
 		CCtrlBaseButton			*_SelectButton;
 
 		bool					_IsExternViewText;
-		ucstring				_ExternViewText;
+		std::string				_ExternViewText;
 
 
 	private:

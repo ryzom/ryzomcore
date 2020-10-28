@@ -156,7 +156,7 @@ void CBotChatPageDynamicMission::update()
 				{
 					if (ClientCfg.Local)
 					{
-						_ChoiceCB[k]->setText(l, ucstring(toString("Dynamic mission %d:%d", (int) k, (int) l)));
+						_ChoiceCB[k]->setText(l, toString("Dynamic mission %d:%d", (int) k, (int) l));
 						_TextReceived[k][l] = true;
 					}
 					else
@@ -167,7 +167,7 @@ void CBotChatPageDynamicMission::update()
 						bool received = CStringManagerClient::instance()->getDynString(textID, result);
 						if (received)
 						{
-							_ChoiceCB[k]->setText(l, result);
+							_ChoiceCB[k]->setText(l, result.toUtf8());
 							_TextReceived[k][l] = true;
 						}
 					}
@@ -183,13 +183,13 @@ void CBotChatPageDynamicMission::update()
 				bool received = CStringManagerClient::instance()->getDynString(textID, result);
 				if (received)
 				{
-					_ChoiceCB[k]->addText(result);
+					_ChoiceCB[k]->addText(result.toUtf8());
 					_TextReceived[k][l] = true;
 				}
 				else
 				{
 					// add a text to show the player that the text is being received
-					_ChoiceCB[k]->addText(NLMISC::CI18N::get("uiWaitingChoiceFromServer"));
+					_ChoiceCB[k]->addText(NLMISC::CI18N::get("uiWaitingChoiceFromServer").toUtf8());
 				}
 			}
 		}

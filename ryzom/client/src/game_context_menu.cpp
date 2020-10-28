@@ -712,18 +712,18 @@ void CGameContextMenu::updateContextMenuMissionsOptions( bool forceHide )
 					{
 						result = NLMISC::CI18N::get("uiMissionOptionNotReceived");
 					}
-					pVTM->setText(result);
+					pVTM->setText(result.toUtf8());
 					pVTM->setActive(true);
 				}
 				else
 				{
-					pVTM->setText(ucstring(""));
+					pVTM->setText("");
 					pVTM->setActive(false);
 				}
 			}
 			else
 			{
-				pVTM->setText(ucstring(""));
+				pVTM->setText("");
 				pVTM->setActive(false);
 			}
 		}
@@ -753,16 +753,16 @@ void CGameContextMenu::updateContextMenuWebPage(uint options)
 				{
 					result = NLMISC::CI18N::get("uiWebPageNameNotReceived");
 				}
-				pVTM->setText(result);
+				pVTM->setText(result.toUtf8());
 			}
 			else
 			{
-				pVTM->setText(ucstring(""));
+				pVTM->setText("");
 			}
 		}
 		else
 		{
-			pVTM->setText(ucstring(""));
+			pVTM->setText("");
 		}
 	}
 
@@ -791,7 +791,7 @@ void CGameContextMenu::updateContextMenuOutpostState(uint options)
 	{
 		CViewTextMenu *pVTM = _TextOutpostState;
 		if (pVTM)
-			pVTM->setText(ucstring(STRING_MANAGER::CStringManagerClient::getOutpostLocalizedName(outpostSheet)));
+			pVTM->setText(CUtfStringView(STRING_MANAGER::CStringManagerClient::getOutpostLocalizedName(outpostSheet)).toUtf8());
 	}
 
 	// apply the active
@@ -833,12 +833,12 @@ void CGameContextMenu::updateContextMenuMissionRing()
 				{
 					result = NLMISC::CI18N::get("uiMissionRingNameNotReceived");
 				}
-				pVTM->setText(result);
+				pVTM->setText(result.toUtf8());
 				pVTM->setActive(true);
 			}
 			else
 			{
-				pVTM->setText(ucstring(""));
+				pVTM->setText("");
 				pVTM->setActive(false);
 			}
 		}

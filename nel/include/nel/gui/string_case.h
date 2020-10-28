@@ -39,6 +39,7 @@ namespace NLGUI
 
 
 	void setCase( ucstring &str, TCaseMode mode );
+	void setCase( std::string &str, TCaseMode mode );
 
 
 }

@@ -548,7 +548,7 @@ namespace NLGUI
 		view->setMultiLine (multiLine);
 		view->setTextMode(_Templ.getTextMode());
 		if (multiLine) view->setMultiLineSpace (_Space);
-		view->setText (line);
+		view->setText (line.toUtf8());
 		// Herit global-coloring
 		view->setModulateGlobalColor(getModulateGlobalColor());
 		addChild(view);
@@ -566,7 +566,7 @@ namespace NLGUI
 		view->_Parent = this;
 		view->setMultiLine (multiLine);
 		if (multiLine) view->setMultiLineSpace (_Space);
-		view->setText (line);
+		view->setText (line.toUtf8());
 		view->setColor (textColor);
 		// Herit global-coloring
 		view->setModulateGlobalColor(getModulateGlobalColor());

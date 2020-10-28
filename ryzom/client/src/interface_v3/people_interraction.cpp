@@ -2199,7 +2199,7 @@ public:
 						if (gc)
 						{
 							CGroupEditBox *geb = dynamic_cast<CGroupEditBox *>(gc->getGroup("add_contact_eb:eb"));
-							geb->setInputString(u32string());
+							geb->setInputString(std::string());
 						}
 						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, sParams);
 					}
@@ -2257,11 +2257,11 @@ public:
 							else
 							{
 								PeopleInterraction.askAddContact(geb->getInputStringAsUtf16(), peopleList);
-								geb->setInputString(u32string());
+								geb->setInputString(std::string());
 							}
 						}
 					}
-					geb->setInputString(u32string());
+					geb->setInputString(std::string());
 				}
 			}
 		}
@@ -2389,7 +2389,7 @@ public:
 		if (eb)
 		{
 			CWidgetManager::getInstance()->setCaptureKeyboard(eb);
-			eb->setInputString(u32string());
+			eb->setInputString(std::string());
 		}
 		//
 		if (gc->getActive())
@@ -2831,7 +2831,7 @@ class CHandlerSelectChatSource : public IActionHandler
 					{
 						ucstring title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-						pVTM->setText("["+s+"] " + title);
+						pVTM->setText("["+s+"] " + title.toUtf8());
 					}
 				}
 			}

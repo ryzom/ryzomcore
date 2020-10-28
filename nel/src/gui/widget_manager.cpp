@@ -1531,7 +1531,7 @@ namespace NLGUI
 			CViewText *pTxt = (CViewText*)groupContextHelp->getView("text");
 			if (pTxt != NULL)
 			{
-				pTxt->setTextFormatTaged(_ContextHelpText);
+				pTxt->setTextFormatTaged(_ContextHelpText.toUtf8());
 				// update only to get correct W/H
 				groupContextHelp->updateCoords ();
 

@@ -780,19 +780,19 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			// Set player name
 			if (info->_Name)
 			{
-				info->_Name->setText(entityName);
+				info->_Name->setText(entityName.toUtf8());
 				info->_Name->setModulateGlobalColor(false);
 			}
 
 			// Set player title
 			if (info->_Title)
-				info->_Title->setText(entityTitle);
+				info->_Title->setText(entityTitle.toUtf8());
 
 			// Set tribe name
 			if (info->_TribeName)
 			{
 				nlassert(info->_GuildName == NULL);
-				info->_TribeName->setText(theTribeName);
+				info->_TribeName->setText(theTribeName.toUtf8());
 			}
 
 			// Init user leaf nodes
@@ -966,7 +966,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 		if (pPlayer != NULL)
 			if (pPlayer->isAFK())
 				entityName += CI18N::get("uiAFK");
-		_Name->setText(entityName);
+		_Name->setText(entityName.toUtf8());
 
 		// Title color get the PVP color
 		if (_Title)
@@ -994,7 +994,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 		ucstring ucsTmp;
 		if (pSMC->getString (_Entity->getGuildNameID(), ucsTmp))
-			_GuildName->setText(ucsTmp);
+			_GuildName->setText(ucsTmp.toUtf8());
 
 		// guildname color is the pvp color
 		_GuildName->setColor(entityColor);
@@ -1020,7 +1020,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 		ucstring ucsTmp;
 		if (pSMC->getString (_Entity->getEventFactionID(), ucsTmp))
-			_EventFaction->setText(ucsTmp);
+			_EventFaction->setText(ucsTmp.toUtf8());
 
 		// guildname color depends of PVP faction or not
 		_EventFaction->setColor(entityColor);
