@@ -492,7 +492,7 @@ void CModalContainerEditCmd::activate()
 					}
 					if (found)
 					{
-						pCB->addText( CI18N::get(rVCat[i].LocalizedName) );
+						pCB->addText(CI18N::get(rVCat[i].LocalizedName).toUtf8());
 						CurrentEditCmdCategories.push_back(rVCat[i].Name);
 					}
 				}
@@ -1033,7 +1033,7 @@ void CModalContainerEditCmd::onChangeCategory()
 			{
 				if (rBA.isUsableInCurrentContext())
 				{
-					pCB->addText( CI18N::get(rBA.LocalizedName) );
+					pCB->addText(CI18N::get(rBA.LocalizedName).toUtf8());
 				}
 			}
 		}
@@ -1130,11 +1130,10 @@ void CModalContainerEditCmd::onChangeAction()
 
 					if (ActionsContext.matchContext(rVal.Contexts))
 					{
-						if ((rVal.LocalizedValue.size() >= 2) &&
-							(rVal.LocalizedValue[0] == 'u') && (rVal.LocalizedValue[1] == 'i'))
-							pCB->addText(CI18N::get(rVal.LocalizedValue));
+						if (NLMISC::startsWith(rVal.LocalizedValue, "ui"))
+							pCB->addText(CI18N::get(rVal.LocalizedValue).toUtf8());
 						else
-							pCB->addText(ucstring(rVal.LocalizedValue));
+							pCB->addText(rVal.LocalizedValue);
 					}
 				}
 			}

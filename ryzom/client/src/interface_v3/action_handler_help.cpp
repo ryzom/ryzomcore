@@ -2200,7 +2200,7 @@ static void	setupRawMaterialStats(CSheetHelpSetup &setup)
 
 					if(pIS->canBuildItemPart(faberType))
 					{
-						pCB->addText(RM_FABER_TYPE::toLocalString(faberType));
+						pCB->addText(RM_FABER_TYPE::toLocalString(faberType).toUtf8());
 					}
 				}
 

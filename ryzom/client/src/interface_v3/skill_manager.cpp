@@ -1097,7 +1097,7 @@ public:
 					string titleStr = CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)i);
 					bool womenTitle = (UserEntity && UserEntity->getGender() == GSGENDER::female);
 					const ucstring s(CStringManagerClient::getTitleLocalizedName(titleStr,womenTitle));
-					pCB->addText(s);
+					pCB->addText(s.toUtf8());
 					pSM->_UIUnblockedTitles.push_back((CHARACTER_TITLE::ECharacterTitle)i);
 				}
 			}

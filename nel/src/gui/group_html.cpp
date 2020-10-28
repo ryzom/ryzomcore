@@ -6437,7 +6437,7 @@ namespace NLGUI
 		if (cb)
 		{
 			uint lineIndex = cb->getNumTexts();
-			cb->addText(_SelectOptionStr);
+			cb->addText(_SelectOptionStr.toUtf8());
 			if (_Forms.back().Entries.back().sbOptionDisabled == lineIndex)
 			{
 				cb->setGrayed(lineIndex, true);
