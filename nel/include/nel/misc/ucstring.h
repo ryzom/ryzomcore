@@ -50,7 +50,7 @@ public:
 	ucstring(const std::string &str)
 	    : ucstringbase()
 	{
-		rawCopy(str);
+		fromUtf8(str);
 	}
 
 	~ucstring() { }
@@ -171,8 +171,6 @@ public:
 		return ret;
 	}
 
-private:
-	void rawCopy(const std::string &str);
 };
 
 inline ucstring operator+(const ucstringbase &ucstr, ucchar c)

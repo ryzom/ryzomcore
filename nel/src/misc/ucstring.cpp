@@ -20,14 +20,7 @@
 
 void ucstring::toString(std::string &str) const
 {
-	str.resize(size());
-	for (uint i = 0; i < str.size(); i++)
-	{
-		if (operator[](i) > 255)
-			str[i] = '?';
-		else
-			str[i] = (char)operator[](i);
-	}
+	str = nlmove(NLMISC::CUtfStringView(*this).toUtf8());
 }
 
 std::string ucstring::toUtf8() const
@@ -38,19 +31,6 @@ std::string ucstring::toUtf8() const
 void ucstring::fromUtf8(const std::string &stringUtf8)
 {
 	*this = NLMISC::CUtfStringView(stringUtf8).toUtf16();
-}
-
-void ucstring::rawCopy(const std::string &str)
-{
-	// We need to convert the char into 8bits unsigned int before promotion to 16 bits
-	// otherwise, as char are signed on some compiler (MSCV for ex), the sign bit is extended to 16 bits.
-	resize(str.size());
-	std::string::const_iterator first(str.begin()), last(str.end());
-	iterator dest(begin());
-	for (; first != last; ++first, ++dest)
-	{
-		*dest = uint8(*first);
-	}
 }
 
 /* end of file */
