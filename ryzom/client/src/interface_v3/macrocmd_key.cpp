@@ -679,7 +679,7 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 			else				sEditBox = WinName+WIN_EDITCMD_COMBO_SECOND_PARAM_EDITBOX;
 			CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(sEditBox));
 			// sTmp is utf8
-			pEB->setInputStringAsUtf8(sTmp);
+			pEB->setInputString(sTmp);
 		}
 
 		// Setup the param name if any
@@ -863,7 +863,7 @@ void CModalContainerEditCmd::validCurrentCommand()
 			CGroupEditBox *pEB= dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId( sWin ));
 			// convert to utf8
 			if (pEB != NULL)
-				CurrentEditCmdLine.ActionName.Argu += pEB->getInputStringAsUtf8();
+				CurrentEditCmdLine.ActionName.Argu += pEB->getInputString();
 			noParam++;
 		}
 	}
@@ -1148,7 +1148,7 @@ void CModalContainerEditCmd::onChangeAction()
 			CGroupEditBox *pEB= dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId( sWin ));
 			if( pEB )
 			{
-				pEB->setInputString(u32string());
+				pEB->setInputString(std::string());
 			}
 			NLGUI::CDBManager::getInstance()->getDbProp( sDB )->setValue32(1);
 		}

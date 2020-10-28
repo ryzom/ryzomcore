@@ -3024,7 +3024,7 @@ namespace NLGUI
 				CGroupEditBox *eb = dynamic_cast<CGroupEditBox*>(textArea->getGroup("eb"));
 				if (eb)
 				{
-					eb->setInputString(CUtfStringView(decodeHTMLEntities(content)).toUtf32());
+					eb->setInputString(CUtfStringView(decodeHTMLEntities(content)).toUtf8());
 					if (style.hasStyle("background-color"))
 					{
 						CViewBitmap *bg = dynamic_cast<CViewBitmap*>(eb->getView("bg"));

@@ -239,8 +239,8 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 					closeButton->setActive(false);
 					group->setActive(true);
 
-					editBoxShort->setInputString(u32string());
-					editBoxLarge->setInputString(u32string());
+					editBoxShort->setInputString(std::string());
+					editBoxLarge->setInputString(std::string());
 					display->setTextFormatTaged(ucstring());
 
 
@@ -297,8 +297,8 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 					closeButton->setActive(true);
 					group->setActive(false);
 
-					editBoxShort->setInputString(u32string());
-					editBoxLarge->setInputString(u32string());
+					editBoxShort->setInputString(std::string());
+					editBoxLarge->setInputString(std::string());
 					display->setTextFormatTaged(ucstring());
 
 					// Finish the display or add the waiter

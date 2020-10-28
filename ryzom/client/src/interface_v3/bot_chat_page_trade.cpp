@@ -333,7 +333,7 @@ uint32 CBotChatPageTrade::getCurrItemQuantity() const
 			CGroupEditBox *ed = dynamic_cast<CGroupEditBox *>(ig->getGroup("header_opened:standard_price:quantity:edit:eb"));
 			if (!ed) return std::numeric_limits<uint32>::max();
 			uint32 intQuantity;
-			if (fromString(ed->getInputStringAsUtf8(), intQuantity))
+			if (fromString(ed->getInputString(), intQuantity))
 			{
 				return intQuantity;
 			}
@@ -1465,7 +1465,7 @@ void	CBotChatPageTrade::setupPriceGroupQuantity(CInterfaceGroup *priceGroup, sin
 			CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(quantityGroup->getGroup("edit:eb"));
 			if (eb)
 			{
-				eb->setInputStringAsUtf8(toString(defaultQuantity));
+				eb->setInputString(toString(defaultQuantity));
 			}
 		}
 	}
@@ -1569,7 +1569,7 @@ void	CBotChatPageTrade::setupResellGroup(bool sellMode, uint defaultQuantity, CI
 			{
 				sint32	resaleMargin= NLGUI::CDBManager::getInstance()->getDbProp( "UI:SAVE:TRADE_ITEM:RESALE_MARGIN" )->getValue32();
 				clamp(resaleMargin, 0, (sint32)MaxResaleMargin);
-				eb->setInputStringAsUtf8( toString( resaleMargin ) );
+				eb->setInputString( toString( resaleMargin ) );
 				eb->setPositiveIntegerMaxValue(MaxResaleMargin);
 			}
 		}
@@ -1725,8 +1725,8 @@ void	CBotChatPageTrade::startChangeBuyFilterDialog(const std::string &dbext, con
 	sint	rangeMax= 0;
 	if(dbRangeMin)	rangeMin= dbRangeMin->getValue32();
 	if(dbRangeMax)	rangeMax= dbRangeMax->getValue32();
-	if(edMin)	edMin->setInputStringAsUtf8(toString(rangeMin));
-	if(edMax)	edMax->setInputStringAsUtf8(toString(rangeMax));
+	if(edMin)	edMin->setInputString(toString(rangeMin));
+	if(edMax)	edMax->setInputString(toString(rangeMax));
 	if(edMin)	edMin->setPositiveIntegerMaxValue(maxValue);
 	if(edMax)	edMax->setPositiveIntegerMaxValue(maxValue);
 
@@ -1754,8 +1754,8 @@ void	CBotChatPageTrade::resetBuyFilterDialog()
 	sint	rangeMin= 0;
 	sint	rangeMax= _FilterBuyDlgMaxValue;
 	// write result in EditBox, and in db
-	if(edMin)	edMin->setInputStringAsUtf8(toString(rangeMin));
-	if(edMax)	edMax->setInputStringAsUtf8(toString(rangeMax));
+	if(edMin)	edMin->setInputString(toString(rangeMin));
+	if(edMax)	edMax->setInputString(toString(rangeMax));
 	if(dbRangeMin)	dbRangeMin->setValue32(rangeMin);
 	if(dbRangeMax)	dbRangeMax->setValue32(rangeMax);
 

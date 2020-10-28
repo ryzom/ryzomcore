@@ -639,8 +639,7 @@ class CAHEditExpandOrCycleTell : public CAHEdit
 	void actionPart ()
 	{
 		// If the line starts with '/tell ', do not try to expand
-		static const u32string TELL_STR(CUtfStringView("/tell ").toUtf32());
-		if (_GroupEdit->getInputString().substr(0, TELL_STR.length()) != TELL_STR)
+		if (!NLMISC::startsWith(_GroupEdit->getInputString(), "/tell "))
 		{
 			if (_GroupEdit->expand()) return;
 		}

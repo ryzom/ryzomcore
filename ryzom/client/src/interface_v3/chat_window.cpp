@@ -1289,7 +1289,7 @@ public:
 		// Parse any tokens in the text
 		if ( ! CInterfaceManager::parseTokens(text))
 		{
-			pEB->setInputString (u32string());
+			pEB->setInputString(std::string());
 			return;
 		}
 
@@ -1329,7 +1329,7 @@ public:
 			}
 		}
 		// Clear input string
-		pEB->setInputString (u32string());
+		pEB->setInputString (std::string());
 		CGroupContainer *gc = static_cast< CGroupContainer* >( pEB->getEnclosingContainer() );
 
 		if (gc)

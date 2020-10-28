@@ -3882,7 +3882,7 @@ class CAHLandMarkFilter : public IActionHandler
 			CGroupEditBox* eb = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(group));
 			if (!eb) return;
 
-			text = eb->getInputStringAsUtf8();
+			text = eb->getInputString();
 		}
 
 		map->setLandmarkFilter(text);

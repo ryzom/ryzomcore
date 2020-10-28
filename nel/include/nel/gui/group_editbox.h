@@ -63,7 +63,7 @@ namespace NLGUI
 		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
 
 		/// Accessors
-		u32string getInputString() const { return _InputString; }
+		std::string getInputString() const;
 		const u32string &getInputStringRef() const { return _InputString; }
 		const ucstring &getPrompt() const { return _Prompt; }
 
@@ -71,7 +71,7 @@ namespace NLGUI
 		  * NB : line returns are encoded as '\n', not '\r\n'
 		  */
 		void		setPrompt(const ucstring &s) { _Prompt = s; }
-		void		setInputString(const u32string &str);
+		void		setInputString(const std::string &str);
 		void		setInputStringRef(const u32string &str) {_InputString = str; };
 		void		setInputStringAsInt(sint32 val);
 		sint32		getInputStringAsInt() const;
@@ -79,10 +79,10 @@ namespace NLGUI
 		sint64		getInputStringAsInt64() const;
 		void		setInputStringAsFloat(float val);
 		float		getInputStringAsFloat() const;
-		void		setInputStringAsUtf8(const std::string &str);
-		std::string	getInputStringAsUtf8() const;
 		void		setInputStringAsUtf16(const ucstring &str);
 		ucstring    getInputStringAsUtf16() const;
+		void		setInputStringAsUtf32(const u32string &str);
+		u32string   getInputStringAsUtf32() const { return _InputString; }
 		void		setColor(NLMISC::CRGBA col);
 
 
@@ -189,7 +189,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("setSelectionAll", luaSetSelectionAll);
 			REFLECT_LUA_METHOD("setFocusOnText", luaSetFocusOnText);
 			REFLECT_LUA_METHOD("cancelFocusOnText", luaCancelFocusOnText);
-			REFLECT_STRING("input_string", getInputStringAsUtf8, setInputStringAsUtf8);
+			REFLECT_STRING("input_string", getInputString, setInputString);
 			REFLECT_UCSTRING("uc_input_string", getInputStringAsUtf16, setInputStringAsUtf16);
 		REFLECT_EXPORT_END
 

@@ -884,7 +884,7 @@ class CHandlerContactEntry : public IActionHandler
 		// Parse any tokens in the text
 		if ( ! CInterfaceManager::parseTokens(text))
 		{
-			pEB->setInputString (u32string());
+			pEB->setInputString (std::string());
 			return;
 		}
 
@@ -895,7 +895,7 @@ class CHandlerContactEntry : public IActionHandler
 			// TODO : have NLMISC::ICommand accept unicode strings
 			std::string str = text.toUtf8().substr(1);
 			NLMISC::ICommand::execute( str, g_log );
-			pEB->setInputString (u32string());
+			pEB->setInputString (std::string());
 			return;
 		}
 		// Well, we could have used CChatWindow class to handle this, but CPeopleList was written earlier, so for now
@@ -908,7 +908,7 @@ class CHandlerContactEntry : public IActionHandler
 
 		// Simply do a tell on the player
 		ChatMngr.tell(playerName.toString(), text);
-		pEB->setInputString (u32string());
+		pEB->setInputString (std::string());
 		if (gc)
 		{
 			// Restore position of enclosing container if it hasn't been moved/scaled/poped by the user

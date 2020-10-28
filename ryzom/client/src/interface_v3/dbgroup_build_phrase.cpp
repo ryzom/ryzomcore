@@ -279,7 +279,7 @@ void			CDBGroupBuildPhrase::clearBuildingPhrase()
 	// Empty the name
 	if(_UserSentenceName)
 	{
-		_UserSentenceName->setInputString(u32string());
+		_UserSentenceName->setInputString(std::string());
 	}
 
 	// update Display

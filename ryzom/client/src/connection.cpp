@@ -2977,7 +2977,7 @@ class CAHLoadScenario : public IActionHandler
 		{
 			CGroupEditBox* editBox = dynamic_cast<CGroupEditBox*>(result);
 			if(editBox)
-				description = editBox->getInputStringAsUtf8();
+				description = editBox->getInputString();
 		}
 
 		// races
