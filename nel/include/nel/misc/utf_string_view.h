@@ -60,6 +60,7 @@ public:
 	u32string toUtf32() const; // Makes a copy
 
 	std::wstring toWide() const; // Platform dependent, UTF-16 or UTF-32. Makes a copy.
+	std::string toAscii() const; // Returns only values 0-127, 7-bit ASCII. Makes a copy.
 
 	inline bool isUtf8() const { return m_Iterator == utf8Iterator; }
 	inline bool isUtf16() const { return m_Iterator == utf16Iterator; }

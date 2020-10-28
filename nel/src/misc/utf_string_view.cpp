@@ -106,6 +106,21 @@ u32string CUtfStringView::toUtf32() const
 	return res;
 }
 
+std::string CUtfStringView::toAscii() const
+{
+	std::string res;
+	res.reserve(m_Size);
+	for (iterator it(begin()), end(end()); it != end; ++it)
+	{
+		u32char c = *it;
+		if (c < 0x80)
+			res += c;
+		else
+			res += '_';
+	}
+	return res;
+}
+
 std::wstring CUtfStringView::toWide() const
 {
 #ifdef NL_OS_WINDOWS
