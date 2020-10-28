@@ -354,7 +354,7 @@ public:
 						if(UserEntity)
 						{
 							ucstring name = UserEntity->getEntityName();
-							if (*it == 'P') setCase(name, CaseUpper);
+							if (*it == 'P') name = toUpper(name);
 							formatedResult += name;
 						}
 					}

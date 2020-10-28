@@ -25,6 +25,9 @@
 namespace	NLMISC
 {
 
+// TODO / FIXME: Write tool to regenerate the unicode tables in this file
+//   See: ftp://ftp.unicode.org/Public/UNIDATA/UnicodeData.txt
+
 // Uppercase to lowercase 16 bits unicode. This table must be sorted. First entry must be unique.
 static const ucchar UnicodeUpperToLower[]=
 {
