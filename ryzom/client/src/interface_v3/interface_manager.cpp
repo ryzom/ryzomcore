@@ -1535,8 +1535,8 @@ void CInterfaceManager::updateFrameEvents()
 			CCtrlBase *pTooltip= dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:weather_tt"));
 			if (pTooltip != NULL)
 			{
-				ucstring tt =	toString("%02d", WeatherManager.getNextWeatherHour()) + CI18N::get("uiMissionTimerHour") +
-								" - " + CI18N::get("uiHumidity") + " " +
+				string tt =	toString("%02d", WeatherManager.getNextWeatherHour()) + CI18N::get("uiMissionTimerHour").toUtf8() +
+								" - " + CI18N::get("uiHumidity").toUtf8() + " " +
 								toString("%d", (uint)(roundWeatherValue(WeatherManager.getNextWeatherValue()) * 100.f)) + "%";
 				pTooltip->setDefaultContextHelp(tt);
 			}

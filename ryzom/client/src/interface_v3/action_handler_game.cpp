@@ -2116,7 +2116,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 			pVBR->setColor(CRGBA(0,0,0,0));
 
 			if (pTooltip)
-				pTooltip->setDefaultContextHelp(ucstring(""));
+				pTooltip->setDefaultContextHelp(std::string());
 
 			return;
 		}
@@ -2140,7 +2140,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 				pVBR->setColor(CRGBA(0,0,0,0));
 
 				if (pTooltip)
-					pTooltip->setDefaultContextHelp(CI18N::get("uittTargetUnknown"));
+					pTooltip->setDefaultContextHelp(CI18N::get("uittTargetUnknown").toUtf8());
 
 				return;
 			}
@@ -2169,7 +2169,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 				pVBR->setColor(CRGBA(0,0,0,0));
 
 				if (pTooltip)
-					pTooltip->setDefaultContextHelp(ucstring(""));
+					pTooltip->setDefaultContextHelp(std::string());
 
 				return;
 			}
@@ -2194,7 +2194,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 		CCtrlBase *tooltip = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:target:header_opened:force"));
 		if (tooltip)
 		{
-			ucstring str;
+			string str;
 
 			if (nForceRegion == 1)
 				nForceRegion = 2;
@@ -2205,7 +2205,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 				sint min = (nForceRegion-2) * 50 + (nLevelForce-1) * 10 + 1;
 				sint max = (nForceRegion-2) * 50 + nLevelForce * 10;
 
-				str= CI18N::get("uittTargetLevel");
+				str= CI18N::get("uittTargetLevel").toUtf8();
 				strFindReplace(str, "%min", toString(min));
 				strFindReplace(str, "%max", toString(max));
 			}
@@ -2214,16 +2214,16 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 			{
 				sint n = (nForceRegion-1) * 50;
 				if (pE->isNPC())
-					str= CI18N::get("uittTargetGuardBoss");
+					str= CI18N::get("uittTargetGuardBoss").toUtf8();
 				else
-					str= CI18N::get("uittTargetBoss");
+					str= CI18N::get("uittTargetBoss").toUtf8();
 				strFindReplace(str, "%n", toString("%d", n) );
 			}
 			// Named
 			else
 			{
 				sint n = (nForceRegion-1) * 50;
-				str= CI18N::get("uittTargetNamed");
+				str= CI18N::get("uittTargetNamed").toUtf8();
 				strFindReplace(str, "%n", toString("%d", n) );
 			}
 
@@ -4059,7 +4059,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "HP", SCORES::hit_points, "uittPlayerLifeFormat");
 
-		CWidgetManager::getInstance()->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTLife, "player_tt_life");
@@ -4076,7 +4076,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "STA", SCORES::stamina, "uittPlayerStaminaFormat");
 
-		CWidgetManager::getInstance()->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTStamina, "player_tt_stamina");
@@ -4093,7 +4093,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "SAP", SCORES::sap, "uittPlayerSapFormat");
 
-		CWidgetManager::getInstance()->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTSap, "player_tt_sap");
@@ -4110,7 +4110,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "FOCUS", SCORES::focus, "uittPlayerFocusFormat");
 
-		CWidgetManager::getInstance()->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTFocus, "player_tt_focus");
@@ -4140,7 +4140,7 @@ public:
 		ucstring	str= CI18N::get("uittBulkFormat");
 		strFindReplace(str, "%v", toString("%.2f", val) );
 		strFindReplace(str, "%m", toString(maxVal) );
-		CWidgetManager::getInstance()->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerGetTTBulk, "get_tt_bulk");

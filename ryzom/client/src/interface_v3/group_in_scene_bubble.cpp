@@ -759,7 +759,7 @@ CGroupInSceneBubbleManager::CPopupContext *CGroupInSceneBubbleManager::buildCont
 
 void CGroupInSceneBubbleManager::addContextHelp (const ucstring &message, const string &targetName, uint time)
 {
-	ucstring finalMessage = message;
+	std::string finalMessage = message.toUtf8();
 	CInterfaceElement *target;
 	CPopupContext *context = CGroupInSceneBubbleManager::buildContextHelp ("context_help_", targetName, target, time);
 	if (context)
@@ -787,7 +787,7 @@ void CGroupInSceneBubbleManager::addContextHelp (const ucstring &message, const 
 					}
 				}
 
-				text->setText(finalMessage.toUtf8());
+				text->setText(finalMessage);
 			}
 		}
 		context->Group->setActive(true);

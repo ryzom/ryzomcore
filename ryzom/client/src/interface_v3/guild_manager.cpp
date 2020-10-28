@@ -857,17 +857,17 @@ class CAHGuildSheetOpen : public IActionHandler
 					case ccs_online:
 						onlineView->setTexture("w_online.tga");
 						if (toolTip)
-							toolTip->setDefaultContextHelp(CI18N::get("uittGuildMemberOnline"));
+							toolTip->setDefaultContextHelp(CI18N::get("uittGuildMemberOnline").toUtf8());
 						break;
 					case ccs_online_abroad:
 						onlineView->setTexture("w_online_abroad.tga");
 						if (toolTip)
-							toolTip->setDefaultContextHelp(CI18N::get("uittGuildMemberOnlineAbroad"));
+							toolTip->setDefaultContextHelp(CI18N::get("uittGuildMemberOnlineAbroad").toUtf8());
 						break;
 					default:
 						onlineView->setTexture("w_offline.tga");
 						if (toolTip)
-							toolTip->setDefaultContextHelp(CI18N::get("uittGuildMemberOffline"));
+							toolTip->setDefaultContextHelp(CI18N::get("uittGuildMemberOffline").toUtf8());
 						break;
 					}
 				}

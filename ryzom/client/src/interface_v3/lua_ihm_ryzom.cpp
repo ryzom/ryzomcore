@@ -2879,7 +2879,7 @@ std::string	CLuaIHMRyzom::getDefine(const std::string &def)
 // ***************************************************************************
 void		CLuaIHMRyzom::setContextHelpText(const ucstring &text)
 {
-	CWidgetManager::getInstance()->setContextHelpText(text);
+	CWidgetManager::getInstance()->setContextHelpText(text.toUtf8());
 }
 
 // ***************************************************************************

@@ -1699,7 +1699,7 @@ public:
 		else
 			strFindReplace(str, "%comp", CI18N::get("uittPhraseCombatRestrictOK"));
 
-		CWidgetManager::getInstance()->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerCombatRestrictTooltip, "phrase_combat_restrict_tooltip");

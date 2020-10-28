@@ -1051,14 +1051,14 @@ void		CDBGroupListSheetText::CSheetChild::updateViewTextAsItem()
 	if(Ctrl && Text && Ctrl->getSheetCategory() == CDBCtrlSheet::Item)
 	{
 		// get the text
-		ucstring text;
+		std::string text;
 		Ctrl->getContextHelp(text);
 
 		// Text color red if requirement not met
 		if(Ctrl->getType() == CCtrlSheetInfo::SheetType_Item)
 		{
 			if(!Ctrl->checkItemRequirement())
-				text= CI18N::get("uiItemCannotUseColor") + text;
+				text= CI18N::get("uiItemCannotUseColor").toUtf8() + text;
 		}
 
 		// For item, add some information
@@ -1075,18 +1075,18 @@ void		CDBGroupListSheetText::CSheetChild::updateViewTextAsItem()
 					if(ipList.empty())
 					{
 						if(pIS->isUsedAsCraftRequirement())
-							text+= "\n" + CI18N::get("uiItemMpCraftRequirement");
+							text+= "\n" + CI18N::get("uiItemMpCraftRequirement").toUtf8();
 						else
-							text+= "\n" + CI18N::get("uiItemMpNoCraft");
+							text+= "\n" + CI18N::get("uiItemMpNoCraft").toUtf8();
 					}
 					else
-						text+= "\n" + CI18N::get("uiItemMpCanCraft") + ipList;
+						text+= "\n" + CI18N::get("uiItemMpCanCraft").toUtf8() + ipList.toUtf8();
 				}
 			}
 		}
 
 		// set text
-		Text->setTextFormatTaged(text.toUtf8());
+		Text->setTextFormatTaged(text);
 	}
 }
 

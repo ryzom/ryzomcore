@@ -41,14 +41,14 @@ CDBGroupListSheetTextPhraseId::CSheetChildPhrase::CSheetChildPhrase()
 // ***************************************************************************
 void CDBGroupListSheetTextPhraseId::CSheetChildPhrase::updateViewText(CDBGroupListSheetText * /* pFather */)
 {
-	ucstring	text;
+	std::string	text;
 	if(Ctrl->getType()!=CCtrlSheetInfo::SheetType_SPhraseId)
 		return;
 
 	// Get the User Name of the phrase
 	Ctrl->getContextHelp(text);
 
-	Text->setText(text.toUtf8());
+	Text->setText(text);
 }
 
 // ***************************************************************************

@@ -127,9 +127,9 @@ namespace NLGUI
 		{
 			// Force I18N tooltip
 			if (!editorMode)
-				_ContextHelp = CI18N::get((const char *)prop);
+				_ContextHelp = CI18N::get((const char *)prop).toUtf8();
 			else
-				_ContextHelp.fromUtf8((const char *)prop);
+				_ContextHelp = (const char *)prop;
 		}
 		else
 		{
@@ -138,9 +138,9 @@ namespace NLGUI
 			if (prop)
 			{
 				if (!editorMode && NLMISC::startsWith((const char *)prop, "ui"))
-					_ContextHelp = CI18N::get((const char *)prop);
+					_ContextHelp = CI18N::get((const char *)prop).toUtf8();
 				else
-					_ContextHelp.fromUtf8((const char *)prop);
+					_ContextHelp = (const char *)prop;
 			}
 		}
 
@@ -197,12 +197,12 @@ namespace NLGUI
 	{
 		if( name == "tooltip" )
 		{
-			return _ContextHelp.toUtf8();
+			return _ContextHelp;
 		}
 		else
 		if( name == "tooltip_i18n" )
 		{
-			return _ContextHelp.toUtf8();
+			return _ContextHelp;
 		}
 		else
 		if( name == "on_tooltip" )
@@ -259,18 +259,18 @@ namespace NLGUI
 		if( name == "tooltip" )
 		{
 			if (!editorMode && NLMISC::startsWith(value, "ui"))
-				_ContextHelp = CI18N::get(value);
+				_ContextHelp = CI18N::get(value).toUtf8();
 			else
-				_ContextHelp.fromUtf8(value);
+				_ContextHelp = value;
 			return;
 		}
 		else
 		if( name == "tooltip_i18n" )
 		{
 			if (!editorMode)
-				_ContextHelp = CI18N::get(value);
+				_ContextHelp = CI18N::get(value).toUtf8();
 			else
-				_ContextHelp.fromUtf8(value);
+				_ContextHelp = value;
 			return;
 		}
 		else
@@ -382,8 +382,8 @@ namespace NLGUI
 		if( node == NULL )
 			return NULL;
 
-		xmlNewProp( node, BAD_CAST "tooltip", BAD_CAST _ContextHelp.toString().c_str() );
-		xmlNewProp( node, BAD_CAST "tooltip_i18n", BAD_CAST _ContextHelp.toString().c_str() );
+		xmlNewProp( node, BAD_CAST "tooltip", BAD_CAST _ContextHelp.c_str() );
+		xmlNewProp( node, BAD_CAST "tooltip_i18n", BAD_CAST _ContextHelp.c_str() );
 		xmlNewProp( node, BAD_CAST "on_tooltip", BAD_CAST _OnContextHelp.toString().c_str() );
 		xmlNewProp( node, BAD_CAST "on_tooltip_params", BAD_CAST _OnContextHelpParams.toString().c_str() );
 		xmlNewProp( node, BAD_CAST "tooltip_parent", BAD_CAST tooltipParentToString( _ToolTipParent ).c_str() );
@@ -476,7 +476,7 @@ namespace NLGUI
 	// ***************************************************************************
 	bool CCtrlBase::emptyContextHelp() const
 	{
-		ucstring help;
+		std::string help;
 		getContextHelp(help);
 		std::string sTmp = _OnContextHelp;
 		return help.empty() && sTmp.empty();
@@ -494,12 +494,15 @@ namespace NLGUI
 	void CCtrlBase::serial(NLMISC::IStream &f)
 	{
 		CViewBase::serial(f);
+
+		uint version = f.serialVersion(1);
+		nlassert(version);
+
 		f.serial(_ContextHelp);
 		f.serial(_OnContextHelp);
 		f.serial(_OnContextHelpParams);
 		f.serial(_ToolTipSpecialParent);
 		f.serialEnum(_ToolTipParent);
-		//
 
 		THotSpot tmpToolTipParentPosRef = _ToolTipParentPosRef;
 		THotSpot tmpToolTipPosRef = _ToolTipPosRef;
@@ -515,7 +518,7 @@ namespace NLGUI
 		_ToolTipPosRef = tmpToolTipPosRef;
 		_ToolTipParentPosRefAlt = tmpToolTipParentPosRefAlt;
 		_ToolTipPosRefAlt = tmpToolTipPosRefAlt;	
-		//
+		
 		nlSerialBitBool(f, _ToolTipInstant);	
 	}
 
@@ -577,7 +580,7 @@ namespace NLGUI
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 		std::string tooltip = ls.toString(1);
 
-		setDefaultContextHelp(ucstring::makeFromUtf8(tooltip));
+		setDefaultContextHelp(tooltip);
 
 		return 0;
 	}

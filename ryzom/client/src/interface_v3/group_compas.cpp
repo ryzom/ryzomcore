@@ -424,11 +424,10 @@ void CGroupCompas::draw()
 	CCtrlBase *toolTip = getCtrl("tt");
 	if (toolTip)
 	{
-		ucstring text;
 		if (displayedTarget.getType() != CCompassTarget::North)
-			toolTip->setDefaultContextHelp(CI18N::get("uittCompassDistance"));
+			toolTip->setDefaultContextHelp(CI18N::get("uittCompassDistance").toUtf8());
 		else
-			toolTip->setDefaultContextHelp(text);
+			toolTip->setDefaultContextHelp(std::string());
 	}
 
 	if (displayedTarget.Name != _CurrTargetName)

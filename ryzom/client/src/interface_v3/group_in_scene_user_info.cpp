@@ -1122,7 +1122,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 			{
 				CInterfaceGroup *group = getGroup ("right");
 				CForageSourceCL *forageSource = static_cast<CForageSourceCL*>(_Entity);
-				ucstring txt( CI18N::get( "uittForageContent" ) + toString( ": %u", forageSource->getCurrentQuantity() ) );
+				string txt( CI18N::get( "uittForageContent" ).toUtf8() + toString( ": %u", forageSource->getCurrentQuantity() ) );
 				CCtrlBase *toolTip = group->getCtrl ("tt1");
 				if ( toolTip )
 					toolTip->setDefaultContextHelp( txt );

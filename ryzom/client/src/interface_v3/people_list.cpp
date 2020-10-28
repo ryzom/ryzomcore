@@ -759,17 +759,17 @@ void CPeopleList::setOnline(uint index, TCharConnectionState online)
 			case ccs_online:
 				onlineView->setTexture("w_online.tga");
 				if (toolTip)
-					toolTip->setDefaultContextHelp(CI18N::get("uittFriendsOnline"));
+					toolTip->setDefaultContextHelp(CI18N::get("uittFriendsOnline").toUtf8());
 				break;
 			case ccs_online_abroad:
 				onlineView->setTexture("w_online_abroad.tga");
 				if (toolTip)
-					toolTip->setDefaultContextHelp(CI18N::get("uittFriendsOnlineAbroad"));
+					toolTip->setDefaultContextHelp(CI18N::get("uittFriendsOnlineAbroad").toUtf8());
 				break;
 			default:
 				onlineView->setTexture("w_offline.tga");
 				if (toolTip)
-					toolTip->setDefaultContextHelp(CI18N::get("uittFriendsOffline"));
+					toolTip->setDefaultContextHelp(CI18N::get("uittFriendsOffline").toUtf8());
 				break;
 			}
 		}

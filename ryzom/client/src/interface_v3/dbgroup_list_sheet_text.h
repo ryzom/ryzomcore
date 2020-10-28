@@ -133,9 +133,9 @@ public:
 		// Called at updateCoords to remake the text
 		virtual void updateViewText(CDBGroupListSheetText * /* pFather */)
 		{
-			ucstring text;
+			std::string text;
 			Ctrl->getContextHelp(text);
-			Text->setText(text.toUtf8());
+			Text->setText(text);
 		}
 
 		// create a CViewText object that is displayed next to the item. This is the opportunnity to create

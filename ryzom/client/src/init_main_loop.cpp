@@ -1692,7 +1692,7 @@ void initBloomConfigUI()
 	if(!supportBloom)
 	{
 		if(group)
-			group->setDefaultContextHelp(CI18N::get("uiFxTooltipBloom"));
+			group->setDefaultContextHelp(CI18N::get("uiFxTooltipBloom").toUtf8());
 
 		ClientCfg.writeBool("FXAA", false);
 		ClientCfg.writeBool("Bloom", false);
@@ -1702,6 +1702,6 @@ void initBloomConfigUI()
 	else
 	{
 		if(group)
-			group->setDefaultContextHelp(ucstring(""));
+			group->setDefaultContextHelp(std::string());
 	}
 }

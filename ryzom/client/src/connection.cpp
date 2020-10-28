@@ -2317,7 +2317,7 @@ public:
 			CCtrlBase *pBut = pNewLine->getCtrl("but");
 			if (pBut != NULL)
 			{
-				pBut->setDefaultContextHelp(tooltip);
+				pBut->setDefaultContextHelp(tooltip.toUtf8());
 			}
 			addGroupInList(pNewLine);
 		}

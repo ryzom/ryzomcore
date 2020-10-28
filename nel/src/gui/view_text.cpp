@@ -3346,7 +3346,7 @@ namespace NLGUI
 				pTooltip->setRenderLayer(getRenderLayer());
 				std::string tempTooltipStr = tempTooltips[i].toUtf8();
 				bool isI18N = NLMISC::startsWith(tempTooltipStr, "ui");
-				pTooltip->setDefaultContextHelp(isI18N ? CI18N::get(tempTooltipStr) : ucstring::makeFromUtf8(tempTooltipStr));
+				pTooltip->setDefaultContextHelp(isI18N ? CI18N::get(tempTooltipStr).toUtf8() : tempTooltipStr);
 				pTooltip->setParentPos(this);
 				pTooltip->setParentPosRef(Hotspot_BR);
 				pTooltip->setPosRef(Hotspot_BR);

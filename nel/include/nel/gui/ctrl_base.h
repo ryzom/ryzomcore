@@ -85,9 +85,10 @@ namespace NLGUI
 
 
 		/// Get the ContextHelp for this control. Default is to return _ContextHelp
-		virtual void		getContextHelp(ucstring &help) const {help= _ContextHelp;}
+		virtual void		getContextHelp(std::string &help) const {help= _ContextHelp;}
+		virtual void		getContextHelpAsUtf16(ucstring &help) const {help.fromUtf8(_ContextHelp);}
 		/// Get the ContextHelp for this control, with tooltip specific code. Default behaviour is identical to getContextHelp.
-		virtual void		getContextHelpToolTip(ucstring &help) const { getContextHelp(help); }
+		virtual void		getContextHelpToolTip(std::string &help) const { getContextHelp(help); }
 		// Get the name of the context help window. Default to "context_help"
 		virtual std::string getContextHelpWindowName() const;
 		/// Get the ContextHelp ActionHandler. If "", noop
@@ -123,8 +124,10 @@ namespace NLGUI
 		void				setToolTipPosRef(THotSpot pos) { _ToolTipPosRef = pos;}
 
 		/// replace the default contextHelp
-		ucstring			getDefaultContextHelp() const {return _ContextHelp;}
-		void				setDefaultContextHelp(const ucstring &help) {_ContextHelp= help;}
+		std::string			getDefaultContextHelp() const {return _ContextHelp;}
+		void				setDefaultContextHelp(const std::string &help) {_ContextHelp= help;}
+		ucstring			getDefaultContextHelpAsUtf16() const {return ucstring::makeFromUtf8(_ContextHelp);}
+		void				setDefaultContextHelpAsUtf16(const ucstring &help) {_ContextHelp= help.toUtf8();}
 		void				setOnContextHelp(const std::string &help) {_OnContextHelp= help;}
 		void				setOnContextHelpAHParams(const std::string &p) {_OnContextHelpParams= p;}
 
@@ -158,7 +161,7 @@ namespace NLGUI
 		int luaSetTooltipUtf8(CLuaState &ls);
 
 		REFLECT_EXPORT_START(CCtrlBase, CViewBase)
-			REFLECT_UCSTRING("tooltip", getDefaultContextHelp, setDefaultContextHelp);
+			REFLECT_UCSTRING("tooltip", getDefaultContextHelpAsUtf16, setDefaultContextHelpAsUtf16); // FIXME: Lua UTF-8
 			REFLECT_LUA_METHOD("setTooltipUtf8", luaSetTooltipUtf8);
 		REFLECT_EXPORT_END
 
@@ -171,7 +174,7 @@ namespace NLGUI
 
 	protected:
 		// This is the ContextHelp filled by default in parse()
-		ucstring			_ContextHelp;
+		std::string			_ContextHelp;
 		CStringShared		_OnContextHelp;
 		CStringShared		_OnContextHelpParams;
 		CStringShared		_ToolTipSpecialParent;

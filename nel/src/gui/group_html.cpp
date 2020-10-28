@@ -2888,7 +2888,7 @@ namespace NLGUI
 							ctrlButton->setModulateGlobalColorAll (false);
 
 							// Translate the tooltip
-							ctrlButton->setDefaultContextHelp(ucstring::makeFromUtf8(getLinkTitle()));
+							ctrlButton->setDefaultContextHelp(getLinkTitle());
 							ctrlButton->setText(tmpStr);
 							// empty url / button disabled
 							bool disabled = string(getLink()).empty();
@@ -3229,12 +3229,12 @@ namespace NLGUI
 		{
 			if (CI18N::hasTranslation(tooltip))
 			{
-				ctrlButton->setDefaultContextHelp(CI18N::get(tooltip));
+				ctrlButton->setDefaultContextHelp(CI18N::get(tooltip).toUtf8());
 				//ctrlButton->setOnContextHelp(CI18N::get(tooltip).toString());
 			}
 			else
 			{
-				ctrlButton->setDefaultContextHelp(ucstring::makeFromUtf8(tooltip));
+				ctrlButton->setDefaultContextHelp(tooltip);
 				//ctrlButton->setOnContextHelp(string(tooltip));
 			}
 
@@ -5467,11 +5467,11 @@ namespace NLGUI
 				{
 					if (CI18N::hasTranslation(tooltip))
 					{
-						ctrlButton->setDefaultContextHelp(CI18N::get(tooltip));
+						ctrlButton->setDefaultContextHelp(CI18N::get(tooltip).toUtf8());
 					}
 					else
 					{
-						ctrlButton->setDefaultContextHelp(ucstring::makeFromUtf8(tooltip));
+						ctrlButton->setDefaultContextHelp(tooltip);
 					}
 				}
 
