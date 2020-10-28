@@ -227,17 +227,18 @@ inline double	isValidDouble (double v)
  * \param str a string to transform to lower case
  */
 
-std::string toLower ( const char *str );
-std::string	toLower ( const std::string &str );
-void		toLower ( char *str );
+std::string toLower ( const char *str ); // UTF-8
+std::string	toLower ( const std::string &str ); // UTF-8
+void		toLower ( char *str ); // Ascii only
 char		toLower ( const char ch );	// convert only one character
 
 /** Convert a string in upper case.
  * \param a string to transform to upper case
  */
 
-std::string	toUpper ( const std::string &str);
-void		toUpper ( char *str);
+std::string toUpper ( const char *str ); // UTF-8
+std::string	toUpper ( const std::string &str); // UTF-8
+void		toUpper ( char *str); // Ascii only
 
 
 /**

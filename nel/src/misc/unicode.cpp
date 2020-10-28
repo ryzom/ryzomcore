@@ -16,6 +16,7 @@
 
 #include "stdmisc.h"
 #include "nel/misc/ucstring.h"
+#include "nel/misc/utf_string_view.h"
 
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
@@ -1949,6 +1950,39 @@ ucchar		toLower (ucchar c)
 
 // ***************************************************************************
 
+static std::string toLower(CUtfStringView sv)
+{
+	std::string res;
+	res.reserve(sv.largestSize());
+	for (CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it)
+	{
+		u32char c = *it;
+		if (c < 0x10000)
+		{
+			ucchar uc = c;
+			ucchar *result = toLowerUpperSearch(&uc, UnicodeUpperToLower);
+			if (result)
+				c = uc;
+		}
+		CUtfStringView::append(res, c);
+	}
+	return res;
+}
+
+std::string toLower(const char *str)
+{
+	return toLower(CUtfStringView(str));
+}
+
+// ***************************************************************************
+
+std::string	toLower(const std::string &str)
+{
+	return toLower(CUtfStringView(str));
+}
+
+// ***************************************************************************
+
 ucstring	toUpper (const ucstring &str)
 {
 	uint i;
@@ -1987,6 +2021,39 @@ ucchar		toUpper (ucchar c)
 	if (result)
 		return result[1];
 	return c;
+}
+
+// ***************************************************************************
+
+static std::string toUpper(CUtfStringView sv)
+{
+	std::string res;
+	res.reserve(sv.largestSize());
+	for (CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it)
+	{
+		u32char c = *it;
+		if (c < 0x10000)
+		{
+			ucchar uc = c;
+			ucchar *result = toLowerUpperSearch(&uc, UnicodeLowerToUpper);
+			if (result)
+				c = uc;
+		}
+		CUtfStringView::append(res, c);
+	}
+	return res;
+}
+
+std::string toUpper(const char *str)
+{
+	return toUpper(CUtfStringView(str));
+}
+
+// ***************************************************************************
+
+std::string	toUpper(const std::string &str)
+{
+	return toUpper(CUtfStringView(str));
 }
 
 // ***************************************************************************
