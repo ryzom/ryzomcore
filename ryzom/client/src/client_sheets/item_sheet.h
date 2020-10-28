@@ -466,7 +466,7 @@ public:
 	bool	canExchangeOrGive(bool botChatGift) const;
 
 	// MP only. return translated text of all item part this MP can build. empty, if can't build anything
-	void	getItemPartListAsText(ucstring &ipList) const;
+	void	getItemPartListAsText(std::string &ipList) const;
 
 	// get craft plan
 	const NLMISC::CSheetId &getCraftPlan() const { return CraftPlan; }

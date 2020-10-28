@@ -992,9 +992,7 @@ class CHandlerBrowse : public IActionHandler
 					}
 				}
 
-				ucstring ucparams(params);
-				CInterfaceManager::parseTokens(ucparams);
-				params = ucparams.toUtf8();
+				CInterfaceManager::parseTokens(params);
 				// go. NB: the action handler himself may translate params from utf8
 				CAHManager::getInstance()->runActionHandler(action, elementGroup, params);
 
@@ -2014,7 +2012,7 @@ void getItemText (CDBCtrlSheet *item, ucstring &itemText, const CItemSheet*pIS)
 			if(pIS->canBuildSomeItemPart())
 			{
 				ucstring	fmt= CI18N::get("uihelpItemMPCraft");
-				ucstring	ipList;
+				std::string	ipList;
 				pIS->getItemPartListAsText(ipList);
 				strFindReplace(fmt, "%ip", ipList);
 				strFindReplace(itemText, "%craft", fmt);
@@ -2200,7 +2198,7 @@ static void	setupRawMaterialStats(CSheetHelpSetup &setup)
 
 					if(pIS->canBuildItemPart(faberType))
 					{
-						pCB->addText(RM_FABER_TYPE::toLocalString(faberType).toUtf8());
+						pCB->addText(RM_FABER_TYPE::toLocalString(faberType));
 					}
 				}
 
@@ -3165,7 +3163,7 @@ void setupListBrickHeader(CSheetHelpSetup &setup)
 	if(view)
 	{
 		view->setActive(true);
-		view->setTextFormatTaged(CI18N::get("uihelpPhraseHeaderBricks").toUtf8());
+		view->setTextFormatTaged(CI18N::get("uihelpPhraseHeaderBricks"));
 	}
 }
 
@@ -3476,73 +3474,73 @@ void setConsoModSuccessTooltip( CDBCtrlSheet *cs )
 	string ustr;
 	if( CSheetId(cs->getSheetId()).toString() == "mod_melee_success.sbrick" )
 	{
-		ustr = CI18N::get("uittModMeleeSuccess").toUtf8();
+		ustr = CI18N::get("uittModMeleeSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:MELEE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_range_success.sbrick" )
 	{
-		ustr = CI18N::get("uittModRangeSuccess").toUtf8();
+		ustr = CI18N::get("uittModRangeSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:RANGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_craft_success.sbrick" )
 	{
-		ustr = CI18N::get("uittModCraftSuccess").toUtf8();
+		ustr = CI18N::get("uittModCraftSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_defense_success.sbrick" )
 	{
-		ustr = CI18N::get("uittModDefenseSuccess").toUtf8();
+		ustr = CI18N::get("uittModDefenseSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_dodge_success.sbrick" )
 	{
-		ustr = CI18N::get("uittModDodgeSuccess").toUtf8();
+		ustr = CI18N::get("uittModDodgeSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_parry_success.sbrick" )
 	{
-		ustr = CI18N::get("uittModParrySuccess").toUtf8();
+		ustr = CI18N::get("uittModParrySuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:PARRY", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_forage_success.sbrick" )
 	{
-		ustr = CI18N::get("uittModForageSuccess").toUtf8();
+		ustr = CI18N::get("uittModForageSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::common_ecosystem)+":FORAGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_desert_forage_success.sbrick" )
 	{
-		ustr = CI18N::get("uittModDesertForageSuccess").toUtf8();
+		ustr = CI18N::get("uittModDesertForageSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::desert)+":FORAGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_forest_forage_success.sbrick" )
 	{
-		ustr = CI18N::get("uittModForestForageSuccess").toUtf8();
+		ustr = CI18N::get("uittModForestForageSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::forest)+":FORAGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_lacustre_forage_success.sbrick" )
 	{
-		ustr = CI18N::get("uittModLacustreForageSuccess").toUtf8();
+		ustr = CI18N::get("uittModLacustreForageSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::lacustre)+":FORAGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_jungle_forage_success.sbrick" )
 	{
-		ustr = CI18N::get("uittModJungleForageSuccess").toUtf8();
+		ustr = CI18N::get("uittModJungleForageSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::jungle)+":FORAGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_primary_root_forage_success.sbrick" )
 	{
-		ustr = CI18N::get("uittModPrimaryRootForageSuccess").toUtf8();
+		ustr = CI18N::get("uittModPrimaryRootForageSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::primary_root)+":FORAGE", false);
 	}
 
@@ -3576,19 +3574,19 @@ public:
 		// special tooltip? (pvp outpost and xp catalyzer)
 		sint	specialTTId= getBonusMalusSpecialTT(cs);
 		if(specialTTId==BONUS_MALUS::XpCatalyser)
-			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittXpBonus").toUtf8());
+			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittXpBonus"));
 		else if(specialTTId==BONUS_MALUS::OutpostPVPOn)
-			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittPvpOutpostOn").toUtf8());
+			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittPvpOutpostOn"));
 		else if(specialTTId==BONUS_MALUS::OutpostPVPOutOfZone)
-			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittPvpOutpostOutOfZone").toUtf8());
+			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittPvpOutpostOutOfZone"));
 		else if(specialTTId==BONUS_MALUS::OutpostPVPInRound)
-			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittPvpOutpostInRound").toUtf8());
+			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittPvpOutpostInRound"));
 		else if(specialTTId==BONUS_MALUS::DeathPenalty)
 		{
 			CCDBNodeLeaf * node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:DEATH_XP_MALUS", false);
 			if( node )
 			{
-				string txt = CI18N::get("uittDeathPenalty").toUtf8();
+				string txt = CI18N::get("uittDeathPenalty");
 				strFindReplace(txt, "%dp", toString((100*node->getValue16())/254));
 				CWidgetManager::getInstance()->setContextHelpText(txt);
 			}
@@ -3600,7 +3598,7 @@ public:
 			std::string	str;
 			cs->getContextHelp(str);
 
-			str+= CI18N::get("uittAuraDisabled").toUtf8();
+			str+= CI18N::get("uittAuraDisabled");
 
 			// and replace the context help that is required.
 			CWidgetManager::getInstance()->setContextHelpText(str);
@@ -3838,7 +3836,7 @@ static	void	onMpChangeItemPart(CInterfaceGroup *wnd, uint32 itemSheetId, const s
 			CViewText	*statTitle= dynamic_cast<CViewText*>(groupStat->getElement(groupStat->getId()+":text" ));
 			CDBViewBar	*statValue= dynamic_cast<CDBViewBar*>(groupStat->getElement(groupStat->getId()+":bar" ));
 			if(statTitle)
-				statTitle->setText(RM_FABER_STAT_TYPE::toLocalString(statType).toUtf8());
+				statTitle->setText(RM_FABER_STAT_TYPE::toLocalString(statType));
 			if(statValue)
 				statValue->setValue(itemPart.Stats[i]);
 		}

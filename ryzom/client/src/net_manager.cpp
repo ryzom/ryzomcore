@@ -614,23 +614,23 @@ static CInterfaceChatDisplayer	InterfaceChatDisplayer;
 void CInterfaceChatDisplayer::colorizeSender(ucstring &text, const ucstring &senderName, CRGBA baseColor)
 {
 	// find the sender/text separator to put color tags
-	ucstring::size_type pos = senderName.length() - 1;
+	ucstring::size_type pos = senderName.toUtf8().length() - 1;
 	if (pos != ucstring::npos)
 	{
-		ucstring str;
+		string str;
 
 		CInterfaceProperty prop;
 		prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
 
 		CChatWindow::encodeColorTag(prop.getRGBA(), str, false);
 
-		str += text.substr(0, pos+1);
+		str += text.toUtf8().substr(0, pos+1);
 
 		CChatWindow::encodeColorTag(baseColor, str, true);
 
-		str += text.substr(pos+1);
+		str += text.toUtf8().substr(pos+1);
 
-		text.swap(str);
+		text.fromUtf8(str);
 	}
 }
 

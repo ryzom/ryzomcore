@@ -598,7 +598,7 @@ namespace NLGUI
 				const char *propPtr = prop;
 				std::string text;
 				if (NLMISC::startsWith(propPtr, "ui"))
-					text = CI18N::get(propPtr).toUtf8();
+					text = CI18N::get(propPtr);
 				else
 					text = propPtr;
 				_ViewText->setText(text);

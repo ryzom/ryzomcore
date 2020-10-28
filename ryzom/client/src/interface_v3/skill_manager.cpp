@@ -588,7 +588,7 @@ void CSkillManager::checkTitleUnblocked(CHARACTER_TITLE::ECharacterTitle i, bool
 				string titleStr = CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)i);
 				bool womenTitle = (UserEntity && UserEntity->getGender() == GSGENDER::female);
 				const ucstring newtitle(CStringManagerClient::getTitleLocalizedName(titleStr, womenTitle));
-				CAHManager::getInstance()->runActionHandler("message_popup", NULL, "text1="+newtitle.toUtf8()+"|text0="+CI18N::get("uiNewTitleBold").toUtf8());
+				CAHManager::getInstance()->runActionHandler("message_popup", NULL, "text1="+newtitle.toUtf8()+"|text0="+CI18N::get("uiNewTitleBold"));
 			}
 			else
 			{

@@ -716,7 +716,7 @@ static std::string getActionKey(const char* name, const char* param = "")
 	if (ite != acmap.end())
 		return ite->second.toUCString().toString();
 
-	return CI18N::get("uiNotAssigned").toString();
+	return CI18N::get("uiNotAssigned");
 }
 
 //---------------------------------------------------

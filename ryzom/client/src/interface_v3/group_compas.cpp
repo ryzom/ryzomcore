@@ -425,7 +425,7 @@ void CGroupCompas::draw()
 	if (toolTip)
 	{
 		if (displayedTarget.getType() != CCompassTarget::North)
-			toolTip->setDefaultContextHelp(CI18N::get("uittCompassDistance").toUtf8());
+			toolTip->setDefaultContextHelp(CI18N::get("uittCompassDistance"));
 		else
 			toolTip->setDefaultContextHelp(std::string());
 	}

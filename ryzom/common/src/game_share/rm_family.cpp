@@ -118,7 +118,7 @@ namespace RM_FABER_TYPE
 	}
 
 	/// Client: use the CI18N
-	const ucstring& toLocalString( TRMFType e )
+	const std::string& toLocalString( TRMFType e )
 	{
 		return CI18N::get("mpft" + toString(e));
 	}
@@ -134,7 +134,7 @@ namespace RM_FABER_TYPE
 namespace RM_FAMILY
 {
 	/// Get the Localized UCString
-	const ucstring& toLocalString( TRMFamily e )
+	const std::string& toLocalString( TRMFamily e )
 	{
 		return CI18N::get("mpfam" + toString(e));
 	}
@@ -144,7 +144,7 @@ namespace RM_FAMILY
 namespace RM_GROUP
 {
 	/// Get the Localized UCString
-	const ucstring& toLocalString( TRMGroup e )
+	const std::string& toLocalString( TRMGroup e )
 	{
 		return CI18N::get("mpgroup" + toString(e));
 	}
@@ -154,7 +154,7 @@ namespace RM_GROUP
 namespace RM_FABER_PROPERTY
 {
 	/// Get the Localized UCString
-	const ucstring& toLocalString( TRMFProperty e )
+	const std::string& toLocalString( TRMFProperty e )
 	{
 		return CI18N::get("mpprop" + toString(e));
 	}
@@ -188,7 +188,7 @@ namespace RM_FABER_QUALITY
 	}
 
 	/// Client: use the CI18N
-	const ucstring& toLocalString( TFaberQuality e )
+	const std::string& toLocalString( TFaberQuality e )
 	{
 		return CI18N::get("mpfq" + toString(e));
 	}
@@ -224,7 +224,7 @@ namespace RM_COLOR
 	}
 
 	/// Get the Localized UCString
-	const ucstring& toLocalString( sint value )
+	const std::string& toLocalString( sint value )
 	{
 		return CI18N::get("mpcol" + toString(value));
 	}
@@ -283,7 +283,7 @@ namespace RM_FABER_STAT_TYPE
 		return conversion.toString(stats);
 	}
 
-	const ucstring& toLocalString( TRMStatType stats )
+	const std::string& toLocalString( TRMStatType stats )
 	{
 		// must change en.uxt
 		nlctassert(NumRMStatType == sizeof(stringTable)/sizeof(stringTable[0]));
@@ -663,9 +663,9 @@ namespace RM_FABER_STAT_TYPE
 namespace RM_CLASS_TYPE
 {
 
-const ucstring &toLocalString(TRMClassType classType)
+const std::string &toLocalString(TRMClassType classType)
 {
-	return CI18N::get(toString("uiItemRMClass%d", classType).c_str());
+	return CI18N::get(toString("uiItemRMClass%d", classType));
 }
 
 

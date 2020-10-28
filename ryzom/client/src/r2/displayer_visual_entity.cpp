@@ -994,7 +994,7 @@ void CDisplayerVisualEntity::updateName()
 		}
 		std::string firstPart;
 		if(actNb>0)
-			firstPart = CI18N::get("uiR2EDDefaultActTitle").toString() + " " + NLMISC::toString(actNb);
+			firstPart = CI18N::get("uiR2EDDefaultActTitle") + " " + NLMISC::toString(actNb);
 
 		if (act->isString("Name"))
 			actName = act->toString("Name");
@@ -1006,7 +1006,7 @@ void CDisplayerVisualEntity::updateName()
 	}
 	else
 	{
-		actName = CI18N::get("uiR2EDBaseAct").toString();
+		actName = CI18N::get("uiR2EDBaseAct");
 	}
 
 	actName = NLMISC::toString(" [%s]", actName.c_str());

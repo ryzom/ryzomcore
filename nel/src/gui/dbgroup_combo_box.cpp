@@ -184,7 +184,7 @@ namespace NLGUI
 				{
 					const char *propPtr = name;
 					if (NLMISC::startsWith(propPtr, "ui"))
-						addText(CI18N::get(propPtr).toUtf8());
+						addText(CI18N::get(propPtr));
 					else
 						addText(propPtr);
 				}

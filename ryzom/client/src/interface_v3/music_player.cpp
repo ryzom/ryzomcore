@@ -492,7 +492,7 @@ void CMusicPlayer::clearPlayingInfo()
 {
 	if (_Songs.empty())
 	{
-		updatePlayingInfo(CI18N::get("uiNoFiles").toUtf8());
+		updatePlayingInfo(CI18N::get("uiNoFiles"));
 	}
 	else
 	{
@@ -632,7 +632,7 @@ void CMusicPlayer::createPlaylistFromMusic()
 	join(extensions, ", ", extlist);
 	extlist += ", m3u, m3u8";
 
-	std::string msg(CI18N::get("uiMk_system6").toUtf8());
+	std::string msg(CI18N::get("uiMk_system6"));
 	msg += ": " + newPath + " (" + extlist + ")";
 	CInterfaceManager::getInstance()->displaySystemInfo(ucstring::makeFromUtf8(msg), "SYS");
 	nlinfo("%s", msg.c_str());

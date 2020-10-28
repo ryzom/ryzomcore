@@ -983,7 +983,7 @@ bool	CItemSheet::canExchangeOrGive(bool botChatGift) const
 }
 
 // ***************************************************************************
-void	CItemSheet::getItemPartListAsText(ucstring &ipList) const
+void	CItemSheet::getItemPartListAsText(std::string &ipList) const
 {
 	bool	all= true;
 	for(uint i=0;i<RM_FABER_TYPE::NUM_FABER_TYPE;i++)

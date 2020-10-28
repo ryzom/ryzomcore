@@ -448,7 +448,7 @@ public:
 
 	/** Parses any tokens in the ucstring like $t$ or $g()$
 	 */
-	static bool parseTokens(ucstring& ucstr);
+	static bool parseTokens(std::string& ucstr);
 
 // ------------------------------------------------------------------------------------------------
 private:

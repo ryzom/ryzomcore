@@ -189,7 +189,7 @@ void CBotChatPageDynamicMission::update()
 				else
 				{
 					// add a text to show the player that the text is being received
-					_ChoiceCB[k]->addText(NLMISC::CI18N::get("uiWaitingChoiceFromServer").toUtf8());
+					_ChoiceCB[k]->addText(NLMISC::CI18N::get("uiWaitingChoiceFromServer"));
 				}
 			}
 		}

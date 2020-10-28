@@ -884,7 +884,7 @@ std::string formatThousands(const std::string& s)
 {
 	sint i, k;
 	sint remaining = (sint)s.length() - 1;
-	static std::string separator = NLMISC::CI18N::get("uiThousandsSeparator").toUtf8();
+	static std::string separator = NLMISC::CI18N::get("uiThousandsSeparator");
 
 	// Don't add separator if the number is < 10k
 	if (remaining < 4) return s;

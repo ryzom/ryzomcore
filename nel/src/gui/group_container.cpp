@@ -3538,7 +3538,7 @@ namespace NLGUI
 						_RightButton->setTexturePushed (pLayer->getValStr ("right_button_tx_popin"));
 						_RightButton->setTextureOver (pLayer->getValStr ("right_button_tx_over"));
 						_RightButton->setActionOnLeftClick ("ic_popin");
-						_RightButton->setDefaultContextHelp(CI18N::get("uiPopinWindow").toUtf8());
+						_RightButton->setDefaultContextHelp(CI18N::get("uiPopinWindow"));
 					}
 					else // else the container can be deactivated ? deactivate button
 					{
@@ -3546,7 +3546,7 @@ namespace NLGUI
 						_RightButton->setTexturePushed (pLayer->getValStr ("right_button_tx_deactive"));
 						_RightButton->setTextureOver (pLayer->getValStr ("right_button_tx_over"));
 						_RightButton->setActionOnLeftClick ("ic_deactive");
-						_RightButton->setDefaultContextHelp(CI18N::get("uiClose").toUtf8());
+						_RightButton->setDefaultContextHelp(CI18N::get("uiClose"));
 					}
 				}
 			}
@@ -3559,7 +3559,7 @@ namespace NLGUI
 					_RightButton->setTexturePushed (pLayer->getValStr ("right_button_tx_popup"));
 					_RightButton->setTextureOver (pLayer->getValStr ("right_button_tx_over"));
 					_RightButton->setActionOnLeftClick ("ic_popup");
-					_RightButton->setDefaultContextHelp(CI18N::get("uiPopupWindow").toUtf8());
+					_RightButton->setDefaultContextHelp(CI18N::get("uiPopupWindow"));
 				}
 				_RightButton->setActive(!_Locked);
 			}
@@ -3602,7 +3602,7 @@ namespace NLGUI
 				_HelpButton->setTexturePushed (pLayer->getValStr ("help_button_tx"));
 				_HelpButton->setTextureOver (pLayer->getValStr ("help_button_tx_over"));
 				_HelpButton->setActionOnLeftClick ("ic_help");
-				_HelpButton->setDefaultContextHelp(CI18N::get("uiHelp").toUtf8());
+				_HelpButton->setDefaultContextHelp(CI18N::get("uiHelp"));
 			}
 
 			// if not layer 0

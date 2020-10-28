@@ -1692,7 +1692,7 @@ void initBloomConfigUI()
 	if(!supportBloom)
 	{
 		if(group)
-			group->setDefaultContextHelp(CI18N::get("uiFxTooltipBloom").toUtf8());
+			group->setDefaultContextHelp(CI18N::get("uiFxTooltipBloom"));
 
 		ClientCfg.writeBool("FXAA", false);
 		ClientCfg.writeBool("Bloom", false);

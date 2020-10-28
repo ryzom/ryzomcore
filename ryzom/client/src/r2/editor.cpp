@@ -1761,7 +1761,7 @@ void CEditor::waitScenarioScreen()
 				// Display the firewall alert string
 				CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_connecting:title"));
 				if (pVT != NULL)
-					pVT->setText(CI18N::get("uiFirewallAlert").toUtf8()+"...");
+					pVT->setText(CI18N::get("uiFirewallAlert")+"...");
 
 				// The mouse and fullscreen mode should be unlocked for the user to set the firewall permission
 				nlSleep( 30 ); // 'nice' the client, and prevent to make too many send attempts
@@ -1853,8 +1853,8 @@ void CEditor::waitScenarioScreen()
 				if (pVT != NULL)
 				{
 					pVT->setMultiLine( true );
-					pVT->setText(CI18N::get("uiFirewallFail").toUtf8()+".\n"+
-								  CI18N::get("uiFirewallAlert").toUtf8()+".");
+					pVT->setText(CI18N::get("uiFirewallFail")+".\n"+
+								  CI18N::get("uiFirewallAlert")+".");
 				}
 			}
 		}
@@ -6468,7 +6468,7 @@ void CEditor::connectionMsg(const std::string &stringId)
 		CViewText *vt = dynamic_cast<CViewText *>(r2ConnectWindow->getView("connexionMsg"));
 		if (vt)
 		{
-			vt->setText(CI18N::get(stringId).toUtf8());
+			vt->setText(CI18N::get(stringId));
 		}
 	}
 }
@@ -7497,7 +7497,7 @@ class CAHInviteCharacter : public IActionHandler
 					{
 						CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 						if (pVT != NULL)
-							pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial").toUtf8());
+							pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
 
 						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 					}

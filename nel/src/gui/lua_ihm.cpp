@@ -1691,7 +1691,7 @@ namespace NLGUI
 		// inside i18n table
 		luabind::module(L, "i18n")
 		[
-			luabind::def("get", &CI18N::get),
+			luabind::def("get", &CI18N::getAsUtf16), // FIXME: Lua UTF-8
 			luabind::def("hasTranslation", &CI18N::hasTranslation)
 		];
 		// inside 'nlfile' table

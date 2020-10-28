@@ -653,7 +653,7 @@ namespace NLGUI
 #if 1
 			if (NLMISC::startsWith(value, "ui"))
 			{
-				_Text = CI18N::get(value).toUtf8();
+				_Text = CI18N::get(value);
 				_TextLength = 0;
 				_HardText = value;
 			}
@@ -1000,7 +1000,7 @@ namespace NLGUI
 			if (NLMISC::startsWith(propPtr, "ui"))
 			{
 				_HardText = propPtr;
-				_Text = CI18N::get(propPtr).toUtf8();
+				_Text = CI18N::get(propPtr);
 				_TextLength = 0;
 			}
 			else
@@ -1021,11 +1021,11 @@ namespace NLGUI
 
 			if (_MultiLine)
 			{
-				setTextFormatTaged(CI18N::get(propPtr).toUtf8());
+				setTextFormatTaged(CI18N::get(propPtr));
 			}
 			else
 			{
-				setSingleLineTextFormatTaged(CI18N::get(propPtr).toUtf8());
+				setSingleLineTextFormatTaged(CI18N::get(propPtr));
 			}
 		}
 
@@ -2394,7 +2394,7 @@ namespace NLGUI
 	{
 		if (NLMISC::startsWith(ht, "ui"))
 		{
-			setText(CI18N::get(ht).toUtf8());
+			setText(CI18N::get(ht));
 			_HardText = ht;
 		}
 		else
@@ -3346,7 +3346,7 @@ namespace NLGUI
 				pTooltip->setRenderLayer(getRenderLayer());
 				std::string tempTooltipStr = tempTooltips[i].toUtf8();
 				bool isI18N = NLMISC::startsWith(tempTooltipStr, "ui");
-				pTooltip->setDefaultContextHelp(isI18N ? CI18N::get(tempTooltipStr).toUtf8() : tempTooltipStr);
+				pTooltip->setDefaultContextHelp(isI18N ? CI18N::get(tempTooltipStr) : tempTooltipStr);
 				pTooltip->setParentPos(this);
 				pTooltip->setParentPosRef(Hotspot_BR);
 				pTooltip->setPosRef(Hotspot_BR);

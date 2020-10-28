@@ -2140,7 +2140,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 				pVBR->setColor(CRGBA(0,0,0,0));
 
 				if (pTooltip)
-					pTooltip->setDefaultContextHelp(CI18N::get("uittTargetUnknown").toUtf8());
+					pTooltip->setDefaultContextHelp(CI18N::get("uittTargetUnknown"));
 
 				return;
 			}
@@ -2205,7 +2205,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 				sint min = (nForceRegion-2) * 50 + (nLevelForce-1) * 10 + 1;
 				sint max = (nForceRegion-2) * 50 + nLevelForce * 10;
 
-				str= CI18N::get("uittTargetLevel").toUtf8();
+				str= CI18N::get("uittTargetLevel");
 				strFindReplace(str, "%min", toString(min));
 				strFindReplace(str, "%max", toString(max));
 			}
@@ -2214,16 +2214,16 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 			{
 				sint n = (nForceRegion-1) * 50;
 				if (pE->isNPC())
-					str= CI18N::get("uittTargetGuardBoss").toUtf8();
+					str= CI18N::get("uittTargetGuardBoss");
 				else
-					str= CI18N::get("uittTargetBoss").toUtf8();
+					str= CI18N::get("uittTargetBoss");
 				strFindReplace(str, "%n", toString("%d", n) );
 			}
 			// Named
 			else
 			{
 				sint n = (nForceRegion-1) * 50;
-				str= CI18N::get("uittTargetNamed").toUtf8();
+				str= CI18N::get("uittTargetNamed");
 				strFindReplace(str, "%n", toString("%d", n) );
 			}
 
@@ -3094,10 +3094,10 @@ public:
 		if( pCB )
 		{
 			pCB->resetTexts();
-			pCB->addText(CI18N::get("uigcLowTextureMode").toUtf8());
-			pCB->addText(CI18N::get("uigcNormalTextureMode").toUtf8());
+			pCB->addText(CI18N::get("uigcLowTextureMode"));
+			pCB->addText(CI18N::get("uigcNormalTextureMode"));
 			if(ClientCfg.HDTextureInstalled)
-				pCB->addText(CI18N::get("uigcHighTextureMode").toUtf8());
+				pCB->addText(CI18N::get("uigcHighTextureMode"));
 		}
 
 		// Anisotropic Filtering
@@ -3110,7 +3110,7 @@ public:
 			sint maxAnisotropic = (sint)Driver->getAnisotropicFilterMaximum();
 
 			pCB->resetTexts();
-			pCB->addText(CI18N::get("uigcFxAnisotropicFilterNone").toUtf8());
+			pCB->addText(CI18N::get("uigcFxAnisotropicFilterNone"));
 
 			sint anisotropic = 2;
 			uint i = 1;

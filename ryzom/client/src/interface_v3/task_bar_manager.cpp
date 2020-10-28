@@ -182,7 +182,7 @@ public:
 				if (it != acmap.end())
 					pVT->setText(it->second.toUCString().toUtf8());
 				else
-					pVT->setText(CI18N::get("uiNotAssigned").toUtf8());
+					pVT->setText(CI18N::get("uiNotAssigned"));
 			}
 		}
 	}

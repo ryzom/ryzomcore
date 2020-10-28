@@ -1058,7 +1058,7 @@ void		CDBGroupListSheetText::CSheetChild::updateViewTextAsItem()
 		if(Ctrl->getType() == CCtrlSheetInfo::SheetType_Item)
 		{
 			if(!Ctrl->checkItemRequirement())
-				text= CI18N::get("uiItemCannotUseColor").toUtf8() + text;
+				text= CI18N::get("uiItemCannotUseColor") + text;
 		}
 
 		// For item, add some information
@@ -1070,17 +1070,17 @@ void		CDBGroupListSheetText::CSheetChild::updateViewTextAsItem()
 				// Add craft info for MP
 				if(pIS->Family==ITEMFAMILY::RAW_MATERIAL)
 				{
-					ucstring	ipList;
+					string	ipList;
 					pIS->getItemPartListAsText(ipList);
 					if(ipList.empty())
 					{
 						if(pIS->isUsedAsCraftRequirement())
-							text+= "\n" + CI18N::get("uiItemMpCraftRequirement").toUtf8();
+							text+= "\n" + CI18N::get("uiItemMpCraftRequirement");
 						else
-							text+= "\n" + CI18N::get("uiItemMpNoCraft").toUtf8();
+							text+= "\n" + CI18N::get("uiItemMpNoCraft");
 					}
 					else
-						text+= "\n" + CI18N::get("uiItemMpCanCraft").toUtf8() + ipList.toUtf8();
+						text+= "\n" + CI18N::get("uiItemMpCanCraft") + ipList;
 				}
 			}
 		}

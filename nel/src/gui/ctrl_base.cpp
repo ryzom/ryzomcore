@@ -127,7 +127,7 @@ namespace NLGUI
 		{
 			// Force I18N tooltip
 			if (!editorMode)
-				_ContextHelp = CI18N::get((const char *)prop).toUtf8();
+				_ContextHelp = CI18N::get((const char *)prop);
 			else
 				_ContextHelp = (const char *)prop;
 		}
@@ -138,7 +138,7 @@ namespace NLGUI
 			if (prop)
 			{
 				if (!editorMode && NLMISC::startsWith((const char *)prop, "ui"))
-					_ContextHelp = CI18N::get((const char *)prop).toUtf8();
+					_ContextHelp = CI18N::get((const char *)prop);
 				else
 					_ContextHelp = (const char *)prop;
 			}
@@ -259,7 +259,7 @@ namespace NLGUI
 		if( name == "tooltip" )
 		{
 			if (!editorMode && NLMISC::startsWith(value, "ui"))
-				_ContextHelp = CI18N::get(value).toUtf8();
+				_ContextHelp = CI18N::get(value);
 			else
 				_ContextHelp = value;
 			return;
@@ -268,7 +268,7 @@ namespace NLGUI
 		if( name == "tooltip_i18n" )
 		{
 			if (!editorMode)
-				_ContextHelp = CI18N::get(value).toUtf8();
+				_ContextHelp = CI18N::get(value);
 			else
 				_ContextHelp = value;
 			return;

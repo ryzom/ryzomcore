@@ -76,7 +76,7 @@ public:
 	virtual void		getContextHelp(std::string &help) const
 	{
 		help = Instance.getDisplayName().toUtf8();
-		if (help == NLMISC::CI18N::get("uiR2EDNoName").toUtf8())
+		if (help == NLMISC::CI18N::get("uiR2EDNoName"))
 			help.clear();
 	}
 	bool				emptyContextHelp() const { return true; }
@@ -125,7 +125,7 @@ public:
 	virtual void		getContextHelp(std::string &help) const
 	{
 		help = Instance.getDisplayName().toUtf8();
-		if (help == NLMISC::CI18N::get("uiR2EDNoName").toUtf8())
+		if (help == NLMISC::CI18N::get("uiR2EDNoName"))
 			help.clear();
 	}
 	bool				emptyContextHelp() const { return true; }

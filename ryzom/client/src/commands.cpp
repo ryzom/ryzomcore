@@ -853,7 +853,7 @@ NLMISC_COMMAND(bugReport, "Call the bug report tool with dump", "<AddScreenshot>
 
 	string sys;
 
-	sys = "Language "+CI18N::getCurrentLanguageName().toString() +" ";
+	sys = "Language "+CI18N::getCurrentLanguageName() +" ";
 
 	if (!args.empty())
 	{
@@ -1306,9 +1306,9 @@ NLMISC_COMMAND(execScript, "Execute a script file (.cmd)","<FileName>")
 						inComment++;
 					if(inComment<=0)
 					{
-						ucstring ucline(line);
+						string ucline(line);
 						CInterfaceManager::parseTokens(ucline);
-						ICommand::execute(ucline.toUtf8(), g_log);
+						ICommand::execute(ucline, g_log);
 					}
 					if(strncmp(line, "*/", 2)==0)
 						inComment--;

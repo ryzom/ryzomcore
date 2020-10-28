@@ -230,7 +230,7 @@ int CSessionBrowserImpl::luaJoinRingSession(CLuaState &ls)
 	{
 		CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 		if (pVT != NULL)
-			pVT->setText(CI18N::get("uiRingWarningFreeTrial").toUtf8());
+			pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
 		CAHManager::getInstance()->runActionHandler("enter_modal", NULL, "group=ui:interface:warning_free_trial");
 	}
 

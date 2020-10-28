@@ -492,7 +492,7 @@ void CModalContainerEditCmd::activate()
 					}
 					if (found)
 					{
-						pCB->addText(CI18N::get(rVCat[i].LocalizedName).toUtf8());
+						pCB->addText(CI18N::get(rVCat[i].LocalizedName));
 						CurrentEditCmdCategories.push_back(rVCat[i].Name);
 					}
 				}
@@ -689,7 +689,7 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 			if (noParam == 0)	sText = WinName+VIEW_EDITCMD_FIRST_PARAM_NAME;
 			else				sText = WinName+VIEW_EDITCMD_SECOND_PARAM_NAME;
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(sText));
-			if (pVT != NULL) pVT->setText(CI18N::get(pBA->Parameters[i].LocalizedName).toUtf8());
+			if (pVT != NULL) pVT->setText(CI18N::get(pBA->Parameters[i].LocalizedName));
 			noParam++;
 		}
 	}
@@ -778,7 +778,7 @@ void CModalContainerEditCmd::invalidCurrentCommand()
 	{
 		// Dont display key shortcut if we are in creation mode
 		pVT= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId( WinName+VIEW_EDITCMD_TEXT_KEY ));
-		if (pVT != NULL) pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT).toUtf8());
+		if (pVT != NULL) pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT));
 
 		// Deactivate the key definer text
 		pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_TEXT_KEY));
@@ -897,7 +897,7 @@ void CModalContainerEditCmd::validCurrentCommand()
 				CurrentEditCmdLine.Combo.Key = KeyCount;
 				CurrentEditCmdLine.Combo.KeyButtons = noKeyButton;
 				// Display not assigned text
-				pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT).toUtf8());
+				pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT));
 				// Do not display the ok button
 				CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
 				if (pCB != NULL) pCB->setFrozen (true);
@@ -1033,7 +1033,7 @@ void CModalContainerEditCmd::onChangeCategory()
 			{
 				if (rBA.isUsableInCurrentContext())
 				{
-					pCB->addText(CI18N::get(rBA.LocalizedName).toUtf8());
+					pCB->addText(CI18N::get(rBA.LocalizedName));
 				}
 			}
 		}
@@ -1111,7 +1111,7 @@ void CModalContainerEditCmd::onChangeAction()
 
 			pViewParamName = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(sViewText));
 			if (pViewParamName != NULL)
-				pViewParamName->setText (CI18N::get(rP.LocalizedName).toUtf8());
+				pViewParamName->setText (CI18N::get(rP.LocalizedName));
 		}
 
 		if (rP.Type == CBaseAction::CParameter::Constant)
@@ -1131,7 +1131,7 @@ void CModalContainerEditCmd::onChangeAction()
 					if (ActionsContext.matchContext(rVal.Contexts))
 					{
 						if (NLMISC::startsWith(rVal.LocalizedValue, "ui"))
-							pCB->addText(CI18N::get(rVal.LocalizedValue).toUtf8());
+							pCB->addText(CI18N::get(rVal.LocalizedValue));
 						else
 							pCB->addText(rVal.LocalizedValue);
 					}

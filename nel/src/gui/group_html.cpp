@@ -3229,7 +3229,7 @@ namespace NLGUI
 		{
 			if (CI18N::hasTranslation(tooltip))
 			{
-				ctrlButton->setDefaultContextHelp(CI18N::get(tooltip).toUtf8());
+				ctrlButton->setDefaultContextHelp(CI18N::get(tooltip));
 				//ctrlButton->setOnContextHelp(CI18N::get(tooltip).toString());
 			}
 			else
@@ -5467,7 +5467,7 @@ namespace NLGUI
 				{
 					if (CI18N::hasTranslation(tooltip))
 					{
-						ctrlButton->setDefaultContextHelp(CI18N::get(tooltip).toUtf8());
+						ctrlButton->setDefaultContextHelp(CI18N::get(tooltip));
 					}
 					else
 					{

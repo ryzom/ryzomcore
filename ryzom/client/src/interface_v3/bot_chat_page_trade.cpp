@@ -600,12 +600,12 @@ void CBotChatPageTrade::updateTradeModal()
 					if (_BuyMean == MoneyGuildXP)
 					{
 						if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiNotEnoughMoney"));
-						if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughMoney").toUtf8());
+						if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughMoney"));
 					}
 					else
 					{
 						if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiNotEnoughGuildMoney"));
-						if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughGuildMoney").toUtf8());
+						if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughGuildMoney"));
 					}
 					return;
 				}
@@ -616,7 +616,7 @@ void CBotChatPageTrade::updateTradeModal()
 						if (confirmTradeGroup)	confirmTradeGroup->setActive(false);
 						if (cantTradeGroup)		cantTradeGroup->setActive(true);
 						if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiNotEnoughGuildXP"));
-						if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughGuildXP").toUtf8());
+						if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughGuildXP"));
 						return;
 					}
 				}
@@ -677,7 +677,7 @@ void CBotChatPageTrade::updateTradeModal()
 					if (cantTradeGroup) cantTradeGroup->setActive(true);
 					// can't sell more than what is in inventory
 					if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiBCNotAvailable"));
-					if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittBCNotAvailable").toUtf8());
+					if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittBCNotAvailable"));
 					ok= false;
 				}
 
@@ -692,7 +692,7 @@ void CBotChatPageTrade::updateTradeModal()
 						if (cantTradeGroup) cantTradeGroup->setActive(true);
 						// can't sell more than what is in inventory
 						if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiBadQuantity"));
-						if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittBadQuantity").toUtf8());
+						if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittBadQuantity"));
 						ok= false;
 					}
 				}
@@ -710,7 +710,7 @@ void CBotChatPageTrade::updateTradeModal()
 								if (confirmTradeGroup) confirmTradeGroup->setActive(false);
 								if (cantTradeGroup) cantTradeGroup->setActive(true);
 								if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiNotEnoughMoney"));
-								if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughMoney").toUtf8());
+								if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughMoney"));
 							}
 							else if (_BuyMean == MoneyFactionPoints)
 							{
@@ -722,7 +722,7 @@ void CBotChatPageTrade::updateTradeModal()
 										confirmTradeGroup->setActive(false);
 										cantTradeGroup->setActive(true);
 										cantTradeButton->setText(CI18N::get("uiNotEnoughFP_"+PVP_CLAN::toString(fpType)));
-										cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughFP_"+PVP_CLAN::toString(fpType)).toUtf8());
+										cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughFP_"+PVP_CLAN::toString(fpType)));
 									}
 									else
 									{
@@ -745,7 +745,7 @@ void CBotChatPageTrade::updateTradeModal()
 								if (confirmTradeGroup) confirmTradeGroup->setActive(false);
 								if (cantTradeGroup) cantTradeGroup->setActive(true);
 								if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiNotEnoughSkillPoints"));
-								if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughSkillPoints").toUtf8());
+								if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughSkillPoints"));
 							}
 							else
 							{
@@ -761,7 +761,7 @@ void CBotChatPageTrade::updateTradeModal()
 								if (confirmTradeGroup) confirmTradeGroup->setActive(false);
 								if (cantTradeGroup) cantTradeGroup->setActive(true);
 								if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiNotEnoughGuildXP"));
-								if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughGuildXP").toUtf8());
+								if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughGuildXP"));
 							}
 							else
 							{
@@ -780,7 +780,7 @@ void CBotChatPageTrade::updateTradeModal()
 							if (cantTradeGroup) cantTradeGroup->setActive(true);
 							// can't sell less than the basic price
 							if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiBadResalePrice"));
-							if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittBadResalePrice").toUtf8());
+							if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittBadResalePrice"));
 						}
 						// else ok, can resell
 						else
@@ -812,7 +812,7 @@ void CBotChatPageTrade::updateTradeModal()
 				if (_SellDlgOn && priceWithoutFame == 0)
 				{
 					if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiWontBuyThis"));
-					if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittWontBuyThis").toUtf8());
+					if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittWontBuyThis"));
 				}
 				else if (_SellDlgOn && priceWithoutFame == std::numeric_limits<uint64>::max())
 				{
@@ -821,7 +821,7 @@ void CBotChatPageTrade::updateTradeModal()
 				else if (quantity == 0 || quantity == std::numeric_limits<uint32>::max())
 				{
 					if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiBadQuantity"));
-					if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittBadQuantity").toUtf8());
+					if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittBadQuantity"));
 				}
 			}
 		}
@@ -865,7 +865,7 @@ void CBotChatPageTrade::startBuyDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCall
 	CViewText *priceLabel = dynamic_cast<CViewText*>(ig->getView( "standard_price:total_price_header" ));
 	if ( _BuyMean == Money && priceLabel )
 	{
-		priceLabel->setText( CI18N::get( "uiPrice" ).toUtf8() );
+		priceLabel->setText( CI18N::get( "uiPrice" ) );
 		priceLabel->setActive(true);
 	}
 	else
@@ -977,7 +977,7 @@ void CBotChatPageTrade::startSellDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCal
 	CViewText *priceLabel = dynamic_cast<CViewText*>(ig->getView( "standard_price:total_price_header" ));
 	if ( priceLabel )
 	{
-		priceLabel->setText( CI18N::get( "uiImmediatePrice" ).toUtf8() );
+		priceLabel->setText( CI18N::get( "uiImmediatePrice" ) );
 		priceLabel->setActive(true);
 	}
 
@@ -1003,7 +1003,7 @@ void CBotChatPageTrade::startSellDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCal
 	{
 		confirmButton->setActive( !sheet->getLockedByOwner() );
 		confirmButton->setText(CI18N::get("uiSellImmediately"));
-		confirmButton->setDefaultContextHelp(CI18N::get("uittDirectSellButton").toUtf8());
+		confirmButton->setDefaultContextHelp(CI18N::get("uittDirectSellButton"));
 	}
 
 	// set item or skill name

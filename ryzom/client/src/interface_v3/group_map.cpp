@@ -697,7 +697,7 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		{
 			_HomeLM->setParent(this);
 			addCtrl(_HomeLM);
-			_HomeLM->setDefaultContextHelp(NLMISC::CI18N::get("uiHome").toUtf8());
+			_HomeLM->setDefaultContextHelp(NLMISC::CI18N::get("uiHome"));
 		}
 
 		// create animals Landmark: pack Animals.
@@ -709,7 +709,7 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 			{
 				_AnimalLM[i]->setParent(this);
 				addCtrl(_AnimalLM[i]);
-				_AnimalLM[i]->setDefaultContextHelp(NLMISC::CI18N::get(NLMISC::toString("uiPATitleMount%d", i+1)).toUtf8());
+				_AnimalLM[i]->setDefaultContextHelp(NLMISC::CI18N::get(NLMISC::toString("uiPATitleMount%d", i+1)));
 			}
 		}
 
@@ -722,7 +722,7 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 			{
 				_TeammateLM[i]->setParent(this);
 				addCtrl(_TeammateLM[i]);
-				_TeammateLM[i]->setDefaultContextHelp(NLMISC::CI18N::get(NLMISC::toString("uittLMTeam%d",i)).toUtf8());
+				_TeammateLM[i]->setDefaultContextHelp(NLMISC::CI18N::get(NLMISC::toString("uittLMTeam%d",i)));
 			}
 		}
 	}
@@ -1201,7 +1201,7 @@ void CGroupMap::checkCoords()
 					CEntityCL *sel = EntitiesMngr.entity(UserEntity->selection());
 					if (sel)
 					{
-						_TargetLM->setDefaultContextHelp(NLMISC::CI18N::get("uiTargetTwoPoint").toUtf8() + sel->removeTitleAndShardFromName(sel->getEntityName()).toUtf8());
+						_TargetLM->setDefaultContextHelp(NLMISC::CI18N::get("uiTargetTwoPoint") + sel->removeTitleAndShardFromName(sel->getEntityName()).toUtf8());
 					}
 				}
 			}
@@ -1374,7 +1374,7 @@ void CGroupMap::checkCoords()
 					case ANIMAL_TYPE::Packer: sPrefix = "uiPATitlePacker"; break;
 					case ANIMAL_TYPE::Demon:  sPrefix = "uiPATitleDemon";  break;
 				}
-				_AnimalLM[i]->setDefaultContextHelp(NLMISC::CI18N::get(sPrefix+toString(i+1)).toUtf8());
+				_AnimalLM[i]->setDefaultContextHelp(NLMISC::CI18N::get(sPrefix+toString(i+1)));
 			}
 		}
 	}

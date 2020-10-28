@@ -837,13 +837,13 @@ class CAHGuildSheetOpen : public IActionHandler
 				if (pViewGrade != NULL)
 				{
 					if (rGuildMembers[i].Grade == EGSPD::CGuildGrade::Leader)
-						pViewGrade->setText (CI18N::get("uiGuildLeader").toUtf8());
+						pViewGrade->setText (CI18N::get("uiGuildLeader"));
 					else if (rGuildMembers[i].Grade == EGSPD::CGuildGrade::HighOfficer)
-						pViewGrade->setText (CI18N::get("uiGuildHighOfficer").toUtf8());
+						pViewGrade->setText (CI18N::get("uiGuildHighOfficer"));
 					else if (rGuildMembers[i].Grade == EGSPD::CGuildGrade::Officer)
-						pViewGrade->setText (CI18N::get("uiGuildOfficer").toUtf8());
+						pViewGrade->setText (CI18N::get("uiGuildOfficer"));
 					else
-						pViewGrade->setText (CI18N::get("uiGuildMember").toUtf8());
+						pViewGrade->setText (CI18N::get("uiGuildMember"));
 				}
 
 				// online?
@@ -857,17 +857,17 @@ class CAHGuildSheetOpen : public IActionHandler
 					case ccs_online:
 						onlineView->setTexture("w_online.tga");
 						if (toolTip)
-							toolTip->setDefaultContextHelp(CI18N::get("uittGuildMemberOnline").toUtf8());
+							toolTip->setDefaultContextHelp(CI18N::get("uittGuildMemberOnline"));
 						break;
 					case ccs_online_abroad:
 						onlineView->setTexture("w_online_abroad.tga");
 						if (toolTip)
-							toolTip->setDefaultContextHelp(CI18N::get("uittGuildMemberOnlineAbroad").toUtf8());
+							toolTip->setDefaultContextHelp(CI18N::get("uittGuildMemberOnlineAbroad"));
 						break;
 					default:
 						onlineView->setTexture("w_offline.tga");
 						if (toolTip)
-							toolTip->setDefaultContextHelp(CI18N::get("uittGuildMemberOffline").toUtf8());
+							toolTip->setDefaultContextHelp(CI18N::get("uittGuildMemberOffline"));
 						break;
 					}
 				}

@@ -471,14 +471,14 @@ void CPeopleList::displayLocalPlayerTell(const ucstring &receiver, uint index, c
 		return;
 	}
 
- 	ucstring csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
-	ucstring finalMsg = csr + CI18N::get("youTell") + ": " + msg;
+ 	string csr = CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "";
+	string finalMsg = csr + CI18N::get("youTell") + ": " + msg.toUtf8();
 	// display msg with good color
 	CInterfaceProperty prop;
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 
-	ucstring s = CI18N::get("youTellPlayer");
-	strFindReplace(s, "%name", receiver);
+	string s = CI18N::get("youTellPlayer");
+	strFindReplace(s, "%name", receiver.toUtf8());
 	strFindReplace(finalMsg, CI18N::get("youTell"), s);
 	gl->addChild(getChatTextMngr().createMsgText(finalMsg, prop.getRGBA()));
 	CInterfaceManager::getInstance()->log(finalMsg, CChatGroup::groupTypeToString(CChatGroup::tell));
@@ -759,17 +759,17 @@ void CPeopleList::setOnline(uint index, TCharConnectionState online)
 			case ccs_online:
 				onlineView->setTexture("w_online.tga");
 				if (toolTip)
-					toolTip->setDefaultContextHelp(CI18N::get("uittFriendsOnline").toUtf8());
+					toolTip->setDefaultContextHelp(CI18N::get("uittFriendsOnline"));
 				break;
 			case ccs_online_abroad:
 				onlineView->setTexture("w_online_abroad.tga");
 				if (toolTip)
-					toolTip->setDefaultContextHelp(CI18N::get("uittFriendsOnlineAbroad").toUtf8());
+					toolTip->setDefaultContextHelp(CI18N::get("uittFriendsOnlineAbroad"));
 				break;
 			default:
 				onlineView->setTexture("w_offline.tga");
 				if (toolTip)
-					toolTip->setDefaultContextHelp(CI18N::get("uittFriendsOffline").toUtf8());
+					toolTip->setDefaultContextHelp(CI18N::get("uittFriendsOffline"));
 				break;
 			}
 		}
@@ -876,7 +876,7 @@ class CHandlerContactEntry : public IActionHandler
 	{
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(pCaller);
 		if (pEB == NULL) return;
-		ucstring text = pEB->getInputStringAsUtf16();
+		string text = pEB->getInputString();
 		// If the line is empty, do nothing
 		if(text.empty())
 			return;
@@ -892,8 +892,7 @@ class CHandlerContactEntry : public IActionHandler
 		if(text[0] == '/')
 		{
 			CChatWindow::_ChatWindowLaunchingCommand = NULL; // no CChatWindow instance there ..
-			// TODO : have NLMISC::ICommand accept unicode strings
-			std::string str = text.toUtf8().substr(1);
+			std::string str = text.substr(1);
 			NLMISC::ICommand::execute( str, g_log );
 			pEB->setInputString (std::string());
 			return;
@@ -904,10 +903,10 @@ class CHandlerContactEntry : public IActionHandler
 		CGroupContainer *gc = static_cast< CGroupContainer* >( pCaller->getParent()->getEnclosingContainer() );
 
 		// title gives the name of the player
-		ucstring playerName = gc->getUCTitle();
+		string playerName = gc->getUCTitle().toUtf8();
 
 		// Simply do a tell on the player
-		ChatMngr.tell(playerName.toString(), text);
+		ChatMngr.tell(playerName, text);
 		pEB->setInputString (std::string());
 		if (gc)
 		{
@@ -940,18 +939,18 @@ class CHandlerContactEntry : public IActionHandler
 				CChatGroupWindow *pWin = PeopleInterraction.getChatGroupWindow();
 				CInterfaceProperty prop;
 				prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
-				ucstring final;
+				string final;
 				CChatWindow::encodeColorTag(prop.getRGBA(), final, false);
 
-				ucstring csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
+				string csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
 				final += csr + CI18N::get("youTell")+": ";
 				prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 				CChatWindow::encodeColorTag(prop.getRGBA(), final, true);
 				final += text;
 				pWin->displayTellMessage(final, prop.getRGBA(), pWin->getFreeTellerName(str));
 
-				ucstring s = CI18N::get("youTellPlayer");
-				strFindReplace(s, "%name", pWin->getFreeTellerName(str));
+				string s = CI18N::get("youTellPlayer");
+				strFindReplace(s, "%name", pWin->getFreeTellerName(str).toUtf8());
 				strFindReplace(final, CI18N::get("youTell"), s);
 				CInterfaceManager::getInstance()->log(final, CChatGroup::groupTypeToString(CChatGroup::tell));
 			}

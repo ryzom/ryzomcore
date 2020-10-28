@@ -73,7 +73,7 @@ ERole toRoleId( const std::string& Role )
 }
 
 // Return the Translated name of the Job
-const ucstring &roleToUCString (ERole r)
+const std::string &roleToUCString(ERole r)
 {
 	return NLMISC::CI18N::get( toString( r ) );
 }

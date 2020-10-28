@@ -254,10 +254,10 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 	switch ( Ctrl->getSheetCategory() )
 	{
 		case CDBCtrlSheet::Item:		break;		// none for item. consider useless
-		case CDBCtrlSheet::Pact:		text= CI18N::get("uiBotChatPact").toUtf8() + text; break;
-		case CDBCtrlSheet::Skill:		text= CI18N::get("uiBotChatSkill").toUtf8() + text; break;
-		case CDBCtrlSheet::GuildFlag:	text= CI18N::get("uiBotChatSkill").toUtf8() + text; break;
-		case CDBCtrlSheet::Phrase:		text= CI18N::get("uiBotChatPhrase").toUtf8() + text; break;
+		case CDBCtrlSheet::Pact:		text= CI18N::get("uiBotChatPact") + text; break;
+		case CDBCtrlSheet::Skill:		text= CI18N::get("uiBotChatSkill") + text; break;
+		case CDBCtrlSheet::GuildFlag:	text= CI18N::get("uiBotChatSkill") + text; break;
+		case CDBCtrlSheet::Phrase:		text= CI18N::get("uiBotChatPhrase") + text; break;
 		default: break;
 	}
 
@@ -269,10 +269,10 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 		{
 			STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 			text += string("\n") + CUtfStringView(pSMC->getOutpostBuildingLocalizedDescription(CSheetId(Ctrl->getSheetId()))).toUtf8();
-			text += "\n" + CI18N::get("uiBotChatPrice").toUtf8() + NLMISC::formatThousands(toString(pOBS->CostDapper));
-			text += CI18N::get("uiBotChatTime").toUtf8() + toString(pOBS->CostTime/60) + CI18N::get("uiBotChatTimeMinute").toUtf8();
+			text += "\n" + CI18N::get("uiBotChatPrice") + NLMISC::formatThousands(toString(pOBS->CostDapper));
+			text += CI18N::get("uiBotChatTime") + toString(pOBS->CostTime/60) + CI18N::get("uiBotChatTimeMinute");
 			if ((pOBS->CostTime % 60) != 0)
-				text += toString(pOBS->CostTime%60) + CI18N::get("uiBotChatTimeSecond").toUtf8();
+				text += toString(pOBS->CostTime%60) + CI18N::get("uiBotChatTimeSecond");
 		}
 	}
 
@@ -285,7 +285,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 		bool melee,range;
 		pPM->getCombatWeaponRestriction(weaponRestriction, Ctrl->getSheetId(),melee,range);
 		// don't add also if no combat restriction
-		if(!weaponRestriction.empty() && weaponRestriction!=CI18N::get("uiawrSF"))
+		if(!weaponRestriction.empty() && weaponRestriction!=CI18N::getAsUtf16("uiawrSF"))
 		{
 			weaponRestriction= CI18N::get("uiPhraseWRHeader") + weaponRestriction;
 			text+= "\n" + weaponRestriction.toUtf8();
@@ -297,7 +297,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 	if(Ctrl->getType() == CCtrlSheetInfo::SheetType_Item)
 	{
 		if(!Ctrl->checkItemRequirement())
-			colorTag= CI18N::get("uiItemCannotUseColor").toUtf8();
+			colorTag= CI18N::get("uiItemCannotUseColor");
 	}
 
 	// For item, add some information
@@ -309,17 +309,17 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 			// Add craft info for MP
 			if(pIS->Family==ITEMFAMILY::RAW_MATERIAL)
 			{
-				ucstring	ipList;
+				string	ipList;
 				pIS->getItemPartListAsText(ipList);
 				if(ipList.empty())
 				{
 					if(pIS->isUsedAsCraftRequirement())
-						text+= "\n" + CI18N::get("uiItemMpCraftRequirement").toUtf8();
+						text+= "\n" + CI18N::get("uiItemMpCraftRequirement");
 					else
-						text+= "\n" + CI18N::get("uiItemMpNoCraft").toUtf8();
+						text+= "\n" + CI18N::get("uiItemMpNoCraft");
 				}
 				else
-					text+= "\n" + CI18N::get("uiItemMpCanCraft").toUtf8() + ipList.toUtf8();
+					text+= "\n" + CI18N::get("uiItemMpCanCraft") + ipList;
 			}
 		}
 	}
@@ -331,9 +331,9 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 		if(Ctrl->getSheetCategory() == CDBCtrlSheet::Phrase)
 		{
 			if (LastPrice != -1)
-				text+= "\n" + CI18N::get("uiBotChatSkillPointCost").toUtf8() + toString(LastPrice);
+				text+= "\n" + CI18N::get("uiBotChatSkillPointCost") + toString(LastPrice);
 			else
-				text+= "\n" + CI18N::get("uiBotChatSkillPointCostNotReceived").toUtf8();
+				text+= "\n" + CI18N::get("uiBotChatSkillPointCostNotReceived");
 		}
 		else
 		{
@@ -345,8 +345,8 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 				const CItemSheet *pIS = Ctrl->asItemSheet();
 				if (pIS && pIS->Family == ITEMFAMILY::GUILD_OPTION)
 				{
-					text+= "\n" + CI18N::get("uiBotChatSkillPointCost").toUtf8() + toString(pIS->GuildOption.XPCost);
-					text+= "\n" + CI18N::get("uiBotChatPrice").toUtf8() + NLMISC::formatThousands(toString(pIS->GuildOption.MoneyCost));
+					text+= "\n" + CI18N::get("uiBotChatSkillPointCost") + toString(pIS->GuildOption.XPCost);
+					text+= "\n" + CI18N::get("uiBotChatPrice") + NLMISC::formatThousands(toString(pIS->GuildOption.MoneyCost));
 					guildOption= true;
 				}
 			}
@@ -381,10 +381,10 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 					if (LastPrice > 0)
 					{
 						if(displayMulPrice)
-							text+= "\n" + CI18N::get("uiBotChatPrice").toUtf8() + NLMISC::formatThousands(toString(sint32(LastPrice * priceFactor))) + " ("
+							text+= "\n" + CI18N::get("uiBotChatPrice") + NLMISC::formatThousands(toString(sint32(LastPrice * priceFactor))) + " ("
 								+ NLMISC::formatThousands(toString( sint32(factor) * sint32(LastPrice * priceFactor) )) + ")";
 						else
-							text+= "\n" + CI18N::get("uiBotChatPrice").toUtf8() + NLMISC::formatThousands(toString( sint32(factor * LastPrice * priceFactor) ));
+							text+= "\n" + CI18N::get("uiBotChatPrice") + NLMISC::formatThousands(toString( sint32(factor * LastPrice * priceFactor) ));
 					}
 
 					if ((LastFactionPointPrice != 0) && (LastFactionType >= PVP_CLAN::BeginClans) && (LastFactionType <= PVP_CLAN::EndClans))
@@ -394,8 +394,8 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 						else
 							text+= "\n";
 
-						text+= CI18N::get("uiBotChatFactionType").toUtf8() + PVP_CLAN::toString((PVP_CLAN::TPVPClan)LastFactionType)
-							+  CI18N::get("uiBotChatFactionPointPrice").toUtf8() + NLMISC::formatThousands(toString(LastFactionPointPrice));
+						text+= CI18N::get("uiBotChatFactionType") + PVP_CLAN::toString((PVP_CLAN::TPVPClan)LastFactionType)
+							+  CI18N::get("uiBotChatFactionPointPrice") + NLMISC::formatThousands(toString(LastFactionPointPrice));
 					}
 
 					// some additional info for resale
@@ -407,31 +407,31 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 						{
 							// append price
 							if(pIS && pIS->Stackable>1 && zeFather->getMultiplyPriceByQuantityFlag())
-								text+= CI18N::get("uiBotChatRetirePrice").toUtf8() + NLMISC::formatThousands(toString(LastPriceRetire)) + " ("
+								text+= CI18N::get("uiBotChatRetirePrice") + NLMISC::formatThousands(toString(LastPriceRetire)) + " ("
 									+ NLMISC::formatThousands(toString(factor * LastPriceRetire)) + ")";
 							else
-								text+= CI18N::get("uiBotChatRetirePrice").toUtf8() + NLMISC::formatThousands(toString(factor * LastPriceRetire));
+								text+= CI18N::get("uiBotChatRetirePrice") + NLMISC::formatThousands(toString(factor * LastPriceRetire));
 							// set resale time left
-							std::string	fmt= CI18N::get("uiBotChatResaleTimeLeft").toUtf8();
+							std::string	fmt= CI18N::get("uiBotChatResaleTimeLeft");
 							strFindReplace(fmt, "%d", toString(LastResaleTimeLeft/RYZOM_DAY_IN_HOUR));
 							strFindReplace(fmt, "%h", toString(LastResaleTimeLeft%RYZOM_DAY_IN_HOUR));
 							text+= "\n" + fmt;
 							// force special color (according if retirable or not)
 							if(LastSellerType == BOTCHATTYPE::UserRetirable || LastSellerType == BOTCHATTYPE::ResaleAndUserRetirable)
-								colorTag= CI18N::get("uiItemUserSellColor").toUtf8();
+								colorTag= CI18N::get("uiItemUserSellColor");
 							else
-								colorTag= CI18N::get("uiItemUserSellColorNotRetirable").toUtf8();
+								colorTag= CI18N::get("uiItemUserSellColorNotRetirable");
 						}
 
 						// Append (NPC) tag if NPC item
 						if(LastSellerType == BOTCHATTYPE::NPC)
 						{
-							text+= "\n" + CI18N::get("uiBotChatNPCTag").toUtf8();
+							text+= "\n" + CI18N::get("uiBotChatNPCTag");
 						}
 						// else display the name of the vendor (not if this is the player himself, to avoid flood)
 						else if (LastSellerType == BOTCHATTYPE::Resale)
 						{
-							text+= "\n" + CI18N::get("uiBotChatVendorTag").toUtf8() + VendorNameString.toUtf8();
+							text+= "\n" + CI18N::get("uiBotChatVendorTag") + VendorNameString.toUtf8();
 						}
 					}
 				}
@@ -441,14 +441,14 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 					if(zeFather->sellerTypeWanted() &&
 						(LastSellerType == BOTCHATTYPE::User || LastSellerType == BOTCHATTYPE::UserRetirable) )
 					{
-						text+= "\n" + CI18N::get("uiItemSold").toUtf8();
+						text+= "\n" + CI18N::get("uiItemSold");
 						// force special color
-						colorTag= CI18N::get("uiItemSoldColor").toUtf8();
+						colorTag= CI18N::get("uiItemSoldColor");
 					}
 					// error case
 					else
 					{
-						text+= "\n" + CI18N::get("uiPriceNotReceived").toUtf8();
+						text+= "\n" + CI18N::get("uiPriceNotReceived");
 					}
 				}
 			}

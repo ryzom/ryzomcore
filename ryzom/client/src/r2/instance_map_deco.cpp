@@ -44,7 +44,7 @@ void CInstanceMapDeco::CCtrlButtonEntity::getContextHelp(std::string &help) cons
 {
 	//H_AUTO(R2_CCtrlButtonEntity_getContextHelp)
 	help = _Instance.getDisplayName().toUtf8();
-	if (help == NLMISC::CI18N::get("uiR2EDNoName").toUtf8())
+	if (help == NLMISC::CI18N::get("uiR2EDNoName"))
 		help.clear();
 }
 

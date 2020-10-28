@@ -529,7 +529,7 @@ string getDebugInformation()
 	str += toString("ServerTick: %u\n", NetMngr.getCurrentServerTick());
 	str += toString("ConnectState: %s\n", NetMngr.getConnectionStateCStr());
 	str += toString("LocalAddress: %s\n", NetMngr.getAddress().asString().c_str());
-	str += toString("Language: %s\n", CI18N::getCurrentLanguageName().toString().c_str());
+	str += toString("Language: %s\n", CI18N::getCurrentLanguageName().c_str());
 	str += toString("ClientVersion: %s\n", getDebugVersion().c_str());
 	if (ClientCfg.R2Mode)
 	{
