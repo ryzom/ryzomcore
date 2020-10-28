@@ -148,10 +148,10 @@ namespace NLGUI
 		switch (mode)
 		{
 		case CaseLower:
-			str = NLMISC::toLower(str);
+			str = NLMISC::toLowerAsUtf8(str);
 			break;
 		case CaseUpper:
-			str = NLMISC::toUpper(str);
+			str = NLMISC::toUpperAsUtf8(str);
 			break;
 		case CaseFirstStringLetterUp:
 		{

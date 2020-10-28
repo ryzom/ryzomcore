@@ -1950,7 +1950,7 @@ ucchar		toLower (ucchar c)
 
 // ***************************************************************************
 
-static std::string toLower(CUtfStringView sv)
+static std::string toLowerAsUtf8(CUtfStringView sv)
 {
 	std::string res;
 	res.reserve(sv.largestSize());
@@ -1962,23 +1962,23 @@ static std::string toLower(CUtfStringView sv)
 			ucchar uc = c;
 			ucchar *result = toLowerUpperSearch(&uc, UnicodeUpperToLower);
 			if (result)
-				c = uc;
+				c = result[1];
 		}
 		CUtfStringView::append(res, c);
 	}
 	return res;
 }
 
-std::string toLower(const char *str)
+std::string toLowerAsUtf8(const char *str)
 {
-	return toLower(CUtfStringView(str));
+	return toLowerAsUtf8(CUtfStringView(str));
 }
 
 // ***************************************************************************
 
-std::string	toLower(const std::string &str)
+std::string	toLowerAsUtf8(const std::string &str)
 {
-	return toLower(CUtfStringView(str));
+	return toLowerAsUtf8(CUtfStringView(str));
 }
 
 // ***************************************************************************
@@ -2025,7 +2025,7 @@ ucchar		toUpper (ucchar c)
 
 // ***************************************************************************
 
-static std::string toUpper(CUtfStringView sv)
+static std::string toUpperAsUtf8(CUtfStringView sv)
 {
 	std::string res;
 	res.reserve(sv.largestSize());
@@ -2037,23 +2037,23 @@ static std::string toUpper(CUtfStringView sv)
 			ucchar uc = c;
 			ucchar *result = toLowerUpperSearch(&uc, UnicodeLowerToUpper);
 			if (result)
-				c = uc;
+				c = result[1];
 		}
 		CUtfStringView::append(res, c);
 	}
 	return res;
 }
 
-std::string toUpper(const char *str)
+std::string toUpperAsUtf8(const char *str)
 {
-	return toUpper(CUtfStringView(str));
+	return toUpperAsUtf8(CUtfStringView(str));
 }
 
 // ***************************************************************************
 
-std::string	toUpper(const std::string &str)
+std::string	toUpperAsUtf8(const std::string &str)
 {
-	return toUpper(CUtfStringView(str));
+	return toUpperAsUtf8(CUtfStringView(str));
 }
 
 // ***************************************************************************

@@ -260,6 +260,12 @@ ucstring toUpper(const ucstring &str);
 void toUpper(ucchar *str);
 ucchar toUpper(ucchar c);
 
+std::string toLowerAsUtf8(const char *str);
+std::string	toLowerAsUtf8(const std::string &str);
+
+std::string toUpperAsUtf8(const char *str);
+std::string	toUpperAsUtf8(const std::string &str);
+
 };
 
 #endif // NL_UCSTRING_H

@@ -594,7 +594,6 @@ NLMISC_CATEGORISED_COMMAND(nel,stohr, "Convert a second number into an human rea
 	return true;
 }
 
-/*
 std::string toLower(const char *str)
 {
 	if (!str) return "";
@@ -625,7 +624,6 @@ std::string	toLower(const std::string &str)
 	}
 	return res;
 }
-*/
 
 char toLower(const char ch)
 {
@@ -654,7 +652,6 @@ void toLower(char *str)
 	}
 }
 
-/*
 std::string toUpper(const std::string &str)
 {
 	string res;
@@ -668,7 +665,6 @@ std::string toUpper(const std::string &str)
 	}
 	return res;
 }
-*/
 
 void toUpper(char *str)
 {
