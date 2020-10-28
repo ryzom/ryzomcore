@@ -250,7 +250,7 @@ namespace NLGUI
 
 				if (vLink->getMouseOverShape(tooltip, rot, col))
 				{
-					setString(ucstring::makeFromUtf8(tooltip));
+					setString(tooltip);
 					sint32 texId = rVR.getTextureIdFromName ("curs_pick.tga");
 
 					CInterfaceGroup *stringCursor = hwMouse ? _StringCursorHardware : _StringCursor;
@@ -406,7 +406,7 @@ namespace NLGUI
 				splitString(tooltipInfos, "@", tooltipInfosList);
 				texName = tooltipInfosList[0];
 				tooltip = tooltipInfosList[1];
-				setString(ucstring::makeFromUtf8(tooltip));
+				setString(tooltip);
 				CViewRenderer &rVR = *CViewRenderer::getInstance();
 				sint32 texId = rVR.getTextureIdFromName (texName);
 
@@ -449,7 +449,7 @@ namespace NLGUI
 	}
 
 	// --------------------------------------------------------------------------------------------------------------------
-	void CViewPointer::setString (const ucstring &str, CInterfaceGroup *target)
+	void CViewPointer::setString(const std::string &str, CInterfaceGroup *target)
 	{
 		if (target)
 		{
@@ -458,14 +458,14 @@ namespace NLGUI
 			{
 				CViewText *text = dynamic_cast<CViewText*> (element);
 				if (text)
-					text->setText(str.toUtf8());
+					text->setText(str);
 			}
 			element = target->getView ("real_txt");
 			if (element)
 			{
 				CViewText *text = dynamic_cast<CViewText*> (element);
 				if (text)
-					text->setText(str.toUtf8());
+					text->setText(str);
 			}
 			target->updateCoords();
 			target->updateCoords();
@@ -475,7 +475,7 @@ namespace NLGUI
 
 
 	// --------------------------------------------------------------------------------------------------------------------
-	void CViewPointer::setString (const ucstring &str)
+	void CViewPointer::setString (const std::string &str)
 	{
 		if (_ContextString != str)
 		{

@@ -309,7 +309,7 @@ namespace NLGUI
 				if (NLMISC::startsWith(ptrName, "ui"))
 					Text = CI18N::get(ptrName);
 				else
-					ucstring::makeFromUtf8(ptrName);
+					Text = ptrName;
 			}
 
 			CXMLAutoPtr color((const char*) xmlGetProp (cur,   (xmlChar*)"color"));
@@ -1292,7 +1292,7 @@ namespace NLGUI
 				CViewText *pVT = new CViewText(TCtorParam());
 				line.TextOrTemplate = pVT;
 				pVT->setId("t"+toString(_Lines.size()));
-				pVT->setText(pNode->Text.toUtf8());
+				pVT->setText(pNode->Text);
 				pVT->setColor(pNode->Color);
 				if(pNode->FontSize==-1)
 					pVT->setFontSize(_FontSize);

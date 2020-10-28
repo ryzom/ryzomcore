@@ -205,7 +205,7 @@ void CEncyclopediaManager::rebuildAlbumList()
 		if (_Albums[i].Name == _AlbumNameSelected)
 			pAlb->Opened = true;
 		if (pSMC->getDynString(_Albums[i].Name, res))
-			pAlb->Text = res;
+			pAlb->Text = res.toUtf8();
 		else
 			nlwarning("try to construct album without name");
 
@@ -217,7 +217,7 @@ void CEncyclopediaManager::rebuildAlbumList()
 			pThm->AHName = "ency_click_thema";
 			pThm->AHParams = toString(_Albums[i].Themas[j].Name);
 			if (pSMC->getDynString(_Albums[i].Themas[j].Name, res))
-				pThm->Text = res;
+				pThm->Text = res.toUtf8();
 			else
 				nlwarning("try to construct thema without name");
 

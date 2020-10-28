@@ -465,7 +465,7 @@ namespace NLGUI
 		void	addDontClipWordLine(std::vector<CWord> &currLine);
 
 		// FormatTag build.
-		static void		buildFormatTagText(const std::string &text, std::string &textBuild, std::vector<CFormatTag> &formatTags, std::vector<ucstring> &tooltips);
+		static void		buildFormatTagText(const std::string &text, std::string &textBuild, std::vector<CFormatTag> &formatTags, std::vector<std::string> &tooltips);
 		// FormatTag parsing.
 		bool			isFormatTagChange(uint textIndex, uint ctIndex) const;
 		void			getFormatTagChange(uint textIndex, uint &ctIndex, CFormatInfo &wordFormat) const;

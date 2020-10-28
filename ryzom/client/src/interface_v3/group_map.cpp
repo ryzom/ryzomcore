@@ -3811,7 +3811,7 @@ void CGroupMap::updateClosestLandMarkMenu(const std::string &menu, const NLMISC:
 		std::string lineId = toString("%s:lmcosest%d", menu.c_str(), i);
 		std::string ahParams = toString("type=user|map=%s|index=%d", _Id.c_str(), index);
 
-		CViewTextMenu* vt = rootMenu->addLine(ucstring(""), "map_landmark_by_index", ahParams, lineId.c_str(), "", "", false, false, false);
+		CViewTextMenu* vt = rootMenu->addLine(std::string(), "map_landmark_by_index", ahParams, lineId.c_str(), "", "", false, false, false);
 		if (!vt) break;
 
 		vt->setSingleLineTextFormatTaged(name.toUtf8());

@@ -56,7 +56,7 @@ CViewText *CDBGroupListSheetMission::CSheetChildMission::createViewText() const
 	CViewTextIDFormated *vti = new CViewTextIDFormated(CViewBase::TCtorParam());
 	if (Ctrl) vti->setDBLeaf(dynamic_cast<CCDBNodeLeaf *>(Ctrl->getRootBranch()->getNode(ICDBNode::CTextId("TEXT"))));
 	else vti->setDBLeaf(NULL);
-	vti->setFormatString(ucstring("$t"));
+	vti->setFormatString("$t");
 	return vti;
 }
 

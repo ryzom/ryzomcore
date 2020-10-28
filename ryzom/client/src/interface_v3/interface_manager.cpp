@@ -324,12 +324,12 @@ class CStringManagerTextProvider : public CViewTextID::IViewTextProvider
 class CRyzomTextFormatter : public CViewTextFormated::IViewTextFormatter
 {
 public:
-	ucstring formatString( const ucstring &inputString, const ucstring &paramString )
+	std::string formatString( const std::string &inputString, const std::string &paramString )
 	{
-		ucstring formatedResult;
+		std::string formatedResult;
 
 		// Apply the format
-		for(ucstring::const_iterator it = inputString.begin(); it != inputString.end();)
+		for(std::string::const_iterator it = inputString.begin(); it != inputString.end();)
 		{
 			if (*it == '$')
 			{
@@ -347,13 +347,14 @@ public:
 				case 'p':  // add player name
 					if (ClientCfg.Local)
 					{
-						formatedResult += ucstring("player");
+						if (*it == 'P') formatedResult += "PLAYER";
+						else formatedResult += "Player";
 					}
 					else
 					{
 						if(UserEntity)
 						{
-							ucstring name = UserEntity->getEntityName();
+							std::string name = UserEntity->getEntityName().toUtf8();
 							if (*it == 'P') name = toUpper(name);
 							formatedResult += name;
 						}
@@ -363,11 +364,11 @@ public:
 				case 's':
 				case 'b': // add bot name
 					{
-						ucstring botName;
+						string botName;
 						bool womanTitle = false;
 						if (ClientCfg.Local)
 						{
-							botName = ucstring("NPC");
+							botName = "NPC";
 						}
 						else
 						{
@@ -387,7 +388,7 @@ public:
 									}
 									else
 									{
-										botName = entity->getDisplayName();
+										botName = entity->getDisplayName().toUtf8();
 									}
 									CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(entity);
 									if (pChar != NULL)
@@ -396,40 +397,40 @@ public:
 							}
 						}
 						// get the title translated
-						ucstring sTitleTranslated = botName;
+						ucstring sTitleTranslated = botName; // FIXME: UTF-8
 						CStringPostProcessRemoveName spprn;
 						spprn.Woman = womanTitle;
 						spprn.cbIDStringReceived(sTitleTranslated);
 
-						botName = CEntityCL::removeTitleAndShardFromName(botName);
+						botName = CEntityCL::removeTitleAndShardFromName(botName).toUtf8();
 
 						// short name (with no title such as 'guard', 'merchant' ...)
 						if (*it == 's')
 						{
 							// But if there is no name, display only the title
 							if (botName.empty())
-								botName = sTitleTranslated;
+								botName = sTitleTranslated.toUtf8();
 						}
 						else
 						{
 							// Else we want the title !
 							if (!botName.empty())
 								botName += " ";
-							botName += sTitleTranslated;
+							botName += sTitleTranslated.toUtf8();
 						}
 
 						formatedResult += botName;
 					}
 					break;
 					default:
-						formatedResult += (ucchar) '$';
+						formatedResult += '$';
 					break;
 				}
 				++it;
 			}
 			else
 			{
-				formatedResult += (ucchar) *it;
+				formatedResult += *it;
 				++it;
 			}
 		}
@@ -2302,7 +2303,7 @@ void CInterfaceManager::addServerString (const std::string &sTarget, uint32 id, 
 	if (id == 0)
 	{
 		CInterfaceExprValue val;
-		val.setUCString (ucstring(""));
+		val.setString (std::string());
 		CInterfaceLink::setTargetProperty (sTarget, val);
 		return;
 	}
@@ -2320,7 +2321,7 @@ void CInterfaceManager::addServerID (const std::string &sTarget, uint32 id, IStr
 	if (id == 0)
 	{
 		CInterfaceExprValue val;
-		val.setUCString (ucstring(""));
+		val.setString (std::string());
 		CInterfaceLink::setTargetProperty (sTarget, val);
 		return;
 	}
@@ -2367,7 +2368,7 @@ void CInterfaceManager::processServerIDString()
 			if (bValid)
 			{
 				ucstrToAffect = STRING_MANAGER::CStringManagerClient::getLocalizedName(ucstrToAffect);
-				val.setUCString (ucstrToAffect);
+				val.setString (ucstrToAffect.toUtf8());
 				CInterfaceLink::setTargetProperty (pISW->Target, val);
 			}
 
@@ -3336,7 +3337,7 @@ void CInterfaceManager::initEmotes()
 					translateEmote(sTmp, sTranslatedName, sCommandName, sCommandNameAlt);
 
 					// Create a line
-					pMenu->addLine (sTranslatedName + " (/" + ucstring::makeFromUtf8(sCommandName) + ")", "emote",
+					pMenu->addLine (sTranslatedName.toUtf8() + " (/" + sCommandName + ")", "emote",
 						"nb="+toString(nEmoteNb)+"|behav="+toString(nBehav), sTmp);
 				}
 			}
@@ -3392,7 +3393,7 @@ void CInterfaceManager::initEmotes()
 					{
 						// Yeah that's a quick emote too; set command
 						pMenu->addLineAtIndex (i,
-								"@{FFFF}/" + ucstring::makeFromUtf8(sCommandName),
+								"@{FFFF}/" + sCommandName,
 								"emote", "nb="+toString(nEmoteNb)+"|behav="+toString(nBehav),
 								"", "", "", false, false, true);
 

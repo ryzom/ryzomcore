@@ -3207,7 +3207,7 @@ namespace NLGUI
 
 
 	// ***************************************************************************
-	void		CViewText::buildFormatTagText(const std::string &text, std::string &textBuild, std::vector<CViewText::CFormatTag> &formatTags, std::vector<ucstring> &tooltips)
+	void		CViewText::buildFormatTagText(const std::string &text, std::string &textBuild, std::vector<CViewText::CFormatTag> &formatTags, std::vector<std::string> &tooltips)
 	{
 		formatTags.clear();
 		tooltips.clear();
@@ -3243,7 +3243,7 @@ namespace NLGUI
 				// get old tag.
 				CViewText::CFormatTag ct= precTag;
 				// get new Tab and skip tag.
-				ucstring uitt = getTooltipTag(text, i);
+				string uitt = getTooltipTag(text, i);
 				if (uitt.empty())
 				{
 					ct.IndexTt= -1;
@@ -3296,7 +3296,7 @@ namespace NLGUI
 		std::string							tempText;
 		// static to avoid reallocation
 		static std::vector<CFormatTag>		tempFormatTags;
-		static std::vector<ucstring>		tempTooltips;
+		static std::vector<std::string>		tempTooltips;
 		buildFormatTagText(text, tempText, tempFormatTags, tempTooltips);
 		setCase (tempText, _CaseMode);
 
@@ -3344,7 +3344,7 @@ namespace NLGUI
 				pTooltip->setId(_Id+"_tt"+toString(i));
 				pTooltip->setAvoidResizeParent(avoidResizeParent());
 				pTooltip->setRenderLayer(getRenderLayer());
-				std::string tempTooltipStr = tempTooltips[i].toUtf8();
+				std::string tempTooltipStr = tempTooltips[i];
 				bool isI18N = NLMISC::startsWith(tempTooltipStr, "ui");
 				pTooltip->setDefaultContextHelp(isI18N ? CI18N::get(tempTooltipStr) : tempTooltipStr);
 				pTooltip->setParentPos(this);
@@ -3390,7 +3390,7 @@ namespace NLGUI
 		// to allow cache (avoid infinite recurse in updateCoords() in some case), compute in temp
 		std::string							tempText;
 		static std::vector<CFormatTag>		tempLetterColors;
-		static std::vector<ucstring>		tempTooltips;
+		static std::vector<std::string>		tempTooltips;
 
 		// parse text
 		buildFormatTagText(text, tempText, tempLetterColors, tempTooltips);

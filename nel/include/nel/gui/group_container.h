@@ -477,8 +477,8 @@ namespace NLGUI
 		float				_CurrentRolloverAlphaContainer;
 		float				_CurrentRolloverAlphaContent;
 		sint32				_LayerSetup;
-		ucstring			_TitleTextOpened;
-		ucstring			_TitleTextClosed;
+		std::string			_TitleTextOpened;
+		std::string			_TitleTextClosed;
 		CViewText			*_TitleOpened;
 		CViewText			*_TitleClosed;
 		sint32				_TitleDeltaMaxW;

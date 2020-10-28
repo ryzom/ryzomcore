@@ -204,7 +204,7 @@ namespace NLGUI
 		if (!_Initialized)
 		{
 			// String result
-			ucstring result;
+			string result;
 
 			if( textProvider != NULL )
 			{
@@ -218,8 +218,8 @@ namespace NLGUI
 			// Remove all {break}
 			for(;;)
 			{
-				ucstring::size_type index = result.find (ucstring("{break}"));
-				if (index == ucstring::npos) break;
+				string::size_type index = result.find("{break}");
+				if (index == string::npos) break;
 				result = result.substr (0, index) + result.substr(index+7, result.size());
 			}
 
@@ -229,13 +229,13 @@ namespace NLGUI
 
 			// Modify the text?
 			if(_StringModifier)
-				_StringModifier->onReceiveTextId(result);
+				_StringModifier->onReceiveTextId(ucstring::makeFromUtf8(result));
 
 			// Set the Text
 			if(_IsTextFormatTaged)
-				setTextFormatTaged(result.toUtf8());
+				setTextFormatTaged(result);
 			else
-				setText (result.toUtf8());
+				setText(result);
 		}
 		CViewText::checkCoords();
 	}

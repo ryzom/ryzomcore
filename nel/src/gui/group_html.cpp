@@ -2755,11 +2755,11 @@ namespace NLGUI
 
 	void CGroupHTML::addString(const ucstring &str)
 	{
-		ucstring tmpStr = str;
+		string tmpStr = str.toUtf8();
 
 		if (_Localize)
 		{
-			string	_str = tmpStr.toString();
+			string	_str = tmpStr;
 			string::size_type	p = _str.find('#');
 			if (p == string::npos)
 			{
@@ -2800,7 +2800,7 @@ namespace NLGUI
 		}
 		else if (_Object)
 		{
-			_ObjectScript += tmpStr.toString();
+			_ObjectScript += tmpStr;
 		}
 		else if (_SelectOption)
 		{
@@ -2853,7 +2853,7 @@ namespace NLGUI
 					(style.GlobalColor == _CurrentViewLink->getModulateGlobalColor()))
 				{
 					// Concat the text
-					_CurrentViewLink->setText(_CurrentViewLink->getText()+tmpStr.toUtf8());
+					_CurrentViewLink->setText(_CurrentViewLink->getText()+tmpStr);
 					_CurrentViewLink->invalidateContent();
 					added = true;
 				}
@@ -2916,7 +2916,7 @@ namespace NLGUI
 							newLink->setParamsOnLeftClick("name=" + getId() + "|url=" + newLink->Link);
 						}
 					}
-					newLink->setText(tmpStr.toUtf8());
+					newLink->setText(tmpStr);
 					newLink->setMultiLineSpace((uint)((float)(style.FontSize)*LineSpaceFontFactor));
 					newLink->setMultiLine(true);
 					newLink->setModulateGlobalColor(style.GlobalColor);
@@ -5475,7 +5475,7 @@ namespace NLGUI
 					}
 				}
 
-				ctrlButton->setText(ucstring::makeFromUtf8(value));
+				ctrlButton->setText(value);
 
 				setTextButtonStyle(ctrlButton, _Style.Current);
 			}
@@ -6449,7 +6449,7 @@ namespace NLGUI
 			if (sb)
 			{
 				uint lineIndex = sb->getNumLine();
-				sb->addLine(_SelectOptionStr, "", "");
+				sb->addLine(_SelectOptionStr.toUtf8(), "", "");
 
 				if (_Forms.back().Entries.back().sbOptionDisabled == lineIndex)
 				{

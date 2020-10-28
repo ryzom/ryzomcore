@@ -668,7 +668,7 @@ namespace NLGUI
 				{
 					checkable = true;
 				}
-				groupMenu->addLine(ucstring::makeFromUtf8(getText(i)), "combo_box_select_end", toString(i),
+				groupMenu->addLine(getText(i), "combo_box_select_end", toString(i),
 					"", std::string(), getTexture(i), checkable);
 				groupMenu->setGrayedLine(i, getGrayed(i));
 			}

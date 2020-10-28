@@ -1338,19 +1338,19 @@ namespace NLGUI
 		if( name == "title" )
 		{
 			if( _TitleTextOpened == _TitleTextClosed )
-				return _TitleTextOpened.toString();
+				return _TitleTextOpened;
 			else
 				return "";
 		}
 		else
 		if( name == "title_opened" )
 		{
-			return _TitleTextOpened.toString();
+			return _TitleTextOpened;
 		}
 		else
 		if( name == "title_closed" )
 		{
-			return _TitleTextClosed.toString();
+			return _TitleTextClosed;
 		}
 		else
 		if( name == "header_active" )
@@ -1997,12 +1997,12 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "content_y_offset", BAD_CAST toString( _ContentYOffset ).c_str() );
 		
 		if( _TitleTextOpened == _TitleTextClosed )
-			xmlSetProp( node, BAD_CAST "title", BAD_CAST _TitleTextOpened.toString().c_str() );
+			xmlSetProp( node, BAD_CAST "title", BAD_CAST _TitleTextOpened.c_str() );
 		else
 			xmlSetProp( node, BAD_CAST "title", BAD_CAST "" );
 
-		xmlSetProp( node, BAD_CAST "title_opened", BAD_CAST _TitleTextOpened.toString().c_str() );
-		xmlSetProp( node, BAD_CAST "title_closed", BAD_CAST _TitleTextClosed.toString().c_str() );
+		xmlSetProp( node, BAD_CAST "title_opened", BAD_CAST _TitleTextOpened.c_str() );
+		xmlSetProp( node, BAD_CAST "title_closed", BAD_CAST _TitleTextClosed.c_str() );
 		xmlSetProp( node, BAD_CAST "header_active", BAD_CAST toString( _HeaderActive ).c_str() );
 
 		if( _HeaderColor.getNodePtr() != NULL )
@@ -3712,7 +3712,7 @@ namespace NLGUI
 					{
 						CViewTextID	*vti= new CViewTextID(CViewBase::TCtorParam());
 						// the title here is actually the DB path
-						vti->setDBTextID(_TitleTextOpened.toString());
+						vti->setDBTextID(_TitleTextOpened);
 						vti->setDynamicString(_TitleClass==TitleTextDynString);
 						_TitleOpened = vti;
 					}
@@ -3744,7 +3744,7 @@ namespace NLGUI
 			_TitleOpened->setY (pLayer->getValSInt32 ("title_offset_y"));
 		}
 		_TitleOpened->setFontSize (pLayer->getValSInt32 ("title_font_size"));
-		if (_TitleClass==TitleText) _TitleOpened->setText (_TitleTextOpened.toUtf8());
+		if (_TitleClass==TitleText) _TitleOpened->setText (_TitleTextOpened);
 		_TitleOpened->setActive (_Opened);
 
 		// Title when the container is closed
@@ -3764,7 +3764,7 @@ namespace NLGUI
 					{
 						CViewTextID	*vti= new CViewTextID(CViewBase::TCtorParam());
 						// the title here is actually the DB path
-						vti->setDBTextID(_TitleTextClosed.toString());
+						vti->setDBTextID(_TitleTextClosed);
 						vti->setDynamicString(_TitleClass==TitleTextDynString);
 						_TitleClosed = vti;
 					}
@@ -3796,7 +3796,7 @@ namespace NLGUI
 			_TitleClosed->setY (pLayer->getValSInt32 ("title_offset_y"));
 		}
 		_TitleClosed->setFontSize (pLayer->getValSInt32 ("title_font_size"));
-		if (_TitleClass==TitleText) _TitleClosed->setText (_TitleTextClosed.toUtf8());
+		if (_TitleClass==TitleText) _TitleClosed->setText (_TitleTextClosed);
 		_TitleClosed->setActive(!_Opened);
 
 
@@ -3949,7 +3949,7 @@ namespace NLGUI
 	// ***************************************************************************
 	std::string		CGroupContainer::getTitle () const
 	{
-		return _TitleTextOpened.toString();
+		return _TitleTextOpened;
 	}
 
 	// ***************************************************************************
@@ -3962,7 +3962,7 @@ namespace NLGUI
 	// ***************************************************************************
 	std::string		CGroupContainer::getTitleOpened () const
 	{
-		return _TitleTextOpened.toString();
+		return _TitleTextOpened;
 	}
 
 	// ***************************************************************************
@@ -3975,7 +3975,7 @@ namespace NLGUI
 	// ***************************************************************************
 	std::string		CGroupContainer::getTitleClosed () const
 	{
-		return _TitleTextClosed.toString();
+		return _TitleTextClosed;
 	}
 
 	// ***************************************************************************
@@ -3988,7 +3988,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupContainer::setUCTitleOpened(const ucstring &title)
 	{
-		_TitleTextOpened = title;
+		_TitleTextOpened = title.toUtf8();
 		if (_TitleOpened != NULL)
 			_TitleOpened->setText (title.toUtf8());
 		invalidateCoords();
@@ -3997,9 +3997,9 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupContainer::setUCTitleClosed(const ucstring &title)
 	{
-		_TitleTextClosed = title;
+		_TitleTextClosed = title.toUtf8();
 		if (_TitleClosed != NULL)
-			_TitleClosed->setText (_TitleTextClosed.toUtf8());
+			_TitleClosed->setText (_TitleTextClosed);
 		invalidateCoords();
 	}
 

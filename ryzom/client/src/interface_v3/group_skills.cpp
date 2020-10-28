@@ -245,11 +245,11 @@ static DECLARE_INTERFACE_USER_FCT(getSkillBaseText)
 
 	if(skillValue!=skillBase)
 	{
-		result.setUCString( toString("(%d)", skillBase) );
+		result.setString( toString("(%d)", skillBase) );
 	}
 	else
 	{
-		result.setUCString( ucstring() );
+		result.setString( std::string() );
 	}
 
 	return true;
@@ -335,7 +335,7 @@ void CGroupSkills::createAllTreeNodes()
 
 	// local variable (avoid realloc in loop)
 	vector< pair<string, string> > tempVec(2);
-	ucstring	sSkillName;
+	string	sSkillName;
 
 	while ((!bQuit) && (nCounter < 32)) // Counter is used to not infinitly loop
 	{
@@ -365,7 +365,7 @@ void CGroupSkills::createAllTreeNodes()
 			pNode->Id = NLMISC::toString(i);
 
 			// get Skill Name
-			sSkillName = STRING_MANAGER::CStringManagerClient::getSkillLocalizedName((SKILLS::ESkills)i);
+			sSkillName = CUtfStringView(STRING_MANAGER::CStringManagerClient::getSkillLocalizedName((SKILLS::ESkills)i)).toUtf8();
 
 			// just text or template?
 			if(_TemplateSkill.empty())
@@ -387,7 +387,7 @@ void CGroupSkills::createAllTreeNodes()
 				// Set Skill Name
 				CViewText *pViewSkillName = dynamic_cast<CViewText*>(pIG->getView("name"));
 				if (pViewSkillName != NULL)
-					pViewSkillName->setText (sSkillName.toUtf8());
+					pViewSkillName->setText (sSkillName);
 				// Set Skill Max Value
 				CViewText *pViewSkillMax = dynamic_cast<CViewText*>(pIG->getView("max"));
 				if (pViewSkillMax != NULL)

@@ -1145,34 +1145,8 @@ namespace NLGUI
 				ls.push(value.getDouble());
 				break;
 			case CInterfaceExprValue::String:
-				{
-					ucstring	ucstr= value.getUCString();
-					// Yoyo: dynamically decide whether must return a string or a ucstring
-					bool	mustUseUCString= false;
-					for (uint i = 0; i < ucstr.size (); i++)
-					{
-						if (ucstr[i] > 255)
-						{
-							mustUseUCString= true;
-							break;
-						}
-					}
-					// push a ucstring?
-					if(mustUseUCString)
-					{
-	#if LUABIND_VERSION > 600
-						luabind::detail::push(ls.getStatePointer(), ucstr);
-	#else
-						luabind::object obj(ls.getStatePointer(), ucstr);
-						obj.pushvalue();
-	#endif
-					}
-					else
-					{
-						ls.push(ucstr.toString());
-					}
-					break;
-				}
+				ls.push(value.getString());
+				break;
 			case CInterfaceExprValue::RGBA:
 				{
 					CRGBA color = value.getRGBA();

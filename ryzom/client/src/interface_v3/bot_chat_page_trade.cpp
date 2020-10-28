@@ -2575,11 +2575,11 @@ static DECLARE_INTERFACE_USER_FCT(getPriceWithFame)
 	sint	value= (sint)args[0].getInteger();
 	sint	valueFame= (sint)args[1].getInteger();
 	if(value==-1)
-		result.setUCString(CI18N::get("uiBadPrice"));
+		result.setString(CI18N::get("uiBadPrice"));
 	else if(value==valueFame)
-		result.setUCString(NLMISC::formatThousands(toString(value)));
+		result.setString(NLMISC::formatThousands(toString(value)));
 	else
-		result.setUCString(NLMISC::formatThousands(toString(valueFame)) + " (" + NLMISC::formatThousands(toString(value)) + ")");
+		result.setString(NLMISC::formatThousands(toString(valueFame)) + " (" + NLMISC::formatThousands(toString(value)) + ")");
 
 	return true;
 }
@@ -2595,7 +2595,7 @@ static DECLARE_INTERFACE_USER_FCT(getBonusOnResale)
 	sint	valueHigh= (sint)args[0].getInteger();
 	sint	valueLow= (sint)args[1].getInteger();
 	sint	diff = valueHigh - valueLow;
-	result.setUCString("+" + NLMISC::formatThousands(toString(diff)));
+	result.setString("+" + NLMISC::formatThousands(toString(diff)));
 
 	return true;
 }

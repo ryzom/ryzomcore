@@ -1350,7 +1350,7 @@ void setTarget(CCtrlBase *ctrl, const string &targetName, ucstring &value)
 	if (ig)
 	{
 		CInterfaceExprValue exprValue;
-		exprValue.setUCString(value);
+		exprValue.setString(value.toUtf8());
 
 		CInterfaceLink::splitLinkTargets(targetName, ig, targets);
 		for(uint k = 0; k < targets.size(); ++k)

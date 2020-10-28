@@ -269,7 +269,7 @@ static DECLARE_INTERFACE_USER_FCT(lua)
 
 		if (CLuaIHM::pop(ls, ucstrVal))
 		{
-			result.setUCString(ucstrVal);
+			result.setString(ucstrVal.toUtf8());
 			ok = true;
 		}
 

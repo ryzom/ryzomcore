@@ -312,16 +312,16 @@ static DECLARE_INTERFACE_USER_FCT(getSheetName)
 	// if from ctrlSheet, then take the correct ACTUAL name (ie from NAMEID if not 0)
 	if(ctrlSheet)
 	{
-		result.setUCString(ctrlSheet->getItemActualName());
+		result.setString(ctrlSheet->getItemActualName().toUtf8());
 		return true;
 	}
 	// Standard (but less accurate) way
 	else
 	{
 		const CItemSheet *itemSheet = getItemSheet(args);
-		ucstring tmp;
-		if (itemSheet != NULL) tmp = STRING_MANAGER::CStringManagerClient::getItemLocalizedName(itemSheet->Id);
-		result.setUCString(tmp);
+		string tmp;
+		if (itemSheet != NULL) tmp = CUtfStringView(STRING_MANAGER::CStringManagerClient::getItemLocalizedName(itemSheet->Id)).toUtf8();
+		result.setString(tmp);
 		return true;
 	}
 }
@@ -345,9 +345,9 @@ static DECLARE_INTERFACE_USER_FCT(getItemTranslatedName)
 		return false;
 	}
 
-	ucstring tmp;
-	tmp = STRING_MANAGER::CStringManagerClient::getItemLocalizedName(sheet);
-	result.setUCString(tmp);
+	string tmp;
+	tmp = CUtfStringView(STRING_MANAGER::CStringManagerClient::getItemLocalizedName(sheet)).toUtf8();
+	result.setString(tmp);
 	return true;
 }
 REGISTER_INTERFACE_USER_FCT("getItemTranslatedName", getItemTranslatedName)

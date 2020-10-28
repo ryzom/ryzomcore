@@ -1041,14 +1041,29 @@ namespace NLGUI
 
 
 	// ***************************************************************************
-	void CCtrlTextButton::setText (const ucstring &text)
+	void CCtrlTextButton::setText (const std::string &text)
+	{
+		if (_ViewText && !_IsViewTextId)
+			_ViewText->setText(text);
+	}
+
+	// ***************************************************************************
+	std::string CCtrlTextButton::getText () const
+	{
+		if (_ViewText && !_IsViewTextId)
+			return _ViewText->getText();
+		return std::string();
+	}
+
+	// ***************************************************************************
+	void CCtrlTextButton::setTextAsUtf16 (const ucstring &text)
 	{
 		if (_ViewText && !_IsViewTextId)
 			_ViewText->setText(text.toUtf8());
 	}
 
 	// ***************************************************************************
-	ucstring CCtrlTextButton::getText () const
+	ucstring CCtrlTextButton::getTextAsUtf16 () const
 	{
 		if (_ViewText && !_IsViewTextId)
 			return CUtfStringView(_ViewText->getText()).toUtf16();
