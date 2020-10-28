@@ -387,7 +387,7 @@ void CGroupSkills::createAllTreeNodes()
 				// Set Skill Name
 				CViewText *pViewSkillName = dynamic_cast<CViewText*>(pIG->getView("name"));
 				if (pViewSkillName != NULL)
-					pViewSkillName->setText (sSkillName);
+					pViewSkillName->setText (sSkillName.toUtf8());
 				// Set Skill Max Value
 				CViewText *pViewSkillMax = dynamic_cast<CViewText*>(pIG->getView("max"));
 				if (pViewSkillMax != NULL)

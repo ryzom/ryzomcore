@@ -48,7 +48,7 @@ void CDBGroupListSheetTextPhraseId::CSheetChildPhrase::updateViewText(CDBGroupLi
 	// Get the User Name of the phrase
 	Ctrl->getContextHelp(text);
 
-	Text->setText(text);
+	Text->setText(text.toUtf8());
 }
 
 // ***************************************************************************

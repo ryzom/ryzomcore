@@ -236,15 +236,15 @@ namespace NLGUI
 			// change selected text
 			if(_CacheSelection<0 || _CacheSelection>=(sint32)_Texts.size() )
 			{
-				_ViewText->setText(ucstring());
+				_ViewText->setText(std::string());
 			}
 			else if(_IsExternViewText)
 			{
-				_ViewText->setText(_ExternViewText);
+				_ViewText->setText(_ExternViewText.toUtf8());
 			}
 			else
 			{
-				_ViewText->setText(_Texts[_CacheSelection].second);
+				_ViewText->setText(_Texts[_CacheSelection].second.toUtf8());
 			}
 		}
 	}
@@ -468,13 +468,13 @@ namespace NLGUI
 	{
 		_IsExternViewText = true;
 		_ExternViewText = text;
-		_ViewText->setText(_ExternViewText);
+		_ViewText->setText(_ExternViewText.toUtf8());
 	}
 
 	// ***************************************************************************
 	ucstring CDBGroupComboBox::getViewText() const
 	{
-		return  _ViewText->getText();
+		return  CUtfStringView(_ViewText->getText()).toUtf16();
 	}
 
 	// ***************************************************************************

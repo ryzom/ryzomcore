@@ -1231,11 +1231,11 @@ namespace NLGUI
 		{
 			pV->setMultiLine (true);
 			pV->setMultiLineMaxWOnly (true);
-			pV->setTextFormatTaged (name);
+			pV->setTextFormatTaged (name.toUtf8());
 		}
 		else
 		{
-			pV->setText (name);
+			pV->setText (name.toUtf8());
 		}
 		pV->setColor (_GroupMenu->_Color);
 		pV->setFontSize (_GroupMenu->_FontSize, _GroupMenu->_FontSizeCoef);
@@ -1319,11 +1319,11 @@ namespace NLGUI
 		{
 			pV->setMultiLine (true);
 			pV->setMultiLineMaxWOnly (true);
-			pV->setTextFormatTaged (name);
+			pV->setTextFormatTaged (name.toUtf8());
 		}
 		else
 		{
-			pV->setText (name);
+			pV->setText (name.toUtf8());
 		}
 
 		pV->setColor (_GroupMenu->_Color);
@@ -1602,7 +1602,7 @@ namespace NLGUI
 					texture = _Lines[k].ViewText->getCheckBox()->getTexture();
 				}
 				CViewTextMenu *pV = NULL;
-				pV = copyMenu->addLine (_Lines[k].ViewText->getText(),  _Lines[k].AHName,  _Lines[k].AHParams,  _Lines[k].Id,  _Lines[k].Cond,
+				pV = copyMenu->addLine (CUtfStringView(_Lines[k].ViewText->getText()).toUtf16(),  _Lines[k].AHName,  _Lines[k].AHParams,  _Lines[k].Id,  _Lines[k].Cond,
 						 texture, _Lines[k].ViewText->getCheckable(),  _Lines[k].ViewText->getChecked(), _Lines[k].ViewText->getFormatted ());
 				copyMenu->_Lines[k].Selectable = _Lines[k].Selectable;
 				pV->setGrayed(_Lines[k].ViewText->getGrayed());

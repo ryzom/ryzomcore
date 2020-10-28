@@ -827,7 +827,7 @@ void addCommandLine (CGroupList *pParent, uint cmdNb, const ucstring &cmdName)
 	if (pNewCmd == NULL) return;
 
 	CViewText *pVT = dynamic_cast<CViewText*>(pNewCmd->getView(TEMPLATE_NEWMACRO_COMMAND_TEXT));
-	if (pVT != NULL) pVT->setText(cmdName);
+	if (pVT != NULL) pVT->setText(cmdName.toUtf8());
 
 	pNewCmd->setParent (pParent);
 	pParent->addChild (pNewCmd);
@@ -895,9 +895,9 @@ public:
 		if (pVT != NULL)
 		{
 			if (pMCM->CurrentEditMacro.Combo.Key == KeyCount)
-				pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT));
+				pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT).toUtf8());
 			else
-				pVT->setText(pMCM->CurrentEditMacro.Combo.toUCString());
+				pVT->setText(pMCM->CurrentEditMacro.Combo.toUCString().toUtf8());
 		}
 
 		pList->clearGroups();
@@ -1003,9 +1003,9 @@ void addMacroLine (CGroupList *pParent, uint macNb, const CMacroCmd &macro)
 	if (pVT != NULL)
 	{
 		if (macro.Combo.Key != KeyCount)
-			pVT->setText(macro.Combo.toUCString());
+			pVT->setText(macro.Combo.toUCString().toUtf8());
 		else
-			pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT));
+			pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT).toUtf8());
 	}
 
 	pNewMacro->setParent (pParent);

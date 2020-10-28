@@ -211,6 +211,7 @@ void CFontManager::computeString (NLMISC::CUtfStringView sv,
 		}
 	}
 	output.Vertices.setNumVertices (j);
+	output.Length = j >> 2;
 
 	// compile string info
 	output.StringWidth = (float)penx;
@@ -314,6 +315,7 @@ void CFontManager::computeStringInfo (	NLMISC::CUtfStringView sv,
 			penx += pLI->AdvX;
 		}
 	}
+	output.Length = idx;
 
 	// compile string info
 	output.StringWidth = (float)penx;

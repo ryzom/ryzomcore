@@ -233,9 +233,9 @@ namespace NLGUI
 
 			// Set the Text
 			if(_IsTextFormatTaged)
-				setTextFormatTaged(result);
+				setTextFormatTaged(result.toUtf8());
 			else
-				setText (result);
+				setText (result.toUtf8());
 		}
 		CViewText::checkCoords();
 	}

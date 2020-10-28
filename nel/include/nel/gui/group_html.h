@@ -765,7 +765,7 @@ namespace NLGUI
 		std::string		_TextAreaScript;
 
 		// Get last char
-		ucchar getLastChar() const;
+		u32char getLastChar() const;
 
 		// Current link view
 		class CViewLink			*_CurrentViewLink;

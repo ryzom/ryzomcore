@@ -104,8 +104,11 @@ public:
 		 */
 		float StringLine;
 
-		CStringInfo() {StringWidth= StringHeight= StringLine= 0;}
-		CStringInfo(float w, float h, float l)  {StringWidth= w; StringHeight= h; StringLine = l;}
+		/// The length in characters
+		size_t StringLength;
+
+		CStringInfo() { StringWidth = StringHeight = StringLine = 0; StringLength = 0; }
+		CStringInfo(float w, float h, float l, size_t len) { StringWidth = w; StringHeight = h; StringLine = l; StringLength = len; }
 
 		/**
 		 *	Get the string's origin

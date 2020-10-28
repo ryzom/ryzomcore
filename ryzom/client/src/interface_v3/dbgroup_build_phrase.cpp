@@ -1074,7 +1074,7 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 				float relative_cost;
 				cost= pBM->getSabrinaCom().getPhraseBrickAndParamCost(phrase.Bricks, i);
 				relative_cost = pBM->getSabrinaCom().getPhraseBrickAndParamRelativeCost(phrase.Bricks, i);
-				ucstring	costText;
+				std::string	costText;
 				if( cost == 0 && relative_cost != 0.f )
 				{
 					cost = (sint32)(relative_cost * 100.f);
@@ -1119,10 +1119,10 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 		{
 			word.InfoView->setActive(true);
 			if(i==0)
-				word.InfoView->setText( CI18N::get("uiTextHelpSelectRootBrick") );
+				word.InfoView->setText( CI18N::get("uiTextHelpSelectRootBrick").toUtf8() );
 			else
 				// start effect index at 1 (human readable :) )
-				word.InfoView->setText( CI18N::get("uiTextHelpSelectEffectBrick") + toString(i) );
+				word.InfoView->setText( CI18N::get("uiTextHelpSelectEffectBrick").toUtf8() + toString(i) );
 		}
 	}
 
@@ -1243,7 +1243,7 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 	{
 		ucstring	text;
 		pPM->buildPhraseDesc(text, phrase, 0, false, "composition");
-		_TextPhraseDesc->setTextFormatTaged(text);
+		_TextPhraseDesc->setTextFormatTaged(text.toUtf8());
 	}
 
 

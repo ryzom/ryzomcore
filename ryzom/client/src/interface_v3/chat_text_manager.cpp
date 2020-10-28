@@ -380,12 +380,12 @@ CViewBase *CChatTextManager::createMsgTextSimple(const ucstring &msg, NLMISC::CR
 	// otherwise, set text normal and apply global color
 	if (msg.find(ucstring("@{")) != ucstring::npos)
 	{
-		vt->setTextFormatTaged(msg);
+		vt->setTextFormatTaged(msg.toUtf8());
 		vt->setColor(NLMISC::CRGBA::White);
 	}
 	else
 	{
-		vt->setText(msg);
+		vt->setText(msg.toUtf8());
 		vt->setColor(col);
 	}
 
@@ -465,12 +465,12 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 				if (title.size() > 0)
 				{
 					vt->LinkTitle = title.toUtf8();
-					vt->setText(title);
+					vt->setText(vt->LinkTitle);
 				}
 				else
 				{
 					vt->LinkTitle = url.toUtf8();
-					vt->setText(url);
+					vt->setText(vt->LinkTitle);
 				}
 
 				if (url.find_first_of('\'') != string::npos)

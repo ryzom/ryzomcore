@@ -884,7 +884,7 @@ int	CLuaIHMRyzom::setTextFormatTaged(CLuaState &ls)
 		throw ELuaIHMException("setTextFormatTaged(): '%s' is not a CViewText",    pIE->getId().c_str());
 
 	// Set the text as format
-	vt->setTextFormatTaged(text);
+	vt->setTextFormatTaged(text.toUtf8());
 
 	return 0;
 }

@@ -457,7 +457,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 
 	// setup color and text
 	text= colorTag + text;
-	Text->setTextFormatTaged(text);
+	Text->setTextFormatTaged(text.toUtf8());
 }
 
 // ***************************************************************************

@@ -530,10 +530,10 @@ void CGroupInSceneBubbleManager::addSkillPopup (uint skillId, sint delta, uint t
 	if (group)
 	{
 		// Skill name
-		const ucstring sSkillName(STRING_MANAGER::CStringManagerClient::getSkillLocalizedName((SKILLS::ESkills)skillId));
+		CUtfStringView sSkillName(STRING_MANAGER::CStringManagerClient::getSkillLocalizedName((SKILLS::ESkills)skillId));
 		CViewText *pViewSkillName = dynamic_cast<CViewText*>(group->getView("name"));
 		if (pViewSkillName != NULL)
-			pViewSkillName->setText (sSkillName);
+			pViewSkillName->setText (sSkillName.toUtf8());
 
 		// Skill value
 		CCDBNodeLeaf *skillLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SKILLS:"+toString(skillId)+":BaseSKILL", false);
@@ -599,7 +599,7 @@ void CGroupInSceneBubbleManager::addMessagePopup (const ucstring &message, CRGBA
 		CViewText *pViewName = dynamic_cast<CViewText*>(group->getView("name"));
 		if (pViewName != NULL)
 		{
-			pViewName->setText (message);
+			pViewName->setText (message.toUtf8());
 			pViewName->setColor (color);
 		}
 
@@ -648,7 +648,7 @@ void CGroupInSceneBubbleManager::addMessagePopupCenter (const ucstring &message,
 		CViewText *pViewName = dynamic_cast<CViewText*>(group->getView("name"));
 		if (pViewName != NULL)
 		{
-			pViewName->setTextFormatTaged(message);
+			pViewName->setTextFormatTaged(message.toUtf8());
 			pViewName->setColor (color);
 		}
 
@@ -787,7 +787,7 @@ void CGroupInSceneBubbleManager::addContextHelp (const ucstring &message, const 
 					}
 				}
 
-				text->setText(finalMessage);
+				text->setText(finalMessage.toUtf8());
 			}
 		}
 		context->Group->setActive(true);
@@ -1080,7 +1080,7 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 		if (pVT != NULL)
 		{
 			pVT->setActive(false);
-			pVT->setText(ucstring(""));
+			pVT->setText(std::string());
 		}
 		pCL = dynamic_cast<CCtrlLink*>(bubble->getElement(id+"optb"+toString(j)));
 		if (pCL != NULL) pCL->setActive(false);
@@ -1094,7 +1094,7 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 			pVT->setActive(true);
 			ucstring optionText;
 			optionText.fromUtf8(strs[j]);
-			pVT->setText(optionText);
+			pVT->setText(optionText.toUtf8());
 			pCL = dynamic_cast<CCtrlLink*>(bubble->getElement(id+"optb"+toString(j)));
 			if (pCL != NULL)
 			{
@@ -1485,7 +1485,7 @@ void CGroupInSceneBubble::setRawText (const ucstring &text)
 	CInterfaceElement *pVTIE = CWidgetManager::getInstance()->getElementFromId(getId()+":header_opened:window:text");
 	CViewText *pVT= dynamic_cast<CViewText*>(pVTIE);
 	if (pVT != NULL)
-		pVT->setText(text);
+		pVT->setText(text.toUtf8());
 }
 
 // ***************************************************************************

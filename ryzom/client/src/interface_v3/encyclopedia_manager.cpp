@@ -303,8 +303,8 @@ void CEncyclopediaManager::rebuildAlbumPage(uint32 albumName)
 	if (pRBVT != NULL)
 	{
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-		const ucstring desc(pSMC->getSBrickLocalizedDescription(CSheetId(pAlbum->RewardBrick)));
-		pRBVT->setText(desc);
+		CUtfStringView desc(pSMC->getSBrickLocalizedDescription(CSheetId(pAlbum->RewardBrick)));
+		pRBVT->setText(desc.toUtf8());
 	}
 }
 
@@ -359,18 +359,18 @@ void CEncyclopediaManager::rebuildThemaPage(uint32 themaName)
 	{
 		if (pES->type() == CEntitySheet::ITEM)
 		{
-			const ucstring desc(pSMC->getItemLocalizedDescription(CSheetId(pThema->RewardSheet)));
-			pRBVT->setText(desc);
+			CUtfStringView desc(pSMC->getItemLocalizedDescription(CSheetId(pThema->RewardSheet)));
+			pRBVT->setText(desc.toUtf8());
 		}
 		else if (pES->type() == CEntitySheet::SBRICK)
 		{
-			const ucstring desc(pSMC->getSBrickLocalizedDescription(CSheetId(pThema->RewardSheet)));
-			pRBVT->setText(desc);
+			CUtfStringView desc(pSMC->getSBrickLocalizedDescription(CSheetId(pThema->RewardSheet)));
+			pRBVT->setText(desc.toUtf8());
 		}
 		else if (pES->type() == CEntitySheet::SPHRASE)
 		{
-			const ucstring desc(pSMC->getSPhraseLocalizedDescription(CSheetId(pThema->RewardSheet)));
-			pRBVT->setText(desc);
+			CUtfStringView desc(pSMC->getSPhraseLocalizedDescription(CSheetId(pThema->RewardSheet)));
+			pRBVT->setText(desc.toUtf8());
 		}
 	}
 

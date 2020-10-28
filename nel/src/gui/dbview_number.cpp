@@ -43,7 +43,7 @@ namespace NLGUI
 	{
 		_Positive = false;
 		_Cache= 0;
-		setText(ucstring("0"));
+		setText(std::string("0"));
 		_Divisor = 1;
 		_Modulo = 0;
 	}
@@ -225,7 +225,7 @@ namespace NLGUI
 
 		// init cache.
 		_Cache= 0;
-		setText(ucstring("0"));
+		setText(std::string("0"));
 
 		return true;
 	}
@@ -238,9 +238,9 @@ namespace NLGUI
 		if (_Cache != val)
 		{
 			_Cache= val;
-			ucstring value = _Format ? NLMISC::formatThousands(toString(val)) : toString(val);
-			if (_Positive) setText(val >= 0 ? ( ucstring(_Prefix) + value + ucstring(_Suffix) ) : ucstring("?"));
-			else setText( ucstring(_Prefix) + value + ucstring(_Suffix) );
+			std::string value = _Format ? NLMISC::formatThousands(toString(val)) : toString(val);
+			if (_Positive) setText(val >= 0 ? ( _Prefix.toString() + value + _Suffix.toString() ) : "?");
+			else setText( _Prefix.toString() + value + _Suffix.toString() );
 		}
 	}
 

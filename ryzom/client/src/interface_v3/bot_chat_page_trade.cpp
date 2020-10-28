@@ -865,7 +865,7 @@ void CBotChatPageTrade::startBuyDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCall
 	CViewText *priceLabel = dynamic_cast<CViewText*>(ig->getView( "standard_price:total_price_header" ));
 	if ( _BuyMean == Money && priceLabel )
 	{
-		priceLabel->setText( CI18N::get( "uiPrice" ) );
+		priceLabel->setText( CI18N::get( "uiPrice" ).toUtf8() );
 		priceLabel->setActive(true);
 	}
 	else
@@ -977,7 +977,7 @@ void CBotChatPageTrade::startSellDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCal
 	CViewText *priceLabel = dynamic_cast<CViewText*>(ig->getView( "standard_price:total_price_header" ));
 	if ( priceLabel )
 	{
-		priceLabel->setText( CI18N::get( "uiImmediatePrice" ) );
+		priceLabel->setText( CI18N::get( "uiImmediatePrice" ).toUtf8() );
 		priceLabel->setActive(true);
 	}
 
@@ -1012,7 +1012,7 @@ void CBotChatPageTrade::startSellDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCal
 	{
 		ucstring itemName;
 		itemName = sheet->getItemActualName();
-		itemNameView->setText(itemName);
+		itemNameView->setText(itemName.toUtf8());
 	}
 
 	// set help for item
@@ -1679,14 +1679,14 @@ void	CBotChatPageTrade::setupFactionPointPrice(bool /* sellMode */, uint default
 		{
 			ucstring	fmt= CI18N::get("uiUnitFPPrice");
 			strFindReplace(fmt, "%fac", factionName);
-			vt->setText(fmt);
+			vt->setText(fmt.toUtf8());
 		}
 		vt= dynamic_cast<CViewText*>(fpGroup->getView("total_price_header"));
 		if(vt)
 		{
 			ucstring	fmt= CI18N::get("uiTotalFPPrice");
 			strFindReplace(fmt, "%fac", factionName);
-			vt->setText(fmt);
+			vt->setText(fmt.toUtf8());
 		}
 
 		// setup icon according to pvp clan

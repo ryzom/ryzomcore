@@ -458,14 +458,14 @@ namespace NLGUI
 			{
 				CViewText *text = dynamic_cast<CViewText*> (element);
 				if (text)
-					text->setText(str);
+					text->setText(str.toUtf8());
 			}
 			element = target->getView ("real_txt");
 			if (element)
 			{
 				CViewText *text = dynamic_cast<CViewText*> (element);
 				if (text)
-					text->setText(str);
+					text->setText(str.toUtf8());
 			}
 			target->updateCoords();
 			target->updateCoords();

@@ -87,7 +87,7 @@ namespace NLGUI
 		formatedResult = formatString(_FormatString, ucstring(""));
 
 		//
-		setText (formatedResult);
+		setText (formatedResult.toUtf8());
 		CViewText::checkCoords();
 	}
 

@@ -180,9 +180,9 @@ public:
 			if (pVT != NULL)
 			{
 				if (it != acmap.end())
-					pVT->setText(it->second.toUCString());
+					pVT->setText(it->second.toUCString().toUtf8());
 				else
-					pVT->setText(CI18N::get("uiNotAssigned"));
+					pVT->setText(CI18N::get("uiNotAssigned").toUtf8());
 			}
 		}
 	}

@@ -2830,7 +2830,7 @@ namespace NLGUI
 			// Number of child in this paragraph
 			if (_CurrentViewLink)
 			{
-				bool skipLine = !_CurrentViewLink->getText().empty() && *(_CurrentViewLink->getText().rbegin()) == (ucchar) '\n';
+				bool skipLine = !_CurrentViewLink->getText().empty() && *(_CurrentViewLink->getText().rbegin()) == '\n';
 				bool sameShadow = style.TextShadow.Enabled && _CurrentViewLink->getShadow();
 				if (sameShadow && style.TextShadow.Enabled)
 				{
@@ -2853,7 +2853,7 @@ namespace NLGUI
 					(style.GlobalColor == _CurrentViewLink->getModulateGlobalColor()))
 				{
 					// Concat the text
-					_CurrentViewLink->setText(_CurrentViewLink->getText()+tmpStr);
+					_CurrentViewLink->setText(_CurrentViewLink->getText()+tmpStr.toUtf8());
 					_CurrentViewLink->invalidateContent();
 					added = true;
 				}
@@ -2916,7 +2916,7 @@ namespace NLGUI
 							newLink->setParamsOnLeftClick("name=" + getId() + "|url=" + newLink->Link);
 						}
 					}
-					newLink->setText(tmpStr);
+					newLink->setText(tmpStr.toUtf8());
 					newLink->setMultiLineSpace((uint)((float)(style.FontSize)*LineSpaceFontFactor));
 					newLink->setMultiLine(true);
 					newLink->setModulateGlobalColor(style.GlobalColor);
@@ -3306,11 +3306,11 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	ucchar CGroupHTML::getLastChar() const
+	u32char CGroupHTML::getLastChar() const
 	{
 		if (_CurrentViewLink)
 		{
-			const ucstring &str = _CurrentViewLink->getText();
+			u32string str = CUtfStringView(_CurrentViewLink->getText()).toUtf32(); // FIXME: Optimize reverse UTF iteration
 			if (!str.empty())
 				return str[str.length()-1];
 		}
@@ -3710,7 +3710,7 @@ namespace NLGUI
 					CGroupEditBox *editBox = dynamic_cast<CGroupEditBox*>(group);
 					if (editBox)
 					{
-						entryData = editBox->getViewText()->getText();
+						entryData = CUtfStringView(editBox->getViewText()->getText()).toUtf16();
 						addEntry = true;
 					}
 				}

@@ -96,7 +96,7 @@ namespace NLGUI
 									_ViewTextDeltaX(0)
 
 	{
-		_Prompt = u32string(1, '>');
+		_Prompt = u32string(1, (u32char)'>');
 		_BackSelectColor= CRGBA::White;
 		_TextSelectColor= CRGBA::Black;
 	}
@@ -1433,16 +1433,14 @@ namespace NLGUI
 	{
 		if (_ViewText)
 		{
-			ucstring usTmp;
+			std::string usTmp;
 			if (_EntryType == Password)
 			{
-				usTmp = CUtfStringView(_Prompt).toUtf16();
-				for (uint32 i = 0; i < _InputString.size(); ++i)
-					usTmp += "*";
+				usTmp = CUtfStringView(_Prompt + u32string(_InputString.size(), 0x2022)).toUtf8();
 			}
 			else
 			{
-				usTmp = CUtfStringView(_Prompt + _InputString).toUtf16();
+				usTmp = CUtfStringView(_Prompt + _InputString).toUtf8();
 			}
 			_ViewText->setText (usTmp);
 		}
@@ -1585,7 +1583,7 @@ namespace NLGUI
 		addView( _ViewText );
 
 		sint32 w,h;
-		w = std::max( sint32( _ViewText->getFontWidth() * _ViewText->getText().size() ), getW() );
+		w = std::max( sint32( _ViewText->getFontWidth() * CUtfStringView(_ViewText->getText()).count() ), getW() );
 		h = std::max( sint32(  _ViewText->getFontHeight() ), getH() );
 					
 		setH( h );

@@ -232,15 +232,15 @@ bool loadStringFile(const std::string filename, vector<TStringInfo> &stringInfos
 
 ucstring prepareStringFile(const vector<TStringInfo> &strings, bool removeDiffComments, bool noDiffInfo)
 {
-	ucstring diff;
+	string diff;
 
 	vector<TStringInfo>::const_iterator first(strings.begin()), last(strings.end());
 	for (; first != last; ++first)
 	{
-		ucstring str;
+		string str;
 		const TStringInfo &si = *first;
-		string comment = si.Comments.toString();
-		vector<string>	lines;
+		string comment = si.Comments.toUtf8();
+		vector<string> lines;
 		explode(comment, string("\n"), lines, true);
 
 		uint i;
@@ -274,30 +274,29 @@ ucstring prepareStringFile(const vector<TStringInfo> &strings, bool removeDiffCo
 		}
 		si.Comments = ucstring(comment);
 
-		str = si.Comments;
+		str = comment;
 		if (!si.Identifier.empty() || !si.Text.empty())
 		{
 			// add hash value comment if needed
 //			if (si.Comments.find(ucstring("// HASH_VALUE ")) == ucstring::npos)
 			if (!noDiffInfo)
 			{
-			str += ucstring("// HASH_VALUE ") + CI18N::hashToString(si.HashValue)+ nl;
-			str += ucstring("// INDEX ") + NLMISC::toString("%u", first-strings.begin())+ nl;
+				str += "// HASH_VALUE " + CI18N::hashToString(si.HashValue) + "\n";
+				str += "// INDEX " + NLMISC::toString("%u", first-strings.begin()) + "\n";
 			}
 			str += si.Identifier + '\t';
 
-			ucstring text = CI18N::makeMarkedString('[', ']', si.Text);;
-			ucstring text2;
+			string text = CI18N::makeMarkedString('[', ']', si.Text).toUtf8();
+			string text2;
 			// add new line and tab after each \n tag
-			ucstring::size_type pos;
-			const ucstring nlTag("\\n");
-			while ((pos = text.find(nlTag)) != ucstring::npos)
+			string::size_type pos;
+			while ((pos = text.find("\\n")) != string::npos)
 			{
-				text2 += text.substr(0, pos+2) + nl + "\t";
+				text2 += text.substr(0, pos+2) + "\n\t";
 				text = text.substr(pos+2);
 			}
 			text2 += text;//.substr(0, pos+2);
-			str += text2 + nl + nl;
+			str += text2 + "\n\n";
 //			str += CI18N::makeMarkedString('[', ']', si.Text) + nl + nl;
 		}
 
@@ -305,7 +304,7 @@ ucstring prepareStringFile(const vector<TStringInfo> &strings, bool removeDiffCo
 		diff += str;
 	}
 
-	return diff;
+	return ucstring::makeFromUtf8(diff);
 }
 
 

@@ -135,7 +135,7 @@ public:
 		{
 			ucstring text;
 			Ctrl->getContextHelp(text);
-			Text->setText(text);
+			Text->setText(text.toUtf8());
 		}
 
 		// create a CViewText object that is displayed next to the item. This is the opportunnity to create

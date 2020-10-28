@@ -2353,7 +2353,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player:header_opened:player_title"));
-		if (pVT != NULL) pVT->setText(_Title);
+		if (pVT != NULL) pVT->setText(_Title.toUtf8());
 
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player"));
 		if (pGC != NULL) pGC->setUCTitle(_EntityName);

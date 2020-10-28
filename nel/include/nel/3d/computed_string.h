@@ -182,6 +182,7 @@ public:
 	CMaterial	*Material;
 	CRGBA Color;
 	std::string Text;
+	size_t Length;
 
 	uint32 CacheVersion;
 

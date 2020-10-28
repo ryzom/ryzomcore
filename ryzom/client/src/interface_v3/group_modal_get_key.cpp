@@ -89,7 +89,7 @@ bool CGroupModalGetKey::handleEvent (const NLGUI::CEventDescriptor &event)
 				// Setup the text !
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 				CViewText *pVT= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId( VIEW_TEXT_KEY ));
-				if (pVT != NULL) pVT->setText(Combo.toUCString());
+				if (pVT != NULL) pVT->setText(Combo.toUCString().toUtf8());
 
 				// Check if in use
 				CActionsManager *pCurAM = NULL;
@@ -111,12 +111,12 @@ bool CGroupModalGetKey::handleEvent (const NLGUI::CEventDescriptor &event)
 						if (baseAction && pCurAM->isActionPresentInContext(it->second))
 						{
 							ucstring shortcutName = baseAction->getActionLocalizedText(it->second);
-							if (pVT != NULL) pVT->setText(shortcutName);
+							if (pVT != NULL) pVT->setText(shortcutName.toUtf8());
 						}
 					}
 					else
 					{
-						if (pVT != NULL) pVT->setText(string(""));
+						if (pVT != NULL) pVT->setText(string());
 					}
 				}
 

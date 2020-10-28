@@ -1167,7 +1167,7 @@ void setHelpText(CSheetHelpSetup &setup, const ucstring &text)
 	CViewText *viewText= dynamic_cast<CViewText *>(setup.HelpWindow->getView(setup.ViewText));
 	if(viewText)
 	{
-		viewText->setTextFormatTaged(copyStr);
+		viewText->setTextFormatTaged(copyStr.toUtf8());
 	}
 	CInterfaceGroup *viewTextGroup = setup.HelpWindow->getGroup(setup.ScrollTextGroup);
 	if (viewTextGroup) viewTextGroup->setActive(true);
@@ -3165,7 +3165,7 @@ void setupListBrickHeader(CSheetHelpSetup &setup)
 	if(view)
 	{
 		view->setActive(true);
-		view->setTextFormatTaged(CI18N::get("uihelpPhraseHeaderBricks"));
+		view->setTextFormatTaged(CI18N::get("uihelpPhraseHeaderBricks").toUtf8());
 	}
 }
 
@@ -3806,7 +3806,7 @@ static	void	onMpChangeItemPart(CInterfaceGroup *wnd, uint32 itemSheetId, const s
 		string	originFilterKey= "iompf" + ITEM_ORIGIN::enumToString((ITEM_ORIGIN::EItemOrigin)itemPart.OriginFilter);
 		mpCraft+= CI18N::get(originFilterKey);
 
-		viewText->setText(mpCraft);
+		viewText->setText(mpCraft.toUtf8());
 	}
 
 
@@ -3838,7 +3838,7 @@ static	void	onMpChangeItemPart(CInterfaceGroup *wnd, uint32 itemSheetId, const s
 			CViewText	*statTitle= dynamic_cast<CViewText*>(groupStat->getElement(groupStat->getId()+":text" ));
 			CDBViewBar	*statValue= dynamic_cast<CDBViewBar*>(groupStat->getElement(groupStat->getId()+":bar" ));
 			if(statTitle)
-				statTitle->setText(RM_FABER_STAT_TYPE::toLocalString(statType));
+				statTitle->setText(RM_FABER_STAT_TYPE::toLocalString(statType).toUtf8());
 			if(statValue)
 				statValue->setValue(itemPart.Stats[i]);
 		}

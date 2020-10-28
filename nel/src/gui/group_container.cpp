@@ -3744,7 +3744,7 @@ namespace NLGUI
 			_TitleOpened->setY (pLayer->getValSInt32 ("title_offset_y"));
 		}
 		_TitleOpened->setFontSize (pLayer->getValSInt32 ("title_font_size"));
-		if (_TitleClass==TitleText) _TitleOpened->setText (_TitleTextOpened);
+		if (_TitleClass==TitleText) _TitleOpened->setText (_TitleTextOpened.toUtf8());
 		_TitleOpened->setActive (_Opened);
 
 		// Title when the container is closed
@@ -3796,7 +3796,7 @@ namespace NLGUI
 			_TitleClosed->setY (pLayer->getValSInt32 ("title_offset_y"));
 		}
 		_TitleClosed->setFontSize (pLayer->getValSInt32 ("title_font_size"));
-		if (_TitleClass==TitleText) _TitleClosed->setText (_TitleTextClosed);
+		if (_TitleClass==TitleText) _TitleClosed->setText (_TitleTextClosed.toUtf8());
 		_TitleClosed->setActive(!_Opened);
 
 
@@ -3990,7 +3990,7 @@ namespace NLGUI
 	{
 		_TitleTextOpened = title;
 		if (_TitleOpened != NULL)
-			_TitleOpened->setText (title);
+			_TitleOpened->setText (title.toUtf8());
 		invalidateCoords();
 	}
 
@@ -3999,7 +3999,7 @@ namespace NLGUI
 	{
 		_TitleTextClosed = title;
 		if (_TitleClosed != NULL)
-			_TitleClosed->setText (_TitleTextClosed);
+			_TitleClosed->setText (_TitleTextClosed.toUtf8());
 		invalidateCoords();
 	}
 

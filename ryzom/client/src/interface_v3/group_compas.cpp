@@ -414,7 +414,7 @@ void CGroupCompas::draw()
 				}
 				if (_DistViewText != distText)
 				{
-					_DistView->setText(distText);
+					_DistView->setText(distText.toUtf8());
 					_DistViewText = distText;
 				}
 			}

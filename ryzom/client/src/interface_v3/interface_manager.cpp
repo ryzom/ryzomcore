@@ -1530,7 +1530,7 @@ void CInterfaceManager::updateFrameEvents()
 
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:weather"));
 			if (pVT != NULL)
-				pVT->setText(str);
+				pVT->setText(str.toUtf8());
 
 			CCtrlBase *pTooltip= dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:weather_tt"));
 			if (pTooltip != NULL)
@@ -1564,7 +1564,7 @@ void CInterfaceManager::updateFrameEvents()
 
 			pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:time"));
 			if (pVT != NULL)
-				pVT->setText(str);
+				pVT->setText(str.toUtf8());
 
 			str.clear();
 			// Update the clock in the compass if enabled.
@@ -1577,7 +1577,7 @@ void CInterfaceManager::updateFrameEvents()
 						str = getTimestampHuman("%I:%M %p");
 					else
 						str = getTimestampHuman("%H:%M");
-					pVT->setText(str);
+					pVT->setText(str.toUtf8());
 				}
 			}
 		}
@@ -2388,7 +2388,7 @@ void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const ucst
 	if (group && viewText)
 	{
 		viewText->setCaseMode(caseMode);
-		viewText->setText(text);
+		viewText->setText(text.toUtf8());
 		CWidgetManager::getInstance()->enableModalWindow(NULL, group);
 		// don't understand why but need to update coords here
 		group->updateCoords();
@@ -2441,7 +2441,7 @@ void	CInterfaceManager::validMessageBox(TValidMessageIcon icon, const ucstring &
 		CWidgetManager::getInstance()->setProcedureAction("proc_valid_message_box_cancel", 1, ahOnCancel, paramsOnCancel);
 
 		// set text and icon
-		viewText->setText(text);
+		viewText->setText(text.toUtf8());
 		if(viewBitmap)
 		{
 			bool	active= true;

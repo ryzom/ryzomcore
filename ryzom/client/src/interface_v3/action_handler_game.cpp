@@ -4606,7 +4606,7 @@ public:
 				CViewText *pVT = dynamic_cast<CViewText *>(pIG->getView("t"));
 				if (!pVT) break;
 
-				names.push_back(toUpper(pVT->getText().toUtf8()));
+				names.push_back(toUpper(pVT->getText()));
 			}
 
 			if (names.size() != nbChilds)

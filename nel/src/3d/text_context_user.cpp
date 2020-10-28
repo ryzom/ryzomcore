@@ -275,23 +275,23 @@ UTextContext::CStringInfo		CTextContextUser::getStringInfo(uint32 i)
 
 	CComputedString		*cstr= _TextContext.getComputedString(i);
 	if(!cstr)
-		return CStringInfo(0, 0, 0);
+		return CStringInfo(0, 0, 0, 0);
 	else
-		return	CStringInfo(cstr->StringWidth, cstr->StringHeight, cstr->StringLine);
+		return	CStringInfo(cstr->StringWidth, cstr->StringHeight, cstr->StringLine, cstr->Length);
 }
 UTextContext::CStringInfo		CTextContextUser::getStringInfo(NLMISC::CUtfStringView sv)
 {
 	H_AUTO2;
 
 	_TextContext.computeStringInfo(sv, _CacheString);
-	return CStringInfo (_CacheString.StringWidth, _CacheString.StringHeight, _CacheString.StringLine);
+	return CStringInfo (_CacheString.StringWidth, _CacheString.StringHeight, _CacheString.StringLine, _CacheString.Length);
 }
 UTextContext::CStringInfo		CTextContextUser::getStringInfo(NLMISC::CUtfStringView sv, size_t len)
 {
 	H_AUTO2;
 
 	_TextContext.computeStringInfo(sv, _CacheString, len);
-	return CStringInfo (_CacheString.StringWidth, _CacheString.StringHeight, _CacheString.StringLine);
+	return CStringInfo (_CacheString.StringWidth, _CacheString.StringHeight, _CacheString.StringLine, _CacheString.Length);
 }
 void CTextContextUser::clear()
 {

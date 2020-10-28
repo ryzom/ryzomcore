@@ -2831,7 +2831,7 @@ class CHandlerSelectChatSource : public IActionHandler
 					{
 						ucstring title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-						pVTM->setText("["+s+"] " + title);
+						pVTM->setText("["+s+"] " + title.toUtf8());
 					}
 				}
 			}

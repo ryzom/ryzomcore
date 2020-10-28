@@ -94,7 +94,7 @@ void CDBGroupListSheetTextPhrase::CSheetChildPhrase::updateViewText(CDBGroupList
 #endif
 
 	// set
-	Text->setText(text);
+	Text->setText(text.toUtf8());
 }
 
 
@@ -173,7 +173,7 @@ void				CDBGroupListSheetTextPhrase::setSectionGroupId(CInterfaceGroup	*pIG, uin
 		pPM->getPhraseLevelFromSection(sectionId, minLevel, maxLevel);
 		strFindReplace(sectionText, "%min", toString(minLevel));
 		strFindReplace(sectionText, "%max", toString(maxLevel));
-		name->setText (sectionText);
+		name->setText (sectionText.toUtf8());
 	}
 }
 

@@ -523,7 +523,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 					{
 						nlstop;
 					}
-					viewText->setText( text );
+					viewText->setText( text.toUtf8() );
 				}
 
 				// Set as Icon the required MP FaberType / or Sheet Texture (directly...)
@@ -1724,7 +1724,7 @@ void	CActionPhraseFaber::updateItemResult()
 				+ "@{FFFF})";
 		}
 		strFindReplace(text, "%success", successStr );
-		successView->setTextFormatTaged(text);
+		successView->setTextFormatTaged(text.toUtf8());
 	}
 
 
@@ -1790,7 +1790,7 @@ void	CActionPhraseFaber::updateItemResult()
 				uint	sv= uint(statArray[i]*100);
 				if(statTitle)
 				{
-					statTitle->setText(RM_FABER_STAT_TYPE::toLocalString(statType));
+					statTitle->setText(RM_FABER_STAT_TYPE::toLocalString(statType).toUtf8());
 					statTitle->setColor(usageColor);
 				}
 				if(statValueBar)

@@ -2483,7 +2483,7 @@ void CGroupMap::updateMatchedLandmarks()
 			CViewText* t = dynamic_cast<CViewText *>(g->getView("title"));
 			if (t)
 			{
-				t->setSingleLineTextFormatTaged(_MatchedLandmarks[k].Title);
+				t->setSingleLineTextFormatTaged(_MatchedLandmarks[k].Title.toUtf8());
 			}
 
 			CViewBitmap* b = dynamic_cast<CViewBitmap *>(g->getView("icon"));
@@ -2553,7 +2553,7 @@ void CGroupMap::createLMWidgets(const std::vector<CContLandMark> &lms)
 		else // just add a text
 		{
 			CLandMarkText *pNewText = new CLandMarkText(CViewBase::TCtorParam());
-			pNewText->setText(ucsTmp);
+			pNewText->setText(ucsTmp.toUtf8());
 			pNewText->Pos = mapPos;
 			pNewText->setParent(this);
 			pNewText->setParentPosRef(Hotspot_BL);
@@ -3411,7 +3411,7 @@ CGroupMap::CLandMarkText* CGroupMap::findClosestLandmark(const CVector2f &center
 	for(TLandMarkTextVect::const_iterator it = landmarks.begin(); it != landmarks.end(); ++it)
 	{
 		ucstring lc;
-		lc = (*it)->getText();
+		lc = CUtfStringView((*it)->getText()).toUtf16();
 		if(filterLandmark(lc, keywords, startsWith)) {
 			CVector2f pos;
 			mapToWorld(pos, (*it)->Pos);
@@ -3466,7 +3466,7 @@ bool CGroupMap::targetLandmarkByName(const ucstring &search, bool startsWith) co
 		{
 			ct.setType(CCompassTarget::ContinentLandMark);
 			mapToWorld(ct.Pos, lmt->Pos);
-			ct.Name = lmt->getText();
+			ct.Name = CUtfStringView(lmt->getText()).toUtf16();
 			closest = dist;
 			found = true;
 		}
@@ -3814,7 +3814,7 @@ void CGroupMap::updateClosestLandMarkMenu(const std::string &menu, const NLMISC:
 		CViewTextMenu* vt = rootMenu->addLine(ucstring(""), "map_landmark_by_index", ahParams, lineId.c_str(), "", "", false, false, false);
 		if (!vt) break;
 
-		vt->setSingleLineTextFormatTaged(name);
+		vt->setSingleLineTextFormatTaged(name.toUtf8());
 		// TODO: should calculate from mouse pos and client width
 		vt->setLineMaxW(800);
 
