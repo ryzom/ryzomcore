@@ -1233,7 +1233,7 @@ static const ucchar UnicodeLowerToUpper[]=
 	0x03B6, 0x0396, // GREEK CAPITAL LETTER ZETA
 	0x03B7, 0x0397, // GREEK CAPITAL LETTER ETA
 	0x03B8, 0x0398, // GREEK CAPITAL LETTER THETA
-	0x03B9, 0x0345, // COMBINING GREEK YPOGEGRAMMENI
+	0x03B9, 0x0399, // GREEK CAPITAL LETTER IOTA
 	0x03BA, 0x039A, // GREEK CAPITAL LETTER KAPPA
 	0x03BB, 0x039B, // GREEK CAPITAL LETTER LAMDA
 	0x03BC, 0x039C, // GREEK CAPITAL LETTER MU
@@ -3819,7 +3819,7 @@ static const char s_Utf8LowerToUpperCE[64 * 4] = {
 	'\xCE', '\x96', '\x00', 0,
 	'\xCE', '\x97', '\x00', 0,
 	'\xCE', '\x98', '\x00', 0,
-	'\xCD', '\x85', '\x00', 0,
+	'\xCE', '\x99', '\x00', 0,
 	'\xCE', '\x9A', '\x00', 0,
 	'\xCE', '\x9B', '\x00', 0,
 	'\xCE', '\x9C', '\x00', 0,
