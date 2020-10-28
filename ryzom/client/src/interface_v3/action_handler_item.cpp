@@ -160,7 +160,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 				else
 				{
 					if (itemInfo.CustomText.empty())
-						display->setTextFormatTaged(ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id)));
+						display->setTextFormatTaged(CUtfStringView(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id)).toUtf8());
 					else
 					{
 						ucstring text = itemInfo.CustomText;
@@ -176,7 +176,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 								text = text.substr(delimiter, text.size()-delimiter);
 						}
 						
-						display->setTextFormatTaged(text);		
+						display->setTextFormatTaged(text.toUtf8());		
 					}
 				}
 			}
@@ -233,7 +233,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 
 					editBoxShort->setInputString(std::string());
 					editBoxLarge->setInputString(std::string());
-					display->setTextFormatTaged(ucstring());
+					display->setTextFormatTaged(std::string());
 
 
 					// Finish the display or add the waiter
@@ -291,14 +291,14 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 
 					editBoxShort->setInputString(std::string());
 					editBoxLarge->setInputString(std::string());
-					display->setTextFormatTaged(ucstring());
+					display->setTextFormatTaged(std::string());
 
 					// Finish the display or add the waiter
 					if (getInventory().isItemInfoUpToDate(ItemSlotId))
 					{
 						// If we already have item info
 						if (itemInfo.CustomText.empty())
-							display->setTextFormatTaged(ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id)));
+							display->setTextFormatTaged(CUtfStringView(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id)).toUtf8());
 						else
 						{
 							ucstring text = itemInfo.CustomText;
@@ -313,7 +313,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 								else
 									text = text.substr(delimiter, text.size()-delimiter);
 							}
-							display->setTextFormatTaged(text);
+							display->setTextFormatTaged(text.toUtf8());
 						}
 					}
 					else
