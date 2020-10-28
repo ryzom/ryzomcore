@@ -130,6 +130,7 @@ void CFontManager::computeString (NLMISC::CUtfStringView sv,
 	output.CacheVersion = getCacheVersion();
 
 	uint j = 0;
+	size_t idx = 0;
 	{
 		CVertexBufferReadWrite vba;
 		output.Vertices.lock (vba);
@@ -138,8 +139,7 @@ void CFontManager::computeString (NLMISC::CUtfStringView sv,
 		hlfPixScrH = 0.f;
 
 		// For all chars
-		//for (uint i = 0; i < s.size(); i++)
-		for (NLMISC::CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it)
+		for (NLMISC::CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it, ++idx)
 		{
 			// Creating font
 			k.Char = *it;
@@ -211,7 +211,8 @@ void CFontManager::computeString (NLMISC::CUtfStringView sv,
 		}
 	}
 	output.Vertices.setNumVertices (j);
-	output.Length = j >> 2;
+	output.Length = idx;
+	nlassert(output.Length == NLMISC::CUtfStringView(output.Text).count());
 
 	// compile string info
 	output.StringWidth = (float)penx;
@@ -316,6 +317,7 @@ void CFontManager::computeStringInfo (	NLMISC::CUtfStringView sv,
 		}
 	}
 	output.Length = idx;
+	nlassert(output.Length == std::min(len, NLMISC::CUtfStringView(output.Text).count()));
 
 	// compile string info
 	output.StringWidth = (float)penx;

@@ -247,7 +247,7 @@ namespace NLGUI
 		std::string _HardTextFormat;
 		std::string _HardText;
 		std::string _Text;
-		size_t _TextLength;
+		mutable sint _TextLength;
 		/// index of the computed String associated to this text control
 		uint _Index;
 		/// info on the computed String associated to this text control
@@ -443,7 +443,7 @@ namespace NLGUI
 		void setup ();
 		void setupDefault ();
 
-		void setStringSelectionSkipingSpace(uint stringId, const ucstring &text, sint charStart, sint charEnd);
+		void setStringSelectionSkipingSpace(uint stringId, const std::string &text, sint charStart, sint charEnd);
 
 	//	void pushString(const ucstring &str, bool deleteSpaceAtStart = false);
 
