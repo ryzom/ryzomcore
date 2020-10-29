@@ -548,7 +548,7 @@ namespace NLGUI
 			case Boolean: return true;
 			case Integer: setBool(_IntegerValue != 0); return true;
 			case Double:  setBool(_DoubleValue != 0); return true;
-			case String:  return evalBoolean(_StringValue.toString().c_str()) != NULL;
+			case String:  return evalBoolean(_StringValue.c_str()) != NULL;
 			default: break;
 		}
 		return false;
@@ -564,7 +564,7 @@ namespace NLGUI
 			case Integer: return true;
 			case Double:  setInteger((sint64) _DoubleValue); return true;
 			case String:
-				if (evalNumber(_StringValue.toString().c_str())) return toInteger();
+				if (evalNumber(_StringValue.c_str())) return toInteger();
 				return false;
 			case RGBA:	setInteger((sint64) _RGBAValue); return true;
 			default: break;
@@ -581,7 +581,7 @@ namespace NLGUI
 			case Integer:	setDouble((double) _IntegerValue); return true;
 			case Double:	return true;
 			case String:
-				if (evalNumber(_StringValue.toString().c_str())) return toBool();
+				if (evalNumber(_StringValue.c_str())) return toBool();
 				return false;
 			case RGBA:	setDouble((double) _RGBAValue); return true;
 			default: break;
@@ -627,7 +627,7 @@ namespace NLGUI
 				return true;
 
 			case String:
-				setRGBA( NLMISC::CRGBA::stringToRGBA(_StringValue.toString().c_str()));
+				setRGBA( NLMISC::CRGBA::stringToRGBA(_StringValue.c_str()));
 				return true;
 
 			default:
@@ -869,14 +869,15 @@ namespace NLGUI
 	}
 
 	//==================================================================
-	std::string CInterfaceExprValue::getString() const
+	const std::string &CInterfaceExprValue::getString() const
 	{
 		if (_Type != String)
 		{
 			nlwarning("<CInterfaceExprValue::getString> bad type!");
-			return "";
+			static const std::string empty;
+			return empty;
 		}
-		return _StringValue.toString();
+		return _StringValue;
 	}
 
 	//==================================================================
@@ -893,19 +894,6 @@ namespace NLGUI
 		col.B = (uint8)((_RGBAValue>>16)&0xff);
 		col.A = (uint8)((_RGBAValue>>24)&0xff);
 		return col;
-	}
-
-
-	//==================================================================
-	const ucstring &CInterfaceExprValue::getUCString() const
-	{
-		if (_Type != String)
-		{
-			nlwarning("<CInterfaceExprValue::getString> bad type!");
-			static ucstring emptyString;
-			return emptyString;
-		}
-		return _StringValue;
 	}
 
 	//==================================================================

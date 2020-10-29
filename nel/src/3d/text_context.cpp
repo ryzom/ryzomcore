@@ -77,7 +77,7 @@ uint32 CTextContext::textPush (const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, NLMISC::MaxCStringSize);
 
-	return textPush(str);
+	return textPush(NLMISC::CUtfStringView(str));
 }
 
 // ------------------------------------------------------------------------------------------------

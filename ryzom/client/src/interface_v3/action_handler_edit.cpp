@@ -70,7 +70,7 @@ static inline uint getCharacterCategory(u32char c)
 /** skip a block of character in a string, (same behaviour than when Ctrl-arrow is pressed)
   * It returns the new index
   */
-static uint skipUCCharsRight(uint startPos, const u32string &str)
+static uint skipUCCharsRight(uint startPos, const ::u32string &str)
 {
 	uint pos = startPos;
 	uint endIndex = (uint)str.length();
@@ -87,7 +87,7 @@ static uint skipUCCharsRight(uint startPos, const u32string &str)
 /** skip a block of character in a string, (same behaviour than when Ctrl-arrow is pressed)
   * It returns the new index
   */
-static uint skipUCCharsLeft(uint startPos, const u32string &str)
+static uint skipUCCharsLeft(uint startPos, const ::u32string &str)
 {
 	uint pos = startPos;
 	-- pos;
@@ -363,7 +363,7 @@ class CAHEditPreviousLine : public CAHEdit
 		if (_GroupEdit->getMaxHistoric() && (! _GroupEdit->getViewText()->getMultiLine()))
 		{
 			// Get the start of the string.
-			u32string	startStr= _GroupEdit->getInputStringRef().substr(0, _GroupEdit->getCursorPos());
+			::u32string	startStr= _GroupEdit->getInputStringRef().substr(0, _GroupEdit->getCursorPos());
 
 			// Search all historic string that match startStr.
 			for(sint i=_GroupEdit->getCurrentHistoricIndex()+1;i<(sint)_GroupEdit->getNumHistoric();i++)
@@ -435,7 +435,7 @@ class CAHEditNextLine : public CAHEdit
 		if( (! _GroupEdit->getViewText()->getMultiLine()) && _GroupEdit->getMaxHistoric() && _GroupEdit->getCurrentHistoricIndex()>0)
 		{
 			// Get the start of the string.
-			u32string	startStr= _GroupEdit->getInputStringRef().substr(0, _GroupEdit->getCursorPos());
+			::u32string	startStr= _GroupEdit->getInputStringRef().substr(0, _GroupEdit->getCursorPos());
 
 			// Search all historic string that match startStr.
 			for(sint i=_GroupEdit->getCurrentHistoricIndex()-1;i>=0;i--)
@@ -521,8 +521,8 @@ protected:
 		// else cut forwards
 		else if(_GroupEdit->getCursorPos() < (sint32) _GroupEdit->getInputStringRef().length())
 		{
-			u32string inputString = _GroupEdit->getInputStringRef();
-			u32string::iterator it = inputString.begin() + _GroupEdit->getCursorPos();
+			::u32string inputString = _GroupEdit->getInputStringRef();
+			::u32string::iterator it = inputString.begin() + _GroupEdit->getCursorPos();
 			inputString.erase(it);
 			_GroupEdit->setInputStringRef (inputString);
 			if (!_GroupEdit->getAHOnChange().empty())
@@ -660,7 +660,7 @@ class CAHEditExpandOrCycleTell : public CAHEdit
 		else
 		{
 			// it is not a filtered chat, display 'tell' (must be ingame)
-			_GroupEdit->setCommand(ucstring("tell ") + *lastTellPeople + (ucchar) ' ', false);
+			_GroupEdit->setCommand("tell " + (*lastTellPeople).toUtf8() + ' ', false);
 		}
 	}
 };

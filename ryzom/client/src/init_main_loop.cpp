@@ -1714,6 +1714,6 @@ void initBloomConfigUI()
 	else
 	{
 		if(group)
-			group->setDefaultContextHelp(ucstring(""));
+			group->setDefaultContextHelp(std::string());
 	}
 }

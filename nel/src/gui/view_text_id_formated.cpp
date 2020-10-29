@@ -37,7 +37,7 @@ namespace NLGUI
 	{
 		if (name == "format")
 		{
-			return getFormatString().toUtf8();
+			return getFormatString();
 		}
 		else
 			return CViewTextID::getProperty(name);
@@ -47,7 +47,7 @@ namespace NLGUI
 	{
 		if (name == "format")
 		{
-			setFormatString(ucstring::makeFromUtf8(value));
+			setFormatString(value);
 			return;
 		}
 		else
@@ -61,7 +61,7 @@ namespace NLGUI
 			return NULL;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_id_formated" );
-		xmlSetProp( node, BAD_CAST "format", BAD_CAST getFormatString().toUtf8().c_str() );
+		xmlSetProp( node, BAD_CAST "format", BAD_CAST getFormatString().c_str() );
 
 		return node;
 	}
@@ -72,9 +72,9 @@ namespace NLGUI
 		if (!CViewTextID::parse(cur, parentGroup)) return false;
 		CXMLAutoPtr prop((const char*) xmlGetProp( cur, (xmlChar*)"format" ));
 		if (prop)
-			setFormatString(ucstring::makeFromUtf8((const char *)prop));
+			setFormatString((const char *)prop);
 		else
-			setFormatString(ucstring("$t"));
+			setFormatString("$t");
 		return true;
 	}
 
@@ -89,15 +89,15 @@ namespace NLGUI
 
 		if (!_Initialized)
 		{
-			ucstring result, formatedResult;
+			std::string result, formatedResult;
 			bool bValid;
 
 			if( CViewTextID::getTextProvider() == NULL )
 			{
 				if(!_DBPath.empty())
-					result = ucstring(_DBPath);
+					result = _DBPath;
 				else
-					result = ucstring("Text ID = " + NLMISC::toString(_TextId));
+					result = "Text ID = " + NLMISC::toString(_TextId);
 				bValid = true;
 			}
 			else
@@ -106,7 +106,7 @@ namespace NLGUI
 			}
 			formatedResult = CViewTextFormated::formatString(_FormatString, result);
 			//
-			setText (formatedResult.toUtf8());
+			setText (formatedResult);
 			//
 			if (bValid)
 			{
@@ -117,12 +117,13 @@ namespace NLGUI
 	}
 
 	// ****************************************************************************
-	void CViewTextIDFormated::setFormatString(const ucstring &format)
+	void CViewTextIDFormated::setFormatString(const std::string &format)
 	{
 		_Initialized = false;
-		_FormatString = format;
-		if ( (_FormatString.size()>2) && (_FormatString[0] == 'u') && (_FormatString[1] == 'i'))
-			_FormatString = NLMISC::CI18N::get (format.toString());
+		if (NLMISC::startsWith(format, "ui"))
+			_FormatString = NLMISC::CI18N::get(format);
+		else
+			_FormatString = format;
 	}
 
 }

@@ -1119,10 +1119,10 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 		{
 			word.InfoView->setActive(true);
 			if(i==0)
-				word.InfoView->setText( CI18N::get("uiTextHelpSelectRootBrick").toUtf8() );
+				word.InfoView->setText( CI18N::get("uiTextHelpSelectRootBrick") );
 			else
 				// start effect index at 1 (human readable :) )
-				word.InfoView->setText( CI18N::get("uiTextHelpSelectEffectBrick").toUtf8() + toString(i) );
+				word.InfoView->setText( CI18N::get("uiTextHelpSelectEffectBrick") + toString(i) );
 		}
 	}
 

@@ -122,12 +122,12 @@ namespace NLGUI
 		// retrieve the index of a line from its id (-1 if not found)
 		sint getLineFromId(const std::string &id);
 
-		CViewTextMenu* addLine (const ucstring &name, const std::string &ah,
+		CViewTextMenu* addLine (const std::string &name, const std::string &ah,
 								const std::string &params, const std::string &id="",
 								const std::string &cond = std::string(), const std::string &texture="",
 								bool checkable = false, bool checked = false, bool formatted = false
 							   );
-		CViewTextMenu* addLineAtIndex(uint index, const ucstring &name, const std::string &ah,
+		CViewTextMenu* addLineAtIndex(uint index, const std::string &name, const std::string &ah,
 									  const std::string &params, const std::string &id="",
 									  const std::string &cond = std::string(), const std::string &texture="",
 									  bool checkable = false, bool checked = false, bool formatted = false
@@ -332,12 +332,7 @@ namespace NLGUI
 		virtual void setActive (bool state);
 
 		virtual bool isWindowUnder (sint32 x, sint32 y);
-
-		// add line with a string, for backward compatibility
-		void addLine (const std::string &name, const std::string &ah, const std::string &params,
-					  const std::string &id = std::string(),
-					  const std::string &cond = std::string(), const std::string &texture="",
-					  bool checkable = false, bool checked = false);
+		
 		uint getNumLine() const;
 		void deleteLine(uint index);
 		const std::string getActionHandler(uint lineIndex) const;
@@ -350,12 +345,12 @@ namespace NLGUI
 		void setRightClickHandler(uint lineIndex, const std::string &ah = "");
 		void setRightClickHandlerParam(uint lineIndex, const std::string &params = "");
 
-		void addLine (const ucstring &name, const std::string &ah = "", const std::string &params = "",
+		void addLine (const std::string &name, const std::string &ah = "", const std::string &params = "",
 					  const std::string &id = std::string(),
 					  const std::string &cond = std::string(), const std::string &texture="",
 					  bool checkable = false, bool checked = false
 					 );
-		void addLineAtIndex (uint index, const ucstring &name, const std::string &ah = "", const std::string &params = "",
+		void addLineAtIndex (uint index, const std::string &name, const std::string &ah = "", const std::string &params = "",
 							 const std::string &id = std::string(),
 							 const std::string &cond = std::string(), const std::string &texture="",
 							 bool checkable = false, bool checked = false

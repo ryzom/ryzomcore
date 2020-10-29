@@ -248,7 +248,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::update(CDBGroupListSheetText *pFa
 void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetText *pFather)
 {
 	H_AUTO(CDBGroupListSheetTrade_updateViewText);
-	ucstring text;
+	std::string text;
 	Ctrl->getContextHelp(text);
 	// Append first the type of the sheet to select
 	switch ( Ctrl->getSheetCategory() )
@@ -268,7 +268,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 		if (pOBS != NULL)
 		{
 			STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-			text += string("\n") + pSMC->getOutpostBuildingLocalizedDescription(CSheetId(Ctrl->getSheetId()));
+			text += string("\n") + CUtfStringView(pSMC->getOutpostBuildingLocalizedDescription(CSheetId(Ctrl->getSheetId()))).toUtf8();
 			text += "\n" + CI18N::get("uiBotChatPrice") + NLMISC::formatThousands(toString(pOBS->CostDapper));
 			text += CI18N::get("uiBotChatTime") + toString(pOBS->CostTime/60) + CI18N::get("uiBotChatTimeMinute");
 			if ((pOBS->CostTime % 60) != 0)
@@ -285,15 +285,15 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 		bool melee,range;
 		pPM->getCombatWeaponRestriction(weaponRestriction, Ctrl->getSheetId(),melee,range);
 		// don't add also if no combat restriction
-		if(!weaponRestriction.empty() && weaponRestriction!=CI18N::get("uiawrSF"))
+		if(!weaponRestriction.empty() && weaponRestriction!=CI18N::getAsUtf16("uiawrSF"))
 		{
 			weaponRestriction= CI18N::get("uiPhraseWRHeader") + weaponRestriction;
-			text+= "\n" + weaponRestriction;
+			text+= "\n" + weaponRestriction.toUtf8();
 		}
 	}
 
 	// Get the Text color
-	ucstring colorTag("@{FFFF}");
+	std::string colorTag("@{FFFF}");
 	if(Ctrl->getType() == CCtrlSheetInfo::SheetType_Item)
 	{
 		if(!Ctrl->checkItemRequirement())
@@ -309,7 +309,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 			// Add craft info for MP
 			if(pIS->Family==ITEMFAMILY::RAW_MATERIAL)
 			{
-				ucstring	ipList;
+				string	ipList;
 				pIS->getItemPartListAsText(ipList);
 				if(ipList.empty())
 				{
@@ -412,7 +412,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 							else
 								text+= CI18N::get("uiBotChatRetirePrice") + NLMISC::formatThousands(toString(factor * LastPriceRetire));
 							// set resale time left
-							ucstring	fmt= CI18N::get("uiBotChatResaleTimeLeft");
+							std::string	fmt= CI18N::get("uiBotChatResaleTimeLeft");
 							strFindReplace(fmt, "%d", toString(LastResaleTimeLeft/RYZOM_DAY_IN_HOUR));
 							strFindReplace(fmt, "%h", toString(LastResaleTimeLeft%RYZOM_DAY_IN_HOUR));
 							text+= "\n" + fmt;
@@ -431,7 +431,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 						// else display the name of the vendor (not if this is the player himself, to avoid flood)
 						else if (LastSellerType == BOTCHATTYPE::Resale)
 						{
-							text+= "\n" + CI18N::get("uiBotChatVendorTag") + VendorNameString;
+							text+= "\n" + CI18N::get("uiBotChatVendorTag") + VendorNameString.toUtf8();
 						}
 					}
 				}
@@ -457,7 +457,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 
 	// setup color and text
 	text= colorTag + text;
-	Text->setTextFormatTaged(text.toUtf8());
+	Text->setTextFormatTaged(text);
 }
 
 // ***************************************************************************

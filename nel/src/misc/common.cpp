@@ -594,6 +594,8 @@ NLMISC_CATEGORISED_COMMAND(nel,stohr, "Convert a second number into an human rea
 	return true;
 }
 
+#if 0
+
 std::string toLower(const char *str)
 {
 	if (!str) return "";
@@ -625,6 +627,8 @@ std::string	toLower(const std::string &str)
 	return res;
 }
 
+#endif
+
 char toLower(const char ch)
 {
 	if( (ch >= 'A') && (ch <= 'Z') )
@@ -652,6 +656,8 @@ void toLower(char *str)
 	}
 }
 
+#if 0
+
 std::string toUpper(const std::string &str)
 {
 	string res;
@@ -665,6 +671,8 @@ std::string toUpper(const std::string &str)
 	}
 	return res;
 }
+
+#endif
 
 void toUpper(char *str)
 {
@@ -876,7 +884,7 @@ std::string formatThousands(const std::string& s)
 {
 	sint i, k;
 	sint remaining = (sint)s.length() - 1;
-	static std::string separator = NLMISC::CI18N::get("uiThousandsSeparator").toUtf8();
+	static std::string separator = NLMISC::CI18N::get("uiThousandsSeparator");
 
 	// Don't add separator if the number is < 10k
 	if (remaining < 4) return s;

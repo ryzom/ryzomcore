@@ -45,7 +45,7 @@ namespace NLGUI
 		{
 		public:
 			virtual ~IViewTextFormatter(){}
-			virtual ucstring formatString( const ucstring &inputString, const ucstring &paramString ) = 0;
+			virtual std::string formatString( const std::string &inputString, const std::string &paramString ) = 0;
 		};
 
 		CViewTextFormated (const TCtorParam &param) : CViewText(param)
@@ -55,15 +55,15 @@ namespace NLGUI
 		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
 		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
 		virtual void checkCoords();
-		const  ucstring &getFormatString() const { return _FormatString; }
-		void setFormatString(const ucstring &format);
+		const  std::string &getFormatString() const { return _FormatString; }
+		void setFormatString(const std::string &format);
 
-		static ucstring formatString(const ucstring &inputString, const ucstring &paramString);
+		static std::string formatString(const std::string &inputString, const std::string &paramString);
 
 		static void setFormatter( IViewTextFormatter *formatter ){ textFormatter = formatter; }
 
 	private:
-		ucstring	_FormatString;
+		std::string	_FormatString;
 		static IViewTextFormatter *textFormatter;
 	};
 

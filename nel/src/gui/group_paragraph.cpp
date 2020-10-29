@@ -479,7 +479,7 @@ namespace NLGUI
 			if (NLMISC::startsWith(propPtr, "ui"))
 				addTextChild(CI18N::get(propPtr));
 			else
-				addTextChild(ucstring::makeFromUtf8(propPtr));
+				addTextChild(propPtr);
 		}
 		else
 		{
@@ -495,7 +495,7 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
-	void CGroupParagraph::addTextChild(const ucstring& line, bool multiLine /*= true*/)
+	void CGroupParagraph::addTextChild(const std::string& line, bool multiLine /*= true*/)
 	{
 		const string elid = _Id + ":el" + toString(_IdCounter); ++_IdCounter;
 		CViewText *view= new CViewText (elid, string(""), _Templ.getFontSize(), _Templ.getColor(), _Templ.getShadow());
@@ -503,7 +503,7 @@ namespace NLGUI
 		view->setMultiLine (multiLine);
 		view->setTextMode(_Templ.getTextMode());
 		if (multiLine) view->setMultiLineSpace (_Space);
-		view->setText (line.toUtf8());
+		view->setText (line);
 		// Herit global-coloring
 		view->setModulateGlobalColor(getModulateGlobalColor());
 		addChild (view);
@@ -513,14 +513,14 @@ namespace NLGUI
 
 
 	// ----------------------------------------------------------------------------
-	void CGroupParagraph::addTextChild(const ucstring& line, const CRGBA& textColor, bool multiLine /*= true*/)
+	void CGroupParagraph::addTextChild(const std::string& line, const CRGBA& textColor, bool multiLine /*= true*/)
 	{
 		const string elid = _Id + ":el" + toString(_IdCounter); ++_IdCounter;
 		CViewText *view= new CViewText (elid, string(""), _Templ.getFontSize(), _Templ.getColor(), _Templ.getShadow());
 		view->_Parent = this;
 		view->setMultiLine (multiLine);
 		if (multiLine) view->setMultiLineSpace (_Space);
-		view->setText (line.toUtf8());
+		view->setText (line);
 		view->setColor (textColor);
 		// Herit global-coloring
 		view->setModulateGlobalColor(getModulateGlobalColor());

@@ -148,7 +148,7 @@ namespace NLGUI
 		{
 			const char *propPtr = ptr;
 			if (NLMISC::startsWith(propPtr, "ui"))
-				_EmptyText = CI18N::get(propPtr).toUtf8();
+				_EmptyText = CI18N::get(propPtr);
 			else
 				_EmptyText = propPtr;
 		}

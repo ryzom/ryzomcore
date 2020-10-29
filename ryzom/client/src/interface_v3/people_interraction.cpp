@@ -2593,7 +2593,7 @@ public:
 		{
 			for(uint l = 0; l < pl.PartyChats.size(); ++l)
 			{
-				menu->addLineAtIndex(insertionIndex, pl.PartyChats[l].Window->getTitle(), "chat_target_selected", toString(pl.PartyChats[l].ID));
+				menu->addLineAtIndex(insertionIndex, pl.PartyChats[l].Window->getTitle().toUtf8(), "chat_target_selected", toString(pl.PartyChats[l].ID));
 				++ insertionIndex;
 			}
 		}
@@ -2640,8 +2640,8 @@ public:
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 
 						// replace dynamic channel name and shortcut
-						ucstring res = CI18N::get("uiFilterMenuDynamic");
-						strFindReplace(res, "%channel", title);
+						string res = CI18N::get("uiFilterMenuDynamic");
+						strFindReplace(res, "%channel", title.toUtf8());
 						strFindReplace(res, "%shortcut", s);
 
 						pMenu->addLineAtIndex(5 + insertion_index, res, "chat_target_selected", "dyn"+s, "dyn"+s);
@@ -2940,7 +2940,7 @@ class CHandlerSelectChatSource : public IActionHandler
 			{
 				if (pc[l].Filter != NULL)
 				{
-					menu->addLineAtIndex(insertionIndex, pc[l].Window->getTitle(), FILTER_TOGGLE, toString(pc[l].ID));
+					menu->addLineAtIndex(insertionIndex, pc[l].Window->getTitle().toUtf8(), FILTER_TOGGLE, toString(pc[l].ID));
 					menu->setUserGroupLeft(insertionIndex, createMenuCheckBox(FILTER_TOGGLE, toString(pc[l].ID), pc[l].Filter->isListeningWindow(cw)));
 					++ insertionIndex;
 				}
@@ -2956,7 +2956,7 @@ class CHandlerSelectChatSource : public IActionHandler
 				{
 					ucstring title;
 					STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-					menu->addLineAtIndex(insertionIndex, "["+s+"] " + title, FILTER_TOGGLE, "dyn"+s);
+					menu->addLineAtIndex(insertionIndex, "["+s+"] " + title.toUtf8(), FILTER_TOGGLE, "dyn"+s);
 					menu->setUserGroupLeft(insertionIndex, createMenuCheckBox(FILTER_TOGGLE, "dyn"+s, pi.ChatInput.DynamicChat[i].isListeningWindow(cw)));
 					++insertionIndex;
 				}

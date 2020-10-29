@@ -89,7 +89,7 @@ bool CGroupModalGetKey::handleEvent (const NLGUI::CEventDescriptor &event)
 				// Setup the text !
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 				CViewText *pVT= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId( VIEW_TEXT_KEY ));
-				if (pVT != NULL) pVT->setText(Combo.toUCString().toUtf8());
+				if (pVT != NULL) pVT->setText(Combo.toString());
 
 				// Check if in use
 				CActionsManager *pCurAM = NULL;

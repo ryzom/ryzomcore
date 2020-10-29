@@ -162,7 +162,7 @@ bool CContextualCursor::context(const std::string &contextName, float dist, cons
 				if(cursName.empty())
 					cursor->setString(CI18N::get(functions.cursor));
 				else
-					cursor->setString(cursName);
+					cursor->setString(cursName.toUtf8());
 			}
 		}
 	}

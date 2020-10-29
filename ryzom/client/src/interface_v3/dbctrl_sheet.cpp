@@ -3373,13 +3373,13 @@ void	CDBCtrlSheet::setupItemInfoWaiter()
 }
 
 // ***************************************************************************
-void	CDBCtrlSheet::getContextHelp(ucstring &help) const
+void	CDBCtrlSheet::getContextHelp(std::string &help) const
 {
 	if (getType() == CCtrlSheetInfo::SheetType_Skill)
 	{
 		// just show the name of the skill
 		// the sheet id is interpreted as a skill enum
-		help= STRING_MANAGER::CStringManagerClient::getSkillLocalizedName( (SKILLS::ESkills)_SheetId.getSInt32() );
+		help= CUtfStringView(STRING_MANAGER::CStringManagerClient::getSkillLocalizedName( (SKILLS::ESkills)_SheetId.getSInt32() )).toUtf8();
 	}
 	else if(getType() == CCtrlSheetInfo::SheetType_Macro)
 	{
@@ -3392,7 +3392,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		if (macroName.empty())
 			macroName = CI18N::get("uiNotAssigned");
 
-		ucstring assignedTo = macro->Combo.toUCString();
+		ucstring assignedTo = macro->Combo.toString();
 		if (assignedTo.empty())
 			assignedTo = CI18N::get("uiNotAssigned");
 
@@ -3426,7 +3426,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		strFindReplace(dispText, ucstring("%n"), macroName);
 		strFindReplace(dispText, ucstring("%k"), assignedTo);
 		strFindReplace(dispText, ucstring("%c"), dispCommands);
-		help = dispText;
+		help = dispText.toUtf8();
 	}
 	else if(getType() == CCtrlSheetInfo::SheetType_Item)
 	{
@@ -3437,10 +3437,10 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 			{
 				// call lua function to update tooltip window
 				_ItemInfoWaiter.sendRequest();
-				help = _ItemInfoWaiter.infoValidated();
+				help = _ItemInfoWaiter.infoValidated().toUtf8();
 				// its expected to get at least item name back
 				if (help.empty())
-					help = getItemActualName();
+					help = getItemActualName().toUtf8();
 			}
 			else if (!_ContextHelp.empty())
 			{
@@ -3448,7 +3448,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 			}
 			else
 			{
-				help = getItemActualName();
+				help = getItemActualName().toUtf8();;
 			}
 		}
 		else
@@ -3479,7 +3479,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		CSBrickManager	*pBM= CSBrickManager::getInstance();
 		CSBrickSheet	*brick= pBM->getBrick(CSheetId(getSheetId()));
 		if(brick)
-			help= STRING_MANAGER::CStringManagerClient::getSBrickLocalizedName(brick->Id);
+			help= CUtfStringView(STRING_MANAGER::CStringManagerClient::getSBrickLocalizedName(brick->Id)).toUtf8();
 		else
 			help= _ContextHelp;
 	}
@@ -3488,7 +3488,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		sint32	phraseId= getSheetId();
 		if (phraseId == 0)
 		{
-			help = ucstring();
+			help = std::string();
 		}
 		else
 		{
@@ -3506,10 +3506,11 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 				game = game["game"];
 				game.callMethodByNameNoThrow("updatePhraseTooltip", 1, 1);
 				// retrieve result from stack
-				help = ucstring();
+				ucstring tmpHelp;
 				if (!ls->empty())
 				{
-					CLuaIHM::pop(*ls, help);
+					CLuaIHM::pop(*ls, tmpHelp); // FIXME: Lua UTF-8
+					help = tmpHelp.toUtf8();
 				}
 				else
 				{
@@ -3542,7 +3543,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 	{
 		CSPhraseSheet	*phrase= dynamic_cast<CSPhraseSheet*>(SheetMngr.get(CSheetId(getSheetId())));
 		if(phrase)
-			help= STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedName(phrase->Id);
+			help= CUtfStringView(STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedName(phrase->Id)).toUtf8();
 		else
 			help= _ContextHelp;
 	}
@@ -3550,14 +3551,14 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 	{
 		const COutpostBuildingSheet *outpost = asOutpostBuildingSheet();
 		if (outpost)
-			help = CStringManagerClient::getOutpostBuildingLocalizedName(CSheetId(_SheetId.getSInt32()));
+			help = CUtfStringView(CStringManagerClient::getOutpostBuildingLocalizedName(CSheetId(_SheetId.getSInt32()))).toUtf8();
 		else
 			help = _ContextHelp;
 	}
 }
 
 // ***************************************************************************
-void	CDBCtrlSheet::getContextHelpToolTip(ucstring &help) const
+void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 {
 	// Special case for buff items and spell crystals, only for tooltips
 	if (getType() == CCtrlSheetInfo::SheetType_Item)
@@ -3568,7 +3569,7 @@ void	CDBCtrlSheet::getContextHelpToolTip(ucstring &help) const
 			if (useItemInfoForFamily(item->Family))
 			{
 				_ItemInfoWaiter.sendRequest();
-				help = _ItemInfoWaiter.infoValidated();
+				help = _ItemInfoWaiter.infoValidated().toUtf8();
 				return;
 			}
 		}

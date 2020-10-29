@@ -578,7 +578,7 @@ void checkDriverDepth ()
 #else
 		if (mode.Depth != 16 && mode.Depth != 24 && mode.Depth != 32)
 #endif
-			ExitClientError (CI18N::get ("uiDesktopNotIn32").toUtf8().c_str ());
+			ExitClientError (CI18N::get ("uiDesktopNotIn32").c_str ());
 	}
 }
 
@@ -1060,7 +1060,7 @@ void prelogInit()
 
 		if(Driver == NULL)
 		{
-			ExitClientError (CI18N::get ("Can_t_load_the_display_driver").toUtf8().c_str ());
+			ExitClientError (CI18N::get ("Can_t_load_the_display_driver").c_str ());
 			// ExitClientError() call exit() so the code after is never called
 			return;
 		}
@@ -1151,14 +1151,14 @@ void prelogInit()
 			string msg;
 			if (mode.Windowed)
 			{
-				msg = CI18N::get ("can_t_create_a_window_display").toUtf8();
+				msg = CI18N::get ("can_t_create_a_window_display");
 			}
 			else
 			{
-				msg = CI18N::get ("can_t_create_a_fullscreen_display").toUtf8();
+				msg = CI18N::get ("can_t_create_a_fullscreen_display");
 			}
 			msg += " (%dx%d %d ";
-			msg += CI18N::get ("bits").toUtf8 ();
+			msg += CI18N::get ("bits");
 			msg += ")";
 			ExitClientError (msg.c_str (), mode.Width, mode.Height, mode.Depth);
 			// ExitClientError() call exit() so the code after is never called

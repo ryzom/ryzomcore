@@ -837,13 +837,13 @@ class CAHGuildSheetOpen : public IActionHandler
 				if (pViewGrade != NULL)
 				{
 					if (rGuildMembers[i].Grade == EGSPD::CGuildGrade::Leader)
-						pViewGrade->setText (CI18N::get("uiGuildLeader").toUtf8());
+						pViewGrade->setText (CI18N::get("uiGuildLeader"));
 					else if (rGuildMembers[i].Grade == EGSPD::CGuildGrade::HighOfficer)
-						pViewGrade->setText (CI18N::get("uiGuildHighOfficer").toUtf8());
+						pViewGrade->setText (CI18N::get("uiGuildHighOfficer"));
 					else if (rGuildMembers[i].Grade == EGSPD::CGuildGrade::Officer)
-						pViewGrade->setText (CI18N::get("uiGuildOfficer").toUtf8());
+						pViewGrade->setText (CI18N::get("uiGuildOfficer"));
 					else
-						pViewGrade->setText (CI18N::get("uiGuildMember").toUtf8());
+						pViewGrade->setText (CI18N::get("uiGuildMember"));
 				}
 
 				// online?

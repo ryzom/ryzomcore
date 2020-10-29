@@ -60,7 +60,7 @@ const std::string& toString( ERole r );
 ERole toRoleId( const std::string& Role );
 
 // Return the Translated name of the Job
-const ucstring &roleToUCString (ERole r);
+const std::string &roleToUCString (ERole r);
 
 } // ROLES
 

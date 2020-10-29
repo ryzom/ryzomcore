@@ -45,7 +45,7 @@ namespace NLGUI
 	// Compare strings
 	static inline bool lt_text(const std::pair<int,std::string> &s1, const std::pair<int,std::string> &s2)
 	{
-		return toLowerAsUtf8(s1.second) < toLowerAsUtf8(s2.second);
+		return toLower(s1.second) < toLower(s2.second);
 	}
 
 	std::string CDBGroupComboBox::measureMenu;
@@ -184,7 +184,7 @@ namespace NLGUI
 				{
 					const char *propPtr = name;
 					if (NLMISC::startsWith(propPtr, "ui"))
-						addText(CI18N::get(propPtr).toUtf8());
+						addText(CI18N::get(propPtr));
 					else
 						addText(propPtr);
 				}
@@ -668,7 +668,7 @@ namespace NLGUI
 				{
 					checkable = true;
 				}
-				groupMenu->addLine(ucstring::makeFromUtf8(getText(i)), "combo_box_select_end", toString(i),
+				groupMenu->addLine(getText(i), "combo_box_select_end", toString(i),
 					"", std::string(), getTexture(i), checkable);
 				groupMenu->setGrayedLine(i, getGrayed(i));
 			}

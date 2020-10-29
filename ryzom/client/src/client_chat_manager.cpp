@@ -1175,9 +1175,9 @@ class CHandlerTell : public IActionHandler
 	void execute (CCtrlBase *pCaller, const std::string &sParams)
 	{
 		string receiver = getParam (sParams, "player");
-		ucstring message;
-		message.fromUtf8(getParam (sParams, "text"));
-//		message = getParam (sParams, "text");
+		string message;
+		message = getParam (sParams, "text");
+
 		if (receiver.empty() || message.empty())
 			return;
 
@@ -1193,10 +1193,10 @@ class CHandlerTell : public IActionHandler
 		// display in the good window
 		CInterfaceProperty prop;
 		prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
-		ucstring finalMsg;
+		string finalMsg;
 		CChatWindow::encodeColorTag(prop.getRGBA(), finalMsg, false);
 
-		ucstring csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
+		string csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
 		finalMsg += csr + CI18N::get("youTell") + ": ";
 		prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 		CChatWindow::encodeColorTag(prop.getRGBA(), finalMsg, true);
@@ -1205,7 +1205,7 @@ class CHandlerTell : public IActionHandler
 //		TDataSetIndex dsi; // not used ....
 		PeopleInterraction.ChatInput.Tell.displayTellMessage(/*dsi, */finalMsg, receiver, prop.getRGBA());
 
-		ucstring s = CI18N::get("youTellPlayer");
+		string s = CI18N::get("youTellPlayer");
 		strFindReplace(s, "%name", receiver);
 		strFindReplace(finalMsg, CI18N::get("youTell"), s);
 		CInterfaceManager::getInstance()->log(finalMsg, CChatGroup::groupTypeToString(CChatGroup::tell));
@@ -1340,9 +1340,7 @@ class CHandlerTalk : public IActionHandler
 		// Param
 		uint mode;
 		fromString(getParam (sParams, "mode"), mode);
-		ucstring text;
-		text.fromUtf8 (getParam (sParams, "text"));
-//		text = getParam (sParams, "text");
+		string text = getParam (sParams, "text");
 
 		// Parse any tokens in the text
 		if ( ! CInterfaceManager::parseTokens(text))
@@ -1355,7 +1353,7 @@ class CHandlerTalk : public IActionHandler
 		{
 			if(text[0] == '/')
 			{
-				string str = text.toUtf8();
+				string str = text;
 				string cmdWithArgs = str.substr(1);
 
 				// Get the command name from the string, can contain spaces

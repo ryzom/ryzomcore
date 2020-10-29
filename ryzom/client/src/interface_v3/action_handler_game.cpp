@@ -2071,9 +2071,9 @@ class CActionHandlerSetTargetName : public IActionHandler
 			}
 			// Set to target
 			CInterfaceExprValue evUCStr;
-			evUCStr.setUCString(TargetName);
+			evUCStr.setString(TargetName.toUtf8());
 			CInterfaceLink::setTargetProperty(sNameTarget, evUCStr);
-			evUCStr.setUCString(TargetTitle);
+			evUCStr.setString(TargetTitle.toUtf8());
 			CInterfaceLink::setTargetProperty(sTitleTarget, evUCStr);
 		}
 	}
@@ -2113,7 +2113,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 			pVBR->setColor(CRGBA(0,0,0,0));
 
 			if (pTooltip)
-				pTooltip->setDefaultContextHelp(ucstring(""));
+				pTooltip->setDefaultContextHelp(std::string());
 
 			return;
 		}
@@ -2166,7 +2166,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 				pVBR->setColor(CRGBA(0,0,0,0));
 
 				if (pTooltip)
-					pTooltip->setDefaultContextHelp(ucstring(""));
+					pTooltip->setDefaultContextHelp(std::string());
 
 				return;
 			}
@@ -2191,7 +2191,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 		CCtrlBase *tooltip = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:target:header_opened:force"));
 		if (tooltip)
 		{
-			ucstring str;
+			string str;
 
 			if (nForceRegion == 1)
 				nForceRegion = 2;
@@ -3091,10 +3091,10 @@ public:
 		if( pCB )
 		{
 			pCB->resetTexts();
-			pCB->addText(CI18N::get("uigcLowTextureMode").toUtf8());
-			pCB->addText(CI18N::get("uigcNormalTextureMode").toUtf8());
+			pCB->addText(CI18N::get("uigcLowTextureMode"));
+			pCB->addText(CI18N::get("uigcNormalTextureMode"));
 			if(ClientCfg.HDTextureInstalled)
-				pCB->addText(CI18N::get("uigcHighTextureMode").toUtf8());
+				pCB->addText(CI18N::get("uigcHighTextureMode"));
 		}
 
 		// Anisotropic Filtering
@@ -3107,7 +3107,7 @@ public:
 			sint maxAnisotropic = (sint)Driver->getAnisotropicFilterMaximum();
 
 			pCB->resetTexts();
-			pCB->addText(CI18N::get("uigcFxAnisotropicFilterNone").toUtf8());
+			pCB->addText(CI18N::get("uigcFxAnisotropicFilterNone"));
 
 			sint anisotropic = 2;
 			uint i = 1;
@@ -4047,7 +4047,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "HP", SCORES::hit_points, "uittPlayerLifeFormat");
 
-		CWidgetManager::getInstance()->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTLife, "player_tt_life");
@@ -4064,7 +4064,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "STA", SCORES::stamina, "uittPlayerStaminaFormat");
 
-		CWidgetManager::getInstance()->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTStamina, "player_tt_stamina");
@@ -4081,7 +4081,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "SAP", SCORES::sap, "uittPlayerSapFormat");
 
-		CWidgetManager::getInstance()->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTSap, "player_tt_sap");
@@ -4098,7 +4098,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "FOCUS", SCORES::focus, "uittPlayerFocusFormat");
 
-		CWidgetManager::getInstance()->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTFocus, "player_tt_focus");
@@ -4128,7 +4128,7 @@ public:
 		ucstring	str= CI18N::get("uittBulkFormat");
 		strFindReplace(str, "%v", toString("%.2f", val) );
 		strFindReplace(str, "%m", toString(maxVal) );
-		CWidgetManager::getInstance()->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerGetTTBulk, "get_tt_bulk");

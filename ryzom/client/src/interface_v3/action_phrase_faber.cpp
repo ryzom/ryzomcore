@@ -1790,7 +1790,7 @@ void	CActionPhraseFaber::updateItemResult()
 				uint	sv= uint(statArray[i]*100);
 				if(statTitle)
 				{
-					statTitle->setText(RM_FABER_STAT_TYPE::toLocalString(statType).toUtf8());
+					statTitle->setText(RM_FABER_STAT_TYPE::toLocalString(statType));
 					statTitle->setColor(usageColor);
 				}
 				if(statValueBar)
@@ -1812,7 +1812,7 @@ void	CActionPhraseFaber::updateItemResult()
 							RM_FABER_STAT_TYPE::isMagicProtectStat(RM_FABER_STAT_TYPE::TRMStatType(i)) )
 							statToolTip->setDefaultContextHelp(CI18N::get("uiFaberStatActive"));
 						else
-							statToolTip->setDefaultContextHelp(ucstring());
+							statToolTip->setDefaultContextHelp(std::string());
 					}
 					else
 						statToolTip->setDefaultContextHelp(CI18N::get("uiFaberStatGrayed"));

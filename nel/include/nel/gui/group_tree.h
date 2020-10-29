@@ -60,7 +60,7 @@ namespace NLGUI
 			bool				Show;			// If false, the node is not displayed (true default, Root ignored)
 			sint32				YDecal;
 			// Text
-			ucstring			Text;			// Internationalized displayed text
+			std::string			Text;			// Internationalized displayed text
 			sint32				FontSize;		// If -1 (default), then take the groupTree one
 			NLMISC::CRGBA		Color;
 			// Template
@@ -112,8 +112,10 @@ namespace NLGUI
 			std::string getBitmap() const { return Bitmap; }
 			void setOpened(bool opened) { Opened = opened; }
 			bool getOpened() const { return Opened; }
-			void setText(const ucstring &text) { Text = text; }
-			const ucstring& getText() const { return Text; }
+			void setText(const std::string &text) { Text = text; }
+			const std::string& getText() const { return Text; }
+			void setTextAsUtf16(const ucstring &text) { Text = text.toUtf8(); }
+			ucstring getTextAsUtf16() const { return ucstring::makeFromUtf8(Text); }
 			sint32 getFontSize() const { return FontSize; }
 			void setFontSize(sint32 value) { FontSize = value; }
 			sint32 getYDecal() const { return YDecal; }
@@ -181,7 +183,7 @@ namespace NLGUI
 				REFLECT_STRING("AHParamsClose", getAHParamsClose, setAHParamsClose);
 				REFLECT_BOOL("Opened", getOpened, setOpened);
 				REFLECT_BOOL("Show", getShow, setShow);
-				REFLECT_UCSTRING_REF("Text", getText, setText);
+				REFLECT_UCSTRING("Text", getTextAsUtf16, setTextAsUtf16); // FIXME: Lua UTF-8
 				// lua
 				REFLECT_LUA_METHOD("getNumChildren", luaGetNumChildren);
 				REFLECT_LUA_METHOD("getChild", luaGetChild);

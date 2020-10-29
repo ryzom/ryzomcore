@@ -393,9 +393,9 @@ public:
 	NLMISC::CRGBA			getSheetColor() const {return _SheetColor;}
 
 	/// Special ContextHelp for ctrl sheet.
-	virtual void			getContextHelp(ucstring &help) const;
+	virtual void			getContextHelp(std::string &help) const;
 
-	virtual void			getContextHelpToolTip(ucstring &help) const;
+	virtual void			getContextHelpToolTip(std::string &help) const;
 
 
 	/** true if an item of another ctrlSheet can be dropped on this slot.

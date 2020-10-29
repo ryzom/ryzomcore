@@ -38,15 +38,18 @@ using namespace std;
 
 namespace NLMISC {
 
-CI18N::StrMapContainer	CI18N::_StrMap;
-CI18N::StrMapContainer	CI18N::_StrMapFallback;
-bool					CI18N::_StrMapLoaded = false;
-const ucstring			CI18N::_NotTranslatedValue("<Not Translated>");
+CI18N::StrMapContainer		CI18N::_StrMap;
+CI18N::StrMapContainer		CI18N::_StrMapFallback;
+CI18N::StrMapContainer16	CI18N::_StrMap16;
+CI18N::StrMapContainer16	CI18N::_StrMapFallback16;
+bool						CI18N::_StrMapLoaded = false;
+const ucstring				CI18N::_NotTranslatedValue16("<Not Translated>");
+const std::string			CI18N::_NotTranslatedValue("<Not Translated>");
 bool					CI18N::_LanguagesNamesLoaded = false;
 string					CI18N::_SelectedLanguageCode;
 CI18N::ILoadProxy		*CI18N::_LoadProxy = 0;
 vector<string>			CI18N::_LanguageCodes;
-vector<ucstring>		CI18N::_LanguageNames;
+vector<std::string>		CI18N::_LanguageNames;
 std::string				CI18N::_SystemLanguageCode;
 bool CI18N::noResolution = false;
 
@@ -65,17 +68,17 @@ void CI18N::initLanguages()
 		_LanguageCodes.push_back("ru");
 		_LanguageCodes.push_back("es");
 
-		_LanguageNames.push_back(ucstring("English"));
-		_LanguageNames.push_back(ucstring("French"));
-		_LanguageNames.push_back(ucstring("German"));
-		_LanguageNames.push_back(ucstring("Russian"));
-		_LanguageNames.push_back(ucstring("Spanish"));
+		_LanguageNames.push_back("English");
+		_LanguageNames.push_back("French");
+		_LanguageNames.push_back("German");
+		_LanguageNames.push_back("Russian");
+		_LanguageNames.push_back("Spanish");
 
 		_LanguagesNamesLoaded = true;
 	}
 }
 
-const std::vector<ucstring> &CI18N::getLanguageNames()
+const std::vector<std::string> &CI18N::getLanguageNames()
 {
 	initLanguages();
 
@@ -91,19 +94,27 @@ const std::vector<std::string> &CI18N::getLanguageCodes()
 
 void CI18N::load (const string &languageCode, const string &fallbackLanguageCode)
 {
-	if (_StrMapLoaded)	_StrMap.clear ();
-	else				_StrMapLoaded = true;
+	if (_StrMapLoaded)
+	{
+		_StrMap.clear();
+		_StrMap16.clear();
+	}
+	else
+	{
+		_StrMapLoaded = true;
+	}
 	_SelectedLanguageCode = languageCode;
-	loadFileIntoMap(languageCode + ".uxt", _StrMap);
+	loadFileIntoMap(languageCode + ".uxt", _StrMap, _StrMap16);
 
 	_StrMapFallback.clear();
+	_StrMapFallback16.clear();
 	if(!fallbackLanguageCode.empty())
 	{
-		loadFileIntoMap(fallbackLanguageCode + ".uxt", _StrMapFallback);
+		loadFileIntoMap(fallbackLanguageCode + ".uxt", _StrMapFallback, _StrMapFallback16);
 	}
 }
 
-bool CI18N::loadFileIntoMap(const string &fileName, StrMapContainer &destMap)
+bool CI18N::loadFileIntoMap(const string &fileName, StrMapContainer &destMap, StrMapContainer16 &destMap16)
 {
 	ucstring text;
 	// read in the text
@@ -138,11 +149,12 @@ bool CI18N::loadFileIntoMap(const string &fileName, StrMapContainer &destMap)
 
 		// ok, a line read.
 		pair<map<string, ucstring>::iterator, bool> ret;
-		ret = destMap.insert(make_pair(label, ucs));
+		ret = destMap16.insert(make_pair(label, ucs));
 		if (!ret.second)
 		{
 			nlwarning("I18N: Error in %s, the label %s exists twice !", fileName.c_str(), label.c_str());
 		}
+		destMap.insert(make_pair(label, ucs.toUtf8()));
 		skipWhiteSpace(first, last);
 	}
 
@@ -152,13 +164,15 @@ bool CI18N::loadFileIntoMap(const string &fileName, StrMapContainer &destMap)
 	{
 		nlwarning("I18N: In file %s, missing LanguageName translation (should be first in file)", fileName.c_str());
 	}
+	nlassert(destMap.size() == destMap16.size());
 	return true;
 }
 
 void CI18N::loadFromFilename(const string &filename, bool reload)
 {
 	StrMapContainer destMap;
-	if (!loadFileIntoMap(filename, destMap))
+	StrMapContainer16 destMap16;
+	if (!loadFileIntoMap(filename, destMap, destMap16))
 	{
 		return;
 	}
@@ -167,16 +181,52 @@ void CI18N::loadFromFilename(const string &filename, bool reload)
 	{
 		if (!reload)
 		{
-			if (_StrMap.count(it->first))
+			if (_StrMap16.count(it->first))
 			{
 				nlwarning("I18N: Error in %s, the label %s exist twice !", filename.c_str(), it->first.c_str());
 			}
 		}
+		_StrMap16[it->first] = ucstring::makeFromUtf8(it->second);
 		_StrMap[it->first] = it->second;
 	}
 }
 
-const ucstring &CI18N::get (const string &label)
+const std::string &CI18N::get(const string &label)
+{
+	if (noResolution)
+	{
+		return label;
+	}
+
+	if (label.empty())
+	{
+		static const std::string empty;
+		return empty;
+	}
+
+	StrMapContainer::iterator it(_StrMap.find(label));
+
+	if (it != _StrMap.end())
+		return it->second;
+
+	static CHashSet<string> missingStrings;
+	if (missingStrings.find(label) == missingStrings.end())
+	{
+		nlwarning("I18N: The string %s did not exist in language %s (display once)", label.c_str(), _SelectedLanguageCode.c_str());
+		missingStrings.insert(label);
+	}
+
+	// use the fall back language if it exists
+	it = _StrMapFallback.find(label);
+	if (it != _StrMapFallback.end())
+		return it->second;
+
+	static std::string badString;
+	badString = string("<NotExist:") + label + ">";
+	return badString;
+}
+
+const ucstring &CI18N::getAsUtf16 (const string &label)
 {
 	if( noResolution )
 	{
@@ -187,13 +237,13 @@ const ucstring &CI18N::get (const string &label)
 
 	if (label.empty())
 	{
-		static ucstring	emptyString;
+		static const ucstring emptyString;
 		return emptyString;
 	}
 
-	StrMapContainer::iterator it(_StrMap.find(label));
+	StrMapContainer16::iterator it(_StrMap16.find(label));
 
-	if (it != _StrMap.end())
+	if (it != _StrMap16.end())
 		return it->second;
 
 	static CHashSet<string>	missingStrings;
@@ -204,8 +254,8 @@ const ucstring &CI18N::get (const string &label)
 	}
 
 	// use the fall back language if it exists
-	it = _StrMapFallback.find(label);
-	if (it != _StrMapFallback.end())
+	it = _StrMapFallback16.find(label);
+	if (it != _StrMapFallback16.end())
 		return it->second;
 
 	static ucstring	badString;
@@ -229,7 +279,7 @@ bool CI18N::hasTranslation(const string &label)
 	return false;
 }
 
-ucstring CI18N::getCurrentLanguageName ()
+std::string CI18N::getCurrentLanguageName ()
 {
 	return get("LanguageName");
 }
@@ -379,7 +429,7 @@ std::string CI18N::getSystemLanguageCode ()
 			// locales names are different under Windows, for example: French_France.1252
 			for(uint i = 0; i < _LanguageNames.size(); ++i)
 			{
-				std::string name = _LanguageNames[i].toUtf8();
+				std::string name = _LanguageNames[i];
 
 				// so we compare the language name with the supported ones
 				if (lang.compare(0, name.length(), name) == 0)
@@ -439,7 +489,7 @@ bool CI18N::setSystemLanguageCode (const std::string &languageCode)
 		// check if language name is supported
 		for(uint i = 0; i < _LanguageNames.size(); ++i)
 		{
-			std::string name = NLMISC::toLower(_LanguageNames[i].toUtf8());
+			std::string name = NLMISC::toLower(_LanguageNames[i]);
 
 			if (name == lang)
 			{

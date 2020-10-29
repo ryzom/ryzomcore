@@ -77,7 +77,7 @@ void CDBGroupListSheetTextPhrase::CSheetChildPhrase::init(CDBGroupListSheetText 
 // ***************************************************************************
 void CDBGroupListSheetTextPhrase::CSheetChildPhrase::updateViewText(CDBGroupListSheetText * /* pFather */)
 {
-	ucstring	text;
+	std::string	text;
 	if(Ctrl->getType()!=CCtrlSheetInfo::SheetType_SPhrase)
 		return;
 
@@ -87,14 +87,14 @@ void CDBGroupListSheetTextPhrase::CSheetChildPhrase::updateViewText(CDBGroupList
 	// append the level if possible
 	if(LevelDB)
 	{
-		ucstring	fmt= CI18N::get("uiPhraseLevelFmt");
+		std::string	fmt= CI18N::get("uiPhraseLevelFmt").toUtf8();
 		strFindReplace(fmt, "%d", toString(LevelCache));
 		text+= "\n" + fmt;
 	}
 #endif
 
 	// set
-	Text->setText(text.toUtf8());
+	Text->setText(text);
 }
 
 

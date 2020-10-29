@@ -2046,9 +2046,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 				std::string name = groupNames[i];
 				std::string ahParams = "name=" + name;
 				//Use ucstring because group name can contain accentued characters (and stuff like that)
-				ucstring nameUC;
-				nameUC.fromUtf8(name);
-				pGroupMenu->addLine(nameUC, "", "", name);
+				pGroupMenu->addLine(name, "", "", name);
 				CGroupSubMenu* pNewSubMenu = new CGroupSubMenu(CViewBase::TCtorParam());
 				pGroupMenu->setSubMenu(pGroupMenu->getNumLine()-1, pNewSubMenu);
 				if(pNewSubMenu)
@@ -2074,7 +2072,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 						{
 							//there is an offset of 1 because TInventory names are pet_animal1/2/3/4
 							std::string dst = toString("destination=pet_animal%d|", j + 1);
-							CViewTextMenu* tmp = pNewSubMenu->addLine(ucstring(pMoveToPa[j]->getHardText()),"item_group_move",  dst + ahParams, name + toString("_pa%d", j + 1));
+							CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToPa[j]->getHardText(),"item_group_move",  dst + ahParams, name + toString("_pa%d", j + 1));
 							if(tmp) tmp->setGrayed(pMoveToPa[j]->getGrayed());
 						}
 					}

@@ -91,7 +91,7 @@ private:
 	private:
 		CInstance			&_Instance;
 	protected:
-		virtual void		getContextHelp(ucstring &help) const;
+		virtual void		getContextHelp(std::string &help) const;
 		bool				emptyContextHelp() const { return true; }
 		bool				wantInstantContextHelp() const { return true; }
 		virtual	bool		isCapturable() const { return false; }

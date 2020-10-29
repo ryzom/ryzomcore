@@ -354,12 +354,12 @@ void CProgress::internalProgress (float value)
 
 					// Print some more info
 					uint32 day = RT.getRyzomDay();
-					str = toString (CI18N::get ("uiTipsTeleport").toUtf8().c_str(),
-						CI18N::get (LoadingContinent->LocalizedName).toUtf8().c_str(),
+					str = toString (CI18N::get ("uiTipsTeleport").c_str(),
+						CI18N::get (LoadingContinent->LocalizedName).c_str(),
 						day,
 						(uint)RT.getRyzomTime(),
-						CI18N::get ("uiSeason"+toStringEnum(CRyzomTime::getSeasonByDay(day))).toUtf8().c_str(),
-						CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName).toUtf8().c_str());
+						CI18N::get ("uiSeason"+toStringEnum(CRyzomTime::getSeasonByDay(day))).c_str(),
+						CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName).c_str());
 					ucstring ucstr;
 					ucstr.fromUtf8 (str);
 					TextContext->setHotSpot(UTextContext::MiddleBottom);

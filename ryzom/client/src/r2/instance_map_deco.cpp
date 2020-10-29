@@ -40,11 +40,12 @@ namespace R2
 {
 
 // *********************************************************************************************************
-void CInstanceMapDeco::CCtrlButtonEntity::getContextHelp(ucstring &help) const
+void CInstanceMapDeco::CCtrlButtonEntity::getContextHelp(std::string &help) const
 {
 	//H_AUTO(R2_CCtrlButtonEntity_getContextHelp)
-	help = _Instance.getDisplayName();
-	if (help == NLMISC::CI18N::get("uiR2EDNoName")) help.clear();
+	help = _Instance.getDisplayName().toUtf8();
+	if (help == NLMISC::CI18N::get("uiR2EDNoName"))
+		help.clear();
 }
 
 // *********************************************************************************************************

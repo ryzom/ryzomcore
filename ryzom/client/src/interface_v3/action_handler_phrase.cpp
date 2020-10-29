@@ -1668,7 +1668,7 @@ static DECLARE_INTERFACE_USER_FCT(getSPhraseName)
 			return false;
 		sint	sphraseId= (sint)args[0].getInteger();
 		CSPhraseManager		*pPM= CSPhraseManager::getInstance();
-		result.setUCString(pPM->getPhrase(sphraseId).Name);
+		result.setString(pPM->getPhrase(sphraseId).Name.toUtf8());
 		return true;
 	}
 	else
@@ -1699,7 +1699,7 @@ public:
 		else
 			strFindReplace(str, "%comp", CI18N::get("uittPhraseCombatRestrictOK"));
 
-		CWidgetManager::getInstance()->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerCombatRestrictTooltip, "phrase_combat_restrict_tooltip");

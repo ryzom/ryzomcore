@@ -222,7 +222,7 @@ namespace NLGUI
 		int luaSetLineMaxW(CLuaState &ls);
 
 		REFLECT_EXPORT_START(CViewText, CViewBase)
-			REFLECT_STRING("text", getText, setText);
+			REFLECT_STRING("text_raw", getText, setText);
 			REFLECT_STRING("hardtext", getHardText, setHardText);
 			// REFLECT_UCSTRING("uc_text", getTextAsUtf16, setTextAsUtf16); // Deprecate uc_ functions
 			REFLECT_UCSTRING("uc_hardtext", getHardTextAsUtf16, setHardTextAsUtf16);
@@ -262,8 +262,8 @@ namespace NLGUI
 		// width of the font in pixel. Just a Hint for tabing format (computed with '_')
 		float	_FontWidth;
 		// strings to use when computing font size
-		ucstring _FontSizingChars;
-		ucstring _FontSizingFallback;
+		::u32string _FontSizingChars;
+		::u32string _FontSizingFallback;
 		// height of the font in pixel.
 		// use getFontHeight
 		float	_FontHeight;
@@ -465,7 +465,7 @@ namespace NLGUI
 		void	addDontClipWordLine(std::vector<CWord> &currLine);
 
 		// FormatTag build.
-		static void		buildFormatTagText(const std::string &text, std::string &textBuild, std::vector<CFormatTag> &formatTags, std::vector<ucstring> &tooltips);
+		static void		buildFormatTagText(const std::string &text, std::string &textBuild, std::vector<CFormatTag> &formatTags, std::vector<std::string> &tooltips);
 		// FormatTag parsing.
 		bool			isFormatTagChange(uint textIndex, uint ctIndex) const;
 		void			getFormatTagChange(uint textIndex, uint &ctIndex, CFormatInfo &wordFormat) const;

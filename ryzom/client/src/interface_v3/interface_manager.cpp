@@ -324,12 +324,12 @@ class CStringManagerTextProvider : public CViewTextID::IViewTextProvider
 class CRyzomTextFormatter : public CViewTextFormated::IViewTextFormatter
 {
 public:
-	ucstring formatString( const ucstring &inputString, const ucstring &paramString )
+	std::string formatString( const std::string &inputString, const std::string &paramString )
 	{
-		ucstring formatedResult;
+		std::string formatedResult;
 
 		// Apply the format
-		for(ucstring::const_iterator it = inputString.begin(); it != inputString.end();)
+		for(std::string::const_iterator it = inputString.begin(); it != inputString.end();)
 		{
 			if (*it == '$')
 			{
@@ -347,14 +347,15 @@ public:
 				case 'p':  // add player name
 					if (ClientCfg.Local)
 					{
-						formatedResult += ucstring("player");
+						if (*it == 'P') formatedResult += "PLAYER";
+						else formatedResult += "Player";
 					}
 					else
 					{
 						if(UserEntity)
 						{
-							ucstring name = UserEntity->getEntityName();
-							if (*it == 'P') setCase(name, CaseUpper);
+							std::string name = UserEntity->getEntityName().toUtf8();
+							if (*it == 'P') name = toUpper(name);
 							formatedResult += name;
 						}
 					}
@@ -363,11 +364,11 @@ public:
 				case 's':
 				case 'b': // add bot name
 					{
-						ucstring botName;
+						string botName;
 						bool womanTitle = false;
 						if (ClientCfg.Local)
 						{
-							botName = ucstring("NPC");
+							botName = "NPC";
 						}
 						else
 						{
@@ -387,7 +388,7 @@ public:
 									}
 									else
 									{
-										botName = entity->getDisplayName();
+										botName = entity->getDisplayName().toUtf8();
 									}
 									CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(entity);
 									if (pChar != NULL)
@@ -396,40 +397,40 @@ public:
 							}
 						}
 						// get the title translated
-						ucstring sTitleTranslated = botName;
+						ucstring sTitleTranslated = botName; // FIXME: UTF-8
 						CStringPostProcessRemoveName spprn;
 						spprn.Woman = womanTitle;
 						spprn.cbIDStringReceived(sTitleTranslated);
 
-						botName = CEntityCL::removeTitleAndShardFromName(botName);
+						botName = CEntityCL::removeTitleAndShardFromName(botName).toUtf8();
 
 						// short name (with no title such as 'guard', 'merchant' ...)
 						if (*it == 's')
 						{
 							// But if there is no name, display only the title
 							if (botName.empty())
-								botName = sTitleTranslated;
+								botName = sTitleTranslated.toUtf8();
 						}
 						else
 						{
 							// Else we want the title !
 							if (!botName.empty())
 								botName += " ";
-							botName += sTitleTranslated;
+							botName += sTitleTranslated.toUtf8();
 						}
 
 						formatedResult += botName;
 					}
 					break;
 					default:
-						formatedResult += (ucchar) '$';
+						formatedResult += '$';
 					break;
 				}
 				++it;
 			}
 			else
 			{
-				formatedResult += (ucchar) *it;
+				formatedResult += *it;
 				++it;
 			}
 		}
@@ -1537,7 +1538,7 @@ void CInterfaceManager::updateFrameEvents()
 			CCtrlBase *pTooltip= dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:weather_tt"));
 			if (pTooltip != NULL)
 			{
-				ucstring tt =	toString("%02d", WeatherManager.getNextWeatherHour()) + CI18N::get("uiMissionTimerHour") +
+				string tt =	toString("%02d", WeatherManager.getNextWeatherHour()) + CI18N::get("uiMissionTimerHour") +
 								" - " + CI18N::get("uiHumidity") + " " +
 								toString("%d", (uint)(roundWeatherValue(WeatherManager.getNextWeatherValue()) * 100.f)) + "%";
 				pTooltip->setDefaultContextHelp(tt);
@@ -2304,7 +2305,7 @@ void CInterfaceManager::addServerString (const std::string &sTarget, uint32 id, 
 	if (id == 0)
 	{
 		CInterfaceExprValue val;
-		val.setUCString (ucstring(""));
+		val.setString (std::string());
 		CInterfaceLink::setTargetProperty (sTarget, val);
 		return;
 	}
@@ -2322,7 +2323,7 @@ void CInterfaceManager::addServerID (const std::string &sTarget, uint32 id, IStr
 	if (id == 0)
 	{
 		CInterfaceExprValue val;
-		val.setUCString (ucstring(""));
+		val.setString (std::string());
 		CInterfaceLink::setTargetProperty (sTarget, val);
 		return;
 	}
@@ -2368,7 +2369,7 @@ void CInterfaceManager::processServerIDString()
 
 			if (bValid)
 			{
-				val.setUCString (ucstrToAffect);
+				val.setString (ucstrToAffect.toUtf8());
 				CInterfaceLink::setTargetProperty (pISW->Target, val);
 			}
 
@@ -3337,7 +3338,7 @@ void CInterfaceManager::initEmotes()
 					translateEmote(sTmp, sTranslatedName, sCommandName, sCommandNameAlt);
 
 					// Create a line
-					pMenu->addLine (sTranslatedName + " (/" + ucstring::makeFromUtf8(sCommandName) + ")", "emote",
+					pMenu->addLine (sTranslatedName.toUtf8() + " (/" + sCommandName + ")", "emote",
 						"nb="+toString(nEmoteNb)+"|behav="+toString(nBehav), sTmp);
 				}
 			}
@@ -3393,7 +3394,7 @@ void CInterfaceManager::initEmotes()
 					{
 						// Yeah that's a quick emote too; set command
 						pMenu->addLineAtIndex (i,
-								"@{FFFF}/" + ucstring::makeFromUtf8(sCommandName),
+								"@{FFFF}/" + sCommandName,
 								"emote", "nb="+toString(nEmoteNb)+"|behav="+toString(nBehav),
 								"", "", "", false, false, true);
 
@@ -4041,11 +4042,11 @@ char* CInterfaceManager::getTimestampHuman(const char* format /* "[%H:%M:%S] " *
  *
  * All \d's in default parameter remove a following character.
  */
-bool CInterfaceManager::parseTokens(ucstring& ucstr)
+bool CInterfaceManager::parseTokens(string& ucstr)
 {
-	ucstring str = ucstr;
-	ucstring start_token("$");
-	ucstring end_token("$");
+	string str = ucstr;
+	string start_token("$");
+	string end_token("$");
 	size_t start_pos = 0;
 	size_t end_pos = 1;
 
@@ -4062,8 +4063,8 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		// Get the whole token substring first
 		end_pos = str.find(end_token, start_pos + 1);
 
-		if ((start_pos == ucstring::npos) ||
-			(end_pos   == ucstring::npos) ||
+		if ((start_pos == string::npos) ||
+			(end_pos   == string::npos) ||
 			(end_pos   <= start_pos + 1))
 		{
 			// Wrong formatting; give up on this one.
@@ -4081,19 +4082,19 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 			continue;
 		}
 
-		ucstring token_whole = str.luabind_substr(start_pos, end_pos - start_pos + 1);
-		ucstring token_string = token_whole.luabind_substr(1, token_whole.length() - 2);
-		ucstring token_replacement = token_whole;
-		ucstring token_default = token_whole;
+		string token_whole = str.substr(start_pos, end_pos - start_pos + 1);
+		string token_string = token_whole.substr(1, token_whole.length() - 2);
+		string token_replacement = token_whole;
+		string token_default = token_whole;
 
-		ucstring token_subject;
-		ucstring token_param;
+		string token_subject;
+		string token_param;
 
 		// Does the token have a parameter?
 		// If not it is 'name' by default
-		vector<ucstring> token_vector;
-		vector<ucstring> param_vector;
-		splitUCString(token_string, ucstring("."), token_vector);
+		vector<string> token_vector;
+		vector<string> param_vector;
+		splitString(token_string, ".", token_vector);
 		if (token_vector.empty())
 		{
 			// Wrong formatting; give up on this one.
@@ -4103,23 +4104,23 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		token_subject = token_vector[0];
 		if (token_vector.size() == 1)
 		{
-			splitUCString(token_subject, ucstring("/"), param_vector);
-			token_subject = !param_vector.empty() ? param_vector[0] : ucstring("");
-			token_param = ucstring("name");
+			splitString(token_subject, "/", param_vector);
+			token_subject = !param_vector.empty() ? param_vector[0] : string();
+			token_param = string("name");
 		}
 		else if (token_vector.size() > 1)
 		{
 			token_param = token_vector[1];
-			if (token_param.luabind_substr(0, 3) != ucstring("gs("))
+			if (token_param.substr(0, 3) != "gs(")
 			{
-				splitUCString(token_vector[1], ucstring("/"), param_vector);
-				token_param = !param_vector.empty() ? param_vector[0] : ucstring("");
+				splitString(token_vector[1], "/", param_vector);
+				token_param = !param_vector.empty() ? param_vector[0] : string();
 			}
 		}
 
 		// Get any default value, if not gs
 		sint extra_replacement = 0;
-		if (token_param.luabind_substr(0, 3) != ucstring("gs("))
+		if (token_param.substr(0, 3) != "gs(")
 		{
 			if (param_vector.size() == 2)
 			{
@@ -4127,9 +4128,9 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 				token_replacement = param_vector[1];
 				// Delete following chars for every '\d' in default
 				string::size_type token_replacement_pos;
-				while ((token_replacement_pos = token_replacement.find(ucstring("\\d"))) != string::npos)
+				while ((token_replacement_pos = token_replacement.find(string("\\d"))) != string::npos)
 				{
-					token_replacement.replace(token_replacement_pos, 2, ucstring(""));
+					token_replacement.replace(token_replacement_pos, 2, string());
 					extra_replacement++;
 				}
 				token_default = token_replacement;
@@ -4138,17 +4139,17 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 
 		CEntityCL *pTokenSubjectEntity = NULL;
 
-		if (token_subject == ucstring("me"))
+		if (token_subject == "me")
 		{
 			pTokenSubjectEntity = static_cast<CEntityCL*>(UserEntity);
 		}
-		else if (token_subject == ucstring("t"))
+		else if (token_subject == "t")
 		{
 			// Target
 			uint targetSlot = UserEntity->targetSlot();
 			pTokenSubjectEntity = EntitiesMngr.entity(targetSlot);
 		}
-		else if (token_subject == ucstring("tt"))
+		else if (token_subject == "tt")
 		{
 			// Target's target
 			uint targetSlot = UserEntity->targetSlot();
@@ -4166,11 +4167,11 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 			}
 		}
 		else if ((token_subject.length() == 3) &&
-			     (token_subject.luabind_substr(0, 2) == ucstring("tm")))
+			     (token_subject.substr(0, 2) == "tm"))
 		{
 			// Teammate
 			uint indexInTeam = 0;
-			fromString(token_subject.luabind_substr(2, 1).toString(), indexInTeam);
+			fromString(token_subject.substr(2, 1), indexInTeam);
 
 			// Make 0-based
 			--indexInTeam;
@@ -4206,22 +4207,22 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		if (pTokenSubjectEntity != NULL)
 		{
 			// Parse the parameter
-			if (token_param == ucstring("name"))
+			if (token_param == "name")
 			{
-				ucstring name = pTokenSubjectEntity->getDisplayName();
+				string name = pTokenSubjectEntity->getDisplayName().toUtf8();
 				// special case where there is only a title, very rare case for some NPC
 				if (name.empty())
 				{
-					name = pTokenSubjectEntity->getTitle();
+					name = pTokenSubjectEntity->getTitle().toUtf8();
 				}
 				token_replacement = name.empty() ? token_replacement : name;
 			}
-			else if (token_param == ucstring("title"))
+			else if (token_param == "title")
 			{
-				ucstring title = pTokenSubjectEntity->getTitle();
+				string title = pTokenSubjectEntity->getTitle().toUtf8();
 				token_replacement = title.empty() ? token_replacement : title;
 			}
-			else if (token_param == ucstring("race"))
+			else if (token_param == "race")
 			{
 				CCharacterCL *pC = dynamic_cast<CCharacterCL*>(pTokenSubjectEntity);
 				if (pC)
@@ -4229,27 +4230,27 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 					EGSPD::CPeople::TPeople race = pC->people();
 					if (race >= EGSPD::CPeople::Playable && race <= EGSPD::CPeople::EndPlayable)
 					{
-						ucstring srace = NLMISC::CI18N::get("io" + EGSPD::CPeople::toString(race));
+						string srace = NLMISC::CI18N::get("io" + EGSPD::CPeople::toString(race));
 						token_replacement = srace.empty() ? token_replacement : srace;
 					}
 				}
 			}
-			else if (token_param == ucstring("guild"))
+			else if (token_param == "guild")
 			{
 				STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 				ucstring ucGuildName;
 				if (pSMC->getString(pTokenSubjectEntity->getGuildNameID(), ucGuildName))
 				{
-					token_replacement = ucGuildName.empty() ? token_replacement : ucGuildName;
+					token_replacement = ucGuildName.empty() ? token_replacement : ucGuildName.toUtf8();
 				}
 			}
-			else if (token_param.luabind_substr(0, 3) == ucstring("gs(") &&
-				token_param.luabind_substr(token_param.length() - 1 , 1) == ucstring(")"))
+			else if (token_param.substr(0, 3) == "gs(" &&
+				token_param.substr(token_param.length() - 1 , 1) == ")")
 			{
 				// Gender string
-				vector<ucstring> strList;
-				ucstring gender_string = token_param.luabind_substr(3, token_param.length() - 4);
-				splitUCString(gender_string, ucstring("/"), strList);
+				vector<string> strList;
+				string gender_string = token_param.substr(3, token_param.length() - 4);
+				splitString(gender_string, "/", strList);
 
 				if (strList.size() <= 1)
 				{
@@ -4278,8 +4279,8 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		{
 			// Nothing to replace; show message and exit
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			ucstring message = ucstring(CI18N::get("uiUntranslatedToken"));
-			message.replace(message.find(ucstring("%s")), 2, token_whole);
+			string message = CI18N::get("uiUntranslatedToken");
+			message.replace(message.find("%s"), 2, token_whole);
 			im->displaySystemInfo(message);
 			return false;
 		}

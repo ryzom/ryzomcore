@@ -73,10 +73,10 @@ public:
 		return CCtrlPolygon::contains(CVector2f(mouseXInWindow + 0.5f, mouseYInWindow + 0.5f));
 	}
 	// tooltip
-	virtual void		getContextHelp(::ucstring &help) const
+	virtual void		getContextHelp(std::string &help) const
 	{
-		help = Instance.getDisplayName();
-		if (std::operator==(help, NLMISC::CI18N::get("uiR2EDNoName") ))
+		help = Instance.getDisplayName().toUtf8();
+		if (help == NLMISC::CI18N::get("uiR2EDNoName"))
 			help.clear();
 	}
 	bool				emptyContextHelp() const { return true; }
@@ -122,10 +122,10 @@ public:
 		return CCtrlQuad::contains(CVector2f(mouseXInWindow + 0.5f, mouseYInWindow + 0.5f));
 	}
 	// tooltip
-	virtual void		getContextHelp(ucstring &help) const
+	virtual void		getContextHelp(std::string &help) const
 	{
-		help = Instance.getDisplayName();
-		if (std::operator==(help, NLMISC::CI18N::get("uiR2EDNoName")))
+		help = Instance.getDisplayName().toUtf8();
+		if (help == NLMISC::CI18N::get("uiR2EDNoName"))
 			help.clear();
 	}
 	bool				emptyContextHelp() const { return true; }

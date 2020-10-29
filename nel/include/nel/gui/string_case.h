@@ -25,7 +25,6 @@
 
 namespace NLGUI
 {
-
 	enum TCaseMode
 	{
 		CaseNormal = 0,					// Nothing done
@@ -37,11 +36,7 @@ namespace NLGUI
 		CaseCount
 	};
 
-
-	void setCase( ucstring &str, TCaseMode mode );
 	void setCase( std::string &str, TCaseMode mode );
-
-
 }
 
 #endif

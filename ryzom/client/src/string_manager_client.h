@@ -60,6 +60,7 @@ public:
 	// Force the cache to be saved
 	void flushStringCache();
 
+	bool getString(uint32 stringId, std::string &result) { ucstring temp; bool res = getString(stringId, temp); result = temp.toUtf8(); return res; } // FIXME: UTF-8
 	bool getString(uint32 stringId, ucstring &result);
 	void waitString(uint32 stringId, const IStringWaiterRemover *premover, ucstring *result);
 	void waitString(uint32 stringId, IStringWaitCallback *pcallback);

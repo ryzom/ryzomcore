@@ -1931,9 +1931,9 @@ int CPatchManager::validateProgress(void *foo, double t, double d, double /* ult
 
 	if (units.empty())
 	{
-		units.push_back(CI18N::get("uiByte").toUtf8());
-		units.push_back(CI18N::get("uiKb").toUtf8());
-		units.push_back(CI18N::get("uiMb").toUtf8());
+		units.push_back(CI18N::get("uiByte"));
+		units.push_back(CI18N::get("uiKb"));
+		units.push_back(CI18N::get("uiMb"));
 	}
 
 	CPatchManager *pPM = CPatchManager::getInstance();

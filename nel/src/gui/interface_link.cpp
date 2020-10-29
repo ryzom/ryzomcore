@@ -121,7 +121,7 @@ namespace NLGUI
 			case CReflectedProperty::UCStringRef:
 				if (valueToAffect.toString())
 				{
-					(destElem.*(property.SetMethod.SetUCString))(valueToAffect.getUCString());
+					(destElem.*(property.SetMethod.SetUCString))(ucstring::makeFromUtf8(valueToAffect.getString()));
 				}
 				else
 				{

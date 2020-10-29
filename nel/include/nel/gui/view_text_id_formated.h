@@ -49,10 +49,10 @@ namespace NLGUI
 		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
 		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
 		virtual void checkCoords();
-		const  ucstring &getFormatString() const { return _FormatString; }
-		void setFormatString(const ucstring &format);
+		const  std::string &getFormatString() const { return _FormatString; }
+		void setFormatString(const std::string &format);
 	private:
-		ucstring	_FormatString;
+		std::string	_FormatString;
 	};
 
 }

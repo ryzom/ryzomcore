@@ -32,18 +32,6 @@ namespace NLGUI
 		return (c == (u32char)' ') || (c == (u32char)'\t') || (c == (u32char)'\n') || (c == (u32char)'\r');
 	}
 
-	inline bool isSeparator (ucchar c)
-	{
-		return (c == ' ') || (c == '\t') || (c == '\n') || (c == '\r');
-	}
-
-	inline bool isSeparator (char c)
-	{
-		return (c == ' ') || (c == '\t') || (c == '\n') || (c == '\r');
-	}
-
-	// ***************************************************************************
-
 	inline bool isEndSentence (u32char c, u32char lastChar)
 	{
 		// Ex: One sentence. Another sentence.
@@ -52,90 +40,6 @@ namespace NLGUI
 		//                       ^
 		return ((c == (u32char)' ') || (c == (u32char)'\n'))
 			&& (lastChar == (u32char)'.') || (lastChar == (u32char)'!') || (lastChar == (u32char)'?');
-	}
-
-	inline bool isEndSentence (ucstring& str, uint index)
-	{
-		// Ex: One sentence. Another sentence.
-		//                  ^
-		// Counterexample: nevrax.com
-		//                       ^
-		ucchar c = str[index];
-		if ((str[index] == ' ') || (str[index] == '\n'))
-		{
-			if (index < 1)
-				return false;
-			c = str[index-1];
-			return (c == '.') || (c == '!') || (c == '?');
-		}
-		return false;
-	}
-
-
-	void setCase( ucstring &str, TCaseMode mode )
-	{
-		const uint length = (uint)str.length();
-		uint i;
-		bool newString = true;
-		bool newSentence = true;
-		bool newWord = true;
-		switch (mode)
-		{
-		case CaseLower:
-			str = NLMISC::toLower (str);
-			break;
-		case CaseUpper:
-			str = NLMISC::toUpper (str);
-			break;
-		case CaseFirstStringLetterUp:
-			for (i=0; i<length; i++)
-			{
-				if (!isSeparator (str[i]))
-				{
-					if (newString)
-						str[i] = NLMISC::toUpper (str[i]);
-					else
-						str[i] = NLMISC::toLower (str[i]);
-					newString = false;
-				}
-			}
-			break;
-		case CaseFirstSentenceLetterUp:
-			for (i=0; i<length; i++)
-			{
-				if (isEndSentence (str, i))
-					newSentence = true;
-				else
-				{
-					if (newSentence)
-						str[i] = NLMISC::toUpper (str[i]);
-					else
-						str[i] = NLMISC::toLower (str[i]);
-
-					if (!isSeparator (str[i]))
-						newSentence = false;
-				}
-			}
-			break;
-		case CaseFirstWordLetterUp:
-			for (i=0; i<length; i++)
-			{
-				if (isSeparator (str[i]) || isEndSentence (str, i))
-					newWord = true;
-				else
-				{
-					if (newWord)
-						str[i] = NLMISC::toUpper (str[i]);
-					else
-						str[i] = NLMISC::toLower (str[i]);
-
-					newWord = false;
-				}
-			}
-			break;
-		default:
-			break;
-		}
 	}
 
 	void setCase(std::string &str, TCaseMode mode)
@@ -148,10 +52,10 @@ namespace NLGUI
 		switch (mode)
 		{
 		case CaseLower:
-			str = NLMISC::toLowerAsUtf8(str);
+			str = NLMISC::toLower(str);
 			break;
 		case CaseUpper:
-			str = NLMISC::toUpperAsUtf8(str);
+			str = NLMISC::toUpper(str);
 			break;
 		case CaseFirstStringLetterUp:
 		{
@@ -240,8 +144,6 @@ namespace NLGUI
 			break;
 		}
 	}
-
 }
 
-
-
+/* end of file */

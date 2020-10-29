@@ -156,7 +156,7 @@ public:
 	void displayLocalPlayerTell(const ucstring &receiver, const ucstring &msg, uint numBlinks = 0);
 
 	/// Encode a color tag '@{RGBA}' in the text. If append is true, append at end of text, otherwise, replace the text
-	static void encodeColorTag(const NLMISC::CRGBA &color, ucstring &text, bool append=true);
+	static void encodeColorTag(const NLMISC::CRGBA &color, std::string &text, bool append=true);
 
 ///////////////////////////////////////////////////////////////////////////////////////
 protected:

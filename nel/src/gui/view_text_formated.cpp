@@ -38,7 +38,7 @@ namespace NLGUI
     {
 		if (name == "format")
 		{
-			return getFormatString().toUtf8();
+			return getFormatString();
 		}
 		else
 			return CViewText::getProperty(name);
@@ -48,7 +48,7 @@ namespace NLGUI
     {
 	    if (name == "format")
 	    {
-		    setFormatString(ucstring::makeFromUtf8(value));
+		    setFormatString(value);
 		    return;
 	    }
 	    else
@@ -62,7 +62,7 @@ namespace NLGUI
 			return NULL;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_formated" );
-		xmlSetProp( node, BAD_CAST "format", BAD_CAST getFormatString().toUtf8().c_str() );
+		xmlSetProp( node, BAD_CAST "format", BAD_CAST getFormatString().c_str() );
 
 		return NULL;
 	}
@@ -73,9 +73,9 @@ namespace NLGUI
 		if (!CViewText::parse(cur, parentGroup)) return false;
 		CXMLAutoPtr prop((const char*) xmlGetProp( cur, (xmlChar*)"format" ));
 		if (prop)
-			setFormatString(ucstring::makeFromUtf8((const char *)prop));
+			setFormatString((const char *)prop);
 		else
-			setFormatString(ucstring("$t"));
+			setFormatString("$t");
 		return true;
 	}
 
@@ -83,26 +83,27 @@ namespace NLGUI
 	void CViewTextFormated::checkCoords()
 	{
 		if (!getActive()) return;
-		ucstring formatedResult;
-		formatedResult = formatString(_FormatString, ucstring(""));
+		std::string formatedResult;
+		formatedResult = formatString(_FormatString, std::string());
 
 		//
-		setText (formatedResult.toUtf8());
+		setText (formatedResult);
 		CViewText::checkCoords();
 	}
 
 	// ****************************************************************************
-	void CViewTextFormated::setFormatString(const ucstring &format)
+	void CViewTextFormated::setFormatString(const std::string &format)
 	{
-		_FormatString = format;
-		if ( (_FormatString.size()>2) && (_FormatString[0] == 'u') && (_FormatString[1] == 'i'))
-			_FormatString = NLMISC::CI18N::get (format.toString());
+		if (NLMISC::startsWith(format, "ui"))
+			_FormatString = NLMISC::CI18N::get(format);
+		else
+			_FormatString = format;
 	}
 
 	// ****************************************************************************
-	ucstring CViewTextFormated::formatString(const ucstring &inputString, const ucstring &paramString)
+	std::string CViewTextFormated::formatString(const std::string &inputString, const std::string &paramString)
 	{
-		ucstring formatedResult;
+		std::string formatedResult;
 
 		if( textFormatter == NULL )
 			formatedResult = inputString;

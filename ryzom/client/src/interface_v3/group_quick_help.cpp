@@ -244,7 +244,7 @@ void CGroupQuickHelp::beginElement(CHtmlElement &elm)
 					CActionsManager::TActionComboMap::const_iterator ite = actionCombo.find (CAction::CName (elm.getAttribute("z_action_shortcut").c_str(), params.c_str()));
 					if (ite != actionCombo.end())
 					{
-						addString (ite->second.toUCString());
+						addString (ite->second.toString());
 					}
 				}
 			}

@@ -176,7 +176,7 @@ static DECLARE_INTERFACE_USER_FCT(getCompassText)
 		"uiWNW",
 	};
 
-	result.setUCString( CI18N::get(txts[direction]) );
+	result.setString( CI18N::get(txts[direction]) );
 	return true;
 }
 REGISTER_INTERFACE_USER_FCT("getCompassText", getCompassText);
@@ -251,7 +251,7 @@ static DECLARE_INTERFACE_USER_FCT(getDifficultyText)
 	}
 
 	SENTENCE_APPRAISAL::ESentenceAppraisal sa = (SENTENCE_APPRAISAL::ESentenceAppraisal)args[0].getInteger();
-	result.setUCString (CI18N::get(SENTENCE_APPRAISAL::toString(sa)));
+	result.setString (CI18N::get(SENTENCE_APPRAISAL::toString(sa)));
 
 	return true;
 }
@@ -665,14 +665,14 @@ static DECLARE_INTERFACE_USER_FCT(getKey)
 	CActionsManager::TActionComboMap::const_iterator it = acmap.find(CAction::CName(name.c_str(),param.c_str()));
 	if (it != acmap.end())
 	{
-		result.setUCString (it->second.toUCString());
+		result.setString (it->second.toString());
 	}
 	else
 	{
 		if (notna)
-			result.setUCString (ucstring(""));
+			result.setString (std::string());
 		else
-			result.setUCString (CI18N::get("uiNotAssigned"));
+			result.setString (CI18N::get("uiNotAssigned"));
 	}
 
 	return true;
@@ -1008,9 +1008,9 @@ static DECLARE_INTERFACE_USER_FCT(getBotChatBuyFilterMPText)
 
 	RM_FABER_TYPE::TRMFType		faberType= (RM_FABER_TYPE::TRMFType)args[0].getInteger();
 	if(faberType>=RM_FABER_TYPE::Unknown)
-		result.setUCString(CI18N::get("uittBCNoItemPartFilter"));
+		result.setString(CI18N::get("uittBCNoItemPartFilter"));
 	else
-		result.setUCString(RM_FABER_TYPE::toLocalString(faberType));
+		result.setString(RM_FABER_TYPE::toLocalString(faberType));
 
 	return true;
 }
@@ -1059,15 +1059,15 @@ static DECLARE_INTERFACE_USER_FCT(getOutpostName)
 	uint32	nSheet = (uint32)args[0].getInteger();
 	if (nSheet == 0)
 	{
-		result.setUCString(string(""));
+		result.setString(string());
 		return true;
 	}
 
 	// get sheet name
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-	const ucstring name(pSMC->getOutpostLocalizedName(CSheetId(nSheet)));
+	const std::string name = CUtfStringView(pSMC->getOutpostLocalizedName(CSheetId(nSheet))).toUtf8();
 
-	result.setUCString(name);
+	result.setString(name);
 
 	return true;
 }
@@ -1086,15 +1086,15 @@ static DECLARE_INTERFACE_USER_FCT(getOutpostDesc)
 	uint32	nSheet = (uint32)args[0].getInteger();
 	if (nSheet == 0)
 	{
-		result.setUCString(string(""));
+		result.setString(string());
 		return true;
 	}
 
 	// get sheet name
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-	const ucstring name(pSMC->getOutpostLocalizedDescription(CSheetId(nSheet)));
+	const string name = CUtfStringView(pSMC->getOutpostLocalizedDescription(CSheetId(nSheet))).toUtf8();
 
-	result.setUCString(name);
+	result.setString(name);
 
 	return true;
 }
@@ -1113,15 +1113,15 @@ static DECLARE_INTERFACE_USER_FCT(getOutpostBuildingName)
 	uint32	nSheet = (uint32)args[0].getInteger();
 	if (nSheet == 0)
 	{
-		result.setUCString(string(""));
+		result.setString(string());
 		return true;
 	}
 
 	// get sheet name
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-	const ucstring name(pSMC->getOutpostBuildingLocalizedName(CSheetId(nSheet)));
+	const string name = CUtfStringView(pSMC->getOutpostBuildingLocalizedName(CSheetId(nSheet))).toUtf8();
 
-	result.setUCString(name);
+	result.setString(name);
 
 	return true;
 }
@@ -1140,12 +1140,12 @@ static DECLARE_INTERFACE_USER_FCT(getOutpostBuildingDesc)
 	uint32	nSheet = (uint32)args[0].getInteger();
 	if (nSheet == 0)
 	{
-		result.setUCString(string(""));
+		result.setString(string());
 		return true;
 	}
 
 	// get sheet name
-	ucstring name;
+	string name;
 	CEntitySheet *pSheet= SheetMngr.get(CSheetId(nSheet));
 	COutpostBuildingSheet *pOBS = dynamic_cast<COutpostBuildingSheet*>(pSheet);
 	if (pOBS && pOBS->OBType == COutpostBuildingSheet::OB_Empty)
@@ -1156,11 +1156,11 @@ static DECLARE_INTERFACE_USER_FCT(getOutpostBuildingDesc)
 	else
 	{
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-		name = pSMC->getOutpostBuildingLocalizedDescription(CSheetId(nSheet));
+		name = CUtfStringView(pSMC->getOutpostBuildingLocalizedDescription(CSheetId(nSheet))).toUtf8();
 	}
 
 
-	result.setUCString(name);
+	result.setString(name);
 
 	return true;
 }
@@ -1179,15 +1179,15 @@ static DECLARE_INTERFACE_USER_FCT(getSquadName)
 	uint32	nSheet = (uint32)args[0].getInteger();
 	if (nSheet == 0)
 	{
-		result.setUCString(string(""));
+		result.setString(string());
 		return true;
 	}
 
 	// get sheet name
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-	const ucstring name(pSMC->getSquadLocalizedName(CSheetId(nSheet)));
+	const string name = CUtfStringView(pSMC->getSquadLocalizedName(CSheetId(nSheet))).toUtf8();
 
-	result.setUCString(name);
+	result.setString(name);
 
 	return true;
 }
@@ -1206,15 +1206,15 @@ static DECLARE_INTERFACE_USER_FCT(getSquadDesc)
 	uint32	nSheet = (uint32)args[0].getInteger();
 	if (nSheet == 0)
 	{
-		result.setUCString(string(""));
+		result.setString(string());
 		return true;
 	}
 
 	// get sheet name
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-	const ucstring name(pSMC->getSquadLocalizedDescription(CSheetId(nSheet)));
+	const string name = CUtfStringView(pSMC->getSquadLocalizedDescription(CSheetId(nSheet))).toUtf8();
 
-	result.setUCString(name);
+	result.setString(name);
 
 	return true;
 }
@@ -1267,7 +1267,7 @@ static DECLARE_INTERFACE_USER_FCT(getOutpostPeriod)
 	// if status wanted is peace or unknow, then "N/A", because there is no attack period in peace mode
 	if( status==OUTPOSTENUMS::Peace || status==OUTPOSTENUMS::UnknownOutpostState )
 	{
-		result.setUCString(string(" - "));
+		result.setString(string(" - "));
 		return true;
 	}
 
@@ -1275,7 +1275,7 @@ static DECLARE_INTERFACE_USER_FCT(getOutpostPeriod)
 	if( (isAttackPeriod && status>OUTPOSTENUMS::AttackRound) ||
 		(!isAttackPeriod && status>OUTPOSTENUMS::DefenseRound) )
 	{
-		result.setUCString(CI18N::get("uiOutpostPeriodEnded"));
+		result.setString(CI18N::get("uiOutpostPeriodEnded"));
 		return true;
 	}
 
@@ -1295,7 +1295,7 @@ static DECLARE_INTERFACE_USER_FCT(getOutpostPeriod)
 	tstruct= gmtime(&tval);
 	if(!tstruct)
 	{
-		result.setUCString(string("Bad Date Received"));
+		result.setString(string("Bad Date Received"));
 		return true;
 	}
 	dname= tstruct->tm_wday;	// 0-6 (Sunday==0!!)
@@ -1308,21 +1308,21 @@ static DECLARE_INTERFACE_USER_FCT(getOutpostPeriod)
 	tstruct= gmtime(&tval);
 	if(!tstruct)
 	{
-		result.setUCString(string("Bad Date Received"));
+		result.setString(string("Bad Date Received"));
 		return true;
 	}
 	hend= tstruct->tm_hour;	// 0-23
 	mend= tstruct->tm_min;	// 0-59
 
 	// translate
-	ucstring	res= CI18N::get("uiOutpostPeriodFormat");
+	string	res= CI18N::get("uiOutpostPeriodFormat");
 	strFindReplace( res, "%dayname", CI18N::get(toString("uiDay%d", dname)) );
 	strFindReplace( res, "%daynumber", toString(dnumber) );
 	strFindReplace( res, "%month", CI18N::get(toString("uiMonth%02d", month+1)) );
 	strFindReplace( res, "%timestart", toString("%02d:%02d", hstart, mstart) );
 	strFindReplace( res, "%timeend", toString("%02d:%02d", hend, mend) );
 
-	result.setUCString(res);
+	result.setString(res);
 	return true;
 }
 REGISTER_INTERFACE_USER_FCT("getOutpostPeriod", getOutpostPeriod)

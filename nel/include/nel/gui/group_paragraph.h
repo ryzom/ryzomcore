@@ -84,13 +84,13 @@ namespace NLGUI
 		* \param line : text to be added
 		* \param color : text color
 		*/
-		void addTextChild (const ucstring& line,const NLMISC::CRGBA &textColor, bool multiLine = true);
+		void addTextChild (const std::string& line,const NLMISC::CRGBA &textColor, bool multiLine = true);
 
 		/**
 		* add a text child element to the group, using the text template
 		* \param line : text to be added
 		*/
-		void addTextChild (const ucstring& line, bool multiLine = true);
+		void addTextChild (const std::string& line, bool multiLine = true);
 
 		/// Same as adding a text child but the text will be taken from the string manager
 		void addTextChildID (uint32 id, bool multiLine = true);

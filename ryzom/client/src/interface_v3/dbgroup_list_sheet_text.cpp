@@ -1051,7 +1051,7 @@ void		CDBGroupListSheetText::CSheetChild::updateViewTextAsItem()
 	if(Ctrl && Text && Ctrl->getSheetCategory() == CDBCtrlSheet::Item)
 	{
 		// get the text
-		ucstring text;
+		std::string text;
 		Ctrl->getContextHelp(text);
 
 		// Text color red if requirement not met
@@ -1070,7 +1070,7 @@ void		CDBGroupListSheetText::CSheetChild::updateViewTextAsItem()
 				// Add craft info for MP
 				if(pIS->Family==ITEMFAMILY::RAW_MATERIAL)
 				{
-					ucstring	ipList;
+					string	ipList;
 					pIS->getItemPartListAsText(ipList);
 					if(ipList.empty())
 					{
@@ -1086,7 +1086,7 @@ void		CDBGroupListSheetText::CSheetChild::updateViewTextAsItem()
 		}
 
 		// set text
-		Text->setTextFormatTaged(text.toUtf8());
+		Text->setTextFormatTaged(text);
 	}
 }
 

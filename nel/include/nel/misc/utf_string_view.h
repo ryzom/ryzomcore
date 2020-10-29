@@ -54,11 +54,11 @@ public:
 
 	inline CUtfStringView(const ucstring &utf16Str) : m_Str(utf16Str.c_str()), m_Size(utf16Str.size() << 1), m_Iterator(utf16Iterator) {}
 	inline CUtfStringView(const ucchar *utf16Str) : m_Str(utf16Str), m_Size(strlen((const char *)utf16Str) & (ptrdiff_t)(-2)), m_Iterator(utf16Iterator) {}
-	inline CUtfStringView(const u32string &utf32Str) : m_Str(utf32Str.c_str()), m_Size(utf32Str.size() << 2), m_Iterator(utf32Iterator) {}
+	inline CUtfStringView(const ::u32string &utf32Str) : m_Str(utf32Str.c_str()), m_Size(utf32Str.size() << 2), m_Iterator(utf32Iterator) {}
 
 	std::string toUtf8(bool reEncode = false) const; // Makes a copy
 	ucstring toUtf16(bool reEncode = false) const; // Makes a copy
-	u32string toUtf32() const; // Makes a copy
+	::u32string toUtf32() const; // Makes a copy
 
 	std::wstring toWide() const; // Platform dependent, UTF-16 or UTF-32. Makes a copy.
 	std::string toAscii() const; // Returns only values 0-127, 7-bit ASCII. Makes a copy.

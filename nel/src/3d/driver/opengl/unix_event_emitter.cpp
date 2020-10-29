@@ -29,6 +29,7 @@
 #include <X11/Xutil.h>
 #include <X11/XKBlib.h>
 #include "nel/misc/debug.h"
+#include "nel/misc/utf_string_view.h"
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -537,8 +538,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		if (c > 0)
 		{
 #ifdef X_HAVE_UTF8_STRING
-			ucstring ucstr;
-			ucstr.fromUtf8(Text);
+			::u32string ucstr = NLMISC::CUtfStringView(Text).toUtf32();
 
 			CEventChar *charEvent = new CEventChar (ucstr[0], getKeyButton(event.xbutton.state), this);
 
@@ -549,7 +549,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 #else
 			for (int i = 0; i < c; i++)
 			{
-				CEventChar *charEvent = new CEventChar ((ucchar)(unsigned char)Text[i], getKeyButton(event.xbutton.state), this);
+				CEventChar *charEvent = new CEventChar ((u32char)(unsigned char)Text[i], getKeyButton(event.xbutton.state), this);
 
 				// raw if not processed by IME
 				charEvent->setRaw(keyCode != 0);

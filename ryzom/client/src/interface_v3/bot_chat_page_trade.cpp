@@ -865,7 +865,7 @@ void CBotChatPageTrade::startBuyDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCall
 	CViewText *priceLabel = dynamic_cast<CViewText*>(ig->getView( "standard_price:total_price_header" ));
 	if ( _BuyMean == Money && priceLabel )
 	{
-		priceLabel->setText( CI18N::get( "uiPrice" ).toUtf8() );
+		priceLabel->setText( CI18N::get( "uiPrice" ) );
 		priceLabel->setActive(true);
 	}
 	else
@@ -893,7 +893,7 @@ void CBotChatPageTrade::startBuyDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCall
 	{
 		confirmButton->setActive( true );
 		// no need any context help because too simple
-		confirmButton->setDefaultContextHelp(ucstring());
+		confirmButton->setDefaultContextHelp(std::string());
 		if(isItem)
 		{
 			CItemSheet * itemSheet = dynamic_cast<CItemSheet*> ( SheetMngr.get( CSheetId( sheet->getSheetId() ) ) );
@@ -977,7 +977,7 @@ void CBotChatPageTrade::startSellDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCal
 	CViewText *priceLabel = dynamic_cast<CViewText*>(ig->getView( "standard_price:total_price_header" ));
 	if ( priceLabel )
 	{
-		priceLabel->setText( CI18N::get( "uiImmediatePrice" ).toUtf8() );
+		priceLabel->setText( CI18N::get( "uiImmediatePrice" ) );
 		priceLabel->setActive(true);
 	}
 
@@ -2428,7 +2428,7 @@ public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		// \todo yoyo: for now disable tooltip
-		CWidgetManager::getInstance()->setContextHelpText(ucstring());
+		CWidgetManager::getInstance()->setContextHelpText(std::string());
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerBotChatTTItemType, "botchat_tt_item_type");
@@ -2575,11 +2575,11 @@ static DECLARE_INTERFACE_USER_FCT(getPriceWithFame)
 	sint	value= (sint)args[0].getInteger();
 	sint	valueFame= (sint)args[1].getInteger();
 	if(value==-1)
-		result.setUCString(CI18N::get("uiBadPrice"));
+		result.setString(CI18N::get("uiBadPrice"));
 	else if(value==valueFame)
-		result.setUCString(NLMISC::formatThousands(toString(value)));
+		result.setString(NLMISC::formatThousands(toString(value)));
 	else
-		result.setUCString(NLMISC::formatThousands(toString(valueFame)) + " (" + NLMISC::formatThousands(toString(value)) + ")");
+		result.setString(NLMISC::formatThousands(toString(valueFame)) + " (" + NLMISC::formatThousands(toString(value)) + ")");
 
 	return true;
 }
@@ -2595,7 +2595,7 @@ static DECLARE_INTERFACE_USER_FCT(getBonusOnResale)
 	sint	valueHigh= (sint)args[0].getInteger();
 	sint	valueLow= (sint)args[1].getInteger();
 	sint	diff = valueHigh - valueLow;
-	result.setUCString("+" + NLMISC::formatThousands(toString(diff)));
+	result.setString("+" + NLMISC::formatThousands(toString(diff)));
 
 	return true;
 }

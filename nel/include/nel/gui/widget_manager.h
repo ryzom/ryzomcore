@@ -333,8 +333,8 @@ namespace NLGUI
 		void updateTooltipCoords(CCtrlBase *newCtrl);
 		
 		/// for ContextHelp action handler only: set the result name
-		void setContextHelpText( const ucstring &text ){ _ContextHelpText = text; }
-		ucstring& getContextHelpText(){ return _ContextHelpText; }
+		void setContextHelpText( const std::string &text ){ _ContextHelpText = text; }
+		std::string& getContextHelpText(){ return _ContextHelpText; }
 		
 		/// force disable the context help
 		void disableContextHelp();
@@ -626,7 +626,7 @@ namespace NLGUI
 
 		SInterfaceTimes interfaceTimes;
 
-		ucstring _ContextHelpText;
+		std::string _ContextHelpText;
 		bool _ContextHelpActive;
 
 		bool inGame;

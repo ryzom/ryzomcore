@@ -992,9 +992,7 @@ class CHandlerBrowse : public IActionHandler
 					}
 				}
 
-				ucstring ucparams(params);
-				CInterfaceManager::parseTokens(ucparams);
-				params = ucparams.toUtf8();
+				CInterfaceManager::parseTokens(params);
 				// go. NB: the action handler himself may translate params from utf8
 				CAHManager::getInstance()->runActionHandler(action, elementGroup, params);
 
@@ -2014,7 +2012,7 @@ void getItemText (CDBCtrlSheet *item, ucstring &itemText, const CItemSheet*pIS)
 			if(pIS->canBuildSomeItemPart())
 			{
 				ucstring	fmt= CI18N::get("uihelpItemMPCraft");
-				ucstring	ipList;
+				std::string	ipList;
 				pIS->getItemPartListAsText(ipList);
 				strFindReplace(fmt, "%ip", ipList);
 				strFindReplace(itemText, "%craft", fmt);
@@ -2200,7 +2198,7 @@ static void	setupRawMaterialStats(CSheetHelpSetup &setup)
 
 					if(pIS->canBuildItemPart(faberType))
 					{
-						pCB->addText(RM_FABER_TYPE::toLocalString(faberType).toUtf8());
+						pCB->addText(RM_FABER_TYPE::toLocalString(faberType));
 					}
 				}
 
@@ -3165,7 +3163,7 @@ void setupListBrickHeader(CSheetHelpSetup &setup)
 	if(view)
 	{
 		view->setActive(true);
-		view->setTextFormatTaged(CI18N::get("uihelpPhraseHeaderBricks").toUtf8());
+		view->setTextFormatTaged(CI18N::get("uihelpPhraseHeaderBricks"));
 	}
 }
 
@@ -3473,7 +3471,7 @@ void setConsoModSuccessTooltip( CDBCtrlSheet *cs )
 	CInterfaceManager * pIM = CInterfaceManager::getInstance();
 
 	CCDBNodeLeaf * nodeSM = NULL;
-	ucstring ustr;
+	string ustr;
 	if( CSheetId(cs->getSheetId()).toString() == "mod_melee_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModMeleeSuccess");
@@ -3588,7 +3586,7 @@ public:
 			CCDBNodeLeaf * node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:DEATH_XP_MALUS", false);
 			if( node )
 			{
-				ucstring txt = CI18N::get("uittDeathPenalty");
+				string txt = CI18N::get("uittDeathPenalty");
 				strFindReplace(txt, "%dp", toString((100*node->getValue16())/254));
 				CWidgetManager::getInstance()->setContextHelpText(txt);
 			}
@@ -3597,7 +3595,7 @@ public:
 		else if( getAuraDisabledState(cs) )
 		{
 			// get the normal string, and append a short info.
-			ucstring	str;
+			std::string	str;
 			cs->getContextHelp(str);
 
 			str+= CI18N::get("uittAuraDisabled");
@@ -3630,7 +3628,7 @@ public:
 		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:NAME", index));
 		if (node && CStringManagerClient::instance()->getDynString(node->getValue32(), txt))
 		{
-			CWidgetManager::getInstance()->setContextHelpText(CEntityCL::removeTitleFromName(txt));
+			CWidgetManager::getInstance()->setContextHelpText(CEntityCL::removeTitleFromName(txt).toUtf8());
 		}
 	}
 };
@@ -3676,7 +3674,7 @@ public:
 		str += toString(minTimeRemaining);
 
 		// replace the context help that is required.
-		CWidgetManager::getInstance()->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerAnimalDeadPopupTooltip, "animal_dead_popup_tooltip");
@@ -3838,7 +3836,7 @@ static	void	onMpChangeItemPart(CInterfaceGroup *wnd, uint32 itemSheetId, const s
 			CViewText	*statTitle= dynamic_cast<CViewText*>(groupStat->getElement(groupStat->getId()+":text" ));
 			CDBViewBar	*statValue= dynamic_cast<CDBViewBar*>(groupStat->getElement(groupStat->getId()+":bar" ));
 			if(statTitle)
-				statTitle->setText(RM_FABER_STAT_TYPE::toLocalString(statType).toUtf8());
+				statTitle->setText(RM_FABER_STAT_TYPE::toLocalString(statType));
 			if(statValue)
 				statValue->setValue(itemPart.Stats[i]);
 		}

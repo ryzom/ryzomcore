@@ -266,7 +266,7 @@ static DECLARE_INTERFACE_USER_FCT(lua)
 
 		if (CLuaIHM::pop(ls, ucstrVal))
 		{
-			result.setUCString(ucstrVal);
+			result.setString(ucstrVal.toUtf8());
 			ok = true;
 		}
 
@@ -1032,7 +1032,7 @@ int CLuaIHMRyzom::initEmotesMenu(CLuaState &ls)
 						// Create a line
 						pMenu->addLine(CI18N::get(sTmp), "lua",
 							luaParams + "('" + sEmoteId + "', '" + toString(CI18N::get(sTmp)) + "')", sTmp);
-						emoteList[sEmoteId] = (toLower(CI18N::get(sTmp))).toUtf8();
+						emoteList[sEmoteId] = (toLower(CI18N::get(sTmp)));
 					}
 				}
 
@@ -2837,7 +2837,7 @@ std::string	CLuaIHMRyzom::getDefine(const std::string &def)
 // ***************************************************************************
 void		CLuaIHMRyzom::setContextHelpText(const ucstring &text)
 {
-	CWidgetManager::getInstance()->setContextHelpText(text);
+	CWidgetManager::getInstance()->setContextHelpText(text.toUtf8());
 }
 
 // ***************************************************************************
@@ -3565,7 +3565,7 @@ void CLuaIHMRyzom::tell(const ucstring &player, const ucstring &msg)
 		if (!msg.empty())
 		{
 			// Parse any tokens in the message.
-			ucstring msg_modified = msg;
+			string msg_modified = msg.toUtf8();
 
 			// Parse any tokens in the text
 			if (! CInterfaceManager::parseTokens(msg_modified))

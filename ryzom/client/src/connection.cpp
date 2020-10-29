@@ -1019,7 +1019,7 @@ TInterfaceState globalMenu()
 				// Display the firewall alert string
 				CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:connecting:title"));
 				if (pVT != NULL)
-					pVT->setText(CI18N::get("uiFirewallAlert").toUtf8() + "...");
+					pVT->setText(CI18N::get("uiFirewallAlert") + "...");
 
 				// The mouse and fullscreen mode should be unlocked for the user to set the firewall permission
 				nlSleep( 30 ); // 'nice' the client, and prevent to make too many send attempts
@@ -1235,8 +1235,8 @@ TInterfaceState globalMenu()
 					if (pVT != NULL)
 					{
 						pVT->setMultiLine( true );
-						pVT->setText(CI18N::get("uiFirewallFail").toUtf8()+".\n"+
-									  CI18N::get("uiFirewallAlert").toUtf8()+".");
+						pVT->setText(CI18N::get("uiFirewallFail")+".\n"+
+									  CI18N::get("uiFirewallAlert")+".");
 					}
 				}
 			}
@@ -1317,7 +1317,7 @@ public:
 			if (pVT == NULL) return;
 
 			if (rCS.Name.empty())
-				pVT->setText(CI18N::get("uiEmptySlot").toUtf8());
+				pVT->setText(CI18N::get("uiEmptySlot"));
 			else
 				pVT->setText(rCS.Name.toUtf8());
 		}
@@ -1326,7 +1326,7 @@ public:
 		{
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(sPath+":text"+NLMISC::toString(i)));
 			if (pVT == NULL) return;
-			pVT->setText(CI18N::get("uiEmptySlot").toUtf8());
+			pVT->setText(CI18N::get("uiEmptySlot"));
 		}
 	}
 };
@@ -1348,7 +1348,7 @@ void setTarget(CCtrlBase *ctrl, const string &targetName, ucstring &value)
 	if (ig)
 	{
 		CInterfaceExprValue exprValue;
-		exprValue.setUCString(value);
+		exprValue.setString(value.toUtf8());
 
 		CInterfaceLink::splitLinkTargets(targetName, ig, targets);
 		for(uint k = 0; k < targets.size(); ++k)
@@ -2315,7 +2315,7 @@ public:
 			CCtrlBase *pBut = pNewLine->getCtrl("but");
 			if (pBut != NULL)
 			{
-				pBut->setDefaultContextHelp(tooltip);
+				pBut->setDefaultContextHelp(tooltip.toUtf8());
 			}
 			addGroupInList(pNewLine);
 		}
@@ -2680,7 +2680,7 @@ class CAHScenarioControl : public IActionHandler
 			CViewText* viewText = dynamic_cast<CViewText*>(result);
 			if(viewText)
 			{
-				viewText->setText(R2::getEditor().isInitialized()?CI18N::get("uiR2EDScenarioName").toUtf8():CI18N::get("uiR2EDScenarioFileName").toUtf8());
+				viewText->setText(R2::getEditor().isInitialized()?CI18N::get("uiR2EDScenarioName"):CI18N::get("uiR2EDScenarioFileName"));
 			}
 		}
 
@@ -2692,9 +2692,9 @@ class CAHScenarioControl : public IActionHandler
 			if(okButton)
 			{
 				if(R2::getEditor().getAccessMode()!=R2::CEditor::AccessDM)
-					okButton->setHardText(CI18N::get("uiR2EDLaunchScenario").toString());
+					okButton->setHardText(CI18N::get("uiR2EDLaunchScenario"));
 				else
-					okButton->setHardText(CI18N::get("uiR2EDApplyScenarioFilters").toString());
+					okButton->setHardText(CI18N::get("uiR2EDApplyScenarioFilters"));
 			}
 		}
 
@@ -3182,9 +3182,9 @@ class CAHLoadScenario : public IActionHandler
 		// --------------------------
 
 		TRuleType ruleType(TRuleType::rt_strict);
-		if(rules==CI18N::get("uiR2EDliberal").toString())
+		if(rules==CI18N::get("uiR2EDliberal"))
 			ruleType = TRuleType(TRuleType::rt_liberal);
-		else if(rules == CI18N::get("uiR2EDstrict").toString())
+		else if(rules == CI18N::get("uiR2EDstrict"))
 			ruleType = TRuleType(TRuleType::rt_strict);
 		volatile static bool override = false;
 		if (override)
@@ -3248,7 +3248,7 @@ class CAHLoadScenario : public IActionHandler
 			{
 				CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 				if (pVT != NULL)
-					pVT->setText(CI18N::get("uiRingWarningFreeTrial").toUtf8());
+					pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
 				CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 
 				return;
@@ -3329,7 +3329,7 @@ class CAHLoadScenario : public IActionHandler
 						{
 							CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 							if (pVT != NULL)
-								pVT->setText(CI18N::get("uiRingWarningFreeTrial").toUtf8());
+								pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
 							CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 						}
 
@@ -3358,7 +3358,7 @@ class CAHLoadScenario : public IActionHandler
 										{
 											CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 											if (pVT != NULL)
-												pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial").toUtf8());
+												pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
 											CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 										}
 									}

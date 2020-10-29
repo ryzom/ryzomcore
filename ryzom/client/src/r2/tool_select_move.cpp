@@ -417,9 +417,9 @@ void CToolSelectMove::commitAction(CInstance &instance)
 			}
 			else
 			{
-				ucstring instanceName = instance.getDisplayName();
+				string instanceName = instance.getDisplayName().toUtf8();
 				if(instanceName == CI18N::get("uiR2EDNoName"))
-					instanceName = ucstring(instance.getClassName());
+					instanceName = instance.getClassName();
 
 				//getDMC().newAction(CI18N::get("uiR2EDMoveAction") + instance.getDisplayName());
 				getDMC().newAction(CI18N::get("uiR2EDMoveAction") + instanceName);

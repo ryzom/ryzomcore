@@ -349,13 +349,13 @@ void CChatWindow::enableBlink(uint numBlinks)
 void CChatWindow::setCommand(const std::string &command, bool execute)
 {
 	if (!_EB) return;
-	_EB->setCommand(ucstring(command), execute);
+	_EB->setCommand(command, execute);
 }
 
 void CChatWindow::setCommand(const ucstring &command,bool execute)
 {
 	if (!_EB) return;
-	_EB->setCommand(command, execute);
+	_EB->setCommand(command.toUtf8(), execute);
 }
 
 
@@ -472,25 +472,25 @@ void CChatWindow::setHeaderColor(const std::string &n)
 //=================================================================================
 void CChatWindow::displayLocalPlayerTell(const ucstring &receiver, const ucstring &msg, uint numBlinks /*= 0*/)
 {
-	ucstring finalMsg;
+	string finalMsg;
 	CInterfaceProperty prop;
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
 	encodeColorTag(prop.getRGBA(), finalMsg, false);
 
-	ucstring csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
+	string csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
 	finalMsg += csr + CI18N::get("youTell") + ": ";
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 	encodeColorTag(prop.getRGBA(), finalMsg, true);
-	finalMsg += msg;
+	finalMsg += msg.toUtf8();
 
-	ucstring s = CI18N::get("youTellPlayer");
-	strFindReplace(s, "%name", receiver);
+	string s = CI18N::get("youTellPlayer");
+	strFindReplace(s, "%name", receiver.toUtf8());
 	strFindReplace(finalMsg, CI18N::get("youTell"), s);
 	displayMessage(finalMsg, prop.getRGBA(), CChatGroup::tell, 0, numBlinks);
 	CInterfaceManager::getInstance()->log(finalMsg, CChatGroup::groupTypeToString(CChatGroup::tell));
 }
 
-void CChatWindow::encodeColorTag(const NLMISC::CRGBA &color, ucstring &text, bool append)
+void CChatWindow::encodeColorTag(const NLMISC::CRGBA &color, std::string &text, bool append)
 {
 	// WARNING : The lookup table MUST contains 17 element (with the last doubled)
 	// because we add 7 to the 8 bit color before shifting to right in order to match color
@@ -498,8 +498,8 @@ void CChatWindow::encodeColorTag(const NLMISC::CRGBA &color, ucstring &text, boo
 	// Have 17 entry remove the need for a %16 for each color component.
 	// By the way, this comment is more longer to type than to add the %16...
 	//
-	static ucchar ConvTable[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'F'};
-	ucstring str;
+	static char ConvTable[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'F'};
+	string str;
 	if (append)
 	{
 		str.reserve(7 + str.size());
@@ -1273,7 +1273,7 @@ public:
 	{
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(pCaller);
 		if (pEB == NULL) return;
-		ucstring text = pEB->getInputStringAsUtf16();
+		string text = pEB->getInputString();
 		// If the line is empty, do nothing
 		if(text.empty())
 			return;
@@ -1297,7 +1297,7 @@ public:
 		if(text[0] == '/')
 		{
 			CChatWindow::_ChatWindowLaunchingCommand = chat;
-			string str = text.toUtf8();
+			string str = text;
 			string cmdWithArgs = str.substr(1);
 
 			// Get the command name from the string, can contain spaces
