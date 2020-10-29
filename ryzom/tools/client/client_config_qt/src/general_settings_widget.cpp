@@ -42,13 +42,13 @@ void CGeneralSettingsWidget::load()
 	CSystem &s = CSystem::GetInstance();
 
 	std::vector<std::string> codes = NLMISC::CI18N::getLanguageCodes();
-	std::vector<ucstring> names = NLMISC::CI18N::getLanguageNames();
+	std::vector<std::string> names = NLMISC::CI18N::getLanguageNames();
 
 	languageComboBox->clear();
 
 	for(uint i = 0; i < codes.size(); ++i)
 	{
-		languageComboBox->addItem(QString::fromUtf16(names[i].c_str()), QString::fromUtf8(codes[i].c_str()));
+		languageComboBox->addItem(QString::fromUtf8(names[i].c_str()), QString::fromUtf8(codes[i].c_str()));
 	}
 
 	sint32 cbIndex = getIndexForLanguageCode( QString::fromUtf8( s.config.getString( "LanguageCode" ).c_str() ) );
