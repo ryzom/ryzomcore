@@ -299,7 +299,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 
 					editBoxShort->setInputString(std::string());
 					editBoxLarge->setInputString(std::string());
-					display->setTextFormatTaged(ucstring());
+					display->setTextFormatTaged(std::string());
 
 					// Finish the display or add the waiter
 					if (getInventory().isItemInfoUpToDate(ItemSlotId))
