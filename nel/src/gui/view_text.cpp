@@ -3045,6 +3045,44 @@ namespace NLGUI
 		TextContext->setEmbolden (_Embolden);
 		TextContext->setOblique (_Oblique);
 
+#if 1
+
+		UTextContext::CStringInfo si = TextContext->getStringInfo("XO");
+		float xoHeight = si.StringHeight;
+
+		si = TextContext->getStringInfo("XO\xC3\x81\xC3\x83");
+		float upHeight = si.StringHeight;
+
+		si = TextContext->getStringInfo("XOgq");
+		float downHeight = si.StringHeight;
+		float legHeight = si.StringLine;
+
+		nlassert(upHeight >= xoHeight);
+		nlassert(downHeight >= xoHeight);
+		float diff;
+		if (downHeight > upHeight)
+		{
+			diff = downHeight - xoHeight;
+		}
+		else
+		{
+			diff = upHeight - xoHeight;
+			legHeight += upHeight - downHeight;
+		}
+
+		_FontHeight = xoHeight + diff + diff;
+		_FontLegHeight = legHeight;
+
+		// Space width
+		si = TextContext->getStringInfo(" ");
+		_SpaceWidth = si.StringWidth;
+
+		// Font Width (used for <tab>)
+		si = TextContext->getStringInfo("O");
+		_FontWidth = si.StringWidth;
+
+#else
+
 		// Letter size
 		UTextContext::CStringInfo si = TextContext->getStringInfo(_FontSizingChars);
 
@@ -3065,6 +3103,8 @@ namespace NLGUI
 		// Font Width (used for <tab>)
 		si = TextContext->getStringInfo("_");
 		_FontWidth = si.StringWidth;
+
+#endif
 	}
 
 
