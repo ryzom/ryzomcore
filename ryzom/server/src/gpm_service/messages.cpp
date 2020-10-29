@@ -46,7 +46,7 @@ using namespace NLNET;
 
 
 /****************************************************************\
-						cbAddEntity() 
+						cbAddEntity()
 \****************************************************************/
 /*
 void cbAddEntity( CMessage& msgin, const string &serviceName, uint16 serviceId )
@@ -91,7 +91,7 @@ void cbAddEntity( CMessage& msgin, const string &serviceName, uint16 serviceId )
 */
 
 /****************************************************************\
-						cbAddIAObject() 
+						cbAddIAObject()
 \****************************************************************/
 /*
 void cbAddIAObject( CMessage& msgin, const string &serviceName, uint16 serviceId )
@@ -102,12 +102,12 @@ void cbAddIAObject( CMessage& msgin, const string &serviceName, uint16 serviceId
 */
 
 /****************************************************************\
-						cbAddEntities() 
+						cbAddEntities()
 \****************************************************************/
 /*void cbAddEntities( CMessage& msgin, const string &serviceName, uint16 serviceId )
 {
 	//nlinfo("received ADD_ENTITIES request");
-	 
+
 	uint32 entitiesCount;
 	msgin.serial( entitiesCount );
 
@@ -153,7 +153,7 @@ void cbRemoveEntity( CMessage& msgin, const string &serviceName, uint16 serviceI
 
 	CEntityId id;
 	id.serial( msgin );
-	
+
 	nlinfo("received REMOVE_ENTITY request for id %s", id.toString().c_str() );
 
 	CWorldPositionManager::onRemoveEntity( id );
@@ -170,7 +170,7 @@ void cbRemoveEntity( CMessage& msgin, const string &serviceName, uint16 serviceI
 
 	list<CEntityId> ids;
 	msgin.serialCont( ids );
-	
+
 	list<CEntityId> idsAgents;
 
 	list<CEntityId>::iterator it;
@@ -180,7 +180,7 @@ void cbRemoveEntity( CMessage& msgin, const string &serviceName, uint16 serviceI
 		nlinfo("	REMOVE_ENTITY id %s", (*it).toString().c_str() );
 
 		if( (*it).getType() == RYZOMID::npc )
-		{			
+		{
 			idsAgents.push_back( *it );
 		}
 	}
@@ -188,7 +188,7 @@ void cbRemoveEntity( CMessage& msgin, const string &serviceName, uint16 serviceI
 	if( idsAgents.size() != 0 )
 	{
 		CMessage msgout("REMOVE_ENTITY");
-		
+
 		for ( it = idsAgents.begin() ; it != idsAgents.end() ; ++it)
 			msgout.serial( const_cast<CEntityId&> (*it) );
 
@@ -199,7 +199,7 @@ void cbRemoveEntity( CMessage& msgin, const string &serviceName, uint16 serviceI
 
 
 /****************************************************************\
-					CGPMPlayerPrivilegeInst::callback 
+					CGPMPlayerPrivilegeInst::callback
 \****************************************************************/
 void	CGPMPlayerPrivilegeInst::callback (const std::string &name, NLNET::TServiceId id)
 {
@@ -216,7 +216,7 @@ void	CGPMPlayerPrivilegeInst::callback (const std::string &name, NLNET::TService
 }
 
 /****************************************************************\
-					cbSetPlayerFlags() 
+					cbSetPlayerFlags()
 \****************************************************************/
 void cbSetPlayerFlags( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
 {
@@ -250,7 +250,7 @@ void cbBag( CMessage& msgin, const string &serviceName, NLNET::TServiceId servic
 
 
 /****************************************************************\
-					cbLoadContinent() 
+					cbLoadContinent()
 \****************************************************************/
 void	cbLoadContinent( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
 {
@@ -272,7 +272,7 @@ void	cbLoadContinent( CMessage& msgin, const string &serviceName, NLNET::TServic
 }
 
 /****************************************************************\
-					cbRemoveContinent() 
+					cbRemoveContinent()
 \****************************************************************/
 void	cbRemoveContinent( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
 {
@@ -284,10 +284,10 @@ void	cbRemoveContinent( CMessage& msgin, const string &serviceName, NLNET::TServ
 	// remove continent from position manager
 	CWorldPositionManager::removeContinent(continent);
 }
-	
-	
+
+
 /****************************************************************\
-					cbCreateIndoorUnit() 
+					cbCreateIndoorUnit()
 \****************************************************************/
 void cbCreateIndoorUnit( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
 {
@@ -310,7 +310,7 @@ void cbCreateIndoorUnit( CMessage& msgin, const string &serviceName, NLNET::TSer
 }
 
 /****************************************************************\
-					cbCreateBuilding() 
+					cbCreateBuilding()
 \****************************************************************/
 void cbCreateBuilding( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
 {
@@ -321,12 +321,12 @@ void cbCreateBuilding( CMessage& msgin, const string &serviceName, NLNET::TServi
 	msgin.serial(continent);
 	msgin.serial(id);
 	msgin.serial(position);
-	
+
 	CWorldPositionManager::createBuildingInstance(continent, id, position);
 }
 
 /****************************************************************\
-					cbCreateObstacle() 
+					cbCreateObstacle()
 \****************************************************************/
 void cbCreateObstacle( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
 {
@@ -342,7 +342,7 @@ void cbCreateObstacle( CMessage& msgin, const string &serviceName, NLNET::TServi
 }
 
 /****************************************************************\
-					cbRemoveObstacle() 
+					cbRemoveObstacle()
 \****************************************************************/
 void cbRemoveObstacle( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
 {
@@ -356,7 +356,7 @@ void cbRemoveObstacle( CMessage& msgin, const string &serviceName, NLNET::TServi
 }
 
 /****************************************************************\
-					cbSetObstacle() 
+					cbSetObstacle()
 \****************************************************************/
 void cbSetObstacle( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
 {
@@ -371,7 +371,7 @@ void cbSetObstacle( CMessage& msgin, const string &serviceName, NLNET::TServiceI
 }
 
 /****************************************************************\
-					cbUpdateEntityPosition() 
+					cbUpdateEntityPosition()
 \****************************************************************/
 /*
 void cbUpdateEntityPosition( CMessage& msgin, const string &serviceName, uint16 serviceId )
@@ -403,7 +403,7 @@ void cbUpdateEntityPosition( CMessage& msgin, const string &serviceName, uint16 
 */
 
 /****************************************************************\
-					cbUpdateEntitiesPositions() 
+					cbUpdateEntitiesPositions()
 \****************************************************************/
 /*
 void cbUpdateEntitiesPositions( CMessage& msgin, const string &serviceName, uint16 serviceId )
@@ -439,7 +439,7 @@ void cbUpdateEntitiesPositions( CMessage& msgin, const string &serviceName, uint
 */
 
 /****************************************************************\
-					cbUpdateEntitiesPositions() 
+					cbUpdateEntitiesPositions()
 \****************************************************************/
 /*
 void cbUpdateEntitiesPositionsUsingSize( CMessage& msgin, const string &serviceName, uint16 serviceId )
@@ -484,7 +484,7 @@ void cbUpdateEntitiesOrientationsUsingSize( CMessage& msgin, const string &servi
 
 
 /****************************************************************\
-					cbEntityTeleport() 
+					cbEntityTeleport()
 \****************************************************************/
 void cbEntityTeleportation( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
 {
@@ -493,7 +493,7 @@ void cbEntityTeleportation( CMessage& msgin, const string &serviceName, NLNET::T
 
 	id.serial( msgin );
 	TDataSetRow	index = CWorldPositionManager::getEntityIndex(id);
-	
+
 	if (!index.isValid())
 		return;
 
@@ -506,7 +506,7 @@ void cbEntityTeleportation( CMessage& msgin, const string &serviceName, NLNET::T
 			pCGPMS->RingVisionUniverse->setEntityPosition(index,0,0);
 
 			// update the player coordinates in the mirror
-			CMirrorPropValue1DS<sint32>( TheDataset, index, DSPropertyPOSX )= 0; 
+			CMirrorPropValue1DS<sint32>( TheDataset, index, DSPropertyPOSX )= 0;
 			CMirrorPropValue1DS<sint32>( TheDataset, index, DSPropertyPOSY )= 0;
 			CMirrorPropValue1DS<sint32>( TheDataset, index, DSPropertyPOSZ )= 0;
 		}
@@ -559,7 +559,7 @@ void cbEntityTeleportation( CMessage& msgin, const string &serviceName, NLNET::T
 		pCGPMS->MoveChecker->teleport(index, x, y, tick);
 
 		// update the player coordinates in the mirror
-		CMirrorPropValue1DS<sint32>( TheDataset, index, DSPropertyPOSX )= x; 
+		CMirrorPropValue1DS<sint32>( TheDataset, index, DSPropertyPOSX )= x;
 		CMirrorPropValue1DS<sint32>( TheDataset, index, DSPropertyPOSY )= y;
 		CMirrorPropValue1DS<sint32>( TheDataset, index, DSPropertyPOSZ )= z;
 		CMirrorPropValue1DS<float>( TheDataset, index, DSPropertyORIENTATION )= t;
@@ -573,7 +573,7 @@ void cbEntityTeleportation( CMessage& msgin, const string &serviceName, NLNET::T
 		}
 		else
 		{
-			nlinfo("MSG: Teleporting entity %d to continent %d cell %d (%d, %d, %d) at tick: %d",index.getIndex(),continent,cell,x,y,z,tick);
+			//nlinfo("MSG: Teleporting entity %d to continent %d cell %d (%d, %d, %d) at tick: %d",index.getIndex(),continent,cell,x,y,z,tick);
 			CWorldPositionManager::teleport(index, x, y, z, t, continent, cell, tick);
 		}
 	}
@@ -592,25 +592,25 @@ void cbEntityPosition( CMessage& msgin, const string &serviceName, NLNET::TServi
 {
 //	CEntityId sender;
 //	sender.serial( msgin );
-	
+
 	CEntityId id;
 	id.serial( msgin );
 
 	TDataSetRow	index = CWorldPositionManager::getEntityIndex(id);
 
 	const CWorldEntity *pEntity = CWorldPositionManager::getEntity( index );
-	
+
 	if( pEntity )
 	{
 		CMessage msgout( "ENTITY_POS" );
 
 //		msgout.serial( sender );
 		msgout.serial( id );
-		
+
 		sint32 val;
 		val = pEntity->X();
 		msgout.serial( val );
-		
+
 		val = pEntity->Y();
 		msgout.serial( val );
 
@@ -824,7 +824,7 @@ void cbEntitiesArroundEntity( NLNET::CMessage& msgin, const std::string &service
 void cbEndEntitiesArroundEntity( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
 {
 	CEntityId id;	// base entity for decide list of entities arround this
-	
+
 	msgin.serial( id );
 
 	CWorldPositionManager::unrequestForEntityAround( serviceId, id );
@@ -870,10 +870,10 @@ void cbR2ForceVisionReset( NLNET::CMessage& msgin, const std::string &serviceNam
 
 	msgin.serial(eid);
 
-	
+
 	TDataSetRow entityIndex = TheDataset.getDataSetRow( eid );
 	BOMB_IF(!entityIndex.isValid() , "Try to reset the vision of a invalid player "+eid.toString(), return);
-	
+
 	pCGPMS->RingVisionUniverse->forceResetVision(entityIndex);
 
 }
@@ -925,14 +925,14 @@ TUnifiedCallbackItem CbGPMSArray[]=
 // / *?DEAD?* /	{ "DISABLE_VISION_PROC",		cbDisableVisionProcessing },	// ask for player vision not to be updated any longer
 
 /*?DEAD?*/	{ "ENTITY_POS",					cbEntityPosition },				// ask for position of an entity
-	
+
 /*?DEAD?*/	{ "ASK_VISION_ARROUND_ENTITY",	cbEntitiesArroundEntity },		// ask for vision update around an entity
 /*?DEAD?*/	{ "UNASK_VISION_ARROUND_ENTITY",cbEndEntitiesArroundEntity },	// remove vision update around an entity
 
 /*?DEAD?*/	{ "VISION_REQUEST",				cbVisionRequest },
 	{ "SET_PLAYER_FLAGS",			cbSetPlayerFlags },				// set flags for player (limit speed, etc)
 	{ "R2_VISION_REFRESH",			cbR2ForceVisionReset },				// force the update of the vision (because some message must have been discared in Ring (in edition mode the network is not listen)
-}; 
+};
 
 
 
