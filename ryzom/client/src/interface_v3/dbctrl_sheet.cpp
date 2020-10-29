@@ -3398,7 +3398,7 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 		if (macroName.empty())
 			macroName = CI18N::get("uiNotAssigned");
 
-		ucstring assignedTo = macro->Combo.toUCString();
+		ucstring assignedTo = macro->Combo.toString();
 		if (assignedTo.empty())
 			assignedTo = CI18N::get("uiNotAssigned");
 

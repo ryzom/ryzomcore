@@ -714,7 +714,7 @@ static std::string getActionKey(const char* name, const char* param = "")
 
 	CActionsManager::TActionComboMap::const_iterator ite = acmap.find(CAction::CName(name, param));
 	if (ite != acmap.end())
-		return ite->second.toUCString().toString();
+		return ite->second.toString();
 
 	return CI18N::get("uiNotAssigned");
 }

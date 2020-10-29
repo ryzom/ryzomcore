@@ -82,13 +82,13 @@ public:
 		return _Key;
 	}
 	// return the char that has been pressed. The key event type MUST be 'keychar', else => assert
-	ucchar getChar() const
+	u32char getChar() const
 	{
 		nlassert(_KeyEvent == keychar);
 		return _Char;
 	}
 	// return the string that has been sent. The key event type MUST be 'keystring', else => assert
-	ucstring getString() const
+	std::string getString() const
 	{
 		nlassert(_KeyEvent == keystring);
 		return _String;
@@ -141,9 +141,9 @@ private:
 	union
 	{
 		NLMISC::TKey	_Key;
-		ucchar			_Char;
+		u32char			_Char;
 	};
-	ucstring		_String;
+	std::string			_String;
 };
 
 // ----------------------------------------------------------------------------

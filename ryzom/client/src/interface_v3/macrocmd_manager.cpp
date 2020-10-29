@@ -897,7 +897,7 @@ public:
 			if (pMCM->CurrentEditMacro.Combo.Key == KeyCount)
 				pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT));
 			else
-				pVT->setText(pMCM->CurrentEditMacro.Combo.toUCString().toUtf8());
+				pVT->setText(pMCM->CurrentEditMacro.Combo.toString());
 		}
 
 		pList->clearGroups();
@@ -1003,7 +1003,7 @@ void addMacroLine (CGroupList *pParent, uint macNb, const CMacroCmd &macro)
 	if (pVT != NULL)
 	{
 		if (macro.Combo.Key != KeyCount)
-			pVT->setText(macro.Combo.toUCString().toUtf8());
+			pVT->setText(macro.Combo.toString());
 		else
 			pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT));
 	}

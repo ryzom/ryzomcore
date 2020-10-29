@@ -1265,6 +1265,10 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		return 0;
 	}
 
+	// https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-unichar
+	if (message == WM_UNICHAR)
+		return (wParam == UNICODE_NOCHAR);
+
 	return DefWindowProcW(hWnd, message, wParam, lParam);
 }
 

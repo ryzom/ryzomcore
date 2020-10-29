@@ -66,7 +66,7 @@ public:
 	void init (NLMISC::TKey key, NLMISC::TKeyButton keyButtons);
 
 	/// Get the combo in human readable form
-	ucstring toUCString() const;
+	std::string toString() const;
 
 	// For maps
 	bool operator<(const CCombo &other) const

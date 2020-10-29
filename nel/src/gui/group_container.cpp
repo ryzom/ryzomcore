@@ -3955,8 +3955,8 @@ namespace NLGUI
 	// ***************************************************************************
 	void			CGroupContainer::setTitle (const std::string &title)
 	{
-		if (_Localize)	setUCTitle (CI18N::get(title));
-		else			setUCTitle (title);
+		if (_Localize)	setTitleRaw (CI18N::get(title));
+		else			setTitleRaw (title);
 	}
 
 	// ***************************************************************************
@@ -3968,8 +3968,8 @@ namespace NLGUI
 	// ***************************************************************************
 	void			CGroupContainer::setTitleOpened (const std::string &title)
 	{
-		if (_Localize)	setUCTitleOpened (CI18N::get(title));
-		else			setUCTitleOpened (title);
+		if (_Localize)	setTitleOpenedRaw (CI18N::get(title));
+		else			setTitleOpenedRaw (title);
 	}
 
 	// ***************************************************************************
@@ -3981,51 +3981,87 @@ namespace NLGUI
 	// ***************************************************************************
 	void			CGroupContainer::setTitleClosed (const std::string &title)
 	{
-		if (_Localize)	setUCTitleClosed (CI18N::get(title));
-		else			setUCTitleClosed (title);
+		if (_Localize)	setTitleClosedRaw (CI18N::get(title));
+		else			setTitleClosedRaw (title);
 	}
 
 	// ***************************************************************************
-	void CGroupContainer::setUCTitleOpened(const ucstring &title)
+	void CGroupContainer::setTitleOpenedRaw(const std::string &title)
 	{
-		_TitleTextOpened = title.toUtf8();
+		_TitleTextOpened = title;
 		if (_TitleOpened != NULL)
-			_TitleOpened->setText (title.toUtf8());
+			_TitleOpened->setText (title);
 		invalidateCoords();
 	}
 
 	// ***************************************************************************
-	void CGroupContainer::setUCTitleClosed(const ucstring &title)
+	void CGroupContainer::setTitleClosedRaw(const std::string &title)
 	{
-		_TitleTextClosed = title.toUtf8();
+		_TitleTextClosed = title;
 		if (_TitleClosed != NULL)
 			_TitleClosed->setText (_TitleTextClosed);
 		invalidateCoords();
 	}
 
 	// ***************************************************************************
-	void CGroupContainer::setUCTitle(const ucstring &title)
+	void CGroupContainer::setTitleRaw(const std::string &title)
 	{
-		setUCTitleOpened(title);
-		setUCTitleClosed(title);
+		setTitleOpenedRaw(title);
+		setTitleClosedRaw(title);
 	}
 
 	// ***************************************************************************
-	ucstring CGroupContainer::getUCTitle () const
+	std::string CGroupContainer::getTitleRaw () const
 	{
-		return getUCTitleOpened();
+		return getTitleOpened();
 	}
 
 	// ***************************************************************************
-	ucstring CGroupContainer::getUCTitleOpened () const
+	std::string CGroupContainer::getTitleOpenedRaw () const
 	{
 		return _TitleTextOpened;
 	}
 
 	// ***************************************************************************
-	ucstring CGroupContainer::getUCTitleClosed () const
+	std::string CGroupContainer::getTitleClosedRaw () const
 	{
 		return _TitleTextClosed;
+	}
+
+	// ***************************************************************************
+	void CGroupContainer::setUCTitleOpened(const ucstring &title)
+	{
+		setTitleOpenedRaw(title.toUtf8());
+	}
+
+	// ***************************************************************************
+	void CGroupContainer::setUCTitleClosed(const ucstring &title)
+	{
+		setTitleClosedRaw(title.toUtf8());
+	}
+
+	// ***************************************************************************
+	void CGroupContainer::setUCTitle(const ucstring &title)
+	{
+		setTitleRaw(title.toUtf8());
+	}
+
+	// ***************************************************************************
+	ucstring CGroupContainer::getUCTitle () const
+	{
+		return ucstring::makeFromUtf8(getTitleRaw());
+	}
+
+	// ***************************************************************************
+	ucstring CGroupContainer::getUCTitleOpened () const
+	{
+		return ucstring::makeFromUtf8(getTitleOpenedRaw());
+	}
+
+	// ***************************************************************************
+	ucstring CGroupContainer::getUCTitleClosed () const
+	{
+		return ucstring::makeFromUtf8(getTitleClosedRaw());
 	}
 
 	// ***************************************************************************

@@ -208,7 +208,7 @@ void getAllComboAction(uint8 nAM, CGroupList *pList, const map<ucstring, CComboA
 		if(remapIT->second.Combo.Key==KeyCount)
 			keyName= CI18N::get("uiNotAssigned");
 		else
-			keyName= remapIT->second.Combo.toUCString();
+			keyName= remapIT->second.Combo.toString();
 		const CBaseAction *baseAction = pAM->getBaseAction(remapIT->second.ActionName);
 		if (baseAction)
 		{
@@ -711,7 +711,7 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_TEXT_KEY));
 		if (pVT != NULL) pVT->setActive(true);
 		// setup the text of the key
-		pVT->setText(it->second.toUCString().toUtf8());
+		pVT->setText(it->second.toString());
 
 		// There is already a shortcut so we can display ok button
 		pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
@@ -887,7 +887,7 @@ void CModalContainerEditCmd::validCurrentCommand()
 			{
 				CurrentEditCmdLine.Combo = it->second;
 				// Yes ok let setup the text of the key
-				pVT->setText(it->second.toUCString().toUtf8());
+				pVT->setText(it->second.toString());
 				// There is already a shortcut so we can display ok button
 				CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
 				if (pCB != NULL) pCB->setFrozen (false);
@@ -1353,7 +1353,7 @@ public:
 			pMCM->NewKey->CurrentEditCmdLine.Combo = pGetKey->Combo;
 
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(pMCM->NewKey->WinName+VIEW_EDITCMD_TEXT_KEY));
-			if (pVT != NULL) pVT->setText(pMCM->NewKey->CurrentEditCmdLine.Combo.toUCString().toUtf8());
+			if (pVT != NULL) pVT->setText(pMCM->NewKey->CurrentEditCmdLine.Combo.toString());
 
 			CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(pMCM->NewKey->WinName+CTRL_EDITCMD_BUTTON_OK));
 			if (pCB != NULL) pCB->setFrozen (false);
@@ -1365,7 +1365,7 @@ public:
 			pMCM->EditCmd->CurrentEditCmdLine.Combo = pGetKey->Combo;
 			pMCM->CurrentEditMacro.Combo = pMCM->EditCmd->CurrentEditCmdLine.Combo;
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_NEWMACRO_KEY));
-			if (pVT != NULL) pVT->setText(pMCM->EditCmd->CurrentEditCmdLine.Combo.toUCString().toUtf8());
+			if (pVT != NULL) pVT->setText(pMCM->EditCmd->CurrentEditCmdLine.Combo.toString());
 		}
 	}
 };

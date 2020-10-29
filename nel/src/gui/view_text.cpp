@@ -118,9 +118,10 @@ namespace NLGUI
 		// Letter size
 		// - "_" that should be the character with the lowest part
 		// - A with an accent for the highest part
-		_FontSizingChars.fromUtf8("_\xc3\x84");
+		// https://www.compart.com/en/unicode/U+00C4
+		_FontSizingChars = { (u32char)'_', 0x000000C4 };
 		// fallback if SizingChars are not supported by font
-		_FontSizingFallback.fromUtf8("|");
+		_FontSizingFallback = { (u32char)'|' };
 		computeFontSize ();
 	}
 
@@ -396,12 +397,12 @@ namespace NLGUI
 		else
 		if ( name == "sizing_chars" )
 		{
-			return _FontSizingChars.toUtf8();
+			return CUtfStringView(_FontSizingChars).toUtf8();
 		}
 		else
 		if ( name == "sizing_fallback" )
 		{
-			return _FontSizingFallback.toUtf8();
+			return CUtfStringView(_FontSizingFallback).toUtf8();
 		}
 		else
 			return "";
@@ -688,13 +689,13 @@ namespace NLGUI
 		else
 		if( name == "sizing_chars" )
 		{
-			_FontSizingChars.fromUtf8(value);
+			_FontSizingChars = CUtfStringView(value).toUtf32();
 			return true;
 		}
 		else
 		if( name == "sizing_fallback" )
 		{
-			_FontSizingFallback.fromUtf8(value);
+			_FontSizingFallback = CUtfStringView(value).toUtf32();
 			return true;
 		}
 		else
@@ -766,8 +767,8 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "clamp_right", BAD_CAST toString( _ClampRight ).c_str() );
 		xmlSetProp( node, BAD_CAST "auto_clamp_offset", BAD_CAST toString( _AutoClampOffset ).c_str() );
 		xmlSetProp( node, BAD_CAST "continuous_update", BAD_CAST toString( _ContinuousUpdate ).c_str() );
-		xmlSetProp( node, BAD_CAST "sizing_chars", BAD_CAST _FontSizingChars.toUtf8().c_str() );
-		xmlSetProp( node, BAD_CAST "sizing_fallback", BAD_CAST _FontSizingFallback.toUtf8().c_str() );
+		xmlSetProp( node, BAD_CAST "sizing_chars", BAD_CAST CUtfStringView(_FontSizingChars).toUtf8().c_str() );
+		xmlSetProp( node, BAD_CAST "sizing_fallback", BAD_CAST CUtfStringView(_FontSizingFallback).toUtf8().c_str() );
 
 		return true;
 	}
@@ -953,16 +954,16 @@ namespace NLGUI
 		}
 
 		// "_Ä" lowest/highest chars (underscore, A+diaeresis)
-		_FontSizingChars.fromUtf8("_\xc3\x84");
+		_FontSizingChars = { (u32char)'_', 0x000000C4 };
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"sizing_chars" );
 		if (prop)
-			_FontSizingChars.fromUtf8((const char*)prop);
+			_FontSizingChars = CUtfStringView((const char*)prop).toUtf32();
 
 		// fallback if SizingChars are not supported by font
-		_FontSizingFallback.fromUtf8("|");
+		_FontSizingFallback = { (u32char)'|' };
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"sizing_fallback" );
 		if (prop)
-			_FontSizingFallback.fromUtf8((const char*)prop);
+			_FontSizingFallback = CUtfStringView((const char*)prop).toUtf32();
 
 		computeFontSize ();
 	}
@@ -1468,9 +1469,9 @@ namespace NLGUI
 	void CViewText::setFontSizing(const std::string &chars, const std::string &fallback)
 	{
 		_FontSizingChars.clear();
-		_FontSizingChars.fromUtf8(chars);
+		_FontSizingChars = CUtfStringView(chars).toUtf32();
 		_FontSizingFallback.clear();
-		_FontSizingFallback.fromUtf8(fallback);
+		_FontSizingFallback = CUtfStringView(fallback).toUtf32();
 	}
 
 	// ***************************************************************************
@@ -1683,7 +1684,7 @@ namespace NLGUI
 		nMaxWidth *= _Scale;
 		//for (i = 0; i < textSize; ++i)
 		CUtfStringView sv(_Text);
-		u32string ucStrLetter(1, ' ');
+		::u32string ucStrLetter(1, ' ');
 		for (CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it, ++i)
 		{
 			if(isFormatTagChange(i, formatTagIndex))
@@ -1863,7 +1864,7 @@ namespace NLGUI
 				uint	i;
 				for(i= (uint)spaceEnd;i<(uint)_Text.length();i++)
 				{
-					ucchar	c= _Text[i];
+					char	c= _Text[i];
 					if(c==' ' || c=='\n')
 						break;
 					// If change of color tag, stop the word, but don't take the new color now.
@@ -1950,7 +1951,7 @@ namespace NLGUI
 					else
 					{
 						float px = numSpaces * _SpaceWidth;
-						u32string oneChar(1, ' ');
+						::u32string oneChar(1, ' ');
 						CUtfStringView wsv(wordValue);
 						CUtfStringView::iterator wit(wsv.begin()), wend(wsv.end());
 						for (; wit != wend; ++wit)
@@ -2198,7 +2199,7 @@ namespace NLGUI
 				if (_ClampRight)
 				{
 					CUtfStringView sv(_Text);
-					u32string ucStrLetter = u32string(1, (u32char)' ');
+					::u32string ucStrLetter = u32string(1, (u32char)' ');
 					for (CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it)
 					{
 						ucStrLetter[0] = *it;
@@ -2224,8 +2225,8 @@ namespace NLGUI
 				else
 				{
 					// FIXME: Optimize reverse UTF iteration
-					u32string uctext = CUtfStringView(_Text).toUtf32();
-					u32string ucStrLetter = u32string(1, (u32char)' ');
+					::u32string uctext = CUtfStringView(_Text).toUtf32();
+					::u32string ucStrLetter = u32string(1, (u32char)' ');
 					for (sint i = (sint)uctext.size() - 1; i >= 0; --i)
 					{
 						ucStrLetter[0] = uctext[i];
@@ -2358,7 +2359,7 @@ namespace NLGUI
 			charIndex += currLine.getNumChars() + currLine.getEndSpaces() + (currLine.getLF() ? 1 : 0);
 		}
 		// skip all spaces at start of line (unless there are only spaces in the line)
-		std::string::size_type nextPos = _Text.find_first_not_of((ucchar) ' ', charIndex);
+		std::string::size_type nextPos = _Text.find_first_not_of(' ', charIndex);
 		if (nextPos != std::string::npos)
 		{
 			if (getLineFromIndex(charIndex) == (sint) line)
@@ -2567,7 +2568,7 @@ namespace NLGUI
 		float px = 0.f;
 
 		UTextContext::CStringInfo si;
-		u32string singleChar(1, ' ');
+		::u32string singleChar(1, ' ');
 		uint i = 0;
 		NLMISC::CUtfStringView sv(textValue);
 		for (NLMISC::CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it, ++i)
@@ -3405,7 +3406,7 @@ namespace NLGUI
 
 			while(textIndex<formatTag.Index)
 			{
-				if(tempText[textIndex] == ucchar(' '))
+				if(tempText[textIndex] == ' ')
 					spacesNb++;
 
 				textIndex++;

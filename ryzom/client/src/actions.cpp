@@ -499,9 +499,9 @@ void CCombo::init (NLMISC::TKey key, NLMISC::TKeyButton keyButtons)
 }
 
 // ***************************************************************************
-ucstring CCombo::toUCString() const
+string CCombo::toString() const
 {
-	ucstring ret;
+	string ret;
 	if ((KeyButtons & shiftKeyButton) && (Key != 0x10))
 		ret += CI18N::get("uiKeySHIFT") + "+";
 	if ((KeyButtons & ctrlKeyButton) && (Key != 0x11))

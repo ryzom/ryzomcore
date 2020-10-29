@@ -665,7 +665,7 @@ static DECLARE_INTERFACE_USER_FCT(getKey)
 	CActionsManager::TActionComboMap::const_iterator it = acmap.find(CAction::CName(name.c_str(),param.c_str()));
 	if (it != acmap.end())
 	{
-		result.setString (it->second.toUCString().toUtf8());
+		result.setString (it->second.toString());
 	}
 	else
 	{

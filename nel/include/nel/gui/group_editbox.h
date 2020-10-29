@@ -65,15 +65,15 @@ namespace NLGUI
 		/// Accessors
 		std::string getInputString() const;
 		std::string getPrompt() const;
-		const u32string &getInputStringRef() const { return _InputString; }
-		const u32string &getPromptRef() const { return _Prompt; }
+		const ::u32string &getInputStringRef() const { return _InputString; }
+		const ::u32string &getPromptRef() const { return _Prompt; }
 
 		/** Set the prompt
 		  * NB : line returns are encoded as '\n', not '\r\n'
 		  */
 		void		setPrompt(const std::string &s);
 		void		setInputString(const std::string &str);
-		void		setInputStringRef(const u32string &str) {_InputString = str; };
+		void		setInputStringRef(const ::u32string &str) {_InputString = str; };
 		void		setInputStringAsInt(sint32 val);
 		sint32		getInputStringAsInt() const;
 		void		setInputStringAsInt64(sint64 val);
@@ -82,8 +82,8 @@ namespace NLGUI
 		float		getInputStringAsFloat() const;
 		void		setInputStringAsUtf16(const ucstring &str);
 		ucstring    getInputStringAsUtf16() const;
-		void		setInputStringAsUtf32(const u32string &str);
-		u32string   getInputStringAsUtf32() const { return _InputString; }
+		void		setInputStringAsUtf32(const ::u32string &str);
+		::u32string   getInputStringAsUtf32() const { return _InputString; }
 		void		setColor(NLMISC::CRGBA col);
 
 
@@ -98,7 +98,7 @@ namespace NLGUI
 
 		static CGroupEditBox *getMenuFather() { return _MenuFather; }
 
-		void setCommand(const ucstring &command, bool execute);
+		void setCommand(const std::string &command, bool execute);
 
 		// Stop parent from blinking
 		void		stopParentBlink() { if (_Parent) _Parent->disableBlink(); }
@@ -122,7 +122,7 @@ namespace NLGUI
 		sint32	getMaxHistoric() const {return _MaxHistoric;}
 		sint32	getCurrentHistoricIndex () const {return _CurrentHistoricIndex;}
 		void	setCurrentHistoricIndex (sint32 index) {_CurrentHistoricIndex=index;}
-		const u32string	&getHistoric(uint32 index) const {return _Historic[index];}
+		const ::u32string	&getHistoric(uint32 index) const {return _Historic[index];}
 		uint32	getNumHistoric() const {return (uint32)_Historic.size ();}
 
 		// Get on change action handler
@@ -140,7 +140,7 @@ namespace NLGUI
 		// Paste the selection into buffer
 		void		paste();
 		// Write the string into buffer
-		void		writeString(const ucstring &str, bool replace = true, bool atEnd = true);
+		void		writeString(const ucstring &str, bool replace = true, bool atEnd = true); // UTF-16 because of Clipboard implementation
 
 		// Expand the expression (true if there was a '/' at the start of the line)
 		bool		expand();
@@ -171,7 +171,7 @@ namespace NLGUI
 		virtual void onKeyboardCaptureLost();
 
 		// set the input string as "default". will be reseted at first click (used for user information)
-		void	setDefaultInputString(const ucstring &str);
+		void	setDefaultInputString(const std::string &str);
 
 		// For Interger and PositiveInteger, can specify min and max values
 		void	setIntegerMinValue(sint32 minValue) {_IntegerMinValue=minValue;}
@@ -229,17 +229,17 @@ namespace NLGUI
 		NLMISC::CRGBA	_BackSelectColor;
 
 		// Text info
-		u32string	_Prompt;
-		u32string	_InputString;
+		::u32string	_Prompt;
+		::u32string	_InputString;
 		CViewText	*_ViewText;
 
 		// undo / redo
-		u32string	_StartInputString;  // value of the input string when focus was acuired first
-		u32string	_ModifiedInputString;
+		::u32string	_StartInputString;  // value of the input string when focus was acuired first
+		::u32string	_ModifiedInputString;
 
 
 		// Historic info
-		typedef std::deque<u32string>		THistoric;
+		typedef std::deque<::u32string>		THistoric;
 		THistoric	_Historic;
 		uint32		_MaxHistoric;
 		sint32		_CurrentHistoricIndex;
@@ -276,7 +276,7 @@ namespace NLGUI
 		bool	_CanRedo                   : 1;
 		bool	_CanUndo                   : 1;
 
-		std::vector<char>					_NegativeFilter;
+		std::vector<u32char>					_NegativeFilter;
 
 		sint	_CursorTexID;
 		sint32	_CursorWidth;
@@ -299,13 +299,13 @@ namespace NLGUI
 		void handleEventString(const NLGUI::CEventDescriptorKey &event);
 		void setup();
 		void triggerOnChangeAH();
-		void appendStringFromClipboard(const ucstring &str);
+		void appendStringFromClipboard(const ucstring &str); // UTF-16 because of Clipboard implementation
 
-		ucstring	getSelection();
+		ucstring	getSelection(); // UTF-16 because of Clipboard implementation
 
 		static CGroupEditBox *_MenuFather;
 
-		static bool isValidAlphaNumSpace(ucchar c)
+		static bool isValidAlphaNumSpace(u32char c)
 		{
 			if (c > 255) return false;
 			char ac = (char) c;
@@ -315,7 +315,7 @@ namespace NLGUI
 				ac==' ';
 		}
 
-		static bool isValidAlphaNum(ucchar c)
+		static bool isValidAlphaNum(u32char c)
 		{
 			if (c > 255) return false;
 			char ac = (char) c;
@@ -324,7 +324,7 @@ namespace NLGUI
 				   (ac >= 'A' && ac <= 'Z');
 		}
 
-		static bool isValidAlpha(ucchar c)
+		static bool isValidAlpha(u32char c)
 		{
 			if (c > 255) return false;
 			char ac = (char) c;
@@ -332,13 +332,13 @@ namespace NLGUI
 				   (ac >= 'A' && ac <= 'Z');
 		}
 
-		static bool isValidPlayerNameChar(ucchar c)
+		static bool isValidPlayerNameChar(u32char c)
 		{
 			// valid player name (with possible shard prefix / suffix format
 			return isValidAlpha(c) || c=='.' || c=='(' || c==')';
 		}
 
-		static bool isValidFilenameChar(ucchar c)
+		static bool isValidFilenameChar(u32char c)
 		{
 			if (c == '\\' ||
 				c == '/' ||
@@ -352,12 +352,12 @@ namespace NLGUI
 			return true;
 		}
 		//
-		bool isFiltered(ucchar c)
+		bool isFiltered(u32char c)
 		{
-			uint length = (uint)_NegativeFilter.size();
-			for (uint k = 0; k < length; ++k)
+			ptrdiff_t length = _NegativeFilter.size();
+			for (ptrdiff_t k = 0; k < length; ++k)
 			{
-				if ((ucchar) _NegativeFilter[k] == c) return true;
+				if (_NegativeFilter[k] == c) return true;
 			}
 			return false;
 		}

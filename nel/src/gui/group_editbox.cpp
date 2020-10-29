@@ -96,7 +96,7 @@ namespace NLGUI
 									_ViewTextDeltaX(0)
 
 	{
-		_Prompt = u32string(1, (u32char)'>');
+		_Prompt = ::u32string(1, (u32char)'>');
 		_BackSelectColor= CRGBA::White;
 		_TextSelectColor= CRGBA::Black;
 	}
@@ -264,9 +264,9 @@ namespace NLGUI
 			std::string s;
 			s.reserve( _NegativeFilter.size() );
 
-			std::vector< char >::const_iterator itr;
-			for( itr = _NegativeFilter.begin(); itr != _NegativeFilter.end(); ++itr )
-				s.push_back( *itr );
+			std::vector< u32char >::const_iterator itr;
+			for (itr = _NegativeFilter.begin(); itr != _NegativeFilter.end(); ++itr)
+				CUtfStringView::append(s, *itr);
 			
 			return s;
 		}
@@ -450,10 +450,10 @@ namespace NLGUI
 		if( name == "negative_filter" )
 		{
 			_NegativeFilter.clear();
-
-			std::string::size_type i;
-			for( i = 0; i < value.size(); i++ )
-				_NegativeFilter.push_back( value[ i ] );
+			::u32string::size_type i;
+			::u32string ustr = CUtfStringView(value).toUtf32();
+			for( i = 0; i < ustr.size(); i++ )
+				_NegativeFilter.push_back(ustr[i]);
 		}
 		else
 			CInterfaceGroup::setProperty( name, value );
@@ -539,9 +539,9 @@ namespace NLGUI
 		std::string s;
 		s.reserve( _NegativeFilter.size() );
 
-		std::vector< char >::const_iterator itr;
+		std::vector< u32char >::const_iterator itr;
 		for( itr = _NegativeFilter.begin(); itr != _NegativeFilter.end(); ++itr )
-			s.push_back( *itr );
+			CUtfStringView::append(s, *itr);
 
 		xmlSetProp( node, BAD_CAST "negative_filter", BAD_CAST s.c_str() );
 
@@ -657,9 +657,11 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"negative_filter" );
 		if (prop)
 		{
-			uint length = (uint)strlen(prop);
-			_NegativeFilter.resize(length);
-			std::copy((const char *) prop, (const char *) prop + length, _NegativeFilter.begin());
+			_NegativeFilter.clear();
+			::u32string::size_type i;
+			::u32string ustr = CUtfStringView(prop).toUtf32();
+			for( i = 0; i < ustr.size(); i++ )
+				_NegativeFilter.push_back(ustr[i]);
 		}
 
 		return true;
@@ -829,10 +831,10 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupEditBox::writeString(const ucstring &str16, bool replace, bool atEnd)
 	{
-		u32string str = CUtfStringView(str16).toUtf32();
+		::u32string str = CUtfStringView(str16).toUtf32();
 		sint length = (sint)str.length();
 
-		u32string toAppend;
+		::u32string toAppend;
 		// filter character depending on the entry type
 		switch (_EntryType)
 		{
@@ -854,7 +856,7 @@ namespace NLGUI
 					}
 				}
 				// remove '\r' characters
-				toAppend.erase(std::remove(toAppend.begin(), toAppend.end(), (ucchar) '\r'), toAppend.end());
+				toAppend.erase(std::remove(toAppend.begin(), toAppend.end(), (u32char) '\r'), toAppend.end());
 
 			}
 			break;
@@ -965,7 +967,7 @@ namespace NLGUI
 		{
 			length = _MaxNumChar - (sint)_InputString.length();
 		}
-		u32string toAdd = toAppend.substr(0, length);
+		::u32string toAdd = toAppend.substr(0, length);
 		sint32	minPos;
 		sint32	maxPos;
 		if (_CurrSelection == this)
@@ -1015,7 +1017,7 @@ namespace NLGUI
 				_CursorAtPreviousLineEnd = false;
 				if (_ClearOnEscape)
 				{
-					setInputStringAsUtf32(u32string());
+					setInputStringAsUtf32(::u32string());
 					triggerOnChangeAH();
 				}
 				CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
@@ -1077,7 +1079,7 @@ namespace NLGUI
 							cutSelection();
 						}
 
-						ucchar c = isKeyRETURN ? '\n' : rEDK.getChar();
+						u32char c = isKeyRETURN ? '\n' : rEDK.getChar();
 						if (isFiltered(c)) return;
 						switch(_EntryType)
 						{
@@ -1124,8 +1126,8 @@ namespace NLGUI
 						if(_EntryType==Integer && (_IntegerMinValue!=INT_MIN || _IntegerMaxValue!=INT_MAX))
 						{
 							// estimate new string
-							u32string	copyStr= _InputString;
-							u32string::iterator it = copyStr.begin() + _CursorPos;
+							::u32string	copyStr= _InputString;
+							::u32string::iterator it = copyStr.begin() + _CursorPos;
 							copyStr.insert(it, c);
 							sint32	value;
 							fromString(CUtfStringView(copyStr).toUtf8(), value);
@@ -1137,8 +1139,8 @@ namespace NLGUI
 						if(_EntryType==PositiveInteger && (_PositiveIntegerMinValue!=0 || _PositiveIntegerMaxValue!=UINT_MAX))
 						{
 							// estimate new string
-							u32string	copyStr= _InputString;
-							u32string::iterator it = copyStr.begin() + _CursorPos;
+							::u32string	copyStr= _InputString;
+							::u32string::iterator it = copyStr.begin() + _CursorPos;
 							copyStr.insert(it, c);
 							// \todo yoyo: this doesn't really work i think....
 							uint32	value;
@@ -1151,7 +1153,7 @@ namespace NLGUI
 						if ((uint) _InputString.length() < _MaxNumChar)
 						{
 							makeTopWindow();
-							u32string::iterator it = _InputString.begin() + _CursorPos;
+							::u32string::iterator it = _InputString.begin() + _CursorPos;
 							_InputString.insert(it, c);
 							++ _CursorPos;
 							triggerOnChangeAH();
@@ -1263,7 +1265,7 @@ namespace NLGUI
 		// else delete last character
 		else if(_InputString.size () > 0 && _CursorPos != 0)
 		{
-			u32string::iterator it = _InputString.begin() + (_CursorPos - 1);
+			::u32string::iterator it = _InputString.begin() + (_CursorPos - 1);
 			_InputString.erase(it);
 			-- _CursorPos;
 			_CursorAtPreviousLineEnd = false;
@@ -1436,7 +1438,7 @@ namespace NLGUI
 			std::string usTmp;
 			if (_EntryType == Password)
 			{
-				usTmp = CUtfStringView(_Prompt + u32string(_InputString.size(), 0x2022)).toUtf8();
+				usTmp = CUtfStringView(_Prompt + ::u32string(_InputString.size(), 0x2022)).toUtf8();
 			}
 			else
 			{
@@ -1634,7 +1636,7 @@ namespace NLGUI
 	{
 		setInputStringAsUtf32(CUtfStringView(str).toUtf32());
 	}
-	void CGroupEditBox::setInputStringAsUtf32(const u32string &str)
+	void CGroupEditBox::setInputStringAsUtf32(const ::u32string &str)
 	{
 		_InputString = str;
 		if (_CursorPos > (sint32) str.length())
@@ -1650,10 +1652,10 @@ namespace NLGUI
 
 
 	// ***************************************************************************
-	void	CGroupEditBox::setDefaultInputString(const ucstring &str)
+	void	CGroupEditBox::setDefaultInputString(const std::string &str)
 	{
 		_DefaultInputString= true;
-		setInputStringAsUtf32(CUtfStringView(str).toUtf32());
+		setInputString(str);
 	}
 
 	// ***************************************************************************
@@ -1771,14 +1773,14 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CGroupEditBox::setCommand(const ucstring &command, bool execute)
+	void CGroupEditBox::setCommand(const std::string &command, bool execute)
 	{
 		// do nothing if frozen
 		if(_Frozen)
 			return;
 
 		// set the string and maybe execute
-		setInputStringAsUtf16((ucchar) '/' + command);
+		setInputString('/' + command);
 		if (execute)
 		{
 			// stop selection
@@ -1878,7 +1880,7 @@ namespace NLGUI
 	void CGroupEditBox::onQuit()
 	{
 		// clear the text and restore backup pos before final save
-		setInputStringAsUtf32(u32string());
+		setInputStringAsUtf32(::u32string());
 		_CurrSelection = NULL;
 	}
 
@@ -1886,7 +1888,7 @@ namespace NLGUI
 	void CGroupEditBox::onLoadConfig()
 	{
 		// config is not saved when there's an empty string, so restore that default state.
-		setInputStringAsUtf32(u32string());
+		setInputStringAsUtf32(::u32string());
 		_CurrSelection = NULL;
 		_PrevNumLine = 1;
 	}
@@ -1901,7 +1903,7 @@ namespace NLGUI
 			if (_DefaultInputString)
 			{
 				_DefaultInputString= false;
-				setInputStringAsUtf32(u32string());
+				setInputStringAsUtf32(::u32string());
 			}
 			_CanRedo = false;
 			_CanUndo = false;

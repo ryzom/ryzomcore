@@ -102,13 +102,13 @@ ucstring CUtfStringView::toUtf16(bool reEncode) const
 	return res;
 }
 
-u32string CUtfStringView::toUtf32() const
+::u32string CUtfStringView::toUtf32() const
 {
 	// Decode any UTF
 	// This implementation makes no attempt at fixing bad encoding
 	if (m_Iterator == utf32Iterator)
-		return u32string((const u32char *)m_Str, (const u32char *)((ptrdiff_t)m_Str + m_Size));
-	u32string res;
+		return ::u32string((const u32char *)m_Str, (const u32char *)((ptrdiff_t)m_Str + m_Size));
+	::u32string res;
 	res.reserve(m_Size << 2);
 	for (iterator it(begin()), end(this->end()); it != end; ++it)
 		res += *it;

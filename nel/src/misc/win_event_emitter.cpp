@@ -162,6 +162,14 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 				server->postEvent (new CEventKeyUp ((NLMISC::TKey)wParam, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
 		}
 		break;
+	case WM_UNICHAR:
+		if (wParam != UNICODE_NOCHAR && _KeyboardEventsEnabled)
+		{
+			//if (wParam < KeyCount)
+			//nlinfo("WM_UNICHAR with %u", wParam);
+			server->postEvent (new CEventChar ((u32char)wParam, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
+		}
+		break;
 	case WM_CHAR:
 		if (_KeyboardEventsEnabled)
 		{

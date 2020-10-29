@@ -248,6 +248,13 @@ namespace NLGUI
 		// Get the header color draw. NB: depends if grayed, and if active.
 		NLMISC::CRGBA	getDrawnHeaderColor () const;
 
+		std::string		getTitleRaw () const;
+		void			setTitleRaw (const std::string &title);
+		std::string		getTitleOpenedRaw () const;
+		void			setTitleOpenedRaw (const std::string &title);
+		std::string		getTitleClosedRaw () const;
+		void			setTitleClosedRaw (const std::string &title);
+
 		ucstring		getUCTitleOpened () const;
 		void			setUCTitleOpened (const ucstring &title);
 		ucstring		getUCTitleClosed () const;
@@ -287,9 +294,15 @@ namespace NLGUI
 			REFLECT_STRING("title", getTitle, setTitle);
 			REFLECT_STRING("title_opened", getTitleOpened, setTitleOpened);
 			REFLECT_STRING("title_closed", getTitleClosed, setTitleClosed);
-			REFLECT_UCSTRING("uc_title_opened", getUCTitleOpened, setUCTitleOpened);
-			REFLECT_UCSTRING("uc_title_closed", getUCTitleClosed, setUCTitleClosed);
-			REFLECT_UCSTRING("uc_title", getUCTitle, setUCTitle);
+
+			REFLECT_STRING("title_raw", getTitleRaw, setTitleRaw);
+			REFLECT_STRING("title_opened_raw", getTitleOpenedRaw, setTitleOpenedRaw);
+			REFLECT_STRING("title_closed_raw", getTitleClosedRaw, setTitleClosedRaw);
+
+			REFLECT_UCSTRING("uc_title_opened", getUCTitleOpened, setUCTitleOpened); // FIXME: Lua UTF-8
+			REFLECT_UCSTRING("uc_title_closed", getUCTitleClosed, setUCTitleClosed); // FIXME: Lua UTF-8
+			REFLECT_UCSTRING("uc_title", getUCTitle, setUCTitle); // FIXME: Lua UTF-8
+
 			REFLECT_STRING("title_color", getTitleColorAsString, setTitleColorAsString);
 			REFLECT_SINT32("pop_min_h", getPopupMinH, setPopupMinH);
 			REFLECT_SINT32("pop_max_h", getPopupMaxH, setPopupMaxH);
