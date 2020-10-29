@@ -781,22 +781,22 @@
 
 <options name="menu_back">
 
-	<param name="tx_tl"			value="CM_TL.tga" />
-	<param name="tx_t"			value="CM_T.tga" />
-	<param name="tx_tr"			value="CM_TR.tga" />
-	<param name="tx_l"			value="CM_L.tga" />
-	<param name="tx_r"			value="CM_R.tga" />
-	<param name="tx_blank"		value="CM_M.tga" />
-	<param name="tx_bl"			value="CM_BL.tga" />
-	<param name="tx_b"			value="CM_B.tga" />
-	<param name="tx_br"			value="CM_BR.tga" />
+	<param name="tx_tl"			value="w_modal_tl.tga" />
+	<param name="tx_t"			value="w_modal_t.tga" />
+	<param name="tx_tr"			value="w_modal_tr.tga" />
+	<param name="tx_l"			value="w_modal_l.tga" />
+	<param name="tx_r"			value="w_modal_r.tga" />
+	<param name="tx_blank"		value="w_modal_blank.tga" />
+	<param name="tx_bl"			value="w_modal_bl.tga" />
+	<param name="tx_b"			value="w_modal_b.tga" />
+	<param name="tx_br"			value="w_modal_br.tga" />
 
 </options>
 
 
 <group type="menu" id="r2ed_editor_menu"
 	options="menu_back"  
-	text_y="-2"
+	space="0"
 	color="255 255 255 255"
 	fontsize="16"
 	shadow="true"
