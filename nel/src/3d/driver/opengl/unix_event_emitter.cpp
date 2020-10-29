@@ -699,22 +699,21 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 			if (XGetWindowProperty(_dpy, _win, XA_NEL_SEL, 0, XMaxRequestSize(_dpy), False, AnyPropertyType, &actualType, &actualFormat, &nitems, &bytesLeft, (unsigned char**)&data) != Success)
 				return false;
 
-			ucstring text;
-			std::string tmpData = (const char*)data;
+			std::string text = (const char*)data;
 			XFree(data);
 
 			// convert buffer to ucstring
 			if (target == XA_UTF8_STRING)
 			{
-				text = ucstring::makeFromUtf8(tmpData);
+				// OK
 			}
 			else if (target == XA_STRING)
 			{
-				text = tmpData;
+				// FIXME: Convert local to UTF-8
 			}
 			else
 			{
-				nlwarning("Unknow format %u", (uint)target);
+				nlwarning("Unknown format %u", (uint)target);
 			}
 
 			// sent string event to event server
