@@ -178,8 +178,13 @@ u32char CUtfStringView::utf8Iterator(const void **addr)
 	const uint8 **pp = reinterpret_cast<const uint8 **>(addr);
 	u32char c0 = **pp;
 	++(*pp);
-	if ((c0 & 0xC0) == 0xC0)
+	if (c0 >= 0x80)
 	{
+		if (c0 < 0xC0)
+		{
+			// Replacement character �
+			return 0xFFFD;
+		}
 		uint8 cx = **pp;
 		if ((cx & 0xC0) == 0x80)
 		{
@@ -206,6 +211,11 @@ u32char CUtfStringView::utf8Iterator(const void **addr)
 							c0 <<= 6;
 							c0 |= (cx & 0x3F); // 22 bits now (17 - 1 + 6), 3-byte encoding
 						}
+						else
+						{
+							// Replacement character �
+							return 0xFFFD;
+						}
 					}
 					else if ((c0 & 0xFC00) == 0xD800) // Higher bits of nutcase UTF-16 encoded as UTF-8
 					{
@@ -222,9 +232,29 @@ u32char CUtfStringView::utf8Iterator(const void **addr)
 							c0 |= (c1 & 0x03FF);
 							c0 += 0x10000;
 						}
+						else
+						{
+							// Replacement character �
+							return 0xFFFD;
+						}
+					}
+					else if ((c0 & 0xFC00) == 0xDC00) // Lower bits of nutcase UTF-16 encoded as UTF-8
+					{
+						// Replacement character �
+						return 0xFFFD;
 					}
 				}
+				else
+				{
+					// Replacement character �
+					return 0xFFFD;
+				}
 			}
+		}
+		else
+		{
+			// Replacement character �
+			return 0xFFFD;
 		}
 	}
 	return c0;
