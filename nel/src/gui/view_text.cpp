@@ -119,9 +119,11 @@ namespace NLGUI
 		// - "_" that should be the character with the lowest part
 		// - A with an accent for the highest part
 		// https://www.compart.com/en/unicode/U+00C4
-		_FontSizingChars = { (u32char)'_', 0x000000C4 };
+		static const u32char chars[] = { (u32char)'_', 0x000000C4, 0 };
+		_FontSizingChars = chars;
 		// fallback if SizingChars are not supported by font
-		_FontSizingFallback = { (u32char)'|' };
+		static const u32char fallback[] = { (u32char)'|', 0 };
+		_FontSizingFallback = fallback;
 		computeFontSize ();
 	}
 
@@ -954,13 +956,15 @@ namespace NLGUI
 		}
 
 		// "_Ä" lowest/highest chars (underscore, A+diaeresis)
-		_FontSizingChars = { (u32char)'_', 0x000000C4 };
+		static const u32char chars[] = { (u32char)'_', 0x000000C4, 0 };
+		_FontSizingChars = chars;
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"sizing_chars" );
 		if (prop)
 			_FontSizingChars = CUtfStringView((const char*)prop).toUtf32();
 
 		// fallback if SizingChars are not supported by font
-		_FontSizingFallback = { (u32char)'|' };
+		static const u32char fallback[] = { (u32char)'|', 0 };
+		_FontSizingFallback = fallback;
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"sizing_fallback" );
 		if (prop)
 			_FontSizingFallback = CUtfStringView((const char*)prop).toUtf32();
