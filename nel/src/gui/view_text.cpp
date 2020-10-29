@@ -1022,7 +1022,10 @@ namespace NLGUI
 
 			if (_MultiLine)
 			{
-				setTextFormatTaged(CI18N::get(propPtr));
+				if (NLMISC::startsWith(propPtr, "u:"))
+					setTextFormatTaged(std::string(propPtr).substr(2));
+				else
+					setTextFormatTaged(CI18N::get(propPtr));
 			}
 			else
 			{
