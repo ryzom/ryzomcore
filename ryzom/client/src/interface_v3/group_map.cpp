@@ -2831,7 +2831,7 @@ void CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &ti
 	CLandMarkButton *lmb = createLandMarkButton(options);
 	lmb->setParent(this);
 	lmb->Pos = pos;
-	lmb->setDefaultContextHelp(title);
+	lmb->setDefaultContextHelp(title.toUtf8());
 	_UserLM.push_back(lmb);
 	addCtrl(lmb);
 	invalidateCoords();
