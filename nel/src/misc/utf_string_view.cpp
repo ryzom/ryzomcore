@@ -125,7 +125,7 @@ std::string CUtfStringView::toAscii() const
 		if (c < 0x80)
 			res += c;
 		else
-			res += '_';
+			res += '?';
 	}
 	return res;
 }

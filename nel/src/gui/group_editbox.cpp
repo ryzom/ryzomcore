@@ -805,7 +805,7 @@ namespace NLGUI
 			cutSelection();
 		}
 
-		ucstring sString;
+		string sString;
 
 		if (CViewRenderer::getInstance()->getDriver()->pasteTextFromClipboard(sString))
 		{
@@ -815,7 +815,7 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
-	void CGroupEditBox::appendStringFromClipboard(const ucstring &str)
+	void CGroupEditBox::appendStringFromClipboard(const std::string &str)
 	{
 		stopParentBlink();
 		makeTopWindow();
@@ -829,7 +829,7 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
-	void CGroupEditBox::writeString(const ucstring &str16, bool replace, bool atEnd)
+	void CGroupEditBox::writeString(const std::string &str16, bool replace, bool atEnd)
 	{
 		::u32string str = CUtfStringView(str16).toUtf32();
 		sint length = (sint)str.length();
@@ -1717,12 +1717,12 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	ucstring	CGroupEditBox::getSelection()
+	std::string	CGroupEditBox::getSelection()
 	{
 		ptrdiff_t	minPos= min(_CursorPos, _SelectCursorPos);
 		ptrdiff_t	maxPos= max(_CursorPos, _SelectCursorPos);
 		// get the selection
-		return CUtfStringView(_InputString.substr(minPos, maxPos-minPos)).toUtf16();
+		return CUtfStringView(_InputString.substr(minPos, maxPos-minPos)).toUtf8();
 	}
 
 

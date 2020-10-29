@@ -558,10 +558,10 @@ public:
 	// @}
 
 	// Copy a string to system clipboard.
-	virtual bool copyTextToClipboard(const ucstring &text);
+	virtual bool copyTextToClipboard(const std::string &text);
 
 	// Paste a string from system clipboard.
-	virtual bool pasteTextFromClipboard(ucstring &text);
+	virtual bool pasteTextFromClipboard(std::string &text);
 
 	virtual uint64	getSwapBufferCounter();
 

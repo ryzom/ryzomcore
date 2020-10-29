@@ -98,13 +98,13 @@ const IEventEmitter *CEventEmitterMulti::getEmitter(uint index) const
 	return _Emitters[index].first;
 }
 
-bool CEventEmitterMulti::copyTextToClipboard(const ucstring &text)
+bool CEventEmitterMulti::copyTextToClipboard(const std::string &text)
 {
 	// Naush: wrapped to old API to avoid duplicate code
 	return CSystemUtils::copyTextToClipboard(text);
 }
 
-bool CEventEmitterMulti::pasteTextFromClipboard(ucstring &text)
+bool CEventEmitterMulti::pasteTextFromClipboard(std::string &text)
 {
 	// Naush: wrapped to old API to avoid duplicate code
 	return CSystemUtils::pasteTextFromClipboard(text);

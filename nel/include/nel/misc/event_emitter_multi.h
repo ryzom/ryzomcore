@@ -48,8 +48,8 @@ public:
 	/// From IEventEmitter. This call submitEvents on all the emitters
 	virtual void submitEvents(CEventServer &server, bool allWindows);
 
-	virtual bool copyTextToClipboard(const ucstring &text);
-	virtual bool pasteTextFromClipboard(ucstring &text);
+	virtual bool copyTextToClipboard(const std::string &text);
+	virtual bool pasteTextFromClipboard(std::string &text);
 
 private:
 	typedef std::vector<std::pair<IEventEmitter *, bool> > TEmitterCont;

@@ -3020,12 +3020,12 @@ void CDriverGL::setupApplicationMenu()
 }
 #endif
 
-bool CDriverGL::copyTextToClipboard(const ucstring &text)
+bool CDriverGL::copyTextToClipboard(const std::string &text)
 {
 	return _EventEmitter.copyTextToClipboard(text);
 }
 
-bool CDriverGL::pasteTextFromClipboard(ucstring &text)
+bool CDriverGL::pasteTextFromClipboard(std::string &text)
 {
 	return _EventEmitter.pasteTextFromClipboard(text);
 }

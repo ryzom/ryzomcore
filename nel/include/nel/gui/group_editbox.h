@@ -140,7 +140,7 @@ namespace NLGUI
 		// Paste the selection into buffer
 		void		paste();
 		// Write the string into buffer
-		void		writeString(const ucstring &str, bool replace = true, bool atEnd = true); // UTF-16 because of Clipboard implementation
+		void		writeString(const std::string &str, bool replace = true, bool atEnd = true);
 
 		// Expand the expression (true if there was a '/' at the start of the line)
 		bool		expand();
@@ -299,9 +299,9 @@ namespace NLGUI
 		void handleEventString(const NLGUI::CEventDescriptorKey &event);
 		void setup();
 		void triggerOnChangeAH();
-		void appendStringFromClipboard(const ucstring &str); // UTF-16 because of Clipboard implementation
+		void appendStringFromClipboard(const std::string &str);
 
-		ucstring	getSelection(); // UTF-16 because of Clipboard implementation
+		std::string	getSelection();
 
 		static CGroupEditBox *_MenuFather;
 

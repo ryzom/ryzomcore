@@ -262,10 +262,10 @@ public:
 	virtual NLMISC::IEventEmitter *getEventEmitter() = 0;
 
 	/// Copy a string to system clipboard.
-	virtual bool			copyTextToClipboard(const ucstring &text) = 0;
+	virtual bool			copyTextToClipboard(const std::string &text) = 0;
 
 	/// Paste a string from system clipboard.
-	virtual bool			pasteTextFromClipboard(ucstring &text) = 0;/// Return the depth of the driver after init().
+	virtual bool			pasteTextFromClipboard(std::string &text) = 0;/// Return the depth of the driver after init().
 
 	virtual uint8			getBitPerPixel() = 0;
 

@@ -2748,8 +2748,8 @@ public:
 
 	bool convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col = NLMISC::CRGBA::White, sint hotSpotX = 0, sint hotSpotY = 0, bool cursor = false);
 
-	virtual bool copyTextToClipboard(const ucstring &text);
-	virtual bool pasteTextFromClipboard(ucstring &text);
+	virtual bool copyTextToClipboard(const std::string &text);
+	virtual bool pasteTextFromClipboard(std::string &text);
 
 public:
 	#ifdef 	NL_DEBUG

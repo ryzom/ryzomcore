@@ -4018,12 +4018,12 @@ void CDriverD3D::findNearestFullscreenVideoMode()
 		}
 	}
 }
-bool CDriverD3D::copyTextToClipboard(const ucstring &text)
+bool CDriverD3D::copyTextToClipboard(const std::string &text)
 {
 	return _EventEmitter.copyTextToClipboard(text);
 }
 
-bool CDriverD3D::pasteTextFromClipboard(ucstring &text)
+bool CDriverD3D::pasteTextFromClipboard(std::string &text)
 {
 	return _EventEmitter.pasteTextFromClipboard(text);
 }
