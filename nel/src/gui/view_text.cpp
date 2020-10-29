@@ -2206,7 +2206,7 @@ namespace NLGUI
 				if (_ClampRight)
 				{
 					CUtfStringView sv(_Text);
-					::u32string ucStrLetter = u32string(1, (u32char)' ');
+					::u32string ucStrLetter = ::u32string(1, (u32char)' ');
 					for (CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it)
 					{
 						ucStrLetter[0] = *it;
@@ -2233,7 +2233,7 @@ namespace NLGUI
 				{
 					// FIXME: Optimize reverse UTF iteration
 					::u32string uctext = CUtfStringView(_Text).toUtf32();
-					::u32string ucStrLetter = u32string(1, (u32char)' ');
+					::u32string ucStrLetter = ::u32string(1, (u32char)' ');
 					for (sint i = (sint)uctext.size() - 1; i >= 0; --i)
 					{
 						ucStrLetter[0] = uctext[i];

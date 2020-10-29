@@ -228,8 +228,12 @@ namespace NLGUI
 			while(NLMISC::strFindReplace(result,   "{ros_exit}",   ""));
 
 			// Modify the text?
-			if(_StringModifier)
-				_StringModifier->onReceiveTextId(ucstring::makeFromUtf8(result));
+			if (_StringModifier)
+			{
+				ucstring tmp = ucstring::makeFromUtf8(result);
+				_StringModifier->onReceiveTextId(tmp); // FIXME: UTF-8
+				result = tmp.toUtf8();
+			}
 
 			// Set the Text
 			if(_IsTextFormatTaged)
