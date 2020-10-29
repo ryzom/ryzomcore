@@ -459,9 +459,11 @@ namespace NLMISC
 		{
 			return handleWMCopyData(hwnd, (COPYDATASTRUCT *) lParam);
 		}
+#ifdef WM_UNICHAR
 		// https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-unichar
 		if (uMsg == WM_UNICHAR)
 			return (wParam == UNICODE_NOCHAR);
+#endif
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 
