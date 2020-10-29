@@ -4731,10 +4731,13 @@ NL_FORCE_INLINE void appendToLowerAsUtf8(std::string &res, const char *str, ptrd
 {
 	char c = str[i];
 	char d, e;
-	if (c >= 'A' && c <= 'Z')
+	if (c < 0x80)
 	{
-		// 1-byte UTF-8
-		c += 'a' - 'A';
+		if (c >= 'A' && c <= 'Z')
+		{
+			// 1-byte UTF-8
+			c += 'a' - 'A';
+		}
 	}
 	else if ((c & 0xE0) == 0xC0 && ((d = str[i + 1]) & 0xC0) == 0x80)
 	{
@@ -4803,10 +4806,13 @@ NL_FORCE_INLINE void appendToUpperAsUtf8(std::string &res, const char *str, ptrd
 {
 	char c = str[i];
 	char d, e;
-	if (c >= 'a' && c <= 'z')
+	if (c < 0x80)
 	{
-		// 1-byte UTF-8
-		c -= 'a' - 'A';
+		if (c >= 'a' && c <= 'z')
+		{
+			// 1-byte UTF-8
+			c -= 'a' - 'A';
+		}
 	}
 	else if ((c & 0xE0) == 0xC0 && ((d = str[i + 1]) & 0xC0) == 0x80)
 	{

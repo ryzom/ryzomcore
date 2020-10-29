@@ -72,7 +72,7 @@ std::string CUtfStringView::toUtf8(bool reEncode) const
 		return std::string((const char *)m_Str, (const char *)((ptrdiff_t)m_Str + m_Size));
 	std::string res;
 	res.reserve(m_Size);
-	for (iterator it(begin()), end(end()); it != end; ++it)
+	for (iterator it(begin()), end(this->end()); it != end; ++it)
 	{
 		appendUtf8(res, *it);
 	}
@@ -85,7 +85,7 @@ ucstring CUtfStringView::toUtf16(bool reEncode) const
 		return ucstring((const ucchar *)m_Str, (const ucchar *)((ptrdiff_t)m_Str + m_Size));
 	ucstring res;
 	res.reserve(m_Size << 1);
-	for (iterator it(begin()), end(end()); it != end; ++it)
+	for (iterator it(begin()), end(this->end()); it != end; ++it)
 	{
 		u32char c = *it;
 		if (c < 0x10000)
@@ -110,7 +110,7 @@ u32string CUtfStringView::toUtf32() const
 		return u32string((const u32char *)m_Str, (const u32char *)((ptrdiff_t)m_Str + m_Size));
 	u32string res;
 	res.reserve(m_Size << 2);
-	for (iterator it(begin()), end(end()); it != end; ++it)
+	for (iterator it(begin()), end(this->end()); it != end; ++it)
 		res += *it;
 	return res;
 }
@@ -119,7 +119,7 @@ std::string CUtfStringView::toAscii() const
 {
 	std::string res;
 	res.reserve(m_Size);
-	for (iterator it(begin()), end(end()); it != end; ++it)
+	for (iterator it(begin()), end(this->end()); it != end; ++it)
 	{
 		u32char c = *it;
 		if (c < 0x80)
@@ -137,7 +137,7 @@ std::wstring CUtfStringView::toWide() const
 		return std::wstring((const wchar_t *)m_Str, (const wchar_t *)((ptrdiff_t)m_Str + m_Size));
 	std::wstring res;
 	res.reserve(m_Size << 1);
-	for (iterator it(begin()), end(end()); it != end; ++it)
+	for (iterator it(begin()), end(this->end()); it != end; ++it)
 	{
 		u32char c = *it;
 		if (c < 0x10000)
@@ -157,7 +157,7 @@ std::wstring CUtfStringView::toWide() const
 		return std::wstring((const wchar_t *)m_Str, (const wchar_t *)((ptrdiff_t)m_Str + m_Size));
 	std::wstring res;
 	res.reserve(m_Size << 2);
-	for (iterator it(begin()), end(end()); it != end; ++it)
+	for (iterator it(begin()), end(this->end()); it != end; ++it)
 		res += *it;
 	return res;
 #endif
@@ -166,7 +166,7 @@ std::wstring CUtfStringView::toWide() const
 size_t CUtfStringView::count() const
 {
 	size_t res = 0;
-	for (iterator it(begin()), end(end()); it != end; ++it)
+	for (iterator it(begin()), end(this->end()); it != end; ++it)
 		++res;
 	return res;
 }
