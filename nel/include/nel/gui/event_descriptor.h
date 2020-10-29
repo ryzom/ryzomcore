@@ -60,7 +60,7 @@ public:
 		keydown = 0, // a key has been press down. The key value is stored as a TKey
 		keyup,   // a key has been released. The key value is stored as a TKey
 		keychar,  // a key has been stroke. The key is a ucchar
-		keystring, // a string has been sent. The string is a ucstring
+		keystring, // a string has been sent. The string is a utf-8 string
 		unknown, // uninitialized event
 	};
 	CEventDescriptorKey() : _KeyEvent(unknown), _CtrlState(false), _ShiftState(false), _AltState(false), _Char(0)

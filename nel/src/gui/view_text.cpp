@@ -119,11 +119,9 @@ namespace NLGUI
 		// - "_" that should be the character with the lowest part
 		// - A with an accent for the highest part
 		// https://www.compart.com/en/unicode/U+00C4
-		static const u32char chars[] = { (u32char)'_', 0x000000C4, 0 };
-		_FontSizingChars = chars;
+		_FontSizingChars = "_\xC3\x84q";
 		// fallback if SizingChars are not supported by font
-		static const u32char fallback[] = { (u32char)'|', 0 };
-		_FontSizingFallback = fallback;
+		_FontSizingFallback = "|XO";
 		computeFontSize ();
 	}
 
@@ -399,12 +397,12 @@ namespace NLGUI
 		else
 		if ( name == "sizing_chars" )
 		{
-			return CUtfStringView(_FontSizingChars).toUtf8();
+			return _FontSizingChars;
 		}
 		else
 		if ( name == "sizing_fallback" )
 		{
-			return CUtfStringView(_FontSizingFallback).toUtf8();
+			return _FontSizingFallback;
 		}
 		else
 			return "";
@@ -691,13 +689,13 @@ namespace NLGUI
 		else
 		if( name == "sizing_chars" )
 		{
-			_FontSizingChars = CUtfStringView(value).toUtf32();
+			_FontSizingChars = value;
 			return true;
 		}
 		else
 		if( name == "sizing_fallback" )
 		{
-			_FontSizingFallback = CUtfStringView(value).toUtf32();
+			_FontSizingFallback = value;
 			return true;
 		}
 		else
@@ -769,8 +767,8 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "clamp_right", BAD_CAST toString( _ClampRight ).c_str() );
 		xmlSetProp( node, BAD_CAST "auto_clamp_offset", BAD_CAST toString( _AutoClampOffset ).c_str() );
 		xmlSetProp( node, BAD_CAST "continuous_update", BAD_CAST toString( _ContinuousUpdate ).c_str() );
-		xmlSetProp( node, BAD_CAST "sizing_chars", BAD_CAST CUtfStringView(_FontSizingChars).toUtf8().c_str() );
-		xmlSetProp( node, BAD_CAST "sizing_fallback", BAD_CAST CUtfStringView(_FontSizingFallback).toUtf8().c_str() );
+		xmlSetProp( node, BAD_CAST "sizing_chars", BAD_CAST _FontSizingChars.c_str() );
+		xmlSetProp( node, BAD_CAST "sizing_fallback", BAD_CAST _FontSizingFallback.c_str() );
 
 		return true;
 	}
@@ -956,18 +954,18 @@ namespace NLGUI
 		}
 
 		// "_Ä" lowest/highest chars (underscore, A+diaeresis)
-		static const u32char chars[] = { (u32char)'_', 0x000000C4, 0 };
-		_FontSizingChars = chars;
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"sizing_chars" );
 		if (prop)
-			_FontSizingChars = CUtfStringView((const char*)prop).toUtf32();
+			_FontSizingChars = (const char*)prop;
+		else
+			_FontSizingChars = "_\xC3\x84q";
 
 		// fallback if SizingChars are not supported by font
-		static const u32char fallback[] = { (u32char)'|', 0 };
-		_FontSizingFallback = fallback;
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"sizing_fallback" );
 		if (prop)
-			_FontSizingFallback = CUtfStringView((const char*)prop).toUtf32();
+			_FontSizingFallback = (const char *)prop;
+		else
+			_FontSizingFallback = "|XO";
 
 		computeFontSize ();
 	}
@@ -1472,10 +1470,8 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::setFontSizing(const std::string &chars, const std::string &fallback)
 	{
-		_FontSizingChars.clear();
-		_FontSizingChars = CUtfStringView(chars).toUtf32();
-		_FontSizingFallback.clear();
-		_FontSizingFallback = CUtfStringView(fallback).toUtf32();
+		_FontSizingChars = chars;
+		_FontSizingFallback = fallback;
 	}
 
 	// ***************************************************************************
@@ -3046,6 +3042,44 @@ namespace NLGUI
 		TextContext->setEmbolden (_Embolden);
 		TextContext->setOblique (_Oblique);
 
+#if 1
+
+		UTextContext::CStringInfo si = TextContext->getStringInfo("XO");
+		float xoHeight = si.StringHeight;
+
+		si = TextContext->getStringInfo("XO\xC3\x81\xC3\x83");
+		float upHeight = si.StringHeight;
+
+		si = TextContext->getStringInfo("XOgq");
+		float downHeight = si.StringHeight;
+		float legHeight = si.StringLine;
+
+		nlassert(upHeight >= xoHeight);
+		nlassert(downHeight >= xoHeight);
+		float diff;
+		if (downHeight > upHeight)
+		{
+			diff = downHeight - xoHeight;
+		}
+		else
+		{
+			diff = upHeight - xoHeight;
+			legHeight += upHeight - downHeight;
+		}
+
+		_FontHeight = xoHeight + diff + diff;
+		_FontLegHeight = legHeight;
+
+		// Space width
+		si = TextContext->getStringInfo(" ");
+		_SpaceWidth = si.StringWidth;
+
+		// Font Width (used for <tab>)
+		si = TextContext->getStringInfo("O");
+		_FontWidth = si.StringWidth;
+
+#else
+
 		// Letter size
 		UTextContext::CStringInfo si = TextContext->getStringInfo(_FontSizingChars);
 
@@ -3066,6 +3100,8 @@ namespace NLGUI
 		// Font Width (used for <tab>)
 		si = TextContext->getStringInfo("_");
 		_FontWidth = si.StringWidth;
+
+#endif
 	}
 
 

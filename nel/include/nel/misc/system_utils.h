@@ -49,10 +49,10 @@ public:
 	static bool updateProgressBar(uint value, uint total);
 
 	/// Copy a string to system clipboard.
-	static bool copyTextToClipboard(const ucstring &text);
+	static bool copyTextToClipboard(const std::string &text);
 
 	/// Paste a string from system clipboard.
-	static bool pasteTextFromClipboard(ucstring &text);
+	static bool pasteTextFromClipboard(std::string &text);
 
 	/// Check if system supports unicode.
 	static bool supportUnicode();

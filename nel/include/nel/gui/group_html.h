@@ -352,7 +352,7 @@ namespace NLGUI
 		// Set the title
 		void setTitle (const std::string &title);
 		std::string getTitle() const;
-		void setTitleRaw (const std::string &title);
+		void setContainerTitle (const std::string &title);
 
 		// Lookup a url in local file system
 		bool lookupLocalFile (std::string &result, const char *url, bool isUrl);

@@ -835,10 +835,10 @@ public:
 	/// \name Clipboard management
 	// @{
 		// Copy a string to system clipboard.
-		virtual bool copyTextToClipboard(const ucstring &text) =0;
+		virtual bool copyTextToClipboard(const std::string &text) =0;
 
 		// Paste a string from system clipboard.
-		virtual bool pasteTextFromClipboard(ucstring &text) =0;
+		virtual bool pasteTextFromClipboard(std::string &text) =0;
 	// @}
 
 public:

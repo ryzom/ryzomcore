@@ -547,6 +547,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 
 			server->postEvent (charEvent);
 #else
+			// FIXME: Convert locale to UTF-32
 			for (int i = 0; i < c; i++)
 			{
 				CEventChar *charEvent = new CEventChar ((u32char)(unsigned char)Text[i], getKeyButton(event.xbutton.state), this);
@@ -610,14 +611,13 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		else if (req.target == XA_STRING)
 		{
 			respond.xselection.property = req.property;
-			std::string str = _CopiedString.toString();
+			std::string str = _CopiedString; // NLMISC::CUtfStringView(_CopiedString).toAscii(); // FIXME: Convert UTF-8 to local
 			XChangeProperty(req.display, req.requestor, req.property, XA_STRING, 8, PropModeReplace, (const unsigned char*)str.c_str(), str.length());
 		}
 		else if (req.target == XA_UTF8_STRING)
 		{
 			respond.xselection.property = req.property;
-			std::string str = _CopiedString.toUtf8();
-			XChangeProperty(req.display, req.requestor, respond.xselection.property, XA_UTF8_STRING, 8, PropModeReplace, (const unsigned char*)str.c_str(), str.length());
+			XChangeProperty(req.display, req.requestor, respond.xselection.property, XA_UTF8_STRING, 8, PropModeReplace, (const unsigned char*)_CopiedString.c_str(), _CopiedString.length());
 		}
 		else
 		{
@@ -710,6 +710,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 			else if (target == XA_STRING)
 			{
 				// FIXME: Convert local to UTF-8
+				// text = NLMISC::CUtfStringView(text).toAscii();
 			}
 			else
 			{
@@ -767,7 +768,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	return true;
 }
 
-bool CUnixEventEmitter::copyTextToClipboard(const ucstring &text)
+bool CUnixEventEmitter::copyTextToClipboard(const std::string &text)
 {
 	_CopiedString = text;
 
@@ -786,7 +787,7 @@ bool CUnixEventEmitter::copyTextToClipboard(const ucstring &text)
 	return true;
 }
 
-bool CUnixEventEmitter::pasteTextFromClipboard(ucstring &text)
+bool CUnixEventEmitter::pasteTextFromClipboard(std::string &text)
 {
 	// check if we own the selection
 	if (_SelectionOwned)

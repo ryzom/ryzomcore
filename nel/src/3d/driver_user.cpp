@@ -1971,12 +1971,12 @@ bool CDriverUser::setRenderTarget(class UTexture & uTex, uint32 x, uint32 y, uin
 
 	return result;
 }
-bool CDriverUser::copyTextToClipboard(const ucstring &text)
+bool CDriverUser::copyTextToClipboard(const std::string &text)
 {
 	return _Driver->copyTextToClipboard(text);
 }
 
-bool CDriverUser::pasteTextFromClipboard(ucstring &text)
+bool CDriverUser::pasteTextFromClipboard(std::string &text)
 {
 	return _Driver->pasteTextFromClipboard(text);
 }

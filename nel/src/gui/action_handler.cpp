@@ -751,9 +751,7 @@ namespace NLGUI
 	{
 		virtual void execute (CCtrlBase *pCaller, const std::string &params)
 		{
-			ucstring s;
-			s.fromUtf8(params);
-			if (!CViewRenderer::getInstance()->getDriver()->copyTextToClipboard(s))
+			if (!CViewRenderer::getInstance()->getDriver()->copyTextToClipboard(params))
 			{
 				nlwarning("Copy to clipboard failed: '%s'", params.c_str());
 			}

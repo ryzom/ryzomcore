@@ -19,6 +19,7 @@
 
 #include "stdmisc.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/utf_string_view.h"
 
 #ifdef NL_OS_WINDOWS
 #define INITGUID
@@ -154,7 +155,7 @@ bool CSystemUtils::updateProgressBar(uint value, uint total)
 	return true;
 }
 
-bool CSystemUtils::copyTextToClipboard(const ucstring &text)
+bool CSystemUtils::copyTextToClipboard(const std::string &text)
 {
 	if (text.empty()) return false;
 
@@ -167,10 +168,23 @@ bool CSystemUtils::copyTextToClipboard(const ucstring &text)
 		bool isUnicode = (IsClipboardFormatAvailable(CF_UNICODETEXT) == TRUE);
 
 		// allocates a buffer to copy text in global memory
-		std::string textLocal;
-		if (!isUnicode) textLocal = NLMISC::wideToMbcs((const wchar_t *)text.c_str(), text.size());
-		if (text.size() && !textLocal.size()) textLocal = text.toString();
-		HGLOBAL mem = GlobalAlloc(GHND | GMEM_DDESHARE, isUnicode ? ((text.size() + 1) * sizeof(wchar_t)) : textLocal.size());
+		std::string textMbcs;
+		std::wstring textWide;
+		if (!isUnicode)
+		{
+			textMbcs = NLMISC::utf8ToMbcs(text); // Prefer system for API
+			if (text.size() && !textMbcs.size()) 
+				textMbcs = CUtfStringView(text).toAscii(); // Fallback to 7-bit ASCII
+		}
+		else
+		{
+			textWide = NLMISC::utf8ToWide(text); // Prefer system for API
+			if (text.size() && !textWide.size()) 
+				textWide = CUtfStringView(text).toWide();
+		}
+		HGLOBAL mem = GlobalAlloc(GHND | GMEM_DDESHARE, isUnicode 
+			? ((textWide.size() + 1) * sizeof(wchar_t))
+			: (textMbcs.size() + 1));
 
 		if (mem)
 		{
@@ -180,9 +194,9 @@ bool CSystemUtils::copyTextToClipboard(const ucstring &text)
 			{
 				// copy text to this buffer
 				if (isUnicode)
-					wcscpy((wchar_t *)hLock, (const wchar_t *)text.c_str());
+					wcscpy((wchar_t *)hLock, textWide.c_str());
 				else
-					strcpy((char *)hLock, textLocal.c_str());
+					strcpy((char *)hLock, textMbcs.c_str());
 
 				// unlock buffer
 				GlobalUnlock(mem);
@@ -204,7 +218,7 @@ bool CSystemUtils::copyTextToClipboard(const ucstring &text)
 	return res;
 }
 
-bool CSystemUtils::pasteTextFromClipboard(ucstring &text)
+bool CSystemUtils::pasteTextFromClipboard(std::string &text)
 {
 	bool res = false;
 
@@ -228,13 +242,21 @@ bool CSystemUtils::pasteTextFromClipboard(ucstring &text)
 				// retrieve clipboard data
 				if (isUnicode)
 				{
-					text = (const ucchar *)hLock;
+					const wchar_t *str = (const wchar_t *)hLock;
+					text = NLMISC::wideToUtf8(str); // Prefer system for API
+					if (!text.size() && str[0])
+						text = CUtfStringView(str).toUtf8();
+					else
+						text = CUtfStringView(text).toUtf8(true); // Sanitize UTF-8 user input
 				}
 				else 
 				{
-					reinterpret_cast<std::wstring &>(text) = NLMISC::mbcsToWide((const char *)hLock);
-					if (!text.size() && ((const char *)hLock)[0])
-						text = (const char *)hLock;
+					const char *str = (const char *)hLock;
+					text = NLMISC::mbcsToUtf8(str); // Prefer system for API
+					if (!text.size() && str[0])
+						text = CUtfStringView(str).toAscii(); // Fallback to 7-bit ASCII
+					else
+						text = CUtfStringView(text).toUtf8(true); // Sanitize UTF-8 user input
 				}
 
 				// unlock data

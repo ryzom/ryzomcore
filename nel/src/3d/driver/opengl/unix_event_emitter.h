@@ -66,12 +66,12 @@ public:
 	/**
 	 * Copy a string to system clipboard.
 	 */
-        virtual bool copyTextToClipboard(const ucstring &text);
+        virtual bool copyTextToClipboard(const std::string &text);
 
 	/*
 	 * Paste a string from system clipboard.
 	 */
-	virtual bool pasteTextFromClipboard(ucstring &text);
+	virtual bool pasteTextFromClipboard(std::string &text);
 
 	void createIM();
 	void closeIM();
@@ -105,7 +105,7 @@ private:
 	XIC						_ic;
 	NL3D::IDriver*			_driver;
 	CUnixEventServer		_InternalServer;
-	ucstring				_CopiedString;
+	std::string				_CopiedString;
 	bool					_SelectionOwned;
 };
 
