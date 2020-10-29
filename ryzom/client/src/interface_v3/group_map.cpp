@@ -1240,9 +1240,7 @@ void CGroupMap::checkCoords()
 				_RespawnLM[i] = createArkPointButton(_ArkPoints[i]);
 				_RespawnLM[i]->setId(this->getId() + ":arklm_" + NLMISC::toString(i));
 				_RespawnLM[i]->setParent(this);
-				ucstring title;
-				title.fromUtf8(_ArkPoints[i].Title);
-				_RespawnLM[i]->setDefaultContextHelp(title);
+				_RespawnLM[i]->setDefaultContextHelp(_ArkPoints[i].Title);
 				_RespawnLM[i]->HandleEvents = true;
 				addCtrl(_RespawnLM[i]);
 				updateLMPosFromDBPos(_RespawnLM[i], _ArkPoints[i].x, _ArkPoints[i].y);
