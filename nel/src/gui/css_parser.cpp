@@ -667,7 +667,8 @@ namespace NLGUI
 			else if (_Style[_Position] == 0x00)
 			{
 				// Unicode replacement character
-				_Style[_Position] = 0xFFFD;
+				// _Style[_Position] = 0xFFFD;
+				_Style.replace(_Position, 1, "\xE\xB\xBD");
 			}
 			else
 			{
