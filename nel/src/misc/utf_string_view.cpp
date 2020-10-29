@@ -49,13 +49,18 @@ NL_FORCE_INLINE void appendUtf8(std::string &str, u32char c)
 		str += (char)((c & 0x0FC0) >> 6) | 0x80;
 		str += (char)(c & 0x3F) | 0x80;
 	}
-	else
+	else if (c < 0x110000)
 	{
 		// Encode as 4 bytes
 		str += (char)((c & 0x1C0000) >> 18) | 0xF0;
 		str += (char)((c & 0x03F000) >> 12) | 0x80;
 		str += (char)((c & 0x0FC0) >> 6) | 0x80;
 		str += (char)(c & 0x3F) | 0x80;
+	}
+	else
+	{
+		// Replacement character �
+		str += "\xEF\xB\xBD";
 	}
 }
 
@@ -175,6 +180,7 @@ u32char CUtfStringView::utf8Iterator(const void **addr)
 {
 	// Decode UTF-8
 	// This implementation makes no attempt at fixing bad encoding, except for bad UTF-16 surrogate pairs
+	// Invalid characters are replaced with the replacement character
 	const uint8 **pp = reinterpret_cast<const uint8 **>(addr);
 	u32char c0 = **pp;
 	++(*pp);
@@ -209,7 +215,12 @@ u32char CUtfStringView::utf8Iterator(const void **addr)
 							++(*pp);
 							c0 &= 0xFFFF; // Drop first bit
 							c0 <<= 6;
-							c0 |= (cx & 0x3F); // 22 bits now (17 - 1 + 6), 3-byte encoding
+							c0 |= (cx & 0x3F); // 22 bits now (17 - 1 + 6), 4-byte encoding
+							if (c0 >= 0x110000)
+							{
+								// Replacement character �
+								return 0xFFFD;
+							}
 						}
 						else
 						{
