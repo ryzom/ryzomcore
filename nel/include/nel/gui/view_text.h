@@ -262,8 +262,8 @@ namespace NLGUI
 		// width of the font in pixel. Just a Hint for tabing format (computed with '_')
 		float	_FontWidth;
 		// strings to use when computing font size
-		::u32string _FontSizingChars;
-		::u32string _FontSizingFallback;
+		std::string _FontSizingChars;
+		std::string _FontSizingFallback;
 		// height of the font in pixel.
 		// use getFontHeight
 		float	_FontHeight;
