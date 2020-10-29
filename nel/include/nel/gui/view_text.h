@@ -84,7 +84,7 @@ namespace NLGUI
 
 		/// Set
 
-		void setText(const std::string &text);
+		void setText(const std::string &text); //< Not localized. Use setHardText to localize strings starting with "ui". TODO: Add a Localize flag, like title in group container. HardText then simply sets localize to true.
 		void setTextAsUtf16 (const ucstring &text);
 		void setFontName (const std::string &name);
 		void setFontSize (sint nFontSize, bool coef = true);
@@ -178,7 +178,7 @@ namespace NLGUI
 		void getLineEndIndex(uint line, sint &index, bool &endOfPreviousLine) const;
 
 		std::string getHardText() const { return _HardText.empty() ? _Text : _HardText; }
-		void        setHardText (const std::string &ht);
+		void        setHardText (const std::string &ht); //< Localizes strings starting with "ui"
 		void		setHardTextAsUtf16(const ucstring &ht);
 
 		std::string getColorAsString() const;

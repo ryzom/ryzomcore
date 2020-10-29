@@ -21,7 +21,6 @@
 #define STRING_CASE_H
 
 #include "nel/misc/types_nl.h"
-#include "nel/misc/ucstring.h"
 
 namespace NLGUI
 {

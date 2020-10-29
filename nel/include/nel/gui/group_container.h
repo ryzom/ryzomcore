@@ -248,13 +248,6 @@ namespace NLGUI
 		// Get the header color draw. NB: depends if grayed, and if active.
 		NLMISC::CRGBA	getDrawnHeaderColor () const;
 
-		std::string		getTitleRaw () const;
-		void			setTitleRaw (const std::string &title);
-		std::string		getTitleOpenedRaw () const;
-		void			setTitleOpenedRaw (const std::string &title);
-		std::string		getTitleClosedRaw () const;
-		void			setTitleClosedRaw (const std::string &title);
-
 		ucstring		getUCTitleOpened () const;
 		void			setUCTitleOpened (const ucstring &title);
 		ucstring		getUCTitleClosed () const;
@@ -295,10 +288,6 @@ namespace NLGUI
 			REFLECT_STRING("title_opened", getTitleOpened, setTitleOpened);
 			REFLECT_STRING("title_closed", getTitleClosed, setTitleClosed);
 
-			REFLECT_STRING("title_raw", getTitleRaw, setTitleRaw);
-			REFLECT_STRING("title_opened_raw", getTitleOpenedRaw, setTitleOpenedRaw);
-			REFLECT_STRING("title_closed_raw", getTitleClosedRaw, setTitleClosedRaw);
-
 			REFLECT_UCSTRING("uc_title_opened", getUCTitleOpened, setUCTitleOpened); // FIXME: Lua UTF-8
 			REFLECT_UCSTRING("uc_title_closed", getUCTitleClosed, setUCTitleClosed); // FIXME: Lua UTF-8
 			REFLECT_UCSTRING("uc_title", getUCTitle, setUCTitle); // FIXME: Lua UTF-8
@@ -314,6 +303,8 @@ namespace NLGUI
 			REFLECT_BOOL("opened", isOpen, setOpen);
 			REFLECT_BOOL("lockable", isLockable, setLockable);
 			REFLECT_BOOL("locked", isLocked, setLocked);
+
+			REFLECT_BOOL("localize", isLocalize, setLocalize);
 
 			REFLECT_BOOL("header_active", getHeaderActive, setHeaderActive);
 			REFLECT_BOOL("right_button_enabled", getRightButtonEnabled, setRightButtonEnabled);
@@ -377,7 +368,7 @@ namespace NLGUI
 		bool             isActiveSavable() const { return _ActiveSavable; }
 
 		bool isLocalize() const { return _Localize; }
-		void setLocalize(bool localize) { _Localize = localize; }
+		void setLocalize(bool localize);
 
 		void setPopupX(sint32 x) { _PopupX = x; }
 		void setPopupY(sint32 y) { _PopupY = y; }
@@ -648,6 +639,9 @@ namespace NLGUI
 		void	removeResizerMaxH();
 
 		TTileClass	convertTitleClass(const char *ptr);
+
+		void setTitledOpenedViewText();
+		void setTitledClosedViewText();
 
 		static COptionsContainerMove *getMoveOptions();
 

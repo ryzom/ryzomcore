@@ -3401,7 +3401,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::setTitleRaw (const std::string &title)
+	void CGroupHTML::setContainerTitle (const std::string &title)
 	{
 		CInterfaceElement *parent = getParent();
 		if (parent)
@@ -3411,7 +3411,7 @@ namespace NLGUI
 				CGroupContainer *container = dynamic_cast<CGroupContainer*>(parent);
 				if (container)
 				{
-					container->setTitleRaw (title);
+					container->setTitle(title);
 				}
 			}
 		}
@@ -3426,7 +3426,7 @@ namespace NLGUI
 		}
 		_TitleString += title;
 
-		setTitleRaw(_TitleString);
+		setContainerTitle(_TitleString);
 	}
 
 	std::string CGroupHTML::getTitle() const {
