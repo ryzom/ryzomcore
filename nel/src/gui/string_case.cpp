@@ -40,7 +40,7 @@ namespace NLGUI
 		// Counterexample: nevrax.com
 		//                       ^
 		return ((c == ' ') || (c == '\n'))
-			&& (lastChar == '.') || (lastChar == '!') || (lastChar == '?');
+			&& ((lastChar == '.') || (lastChar == '!') || (lastChar == '?') || (lastChar == '\n'));
 	}
 
 	void setCase(std::string &str, TCaseMode mode)
