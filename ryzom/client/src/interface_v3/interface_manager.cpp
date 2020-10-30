@@ -425,37 +425,6 @@ public:
 					formatedResult += botName;
 					break;
 				}
-				case '\'': // 's and 'S -> Potato’s Identity and TOMATOES’ IDENTITY
-				{
-					std::string::const_iterator it2 = it;
-					++it2;
-					if (it2 == inputString.end())
-					{
-						formatedResult += "$'";
-					}
-					else
-					{
-						it = it2;
-						if (*it == 's' || *it == 'S')
-						{
-							if (formatedResult.size() && (formatedResult[formatedResult.size() - 1] == 's' || formatedResult[formatedResult.size() - 1] == 'S'))
-							{
-								formatedResult += "\xE2\x80\x99"; // RIGHT SINGLE QUOTATION MARK
-							}
-							else
-							{
-								formatedResult += "\xE2\x80\x99"; // RIGHT SINGLE QUOTATION MARK
-								formatedResult += *it;
-							}
-						}
-						else
-						{
-							--it;
-							formatedResult += "$'";
-						}
-					}
-					break;
-				}
 				default:
 				{
 					formatedResult += '$';
