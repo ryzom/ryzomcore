@@ -1195,6 +1195,7 @@ namespace NLGUI
 					sint32 backupX = groupOver->getX();
 
 					// Copy all aspects to the view
+					vtDst->setLocalized (vtSrc->isLocalized());
 					vtDst->setText (vtSrc->getText());
 					vtDst->setFontSize (vtSrc->getFontSize());
 					vtDst->setColor (vtSrc->getColor());

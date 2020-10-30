@@ -2144,24 +2144,20 @@ namespace NLGUI
 		ptr = xmlGetProp (cur, (xmlChar*)"title");
 		if (ptr)
 		{
-			if (_Localize)	_TitleTextOpened = CI18N::get(string((const char*)ptr));
-			else			_TitleTextOpened = string((const char*)ptr);
-			if (_Localize)	_TitleTextClosed = CI18N::get(string((const char*)ptr));
-			else			_TitleTextClosed = string((const char*)ptr);
+			_TitleTextOpened = (const char *)ptr;
+			_TitleTextClosed = (const char *)ptr;
 		}
 
 		ptr = xmlGetProp (cur, (xmlChar*)"title_opened");
 		if (ptr)
 		{
-			if (_Localize)	_TitleTextOpened = CI18N::get(string((const char*)ptr));
-			else			_TitleTextOpened = string((const char*)ptr);
+			_TitleTextOpened = (const char*)ptr;
 		}
 
 		ptr = xmlGetProp (cur, (xmlChar*)"title_closed");
 		if (ptr)
 		{
-			if (_Localize)	_TitleTextClosed = CI18N::get(string((const char*)ptr));
-			else			_TitleTextClosed = string((const char*)ptr);
+			_TitleTextClosed = (const char *)ptr;
 		}
 
 		ptr = xmlGetProp (cur, (xmlChar*)"header_active");
@@ -3950,8 +3946,14 @@ namespace NLGUI
 	void CGroupContainer::setLocalize(bool localize) 
 	{ 
 		_Localize = localize; 
-		setTitledOpenedViewText(); 
-		setTitledClosedViewText(); 
+		if (_TitleOpened)
+		{
+			_TitleOpened->setLocalized(localize);
+		}
+		if (_TitleClosed)
+		{
+			_TitleClosed->setLocalized(localize);
+		}
 		invalidateCoords();
 	}
 
@@ -4001,10 +4003,7 @@ namespace NLGUI
 	{
 		if (_TitleOpened != NULL)
 		{
-			if (_Localize && NLMISC::startsWith(_TitleTextOpened, "ui"))
-				_TitleOpened->setHardText(_TitleTextOpened);
-			else
-				_TitleOpened->setText(_TitleTextOpened);
+			_TitleOpened->setTextLocalized(_TitleTextOpened, _Localize);
 		}
 	}
 
@@ -4013,10 +4012,7 @@ namespace NLGUI
 	{
 		if (_TitleClosed != NULL)
 		{
-			if (_Localize && NLMISC::startsWith(_TitleTextClosed, "ui"))
-				_TitleClosed->setHardText(_TitleTextClosed);
-			else
-				_TitleClosed->setText(_TitleTextClosed);
+			_TitleClosed->setTextLocalized(_TitleTextClosed, _Localize);
 		}
 	}
 
