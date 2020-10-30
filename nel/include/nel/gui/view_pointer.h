@@ -61,8 +61,11 @@ namespace NLGUI
 		// TEMP PATCH
 		void setCursor (const std::string &name)
 		{
-			_TxDefault = name;
-			_TxIdDefault = -2;
+			if (_TxDefault != name)
+			{
+				_TxDefault = name;
+				_TxIdDefault = -2;
+			}
 		}
 		// TEMP PATCH
 

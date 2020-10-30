@@ -207,7 +207,10 @@ namespace NLGUI
 
 		if (_TxIdDefault == -2)
 		{
-			_TxIdDefault	= rVR.getTextureIdFromName (_TxDefault);
+			_TxIdDefault = rVR.getTextureIdFromName(_TxDefault);
+		}
+		if (_TxIdMoveWindow == -2)
+		{
 			_TxIdMoveWindow = rVR.getTextureIdFromName (_TxMoveWindow);
 			_TxIdResizeBRTL = rVR.getTextureIdFromName (_TxResizeBRTL);
 			_TxIdResizeBLTR = rVR.getTextureIdFromName (_TxResizeBLTR);
