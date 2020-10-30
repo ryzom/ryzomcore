@@ -1093,10 +1093,7 @@ CChatWindow *CChatWindowManager::createChatWindow(const CChatWindowDesc &desc)
 		if (desc.Id.empty())
 			_WindowID++;
 
-		if (desc.Localize)
-			_ChatWindowMap[CI18N::get(desc.Title.toString())] = w;
-		else
-			_ChatWindowMap[desc.Title] = w;
+		_ChatWindowMap[desc.Title] = w;
 
 		w->setAHOnActive(desc.AHOnActive);
 		w->setAHOnActiveParams(desc.AHOnActiveParams);
@@ -1135,10 +1132,7 @@ CChatWindow *CChatWindowManager::createChatGroupWindow(const CChatWindowDesc &de
 		if (desc.Id.empty())
 			_WindowID++;
 
-		if (desc.Localize)
-			_ChatWindowMap[CI18N::get(desc.Title.toString())] = w;
-		else
-			_ChatWindowMap[desc.Title] = w;
+		_ChatWindowMap[desc.Title] = w;
 
 		w->setAHOnActive(desc.AHOnActive);
 		w->setAHOnActiveParams(desc.AHOnActiveParams);
@@ -1185,7 +1179,7 @@ void CChatWindowManager::removeChatWindow(const ucstring &title)
 	TChatWindowMap::iterator it = _ChatWindowMap.find(title);
 	if (it == _ChatWindowMap.end())
 	{
-		nlwarning("unknwown window %s", title.toString().c_str());
+		nlwarning("Unknown chat window '%s'", title.toUtf8().c_str());
 		return;
 	}
 	it->second->deleteContainer();
@@ -1225,18 +1219,9 @@ bool CChatWindowManager::rename(const ucstring &oldName, const ucstring &newName
 	if (newWin != NULL) return false; // target window exists
 	TChatWindowMap::iterator it = _ChatWindowMap.find(oldName);
 	if (it == _ChatWindowMap.end()) return false;
-	if (newNameLocalize)
-	{
-		_ChatWindowMap[CI18N::get(newName.toString())] = it->second;
-		it->second->getContainer()->setLocalize(true);
-		it->second->getContainer()->setTitle(newName.toString());
-	}
-	else
-	{
-		_ChatWindowMap[newName] = it->second;
-		it->second->getContainer()->setLocalize(false);
-		it->second->getContainer()->setUCTitle(newName);
-	}
+	_ChatWindowMap[newName] = it->second;
+	it->second->getContainer()->setLocalize(false);
+	it->second->getContainer()->setTitle(newName.toUtf8());
 	_ChatWindowMap.erase(it);
 	return true;
 }
