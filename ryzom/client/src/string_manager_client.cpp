@@ -734,7 +734,7 @@ restartLoop:
 									// If the shard name is the same as the player home shard name, remove it
 									uint	len= (uint)PlayerSelectedHomeShardNameWithParenthesis.size();
 									uint	start= (uint)str.size()-len;
-									if(ucstrnicmp(str, start, len, PlayerSelectedHomeShardNameWithParenthesis)==0)
+									if(ucstrnicmp(str, start, len, PlayerSelectedHomeShardNameWithParenthesis)==0) // TODO: NLMISC::compareCaseInsensitive
 										str.resize(start);
 								}
 							}
@@ -744,7 +744,7 @@ restartLoop:
 						ucstring::size_type pos = str.find('$');
 						if ( ! str.empty() && pos != ucstring::npos)
 						{
-							str = CEntityCL::removeTitleFromName(str);
+							str = CEntityCL::removeTitleFromName(str.toUtf8());
 						}
 
 						// append this string

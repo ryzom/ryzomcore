@@ -97,7 +97,7 @@ void addWebIGParams (string &url, bool trustedDomain)
 		if (url.find('$') != string::npos)
 		{
 			strFindReplace(url, "$gender$", GSGENDER::toString(UserEntity->getGender()));
-			strFindReplace(url, "$displayName$", UserEntity->getDisplayName().toString());
+			strFindReplace(url, "$displayName$", UserEntity->getDisplayName()); // FIXME: UrlEncode...
 			strFindReplace(url, "$posx$", toString(UserEntity->pos().x));
 			strFindReplace(url, "$posy$", toString(UserEntity->pos().y));
 			strFindReplace(url, "$posz$", toString(UserEntity->pos().z));
@@ -113,7 +113,7 @@ void addWebIGParams (string &url, bool trustedDomain)
 				if (target)
 				{
 					strFindReplace(url, "$tdatasetid$", toString(target->dataSetId()));
-					strFindReplace(url, "$tdisplayName$", target->getDisplayName().toString());
+					strFindReplace(url, "$tdisplayName$", target->getDisplayName()); // FIXME: UrlEncode...
 					strFindReplace(url, "$tposx$", toString(target->pos().x));
 					strFindReplace(url, "$tposy$", toString(target->pos().y));
 					strFindReplace(url, "$tposz$", toString(target->pos().z));

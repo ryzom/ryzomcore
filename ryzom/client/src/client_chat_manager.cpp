@@ -955,7 +955,7 @@ void CClientChatManager::buildTellSentence(const ucstring &sender, const ucstrin
 		result = msg;
 	else
 	{
-		ucstring name = CEntityCL::removeTitleAndShardFromName(sender);
+		ucstring name = CEntityCL::removeTitleAndShardFromName(sender.toUtf8());
 		ucstring csr;
 
 		// special case where there is only a title, very rare case for some NPC
@@ -965,20 +965,20 @@ void CClientChatManager::buildTellSentence(const ucstring &sender, const ucstrin
 			CCharacterCL *entity = dynamic_cast<CCharacterCL*>(EntitiesMngr.getEntityByName(sender, true, true));
 			bool bWoman = entity && entity->getGender() == GSGENDER::female;
 
-			name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sender), bWoman);
+			name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sender.toUtf8()), bWoman);
 			{
 				// Sometimes translation contains another title
 				ucstring::size_type pos = name.find('$');
 				if (pos != ucstring::npos)
 				{
-					name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(name), bWoman);
+					name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(name.toUtf8()), bWoman);
 				}
 			}
 		}
 		else
 		{
 			// Does the char have a CSR title?
-			csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender)) ? ucstring("(CSR) ") : ucstring("");
+			csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender.toUtf8())) ? ucstring("(CSR) ") : ucstring("");
 		}
 
 		result = csr + name + ucstring(" ") + CI18N::get("tellsYou") + ucstring(": ") + msg;
@@ -1018,13 +1018,13 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 	}
 
 	// Format the sentence with the provided sender name
-	ucstring senderName = CEntityCL::removeTitleAndShardFromName(sender);
+	ucstring senderName = CEntityCL::removeTitleAndShardFromName(sender.toUtf8());
 
 	ucstring csr;
 	// Does the char have a CSR title?
-	csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender)) ? ucstring("(CSR) ") : ucstring("");
+	csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender.toUtf8())) ? ucstring("(CSR) ") : ucstring("");
 
-	if (UserEntity && senderName == UserEntity->getDisplayName())
+	if (UserEntity && senderName.toUtf8() == UserEntity->getDisplayName())
 	{
 		// The player talks
 		switch(type)
@@ -1046,13 +1046,13 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 			// We need the gender to display the correct title
 			bool bWoman = entity && entity->getGender() == GSGENDER::female;
 
-			senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sender), bWoman);
+			senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sender.toUtf8()), bWoman);
 			{
 				// Sometimes translation contains another title
 				ucstring::size_type pos = senderName.find('$');
 				if (pos != ucstring::npos)
 				{
-					senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(senderName), bWoman);
+					senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(senderName.toUtf8()), bWoman);
 				}
 			}
 		}

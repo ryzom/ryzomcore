@@ -1201,7 +1201,7 @@ void CGroupMap::checkCoords()
 					CEntityCL *sel = EntitiesMngr.entity(UserEntity->selection());
 					if (sel)
 					{
-						_TargetLM->setDefaultContextHelp(NLMISC::CI18N::get("uiTargetTwoPoint") + sel->removeTitleAndShardFromName(sel->getEntityName()).toUtf8());
+						_TargetLM->setDefaultContextHelp(NLMISC::CI18N::get("uiTargetTwoPoint") + sel->removeTitleAndShardFromName(sel->getEntityName()));
 					}
 				}
 			}
@@ -1405,8 +1405,8 @@ void CGroupMap::checkCoords()
 
 				if (pSMC->getString(val,res))
 				{
-						res = CEntityCL::removeTitleAndShardFromName(res);
-						_TeammateLM[i]->setDefaultContextHelp(res.toUtf8());
+						std::string res2 = CEntityCL::removeTitleAndShardFromName(res.toUtf8());
+						_TeammateLM[i]->setDefaultContextHelp(res2);
 				}
 			}
 			updateLMPosFromDBPos(_TeammateLM[i], px, py);

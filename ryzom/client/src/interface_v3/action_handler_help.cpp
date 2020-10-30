@@ -670,7 +670,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 			if (selection == NULL) return;
 			//if(selection->isNPC())
 			{
-				ucstring name = selection->getEntityName();
+				std::string name = selection->getEntityName();
 				if(name.empty())
 				{
 					// try to get the name from the string manager (for npc)
@@ -679,7 +679,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 					{
 						STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 						pSMC->getString (nDBid, name);
-						ucstring copyName = name;
+						std::string copyName = name;
 						name = CEntityCL::removeTitleAndShardFromName(name);
 						if (name.empty())
 						{
@@ -689,18 +689,18 @@ class CHandlerOpenTitleHelp : public IActionHandler
 								woman = pChar->getGender() == GSGENDER::female;
 
 							// extract the replacement id
-							ucstring strNewTitle = CEntityCL::getTitleFromName(copyName);
+							std::string strNewTitle = CEntityCL::getTitleFromName(copyName);
 
 							// retrieve the translated string
 							if (!strNewTitle.empty())
-								name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(strNewTitle, woman);
+								name = ucstring(STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(ucstring::makeFromUtf8(strNewTitle), woman)).toUtf8();
 							else
 								name.clear();
 						}
 					}
 				}
 				if(!name.empty())
-					CAHManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name.toUtf8()+"|ptype="+toString((int)selection->Type));
+					CAHManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name+"|ptype="+toString((int)selection->Type));
 				return;
 			}
 		}
@@ -2762,7 +2762,7 @@ class CPlayerShardNameRemover : public IOnReceiveTextId
 {
 	virtual	void	onReceiveTextId(ucstring &str)
 	{
-		str= CEntityCL::removeShardFromName(str);
+		str= CEntityCL::removeShardFromName(str.toUtf8());
 	}
 };
 static CPlayerShardNameRemover	PlayerShardNameRemover;
@@ -3629,7 +3629,7 @@ public:
 		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:NAME", index));
 		if (node && CStringManagerClient::instance()->getDynString(node->getValue32(), txt))
 		{
-			CWidgetManager::getInstance()->setContextHelpText(CEntityCL::removeTitleFromName(txt).toUtf8());
+			CWidgetManager::getInstance()->setContextHelpText(CEntityCL::removeTitleFromName(txt.toUtf8()));
 		}
 	}
 };

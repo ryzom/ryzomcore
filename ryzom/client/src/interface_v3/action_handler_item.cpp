@@ -1737,7 +1737,7 @@ void CItemMenuInBagInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet)
 		ucstring creatorNameString;
 		if( STRING_MANAGER::CStringManagerClient::instance()->getString ( itemInfo.CreatorName, creatorNameString) )
 		{
-			if (toLower(UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis) == toLower(creatorNameString))
+			if (   toLower(UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis) == toLower(creatorNameString.toUtf8()))
 				isCraftedByUserEntity = true;
 		}
 
@@ -1845,7 +1845,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 							ucstring creatorNameString;
 							if( STRING_MANAGER::CStringManagerClient::instance()->getString ( getInventory().getItemInfo(getInventory().getItemSlotId(pCS)).CreatorName, creatorNameString) )
 							{
-								if (toLower(UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis) == toLower(creatorNameString))
+								if (toLower(UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis) == toLower(creatorNameString.toUtf8()))
 									isTextEditionActive = true;
 							}
 						}

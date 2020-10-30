@@ -1959,13 +1959,13 @@ public:
 					if (pChar != NULL)
 						womanTitle = pChar->getGender() == GSGENDER::female;
 					
-					STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(copyInout), womanTitle);
+					STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(copyInout.toUtf8()), womanTitle);
 
 					// Sometimes translation contains another title
 					ucstring::size_type pos = copyInout.find('$');
 					if (pos != ucstring::npos)
 					{
-						copyInout = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(copyInout), womanTitle);
+						copyInout = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(copyInout.toUtf8()), womanTitle);
 					}
 
 					CStringPostProcessRemoveTitle::cbIDStringReceived(copyInout);

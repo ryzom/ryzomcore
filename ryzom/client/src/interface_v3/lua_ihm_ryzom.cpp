@@ -1363,7 +1363,7 @@ int CLuaIHMRyzom::getPlayerGender(CLuaState &ls)
 int CLuaIHMRyzom::getPlayerName(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getPlayerName", 0);
-	ls.push(UserEntity->getEntityName().toUtf8());
+	ls.push(UserEntity->getEntityName());
 	return 1;
 }
 
@@ -1441,7 +1441,7 @@ int CLuaIHMRyzom::getTargetName(CLuaState &ls)
 
 	if (!target) return 0;
 
-	ls.push(target->getEntityName().toUtf8());
+	ls.push(target->getEntityName());
 	return 1;
 }
 
@@ -3274,7 +3274,7 @@ void	CLuaIHMRyzom::browseNpcWebPage(const std::string &htmlId, const std::string
 
 			if (UserEntity)
 			{
-				userName = UserEntity->getDisplayName().toString();
+				userName = UserEntity->getDisplayName();
 				STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 				ucstring ucsTmp;
 				pSMC->getString(UserEntity->getGuildNameID(), ucsTmp);
@@ -3648,7 +3648,7 @@ void CLuaIHMRyzom::tell(const ucstring &player, const ucstring &msg)
 				CInterfaceManager *im = CInterfaceManager::getInstance();
 				w->setKeyboardFocus();
 				w->enableBlink(1);
-				w->setCommand(ucstring("tell ") + CEntityCL::removeTitleFromName(player) + ucstring(" "), false);
+				w->setCommand(ucstring("tell ") + CEntityCL::removeTitleFromName(player.toUtf8()) + ucstring(" "), false);
 				CGroupEditBox *eb = w->getEditBox();
 
 				if (eb != NULL)

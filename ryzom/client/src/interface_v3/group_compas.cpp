@@ -560,7 +560,7 @@ bool	buildCompassTargetFromTeamMember(CCompassTarget &ct, uint teamMemberId)
 		CStringManagerClient *pSMC = CStringManagerClient::instance();
 		ucstring name;
 		if (pSMC->getString(nameNode->getValue32(), name))
-			ct.Name = CEntityCL::removeTitleAndShardFromName(name); // TODO : dynamic support for name
+			ct.Name = CEntityCL::removeTitleAndShardFromName(name.toUtf8()); // TODO : dynamic support for name
 		else
 			ct.Name = CI18N::get("uiNotReceived");
 		return true;

@@ -2097,7 +2097,7 @@ bool CEntityCL::clipped (const std::vector<NLMISC::CPlane> &clippingPlanes, cons
 // Set the name of the entity. Handle replacement tag if any
 // to insert NPC task translated.
 //---------------------------------------------------
-void CEntityCL::setEntityName(const ucstring &name)
+void CEntityCL::setEntityName(const std::string &name)
 {
 	_EntityName = name;
 }
@@ -2264,7 +2264,7 @@ void CEntityCL::load()	// virtual
 //-----------------------------------------------
 void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 {
-	_EntityName = value;
+	_EntityName = value.toUtf8();
 
 	// remove the shard name if possible
 	_EntityName= removeShardFromName(_EntityName);
@@ -2303,7 +2303,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 				if (pos != ucstring::npos)
 				{
 					ucstring sn = replacement;
-					_EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(sn.substr(0, pos));
+					_EntityName = sn.substr(0, pos).toUtf8();
 					ucstring::size_type pos2 = sn.find('$', pos + 1);
 					_TitleRaw = sn.substr(pos+1, pos2 - pos - 1);
 					replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
@@ -2370,32 +2370,32 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 //-----------------------------------------------
 // getTitleFromName
 //-----------------------------------------------
-ucstring CEntityCL::getTitleFromName(const ucstring &name)
+std::string CEntityCL::getTitleFromName(const std::string &name)
 {
-	ucstring::size_type p1 = name.find('$');
+	std::string::size_type p1 = name.find('$');
 	if (p1 != ucstring::npos)
 	{
-		ucstring::size_type p2 = name.find('$', p1 + 1);
-		if (p2 != ucstring::npos)
+		std::string::size_type p2 = name.find('$', p1 + 1);
+		if (p2 != std::string::npos)
 			return name.substr(p1+1, p2-p1-1);
 	}
 
-	return ucstring("");
+	return std::string();
 }// getTitleFromName //
 
 //-----------------------------------------------
 // removeTitleFromName
 //-----------------------------------------------
-ucstring CEntityCL::removeTitleFromName(const ucstring &name)
+std::string CEntityCL::removeTitleFromName(const std::string &name)
 {
-	ucstring::size_type p1 = name.find('$');
+	std::string::size_type p1 = name.find('$');
 	if (p1 == ucstring::npos)
 	{
 		return name;
 	}
 	else
 	{
-		ucstring::size_type p2 = name.find('$', p1 + 1);
+		std::string::size_type p2 = name.find('$', p1 + 1);
 		if (p2 != ucstring::npos)
 		{
 			return name.substr(0, p1) + name.substr(p2 + 1);
@@ -2410,16 +2410,16 @@ ucstring CEntityCL::removeTitleFromName(const ucstring &name)
 //-----------------------------------------------
 // removeShardFromName
 //-----------------------------------------------
-ucstring CEntityCL::removeShardFromName(const ucstring &name)
+std::string CEntityCL::removeShardFromName(const std::string &name)
 {
 	// The string must contains a '(' and a ')'
-	ucstring::size_type	p0= name.find('(');
-	ucstring::size_type	p1= name.find(')');
-	if(p0==ucstring::npos || p1==ucstring::npos || p1<=p0)
+	std::string::size_type	p0= name.find('(');
+	std::string::size_type	p1= name.find(')');
+	if(p0==std::string::npos || p1==std::string::npos || p1<=p0)
 		return name;
 
 	// if it is the same as the shard name of the user, remove it
-	if(ucstrnicmp(name, (uint)p0+1, (uint)(p1-p0-1), PlayerSelectedHomeShardName)==0)
+	if (!NLMISC::compareCaseInsensitive(name.c_str() + p0 + 1, p1-p0-1, PlayerSelectedHomeShardName.c_str(), PlayerSelectedHomeShardName.size()))
 		return name.substr(0,p0) + name.substr(p1+1);
 	// else don't modify
 	else
@@ -2429,7 +2429,7 @@ ucstring CEntityCL::removeShardFromName(const ucstring &name)
 //-----------------------------------------------
 // removeTitleAndShardFromName
 //-----------------------------------------------
-ucstring CEntityCL::removeTitleAndShardFromName(const ucstring &name)
+std::string CEntityCL::removeTitleAndShardFromName(const std::string &name)
 {
 	return removeTitleFromName(removeShardFromName(name));
 }

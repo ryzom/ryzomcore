@@ -334,19 +334,19 @@ public:
 	 */
 	//@{
 	/// Return the Name of the entity. There may be a specification in it (guard, trader, etc ...). It is then surrounded by '$'
-	const ucstring &getEntityName() const {return _EntityName;}
+	const std::string &getEntityName() const {return _EntityName;}
 	/// Return the title from a name. The specification is surrounded by '$', and tells the title of the entity (guard, matis merchant, etc ..)
-	static ucstring getTitleFromName(const ucstring &name);
+	static std::string getTitleFromName(const std::string &name);
 	/// Remove the specification from a name. The specification is surrounded by '$', and tells the title of the entity (guard, matis merchant, etc ..)
-	static ucstring removeTitleFromName(const ucstring &name);
+	static std::string removeTitleFromName(const std::string &name);
 	/// Remove the shard from a name (if player from the same shard). The shard is surrounded by (), and tells the incoming shard of the entity (aniro, leanon etc...)
-	static ucstring removeShardFromName(const ucstring &name);
+	static std::string removeShardFromName(const std::string &name);
 	/// Remove both title and shard from name
-	static ucstring removeTitleAndShardFromName(const ucstring &name);
+	static std::string removeTitleAndShardFromName(const std::string &name);
 	/// Change the entity name.
-	void setEntityName(const ucstring &name);
+	void setEntityName(const std::string &name);
 	/// Return a displayable name
-	ucstring getDisplayName() const
+	std::string getDisplayName() const
 	{
 		return removeTitleAndShardFromName(_EntityName);
 	}
@@ -931,7 +931,7 @@ protected:
 	// Flags to know what is possible to do with the entity (selectable, liftable, etc.).
 	CProperties						_Properties;
 	// Current Name for the entity
-	ucstring						_EntityName;
+	std::string						_EntityName;
 	// Current entity title
 	ucstring						_Title;
 	// Current entity tags

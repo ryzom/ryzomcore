@@ -145,8 +145,8 @@ string CharNameValidDBLink;
 uint8		PlayerSelectedSlot = 0;
 string		PlayerSelectedFileName;
 TSessionId	PlayerSelectedMainland= (TSessionId)0;	// This is the mainland selected at the SELECT perso!!
-ucstring	PlayerSelectedHomeShardName;
-ucstring	PlayerSelectedHomeShardNameWithParenthesis;
+std::string	PlayerSelectedHomeShardName;
+std::string	PlayerSelectedHomeShardNameWithParenthesis;
 extern std::string CurrentCookie;
 
 ucstring NewKeysCharNameWanted; // name of the character for which a new keyset must be created
@@ -1441,7 +1441,7 @@ Deprecated	{
 				ucstring::size_type pos = sValue.find('$');
 				if (pos != ucstring::npos)
 				{
-					sValue = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sValue), womanTitle);
+					sValue = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sValue.toUtf8()), womanTitle);
 				}
 			}
 			setTarget (pCaller, sTarget, sValue);
@@ -3348,7 +3348,7 @@ class CAHLoadScenario : public IActionHandler
 									ucstring res;
 									if (pSMC->getString(val,res))
 									{
-										string charName = CEntityCL::removeTitleAndShardFromName(res).toString();
+										string charName = CEntityCL::removeTitleAndShardFromName(res.toUtf8());
 										sessionBrowser.inviteCharacterByName(sessionBrowser._LastScheduleSessionCharId, charName);
 
 										if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))

@@ -514,7 +514,7 @@ string getDebugInformation()
 
 	if(UserEntity)
 	{
-		str += toString("Player Name: '%s'\n", UserEntity->getEntityName().toString().c_str());
+		str += toString("Player Name: '%s'\n", UserEntity->getEntityName().c_str());
 		str += toString("UserPosition: %.2f %.2f %.2f\n", UserEntity->pos().x, UserEntity->pos().y, UserEntity->pos().z);
 	}
 	else

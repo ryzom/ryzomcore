@@ -225,8 +225,8 @@ struct CStatThread : public NLMISC::IRunnable
 	string cookie()
 	{
 		string name;
-		if(UserEntity && !UserEntity->getEntityName().toString().empty())
-			name = UserEntity->getEntityName().toString();
+		if(UserEntity && !UserEntity->getEntityName().empty())
+			name = UserEntity->getEntityName();
 
 		std::string userid = toString("u%d", NetMngr.getUserId())+name;
 		return toUpper(getMD5((const uint8 *)userid.c_str(), (uint32)userid.size()).toString());
@@ -236,7 +236,7 @@ struct CStatThread : public NLMISC::IRunnable
 	bool connect()
 	{
 		//nlinfo("connect");
-		if(!UserEntity || UserEntity->getEntityName().toString().empty())
+		if(!UserEntity || UserEntity->getEntityName().empty())
 			return false;
 
 		referer = ContinentMngr.getCurrentContinentSelectName();
@@ -260,7 +260,7 @@ struct CStatThread : public NLMISC::IRunnable
 		timeinfo = localtime ( &rawtime );
 		strftime (buffer,80,"%H%%3A%M", timeinfo);
 		addParam(params, "localtime", buffer);
-		addParam(params, "cv_name", UserEntity->getEntityName().toUtf8());
+		addParam(params, "cv_name", UserEntity->getEntityName());
 		//addParam(params, "cv_email", "");
 		//addParam(params, "cv_avatar", "");
 		addParam(params, "cv_Userid", toString(NetMngr.getUserId()));

@@ -508,9 +508,9 @@ void CForageSourceCL::updateVisualPropertyVisualFX(const NLMISC::TGameCycle &/* 
 			CEntityCL *prospector = EntitiesMngr.entities()[_ProspectorSlot];
 			if (prospector != NULL)
 			{
-				ucstring prospectorName = prospector->getDisplayName();
+				string prospectorName = prospector->getDisplayName();
 				if ( ! prospectorName.empty() )
-					_EntityName += ucstring(" [") + prospectorName + ucstring("]");
+					_EntityName += " [" + prospectorName + "]";
 			}
 		}
 
@@ -539,15 +539,15 @@ void CForageSourceCL::updateVisualPropertyName(const NLMISC::TGameCycle &/* game
 	const ucchar *name = STRING_MANAGER::CStringManagerClient::getItemLocalizedName( rmSheetId );
 	if ( name )
 	{
-		_EntityName = name;
+		_EntityName = ucstring(name).toUtf8();
 		if ( _ProspectorSlot != 255 )
 		{
 			CEntityCL *prospector = EntitiesMngr.entities()[_ProspectorSlot];
 			if (prospector != NULL)
 			{
-				ucstring prospectorName = prospector->getDisplayName();
+				std::string prospectorName = prospector->getDisplayName();
 				if ( ! prospectorName.empty() )
-					_EntityName += ucstring(" [") + prospectorName + ucstring("]");
+					_EntityName += " [" + prospectorName + "]";
 			}
 		}
 		// Rebuild inscene interface
@@ -568,9 +568,9 @@ void CForageSourceCL::updateVisualPropertyTarget(const NLMISC::TGameCycle &/* ga
 		CEntityCL *prospector = EntitiesMngr.entities()[_ProspectorSlot]; // NULL if entity not received
 		if (prospector != NULL)
 		{
-			ucstring prospectorName = prospector->getDisplayName();
+			std::string prospectorName = prospector->getDisplayName();
 			if ( ! prospectorName.empty() )
-				_EntityName = _EntityName + ucstring(" [") + prospectorName + ucstring("]");
+				_EntityName = _EntityName + " [" + prospectorName + "]";
 		}
 
 		// Rebuild inscene interface

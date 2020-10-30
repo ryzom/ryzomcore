@@ -1017,7 +1017,7 @@ void CDisplayerVisualEntity::updateName()
 
 	{
 		//BENCH(setEntityName)
-		_Entity->setEntityName(ucName);
+		_Entity->setEntityName(ucName.toUtf8());
 	}
 	{
 		//BENCH(buildInSceneInterface)

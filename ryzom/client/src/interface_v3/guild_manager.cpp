@@ -359,7 +359,7 @@ void CGuildManager::update()
 		for (uint i = 0; i < _GuildMembers.size(); ++i)
 		{
 			if (!pSMC->getString (_GuildMembers[i].NameID, _GuildMembers[i].Name)) bAllValid = false;
-			else _GuildMembers[i].Name = CEntityCL::removeTitleAndShardFromName(_GuildMembers[i].Name);
+			else _GuildMembers[i].Name = CEntityCL::removeTitleAndShardFromName(_GuildMembers[i].Name.toUtf8());
 		}
 
 		// If all is valid no more need update and if guild is opened update the interface
@@ -875,7 +875,7 @@ class CAHGuildSheetOpen : public IActionHandler
 				
 				CCtrlBase *inviteButton = pLine->getCtrl("invite_button");
 				if (inviteButton != NULL)
-					inviteButton->setActive(rGuildMembers[i].Online != ccs_offline && rGuildMembers[i].Name != UserEntity->getEntityName());
+					inviteButton->setActive(rGuildMembers[i].Online != ccs_offline && rGuildMembers[i].Name.toUtf8() != UserEntity->getEntityName());
 
 				// Enter Date
 				CViewText *pViewEnterDate = dynamic_cast<CViewText*>(pLine->getView(TEMPLATE_GUILD_MEMBER_ENTER_DATE));
