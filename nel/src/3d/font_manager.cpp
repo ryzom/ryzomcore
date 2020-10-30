@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -143,6 +146,8 @@ void CFontManager::computeString (NLMISC::CUtfStringView sv,
 		{
 			// Creating font
 			k.Char = *it;
+			if (k.Char < 0x20)
+				k.Char += 0x2400;
 			k.FontGenerator = fontGen;
 			k.Size = fontSize;
 			k.Embolden = embolden;
@@ -297,6 +302,8 @@ void CFontManager::computeStringInfo (	NLMISC::CUtfStringView sv,
 	{
 		// Creating font
 		k.Char = *it;
+		if (k.Char < 0x20)
+			k.Char += 0x2400;
 		k.FontGenerator = fontGen;
 		k.Size = fontSize;
 		k.Embolden = embolden;

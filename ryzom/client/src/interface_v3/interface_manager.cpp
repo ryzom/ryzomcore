@@ -2,7 +2,7 @@
 // Copyright (C) 2010-2017  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2010-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2011  Robert TIMM (rti) <mail@rtti.de>
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -335,96 +335,133 @@ public:
 			{
 				++it;
 				if (it == inputString.end())
+				{
+					formatedResult += '$';
+					--it;
 					break;
+				}
 
 				switch(*it)
 				{
 				case 't': // add text ID
+				{
 					formatedResult += paramString;
 					break;
-
+				}
 				case 'P':
 				case 'p':  // add player name
-					if (ClientCfg.Local)
+				{
+					if (ClientCfg.Local || !UserEntity)
 					{
 						if (*it == 'P') formatedResult += "PLAYER";
 						else formatedResult += "Player";
 					}
 					else
 					{
-						if(UserEntity)
-						{
-							std::string name = UserEntity->getEntityName().toUtf8();
-							if (*it == 'P') name = toUpper(name);
-							formatedResult += name;
-						}
+						std::string name = UserEntity->getEntityName().toUtf8();
+						if (*it == 'P') name = toUpper(name);
+						formatedResult += name;
 					}
 					break;
-					//
+				}
 				case 's':
 				case 'b': // add bot name
+				{
+					string botName;
+					bool womanTitle = false;
+					if (ClientCfg.Local)
 					{
-						string botName;
-						bool womanTitle = false;
-						if (ClientCfg.Local)
+						botName = "NPC";
+					}
+					else
+					{
+						CLFECOMMON::TCLEntityId trader = CLFECOMMON::INVALID_SLOT;
+						if(UserEntity)
+							trader = UserEntity->trader();
+						if (trader != CLFECOMMON::INVALID_SLOT)
 						{
-							botName = "NPC";
-						}
-						else
-						{
-							CLFECOMMON::TCLEntityId trader = CLFECOMMON::INVALID_SLOT;
-							if(UserEntity)
-								trader = UserEntity->trader();
-							if (trader != CLFECOMMON::INVALID_SLOT)
+							CEntityCL *entity = EntitiesMngr.entity(trader);
+							if (entity != NULL)
 							{
-								CEntityCL *entity = EntitiesMngr.entity(trader);
-								if (entity != NULL)
+								uint32 nDBid = entity->getNameId();
+								if (nDBid != 0)
 								{
-									uint32 nDBid = entity->getNameId();
-									if (nDBid != 0)
-									{
-										STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-										pSMC->getString(nDBid, botName);
-									}
-									else
-									{
-										botName = entity->getDisplayName().toUtf8();
-									}
-									CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(entity);
-									if (pChar != NULL)
-										womanTitle = pChar->getGender() == GSGENDER::female;
+									STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
+									pSMC->getString(nDBid, botName);
 								}
+								else
+								{
+									botName = entity->getDisplayName().toUtf8();
+								}
+								CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(entity);
+								if (pChar != NULL)
+									womanTitle = pChar->getGender() == GSGENDER::female;
 							}
 						}
-						// get the title translated
-						ucstring sTitleTranslated = botName; // FIXME: UTF-8
-						CStringPostProcessRemoveName spprn;
-						spprn.Woman = womanTitle;
-						spprn.cbIDStringReceived(sTitleTranslated);
+					}
+					// get the title translated
+					ucstring sTitleTranslated = botName; // FIXME: UTF-8
+					CStringPostProcessRemoveName spprn;
+					spprn.Woman = womanTitle;
+					spprn.cbIDStringReceived(sTitleTranslated);
 
-						botName = CEntityCL::removeTitleAndShardFromName(botName).toUtf8();
+					botName = CEntityCL::removeTitleAndShardFromName(botName).toUtf8();
 
-						// short name (with no title such as 'guard', 'merchant' ...)
-						if (*it == 's')
+					// short name (with no title such as 'guard', 'merchant' ...)
+					if (*it == 's')
+					{
+						// But if there is no name, display only the title
+						if (botName.empty())
+							botName = sTitleTranslated.toUtf8();
+					}
+					else
+					{
+						// Else we want the title !
+						if (!botName.empty())
+							botName += " ";
+						botName += sTitleTranslated.toUtf8();
+					}
+
+					formatedResult += botName;
+					break;
+				}
+				case '\'': // 's and 'S -> Potato’s Identity and TOMATOES’ IDENTITY
+				{
+					std::string::const_iterator it2 = it;
+					++it2;
+					if (it2 == inputString.end())
+					{
+						formatedResult += "$'";
+					}
+					else
+					{
+						it = it2;
+						if (*it == 's' || *it == 'S')
 						{
-							// But if there is no name, display only the title
-							if (botName.empty())
-								botName = sTitleTranslated.toUtf8();
+							if (formatedResult.size() && (formatedResult[formatedResult.size() - 1] == 's' || formatedResult[formatedResult.size() - 1] == 'S'))
+							{
+								formatedResult += "\xE2\x80\x99"; // RIGHT SINGLE QUOTATION MARK
+							}
+							else
+							{
+								formatedResult += "\xE2\x80\x99"; // RIGHT SINGLE QUOTATION MARK
+								formatedResult += *it;
+							}
 						}
 						else
 						{
-							// Else we want the title !
-							if (!botName.empty())
-								botName += " ";
-							botName += sTitleTranslated.toUtf8();
+							--it;
+							formatedResult += "$'";
 						}
-
-						formatedResult += botName;
 					}
 					break;
-					default:
-						formatedResult += '$';
+				}
+				default:
+				{
+					formatedResult += '$';
+					--it;
 					break;
+				}
 				}
 				++it;
 			}

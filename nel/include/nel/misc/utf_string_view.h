@@ -71,29 +71,27 @@ public:
 	{
 	public:
 		inline void operator++()
-		{ 
-			m_Char = m_View.m_Iterator(&m_Addr);
-			if ((ptrdiff_t)m_Addr > ((ptrdiff_t)m_View.m_Str + m_View.m_Size))
-			{
-				m_Addr = 0;
-				m_Char = 0;
-			}
+		{
+			if ((ptrdiff_t)m_Next > ((ptrdiff_t)m_View.m_Str + m_View.m_Size))
+				m_Next = (void *)((ptrdiff_t)m_View.m_Str + m_View.m_Size);
+			m_Addr = m_Next;
+			m_Char = m_View.m_Iterator(&m_Next);
 		}
 		inline void operator+=(ptrdiff_t a)
 		{
-			while (m_Addr)
+			while ((ptrdiff_t)m_Addr < ((ptrdiff_t)m_View.m_Str + m_View.m_Size))
 			{
 				++(*this);
 			}
 		}
 		inline bool operator!=(const const_iterator &o) const { return m_Addr != o.m_Addr; }
 		inline bool operator==(const const_iterator &o) const { return m_Addr == o.m_Addr; }
-		inline const u32char &operator*() const {  return m_Char; }
+		inline const u32char &operator*() const { return m_Char; }
 		const_iterator() : m_View(*(CUtfStringView *)NULL), m_Addr(NULL), m_Char(0) { }
 
-		const_iterator &operator=(const const_iterator &other) 
-		{  
-			if(this == &other) return *this;
+		const_iterator &operator=(const const_iterator &other)
+		{
+			if (this == &other) return *this;
 			this->~const_iterator();
 			return *new(this) const_iterator(other);
 		}
@@ -101,23 +99,22 @@ public:
 		const void *ptr() const { return m_Addr; }
 	private:
 		friend class CUtfStringView;
-		inline const_iterator(const CUtfStringView &view, const void *addr) : m_View(view), m_Addr(addr), m_Char(addr ? view.m_Iterator(&m_Addr) : 0)
-		{ 
-			if ((ptrdiff_t)m_Addr > ((ptrdiff_t)m_View.m_Str + m_View.m_Size))
-			{
-				m_Addr = 0;
-				m_Char = 0;
-			}
+		inline const_iterator(const CUtfStringView &view, const void *addr) : m_View(view), m_Addr(addr), m_Next(addr), m_Char(view.m_Iterator(&m_Next))
+		{
+			if ((ptrdiff_t)m_Next > ((ptrdiff_t)m_View.m_Str + m_View.m_Size))
+				m_Next = (void *)((ptrdiff_t)m_View.m_Str + m_View.m_Size);
 		}
+		inline const_iterator(const CUtfStringView &view) : m_View(view), m_Addr((char *)view.m_Str + view.m_Size), m_Next((char *)view.m_Str + view.m_Size + 1), m_Char(0) { }
 		const CUtfStringView &m_View;
-		const void *m_Addr; // Next address
+		const void *m_Addr; // Current address
+		const void *m_Next; // Next address
 		u32char m_Char;
 	};
 
 	typedef const_iterator iterator;
 
 	iterator begin() const { return iterator(*this, m_Str); }
-	inline iterator end() const { return iterator(*this, NULL); }
+	inline iterator end() const { return iterator(*this); }
 
 	/// Largest possible number of characters in this string.
 	/// Number of actual characters may be less or equal.
