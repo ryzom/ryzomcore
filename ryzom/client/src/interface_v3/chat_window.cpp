@@ -208,7 +208,8 @@ void CChatWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGr
 {
 	if (!_Chat)
 	{
-		nlwarning("<CChatWindow::displayMessage> There's no global chat");
+		if (msg.toUtf8() != "WRN: <CChatWindow::displayMessage> There's no global chat")
+			nlwarning("<CChatWindow::displayMessage> There's no global chat");
 		return;
 	}
 	CGroupList *gl;
@@ -541,7 +542,8 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 {
 	if (!_Chat)
 	{
-		nlwarning("<CChatGroupWindow::displayMessage> There's no global chat");
+		if (msg.toUtf8() != "WRN: <CChatGroupWindow::displayMessage> There's no global chat")
+			nlwarning("<CChatGroupWindow::displayMessage> There's no global chat");
 		return;
 	}
 
