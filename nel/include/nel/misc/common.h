@@ -240,6 +240,16 @@ std::string toUpper ( const char *str ); // UTF-8
 std::string	toUpper ( const std::string &str); // UTF-8
 void		toUpper ( char *str); // Ascii only
 
+/** Convert a single character in UTF-8 to upper or lowercase.
+* \param res Character is appended in UTF-8 into this string.
+* \param src Character is sourced from this UTF-8 string.
+* \param i Index in `str`, incremented by the number of bytes read.
+*/
+void appendToLower(std::string &res, const char *str, ptrdiff_t &i);
+void appendToLower(std::string &res, const std::string &str, ptrdiff_t &i);
+void appendToUpper(std::string &res, const char *str, ptrdiff_t &i);
+void appendToUpper(std::string &res, const std::string &str, ptrdiff_t &i);
+
 
 /**
  *  Convert to an hexadecimal std::string

@@ -4752,7 +4752,7 @@ NL_FORCE_INLINE void appendToLowerAsUtf8(std::string &res, const char *str, ptrd
 			if (table[idx])
 			{
 				res += &table[idx];
-				++i;
+				i += 2;
 				return;
 			}
 		}
@@ -4770,20 +4770,23 @@ NL_FORCE_INLINE void appendToLowerAsUtf8(std::string &res, const char *str, ptrd
 				if (table[idx])
 				{
 					res += &table[idx];
-					i += 2;
+					i += 3;
 					return;
 				}
 			}
 		}
 	}
 	res += c;
+	++i;
 }
+
+// ***************************************************************************
 
 std::string toLower(const char *str)
 {
 	// UTF-8 toLower, tables generated from UTF-16 tables
 	std::string res;
-	for (ptrdiff_t i = 0; str[i]; ++i)
+	for (ptrdiff_t i = 0; str[i];)
 		appendToLowerAsUtf8(res, str, i);
 	return res;
 }
@@ -4796,9 +4799,23 @@ std::string	toLower(const std::string &str)
 	std::string res;
 	res.reserve(str.size() + (str.size() >> 2));
 	const char *cstr = &str[0];
-	for (ptrdiff_t i = 0; i < (ptrdiff_t)str.size(); ++i)
+	for (ptrdiff_t i = 0; i < (ptrdiff_t)str.size();)
 		appendToLowerAsUtf8(res, cstr, i);
 	return res;
+}
+
+// ***************************************************************************
+
+void appendToLower(std::string &res, const char *str, ptrdiff_t &i)
+{
+	appendToLowerAsUtf8(res, str, i);
+}
+
+// ***************************************************************************
+
+void appendToLower(std::string &res, const std::string &str, ptrdiff_t &i)
+{
+	appendToLowerAsUtf8(res, &str[0], i);
 }
 
 // ***************************************************************************
@@ -4827,7 +4844,7 @@ NL_FORCE_INLINE void appendToUpperAsUtf8(std::string &res, const char *str, ptrd
 			if (table[idx])
 			{
 				res += &table[idx];
-				++i;
+				i += 2;
 				return;
 			}
 		}
@@ -4845,13 +4862,14 @@ NL_FORCE_INLINE void appendToUpperAsUtf8(std::string &res, const char *str, ptrd
 				if (table[idx])
 				{
 					res += &table[idx];
-					i += 2;
+					i += 3;
 					return;
 				}
 			}
 		}
 	}
 	res += c;
+	++i;
 }
 
 // ***************************************************************************
@@ -4860,7 +4878,7 @@ std::string toUpper(const char *str)
 {
 	// UTF-8 toLower, tables generated from UTF-16 tables
 	std::string res;
-	for (ptrdiff_t i = 0; str[i]; ++i)
+	for (ptrdiff_t i = 0; str[i];)
 		appendToUpperAsUtf8(res, str, i);
 	return res;
 }
@@ -4873,9 +4891,23 @@ std::string	toUpper(const std::string &str)
 	std::string res;
 	res.reserve(str.size() + (str.size() >> 2));
 	const char *cstr = &str[0];
-	for (ptrdiff_t i = 0; i < (ptrdiff_t)str.size(); ++i)
+	for (ptrdiff_t i = 0; i < (ptrdiff_t)str.size();)
 		appendToUpperAsUtf8(res, cstr, i);
 	return res;
+}
+
+// ***************************************************************************
+
+void appendToUpper(std::string &res, const char *str, ptrdiff_t &i)
+{
+	appendToUpperAsUtf8(res, str, i);
+}
+
+// ***************************************************************************
+
+void appendToUpper(std::string &res, const std::string &str, ptrdiff_t &i)
+{
+	appendToUpperAsUtf8(res, &str[0], i);
 }
 
 // ***************************************************************************
