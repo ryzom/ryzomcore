@@ -1021,7 +1021,7 @@ TInterfaceState globalMenu()
 				// Display the firewall alert string
 				CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:connecting:title"));
 				if (pVT != NULL)
-					pVT->setText(CI18N::get("uiFirewallAlert") + "...");
+					pVT->setTextLocalized("uiFirewallAlert", true);
 
 				// The mouse and fullscreen mode should be unlocked for the user to set the firewall permission
 				nlSleep( 30 ); // 'nice' the client, and prevent to make too many send attempts
@@ -1237,8 +1237,8 @@ TInterfaceState globalMenu()
 					if (pVT != NULL)
 					{
 						pVT->setMultiLine( true );
-						pVT->setText(CI18N::get("uiFirewallFail")+".\n"+
-									  CI18N::get("uiFirewallAlert")+".");
+						pVT->setTextLocalized(CI18N::get("uiFirewallFail")+".\n"+
+									  CI18N::get("uiFirewallAlert")+".", false);
 					}
 				}
 			}
@@ -1319,16 +1319,16 @@ public:
 			if (pVT == NULL) return;
 
 			if (rCS.Name.empty())
-				pVT->setText(CI18N::get("uiEmptySlot"));
+				pVT->setTextLocalized("uiEmptySlot", true);
 			else
-				pVT->setText(rCS.Name.toUtf8());
+				pVT->setTextLocalized(rCS.Name.toUtf8(), false);
 		}
 		// 5 slots
 		for (; i < 5; ++i)
 		{
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(sPath+":text"+NLMISC::toString(i)));
 			if (pVT == NULL) return;
-			pVT->setText(CI18N::get("uiEmptySlot"));
+			pVT->setTextLocalized("uiEmptySlot", true);
 		}
 	}
 };
@@ -2171,7 +2171,7 @@ public:
 				if (pVT != NULL)
 				{
 					std::string str = Mainlands[i].Name.toUtf8() + " " + Mainlands[i].Description.toUtf8();
-					pVT->setText(str);
+					pVT->setTextLocalized(str, false);
 				}
 
 				// Add to the list
@@ -2311,7 +2311,7 @@ public:
 			CViewText *pVT = dynamic_cast<CViewText*>(pNewLine->getView("name"));
 			if (pVT != NULL)
 			{
-				pVT->setText(name.toUtf8());
+				pVT->setTextLocalized(name.toUtf8(), false);
 			}
 
 			CCtrlBase *pBut = pNewLine->getCtrl("but");
@@ -2559,7 +2559,7 @@ static void setTextField(CInterfaceGroup* scenarioWnd, const std::string &uiName
 	{
 		CViewText* viewText = dynamic_cast<CViewText*>(result);
 		if(viewText)
-			viewText->setText(text.toUtf8());
+			viewText->setTextLocalized(text.toUtf8(), false);
 		CGroupEditBox* editBox = dynamic_cast<CGroupEditBox*>(result);
 		if(editBox)
 			editBox->setInputStringAsUtf16(text);
@@ -2682,7 +2682,7 @@ class CAHScenarioControl : public IActionHandler
 			CViewText* viewText = dynamic_cast<CViewText*>(result);
 			if(viewText)
 			{
-				viewText->setText(R2::getEditor().isInitialized()?CI18N::get("uiR2EDScenarioName"):CI18N::get("uiR2EDScenarioFileName"));
+				viewText->setTextLocalized(R2::getEditor().isInitialized() ? "uiR2EDScenarioName" : "uiR2EDScenarioFileName", true);
 			}
 		}
 
@@ -2712,7 +2712,7 @@ class CAHScenarioControl : public IActionHandler
 				CViewText* viewText= dynamic_cast<CViewText*>(result);
 
 				if(viewText)
-					viewText->setText("");
+					viewText->setText(std::string());
 			}
 		}
 		setScenarioInformation(scenarioWnd, "");
@@ -2748,7 +2748,7 @@ class CAHScenarioControl : public IActionHandler
 					CViewText *shardName = dynamic_cast<CViewText *>(toggleGr->getView("button_text"));
 					if (shardName)
 					{
-						shardName->setText(Mainlands[i].Name.toUtf8());
+						shardName->setTextLocalized(Mainlands[i].Name.toUtf8(), false);
 					}
 				}
 			}
@@ -2888,7 +2888,7 @@ class CAHScenarioInformation : public IActionHandler
 					scenarioName = scenarioName.substr(posScenarioName==0?posScenarioName:posScenarioName+1);
 					posScenarioName = scenarioName.find('/');
 				}
-				viewText->setText(scenarioName);
+				viewText->setTextLocalized(scenarioName, false);
 			}
 		}
 
@@ -3250,7 +3250,7 @@ class CAHLoadScenario : public IActionHandler
 			{
 				CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 				if (pVT != NULL)
-					pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
+					pVT->setTextLocalized("uiRingWarningFreeTrial", true);
 				CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 
 				return;
@@ -3331,7 +3331,7 @@ class CAHLoadScenario : public IActionHandler
 						{
 							CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 							if (pVT != NULL)
-								pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
+								pVT->setTextLocalized("uiRingWarningFreeTrial", true);
 							CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 						}
 
@@ -3360,7 +3360,7 @@ class CAHLoadScenario : public IActionHandler
 										{
 											CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 											if (pVT != NULL)
-												pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
+												pVT->setTextLocalized("uiRingWarningInviteFreeTrial", true);
 											CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 										}
 									}
