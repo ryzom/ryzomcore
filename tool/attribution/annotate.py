@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2019  Jan BOON <jan.boon@kaetemi.be>
+# Copyright (C) 2019-2020  Jan BOON <jan.boon@kaetemi.be>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ from datetime import datetime
 from pathlib import Path
 
 from git import Repo
-repo = Repo("../../..")
+repo = Repo("../..")
 
 # Mapping for author short name to full display name
 authors = { }
@@ -83,6 +83,7 @@ authors["etrange"] = "StudioEtrange <nomorgan@gmail.com>"
 authors["sircotare"] = "SirCotare"
 authors["rolandw"] = "Roland WINKLMEIER <roland.m.winklmeier@gmail.com>"
 authors["thibg"] = "Thibaut GIRKA (ThibG) <thib@sitedethib.com>" # LibVR support
+authors["xtarsia"] = "Xtarsia"
 
 # Mapping from git author name to short name, dash to ignore author
 short_authors = { }
@@ -164,6 +165,8 @@ short_authors["cemycc <cemycc@gmail.com>"] = "cemycc"
 short_authors["cemycc"] = "cemycc"
 short_authors["Thibaut Girka <thib@sitedethib.com>"] = "thibg"
 short_authors["Thibaut Girka (ThibG)"] = "thibg"
+short_authors["Xtarsia <69606701+Xtarsia@users.noreply.github.com>"] = "xtarsia"
+short_authors["Xtarsia"] = "xtarsia"
 # short_authors["\"picomancer ext:(%22) <pico-bitbucketpub-4mcdxm39-onlyham@picomancer.com>"] = "-"
 # short_authors["Quitta"] = "-"
 # short_authors["Krolock"] = "-"
@@ -206,12 +209,12 @@ override_author["dc734ed66226b257becae9fcd140898e14510e6a"] = "-" # Header clean
 
 # Exclude some paths
 exclude_paths = { }
-exclude_paths["code/nel/3rdparty"] = True
-exclude_paths["code/nel/src/3d/driver/opengl/GL"] = True
-exclude_paths["code/nel/src/3d/driver/opengl/EGL"] = True
-exclude_paths["code/nel/src/3d/driver/opengl/GLES"] = True
-exclude_paths["code/nel/src/3d/driver/opengl/KHR"] = True
-exclude_paths["code/studio/src/3rdparty"] = True
+exclude_paths["nel/3rdparty"] = True
+exclude_paths["nel/src/3d/driver/opengl/GL"] = True
+exclude_paths["nel/src/3d/driver/opengl/EGL"] = True
+exclude_paths["nel/src/3d/driver/opengl/GLES"] = True
+exclude_paths["nel/src/3d/driver/opengl/KHR"] = True
+exclude_paths["studio/src/3rdparty"] = True
 
 # Programmatical remappings
 def remap_author(blob, commit, author):
@@ -234,7 +237,7 @@ def remap_author(blob, commit, author):
 		short_author = "winch_gate"
 	if short_author == "sircotare" and authored_date.year >= 2012:
 		short_author = "winch_gate"
-	if short_author == "inky":
+	if short_author == "inky" and authored_date.year < 2020:
 		short_author = "winch_gate"
 	if "feature-export-assimp" in commit.message and authored_date.year <= 2015:
 		# Project paid for by Winch Gate
@@ -334,7 +337,7 @@ def rewrite_cpp(path, copyright_oldest, copyright_newest, copyright_lines):
 	# Everything before the first "// Copyright" remains intact
 	# Parse existing notices, merge with lists, track which one is first
 	# Write out new copyright and modification notices
-	contents = Path("../../../" + path).read_text()
+	contents = Path("../../" + path).read_text()
 	content_start = contents.find("// This program is free software")
 	if content_start < 0:
 		header_not_found[path] = True
@@ -431,7 +434,7 @@ def rewrite_cpp(path, copyright_oldest, copyright_newest, copyright_lines):
 	new_contents = contents[0:copyright_start] + new_statement + contents[content_start:]
 	if contents != new_contents:
 		print(new_statement)
-		Path("../../../" + path).write_text(new_contents)
+		Path("../../" + path).write_text(new_contents)
 
 def process_cpp(cpp_entry):
 	print(cpp_entry.path)
