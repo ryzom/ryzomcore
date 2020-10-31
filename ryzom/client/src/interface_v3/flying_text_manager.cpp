@@ -121,7 +121,7 @@ void	CFlyingTextManager::releaseInGame()
 }
 
 // ***************************************************************************
-void	CFlyingTextManager::addFlyingText(void *key, const ucstring &text, const NLMISC::CVector &pos, CRGBA color, float scale, sint offsetX)
+void	CFlyingTextManager::addFlyingText(void *key, const string &text, const NLMISC::CVector &pos, CRGBA color, float scale, sint offsetX)
 {
 	// key exist in the map?
 	TInSceneCurrentMap::iterator	it= _InSceneCurrent.find(key);
@@ -144,7 +144,7 @@ void	CFlyingTextManager::addFlyingText(void *key, const ucstring &text, const NL
 	gi.UsedThisFrame= true;
 
 	// update infos
-	gi.ViewText->setText(text.toUtf8());
+	gi.ViewText->setText(text);
 	gi.ViewText->setColor(color);
 	gi.GroupInScene->Position= pos;
 	gi.GroupInScene->Scale= scale;

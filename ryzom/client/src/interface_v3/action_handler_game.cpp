@@ -192,9 +192,9 @@ public:
 		CEntityCL *selection = EntitiesMngr.entity(UserEntity->selection());
 		if (selection && selection->Type == CEntityCL::Player)
 		{
-			ucstring name = CEntityCL::removeTitleAndShardFromName(selection->getEntityName());
+			string name = CEntityCL::removeTitleAndShardFromName(selection->getEntityName());
 			if (name.empty()) return;
-			CAHManager::getInstance()->runActionHandler("enter_tell", pCaller, "player=" + name.toString());
+			CAHManager::getInstance()->runActionHandler("enter_tell", pCaller, "player=" + name);
 		}
 	}
 protected:
@@ -1963,7 +1963,7 @@ public:
 
 					// Sometimes translation contains another title
 					string::size_type pos = copyInout.find('$');
-					if (pos != ucstring::npos)
+					if (pos != string::npos)
 					{
 						copyInout = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(copyInout), womanTitle);
 					}
@@ -2038,8 +2038,8 @@ class CActionHandlerSetTargetName : public IActionHandler
 		{
 			sint32 nSlot = (sint32)evValue.getInteger();
 
-			ucstring TargetName;
-			ucstring TargetTitle;
+			string TargetName;
+			string TargetTitle;
 
 			// Get from nSlot
 			if (nSlot > -1)
@@ -2074,9 +2074,9 @@ class CActionHandlerSetTargetName : public IActionHandler
 			// Set to target
 			CInterfaceExprValue evUCStr;
 			TargetName = STRING_MANAGER::CStringManagerClient::getLocalizedName(TargetName);
-			evUCStr.setString(TargetName.toUtf8());
+			evUCStr.setString(TargetName);
 			CInterfaceLink::setTargetProperty(sNameTarget, evUCStr);
-			evUCStr.setString(TargetTitle.toUtf8());
+			evUCStr.setString(TargetTitle);
 			CInterfaceLink::setTargetProperty(sTitleTarget, evUCStr);
 		}
 	}
@@ -2424,28 +2424,27 @@ class CAHTarget : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
-		ucstring entityName;
-		entityName.fromUtf8(getParam(Params, "entity"));
+		string entityName = getParam(Params, "entity");
 		if (entityName.empty()) return;
 
 		string completeMatch = getParam(Params, "prefer_complete_match");
 		bool quiet = (getParam (Params, "quiet") == "true");
 
-		vector<ucstring> keywords;
-		NLMISC::splitUCString(entityName, ucstring(" "), keywords);
-		if (!keywords.empty() && keywords[0].size() > 0 && keywords[0][0] == (ucchar)'"')
+		vector<string> keywords;
+		NLMISC::splitString(entityName, " ", keywords);
+		if (!keywords.empty() && keywords[0].size() > 0 && keywords[0][0] == '"')
 		{
 			// entity name is in quotes, do old style match with 'starts with' filter
 			// search for optional second parameter from old command for prefer_complete_match param
 			keywords.clear();
 
-			ucstring::size_type lastOf = entityName.rfind(ucstring("\""));
+			string::size_type lastOf = entityName.rfind("\"");
 			if (lastOf == 0)
-				lastOf = ucstring::npos;
+				lastOf = string::npos;
 
 			// override the value only when there is no 'prefer_complete_match' parameter set
 			if (completeMatch.empty() && lastOf < entityName.size())
-				completeMatch = trim(entityName.substr(lastOf+1).toUtf8());
+				completeMatch = trim(entityName.substr(lastOf+1));
 
 			entityName = entityName.substr(1, lastOf-1);
 		}
@@ -2474,7 +2473,7 @@ class CAHTarget : public IActionHandler
 		if (entity == NULL)
 		{
 			//Get the entity with a sheetName
-			entity = EntitiesMngr.getEntityBySheetName(entityName.toUtf8());
+			entity = EntitiesMngr.getEntityBySheetName(entityName);
 		}
 
 		if (entity && entity->properties().selectable() && !entity->getDisplayName().empty())
@@ -2758,8 +2757,7 @@ class CAHAssist : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		// Get the entity name to target
-		ucstring entityName;
-		entityName.fromUtf8 (getParam (Params, "entity"));
+		string entityName = getParam (Params, "entity");
 		if (!entityName.empty())
 		{
 			// Get the entity
@@ -4026,7 +4024,7 @@ REGISTER_ACTION_HANDLER(CHandlerSelectProtectedSlot, "select_protected_slot");
 // ***************************************************************************
 // Common code
 //static	void	fillPlayerBarText(ucstring &str, const string &dbScore, const string &dbScoreMax, const string &ttFormat)
-static	void	fillPlayerBarText(ucstring &str, const string &dbScore, SCORES::TScores score, const string &ttFormat)
+static	void	fillPlayerBarText(std::string &str, const string &dbScore, SCORES::TScores score, const string &ttFormat)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CCDBNodeLeaf		*node;
@@ -4056,10 +4054,10 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-		ucstring	str;
+		string	str;
 		fillPlayerBarText(str, "HP", SCORES::hit_points, "uittPlayerLifeFormat");
 
-		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTLife, "player_tt_life");
@@ -4073,10 +4071,10 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-		ucstring	str;
+		string	str;
 		fillPlayerBarText(str, "STA", SCORES::stamina, "uittPlayerStaminaFormat");
 
-		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTStamina, "player_tt_stamina");
@@ -4090,10 +4088,10 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-		ucstring	str;
+		string	str;
 		fillPlayerBarText(str, "SAP", SCORES::sap, "uittPlayerSapFormat");
 
-		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTSap, "player_tt_sap");
@@ -4107,10 +4105,10 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-		ucstring	str;
+		string	str;
 		fillPlayerBarText(str, "FOCUS", SCORES::focus, "uittPlayerFocusFormat");
 
-		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTFocus, "player_tt_focus");
@@ -4137,10 +4135,10 @@ public:
 			maxVal= node->getValue32();
 
 		// Replace in the formated text
-		ucstring	str= CI18N::get("uittBulkFormat");
+		string	str= CI18N::get("uittBulkFormat");
 		strFindReplace(str, "%v", toString("%.2f", val) );
 		strFindReplace(str, "%m", toString(maxVal) );
-		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerGetTTBulk, "get_tt_bulk");
@@ -4552,7 +4550,7 @@ public:
 			CBitMemStream out;
 			if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 			{
-				ucstring ucstr;
+				ucstring ucstr; // FIXME: UTF-8 (serial)
 				ucstr.fromUtf8(sCustomPhrase);
 
 				if( sCustomPhrase == "none" )

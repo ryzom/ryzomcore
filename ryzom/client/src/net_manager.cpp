@@ -1527,7 +1527,7 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 
 	// start progress bar and display background
 	ProgressBar.reset (BAR_STEP_TP);
-	ucstring nmsg("Loading...");
+	string nmsg("Loading...");
 	ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 
 
@@ -3463,7 +3463,7 @@ void impulseCombatFlyingHpDelta(NLMISC::CBitMemStream &impulse)
 	CRGBA color((uint8)(rgba>>24&255), (uint8)(rgba>>16&255), (uint8)(rgba>>8&255), (uint8)(rgba&255));
 	CEntityCL *entity = EntitiesMngr.getEntityByCompressedIndex(entityID);
 	if (entity)
-		entity->addHPOutput(ucstring(toString("%d", hpDelta)), color);
+		entity->addHPOutput(toString("%d", hpDelta), color);
 }
 
 void impulseCombatFlyingTextItemSpecialEffectProc(NLMISC::CBitMemStream &impulse)
@@ -3477,7 +3477,7 @@ void impulseCombatFlyingTextItemSpecialEffectProc(NLMISC::CBitMemStream &impulse
 	impulse.serial(effect);
 	impulse.serial(param);
 	CRGBA color((uint8)(rgba>>24&255), (uint8)(rgba>>16&255), (uint8)(rgba>>8&255), (uint8)(rgba&255));
-	ucstring text = CI18N::get(toString("uiItemSpecialEffectFlyingText%s", ITEM_SPECIAL_EFFECT::toString((ITEM_SPECIAL_EFFECT::TItemSpecialEffect)effect).c_str()));
+	string text = CI18N::get(toString("uiItemSpecialEffectFlyingText%s", ITEM_SPECIAL_EFFECT::toString((ITEM_SPECIAL_EFFECT::TItemSpecialEffect)effect).c_str()));
 	strFindReplace(text, "%param", toString("%d", param));
 	CEntityCL *entity = EntitiesMngr.getEntityByCompressedIndex(entityID);
 	if (entity)
@@ -3493,7 +3493,7 @@ void impulseCombatFlyingText(NLMISC::CBitMemStream &impulse)
 	COMBAT_FLYING_TEXT::TCombatFlyingText type = (COMBAT_FLYING_TEXT::TCombatFlyingText)tmp;
 
 	CRGBA color(255, 255, 255);
-	ucstring text("");
+	string text("");
 	float dt = 0.0f;
 
 	switch (type)

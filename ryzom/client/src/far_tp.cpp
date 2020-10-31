@@ -927,7 +927,7 @@ retryJoinEdit:
 			}
 		}
 		pIM->messageBoxWithHelp(
-			CI18N::get(requestRetToMainland ? "uiSessionVanishedFarTP" : "uiSessionUnreachable") + ucstring(errorMsg),
+			CI18N::get(requestRetToMainland ? "uiSessionVanishedFarTP" : "uiSessionUnreachable") + errorMsg,
 			letReturnToCharSelect ? "ui:outgame:charsel" : "ui:interface");
 
 		// Info in the log
@@ -1117,7 +1117,7 @@ void CFarTP::disconnectFromPreviousShard()
 
 		// Start progress bar and display background
 		ProgressBar.reset (BAR_STEP_TP);
-		ucstring nmsg("Loading...");
+		string nmsg("Loading...");
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		ProgressBar.progress(0);
 

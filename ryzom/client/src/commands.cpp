@@ -924,9 +924,7 @@ NLMISC_COMMAND(a, "Execute an admin command on you","<cmd> <arg>")
 	cmd = args[0];
 	for (uint i = 1; i < args.size(); i++)
 	{
-		// temporary fix for utf-8
-		// servers commands are not decoded so convert them to ansi
-		std::string tmp = ucstring::makeFromUtf8(args[i]).toString();
+		std::string tmp = args[i];
 
 		if (!arg.empty())
 			arg += ' ';
@@ -968,9 +966,7 @@ NLMISC_COMMAND(b, "Execute an admin command on your target","<cmd> <arg>")
 	cmd = args[0];
 	for (uint i = 1; i < args.size(); i++)
 	{
-		// temporary fix for utf-8
-		// servers commands are not decoded so convert them to ansi
-		std::string tmp = ucstring::makeFromUtf8(args[i]).toString();
+		std::string tmp = args[i];
 
 		if (!arg.empty())
 			arg += ' ';
@@ -1015,9 +1011,7 @@ NLMISC_COMMAND(c, "Execute an admin command on character name","<Character Name>
 	cmd = args[1];
 	for (uint i = 2; i < args.size(); i++)
 	{
-		// temporary fix for utf-8
-		// servers commands are not decoded so convert them to ansi
-		std::string tmp = ucstring::makeFromUtf8(args[i]).toString();
+		std::string tmp = args[i];
 
 		if (!arg.empty())
 			arg += ' ';
@@ -3863,7 +3857,7 @@ NLMISC_COMMAND(testLongBubble, "To display a bubble with a long text", "<entity>
 	fromString(args[0], entityId);
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	ucstring text("test\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\n");
+	string text("test\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\n");
 	uint duration = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutBubbles).getValSInt32();
 
 	CEntityCL *entity = EntitiesMngr.entity(entityId);

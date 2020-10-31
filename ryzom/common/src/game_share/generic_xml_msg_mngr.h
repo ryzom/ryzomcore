@@ -232,6 +232,14 @@ public:
 	bool	pushNameToStream(const std::string &msgName, NLMISC::CBitMemStream &strm);
 
 	/**
+	* Convert and write a Message Name into a stream.
+	* \param string msgName : Message Name to convert and write into the stream.
+	* \param CBitMemStream strm : the stream to receive the Message Name.
+	* \return bool : 'false' if the method cannot write the message Name into the stream (probably because de message name is wrong).
+	*/
+	bool	pushNameToStream(const char *msgName, NLMISC::CBitMemStream &strm);
+
+	/**
 	 * Convert and return the Message Name from a stream.
 	 * \param string resultName: The result for the Message Name.
 	 * \param CBitMemStream strm : the stream with the Message Name.

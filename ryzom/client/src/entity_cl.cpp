@@ -2276,11 +2276,11 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 
 	// check if there is any replacement tag in the string
 	string::size_type p1 = _EntityName.find('$');
-	if (p1 != ucstring::npos)
+	if (p1 != string::npos)
 	{
 		// we found a replacement point begin tag
 		string::size_type p2 = _EntityName.find('$', p1+1);
-		if (p2 != ucstring::npos)
+		if (p2 != string::npos)
 		{
 			// ok, we have the second replacement point!
 			// extract the replacement id
@@ -2300,7 +2300,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 			// Sometimes translation contains another title
 			{
 				string::size_type pos = replacement.find('$');
-				if (pos != ucstring::npos)
+				if (pos != string::npos)
 				{
 					_EntityName = _EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(sn.substr(0, pos));
 					string::size_type pos2 = replacement.find('$', pos + 1);
@@ -2318,7 +2318,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 				_EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(_EntityName.substr(0, p1));	// + _Name.substr(p2+1)
 				// Get extended name
 				_NameEx = replacement;
-				newtitle = _NameEx.toUtf8();
+				newtitle = _NameEx;
 			}
 			CHARACTER_TITLE::ECharacterTitle titleEnum = CHARACTER_TITLE::toCharacterTitle( _TitleRaw );
 			if ( titleEnum >= CHARACTER_TITLE::BeginGmTitle && titleEnum <= CHARACTER_TITLE::EndGmTitle )
@@ -2372,7 +2372,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 std::string CEntityCL::getTitleFromName(const std::string &name)
 {
 	std::string::size_type p1 = name.find('$');
-	if (p1 != ucstring::npos)
+	if (p1 != string::npos)
 	{
 		std::string::size_type p2 = name.find('$', p1 + 1);
 		if (p2 != std::string::npos)
@@ -2388,14 +2388,14 @@ std::string CEntityCL::getTitleFromName(const std::string &name)
 std::string CEntityCL::removeTitleFromName(const std::string &name)
 {
 	std::string::size_type p1 = name.find('$');
-	if (p1 == ucstring::npos)
+	if (p1 == string::npos)
 	{
 		return name;
 	}
 	else
 	{
 		std::string::size_type p2 = name.find('$', p1 + 1);
-		if (p2 != ucstring::npos)
+		if (p2 != string::npos)
 		{
 			return name.substr(0, p1) + name.substr(p2 + 1);
 		}

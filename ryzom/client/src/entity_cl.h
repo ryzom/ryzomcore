@@ -638,7 +638,7 @@ public:
 
 	// Add hit points gain/lost by this entity.
 	void addHPOutput(sint16 hp, NLMISC::CRGBA color, float dt=0.0f) { if(_HPModifiers.size()<20) _HPModifiers.push_back(CHPModifier(hp,color,dt));}
-	void addHPOutput(const ucstring &text, NLMISC::CRGBA color, float dt=0.0f) { if(_HPModifiers.size()<20 && !text.empty()) _HPModifiers.push_back(CHPModifier(text,color,dt));}
+	void addHPOutput(const std::string &text, NLMISC::CRGBA color, float dt=0.0f) { if(_HPModifiers.size()<20 && !text.empty()) _HPModifiers.push_back(CHPModifier(text,color,dt));}
 
 	/// Return the entity sheet scale. (return 1.0 if there is any problem).
 	virtual float getSheetScale() const {return 1.0f;}
@@ -944,7 +944,7 @@ protected:
 	bool							_HasReservedTitle;
 
 	// Extended Name
-	ucstring						_NameEx;
+	std::string						_NameEx;
 	// String ID
 	uint32							_NameId;
 	// Primitive used for the collision in PACS
@@ -995,10 +995,10 @@ protected:
 		CHPModifier() {}
 		virtual ~CHPModifier() {}
 		CHPModifier (sint16 value, NLMISC::CRGBA color, float dt) : Value(value), Color(color), DeltaT(dt) {}
-		CHPModifier (const ucstring &text, NLMISC::CRGBA color, float dt) : Text(text), Color(color), DeltaT(dt) {}
+		CHPModifier (const std::string &text, NLMISC::CRGBA color, float dt) : Text(text), Color(color), DeltaT(dt) {}
 
 		sint16			Value;		// If Text.empty(), take the Value
-		ucstring		Text;
+		std::string		Text;
 		NLMISC::CRGBA	Color;
 		float			DeltaT;
 	};

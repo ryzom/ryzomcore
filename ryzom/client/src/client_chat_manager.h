@@ -304,7 +304,7 @@ private :
 		uint8			ChatMode;
 		NLMISC::CEntityId	DynChatChanID;
 		// For Chat and Tell messages
-		ucstring		Content;
+		ucstring		Content; // FIXME: UTF-8 (serial)
 		// For Chat2 and Tell2 messages
 		uint32			PhraseId;
 		// Use PhraseId or Content?

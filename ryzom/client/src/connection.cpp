@@ -360,7 +360,7 @@ bool connection (const string &cookie, const string &fsaddr)
 
 	// Preload continents
 	{
-		const ucstring nmsg("Loading continents...");
+		const string nmsg("Loading continents...");
 		ProgressBar.newMessage (ClientCfg.buildLoadingString(nmsg) );
 		ContinentMngr.preloadSheets();
 
@@ -398,7 +398,7 @@ bool connection (const string &cookie, const string &fsaddr)
 	// Init out game
 	setOutGameFullScreen();
 
-	ucstring nmsg("Initializing outgame...");
+	string nmsg("Initializing outgame...");
 	ProgressBar.newMessage (ClientCfg.buildLoadingString(nmsg) );
 	pIM->initOutGame();
 
@@ -542,7 +542,7 @@ bool reconnection()
 
 	// Preload continents
 	{
-		const ucstring nmsg ("Loading continents...");
+		const string nmsg ("Loading continents...");
 		ProgressBar.newMessage (ClientCfg.buildLoadingString(nmsg) );
 		ContinentMngr.preloadSheets();
 	}

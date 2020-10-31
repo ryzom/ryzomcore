@@ -160,6 +160,16 @@ bool	CGenericXmlMsgHeaderManager::pushNameToStream(const string &msgName, CBitMe
 }
 
 //
+bool	CGenericXmlMsgHeaderManager::pushNameToStream(const char *msgName, CBitMemStream &strm)
+{
+	bool res = (_Root->select(msgName, strm) != NULL);
+
+	if (!res) nlwarning("pushNameToStream failed: Unknown message name '%s'", msgName);
+
+	return res;
+}
+
+//
 void	CGenericXmlMsgHeaderManager::popNameFromStream(string &resultName, CBitMemStream &strm)
 {
 	_Root->select(strm, resultName);

@@ -623,7 +623,7 @@ void CForageSourceCL::displayModifiers()
 		{
 			uint16 qttyDelta = ((uint16)mod.Value) & 0xFF;
 			uint16 qlty = ((uint16)mod.Value) >> 8;
-			ucstring hpModifier = ucstring(toString("%u ", qttyDelta) + CI18N::get("uittQualityAbbrev") + toString(" %u", qlty));
+			string hpModifier = toString("%u ", qttyDelta) + CI18N::get("uittQualityAbbrev") + toString(" %u", qlty);
 			double t = TimeInSec-mod.Time;
 			// Compute the position for the Modifier.
 			CVector		pos= namePos + CVector(0.0f, 0.0f, 0.3f+(float)t*1.0f/totalDuration);

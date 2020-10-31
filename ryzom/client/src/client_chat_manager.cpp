@@ -285,11 +285,11 @@ void CClientChatManager::init( const string& /* staticDBFileName */ )
 void CClientChatManager::chat( const string& strIn, bool isChatTeam )
 {
 	// Truncate to 255 chars max (because of server restriction)
-	ucstring	str= ucstring(strIn).substr(0,255);
+	ucstring	str= ucstring(strIn).substr(0,255);  // FIXME: UTF-8 (serial)
 
 	// send str to IOS
 	CBitMemStream bms;
-	string msgType;
+	const char *msgType;
 
 	if (isChatTeam)
 	{
@@ -303,13 +303,13 @@ void CClientChatManager::chat( const string& strIn, bool isChatTeam )
 
 	if( GenericMsgHeaderMngr.pushNameToStream(msgType,bms) )
 	{
-		bms.serial( str ); // FIXME: UTF-8
+		bms.serial( str ); // FIXME: UTF-8 (serial)
 		NetMngr.push( bms );
 		//nlinfo("impulseCallBack : %s %s sent", msgType.c_str(), str.toString().c_str());
 	}
 	else
 	{
-		nlwarning("<CClientChatManager::chat> unknown message name : %s", msgType.c_str());
+		nlwarning("<CClientChatManager::chat> unknown message name : %s", msgType);
 	}
 
 	if (UserEntity != NULL) UserEntity->setAFK(false);
@@ -324,8 +324,8 @@ void CClientChatManager::chat( const string& strIn, bool isChatTeam )
 void CClientChatManager::tell( const string& receiverIn, const string& strIn )
 {
 	// Truncate to 255 chars max (because of server restriction)
-	string		receiver= receiverIn.substr(0,255);
-	ucstring	str= ucstring(strIn).substr(0,255);
+	string		receiver= receiverIn.substr(0,255); // FIXME: UTF-8 (serial)
+	ucstring	str= ucstring(strIn).substr(0,255); // FIXME: UTF-8 (serial)
 
 	// *** send str
 	CBitMemStream bms;
@@ -454,7 +454,7 @@ void CClientChatManager::processTellString(NLMISC::CBitMemStream& bms, IChatDisp
 	// Serial. For tell message, there is no chat mode, coz we know we are in tell mode !
 	bms.serial (chatMsg.CompressedIndex);
 	bms.serial (chatMsg.SenderNameId);
-	bms.serial (chatMsg.Content); // FIXME: UTF-8
+	bms.serial (chatMsg.Content); // FIXME: UTF-8 (serial)
 
 	if (PermanentlyBanned) return;
 
@@ -718,7 +718,7 @@ string CClientChatManager::getString( CBitMemStream& bms, string& ucstr )
 		string::size_type idx = ucstr.find(ucstrTmp);
 
 		// if there's a parameter in the string
-		if( idx != ucstring::npos )
+		if( idx != string::npos )
 		{
 			char c = (char)ucstr[idx+ucstrTmp.size()];
 			switch( c )
@@ -967,8 +967,8 @@ void CClientChatManager::buildTellSentence(const string &sender, const string &m
 			name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sender), bWoman);
 			{
 				// Sometimes translation contains another title
-				ucstring::size_type pos = name.find('$');
-				if (pos != ucstring::npos)
+				string::size_type pos = name.find('$');
+				if (pos != string::npos)
 				{
 					name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(name), bWoman);
 				}
@@ -1048,8 +1048,8 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 			senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sender), bWoman);
 			{
 				// Sometimes translation contains another title
-				ucstring::size_type pos = senderName.find('$');
-				if (pos != ucstring::npos)
+				string::size_type pos = senderName.find('$');
+				if (pos != string::npos)
 				{
 					senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(senderName), bWoman);
 				}

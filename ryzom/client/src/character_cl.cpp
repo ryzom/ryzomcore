@@ -809,9 +809,9 @@ bool CCharacterCL::build(const CEntitySheet *sheet)	// virtual
 	if (Type == Fauna)
 	{
 		// Get the fauna name in the sheet
-		const ucstring creatureName(STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(_Sheet->Id));
-		if (creatureName.find(ucstring("<NotExist:")) != 0)
-			_EntityName = creatureName.toUtf8();
+		const char *creatureName = STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(_Sheet->Id);
+		if (!FINAL_VERSION || !NLMISC::startsWith(creatureName, "<NotExist:"))
+			_EntityName = creatureName;
 	}
 	else
 	{
@@ -7589,7 +7589,7 @@ void CCharacterCL::displayName()
 //---------------------------------------------------
 void CCharacterCL::drawName(const NLMISC::CMatrix &mat)	// virtual
 {
-	const ucstring &ucname = getEntityName();
+	const string &ucname = getEntityName();
 	if(!getEntityName().empty())
 	{
 		// If there is no extended name, just display the name
@@ -7616,8 +7616,8 @@ void CCharacterCL::drawName(const NLMISC::CMatrix &mat)	// virtual
 	{
 		if(_Sheet != 0)
 		{
-			const ucstring name(STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(_Sheet->Id));
-			if (name.find(ucstring("<NotExist:")) != 0)
+			const char *name = STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(_Sheet->Id);
+			if (!FINAL_VERSION || !NLMISC::startsWith(name, "<NotExist:"))
 				TextContext->render3D(mat, name);
 		}
 	}
@@ -7674,9 +7674,9 @@ void CCharacterCL::displayModifiers()	// virtual
 		}
 		else if (TimeInSec >= mod.Time)
 		{
-			ucstring hpModifier;
+			string hpModifier;
 			if (mod.Text.empty())
-				hpModifier = ucstring(toString("%d", mod.Value));
+				hpModifier = toString("%d", mod.Value);
 			else
 				hpModifier = mod.Text;
 			double t = TimeInSec-mod.Time;

@@ -1124,7 +1124,7 @@ bool mainLoop()
 			//
 			#define BAR_STEP_TP 2
 			ProgressBar.reset (BAR_STEP_TP);
-			ucstring nmsg("Loading...");
+			string nmsg("Loading...");
 			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 			ProgressBar.progress(0);
 			ContinentMngr.select(UserEntity->pos(), ProgressBar);

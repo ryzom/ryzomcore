@@ -49,7 +49,7 @@ public:
 	/** add a flying text at a position (called during entity display). NB: may fail if no more free groups
 	 *	\param offsetx: screen offsetx of the group in scene
 	 */
-	void	addFlyingText(void *key, const ucstring &text, const NLMISC::CVector &pos, NLMISC::CRGBA color, float scale, sint offsetX=0);
+	void	addFlyingText(void *key, const std::string &text, const NLMISC::CVector &pos, NLMISC::CRGBA color, float scale, sint offsetX=0);
 	/// release no more used flying text (called by CEntityManager at each draw)
 	void	releaseNotUsedFlyingText();
 
