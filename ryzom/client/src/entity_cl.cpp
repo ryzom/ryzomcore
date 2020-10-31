@@ -2302,7 +2302,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 				string::size_type pos = replacement.find('$');
 				if (pos != string::npos)
 				{
-					_EntityName = _EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(sn.substr(0, pos));
+					_EntityName = _EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(replacement.substr(0, pos));
 					string::size_type pos2 = replacement.find('$', pos + 1);
 					_TitleRaw = replacement.substr(pos+1, pos2 - pos - 1);
 					replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
