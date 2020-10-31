@@ -792,7 +792,7 @@ void CGameContextMenu::updateContextMenuOutpostState(uint options)
 	{
 		CViewTextMenu *pVTM = _TextOutpostState;
 		if (pVTM)
-			pVTM->setText(CUtfStringView(STRING_MANAGER::CStringManagerClient::getOutpostLocalizedName(outpostSheet)).toUtf8());
+			pVTM->setText(STRING_MANAGER::CStringManagerClient::getOutpostLocalizedName(outpostSheet));
 	}
 
 	// apply the active

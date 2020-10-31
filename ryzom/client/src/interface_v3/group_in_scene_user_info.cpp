@@ -200,9 +200,9 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 
 	// Names
 	const char *templateName;
-	ucstring theTribeName;
-	ucstring entityName = entity->getDisplayName();
-	ucstring entityTitle = entity->getTitle();
+	const char *theTribeName = "";
+	std::string entityName = entity->getDisplayName();
+	std::string entityTitle = entity->getTitle().toUtf8();
 
 	// For some NPC's the name is empty and only a title is given,
 	// in that case, treat the title as the name.
@@ -780,19 +780,19 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			// Set player name
 			if (info->_Name)
 			{
-				info->_Name->setText(entityName.toUtf8());
+				info->_Name->setText(entityName);
 				info->_Name->setModulateGlobalColor(false);
 			}
 
 			// Set player title
 			if (info->_Title)
-				info->_Title->setText(entityTitle.toUtf8());
+				info->_Title->setText(entityTitle);
 
 			// Set tribe name
 			if (info->_TribeName)
 			{
 				nlassert(info->_GuildName == NULL);
-				info->_TribeName->setText(theTribeName.toUtf8());
+				info->_TribeName->setText(theTribeName);
 			}
 
 			// Init user leaf nodes

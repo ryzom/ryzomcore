@@ -836,7 +836,7 @@ class CAHReplyTeller : public IActionHandler
 			{
 				w->setKeyboardFocus();
 				w->enableBlink(1);
-				PeopleInterraction.ChatGroup.Filter.setTargetPlayer(CEntityCL::removeTitleAndShardFromName(PeopleInterraction.LastSenderName));
+				PeopleInterraction.ChatGroup.Filter.setTargetPlayer(CEntityCL::removeTitleAndShardFromName(PeopleInterraction.LastSenderName.toUtf8()));
 				CGroupEditBox *eb = w->getEditBox();
 				if (eb != NULL)
 				{
@@ -863,7 +863,7 @@ class CAHReplyTellerOnce : public IActionHandler
 			{
 				w->setKeyboardFocus();
 				w->enableBlink(1);
-				w->setCommand(ucstring("tell ") + CEntityCL::removeTitleAndShardFromName(PeopleInterraction.LastSenderName) + ucstring(" "), false);
+				w->setCommand(ucstring("tell ") + CEntityCL::removeTitleAndShardFromName(PeopleInterraction.LastSenderName.toUtf8()) + ucstring(" "), false);
 				CGroupEditBox *eb = w->getEditBox();
 				if (eb != NULL)
 				{
@@ -916,7 +916,7 @@ NLMISC_COMMAND(slsn, "Temp : set the name of the last sender.", "<name>")
 bool CStringPostProcessRemoveName::cbIDStringReceived(ucstring &inOut)
 {
 	// extract the replacement id
-	ucstring strNewTitle = CEntityCL::getTitleFromName(inOut);
+	string strNewTitle = CEntityCL::getTitleFromName(inOut.toUtf8());
 
 	// retrieve the translated string
 	if (!strNewTitle.empty())
@@ -927,7 +927,7 @@ bool CStringPostProcessRemoveName::cbIDStringReceived(ucstring &inOut)
 			ucstring::size_type pos = inOut.find('$');
 			if (pos != ucstring::npos)
 			{
-				inOut = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(inOut), Woman);
+				inOut = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(inOut.toUtf8()), Woman);
 			}
 		}
 	}
@@ -940,14 +940,14 @@ bool CStringPostProcessRemoveName::cbIDStringReceived(ucstring &inOut)
 // ***************************************************************************
 bool CStringPostProcessRemoveTitle::cbIDStringReceived(ucstring &inOut)
 {
-	inOut = CEntityCL::removeTitleAndShardFromName(inOut);
+	inOut = CEntityCL::removeTitleAndShardFromName(inOut.toUtf8());
 	return true;
 }
 
 // ***************************************************************************
 bool CStringPostProcessNPCRemoveTitle::cbIDStringReceived(ucstring &inOut)
 {
-	ucstring sOut = CEntityCL::removeTitleAndShardFromName(inOut);
+	ucstring sOut = CEntityCL::removeTitleAndShardFromName(inOut.toUtf8());
 	if (sOut.empty())
 	{
 		CStringPostProcessRemoveName SPPRM;

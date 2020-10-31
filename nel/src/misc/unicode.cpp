@@ -4732,8 +4732,8 @@ static const char **s_UtfLowerToUpperMap[16] = {
 
 NL_FORCE_INLINE void appendToLowerAsUtf8(std::string &res, const char *str, ptrdiff_t &i)
 {
-	char c = str[i];
-	char d, e;
+	unsigned char c = str[i];
+	unsigned char d, e;
 	if (c < 0x80)
 	{
 		if (c >= 'A' && c <= 'Z')
@@ -4752,7 +4752,7 @@ NL_FORCE_INLINE void appendToLowerAsUtf8(std::string &res, const char *str, ptrd
 			if (table[idx])
 			{
 				res += &table[idx];
-				++i;
+				i += 2;
 				return;
 			}
 		}
@@ -4770,20 +4770,23 @@ NL_FORCE_INLINE void appendToLowerAsUtf8(std::string &res, const char *str, ptrd
 				if (table[idx])
 				{
 					res += &table[idx];
-					i += 2;
+					i += 3;
 					return;
 				}
 			}
 		}
 	}
 	res += c;
+	++i;
 }
+
+// ***************************************************************************
 
 std::string toLower(const char *str)
 {
 	// UTF-8 toLower, tables generated from UTF-16 tables
 	std::string res;
-	for (ptrdiff_t i = 0; str[i]; ++i)
+	for (ptrdiff_t i = 0; str[i];)
 		appendToLowerAsUtf8(res, str, i);
 	return res;
 }
@@ -4796,9 +4799,23 @@ std::string	toLower(const std::string &str)
 	std::string res;
 	res.reserve(str.size() + (str.size() >> 2));
 	const char *cstr = &str[0];
-	for (ptrdiff_t i = 0; i < (ptrdiff_t)str.size(); ++i)
+	for (ptrdiff_t i = 0; i < (ptrdiff_t)str.size();)
 		appendToLowerAsUtf8(res, cstr, i);
 	return res;
+}
+
+// ***************************************************************************
+
+void appendToLower(std::string &res, const char *str, ptrdiff_t &i)
+{
+	appendToLowerAsUtf8(res, str, i);
+}
+
+// ***************************************************************************
+
+void appendToLower(std::string &res, const std::string &str, ptrdiff_t &i)
+{
+	appendToLowerAsUtf8(res, &str[0], i);
 }
 
 // ***************************************************************************
@@ -4807,8 +4824,8 @@ std::string	toLower(const std::string &str)
 
 NL_FORCE_INLINE void appendToUpperAsUtf8(std::string &res, const char *str, ptrdiff_t &i)
 {
-	char c = str[i];
-	char d, e;
+	unsigned char c = str[i];
+	unsigned char d, e;
 	if (c < 0x80)
 	{
 		if (c >= 'a' && c <= 'z')
@@ -4827,7 +4844,7 @@ NL_FORCE_INLINE void appendToUpperAsUtf8(std::string &res, const char *str, ptrd
 			if (table[idx])
 			{
 				res += &table[idx];
-				++i;
+				i += 2;
 				return;
 			}
 		}
@@ -4845,13 +4862,14 @@ NL_FORCE_INLINE void appendToUpperAsUtf8(std::string &res, const char *str, ptrd
 				if (table[idx])
 				{
 					res += &table[idx];
-					i += 2;
+					i += 3;
 					return;
 				}
 			}
 		}
 	}
 	res += c;
+	++i;
 }
 
 // ***************************************************************************
@@ -4860,7 +4878,7 @@ std::string toUpper(const char *str)
 {
 	// UTF-8 toLower, tables generated from UTF-16 tables
 	std::string res;
-	for (ptrdiff_t i = 0; str[i]; ++i)
+	for (ptrdiff_t i = 0; str[i];)
 		appendToUpperAsUtf8(res, str, i);
 	return res;
 }
@@ -4873,9 +4891,247 @@ std::string	toUpper(const std::string &str)
 	std::string res;
 	res.reserve(str.size() + (str.size() >> 2));
 	const char *cstr = &str[0];
-	for (ptrdiff_t i = 0; i < (ptrdiff_t)str.size(); ++i)
+	for (ptrdiff_t i = 0; i < (ptrdiff_t)str.size();)
 		appendToUpperAsUtf8(res, cstr, i);
 	return res;
+}
+
+// ***************************************************************************
+
+void appendToUpper(std::string &res, const char *str, ptrdiff_t &i)
+{
+	appendToUpperAsUtf8(res, str, i);
+}
+
+// ***************************************************************************
+
+void appendToUpper(std::string &res, const std::string &str, ptrdiff_t &i)
+{
+	appendToUpperAsUtf8(res, &str[0], i);
+}
+
+// ***************************************************************************
+// ***************************************************************************
+// ***************************************************************************
+
+static const char s_UpperAscii[] = {
+	'A', 0, 'B', 0, 'C', 0, 'D', 0, 'E', 0, 'F', 0, 'G', 0, 
+	'H', 0, 'I', 0, 'J', 0, 'K', 0, 'L', 0, 'M', 0, 'N', 0, 
+	'O', 0, 'P', 0, 'Q', 0, 'R', 0, 'S', 0, 'T', 0, 'U', 0, 
+	'V', 0, 'W', 0, 'X', 0, 'Y', 0, 'Z', 0, 0, 0, 0, 0
+};
+
+const char *fetchToUpperAsUtf8(const char **str)
+{
+	unsigned char c = *(*str);
+	unsigned char d, e;
+	if (c < 0x80)
+	{
+		if (c >= 'a' && c <= 'z')
+		{
+			// 1-byte UTF-8
+			++(*str);
+			return &s_UpperAscii[(c - 'a') << 1];
+		}
+	}
+	else if ((c & 0xE0) == 0xC0 && ((d = (*str)[1]) & 0xC0) == 0x80)
+	{
+		// 2-byte UTF-8
+		const char *table = s_Utf8LowerToUpperTables[c & 0x1F];
+		if (table)
+		{
+			unsigned char idx = (d & 0x3F) << 2;
+			if (table[idx])
+			{
+				(*str) += 2;
+				return &table[idx];
+			}
+		}
+	}
+	else if ((c & 0xF0) == 0xE0 && ((d = (*str)[1]) & 0xC0) == 0x80 && ((e = (*str)[2]) & 0xC0) == 0x80)
+	{
+		// 3-byte UTF-8
+		const char **map = s_UtfLowerToUpperMap[c & 0x0F];
+		if (map)
+		{
+			const char *table = map[d & 0x3F];
+			if (table)
+			{
+				unsigned char idx = (d & 0x3F) << 2;
+				if (table[idx])
+				{
+					(*str) += 3;
+					return &table[idx];
+				}
+			}
+		}
+	}
+	return NULL;
+}
+
+int compareCaseInsensitive(const char *a, const char *b)
+{
+	// while (*a != 0 && *b != 0)
+	for (; ;)
+	{
+		const char *ca = fetchToUpperAsUtf8(&a);
+		const char *cb = fetchToUpperAsUtf8(&b);
+		if (!ca && !cb)
+		{
+			// Easy case, ASCII compare or junk
+			if (*a != *b)
+			{
+				if (*a > * b) return 1;
+				else return -1;
+			}
+			else if (!*a) // Equal and NUL, ends both
+			{
+				return 0;
+			}
+			++a;
+			++b;
+		}
+		else if (!cb)
+		{
+			// String a changed lowercase, iterate ca until NUL alongside b
+			nlassert(*ca);
+			do
+			{
+				if (*ca != *b)
+				{
+					if (*ca > *b) return 1;
+					else return -1;
+				}
+				++ca;
+				++b;
+			} while (*ca);
+		}
+		else if (!ca)
+		{
+			// String b changed lowercase, iterate a alongside cb until NUL
+			nlassert(*cb);
+			do
+			{
+				if (*a != *cb)
+				{
+					if (*a > *cb) return 1;
+					else return -1;
+				}
+				++a;
+				++cb;
+			} while (*cb);
+		}
+		else
+		{
+			// Both strings changed lowercase
+			if (ca != cb) // Only check if it's a different result
+			{
+				do
+				{
+					if (*ca != *cb)
+					{
+						if (*ca > *cb) return 1;
+						else return -1;
+					}
+					++ca;
+					++cb;
+				} while (*ca && *cb);
+			}
+		}
+	}
+	// if (*a == *b) return 0;
+	// if (*a > *b) return 1;
+	// return -1;
+}
+
+int compareCaseInsensitive(const char *a, size_t lenA, const char *b, size_t lenB)
+{
+	const char *ma = a + lenA;
+	const char *mb = b + lenB;
+	for (; ;)
+	{
+		if (a >= ma)
+		{
+			if (b >= mb)
+			{
+				return 0; // Both strings ended
+			}
+			else
+			{
+				return 1; // A is longer
+			}
+		}
+		if (b >= mb)
+		{
+			return -1; // B is longer
+		}
+		const char *ca = fetchToUpperAsUtf8(&a);
+		const char *cb = fetchToUpperAsUtf8(&b);
+		if (!ca && !cb)
+		{
+			// Easy case, ASCII compare or junk
+			if (*a != *b)
+			{
+				if (*a > * b) return 1;
+				else return -1;
+			}
+			/*
+			else if (!*a) // Equal and NUL, ends both
+			{
+				return 0;
+			}
+			*/
+			++a;
+			++b;
+		}
+		else if (!cb)
+		{
+			// String a changed lowercase, iterate ca until NUL alongside b
+			nlassert(*ca);
+			do
+			{
+				if (*ca != *b)
+				{
+					if (*ca > *b) return 1;
+					else return -1;
+				}
+				++ca;
+				++b;
+			} while (*ca);
+		}
+		else if (!ca)
+		{
+			// String b changed lowercase, iterate a alongside cb until NUL
+			nlassert(*cb);
+			do
+			{
+				if (*a != *cb)
+				{
+					if (*a > *cb) return 1;
+					else return -1;
+				}
+				++a;
+				++cb;
+			} while (*cb);
+		}
+		else
+		{
+			// Both strings changed lowercase
+			if (ca != cb) // Only check if it's a different result
+			{
+				do
+				{
+					if (*ca != *cb)
+					{
+						if (*ca > *cb) return 1;
+						else return -1;
+					}
+					++ca;
+					++cb;
+				} while (*ca && *cb);
+			}
+		}
+	}
 }
 
 // ***************************************************************************

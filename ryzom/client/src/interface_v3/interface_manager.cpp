@@ -358,7 +358,7 @@ public:
 					}
 					else
 					{
-						std::string name = UserEntity->getEntityName().toUtf8();
+						std::string name = UserEntity->getEntityName();
 						if (*it == 'P') name = toUpper(name);
 						formatedResult += name;
 					}
@@ -391,7 +391,7 @@ public:
 								}
 								else
 								{
-									botName = entity->getDisplayName().toUtf8();
+									botName = entity->getDisplayName();
 								}
 								CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(entity);
 								if (pChar != NULL)
@@ -405,7 +405,7 @@ public:
 					spprn.Woman = womanTitle;
 					spprn.cbIDStringReceived(sTitleTranslated);
 
-					botName = CEntityCL::removeTitleAndShardFromName(botName).toUtf8();
+					botName = CEntityCL::removeTitleAndShardFromName(botName);
 
 					// short name (with no title such as 'guard', 'merchant' ...)
 					if (*it == 's')
@@ -423,37 +423,6 @@ public:
 					}
 
 					formatedResult += botName;
-					break;
-				}
-				case '\'': // 's and 'S -> Potato’s Identity and TOMATOES’ IDENTITY
-				{
-					std::string::const_iterator it2 = it;
-					++it2;
-					if (it2 == inputString.end())
-					{
-						formatedResult += "$'";
-					}
-					else
-					{
-						it = it2;
-						if (*it == 's' || *it == 'S')
-						{
-							if (formatedResult.size() && (formatedResult[formatedResult.size() - 1] == 's' || formatedResult[formatedResult.size() - 1] == 'S'))
-							{
-								formatedResult += "\xE2\x80\x99"; // RIGHT SINGLE QUOTATION MARK
-							}
-							else
-							{
-								formatedResult += "\xE2\x80\x99"; // RIGHT SINGLE QUOTATION MARK
-								formatedResult += *it;
-							}
-						}
-						else
-						{
-							--it;
-							formatedResult += "$'";
-						}
-					}
 					break;
 				}
 				default:
@@ -4246,7 +4215,7 @@ bool CInterfaceManager::parseTokens(string& ucstr)
 			// Parse the parameter
 			if (token_param == "name")
 			{
-				string name = pTokenSubjectEntity->getDisplayName().toUtf8();
+				string name = pTokenSubjectEntity->getDisplayName();
 				// special case where there is only a title, very rare case for some NPC
 				if (name.empty())
 				{

@@ -1580,7 +1580,7 @@ namespace NLGUI
 
 		_ViewText->setParent( this );
 		_ViewText->setIdRecurse( "edit_text" );
-		_ViewText->setHardText( "" );
+		_ViewText->setTextLocalized( "", false );
 		_ViewText->setPosRef( Hotspot_ML );
 		_ViewText->setParentPosRef( Hotspot_ML );
 		addView( _ViewText );

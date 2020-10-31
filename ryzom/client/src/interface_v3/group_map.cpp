@@ -1201,7 +1201,7 @@ void CGroupMap::checkCoords()
 					CEntityCL *sel = EntitiesMngr.entity(UserEntity->selection());
 					if (sel)
 					{
-						_TargetLM->setDefaultContextHelp(NLMISC::CI18N::get("uiTargetTwoPoint") + sel->removeTitleAndShardFromName(sel->getEntityName()).toUtf8());
+						_TargetLM->setDefaultContextHelp(NLMISC::CI18N::get("uiTargetTwoPoint") + sel->removeTitleAndShardFromName(sel->getEntityName()));
 					}
 				}
 			}
@@ -1367,8 +1367,8 @@ void CGroupMap::checkCoords()
 
 				if (pSMC->getString(val,res))
 				{
-						res = CEntityCL::removeTitleAndShardFromName(res);
-						_TeammateLM[i]->setDefaultContextHelp(res.toUtf8());
+						std::string res2 = CEntityCL::removeTitleAndShardFromName(res.toUtf8());
+						_TeammateLM[i]->setDefaultContextHelp(res2);
 				}
 			}
 			updateLMPosFromDBPos(_TeammateLM[i], px, py);
@@ -2471,19 +2471,19 @@ void CGroupMap::createLMWidgets(const std::vector<CContLandMark> &lms)
 		NLMISC::CVector2f mapPos;
 		worldToMap(mapPos, rCLM.Pos);
 
-		const ucstring ucsTmp(CStringManagerClient::getPlaceLocalizedName(rCLM.TitleTextID));
-		const ucstring lcTitle = toLower(ucsTmp);
+		const char *ucsTmp = CStringManagerClient::getPlaceLocalizedName(rCLM.TitleTextID);
+		const std::string lcTitle = toLower(ucsTmp);
 
 		bool searchMatch = notWorldMode && _LandmarkFilter.size() > 0 && filterLandmark(lcTitle);
 		if (searchMatch)
-			_MatchedLandmarks.push_back(SMatchedLandmark(rCLM.Pos, ucsTmp, _ContinentLMOptions));
+			_MatchedLandmarks.push_back(SMatchedLandmark(rCLM.Pos, ucstring::makeFromUtf8(ucsTmp), _ContinentLMOptions));
 
 		// Add button if not a region nor a place
 		if ((rCLM.Type != CContLandMark::Region) && (rCLM.Type != CContLandMark::Place) &&
 			(rCLM.Type != CContLandMark::Street))
 		{
 			if (rCLM.Type != CContLandMark::Stable)
-				addLandMark(_ContinentLM, mapPos, ucsTmp, _ContinentLMOptions);
+				addLandMark(_ContinentLM, mapPos, ucstring::makeFromUtf8(ucsTmp), _ContinentLMOptions);
 			else
 				addLandMark(_ContinentLM, mapPos, CI18N::get("uiStable"), _ContinentLMOptions);
 			_ContinentLM.back()->Type = rCLM.Type;
@@ -2492,7 +2492,7 @@ void CGroupMap::createLMWidgets(const std::vector<CContLandMark> &lms)
 		else // just add a text
 		{
 			CLandMarkText *pNewText = new CLandMarkText(CViewBase::TCtorParam());
-			pNewText->setText(ucsTmp.toUtf8());
+			pNewText->setText(ucsTmp);
 			pNewText->Pos = mapPos;
 			pNewText->setParent(this);
 			pNewText->setParentPosRef(Hotspot_BL);

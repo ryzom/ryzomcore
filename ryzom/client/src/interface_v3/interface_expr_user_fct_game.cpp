@@ -1066,7 +1066,7 @@ static DECLARE_INTERFACE_USER_FCT(getOutpostName)
 
 	// get sheet name
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-	const std::string name = CUtfStringView(pSMC->getOutpostLocalizedName(CSheetId(nSheet))).toUtf8();
+	const char *name = pSMC->getOutpostLocalizedName(CSheetId(nSheet));
 
 	result.setString(name);
 
@@ -1093,7 +1093,7 @@ static DECLARE_INTERFACE_USER_FCT(getOutpostDesc)
 
 	// get sheet name
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-	const string name = CUtfStringView(pSMC->getOutpostLocalizedDescription(CSheetId(nSheet))).toUtf8();
+	const char *name = pSMC->getOutpostLocalizedDescription(CSheetId(nSheet));
 
 	result.setString(name);
 
@@ -1120,7 +1120,7 @@ static DECLARE_INTERFACE_USER_FCT(getOutpostBuildingName)
 
 	// get sheet name
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-	const string name = CUtfStringView(pSMC->getOutpostBuildingLocalizedName(CSheetId(nSheet))).toUtf8();
+	const char *name = pSMC->getOutpostBuildingLocalizedName(CSheetId(nSheet));
 
 	result.setString(name);
 
@@ -1146,18 +1146,18 @@ static DECLARE_INTERFACE_USER_FCT(getOutpostBuildingDesc)
 	}
 
 	// get sheet name
-	string name;
+	const char *name;
 	CEntitySheet *pSheet= SheetMngr.get(CSheetId(nSheet));
 	COutpostBuildingSheet *pOBS = dynamic_cast<COutpostBuildingSheet*>(pSheet);
 	if (pOBS && pOBS->OBType == COutpostBuildingSheet::OB_Empty)
 	{
 		// Don't display description if the building is an empty slot
-		name.clear();
+		name = "";
 	}
 	else
 	{
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-		name = CUtfStringView(pSMC->getOutpostBuildingLocalizedDescription(CSheetId(nSheet))).toUtf8();
+		name = pSMC->getOutpostBuildingLocalizedDescription(CSheetId(nSheet));
 	}
 
 
@@ -1186,7 +1186,7 @@ static DECLARE_INTERFACE_USER_FCT(getSquadName)
 
 	// get sheet name
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-	const string name = CUtfStringView(pSMC->getSquadLocalizedName(CSheetId(nSheet))).toUtf8();
+	const char *name = pSMC->getSquadLocalizedName(CSheetId(nSheet));
 
 	result.setString(name);
 
@@ -1213,7 +1213,7 @@ static DECLARE_INTERFACE_USER_FCT(getSquadDesc)
 
 	// get sheet name
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-	const string name = CUtfStringView(pSMC->getSquadLocalizedDescription(CSheetId(nSheet))).toUtf8();
+	const char *name = pSMC->getSquadLocalizedDescription(CSheetId(nSheet));
 
 	result.setString(name);
 

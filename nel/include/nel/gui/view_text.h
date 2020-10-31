@@ -84,8 +84,10 @@ namespace NLGUI
 
 		/// Set
 
-		void setText(const std::string &text); //< Not localized. Use setHardText to localize strings starting with "ui". TODO: Add a Localize flag, like title in group container. HardText then simply sets localize to true.
+		void setText(const std::string &text);
+		void setTextLocalized(const std::string &text, bool localized);
 		void setTextAsUtf16 (const ucstring &text);
+		void setLocalized(bool localized);
 		void setFontName (const std::string &name);
 		void setFontSize (sint nFontSize, bool coef = true);
 		void setEmbolden (bool nEmbolden);
@@ -114,9 +116,10 @@ namespace NLGUI
 		void disableStringSelection();
 
 		/// Get
-		std::string		getText() const { return _Text; }
+		std::string		getText() const { return _HardText.empty() ? _Text : _HardText; }
 		ucstring		getTextAsUtf16() const;
 		ucstring		getHardTextAsUtf16() const;
+		bool			isLocalized() const { return _Localized;  }
 		sint			getFontSize() const;
 		std::string		getFontName() const { return _FontName; }
 		bool			getEmbolden() 		{ return _Embolden; }
@@ -224,6 +227,7 @@ namespace NLGUI
 		REFLECT_EXPORT_START(CViewText, CViewBase)
 			REFLECT_STRING("text_raw", getText, setText);
 			REFLECT_STRING("hardtext", getHardText, setHardText);
+			REFLECT_BOOL ("localize", isLocalized, setLocalized);
 			// REFLECT_UCSTRING("uc_text", getTextAsUtf16, setTextAsUtf16); // Deprecate uc_ functions
 			REFLECT_UCSTRING("uc_hardtext", getHardTextAsUtf16, setHardTextAsUtf16);
 			REFLECT_UCSTRING("uc_hardtext_format", getTextAsUtf16, setTextFormatTagedAsUtf16); // FIXME: Name doesn't make sense
@@ -248,6 +252,7 @@ namespace NLGUI
 		std::string _HardText;
 		std::string _Text;
 		mutable sint _TextLength;
+		bool _Localized;
 		/// index of the computed String associated to this text control
 		uint _Index;
 		/// info on the computed String associated to this text control
@@ -442,6 +447,8 @@ namespace NLGUI
 	private:
 		void setup ();
 		void setupDefault ();
+
+		void setTextLocalized(const std::string &text);
 
 		void setStringSelectionSkipingSpace(uint stringId, const std::string &text, sint charStart, sint charEnd);
 

@@ -1276,7 +1276,7 @@ void CPeopleInterraction::addContactInList(uint32 contactId, const ucstring &nam
 	CPeopleList	&pl= nList==0?FriendList:IgnoreList;
 
 	// remove the shard name if possible
-	ucstring	name= CEntityCL::removeShardFromName(nameIn);
+	ucstring	name= CEntityCL::removeShardFromName(nameIn.toUtf8());
 
 	// add the contact to this list
 	sint index = pl.getIndexFromName(name);
@@ -1327,7 +1327,7 @@ bool CPeopleInterraction::isContactInList(const ucstring &nameIn, uint8 nList) c
 	// select correct people list
 	const CPeopleList	&pl= nList==0?FriendList:IgnoreList;
 	// remove the shard name if possible
-	ucstring	name= CEntityCL::removeShardFromName(nameIn);
+	ucstring	name= CEntityCL::removeShardFromName(nameIn.toUtf8());
 	return pl.getIndexFromName(name) != -1;
 }
 
@@ -2250,7 +2250,7 @@ public:
 						if (peopleList)
 						{
 							// don't add if it is the player name
-							if (!ClientCfg.Local && (UserEntity->getEntityName() == geb->getInputStringAsUtf16()))
+							if (!ClientCfg.Local && (UserEntity->getEntityName() == geb->getInputString()))
 							{
 								displayVisibleSystemMsg(CI18N::get("uiCantAddYourSelfInContactList"));
 							}

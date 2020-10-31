@@ -832,7 +832,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 				}
 				if (!senderName.empty())
 				{
-					CEntityCL *senderEntity = EntitiesMngr.getEntityByName (CEntityCL::removeTitleAndShardFromName(senderName), true, true);
+					CEntityCL *senderEntity = EntitiesMngr.getEntityByName (CEntityCL::removeTitleAndShardFromName(senderName.toUtf8()), true, true);
 					if (senderEntity)
 					{
 						if (senderEntity->Type != CEntityCL::Player)
@@ -845,7 +845,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 							}
 							else
 							{
-								CEntityCL *destEntity = EntitiesMngr.getEntityByName (CEntityCL::removeTitleAndShardFromName(playerName), false, true);
+								CEntityCL *destEntity = EntitiesMngr.getEntityByName (CEntityCL::removeTitleAndShardFromName(playerName.toUtf8()), false, true);
 								if (destEntity)
 								{
 									destEntity->removeStateFx();
@@ -866,7 +866,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		// if tell, bkup sendername
 		if (mode == CChatGroup::tell && windowVisible && !senderName.empty())
 		{
-			PeopleInterraction.LastSenderName = CEntityCL::removeTitleAndShardFromName(senderName);
+			PeopleInterraction.LastSenderName = CEntityCL::removeTitleAndShardFromName(senderName.toUtf8());
 		}
 	}
 
@@ -928,7 +928,7 @@ void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const u
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 	bool windowVisible;
 
-	ucstring goodSenderName = CEntityCL::removeTitleAndShardFromName(senderName);
+	ucstring goodSenderName = CEntityCL::removeTitleAndShardFromName(senderName.toUtf8());
 
 	// The sender part is up to and including the first ":" after the goodSenderName
 	ucstring::size_type pos = finalString.find(goodSenderName);
@@ -2299,11 +2299,9 @@ void impulsePhraseSend(NLMISC::CBitMemStream &impulse)
 void impulseStringResp(NLMISC::CBitMemStream &impulse)
 {
 	uint32 stringId;
-	string	strUtf8;
+	string	str;
 	impulse.serial(stringId);
-	impulse.serial(strUtf8);
-	ucstring str;
-	str.fromUtf8(strUtf8);
+	impulse.serial(str);
 
 	if (PermanentlyBanned) return;
 
@@ -3389,7 +3387,7 @@ private:
 
 public:
 	// called when the string is available
-	virtual void onDynStringAvailable(uint stringId, const ucstring &value)
+	virtual void onDynStringAvailable(uint stringId, const std::string &value)
 	{
 		// don't care if already displayed
 		if(_AlreadyDisplayed)

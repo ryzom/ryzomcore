@@ -111,6 +111,8 @@ namespace NLGUI
 		_ClampRight = true; // clamp on the right of the text
 		_OverflowText = "...";
 
+		_Localized = true;
+
 		_LetterColors = NULL;
 		_Setuped= false;
 		_AutoClampOffset = 0;
@@ -211,7 +213,7 @@ namespace NLGUI
 		_Index = 0xFFFFFFFF;
 
 		_ModulateGlobalColor= vt._ModulateGlobalColor;
-
+		_Localized = vt._Localized;
 
 		// remove previous lines
 		clearLines();
@@ -244,6 +246,11 @@ namespace NLGUI
 
 	std::string CViewText::getTextProperty( const std::string &name ) const
 	{
+		if( name == "localize" )
+		{
+			return toString(_Localized);
+		}
+		else
 		if( name == "color" )
 		{
 			return toString( _Color );
@@ -418,6 +425,18 @@ namespace NLGUI
 
 	bool CViewText::setTextProperty( const std::string &name, const std::string &value )
 	{
+		if( name == "localize" )
+		{
+			bool b;
+			if (fromString(value, b))
+			{
+				_Localized = b;
+				setTextLocalized(_HardText.empty() ? _Text : _HardText); // FIXME: setCase?
+				_TextLength = 0;
+			}
+			return true;
+		}
+		else
 		if( name == "color" )
 		{
 			CRGBA c;
@@ -649,28 +668,19 @@ namespace NLGUI
 			return true;
 		}
 		else
+		if( name == "text" )
+		{
+			setTextLocalized(value); // FIXME: setCase?
+			_TextLength = 0;
+			invalidateContent();
+			return true;
+		}
+		else
 		if( name == "hardtext" )
 		{
-#if 1
-			if (NLMISC::startsWith(value, "ui"))
-			{
-				_Text = CI18N::get(value);
-				_TextLength = 0;
-				_HardText = value;
-			}
-			else
-			{
-				_Text = value;
-				_TextLength = 0;
-				_HardText.clear();
-			}
-#else
-			_Text = value;
+			_Localized = true;
+			setTextLocalized(value); // FIXME: setCase?
 			_TextLength = 0;
-			_HardText.clear();
-			if (NLMISC::startsWith(value, "ui"))
-				_HardText = _Text;
-#endif
 			invalidateContent();
 			return true;
 		}
@@ -705,6 +715,8 @@ namespace NLGUI
 
 	bool CViewText::serializeTextOptions( xmlNodePtr node ) const
 	{
+		xmlSetProp( node, BAD_CAST "localize", BAD_CAST toString( _Localized ).c_str() );
+
 		xmlSetProp( node, BAD_CAST "color", BAD_CAST toString( _Color ).c_str() );
 		xmlSetProp( node, BAD_CAST "global_color", BAD_CAST toString( _ModulateGlobalColor ).c_str() );
 
@@ -784,7 +796,7 @@ namespace NLGUI
 
 		serializeTextOptions( node );
 
-		xmlSetProp( node, BAD_CAST "hardtext", BAD_CAST _Text.c_str() );
+		xmlSetProp( node, BAD_CAST "text", BAD_CAST (_HardText.empty() ? _Text.c_str() : _HardText.c_str()) );
 		xmlSetProp( node, BAD_CAST "hardtext_format", BAD_CAST _HardTextFormat.c_str() );
 
 		return node;
@@ -794,6 +806,9 @@ namespace NLGUI
 	void CViewText::parseTextOptions (xmlNodePtr cur)
 	{
 		CXMLAutoPtr prop;
+
+		prop = xmlGetProp (cur, (xmlChar*)"localize");
+		if (prop) _Localized = convertBool((const char*)prop);
 
 		prop= (char*) xmlGetProp( cur, (xmlChar*)"color" );
 		_Color = CRGBA(255,255,255,255);
@@ -1000,18 +1015,8 @@ namespace NLGUI
 		if (prop)
 		{
 			const char *propPtr = prop;
-			if (NLMISC::startsWith(propPtr, "ui"))
-			{
-				_HardText = propPtr;
-				_Text = CI18N::get(propPtr);
-				_TextLength = 0;
-			}
-			else
-			{
-				_HardText.clear();
-				_Text = propPtr;
-				_TextLength = 0;
-			}
+			_Localized = true;
+			setTextLocalized(propPtr);
 			setCase(_Text, _CaseMode);
 			_TextLength = 0;
 		}
@@ -1424,48 +1429,108 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::setText(const std::string &text)
+	void CViewText::setTextLocalized(const std::string &text, bool localized)
 	{
-		_HardText.clear();
-		// common case: no special format, no case mode => easy cache test
-		if (_FormatTags.empty() && _CaseMode==CaseNormal)
+		if (localized != _Localized)
 		{
-			if (text != _Text)
-			{
-				_Text = text;
-				_TextLength = 0;
-				// no need to call  "setCase (_Text, _CaseMode);"  since CaseNormal:
-				invalidateContent ();
-			}
+			_Localized = localized;
+
+			// Always recompute if localization and text changed
+			setTextLocalized(text);
+			setCase(_Text, _CaseMode);
+			_TextLength = 0;
+			invalidateContent();
 		}
 		else
 		{
-			// if the view text had some format before, no choice, must recompute all
-			if (!_FormatTags.empty())
+			setText(text);
+		}
+	}
+
+	// ***************************************************************************
+	void CViewText::setLocalized(bool localized)
+	{
+		if (localized != _Localized)
+		{
+			const std::string &text = _HardText.empty() ? _Text : _HardText;
+			_Localized = localized;
+			if (!text.empty() && NLMISC::startsWith(text, "ui"))
 			{
-				_Text = text;
-				setCase (_Text, _CaseMode);
+				setTextLocalized(text);
+				setCase(_Text, _CaseMode);
 				_TextLength = 0;
-				invalidateContent ();
-			}
-			// else test if after the case change the cache succeed
-			else
-			{
-				// compute the temp cased text
-				std::string tempText = text;
-				setCase (tempText, _CaseMode);
-				if (tempText != _Text)
-				{
-					_Text = tempText;
-					_TextLength = 0;
-					invalidateContent();
-				}
+				invalidateContent();
 			}
 		}
 
-		// clear format tags if any
-		_FormatTags.clear();
+		nlassert(_Text.empty() || ((_Localized && (NLMISC::startsWith(getText(), "ui"))) == (_HardText.empty() == _Text.empty())));
 	}
+
+	// ***************************************************************************
+	void CViewText::setTextLocalized(const std::string &text)
+	{
+		if (_Localized && NLMISC::startsWith(text, "ui"))
+		{
+			_HardText = text;
+			_Text = CI18N::get(text);
+		}
+		else
+		{
+			_Text = text;
+			_HardText.clear();
+		}
+	}
+
+	// ***************************************************************************
+    void CViewText::setText(const std::string &text)
+    {
+	    // common case: no special format, no case mode => easy cache test
+	    if (_FormatTags.empty() && _CaseMode == CaseNormal)
+	    {
+		    if (_HardText.empty() ? text != _Text : text != _HardText)
+		    {
+			    setTextLocalized(text);
+			    _TextLength = 0;
+			    // no need to call  "setCase (_Text, _CaseMode);"  since CaseNormal:
+			    invalidateContent();
+		    }
+	    }
+	    else
+	    {
+		    // if the view text had some format before, no choice, must recompute all
+		    if (!_FormatTags.empty())
+		    {
+			    setTextLocalized(text);
+			    setCase(_Text, _CaseMode);
+			    _TextLength = 0;
+			    invalidateContent();
+		    }
+		    // else test if after the case change the cache succeed
+		    else
+		    {
+			    // compute the temp cased text
+			    std::string holdText, holdHardText;
+			    holdText.swap(_Text);
+			    holdHardText.swap(_HardText);
+			    setTextLocalized(text);
+			    setCase(_Text, _CaseMode);
+			    if (holdText != _Text)
+			    {
+				    _TextLength = 0;
+				    invalidateContent();
+			    }
+			    else
+			    {
+				    holdText.swap(_Text);
+			    }
+		    }
+	    }
+
+		nlassert(_Text.empty() || ((_Localized && (NLMISC::startsWith(text, "ui"))) == (_HardText.empty() == _Text.empty())));
+
+	    // clear format tags if any
+	    _FormatTags.clear();
+    }
 
 	// ***************************************************************************
 	void CViewText::setFontSizing(const std::string &chars, const std::string &fallback)
@@ -2393,15 +2458,12 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::setHardText (const std::string &ht)
 	{
-		if (NLMISC::startsWith(ht, "ui"))
+		if (!_Localized)
 		{
-			setText(CI18N::get(ht));
-			_HardText = ht;
+			setText(std::string());
+			_Localized = true;
 		}
-		else
-		{
-			setText(ht);
-		}
+		setText(ht);
 	}
 
 	// ***************************************************************************
@@ -3364,6 +3426,7 @@ namespace NLGUI
 			// Copy to Text (preserve Memory)
 			contReset(_Text);
 			_Text = tempText;
+			_HardText.clear();
 			_TextLength = 0;
 
 			CInterfaceGroup *parent = getParent();
@@ -3474,6 +3537,7 @@ namespace NLGUI
 			// Copy to Text (preserve Memory)
 			contReset(_Text);
 			_Text = tempText;
+			_HardText.clear();
 			_TextLength = 0;
 			invalidateContent ();
 		}
@@ -3557,6 +3621,11 @@ namespace NLGUI
 		#define SERIAL_UINT(val) { uint32 tmp = (uint32) val; f.serial(tmp); val = (uint) tmp; }
 		#define SERIAL_SINT(val) { sint32 tmp = (sint32) val; f.serial(tmp); val = (sint) tmp; }
 		CViewBase::serial(f);
+
+		int version = f.serialVersion(101);
+		nlassert(version >= 100);
+
+		f.serial(_Localized);
 		SERIAL_SINT(_FontSize);
 		SERIAL_UINT(_FontWidth);
 		SERIAL_UINT(_FontHeight);

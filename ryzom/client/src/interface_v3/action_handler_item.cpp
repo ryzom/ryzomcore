@@ -161,7 +161,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 				else
 				{
 					if (itemInfo.CustomText.empty())
-						display->setTextFormatTaged(CUtfStringView(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id)).toUtf8());
+						display->setTextFormatTaged(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
 					else
 					{
 						ucstring text = itemInfo.CustomText;
@@ -299,7 +299,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 					{
 						// If we already have item info
 						if (itemInfo.CustomText.empty())
-							display->setTextFormatTaged(CUtfStringView(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id)).toUtf8());
+							display->setTextFormatTaged(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
 						else
 						{
 							ucstring text = itemInfo.CustomText;
@@ -1721,7 +1721,7 @@ void CItemMenuInBagInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet)
 		ucstring creatorNameString;
 		if( STRING_MANAGER::CStringManagerClient::instance()->getString ( itemInfo.CreatorName, creatorNameString) )
 		{
-			if (toLower(UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis) == toLower(creatorNameString))
+			if (   toLower(UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis) == toLower(creatorNameString.toUtf8()))
 				isCraftedByUserEntity = true;
 		}
 
@@ -1827,7 +1827,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 							ucstring creatorNameString;
 							if( STRING_MANAGER::CStringManagerClient::instance()->getString ( getInventory().getItemInfo(getInventory().getItemSlotId(pCS)).CreatorName, creatorNameString) )
 							{
-								if (toLower(UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis) == toLower(creatorNameString))
+								if (toLower(UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis) == toLower(creatorNameString.toUtf8()))
 									isTextEditionActive = true;
 							}
 						}

@@ -560,7 +560,7 @@ bool	buildCompassTargetFromTeamMember(CCompassTarget &ct, uint teamMemberId)
 		CStringManagerClient *pSMC = CStringManagerClient::instance();
 		ucstring name;
 		if (pSMC->getString(nameNode->getValue32(), name))
-			ct.Name = CEntityCL::removeTitleAndShardFromName(name); // TODO : dynamic support for name
+			ct.Name = CEntityCL::removeTitleAndShardFromName(name.toUtf8()); // TODO : dynamic support for name
 		else
 			ct.Name = CI18N::get("uiNotReceived");
 		return true;
@@ -1047,12 +1047,12 @@ REGISTER_ACTION_HANDLER( CHandlerSetCompassNorth, "set_compass_north");
 
 class CCompassDialogsStringCallback : public IStringWaitCallback
 {
-	virtual void onDynStringAvailable(uint /* stringId */, const ucstring &value)
+	virtual void onDynStringAvailable(uint /* stringId */, const std::string &value)
 	{
 		uint size = (uint)CCompassDialogsManager::getInstance()._Entries.size();
 		for ( uint i = 0; i < size; i++)
 		{
-			ucstring name;
+			std::string name;
 			if ( CStringManagerClient::instance()->getDynString(CCompassDialogsManager::getInstance()._Entries[i].Text, name) )
 			{
 				if ( value == name )

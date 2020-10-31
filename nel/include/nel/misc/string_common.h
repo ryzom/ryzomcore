@@ -254,9 +254,10 @@ inline bool fromString(const std::string &str, double &val) { bool ret = sscanf(
 inline bool fromString(const std::string &str, wchar_t &val) { return fromString(str, reinterpret_cast<uint16 &>(val)); }
 #endif
 
-// Fast string to bool, reliably defined for strings starting with 0, 1, t, T, f, F, y, Y, n, N, anything else is undefined.
-// (str[0] == '1' || (str[0] & 0xD2) == 0x50)
-//  - Kaetemi
+/// Fast string to bool, reliably defined for strings starting with 0, 1, t, T, f, F, y, Y, n, N, and empty strings, anything else is undefined.
+///  - Kaetemi
+inline bool toBool(const char *str) { return str[0] == '1' || (str[0] & 0xD2) == 0x50; }
+inline bool toBool(const std::string &str) { return toBool(str.c_str()); } // Safe because first byte may be null
 
 bool fromString(const std::string &str, bool &val);
 

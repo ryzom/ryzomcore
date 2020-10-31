@@ -336,7 +336,7 @@ void CGroupSkills::createAllTreeNodes()
 
 	// local variable (avoid realloc in loop)
 	vector< pair<string, string> > tempVec(2);
-	string	sSkillName;
+	const char *sSkillName;
 
 	while ((!bQuit) && (nCounter < 32)) // Counter is used to not infinitly loop
 	{
@@ -366,7 +366,7 @@ void CGroupSkills::createAllTreeNodes()
 			pNode->Id = NLMISC::toString(i);
 
 			// get Skill Name
-			sSkillName = CUtfStringView(STRING_MANAGER::CStringManagerClient::getSkillLocalizedName((SKILLS::ESkills)i)).toUtf8();
+			sSkillName = STRING_MANAGER::CStringManagerClient::getSkillLocalizedName((SKILLS::ESkills)i);
 
 			// just text or template?
 			if(_TemplateSkill.empty())

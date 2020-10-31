@@ -21,7 +21,7 @@ IF(WITH_RYZOM_CLIENT)
   ENDIF()
 
   FILE(GLOB CFG ../*.cfg)
-  FILE(GLOB SRC *.cpp *.h motion/*.cpp motion/*.h client.rc)
+  FILE(GLOB SRC *.cpp *.h motion/*.cpp motion/*.h client.rc *.manifest)
   FILE(GLOB SRC_INTERFACE interface_v3/*.h interface_v3/*.cpp)
   FILE(GLOB SRC_MODE motion/modes/*.cpp motion/modes/*.h)
   FILE(GLOB SRC_R2 r2/*.h r2/*.cpp r2/dmc/*.h r2/dmc/*.cpp)

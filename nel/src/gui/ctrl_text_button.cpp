@@ -597,12 +597,7 @@ namespace NLGUI
 			if (prop)
 			{
 				const char *propPtr = prop;
-				std::string text;
-				if (NLMISC::startsWith(propPtr, "ui"))
-					text = CI18N::get(propPtr);
-				else
-					text = propPtr;
-				_ViewText->setText(text);
+				_ViewText->setTextLocalized(propPtr, true);
 			}
 		}
 

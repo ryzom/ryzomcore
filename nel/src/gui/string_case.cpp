@@ -28,19 +28,19 @@
 
 namespace NLGUI
 {
-	inline bool isSeparator (u32char c)
+	inline bool isSeparator (char c)
 	{
-		return (c == (u32char)' ') || (c == (u32char)'\t') || (c == (u32char)'\n') || (c == (u32char)'\r');
+		return (c == ' ') || (c == '\t') || (c == '\n') || (c == '\r');
 	}
 
-	inline bool isEndSentence (u32char c, u32char lastChar)
+	inline bool isEndSentence (char c, char lastChar)
 	{
 		// Ex: One sentence. Another sentence.
 		//                  ^
 		// Counterexample: nevrax.com
 		//                       ^
-		return ((c == (u32char)' ') || (c == (u32char)'\n'))
-			&& (lastChar == (u32char)'.') || (lastChar == (u32char)'!') || (lastChar == (u32char)'?');
+		return ((c == ' ') || (c == '\n'))
+			&& ((lastChar == '.') || (lastChar == '!') || (lastChar == '?') || (lastChar == '\n'));
 	}
 
 	void setCase(std::string &str, TCaseMode mode)
@@ -60,85 +60,83 @@ namespace NLGUI
 			break;
 		case CaseFirstStringLetterUp:
 		{
-			NLMISC::CUtfStringView sv(str);
 			std::string res;
-			res.reserve(sv.largestSize());
-			for (NLMISC::CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it)
+			res.reserve(str.size() + (str.size() >> 2));
+			for (ptrdiff_t i = 0; i < (ptrdiff_t)str.size();)
 			{
-				u32char c = *it;
-				if (c < 0x10000)
+				char c = str[i];
+				if (!isSeparator(c))
 				{
-					if (!isSeparator(c))
-					{
-						if (newString)
-							c = NLMISC::toUpper((ucchar)c);
-						else
-							c = NLMISC::toLower((ucchar)c);
-						newString = false;
-					}
+					if (newString)
+						NLMISC::appendToUpper(res, str, i);
+					else
+						NLMISC::appendToLower(res, str, i);
+					newString = false;
 				}
-				NLMISC::CUtfStringView::append(res, c);
+				else
+				{
+					res += c;
+					++i;
+				}
 			}
-			str = nlmove(res);
+			str.swap(res);
 			break;
 		}
 		case CaseFirstSentenceLetterUp:
 		{
-			NLMISC::CUtfStringView sv(str);
 			std::string res;
-			res.reserve(sv.largestSize());
-			u32char lastChar = 0;
-			for (NLMISC::CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it)
+			res.reserve(str.size() + (str.size() >> 2));
+			char lastChar = 0;
+			for (ptrdiff_t i = 0; i < (ptrdiff_t)str.size();)
 			{
-				u32char c = *it;
-				if (c < 0x10000)
+				char c = str[i];
+				if (isEndSentence(c, lastChar))
 				{
-					if (isEndSentence(c, lastChar))
-						newSentence = true;
-					else
-					{
-						if (newSentence)
-							c = NLMISC::toUpper((ucchar)c);
-						else
-							c = NLMISC::toLower((ucchar)c);
-
-						if (!isSeparator(c))
-							newSentence = false;
-					}
+					newSentence = true;
+					res += c;
+					++i;
 				}
-				NLMISC::CUtfStringView::append(res, c);
+				else
+				{
+					if (newSentence)
+						NLMISC::appendToUpper(res, str, i);
+					else
+						NLMISC::appendToLower(res, str, i);
+
+					if (!isSeparator(c))
+						newSentence = false;
+				}
 				lastChar = c;
 			}
-			str = nlmove(res);
+			str.swap(res);
 			break;
 		}
 		case CaseFirstWordLetterUp:
 		{
-			NLMISC::CUtfStringView sv(str);
 			std::string res;
-			res.reserve(sv.largestSize());
-			u32char lastChar = 0;
-			for (NLMISC::CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it)
+			res.reserve(str.size() + (str.size() >> 2));
+			char lastChar = 0;
+			for (ptrdiff_t i = 0; i < (ptrdiff_t)str.size();)
 			{
-				u32char c = *it;
-				if (c < 0x10000)
+				char c = str[i];
+				if (isSeparator(c) || isEndSentence(c, lastChar))
 				{
-					if (isSeparator(c) || isEndSentence(c, lastChar))
-						newWord = true;
-					else
-					{
-						if (newWord)
-							c = NLMISC::toUpper((ucchar)c);
-						else
-							c = NLMISC::toLower((ucchar)c);
-
-						newWord = false;
-					}
+					newWord = true;
+					res += c;
+					++i;
 				}
-				NLMISC::CUtfStringView::append(res, c);
+				else
+				{
+					if (newWord)
+						NLMISC::appendToUpper(res, str, i);
+					else
+						NLMISC::appendToLower(res, str, i);
+
+					newWord = false;
+				}
 				lastChar = c;
 			}
-			str = nlmove(res);
+			str.swap(res);
 			break;
 		}
 		default:

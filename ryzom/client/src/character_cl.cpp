@@ -811,7 +811,7 @@ bool CCharacterCL::build(const CEntitySheet *sheet)	// virtual
 		// Get the fauna name in the sheet
 		const ucstring creatureName(STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(_Sheet->Id));
 		if (creatureName.find(ucstring("<NotExist:")) != 0)
-			_EntityName = creatureName;
+			_EntityName = creatureName.toUtf8();
 	}
 	else
 	{

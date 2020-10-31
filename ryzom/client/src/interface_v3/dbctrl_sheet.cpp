@@ -3379,7 +3379,7 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 	{
 		// just show the name of the skill
 		// the sheet id is interpreted as a skill enum
-		help= CUtfStringView(STRING_MANAGER::CStringManagerClient::getSkillLocalizedName( (SKILLS::ESkills)_SheetId.getSInt32() )).toUtf8();
+		help= STRING_MANAGER::CStringManagerClient::getSkillLocalizedName( (SKILLS::ESkills)_SheetId.getSInt32() );
 	}
 	else if(getType() == CCtrlSheetInfo::SheetType_Macro)
 	{
@@ -3479,7 +3479,7 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 		CSBrickManager	*pBM= CSBrickManager::getInstance();
 		CSBrickSheet	*brick= pBM->getBrick(CSheetId(getSheetId()));
 		if(brick)
-			help= CUtfStringView(STRING_MANAGER::CStringManagerClient::getSBrickLocalizedName(brick->Id)).toUtf8();
+			help= STRING_MANAGER::CStringManagerClient::getSBrickLocalizedName(brick->Id);
 		else
 			help= _ContextHelp;
 	}
@@ -3543,7 +3543,7 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 	{
 		CSPhraseSheet	*phrase= dynamic_cast<CSPhraseSheet*>(SheetMngr.get(CSheetId(getSheetId())));
 		if(phrase)
-			help= CUtfStringView(STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedName(phrase->Id)).toUtf8();
+			help= STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedName(phrase->Id);
 		else
 			help= _ContextHelp;
 	}
@@ -3551,7 +3551,7 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 	{
 		const COutpostBuildingSheet *outpost = asOutpostBuildingSheet();
 		if (outpost)
-			help = CUtfStringView(CStringManagerClient::getOutpostBuildingLocalizedName(CSheetId(_SheetId.getSInt32()))).toUtf8();
+			help = CStringManagerClient::getOutpostBuildingLocalizedName(CSheetId(_SheetId.getSInt32()));
 		else
 			help = _ContextHelp;
 	}
