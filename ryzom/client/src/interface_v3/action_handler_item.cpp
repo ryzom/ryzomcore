@@ -161,9 +161,8 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 				}
 				else
 				{
-					ucstring localDesc = ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
 					if (itemInfo.CustomText.empty())
-						display->setTextFormatTaged(localDesc.toUtf8());
+						display->setTextFormatTaged(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
 					else
 					{
 						ucstring text = itemInfo.CustomText;
@@ -305,9 +304,8 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 					// Finish the display or add the waiter
 					if (getInventory().isItemInfoUpToDate(ItemSlotId))
 					{
-						ucstring localDesc = ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
 						if (itemInfo.CustomText.empty())
-							display->setTextFormatTaged(localDesc.toUtf8());
+							display->setTextFormatTaged(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
 						else
 						{
 							ucstring text = itemInfo.CustomText;

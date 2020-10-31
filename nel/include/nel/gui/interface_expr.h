@@ -68,6 +68,7 @@ namespace NLGUI
 		void               setInteger(sint64 value) { clean(); _Type = Integer; _IntegerValue = value; }
 		void               setDouble(double value) { clean(); _Type = Double; _DoubleValue = value; }
 		void               setString(const std::string &value) { clean(); _Type = String; _StringValue = value; }
+		void               setString(const char *value) { clean(); _Type = String; _StringValue = value; }
 		void			   setRGBA(NLMISC::CRGBA value) { clean(); _Type = RGBA; _RGBAValue = (uint32)(value.R+(value.G<<8)+(value.B<<16)+(value.A<<24)); }
 		void               setUserType(CInterfaceExprUserType *value);
 		// reset this object to initial state (no type)

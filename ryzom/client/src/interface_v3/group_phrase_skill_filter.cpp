@@ -225,7 +225,7 @@ void	CGroupPhraseSkillFilter::rebuild()
 			// just text
 			pNode->DisplayText = true;
 			pNode->Template = NULL;
-			pNode->Text = CUtfStringView(STRING_MANAGER::CStringManagerClient::getSkillLocalizedName((SKILLS::ESkills)i)).toUtf8();
+			pNode->Text = STRING_MANAGER::CStringManagerClient::getSkillLocalizedName((SKILLS::ESkills)i);
 
 			// Action handler?
 			if(!_AHCtrlNode.empty())

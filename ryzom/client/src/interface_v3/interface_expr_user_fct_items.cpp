@@ -320,8 +320,8 @@ static DECLARE_INTERFACE_USER_FCT(getSheetName)
 	else
 	{
 		const CItemSheet *itemSheet = getItemSheet(args);
-		string tmp;
-		if (itemSheet != NULL) tmp = CUtfStringView(STRING_MANAGER::CStringManagerClient::getItemLocalizedName(itemSheet->Id)).toUtf8();
+		const char *tmp = "";
+		if (itemSheet != NULL) tmp = STRING_MANAGER::CStringManagerClient::getItemLocalizedName(itemSheet->Id);
 		result.setString(tmp);
 		return true;
 	}
@@ -346,8 +346,8 @@ static DECLARE_INTERFACE_USER_FCT(getItemTranslatedName)
 		return false;
 	}
 
-	string tmp;
-	tmp = CUtfStringView(STRING_MANAGER::CStringManagerClient::getItemLocalizedName(sheet)).toUtf8();
+	const char *tmp = "";
+	tmp = STRING_MANAGER::CStringManagerClient::getItemLocalizedName(sheet);
 	result.setString(tmp);
 	return true;
 }

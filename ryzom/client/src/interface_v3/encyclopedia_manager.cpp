@@ -360,18 +360,15 @@ void CEncyclopediaManager::rebuildThemaPage(uint32 themaName)
 	{
 		if (pES->type() == CEntitySheet::ITEM)
 		{
-			CUtfStringView desc(pSMC->getItemLocalizedDescription(CSheetId(pThema->RewardSheet)));
-			pRBVT->setText(desc.toUtf8());
+			pRBVT->setText(pSMC->getItemLocalizedDescription(CSheetId(pThema->RewardSheet)));
 		}
 		else if (pES->type() == CEntitySheet::SBRICK)
 		{
-			CUtfStringView desc(pSMC->getSBrickLocalizedDescription(CSheetId(pThema->RewardSheet)));
-			pRBVT->setText(desc.toUtf8());
+			pRBVT->setText(pSMC->getSBrickLocalizedDescription(CSheetId(pThema->RewardSheet)));
 		}
 		else if (pES->type() == CEntitySheet::SPHRASE)
 		{
-			CUtfStringView desc(pSMC->getSPhraseLocalizedDescription(CSheetId(pThema->RewardSheet)));
-			pRBVT->setText(desc.toUtf8());
+			pRBVT->setText(pSMC->getSPhraseLocalizedDescription(CSheetId(pThema->RewardSheet)));
 		}
 	}
 

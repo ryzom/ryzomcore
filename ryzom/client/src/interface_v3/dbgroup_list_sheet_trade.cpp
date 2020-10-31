@@ -269,7 +269,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 		if (pOBS != NULL)
 		{
 			STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-			text += string("\n") + CUtfStringView(pSMC->getOutpostBuildingLocalizedDescription(CSheetId(Ctrl->getSheetId()))).toUtf8();
+			text += string("\n") + pSMC->getOutpostBuildingLocalizedDescription(CSheetId(Ctrl->getSheetId()));
 			text += "\n" + CI18N::get("uiBotChatPrice") + NLMISC::formatThousands(toString(pOBS->CostDapper));
 			text += CI18N::get("uiBotChatTime") + toString(pOBS->CostTime/60) + CI18N::get("uiBotChatTimeMinute");
 			if ((pOBS->CostTime % 60) != 0)

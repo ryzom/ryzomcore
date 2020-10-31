@@ -531,10 +531,9 @@ void CGroupInSceneBubbleManager::addSkillPopup (uint skillId, sint delta, uint t
 	if (group)
 	{
 		// Skill name
-		CUtfStringView sSkillName(STRING_MANAGER::CStringManagerClient::getSkillLocalizedName((SKILLS::ESkills)skillId));
 		CViewText *pViewSkillName = dynamic_cast<CViewText*>(group->getView("name"));
 		if (pViewSkillName != NULL)
-			pViewSkillName->setText (sSkillName.toUtf8());
+			pViewSkillName->setText (STRING_MANAGER::CStringManagerClient::getSkillLocalizedName((SKILLS::ESkills)skillId));
 
 		// Skill value
 		CCDBNodeLeaf *skillLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SKILLS:"+toString(skillId)+":BaseSKILL", false);
