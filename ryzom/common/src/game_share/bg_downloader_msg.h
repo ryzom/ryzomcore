@@ -137,7 +137,7 @@ extern const wchar_t *DownloaderMutexName;
 
 
 // get patch written size in megabytes
-ucstring getWrittenSize(uint32 nSize);
+std::string getWrittenSize(uint32 nSize);
 
 std::string toString(TMsgType msgType);
 

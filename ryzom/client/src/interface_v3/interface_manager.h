@@ -310,7 +310,7 @@ public:
 	 *  The help button with open a browser on ryzom.com faq
 	 *	ui:interface:message_box_with_help must be defined in xml, with a "text" ViewText son
 	 */
-	void	messageBoxWithHelp(const ucstring &text, const std::string &masterGroup="ui:interface",
+	void	messageBoxWithHelp(const std::string &text, const std::string &masterGroup="ui:interface",
 							   const std::string &ahOnOk = std::string(), const std::string &paramsOnOk= std::string(),
 							   TCaseMode caseMode = CaseFirstSentenceLetterUp);
 

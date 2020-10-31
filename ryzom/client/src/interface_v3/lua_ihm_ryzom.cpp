@@ -527,9 +527,9 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		luabind::def("messageBox", (void(*)(const ucstring &, const std::string &)) &messageBox),
 		luabind::def("messageBox", (void(*)(const ucstring &, const std::string &, int caseMode)) &messageBox),
 		luabind::def("messageBox", (void(*)(const std::string &)) &messageBox),
-		luabind::def("messageBoxWithHelp", (void(*)(const ucstring &)) &messageBoxWithHelp),
-		luabind::def("messageBoxWithHelp", (void(*)(const ucstring &, const std::string &)) &messageBoxWithHelp),
-		luabind::def("messageBoxWithHelp", (void(*)(const ucstring &, const std::string &, int caseMode)) &messageBoxWithHelp),
+		luabind::def("messageBoxWithHelp", (void(*)(const ucstring &)) &messageBoxWithHelp), // TODO: Lua UTF-8
+		luabind::def("messageBoxWithHelp", (void(*)(const ucstring &, const std::string &)) &messageBoxWithHelp), // TODO: Lua UTF-8
+		luabind::def("messageBoxWithHelp", (void(*)(const ucstring &, const std::string &, int caseMode)) &messageBoxWithHelp), // TODO: Lua UTF-8
 		luabind::def("messageBoxWithHelp", (void(*)(const std::string &)) &messageBoxWithHelp),
 		LUABIND_FUNC(replacePvpEffectParam),
 		LUABIND_FUNC(secondsSince1970ToHour),
@@ -2929,23 +2929,23 @@ void		CLuaIHMRyzom::messageBox(const std::string &text)
 }
 
 // ***************************************************************************
-void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text)
+void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text) // TODO: Lua UTF-8
 {
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBoxWithHelp(text);
+	pIM->messageBoxWithHelp(text.toUtf8());
 }
 
 // ***************************************************************************
-void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text, const std::string &masterGroup)
+void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text, const std::string &masterGroup) // TODO: Lua UTF-8
 {
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBoxWithHelp(text, masterGroup);
+	pIM->messageBoxWithHelp(text.toUtf8(), masterGroup);
 }
 
 // ***************************************************************************
-void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text, const std::string &masterGroup, int caseMode)
+void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text, const std::string &masterGroup, int caseMode) // TODO: Lua UTF-8
 {
 	if (caseMode < 0 || caseMode >= CaseCount)
 	{
@@ -2954,7 +2954,7 @@ void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text, const std::string &
 
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBoxWithHelp(text, masterGroup, "" , "", (TCaseMode) caseMode);
+	pIM->messageBoxWithHelp(text.toUtf8(), masterGroup, "" , "", (TCaseMode) caseMode);
 }
 
 // ***************************************************************************

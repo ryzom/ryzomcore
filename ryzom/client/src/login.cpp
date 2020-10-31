@@ -243,7 +243,7 @@ void createOptionalCatUI()
 			pVT = dynamic_cast<CViewText*>(pNewLine->getView("size"));
 			if (pVT != NULL)
 			{
-				pVT->setText(BGDownloader::getWrittenSize(InfoOnPatch.OptCat[i].Size).toUtf8());
+				pVT->setText(BGDownloader::getWrittenSize(InfoOnPatch.OptCat[i].Size));
 			}
 
 			// Add to the list
@@ -467,8 +467,8 @@ void loginMainLoop()
 			bool res = false;
 			BGDownloader::TTaskResult taskResult = BGDownloader::TaskResult_Unknown;
 			bool finished = false;
-			ucstring bgDownloaderError;
 #ifdef RYZOM_BG_DOWNLOADER
+			string bgDownloaderError;
 			if (isBGDownloadEnabled())
 			{
 				finished = bgDownloader.isTaskEnded(taskResult, bgDownloaderError);
@@ -657,7 +657,7 @@ void loginMainLoop()
 				totalPatchSize = bgDownloader.getTotalSize();
 				BGDownloader::TTaskResult taskResult;
 				bool finished = false;
-				ucstring bgDownloaderError;
+				string bgDownloaderError;
 				finished = bgDownloader.isTaskEnded(taskResult, bgDownloaderError);
 				if (finished)
 				{
@@ -670,8 +670,8 @@ void loginMainLoop()
 
 					if (taskResult == BGDownloader::TaskResult_Error)
 					{
-						setPatcherStateText("ui:login:patching", ucstring());
-						setPatcherProgressText("ui:login:patching", ucstring());
+						setPatcherStateText("ui:login:patching", string());
+						setPatcherProgressText("ui:login:patching", string());
 
 						if (!fatalMessageBoxShown)
 						{
@@ -723,10 +723,10 @@ void loginMainLoop()
 			}
 
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TOTAL_SIZE_PATCH));
-			ucstring sTmp;
+			string sTmp;
 			sTmp = BGDownloader::getWrittenSize(currentPatchingSize);
 			sTmp += " / " + BGDownloader::getWrittenSize(totalPatchSize);
-			if (pVT != NULL) pVT->setText(sTmp.toUtf8());
+			if (pVT != NULL) pVT->setText(sTmp);
 		}
 //		else if (screen == UI_VARIABLES_SCREEN_CATDISP) // If we are displaying patch info
 		else if (LoginSM.getCurrentState() == CLoginStateMachine::st_display_cat)
@@ -775,10 +775,10 @@ void loginMainLoop()
 			// Total size of the patches is optional cats + required cat (f(optCat)) + non opt cat
 
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TOTAL_SIZE));
-			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(TotalPatchSize).toUtf8());
+			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(TotalPatchSize));
 
 			pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_NON_OPTIONAL_SIZE));
-			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(nNonOptSize).toUtf8());
+			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(nNonOptSize));
 		}
 	}
 }
@@ -802,7 +802,7 @@ void initLoginScreen()
 
 	// version
 	std::string ext;
-	if (ClientApp.find("ryzom_") != ucstring::npos)
+	if (ClientApp.find("ryzom_") != string::npos)
 		ext = " (" + ClientApp.substr(6) + ")";
 
 	CViewText *pV = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:ver_value"));
@@ -1878,7 +1878,7 @@ class CAHReboot : public IActionHandler
 		}
 		catch (const std::exception &e)
 		{
-			im->messageBoxWithHelp(ucstring::makeFromUtf8(e.what()), "ui:login", "login_quit");
+			im->messageBoxWithHelp(e.what(), "ui:login", "login_quit");
 		}
 	}
 };
@@ -2354,10 +2354,6 @@ inline string parseTooltip(const string & initString, const string & tagName)
 		tooltip = tooltip.substr(0, tooltip.find("<"));
 	}
 
-	ucstring uc;
-	uc.fromUtf8(tooltip);;
-	tooltip = uc.toString();
-
 	return tooltip;
 }
 
@@ -2376,10 +2372,6 @@ inline string parseCommentError(const string & initString, const string & tagNam
 		// end of comment
 		error = error.substr(0, error.find("<"));
 	}
-
-	ucstring uc;
-	uc.fromUtf8(error);;
-	error = uc.toString();
 
 	return error;
 }
@@ -3304,7 +3296,7 @@ void loginIntro()
 		if (i != 0)
 		{
 			beginLoading(IntroNVidia);
-			ucstring nmsg("");
+			string nmsg("");
 			ProgressBar.newMessage (nmsg);
 		}
 
@@ -3330,7 +3322,7 @@ void loginIntro()
 				Driver->AsyncListener.isKeyPushed (KeySPACE))
 				break;
 
-			const ucstring nmsg("");
+			const string nmsg("");
 			ProgressBar.newMessage (nmsg);
 			IngameDbMngr.flushObserverCalls();
 			NLGUI::CDBManager::getInstance()->flushObserverCalls();

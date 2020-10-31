@@ -879,7 +879,7 @@ NLMISC::CRGBA interpClientCfgColor(const string &src, string &dest)
 		if (src[0] == '&')
 		{
 			string::size_type nextPos = src.find('&', 1);
-			if (nextPos != ucstring::npos)
+			if (nextPos != string::npos)
 			{
 				std::string colorCode;
 				colorCode.resize(nextPos - 1);
@@ -980,7 +980,7 @@ std::string getStringCategoryIfAny(const string &src, string &dest)
 
 
 // ***************************************************************************
-sint ucstrnicmp(const ucstring &s0, uint p0, uint n0, const ucstring &s1)
+sint ucstrnicmp(const ucstring &s0, uint p0, uint n0, const ucstring &s1) // OLD
 {
 	// start
 	const ucchar	*start1= s1.c_str();

@@ -4340,7 +4340,7 @@ NLMISC_COMMAND(testDuelInvite, "","")
 //{
 //	uint32 index;
 //	fromString(args[0], index);
-//	ucstring ucstr = args[1];
+//	ucstring ucstr = args[1]; // OLD
 //
 //	vector<bool> code;
 //

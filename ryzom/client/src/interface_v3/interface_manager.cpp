@@ -2413,7 +2413,7 @@ void	CInterfaceManager::messageBox(const ucstring &text, const string &masterGro
 
 
 // ------------------------------------------------------------------------------------------------
-void CInterfaceManager::messageBoxWithHelp(const ucstring &text, const std::string &masterGroup,
+void CInterfaceManager::messageBoxWithHelp(const std::string &text, const std::string &masterGroup,
 										   const std::string &ahOnOk, const std::string &paramsOnOk,
 										   TCaseMode caseMode)
 {
