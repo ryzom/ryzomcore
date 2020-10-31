@@ -1178,9 +1178,9 @@ bool CStringManagerClient::checkWordFileDates(vector<CFileCheck> &fileChecks, co
 // ***************************************************************************
 void CStringManagerClient::initI18NSpecialWords(const string &languageCode)
 {
-	ucstring womenNameColIdent = "women_name";
-	ucstring descColIdent = "description";
-	ucstring descColIdent2 = "description2";
+	ucstring womenNameColIdent = ucstring("women_name");
+	ucstring descColIdent = ucstring("description");
+	ucstring descColIdent2 = ucstring("description2");
 
 	// List of words to append to the local CI18N system.
 	static const char	*specialWords[]=
