@@ -564,7 +564,7 @@ void checkUnderCursor()
 					
 					cursor->setCursor("r2ed_tool_select_move_over.tga");
 					InstanceId = instance_idx;
-					if (ContextCur.context("ARKITECT", 0.f, ucstring("Edit")))
+					if (ContextCur.context("ARKITECT", 0.f, "Edit"))
 						return;
 				}
 				else
