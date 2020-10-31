@@ -157,7 +157,7 @@ class CStringPostProcessRemoveName : public CInterfaceManager::IStringProcess
 public:
 	CStringPostProcessRemoveName():Woman(false) {}
 	bool Woman;
-	bool cbIDStringReceived(ucstring &inOut);
+	bool cbIDStringReceived(std::string &inOut);
 };
 
 // ***************************************************************************
@@ -165,7 +165,7 @@ public:
 class CStringPostProcessRemoveTitle : public CInterfaceManager::IStringProcess
 {
 public:
-	bool cbIDStringReceived(ucstring &inOut);
+	bool cbIDStringReceived(std::string &inOut);
 };
 
 // ***************************************************************************
@@ -173,7 +173,7 @@ public:
 class CStringPostProcessNPCRemoveTitle : public CInterfaceManager::IStringProcess
 {
 public:
-	bool cbIDStringReceived(ucstring &inOut);
+	bool cbIDStringReceived(std::string &inOut);
 };
 
 

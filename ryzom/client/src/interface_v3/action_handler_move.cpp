@@ -441,7 +441,7 @@ class CAHToggleDodgeParry : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		ucstring msg;
+		string msg;
 		// 0 - dodge mode
 		// 1 - parry mode
 		if (NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DEFENSE:DEFENSE_MODE")->getValue32() == 0)

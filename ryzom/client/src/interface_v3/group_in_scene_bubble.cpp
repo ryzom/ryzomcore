@@ -456,7 +456,7 @@ void CGroupInSceneBubbleManager::update ()
 	{
 		if (_DynBubbles[i].DescWaiting != 0)
 		{
-			ucstring res;
+			string res;
 			STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 			if (pSMC->getDynString(_DynBubbles[i].DescWaiting,res))
 			{
@@ -488,7 +488,7 @@ void CGroupInSceneBubbleManager::update ()
 
 // ***************************************************************************
 
-CGroupInSceneBubble *CGroupInSceneBubbleManager::newBubble (const ucstring &text)
+CGroupInSceneBubble *CGroupInSceneBubbleManager::newBubble (const string &text)
 {
 	if (!text.empty() && !_Bubbles.empty())
 	{
@@ -576,7 +576,7 @@ void CGroupInSceneBubbleManager::addSkillPopup (uint skillId, sint delta, uint t
 
 // ***************************************************************************
 
-void CGroupInSceneBubbleManager::addMessagePopup (const ucstring &message, CRGBA color, uint time)
+void CGroupInSceneBubbleManager::addMessagePopup (const string &message, CRGBA color, uint time)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -599,7 +599,7 @@ void CGroupInSceneBubbleManager::addMessagePopup (const ucstring &message, CRGBA
 		CViewText *pViewName = dynamic_cast<CViewText*>(group->getView("name"));
 		if (pViewName != NULL)
 		{
-			pViewName->setText (message.toUtf8());
+			pViewName->setText (message);
 			pViewName->setColor (color);
 		}
 
@@ -625,7 +625,7 @@ void CGroupInSceneBubbleManager::addMessagePopup (const ucstring &message, CRGBA
 
 // ***************************************************************************
 
-void CGroupInSceneBubbleManager::addMessagePopupCenter (const ucstring &message, CRGBA color, uint time)
+void CGroupInSceneBubbleManager::addMessagePopupCenter (const string &message, CRGBA color, uint time)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -648,7 +648,7 @@ void CGroupInSceneBubbleManager::addMessagePopupCenter (const ucstring &message,
 		CViewText *pViewName = dynamic_cast<CViewText*>(group->getView("name"));
 		if (pViewName != NULL)
 		{
-			pViewName->setTextFormatTaged(message.toUtf8());
+			pViewName->setTextFormatTaged(message);
 			pViewName->setColor (color);
 		}
 
@@ -757,9 +757,9 @@ CGroupInSceneBubbleManager::CPopupContext *CGroupInSceneBubbleManager::buildCont
 
 // ***************************************************************************
 
-void CGroupInSceneBubbleManager::addContextHelp (const ucstring &message, const string &targetName, uint time)
+void CGroupInSceneBubbleManager::addContextHelp (const string &message, const string &targetName, uint time)
 {
-	std::string finalMessage = message.toUtf8();
+	std::string finalMessage = message;
 	CInterfaceElement *target;
 	CPopupContext *context = CGroupInSceneBubbleManager::buildContextHelp ("context_help_", targetName, target, time);
 	if (context)
@@ -835,7 +835,7 @@ void CGroupInSceneBubbleManager::ignoreContextHelp (CInterfaceGroup *groupToRemo
 
 // ***************************************************************************
 
-void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const ucstring &ucsText, uint bubbleTimer)
+void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const std::string &ucsText, uint bubbleTimer)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -1065,9 +1065,7 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 
 	// Update the bubble's texts
 
-	ucstring ucText;
-	ucText.fromUtf8(text);
-	bubble->setText(ucText);
+	bubble->setText(text);
 	id = bubble->getId() + ":header_opened:window:";
 	CViewText *pVT;
 	CCtrlLink *pCL;
@@ -1092,9 +1090,8 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 		if (pVT != NULL)
 		{
 			pVT->setActive(true);
-			ucstring optionText;
-			optionText.fromUtf8(strs[j]);
-			pVT->setText(optionText.toUtf8());
+			string optionText = strs[j];
+			pVT->setText(optionText);
 			pCL = dynamic_cast<CCtrlLink*>(bubble->getElement(id+"optb"+toString(j)));
 			if (pCL != NULL)
 			{
@@ -1317,14 +1314,14 @@ class CAHDynChatClickOption : public IActionHandler
 		if (isBGDownloadEnabled())
 		{
 			STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-			ucstring result;
+			string result;
 			if (!pSMC->getDynString(optStrId, result))
 			{
 				return; // shouldn't happen since the button isn't visible as long as the text has not been received ...
 			}
 			static volatile bool forceWarning = false; // for debug
-			ucstring::size_type	pos= result.find(ucstring("{ros_exit}"));
-			if(pos != ucstring::npos || forceWarning)
+			string::size_type	pos= result.find("{ros_exit}");
+			if(pos != string::npos || forceWarning)
 			{
 				if (AvailablePatchs != 0)
 				{
@@ -1334,7 +1331,7 @@ class CAHDynChatClickOption : public IActionHandler
 			}
 		}
 
-		const string sMsg = "BOTCHAT:DYNCHAT_SEND";
+		static const string sMsg = "BOTCHAT:DYNCHAT_SEND";
 		CBitMemStream out;
 		if(GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 		{
@@ -1425,19 +1422,19 @@ void CGroupInSceneBubble::unlink ()
 
 // ***************************************************************************
 
-void CGroupInSceneBubble::setText (const ucstring &text)
+void CGroupInSceneBubble::setText (const string &text)
 {
 	if (text.empty()) return;
 	_TextParts.clear();
 
 	// Look for "{break}" in the message
-	ucstring finalMsg = text;
-	ucstring tmpMsg;
+	string finalMsg = text;
+	string tmpMsg;
 
 	for(;;)
 	{
-		ucstring::size_type index = finalMsg.find (ucstring("{break}"));
-		if (index == ucstring::npos) break;
+		string::size_type index = finalMsg.find ("{break}");
+		if (index == string::npos) break;
 		tmpMsg = finalMsg.substr (0, index);
 		if (!tmpMsg.empty())
 			_TextParts.push_back(tmpMsg);
@@ -1478,14 +1475,14 @@ void CGroupInSceneBubble::skip()
 
 // ***************************************************************************
 
-void CGroupInSceneBubble::setRawText (const ucstring &text)
+void CGroupInSceneBubble::setRawText (const string &text)
 {
 	_CanBeShown = !text.empty();
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CInterfaceElement *pVTIE = CWidgetManager::getInstance()->getElementFromId(getId()+":header_opened:window:text");
 	CViewText *pVT= dynamic_cast<CViewText*>(pVTIE);
 	if (pVT != NULL)
-		pVT->setText(text.toUtf8());
+		pVT->setText(text);
 }
 
 // ***************************************************************************
@@ -1584,8 +1581,7 @@ class CHandlerCharacterBubble : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		uint entityId;
 		fromString(getParam (sParams, "entity"), entityId);
-		ucstring text;
-		text.fromUtf8(getParam (sParams, "text"));
+		string text = getParam (sParams, "text");
 		string sTime = getParam (sParams, "time");
 		uint duration;
 		if (sTime.empty())
@@ -1633,10 +1629,8 @@ class CHandlerMessagePopup : public IActionHandler
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		ucstring text0;
-		text0.fromUtf8(getParam (sParams, "text0").c_str());
-		ucstring text1;
-		text1.fromUtf8(getParam (sParams, "text1").c_str());
+		string text0 = getParam (sParams, "text0");
+		string text1 = getParam (sParams, "text1");
 		string sTime = getParam (sParams, "time");
 		uint duration;
 		if (sTime.empty())
@@ -1660,8 +1654,7 @@ class CHandlerContextHelp : public IActionHandler
 
 		string targetName = getParam (sParams, "target");
 		string text = getParam (sParams, "text");
-		ucstring itext;
-		itext.fromUtf8 (getParam (sParams, "itext"));
+		string itext = getParam (sParams, "itext");
 		if (itext.empty())
 			itext = CI18N::get(text);
 

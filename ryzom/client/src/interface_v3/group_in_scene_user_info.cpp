@@ -202,7 +202,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 	const char *templateName;
 	const char *theTribeName = "";
 	std::string entityName = entity->getDisplayName();
-	std::string entityTitle = entity->getTitle().toUtf8();
+	std::string entityTitle = entity->getTitle();
 
 	// For some NPC's the name is empty and only a title is given,
 	// in that case, treat the title as the name.
@@ -992,9 +992,9 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 	if (_GuildName)
 	{
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-		ucstring ucsTmp;
+		string ucsTmp;
 		if (pSMC->getString (_Entity->getGuildNameID(), ucsTmp))
-			_GuildName->setText(ucsTmp.toUtf8());
+			_GuildName->setText(ucsTmp);
 
 		// guildname color is the pvp color
 		_GuildName->setColor(entityColor);
@@ -1018,9 +1018,9 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 	if (_EventFaction)
 	{
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-		ucstring ucsTmp;
-		if (pSMC->getString (_Entity->getEventFactionID(), ucsTmp))
-			_EventFaction->setText(ucsTmp.toUtf8());
+		string ucsTmp;
+		if (pSMC->getString(_Entity->getEventFactionID(), ucsTmp))
+			_EventFaction->setText(ucsTmp);
 
 		// guildname color depends of PVP faction or not
 		_EventFaction->setColor(entityColor);

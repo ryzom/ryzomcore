@@ -2276,11 +2276,11 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 
 	// check if there is any replacement tag in the string
 	string::size_type p1 = _EntityName.find('$');
-	if (p1 != ucstring::npos)
+	if (p1 != string::npos)
 	{
 		// we found a replacement point begin tag
 		string::size_type p2 = _EntityName.find('$', p1+1);
-		if (p2 != ucstring::npos)
+		if (p2 != string::npos)
 		{
 			// ok, we have the second replacement point!
 			// extract the replacement id
@@ -2295,21 +2295,21 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 				womanTitle = ( c->getGender() == GSGENDER::female );
 			}
 			
-			string replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw.toUtf8(), womanTitle);
+			string replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
 
 			// Sometimes translation contains another title
 			{
 				string::size_type pos = replacement.find('$');
-				if (pos != ucstring::npos)
+				if (pos != string::npos)
 				{
 					_EntityName = replacement.substr(0, pos);
 					string::size_type pos2 = replacement.find('$', pos + 1);
 					_TitleRaw = replacement.substr(pos+1, pos2 - pos - 1);
-					replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw.toUtf8(), womanTitle);
+					replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
 				}
 			}
 
-			_Tags = STRING_MANAGER::CStringManagerClient::getTitleInfos(_TitleRaw.toUtf8(), womanTitle);
+			_Tags = STRING_MANAGER::CStringManagerClient::getTitleInfos(_TitleRaw, womanTitle);
 
 			if (!replacement.empty() || !ClientCfg.DebugStringManager)
 			{
@@ -2318,9 +2318,9 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 				_EntityName   = _EntityName.substr(0, p1);	// + _Name.substr(p2+1)
 				// Get extended name
 				_NameEx = replacement;
-				newtitle = _NameEx.toUtf8();
+				newtitle = _NameEx;
 			}
-			CHARACTER_TITLE::ECharacterTitle titleEnum = CHARACTER_TITLE::toCharacterTitle( _TitleRaw.toUtf8() );
+			CHARACTER_TITLE::ECharacterTitle titleEnum = CHARACTER_TITLE::toCharacterTitle( _TitleRaw );
 			if ( titleEnum >= CHARACTER_TITLE::BeginGmTitle && titleEnum <= CHARACTER_TITLE::EndGmTitle )
 			{
 				_GMTitle = titleEnum - CHARACTER_TITLE::BeginGmTitle;
@@ -2348,13 +2348,13 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player:header_opened:player_title"));
-		if (pVT != NULL) pVT->setText(_Title.toUtf8());
+		if (pVT != NULL) pVT->setText(_Title);
 
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player"));
 		if (pGC != NULL) pGC->setUCTitle(_EntityName);
 
 		CSkillManager *pSM = CSkillManager::getInstance();
-		pSM->setPlayerTitle(_TitleRaw.toUtf8());
+		pSM->setPlayerTitle(_TitleRaw);
 	}
 
 	// Must rebuild the in scene interface 'cause name has changed
@@ -2368,7 +2368,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 std::string CEntityCL::getTitleFromName(const std::string &name)
 {
 	std::string::size_type p1 = name.find('$');
-	if (p1 != ucstring::npos)
+	if (p1 != string::npos)
 	{
 		std::string::size_type p2 = name.find('$', p1 + 1);
 		if (p2 != std::string::npos)
@@ -2384,14 +2384,14 @@ std::string CEntityCL::getTitleFromName(const std::string &name)
 std::string CEntityCL::removeTitleFromName(const std::string &name)
 {
 	std::string::size_type p1 = name.find('$');
-	if (p1 == ucstring::npos)
+	if (p1 == string::npos)
 	{
 		return name;
 	}
 	else
 	{
 		std::string::size_type p2 = name.find('$', p1 + 1);
-		if (p2 != ucstring::npos)
+		if (p2 != string::npos)
 		{
 			return name.substr(0, p1) + name.substr(p2 + 1);
 		}

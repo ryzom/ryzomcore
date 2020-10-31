@@ -623,9 +623,9 @@ void CMusicPlayer::createPlaylistFromMusic()
 	if (extensions.empty())
 	{
 		// in the very unlikely scenario
-		const ucstring message("Sound driver has no support for music.");
+		static const string message("Sound driver has no support for music.");
 		CInterfaceManager::getInstance()->displaySystemInfo(message, "SYS");
-		nlinfo("%s", message.toUtf8().c_str());
+		nlinfo("%s", message.c_str());
 		return;
 	}
 	std::string newPath = CPath::makePathAbsolute(CPath::standardizePath(ClientCfg.MediaPlayerDirectory), CPath::getCurrentPath(), true);
@@ -635,7 +635,7 @@ void CMusicPlayer::createPlaylistFromMusic()
 
 	std::string msg(CI18N::get("uiMk_system6"));
 	msg += ": " + newPath + " (" + extlist + ")";
-	CInterfaceManager::getInstance()->displaySystemInfo(ucstring::makeFromUtf8(msg), "SYS");
+	CInterfaceManager::getInstance()->displaySystemInfo(msg, "SYS");
 	nlinfo("%s", msg.c_str());
 
 	// Recursive scan for files from media directory

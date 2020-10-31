@@ -310,12 +310,12 @@ public:
 
 class CStringManagerTextProvider : public CViewTextID::IViewTextProvider
 {
-	bool getString( uint32 stringId, ucstring &result )
+	bool getString( uint32 stringId, string &result )
 	{
 		return STRING_MANAGER::CStringManagerClient::instance()->getString( stringId, result );
 	}
 
-	bool getDynString( uint32 dynStringId, ucstring &result )
+	bool getDynString( uint32 dynStringId, string &result )
 	{
 		return STRING_MANAGER::CStringManagerClient::instance()->getDynString( dynStringId, result );
 	}
@@ -400,7 +400,7 @@ public:
 						}
 					}
 					// get the title translated
-					ucstring sTitleTranslated = botName; // FIXME: UTF-8
+					string sTitleTranslated = botName; // FIXME: UTF-8
 					CStringPostProcessRemoveName spprn;
 					spprn.Woman = womanTitle;
 					spprn.cbIDStringReceived(sTitleTranslated);
@@ -412,14 +412,14 @@ public:
 					{
 						// But if there is no name, display only the title
 						if (botName.empty())
-							botName = sTitleTranslated.toUtf8();
+							botName = sTitleTranslated;
 					}
 					else
 					{
 						// Else we want the title !
 						if (!botName.empty())
 							botName += " ";
-						botName += sTitleTranslated.toUtf8();
+						botName += sTitleTranslated;
 					}
 
 					formatedResult += botName;
@@ -984,7 +984,7 @@ void CInterfaceManager::initInGame()
 	// flush system msg buffer
 	for( uint i=0; i<PeopleInterraction.SystemMessageBuffer.size(); ++i )
 	{
-		displaySystemInfo(PeopleInterraction.SystemMessageBuffer[i].Str, PeopleInterraction.SystemMessageBuffer[i].Cat);
+		displaySystemInfo(PeopleInterraction.SystemMessageBuffer[i].Str.toUtf8(), PeopleInterraction.SystemMessageBuffer[i].Cat);
 	}
 	PeopleInterraction.SystemMessageBuffer.clear();
 
@@ -2349,7 +2349,7 @@ void CInterfaceManager::processServerIDString()
 	for (uint32 i = 0; i < _IDStringWaiters.size(); ++i)
 	{
 		bool bAffect = false;
-		ucstring ucstrToAffect;
+		string ucstrToAffect;
 		SIDStringWaiter *pISW = _IDStringWaiters[i];
 		if (pISW->IdOrString == true) // ID !
 		{
@@ -2375,7 +2375,7 @@ void CInterfaceManager::processServerIDString()
 
 			if (bValid)
 			{
-				val.setString (ucstrToAffect.toUtf8());
+				val.setString (ucstrToAffect);
 				CInterfaceLink::setTargetProperty (pISW->Target, val);
 			}
 
@@ -2496,7 +2496,7 @@ bool	CInterfaceManager::getCurrentValidMessageBoxOnOk(string &ahOnOk, const std:
 
 
 // ***************************************************************************
-void CInterfaceManager::displayDebugInfo(const ucstring &str, TSystemInfoMode mode /*=InfoMsg*/)
+void CInterfaceManager::displayDebugInfo(const string &str, TSystemInfoMode mode /*=InfoMsg*/)
 {
 	if (PeopleInterraction.DebugInfo)
 		PeopleInterraction.ChatInput.DebugInfo.displayMessage(str, getDebugInfoColor(mode), 2);
@@ -2526,7 +2526,7 @@ NLMISC::CRGBA CInterfaceManager::getDebugInfoColor(TSystemInfoMode mode)
 }
 
 // ***************************************************************************
-void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat)
+void CInterfaceManager::displaySystemInfo(const string &str, const string &cat)
 {
 	CClientConfig::SSysInfoParam::TMode mode = CClientConfig::SSysInfoParam::Normal;
 	CRGBA color = CRGBA::White;
@@ -3062,7 +3062,7 @@ NLMISC_COMMAND( localCounter, "Get value of local counter", "" )
 {
 	if (args.size() != 0) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->displaySystemInfo(ucstring(toString(im->getLocalSyncActionCounter())));
+	im->displaySystemInfo(toString(im->getLocalSyncActionCounter()));
 	return true;
 }
 
@@ -4219,13 +4219,13 @@ bool CInterfaceManager::parseTokens(string& ucstr)
 				// special case where there is only a title, very rare case for some NPC
 				if (name.empty())
 				{
-					name = pTokenSubjectEntity->getTitle().toUtf8();
+					name = pTokenSubjectEntity->getTitle();
 				}
 				token_replacement = name.empty() ? token_replacement : name;
 			}
 			else if (token_param == "title")
 			{
-				string title = pTokenSubjectEntity->getTitle().toUtf8();
+				string title = pTokenSubjectEntity->getTitle();
 				token_replacement = title.empty() ? token_replacement : title;
 			}
 			else if (token_param == "race")
@@ -4244,10 +4244,10 @@ bool CInterfaceManager::parseTokens(string& ucstr)
 			else if (token_param == "guild")
 			{
 				STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-				ucstring ucGuildName;
+				string ucGuildName;
 				if (pSMC->getString(pTokenSubjectEntity->getGuildNameID(), ucGuildName))
 				{
-					token_replacement = ucGuildName.empty() ? token_replacement : ucGuildName.toUtf8();
+					token_replacement = ucGuildName.empty() ? token_replacement : ucGuildName;
 				}
 			}
 			else if (token_param.substr(0, 3) == "gs(" &&

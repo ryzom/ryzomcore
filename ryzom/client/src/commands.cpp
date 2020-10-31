@@ -240,20 +240,18 @@ NLMISC_COMMAND(equipGroup, "equip group <name>", "name")
 	}
 	if(CItemGroupManager::getInstance()->equipGroup(args[0]))
 	{
-		ucstring msg = CI18N::get("cmdEquipGroupSuccess");
+		string msg = CI18N::get("cmdEquipGroupSuccess");
 		//Use ucstring because group name can contain accentued characters (and stuff like that)
-		ucstring nameUC;
-		nameUC.fromUtf8(args[0]);
+		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
 		return true;
 	}
 	else
 	{
-		ucstring msg = CI18N::get("cmdEquipGroupError");
+		string msg = CI18N::get("cmdEquipGroupError");
 		//Use ucstring because group name can contain accentued characters (and stuff like that)
-		ucstring nameUC;
-		nameUC.fromUtf8(args[0]);
+		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
 		return false;
@@ -274,10 +272,9 @@ NLMISC_COMMAND(moveGroup, "move group <name> to <dst>", "name dst")
 
 	if(CItemGroupManager::getInstance()->moveGroup(args[0], INVENTORIES::toInventory(args[1])))
 	{
-		ucstring msg = CI18N::get("cmdMoveGroupSuccess");
+		string msg = CI18N::get("cmdMoveGroupSuccess");
 		//Use ucstring because group name can contain accentued characters (and stuff like that)
-		ucstring nameUC;
-		nameUC.fromUtf8(args[0]);
+		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		strFindReplace(msg, "%inventory", args[1]);
 		pIM->displaySystemInfo(msg);
@@ -285,10 +282,9 @@ NLMISC_COMMAND(moveGroup, "move group <name> to <dst>", "name dst")
 	}
 	else
 	{
-		ucstring msg = CI18N::get("cmdMoveGroupError");
+		string msg = CI18N::get("cmdMoveGroupError");
 		//Use ucstring because group name can contain accentued characters (and stuff like that)
-		ucstring nameUC;
-		nameUC.fromUtf8(args[0]);
+		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		strFindReplace(msg, "%inventory", args[1]);
 		pIM->displaySystemInfo(msg);
@@ -312,24 +308,22 @@ NLMISC_COMMAND(createGroup, "create group <name> [true](create a <remove> for ev
 		removeUnequiped = !args[1].empty();
 	if(CItemGroupManager::getInstance()->createGroup(args[0], removeUnequiped))
 	{
-		ucstring msg;
+		string msg;
 		if(removeUnequiped)
 			msg = CI18N::get("cmdCreateGroupSuccess2");
 		else
 			msg = CI18N::get("cmdCreateGroupSuccess1");
 		//Use ucstring because group name can contain accentued characters (and stuff like that)
-		ucstring nameUC;
-		nameUC.fromUtf8(args[0]);
+		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
 		return true;
 	}
 	else
 	{
-		ucstring msg = CI18N::get("cmdCreateGroupError");
+		string msg = CI18N::get("cmdCreateGroupError");
 		//Use ucstring because group name can contain accentued characters (and stuff like that)
-		ucstring nameUC;
-		nameUC.fromUtf8(args[0]);
+		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
 		return false;
@@ -350,20 +344,18 @@ NLMISC_COMMAND(deleteGroup, "delete group <name>", "name")
 	}
 	if(CItemGroupManager::getInstance()->deleteGroup(args[0]))
 	{
-		ucstring msg = CI18N::get("cmdDeleteGroupSuccess");
+		string msg = CI18N::get("cmdDeleteGroupSuccess");
 		//Use ucstring because group name can contain accentued characters (and stuff like that)
-		ucstring nameUC;
-		nameUC.fromUtf8(args[0]);
+		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
 		return true;
 	}
 	else
 	{
-		ucstring msg = CI18N::get("cmdDeleteGroupError");
+		string msg = CI18N::get("cmdDeleteGroupError");
 		//Use ucstring because group name can contain accentued characters (and stuff like that)
-		ucstring nameUC;
-		nameUC.fromUtf8(args[0]);
+		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
 		return false;
@@ -494,7 +486,7 @@ NLMISC_COMMAND(random, "Roll a dice and say the result around","[<min>] <max> [h
 	if (!randomFromString(args[0], max))
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		ucstring msg = CI18N::get("uiRandomBadParameter");
+		string msg = CI18N::get("uiRandomBadParameter");
 		strFindReplace(msg, "%s", args[0] );
 		pIM->displaySystemInfo(msg);
 		return false;
@@ -504,7 +496,7 @@ NLMISC_COMMAND(random, "Roll a dice and say the result around","[<min>] <max> [h
 		if (!randomFromString(args[1], min))
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			ucstring msg = CI18N::get("uiRandomBadParameter");
+			string msg = CI18N::get("uiRandomBadParameter");
 			strFindReplace(msg, "%s", args[1] );
 			pIM->displaySystemInfo(msg);
 			return false;
@@ -544,7 +536,7 @@ NLMISC_COMMAND(dumpShapePos, "Dump Last Added Shape Pos.", "")
 
 	CInterfaceManager *IM = CInterfaceManager::getInstance();
 	CVector pos = ShapeAddedByCommand.back().getPos();
-	IM->displaySystemInfo(ucstring(toString("Shape Pos = %f, %f, %f", pos.x, pos.y, pos.z)));
+	IM->displaySystemInfo(toString("Shape Pos = %f, %f, %f", pos.x, pos.y, pos.z));
 	return true;
 }
 //-----------------------------------------------
@@ -932,9 +924,7 @@ NLMISC_COMMAND(a, "Execute an admin command on you","<cmd> <arg>")
 	cmd = args[0];
 	for (uint i = 1; i < args.size(); i++)
 	{
-		// temporary fix for utf-8
-		// servers commands are not decoded so convert them to ansi
-		std::string tmp = ucstring::makeFromUtf8(args[i]).toString();
+		std::string tmp = args[i];
 
 		if (!arg.empty())
 			arg += ' ';
@@ -976,9 +966,7 @@ NLMISC_COMMAND(b, "Execute an admin command on your target","<cmd> <arg>")
 	cmd = args[0];
 	for (uint i = 1; i < args.size(); i++)
 	{
-		// temporary fix for utf-8
-		// servers commands are not decoded so convert them to ansi
-		std::string tmp = ucstring::makeFromUtf8(args[i]).toString();
+		std::string tmp = args[i];
 
 		if (!arg.empty())
 			arg += ' ';
@@ -1023,9 +1011,7 @@ NLMISC_COMMAND(c, "Execute an admin command on character name","<Character Name>
 	cmd = args[1];
 	for (uint i = 2; i < args.size(); i++)
 	{
-		// temporary fix for utf-8
-		// servers commands are not decoded so convert them to ansi
-		std::string tmp = ucstring::makeFromUtf8(args[i]).toString();
+		std::string tmp = args[i];
 
 		if (!arg.empty())
 			arg += ' ';
@@ -1096,11 +1082,11 @@ NLMISC_COMMAND(verbose, "Enable/Disable some Debug Information", "none or magic"
 	{
 		// Help
 		CInterfaceManager *IM = CInterfaceManager::getInstance();
-		IM->displaySystemInfo(ucstring("This command need 1 parameter :"));
-		IM->displaySystemInfo(ucstring("<string> :"));
-		IM->displaySystemInfo(ucstring("- none(to remove all verboses)"));
-		IM->displaySystemInfo(ucstring("- magic(to add debug infos about magic)"));
-		IM->displaySystemInfo(ucstring("- anim (to add debug infos about animation)"));
+		IM->displaySystemInfo("This command need 1 parameter :");
+		IM->displaySystemInfo("<string> :");
+		IM->displaySystemInfo("- none(to remove all verboses)");
+		IM->displaySystemInfo("- magic(to add debug infos about magic)");
+		IM->displaySystemInfo("- anim (to add debug infos about animation)");
 	}
 	else
 	{
@@ -1114,11 +1100,11 @@ NLMISC_COMMAND(verbose, "Enable/Disable some Debug Information", "none or magic"
 		else
 		{
 			CInterfaceManager *IM = CInterfaceManager::getInstance();
-			IM->displaySystemInfo(ucstring("This command need 1 parameter :"));
-			IM->displaySystemInfo(ucstring("<string> :"));
-			IM->displaySystemInfo(ucstring("- none(to remove all verboses)"));
-			IM->displaySystemInfo(ucstring("- magic(to add debug infos about magic)"));
-			IM->displaySystemInfo(ucstring("- anim (to add debug infos about animation)"));
+			IM->displaySystemInfo("This command need 1 parameter :");
+			IM->displaySystemInfo("<string> :");
+			IM->displaySystemInfo("- none(to remove all verboses)");
+			IM->displaySystemInfo("- magic(to add debug infos about magic)");
+			IM->displaySystemInfo("- anim (to add debug infos about animation)");
 		}
 	}
 	return true;
@@ -1323,7 +1309,7 @@ NLMISC_COMMAND(execScript, "Execute a script file (.cmd)","<FileName>")
 	}
 	else
 	{
-		CInterfaceManager::getInstance()->displaySystemInfo(ucstring("Cannot open file"));
+		CInterfaceManager::getInstance()->displaySystemInfo("Cannot open file");
 	}
 
 	return true;
@@ -1368,7 +1354,7 @@ NLMISC_COMMAND(db, "Modify Database","<Property> <Value>")
 		{
 			sint64 prop = node->getValue64();
 			string str = toString(prop);
-			pIM->displaySystemInfo(ucstring(str));
+			pIM->displaySystemInfo(str);
 			nlinfo("%s", str.c_str());
 		}
 		else
@@ -1722,7 +1708,7 @@ NLMISC_COMMAND(getSheetId, "get_sheet_id","<sheet file name>")
 		return false;
 	CSheetId id(args[0]);
 
-	CInterfaceManager::getInstance()->displaySystemInfo(ucstring(toString(id.asInt())));
+	CInterfaceManager::getInstance()->displaySystemInfo(toString(id.asInt()));
 	return true;
 }
 
@@ -1737,7 +1723,7 @@ NLMISC_COMMAND(getSheetName, "get_sheet_name","<Sheet Id>")
 	string name = id.toString();
 
 
-	CInterfaceManager::getInstance()->displaySystemInfo(ucstring(name));
+	CInterfaceManager::getInstance()->displaySystemInfo(name);
 	return true;
 }
 
@@ -2388,7 +2374,7 @@ NLMISC_COMMAND(sheet2idx, "Return the index of a sheet", "<sheet name> <visual s
 	else
 		result = NLMISC::toString("sheet '%s' not valid", args[0].c_str());
 
-	IM->displaySystemInfo(ucstring(result));
+	IM->displaySystemInfo(result);
 	nlinfo("'sheet2idx': %s", result.c_str());
 	return true;
 }
@@ -2411,7 +2397,7 @@ NLMISC_COMMAND(dynstr, "display a dyn string value", "<dyn string_id>")
 	uint dynId;
 	fromString(args[0], dynId);
 
-	ucstring result;
+	string result;
 	STRING_MANAGER::CStringManagerClient::instance()->getDynString(dynId, result);
 
 	CInterfaceManager::getInstance()->displaySystemInfo(result);
@@ -2426,7 +2412,7 @@ NLMISC_COMMAND(serverstr, "display a server string value", "<serverstr string_id
 	uint dynId;
 	fromString(args[0], dynId);
 
-	ucstring result;
+	string result;
 	STRING_MANAGER::CStringManagerClient::instance()->getString(dynId, result);
 
 	CInterfaceManager::getInstance()->displaySystemInfo(result);
@@ -2510,11 +2496,11 @@ NLMISC_COMMAND(mode, "Change the mode for an entity in a slot", "<Slot> <Mode> [
 	if(args.size() < 2)
 	{
 		// Help
-		CInterfaceManager::getInstance()->displaySystemInfo(ucstring("This command need 2 paramters :"));
-		CInterfaceManager::getInstance()->displaySystemInfo(ucstring("  <Slot> : the slot number of the entity to change"));
-		CInterfaceManager::getInstance()->displaySystemInfo(ucstring("  <Mode> : the mode wanted for the entity, one of the following number :"));
+		CInterfaceManager::getInstance()->displaySystemInfo("This command need 2 paramters :");
+		CInterfaceManager::getInstance()->displaySystemInfo("  <Slot> : the slot number of the entity to change");
+		CInterfaceManager::getInstance()->displaySystemInfo("  <Mode> : the mode wanted for the entity, one of the following number :");
 		for(uint i = 0; i<MBEHAV::NUMBER_OF_MODES; ++i)
-			CInterfaceManager::getInstance()->displaySystemInfo(ucstring(NLMISC::toString("    %d - %s", i, MBEHAV::modeToString((MBEHAV::EMode)i).c_str())));
+			CInterfaceManager::getInstance()->displaySystemInfo(NLMISC::toString("    %d - %s", i, MBEHAV::modeToString((MBEHAV::EMode)i).c_str()));
 	}
 	// Right parameters number
 	else
@@ -2544,7 +2530,7 @@ NLMISC_COMMAND(mode, "Change the mode for an entity in a slot", "<Slot> <Mode> [
 		}
 		// Invalid slot.
 		else
-			CInterfaceManager::getInstance()->displaySystemInfo(ucstring("There is no entity in the given slot"));
+			CInterfaceManager::getInstance()->displaySystemInfo("There is no entity in the given slot");
 	}
 
 	// Command well done.
@@ -2557,12 +2543,12 @@ NLMISC_COMMAND(behaviour, "Change the behaviour for an entity in a slot", "<Slot
 	if(args.size() < 2 || args.size() > 6)
 	{
 		// Help
-		CInterfaceManager::getInstance()->displaySystemInfo(ucstring("This command need 2 to 6 paramters :"));
-		CInterfaceManager::getInstance()->displaySystemInfo(ucstring("  <Slot> : the slot number of the entity to change"));
-		CInterfaceManager::getInstance()->displaySystemInfo(ucstring("  <Behaviour> : the behaviour to play for the entity, one of the following number :"));
+		CInterfaceManager::getInstance()->displaySystemInfo("This command need 2 to 6 paramters :");
+		CInterfaceManager::getInstance()->displaySystemInfo("  <Slot> : the slot number of the entity to change");
+		CInterfaceManager::getInstance()->displaySystemInfo("  <Behaviour> : the behaviour to play for the entity, one of the following number :");
 		for(uint i = 0; i<MBEHAV::EMOTE_BEGIN; ++i)
-			CInterfaceManager::getInstance()->displaySystemInfo(ucstring(NLMISC::toString("    %d - %s", i, MBEHAV::behaviourToString((MBEHAV::EBehaviour)i).c_str())));
-		CInterfaceManager::getInstance()->displaySystemInfo(ucstring(NLMISC::toString("    %d-%d - Emotes", MBEHAV::EMOTE_BEGIN, MBEHAV::EMOTE_END)));
+			CInterfaceManager::getInstance()->displaySystemInfo(NLMISC::toString("    %d - %s", i, MBEHAV::behaviourToString((MBEHAV::EBehaviour)i).c_str()));
+		CInterfaceManager::getInstance()->displaySystemInfo(NLMISC::toString("    %d-%d - Emotes", MBEHAV::EMOTE_BEGIN, MBEHAV::EMOTE_END));
 	}
 	else
 	{
@@ -2633,7 +2619,7 @@ NLMISC_COMMAND(behaviour, "Change the behaviour for an entity in a slot", "<Slot
 			entity->updateVisualProperty(NetMngr.getCurrentServerTick()+dt, CLFECOMMON::PROPERTY_BEHAVIOUR);
 		}
 		else
-			CInterfaceManager::getInstance()->displaySystemInfo(ucstring("There is no entity in the given slot"));
+			CInterfaceManager::getInstance()->displaySystemInfo("There is no entity in the given slot");
 	}
 
 	// Command well done.
@@ -2782,7 +2768,7 @@ NLMISC_COMMAND(spell, "Cast a spell", "\n"
 			entity->updateVisualProperty(NetMngr.getCurrentServerTick()+50, CLFECOMMON::PROPERTY_BEHAVIOUR);
 		}
 		else
-			CInterfaceManager::getInstance()->displaySystemInfo(ucstring("There is no entity in the given slot"));
+			CInterfaceManager::getInstance()->displaySystemInfo("There is no entity in the given slot");
 	}
 
 	// Command well done.
@@ -3871,7 +3857,7 @@ NLMISC_COMMAND(testLongBubble, "To display a bubble with a long text", "<entity>
 	fromString(args[0], entityId);
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	ucstring text("test\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\n");
+	string text("test\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\n");
 	uint duration = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutBubbles).getValSInt32();
 
 	CEntityCL *entity = EntitiesMngr.entity(entityId);
@@ -4005,7 +3991,7 @@ NLMISC_COMMAND(displayInventoryCounter, "display the Inventory counter to compar
 	srvVal&= pIM->getLocalSyncActionCounterMask();
 	locVal&= pIM->getLocalSyncActionCounterMask();
 
-	pIM->displaySystemInfo(ucstring( "ServerCounter: " + toString(srvVal) + "/ LocalCounter: " + toString(locVal)) );
+	pIM->displaySystemInfo("ServerCounter: " + toString(srvVal) + "/ LocalCounter: " + toString(locVal));
 
 	// Well done.
 	return true;
@@ -4023,7 +4009,7 @@ NLMISC_COMMAND(displayActionCounter, "display the action counters", "")
 	srvVal&= PHRASE_EXECUTE_COUNTER_MASK;
 	locVal&= PHRASE_EXECUTE_COUNTER_MASK;
 
-	pIM->displaySystemInfo(ucstring( "NextCounter: " + toString(srvVal) + "/ LocalCounter: " + toString(locVal)) );
+	pIM->displaySystemInfo("NextCounter: " + toString(srvVal) + "/ LocalCounter: " + toString(locVal));
 
 	// cycle
 	srvVal= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_COUNTER_CYCLE)->getValue32();
@@ -4031,7 +4017,7 @@ NLMISC_COMMAND(displayActionCounter, "display the action counters", "")
 	srvVal&= PHRASE_EXECUTE_COUNTER_MASK;
 	locVal&= PHRASE_EXECUTE_COUNTER_MASK;
 
-	pIM->displaySystemInfo(ucstring( "CycleCounter: " + toString(srvVal) + "/ LocalCounter: " + toString(locVal)) );
+	pIM->displaySystemInfo("CycleCounter: " + toString(srvVal) + "/ LocalCounter: " + toString(locVal));
 
 	return true;
 }
@@ -4114,7 +4100,7 @@ NLMISC_COMMAND(skillToInt, "Convert a skill to an int", "")
 {
 	if (args.size() != 1) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->displaySystemInfo(ucstring(toString((uint) SKILLS::toSkill(args[0]))));
+	im->displaySystemInfo(toString((uint) SKILLS::toSkill(args[0])));
 	return true;
 }
 
@@ -4520,7 +4506,7 @@ NLMISC_COMMAND(getSkillValue, "get a skill value by its name", "skill_name")
 	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:SKILL", skillId), false);
 	if(node)
 	{
-		pIM->displaySystemInfo(ucstring(toString(node->getValue32())));
+		pIM->displaySystemInfo(toString(node->getValue32()));
 	}
 
 	return true;
@@ -4550,7 +4536,7 @@ NLMISC_COMMAND(getBaseSkillValue, "get a baseskill value by its name", "skill_na
 	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", skillId), false);
 	if(node)
 	{
-		pIM->displaySystemInfo(ucstring(toString(node->getValue32())));
+		pIM->displaySystemInfo(toString(node->getValue32()));
 	}
 
 	return true;
@@ -4812,7 +4798,7 @@ NLMISC_COMMAND(stick_log, "", "<slot>")
 		skel->getStickedObjects(sticks);
 
 		nlinfo("StickedModels: %d", sticks.size());
-		pIM->displaySystemInfo(ucstring(toString("StickedModels: %d", sticks.size())));
+		pIM->displaySystemInfo(toString("StickedModels: %d", sticks.size()));
 
 		for(uint i=0;i<sticks.size();i++)
 		{
@@ -5377,7 +5363,7 @@ bool CUserCommand::execute(const std::string &/* rawCommandString */, const std:
 				if ((uint)index >= args.size())
 				{
 					// Not enough arguments
-					pIM->displaySystemInfo (ucstring(CommandName+" : ")+CI18N::get ("uiCommandWrongArgumentCount"));
+					pIM->displaySystemInfo (CommandName+" : "+CI18N::get ("uiCommandWrongArgumentCount"));
 					return false;
 				}
 				else
@@ -5414,7 +5400,7 @@ bool CUserCommand::execute(const std::string &/* rawCommandString */, const std:
 	else
 	{
 		// Not enough argument
-		pIM->displaySystemInfo (ucstring(CommandName+" : ")+CI18N::get ("uiCommandWrongArgumentCount"));
+		pIM->displaySystemInfo (CommandName+" : "+CI18N::get ("uiCommandWrongArgumentCount"));
 		return false;
 	}
 	return true;
@@ -5658,7 +5644,7 @@ NLMISC_COMMAND(tickToDate, "convert a tick value into a readable ryzom time", ""
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	float ryTime = rt.getRyzomTime();
 	std::string readableDate = toString("Day = %d, hour = %d:%d", rt.getRyzomDay(), (int) floorf(ryTime), (int) floorf(60.f * fmodf(ryTime, 1.f)));
-	im->displaySystemInfo(ucstring(readableDate));
+	im->displaySystemInfo(readableDate);
 	return true;
 }
 
@@ -5930,7 +5916,7 @@ NLMISC_COMMAND(time, "Shows information about the current time", "")
 	tm = gmtime(&date);
 	strftime(cs_utc, size, "%X", tm);
 
-	ucstring msg = CI18N::get("uiCurrentLocalAndUtcTime");
+	string msg = CI18N::get("uiCurrentLocalAndUtcTime");
 	strFindReplace(msg, "%local", cs_local);
 	strFindReplace(msg, "%utc", cs_utc);
 	CInterfaceManager::getInstance()->displaySystemInfo(msg, "AROUND");
@@ -5939,7 +5925,7 @@ NLMISC_COMMAND(time, "Shows information about the current time", "")
 
 NLMISC_COMMAND(playedTime, "Display character played time", "")
 {
-	ucstring msg = CI18N::get("uiPlayedTime");
+	string msg = CI18N::get("uiPlayedTime");
 	strFindReplace(msg, "%time", NLMISC::secondsToHumanReadable(CharPlayedTime));
 	CInterfaceManager::getInstance()->displaySystemInfo(msg, "AROUND");
 	return true;
@@ -5947,7 +5933,7 @@ NLMISC_COMMAND(playedTime, "Display character played time", "")
 
 NLMISC_COMMAND(version, "Display client version", "")
 {
-	ucstring msg = getDebugVersion();
+	string msg = getDebugVersion();
 	CInterfaceManager::getInstance()->displaySystemInfo(msg, "AROUND");
 	return true;
 }

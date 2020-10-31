@@ -702,7 +702,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 	}
 
 	// update title when gender changed
-	const string replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw.toUtf8(), _Gender == GSGENDER::female);
+	const string replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, _Gender == GSGENDER::female);
 	if (!replacement.empty() || !ClientCfg.DebugStringManager)
 	{
 		// Get extended name
@@ -713,7 +713,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 		if (_Slot == 0)
 		{
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player:header_opened:player_title"));
-			if (pVT != NULL) pVT->setText(_Title.toUtf8());
+			if (pVT != NULL) pVT->setText(_Title);
 		}
 
 		// rebuild in scene interface

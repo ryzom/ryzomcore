@@ -109,7 +109,7 @@ public:
 	};
 
 	NLMISC::CVector2f	Pos; // Pos in local map
-	ucstring			Title;
+	ucstring			Title; // FIXME: UTF-8 (serial)
 	uint8				Type;
 
 	//User LandMarks Colors

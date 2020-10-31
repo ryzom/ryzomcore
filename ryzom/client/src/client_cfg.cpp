@@ -2275,14 +2275,13 @@ string	CClientConfig::getHtmlLanguageCode() const
 }
 
 // ***************************************************************************
-ucstring CClientConfig::buildLoadingString( const ucstring& ucstr ) const
+string CClientConfig::buildLoadingString( const string& ucstr ) const
 {
 	if( LoadingStringCount > 0 )
 	{
 		uint index = rand()%LoadingStringCount;
-		string tipId = "uiLoadingString"+toString(index);
-		ucstring randomUCStr = CI18N::get(tipId);
-		return randomUCStr;
+		string tipId = "uiLoadingString" + toString(index);
+		return CI18N::get(tipId);
 	}
 	else
 		return ucstr;

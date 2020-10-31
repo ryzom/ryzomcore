@@ -360,7 +360,7 @@ bool connection (const string &cookie, const string &fsaddr)
 
 	// Preload continents
 	{
-		const ucstring nmsg("Loading continents...");
+		const string nmsg("Loading continents...");
 		ProgressBar.newMessage (ClientCfg.buildLoadingString(nmsg) );
 		ContinentMngr.preloadSheets();
 
@@ -398,7 +398,7 @@ bool connection (const string &cookie, const string &fsaddr)
 	// Init out game
 	setOutGameFullScreen();
 
-	ucstring nmsg("Initializing outgame...");
+	string nmsg("Initializing outgame...");
 	ProgressBar.newMessage (ClientCfg.buildLoadingString(nmsg) );
 	pIM->initOutGame();
 
@@ -541,7 +541,7 @@ bool reconnection()
 
 	// Preload continents
 	{
-		const ucstring nmsg ("Loading continents...");
+		const string nmsg ("Loading continents...");
 		ProgressBar.newMessage (ClientCfg.buildLoadingString(nmsg) );
 		ContinentMngr.preloadSheets();
 	}
@@ -3343,10 +3343,10 @@ class CAHLoadScenario : public IActionHandler
 								if(val!=0)
 								{
 									STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-									ucstring res;
+									string res;
 									if (pSMC->getString(val,res))
 									{
-										string charName = CEntityCL::removeTitleAndShardFromName(res.toUtf8());
+										string charName = CEntityCL::removeTitleAndShardFromName(res);
 										sessionBrowser.inviteCharacterByName(sessionBrowser._LastScheduleSessionCharId, charName);
 
 										if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))

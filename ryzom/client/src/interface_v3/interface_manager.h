@@ -249,7 +249,7 @@ public:
 	{
 	public:
 		virtual ~IStringProcess() { }
-		virtual bool cbIDStringReceived(ucstring &inOut) = 0; // called when string or id is received (return true if valid the change)
+		virtual bool cbIDStringReceived(std::string &inOut) = 0; // called when string or id is received (return true if valid the change)
 	};
 
 	void addServerString (const std::string &sTarget, uint32 id, IStringProcess *cb = NULL);
@@ -292,12 +292,12 @@ public:
 	void drawViews (NL3D::UCamera camera);
 
 	// display a debug info
-	void		  displayDebugInfo(const ucstring &str, TSystemInfoMode mode = InfoMsg);
+	void		  displayDebugInfo(const std::string &str, TSystemInfoMode mode = InfoMsg);
 	// get the color associated with the given system info mode
 	NLMISC::CRGBA getDebugInfoColor(TSystemInfoMode mode);
 
 	// display a system info string
-	void		  displaySystemInfo(const ucstring &str, const std::string &Category = "SYS");
+	void		  displaySystemInfo(const std::string &str, const std::string &Category = "SYS");
 	NLMISC::CRGBA getSystemInfoColor(const std::string &Category = "SYS");
 
 	void setupOptions();

@@ -481,7 +481,7 @@ void initMainLoop()
 
 	// Progress bar for init_main_loop()
 	ProgressBar.reset (BAR_STEP_INIT_MAIN_LOOP);
-	ucstring nmsg;
+	string nmsg;
 
 	FPU_CHECKER_ONCE
 
@@ -1029,7 +1029,7 @@ void initMainLoop()
 	// PreLoad Fauna and Characters
 	if (!ClientCfg.Light && ClientCfg.PreCacheShapes)
 	{
-		ucstring nmsg("Loading character shapes ...");
+		string nmsg("Loading character shapes ...");
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 
 

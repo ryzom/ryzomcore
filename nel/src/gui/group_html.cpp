@@ -4177,7 +4177,8 @@ namespace NLGUI
 		}
 		else
 		{
-			renderHtmlString(content);
+			// Sanitize downloaded HTML UTF-8 encoding, and render
+			renderHtmlString(CUtfStringView(content).toUtf8(true));
 		}
 	}
 

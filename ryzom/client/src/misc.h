@@ -165,11 +165,11 @@ bool setVect(NLMISC::CVector &vectToChange, const NLMISC::CVector &vect, bool co
 
 
 // read color from client cfg system info colors
-NLMISC::CRGBA interpClientCfgColor(const ucstring &src, ucstring &dest);
+NLMISC::CRGBA interpClientCfgColor(const std::string &src, std::string &dest);
 // Get the category from the string (src="&SYS&Who are you?" and dest="Who are you?" and return "SYS"), if no category, return "SYS"
-std::string getStringCategory(const ucstring &src, ucstring &dest, bool alwaysAddSysByDefault = true);
+std::string getStringCategory(const std::string &src, std::string &dest, bool alwaysAddSysByDefault = true);
 // Get the category from the string (src="&SYS&Who are you?" and dest="Who are you?" and return "SYS"), if no category, return ""
-std::string getStringCategoryIfAny(const ucstring &src, ucstring &dest);
+std::string getStringCategoryIfAny(const std::string &src, std::string &dest);
 
 bool getRelativeFloatFromString(const std::string src, float &dst);
 void updateVector(const std::string part, NLMISC::CVector &dst, float value, bool add = false);

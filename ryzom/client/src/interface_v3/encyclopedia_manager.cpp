@@ -194,7 +194,7 @@ void CEncyclopediaManager::rebuildAlbumList()
 	nlassert(pTree != NULL);
 
 	CGroupTree::SNode *pRoot = new CGroupTree::SNode;
-	ucstring res;
+	string res;
 
 	// Add all albums
 	for (uint32 i = 0; i < _Albums.size(); ++i)
@@ -206,7 +206,7 @@ void CEncyclopediaManager::rebuildAlbumList()
 		if (_Albums[i].Name == _AlbumNameSelected)
 			pAlb->Opened = true;
 		if (pSMC->getDynString(_Albums[i].Name, res))
-			pAlb->Text = res.toUtf8();
+			pAlb->Text = res;
 		else
 			nlwarning("try to construct album without name");
 
@@ -218,7 +218,7 @@ void CEncyclopediaManager::rebuildAlbumList()
 			pThm->AHName = "ency_click_thema";
 			pThm->AHParams = toString(_Albums[i].Themas[j].Name);
 			if (pSMC->getDynString(_Albums[i].Themas[j].Name, res))
-				pThm->Text = res.toUtf8();
+				pThm->Text = res;
 			else
 				nlwarning("try to construct thema without name");
 
@@ -426,7 +426,7 @@ bool CEncyclopediaManager::isStringWaiting()
 
 	for (uint32 i = 0; i < _Albums.size(); ++i)
 	{
-		ucstring res;
+		string res;
 		if (!pSMC->getDynString(_Albums[i].Name, res))
 			return true;
 		for (uint32 j = 0; j < _Albums[i].Themas.size(); ++j)

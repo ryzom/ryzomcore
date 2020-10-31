@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
+#if 0
 #ifndef CL_CANDIDATE_H
 #define CL_CANDIDATE_H
 
@@ -39,3 +39,4 @@ struct Candidate
 
 
 #endif // CL_CANDIDATE_H
+#endif

@@ -207,9 +207,9 @@ int CDBCtrlSheet::luaGetCreatorName(CLuaState &ls)
 {
 	uint32	itemSlotId = getInventory().getItemSlotId(this);
 	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
-	ucstring creatorName;
+	string creatorName;
 	STRING_MANAGER::CStringManagerClient::instance()->getString(itemInfo.CreatorName, creatorName);
-	CLuaIHM::push(ls, creatorName);
+	CLuaIHM::push(ls, ucstring::makeFromUtf8(creatorName)); // FIXME: Lua UTF-8
 
 	return 1;
 }
@@ -1454,7 +1454,7 @@ void CDBCtrlSheet::setupMission()
 void CDBCtrlSheet::setupGuildFlag ()
 {
 	// Find the guild name
-	ucstring usGuildName;
+	string usGuildName;
 	sint32 nGuildName = _SheetId.getSInt32();
 	if (_LastSheetId != nGuildName || _NeedSetup)
 	{
@@ -4564,7 +4564,7 @@ ucstring CDBCtrlSheet::getItemActualName() const
 		return ucstring();
 	else
 	{
-		ucstring ret;
+		string ret;
 		// If NameId not 0, get from StringManager
 		uint32	nameId= getItemNameId();
 		if(nameId)
@@ -4596,21 +4596,21 @@ ucstring CDBCtrlSheet::getItemActualName() const
 		{
 			// get description string for item format
 			std::string formatID = getItemRMFaberStatType() != RM_FABER_STAT_TYPE::Unknown ? "uihelpItemFaberPrefixAndSuffix" : "uihelpItemFaberPrefix";
-			ucstring format;
+			string format;
 			if (!CI18N::hasTranslation(formatID))
 			{
-				format = ucstring("%p %n %s"); // not found, uses default string
+				format = "%p %n %s"; // not found, uses default string
 			}
 			else
 			{
 				format = CI18N::get(formatID);
 			}
 			// suffix
-			strFindReplace(format, ucstring("%p"), RM_CLASS_TYPE::toLocalString(getItemRMClassType()));
+			strFindReplace(format, "%p", RM_CLASS_TYPE::toLocalString(getItemRMClassType()));
 			// name
-			strFindReplace(format, ucstring("%n"), ret);
+			strFindReplace(format, "%n", ret);
 			// prefix
-			strFindReplace(format, ucstring("%s"), CI18N::get(toString("mpstatItemQualifier%d", (int) getItemRMFaberStatType()).c_str()));
+			strFindReplace(format, "%s", CI18N::get(toString("mpstatItemQualifier%d", (int) getItemRMFaberStatType()).c_str()));
 
 
 			ret = format;

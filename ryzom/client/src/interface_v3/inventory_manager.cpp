@@ -3194,7 +3194,7 @@ class CHandlerInvTempToBag : public IActionHandler
 		// If we cant find place display a message and dont send the request to the server
 		if (!getInventory().isSpaceInAllBagsForItem(pCSDst))
 		{
-			ucstring msg = CI18N::get("msgCantPutItemInBag");
+			string msg = CI18N::get("msgCantPutItemInBag");
 			string cat = getStringCategory(msg, msg);
 			pIM->displaySystemInfo(msg, cat);
 			return;
@@ -3274,7 +3274,7 @@ class CHandlerInvTempAll : public IActionHandler
 
 		if (!bPlaceFound)
 		{
-			ucstring msg = CI18N::get("msgCantPutItemInBag");
+			string msg = CI18N::get("msgCantPutItemInBag");
 			string cat = getStringCategory(msg, msg);
 			CInterfaceManager::getInstance()->displaySystemInfo(msg, cat);
 			return;

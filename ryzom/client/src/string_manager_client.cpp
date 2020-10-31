@@ -373,7 +373,7 @@ restartLoop4:
 					_WaitingStrings.insert(stringId);
 					// need to ask for this string.
 					NLMISC::CBitMemStream bms;
-					const string msgType = "STRING_MANAGER:STRING_RQ";
+					static const string msgType = "STRING_MANAGER:STRING_RQ";
 					if( GenericMsgHeaderMngr.pushNameToStream(msgType,bms) )
 					{
 						bms.serial( stringId );
@@ -752,7 +752,7 @@ restartLoop:
 
 						// If the string contains a title, then remove it
 						string::size_type pos = str.find('$');
-						if ( ! str.empty() && pos != ucstring::npos)
+						if ( ! str.empty() && pos != string::npos)
 						{
 							str = CEntityCL::removeTitleFromName(str);
 						}
@@ -1181,9 +1181,9 @@ bool CStringManagerClient::checkWordFileDates(vector<CFileCheck> &fileChecks, co
 // ***************************************************************************
 void CStringManagerClient::initI18NSpecialWords(const string &languageCode)
 {
-	ucstring		womenNameColIdent= string("women_name");
-	ucstring		descColIdent= string("description");
-	ucstring		descColIdent2= string("description2");
+	ucstring womenNameColIdent = "women_name";
+	ucstring descColIdent = "description";
+	ucstring descColIdent2 = "description2";
 
 	// List of words to append to the local CI18N system.
 	static const char	*specialWords[]=
@@ -1260,8 +1260,8 @@ void CStringManagerClient::initI18NSpecialWords(const string &languageCode)
 			for(uint j=1;j<ws.size();j++)
 			{
 				// Get the key and name string.
-				const string &key=  ws.getData(j, keyColIndex).toUtf8();
-				const string &name= ws.getData(j, nameColIndex).toUtf8();
+				string key=  ws.getData(j, keyColIndex).toUtf8(); // FIXME: const string & when UTF-8
+				string name= ws.getData(j, nameColIndex).toUtf8(); // FIXME: const string & when UTF-8
 				// Append to the I18N.
 				// avoid case problems
 				string keyStr = NLMISC::toLower(key);
@@ -1442,8 +1442,7 @@ const char *CStringManagerClient::getSpecialWord(const string &label, bool women
 			{
 				if( UseFemaleTitles && women )
 				{
-					ucstring ustr(it->WomenName);
-					if( !ustr.empty() )
+					if( !it->WomenName[0] )
 						return it->WomenName;
 				}
 				return it->Name;
@@ -1637,8 +1636,6 @@ const char *CStringManagerClient::getTitleLocalizedName(const string &titleId, b
 // ***************************************************************************
 vector<string> CStringManagerClient::getTitleInfos(const string &titleId, bool women)
 {
-	//ucstring infosUC;
-	//infosUC.fromUtf8(titleId);
 	vector<string> listInfos;
 	splitString(titleId, string("#"), listInfos);
 

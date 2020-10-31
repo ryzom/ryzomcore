@@ -262,7 +262,7 @@ char *XmlStrdup4NeL (const char *str)
 #ifdef NL_OS_WINDOWS
 
 
-static ucstring CurrentErrorMessage;
+static std::wstring CurrentErrorMessage;
 
 static INT_PTR CALLBACK ExitClientErrorDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM /* lParam */)
 {
@@ -338,7 +338,7 @@ void ExitClientError (const char *format, ...)
 	}
 
 #ifdef NL_OS_WINDOWS
-	CurrentErrorMessage.fromUtf8(str);
+	CurrentErrorMessage = NLMISC::utf8ToWide(str);
 	DialogBox(HInstance, MAKEINTRESOURCE(IDD_ERROR_HELP_MESSAGE_BOX), NULL, ExitClientErrorDialogProc);
 	/*
 		ucstring ucstr;
@@ -937,7 +937,7 @@ void prelogInit()
 		initDebugMemory();
 
 		// Load the application configuration.
-		ucstring nmsg("Loading config file...");
+		string nmsg("Loading config file...");
 		ProgressBar.newMessage (nmsg);
 
 		ClientCfg.init(ConfigFileName);
@@ -1533,7 +1533,7 @@ void postlogInit()
 	Driver->clearBuffers(CRGBA::Black);
 	Driver->swapBuffers();
 	CNiceInputAuto niceInputs;
-	ucstring nmsg;
+	string nmsg;
 
 	try
 	{

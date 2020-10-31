@@ -647,7 +647,7 @@ class CAHEditExpandOrCycleTell : public CAHEdit
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		if (!im->isInGame()) return;
 		// there was no / at the start of the line so try to cycle through the last people on which a tell was done
-		const ucstring *lastTellPeople = ChatMngr.cycleLastTell();
+		const string *lastTellPeople = ChatMngr.cycleLastTell();
 		if (!lastTellPeople) return;
 		// Get chat box from ist edit box
 		// If it isn't a user chat or the main chat, just display 'tell' with the name. Otherwise, change the target of the window
@@ -661,7 +661,7 @@ class CAHEditExpandOrCycleTell : public CAHEdit
 		else
 		{
 			// it is not a filtered chat, display 'tell' (must be ingame)
-			_GroupEdit->setCommand("tell " + (*lastTellPeople).toUtf8() + ' ', false);
+			_GroupEdit->setCommand("tell " + (*lastTellPeople) + ' ', false);
 		}
 	}
 };

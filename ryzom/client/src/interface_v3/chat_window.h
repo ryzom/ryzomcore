@@ -47,7 +47,7 @@ class CChatWindow;
 struct IChatWindowListener
 {
 	// the user entered a msg in the given chat box
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow) = 0;
+	virtual void msgEntered(const std::string &msg, CChatWindow *chatWindow) = 0;
 };
 
 
@@ -98,8 +98,8 @@ public:
 	};
 public:
 	// display a message in this chat box with the given color
-	virtual void displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks = 0, bool *windowVisible = NULL);
-	virtual void displayTellMessage(const ucstring &/* msg */, NLMISC::CRGBA /* col */, const ucstring &/* sender */) {}
+	virtual void displayMessage(const std::string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks = 0, bool *windowVisible = NULL);
+	virtual void displayTellMessage(const std::string &/* msg */, NLMISC::CRGBA /* col */, const std::string &/* sender */) {}
 	virtual void clearMessages(CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex);
 	// Test if the window is visible
 	bool isVisible() const;
@@ -189,8 +189,8 @@ class CChatGroupWindow : public CChatWindow
 public:
 	CChatGroupWindow() {}
 	// display a message in this chat box with the given color (callback from chat input filter)
-	virtual void displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks = 0, bool *windowVisible = NULL);
-	virtual void displayTellMessage(const ucstring &msg, NLMISC::CRGBA col, const ucstring &sender);
+	virtual void displayMessage(const std::string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks = 0, bool *windowVisible = NULL);
+	virtual void displayTellMessage(const std::string &msg, NLMISC::CRGBA col, const std::string &sender);
 	virtual void clearMessages(CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex);
 	sint32 getTabIndex();
 	void setTabIndex(sint32 n);
@@ -198,7 +198,7 @@ public:
 	// Free Teller
 	NLGUI::CGroupContainer *createFreeTeller(const ucstring &winName, const std::string &winColor="");
 	void setActiveFreeTeller(const ucstring &winName, bool bActive=true);
-	ucstring getFreeTellerName(const std::string &containerID);
+	std::string getFreeTellerName(const std::string &containerID);
 	bool removeFreeTeller(const std::string &containerID); // Return true if free teller found
 	void removeAllFreeTellers();
 	void saveFreeTeller(NLMISC::IStream &f);

@@ -1868,7 +1868,7 @@ void CClientEditionModule::onTpPositionSimulated(NLNET::IModuleProxy * /* sender
 	beginLoading (LoadingBackground);
 	#define BAR_STEP_TP 2 // fixme : this define is duplicated....
 	ProgressBar.reset (BAR_STEP_TP);
-	ucstring nmsg("Loading...");
+	string nmsg("Loading...");
 	ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 	ProgressBar.progress(0);
 	ContinentMngr.select(dest, ProgressBar);

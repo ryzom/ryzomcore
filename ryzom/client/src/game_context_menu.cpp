@@ -707,13 +707,13 @@ void CGameContextMenu::updateContextMenuMissionsOptions( bool forceHide )
 				uint32 textID = (uint32) _MissionOption[k]->getValue32();
 				if (textID)
 				{
-					ucstring result;
+					string result;
 					bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(textID, result);
 					if (!res)
 					{
 						result = NLMISC::CI18N::get("uiMissionOptionNotReceived");
 					}
-					pVTM->setText(result.toUtf8());
+					pVTM->setText(result);
 					pVTM->setActive(true);
 				}
 				else
@@ -748,13 +748,13 @@ void CGameContextMenu::updateContextMenuWebPage(uint options)
 			uint32 textID = (uint32) _WebPageTitle->getValue32();
 			if (textID)
 			{
-				ucstring result;
+				string result;
 				bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(textID, result);
 				if (!res)
 				{
 					result = NLMISC::CI18N::get("uiWebPageNameNotReceived");
 				}
-				pVTM->setText(result.toUtf8());
+				pVTM->setText(result);
 			}
 			else
 			{
@@ -828,13 +828,13 @@ void CGameContextMenu::updateContextMenuMissionRing()
 			// if the textId is ok and Flag is set.
 			if ( textId )
 			{
-				ucstring result;
+				string result;
 				bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, result);
 				if (!res)
 				{
 					result = NLMISC::CI18N::get("uiMissionRingNameNotReceived");
 				}
-				pVTM->setText(result.toUtf8());
+				pVTM->setText(result);
 				pVTM->setActive(true);
 			}
 			else

@@ -91,7 +91,7 @@ static const sint PARTY_CHAT_SPAWN_DELTA = 20; // to avoid that all party chat a
 
 /** Display an error msg in the system info window, and also in the last window that triggered the command (so that the user is sure to see it)
   */
-static void displayVisibleSystemMsg(const ucstring &msg, const string &cat = "CHK");
+static void displayVisibleSystemMsg(const std::string &msg, const string &cat = "CHK");
 
 
 //////////////////////////////
@@ -102,7 +102,7 @@ static void displayVisibleSystemMsg(const ucstring &msg, const string &cat = "CH
 
 struct CPartyChatEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -120,7 +120,7 @@ struct CPartyChatEntryHandler : public IChatWindowListener
 // handler to manage user entry in 'around me' window
 struct CAroundMeEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -138,7 +138,7 @@ struct CAroundMeEntryHandler : public IChatWindowListener
 // handler to manage user entry in 'region' window
 struct CRegionEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -156,7 +156,7 @@ struct CRegionEntryHandler : public IChatWindowListener
 // handler to manage user entry in 'universe' window
 struct CUniverseEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -174,7 +174,7 @@ struct CUniverseEntryHandler : public IChatWindowListener
 // handler to manage user entry in 'guild chat' window
 struct CGuildChatEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -191,7 +191,7 @@ struct CGuildChatEntryHandler : public IChatWindowListener
 // handler to manage user entry in 'team chat' window
 struct CTeamChatEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -208,7 +208,7 @@ struct CTeamChatEntryHandler : public IChatWindowListener
 // handler to manage user entry in a 'talk with friend' window
 struct CFriendTalkEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -225,10 +225,9 @@ struct CFriendTalkEntryHandler : public IChatWindowListener
 // handler to manage user entry in a debug console window
 struct CDebugConsoleEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow * /* chatWindow */)
+	virtual void msgEntered(const string &msg, CChatWindow * /* chatWindow */)
 	{
-		std::string str = msg.toString();
-		NLMISC::ICommand::execute( str, g_log );
+		NLMISC::ICommand::execute( msg, g_log );
 	}
 };
 
@@ -242,7 +241,7 @@ public:
 		DbIndex= 0;
 	}
 
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -935,7 +934,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 					case CChatGroup::dyn_chat:
 						uint32 index = PeopleInterraction.TheUserChat.Filter.getTargetDynamicChannelDbIndex();
 						uint32 textId = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DYN_CHAT:CHANNEL"+toString(index)+":NAME")->getValue32();
-						ucstring title;
+						string title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 						if (title.empty())
 						{
@@ -945,7 +944,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 						}
 						else
 						{
-							pUserBut->setHardText(title.toUtf8());
+							pUserBut->setHardText(title);
 						}
 						break;
 				}
@@ -1298,7 +1297,7 @@ void CPeopleInterraction::addContactInList(uint32 contactId, const ucstring &nam
 //=================================================================================================================
 void CPeopleInterraction::addContactInList(uint32 contactId, uint32 nameID, TCharConnectionState online, uint8 nList)
 {
-	ucstring name;
+	string name;
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 	if (pSMC->getString(nameID, name))
 	{
@@ -1358,7 +1357,7 @@ void CPeopleInterraction::updateWaitingContacts()
 	for (uint32 i = 0; i < WaitingContacts.size();)
 	{
 		SWaitingContact &w = WaitingContacts[i];
-		ucstring name;
+		string name;
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 		if (pSMC->getString(w.NameId, name))
 		{
@@ -1394,7 +1393,7 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 					// Only show the message if this player is not in my guild (because then the guild manager will show a message)
 					std::vector<SGuildMember> GuildMembers = CGuildManager::getInstance()->getGuildMembers();
 					bool bOnlyFriend = true;
-					ucstring name = toLower(FriendList.getName(index));
+					string name = toLower(FriendList.getName(index).toUtf8());
 					for (uint i = 0; i < GuildMembers.size(); ++i)
 					{
 						if (toLower(GuildMembers[i].Name) == name)
@@ -1410,8 +1409,8 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 					// Player is not in my guild, and the status change is from offline to online/abroad online or vice versa. 
 					if (showMsg)
 					{
-						ucstring msg = (online != ccs_offline) ? CI18N::get("uiPlayerOnline") : CI18N::get("uiPlayerOffline");
-						strFindReplace(msg, "%s", FriendList.getName(index));
+						string msg = (online != ccs_offline) ? CI18N::get("uiPlayerOnline") : CI18N::get("uiPlayerOffline");
+						strFindReplace(msg, "%s", FriendList.getName(index).toUtf8());
 						string cat = getStringCategory(msg, msg);
 						map<string, CClientConfig::SSysInfoParam>::const_iterator it;
 						NLMISC::CRGBA col = CRGBA::Yellow;
@@ -1883,7 +1882,7 @@ void CPeopleInterraction::refreshActiveUserChats()
 }
 
 //=================================================================================================================
-void CPeopleInterraction::talkInDynamicChannel(uint32 channelNb,ucstring sentence)
+void CPeopleInterraction::talkInDynamicChannel(uint32 channelNb,string sentence)
 {
 	if(channelNb<CChatGroup::MaxDynChanPerPlayer)
 	{
@@ -1892,7 +1891,7 @@ void CPeopleInterraction::talkInDynamicChannel(uint32 channelNb,ucstring sentenc
 }
 
 //=================================================================================================================
-void CPeopleInterraction::displayTellInMainChat(const ucstring &playerName)
+void CPeopleInterraction::displayTellInMainChat(const string &playerName)
 {
 	//CChatWindow *chat = PeopleInterraction.MainChat.Window;
 	CChatWindow *chat = PeopleInterraction.ChatGroup.Window;
@@ -2138,7 +2137,7 @@ public:
 		uint peopleIndex;
 		if (PeopleInterraction.getPeopleFromCurrentMenu(list, peopleIndex))
 		{
-			CPeopleInterraction::displayTellInMainChat(list->getName(peopleIndex));
+			CPeopleInterraction::displayTellInMainChat(list->getName(peopleIndex).toUtf8());
 		}
 	}
 };
@@ -2160,7 +2159,7 @@ class CHandlerTellContact : public IActionHandler
 		uint peopleIndex;
 		if (PeopleInterraction.getPeopleFromContainerID(gc->getId(), list, peopleIndex))
 		{
-			CPeopleInterraction::displayTellInMainChat(list->getName(peopleIndex));
+			CPeopleInterraction::displayTellInMainChat(list->getName(peopleIndex).toUtf8());
 		}
 
 	}
@@ -2416,7 +2415,7 @@ class CHandlerValidatePartyChatName : public IActionHandler
 		if (!gc) return;
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(gc->getGroup("eb"));
 		if (!eb) return;
-		ucstring title = eb->getInputStringAsUtf16();
+		string title = eb->getInputString();
 
 		// TODO GAMEDEV : create (or join ?) a new channel. Each channel (party chat) should have a unique name in the game
 		// moreover, it should not have the name of another available chat window (for example, it shouldn't be named 'Around Me')
@@ -2425,7 +2424,7 @@ class CHandlerValidatePartyChatName : public IActionHandler
 
 		if (!PeopleInterraction.testValidPartyChatName(title))
 		{
-			displayVisibleSystemMsg(title + ucstring(" : ") +  CI18N::get("uiInvalidPartyChatName"));
+			displayVisibleSystemMsg(title + " : " +  CI18N::get("uiInvalidPartyChatName"));
 			return;
 		}
 
@@ -2636,12 +2635,12 @@ public:
 					uint32 canWrite = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DYN_CHAT:CHANNEL"+s+":WRITE_RIGHT")->getValue32();
 					if (canWrite != 0)
 					{
-						ucstring title;
+						string title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 
 						// replace dynamic channel name and shortcut
 						string res = CI18N::get("uiFilterMenuDynamic");
-						strFindReplace(res, "%channel", title.toUtf8());
+						strFindReplace(res, "%channel", title);
 						strFindReplace(res, "%shortcut", s);
 
 						pMenu->addLineAtIndex(5 + insertion_index, res, "chat_target_selected", "dyn"+s, "dyn"+s);
@@ -2829,9 +2828,9 @@ class CHandlerSelectChatSource : public IActionHandler
 					pVTM->setActive(active);
 					if (active)
 					{
-						ucstring title;
+						string title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-						pVTM->setText("["+s+"] " + title.toUtf8());
+						pVTM->setText("["+s+"] " + title);
 					}
 				}
 			}
@@ -2954,9 +2953,9 @@ class CHandlerSelectChatSource : public IActionHandler
 				bool active = (textId != 0);
 				if (active)
 				{
-					ucstring title;
+					string title;
 					STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-					menu->addLineAtIndex(insertionIndex, "["+s+"] " + title.toUtf8(), FILTER_TOGGLE, "dyn"+s);
+					menu->addLineAtIndex(insertionIndex, "["+s+"] " + title, FILTER_TOGGLE, "dyn"+s);
 					menu->setUserGroupLeft(insertionIndex, createMenuCheckBox(FILTER_TOGGLE, "dyn"+s, pi.ChatInput.DynamicChat[i].isListeningWindow(cw)));
 					++insertionIndex;
 				}
@@ -3315,7 +3314,7 @@ REGISTER_INTERFACE_USER_FCT("getNumUserChatLeft", getNumUserChatLeft)
 // STATIC FUNCTIONS IMPLEMENTATIONS //
 //////////////////////////////////////
 
-static void displayVisibleSystemMsg(const ucstring &msg, const string &cat)
+static void displayVisibleSystemMsg(const string &msg, const string &cat)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	im->displaySystemInfo(msg, cat);
@@ -3328,7 +3327,7 @@ static void displayVisibleSystemMsg(const ucstring &msg, const string &cat)
 #if !FINAL_VERSION
 NLMISC_COMMAND(testSI, "tmp", "tmp")
 {
-	PeopleInterraction.ChatInput.DebugInfo.displayMessage(ucstring("test"), CRGBA::Red);
+	PeopleInterraction.ChatInput.DebugInfo.displayMessage("test", CRGBA::Red);
 	return true;
 }
 #endif
