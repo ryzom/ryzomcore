@@ -551,9 +551,9 @@ void CToolDrawPrim::commit()
 		if (!_Extending)
 		{
 			// set readable name
-			ucstring readableName = NLMISC::CI18N::get(_PrimType == Road ? "uiR2EDNameBotRoad" : "uiR2EDNameBotRegion");
-			readableName = getEditor().genInstanceName(readableName);
-			desc->set("Name", readableName.toUtf8());
+			string readableName = NLMISC::CI18N::get(_PrimType == Road ? "uiR2EDNameBotRoad" : "uiR2EDNameBotRegion");
+			readableName = getEditor().genInstanceName(readableName).toUtf8();
+			desc->set("Name", readableName);
 			// send creation command
 			// tmp : static npc counter
 			// add in component list of default feature

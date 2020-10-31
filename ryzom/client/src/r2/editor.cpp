@@ -1571,12 +1571,12 @@ int CEditor::luaGetUserEntityName(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 1); // this is a method
 	if (UserEntity)
 	{
-		ucstring name = UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis;
-		ls.push( name.toUtf8() );
+		string name = UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis;
+		ls.push( name );
 	}
 	else
 	{
-		ls.push(std::string(""));
+		ls.push(std::string());
 	}
 
 	return 1;

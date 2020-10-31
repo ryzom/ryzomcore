@@ -279,12 +279,12 @@ void CAutoGroup::group(CObject *newEntityDesc, const NLMISC::CVectorD &createPos
 			getEditor().getDMC().flushActions();
 			return;
 		}
-		ucstring readableName;
+		string readableName;
 		CLuaState &ls = getEditor().getLua();
 		R2::getEditor().getEnv()["PaletteIdToGroupTranslation"][newEntityDesc->getAttr("Base")->toString()].push();
 		if (ls.isString(-1))
-			readableName.fromUtf8(ls.toString(-1));
-		ucstring ucGroupName = ucstring(readableName + " " + CI18N::get("uiR2EDNameGroup"));
+			readableName = ls.toString(-1);
+		string ucGroupName = readableName + " " + CI18N::get("uiR2EDNameGroup");
 
 		newGroup->set("Name", getEditor().genInstanceName(ucGroupName).toUtf8());
 		getEditor().getDMC().requestInsertNode(destGroup->getParentAct()->getId(),
