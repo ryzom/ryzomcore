@@ -3394,22 +3394,22 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 		if (!macro)
 			return;
 
-		ucstring macroName = macro->Name;
+		string macroName = macro->Name;
 		if (macroName.empty())
 			macroName = CI18N::get("uiNotAssigned");
 
-		ucstring assignedTo = macro->Combo.toString();
+		string assignedTo = macro->Combo.toString();
 		if (assignedTo.empty())
 			assignedTo = CI18N::get("uiNotAssigned");
 
-		ucstring dispText;
-		ucstring dispCommands;
+		string dispText;
+		string dispCommands;
 		const CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 
 		uint nb = 0;
 		for (uint i = 0; i < macro->Commands.size(); ++i)
 		{
-			ucstring commandName;
+			string commandName;
 			for (uint j = 0; j < pMCM->ActionManagers.size(); ++j)
 			{
 				CAction::CName c(macro->Commands[i].Name.c_str(), macro->Commands[i].Params.c_str());
@@ -3425,14 +3425,14 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 			}
 		}
 		// formats
-		dispText = ucstring("%n (@{6F6F}%k@{FFFF})\n%c");
+		dispText = "%n (@{6F6F}%k@{FFFF})\n%c";
 		if (nb > 5) // more?
 			dispCommands += toString(" ... @{6F6F}%i@{FFFF}+", nb-5);
 
-		strFindReplace(dispText, ucstring("%n"), macroName);
-		strFindReplace(dispText, ucstring("%k"), assignedTo);
-		strFindReplace(dispText, ucstring("%c"), dispCommands);
-		help = dispText.toUtf8();
+		strFindReplace(dispText, "%n", macroName);
+		strFindReplace(dispText, "%k", assignedTo);
+		strFindReplace(dispText, "%c", dispCommands);
+		help = dispText;
 	}
 	else if(getType() == CCtrlSheetInfo::SheetType_Item)
 	{

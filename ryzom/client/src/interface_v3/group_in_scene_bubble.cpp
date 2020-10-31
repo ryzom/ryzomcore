@@ -1311,6 +1311,7 @@ class CAHDynChatClickOption : public IActionHandler
 		uint32 optStrId = InSceneBubbleManager.dynChatGetOptionStringId(nBubbleNb, nOpt);
 		if (!optStrId) return;
 
+#ifdef RYZOM_BG_DOWNLOADER
 		if (isBGDownloadEnabled())
 		{
 			STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
@@ -1330,6 +1331,7 @@ class CAHDynChatClickOption : public IActionHandler
 				}
 			}
 		}
+#endif
 
 		static const string sMsg = "BOTCHAT:DYNCHAT_SEND";
 		CBitMemStream out;

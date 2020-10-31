@@ -149,8 +149,8 @@ std::string	PlayerSelectedHomeShardName;
 std::string	PlayerSelectedHomeShardNameWithParenthesis;
 extern std::string CurrentCookie;
 
-ucstring NewKeysCharNameWanted; // name of the character for which a new keyset must be created
-ucstring NewKeysCharNameValidated;
+std::string NewKeysCharNameWanted; // name of the character for which a new keyset must be created
+std::string NewKeysCharNameValidated;
 std::string GameKeySet = "keys.xml";
 std::string RingEditorKeySet = "keys_r2ed.xml";
 
@@ -520,7 +520,9 @@ bool connection (const string &cookie, const string &fsaddr)
 	if (InterfaceState == GOGOGO_IN_THE_GAME)
 	{
 		// set background downloader to 'paused' to ease loading of client
+#ifdef RYZOM_BG_DOWNLOADER
 		pauseBGDownloader();
+#endif
 		return true;
 	}
 
@@ -659,7 +661,9 @@ bool reconnection()
 
 	if (InterfaceState == GOGOGO_IN_THE_GAME)
 	{
+#ifdef RYZOM_BG_DOWNLOADER
 		pauseBGDownloader();
+#endif
 		return true;
 	}
 	if (InterfaceState == QUIT_THE_GAME)
@@ -779,12 +783,12 @@ void globalMenuMovieShooter()
 
 // ------------------------------------------------------------------------------------------------
 // Build a valid PlayerName for file Save selection.
-std::string	buildPlayerNameForSaveFile(const ucstring &playerNameIn)
+std::string	buildPlayerNameForSaveFile(const std::string &playerNameIn)
 {
 	// remove any shard name appended
-	ucstring playerName = playerNameIn;
-	ucstring::size_type pos = playerNameIn.find('(');
-	if(pos!=ucstring::npos && pos>0)
+	string playerName = playerNameIn;
+	string::size_type pos = playerNameIn.find('(');
+	if(pos!=string::npos && pos>0)
 	{
 		playerName.resize(pos);
 	}
@@ -809,8 +813,8 @@ std::string	buildPlayerNameForSaveFile(const ucstring &playerNameIn)
 }
 
 
+#ifdef RYZOM_BG_DOWNLOADER
 static bool LuaBGDSuccessFlag = true; // tmp, for debug
-
 
 void updateBGDownloaderUI()
 {
@@ -909,11 +913,12 @@ void updateBGDownloaderUI()
 		nlwarning("Some scipt error occurred");
 	}
 }
-
+#endif
 
 // compute patcher priority, depending on the presence of one or more mainland characters : in this case, give the patch a boost
 void updatePatcherPriorityBasedOnCharacters()
 {
+#ifdef RYZOM_BG_DOWNLOADER
 	if (isBGDownloadEnabled())
 	{
 		if (CBGDownloaderAccess::getInstance().getDownloadThreadPriority() != BGDownloader::ThreadPriority_Paused)
@@ -932,6 +937,7 @@ void updatePatcherPriorityBasedOnCharacters()
 			CBGDownloaderAccess::getInstance().requestDownloadThreadPriority(hasMainlandChar ? BGDownloader::ThreadPriority_Normal : BGDownloader::ThreadPriority_Low, false);
 		}
 	}
+#endif
 }
 
 // Launch the interface to choose a character
@@ -940,6 +946,7 @@ TInterfaceState globalMenu()
 {
 	CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_CharacterSelection, "login_step_character_selection"));
 
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess &bgDownloader = CBGDownloaderAccess::getInstance();
 
 	if (isBGDownloadEnabled())
@@ -950,14 +957,14 @@ TInterfaceState globalMenu()
 			// if a task is already started, then this was a situation where player went back from game to the character selection,
 			// so just unpause
 			BGDownloader::TTaskResult dummyResult;
-			ucstring				  dummyMessage;
+			ucstring				  dummyMessage; // OLD
 			if (!bgDownloader.isTaskEnded(dummyResult, dummyMessage))
 			{
 				unpauseBGDownloader();
 			}
 		}
 	}
-
+#endif
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -1003,8 +1010,9 @@ TInterfaceState globalMenu()
 			}
 		#endif
 
+#ifdef RYZOM_BG_DOWNLOADER
 		updateBGDownloaderUI();
-
+#endif
 
 		// Update network.
 		try
@@ -1087,7 +1095,7 @@ TInterfaceState globalMenu()
 		{
 			if (noUserChar || userChar)
 			{
-
+#ifdef RYZOM_BG_DOWNLOADER
 				if (isBGDownloadEnabled())
 				{
 					// If there's a need for mainland download, then proceed
@@ -1096,7 +1104,7 @@ TInterfaceState globalMenu()
 						// if a task is already started, then this was a situation where player went back from game to the character selection,
 						// so just unpause
 						BGDownloader::TTaskResult dummyResult;
-						ucstring				  dummyMessage;
+						ucstring				  dummyMessage; // OLD
 						if (bgDownloader.isTaskEnded(dummyResult, dummyMessage))
 						{
 							// launch mainland patch as a background task
@@ -1111,6 +1119,7 @@ TInterfaceState globalMenu()
 						}
 					}
 				}
+#endif
 
 				//nlinfo("impulseCallBack : received userChars list");
 				noUserChar = userChar = false;
@@ -1260,8 +1269,8 @@ TInterfaceState globalMenu()
 	LoginSM.pushEvent(CLoginStateMachine::ev_global_menu_exited);
 
 	//  Init the current Player Name (for interface.cfg and sentence.name save). Make a good File Name.
-	ucstring	&playerName= CharacterSummaries[PlayerSelectedSlot].Name;
-	PlayerSelectedFileName= buildPlayerNameForSaveFile(playerName);
+	string playerName = CharacterSummaries[PlayerSelectedSlot].Name.toUtf8();
+	PlayerSelectedFileName = buildPlayerNameForSaveFile(playerName);
 
 	// Init the current Player Home shard Id and name
 	CharacterHomeSessionId = CharacterSummaries[PlayerSelectedSlot].Mainland;
@@ -1337,7 +1346,7 @@ public:
 REGISTER_ACTION_HANDLER (CAHNetInitCharSel, "net_init_char_sel");
 
 // ------------------------------------------------------------------------------------------------
-void setTarget(CCtrlBase *ctrl, const string &targetName, ucstring &value)
+void setTarget(CCtrlBase *ctrl, const string &targetName, std::string &value)
 {
 	std::vector<CInterfaceLink::CTargetInfo> targets;
 	// find first enclosing group
@@ -1352,7 +1361,7 @@ void setTarget(CCtrlBase *ctrl, const string &targetName, ucstring &value)
 	if (ig)
 	{
 		CInterfaceExprValue exprValue;
-		exprValue.setString(value.toUtf8());
+		exprValue.setString(value);
 
 		CInterfaceLink::splitLinkTargets(targetName, ig, targets);
 		for(uint k = 0; k < targets.size(); ++k)
@@ -1410,12 +1419,12 @@ public:
 		if (CharacterSummaries[PlayerSelectedSlot].Name.empty())
 			return;
 
-		ucstring sValue("");
+		string sValue;
 		uint32 nValue = 0;
 
 		if (sProp == "name")
 		{
-			sValue = CharacterSummaries[PlayerSelectedSlot].Name;
+			sValue = CharacterSummaries[PlayerSelectedSlot].Name.toUtf8();
 			setTarget (pCaller, sTarget, sValue);
 		}
 /*			else if (sProp == "surname")
@@ -1440,10 +1449,10 @@ Deprecated	{
 			sValue = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(titleStr, womanTitle);
 			{
 				// Sometimes translation contains another title
-				ucstring::size_type pos = sValue.find('$');
-				if (pos != ucstring::npos)
+				string::size_type pos = sValue.find('$');
+				if (pos != string::npos)
 				{
-					sValue = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sValue.toUtf8()), womanTitle);
+					sValue = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sValue), womanTitle);
 				}
 			}
 			setTarget (pCaller, sTarget, sValue);
@@ -1684,11 +1693,11 @@ public:
 
 		// Setup the name
 		string sEditBoxPath = getParam (Params, "name");
-		ucstring sFirstName = ucstring("NotSet");
-		ucstring sSurName = ucstring("NotSet");
+		string sFirstName = "NotSet";
+		string sSurName = "NotSet";
 		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(sEditBoxPath));
 		if (pGEB != NULL)
-			sFirstName = pGEB->getInputStringAsUtf16();
+			sFirstName = pGEB->getInputString();
 		else
 			nlwarning ("can't get edit box name : %s",sEditBoxPath.c_str());
 
@@ -1803,8 +1812,8 @@ public:
 		out.serial (nSelectedSlot);
 
 		// Yoyo: delete the Local files. To avoid problem if recreate a character with same name.
-		ucstring	&playerName= CharacterSummaries[nSelectedSlot].Name;
-		string		playerDeletedFileName= buildPlayerNameForSaveFile(playerName);
+		string playerName = CharacterSummaries[nSelectedSlot].Name.toUtf8();
+		string playerDeletedFileName = buildPlayerNameForSaveFile(playerName);
 		// Delete the 2 Local files
 		pIM->deletePlayerConfig(playerDeletedFileName);
 		pIM->deletePlayerKeys(playerDeletedFileName);
@@ -1855,7 +1864,7 @@ string getTarget(CCtrlBase * /* ctrl */, const string &targetName)
 }
 
 // ------------------------------------------------------------------------------------------------
-ucstring getUCTarget(CCtrlBase * /* ctrl */, const string &targetName)
+ucstring getUCTarget(CCtrlBase * /* ctrl */, const string &targetName) // TODO: UTF-8 Lua
 {
 	string sTmp = targetName;
 	std::vector<CInterfaceLink::CTargetInfo> targetsVector;
@@ -1867,13 +1876,13 @@ ucstring getUCTarget(CCtrlBase * /* ctrl */, const string &targetName)
 	if (!elem)
 	{
 		nlwarning("<CInterfaceExpr::getprop> : Element is NULL");
-		return ucstring("");
+		return ucstring(""); // TODO: UTF-8 Lua
 	}
 	const CReflectedProperty *pRP = elem->getReflectedProperty(rTI.PropertyName);
 
 	if (pRP->Type == CReflectedProperty::UCString)
 		return ((elem->*(pRP->GetMethod.GetUCString))());
-	return ucstring("");
+	return ucstring(""); // TODO: UTF-8 Lua
 }
 
 /*// Ask the server to rename a character
@@ -1946,7 +1955,7 @@ public:
 		string sDBLink = getParam(Params, "dblink");
 		CharNameValidDBLink = sDBLink;
 
-		ucstring sName = getUCTarget(NULL,sTarget);
+		string sName = getUCTarget(NULL,sTarget).toUtf8(); // TODO: UTF-8 Lua
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if (sName.empty())
@@ -1988,13 +1997,13 @@ public:
 					if (Mainlands[k].Id == MainlandSelected)
 					{
 						// extract name from mainland
-						/*ucstring::size_type first = Mainlands[k].Name.find('(');
-						ucstring::size_type last = Mainlands[k].Name.find(')');
-						if (first != ucstring::npos && last != ucstring::npos && first < last)
+						/*ucstring::size_type first = Mainlands[k].Name.find('('); // OLD
+						ucstring::size_type last = Mainlands[k].Name.find(')');// OLD
+						if (first != ucstring::npos && last != ucstring::npos && first < last)// OLD
 						{
 							NewKeysCharNameWanted += Mainlands[k].Name.substr(first, last - first + 1);
 						}*/
-						NewKeysCharNameWanted += ('(' + Mainlands[k].Name + ')');
+						NewKeysCharNameWanted += ('(' + Mainlands[k].Name.toUtf8() + ')');
 						break;
 					}
 				}
@@ -2017,7 +2026,7 @@ public:
 
 				for (uint i = 0; i < CharacterSummaries.size(); ++i)
 				{
-					ucstring ls = CharacterSummaries[i].Name.toString();
+					string ls = CharacterSummaries[i].Name.toString();
 					if (ls == sName)
 						CharNameValid = false;
 				}
@@ -2304,7 +2313,7 @@ public:
 	}
 
 	// add a new keyset in the list
-	void addKeySet(const std::string &filename, const ucstring &name, const ucstring tooltip)
+	void addKeySet(const std::string &filename, const std::string &name, const std::string tooltip)
 	{
 		nlassert(List);
 		CInterfaceGroup *pNewLine = buildTemplate("t_keyset", toString(filename));
@@ -2313,13 +2322,13 @@ public:
 			CViewText *pVT = dynamic_cast<CViewText*>(pNewLine->getView("name"));
 			if (pVT != NULL)
 			{
-				pVT->setTextLocalized(name.toUtf8(), false);
+				pVT->setTextLocalized(name, false);
 			}
 
 			CCtrlBase *pBut = pNewLine->getCtrl("but");
 			if (pBut != NULL)
 			{
-				pBut->setDefaultContextHelp(tooltip.toUtf8());
+				pBut->setDefaultContextHelp(tooltip);
 			}
 			addGroupInList(pNewLine);
 		}
@@ -2355,12 +2364,12 @@ public:
 
 				std::string strId = "uiCP_KeysetName_" + keySetVar->asString(k);
 				strFindReplace(strId, ".", "_");
-				ucstring keySetName = CI18N::get(strId);
+				const string &keySetName = CI18N::get(strId);
 				strId = "uiCP_KeysetTooltip_" + keySetVar->asString(k);
 				strFindReplace(strId, ".", "_");
 				if (CI18N::hasTranslation(strId))
 				{
-					ucstring keySetTooltip = CI18N::get(strId);
+					const string &keySetTooltip = CI18N::get(strId);
 					addKeySet(keySetVar->asString(k), keySetName, keySetTooltip);
 				}
 			}
@@ -2369,8 +2378,8 @@ public:
 		{
 			nlwarning("'%s' var not found in config file, or list is empty, proposing default keyset only", KeySetVarName);
 			std::string defaultKeySet = "keys";
-			ucstring keySetName = CI18N::get("uiCP_KeysetName_" + defaultKeySet);
-			ucstring keySetTooltip = CI18N::get("uiCP_KeysetTooltip_" + defaultKeySet);
+			const string &keySetName = CI18N::get("uiCP_KeysetName_" + defaultKeySet);
+			const string &keySetTooltip = CI18N::get("uiCP_KeysetTooltip_" + defaultKeySet);
 			addKeySet(defaultKeySet, keySetName, keySetTooltip);
 		}
 
@@ -2396,19 +2405,19 @@ public:
 		{
 			for(TKeySetFileMap::iterator it = keySetFiles.begin(); it != keySetFiles.end(); ++it)
 			{
-				ucstring name;
+				string name;
 				if (ClientCfg.Local)
 				{
-					name = ucstring(it->first);
+					name = it->first;
 				}
 				else
 				{
-					// search matching ucstring name from character summaries
+					// search matching utf-8 string name from character summaries
 					for (uint k = 0; k < CharacterSummaries.size(); ++k)
 					{
-						if (it->first == buildPlayerNameForSaveFile(CharacterSummaries[k].Name))
+						if (it->first == buildPlayerNameForSaveFile(CharacterSummaries[k].Name.toUtf8()))
 						{
-							name = CharacterSummaries[k].Name;
+							name = CharacterSummaries[k].Name.toUtf8();
 						}
 					}
 				}
@@ -2419,7 +2428,7 @@ public:
 						addSeparator();
 						separatorAdded = true;
 					}
-					addKeySet(it->first, ucstring(it->first), CI18N::get(std::string("uiCP_KeysetImport") + (it->second & GameKeys ? "_Game" : "")
+					addKeySet(it->first, it->first, CI18N::get(std::string("uiCP_KeysetImport") + (it->second & GameKeys ? "_Game" : "")
 																						  + (it->second & EditorKeys ? "_Editor" : "")));
 				}
 			}
@@ -2554,26 +2563,24 @@ REGISTER_ACTION_HANDLER (CAHResetKeysetSelect, "keyset_select");
 // *************************** SCENARIO CONTROL WINDOW ***********************
 // ***************************************************************************
 // helper function for "setScenarioInformation"
-static void setTextField(CInterfaceGroup* scenarioWnd, const std::string &uiName, const ucstring &text)
+static void setTextField(CInterfaceGroup* scenarioWnd, const std::string &uiName, const std::string &text)
 {
 	CInterfaceElement *result = scenarioWnd->findFromShortId(uiName);
 	if(result)
 	{
 		CViewText* viewText = dynamic_cast<CViewText*>(result);
 		if(viewText)
-			viewText->setTextLocalized(text.toUtf8(), false);
+			viewText->setTextLocalized(text, false);
 		CGroupEditBox* editBox = dynamic_cast<CGroupEditBox*>(result);
 		if(editBox)
-			editBox->setInputStringAsUtf16(text);
+			editBox->setInputString(text);
 
 	}
 }
 // helper function for "setScenarioInformation"
-static void setTextField(CInterfaceGroup* scenarioWnd, const std::string &uiName, const std::string &utf8Text)
+static void setTextField(CInterfaceGroup* scenarioWnd, const std::string &uiName, const ucstring &text) // TODO: UTF-8 Lua
 {
-	ucstring ucText;
-	ucText.fromUtf8(utf8Text);
-	setTextField(scenarioWnd, uiName, ucText);
+	setTextField(scenarioWnd, uiName, text.toUtf8());
 }
 // helper function for "setScenarioInformation"
 static std::string fieldLookup(const vector< pair< string, string > > &values, const std::string &id)
@@ -3455,7 +3462,7 @@ class CAHInitImportCharacter : public IActionHandler
 		CPath::getPathContent("save/", false, false, true, savedCharacters);
 
 		CInterfaceGroup *newLine;
-		CInterfaceGroup *prevLine;
+		CInterfaceGroup *prevLine = NULL;
 
 		for (uint i = 0; i < savedCharacters.size(); ++i)
 		{
@@ -3644,7 +3651,7 @@ class CAHExportCharacter : public IActionHandler
 			return;
 
 		// extract name
-		const std::string name = buildPlayerNameForSaveFile(CS.Name.toString());
+		const std::string name = buildPlayerNameForSaveFile(CS.Name.toUtf8());
 
 		COFile fd;
 		bool success = false;

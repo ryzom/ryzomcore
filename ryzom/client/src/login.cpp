@@ -357,6 +357,7 @@ static void setPatcherProgressText(const std::string &baseUIPath, const ucstring
 static void updatePatchingInfoText(const std::string &baseUIPath)
 {
 	CPatchManager *pPM = CPatchManager::getInstance();
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess &bgDownloader = CBGDownloaderAccess::getInstance();
 	if (isBGDownloadEnabled())
 	{
@@ -380,6 +381,7 @@ static void updatePatchingInfoText(const std::string &baseUIPath)
 		}
 	}
 	else
+#endif
 	{
 		ucstring state;
 		vector<ucstring> log;
@@ -406,7 +408,9 @@ void loginMainLoop()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CPatchManager *pPM = CPatchManager::getInstance();
 
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess &bgDownloader = CBGDownloaderAccess::getInstance();
+#endif
 
 	bool windowBlinkDone = false;
 	bool fatalMessageBoxShown = false;
@@ -464,11 +468,13 @@ void loginMainLoop()
 			BGDownloader::TTaskResult taskResult = BGDownloader::TaskResult_Unknown;
 			bool finished = false;
 			ucstring bgDownloaderError;
+#ifdef RYZOM_BG_DOWNLOADER
 			if (isBGDownloadEnabled())
 			{
 				finished = bgDownloader.isTaskEnded(taskResult, bgDownloaderError);
 			}
 			else
+#endif
 			{
 				finished = pPM->isCheckThreadEnded(res);
 			}
@@ -478,6 +484,7 @@ void loginMainLoop()
 				setPatcherStateText("ui:login:checking", ucstring());
 				setPatcherProgressText("ui:login:checking", ucstring());
 
+#ifdef RYZOM_BG_DOWNLOADER
 				if (isBGDownloadEnabled())
 				{
 					AvailablePatchs = bgDownloader.getAvailablePatchs();
@@ -529,6 +536,7 @@ void loginMainLoop()
 
 				}
 				else
+#endif
 				{
 					if(res)
 					{
@@ -642,7 +650,7 @@ void loginMainLoop()
 			int currentPatchingSize;
 			int totalPatchSize;
 
-
+#ifdef RYZOM_BG_DOWNLOADER
 			if (isBGDownloadEnabled())
 			{
 				currentPatchingSize = bgDownloader.getPatchingSize();
@@ -683,6 +691,7 @@ void loginMainLoop()
 				}
 			}
 			else
+#endif
 			{
 				totalPatchSize = TotalPatchSize;
 				currentPatchingSize = pPM->getPatchingSize();
@@ -1130,18 +1139,22 @@ void initPatchCheck()
 		LoginShardId = Shards[ShardSelected].ShardId;
 	}
 
+#ifdef RYZOM_BG_DOWNLOADER
 	if (!isBGDownloadEnabled())
+#endif
 	{
 		getPatchParameters(url, ver, patchURIs);
 		pPM->init(patchURIs, url, ver);
 		pPM->startCheckThread(true /* include background patchs */);
 	}
+#ifdef RYZOM_BG_DOWNLOADER
 	else
 	{
 		BGDownloader::CTaskDesc taskDesc(BGDownloader::DLState_CheckPatch);
 		CBGDownloaderAccess::getInstance().requestDownloadThreadPriority(BGDownloader::ThreadPriority_Normal, false);
 		CBGDownloaderAccess::getInstance().startTask(taskDesc, getBGDownloaderCommandLine(), true /* showDownloader */);
 	}
+#endif
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
 
 	setPatcherStateText("ui:login:checking", ucstring());
@@ -1650,8 +1663,9 @@ void initPatch()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CPatchManager *pPM = CPatchManager::getInstance();
 
-
+#ifdef RYZOM_BG_DOWNLOADER
 	if (!isBGDownloadEnabled())
+#endif
 	{
 		// Get the list of optional categories to patch
 		vector<string> vCategories;
@@ -1686,6 +1700,7 @@ void initPatch()
 		}
 		pPM->startPatchThread(vCategories, true);
 	}
+#ifdef RYZOM_BG_DOWNLOADER
 	else
 	{
 		// NB : here we only do a part of the download each time
@@ -1695,6 +1710,7 @@ void initPatch()
 		NLMISC::CBigFile::getInstance().removeAll();
 		NLMISC::CStreamedPackageManager::getInstance().unloadAll();
 	}
+#endif
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_PATCHING);
 
 	CInterfaceElement *closeBtn = CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_CLOSE_PATCH);
@@ -1840,11 +1856,13 @@ class CAHReboot : public IActionHandler
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		try
 		{
+#ifdef RYZOM_BG_DOWNLOADER
 			if (isBGDownloadEnabled())
 			{
 				CBGDownloaderAccess::getInstance().reboot();
 			}
 			else
+#endif
 			{
 				CPatchManager::getInstance()->reboot();
 			}

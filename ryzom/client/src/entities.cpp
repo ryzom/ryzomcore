@@ -246,7 +246,7 @@ public :
 	}
 private:
 	std::list<CCDBNodeLeaf *> _PendingMissionTitle;
-//	std::set<ucstring> _AlreadyReceived;
+//	std::set<std::string> _AlreadyReceived;
 };
 
 //-----------------------------------------------

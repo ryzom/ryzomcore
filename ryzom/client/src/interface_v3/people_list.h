@@ -75,13 +75,13 @@ public:
 	  */
 	bool create(const CPeopleListDesc &desc, const CChatWindowDesc *chat = NULL);
 	// Get index from the name of a people, or -1 if not found
-	sint getIndexFromName(const ucstring &name) const;
+	sint getIndexFromName(const std::string &name) const;
 	// Get index from the id of the container that represent the people
 	sint getIndexFromContainerID(const std::string &id) const;
 	// Get the number of people in this list
 	uint getNumPeople() const { return (uint)_Peoples.size(); }
 	// Get name of a people
-	ucstring getName(uint index) const;
+	std::string getName(uint index) const;
 	// Sort people alphabetically
 	void sort();
 

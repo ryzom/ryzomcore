@@ -64,7 +64,7 @@ public:
 	void			finish ();
 
 	// New message
-	void			newMessage (const ucstring& message);
+	void			newMessage (const std::string& message);
 
 	void			setFontFactor(float f);
 
@@ -72,7 +72,7 @@ public:
 	bool			ApplyTextCommands;
 
 	// Set teleport specific message
-	void			setTPMessages(const ucstring &tpReason, const ucstring &tpCancelText, const std::string &iconName);
+	void			setTPMessages(const std::string &tpReason, const std::string &tpCancelText, const std::string &iconName);
 
 	bool			getTPCancelFlag(bool clearFlag = true);
 
@@ -83,7 +83,7 @@ private:
 
 	// Display a text to describe what is the application going to do.
 	// this function can be call even if texture is NULL, driver or textcontext not initialised
-	ucstring		_ProgressMessage;
+	std::string		_ProgressMessage;
 
 	// Time since last update
 	sint64			_LastUpdate;
@@ -92,8 +92,8 @@ private:
 	uint			_CurrentRootStep;
 	uint			_RootStepCount;
 
-	ucstring		_TPReason;
-	ucstring		_TPCancelText;
+	std::string		_TPReason;
+	std::string		_TPCancelText;
 
 	bool			_TPCancelFlag;
 

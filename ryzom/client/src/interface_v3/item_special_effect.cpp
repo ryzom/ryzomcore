@@ -76,11 +76,11 @@ void CItemSpecialEffectHelper::registerItemSpecialEffect(const string &name)
 	effectMap.insert(make_pair(name, params));
 }
 
-void CItemSpecialEffectHelper::getItemSpecialEffectText(const CItemSheet *pIS, ucstring &itemText)
+void CItemSpecialEffectHelper::getItemSpecialEffectText(const CItemSheet *pIS, string &itemText)
 {
 	// check if some effects are present on this item
 	bool firstEffect = false;
-	ucstring effects;
+	string effects;
 	effects += getEffect(pIS->getEffect1(), firstEffect);
 	effects += getEffect(pIS->getEffect2(), firstEffect);
 	effects += getEffect(pIS->getEffect3(), firstEffect);
@@ -92,9 +92,9 @@ void CItemSpecialEffectHelper::getItemSpecialEffectText(const CItemSheet *pIS, u
 	strFindReplace(itemText, "%special_effects", effects);
 }
 
-ucstring CItemSpecialEffectHelper::getEffect(const std::string &effect, bool &first)
+string CItemSpecialEffectHelper::getEffect(const std::string &effect, bool &first)
 {
-	ucstring result;
+	string result;
 	CSString eff = effect;
 
 	if (eff.empty())

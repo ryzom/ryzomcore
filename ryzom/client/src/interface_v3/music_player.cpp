@@ -327,9 +327,7 @@ void CMusicPlayer::rebuildPlaylist()
 				CViewText *pVT = dynamic_cast<CViewText *>(pNew->getView(TEMPLATE_PLAYLIST_SONG_TITLE));
 				if (pVT)
 				{
-					ucstring title;
-					title.fromUtf8(_Songs[i].Title);
-					pVT->setText(title.toUtf8());
+					pVT->setText(_Songs[i].Title);
 				}
 
 				pVT = dynamic_cast<CViewText *>(pNew->getView(TEMPLATE_PLAYLIST_SONG_DURATION));

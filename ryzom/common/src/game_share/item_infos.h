@@ -136,9 +136,9 @@ public:
 	CSPhraseCom	Enchantment;
 	float  WearEquipmentMalus; // Malus for wearing this equipment (malus is used when execute an magic, forage action, craft action...), malus is only applicable for weapon and armor pieces
 
-	ucstring	CustomText;
-	ucstring	R2ItemDescription;
-	ucstring	R2ItemComment;
+	ucstring	CustomText; // TODO: UTF-8 (serial)
+	ucstring	R2ItemDescription; // TODO: UTF-8 (serial)
+	ucstring	R2ItemComment; // TODO: UTF-8 (serial)
 	uint8		PetNumber; // 1 based pet index
 	//@}
 };

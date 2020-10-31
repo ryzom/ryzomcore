@@ -413,7 +413,9 @@ static uint16 getZoneIdFromName(const string &zoneName)
 //-----------------------------------------------
 void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress, bool complete, bool unhibernate, EGSPD::CSeason::TSeason season)
 {
+#ifdef RYZOM_BG_DOWNLOADER
 	pauseBGDownloader();
+#endif
 	CNiceInputAuto niceInputs;
 	// Season has changed ?
 	Season = season;

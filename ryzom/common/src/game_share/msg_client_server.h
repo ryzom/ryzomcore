@@ -88,7 +88,7 @@ public:
 class CCheckNameMsg
 {
 public:
-	ucstring	Name;
+	ucstring	Name; // TODO: UTF-8 (serial)
 	TSessionId	HomeSessionId;
 
 	void serialBitMemStream(NLMISC::CBitMemStream &f)

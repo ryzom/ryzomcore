@@ -18,6 +18,7 @@
 
 // Project includes
 #include <nel/misc/utf_string_view.h>
+#include <nel/misc/stream.h>
 
 // References:
 // - https://twiserandom.com/unicode/unicode-encoding-utf-8-utf-16-utf-32/
@@ -67,6 +68,44 @@ NL_FORCE_INLINE void appendUtf8(std::string &str, u32char c)
 void CUtfStringView::append(std::string &str, u32char c)
 {
 	appendUtf8(str, c);
+}
+
+void CUtfStringView::append(IStream &s, u32char c)
+{
+	nlassert(!s.isReading());
+	std::string tmp;
+	tmp.reserve(4);
+	append(tmp, c);
+	s.serialBuffer((uint8_t *)&tmp[0], tmp.size());
+}
+
+u32char CUtfStringView::get(IStream &s)
+{
+	nlassert(s.isReading());
+
+	std::string tmp;
+	tmp.reserve(4);
+	uint8_t c;
+	s.serial(c);
+
+	// Single byte
+	if (c < 0x80)
+		return c;
+
+	// Do a fast check of length
+	tmp += (char)c;
+	size_t len;
+	if ((c & 0xF0) == 0xF0) len = 4;
+	if ((c & 0xE0) == 0xE0) len = 3;
+	else len = 2;
+
+	// Read from stream
+	tmp.resize(len);
+	s.serialBuffer((uint8_t *)&tmp[1], len - 1);
+
+	// Decode
+	const void *str = tmp.c_str();
+	return utf8Iterator(&str);
 }
 
 std::string CUtfStringView::toUtf8(bool reEncode) const

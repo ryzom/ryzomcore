@@ -43,7 +43,7 @@ public:
 	TContLMType			Type;
 	NLMISC::CVector2f	Pos;			// Center of the zone
 	NLLIGO::CPrimZone	Zone;			// Region & Place
-	std::string			TitleTextID;	// should be converted with CStringManagerClient::getPlaceLocalizedName() to get the actual title in ucstring
+	std::string			TitleTextID;	// should be converted with CStringManagerClient::getPlaceLocalizedName() to get the actual title in utf-8 string
 
 	CContLandMark()
 	{

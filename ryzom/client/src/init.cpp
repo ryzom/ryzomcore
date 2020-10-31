@@ -341,9 +341,7 @@ void ExitClientError (const char *format, ...)
 	CurrentErrorMessage = NLMISC::utf8ToWide(str);
 	DialogBox(HInstance, MAKEINTRESOURCE(IDD_ERROR_HELP_MESSAGE_BOX), NULL, ExitClientErrorDialogProc);
 	/*
-		ucstring ucstr;
-		ucstr.fromUtf8 (str);
-		MessageBoxW (NULL, (WCHAR *)ucstr.c_str(), nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str()), MB_OK|MB_ICONERROR);
+		MessageBoxW (NULL, nlUtf8ToWide(str.c_str()), nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str()), MB_OK|MB_ICONERROR);
 	*/
 #else
 	fprintf (stderr, "%s\n", str);
@@ -357,18 +355,18 @@ void ExitClientError (const char *format, ...)
 }
 
 // Use this function to return an information to the final user
-void ClientInfo (const ucstring &message)
+void ClientInfo (const std::string &message)
 {
 #ifdef NL_OS_WINDOWS
-	MessageBoxW(NULL, (WCHAR *)message.c_str(), nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str()), MB_OK|MB_ICONINFORMATION);
+	MessageBoxW(NULL, nlUtf8ToWide(message.c_str()), nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str()), MB_OK|MB_ICONINFORMATION);
 #endif
 }
 
 // Use this function to ask a question to the final user
-bool ClientQuestion (const ucstring &message)
+bool ClientQuestion (const std::string &message)
 {
 #ifdef NL_OS_WINDOWS
-	return MessageBoxW(NULL, (WCHAR *)message.c_str(), nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str()), MB_YESNO|MB_ICONQUESTION) != IDNO;
+	return MessageBoxW(NULL, nlUtf8ToWide(message.c_str()), nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str()), MB_YESNO|MB_ICONQUESTION) != IDNO;
 #else
 	return false;
 #endif
@@ -379,7 +377,7 @@ void selectTipsOfTheDay (uint /* tips */)
 	/* todo tips of the day uncomment
 	tips %= RZ_NUM_TIPS;
 	TipsOfTheDayIndex = tips;
-	ucstring title = CI18N::get ("uiTipsTitle");
+	string title = CI18N::get ("uiTipsTitle");
 	title += toString (tips+1);
 	title += " : ";
 	TipsOfTheDay = title+CI18N::get ("uiTips"+toString (tips));*/
@@ -541,7 +539,7 @@ void checkDriverVersion()
 			{
 				if (driverVersion < driversVersion[i])
 				{
-					ucstring message = CI18N::get ("uiUpdateDisplayDriversNotUpToDate") + "\n\n";
+					string message = CI18N::get ("uiUpdateDisplayDriversNotUpToDate") + "\n\n";
 					// message += CI18N::get ("uiUpdateDisplayDriversVendor") + driversVendor[i] + "\n";
 					message += CI18N::get ("uiUpdateDisplayDriversCard") + deviceName + "\n";
 					message += CI18N::get ("uiUpdateDisplayDriversCurrent") + getVersionString (driverVersion) + "\n";
@@ -999,7 +997,7 @@ void prelogInit()
 
 			FPU_CHECKER_ONCE
 			// Set the data path for the localisation.
-			const ucstring nmsg("Loading I18N...");
+			const string nmsg("Loading I18N...");
 			ProgressBar.newMessage ( nmsg );
 
 			FPU_CHECKER_ONCE
@@ -1177,7 +1175,9 @@ void prelogInit()
 
 #ifdef NL_OS_WINDOWS
 
+#ifdef RYZOM_BG_DOWNLOADER
 		CBGDownloaderAccess::getInstance().init();
+#endif
 
 		if (SlashScreen)
 			DestroyWindow (SlashScreen);

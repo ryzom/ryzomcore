@@ -42,7 +42,7 @@ extern CEventsListener EventsListener;
 // Hierarchical timer
 H_AUTO_DECL ( RZ_Client_Actions_Context_Mngr_Update )
 
-static bool getParam (CBaseAction::CParameter::TType type, ucstring &paramName, ucstring &paramValue, const std::string &argu, uint paramId);
+static bool getParam (CBaseAction::CParameter::TType type, string &paramName, string &paramValue, const std::string &argu, uint paramId);
 
 /////////////////////////////////////////////////////
 /////////////////////////////////////////////////////
@@ -243,8 +243,8 @@ bool CActionsManager::isActionPresentInContext(const CAction::CName &name) const
 			const CBaseAction::CParameter &parameter = baseAction->Parameters[i];
 			if (parameter.Type == CBaseAction::CParameter::Constant)
 			{
-				ucstring paramName;
-				ucstring paramValue = parameter.DefaultValue;
+				string paramName;
+				string paramValue = parameter.DefaultValue;
 
 				// Get the param from the argu
 				getParam (parameter.Type, paramName, paramValue, name.Argu, i);
@@ -252,7 +252,7 @@ bool CActionsManager::isActionPresentInContext(const CAction::CName &name) const
 				bool found = true;
 				for (uint k = 0; k < parameter.Values.size(); ++k)
 				{
-					if (parameter.Values[k].Value == paramValue.toUtf8())
+					if (parameter.Values[k].Value == paramValue)
 					{
 						if (!ActionsContext.matchContext(parameter.Values[k].Contexts)) return false;
 						found = true;
@@ -631,7 +631,7 @@ CBaseAction::CParameter::CParameter ()
 
 // ***************************************************************************
 
-static bool getParam (CBaseAction::CParameter::TType type, ucstring &paramName, ucstring &paramValue, const std::string &argu, uint paramId)
+static bool getParam (CBaseAction::CParameter::TType type, string &paramName, string &paramValue, const std::string &argu, uint paramId)
 {
 	const string separator = "|";
 	const string equal_separator = "=";
@@ -672,10 +672,7 @@ static bool getParam (CBaseAction::CParameter::TType type, ucstring &paramName, 
 		}
 
 		// Value ?
-		if(type==CBaseAction::CParameter::User || type==CBaseAction::CParameter::UserName)
-			paramValue.fromUtf8(argu.substr(pos, end-pos));
-		else
-			paramValue = argu.substr(pos, end-pos);
+		paramValue = argu.substr(pos, end-pos);
 
 		// Ok
 		return true;
@@ -683,10 +680,10 @@ static bool getParam (CBaseAction::CParameter::TType type, ucstring &paramName, 
 	return false;
 }
 
-ucstring CBaseAction::getActionLocalizedText (const CAction::CName &name) const
+string CBaseAction::getActionLocalizedText(const CAction::CName &name) const
 {
 	// Action base name
-	ucstring temp = CI18N::get(LocalizedName);
+	string temp = CI18N::get(LocalizedName);
 
 	// Get the parameter
 	uint i;
@@ -694,8 +691,8 @@ ucstring CBaseAction::getActionLocalizedText (const CAction::CName &name) const
 	{
 		bool parameterOk = false;
 		const CParameter &parameter = Parameters[i];
-		ucstring paramName;
-		ucstring paramValue;
+		string paramName;
+		string paramValue;
 
 		// Get the param from the argu
 		if (getParam (parameter.Type, paramName, paramValue, name.Argu, i))
@@ -703,7 +700,7 @@ ucstring CBaseAction::getActionLocalizedText (const CAction::CName &name) const
 			switch (parameter.Type)
 			{
 			case CParameter::Hidden:
-				if ((ucstring (parameter.DefaultValue) == paramValue) && (ucstring (parameter.Name) == paramName))
+				if ((parameter.DefaultValue == paramValue) && (parameter.Name == paramName))
 					parameterOk = true;
 				break;
 			case CParameter::Constant:
@@ -713,7 +710,7 @@ ucstring CBaseAction::getActionLocalizedText (const CAction::CName &name) const
 					{
 						// This value ?
 						const CParameter::CValue &value = parameter.Values[j];
-						if (ucstring(value.Value) == paramValue)
+						if (value.Value == paramValue)
 						{
 							temp += " ";
 
@@ -746,7 +743,7 @@ ucstring CBaseAction::getActionLocalizedText (const CAction::CName &name) const
 	if (i==Parameters.size ())
 		return temp;
 
-	return ucstring("");
+	return string();
 }
 
 // ***************************************************************************
@@ -791,8 +788,8 @@ const CActionsManager::CCategoryLocator *CActionsManager::getActionLocator (cons
 		{
 			bool parameterOk = false;
 			const CBaseAction::CParameter &parameter = baseAction.Parameters[i];
-			ucstring paramName;
-			ucstring paramValue;
+			string paramName;
+			string paramValue;
 
 			// Get the param from the argu
 			if (getParam (parameter.Type, paramName, paramValue, name.Argu, i))
@@ -800,7 +797,7 @@ const CActionsManager::CCategoryLocator *CActionsManager::getActionLocator (cons
 				switch (parameter.Type)
 				{
 				case CBaseAction::CParameter::Hidden:
-					if ((ucstring (parameter.DefaultValue) == paramValue) && (ucstring (parameter.Name) == paramName))
+					if ((parameter.DefaultValue == paramValue) && (parameter.Name == paramName))
 						parameterOk = true;
 					break;
 				case CBaseAction::CParameter::Constant:
@@ -810,7 +807,7 @@ const CActionsManager::CCategoryLocator *CActionsManager::getActionLocator (cons
 						for (j=0; j<parameter.Values.size (); j++)
 						{
 							const CBaseAction::CParameter::CValue &value = parameter.Values[j];
-							if (ucstring(value.Value) == paramValue)
+							if (value.Value == paramValue)
 							{
 								parameterOk = true;
 								break;
@@ -886,11 +883,11 @@ bool	CActionsManager::isActionDisplayForced(const CAction::CName &name) const
 }
 
 // ***************************************************************************
-ucstring CActionsManager::getActionLocalizedText (const CAction::CName &name) const
+string CActionsManager::getActionLocalizedText (const CAction::CName &name) const
 {
 	const CBaseAction *baseAction= getBaseAction(name);
 	if(!baseAction)
-		return ucstring();
+		return string();
 	return baseAction->getActionLocalizedText(name);
 }
 

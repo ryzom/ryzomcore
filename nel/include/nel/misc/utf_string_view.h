@@ -23,6 +23,8 @@
 
 namespace NLMISC {
 
+class IStream;
+
 /// String view for UTF-8 and UTF-32 iteration as 32-bit codepoints.
 /// This string view keeps the string as a reference, it does not make a copy.
 /// Only use this for iterating a string's codepoints.
@@ -140,6 +142,10 @@ public:
 	}
 
 	static void append(std::string &str, u32char c);
+
+	/// Encode or decode a single UTF-8 character in a stream (also useful for packing unsigned 20-bit integers)
+	static void append(IStream &s, u32char c);
+	static u32char get(IStream &s);
 
 private:
 	typedef u32char (*TIterator)(const void **addr);

@@ -157,12 +157,12 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 }
 
 //==================================================================
-sint CPeopleList::getIndexFromName(const ucstring &name) const
+sint CPeopleList::getIndexFromName(const string &name) const
 {
-	string sNameIn = toLower(name.toString());
+	string sNameIn = toLower(name);
 	for(uint k = 0; k < _Peoples.size(); ++k)
 	{
-		string sPeopleName = toLower(_Peoples[k].getName().toString());
+		string sPeopleName = toLower(_Peoples[k].getName().toUtf8());
 		if (sPeopleName == sNameIn) return k;
 	}
 	return -1;
@@ -335,7 +335,7 @@ sint CPeopleList::addPeople(const ucstring &name, uint teamMateIndex /*= 0*/)
 {
 	if (!_BaseContainer) return - 1;
 	// check if not already inserted
-	if (getIndexFromName(name) != -1)
+	if (getIndexFromName(name.toUtf8()) != -1)
 	{
 		nlwarning("<CPeopleList::addPeople> people %s inserted twice.", name.toString().c_str());
 	}
@@ -687,14 +687,14 @@ void CPeopleList::updatePeopleMenu(uint index)
 }
 
 //==================================================================
-ucstring CPeopleList::getName(uint index) const
+std::string CPeopleList::getName(uint index) const
 {
 	if (index >= _Peoples.size())
 	{
 		nlwarning("bad index");
-		return ucstring("BAD INDEX!");
+		return "BAD INDEX!";
 	}
-	return _Peoples[index].getName();
+	return _Peoples[index].getName().toUtf8();
 }
 
 //==================================================================

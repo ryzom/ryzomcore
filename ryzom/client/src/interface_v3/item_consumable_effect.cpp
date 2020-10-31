@@ -33,10 +33,10 @@ CItemConsumableEffectHelper* CItemConsumableEffectHelper::getInstance()
 	return instance;
 }
 
-void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *pIS, ucstring &itemText, sint32 itemQuality)
+void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *pIS, string &itemText, sint32 itemQuality)
 {
 	// check if some effects are present on this item
-	ucstring effects("");
+	string effects("");
 
 	uint i;
 	for( i=0; i<pIS->Consumable.Properties.size(); ++i )
@@ -71,7 +71,7 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 			uint32 timeInSec;
 			fromString(params[3].c_str(), timeInSec);
 
-			ucstring result;
+			string result;
 
 			if (bonus >= 0)
 				result = CI18N::get("uiItemConsumableEffectUpCharac");
@@ -101,7 +101,7 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 			uint32 userDisableTime;
 			fromString(params[4].c_str(), userDisableTime);
 
-			ucstring result = CI18N::get("uiItemConsumableEffectLifeAura");
+			string result = CI18N::get("uiItemConsumableEffectLifeAura");
 			strFindReplace(result, "%modifier", toString(regenMod));
 			strFindReplace(result, "%minutes", toString(duration/60));
 			strFindReplace(result, "%secondes", toString(duration%60));
@@ -128,7 +128,7 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 			uint32 userDisableTime;
 			fromString(params[4].c_str(), userDisableTime);
 
-			ucstring result = CI18N::get("uiItemConsumableEffectLifeAura");
+			string result = CI18N::get("uiItemConsumableEffectLifeAura");
 			strFindReplace(result, "%modifier", toString(bonus));
 			strFindReplace(result, "%minutes", toString(duration/60));
 			strFindReplace(result, "%secondes", toString(duration%60));
@@ -154,7 +154,7 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 			uint32 userDisableTime;
 			fromString(params[4].c_str(), userDisableTime);
 
-			ucstring result = CI18N::get("uiItemConsumableEffectStaminaAura");
+			string result = CI18N::get("uiItemConsumableEffectStaminaAura");
 			strFindReplace(result, "%modifier", toString(regenMod));
 			strFindReplace(result, "%minutes", toString(duration/60));
 			strFindReplace(result, "%secondes", toString(duration%60));
@@ -182,7 +182,7 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 			uint32 userDisableTime;
 			fromString(params[4].c_str(), userDisableTime);
 
-			ucstring result = CI18N::get("uiItemConsumableEffectStaminaAura");
+			string result = CI18N::get("uiItemConsumableEffectStaminaAura");
 			strFindReplace(result, "%modifier", toString(bonus));
 			strFindReplace(result, "%minutes", toString(duration/60));
 			strFindReplace(result, "%secondes", toString(duration%60));
@@ -208,7 +208,7 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 			uint32 userDisableTime;
 			fromString(params[4].c_str(), userDisableTime);
 
-			ucstring result = CI18N::get("uiItemConsumableEffectSapAura");
+			string result = CI18N::get("uiItemConsumableEffectSapAura");
 			strFindReplace(result, "%modifier", toString(regenMod));
 			strFindReplace(result, "%minutes", toString(duration/60));
 			strFindReplace(result, "%secondes", toString(duration%60));
@@ -235,7 +235,7 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 			uint32 userDisableTime;
 			fromString(params[4].c_str(), userDisableTime);
 
-			ucstring result = CI18N::get("uiItemConsumableEffectSapAura");
+			string result = CI18N::get("uiItemConsumableEffectSapAura");
 			strFindReplace(result, "%modifier", toString(bonus));
 			strFindReplace(result, "%minutes", toString(duration/60));
 			strFindReplace(result, "%secondes", toString(duration%60));
@@ -249,7 +249,7 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 
 		// skill modifier consumables
 		//---------------------------
-		ucstring result("");
+		string result("");
 		uint8 paramIdx = 0;
 		if( name == "SP_MOD_DEFENSE" )
 		{

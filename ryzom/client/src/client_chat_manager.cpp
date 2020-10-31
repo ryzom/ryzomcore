@@ -65,7 +65,7 @@ extern CEntityManager		EntitiesMngr;
 
 //#ifdef OLD_STRING_SYSTEM
 //
-//bool CNetworkString::getString (ucstring &result, CClientChatManager *mng)
+//bool CNetworkString::getString (ucstring &result, CClientChatManager *mng) // OLD
 //{
 //	result = StaticString + " / ";
 //	for (uint i = 0; i < Args.size(); i++)
@@ -86,7 +86,7 @@ extern CEntityManager		EntitiesMngr;
 //	return mng->getString (result, Args, StaticString);
 //}
 //
-//void CNetworkString::setString (const ucstring &staticStringId, CClientChatManager *mng)
+//void CNetworkString::setString (const ucstring &staticStringId, CClientChatManager *mng) // OLD
 //{
 //	CBitMemStream bms;
 //	mng->getStaticDB().getInfos(staticStringId, StaticString, bms);
@@ -96,11 +96,11 @@ extern CEntityManager		EntitiesMngr;
 ////	add
 ////
 ////-----------------------------------------------
-//uint32 CChatDynamicDatabase::add( uint32 index, ucstring& ucstr, vector<bool>& code )
+//uint32 CChatDynamicDatabase::add( uint32 index, ucstring& ucstr, vector<bool>& code ) // OLD
 //{
 //	nlinfo ("receive dynamic string association '%d' '%s'", index, ucstr.toString().c_str());
 //
-//	map<ucstring, uint32>::iterator itIdx = _StringToIndex.find( ucstr );
+//	map<ucstring, uint32>::iterator itIdx = _StringToIndex.find( ucstr ); // OLD
 //	if( itIdx == _StringToIndex.end() )
 //	{
 //		map<uint32,CDynamicStringInfos *>::iterator itStr = _Data.find( index );
@@ -162,7 +162,7 @@ extern CEntityManager		EntitiesMngr;
 ////	decodeString
 ////
 ////-----------------------------------------------
-//void CChatDynamicDatabase::decodeString( ucstring& str, CBitMemStream& bms )
+//void CChatDynamicDatabase::decodeString( ucstring& str, CBitMemStream& bms ) // OLD
 //{
 //	_Huffman.getId( str, bms );
 //

@@ -1605,7 +1605,9 @@ void CInterfaceManager::updateFrameEvents()
 	// handle gc for lua
 	CLuaManager::getInstance().getLuaState()->handleGC();
 
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().update();
+#endif
 
 	CItemGroupManager::getInstance()->update();
 

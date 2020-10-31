@@ -932,7 +932,7 @@ void CChatGroupWindow::removeAllFreeTellers()
 //=================================================================================
 void CChatGroupWindow::saveFreeTeller(NLMISC::IStream &f)
 {
-	f.serialVersion(2);
+	f.serialVersion(3);
 
 	// Save the free teller only if it is present in the friend list to avoid the only-growing situation
 	// because free tellers are never deleted in game if we save/load all the free tellers, we just create more
@@ -940,7 +940,7 @@ void CChatGroupWindow::saveFreeTeller(NLMISC::IStream &f)
 
 	uint32 i, nNbFreeTellerSaved = 0;
 	for (i = 0; i < _FreeTellers.size(); ++i)
-		if (PeopleInterraction.FriendList.getIndexFromName(_FreeTellers[i]->getUCTitle()) != -1)
+		if (PeopleInterraction.FriendList.getIndexFromName(_FreeTellers[i]->getTitle()) != -1)
 			nNbFreeTellerSaved++;
 
 	f.serial(nNbFreeTellerSaved);
@@ -949,9 +949,9 @@ void CChatGroupWindow::saveFreeTeller(NLMISC::IStream &f)
 	{
 		CGroupContainer *pGC = _FreeTellers[i];
 
-		if (PeopleInterraction.FriendList.getIndexFromName(pGC->getUCTitle()) != -1)
+		if (PeopleInterraction.FriendList.getIndexFromName(pGC->getTitle()) != -1)
 		{
-			ucstring sTitle = pGC->getUCTitle();
+			string sTitle = pGC->getTitle();
 			f.serial(sTitle);
 		}
 	}
@@ -960,7 +960,7 @@ void CChatGroupWindow::saveFreeTeller(NLMISC::IStream &f)
 //=================================================================================
 void CChatGroupWindow::loadFreeTeller(NLMISC::IStream &f)
 {
-	sint ver = f.serialVersion(2);
+	sint ver = f.serialVersion(3);
 
 	if (ver == 1)
 	{
@@ -980,10 +980,15 @@ void CChatGroupWindow::loadFreeTeller(NLMISC::IStream &f)
 			string sID;
 			f.serial(sID);
 		}
-		ucstring sTitle;
-		f.serial(sTitle);
+		string title;
+		if (ver < 3)
+		{
+			ucstring sTitle; // Old UTF-16 serial
+			f.serial(sTitle);
+			title = sTitle.toUtf8();
+		}
 
-		CGroupContainer *pGC = createFreeTeller(sTitle, "");
+		CGroupContainer *pGC = createFreeTeller(title, "");
 
 		// With version 1 all tells are active because windows information have "title based" ids and no "sID based".
 		if ((ver == 1) && (pGC != NULL))
@@ -1334,13 +1339,13 @@ REGISTER_ACTION_HANDLER(CHandlerChatBoxEntry, "chat_box_entry");
 
 
 
-static ucstring getFreeTellerName(CInterfaceElement *pCaller)
+static string getFreeTellerName(CInterfaceElement *pCaller)
 {
-	if (!pCaller) return ucstring();
+	if (!pCaller) return string();
 	CChatGroupWindow *cgw = PeopleInterraction.getChatGroupWindow();
-	if (!cgw) return ucstring();
+	if (!cgw) return string();
 	CInterfaceGroup *freeTeller = pCaller->getParentContainer();
-	if (!freeTeller) return ucstring();
+	if (!freeTeller) return string();
 	return cgw->getFreeTellerName( freeTeller->getId() );
 }
 
@@ -1350,7 +1355,7 @@ class CHandlerAddTellerToFriendList : public IActionHandler
 public:
 	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
 	{
-		ucstring playerName = ::getFreeTellerName(pCaller);
+		string playerName = ::getFreeTellerName(pCaller);
 		if (!playerName.empty())
 		{
 			sint playerIndex = PeopleInterraction.IgnoreList.getIndexFromName(playerName);
@@ -1378,7 +1383,7 @@ public:
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		std::string callerId = getParam(sParams, "id");
 		CInterfaceElement *prevCaller = CWidgetManager::getInstance()->getElementFromId(callerId);
-		ucstring playerName = ::getFreeTellerName(prevCaller);
+		string playerName = ::getFreeTellerName(prevCaller);
 		if (!playerName.empty())
 		{
 			// if already in friend list, ask to move rather than add
@@ -1410,7 +1415,7 @@ class CHandlerInviteToRingSession : public IActionHandler
 public:
 	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
 	{
-		string playerName = ::getFreeTellerName(pCaller).toUtf8();
+		string playerName = ::getFreeTellerName(pCaller);
 		if (!playerName.empty())
 		{
 			// ask the SBS to invite the character in the session

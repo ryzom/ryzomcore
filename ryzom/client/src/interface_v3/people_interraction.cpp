@@ -1089,7 +1089,7 @@ CFilteredChat *CPeopleInterraction::getFilteredChatFromChatWindow(CChatWindow *c
 }
 
 //===========================================================================================================
-void CPeopleInterraction::askAddContact(const ucstring &contactName, CPeopleList *pl)
+void CPeopleInterraction::askAddContact(const string &contactName, CPeopleList *pl)
 {
 	if (pl == NULL)
 		return;
@@ -1109,7 +1109,7 @@ void CPeopleInterraction::askAddContact(const ucstring &contactName, CPeopleList
 	}
 
 	// add into server (NB: will be added by the server response later)
-	const std::string sMsg = "TEAM:CONTACT_ADD";
+	const char *sMsg = "TEAM:CONTACT_ADD";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 	{
@@ -1121,14 +1121,14 @@ void CPeopleInterraction::askAddContact(const ucstring &contactName, CPeopleList
 		if (pl == &FriendList)
 			list = 0;
 
-		ucstring temp = contactName;
+		ucstring temp = contactName; // TODO: UTF-8 serial
 		out.serial(temp);
 		out.serial(list);
 		NetMngr.push(out);
 		//nlinfo("impulseCallBack : %s %s %d sent", sMsg.c_str(), contactName.toString().c_str(), list);
 	}
 	else
-		nlwarning("impulseCallBack : unknown message name : '%s'.", sMsg.c_str());
+		nlwarning("impulseCallBack : unknown message name : '%s'.", sMsg);
 
 	// NB: no client prediction, will be added by server later
 
@@ -1275,7 +1275,7 @@ void CPeopleInterraction::addContactInList(uint32 contactId, const ucstring &nam
 	CPeopleList	&pl= nList==0?FriendList:IgnoreList;
 
 	// remove the shard name if possible
-	ucstring	name= CEntityCL::removeShardFromName(nameIn.toUtf8());
+	string	name= CEntityCL::removeShardFromName(nameIn.toUtf8());
 
 	// add the contact to this list
 	sint index = pl.getIndexFromName(name);
@@ -1326,7 +1326,7 @@ bool CPeopleInterraction::isContactInList(const ucstring &nameIn, uint8 nList) c
 	// select correct people list
 	const CPeopleList	&pl= nList==0?FriendList:IgnoreList;
 	// remove the shard name if possible
-	ucstring	name= CEntityCL::removeShardFromName(nameIn.toUtf8());
+	string	name= CEntityCL::removeShardFromName(nameIn.toUtf8());
 	return pl.getIndexFromName(name) != -1;
 }
 
@@ -1393,7 +1393,7 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 					// Only show the message if this player is not in my guild (because then the guild manager will show a message)
 					std::vector<SGuildMember> GuildMembers = CGuildManager::getInstance()->getGuildMembers();
 					bool bOnlyFriend = true;
-					string name = toLower(FriendList.getName(index).toUtf8());
+					string name = toLower(FriendList.getName(index));
 					for (uint i = 0; i < GuildMembers.size(); ++i)
 					{
 						if (toLower(GuildMembers[i].Name) == name)
@@ -1410,7 +1410,7 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 					if (showMsg)
 					{
 						string msg = (online != ccs_offline) ? CI18N::get("uiPlayerOnline") : CI18N::get("uiPlayerOffline");
-						strFindReplace(msg, "%s", FriendList.getName(index).toUtf8());
+						strFindReplace(msg, "%s", FriendList.getName(index));
 						string cat = getStringCategory(msg, msg);
 						map<string, CClientConfig::SSysInfoParam>::const_iterator it;
 						NLMISC::CRGBA col = CRGBA::Yellow;
@@ -1471,9 +1471,9 @@ bool CPeopleInterraction::testValidPartyChatName(const ucstring &title)
 	if (GuildChat && title == GuildChat->getTitle()) return false;
 	if (TeamChat && title == TeamChat->getTitle()) return false;
 	sint index;
-	index = FriendList.getIndexFromName(title);
+	index = FriendList.getIndexFromName(title.toUtf8());
 	if (index != -1) return false;
-	index = IgnoreList.getIndexFromName(title);
+	index = IgnoreList.getIndexFromName(title.toUtf8());
 	if (index != -1) return false;
 	// TODO_GAMEDEV server test for the name (not only local), & modify callers of this function
     // The party chat should NOT have the name of a player
@@ -2137,7 +2137,7 @@ public:
 		uint peopleIndex;
 		if (PeopleInterraction.getPeopleFromCurrentMenu(list, peopleIndex))
 		{
-			CPeopleInterraction::displayTellInMainChat(list->getName(peopleIndex).toUtf8());
+			CPeopleInterraction::displayTellInMainChat(list->getName(peopleIndex));
 		}
 	}
 };
@@ -2159,7 +2159,7 @@ class CHandlerTellContact : public IActionHandler
 		uint peopleIndex;
 		if (PeopleInterraction.getPeopleFromContainerID(gc->getId(), list, peopleIndex))
 		{
-			CPeopleInterraction::displayTellInMainChat(list->getName(peopleIndex).toUtf8());
+			CPeopleInterraction::displayTellInMainChat(list->getName(peopleIndex));
 		}
 
 	}
@@ -2255,7 +2255,7 @@ public:
 							}
 							else
 							{
-								PeopleInterraction.askAddContact(geb->getInputStringAsUtf16(), peopleList);
+								PeopleInterraction.askAddContact(geb->getInputString(), peopleList);
 								geb->setInputString(std::string());
 							}
 						}
@@ -3176,7 +3176,7 @@ NLMISC_COMMAND(ignore, "add or remove a player from the ignore list", "<player n
 	}
 
 	// NB: playernames cannot have special characters
-	ucstring playerName = ucstring(args[0]);
+	const string &playerName = args[0];
 
 	// add to the ignore list
 	PeopleInterraction.askAddContact(playerName, &PeopleInterraction.IgnoreList);

@@ -208,7 +208,7 @@ public:
 	/// \name CONTACT LIST
 	// @{
 	// ask the server to add/move/remove a contact
-	void askAddContact(const ucstring &contactName, CPeopleList *pl);
+	void askAddContact(const std::string &contactName, CPeopleList *pl);
 	void askMoveContact(uint peopleIndexInSrc, CPeopleList *plSRC, CPeopleList *plDST);
 	void askRemoveContact(uint peopleIndex, CPeopleList *pl);
 

@@ -111,8 +111,8 @@ bool CGroupModalGetKey::handleEvent (const NLGUI::CEventDescriptor &event)
 						const CBaseAction *baseAction = pCurAM->getBaseAction(it->second);
 						if (baseAction && pCurAM->isActionPresentInContext(it->second))
 						{
-							ucstring shortcutName = baseAction->getActionLocalizedText(it->second);
-							if (pVT != NULL) pVT->setText(shortcutName.toUtf8());
+							string shortcutName = baseAction->getActionLocalizedText(it->second);
+							if (pVT != NULL) pVT->setText(shortcutName);
 						}
 					}
 					else

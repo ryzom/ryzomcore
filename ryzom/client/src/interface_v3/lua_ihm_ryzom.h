@@ -174,12 +174,14 @@ private:
 	static void	messageBoxWithHelp(const ucstring &text, const std::string &masterGroup, int caseMode);
 	static void	messageBoxWithHelp(const std::string &text);
 
-	static ucstring	replacePvpEffectParam(const ucstring &str, sint32 parameter);
+	static ucstring	replacePvpEffectParam(const ucstring &str, sint32 parameter); // TODO: UTF-8 Lua
 	static sint32 secondsSince1970ToHour(sint32 seconds);
+#ifdef RYZOM_BG_DOWNLOADER
 	static void	pauseBGDownloader();
 	static void	unpauseBGDownloader();
 	static void	requestBGDownloaderPriority(uint priority);
 	static sint	getBGDownloaderPriority();
+#endif
 	static void	loadBackground(const std::string &bg);
 	static ucstring	getPatchLastErrorMessage();
 	static bool	isInGame();

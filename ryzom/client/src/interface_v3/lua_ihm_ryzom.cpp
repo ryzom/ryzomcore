@@ -533,10 +533,12 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		luabind::def("messageBoxWithHelp", (void(*)(const std::string &)) &messageBoxWithHelp),
 		LUABIND_FUNC(replacePvpEffectParam),
 		LUABIND_FUNC(secondsSince1970ToHour),
+#ifdef RYZOM_BG_DOWNLOADER
 		LUABIND_FUNC(pauseBGDownloader),
 		LUABIND_FUNC(unpauseBGDownloader),
 		LUABIND_FUNC(requestBGDownloaderPriority),
 		LUABIND_FUNC(getBGDownloaderPriority),
+#endif
 		LUABIND_FUNC(loadBackground),
 		LUABIND_FUNC(getPatchLastErrorMessage),
 		LUABIND_FUNC(getPlayerSelectedSlot),
@@ -3080,6 +3082,7 @@ sint32 CLuaIHMRyzom::secondsSince1970ToHour(sint32 seconds)
 	return tstruct->tm_hour;	// 0-23
 }
 
+#ifdef RYZOM_BG_DOWNLOADER
 // ***************************************************************************
 void CLuaIHMRyzom::pauseBGDownloader()
 {
@@ -3108,6 +3111,7 @@ sint CLuaIHMRyzom::getBGDownloaderPriority()
 {
 	return CBGDownloaderAccess::getInstance().getDownloadThreadPriority();
 }
+#endif
 
 // ***************************************************************************
 void CLuaIHMRyzom::loadBackground(const std::string &bg)
@@ -3120,11 +3124,13 @@ void CLuaIHMRyzom::loadBackground(const std::string &bg)
 // ***************************************************************************
 ucstring CLuaIHMRyzom::getPatchLastErrorMessage()
 {
+#ifdef RYZOM_BG_DOWNLOADER
 	if (isBGDownloadEnabled())
 	{
 		return CBGDownloaderAccess::getInstance().getLastErrorMessage();
 	}
 	else
+#endif
 	{
 		CPatchManager *pPM = CPatchManager::getInstance();
 		return pPM->getLastErrorMessage();

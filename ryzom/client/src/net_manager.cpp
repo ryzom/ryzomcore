@@ -404,7 +404,7 @@ void impulseUserChars(NLMISC::CBitMemStream &impulse)
 		// if there's a new char for which a key set was wanted, create it now
 		for (uint k = 0; k < CharacterSummaries.size(); ++k)
 		{
-			if (toLower(CharacterSummaries[k].Name) == toLower(NewKeysCharNameValidated))
+			if (toLower(CharacterSummaries[k].Name.toUtf8()) == toLower(NewKeysCharNameValidated))
 			{
 				// first, stripes server name
 				copyKeySet(lookupSrcKeyFile(GameKeySet), "save/keys_" + buildPlayerNameForSaveFile(NewKeysCharNameValidated) + ".xml");
@@ -1582,8 +1582,8 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 
 	R2::TTeleportContext tpContext = R2::TPContext_Unknown;
 
-	ucstring tpReason;
-	ucstring tpCancelText;
+	string tpReason;
+	string tpCancelText;
 
 	try
 	{
@@ -1597,14 +1597,14 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 
 			uint32 size = (uint32)tpInfos.TpReasonParams.size();
 			uint32 first = 0;
-			CSString  str(tpReason.toString());
+			CSString  str(tpReason);
 			for (;first != size ; ++first)
 			{
 				std::string value = tpInfos.TpReasonParams[first];
 				std::string key = NLMISC::toString("%%%u", first +1);
 				str = str.replace( key.c_str(), value.c_str());
 			}
-			tpReason = ucstring(str);
+			tpReason = string(str);
 			tpCancelText = CI18N::get(tpInfos.TpCancelTextId);
 			tpContext = tpInfos.TpContext;
 		}
@@ -1612,16 +1612,16 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 	}
 	catch (const EStream &)
 	{
-		tpReason = ucstring("TP Reason");
-		tpCancelText = ucstring("Cancel TP"); // for test
+		tpReason = "TP Reason";
+		tpCancelText = "Cancel TP"; // for test
 		// try to deduce tp context from current editor mode
 		switch (R2::getEditor().getMode())
 		{
 			case R2::CEditor::EditionMode:
 			case R2::CEditor::NotInitialized:
 				tpContext = R2::TPContext_Unknown;
-				tpReason = ucstring();
-				tpCancelText = ucstring();
+				tpReason = string();
+				tpCancelText = string();
 			break;
 			case R2::CEditor::GoingToDMMode:
 			case R2::CEditor::TestMode:
@@ -1667,7 +1667,7 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 	//InitMouseWithCursor(oldHardwareCursor);
 
 	// reset 'cancel' button
-	ProgressBar.setTPMessages(ucstring(), ucstring(), "");
+	ProgressBar.setTPMessages(string(), string(), "");
 
 
 	// ProgressBar.enableQuitButton(false); // TMP TMP

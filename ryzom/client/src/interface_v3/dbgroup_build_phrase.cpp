@@ -1242,9 +1242,9 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 	// **** Setup the phrase Desc
 	if(_TextPhraseDesc)
 	{
-		ucstring	text;
+		string	text;
 		pPM->buildPhraseDesc(text, phrase, 0, false, "composition");
-		_TextPhraseDesc->setTextFormatTaged(text.toUtf8());
+		_TextPhraseDesc->setTextFormatTaged(text);
 	}
 
 

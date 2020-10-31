@@ -489,7 +489,9 @@ void releaseMainLoop(bool closeConnection)
 // Called when Quit from OutGame
 void releaseOutGame()
 {
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().release();
+#endif
 
 	ProgressBar.release();
 
@@ -571,7 +573,9 @@ void release()
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_GameExit, "login_step_game_exit&play_time=" + toString((NLMISC::CTime::getLocalTime() - StartPlayTime) / 1000)));
 	}
 
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().release();
+#endif
 
 	ProgressBar.release();
 

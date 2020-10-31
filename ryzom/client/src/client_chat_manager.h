@@ -54,7 +54,7 @@ class CCDBNodeLeaf;
 struct CDynamicStringInfos
 {
 	/// string
-	ucstring Str;
+	ucstring Str; // OLD
 
 	/// index in the infos buffer, same as the index in the client dynamic string known buffer
 	uint32 Index;
@@ -89,12 +89,12 @@ public :
 	/// \param str the string
 	/// \param huffCode the Huffman code(may be empty)
 	/// \return the index of the string
-	uint32 add( uint32 index, ucstring& str, std::vector<bool>& huffCode );
+	uint32 add( uint32 index, ucstring& str, std::vector<bool>& huffCode ); // OLD
 
 	/// Get the string from its Huffman code
 	/// \param str will be filled with the string
 	/// \param bms contains the Huffman code
-	void decodeString( ucstring& str, NLMISC::CBitMemStream& bms );
+	void decodeString( ucstring& str, NLMISC::CBitMemStream& bms ); // OLD
 
 	/// Get infos on the dynamic string
 	CDynamicStringInfos * getDynamicStringInfos( uint32 index );
@@ -111,7 +111,7 @@ private :
 	std::map< uint32, CDynamicStringInfos *> _Data;
 
 	/// Map to find index from the string (only for uncoded strings)
-	std::map< ucstring, uint32> _StringToIndex;
+	std::map< ucstring, uint32> _StringToIndex; // OLD
 
 };
 #endif
@@ -372,13 +372,13 @@ private :
 #ifdef OLD_STRING_SYSTEM
 class CNetworkString
 {
-	ucstring StaticString;
+	ucstring StaticString; // OLD
 public:
 	std::vector<uint64> Args;
 
-	bool getString (ucstring &result, CClientChatManager *mng);
+	bool getString (ucstring &result, CClientChatManager *mng); // OLD
 
-	void setString (const ucstring &staticStringId, CClientChatManager *mng);
+	void setString (const ucstring &staticStringId, CClientChatManager *mng); // OLD
 };
 #endif
 
