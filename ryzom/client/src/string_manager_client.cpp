@@ -1629,13 +1629,13 @@ const char *CStringManagerClient::getTitleLocalizedName(const string &titleId, b
 }
 
 
-const ucchar *CStringManagerClient::getLocalizedName(const ucstring &uctext)
+const ucchar *CStringManagerClient::getLocalizedName(const string &uctext)
 {
-	string text = uctext.toUtf8();
+	string text = uctext;
 	if (text[0] == '[')
 	{
 		vector<string> textLocalizations;
-		static ucstring defaultText;
+		static string defaultText;
 		splitString(text.substr(1), "[", textLocalizations);
 		if (!textLocalizations.empty())
 		{
@@ -1643,12 +1643,12 @@ const ucchar *CStringManagerClient::getLocalizedName(const ucstring &uctext)
 			{
 				if (textLocalizations[i].substr(0, 3) == CI18N::getCurrentLanguageCode()+"]")
 				{
-					defaultText.fromUtf8(textLocalizations[i].substr(3));
+					defaultText = textLocalizations[i].substr(3);
 					return defaultText.c_str();
 				}
 				else if (textLocalizations[i].substr(0, 3) == "wk]")
 				{
-					defaultText.fromUtf8(textLocalizations[i].substr(3));
+					defaultText = extLocalizations[i].substr(3);
 				}
 			}
 		}
