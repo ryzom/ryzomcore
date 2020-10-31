@@ -30,6 +30,7 @@
 #include "nel/misc/async_file_manager.h"
 #include "nel/misc/system_utils.h"
 #include "nel/misc/streamed_package_manager.h"
+#include "nel/web/http_package_provider.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
 #include "nel/3d/fxaa.h"
