@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -34,26 +35,26 @@ namespace NLGUI
 
 	CViewTextFormated::IViewTextFormatter *CViewTextFormated::textFormatter = NULL;
 
-	std::string CViewTextFormated::getProperty( const std::string &name ) const
-	{
-		if( name == "format" )
+	std::string CViewTextFormated::getProperty(const std::string &name) const
+    {
+		if (name == "format")
 		{
-			return getFormatString().toString();
+			return getFormatString();
 		}
 		else
-			return CViewText::getProperty( name );
-	}
+			return CViewText::getProperty(name);
+    }
 
-	void CViewTextFormated::setProperty( const std::string &name, const std::string &value )
-	{
-		if( name == "format" )
-		{
-			setFormatString( value );
-			return;
-		}
-		else
-			CViewText::setProperty( name, value );
-	}
+    void CViewTextFormated::setProperty(const std::string &name, const std::string &value)
+    {
+	    if (name == "format")
+	    {
+		    setFormatString(value);
+		    return;
+	    }
+	    else
+		    CViewText::setProperty(name, value);
+    }
 
 	xmlNodePtr CViewTextFormated::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
@@ -73,9 +74,9 @@ namespace NLGUI
 		if (!CViewText::parse(cur, parentGroup)) return false;
 		CXMLAutoPtr prop((const char*) xmlGetProp( cur, (xmlChar*)"format" ));
 		if (prop)
-			setFormatString(ucstring((const char *) prop));
+			setFormatString((const char *)prop);
 		else
-			setFormatString(ucstring("$t"));
+			setFormatString("$t");
 		return true;
 	}
 
@@ -83,8 +84,8 @@ namespace NLGUI
 	void CViewTextFormated::checkCoords()
 	{
 		if (!getActive()) return;
-		ucstring formatedResult;
-		formatedResult = formatString(_FormatString, ucstring(""));
+		std::string formatedResult;
+		formatedResult = formatString(_FormatString, std::string());
 
 		//
 		setText (formatedResult);
@@ -92,17 +93,18 @@ namespace NLGUI
 	}
 
 	// ****************************************************************************
-	void CViewTextFormated::setFormatString(const ucstring &format)
+	void CViewTextFormated::setFormatString(const std::string &format)
 	{
-		_FormatString = format;
-		if ( (_FormatString.size()>2) && (_FormatString[0] == 'u') && (_FormatString[1] == 'i'))
-			_FormatString = NLMISC::CI18N::get (format.toString());
+		if (NLMISC::startsWith(format, "ui"))
+			_FormatString = NLMISC::CI18N::get(format);
+		else
+			_FormatString = format;
 	}
 
 	// ****************************************************************************
-	ucstring CViewTextFormated::formatString(const ucstring &inputString, const ucstring &paramString)
+	std::string CViewTextFormated::formatString(const std::string &inputString, const std::string &paramString)
 	{
-		ucstring formatedResult;
+		std::string formatedResult;
 
 		if( textFormatter == NULL )
 			formatedResult = inputString;

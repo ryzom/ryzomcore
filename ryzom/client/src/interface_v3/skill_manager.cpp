@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -588,7 +589,7 @@ void CSkillManager::checkTitleUnblocked(CHARACTER_TITLE::ECharacterTitle i, bool
 				string titleStr = CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)i);
 				bool womenTitle = (UserEntity && UserEntity->getGender() == GSGENDER::female);
 				const ucstring newtitle(CStringManagerClient::getTitleLocalizedName(titleStr, womenTitle));
-				CAHManager::getInstance()->runActionHandler("message_popup", NULL, "text1="+newtitle.toUtf8()+"|text0="+CI18N::get("uiNewTitleBold").toUtf8());
+				CAHManager::getInstance()->runActionHandler("message_popup", NULL, "text1="+newtitle.toUtf8()+"|text0="+CI18N::get("uiNewTitleBold"));
 			}
 			else
 			{
@@ -1097,7 +1098,7 @@ public:
 					string titleStr = CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)i);
 					bool womenTitle = (UserEntity && UserEntity->getGender() == GSGENDER::female);
 					const ucstring s(CStringManagerClient::getTitleLocalizedName(titleStr,womenTitle));
-					pCB->addText(s);
+					pCB->addText(s.toUtf8());
 					pSM->_UIUnblockedTitles.push_back((CHARACTER_TITLE::ECharacterTitle)i);
 				}
 			}

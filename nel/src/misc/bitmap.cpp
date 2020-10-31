@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2016-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -4327,7 +4327,7 @@ void CBitmap::blend(CBitmap &Bm0, CBitmap &Bm1, uint16 factor, bool inputBitmapI
 	else
 	#endif //#ifdef NL_OS_WINDOWS
 	{
-		uint8 *endPix			= dest + (numPix << 2);
+		uint8 *endPix			= dest + ((ptrdiff_t)numPix << 2);
 		// no mmx version
 		uint blendFact    = (uint) factor;
 		uint invblendFact = 256 - blendFact;

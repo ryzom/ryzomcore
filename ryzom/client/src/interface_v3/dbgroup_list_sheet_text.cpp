@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -313,7 +313,7 @@ void CDBGroupListSheetText::updateCoords ()
 				else
 				{
 					// if not received, must insert in list of pending dynstring to check each frame
-					ucstring result;
+					string result;
 					if( !STRING_MANAGER::CStringManagerClient::instance()->getDynString ( curNameId, result) )
 						_NameIdToUpdate.insert( _SheetChildren[i] );
 				}
@@ -492,7 +492,7 @@ void CDBGroupListSheetText::checkCoords ()
 	{
 		CSheetChild * cst = (*it);
 		// String result
-		ucstring result;
+		string result;
 		if( STRING_MANAGER::CStringManagerClient::instance()->getDynString ( cst->NameId, result) )
 		{
 			set< CSheetChild *>::iterator itTmp = it;
@@ -1051,7 +1051,7 @@ void		CDBGroupListSheetText::CSheetChild::updateViewTextAsItem()
 	if(Ctrl && Text && Ctrl->getSheetCategory() == CDBCtrlSheet::Item)
 	{
 		// get the text
-		ucstring text;
+		std::string text;
 		Ctrl->getContextHelp(text);
 
 		// Text color red if requirement not met
@@ -1070,7 +1070,7 @@ void		CDBGroupListSheetText::CSheetChild::updateViewTextAsItem()
 				// Add craft info for MP
 				if(pIS->Family==ITEMFAMILY::RAW_MATERIAL)
 				{
-					ucstring	ipList;
+					string	ipList;
 					pIS->getItemPartListAsText(ipList);
 					if(ipList.empty())
 					{

@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010-2019  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -982,7 +985,7 @@ bool	CItemSheet::canExchangeOrGive(bool botChatGift) const
 }
 
 // ***************************************************************************
-void	CItemSheet::getItemPartListAsText(ucstring &ipList) const
+void	CItemSheet::getItemPartListAsText(std::string &ipList) const
 {
 	bool	all= true;
 	for(uint i=0;i<RM_FABER_TYPE::NUM_FABER_TYPE;i++)

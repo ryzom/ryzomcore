@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -206,7 +207,10 @@ namespace NLGUI
 
 		if (_TxIdDefault == -2)
 		{
-			_TxIdDefault	= rVR.getTextureIdFromName (_TxDefault);
+			_TxIdDefault = rVR.getTextureIdFromName(_TxDefault);
+		}
+		if (_TxIdMoveWindow == -2)
+		{
 			_TxIdMoveWindow = rVR.getTextureIdFromName (_TxMoveWindow);
 			_TxIdResizeBRTL = rVR.getTextureIdFromName (_TxResizeBRTL);
 			_TxIdResizeBLTR = rVR.getTextureIdFromName (_TxResizeBLTR);
@@ -250,7 +254,7 @@ namespace NLGUI
 
 				if (vLink->getMouseOverShape(tooltip, rot, col))
 				{
-					setString(ucstring::makeFromUtf8(tooltip));
+					setString(tooltip);
 					sint32 texId = rVR.getTextureIdFromName ("curs_pick.tga");
 
 					CInterfaceGroup *stringCursor = hwMouse ? _StringCursorHardware : _StringCursor;
@@ -406,7 +410,7 @@ namespace NLGUI
 				splitString(tooltipInfos, "@", tooltipInfosList);
 				texName = tooltipInfosList[0];
 				tooltip = tooltipInfosList[1];
-				setString(ucstring::makeFromUtf8(tooltip));
+				setString(tooltip);
 				CViewRenderer &rVR = *CViewRenderer::getInstance();
 				sint32 texId = rVR.getTextureIdFromName (texName);
 
@@ -449,7 +453,7 @@ namespace NLGUI
 	}
 
 	// --------------------------------------------------------------------------------------------------------------------
-	void CViewPointer::setString (const ucstring &str, CInterfaceGroup *target)
+	void CViewPointer::setString(const std::string &str, CInterfaceGroup *target)
 	{
 		if (target)
 		{
@@ -475,7 +479,7 @@ namespace NLGUI
 
 
 	// --------------------------------------------------------------------------------------------------------------------
-	void CViewPointer::setString (const ucstring &str)
+	void CViewPointer::setString (const std::string &str)
 	{
 		if (_ContextString != str)
 		{

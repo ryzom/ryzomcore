@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
-// Copyright (C) 2010-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2011-2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
@@ -2261,14 +2261,13 @@ string	CClientConfig::getHtmlLanguageCode() const
 }
 
 // ***************************************************************************
-ucstring CClientConfig::buildLoadingString( const ucstring& ucstr ) const
+string CClientConfig::buildLoadingString( const string& ucstr ) const
 {
 	if( LoadingStringCount > 0 )
 	{
 		uint index = rand()%LoadingStringCount;
-		string tipId = "uiLoadingString"+toString(index);
-		ucstring randomUCStr = CI18N::get(tipId);
-		return randomUCStr;
+		string tipId = "uiLoadingString" + toString(index);
+		return CI18N::get(tipId);
 	}
 	else
 		return ucstr;

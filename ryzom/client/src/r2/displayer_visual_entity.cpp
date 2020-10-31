@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2016-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -994,7 +994,7 @@ void CDisplayerVisualEntity::updateName()
 		}
 		std::string firstPart;
 		if(actNb>0)
-			firstPart = CI18N::get("uiR2EDDefaultActTitle").toString() + " " + NLMISC::toString(actNb);
+			firstPart = CI18N::get("uiR2EDDefaultActTitle") + " " + NLMISC::toString(actNb);
 
 		if (act->isString("Name"))
 			actName = act->toString("Name");
@@ -1006,7 +1006,7 @@ void CDisplayerVisualEntity::updateName()
 	}
 	else
 	{
-		actName = CI18N::get("uiR2EDBaseAct").toString();
+		actName = CI18N::get("uiR2EDBaseAct");
 	}
 
 	actName = NLMISC::toString(" [%s]", actName.c_str());
@@ -1017,7 +1017,7 @@ void CDisplayerVisualEntity::updateName()
 
 	{
 		//BENCH(setEntityName)
-		_Entity->setEntityName(ucName);
+		_Entity->setEntityName(ucName.toUtf8());
 	}
 	{
 		//BENCH(buildInSceneInterface)

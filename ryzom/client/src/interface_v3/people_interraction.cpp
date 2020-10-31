@@ -2,8 +2,8 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -91,7 +91,7 @@ static const sint PARTY_CHAT_SPAWN_DELTA = 20; // to avoid that all party chat a
 
 /** Display an error msg in the system info window, and also in the last window that triggered the command (so that the user is sure to see it)
  */
-static void displayVisibleSystemMsg(const ucstring &msg, const string &cat = "CHK");
+static void displayVisibleSystemMsg(const std::string &msg, const string &cat = "CHK");
 
 
 //////////////////////////////
@@ -102,7 +102,7 @@ static void displayVisibleSystemMsg(const ucstring &msg, const string &cat = "CH
 
 struct CPartyChatEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -120,7 +120,7 @@ struct CPartyChatEntryHandler : public IChatWindowListener
 // handler to manage user entry in 'around me' window
 struct CAroundMeEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -138,7 +138,7 @@ struct CAroundMeEntryHandler : public IChatWindowListener
 // handler to manage user entry in 'region' window
 struct CRegionEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -156,7 +156,7 @@ struct CRegionEntryHandler : public IChatWindowListener
 // handler to manage user entry in 'universe' window
 struct CUniverseEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -174,7 +174,7 @@ struct CUniverseEntryHandler : public IChatWindowListener
 // handler to manage user entry in 'guild chat' window
 struct CGuildChatEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -191,7 +191,7 @@ struct CGuildChatEntryHandler : public IChatWindowListener
 // handler to manage user entry in 'team chat' window
 struct CTeamChatEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -208,7 +208,7 @@ struct CTeamChatEntryHandler : public IChatWindowListener
 // handler to manage user entry in a 'talk with friend' window
 struct CFriendTalkEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -225,10 +225,9 @@ struct CFriendTalkEntryHandler : public IChatWindowListener
 // handler to manage user entry in a debug console window
 struct CDebugConsoleEntryHandler : public IChatWindowListener
 {
-	virtual void msgEntered(const ucstring &msg, CChatWindow * /* chatWindow */)
+	virtual void msgEntered(const string &msg, CChatWindow * /* chatWindow */)
 	{
-		std::string str = msg.toString();
-		NLMISC::ICommand::execute( str, g_log );
+		NLMISC::ICommand::execute( msg, g_log );
 	}
 };
 
@@ -242,7 +241,7 @@ public:
 		DbIndex= 0;
 	}
 
-	virtual void msgEntered(const ucstring &msg, CChatWindow *chatWindow)
+	virtual void msgEntered(const string &msg, CChatWindow *chatWindow)
 	{
 		if (ClientCfg.Local)
 		{
@@ -937,7 +936,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 				case CChatGroup::dyn_chat:
 					uint32 index = PeopleInterraction.TheUserChat.Filter.getTargetDynamicChannelDbIndex();
 					uint32 textId = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DYN_CHAT:CHANNEL"+toString(index)+":NAME")->getValue32();
-					ucstring title;
+					string title;
 					STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 					if (title.empty())
 					{
@@ -947,7 +946,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 					}
 					else
 					{
-						pUserBut->setHardText(title.toUtf8());
+						pUserBut->setHardText(title);
 					}
 					break;
 				}
@@ -1281,7 +1280,7 @@ void CPeopleInterraction::addContactInList(uint32 contactId, const ucstring &nam
 	CPeopleList	&pl= nList==0?FriendList:IgnoreList;
 
 	// remove the shard name if possible
-	ucstring	name= CEntityCL::removeShardFromName(nameIn);
+	ucstring	name= CEntityCL::removeShardFromName(nameIn.toUtf8());
 
 	
 
@@ -1305,7 +1304,7 @@ void CPeopleInterraction::addContactInList(uint32 contactId, const ucstring &nam
 //=================================================================================================================
 void CPeopleInterraction::addContactInList(uint32 contactId, uint32 nameID, TCharConnectionState online, uint8 nList)
 {
-	ucstring name;
+	string name;
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 	if (pSMC->getString(nameID, name))
 	{
@@ -1334,7 +1333,7 @@ bool CPeopleInterraction::isContactInList(const ucstring &nameIn, uint8 nList) c
 	// select correct people list
 	const CPeopleList	&pl= nList==0?FriendList:IgnoreList;
 	// remove the shard name if possible
-	ucstring	name= CEntityCL::removeShardFromName(nameIn);
+	ucstring	name= CEntityCL::removeShardFromName(nameIn.toUtf8());
 	return pl.getIndexFromName(name) != -1;
 }
 
@@ -1365,7 +1364,7 @@ void CPeopleInterraction::updateWaitingContacts()
 	for (uint32 i = 0; i < WaitingContacts.size();)
 	{
 		SWaitingContact &w = WaitingContacts[i];
-		ucstring name;
+		string name;
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 		if (pSMC->getString(w.NameId, name))
 		{
@@ -1401,7 +1400,7 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 					// Only show the message if this player is not in my guild (because then the guild manager will show a message)
 					std::vector<SGuildMember> GuildMembers = CGuildManager::getInstance()->getGuildMembers();
 					bool bOnlyFriend = true;
-					ucstring name = toLower(FriendList.getName(index));
+					string name = toLower(FriendList.getName(index).toUtf8());
 					for (uint i = 0; i < GuildMembers.size(); ++i)
 					{
 						if (toLower(GuildMembers[i].Name) == name)
@@ -1417,8 +1416,8 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 					// Player is not in my guild, and the status change is from offline to online/abroad online or vice versa. 
 					if (showMsg)
 					{
-						ucstring msg = (online != ccs_offline) ? CI18N::get("uiPlayerOnline") : CI18N::get("uiPlayerOffline");
-						strFindReplace(msg, "%s", FriendList.getName(index));
+						string msg = (online != ccs_offline) ? CI18N::get("uiPlayerOnline") : CI18N::get("uiPlayerOffline");
+						strFindReplace(msg, "%s", FriendList.getName(index).toUtf8());
 						string cat = getStringCategory(msg, msg);
 						map<string, CClientConfig::SSysInfoParam>::const_iterator it;
 						NLMISC::CRGBA col = CRGBA::Yellow;
@@ -1890,7 +1889,7 @@ void CPeopleInterraction::refreshActiveUserChats()
 }
 
 //=================================================================================================================
-void CPeopleInterraction::talkInDynamicChannel(uint32 channelNb,ucstring sentence)
+void CPeopleInterraction::talkInDynamicChannel(uint32 channelNb,string sentence)
 {
 	if(channelNb<CChatGroup::MaxDynChanPerPlayer)
 	{
@@ -1899,7 +1898,7 @@ void CPeopleInterraction::talkInDynamicChannel(uint32 channelNb,ucstring sentenc
 }
 
 //=================================================================================================================
-void CPeopleInterraction::displayTellInMainChat(const ucstring &playerName)
+void CPeopleInterraction::displayTellInMainChat(const string &playerName)
 {
 	//CChatWindow *chat = PeopleInterraction.MainChat.Window;
 	CChatWindow *chat = PeopleInterraction.ChatGroup.Window;
@@ -2145,7 +2144,7 @@ public:
 		uint peopleIndex;
 		if (PeopleInterraction.getPeopleFromCurrentMenu(list, peopleIndex))
 		{
-			CPeopleInterraction::displayTellInMainChat(list->getName(peopleIndex));
+			CPeopleInterraction::displayTellInMainChat(list->getName(peopleIndex).toUtf8());
 		}
 	}
 };
@@ -2167,7 +2166,7 @@ class CHandlerTellContact : public IActionHandler
 		uint peopleIndex;
 		if (PeopleInterraction.getPeopleFromContainerID(gc->getId(), list, peopleIndex))
 		{
-			CPeopleInterraction::displayTellInMainChat(list->getName(peopleIndex));
+			CPeopleInterraction::displayTellInMainChat(list->getName(peopleIndex).toUtf8());
 		}
 
 	}
@@ -2206,7 +2205,7 @@ public:
 						if (gc)
 						{
 							CGroupEditBox *geb = dynamic_cast<CGroupEditBox *>(gc->getGroup("add_contact_eb:eb"));
-							geb->setInputString(ucstring(""));
+							geb->setInputString(std::string());
 						}
 						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, sParams);
 					}
@@ -2263,12 +2262,12 @@ public:
 							}
 							else
 							{
-								PeopleInterraction.askAddContact(geb->getInputString(), peopleList);
-								geb->setInputString(ucstring(""));
+								PeopleInterraction.askAddContact(geb->getInputStringAsUtf16(), peopleList);
+								geb->setInputString(std::string());
 							}
 						}
 					}
-					geb->setInputString(ucstring(""));
+					geb->setInputString(std::string());
 				}
 			}
 		}
@@ -2446,7 +2445,7 @@ public:
 		if (eb)
 		{
 			CWidgetManager::getInstance()->setCaptureKeyboard(eb);
-			eb->setInputString(ucstring(""));
+			eb->setInputString(std::string());
 		}
 		//
 		if (gc->getActive())
@@ -2473,7 +2472,7 @@ class CHandlerValidatePartyChatName : public IActionHandler
 		if (!gc) return;
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(gc->getGroup("eb"));
 		if (!eb) return;
-		ucstring title = eb->getInputString();
+		string title = eb->getInputString();
 
 		// TODO GAMEDEV : create (or join ?) a new channel. Each channel (party chat) should have a unique name in the game
 		// moreover, it should not have the name of another available chat window (for example, it shouldn't be named 'Around Me')
@@ -2482,7 +2481,7 @@ class CHandlerValidatePartyChatName : public IActionHandler
 
 		if (!PeopleInterraction.testValidPartyChatName(title))
 		{
-			displayVisibleSystemMsg(title + ucstring(" : ") +  CI18N::get("uiInvalidPartyChatName"));
+			displayVisibleSystemMsg(title + " : " +  CI18N::get("uiInvalidPartyChatName"));
 			return;
 		}
 
@@ -2650,7 +2649,7 @@ public:
 		{
 			for(uint l = 0; l < pl.PartyChats.size(); ++l)
 			{
-				menu->addLineAtIndex(insertionIndex, pl.PartyChats[l].Window->getTitle(), "chat_target_selected", toString(pl.PartyChats[l].ID));
+				menu->addLineAtIndex(insertionIndex, pl.PartyChats[l].Window->getTitle().toUtf8(), "chat_target_selected", toString(pl.PartyChats[l].ID));
 				++ insertionIndex;
 			}
 		}
@@ -2693,11 +2692,11 @@ public:
 					uint32 canWrite = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DYN_CHAT:CHANNEL"+s+":WRITE_RIGHT")->getValue32();
 					if (canWrite != 0)
 					{
-						ucstring title;
+						string title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 
 						// replace dynamic channel name and shortcut
-						ucstring res = CI18N::get("uiFilterMenuDynamic");
+						string res = CI18N::get("uiFilterMenuDynamic");
 						strFindReplace(res, "%channel", title);
 						strFindReplace(res, "%shortcut", s);
 
@@ -2886,7 +2885,7 @@ class CHandlerSelectChatSource : public IActionHandler
 					pVTM->setActive(active);
 					if (active)
 					{
-						ucstring title;
+						string title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 						pVTM->setText("["+s+"] " + title);
 					}
@@ -2997,7 +2996,7 @@ class CHandlerSelectChatSource : public IActionHandler
 			{
 				if (pc[l].Filter != NULL)
 				{
-					menu->addLineAtIndex(insertionIndex, pc[l].Window->getTitle(), FILTER_TOGGLE, toString(pc[l].ID));
+					menu->addLineAtIndex(insertionIndex, pc[l].Window->getTitle().toUtf8(), FILTER_TOGGLE, toString(pc[l].ID));
 					menu->setUserGroupLeft(insertionIndex, createMenuCheckBox(FILTER_TOGGLE, toString(pc[l].ID), pc[l].Filter->isListeningWindow(cw)));
 					++ insertionIndex;
 				}
@@ -3011,7 +3010,7 @@ class CHandlerSelectChatSource : public IActionHandler
 				bool active = (textId != 0);
 				if (active)
 				{
-					ucstring title;
+					string title;
 					STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 					menu->addLineAtIndex(insertionIndex, "["+s+"] " + title, FILTER_TOGGLE, "dyn"+s);
 					menu->setUserGroupLeft(insertionIndex, createMenuCheckBox(FILTER_TOGGLE, "dyn"+s, pi.ChatInput.DynamicChat[i].isListeningWindow(cw)));
@@ -3372,7 +3371,7 @@ REGISTER_INTERFACE_USER_FCT("getNumUserChatLeft", getNumUserChatLeft)
 // STATIC FUNCTIONS IMPLEMENTATIONS //
 //////////////////////////////////////
 
-static void displayVisibleSystemMsg(const ucstring &msg, const string &cat)
+static void displayVisibleSystemMsg(const string &msg, const string &cat)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	im->displaySystemInfo(msg, cat);
@@ -3385,7 +3384,7 @@ static void displayVisibleSystemMsg(const ucstring &msg, const string &cat)
 #if !FINAL_VERSION
 NLMISC_COMMAND(testSI, "tmp", "tmp")
 {
-	PeopleInterraction.ChatInput.DebugInfo.displayMessage(ucstring("test"), CRGBA::Red);
+	PeopleInterraction.ChatInput.DebugInfo.displayMessage("test", CRGBA::Red);
 	return true;
 }
 #endif

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -63,27 +66,8 @@ CMaterial* CFontManager::getFontMaterial()
 	return _MatFont;
 }
 
-
 // ***************************************************************************
-void CFontManager::computeString (const std::string &s,
-								  CFontGenerator *fontGen,
-								  const NLMISC::CRGBA &color,
-								  uint32 fontSize,
-								  bool embolden,
-								  bool oblique,
-								  IDriver *driver,
-								  CComputedString &output,
-								  bool	keep800x600Ratio)
-{
-	// static to avoid reallocation
-	static ucstring	ucs;
-	ucs= s;
-	computeString(ucs, fontGen, color, fontSize, embolden, oblique, driver, output, keep800x600Ratio);
-}
-
-
-// ***************************************************************************
-void CFontManager::computeString (const ucstring &s,
+void CFontManager::computeString (NLMISC::CUtfStringView sv,
 								  CFontGenerator *fontGen,
 								  const NLMISC::CRGBA &color,
 								  uint32 fontSize,
@@ -109,7 +93,7 @@ void CFontManager::computeString (const ucstring &s,
 	}
 
 	// Setting vertices format
-	output.Vertices.setNumVertices (4 * (uint32)s.size());
+	output.Vertices.setNumVertices (4 * (uint32)sv.largestSize());
 
 	// 1 character <-> 1 quad
 	sint32 penx = 0, dx;
@@ -144,10 +128,12 @@ void CFontManager::computeString (const ucstring &s,
 	output.StringHeight = 0;
 
 	// save string info for later rebuild as needed
-	output.Text = s;
+	if (sv.ptr() != output.Text.c_str()) // don't resave if rebuilding
+		output.Text = sv.toUtf8();
 	output.CacheVersion = getCacheVersion();
 
 	uint j = 0;
+	size_t idx = 0;
 	{
 		CVertexBufferReadWrite vba;
 		output.Vertices.lock (vba);
@@ -156,10 +142,12 @@ void CFontManager::computeString (const ucstring &s,
 		hlfPixScrH = 0.f;
 
 		// For all chars
-		for (uint i = 0; i < s.size(); i++)
+		for (NLMISC::CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it, ++idx)
 		{
 			// Creating font
-			k.Char = s[i];
+			k.Char = *it;
+			if (k.Char < 0x20)
+				k.Char += 0x2400;
 			k.FontGenerator = fontGen;
 			k.Size = fontSize;
 			k.Embolden = embolden;
@@ -228,6 +216,8 @@ void CFontManager::computeString (const ucstring &s,
 		}
 	}
 	output.Vertices.setNumVertices (j);
+	output.Length = idx;
+	nlassert(output.Length == NLMISC::CUtfStringView(output.Text).count());
 
 	// compile string info
 	output.StringWidth = (float)penx;
@@ -245,7 +235,23 @@ void CFontManager::computeString (const ucstring &s,
 
 
 // ***************************************************************************
-void CFontManager::computeStringInfo (	const ucstring &s,
+void CFontManager::computeStringInfo (	NLMISC::CUtfStringView sv,
+										CFontGenerator *fontGen,
+										const NLMISC::CRGBA &color,
+										uint32 fontSize,
+										bool embolden,
+										bool oblique,
+										IDriver *driver,
+										CComputedString &output,
+										bool keep800x600Ratio	)
+{
+	computeStringInfo(sv, sv.largestSize(), fontGen, color, fontSize, embolden, oblique, driver, output, keep800x600Ratio);
+}
+
+
+// ***************************************************************************
+void CFontManager::computeStringInfo (	NLMISC::CUtfStringView sv,
+										size_t len,
 										CFontGenerator *fontGen,
 										const NLMISC::CRGBA &color,
 										uint32 fontSize,
@@ -258,10 +264,11 @@ void CFontManager::computeStringInfo (	const ucstring &s,
 	output.Color = color;
 
 	// save string info for later rebuild as needed
-	output.Text = s;
+	if (sv.ptr() != output.Text.c_str()) // don't resave if rebuilding
+		output.Text = sv.toUtf8();
 	output.CacheVersion = 0;
 
-	if (s.empty())
+	if (sv.empty())
 	{
 		output.StringWidth = 0.f;
 		output.StringHeight = 0;
@@ -290,10 +297,13 @@ void CFontManager::computeStringInfo (	const ucstring &s,
 	CTextureFont::SLetterKey k;
 	CTextureFont::SLetterInfo *pLI;
 
-	for (uint i = 0; i < s.size(); i++)
+	size_t idx = 0;
+	for (NLMISC::CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end && idx < len; ++it, ++idx)
 	{
 		// Creating font
-		k.Char = s[i];
+		k.Char = *it;
+		if (k.Char < 0x20)
+			k.Char += 0x2400;
 		k.FontGenerator = fontGen;
 		k.Size = fontSize;
 		k.Embolden = embolden;
@@ -313,6 +323,8 @@ void CFontManager::computeStringInfo (	const ucstring &s,
 			penx += pLI->AdvX;
 		}
 	}
+	output.Length = idx;
+	nlassert(output.Length == std::min(len, NLMISC::CUtfStringView(output.Text).count()));
 
 	// compile string info
 	output.StringWidth = (float)penx;

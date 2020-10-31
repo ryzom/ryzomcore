@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -193,7 +194,7 @@ void CEncyclopediaManager::rebuildAlbumList()
 	nlassert(pTree != NULL);
 
 	CGroupTree::SNode *pRoot = new CGroupTree::SNode;
-	ucstring res;
+	string res;
 
 	// Add all albums
 	for (uint32 i = 0; i < _Albums.size(); ++i)
@@ -303,8 +304,8 @@ void CEncyclopediaManager::rebuildAlbumPage(uint32 albumName)
 	if (pRBVT != NULL)
 	{
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-		const ucstring desc(pSMC->getSBrickLocalizedDescription(CSheetId(pAlbum->RewardBrick)));
-		pRBVT->setText(desc);
+		CUtfStringView desc(pSMC->getSBrickLocalizedDescription(CSheetId(pAlbum->RewardBrick)));
+		pRBVT->setText(desc.toUtf8());
 	}
 }
 
@@ -359,18 +360,15 @@ void CEncyclopediaManager::rebuildThemaPage(uint32 themaName)
 	{
 		if (pES->type() == CEntitySheet::ITEM)
 		{
-			const ucstring desc(pSMC->getItemLocalizedDescription(CSheetId(pThema->RewardSheet)));
-			pRBVT->setText(desc);
+			pRBVT->setText(pSMC->getItemLocalizedDescription(CSheetId(pThema->RewardSheet)));
 		}
 		else if (pES->type() == CEntitySheet::SBRICK)
 		{
-			const ucstring desc(pSMC->getSBrickLocalizedDescription(CSheetId(pThema->RewardSheet)));
-			pRBVT->setText(desc);
+			pRBVT->setText(pSMC->getSBrickLocalizedDescription(CSheetId(pThema->RewardSheet)));
 		}
 		else if (pES->type() == CEntitySheet::SPHRASE)
 		{
-			const ucstring desc(pSMC->getSPhraseLocalizedDescription(CSheetId(pThema->RewardSheet)));
-			pRBVT->setText(desc);
+			pRBVT->setText(pSMC->getSPhraseLocalizedDescription(CSheetId(pThema->RewardSheet)));
 		}
 	}
 
@@ -428,7 +426,7 @@ bool CEncyclopediaManager::isStringWaiting()
 
 	for (uint32 i = 0; i < _Albums.size(); ++i)
 	{
-		ucstring res;
+		string res;
 		if (!pSMC->getDynString(_Albums[i].Name, res))
 			return true;
 		for (uint32 j = 0; j < _Albums[i].Themas.size(); ++j)

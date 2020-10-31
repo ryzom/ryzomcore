@@ -197,7 +197,7 @@ static bool testMissionOption(sint32 priorityWanted)
 	// Get the Text for the cursor
 	if(textID)
 	{
-		ucstring result;
+		string result;
 		bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(textID, result);
 		if (!res)
 			result = NLMISC::CI18N::get("uiMissionOptionNotReceived");
@@ -224,7 +224,7 @@ static bool testMissionRing()
 			uint32	textID = pNL->getValue32();
 
 			// if the string is not received display a temp string
-			ucstring	missionRingText;
+			string	missionRingText;
 			if(!STRING_MANAGER::CStringManagerClient::instance()->getDynString(textID, missionRingText))
 				missionRingText = NLMISC::CI18N::get("uiMissionRingNameNotReceived");
 
@@ -445,7 +445,7 @@ void checkUnderCursor()
 									uint32	textID = pNL->getValue32();
 
 									// if the string is not received display a temp string
-									ucstring	webPageText;
+									string	webPageText;
 									if(!STRING_MANAGER::CStringManagerClient::instance()->getDynString(textID, webPageText))
 										webPageText = NLMISC::CI18N::get("uiWebPageNameNotReceived");
 
@@ -463,8 +463,8 @@ void checkUnderCursor()
 								{
 									// get the outpost name
 									CSheetId outpostSheet(pNL->getValue32());
-									ucstring outpostName;
-									outpostName= ucstring(STRING_MANAGER::CStringManagerClient::getOutpostLocalizedName(outpostSheet));
+									string outpostName;
+									outpostName= STRING_MANAGER::CStringManagerClient::getOutpostLocalizedName(outpostSheet);
 
 									// display the cursor
 									if(ContextCur.context("OUTPOST", 0.f, outpostName))
@@ -564,14 +564,13 @@ void checkUnderCursor()
 					
 					cursor->setCursor("r2ed_tool_select_move_over.tga");
 					InstanceId = instance_idx;
-					if (ContextCur.context("ARKITECT", 0.f, ucstring("Edit")))
+					if (ContextCur.context("ARKITECT", 0.f, "Edit"))
 						return;
 				}
 				else
 				{
 					cursor->setCursor("curs_pick.tga");
-					ucstring contextText;
-					contextText.fromUtf8(instref.ContextText);
+					string contextText = instref.ContextText;
 					if (ContextCur.context("WEBIG", 0.f, contextText))
 						return;
 				}

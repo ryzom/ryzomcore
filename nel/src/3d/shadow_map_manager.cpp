@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -256,14 +256,14 @@ void			CShadowMapManager::renderGenerate(CScene *scene)
 	garbageShadowTextures(scene);
 
 	IDriver *driverForShadowGeneration= scene->getRenderTrav().getAuxDriver();
+	nlassert(driverForShadowGeneration);
 	CSmartPtr<NL3D::ITexture> previousRenderTarget = driverForShadowGeneration->getRenderTarget();
 
 	// Init
 	// ********
 	uint32	wndW= _BlurTextureW, wndH= _BlurTextureH;
 	// get some text/screen size.
-	if(driverForShadowGeneration)
-		driverForShadowGeneration->getWindowSize(wndW, wndH);
+	driverForShadowGeneration->getWindowSize(wndW, wndH);
 	uint	baseTextureSize= scene->getShadowMapTextureSize();
 	// Minimize the Dest Texture size, so the blurTexture don't get too heavy in VRAM.
 	uint32	textDestW= min(wndW, (uint32)NL3D_SMM_MAX_TEXTDEST_SIZE);

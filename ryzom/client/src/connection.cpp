@@ -4,7 +4,7 @@
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -146,8 +146,8 @@ string CharNameValidDBLink;
 uint8		PlayerSelectedSlot = 0;
 string		PlayerSelectedFileName;
 TSessionId	PlayerSelectedMainland= (TSessionId)0;	// This is the mainland selected at the SELECT perso!!
-ucstring	PlayerSelectedHomeShardName;
-ucstring	PlayerSelectedHomeShardNameWithParenthesis;
+std::string	PlayerSelectedHomeShardName;
+std::string	PlayerSelectedHomeShardNameWithParenthesis;
 extern std::string CurrentCookie;
 
 
@@ -365,7 +365,7 @@ bool connection (const string &cookie, const string &fsaddr)
 
 	// Preload continents
 	{
-		const ucstring nmsg("Loading continents...");
+		const string nmsg("Loading continents...");
 		ProgressBar.newMessage (ClientCfg.buildLoadingString(nmsg) );
 		ContinentMngr.preloadSheets();
 
@@ -403,7 +403,7 @@ bool connection (const string &cookie, const string &fsaddr)
 	// Init out game
 	setOutGameFullScreen();
 
-	ucstring nmsg("Initializing outgame...");
+	string nmsg("Initializing outgame...");
 	ProgressBar.newMessage (ClientCfg.buildLoadingString(nmsg) );
 	pIM->initOutGame();
 
@@ -547,7 +547,7 @@ bool reconnection()
 
 	// Preload continents
 	{
-		const ucstring nmsg ("Loading continents...");
+		const string nmsg ("Loading continents...");
 		ProgressBar.newMessage (ClientCfg.buildLoadingString(nmsg) );
 		ContinentMngr.preloadSheets();
 	}
@@ -986,7 +986,7 @@ TInterfaceState globalMenu()
 	while (PlayerWantToGoInGame == false)
 	{
 
-		#if defined(NL_OS_WINDOWS) && defined(NL_DEBUG)
+		#if defined(NL_OS_WINDOWS) && defined(NL_DEBUG) && 0
 			// tmp for debug
 			if (::GetAsyncKeyState(VK_SPACE))
 			{
@@ -1026,7 +1026,7 @@ TInterfaceState globalMenu()
 				// Display the firewall alert string
 				CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:connecting:title"));
 				if (pVT != NULL)
-					pVT->setText(CI18N::get("uiFirewallAlert")+ucstring("..."));
+					pVT->setTextLocalized("uiFirewallAlert", true);
 
 				// The mouse and fullscreen mode should be unlocked for the user to set the firewall permission
 				nlSleep( 30 ); // 'nice' the client, and prevent to make too many send attempts
@@ -1072,7 +1072,7 @@ TInterfaceState globalMenu()
 			nlSleep(ClientCfg.Sleep);
 		}
 
-		#if defined(NL_OS_WINDOWS) && defined(NL_DEBUG)
+		#if defined(NL_OS_WINDOWS) && defined(NL_DEBUG) && 0
 			if (::GetAsyncKeyState(VK_CONTROL))
 			{
 				pIM->displayUIViewBBoxs("");
@@ -1242,8 +1242,8 @@ TInterfaceState globalMenu()
 					if (pVT != NULL)
 					{
 						pVT->setMultiLine( true );
-						pVT->setText(CI18N::get("uiFirewallFail")+ucstring(".\n")+
-									  CI18N::get("uiFirewallAlert")+ucstring("."));
+						pVT->setTextLocalized(CI18N::get("uiFirewallFail")+".\n"+
+									  CI18N::get("uiFirewallAlert")+".", false);
 					}
 				}
 			}
@@ -1324,16 +1324,16 @@ public:
 			if (pVT == NULL) return;
 
 			if (rCS.Name.empty())
-				pVT->setText(CI18N::get("uiEmptySlot"));
+				pVT->setTextLocalized("uiEmptySlot", true);
 			else
-				pVT->setText(rCS.Name);
+				pVT->setTextLocalized(rCS.Name.toUtf8(), false);
 		}
 		// 5 slots
 		for (; i < 5; ++i)
 		{
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(sPath+":text"+NLMISC::toString(i)));
 			if (pVT == NULL) return;
-			pVT->setText(CI18N::get("uiEmptySlot"));
+			pVT->setTextLocalized("uiEmptySlot", true);
 		}
 	}
 };
@@ -1355,7 +1355,7 @@ void setTarget(CCtrlBase *ctrl, const string &targetName, ucstring &value)
 	if (ig)
 	{
 		CInterfaceExprValue exprValue;
-		exprValue.setUCString(value);
+		exprValue.setString(value.toUtf8());
 
 		CInterfaceLink::splitLinkTargets(targetName, ig, targets);
 		for(uint k = 0; k < targets.size(); ++k)
@@ -1446,7 +1446,7 @@ Deprecated	{
 				ucstring::size_type pos = sValue.find('$');
 				if (pos != ucstring::npos)
 				{
-					sValue = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sValue), womanTitle);
+					sValue = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sValue.toUtf8()), womanTitle);
 				}
 			}
 			setTarget (pCaller, sTarget, sValue);
@@ -1691,7 +1691,7 @@ public:
 		ucstring sSurName = ucstring("NotSet");
 		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(sEditBoxPath));
 		if (pGEB != NULL)
-			sFirstName = pGEB->getInputString();
+			sFirstName = pGEB->getInputStringAsUtf16();
 		else
 			nlwarning ("can't get edit box name : %s",sEditBoxPath.c_str());
 
@@ -2175,8 +2175,8 @@ public:
 				CViewText *pVT = dynamic_cast<CViewText*>(pNewLine->getView("name"));
 				if (pVT != NULL)
 				{
-					ucstring ucstr = Mainlands[i].Name + ucstring(" ") + Mainlands[i].Description;
-					pVT->setText(ucstr);
+					std::string str = Mainlands[i].Name.toUtf8() + " " + Mainlands[i].Description.toUtf8();
+					pVT->setTextLocalized(str, false);
 				}
 
 				// Add to the list
@@ -2340,13 +2340,13 @@ public:
 			CViewText *pVT = dynamic_cast<CViewText*>(pNewLine->getView("name"));
 			if (pVT != NULL)
 			{
-				pVT->setText(name);
+				pVT->setTextLocalized(name.toUtf8(), false);
 			}
 
 			CCtrlBase *pBut = pNewLine->getCtrl("but");
 			if (pBut != NULL)
 			{
-				pBut->setDefaultContextHelp(tooltip);
+				pBut->setDefaultContextHelp(tooltip.toUtf8());
 			}
 			addGroupInList(pNewLine);
 		}
@@ -2593,10 +2593,10 @@ static void setTextField(CInterfaceGroup* scenarioWnd, const std::string &uiName
 	{
 		CViewText* viewText = dynamic_cast<CViewText*>(result);
 		if(viewText)
-			viewText->setText(text);
+			viewText->setTextLocalized(text.toUtf8(), false);
 		CGroupEditBox* editBox = dynamic_cast<CGroupEditBox*>(result);
 		if(editBox)
-			editBox->setInputString(text);
+			editBox->setInputStringAsUtf16(text);
 
 	}
 }
@@ -2716,7 +2716,7 @@ class CAHScenarioControl : public IActionHandler
 			CViewText* viewText = dynamic_cast<CViewText*>(result);
 			if(viewText)
 			{
-				viewText->setText(R2::getEditor().isInitialized()?CI18N::get("uiR2EDScenarioName"):CI18N::get("uiR2EDScenarioFileName"));
+				viewText->setTextLocalized(R2::getEditor().isInitialized() ? "uiR2EDScenarioName" : "uiR2EDScenarioFileName", true);
 			}
 		}
 
@@ -2728,9 +2728,9 @@ class CAHScenarioControl : public IActionHandler
 			if(okButton)
 			{
 				if(R2::getEditor().getAccessMode()!=R2::CEditor::AccessDM)
-					okButton->setHardText(CI18N::get("uiR2EDLaunchScenario").toString());
+					okButton->setHardText(CI18N::get("uiR2EDLaunchScenario"));
 				else
-					okButton->setHardText(CI18N::get("uiR2EDApplyScenarioFilters").toString());
+					okButton->setHardText(CI18N::get("uiR2EDApplyScenarioFilters"));
 			}
 		}
 
@@ -2746,7 +2746,7 @@ class CAHScenarioControl : public IActionHandler
 				CViewText* viewText= dynamic_cast<CViewText*>(result);
 
 				if(viewText)
-					viewText->setText(ucstring(""));
+					viewText->setText(std::string());
 			}
 		}
 		setScenarioInformation(scenarioWnd, "");
@@ -2782,7 +2782,7 @@ class CAHScenarioControl : public IActionHandler
 					CViewText *shardName = dynamic_cast<CViewText *>(toggleGr->getView("button_text"));
 					if (shardName)
 					{
-						shardName->setText(Mainlands[i].Name);
+						shardName->setTextLocalized(Mainlands[i].Name.toUtf8(), false);
 					}
 				}
 			}
@@ -2860,7 +2860,7 @@ class CAHScenarioControl : public IActionHandler
 					{
 						CGroupEditBox* editBox = dynamic_cast<CGroupEditBox*>(result);
 						if(editBox)
-							editBox->setInputString(description);
+							editBox->setInputStringAsUtf16(description);
 					}
 				}
 			}
@@ -2922,7 +2922,7 @@ class CAHScenarioInformation : public IActionHandler
 					scenarioName = scenarioName.substr(posScenarioName==0?posScenarioName:posScenarioName+1);
 					posScenarioName = scenarioName.find('/');
 				}
-				viewText->setText(scenarioName);
+				viewText->setTextLocalized(scenarioName, false);
 			}
 		}
 
@@ -3011,7 +3011,7 @@ class CAHLoadScenario : public IActionHandler
 		{
 			CGroupEditBox* editBox = dynamic_cast<CGroupEditBox*>(result);
 			if(editBox)
-				description = editBox->getInputString().toString();
+				description = editBox->getInputString();
 		}
 
 		// races
@@ -3218,9 +3218,9 @@ class CAHLoadScenario : public IActionHandler
 		// --------------------------
 
 		TRuleType ruleType(TRuleType::rt_strict);
-		if(rules==CI18N::get("uiR2EDliberal").toString())
+		if(rules==CI18N::get("uiR2EDliberal"))
 			ruleType = TRuleType(TRuleType::rt_liberal);
-		else if(rules == CI18N::get("uiR2EDstrict").toString())
+		else if(rules == CI18N::get("uiR2EDstrict"))
 			ruleType = TRuleType(TRuleType::rt_strict);
 		volatile static bool override = false;
 		if (override)
@@ -3284,7 +3284,7 @@ class CAHLoadScenario : public IActionHandler
 			{
 				CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 				if (pVT != NULL)
-					pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
+					pVT->setTextLocalized("uiRingWarningFreeTrial", true);
 				CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 
 				return;
@@ -3365,7 +3365,7 @@ class CAHLoadScenario : public IActionHandler
 						{
 							CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 							if (pVT != NULL)
-								pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
+								pVT->setTextLocalized("uiRingWarningFreeTrial", true);
 							CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 						}
 
@@ -3379,10 +3379,10 @@ class CAHLoadScenario : public IActionHandler
 								if(val!=0)
 								{
 									STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-									ucstring res;
+									string res;
 									if (pSMC->getString(val,res))
 									{
-										string charName = CEntityCL::removeTitleAndShardFromName(res).toString();
+										string charName = CEntityCL::removeTitleAndShardFromName(res);
 										sessionBrowser.inviteCharacterByName(sessionBrowser._LastScheduleSessionCharId, charName);
 
 										if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))
@@ -3394,7 +3394,7 @@ class CAHLoadScenario : public IActionHandler
 										{
 											CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 											if (pVT != NULL)
-												pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
+												pVT->setTextLocalized("uiRingWarningInviteFreeTrial", true);
 											CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 										}
 									}

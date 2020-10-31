@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -136,7 +137,7 @@ namespace NLGUI
 		if( name == "hardtext" )
 		{
 			if( _ViewText != NULL )
-				return _ViewText->getText().toString();
+				return _ViewText->getText();
 			else
 				return std::string( "" );
 		}
@@ -316,7 +317,7 @@ namespace NLGUI
 		if( name == "hardtext" )
 		{
 			if( _ViewText != NULL )
-				_ViewText->setText( value );
+				_ViewText->setHardText( value );
 			return;
 		}
 		else
@@ -487,7 +488,7 @@ namespace NLGUI
 		xmlNewProp( node, BAD_CAST "wmargin", BAD_CAST toString( _WMargin ).c_str() );
 		xmlNewProp( node, BAD_CAST "wmin", BAD_CAST toString( _WMin ).c_str() );
 		xmlNewProp( node, BAD_CAST "hmin", BAD_CAST toString( _HMin ).c_str() );
-		xmlNewProp( node, BAD_CAST "hardtext", BAD_CAST _ViewText->getText().toString().c_str() );
+		xmlNewProp( node, BAD_CAST "hardtext", BAD_CAST _ViewText->getText().c_str() );
 		xmlNewProp( node, BAD_CAST "text_y", BAD_CAST toString( _TextY ).c_str() );
 		xmlNewProp( node, BAD_CAST "text_x", BAD_CAST toString( _TextX ).c_str() );
 		xmlNewProp( node, BAD_CAST "text_underlined", BAD_CAST toString( _ViewText->getUnderlined() ).c_str() );
@@ -596,10 +597,7 @@ namespace NLGUI
 			if (prop)
 			{
 				const char *propPtr = prop;
-				ucstring text = ucstring(propPtr);
-				if ((strlen(propPtr)>2) && (propPtr[0] == 'u') && (propPtr[1] == 'i'))
-					text = CI18N::get (propPtr);
-				_ViewText->setText(text);
+				_ViewText->setTextLocalized(propPtr, true);
 			}
 		}
 
@@ -988,7 +986,7 @@ namespace NLGUI
 			nlassert( v != NULL );
 			_ViewText = dynamic_cast< CViewText* >( v );
 			_ViewText->setId( _Id + "_text" );
-			_ViewText->setText( ucstring( "text" ) );
+			_ViewText->setText( "text" );
 			_ViewText->setSerializable( false );
 		}
 
@@ -1039,17 +1037,32 @@ namespace NLGUI
 
 
 	// ***************************************************************************
-	void CCtrlTextButton::setText (const ucstring &text)
+	void CCtrlTextButton::setText (const std::string &text)
 	{
 		if (_ViewText && !_IsViewTextId)
 			_ViewText->setText(text);
 	}
 
 	// ***************************************************************************
-	ucstring CCtrlTextButton::getText () const
+	std::string CCtrlTextButton::getText () const
 	{
 		if (_ViewText && !_IsViewTextId)
 			return _ViewText->getText();
+		return std::string();
+	}
+
+	// ***************************************************************************
+	void CCtrlTextButton::setTextAsUtf16 (const ucstring &text)
+	{
+		if (_ViewText && !_IsViewTextId)
+			_ViewText->setText(text.toUtf8());
+	}
+
+	// ***************************************************************************
+	ucstring CCtrlTextButton::getTextAsUtf16 () const
+	{
+		if (_ViewText && !_IsViewTextId)
+			return CUtfStringView(_ViewText->getText()).toUtf16();
 		return ucstring("");
 	}
 

@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -137,11 +137,11 @@ void CDBGroupListSheetTextBrickComposition::CSheetChildBrick::updateViewText(CDB
 	// Temp if the Desc2 is empty, set Name
 	ucstring desc2(STRING_MANAGER::CStringManagerClient::getSBrickLocalizedCompositionDescription(brickSheetId));
 	if( !desc2.empty() && !hasOnlyBlankChars(desc2))	// tolerate Blank error in translation
-		Text->setText(desc2);
+		Text->setText(desc2.toUtf8());
 	else
 	{
 		desc2 = STRING_MANAGER::CStringManagerClient::getSBrickLocalizedName(brickSheetId);
-		Text->setText(desc2);
+		Text->setText(desc2.toUtf8());
 	}
 
 
@@ -159,7 +159,7 @@ void CDBGroupListSheetTextBrickComposition::CSheetChildBrick::updateViewText(CDB
 		{
 			// Special Case for the "Remove Brick" brick. No Cost (not revelant)
 			if( brick->Id==pBM->getInterfaceRemoveBrick() )
-				CostView->setText( ucstring() );
+				CostView->setText( std::string() );
 			else if( brick->SabrinaCost == 0 && brick->SabrinaRelativeCost != 0.f )
 				CostView->setText( toString("%+d", (sint32)(brick->SabrinaRelativeCost * 100.f) ) + string("%") );
 			else

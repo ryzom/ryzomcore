@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1145,34 +1145,8 @@ namespace NLGUI
 				ls.push(value.getDouble());
 				break;
 			case CInterfaceExprValue::String:
-				{
-					ucstring	ucstr= value.getUCString();
-					// Yoyo: dynamically decide whether must return a string or a ucstring
-					bool	mustUseUCString= false;
-					for (uint i = 0; i < ucstr.size (); i++)
-					{
-						if (ucstr[i] > 255)
-						{
-							mustUseUCString= true;
-							break;
-						}
-					}
-					// push a ucstring?
-					if(mustUseUCString)
-					{
-	#if LUABIND_VERSION > 600
-						luabind::detail::push(ls.getStatePointer(), ucstr);
-	#else
-						luabind::object obj(ls.getStatePointer(), ucstr);
-						obj.pushvalue();
-	#endif
-					}
-					else
-					{
-						ls.push(ucstr.toString());
-					}
-					break;
-				}
+				ls.push(value.getString());
+				break;
 			case CInterfaceExprValue::RGBA:
 				{
 					CRGBA color = value.getRGBA();
@@ -1691,7 +1665,7 @@ namespace NLGUI
 		// inside i18n table
 		luabind::module(L, "i18n")
 		[
-			luabind::def("get", &CI18N::get),
+			luabind::def("get", &CI18N::getAsUtf16), // FIXME: Lua UTF-8
 			luabind::def("hasTranslation", &CI18N::hasTranslation)
 		];
 		// inside 'nlfile' table
@@ -1880,21 +1854,21 @@ namespace NLGUI
 	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const std::string &search,   const std::string &replace)
 	{
 		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
-		return findReplaceAll(str,   ucstring(search),   ucstring(replace));
+		return findReplaceAll(str,   ucstring::makeFromUtf8(search),   ucstring::makeFromUtf8(replace));
 	}
 
 	// ***************************************************************************
 	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const std::string &search,   const ucstring &replace)
 	{
 		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
-		return findReplaceAll(str,   ucstring(search),   ucstring(replace));
+		return findReplaceAll(str,   ucstring::makeFromUtf8(search),  replace);
 	}
 
 	// ***************************************************************************
 	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const ucstring &search,   const std::string &replace)
 	{
 		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
-		return findReplaceAll(str,   ucstring(search),   ucstring(replace));
+		return findReplaceAll(str,   search,   ucstring::makeFromUtf8(replace));
 	}
 
 

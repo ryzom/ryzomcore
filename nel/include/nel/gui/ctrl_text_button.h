@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -96,8 +97,10 @@ namespace NLGUI
 		bool			getTextModulateGlobalColorOver() const {return _TextModulateGlobalColorOver;}
 		void			setTextModulateGlobalColorOver(bool v) {_TextModulateGlobalColorOver= v;}
 		// Set text (noop if text id)
-		void			setText (const ucstring &text);
-		ucstring		getText () const;
+		void			setText (const std::string &text);
+		std::string		getText () const;
+		void			setTextAsUtf16 (const ucstring &text);
+		ucstring		getTextAsUtf16 () const;
 
 		void			setHardText (const std::string &text);
 		std::string		getHardText () const;
@@ -140,7 +143,7 @@ namespace NLGUI
 		int luaGetViewText(CLuaState &ls);
 
 		REFLECT_EXPORT_START(CCtrlTextButton, CCtrlBaseButton)
-			REFLECT_UCSTRING("uc_hardtext", getText, setText);
+			REFLECT_UCSTRING("uc_hardtext", getTextAsUtf16, setTextAsUtf16);
 			REFLECT_STRING("hardtext", getHardText, setHardText);
 			REFLECT_SINT32("text_x", getTextX, setTextX)
 			REFLECT_SINT32("wmargin", getWMargin, setWMargin)

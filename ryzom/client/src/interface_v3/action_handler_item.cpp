@@ -4,6 +4,7 @@
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -129,7 +130,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 				{
 					if ( pIS->Family == ITEMFAMILY::SCROLL)
 					{
-						editBoxLarge->setInputString(itemInfo.CustomText);
+						editBoxLarge->setInputStringAsUtf16(itemInfo.CustomText);
 						editLarge->setActive(true);
 						editBoxLarge->setActive(true);
 
@@ -147,7 +148,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 							strFindReplace(customText, "%mfc", ucstring());
 						}
 
-						editBoxShort->setInputString(customText);
+						editBoxShort->setInputStringAsUtf16(customText);
 						editShort->setActive(true);
 						editBoxShort->setActive(true);
 
@@ -160,9 +161,8 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 				}
 				else
 				{
-					ucstring localDesc = ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
 					if (itemInfo.CustomText.empty())
-						display->setTextFormatTaged(localDesc);
+						display->setTextFormatTaged(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
 					else
 					{
 						ucstring text = itemInfo.CustomText;
@@ -182,7 +182,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 						}
 						if (!text.empty())
 						{
-							display->setTextFormatTaged(text);
+							display->setTextFormatTaged(text.toUtf8());
 							group->setActive(true);
 						}
 					}
@@ -239,9 +239,9 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 					closeButton->setActive(false);
 					group->setActive(true);
 
-					editBoxShort->setInputString(ucstring());
-					editBoxLarge->setInputString(ucstring());
-					display->setTextFormatTaged(ucstring());
+					editBoxShort->setInputString(std::string());
+					editBoxLarge->setInputString(std::string());
+					display->setTextFormatTaged(std::string());
 
 
 					// Finish the display or add the waiter
@@ -250,7 +250,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 						// If we already have item info
 						if ( pIS->Family == ITEMFAMILY::SCROLL)
 						{
-							editBoxLarge->setInputString(itemInfo.CustomText);
+							editBoxLarge->setInputStringAsUtf16(itemInfo.CustomText);
 							editLarge->setActive(true);
 							editBoxLarge->setActive(true);
 
@@ -269,7 +269,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 								strFindReplace(customText, "%mfc", ucstring());
 							}
 
-							editBoxShort->setInputString(customText);
+							editBoxShort->setInputStringAsUtf16(customText);
 							editShort->setActive(true);
 							editBoxShort->setActive(true);
 
@@ -297,16 +297,15 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 					closeButton->setActive(true);
 					group->setActive(false);
 
-					editBoxShort->setInputString(ucstring());
-					editBoxLarge->setInputString(ucstring());
-					display->setTextFormatTaged(ucstring());
+					editBoxShort->setInputString(std::string());
+					editBoxLarge->setInputString(std::string());
+					display->setTextFormatTaged(std::string());
 
 					// Finish the display or add the waiter
 					if (getInventory().isItemInfoUpToDate(ItemSlotId))
 					{
-						ucstring localDesc = ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
 						if (itemInfo.CustomText.empty())
-							display->setTextFormatTaged(localDesc);
+							display->setTextFormatTaged(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
 						else
 						{
 							ucstring text = itemInfo.CustomText;
@@ -314,18 +313,18 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 							{
 								CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 								if (pGH)
-									pGH->browse(text.substr(4, text.size()-4).toString().c_str());
+									pGH->browse(text.substr(4, text.size()-4).toUtf8().c_str());
 								text = localDesc;
 							}
 							else if (text.size() > 3 && text[0]=='@' && text[1]=='L' && text[2]=='U' && text[3]=='A')
 							{
-								string code = text.substr(4, text.size()-4).toString();
+								string code = text.substr(4, text.size()-4).toUtf8();
 								if (!code.empty())
 									CLuaManager::getInstance().executeLuaScript(code);
 								text = localDesc;
 							}
 							if (!text.empty())
-								display->setTextFormatTaged(text);
+								display->setTextFormatTaged(text.toUtf8());
 						}
 					}
 					else
@@ -406,11 +405,11 @@ void CInterfaceItemEdition::CItemEditionWindow::validate()
 		if (group && editShort && editBoxShort && editLarge && editBoxLarge && display && editButtons && closeButton && background)
 		{
 			bool textValid = editShort->getActive();
-			ucstring text = editBoxShort->getInputString();
+			ucstring text = editBoxShort->getInputStringAsUtf16();
 			if (!textValid)
 			{
 				textValid = editLarge->getActive();
-				text = editBoxLarge->getInputString();
+				text = editBoxLarge->getInputStringAsUtf16();
 			}
 			 
 			if (textValid)
@@ -1733,10 +1732,11 @@ void CItemMenuInBagInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet)
 
 		// get the CreatorTextID
 		bool isCraftedByUserEntity = false;
-		ucstring creatorNameString;
+		string creatorNameString;
 		if( STRING_MANAGER::CStringManagerClient::instance()->getString ( itemInfo.CreatorName, creatorNameString) )
 		{
-			if (toLower(UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis) == toLower(creatorNameString))
+			std::string userNameString = UserEntity->getEntityName() + PlayerSelectedHomeShardNameWithParenthesis;
+			if (NLMISC::compareCaseInsensitive(userNameString, creatorNameString) == 0)
 				isCraftedByUserEntity = true;
 		}
 
@@ -1841,10 +1841,11 @@ class CHandlerItemMenuCheck : public IActionHandler
 						if (getInventory().isItemInfoUpToDate(getInventory().getItemSlotId(pCS)))
 						{
 							// get the CreatorTextID
-							ucstring creatorNameString;
+							string creatorNameString;
 							if( STRING_MANAGER::CStringManagerClient::instance()->getString ( getInventory().getItemInfo(getInventory().getItemSlotId(pCS)).CreatorName, creatorNameString) )
 							{
-								if (toLower(UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis) == toLower(creatorNameString))
+								string userNameString = UserEntity->getEntityName() + PlayerSelectedHomeShardNameWithParenthesis;
+								if (NLMISC::compareCaseInsensitive(userNameString, creatorNameString) == 0)
 									isTextEditionActive = true;
 							}
 						}
@@ -2121,9 +2122,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 				std::string name = groupNames[i];
 				std::string ahParams = "name=" + name;
 				//Use ucstring because group name can contain accentued characters (and stuff like that)
-				ucstring nameUC;
-				nameUC.fromUtf8(name);
-				pGroupMenu->addLine(nameUC, "", "", name);
+				pGroupMenu->addLine(name, "", "", name);
 				CGroupSubMenu* pNewSubMenu = new CGroupSubMenu(CViewBase::TCtorParam());
 				pGroupMenu->setSubMenu(pGroupMenu->getNumLine()-1, pNewSubMenu);
 				if(pNewSubMenu)
@@ -2149,7 +2148,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 						{
 							//there is an offset of 1 because TInventory names are pet_animal1/2/3/4
 							std::string dst = toString("destination=pet_animal%d|", j + 1);
-							CViewTextMenu* tmp = pNewSubMenu->addLine(ucstring(pMoveToPa[j]->getHardText()),"item_group_move",  dst + ahParams, name + toString("_pa%d", j + 1));
+							CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToPa[j]->getHardText(),"item_group_move",  dst + ahParams, name + toString("_pa%d", j + 1));
 							if(tmp) tmp->setGrayed(pMoveToPa[j]->getGrayed());
 						}
 					}

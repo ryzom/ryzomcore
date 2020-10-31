@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2015-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -2755,7 +2755,7 @@ class CHandlerInvSearchButton : public IActionHandler
 		{
 			CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 			eb->setSelectionAll();
-			filter = eb->getInputString();
+			filter = eb->getInputStringAsUtf16();
 		}
 
 		CDBGroupListSheetBag *pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(btn->getParent()->getId() + ":bag_list"));
@@ -2805,10 +2805,10 @@ class CHandlerInvSetSearch : public IActionHandler
 		std::string id = pCaller->getParent()->getParent()->getId();
 
 		CDBGroupListSheetBag *pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(id + ":bag_list"));
-		if (pList != NULL) pList->setSearchFilter(eb->getInputString());
+		if (pList != NULL) pList->setSearchFilter(eb->getInputStringAsUtf16());
 
 		CDBGroupIconListBag *pIcons = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(id + ":bag_icons"));
-		if (pIcons != NULL) pIcons->setSearchFilter(eb->getInputString());
+		if (pIcons != NULL) pIcons->setSearchFilter(eb->getInputStringAsUtf16());
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerInvSetSearch, "inv_set_search" );
@@ -3236,7 +3236,7 @@ class CHandlerInvTempToBag : public IActionHandler
 		// If we cant find place display a message and dont send the request to the server
 		if (!getInventory().isSpaceInAllBagsForItem(pCSDst))
 		{
-			ucstring msg = CI18N::get("msgCantPutItemInBag");
+			string msg = CI18N::get("msgCantPutItemInBag");
 			string cat = getStringCategory(msg, msg);
 			pIM->displaySystemInfo(msg, cat);
 			return;
@@ -3322,7 +3322,7 @@ class CHandlerInvTempAll : public IActionHandler
 
 		if (!bPlaceFound)
 		{
-			ucstring msg = CI18N::get("msgCantPutItemInBag");
+			string msg = CI18N::get("msgCantPutItemInBag");
 			string cat = getStringCategory(msg, msg);
 			CInterfaceManager::getInstance()->displaySystemInfo(msg, cat);
 			return;

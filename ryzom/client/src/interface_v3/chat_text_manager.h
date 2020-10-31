@@ -55,7 +55,7 @@ public:
 	  * \param justified Should be true for justified text (stretch spaces of line to fill the full width)
 	  * \param plaintext Text will not be parsed for uri markup links
 	  */
-	NLGUI::CViewBase *createMsgText(const ucstring &msg, NLMISC::CRGBA col, bool justified = false, bool plaintext = false);
+	NLGUI::CViewBase *createMsgText(const std::string &msg, NLMISC::CRGBA col, bool justified = false, bool plaintext = false);
 	// Singleton access
 	static CChatTextManager &getInstance();
 
@@ -79,8 +79,8 @@ private:
 
 	bool showTimestamps() const;
 
-	NLGUI::CViewBase *createMsgTextSimple(const ucstring &msg, NLMISC::CRGBA col, bool justified, NLGUI::CInterfaceGroup *commandGroup);
-	NLGUI::CViewBase *createMsgTextComplex(const ucstring &msg, NLMISC::CRGBA col, bool justified, bool plaintext, NLGUI::CInterfaceGroup *commandGroup);
+	NLGUI::CViewBase *createMsgTextSimple(const std::string &msg, NLMISC::CRGBA col, bool justified, NLGUI::CInterfaceGroup *commandGroup);
+	NLGUI::CViewBase *createMsgTextComplex(const std::string &msg, NLMISC::CRGBA col, bool justified, bool plaintext, NLGUI::CInterfaceGroup *commandGroup);
 };
 
 // shortcut to get text manager instance

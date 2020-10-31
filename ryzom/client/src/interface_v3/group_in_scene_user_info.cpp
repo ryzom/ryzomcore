@@ -3,8 +3,8 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -200,9 +200,9 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 
 	// Names
 	const char *templateName;
-	ucstring theTribeName;
-	ucstring entityName = entity->getDisplayName();
-	ucstring entityTitle = entity->getTitle();
+	const char *theTribeName = "";
+	std::string entityName = entity->getDisplayName();
+	std::string entityTitle = entity->getTitle();
 
 	// For some NPC's the name is empty and only a title is given,
 	// in that case, treat the title as the name.
@@ -980,7 +980,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 		if (pPlayer != NULL)
 			if (pPlayer->isAFK())
 				entityName += CI18N::get("uiAFK");
-		_Name->setText(entityName);
+		_Name->setText(entityName.toUtf8());
 
 		// Title color get the PVP color
 		if (_Title)
@@ -1006,7 +1006,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 	if (_GuildName)
 	{
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-		ucstring ucsTmp;
+		string ucsTmp;
 		if (pSMC->getString (_Entity->getGuildNameID(), ucsTmp))
 			_GuildName->setText(ucsTmp);
 
@@ -1032,8 +1032,8 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 	if (_EventFaction)
 	{
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-		ucstring ucsTmp;
-		if (pSMC->getString (_Entity->getEventFactionID(), ucsTmp))
+		string ucsTmp;
+		if (pSMC->getString(_Entity->getEventFactionID(), ucsTmp))
 			_EventFaction->setText(ucsTmp);
 
 		// guildname color depends of PVP faction or not
@@ -1136,7 +1136,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 			{
 				CInterfaceGroup *group = getGroup ("right");
 				CForageSourceCL *forageSource = static_cast<CForageSourceCL*>(_Entity);
-				ucstring txt( CI18N::get( "uittForageContent" ) + toString( ": %u", forageSource->getCurrentQuantity() ) );
+				string txt( CI18N::get( "uittForageContent" ) + toString( ": %u", forageSource->getCurrentQuantity() ) );
 				CCtrlBase *toolTip = group->getCtrl ("tt1");
 				if ( toolTip )
 					toolTip->setDefaultContextHelp( txt );

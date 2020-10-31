@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -775,9 +775,9 @@ CTransformShape	*CScene::createInstance(const string &shapeName)
 
 	// Look if this instance get lightmap information
 #if defined(__GNUC__) && __GNUC__ < 3
-	CMeshBase *pMB = (CMeshBase*)((IShape*)(pTShp->Shape));
+	CMeshBase *pMB = pTShp ? (CMeshBase*)((IShape*)(pTShp->Shape)) : NULL;
 #else // not GNUC
-	CMeshBase *pMB = dynamic_cast<CMeshBase*>((IShape*)(pTShp->Shape));
+	CMeshBase *pMB = pTShp ? dynamic_cast<CMeshBase*>((IShape*)(pTShp->Shape)) : NULL;
 #endif // not GNUC
 	CMeshBaseInstance *pMBI = dynamic_cast<CMeshBaseInstance*>( pTShp );
 	if( ( pMB != NULL ) && ( pMBI != NULL ) )

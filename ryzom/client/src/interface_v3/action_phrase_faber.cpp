@@ -4,6 +4,7 @@
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -537,7 +538,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 					{
 						nlstop;
 					}
-					viewText->setText( text );
+					viewText->setText( text.toUtf8() );
 				}
 
 				// Set as Icon the required MP FaberType / or Sheet Texture (directly...)
@@ -1738,7 +1739,7 @@ void	CActionPhraseFaber::updateItemResult()
 				+ "@{FFFF})";
 		}
 		strFindReplace(text, "%success", successStr );
-		successView->setTextFormatTaged(text);
+		successView->setTextFormatTaged(text.toUtf8());
 	}
 
 
@@ -1826,7 +1827,7 @@ void	CActionPhraseFaber::updateItemResult()
 							RM_FABER_STAT_TYPE::isMagicProtectStat(RM_FABER_STAT_TYPE::TRMStatType(i)) )
 							statToolTip->setDefaultContextHelp(CI18N::get("uiFaberStatActive"));
 						else
-							statToolTip->setDefaultContextHelp(ucstring());
+							statToolTip->setDefaultContextHelp(std::string());
 					}
 					else
 						statToolTip->setDefaultContextHelp(CI18N::get("uiFaberStatGrayed"));

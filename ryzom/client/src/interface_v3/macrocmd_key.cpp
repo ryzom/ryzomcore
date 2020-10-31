@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -103,14 +104,14 @@ void addKeyLine (CGroupList *pParent, const ucstring &keyName, const ucstring &s
 	CViewText *pViewKeyName = dynamic_cast<CViewText*>(pKeysLine->getView(TEMPLATE_KEYS_KEY_NAME));
 	if (pViewKeyName != NULL)
 	{
-		pViewKeyName->setText (keyName);
+		pViewKeyName->setText (keyName.toUtf8());
 		pViewKeyName->setColor(grayed?CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlTextGrayColor).getValColor():CRGBA::White);
 	}
 
 	CViewText *pViewShortcutName = dynamic_cast<CViewText*>(pKeysLine->getView(TEMPLATE_KEYS_SHORTCUT_NAME));
 	if (pViewShortcutName != NULL)
 	{
-		pViewShortcutName->setText (shortcutName);
+		pViewShortcutName->setText (shortcutName.toUtf8());
 		pViewShortcutName->setColor(grayed?CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlTextGrayColor).getValColor():CRGBA::White);
 	}
 
@@ -208,7 +209,7 @@ void getAllComboAction(uint8 nAM, CGroupList *pList, const map<ucstring, CComboA
 		if(remapIT->second.Combo.Key==KeyCount)
 			keyName= CI18N::get("uiNotAssigned");
 		else
-			keyName= remapIT->second.Combo.toUCString();
+			keyName= remapIT->second.Combo.toString();
 		const CBaseAction *baseAction = pAM->getBaseAction(remapIT->second.ActionName);
 		if (baseAction)
 		{
@@ -492,7 +493,7 @@ void CModalContainerEditCmd::activate()
 					}
 					if (found)
 					{
-						pCB->addText( CI18N::get(rVCat[i].LocalizedName) );
+						pCB->addText(CI18N::get(rVCat[i].LocalizedName));
 						CurrentEditCmdCategories.push_back(rVCat[i].Name);
 					}
 				}
@@ -512,9 +513,9 @@ void CModalContainerEditCmd::activate()
 	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp2P )->setValue32(-1);
 	// reset name of params
 	CViewText *pViewParamName = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_FIRST_PARAM_NAME));
-	if (pViewParamName != NULL) pViewParamName->setText (string(""));
+	if (pViewParamName != NULL) pViewParamName->setText (string());
 	pViewParamName = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_SECOND_PARAM_NAME));
-	if (pViewParamName != NULL) pViewParamName->setText (string(""));
+	if (pViewParamName != NULL) pViewParamName->setText (string());
 	invalidCurrentCommand();
 }
 
@@ -679,7 +680,7 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 			else				sEditBox = WinName+WIN_EDITCMD_COMBO_SECOND_PARAM_EDITBOX;
 			CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(sEditBox));
 			// sTmp is utf8
-			pEB->setInputStringAsUtf8(sTmp);
+			pEB->setInputString(sTmp);
 		}
 
 		// Setup the param name if any
@@ -711,7 +712,7 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_TEXT_KEY));
 		if (pVT != NULL) pVT->setActive(true);
 		// setup the text of the key
-		pVT->setText(it->second.toUCString());
+		pVT->setText(it->second.toString());
 
 		// There is already a shortcut so we can display ok button
 		pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
@@ -863,7 +864,7 @@ void CModalContainerEditCmd::validCurrentCommand()
 			CGroupEditBox *pEB= dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId( sWin ));
 			// convert to utf8
 			if (pEB != NULL)
-				CurrentEditCmdLine.ActionName.Argu += pEB->getInputStringAsUtf8();
+				CurrentEditCmdLine.ActionName.Argu += pEB->getInputString();
 			noParam++;
 		}
 	}
@@ -887,7 +888,7 @@ void CModalContainerEditCmd::validCurrentCommand()
 			{
 				CurrentEditCmdLine.Combo = it->second;
 				// Yes ok let setup the text of the key
-				pVT->setText(it->second.toUCString());
+				pVT->setText(it->second.toString());
 				// There is already a shortcut so we can display ok button
 				CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
 				if (pCB != NULL) pCB->setFrozen (false);
@@ -1033,7 +1034,7 @@ void CModalContainerEditCmd::onChangeCategory()
 			{
 				if (rBA.isUsableInCurrentContext())
 				{
-					pCB->addText( CI18N::get(rBA.LocalizedName) );
+					pCB->addText(CI18N::get(rBA.LocalizedName));
 				}
 			}
 		}
@@ -1048,9 +1049,9 @@ void CModalContainerEditCmd::onChangeCategory()
 	// reset name of params
 	CViewText *pViewParamName;
 	pViewParamName = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_FIRST_PARAM_NAME));
-	if (pViewParamName != NULL) pViewParamName->setText (string(""));
+	if (pViewParamName != NULL) pViewParamName->setText (string());
 	pViewParamName = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_SECOND_PARAM_NAME));
-	if (pViewParamName != NULL) pViewParamName->setText (string(""));
+	if (pViewParamName != NULL) pViewParamName->setText (string());
 	// Reset key
 	invalidCurrentCommand();
 }
@@ -1086,9 +1087,9 @@ void CModalContainerEditCmd::onChangeAction()
 	// reset name of params
 	CViewText *pViewParamName;
 	pViewParamName = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_FIRST_PARAM_NAME));
-	if (pViewParamName != NULL) pViewParamName->setText (string(""));
+	if (pViewParamName != NULL) pViewParamName->setText (string());
 	pViewParamName = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_SECOND_PARAM_NAME));
-	if (pViewParamName != NULL) pViewParamName->setText (string(""));
+	if (pViewParamName != NULL) pViewParamName->setText (string());
 
 	uint noParam = 0;
 	for (uint i = 0; i < rVParams.size(); ++i)
@@ -1130,11 +1131,10 @@ void CModalContainerEditCmd::onChangeAction()
 
 					if (ActionsContext.matchContext(rVal.Contexts))
 					{
-						if ((rVal.LocalizedValue.size() >= 2) &&
-							(rVal.LocalizedValue[0] == 'u') && (rVal.LocalizedValue[1] == 'i'))
+						if (NLMISC::startsWith(rVal.LocalizedValue, "ui"))
 							pCB->addText(CI18N::get(rVal.LocalizedValue));
 						else
-							pCB->addText(ucstring(rVal.LocalizedValue));
+							pCB->addText(rVal.LocalizedValue);
 					}
 				}
 			}
@@ -1148,7 +1148,7 @@ void CModalContainerEditCmd::onChangeAction()
 			CGroupEditBox *pEB= dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId( sWin ));
 			if( pEB )
 			{
-				pEB->setInputString(ucstring(""));
+				pEB->setInputString(std::string());
 			}
 			NLGUI::CDBManager::getInstance()->getDbProp( sDB )->setValue32(1);
 		}
@@ -1354,7 +1354,7 @@ public:
 			pMCM->NewKey->CurrentEditCmdLine.Combo = pGetKey->Combo;
 
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(pMCM->NewKey->WinName+VIEW_EDITCMD_TEXT_KEY));
-			if (pVT != NULL) pVT->setText(pMCM->NewKey->CurrentEditCmdLine.Combo.toUCString());
+			if (pVT != NULL) pVT->setText(pMCM->NewKey->CurrentEditCmdLine.Combo.toString());
 
 			CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(pMCM->NewKey->WinName+CTRL_EDITCMD_BUTTON_OK));
 			if (pCB != NULL) pCB->setFrozen (false);
@@ -1366,7 +1366,7 @@ public:
 			pMCM->EditCmd->CurrentEditCmdLine.Combo = pGetKey->Combo;
 			pMCM->CurrentEditMacro.Combo = pMCM->EditCmd->CurrentEditCmdLine.Combo;
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_NEWMACRO_KEY));
-			if (pVT != NULL) pVT->setText(pMCM->EditCmd->CurrentEditCmdLine.Combo.toUCString());
+			if (pVT != NULL) pVT->setText(pMCM->EditCmd->CurrentEditCmdLine.Combo.toString());
 		}
 	}
 };

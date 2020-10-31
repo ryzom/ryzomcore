@@ -598,7 +598,7 @@ void getBuffer (CBitmap &btm)
 void displayScreenShotSavedInfo(const string &filename)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	ucstring msg("'" + filename + "' " + CI18N::get("uiScreenshotSaved"));
+	string msg = "'" + filename + "' " + CI18N::get("uiScreenshotSaved");
 	pIM->displaySystemInfo(msg);
 }
 
@@ -836,7 +836,7 @@ class CAHReplyTeller : public IActionHandler
 			{
 				w->setKeyboardFocus();
 				w->enableBlink(1);
-				PeopleInterraction.ChatGroup.Filter.setTargetPlayer(CEntityCL::removeTitleAndShardFromName(PeopleInterraction.LastSenderName));
+				PeopleInterraction.ChatGroup.Filter.setTargetPlayer(CEntityCL::removeTitleAndShardFromName(PeopleInterraction.LastSenderName.toUtf8()));
 				CGroupEditBox *eb = w->getEditBox();
 				if (eb != NULL)
 				{
@@ -863,7 +863,7 @@ class CAHReplyTellerOnce : public IActionHandler
 			{
 				w->setKeyboardFocus();
 				w->enableBlink(1);
-				w->setCommand(ucstring("tell ") + CEntityCL::removeTitleAndShardFromName(PeopleInterraction.LastSenderName) + ucstring(" "), false);
+				w->setCommand(ucstring("tell ") + CEntityCL::removeTitleAndShardFromName(PeopleInterraction.LastSenderName.toUtf8()) + ucstring(" "), false);
 				CGroupEditBox *eb = w->getEditBox();
 				if (eb != NULL)
 				{
@@ -885,7 +885,7 @@ class CAHCycleTell : public IActionHandler
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		if (!im->isInGame()) return;
-		const ucstring *lastTellPeople = ChatMngr.cycleLastTell();
+		const string *lastTellPeople = ChatMngr.cycleLastTell();
 		if (!lastTellPeople) return;
 		// just popup the main chat
 		//CChatWindow *w = PeopleInterraction.MainChat.Window;
@@ -913,10 +913,10 @@ NLMISC_COMMAND(slsn, "Temp : set the name of the last sender.", "<name>")
 }
 
 // ***************************************************************************
-bool CStringPostProcessRemoveName::cbIDStringReceived(ucstring &inOut)
+bool CStringPostProcessRemoveName::cbIDStringReceived(string &inOut)
 {
 	// extract the replacement id
-	ucstring strNewTitle = CEntityCL::getTitleFromName(inOut);
+	string strNewTitle = CEntityCL::getTitleFromName(inOut);
 
 	// retrieve the translated string
 	if (!strNewTitle.empty())
@@ -938,16 +938,16 @@ bool CStringPostProcessRemoveName::cbIDStringReceived(ucstring &inOut)
 }
 
 // ***************************************************************************
-bool CStringPostProcessRemoveTitle::cbIDStringReceived(ucstring &inOut)
+bool CStringPostProcessRemoveTitle::cbIDStringReceived(string &inOut)
 {
 	inOut = CEntityCL::removeTitleAndShardFromName(inOut);
 	return true;
 }
 
 // ***************************************************************************
-bool CStringPostProcessNPCRemoveTitle::cbIDStringReceived(ucstring &inOut)
+bool CStringPostProcessNPCRemoveTitle::cbIDStringReceived(string &inOut)
 {
-	ucstring sOut = CEntityCL::removeTitleAndShardFromName(inOut);
+	string sOut = CEntityCL::removeTitleAndShardFromName(inOut);
 	if (sOut.empty())
 	{
 		CStringPostProcessRemoveName SPPRM;

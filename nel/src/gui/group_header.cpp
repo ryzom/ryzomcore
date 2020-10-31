@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -161,8 +162,14 @@ namespace NLGUI
 				// ...
 				limitingParent = limitingParent->getParent();
 			}
-
-			getParentContainer()->setW(totalWidth + getParentContainer()->getWReal() - limitingParent->getWReal());
+			if (limitingParent)
+			{
+				getParentContainer()->setW(totalWidth + getParentContainer()->getWReal() - limitingParent->getWReal());
+			}
+			else
+			{
+				nlwarning("No limiting parent for width");
+			}
 		}
 
 		// resize H
@@ -178,9 +185,14 @@ namespace NLGUI
 					CInterfaceGroup *limitingParent = colEnclosing->getParent();
 					while (limitingParent && (limitingParent->getResizeFromChildH() || dynamic_cast<CGroupList *>(limitingParent)))
 						limitingParent = limitingParent->getParent();
-
-					nlassert(limitingParent);
-					getParentContainer()->setH(col->getH() + getParentContainer()->getHReal() - limitingParent->getHReal());
+					if (limitingParent)
+					{
+						getParentContainer()->setH(col->getH() + getParentContainer()->getHReal() - limitingParent->getHReal());
+					}
+					else
+					{
+						nlwarning("No limiting parent for height");
+					}
 				}
 			}
 		}

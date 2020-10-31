@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2012  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -230,7 +230,7 @@ void CBGDownloaderAccess::CDownloadCoTask::run()
 			// that the downloader is still running and in slave mode
 			if (!isDownloaderProcessRunning() && getDownloaderMode() != DownloaderMode_Slave)
 			{
-				throw EDownloadException(CI18N::get("uiBGD_DownloaderStopped").toUtf8());
+				throw EDownloadException(CI18N::get("uiBGD_DownloaderStopped"));
 			}
 		}
 		else
@@ -429,7 +429,7 @@ void CBGDownloaderAccess::CDownloadCoTask::createDownloaderProcess()
 		BOOL ok = NLMISC::launchProgram(BGDownloaderName, Parent->_CommandLine);
 		if (!ok)
 		{
-			throw EDownloadException(CI18N::get("uiBGD_LaunchError").toUtf8());
+			throw EDownloadException(CI18N::get("uiBGD_LaunchError"));
 		}
 	}
 	else
@@ -458,7 +458,7 @@ void CBGDownloaderAccess::CDownloadCoTask::restartDownloader()
 			{
 				nlwarning("CBGDownloaderAccess::CDownloadCoTask : detected shared memory segment, with NULL pid");
 				// some problem here ...
-				throw EDownloadException(CI18N::get("uiBGD_MultipleRyzomInstance").toUtf8());
+				throw EDownloadException(CI18N::get("uiBGD_MultipleRyzomInstance"));
 			}
 		}
 		bool ok = NLMISC::CWinProcess::terminateProcess(*(DWORD *) ryzomInstPIDPtr);
@@ -467,7 +467,7 @@ void CBGDownloaderAccess::CDownloadCoTask::restartDownloader()
 		{
 			nlwarning("CBGDownloaderAccess::CDownloadCoTask : detected shared memory segment, with good pid, but couldn't stop the process");
 			// couldn't stop the other client ...
-			throw EDownloadException(CI18N::get("uiBGD_MultipleRyzomInstance").toUtf8());
+			throw EDownloadException(CI18N::get("uiBGD_MultipleRyzomInstance"));
 		}
 	}
 	// write our pid into shared mem
@@ -475,7 +475,7 @@ void CBGDownloaderAccess::CDownloadCoTask::restartDownloader()
 	if (!Parent->_RyzomInstPIDPtr)
 	{
 		// really, really bad luck ...
-		throw EDownloadException(CI18N::get("uiBGD_MultipleRyzomInstance").toUtf8());
+		throw EDownloadException(CI18N::get("uiBGD_MultipleRyzomInstance"));
 	}
 	*(uint32 *) Parent->_RyzomInstPIDPtr = (uint32) GetCurrentProcessId();
 
@@ -514,7 +514,7 @@ void CBGDownloaderAccess::CDownloadCoTask::restartDownloader()
 		const uint32 totalTries = 7;
 		while (waitTime <= 32000)
 		{
-			Parent->_CurrentMessage.fromUtf8(toString(CI18N::get("uiBGD_HandShaking").toUtf8().c_str(), tryIndex, totalTries));
+			Parent->_CurrentMessage.fromUtf8(toString(CI18N::get("uiBGD_HandShaking").c_str(), tryIndex, totalTries));
 
 			sendSimpleMsg(CL_Probe);
 			NLMISC::CMemStream dummyMsg;
@@ -758,7 +758,7 @@ void CBGDownloaderAccess::CDownloadCoTask::waitMsg(BGDownloader::TMsgType wanted
 	if (msgType != wantedMsgType)
 	{
 		nlwarning("BG DOWNLOADER PROTOCOL ERROR ! Bad message type received. Expected type is '%d', received type is '%d'", (int) wantedMsgType, (int) msgType);
-		throw EDownloadException(CI18N::get("uiBGD_ProtocolError").toUtf8());
+		throw EDownloadException(CI18N::get("uiBGD_ProtocolError"));
 	}
 }
 
@@ -816,7 +816,7 @@ void CBGDownloaderAccess::CDownloadCoTask::checkDownloaderAlive()
 {
 	if (!Parent->_DownloaderMsgQueue.connected() || !isDownloaderProcessRunning())
 	{
-		throw EDownloadException(CI18N::get("uiBGD_DownloaderDisconnected").toUtf8());
+		throw EDownloadException(CI18N::get("uiBGD_DownloaderDisconnected"));
 	}
 }
 

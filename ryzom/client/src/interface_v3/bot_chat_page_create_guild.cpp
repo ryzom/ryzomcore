@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -70,10 +71,10 @@ class CHandlerGuildCreate : public IActionHandler
 
 		CGroupEditBox *pDesc = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(guildDescWin));
 
-		ucstring guildName = pGEB->getInputString();
+		ucstring guildName = pGEB->getInputStringAsUtf16();
 
 		ucstring guildDesc;
-		if (pDesc != NULL) guildDesc = pDesc->getInputString();
+		if (pDesc != NULL) guildDesc = pDesc->getInputStringAsUtf16();
 
 		uint64 icon = CGuildManager::iconMake((uint8)pCS->getGuildBack(), (uint8)pCS->getGuildSymbol(),
 								pCS->getInvertGuildSymbol(), pCS->getGuildColor1(), pCS->getGuildColor2());

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -121,17 +124,20 @@ void		CSurfaceLightGrid::getStaticLightSetup(NLMISC::CRGBA sunAmbient, const CVe
 			CLightInfluenceInterpolator::CCorner	&corner= interp.Corners[y*2 + x];
 			// For all lights
 			uint lid;
-			for(lid= 0; lid<CSurfaceLightGrid::NumLightPerCorner; lid++)
+			if (igPointLights)
 			{
-				// get the id of the light in the ig
-				uint	igLightId= cellCorner.Light[lid];
-				// If empty id, stop
-				if(igLightId==0xFF)
-					break;
-				else
+				for (lid = 0; lid < CSurfaceLightGrid::NumLightPerCorner; lid++)
 				{
-					// Set pointer of the light in the corner
-					corner.Lights[lid]= igPointLights + igLightId;
+					// get the id of the light in the ig
+					uint	igLightId = cellCorner.Light[lid];
+					// If empty id, stop
+					if (igLightId == 0xFF)
+						break;
+					else
+					{
+						// Set pointer of the light in the corner
+						corner.Lights[lid] = igPointLights + igLightId;
+					}
 				}
 			}
 			// Reset Empty slots.
@@ -152,7 +158,7 @@ void		CSurfaceLightGrid::getStaticLightSetup(NLMISC::CRGBA sunAmbient, const CVe
 			// BiLinear Ambient Contribution.
 			//-------------
 			// If FF, then take Sun Ambient => leave color and alpha To 0.
-			if(cellCorner.LocalAmbientId!=0xFF)
+			if(igPointLights && cellCorner.LocalAmbientId!=0xFF)
 			{
 				CPointLight	&pl= igPointLights[cellCorner.LocalAmbientId];
 				// take current ambient from pointLight

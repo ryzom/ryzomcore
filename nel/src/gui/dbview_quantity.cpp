@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -63,7 +64,7 @@ namespace NLGUI
 		else
 		if( name == "emptytext" )
 		{
-			return _EmptyText.toString();
+			return _EmptyText;
 		}
 		else
 			return CViewText::getProperty( name );
@@ -112,7 +113,7 @@ namespace NLGUI
 		else
 			xmlSetProp( node, BAD_CAST "valuemax", BAD_CAST "" );
 
-		xmlSetProp( node, BAD_CAST "emptytext", BAD_CAST _EmptyText.toString().c_str() );
+		xmlSetProp( node, BAD_CAST "emptytext", BAD_CAST _EmptyText.c_str() );
 
 		return node;
 	}
@@ -147,9 +148,10 @@ namespace NLGUI
 		if(ptr)
 		{
 			const char *propPtr = ptr;
-			_EmptyText = ucstring(propPtr);
-			if ((strlen(propPtr)>2) && (propPtr[0] == 'u') && (propPtr[1] == 'i'))
-				_EmptyText = CI18N::get (propPtr);
+			if (NLMISC::startsWith(propPtr, "ui"))
+				_EmptyText = CI18N::get(propPtr);
+			else
+				_EmptyText = propPtr;
 		}
 
 		// init cache.

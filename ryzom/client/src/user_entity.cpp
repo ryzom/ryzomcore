@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -2952,7 +2952,7 @@ bool CUserEntity::sit(bool s)
 				// autowalk disabled
 				UserControls.autowalkState(false);
 
-				const string msgName = "COMMAND:SIT";
+				static const string msgName = "COMMAND:SIT";
 				CBitMemStream out;
 				if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 				{
@@ -2967,7 +2967,7 @@ bool CUserEntity::sit(bool s)
 
 				// display sit msg
 				CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-				ucstring msg = CI18N::get("msgUserIsSitting");
+				string msg = CI18N::get("msgUserIsSitting");
 				string cat = getStringCategory(msg, msg);
 				pIM->displaySystemInfo(msg, cat);
 			}
@@ -2980,7 +2980,7 @@ bool CUserEntity::sit(bool s)
 		{
 			if(mode(MBEHAV::NORMAL))
 			{
-				const string msgName = "COMMAND:SIT";
+				static const string msgName = "COMMAND:SIT";
 				CBitMemStream out;
 				if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 				{
@@ -2995,7 +2995,7 @@ bool CUserEntity::sit(bool s)
 
 				// display stand msg
 				CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-				ucstring msg = CI18N::get("msgUserIsStanding");
+				string msg = CI18N::get("msgUserIsStanding");
 				string cat = getStringCategory(msg, msg);
 				pIM->displaySystemInfo(msg, cat);
 			}
@@ -3071,7 +3071,7 @@ void CUserEntity::setAFK(bool b, string afkTxt)
 	}
 
 	// send afk state
-	string msgName = "COMMAND:AFK";
+	static const string msgName = "COMMAND:AFK";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
@@ -3085,15 +3085,15 @@ void CUserEntity::setAFK(bool b, string afkTxt)
 	ucstring ucstr;
 	ucstr.fromUtf8( afkTxt );
 	CBitMemStream outTxt;
-	msgName = "STRING:AFK_TXT";
-	if( GenericMsgHeaderMngr.pushNameToStream(msgName,outTxt) )
+	static const string msgNameTxt = "STRING:AFK_TXT";
+	if( GenericMsgHeaderMngr.pushNameToStream(msgNameTxt,outTxt) )
 	{
 		outTxt.serial( ucstr );
 		NetMngr.push( outTxt );
 	}
 	else
 	{
-		nlwarning("CUserEntity:setAFK: unknown message named '%s'.", msgName.c_str());
+		nlwarning("CUserEntity:setAFK: unknown message named '%s'.", msgNameTxt.c_str());
 	}
 
 
@@ -3115,7 +3115,7 @@ void CUserEntity::rollDice(sint16 min, sint16 max, bool local)
 		}
 		sint16 roll = min + (sint16)dice->rand(max-min);
 
-		ucstring msg = CI18N::get("msgRollDiceLocal");
+		string msg = CI18N::get("msgRollDiceLocal");
 		strFindReplace(msg, "%min", toString(min));
 		strFindReplace(msg, "%max", toString(max));
 		strFindReplace(msg, "%roll", toString(roll));
@@ -3147,7 +3147,7 @@ bool CUserEntity::canEngageCombat()
 	{
 		// display "you can't fight while sitting" message)
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		ucstring msg = CI18N::get("msgCantFightSit");
+		string msg = CI18N::get("msgCantFightSit");
 		string cat = getStringCategory(msg, msg);
 		pIM->displaySystemInfo(msg, cat);
 
@@ -3158,7 +3158,7 @@ bool CUserEntity::canEngageCombat()
 	{
 		// display "you can't fight while swiming" message)
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		ucstring msg = CI18N::get("msgCantFightSwim");
+		string msg = CI18N::get("msgCantFightSwim");
 		string cat = getStringCategory(msg, msg);
 		pIM->displaySystemInfo(msg, cat);
 
@@ -3169,7 +3169,7 @@ bool CUserEntity::canEngageCombat()
 	{
 		// display "you can't fight while swimming" message)
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		ucstring msg = CI18N::get("msgCantFightRide");
+		string msg = CI18N::get("msgCantFightRide");
 		string cat = getStringCategory(msg, msg);
 		pIM->displaySystemInfo(msg, cat);
 
@@ -4144,7 +4144,7 @@ void CUserEntity::switchVelocity(bool userRequest)
 
 	// display message : your are running, you are walking
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	ucstring msg;
+	string msg;
 	if( _Run )
 		msg = CI18N::get("msgUserIsRunning");
 	else

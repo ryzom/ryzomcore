@@ -2,7 +2,7 @@
 // Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2011  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2011-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
@@ -207,9 +207,9 @@ int CDBCtrlSheet::luaGetCreatorName(CLuaState &ls)
 {
 	uint32	itemSlotId = getInventory().getItemSlotId(this);
 	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
-	ucstring creatorName;
+	string creatorName;
 	STRING_MANAGER::CStringManagerClient::instance()->getString(itemInfo.CreatorName, creatorName);
-	CLuaIHM::push(ls, creatorName);
+	CLuaIHM::push(ls, ucstring::makeFromUtf8(creatorName)); // FIXME: Lua UTF-8
 
 	return 1;
 }
@@ -1467,7 +1467,7 @@ void CDBCtrlSheet::setupMission()
 void CDBCtrlSheet::setupGuildFlag ()
 {
 	// Find the guild name
-	ucstring usGuildName;
+	string usGuildName;
 	sint32 nGuildName = _SheetId.getSInt32();
 	if (_LastSheetId != nGuildName || _NeedSetup)
 	{
@@ -2101,7 +2101,7 @@ void CDBCtrlSheet::draw()
 				_RegenText = new CViewText(CViewBase::TCtorParam());
 				_RegenText->setId(getId() + ":regen");
 				_RegenText->setParent(_Parent);
-				_RegenText->setOverflowText(ucstring(""));
+				_RegenText->setOverflowText(std::string());
 				_RegenText->setModulateGlobalColor(false);
 				_RegenText->setMultiLine(false);
 				_RegenText->setTextMode(CViewText::ClipWord);
@@ -3390,7 +3390,7 @@ void	CDBCtrlSheet::setupItemInfoWaiter()
 }
 
 // ***************************************************************************
-void	CDBCtrlSheet::getContextHelp(ucstring &help) const
+void	CDBCtrlSheet::getContextHelp(std::string &help) const
 {
 	if (getType() == CCtrlSheetInfo::SheetType_Skill)
 	{
@@ -3409,7 +3409,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		if (macroName.empty())
 			macroName = CI18N::get("uiNotAssigned");
 
-		ucstring assignedTo = macro->Combo.toUCString();
+		ucstring assignedTo = macro->Combo.toString();
 		if (assignedTo.empty())
 			assignedTo = CI18N::get("uiNotAssigned");
 
@@ -3443,7 +3443,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		strFindReplace(dispText, ucstring("%n"), macroName);
 		strFindReplace(dispText, ucstring("%k"), assignedTo);
 		strFindReplace(dispText, ucstring("%c"), dispCommands);
-		help = dispText;
+		help = dispText.toUtf8();
 	}
 	else if(getType() == CCtrlSheetInfo::SheetType_Item)
 	{
@@ -3454,10 +3454,10 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 			{
 				// call lua function to update tooltip window
 				_ItemInfoWaiter.sendRequest();
-				help = _ItemInfoWaiter.infoValidated();
+				help = _ItemInfoWaiter.infoValidated().toUtf8();
 				// its expected to get at least item name back
 				if (help.empty())
-					help = getItemActualName();
+					help = getItemActualName().toUtf8();
 			}
 			else if (!_ContextHelp.empty())
 			{
@@ -3465,7 +3465,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 			}
 			else
 			{
-				help = getItemActualName();
+				help = getItemActualName().toUtf8();;
 			}
 		}
 		else
@@ -3505,7 +3505,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		sint32	phraseId= getSheetId();
 		if (phraseId == 0)
 		{
-			help = ucstring();
+			help = std::string();
 		}
 		else
 		{
@@ -3523,10 +3523,11 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 				game = game["game"];
 				game.callMethodByNameNoThrow("updatePhraseTooltip", 1, 1);
 				// retrieve result from stack
-				help = ucstring();
+				ucstring tmpHelp;
 				if (!ls->empty())
 				{
-					CLuaIHM::pop(*ls, help);
+					CLuaIHM::pop(*ls, tmpHelp); // FIXME: Lua UTF-8
+					help = tmpHelp.toUtf8();
 				}
 				else
 				{
@@ -3574,7 +3575,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 }
 
 // ***************************************************************************
-void	CDBCtrlSheet::getContextHelpToolTip(ucstring &help) const
+void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 {
 	// Special case for buff items and spell crystals, only for tooltips
 	if (getType() == CCtrlSheetInfo::SheetType_Item)
@@ -3585,7 +3586,7 @@ void	CDBCtrlSheet::getContextHelpToolTip(ucstring &help) const
 			if (useItemInfoForFamily(item->Family))
 			{
 				_ItemInfoWaiter.sendRequest();
-				help = _ItemInfoWaiter.infoValidated();
+				help = _ItemInfoWaiter.infoValidated().toUtf8();
 				return;
 			}
 		}
@@ -4580,7 +4581,7 @@ ucstring CDBCtrlSheet::getItemActualName() const
 		return ucstring();
 	else
 	{
-		ucstring ret;
+		string ret;
 		// If NameId not 0, get from StringManager
 		uint32	nameId= getItemNameId();
 		if(nameId)
@@ -4612,21 +4613,21 @@ ucstring CDBCtrlSheet::getItemActualName() const
 		{
 			// get description string for item format
 			std::string formatID = getItemRMFaberStatType() != RM_FABER_STAT_TYPE::Unknown ? "uihelpItemFaberPrefixAndSuffix" : "uihelpItemFaberPrefix";
-			ucstring format;
+			string format;
 			if (!CI18N::hasTranslation(formatID))
 			{
-				format = ucstring("%p %n %s"); // not found, uses default string
+				format = "%p %n %s"; // not found, uses default string
 			}
 			else
 			{
 				format = CI18N::get(formatID);
 			}
 			// suffix
-			strFindReplace(format, ucstring("%p"), RM_CLASS_TYPE::toLocalString(getItemRMClassType()));
+			strFindReplace(format, "%p", RM_CLASS_TYPE::toLocalString(getItemRMClassType()));
 			// name
-			strFindReplace(format, ucstring("%n"), ret);
+			strFindReplace(format, "%n", ret);
 			// prefix
-			strFindReplace(format, ucstring("%s"), CI18N::get(toString("mpstatItemQualifier%d", (int) getItemRMFaberStatType()).c_str()));
+			strFindReplace(format, "%s", CI18N::get(toString("mpstatItemQualifier%d", (int) getItemRMFaberStatType()).c_str()));
 
 
 			ret = format;

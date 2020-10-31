@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2008-2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2008-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -480,7 +480,7 @@ void CSourceXAudio2::setLooping(bool l)
 					_SourceVoice->GetState(&voice_state);
 					if (voice_state.BuffersQueued)
 					{
-						nlwarning(NLSOUND_XAUDIO2_PREFIX "Not playing but buffer already queued while switching loop mode!?! Flush and requeue");
+						// nlwarning(NLSOUND_XAUDIO2_PREFIX "Not playing but buffer already queued while switching loop mode!?! Flush and requeue");
 						if (FAILED(_SourceVoice->FlushSourceBuffers())) 
 							nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED FlushSourceBuffers");
 						// queue buffer with correct looping parameters

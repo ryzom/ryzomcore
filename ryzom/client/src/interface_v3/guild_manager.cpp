@@ -4,6 +4,7 @@
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -245,11 +246,11 @@ bool CGuildManager::isLeaderOfTheGuild()
 }
 
 // ***************************************************************************
-ucstring CGuildManager::getGuildName()
+string CGuildManager::getGuildName()
 {
 	if (_InGuild)
 		return _Guild.Name;
-	return ucstring("");
+	return string();
 }
 
 // ***************************************************************************
@@ -369,13 +370,13 @@ void CGuildManager::update()
 			if (node && node->getValueBool())
 			{
 				// See if we need to show any online/offline messages
-				static map<ucstring, SGuildMember> CachedGuildMembers;
-				ucstring onlineMessage = CI18N::get("uiPlayerOnline");
-				ucstring offlineMessage = CI18N::get("uiPlayerOffline");
+				static map<string, SGuildMember> CachedGuildMembers;
+				const string &onlineMessage = CI18N::get("uiPlayerOnline");
+				const string &offlineMessage = CI18N::get("uiPlayerOffline");
 
 				for (uint i = 0; i < _GuildMembers.size(); ++i)
 				{
-					map<ucstring, SGuildMember>::const_iterator it = CachedGuildMembers.find(_GuildMembers[i].Name);
+					map<string, SGuildMember>::const_iterator it = CachedGuildMembers.find(_GuildMembers[i].Name);
 					if ( it != CachedGuildMembers.end() )
 					{
 						if ( (*it).second.Online == _GuildMembers[i].Online)
@@ -390,7 +391,7 @@ void CGuildManager::update()
 							continue;
 						}
 
-						ucstring msg = (_GuildMembers[i].Online != ccs_offline) ? onlineMessage : offlineMessage;
+						string msg = (_GuildMembers[i].Online != ccs_offline) ? onlineMessage : offlineMessage;
 						strFindReplace(msg, "%s", _GuildMembers[i].Name);
 						string cat = getStringCategory(msg, msg);
 						map<string, CClientConfig::SSysInfoParam>::const_iterator it;
@@ -418,7 +419,7 @@ void CGuildManager::update()
 			{
 				uint i;
 				_Grade = EGSPD::CGuildGrade::Member;
-				ucstring sUserName = toLower(UserEntity->getEntityName());
+				string sUserName = toLower(UserEntity->getEntityName());
 				for (i = 0; i < _GuildMembers.size(); ++i)
 				{
 					if (toLower(_GuildMembers[i].Name) == sUserName)
@@ -722,7 +723,7 @@ bool CDBGroupListAscensor::CSheetChildAscensor::isInvalidated(CDBGroupListSheetT
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 
 		uint32 nameID = NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:" + toString(Index) + ":NAME")->getValue32();
-		ucstring name;
+		string name;
 		if (nameID && pSMC->getDynString(nameID, name))
 		{
 			Text->setText(name);
@@ -886,7 +887,7 @@ class CAHGuildSheetOpen : public IActionHandler
 				{
 					CRyzomTime rt;
 					rt.updateRyzomClock(rGuildMembers[i].EnterDate);
-					ucstring str = toString("%04d", rt.getRyzomYear()) + " ";
+					string str = toString("%04d", rt.getRyzomYear()) + " ";
 					str += CI18N::get("uiJenaYear") + " : ";
 					str += CI18N::get("uiAtysianCycle") + " ";
 					str += toString("%01d", rt.getRyzomCycle()+1) +", ";
@@ -998,12 +999,12 @@ class CAHGuildSheetMenuOpen : public IActionHandler
 public:
 	// Current selection
 	static sint32	MemberIndexSelected;		// Index of the member selected when right clicked
-	static ucstring	MemberNameSelected;			// Name of the member selected when right clicked (for extra check)
+	static std::string	MemberNameSelected;			// Name of the member selected when right clicked (for extra check)
 };
 REGISTER_ACTION_HANDLER (CAHGuildSheetMenuOpen, "guild_member_menu_open");
 
 sint32		CAHGuildSheetMenuOpen::MemberIndexSelected= -1;
-ucstring	CAHGuildSheetMenuOpen::MemberNameSelected;
+std::string	CAHGuildSheetMenuOpen::MemberNameSelected;
 
 
 // ***************************************************************************
@@ -1098,12 +1099,12 @@ public:
 
 	// Current selection
 	static sint32	MemberIndexSelected;		// Index of the member selected when left clicked
-	static ucstring	MemberNameSelected;			// Name of the member selected when lef clicked
+	static std::string	MemberNameSelected;			// Name of the member selected when lef clicked
 };
 REGISTER_ACTION_HANDLER(CAHGuildSheetTellMember, "guild_tell_member");
 
 sint32		CAHGuildSheetTellMember::MemberIndexSelected= -1;
-ucstring	CAHGuildSheetTellMember::MemberNameSelected;
+string		CAHGuildSheetTellMember::MemberNameSelected;
 
 // ***************************************************************************
 class CAHGuildSheetSetLeader : public IActionHandler

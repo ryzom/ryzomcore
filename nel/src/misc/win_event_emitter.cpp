@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -162,11 +162,24 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 				server->postEvent (new CEventKeyUp ((NLMISC::TKey)wParam, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
 		}
 		break;
+#ifdef WM_UNICHAR
+	case WM_UNICHAR:
+		if (wParam != UNICODE_NOCHAR && _KeyboardEventsEnabled)
+		{
+			//if (wParam < KeyCount)
+			//nlinfo("WM_UNICHAR with %u", wParam);
+			server->postEvent (new CEventChar ((u32char)wParam, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
+		}
+		break;
+#endif
 	case WM_CHAR:
 		if (_KeyboardEventsEnabled)
 		{
 			//if (wParam < KeyCount)
 			//nlinfo("WM_CHAR with %u", wParam);
+#ifndef WM_UNICHAR
+			// FIXME: Combine UTF-16 pairs
+#endif
 			server->postEvent (new CEventChar ((ucchar)wParam, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
 		}
 		break;

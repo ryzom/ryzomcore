@@ -4,6 +4,7 @@
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -669,7 +670,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 			if (selection == NULL) return;
 			//if(selection->isNPC())
 			{
-				ucstring name = selection->getEntityName();
+				std::string name = selection->getEntityName();
 				if(name.empty())
 				{
 					// try to get the name from the string manager (for npc)
@@ -678,7 +679,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 					{
 						STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 						pSMC->getString (nDBid, name);
-						ucstring copyName = name;
+						std::string copyName = name;
 						name = CEntityCL::removeTitleAndShardFromName(name);
 						if (name.empty())
 						{
@@ -688,7 +689,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 								woman = pChar->getGender() == GSGENDER::female;
 
 							// extract the replacement id
-							ucstring strNewTitle = CEntityCL::getTitleFromName(copyName);
+							std::string strNewTitle = CEntityCL::getTitleFromName(copyName);
 
 							// retrieve the translated string
 							if (!strNewTitle.empty())
@@ -699,7 +700,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 					}
 				}
 				if(!name.empty())
-					CAHManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name.toUtf8()+"|ptype="+toString((int)selection->Type));
+					CAHManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name+"|ptype="+toString((int)selection->Type));
 				return;
 			}
 		}
@@ -751,7 +752,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 		for (titleIDnb = 0; titleIDnb < CHARACTER_TITLE::NB_CHARACTER_TITLE; ++titleIDnb)
 		{
 			bool women = UserEntity && UserEntity->getGender()==GSGENDER::female;
-			if (CStringManagerClient::getTitleLocalizedName(CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)titleIDnb),women) == title)
+			if (CStringManagerClient::getTitleLocalizedName(CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)titleIDnb),women) == title.toUtf8())
 				break;
 		}
 
@@ -992,9 +993,7 @@ class CHandlerBrowse : public IActionHandler
 					}
 				}
 
-				ucstring ucparams(params);
-				CInterfaceManager::parseTokens(ucparams);
-				params = ucparams.toUtf8();
+				CInterfaceManager::parseTokens(params);
 				// go. NB: the action handler himself may translate params from utf8
 				CAHManager::getInstance()->runActionHandler(action, elementGroup, params);
 
@@ -1167,7 +1166,7 @@ void setHelpText(CSheetHelpSetup &setup, const ucstring &text)
 	CViewText *viewText= dynamic_cast<CViewText *>(setup.HelpWindow->getView(setup.ViewText));
 	if(viewText)
 	{
-		viewText->setTextFormatTaged(copyStr);
+		viewText->setTextFormatTaged(copyStr.toUtf8());
 	}
 	CInterfaceGroup *viewTextGroup = setup.HelpWindow->getGroup(setup.ScrollTextGroup);
 	if (viewTextGroup) viewTextGroup->setActive(true);
@@ -2014,7 +2013,7 @@ void getItemText (CDBCtrlSheet *item, ucstring &itemText, const CItemSheet*pIS)
 			if(pIS->canBuildSomeItemPart())
 			{
 				ucstring	fmt= CI18N::get("uihelpItemMPCraft");
-				ucstring	ipList;
+				std::string	ipList;
 				pIS->getItemPartListAsText(ipList);
 				strFindReplace(fmt, "%ip", ipList);
 				strFindReplace(itemText, "%craft", fmt);
@@ -2764,7 +2763,7 @@ class CPlayerShardNameRemover : public IOnReceiveTextId
 {
 	virtual	void	onReceiveTextId(ucstring &str)
 	{
-		str= CEntityCL::removeShardFromName(str);
+		str= CEntityCL::removeShardFromName(str.toUtf8());
 	}
 };
 static CPlayerShardNameRemover	PlayerShardNameRemover;
@@ -3474,7 +3473,7 @@ void setConsoModSuccessTooltip( CDBCtrlSheet *cs )
 	CInterfaceManager * pIM = CInterfaceManager::getInstance();
 
 	CCDBNodeLeaf * nodeSM = NULL;
-	ucstring ustr;
+	string ustr;
 	if( CSheetId(cs->getSheetId()).toString() == "mod_melee_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModMeleeSuccess");
@@ -3589,7 +3588,7 @@ public:
 			CCDBNodeLeaf * node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:DEATH_XP_MALUS", false);
 			if( node )
 			{
-				ucstring txt = CI18N::get("uittDeathPenalty");
+				string txt = CI18N::get("uittDeathPenalty");
 				strFindReplace(txt, "%dp", toString((100*node->getValue16())/254));
 				CWidgetManager::getInstance()->setContextHelpText(txt);
 			}
@@ -3598,7 +3597,7 @@ public:
 		else if( getAuraDisabledState(cs) )
 		{
 			// get the normal string, and append a short info.
-			ucstring	str;
+			std::string	str;
 			cs->getContextHelp(str);
 
 			str+= CI18N::get("uittAuraDisabled");
@@ -3627,7 +3626,7 @@ public:
 			return;
 		}
 
-		ucstring txt;
+		string txt;
 		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:NAME", index));
 		if (node && CStringManagerClient::instance()->getDynString(node->getValue32(), txt))
 		{
@@ -3677,7 +3676,7 @@ public:
 		str += toString(minTimeRemaining);
 
 		// replace the context help that is required.
-		CWidgetManager::getInstance()->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerAnimalDeadPopupTooltip, "animal_dead_popup_tooltip");
@@ -3807,7 +3806,7 @@ static	void	onMpChangeItemPart(CInterfaceGroup *wnd, uint32 itemSheetId, const s
 		string	originFilterKey= "iompf" + ITEM_ORIGIN::enumToString((ITEM_ORIGIN::EItemOrigin)itemPart.OriginFilter);
 		mpCraft+= CI18N::get(originFilterKey);
 
-		viewText->setText(mpCraft);
+		viewText->setText(mpCraft.toUtf8());
 	}
 
 

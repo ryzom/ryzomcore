@@ -30,8 +30,8 @@ extern std::vector<CMainlandSummary>	Mainlands;
 extern uint8 PlayerSelectedSlot;
 extern std::string	PlayerSelectedFileName;
 extern TSessionId	PlayerSelectedMainland;							// This is the mainland selected at the SELECT perso!!
-extern ucstring		PlayerSelectedHomeShardName;					// The home shard name (aniro, leanon etc....)
-extern ucstring		PlayerSelectedHomeShardNameWithParenthesis;		// Same with parenthesis
+extern std::string	PlayerSelectedHomeShardName;					// The home shard name (aniro, leanon etc....)
+extern std::string	PlayerSelectedHomeShardNameWithParenthesis;		// Same with parenthesis
 extern std::vector<CCharacterSummary>	CharacterSummaries;
 extern std::string UserPrivileges;
 extern sint LoginCharsel;

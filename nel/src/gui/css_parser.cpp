@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -65,7 +68,7 @@ namespace NLGUI
 		_Rules.clear();
 		_Style.clear();
 
-		_Style.fromUtf8(cssString);
+		_Style = cssString;
 		preprocess();
 
 		_Position = 0;
@@ -73,7 +76,7 @@ namespace NLGUI
 		{
 			skipWhitespace();
 
-			if (_Style[_Position] == (ucchar)'@')
+			if (_Style[_Position] == '@')
 				readAtRule();
 			else
 				readRule();
@@ -89,13 +92,13 @@ namespace NLGUI
 	// style:    "color: red; font-size: 10px;"
 	//
 	// @internal
-	void CCssParser::parseRule(const ucstring &selectorString, const ucstring &styleString)
+	void CCssParser::parseRule(const std::string &selectorString, const std::string &styleString)
 	{
-		std::vector<ucstring> selectors;
-		NLMISC::explode(selectorString, ucstring(","), selectors);
+		std::vector<std::string> selectors;
+		NLMISC::explode(selectorString, std::string(","), selectors);
 
 		TStyleVec props;
-		props = parseDecls(styleString.toUtf8());
+		props = parseDecls(styleString);
 
 		// duplicate props to each selector in selector list,
 		// example 'div > p, h1' creates 'div>p' and 'h1'
@@ -129,7 +132,7 @@ namespace NLGUI
 		skipIdentifier();
 
 		// skip at-rule statement
-		while(!is_eof() && _Style[_Position] != (ucchar)';')
+		while(!is_eof() && _Style[_Position] != ';')
 		{
 			if (maybe_escape())
 			{
@@ -174,9 +177,9 @@ namespace NLGUI
 				_Position++;
 			else if (is_quote(_Style[_Position]))
 				skipString();
-			else if (_Style[_Position] == (ucchar)'[')
+			else if (_Style[_Position] == '[')
 				skipBlock();
-			else if (_Style[_Position] == (ucchar)'{')
+			else if (_Style[_Position] == '{')
 				break;
 			else
 				_Position++;
@@ -184,7 +187,7 @@ namespace NLGUI
 
 		if (!is_eof())
 		{
-			ucstring selector;
+			std::string selector;
 			selector.append(_Style, start, _Position - start);
 
 			skipWhitespace();
@@ -194,7 +197,7 @@ namespace NLGUI
 			skipBlock();
 			if (_Position <= _Style.size())
 			{
-				ucstring rules;
+				std::string rules;
 				rules.append(_Style, start + 1, _Position - start - 2);
 
 				parseRule(selector, rules);
@@ -215,7 +218,7 @@ namespace NLGUI
 			for(uint i=0; i<6 && is_hex(_Style[_Position]); i++)
 				_Position++;
 
-			if (_Style[_Position] == (ucchar)' ')
+			if (_Style[_Position] == ' ')
 				_Position++;
 		}
 		else if (_Style[_Position] != 0x0A)
@@ -246,23 +249,23 @@ namespace NLGUI
 					// cannot start with digit
 					valid = false;
 				}
-				else if ((_Position - start) == 0 && _Style[_Position-1] == (ucchar)'-')
+				else if ((_Position - start) == 0 && _Style[_Position-1] == '-')
 				{
 					// cannot start with -#
 					valid = false;
 				}
 			}
-			else if (_Style[_Position] == (ucchar)'_')
+			else if (_Style[_Position] == '_')
 			{
 				// valid
 			}
-			else if (_Style[_Position] >= 0x0080)
+			else if (_Style[_Position] >= 0x80)
 			{
 				// valid
 			}
-			else if (_Style[_Position] == (ucchar)'-')
+			else if (_Style[_Position] == '-')
 			{
-				if ((_Position - start) == 1 && _Style[_Position-1] == (ucchar)'-')
+				if ((_Position - start) == 1 && _Style[_Position-1] == '-')
 				{
 					// cannot start with --
 					valid = false;
@@ -285,7 +288,7 @@ namespace NLGUI
 	// @internal
 	void CCssParser::skipBlock()
 	{
-		ucchar startChar = _Style[_Position];
+		char startChar = _Style[_Position];
 
 		// block start
 		_Position++;
@@ -311,7 +314,7 @@ namespace NLGUI
 	// @internal
 	void CCssParser::skipString()
 	{
-		ucchar endChar = _Style[_Position];
+		char endChar = _Style[_Position];
 
 		// quote start
 		_Position++;
@@ -338,7 +341,7 @@ namespace NLGUI
 	// ***************************************************************************
 	// parse selector list
 	// @internal
-	std::vector<CCssSelector> CCssParser::parse_selector(const ucstring &sel, std::string &pseudoElement) const
+	std::vector<CCssSelector> CCssParser::parse_selector(const std::string &sel, std::string &pseudoElement) const
 	{
 		std::vector<CCssSelector> result;
 		CCssSelector current;
@@ -346,10 +349,10 @@ namespace NLGUI
 		pseudoElement.clear();
 
 		bool failed = false;
-		ucstring::size_type start = 0, pos = 0;
+		std::string::size_type start = 0, pos = 0;
 		while(pos < sel.size())
 		{
-			ucstring uc;
+			std::string uc;
 			uc = sel[pos];
 			if (is_nmchar(sel[pos]) && current.empty())
 			{
@@ -358,7 +361,7 @@ namespace NLGUI
 				while(pos < sel.size() && is_nmchar(sel[pos]))
 					pos++;
 
-				current.Element = toLower(sel.substr(start, pos - start).toUtf8());
+				current.Element = toLower(sel.substr(start, pos - start));
 				start = pos;
 				continue;
 			}
@@ -371,7 +374,7 @@ namespace NLGUI
 				while(pos < sel.size() && is_nmchar(sel[pos]))
 					pos++;
 
-				current.Id = toLower(sel.substr(start, pos - start).toUtf8());
+				current.Id = toLower(sel.substr(start, pos - start));
 				start = pos;
 			}
 			else if (sel[pos] == '.')
@@ -383,7 +386,7 @@ namespace NLGUI
 				while(pos < sel.size() && (is_nmchar(sel[pos]) || sel[pos] == '.'))
 					pos++;
 
-				current.setClass(toLower(sel.substr(start, pos - start).toUtf8()));
+				current.setClass(toLower(sel.substr(start, pos - start)));
 				start = pos;
 			}
 			else if (sel[pos] == '[')
@@ -399,9 +402,9 @@ namespace NLGUI
 					start = pos;
 				}
 
-				ucstring key;
-				ucstring value;
-				ucchar op = ' ';
+				std::string key;
+				std::string value;
+				char op = ' ';
 
 				// key
 				while(pos < sel.size() && is_nmchar(sel[pos]))
@@ -420,7 +423,7 @@ namespace NLGUI
 
 				if (sel[pos] == ']')
 				{
-					current.addAttribute(key.toUtf8());
+					current.addAttribute(key);
 				}
 				else
 				{
@@ -496,14 +499,14 @@ namespace NLGUI
 						// [value="attr" i]
 						if (value.size() > 2 && value[value.size()-2] == ' ')
 						{
-							ucchar lastChar = value[value.size()-1];
+							char lastChar = value[value.size()-1];
 							if (lastChar == 'i' || lastChar == 'I' || lastChar == 's' || lastChar == 'S')
 							{
 								value = value.substr(0, value.size()-2);
 								cs = !((lastChar == 'i' || lastChar == 'I'));
 							}
 						}
-						current.addAttribute(key.toUtf8(), trimQuotes(value).toUtf8(), (char)op, cs);
+						current.addAttribute(key, trimQuotes(value), (char)op, cs);
 					} // op error
 				} // no value
 
@@ -549,7 +552,7 @@ namespace NLGUI
 					}
 				}
 
-				std::string key = toLower(sel.substr(start, pos - start).toUtf8());
+				std::string key = toLower(sel.substr(start, pos - start));
 				if (key.empty())
 				{
 					failed = true;
@@ -647,7 +650,7 @@ namespace NLGUI
 		size_t start;
 		size_t charsLeft;
 		bool quote = false;
-		ucchar quoteChar;
+		char quoteChar;
 		while(!is_eof())
 		{
 			charsLeft = _Style.size() - _Position - 1;
@@ -660,14 +663,15 @@ namespace NLGUI
 				if (charsLeft >= 1 && _Style[_Position] == 0x0D && _Style[_Position+1] == 0x0A)
 					len++;
 
-				ucstring tmp;
-				tmp += 0x000A;
+				std::string tmp;
+				tmp += 0x0A;
 				_Style.replace(_Position, 1, tmp);
 			}
 			else if (_Style[_Position] == 0x00)
 			{
 				// Unicode replacement character
-				_Style[_Position] = 0xFFFD;
+				// _Style[_Position] = 0xFFFD;
+				_Style.replace(_Position, 1, "\xEF\xBF\xBD");
 			}
 			else
 			{
@@ -686,12 +690,12 @@ namespace NLGUI
 				}
 				else if (!quote && is_comment_open())
 				{
-					size_t pos = _Style.find(ucstring("*/"), _Position + 2);
+					size_t pos = _Style.find("*/", _Position + 2);
 					if (pos == std::string::npos)
 						pos = _Style.size();
 
 					_Style.erase(_Position, pos - _Position + 2);
-					ucstring uc;
+					std::string uc;
 					uc = _Style[_Position];
 
 					// _Position is already at correct place

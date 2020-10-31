@@ -2,8 +2,8 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -216,16 +216,55 @@ namespace NLGUI
 		// *** Load base libs
 		{
 			CLuaStackChecker lsc(this);
-	#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
+#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
 			luaL_openlibs(_State);
-	#else
+#else
 			luaopen_base (_State);
 			luaopen_table (_State);
 			luaopen_io (_State);
 			luaopen_string (_State);
 			luaopen_math (_State);
 			luaopen_debug (_State);
-	#endif
+#endif
+
+#ifdef _WIN32
+			// Lua socket library for MobDebug, optional
+			if (NLMISC::CFile::fileExists("socket\\core.dll"))
+			{
+				// Load socket\core.dll dynamically
+				m_LuaSocket = LoadLibraryW(L"socket\\core.dll");
+				if (!m_LuaSocket)
+				{
+					nlwarning("Lua socket library found, but failed to load");
+				}
+				else
+				{
+					void *luaopen_socket_core = (void *)GetProcAddress(m_LuaSocket, "luaopen_socket_core");
+					if (!luaopen_socket_core)
+					{
+						nlwarning("Lua socket library loaded, but `luaopen_socket_core` not found");
+						FreeLibrary(m_LuaSocket);
+						m_LuaSocket = NULL;
+					}
+					else
+					{
+						// preload['socket.core'] = luaopen_socket_core
+#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
+						lua_getglobal(_State, "package");
+						lua_getfield(_State, -1, "preload");
+						lua_pushcfunction(_State, (lua_CFunction)luaopen_socket_core);
+						lua_setfield(_State, -2, "socket.core");
+						lua_pop(_State, 2);
+						nlinfo("Lua socket library preloaded");
+#endif
+					}
+				}
+			}
+			else
+			{
+				m_LuaSocket = NULL;
+			}
+#endif
 
 			// open are buggy????
 			clear();
@@ -313,6 +352,14 @@ namespace NLGUI
 		// Clear Small Script Cache
 		_SmallScriptPool= 0;
 		_SmallScriptCache.clear();
+
+#ifdef _WIN32
+		if (m_LuaSocket)
+		{
+			FreeLibrary(m_LuaSocket);
+			m_LuaSocket = NULL;
+		}
+#endif
 	}
 
 	// ***************************************************************************
@@ -464,7 +511,23 @@ namespace NLGUI
 
 
 		// execute the script text,   with dbgSrc==filename (use @ for lua internal purpose)
-		executeScriptInternal(script,   string("@") + CFile::getFilename(pathName));
+#ifdef _WIN32
+		// Paths need to be correct for debugging to work
+		std::string pathNameStandardized = pathName;
+		if (pathNameStandardized.size() > 1)
+		{
+			if (pathNameStandardized[1] == ':' && pathNameStandardized[0] >= 'a' && pathNameStandardized[0] <= 'z')
+				pathNameStandardized[0] -= 'a' - 'A';
+			for (ptrdiff_t i = 0; i < (ptrdiff_t)pathNameStandardized.size(); ++i)
+			{
+				if (pathNameStandardized[i] == '/')
+					pathNameStandardized[i] = '\\';
+			}
+		}
+#else
+		const std::string &pathNameStandardized = pathName;
+#endif
+		executeScriptInternal(script, string("@") + pathNameStandardized);
 
 		return true;
 	}

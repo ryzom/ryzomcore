@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -77,7 +78,7 @@ void CDBGroupListSheetTextPhrase::CSheetChildPhrase::init(CDBGroupListSheetText 
 // ***************************************************************************
 void CDBGroupListSheetTextPhrase::CSheetChildPhrase::updateViewText(CDBGroupListSheetText * /* pFather */)
 {
-	ucstring	text;
+	std::string	text;
 	if(Ctrl->getType()!=CCtrlSheetInfo::SheetType_SPhrase)
 		return;
 
@@ -87,7 +88,7 @@ void CDBGroupListSheetTextPhrase::CSheetChildPhrase::updateViewText(CDBGroupList
 	// append the level if possible
 	if(LevelDB)
 	{
-		ucstring	fmt= CI18N::get("uiPhraseLevelFmt");
+		std::string	fmt= CI18N::get("uiPhraseLevelFmt").toUtf8();
 		strFindReplace(fmt, "%d", toString(LevelCache));
 		text+= "\n" + fmt;
 	}
@@ -173,7 +174,7 @@ void				CDBGroupListSheetTextPhrase::setSectionGroupId(CInterfaceGroup	*pIG, uin
 		pPM->getPhraseLevelFromSection(sectionId, minLevel, maxLevel);
 		strFindReplace(sectionText, "%min", toString(minLevel));
 		strFindReplace(sectionText, "%max", toString(maxLevel));
-		name->setText (sectionText);
+		name->setText (sectionText.toUtf8());
 	}
 }
 

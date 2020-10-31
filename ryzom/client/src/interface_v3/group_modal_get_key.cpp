@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -89,7 +90,7 @@ bool CGroupModalGetKey::handleEvent (const NLGUI::CEventDescriptor &event)
 				// Setup the text !
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 				CViewText *pVT= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId( VIEW_TEXT_KEY ));
-				if (pVT != NULL) pVT->setText(Combo.toUCString());
+				if (pVT != NULL) pVT->setText(Combo.toString());
 
 				// Check if in use
 				CActionsManager *pCurAM = NULL;
@@ -111,12 +112,12 @@ bool CGroupModalGetKey::handleEvent (const NLGUI::CEventDescriptor &event)
 						if (baseAction && pCurAM->isActionPresentInContext(it->second))
 						{
 							ucstring shortcutName = baseAction->getActionLocalizedText(it->second);
-							if (pVT != NULL) pVT->setText(shortcutName);
+							if (pVT != NULL) pVT->setText(shortcutName.toUtf8());
 						}
 					}
 					else
 					{
-						if (pVT != NULL) pVT->setText(string(""));
+						if (pVT != NULL) pVT->setText(string());
 					}
 				}
 

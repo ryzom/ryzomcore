@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -55,13 +56,16 @@ namespace NLGUI
 		bool getStringMode() const {return _StringMode;}
 
 		// Set cursor string
-		void setString (const ucstring &str);
+		void setString (const std::string &str);
 
 		// TEMP PATCH
 		void setCursor (const std::string &name)
 		{
-			_TxDefault = name;
-			_TxIdDefault = -2;
+			if (_TxDefault != name)
+			{
+				_TxDefault = name;
+				_TxIdDefault = -2;
+			}
 		}
 		// TEMP PATCH
 
@@ -126,14 +130,14 @@ namespace NLGUI
 		bool				_ForceStringMode;
 		CInterfaceGroup		*_StringCursor;
 		CInterfaceGroup		*_StringCursorHardware;
-		ucstring			_ContextString;
+		std::string			_ContextString;
 
 		// draw current cursor with the given texture, or, if in hardware mode, change the hardware cursor shape
 		void drawCursor(sint32 texId, NLMISC::CRGBA col, uint8 rot);
 
 	private:
 		// set the string into frame for software or hardware version
-		void setString (const ucstring &str, CInterfaceGroup *target);
+		void setString(const std::string &str, CInterfaceGroup *target);
 
 		static bool hwMouse;
 

@@ -4,7 +4,7 @@
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -809,8 +809,8 @@ bool CCharacterCL::build(const CEntitySheet *sheet)	// virtual
 	if (Type == Fauna)
 	{
 		// Get the fauna name in the sheet
-		const ucstring creatureName(STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(_Sheet->Id));
-		if (creatureName.find(ucstring("<NotExist:")) != 0)
+		const char *creatureName = STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(_Sheet->Id);
+		if (!FINAL_VERSION || !NLMISC::startsWith(creatureName, "<NotExist:"))
 			_EntityName = creatureName;
 	}
 	else
@@ -1120,7 +1120,7 @@ void CCharacterCL::computeAnimSet()
 	// Use the generic method to compute the animation set.
 	if(!::computeAnimSet(_CurrentAnimSet[MOVE], _Mode, _Sheet->getAnimSetBaseName(), _Items[SLOTTYPE::LEFT_HAND_SLOT].Sheet, _Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet, !modeWithHiddenItems()))
 	{
-		//nlwarning("CH:computeAnimSet:%d: pb when trying to compute the animset. Sheet Id '%u(%s)'.", _Slot, _SheetId.asInt(), _SheetId.toString().c_str());
+		nlwarning("CH:computeAnimSet:%d: pb when trying to compute the animset. Sheet Id '%u(%s)'.", _Slot, _SheetId.asInt(), _SheetId.toString().c_str());
 	}
 
 }// computeAnimSet //
@@ -3360,7 +3360,7 @@ void CCharacterCL::showOrHideBodyParts( bool objectsVisible )
 		lHandInstIdx = SLOTTYPE::LEFT_HAND_SLOT;
 
 		// hide gloves(armor) if player has magician amplifier
-		if( _Items[rHandInstIdx].Sheet && (_Items[rHandInstIdx].Sheet->ItemType == ITEM_TYPE::MAGICIAN_STAFF) )
+		if( _Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet && (_Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet->ItemType == ITEM_TYPE::MAGICIAN_STAFF) )
 		{
 			if( !_Instances[SLOTTYPE::HANDS_SLOT].Current.empty() )
 				_Instances[SLOTTYPE::HANDS_SLOT].Current.hide();
@@ -3378,8 +3378,9 @@ void CCharacterCL::showOrHideBodyParts( bool objectsVisible )
 	if( !objectsVisible )
 	{
 		// Right Hand
+		nlassert(SLOTTYPE::RIGHT_HAND_SLOT < _Items.size() && SLOTTYPE::LEFT_HAND_SLOT < _Items.size());
 		if(rHandInstIdx<_Instances.size())
-			if( !(_Items[rHandInstIdx].Sheet && _Items[rHandInstIdx].Sheet->NeverHideWhenEquipped ) )
+			if( !(_Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet && _Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet->NeverHideWhenEquipped ) )
 				if(!_Instances[rHandInstIdx].Current.empty())
 				{
 					_Instances[rHandInstIdx].Current.hide();
@@ -3387,7 +3388,7 @@ void CCharacterCL::showOrHideBodyParts( bool objectsVisible )
 				}
 		// Left Hand
 		if(lHandInstIdx <_Instances.size())
-			if( !(_Items[lHandInstIdx].Sheet && _Items[lHandInstIdx].Sheet->NeverHideWhenEquipped ) )
+			if( !(_Items[SLOTTYPE::LEFT_HAND_SLOT].Sheet && _Items[SLOTTYPE::LEFT_HAND_SLOT].Sheet->NeverHideWhenEquipped ) )
 				if(!_Instances[lHandInstIdx].Current.empty())
 				{
 					_Instances[lHandInstIdx].Current.hide();
@@ -7588,7 +7589,7 @@ void CCharacterCL::displayName()
 //---------------------------------------------------
 void CCharacterCL::drawName(const NLMISC::CMatrix &mat)	// virtual
 {
-	const ucstring &ucname = getEntityName();
+	const string &ucname = getEntityName();
 	if(!getEntityName().empty())
 	{
 		// If there is no extended name, just display the name
@@ -7615,8 +7616,8 @@ void CCharacterCL::drawName(const NLMISC::CMatrix &mat)	// virtual
 	{
 		if(_Sheet != 0)
 		{
-			const ucstring name(STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(_Sheet->Id));
-			if (name.find(ucstring("<NotExist:")) != 0)
+			const char *name = STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(_Sheet->Id);
+			if (!FINAL_VERSION || !NLMISC::startsWith(name, "<NotExist:"))
 				TextContext->render3D(mat, name);
 		}
 	}
@@ -7673,9 +7674,9 @@ void CCharacterCL::displayModifiers()	// virtual
 		}
 		else if (TimeInSec >= mod.Time)
 		{
-			ucstring hpModifier;
+			string hpModifier;
 			if (mod.Text.empty())
-				hpModifier = ucstring(toString("%d", mod.Value));
+				hpModifier = toString("%d", mod.Value);
 			else
 				hpModifier = mod.Text;
 			double t = TimeInSec-mod.Time;
@@ -9293,14 +9294,14 @@ const char *CCharacterCL::getBoneNameFromBodyPart(BODY::TBodyPart part, BODY::TS
 const CItemSheet *CCharacterCL::getRightHandItemSheet() const
 {
 	if (_RHandInstIdx == CEntityCL::BadIndex) return NULL;
-	return _Items[_RHandInstIdx].Sheet;
+	return _Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet;
 }
 
 // *********************************************************************************************
 const CItemSheet *CCharacterCL::getLeftHandItemSheet() const
 {
 	if (_LHandInstIdx == CEntityCL::BadIndex) return NULL;
-	return _Items[_LHandInstIdx].Sheet;
+	return _Items[SLOTTYPE::LEFT_HAND_SLOT].Sheet;
 }
 
 // ***************************************************************************
@@ -10366,7 +10367,7 @@ NLMISC_COMMAND(pvpMode, "modify pvp mode", "[<pvp mode> <state>]")
 			str+="in_safe_zone ";
 		if( pvpMode&PVP_MODE::PvpSafe)
 			str+="safe ";
-		IM->displaySystemInfo(ucstring(str));
+		IM->displaySystemInfo(str);
 		nlinfo("<pvpMode> %s",str.c_str());
 	}
 	else

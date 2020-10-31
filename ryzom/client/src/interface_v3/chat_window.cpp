@@ -4,6 +4,7 @@
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -203,11 +204,12 @@ bool CChatWindow::isVisible() const
 }
 
 //=================================================================================
-void CChatWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks /* = 0*/, bool *windowVisible /*= NULL*/)
+void CChatWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks /* = 0*/, bool *windowVisible /*= NULL*/)
 {
 	if (!_Chat)
 	{
-		nlwarning("<CChatWindow::displayMessage> There's no global chat");
+		if (msg != "WRN: <CChatWindow::displayMessage> There's no global chat")
+			nlwarning("<CChatWindow::displayMessage> There's no global chat");
 		return;
 	}
 	CGroupList *gl;
@@ -267,7 +269,7 @@ void CChatWindow::setPrompt(const ucstring &prompt)
 	if (!_Chat) return;
 	CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(_Chat->getGroup("eb"));
 	if (!eb) return;
-	eb->setPrompt(prompt);
+	eb->setPrompt(prompt.toUtf8());
 }
 
 void CChatWindow::setPromptColor(NLMISC::CRGBA col)
@@ -354,13 +356,13 @@ void CChatWindow::enableBlink(uint numBlinks)
 void CChatWindow::setCommand(const std::string &command, bool execute)
 {
 	if (!_EB) return;
-	_EB->setCommand(ucstring(command), execute);
+	_EB->setCommand(command, execute);
 }
 
 void CChatWindow::setCommand(const ucstring &command,bool execute)
 {
 	if (!_EB) return;
-	_EB->setCommand(command, execute);
+	_EB->setCommand(command.toUtf8(), execute);
 }
 
 
@@ -368,7 +370,7 @@ void CChatWindow::setCommand(const ucstring &command,bool execute)
 void CChatWindow::setEntry(const ucstring &entry)
 {
 	if (!_EB) return;
-	_EB->setInputString(entry);
+	_EB->setInputStringAsUtf16(entry);
 }
 
 //=================================================================================
@@ -477,25 +479,25 @@ void CChatWindow::setHeaderColor(const std::string &n)
 //=================================================================================
 void CChatWindow::displayLocalPlayerTell(const ucstring &receiver, const ucstring &msg, uint numBlinks /*= 0*/)
 {
-	ucstring finalMsg;
+	string finalMsg;
 	CInterfaceProperty prop;
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
 	encodeColorTag(prop.getRGBA(), finalMsg, false);
 
-	ucstring csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
+	string csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
 	finalMsg += csr + CI18N::get("youTell") + ": ";
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 	encodeColorTag(prop.getRGBA(), finalMsg, true);
-	finalMsg += msg;
+	finalMsg += msg.toUtf8();
 
-	ucstring s = CI18N::get("youTellPlayer");
-	strFindReplace(s, "%name", receiver);
+	string s = CI18N::get("youTellPlayer");
+	strFindReplace(s, "%name", receiver.toUtf8());
 	strFindReplace(finalMsg, CI18N::get("youTell"), s);
 	displayMessage(finalMsg, prop.getRGBA(), CChatGroup::tell, 0, numBlinks);
 	CInterfaceManager::getInstance()->log(finalMsg, CChatGroup::groupTypeToString(CChatGroup::tell));
 }
 
-void CChatWindow::encodeColorTag(const NLMISC::CRGBA &color, ucstring &text, bool append)
+void CChatWindow::encodeColorTag(const NLMISC::CRGBA &color, std::string &text, bool append)
 {
 	// WARNING : The lookup table MUST contains 17 element (with the last doubled)
 	// because we add 7 to the 8 bit color before shifting to right in order to match color
@@ -503,8 +505,8 @@ void CChatWindow::encodeColorTag(const NLMISC::CRGBA &color, ucstring &text, boo
 	// Have 17 entry remove the need for a %16 for each color component.
 	// By the way, this comment is more longer to type than to add the %16...
 	//
-	static ucchar ConvTable[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'F'};
-	ucstring str;
+	static char ConvTable[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'F'};
+	string str;
 	if (append)
 	{
 		str.reserve(7 + str.size());
@@ -541,11 +543,12 @@ void CChatWindow::clearMessages(CChatGroup::TGroupType /* gt */, uint32 /* dynam
 // CChatGroupWindow //
 //////////////////////
 
-void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks, bool *windowVisible)
+void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks, bool *windowVisible)
 {
 	if (!_Chat)
 	{
-		nlwarning("<CChatGroupWindow::displayMessage> There's no global chat");
+		if (msg != "WRN: <CChatGroupWindow::displayMessage> There's no global chat")
+			nlwarning("<CChatGroupWindow::displayMessage> There's no global chat");
 		return;
 	}
 
@@ -565,8 +568,8 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CRGBA	newMsgColor= CRGBA::stringToRGBA(CWidgetManager::getInstance()->getParser()->getDefine("chat_group_tab_color_newmsg").c_str());
 
-	ucstring newmsg = msg;
-	ucstring prefix;
+	string newmsg = msg;
+	string prefix;
 
 	CViewBase *child = NULL;
 	if (gl != NULL)
@@ -606,20 +609,20 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 					gl = gl2;
 
 					// Add dyn chan number before string
-					ucstring prefix("[" + NLMISC::toString(dynamicChatDbIndex) + "]");
+					string prefix = "[" + NLMISC::toString(dynamicChatDbIndex) + "]";
 					// Find position to put the new string
 					// After timestamp?
-					size_t pos = newmsg.find(ucstring("]"));
-					size_t colonpos = newmsg.find(ucstring(": @{"));
+					size_t pos = newmsg.find("]");
+					size_t colonpos = newmsg.find(": @{");
 					// If no ] found or if found but after the colon (so part of the user chat)
-					if (pos == ucstring::npos || (colonpos < pos))
+					if (pos == string::npos || (colonpos < pos))
 					{
 						// No timestamp, so put it right after the color and add a space
-						pos = newmsg.find(ucstring("}"));
+						pos = newmsg.find("}");
 						prefix += " ";
 					}
 
-					if (pos == ucstring::npos)
+					if (pos == string::npos)
 						newmsg = prefix + newmsg;
 					else
 						newmsg = newmsg.substr(0, pos + 1) + prefix + newmsg.substr(pos + 1);
@@ -629,10 +632,10 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 					if (node && node->getValueBool())
 					{
 						uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(dynamicChatDbIndex);
-						ucstring title;
+						string title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-						prefix = title.empty() ? ucstring("") : ucstring(" ") + title;
-						pos = newmsg.find(ucstring("] "));
+						prefix = (title.empty() ? "" : " ") + title;
+						pos = newmsg.find("] ");
 
 						if (pos == ucstring::npos)
 							newmsg = prefix + newmsg;
@@ -680,7 +683,7 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 }
 
 //=================================================================================
-void CChatGroupWindow::displayTellMessage(const ucstring &msg, NLMISC::CRGBA col, const ucstring &sender)
+void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, const string &sender)
 {
 	// If we are here with a tell message this is because the teller doesn't belong to any people list
 	CGroupContainer *gcChat = createFreeTeller(sender);
@@ -890,7 +893,7 @@ void CChatGroupWindow::setActiveFreeTeller(const ucstring &winName, bool bActive
 }
 
 //=================================================================================
-ucstring CChatGroupWindow::getFreeTellerName(const std::string &containerID)
+string CChatGroupWindow::getFreeTellerName(const std::string &containerID)
 {
 	uint32 i;
 	for (i = 0; i < _FreeTellers.size(); ++i)
@@ -900,8 +903,8 @@ ucstring CChatGroupWindow::getFreeTellerName(const std::string &containerID)
 			break;
 	}
 	if (i == _FreeTellers.size())
-		return ucstring("");
-	return _FreeTellers[i]->getUCTitle();
+		return string();
+	return _FreeTellers[i]->getTitle();
 }
 
 //=================================================================================
@@ -1107,10 +1110,7 @@ CChatWindow *CChatWindowManager::createChatWindow(const CChatWindowDesc &desc)
 		if (desc.Id.empty())
 			_WindowID++;
 
-		if (desc.Localize)
-			_ChatWindowMap[CI18N::get(desc.Title.toString())] = w;
-		else
-			_ChatWindowMap[desc.Title] = w;
+		_ChatWindowMap[desc.Title] = w;
 
 		w->setAHOnActive(desc.AHOnActive);
 		w->setAHOnActiveParams(desc.AHOnActiveParams);
@@ -1149,10 +1149,7 @@ CChatWindow *CChatWindowManager::createChatGroupWindow(const CChatWindowDesc &de
 		if (desc.Id.empty())
 			_WindowID++;
 
-		if (desc.Localize)
-			_ChatWindowMap[CI18N::get(desc.Title.toString())] = w;
-		else
-			_ChatWindowMap[desc.Title] = w;
+		_ChatWindowMap[desc.Title] = w;
 
 		w->setAHOnActive(desc.AHOnActive);
 		w->setAHOnActiveParams(desc.AHOnActiveParams);
@@ -1199,7 +1196,7 @@ void CChatWindowManager::removeChatWindow(const ucstring &title)
 	TChatWindowMap::iterator it = _ChatWindowMap.find(title);
 	if (it == _ChatWindowMap.end())
 	{
-		nlwarning("unknwown window %s", title.toString().c_str());
+		nlwarning("Unknown chat window '%s'", title.toUtf8().c_str());
 		return;
 	}
 	it->second->deleteContainer();
@@ -1239,18 +1236,9 @@ bool CChatWindowManager::rename(const ucstring &oldName, const ucstring &newName
 	if (newWin != NULL) return false; // target window exists
 	TChatWindowMap::iterator it = _ChatWindowMap.find(oldName);
 	if (it == _ChatWindowMap.end()) return false;
-	if (newNameLocalize)
-	{
-		_ChatWindowMap[CI18N::get(newName.toString())] = it->second;
-		it->second->getContainer()->setLocalize(true);
-		it->second->getContainer()->setTitle(newName.toString());
-	}
-	else
-	{
-		_ChatWindowMap[newName] = it->second;
-		it->second->getContainer()->setLocalize(false);
-		it->second->getContainer()->setUCTitle(newName);
-	}
+	_ChatWindowMap[newName] = it->second;
+	it->second->getContainer()->setLocalize(false);
+	it->second->getContainer()->setTitle(newName.toUtf8());
 	_ChatWindowMap.erase(it);
 	return true;
 }
@@ -1290,7 +1278,7 @@ public:
 	{
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(pCaller);
 		if (pEB == NULL) return;
-		ucstring text = pEB->getInputString();
+		string text = pEB->getInputString();
 		// If the line is empty, do nothing
 		if(text.empty())
 			return;
@@ -1306,7 +1294,7 @@ public:
 		// Parse any tokens in the text
 		if ( ! CInterfaceManager::parseTokens(text))
 		{
-			pEB->setInputString (string(""));
+			pEB->setInputString(std::string());
 			return;
 		}
 
@@ -1314,7 +1302,7 @@ public:
 		if(text[0] == '/')
 		{
 			CChatWindow::_ChatWindowLaunchingCommand = chat;
-			string str = text.toUtf8();
+			string str = text;
 			string cmdWithArgs = str.substr(1);
 
 			// Get the command name from the string, can contain spaces
@@ -1335,7 +1323,7 @@ public:
 			else
 			{
 				CInterfaceManager *im = CInterfaceManager::getInstance();
-				im->displaySystemInfo (ucstring::makeFromUtf8(cmd) + ": " + CI18N::get ("uiCommandNotExists"));
+				im->displaySystemInfo (cmd + ": " + CI18N::get ("uiCommandNotExists"));
 			}
 		}
 		else
@@ -1346,7 +1334,7 @@ public:
 			}
 		}
 		// Clear input string
-		pEB->setInputString (ucstring(""));
+		pEB->setInputString (std::string());
 		CGroupContainer *gc = static_cast< CGroupContainer* >( pEB->getEnclosingContainer() );
 
 		if (gc)
@@ -1439,16 +1427,16 @@ class CHandlerInviteToRingSession : public IActionHandler
 public:
 	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
 	{
-		ucstring playerName = ::getFreeTellerName(pCaller);
+		string playerName = ::getFreeTellerName(pCaller).toUtf8();
 		if (!playerName.empty())
 		{
 			// ask the SBS to invite the character in the session
-			CSessionBrowserImpl::getInstance().inviteCharacterByName(CSessionBrowserImpl::getInstance().getCharId(), playerName.toUtf8());
+			CSessionBrowserImpl::getInstance().inviteCharacterByName(CSessionBrowserImpl::getInstance().getCharId(), playerName);
 			// additionaly, send a tell to signal the player he has been invited to a ring session
-			ChatMngr.tell(playerName.toUtf8(), CI18N::get("uiRingInviteNotification"));
+			ChatMngr.tell(playerName, CI18N::get("uiRingInviteNotification"));
 			//
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			im->displaySystemInfo(ucstring("@{6F6F}") +  playerName +ucstring(" @{FFFF}") + CI18N::get("uiRingInvitationSent"), "BC");
+			im->displaySystemInfo("@{6F6F}" +  playerName +" @{FFFF}" + CI18N::get("uiRingInvitationSent"), "BC");
 			// force a refresh of the ui
 			CLuaManager::getInstance().executeLuaScript("CharTracking:forceRefresh()");
 		}

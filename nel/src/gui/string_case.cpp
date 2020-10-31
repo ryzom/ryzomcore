@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -19,6 +20,7 @@
 
 #include "stdpch.h"
 #include "nel/gui/string_case.h"
+#include "nel/misc/utf_string_view.h"
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -26,32 +28,22 @@
 
 namespace NLGUI
 {
-	inline bool isSeparator (ucchar c)
+	inline bool isSeparator (char c)
 	{
 		return (c == ' ') || (c == '\t') || (c == '\n') || (c == '\r');
 	}
 
-	// ***************************************************************************
-
-	inline bool isEndSentence (ucstring& str, uint index)
+	inline bool isEndSentence (char c, char lastChar)
 	{
 		// Ex: One sentence. Another sentence.
 		//                  ^
 		// Counterexample: nevrax.com
 		//                       ^
-		ucchar c = str[index];
-		if ((str[index] == ' ') || (str[index] == '\n'))
-		{
-			if (index < 1)
-				return false;
-			c = str[index-1];
-			return (c == '.') || (c == '!') || (c == '?');
-		}
-		return false;
+		return ((c == ' ') || (c == '\n'))
+			&& ((lastChar == '.') || (lastChar == '!') || (lastChar == '?') || (lastChar == '\n'));
 	}
 
-
-	void setCase( ucstring &str, TCaseMode mode )
+	void setCase(std::string &str, TCaseMode mode)
 	{
 		const uint length = (uint)str.length();
 		uint i;
@@ -61,63 +53,96 @@ namespace NLGUI
 		switch (mode)
 		{
 		case CaseLower:
-			str = NLMISC::toLower (str);
+			str = NLMISC::toLower(str);
 			break;
 		case CaseUpper:
-			str = NLMISC::toUpper (str);
+			str = NLMISC::toUpper(str);
 			break;
 		case CaseFirstStringLetterUp:
-			for (i=0; i<length; i++)
+		{
+			std::string res;
+			res.reserve(str.size() + (str.size() >> 2));
+			for (ptrdiff_t i = 0; i < (ptrdiff_t)str.size();)
 			{
-				if (!isSeparator (str[i]))
+				char c = str[i];
+				if (!isSeparator(c))
 				{
 					if (newString)
-						str[i] = NLMISC::toUpper (str[i]);
+						NLMISC::appendToUpper(res, str, i);
 					else
-						str[i] = NLMISC::toLower (str[i]);
+						NLMISC::appendToLower(res, str, i);
 					newString = false;
 				}
+				else
+				{
+					res += c;
+					++i;
+				}
 			}
+			str.swap(res);
 			break;
+		}
 		case CaseFirstSentenceLetterUp:
-			for (i=0; i<length; i++)
+		{
+			std::string res;
+			res.reserve(str.size() + (str.size() >> 2));
+			char lastChar = 0;
+			for (ptrdiff_t i = 0; i < (ptrdiff_t)str.size();)
 			{
-				if (isEndSentence (str, i))
+				char c = str[i];
+				if (isEndSentence(c, lastChar))
+				{
 					newSentence = true;
+					res += c;
+					++i;
+				}
 				else
 				{
 					if (newSentence)
-						str[i] = NLMISC::toUpper (str[i]);
+						NLMISC::appendToUpper(res, str, i);
 					else
-						str[i] = NLMISC::toLower (str[i]);
+						NLMISC::appendToLower(res, str, i);
 
-					if (!isSeparator (str[i]))
+					if (!isSeparator(c))
 						newSentence = false;
 				}
+				lastChar = c;
 			}
+			str.swap(res);
 			break;
+		}
 		case CaseFirstWordLetterUp:
-			for (i=0; i<length; i++)
+		{
+			std::string res;
+			res.reserve(str.size() + (str.size() >> 2));
+			char lastChar = 0;
+			for (ptrdiff_t i = 0; i < (ptrdiff_t)str.size();)
 			{
-				if (isSeparator (str[i]) || isEndSentence (str, i))
+				char c = str[i];
+				if (isSeparator(c) || isEndSentence(c, lastChar))
+				{
 					newWord = true;
+					res += c;
+					++i;
+				}
 				else
 				{
 					if (newWord)
-						str[i] = NLMISC::toUpper (str[i]);
+						NLMISC::appendToUpper(res, str, i);
 					else
-						str[i] = NLMISC::toLower (str[i]);
+						NLMISC::appendToLower(res, str, i);
 
 					newWord = false;
 				}
+				lastChar = c;
 			}
+			str.swap(res);
 			break;
+		}
 		default:
 			break;
 		}
 	}
-
 }
 
-
-
+/* end of file */

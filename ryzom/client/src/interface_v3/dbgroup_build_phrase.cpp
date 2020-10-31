@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -279,7 +280,7 @@ void			CDBGroupBuildPhrase::clearBuildingPhrase()
 	// Empty the name
 	if(_UserSentenceName)
 	{
-		_UserSentenceName->setInputString(ucstring());
+		_UserSentenceName->setInputString(std::string());
 	}
 
 	// update Display
@@ -373,7 +374,7 @@ void			CDBGroupBuildPhrase::startComposition(const CSPhraseCom &phrase)
 
 	// set the editable name.
 	if(_UserSentenceName)
-		_UserSentenceName->setInputString(name);
+		_UserSentenceName->setInputStringAsUtf16(name);
 }
 
 
@@ -1074,7 +1075,7 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 				float relative_cost;
 				cost= pBM->getSabrinaCom().getPhraseBrickAndParamCost(phrase.Bricks, i);
 				relative_cost = pBM->getSabrinaCom().getPhraseBrickAndParamRelativeCost(phrase.Bricks, i);
-				ucstring	costText;
+				std::string	costText;
 				if( cost == 0 && relative_cost != 0.f )
 				{
 					cost = (sint32)(relative_cost * 100.f);
@@ -1243,7 +1244,7 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 	{
 		ucstring	text;
 		pPM->buildPhraseDesc(text, phrase, 0, false, "composition");
-		_TextPhraseDesc->setTextFormatTaged(text);
+		_TextPhraseDesc->setTextFormatTaged(text.toUtf8());
 	}
 
 
@@ -1790,7 +1791,7 @@ void			CDBGroupBuildPhrase::buildCurrentPhrase(CSPhraseCom &newPhrase)
 	// Set the Name
 	if(_UserSentenceName)
 	{
-		newPhrase.Name= _UserSentenceName->getInputString();
+		newPhrase.Name= _UserSentenceName->getInputStringAsUtf16();
 	}
 }
 

@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -680,6 +680,7 @@ bool	CNetworkConnection::connect(string &result)
 	_LatestLoginTime = ryzomGetLocalTime ();
 	_LatestSyncTime = _LatestLoginTime;
 	_LatestProbeTime = _LatestLoginTime;
+	m_LoginAttempts = 0;
 
 	nlinfo("CNET[%p]: Client connected to shard, attempting login", this);
 	return true;
@@ -1091,6 +1092,17 @@ bool	CNetworkConnection::stateLogin()
 	{
 		sendSystemLogin();
 		_LatestLoginTime = _UpdateTime;
+		if (m_LoginAttempts > 24)
+		{
+			m_LoginAttempts = 0;
+			disconnect(); // will send disconnection message
+			nlwarning("CNET[%p]: Too many LOGIN attempts, connection problem", this);
+			return false; // exit now from loop, don't expect a new state
+		}
+		else
+		{
+			++m_LoginAttempts;
+		}
 	}
 
 	return false;
@@ -2308,6 +2320,7 @@ bool	CNetworkConnection::stateProbe()
 			else
 			{
 				nlwarning("CNET[%p]: received normal in state Probe", this);
+				_LatestProbeTime = _UpdateTime;
 			}
 		}
 	}

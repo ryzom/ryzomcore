@@ -2,7 +2,7 @@
 // Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2011  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2011-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
@@ -393,9 +393,9 @@ public:
 	NLMISC::CRGBA			getSheetColor() const {return _SheetColor;}
 
 	/// Special ContextHelp for ctrl sheet.
-	virtual void			getContextHelp(ucstring &help) const;
+	virtual void			getContextHelp(std::string &help) const;
 
-	virtual void			getContextHelpToolTip(ucstring &help) const;
+	virtual void			getContextHelpToolTip(std::string &help) const;
 
 
 	/** true if an item of another ctrlSheet can be dropped on this slot.

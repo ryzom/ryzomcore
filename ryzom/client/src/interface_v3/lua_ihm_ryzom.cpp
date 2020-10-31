@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2013-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -273,7 +273,7 @@ static DECLARE_INTERFACE_USER_FCT(lua)
 
 		if (CLuaIHM::pop(ls, ucstrVal))
 		{
-			result.setUCString(ucstrVal);
+			result.setString(ucstrVal.toUtf8());
 			ok = true;
 		}
 
@@ -904,7 +904,7 @@ int	CLuaIHMRyzom::setTextFormatTaged(CLuaState &ls)
 		throw ELuaIHMException("setTextFormatTaged(): '%s' is not a CViewText",    pIE->getId().c_str());
 
 	// Set the text as format
-	vt->setTextFormatTaged(text);
+	vt->setTextFormatTaged(text.toUtf8());
 
 	return 0;
 }
@@ -1070,7 +1070,7 @@ int CLuaIHMRyzom::initEmotesMenu(CLuaState &ls)
 						// Create a line
 						pMenu->addLine(CI18N::get(sTmp), "lua",
 							luaParams + "('" + sEmoteId + "', '" + toString(CI18N::get(sTmp)) + "')", sTmp);
-						emoteList[sEmoteId] = (toLower(CI18N::get(sTmp))).toUtf8();
+						emoteList[sEmoteId] = (toLower(CI18N::get(sTmp)));
 					}
 				}
 
@@ -1426,7 +1426,7 @@ int CLuaIHMRyzom::getPlayerGender(CLuaState &ls)
 int CLuaIHMRyzom::getPlayerName(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getPlayerName", 0);
-	ls.push(UserEntity->getEntityName().toUtf8());
+	ls.push(UserEntity->getEntityName());
 	return 1;
 }
 
@@ -1434,7 +1434,7 @@ int CLuaIHMRyzom::getPlayerName(CLuaState &ls)
 int CLuaIHMRyzom::getPlayerTitleRaw(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getPlayerTitleRaw", 0);
-	ls.push(UserEntity->getTitleRaw().toUtf8());
+	ls.push(UserEntity->getTitleRaw());
 	return 1;
 }
 
@@ -1442,7 +1442,7 @@ int CLuaIHMRyzom::getPlayerTitleRaw(CLuaState &ls)
 int CLuaIHMRyzom::getPlayerTitle(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getPlayerTitle", 0);
-	ls.push(UserEntity->getTitle().toUtf8());
+	ls.push(UserEntity->getTitle());
 	return 1;
 }
 
@@ -1504,7 +1504,7 @@ int CLuaIHMRyzom::getTargetName(CLuaState &ls)
 
 	if (!target) return 0;
 
-	ls.push(target->getEntityName().toUtf8());
+	ls.push(target->getEntityName());
 	return 1;
 }
 
@@ -1516,7 +1516,7 @@ int CLuaIHMRyzom::getTargetTitleRaw(CLuaState &ls)
 
 	if (!target) return 0;
 
-	ls.push(target->getTitleRaw().toUtf8());
+	ls.push(target->getTitleRaw());
 	return 1;
 }
 
@@ -1528,7 +1528,7 @@ int CLuaIHMRyzom::getTargetTitle(CLuaState &ls)
 
 	if (!target) return 0;
 
-	ls.push(target->getTitle().toUtf8());
+	ls.push(target->getTitle());
 	return 1;
 }
 
@@ -1780,7 +1780,7 @@ int CLuaIHMRyzom::displaySystemInfo(CLuaState &ls)
 	ucstring msg;
 	nlverify(CLuaIHM::getUCStringOnStack(ls, 1, msg));
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->displaySystemInfo(msg, ls.toString(2));
+	pIM->displaySystemInfo(msg.toUtf8(), ls.toString(2));
 	return 0;
 }
 
@@ -2988,7 +2988,7 @@ std::string	CLuaIHMRyzom::getDefine(const std::string &def)
 // ***************************************************************************
 void		CLuaIHMRyzom::setContextHelpText(const ucstring &text)
 {
-	CWidgetManager::getInstance()->setContextHelpText(text);
+	CWidgetManager::getInstance()->setContextHelpText(text.toUtf8());
 }
 
 // ***************************************************************************
@@ -3383,11 +3383,9 @@ void	CLuaIHMRyzom::browseNpcWebPage(const std::string &htmlId, const std::string
 
 			if (UserEntity)
 			{
-				userName = UserEntity->getDisplayName().toString();
+				userName = UserEntity->getDisplayName();
 				STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-				ucstring ucsTmp;
-				pSMC->getString(UserEntity->getGuildNameID(), ucsTmp);
-				guildName = ucsTmp.toString();
+				pSMC->getString(UserEntity->getGuildNameID(), guildName);
 
 				while (guildName.find(' ') != string::npos)
 				{
@@ -3438,16 +3436,16 @@ void		CLuaIHMRyzom::clearHtmlUndoRedo(const std::string &htmlId)
 ucstring	CLuaIHMRyzom::getDynString(sint32 dynStringId)
 {
 	//H_AUTO(Lua_CLuaIHM_getDynString)
-	ucstring result;
+	string result;
 	STRING_MANAGER::CStringManagerClient::instance()->getDynString(dynStringId,   result);
-	return result;
+	return ucstring::makeFromUtf8(result); // TODO: Lua UTF-8
 }
 
 // ***************************************************************************
 bool		CLuaIHMRyzom::isDynStringAvailable(sint32 dynStringId)
 {
 	//H_AUTO(Lua_CLuaIHM_isDynStringAvailable)
-	ucstring result;
+	string result;
 	bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(dynStringId,   result);
 	return res;
 }
@@ -3599,7 +3597,7 @@ string CLuaIHMRyzom::getGuildMemberName(sint32 nMemberId)
 	if ((nMemberId < 0) || (nMemberId >= getNbGuildMembers()))
 		return "";
 
-	return CGuildManager::getInstance()->getGuildMembers()[nMemberId].Name.toString();
+	return CGuildManager::getInstance()->getGuildMembers()[nMemberId].Name;
 }
 
 // ***************************************************************************
@@ -3763,7 +3761,7 @@ void CLuaIHMRyzom::tell(const ucstring &player, const ucstring &msg)
 		if (!msg.empty())
 		{
 			// Parse any tokens in the message.
-			ucstring msg_modified = msg;
+			string msg_modified = msg.toUtf8();
 
 			// Parse any tokens in the text
 			if (! CInterfaceManager::parseTokens(msg_modified))
@@ -3782,7 +3780,7 @@ void CLuaIHMRyzom::tell(const ucstring &player, const ucstring &msg)
 				CInterfaceManager *im = CInterfaceManager::getInstance();
 				w->setKeyboardFocus();
 				w->enableBlink(1);
-				w->setCommand(ucstring("tell ") + CEntityCL::removeTitleFromName(player) + ucstring(" "), false);
+				w->setCommand(ucstring("tell ") + CEntityCL::removeTitleFromName(player.toUtf8()) + ucstring(" "), false);
 				CGroupEditBox *eb = w->getEditBox();
 
 				if (eb != NULL)
@@ -4457,27 +4455,27 @@ int CLuaIHMRyzom::displayChatMessage(CLuaState &ls)
 		if (input == "around")
 		{
 			prop.readRGBA(std::string(dbPath + ":SAY").c_str(), " ");
-			ci.AroundMe.displayMessage(ucstring(msg), prop.getRGBA());
+			ci.AroundMe.displayMessage(msg, prop.getRGBA());
 		}
 		else if (input == "region")
 		{
 			prop.readRGBA(std::string(dbPath + ":REGION").c_str(), " ");
-			ci.Region.displayMessage(ucstring(msg), prop.getRGBA());
+			ci.Region.displayMessage(msg, prop.getRGBA());
 		}
 		else if (input == "universe")
 		{
 			prop.readRGBA(std::string(dbPath + ":UNIVERSE_NEW").c_str(), " ");
-			ci.Universe.displayMessage(ucstring(msg), prop.getRGBA());
+			ci.Universe.displayMessage(msg, prop.getRGBA());
 		}
 		else if (input == "guild")
 		{
 			prop.readRGBA(std::string(dbPath + ":CLADE").c_str(), " ");
-			ci.Guild.displayMessage(ucstring(msg), prop.getRGBA());
+			ci.Guild.displayMessage(msg, prop.getRGBA());
 		}
 		else if (input == "team")
 		{
 			prop.readRGBA(std::string(dbPath + ":GROUP").c_str(), " ");
-			ci.Team.displayMessage(ucstring(msg), prop.getRGBA());
+			ci.Team.displayMessage(msg, prop.getRGBA());
 		}
 	}
 	if (ls.type(2) == LUA_TNUMBER)
@@ -4485,7 +4483,7 @@ int CLuaIHMRyzom::displayChatMessage(CLuaState &ls)
 		sint64 id = ls.toInteger(2);
 		prop.readRGBA(toString("%s:DYN:%i", dbPath.c_str(), id).c_str(), " ");
 		if (id >= 0 && id < CChatGroup::MaxDynChanPerPlayer)
-			ci.DynamicChat[id].displayMessage(ucstring(msg), prop.getRGBA());
+			ci.DynamicChat[id].displayMessage(msg, prop.getRGBA());
 	}
 	return 1;
 }

@@ -436,7 +436,7 @@ void			CSBrickManager::compileBrickProperties()
 
 
 	// **** for all bricks, recompute localized text with formated version
-	ucstring	textTemp;
+	string	textTemp;
 	textTemp.reserve(1000);
 	for (std::vector<CSBrickSheet *>::size_type ib = 0; ib < _BrickVector.size(); ++ib)
 	{
@@ -445,7 +445,7 @@ void			CSBrickManager::compileBrickProperties()
 			continue;
 
 		// Get the Brick texts
-		ucstring	texts[3];
+		std::string texts[3];
 		texts[0]= STRING_MANAGER::CStringManagerClient::getSBrickLocalizedName(brickSheet->Id);
 		texts[1]= STRING_MANAGER::CStringManagerClient::getSBrickLocalizedDescription(brickSheet->Id);
 		texts[2]= STRING_MANAGER::CStringManagerClient::getSBrickLocalizedCompositionDescription(brickSheet->Id);
@@ -453,7 +453,7 @@ void			CSBrickManager::compileBrickProperties()
 		// For alls texts, parse format
 		for(uint i=0;i<3;i++)
 		{
-			ucstring	&text= texts[i];
+			string	&text= texts[i];
 			textTemp.erase();
 
 			// Parse the text

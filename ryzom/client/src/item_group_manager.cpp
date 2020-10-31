@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -301,10 +304,18 @@ bool CItemGroupManager::loadGroups()
 	NLMISC::CIFile f;
 	f.open(userGroupFileName);
 	NLMISC::CIXml xmlStream;
-	xmlStream.init(f);
-	// Actual loading
 	xmlNodePtr globalEnclosing;
-	globalEnclosing = xmlStream.getRootNode();
+	try
+	{
+		xmlStream.init(f);
+		// Actual loading
+		globalEnclosing = xmlStream.getRootNode();
+	}
+	catch (const NLMISC::EXmlParsingError &ex)
+	{
+		nlwarning("Failed to parse '%s', skip", userGroupFileName.c_str());
+		return false;
+	}
 	if(!globalEnclosing)
 	{
 		nlwarning("no root element in item_group xml, skipping xml parsing");
@@ -686,10 +697,9 @@ void CItemGroupManager::listGroup()
 	for(int i=0;i<_Groups.size();i++)
 	{
 		CItemGroup group = _Groups[i];
-		ucstring msg = NLMISC::CI18N::get("cmdListGroupLine");
+		string msg = NLMISC::CI18N::get("cmdListGroupLine");
 		//Use ucstring because group name can contain accentued characters (and stuff like that)
-		ucstring nameUC;
-		nameUC.fromUtf8(group.name);
+		string nameUC = group.name;
 		NLMISC::strFindReplace(msg, "%name", nameUC);
 		NLMISC::strFindReplace(msg, "%size", NLMISC::toString(group.Items.size()));
 		pIM->displaySystemInfo(msg);
