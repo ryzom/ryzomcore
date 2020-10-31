@@ -1385,14 +1385,14 @@ NLMISC_COMMAND(setItemName, "set name of items, sbrick, etc..","<sheet_id> <name
 {
 	if (args.size() < 2) return false;
 	CSheetId id(args[0]);
-	ucstring name;
-	name.fromUtf8(args[1]);
-	ucstring desc;
-	ucstring desc2;
+	string name;
+	name = args[1];
+	string desc;
+	string desc2;
 	if (args.size() > 2)
-		desc.fromUtf8(args[2]);
+		desc = args[2];
 	if (args.size() > 3)
-		desc2.fromUtf8(args[3]);
+		desc2 = args[3];
 
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 	if (pSMC)
@@ -1406,10 +1406,10 @@ NLMISC_COMMAND(setItemName, "set name of items, sbrick, etc..","<sheet_id> <name
 NLMISC_COMMAND(setMissingDynstringText, "set text of missing dynamic string"," <name> <text>")
 {
 	if (args.size() < 2) return false;
-	ucstring name;
-	name.fromUtf8(args[0]);
-	ucstring text;
-	text.fromUtf8(args[1]);
+	string name;
+	name = args[0];
+	string text;
+	text = args[1];
 
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 	if (pSMC)
@@ -1459,7 +1459,7 @@ NLMISC_COMMAND(ah, "Launch an action handler", "<ActionHandler> <AHparam>")
 static void setDynString(uint32 strID, const std::string &value)
 {
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-	pSMC->receiveString(strID, ucstring(value));
+	pSMC->receiveString(strID, value);
 	CBitMemStream bm;
 	if (bm.isReading()) bm.invert();
 	bm.serial(strID);

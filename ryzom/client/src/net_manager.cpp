@@ -2299,11 +2299,9 @@ void impulsePhraseSend(NLMISC::CBitMemStream &impulse)
 void impulseStringResp(NLMISC::CBitMemStream &impulse)
 {
 	uint32 stringId;
-	string	strUtf8;
+	string	str;
 	impulse.serial(stringId);
-	impulse.serial(strUtf8);
-	ucstring str;
-	str.fromUtf8(strUtf8);
+	impulse.serial(str);
 
 	if (PermanentlyBanned) return;
 
@@ -3390,7 +3388,7 @@ private:
 
 public:
 	// called when the string is available
-	virtual void onDynStringAvailable(uint stringId, const ucstring &value)
+	virtual void onDynStringAvailable(uint stringId, const std::string &value)
 	{
 		// don't care if already displayed
 		if(_AlreadyDisplayed)

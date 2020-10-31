@@ -935,7 +935,7 @@ protected:
 	// Current entity title
 	ucstring						_Title;
 	// Current entity tags
-	std::vector<ucstring>			_Tags;
+	std::vector<std::string>		_Tags;
 	// Current entity title string id
 	ucstring						_TitleRaw;
 	// Current permanent content symbol for the entity
@@ -1222,7 +1222,7 @@ public:
 private:
 
 	// Override for string reception callback
-	virtual void onStringAvailable(uint stringId, const ucstring &value);
+	virtual void onStringAvailable(uint stringId, const std::string &value);
 
 };
 

@@ -63,15 +63,16 @@ public:
 	// Force the cache to be saved
 	void flushStringCache();
 
-	bool getString(uint32 stringId, std::string &result) { ucstring temp; bool res = getString(stringId, temp); result = temp.toUtf8(); return res; } // FIXME: UTF-8
-	bool getString(uint32 stringId, ucstring &result);
-	void waitString(uint32 stringId, const IStringWaiterRemover *premover, ucstring *result);
+	bool getString(uint32 stringId, std::string &result);
+	bool getString(uint32 stringId, ucstring &result) { std::string temp; bool res = getString(stringId, temp); result.fromUtf8(temp); return res; } // FIXME: UTF-8
+	void waitString(uint32 stringId, const IStringWaiterRemover *premover, std::string *result);
 	void waitString(uint32 stringId, IStringWaitCallback *pcallback);
-	bool getDynString(uint32 dynStringId, ucstring &result);
-	void waitDynString(uint32 stringId, const IStringWaiterRemover *premover, ucstring *result);
+	bool getDynString(uint32 dynStringId, std::string &result);
+	bool getDynString(uint32 dynStringId, ucstring &result) { std::string temp; bool res = getString(dynStringId, temp); result.fromUtf8(temp); return res; } // FIXME: UTF-8
+	void waitDynString(uint32 stringId, const IStringWaiterRemover *premover, std::string *result);
 	void waitDynString(uint32 stringId, IStringWaitCallback *pcallback);
 
-	void receiveString(uint32 stringId, const ucstring &str);
+	void receiveString(uint32 stringId, const std::string &str);
 	void receiveDynString(NLMISC::CBitMemStream &bms);
 
 	void releaseDynString(uint32 stringId);
@@ -80,55 +81,55 @@ public:
 	static void				initI18NSpecialWords(const std::string &languageCode);
 	static void				specialWordsMemoryCompress();
 	// Yoyo: Replace the Brick Name with Filled stats (CSBrickManager work). No-Op if not found
-	static void				replaceSBrickName(NLMISC::CSheetId id, const ucstring &name, const ucstring &desc, const ucstring &desc2);
-	static void				replaceDynString(const ucstring &name, const ucstring &text);
+	static void				replaceSBrickName(NLMISC::CSheetId id, const std::string &name, const std::string &desc, const std::string &desc2);
+	static void				replaceDynString(const std::string &name, const std::string &text);
 
 	// Get the Localized Name of the Places.
-	static const ucchar *getPlaceLocalizedName(const std::string &placeNameID);
+	static const char *getPlaceLocalizedName(const std::string &placeNameID);
 	// Get the Localized Name of the faction (for the fame)
-	static const ucchar *getFactionLocalizedName(const std::string &factionNameID);
+	static const char *getFactionLocalizedName(const std::string &factionNameID);
 	// Get the Localized Name of the Skill.
-	static const ucchar *getSkillLocalizedName(SKILLS::ESkills e);
+	static const char *getSkillLocalizedName(SKILLS::ESkills e);
 	// Get the Localized Name of the Item.
-	static const ucchar *getItemLocalizedName(NLMISC::CSheetId id);
+	static const char *getItemLocalizedName(NLMISC::CSheetId id);
 	// Get the Localized Name of the Creature.
-	static const ucchar *getCreatureLocalizedName(NLMISC::CSheetId id);
+	static const char *getCreatureLocalizedName(NLMISC::CSheetId id);
 	// Get the Localized Name of the SBrick.
-	static const ucchar *getSBrickLocalizedName(NLMISC::CSheetId id);
+	static const char *getSBrickLocalizedName(NLMISC::CSheetId id);
 	// Get the Localized Name of the SPhrase.
-	static const ucchar *getSPhraseLocalizedName(NLMISC::CSheetId id);
+	static const char *getSPhraseLocalizedName(NLMISC::CSheetId id);
 
 	// Get the Localized Description of the Skill.
-	static const ucchar *getSkillLocalizedDescription(SKILLS::ESkills e);
+	static const char *getSkillLocalizedDescription(SKILLS::ESkills e);
 	// Get the Localized Descriptionof the Item.
-	static const ucchar *getItemLocalizedDescription(NLMISC::CSheetId id);
+	static const char *getItemLocalizedDescription(NLMISC::CSheetId id);
 	// Get the Localized Description of the SBrick.
-	static const ucchar *getSBrickLocalizedDescription(NLMISC::CSheetId id);
+	static const char *getSBrickLocalizedDescription(NLMISC::CSheetId id);
 	// Get the Localized Composition Description of the SBrick.
-	static const ucchar *getSBrickLocalizedCompositionDescription(NLMISC::CSheetId id);
+	static const char *getSBrickLocalizedCompositionDescription(NLMISC::CSheetId id);
 	// Get the Localized Description of the SPhrase.
-	static const ucchar *getSPhraseLocalizedDescription(NLMISC::CSheetId id);
+	static const char *getSPhraseLocalizedDescription(NLMISC::CSheetId id);
 
 	// Get the Localized Title name
-	static const ucchar *getTitleLocalizedName(const ucstring &titleId, bool women);
-	static const ucchar *getLocalizedName(const ucstring &text);
-	static std::vector<ucstring> getTitleInfos(const ucstring &titleId, bool women);
+	static const char *getTitleLocalizedName(const std::string &titleId, bool women);
+	static const char *getLocalizedName(const std::string &text);
+	static std::vector<std::string> getTitleInfos(const std::string &titleId, bool women);
 
 	// Get the Localized name of a classification type
-	static const ucchar *getClassificationTypeLocalizedName(EGSPD::CClassificationType::TClassificationType type);
+	static const char *getClassificationTypeLocalizedName(EGSPD::CClassificationType::TClassificationType type);
 
 	// Outpost name
-	static const ucchar *getOutpostLocalizedName(NLMISC::CSheetId id);
+	static const char *getOutpostLocalizedName(NLMISC::CSheetId id);
 	// Outpost description
-	static const ucchar *getOutpostLocalizedDescription(NLMISC::CSheetId id);
+	static const char *getOutpostLocalizedDescription(NLMISC::CSheetId id);
 	// Outpost building name
-	static const ucchar *getOutpostBuildingLocalizedName(NLMISC::CSheetId id);
+	static const char *getOutpostBuildingLocalizedName(NLMISC::CSheetId id);
 	// Outpost building description
-	static const ucchar *getOutpostBuildingLocalizedDescription(NLMISC::CSheetId id);
+	static const char *getOutpostBuildingLocalizedDescription(NLMISC::CSheetId id);
 	// Squad name
-	static const ucchar *getSquadLocalizedName(NLMISC::CSheetId id);
+	static const char *getSquadLocalizedName(NLMISC::CSheetId id);
 	// Squad description
-	static const ucchar *getSquadLocalizedDescription(NLMISC::CSheetId id);
+	static const char *getSquadLocalizedDescription(NLMISC::CSheetId id);
 
 private:
 	// constructor.
@@ -153,8 +154,8 @@ private:
 
 	struct TParamValue
 	{
-		TParamType				Type;
-		ucstring::size_type		ReplacementPoint;
+		TParamType Type;
+		std::string::size_type ReplacementPoint;
 		union
 		{
 			uint32	StringId;
@@ -177,7 +178,7 @@ private:
 		NLMISC::CBitMemStream		Message;
 		uint32						StringId;
 		std::vector<TParamValue>	Params;
-		ucstring					String;
+		std::string					String;
 	};
 
 	enum
@@ -189,7 +190,7 @@ private:
 	struct TStringWaiter
 	{
 		/// Pointer to the ucstring to fill
-		ucstring					*Result;
+		std::string					*Result;
 		/// Pointer to the remover that contains this string reference
 		const IStringWaiterRemover	*Remover;
 	};
@@ -198,7 +199,7 @@ private:
 
 
 	/// Container for simple strings
-	typedef CHashMap<uint, ucstring>			TStringsContainer;
+	typedef CHashMap<uint, std::string>			TStringsContainer;
 	/// Container for dyn strings
 	typedef CHashMap<uint, TDynStringInfo>		TDynStringsContainer;
 	/// Container of string reference waiting for value.
@@ -224,7 +225,7 @@ private:
 	TStringCallbacksContainer	_DynStringsCallbacks;
 
 	// Return value for waiting string..
-	static ucstring			_WaitString;
+	static std::string			_WaitString;
 
 	// Singleton pattern implementation
 	static CStringManagerClient	*_Instance;
@@ -247,7 +248,7 @@ private:
 	struct CCacheString
 	{
 		uint32		StringId;
-		ucstring	String;
+		std::string	String;
 	};
 	std::vector<CCacheString>	_CacheStringToSave;
 	//@}
@@ -257,41 +258,60 @@ private:
 	{
 	public:
 		// The Name of the item
-		ucstring		Name;
+		std::string		Name;
 		// The Women Name of the item
-		ucstring		WomenName;
+		std::string		WomenName;
 		// Description of the item
-		ucstring		Desc;
+		std::string		Desc;
 		// Optional Second description (For SBrick composition for example)
-		ucstring		Desc2;
+		std::string		Desc2;
 
 		void	serial(NLMISC::IStream &f)
 		{
-			sint	ver= f.serialVersion(1);
-			f.serial(Name);
-			if (ver >= 1)
+			sint ver = f.serialVersion(2);
+			if (ver >= 2)
+			{
+				f.serial(Name);
 				f.serial(WomenName);
-			f.serial(Desc);
-			f.serial(Desc2);
+				f.serial(Desc);
+				f.serial(Desc2);
+			}
+			else
+			{
+				nlassert(f.isReading());
+				ucstring name;
+				ucstring womenName;
+				ucstring desc;
+				ucstring desc2;
+				f.serial(name);
+				if (ver >= 1)
+					f.serial(womenName);
+				f.serial(desc);
+				f.serial(desc2);
+				Name = name.toUtf8();
+				WomenName = womenName.toUtf8();
+				Desc = desc.toUtf8();
+				Desc2 = desc2.toUtf8();
+			}
 		}
 	};
 
 	static bool _SpecItem_MemoryCompressed;
 
 	static	std::map<std::string, CItem> _SpecItem_TempMap;
-	static std::vector<ucstring> _TitleWords;
-	static std::map<ucstring, ucstring> _DynStrings;
+	static std::vector<std::string> _TitleWords;
+	static std::map<std::string, std::string> _DynStrings;
 
 
 	static char *_SpecItem_Labels;
-	static ucchar *_SpecItem_NameDesc;
+	static char *_SpecItem_NameDesc;
 	struct CItemLight
 	{
-		char	*Label;
-		ucchar	*Name;
-		ucchar	*WomenName;
-		ucchar	*Desc;
-		ucchar	*Desc2;
+		const char *Label;
+		const char *Name;
+		const char *WomenName;
+		const char *Desc;
+		const char *Desc2;
 	};
 	struct CItemLightComp
 	{
@@ -303,9 +323,9 @@ private:
 
 	static std::vector<CItemLight> _SpecItems;
 
-	static	const ucchar *getSpecialWord(const std::string &label, bool women = false);
-	static	const ucchar *getSpecialDesc(const std::string &label);
-	static	const ucchar *getSpecialDesc2(const std::string &label);
+	static	const char *getSpecialWord(const std::string &label, bool women = false);
+	static	const char *getSpecialDesc(const std::string &label);
+	static	const char *getSpecialDesc2(const std::string &label);
 
 	// Check Files for the Packed string.
 	class CFileCheck
@@ -381,9 +401,9 @@ class IStringWaitCallback
 {
 public:
 	/// Overide this method to receive callback for string.
-	virtual void onStringAvailable(uint /* stringId */, const ucstring &/* value */) {}
+	virtual void onStringAvailable(uint /* stringId */, const std::string &/* value */) {}
 	/// Overide this method to receive callback for dynamic string.
-	virtual void onDynStringAvailable(uint /* stringId */, const ucstring &/* value */) {}
+	virtual void onDynStringAvailable(uint /* stringId */, const std::string &/* value */) {}
 
 	virtual ~IStringWaitCallback()
 	{

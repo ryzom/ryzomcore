@@ -916,7 +916,7 @@ NLMISC_COMMAND(slsn, "Temp : set the name of the last sender.", "<name>")
 bool CStringPostProcessRemoveName::cbIDStringReceived(ucstring &inOut)
 {
 	// extract the replacement id
-	ucstring strNewTitle = CEntityCL::getTitleFromName(inOut.toUtf8());
+	string strNewTitle = CEntityCL::getTitleFromName(inOut.toUtf8());
 
 	// retrieve the translated string
 	if (!strNewTitle.empty())

@@ -1047,12 +1047,12 @@ REGISTER_ACTION_HANDLER( CHandlerSetCompassNorth, "set_compass_north");
 
 class CCompassDialogsStringCallback : public IStringWaitCallback
 {
-	virtual void onDynStringAvailable(uint /* stringId */, const ucstring &value)
+	virtual void onDynStringAvailable(uint /* stringId */, const std::string &value)
 	{
 		uint size = (uint)CCompassDialogsManager::getInstance()._Entries.size();
 		for ( uint i = 0; i < size; i++)
 		{
-			ucstring name;
+			std::string name;
 			if ( CStringManagerClient::instance()->getDynString(CCompassDialogsManager::getInstance()._Entries[i].Text, name) )
 			{
 				if ( value == name )

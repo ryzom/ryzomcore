@@ -693,7 +693,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 
 							// retrieve the translated string
 							if (!strNewTitle.empty())
-								name = ucstring(STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(ucstring::makeFromUtf8(strNewTitle), woman)).toUtf8();
+								name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(strNewTitle, woman);
 							else
 								name.clear();
 						}
@@ -752,7 +752,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 		for (titleIDnb = 0; titleIDnb < CHARACTER_TITLE::NB_CHARACTER_TITLE; ++titleIDnb)
 		{
 			bool women = UserEntity && UserEntity->getGender()==GSGENDER::female;
-			if (CStringManagerClient::getTitleLocalizedName(CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)titleIDnb),women) == title)
+			if (CStringManagerClient::getTitleLocalizedName(CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)titleIDnb),women) == title.toUtf8())
 				break;
 		}
 

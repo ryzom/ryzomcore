@@ -536,10 +536,10 @@ void CForageSourceCL::updateVisualPropertyVisualFX(const NLMISC::TGameCycle &/* 
 void CForageSourceCL::updateVisualPropertyName(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {
 	CSheetId rmSheetId( (const uint32&)prop );
-	const ucchar *name = STRING_MANAGER::CStringManagerClient::getItemLocalizedName( rmSheetId );
+	const char *name = STRING_MANAGER::CStringManagerClient::getItemLocalizedName( rmSheetId );
 	if ( name )
 	{
-		_EntityName = ucstring(name).toUtf8();
+		_EntityName = name;
 		if ( _ProspectorSlot != 255 )
 		{
 			CEntityCL *prospector = EntitiesMngr.entities()[_ProspectorSlot];
