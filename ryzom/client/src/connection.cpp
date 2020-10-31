@@ -3478,7 +3478,7 @@ class CAHInitImportCharacter : public IActionHandler
 				{
 					CViewText *text = dynamic_cast<CViewText*>(newLine->getView("name"));
 					if (text)
-						text->setText(ucstring(savedCharacters[i]));
+						text->setText(string(savedCharacters[i]));
 
 					// first button is pushed
 					CCtrlButton *button = dynamic_cast<CCtrlButton*>(newLine->getCtrl("but"));
