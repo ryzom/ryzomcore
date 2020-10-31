@@ -202,7 +202,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 	const char *templateName;
 	const char *theTribeName = "";
 	std::string entityName = entity->getDisplayName();
-	std::string entityTitle = entity->getTitle().toUtf8();
+	std::string entityTitle = entity->getTitle();
 
 	// For some NPC's the name is empty and only a title is given,
 	// in that case, treat the title as the name.

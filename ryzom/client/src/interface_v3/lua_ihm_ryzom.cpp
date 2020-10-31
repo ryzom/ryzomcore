@@ -1371,7 +1371,7 @@ int CLuaIHMRyzom::getPlayerName(CLuaState &ls)
 int CLuaIHMRyzom::getPlayerTitleRaw(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getPlayerTitleRaw", 0);
-	ls.push(UserEntity->getTitleRaw().toUtf8());
+	ls.push(UserEntity->getTitleRaw());
 	return 1;
 }
 
@@ -1379,7 +1379,7 @@ int CLuaIHMRyzom::getPlayerTitleRaw(CLuaState &ls)
 int CLuaIHMRyzom::getPlayerTitle(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getPlayerTitle", 0);
-	ls.push(UserEntity->getTitle().toUtf8());
+	ls.push(UserEntity->getTitle());
 	return 1;
 }
 
@@ -1453,7 +1453,7 @@ int CLuaIHMRyzom::getTargetTitleRaw(CLuaState &ls)
 
 	if (!target) return 0;
 
-	ls.push(target->getTitleRaw().toUtf8());
+	ls.push(target->getTitleRaw());
 	return 1;
 }
 
@@ -1465,7 +1465,7 @@ int CLuaIHMRyzom::getTargetTitle(CLuaState &ls)
 
 	if (!target) return 0;
 
-	ls.push(target->getTitle().toUtf8());
+	ls.push(target->getTitle());
 	return 1;
 }
 

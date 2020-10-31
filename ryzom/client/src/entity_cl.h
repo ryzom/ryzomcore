@@ -769,25 +769,25 @@ public:
 	bool					isAnOutpostAlly() const;
 
 	/// Return the entity title
-	const ucstring &getTitle() const
+	const std::string &getTitle() const
 	{
 		return _Title;
 	}
 
 	/// Return the entity tags
-	const ucstring &getTag(uint8 id) const
+	const std::string &getTag(uint8 id) const
 	{
 		if (_Tags.size() > id) {
 			return _Tags[id];
 		}
-		static ucstring empty;
+		static const std::string empty;
 		return empty;
 	}
 
 	/// Return the raw unparsed entity title
-	const ucstring getTitleRaw() const
+	const std::string &getTitleRaw() const
 	{
-		return ucstring(_TitleRaw);
+		return _TitleRaw;
 	}
 
 	/// Return true if this entity has a reserved title
@@ -933,11 +933,11 @@ protected:
 	// Current Name for the entity
 	std::string						_EntityName;
 	// Current entity title
-	ucstring						_Title;
+	std::string						_Title;
 	// Current entity tags
 	std::vector<std::string>		_Tags;
 	// Current entity title string id
-	ucstring						_TitleRaw;
+	std::string						_TitleRaw;
 	// Current permanent content symbol for the entity
 	std::string						_PermanentStatutIcon;
 	// Has reserved title?

@@ -4218,13 +4218,13 @@ bool CInterfaceManager::parseTokens(string& ucstr)
 				// special case where there is only a title, very rare case for some NPC
 				if (name.empty())
 				{
-					name = pTokenSubjectEntity->getTitle().toUtf8();
+					name = pTokenSubjectEntity->getTitle();
 				}
 				token_replacement = name.empty() ? token_replacement : name;
 			}
 			else if (token_param == "title")
 			{
-				string title = pTokenSubjectEntity->getTitle().toUtf8();
+				string title = pTokenSubjectEntity->getTitle();
 				token_replacement = title.empty() ? token_replacement : title;
 			}
 			else if (token_param == "race")

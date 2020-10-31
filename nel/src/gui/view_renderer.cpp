@@ -883,6 +883,7 @@ namespace NLGUI
 		driver->setCursorScale( CViewRenderer::hwCursorScale );
 
 		char bufTmp[256], tgaName[256];
+		tgaName[0] = 0;
 		string sTGAname;
 		float uvMinU, uvMinV, uvMaxU, uvMaxV;
 		while (!iFile.eof())
