@@ -106,15 +106,13 @@ bool CChatTextManager::showTimestamps() const
 }
 
 //=================================================================================
-static CInterfaceGroup *parseCommandTag(ucstring &line)
+static CInterfaceGroup *parseCommandTag(string &line)
 {
-	string::size_type start = line.find(ucstring("/$$"));
+	string::size_type start = line.find("/$$");
 	if (start == string::npos) return NULL;
-	string::size_type end = line.find(ucstring("$$/"), start + 3);
+	string::size_type end = line.find("$$/", start + 3);
 	if (end == string::npos) return NULL;
-	std::string commandLine;
-	ucstring ucCommandLine = line.substr(start + 3, end - start - 3);
-	ucCommandLine.toString(commandLine);
+	std::string commandLine = line.substr(start + 3, end - start - 3);
 	line = line.substr(0, start) + line.substr(end +3);
 	vector<string> params;
 	explode(commandLine, std::string("|"), params);
@@ -221,11 +219,11 @@ static inline bool	isUrlTag(const ucstring &s, ucstring::size_type index, ucstri
 
 // ***************************************************************************
 // isUrlTag must match
-static inline void getUrlTag(const ucstring &s, ucstring::size_type &index, ucstring &url, ucstring &title)
+static inline void getUrlTag(const string &s, string::size_type &index, string &url, string &title)
 {
 	bool isMarkdown = false;
-	ucstring::size_type textSize = s.size();
-	ucstring::size_type pos;
+	string::size_type textSize = s.size();
+	string::size_type pos;
 
 	// see if we have markdown format
 	if (s[index] == '(')
@@ -250,8 +248,8 @@ static inline void getUrlTag(const ucstring &s, ucstring::size_type &index, ucst
 		}
 	}
 
-	ucchar chOpen = ' ';
-	ucchar chClose = ' ';
+	char chOpen = ' ';
+	char chClose = ' ';
 	if (isMarkdown)
 	{
 		chOpen = '[';
@@ -272,7 +270,7 @@ static inline void getUrlTag(const ucstring &s, ucstring::size_type &index, ucst
 		pos = s.find_first_of(chClose, index);
 
 		// handle common special case: 'text http://.../, text'
-		if (pos != ucstring::npos && index > 0)
+		if (pos != string::npos && index > 0)
 		{
 			if (s[index-1] == ' ' && (s[pos-1] == ',' || s[pos-1] == '.'))
 			{
@@ -308,7 +306,7 @@ static inline void getUrlTag(const ucstring &s, ucstring::size_type &index, ucst
 	}
 
 	// fallback to full string length as we did match http:// already and url spans to the end probably
-	if (pos == ucstring::npos)
+	if (pos == string::npos)
 	{
 		pos = textSize;
 	}
@@ -321,22 +319,22 @@ static inline void getUrlTag(const ucstring &s, ucstring::size_type &index, ucst
 }
 
 //=================================================================================
-static void prependTimestamp(ucstring &msg)
+static void prependTimestamp(string &msg)
 {
-	ucstring cur_time;
+	string cur_time;
 	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_CLOCK_12H", false);
 	if (node && node->getValueBool())
 		cur_time = CInterfaceManager::getTimestampHuman("[%I:%M:%S %p] ");
 	else
 		cur_time = CInterfaceManager::getTimestampHuman();
 
-	ucstring::size_type codePos = msg.find(ucstring("@{"));
-	if (codePos != ucstring::npos)
+	string::size_type codePos = msg.find("@{");
+	if (codePos != string::npos)
 	{
 		// Prepend the current time (do it after the color if the color at first position.
 		if (codePos == 0)
 		{
-			codePos = msg.find(ucstring("}"));
+			codePos = msg.find(string("}"));
 			msg = msg.substr(0, codePos + 1) + cur_time + msg.substr(codePos + 1, msg.length() - codePos);
 		}
 		else
@@ -351,9 +349,9 @@ static void prependTimestamp(ucstring &msg)
 }
 
 //=================================================================================
-CViewBase *CChatTextManager::createMsgText(const ucstring &cstMsg, NLMISC::CRGBA col, bool justified /*=false*/, bool plaintext /*=false*/)
+CViewBase *CChatTextManager::createMsgText(const string &cstMsg, NLMISC::CRGBA col, bool justified /*=false*/, bool plaintext /*=false*/)
 {
-	ucstring msg = cstMsg;
+	string msg = cstMsg;
 	CInterfaceGroup *commandGroup = parseCommandTag(msg);
 
 	if (showTimestamps())
@@ -365,7 +363,7 @@ CViewBase *CChatTextManager::createMsgText(const ucstring &cstMsg, NLMISC::CRGBA
 }
 
 //=================================================================================
-CViewBase *CChatTextManager::createMsgTextSimple(const ucstring &msg, NLMISC::CRGBA col, bool justified, CInterfaceGroup *commandGroup)
+CViewBase *CChatTextManager::createMsgTextSimple(const string &msg, NLMISC::CRGBA col, bool justified, CInterfaceGroup *commandGroup)
 {
 	CViewText *vt = new CViewText(CViewText::TCtorParam());
 	// get parameters from config.xml
@@ -379,14 +377,14 @@ CViewBase *CChatTextManager::createMsgTextSimple(const ucstring &msg, NLMISC::CR
 
 	// if text contain any color code, set the text formated and white,
 	// otherwise, set text normal and apply global color
-	if (msg.find(ucstring("@{")) != ucstring::npos)
+	if (msg.find("@{") != string::npos)
 	{
-		vt->setTextFormatTaged(msg.toUtf8());
+		vt->setTextFormatTaged(msg);
 		vt->setColor(NLMISC::CRGBA::White);
 	}
 	else
 	{
-		vt->setText(msg.toUtf8());
+		vt->setText(msg);
 		vt->setColor(col);
 	}
 
@@ -401,9 +399,9 @@ CViewBase *CChatTextManager::createMsgTextSimple(const ucstring &msg, NLMISC::CR
 }
 
 //=================================================================================
-CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::CRGBA col, bool justified, bool plaintext, CInterfaceGroup *commandGroup)
+CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRGBA col, bool justified, bool plaintext, CInterfaceGroup *commandGroup)
 {
-	ucstring::size_type textSize = msg.size();
+	string::size_type textSize = msg.size();
 
 	CGroupParagraph *para = new CGroupParagraph(CViewBase::TCtorParam());
 	para->setId("line");
@@ -412,7 +410,7 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 
 	// use right click because left click might be used to activate chat window
 	para->setRightClickHandler("copy_chat_popup");
-	para->setRightClickHandlerParams(msg.toUtf8());
+	para->setRightClickHandlerParams(msg);
 
 	if (plaintext)
 	{
@@ -427,12 +425,12 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 	// quickly check if text has links or not
 	bool hasUrl;
 	{
-		ucstring s = toLower(msg);
-		hasUrl = (s.find(ucstring("http://")) || s.find(ucstring("https://")));
+		string s = toLower(msg);
+		hasUrl = (s.find("http://") || s.find("https://"));
 	}
 
-	ucstring::size_type pos = 0;
-	for (ucstring::size_type i = 0; i< textSize;)
+	string::size_type pos = 0;
+	for (string::size_type i = 0; i< textSize;)
 	{
 		if (hasUrl && isUrlTag(msg, i, textSize))
 		{
@@ -442,8 +440,8 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 				para->addChild(vt);
 			}
 
-			ucstring url;
-			ucstring title;
+			string url;
+			string title;
 			getUrlTag(msg, i, url, title);
 			if (url.size() > 0)
 			{
@@ -465,29 +463,29 @@ CViewBase *CChatTextManager::createMsgTextComplex(const ucstring &msg, NLMISC::C
 
 				if (title.size() > 0)
 				{
-					vt->LinkTitle = title.toUtf8();
+					vt->LinkTitle = title;
 					vt->setText(vt->LinkTitle);
 				}
 				else
 				{
-					vt->LinkTitle = url.toUtf8();
+					vt->LinkTitle = url;
 					vt->setText(vt->LinkTitle);
 				}
 
 				if (url.find_first_of('\'') != string::npos)
 				{
-					ucstring clean;
+					string clean;
 					for(string::size_type i = 0; i< url.size(); ++i)
 					{
 						if (url[i] == '\'')
-							clean += ucstring("%27");
+							clean += "%27";
 						else
 							clean += url[i];
 					}
 					url = clean;
 				}
 				vt->setActionOnLeftClick("lua");
-				vt->setParamsOnLeftClick("game:chatUrl('" + url.toUtf8() + "')");
+				vt->setParamsOnLeftClick("game:chatUrl('" + url + "')");
 
 				para->addChildLink(vt);
 

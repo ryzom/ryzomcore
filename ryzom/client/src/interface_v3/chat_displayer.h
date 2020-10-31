@@ -97,7 +97,7 @@ public:
 		std::vector<SDispString> &rVal = acces.value ();
 		for (uint i = 0; i < rVal.size(); ++i)
 		{
-			CInterfaceManager::getInstance()->displayDebugInfo(ucstring(rVal[i].Str), rVal[i].Mode);
+			CInterfaceManager::getInstance()->displayDebugInfo(rVal[i].Str, rVal[i].Mode);
 		}
 		rVal.clear();
 	}

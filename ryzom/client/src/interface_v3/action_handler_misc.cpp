@@ -598,7 +598,7 @@ void getBuffer (CBitmap &btm)
 void displayScreenShotSavedInfo(const string &filename)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	ucstring msg("'" + filename + "' " + CI18N::get("uiScreenshotSaved"));
+	string msg = "'" + filename + "' " + CI18N::get("uiScreenshotSaved");
 	pIM->displaySystemInfo(msg);
 }
 
@@ -885,7 +885,7 @@ class CAHCycleTell : public IActionHandler
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		if (!im->isInGame()) return;
-		const ucstring *lastTellPeople = ChatMngr.cycleLastTell();
+		const string *lastTellPeople = ChatMngr.cycleLastTell();
 		if (!lastTellPeople) return;
 		// just popup the main chat
 		//CChatWindow *w = PeopleInterraction.MainChat.Window;

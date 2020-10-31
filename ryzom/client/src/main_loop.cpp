@@ -1165,7 +1165,7 @@ bool mainLoop()
 			if (BanMsgCountdown < 0.f)
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				ucstring msg = CI18N::get("msgPermanentlyBanned");
+				string msg = CI18N::get("msgPermanentlyBanned");
 				string cat = getStringCategory(msg, msg);
 				pIM->displaySystemInfo(msg, cat);
 				BanMsgCountdown	 = BanMsgRepeatTime;
@@ -3448,11 +3448,11 @@ NLMISC_COMMAND(dumpFontTexture, "Write font texture to file", "")
 	{
 		std::string fname = CFile::findNewFile("font-texture.tga");
 		TextContext->dumpCacheTexture(fname.c_str());
-		im->displaySystemInfo(ucstring(fname + " created"), "SYS");
+		im->displaySystemInfo(fname + " created", "SYS");
 	}
 	else
 	{
-		im->displaySystemInfo(ucstring("Error: TextContext == NULL"), "SYS");
+		im->displaySystemInfo("Error: TextContext == NULL", "SYS");
 	}
 	return true;
 }

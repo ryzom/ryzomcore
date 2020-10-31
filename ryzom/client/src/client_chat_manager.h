@@ -137,11 +137,11 @@ public:
 		 *	\param mode in which channel should this message goes
 		 *	\param dynChatId is valid only if mode==dyn_chat. This the Id of channel (not the index in DB!)
 		 */
-		virtual void	displayChat(TDataSetIndex compressedSenderIndex, const ucstring &ucstr, const ucstring &rawMessage, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, ucstring &senderName, uint bubbleTimer=0) =0;
+		virtual void	displayChat(TDataSetIndex compressedSenderIndex, const std::string &ucstr, const std::string &rawMessage, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName, uint bubbleTimer=0) =0;
 		/**
 		 *	display a player tell message
 		 */
-		virtual void	displayTell(/*TDataSetIndex senderIndex, */const ucstring &ucstr, const ucstring &senderName) =0;
+		virtual void	displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName) =0;
 		/**
 		 *	Clear a channel.
 		 *	\param dynChatDbIndex is valid only if mode==dyn_chat. Contrary to displayChat, this is the Db Index (0..MaxDynChanPerPlayer)
@@ -177,18 +177,18 @@ public :
 	 * \param str is the chat content (truncated to 255 char max)
 	 * \param isChatTeam special case for Chat TEAM
 	 */
-	void chat( const ucstring& str, bool isChatTeam = false );
+	void chat( const std::string& str, bool isChatTeam = false );
 
 	/**
 	 * Transmit a chat message to the receiver
 	 * \param receiver is the name of the listening char (truncated to 255 char max)
 	 * \param str is the chat content (truncated to 255 char max)
 	 */
-	void tell( const std::string& receiver, const ucstring& str );
+	void tell( const std::string& receiver, const std::string& str );
 
 	/** Get the last name of the people with which a 'tell' has been done, then move that name at the start of the list
 	  */
-	const ucstring *cycleLastTell();
+	const std::string *cycleLastTell();
 
 	/** Set the max number of name in the tell list
 	  */
@@ -263,12 +263,12 @@ public :
 	 * \param result decoded string
 	 * \return true if the string is finalize, false if some param are missing from network
 	 */
-	bool getString( ucstring &result, std::vector<uint64>& args, const ucstring& strbase );
+	bool getString( std::string &result, std::vector<uint64>& args, const std::string& strbase );
 
 	// build a sentence to be displayed in the chat (e.g add "you say", "you shout", "[user name] says" or "[user name] shout")
-	static void	 buildChatSentence(TDataSetIndex compressedSenderIndex, const ucstring &sender, const ucstring &msg, CChatGroup::TGroupType type, ucstring &result);
+	static void	 buildChatSentence(TDataSetIndex compressedSenderIndex, const std::string &sender, const std::string &msg, CChatGroup::TGroupType type, std::string &result);
 	// build a sentence to be displayed in the tell
-	static void	 buildTellSentence(const ucstring &sender, const ucstring &msg, ucstring &result);
+	static void	 buildTellSentence(const std::string &sender, const std::string &msg, std::string &result);
 
 
 	/// \name Dynamic Chat channel mgt
@@ -338,7 +338,7 @@ private :
 	std::list<CChatMsgNode>		_ChatBuffer;
 
 	// peoples
-	std::list<ucstring> _TellPeople; // the last people on which tells ha been done
+	std::list<std::string> _TellPeople; // the last people on which tells ha been done
 	uint				_NumTellPeople;
 	uint				_MaxNumTellPeople;
 
@@ -361,7 +361,7 @@ private :
 	 * \param str string with parameter values at end (str will change after)
 	 * \return decoded string (str)
 	 */
-	ucstring getString( NLMISC::CBitMemStream& bms, ucstring& str );
+	std::string getString( NLMISC::CBitMemStream& bms, std::string& str );
 
 };
 

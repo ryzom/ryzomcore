@@ -982,7 +982,7 @@ void CInterfaceManager::initInGame()
 	// flush system msg buffer
 	for( uint i=0; i<PeopleInterraction.SystemMessageBuffer.size(); ++i )
 	{
-		displaySystemInfo(PeopleInterraction.SystemMessageBuffer[i].Str, PeopleInterraction.SystemMessageBuffer[i].Cat);
+		displaySystemInfo(PeopleInterraction.SystemMessageBuffer[i].Str.toUtf8(), PeopleInterraction.SystemMessageBuffer[i].Cat);
 	}
 	PeopleInterraction.SystemMessageBuffer.clear();
 
@@ -2495,7 +2495,7 @@ bool	CInterfaceManager::getCurrentValidMessageBoxOnOk(string &ahOnOk, const std:
 
 
 // ***************************************************************************
-void CInterfaceManager::displayDebugInfo(const ucstring &str, TSystemInfoMode mode /*=InfoMsg*/)
+void CInterfaceManager::displayDebugInfo(const string &str, TSystemInfoMode mode /*=InfoMsg*/)
 {
 	if (PeopleInterraction.DebugInfo)
 		PeopleInterraction.ChatInput.DebugInfo.displayMessage(str, getDebugInfoColor(mode), 2);
@@ -2525,7 +2525,7 @@ NLMISC::CRGBA CInterfaceManager::getDebugInfoColor(TSystemInfoMode mode)
 }
 
 // ***************************************************************************
-void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat)
+void CInterfaceManager::displaySystemInfo(const string &str, const string &cat)
 {
 	CClientConfig::SSysInfoParam::TMode mode = CClientConfig::SSysInfoParam::Normal;
 	CRGBA color = CRGBA::White;
@@ -3061,7 +3061,7 @@ NLMISC_COMMAND( localCounter, "Get value of local counter", "" )
 {
 	if (args.size() != 0) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->displaySystemInfo(ucstring(toString(im->getLocalSyncActionCounter())));
+	im->displaySystemInfo(toString(im->getLocalSyncActionCounter()));
 	return true;
 }
 

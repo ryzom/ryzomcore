@@ -1701,7 +1701,7 @@ int CLuaIHMRyzom::displaySystemInfo(CLuaState &ls)
 	ucstring msg;
 	nlverify(CLuaIHM::getUCStringOnStack(ls, 1, msg));
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->displaySystemInfo(msg, ls.toString(2));
+	pIM->displaySystemInfo(msg.toUtf8(), ls.toString(2));
 	return 0;
 }
 
@@ -4247,27 +4247,27 @@ int CLuaIHMRyzom::displayChatMessage(CLuaState &ls)
 		if (input == "around")
 		{
 			prop.readRGBA(std::string(dbPath + ":SAY").c_str(), " ");
-			ci.AroundMe.displayMessage(ucstring(msg), prop.getRGBA());
+			ci.AroundMe.displayMessage(msg, prop.getRGBA());
 		}
 		else if (input == "region")
 		{
 			prop.readRGBA(std::string(dbPath + ":REGION").c_str(), " ");
-			ci.Region.displayMessage(ucstring(msg), prop.getRGBA());
+			ci.Region.displayMessage(msg, prop.getRGBA());
 		}
 		else if (input == "universe")
 		{
 			prop.readRGBA(std::string(dbPath + ":UNIVERSE_NEW").c_str(), " ");
-			ci.Universe.displayMessage(ucstring(msg), prop.getRGBA());
+			ci.Universe.displayMessage(msg, prop.getRGBA());
 		}
 		else if (input == "guild")
 		{
 			prop.readRGBA(std::string(dbPath + ":CLADE").c_str(), " ");
-			ci.Guild.displayMessage(ucstring(msg), prop.getRGBA());
+			ci.Guild.displayMessage(msg, prop.getRGBA());
 		}
 		else if (input == "team")
 		{
 			prop.readRGBA(std::string(dbPath + ":GROUP").c_str(), " ");
-			ci.Team.displayMessage(ucstring(msg), prop.getRGBA());
+			ci.Team.displayMessage(msg, prop.getRGBA());
 		}
 	}
 	if (ls.type(2) == LUA_TNUMBER)
@@ -4275,7 +4275,7 @@ int CLuaIHMRyzom::displayChatMessage(CLuaState &ls)
 		sint64 id = ls.toInteger(2);
 		prop.readRGBA(toString("%s:DYN:%i", dbPath.c_str(), id).c_str(), " ");
 		if (id >= 0 && id < CChatGroup::MaxDynChanPerPlayer)
-			ci.DynamicChat[id].displayMessage(ucstring(msg), prop.getRGBA());
+			ci.DynamicChat[id].displayMessage(msg, prop.getRGBA());
 	}
 	return 1;
 }

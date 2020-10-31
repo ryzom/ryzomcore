@@ -250,14 +250,14 @@ public:
 	// Test if the given chat is a user chat (this includes the main chat)
 	bool				isUserChat(CChatWindow *cw) const;
 
-	void				talkInDynamicChannel(uint32 channelNb,ucstring sentence);
+	void				talkInDynamicChannel(uint32 channelNb,std::string sentence);
 
 	CChatGroupWindow	*getChatGroupWindow() const;
 
 	void updateAllFreeTellerHeaders();
 	void removeAllFreeTellers();
 
-	static void displayTellInMainChat(const ucstring &playerName);
+	static void displayTellInMainChat(const std::string &playerName);
 private:
 	// create various chat & people lists
 	void createTeamChat();

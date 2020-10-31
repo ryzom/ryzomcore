@@ -241,7 +241,7 @@ CClientChatManager::CClientChatManager()
 }
 
 //-------------------------------------------------------
-const ucstring *CClientChatManager::cycleLastTell()
+const string *CClientChatManager::cycleLastTell()
 {
 	if (_TellPeople.empty()) return NULL;
 	_TellPeople.push_front(_TellPeople.back());
@@ -282,10 +282,10 @@ void CClientChatManager::init( const string& /* staticDBFileName */ )
 //	chat
 //
 //-----------------------------------------------
-void CClientChatManager::chat( const ucstring& strIn, bool isChatTeam )
+void CClientChatManager::chat( const string& strIn, bool isChatTeam )
 {
 	// Truncate to 255 chars max (because of server restriction)
-	ucstring	str= strIn.substr(0,255);
+	ucstring	str= ucstring(strIn).substr(0,255);
 
 	// send str to IOS
 	CBitMemStream bms;
@@ -303,7 +303,7 @@ void CClientChatManager::chat( const ucstring& strIn, bool isChatTeam )
 
 	if( GenericMsgHeaderMngr.pushNameToStream(msgType,bms) )
 	{
-		bms.serial( str );
+		bms.serial( str ); // FIXME: UTF-8
 		NetMngr.push( bms );
 		//nlinfo("impulseCallBack : %s %s sent", msgType.c_str(), str.toString().c_str());
 	}
@@ -321,11 +321,11 @@ void CClientChatManager::chat( const ucstring& strIn, bool isChatTeam )
 //	tell
 //
 //-----------------------------------------------
-void CClientChatManager::tell( const string& receiverIn, const ucstring& strIn )
+void CClientChatManager::tell( const string& receiverIn, const string& strIn )
 {
 	// Truncate to 255 chars max (because of server restriction)
 	string		receiver= receiverIn.substr(0,255);
-	ucstring	str= strIn.substr(0,255);
+	ucstring	str= ucstring(strIn).substr(0,255);
 
 	// *** send str
 	CBitMemStream bms;
@@ -333,7 +333,7 @@ void CClientChatManager::tell( const string& receiverIn, const ucstring& strIn )
 	if( GenericMsgHeaderMngr.pushNameToStream(msgType,bms) )
 	{
 		bms.serial( receiver );
-		bms.serial( str );
+		bms.serial( str ); // FIXME: UTF-8
 		NetMngr.push( bms );
 		//nlinfo("impulseCallBack : %s %s %s sent", msgType.c_str(), receiver.c_str(), str.toString().c_str());
 	}
@@ -345,10 +345,10 @@ void CClientChatManager::tell( const string& receiverIn, const ucstring& strIn )
 
 	// *** manage list of last telled people
 	// remove the telled people from list (if present)
-	std::list<ucstring>::iterator it = _TellPeople.begin();
+	std::list<string>::iterator it = _TellPeople.begin();
 	while(it != _TellPeople.end())
 	{
-		if (*it == ucstring(receiver))
+		if (*it == receiver)
 		{
 			it = _TellPeople.erase(it);
 			nlassert(_NumTellPeople != 0);
@@ -454,14 +454,14 @@ void CClientChatManager::processTellString(NLMISC::CBitMemStream& bms, IChatDisp
 	// Serial. For tell message, there is no chat mode, coz we know we are in tell mode !
 	bms.serial (chatMsg.CompressedIndex);
 	bms.serial (chatMsg.SenderNameId);
-	bms.serial (chatMsg.Content);
+	bms.serial (chatMsg.Content); // FIXME: UTF-8
 
 	if (PermanentlyBanned) return;
 
 	chatMsg.ChatMode = (uint8) CChatGroup::tell;
 
 	// If !complete, wait
-	ucstring senderStr;
+	string senderStr;
 	bool	complete = true;
 	complete &= STRING_MANAGER::CStringManagerClient::instance()->getString(chatMsg.SenderNameId, senderStr);
 	if (!complete)
@@ -472,8 +472,8 @@ void CClientChatManager::processTellString(NLMISC::CBitMemStream& bms, IChatDisp
 	}
 
 	// display
-	ucstring	ucstr;
-	buildTellSentence(senderStr, chatMsg.Content, ucstr);
+	string	ucstr;
+	buildTellSentence(senderStr, chatMsg.Content.toUtf8(), ucstr);
 	chatDisplayer.displayTell(/*chatMsg.CompressedIndex, */ucstr, senderStr);
 }
 
@@ -488,9 +488,9 @@ void CClientChatManager::processFarTellString(NLMISC::CBitMemStream& bms, IChatD
 	if (PermanentlyBanned) return;
 
 	// display
-	ucstring	ucstr;
-	buildTellSentence(farTellMsg.SenderName, farTellMsg.Text, ucstr);
-	chatDisplayer.displayTell(/*chatMsg.CompressedIndex, */ucstr, farTellMsg.SenderName);
+	string	ucstr;
+	buildTellSentence(farTellMsg.SenderName.toUtf8(), farTellMsg.Text.toUtf8(), ucstr);
+	chatDisplayer.displayTell(/*chatMsg.CompressedIndex, */ucstr, farTellMsg.SenderName.toUtf8());
 }
 
 
@@ -505,7 +505,7 @@ void	CClientChatManager::processChatString( NLMISC::CBitMemStream& bms, IChatDis
 	CChatMsg chatMsg;
 	bms.serial( chatMsg );
 	CChatGroup::TGroupType	type = static_cast<CChatGroup::TGroupType>(chatMsg.ChatMode);
-	ucstring	senderStr;
+	string	senderStr;
 
 	bool complete = true;
 	complete &= STRING_MANAGER::CStringManagerClient::instance()->getString(chatMsg.SenderNameId, senderStr);
@@ -528,9 +528,9 @@ void	CClientChatManager::processChatString( NLMISC::CBitMemStream& bms, IChatDis
 	}
 
 	// display
-	ucstring	ucstr;
-	buildChatSentence(chatMsg.CompressedIndex, senderStr, chatMsg.Content, type, ucstr);
-	chatDisplayer.displayChat(chatMsg.CompressedIndex, ucstr, chatMsg.Content, type, chatMsg.DynChatChanID, senderStr);
+	string	ucstr;
+	buildChatSentence(chatMsg.CompressedIndex, senderStr, chatMsg.Content.toUtf8(), type, ucstr);
+	chatDisplayer.displayChat(chatMsg.CompressedIndex, ucstr, chatMsg.Content.toUtf8(), type, chatMsg.DynChatChanID, senderStr);
 }
 
 
@@ -545,8 +545,8 @@ void CClientChatManager::processTellString2(NLMISC::CBitMemStream& bms, IChatDis
 	bms.serial(chatMsg.PhraseId);
 
 	// if !complete, wait
-	ucstring senderStr;
-	ucstring rawMessage;
+	string senderStr;
+	string rawMessage;
 	bool	complete = true;
 	complete &= STRING_MANAGER::CStringManagerClient::instance()->getString(chatMsg.SenderNameId, senderStr);
 	complete &= STRING_MANAGER::CStringManagerClient::instance()->getDynString(chatMsg.PhraseId, rawMessage);
@@ -558,7 +558,7 @@ void CClientChatManager::processTellString2(NLMISC::CBitMemStream& bms, IChatDis
 	}
 
 	// display
-	ucstring	ucstr;
+	string	ucstr;
 	buildTellSentence(senderStr, rawMessage, ucstr);
 	chatDisplayer.displayTell(/*chatMsg.CompressedIndex, */ucstr, senderStr);
 }
@@ -571,8 +571,8 @@ void CClientChatManager::processChatString2(NLMISC::CBitMemStream& bms, IChatDis
 	bms.serial( chatMsg );
 	if (PermanentlyBanned) return;
 	CChatGroup::TGroupType	type = static_cast<CChatGroup::TGroupType>(chatMsg.ChatMode);
-	ucstring	senderStr;
-	ucstring	rawMessage;
+	string	senderStr;
+	string	rawMessage;
 
 	// here, the type cannot be dyn_chat (no DynChatId in the message) => discard
 	if(type==CChatGroup::dyn_chat)
@@ -592,11 +592,11 @@ void CClientChatManager::processChatString2(NLMISC::CBitMemStream& bms, IChatDis
 		return;
 	}
 
-	rawMessage += ucstring(" ");
-	rawMessage += chatMsg.CustomTxt;
+	rawMessage += " ";
+	rawMessage += chatMsg.CustomTxt.toUtf8();
 
 	// display
-	ucstring	ucstr;
+	string	ucstr;
 	buildChatSentence(chatMsg.CompressedIndex, senderStr, rawMessage, type, ucstr);
 	chatDisplayer.displayChat(chatMsg.CompressedIndex, ucstr, rawMessage, type, CEntityId::Unknown, senderStr);
 }
@@ -615,7 +615,7 @@ void CClientChatManager::processChatStringWithNoSender( NLMISC::CBitMemStream& b
 	chatMsg.SenderNameId = 0;
 	chatMsg.ChatMode = type;
 	chatMsg.PhraseId = phraseID;
-	ucstring ucstr;
+	string ucstr;
 
 	// if !complete, wait
 	bool	complete = STRING_MANAGER::CStringManagerClient::instance()->getDynString(chatMsg.PhraseId, ucstr);
@@ -627,7 +627,7 @@ void CClientChatManager::processChatStringWithNoSender( NLMISC::CBitMemStream& b
 	}
 
 	// diplay
-	ucstring senderName("");
+	string senderName;
 	chatDisplayer.displayChat(INVALID_DATASET_INDEX, ucstr, ucstr, type, CEntityId::Unknown, senderName);
 }
 
@@ -643,7 +643,7 @@ void CClientChatManager::flushBuffer(IChatDisplayer &chatDisplayer)
 		for( itMsg = _ChatBuffer.begin(); itMsg != _ChatBuffer.end(); )
 		{
 			CChatGroup::TGroupType	type = static_cast<CChatGroup::TGroupType>(itMsg->ChatMode);
-			ucstring sender, content;
+			string sender, content;
 
 			// all strings received?
 			bool complete = true;
@@ -652,7 +652,7 @@ void CClientChatManager::flushBuffer(IChatDisplayer &chatDisplayer)
 			if(itMsg->UsePhraseId)
 				complete &= STRING_MANAGER::CStringManagerClient::instance()->getDynString(itMsg->PhraseId, content);
 			else
-				content= itMsg->Content;
+				content= itMsg->Content.toUtf8();
 
 			if (type == CChatGroup::dyn_chat)
 			{
@@ -666,7 +666,7 @@ void CClientChatManager::flushBuffer(IChatDisplayer &chatDisplayer)
 			// if complete, process
 			if (complete)
 			{
-				ucstring ucstr;
+				string ucstr;
 				if (itMsg->SenderNameId == 0)
 				{
 					ucstr = content;
@@ -703,7 +703,7 @@ void CClientChatManager::flushBuffer(IChatDisplayer &chatDisplayer)
 //	getString
 //
 //-----------------------------------------------
-ucstring CClientChatManager::getString( CBitMemStream& bms, ucstring& ucstr )
+string CClientChatManager::getString( CBitMemStream& bms, string& ucstr )
 {
 
 	// deal with parameters
@@ -714,8 +714,8 @@ ucstring CClientChatManager::getString( CBitMemStream& bms, ucstring& ucstr )
 	{
 		// search if a parameter exists in the string
 		sprintf(chTmp,"$%d",dynParamIdx);
-		ucstring ucstrTmp( chTmp );
-		ucstring::size_type idx = ucstr.find(ucstrTmp);
+		string ucstrTmp( chTmp );
+		string::size_type idx = ucstr.find(ucstrTmp);
 
 		// if there's a parameter in the string
 		if( idx != ucstring::npos )
@@ -728,7 +728,7 @@ ucstring CClientChatManager::getString( CBitMemStream& bms, ucstring& ucstr )
 				{
 					bool huff;
 					bms.serialBit(huff);
-					const ucstring dynStr("???");
+					const string dynStr("???");
 					if( huff )
 					{
 						nldebug("<CClientChatManager::getString> receiving huffman dynamic parameter in static string");
@@ -756,8 +756,7 @@ ucstring CClientChatManager::getString( CBitMemStream& bms, ucstring& ucstr )
 				{
 					string dynStr;
 					bms.serial( dynStr );
-					ucstring ucDynStr(dynStr);
-					ucstr.replace( idx, ucstrTmp.size()+1, ucDynStr );
+					ucstr.replace( idx, ucstrTmp.size()+1, dynStr );
 				}
 				break;
 
@@ -766,7 +765,7 @@ ucstring CClientChatManager::getString( CBitMemStream& bms, ucstring& ucstr )
 				{
 					uint32 nb;
 					bms.serial( nb );
-					ucstr.replace( idx, ucstrTmp.size()+1, ucstring(toString(nb)) );
+					ucstr.replace( idx, ucstrTmp.size()+1, toString(nb) );
 				}
 				break;
 				/*
@@ -794,7 +793,7 @@ ucstring CClientChatManager::getString( CBitMemStream& bms, ucstring& ucstr )
 				{
 					sint32 nb;
 					bms.serial( nb );
-					ucstr.replace( idx, ucstrTmp.size()+1, ucstring(toString(nb)) );
+					ucstr.replace( idx, ucstrTmp.size()+1, toString(nb) );
 				}
 				break;
 				/*
@@ -823,7 +822,7 @@ ucstring CClientChatManager::getString( CBitMemStream& bms, ucstring& ucstr )
 				{
 					float nb;
 					bms.serial( nb );
-					ucstr.replace( idx, ucstrTmp.size()+1, ucstring(toString(nb)) );
+					ucstr.replace( idx, ucstrTmp.size()+1, toString(nb) );
 				}
 				break;
 
@@ -849,7 +848,7 @@ ucstring CClientChatManager::getString( CBitMemStream& bms, ucstring& ucstr )
 //	getString
 //
 //-----------------------------------------------
-bool CClientChatManager::getString( ucstring &result, std::vector<uint64>& args, const ucstring &ucstrbase )
+bool CClientChatManager::getString( string &result, std::vector<uint64>& args, const string &ucstrbase )
 {
 	result = ucstrbase;
 
@@ -863,17 +862,17 @@ bool CClientChatManager::getString( ucstring &result, std::vector<uint64>& args,
 	{
 		// search if a parameter exists in the string
 		sprintf(chTmp,"$%d",dynParamIdx);
-		ucstring ucstrTmp( chTmp );
-		ucstring::size_type idx = result.find(ucstrTmp);
+		string ucstrTmp( chTmp );
+		string::size_type idx = result.find(ucstrTmp);
 
 		// if there's a parameter in the string
-		if( idx != ucstring::npos )
+		if( idx != string::npos )
 		{
-			ucstring rep;
+			string rep;
 			rep = "???";
 			if (dynParamIdx >= args.size())
 			{
-				nlwarning ("Missing args for string '%s', only %d args, need arg %d", ucstrbase.toString().c_str(), args.size(), dynParamIdx);
+				nlwarning ("Missing args for string '%s', only %d args, need arg %d", ucstrbase.c_str(), args.size(), dynParamIdx);
 			}
 			else
 			{
@@ -948,15 +947,15 @@ bool CClientChatManager::getString( ucstring &result, std::vector<uint64>& args,
 } // getString //
 
 // ***************************************************************************
-void CClientChatManager::buildTellSentence(const ucstring &sender, const ucstring &msg, ucstring &result)
+void CClientChatManager::buildTellSentence(const string &sender, const string &msg, string &result)
 {
 	// If no sender name was provided, show only the msg
 	if ( sender.empty() )
 		result = msg;
 	else
 	{
-		ucstring name = CEntityCL::removeTitleAndShardFromName(sender.toUtf8());
-		ucstring csr;
+		string name = CEntityCL::removeTitleAndShardFromName(sender);
+		string csr;
 
 		// special case where there is only a title, very rare case for some NPC
 		if (name.empty())
@@ -965,29 +964,29 @@ void CClientChatManager::buildTellSentence(const ucstring &sender, const ucstrin
 			CCharacterCL *entity = dynamic_cast<CCharacterCL*>(EntitiesMngr.getEntityByName(sender, true, true));
 			bool bWoman = entity && entity->getGender() == GSGENDER::female;
 
-			name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sender.toUtf8()), bWoman);
+			name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sender), bWoman);
 			{
 				// Sometimes translation contains another title
 				ucstring::size_type pos = name.find('$');
 				if (pos != ucstring::npos)
 				{
-					name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(name.toUtf8()), bWoman);
+					name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(name), bWoman);
 				}
 			}
 		}
 		else
 		{
 			// Does the char have a CSR title?
-			csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender.toUtf8())) ? ucstring("(CSR) ") : ucstring("");
+			csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender)) ? "(CSR) " : "";
 		}
 
-		result = csr + name + ucstring(" ") + CI18N::get("tellsYou") + ucstring(": ") + msg;
+		result = csr + name + " " + CI18N::get("tellsYou") + ": " + msg;
 	}
 }
 
 
 // ***************************************************************************
-void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderIndex */, const ucstring &sender, const ucstring &msg, CChatGroup::TGroupType type, ucstring &result)
+void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderIndex */, const string &sender, const string &msg, CChatGroup::TGroupType type, string &result)
 {
 	// if its a tell, then use buildTellSentence
 	if(type==CChatGroup::tell)
@@ -1005,35 +1004,35 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 
 	// get the category if any. Note, in some case (chat from other player), there is not categories
 	// and we do not want getStringCategory to return 'SYS' category.
-	ucstring finalMsg;
+	string finalMsg;
 	string catStr = getStringCategory(msg, finalMsg, false);
-	ucstring cat;
+	string cat;
 	if (!catStr.empty())
-		cat = string("&")+catStr+"&";
+		cat = "&" + catStr + "&";
 
-	if ( ! cat.empty())
+	if (!cat.empty())
 	{
 		result = msg;
 		return;
 	}
 
 	// Format the sentence with the provided sender name
-	ucstring senderName = CEntityCL::removeTitleAndShardFromName(sender.toUtf8());
+	string senderName = CEntityCL::removeTitleAndShardFromName(sender);
 
-	ucstring csr;
+	string csr;
 	// Does the char have a CSR title?
-	csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender.toUtf8())) ? ucstring("(CSR) ") : ucstring("");
+	csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender)) ? "(CSR) " : "";
 
-	if (UserEntity && senderName.toUtf8() == UserEntity->getDisplayName())
+	if (UserEntity && senderName == UserEntity->getDisplayName())
 	{
 		// The player talks
 		switch(type)
 		{
 			case CChatGroup::shout:
-				result = cat + csr + CI18N::get("youShout") + ucstring(": ") + finalMsg;
+				result = cat + csr + CI18N::get("youShout") + ": " + finalMsg;
 			break;
 			default:
-				result = cat + csr + CI18N::get("youSay") + ucstring(": ") + finalMsg;
+				result = cat + csr + CI18N::get("youSay") + ": " + finalMsg;
 			break;
 		}
 	}
@@ -1046,13 +1045,13 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 			// We need the gender to display the correct title
 			bool bWoman = entity && entity->getGender() == GSGENDER::female;
 
-			senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sender.toUtf8()), bWoman);
+			senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sender), bWoman);
 			{
 				// Sometimes translation contains another title
 				ucstring::size_type pos = senderName.find('$');
 				if (pos != ucstring::npos)
 				{
-					senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(senderName.toUtf8()), bWoman);
+					senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(senderName), bWoman);
 				}
 			}
 		}
@@ -1061,10 +1060,10 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 		switch(type)
 		{
 			case CChatGroup::shout:
-				result = cat + csr + senderName + ucstring(" ") + CI18N::get("heShout") + ucstring(": ") + finalMsg;
+				result = cat + csr + senderName + " " + CI18N::get("heShout") + ": " + finalMsg;
 			break;
 			default:
-				result = cat + csr + senderName + ucstring(" ") + CI18N::get("heSays") + ucstring(": ") + finalMsg;
+				result = cat + csr + senderName + " " + CI18N::get("heSays") + ": " + finalMsg;
 			break;
 		}
 	}
@@ -1174,7 +1173,7 @@ void	CClientChatManager::updateDynamicChatChannels(IChatDisplayer &chatDisplayer
 
 class CHandlerTell : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	void execute (CCtrlBase *pCaller, const string &sParams)
 	{
 		string receiver = getParam (sParams, "player");
 		string message;
@@ -1219,7 +1218,7 @@ REGISTER_ACTION_HANDLER( CHandlerTell, "tell");
 
 class CHandlerEnterTell : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const string &sParams)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		string receiver = getParam (sParams, "player");
@@ -1295,7 +1294,7 @@ void CClientChatManager::updateChatModeAndButton(uint mode, uint32 dynamicChanne
 					case CChatGroup::guild:		if (guildActive) pUserBut->setHardText("uiFilterGuild");	break;
 					case CChatGroup::dyn_chat:
 						uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(dynamicChannelDbIndex);
-						ucstring title;
+						string title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 						if (title.empty())
 						{
@@ -1305,7 +1304,7 @@ void CClientChatManager::updateChatModeAndButton(uint mode, uint32 dynamicChanne
 						}
 						else
 						{
-							pUserBut->setHardText(title.toUtf8());
+							pUserBut->setHardText(title);
 						}
 						break;
 				}
@@ -1337,7 +1336,7 @@ void CClientChatManager::updateChatModeAndButton(uint mode, uint32 dynamicChanne
 
 class CHandlerTalk : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const string &sParams)
 	{
 		// Param
 		uint mode;
@@ -1376,7 +1375,7 @@ class CHandlerTalk : public IActionHandler
 				else
 				{
 					CInterfaceManager *im = CInterfaceManager::getInstance();
-					im->displaySystemInfo (ucstring::makeFromUtf8(cmd) + ": " + CI18N::get ("uiCommandNotExists"));
+					im->displaySystemInfo (cmd + ": " + CI18N::get ("uiCommandNotExists"));
 				}
 			}
 			else
@@ -1409,7 +1408,7 @@ REGISTER_ACTION_HANDLER( CHandlerTalk, "talk");
 
 class CHandlerEnterTalk : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const string &sParams)
 	{
 		// Param
 		uint mode;
@@ -1436,10 +1435,10 @@ REGISTER_ACTION_HANDLER( CHandlerEnterTalk, "enter_talk");
 
 class CHandlerTalkMessage : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const string &sParams)
 	{
 		// Param
-		ucstring text = CI18N::get ("uiTalkMemMsg"+sParams);
+		string text = CI18N::get ("uiTalkMemMsg"+sParams);
 
 		// Find the base group
 		if (!text.empty())
@@ -1455,7 +1454,7 @@ REGISTER_ACTION_HANDLER( CHandlerTalkMessage, "talk_message");
 
 class CHandlerSwapChatMode : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const string &sParams)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		bool	updateCapture= getParam(sParams, "update_capture")=="1";

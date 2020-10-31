@@ -370,8 +370,8 @@ void CGuildManager::update()
 			{
 				// See if we need to show any online/offline messages
 				static map<ucstring, SGuildMember> CachedGuildMembers;
-				ucstring onlineMessage = CI18N::get("uiPlayerOnline");
-				ucstring offlineMessage = CI18N::get("uiPlayerOffline");
+				const string &onlineMessage = CI18N::get("uiPlayerOnline");
+				const string &offlineMessage = CI18N::get("uiPlayerOffline");
 
 				for (uint i = 0; i < _GuildMembers.size(); ++i)
 				{
@@ -390,8 +390,8 @@ void CGuildManager::update()
 							continue;
 						}
 
-						ucstring msg = (_GuildMembers[i].Online != ccs_offline) ? onlineMessage : offlineMessage;
-						strFindReplace(msg, "%s", _GuildMembers[i].Name);
+						string msg = (_GuildMembers[i].Online != ccs_offline) ? onlineMessage : offlineMessage;
+						strFindReplace(msg, "%s", _GuildMembers[i].Name.toUtf8());
 						string cat = getStringCategory(msg, msg);
 						map<string, CClientConfig::SSysInfoParam>::const_iterator it;
 						NLMISC::CRGBA col = CRGBA::Yellow;
@@ -1084,7 +1084,7 @@ public:
 		MemberIndexSelected= nLineNb;
 		MemberNameSelected = rGuildMembers[nLineNb].Name;
 
-		CPeopleInterraction::displayTellInMainChat(MemberNameSelected);	
+		CPeopleInterraction::displayTellInMainChat(MemberNameSelected.toUtf8());	
 	}
 
 	// Current selection

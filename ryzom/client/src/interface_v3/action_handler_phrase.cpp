@@ -1173,7 +1173,7 @@ public:
 				{
 					// display "you can't cast while moving"
 					CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-					ucstring msg = CI18N::get("msgNoCastWhileMoving");
+					string msg = CI18N::get("msgNoCastWhileMoving");
 					string cat = getStringCategory(msg, msg);
 					pIM->displaySystemInfo(msg, cat);
 					return;
@@ -1417,7 +1417,7 @@ public:
 		else
 		{
 			// debug:
-			pIM->displaySystemInfo( ucstring("PHRASE:CANCEL_ALL") );
+			pIM->displaySystemInfo("PHRASE:CANCEL_ALL");
 		}
 	}
 };

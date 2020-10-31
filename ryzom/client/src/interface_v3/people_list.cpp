@@ -449,7 +449,7 @@ void CPeopleList::setContactId(uint index, uint32 contactId)
 }
 
 //==================================================================
-void CPeopleList::displayLocalPlayerTell(const ucstring &receiver, uint index, const ucstring &msg,uint numBlinks /*=0*/)
+void CPeopleList::displayLocalPlayerTell(const string &receiver, uint index, const string &msg,uint numBlinks /*=0*/)
 {
 	if (_ContactType == CPeopleListDesc::Ignore)
 	{
@@ -473,13 +473,13 @@ void CPeopleList::displayLocalPlayerTell(const ucstring &receiver, uint index, c
 	}
 
  	string csr = CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "";
-	string finalMsg = csr + CI18N::get("youTell") + ": " + msg.toUtf8();
+	string finalMsg = csr + CI18N::get("youTell") + ": " + msg;
 	// display msg with good color
 	CInterfaceProperty prop;
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 
 	string s = CI18N::get("youTellPlayer");
-	strFindReplace(s, "%name", receiver.toUtf8());
+	strFindReplace(s, "%name", receiver);
 	strFindReplace(finalMsg, CI18N::get("youTell"), s);
 	gl->addChild(getChatTextMngr().createMsgText(finalMsg, prop.getRGBA()));
 	CInterfaceManager::getInstance()->log(finalMsg, CChatGroup::groupTypeToString(CChatGroup::tell));
@@ -497,7 +497,7 @@ void CPeopleList::displayLocalPlayerTell(const ucstring &receiver, uint index, c
 
 
 //==================================================================
-void CPeopleList::displayMessage(uint index, const ucstring &msg, NLMISC::CRGBA col, uint /* numBlinks */ /*= 0*/)
+void CPeopleList::displayMessage(uint index, const string &msg, NLMISC::CRGBA col, uint /* numBlinks */ /*= 0*/)
 {
 	if (_ContactType == CPeopleListDesc::Ignore)
 	{
@@ -951,7 +951,7 @@ class CHandlerContactEntry : public IActionHandler
 				pWin->displayTellMessage(final, prop.getRGBA(), pWin->getFreeTellerName(str));
 
 				string s = CI18N::get("youTellPlayer");
-				strFindReplace(s, "%name", pWin->getFreeTellerName(str).toUtf8());
+				strFindReplace(s, "%name", pWin->getFreeTellerName(str));
 				strFindReplace(final, CI18N::get("youTell"), s);
 				CInterfaceManager::getInstance()->log(final, CChatGroup::groupTypeToString(CChatGroup::tell));
 			}

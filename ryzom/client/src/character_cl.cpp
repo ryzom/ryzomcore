@@ -10367,7 +10367,7 @@ NLMISC_COMMAND(pvpMode, "modify pvp mode", "[<pvp mode> <state>]")
 			str+="in_safe_zone ";
 		if( pvpMode&PVP_MODE::PvpSafe)
 			str+="safe ";
-		IM->displaySystemInfo(ucstring(str));
+		IM->displaySystemInfo(str);
 		nlinfo("<pvpMode> %s",str.c_str());
 	}
 	else

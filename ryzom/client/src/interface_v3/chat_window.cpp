@@ -204,11 +204,11 @@ bool CChatWindow::isVisible() const
 }
 
 //=================================================================================
-void CChatWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks /* = 0*/, bool *windowVisible /*= NULL*/)
+void CChatWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks /* = 0*/, bool *windowVisible /*= NULL*/)
 {
 	if (!_Chat)
 	{
-		if (msg.toUtf8() != "WRN: <CChatWindow::displayMessage> There's no global chat")
+		if (msg != "WRN: <CChatWindow::displayMessage> There's no global chat")
 			nlwarning("<CChatWindow::displayMessage> There's no global chat");
 		return;
 	}
@@ -538,11 +538,11 @@ void CChatWindow::clearMessages(CChatGroup::TGroupType /* gt */, uint32 /* dynam
 // CChatGroupWindow //
 //////////////////////
 
-void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks, bool *windowVisible)
+void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks, bool *windowVisible)
 {
 	if (!_Chat)
 	{
-		if (msg.toUtf8() != "WRN: <CChatGroupWindow::displayMessage> There's no global chat")
+		if (msg != "WRN: <CChatGroupWindow::displayMessage> There's no global chat")
 			nlwarning("<CChatGroupWindow::displayMessage> There's no global chat");
 		return;
 	}
@@ -563,8 +563,8 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CRGBA	newMsgColor= CRGBA::stringToRGBA(CWidgetManager::getInstance()->getParser()->getDefine("chat_group_tab_color_newmsg").c_str());
 
-	ucstring newmsg = msg;
-	ucstring prefix;
+	string newmsg = msg;
+	string prefix;
 
 	if (gl != NULL)
 	{
@@ -599,20 +599,20 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 					gl = gl2;
 
 					// Add dyn chan number before string
-					ucstring prefix("[" + NLMISC::toString(dynamicChatDbIndex) + "]");
+					string prefix = "[" + NLMISC::toString(dynamicChatDbIndex) + "]";
 					// Find position to put the new string
 					// After timestamp?
-					size_t pos = newmsg.find(ucstring("]"));
-					size_t colonpos = newmsg.find(ucstring(": @{"));
+					size_t pos = newmsg.find("]");
+					size_t colonpos = newmsg.find(": @{");
 					// If no ] found or if found but after the colon (so part of the user chat)
-					if (pos == ucstring::npos || (colonpos < pos))
+					if (pos == string::npos || (colonpos < pos))
 					{
 						// No timestamp, so put it right after the color and add a space
-						pos = newmsg.find(ucstring("}"));
+						pos = newmsg.find("}");
 						prefix += " ";
 					}
 					
-					if (pos == ucstring::npos)
+					if (pos == string::npos)
 						newmsg = prefix + newmsg;
 					else
 						newmsg = newmsg.substr(0, pos + 1) + prefix + newmsg.substr(pos + 1);
@@ -622,10 +622,10 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 					if (node && node->getValueBool())
 					{
 						uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(dynamicChatDbIndex);
-						ucstring title;
+						string title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-						prefix = title.empty() ? ucstring("") : ucstring(" ") + title;
-						pos = newmsg.find(ucstring("] "));
+						prefix = (title.empty() ? "" : " ") + title;
+						pos = newmsg.find("] ");
 
 						if (pos == ucstring::npos)
 							newmsg = prefix + newmsg;
@@ -667,7 +667,7 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 }
 
 //=================================================================================
-void CChatGroupWindow::displayTellMessage(const ucstring &msg, NLMISC::CRGBA col, const ucstring &sender)
+void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, const string &sender)
 {
 	// If we are here with a tell message this is because the teller doesn't belong to any people list
 	CGroupContainer *gcChat = createFreeTeller(sender);
@@ -876,7 +876,7 @@ void CChatGroupWindow::setActiveFreeTeller(const ucstring &winName, bool bActive
 }
 
 //=================================================================================
-ucstring CChatGroupWindow::getFreeTellerName(const std::string &containerID)
+string CChatGroupWindow::getFreeTellerName(const std::string &containerID)
 {
 	uint32 i;
 	for (i = 0; i < _FreeTellers.size(); ++i)
@@ -886,8 +886,8 @@ ucstring CChatGroupWindow::getFreeTellerName(const std::string &containerID)
 			break;
 	}
 	if (i == _FreeTellers.size())
-		return ucstring("");
-	return _FreeTellers[i]->getUCTitle();
+		return string();
+	return _FreeTellers[i]->getTitle();
 }
 
 //=================================================================================
@@ -1306,7 +1306,7 @@ public:
 			else
 			{
 				CInterfaceManager *im = CInterfaceManager::getInstance();
-				im->displaySystemInfo (ucstring::makeFromUtf8(cmd) + ": " + CI18N::get ("uiCommandNotExists"));
+				im->displaySystemInfo (cmd + ": " + CI18N::get ("uiCommandNotExists"));
 			}
 		}
 		else
@@ -1410,16 +1410,16 @@ class CHandlerInviteToRingSession : public IActionHandler
 public:
 	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
 	{
-		ucstring playerName = ::getFreeTellerName(pCaller);
+		string playerName = ::getFreeTellerName(pCaller).toUtf8();
 		if (!playerName.empty())
 		{
 			// ask the SBS to invite the character in the session
-			CSessionBrowserImpl::getInstance().inviteCharacterByName(CSessionBrowserImpl::getInstance().getCharId(), playerName.toUtf8());
+			CSessionBrowserImpl::getInstance().inviteCharacterByName(CSessionBrowserImpl::getInstance().getCharId(), playerName);
 			// additionaly, send a tell to signal the player he has been invited to a ring session
-			ChatMngr.tell(playerName.toUtf8(), CI18N::get("uiRingInviteNotification"));
+			ChatMngr.tell(playerName, CI18N::get("uiRingInviteNotification"));
 			//
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			im->displaySystemInfo(ucstring("@{6F6F}") +  playerName +ucstring(" @{FFFF}") + CI18N::get("uiRingInvitationSent"), "BC");
+			im->displaySystemInfo("@{6F6F}" +  playerName +" @{FFFF}" + CI18N::get("uiRingInvitationSent"), "BC");
 			// force a refresh of the ui
 			CLuaManager::getInstance().executeLuaScript("CharTracking:forceRefresh()");
 		}

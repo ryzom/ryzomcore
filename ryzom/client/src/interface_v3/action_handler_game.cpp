@@ -1358,19 +1358,19 @@ class CSelectItemSheet : public IActionHandler
 					// display msg in the system infos
 					if (!canUse)
 					{
-						ucstring msg = CI18N::get("msgCantUseItem");
+						string msg = CI18N::get("msgCantUseItem");
 						string cat = getStringCategory(msg, msg);
 						im->displaySystemInfo(msg, cat);
 					}
 					if (!canBuild)
 					{
-						ucstring msg = CI18N::get("msgCantBuild");
+						string msg = CI18N::get("msgCantBuild");
 						string cat = getStringCategory(msg, msg);
 						im->displaySystemInfo(msg, cat);
 					}
 					if (!canUseBuiltItem)
 					{
-						ucstring msg = CI18N::get("msgCantUseBuiltItem");
+						string msg = CI18N::get("msgCantUseBuiltItem");
 						string cat = getStringCategory(msg, msg);
 						im->displaySystemInfo(msg, cat);
 					}
@@ -3797,7 +3797,7 @@ class CHandlerSetInterfaceScale : public IActionHandler
 			}
 		}
 
-		ucstring help("/setuiscale "+toString("%.1f .. %.1f", ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max));
+		string help = "/setuiscale "+toString("%.1f .. %.1f", ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max);
 		CInterfaceManager::getInstance()->displaySystemInfo(help);
 	}
 };
@@ -3981,7 +3981,7 @@ public:
 
 		// display parry mode msg
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		ucstring msg = CI18N::get("msgUserModeParry");
+		string msg = CI18N::get("msgUserModeParry");
 		string cat = getStringCategory(msg, msg);
 		pIM->displaySystemInfo(msg, cat);
 	}
@@ -3998,7 +3998,7 @@ public:
 
 		// display dodge mode msg
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		ucstring msg = CI18N::get("msgUserModeDodge");
+		string msg = CI18N::get("msgUserModeDodge");
 		string cat = getStringCategory(msg, msg);
 		pIM->displaySystemInfo(msg, cat);
 	}
@@ -4533,7 +4533,7 @@ public:
 		if( sCustomPhrase.empty() )
 		{
 			// Create the message and send.
-			const string msgName = "COMMAND:EMOTE";
+			static const string msgName = "COMMAND:EMOTE";
 			CBitMemStream out;
 			if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 			{
@@ -4548,7 +4548,7 @@ public:
 		else
 		{
 			// Create the message and send.
-			const string msgName = "COMMAND:CUSTOM_EMOTE";
+			static const string msgName = "COMMAND:CUSTOM_EMOTE";
 			CBitMemStream out;
 			if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 			{
@@ -4561,7 +4561,7 @@ public:
 					{
 						// display "no animation for emote"
 						CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-						ucstring msg = CI18N::get("msgCustomizedEmoteNoAnim");
+						string msg = CI18N::get("msgCustomizedEmoteNoAnim");
 						string cat = getStringCategory(msg, msg);
 						pIM->displaySystemInfo(msg, cat);
 						return;
@@ -4573,7 +4573,7 @@ public:
 				}
 
 				out.serialEnum(behavToSend);
-				out.serial(ucstr);
+				out.serial(ucstr); // FIXME: UTF-8 (serial)
 				NetMngr.push(out);
 				//nlinfo("impulseCallBack : %s %d %s sent", msgName.c_str(), (uint32)behavToSend, sCustomPhrase.c_str());
 			}
