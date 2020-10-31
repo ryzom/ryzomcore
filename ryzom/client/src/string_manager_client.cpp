@@ -1648,7 +1648,7 @@ const char *CStringManagerClient::getLocalizedName(const string &uctext)
 				}
 				else if (textLocalizations[i].substr(0, 3) == "wk]")
 				{
-					defaultText = extLocalizations[i].substr(3);
+					defaultText = textLocalizations[i].substr(3);
 				}
 			}
 		}
