@@ -187,7 +187,7 @@ private:
 
 	struct TStringWaiter
 	{
-		/// Pointer to the ucstring to fill
+		/// Pointer to the utf-8 string to fill
 		std::string					*Result;
 		/// Pointer to the remover that contains this string reference
 		const IStringWaiterRemover	*Remover;
@@ -277,10 +277,10 @@ private:
 			else
 			{
 				nlassert(f.isReading());
-				ucstring name;
-				ucstring womenName;
-				ucstring desc;
-				ucstring desc2;
+				ucstring name; // Old UTF-16 serial
+				ucstring womenName; // Old UTF-16 serial
+				ucstring desc; // Old UTF-16 serial
+				ucstring desc2; // Old UTF-16 serial
 				f.serial(name);
 				if (ver >= 1)
 					f.serial(womenName);
@@ -419,7 +419,7 @@ public:
  */
 class CLoadProxy : public NLMISC::CI18N::ILoadProxy, public TStringDiff::IDiffCallback
 {
-	void loadStringFile(const std::string &filename, ucstring &text);
+	void loadStringFile(const std::string &filename, ucstring &text); // TODO: UTF-8 (serial)
 
 	void onEquivalent(uint addIndex, uint refIndex, TStringDiffContext &context);
 	void onAdd(uint addIndex, uint refIndex, TStringDiffContext &context);

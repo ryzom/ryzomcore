@@ -57,10 +57,10 @@ CGroupHTMLMail::~CGroupHTMLMail()
 
 void CGroupHTMLMail::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 {
-	ucstring user_name = UserEntity->getLoginName ();
+	string user_name = UserEntity->getLoginName ();
 	url += ((url.find('?') != string::npos) ? "&" : "?") +
 		string("shard=") + toString(CharacterHomeSessionId) +
-		string("&user_login=") + user_name.toString() +
+		string("&user_login=") + user_name + // FIXME: UrlEncode
 		string("&session_cookie=") + NetMngr.getLoginCookie().toString() + 
 		string("&lang=") + CI18N::getCurrentLanguageCode();
 }
@@ -69,9 +69,9 @@ void CGroupHTMLMail::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 
 void CGroupHTMLMail::addHTTPPostParams (SFormFields &formfields, bool /*trustedDomain*/)
 {
-	ucstring user_name = UserEntity->getLoginName ();
+	string user_name = UserEntity->getLoginName ();
 	formfields.add("shard", toString(CharacterHomeSessionId));
-	formfields.add("user_login", user_name.toString());
+	formfields.add("user_login", user_name); // FIXME: UrlEncode
 	formfields.add("session_cookie", NetMngr.getLoginCookie().toString());
 	formfields.add("lang", CI18N::getCurrentLanguageCode());
 }

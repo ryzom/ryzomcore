@@ -312,7 +312,7 @@ void CProgress::internalProgress (float value)
 					// More help
 					TextContext->setFontSize((uint)(12.f * fontFactor));
 					/* todo tips of the day uncomment
-					ucstring ucstr = CI18N::get ("uiTipsEnd");
+					string ucstr = CI18N::get ("uiTipsEnd");
 					TextContext->printAt(0.5f, fY, ucstr); */
 					fY = nextLine (TextContext->getFontSize(), Driver->getWindowHeight(), fY);
 					fY = nextLine (TextContext->getFontSize(), Driver->getWindowHeight(), fY);
@@ -360,11 +360,9 @@ void CProgress::internalProgress (float value)
 						(uint)RT.getRyzomTime(),
 						CI18N::get ("uiSeason"+toStringEnum(CRyzomTime::getSeasonByDay(day))).c_str(),
 						CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName).c_str());
-					ucstring ucstr;
-					ucstr.fromUtf8 (str);
 					TextContext->setHotSpot(UTextContext::MiddleBottom);
 					TextContext->setColor(CRGBA(186, 179, 163, 255));
-					TextContext->printAt(0.5f, 25/768.f, ucstr);
+					TextContext->printAt(0.5f, 25/768.f, str);
 				}
 
 				// apply text commands

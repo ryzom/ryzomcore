@@ -968,9 +968,7 @@ void CDisplayerVisualEntity::updateName()
 	//H_AUTO(R2_CDisplayerVisualEntity_updateName)
 	if (!_Entity) return;
 
-	std::string name = getString(&getProps(), "Name");
-	ucstring ucName;
-	ucName.fromUtf8(name);
+	std::string ucName = getString(&getProps(), "Name");
 	if (ucName.empty())
 	{
 		ucName = CI18N::get("uiR2EDNoName");
@@ -1011,13 +1009,11 @@ void CDisplayerVisualEntity::updateName()
 
 	actName = NLMISC::toString(" [%s]", actName.c_str());
 
-	ucstring ucActName;
-	ucActName.fromUtf8(actName);
-	ucName += ucActName;
+	ucName += actName;
 
 	{
 		//BENCH(setEntityName)
-		_Entity->setEntityName(ucName.toUtf8());
+		_Entity->setEntityName(ucName);
 	}
 	{
 		//BENCH(buildInSceneInterface)

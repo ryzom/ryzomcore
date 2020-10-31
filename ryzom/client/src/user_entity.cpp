@@ -3078,7 +3078,7 @@ void CUserEntity::setAFK(bool b, string afkTxt)
 		nlwarning("CUserEntity:setAFK: unknown message named '%s'.", msgName.c_str());
 
 	// custom afk txt
-	ucstring ucstr;
+	ucstring ucstr; // TODO: UTF-8 (serial)
 	ucstr.fromUtf8( afkTxt );
 	CBitMemStream outTxt;
 	static const string msgNameTxt = "STRING:AFK_TXT";
@@ -3828,11 +3828,10 @@ void CUserEntity::CSkillPointsObserver::update(ICDBNode* node )
 			string deltaStr = toString("%+d", delta);
 
 			// get the sp title
-			ucstring	spTitle;
-			spTitle= CI18N::get(toString("uiSkillPointsBold%d",SpType));
+			const string &spTitle = CI18N::get(toString("uiSkillPointsBold%d",SpType));
 
 			// run the popup
-			CAHManager::getInstance()->runActionHandler("message_popup", NULL, "text1="+deltaStr+"|text0="+spTitle.toUtf8());
+			CAHManager::getInstance()->runActionHandler("message_popup", NULL, "text1="+deltaStr+"|text0="+spTitle);
 
 			// Context help
 			contextHelp ("skill_point");

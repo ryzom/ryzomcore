@@ -14,8 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// Lost code
 
-
+#if 0
 #ifndef NL_TEXT_MANAGER_H
 #define NL_TEXT_MANAGER_H
 
@@ -25,7 +26,7 @@
 /////////////
 // Misc
 #include "nel/misc/types_nl.h"
-#include "nel/misc/ucstring.h"
+#include "nel/misc/ucstring.h" // OLD
 // Std
 #include <map>
 
@@ -42,18 +43,18 @@
 class CTextManager
 {
 protected:
-	std::map<uint, ucstring> _Texts;
+	std::map<uint, ucstring> _Texts; // OLD
 
 public:
 	/// Constructor
 	CTextManager();
 
 	/// Return the text according to the Id.
-	ucstring text(uint textId);
+	ucstring text(uint textId); // OLD
 	/// Set the text for 'textId'.
 	void text(uint textId, const std::string &str);
 	/// Set the text for 'textId'.
-	void text(uint textId, const ucstring &str);
+	void text(uint textId, const ucstring &str); // OLD
 };
 
 
@@ -65,5 +66,6 @@ extern CTextManager TextMngr;
 
 
 #endif // NL_TEXT_MANAGER_H
+#endif
 
 /* End of text_manager.h */
