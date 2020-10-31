@@ -3625,11 +3625,11 @@ public:
 			return;
 		}
 
-		ucstring txt;
+		string txt;
 		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:NAME", index));
 		if (node && CStringManagerClient::instance()->getDynString(node->getValue32(), txt))
 		{
-			CWidgetManager::getInstance()->setContextHelpText(CEntityCL::removeTitleFromName(txt.toUtf8()));
+			CWidgetManager::getInstance()->setContextHelpText(CEntityCL::removeTitleFromName(txt));
 		}
 	}
 };

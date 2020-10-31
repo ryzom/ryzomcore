@@ -60,7 +60,7 @@ void CGroupHTMLForum::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 {
  	ucstring user_name = UserEntity->getLoginName ();
 	const SGuild &guild = CGuildManager::getInstance()->getGuild();
-	string	gname = guild.Name.toUtf8();
+	string	gname = guild.Name;
 
 	if (!gname.empty())
 	{
@@ -92,7 +92,7 @@ void CGroupHTMLForum::addHTTPPostParams (SFormFields &formfields, bool /*trusted
 {
 	ucstring user_name = UserEntity->getLoginName ();
 	const SGuild &guild = CGuildManager::getInstance()->getGuild();
-	string	gname = guild.Name.toUtf8();
+	string	gname = guild.Name;
 
 	if (!gname.empty())
 	{

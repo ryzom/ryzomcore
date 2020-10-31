@@ -456,7 +456,7 @@ void CGroupInSceneBubbleManager::update ()
 	{
 		if (_DynBubbles[i].DescWaiting != 0)
 		{
-			ucstring res;
+			string res;
 			STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 			if (pSMC->getDynString(_DynBubbles[i].DescWaiting,res))
 			{
@@ -1317,14 +1317,14 @@ class CAHDynChatClickOption : public IActionHandler
 		if (isBGDownloadEnabled())
 		{
 			STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-			ucstring result;
+			string result;
 			if (!pSMC->getDynString(optStrId, result))
 			{
 				return; // shouldn't happen since the button isn't visible as long as the text has not been received ...
 			}
 			static volatile bool forceWarning = false; // for debug
-			ucstring::size_type	pos= result.find(ucstring("{ros_exit}"));
-			if(pos != ucstring::npos || forceWarning)
+			string::size_type	pos= result.find("{ros_exit}");
+			if(pos != string::npos || forceWarning)
 			{
 				if (AvailablePatchs != 0)
 				{
@@ -1334,7 +1334,7 @@ class CAHDynChatClickOption : public IActionHandler
 			}
 		}
 
-		const string sMsg = "BOTCHAT:DYNCHAT_SEND";
+		static const string sMsg = "BOTCHAT:DYNCHAT_SEND";
 		CBitMemStream out;
 		if(GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 		{

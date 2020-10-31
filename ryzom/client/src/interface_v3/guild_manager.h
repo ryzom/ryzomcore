@@ -37,7 +37,7 @@ struct SGuildMember
 {
 	uint32		Index;	// Index in the DB
 	uint32		NameID;
-	ucstring	Name;
+	std::string	Name;
 	EGSPD::CGuildGrade::TGuildGrade Grade;
 	TCharConnectionState			Online;
 	uint32		EnterDate;
@@ -54,7 +54,7 @@ struct SGuildMember
 struct SGuild
 {
 	uint32		NameID;
-	ucstring	Name;
+	std::string	Name;
 	uint64		Icon;
 	bool		QuitGuildAvailable;
 
@@ -131,7 +131,7 @@ public:
 	bool isLeaderOfTheGuild();
 
 	/// If the player is in a guild get the guild name else return empty
-	ucstring getGuildName();
+	std::string getGuildName();
 
 	/// If the player is in a guild get the amount of money the guild owns else return zero
 	uint64 getMoney();
@@ -270,7 +270,7 @@ private:
 
 	// Join Proposal handling
 	uint32		_JoinPropPhraseID;
-	ucstring	_JoinPropPhrase;
+	std::string	_JoinPropPhrase;
 	bool		_JoinPropUpdate;
 };
 

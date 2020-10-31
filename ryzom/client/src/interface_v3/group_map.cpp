@@ -1176,10 +1176,10 @@ void CGroupMap::checkCoords()
 			// update text if needed
 			if (!_MissionTargetTextReceived[k])
 			{
-				ucstring result;
+				string result;
 				if (STRING_MANAGER::CStringManagerClient::instance()->getDynString(_MissionTargetTextIDs[k], result))
 				{
-					_MissionLM[k]->setDefaultContextHelp(result.toUtf8());
+					_MissionLM[k]->setDefaultContextHelp(result);
 					_MissionTargetTextReceived[k] = true;
 				}
 			}
@@ -1401,11 +1401,11 @@ void CGroupMap::checkCoords()
 				CInterfaceManager *im = CInterfaceManager::getInstance();
 				uint32 val = NLGUI::CDBManager::getInstance()->getDbProp(NLMISC::toString("SERVER:GROUP:%d:NAME",i))->getValue32();
 				STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-				ucstring res;
+				string res;
 
-				if (pSMC->getString(val,res))
+				if (pSMC->getString(val, res))
 				{
-						std::string res2 = CEntityCL::removeTitleAndShardFromName(res.toUtf8());
+						std::string res2 = CEntityCL::removeTitleAndShardFromName(res);
 						_TeammateLM[i]->setDefaultContextHelp(res2);
 				}
 			}
@@ -3197,7 +3197,7 @@ void CGroupMap::targetLandmark(CCtrlButton *lm)
 		if (it != _ContinentLM.end())
 		{
 			ct.setType(CCompassTarget::ContinentLandMark);
-			(*it)->getContextHelpAsUtf16(ct.Name);
+			(*it)->getContextHelp(ct.Name);
 			mapToWorld(ct.Pos, (*it)->Pos);
 			found = true;
 		}
@@ -3210,7 +3210,7 @@ void CGroupMap::targetLandmark(CCtrlButton *lm)
 			if (it != _MissionLM.end())
 			{
 				ct.setPositionState(_MissionPosStates[it - _MissionLM.begin()]);
-				(*it)->getContextHelpAsUtf16(ct.Name);
+				(*it)->getContextHelp(ct.Name);
 				mapToWorld(ct.Pos, (*it)->Pos);
 				found = true;
 			}
@@ -3224,7 +3224,7 @@ void CGroupMap::targetLandmark(CCtrlButton *lm)
 			if (it != _UserLM.end())
 			{
 				ct.setType(CCompassTarget::UserLandMark);
-				(*it)->getContextHelpAsUtf16(ct.Name);
+				(*it)->getContextHelp(ct.Name);
 				mapToWorld(ct.Pos, (*it)->Pos);
 				found = true;
 			}
@@ -3252,7 +3252,7 @@ void CGroupMap::targetLandmark(CCtrlButton *lm)
 				if (!isIsland())
 				{
 					ct.setType(CCompassTarget::Respawn);
-					(*it)->getContextHelpAsUtf16(ct.Name);
+					(*it)->getContextHelp(ct.Name);
 					mapToWorld(ct.Pos, (*it)->Pos);
 					found = true;
 				}
@@ -3298,7 +3298,7 @@ void CGroupMap::targetLandmark(CCtrlButton *lm)
 			{
 				if(_AnimalLM[i]==lm)
 				{
-					_AnimalLM[i]->getContextHelpAsUtf16(ct.Name);
+					_AnimalLM[i]->getContextHelp(ct.Name);
 					// copy The Animal Pos retriever into the compass
 					ct.setPositionState(_AnimalPosStates[i]);
 					found = true;
@@ -3316,7 +3316,7 @@ void CGroupMap::targetLandmark(CCtrlButton *lm)
 			{
 				if(_TeammateLM[i]==lm)
 				{
-					_TeammateLM[i]->getContextHelpAsUtf16(ct.Name);
+					_TeammateLM[i]->getContextHelp(ct.Name);
 					// copy The Animal Pos retriever into the compass
 					ct.setPositionState(_TeammatePosStates[i]);
 					found = true;
@@ -3346,7 +3346,7 @@ void CGroupMap::targetLandmarkResult(uint32 index)
 
 	CCompassTarget ct;
 	ct.Pos = _MatchedLandmarks[index].Pos;
-	ct.Name = _MatchedLandmarks[index].Title;
+	ct.Name = _MatchedLandmarks[index].Title.toUtf8();
 	// type sets compass arrow color
 	ct.setType(CCompassTarget::UserLandMark);
 
@@ -3440,7 +3440,7 @@ bool CGroupMap::targetLandmarkByName(const ucstring &search, bool startsWith) co
 	{
 		ct.setType(CCompassTarget::UserLandMark);
 		mapToWorld(ct.Pos, lm->Pos);
-		lm->getContextHelpAsUtf16(ct.Name);
+		lm->getContextHelp(ct.Name);
 		closest = dist;
 		found = true;
 	}
@@ -3453,7 +3453,7 @@ bool CGroupMap::targetLandmarkByName(const ucstring &search, bool startsWith) co
 		{
 			ct.setType(CCompassTarget::ContinentLandMark);
 			mapToWorld(ct.Pos, lm->Pos);
-			lm->getContextHelpAsUtf16(ct.Name);
+			lm->getContextHelp(ct.Name);
 			closest = dist;
 			found = true;
 		}
@@ -3464,7 +3464,7 @@ bool CGroupMap::targetLandmarkByName(const ucstring &search, bool startsWith) co
 		{
 			ct.setType(CCompassTarget::ContinentLandMark);
 			mapToWorld(ct.Pos, lmt->Pos);
-			ct.Name = CUtfStringView(lmt->getText()).toUtf16();
+			ct.Name = lmt->getText();
 			closest = dist;
 			found = true;
 		}

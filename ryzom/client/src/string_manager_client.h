@@ -64,11 +64,11 @@ public:
 	void flushStringCache();
 
 	bool getString(uint32 stringId, std::string &result);
-	bool getString(uint32 stringId, ucstring &result) { std::string temp; bool res = getString(stringId, temp); result.fromUtf8(temp); return res; } // FIXME: UTF-8
+	// bool getString(uint32 stringId, ucstring &result) { std::string temp; bool res = getString(stringId, temp); result.fromUtf8(temp); return res; } // FIXME: UTF-8
 	void waitString(uint32 stringId, const IStringWaiterRemover *premover, std::string *result);
 	void waitString(uint32 stringId, IStringWaitCallback *pcallback);
 	bool getDynString(uint32 dynStringId, std::string &result);
-	bool getDynString(uint32 dynStringId, ucstring &result) { std::string temp; bool res = getString(dynStringId, temp); result.fromUtf8(temp); return res; } // FIXME: UTF-8
+	// bool getDynString(uint32 dynStringId, ucstring &result) { std::string temp; bool res = getString(dynStringId, temp); result.fromUtf8(temp); return res; } // FIXME: UTF-8
 	void waitDynString(uint32 stringId, const IStringWaiterRemover *premover, std::string *result);
 	void waitDynString(uint32 stringId, IStringWaitCallback *pcallback);
 

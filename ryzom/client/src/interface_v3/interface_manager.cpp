@@ -310,12 +310,12 @@ public:
 
 class CStringManagerTextProvider : public CViewTextID::IViewTextProvider
 {
-	bool getString( uint32 stringId, ucstring &result )
+	bool getString( uint32 stringId, string &result )
 	{
 		return STRING_MANAGER::CStringManagerClient::instance()->getString( stringId, result );
 	}
 
-	bool getDynString( uint32 dynStringId, ucstring &result )
+	bool getDynString( uint32 dynStringId, string &result )
 	{
 		return STRING_MANAGER::CStringManagerClient::instance()->getDynString( dynStringId, result );
 	}
@@ -400,7 +400,7 @@ public:
 						}
 					}
 					// get the title translated
-					ucstring sTitleTranslated = botName; // FIXME: UTF-8
+					string sTitleTranslated = botName; // FIXME: UTF-8
 					CStringPostProcessRemoveName spprn;
 					spprn.Woman = womanTitle;
 					spprn.cbIDStringReceived(sTitleTranslated);
@@ -412,14 +412,14 @@ public:
 					{
 						// But if there is no name, display only the title
 						if (botName.empty())
-							botName = sTitleTranslated.toUtf8();
+							botName = sTitleTranslated;
 					}
 					else
 					{
 						// Else we want the title !
 						if (!botName.empty())
 							botName += " ";
-						botName += sTitleTranslated.toUtf8();
+						botName += sTitleTranslated;
 					}
 
 					formatedResult += botName;
@@ -2347,7 +2347,7 @@ void CInterfaceManager::processServerIDString()
 	for (uint32 i = 0; i < _IDStringWaiters.size(); ++i)
 	{
 		bool bAffect = false;
-		ucstring ucstrToAffect;
+		string ucstrToAffect;
 		SIDStringWaiter *pISW = _IDStringWaiters[i];
 		if (pISW->IdOrString == true) // ID !
 		{
@@ -2374,7 +2374,7 @@ void CInterfaceManager::processServerIDString()
 			if (bValid)
 			{
 				ucstrToAffect = STRING_MANAGER::CStringManagerClient::getLocalizedName(ucstrToAffect);
-				val.setString (ucstrToAffect.toUtf8());
+				val.setString (ucstrToAffect);
 				CInterfaceLink::setTargetProperty (pISW->Target, val);
 			}
 
@@ -4243,10 +4243,10 @@ bool CInterfaceManager::parseTokens(string& ucstr)
 			else if (token_param == "guild")
 			{
 				STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-				ucstring ucGuildName;
+				string ucGuildName;
 				if (pSMC->getString(pTokenSubjectEntity->getGuildNameID(), ucGuildName))
 				{
-					token_replacement = ucGuildName.empty() ? token_replacement : ucGuildName.toUtf8();
+					token_replacement = ucGuildName.empty() ? token_replacement : ucGuildName;
 				}
 			}
 			else if (token_param.substr(0, 3) == "gs(" &&

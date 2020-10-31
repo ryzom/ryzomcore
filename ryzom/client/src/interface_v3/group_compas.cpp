@@ -394,18 +394,18 @@ void CGroupCompas::draw()
 
 				// The text
 				char message[50];
-				ucstring  distText;
+				string  distText;
 				if (displayedTarget.getType() != CCompassTarget::North)
 				{
 					if (dist > 999.0f)
 					{
 						smprintf (message, 50, "%.1f ", dist/1000.0f);
-						distText = ucstring (message) + CI18N::get("uiKilometerUnit");
+						distText = message + CI18N::get("uiKilometerUnit");
 					}
 					else
 					{
 						smprintf (message, 50, "%.0f ", dist);
-						distText = ucstring (message) + CI18N::get("uiMeterUnit");
+						distText = message + CI18N::get("uiMeterUnit");
 					}
 					distText = distText + " - " + displayedTarget.Name;
 				}
@@ -415,7 +415,7 @@ void CGroupCompas::draw()
 				}
 				if (_DistViewText != distText)
 				{
-					_DistView->setText(distText.toUtf8());
+					_DistView->setText(distText);
 					_DistViewText = distText;
 				}
 			}
@@ -558,9 +558,9 @@ bool	buildCompassTargetFromTeamMember(CCompassTarget &ct, uint teamMemberId)
 		ct.setPositionState(tracker);
 
 		CStringManagerClient *pSMC = CStringManagerClient::instance();
-		ucstring name;
+		string name;
 		if (pSMC->getString(nameNode->getValue32(), name))
-			ct.Name = CEntityCL::removeTitleAndShardFromName(name.toUtf8()); // TODO : dynamic support for name
+			ct.Name = CEntityCL::removeTitleAndShardFromName(name); // TODO : dynamic support for name
 		else
 			ct.Name = CI18N::get("uiNotReceived");
 		return true;
@@ -711,7 +711,7 @@ void CGroupCompasMenu::setActive (bool state)
 			ct.setType(CCompassTarget::North);
 			ct.Name = CI18N::get("uiNorth");
 			Targets.push_back(ct);
-			getRootMenu()->addLineAtIndex(lineIndex ++, ct.Name.toUtf8(), "set_compas", toString ("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
+			getRootMenu()->addLineAtIndex(lineIndex ++, ct.Name, "set_compas", toString ("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 			// Home
 			CCDBNodeLeaf *pos = NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":HOME_POINT");
 			sint32 px = (sint32) (pos->getValue64() >> 32);
@@ -721,7 +721,7 @@ void CGroupCompasMenu::setActive (bool state)
 				ct.setType(CCompassTarget::Home);
 				ct.Name = CI18N::get("uiHome");
 				Targets.push_back(ct);
-				getRootMenu()->addLineAtIndex(lineIndex ++,  ct.Name.toUtf8(), "set_compas", toString ("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
+				getRootMenu()->addLineAtIndex(lineIndex ++,  ct.Name, "set_compas", toString ("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 			}
 			// Respawn
 			pos = NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":BIND_POINT");
@@ -732,7 +732,7 @@ void CGroupCompasMenu::setActive (bool state)
 				ct.setType(CCompassTarget::Respawn);
 				ct.Name = CI18N::get("uiRespawn");
 				Targets.push_back(ct);
-				getRootMenu()->addLineAtIndex(lineIndex ++,  ct.Name.toUtf8(), "set_compas", toString ("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
+				getRootMenu()->addLineAtIndex(lineIndex ++,  ct.Name, "set_compas", toString ("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 			}
 
 			// As of 6/5/2007 : The option to point the selection is always proposed even if no slot is currently targeted
@@ -777,7 +777,7 @@ void CGroupCompasMenu::setActive (bool state)
 						CCDBNodeLeaf *textIDLeaf = NLGUI::CDBManager::getInstance()->getDbProp(baseDbPath + toString(":%d:TARGET%d:TITLE", (int) k, (int) l), false);
 						if (textIDLeaf)
 						{
-							ucstring name;
+							string name;
 							if (CStringManagerClient::instance()->getDynString(textIDLeaf->getValue32(), name))
 							{
 								CCDBNodeLeaf *leafPosX= NLGUI::CDBManager::getInstance()->getDbProp(baseDbPath +  toString(":%d:TARGET%d:X", (int) k, (int) l), false);
@@ -790,7 +790,7 @@ void CGroupCompasMenu::setActive (bool state)
 									ct.setPositionState(tracker);
 									ct.Name = name;
 									Targets.push_back(ct);
-									missionSubMenu->addLine(ct.Name.toUtf8(), "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
+									missionSubMenu->addLine(ct.Name, "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 									selectable= true;
 								}
 							}
@@ -847,7 +847,7 @@ void CGroupCompasMenu::setActive (bool state)
 					ct.Pos = currCont->ContLandMarks[k].Pos;
 					ct.Name = CStringManagerClient::getPlaceLocalizedName(currCont->ContLandMarks[k].TitleTextID);
 					Targets.push_back(ct);
-					landMarkSubMenu->addLineAtIndex(contLandMarkIndex++, ct.Name.toUtf8(), "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
+					landMarkSubMenu->addLineAtIndex(contLandMarkIndex++, ct.Name, "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 					selectable= true;
 				}
 				// separator?
@@ -868,9 +868,9 @@ void CGroupCompasMenu::setActive (bool state)
 						CCompassTarget ct;
 						ct.setType(CCompassTarget::UserLandMark);
 						ct.Pos = sortedLandmarks[k].Pos;
-						ct.Name = sortedLandmarks[k].Title;
+						ct.Name = sortedLandmarks[k].Title.toUtf8();
 						Targets.push_back(ct);
-						landMarkSubMenus[sortedLandmarks[k].Type]->addLine(ct.Name.toUtf8(), "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
+						landMarkSubMenus[sortedLandmarks[k].Type]->addLine(ct.Name, "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 						selectable= true;
 					}
 				}
@@ -901,7 +901,7 @@ void CGroupCompasMenu::setActive (bool state)
 				if (buildCompassTargetFromTeamMember(ct, k))
 				{
 					Targets.push_back(ct);
-					teamSubMenu->addLine(ct.Name.toUtf8(), "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
+					teamSubMenu->addLine(ct.Name, "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 					selectable= true;
 				}
 			}
@@ -924,7 +924,7 @@ void CGroupCompasMenu::setActive (bool state)
 				if (buildCompassTargetFromAnimalMember(ct, k))
 				{
 					Targets.push_back(ct);
-					animalSubMenu->addLine(ct.Name.toUtf8(), "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
+					animalSubMenu->addLine(ct.Name, "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 					selectable= true;
 				}
 			}
@@ -952,7 +952,7 @@ void CGroupCompasMenu::setActive (bool state)
 					CSmartPtr<CDialogEntityPositionState> tracker = new CDialogEntityPositionState( i );
 					ct.setPositionState(tracker);
 					Targets.push_back(ct);
-					dialogsSubMenu->addLine(ct.Name.toUtf8(), "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
+					dialogsSubMenu->addLine(ct.Name, "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 					selectable= true;
 				}
 			}

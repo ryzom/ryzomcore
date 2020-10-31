@@ -1732,10 +1732,11 @@ void CItemMenuInBagInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet)
 
 		// get the CreatorTextID
 		bool isCraftedByUserEntity = false;
-		ucstring creatorNameString;
+		string creatorNameString;
 		if( STRING_MANAGER::CStringManagerClient::instance()->getString ( itemInfo.CreatorName, creatorNameString) )
 		{
-			if (   toLower(UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis) == toLower(creatorNameString.toUtf8()))
+			std::string userNameString = UserEntity->getEntityName() + PlayerSelectedHomeShardNameWithParenthesis;
+			if (NLMISC::compareCaseInsensitive(userNameString, creatorNameString) == 0)
 				isCraftedByUserEntity = true;
 		}
 
@@ -1840,10 +1841,11 @@ class CHandlerItemMenuCheck : public IActionHandler
 						if (getInventory().isItemInfoUpToDate(getInventory().getItemSlotId(pCS)))
 						{
 							// get the CreatorTextID
-							ucstring creatorNameString;
+							string creatorNameString;
 							if( STRING_MANAGER::CStringManagerClient::instance()->getString ( getInventory().getItemInfo(getInventory().getItemSlotId(pCS)).CreatorName, creatorNameString) )
 							{
-								if (toLower(UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis) == toLower(creatorNameString.toUtf8()))
+								string userNameString = UserEntity->getEntityName() + PlayerSelectedHomeShardNameWithParenthesis;
+								if (NLMISC::compareCaseInsensitive(userNameString, creatorNameString) == 0)
 									isTextEditionActive = true;
 							}
 						}

@@ -249,7 +249,7 @@ public:
 	{
 	public:
 		virtual ~IStringProcess() { }
-		virtual bool cbIDStringReceived(ucstring &inOut) = 0; // called when string or id is received (return true if valid the change)
+		virtual bool cbIDStringReceived(std::string &inOut) = 0; // called when string or id is received (return true if valid the change)
 	};
 
 	void addServerString (const std::string &sTarget, uint32 id, IStringProcess *cb = NULL);

@@ -3276,9 +3276,7 @@ void	CLuaIHMRyzom::browseNpcWebPage(const std::string &htmlId, const std::string
 			{
 				userName = UserEntity->getDisplayName();
 				STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-				ucstring ucsTmp;
-				pSMC->getString(UserEntity->getGuildNameID(), ucsTmp);
-				guildName = ucsTmp.toString();
+				pSMC->getString(UserEntity->getGuildNameID(), guildName);
 
 				while (guildName.find(' ') != string::npos)
 				{
@@ -3329,16 +3327,16 @@ void		CLuaIHMRyzom::clearHtmlUndoRedo(const std::string &htmlId)
 ucstring	CLuaIHMRyzom::getDynString(sint32 dynStringId)
 {
 	//H_AUTO(Lua_CLuaIHM_getDynString)
-	ucstring result;
+	string result;
 	STRING_MANAGER::CStringManagerClient::instance()->getDynString(dynStringId,   result);
-	return result;
+	return ucstring::makeFromUtf8(result); // TODO: Lua UTF-8
 }
 
 // ***************************************************************************
 bool		CLuaIHMRyzom::isDynStringAvailable(sint32 dynStringId)
 {
 	//H_AUTO(Lua_CLuaIHM_isDynStringAvailable)
-	ucstring result;
+	string result;
 	bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(dynStringId,   result);
 	return res;
 }
@@ -3490,7 +3488,7 @@ string CLuaIHMRyzom::getGuildMemberName(sint32 nMemberId)
 	if ((nMemberId < 0) || (nMemberId >= getNbGuildMembers()))
 		return "";
 
-	return CGuildManager::getInstance()->getGuildMembers()[nMemberId].Name.toString();
+	return CGuildManager::getInstance()->getGuildMembers()[nMemberId].Name;
 }
 
 // ***************************************************************************

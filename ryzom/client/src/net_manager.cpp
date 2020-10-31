@@ -3266,8 +3266,8 @@ private:
 		STRING_MANAGER::CStringManagerClient		*pSMC= STRING_MANAGER::CStringManagerClient::instance();
 
 		// get the content string (should have been received!)
-		ucstring	contentStr;
-		ucstring	titleStr;
+		string	contentStr;
+		string	titleStr;
 		if(!pSMC->getDynString(_TextId[ContentType], contentStr))
 			return;
 
@@ -3294,8 +3294,8 @@ private:
 			}
 			if(i != digitMaxEnd)
 			{
-				ucstring web_app = contentStr.substr(digitStart, i-digitStart);
-				contentStr = ucstring(ClientCfg.WebIgMainDomain + "/") + web_app + ucstring("/index.php?") + contentStr.substr((size_t)i + 1);
+				string web_app = contentStr.substr(digitStart, i-digitStart);
+				contentStr = string(ClientCfg.WebIgMainDomain + "/") + web_app + string("/index.php?") + contentStr.substr((size_t)i + 1);
 			}
 			else
 			{
@@ -3329,7 +3329,7 @@ private:
 		if (is_webig)
 		{
 			CGroupHTML *groupHtml;
-			string group = titleStr.toString();
+			string group = titleStr;
 			// <missing:XXX>
 			group = group.substr(9, group.size()-10);
 			groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:"+group+":content:html"));
@@ -3352,7 +3352,7 @@ private:
 					{
 						if (group == "webig")
 							pGC->setActive(true);
-						string url = contentStr.toString();
+						string url = contentStr;
 						addWebIGParams(url, true);
 						groupHtml->browse(url.c_str());
 						CWidgetManager::getInstance()->setTopWindow(pGC);
@@ -3372,7 +3372,7 @@ private:
 				// must set the text by hand
 				CViewText	*vt= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("server_message_box_content_view_text")));
 				if(vt)
-					vt->setTextFormatTaged(contentStr.toUtf8());
+					vt->setTextFormatTaged(contentStr);
 
 				// open
 				CWidgetManager::getInstance()->setTopWindow(pGC);

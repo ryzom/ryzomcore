@@ -689,10 +689,10 @@ void CDBGroupListSheetTrade::checkCoords ()
 	{
 		CSheetChildTrade * cst = (*it);
 		// String result
-		ucstring result;
+		string result;
 		if( pSMC->getString ( cst->LastVendorNameId, result) )
 		{
-			cst->VendorNameString = CEntityCL::removeShardFromName(result.toUtf8());
+			cst->VendorNameString = CEntityCL::removeShardFromName(result);
 			set< CSheetChildTrade *>::iterator itTmp = it;
 			++it;
 			VendorNameIdToUpdate.erase(itTmp);

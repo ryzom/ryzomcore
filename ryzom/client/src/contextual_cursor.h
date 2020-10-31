@@ -68,7 +68,7 @@ public:
 	void del(const std::string &contextName);
 
 	// Select a nex context.
-	bool context(const std::string &contextName, float dist = 0, const ucstring &cursName = ucstring(""));
+	bool context(const std::string &contextName, float dist = 0, const std::string &cursName = std::string());
 	inline const std::string &context() const {return _Context;}
 
 	// Check if there is an entity under the cursor.

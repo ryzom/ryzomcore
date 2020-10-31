@@ -3345,10 +3345,10 @@ class CAHLoadScenario : public IActionHandler
 								if(val!=0)
 								{
 									STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-									ucstring res;
+									string res;
 									if (pSMC->getString(val,res))
 									{
-										string charName = CEntityCL::removeTitleAndShardFromName(res.toUtf8());
+										string charName = CEntityCL::removeTitleAndShardFromName(res);
 										sessionBrowser.inviteCharacterByName(sessionBrowser._LastScheduleSessionCharId, charName);
 
 										if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))

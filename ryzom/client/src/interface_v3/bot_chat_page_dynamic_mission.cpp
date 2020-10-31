@@ -164,11 +164,11 @@ void CBotChatPageDynamicMission::update()
 					{
 						uint32 textID = (uint32) NLGUI::CDBManager::getInstance()->getDbProp(toString(DM_CHOICE "%d:%d:TEXT", (int) k, (int) l))->getValue32();
 						// see if text has been receive
-						ucstring result;
+						string result;
 						bool received = CStringManagerClient::instance()->getDynString(textID, result);
 						if (received)
 						{
-							_ChoiceCB[k]->setText(l, result.toUtf8());
+							_ChoiceCB[k]->setText(l, result);
 							_TextReceived[k][l] = true;
 						}
 					}
@@ -180,11 +180,11 @@ void CBotChatPageDynamicMission::update()
 				uint32 textID = (uint32) NLGUI::CDBManager::getInstance()->getDbProp(toString(DM_CHOICE "%d:%d:TEXT", (int) k, (int) l))->getValue32();
 				if (textID == 0 && !ClientCfg.Local) break;
 				// see if text has been received
-				ucstring result;
+				string result;
 				bool received = CStringManagerClient::instance()->getDynString(textID, result);
 				if (received)
 				{
-					_ChoiceCB[k]->addText(result.toUtf8());
+					_ChoiceCB[k]->addText(result);
 					_TextReceived[k][l] = true;
 				}
 				else
@@ -207,7 +207,7 @@ void CBotChatPageDynamicMission::update()
 			uint32 textID = NLGUI::CDBManager::getInstance()->getDbProp(DM_TITLE_DB_PATH)->getValue32();
 			if (textID != 0)
 			{
-				ucstring result;
+				string result;
 				if (CStringManagerClient::instance()->getDynString(textID, result))
 				{
 					textID = NLGUI::CDBManager::getInstance()->getDbProp(DM_DESCRIPTION_DB_PATH)->getValue32();

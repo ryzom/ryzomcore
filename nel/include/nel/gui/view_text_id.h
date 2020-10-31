@@ -59,10 +59,8 @@ namespace NLGUI
 		{
 		public:
 			virtual ~IViewTextProvider(){}
-			bool getString(uint32 stringId, std::string &result) { ucstring temp; bool res = getString(stringId, temp); result = temp.toUtf8(); return res;  }
-			bool getDynString(uint32 dynStringId, std::string &result) { ucstring temp; bool res = getDynString(dynStringId, temp); result = temp.toUtf8(); return res; }
-			virtual bool getString( uint32 stringId, ucstring &result ) = 0; // TODO: UTF-8
-			virtual bool getDynString( uint32 dynStringId, ucstring &result ) = 0; // TODO: UTF-8
+			virtual bool getString(uint32 stringId, std::string &result) = 0;
+			virtual bool getDynString(uint32 dynStringId, std::string &result) = 0;
 		};
 
 		CViewTextID(const TCtorParam &param) : CViewText(param)

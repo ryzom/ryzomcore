@@ -178,7 +178,7 @@ public :
 				CCompassTarget ct = pGC->getTarget();
 
 				STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-				ucstring oldName;
+				string oldName;
 				if (!pSMC->getDynString(leaf->getOldValue32(), oldName))
 				{
 					nlwarning("Can't get compass target name");
@@ -201,7 +201,7 @@ public :
 			{
 				// TODO : maybe the following code could be include in CGroupMap::checkCoords, but it is not called when the map is not visible...
 				STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-				ucstring name;
+				string name;
 				if (pSMC->getDynString((*tmpIt)->getValue32(), name))
 				{
 //					if (_AlreadyReceived.count(name) == 0)

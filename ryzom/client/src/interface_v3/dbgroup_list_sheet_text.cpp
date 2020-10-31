@@ -313,7 +313,7 @@ void CDBGroupListSheetText::updateCoords ()
 				else
 				{
 					// if not received, must insert in list of pending dynstring to check each frame
-					ucstring result;
+					string result;
 					if( !STRING_MANAGER::CStringManagerClient::instance()->getDynString ( curNameId, result) )
 						_NameIdToUpdate.insert( _SheetChildren[i] );
 				}
@@ -492,7 +492,7 @@ void CDBGroupListSheetText::checkCoords ()
 	{
 		CSheetChild * cst = (*it);
 		// String result
-		ucstring result;
+		string result;
 		if( STRING_MANAGER::CStringManagerClient::instance()->getDynString ( cst->NameId, result) )
 		{
 			set< CSheetChild *>::iterator itTmp = it;

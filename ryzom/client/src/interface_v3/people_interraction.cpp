@@ -934,7 +934,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 					case CChatGroup::dyn_chat:
 						uint32 index = PeopleInterraction.TheUserChat.Filter.getTargetDynamicChannelDbIndex();
 						uint32 textId = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DYN_CHAT:CHANNEL"+toString(index)+":NAME")->getValue32();
-						ucstring title;
+						string title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 						if (title.empty())
 						{
@@ -944,7 +944,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 						}
 						else
 						{
-							pUserBut->setHardText(title.toUtf8());
+							pUserBut->setHardText(title);
 						}
 						break;
 				}
@@ -1297,7 +1297,7 @@ void CPeopleInterraction::addContactInList(uint32 contactId, const ucstring &nam
 //=================================================================================================================
 void CPeopleInterraction::addContactInList(uint32 contactId, uint32 nameID, TCharConnectionState online, uint8 nList)
 {
-	ucstring name;
+	string name;
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 	if (pSMC->getString(nameID, name))
 	{
@@ -1357,7 +1357,7 @@ void CPeopleInterraction::updateWaitingContacts()
 	for (uint32 i = 0; i < WaitingContacts.size();)
 	{
 		SWaitingContact &w = WaitingContacts[i];
-		ucstring name;
+		string name;
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 		if (pSMC->getString(w.NameId, name))
 		{
@@ -1393,7 +1393,7 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 					// Only show the message if this player is not in my guild (because then the guild manager will show a message)
 					std::vector<SGuildMember> GuildMembers = CGuildManager::getInstance()->getGuildMembers();
 					bool bOnlyFriend = true;
-					ucstring name = toLower(FriendList.getName(index));
+					string name = toLower(FriendList.getName(index).toUtf8());
 					for (uint i = 0; i < GuildMembers.size(); ++i)
 					{
 						if (toLower(GuildMembers[i].Name) == name)
@@ -2635,12 +2635,12 @@ public:
 					uint32 canWrite = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DYN_CHAT:CHANNEL"+s+":WRITE_RIGHT")->getValue32();
 					if (canWrite != 0)
 					{
-						ucstring title;
+						string title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 
 						// replace dynamic channel name and shortcut
 						string res = CI18N::get("uiFilterMenuDynamic");
-						strFindReplace(res, "%channel", title.toUtf8());
+						strFindReplace(res, "%channel", title);
 						strFindReplace(res, "%shortcut", s);
 
 						pMenu->addLineAtIndex(5 + insertion_index, res, "chat_target_selected", "dyn"+s, "dyn"+s);
@@ -2828,9 +2828,9 @@ class CHandlerSelectChatSource : public IActionHandler
 					pVTM->setActive(active);
 					if (active)
 					{
-						ucstring title;
+						string title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-						pVTM->setText("["+s+"] " + title.toUtf8());
+						pVTM->setText("["+s+"] " + title);
 					}
 				}
 			}
@@ -2953,9 +2953,9 @@ class CHandlerSelectChatSource : public IActionHandler
 				bool active = (textId != 0);
 				if (active)
 				{
-					ucstring title;
+					string title;
 					STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-					menu->addLineAtIndex(insertionIndex, "["+s+"] " + title.toUtf8(), FILTER_TOGGLE, "dyn"+s);
+					menu->addLineAtIndex(insertionIndex, "["+s+"] " + title, FILTER_TOGGLE, "dyn"+s);
 					menu->setUserGroupLeft(insertionIndex, createMenuCheckBox(FILTER_TOGGLE, "dyn"+s, pi.ChatInput.DynamicChat[i].isListeningWindow(cw)));
 					++insertionIndex;
 				}

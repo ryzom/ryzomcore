@@ -130,7 +130,7 @@ void CContextualCursor::del(const std::string &contextName)
 // context :
 // Select a nex context.
 //-----------------------------------------------
-bool CContextualCursor::context(const std::string &contextName, float dist, const ucstring &cursName)
+bool CContextualCursor::context(const std::string &contextName, float dist, const std::string &cursName)
 {
 	// Delete the context.
 	TContext::iterator it = _Contexts.find(contextName);
@@ -163,7 +163,7 @@ bool CContextualCursor::context(const std::string &contextName, float dist, cons
 				if(cursName.empty())
 					cursor->setString(CI18N::get(functions.cursor));
 				else
-					cursor->setString(cursName.toUtf8());
+					cursor->setString(cursName);
 			}
 		}
 	}
