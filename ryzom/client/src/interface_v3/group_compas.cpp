@@ -75,11 +75,20 @@ void CCompassTarget::serial(NLMISC::IStream &f)
 		}
 	}
 	f.serialCheck(NELID("CTAR"));
-	f.serialVersion(0);
+	sint version = f.serialVersion(1);
 	f.serial(Pos);
 	// for the name, try to save a string identifier if possible, because language may be changed between
 	// save & reload
-	f.serial(Name);
+	if (version < 1)
+	{
+		ucstring name; // Serial old version
+		f.serial(name);
+		Name = name.toUtf8();
+	}
+	else
+	{
+		f.serial(Name);
+	}
 	std::string language = toLower(ClientCfg.LanguageCode);
 	f.serial(language);
 	f.serialEnum(_Type);
