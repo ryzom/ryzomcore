@@ -1629,7 +1629,7 @@ const char *CStringManagerClient::getTitleLocalizedName(const string &titleId, b
 }
 
 
-const ucchar *CStringManagerClient::getLocalizedName(const string &uctext)
+const char *CStringManagerClient::getLocalizedName(const string &uctext)
 {
 	string text = uctext;
 	if (text[0] == '[')
