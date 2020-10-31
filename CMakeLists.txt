@@ -171,6 +171,20 @@ IF(WITH_STATIC)
     IF(LIBLZMA_LIBRARIES)
       SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${LIBLZMA_LIBRARIES})
     ENDIF()
+
+    # under Linux and OS X, recent libxml2 versions are linked against libicu
+    # FIND_PACKAGE(Icu)
+    FIND_LIBRARY(ICU_LIBRARY icuuc)
+    IF(ICU_LIBRARY)
+       FIND_LIBRARY(ICU_DATA_LIBRARY icudata)
+       IF(ICU_LIBRARY)
+         MESSAGE(STATUS "ICU UC was found: ${ICU_LIBRARY}")
+       ELSE()
+         MESSAGE(STATUS "ICU UC was NOT found")
+       ENDIF()
+       SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${ICU_DATA_LIBRARY} ${ICU_LIBRARY})
+    ENDIF()
+
   ENDIF()
 ENDIF()
 

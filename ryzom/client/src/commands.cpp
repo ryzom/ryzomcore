@@ -1344,7 +1344,7 @@ NLMISC_COMMAND(db, "Modify Database","<Property> <Value>")
 		else
 			pIM->displaySystemInfo(toString("DB '%s' does not exist.", args[0].c_str()));
 #else
-		pIM->displaySystemInfo(ucstring("Can't write to DB when in Final Version."));
+		pIM->displaySystemInfo("Can't write to DB when in Final Version.");
 #endif
 	}
 	else if (size == 1)
