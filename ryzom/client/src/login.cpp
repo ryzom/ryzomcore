@@ -199,7 +199,7 @@ void setLoginFinished( bool f )
 
 // ***************************************************************************
 // Pop a fatal error message box, giving the option to 'quit' the client, plus a help button
-static void fatalMessageBox(const ucstring &msg)
+static void fatalMessageBox(const std::string &msg)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	im->messageBoxWithHelp(msg, "ui:login", "login_quit");
@@ -207,7 +207,7 @@ static void fatalMessageBox(const ucstring &msg)
 
 // ***************************************************************************
 // Pop an error message box, giving the option to go back to main menu, plus a help button
-static void errorMessageBox(const ucstring &msg)
+static void errorMessageBox(const std::string &msg)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	im->messageBoxWithHelp(msg, "ui:login", "on_back_to_login");
@@ -281,25 +281,25 @@ void initEula()
 }
 
 // ***************************************************************************
-static void setDataScanLog(const ucstring &text)
+static void setDataScanLog(const std::string &text)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:datascan:content:log_txt:log"));
 	if (pVT != NULL)
 	{
-		pVT->setText(text.toUtf8());
+		pVT->setText(text);
 	}
 }
 
 // ***************************************************************************
-static void setDataScanState(const ucstring &text, ucstring progress= ucstring())
+static void setDataScanState(const std::string &text, const std::string &progress = string())
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:datascan:content:state"));
-	if (pVT != NULL) pVT->setText(text.toUtf8());
+	if (pVT != NULL) pVT->setText(text);
 
 	pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:datascan:content:progress"));
-	if (pVT != NULL) pVT->setText(progress.toUtf8());
+	if (pVT != NULL) pVT->setText(progress);
 }
 
 void initCatDisplay()
@@ -332,24 +332,24 @@ void initReboot()
 
 
 // ***************************************************************************
-static void setPatcherStateText(const std::string &baseUIPath, const ucstring &str)
+static void setPatcherStateText(const std::string &baseUIPath, const std::string &str)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(baseUIPath + ":content:state"));
 	if (pVT != NULL)
 	{
-		pVT->setText(str.toUtf8());
+		pVT->setText(str);
 	}
 }
 
 // ***************************************************************************
-static void setPatcherProgressText(const std::string &baseUIPath, const ucstring &str)
+static void setPatcherProgressText(const std::string &baseUIPath, const std::string &str)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(baseUIPath + ":content:progress"));
 	if (pVT != NULL)
 	{
-		pVT->setText(str.toUtf8());
+		pVT->setText(str);
 	}
 }
 
@@ -365,7 +365,7 @@ static void updatePatchingInfoText(const std::string &baseUIPath)
 		if (bgDownloader.getDownloadThreadPriority() == BGDownloader::ThreadPriority_Paused)
 		{
 			setPatcherStateText(baseUIPath, CI18N::get("uiBGD_Paused"));
-			setPatcherProgressText(baseUIPath, ucstring());
+			setPatcherProgressText(baseUIPath, string());
 		}
 		else
 		{
@@ -376,15 +376,15 @@ static void updatePatchingInfoText(const std::string &baseUIPath)
 			}
 			else
 			{
-				setPatcherProgressText(baseUIPath, ucstring());
+				setPatcherProgressText(baseUIPath, string());
 			}
 		}
 	}
 	else
 #endif
 	{
-		ucstring state;
-		vector<ucstring> log;
+		string state;
+		vector<string> log;
 		if(pPM->getThreadState(state, log))
 		{
 			setPatcherStateText(baseUIPath, state);
@@ -394,7 +394,7 @@ static void updatePatchingInfoText(const std::string &baseUIPath)
 			}
 			else
 			{
-				setPatcherProgressText(baseUIPath, ucstring());
+				setPatcherProgressText(baseUIPath, string());
 			}
 		}
 	}
@@ -481,8 +481,8 @@ void loginMainLoop()
 
 			if (finished)
 			{
-				setPatcherStateText("ui:login:checking", ucstring());
-				setPatcherProgressText("ui:login:checking", ucstring());
+				setPatcherStateText("ui:login:checking", string());
+				setPatcherProgressText("ui:login:checking", string());
 
 #ifdef RYZOM_BG_DOWNLOADER
 				if (isBGDownloadEnabled())
@@ -561,7 +561,7 @@ void loginMainLoop()
 					}
 					else
 					{
-						ucstring errMsg = CI18N::get("uiErrChecking");
+						string errMsg = CI18N::get("uiErrChecking");
 						if (!pPM->getLastErrorMessage().empty())
 						{
 							errMsg = pPM->getLastErrorMessage();
@@ -604,14 +604,14 @@ void loginMainLoop()
 							setDataScanState(CI18N::get("uiScanDataSucess"));
 						else
 						{
-							ucstring	fmt= CI18N::get("uiScanDataErrors");
+							string	fmt= CI18N::get("uiScanDataErrors");
 							strFindReplace(fmt, "%d", toString(numFiles));
 							setDataScanState(fmt);
 						}
 					}
 					else
 					{
-						ucstring errMsg = CI18N::get("uiErrDataScanning");
+						string errMsg = CI18N::get("uiErrDataScanning");
 						if (!pPM->getLastErrorMessage().empty())
 						{
 							errMsg = pPM->getLastErrorMessage();
@@ -620,7 +620,7 @@ void loginMainLoop()
 					}
 
 					// the log may have changed
-					ucstring	dsLog;
+					string	dsLog;
 					if(pPM->getDataScanLog(dsLog))
 						setDataScanLog(dsLog);
 				}
@@ -628,8 +628,8 @@ void loginMainLoop()
 			else
 			{
 				// update inteface content
-				ucstring state;
-				vector<ucstring> log;
+				string state;
+				vector<string> log;
 				// get state
 				if(pPM->getThreadState(state, log))
 				{
@@ -637,7 +637,7 @@ void loginMainLoop()
 					setDataScanState(state, toString("%d/%d", pPM->getCurrentFilesToGet(), pPM->getTotalFilesToGet()));
 				}
 				// set special data scan log
-				ucstring	dsLog;
+				string	dsLog;
 				if(pPM->getDataScanLog(dsLog))
 					setDataScanLog(dsLog);
 			}
@@ -704,7 +704,7 @@ void loginMainLoop()
 					}
 					else
 					{
-						ucstring errMsg = CI18N::get("uiErrPatchApply");
+						string errMsg = CI18N::get("uiErrPatchApply");
 						if (!pPM->getLastErrorMessage().empty())
 						{
 							errMsg = pPM->getLastErrorMessage();
@@ -1157,8 +1157,8 @@ void initPatchCheck()
 #endif
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
 
-	setPatcherStateText("ui:login:checking", ucstring());
-	setPatcherProgressText("ui:login:checking", ucstring());
+	setPatcherStateText("ui:login:checking", string());
+	setPatcherProgressText("ui:login:checking", string());
 }
 
 void initShardDisplay()
@@ -1717,8 +1717,8 @@ void initPatch()
 	if (closeBtn)
 		closeBtn->setActive(false);
 
-	setPatcherStateText("ui:login:patching", ucstring());
-	setPatcherProgressText("ui:login:patching", ucstring());
+	setPatcherStateText("ui:login:patching", string());
+	setPatcherProgressText("ui:login:patching", string());
 }
 
 // ***************************************************************************
@@ -2274,7 +2274,7 @@ void initDataScan()
 	CPatchManager *pPM = CPatchManager::getInstance();
 
 	// reset the log
-	setDataScanLog(ucstring());
+	setDataScanLog(string());
 
 	// Start Scanning
 	pPM->startScanDataThread();
@@ -2442,26 +2442,26 @@ bool initCreateAccount()
 
 		if(!CurlHttpClient.sendGet(url, params, pPM->isVerboseLog()))
 		{
-			ucstring errorMessage("Can't send (error code 60)");
+			string errorMessage("Can't send (error code 60)");
 			errorMessageBox(errorMessage);
-			nlwarning(errorMessage.toString().c_str());
+			nlwarning(errorMessage.c_str());
 			return false;
 		}
 
 		string res;
 		if(!CurlHttpClient.receive(res, pPM->isVerboseLog()))
 		{
-			ucstring errorMessage("Can't receive (error code 61)");
+			string errorMessage("Can't receive (error code 61)");
 			errorMessageBox(errorMessage);
-			nlwarning(errorMessage.toString().c_str());
+			nlwarning(errorMessage.c_str());
 			return false;
 		}
 
 		if(res.empty())
 		{
-			ucstring errorMessage("Empty result (error code 13)");
+			string errorMessage("Empty result (error code 13)");
 			errorMessageBox(errorMessage);
-			nlwarning(errorMessage.toString().c_str());
+			nlwarning(errorMessage.c_str());
 			return false;
 		}
 
@@ -2618,9 +2618,9 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 
 			if (!CurlHttpClient.connect(url))
 			{
-				ucstring errorMessage("Can't connect");
+				string errorMessage("Can't connect");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.toString().c_str());
+				nlwarning(errorMessage.c_str());
 				return;
 			}
 
@@ -2645,26 +2645,26 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 
 			if(!CurlHttpClient.sendPost(url, params, pPM->isVerboseLog()))
 			{
-				ucstring errorMessage("Can't send (error code 60)");
+				string errorMessage("Can't send (error code 60)");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.toString().c_str());
+				nlwarning(errorMessage.c_str());
 				return;
 			}
 
 			string res;
 			if(!CurlHttpClient.receive(res, pPM->isVerboseLog()))
 			{
-				ucstring errorMessage("Can't receive (error code 61)");
+				string errorMessage("Can't receive (error code 61)");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.toString().c_str());
+				nlwarning(errorMessage.c_str());
 				return;
 			}
 
 			if(res.empty())
 			{
-				ucstring errorMessage("Empty result (error code 13)");
+				string errorMessage("Empty result (error code 13)");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.toString().c_str());
+				nlwarning(errorMessage.c_str());
 				return;
 			}
 
