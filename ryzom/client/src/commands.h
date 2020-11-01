@@ -43,7 +43,7 @@ public:
 		std::vector<std::string>		Keywords;
 	};
 
-	CUserCommand (const std::string &commandName, const ucstring &help, const ucstring &argsHelp);
+	CUserCommand (const std::string &commandName, const std::string &help, const std::string &argsHelp);
 
 	void addMode (const std::string &action, uint numArg, bool infiniteAgr, const std::vector<std::string> &keywords);
 

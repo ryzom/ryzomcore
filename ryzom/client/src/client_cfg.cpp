@@ -2030,7 +2030,7 @@ void CClientConfig::init(const string &configFileName)
 	}
 
 	// read the exising config file (don't parse it yet!)
-	ucstring content;
+	ucstring content; // UTF-16 and UTF-8 textfile support
 	NLMISC::CI18N::readTextFile(configFileName, content);
 	std::string contentUtf8 = content.toUtf8();
 

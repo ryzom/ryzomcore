@@ -1992,11 +1992,11 @@ void CTempInvManager::updateForageQQ( uint whichOne )
 			break;
 		default:;
 		}
-		ucstring title = CI18N::get( WIN_TEMPINV_TITLE_FORAGING );
+		string title = CI18N::get( WIN_TEMPINV_TITLE_FORAGING );
 		strFindReplace( title, "%qt", toString( "%.1f", qt ) );
 		strFindReplace( title, "%ql", toString( "%.1f", ql ) );
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_TEMPINV));
-		pGC->setUCTitle( title );
+		pGC->setTitle( title );
 	}
 
 	isInUpdateForageQQ = false;
@@ -2170,7 +2170,7 @@ bool SBagOptions::parse(xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 }
 
 // ***************************************************************************
-void SBagOptions::setSearchFilter(const ucstring &s)
+void SBagOptions::setSearchFilter(const string &s)
 {
 	SearchQualityMin = 0;
 	SearchQualityMax = 999;
@@ -2179,13 +2179,13 @@ void SBagOptions::setSearchFilter(const ucstring &s)
 
 	if (!s.empty())
 	{
-		std::vector<ucstring> words;
-		splitUCString(toLower(s), ucstring(" "), words);
+		std::vector<string> words;
+		splitString(toLower(s), string(" "), words);
 
 		size_t pos;
 		for(int i = 0; i<words.size(); ++i)
 		{
-			std::string kw = words[i].toUtf8();
+			std::string kw = words[i];
 
 			pos = kw.find("-");
 			if (pos != std::string::npos)
@@ -2289,17 +2289,17 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 		if (SearchFilter.size() > 0)
 		{
 			bool match = true;
-			ucstring lcName = toLower(pCS->getItemActualName());
+			string lcName = toLower(pCS->getItemActualName());
 
 			// add item quality as a keyword to match
 			if (pCS->getQuality() > 1)
 			{
-				lcName += ucstring(" " + toString(pCS->getQuality()));
+				lcName += string(" " + toString(pCS->getQuality()));
 			}
 
 			for (uint i = 0; i< SearchFilter.size(); ++i)
 			{
-				if (lcName.find(SearchFilter[i]) == ucstring::npos)
+				if (lcName.find(SearchFilter[i]) == string::npos)
 				{
 					return false;
 				}
@@ -2712,7 +2712,7 @@ class CHandlerInvSearchButton : public IActionHandler
 			return;
 		}
 
-		ucstring filter;
+		string filter;
 		std::string id = btn->getParent()->getId() + ":" + sParams + ":eb";
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(id));
 		if (!eb)
@@ -2726,7 +2726,7 @@ class CHandlerInvSearchButton : public IActionHandler
 		{
 			CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 			eb->setSelectionAll();
-			filter = eb->getInputStringAsUtf16();
+			filter = eb->getInputString();
 		}
 
 		CDBGroupListSheetBag *pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(btn->getParent()->getId() + ":bag_list"));
@@ -2776,10 +2776,10 @@ class CHandlerInvSetSearch : public IActionHandler
 		std::string id = pCaller->getParent()->getParent()->getId();
 
 		CDBGroupListSheetBag *pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(id + ":bag_list"));
-		if (pList != NULL) pList->setSearchFilter(eb->getInputStringAsUtf16());
+		if (pList != NULL) pList->setSearchFilter(eb->getInputString());
 
 		CDBGroupIconListBag *pIcons = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(id + ":bag_icons"));
-		if (pIcons != NULL) pIcons->setSearchFilter(eb->getInputStringAsUtf16());
+		if (pIcons != NULL) pIcons->setSearchFilter(eb->getInputString());
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerInvSetSearch, "inv_set_search" );

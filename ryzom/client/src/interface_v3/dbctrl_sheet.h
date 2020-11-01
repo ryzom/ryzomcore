@@ -73,7 +73,7 @@ public:
 		: IItemInfoWaiter(), Requesting(false)
 	{ }
 public:
-	ucstring infoValidated() const;
+	std::string infoValidated() const;
 	void sendRequest();
 	virtual void infoReceived();
 };
@@ -582,7 +582,7 @@ public:
 	void	setItemColor(sint32 val) {if(_UserColor) _UserColor->setValue32(val);}
 
 	// Get the Actual item name. Localized version of SheetId, or given by server through NAMEID.
-	ucstring getItemActualName() const;
+	std::string getItemActualName() const;
 
 	/// true if support drag copy (with CTRL). action handler has to check control.
 	bool	canDragCopy() const {return _DragCopy;}
@@ -626,7 +626,7 @@ protected:
 	// optSheet is for special faber
 	void setupDisplayAsSBrick(sint32 sheet, sint32 optSheet= 0);
 	// setup icon from phrases
-	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const ucstring &phraseName);
+	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const std::string &phraseName);
 
 	// draw a number and returns the width of the drawn number
 	sint32 drawNumber(sint32 x, sint32 y, sint32 wSheet, sint32 hSheet, NLMISC::CRGBA color, sint32 value, bool rightAlign=true);

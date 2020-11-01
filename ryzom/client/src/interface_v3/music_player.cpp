@@ -327,9 +327,7 @@ void CMusicPlayer::rebuildPlaylist()
 				CViewText *pVT = dynamic_cast<CViewText *>(pNew->getView(TEMPLATE_PLAYLIST_SONG_TITLE));
 				if (pVT)
 				{
-					ucstring title;
-					title.fromUtf8(_Songs[i].Title);
-					pVT->setText(title.toUtf8());
+					pVT->setText(_Songs[i].Title);
 				}
 
 				pVT = dynamic_cast<CViewText *>(pNew->getView(TEMPLATE_PLAYLIST_SONG_DURATION));
@@ -588,9 +586,17 @@ static void addFromPlaylist(const std::string &playlist, const std::vector<std::
 
 			if (!useUtf8)
 			{
-				lineStr = ucstring(line).toUtf8();
+				lineStr = NLMISC::mbcsToUtf8(line); // Attempt local codepage first
+				if (lineStr.empty())
+					lineStr = CUtfStringView::fromAscii(std::string(line));
 				lineStr = trim(lineStr);
 			}
+			else
+			{
+				lineStr = trim(std::string(line + 3));
+			}
+
+			lineStr = CUtfStringView(lineStr).toUtf8(true); // Re-encode external string
 
 			// Not a comment line
 			if (lineStr[0] != '#')

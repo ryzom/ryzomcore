@@ -136,13 +136,13 @@ void				CDBGroupListSheetIconPhrase::setSectionGroupId(CInterfaceGroup	*pIG, uin
 	CViewText *name = dynamic_cast<CViewText*>(pIG->getView("name"));
 	if (name != NULL)
 	{
-		ucstring	sectionText= CI18N::get("uiPhraseSectionFmt");
+		string	sectionText= CI18N::get("uiPhraseSectionFmt");
 		uint32	minLevel, maxLevel;
 		CSPhraseManager		*pPM= CSPhraseManager::getInstance();
 		pPM->getPhraseLevelFromSection(sectionId, minLevel, maxLevel);
 		strFindReplace(sectionText, "%min", toString(minLevel));
 		strFindReplace(sectionText, "%max", toString(maxLevel));
-		name->setText (sectionText.toUtf8());
+		name->setText (sectionText);
 	}
 }
 

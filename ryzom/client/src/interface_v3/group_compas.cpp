@@ -750,8 +750,8 @@ void CGroupCompasMenu::setActive (bool state)
 				/*CEntityCL *entity = EntitiesMngr.entity(UserEntity->selection());
 				if (entity != NULL)
 				{*/
-					//ucstring targetName = CI18N::get("uiTargetTwoPoint") + entity->removeTitleAndShardFromName(entity->getEntityName());
-					std::string targetName = CI18N::get("uiTarget");
+					//string targetName = CI18N::get("uiTargetTwoPoint") + entity->removeTitleAndShardFromName(entity->getEntityName());
+					string targetName = CI18N::get("uiTarget");
 					ct.setType(CCompassTarget::Selection);
 					ct.Name = targetName;
 					Targets.push_back(ct);

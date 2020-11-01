@@ -23,7 +23,6 @@
 #ifndef CL_CHAT_WINDOW_H
 #define CL_CHAT_WINDOW_H
 
-#include "nel/misc/ucstring.h"
 #include "nel/misc/smart_ptr.h"
 
 #include "game_share/chat_group.h"
@@ -57,7 +56,7 @@ struct CChatWindowDesc
 {
 	typedef	std::vector<std::pair<std::string,std::string> >	TTemplateParams;
 
-	ucstring				Title;                // unique title for the window
+	std::string				Title;                // unique title for the window
 	std::string				FatherContainer;      // name of the father container. If empty, the chat box must be added manually in the hierarchy
 	std::string				ChatTemplate;         // Template for the chat interface, or "" to use the default one
 	TTemplateParams			ChatTemplateParams;	  // optional template parameters
@@ -94,7 +93,7 @@ public:
 		// called by a CChatWindow when it is deleted
 		virtual void chatWindowRemoved(CChatWindow * /* cw */) {}
 		// called by a CChatWindow when a msg has been displayed in it ('displayMessage' has been called)
-		//virtual void displayMessage(CChatWindow *cw, const ucstring &msg, NLMISC::CRGBA col, uint numBlinks = 0) {}
+		//virtual void displayMessage(CChatWindow *cw, const std::string &msg, NLMISC::CRGBA col, uint numBlinks = 0) {}
 	};
 public:
 	// display a message in this chat box with the given color
@@ -109,17 +108,15 @@ public:
 	void enableBlink(uint numBlinks);
 	// set a command to be displayed and eventually executed in this chat window. std::string version for backward compatibility
 	void setCommand(const std::string &command, bool execute);
-	// set a command to be displayed and eventually executed in this chat window
-	void setCommand(const ucstring &command, bool execute);
 	// set a string to be displayed in the edit box of this window (if it has one)
-	void setEntry(const ucstring &entry);
+	void setEntry(const std::string &entry);
 	// Set listener to react to a chat entry
 	void setListener(IChatWindowListener *listener) { _Listener = listener; }
 	IChatWindowListener *getListener() const { return _Listener; }
 	// Set the menu for the chat
 	void setMenu(const std::string &menuName);
 	// Set a new prompt for the chat window
-	void setPrompt(const ucstring &prompt);
+	void setPrompt(const std::string &prompt);
 	// Set the color for the chat window
 	void setPromptColor(NLMISC::CRGBA col);
 	/** Get the container associated with this chat window
@@ -131,7 +128,7 @@ public:
 	/** try to rename the chat window
 	  * \return true if success
 	  */
-	bool rename(const ucstring &newName, bool newNameLocalize);
+	bool rename(const std::string &newName, bool newNameLocalize);
 	/** delete the container
 	  * Don't do it in the dtor, because done automatically at the end of the app by the interface manager.
 	  * Useful only if querried by the user
@@ -140,7 +137,7 @@ public:
 	// get the last chat window from which a command has been called
 	static CChatWindow *getChatWindowLaunchingCommand() { return _ChatWindowLaunchingCommand; }
 	// get the title of this chat window
-	ucstring getTitle() const;
+	std::string getTitle() const;
 	// observers
 	void addObserver(IObserver *obs);
 	void removeObserver(IObserver *obs);
@@ -154,7 +151,7 @@ public:
 	void setAHOnCloseButtonParams(const std::string &n);
 	void setHeaderColor(const std::string &n);
 	//
-	void displayLocalPlayerTell(const ucstring &receiver, const ucstring &msg, uint numBlinks = 0);
+	void displayLocalPlayerTell(const std::string &receiver, const std::string &msg, uint numBlinks = 0);
 
 	/// Encode a color tag '@{RGBA}' in the text. If append is true, append at end of text, otherwise, replace the text
 	static void encodeColorTag(const NLMISC::CRGBA &color, std::string &text, bool append=true);
@@ -196,8 +193,8 @@ public:
 	void setTabIndex(sint32 n);
 
 	// Free Teller
-	NLGUI::CGroupContainer *createFreeTeller(const ucstring &winName, const std::string &winColor="");
-	void setActiveFreeTeller(const ucstring &winName, bool bActive=true);
+	NLGUI::CGroupContainer *createFreeTeller(const std::string &winName, const std::string &winColor="");
+	void setActiveFreeTeller(const std::string &winName, bool bActive=true);
 	std::string getFreeTellerName(const std::string &containerID);
 	bool removeFreeTeller(const std::string &containerID); // Return true if free teller found
 	void removeAllFreeTellers();
@@ -245,9 +242,9 @@ public:
 	CChatWindow *createChatGroupWindow(const CChatWindowDesc &desc);
 
 	// Get a chat window by its title
-	CChatWindow *getChatWindow(const ucstring &title);
+	CChatWindow *getChatWindow(const std::string &title);
 	/// Remove a chat window by its title
-	void		 removeChatWindow(const ucstring &title);
+	void		 removeChatWindow(const std::string &title);
 	// Remove a chat window by its pointer
 	void		 removeChatWindow(CChatWindow *cw);
 	/// from a ctrl of a chat box that triggered a menu, or an event, retrieve the associated chat box
@@ -255,14 +252,14 @@ public:
 	// Singleton pattern applied to the chat window manager
 	static CChatWindowManager &getInstance();
 	// try to rename a window
-	bool rename(const ucstring &oldName, const ucstring &newName, bool newNameLocalize);
+	bool rename(const std::string &oldName, const std::string &newName, bool newNameLocalize);
 	// warning : this is slow
 	uint getNumChatWindow() const { return (uint)_ChatWindowMap.size(); }
 	// warning : this is slow : for debug only
 	CChatWindow *getChatWindowByIndex(uint index);
 ///////////////////////////////////////////////////////////////////////////////////////
 private:
-	typedef std::map<ucstring, NLMISC::CRefPtr<CChatWindow> > TChatWindowMap;
+	typedef std::map<std::string, NLMISC::CRefPtr<CChatWindow> > TChatWindowMap;
 private:
 	//
 	TChatWindowMap	_ChatWindowMap;

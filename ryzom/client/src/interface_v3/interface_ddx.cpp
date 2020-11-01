@@ -351,7 +351,7 @@ void CInterfaceDDX::CParam::updateScrollView(sint32 nVal)
 {
 	if(ResultView)
 	{
-		ResultView->setText(toString(nVal) + ResultUnit.toUtf8());
+		ResultView->setText(toString(nVal) + ResultUnit);
 	}
 }
 
@@ -362,7 +362,7 @@ void CInterfaceDDX::CParam::updateScrollView(double nVal)
 	{
 		// allow N digits
 		string	fmt= toString("%%.%df", ResultDecimal);
-		ResultView->setText(toString(fmt.c_str(), nVal) + ResultUnit.toUtf8());
+		ResultView->setText(toString(fmt.c_str(), nVal) + ResultUnit);
 	}
 }
 

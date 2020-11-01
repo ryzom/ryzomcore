@@ -58,7 +58,7 @@ CGroupHTMLForum::~CGroupHTMLForum()
 
 void CGroupHTMLForum::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 {
- 	ucstring user_name = UserEntity->getLoginName ();
+ 	string user_name = UserEntity->getLoginName ();
 	const SGuild &guild = CGuildManager::getInstance()->getGuild();
 	string	gname = guild.Name;
 
@@ -76,7 +76,7 @@ void CGroupHTMLForum::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 
 		url += ((url.find('?') != string::npos) ? "&" : "?") +
 		string("shard=") + toString(CharacterHomeSessionId) +
-		string("&user_login=") + user_name.toString() +
+		string("&user_login=") + user_name +
 		string("&forum=") + gname +
 		string("&session_cookie=") + NetMngr.getLoginCookie().toString();
 	}
@@ -90,14 +90,14 @@ void CGroupHTMLForum::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 
 void CGroupHTMLForum::addHTTPPostParams (SFormFields &formfields, bool /*trustedDomain*/)
 {
-	ucstring user_name = UserEntity->getLoginName ();
+	string user_name = UserEntity->getLoginName ();
 	const SGuild &guild = CGuildManager::getInstance()->getGuild();
 	string	gname = guild.Name;
 
 	if (!gname.empty())
 	{
 		formfields.add("shard", toString(CharacterHomeSessionId));
-		formfields.add("user_login", user_name.toString());
+		formfields.add("user_login", user_name);
 		formfields.add("forum", gname);
 		formfields.add("session_cookie", NetMngr.getLoginCookie().toString());
 	}

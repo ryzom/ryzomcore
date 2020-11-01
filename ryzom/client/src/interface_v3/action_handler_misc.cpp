@@ -836,7 +836,7 @@ class CAHReplyTeller : public IActionHandler
 			{
 				w->setKeyboardFocus();
 				w->enableBlink(1);
-				PeopleInterraction.ChatGroup.Filter.setTargetPlayer(CEntityCL::removeTitleAndShardFromName(PeopleInterraction.LastSenderName.toUtf8()));
+				PeopleInterraction.ChatGroup.Filter.setTargetPlayer(CEntityCL::removeTitleAndShardFromName(PeopleInterraction.LastSenderName));
 				CGroupEditBox *eb = w->getEditBox();
 				if (eb != NULL)
 				{
@@ -863,7 +863,7 @@ class CAHReplyTellerOnce : public IActionHandler
 			{
 				w->setKeyboardFocus();
 				w->enableBlink(1);
-				w->setCommand(ucstring("tell ") + CEntityCL::removeTitleAndShardFromName(PeopleInterraction.LastSenderName.toUtf8()) + ucstring(" "), false);
+				w->setCommand("tell " + CEntityCL::removeTitleAndShardFromName(PeopleInterraction.LastSenderName) + " ", false);
 				CGroupEditBox *eb = w->getEditBox();
 				if (eb != NULL)
 				{
@@ -908,7 +908,7 @@ REGISTER_ACTION_HANDLER (CAHCycleTell, "cycle_tell")
 NLMISC_COMMAND(slsn, "Temp : set the name of the last sender.", "<name>")
 {
 	if (args.size() != 1) return false;
-	PeopleInterraction.LastSenderName = ucstring(args[0]);
+	PeopleInterraction.LastSenderName = args[0];
 	return true;
 }
 
@@ -924,8 +924,8 @@ bool CStringPostProcessRemoveName::cbIDStringReceived(string &inOut)
 		inOut = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(strNewTitle, Woman);
 		{
 			// Sometimes translation contains another title
-			ucstring::size_type pos = inOut.find('$');
-			if (pos != ucstring::npos)
+			string::size_type pos = inOut.find('$');
+			if (pos != string::npos)
 			{
 				inOut = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(inOut), Woman);
 			}

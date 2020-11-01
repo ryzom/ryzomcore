@@ -313,7 +313,7 @@ static DECLARE_INTERFACE_USER_FCT(getSheetName)
 	// if from ctrlSheet, then take the correct ACTUAL name (ie from NAMEID if not 0)
 	if(ctrlSheet)
 	{
-		result.setString(ctrlSheet->getItemActualName().toUtf8());
+		result.setString(ctrlSheet->getItemActualName());
 		return true;
 	}
 	// Standard (but less accurate) way

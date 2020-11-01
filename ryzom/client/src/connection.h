@@ -36,8 +36,8 @@ extern std::vector<CCharacterSummary>	CharacterSummaries;
 extern std::string UserPrivileges;
 extern sint LoginCharsel;
 
-extern ucstring NewKeysCharNameWanted;
-extern ucstring NewKeysCharNameValidated;
+extern std::string NewKeysCharNameWanted;
+extern std::string NewKeysCharNameValidated;
 extern std::string GameKeySet;
 extern std::string RingEditorKeySet;
 
@@ -71,12 +71,14 @@ enum TInterfaceState
 TInterfaceState autoLogin (const std::string &cookie, const std::string &fsaddr, bool firstConnection);
 
 
-std::string buildPlayerNameForSaveFile(const ucstring &playerNameIn);
+std::string buildPlayerNameForSaveFile(const std::string &playerNameIn);
 
 
 void globalMenuMovieShooter();
 
+#ifdef RYZOM_BG_DOWNLOADER
 void updateBGDownloaderUI();
+#endif
 
 // compute patcher priority, depending on the presence of one or more mainland characters : in this case, give the patch a boost
 void updatePatcherPriorityBasedOnCharacters();

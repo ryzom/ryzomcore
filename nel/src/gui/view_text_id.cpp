@@ -231,9 +231,7 @@ namespace NLGUI
 			// Modify the text?
 			if (_StringModifier)
 			{
-				ucstring tmp = ucstring::makeFromUtf8(result);
-				_StringModifier->onReceiveTextId(tmp); // FIXME: UTF-8
-				result = tmp.toUtf8();
+				_StringModifier->onReceiveTextId(result);
 			}
 
 			// Set the Text

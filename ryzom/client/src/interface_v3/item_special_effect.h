@@ -32,7 +32,7 @@ public:
 	static CItemSpecialEffectHelper* getInstance();
 
 	// Fill itemText with special effects from item sheet
-	void getItemSpecialEffectText(const CItemSheet *pIS, ucstring &itemText);
+	void getItemSpecialEffectText(const CItemSheet *pIS, std::string &itemText);
 
 	// Register a new item special effect
 	void registerItemSpecialEffect(const std::string &name);
@@ -42,7 +42,7 @@ private:
 	CItemSpecialEffectHelper(const CItemSpecialEffectHelper&);
 
 	// Get UI text with values filled from 'effect' string
-	ucstring getEffect(const std::string &effect, bool &first);
+	std::string getEffect(const std::string &effect, bool &first);
 
 	// Map effects name with parameters
 	typedef std::vector<std::string> stringVector;

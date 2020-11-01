@@ -1266,7 +1266,7 @@ class CHandlerInvGuildToBag : public IActionHandler
 
 		if (!bPlaceFound)
 		{
-			ucstring msg = CI18N::get("msgCantPutItemInBag");
+			string msg = CI18N::get("msgCantPutItemInBag");
 			string cat = getStringCategory(msg, msg);
 			pIM->displaySystemInfo(msg, cat);
 			return;

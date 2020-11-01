@@ -732,7 +732,7 @@ public:
 			CEntityCL *entity = EntitiesMngr.entity(trader);
 			if (entity)
 			{
-				ucstring playerName = entity->getEntityName();
+				string playerName = entity->getEntityName();
 				if (!playerName.empty())
 				{
 					PeopleInterraction.askAddContact(playerName, &PeopleInterraction.FriendList);
@@ -4011,7 +4011,6 @@ REGISTER_ACTION_HANDLER(CHandlerSelectProtectedSlot, "select_protected_slot");
 
 // ***************************************************************************
 // Common code
-//static	void	fillPlayerBarText(ucstring &str, const string &dbScore, const string &dbScoreMax, const string &ttFormat)
 static	void	fillPlayerBarText(std::string &str, const string &dbScore, SCORES::TScores score, const string &ttFormat)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
@@ -4555,7 +4554,7 @@ public:
 				}
 				else
 				{
-					ucstr = ucstring("&EMT&") + UserEntity->getDisplayName() + ucstring(" ") + ucstr;
+					ucstr = ucstring("&EMT&") + UserEntity->getDisplayName() + ucstring(" ") + ucstr; // FIXME: UTF-8 (serial)
 				}
 
 				out.serialEnum(behavToSend);

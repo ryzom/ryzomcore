@@ -41,10 +41,10 @@ struct CMainlandSummary
 	TSessionId Id;
 
 	/// description
-	ucstring Name;
+	ucstring Name; // TODO: UTF-8 (serial)
 
 	/// description
-	ucstring Description;
+	ucstring Description; // TODO: UTF-8 (serial)
 
 	/// language code
 	std::string LanguageCode;

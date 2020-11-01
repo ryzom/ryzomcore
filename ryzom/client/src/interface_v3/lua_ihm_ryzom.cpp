@@ -512,16 +512,18 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		luabind::def("messageBox", (void(*)(const ucstring &, const std::string &)) &messageBox),
 		luabind::def("messageBox", (void(*)(const ucstring &, const std::string &, int caseMode)) &messageBox),
 		luabind::def("messageBox", (void(*)(const std::string &)) &messageBox),
-		luabind::def("messageBoxWithHelp", (void(*)(const ucstring &)) &messageBoxWithHelp),
-		luabind::def("messageBoxWithHelp", (void(*)(const ucstring &, const std::string &)) &messageBoxWithHelp),
-		luabind::def("messageBoxWithHelp", (void(*)(const ucstring &, const std::string &, int caseMode)) &messageBoxWithHelp),
+		luabind::def("messageBoxWithHelp", (void(*)(const ucstring &)) &messageBoxWithHelp), // TODO: Lua UTF-8
+		luabind::def("messageBoxWithHelp", (void(*)(const ucstring &, const std::string &)) &messageBoxWithHelp), // TODO: Lua UTF-8
+		luabind::def("messageBoxWithHelp", (void(*)(const ucstring &, const std::string &, int caseMode)) &messageBoxWithHelp), // TODO: Lua UTF-8
 		luabind::def("messageBoxWithHelp", (void(*)(const std::string &)) &messageBoxWithHelp),
 		LUABIND_FUNC(replacePvpEffectParam),
 		LUABIND_FUNC(secondsSince1970ToHour),
+#ifdef RYZOM_BG_DOWNLOADER
 		LUABIND_FUNC(pauseBGDownloader),
 		LUABIND_FUNC(unpauseBGDownloader),
 		LUABIND_FUNC(requestBGDownloaderPriority),
 		LUABIND_FUNC(getBGDownloaderPriority),
+#endif
 		LUABIND_FUNC(loadBackground),
 		LUABIND_FUNC(getPatchLastErrorMessage),
 		LUABIND_FUNC(getPlayerSelectedSlot),
@@ -805,7 +807,7 @@ int CLuaIHMRyzom::validMessageBox(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, funcName, 5, LUA_TSTRING);
 	CLuaIHM::checkArgType(ls, funcName, 6, LUA_TSTRING);
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->validMessageBox(CInterfaceManager::QuestionIconMsg, msg, ls.toString(2), ls.toString(3), ls.toString(4), ls.toString(5), ls.toString(6));
+	im->validMessageBox(CInterfaceManager::QuestionIconMsg, msg.toUtf8(), ls.toString(2), ls.toString(3), ls.toString(4), ls.toString(5), ls.toString(6));
 	return 0;
 }
 
@@ -2845,7 +2847,7 @@ void		CLuaIHMRyzom::messageBox(const ucstring &text)
 {
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBox(text);
+	pIM->messageBox(text.toUtf8());
 }
 
 // ***************************************************************************
@@ -2853,7 +2855,7 @@ void		CLuaIHMRyzom::messageBox(const ucstring &text, const std::string &masterGr
 {
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBox(text, masterGroup);
+	pIM->messageBox(text.toUtf8(), masterGroup);
 }
 
 // ***************************************************************************
@@ -2866,7 +2868,7 @@ void		CLuaIHMRyzom::messageBox(const ucstring &text, const std::string &masterGr
 
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBox(text, masterGroup, (TCaseMode) caseMode);
+	pIM->messageBox(text.toUtf8(), masterGroup, (TCaseMode) caseMode);
 }
 
 // ***************************************************************************
@@ -2885,23 +2887,23 @@ void		CLuaIHMRyzom::messageBox(const std::string &text)
 }
 
 // ***************************************************************************
-void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text)
+void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text) // TODO: Lua UTF-8
 {
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBoxWithHelp(text);
+	pIM->messageBoxWithHelp(text.toUtf8());
 }
 
 // ***************************************************************************
-void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text, const std::string &masterGroup)
+void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text, const std::string &masterGroup) // TODO: Lua UTF-8
 {
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBoxWithHelp(text, masterGroup);
+	pIM->messageBoxWithHelp(text.toUtf8(), masterGroup);
 }
 
 // ***************************************************************************
-void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text, const std::string &masterGroup, int caseMode)
+void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text, const std::string &masterGroup, int caseMode) // TODO: Lua UTF-8
 {
 	if (caseMode < 0 || caseMode >= CaseCount)
 	{
@@ -2910,7 +2912,7 @@ void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text, const std::string &
 
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBoxWithHelp(text, masterGroup, "" , "", (TCaseMode) caseMode);
+	pIM->messageBoxWithHelp(text.toUtf8(), masterGroup, "" , "", (TCaseMode) caseMode);
 }
 
 // ***************************************************************************
@@ -3038,6 +3040,7 @@ sint32 CLuaIHMRyzom::secondsSince1970ToHour(sint32 seconds)
 	return tstruct->tm_hour;	// 0-23
 }
 
+#ifdef RYZOM_BG_DOWNLOADER
 // ***************************************************************************
 void CLuaIHMRyzom::pauseBGDownloader()
 {
@@ -3066,6 +3069,7 @@ sint CLuaIHMRyzom::getBGDownloaderPriority()
 {
 	return CBGDownloaderAccess::getInstance().getDownloadThreadPriority();
 }
+#endif
 
 // ***************************************************************************
 void CLuaIHMRyzom::loadBackground(const std::string &bg)
@@ -3078,11 +3082,13 @@ void CLuaIHMRyzom::loadBackground(const std::string &bg)
 // ***************************************************************************
 ucstring CLuaIHMRyzom::getPatchLastErrorMessage()
 {
+#ifdef RYZOM_BG_DOWNLOADER
 	if (isBGDownloadEnabled())
 	{
 		return CBGDownloaderAccess::getInstance().getLastErrorMessage();
 	}
 	else
+#endif
 	{
 		CPatchManager *pPM = CPatchManager::getInstance();
 		return pPM->getLastErrorMessage();
@@ -3582,7 +3588,7 @@ void CLuaIHMRyzom::tell(const ucstring &player, const ucstring &msg)
 				CInterfaceManager *im = CInterfaceManager::getInstance();
 				w->setKeyboardFocus();
 				w->enableBlink(1);
-				w->setCommand(ucstring("tell ") + CEntityCL::removeTitleFromName(player.toUtf8()) + ucstring(" "), false);
+				w->setCommand("tell " + CEntityCL::removeTitleFromName(player.toUtf8()) + " ", false);
 				CGroupEditBox *eb = w->getEditBox();
 
 				if (eb != NULL)

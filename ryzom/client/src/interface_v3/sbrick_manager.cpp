@@ -486,7 +486,7 @@ void			CSBrickManager::compileBrickProperties()
 								k++;
 							}
 							// Param Id modifier? (ie read not the 0th value, but the 1th etc... up to 9)
-							else if(k<textSize && isdigit(text[k]))
+							else if(k<textSize && (uint8)text[k] < (uint8)'\x80' && isdigit(text[k]))
 							{
 								char	tp[2];
 								tp[0]= (char)text[k];

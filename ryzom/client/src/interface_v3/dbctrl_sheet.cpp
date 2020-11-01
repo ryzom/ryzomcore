@@ -102,9 +102,9 @@ void CControlSheetInfoWaiter::infoReceived()
 }
 
 
-ucstring CControlSheetInfoWaiter::infoValidated() const
+string CControlSheetInfoWaiter::infoValidated() const
 {
-	ucstring help;
+	ucstring help; // FIXME: Lua UTF-8
 	if (CtrlSheet && !LuaMethodName.empty())
 	{
 		// delegate setup of context he help ( & window ) to lua
@@ -131,7 +131,7 @@ ucstring CControlSheetInfoWaiter::infoValidated() const
 		}
 	}
 
-	return help;
+	return help.toUtf8();
 }
 
 // ***************************************************************************
@@ -1659,7 +1659,7 @@ void CDBCtrlSheet::setupSBrick ()
 }
 
 // ***************************************************************************
-void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const ucstring &phraseName)
+void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const string &phraseName)
 {
 	CSBrickManager		*pBM = CSBrickManager::getInstance();
 
@@ -1712,7 +1712,7 @@ void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bri
 	{
 		// Compute the text from the phrase only if needed
 //		string	iconName= phraseName.toString();
-		string	iconName= phraseName.toUtf8();
+		const string &iconName = phraseName;
 		if( _NeedSetup || iconName != _OptString )
 		{
 			// recompute text
@@ -1735,7 +1735,7 @@ void CDBCtrlSheet::setupSPhrase()
 		CSPhraseSheet *pSPS = dynamic_cast<CSPhraseSheet*>(SheetMngr.get(CSheetId(sheet)));
 		if (pSPS && !pSPS->Bricks.empty())
 		{
-			const ucstring phraseName(STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedName(CSheetId(sheet)));
+			const char *phraseName = STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedName(CSheetId(sheet));
 			setupDisplayAsPhrase(pSPS->Bricks, phraseName);
 		}
 		else
@@ -1793,7 +1793,7 @@ void CDBCtrlSheet::setupSPhraseId ()
 			}
 			else
 			{
-				setupDisplayAsPhrase(phrase.Bricks, phrase.Name);
+				setupDisplayAsPhrase(phrase.Bricks, phrase.Name.toUtf8()); // FIXME: UTF-8 (serial)
 			}
 		}
 
@@ -3388,22 +3388,22 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 		if (!macro)
 			return;
 
-		ucstring macroName = macro->Name;
+		string macroName = macro->Name;
 		if (macroName.empty())
 			macroName = CI18N::get("uiNotAssigned");
 
-		ucstring assignedTo = macro->Combo.toString();
+		string assignedTo = macro->Combo.toString();
 		if (assignedTo.empty())
 			assignedTo = CI18N::get("uiNotAssigned");
 
-		ucstring dispText;
-		ucstring dispCommands;
+		string dispText;
+		string dispCommands;
 		const CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 
 		uint nb = 0;
 		for (uint i = 0; i < macro->Commands.size(); ++i)
 		{
-			ucstring commandName;
+			string commandName;
 			for (uint j = 0; j < pMCM->ActionManagers.size(); ++j)
 			{
 				CAction::CName c(macro->Commands[i].Name.c_str(), macro->Commands[i].Params.c_str());
@@ -3419,14 +3419,14 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 			}
 		}
 		// formats
-		dispText = ucstring("%n (@{6F6F}%k@{FFFF})\n%c");
+		dispText = "%n (@{6F6F}%k@{FFFF})\n%c";
 		if (nb > 5) // more?
 			dispCommands += toString(" ... @{6F6F}%i@{FFFF}+", nb-5);
 
-		strFindReplace(dispText, ucstring("%n"), macroName);
-		strFindReplace(dispText, ucstring("%k"), assignedTo);
-		strFindReplace(dispText, ucstring("%c"), dispCommands);
-		help = dispText.toUtf8();
+		strFindReplace(dispText, "%n", macroName);
+		strFindReplace(dispText, "%k", assignedTo);
+		strFindReplace(dispText, "%c", dispCommands);
+		help = dispText;
 	}
 	else if(getType() == CCtrlSheetInfo::SheetType_Item)
 	{
@@ -3437,10 +3437,10 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 			{
 				// call lua function to update tooltip window
 				_ItemInfoWaiter.sendRequest();
-				help = _ItemInfoWaiter.infoValidated().toUtf8();
+				help = _ItemInfoWaiter.infoValidated();
 				// its expected to get at least item name back
 				if (help.empty())
-					help = getItemActualName().toUtf8();
+					help = getItemActualName();
 			}
 			else if (!_ContextHelp.empty())
 			{
@@ -3448,7 +3448,7 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 			}
 			else
 			{
-				help = getItemActualName().toUtf8();;
+				help = getItemActualName();;
 			}
 		}
 		else
@@ -3506,11 +3506,11 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 				game = game["game"];
 				game.callMethodByNameNoThrow("updatePhraseTooltip", 1, 1);
 				// retrieve result from stack
-				ucstring tmpHelp;
+				ucstring tmpHelp; // FIXME: Lua UTF-8
 				if (!ls->empty())
 				{
 					CLuaIHM::pop(*ls, tmpHelp); // FIXME: Lua UTF-8
-					help = tmpHelp.toUtf8();
+					help = tmpHelp.toUtf8(); // FIXME: Lua UTF-8
 				}
 				else
 				{
@@ -3531,10 +3531,10 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 		if (phraseSheetID != 0)
 		{
 			// is it a built-in phrase?
-			ucstring desc = STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId(phraseSheetID));
+			string desc = STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId(phraseSheetID));
 			if (!desc.empty())
 			{
-				help += ucstring("\n\n@{CCCF}") + desc;
+				help += "\n\n@{CCCF}" + desc;
 			}
 		}
 		*/
@@ -3569,7 +3569,7 @@ void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 			if (useItemInfoForFamily(item->Family))
 			{
 				_ItemInfoWaiter.sendRequest();
-				help = _ItemInfoWaiter.infoValidated().toUtf8();
+				help = _ItemInfoWaiter.infoValidated();
 				return;
 			}
 		}
@@ -4557,11 +4557,11 @@ void CDBCtrlSheet::initArmourColors()
 
 
 // ***************************************************************************
-ucstring CDBCtrlSheet::getItemActualName() const
+string CDBCtrlSheet::getItemActualName() const
 {
 	const CItemSheet *pIS= asItemSheet();
 	if(!pIS)
-		return ucstring();
+		return string();
 	else
 	{
 		string ret;
@@ -4581,7 +4581,7 @@ ucstring CDBCtrlSheet::getItemActualName() const
 		if (pIS->Family == ITEMFAMILY::SCROLL_R2)
 		{
 			const R2::TMissionItem *mi = R2::getEditor().getPlotItemInfos(getSheetId());
-			if (mi) return mi->Name;
+			if (mi) return mi->Name.toUtf8();
 		}
 		// if item is not a mp, append faber_quality & faber_stat_type
 		// Don't append quality and stat type for Named Items!!!

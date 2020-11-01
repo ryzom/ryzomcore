@@ -281,15 +281,15 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 	if(Ctrl->getSheetCategory() == CDBCtrlSheet::Phrase)
 	{
 		// For combat action, Append weapon restriction
-		ucstring	weaponRestriction;
+		string	weaponRestriction;
 		CSPhraseManager	*pPM= CSPhraseManager::getInstance();
 		bool melee,range;
 		pPM->getCombatWeaponRestriction(weaponRestriction, Ctrl->getSheetId(),melee,range);
 		// don't add also if no combat restriction
-		if(!weaponRestriction.empty() && weaponRestriction!=CI18N::getAsUtf16("uiawrSF"))
+		if(!weaponRestriction.empty() && weaponRestriction!=CI18N::get("uiawrSF"))
 		{
 			weaponRestriction= CI18N::get("uiPhraseWRHeader") + weaponRestriction;
-			text+= "\n" + weaponRestriction.toUtf8();
+			text+= "\n" + weaponRestriction;
 		}
 	}
 
@@ -432,7 +432,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 						// else display the name of the vendor (not if this is the player himself, to avoid flood)
 						else if (LastSellerType == BOTCHATTYPE::Resale)
 						{
-							text+= "\n" + CI18N::get("uiBotChatVendorTag") + VendorNameString.toUtf8();
+							text+= "\n" + CI18N::get("uiBotChatVendorTag") + VendorNameString;
 						}
 					}
 				}

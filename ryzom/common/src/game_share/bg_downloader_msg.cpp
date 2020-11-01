@@ -26,10 +26,10 @@ namespace BGDownloader
 
 const wchar_t *DownloaderMutexName = L"RyzomBgDownloader";
 
-ucstring getWrittenSize(uint32 nSize)
+std::string getWrittenSize(uint32 nSize)
 {
 	float fSize = ((float)nSize)/(1024.0f*1024.0f);
-	ucstring ucs = NLMISC::toString("%.1f", fSize) + " " + NLMISC::CI18N::get("uiMb");
+	std::string ucs = NLMISC::toString("%.1f", fSize) + " " + NLMISC::CI18N::get("uiMb");
 	return ucs;
 }
 

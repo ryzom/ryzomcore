@@ -87,7 +87,7 @@ using namespace NLMISC;
 
 // ***************************************************************************
 // Add the template key to the parent
-void addKeyLine (CGroupList *pParent, const ucstring &keyName, const ucstring &shortcutName, bool grayed)
+void addKeyLine (CGroupList *pParent, const string &keyName, const string &shortcutName, bool grayed)
 {
 	CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 	CMacroCmdManager	*pMCM = CMacroCmdManager::getInstance();
@@ -104,14 +104,14 @@ void addKeyLine (CGroupList *pParent, const ucstring &keyName, const ucstring &s
 	CViewText *pViewKeyName = dynamic_cast<CViewText*>(pKeysLine->getView(TEMPLATE_KEYS_KEY_NAME));
 	if (pViewKeyName != NULL)
 	{
-		pViewKeyName->setText (keyName.toUtf8());
+		pViewKeyName->setText (keyName);
 		pViewKeyName->setColor(grayed?CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlTextGrayColor).getValColor():CRGBA::White);
 	}
 
 	CViewText *pViewShortcutName = dynamic_cast<CViewText*>(pKeysLine->getView(TEMPLATE_KEYS_SHORTCUT_NAME));
 	if (pViewShortcutName != NULL)
 	{
-		pViewShortcutName->setText (shortcutName.toUtf8());
+		pViewShortcutName->setText (shortcutName);
 		pViewShortcutName->setColor(grayed?CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlTextGrayColor).getValColor():CRGBA::White);
 	}
 
@@ -125,7 +125,7 @@ struct CComboActionName
 	CCombo				Combo;		// KeyCount <=> action name unbound
 	CAction::CName		ActionName;
 };
-void buildActionToComboMap(uint8 nAM, CGroupList * /* pList */, string catName, map<ucstring, CComboActionName> &remaped)
+void buildActionToComboMap(uint8 nAM, CGroupList * /* pList */, string catName, map<string, CComboActionName> &remaped)
 {
 	CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 	CActionsManager *pAM = pMCM->ActionManagers[nAM];
@@ -148,7 +148,7 @@ void buildActionToComboMap(uint8 nAM, CGroupList * /* pList */, string catName, 
 			// see if action active in current context
 			if (pAM->isActionPresentInContext(it->second))
 			{
-				pair<ucstring, CComboActionName>	value;
+				pair<string, CComboActionName>	value;
 				// Don't take any risk: avoid any bug if the localisation is buggy and give same text for 2 differents CAction::CName
 				// Use the localized text first, to have correct sort according to language
 				value.first= pAM->getActionLocalizedText(rName) + rName.Name + rName.Argu;
@@ -177,7 +177,7 @@ void buildActionToComboMap(uint8 nAM, CGroupList * /* pList */, string catName, 
 			// see if action active in current context
 			if (pAM->isActionPresentInContext(rName))
 			{
-				pair<ucstring, CComboActionName>	value;
+				pair<string, CComboActionName>	value;
 				// Don't take any risk: avoid any bug if the localisation is buggy and give same text for 2 differents CAction::CName
 				// Use the localized text first, to have correct sort according to language
 				value.first= pAM->getActionLocalizedText(rName) + rName.Name + rName.Argu;
@@ -197,15 +197,15 @@ void buildActionToComboMap(uint8 nAM, CGroupList * /* pList */, string catName, 
 
 
 // Get all the couple (combo,action) from the action manager nAM and insert them into pList (with the template)
-void getAllComboAction(uint8 nAM, CGroupList *pList, const map<ucstring, CComboActionName> &remaped)
+void getAllComboAction(uint8 nAM, CGroupList *pList, const map<string, CComboActionName> &remaped)
 {
 	CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 	CActionsManager *pAM = pMCM->ActionManagers[nAM];
 	// *** Fill Actions
-	map<ucstring, CComboActionName>::const_iterator remapIT = remaped.begin();
+	map<string, CComboActionName>::const_iterator remapIT = remaped.begin();
 	while (remapIT != remaped.end())
 	{
-		ucstring keyName;
+		string keyName;
 		if(remapIT->second.Combo.Key==KeyCount)
 			keyName= CI18N::get("uiNotAssigned");
 		else
@@ -213,7 +213,7 @@ void getAllComboAction(uint8 nAM, CGroupList *pList, const map<ucstring, CComboA
 		const CBaseAction *baseAction = pAM->getBaseAction(remapIT->second.ActionName);
 		if (baseAction)
 		{
-			ucstring shortcutName = baseAction->getActionLocalizedText(remapIT->second.ActionName);
+			string shortcutName = baseAction->getActionLocalizedText(remapIT->second.ActionName);
 
 			addKeyLine(pList, keyName, shortcutName, remapIT->second.Combo.Key==KeyCount);
 			CModalContainerEditCmd::CLine	line;
@@ -274,7 +274,7 @@ public:
 					pList->clearGroups();
 					pList->setDynamicDisplaySize(true);
 
-					map<ucstring, CComboActionName> remaped;
+					map<string, CComboActionName> remaped;
 					buildActionToComboMap(nAM, pList, rCats[i].Name, remaped);
 					if (!remaped.empty())
 					{

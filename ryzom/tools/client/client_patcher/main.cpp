@@ -252,8 +252,8 @@ int main(int argc, char *argv[])
 	pPM->init(patchURLs, PatchUrl, "");
 	pPM->startCheckThread(true /* include background patchs */);
 
-	ucstring state;
-	vector<ucstring> log;
+	string state;
+	vector<string> log;
 	bool res = false;
 	bool finished = false;
 

@@ -79,7 +79,7 @@ private:
 		// The tex view, result of the scroll
 		CViewTextPtr		ResultView;
 		// The unit to append to the result string
-		ucstring			ResultUnit;
+		std::string			ResultUnit;
 		// For ScrollBarFloat widget only
 		uint8				ResultDecimal;
 		// For ScrollBarFloat widget only

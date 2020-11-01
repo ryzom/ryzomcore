@@ -698,7 +698,7 @@ void CItemGroupManager::listGroup()
 	{
 		CItemGroup group = _Groups[i];
 		string msg = NLMISC::CI18N::get("cmdListGroupLine");
-		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		//Use utf-8 string because group name can contain accentued characters (and stuff like that)
 		string nameUC = group.name;
 		NLMISC::strFindReplace(msg, "%name", nameUC);
 		NLMISC::strFindReplace(msg, "%size", NLMISC::toString(group.Items.size()));

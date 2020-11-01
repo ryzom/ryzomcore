@@ -2351,7 +2351,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 		if (pVT != NULL) pVT->setText(_Title);
 
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player"));
-		if (pGC != NULL) pGC->setUCTitle(_EntityName);
+		if (pGC != NULL) pGC->setTitle(_EntityName);
 
 		CSkillManager *pSM = CSkillManager::getInstance();
 		pSM->setPlayerTitle(_TitleRaw);

@@ -279,9 +279,9 @@ void	launchPhraseComposition(bool creation)
 
 			// Set the Text of the Window
 			if(creation)
-				window->setUCTitle(CI18N::get("uiPhraseCreate"));
+				window->setTitle(CI18N::get("uiPhraseCreate"));
 			else
-				window->setUCTitle(CI18N::get("uiPhraseEdit"));
+				window->setTitle(CI18N::get("uiPhraseEdit"));
 
 			// clear the sentence for a New Phrase creation.
 			buildSentenceTarget->clearBuildingPhrase();
@@ -1692,7 +1692,7 @@ public:
 		if(!ctrlSheet)
 			return;
 
-		ucstring	str(STRING_MANAGER::CStringManagerClient::getSBrickLocalizedName(CSheetId(ctrlSheet->getSheetId())));
+		string	str(STRING_MANAGER::CStringManagerClient::getSBrickLocalizedName(CSheetId(ctrlSheet->getSheetId())));
 
 		// According to locked state
 		if(ctrlSheet->getGrayed())
@@ -1700,7 +1700,7 @@ public:
 		else
 			strFindReplace(str, "%comp", CI18N::get("uittPhraseCombatRestrictOK"));
 
-		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerCombatRestrictTooltip, "phrase_combat_restrict_tooltip");

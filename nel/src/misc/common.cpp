@@ -689,6 +689,56 @@ void toUpper(char *str)
 	}
 }
 
+std::string toLowerAscii(const std::string &str, char replacement)
+{
+	std::string res;
+	res.reserve(str.size());
+	for (std::string::const_iterator it(str.begin()), end(str.end()); it != end; ++it)
+	{
+		char c = *it;
+		if ((sint8)(c + '\x01') < (sint8)(' ' + '\x01')) res += replacement;
+		else if (c >= 'A' && c <= 'Z') res += c + ('a' - 'A');
+		else res += c;
+	}
+	return res;
+}
+
+void toLowerAscii(char *str, char replacement)
+{
+	for (ptrdiff_t i = 0; str[i]; ++i)
+	{
+		char c = str[i];
+		if ((sint8)(c + '\x01') < (sint8)(' ' + '\x01')) str[i] = replacement;
+		else if (c >= 'A' && c <= 'Z') str[i] = c + ('a' - 'A');
+		else str[i] = c;
+	}
+}
+
+std::string toUpperAscii(const std::string &str, char replacement)
+{
+	std::string res;
+	res.reserve(str.size());
+	for (std::string::const_iterator it(str.begin()), end(str.end()); it != end; ++it)
+	{
+		char c = *it;
+		if ((sint8)(c + '\x01') < (sint8)(' ' + '\x01')) res += replacement;
+		else if (c >= 'a' && c <= 'z') res += c - ('a' - 'A');
+		else res += c;
+	}
+	return res;
+}
+
+void toUpperAscii(char *str, char replacement)
+{
+	for (ptrdiff_t i = 0; str[i]; ++i)
+	{
+		char c = str[i];
+		if ((sint8)(c + '\x01') < (sint8)(' ' + '\x01')) str[i] = replacement;
+		else if (c >= 'a' && c <= 'z') str[i] = c - ('a' - 'A');
+		else str[i] = c;
+	}
+}
+
 std::string toHexa(const uint8 &b)
 {
 	return toString("%02hhx", b);

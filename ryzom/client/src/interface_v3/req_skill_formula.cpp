@@ -343,7 +343,7 @@ void		CReqSkillFormula::log(const char *prefix) const
 }
 
 // ***************************************************************************
-void		CReqSkillFormula::getInfoText(ucstring &info) const
+void		CReqSkillFormula::getInfoText(string &info) const
 {
 	info.clear();
 
@@ -363,7 +363,7 @@ void		CReqSkillFormula::getInfoText(ucstring &info) const
 			{
 				const CSkillValue	&sv= *itSv;
 				// get the colored line if the skill don't reach the req level
-				ucstring	line;
+				string	line;
 				if(!isSkillValueTrained(sv))
 					line= CI18N::get("uihelpPhraseRequirementNotMetLine");
 				else

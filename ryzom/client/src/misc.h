@@ -193,8 +193,8 @@ enum TFilter3d
 	RYZOM_MAX_FILTER_3D,
 };
 
-// compare 2 ucstring s0 and s1, without regard to case. give start and size for sequence p0
-sint ucstrnicmp(const ucstring &s0, uint p0, uint n0, const ucstring &s1);
+// compare 2 ucstring s0 and s1, without regard to case. give start and size for sequence p0 // OLD
+sint ucstrnicmp(const ucstring &s0, uint p0, uint n0, const ucstring &s1); // OLD
 
 /** Compute a non-continuous noise with uniform repartition in [0, 1], with the given noise object
   * By default repartition is not uniform for noise

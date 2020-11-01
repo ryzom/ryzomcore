@@ -212,10 +212,10 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 		entityTitle.clear();
 	}
 
-	ucstring entityTag1 = entity->getTag(1);
-	ucstring entityTag2 = entity->getTag(2);
-	ucstring entityTag3 = entity->getTag(3);
-	ucstring entityTag4 = entity->getTag(4);
+	string entityTag1 = entity->getTag(1);
+	string entityTag2 = entity->getTag(2);
+	string entityTag3 = entity->getTag(3);
+	string entityTag4 = entity->getTag(4);
 
 	string entityPermanentContent = entity->getPermanentStatutIcon();
 
@@ -471,17 +471,17 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 				{
 					bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_1"));
 					if (bitmap)
-						bitmap->setTexture(entityTag1.toString());
+						bitmap->setTexture(entityTag1);
 					bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_2"));
 					if (bitmap)
-						bitmap->setTexture(entityTag2.toString());
+						bitmap->setTexture(entityTag2);
 				}
 				bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_3"));
 				if (bitmap)
-					bitmap->setTexture(entityTag3.toString());
+					bitmap->setTexture(entityTag3);
 				bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_4"));
 				if (bitmap)
-					bitmap->setTexture(entityTag4.toString());
+					bitmap->setTexture(entityTag4);
 			}
 
 			// Get the permanent content bitmap
@@ -959,14 +959,14 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 	{
 		_Name->setColor(entityColor);
 		_Name->setModulateGlobalColor(false);
-		ucstring entityName = _Entity->getDisplayName();
+		string entityName = _Entity->getDisplayName();
 		if (entityName.empty())
 			entityName = _Entity->getTitle();
 
 		if (pPlayer != NULL)
 			if (pPlayer->isAFK())
 				entityName += CI18N::get("uiAFK");
-		_Name->setText(entityName.toUtf8());
+		_Name->setText(entityName);
 
 		// Title color get the PVP color
 		if (_Title)

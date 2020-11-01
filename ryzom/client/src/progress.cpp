@@ -71,7 +71,7 @@ void CProgress::setFontFactor(float temp)
 	_FontFactor = temp;
 }
 
-void CProgress::newMessage (const ucstring& message)
+void CProgress::newMessage (const string& message)
 {
 	popCropedValues ();
 	_CurrentRootStep++;
@@ -249,7 +249,7 @@ void CProgress::internalProgress (float value)
 			for(uint i = 0; i < ClientCfg.Logos.size(); i++)
 			{
 				std::vector<string> res;
-				explode(ClientCfg.Logos[i], std::string(":"), res);
+				explode(ClientCfg.Logos[i], string(":"), res);
 				if(res.size()==9 && i<LogoBitmaps.size() && LogoBitmaps[i]!=NULL)
 				{
 					fromString(res[1], x);
@@ -312,7 +312,7 @@ void CProgress::internalProgress (float value)
 					// More help
 					TextContext->setFontSize((uint)(12.f * fontFactor));
 					/* todo tips of the day uncomment
-					ucstring ucstr = CI18N::get ("uiTipsEnd");
+					string ucstr = CI18N::get ("uiTipsEnd");
 					TextContext->printAt(0.5f, fY, ucstr); */
 					fY = nextLine (TextContext->getFontSize(), Driver->getWindowHeight(), fY);
 					fY = nextLine (TextContext->getFontSize(), Driver->getWindowHeight(), fY);
@@ -338,7 +338,7 @@ void CProgress::internalProgress (float value)
 						TextContext->setFontSize((uint)(15.f * fontFactor));
 						TextContext->setHotSpot(UTextContext::BottomLeft);
 
-						string uc = CI18N::get("uiR2EDTPEscapeToInteruptLoading") + " (" + _TPCancelText.toUtf8() + ") - " + CI18N::get("uiDelayedTPCancel");
+						string uc = CI18N::get("uiR2EDTPEscapeToInteruptLoading") + " (" + _TPCancelText + ") - " + CI18N::get("uiDelayedTPCancel");
 						UTextContext::CStringInfo info = TextContext->getStringInfo(uc);
 						float stringX = 0.5f - info.StringWidth/(ClientCfg.Width*2);
 						TextContext->printAt(stringX, 7.f / ClientCfg.Height, uc);
@@ -360,11 +360,9 @@ void CProgress::internalProgress (float value)
 						(uint)RT.getRyzomTime(),
 						CI18N::get ("uiSeason"+toStringEnum(CRyzomTime::getSeasonByDay(day))).c_str(),
 						CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName).c_str());
-					ucstring ucstr;
-					ucstr.fromUtf8 (str);
 					TextContext->setHotSpot(UTextContext::MiddleBottom);
 					TextContext->setColor(CRGBA(186, 179, 163, 255));
-					TextContext->printAt(0.5f, 25/768.f, ucstr);
+					TextContext->printAt(0.5f, 25/768.f, str);
 				}
 
 				// apply text commands
@@ -452,8 +450,9 @@ void CProgress::internalProgress (float value)
 		_TPCancelFlag = true;
 	}
 
-
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().update();
+#endif
 	// Display to screen.
 	Driver->swapBuffers();
 
@@ -474,7 +473,7 @@ void CProgress::internalProgress (float value)
 }
 
 
-void CProgress::setTPMessages(const ucstring &tpReason,const ucstring &tpCancelText, const std::string &/* iconName */)
+void CProgress::setTPMessages(const string &tpReason,const string &tpCancelText, const string &/* iconName */)
 {
 	_TPReason = tpReason;
 	_TPCancelText = tpCancelText;
@@ -497,7 +496,7 @@ bool CProgress::getTPCancelFlag(bool clearFlag /*=true*/)
 
 void CProgress::release()
 {
-	setTPMessages(ucstring(), ucstring(), "");
+	setTPMessages(string(), string(), string());
 	_TPCancelFlag = false;
 }
 
