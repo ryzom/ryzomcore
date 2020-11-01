@@ -161,28 +161,29 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 				}
 				else
 				{
+					const char *localDesc = STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id);
 					if (itemInfo.CustomText.empty())
-						display->setTextFormatTaged(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
+						display->setTextFormatTaged(localDesc);
 					else
 					{
-						ucstring text = itemInfo.CustomText;
+						string text = itemInfo.CustomText.toUtf8();
 						if (text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
 						{
 							CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 							if (pGH)
-								pGH->browse(text.substr(4, text.size()-4).toString().c_str());
+								pGH->browse(text.substr(4, text.size()-4).c_str());
 							text = localDesc;
 						}
 						else if (text.size() > 3 && text[0]=='@' && text[1]=='L' && text[2]=='U' && text[3]=='A')
 						{
-							string code = text.substr(4, text.size()-4).toString();
+							string code = text.substr(4, text.size()-4);
 							if (!code.empty())
 								CLuaManager::getInstance().executeLuaScript(code);
 							text = localDesc;
 						}
 						if (!text.empty())
 						{
-							display->setTextFormatTaged(text.toUtf8());
+							display->setTextFormatTaged(text);
 							group->setActive(true);
 						}
 					}
