@@ -141,14 +141,14 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 					}
 					else
 					{
-						ucstring customText;
+						string customText;
 						if (!itemInfo.CustomText.empty())
 						{
-							customText = itemInfo.CustomText;
-							strFindReplace(customText, "%mfc", ucstring());
+							customText = itemInfo.CustomText.toUtf8(); // TODO: UTF-8 (serial)
+							strFindReplace(customText, "%mfc", string());
 						}
 
-						editBoxShort->setInputStringAsUtf16(customText);
+						editBoxShort->setInputString(customText);
 						editShort->setActive(true);
 						editBoxShort->setActive(true);
 
@@ -263,14 +263,14 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 						else
 						{
 
-							ucstring customText;
+							string customText;
 							if (!itemInfo.CustomText.empty())
 							{
-								customText = itemInfo.CustomText;
-								strFindReplace(customText, "%mfc", ucstring());
+								customText = itemInfo.CustomText.toUtf8();
+								strFindReplace(customText, "%mfc", string());
 							}
 
-							editBoxShort->setInputStringAsUtf16(customText);
+							editBoxShort->setInputString(customText);
 							editShort->setActive(true);
 							editBoxShort->setActive(true);
 
@@ -407,11 +407,11 @@ void CInterfaceItemEdition::CItemEditionWindow::validate()
 		if (group && editShort && editBoxShort && editLarge && editBoxLarge && display && editButtons && closeButton && background)
 		{
 			bool textValid = editShort->getActive();
-			ucstring text = editBoxShort->getInputStringAsUtf16();
+			string text = editBoxShort->getInputString();
 			if (!textValid)
 			{
 				textValid = editLarge->getActive();
-				text = editBoxLarge->getInputStringAsUtf16();
+				text = editBoxLarge->getInputString();
 			}
 			 
 			if (textValid)
@@ -428,7 +428,8 @@ void CInterfaceItemEdition::CItemEditionWindow::validate()
 					out.serial(uiInventory);
 					uint32 uiSlot = (uint32)pCSItem->getIndexInDB();
 					out.serial(uiSlot);
-					out.serial(text);
+					ucstring ucText = ucstring::makeFromUtf8(text); // TODO: UTF-8 (serial)
+					out.serial(ucText);
 					NetMngr.push(out);
 					//nlinfo("impulseCallBack : %s %s %d \"%s\" sent", msgName.c_str(), INVENTORIES::toString((INVENTORIES::TInventory)pCSItem->getInventoryIndex()).c_str(), pCSItem->getIndexInDB(), text.toUtf8().c_str());
 				}
@@ -2123,7 +2124,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			{
 				std::string name = groupNames[i];
 				std::string ahParams = "name=" + name;
-				//Use ucstring because group name can contain accentued characters (and stuff like that)
+				//Use utf-8 string because group name can contain accentued characters (and stuff like that)
 				pGroupMenu->addLine(name, "", "", name);
 				CGroupSubMenu* pNewSubMenu = new CGroupSubMenu(CViewBase::TCtorParam());
 				pGroupMenu->setSubMenu(pGroupMenu->getNumLine()-1, pNewSubMenu);

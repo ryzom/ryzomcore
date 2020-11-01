@@ -1527,7 +1527,7 @@ void CInterfaceManager::updateFrameEvents()
 		if ((T0 - _UpdateWeatherTime) > (1 * 3 * 1000))
 		{
 			_UpdateWeatherTime = T0;
-			ucstring str =	CI18N::get ("uiTheSeasonIs") +
+			string str =	CI18N::get ("uiTheSeasonIs") +
 							CI18N::get ("uiSeason"+toStringEnum(computeCurrSeason())) +
 							CI18N::get ("uiAndTheWeatherIs") +
 							CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName) +
@@ -1537,7 +1537,7 @@ void CInterfaceManager::updateFrameEvents()
 
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:weather"));
 			if (pVT != NULL)
-				pVT->setText(str.toUtf8());
+				pVT->setText(str);
 
 			CCtrlBase *pTooltip= dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:weather_tt"));
 			if (pTooltip != NULL)
@@ -1571,7 +1571,7 @@ void CInterfaceManager::updateFrameEvents()
 
 			pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:time"));
 			if (pVT != NULL)
-				pVT->setText(str.toUtf8());
+				pVT->setText(str);
 
 			str.clear();
 			// Update the clock in the compass if enabled.
@@ -1584,7 +1584,7 @@ void CInterfaceManager::updateFrameEvents()
 						str = getTimestampHuman("%I:%M %p");
 					else
 						str = getTimestampHuman("%H:%M");
-					pVT->setText(str.toUtf8());
+					pVT->setText(str);
 				}
 			}
 		}
@@ -2389,7 +2389,7 @@ void CInterfaceManager::processServerIDString()
 }
 
 // ------------------------------------------------------------------------------------------------
-void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const ucstring &text, const string &masterGroup, TCaseMode caseMode)
+void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const string &text, const string &masterGroup, TCaseMode caseMode)
 {
 	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + msgBoxGroup));
 	CViewText		*viewText= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + msgBoxGroup + ":text"));
@@ -2397,7 +2397,7 @@ void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const ucst
 	if (group && viewText)
 	{
 		viewText->setCaseMode(caseMode);
-		viewText->setText(text.toUtf8());
+		viewText->setText(text);
 		CWidgetManager::getInstance()->enableModalWindow(NULL, group);
 		// don't understand why but need to update coords here
 		group->updateCoords();
@@ -2406,7 +2406,7 @@ void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const ucst
 }
 
 // ------------------------------------------------------------------------------------------------
-void	CInterfaceManager::messageBox(const ucstring &text, const string &masterGroup, TCaseMode caseMode)
+void	CInterfaceManager::messageBox(const string &text, const string &masterGroup, TCaseMode caseMode)
 {
 	messageBoxInternal("message_box", text, masterGroup, caseMode);
 }
@@ -2435,7 +2435,7 @@ void CInterfaceManager::messageBoxWithHelp(const std::string &text, const std::s
 
 
 // ------------------------------------------------------------------------------------------------
-void	CInterfaceManager::validMessageBox(TValidMessageIcon icon, const ucstring &text, const std::string &ahOnOk,
+void	CInterfaceManager::validMessageBox(TValidMessageIcon icon, const std::string &text, const std::string &ahOnOk,
 	const std::string &paramsOnOk, const std::string &ahOnCancel, const std::string &paramsOnCancel, const string &masterGroup)
 {
 	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":valid_message_box"));
@@ -2450,7 +2450,7 @@ void	CInterfaceManager::validMessageBox(TValidMessageIcon icon, const ucstring &
 		CWidgetManager::getInstance()->setProcedureAction("proc_valid_message_box_cancel", 1, ahOnCancel, paramsOnCancel);
 
 		// set text and icon
-		viewText->setText(text.toUtf8());
+		viewText->setText(text);
 		if(viewBitmap)
 		{
 			bool	active= true;
@@ -2978,7 +2978,7 @@ bool CInterfaceManager::deletePlayerKeys (const std::string &playerFileIdent)
 }
 
 // ***************************************************************************
-void CInterfaceManager::log(const ucstring &str, const std::string &cat)
+void CInterfaceManager::log(const std::string &str, const std::string &cat)
 {
 	if (_LogState)
 	{
@@ -2987,7 +2987,7 @@ void CInterfaceManager::log(const ucstring &str, const std::string &cat)
 		FILE *f = nlfopen(fileName, "at");
 		if (f != NULL)
 		{
-			const string finalString = string(NLMISC::IDisplayer::dateToHumanString()) + " (" + NLMISC::toUpper(cat) + ") * " + str.toUtf8();
+			const string finalString = string(NLMISC::IDisplayer::dateToHumanString()) + " (" + NLMISC::toUpper(cat) + ") * " + str;
 			fprintf(f, "%s\n", finalString.c_str());
 			fclose(f);
 		}
@@ -3176,8 +3176,8 @@ struct CEmoteEntry
 			string::size_type pos1 = path1.find('|');
 			string::size_type pos2 = path2.find('|');
 
-			ucstring s1 = toUpper(CI18N::get(path1.substr(0, pos1)));
-			ucstring s2 = toUpper(CI18N::get(path2.substr(0, pos2)));
+			string s1 = toUpper(CI18N::get(path1.substr(0, pos1)));
+			string s2 = toUpper(CI18N::get(path2.substr(0, pos2)));
 
 			sint result = s1.compare(s2);
 			if (result != 0)
@@ -3195,14 +3195,14 @@ struct CEmoteEntry
 	}
 };
 
-static bool translateEmote(const std::string &id, ucstring &translatedName, std::string &commandName, std::string &commandNameAlt)
+static bool translateEmote(const std::string &id, std::string &translatedName, std::string &commandName, std::string &commandNameAlt)
 {
 	if (CI18N::hasTranslation(id))
 	{
 		translatedName = CI18N::get(id);
 
 		// convert command to utf8 since emote translation can have strange chars
-		commandName = toLower(translatedName).toUtf8();
+		commandName = toLower(translatedName);
 
 		// replace all spaces by _
 		while (strFindReplace(commandName, " ", "_"));
@@ -3301,7 +3301,7 @@ void CInterfaceManager::initEmotes()
 		CGroupSubMenu *pMenu = pRootMenu->getRootMenu();
 		nlassert(pMenu);
 
-		ucstring sTranslatedName;
+		std::string sTranslatedName;
 		std::string sCommandName;
 		std::string sCommandNameAlt;
 
@@ -3345,7 +3345,7 @@ void CInterfaceManager::initEmotes()
 					translateEmote(sTmp, sTranslatedName, sCommandName, sCommandNameAlt);
 
 					// Create a line
-					pMenu->addLine (sTranslatedName.toUtf8() + " (/" + sCommandName + ")", "emote",
+					pMenu->addLine (sTranslatedName + " (/" + sCommandName + ")", "emote",
 						"nb="+toString(nEmoteNb)+"|behav="+toString(nBehav), sTmp);
 				}
 			}

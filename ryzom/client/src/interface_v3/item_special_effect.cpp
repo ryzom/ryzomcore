@@ -66,7 +66,7 @@ void CItemSpecialEffectHelper::registerItemSpecialEffect(const string &name)
 		{
 			string tmp = "%";
 			tmp += s[0];
-			if (s.size() >=2 && isdigit(s[1]))
+			if (s.size() >=2 && (uint8)s[1] < (uint8)'\x80' && isdigit(s[1]))
 				tmp += s[1];
 			params.push_back(tmp);
 		}

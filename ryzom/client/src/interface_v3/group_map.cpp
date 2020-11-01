@@ -146,7 +146,7 @@ static void popupLandMarkNameDialog()
 	else
 	{
 		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(CUserLandMark::Misc));
-		eb->setInputStringAsUtf16(ucstring());
+		eb->setInputString(string());
 	}
 
 	CWidgetManager::getInstance()->setCaptureKeyboard(eb);

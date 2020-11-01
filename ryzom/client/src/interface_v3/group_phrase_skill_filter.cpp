@@ -191,9 +191,9 @@ void	CGroupPhraseSkillFilter::rebuild()
 	uint nCounter = 0;
 
 	// local variable (avoid realloc in loop)
-	vector< pair<string, string> > tempVec(2);
-	ucstring	sSkillName;
-	string		sDBNameSkillValue;
+	// vector< pair<string, string> > tempVec(2);
+	// string		sSkillName;
+	// string		sDBNameSkillValue;
 
 	// Build the hierarchy
 	while ((!bQuit) && (nCounter < 32)) // Counter is used to not infinitly loop

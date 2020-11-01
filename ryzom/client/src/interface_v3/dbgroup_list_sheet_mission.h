@@ -36,7 +36,7 @@ public:
 	// A child node
 	struct	CSheetChildMission : public CDBGroupListSheetText::CSheetChild
 	{
-		virtual void updateText(CDBGroupListSheetText * /* pFather */, ucstring &/* text */) {}
+		//virtual void updateText(CDBGroupListSheetText * /* pFather */, std::string &/* text */) {}
 		virtual CViewText *createViewText() const;
 		virtual void updateViewText(CDBGroupListSheetText *pFather);
 		virtual bool isInvalidated(CDBGroupListSheetText *pFather);

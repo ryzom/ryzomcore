@@ -924,8 +924,8 @@ bool CStringPostProcessRemoveName::cbIDStringReceived(string &inOut)
 		inOut = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(strNewTitle, Woman);
 		{
 			// Sometimes translation contains another title
-			ucstring::size_type pos = inOut.find('$');
-			if (pos != ucstring::npos)
+			string::size_type pos = inOut.find('$');
+			if (pos != string::npos)
 			{
 				inOut = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(inOut), Woman);
 			}

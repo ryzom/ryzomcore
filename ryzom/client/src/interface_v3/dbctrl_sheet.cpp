@@ -1665,7 +1665,7 @@ void CDBCtrlSheet::setupSBrick ()
 }
 
 // ***************************************************************************
-void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const ucstring &phraseName)
+void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const string &phraseName)
 {
 	CSBrickManager		*pBM = CSBrickManager::getInstance();
 
@@ -1718,7 +1718,7 @@ void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bri
 	{
 		// Compute the text from the phrase only if needed
 //		string	iconName= phraseName.toString();
-		string	iconName= phraseName.toUtf8();
+		const string &iconName = phraseName;
 		if( _NeedSetup || iconName != _OptString )
 		{
 			// recompute text
@@ -1741,7 +1741,7 @@ void CDBCtrlSheet::setupSPhrase()
 		CSPhraseSheet *pSPS = dynamic_cast<CSPhraseSheet*>(SheetMngr.get(CSheetId(sheet)));
 		if (pSPS && !pSPS->Bricks.empty())
 		{
-			const ucstring phraseName(STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedName(CSheetId(sheet)));
+			const char *phraseName = STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedName(CSheetId(sheet));
 			setupDisplayAsPhrase(pSPS->Bricks, phraseName);
 		}
 		else
@@ -1799,7 +1799,7 @@ void CDBCtrlSheet::setupSPhraseId ()
 			}
 			else
 			{
-				setupDisplayAsPhrase(phrase.Bricks, phrase.Name);
+				setupDisplayAsPhrase(phrase.Bricks, phrase.Name.toUtf8()); // FIXME: UTF-8 (serial)
 			}
 		}
 
@@ -3512,11 +3512,11 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 				game = game["game"];
 				game.callMethodByNameNoThrow("updatePhraseTooltip", 1, 1);
 				// retrieve result from stack
-				ucstring tmpHelp;
+				ucstring tmpHelp; // FIXME: Lua UTF-8
 				if (!ls->empty())
 				{
 					CLuaIHM::pop(*ls, tmpHelp); // FIXME: Lua UTF-8
-					help = tmpHelp.toUtf8();
+					help = tmpHelp.toUtf8(); // FIXME: Lua UTF-8
 				}
 				else
 				{
@@ -3537,10 +3537,10 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 		if (phraseSheetID != 0)
 		{
 			// is it a built-in phrase?
-			ucstring desc = STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId(phraseSheetID));
+			string desc = STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId(phraseSheetID));
 			if (!desc.empty())
 			{
-				help += ucstring("\n\n@{CCCF}") + desc;
+				help += "\n\n@{CCCF}" + desc;
 			}
 		}
 		*/

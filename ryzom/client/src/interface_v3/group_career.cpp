@@ -128,7 +128,7 @@ bool CGroupJob::parse (xmlNodePtr /* cur */, CInterfaceGroup * /* parentGroup */
 //		return false;
 //	}
 //
-//	ucstring sTmp = JOBS::jobToUCString(Job);
+//	string sTmp = JOBS::jobToUCString(Job);
 //	for (uint32 i= 0; i < sTmp.size(); ++i)
 //		if (sTmp[i] < 128)
 //			if ( (sTmp[i] >= 'a') && (sTmp[i] <= 'z') )

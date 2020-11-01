@@ -23,7 +23,6 @@
 #ifndef CL_CHAT_WINDOW_H
 #define CL_CHAT_WINDOW_H
 
-#include "nel/misc/ucstring.h" // REMOVE
 #include "nel/misc/smart_ptr.h"
 
 #include "game_share/chat_group.h"
@@ -109,8 +108,6 @@ public:
 	void enableBlink(uint numBlinks);
 	// set a command to be displayed and eventually executed in this chat window. std::string version for backward compatibility
 	void setCommand(const std::string &command, bool execute);
-	// set a command to be displayed and eventually executed in this chat window
-	void setCommand(const ucstring &command, bool execute); // REMOVE
 	// set a string to be displayed in the edit box of this window (if it has one)
 	void setEntry(const std::string &entry);
 	// Set listener to react to a chat entry

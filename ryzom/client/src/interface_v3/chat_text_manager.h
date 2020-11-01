@@ -30,7 +30,6 @@ namespace NLGUI
 	class CInterfaceGroup;
 }
 
-class ucstring;
 namespace NLMISC{
 	class CCDBNodeLeaf;
 }

@@ -39,7 +39,7 @@ namespace NLGUI
 	public:
 		virtual ~IOnReceiveTextId() {}
 		// the deriver may change the input text
-		virtual	void	onReceiveTextId(ucstring &str) =0;
+		virtual	void	onReceiveTextId(std::string &str) =0;
 	};
 
 	// ***************************************************************************

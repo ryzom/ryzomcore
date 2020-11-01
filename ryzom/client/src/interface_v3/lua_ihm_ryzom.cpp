@@ -825,7 +825,7 @@ int CLuaIHMRyzom::validMessageBox(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, funcName, 5, LUA_TSTRING);
 	CLuaIHM::checkArgType(ls, funcName, 6, LUA_TSTRING);
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->validMessageBox(CInterfaceManager::QuestionIconMsg, msg, ls.toString(2), ls.toString(3), ls.toString(4), ls.toString(5), ls.toString(6));
+	im->validMessageBox(CInterfaceManager::QuestionIconMsg, msg.toUtf8(), ls.toString(2), ls.toString(3), ls.toString(4), ls.toString(5), ls.toString(6));
 	return 0;
 }
 
@@ -2889,7 +2889,7 @@ void		CLuaIHMRyzom::messageBox(const ucstring &text)
 {
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBox(text);
+	pIM->messageBox(text.toUtf8());
 }
 
 // ***************************************************************************
@@ -2897,7 +2897,7 @@ void		CLuaIHMRyzom::messageBox(const ucstring &text, const std::string &masterGr
 {
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBox(text, masterGroup);
+	pIM->messageBox(text.toUtf8(), masterGroup);
 }
 
 // ***************************************************************************
@@ -2910,7 +2910,7 @@ void		CLuaIHMRyzom::messageBox(const ucstring &text, const std::string &masterGr
 
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBox(text, masterGroup, (TCaseMode) caseMode);
+	pIM->messageBox(text.toUtf8(), masterGroup, (TCaseMode) caseMode);
 }
 
 // ***************************************************************************
@@ -3652,7 +3652,7 @@ void CLuaIHMRyzom::tell(const ucstring &player, const ucstring &msg)
 				CInterfaceManager *im = CInterfaceManager::getInstance();
 				w->setKeyboardFocus();
 				w->enableBlink(1);
-				w->setCommand(ucstring("tell ") + CEntityCL::removeTitleFromName(player.toUtf8()) + ucstring(" "), false);
+				w->setCommand("tell " + CEntityCL::removeTitleFromName(player.toUtf8()) + " ", false);
 				CGroupEditBox *eb = w->getEditBox();
 
 				if (eb != NULL)

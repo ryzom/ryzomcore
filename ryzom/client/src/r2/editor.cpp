@@ -4244,7 +4244,7 @@ sint CEditor::getGeneratedNameIndex(const std::string &nameUtf8, const std::stri
 			{
 				++ strIt;
 				const char *numberStart = &*strIt;
-				for (; strIt != endStrIt && isdigit(*strIt); ++strIt) {}
+				for (; strIt != endStrIt && (uint8)(*strIt) < (uint8)'\x80' && isdigit(*strIt); ++strIt) {}
 				if (strIt == endStrIt)
 				{
 					sint ret;
@@ -4266,7 +4266,7 @@ bool CEditor::isPostFixedByNumber(const ucstring &baseName)
 	while (lastIndex > 0)
 	{
 		int currChar = (int) baseName[lastIndex];
-		if (!isdigit(currChar) &&
+		if (((uint8)currChar >= (uint8)'\x80' || !isdigit(currChar)) &&
 			currChar != ' ' &&
 			currChar != '\t')
 		{
@@ -4289,7 +4289,7 @@ ucstring CEditor::genInstanceName(const ucstring &baseName)
 	while (lastIndex > 0)
 	{
 		int currChar = (int) strippedName[lastIndex];
-		if (!isdigit(currChar) &&
+		if (((uint8)currChar >= (uint8)'\x80' || !isdigit(currChar)) &&
 			currChar != ' ' &&
 			currChar != '\t')
 		{

@@ -3840,14 +3840,14 @@ void				CSPhraseManager::computePhraseProgression()
 			// replace each number with 001 format. toLower
 			for(uint k=0;k<pse.Text.size();k++)
 			{
-				if((unsigned char)pse.Text[k] < 0x80 && isalpha(pse.Text[k]))
+				if((uint8)pse.Text[k] < (uint8)'\x80' && isalpha(pse.Text[k]))
 					pse.Text[k]= tolower(pse.Text[k]); // FIXME: toLowerAscii
-				else if((unsigned char)pse.Text[k] < 0x80 && isdigit(pse.Text[k]))
+				else if((uint8)pse.Text[k] < (uint8)'\x80' && isdigit(pse.Text[k]))
 				{
 					uint32	number= 0;
 					uint32	start= k;
 					// get the whole number
-					for(;k<pse.Text.size() && isdigit(pse.Text[k]);k++)
+					for(;k<pse.Text.size() && (uint8)pse.Text[k] < (uint8)'\x80' && isdigit(pse.Text[k]);k++)
 					{
 						number*=10;
 						number+= pse.Text[k] - '0';

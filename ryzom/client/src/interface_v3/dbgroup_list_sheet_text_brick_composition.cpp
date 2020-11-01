@@ -110,11 +110,11 @@ void CDBGroupListSheetTextBrickComposition::CSheetChildBrick::init(CDBGroupListS
 
 
 // ***************************************************************************
-bool	hasOnlyBlankChars(const ucstring &str)
+bool hasOnlyBlankChars(const char *str)
 {
-	for(uint i=0;i!=str.size();++i)
+	for (ptrdiff_t i = 0; str[i]; ++i)
 	{
-		if(str[i]!=' ')
+		if (str[i] != ' ')
 			return false;
 	}
 
@@ -128,20 +128,20 @@ void CDBGroupListSheetTextBrickComposition::CSheetChildBrick::updateViewText(CDB
 	CSBrickManager	*pBM= CSBrickManager::getInstance();
 	CDBGroupListSheetTextBrickComposition	*compoList= (CDBGroupListSheetTextBrickComposition*)pFather;
 
-	ucstring	text;
+	string	text;
 	if(Ctrl->getType()!=CCtrlSheetInfo::SheetType_SBrick)
 		return;
 
 	// Get the compo description of the phrase (Desc2)
 	CSheetId	brickSheetId= CSheetId(Ctrl->getSheetId());
 	// Temp if the Desc2 is empty, set Name
-	ucstring desc2(STRING_MANAGER::CStringManagerClient::getSBrickLocalizedCompositionDescription(brickSheetId));
-	if( !desc2.empty() && !hasOnlyBlankChars(desc2))	// tolerate Blank error in translation
-		Text->setText(desc2.toUtf8());
+	const char *desc2(STRING_MANAGER::CStringManagerClient::getSBrickLocalizedCompositionDescription(brickSheetId));
+	if( *desc2 && !hasOnlyBlankChars(desc2))	// tolerate Blank error in translation
+		Text->setText(desc2);
 	else
 	{
 		desc2 = STRING_MANAGER::CStringManagerClient::getSBrickLocalizedName(brickSheetId);
-		Text->setText(desc2.toUtf8());
+		Text->setText(desc2);
 	}
 
 

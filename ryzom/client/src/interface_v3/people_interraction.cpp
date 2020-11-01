@@ -3201,7 +3201,7 @@ NLMISC_COMMAND(party_chat, "Create a new party chat", "<party_chat_name>")
 		return true;
 	}
 	CPeopleInterraction &pi = PeopleInterraction;
-	ucstring title = args[0];
+	string title = args[0];
 
 	if (!pi.testValidPartyChatName(title))
 	{
@@ -3221,16 +3221,16 @@ NLMISC_COMMAND(remove_party_chat, "Remove a party chat", "<party_chat_name>")
 		displayVisibleSystemMsg(CI18N::get("uiRemovePartyChatCmd"));
 		return true;
 	}
-	ucstring title = ucstring(args[0]);
+	string title = ucstring(args[0]);
 	CChatWindow *chat = getChatWndMgr().getChatWindow(title);
 	if (!chat)
 	{
-		displayVisibleSystemMsg(title + ucstring(" : ") + CI18N::get("uiBadPartyChatName"));
+		displayVisibleSystemMsg(title + " : " + CI18N::get("uiBadPartyChatName"));
 		return true;
 	}
 	if (!PeopleInterraction.removePartyChat(chat))
 	{
-		displayVisibleSystemMsg(title + ucstring(" : ") + CI18N::get("uiCantRemovePartyChat"));
+		displayVisibleSystemMsg(title + " : " + CI18N::get("uiCantRemovePartyChat"));
 		return true;
 	}
 	return true;

@@ -432,7 +432,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 						// else display the name of the vendor (not if this is the player himself, to avoid flood)
 						else if (LastSellerType == BOTCHATTYPE::Resale)
 						{
-							text+= "\n" + CI18N::get("uiBotChatVendorTag") + VendorNameString.toUtf8();
+							text+= "\n" + CI18N::get("uiBotChatVendorTag") + VendorNameString;
 						}
 					}
 				}

@@ -510,7 +510,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 				CViewText	*viewText= dynamic_cast<CViewText*>(itemReqLineGroup->getView(FaberPhraseText));
 				if(viewText)
 				{
-					ucstring	text;
+					string	text;
 					if(mpBuild.RequirementType==CMPBuild::ItemPartReq)
 					{
 						text= CI18N::get("uihelpFaberMpHeader");
@@ -524,7 +524,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 					{
 						nlstop;
 					}
-					viewText->setText( text.toUtf8() );
+					viewText->setText(text);
 				}
 
 				// Set as Icon the required MP FaberType / or Sheet Texture (directly...)
@@ -1687,7 +1687,7 @@ void	CActionPhraseFaber::updateItemResult()
 	CViewText	*successView= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseFpSuccessText));
 	if(successView)
 	{
-		ucstring	text= CI18N::get("uiPhraseFaberSuccessRate");
+		string	text= CI18N::get("uiPhraseFaberSuccessRate");
 		// Get the success rate of the related phrase
 		uint		phraseSlot= pPM->getMemorizedPhrase(_ExecuteFromMemoryLine, _ExecuteFromMemoryIndex);
 
@@ -1725,7 +1725,7 @@ void	CActionPhraseFaber::updateItemResult()
 				+ "@{FFFF})";
 		}
 		strFindReplace(text, "%success", successStr );
-		successView->setTextFormatTaged(text.toUtf8());
+		successView->setTextFormatTaged(text);
 	}
 
 

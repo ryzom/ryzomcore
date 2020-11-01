@@ -96,7 +96,7 @@ public:
 		CInterfaceProperty	CurrentVendorNameId;
 		CInterfaceProperty	CurrentFactionType;
 		CInterfaceProperty	CurrentFactionPointPrice;
-		ucstring			VendorNameString;
+		std::string			VendorNameString;
 
 		virtual void init(CDBGroupListSheetText *pFather, uint index);
 		virtual bool isInvalidated(CDBGroupListSheetText *pFather);

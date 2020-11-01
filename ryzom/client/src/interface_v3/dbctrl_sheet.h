@@ -626,7 +626,7 @@ protected:
 	// optSheet is for special faber
 	void setupDisplayAsSBrick(sint32 sheet, sint32 optSheet= 0);
 	// setup icon from phrases
-	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const ucstring &phraseName);
+	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const std::string &phraseName);
 
 	// draw a number and returns the width of the drawn number
 	sint32 drawNumber(sint32 x, sint32 y, sint32 wSheet, sint32 hSheet, NLMISC::CRGBA color, sint32 value, bool rightAlign=true);

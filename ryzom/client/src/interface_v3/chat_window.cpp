@@ -351,13 +351,6 @@ void CChatWindow::setCommand(const std::string &command, bool execute)
 	_EB->setCommand(command, execute);
 }
 
-void CChatWindow::setCommand(const ucstring &command,bool execute)
-{
-	if (!_EB) return;
-	_EB->setCommand(command.toUtf8(), execute);
-}
-
-
 //=================================================================================
 void CChatWindow::setEntry(const string &entry)
 {
@@ -624,7 +617,7 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 						prefix = (title.empty() ? "" : " ") + title;
 						pos = newmsg.find("] ");
 
-						if (pos == ucstring::npos)
+						if (pos == string::npos)
 							newmsg = prefix + newmsg;
 						else
 							newmsg = newmsg.substr(0, pos) + prefix + newmsg.substr(pos);

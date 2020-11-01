@@ -2104,9 +2104,7 @@ void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 	INVENTORIES::TInventory inventory = (INVENTORIES::TInventory)item->getInventoryIndex();
 	sint32 slot = item->getIndexInDB();
 	string debugText = NLMISC::toString("inventory: %s\nslot: %d\n", INVENTORIES::toString(inventory).c_str(), slot);
-	ucstring debugText2;
-	debugText2.fromUtf8(debugText);
-	itemText = debugText2 + itemText;
+	itemText = debugText + itemText;
 #endif
 }
 
@@ -2536,10 +2534,10 @@ void refreshItemHelp(CSheetHelpSetup &setup)
 //				itemText += CI18N::get("uiRingPlotItemDesc");
 //				itemText += mi->Description.empty() ? CI18N::get("uiRingPlotItemEmpty")
 //													: mi->Description;
-//				//itemText += ucstring("\n@{6F6F}") + CI18N::get("uiRingPlotItemComment") + ucstring("\n");
+//				//itemText += "\n@{6F6F}" + CI18N::get("uiRingPlotItemComment") + "\n";
 //				/*
 //				itemText += mi->Comment.empty() ? CI18N::get("uiRingPlotItemEmpty")
-//												: (ucstring("\n") + mi->Comment);
+//												: ("\n" + mi->Comment);
 //												*/
 //			}
 //		}
@@ -2761,9 +2759,9 @@ void refreshMissionHelp(CSheetHelpSetup &setup, const CPrerequisitInfos &infos)
 // ***************************************************************************
 class CPlayerShardNameRemover : public IOnReceiveTextId
 {
-	virtual	void	onReceiveTextId(ucstring &str)
+	virtual	void	onReceiveTextId(std::string &str)
 	{
-		str= CEntityCL::removeShardFromName(str.toUtf8());
+		str= CEntityCL::removeShardFromName(str);
 	}
 };
 static CPlayerShardNameRemover	PlayerShardNameRemover;
@@ -2968,7 +2966,7 @@ void getSabrinaBrickText(CSBrickSheet *pBR, string &brickText)
 	if( pBR->getSkill()==SKILLS::unknown )
 	{
 		string::size_type	pos0= brickText.find(killSkill);
-		if(pos0 != ucstring::npos)
+		if(pos0 != string::npos)
 		{
 			string::size_type	pos1= brickText.find(killSkill, pos0 + killSkill.size() );
 			if(pos1 != string::npos)
@@ -3668,7 +3666,7 @@ public:
 			}
 		}
 
-		ucstring str;
+		string str;
 		BOMB_IF( minTimeRemaining < 0, "at least one animal should be dead", return; );
 
 		str += CI18N::get("uittAnimalDeadPopupToolTip");
@@ -3676,7 +3674,7 @@ public:
 		str += toString(minTimeRemaining);
 
 		// replace the context help that is required.
-		CWidgetManager::getInstance()->setContextHelpText(str.toUtf8());
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerAnimalDeadPopupTooltip, "animal_dead_popup_tooltip");
@@ -3800,13 +3798,13 @@ static	void	onMpChangeItemPart(CInterfaceGroup *wnd, uint32 itemSheetId, const s
 	CViewText	*viewText= dynamic_cast<CViewText*>(groupMp->getElement(groupMp->getId()+":text" ));
 	if(viewText)
 	{
-		ucstring	mpCraft;
+		string	mpCraft;
 
 		// add the Origin filter.
 		string	originFilterKey= "iompf" + ITEM_ORIGIN::enumToString((ITEM_ORIGIN::EItemOrigin)itemPart.OriginFilter);
 		mpCraft+= CI18N::get(originFilterKey);
 
-		viewText->setText(mpCraft.toUtf8());
+		viewText->setText(mpCraft);
 	}
 
 
