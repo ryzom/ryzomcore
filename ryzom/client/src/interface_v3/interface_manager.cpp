@@ -982,7 +982,7 @@ void CInterfaceManager::initInGame()
 	// flush system msg buffer
 	for( uint i=0; i<PeopleInterraction.SystemMessageBuffer.size(); ++i )
 	{
-		displaySystemInfo(PeopleInterraction.SystemMessageBuffer[i].Str.toUtf8(), PeopleInterraction.SystemMessageBuffer[i].Cat);
+		displaySystemInfo(PeopleInterraction.SystemMessageBuffer[i].Str, PeopleInterraction.SystemMessageBuffer[i].Cat);
 	}
 	PeopleInterraction.SystemMessageBuffer.clear();
 

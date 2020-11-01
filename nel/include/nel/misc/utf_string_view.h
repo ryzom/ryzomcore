@@ -147,6 +147,9 @@ public:
 	static void append(IStream &s, u32char c);
 	static u32char get(IStream &s);
 
+	/// Get an UTF-8 string from an undefined ASCII-based codepage
+	static std::string fromAscii(std::string &str);
+
 private:
 	typedef u32char (*TIterator)(const void **addr);
 	static u32char utf8Iterator(const void **addr);

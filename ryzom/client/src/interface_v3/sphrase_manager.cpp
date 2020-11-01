@@ -3632,7 +3632,7 @@ public:
 	bool		Castable;
 	uint32		Type;
 	uint32		Icon;
-	ucstring	Text;
+	string	Text;
 
 	bool	operator<(const CPhraseSortEntry &pse) const
 	{
@@ -3840,9 +3840,9 @@ void				CSPhraseManager::computePhraseProgression()
 			// replace each number with 001 format. toLower
 			for(uint k=0;k<pse.Text.size();k++)
 			{
-				if(pse.Text[k] < 256 && isalpha(pse.Text[k]))
-					pse.Text[k]= tolower(pse.Text[k]);
-				else if(pse.Text[k] < 256 && isdigit(pse.Text[k]))
+				if((unsigned char)pse.Text[k] < 0x80 && isalpha(pse.Text[k]))
+					pse.Text[k]= tolower(pse.Text[k]); // FIXME: toLowerAscii
+				else if((unsigned char)pse.Text[k] < 0x80 && isdigit(pse.Text[k]))
 				{
 					uint32	number= 0;
 					uint32	start= k;
@@ -3853,7 +3853,7 @@ void				CSPhraseManager::computePhraseProgression()
 						number+= pse.Text[k] - '0';
 					}
 					// format, and replace in string
-					ucstring	newNumber= toString("%3d", number);
+					string	newNumber= toString("%3d", number);
 					pse.Text.replace(start, k-start, newNumber);
 					// and skip this number
 					k= start + (uint)newNumber.size();
@@ -4688,7 +4688,8 @@ int CSPhraseComAdpater::luaGetDesc(CLuaState &ls)
 	if (phraseSheetID != 0)
 	{
 		// is it a built-in phrase?
-		ucstring desc(STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId(phraseSheetID)));
+		ucstring desc; // FIXME: UTF-8 Lua
+		desc.fromUtf8(STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId(phraseSheetID)));
 		if (!desc.empty())
 		{
 			CLuaIHM::push(ls, desc);

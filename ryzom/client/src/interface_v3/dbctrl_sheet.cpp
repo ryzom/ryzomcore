@@ -102,9 +102,9 @@ void CControlSheetInfoWaiter::infoReceived()
 }
 
 
-ucstring CControlSheetInfoWaiter::infoValidated() const
+string CControlSheetInfoWaiter::infoValidated() const
 {
-	ucstring help;
+	ucstring help; // FIXME: Lua UTF-8
 	if (CtrlSheet && !LuaMethodName.empty())
 	{
 		// delegate setup of context he help ( & window ) to lua
@@ -131,7 +131,7 @@ ucstring CControlSheetInfoWaiter::infoValidated() const
 		}
 	}
 
-	return help;
+	return help.toUtf8();
 }
 
 // ***************************************************************************
@@ -3443,10 +3443,10 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 			{
 				// call lua function to update tooltip window
 				_ItemInfoWaiter.sendRequest();
-				help = _ItemInfoWaiter.infoValidated().toUtf8();
+				help = _ItemInfoWaiter.infoValidated();
 				// its expected to get at least item name back
 				if (help.empty())
-					help = getItemActualName().toUtf8();
+					help = getItemActualName();
 			}
 			else if (!_ContextHelp.empty())
 			{
@@ -3454,7 +3454,7 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 			}
 			else
 			{
-				help = getItemActualName().toUtf8();;
+				help = getItemActualName();;
 			}
 		}
 		else
@@ -3575,7 +3575,7 @@ void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 			if (useItemInfoForFamily(item->Family))
 			{
 				_ItemInfoWaiter.sendRequest();
-				help = _ItemInfoWaiter.infoValidated().toUtf8();
+				help = _ItemInfoWaiter.infoValidated();
 				return;
 			}
 		}
@@ -4563,11 +4563,11 @@ void CDBCtrlSheet::initArmourColors()
 
 
 // ***************************************************************************
-ucstring CDBCtrlSheet::getItemActualName() const
+string CDBCtrlSheet::getItemActualName() const
 {
 	const CItemSheet *pIS= asItemSheet();
 	if(!pIS)
-		return ucstring();
+		return string();
 	else
 	{
 		string ret;
@@ -4587,7 +4587,7 @@ ucstring CDBCtrlSheet::getItemActualName() const
 		if (pIS->Family == ITEMFAMILY::SCROLL_R2)
 		{
 			const R2::TMissionItem *mi = R2::getEditor().getPlotItemInfos(getSheetId());
-			if (mi) return mi->Name;
+			if (mi) return mi->Name.toUtf8();
 		}
 		// if item is not a mp, append faber_quality & faber_stat_type
 		// Don't append quality and stat type for Named Items!!!

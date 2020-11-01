@@ -588,8 +588,8 @@ void CSkillManager::checkTitleUnblocked(CHARACTER_TITLE::ECharacterTitle i, bool
 				// This is a new title, send a message
 				string titleStr = CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)i);
 				bool womenTitle = (UserEntity && UserEntity->getGender() == GSGENDER::female);
-				const ucstring newtitle(CStringManagerClient::getTitleLocalizedName(titleStr, womenTitle));
-				CAHManager::getInstance()->runActionHandler("message_popup", NULL, "text1="+newtitle.toUtf8()+"|text0="+CI18N::get("uiNewTitleBold"));
+				const char *newtitle(CStringManagerClient::getTitleLocalizedName(titleStr, womenTitle));
+				CAHManager::getInstance()->runActionHandler("message_popup", NULL, string("text1=") + newtitle + "|text0=" + CI18N::get("uiNewTitleBold"));
 			}
 			else
 			{
@@ -1097,8 +1097,8 @@ public:
 				{
 					string titleStr = CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)i);
 					bool womenTitle = (UserEntity && UserEntity->getGender() == GSGENDER::female);
-					const ucstring s(CStringManagerClient::getTitleLocalizedName(titleStr,womenTitle));
-					pCB->addText(s.toUtf8());
+					const char *s = CStringManagerClient::getTitleLocalizedName(titleStr, womenTitle);
+					pCB->addText(s);
 					pSM->_UIUnblockedTitles.push_back((CHARACTER_TITLE::ECharacterTitle)i);
 				}
 			}

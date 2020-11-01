@@ -279,9 +279,9 @@ void	launchPhraseComposition(bool creation)
 
 			// Set the Text of the Window
 			if(creation)
-				window->setUCTitle(CI18N::get("uiPhraseCreate"));
+				window->setTitle(CI18N::get("uiPhraseCreate"));
 			else
-				window->setUCTitle(CI18N::get("uiPhraseEdit"));
+				window->setTitle(CI18N::get("uiPhraseEdit"));
 
 			// clear the sentence for a New Phrase creation.
 			buildSentenceTarget->clearBuildingPhrase();

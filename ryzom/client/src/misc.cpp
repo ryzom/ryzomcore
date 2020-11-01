@@ -885,7 +885,7 @@ NLMISC::CRGBA interpClientCfgColor(const string &src, string &dest)
 				colorCode.resize(nextPos - 1);
 				for(uint k = 0; k < nextPos - 1; ++k)
 				{
-					colorCode[k] = tolower((char) src[k + 1]);
+					colorCode[k] = tolower((char) src[k + 1]); // TODO: toLowerAscii
 				}
 				std::map<std::string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(colorCode);
 				if (it != ClientCfg.SystemInfoParams.end())
@@ -953,7 +953,7 @@ std::string getStringCategoryIfAny(const string &src, string &dest)
 				colorCode.resize( codeSize );
 				for(ptrdiff_t k = 0; k < (ptrdiff_t)codeSize; ++k)
 				{
-					colorCode[k] = tolower((char) src[k + startPos + 1]);
+					colorCode[k] = tolower((char) src[k + startPos + 1]); // TODO: toLowerAscii
 				}
 				string destTmp;
 				if ( startPos != 0 )

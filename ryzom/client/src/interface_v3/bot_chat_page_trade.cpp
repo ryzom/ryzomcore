@@ -250,7 +250,7 @@ void CBotChatPageTrade::begin()
 	if (gc)
 	{
 		// set the title
-		gc->setUCTitle(_Title);
+		gc->setTitle(_Title);
 		// show the buy mean
 		CInterfaceGroup *money = dynamic_cast<CInterfaceGroup *>(gc->getGroup("money"));
 		if (money) money->setActive((_BuyMean == Money) || (_BuyMean == MoneyFactionPoints));

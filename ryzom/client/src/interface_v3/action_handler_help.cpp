@@ -973,12 +973,12 @@ class CHandlerBrowse : public IActionHandler
 				{
 					if(params[i]=='%' && i<params.size()-2)
 					{
-						if(isxdigit(params[i+1]) && isxdigit(params[i+2]))
+						if(isxdigit(params[i+1]) && isxdigit(params[i+2])) // FIXME: Locale dependent
 						{
 							// read value from heax decimal
 							uint8	val= 0;
-							params[i+1]= tolower(params[i+1]);
-							params[i+2]= tolower(params[i+2]);
+							params[i+1]= tolower(params[i+1]); // FIXME: toLowerAscii
+							params[i+2]= tolower(params[i+2]); // FIXME: toLowerAscii
 							if(isdigit(params[i+1]))	val= params[i+1]-'0';
 							else						val= 10+ params[i+1]-'a';
 							val*=16;
@@ -2508,7 +2508,7 @@ void refreshItemHelp(CSheetHelpSetup &setup)
 		CItemSheet *pIS = (CItemSheet*)pES;
 
 		// ---- Common
-		string title = setup.SrcSheet->getItemActualName().toUtf8();
+		string title = setup.SrcSheet->getItemActualName();
 		setupHelpTitle(setup.HelpWindow, title );
 		getItemText (setup.SrcSheet, itemText, pIS);
 

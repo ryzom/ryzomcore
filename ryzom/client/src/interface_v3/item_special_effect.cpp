@@ -51,8 +51,8 @@ void CItemSpecialEffectHelper::registerItemSpecialEffect(const string &name)
 	vector<string> params;
 
 	// get ui string
-	ucstring ucs = CI18N::get("uiItemFX_" + name);
-	CSString p, s = ucs.toString();
+	string ucs = CI18N::get("uiItemFX_" + name);
+	CSString p, s = ucs;
 
 	// locate and store parameters
 	// %p : percent

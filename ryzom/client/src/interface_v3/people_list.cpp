@@ -127,10 +127,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 
 	_BaseContainer->setSavable(desc.Savable);
 	_BaseContainer->setLocalize(desc.Localize);
-	if (desc.Localize)
-		_BaseContainer->setTitle(desc.PeopleListTitle.toString());
-	else
-		_BaseContainer->setUCTitle(desc.PeopleListTitle);
+	_BaseContainer->setTitle(desc.PeopleListTitle);
 	//_BaseContainer->setId("ui:interface:" + desc.Id);
 
 	// create the chat window if there's one
@@ -162,7 +159,7 @@ sint CPeopleList::getIndexFromName(const string &name) const
 	string sNameIn = toLower(name);
 	for(uint k = 0; k < _Peoples.size(); ++k)
 	{
-		string sPeopleName = toLower(_Peoples[k].getName().toUtf8());
+		string sPeopleName = toLower(_Peoples[k].getName());
 		if (sPeopleName == sNameIn) return k;
 	}
 	return -1;
@@ -198,8 +195,8 @@ bool CPeopleList::sortExByContactId(const CPeople& a, const CPeople& b)
 //==================================================================
 bool CPeopleList::sortExByName(const CPeople& a, const CPeople& b)
 {
-	ucstring name_a = toUpper(a.getName());
-	ucstring name_b = toUpper(b.getName());
+	string name_a = toUpper(a.getName());
+	string name_b = toUpper(b.getName());
 	
 	return (name_a < name_b);
 }
@@ -207,8 +204,8 @@ bool CPeopleList::sortExByName(const CPeople& a, const CPeople& b)
 //==================================================================
 bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
 {
-	ucstring name_a = toUpper(a.getName());
-	ucstring name_b = toUpper(b.getName());
+	string name_a = toUpper(a.getName());
+	string name_b = toUpper(b.getName());
 	
 	// We want order: online/alpha, offworld/alpha, offline/alpha
 	if (a.Online == b.Online)
@@ -331,13 +328,13 @@ bool CPeopleList::isPeopleWindowVisible(uint index) const
 */
 
 //==================================================================
-sint CPeopleList::addPeople(const ucstring &name, uint teamMateIndex /*= 0*/)
+sint CPeopleList::addPeople(const string &name, uint teamMateIndex /*= 0*/)
 {
 	if (!_BaseContainer) return - 1;
 	// check if not already inserted
-	if (getIndexFromName(name.toUtf8()) != -1)
+	if (getIndexFromName(name) != -1)
 	{
-		nlwarning("<CPeopleList::addPeople> people %s inserted twice.", name.toString().c_str());
+		nlwarning("<CPeopleList::addPeople> people %s inserted twice.", name.c_str());
 	}
 
 	vector<pair<string ,string> > properties;
@@ -371,11 +368,11 @@ sint CPeopleList::addPeople(const ucstring &name, uint teamMateIndex /*= 0*/)
 	if (!gc)
 	{
 		delete group;
-		nlwarning("<CPeopleList::addPeople> group is not a container.", name.toString().c_str());
+		nlwarning("<CPeopleList::addPeople> group is not a container.", name.c_str());
 		return -1;
 	}
 	// set title from the name
-	gc->setUCTitle(name);
+	gc->setTitle(name);
 	// People inside list are not savable !
 	gc->setSavable(false);
 	//
@@ -694,7 +691,7 @@ std::string CPeopleList::getName(uint index) const
 		nlwarning("bad index");
 		return "BAD INDEX!";
 	}
-	return _Peoples[index].getName().toUtf8();
+	return _Peoples[index].getName();
 }
 
 //==================================================================

@@ -73,7 +73,7 @@ public:
 		: IItemInfoWaiter(), Requesting(false)
 	{ }
 public:
-	ucstring infoValidated() const;
+	std::string infoValidated() const;
 	void sendRequest();
 	virtual void infoReceived();
 };
@@ -582,7 +582,7 @@ public:
 	void	setItemColor(sint32 val) {if(_UserColor) _UserColor->setValue32(val);}
 
 	// Get the Actual item name. Localized version of SheetId, or given by server through NAMEID.
-	ucstring getItemActualName() const;
+	std::string getItemActualName() const;
 
 	/// true if support drag copy (with CTRL). action handler has to check control.
 	bool	canDragCopy() const {return _DragCopy;}

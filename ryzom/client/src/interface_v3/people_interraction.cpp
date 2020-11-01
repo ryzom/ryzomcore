@@ -355,7 +355,7 @@ void CPeopleInterraction::release()
 		uint numCW = cwm.getNumChatWindow();
 		for(uint k = 0; k < numCW; ++k)
 		{
-			nlwarning("Window %d : %s", (int) k, (cwm.getChatWindowByIndex(k)->getTitle().toString()).c_str());
+			nlwarning("Window %d : %s", (int) k, (cwm.getChatWindowByIndex(k)->getTitle()).c_str());
 		}
 	}
 }
@@ -1121,7 +1121,7 @@ void CPeopleInterraction::askAddContact(const string &contactName, CPeopleList *
 		if (pl == &FriendList)
 			list = 0;
 
-		ucstring temp = contactName; // TODO: UTF-8 serial
+		ucstring temp = ucstring::makeFromUtf8(contactName); // TODO: UTF-8 (serial)
 		out.serial(temp);
 		out.serial(list);
 		NetMngr.push(out);
@@ -1192,7 +1192,7 @@ void CPeopleInterraction::askMoveContact(uint peopleIndexInSrc, CPeopleList *plS
 	// Fake Local simulation
 	if (ClientCfg.Local)
 	{
-		ucstring peopleName= plSRC->getName(peopleIndexInSrc);
+		string peopleName= plSRC->getName(peopleIndexInSrc);
 		plSRC->removePeople(peopleIndexInSrc);
 		sint dstIndex = plDST->addPeople(peopleName);
 		plDST->setOnline(dstIndex, ccs_online);
@@ -1252,7 +1252,7 @@ void CPeopleInterraction::askRemoveContact(uint peopleIndex, CPeopleList *pl)
 //=================================================================================================================
 void CPeopleInterraction::initContactLists( const std::vector<uint32> &vFriendListName,
 											const std::vector<TCharConnectionState> &vFriendListOnline,
-											const std::vector<ucstring> &vIgnoreListName	)
+											const std::vector<ucstring> &vIgnoreListName	) // TODO: UTF-8 (serial)
 
 {
 	// clear the current lists if any
@@ -1264,18 +1264,18 @@ void CPeopleInterraction::initContactLists( const std::vector<uint32> &vFriendLi
 	for (uint i = 0; i < vFriendListName.size(); ++i)
 		addContactInList(contactIdPool++, vFriendListName[i], vFriendListOnline[i], 0);
 	for (uint i = 0; i < vIgnoreListName.size(); ++i)
-		addContactInList(contactIdPool++, vIgnoreListName[i], ccs_offline, 1);
+		addContactInList(contactIdPool++, vIgnoreListName[i].toUtf8(), ccs_offline, 1);
 	updateAllFreeTellerHeaders();
 }
 
 //=================================================================================================================
-void CPeopleInterraction::addContactInList(uint32 contactId, const ucstring &nameIn, TCharConnectionState online, uint8 nList)
+void CPeopleInterraction::addContactInList(uint32 contactId, const string &nameIn, TCharConnectionState online, uint8 nList)
 {
 	// select correct people list
 	CPeopleList	&pl= nList==0?FriendList:IgnoreList;
 
 	// remove the shard name if possible
-	string	name= CEntityCL::removeShardFromName(nameIn.toUtf8());
+	string	name= CEntityCL::removeShardFromName(nameIn);
 
 	// add the contact to this list
 	sint index = pl.getIndexFromName(name);
@@ -1321,12 +1321,12 @@ void CPeopleInterraction::addContactInList(uint32 contactId, uint32 nameID, TCha
 }
 
 //=================================================================================================================
-bool CPeopleInterraction::isContactInList(const ucstring &nameIn, uint8 nList) const
+bool CPeopleInterraction::isContactInList(const string &nameIn, uint8 nList) const
 {
 	// select correct people list
 	const CPeopleList	&pl= nList==0?FriendList:IgnoreList;
 	// remove the shard name if possible
-	string	name= CEntityCL::removeShardFromName(nameIn.toUtf8());
+	string	name= CEntityCL::removeShardFromName(nameIn);
 	return pl.getIndexFromName(name) != -1;
 }
 
@@ -1455,12 +1455,14 @@ void CPeopleInterraction::removeContactFromList(uint32 contactId, uint8 nList)
 }
 
 //=================================================================================================================
-bool CPeopleInterraction::testValidPartyChatName(const ucstring &title)
+bool CPeopleInterraction::testValidPartyChatName(const string &title)
 {
 	if (title.empty()) return false;
 	// shouldn't begin like 'user chat 1-5'
-	ucstring userChatStr = CI18N::get("uiUserChat");
-	if (title.substr(0, userChatStr.length()) == userChatStr) return false;
+	const string &userChatStr = CI18N::get("uiUserChat");
+	if (NLMISC::startsWith(title, userChatStr)) return false;
+	// can't match a translation identifier
+	if (CI18N::hasTranslation(title)) return false;
 	for(uint k = 0; k < PartyChats.size(); ++k) // there shouldn't be that much party chat simultaneously so a linear search is ok
 	{
 		if (PartyChats[k].Window->getTitle() == title) return false;
@@ -1471,9 +1473,9 @@ bool CPeopleInterraction::testValidPartyChatName(const ucstring &title)
 	if (GuildChat && title == GuildChat->getTitle()) return false;
 	if (TeamChat && title == TeamChat->getTitle()) return false;
 	sint index;
-	index = FriendList.getIndexFromName(title.toUtf8());
+	index = FriendList.getIndexFromName(title);
 	if (index != -1) return false;
-	index = IgnoreList.getIndexFromName(title.toUtf8());
+	index = IgnoreList.getIndexFromName(title);
 	if (index != -1) return false;
 	// TODO_GAMEDEV server test for the name (not only local), & modify callers of this function
     // The party chat should NOT have the name of a player
@@ -1526,7 +1528,7 @@ void CPeopleInterraction::assignPartyChatMenu(CChatWindow *partyChat)
 }
 
 //=================================================================================================================
-bool CPeopleInterraction::createNewPartyChat(const ucstring &title)
+bool CPeopleInterraction::createNewPartyChat(const string &title)
 {
 	// now there are no party chat windows, party chat phrases must be filtered from the main chat
 
@@ -1851,8 +1853,8 @@ void CPeopleInterraction::createUserChat(uint index)
 		return;
 	}
 	CChatWindowDesc chatDesc;
-	ucstring userChatStr = CI18N::get("uiUserChat");
-	userChatStr += ucchar(' ') + ucstring(toString(index + 1));
+	string userChatStr = CI18N::get("uiUserChat");
+	userChatStr += ' ' + toString(index + 1);
 	//chatDesc.FatherContainer = "ui:interface:communication";
 	chatDesc.FatherContainer = "ui:interface:contact_list";
 	chatDesc.Title = userChatStr;
@@ -2592,7 +2594,7 @@ public:
 		{
 			for(uint l = 0; l < pl.PartyChats.size(); ++l)
 			{
-				menu->addLineAtIndex(insertionIndex, pl.PartyChats[l].Window->getTitle().toUtf8(), "chat_target_selected", toString(pl.PartyChats[l].ID));
+				menu->addLineAtIndex(insertionIndex, pl.PartyChats[l].Window->getTitle(), "chat_target_selected", toString(pl.PartyChats[l].ID));
 				++ insertionIndex;
 			}
 		}
@@ -2939,7 +2941,7 @@ class CHandlerSelectChatSource : public IActionHandler
 			{
 				if (pc[l].Filter != NULL)
 				{
-					menu->addLineAtIndex(insertionIndex, pc[l].Window->getTitle().toUtf8(), FILTER_TOGGLE, toString(pc[l].ID));
+					menu->addLineAtIndex(insertionIndex, pc[l].Window->getTitle(), FILTER_TOGGLE, toString(pc[l].ID));
 					menu->setUserGroupLeft(insertionIndex, createMenuCheckBox(FILTER_TOGGLE, toString(pc[l].ID), pc[l].Filter->isListeningWindow(cw)));
 					++ insertionIndex;
 				}

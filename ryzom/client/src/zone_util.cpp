@@ -53,7 +53,7 @@ bool getPosFromZoneName(const std::string &name,NLMISC::CVector2f &dest)
 	while (i < zoneName.size())
 	{
 		if (!::isalpha(zoneName[i])) return false;
-		xStr += (char) ::toupper(zoneName[i]); ++i;
+		xStr += (char) NLMISC::toUpper(zoneName[i]); ++i;
 	}
 	if (xStr.size() != 2) return false;
 	dest.x = 160.f * ((xStr[0] - 'A') * 26 + (xStr[1] - 'A'));
@@ -89,7 +89,7 @@ bool getZonePosFromZoneName(const std::string &name, sint &x, sint &y)
 	while (i < zoneName.size())
 	{
 		if (!::isalpha(zoneName[i])) return false;
-		xStr += (char) ::toupper(zoneName[i]); ++i;
+		xStr += (char) NLMISC::toUpper(zoneName[i]); ++i;
 	}
 	if (xStr.size() != 2) return false;
 	x = (xStr[0] - 'A') * 26 + (xStr[1] - 'A');

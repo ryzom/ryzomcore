@@ -87,7 +87,7 @@ using namespace NLMISC;
 
 // ***************************************************************************
 // Add the template key to the parent
-void addKeyLine (CGroupList *pParent, const ucstring &keyName, const ucstring &shortcutName, bool grayed)
+void addKeyLine (CGroupList *pParent, const string &keyName, const string &shortcutName, bool grayed)
 {
 	CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 	CMacroCmdManager	*pMCM = CMacroCmdManager::getInstance();
@@ -104,14 +104,14 @@ void addKeyLine (CGroupList *pParent, const ucstring &keyName, const ucstring &s
 	CViewText *pViewKeyName = dynamic_cast<CViewText*>(pKeysLine->getView(TEMPLATE_KEYS_KEY_NAME));
 	if (pViewKeyName != NULL)
 	{
-		pViewKeyName->setText (keyName.toUtf8());
+		pViewKeyName->setText (keyName);
 		pViewKeyName->setColor(grayed?CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlTextGrayColor).getValColor():CRGBA::White);
 	}
 
 	CViewText *pViewShortcutName = dynamic_cast<CViewText*>(pKeysLine->getView(TEMPLATE_KEYS_SHORTCUT_NAME));
 	if (pViewShortcutName != NULL)
 	{
-		pViewShortcutName->setText (shortcutName.toUtf8());
+		pViewShortcutName->setText (shortcutName);
 		pViewShortcutName->setColor(grayed?CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlTextGrayColor).getValColor():CRGBA::White);
 	}
 

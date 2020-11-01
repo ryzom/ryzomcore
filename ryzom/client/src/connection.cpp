@@ -804,7 +804,7 @@ std::string	buildPlayerNameForSaveFile(const std::string &playerNameIn)
 			(c>='0' && c<='9') ||
 			(c=='_') )
 		{
-			ret[i]= tolower(c);
+			ret[i]= tolower(c); // TODO: toLowerAscii
 		}
 		else
 			ret[i]= '_';

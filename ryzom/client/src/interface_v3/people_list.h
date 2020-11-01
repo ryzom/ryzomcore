@@ -28,7 +28,6 @@
 #include "chat_window.h"
 #include "interface_pointer.h"
 // NeL
-#include "nel/misc/ucstring.h"
 #include "nel/misc/rgba.h"
 
 
@@ -40,7 +39,7 @@
 struct CPeopleListDesc
 {
 	enum TContactType { Team, Contact, Ignore, Unknown };
-	ucstring     PeopleListTitle;    // title of the people list
+	std::string     PeopleListTitle;    // title of the people list
 	TContactType ContactType;
 	std::string  FatherContainer;           // name of the father container
 	std::string  BaseContainerTemplateName; // name of the template for the base container
@@ -99,7 +98,7 @@ public:
 	/** Add a people to the list, and returns its index or -1 if the creation failed
 	  * If this is a team mate, tells its index so that ic can be bound to the database in the right location
 	  */
-	sint addPeople(const ucstring &name, uint teamMateIndex = 0);
+	sint addPeople(const std::string &name, uint teamMateIndex = 0);
 	// swap people position between the 2 given indexs
 	void swapPeople(uint index1, uint index2);
 	// Remove the people at the given index
@@ -159,7 +158,7 @@ private:
 		bool							Blocked;
 		uint32							ContactId;
 		bool operator < (const CPeople &other) const { return getName() < other.getName(); }
-		ucstring		getName() const { return Container->getUCTitle(); }
+		std::string getName() const { return Container->getTitle(); }
 	};
 	typedef std::vector<CPeople> TPeopleVect;
 private:

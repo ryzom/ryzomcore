@@ -188,8 +188,8 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 		window->setActive(true);
 
 		// Setup the Title with a default text
-		ucstring	title= CI18N::get("uiPhraseFaberExecuteNoPlan");
-		window->setUCTitle (title);
+		string	title= CI18N::get("uiPhraseFaberExecuteNoPlan");
+		window->setTitle (title);
 	}
 
 	// **** setup DB observer!
@@ -570,9 +570,9 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 	if(window)
 	{
 		// Setup the Title with the item built
-		ucstring	title= CI18N::get("uiPhraseFaberExecute");
+		string	title= CI18N::get("uiPhraseFaberExecute");
 		strFindReplace(title, "%item", STRING_MANAGER::CStringManagerClient::getItemLocalizedName(_ExecuteFromItemPlanBrick->FaberPlan.ItemBuilt) );
-		window->setUCTitle (title);
+		window->setTitle (title);
 	}
 
 

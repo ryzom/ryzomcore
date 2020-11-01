@@ -2494,7 +2494,7 @@ void impulseRemoteAdmin (NLMISC::CBitMemStream &impulse)
 	impulse.serial (cmd);
 
 	// remove the 2 first rc character if exists, only there to say to the EGS that is a remote command
-	if (cmd.size()>2 && tolower(cmd[0])=='r' && tolower(cmd[1])=='c')
+	if (cmd.size()>2 && tolower(cmd[0])=='r' && tolower(cmd[1])=='c') // FIXME: toLowerAscii
 		cmd = cmd.substr(2);
 
 	mdDisplayVars.clear ();
