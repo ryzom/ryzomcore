@@ -1422,11 +1422,13 @@ namespace NLGUI
 		}
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	void CViewText::setTextAsUtf16(const ucstring &text)
 	{
 		setText(text.toUtf8());
 	}
+#endif
 
 	// ***************************************************************************
 	void CViewText::setTextLocalized(const std::string &text, bool localized)
@@ -2449,11 +2451,13 @@ namespace NLGUI
 		endOfPreviousLine = !_Lines[line]->getLF();
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	void CViewText::setHardTextAsUtf16(const ucstring &ht)
 	{
 		setHardText(ht.toUtf8());
 	}
+#endif
 
 	// ***************************************************************************
 	void CViewText::setHardText (const std::string &ht)
@@ -2466,6 +2470,7 @@ namespace NLGUI
 		setText(ht);
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	ucstring CViewText::getTextAsUtf16() const
 	{
@@ -2477,6 +2482,7 @@ namespace NLGUI
 	{
 		return CUtfStringView(getHardText()).toUtf16();
 	}
+#endif
 
 	// ***************************************************************************
 	string CViewText::getColorAsString() const
@@ -3383,11 +3389,13 @@ namespace NLGUI
 		}
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	void	CViewText::setTextFormatTagedAsUtf16(const ucstring &text)
 	{
 		setTextFormatTaged(text.toUtf8());
 	}
+#endif
 
 	// ***************************************************************************
 	void	CViewText::setTextFormatTaged(const std::string &text)
@@ -3481,10 +3489,12 @@ namespace NLGUI
 			nlwarning("ViewText isn't multilined : uc_hardtext_format will not act as wanted !\n%s", text.c_str());
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	void CViewText::setSingleLineTextFormatTagedAsUtf16(const ucstring &text)
 	{
 		setSingleLineTextFormatTaged(text.toUtf8());
 	}
+#endif
 
 	void CViewText::setSingleLineTextFormatTaged(const std::string &text)
 	{

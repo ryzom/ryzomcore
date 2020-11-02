@@ -1272,7 +1272,6 @@ namespace NLGUI
 			return;
 		}
 
-		// TODO: use ucstring / ucchar as content is utf8 chars
 		std::string::size_type pos = 0;
 		while(pos < content.size())
 		{
@@ -3695,7 +3694,7 @@ namespace NLGUI
 		{
 			// Text area ?
 			bool addEntry = false;
-			ucstring entryData;
+			string entryData;
 			if (form.Entries[i].TextArea)
 			{
 				// Get the edit box view
@@ -3706,7 +3705,7 @@ namespace NLGUI
 					CGroupEditBox *editBox = dynamic_cast<CGroupEditBox*>(group);
 					if (editBox)
 					{
-						entryData = CUtfStringView(editBox->getViewText()->getText()).toUtf16();
+						entryData = editBox->getViewText()->getText();
 						addEntry = true;
 					}
 				}
@@ -3723,7 +3722,7 @@ namespace NLGUI
 			else if (form.Entries[i].ComboBox)
 			{
 				CDBGroupComboBox *cb = form.Entries[i].ComboBox;
-				entryData.fromUtf8(form.Entries[i].SelectValues[cb->getSelection()]);
+				entryData = form.Entries[i].SelectValues[cb->getSelection()];
 				addEntry = true;
 			}
 			else if (form.Entries[i].SelectBox)
@@ -3754,7 +3753,7 @@ namespace NLGUI
 			// Add this entry
 			if (addEntry)
 			{
-				formfields.add(form.Entries[i].Name, CI18N::encodeUTF8(entryData));
+				formfields.add(form.Entries[i].Name, entryData);
 			}
 		}
 

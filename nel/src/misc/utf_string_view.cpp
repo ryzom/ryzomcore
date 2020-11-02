@@ -76,7 +76,7 @@ void CUtfStringView::append(IStream &s, u32char c)
 	std::string tmp;
 	tmp.reserve(4);
 	append(tmp, c);
-	s.serialBuffer((uint8_t *)&tmp[0], tmp.size());
+	s.serialBuffer((uint8 *)&tmp[0], tmp.size());
 }
 
 u32char CUtfStringView::get(IStream &s)
@@ -85,7 +85,7 @@ u32char CUtfStringView::get(IStream &s)
 
 	std::string tmp;
 	tmp.reserve(4);
-	uint8_t c;
+	uint8 c;
 	s.serial(c);
 
 	// Single byte
@@ -101,7 +101,7 @@ u32char CUtfStringView::get(IStream &s)
 
 	// Read from stream
 	tmp.resize(len);
-	s.serialBuffer((uint8_t *)&tmp[1], len - 1);
+	s.serialBuffer((uint8 *)&tmp[1], len - 1);
 
 	// Decode
 	const void *str = tmp.c_str();

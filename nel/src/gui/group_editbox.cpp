@@ -63,6 +63,7 @@ namespace NLGUI
 									_BlinkTime(0.f),
 									_CursorPos(0),
 									_MaxNumChar(std::numeric_limits<uint32>::max()),
+									_MaxNumBytes(0),
 									_MaxNumReturn(std::numeric_limits<uint32>::max()),
 									_MaxFloatPrec(20),
 									_MaxCharsSize(32768),
@@ -147,6 +148,11 @@ namespace NLGUI
 		if( name == "max_num_chars" )
 		{
 			return toString( _MaxNumChar );
+		}
+		else
+		if( name == "max_num_bytes" )
+		{
+			return toString( _MaxNumBytes );
 		}
 		else
 		if( name == "max_num_return" )
@@ -321,6 +327,14 @@ namespace NLGUI
 			return;
 		}
 		else
+		if( name == "max_num_bytes" )
+		{
+			uint32 i;
+			if( fromString( value, i ) )
+				_MaxNumBytes = i;
+			return;
+		}
+		else
 		if( name == "max_num_return" )
 		{
 			uint32 i;
@@ -474,6 +488,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "on_focus", BAD_CAST _AHOnFocus.c_str() );
 		xmlSetProp( node, BAD_CAST "on_focus_params", BAD_CAST _AHOnFocusParams.c_str() );
 		xmlSetProp( node, BAD_CAST "max_num_chars", BAD_CAST toString( _MaxNumChar ).c_str() );
+		xmlSetProp( node, BAD_CAST "max_num_bytes", BAD_CAST toString( _MaxNumBytes ).c_str() );
 		xmlSetProp( node, BAD_CAST "max_num_return", BAD_CAST toString( _MaxNumReturn ).c_str() );
 		xmlSetProp( node, BAD_CAST "max_chars_size", BAD_CAST toString( _MaxCharsSize ).c_str() );
 		xmlSetProp( node, BAD_CAST "enter_loose_focus", BAD_CAST toString( _LooseFocusOnEnter ).c_str() );
@@ -590,6 +605,9 @@ namespace NLGUI
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"max_num_chars" );
 		if (prop) fromString((const char*)prop, _MaxNumChar);
+
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"max_num_bytes" );
+		if (prop) fromString((const char*)prop, _MaxNumBytes);
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"max_num_return" );
 		if (prop) fromString((const char*)prop, _MaxNumReturn);
@@ -969,6 +987,17 @@ namespace NLGUI
 			length = _MaxNumChar - (sint)_InputString.length();
 		}
 		::u32string toAdd = toAppend.substr(0, length);
+		if (_MaxNumBytes && length)
+		{
+			sint baseBytes = CUtfStringView(_InputString).toUtf8().length();
+			sint bytes = baseBytes + CUtfStringView(toAdd).toUtf8().length();
+			while (bytes > _MaxNumBytes)
+			{
+				length -= std::max((int)(bytes - _MaxNumBytes) >> 2, 1);
+				toAdd = toAdd.substr(0, length);
+				bytes = baseBytes + CUtfStringView(toAdd).toUtf8().length();
+			}
+		}
 		sint32	minPos;
 		sint32	maxPos;
 		if (_CurrSelection == this)
@@ -1018,7 +1047,7 @@ namespace NLGUI
 				_CursorAtPreviousLineEnd = false;
 				if (_ClearOnEscape)
 				{
-					setInputStringAsUtf32(::u32string());
+					setInputStringRef(::u32string());
 					triggerOnChangeAH();
 				}
 				CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
@@ -1064,7 +1093,7 @@ namespace NLGUI
 					{
 						if (isKeyRETURN)
 						{
-							//ucstring	copyStr= _InputString;
+							//u32string	copyStr= _InputString;
 							//if ((uint) std::count(copyStr.begin(), copyStr.end(), '\n') >= _MaxNumReturn)
 							if ((uint)std::count(_InputString.begin(), _InputString.end(), '\n') >= _MaxNumReturn)
 								break;
@@ -1153,11 +1182,14 @@ namespace NLGUI
 						// verify max num char
 						if ((uint) _InputString.length() < _MaxNumChar)
 						{
-							makeTopWindow();
-							::u32string::iterator it = _InputString.begin() + _CursorPos;
-							_InputString.insert(it, c);
-							++ _CursorPos;
-							triggerOnChangeAH();
+							if (!_MaxNumBytes || CUtfStringView(_InputString + c).toUtf8().size() <= _MaxNumBytes)
+							{
+								makeTopWindow();
+								::u32string::iterator it = _InputString.begin() + _CursorPos;
+								_InputString.insert(it, c);
+								++_CursorPos;
+								triggerOnChangeAH();
+							}
 						}
 						if (isKeyRETURN)
 						{
@@ -1182,7 +1214,7 @@ namespace NLGUI
 		if (CWidgetManager::getInstance()->getCaptureKeyboard() != this) return false;
 		if (!_CanUndo) return false;
 		_ModifiedInputString = _InputString;
-		setInputStringAsUtf32(_StartInputString);
+		setInputStringRef(_StartInputString);
 		_CanUndo = false;
 		_CanRedo = true;
 		setCursorPos((sint32)_InputString.length());
@@ -1195,7 +1227,7 @@ namespace NLGUI
 	{
 		if (CWidgetManager::getInstance()->getCaptureKeyboard() != this) return false;
 		if (!_CanRedo) return false;
-		setInputStringAsUtf32(_ModifiedInputString);
+		setInputStringRef(_ModifiedInputString);
 		_CanUndo = true;
 		_CanRedo = false;
 		setCursorPos((sint32)_InputString.length());
@@ -1306,7 +1338,7 @@ namespace NLGUI
 				default: break;
 			}
 			// update the text
-			setInputStringAsUtf32(_InputString);
+			setInputStringRef(_InputString);
 
 			// if event of type char or string, consider handle all of them
 			if( rEDK.getKeyEventType()==NLGUI::CEventDescriptorKey::keychar || rEDK.getKeyEventType()==NLGUI::CEventDescriptorKey::keystring )
@@ -1635,9 +1667,9 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupEditBox::setInputString(const std::string &str)
 	{
-		setInputStringAsUtf32(CUtfStringView(str).toUtf32());
+		setInputStringRef(CUtfStringView(str).toUtf32());
 	}
-	void CGroupEditBox::setInputStringAsUtf32(const ::u32string &str)
+	void CGroupEditBox::setInputStringRef(const ::u32string &str)
 	{
 		_InputString = str;
 		if (_CursorPos > (sint32) str.length())
@@ -1761,6 +1793,7 @@ namespace NLGUI
 		return NLMISC::CUtfStringView(_InputString).toUtf8();
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	void	CGroupEditBox::setInputStringAsUtf16(const ucstring &str)
 	{
@@ -1772,6 +1805,7 @@ namespace NLGUI
 	{
 		return CUtfStringView(_InputString).toUtf16();
 	}
+#endif
 
 	// ***************************************************************************
 	void CGroupEditBox::setCommand(const std::string &command, bool execute)
@@ -1844,7 +1878,7 @@ namespace NLGUI
 		}
 		if (version < 1)
 		{
-			ucstring str;
+			ucstring str; // Compatibility
 			if (!f.isReading())
 				str = CUtfStringView(_InputString).toUtf16();
 			f.serial(str);
@@ -1864,7 +1898,7 @@ namespace NLGUI
 		f.serial(_PrevNumLine);
 		if (f.isReading())
 		{
-			setInputStringAsUtf32(_InputString);
+			setInputStringRef(_InputString);
 
 		}
 		// serial selection
@@ -1881,7 +1915,7 @@ namespace NLGUI
 	void CGroupEditBox::onQuit()
 	{
 		// clear the text and restore backup pos before final save
-		setInputStringAsUtf32(::u32string());
+		setInputStringRef(::u32string());
 		_CurrSelection = NULL;
 	}
 
@@ -1889,7 +1923,7 @@ namespace NLGUI
 	void CGroupEditBox::onLoadConfig()
 	{
 		// config is not saved when there's an empty string, so restore that default state.
-		setInputStringAsUtf32(::u32string());
+		setInputStringRef(::u32string());
 		_CurrSelection = NULL;
 		_PrevNumLine = 1;
 	}
@@ -1904,7 +1938,7 @@ namespace NLGUI
 			if (_DefaultInputString)
 			{
 				_DefaultInputString= false;
-				setInputStringAsUtf32(::u32string());
+				setInputStringRef(::u32string());
 			}
 			_CanRedo = false;
 			_CanUndo = false;

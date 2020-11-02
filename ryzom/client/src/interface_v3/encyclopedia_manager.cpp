@@ -399,7 +399,7 @@ void CEncyclopediaManager::rebuildThemaPage(uint32 themaName)
 
 		// setup task NPC name
 		CStringPostProcessNPCRemoveTitle *pSPPRT = new CStringPostProcessNPCRemoveTitle;
-		pIM->addServerID (sTmp+":npc:uc_hardtext", pThema->TaskNPCName[i], pSPPRT);
+		pIM->addServerID (sTmp+":npc:hardtext", pThema->TaskNPCName[i], pSPPRT);
 
 		// If the task is not known gray it
 		if (pThema->getTaskState((uint8)i) == 0)

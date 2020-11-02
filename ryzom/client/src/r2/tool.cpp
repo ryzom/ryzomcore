@@ -938,7 +938,11 @@ void CTool::setContextHelp(const ucstring &contextHelp)
 	// forward the call to lua (all ui handling done bye lua)
 	CLuaState &ls = getEditor().getLua();
 	CLuaStackChecker lsc(&ls);
+#ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::push(ls, contextHelp);
+#else
+	ls.push(contextHelp.toUtf8());
+#endif
 	getEditor().callEnvMethod("setToolContextHelp", 1, 0);
 }
 

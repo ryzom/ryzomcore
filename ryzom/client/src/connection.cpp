@@ -2833,7 +2833,7 @@ class CAHScenarioControl : public IActionHandler
 					{
 						CGroupEditBox* editBox = dynamic_cast<CGroupEditBox*>(result);
 						if(editBox)
-							editBox->setInputStringAsUtf16(description);
+							editBox->setInputString(description);
 					}
 				}
 			}

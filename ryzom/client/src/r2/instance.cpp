@@ -120,8 +120,14 @@ ucstring CInstance::getDisplayName()
 	}
 	if (getLuaProjection().callMethodByNameNoThrow("getDisplayName", 0, 1))
 	{
+#ifdef RYZOM_LUA_UCSTRING
 		ucstring result;
 		if (CLuaIHM::pop(ls, result)) return result;
+#else
+		std::string res = ls.toString();
+		ls.pop();
+		if (!res.empty()) return res;
+#endif
 	}
 	TEST_LUA_PROJ;
 	return ucstring("Can't find display name");

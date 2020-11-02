@@ -1051,6 +1051,20 @@ namespace NLGUI
 		return std::string();
 	}
 
+	void CCtrlTextButton::setLocalize(bool localize)
+	{
+		if (_ViewText && !_IsViewTextId)
+			_ViewText->setLocalized(localize);
+	}
+
+	bool CCtrlTextButton::isLocalized() const
+	{
+		if (_ViewText && !_IsViewTextId)
+			return _ViewText->isLocalized();
+		return true;
+	}
+
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	void CCtrlTextButton::setTextAsUtf16 (const ucstring &text)
 	{
@@ -1065,6 +1079,7 @@ namespace NLGUI
 			return CUtfStringView(_ViewText->getText()).toUtf16();
 		return ucstring("");
 	}
+#endif
 
 	// ***************************************************************************
 	void CCtrlTextButton::setHardText (const std::string &text)

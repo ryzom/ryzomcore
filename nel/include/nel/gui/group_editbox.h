@@ -74,17 +74,19 @@ namespace NLGUI
 		  */
 		void		setPrompt(const std::string &s);
 		void		setInputString(const std::string &str);
-		void		setInputStringRef(const ::u32string &str) {_InputString = str; };
+		void		setInputStringRef(const ::u32string &str);
 		void		setInputStringAsInt(sint32 val);
 		sint32		getInputStringAsInt() const;
 		void		setInputStringAsInt64(sint64 val);
 		sint64		getInputStringAsInt64() const;
 		void		setInputStringAsFloat(float val);
 		float		getInputStringAsFloat() const;
-		void		setInputStringAsUtf16(const ucstring &str);
-		ucstring    getInputStringAsUtf16() const;
-		void		setInputStringAsUtf32(const ::u32string &str);
-		::u32string   getInputStringAsUtf32() const { return _InputString; }
+#ifdef RYZOM_LUA_UCSTRING
+		void		setInputStringAsUtf16(const ucstring &str); // Compatibility
+		ucstring    getInputStringAsUtf16() const; // Compatibility
+		void		setInputStringAsUtf32(const ::u32string &str) { setInputStringRef(str); } // Compatibility
+		::u32string   getInputStringAsUtf32() const { return _InputString; } // Compatibility
+#endif
 		void		setColor(NLMISC::CRGBA col);
 
 
@@ -192,7 +194,9 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("setFocusOnText", luaSetFocusOnText);
 			REFLECT_LUA_METHOD("cancelFocusOnText", luaCancelFocusOnText);
 			REFLECT_STRING("input_string", getInputString, setInputString);
-			REFLECT_UCSTRING("uc_input_string", getInputStringAsUtf16, setInputStringAsUtf16);
+#ifdef RYZOM_LUA_UCSTRING
+			REFLECT_UCSTRING("uc_input_string", getInputStringAsUtf16, setInputStringAsUtf16); // Compatibility
+#endif
 		REFLECT_EXPORT_END
 
 		/** Restore the original value of the edit box.
@@ -217,6 +221,7 @@ namespace NLGUI
 		float	_BlinkTime;
 		sint32	_CursorPos;
 		uint32  _MaxNumChar;
+		uint32  _MaxNumBytes;
 		uint32  _MaxNumReturn;
 		uint32  _MaxFloatPrec;		// used in setInputStringAsFloat() only
 		sint32	_MaxCharsSize;

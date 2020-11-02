@@ -1823,8 +1823,13 @@ namespace NLGUI
 		const char *funcName = "getLineId";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		std::string id = getLineId((uint) ls.toInteger(1));
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring id = getLineId((uint) ls.toInteger(1)); // Compatibility
 		CLuaIHM::push(ls, id);
+#else
+		std::string id = getLineId((uint)ls.toInteger(1));
+		ls.push(id);
+#endif
 		return 1;
 	}
 
@@ -1853,13 +1858,21 @@ namespace NLGUI
 	{
 		const char *funcName = "addLine";
 		CLuaIHM::checkArgCount(ls, funcName, 4);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 1);
+#else
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+#endif
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 4, LUA_TSTRING);
-		ucstring arg1;
-		nlverify(CLuaIHM::getUCStringOnStack(ls, 1, arg1)); // FIXME: Lua UTF-8
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring arg1; // Compatibility
+		nlverify(CLuaIHM::getUCStringOnStack(ls, 1, arg1));
 		addLine(arg1.toUtf8(), ls.toString(2), ls.toString(3), ls.toString(4));
+#else
+		addLine(ls.toString(1), ls.toString(2), ls.toString(3), ls.toString(4));
+#endif
 		return 0;
 	}
 
@@ -1868,14 +1881,22 @@ namespace NLGUI
 	{
 		const char *funcName = "addIconLine";
 		CLuaIHM::checkArgCount(ls, funcName, 5);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 1);
+#else
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+#endif
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 4, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 5, LUA_TSTRING);
-		ucstring arg1;
-		nlverify(CLuaIHM::getUCStringOnStack(ls, 1, arg1)); // FIXME: Lua UTF-8
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring arg1; // Compatibility
+		nlverify(CLuaIHM::getUCStringOnStack(ls, 1, arg1));
 		addLine(arg1.toUtf8(), ls.toString(2), ls.toString(3), ls.toString(4), string(), ls.toString(5));
+#else
+		addLine(ls.toString(1), ls.toString(2), ls.toString(3), ls.toString(4), string(), ls.toString(5));
+#endif
 		return 0;
 	}
 
@@ -1885,13 +1906,21 @@ namespace NLGUI
 		const char *funcName = "addLineAtIndex";
 		CLuaIHM::checkArgCount(ls, funcName, 5);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
+#else
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+#endif
 		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 4, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 5, LUA_TSTRING);
+#ifdef RYZOM_LUA_UCSTRING
 		ucstring arg2;
-		nlverify(CLuaIHM::getUCStringOnStack(ls, 2, arg2)); // FIXME: Lua UTF-8
+		nlverify(CLuaIHM::getUCStringOnStack(ls, 2, arg2));
 		addLineAtIndex((uint) ls.toInteger(1), arg2.toUtf8(), ls.toString(3), ls.toString(4), ls.toString(5));
+#else
+		addLineAtIndex((uint)ls.toInteger(1), ls.toString(2), ls.toString(3), ls.toString(4), ls.toString(5));
+#endif
 		return 0;
 	}
 

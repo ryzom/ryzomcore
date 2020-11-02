@@ -903,6 +903,7 @@ int CComLuaModule::luaRequestNewAction(lua_State* state, bool pending, uint coun
 		}
 		else
 		{
+#ifdef RYZOM_LUA_UCSTRING
 			// try with ucstring
 			CLuaState &ls = getEditor().getLua();
 			nlassert(ls.getStatePointer() == state);
@@ -911,6 +912,9 @@ int CComLuaModule::luaRequestNewAction(lua_State* state, bool pending, uint coun
 				nlwarning("<r2.%s> : ucstring or string expected as action name", funcName);
 				return 0;
 			}
+#else
+			return 0;
+#endif
 		}
 	}
 	else

@@ -130,7 +130,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 				{
 					if ( pIS->Family == ITEMFAMILY::SCROLL)
 					{
-						editBoxLarge->setInputStringAsUtf16(itemInfo.CustomText);
+						editBoxLarge->setInputString(itemInfo.CustomText.toUtf8()); // TODO: UTF-8 (serial)
 						editLarge->setActive(true);
 						editBoxLarge->setActive(true);
 
@@ -244,7 +244,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 						// If we already have item info
 						if ( pIS->Family == ITEMFAMILY::SCROLL)
 						{
-							editBoxLarge->setInputStringAsUtf16(itemInfo.CustomText);
+							editBoxLarge->setInputString(itemInfo.CustomText.toUtf8()); // TODO: UTF-8 (serial)
 							editLarge->setActive(true);
 							editBoxLarge->setActive(true);
 
