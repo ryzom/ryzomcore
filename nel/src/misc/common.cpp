@@ -577,7 +577,6 @@ uint32 fromHumanReadable (const std::string &str)
 	return 0;
 }
 
-
 NLMISC_CATEGORISED_COMMAND(nel,stohr, "Convert a second number into an human readable time", "<int>")
 {
 	nlunreferenced(rawCommandString);
@@ -590,6 +589,50 @@ NLMISC_CATEGORISED_COMMAND(nel,stohr, "Convert a second number into an human rea
 	uint32 seconds;
 	fromString(args[0], seconds);
 	log.displayNL("%s -> %s", args[0].c_str(), secondsToHumanReadable(seconds).c_str());
+
+	return true;
+}
+
+NLMISC_CATEGORISED_COMMAND(nel, toLower, "Convert a string to lowercase", "<string>")
+{
+	nlunreferenced(args);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
+
+	log.displayNL("%s", toLower(rawCommandString).c_str());
+
+	return true;
+}
+
+NLMISC_CATEGORISED_COMMAND(nel, toUpper, "Convert a string to uppercase", "<string>")
+{
+	nlunreferenced(args);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
+
+	log.displayNL("%s", toUpper(rawCommandString).c_str());
+
+	return true;
+}
+
+NLMISC_CATEGORISED_COMMAND(nel, toLowerAscii, "Convert a string's ascii-characters to lowercase", "<string>")
+{
+	nlunreferenced(args);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
+
+	log.displayNL("%s", toLowerAscii(rawCommandString).c_str());
+
+	return true;
+}
+
+NLMISC_CATEGORISED_COMMAND(nel, toUpperAscii, "Convert a string's ascii-characters to uppercase", "<string>")
+{
+	nlunreferenced(args);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
+
+	log.displayNL("%s", toUpperAscii(rawCommandString).c_str());
 
 	return true;
 }
@@ -735,6 +778,52 @@ void toUpperAscii(char *str, char replacement)
 		char c = str[i];
 		if ((sint8)(c + '\x01') < (sint8)(' ' + '\x01')) str[i] = replacement;
 		else if (c >= 'a' && c <= 'z') str[i] = c - ('a' - 'A');
+		else str[i] = c;
+	}
+}
+
+std::string toLowerAscii(const std::string &str)
+{
+	std::string res;
+	res.reserve(str.size());
+	for (std::string::const_iterator it(str.begin()), end(str.end()); it != end; ++it)
+	{
+		char c = *it;
+		if (c >= 'A' && c <= 'Z') res += c + ('a' - 'A');
+		else res += c;
+	}
+	return res;
+}
+
+void toLowerAscii(char *str)
+{
+	for (ptrdiff_t i = 0; str[i]; ++i)
+	{
+		char c = str[i];
+		if (c >= 'A' && c <= 'Z') str[i] = c + ('a' - 'A');
+		else str[i] = c;
+	}
+}
+
+std::string toUpperAscii(const std::string &str)
+{
+	std::string res;
+	res.reserve(str.size());
+	for (std::string::const_iterator it(str.begin()), end(str.end()); it != end; ++it)
+	{
+		char c = *it;
+		if (c >= 'a' && c <= 'z') res += c - ('a' - 'A');
+		else res += c;
+	}
+	return res;
+}
+
+void toUpperAscii(char *str)
+{
+	for (ptrdiff_t i = 0; str[i]; ++i)
+	{
+		char c = str[i];
+		if (c >= 'a' && c <= 'z') str[i] = c - ('a' - 'A');
 		else str[i] = c;
 	}
 }

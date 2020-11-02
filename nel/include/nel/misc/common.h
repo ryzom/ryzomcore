@@ -267,6 +267,18 @@ void toLowerAscii(char *str, char replacement);
 std::string toUpperAscii(const std::string &str, char replacement);
 void toUpperAscii(char *str, char replacement);
 
+/** ASCII to lowercase. Useful for internal identifiers.
+* Characters outside of the 7-bit ASCII space are not affected.
+*/
+std::string toLowerAscii(const std::string &str);
+void toLowerAscii(char *str);
+
+/** ASCII to uppercase. Useful for internal identifiers.
+* Characters outside of the 7-bit ASCII space are not affected.
+*/
+std::string toUpperAscii(const std::string &str);
+void toUpperAscii(char *str);
+
 /**
  *  Convert to an hexadecimal std::string
  */
