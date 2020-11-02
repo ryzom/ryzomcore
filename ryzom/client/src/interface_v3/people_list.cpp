@@ -895,7 +895,7 @@ class CHandlerContactEntry : public IActionHandler
 		CGroupContainer *gc = static_cast< CGroupContainer* >( pCaller->getParent()->getEnclosingContainer() );
 
 		// title gives the name of the player
-		string playerName = gc->getUCTitle().toUtf8();
+		string playerName = gc->getTitle();
 
 		// Simply do a tell on the player
 		ChatMngr.tell(playerName, text);

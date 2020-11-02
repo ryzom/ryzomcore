@@ -141,7 +141,7 @@ static void popupLandMarkNameDialog()
 		const CUserLandMark userLM = map->getUserLandMark(LastSelectedLandMark);
 
 		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(userLM.Type));
-		eb->setInputStringAsUtf16(userLM.Title);
+		eb->setInputString(userLM.Title.toUtf8());
 	}
 	else
 	{
@@ -3375,9 +3375,10 @@ CGroupMap::CLandMarkButton* CGroupMap::findClosestLandmark(const CVector2f &cent
 	closest = std::numeric_limits<float>::max();
 	for(TLandMarkButtonVect::const_iterator it = landmarks.begin(); it != landmarks.end(); ++it)
 	{
-		ucstring lc;
-		(*it)->getContextHelpAsUtf16(lc);
-		if(filterLandmark(lc, keywords, startsWith)) {
+		std::string lc;
+		(*it)->getContextHelp(lc);
+		ucstring ulc = ucstring::makeFromUtf8(lc);
+		if(filterLandmark(ulc, keywords, startsWith)) {
 			CVector2f pos;
 			mapToWorld(pos, (*it)->Pos);
 			float dist = distsqr(center, pos);
@@ -3984,7 +3985,7 @@ class CAHValidateUserLandMarkName : public IActionHandler
 			CGroupMap *map = dynamic_cast<CGroupMap *>(LastSelectedLandMark->getParent());
 			if (!map) return;
 			// update existing landmark
-			map->updateUserLandMark(LastSelectedLandMark, eb->getInputStringAsUtf16(), landMarkType);
+			map->updateUserLandMark(LastSelectedLandMark, ucstring::makeFromUtf8(eb->getInputString()), landMarkType);
 		}
 		else
 		{
@@ -3992,11 +3993,11 @@ class CAHValidateUserLandMarkName : public IActionHandler
 			if (!LastClickedMap) return;
 			if( UseUserPositionForLandMark )
 			{
-				LastClickedMap->addUserLandMark(LastClickedMap->getPlayerPos(), eb->getInputStringAsUtf16(), landMarkType);
+				LastClickedMap->addUserLandMark(LastClickedMap->getPlayerPos(), ucstring::makeFromUtf8(eb->getInputString()), landMarkType);
 			}
 			else
 			{
-				LastClickedMap->addUserLandMark(LastClickedMap->getRightClickLastPos(), eb->getInputStringAsUtf16(), landMarkType);
+				LastClickedMap->addUserLandMark(LastClickedMap->getRightClickLastPos(), ucstring::makeFromUtf8(eb->getInputString()), landMarkType);
 			}
 			LastClickedMap->invalidateCoords();
 		}

@@ -1677,7 +1677,10 @@ bool CPeopleInterraction::saveUserChatsInfos(NLMISC::IStream &f)
 		if (ver>=2)
 		{
 			CChatGroupWindow *pCGW = PeopleInterraction.getChatGroupWindow();
-			pCGW->saveFreeTeller(f);
+			if (pCGW)
+			{
+				pCGW->saveFreeTeller(f);
+			}
 		}
 	}
 	catch(const NLMISC::EStream &e)

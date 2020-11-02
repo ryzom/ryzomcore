@@ -249,12 +249,14 @@ namespace NLGUI
 		// Get the header color draw. NB: depends if grayed, and if active.
 		NLMISC::CRGBA	getDrawnHeaderColor () const;
 
-		ucstring		getUCTitleOpened () const;
-		void			setUCTitleOpened (const ucstring &title);
-		ucstring		getUCTitleClosed () const;
-		void			setUCTitleClosed (const ucstring &title);
-		ucstring		getUCTitle () const;
-		void			setUCTitle (const ucstring &title);
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring		getUCTitleOpened () const; // Compatibility
+		void			setUCTitleOpened (const ucstring &title); // Compatibility
+		ucstring		getUCTitleClosed () const; // Compatibility
+		void			setUCTitleClosed (const ucstring &title); // Compatibility
+		ucstring		getUCTitle () const; // Compatibility
+		void			setUCTitle (const ucstring &title); // Compatibility
+#endif
 
 		void			setPopable(bool popable) { _Popable = popable; }
 		bool			isPopable() const { return _Popable; }
@@ -289,9 +291,11 @@ namespace NLGUI
 			REFLECT_STRING("title_opened", getTitleOpened, setTitleOpened);
 			REFLECT_STRING("title_closed", getTitleClosed, setTitleClosed);
 
-			REFLECT_UCSTRING("uc_title_opened", getUCTitleOpened, setUCTitleOpened); // FIXME: Lua UTF-8
-			REFLECT_UCSTRING("uc_title_closed", getUCTitleClosed, setUCTitleClosed); // FIXME: Lua UTF-8
-			REFLECT_UCSTRING("uc_title", getUCTitle, setUCTitle); // FIXME: Lua UTF-8
+#ifdef RYZOM_LUA_UCSTRING
+			REFLECT_UCSTRING("uc_title_opened", getUCTitleOpened, setUCTitleOpened); // Compatibility
+			REFLECT_UCSTRING("uc_title_closed", getUCTitleClosed, setUCTitleClosed); // Compatibility
+			REFLECT_UCSTRING("uc_title", getUCTitle, setUCTitle); // Compatibility
+#endif
 
 			REFLECT_STRING("title_color", getTitleColorAsString, setTitleColorAsString);
 			REFLECT_SINT32("pop_min_h", getPopupMinH, setPopupMinH);

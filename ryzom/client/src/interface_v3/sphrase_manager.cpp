@@ -4675,7 +4675,11 @@ int CSPhraseComAdpater::luaGetStaCost(CLuaState &ls)
 // ***************************************************************************
 int CSPhraseComAdpater::luaGetName(CLuaState &ls)
 {
+#ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::push(ls, this->Phrase.Name);
+#else
+	ls.push(this->Phrase.Name.toUtf8());
+#endif
 	return 1;
 }
 
@@ -4688,11 +4692,15 @@ int CSPhraseComAdpater::luaGetDesc(CLuaState &ls)
 	if (phraseSheetID != 0)
 	{
 		// is it a built-in phrase?
-		ucstring desc; // FIXME: UTF-8 Lua
-		desc.fromUtf8(STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId(phraseSheetID)));
-		if (!desc.empty())
+		const char *desc = STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetId(phraseSheetID));
+		if (*desc)
 		{
+#ifdef RYZOM_LUA_UCSTRING
+			ucstring desc = ucstring::makeFromUtf8(desc); // Compatibility
 			CLuaIHM::push(ls, desc);
+#else
+			ls.push(desc);
+#endif
 			return 1;
 		}
 	}

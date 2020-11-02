@@ -100,11 +100,13 @@ using namespace NLMISC;
 #define new DEBUG_NEW
 #endif
 
+#ifdef RYZOM_LUA_UCSTRING
 // declare ostream << operator for ucstring -> registration of ucstring iin luabind will build a 'tostring' function from it
 std::ostream &operator<<(std::ostream &str, const ucstring &value)
 {
 	return str << value.toString();
 }
+#endif
 
 namespace NLGUI
 {
@@ -172,6 +174,7 @@ namespace NLGUI
 		return true;
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	bool CLuaIHM::pop(CLuaState &ls,   ucstring &dest)
 	{
@@ -224,6 +227,7 @@ namespace NLGUI
 		obj.pushvalue();
 	#endif
 	}
+#endif
 
 	// ***************************************************************************
 	// ***************************************************************************
@@ -689,6 +693,7 @@ namespace NLGUI
 				.def_readwrite("A",    &NLMISC::CRGBA::A)
 		];
 
+#ifdef RYZOM_LUA_UCSTRING
 		// ucstring
 		module(L)
 		[
@@ -709,6 +714,7 @@ namespace NLGUI
 				.def("toString",   (std::string(ucstring::*)()const)&ucstring::toString)
 				//.def(self + other<ucstring>())
 		];
+#endif
 
 		// CVector2f
 		module(L)
@@ -1279,6 +1285,7 @@ namespace NLGUI
 		return 1;
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	int CLuaIHM::isUCString(CLuaState &ls)
 	{
@@ -1313,6 +1320,7 @@ namespace NLGUI
 		CLuaIHM::push(ls, result);
 		return 1;
 	}
+#endif
 
 	// ***************************************************************************
 	int CLuaIHM::concatString(CLuaState &ls)
@@ -1511,6 +1519,7 @@ namespace NLGUI
 						ls.toString(stackIndex,    str);
 						val= str;
 					}
+#ifdef RYZOM_LUA_UCSTRING
 					else
 					{
 						// else this should be a ucstring
@@ -1519,6 +1528,7 @@ namespace NLGUI
 							throw ELuaIHMException("You must set a string,    number or ucstring to UI property '%s'",    property.Name.c_str());
 						}
 					}
+#endif
 					(target.*(property.SetMethod.SetUCString))(val);
 					return;
 				}
@@ -1631,8 +1641,10 @@ namespace NLGUI
 		ls.registerFunc("getWindowSize",    getWindowSize);
 		ls.registerFunc("getTextureSize", getTextureSize);
 		ls.registerFunc("disableModalWindow", disableModalWindow);
+#ifdef RYZOM_LUA_UCSTRING
 		ls.registerFunc("isUCString", isUCString);
 		ls.registerFunc("concatUCString", concatUCString);
+#endif
 		ls.registerFunc("concatString", concatString);
 		ls.registerFunc("tableToString", tableToString);
 		ls.registerFunc("getCurrentWindowUnder", getCurrentWindowUnder);
@@ -1665,7 +1677,11 @@ namespace NLGUI
 		// inside i18n table
 		luabind::module(L, "i18n")
 		[
-			luabind::def("get", &CI18N::getAsUtf16), // FIXME: Lua UTF-8
+#ifdef RYZOM_LUA_UCSTRING
+			luabind::def("get", &CI18N::getAsUtf16), // Compatibility
+#else
+			luabind::def("get", &CI18N::get),
+#endif
 			luabind::def("hasTranslation", &CI18N::hasTranslation)
 		];
 		// inside 'nlfile' table
@@ -1843,6 +1859,7 @@ namespace NLGUI
 		return ret;
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const ucstring &search,   const ucstring &replace)
 	{
@@ -1870,7 +1887,7 @@ namespace NLGUI
 		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
 		return findReplaceAll(str,   search,   ucstring::makeFromUtf8(replace));
 	}
-
+#endif
 
 	// ***************************************************************************
 	void CLuaIHM::fails(CLuaState &ls, const char *format, ...)
@@ -1957,6 +1974,7 @@ namespace NLGUI
 		}
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	void CLuaIHM::checkArgTypeUCString(CLuaState &ls, const char *funcName, uint index)
 	{
@@ -1973,7 +1991,7 @@ namespace NLGUI
 			fails(ls, "%s : argument %d of expected type ucstring has bad type : %s",   funcName,   index,   ls.getTypename(ls.type(index)),   ls.type(index));
 		}
 	}
-
+#endif
 
 
 	// ***************************************************************************

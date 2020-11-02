@@ -119,13 +119,14 @@ namespace NLGUI
 			break;
 			case CReflectedProperty::UCString:
 			case CReflectedProperty::UCStringRef:
+#ifdef RYZOM_LUA_UCSTRING
 				if (valueToAffect.toString())
 				{
 					(destElem.*(property.SetMethod.SetUCString))(ucstring::makeFromUtf8(valueToAffect.getString()));
 				}
 				else
+#endif
 				{
-
 					return false;
 				}
 			break;

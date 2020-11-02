@@ -586,7 +586,11 @@ void CActionHistoric::CRequestEraseNode::undo(IDynamicMapClient *dmc, CScenario 
 	dmc->doRequestInsertNode(_ParentInstanceId, _AttrNameInParent, _PositionInParent, "", _OldValue);
 	_OldValue = NULL;
 
-	CLuaIHM::push(getEditor().getLua(), _InstanceId);
+#ifdef RYZOM_LUA_UCSTRING
+	CLuaIHM::push(getEditor().getLua(), ucstring::makeFromUtf8(_InstanceId));
+#else
+	getEditor().getLua().push(_InstanceId);
+#endif
 	getEditor().callEnvMethod("setUndoRedoInstances", 1, 0);
 }
 //====================================================================================
@@ -616,7 +620,11 @@ void CActionHistoric::CRequestInsertNode::redo(IDynamicMapClient *dmc, CScenario
 	dmc->doRequestInsertNode(_InstanceId, _AttrName, _Position, _Key, _Value);
 
 	CObject* nodeId = _Value->findAttr("InstanceId");
-	CLuaIHM::push(getEditor().getLua(), nodeId->toString());
+#ifdef RYZOM_LUA_UCSTRING
+	CLuaIHM::push(getEditor().getLua(), ucstring::makeFromUtf8(nodeId->toString()));
+#else
+	getEditor().getLua().push(nodeId->toString());
+#endif
 	getEditor().callEnvMethod("setUndoRedoInstances", 1, 0);
 }
 //
@@ -641,7 +649,11 @@ void CActionHistoric::CRequestInsertNode::undo(IDynamicMapClient *dmc, CScenario
 			// send to network
 			dmc->doRequestEraseNode(instanceId, attrName, position);
 
-			CLuaIHM::push(getEditor().getLua(), instanceId);
+#ifdef RYZOM_LUA_UCSTRING
+			CLuaIHM::push(getEditor().getLua(), ucstring::makeFromUtf8(instanceId));
+#else
+			getEditor().getLua().push(instanceId);
+#endif
 			getEditor().callEnvMethod("setUndoRedoInstances", 1, 0);
 		}
 		else

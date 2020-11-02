@@ -1286,12 +1286,18 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	int CGroupList::luaAddTextChild(CLuaState &ls)
 	{
-		CLuaIHM::checkArgCount(ls, "addTextChild", 1);
-		ucstring text;
+		const char *funcName = "addTextChild";
+		CLuaIHM::checkArgCount(ls, funcName, 1);
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring text; // Compatibility
 		if(CLuaIHM::pop(ls, text))
 		{
-			addTextChild(text.toUtf8()); // FIXME: Lua UTF-8
+			addTextChild(text.toUtf8());
 		}
+#else
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		addTextChild(ls.toString(1));
+#endif
 		return 0;
 	}
 
@@ -1306,15 +1312,13 @@ namespace NLGUI
 		CLuaIHM::checkArgType(ls, funcName, 4, LUA_TNUMBER);
 		CLuaIHM::checkArgType(ls, funcName, 5, LUA_TNUMBER);
 		string text = ls.toString(1);
-		ucstring ucText;
-		ucText.fromUtf8(text);
 
 		uint r = (uint) ls.toInteger(2);
 		uint g = (uint) ls.toInteger(3);
 		uint b = (uint) ls.toInteger(4);
 		uint a = (uint) ls.toInteger(5);
 
-		addTextChild(ucText.toUtf8(), CRGBA(r, g, b, a)); // FIXME: Lua UTF-8
+		addTextChild(text, CRGBA(r, g, b, a));
 
 		return 0;
 	}

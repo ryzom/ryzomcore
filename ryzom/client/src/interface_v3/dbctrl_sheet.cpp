@@ -104,7 +104,11 @@ void CControlSheetInfoWaiter::infoReceived()
 
 string CControlSheetInfoWaiter::infoValidated() const
 {
-	ucstring help; // FIXME: Lua UTF-8
+#ifdef RYZOM_LUA_UCSTRING
+	ucstring help; // Compatibility
+#else
+	string help;
+#endif
 	if (CtrlSheet && !LuaMethodName.empty())
 	{
 		// delegate setup of context he help ( & window ) to lua
@@ -122,7 +126,12 @@ string CControlSheetInfoWaiter::infoValidated() const
 			// retrieve result from stack
 			if (!ls->empty())
 			{
+#ifdef RYZOM_LUA_UCSTRING
 				CLuaIHM::pop(*ls, help);
+#else
+				help = ls->toString(-1);
+				ls->pop();
+#endif
 			}
 			else
 			{
@@ -131,7 +140,11 @@ string CControlSheetInfoWaiter::infoValidated() const
 		}
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	return help.toUtf8();
+#else
+	return help;
+#endif
 }
 
 // ***************************************************************************
@@ -179,7 +192,11 @@ int CDBCtrlSheet::luaGetItemInfo(CLuaState &ls)
 // ***************************************************************************
 int CDBCtrlSheet::luaGetName(CLuaState &ls)
 {
-	CLuaIHM::push(ls, getItemActualName());
+#ifdef RYZOM_LUA_UCSTRING
+	CLuaIHM::push(ls, ucstring::makeFromUtf8(getItemActualName()));
+#else
+	ls.push(getItemActualName());
+#endif
 	return 1;
 }
 
@@ -209,7 +226,11 @@ int CDBCtrlSheet::luaGetCreatorName(CLuaState &ls)
 	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
 	string creatorName;
 	STRING_MANAGER::CStringManagerClient::instance()->getString(itemInfo.CreatorName, creatorName);
+#ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::push(ls, ucstring::makeFromUtf8(creatorName)); // FIXME: Lua UTF-8
+#else
+	ls.push(creatorName);
+#endif
 
 	return 1;
 }
@@ -3513,11 +3534,16 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 				game = game["game"];
 				game.callMethodByNameNoThrow("updatePhraseTooltip", 1, 1);
 				// retrieve result from stack
-				ucstring tmpHelp; // FIXME: Lua UTF-8
 				if (!ls->empty())
 				{
-					CLuaIHM::pop(*ls, tmpHelp); // FIXME: Lua UTF-8
-					help = tmpHelp.toUtf8(); // FIXME: Lua UTF-8
+#ifdef RYZOM_LUA_UCSTRING
+					ucstring tmpHelp; // Compatibility
+					CLuaIHM::pop(*ls, tmpHelp);
+					help = tmpHelp.toUtf8();
+#else
+					help = ls->toString();
+					ls->pop();
+#endif
 				}
 				else
 				{

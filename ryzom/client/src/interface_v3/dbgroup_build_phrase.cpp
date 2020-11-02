@@ -374,7 +374,7 @@ void			CDBGroupBuildPhrase::startComposition(const CSPhraseCom &phrase)
 
 	// set the editable name.
 	if(_UserSentenceName)
-		_UserSentenceName->setInputStringAsUtf16(name);
+		_UserSentenceName->setInputString(name);
 }
 
 
@@ -1791,7 +1791,7 @@ void			CDBGroupBuildPhrase::buildCurrentPhrase(CSPhraseCom &newPhrase)
 	// Set the Name
 	if(_UserSentenceName)
 	{
-		newPhrase.Name= _UserSentenceName->getInputStringAsUtf16();
+		newPhrase.Name= ucstring::makeFromUtf8(_UserSentenceName->getInputString());
 	}
 }
 

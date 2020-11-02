@@ -145,7 +145,7 @@ namespace NLGUI
 		// If true, setTextFormatted() is used instead of setText()
 		bool					_IsTextFormatTaged;
 
-		// Optional ucstring modifier
+		// Optional utf-8 string modifier
 		IOnReceiveTextId		*_StringModifier;
 		std::string				_DBPath;
 		static IViewTextProvider* getTextProvider(){ return textProvider; }
