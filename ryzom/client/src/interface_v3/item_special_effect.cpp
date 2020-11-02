@@ -101,7 +101,7 @@ string CItemSpecialEffectHelper::getEffect(const std::string &effect, bool &firs
 		return result;
 
 	// Get name id of effect
-	CSString name = toUpper(eff.splitTo(':', true));
+	CSString name = toUpperAscii(eff.splitTo(':', true));
 
 	// Extract parameters from sheet
 	vector<CSString> params;

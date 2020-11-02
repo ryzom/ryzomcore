@@ -956,7 +956,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		// Load the recording state from the config file
 		if ((var = ConfigFile.getVarPtr ("Rec")) != NULL)
 		{
-			string srecstate = toUpper(var->asString());
+			string srecstate = toUpperAscii(var->asString());
 			if ( srecstate == "RECORD" )
 			{
 				_RecordingState = CCallbackNetBase::Record;

@@ -302,7 +302,7 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 						debug(toString("The slot name %d is Empty.", i));
 
 					// Push the possible slots for the item in the list.
-					SlotBF|= SINT64_CONSTANT(1)<< (SLOTTYPE::stringToSlotType(NLMISC::toUpper(slotName)));
+					SlotBF|= SINT64_CONSTANT(1)<< (SLOTTYPE::stringToSlotType(NLMISC::toUpperAscii(slotName)));
 				}
 			}
 		}
@@ -321,7 +321,7 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	}
 	else
 	{
-		Family = (ITEMFAMILY::EItemFamily) ITEMFAMILY::stringToItemFamily(NLMISC::toUpper( family) );
+		Family = (ITEMFAMILY::EItemFamily) ITEMFAMILY::stringToItemFamily(NLMISC::toUpperAscii( family) );
 		if(Family == ITEMFAMILY::UNDEFINED)
 			debug("Item Family Undefined.");
 	}
@@ -335,7 +335,7 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	}
 	else
 	{
-		ItemType = (ITEM_TYPE::TItemType) ITEM_TYPE::stringToItemType(NLMISC::toUpper(itemtype) );
+		ItemType = (ITEM_TYPE::TItemType) ITEM_TYPE::stringToItemType(NLMISC::toUpperAscii(itemtype) );
 		if (ItemType == ITEM_TYPE::UNDEFINED)
 			debug("Item Type Undefined.");
 	}

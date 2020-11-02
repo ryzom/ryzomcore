@@ -2987,7 +2987,7 @@ void CInterfaceManager::log(const std::string &str, const std::string &cat)
 		FILE *f = nlfopen(fileName, "at");
 		if (f != NULL)
 		{
-			const string finalString = string(NLMISC::IDisplayer::dateToHumanString()) + " (" + NLMISC::toUpper(cat) + ") * " + str;
+			const string finalString = string(NLMISC::IDisplayer::dateToHumanString()) + " (" + NLMISC::toUpperAscii(cat) + ") * " + str;
 			fprintf(f, "%s\n", finalString.c_str());
 			fclose(f);
 		}

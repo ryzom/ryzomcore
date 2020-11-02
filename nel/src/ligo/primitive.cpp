@@ -1250,7 +1250,7 @@ const	IPrimitive	*IPrimitive::getPrimitive	(const	std::string	&absoluteOrRelativ
 			childName=path.substr(0,indexStr);
 			path.erase(0, indexStr);
 		}
-		childName=toUpper(childName);
+		childName=toUpperAscii(childName);
 		const	IPrimitive*child=NULL;
 		uint	childIndex;
 		for	(childIndex=0;childIndex<cursor->getNumChildren();childIndex++)
@@ -1259,7 +1259,7 @@ const	IPrimitive	*IPrimitive::getPrimitive	(const	std::string	&absoluteOrRelativ
 			nlassert(child);
 			string	name;
 			if	(	child->getPropertyByName("class", name)
-				&&	toUpper(name)==childName	)
+				&&	toUpperAscii(name)==childName	)
 				break;
 		}
 		if	(childIndex>=cursor->getNumChildren())

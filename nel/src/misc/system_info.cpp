@@ -1733,7 +1733,7 @@ bool CSystemInfo::getVideoInfo (std::string &deviceName, uint64 &driverVersion)
 					HKEY keyRoot = HKEY_LOCAL_MACHINE;
 					for (i=0; i<sizeof(rootKeysH)/sizeof(HKEY); i++)
 					{
-						if (toUpper(keyPath).find (rootKeys[i]) == 0)
+						if (toUpperAscii(keyPath).find (rootKeys[i]) == 0)
 						{
 							keyPath = keyPath.substr (strlen (rootKeys[i]));
 							keyRoot = rootKeysH[i];

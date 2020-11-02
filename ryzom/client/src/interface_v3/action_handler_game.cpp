@@ -4613,7 +4613,7 @@ public:
 			}
 
 			std::locale loc("");
-			const std::collate<char>& coll = std::use_facet<std::collate<char> >(loc);
+			const std::collate<char>& coll = std::use_facet<std::collate<char> >(loc); // FIXME: Probably does not work
 
 			for(uint i = 0; i < nbChilds - 1; ++i)
 			{

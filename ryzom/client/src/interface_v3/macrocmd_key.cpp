@@ -404,7 +404,7 @@ CModalContainerEditCmd::CModalContainerEditCmd()
 void CModalContainerEditCmd::create(const std::string &name, bool bDefKey, bool allowAllActions)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	string prefix = NLMISC::toUpper(name);
+	string prefix = NLMISC::toUpperAscii(name);
 	CanDefineKey = bDefKey;
 	_AllowAllActions = allowAllActions;
 	prefix = string(DB_EDITCMD_PREFIX) + string(":") + prefix + string(":");

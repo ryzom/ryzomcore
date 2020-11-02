@@ -431,7 +431,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 		// The string may have multiple brick type separated by |
 		string	brickTypeArray= (const char*)prop;
 		vector<string>	strList;
-		NLMISC::splitString(NLMISC::toUpper(brickTypeArray), "|", strList);
+		NLMISC::splitString(NLMISC::toUpperAscii(brickTypeArray), "|", strList);
 
 		// Test All words
 		for(uint i=0;i<strList.size();i++)
@@ -457,7 +457,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	if(prop)
 	{
 		string str= prop.str();
-		_ItemSlot= SLOTTYPE::stringToSlotType(NLMISC::toUpper(str));
+		_ItemSlot= SLOTTYPE::stringToSlotType(NLMISC::toUpperAscii(str));
 	}
 
 	// _AutoGrayed
