@@ -3,8 +3,9 @@
 <root id="outgame" x="0" y="0" w="800" h="600" active="false" />
 
 <lua file="out_v2_select.lua" />
+<!--
 <lua file="bg_downloader.lua" />
-
+-->
 <!-- *********************** -->
 <!-- * CHARACTER SELECTION * -->
 <!-- *********************** -->
@@ -542,7 +543,8 @@
 			onover="play_sound" params_over="name=specie_but_over"
 			onclick_l="proc" params_l="proc_charsel_clickslot|4" />
 
-
+<!-- UI 'commented out' for future purpose -->
+<!--
 	<group id="bgd_progress" posref="BM BM" w="430" h="75" x="85" y="65" active="true">		
 		<instance template="outgame_black_back" id="border"/>		
 		<view type="text" id="text"	active="true" y="-10" posref="TM TM"	hardtext="" fontsize="13" color="255 255 255 255"/>
@@ -562,8 +564,9 @@
 			<combo_text name="uiBGD_LowPriority" />
 			<combo_text name="uiBGD_NormalPriority" />			
 		</group>
-	</group>
 
+	</group>
+-->
 
 	<!--***************-->
 	<!-- BOTTOM BUTTON -->
