@@ -59,7 +59,7 @@ uint32			CHLSTextureBank::addColorTexture(const CHLSColorTexture &tex)
 // ***************************************************************************
 void			CHLSTextureBank::addTextureInstance(const std::string &name, uint32 colorTextureId, const vector<CHLSColorDelta> &cols)
 {
-	string	nameLwr= toLower(name);
+	string	nameLwr= toLowerAscii(name);
 
 	// checks
 	nlassert(colorTextureId<_ColorTextures.size());

@@ -90,7 +90,7 @@ bool fromString(const std::string &str, bool &val)
 	}
 	else
 	{
-		std::string strl = toLower(str);
+		std::string strl = toLowerAscii(str);
 		if (strl == "true" || strl == "yes")
 		{
 			val = true;

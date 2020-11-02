@@ -180,7 +180,7 @@ bool CIXml::init (IStream &stream)
 			header[2] = buffer[2];
 			header[3] = buffer[3];
 			header[4] = '\0';
-			toLower(header);
+			toLowerAscii(header);
 
 			// Does it a xml stream ?
 			if (strcmp(header, "<?xm"))

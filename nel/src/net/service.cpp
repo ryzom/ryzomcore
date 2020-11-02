@@ -708,7 +708,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			// we create the log with service name filename ("test_service_ALIAS.log" for example)
 			string logname = LogDirectory.toString() + _LongName;
 			if (haveArg('N'))
-				logname += "_" + toLower(getArg('N'));
+				logname += "_" + toLowerAscii(getArg('N'));
 			logname += ".log";
 			fd.setParam (logname, false);
 

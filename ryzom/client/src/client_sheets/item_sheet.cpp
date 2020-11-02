@@ -240,28 +240,28 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	string IconMain;
 	if(!item.getValueByName (IconMain, "3d.icon"))
 		debug("key '3d.icon' not found.");
-	IconMain = toLower(IconMain);
+	IconMain = toLowerAscii(IconMain);
 	IdIconMain = ClientSheetsStrings.add(IconMain);
 
 	// Get the icon associated.
 	string IconBack;
 	if(!item.getValueByName (IconBack, "3d.icon background"))
 		debug("key '3d.icon background' not found.");
-	IconBack = toLower(IconBack);
+	IconBack = toLowerAscii(IconBack);
 	IdIconBack = ClientSheetsStrings.add(IconBack);
 
 	// Get the icon associated.
 	string IconOver;
 	if(!item.getValueByName (IconOver, "3d.icon overlay"))
 		debug("key '3d.icon overlay' not found.");
-	IconOver = toLower(IconOver);
+	IconOver = toLowerAscii(IconOver);
 	IdIconOver = ClientSheetsStrings.add(IconOver);
 
 	// Get the icon associated.
 	string IconOver2;
 	if(!item.getValueByName (IconOver2, "3d.icon overlay2"))
 		debug("key '3d.icon overlay2' not found.");
-	IconOver2 = toLower(IconOver2);
+	IconOver2 = toLowerAscii(IconOver2);
 	IdIconOver2 = ClientSheetsStrings.add(IconOver2);
 
 	// Get Special modulate colors
@@ -274,7 +274,7 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	string IconText;
 	if(!item.getValueByName (IconText, "3d.text overlay"))
 		debug("key '3d.text overlay' not found.");
-	IconText = toLower(IconText);
+	IconText = toLowerAscii(IconText);
 	IdIconText = ClientSheetsStrings.add(IconText);
 
 	// See if this item can be hiden when equipped
@@ -366,7 +366,7 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 		debug("key '3d.anim_set' not found.");
 	// Force the CASE in UPPER to not be CASE SENSITIVE.
 	else
-		AnimSet = NLMISC::toLower(AnimSet);
+		AnimSet = NLMISC::toLowerAscii(AnimSet);
 	IdAnimSet = ClientSheetsStrings.add(AnimSet);
 
 	// Get the Trail Shape
@@ -381,28 +381,28 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	string Effect1;
 	if(!item.getValueByName(Effect1, "Effects.Effect1"))
 		debug("key 'Effects.Effect1' not found.");
-	Effect1 = toLower(Effect1);
+	Effect1 = toLowerAscii(Effect1);
 	IdEffect1 = ClientSheetsStrings.add(Effect1);
 
 	// Get special Effect2
 	string Effect2;
 	if(!item.getValueByName(Effect2, "Effects.Effect2"))
 		debug("key 'Effects.Effect2' not found.");
-	Effect2 = toLower(Effect2);
+	Effect2 = toLowerAscii(Effect2);
 	IdEffect2 = ClientSheetsStrings.add(Effect2);
 
 	// Get special Effect3
 	string Effect3;
 	if(!item.getValueByName(Effect3, "Effects.Effect3"))
 		debug("key 'Effects.Effect3' not found.");
-	Effect3 = toLower(Effect3);
+	Effect3 = toLowerAscii(Effect3);
 	IdEffect3 = ClientSheetsStrings.add(Effect3);
 
 	// Get special Effect4
 	string Effect4;
 	if(!item.getValueByName(Effect4, "Effects.Effect4"))
 		debug("key 'Effects.Effect4' not found.");
-	Effect4 = toLower(Effect4);
+	Effect4 = toLowerAscii(Effect4);
 	IdEffect4 = ClientSheetsStrings.add(Effect4);
 
 	// Get its bulk

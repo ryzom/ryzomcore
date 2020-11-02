@@ -45,7 +45,8 @@ namespace NLGUI
 	// Compare strings
 	static inline bool lt_text(const std::pair<int,std::string> &s1, const std::pair<int,std::string> &s2)
 	{
-		return toLower(s1.second) < toLower(s2.second);
+		// return toLower(s1.second) < toLower(s2.second);
+		return -NLMISC::compareCaseInsensitive(s1.second, s2.second);
 	}
 
 	std::string CDBGroupComboBox::measureMenu;

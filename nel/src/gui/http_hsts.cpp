@@ -210,7 +210,7 @@ namespace NLGUI {
 	{
 		// max-age=<seconds>; includeSubdomains; preload;
 		std::vector<std::string> elements;
-		NLMISC::splitString(toLower(header), ";", elements);
+		NLMISC::splitString(toLowerAscii(header), ";", elements);
 		if (elements.empty()) return;
 
 		time_t currentTime;

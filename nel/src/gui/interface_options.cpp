@@ -83,7 +83,7 @@ namespace NLGUI
 				}
 				else
 				{
-					string name = NLMISC::toLower(string((const char*)ptr));
+					string name = NLMISC::toLowerAscii(string((const char*)ptr));
 					string value = (string((const char*)val));
 					_ParamValue[name].init(value);
 				}
@@ -135,7 +135,7 @@ namespace NLGUI
 	// ***************************************************************************
 	const CInterfaceOptionValue	 &CInterfaceOptions::getValue(const string &sParamName) const
 	{
-		std::map<std::string, CInterfaceOptionValue>::const_iterator it = _ParamValue.find (toLower(sParamName));
+		std::map<std::string, CInterfaceOptionValue>::const_iterator it = _ParamValue.find (toLowerAscii(sParamName));
 		if (it != _ParamValue.end())
 			return it->second;
 		else

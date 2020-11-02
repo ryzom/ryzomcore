@@ -43,7 +43,7 @@ inline CPeople::TPeople			CPeople::fromString(const std::string& v)
 	{
 		return Unknown;
 	}
-	const std::map<std::string, TPeople>::const_iterator	it = _ValueMap.find(NLMISC::toLower(v));
+	const std::map<std::string, TPeople>::const_iterator	it = _ValueMap.find(NLMISC::toLowerAscii(v));
 	if (it == _ValueMap.end())
 	{
 		nlwarning("TPeople::toString(): string '%s' is not matched, 'Unknown' enum value returned", v.c_str());
@@ -79,7 +79,7 @@ inline CClassificationType::TClassificationType	CClassificationType::fromString(
 	{
 		return Unknown;
 	}
-	const std::map<std::string, TClassificationType>::const_iterator	it = _ValueMap.find(NLMISC::toLower(v));
+	const std::map<std::string, TClassificationType>::const_iterator	it = _ValueMap.find(NLMISC::toLowerAscii(v));
 	if (it == _ValueMap.end())
 	{
 		nlwarning("TClassificationType::toString(): string '%s' is not matched, 'Unknown' enum value returned", v.c_str());

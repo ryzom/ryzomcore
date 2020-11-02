@@ -88,7 +88,7 @@ namespace NLGUI
 				host = authority.substr(2);
 
 			// case-insensitive
-			host = NLMISC::toLower(host);
+			host = NLMISC::toLowerAscii(host);
 
 			pos = host.find(":");
 			if (pos != npos)

@@ -2672,9 +2672,7 @@ void CGroupMap::setLandmarkFilter(const std::string &s)
 	_LandmarkFilter.clear();
 
 	if (!s.empty()) {
-		ucstring ucs;
-		ucs.fromUtf8(s);
-		splitUCString(toLower(ucs), ucstring(" "), _LandmarkFilter);
+		splitUCString(ucstring(toLower(s)), ucstring(" "), _LandmarkFilter);
 	}
 
 	// recreate landmarks
@@ -3712,13 +3710,13 @@ std::string CGroupMap::getContinentName() const
 {
 	if (_CurMap == NULL) return "";
 
-	return toLower(_CurMap->ContinentName);
+	return toLowerAscii(_CurMap->ContinentName);
 }
 
 //=========================================================================================================
 std::string CGroupMap::getMapTexture() const
 {
-	return toLower(_MapTexture);
+	return toLowerAscii(_MapTexture);
 }
 
 //=========================================================================================================

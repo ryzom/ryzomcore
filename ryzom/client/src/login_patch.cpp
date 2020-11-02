@@ -1538,7 +1538,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 void CPatchManager::downloadFile (const string &source, const string &dest, NLMISC::IProgressCallback *progress)
 {
 	// For the moment use only curl
-	const string sourceLower = toLower(source.substr(0, 6));
+	const string sourceLower = toLowerAscii(source.substr(0, 6));
 
 	if (startsWith(sourceLower, "http:")
 		|| startsWith(sourceLower, "https:")

@@ -320,7 +320,7 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"max_sizeparent" );
 		if (ptr)
 		{
-			string idparent = NLMISC::toLower(ptr.str());
+			string idparent = NLMISC::toLowerAscii(ptr.str());
 			if (idparent != "parent")
 			{
 				if (parentGroup)

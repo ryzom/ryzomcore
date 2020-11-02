@@ -74,7 +74,7 @@ void CPlayerSheet::build(const NLGEORGES::UFormElm &item)
 		debug("Key 'AnimSetBaseName' not found.");
 	// Force the CASE in UPPER to not be CASE SENSITIVE.
 	else
-		AnimSetBaseName = NLMISC::toLower(AnimSetBaseName);
+		AnimSetBaseName = NLMISC::toLowerAscii(AnimSetBaseName);
 
 	// Load Lod character name
 	if(!item.getValueByName(LodCharacterName, "LodCharacterName"))
@@ -240,7 +240,7 @@ void CPlayerSheet::CEquipment::build(const std::string &key,const NLGEORGES::UFo
 	if(!item.getValueByName(itemName, string(key + ".Item").c_str() ))
 		debug(NLMISC::toString("Key '%s.Item' not found.", key.c_str()));
 	else
-		Item = NLMISC::toLower(itemName);
+		Item = NLMISC::toLowerAscii(itemName);
 
 	// Get the color.
 	if(!item.getValueByName(Color, string(key + ".Color").c_str() ))

@@ -395,7 +395,7 @@ void CGuildManager::update()
 						string cat = getStringCategory(msg, msg);
 						map<string, CClientConfig::SSysInfoParam>::const_iterator it;
 						NLMISC::CRGBA col = CRGBA::Yellow;
-						it = ClientCfg.SystemInfoParams.find(toLower(cat));
+						it = ClientCfg.SystemInfoParams.find(toLowerAscii(cat));
 						if (it != ClientCfg.SystemInfoParams.end())
 						{
 							col = it->second.Color;
@@ -734,7 +734,7 @@ bool CDBGroupListAscensor::CSheetChildAscensor::isInvalidated(CDBGroupListSheetT
 			{
 
 				LIFT_ICONS::TLiftIcon li = (LIFT_ICONS::TLiftIcon)(icon & UINT64_CONSTANT(0x7FFFFFFFFFFFFFFF));
-				string str = toLower(LIFT_ICONS::toString(li));
+				string str = toLowerAscii(LIFT_ICONS::toString(li));
 				Ctrl->setType(CCtrlSheetInfo::SheetType_Teleport_Location);
 				Ctrl->setSlot("asc_"+str+".tga");
 			}

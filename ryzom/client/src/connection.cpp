@@ -306,9 +306,9 @@ void	CSoundGlobalMenu::updateSound()
 	// **** update the music played
 	// The first music played is the music played at loading, before select char
 	if (_MusicPlayed.empty())
-		_MusicPlayed = toLower(LoadingMusic.empty() ? ClientCfg.StartMusic : LoadingMusic);
+		_MusicPlayed = toLowerAscii(LoadingMusic.empty() ? ClientCfg.StartMusic : LoadingMusic);
 	if (_MusicWanted.empty())
-		_MusicWanted = toLower(LoadingMusic.empty() ? ClientCfg.StartMusic : LoadingMusic);
+		_MusicWanted = toLowerAscii(LoadingMusic.empty() ? ClientCfg.StartMusic : LoadingMusic);
 
 	// because music is changed when the player select other race for instance,
 	// wait the 3D to load (stall some secs)
@@ -335,7 +335,7 @@ void	CSoundGlobalMenu::updateSound()
 
 void	CSoundGlobalMenu::setMusic(const string &music, bool async)
 {
-	_MusicWanted= toLower(music);
+	_MusicWanted= toLowerAscii(music);
 	_MusicWantedAsync= async;
 	// reset the counter
 	_NbFrameBeforeChange= NbFrameBeforeChangeMax;

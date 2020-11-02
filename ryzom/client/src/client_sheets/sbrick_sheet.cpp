@@ -113,22 +113,22 @@ void CSBrickSheet::build (const NLGEORGES::UFormElm &root)
 	// read icons
 	string Icon;
 	root.getValueByName (Icon, "Client.Icon" );
-	Icon = toLower(Icon);
+	Icon = toLowerAscii(Icon);
 	IdIcon = ClientSheetsStrings.add(Icon);
 
 	string IconBack;
 	root.getValueByName (IconBack, "Client.IconBack" );
-	IconBack = toLower(IconBack);
+	IconBack = toLowerAscii(IconBack);
 	IdIconBack = ClientSheetsStrings.add(IconBack);
 
 	string IconOver;
 	root.getValueByName (IconOver, "Client.IconOver" );
-	IconOver = toLower(IconOver);
+	IconOver = toLowerAscii(IconOver);
 	IdIconOver = ClientSheetsStrings.add(IconOver);
 
 	string IconOver2;
 	root.getValueByName (IconOver2, "Client.IconOver2" );
-	IconOver2 = toLower(IconOver2);
+	IconOver2 = toLowerAscii(IconOver2);
 	IdIconOver2 = ClientSheetsStrings.add(IconOver2);
 
 	root.getValueByName (IconColor, "Client.IconColor" );
@@ -312,7 +312,7 @@ void CSBrickSheet::build (const NLGEORGES::UFormElm &root)
 	BrickRequiredFlags= 0;
 	for(i=0;i<Properties.size();i++)
 	{
-		string text= NLMISC::toLower(Properties[i].Text);
+		string text= NLMISC::toLowerAscii(Properties[i].Text);
 
 		// If the property is an opening property
 		const	string	openingProp[]= { "opening_1:", "opening_2:", "opening_3:" };
@@ -381,7 +381,7 @@ void CSBrickSheet::build (const NLGEORGES::UFormElm &root)
 	for(i=0;i<listBrick.size();i++)
 	{
 		CSheetId	sheetId;
-		string	str= toLower(listBrick[i]);
+		string	str= toLowerAscii(listBrick[i]);
 		if(str.find(".sbrick")==string::npos)
 			str+= ".sbrick";
 		sheetId.buildSheetId(str);
@@ -402,7 +402,7 @@ void CSBrickSheet::build (const NLGEORGES::UFormElm &root)
 	// **** Magic only: try to get a ResistType against this brick
 	for(i=0;i<Properties.size();i++)
 	{
-		string text= toLower(Properties[i].Text);
+		string text= toLowerAscii(Properties[i].Text);
 
 		// *** If the property is a DamageType
 		const string	dmgTypeProp= "ma_dmg_type:";

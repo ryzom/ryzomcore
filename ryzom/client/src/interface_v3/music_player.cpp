@@ -602,7 +602,7 @@ static void addFromPlaylist(const std::string &playlist, const std::vector<std::
 			if (lineStr[0] != '#')
 			{
 				std::string filename = CPath::makePathAbsolute(CFile::getPath(lineStr), basePlaylist) + CFile::getFilename(lineStr);
-				std::string ext = toLower(CFile::getExtension(filename));
+				std::string ext = toLowerAscii(CFile::getExtension(filename));
 				if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
 				{
 					if (CFile::fileExists(filename))
@@ -654,7 +654,7 @@ void CMusicPlayer::createPlaylistFromMusic()
 
 	for (i = 0; i < filesToProcess.size(); ++i)
 	{
-		std::string ext = toLower(CFile::getExtension(filesToProcess[i]));
+		std::string ext = toLowerAscii(CFile::getExtension(filesToProcess[i]));
 		if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
 		{
 			filenames.push_back(filesToProcess[i]);

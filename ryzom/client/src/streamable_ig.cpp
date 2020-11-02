@@ -300,8 +300,8 @@ bool CStreamableIG::setIG(uint ig, const std::string &name, const std::string &p
 		}
 
 		// Load this IG
-		_IGs[ig].Name = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(name));
-		_IGs[ig].ParentName = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(parentName));
+		_IGs[ig].Name = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(name));
+		_IGs[ig].ParentName = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(parentName));
 		_IGs[ig].IG = NULL;
 		_IGs[ig].Loading = false;
 		_Linked = false;
@@ -315,8 +315,8 @@ void CStreamableIG::addIG(const std::string &name,const std::string &parentName,
 {
 	H_AUTO_USE(RZ_StremableIG)
 	_IGs.push_back(CIGNode ());
-	_IGs.back().Name = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(name));
-	_IGs.back().ParentName = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(parentName));
+	_IGs.back().Name = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(name));
+	_IGs.back().ParentName = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(parentName));
 	_IGs.back().IG = NULL;
 	_IGs.back().Loading = false;
 	_IGs.back().Pos = pos;
@@ -381,7 +381,7 @@ void CStreamableIG::addLoadedIGToMap()
 		if (_IGs[k].IG && _IGs[k].IG != (NL3D::UInstanceGroup *)-1) // is this a successfully loaded ig ?
 		{
 			// insert the new ig if it hasn't before..
-			if( _IGMap->insert(std::make_pair(NLMISC::toLower(_IGs[k].Name), _IGs[k].IG)).second )
+			if( _IGMap->insert(std::make_pair(NLMISC::toLowerAscii(_IGs[k].Name), _IGs[k].IG)).second )
 				// if inserted, must notify IG Added, else already notifiyed by loadAsync()
 				this->notifyIGAdded(_IGs[k].IG);
 		}

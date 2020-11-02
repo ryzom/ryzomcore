@@ -39,14 +39,14 @@ namespace ECOSYSTEM
 	//-----------------------------------------------
 	EECosystem stringToEcosystem(const string &str)
 	{
-		string strL = NLMISC::toLower( str );
-		if( strL == NLMISC::toLower( CommonString) ) return common_ecosystem;
-		if( strL == NLMISC::toLower( DesertString ) ) return desert;
-		if( strL == NLMISC::toLower( ForestString ) ) return forest;
-		if( strL == NLMISC::toLower( LacustreString ) ) return lacustre;
-		if( strL == NLMISC::toLower( JungleString ) ) return jungle;
-		if( strL == NLMISC::toLower( GooString ) ) return goo;
-		if( strL == NLMISC::toLower( PrimaryRootString ) ) return primary_root;
+		string strL = NLMISC::toLowerAscii( str );
+		if( strL == NLMISC::toLowerAscii( CommonString) ) return common_ecosystem;
+		if( strL == NLMISC::toLowerAscii( DesertString ) ) return desert;
+		if( strL == NLMISC::toLowerAscii( ForestString ) ) return forest;
+		if( strL == NLMISC::toLowerAscii( LacustreString ) ) return lacustre;
+		if( strL == NLMISC::toLowerAscii( JungleString ) ) return jungle;
+		if( strL == NLMISC::toLowerAscii( GooString ) ) return goo;
+		if( strL == NLMISC::toLowerAscii( PrimaryRootString ) ) return primary_root;
 		return unknown;
 	} // stringToEcosystem //
 

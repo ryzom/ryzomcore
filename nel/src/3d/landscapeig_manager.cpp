@@ -129,7 +129,7 @@ void	CLandscapeIGManager::initIG(UScene *scene, const std::string &igDesc, UDriv
 							_ig.getShapeName(i, shapeName);
 							if (!shapeName.empty ())
 							{
-								if (toLower(CFile::getExtension(shapeName)) != "pacs_prim")
+								if (toLowerAscii(CFile::getExtension(shapeName)) != "pacs_prim")
 								{
 									// Insert a new shape ?
 									if (_ShapeAdded.find(shapeName) == _ShapeAdded.end())

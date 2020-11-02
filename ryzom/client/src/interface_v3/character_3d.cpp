@@ -486,7 +486,7 @@ void SCharacter3DSetup::setupFromCS_ModelCol (SLOTTYPE::EVisualSlot s, sint32 mo
 
 			if (shapeLegs.find("_caster01_") != std::string::npos)
 			{
-				std::string tmpName = toLower(Parts[part].Name);
+				std::string tmpName = toLowerAscii(Parts[part].Name);
 
 				std::string::size_type posBottes = tmpName.find("_bottes");
 

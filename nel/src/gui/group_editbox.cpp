@@ -629,7 +629,7 @@ namespace NLGUI
 		}
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r" );
-		if (prop) _ListMenuRight = toLower((const char *) prop);
+		if (prop) _ListMenuRight = toLowerAscii((const char *) prop);
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"max_historic" );
 		if (prop) fromString((const char*)prop, _MaxHistoric);

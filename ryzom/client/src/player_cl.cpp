@@ -603,7 +603,7 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, uint index, uint color)
 
 			if (!shapeLegs.empty() && shapeLegs.find("_caster01_") != std::string::npos)
 			{
-				std::string tmpName = toLower(shapeName);
+				std::string tmpName = toLowerAscii(shapeName);
 
 				std::string::size_type posBottes = tmpName.find("_bottes");
 

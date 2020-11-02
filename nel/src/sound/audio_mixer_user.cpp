@@ -371,7 +371,7 @@ void CAudioMixerUser::init(uint maxTrack, bool useEax, bool useADPCM, IProgressC
 /// Initialize the NeL Sound Driver with given driverName.
 void CAudioMixerUser::initDriver(const std::string &driverName)
 {
-	std::string dn = NLMISC::toLower(driverName);
+	std::string dn = NLMISC::toLowerAscii(driverName);
 	nldebug("AM: Init Driver '%s' ('%s')...", driverName.c_str(), dn.c_str());
 
 	ISoundDriver::TDriver driverType;

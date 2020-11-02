@@ -156,10 +156,10 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 //==================================================================
 sint CPeopleList::getIndexFromName(const string &name) const
 {
-	string sNameIn = toLower(name);
+	string sNameIn = toLowerAscii(name);
 	for(uint k = 0; k < _Peoples.size(); ++k)
 	{
-		string sPeopleName = toLower(_Peoples[k].getName());
+		string sPeopleName = toLowerAscii(_Peoples[k].getName());
 		if (sPeopleName == sNameIn) return k;
 	}
 	return -1;

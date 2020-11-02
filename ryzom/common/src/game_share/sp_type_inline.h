@@ -43,7 +43,7 @@ inline CSPType::TSPType			CSPType::fromString(const std::string& v)
 	{
 		return Unknown;
 	}
-	const std::map<std::string, TSPType>::const_iterator	it = _ValueMap.find(NLMISC::toLower(v));
+	const std::map<std::string, TSPType>::const_iterator	it = _ValueMap.find(NLMISC::toLowerAscii(v));
 	if (it == _ValueMap.end())
 	{
 		nlwarning("TSPType::toString(): string '%s' is not matched, 'Unknown' enum value returned", v.c_str());

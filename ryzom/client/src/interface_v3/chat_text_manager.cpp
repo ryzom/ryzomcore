@@ -188,7 +188,7 @@ static inline bool	isUrlTag(const string &s, string::size_type index, string::si
 
 		if (textSize > i + 7)
 		{
-			bool isUrl = (toLower(s.substr(i, 7)) == "http://" || toLower(s.substr(i, 8)) == "https://");
+			bool isUrl = (toLowerAscii(s.substr(i, 7)) == "http://" || toLowerAscii(s.substr(i, 8)) == "https://");
 			// match "text http://" and not "texthttp://"
 			if (isUrl && i > 0 && !markdown)
 			{
@@ -425,7 +425,7 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 	// quickly check if text has links or not
 	bool hasUrl;
 	{
-		string s = toLower(msg);
+		string s = toLowerAscii(msg);
 		hasUrl = (s.find("http://") || s.find("https://"));
 	}
 

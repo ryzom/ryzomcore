@@ -253,10 +253,10 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 		uint8 paramIdx = 0;
 		if( name == "SP_MOD_DEFENSE" )
 		{
-			if( toLower(params[0]) == "dodge" )
+			if( toLowerAscii(params[0]) == "dodge" )
 				result = CI18N::get("uiItemConsumableEffectModDodgeSuccess");
 			else
-			if( toLower(params[0]) == "parry" )
+			if( toLowerAscii(params[0]) == "parry" )
 				result = CI18N::get("uiItemConsumableEffectModParrySuccess");
 			else
 				result = CI18N::get("uiItemConsumableEffectModDefenseSuccess");
@@ -280,17 +280,17 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 		}
 		if( name == "SP_MOD_FORAGE_SUCCESS" )
 		{
-			if( toLower(params[0]) == "commonecosystem" )
+			if( toLowerAscii(params[0]) == "commonecosystem" )
 				result = CI18N::get("uiItemConsumableEffectModForageSuccess");
-			if( toLower(params[0]) == "desert" )
+			if( toLowerAscii(params[0]) == "desert" )
 				result = CI18N::get("uiItemConsumableEffectModDesertForageSuccess");
-			if( toLower(params[0]) == "forest" )
+			if( toLowerAscii(params[0]) == "forest" )
 				result = CI18N::get("uiItemConsumableEffectModForestForageSuccess");
-			if( toLower(params[0]) == "lacustre" )
+			if( toLowerAscii(params[0]) == "lacustre" )
 				result = CI18N::get("uiItemConsumableEffectModLacustreForageSuccess");
-			if( toLower(params[0]) == "jungle" )
+			if( toLowerAscii(params[0]) == "jungle" )
 				result = CI18N::get("uiItemConsumableEffectModJungleForageSuccess");
-			if( toLower(params[0]) == "primaryroot" )
+			if( toLowerAscii(params[0]) == "primaryroot" )
 				result = CI18N::get("uiItemConsumableEffectModPrimaryRootForageSuccess");
 			paramIdx++;
 		}
