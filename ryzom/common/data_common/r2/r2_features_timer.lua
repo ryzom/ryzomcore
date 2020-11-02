@@ -365,7 +365,7 @@ component.createComponent = function(x, y, secondes, minutes, cyclic)
 	assert(comp)
 
 	comp.Base = r2.Translator.getDebugBase("palette.entities.botobjects.timer")
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EdNameTimerFeature")):toUtf8()			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EdNameTimerFeature"))			
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -455,52 +455,52 @@ function component:getLogicTranslations()
 	-- register trad
 	local logicTranslations = {
 		["ApplicableActions"] = {	
-			["Activate"]		= { menu=i18n.get( "uiR2AA0Activate"			):toUtf8(),
-									text=i18n.get( "uiR2AA1Activate"			):toUtf8()},
-			["Deactivate"]		= { menu=i18n.get( "uiR2AA0Deactivate"			):toUtf8(),
-									text=i18n.get( "uiR2AA1Deactivate"			):toUtf8()},
-			["Trigger"]			= { menu=i18n.get( "uiR2AA0Trigger"				):toUtf8(), 
-									text=i18n.get( "uiR2AA1Trigger"				):toUtf8()},
-			["Pause"]			= { menu=i18n.get( "uiR2AA0TimerPause"			):toUtf8(), 
-									text=i18n.get( "uiR2AA1TimerPause"			):toUtf8()},
-			["Resume"]			= { menu=i18n.get( "uiR2AA0TimerResume"			):toUtf8(), 
-									text=i18n.get( "uiR2AA1TimerResume"			):toUtf8()},
-			["Add 10 Seconds"]	= { menu=i18n.get( "uiR2AA0TimerAdd10s"			):toUtf8(), 
-									text=i18n.get( "uiR2AA1TimerAdds10s"		):toUtf8()},
-			["Add 1 minute"]	= { menu=i18n.get( "uiR2AA0TimerAdd1m"			):toUtf8(), 
-									text=i18n.get( "uiR2AA1TimerAdds1m"			):toUtf8()},
-			["Sub 10 seconds"]	= { menu=i18n.get( "uiR2AA0TimerSub10s"			):toUtf8(), 
-									text=i18n.get( "uiR2AA1TimerSubs10s"		):toUtf8()},
-			["Sub 1 minute"]	= { menu=i18n.get( "uiR2AA0TimerSub1m"			):toUtf8(), 
-									text=i18n.get( "uiR2AA1TimerSubs1m"			):toUtf8()},
-			["add seconds"]		= { menu=i18n.get( "uiR2AA0TimerAddNSeconds"	):toUtf8(), 
-									text=i18n.get( "uiR2AA1TimerAddNSeconds"	):toUtf8()},
-			["sub seconds"]		= { menu=i18n.get( "uiR2AA0TimerSubNSeconds"	):toUtf8(), 
-									text=i18n.get( "uiR2AA1TimerSubNSeconds"	):toUtf8()},
+			["Activate"]		= { menu=i18n.get( "uiR2AA0Activate"			),
+									text=i18n.get( "uiR2AA1Activate"			)},
+			["Deactivate"]		= { menu=i18n.get( "uiR2AA0Deactivate"			),
+									text=i18n.get( "uiR2AA1Deactivate"			)},
+			["Trigger"]			= { menu=i18n.get( "uiR2AA0Trigger"				), 
+									text=i18n.get( "uiR2AA1Trigger"				)},
+			["Pause"]			= { menu=i18n.get( "uiR2AA0TimerPause"			), 
+									text=i18n.get( "uiR2AA1TimerPause"			)},
+			["Resume"]			= { menu=i18n.get( "uiR2AA0TimerResume"			), 
+									text=i18n.get( "uiR2AA1TimerResume"			)},
+			["Add 10 Seconds"]	= { menu=i18n.get( "uiR2AA0TimerAdd10s"			), 
+									text=i18n.get( "uiR2AA1TimerAdds10s"		)},
+			["Add 1 minute"]	= { menu=i18n.get( "uiR2AA0TimerAdd1m"			), 
+									text=i18n.get( "uiR2AA1TimerAdds1m"			)},
+			["Sub 10 seconds"]	= { menu=i18n.get( "uiR2AA0TimerSub10s"			), 
+									text=i18n.get( "uiR2AA1TimerSubs10s"		)},
+			["Sub 1 minute"]	= { menu=i18n.get( "uiR2AA0TimerSub1m"			), 
+									text=i18n.get( "uiR2AA1TimerSubs1m"			)},
+			["add seconds"]		= { menu=i18n.get( "uiR2AA0TimerAddNSeconds"	), 
+									text=i18n.get( "uiR2AA1TimerAddNSeconds"	)},
+			["sub seconds"]		= { menu=i18n.get( "uiR2AA0TimerSubNSeconds"	), 
+									text=i18n.get( "uiR2AA1TimerSubNSeconds"	)},
 		},
 		["Events"] = {	
-			["On Activation"]	= { menu=i18n.get( "uiR2Event0Activation"		):toUtf8(), 
-									text=i18n.get( "uiR2Event1Activation"		):toUtf8()},
-			["On Desactivation"]= { menu=i18n.get( "uiR2Event0Deactivation"		):toUtf8(), 
-									text=i18n.get( "uiR2Event1Deactivation"		):toUtf8()},
-			["On Trigger"]		= { menu=i18n.get( "uiR2Event0Trigger"			):toUtf8(), 
-									text=i18n.get( "uiR2Event1Trigger"			):toUtf8()},
-			["On Pause"]		= { menu=i18n.get( "uiR2Event0TimerPause"		):toUtf8(), 
-									text=i18n.get( "uiR2Event1TimerPause"		):toUtf8()},
-			["On Resume"]		= { menu=i18n.get( "uiR2Event0TimerResume"		):toUtf8(), 
-									text=i18n.get( "uiR2Event1TimerResume"		):toUtf8()},
+			["On Activation"]	= { menu=i18n.get( "uiR2Event0Activation"		), 
+									text=i18n.get( "uiR2Event1Activation"		)},
+			["On Desactivation"]= { menu=i18n.get( "uiR2Event0Deactivation"		), 
+									text=i18n.get( "uiR2Event1Deactivation"		)},
+			["On Trigger"]		= { menu=i18n.get( "uiR2Event0Trigger"			), 
+									text=i18n.get( "uiR2Event1Trigger"			)},
+			["On Pause"]		= { menu=i18n.get( "uiR2Event0TimerPause"		), 
+									text=i18n.get( "uiR2Event1TimerPause"		)},
+			["On Resume"]		= { menu=i18n.get( "uiR2Event0TimerResume"		), 
+									text=i18n.get( "uiR2Event1TimerResume"		)},
 		},
 		["Conditions"] = {	
-			["is active"]		= { menu=i18n.get( "uiR2Test0Active"			):toUtf8(), 
-									text=i18n.get( "uiR2Test1Active"			):toUtf8()},
-			["is inactive"]		= { menu=i18n.get( "uiR2Test0Inactive"			):toUtf8(), 
-									text=i18n.get( "uiR2Test1Inactive"			):toUtf8()},
-			["is paused"]		= { menu=i18n.get( "uiR2Test0TimerPaused"		):toUtf8(), 
-									text=i18n.get( "uiR2Test1TimerPaused"		):toUtf8()},
-			["is running"]		= { menu=i18n.get( "uiR2Test0TimerRunning"		):toUtf8(), 
-									text=i18n.get( "uiR2Test1TimerRunning"		):toUtf8()},
-			["is finished"]		= { menu=i18n.get( "uiR2Test0TimerFinished"		):toUtf8(), 
-									text=i18n.get( "uiR2Test1TimerFinished"			):toUtf8()}, 
+			["is active"]		= { menu=i18n.get( "uiR2Test0Active"			), 
+									text=i18n.get( "uiR2Test1Active"			)},
+			["is inactive"]		= { menu=i18n.get( "uiR2Test0Inactive"			), 
+									text=i18n.get( "uiR2Test1Inactive"			)},
+			["is paused"]		= { menu=i18n.get( "uiR2Test0TimerPaused"		), 
+									text=i18n.get( "uiR2Test1TimerPaused"		)},
+			["is running"]		= { menu=i18n.get( "uiR2Test0TimerRunning"		), 
+									text=i18n.get( "uiR2Test1TimerRunning"		)},
+			["is finished"]		= { menu=i18n.get( "uiR2Test0TimerFinished"		), 
+									text=i18n.get( "uiR2Test1TimerFinished"			)}, 
 		}
 	}
 	return logicTranslations
@@ -521,10 +521,8 @@ function component.initEventValuesMenu(this, menu, categoryEvent)
 			local subMenu = menu:getSubMenu(ev)
 			local func = ""
 	--		for i=0, 9 do
-	--			local uc_name = ucstring()
-	--			uc_name:fromUtf8( tostring(i) )
 	--			func = "r2.events:setEventValue('','" .. categoryEvent .."','".. tostring(i).."')"
-	--			subMenu:addLine(uc_name, "lua", func, tostring(i))
+	--			subMenu:addLine(tostring(i), "lua", func, tostring(i))
 	--		end
 
 			--endTime = nltime.getPreciseLocalTime()
@@ -534,7 +532,7 @@ function component.initEventValuesMenu(this, menu, categoryEvent)
 			local lineNb = 0
 			for i=0, 50, 10 do
 				local lineStr = tostring(i).."/"..tostring(i+9)
-				subMenu:addLine(ucstring(lineStr), "", "", tostring(i))
+				subMenu:addLine(lineStr, "", "", tostring(i))
 
 				--endTime = nltime.getPreciseLocalTime()
 				--debugInfo(string.format("time for 12 is %f", endTime - startTime))
@@ -545,7 +543,7 @@ function component.initEventValuesMenu(this, menu, categoryEvent)
 				for s=0,9 do
 					lineStr = tostring(i+s) 
 					local func = "r2.events:setEventValue('','" .. categoryEvent .."','".. lineStr.."')"
-					subMenu2:addLine(ucstring(lineStr), "lua", func, lineStr)
+					subMenu2:addLine(lineStr, "lua", func, lineStr)
 				end
 				lineNb = lineNb+1
 
@@ -556,7 +554,7 @@ function component.initEventValuesMenu(this, menu, categoryEvent)
 
 			for i=0, 50, 10 do
 				local lineStr = tostring(i).." m /"..tostring(i+9).." m"
-				subMenu:addLine(ucstring(lineStr), "", "", tostring(i))
+				subMenu:addLine(lineStr, "", "", tostring(i))
 
 				subMenu:addSubMenu(lineNb)
 				local subMenu2= subMenu:getSubMenu(lineNb)
@@ -569,14 +567,14 @@ function component.initEventValuesMenu(this, menu, categoryEvent)
 				for m=0,9 do
 					lineStr = tostring( (i+m)*60) 
 --					local func = "r2.events:setEventValue('','" .. categoryEvent .."','".. lineStr.."')"
-					subMenu2:addLine(ucstring(tostring(i+m) .. "m"), "", "", lineStr)
+					subMenu2:addLine(tostring(i+m) .. "m", "", "", lineStr)
 					subMenu2:addSubMenu(index)
 					local subMenu3= subMenu2:getSubMenu(index)
 					index = index + 1
 					for s=0, 55, 5 do
 						lineStr = tostring( (i+m)*60 + s) 
 						local func = "r2.events:setEventValue('','" .. categoryEvent .."','".. lineStr.."')"
-						subMenu3:addLine(ucstring(tostring(i+m) .. "m ".. s .. "s"), "lua", func, lineStr)				
+						subMenu3:addLine(tostring(i+m) .. "m ".. s .. "s", "lua", func, lineStr)				
 					end										
 				end
 				lineNb = lineNb+1

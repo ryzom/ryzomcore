@@ -200,7 +200,7 @@ end
 --***********************************************************************
 function RingAccessPoint:initScenarioTypes()
 	for k = 0, 6 do		
-		self.ScenarioTypeToUtf8[k] = i18n.get("uiRAP_ST_" .. tostring(k)):toUtf8()		
+		self.ScenarioTypeToUtf8[k] = i18n.get("uiRAP_ST_" .. tostring(k))		
 	end
 end
 
@@ -227,15 +227,11 @@ function RingAccessPoint:getColumn(name)
 	return getUI("ui:interface:ring_sessions:content:main:enclosing:columns:getw:column_group:" .. name .. ":values")
 end
 
-
 --***********************************************************************
 function RingAccessPoint:getSelectList()
 	return getUI("ui:interface:ring_sessions:content:main:enclosing:columns:getw:select")
 	--return getUI("ui:interface:checkpass:content:enclosing:select")
 end
-
-
-local scratchUCStr = ucstring()
 
 --***********************************************************************
 function RingAccessPoint:newTemplate(name, cache)	
@@ -249,16 +245,15 @@ function RingAccessPoint:newTemplate(name, cache)
 	return group
 end
 
-local lineFeed = ucstring("\n")
-local lineEnd = ucstring(". ")
+local lineFeed = "\n"
+local lineEnd = ". "
 
 --***********************************************************************
 -- build a new text group from utf8 text
 function RingAccessPoint:newTextLabel(value)				
 	local group = self:newTemplate("rap_text", self.TextCache)
-	scratchUCStr:fromUtf8(value)
-	scratchUCStr = findReplaceAll(scratchUCStr, lineFeed, lineEnd)
-	group:find("t").uc_hardtext_single_line_format = scratchUCStr
+	local str = findReplaceAll(value, lineFeed, lineEnd)
+	group:find("t").text_single_line_format = str
 	return group
 end
 
@@ -266,15 +261,14 @@ end
 -- build a new text group from utf8 text
 function RingAccessPoint:newCenteredTextLabel(value)				
 	local group = self:newTemplate("rap_text_centered", self.CenteredTextCache)
-	scratchUCStr:fromUtf8(value)
-	group:find("t").uc_hardtext_single_line_format = scratchUCStr
+	group:find("t").text_single_line_format = value
 	return group
 end
 
 --***********************************************************************
 function RingAccessPoint:newNumberLabel(value)	
 	local group = self:newTemplate("rap_number", self.NumberCache)
-	group:find("t").uc_hardtext_single_line_format = tostring(value)
+	group:find("t").text_single_line_format = tostring(value)
 	return group
 end
 
@@ -324,7 +318,7 @@ function RingAccessPoint:addLine(line)
 	
 	local level = line.Level-1
 	if level >= 0 and level <= 5 then
-		self:getColumn("level"):addChild(self:newNumberLabel(i18n.get("uiRAP_Level" .. tostring(level)):toUtf8()))
+		self:getColumn("level"):addChild(self:newNumberLabel(i18n.get("uiRAP_Level" .. tostring(level))))
 	else
 		self:getColumn("level"):addChild(self:newNumberLabel("?"))
 	end
@@ -333,7 +327,7 @@ function RingAccessPoint:addLine(line)
 	if self.LangToTex[line.Language] ~= nil then
 		self:getColumn("language"):addChild(self:newBitmap(self.LangToTex[line.Language]))
 	elseif i18n.hasTranslation("uiR2ED" .. line.Language) then
-		self:getColumn("language"):addChild(self:newCenteredTextLabel(i18n.get("uiR2ED" .. line.Language):toUtf8()))
+		self:getColumn("language"):addChild(self:newCenteredTextLabel(i18n.get("uiR2ED" .. line.Language)))
 	else
 		self:getColumn("language"):addChild(self:newCenteredTextLabel(line.Language))
 	end		
@@ -527,7 +521,7 @@ function RingAccessPoint:setMessage(msg, color)
 	-- The version below set the msg in the middle of the window
 	--local errorTxt = self:getWindow():find("errorMsg")
 
-	errorTxt.uc_hardtext = msg
+	errorTxt.text = msg
 	errorTxt.color = color
 	errorTxt.active=true
 	--self:getWindow():invalidateCoords()
@@ -631,20 +625,20 @@ function RingAccessPoint:onLineSessionTooltip()
 	local activeLine = self.CurrActiveList[self:getSelectList():getElementIndex(getUICaller().parent) + 1]
 	local contextHelpText
 	if self:isInvited(activeLine.Flags) then
-		contextHelpText = i18n.get("uiRAP_HowToJoin"):toUtf8()
+		contextHelpText = i18n.get("uiRAP_HowToJoin")
 	else
-		contextHelpText = i18n.get("uiRAP_HowToBeInvited"):toUtf8()
+		contextHelpText = i18n.get("uiRAP_HowToBeInvited")
 	end
 
 	local desc = activeLine.Desc
 	if desc=="" then desc="-" end
-	contextHelpText = contextHelpText .. "\n\n@{6F6F}" .. i18n.get("uiR2EDProp_LoadScenario_Description"):toUtf8() .. " : @{FFFF}" .. ucstring(desc):toUtf8() .. "\n\n"
+	contextHelpText = contextHelpText .. "\n\n@{6F6F}" .. i18n.get("uiR2EDProp_LoadScenario_Description") .. " : @{FFFF}" .. desc .. "\n\n"
 
-	local rateFun =			"@{6F6F}" .. i18n.get("uiRAP_RateFun"):toUtf8() .. " : @{FFFF}"
-	local rateDiff =		"@{6F6F}" .. i18n.get("uiRAP_RateDifficulty"):toUtf8() .. " : @{FFFF}"
-	local rateAccess =		"@{6F6F}" .. i18n.get("uiRAP_RateAccessibility"):toUtf8() .. " : @{FFFF}"
-	local rateOrig =		"@{6F6F}" .. i18n.get("uiRAP_RateOriginality"):toUtf8() .. " : @{FFFF}"
-	local rateDirection =	"@{6F6F}" .. i18n.get("uiRAP_RateDirection"):toUtf8() .. " : @{FFFF}"
+	local rateFun =			"@{6F6F}" .. i18n.get("uiRAP_RateFun") .. " : @{FFFF}"
+	local rateDiff =		"@{6F6F}" .. i18n.get("uiRAP_RateDifficulty") .. " : @{FFFF}"
+	local rateAccess =		"@{6F6F}" .. i18n.get("uiRAP_RateAccessibility") .. " : @{FFFF}"
+	local rateOrig =		"@{6F6F}" .. i18n.get("uiRAP_RateOriginality") .. " : @{FFFF}"
+	local rateDirection =	"@{6F6F}" .. i18n.get("uiRAP_RateDirection") .. " : @{FFFF}"
 	
 	if activeLine.NbRating>0 then
 		rateFun =		rateFun .. tostring(math.min(100, activeLine.RateFun)) .. "/100"
@@ -653,11 +647,11 @@ function RingAccessPoint:onLineSessionTooltip()
 		rateOrig =		rateOrig ..	tostring(math.min(100, activeLine.RateOriginality)) .. "/100"
 		rateDirection =	rateDirection .. tostring(math.min(100, activeLine.RateDirection)) .. "/100"
 	else
-		rateFun =		rateFun .. i18n.get("uiRAP_NoRate"):toUtf8()
-		rateDiff =		rateDiff .. i18n.get("uiRAP_NoRate"):toUtf8()	
-		rateAccess =	rateAccess .. i18n.get("uiRAP_NoRate"):toUtf8()
-		rateOrig =		rateOrig ..	i18n.get("uiRAP_NoRate"):toUtf8()
-		rateDirection =	rateDirection .. i18n.get("uiRAP_NoRate"):toUtf8()
+		rateFun =		rateFun .. i18n.get("uiRAP_NoRate")
+		rateDiff =		rateDiff .. i18n.get("uiRAP_NoRate")	
+		rateAccess =	rateAccess .. i18n.get("uiRAP_NoRate")
+		rateOrig =		rateOrig ..	i18n.get("uiRAP_NoRate")
+		rateDirection =	rateDirection .. i18n.get("uiRAP_NoRate")
 	end
 		
 --	contextHelpText = contextHelpText .. rateFun .. "\n"
@@ -666,9 +660,7 @@ function RingAccessPoint:onLineSessionTooltip()
 --	contextHelpText = contextHelpText .. rateOrig .. "\n"
 --	contextHelpText = contextHelpText .. rateDirection .. "\n"
 
-	local uc_contextHelpText = ucstring()
-	uc_contextHelpText:fromUtf8(contextHelpText)
-	setContextHelpText(uc_contextHelpText)
+	setContextHelpText(contextHelpText)
 end
 
 
@@ -724,10 +716,9 @@ end
 --***********************************************************************
 function RingAccessPoint:onTell()
 	--debugInfo("tell to owner of session" .. self.SelectedSessionId)
-	player = ucstring()		
-	player:fromUtf8(self:getSessionFromId(self.SelectedSessionId).Owner)
+	player = self:getSessionFromId(self.SelectedSessionId).Owner
 	tell(player, i18n.get("uiRAP_AskForInvite"))	
-	displaySystemInfo(concatUCString(i18n.get("uiRAP_TellSentTo"), player), "BC")	
+	displaySystemInfo(concatString(i18n.get("uiRAP_TellSentTo"), player), "BC")	
 end
 
 --***********************************************************************
@@ -915,7 +906,7 @@ function RingAccessPoint:onDraw()
 			--	refreshText.active = false
 			--else			
 			--	refreshText.active = true
-			--	refreshText.uc_hardtext = waitText 
+			--	refreshText.text = waitText 
 			--end
 		end
 	else

@@ -131,9 +131,7 @@ UnitTest.testLoadScenarioUi = function()
 				return
 			end
 
-			local ucName = ucstring()
-			ucName:fromUtf8(form.LoadScenario_Name)
-			local filename = tostring(ucName)	
+			local filename = tostring(form.LoadScenario_Name)
 			if string.find(filename, '.r2', -3) == nil then
 				messageBox(i18n.get("uiR2EDLoadScenario_InvalidFileName"))
 				return
@@ -222,7 +220,7 @@ function UnitTest.saveScenario(name, overwrite)
 			local file = io.open(extendedFilename, "r")
 			if file ~= nil then
 				io.close(file)		
-				validMessageBox(concatUCString(ucstring(name), i18n.get("uiR2EDConfirmOverWrite")), "lua", "UnitTest.saveScenario('" .. name .. "', true )", "", "", "ui:interface")
+				validMessageBox(concatString(name, i18n.get("uiR2EDConfirmOverWrite")), "lua", "UnitTest.saveScenario('" .. name .. "', true )", "", "", "ui:interface")
 				return
 			end
 		end
@@ -230,9 +228,9 @@ function UnitTest.saveScenario(name, overwrite)
 		local ok, ret = pcall(r2.Version.save, extendedFilename)		
 		local errorMsg = ret
 		if ok and ret then				
-			displaySystemInfo(concatUCString(i18n.get("uiR2EDSaveSuccessFull"), ucstring(name)), "BC")
+			displaySystemInfo(concatString(i18n.get("uiR2EDSaveSuccessFull"), name), "BC")
 		else
-			displaySystemInfo(concatUCString(i18n.get("uiR2EDSaveFailure"), ucstring(name)), "BC")				
+			displaySystemInfo(concatString(i18n.get("uiR2EDSaveFailure"), name), "BC")				
 		end
 	end
 end
@@ -240,10 +238,7 @@ end
 UnitTest.testSaveScenarioUi = function()
 	local function onOk(form)
 		local smallName = form.Name
-		uc=ucstring()
-		uc:fromUtf8(smallName)
-		local str = uc:toString()
-		UnitTest.saveScenario(str, false)		
+		UnitTest.saveScenario(smallName, false)		
 	end
 
 	local function onCancel(form)
@@ -372,7 +367,7 @@ function UserComponentsManager:newComponent()
 		Prop = 	{ }
 	}
 	function component:registerMenu(logicEntityMenu)
-		logicEntityMenu:addLine(ucstring(self.Name), "lua", "", self.Name)
+		logicEntityMenu:addLine(self.Name, "lua", "", self.Name)
 	end
 	
 	function component:createImpl()
@@ -749,7 +744,7 @@ function RingAccess.errorMessageImpl(errorType, name, package, entityLevel, char
 
 	if errorType == "InvalidIslandLevel" then
 		trad =  i18n.get("uiR2EDErrMessageNoEnoughRingPointFor".."Island")
-		entityName = i18n.get(name):toUtf8()
+		entityName = i18n.get(name)
 	elseif errorType == "InvalidBotLevel" then
 		trad =  i18n.get("uiR2EDErrMessageNoEnoughRingPointFor".."Bot")
 		entityName = name
@@ -765,11 +760,11 @@ function RingAccess.errorMessageImpl(errorType, name, package, entityLevel, char
 
 
 
-	local str = trad:toUtf8()
+	local str = trad
 
 	if package  and string.len(package) ~= 0 then
 		local category = i18n.get(string.format("uiR2EDRingAccessCategory_%s", package))
-		str=string.gsub (str, "<Package>", category:toUtf8())
+		str=string.gsub (str, "<Package>", category)
 	end
 	if entityLevel then
 		str=string.gsub (str, "<EntityLevel>", tostring(entityLevel))
@@ -1132,9 +1127,7 @@ function r2:dumpDialogsAsText(filename, noMessage)
 				if tostring(step.Actions[0].Says) ~= "" then
 					local whatInst =  r2:getInstanceFromId(step.Actions[0].Says)
 					if whatInst then 
-						local tmp = ucstring()
-						tmp:fromUtf8(whatInst.Text)
-						what = tmp:toString()
+						what = whatInst.Text
 					end
 				end
 				id = tostring(step.Actions[0].Says)
@@ -1342,10 +1335,7 @@ function r2:updateDialogsFromText(filename, noMessage)
 		while dialogId do
 			local textId, text = next(dialog.Texts, nil)
 			while textId do
-				local t = tostring(text.Text)
-				local uc=ucstring(t)
-				local utf8=uc:toUtf8()
-				r2.requestSetNode(tostring(text.Id), "Text", utf8)
+				r2.requestSetNode(tostring(text.Id), "Text", tostring(text.Text))
 				textId, text = next(dialog.Texts, textId)
 			end
 			dialogId, dialog = next(r2.DialogsAsText, dialogId)
@@ -1354,10 +1344,7 @@ function r2:updateDialogsFromText(filename, noMessage)
 		do
 			local id, value = next(r2.BotnameAsText, nil)
 			while id do
-				local t = tostring(value.Name)
-				local uc=ucstring(t)
-				local utf8=uc:toUtf8()
-				r2.requestSetNode(tostring(value.Id), "Name", utf8)
+				r2.requestSetNode(tostring(value.Id), "Name", tostring(value.Name))
 				id, value = next(r2.BotnameAsText, id)
 			end
 		end
@@ -1365,10 +1352,7 @@ function r2:updateDialogsFromText(filename, noMessage)
 		do
 			local id, value = next(r2.DiversText, nil)
 			while id do
-				local t = tostring(value.Text)
-				local uc=ucstring(t)
-				local utf8=uc:toUtf8()
-				r2.requestSetNode(tostring(value.Id), value.Property, utf8)
+				r2.requestSetNode(tostring(value.Id), value.Property, tostring(value.Text))
 				id, value = next(r2.DiversText, id)
 			end
 		end

@@ -336,7 +336,7 @@ end
 -- helper : add "delete : name_of_the_thing_being_deleted"  in the action historic as the name of the delete action that is about 
 -- to be done
 function baseClass.setDeleteActionName(this)
-	r2.requestNewAction(concatUCString(i18n.get("uiR2EDDeleteAction"), this:getDisplayName()))
+	r2.requestNewAction(concatString(i18n.get("uiR2EDDeleteAction"), this:getDisplayName()))
 end
 
 
@@ -456,9 +456,9 @@ end
 ---------------------------------------------------------------------------------------------------------
 -- Get the display name (in i18n format). This name will be displayed in the property sheet or inthe instance tree
 function baseClass.getDisplayName(this)
-	local displayName = ucstring()
+	local displayName = ""
 	if this.Name ~= nil and this.Name ~= "" then		
-		displayName:fromUtf8(this.Name)
+		displayName = this.Name
 	else
 		return i18n.get("uiR2EDNoName")
 		-- local className = this.Class
@@ -469,15 +469,15 @@ function baseClass.getDisplayName(this)
 		-- end
 		-- end
 		-- className = className .. " : " .. this.InstanceId
-		-- displayName:fromUtf8(className)
+		-- displayName = className
 	end
 	return displayName
 end
 
 ---------------------------------------------------------------------------------------------------------
--- Get the base name for instance name generation (should return a ucstring)
+-- Get the base name for instance name generation (should return a utf-8 string)
 function baseClass.getBaseName(this)
-	return ucstring("")
+	return ""
 end
 
 
@@ -576,7 +576,7 @@ function baseClass.onSetupMenu(this)
 	-- for i = 1,9 do
 	-- 	if parent == nil or parent.Parent == nil then break end		
 	-- 	menu["selectParent" .. tostring(i)].active = true
-	-- 	menu["selectParent" .. tostring(i)].uc_hardtext = i18n.get("uimR2EDSelectParent") + (parent.InstanceId .. "  (" .. parent.Class .. ")")
+	-- 	menu["selectParent" .. tostring(i)].text = i18n.get("uimR2EDSelectParent") + (parent.InstanceId .. "  (" .. parent.Class .. ")")
 	-- 	--debugInfo(colorTag(0, 255, 255) .. tostring(i))
 	-- 	parent = parent.ParentInstance
 	-- end		
@@ -764,11 +764,11 @@ function baseClass.setRefIdValue(this, refIdName, targetId)
 	local name = this:getDisplayName()
 	local refIdUCName = r2:getPropertyTranslation(this:getClass().NameToProp[refIdName])
 	if targetId == "" then
-	r2.requestNewAction(concatUCString(i18n.get("uiR2EDRemovingTargetAction"), name,
+	r2.requestNewAction(concatString(i18n.get("uiR2EDRemovingTargetAction"), name,
 								i18n.get("uiR2EDAddingReferenceSeparator"), refIdname))
 	else
 		local targetName = r2:getInstanceFromId(targetId):getDisplayName()
-		r2.requestNewAction(concatUCString(i18n.get("uiR2EDAddingReferenceAction"), name,
+		r2.requestNewAction(concatString(i18n.get("uiR2EDAddingReferenceAction"), name,
 									i18n.get("uiR2EDAddingReferenceSeparator"), refIdUCName,
 									i18n.get("uiR2EDAddingReferenceToAction"), targetName))
 	end

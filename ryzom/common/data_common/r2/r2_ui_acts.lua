@@ -33,11 +33,11 @@ r2.acts = {
 
 	ecosystemNames = 
 	{
-		["r2_desert"] =	i18n.get("uiR2EDEcosystemDesert"):toUtf8(),
-		["r2_jungle"] =	i18n.get("uiR2EDEcosystemJungle"):toUtf8(), 
-		["r2_forest"] =	i18n.get("uiR2EDEcosystemForest"):toUtf8(), 
-		["r2_lakes"]  =	i18n.get("uiR2EDEcosystemLacustre"):toUtf8(),
-		["r2_roots"]  =	i18n.get("uiR2EDEcosystemPrimeRoots"):toUtf8(), 
+		["r2_desert"] =	i18n.get("uiR2EDEcosystemDesert"),
+		["r2_jungle"] =	i18n.get("uiR2EDEcosystemJungle"), 
+		["r2_forest"] =	i18n.get("uiR2EDEcosystemForest"), 
+		["r2_lakes"]  =	i18n.get("uiR2EDEcosystemLacustre"),
+		["r2_roots"]  =	i18n.get("uiR2EDEcosystemPrimeRoots"), 
 	},
 
 	selectedIslandButtonId = nil,
@@ -78,7 +78,7 @@ r2.acts = {
 -------------------------- to sort islands in function of their translated name -----------
 function r2.acts:getIslandNb(islandName)
 
-	local islandTrans = i18n.get(islandName):toUtf8()
+	local islandTrans = i18n.get(islandName)
 	local islandNb = string.sub(islandTrans, -5)
 	local endLen = 6
 	if string.sub(islandNb, 1, 1) ~= " " then
@@ -155,9 +155,7 @@ function r2.acts:initActsEditor()
 		local ecoButton = ecoButtonsGr:find(ecoSysName):find("eco_button")
 		assert(ecoButton)
 
-		local uc_package = ucstring()
-		uc_package:fromUtf8(i18n.get("uiR2EDEcosystemPackage"):toUtf8().." : "..maxPackage)
-		ecoButton.tooltip = uc_package
+		ecoButton.tooltip = i18n.get("uiR2EDEcosystemPackage").." : "..maxPackage
 
 		for i=0, nbLines-1 do
 			local lineGr = createGroupInstance("template_line", ecoGr.id, {id="line"..i, h=buttonDim})
@@ -319,14 +317,14 @@ function r2.acts:openScenarioActEditor(newScenario, noCancelOption, rebuildFirst
 
 	-- act and scenario names
 	if self.createNewScenario or rebuildFirstAct then
-		self.currentAct.name = i18n.get("uiR2EDDefaultActTitle"):toUtf8() .. " 1"
+		self.currentAct.name = i18n.get("uiR2EDDefaultActTitle") .. " 1"
 	else
 		local actNb = r2.Scenario.Acts.Size 
-		self.currentAct.name = i18n.get("uiR2EDDefaultActTitle"):toUtf8() .. " " .. actNb 
+		self.currentAct.name = i18n.get("uiR2EDDefaultActTitle") .. " " .. actNb 
 	end
 	
 	if self.createNewScenario == true then
-		self.currentScenario.name = i18n.get("uiR2EDNewScenario"):toUtf8()
+		self.currentScenario.name = i18n.get("uiR2EDNewScenario")
 	else
 		r2.ScenarioWindow:setActNotes()
 
@@ -497,10 +495,8 @@ function r2.acts:openPreviousIslandsActs()
 				locationList:addChild(buttonIsland)	
 				buttonIsland.Env.InstanceId = location.InstanceId
 
-				local uc_island = ucstring()
-				uc_island:fromUtf8(location.Name)
-				buttonIsland:find("button"):find("center_button").tooltip = uc_island
-				buttonIsland:find("selected_button"):find("center_button").tooltip = uc_island
+				buttonIsland:find("button"):find("center_button").tooltip = location.Name
+				buttonIsland:find("selected_button"):find("center_button").tooltip = location.Name
 
 				-- init text
 				local textList = buttonIsland:find("text_list")
@@ -523,10 +519,7 @@ function r2.acts:openPreviousIslandsActs()
 					prevText:addColoredTextChild(act_text, 200, 120, 0, 255)
 
 					if act.ShortDescription~="" then
-						act_text = act.ShortDescription
-						local uc_act = ucstring()
-						uc_act:fromUtf8(act_text)
-						prevText:addTextChild(uc_act)
+						prevText:addTextChild(act_text)
 					end
 				end
 
@@ -687,11 +680,9 @@ function r2.acts:openEcosystemIslands(ecoSystemName)
 	-- "choose island" title
 	local title = actsUI:find("choose_island"):find("choose_island_title")
 	assert(title)
-	-- doesn't work in all language local titleText = " " .. i18n.get("uiR2EDChooseIsland"):toUtf8() .." " .. self.ecosystemNames[self.ecoSystemName] .. " " .. i18n.get("uiR2EDEcosystem"):toUtf8() .. " "
-	local titleText = " " .. i18n.get("uiR2EDChooseIsland"):toUtf8() .. self.ecosystemNames[self.ecoSystemName] .. " "
-	local uc_title = ucstring()
-	uc_title:fromUtf8(titleText)
-	title.uc_hardtext = uc_title
+	-- doesn't work in all language local titleText = " " .. i18n.get("uiR2EDChooseIsland") .." " .. self.ecosystemNames[self.ecoSystemName] .. " " .. i18n.get("uiR2EDEcosystem") .. " "
+	local titleText = " " .. i18n.get("uiR2EDChooseIsland") .. self.ecosystemNames[self.ecoSystemName] .. " "
+	title.text = titleText
 end
 
 --------------------------------------------------------------------------------------
@@ -752,11 +743,9 @@ function r2.acts:openIslandCard(islandName)
 	-- card title
 	local title = actsUI:find("island_images"):find("card_title")
 	assert(title)
-	-- doesn't work in all language local titleText = " " .. i18n.get("uiR2EDZoomOn"):toUtf8() .." '" .. i18n.get(islandName):toUtf8() .. "' " .. i18n.get("uiR2EDIsland"):toUtf8() .. " "
-	local titleText = " " .. i18n.get("uiR2EDZoomOn"):toUtf8() .. i18n.get(islandName):toUtf8() .. " "
-	local uc_title = ucstring()
-	uc_title:fromUtf8(titleText)
-	title.uc_hardtext = uc_title
+	-- doesn't work in all language local titleText = " " .. i18n.get("uiR2EDZoomOn") .." '" .. i18n.get(islandName) .. "' " .. i18n.get("uiR2EDIsland") .. " "
+	local titleText = " " .. i18n.get("uiR2EDZoomOn") .. i18n.get(islandName) .. " "
+	title.text = titleText
 
 	local islandTable = self.islands[self.ecoSystemName][self:getIslandNb(islandName)].table
 	local islandW, islandH = (islandTable.xmax - islandTable.xmin)*enlargingFactor, (islandTable.ymax - islandTable.ymin)*enlargingFactor
@@ -866,7 +855,7 @@ function r2.acts:chooseLocationName()
 	local editText = chooseNamePopup:find("edit_box_group")
 	assert(editText)
 
-	local name = editText.uc_input_string:toUtf8()
+	local name = editText.input_string
 
 	-- check location name duplication
 	if not self.createNewScenario then
@@ -914,7 +903,7 @@ function r2.acts:chooseScenarioActName()
 	assert(actGr)
 	local actEditText = actGr:find("edit_box_group")
 	assert(actEditText)
-	local actName = actEditText.uc_input_string:toUtf8()
+	local actName = actEditText.input_string
 	local scenarioName = ""
 
 	local scenarioEditText
@@ -926,7 +915,7 @@ function r2.acts:chooseScenarioActName()
 		scenarioEditText = scenarioGr:find("edit_box_group")
 		assert(scenarioEditText)
 		
-		scenarioName = scenarioEditText.uc_input_string:toUtf8()
+		scenarioName = scenarioEditText.input_string
 	end
 
 	if (self.createNewScenario and scenarioName~="" and actName~="") or (not self.createNewScenario and actName~="") then
@@ -997,7 +986,7 @@ function r2.acts:createScenario()
 	local act =r2.newComponent("Act")
 	local features = act.Features
 	local tmpDefault = r2.newComponent("DefaultFeature")
-	act.Name =  i18n.get("uiR2EDBaseAct"):toUtf8() 
+	act.Name =  i18n.get("uiR2EDBaseAct") 
 	table.insert(features, tmpDefault)
 	table.insert(scenario.Acts, act)
 
@@ -1006,7 +995,7 @@ function r2.acts:createScenario()
 	local features = act.Features
 	local tmpDefault = r2.newComponent("DefaultFeature")
 	r2.ActUIDisplayer.LastSelfCreatedActInstanceId = act.InstanceId
-	--act.Name =  i18n.get("uiR2EDAct1"):toUtf8() .. ":" .. r2.currentAct.name
+	--act.Name =  i18n.get("uiR2EDAct1") .. ":" .. r2.currentAct.name
 	act.Name =  self.currentAct.name
 	act.WeatherValue = self.currentAct.weather
 	local manualWeather = 0
@@ -1054,7 +1043,7 @@ function r2.acts:createAct()
 	end	
 	r2.ActUIDisplayer.LastSelfCreatedActInstanceId = act.InstanceId
 	local actNb = r2.Scenario.Acts.Size 
-	--act.Name = i18n.get("uiR2EDDefaultActTitle"):toUtf8() .. actNb .. ":" .. r2.currentAct.name 
+	--act.Name = i18n.get("uiR2EDDefaultActTitle") .. actNb .. ":" .. r2.currentAct.name 
 	act.Name = self.currentAct.name 
 	act.WeatherValue = self.currentAct.weather
 	local manualWeather = 0
@@ -1108,7 +1097,7 @@ function r2.acts:openLocationName()
 
 	local editText = chooseNamePopup:find("edit_box_group")
 	assert(editText)
-	editText.uc_input_string = i18n.get(self.currentLocation.islandName)
+	editText.input_string = i18n.get(self.currentLocation.islandName)
 	editText:setFocusOnText()
 end
 

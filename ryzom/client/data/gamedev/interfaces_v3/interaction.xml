@@ -28,7 +28,7 @@
         <define id="force_level_8" value="consider_7.tga" />
         <proc id="proc_target_changed">
                 <!-- Name -->
-                <action handler="set_target_name" params="slot=@@UI:VARIABLES:TARGET:SLOT|target=ui:interface:target:uc_title| title=ui:interface:target:header_opened:target_title:uc_hardtext" />
+                <action handler="set_target_name" params="slot=@@UI:VARIABLES:TARGET:SLOT|target=ui:interface:target:title| title=ui:interface:target:header_opened:target_title:hardtext" />
                 <!-- Region force & Force level of the creature/player -->
                 <!-- old consider system -->
                 <!--
@@ -145,7 +145,7 @@
         <group type="modal" id="add_contact" exit_click_out="true" posref="MM MR" w="212" child_resize_h="true" child_resize_hmargin="14" options="skin_modal" on_active="set_keyboard_focus" on_active_params="target=ui:interface:add_contact:add_contact_eb:eb|select_all=false">
 
                 <view type="text" id="text" posref="TL TL" x="8" y="-8" color="255 255 255 255" global_color="false" fontsize="12" shadow="true" hardtext="uiPeopleAddContact" />
-                <instance template="edit_box_widget" id="add_contact_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="add_contact" max_num_chars="255" entry_type="playername" />
+                <instance template="edit_box_widget" id="add_contact_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="add_contact" max_num_bytes="255" entry_type="playername" />
                 <instance template="button_ok_cancel" posparent="add_contact_eb" posref="BR TR" x="0" y="0" onclick_ok="add_contact" onclick_ok_param="" onclick_cancel="leave_modal" onclick_cancel_param="" />
         </group>
         <!-- ***************** -->
@@ -469,7 +469,7 @@
                         <!-- link to display the group when the team member is present -->
                         <link expr="ne(@SERVER:GROUP:#team_mate_index:NAME, 0)" target="active" />
                         <!-- links to display the name of the team mate -->
-                        <link expr="depends(@SERVER:GROUP:#team_mate_index:NAME)" action="set_server_id" params="value=@SERVER:GROUP:#team_mate_index:NAME|target=uc_title|remove_title=1" />
+                        <link expr="depends(@SERVER:GROUP:#team_mate_index:NAME)" action="set_server_id" params="value=@SERVER:GROUP:#team_mate_index:NAME|target=title|remove_title=1" />
                         <!-- links to change the name color if it is the target -->
                         <link expr="ifthenelse(eq(@SERVER:GROUP:#team_mate_index:UID,@UI:VARIABLES:TARGET:UID),
                                                                 '255 0 0 255',

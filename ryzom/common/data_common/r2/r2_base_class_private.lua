@@ -134,8 +134,8 @@ function baseClass.newCopy(this)
 	local result = cloneNode(this, srcToCopyMapping)   
 	renameRefIds(result, srcToCopyMapping)
 	-- if the name is a generated one, create a new name
-	if result.Name ~= nil and r2:isPostFixedByNumber(ucstring(result.Name)) then
-		result.Name = r2:genInstanceName(ucstring(result.Name)):toUtf8()
+	if result.Name ~= nil and r2:isPostFixedByNumber(result.Name) then
+		result.Name = r2:genInstanceName(result.Name)
 	end  
 
 	-- the copy of a undeletable object is a deltable object

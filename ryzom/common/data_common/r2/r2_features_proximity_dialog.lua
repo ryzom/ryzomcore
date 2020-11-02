@@ -158,7 +158,7 @@ function onComponentCreated(this)
 	local y = this.Position.y + 3
 	local zoneTrigger = r2.Features["ZoneTrigger"].Components.ZoneTrigger.createComponent(x, y)
 	assert(zoneTrigger)
-	zoneTrigger.Name = this.Name.." "..i18n.get("uiR2EdZoneTrigger"):toUtf8()
+	zoneTrigger.Name = this.Name.." "..i18n.get("uiR2EdZoneTrigger")
 	zoneTrigger.InheritPos = 0
 	zoneTrigger.Deletable = false
 	table.insert(this.SubComponents, zoneTrigger)
@@ -175,7 +175,7 @@ component.create = function()
 		r2.requestNewAction(i18n.get("uiR2EDNewProximityDialogAction"))
 		local proxDialog = r2.newComponent("ProximityDialog")
 		assert(proxDialog)
-		proxDialog.Name = r2:genInstanceName(i18n.get("uiR2EDProximityDialog")):toUtf8()
+		proxDialog.Name = r2:genInstanceName(i18n.get("uiR2EDProximityDialog"))
 		proxDialog.Base = r2.Translator.getDebugBase("palette.entities.botobjects.dialog")
 		proxDialog.Position.x = x
 		proxDialog.Position.y = y
@@ -249,9 +249,7 @@ end
 function component.initLogicEntitiesInstancesMenu(this, subMenu, calledFunction)
 	local entitiesTable = r2.Scenario:getAllInstancesByType(this.Name)
 	for key, entity in pairs(entitiesTable) do
-		local uc_name = ucstring()
-		uc_name:fromUtf8(entity.Name)
-		subMenu:addLine(uc_name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+		subMenu:addLine(entity.Name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
 	end
 
 	if table.getn(entitiesTable)==0 then
@@ -262,38 +260,38 @@ end
 function component:getLogicTranslations()
 	local logicTranslations = {
 		["ApplicableActions"] = {
-			["starts dialog"]			= { menu=i18n.get( "uiR2AA0ChatSeqStart"		):toUtf8(), 
-											text=i18n.get( "uiR2AA1ChatSeqStart"		):toUtf8()},
-			["stops dialog"]			= { menu=i18n.get( "uiR2AA0ChatSeqStop"			):toUtf8(), 
-											text=i18n.get( "uiR2AA1ChatSeqStop"			):toUtf8()},
-			["starts chat"]				= { menu=i18n.get( "uiR2AA0ChatStepStart"		):toUtf8(), 
-											text=i18n.get( "uiR2AA1ChatStepStart"		):toUtf8()},
-			["trigger"]					= { menu=i18n.get( "uiR2AA0Trigger"		):toUtf8(), 
-											text=i18n.get( "uiR2AA1Trigger"		):toUtf8()},
+			["starts dialog"]			= { menu=i18n.get( "uiR2AA0ChatSeqStart"		), 
+											text=i18n.get( "uiR2AA1ChatSeqStart"		)},
+			["stops dialog"]			= { menu=i18n.get( "uiR2AA0ChatSeqStop"			), 
+											text=i18n.get( "uiR2AA1ChatSeqStop"			)},
+			["starts chat"]				= { menu=i18n.get( "uiR2AA0ChatStepStart"		), 
+											text=i18n.get( "uiR2AA1ChatStepStart"		)},
+			["trigger"]					= { menu=i18n.get( "uiR2AA0Trigger"		), 
+											text=i18n.get( "uiR2AA1Trigger"		)},
 		},
 		["Events"] = {	
-			["start of dialog"]			= { menu=i18n.get( "uiR2Event0ChatSeqStart"		):toUtf8(), 
-											text=i18n.get( "uiR2Event1ChatSeqStart"		):toUtf8()},
-			["end of dialog"]			= { menu=i18n.get( "uiR2Event0ChatSeqEnd"		):toUtf8(), 
-											text=i18n.get( "uiR2Event1ChatSeqEnd"		):toUtf8()},
-			["start of chat"]			= { menu=i18n.get( "uiR2Event0ChatStepStart"	):toUtf8(), 
-											text=i18n.get( "uiR2Event1ChatStepStart"	):toUtf8()},
-			["end of chat"]				= { menu=i18n.get( "uiR2Event0ChatStepEnd"		):toUtf8(), 
-											text=i18n.get( "uiR2Event1ChatStepEnd"		):toUtf8()},
-			["trigger"]					= { menu=i18n.get( "uiR2Event0Trigger"		):toUtf8(), 
-											text=i18n.get( "uiR2Event1Trigger"		):toUtf8()},
+			["start of dialog"]			= { menu=i18n.get( "uiR2Event0ChatSeqStart"		), 
+											text=i18n.get( "uiR2Event1ChatSeqStart"		)},
+			["end of dialog"]			= { menu=i18n.get( "uiR2Event0ChatSeqEnd"		), 
+											text=i18n.get( "uiR2Event1ChatSeqEnd"		)},
+			["start of chat"]			= { menu=i18n.get( "uiR2Event0ChatStepStart"	), 
+											text=i18n.get( "uiR2Event1ChatStepStart"	)},
+			["end of chat"]				= { menu=i18n.get( "uiR2Event0ChatStepEnd"		), 
+											text=i18n.get( "uiR2Event1ChatStepEnd"		)},
+			["trigger"]					= { menu=i18n.get( "uiR2Event0Trigger"		), 
+											text=i18n.get( "uiR2Event1Trigger"		)},
 		},
 		["Conditions"] = {	
-			["is in dialog"]			= { menu=i18n.get( "uiR2Test0ChatSeq"			):toUtf8(), 
-											text=i18n.get( "uiR2Test1ChatSeq"			):toUtf8()},
-			["is not in dialog"]		= { menu=i18n.get( "uiR2Test0ChatNotSeq"		):toUtf8(), 
-											text=i18n.get( "uiR2Test1ChatNotSeq"		):toUtf8()},
-			["is in chat"]				= { menu=i18n.get( "uiR2Test0ChatStep"			):toUtf8(), 
-											text=i18n.get( "uiR2Test1ChatStep"			):toUtf8()},
-			["is active"]				= { menu=i18n.get( "uiR2Test0Active"			):toUtf8(), 
-											text=i18n.get( "uiR2Test1Active"			):toUtf8()},
-			["is inactive"]				= { menu=i18n.get( "uiR2Test0Inactive"			):toUtf8(), 
-											text=i18n.get( "uiR2Test1Inactive"			):toUtf8()},
+			["is in dialog"]			= { menu=i18n.get( "uiR2Test0ChatSeq"			), 
+											text=i18n.get( "uiR2Test1ChatSeq"			)},
+			["is not in dialog"]		= { menu=i18n.get( "uiR2Test0ChatNotSeq"		), 
+											text=i18n.get( "uiR2Test1ChatNotSeq"		)},
+			["is in chat"]				= { menu=i18n.get( "uiR2Test0ChatStep"			), 
+											text=i18n.get( "uiR2Test1ChatStep"			)},
+			["is active"]				= { menu=i18n.get( "uiR2Test0Active"			), 
+											text=i18n.get( "uiR2Test1Active"			)},
+			["is inactive"]				= { menu=i18n.get( "uiR2Test0Inactive"			), 
+											text=i18n.get( "uiR2Test1Inactive"			)},
 		}
 	}
 	return logicTranslations

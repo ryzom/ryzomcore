@@ -28,7 +28,7 @@ function game:getMilkoTooltipWithKey(prop, tooltip, tooltip_pushed, name, param)
 	
 	if (key ~= nil and key  ~= '') then
 		key = ' @{2F2F}(' .. key .. ')'
-		text = concatUCString(text, key)
+		text = concatString(text, key)
 	end
 	
 	setContextHelpText(text)

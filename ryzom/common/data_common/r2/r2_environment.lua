@@ -35,13 +35,13 @@ function r2:getPropertyTranslationId(prop)
 end
 
 -------------------------------------------------------------------------------------
--- get translation id for a property, as an ucstring
+-- get translation id for a property, as an utf-8 string
 function r2:getPropertyTranslation(prop)
-	local translationId = r2:getPropertyTranslationId(prop)		
+	local translationId = r2:getPropertyTranslationId(prop)
 	if (i18n.hasTranslation(translationId)) then
 		return i18n.get(translationId)
 	else
-		return ucstring(translationId)
+		return translationId
 	end
 end
 
@@ -148,12 +148,6 @@ end
 if r2 == nil then
 	r2 = {} -- for vianney's tests (is initialized by the caller otherwise)
 end
-
-------------------
--- MISC GLOBALS --
-------------------
-
-r2.ScratchUCStr = ucstring() -- scratch ucstring, useful to do call from utf8 without to create a new object
 
 ---------------------
 -- EDITION GLOBALS --

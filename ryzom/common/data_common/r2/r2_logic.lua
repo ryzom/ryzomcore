@@ -61,7 +61,7 @@ Logic.Components.LogicEntityAction =
 
 			local coloredName = (logicEntity.InstanceId == r2.events.filteredLogicEntityId)
 
-			local eventType = r2.events.keyWordsColor .. i18n.get("uiR2EdEventTxtPreEvent"):toUtf8() .. " "
+			local eventType = r2.events.keyWordsColor .. i18n.get("uiR2EdEventTxtPreEvent") .. " "
 
 			if coloredName then		
 				eventType = eventType .. r2.events.filterWordColor 
@@ -106,7 +106,7 @@ Logic.Components.LogicEntityAction =
 				if conditionInst.Entity~="" and conditionInst.Condition.Type~="" then
 
 					conditionsList = conditionsList .. "\n" .. r2.events.keyWordsColor 
-						..string.upper(i18n.get("uiR2EdEventTxtPreCondition"):toUtf8()).." " 
+						..string.upper(i18n.get("uiR2EdEventTxtPreCondition")).." " 
 						.. r2.events.communWordsColor 
 
 					local conditionLogicEntity = r2:getInstanceFromId(tostring(conditionInst.Entity))
@@ -141,7 +141,7 @@ Logic.Components.LogicEntityAction =
 				if actionInst.Entity~="" and actionInst.Action.Type~="" then
 					
 					actionsList = actionsList .. "\n" .. r2.events.keyWordsColor 
-						..string.upper(i18n.get("uiR2EdEventTxtPreActions"):toUtf8()).." "
+						..string.upper(i18n.get("uiR2EdEventTxtPreActions")).." "
 						.. r2.events.communWordsColor 
 
 					local actionLogicEntity = r2:getInstanceFromId(tostring(actionInst.Entity))
@@ -511,10 +511,10 @@ Logic.Components.ChatStep = {
 			local minNb, secNb = r2.dialogs:calculMinSec(this.Time)
 			local time = ""
 			if minNb ~= 0 then
-				time = tostring(minNb)..i18n.get("uiR2EdShortMinutes"):toUtf8()
+				time = tostring(minNb)..i18n.get("uiR2EdShortMinutes")
 			end
-			time = time.." " ..tostring(secNb)..i18n.get("uiR2EdShortSeconds"):toUtf8()
-			local afterTime = "(" ..i18n.get("uiR2EdAfter"):toUtf8().." ".. time..") "
+			time = time.." " ..tostring(secNb)..i18n.get("uiR2EdShortSeconds")
+			local afterTime = "(" ..i18n.get("uiR2EdAfter").." ".. time..") "
 
 			-- says
 			local whoToWho = ""
@@ -533,7 +533,7 @@ Logic.Components.ChatStep = {
 
 				local facing = action.Facing
 				if facing~="" then
-					whoToWho = whoToWho ..i18n.get("uiR2EdSaysTo"):toUtf8().. " " .. r2:getInstanceFromId(facing).Name .. " "	
+					whoToWho = whoToWho ..i18n.get("uiR2EdSaysTo").. " " .. r2:getInstanceFromId(facing).Name .. " "	
 				end
 
 				local emote = action.Emote
@@ -557,22 +557,22 @@ Logic.Components.ChatStep = {
 				if who then
 					saysWhat = who.Name
 				elseif action.WhoNoEntity=="_System" then
-					saysWhat = i18n.get("uiR2EdSystem"):toUtf8()
+					saysWhat = i18n.get("uiR2EdSystem")
 				elseif action.WhoNoEntity=="_DM" then
-					saysWhat = i18n.get("uiR2EdDonjonMaster"):toUtf8()
+					saysWhat = i18n.get("uiR2EdDonjonMaster")
 				end
 			
-				saysWhat = saysWhat .. " " ..i18n.get("uiR2EdSays"):toUtf8().. " " 
+				saysWhat = saysWhat .. " " ..i18n.get("uiR2EdSays").. " " 
 
 				local says = action.Says
 				if says ~= "" then
 					local inst=r2:getInstanceFromId(says)
 					if inst then
 						says = inst.Text 
-						local uc_says = ucstring()
-						uc_says:fromUtf8(says)
-						uc_says = uc_says:substr(0, 4)
-						says = uc_says:toUtf8()					
+						--local uc_says = ucstring() ???
+						--uc_says:fromUtf8(says)
+						--uc_says = uc_says:substr(0, 4) ???
+						--says = uc_says					
 					end
 
 				end
@@ -688,7 +688,7 @@ Logic.Components.ChatSequence = {
 
 				local index = r2.logicComponents:searchElementIndex(this)
 				if index >= 0 then
-					name = i18n.get("uiR2EDDialog"):toUtf8() .. index
+					name = i18n.get("uiR2EDDialog") .. index
 				end
 			end
 			
@@ -723,10 +723,8 @@ Logic.Components.ChatSequence = {
 					local subMenu = menu:getSubMenu(ev)
 					local func = ""
 					for i=0, 9 do
-						local uc_name = ucstring()
-						uc_name:fromUtf8( tostring(i) )
 						func = "r2.events:setEventValue('','" .. categoryEvent .."','".. tostring(i).."')"
-						subMenu:addLine(uc_name, "lua", func, tostring(i))
+						subMenu:addLine(tostring(i), "lua", func, tostring(i))
 					end
 
 				elseif r2.events.eventTypeWithValue[eventType]=="ChatStep" then
@@ -736,9 +734,7 @@ Logic.Components.ChatSequence = {
 
 					for c=0, this.Components.Size-1 do
 						local chat = this.Components[c]
-						local uc_name = ucstring()
-						uc_name:fromUtf8(chat:getShortName())
-						subMenu:addLine(uc_name, "lua", 
+						subMenu:addLine(chat:getShortName(), "lua", 
 							"r2.events:setEventValue('".. chat.InstanceId .."','" .. categoryEvent .. "')", chat.InstanceId)
 					end
 
@@ -787,9 +783,7 @@ Logic.Components.ChatSequence = {
 			
 			local entitiesTable = r2.Scenario:getAllInstancesByType(this.Name)
 			for key, entity in pairs(entitiesTable) do
-				local uc_name = ucstring()
-				uc_name:fromUtf8(entity.Name)
-				subMenu:addLine(uc_name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+				subMenu:addLine(entity.Name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
 			end
 
 			if table.getn(entitiesTable)==0 then
@@ -870,7 +864,7 @@ Logic.Components.ActivityStep = {
 			local result = this:doLookupFromVerb(r2.activities.activityTypeTranslation)
 			if result then result = result.trans end
 			if result then return result end
-			return ucstring("Activity not registered : " .. lookupString)
+			return "Activity not registered : " .. lookupString
 		end,
 		-- element name
 		getName = function(this)			
@@ -888,10 +882,10 @@ Logic.Components.ActivityStep = {
 			
 				local hourNb, minNb, secNb = r2.logicComponents:calculHourMinSec(tonumber(this.TimeLimitValue))
 
-				local timeLimitText = i18n.get("uiR2EdFor"):toUtf8() .. " "
-				if hourNb ~= 0 then timeLimitText = timeLimitText .. hourNb .. i18n.get("uiR2EdShortHours"):toUtf8() .. " " end
-				if minNb ~= 0 then timeLimitText = timeLimitText .. minNb .. i18n.get("uiR2EdShortMinutes"):toUtf8() .. " " end
-				timeLimitText = timeLimitText .. secNb .. i18n.get("uiR2EdShortSeconds"):toUtf8() 
+				local timeLimitText = i18n.get("uiR2EdFor") .. " "
+				if hourNb ~= 0 then timeLimitText = timeLimitText .. hourNb .. i18n.get("uiR2EdShortHours") .. " " end
+				if minNb ~= 0 then timeLimitText = timeLimitText .. minNb .. i18n.get("uiR2EdShortMinutes") .. " " end
+				timeLimitText = timeLimitText .. secNb .. i18n.get("uiR2EdShortSeconds") 
 				
 				activityTime = timeLimitText
 
@@ -966,7 +960,7 @@ Logic.Components.ActivitySequence = {
 				local index = r2.logicComponents:searchElementIndex(this)
 
 				if index >= 0 then
-					name = i18n.get("uiR2EdSeq"):toUtf8() .. index
+					name = i18n.get("uiR2EdSeq") .. index
 				end
 			end
 			
@@ -2601,32 +2595,32 @@ function component:getLogicTranslations()
 
 	local logicTranslations = {
 		["ApplicableActions"] = {
-			["starts dialog"]			= { menu=i18n.get( "uiR2AA0ChatSeqStart"		):toUtf8(), 
-											text=i18n.get( "uiR2AA1ChatSeqStart"		):toUtf8()},
-			["stops dialog"]			= { menu=i18n.get( "uiR2AA0ChatSeqStop"			):toUtf8(), 
-											text=i18n.get( "uiR2AA1ChatSeqStop"			):toUtf8()},
-			["starts chat"]				= { menu=i18n.get( "uiR2AA0ChatStepStart"		):toUtf8(), 
-											text=i18n.get( "uiR2AA1ChatStepStart"		):toUtf8()},
-			["continues dialog"]				= { menu=i18n.get( "uiR2AA0ChatStepContinue"		):toUtf8(), 
-											text=i18n.get( "uiR2AA1ChatStepContinue"		):toUtf8()},
+			["starts dialog"]			= { menu=i18n.get( "uiR2AA0ChatSeqStart"		), 
+											text=i18n.get( "uiR2AA1ChatSeqStart"		)},
+			["stops dialog"]			= { menu=i18n.get( "uiR2AA0ChatSeqStop"			), 
+											text=i18n.get( "uiR2AA1ChatSeqStop"			)},
+			["starts chat"]				= { menu=i18n.get( "uiR2AA0ChatStepStart"		), 
+											text=i18n.get( "uiR2AA1ChatStepStart"		)},
+			["continues dialog"]				= { menu=i18n.get( "uiR2AA0ChatStepContinue"		), 
+											text=i18n.get( "uiR2AA1ChatStepContinue"		)},
 		},
 		["Events"] = {	
-			["start of dialog"]			= { menu=i18n.get( "uiR2Event0ChatSeqStart"		):toUtf8(), 
-											text=i18n.get( "uiR2Event1ChatSeqStart"		):toUtf8()},
-			["end of dialog"]			= { menu=i18n.get( "uiR2Event0ChatSeqEnd"		):toUtf8(), 
-											text=i18n.get( "uiR2Event1ChatSeqEnd"		):toUtf8()},
-			["start of chat"]			= { menu=i18n.get( "uiR2Event0ChatStepStart"	):toUtf8(), 
-											text=i18n.get( "uiR2Event1ChatStepStart"	):toUtf8()},
-			["end of chat"]				= { menu=i18n.get( "uiR2Event0ChatStepEnd"		):toUtf8(), 
-											text=i18n.get( "uiR2Event1ChatStepEnd"		):toUtf8()},
+			["start of dialog"]			= { menu=i18n.get( "uiR2Event0ChatSeqStart"		), 
+											text=i18n.get( "uiR2Event1ChatSeqStart"		)},
+			["end of dialog"]			= { menu=i18n.get( "uiR2Event0ChatSeqEnd"		), 
+											text=i18n.get( "uiR2Event1ChatSeqEnd"		)},
+			["start of chat"]			= { menu=i18n.get( "uiR2Event0ChatStepStart"	), 
+											text=i18n.get( "uiR2Event1ChatStepStart"	)},
+			["end of chat"]				= { menu=i18n.get( "uiR2Event0ChatStepEnd"		), 
+											text=i18n.get( "uiR2Event1ChatStepEnd"		)},
 		},
 		["Conditions"] = {	
-			["is in dialog"]			= { menu=i18n.get( "uiR2Test0ChatSeq"			):toUtf8(), 
-											text=i18n.get( "uiR2Test1ChatSeq"			):toUtf8()},
-			["is not in dialog"]		= { menu=i18n.get( "uiR2Test0ChatNotSeq"		):toUtf8(), 
-											text=i18n.get( "uiR2Test1ChatNotSeq"		):toUtf8()},
-			["is in chat"]				= { menu=i18n.get( "uiR2Test0ChatStep"			):toUtf8(), 
-											text=i18n.get( "uiR2Test1ChatStep"			):toUtf8()},
+			["is in dialog"]			= { menu=i18n.get( "uiR2Test0ChatSeq"			), 
+											text=i18n.get( "uiR2Test1ChatSeq"			)},
+			["is not in dialog"]		= { menu=i18n.get( "uiR2Test0ChatNotSeq"		), 
+											text=i18n.get( "uiR2Test1ChatNotSeq"		)},
+			["is in chat"]				= { menu=i18n.get( "uiR2Test0ChatStep"			), 
+											text=i18n.get( "uiR2Test1ChatStep"			)},
 		}
 	}
 	return logicTranslations

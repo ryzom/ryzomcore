@@ -186,51 +186,51 @@ function component:getLogicTranslations()
 
 	local logicTranslations = {
 		["ApplicableActions"] = {
-			["activate"]				= { menu=i18n.get( "uiR2AA0Spawn"					):toUtf8(), 
-											text=i18n.get( "uiR2AA1Spawn"					):toUtf8()},
-			["deactivate"]				= { menu=i18n.get( "uiR2AA0Despawn"					):toUtf8(), 
-											text=i18n.get( "uiR2AA1Despawn"					):toUtf8()},
-			["Wander"]					= { menu=i18n.get( "uiR2AA0BanditWander"			):toUtf8(), 
-											text=i18n.get( "uiR2AA1BanditWander"			):toUtf8()},
-			["Sit Down"]				= { menu=i18n.get( "uiR2AA0BanditSitDown"			):toUtf8(), 
-											text=i18n.get( "uiR2AA1BanditSitDown"			):toUtf8()},
-			["Kill"]					= { menu=i18n.get( "uiR2AA0BanditKill"				):toUtf8(), 
-											text=i18n.get( "uiR2AA1BanditKill"				):toUtf8()},
+			["activate"]				= { menu=i18n.get( "uiR2AA0Spawn"					), 
+											text=i18n.get( "uiR2AA1Spawn"					)},
+			["deactivate"]				= { menu=i18n.get( "uiR2AA0Despawn"					), 
+											text=i18n.get( "uiR2AA1Despawn"					)},
+			["Wander"]					= { menu=i18n.get( "uiR2AA0BanditWander"			), 
+											text=i18n.get( "uiR2AA1BanditWander"			)},
+			["Sit Down"]				= { menu=i18n.get( "uiR2AA0BanditSitDown"			), 
+											text=i18n.get( "uiR2AA1BanditSitDown"			)},
+			["Kill"]					= { menu=i18n.get( "uiR2AA0BanditKill"				), 
+											text=i18n.get( "uiR2AA1BanditKill"				)},
 		},
 		["Events"] = {	
-			["activation"]				= { menu=i18n.get( "uiR2Event0Spawn"				):toUtf8(), 
-											text=i18n.get( "uiR2Event1Spawn"				):toUtf8()},
-			["deactivation"]			= { menu=i18n.get( "uiR2Event0Despawn"				):toUtf8(), 
-											text=i18n.get( "uiR2Event1Despawn"				):toUtf8()},
-			["member death"]			= { menu=i18n.get( "uiR2Event0MemberDeath"			):toUtf8(), 
-											text=i18n.get( "uiR2Event1MemberDeath"			):toUtf8()},
-			["group death"]				= { menu=i18n.get( "uiR2Event0GroupDeath"			):toUtf8(), 
-											text=i18n.get( "uiR2Event1GroupDeath"			):toUtf8()},
-			["head to wander zone"]		= { menu=i18n.get( "uiR2Event0BanditHeadWander"		):toUtf8(), 
-											text=i18n.get( "uiR2Event1BanditHeadWander"		):toUtf8()},
-			["arrive at wander zone"]	= { menu=i18n.get( "uiR2Event0BanditArriveWander"	):toUtf8(), 
-											text=i18n.get( "uiR2Event1BanditArriveWander"	):toUtf8()},
-			["head to camp"]			= { menu=i18n.get( "uiR2Event0BanditHeadCamp"		):toUtf8(), 
-											text=i18n.get( "uiR2Event1BanditHeadCamp"		):toUtf8()},
-			["arrive at camp"]			= { menu=i18n.get( "uiR2Event0BanditArriveCamp"		):toUtf8(), 
-											text=i18n.get( "uiR2Event1BanditArriveCamp"		):toUtf8()},
+			["activation"]				= { menu=i18n.get( "uiR2Event0Spawn"				), 
+											text=i18n.get( "uiR2Event1Spawn"				)},
+			["deactivation"]			= { menu=i18n.get( "uiR2Event0Despawn"				), 
+											text=i18n.get( "uiR2Event1Despawn"				)},
+			["member death"]			= { menu=i18n.get( "uiR2Event0MemberDeath"			), 
+											text=i18n.get( "uiR2Event1MemberDeath"			)},
+			["group death"]				= { menu=i18n.get( "uiR2Event0GroupDeath"			), 
+											text=i18n.get( "uiR2Event1GroupDeath"			)},
+			["head to wander zone"]		= { menu=i18n.get( "uiR2Event0BanditHeadWander"		), 
+											text=i18n.get( "uiR2Event1BanditHeadWander"		)},
+			["arrive at wander zone"]	= { menu=i18n.get( "uiR2Event0BanditArriveWander"	), 
+											text=i18n.get( "uiR2Event1BanditArriveWander"	)},
+			["head to camp"]			= { menu=i18n.get( "uiR2Event0BanditHeadCamp"		), 
+											text=i18n.get( "uiR2Event1BanditHeadCamp"		)},
+			["arrive at camp"]			= { menu=i18n.get( "uiR2Event0BanditArriveCamp"		), 
+											text=i18n.get( "uiR2Event1BanditArriveCamp"		)},
 			
 		},
 		["Conditions"] = {	
-			["is active"]				= { menu=i18n.get( "uiR2Test0Spawned"				):toUtf8(), 
-											text=i18n.get( "uiR2Test1Spawned"				):toUtf8()},
-			["is inactive"]				= { menu=i18n.get( "uiR2Test0Despawned"				):toUtf8(), 
-											text=i18n.get( "uiR2Test1Despawned"				):toUtf8()},
-			["is dead"]					= { menu=i18n.get( "uiR2Test0BanditDead"			):toUtf8(), 
-											text=i18n.get( "uiR2Test1BanditDead"			):toUtf8()},
-			["is wandering"]			= { menu=i18n.get( "uiR2Test0BanditPatrolZone"		):toUtf8(), 
-											text=i18n.get( "uiR2Test1BanditPatrolZone"		):toUtf8()},
-			["is sitting"]				= { menu=i18n.get( "uiR2Test0BanditAtCamp"			):toUtf8(), 
-											text=i18n.get( "uiR2Test1BanditAtCamp"			):toUtf8()},
-			["is heading to wander zone"]= {menu=i18n.get( "uiR2Test0BanditHeadPatrolZone"	):toUtf8(), 
-											text=i18n.get( "uiR2Test1BanditHeadPatrolZone"	):toUtf8()},
-			["is heading to camp"]		= { menu=i18n.get( "uiR2Test0BanditHeadCamp"		):toUtf8(), 
-											text=i18n.get( "uiR2Test1BanditHeadCamp"		):toUtf8()},
+			["is active"]				= { menu=i18n.get( "uiR2Test0Spawned"				), 
+											text=i18n.get( "uiR2Test1Spawned"				)},
+			["is inactive"]				= { menu=i18n.get( "uiR2Test0Despawned"				), 
+											text=i18n.get( "uiR2Test1Despawned"				)},
+			["is dead"]					= { menu=i18n.get( "uiR2Test0BanditDead"			), 
+											text=i18n.get( "uiR2Test1BanditDead"			)},
+			["is wandering"]			= { menu=i18n.get( "uiR2Test0BanditPatrolZone"		), 
+											text=i18n.get( "uiR2Test1BanditPatrolZone"		)},
+			["is sitting"]				= { menu=i18n.get( "uiR2Test0BanditAtCamp"			), 
+											text=i18n.get( "uiR2Test1BanditAtCamp"			)},
+			["is heading to wander zone"]= {menu=i18n.get( "uiR2Test0BanditHeadPatrolZone"	), 
+											text=i18n.get( "uiR2Test1BanditHeadPatrolZone"	)},
+			["is heading to camp"]		= { menu=i18n.get( "uiR2Test0BanditHeadCamp"		), 
+											text=i18n.get( "uiR2Test1BanditHeadCamp"		)},
 		}
 	}
 	return logicTranslations
@@ -360,7 +360,7 @@ component.createComponent = function(x, y, banditsCount, race, banditsLevel, Zon
 	
 	--feature.BanditCount = feature.BanditCount + 1
 	--comp.Name = "BanditCampFeature[".. feature.BanditCount .."]"
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EDNameBanditCampFeature")):toUtf8()			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EDNameBanditCampFeature"))			
 	
 	local fire = comp.Fire
 	
@@ -394,7 +394,7 @@ component.createComponent = function(x, y, banditsCount, race, banditsLevel, Zon
 	zone.Position.y = comp.Position.y
 	zone.Position.z = comp.Position.z
 	zone.InheritPos = 0 -- don't inherit position of parents
-	zone.Name = r2:genInstanceName(i18n.get("uiR2EDNameWanderRegion")):toUtf8()			
+	zone.Name = r2:genInstanceName(i18n.get("uiR2EDNameWanderRegion"))			
 	comp._Zone = zone.InstanceId
 	table.insert(comp.Components, zone)
 	comp._Seed = os.time() 
@@ -435,7 +435,7 @@ function updateBanditCampEnum()
 
 			local paletteElt = r2.getPaletteElement(elementName)			
 			if paletteElt and paletteElt.RingAccess and r2.RingAccess.testAccess(paletteElt.RingAccess) then
-				formLevel:addText(ucstring(tostring(level)))
+				formLevel:addText(tostring(level))
 				ok = true
 			--	local levelEnum = currentForm:find(creature.."Level")
 
@@ -569,7 +569,7 @@ component.createGhostComponents = function(comp, act)
 		
 			table.insert(npcGroup.Components, npc)
 		end
-		npcGroup.Name = r2:genInstanceName(i18n.get("uiR2EDNameBanditCamp")):toUtf8()	
+		npcGroup.Name = r2:genInstanceName(i18n.get("uiR2EDNameBanditCamp"))	
 		bandits = npcGroup
 		bandits.Position.x = x
 		bandits.Position.y = y

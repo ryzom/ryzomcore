@@ -796,7 +796,7 @@
 
 	<action handler="remove_link" params="id=mission_timer_link" />
 	<action handler="remove_link" params="id=mission_time2_link" />
-	<action handler="add_link" params="id=mission_timer_link|expr=secondsToTimeString(div(sub(@SERVER:MISSIONS:@0:END_DATE,@UI:VARIABLES:CURRENT_SERVER_TICK),10))|target=ui:interface:info_player_journal:content:desc:timer:t:uc_hardtext" />
+	<action handler="add_link" params="id=mission_timer_link|expr=secondsToTimeString(div(sub(@SERVER:MISSIONS:@0:END_DATE,@UI:VARIABLES:CURRENT_SERVER_TICK),10))|target=ui:interface:info_player_journal:content:desc:timer:t:hardtext" />
 	<action handler="add_link" params="id=mission_time2_link|expr=ne(@SERVER:MISSIONS:@0:END_DATE,0)|target=ui:interface:info_player_journal:content:desc:timer:active" />
 
 	<vector template="t_mission_proc_title_histo" _size="%ipj_nb_histo" nb="$i" />
@@ -884,7 +884,7 @@
 
 	<action handler="remove_link" params="id=mission_timer_link" />
 	<action handler="remove_link" params="id=mission_time2_link" />
-	<action handler="add_link" params="id=mission_timer_link|expr=secondsToTimeString(div(sub(@SERVER:GROUP:MISSIONS:@0:END_DATE,@UI:VARIABLES:CURRENT_SERVER_TICK),10))|target=ui:interface:info_player_journal:content:desc:timer:t:uc_hardtext" />
+	<action handler="add_link" params="id=mission_timer_link|expr=secondsToTimeString(div(sub(@SERVER:GROUP:MISSIONS:@0:END_DATE,@UI:VARIABLES:CURRENT_SERVER_TICK),10))|target=ui:interface:info_player_journal:content:desc:timer:t:hardtext" />
 	<action handler="add_link" params="id=mission_time2_link|expr=ne(@SERVER:GROUP:MISSIONS:@0:END_DATE,0)|target=ui:interface:info_player_journal:content:desc:timer:active" />
 
 	<vector template="t_group_mission_proc_title_histo" _size="%ipj_nb_histo" nb="$i" />

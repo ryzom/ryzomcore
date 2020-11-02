@@ -133,9 +133,7 @@ function r2:group(src, target)
 		-- create a new group
 		-- debugInfo(colorTag(255, 255, 0) .. "Creating new group")
 		local newGroup = r2.newComponent("NpcGrpFeature")
-		local uc_groupName = ucstring()
-		uc_groupName:fromUtf8(r2.PaletteIdToGroupTranslation[src.Base].. " " .. i18n.get("uiR2EDNameGroup"):toUtf8())
-		local groupName = r2:genInstanceName(uc_groupName):toUtf8()	
+		local groupName = r2:genInstanceName(r2.PaletteIdToGroupTranslation[src.Base].. " " .. i18n.get("uiR2EDNameGroup"))
 		newGroup.Name = groupName
 
 		--r2.requestSetNode(target.Behavior.InstanceId, "Type", "")	
@@ -546,20 +544,20 @@ function r2:copy()
    r2.ClipBoard = selection:copy()
    r2.ClipBoardSrcInstanceId = selection.InstanceId
    r2.ClipBoardDisplayName = selection:getDisplayName()
-   displaySystemInfo(concatUCString(selection:getDisplayName(), i18n.get("uiR2EDSelectionCopied")), "BC")
+   displaySystemInfo(concatString(selection:getDisplayName(), i18n.get("uiR2EDSelectionCopied")), "BC")
 end
 
 ------------------------------------------------------------------------------------
 -- called by C++ when copy has been pressed (key or ui button)
 function r2:paste()	
-	r2.requestNewAction(concatUCString(i18n.get("uiR2EDPasteAction"), r2.ClipBoardDisplayName))
+	r2.requestNewAction(concatString(i18n.get("uiR2EDPasteAction"), r2.ClipBoardDisplayName))
 	if r2.ClipBoard == nil then
 		displaySystemInfo(i18n.get("uiR2EDEmptyClipBoard"), "BC")
 		return
 	end
 	-- call the paste function (not a method here)
 	local newCopy = r2.Classes[r2.ClipBoard.Class].newCopy(r2.ClipBoard) 
-	r2.requestNewAction(concatUCString(i18n.get("uiR2EDPasteAction"), r2.ClipBoardDisplayName))
+	r2.requestNewAction(concatString(i18n.get("uiR2EDPasteAction"), r2.ClipBoardDisplayName))
 	r2.Classes[r2.ClipBoard.Class].paste(newCopy,  true, r2.ClipBoardSrcInstanceId)
 	r2.requestEndAction()	
 end
@@ -704,33 +702,32 @@ function r2:popMainMenu()
 	local menu = getUI(menuName)	
 	assert(menu)
 	local function buildKeyName(action, params)
-		local keyName = ucstring(runExpr(string.format("getKey('%s', '%s')", action, params)))
-		assert(isUCString(keyName))		
+		local keyName = runExpr(string.format("getKey('%s', '%s')", action, params))
 		if keyName == i18n.get("uiNotAssigned")	then
 			-- no associated key...
 			return keyName
 		else
-			local result = concatUCString(ucstring("(") , keyName, ucstring(")"))
-			--debugInfo(result:toUtf8())
+			local result = "("..keyName..")"
+			--debugInfo(result)
 			return result
 		end
 	end
 	-- fill menu entries common to edition & test
-	menu:find("preferences_key").t.uc_hardtext = buildKeyName("show_hide", "game_config")
-	menu:find("keys_key").t.uc_hardtext = buildKeyName("show_hide", "keys")
-	--menu:find("debug_console_key").t.uc_hardtext = buildKeyName("show_hide", "debug_info")
-	menu:find("chat_window_key").t.uc_hardtext = buildKeyName("show_hide", "main_chat")		
-	menu:find("quit_key").t.uc_hardtext = buildKeyName("quit_ryzom_now", "")   
-	menu:find("mail_box_key").t.uc_hardtext = buildKeyName("show_hide", "mailbox")
-	menu:find("guild_forum_key").t.uc_hardtext = buildKeyName("show_hide", "guild_forum")    
+	menu:find("preferences_key").t.text = buildKeyName("show_hide", "game_config")
+	menu:find("keys_key").t.text = buildKeyName("show_hide", "keys")
+	--menu:find("debug_console_key").t.text = buildKeyName("show_hide", "debug_info")
+	menu:find("chat_window_key").t.text = buildKeyName("show_hide", "main_chat")		
+	menu:find("quit_key").t.text = buildKeyName("quit_ryzom_now", "")   
+	menu:find("mail_box_key").t.text = buildKeyName("show_hide", "mailbox")
+	menu:find("guild_forum_key").t.text = buildKeyName("show_hide", "guild_forum")    
 	-- fill name of key for each menu entry
 	if r2.Mode == "Edit" then
-		menu:find("go_test_key").t.uc_hardtext = buildKeyName("r2ed_try_go_test", "")
-		menu:find("palette_key").t.uc_hardtext = buildKeyName("show_hide", "r2ed_palette")
-		menu:find("scenario_key").t.uc_hardtext = buildKeyName("show_hide", "r2ed_scenario")
+		menu:find("go_test_key").t.text = buildKeyName("r2ed_try_go_test", "")
+		menu:find("palette_key").t.text = buildKeyName("show_hide", "r2ed_palette")
+		menu:find("scenario_key").t.text = buildKeyName("show_hide", "r2ed_scenario")
 		menu:find("cust_bbox").active = (config.R2EDExtendedDebug == 1)		
 	else
-		menu:find("stop_test_key").t.uc_hardtext = buildKeyName("r2ed_stop_test", "")
+		menu:find("stop_test_key").t.text = buildKeyName("r2ed_stop_test", "")
 		menu:find("stop_test").active = (r2.AccessMode == "Editor")
 	end			
 
@@ -740,7 +737,7 @@ function r2:popMainMenu()
 		menu:find("player_admin").active = not (r2.AccessMode == "Editor")
 	end
 
-	menu:find("map_key").t.uc_hardtext = buildKeyName("show_hide", "map")
+	menu:find("map_key").t.text = buildKeyName("show_hide", "map")
 	menu:find("debug_console").active = (config.R2EDExtendedDebug == 1)
 
 	menu:find("fixed_lighting_bm").bm.texture = select(r2:getFixedLighting(), "r2_icon_light_on_small.tga", "r2_icon_light_off_small.tga")
@@ -904,9 +901,8 @@ function r2:onModeChanged()
 	if r2.Mode == "Edit" and r2.LastTranslationErrorMsg ~= nil then		
 		local str = r2.LastTranslationErrorMsg 
 		assert(type(str) == "string")
-		local ucStringMsg = ucstring("Translation Error")
-		--ucStringMsg:fromUtf8(r2.LastTranslationErrorMsg)		
-		displaySystemInfo(ucStringMsg, "BC")
+		--displaySystemInfo(str, "BC")
+		displaySystemInfo("Translation Error", "BC")
 		messageBox(str)
 		r2.LastTranslationErrorMsg = nil
 	end
@@ -1006,7 +1002,7 @@ end
 function r2:setToolContextHelp(ucHelp)
 	--debugInfo(tostring(ucHelp))
    local helpGroup = getUI("ui:interface:r2ed_tool_context_help")
-   helpGroup.t.uc_hardtext = ucHelp
+   helpGroup.t.text = ucHelp
    helpGroup.t:updateCoords()
    helpGroup.w = helpGroup.t.w
    helpGroup:invalidateCoords()
@@ -1015,8 +1011,8 @@ end
 -- call by C++ to display a message saying that the max number of points has been reached 
 -- while drawing a primitive
 function r2:noMoreRoomLeftInPrimitveMsg()
-	local keyName = ucstring(runExpr("getKey('r2ed_context_command', 'commandId=delete')"))
-	local msg = concatUCString(i18n.get("uiR2EDNoMoreRoomInPrimStart"),
+	local keyName = runExpr("getKey('r2ed_context_command', 'commandId=delete')")
+	local msg = concatString(i18n.get("uiR2EDNoMoreRoomInPrimStart"),
 							   keyName,
 							   i18n.get("uiR2EDNoMoreRoomInPrimEnd"))
 	displaySystemInfo(msg, "TAGBC")
@@ -1046,14 +1042,14 @@ end
 -- called by C++ when an action has been undone 
 function r2:onUndo(actionUCName)
 	debugInfo("*undo*")
-	displaySystemInfo(concatUCString(i18n.get("uiR2EDUndoing"), actionUCName), "BC")
+	displaySystemInfo(concatString(i18n.get("uiR2EDUndoing"), actionUCName), "BC")
 	r2.ToolUI:updateUndoRedo()	
 end
 
 -- called by C++ when an action has been redone 
 function r2:onRedo(actionUCName)
 	debugInfo("*redo*")
-	displaySystemInfo(concatUCString(i18n.get("uiR2EDRedoing"), actionUCName), "BC")
+	displaySystemInfo(concatString(i18n.get("uiR2EDRedoing"), actionUCName), "BC")
 	r2.ToolUI:updateUndoRedo()
 end
 
@@ -1252,7 +1248,7 @@ function r2:setDisplayMode(filter, displayMode, contextualVisibility)
 			v.DisplayerVisual.ContextualVisibilityActive = contextualVisibility
 		end
 		--if v.DisplayMode == srcDisplayMode or (srcDisplayMode == nil and v.DisplayMode ~= displayModeValue) then
-			--debugInfo("Changing display mode for " .. v:getDisplayName():toUtf8())
+			--debugInfo("Changing display mode for " .. v:getDisplayName())
 			--r2.requestSetNode(v.InstanceId, "DisplayMode", displayModeValue)
 			-- now a local property			
 		--end
@@ -1311,9 +1307,9 @@ function r2:onMessageSendingStart(messageName, nbPacket, size)
 
 	local msg = nil
 	if lastMessage.MessageName == "SSUA" then
-		msg = i18n.get("uiR2EDUploadScenario"):toUtf8()
+		msg = i18n.get("uiR2EDUploadScenario")
 	elseif lastMessage.MessageName == "RSS2" then
-		msg = i18n.get("uimR2EDGoToDMMode"):toUtf8()
+		msg = i18n.get("uimR2EDGoToDMMode")
 
 	else 
 		return
@@ -1340,10 +1336,10 @@ function r2:onMessageSendingUpdate(packetId, packetSize)
 		debugInfo("--- " .. tostring( math.floor( (100*lastMessage.Received) / lastMessage.Size) ) )
 
 		if lastMessage.MessageName == "SSUA" then
-			msg = i18n.get("uiR2EDUploadScenario"):toUtf8()
+			msg = i18n.get("uiR2EDUploadScenario")
 
 		elseif lastMessage.MessageName == "RSS2" then
-			msg = i18n.get("uimR2EDGoToDMMode"):toUtf8()
+			msg = i18n.get("uimR2EDGoToDMMode")
 
 		else 
 			return

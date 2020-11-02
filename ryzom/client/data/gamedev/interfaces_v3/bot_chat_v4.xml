@@ -366,7 +366,7 @@
 		<instance template="box_widget" id="box1" posref="TL TL" sizeref="w" w="-18" h="16" x="18" />
 		<view type="text" id="val1" posparent="box1" posref="MR MR" x="-3" y="-2" color="135 243 28 255" shadow="true" fontsize="10" hardtext="" global_color="false" />
 		<ctrl type="tooltip" id="tt" instant_help="true" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0" />
-		<link expr="getPriceWithFame(@#value,@#value_fame)" target="val1:uc_hardtext" />
+		<link expr="getPriceWithFame(@#value,@#value_fame)" target="val1:hardtext" />
 		<link expr="ifthenelse(eq(@UI:TEMP:TRADE_ITEM:IS_SELL_DLG,1),ifthenelse(eq(@#value,@#value_fame),localize('uittPriceWithFameEqual'),localize('uittPriceWithFameDiff')),'')" target="tt:tooltip" />
 	</group>
 </template>
@@ -376,7 +376,7 @@
 		<view type="bitmap" id="icone" posref="TL TL" texture="money_seve.tga" global_color="false" />
 		<instance template="box_widget" id="box1" posref="TL TL" sizeref="w" w="-18" h="16" x="18" />
 		<view type="text" id="val1" posparent="box1" posref="MR MR" x="-3" y="-2" color="135 243 28 255" shadow="true" fontsize="10" hardtext="" global_color="false" />
-		<link expr="getBonusOnResale(@#value_high,@#value_low)" target="val1:uc_hardtext" />
+		<link expr="getBonusOnResale(@#value_high,@#value_low)" target="val1:hardtext" />
 	</group>
 </template>
 <!-- the modal -->

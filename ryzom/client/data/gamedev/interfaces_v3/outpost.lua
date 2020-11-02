@@ -45,7 +45,7 @@ end
 function game:outpostDisplayTimeZone(uiLocal)
 	local tz= getDbProp('UI:SAVE:OUTPOST:TIME_ZONE');
 	local uiGroup= getUICaller();
-	uiGroup[uiLocal].uc_hardtext= 'GMT ' .. string.format('%+d', tz);
+	uiGroup[uiLocal].text= 'GMT ' .. string.format('%+d', tz);
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ function game:outpostAdjustHour(uiLocal, prop)
 	
 	-- add time zone and clamp hour
 	h = math.fmod(h + tz + 24, 24);
-	uiGroup[uiLocal].uc_hardtext = string.format('%02d:00', h);
+	uiGroup[uiLocal].text = string.format('%02d:00', h);
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -220,9 +220,9 @@ function game:outpostInfoOnDraw()
 
 	-- readable form
 	if (status == self.OutpostEnums.Peace) then
-		uiGroup.Env.Timer.uc_hardtext= '';
+		uiGroup.Env.Timer.text= '';
 	else
-		uiGroup.Env.Timer.uc_hardtext= '(' .. runFct('secondsToTimeString', timeSec) .. ')';
+		uiGroup.Env.Timer.text= '(' .. runFct('secondsToTimeString', timeSec) .. ')';
 	end
 end
 
@@ -448,7 +448,7 @@ end
 function game:outpostDisplayStatusInfo(statusExpr, id)
 	local uiGroup = getUICaller();
 	local text = self:outpostGetStatusInfo(statusExpr, -1, 'no');
-	uiGroup[id].uc_hardtext_format = text;
+	uiGroup[id].text_format = text;
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -487,7 +487,7 @@ function game:outpostChangeRoundLvlThreshold()
 	local val= getDbProp(path .. ':ROUND_LVL_THRESHOLD');
 
 	-- setup text
-	uiGroup.outpost_lvl_thre.uc_hardtext= tostring(val);
+	uiGroup.outpost_lvl_thre.text= tostring(val);
 end
 
 
@@ -504,9 +504,9 @@ function game:outpostChangeRoundLvlMaxAtt()
 
 	-- setup text (only relevant when attack period has begun)
 	if(status>=self.OutpostEnums.AttackRound) then
-		uiGroup.outpost_lvl_max_att.uc_hardtext= tostring(val);
+		uiGroup.outpost_lvl_max_att.text= tostring(val);
 	else
-		uiGroup.outpost_lvl_max_att.uc_hardtext= '- ';
+		uiGroup.outpost_lvl_max_att.text= '- ';
 	end
 end
 
@@ -524,9 +524,9 @@ function game:outpostChangeRoundLvlMaxDef()
 
 	-- setup text (only relevant in War)
 	if(status>=self.OutpostEnums.DefenseRound) then
-		uiGroup.outpost_lvl_max_def.uc_hardtext= tostring(val);
+		uiGroup.outpost_lvl_max_def.text= tostring(val);
 	else
-		uiGroup.outpost_lvl_max_def.uc_hardtext= '- ';
+		uiGroup.outpost_lvl_max_def.text= '- ';
 	end
 end
 
@@ -546,9 +546,9 @@ function game:outpostChangeRoundLvlCur()
 
 	-- setup text (only in a Attack/Defense Round)
 	if(self:outpostIsStatusWarRound(status)) then
-		uiGroup.outpost_lvl_cur.uc_hardtext= tostring(val);
+		uiGroup.outpost_lvl_cur.text= tostring(val);
 	else
-		uiGroup.outpost_lvl_cur.uc_hardtext= '- ';
+		uiGroup.outpost_lvl_cur.text= '- ';
 	end
 end
 
@@ -569,9 +569,9 @@ function game:outpostChangeRoundId()
 
 	-- setup text (only in a Attack/Defense Round)
 	if(self:outpostIsStatusWarRound(status)) then
-		uiGroup.outpost_round_cur.uc_hardtext= tostring(val) .. ' / ' .. tostring(maxRound);
+		uiGroup.outpost_round_cur.text= tostring(val) .. ' / ' .. tostring(maxRound);
 	else
-		uiGroup.outpost_round_cur.uc_hardtext= '- ';
+		uiGroup.outpost_round_cur.text= '- ';
 	end
 end
 
@@ -607,7 +607,7 @@ function game:outpostPvpJoinTimerOnDraw()
 	-- replace in str
 	local	text= i18n.get('uiOutpostJoinPVPTimer');
 	text= findReplaceAll(text, "%time", tostring(timeSec));
-	uiGroup.Env.Timer.uc_hardtext_format= text;
+	uiGroup.Env.Timer.text_format= text;
 
 end
 

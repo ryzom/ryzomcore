@@ -146,7 +146,7 @@
 	<action handler="set" params="target_property=ui:outgame:charsel:slot@0:cam:posz|value=add(0.06,getprop('ui:outgame:charsel:slot@0:char:headz'))" />
 	<action handler="set" params="target_property=ui:outgame:charsel:slot@0:cam:tgtz|value=add(0.06,getprop('ui:outgame:charsel:slot@0:char:headz'))" />
 
-	<action handler="get_slot" cond="not(isCharSelSlotEmpty(@0))" params="prop=name|target=ui:outgame:charsel:but_slot@0:uc_hardtext|slot=@0" />
+	<action handler="get_slot" cond="not(isCharSelSlotEmpty(@0))" params="prop=name|target=ui:outgame:charsel:but_slot@0:hardtext|slot=@0" />
 </proc>
 
 <proc id="proc_charsel_initslot_empty">

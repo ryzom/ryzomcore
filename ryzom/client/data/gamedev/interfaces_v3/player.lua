@@ -329,7 +329,7 @@ function game:playerTTPvp()
 		elseif(buttonMode==1 and buttonPushed) then
 			text = i18n.get('uittPvPModeTagOnChange');
 		else
-			text = ucstring();
+			text = "";
 		end
 		-- timer
 		if(buttonTimer) then
@@ -338,7 +338,7 @@ function game:playerTTPvp()
 			local tempsString = game:formatTime( pvpServerTagTimer - currentServerTick ); 
 			local timeFmt= i18n.get('uittPvPTagTimer');
 			timeFmt= findReplaceAll(timeFmt, '%temps', tempsString);
-			text= concatUCString(text, timeFmt);
+			text= concatString(text, timeFmt);
 		end
 	end
 
@@ -367,12 +367,12 @@ end
 function game:bonusMalusSetText(ui, slot, fmt)
 	local uiTextGroup= ui["text" .. tostring(slot) ];
 	if(uiTextGroup) then
-		uiTextGroup.shade0.uc_hardtext_format= fmt;
-		uiTextGroup.shade1.uc_hardtext_format= fmt;
-		uiTextGroup.shade2.uc_hardtext_format= fmt;
-		uiTextGroup.shade3.uc_hardtext_format= fmt;
-		uiTextGroup.text.uc_hardtext_format= fmt;
-		uiTextGroup.text2.uc_hardtext_format= fmt;
+		uiTextGroup.shade0.text_format= fmt;
+		uiTextGroup.shade1.text_format= fmt;
+		uiTextGroup.shade2.text_format= fmt;
+		uiTextGroup.shade3.text_format= fmt;
+		uiTextGroup.text.text_format= fmt;
+		uiTextGroup.text2.text_format= fmt;
 	end
 end
 
@@ -800,7 +800,7 @@ function game:setPhraseTooltipCarac(ttWin, name, value, textValue)
 		icon.active = true
 		text.active = true
 		if textValue ~= nil then 			
-			text.uc_hardtext = textValue
+			text.text = textValue
 		else
 			text.hardtext = tostring(value)			
 		end
@@ -813,9 +813,9 @@ function game:timeInSecondsToReadableTime(regenTime)
 	local minutes = math.fmod(math.floor(regenTime / 60), 60)	
 	local hours = math.floor(regenTime / 3600)	
 	local result = ""
-	if seconds > 0 then result = concatUCString(tostring(seconds), i18n.get("uittSecondsShort"))	end
-	if minutes > 0 then result = concatUCString(tostring(minutes), i18n.get("uittMinutesShort"), result) end	
-	if hours > 0 then result = concatUCString(tostring(hours), i18n.get("uittHoursShort"), result) end	
+	if seconds > 0 then result = concatString(tostring(seconds), i18n.get("uittSecondsShort"))	end
+	if minutes > 0 then result = concatString(tostring(minutes), i18n.get("uittMinutesShort"), result) end	
+	if hours > 0 then result = concatString(tostring(hours), i18n.get("uittHoursShort"), result) end	
 	return result	
 end
 
@@ -827,14 +827,11 @@ function game:setPhraseTooltipPowerRegenTime(ttWin, regenTimeInTicks)
 		text.active = false
 	else				
 		text.active = true		
-		text.uc_hardtext_single_line_format = concatUCString(i18n.get("uittRegenTime"), game:timeInSecondsToReadableTime(math.floor((regenTimeInTicks + 9) * 0.1)))
+		text.text_single_line_format = concatString(i18n.get("uittRegenTime"), game:timeInSecondsToReadableTime(math.floor((regenTimeInTicks + 9) * 0.1)))
 		text:invalidateCoords()
 		ttWin:invalidateCoords()
 	end
 end
-
-
-local EmptyUCString = ucstring()
 
 ------------------------------------------------------------------------------------------------------------
 -- called by C++ code when the tooltip of a phrase is about to be displayed
@@ -843,12 +840,12 @@ function game:updatePhraseTooltip(phrase)
 	local ttWin = getUI("ui:interface:action_context_help")
 	local text = phrase:getName()
 	
-	if not text or text == EmptyUCString then
-		text = ucstring("")
+	if not text then
+		text = ""
 	end
 
 	local desc = phrase:getDesc()
-	if desc and desc ~= EmptyUCString then
+	if desc and desc ~= "" then
 		local str = tostring(desc)
 		local charFound = false
 		for k = 1, string.len(str) do
@@ -858,22 +855,22 @@ function game:updatePhraseTooltip(phrase)
 			end
 		end
 		if charFound then
-			text = concatUCString(text, "\n@{CCCF}", desc)
+			text = concatString(text, "\n@{CCCF}", desc)
 		end
 	else
-		text = concatUCString(text, "@{CCCF}")
+		text = concatString(text, "@{CCCF}")
 	end
 	-- IMPORTANT : the following getters on 'phrase' take in account the 'total action malus' for the timebeing 	
 	self:setPhraseTooltipCarac(ttWin, "hp_cost",	phrase:getHpCost())
 	self:setPhraseTooltipCarac(ttWin, "sta_cost",	phrase:getStaCost())
 	self:setPhraseTooltipCarac(ttWin, "sap_cost",	phrase:getSapCost())	
 	self:setPhraseTooltipCarac(ttWin, "focus_cost", phrase:getFocusCost())	
-	self:setPhraseTooltipCarac(ttWin, "cast_time",  phrase:getCastTime(), concatUCString(string.format("%.1f", phrase:getCastTime()), i18n.get("uittSeconds")))
+	self:setPhraseTooltipCarac(ttWin, "cast_time",  phrase:getCastTime(), concatString(string.format("%.1f", phrase:getCastTime()), i18n.get("uittSeconds")))
 	local castRange = phrase:getCastRange()
 	if not phrase:isMagicPhrase() then
 		castRange = 0
 	end
-	self:setPhraseTooltipCarac(ttWin, "cast_range", castRange, concatUCString(tostring(castRange), i18n.get("uittMeters")))
+	self:setPhraseTooltipCarac(ttWin, "cast_range", castRange, concatString(tostring(castRange), i18n.get("uittMeters")))
 	-- if the phrase is a power / aura, then we may want to display its regen time in the tooltip
 	if phrase:isPowerPhrase() then
 		setOnDraw(ttWin, "game:updatePowerPhraseTooltip()")
@@ -887,7 +884,7 @@ function game:updatePhraseTooltip(phrase)
 		successRateText.active = false
 	else
 		successRateText.active = true
-		successRateText.uc_hardtext_single_line_format = concatUCString(i18n.get("uittSuccessRate"), tostring(successRate), " %")
+		successRateText.text_single_line_format = concatString(i18n.get("uittSuccessRate"), tostring(successRate), " %")
 	end
 
 	local disableTimeText = ttWin:find("disable_time")	
@@ -897,7 +894,7 @@ function game:updatePhraseTooltip(phrase)
 			disableTimeText.active = false
 		else
 			disableTimeText.active = true
-			disableTimeText.uc_hardtext_single_line_format = concatUCString(i18n.get("uittDisableTime"), game:timeInSecondsToReadableTime(disableTime / 10))
+			disableTimeText.text_single_line_format = concatString(i18n.get("uittDisableTime"), game:timeInSecondsToReadableTime(disableTime / 10))
 		end
 	else
 		disableTimeText.active = false

@@ -100,12 +100,12 @@ function r2.ToolUI:updateTooltip(onClickL, paramsL)
    onClickL = defaulting(onClickL, getUICaller().onclick_l)
    paramsL = defaulting(paramsL, getUICaller().params_l)
    local expr = string.format("getKey('%s', '%s')", onClickL, paramsL)
-   local keyName = ucstring(runExpr(expr))
+   local keyName = runExpr(expr)
 	if keyName == i18n.get("uiNotAssigned") then
 		-- no associated key
 		setContextHelpText(getUICaller().tooltip)
 	else
-		setContextHelpText(concatUCString(getUICaller().tooltip, "@{6F6F} (", keyName, ")"))
+		setContextHelpText(concatString(getUICaller().tooltip, "@{6F6F} (", keyName, ")"))
 	end
 end
 

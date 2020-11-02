@@ -13,18 +13,14 @@ Translator.PredatorEnemyFaction = "Player|guard|bandit|herbivore|karavan";
 function printMsg(str)	
 	messageBox(str)	
 	debugInfo(colorTag(255,255,0)..str)
-	local ucStringMsg = ucstring()
-	ucStringMsg:fromUtf8(str)	
-	displaySystemInfo(ucStringMsg, "BC")
+	displaySystemInfo(str, "BC")
 	messageBox(str)
 end
 
 function printError( str)
 	local msg = "Translation WRN:"
 	debugInfo(colorTag(255,0,0)..msg..str)
---	local ucStringMsg = ucstring()
---	ucStringMsg:fromUtf8(str)
---	displaySystemInfo(ucStringMsg, "BC")
+--	displaySystemInfo(str, "BC")
 	--messageBox(str)
 	assert(nil)
 end
@@ -34,10 +30,8 @@ r2.Translator.MultilineBc = {}
 function Translator.updateEachSecond()
 	if table.getn( Translator.MultilineBc ) > 0 then
 		local msg=table.remove(Translator.MultilineBc, 1)
-		if msg then 
-			local ucStringMsg = ucstring()
-			ucStringMsg:fromUtf8(msg)	
-			displaySystemInfo(ucStringMsg, "BC")
+		if msg then
+			displaySystemInfo(msg, "BC")
 		end
 	end
 end
@@ -60,9 +54,8 @@ function printWarning( str)
  	-- Just report the last error
  	if (r2.LastTranslationErrorMsg  == nil) then
 		r2.LastTranslationErrorMsg = str
-		local ucStringMsg = ucstring("Translation Error")
-		-- ucStringMsg:fromUtf8(r2.LastTranslationErrorMsg)
-		displaySystemInfo(ucStringMsg, "BC")
+		--displaySystemInfo(str, "BC")
+		displaySystemInfo("Translation Error", "BC")
 	 	messageBox(str)
 	end
 	if devMode then
@@ -4384,18 +4377,18 @@ end
 
 function Translator.addActivationToTranslations(logicTranslations)
 	if logicTranslations.ApplicableActions == nil then logicTranslations.ApplicableActions = {} end
-	--logicTranslations.ApplicableActions.activate = {menu=i18n.get("uiR2EdActivate"):toUtf8(), text="activates"}
-	--logicTranslations.ApplicableActions.deactivate = {menu=i18n.get("uiR2EdDesactivate"):toUtf8(), text="deactivates"}
-	--logicTranslations.ApplicableActions.trigger = {menu=i18n.get("uiR2EdTrigger"):toUtf8(), text="triggers"}
+	--logicTranslations.ApplicableActions.activate = {menu=i18n.get("uiR2EdActivate"), text="activates"}
+	--logicTranslations.ApplicableActions.deactivate = {menu=i18n.get("uiR2EdDesactivate"), text="deactivates"}
+	--logicTranslations.ApplicableActions.trigger = {menu=i18n.get("uiR2EdTrigger"), text="triggers"}
 
 	if logicTranslations.Events == nil then logicTranslations.Events = {} end
-	--logicTranslations.Events.activation	= {menu=i18n.get("uiR2EdActivation"):toUtf8(), text=r2:lowerTranslate("uiR2EdActivation")}
-	--logicTranslations.Events.deactivation = {menu=i18n.get("uiR2EdDesactivation"):toUtf8(), text=r2:lowerTranslate("uiR2EdDesactivation")}
-	--logicTranslations.Events.trigger = {menu=i18n.get("uiR2EdTrigger"):toUtf8(), text=r2:lowerTranslate("uiR2EdTrigger")}
+	--logicTranslations.Events.activation	= {menu=i18n.get("uiR2EdActivation"), text=r2:lowerTranslate("uiR2EdActivation")}
+	--logicTranslations.Events.deactivation = {menu=i18n.get("uiR2EdDesactivation"), text=r2:lowerTranslate("uiR2EdDesactivation")}
+	--logicTranslations.Events.trigger = {menu=i18n.get("uiR2EdTrigger"), text=r2:lowerTranslate("uiR2EdTrigger")}
 
 	if logicTranslations.Conditions == nil then logicTranslations.Conditions = {} end
-	--logicTranslations.Conditions["is active"] = {menu=i18n.get("uiR2EdIsActive"):toUtf8(), text=r2:lowerTranslate("uiR2EdIsActive")}
-	--logicTranslations.Conditions["is inactive"]	= {menu=i18n.get("uiR2EdIsInactive"):toUtf8(), text=r2:lowerTranslate("uiR2EdIsInactive")}
+	--logicTranslations.Conditions["is active"] = {menu=i18n.get("uiR2EdIsActive"), text=r2:lowerTranslate("uiR2EdIsActive")}
+	--logicTranslations.Conditions["is inactive"]	= {menu=i18n.get("uiR2EdIsInactive"), text=r2:lowerTranslate("uiR2EdIsInactive")}
 	return logicTranslations
 end
 

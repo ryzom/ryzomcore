@@ -97,9 +97,9 @@ function ScenarioScores:initScenarioScoresOLD()
 
 	-- windows title
 	if ratingsGr.active then
-		ui.uc_title = i18n.get("uiR2EDMyScenarioScores")
+		ui.title = i18n.get("uiR2EDMyScenarioScores")
 	else
-		ui.uc_title = i18n.get("uiR2EDScenarioScores")
+		ui.title = i18n.get("uiR2EDScenarioScores")
 	end
 end
 

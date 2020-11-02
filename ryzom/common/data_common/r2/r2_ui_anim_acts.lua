@@ -25,12 +25,13 @@ function r2.ui.AnimActs:popMenu()
 	--
 	if not acts then return end
 	for k = 2, table.getn(acts) do
+		local str = ""
       if acts[k].Name == "" then
-         r2.ScratchUCStr = i18n.get("uiR2EDUnamedAct")
+         str = i18n.get("uiR2EDUnamedAct")
       else
-         r2.ScratchUCStr:fromUtf8(acts[k].Name)
+         str = acts[k].Name
       end
-		rootMenu:addLine(r2.ScratchUCStr, "lua", "r2.ui.AnimActs:chooseAct(" .. tostring(k) .. ")", "")
+		rootMenu:addLine(str, "lua", "r2.ui.AnimActs:chooseAct(" .. tostring(k) .. ")", "")
 	end
 	launchContextMenuInGame(menuName)
 	local but = getUI("ui:interface:r2ed_testbar"):find("r2ed_anim_acts")

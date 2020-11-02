@@ -446,7 +446,7 @@
 	<!-- ************ -->
 	<!--     MISC     -->
 	<!-- ************ -->
-	<action handler="lua" params="getUI('ui:interface:keys').uc_title = i18n.get('uiKeysTitle')"/>	
+	<action handler="lua" params="getUI('ui:interface:keys').title = i18n.get('uiKeysTitle')"/>	
 	<action handler="lua" params="local w = getUI('ui:interface:r2ed_toolbar_window', false) if w then w.active = (r2~=nil and r2.Mode~=nil and r2.Mode=='Test') end"/>	
 	<!-- reenable missions, possibly hidden after a ring session -->
 	<action handler="lua:game:updateMissionJournalMode()"/>

@@ -60,12 +60,12 @@ function game:updateEmoteMenu(prop, tooltip, tooltip_pushed, name, param)
 
 		if (key ~= nil and key  ~= '') then
 			key = ' @{T25}@{2F2F}(' .. key .. ')';
-			text = concatUCString(text, key);
+			text = concatString(text, key);
 		end
 
 		-- if we don't do the full getUI, it doesn't work (don't understand why)
 		local	uiQC= getUI("ui:interface:user_chat_emote_menu:quick_chat:" .. "qc" .. i);
-		uiQC.uc_hardtext_format= text;
+		uiQC.text_format= text;
 	end
 
 end
@@ -358,7 +358,7 @@ function game:updateTargetConsiderUI()
 	end
 
 	if impossible then
-		wgToolTip.tooltip = concatUCString(wgToolTip.tooltip, ucstring("\n"), i18n.get("uittConsiderUnknownLevel"))
+		wgToolTip.tooltip = concatString(wgToolTip.tooltip, "\n", i18n.get("uittConsiderUnknownLevel"))
 	end
 end
 

@@ -236,7 +236,7 @@ function npcCustomPropertySheetDisplayerTable:updateAllPrivate(instance)
 	local propWnd = r2:getPropertySheet(instance)	
 	if propWnd.active then
 		local nameEBox = propWnd:find("Name"):find("eb")
-		local name = nameEBox.uc_input_string:toUtf8()
+		local name = nameEBox.input_string
 		r2:setNpcAttribute(instance.InstanceId, "Name", name)
 	end	
 
@@ -279,8 +279,8 @@ function npcCustomPropertySheetDisplayerTable:updateAllPrivate(instance)
 	-- update name
 	local editName = npcUI:find("name").edit_box_group
 	assert(editName)
-	editName.uc_input_string = instance:getDisplayName()
-	npcUI.uc_title = concatUCString(i18n.get("uiRE2DPropertiesOf"), instance:getDisplayName())
+	editName.input_string = instance:getDisplayName()
+	npcUI.title = concatString(i18n.get("uiRE2DPropertiesOf"), instance:getDisplayName())
 
 	-- update notes
 	local editNotes = npcUI:find("small_description")
@@ -487,8 +487,8 @@ function npcCustomPropertySheetDisplayerTable:onAttrModified(instance, attribute
 	if attributeName == "Name" then
 		local editName = npcUI:find("name").edit_box_group
 		assert(editName)
-		editName.uc_input_string = instance:getDisplayName()
-		npcUI.uc_title = concatUCString(i18n.get("uiRE2DPropertiesOf"), instance:getDisplayName())
+		editName.input_string = instance:getDisplayName()
+		npcUI.title = concatString(i18n.get("uiRE2DPropertiesOf"), instance:getDisplayName())
 		editName:cancelFocusOnText()
 		return 
 	end
@@ -806,17 +806,17 @@ function r2:initNpcEditor()
 	local raceCB = npcUI:find("race").combo_box
 	assert(raceCB)
 	raceCB:resetTexts()
-	raceCB:addText(ucstring("Fyros"))
-	raceCB:addText(ucstring("Matis"))
-	raceCB:addText(ucstring("Tryker"))
-	raceCB:addText(ucstring("Zorai"))
+	raceCB:addText("Fyros")
+	raceCB:addText("Matis")
+	raceCB:addText("Tryker")
+	raceCB:addText("Zorai")
 
 	-- sex
 	local sexCB = npcUI:find("sex").combo_box
 	assert(sexCB)
 	sexCB:resetTexts()
-	sexCB:addText(ucstring(r2.female))
-	sexCB:addText(ucstring(r2.male))
+	sexCB:addText(r2.female)
+	sexCB:addText(r2.male)
 
 	-- Equipment
 	r2:initEquipmentEnv()
@@ -832,8 +832,8 @@ function r2:initNpcEditor()
 	updateBodySetsCB:resetTexts()
 	
 	for k, v in pairs(r2.tableBodySets) do
-		bodySetsCB:addText(ucstring(k))
-		updateBodySetsCB:addText(ucstring(k))
+		bodySetsCB:addText(k)
+		updateBodySetsCB:addText(k)
 	end
 
 	-- face sets
@@ -845,8 +845,8 @@ function r2:initNpcEditor()
 	updateFaceSetsCB:resetTexts()
 	
 	for k, v in pairs(r2.tableFaceSets) do
-		faceSetsCB:addText(ucstring(k))
-		updateFaceSetsCB:addText(ucstring(k))
+		faceSetsCB:addText(k)
+		updateFaceSetsCB:addText(k)
 	end
 
 	-- face morph
@@ -858,8 +858,8 @@ function r2:initNpcEditor()
 	updateFaceMorphCB:resetTexts()
 	
 	for k, v in pairs(r2.tableFaceMorph) do
-		faceMorphCB:addText(ucstring(k))
-		updateFaceMorphCB:addText(ucstring(k))
+		faceMorphCB:addText(k)
+		updateFaceMorphCB:addText(k)
 	end
 
 	bodySetsCB.view_text = r2.emptyComboLine
@@ -1090,14 +1090,14 @@ function r2:updateName()
 	local editName  = npcUI:find("name").edit_box_group
 	assert(editName)
 
-	local newString = editName.uc_input_string:toUtf8()
+	local newString = editName.input_string
 	local oldString = defaulting(selection.Name, "")
 	if newString ~= oldString then
 		r2.requestNewAction(i18n.get("uiR2EDUpdateNpcNameAction"))
 		r2:setNpcAttribute(selection.InstanceId, "Name", newString)
 	end
 
-	return editName.uc_input_string:toUtf8()
+	return editName.input_string
 end
 
 -- UPDATE NOTES --------------------------------------------------------------------------------
@@ -1112,7 +1112,7 @@ function r2:updateNotes()
 	local editNotes = npcUI:find("small_description")
 	assert(editNotes)
 	
-	local newString = editNotes.uc_input_string:toUtf8()
+	local newString = editNotes.input_string
 	local oldString = defaulting(selection.Notes, "")
 	if newString ~= oldString then
 		r2.requestNewAction(i18n.get("uiR2EDUpdateNpcNotesAction"))
@@ -1344,10 +1344,10 @@ function r2:updateType(existingAction)
 		r2:setNpcAttribute(selection.InstanceId, "SheetClient", typeElement.SheetClient)
 
 		-- Name
-		local oldName = i18n.get(r2.sheetTypeCB[oldTypeNPC].Translation):toUtf8()
+		local oldName = i18n.get(r2.sheetTypeCB[oldTypeNPC].Translation)
 		if selection.Class == "Npc" and string.find(selection.Name, oldName) then
 			local ucNewName =  getUICaller():getText(typeNPC)
-			local newName = r2:genInstanceName(ucNewName):toUtf8()
+			local newName = r2:genInstanceName(ucNewName)
 			r2:setNpcAttribute(selection.InstanceId, "Name", newName)
 
 		elseif selection.Name == oldName then
@@ -1577,8 +1577,8 @@ function r2:addBodySets()
 		local bodySetsCombo = npcUI:find("body_sets").combo_box
 		assert(bodySetsCombo)
 
-		bodySetsCombo:addText(editText.uc_input_string)
-		updateBodySetsCombo:addText(editText.uc_input_string)
+		bodySetsCombo:addText(editText.input_string)
+		updateBodySetsCombo:addText(editText.input_string)
 
 		-- add new sets in table
 		local bodySets = npcUI:find("body_sets_scroll_target")
@@ -1732,8 +1732,8 @@ function r2:addFaceSets()
 		local faceSetsCombo = npcUI:find("face_sets").combo_box
 		assert(faceSetsCombo)
 
-		faceSetsCombo:addText(editText.uc_input_string)
-		updateFaceSetsCombo:addText(editText.uc_input_string)
+		faceSetsCombo:addText(editText.input_string)
+		updateFaceSetsCombo:addText(editText.input_string)
 
 		-- add new sets in table
 		local faceSets = npcUI:find("face_sets_scroll_target")
@@ -1886,8 +1886,8 @@ function r2:addFaceMorph()
 		local faceMorphCombo = npcUI:find("face_morph").combo_box
 		assert(faceMorphCombo)
 
-		faceMorphCombo:addText(editText.uc_input_string)
-		updateFaceMorphCombo:addText(editText.uc_input_string)
+		faceMorphCombo:addText(editText.input_string)
+		updateFaceMorphCombo:addText(editText.input_string)
 
 		-- add new sets in table
 		local faceMorph = npcUI:find("face_morph_scroll_target")
@@ -2041,7 +2041,7 @@ end
 r2.equipmentPalette = {}
 r2.itemIndexEquipmentToSelectionText = {}
 r2.equipmentEnv = {}
-r2.noPiece = i18n.get("uiR2EdNoPiece"):toUtf8()
+r2.noPiece = i18n.get("uiR2EdNoPiece")
 
 r2.equipmentAttNb = 6
 
@@ -2146,7 +2146,7 @@ function r2.addR2PlayerEquipment(paletteElt, equipmentTable)
 
 		tempTable[equType] = {}
 		for equName, equFile in pairs(v) do
-			local tradEquName = i18n.get(equName):toUtf8()
+			local tradEquName = i18n.get(equName)
 			if tostring(equType) ~= "hands" then
 				if equName == "uiR2EDequipment_none" then
 					table.insert(tempTable[equType], 1, {["trad"]=tradEquName, ["itemFile"]=equFile})
@@ -2203,7 +2203,7 @@ function r2:updateEquipment(instance, init)
 			comboBox:resetTexts()
 			
 			for k1, v1 in pairs(v) do
-				comboBox:addText(ucstring(v1.trad))
+				comboBox:addText(v1.trad)
 			end	
 		end
 
@@ -2222,8 +2222,8 @@ function r2:updateEquipment(instance, init)
 
 	if r2.equipmentSets[equipmentId] then
 		for k1, v1 in pairs(r2.equipmentSets[equipmentId]) do
-			comboBox:addText(ucstring(k1))
-			comboBoxPopup:addText(ucstring(k1))
+			comboBox:addText(k1)
+			comboBoxPopup:addText(k1)
 		end
 	end
 	comboBox.view_text = r2.emptyComboLine
@@ -2433,8 +2433,8 @@ function r2:addEquipmentSet()
 		local equSetCombo = npcUI:find("equipment_sets").combo_box
 		assert(equSetCombo)
 
-		updateEquSetCombo:addText(editText.uc_input_string)
-		equSetCombo:addText(editText.uc_input_string)
+		updateEquSetCombo:addText(editText.input_string)
+		equSetCombo:addText(editText.input_string)
 
 		if r2.equipmentSets[selection.Equipment] == nil then
 			r2.equipmentSets[selection.Equipment] = {}

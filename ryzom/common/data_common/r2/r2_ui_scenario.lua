@@ -42,7 +42,7 @@ function r2.ScenarioWindow:initScenarioWindow()
 
 	local languages2 = {}
 	for k, lang in pairs(languages) do
-		self.Languages[i18n.get("uiR2ED"..lang):toUtf8()] = lang
+		self.Languages[i18n.get("uiR2ED"..lang)] = lang
 		table.insert(languages2, i18n.get("uiR2ED"..lang))
 	end
 	table.sort(languages2)
@@ -53,7 +53,7 @@ function r2.ScenarioWindow:initScenarioWindow()
 
 	local types2 = {}
 	for k, type in pairs(types) do
-		self.Types[i18n.get("uiR2ED"..type):toUtf8()] = type
+		self.Types[i18n.get("uiR2ED"..type)] = type
 		table.insert(types2, i18n.get("uiR2ED"..type))
 	end
 	table.sort(types2)
@@ -70,7 +70,7 @@ function r2.ScenarioWindow:initScenarioWindow()
 			table.insert(locked, "RoSOnly")
 		end
 		for k, type in pairs(locked) do
-			self.Locked[i18n.get("uiR2ED"..type):toUtf8()] = type
+			self.Locked[i18n.get("uiR2ED"..type)] = type
 			table.insert(tmp, i18n.get("uiR2ED"..type))
 		end
 --		table.sort(tmp)
@@ -183,17 +183,13 @@ function r2.ScenarioWindow:updateLeftQuota()
 
 			self.LeftQuota, self.LeftStaticQuota = act:getLeftQuota() 
 
-			local uc_tooltip = ucstring()
 			quotaViewText.hardtext = string.format("(%d)", self.LeftQuota)
-			uc_tooltip:fromUtf8(i18n.get("uiR2EDScene"):toUtf8() .. " (" .. self.LeftQuota .. ")")
-			quotaTooltip.tooltip = uc_tooltip
-			quotaMacroViewText.hardtext = string.format("(%d)", self.LeftQuota)	
-			uc_tooltip:fromUtf8(i18n.get("uiR2EDMacroComponents"):toUtf8() .. " (" .. self.LeftQuota .. ")")
-			quotaMacroTooltip.tooltip = uc_tooltip		
+			quotaTooltip.tooltip = i18n.get("uiR2EDScene") .. " (" .. self.LeftQuota .. ")"
+			quotaMacroViewText.hardtext = string.format("(%d)", self.LeftQuota)
+			quotaMacroTooltip.tooltip = i18n.get("uiR2EDMacroComponents") .. " (" .. self.LeftQuota .. ")"
 			quotaViewTextMisc.hardtext = string.format("(%d)", self.LeftStaticQuota)
 			quotaViewTextMisc2.hardtext = string.format("(%d)", self.LeftStaticQuota)
-			uc_tooltip:fromUtf8(i18n.get("uiR2EDbotObjects"):toUtf8() .. " (" .. self.LeftStaticQuota .. ")")
-			quotaMiscTooltip.tooltip = uc_tooltip			
+			quotaMiscTooltip.tooltip = i18n.get("uiR2EDbotObjects") .. " (" .. self.LeftStaticQuota .. ")"
 			
 			quotaViewText.color_rgba = select(self.LeftQuota >= 0, CRGBA(255, 255, 255), CRGBA(255, 0, 0))
 			quotaViewTextMisc.color_rgba = select(self.LeftStaticQuota >= 0, CRGBA(255, 255, 255), CRGBA(255, 0, 0))
@@ -218,7 +214,7 @@ function r2.ScenarioWindow:setAct(act)
 		r2:setCurrentActFromId(act.InstanceId) -- will also trigger ui update (called by C++)
 		if act.InstanceId~=self.setActId then
 			if not r2:isClearingContent() then
-				displaySystemInfo(concatUCString(i18n.get("uiR2EDCurrentActNotify"), act:getDisplayName()), "BC")
+				displaySystemInfo(concatString(i18n.get("uiR2EDCurrentActNotify"), act:getDisplayName()), "BC")
 			end
 			self.setActId = act.InstanceId
 		end
@@ -230,20 +226,17 @@ end
 function r2.ScenarioWindow:updateComboBoxCurrentAct(newAct)
 
 	local comboB = self:getActComboBox()
-	local text = ucstring()	
 	local currentAct = r2:getCurrentAct()
 	if not (currentAct==nil or currentAct.isNil) then
 		local currentActIndex = r2.ScenarioWindow:findComboBoxLineFromAct(currentAct)
 		if currentActIndex then
-			text:fromUtf8(currentAct:getName())	
-			comboB:setText(currentActIndex, text)
+			comboB:setText(currentActIndex, currentAct:getName())
 		end
 	end
 
 	local newActIndex = r2.ScenarioWindow:findComboBoxLineFromAct(newAct)
 	if newActIndex then
-		text:fromUtf8(newAct:getName() .. "  [" .. i18n.get("uiR2EDCurrentActComboBox"):toUtf8() .."]")	
-		comboB:setText(newActIndex, text)
+		comboB:setText(newActIndex, newAct:getName() .. "  [" .. i18n.get("uiR2EDCurrentActComboBox") .."]")
 	end
 end
 
@@ -316,11 +309,11 @@ function r2.ScenarioWindow:confirmDeleteAct()
 
 			local name = act.Name
 			
-			local firstPart = i18n.get("uiR2EDDefaultActTitle"):toUtf8() .. i 
-			local firstPartSpace = i18n.get("uiR2EDDefaultActTitle"):toUtf8().. " " .. i 
+			local firstPart = i18n.get("uiR2EDDefaultActTitle") .. i 
+			local firstPartSpace = i18n.get("uiR2EDDefaultActTitle").. " " .. i 
 
 			if name == firstPart or name == firstPartSpace then
-				name = i18n.get("uiR2EDDefaultActTitle"):toUtf8() .. " " .. (i-1) 
+				name = i18n.get("uiR2EDDefaultActTitle") .. " " .. (i-1) 
 				r2.requestSetNode(act.InstanceId, "Name", name)
 			end
 
@@ -527,8 +520,8 @@ function r2.ScenarioWindow:setActNotes()
 	local actGr = scenarioUI:find("act_properties")
 	assert(actGr)
 
-	local preActNotes = actGr:find("pre_act_notes"):find("small_description").uc_input_string:toUtf8()
-	local actNotes = actGr:find("act_notes"):find("small_description").uc_input_string:toUtf8()
+	local preActNotes = actGr:find("pre_act_notes"):find("small_description").input_string
+	local actNotes = actGr:find("act_notes"):find("small_description").input_string
 
 	if act==nil then act = r2:getCurrentAct() end
 	if actNotes~=act.ShortDescription then
@@ -585,9 +578,7 @@ function r2.ScenarioWindow:updateActProperties()
 	if location==nil then return end
 	local locationName = actGr:find("location_name")
 	assert(locationName)
-	local uc_location = ucstring()
-	uc_location:fromUtf8(location.Name)
-	locationName.uc_hardtext = uc_location
+	locationName.text = location.Name
 
 	-- season
 	local seasons = {
@@ -600,7 +591,7 @@ function r2.ScenarioWindow:updateActProperties()
 	assert(season)
 	local seasonStr = seasons[location.Season]
 	local uc_season = i18n.get(seasonStr)
-	season.uc_hardtext = uc_season
+	season.text = uc_season
 
 	-- manual weather
 	local weatherGr = actGr:find("weather")
@@ -624,9 +615,7 @@ function r2.ScenarioWindow:updateActProperties()
 		assert(notesGr)
 		local notesAct = notesGr:find("small_description")
 		assert(notesAct)
-		local uc_notes = ucstring()
-		uc_notes:fromUtf8(act.ShortDescription)
-		notesAct.uc_input_string = uc_notes
+		notesAct.input_string = act.ShortDescription
 	end
 	
 	-- pre act notes
@@ -635,9 +624,7 @@ function r2.ScenarioWindow:updateActProperties()
 		assert(notesGr)
 		local notesAct = notesGr:find("small_description")
 		assert(notesAct)
-		local uc_notes = ucstring()
-		uc_notes:fromUtf8(act.PreActDescription)
-		notesAct.uc_input_string = uc_notes
+		notesAct.input_string = act.PreActDescription
 	end
 
 
@@ -645,11 +632,8 @@ function r2.ScenarioWindow:updateActProperties()
 	if act==r2:getCurrentAct() then
 		local entityBudgetText = scenarioUI:find("entity_budget_text")
 		local macroBudgetText = scenarioUI:find("macro_budget_text")
-		local ucBudget = ucstring()
-		ucBudget:fromUtf8(i18n.get("uiR2EDMacroComponentsInAct"):toUtf8() .. act:getName())
-		macroBudgetText.uc_hardtext = ucBudget
-		ucBudget:fromUtf8(i18n.get("uiR2EDEntitiesInAct"):toUtf8() .. act:getName())
-		entityBudgetText.uc_hardtext = ucBudget
+		macroBudgetText.text = i18n.get("uiR2EDMacroComponentsInAct") .. act:getName()
+		entityBudgetText.text = i18n.get("uiR2EDEntitiesInAct") .. act:getName()
 	end
 end
 
@@ -677,9 +661,9 @@ function r2.ScenarioWindow:updateScenarioProperties()
 		assert(cb)
 		if r2.Scenario.Description.OtherCharAccess then
 			local access = r2.Scenario.Description.OtherCharAccess
-			cb.selection_text = i18n.get("uiR2ED".. access):toUtf8()
+			cb.selection_text = i18n.get("uiR2ED".. access)
 		else
-			cb.selection_text = i18n.get("uiR2EDFull"):toUtf8() 
+			cb.selection_text = i18n.get("uiR2EDFull") 
 		end
 		
 	end
@@ -707,9 +691,7 @@ function r2.ScenarioWindow:updateScenarioProperties()
 		assert(ui)
 		local widget = ui:find("mission_tag")
 		assert(widget)
-		local uc = ucstring()
-		uc:fromUtf8(scenario.Description.MissionTag)
-		widget:find("mission_tag_eb").eb.uc_input_string = uc
+		widget:find("mission_tag_eb").eb.input_string = scenario.Description.MissionTag
 	end
 
 	-- scenario rules
@@ -723,39 +705,33 @@ function r2.ScenarioWindow:updateScenarioProperties()
 	-- scenario language
 	local languageCB = scenarioGr:find("language_combo_box")
 	assert(languageCB)
-	languageCB.selection_text = i18n.get("uiR2ED"..r2.Scenario.Language):toUtf8()
+	languageCB.selection_text = i18n.get("uiR2ED"..r2.Scenario.Language)
 
 	-- scenario type
 	local typeCB = scenarioGr:find("type_combo_box")
 	assert(typeCB)
 	-- special case for old enums	
 	if r2.Scenario.Type =="Combat" then		
-		typeCB.selection_text = i18n.get("uiR2EDso_hack_slash"):toUtf8()
+		typeCB.selection_text = i18n.get("uiR2EDso_hack_slash")
 	elseif r2.Scenario.Type =="Roleplay" then		
-		typeCB.selection_text = i18n.get("uiR2EDso_story_telling"):toUtf8()
+		typeCB.selection_text = i18n.get("uiR2EDso_story_telling")
 	else
-		typeCB.selection_text = i18n.get("uiR2ED"..r2.Scenario.Type):toUtf8()
+		typeCB.selection_text = i18n.get("uiR2ED"..r2.Scenario.Type)
 	end
 
 	-- scenario title
-	local ucTitle = ucstring()
-	ucTitle:fromUtf8(scenario.Description.Title)
-	getUI("ui:interface:r2ed_scenario"):find("title_eb").eb.uc_input_string	= ucTitle
+	getUI("ui:interface:r2ed_scenario"):find("title_eb").eb.input_string = scenario.Description.Title
 
 	-- scenario notes
 	local notesGr = scenarioGr:find("scenario_notes")
 	assert(notesGr)
 	local notesScenario = notesGr:find("small_description")
 	assert(notesScenario)
-	local uc_notes = ucstring()
-	uc_notes:fromUtf8(scenario.Description.ShortDescription)
-	notesScenario.uc_input_string = uc_notes
+	notesScenario.input_string = scenario.Description.ShortDescription
 	
 	-- scenario name
 	local scenarioName = scenarioUI:find("scenario_name_text")
-	local uc_name = ucstring()
-	uc_name:fromUtf8(i18n.get("uiR2EDScenarioFilename"):toUtf8() .. " " ..ucstring(scenario:getName()):toUtf8())
-	scenarioName.uc_hardtext = uc_name
+	scenarioName.text = i18n.get("uiR2EDScenarioFilename") .. " " ..scenario:getName()
 
 	self.lockComboBoxes = false
 end
@@ -769,7 +745,7 @@ function r2.ScenarioWindow:setScenarioNotes()
 	local scenarioGr = scenarioUI:find("scenario_properties")
 	assert(scenarioGr)
 
-	local scenarioNotes = scenarioGr:find("scenario_notes"):find("small_description").uc_input_string:toUtf8()
+	local scenarioNotes = scenarioGr:find("scenario_notes"):find("small_description").input_string
 
 	if r2.Scenario and scenarioNotes~= r2.Scenario.Description.ShortDescription then
 		r2.requestNewAction(i18n.get("uiR2EDChangeScenarioDescription"))
@@ -865,7 +841,7 @@ end
 -- the scenario title was changed by the user
 function r2.ScenarioWindow:onTitleChanged()
 	if self.lockComboBoxes then return end	
-	local newTitle = getUI("ui:interface:r2ed_scenario"):find("title_eb").eb.uc_input_string:toUtf8()
+	local newTitle = getUI("ui:interface:r2ed_scenario"):find("title_eb").eb.input_string
 	if newTitle ~= r2.Scenario.Description.Title then
 		r2.requestNewAction(i18n.get("uiR2EDChangeScenarioTitle"))	
 		r2.requestSetNode(r2.Scenario.Description.InstanceId, "Title", newTitle)
@@ -936,7 +912,7 @@ end
 function r2.ScenarioWindow:onScenarioMissionTagChanged()
 	if self.lockComboBoxes then return end		
 	if config.R2EDExtendedDebug ~= 1 then return end
-	local newTag = getUI("ui:interface:r2ed_palette"):find("mission_tag"):find("mission_tag_eb").eb.uc_input_string:toUtf8()
+	local newTag = getUI("ui:interface:r2ed_palette"):find("mission_tag"):find("mission_tag_eb").eb.input_string
 	
 	self:setScenarioNotes()
 	self:onTitleChanged()
