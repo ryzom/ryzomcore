@@ -617,7 +617,7 @@ uint32 CCharacterCL::buildEquipment(const CCharacterSheet::CEquipment &slot, SLO
 	{
 		// IS the item a valid one ?
 		CSheetId itemId;
-		if(itemId.buildSheetId(NLMISC::toLower(slot.getItem())))
+		if(itemId.buildSheetId(NLMISC::toLowerAscii(slot.getItem())))
 		{
 			// Is it stored in the database ?
 			CEntitySheet *entitySheet = SheetMngr.get(itemId);
@@ -1105,7 +1105,7 @@ string CCharacterCL::automatonType() const	// virtual
 //-----------------------------------------------
 void CCharacterCL::computeAutomaton()
 {
-	_CurrentAutomaton = automatonType() + "_" + NLMISC::toLower(MBEHAV::modeToString(_Mode)) + ".automaton";
+	_CurrentAutomaton = automatonType() + "_" + NLMISC::toLowerAscii(MBEHAV::modeToString(_Mode)) + ".automaton";
 }// computeAutomaton //
 
 
@@ -10207,11 +10207,11 @@ NLMISC_COMMAND(setNamePosZ, "", "<low/high/normal> <value>")
 			CRaceStatsSheet *sheet = const_cast<CRaceStatsSheet*>(playerTarget->playerSheet());
 			if (sheet)
 			{
-				if (toLower(args[0]) == "low")
+				if (toLowerAscii(args[0]) == "low")
 					namePosZ = &sheet->GenderInfos[playerTarget->getGender()].NamePosZLow;
-				else if (toLower(args[0]) == "normal")
+				else if (toLowerAscii(args[0]) == "normal")
 					namePosZ = &sheet->GenderInfos[playerTarget->getGender()].NamePosZNormal;
-				else if (toLower(args[0]) == "high")
+				else if (toLowerAscii(args[0]) == "high")
 					namePosZ = &sheet->GenderInfos[playerTarget->getGender()].NamePosZHigh;
 
 				sheetName = sheet->Id.toString();
@@ -10227,11 +10227,11 @@ NLMISC_COMMAND(setNamePosZ, "", "<low/high/normal> <value>")
 			CCharacterSheet *sheet = const_cast<CCharacterSheet*>(creatureTarget->getSheet());
 			if (sheet)
 			{
-				if (toLower(args[0]) == "low")
+				if (toLowerAscii(args[0]) == "low")
 					namePosZ = &sheet->NamePosZLow;
-				else if (toLower(args[0]) == "normal")
+				else if (toLowerAscii(args[0]) == "normal")
 					namePosZ = &sheet->NamePosZNormal;
-				else if (toLower(args[0]) == "high")
+				else if (toLowerAscii(args[0]) == "high")
 					namePosZ = &sheet->NamePosZHigh;
 
 				sheetName = sheet->Id.toString();
@@ -10258,11 +10258,11 @@ NLMISC_COMMAND(setMyNamePosZ, "", "<low/high/normal> <value>")
 	CRaceStatsSheet *sheet = const_cast<CRaceStatsSheet*>(UserEntity->playerSheet());
 	if (sheet)
 	{
-		if (toLower(args[0]) == "low")
+		if (toLowerAscii(args[0]) == "low")
 			namePosZ = &sheet->GenderInfos[UserEntity->getGender()].NamePosZLow;
-		else if (toLower(args[0]) == "normal")
+		else if (toLowerAscii(args[0]) == "normal")
 			namePosZ = &sheet->GenderInfos[UserEntity->getGender()].NamePosZNormal;
-		else if (toLower(args[0]) == "high")
+		else if (toLowerAscii(args[0]) == "high")
 			namePosZ = &sheet->GenderInfos[UserEntity->getGender()].NamePosZHigh;
 
 		sheetName = sheet->Id.toString();

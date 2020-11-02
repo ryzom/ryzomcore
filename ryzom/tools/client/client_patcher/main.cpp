@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
 	INelContext::getInstance().getWarningLog()->removeDisplayer("DEFAULT_SD");
 
 	// check if console supports colors
-	std::string term = toLower(std::string(getenv("TERM") ? getenv("TERM"):""));
+	std::string term = toLowerAscii(std::string(getenv("TERM") ? getenv("TERM"):""));
 	useEsc = (term.find("xterm") != string::npos || term.find("linux") != string::npos);
 
 #ifdef NL_OS_WINDOWS

@@ -73,13 +73,13 @@ namespace NLGUI
 	{
 		string allparam = Params;
 		skipBlankAtStart (allparam);
-		string param = toLower (ParamName);
+		string param = toLowerAscii (ParamName);
 		while (!allparam.empty())
 		{
 			std::string::size_type e = allparam.find('=');
 			if (e == std::string::npos || e == 0) break;
 			std::string::size_type p = allparam.find('|');
-			string tmp = NLMISC::toLower(allparam.substr(0,e));
+			string tmp = NLMISC::toLowerAscii(allparam.substr(0,e));
 			skipBlankAtEnd(tmp);
 			if (tmp == param)
 			{
@@ -105,7 +105,7 @@ namespace NLGUI
 			std::string::size_type e = allparam.find('=');
 			if (e == std::string::npos || e == 0) break;
 			std::string::size_type p = allparam.find('|');
-			string tmp = NLMISC::toLower(allparam.substr(0,e));
+			string tmp = NLMISC::toLowerAscii(allparam.substr(0,e));
 			skipBlankAtEnd(tmp);
 
 			string tmp2 = allparam.substr(e+1,p-e-1);

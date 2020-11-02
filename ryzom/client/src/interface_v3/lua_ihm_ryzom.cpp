@@ -3947,7 +3947,7 @@ int CLuaIHMRyzom::displayChatMessage(CLuaState &ls)
 
 	if (ls.type(2) == LUA_TSTRING)
 	{
-		std::string input = toLower(ls.toString(2));
+		std::string input = toLowerAscii(ls.toString(2));
 		if (input == "around")
 		{
 			prop.readRGBA(std::string(dbPath + ":SAY").c_str(), " ");

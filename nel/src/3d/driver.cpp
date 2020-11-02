@@ -291,7 +291,7 @@ bool			IDriver::invalidateShareTexture (ITexture &texture)
 void			IDriver::getTextureShareName (const ITexture& tex, string &output)
 {
 	// Create the shared Name.
-	output= toLower(tex.getShareName());
+	output= toLowerAscii(tex.getShareName());
 
 	// append format Id of the texture.
 	static char	fmt[256];
@@ -372,7 +372,7 @@ void IDriver::profileTextureUsage(std::vector<std::string> &result)
 		// get the shareName
 		string	shareName;
 		if(text->supportSharing())
-			shareName= toLower(text->getShareName());
+			shareName= toLowerAscii(text->getShareName());
 		else
 			shareName= "Not Shared";
 

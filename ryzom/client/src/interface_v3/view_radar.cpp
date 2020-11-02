@@ -104,7 +104,7 @@ bool CViewRadar::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		prop = (char*) xmlGetProp( cur, (xmlChar*)spotTextureNames[i] );
 		if (prop)
 		{
-			txName = toLower((const char *) prop);
+			txName = toLowerAscii((const char *) prop);
 		}
 		_SpotDescriptions[i].TextureId.setTexture(txName.c_str());
 		rVR.getTextureSizeFromId (_SpotDescriptions[i].TextureId, _SpotDescriptions[i].TxW, _SpotDescriptions[i].TxH);
@@ -113,7 +113,7 @@ bool CViewRadar::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		prop = (char*) xmlGetProp( cur, (xmlChar*)spotMiniTextureNames[i] );
 		if (prop)
 		{
-			txName = toLower((const char *) prop);
+			txName = toLowerAscii((const char *) prop);
 		}
 		_SpotDescriptions[i].MiniTextureId.setTexture(txName.c_str());
 		rVR.getTextureSizeFromId (_SpotDescriptions[i].MiniTextureId, _SpotDescriptions[i].MTxW, _SpotDescriptions[i].MTxH);

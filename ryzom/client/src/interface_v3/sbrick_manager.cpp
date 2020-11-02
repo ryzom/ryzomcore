@@ -408,7 +408,7 @@ void			CSBrickManager::compileBrickProperties()
 			string::size_type pos = prop.Text.find(':');
 			if (pos != string::npos)
 			{
-				string key = toLower(prop.Text.substr(0, pos));
+				string key = toLowerAscii(prop.Text.substr(0, pos));
 				string value = prop.Text.substr(pos + 1);
 				// get key id.
 				if (_BrickPropIdMap.find(key) == _BrickPropIdMap.end())
@@ -509,7 +509,7 @@ void			CSBrickManager::compileBrickProperties()
 							// Parse all the brick properties if match the key
 							float	value= 0.f;
 							// get the wanted prop id
-							key = toLower(key);
+							key = toLowerAscii(key);
 							uint	propId= getBrickPropId(key);
 							// if propid exist
 							if(propId)

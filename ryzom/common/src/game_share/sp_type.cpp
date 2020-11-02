@@ -40,7 +40,7 @@ void							CSPType::init()
 	for (i=0; i<4; ++i)
 	{
 		_StrTable[TSPTypeConvert[i].Value] = TSPTypeConvert[i].Name;
-		_ValueMap[NLMISC::toLower(std::string(TSPTypeConvert[i].Name))] = TSPTypeConvert[i].Value;
+		_ValueMap[NLMISC::toLowerAscii(std::string(TSPTypeConvert[i].Name))] = TSPTypeConvert[i].Value;
 	}
 	_Initialised = true;
 }

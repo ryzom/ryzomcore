@@ -1090,7 +1090,7 @@ NLMISC_COMMAND(verbose, "Enable/Disable some Debug Information", "none or magic"
 	}
 	else
 	{
-		std::string type = NLMISC::toLower(args[0]);
+		std::string type = NLMISC::toLowerAscii(args[0]);
 		if     (type == "none")
 			Verbose = VerboseNone;
 		else if(type == "magic")
@@ -1424,7 +1424,7 @@ NLMISC_COMMAND(ah, "Launch an action handler", "<ActionHandler> <AHparam>")
 	if (args.empty())
 		return false;
 
-	if (!ClientCfg.AllowDebugLua && toLower(args[0]) == "lua")
+	if (!ClientCfg.AllowDebugLua && toLowerAscii(args[0]) == "lua")
 	{
 		return false; // not allowed!!
 	}
@@ -1981,7 +1981,7 @@ NLMISC_COMMAND(pos, "Change the position of the user (in local only)", "<x, y, (
 	if(args.size() == 1)
 	{
 		string dest = args[0];
-		newPos = CTeleport::getPos(NLMISC::toLower(dest));
+		newPos = CTeleport::getPos(NLMISC::toLowerAscii(dest));
 		if(newPos == CTeleport::Unknown)
 		{
 			//here we try to teleport to a bot destination
@@ -5666,7 +5666,7 @@ NLMISC_COMMAND(dumpShapeMaxDist, "dump max dist for shapes", "")
 			cs->getWholeEquipmentList(equipList);
 			for (uint k = 0; k < equipList.size(); ++k)
 			{
-				std::string item = toLower(equipList[k]->getItem());
+				std::string item = toLowerAscii(equipList[k]->getItem());
 				if (!item.empty())
 				{
 

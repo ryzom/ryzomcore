@@ -534,7 +534,7 @@ void checkDriverVersion()
 		uint i;
 		for (i=0; i< sizeofarray(driversVersion); i++)
 		{
-			string lwr = toLower(deviceName);
+			string lwr = toLowerAscii(deviceName);
 			if ((lwr.find (driversTest[i])!=string::npos) && (driversNTest[i]==NULL || lwr.find (driversNTest[i])==string::npos))
 			{
 				if (driverVersion < driversVersion[i])
@@ -1285,7 +1285,7 @@ void prelogInit()
 			std::string deviceName;
 			uint64 driverVersion;
 			CSystemInfo::getVideoInfo(deviceName, driverVersion);
-			deviceName = NLMISC::toLower(deviceName);
+			deviceName = NLMISC::toLowerAscii(deviceName);
 			// for radeon 7200, patch because agp crash with agp with OpenGL -> don't display the message
 			if (!(Driver->getNbTextureStages() <= 3 && strstr(deviceName.c_str(), "radeon")))
 			{*/
@@ -1496,7 +1496,7 @@ void	initBotObjectSelection()
 						{
 							// IS the item a valid one ?
 							CSheetId itemId;
-							if(itemId.buildSheetId(NLMISC::toLower(strShape)))
+							if(itemId.buildSheetId(NLMISC::toLowerAscii(strShape)))
 							{
 								// Get this item sheet ?
 								CItemSheet		*itemSheet= dynamic_cast<CItemSheet *>(SheetMngr.get(itemId));

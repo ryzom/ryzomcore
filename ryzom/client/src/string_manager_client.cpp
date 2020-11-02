@@ -1264,7 +1264,7 @@ void CStringManagerClient::initI18NSpecialWords(const string &languageCode)
 				string name= ws.getData(j, nameColIndex).toUtf8(); // FIXME: const string & when UTF-8
 				// Append to the I18N.
 				// avoid case problems
-				string keyStr = NLMISC::toLower(key);
+				string keyStr = NLMISC::toLowerAscii(key);
 
 				// append the special key extension.
 				keyStr+= keyExtenstion;
@@ -1428,7 +1428,7 @@ const char *CStringManagerClient::getSpecialWord(const string &label, bool women
 
 	// avoid case problems
 	static string lwrLabel;
-	lwrLabel = toLower(label);
+	lwrLabel = toLowerAscii(label);
 
 	if (_SpecItem_MemoryCompressed)
 	{
@@ -1475,7 +1475,7 @@ const char *CStringManagerClient::getSpecialDesc(const string &label)
 
 	// avoid case problems
 	static string lwrLabel;
-	lwrLabel = toLower(label);
+	lwrLabel = toLowerAscii(label);
 
 	if (_SpecItem_MemoryCompressed)
 	{
@@ -1508,7 +1508,7 @@ const char *CStringManagerClient::getSpecialDesc2(const string &label)
 
 	// avoid case problems
 	static string lwrLabel;
-	lwrLabel = toLower(label);
+	lwrLabel = toLowerAscii(label);
 
 	if (_SpecItem_MemoryCompressed)
 	{
@@ -1710,7 +1710,7 @@ void CStringManagerClient::replaceSBrickName(NLMISC::CSheetId id, const std::str
 
 	// avoid case problems
 	static string lwrLabel;
-	lwrLabel = toLower(label);
+	lwrLabel = toLowerAscii(label);
 
 	nlassert(!_SpecItem_MemoryCompressed); // Not allowed, strings are released!
 	if (_SpecItem_MemoryCompressed)

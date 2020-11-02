@@ -325,29 +325,30 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"nature" );
 	if (prop)
 	{
-		if (NLMISC::toLower(prop.str()) == "item")
+		std::string lwrProp = NLMISC::toLower(prop.str());
+		if (lwrProp == "item")
 			_Type = CCtrlSheetInfo::SheetType_Item;
-		else if (NLMISC::toLower(prop.str()) == "pact")
+		else if (lwrProp == "pact")
 			_Type = CCtrlSheetInfo::SheetType_Pact;
-		else if (NLMISC::toLower(prop.str()) == "skill")
+		else if (lwrProp == "skill")
 			_Type = CCtrlSheetInfo::SheetType_Skill;
-		else if (NLMISC::toLower(prop.str()) == "auto")
+		else if (lwrProp == "auto")
 			_Type = CCtrlSheetInfo::SheetType_Auto;
-		else if (NLMISC::toLower(prop.str()) == "macro")
+		else if (lwrProp == "macro")
 			_Type = CCtrlSheetInfo::SheetType_Macro;
-		else if (NLMISC::toLower(prop.str()) == "guild_flag")
+		else if (lwrProp == "guild_flag")
 			_Type = CCtrlSheetInfo::SheetType_GuildFlag;
-		else if (NLMISC::toLower(prop.str()) == "mission")
+		else if (lwrProp == "mission")
 			_Type = CCtrlSheetInfo::SheetType_Mission;
-		else if (NLMISC::toLower(prop.str()) == "sbrick")
+		else if (lwrProp == "sbrick")
 			_Type = CCtrlSheetInfo::SheetType_SBrick;
-		else if (NLMISC::toLower(prop.str()) == "sphraseid")
+		else if (lwrProp == "sphraseid")
 			_Type = CCtrlSheetInfo::SheetType_SPhraseId;
-		else if (NLMISC::toLower(prop.str()) == "sphrase")
+		else if (lwrProp == "sphrase")
 			_Type = CCtrlSheetInfo::SheetType_SPhrase;
-		else if (NLMISC::toLower(prop.str()) == "elevator_destination")
+		else if (lwrProp == "elevator_destination")
 			_Type = CCtrlSheetInfo::SheetType_ElevatorDestination;
-		else if (NLMISC::toLower(prop.str()) == "outpost_building")
+		else if (lwrProp == "outpost_building")
 			_Type = CCtrlSheetInfo::SheetType_OutpostBuilding;
 	}
 
@@ -355,7 +356,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_noitem" );
 	if (prop)
 	{
-		string TxName = toLower((const char *) prop);
+		string TxName = toLowerAscii((const char *) prop);
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		_DispNoSheetBmpId = rVR.getTextureIdFromName (TxName);
 	}
@@ -401,23 +402,23 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_l" );
 	if (prop)
 	{
-		_ListMenuLeft = toLower((const char *) prop);
+		_ListMenuLeft = toLowerAscii((const char *) prop);
 	}
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r" );
 	if (prop)
 	{
-		_ListMenuRight = toLower((const char *) prop);
+		_ListMenuRight = toLowerAscii((const char *) prop);
 	}
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r_empty_slot" );
 	if (prop)
 	{
-		_ListMenuRightEmptySlot = toLower((const char *) prop);
+		_ListMenuRightEmptySlot = toLowerAscii((const char *) prop);
 	}
 	// list menu on both clicks
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_b" );
 	if (prop)
 	{
-		setListMenuBoth(toLower((const char *) prop));
+		setListMenuBoth(toLowerAscii((const char *) prop));
 	}
 
 	// _BrickTypeBitField
@@ -430,7 +431,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 		// The string may have multiple brick type separated by |
 		string	brickTypeArray= (const char*)prop;
 		vector<string>	strList;
-		NLMISC::splitString(NLMISC::toUpper(brickTypeArray), "|", strList);
+		NLMISC::splitString(NLMISC::toUpperAscii(brickTypeArray), "|", strList);
 
 		// Test All words
 		for(uint i=0;i<strList.size();i++)
@@ -456,7 +457,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	if(prop)
 	{
 		string str= prop.str();
-		_ItemSlot= SLOTTYPE::stringToSlotType(NLMISC::toUpper(str));
+		_ItemSlot= SLOTTYPE::stringToSlotType(NLMISC::toUpperAscii(str));
 	}
 
 	// _AutoGrayed
@@ -1893,7 +1894,7 @@ void CDBCtrlSheet::resetCharBitmaps()
 void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar, bool topDown)
 {
 	// Use the optString for the Macro name
-	_OptString = toLower(_OptString);
+	_OptString = toLowerAscii(_OptString);
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 

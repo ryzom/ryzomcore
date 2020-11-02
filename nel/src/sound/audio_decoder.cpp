@@ -89,7 +89,7 @@ IAudioDecoder *IAudioDecoder::createAudioDecoder(const std::string &type, NLMISC
 		return NULL;
 	}
 #else
-	std::string type_lower = toLower(type);
+	std::string type_lower = toLowerAscii(type);
 	if (type_lower == "ogg")
 	{
 		return new CAudioDecoderVorbis(stream, loop);
@@ -124,7 +124,7 @@ bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, st
 		return CAudioDecoderFfmpeg::getInfo(&ifile, artist, title, length);
 #else
 	std::string type = CFile::getExtension(filepath);
-	std::string type_lower = NLMISC::toLower(type);
+	std::string type_lower = NLMISC::toLowerAscii(type);
 
 	if (type_lower == "ogg")
 	{

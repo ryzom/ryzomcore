@@ -3949,7 +3949,7 @@ const CItemImage *CInventoryManager::getServerItem(uint slotId) const
 // ***************************************************************************
 CInventoryManager::TInvType CInventoryManager::invTypeFromString(const string &str)
 {
-	string sTmp = toLower(str);
+	string sTmp = toLowerAscii(str);
 	if (sTmp == "inv_bag")		return InvBag;
 	if (sTmp == "inv_pa0")		return InvPA0;
 	if (sTmp == "inv_pa1")		return InvPA1;

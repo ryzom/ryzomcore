@@ -50,7 +50,7 @@ namespace NLGUI
 			pos = elements[i].find_first_of(':');
 			if (pos != std::string::npos)
 			{
-				std::string key = trim(toLower(elements[i].substr(0, pos)));
+				std::string key = trim(toLowerAscii(elements[i].substr(0, pos)));
 				std::string value = trim(elements[i].substr(pos+1));
 				styles.push_back(TStylePair(key, value));
 			}
@@ -361,7 +361,7 @@ namespace NLGUI
 				while(pos < sel.size() && is_nmchar(sel[pos]))
 					pos++;
 
-				current.Element = toLower(sel.substr(start, pos - start));
+				current.Element = toLowerAscii(sel.substr(start, pos - start));
 				start = pos;
 				continue;
 			}
@@ -374,7 +374,7 @@ namespace NLGUI
 				while(pos < sel.size() && is_nmchar(sel[pos]))
 					pos++;
 
-				current.Id = toLower(sel.substr(start, pos - start));
+				current.Id = toLowerAscii(sel.substr(start, pos - start));
 				start = pos;
 			}
 			else if (sel[pos] == '.')
@@ -386,7 +386,7 @@ namespace NLGUI
 				while(pos < sel.size() && (is_nmchar(sel[pos]) || sel[pos] == '.'))
 					pos++;
 
-				current.setClass(toLower(sel.substr(start, pos - start)));
+				current.setClass(toLowerAscii(sel.substr(start, pos - start)));
 				start = pos;
 			}
 			else if (sel[pos] == '[')
@@ -552,7 +552,7 @@ namespace NLGUI
 					}
 				}
 
-				std::string key = toLower(sel.substr(start, pos - start));
+				std::string key = toLowerAscii(sel.substr(start, pos - start));
 				if (key.empty())
 				{
 					failed = true;

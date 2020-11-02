@@ -607,7 +607,7 @@ void CInstanceGroup::getShapeName (uint instanceIndex, std::string &shapeName) c
 		shapeName = _TransformName->transformName (instanceIndex, rInstanceInfo.InstanceName, rInstanceInfo.Name);
 	}
 
-	toLower(shapeName);
+	toLowerAscii(shapeName);
 	if (!shapeName.empty() && shapeName.find('.') == std::string::npos)
 		shapeName += ".shape";
 }
@@ -860,7 +860,7 @@ bool CInstanceGroup::addToSceneAsync (CScene& scene, IDriver *driver, uint selec
 				shapeName = _TransformName->transformName (i, rInstanceInfo.InstanceName, rInstanceInfo.Name);
 			}
 
-			toLower(shapeName);
+			toLowerAscii(shapeName);
 
 			if (!shapeName.empty() && shapeName.find('.') == std::string::npos)
 				shapeName += ".shape";
@@ -920,7 +920,7 @@ void CInstanceGroup::stopAddToSceneAsync ()
 					shapeName  = rInstanceInfo.Name;
 			}
 
-			toLower(shapeName);
+			toLowerAscii(shapeName);
 			_AddToSceneTempScene->getShapeBank()->cancelLoadAsync (shapeName);
 		}
 	}

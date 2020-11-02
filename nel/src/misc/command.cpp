@@ -465,7 +465,7 @@ void CCommandRegistry::expand (std::string &commandName, NLMISC::CLog &log)
 		useprefix = false;
 	}
 
-	string lowerCommandName = toLower(commandName);
+	string lowerCommandName = toLowerAscii(commandName);
 	// Build the list of matching command names
 	vector<string> matchingnames;
 	{
@@ -474,7 +474,7 @@ void CCommandRegistry::expand (std::string &commandName, NLMISC::CLog &log)
 			// list of global commands
 			for (TCommand::iterator comm = _Commands.begin(); comm != _Commands.end(); comm++)
 			{
-				string first = toLower((*comm).first);
+				string first = toLowerAscii((*comm).first);
 				if (first.find( lowerCommandName ) == 0)
 				{
 					matchingnames.push_back( (*comm).first );
@@ -484,7 +484,7 @@ void CCommandRegistry::expand (std::string &commandName, NLMISC::CLog &log)
 			// list of object instance
 			for (TCommandsHandlers::TAToBMap::const_iterator it(_CommandsHandlers.getAToBMap().begin()); it != _CommandsHandlers.getAToBMap().end(); ++it)
 			{
-				string first = toLower(it->first);
+				string first = toLowerAscii(it->first);
 				if (first.find( lowerCommandName ) == 0)
 				{
 					matchingnames.push_back( it->first );
@@ -506,7 +506,7 @@ void CCommandRegistry::expand (std::string &commandName, NLMISC::CLog &log)
 
 					for (TCommandHandlerClassInfo::TCommandsInfo::iterator it(chci._Commands.begin()); it != chci._Commands.end(); ++it)
 					{
-						string first = toLower(it->first);
+						string first = toLowerAscii(it->first);
 						if (first.find( lowerCommandName ) == 0)
 						{
 							matchingnames.push_back( it->first );

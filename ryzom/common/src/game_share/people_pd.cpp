@@ -194,7 +194,7 @@ void							CPeople::init()
 	for (i=0; i<159; ++i)
 	{
 		_StrTable[TPeopleConvert[i].Value] = TPeopleConvert[i].Name;
-		_ValueMap[NLMISC::toLower(std::string(TPeopleConvert[i].Name))] = TPeopleConvert[i].Value;
+		_ValueMap[NLMISC::toLowerAscii(std::string(TPeopleConvert[i].Name))] = TPeopleConvert[i].Value;
 	}
 	_Initialised = true;
 }
@@ -239,7 +239,7 @@ void							CClassificationType::init()
 	for (i=0; i<20; ++i)
 	{
 		_StrTable[TClassificationTypeConvert[i].Value] = TClassificationTypeConvert[i].Name;
-		_ValueMap[NLMISC::toLower(std::string(TClassificationTypeConvert[i].Name))] = TClassificationTypeConvert[i].Value;
+		_ValueMap[NLMISC::toLowerAscii(std::string(TClassificationTypeConvert[i].Name))] = TClassificationTypeConvert[i].Value;
 	}
 	_Initialised = true;
 }

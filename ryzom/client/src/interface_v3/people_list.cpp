@@ -156,10 +156,10 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 //==================================================================
 sint CPeopleList::getIndexFromName(const string &name) const
 {
-	string sNameIn = toLower(name);
+	string sNameIn = toLowerAscii(name);
 	for(uint k = 0; k < _Peoples.size(); ++k)
 	{
-		string sPeopleName = toLower(_Peoples[k].getName());
+		string sPeopleName = toLowerAscii(_Peoples[k].getName());
 		if (sPeopleName == sNameIn) return k;
 	}
 	return -1;
@@ -195,22 +195,16 @@ bool CPeopleList::sortExByContactId(const CPeople& a, const CPeople& b)
 //==================================================================
 bool CPeopleList::sortExByName(const CPeople& a, const CPeople& b)
 {
-	string name_a = toUpper(a.getName());
-	string name_b = toUpper(b.getName());
-	
-	return (name_a < name_b);
+	return -NLMISC::compareCaseInsensitive(a.getName(), b.getName()); // FIXME: Locale-dependent sort
 }
 
 //==================================================================
 bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
 {
-	string name_a = toUpper(a.getName());
-	string name_b = toUpper(b.getName());
-	
 	// We want order: online/alpha, offworld/alpha, offline/alpha
 	if (a.Online == b.Online)
 	{
-		return (name_a < name_b);
+		return -NLMISC::compareCaseInsensitive(a.getName(), b.getName()); // FIXME: Locale-dependent sort
 	}
 	else
 	{

@@ -100,7 +100,7 @@ namespace NLGUI
 
 	CCtrlBase::TToolTipParentType CCtrlBase::stringToToolTipParent( const std::string &str )
 	{
-		std::string s = toLower( str );
+		std::string s = toLowerAscii( str );
 
 		if( s == "mouse" )
 			return TTMouse;

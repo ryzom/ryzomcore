@@ -84,7 +84,7 @@ void initAutoAnimation()
 			file.getline(line, 512);
 
 			// Read the animation file
-			string animName = toLower(CFile::getFilenameWithoutExtension(line));
+			string animName = toLowerAscii(CFile::getFilenameWithoutExtension(line));
 			uint id = AutoAnimSet->addAnimation (line, animName.c_str ());
 			if (id == UAnimationSet::NotFound)
 			{

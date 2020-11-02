@@ -225,7 +225,7 @@ bool sendEmail (const string &smtpServer, const string &from, const string &to, 
 			formatedBody += "--Multipart_nel\r\n";
 			formatedBody += "Content-Disposition: attachment;\r\n";
 
-			string lext = toLower(ext);
+			string lext = toLowerAscii(ext);
 			if(lext == "tga")
 			{
 				formatedBody += "Content-Type: image/x-targa;\r\n";

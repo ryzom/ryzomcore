@@ -793,7 +793,7 @@ CTransformShape	*CScene::createInstance(const string &shapeName)
 			if (pMB->getAutoAnim())
 			{
 
-				std::string animName = toLower(CFile::getFilenameWithoutExtension(shapeName));
+				std::string animName = toLowerAscii(CFile::getFilenameWithoutExtension(shapeName));
 				uint animID = _AutomaticAnimationSet->getAnimationIdByName(animName);
 				if (animID != CAnimationSet::NotFound)
 				{
@@ -833,7 +833,7 @@ void CScene::createInstanceAsync(const string &shapeName, CTransformShape **pIns
 	if (_ShapeBank->getPresentState( shapeName ) != CShapeBank::Present)
 	{
 		// Load it from file asynchronously
-		_ShapeBank->loadAsync( toLower(shapeName), getDriver(), position, NULL, selectedTexture);
+		_ShapeBank->loadAsync( toLowerAscii(shapeName), getDriver(), position, NULL, selectedTexture);
 	}
 }
 

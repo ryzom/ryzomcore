@@ -528,7 +528,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 				// Associate IGs with the ZC number or -1 if there is no ZC.
 				for(uint i = 0; i<igsWithNames.size(); ++i)
 				{
-					string igZone = toLower(CFile::getFilenameWithoutExtension(igsWithNames[i].second));
+					string igZone = toLowerAscii(CFile::getFilenameWithoutExtension(igsWithNames[i].second));
 
 					// Search for the IG name in the ZC list to associate.
 					for(uint j = 0; j<ZCList.size(); ++j)
@@ -538,7 +538,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 						if (outpost)
 						{
 							// If name matching -> this zone should be a ZC.
-							string outpostZone = toLower(CFile::getFilenameWithoutExtension(ZCList[j].Name));
+							string outpostZone = toLowerAscii(CFile::getFilenameWithoutExtension(ZCList[j].Name));
 							if(igZone == outpostZone)
 							{
 								nlctassert(RZ_MAX_BUILDING_PER_OUTPOST==4);
@@ -794,7 +794,7 @@ void CContinent::reloadFogMap()
 	const R2::CScenarioEntryPoints::CCompleteIsland *completeIsland = R2::CScenarioEntryPoints::getInstance().getCompleteIslandFromCoords(CVector2f((float) UserEntity->pos().x, (float) UserEntity->pos().y));
 	if (completeIsland)
 	{
-		std::string islandName = toLower(completeIsland->Island);
+		std::string islandName = toLowerAscii(completeIsland->Island);
 		std::string::size_type lastPos = islandName.find_last_of("_");
 		if (lastPos != std::string::npos)
 		{

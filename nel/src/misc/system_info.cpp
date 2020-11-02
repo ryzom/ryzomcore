@@ -1690,7 +1690,7 @@ bool CSystemInfo::getVideoInfo (std::string &deviceName, uint64 &driverVersion)
 						}
 						else
 						{
-							string::size_type pos = toLower(keyPath).find ("\\device");
+							string::size_type pos = toLowerAscii(keyPath).find ("\\device");
 							if (pos != string::npos)
 								keyPath = keyPath.substr (0, pos+1);
 							keyName = "ImagePath";
@@ -1703,7 +1703,7 @@ bool CSystemInfo::getVideoInfo (std::string &deviceName, uint64 &driverVersion)
 					}
 
 					// Format the key path
-					if (toLower(keyPath).find ("\\registry\\machine") == 0)
+					if (toLowerAscii(keyPath).find ("\\registry\\machine") == 0)
 					{
 						keyPath = "HKEY_LOCAL_MACHINE" + keyPath.substr (strlen ("\\registry\\machine"));
 					}
@@ -1733,7 +1733,7 @@ bool CSystemInfo::getVideoInfo (std::string &deviceName, uint64 &driverVersion)
 					HKEY keyRoot = HKEY_LOCAL_MACHINE;
 					for (i=0; i<sizeof(rootKeysH)/sizeof(HKEY); i++)
 					{
-						if (toUpper(keyPath).find (rootKeys[i]) == 0)
+						if (toUpperAscii(keyPath).find (rootKeys[i]) == 0)
 						{
 							keyPath = keyPath.substr (strlen (rootKeys[i]));
 							keyRoot = rootKeysH[i];

@@ -129,7 +129,7 @@ void CCharacterSheet::readEquipment(const NLGEORGES::UFormElm &form, const strin
 	string itemName;
 	if(!form.getValueByName(itemName, string(key + ".Item").c_str() ))
 		debug(NLMISC::toString("Key '%s.Item' not found.", key.c_str()));
-	slot.IdItem = ClientSheetsStrings.add(NLMISC::toLower(itemName));
+	slot.IdItem = ClientSheetsStrings.add(NLMISC::toLowerAscii(itemName));
 
 	// Get the texture.
 	if(!form.getValueByName(slot.Texture, string(key + ".Texture").c_str() ))
@@ -221,7 +221,7 @@ void CCharacterSheet::build(const NLGEORGES::UFormElm &item)
 		std::string	right;
 		item.getValueByName(right, "item_right");
 		if (!right.empty())
-			ObjectInRightHand.IdItem = ClientSheetsStrings.add(NLMISC::toLower(right));
+			ObjectInRightHand.IdItem = ClientSheetsStrings.add(NLMISC::toLowerAscii(right));
 	}
 
 	if (!ObjectInLeftHand.IdItem)
@@ -229,7 +229,7 @@ void CCharacterSheet::build(const NLGEORGES::UFormElm &item)
 		std::string	left;
 		item.getValueByName(left, "item_left");
 		if (!left.empty())
-			ObjectInLeftHand.IdItem = ClientSheetsStrings.add(NLMISC::toLower(left));
+			ObjectInLeftHand.IdItem = ClientSheetsStrings.add(NLMISC::toLowerAscii(left));
 	}
 
 	// Get the animation set Base Name.
@@ -239,7 +239,7 @@ void CCharacterSheet::build(const NLGEORGES::UFormElm &item)
 		if(AnimSetBaseName.empty())
 			debug("AnimSetBaseName is Empty.");
 		else
-			AnimSetBaseName = NLMISC::toLower(AnimSetBaseName); // Force the CASE in UPPER to not be CASE SENSITIVE.
+			AnimSetBaseName = NLMISC::toLowerAscii(AnimSetBaseName); // Force the CASE in UPPER to not be CASE SENSITIVE.
 	}
 	else
 		debug("Key '3d data.AnimSetBaseName' not found.");
@@ -253,7 +253,7 @@ void CCharacterSheet::build(const NLGEORGES::UFormElm &item)
 			debug("Automaton is Empty.");
 		// Lower Case
 		else
-			Automaton = NLMISC::toLower(Automaton);
+			Automaton = NLMISC::toLowerAscii(Automaton);
 	}
 	// Key not Found
 	else

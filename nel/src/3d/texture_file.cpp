@@ -311,7 +311,7 @@ void			CTextureFile::setMipMapSkipAtLoad(uint8 level)
 // ***************************************************************************
 std::string		CTextureFile::getShareName() const
 {
-	return toLower(_FileName);
+	return toLowerAscii(_FileName);
 }
 
 

@@ -1414,7 +1414,7 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 						string cat = getStringCategory(msg, msg);
 						map<string, CClientConfig::SSysInfoParam>::const_iterator it;
 						NLMISC::CRGBA col = CRGBA::Yellow;
-						it = ClientCfg.SystemInfoParams.find(toLower(cat));
+						it = ClientCfg.SystemInfoParams.find(toLowerAscii(cat));
 						if (it != ClientCfg.SystemInfoParams.end())
 						{
 							col = it->second.Color;

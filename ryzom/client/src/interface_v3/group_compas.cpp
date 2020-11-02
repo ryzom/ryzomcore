@@ -89,7 +89,7 @@ void CCompassTarget::serial(NLMISC::IStream &f)
 	{
 		f.serial(Name);
 	}
-	std::string language = toLower(ClientCfg.LanguageCode);
+	std::string language = toLowerAscii(ClientCfg.LanguageCode);
 	f.serial(language);
 	f.serialEnum(_Type);
 	if (_Type == PosTracker)
@@ -115,7 +115,7 @@ void CCompassTarget::serial(NLMISC::IStream &f)
 	// reset the compass to north to avoid incoherency
 	if (f.isReading())
 	{
-		if (toLower(ClientCfg.LanguageCode) != language)
+		if (toLowerAscii(ClientCfg.LanguageCode) != language)
 		{
 			*this = CCompassTarget();
 		}

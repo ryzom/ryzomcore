@@ -371,7 +371,7 @@ void CForm::warning (bool exception, const std::string &function, const char *fo
 void CForm::getDependencies (std::set<std::string> &dependencies) const
 {
 	// Add me
-	if (dependencies.insert (toLower(CFile::getFilename (_Filename))).second)
+	if (dependencies.insert (toLowerAscii(CFile::getFilename (_Filename))).second)
 	{
 		// Add parents
 		uint i;

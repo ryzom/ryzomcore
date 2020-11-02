@@ -582,18 +582,17 @@ static void addFromPlaylist(const std::string &playlist, const std::vector<std::
 
 			// id a UTF-8 BOM header is present, parse as UTF-8
 			if (!useUtf8 && lineStr.length() >= 3 && memcmp(line, utf8Header, 3) == 0)
+			{
 				useUtf8 = true;
+				lineStr = trim(std::string(line + 3));
+			}
 
 			if (!useUtf8)
 			{
 				lineStr = NLMISC::mbcsToUtf8(line); // Attempt local codepage first
 				if (lineStr.empty())
-					lineStr = CUtfStringView::fromAscii(std::string(line));
+					lineStr = CUtfStringView::fromAscii(std::string(line)); // Fallback
 				lineStr = trim(lineStr);
-			}
-			else
-			{
-				lineStr = trim(std::string(line + 3));
 			}
 
 			lineStr = CUtfStringView(lineStr).toUtf8(true); // Re-encode external string
@@ -602,7 +601,7 @@ static void addFromPlaylist(const std::string &playlist, const std::vector<std::
 			if (lineStr[0] != '#')
 			{
 				std::string filename = CPath::makePathAbsolute(CFile::getPath(lineStr), basePlaylist) + CFile::getFilename(lineStr);
-				std::string ext = toLower(CFile::getExtension(filename));
+				std::string ext = toLowerAscii(CFile::getExtension(filename));
 				if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
 				{
 					if (CFile::fileExists(filename))
@@ -654,7 +653,7 @@ void CMusicPlayer::createPlaylistFromMusic()
 
 	for (i = 0; i < filesToProcess.size(); ++i)
 	{
-		std::string ext = toLower(CFile::getExtension(filesToProcess[i]));
+		std::string ext = toLowerAscii(CFile::getExtension(filesToProcess[i]));
 		if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
 		{
 			filenames.push_back(filesToProcess[i]);
