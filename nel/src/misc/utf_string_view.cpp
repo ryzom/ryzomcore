@@ -174,11 +174,11 @@ std::string CUtfStringView::toAscii() const
 	return res;
 }
 
-std::string CUtfStringView::fromAscii(std::string &str)
+std::string CUtfStringView::fromAscii(const std::string &str)
 {
 	std::string res;
 	res.reserve(str.size());
-	for (std::string::iterator it(str.begin()), end(str.end()); it != end; ++it)
+	for (std::string::const_iterator it(str.begin()), end(str.end()); it != end; ++it)
 	{
 		unsigned char c = *it;
 		if (c < 0x80)

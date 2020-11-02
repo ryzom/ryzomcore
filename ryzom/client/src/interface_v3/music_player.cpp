@@ -582,18 +582,17 @@ static void addFromPlaylist(const std::string &playlist, const std::vector<std::
 
 			// id a UTF-8 BOM header is present, parse as UTF-8
 			if (!useUtf8 && lineStr.length() >= 3 && memcmp(line, utf8Header, 3) == 0)
+			{
 				useUtf8 = true;
+				lineStr = trim(std::string(line + 3));
+			}
 
 			if (!useUtf8)
 			{
 				lineStr = NLMISC::mbcsToUtf8(line); // Attempt local codepage first
 				if (lineStr.empty())
-					lineStr = CUtfStringView::fromAscii(std::string(line));
+					lineStr = CUtfStringView::fromAscii(std::string(line)); // Fallback
 				lineStr = trim(lineStr);
-			}
-			else
-			{
-				lineStr = trim(std::string(line + 3));
 			}
 
 			lineStr = CUtfStringView(lineStr).toUtf8(true); // Re-encode external string
