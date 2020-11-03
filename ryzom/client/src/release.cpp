@@ -704,6 +704,7 @@ void release()
 	CIXml::releaseLibXml();
 	CHttpCache::release();
 	CStrictTransportSecurity::release();
+	CCoTask::releaseInstance();
 
 #if FINAL_VERSION
 	// openURL ("http://ryzom.com/exit/");
