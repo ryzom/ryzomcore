@@ -1412,6 +1412,7 @@ namespace NLGUI
 			case CReflectedProperty::String:
 				ls.push( (reflectedObject.*(property.GetMethod.GetString))() );
 			break;
+#ifdef RYZOM_LUA_UCSTRING
 			case CReflectedProperty::UCString:
 			{
 				ucstring str = (reflectedObject.*(property.GetMethod.GetUCString))();
@@ -1434,6 +1435,7 @@ namespace NLGUI
 	#endif
 			}
 			break;
+#endif
 			case CReflectedProperty::StringRef:
 				ls.push( (reflectedObject.*(property.GetMethod.GetStringRef))() );
 			break;
@@ -1508,6 +1510,7 @@ namespace NLGUI
 					(target.*(property.SetMethod.SetString))(val);
 					return;
 				}
+#ifdef RYZOM_LUA_UCSTRING
 			case CReflectedProperty::UCString:
 			case CReflectedProperty::UCStringRef:
 				{
@@ -1532,6 +1535,7 @@ namespace NLGUI
 					(target.*(property.SetMethod.SetUCString))(val);
 					return;
 				}
+#endif
 			case CReflectedProperty::RGBA:
 				{
 					CRGBA color;
