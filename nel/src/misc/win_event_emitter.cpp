@@ -24,6 +24,7 @@
 #include "nel/misc/event_emitter.h"
 #include "nel/misc/win_event_emitter.h"
 #include "nel/misc/event_server.h"
+#include "nel/misc/utf_string_view.h"
 
 #ifdef NL_OS_WINDOWS
 #include <windowsx.h>
@@ -177,10 +178,28 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 		{
 			//if (wParam < KeyCount)
 			//nlinfo("WM_CHAR with %u", wParam);
-#ifndef WM_UNICHAR
-			// FIXME: Combine UTF-16 pairs
-#endif
-			server->postEvent (new CEventChar ((ucchar)wParam, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
+			wchar_t c = (wchar_t)wParam;
+			if ((c & 0xFC00) == 0xD800)
+			{
+				_Utf16Pair = c;
+			}
+			else if (_Utf16Pair && (c & 0xFC00) == 0xDC00)
+			{
+				wchar_t cc[] = { _Utf16Pair, c, 0 };
+				_Utf16Pair = 0;
+				CUtfStringView cv = CUtfStringView(cc);
+				for (CUtfStringView::iterator it(cv.begin()), end(cv.end()); it != end; ++it)
+					server->postEvent(new CEventChar(*it, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
+			}
+			else
+			{
+				if (_Utf16Pair)
+				{
+					server->postEvent(new CEventChar(_Utf16Pair, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
+					_Utf16Pair = 0;
+				}
+				server->postEvent(new CEventChar(c, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
+			}
 		}
 		break;
 	/*case WM_IME_CHAR:

@@ -50,6 +50,7 @@ mkPath(log, fontExportDir)
 
 printLog(log, ">>> Install font <<<")
 copyFilesExtNoTreeIfNeeded(log, fontExportDir, installPath, ".ttf")
+copyFilesExtNoTreeIfNeeded(log, fontExportDir, installPath, ".otf")
 copyFilesExtNoTreeIfNeeded(log, fontExportDir, installPath, ".afm")
 copyFilesExtNoTreeIfNeeded(log, fontExportDir, installPath, ".pfb")
 copyFilesExtNoTreeIfNeeded(log, fontExportDir, installPath, ".pfm")

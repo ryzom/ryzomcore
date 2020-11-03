@@ -36,7 +36,7 @@ typedef struct FT_FaceRec_* FT_Face;
 
 #include "nel/misc/types_nl.h"
 #include <string>
-
+#include <vector>
 
 namespace NL3D {
 
@@ -88,6 +88,7 @@ private:
 	static uint32 _FontGeneratorCounterUID;
 	uint32			_UID;
 	std::string		_FontFileName;
+	std::vector<std::string> _FontFileNames;
 
 #ifndef NL_DONT_USE_EXTERNAL_CODE
 	const char			*getFT2Error(FT_Error fte);
@@ -95,7 +96,7 @@ private:
 	static FT_Library	_Library;
 	static uint			_LibraryInit;
 
-	FT_Face				_Face;
+	std::vector<FT_Face> _Faces;
 #else // NL_DONT_USE_EXTERNAL_CODE
 
 #endif // NL_DONT_USE_EXTERNAL_CODE
