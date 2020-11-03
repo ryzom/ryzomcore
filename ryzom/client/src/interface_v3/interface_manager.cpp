@@ -2535,7 +2535,7 @@ void CInterfaceManager::displaySystemInfo(const string &str, const string &cat)
 	// If broadcast, parse lua code
 	if (toLower(cat) == "bc" && str.size() > 3 && str[0]=='@' && str[1]=='L' && str[2]=='U' && str[3]=='A')
 	{
-		string code = str.substr(4, str.size()-4).toString();
+		string code = str.substr(4, str.size()-4);
 		if (!code.empty())
 			CLuaManager::getInstance().executeLuaScript(code);
 		return;

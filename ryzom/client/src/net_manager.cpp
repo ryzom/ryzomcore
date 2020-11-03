@@ -147,7 +147,7 @@ extern bool CharNameValidArrived;
 extern bool CharNameValid;
 bool IsInRingSession = false;
 TSessionId HighestMainlandSessionId; // highest in the position stack
-ucstring lastUniversMessage;
+std::string lastUniversMessage;
 
 extern const char *CDBBankNames[INVALID_CDB_BANK+1];
 

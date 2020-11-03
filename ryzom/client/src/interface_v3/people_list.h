@@ -110,7 +110,7 @@ public:
 	sint	getIndexFromContactId(uint32 contactId);
 
 	// For Friend Groups management
-	void changeGroup(uint index, const ucstring &groupName);
+	void changeGroup(uint index, const std::string &groupName);
 	void readContactGroups();
 	void saveContactGroups();
 
@@ -162,7 +162,7 @@ private:
 		TCharConnectionState			Online;
 		bool							Blocked;
 		uint32							ContactId;
-		ucstring						Group;
+		std::string						Group;
 		bool operator < (const CPeople &other) const { return getName() < other.getName(); }
 		std::string getName() const { return Container->getTitle(); }
 	};

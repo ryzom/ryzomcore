@@ -287,7 +287,7 @@ void CPeopleList::sortEx(TSortOrder order)
 		{
 			newGroup = true;
 		}
-		while (groupIndex < _GroupContainers.size() && _GroupContainers[groupIndex].first != _Peoples[k].Group.toString())
+		while (groupIndex < _GroupContainers.size() && _GroupContainers[groupIndex].first != _Peoples[k].Group)
 		{
 			newGroup = true;
 			++groupIndex;
@@ -479,44 +479,44 @@ void CPeopleList::setContactId(uint index, uint32 contactId)
 }
 
 //==================================================================
-void CPeopleList::changeGroup(uint index, const ucstring &groupName)
+void CPeopleList::changeGroup(uint index, const std::string &groupName)
 {
         if (index >= _Peoples.size())
 	{
 		nlwarning("<CPeopleList::changeGroup> bad index.");
 		return;
 	}
-	ucstring group = groupName;
-	if (group.toString() == "General")
-		group = ucstring("");
+	std::string group = groupName;
+	if (group == "General")
+		group.clear();
 	_Peoples[index].Group = group;
 	
 	for (uint k = 0; k < _GroupContainers.size(); ++k)
 	{
-		if (_GroupContainers[k].first == group.toString())
+		if (_GroupContainers[k].first == group)
 			return;
 	}
 	
 	vector<pair<string, string> > properties;
 	properties.push_back(make_pair(string("posparent"), string("parent")));
 	properties.push_back(make_pair(string("id"), _ContainerID + "_group_" + toString(_GroupContainers.size())));
-	if (group.toString() == "")
+	if (group.empty())
 		properties.push_back(make_pair(string("title"), "General"));
 	else
-		properties.push_back(make_pair(string("title"), group.toString()));
+		properties.push_back(make_pair(string("title"), group));
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getParser()->createGroupInstance("people_list_group_header", "ui:interface", properties, false));
 
-	if (group.toString() == "")
-		gc->setUCTitle(ucstring("General"));
+	if (group.empty())
+		gc->setTitle(std::string("General"));
 	else
-		gc->setUCTitle(group.toString());
+		gc->setTitle(group);
 	gc->setSavable(false);
 
 	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 	pRoot->addGroup (gc);
 	_BaseContainer->attachContainer(gc);
 	
-	_GroupContainers.push_back(make_pair(group.toString(), gc));
+	_GroupContainers.push_back(make_pair(group, gc));
 	
 	std::sort(_GroupContainers.begin(), _GroupContainers.end());
 }
@@ -627,8 +627,8 @@ void CPeopleList::saveContactGroups()
 			{
 				xmlNodePtr newNode = xmlNewChild(node, NULL, (const xmlChar*)"contact", NULL);
 				
-				xmlSetProp(newNode, (const xmlChar*)"name", (const xmlChar*)_Peoples[k].getName().toString().c_str());
-				xmlSetProp(newNode, (const xmlChar*)"group", (const xmlChar*)_Peoples[k].Group.toString().c_str());
+				xmlSetProp(newNode, (const xmlChar*)"name", (const xmlChar*)_Peoples[k].getName().c_str());
+				xmlSetProp(newNode, (const xmlChar*)"group", (const xmlChar*)_Peoples[k].Group.c_str());
 			}
 			stream.flush();
 			fd.close();

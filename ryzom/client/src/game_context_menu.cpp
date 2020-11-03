@@ -768,11 +768,11 @@ void CGameContextMenu::updateContextMenuMissionsOptions( bool forceHide )
 					{
 						result = NLMISC::CI18N::get("uiMissionOptionNotReceived");
 					}
-					if (result == ucstring("Qui etes-vous ?")
-						|| result == ucstring("Wer bist Du?")
-						|| result == ucstring("Who are you?")
-						|| result == ucstring("Quién eres tú?")
-						|| result == ucstring("Кто ты?"))
+					if (result == string("Qui etes-vous ?")
+						|| result == string("Wer bist Du?")
+						|| result == string("Who are you?")
+						|| result == string("Quién eres tú?")
+						|| result == string("Кто ты?"))
 					{
 						pVTM->setActive(false);
 					}

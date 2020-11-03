@@ -421,14 +421,14 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 		return para;
 	}
 
-	ucstring::size_type pos = 0;
+	string::size_type pos = 0;
 
 	// Manage Translations
 	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TRANSLATION_ONLY_AS_TOOLTIP_CB", false);
 	bool originalFirst = node->getValueBool();
 
-	string::size_type startTr = msg.find(ucstring("{:"));
-	string::size_type endOfOriginal = msg.find(ucstring("}@{"));
+	string::size_type startTr = msg.find("{:");
+	string::size_type endOfOriginal = msg.find("}@{");
 
 	// Original/Translated case, example: {:enHello the world!}@{ Bonjour le monde !
 	if (startTr != string::npos && endOfOriginal != string::npos)
@@ -436,9 +436,9 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 		CViewBase *vt = createMsgTextSimple(msg.substr(0, startTr), col, justified, NULL);
 		para->addChild(vt);
 
-		string texture = "flag-"+toLower(msg.substr(startTr+2, 2)).toString()+".tga";
-		ucstring original = msg.substr(startTr+5, endOfOriginal-startTr-5);
-		ucstring translation = msg.substr(endOfOriginal+3);
+		string texture = "flag-"+toLowerAscii(msg.substr(startTr+2, 2))+".tga";
+		string original = msg.substr(startTr+5, endOfOriginal-startTr-5);
+		string translation = msg.substr(endOfOriginal+3);
 		CCtrlButton *ctrlButton = new CCtrlButton(CViewBase::TCtorParam());
 		ctrlButton->setTexture(texture);
 		ctrlButton->setTextureOver(texture);

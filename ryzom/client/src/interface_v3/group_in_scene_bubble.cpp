@@ -849,10 +849,10 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const std::string &ucsTe
 	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TRANSLATION_ONLY_AS_TOOLTIP_CB", false);
 	bool originalFirst = node->getValueBool();
 
-	ucstring::size_type pos = 0;
-	ucstring::size_type textSize = ucsText.size();
-	string::size_type startTr = ucsText.find(ucstring("{:"));
-	string::size_type endOfOriginal = ucsText.find(ucstring("}@{"));
+	string::size_type pos = 0;
+	string::size_type textSize = ucsText.size();
+	string::size_type startTr = ucsText.find("{:");
+	string::size_type endOfOriginal = ucsText.find("}@{");
 	if (endOfOriginal != string::npos)
 	{
 		if (!originalFirst)

@@ -2334,7 +2334,7 @@ public:
 			if (gc)
 			{
 				CGroupEditBox *geb = dynamic_cast<CGroupEditBox *>(gc->getGroup("change_contact_group_eb:eb"));
-				geb->setInputString(ucstring(""));
+				geb->setInputString(std::string(""));
 			}
 			CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, sParams);
 		}
@@ -2359,7 +2359,7 @@ public:
 			{
 				
 				PeopleInterraction.FriendList.changeGroup(lastPeopleIndexChangeGroup, geb->getInputString());
-				geb->setInputString(ucstring(""));
+				geb->setInputString(std::string(""));
 				CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
 				PeopleInterraction.FriendList.sortEx(order);
 			}
