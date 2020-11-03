@@ -4704,8 +4704,8 @@ int CSPhraseComAdpater::luaGetDesc(CLuaState &ls)
 		if (*desc)
 		{
 #ifdef RYZOM_LUA_UCSTRING
-			ucstring desc = ucstring::makeFromUtf8(desc); // Compatibility
-			CLuaIHM::push(ls, desc);
+			ucstring uc = ucstring::makeFromUtf8(desc); // Compatibility
+			CLuaIHM::push(ls, uc);
 #else
 			ls.push(desc);
 #endif
