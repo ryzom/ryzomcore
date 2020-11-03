@@ -22,6 +22,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/georges/u_form.h"
+#include "form_dfn.h"
 #include "form_elm.h"
 #include "header.h"
 
@@ -124,6 +125,10 @@ private:
 
 	// The form filename
 	std::string			_Filename;
+
+	// The dfn
+	NLMISC::CSmartPtr<CFormDfn> _Dfn;
+
 };
 
 } // NLGEORGES

@@ -695,6 +695,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 				setBackgroundFlags(flags);
 			}
 
+			form = NULL;
 			NLGEORGES::UFormLoader::releaseLoader(formLoader);
 		}
 	}

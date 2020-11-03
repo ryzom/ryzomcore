@@ -1707,6 +1707,7 @@ CFormElmStruct::CFormElmStruct (CForm *form, CFormElm *parentNode, const CFormDf
 CFormElmStruct::~CFormElmStruct ()
 {
 	// Job done in clean()
+	clean();
 }
 
 // ***************************************************************************
@@ -1717,10 +1718,10 @@ void CFormElmStruct::clean ()
 	uint elm;
 	for (elm =0; elm<Elements.size(); elm++)
 	{
-		if (Elements[elm].Element)
-			delete Elements[elm].Element;
+		delete Elements[elm].Element;
 		Elements[elm].Element = NULL;
 	}
+	Elements.clear();
 }
 
 // ***************************************************************************
@@ -2270,6 +2271,7 @@ CFormElmArray::CFormElmArray (CForm *form, const CFormDfn *formDfn, const CType 
 CFormElmArray::~CFormElmArray ()
 {
 	// Job done in clean()
+	clean();
 }
 
 // ***************************************************************************
@@ -2280,8 +2282,8 @@ void CFormElmArray::clean ()
 	uint elm;
 	for (elm =0; elm<Elements.size(); elm++)
 	{
-		if (Elements[elm].Element)
-			delete Elements[elm].Element;
+		delete Elements[elm].Element;
+		Elements[elm].Element = NULL;
 	}
 	Elements.clear ();
 }
