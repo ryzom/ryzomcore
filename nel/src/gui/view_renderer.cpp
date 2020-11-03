@@ -312,7 +312,7 @@ namespace NLGUI
 		if (fonts.count(name) > 0)
 			driver->deleteTextContext(fonts[name]);
 
-		std::string fontFile = CPath::lookup(font, false);
+		std::string fontFile = NLMISC::startsWith(font, "ui") ? font : CPath::lookup(font, false);
 		if (fontFile.empty())
 		{
 			nlwarning("Font file '%s' not found", font.c_str());

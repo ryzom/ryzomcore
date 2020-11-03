@@ -26,6 +26,7 @@
 #include "nel/misc/common.h"
 #include "nel/misc/path.h"
 #include "nel/misc/file.h"
+#include "nel/misc/i18n.h"
 
 #include "nel/3d/font_generator.h"
 
@@ -190,6 +191,20 @@ CFontGenerator::CFontGenerator (const std::string &fontFileName, const std::stri
 	_FontGeneratorCounterUID++;
 	_FontFileName = fontFileName;
 
+	if (NLMISC::startsWith(fontFileName, "ui"))
+	{
+		std::string nameList = CI18N::get(fontFileName);
+		NLMISC::explode(nameList, string("\n"), _FontFileNames, true);
+		for (std::vector<std::string>::iterator it(_FontFileNames.begin()), end(_FontFileNames.end()); it != end; ++it)
+		{
+			*it = CPath::lookup(*it);
+		}
+	}
+	else
+	{
+		_FontFileNames.push_back(fontFileName);
+	}
+
 	FT_Error error;
 
 	if (!_LibraryInit)
@@ -202,49 +217,66 @@ CFontGenerator::CFontGenerator (const std::string &fontFileName, const std::stri
 	}
 	++_LibraryInit;
 
-	FT_Open_Args args;
-
-	if (!createFreetypeStream(fontFileName, args))
+	for (std::vector<std::string>::iterator it(_FontFileNames.begin()), end(_FontFileNames.end()); it != end; ++it)
 	{
-		nlerror ("createFreetypeStream failed with file '%s'", fontFileName.c_str());
-	}
+		FT_Open_Args args;
+		const std::string &fileName = *it;
 
-	error = FT_Open_Face(_Library, &args, 0, &_Face);
-	if (error)
-	{
-		nlerror ("FT_New_Face() failed with file '%s': %s", fontFileName.c_str(), getFT2Error(error));
-	}
-
-	string fontEx = fontExFileName;
-	if (fontEx.empty())
-	{
-		// try to see if the ex filename exists based on the fontExFileName
-		fontEx = CPath::lookup(CFile::getFilenameWithoutExtension (fontFileName)+".afm", false, false);
-	}
-
-	if (!fontEx.empty())
-	{
-		if (!createFreetypeStream(fontEx, args))
+		if (!createFreetypeStream(fileName, args))
 		{
-			nlerror ("createFreetypeStream failed with file '%s'", fontFileName.c_str());
+			nlerror("createFreetypeStream failed with file '%s'", fileName.c_str());
 		}
 
-		error = FT_Attach_Stream(_Face, &args);
+		FT_Face face;
+		error = FT_Open_Face(_Library, &args, 0, &face);
 		if (error)
 		{
-			nlwarning ("FT_Attach_File() failed with file '%s': %s", fontEx.c_str(), getFT2Error(error));
+			nlerror("FT_New_Face() failed with file '%s': %s", fileName.c_str(), getFT2Error(error));
 		}
-	}
 
-	error = FT_Select_Charmap (_Face, ft_encoding_unicode);
-	if (error)
-	{
-		nlerror ("FT_Select_Charmap() failed with file '%s': %s", fontFileName.c_str(), getFT2Error(error));
+		string fontEx = fontExFileName;
+		if (fontEx.empty())
+		{
+			// try to see if the ex filename exists based on the fontExFileName
+			fontEx = CPath::lookup(CFile::getFilenameWithoutExtension(fileName) + ".afm", false, false);
+		}
+
+		if (!fontEx.empty())
+		{
+			if (!createFreetypeStream(fontEx, args))
+			{
+				nlerror("createFreetypeStream failed with file '%s'", fileName.c_str());
+				FT_Done_Face(face);
+				continue;
+			}
+
+			error = FT_Attach_Stream(face, &args);
+			if (error)
+			{
+				nlwarning("FT_Attach_File() failed with file '%s': %s", fontEx.c_str(), getFT2Error(error));
+				FT_Done_Face(face);
+				continue;
+			}
+		}
+
+		error = FT_Select_Charmap(face, ft_encoding_unicode);
+		if (error)
+		{
+			nlerror("FT_Select_Charmap() failed with file '%s': %s", fileName.c_str(), getFT2Error(error));
+			FT_Done_Face(face);
+			continue;
+		}
+
+		_Faces.push_back(face);
 	}
 }
 
 CFontGenerator::~CFontGenerator ()
 {
+	for (std::vector<FT_Face>::iterator it(_Faces.begin()), end(_Faces.end()); it != end; ++it)
+		FT_Done_Face(*it);
+	_Faces.clear();
+
 	// important: destroying and creating your last font generator
 	// will also reload the freetype library
 	nlassert(_LibraryInit);
@@ -259,30 +291,41 @@ CFontGenerator::~CFontGenerator ()
 void CFontGenerator::getSizes (u32char c, uint32 size, uint32 &width, uint32 &height)
 {
 	FT_Error error;
+	FT_Face face;
+	FT_UInt glyph_index = 0;
 
-	error = FT_Set_Pixel_Sizes (_Face, size, size);
-	if (error)
+	if (!_Faces.size())
 	{
-		nlerror ("FT_Set_Pixel_Sizes() failed: %s", getFT2Error(error));
+		nlerror("No faces loaded");
+		return;
 	}
 
-	// retrieve glyph index from character code
-	FT_UInt glyph_index = FT_Get_Char_Index (_Face, c);
-
-	if (glyph_index == 0)
+	for (std::vector<FT_Face>::iterator it(_Faces.begin()), end(_Faces.end()); it != end; ++it)
 	{
-		// no glyph available, replace with a dot
-		glyph_index = FT_Get_Char_Index (_Face, u32char('.'));
+		face = *it;
+		error = FT_Set_Pixel_Sizes(face, size, size);
+		if (error)
+		{
+			nlerror("FT_Set_Pixel_Sizes() failed: %s", getFT2Error(error));
+			continue;
+		}
+
+		// retrieve glyph index from character code
+		glyph_index = FT_Get_Char_Index(face, c);
+
+		// found glyph
+		if (glyph_index)
+			break;
 	}
 
 	// load glyph image into the slot (erase previous one)
-	error = FT_Load_Glyph (_Face, glyph_index, FT_LOAD_DEFAULT);
+	error = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT);
 	if (error)
 	{
 		// use fallback for glyph/character errors (composite char limit for example)
 		nlwarning ("FT_Load_Glyph() failed: %s", getFT2Error(error));
 
-		error = FT_Load_Glyph (_Face, 0, FT_LOAD_DEFAULT);
+		error = FT_Load_Glyph(face, 0, FT_LOAD_DEFAULT);
 		if (error)
 		{
 			nlerror("FT_Load_Glyph() fallback failed: %s", getFT2Error(error));
@@ -290,39 +333,48 @@ void CFontGenerator::getSizes (u32char c, uint32 size, uint32 &width, uint32 &he
 	}
 
 	// convert 24.6 fixed point into integer
-	width = _Face->glyph->metrics.width >> 6;
-	height = _Face->glyph->metrics.height >> 6;
+	width = face->glyph->metrics.width >> 6;
+	height = face->glyph->metrics.height >> 6;
 }
 
 uint8 *CFontGenerator::getBitmap (u32char c, uint32 size, bool embolden, bool oblique, uint32 &width, uint32 &height, uint32 &pitch, sint32 &left, sint32 &top, sint32 &advx, uint32 &glyphIndex)
 {
 	FT_Error error;
+	FT_Face face;
+	FT_UInt glyph_index = 0;
 
-	error = FT_Set_Pixel_Sizes (_Face, size, size);
-	if (error)
+	if (!_Faces.size())
 	{
-		nlerror ("FT_Set_Pixel_Sizes() failed: %s", getFT2Error(error));
+		nlerror("No faces loaded");
+		return NULL;
 	}
 
-	// retrieve glyph index from character code
-	FT_UInt glyph_index = FT_Get_Char_Index (_Face, c);
-
-	/*
-	if (glyph_index == 0)
+	for (std::vector<FT_Face>::iterator it(_Faces.begin()), end(_Faces.end()); it != end; ++it)
 	{
-		// no glyph available, replace with a dot
-		glyph_index = FT_Get_Char_Index (_Face, u32char('.'));
+		face = *it;
+		error = FT_Set_Pixel_Sizes(face, size, size);
+		if (error)
+		{
+			nlerror("FT_Set_Pixel_Sizes() failed: %s", getFT2Error(error));
+			continue;
+		}
+
+		// retrieve glyph index from character code
+		glyph_index = FT_Get_Char_Index(face, c);
+
+		// found glyph
+		if (glyph_index)
+			break;
 	}
-	*/
 
 	// load glyph image into the slot (erase previous one)
-	error = FT_Load_Glyph (_Face, glyph_index, FT_LOAD_DEFAULT);
+	error = FT_Load_Glyph (face, glyph_index, FT_LOAD_DEFAULT);
 	if (error)
 	{
 		// use fallback for glyph/character errors (composite char limit for example)
 		nlwarning ("FT_Load_Glyph() failed: %s", getFT2Error(error));
 
-		error = FT_Load_Glyph (_Face, 0, FT_LOAD_DEFAULT);
+		error = FT_Load_Glyph (face, 0, FT_LOAD_DEFAULT);
 		if (error)
 		{
 			nlerror("FT_Load_Glyph() fallback failed: %s", getFT2Error(error));
@@ -343,47 +395,49 @@ uint8 *CFontGenerator::getBitmap (u32char c, uint32 size, bool embolden, bool ob
 
 	if (embolden)
 	{
-		FT_GlyphSlot_Embolden(_Face->glyph);
+		FT_GlyphSlot_Embolden(face->glyph);
 	}
 
 	if (oblique)
 	{
-		FT_GlyphSlot_Oblique(_Face->glyph);
+		FT_GlyphSlot_Oblique(face->glyph);
 	}
 
 	// convert to an anti-aliased bitmap
-	error = FT_Render_Glyph (_Face->glyph, ft_render_mode_normal);
+	error = FT_Render_Glyph (face->glyph, ft_render_mode_normal);
 	if (error)
 	{
 		nlerror ("FT_Render_Glyph() failed: %s", getFT2Error(error));
 	}
 
-	width = _Face->glyph->bitmap.width;
-	height = _Face->glyph->bitmap.rows;
-	pitch = _Face->glyph->bitmap.pitch;
+	width = face->glyph->bitmap.width;
+	height = face->glyph->bitmap.rows;
+	pitch = face->glyph->bitmap.pitch;
 
-	left = _Face->glyph->bitmap_left;
-	top = _Face->glyph->bitmap_top;
+	left = face->glyph->bitmap_left;
+	top = face->glyph->bitmap_top;
 
-	advx = _Face->glyph->advance.x >> 6;
+	advx = face->glyph->advance.x >> 6;
 
 	glyphIndex = glyph_index;
 
-	return (uint8 *) _Face->glyph->bitmap.buffer;
+	return (uint8 *) face->glyph->bitmap.buffer;
 }
 
 
 
 void CFontGenerator::getKerning (u32char left, u32char right, sint32 &kernx)
 {
-	if (!FT_HAS_KERNING(_Face))
+	if (!FT_HAS_KERNING(_Faces[0]))
 	{
 		kernx = 0;
 	}
 	else
 	{
+		// This is currently not used...
+
 		FT_Vector  kerning;
-		FT_Error error = FT_Get_Kerning (_Face, left, right, ft_kerning_default, &kerning);
+		FT_Error error = FT_Get_Kerning (_Faces[0], left, right, ft_kerning_default, &kerning);
 		if (error)
 		{
 			nlerror ("FT_Get_Kerning() failed: %s", getFT2Error(error));
@@ -396,12 +450,14 @@ void CFontGenerator::getKerning (u32char left, u32char right, sint32 &kernx)
 
 uint32	 CFontGenerator::getCharIndex (u32char c)
 {
-	uint32 ret = FT_Get_Char_Index(_Face, c);
+	// This is currently not used...
+
+	uint32 ret = FT_Get_Char_Index(_Faces[0], c);
 
 	if (ret == 0)
 	{
 		// no glyph available, replace with a dot
-		ret = FT_Get_Char_Index (_Face, u32char('.'));
+		ret = FT_Get_Char_Index (_Faces[0], u32char('.'));
 	}
 
 	return ret;
