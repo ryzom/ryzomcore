@@ -1436,7 +1436,7 @@ void CClientConfig::setValues()
 				else if (stricmp(mode, "centeraround") == 0)	p.Mode = SSysInfoParam::CenterAround;
 				else if (stricmp(mode, "around") == 0)	p.Mode = SSysInfoParam::Around;
 
-				ClientCfg.SystemInfoParams[toLower(sic->asString(2 * k))] = p;
+				ClientCfg.SystemInfoParams[toLowerAscii(sic->asString(2 * k))] = p;
 			}
 		}
 	}
@@ -1851,7 +1851,7 @@ void CClientConfig::setValues()
 		ClientCfg.HardwareCursors.clear ();
 		int iSz = pcvHardwareCursors->size();
 		for (int i = 0; i < iSz; i++)
-			ClientCfg.HardwareCursors.insert(toLower(pcvHardwareCursors->asString(i)));
+			ClientCfg.HardwareCursors.insert(toLowerAscii(pcvHardwareCursors->asString(i)));
 	}
 	else
 	{
@@ -2018,7 +2018,7 @@ void CClientConfig::init(const string &configFileName)
 	}
 
 	// read the exising config file (don't parse it yet!)
-	ucstring content;
+	ucstring content; // UTF-16 and UTF-8 textfile support
 	NLMISC::CI18N::readTextFile(configFileName, content);
 	std::string contentUtf8 = content.toUtf8();
 

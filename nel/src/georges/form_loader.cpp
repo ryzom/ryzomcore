@@ -67,7 +67,7 @@ CFormLoader::~CFormLoader()
 CType *CFormLoader::loadType (const std::string &filename)
 {
 	// Lower string filename
-	string lowerStr = toLower(filename);
+	string lowerStr = toLowerAscii(filename);
 	lowerStr = CFile::getFilename (lowerStr);
 
 	// Already in the map ?
@@ -137,7 +137,7 @@ CType *CFormLoader::loadType (const std::string &filename)
 CFormDfn *CFormLoader::loadFormDfn (const std::string &filename, bool forceLoad)
 {
 	// Lower string filename
-	string lowerStr = toLower(filename);
+	string lowerStr = toLowerAscii(filename);
 	lowerStr = CFile::getFilename (lowerStr);
 
 	// Already in the map ?
@@ -203,7 +203,7 @@ CFormDfn *CFormLoader::loadFormDfn (const std::string &filename, bool forceLoad)
 UForm *CFormLoader::loadForm (const std::string &filename)
 {
 	// Lower string filename
-	string lowerStr = toLower((string)filename);
+	string lowerStr = toLowerAscii((string)filename);
 	lowerStr = CFile::getFilename (lowerStr);
 
 	// Already in the map ?

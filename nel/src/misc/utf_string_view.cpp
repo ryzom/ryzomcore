@@ -18,6 +18,7 @@
 
 // Project includes
 #include <nel/misc/utf_string_view.h>
+#include <nel/misc/stream.h>
 
 // References:
 // - https://twiserandom.com/unicode/unicode-encoding-utf-8-utf-16-utf-32/
@@ -67,6 +68,44 @@ NL_FORCE_INLINE void appendUtf8(std::string &str, u32char c)
 void CUtfStringView::append(std::string &str, u32char c)
 {
 	appendUtf8(str, c);
+}
+
+void CUtfStringView::append(IStream &s, u32char c)
+{
+	nlassert(!s.isReading());
+	std::string tmp;
+	tmp.reserve(4);
+	append(tmp, c);
+	s.serialBuffer((uint8 *)&tmp[0], tmp.size());
+}
+
+u32char CUtfStringView::get(IStream &s)
+{
+	nlassert(s.isReading());
+
+	std::string tmp;
+	tmp.reserve(4);
+	uint8 c;
+	s.serial(c);
+
+	// Single byte
+	if (c < 0x80)
+		return c;
+
+	// Do a fast check of length
+	tmp += (char)c;
+	size_t len;
+	if ((c & 0xF0) == 0xF0) len = 4;
+	if ((c & 0xE0) == 0xE0) len = 3;
+	else len = 2;
+
+	// Read from stream
+	tmp.resize(len);
+	s.serialBuffer((uint8 *)&tmp[1], len - 1);
+
+	// Decode
+	const void *str = tmp.c_str();
+	return utf8Iterator(&str);
 }
 
 std::string CUtfStringView::toUtf8(bool reEncode) const
@@ -129,6 +168,21 @@ std::string CUtfStringView::toAscii() const
 		u32char c = *it;
 		if (c < 0x80)
 			res += c;
+		else
+			res += '?';
+	}
+	return res;
+}
+
+std::string CUtfStringView::fromAscii(const std::string &str)
+{
+	std::string res;
+	res.reserve(str.size());
+	for (std::string::const_iterator it(str.begin()), end(str.end()); it != end; ++it)
+	{
+		unsigned char c = *it;
+		if (c < 0x80)
+			res += (char)c;
 		else
 			res += '?';
 	}

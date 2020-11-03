@@ -227,7 +227,7 @@ namespace NLGUI
 			pos++;
 		}
 
-		unit = toLower(str.substr(pos));
+		unit = toLowerAscii(str.substr(pos));
 		if (unit == "%" || unit == "rem" || unit == "em" || unit == "px" || unit == "pt")
 		{
 			std::string tmpstr = str.substr(0, pos);
@@ -687,7 +687,7 @@ namespace NLGUI
 		}
 
 		// make sure domain is lowercase
-		chunks[0] = toLower(chunks[0]);
+		chunks[0] = toLowerAscii(chunks[0]);
 
 		if (chunks[0] != domain && chunks[0] != std::string("." + domain))
 		{

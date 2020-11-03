@@ -4016,6 +4016,7 @@ namespace NLGUI
 		}
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	void CGroupContainer::setUCTitleOpened(const ucstring &title)
 	{
@@ -4051,6 +4052,7 @@ namespace NLGUI
 	{
 		return ucstring::makeFromUtf8(getTitleClosed());
 	}
+#endif
 
 	// ***************************************************************************
 	void	CGroupContainer::launch ()

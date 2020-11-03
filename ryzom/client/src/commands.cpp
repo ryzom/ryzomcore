@@ -241,7 +241,7 @@ NLMISC_COMMAND(equipGroup, "equip group <name>", "name")
 	if(CItemGroupManager::getInstance()->equipGroup(args[0]))
 	{
 		string msg = CI18N::get("cmdEquipGroupSuccess");
-		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		//Use utf-8 string because group name can contain accentued characters (and stuff like that)
 		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
@@ -250,7 +250,7 @@ NLMISC_COMMAND(equipGroup, "equip group <name>", "name")
 	else
 	{
 		string msg = CI18N::get("cmdEquipGroupError");
-		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		//Use utf-8 string because group name can contain accentued characters (and stuff like that)
 		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
@@ -273,7 +273,7 @@ NLMISC_COMMAND(moveGroup, "move group <name> to <dst>", "name dst")
 	if(CItemGroupManager::getInstance()->moveGroup(args[0], INVENTORIES::toInventory(args[1])))
 	{
 		string msg = CI18N::get("cmdMoveGroupSuccess");
-		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		//Use utf-8 string because group name can contain accentued characters (and stuff like that)
 		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		strFindReplace(msg, "%inventory", args[1]);
@@ -283,7 +283,7 @@ NLMISC_COMMAND(moveGroup, "move group <name> to <dst>", "name dst")
 	else
 	{
 		string msg = CI18N::get("cmdMoveGroupError");
-		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		//Use utf-8 string because group name can contain accentued characters (and stuff like that)
 		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		strFindReplace(msg, "%inventory", args[1]);
@@ -313,7 +313,7 @@ NLMISC_COMMAND(createGroup, "create group <name> [true](create a <remove> for ev
 			msg = CI18N::get("cmdCreateGroupSuccess2");
 		else
 			msg = CI18N::get("cmdCreateGroupSuccess1");
-		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		//Use utf-8 string because group name can contain accentued characters (and stuff like that)
 		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
@@ -322,7 +322,7 @@ NLMISC_COMMAND(createGroup, "create group <name> [true](create a <remove> for ev
 	else
 	{
 		string msg = CI18N::get("cmdCreateGroupError");
-		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		//Use utf-8 string because group name can contain accentued characters (and stuff like that)
 		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
@@ -345,7 +345,7 @@ NLMISC_COMMAND(deleteGroup, "delete group <name>", "name")
 	if(CItemGroupManager::getInstance()->deleteGroup(args[0]))
 	{
 		string msg = CI18N::get("cmdDeleteGroupSuccess");
-		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		//Use utf-8 string because group name can contain accentued characters (and stuff like that)
 		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
@@ -354,7 +354,7 @@ NLMISC_COMMAND(deleteGroup, "delete group <name>", "name")
 	else
 	{
 		string msg = CI18N::get("cmdDeleteGroupError");
-		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		//Use utf-8 string because group name can contain accentued characters (and stuff like that)
 		string nameUC = args[0];
 		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
@@ -1090,7 +1090,7 @@ NLMISC_COMMAND(verbose, "Enable/Disable some Debug Information", "none or magic"
 	}
 	else
 	{
-		std::string type = NLMISC::toLower(args[0]);
+		std::string type = NLMISC::toLowerAscii(args[0]);
 		if     (type == "none")
 			Verbose = VerboseNone;
 		else if(type == "magic")
@@ -1424,7 +1424,7 @@ NLMISC_COMMAND(ah, "Launch an action handler", "<ActionHandler> <AHparam>")
 	if (args.empty())
 		return false;
 
-	if (!ClientCfg.AllowDebugLua && toLower(args[0]) == "lua")
+	if (!ClientCfg.AllowDebugLua && toLowerAscii(args[0]) == "lua")
 	{
 		return false; // not allowed!!
 	}
@@ -1672,10 +1672,10 @@ NLMISC_COMMAND(missionProgress, "debug"," ")
 NLMISC_COMMAND( displayDBModifs, "display server database modification in the chat window"," ")
 {
 	if ( VerboseDatabase )
-		CInterfaceManager::getInstance()->getChatOutput()->addTextChild(ucstring("the database is already in verbose mode"),CRGBA(255,255,255,255));
+		CInterfaceManager::getInstance()->getChatOutput()->addTextChild("the database is already in verbose mode",CRGBA(255,255,255,255));
 	else
 	{
-		CInterfaceManager::getInstance()->getChatOutput()->addTextChild(ucstring("database  is now in verbose mode"),CRGBA(255,255,255,255));
+		CInterfaceManager::getInstance()->getChatOutput()->addTextChild("database  is now in verbose mode",CRGBA(255,255,255,255));
 		VerboseDatabase = true;
 	}
 	return true;
@@ -1684,10 +1684,10 @@ NLMISC_COMMAND( displayDBModifs, "display server database modification in the ch
 NLMISC_COMMAND( hideDBModifs, "stop displaying server database modification in the chat window"," ")
 {
 	if ( !VerboseDatabase )
-		CInterfaceManager::getInstance()->getChatOutput()->addTextChild(ucstring("the database is already not in verbose mode"),CRGBA(255,255,255,255));
+		CInterfaceManager::getInstance()->getChatOutput()->addTextChild("the database is already not in verbose mode",CRGBA(255,255,255,255));
 	else
 	{
-		CInterfaceManager::getInstance()->getChatOutput()->addTextChild(ucstring("database is not in verbose mode anymore"),CRGBA(255,255,255,255));
+		CInterfaceManager::getInstance()->getChatOutput()->addTextChild("database is not in verbose mode anymore",CRGBA(255,255,255,255));
 		VerboseDatabase = false;
 	}
 	return true;
@@ -1981,7 +1981,7 @@ NLMISC_COMMAND(pos, "Change the position of the user (in local only)", "<x, y, (
 	if(args.size() == 1)
 	{
 		string dest = args[0];
-		newPos = CTeleport::getPos(NLMISC::toLower(dest));
+		newPos = CTeleport::getPos(NLMISC::toLowerAscii(dest));
 		if(newPos == CTeleport::Unknown)
 		{
 			//here we try to teleport to a bot destination
@@ -2297,7 +2297,7 @@ NLMISC_COMMAND(record, "Start Recording", "<name>")
 	// Warning when already recording.
 	if(NetMngr.isRecording())
 	{
-		IM->displaySystemInfo(ucstring("Already Recording. Stop the current Record first"));
+		IM->displaySystemInfo("Already Recording. Stop the current Record first");
 		return true;
 	}
 
@@ -2641,12 +2641,12 @@ NLMISC_COMMAND(magic, "Cast a spell", "\n"
 	if(args.size() != 6)
 	{
 		// Help
-//		CInterfaceManager::getInstance()->displaySystemInfo(ucstring("This command need 2 or 3 paramters :"));
-//		CInterfaceManager::getInstance()->displaySystemInfo(ucstring("  <Slot> : the slot number of the entity to change"));
-//		CInterfaceManager::getInstance()->displaySystemInfo(ucstring("  <Behaviour> : the behaviour to play for the entity, one of the following number :"));
+//		CInterfaceManager::getInstance()->displaySystemInfo("This command need 2 or 3 paramters :");
+//		CInterfaceManager::getInstance()->displaySystemInfo("  <Slot> : the slot number of the entity to change");
+//		CInterfaceManager::getInstance()->displaySystemInfo("  <Behaviour> : the behaviour to play for the entity, one of the following number :");
 //		for(uint i = 0; i<MBEHAV::EMOTE_BEGIN; ++i)
-//			CInterfaceManager::getInstance()->displaySystemInfo(ucstring(NLMISC::toString("    %d - %s", i, MBEHAV::behaviourToString((MBEHAV::EBehaviour)i))));
-//		CInterfaceManager::getInstance()->displaySystemInfo(ucstring(NLMISC::toString("    %d-%d - Emotes", MBEHAV::EMOTE_BEGIN, MBEHAV::EMOTE_END)));
+//			CInterfaceManager::getInstance()->displaySystemInfo(NLMISC::toString("    %d - %s", i, MBEHAV::behaviourToString((MBEHAV::EBehaviour)i)));
+//		CInterfaceManager::getInstance()->displaySystemInfo(NLMISC::toString("    %d-%d - Emotes", MBEHAV::EMOTE_BEGIN, MBEHAV::EMOTE_END));
 	}
 	else
 	{
@@ -2695,7 +2695,7 @@ NLMISC_COMMAND(magic, "Cast a spell", "\n"
 			entity->updateVisualProperty(NetMngr.getCurrentServerTick()+50, CLFECOMMON::PROPERTY_BEHAVIOUR);
 		}
 		else
-			CInterfaceManager::getInstance()->displaySystemInfo(ucstring("There is no entity in the given slot"));
+			CInterfaceManager::getInstance()->displaySystemInfo("There is no entity in the given slot");
 	}
 
 	// Command well done.
@@ -2714,12 +2714,12 @@ NLMISC_COMMAND(spell, "Cast a spell", "\n"
 	if(args.size() != 6)
 	{
 		// Help
-		//		CInterfaceManager::getInstance()->displaySystemInfo(ucstring("This command need 2 or 3 paramters :"));
-		//		CInterfaceManager::getInstance()->displaySystemInfo(ucstring("  <Slot> : the slot number of the entity to change"));
-		//		CInterfaceManager::getInstance()->displaySystemInfo(ucstring("  <Behaviour> : the behaviour to play for the entity, one of the following number :"));
+		//		CInterfaceManager::getInstance()->displaySystemInfo("This command need 2 or 3 paramters :");
+		//		CInterfaceManager::getInstance()->displaySystemInfo("  <Slot> : the slot number of the entity to change");
+		//		CInterfaceManager::getInstance()->displaySystemInfo("  <Behaviour> : the behaviour to play for the entity, one of the following number :");
 		//		for(uint i = 0; i<MBEHAV::EMOTE_BEGIN; ++i)
-		//			CInterfaceManager::getInstance()->displaySystemInfo(ucstring(NLMISC::toString("    %d - %s", i, MBEHAV::behaviourToString((MBEHAV::EBehaviour)i))));
-		//		CInterfaceManager::getInstance()->displaySystemInfo(ucstring(NLMISC::toString("    %d-%d - Emotes", MBEHAV::EMOTE_BEGIN, MBEHAV::EMOTE_END)));
+		//			CInterfaceManager::getInstance()->displaySystemInfo(NLMISC::toString("    %d - %s", i, MBEHAV::behaviourToString((MBEHAV::EBehaviour)i)));
+		//		CInterfaceManager::getInstance()->displaySystemInfo(NLMISC::toString("    %d-%d - Emotes", MBEHAV::EMOTE_BEGIN, MBEHAV::EMOTE_END));
 	}
 	else
 	{
@@ -5314,8 +5314,8 @@ void CUserCommand::release()
 
 // ***************************************************************************
 
-CUserCommand::CUserCommand(const string &commandName, const ucstring &help, const ucstring &argsHelp)
-		: ICommand("user", commandName.c_str(), toString(help).c_str(), toString(argsHelp).c_str())
+CUserCommand::CUserCommand(const string &commandName, const string &help, const string &argsHelp)
+		: ICommand("user", commandName.c_str(), help.c_str(), argsHelp.c_str())
 {
 	CommandName  = commandName;
 }
@@ -5369,7 +5369,7 @@ bool CUserCommand::execute(const std::string &/* rawCommandString */, const std:
 				else
 				{
 					if (keywords[i] == "$")
-						finalArgs += /*ucstring(*/args[index++]/*).toUtf8()*/;
+						finalArgs += args[index++];
 					else
 					{
 						while (index<args.size())
@@ -5447,13 +5447,13 @@ void CUserCommand::createCommand (const char *name, const char *action, const ch
 	}
 
 	// Find action name
-	ucstring help;
+	string help;
 	const CBaseAction *ab = Actions.getBaseAction (::CAction::CName (action, ptrParams));
 	if (ab)
 		help = CI18N::get(ab->LocalizedName);
 
 	// Build a argument help
-	ucstring argsHelp;
+	string argsHelp;
 
 	if (ab)
 	{
@@ -5477,7 +5477,7 @@ void CUserCommand::createCommand (const char *name, const char *action, const ch
 							// Add the string
 							if (!argsHelp.empty())
 								argsHelp += " ";
-							argsHelp += ucstring("<") + CI18N::get(ab->Parameters[j].LocalizedName) + ucstring(">");
+							argsHelp += "<" + CI18N::get(ab->Parameters[j].LocalizedName) + ">";
 							bFound = true;
 						}
 					}
@@ -5666,7 +5666,7 @@ NLMISC_COMMAND(dumpShapeMaxDist, "dump max dist for shapes", "")
 			cs->getWholeEquipmentList(equipList);
 			for (uint k = 0; k < equipList.size(); ++k)
 			{
-				std::string item = toLower(equipList[k]->getItem());
+				std::string item = toLowerAscii(equipList[k]->getItem());
 				if (!item.empty())
 				{
 

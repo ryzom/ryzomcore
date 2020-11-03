@@ -141,12 +141,12 @@ static void popupLandMarkNameDialog()
 		const CUserLandMark userLM = map->getUserLandMark(LastSelectedLandMark);
 
 		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(userLM.Type));
-		eb->setInputStringAsUtf16(userLM.Title);
+		eb->setInputString(userLM.Title.toUtf8());
 	}
 	else
 	{
 		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(CUserLandMark::Misc));
-		eb->setInputStringAsUtf16(ucstring());
+		eb->setInputString(string());
 	}
 
 	CWidgetManager::getInstance()->setCaptureKeyboard(eb);
@@ -2677,9 +2677,7 @@ void CGroupMap::setLandmarkFilter(const std::string &s)
 	_LandmarkFilter.clear();
 
 	if (!s.empty()) {
-		ucstring ucs;
-		ucs.fromUtf8(s);
-		splitUCString(toLower(ucs), ucstring(" "), _LandmarkFilter);
+		splitUCString(ucstring(toLower(s)), ucstring(" "), _LandmarkFilter);
 	}
 
 	// recreate landmarks
@@ -3391,9 +3389,10 @@ CGroupMap::CLandMarkButton* CGroupMap::findClosestLandmark(const CVector2f &cent
 	closest = std::numeric_limits<float>::max();
 	for(TLandMarkButtonVect::const_iterator it = landmarks.begin(); it != landmarks.end(); ++it)
 	{
-		ucstring lc;
-		(*it)->getContextHelpAsUtf16(lc);
-		if(filterLandmark(lc, keywords, startsWith)) {
+		std::string lc;
+		(*it)->getContextHelp(lc);
+		ucstring ulc = ucstring::makeFromUtf8(lc);
+		if(filterLandmark(ulc, keywords, startsWith)) {
 			CVector2f pos;
 			mapToWorld(pos, (*it)->Pos);
 			float dist = distsqr(center, pos);
@@ -3726,13 +3725,13 @@ std::string CGroupMap::getContinentName() const
 {
 	if (_CurMap == NULL) return "";
 
-	return toLower(_CurMap->ContinentName);
+	return toLowerAscii(_CurMap->ContinentName);
 }
 
 //=========================================================================================================
 std::string CGroupMap::getMapTexture() const
 {
-	return toLower(_MapTexture);
+	return toLowerAscii(_MapTexture);
 }
 
 //=========================================================================================================
@@ -4005,7 +4004,7 @@ class CAHValidateUserLandMarkName : public IActionHandler
 			CGroupMap *map = dynamic_cast<CGroupMap *>(LastSelectedLandMark->getParent());
 			if (!map) return;
 			// update existing landmark
-			map->updateUserLandMark(LastSelectedLandMark, eb->getInputStringAsUtf16(), landMarkType);
+			map->updateUserLandMark(LastSelectedLandMark, ucstring::makeFromUtf8(eb->getInputString()), landMarkType);
 		}
 		else
 		{
@@ -4013,11 +4012,11 @@ class CAHValidateUserLandMarkName : public IActionHandler
 			if (!LastClickedMap) return;
 			if( UseUserPositionForLandMark )
 			{
-				LastClickedMap->addUserLandMark(LastClickedMap->getPlayerPos(), eb->getInputStringAsUtf16(), landMarkType);
+				LastClickedMap->addUserLandMark(LastClickedMap->getPlayerPos(), ucstring::makeFromUtf8(eb->getInputString()), landMarkType);
 			}
 			else
 			{
-				LastClickedMap->addUserLandMark(LastClickedMap->getRightClickLastPos(), eb->getInputStringAsUtf16(), landMarkType);
+				LastClickedMap->addUserLandMark(LastClickedMap->getRightClickLastPos(), ucstring::makeFromUtf8(eb->getInputString()), landMarkType);
 			}
 			LastClickedMap->invalidateCoords();
 		}

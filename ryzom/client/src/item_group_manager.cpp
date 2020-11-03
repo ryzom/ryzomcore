@@ -96,7 +96,7 @@ void CItemGroup::addItem(sint32 createTime, sint32 serial, SLOT_EQUIPMENT::TSlot
 
 void CItemGroup::addRemove(std::string slotName)
 {
-	SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpper(slotName));
+	SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpperAscii(slotName));
 	if(slot != SLOT_EQUIPMENT::UNDEFINED)
 		addRemove(slot);
 }
@@ -161,7 +161,7 @@ void CItemGroup::readFrom(xmlNodePtr node)
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"slot");
 			std::string slot;
 			if (ptrName) NLMISC::fromString((const char*)ptrName, slot);
-			item.slot = SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpper(slot));
+			item.slot = SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpperAscii(slot));
 			// Old read, keep for compatibility reasons
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"sheetName");
 			if (ptrName) NLMISC::fromString((const char*)ptrName, item.sheetName);
@@ -698,7 +698,7 @@ void CItemGroupManager::listGroup()
 	{
 		CItemGroup group = _Groups[i];
 		string msg = NLMISC::CI18N::get("cmdListGroupLine");
-		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		//Use utf-8 string because group name can contain accentued characters (and stuff like that)
 		string nameUC = group.name;
 		NLMISC::strFindReplace(msg, "%name", nameUC);
 		NLMISC::strFindReplace(msg, "%size", NLMISC::toString(group.Items.size()));

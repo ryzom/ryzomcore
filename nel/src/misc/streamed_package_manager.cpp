@@ -41,7 +41,7 @@ bool CStreamedPackageManager::loadPackage(const std::string &package)
 {
 	nldebug("Load package '%s'", package.c_str());
 
-	std::string packname = NLMISC::toLower(CFile::getFilename(package));
+	std::string packname = NLMISC::toLowerAscii(CFile::getFilename(package));
 	m_Packages[packname] = CStreamedPackage();
 	std::map<std::string, CStreamedPackage>::iterator it = m_Packages.find(packname);
 	CStreamedPackage &p = it->second;

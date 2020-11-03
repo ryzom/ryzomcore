@@ -327,9 +327,7 @@ void CMusicPlayer::rebuildPlaylist()
 				CViewText *pVT = dynamic_cast<CViewText *>(pNew->getView(TEMPLATE_PLAYLIST_SONG_TITLE));
 				if (pVT)
 				{
-					ucstring title;
-					title.fromUtf8(_Songs[i].Title);
-					pVT->setText(title.toUtf8());
+					pVT->setText(_Songs[i].Title);
 				}
 
 				pVT = dynamic_cast<CViewText *>(pNew->getView(TEMPLATE_PLAYLIST_SONG_DURATION));
@@ -584,19 +582,26 @@ static void addFromPlaylist(const std::string &playlist, const std::vector<std::
 
 			// id a UTF-8 BOM header is present, parse as UTF-8
 			if (!useUtf8 && lineStr.length() >= 3 && memcmp(line, utf8Header, 3) == 0)
+			{
 				useUtf8 = true;
+				lineStr = trim(std::string(line + 3));
+			}
 
 			if (!useUtf8)
 			{
-				lineStr = ucstring(line).toUtf8();
+				lineStr = NLMISC::mbcsToUtf8(line); // Attempt local codepage first
+				if (lineStr.empty())
+					lineStr = CUtfStringView::fromAscii(std::string(line)); // Fallback
 				lineStr = trim(lineStr);
 			}
+
+			lineStr = CUtfStringView(lineStr).toUtf8(true); // Re-encode external string
 
 			// Not a comment line
 			if (lineStr[0] != '#')
 			{
 				std::string filename = CPath::makePathAbsolute(CFile::getPath(lineStr), basePlaylist) + CFile::getFilename(lineStr);
-				std::string ext = toLower(CFile::getExtension(filename));
+				std::string ext = toLowerAscii(CFile::getExtension(filename));
 				if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
 				{
 					if (CFile::fileExists(filename))
@@ -648,7 +653,7 @@ void CMusicPlayer::createPlaylistFromMusic()
 
 	for (i = 0; i < filesToProcess.size(); ++i)
 	{
-		std::string ext = toLower(CFile::getExtension(filesToProcess[i]));
+		std::string ext = toLowerAscii(CFile::getExtension(filesToProcess[i]));
 		if (std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
 		{
 			filenames.push_back(filesToProcess[i]);

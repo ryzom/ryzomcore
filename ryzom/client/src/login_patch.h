@@ -56,7 +56,7 @@ public:
 class IPatchManagerStateListener
 {
 public:
-	virtual void setState (bool /* bOutputToLog */, const ucstring &/* ucsNewState */){}
+	virtual void setState (bool /* bOutputToLog */, const std::string &/* ucsNewState */){}
 };
 
 // Get Info of file to install
@@ -154,12 +154,12 @@ public:
 
 	// Get the string information about what the threads are doing
 	// Return true if the state has changed
-	bool getThreadState (ucstring &state, std::vector<ucstring> &stateLog);
+	bool getThreadState (std::string &state, std::vector<std::string> &stateLog);
 
 	/** Get the error message (filled after a patch of check)
 	  * May be empty if the cause of error is unknown or unhandled
 	  */
-	const ucstring &getLastErrorMessage() { return _ErrorMessage; }
+	const std::string &getLastErrorMessage() { return _ErrorMessage; }
 
 	// ---------------------
 	// First Part : Checking
@@ -235,7 +235,7 @@ public:
 	uint applyScanDataResult();
 
 	// get the current info Log for data Scan (true if some change from last get, else text is not filled)
-	bool getDataScanLog(ucstring &text);
+	bool getDataScanLog(std::string &text);
 
 	CProductDescriptionForClient &getDescFile() { return DescFile; }
 
@@ -285,7 +285,7 @@ private:
 	friend class CPatchThreadDownloadProgress;
 
 	// Set the thread state (called by threads to let us know what they are doing)
-	void setState (bool bOutputToLog, const ucstring &ucsState);
+	void setState (bool bOutputToLog, const std::string &ucsState);
 	void touchState();
 
 	/// Get the version of the server given during init()
@@ -329,7 +329,7 @@ private:
 	// add a file to the scan data log
 	void addDataScanLogCorruptedFile(const SFileToPatch &ftp);
 	void clearDataScanLog();
-	static void getCorruptedFileInfo(const SFileToPatch &ftp, ucstring &sTranslate);
+	static void getCorruptedFileInfo(const SFileToPatch &ftp, std::string &sTranslate);
 
 	static bool downloadAndUnpack(const std::string& patchPath, const std::string& sourceFilename, const std::string& extractPath, const std::string& tmpDirectory, uint32 timestamp);
 	// Forward message to Installation Software
@@ -403,7 +403,7 @@ private:
 	std::vector<SFileToPatch>		FilesToPatch;
 	std::vector<std::string>		OptionalCat;
 
-	ucstring						_ErrorMessage;
+	std::string						_ErrorMessage;
 
 	// Threads
 	CPatchThread	*PatchThread;
@@ -416,8 +416,8 @@ private:
 	// State
 	struct CState
 	{
-		ucstring					State;
-		std::vector<ucstring>		StateLog;
+		std::string					State;
+		std::vector<std::string>		StateLog;
 		bool						StateChanged;
 		CState()
 		{
@@ -469,7 +469,7 @@ private:
 	bool _StartRyzomAtEnd;
 public:
 	// used by threads to signal error at the end of execution
-	void setErrorMessage(const ucstring &message);
+	void setErrorMessage(const std::string &message);
 };
 
 /**

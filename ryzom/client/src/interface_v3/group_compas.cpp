@@ -89,7 +89,7 @@ void CCompassTarget::serial(NLMISC::IStream &f)
 	{
 		f.serial(Name);
 	}
-	std::string language = toLower(ClientCfg.LanguageCode);
+	std::string language = toLowerAscii(ClientCfg.LanguageCode);
 	f.serial(language);
 	f.serialEnum(_Type);
 	if (_Type == PosTracker)
@@ -115,7 +115,7 @@ void CCompassTarget::serial(NLMISC::IStream &f)
 	// reset the compass to north to avoid incoherency
 	if (f.isReading())
 	{
-		if (toLower(ClientCfg.LanguageCode) != language)
+		if (toLowerAscii(ClientCfg.LanguageCode) != language)
 		{
 			*this = CCompassTarget();
 		}
@@ -750,8 +750,8 @@ void CGroupCompasMenu::setActive (bool state)
 				/*CEntityCL *entity = EntitiesMngr.entity(UserEntity->selection());
 				if (entity != NULL)
 				{*/
-					//ucstring targetName = CI18N::get("uiTargetTwoPoint") + entity->removeTitleAndShardFromName(entity->getEntityName());
-					std::string targetName = CI18N::get("uiTarget");
+					//string targetName = CI18N::get("uiTargetTwoPoint") + entity->removeTitleAndShardFromName(entity->getEntityName());
+					string targetName = CI18N::get("uiTarget");
 					ct.setType(CCompassTarget::Selection);
 					ct.Name = targetName;
 					Targets.push_back(ct);

@@ -676,7 +676,7 @@ namespace NLGUI
 			else
 			if (it->first == "text-decoration" || it->first == "text-decoration-line")
 			{
-				std::string prop(toLower(it->second));
+				std::string prop(toLowerAscii(it->second));
 				style.Underlined = (prop.find("underline") != std::string::npos);
 				style.StrikeThrough = (prop.find("line-through") != std::string::npos);
 			}
@@ -924,7 +924,7 @@ namespace NLGUI
 			{
 				// normalize
 				std::string image = trim(it->second);
-				if (toLower(image.substr(0, 4)) == "url(")
+				if (toLowerAscii(image.substr(0, 4)) == "url(")
 				{
 					image = image.substr(4, image.size()-5);
 				}
@@ -934,7 +934,7 @@ namespace NLGUI
 			if (it->first == "background-repeat")
 			{
 				// normalize
-				std::string val = toLower(trim(it->second));
+				std::string val = toLowerAscii(trim(it->second));
 				std::vector<std::string> parts;
 				splitParams(val, ' ', parts);
 				// check for "repeat repeat"
@@ -947,7 +947,7 @@ namespace NLGUI
 			if (it->first == "background-size")
 			{
 				// normalize
-				std::string val = toLower(trim(it->second));
+				std::string val = toLowerAscii(trim(it->second));
 				std::vector<std::string> parts;
 				splitParams(val, ' ', parts);
 				if (parts.size() == 2 && parts[0] == parts[1])
@@ -999,7 +999,7 @@ namespace NLGUI
 		uint index = 0;
 		while(!failed && index < parts.size())
 		{
-			std::string val = toLower(parts[index]);
+			std::string val = toLowerAscii(parts[index]);
 			bool matches = false;
 			for(uint i = 0; i < nbProps; i++)
 			{
@@ -1028,7 +1028,7 @@ namespace NLGUI
 						// second loop -> false && break
 						loop = !loop;
 
-						val = toLower(parts[next]);
+						val = toLowerAscii(parts[next]);
 						if (val == "center")
 						{
 							if (bgPositionX.empty()) bgPositionX = "center";
@@ -1082,7 +1082,7 @@ namespace NLGUI
 						uint next = index + 1;
 						if (next < parts.size())
 						{
-							val = toLower(parts[next]);
+							val = toLowerAscii(parts[next]);
 							if (val == "cover" || val == "contain")
 							{
 								matches = true;
@@ -1106,7 +1106,7 @@ namespace NLGUI
 									next++;
 									if (next < parts.size())
 									{
-										val = toLower(parts[next]);
+										val = toLowerAscii(parts[next]);
 										if (val == "auto")
 											v = "auto";
 										else if (getCssLength(fval, unit, val))
@@ -1160,7 +1160,7 @@ namespace NLGUI
 							uint next = index + 1;
 							if (next < parts.size())
 							{
-								val = toLower(parts[next]);
+								val = toLowerAscii(parts[next]);
 								if (val == "repeat" || val == "space" || val == "round" || val == "no-repeat")
 								{
 									vert = val;
@@ -1334,7 +1334,7 @@ namespace NLGUI
 	bool CCssStyle::tryBorderWidthShorthand(const std::string &prop, const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		splitParams(toLower(value), ' ', parts);
+		splitParams(toLowerAscii(value), ' ', parts);
 		float tmpf;
 		std::string unit;
 
@@ -1371,7 +1371,7 @@ namespace NLGUI
 	bool CCssStyle::tryBorderStyleShorthand(const std::string &prop, const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		splitParams(toLower(value), ' ', parts);
+		splitParams(toLowerAscii(value), ' ', parts);
 
 		// verify that parts are valid
 		uint8 maxSize  = (prop == "border" || prop == "border-style") ? 4 : 1;
@@ -1420,7 +1420,7 @@ namespace NLGUI
 	bool CCssStyle::tryBorderColorShorthand(const std::string &prop, const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		splitParams(toLower(value), ' ', parts);
+		splitParams(toLowerAscii(value), ' ', parts);
 		CRGBA color;
 
 		// verify that parts are valid
@@ -1465,7 +1465,7 @@ namespace NLGUI
 
 		TStyle borderStyle;
 		std::vector<std::string> parts;
-		splitParams(toLower(value), ' ', parts);
+		splitParams(toLowerAscii(value), ' ', parts);
 
 		for(uint index = 0; index < parts.size(); ++index)
 		{
@@ -1530,7 +1530,7 @@ namespace NLGUI
 	void CCssStyle::expandPaddingShorthand(const std::string &value, TStyle &style) const
 	{
 		std::vector<std::string> parts;
-		splitParams(toLower(value), ' ', parts);
+		splitParams(toLowerAscii(value), ' ', parts);
 
 		uint8 t, r, b, l;
 		if (!getShorthandIndices(parts.size(), t, r, b, l))

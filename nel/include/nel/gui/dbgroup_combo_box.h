@@ -64,11 +64,15 @@ namespace NLGUI
 		void			setText(uint i, const std::string &text);
 		void			insertText(uint i, const std::string &text);
 		const std::string	&getText(uint i) const;
-		ucstring	getTextAsUtf16(uint i) const;
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring	getTextAsUtf16(uint i) const; // Compatibility
+#endif
 		uint			getTextId(uint i) const;
 		uint			getTextPos(uint nId) const;
 		const std::string	&getTexture(uint i) const;
-		ucstring	getTextureAsUtf16(uint i) const;
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring	getTextureAsUtf16(uint i) const; // Compatibility
+#endif
 		void			setGrayed(uint i, bool g);
 		bool			getGrayed(uint i) const;
 		void			removeText(uint nPos);
@@ -91,8 +95,10 @@ namespace NLGUI
 		// view text
 		void			setViewText(const std::string & text);
 		std::string		getViewText() const;
-		void			setViewTextAsUtf16(const ucstring &text) { setViewText(text.toUtf8()); }
-		ucstring		getViewTextAsUtf16() const;
+#ifdef RYZOM_LUA_UCSTRING
+		void			setViewTextAsUtf16(const ucstring &text) { setViewText(text.toUtf8()); } // Compatibility
+		ucstring		getViewTextAsUtf16() const; // Compatibility
+#endif
 		CViewText		*getViewText();
 
 		void			setTexture(uint i, const std::string &texture);
@@ -126,7 +132,11 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("resetTexts", luaResetTexts)
 			REFLECT_SINT32 ("selectionNb", getSelectionNb, setSelectionNb)
 			REFLECT_STRING ("selection_text", getSelectionText, setSelectionText)
-			REFLECT_UCSTRING ("view_text", getViewTextAsUtf16, setViewTextAsUtf16) // FIXME: Better to have UTF-8
+#ifdef RYZOM_LUA_UCSTRING
+			REFLECT_UCSTRING ("view_text", getViewTextAsUtf16, setViewTextAsUtf16) // Compatibility
+#else
+			REFLECT_STRING ("view_text", getViewText, setViewText)
+#endif
 		REFLECT_EXPORT_END
 
 

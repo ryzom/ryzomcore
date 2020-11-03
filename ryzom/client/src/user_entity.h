@@ -486,7 +486,7 @@ public:
 	/// true if current behaviour allows to change front
 	bool canChangeFront();
 
-	ucstring getLoginName()
+	string getLoginName()
 	{
 		if (_LoginName.empty())
 			_LoginName = getDisplayName();
@@ -785,7 +785,7 @@ private:
 	CItemSnapshot			_PreviousRightHandItem;
 	CItemSnapshot			_PreviousLeftHandItem;
 
-	ucstring _LoginName;
+	std::string _LoginName;
 };
 
 /// Out game received position

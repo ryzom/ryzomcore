@@ -246,7 +246,7 @@ public :
 	}
 private:
 	std::list<CCDBNodeLeaf *> _PendingMissionTitle;
-//	std::set<ucstring> _AlreadyReceived;
+//	std::set<std::string> _AlreadyReceived;
 };
 
 //-----------------------------------------------
@@ -2419,14 +2419,8 @@ CEntityCL *CEntityManager::getEntityByKeywords (const std::vector<string> &keywo
 //-----------------------------------------------
 CEntityCL *CEntityManager::getEntityByName (const string &name, bool caseSensitive, bool complete) const
 {
-	string source = name;
-	const uint size = (uint)source.size();
-	if (!caseSensitive)
-	{
-		uint j;
-		for (j=0; j<size; j++)
-			source[j] = tolower (source[j]);
-	}
+	string source;
+	source = caseSensitive ? name : toLower(name); // TODO: toLowerInsensitive
 
 	uint i;
 	const uint count = (uint)_Entities.size();
@@ -2437,15 +2431,8 @@ CEntityCL *CEntityManager::getEntityByName (const string &name, bool caseSensiti
 	{
 		if(_Entities[i])
 		{
-			string value = _Entities[i]->getDisplayName();
+			string value = caseSensitive ? _Entities[i]->getDisplayName() : toLower(_Entities[i]->getDisplayName()); // TODO: toLowerInsensitive
 			bool foundEntity = false;
-
-			uint j;
-			if (!caseSensitive)
-			{
-				for (j=0; j<value.size(); j++)
-					value[j] = tolower (value[j]);
-			}
 
 			// Complete test ?
 			if (complete)
@@ -2455,11 +2442,8 @@ CEntityCL *CEntityManager::getEntityByName (const string &name, bool caseSensiti
 			}
 			else
 			{
-				if (value.size() >= size)
-				{
-					if (std::operator==(source, value.substr (0, size)))
-						foundEntity = true;
-				}
+				if (NLMISC::startsWith(value, source))
+					foundEntity = true;
 			}
 
 			if (foundEntity)

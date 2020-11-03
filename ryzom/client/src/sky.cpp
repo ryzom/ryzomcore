@@ -288,7 +288,7 @@ CBitmap *buildSharedBitmap(const std::string &filename,
 {
 	alreadyBuilt = false;
 	if (filename.empty()) return NULL;
-	std::string lcBMFilename = toLower(CFile::getFilenameWithoutExtension(filename));
+	std::string lcBMFilename = toLowerAscii(CFile::getFilenameWithoutExtension(filename));
 	std::map<std::string, CBitmap *>::iterator it = bitmapByName.find(lcBMFilename);
 	if (it != bitmapByName.end())
 	{

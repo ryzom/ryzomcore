@@ -405,7 +405,7 @@ void impulseUserChars(NLMISC::CBitMemStream &impulse)
 		// if there's a new char for which a key set was wanted, create it now
 		for (uint k = 0; k < CharacterSummaries.size(); ++k)
 		{
-			if (toLower(CharacterSummaries[k].Name) == toLower(NewKeysCharNameValidated))
+			if (toLower(CharacterSummaries[k].Name.toUtf8()) == toLower(NewKeysCharNameValidated))
 			{
 				// first, stripes server name
 				copyKeySet(lookupSrcKeyFile(GameKeySet), "save/keys_" + buildPlayerNameForSaveFile(NewKeysCharNameValidated) + ".xml");
@@ -615,8 +615,8 @@ static CInterfaceChatDisplayer	InterfaceChatDisplayer;
 void CInterfaceChatDisplayer::colorizeSender(string &text, const string &senderName, CRGBA baseColor)
 {
 	// find the sender/text separator to put color tags
-	ucstring::size_type pos = senderName.length() - 1;
-	if (pos != ucstring::npos)
+	string::size_type pos = senderName.length() - 1;
+	if (pos != string::npos)
 	{
 		string str;
 
@@ -667,7 +667,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		for(;;)
 		{
 			string::size_type index = finalString.find("{break}");
-			if (index == ucstring::npos) break;
+			if (index == string::npos) break;
 			finalString = finalString.substr(0, index) + finalString.substr(index+7,finalString.size());
 		}
 
@@ -699,7 +699,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		if (!stringCategory.empty() && stringCategory != "SYS")
 		{
 			map<string, CClientConfig::SSysInfoParam>::const_iterator it;
-			it = ClientCfg.SystemInfoParams.find(toLower(stringCategory));
+			it = ClientCfg.SystemInfoParams.find(toLowerAscii(stringCategory));
 			if (it != ClientCfg.SystemInfoParams.end())
 			{
 				col = it->second.Color;
@@ -730,7 +730,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 	if( !stringCategory.empty() )
 	{
 		map<string, CClientConfig::SSysInfoParam>::const_iterator it;
-		it = ClientCfg.SystemInfoParams.find( toLower(stringCategory) );
+		it = ClientCfg.SystemInfoParams.find( toLowerAscii(stringCategory) );
 		if( it != ClientCfg.SystemInfoParams.end() )
 		{
 			if( !(*it).second.SysInfoFxName.empty() )
@@ -824,7 +824,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		else
 		{
 			string::size_type index = finalString.find("<BPFX>");
-			if (index != ucstring::npos)
+			if (index != string::npos)
 			{
 				bubbleWanted = false;
 				finalString = finalString.substr(index+6,finalString.size());
@@ -1020,7 +1020,7 @@ void inpulseDynStringInChatGroup(NLMISC::CBitMemStream &impulse)
 //	impulse.serialBit(huff);
 //
 //	uint32 index;
-//	ucstring ucstr;
+//	ucstring ucstr; // OLD
 //
 //	impulse.serial( index );
 //	impulse.serial( ucstr );
@@ -1114,15 +1114,15 @@ void setFakeNews ()
 
 			CViewText *inter2 = (CViewText *)inter->getView("title0");
 			nlassert (inter2 != NULL);
-			inter2->setText(ucstring(shortNews[rnd*3]));
+			inter2->setText(ucstring(shortNews[rnd*3])); // OLD
 
 			CViewText *inter3 = (CViewText *)inter->getView("title1");
 			nlassert (inter3 != NULL);
-			inter3->setText(ucstring(shortNews[rnd*3+1]));
+			inter3->setText(ucstring(shortNews[rnd*3+1])); // OLD
 
 			CViewText *inter4 = (CViewText *)inter->getView("title2");
 			nlassert (inter4 != NULL);
-			inter4->setText(ucstring(shortNews[rnd*3+2]));
+			inter4->setText(ucstring(shortNews[rnd*3+2])); // OLD
 		}
 		{ // set test for the neutral main
 			string iname;
@@ -1139,11 +1139,11 @@ void setFakeNews ()
 
 			CViewText *inter2 = (CViewText *)inter->getView("title0");
 			nlassert (inter2 != NULL);
-			inter2->setText(ucstring(shortNews[rnd*3]));
+			inter2->setText(ucstring(shortNews[rnd*3])); // OLD
 
 			CViewText *inter3 = (CViewText *)inter->getView("title1");
 			nlassert (inter3 != NULL);
-			inter3->setText(ucstring(shortNews[rnd*3+1]));
+			inter3->setText(ucstring(shortNews[rnd*3+1])); // OLD
 		}
 		{ // set test for the more news
 			string iname;
@@ -1160,15 +1160,15 @@ void setFakeNews ()
 
 			CViewText *inter2 = (CViewText *)inter->getView("title0");
 			nlassert (inter2 != NULL);
-			inter2->setText(ucstring(longNews[rnd*3]));
+			inter2->setText(ucstring(longNews[rnd*3])); // OLD
 
 			CViewText *inter3 = (CViewText *)inter->getView("title1");
 			nlassert (inter3 != NULL);
-			inter3->setText(ucstring(longNews[rnd*3+1]));
+			inter3->setText(ucstring(longNews[rnd*3+1])); // OLD
 
 			CViewText *inter4 = (CViewText *)inter->getView("title2");
 			nlassert (inter4 != NULL);
-			inter4->setText(ucstring(longNews[rnd*3+2]));
+			inter4->setText(ucstring(longNews[rnd*3+2])); // OLD
 		}
 	}
 }
@@ -1185,7 +1185,7 @@ void setFakeNews ()
 static void setupBotChatChoiceList(CInterfaceGroup *botChatGroup)
 {
 	// Temp for test. Should then be read from server msg
-	std::vector<ucstring> choices;
+	std::vector<string> choices;
 	for(uint k = 0; k < 90; ++k)
 	{
 		choices.push_back("Choice " + toString(k));
@@ -1200,7 +1200,7 @@ static void setupBotChatChoiceList(CInterfaceGroup *botChatGroup)
 /*
 static void setupBotChatDescription(CInterfaceGroup *botChatGroup)
 {
-	ucstring desc;
+	string desc;
 	for(uint k = 0; k < 90; ++k)
 	{
 		desc += "This is a multi line description. ";
@@ -1221,7 +1221,7 @@ static void setupBotChatBotGift(CInterfaceGroup *botChatGroup)
 	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:20:0:QUALITY")->setValue32(0);
 	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:20:1:SHEET")->setValue32(CSheetId("fyros_sword_lvl_01_05.item").asInt());
 	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:20:1:QUALITY")->setValue32(2);
-	CBotChat::setBotGift(botChatGroup, ucstring("Thanks to have succeeded the mission"), ucstring("Here's your reward"), ucstring("The bot has taken the object quest from your inventory"));
+	CBotChat::setBotGift(botChatGroup, "Thanks to have succeeded the mission", "Here's your reward", "The bot has taken the object quest from your inventory");
 }
 */
 
@@ -1587,8 +1587,8 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 
 	R2::TTeleportContext tpContext = R2::TPContext_Unknown;
 
-	ucstring tpReason;
-	ucstring tpCancelText;
+	string tpReason;
+	string tpCancelText;
 
 	try
 	{
@@ -1602,14 +1602,14 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 
 			uint32 size = (uint32)tpInfos.TpReasonParams.size();
 			uint32 first = 0;
-			CSString  str(tpReason.toString());
+			CSString  str(tpReason);
 			for (;first != size ; ++first)
 			{
 				std::string value = tpInfos.TpReasonParams[first];
 				std::string key = NLMISC::toString("%%%u", first +1);
 				str = str.replace( key.c_str(), value.c_str());
 			}
-			tpReason = ucstring(str);
+			tpReason = string(str);
 			tpCancelText = CI18N::get(tpInfos.TpCancelTextId);
 			tpContext = tpInfos.TpContext;
 		}
@@ -1617,16 +1617,16 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 	}
 	catch (const EStream &)
 	{
-		tpReason = ucstring("TP Reason");
-		tpCancelText = ucstring("Cancel TP"); // for test
+		tpReason = "TP Reason";
+		tpCancelText = "Cancel TP"; // for test
 		// try to deduce tp context from current editor mode
 		switch (R2::getEditor().getMode())
 		{
 			case R2::CEditor::EditionMode:
 			case R2::CEditor::NotInitialized:
 				tpContext = R2::TPContext_Unknown;
-				tpReason = ucstring();
-				tpCancelText = ucstring();
+				tpReason = string();
+				tpCancelText = string();
 			break;
 			case R2::CEditor::GoingToDMMode:
 			case R2::CEditor::TestMode:
@@ -1672,7 +1672,7 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 	//InitMouseWithCursor(oldHardwareCursor);
 
 	// reset 'cancel' button
-	ProgressBar.setTPMessages(ucstring(), ucstring(), "");
+	ProgressBar.setTPMessages(string(), string(), "");
 
 
 	// ProgressBar.enableQuitButton(false); // TMP TMP
@@ -1803,7 +1803,7 @@ void impulseTeamContactInit(NLMISC::CBitMemStream &impulse)
 {
 	vector<uint32> vFriendListName;
 	vector<TCharConnectionState> vFriendListOnline;
-	vector<ucstring> vIgnoreListName;
+	vector<ucstring> vIgnoreListName; // TODO: UTF-8 (serial)
 
 	impulse.serialCont(vFriendListName);
 	uint32 nbState;
@@ -2141,9 +2141,9 @@ void impulseWhere(NLMISC::CBitMemStream &impulse)
 void impulseWho(NLMISC::CBitMemStream &impulse)
 {
 	nlinfo("impulseWho Received");
-	CInterfaceManager::getInstance()->displaySystemInfo(ucstring("Players currently in the game :"));
+	CInterfaceManager::getInstance()->displaySystemInfo("Players currently in the game :");
 
-	ucstring name;
+	ucstring name; // OLD
 	uint32 loginId;
 	uint16 dist;
 	uint8 dirshort;
@@ -2181,7 +2181,7 @@ void impulseWho(NLMISC::CBitMemStream &impulse)
 		};
 
 		str = toString (" - uid %d - distance %hu meters - direction ", loginId, dist);
-		CInterfaceManager::getInstance()->displaySystemInfo(ucstring(name + ucstring(str) + CI18N::get(txts[direction])));
+		CInterfaceManager::getInstance()->displaySystemInfo(name + str + CI18N::get(txts[direction]));
 	}
 }// impulseWho //
 */
@@ -2190,9 +2190,9 @@ void impulseWho(NLMISC::CBitMemStream &impulse)
 void impulseWhoGM(NLMISC::CBitMemStream &impulse)
 {
 	nlinfo("impulseWhoGM Received");
-	CInterfaceManager::getInstance()->displaySystemInfo(ucstring("Players currently in the game :"));
+	CInterfaceManager::getInstance()->displaySystemInfo("Players currently in the game :");
 
-	ucstring name;
+	ucstring name; // OLD
 	uint32 loginId;
 	uint16 dist;
 	uint8 dirshort;
@@ -2230,7 +2230,7 @@ void impulseWhoGM(NLMISC::CBitMemStream &impulse)
 		};
 
 		str = toString (" - uid %d - distance %hu meters - direction ", loginId, dist);
-		CInterfaceManager::getInstance()->displaySystemInfo(ucstring(name + ucstring(str) + CI18N::get(txts[direction])));
+		CInterfaceManager::getInstance()->displaySystemInfo(name + str + CI18N::get(txts[direction]));
 	}
 }// impulseWho //
 */
@@ -2499,7 +2499,7 @@ void impulseRemoteAdmin (NLMISC::CBitMemStream &impulse)
 	impulse.serial (cmd);
 
 	// remove the 2 first rc character if exists, only there to say to the EGS that is a remote command
-	if (cmd.size()>2 && tolower(cmd[0])=='r' && tolower(cmd[1])=='c')
+	if (cmd.size()>2 && tolower(cmd[0])=='r' && tolower(cmd[1])=='c') // FIXME: toLowerAscii
 		cmd = cmd.substr(2);
 
 	mdDisplayVars.clear ();
@@ -3120,12 +3120,12 @@ void impulsePVPChooseClan(NLMISC::CBitMemStream &impulse)
 	CCtrlTextButton * butClan1 = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_clan_proposal:content:clan1"));
 	if( butClan1 == NULL )
 		return;
-	butClan1->setText( ucstring(EGSPD::CPeople::toString( clan1 )) );
+	butClan1->setText( EGSPD::CPeople::toString( clan1 ) );
 
 	CCtrlTextButton * butClan2 = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_clan_proposal:content:clan2"));
 	if( butClan2 == NULL )
 		return;
-	butClan2->setText( ucstring(EGSPD::CPeople::toString( clan2 )) );
+	butClan2->setText( EGSPD::CPeople::toString( clan2 ) );
 }
 */
 
@@ -3321,8 +3321,8 @@ private:
 			if(i!=digitMaxEnd)
 			{
 				// get the width
-				ucstring	digitStr= contentStr.substr(digitStart, i-digitStart);
-				fromString(digitStr.toString(), w);
+				string	digitStr= contentStr.substr(digitStart, i-digitStart);
+				fromString(digitStr, w);
 				// remove the first tag
 				contentStr= contentStr.substr(i+1);
 			}
@@ -4345,7 +4345,7 @@ NLMISC_COMMAND(testDuelInvite, "","")
 //{
 //	uint32 index;
 //	fromString(args[0], index);
-//	ucstring ucstr = args[1];
+//	ucstring ucstr = args[1]; // OLD
 //
 //	vector<bool> code;
 //

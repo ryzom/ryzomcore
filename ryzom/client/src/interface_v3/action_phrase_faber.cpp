@@ -117,7 +117,7 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 
 	if (!rootBrick->Properties.empty())
 	{
-		string prop= NLMISC::toUpper(rootBrick->Properties[0].Text);
+		string prop= NLMISC::toUpperAscii(rootBrick->Properties[0].Text);
 		vector<string>	strList;
 		splitString(prop, " ", strList);
 		// The prop Id should be 'FPLAN:'
@@ -188,8 +188,8 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 		window->setActive(true);
 
 		// Setup the Title with a default text
-		ucstring	title= CI18N::get("uiPhraseFaberExecuteNoPlan");
-		window->setUCTitle (title);
+		string	title= CI18N::get("uiPhraseFaberExecuteNoPlan");
+		window->setTitle (title);
 	}
 
 	// **** setup DB observer!
@@ -524,7 +524,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 				CViewText	*viewText= dynamic_cast<CViewText*>(itemReqLineGroup->getView(FaberPhraseText));
 				if(viewText)
 				{
-					ucstring	text;
+					string	text;
 					if(mpBuild.RequirementType==CMPBuild::ItemPartReq)
 					{
 						text= CI18N::get("uihelpFaberMpHeader");
@@ -538,7 +538,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 					{
 						nlstop;
 					}
-					viewText->setText( text.toUtf8() );
+					viewText->setText(text);
 				}
 
 				// Set as Icon the required MP FaberType / or Sheet Texture (directly...)
@@ -584,9 +584,9 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 	if(window)
 	{
 		// Setup the Title with the item built
-		ucstring	title= CI18N::get("uiPhraseFaberExecute");
+		string	title= CI18N::get("uiPhraseFaberExecute");
 		strFindReplace(title, "%item", STRING_MANAGER::CStringManagerClient::getItemLocalizedName(_ExecuteFromItemPlanBrick->FaberPlan.ItemBuilt) );
-		window->setUCTitle (title);
+		window->setTitle (title);
 	}
 
 
@@ -1701,7 +1701,7 @@ void	CActionPhraseFaber::updateItemResult()
 	CViewText	*successView= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseFpSuccessText));
 	if(successView)
 	{
-		ucstring	text= CI18N::get("uiPhraseFaberSuccessRate");
+		string	text= CI18N::get("uiPhraseFaberSuccessRate");
 		// Get the success rate of the related phrase
 		uint		phraseSlot= pPM->getMemorizedPhrase(_ExecuteFromMemoryLine, _ExecuteFromMemoryIndex);
 
@@ -1739,7 +1739,7 @@ void	CActionPhraseFaber::updateItemResult()
 				+ "@{FFFF})";
 		}
 		strFindReplace(text, "%success", successStr );
-		successView->setTextFormatTaged(text.toUtf8());
+		successView->setTextFormatTaged(text);
 	}
 
 

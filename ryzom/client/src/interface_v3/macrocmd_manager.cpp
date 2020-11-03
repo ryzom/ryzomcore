@@ -65,7 +65,7 @@ void CMacroCmd::writeTo (xmlNodePtr node) const
 	xmlNodePtr macroNode = xmlNewChild ( node, NULL, (const xmlChar*)"macro", NULL );
 
 	// Props
-	xmlSetProp (macroNode, (const xmlChar*)"name", (const xmlChar*)ucstring(Name).toUtf8().c_str());
+	xmlSetProp (macroNode, (const xmlChar*)"name", (const xmlChar*)Name.c_str());
 	xmlSetProp (macroNode, (const xmlChar*)"id",   (const xmlChar*)toString(ID).c_str());
 	xmlSetProp (macroNode, (const xmlChar*)"back", (const xmlChar*)toString(BitmapBack).c_str());
 	xmlSetProp (macroNode, (const xmlChar*)"icon", (const xmlChar*)toString(BitmapIcon).c_str());
@@ -86,12 +86,7 @@ bool CMacroCmd::readFrom (xmlNodePtr node)
 	CXMLAutoPtr ptrName;
 
 	ptrName = (char*) xmlGetProp( node, (xmlChar*)"name" );
-	if (ptrName)
-	{
-		ucstring ucName;
-		ucName.fromUtf8((const char*)ptrName);
-		Name = ucName.toString();
-	}
+	if (ptrName) Name = (const char *)ptrName;
 
 	ptrName = (char*) xmlGetProp( node, (xmlChar*)"id" );
 	if (ptrName) fromString((const char*)ptrName, ID);
@@ -818,7 +813,7 @@ public:
 REGISTER_ACTION_HANDLER( CHandlerNewMacroCmdDelete, "new_macro_cmd_delete");
 
 // ***************************************************************************
-void addCommandLine (CGroupList *pParent, uint cmdNb, const ucstring &cmdName)
+void addCommandLine (CGroupList *pParent, uint cmdNb, const string &cmdName)
 {
 	CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 
@@ -828,7 +823,7 @@ void addCommandLine (CGroupList *pParent, uint cmdNb, const ucstring &cmdName)
 	if (pNewCmd == NULL) return;
 
 	CViewText *pVT = dynamic_cast<CViewText*>(pNewCmd->getView(TEMPLATE_NEWMACRO_COMMAND_TEXT));
-	if (pVT != NULL) pVT->setText(cmdName.toUtf8());
+	if (pVT != NULL) pVT->setText(cmdName);
 
 	pNewCmd->setParent (pParent);
 	pParent->addChild (pNewCmd);
@@ -906,7 +901,7 @@ public:
 
 		for (uint i = 0; i < pMCM->CurrentEditMacro.Commands.size(); ++i)
 		{
-			ucstring commandName;
+			string commandName;
 			for (uint j = 0; j < pMCM->ActionManagers.size(); ++j)
 			{
 				CAction::CName c(pMCM->CurrentEditMacro.Commands[i].Name.c_str(), pMCM->CurrentEditMacro.Commands[i].Params.c_str());

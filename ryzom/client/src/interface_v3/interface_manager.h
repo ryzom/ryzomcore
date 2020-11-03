@@ -241,7 +241,7 @@ public:
 	// Log system (all chat/tell
 	void setLogState(bool state) { _LogState = state; }
 	bool getLogState() const { return _LogState; }
-	void log(const ucstring &str, const std::string &cat = "");
+	void log(const std::string &str, const std::string &cat = "");
 
 	/// Text from here and from server
 
@@ -305,12 +305,12 @@ public:
 	/** Open a MessageBox. this is a simple ModalWindow with a Ok button
 	 *	ui:interface:message_box must be defined in xml, with a "text" ViewText son
 	 */
-	void	messageBox(const ucstring &text, const std::string &masterGroup="ui:interface", TCaseMode caseMode = CaseFirstSentenceLetterUp);
+	void	messageBox(const std::string &text, const std::string &masterGroup="ui:interface", TCaseMode caseMode = CaseFirstSentenceLetterUp);
 	/** Open a MessageBox. this is a simple ModalWindow with a Ok and a HELP button.
 	 *  The help button with open a browser on ryzom.com faq
 	 *	ui:interface:message_box_with_help must be defined in xml, with a "text" ViewText son
 	 */
-	void	messageBoxWithHelp(const ucstring &text, const std::string &masterGroup="ui:interface",
+	void	messageBoxWithHelp(const std::string &text, const std::string &masterGroup="ui:interface",
 							   const std::string &ahOnOk = std::string(), const std::string &paramsOnOk= std::string(),
 							   TCaseMode caseMode = CaseFirstSentenceLetterUp);
 
@@ -321,7 +321,7 @@ public:
 	 *	\param ahOnCancel => the action handler to call if cancel is pressed. NB: you don't have to call leave_modal in this ah (auto done).
 	 *	\param paramsOnCancel => params passed to ahOnCancel.
 	 */
-	void	validMessageBox(TValidMessageIcon icon, const ucstring &text, const std::string &ahOnOk, const std::string &paramsOnOk= std::string(),
+	void	validMessageBox(TValidMessageIcon icon, const std::string &text, const std::string &ahOnOk, const std::string &paramsOnOk= std::string(),
 		const std::string &ahOnCancel= std::string(), const std::string &paramsOnCancel= std::string(), const std::string &masterGroup="ui:interface");
 
 	/** Get the current running validMessageBox OnOk action. empty if no validMessageBox currently opened
@@ -446,7 +446,7 @@ public:
 	 */
 	static char* getTimestampHuman(const char* format = "[%H:%M:%S] ");
 
-	/** Parses any tokens in the ucstring like $t$ or $g()$
+	/** Parses any tokens in the utf-8 string like $t$ or $g()$
 	 */
 	static bool parseTokens(std::string& ucstr);
 
@@ -672,7 +672,7 @@ private:
 	CServerToLocalAutoCopy ServerToLocalAutoCopyDMGift;
 
 	// Pop a new message box. If the message box was found, returns a pointer on it
-	void messageBoxInternal(const std::string &msgBoxGroup, const ucstring &text, const std::string &masterGroup, TCaseMode caseMode);
+	void messageBoxInternal(const std::string &msgBoxGroup, const std::string &text, const std::string &masterGroup, TCaseMode caseMode);
 
 	CInterfaceLink::CInterfaceLinkUpdater *interfaceLinkUpdater;
 };

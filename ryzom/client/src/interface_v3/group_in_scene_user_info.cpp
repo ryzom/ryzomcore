@@ -212,10 +212,10 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 		entityTitle.clear();
 	}
 
-	ucstring entityTag1 = entity->getTag(1);
-	ucstring entityTag2 = entity->getTag(2);
-	ucstring entityTag3 = entity->getTag(3);
-	ucstring entityTag4 = entity->getTag(4);
+	string entityTag1 = entity->getTag(1);
+	string entityTag2 = entity->getTag(2);
+	string entityTag3 = entity->getTag(3);
+	string entityTag4 = entity->getTag(4);
 
 	string entityPermanentContent = entity->getPermanentStatutIcon();
 
@@ -472,10 +472,10 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 				CViewBitmap *rp3 = dynamic_cast<CViewBitmap*>(info->getView ("rp_logo_3"));
 				CViewBitmap *rp4 = dynamic_cast<CViewBitmap*>(info->getView ("rp_logo_4"));
 
-				if (entityTag1.toString() == "_") entityTag1.clear();
-				if (entityTag2.toString() == "_") entityTag2.clear();
-				if (entityTag3.toString() == "_") entityTag3.clear();
-				if (entityTag4.toString() == "_") entityTag4.clear();
+				if (entityTag1 == "_") entityTag1.clear();
+				if (entityTag2 == "_") entityTag2.clear();
+				if (entityTag3 == "_") entityTag3.clear();
+				if (entityTag4 == "_") entityTag4.clear();
 
 				if (pPlayer && (pPlayer->getPvpMode() == PVP_MODE::None))
 				{
@@ -483,10 +483,10 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 					entityTag2.clear();
 				}
 
-				if (rp1) rp1->setTexture(entityTag1.toString());
-				if (rp2) rp2->setTexture(entityTag2.toString());
-				if (rp3) rp3->setTexture(entityTag3.toString());
-				if (rp4) rp4->setTexture(entityTag4.toString());
+				if (rp1) rp1->setTexture(entityTag1);
+				if (rp2) rp2->setTexture(entityTag2);
+				if (rp3) rp3->setTexture(entityTag3);
+				if (rp4) rp4->setTexture(entityTag4);
 
 				// hide if texture is empty
 				if (rp1) rp1->setActive(!entityTag1.empty());
@@ -973,14 +973,14 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 	{
 		_Name->setColor(entityColor);
 		_Name->setModulateGlobalColor(false);
-		ucstring entityName = _Entity->getDisplayName();
+		string entityName = _Entity->getDisplayName();
 		if (entityName.empty())
 			entityName = _Entity->getTitle();
 
 		if (pPlayer != NULL)
 			if (pPlayer->isAFK())
 				entityName += CI18N::get("uiAFK");
-		_Name->setText(entityName.toUtf8());
+		_Name->setText(entityName);
 
 		// Title color get the PVP color
 		if (_Title)

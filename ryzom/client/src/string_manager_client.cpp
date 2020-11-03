@@ -977,7 +977,7 @@ restartLoop:
 		return referenceFile;
 	}
 
-	void CLoadProxy::loadStringFile(const string &filename, ucstring &text)
+	void CLoadProxy::loadStringFile(const string &filename, ucstring &text) // TODO: UTF-8 (serial)
 	{
 		vector<TStringInfo>	reference;
 		vector<TStringInfo> addition;
@@ -1021,7 +1021,7 @@ restartLoop:
 		context.Diff.push_back(context.Addition[addIndex]);
 		//nldebug("Adding new string '%s' in CI18N", context.Addition[addIndex].Identifier.c_str());
 		if (ClientCfg.DebugStringManager)
-			context.Diff.back().Text = ucstring("<NEW>")+context.Diff.back().Text;
+			context.Diff.back().Text = ucstring("<NEW>")+context.Diff.back().Text; // TODO: UTF-8 (serial)
 	}
 	void CLoadProxy::onRemove(uint /* addIndex */, uint /* refIndex */, TStringDiffContext &/* context */)
 	{
@@ -1033,7 +1033,7 @@ restartLoop:
 		context.Diff.push_back(context.Addition[addIndex]);
 		//nldebug("Using changed string '%s' in CI18N", context.Addition[addIndex].Identifier.c_str());
 		if (ClientCfg.DebugStringManager)
-			context.Diff.back().Text = ucstring("<CHG>")+context.Diff.back().Text;
+			context.Diff.back().Text = ucstring("<CHG>")+context.Diff.back().Text; // TODO: UTF-8 (serial)
 	}
 	void CLoadProxy::onSwap(uint /* newIndex */, uint /* refIndex */, TStringDiffContext &/* context */)
 	{
@@ -1047,7 +1047,7 @@ restartLoop:
 class CReadWorkSheetFile : public TWorkSheetDiff::IDiffCallback
 {
 public:
-	void readWorkSheetFile(const string &filename, ucstring &text)
+	void readWorkSheetFile(const string &filename, ucstring &text) // TODO: UTF-8 (serial)
 	{
 		TWorksheet	addition;
 		TWorksheet	reference;
@@ -1184,9 +1184,9 @@ bool CStringManagerClient::checkWordFileDates(vector<CFileCheck> &fileChecks, co
 // ***************************************************************************
 void CStringManagerClient::initI18NSpecialWords(const string &languageCode)
 {
-	ucstring womenNameColIdent = "women_name";
-	ucstring descColIdent = "description";
-	ucstring descColIdent2 = "description2";
+	ucstring womenNameColIdent = ucstring("women_name"); // TODO: UTF-8 (serial)
+	ucstring descColIdent = ucstring("description"); // TODO: UTF-8 (serial)
+	ucstring descColIdent2 = ucstring("description2"); // TODO: UTF-8 (serial)
 
 	// List of words to append to the local CI18N system.
 	static const char	*specialWords[]=
@@ -1225,11 +1225,11 @@ void CStringManagerClient::initI18NSpecialWords(const string &languageCode)
 		{
 			uint32	profile0= (uint32)ryzomGetLocalTime();
 
-			ucstring ucs;
+			ucstring ucs; // TODO: UTF-8 (serial)
 			string fileName = fileNames[i];
 			string keyExtenstion = specialWords[i*3+2];
 
-			// read the ucstring and make diffs with data in ./translation/work.
+			// read the ucstring and make diffs with data in ./translation/work. // TODO: UTF-8 (serial)
 			CReadWorkSheetFile	rwsf;
 			rwsf.readWorkSheetFile(fileName, ucs);
 			if(ucs.empty())
@@ -1241,9 +1241,9 @@ void CStringManagerClient::initI18NSpecialWords(const string &languageCode)
 
 			// Get the Key and Data ColIndex.
 			uint	nameColIndex = 0, keyColIndex = 0;
-			if( !ws.findCol(ucstring("name"), nameColIndex) )
+			if( !ws.findCol(ucstring("name"), nameColIndex) ) // TODO: UTF-8 (serial)
 				continue;
-			if( !ws.findCol(ucstring(specialWords[i*3+1]), keyColIndex) )
+			if( !ws.findCol(ucstring(specialWords[i*3+1]), keyColIndex) ) // TODO: UTF-8 (serial)
 				continue;
 
 			// Get the women name index if possible.
@@ -1267,7 +1267,7 @@ void CStringManagerClient::initI18NSpecialWords(const string &languageCode)
 				string name= ws.getData(j, nameColIndex).toUtf8(); // FIXME: const string & when UTF-8
 				// Append to the I18N.
 				// avoid case problems
-				string keyStr = NLMISC::toLower(key);
+				string keyStr = NLMISC::toLowerAscii(key);
 
 				// append the special key extension.
 				keyStr+= keyExtenstion;
@@ -1288,7 +1288,7 @@ void CStringManagerClient::initI18NSpecialWords(const string &languageCode)
 					// insert in map of Women Name if OK.
 					if(womenNameColIndex!=std::numeric_limits<uint>::max())
 					{
-						const ucstring &womenName= ws.getData(j, womenNameColIndex);
+						const ucstring &womenName= ws.getData(j, womenNameColIndex); // TODO: UTF-8 (serial)
 						_SpecItem_TempMap[keyStr].WomenName= womenName.toUtf8();
 						// replace all \n in the women name with true \n
 						while(strFindReplace(_SpecItem_TempMap[keyStr].WomenName, "\\n", "\n"));
@@ -1297,7 +1297,7 @@ void CStringManagerClient::initI18NSpecialWords(const string &languageCode)
 					// insert in map of Description if OK.
 					if(descColIndex!=std::numeric_limits<uint>::max())
 					{
-						const ucstring &desc= ws.getData(j, descColIndex);
+						const ucstring &desc= ws.getData(j, descColIndex); // TODO: UTF-8 (serial)
 						_SpecItem_TempMap[keyStr].Desc= desc.toUtf8();
 						// replace all \n in the desc with true \n
 						while(strFindReplace(_SpecItem_TempMap[keyStr].Desc, "\\n", "\n"));
@@ -1306,7 +1306,7 @@ void CStringManagerClient::initI18NSpecialWords(const string &languageCode)
 					// insert in map of Description2 if OK.
 					if(descColIndex2!=std::numeric_limits<uint>::max())
 					{
-						const ucstring &desc= ws.getData(j, descColIndex2);
+						const ucstring &desc= ws.getData(j, descColIndex2); // TODO: UTF-8 (serial)
 						_SpecItem_TempMap[keyStr].Desc2= desc.toUtf8();
 						// replace all \n in the desc with true \n
 						while(strFindReplace(_SpecItem_TempMap[keyStr].Desc2, "\\n", "\n"));
@@ -1429,7 +1429,7 @@ const char *CStringManagerClient::getSpecialWord(const string &label, bool women
 
 	// avoid case problems
 	static string lwrLabel;
-	lwrLabel = toLower(label);
+	lwrLabel = toLowerAscii(label);
 
 	if (_SpecItem_MemoryCompressed)
 	{
@@ -1476,7 +1476,7 @@ const char *CStringManagerClient::getSpecialDesc(const string &label)
 
 	// avoid case problems
 	static string lwrLabel;
-	lwrLabel = toLower(label);
+	lwrLabel = toLowerAscii(label);
 
 	if (_SpecItem_MemoryCompressed)
 	{
@@ -1509,7 +1509,7 @@ const char *CStringManagerClient::getSpecialDesc2(const string &label)
 
 	// avoid case problems
 	static string lwrLabel;
-	lwrLabel = toLower(label);
+	lwrLabel = toLowerAscii(label);
 
 	if (_SpecItem_MemoryCompressed)
 	{
@@ -1635,13 +1635,13 @@ const char *CStringManagerClient::getTitleLocalizedName(const string &titleId, b
 }
 
 
-const ucchar *CStringManagerClient::getLocalizedName(const ucstring &uctext)
+const char *CStringManagerClient::getLocalizedName(const string &uctext)
 {
-	string text = uctext.toUtf8();
+	string text = uctext;
 	if (text[0] == '[')
 	{
 		vector<string> textLocalizations;
-		static ucstring defaultText;
+		static string defaultText;
 		splitString(text.substr(1), "[", textLocalizations);
 		if (!textLocalizations.empty())
 		{
@@ -1649,12 +1649,12 @@ const ucchar *CStringManagerClient::getLocalizedName(const ucstring &uctext)
 			{
 				if (textLocalizations[i].substr(0, 3) == CI18N::getCurrentLanguageCode()+"]")
 				{
-					defaultText.fromUtf8(textLocalizations[i].substr(3));
+					defaultText = textLocalizations[i].substr(3);
 					return defaultText.c_str();
 				}
 				else if (textLocalizations[i].substr(0, 3) == "wk]")
 				{
-					defaultText.fromUtf8(textLocalizations[i].substr(3));
+					defaultText = textLocalizations[i].substr(3);
 				}
 			}
 		}
@@ -1742,7 +1742,7 @@ void CStringManagerClient::replaceSBrickName(NLMISC::CSheetId id, const std::str
 
 	// avoid case problems
 	static string lwrLabel;
-	lwrLabel = toLower(label);
+	lwrLabel = toLowerAscii(label);
 
 	nlassert(!_SpecItem_MemoryCompressed); // Not allowed, strings are released!
 	if (_SpecItem_MemoryCompressed)

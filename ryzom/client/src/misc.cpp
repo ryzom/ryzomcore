@@ -879,13 +879,13 @@ NLMISC::CRGBA interpClientCfgColor(const string &src, string &dest)
 		if (src[0] == '&')
 		{
 			string::size_type nextPos = src.find('&', 1);
-			if (nextPos != ucstring::npos)
+			if (nextPos != string::npos)
 			{
 				std::string colorCode;
 				colorCode.resize(nextPos - 1);
 				for(uint k = 0; k < nextPos - 1; ++k)
 				{
-					colorCode[k] = tolower((char) src[k + 1]);
+					colorCode[k] = tolower((char) src[k + 1]); // TODO: toLowerAscii
 				}
 				std::map<std::string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(colorCode);
 				if (it != ClientCfg.SystemInfoParams.end())
@@ -953,7 +953,7 @@ std::string getStringCategoryIfAny(const string &src, string &dest)
 				colorCode.resize( codeSize );
 				for(ptrdiff_t k = 0; k < (ptrdiff_t)codeSize; ++k)
 				{
-					colorCode[k] = tolower((char) src[k + startPos + 1]);
+					colorCode[k] = tolower((char) src[k + startPos + 1]); // TODO: toLowerAscii
 				}
 				string destTmp;
 				if ( startPos != 0 )
@@ -980,7 +980,7 @@ std::string getStringCategoryIfAny(const string &src, string &dest)
 
 
 // ***************************************************************************
-sint ucstrnicmp(const ucstring &s0, uint p0, uint n0, const ucstring &s1)
+sint ucstrnicmp(const ucstring &s0, uint p0, uint n0, const ucstring &s1) // OLD
 {
 	// start
 	const ucchar	*start1= s1.c_str();

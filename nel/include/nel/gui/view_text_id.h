@@ -39,7 +39,7 @@ namespace NLGUI
 	public:
 		virtual ~IOnReceiveTextId() {}
 		// the deriver may change the input text
-		virtual	void	onReceiveTextId(ucstring &str) =0;
+		virtual	void	onReceiveTextId(std::string &str) =0;
 	};
 
 	// ***************************************************************************
@@ -145,7 +145,7 @@ namespace NLGUI
 		// If true, setTextFormatted() is used instead of setText()
 		bool					_IsTextFormatTaged;
 
-		// Optional ucstring modifier
+		// Optional utf-8 string modifier
 		IOnReceiveTextId		*_StringModifier;
 		std::string				_DBPath;
 		static IViewTextProvider* getTextProvider(){ return textProvider; }

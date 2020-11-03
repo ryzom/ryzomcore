@@ -542,7 +542,7 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_normal" );
 		if (prop)
 		{
-			string TxName = toLower(std::string((const char *) prop));
+			string TxName = toLowerAscii(std::string((const char *) prop));
 			_TextureIdNormal[0].setTexture((TxName+"_l.tga").c_str());
 			_TextureIdNormal[1].setTexture((TxName+"_m.tga").c_str());
 			_TextureIdNormal[2].setTexture((TxName+"_r.tga").c_str());
@@ -551,7 +551,7 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_pushed" );
 		if (prop)
 		{
-			string TxName = toLower(std::string((const char *) prop));
+			string TxName = toLowerAscii(std::string((const char *) prop));
 			_TextureIdPushed[0].setTexture((TxName+"_l.tga").c_str());
 			_TextureIdPushed[1].setTexture((TxName+"_m.tga").c_str());
 			_TextureIdPushed[2].setTexture((TxName+"_r.tga").c_str());
@@ -560,7 +560,7 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_over" );
 		if (prop)
 		{
-			string TxName = toLower(std::string((const char *) prop));
+			string TxName = toLowerAscii(std::string((const char *) prop));
 			_TextureIdOver[0].setTexture((TxName+"_l.tga").c_str());
 			_TextureIdOver[1].setTexture((TxName+"_m.tga").c_str());
 			_TextureIdOver[2].setTexture((TxName+"_r.tga").c_str());
@@ -1051,6 +1051,20 @@ namespace NLGUI
 		return std::string();
 	}
 
+	void CCtrlTextButton::setLocalize(bool localize)
+	{
+		if (_ViewText && !_IsViewTextId)
+			_ViewText->setLocalized(localize);
+	}
+
+	bool CCtrlTextButton::isLocalized() const
+	{
+		if (_ViewText && !_IsViewTextId)
+			return _ViewText->isLocalized();
+		return true;
+	}
+
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	void CCtrlTextButton::setTextAsUtf16 (const ucstring &text)
 	{
@@ -1065,6 +1079,7 @@ namespace NLGUI
 			return CUtfStringView(_ViewText->getText()).toUtf16();
 		return ucstring("");
 	}
+#endif
 
 	// ***************************************************************************
 	void CCtrlTextButton::setHardText (const std::string &text)

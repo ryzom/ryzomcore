@@ -250,7 +250,7 @@ void CBotChatPageTrade::begin()
 	if (gc)
 	{
 		// set the title
-		gc->setUCTitle(_Title);
+		gc->setTitle(_Title);
 		// show the buy mean
 		CInterfaceGroup *money = dynamic_cast<CInterfaceGroup *>(gc->getGroup("money"));
 		if (money) money->setActive((_BuyMean == Money) || (_BuyMean == MoneyFactionPoints));
@@ -1012,9 +1012,9 @@ void CBotChatPageTrade::startSellDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCal
 	CViewText *itemNameView = dynamic_cast<CViewText *>(ig->getView("object_name"));
 	if (itemNameView)
 	{
-		ucstring itemName;
+		string itemName;
 		itemName = sheet->getItemActualName();
-		itemNameView->setText(itemName.toUtf8());
+		itemNameView->setText(itemName);
 	}
 
 	// set help for item
@@ -1679,21 +1679,21 @@ void	CBotChatPageTrade::setupFactionPointPrice(bool /* sellMode */, uint default
 		CViewText	*vt= dynamic_cast<CViewText*>(fpGroup->getView("unit_price_header"));
 		if(vt)
 		{
-			ucstring	fmt= CI18N::get("uiUnitFPPrice");
+			string	fmt= CI18N::get("uiUnitFPPrice");
 			strFindReplace(fmt, "%fac", factionName);
-			vt->setText(fmt.toUtf8());
+			vt->setText(fmt);
 		}
 		vt= dynamic_cast<CViewText*>(fpGroup->getView("total_price_header"));
 		if(vt)
 		{
-			ucstring	fmt= CI18N::get("uiTotalFPPrice");
+			string	fmt= CI18N::get("uiTotalFPPrice");
 			strFindReplace(fmt, "%fac", factionName);
-			vt->setText(fmt.toUtf8());
+			vt->setText(fmt);
 		}
 
 		// setup icon according to pvp clan
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		factionName = NLMISC::toLower(factionName);
+		factionName = NLMISC::toLowerAscii(factionName);
 		string	factionIcon= CWidgetManager::getInstance()->getParser()->getDefine(toString("faction_icon_%s", factionName.c_str()));
 		CViewBitmap		*vBmp= dynamic_cast<CViewBitmap*>(fpGroup->getView("unit_price:item_price:icone"));
 		if(vBmp)	vBmp->setTexture(factionIcon);

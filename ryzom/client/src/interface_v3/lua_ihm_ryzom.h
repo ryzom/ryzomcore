@@ -165,26 +165,48 @@ private:
 
 	static void	getCallStackAsString(int startStackLevel, std::string &result);
 	static std::string	getDefine(const std::string &def);
+#ifdef RYZOM_LUA_UCSTRING
 	static void			setContextHelpText(const ucstring &text);
+#else
+	static void			setContextHelpText(const std::string &text);
+#endif
 
 
+#ifdef RYZOM_LUA_UCSTRING
 	static void	messageBox(const ucstring &text);
 	static void	messageBox(const ucstring &text, const std::string &masterGroup);
 	static void	messageBox(const ucstring &text, const std::string &masterGroup, int caseMode);
+#endif
 	static void	messageBox(const std::string &text);
+	static void	messageBox(const std::string &text, const std::string &masterGroup);
+	static void	messageBox(const std::string &text, const std::string &masterGroup, int caseMode);
+#ifdef RYZOM_LUA_UCSTRING
 	static void	messageBoxWithHelp(const ucstring &text);
 	static void	messageBoxWithHelp(const ucstring &text, const std::string &masterGroup);
 	static void	messageBoxWithHelp(const ucstring &text, const std::string &masterGroup, int caseMode);
+#endif
 	static void	messageBoxWithHelp(const std::string &text);
+	static void	messageBoxWithHelp(const std::string &text, const std::string &masterGroup);
+	static void	messageBoxWithHelp(const std::string &text, const std::string &masterGroup, int caseMode);
 
-	static ucstring	replacePvpEffectParam(const ucstring &str, sint32 parameter);
+#ifdef RYZOM_LUA_UCSTRING
+	static ucstring	replacePvpEffectParam(const ucstring &str, sint32 parameter); // TODO: UTF-8 Lua
+#else
+	static std::string	replacePvpEffectParam(const std::string &str, sint32 parameter); // TODO: UTF-8 Lua
+#endif
 	static sint32 secondsSince1970ToHour(sint32 seconds);
+#ifdef RYZOM_BG_DOWNLOADER
 	static void	pauseBGDownloader();
 	static void	unpauseBGDownloader();
 	static void	requestBGDownloaderPriority(uint priority);
 	static sint	getBGDownloaderPriority();
+#endif
 	static void	loadBackground(const std::string &bg);
+#ifdef RYZOM_LUA_UCSTRING
 	static ucstring	getPatchLastErrorMessage();
+#else
+	static std::string	getPatchLastErrorMessage();
+#endif
 	static bool	isInGame();
 	static uint32 getPlayerSelectedSlot();
 	static bool	isPlayerSlotNewbieLand(uint32 slot);  // test if one of the player slot is a newbieland one, if not so, client must be patched in order to continue
@@ -193,14 +215,22 @@ private:
 	static ucstring	getSheetLocalizedName(const std::string &sheet);
 	static ucstring	getSheetLocalizedDesc(const std::string &sheet);
 	static sint32 getSkillIdFromName(const std::string &def);
+#ifdef RYZOM_LUA_UCSTRING
 	static ucstring	getSkillLocalizedName(sint32 skillId);
+#else
+	static std::string	getSkillLocalizedName(sint32 skillId);
+#endif
 	static sint32 getMaxSkillValue(sint32 skillId);
 	static sint32 getBaseSkillValueMaxChildren(sint32 skillId);
 	static sint32 getMagicResistChance(bool elementalSpell, sint32 casterSpellLvl, sint32 victimResistLvl);
 	static sint32 getDodgeParryChance(sint32 attLvl, sint32 defLvl);
 	static void	browseNpcWebPage(const std::string &htmlId, const std::string &url, bool addParameters, double timeout);
 	static void	clearHtmlUndoRedo(const std::string &htmlId);
+#ifdef RYZOM_LUA_UCSTRING
 	static ucstring	getDynString(sint32 dynStringId);
+#else
+	static std::string	getDynString(sint32 dynStringId);
+#endif
 	static bool	isDynStringAvailable(sint32 dynStringId);
 	static bool	isFullyPatched();
 	static std::string getSheetType(const std::string &sheet);
@@ -255,13 +285,21 @@ private:
 
 	// open the window to do a tell to 'player', if 'msg' is not empty, then the message will be sent immediatly
     // else, current command of the chat window will be replaced with tell 'player'
+#ifdef RYZOM_LUA_UCSTRING
 	static void	tell(const ucstring &player, const ucstring &msg);
+#else
+	static void	tell(const std::string &player, const std::string &msg);
+#endif
 	static bool isRingAccessPointInReach();
 	static void updateTooltipCoords();
 	// test if the ctrl key is down (NB nico : I didn't add other key,
 	// because it would be too easy to write a key recorder ...)
 	static bool	isCtrlKeyDown(); 							     
+#ifdef RYZOM_LUA_UCSTRING
 	static std::string encodeURLUnicodeParam(const ucstring &text);
+#else
+	static std::string encodeURLUnicodeParam(const std::string &text);
+#endif
 	static std::string encodeURLParam(const std::string &text);
 
 	static std::string encodeToHexa(const std::string &text);
@@ -276,8 +314,12 @@ private:
 	static sint64 getPlayerVpc();
 	static sint32 getTargetLevel();		// get current, precise level of the selected target, or -1 if there's no such selected target
 	static sint32 getTargetForceRegion(); // get 'force region' for current target, or -1 if there's no selected target
-	static sint32 getTargetLevelForce();	// get 'level force' for current target, or -1 if there's no selected target
+	static sint32 getTargetLevelForce();	// get 'level force' for current target, or -1 if there's no selected target					     
+#ifdef RYZOM_LUA_UCSTRING
 	static ucstring getTargetSheet();		// get the name of the target sheet (like 'zoha2old.creature')
+#else
+	static std::string getTargetSheet();		// get the name of the target sheet (like 'zoha2old.creature')
+#endif
 	static std::string getTargetVpaHex();
 	static std::string getTargetVpbHex();
 	static std::string getTargetVpcHex();

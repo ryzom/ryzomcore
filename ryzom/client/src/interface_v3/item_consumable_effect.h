@@ -32,7 +32,7 @@ public:
 	static CItemConsumableEffectHelper* getInstance();
 
 	// Fill itemText with consumable effects from item sheet
-	void getItemConsumableEffectText(const CItemSheet *pIS, ucstring &itemText, sint32 itemQuality);
+	void getItemConsumableEffectText(const CItemSheet *pIS, std::string &itemText, sint32 itemQuality);
 
 private:
 	CItemConsumableEffectHelper() {}

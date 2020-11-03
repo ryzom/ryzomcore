@@ -49,6 +49,7 @@ mkPath(log, fontExportDir)
 for dir in FontSourceDirectories:
 	mkPath(log, DatabaseDirectory + "/" + dir)
 	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, fontExportDir, ".ttf")
+	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, fontExportDir, ".otf")
 	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, fontExportDir, ".afm")
 	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, fontExportDir, ".pfb")
 	copyFilesExtNoTreeIfNeeded(log, DatabaseDirectory + "/" + dir, fontExportDir, ".pfm")

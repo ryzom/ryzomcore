@@ -296,7 +296,7 @@ void			CDBGroupBuildPhrase::startComposition(const CSPhraseCom &phrase)
 	CSBrickManager		*pBM= CSBrickManager::getInstance();
 
 
-	ucstring	name;
+	string	name;
 
 	// if phrase empty (new phrase), invent a new name
 	if(phrase.empty())
@@ -310,7 +310,7 @@ void			CDBGroupBuildPhrase::startComposition(const CSPhraseCom &phrase)
 	else
 	{
 		// copy name
-		name= phrase.Name;
+		name= phrase.Name.toUtf8();
 
 		// get the root Brick. Must exist.
 		CSBrickSheet	*rootBrick= pBM->getBrick(phrase.Bricks[0]);
@@ -374,7 +374,7 @@ void			CDBGroupBuildPhrase::startComposition(const CSPhraseCom &phrase)
 
 	// set the editable name.
 	if(_UserSentenceName)
-		_UserSentenceName->setInputStringAsUtf16(name);
+		_UserSentenceName->setInputString(name);
 }
 
 
@@ -1242,9 +1242,9 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 	// **** Setup the phrase Desc
 	if(_TextPhraseDesc)
 	{
-		ucstring	text;
+		string	text;
 		pPM->buildPhraseDesc(text, phrase, 0, false, "composition");
-		_TextPhraseDesc->setTextFormatTaged(text.toUtf8());
+		_TextPhraseDesc->setTextFormatTaged(text);
 	}
 
 
@@ -1791,7 +1791,7 @@ void			CDBGroupBuildPhrase::buildCurrentPhrase(CSPhraseCom &newPhrase)
 	// Set the Name
 	if(_UserSentenceName)
 	{
-		newPhrase.Name= _UserSentenceName->getInputStringAsUtf16();
+		newPhrase.Name= ucstring::makeFromUtf8(_UserSentenceName->getInputString());
 	}
 }
 

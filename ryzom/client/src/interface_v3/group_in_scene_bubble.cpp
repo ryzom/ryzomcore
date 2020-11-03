@@ -472,11 +472,11 @@ void CGroupInSceneBubbleManager::update ()
 				// Send to the around me window
 				// TODO must get the name of the bot etc...
 				/*
-				ucstring finalString = res;
+				string finalString = res;
 				for(;;)
 				{
-					std::string::size_type index = finalString.find (ucstring("{break}"));
-					if (index == ucstring::npos) break;
+					std::string::size_type index = finalString.find ("{break}");
+					if (index == string::npos) break;
 					finalString = finalString.substr (0, index) + finalString.substr(index+7,finalString.size());
 				}
 
@@ -1334,6 +1334,7 @@ class CAHDynChatClickOption : public IActionHandler
 		uint32 optStrId = InSceneBubbleManager.dynChatGetOptionStringId(nBubbleNb, nOpt);
 		if (!optStrId) return;
 
+#ifdef RYZOM_BG_DOWNLOADER
 		if (isBGDownloadEnabled())
 		{
 			STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
@@ -1353,6 +1354,7 @@ class CAHDynChatClickOption : public IActionHandler
 				}
 			}
 		}
+#endif
 
 		static const string sMsg = "BOTCHAT:DYNCHAT_SEND";
 		CBitMemStream out;

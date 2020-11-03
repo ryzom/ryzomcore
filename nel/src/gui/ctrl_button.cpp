@@ -210,21 +210,21 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_normal" );
 		if (prop)
 		{
-			string TxName = NLMISC::toLower((const char *) prop);
+			string TxName = NLMISC::toLowerAscii((const char *) prop);
 			_TextureIdNormal.setTexture(TxName.c_str());
 		}
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_pushed" );
 		if (prop)
 		{
-			string TxName = NLMISC::toLower((const char *) prop);
+			string TxName = NLMISC::toLowerAscii((const char *) prop);
 			_TextureIdPushed.setTexture(TxName.c_str());
 		}
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_over" );
 		if (prop)
 		{
-			string TxName = NLMISC::toLower((const char *) prop);
+			string TxName = NLMISC::toLowerAscii((const char *) prop);
 			_TextureIdOver.setTexture(TxName.c_str());
 		}
 

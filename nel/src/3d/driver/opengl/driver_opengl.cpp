@@ -2583,7 +2583,7 @@ void CDriverGL::retrieveATIDriverVersion()
 				result = RegQueryValueExA(subKey, "DriverDesc", NULL, &valueType, (unsigned char *) driverDesc, &driverDescBufSize);
 				if (result == ERROR_SUCCESS && valueType == REG_SZ)
 				{
-					toLower(driverDesc);
+					toLowerAscii(driverDesc);
 					if (strstr(driverDesc, "radeon")) // is it a radeon card ?
 					{
 						char driverVersion[256];

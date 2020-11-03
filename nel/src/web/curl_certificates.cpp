@@ -340,7 +340,7 @@ namespace NLWEB
 					}
 					else
 					{
-						nldebug("Added certificate %s", entry.name.c_str());
+						// nldebug("Added certificate %s", entry.name.c_str());
 					}
 				}
 			}

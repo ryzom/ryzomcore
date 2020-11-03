@@ -363,8 +363,7 @@ void CChatTargetFilter::setTargetGroup(CChatGroup::TGroupType groupType, uint32 
 	if (_Chat)
 	{
 		// set the prompt
-		const ucstring prompt("");
-		_Chat->setPrompt(prompt + (ucchar) '>');
+		_Chat->setPrompt(">");
 
 		// set the color
 		string entry="UI:SAVE:CHAT:COLORS:";

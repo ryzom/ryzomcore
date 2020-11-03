@@ -130,7 +130,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 				{
 					if ( pIS->Family == ITEMFAMILY::SCROLL)
 					{
-						editBoxLarge->setInputStringAsUtf16(itemInfo.CustomText);
+						editBoxLarge->setInputString(itemInfo.CustomText.toUtf8()); // TODO: UTF-8 (serial)
 						editLarge->setActive(true);
 						editBoxLarge->setActive(true);
 
@@ -141,14 +141,14 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 					}
 					else
 					{
-						ucstring customText;
+						string customText;
 						if (!itemInfo.CustomText.empty())
 						{
-							customText = itemInfo.CustomText;
-							strFindReplace(customText, "%mfc", ucstring());
+							customText = itemInfo.CustomText.toUtf8(); // TODO: UTF-8 (serial)
+							strFindReplace(customText, "%mfc", string());
 						}
 
-						editBoxShort->setInputStringAsUtf16(customText);
+						editBoxShort->setInputString(customText);
 						editShort->setActive(true);
 						editBoxShort->setActive(true);
 
@@ -161,28 +161,29 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 				}
 				else
 				{
+					const char *localDesc = STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id);
 					if (itemInfo.CustomText.empty())
-						display->setTextFormatTaged(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
+						display->setTextFormatTaged(localDesc);
 					else
 					{
-						ucstring text = itemInfo.CustomText;
+						string text = itemInfo.CustomText.toUtf8();
 						if (text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
 						{
 							CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 							if (pGH)
-								pGH->browse(text.substr(4, text.size()-4).toString().c_str());
+								pGH->browse(text.substr(4, text.size()-4).c_str());
 							text = localDesc;
 						}
 						else if (text.size() > 3 && text[0]=='@' && text[1]=='L' && text[2]=='U' && text[3]=='A')
 						{
-							string code = text.substr(4, text.size()-4).toString();
+							string code = text.substr(4, text.size()-4);
 							if (!code.empty())
 								CLuaManager::getInstance().executeLuaScript(code);
 							text = localDesc;
 						}
 						if (!text.empty())
 						{
-							display->setTextFormatTaged(text.toUtf8());
+							display->setTextFormatTaged(text);
 							group->setActive(true);
 						}
 					}
@@ -250,7 +251,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 						// If we already have item info
 						if ( pIS->Family == ITEMFAMILY::SCROLL)
 						{
-							editBoxLarge->setInputStringAsUtf16(itemInfo.CustomText);
+							editBoxLarge->setInputString(itemInfo.CustomText.toUtf8()); // TODO: UTF-8 (serial)
 							editLarge->setActive(true);
 							editBoxLarge->setActive(true);
 
@@ -262,14 +263,14 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 						else
 						{
 
-							ucstring customText;
+							string customText;
 							if (!itemInfo.CustomText.empty())
 							{
-								customText = itemInfo.CustomText;
-								strFindReplace(customText, "%mfc", ucstring());
+								customText = itemInfo.CustomText.toUtf8();
+								strFindReplace(customText, "%mfc", string());
 							}
 
-							editBoxShort->setInputStringAsUtf16(customText);
+							editBoxShort->setInputString(customText);
 							editShort->setActive(true);
 							editBoxShort->setActive(true);
 
@@ -304,27 +305,28 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 					// Finish the display or add the waiter
 					if (getInventory().isItemInfoUpToDate(ItemSlotId))
 					{
+						const char *localDesc = STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id);
 						if (itemInfo.CustomText.empty())
-							display->setTextFormatTaged(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
+							display->setTextFormatTaged(localDesc);
 						else
 						{
-							ucstring text = itemInfo.CustomText;
+							string text = itemInfo.CustomText.toUtf8();
 							if (text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
 							{
 								CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 								if (pGH)
-									pGH->browse(text.substr(4, text.size()-4).toUtf8().c_str());
+									pGH->browse(text.substr(4, text.size()-4).c_str());
 								text = localDesc;
 							}
 							else if (text.size() > 3 && text[0]=='@' && text[1]=='L' && text[2]=='U' && text[3]=='A')
 							{
-								string code = text.substr(4, text.size()-4).toUtf8();
+								string code = text.substr(4, text.size()-4);
 								if (!code.empty())
 									CLuaManager::getInstance().executeLuaScript(code);
 								text = localDesc;
 							}
 							if (!text.empty())
-								display->setTextFormatTaged(text.toUtf8());
+								display->setTextFormatTaged(text);
 						}
 					}
 					else
@@ -405,11 +407,11 @@ void CInterfaceItemEdition::CItemEditionWindow::validate()
 		if (group && editShort && editBoxShort && editLarge && editBoxLarge && display && editButtons && closeButton && background)
 		{
 			bool textValid = editShort->getActive();
-			ucstring text = editBoxShort->getInputStringAsUtf16();
+			string text = editBoxShort->getInputString();
 			if (!textValid)
 			{
 				textValid = editLarge->getActive();
-				text = editBoxLarge->getInputStringAsUtf16();
+				text = editBoxLarge->getInputString();
 			}
 			 
 			if (textValid)
@@ -426,7 +428,8 @@ void CInterfaceItemEdition::CItemEditionWindow::validate()
 					out.serial(uiInventory);
 					uint32 uiSlot = (uint32)pCSItem->getIndexInDB();
 					out.serial(uiSlot);
-					out.serial(text);
+					ucstring ucText = ucstring::makeFromUtf8(text); // TODO: UTF-8 (serial)
+					out.serial(ucText);
 					NetMngr.push(out);
 					//nlinfo("impulseCallBack : %s %s %d \"%s\" sent", msgName.c_str(), INVENTORIES::toString((INVENTORIES::TInventory)pCSItem->getInventoryIndex()).c_str(), pCSItem->getIndexInDB(), text.toUtf8().c_str());
 				}
@@ -2121,7 +2124,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			{
 				std::string name = groupNames[i];
 				std::string ahParams = "name=" + name;
-				//Use ucstring because group name can contain accentued characters (and stuff like that)
+				//Use utf-8 string because group name can contain accentued characters (and stuff like that)
 				pGroupMenu->addLine(name, "", "", name);
 				CGroupSubMenu* pNewSubMenu = new CGroupSubMenu(CViewBase::TCtorParam());
 				pGroupMenu->setSubMenu(pGroupMenu->getNumLine()-1, pNewSubMenu);

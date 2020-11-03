@@ -19,6 +19,9 @@
 
 #include "stdpch.h"
 #include "bg_downloader_access.h"
+
+#ifdef RYZOM_BG_DOWNLOADER
+
 #include "global.h"
 #include "login_patch.h"
 //
@@ -84,7 +87,7 @@ CBGDownloaderAccess::CBGDownloaderAccess()
 //=====================================================
 void CBGDownloaderAccess::clearCurrentMessage()
 {
-	_CurrentMessage = ucstring();
+	_CurrentMessage = ucstring(); // OLD
 	_CurrentFilesToGet = 0;
 	_TotalFilesToGet = 0;
 	_PatchingSize = 0;
@@ -194,7 +197,7 @@ void CBGDownloaderAccess::startTask(const BGDownloader::CTaskDesc &taskDesc, con
 }
 
 //=====================================================
-bool CBGDownloaderAccess::isTaskEnded(BGDownloader::TTaskResult &result, ucstring &errorMsg) const
+bool CBGDownloaderAccess::isTaskEnded(BGDownloader::TTaskResult &result, ucstring &errorMsg) const // OLD
 {
 	if (_State == State_Finished)
 	{
@@ -354,7 +357,7 @@ void CBGDownloaderAccess::CDownloadCoTask::run()
 	{
 		shutdownDownloader();
 		Parent->_TaskResult = TaskResult_Error;
-		Parent->_ErrorMsg = ucstring(e.what());
+		Parent->_ErrorMsg = ucstring(e.what()); // OLD
 		Parent->_DownloadThreadPriority = ThreadPriority_DownloaderError;
 	}
 	catch(const NLMISC::EStream &e)
@@ -362,7 +365,7 @@ void CBGDownloaderAccess::CDownloadCoTask::run()
 		shutdownDownloader();
 		Parent->_TaskResult = TaskResult_Error;
 		nlwarning("BG DOWNLOADER PROTOCOL ERROR ! Stream error");
-		Parent->_ErrorMsg = CI18N::get("uiBGD_ProtocolError") + ucstring(" : ") + ucstring(e.what());
+		Parent->_ErrorMsg = CI18N::get("uiBGD_ProtocolError") + ucstring(" : ") + ucstring(e.what()); // OLD
 		Parent->_DownloadThreadPriority = ThreadPriority_DownloaderError;
 	}
 	catch (const EWaitMessageTimeoutException &e)
@@ -370,7 +373,7 @@ void CBGDownloaderAccess::CDownloadCoTask::run()
 		shutdownDownloader();
 		Parent->_TaskResult = TaskResult_Error;
 		nlwarning("BG DOWNLOADER PROTOCOL ERROR ! Message timeout");
-		Parent->_ErrorMsg = CI18N::get("uiBGD_ProtocolError") + ucstring(" : ") + ucstring(e.what());
+		Parent->_ErrorMsg = CI18N::get("uiBGD_ProtocolError") + ucstring(" : ") + ucstring(e.what()); // OLD
 		Parent->_DownloadThreadPriority = ThreadPriority_DownloaderError;
 	}
 	Parent->_State = State_Finished;
@@ -614,7 +617,7 @@ TDownloaderMode CBGDownloaderAccess::CDownloadCoTask::getDownloaderMode()
 void  CBGDownloaderAccess::CDownloadCoTask::getTaskResult(TTaskResult &result,
 														  uint32 &availablePatchs,
 														  bool &mustLaunchBatFile,
-														  ucstring &errorMsg
+														  ucstring &errorMsg // OLD
 														 )
 {
 	sendSimpleMsg(CL_GetTaskResult);
@@ -623,7 +626,7 @@ void  CBGDownloaderAccess::CDownloadCoTask::getTaskResult(TTaskResult &result,
 	inMsg.serialEnum(result);
 	inMsg.serial(availablePatchs);
 	inMsg.serial(mustLaunchBatFile);
-	inMsg.serial(errorMsg);
+	inMsg.serial(errorMsg); // OLD
 }
 
 //=====================================================
@@ -687,7 +690,7 @@ void CBGDownloaderAccess::CDownloadCoTask::shutdownDownloader()
 		}
 	}
 	CWinProcess::terminateProcessFromModuleName(BGDownloaderName); // for safety
-	Parent->_CurrentMessage = ucstring();
+	Parent->_CurrentMessage = ucstring(); // OLD
 }
 
 //=====================================================
@@ -795,7 +798,7 @@ bool CBGDownloaderAccess::CDownloadCoTask::defaultMessageHandling(BGDownloader::
 		case BGD_Error:
 		{
 			Parent->_TaskResult = TaskResult_Error;
-			ucstring errorMsg;
+			ucstring errorMsg; // OLD
 			msg.serial(errorMsg);
 			throw EDownloadException(errorMsg.toUtf8());
 		}
@@ -885,7 +888,7 @@ void CBGDownloaderAccess::startTask(const BGDownloader::CTaskDesc &taskDesc, con
 }
 
 //=====================================================
-bool CBGDownloaderAccess::isTaskEnded(BGDownloader::TTaskResult &result, ucstring &errorMsg) const
+bool CBGDownloaderAccess::isTaskEnded(BGDownloader::TTaskResult &result, ucstring &errorMsg) const // OLD
 {
 	// TODO for Linux
 	return false;
@@ -956,3 +959,5 @@ void unpauseBGDownloader()
 		DownloaderPaused = false;
 	}
 }
+
+#endif

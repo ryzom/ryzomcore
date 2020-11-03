@@ -2302,7 +2302,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 				string::size_type pos = replacement.find('$');
 				if (pos != string::npos)
 				{
-					_EntityName = _EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(sn.substr(0, pos));
+					_EntityName = _EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(replacement.substr(0, pos));
 					string::size_type pos2 = replacement.find('$', pos + 1);
 					_TitleRaw = replacement.substr(pos+1, pos2 - pos - 1);
 					replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
@@ -2355,7 +2355,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 		if (pVT != NULL) pVT->setText(_Title);
 
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player"));
-		if (pGC != NULL) pGC->setUCTitle(_EntityName);
+		if (pGC != NULL) pGC->setTitle(_EntityName);
 
 		CSkillManager *pSM = CSkillManager::getInstance();
 		pSM->setPlayerTitle(_TitleRaw);

@@ -59,7 +59,7 @@ namespace NLGUI
 	void CCssSelector::setClass(const std::string &cls)
 	{
 		std::vector<std::string> parts;
-		NLMISC::splitString(toLower(cls), ".", parts);
+		NLMISC::splitString(toLowerAscii(cls), ".", parts);
 
 		for(uint i = 0; i< parts.size(); i++)
 		{
@@ -80,7 +80,7 @@ namespace NLGUI
 		}
 		else
 		{
-			Attr.push_back(SAttribute(key, toLower(val), op, cs));
+			Attr.push_back(SAttribute(key, toLowerAscii(val), op, cs));
 		}
 	}
 
@@ -146,7 +146,7 @@ namespace NLGUI
 			// case-insensitive compare, Attr.value is already lowercased
 			if (!Attr[i].caseSensitive)
 			{
-				value = toLower(value);
+				value = toLowerAscii(value);
 			}
 
 			switch(Attr[i].op)
@@ -255,7 +255,7 @@ namespace NLGUI
 
 		if (start == std::string::npos) return;
 
-		std::string expr = toLower(pseudo.substr(start, end - start));
+		std::string expr = toLowerAscii(pseudo.substr(start, end - start));
 
 		if (expr.empty()) return;
 

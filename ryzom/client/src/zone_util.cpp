@@ -44,7 +44,7 @@ bool getPosFromZoneName(const std::string &name,NLMISC::CVector2f &dest)
 	uint32 i = 0;
 	while (zoneName[i] != '_')
 	{
-		if (!::isdigit(zoneName[i])) return false;
+		if ((uint8)zoneName[i] >= (uint8)'\x80' || !::isdigit(zoneName[i])) return false;
 		yStr += zoneName[i]; ++i;
 		if (i == zoneName.size())
 			return false;
@@ -52,8 +52,8 @@ bool getPosFromZoneName(const std::string &name,NLMISC::CVector2f &dest)
 	++i;
 	while (i < zoneName.size())
 	{
-		if (!::isalpha(zoneName[i])) return false;
-		xStr += (char) ::toupper(zoneName[i]); ++i;
+		if ((uint8)zoneName[i] >= (uint8)'\x80' || !::isalpha(zoneName[i])) return false;
+		xStr += (char) NLMISC::toUpper(zoneName[i]); ++i;
 	}
 	if (xStr.size() != 2) return false;
 	dest.x = 160.f * ((xStr[0] - 'A') * 26 + (xStr[1] - 'A'));
@@ -80,7 +80,7 @@ bool getZonePosFromZoneName(const std::string &name, sint &x, sint &y)
 	uint32 i = 0;
 	while (zoneName[i] != '_')
 	{
-		if (!::isdigit(zoneName[i])) return false;
+		if ((uint8)zoneName[i] >= (uint8)'\x80' || !::isdigit(zoneName[i])) return false;
 		yStr += zoneName[i]; ++i;
 		if (i == zoneName.size())
 			return false;
@@ -88,8 +88,8 @@ bool getZonePosFromZoneName(const std::string &name, sint &x, sint &y)
 	++i;
 	while (i < zoneName.size())
 	{
-		if (!::isalpha(zoneName[i])) return false;
-		xStr += (char) ::toupper(zoneName[i]); ++i;
+		if ((uint8)zoneName[i] >= (uint8)'\x80' || !::isalpha(zoneName[i])) return false;
+		xStr += (char) NLMISC::toUpper(zoneName[i]); ++i;
 	}
 	if (xStr.size() != 2) return false;
 	x = (xStr[0] - 'A') * 26 + (xStr[1] - 'A');

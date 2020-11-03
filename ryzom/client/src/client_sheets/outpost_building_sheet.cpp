@@ -110,21 +110,21 @@ void COutpostBuildingSheet::build(const NLGEORGES::UFormElm &root)
 	string IconMain;
 	if(!root.getValueByName (IconMain, "icon"))
 		debug("key 'icon' not found.");
-	IconMain = toLower(IconMain);
+	IconMain = toLowerAscii(IconMain);
 	IdIconMain = ClientSheetsStrings.add(IconMain);
 
 	// Get the icon associated.
 	string IconBack;
 	if(!root.getValueByName (IconBack, "icon background"))
 		debug("key 'icon background' not found.");
-	IconBack = toLower(IconBack);
+	IconBack = toLowerAscii(IconBack);
 	IdIconBack = ClientSheetsStrings.add(IconBack);
 
 	// Get the icon associated.
 	string IconOver;
 	if(!root.getValueByName (IconOver, "icon overlay"))
 		debug("key 'icon overlay' not found.");
-	IconOver = toLower(IconOver);
+	IconOver = toLowerAscii(IconOver);
 	IdIconOver = ClientSheetsStrings.add(IconOver);
 
 	// Get the icon text associated.

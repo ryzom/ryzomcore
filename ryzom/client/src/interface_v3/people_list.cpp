@@ -128,10 +128,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 
 	_BaseContainer->setSavable(desc.Savable);
 	_BaseContainer->setLocalize(desc.Localize);
-	if (desc.Localize)
-		_BaseContainer->setTitle(desc.PeopleListTitle.toString());
-	else
-		_BaseContainer->setUCTitle(desc.PeopleListTitle);
+	_BaseContainer->setTitle(desc.PeopleListTitle);
 	//_BaseContainer->setId("ui:interface:" + desc.Id);
 
 	// create the chat window if there's one
@@ -158,12 +155,12 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 }
 
 //==================================================================
-sint CPeopleList::getIndexFromName(const ucstring &name) const
+sint CPeopleList::getIndexFromName(const string &name) const
 {
-	string sNameIn = toLower(name.toString());
+	string sNameIn = toLowerAscii(name);
 	for(uint k = 0; k < _Peoples.size(); ++k)
 	{
-		string sPeopleName = toLower(_Peoples[k].getName().toString());
+		string sPeopleName = toLowerAscii(_Peoples[k].getName());
 		if (sPeopleName == sNameIn) return k;
 	}
 	return -1;
@@ -203,25 +200,22 @@ bool CPeopleList::sortExByContactId(const CPeople& a, const CPeople& b)
 bool CPeopleList::sortExByName(const CPeople& a, const CPeople& b)
 {
 	if (a.Group == b.Group) {
-		ucstring name_a = toUpper(a.getName());
-		ucstring name_b = toUpper(b.getName());
-		return (name_a < name_b);
+		return -NLMISC::compareCaseInsensitive(a.getName(), b.getName()); // FIXME: Locale-dependent sort
 	}
 	else
-		return (a.Group < b.Group);
+	{
+		return -NLMISC::compareCaseInsensitive(a.Group, b.Group); // FIXME: Locale-dependent sort
+	}
 }
 
 //==================================================================
 bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
 {
 	if (a.Group == b.Group) {
-		ucstring name_a = toUpper(a.getName());
-		ucstring name_b = toUpper(b.getName());
-
 		// We want order: online/alpha, offworld/alpha, offline/alpha
 		if (a.Online == b.Online)
 		{
-			return (name_a < name_b);
+			return -NLMISC::compareCaseInsensitive(a.getName(), b.getName()); // FIXME: Locale-dependent sort
 		}
 		else
 		{
@@ -245,7 +239,9 @@ bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
 		}
 	}
 	else
-		return (a.Group < b.Group);
+	{
+		return -NLMISC::compareCaseInsensitive(a.Group, b.Group); // FIXME: Locale-dependent sort
+	}
 }
 
 //==================================================================
@@ -364,13 +360,13 @@ bool CPeopleList::isPeopleChatVisible(uint index) const
 */
 
 //==================================================================
-sint CPeopleList::addPeople(const ucstring &name, uint teamMateIndex /*= 0*/)
+sint CPeopleList::addPeople(const string &name, uint teamMateIndex /*= 0*/)
 {
 	if (!_BaseContainer) return - 1;
 	// check if not already inserted
 	if (getIndexFromName(name) != -1)
 	{
-		nlwarning("<CPeopleList::addPeople> people %s inserted twice.", name.toString().c_str());
+		nlwarning("<CPeopleList::addPeople> people %s inserted twice.", name.c_str());
 	}
 
 	vector<pair<string ,string> > properties;
@@ -404,11 +400,11 @@ sint CPeopleList::addPeople(const ucstring &name, uint teamMateIndex /*= 0*/)
 	if (!gc)
 	{
 		delete group;
-		nlwarning("<CPeopleList::addPeople> group is not a container.", name.toString().c_str());
+		nlwarning("<CPeopleList::addPeople> group is not a container.", name.c_str());
 		return -1;
 	}
 	// set title from the name
-	gc->setUCTitle(name);
+	gc->setTitle(name);
 	// People inside list are not savable !
 	gc->setSavable(false);
 	//
@@ -889,12 +885,12 @@ void CPeopleList::updatePeopleMenu(uint index)
 }
 
 //==================================================================
-ucstring CPeopleList::getName(uint index) const
+std::string CPeopleList::getName(uint index) const
 {
 	if (index >= _Peoples.size())
 	{
 		nlwarning("bad index");
-		return ucstring("BAD INDEX!");
+		return "BAD INDEX!";
 	}
 	return _Peoples[index].getName();
 }
@@ -1106,7 +1102,7 @@ class CHandlerContactEntry : public IActionHandler
 		CGroupContainer *gc = static_cast< CGroupContainer* >( pCaller->getParent()->getEnclosingContainer() );
 
 		// title gives the name of the player
-		string playerName = gc->getUCTitle().toUtf8();
+		string playerName = gc->getTitle();
 
 		// Simply do a tell on the player
 		ChatMngr.tell(playerName, text);

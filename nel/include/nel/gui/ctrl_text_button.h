@@ -99,8 +99,12 @@ namespace NLGUI
 		// Set text (noop if text id)
 		void			setText (const std::string &text);
 		std::string		getText () const;
-		void			setTextAsUtf16 (const ucstring &text);
-		ucstring		getTextAsUtf16 () const;
+#ifdef RYZOM_LUA_UCSTRING
+		void			setTextAsUtf16 (const ucstring &text); // Compatibility
+		ucstring		getTextAsUtf16 () const; // Compatibility
+#endif
+		void			setLocalize (bool localize);
+		bool			isLocalized () const;
 
 		void			setHardText (const std::string &text);
 		std::string		getHardText () const;
@@ -143,8 +147,12 @@ namespace NLGUI
 		int luaGetViewText(CLuaState &ls);
 
 		REFLECT_EXPORT_START(CCtrlTextButton, CCtrlBaseButton)
-			REFLECT_UCSTRING("uc_hardtext", getTextAsUtf16, setTextAsUtf16);
+#ifdef RYZOM_LUA_UCSTRING
+			REFLECT_UCSTRING("uc_hardtext", getTextAsUtf16, setTextAsUtf16); // Compatibility
+#endif
+			REFLECT_BOOL("localize", isLocalized, setLocalize);
 			REFLECT_STRING("hardtext", getHardText, setHardText);
+			REFLECT_STRING("text", getText, setText);
 			REFLECT_SINT32("text_x", getTextX, setTextX)
 			REFLECT_SINT32("wmargin", getWMargin, setWMargin)
 			REFLECT_SINT32("wmin", getWMin, setWMin)

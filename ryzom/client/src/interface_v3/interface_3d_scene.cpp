@@ -298,7 +298,7 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 			CXMLAutoPtr ptr((const char*)xmlGetProp (cur, (xmlChar*)"name"));
 			string animName;
 			if (ptr)
-				animName = toLower(CFile::getFilenameWithoutExtension(ptr.str()));
+				animName = toLowerAscii(CFile::getFilenameWithoutExtension(ptr.str()));
 
 			if (!animName.empty())
 			{
@@ -1108,7 +1108,7 @@ bool CInterface3DIG::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	if (ptr) _Rot = convertVector(ptr);
 
 	ptr = xmlGetProp (cur, (xmlChar*)"name");
-	if (ptr) _Name = toLower((const char*)ptr);
+	if (ptr) _Name = toLowerAscii((const char*)ptr);
 
 	_IG = UInstanceGroup::createInstanceGroup(_Name);
 	if (_IG == NULL)
@@ -1223,7 +1223,7 @@ std::string CInterface3DIG::getName() const
 // ----------------------------------------------------------------------------
 void CInterface3DIG::setName (const std::string &ht)
 {
-	string lwrname = toLower(ht);
+	string lwrname = toLowerAscii(ht);
 	if (lwrname != _Name)
 	{
 		CInterface3DScene *pI3DS = dynamic_cast<CInterface3DScene*>(_Parent);
@@ -1271,7 +1271,7 @@ bool CInterface3DShape::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	if (ptr) _Rot = convertVector(ptr);
 
 	ptr = xmlGetProp (cur, (xmlChar*)"name");
-	if (ptr) _Name = toLower((const char*)ptr);
+	if (ptr) _Name = toLowerAscii((const char*)ptr);
 
 	_Instance = dynamic_cast<CInterface3DScene*>(parentGroup)->getScene()->createInstance(_Name);
 	if (_Instance.empty())
@@ -1417,7 +1417,7 @@ void CInterface3DShape::setName (const std::string &ht)
 		_Name.clear();
 	}
 
-	string lwrname = toLower(ht);
+	string lwrname = toLowerAscii(ht);
 	if (lwrname != _Name)
 	{
 		CInterface3DScene *pI3DS = dynamic_cast<CInterface3DScene*>(_Parent);
@@ -1583,7 +1583,7 @@ bool CInterface3DFX::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	if (ptr) _Rot = convertVector(ptr);
 
 	ptr = xmlGetProp (cur, (xmlChar*)"name");
-	if (ptr) _Name = toLower((const char*)ptr);
+	if (ptr) _Name = toLowerAscii((const char*)ptr);
 
 	return true;
 }

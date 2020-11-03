@@ -52,9 +52,7 @@ namespace PVP_CLAN
 
 	std::string toLowerString(TPVPClan clan)
 	{
-		CSString s = PVPClanConversion.toString(clan);
-		CSString sl = s.toLower();
-		return sl;
+		return toLowerAscii(PVPClanConversion.toString(clan));
 	}
 
 	uint32 getFactionIndex(TPVPClan clan)

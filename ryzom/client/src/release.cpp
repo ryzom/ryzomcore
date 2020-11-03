@@ -30,6 +30,7 @@
 #include "nel/misc/async_file_manager.h"
 #include "nel/misc/system_utils.h"
 #include "nel/misc/streamed_package_manager.h"
+#include "nel/web/http_package_provider.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
 #include "nel/3d/fxaa.h"
@@ -488,7 +489,9 @@ void releaseMainLoop(bool closeConnection)
 // Called when Quit from OutGame
 void releaseOutGame()
 {
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().release();
+#endif
 
 	ProgressBar.release();
 
@@ -570,7 +573,9 @@ void release()
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_GameExit, "login_step_game_exit&play_time=" + toString((NLMISC::CTime::getLocalTime() - StartPlayTime) / 1000)));
 	}
 
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().release();
+#endif
 
 	ProgressBar.release();
 

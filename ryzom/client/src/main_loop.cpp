@@ -1100,6 +1100,7 @@ bool mainLoop()
 		// Start Bench
 		H_AUTO_USE ( RZ_Client_Main_Loop )
 
+#ifdef RYZOM_BG_DOWNLOADER
 		if (isBGDownloadEnabled())
 		{
 			CBGDownloaderAccess &bgDownloader = CBGDownloaderAccess::getInstance();
@@ -1110,6 +1111,7 @@ bool mainLoop()
 				unpauseBGDownloader();
 			}
 		}
+#endif
 
 		FPU_CHECKER_ONCE
 
@@ -1281,7 +1283,9 @@ bool mainLoop()
 			// Get Mouse Position.
 			OldMouseX = MouseX; OldMouseY = MouseY;
 
+#ifdef RYZOM_BG_DOWNLOADER
 			updateBGDownloaderUI();
+#endif
 		}
 
 		// Get the pointer pos

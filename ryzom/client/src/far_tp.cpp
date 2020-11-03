@@ -422,11 +422,13 @@ void CLoginStateMachine::run()
 
 			bool mustReboot = false;
 
+#ifdef RYZOM_BG_DOWNLOADER
 			if (isBGDownloadEnabled())
 			{
 				mustReboot = CBGDownloaderAccess::getInstance().mustLaunchBatFile();
 			}
 			else
+#endif
 			{
 				mustReboot = CPatchManager::getInstance()->mustLaunchBatFile();
 			}
@@ -470,11 +472,13 @@ void CLoginStateMachine::run()
 			}
 			initPatchCheck();
 			SM_BEGIN_EVENT_TABLE
+#ifdef RYZOM_BG_DOWNLOADER
 				if (isBGDownloadEnabled())
 				{
 					SM_EVENT(ev_patch_needed, st_patch); // no choice for patch content when background downloader is used
 				}
 				else
+#endif
 				{
 					SM_EVENT(ev_patch_needed, st_display_cat);
 				}
@@ -600,7 +604,9 @@ void CLoginStateMachine::run()
 			break;
 		case st_enter_far_tp_main_loop:
 			// if bgdownloader is used, then pause it
+#ifdef RYZOM_BG_DOWNLOADER
 			pauseBGDownloader();
+#endif
 
 
 			// Far TP part 1.2: let the main loop finish the current frame.

@@ -100,7 +100,7 @@ namespace NLGUI
 
 	CCtrlBase::TToolTipParentType CCtrlBase::stringToToolTipParent( const std::string &str )
 	{
-		std::string s = toLower( str );
+		std::string s = toLowerAscii( str );
 
 		if( s == "mouse" )
 			return TTMouse;
@@ -573,6 +573,7 @@ namespace NLGUI
 			return itr2->second;
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	int CCtrlBase::luaSetTooltipUtf8(CLuaState &ls)
 	{
@@ -585,5 +586,6 @@ namespace NLGUI
 
 		return 0;
 	}
+#endif
 }
 

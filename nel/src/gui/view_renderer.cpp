@@ -312,7 +312,7 @@ namespace NLGUI
 		if (fonts.count(name) > 0)
 			driver->deleteTextContext(fonts[name]);
 
-		std::string fontFile = CPath::lookup(font, false);
+		std::string fontFile = NLMISC::startsWith(font, "ui") ? font : CPath::lookup(font, false);
 		if (fontFile.empty())
 		{
 			nlwarning("Font file '%s' not found", font.c_str());
@@ -901,7 +901,7 @@ namespace NLGUI
 			image.UVMin.V = uvMinV;
 			image.UVMax.U = uvMaxU;
 			image.UVMax.V = uvMaxV;
-			sTGAname = toLower(string(tgaName));
+			sTGAname = toLowerAscii(string(tgaName));
 
 			string::size_type stripPng = sTGAname.find(".png");
 			if (stripPng != string::npos)
@@ -974,11 +974,11 @@ namespace NLGUI
 			return;
 		}
 		// Look if already existing
-		string sLwrGTName = toLower(sGlobalTextureName);
+		string sLwrGTName = toLowerAscii(sGlobalTextureName);
 		TGlobalTextureList::iterator ite = _GlobalTextures.begin();
 		while (ite != _GlobalTextures.end())
 		{
-			if (toLower(ite->Name) == sLwrGTName)
+			if (toLowerAscii(ite->Name) == sLwrGTName)
 				break;
 			ite++;
 		}
@@ -1017,11 +1017,11 @@ namespace NLGUI
 			return createTextureFromDataURL(sGlobalTextureName, uploadDXTC, bReleasable);
 
 		// Look if already existing
-		string sLwrGTName = toLower(sGlobalTextureName);
+		string sLwrGTName = toLowerAscii(sGlobalTextureName);
 		TGlobalTextureList::iterator ite = _GlobalTextures.begin();
 		while (ite != _GlobalTextures.end())
 		{
-			std::string sText = toLower(ite->Name);
+			std::string sText = toLowerAscii(ite->Name);
 			if (sText == sLwrGTName)
 				break;
 			ite++;
@@ -1194,11 +1194,11 @@ namespace NLGUI
 	 */
 	NL3D::UTexture *CViewRenderer::getGlobalTexture(const std::string &name)
 	{
-		string sLwrGTName = NLMISC::toLower(name);
+		string sLwrGTName = NLMISC::toLowerAscii(name);
 		TGlobalTextureList::iterator ite = _GlobalTextures.begin();
 		while (ite != _GlobalTextures.end())
 		{
-			std::string sText = NLMISC::toLower(ite->Name);
+			std::string sText = NLMISC::toLowerAscii(ite->Name);
 			if (sText == sLwrGTName)
 				break;
 			ite++;
@@ -1328,7 +1328,7 @@ namespace NLGUI
 			return -1;
 
 		// convert to lowCase
-		string nameLwr = toLower(sName);
+		string nameLwr = toLowerAscii(sName);
 
 		string::size_type stripPng = nameLwr.find(".png");
 		if (stripPng != string::npos)

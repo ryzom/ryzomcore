@@ -41,7 +41,7 @@ void							CSeason::init()
 	for (i=0; i<5; ++i)
 	{
 		_StrTable[TSeasonConvert[i].Value] = TSeasonConvert[i].Name;
-		_ValueMap[NLMISC::toLower(std::string(TSeasonConvert[i].Name))] = TSeasonConvert[i].Value;
+		_ValueMap[NLMISC::toLowerAscii(std::string(TSeasonConvert[i].Name))] = TSeasonConvert[i].Value;
 	}
 	_Initialised = true;
 }

@@ -156,14 +156,14 @@ static CInterfaceGroup *buildLineWithCommand(CInterfaceGroup *commandGroup, CVie
 	return group;
 }
 
-static inline bool	isUrlTag(const ucstring &s, ucstring::size_type index, ucstring::size_type textSize)
+static inline bool	isUrlTag(const string &s, string::size_type index, string::size_type textSize)
 {
 	// Format http://, https://
 	// or markdown style (title)[http://..]
 	if(textSize > index+7)
 	{
 		bool markdown = false;
-		ucstring::size_type i = index;
+		string::size_type i = index;
 		// advance index to url section if markdown style link is detected
 		if (s[i] == '(')
 		{
@@ -188,7 +188,7 @@ static inline bool	isUrlTag(const ucstring &s, ucstring::size_type index, ucstri
 
 		if (textSize > i + 7)
 		{
-			bool isUrl = (toLower(s.substr(i, 7)) == ucstring("http://") || toLower(s.substr(i, 8)) == ucstring("https://"));
+			bool isUrl = (toLowerAscii(s.substr(i, 7)) == "http://" || toLowerAscii(s.substr(i, 8)) == "https://");
 			// match "text http://" and not "texthttp://"
 			if (isUrl && i > 0 && !markdown)
 			{
@@ -461,7 +461,7 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 	// quickly check if text has links or not
 	bool hasUrl;
 	{
-		string s = toLower(msg);
+		string s = toLowerAscii(msg);
 		hasUrl = (s.find("http://") || s.find("https://"));
 	}
 

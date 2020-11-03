@@ -248,7 +248,7 @@ public:
 	std::string		Contexts;
 
 	/// Get an action localized text
-	ucstring getActionLocalizedText (const CAction::CName &name) const;
+	std::string getActionLocalizedText (const CAction::CName &name) const;
 
 	// see if there's at least one set of parameters for which this action is usable in current context
 	bool	isUsableInCurrentContext() const;
@@ -417,7 +417,7 @@ public:
 	const TActionsForceDisplaySet	&getActionsForceDisplaySet() const {return _ActionForceDisplay;}
 
 	/// Get an action localized text
-	ucstring getActionLocalizedText (const CAction::CName &name) const;
+	std::string getActionLocalizedText (const CAction::CName &name) const;
 
 	//@}
 

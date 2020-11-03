@@ -45,7 +45,8 @@ namespace NLGUI
 	// Compare strings
 	static inline bool lt_text(const std::pair<int,std::string> &s1, const std::pair<int,std::string> &s2)
 	{
-		return toLower(s1.second) < toLower(s2.second);
+		// return toLower(s1.second) < toLower(s2.second);
+		return -NLMISC::compareCaseInsensitive(s1.second, s2.second);
 	}
 
 	std::string CDBGroupComboBox::measureMenu;
@@ -360,11 +361,13 @@ namespace NLGUI
 			return empty;
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	ucstring CDBGroupComboBox::getTextAsUtf16(uint i) const
 	{
 		return ucstring::makeFromUtf8(getText(i));
 	}
+#endif
 
 	// ***************************************************************************
 	uint CDBGroupComboBox::getTextId(uint i) const
@@ -401,12 +404,14 @@ namespace NLGUI
 		else
 			return empty;
 	}
-	
+
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	ucstring CDBGroupComboBox::getTextureAsUtf16(uint i) const
 	{
 		return ucstring::makeFromUtf8(getTexture(i));
 	}
+#endif
 
 	// ***************************************************************************
 	void		CDBGroupComboBox::setSelection(sint32 val)
@@ -488,11 +493,13 @@ namespace NLGUI
 		return _ViewText->getText();
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	ucstring CDBGroupComboBox::getViewTextAsUtf16() const
 	{
 		return  CUtfStringView(_ViewText->getText()).toUtf16();
 	}
+#endif
 
 	// ***************************************************************************
 	CViewText *CDBGroupComboBox::getViewText()
@@ -575,10 +582,16 @@ namespace NLGUI
 	{
 		const char *funcName = "addText";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 1);
-		ucstring text;
+		ucstring text; // Compatibility
 		nlverify(CLuaIHM::pop(ls, text));
-		addText(text.toUtf8()); // FIXME: Lua should just do UTF-8!
+		addText(text.toUtf8());
+#else
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		string text = ls.toString(1);
+		addText(text);
+#endif
 		return 0;
 	}
 
@@ -588,10 +601,16 @@ namespace NLGUI
 		const char *funcName = "setText";
 		CLuaIHM::checkArgCount(ls, funcName, 2);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
-		ucstring text;
+		ucstring text; // Compatibility
 		nlverify(CLuaIHM::pop(ls, text));
-		setText((uint) ls.toInteger(1), text.toUtf8()); // FIXME: Lua should just do UTF-8!
+		setText((uint) ls.toInteger(1), text.toUtf8());
+#else
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+		string text = ls.toString(2);
+		setText((uint)ls.toInteger(1), text);
+#endif
 		return 0;
 	}
 
@@ -601,10 +620,16 @@ namespace NLGUI
 		const char *funcName = "insertText";
 		CLuaIHM::checkArgCount(ls, funcName, 2);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
 		ucstring text;
 		nlverify(CLuaIHM::pop(ls, text));
 		insertText((uint) ls.toInteger(1), text.toUtf8()); // FIXME: Lua should just do UTF-8!
+#else
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+		string text = ls.toString(2);
+		insertText((uint)ls.toInteger(1), text);
+#endif
 		return 0;
 	}
 
@@ -614,20 +639,30 @@ namespace NLGUI
 		const char *funcName = "setTexture";
 		CLuaIHM::checkArgCount(ls, funcName, 2);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
 		ucstring texture;
 		nlverify(CLuaIHM::pop(ls, texture));
 		setTexture((uint) ls.toInteger(1), texture.toUtf8()); // FIXME: Lua should just do UTF-8!
+#else
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+		string texture = ls.toString(2);
+		setTexture((uint)ls.toInteger(1), texture);
+#endif
 		return 0;
 	}
 
 	// ***************************************************************************
 	int CDBGroupComboBox::luaGetText(CLuaState &ls)
 	{
-		const char *funcName = "setText";
+		const char *funcName = "getText";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		CLuaIHM::push(ls, getText((uint) ls.toInteger(1)));
+#ifdef RYZOM_LUA_UCSTRING
+		CLuaIHM::push(ls, getTextAsUtf16((uint) ls.toInteger(1)));
+#else
+		ls.push(getText((uint)ls.toInteger(1)));
+#endif
 		return 1;
 	}
 

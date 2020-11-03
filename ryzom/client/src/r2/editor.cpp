@@ -1191,10 +1191,15 @@ int CEditor::luaGenInstanceName(CLuaState &ls)
 	CHECK_EDITOR
 	const char *funcName = "genInstanceName";
 	CLuaIHM::checkArgCount(ls, funcName, 2); // this is a method
+#ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 2); // name
 	ucstring baseName;
 	nlverify(CLuaIHM::getUCStringOnStack(ls, 2, baseName));
 	CLuaIHM::push(ls, getEditor().genInstanceName(baseName));
+#else
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+	ls.push(getEditor().genInstanceName(ucstring::makeFromUtf8(ls.toString(2))).toUtf8()); // FIXME: Ring UTF-8
+#endif
 	return 1;
 }
 
@@ -1205,10 +1210,15 @@ int CEditor::luaIsPostFixedByNumber(CLuaState &ls)
 	CHECK_EDITOR
 	const char *funcName = "isPostFixedByNumber";
 	CLuaIHM::checkArgCount(ls, funcName, 2); // this is a method
+#ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 2); // name
 	ucstring baseName;
 	nlverify(CLuaIHM::getUCStringOnStack(ls, 2, baseName));
 	ls.push(getEditor().isPostFixedByNumber(baseName));
+#else
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+	ls.push(getEditor().isPostFixedByNumber(ucstring::makeFromUtf8(ls.toString(2)))); // FIXME: Ring UTF-8
+#endif
 	return 1;
 }
 
@@ -1326,9 +1336,15 @@ int CEditor::luaSetPlotItemInfos(CLuaState &ls)
 	const char *funcName = "setPlotItemInfos";
 	CLuaIHM::checkArgCount(ls, funcName, 5); // a method with 4 args
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER);
+#ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 3);
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 4);
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 5);
+#else
+	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
+	CLuaIHM::checkArgType(ls, funcName, 4, LUA_TSTRING);
+	CLuaIHM::checkArgType(ls, funcName, 5, LUA_TSTRING);
+#endif
 	CItemSheet *item = dynamic_cast<CItemSheet *>(SheetMngr.get(CSheetId((uint32) ls.toInteger(2))));
 	if (!item || item->Family != ITEMFAMILY::SCROLL_R2)
 	{
@@ -1336,9 +1352,15 @@ int CEditor::luaSetPlotItemInfos(CLuaState &ls)
 	}
 	R2::TMissionItem mi;
 	mi.SheetId = (uint32) ls.toInteger(2);
+#ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::getUCStringOnStack(ls, 3, mi.Name);
 	CLuaIHM::getUCStringOnStack(ls, 4, mi.Description);
 	CLuaIHM::getUCStringOnStack(ls, 5, mi.Comment);
+#else
+	mi.Name = ucstring::makeFromUtf8(ls.toString(3));
+	mi.Description = ucstring::makeFromUtf8(ls.toString(4));
+	mi.Comment = ucstring::makeFromUtf8(ls.toString(5));
+#endif
 	getEditor().setPlotItemInfos(mi);
 	return 0;
 }
@@ -4244,7 +4266,7 @@ sint CEditor::getGeneratedNameIndex(const std::string &nameUtf8, const std::stri
 			{
 				++ strIt;
 				const char *numberStart = &*strIt;
-				for (; strIt != endStrIt && isdigit(*strIt); ++strIt) {}
+				for (; strIt != endStrIt && (uint8)(*strIt) < (uint8)'\x80' && isdigit(*strIt); ++strIt) {}
 				if (strIt == endStrIt)
 				{
 					sint ret;
@@ -4266,7 +4288,7 @@ bool CEditor::isPostFixedByNumber(const ucstring &baseName)
 	while (lastIndex > 0)
 	{
 		int currChar = (int) baseName[lastIndex];
-		if (!isdigit(currChar) &&
+		if (((uint8)currChar >= (uint8)'\x80' || !isdigit(currChar)) &&
 			currChar != ' ' &&
 			currChar != '\t')
 		{
@@ -4289,7 +4311,7 @@ ucstring CEditor::genInstanceName(const ucstring &baseName)
 	while (lastIndex > 0)
 	{
 		int currChar = (int) strippedName[lastIndex];
-		if (!isdigit(currChar) &&
+		if (((uint8)currChar >= (uint8)'\x80' || !isdigit(currChar)) &&
 			currChar != ' ' &&
 			currChar != '\t')
 		{
@@ -7622,7 +7644,11 @@ class CAHR2Undo : public IActionHandler
 			getEditor().setCurrentTool(NULL);
 			const ucstring *actionName = historic.getPreviousActionName();
 			nlassert(actionName);
+#ifdef RYZOM_LUA_UCSTRING
 			CLuaIHM::push(getEditor().getLua(), *actionName);
+#else
+			getEditor().getLua().push((*actionName).toUtf8());
+#endif
 			historic.undo();
 			getEditor().callEnvMethod("onUndo", 1, 0);
 		}
@@ -7651,7 +7677,11 @@ class CAHR2Redo : public IActionHandler
 			getEditor().setCurrentTool(NULL);
 			const ucstring *actionName = historic.getNextActionName();
 			nlassert(actionName);
+#ifdef RYZOM_LUA_UCSTRING
 			CLuaIHM::push(getEditor().getLua(), *actionName);
+#else
+			getEditor().getLua().push((*actionName).toUtf8());
+#endif
 			historic.redo();
 			getEditor().callEnvMethod("onRedo", 1, 0);
 		}

@@ -255,6 +255,29 @@ int compareCaseInsensitive(const char *a, const char *b);
 int compareCaseInsensitive(const char *a, size_t lenA, const char *b, size_t lenB);
 inline int compareCaseInsensitive(const std::string &a, const std::string &b) { return compareCaseInsensitive(&a[0], a.size(), &b[0], b.size()); }
 
+/** ASCII to lowercase. Useful for internal identifiers.
+* Characters outside of the 7-bit ASCII space, and control characters, are replaced.
+*/
+std::string toLowerAscii(const std::string &str, char replacement);
+void toLowerAscii(char *str, char replacement);
+
+/** ASCII to uppercase. Useful for internal identifiers.
+* Characters outside of the 7-bit ASCII space, and control characters, are replaced.
+*/
+std::string toUpperAscii(const std::string &str, char replacement);
+void toUpperAscii(char *str, char replacement);
+
+/** ASCII to lowercase. Useful for internal identifiers.
+* Characters outside of the 7-bit ASCII space are not affected.
+*/
+std::string toLowerAscii(const std::string &str);
+void toLowerAscii(char *str);
+
+/** ASCII to uppercase. Useful for internal identifiers.
+* Characters outside of the 7-bit ASCII space are not affected.
+*/
+std::string toUpperAscii(const std::string &str);
+void toUpperAscii(char *str);
 
 /**
  *  Convert to an hexadecimal std::string

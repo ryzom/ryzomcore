@@ -298,6 +298,7 @@ namespace NLGUI
 		props.push_back(prop);                                                         \
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// export a unicode string value, by giving the name of the get and the set method
 	#define REFLECT_UCSTRING(exportName, getMethod, setMethod)                         \
 	{                                                                                  \
@@ -308,6 +309,7 @@ namespace NLGUI
 		prop.SetMethod.SetUCString = (CReflectedProperty::TSetUCString) static_cast<TSetUCStringa>(&A::setMethod); \
 		props.push_back(prop);                                                         \
 	}
+#endif
 
 	// export a string value, by giving the name of the get and the set method
 	#define REFLECT_STRING_REF(exportName, getMethod, setMethod)                           \
@@ -320,6 +322,7 @@ namespace NLGUI
 		props.push_back(prop);                                                         \
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// export a unicode string value, by giving the name of the get and the set method
 	#define REFLECT_UCSTRING_REF(exportName, getMethod, setMethod)                         \
 	{                                                                                  \
@@ -330,7 +333,7 @@ namespace NLGUI
 		prop.SetMethod.SetUCString = (CReflectedProperty::TSetUCString) static_cast<TSetUCStringa>(&A::setMethod); \
 		props.push_back(prop);                                                         \
 	}
-
+#endif
 
 	// export a color value, by giving the name of the get and the set method
 	#define REFLECT_RGBA(exportName, getMethod, setMethod)							   \

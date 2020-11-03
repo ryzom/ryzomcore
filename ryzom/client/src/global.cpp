@@ -91,7 +91,7 @@ void resetTextContext (const char *font, bool resetInterfaceManager)
 {
 	if (TextContext != NULL)
 		Driver->deleteTextContext(TextContext);
-	TextContext = Driver->createTextContext(CPath::lookup(font));
+	TextContext = Driver->createTextContext(NLMISC::startsWith(font, "ui") ? font : CPath::lookup(font));
 	if (TextContext != NULL)
 		TextContext->setKeep800x600Ratio(false);
 	else

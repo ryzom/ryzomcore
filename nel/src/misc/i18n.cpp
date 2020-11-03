@@ -444,7 +444,7 @@ std::string CI18N::getSystemLanguageCode ()
 			if (lang.size() > 1)
 			{
 				// only keep 2 first characters
-				lang = NLMISC::toLower(lang).substr(0, 2);
+				lang = NLMISC::toLowerAscii(lang).substr(0, 2);
 
 				// language code supported?
 				if (isLanguageCodeSupported(lang))
@@ -466,7 +466,7 @@ bool CI18N::setSystemLanguageCode (const std::string &languageCode)
 	// be sure supported languages are initialized
 	initLanguages();
 
-	std::string lang = NLMISC::toLower(languageCode);
+	std::string lang = NLMISC::toLowerAscii(languageCode);
 
 	// specified language is really a code (2 characters)
 	if (lang.length() == 2)
@@ -474,7 +474,7 @@ bool CI18N::setSystemLanguageCode (const std::string &languageCode)
 		// check if language code is supported
 		for(uint i = 0; i < _LanguageCodes.size(); ++i)
 		{
-			std::string code = NLMISC::toLower(_LanguageCodes[i]);
+			std::string code = NLMISC::toLowerAscii(_LanguageCodes[i]);
 
 			if (lang == code)
 			{
@@ -490,7 +490,7 @@ bool CI18N::setSystemLanguageCode (const std::string &languageCode)
 		// check if language name is supported
 		for(uint i = 0; i < _LanguageNames.size(); ++i)
 		{
-			std::string name = NLMISC::toLower(_LanguageNames[i]);
+			std::string name = NLMISC::toLowerAscii(_LanguageNames[i]);
 
 			if (name == lang)
 			{

@@ -626,11 +626,11 @@ static DECLARE_INTERFACE_USER_FCT(getChatWin)
 
 
 	CChatWindowManager &rCWM = CChatWindowManager::getInstance();
-	ucstring title = CI18N::get(args[0].getString());
+	string title = CI18N::get(args[0].getString());
 	CChatWindow *window = rCWM.getChatWindow(title);
 	if (!window)
 	{
-		nlwarning("Can't find window named %s", title.toString().c_str());
+		nlwarning("Can't find window named %s", title.c_str());
 		return false;
 	}
 	string sTmp = window->getContainer()->getId();

@@ -89,7 +89,7 @@ namespace NLGUI
 	// Return URL with https is host is in HSTS list
 	static std::string upgradeInsecureUrl(const std::string &url)
 	{
-		if (toLower(url.substr(0, 7)) != "http://") {
+		if (toLowerAscii(url.substr(0, 7)) != "http://") {
 			return url;
 		}
 
@@ -136,7 +136,7 @@ namespace NLGUI
 				if (pos == std::string::npos)
 					return;
 
-				std::string key = toLower(header.substr(0, pos));
+				std::string key = toLowerAscii(header.substr(0, pos));
 				if (pos != std::string::npos)
 				{
 					HeadersRecv[key] = header.substr(pos + 2);
@@ -185,7 +185,7 @@ namespace NLGUI
 			bool hasHSTSHeader()
 			{
 				// ignore header if not secure connection
-				if (toLower(Url.substr(0, 8)) != "https://")
+				if (toLowerAscii(Url.substr(0, 8)) != "https://")
 				{
 					return false;
 				}
@@ -552,7 +552,7 @@ namespace NLGUI
 		LOG_DL("curl easy handle %p created for '%s'", curl, download.url.c_str());
 
 		// https://
-		if (toLower(download.url.substr(0, 8)) == "https://")
+		if (toLowerAscii(download.url.substr(0, 8)) == "https://")
 		{
 			// if supported, use custom SSL context function to load certificates
 			NLWEB::CCurlCertificates::useCertificates(curl);
@@ -1266,13 +1266,12 @@ namespace NLGUI
 
 		// TODO: 'content' should already be tokenized in css parser as it has all the functions for that
 		std::string content = trim(_Style.getStyle("content"));
-		if (toLower(content) == "none" || toLower(content) == "normal")
+		if (toLowerAscii(content) == "none" || toLowerAscii(content) == "normal")
 		{
 			_Style.popStyle();
 			return;
 		}
 
-		// TODO: use ucstring / ucchar as content is utf8 chars
 		std::string::size_type pos = 0;
 		while(pos < content.size())
 		{
@@ -1297,7 +1296,7 @@ namespace NLGUI
 				// skip closing quote
 				pos++;
 			}
-			else if (content[pos] == 'u' && pos < content.size() - 6 && toLower(content.substr(pos, 4)) == "url(")
+			else if (content[pos] == 'u' && pos < content.size() - 6 && toLowerAscii(content.substr(pos, 4)) == "url(")
 			{
 				// url(/path-to/image.jpg) / "Alt!"
 				// url("/path to/image.jpg") / "Alt!"
@@ -3440,7 +3439,7 @@ namespace NLGUI
 		result = url;
 		string tmp;
 
-		if (toLower(result).find("file:") == 0 && result.size() > 5)
+		if (toLowerAscii(result).find("file:") == 0 && result.size() > 5)
 		{
 			result = result.substr(5, result.size()-5);
 		}
@@ -3461,7 +3460,7 @@ namespace NLGUI
 		{
 			// Normalize the path
 			if (isUrl)
-				//result = "file:"+toLower(CPath::standardizePath (CPath::getFullPath (CFile::getPath(result)))+CFile::getFilename(result));*/
+				//result = "file:"+toLowerAscii(CPath::standardizePath (CPath::getFullPath (CFile::getPath(result)))+CFile::getFilename(result));*/
 				result = "file:/"+tmp;
 			else
 				result = tmp;
@@ -3695,7 +3694,7 @@ namespace NLGUI
 		{
 			// Text area ?
 			bool addEntry = false;
-			ucstring entryData;
+			string entryData;
 			if (form.Entries[i].TextArea)
 			{
 				// Get the edit box view
@@ -3706,7 +3705,7 @@ namespace NLGUI
 					CGroupEditBox *editBox = dynamic_cast<CGroupEditBox*>(group);
 					if (editBox)
 					{
-						entryData = CUtfStringView(editBox->getViewText()->getText()).toUtf16();
+						entryData = editBox->getViewText()->getText();
 						addEntry = true;
 					}
 				}
@@ -3723,7 +3722,7 @@ namespace NLGUI
 			else if (form.Entries[i].ComboBox)
 			{
 				CDBGroupComboBox *cb = form.Entries[i].ComboBox;
-				entryData.fromUtf8(form.Entries[i].SelectValues[cb->getSelection()]);
+				entryData = form.Entries[i].SelectValues[cb->getSelection()];
 				addEntry = true;
 			}
 			else if (form.Entries[i].SelectBox)
@@ -3754,7 +3753,7 @@ namespace NLGUI
 			// Add this entry
 			if (addEntry)
 			{
-				formfields.add(form.Entries[i].Name, CI18N::encodeUTF8(entryData));
+				formfields.add(form.Entries[i].Name, entryData);
 			}
 		}
 
@@ -3786,7 +3785,7 @@ namespace NLGUI
 		updateRefreshButton();
 
 		std::string filename;
-		if (toLower(uri).find("file:/") == 0)
+		if (toLowerAscii(uri).find("file:/") == 0)
 		{
 			filename = uri.substr(6, uri.size() - 6);
 		}
@@ -3856,7 +3855,7 @@ namespace NLGUI
 		}
 
 		// https://
-		if (toLower(url.substr(0, 8)) == "https://")
+		if (toLowerAscii(url.substr(0, 8)) == "https://")
 		{
 			// if supported, use custom SSL context function to load certificates
 			NLWEB::CCurlCertificates::useCertificates(curl);
@@ -5347,7 +5346,7 @@ namespace NLGUI
 			if (_Style.hasStyle("text-align"))
 				align = _Style.Current.TextAlign;
 			else if (elm.hasNonEmptyAttribute("align"))
-				align = toLower(elm.getAttribute("align"));
+				align = toLowerAscii(elm.getAttribute("align"));
 
 			if (align == "left")
 				cellParams.Align = CGroupCell::Left;
@@ -5362,7 +5361,7 @@ namespace NLGUI
 			if (_Style.hasStyle("vertical-align"))
 				valign = _Style.Current.VerticalAlign;
 			else if (elm.hasNonEmptyAttribute("valign"))
-				valign = toLower(elm.getAttribute("valign"));
+				valign = toLowerAscii(elm.getAttribute("valign"));
 
 			if (valign == "top")
 				cellParams.VAlign = CGroupCell::Top;
@@ -5859,7 +5858,7 @@ namespace NLGUI
 		// Build the form
 		CGroupHTML::CForm form;
 		// id check is case sensitive and auto id's are uppercase
-		form.id = toLower(trim(elm.getAttribute("id")));
+		form.id = toLowerAscii(trim(elm.getAttribute("id")));
 		if (form.id.empty())
 		{
 			form.id = toString("FORM%d", _Forms.size());
@@ -6287,7 +6286,7 @@ namespace NLGUI
 			{
 				fromString(httpContent.substr(0, pos), _NextRefreshTime);
 
-				pos = toLower(httpContent).find("url=");
+				pos = toLowerAscii(httpContent).find("url=");
 				if (pos != string::npos)
 					_RefreshUrl = getAbsoluteUrl(httpContent.substr(pos + 4));
 			}

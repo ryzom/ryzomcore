@@ -203,7 +203,7 @@ void setLoginFinished( bool f )
 
 // ***************************************************************************
 // Pop a fatal error message box, giving the option to 'quit' the client, plus a help button
-static void fatalMessageBox(const ucstring &msg)
+static void fatalMessageBox(const std::string &msg)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	im->messageBoxWithHelp(msg, "ui:login", "login_quit");
@@ -211,7 +211,7 @@ static void fatalMessageBox(const ucstring &msg)
 
 // ***************************************************************************
 // Pop an error message box, giving the option to go back to main menu, plus a help button
-static void errorMessageBox(const ucstring &msg)
+static void errorMessageBox(const std::string &msg)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	im->messageBoxWithHelp(msg, "ui:login", "on_back_to_login");
@@ -247,7 +247,7 @@ void createOptionalCatUI()
 			pVT = dynamic_cast<CViewText*>(pNewLine->getView("size"));
 			if (pVT != NULL)
 			{
-				pVT->setText(BGDownloader::getWrittenSize(InfoOnPatch.OptCat[i].Size).toUtf8());
+				pVT->setText(BGDownloader::getWrittenSize(InfoOnPatch.OptCat[i].Size));
 			}
 
 			// Add to the list
@@ -285,25 +285,25 @@ void initEula()
 }
 
 // ***************************************************************************
-static void setDataScanLog(const ucstring &text)
+static void setDataScanLog(const std::string &text)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:datascan:content:log_txt:log"));
 	if (pVT != NULL)
 	{
-		pVT->setText(text.toUtf8());
+		pVT->setText(text);
 	}
 }
 
 // ***************************************************************************
-static void setDataScanState(const ucstring &text, ucstring progress= ucstring())
+static void setDataScanState(const std::string &text, const std::string &progress = string())
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:datascan:content:state"));
-	if (pVT != NULL) pVT->setText(text.toUtf8());
+	if (pVT != NULL) pVT->setText(text);
 
 	pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:datascan:content:progress"));
-	if (pVT != NULL) pVT->setText(progress.toUtf8());
+	if (pVT != NULL) pVT->setText(progress);
 }
 
 void initCatDisplay()
@@ -336,24 +336,24 @@ void initReboot()
 
 
 // ***************************************************************************
-static void setPatcherStateText(const std::string &baseUIPath, const ucstring &str)
+static void setPatcherStateText(const std::string &baseUIPath, const std::string &str)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(baseUIPath + ":content:state"));
 	if (pVT != NULL)
 	{
-		pVT->setText(str.toUtf8());
+		pVT->setText(str);
 	}
 }
 
 // ***************************************************************************
-static void setPatcherProgressText(const std::string &baseUIPath, const ucstring &str)
+static void setPatcherProgressText(const std::string &baseUIPath, const std::string &str)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(baseUIPath + ":content:progress"));
 	if (pVT != NULL)
 	{
-		pVT->setText(str.toUtf8());
+		pVT->setText(str);
 	}
 }
 
@@ -361,6 +361,7 @@ static void setPatcherProgressText(const std::string &baseUIPath, const ucstring
 static void updatePatchingInfoText(const std::string &baseUIPath)
 {
 	CPatchManager *pPM = CPatchManager::getInstance();
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess &bgDownloader = CBGDownloaderAccess::getInstance();
 	if (isBGDownloadEnabled())
 	{
@@ -368,7 +369,7 @@ static void updatePatchingInfoText(const std::string &baseUIPath)
 		if (bgDownloader.getDownloadThreadPriority() == BGDownloader::ThreadPriority_Paused)
 		{
 			setPatcherStateText(baseUIPath, CI18N::get("uiBGD_Paused"));
-			setPatcherProgressText(baseUIPath, ucstring());
+			setPatcherProgressText(baseUIPath, string());
 		}
 		else
 		{
@@ -379,14 +380,15 @@ static void updatePatchingInfoText(const std::string &baseUIPath)
 			}
 			else
 			{
-				setPatcherProgressText(baseUIPath, ucstring());
+				setPatcherProgressText(baseUIPath, string());
 			}
 		}
 	}
 	else
+#endif
 	{
-		ucstring state;
-		vector<ucstring> log;
+		string state;
+		vector<string> log;
 		if(pPM->getThreadState(state, log))
 		{
 			setPatcherStateText(baseUIPath, state);
@@ -396,7 +398,7 @@ static void updatePatchingInfoText(const std::string &baseUIPath)
 			}
 			else
 			{
-				setPatcherProgressText(baseUIPath, ucstring());
+				setPatcherProgressText(baseUIPath, string());
 			}
 		}
 	}
@@ -410,7 +412,9 @@ void loginMainLoop()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CPatchManager *pPM = CPatchManager::getInstance();
 
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess &bgDownloader = CBGDownloaderAccess::getInstance();
+#endif
 
 	bool windowBlinkDone = false;
 	bool fatalMessageBoxShown = false;
@@ -467,21 +471,24 @@ void loginMainLoop()
 			bool res = false;
 			BGDownloader::TTaskResult taskResult = BGDownloader::TaskResult_Unknown;
 			bool finished = false;
-			ucstring bgDownloaderError;
+#ifdef RYZOM_BG_DOWNLOADER
+			string bgDownloaderError;
 			if (isBGDownloadEnabled())
 			{
 				finished = bgDownloader.isTaskEnded(taskResult, bgDownloaderError);
 			}
 			else
+#endif
 			{
 				finished = pPM->isCheckThreadEnded(res);
 			}
 
 			if (finished)
 			{
-				setPatcherStateText("ui:login:checking", ucstring());
-				setPatcherProgressText("ui:login:checking", ucstring());
+				setPatcherStateText("ui:login:checking", string());
+				setPatcherProgressText("ui:login:checking", string());
 
+#ifdef RYZOM_BG_DOWNLOADER
 				if (isBGDownloadEnabled())
 				{
 					AvailablePatchs = bgDownloader.getAvailablePatchs();
@@ -533,6 +540,7 @@ void loginMainLoop()
 
 				}
 				else
+#endif
 				{
 					if(res)
 					{
@@ -557,7 +565,7 @@ void loginMainLoop()
 					}
 					else
 					{
-						ucstring errMsg = CI18N::get("uiErrChecking");
+						string errMsg = CI18N::get("uiErrChecking");
 						if (!pPM->getLastErrorMessage().empty())
 						{
 							errMsg = pPM->getLastErrorMessage();
@@ -600,14 +608,14 @@ void loginMainLoop()
 							setDataScanState(CI18N::get("uiScanDataSucess"));
 						else
 						{
-							ucstring	fmt= CI18N::get("uiScanDataErrors");
+							string	fmt= CI18N::get("uiScanDataErrors");
 							strFindReplace(fmt, "%d", toString(numFiles));
 							setDataScanState(fmt);
 						}
 					}
 					else
 					{
-						ucstring errMsg = CI18N::get("uiErrDataScanning");
+						string errMsg = CI18N::get("uiErrDataScanning");
 						if (!pPM->getLastErrorMessage().empty())
 						{
 							errMsg = pPM->getLastErrorMessage();
@@ -616,7 +624,7 @@ void loginMainLoop()
 					}
 
 					// the log may have changed
-					ucstring	dsLog;
+					string	dsLog;
 					if(pPM->getDataScanLog(dsLog))
 						setDataScanLog(dsLog);
 				}
@@ -624,8 +632,8 @@ void loginMainLoop()
 			else
 			{
 				// update inteface content
-				ucstring state;
-				vector<ucstring> log;
+				string state;
+				vector<string> log;
 				// get state
 				if(pPM->getThreadState(state, log))
 				{
@@ -633,7 +641,7 @@ void loginMainLoop()
 					setDataScanState(state, toString("%d/%d", pPM->getCurrentFilesToGet(), pPM->getTotalFilesToGet()));
 				}
 				// set special data scan log
-				ucstring	dsLog;
+				string	dsLog;
 				if(pPM->getDataScanLog(dsLog))
 					setDataScanLog(dsLog);
 			}
@@ -646,14 +654,14 @@ void loginMainLoop()
 			int currentPatchingSize;
 			int totalPatchSize;
 
-
+#ifdef RYZOM_BG_DOWNLOADER
 			if (isBGDownloadEnabled())
 			{
 				currentPatchingSize = bgDownloader.getPatchingSize();
 				totalPatchSize = bgDownloader.getTotalSize();
 				BGDownloader::TTaskResult taskResult;
 				bool finished = false;
-				ucstring bgDownloaderError;
+				string bgDownloaderError;
 				finished = bgDownloader.isTaskEnded(taskResult, bgDownloaderError);
 				if (finished)
 				{
@@ -666,8 +674,8 @@ void loginMainLoop()
 
 					if (taskResult == BGDownloader::TaskResult_Error)
 					{
-						setPatcherStateText("ui:login:patching", ucstring());
-						setPatcherProgressText("ui:login:patching", ucstring());
+						setPatcherStateText("ui:login:patching", string());
+						setPatcherProgressText("ui:login:patching", string());
 
 						if (!fatalMessageBoxShown)
 						{
@@ -687,6 +695,7 @@ void loginMainLoop()
 				}
 			}
 			else
+#endif
 			{
 				totalPatchSize = TotalPatchSize;
 				currentPatchingSize = pPM->getPatchingSize();
@@ -699,7 +708,7 @@ void loginMainLoop()
 					}
 					else
 					{
-						ucstring errMsg = CI18N::get("uiErrPatchApply");
+						string errMsg = CI18N::get("uiErrPatchApply");
 						if (!pPM->getLastErrorMessage().empty())
 						{
 							errMsg = pPM->getLastErrorMessage();
@@ -718,10 +727,10 @@ void loginMainLoop()
 			}
 
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TOTAL_SIZE_PATCH));
-			ucstring sTmp;
+			string sTmp;
 			sTmp = BGDownloader::getWrittenSize(currentPatchingSize);
 			sTmp += " / " + BGDownloader::getWrittenSize(totalPatchSize);
-			if (pVT != NULL) pVT->setText(sTmp.toUtf8());
+			if (pVT != NULL) pVT->setText(sTmp);
 		}
 //		else if (screen == UI_VARIABLES_SCREEN_CATDISP) // If we are displaying patch info
 		else if (LoginSM.getCurrentState() == CLoginStateMachine::st_display_cat)
@@ -770,10 +779,10 @@ void loginMainLoop()
 			// Total size of the patches is optional cats + required cat (f(optCat)) + non opt cat
 
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TOTAL_SIZE));
-			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(TotalPatchSize).toUtf8());
+			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(TotalPatchSize));
 
 			pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_NON_OPTIONAL_SIZE));
-			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(nNonOptSize).toUtf8());
+			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(nNonOptSize));
 		}
 	}
 }
@@ -797,7 +806,7 @@ void initLoginScreen()
 
 	// version
 	std::string ext;
-	if (ClientApp.find("ryzom_") != ucstring::npos)
+	if (ClientApp.find("ryzom_") != string::npos)
 		ext = " (" + ClientApp.substr(6) + ")";
 
 	CViewText *pV = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:ver_value"));
@@ -1134,22 +1143,26 @@ void initPatchCheck()
 		LoginShardId = Shards[ShardSelected].ShardId;
 	}
 
+#ifdef RYZOM_BG_DOWNLOADER
 	if (!isBGDownloadEnabled())
+#endif
 	{
 		getPatchParameters(url, ver, patchURIs);
 		pPM->init(patchURIs, url, ver);
 		pPM->startCheckThread(true /* include background patchs */);
 	}
+#ifdef RYZOM_BG_DOWNLOADER
 	else
 	{
 		BGDownloader::CTaskDesc taskDesc(BGDownloader::DLState_CheckPatch);
 		CBGDownloaderAccess::getInstance().requestDownloadThreadPriority(BGDownloader::ThreadPriority_Normal, false);
 		CBGDownloaderAccess::getInstance().startTask(taskDesc, getBGDownloaderCommandLine(), true /* showDownloader */);
 	}
+#endif
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
 
-	setPatcherStateText("ui:login:checking", ucstring());
-	setPatcherProgressText("ui:login:checking", ucstring());
+	setPatcherStateText("ui:login:checking", string());
+	setPatcherProgressText("ui:login:checking", string());
 }
 
 void initShardDisplay()
@@ -1654,8 +1667,9 @@ void initPatch()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CPatchManager *pPM = CPatchManager::getInstance();
 
-
+#ifdef RYZOM_BG_DOWNLOADER
 	if (!isBGDownloadEnabled())
+#endif
 	{
 		// Get the list of optional categories to patch
 		vector<string> vCategories;
@@ -1690,6 +1704,7 @@ void initPatch()
 		}
 		pPM->startPatchThread(vCategories, true);
 	}
+#ifdef RYZOM_BG_DOWNLOADER
 	else
 	{
 		// NB : here we only do a part of the download each time
@@ -1699,14 +1714,15 @@ void initPatch()
 		NLMISC::CBigFile::getInstance().removeAll();
 		NLMISC::CStreamedPackageManager::getInstance().unloadAll();
 	}
+#endif
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_PATCHING);
 
 	CInterfaceElement *closeBtn = CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_CLOSE_PATCH);
 	if (closeBtn)
 		closeBtn->setActive(false);
 
-	setPatcherStateText("ui:login:patching", ucstring());
-	setPatcherProgressText("ui:login:patching", ucstring());
+	setPatcherStateText("ui:login:patching", string());
+	setPatcherProgressText("ui:login:patching", string());
 }
 
 // ***************************************************************************
@@ -1844,11 +1860,13 @@ class CAHReboot : public IActionHandler
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		try
 		{
+#ifdef RYZOM_BG_DOWNLOADER
 			if (isBGDownloadEnabled())
 			{
 				CBGDownloaderAccess::getInstance().reboot();
 			}
 			else
+#endif
 			{
 				CPatchManager::getInstance()->reboot();
 			}
@@ -1864,7 +1882,7 @@ class CAHReboot : public IActionHandler
 		}
 		catch (const std::exception &e)
 		{
-			im->messageBoxWithHelp(ucstring::makeFromUtf8(e.what()), "ui:login", "login_quit");
+			im->messageBoxWithHelp(e.what(), "ui:login", "login_quit");
 		}
 	}
 };
@@ -2260,7 +2278,7 @@ void initDataScan()
 	CPatchManager *pPM = CPatchManager::getInstance();
 
 	// reset the log
-	setDataScanLog(ucstring());
+	setDataScanLog(string());
 
 	// Start Scanning
 	pPM->startScanDataThread();
@@ -2340,10 +2358,6 @@ inline string parseTooltip(const string & initString, const string & tagName)
 		tooltip = tooltip.substr(0, tooltip.find("<"));
 	}
 
-	ucstring uc;
-	uc.fromUtf8(tooltip);;
-	tooltip = uc.toString();
-
 	return tooltip;
 }
 
@@ -2362,10 +2376,6 @@ inline string parseCommentError(const string & initString, const string & tagNam
 		// end of comment
 		error = error.substr(0, error.find("<"));
 	}
-
-	ucstring uc;
-	uc.fromUtf8(error);;
-	error = uc.toString();
 
 	return error;
 }
@@ -2428,26 +2438,26 @@ bool initCreateAccount()
 
 		if(!CurlHttpClient.sendGet(url, params, pPM->isVerboseLog()))
 		{
-			ucstring errorMessage("Can't send (error code 60)");
+			string errorMessage("Can't send (error code 60)");
 			errorMessageBox(errorMessage);
-			nlwarning(errorMessage.toString().c_str());
+			nlwarning(errorMessage.c_str());
 			return false;
 		}
 
 		string res;
 		if(!CurlHttpClient.receive(res, pPM->isVerboseLog()))
 		{
-			ucstring errorMessage("Can't receive (error code 61)");
+			string errorMessage("Can't receive (error code 61)");
 			errorMessageBox(errorMessage);
-			nlwarning(errorMessage.toString().c_str());
+			nlwarning(errorMessage.c_str());
 			return false;
 		}
 
 		if(res.empty())
 		{
-			ucstring errorMessage("Empty result (error code 13)");
+			string errorMessage("Empty result (error code 13)");
 			errorMessageBox(errorMessage);
-			nlwarning(errorMessage.toString().c_str());
+			nlwarning(errorMessage.c_str());
 			return false;
 		}
 
@@ -2604,9 +2614,9 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 
 			if (!CurlHttpClient.connect(url))
 			{
-				ucstring errorMessage("Can't connect");
+				string errorMessage("Can't connect");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.toString().c_str());
+				nlwarning(errorMessage.c_str());
 				return;
 			}
 
@@ -2631,26 +2641,26 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 
 			if(!CurlHttpClient.sendPost(url, params, pPM->isVerboseLog()))
 			{
-				ucstring errorMessage("Can't send (error code 60)");
+				string errorMessage("Can't send (error code 60)");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.toString().c_str());
+				nlwarning(errorMessage.c_str());
 				return;
 			}
 
 			string res;
 			if(!CurlHttpClient.receive(res, pPM->isVerboseLog()))
 			{
-				ucstring errorMessage("Can't receive (error code 61)");
+				string errorMessage("Can't receive (error code 61)");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.toString().c_str());
+				nlwarning(errorMessage.c_str());
 				return;
 			}
 
 			if(res.empty())
 			{
-				ucstring errorMessage("Empty result (error code 13)");
+				string errorMessage("Empty result (error code 13)");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.toString().c_str());
+				nlwarning(errorMessage.c_str());
 				return;
 			}
 
@@ -3290,7 +3300,7 @@ void loginIntro()
 		if (i != 0)
 		{
 			beginLoading(IntroNVidia);
-			ucstring nmsg("");
+			string nmsg("");
 			ProgressBar.newMessage (nmsg);
 		}
 
@@ -3316,7 +3326,7 @@ void loginIntro()
 				Driver->AsyncListener.isKeyPushed (KeySPACE))
 				break;
 
-			const ucstring nmsg("");
+			const string nmsg("");
 			ProgressBar.newMessage (nmsg);
 			IngameDbMngr.flushObserverCalls();
 			NLGUI::CDBManager::getInstance()->flushObserverCalls();

@@ -408,7 +408,7 @@ void			CSBrickManager::compileBrickProperties()
 			string::size_type pos = prop.Text.find(':');
 			if (pos != string::npos)
 			{
-				string key = toLower(prop.Text.substr(0, pos));
+				string key = toLowerAscii(prop.Text.substr(0, pos));
 				string value = prop.Text.substr(pos + 1);
 				// get key id.
 				if (_BrickPropIdMap.find(key) == _BrickPropIdMap.end())
@@ -486,7 +486,7 @@ void			CSBrickManager::compileBrickProperties()
 								k++;
 							}
 							// Param Id modifier? (ie read not the 0th value, but the 1th etc... up to 9)
-							else if(k<textSize && isdigit(text[k]))
+							else if(k<textSize && (uint8)text[k] < (uint8)'\x80' && isdigit(text[k]))
 							{
 								char	tp[2];
 								tp[0]= (char)text[k];
@@ -509,7 +509,7 @@ void			CSBrickManager::compileBrickProperties()
 							// Parse all the brick properties if match the key
 							float	value= 0.f;
 							// get the wanted prop id
-							key = toLower(key);
+							key = toLowerAscii(key);
 							uint	propId= getBrickPropId(key);
 							// if propid exist
 							if(propId)
