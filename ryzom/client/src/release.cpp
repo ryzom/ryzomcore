@@ -629,6 +629,9 @@ void release()
 		delete FXAA; FXAA = NULL;
 		CBloomEffect::releaseInstance();
 
+		// Release texture
+		endLoading();
+
 		// Release Scene, textcontexts, materials, ...
 		Driver->release();
 
