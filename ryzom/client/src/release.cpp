@@ -43,6 +43,7 @@
 #include "nel/3d/u_visual_collision_manager.h"
 #include "nel/3d/u_shape_bank.h"
 #include "nel/3d/stereo_hmd.h"
+#include "nel/3d/async_file_manager_3d.h"
 // Client
 #include "global.h"
 #include "release.h"
@@ -572,6 +573,8 @@ void release()
 	{
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_GameExit, "login_step_game_exit&play_time=" + toString((NLMISC::CTime::getLocalTime() - StartPlayTime) / 1000)));
 	}
+	
+	setCrashCallback(NULL);
 
 #ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().release();
@@ -704,7 +707,7 @@ void release()
 	CIXml::releaseLibXml();
 	CHttpCache::release();
 	CStrictTransportSecurity::release();
-	CCoTask::releaseInstance();
+	CAsyncFileManager3D::releaseInstance();
 
 #if FINAL_VERSION
 	// openURL ("http://ryzom.com/exit/");

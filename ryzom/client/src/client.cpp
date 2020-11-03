@@ -451,6 +451,7 @@ int main(int argc, char **argv)
 	// delete all logs and displayers when we're not using logs macros anymore
 	destroyDebug();
 	CLog::releaseProcessName();
+	// CCoTask::releaseInstance();
 
 	// delete the Nel context
 	delete appContext;

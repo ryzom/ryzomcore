@@ -40,7 +40,7 @@ class CTextureFile;
 class CAsyncFileManager3D
 {
 
-	NLMISC_SAFE_SINGLETON_DECL(CAsyncFileManager3D);
+	NLMISC_SAFE_RELEASABLE_SINGLETON_DECL(CAsyncFileManager3D);
 	CAsyncFileManager3D();
 public:
 
