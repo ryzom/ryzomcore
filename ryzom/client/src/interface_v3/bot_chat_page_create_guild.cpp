@@ -79,7 +79,7 @@ class CHandlerGuildCreate : public IActionHandler
 		uint64 icon = CGuildManager::iconMake((uint8)pCS->getGuildBack(), (uint8)pCS->getGuildSymbol(),
 								pCS->getInvertGuildSymbol(), pCS->getGuildColor1(), pCS->getGuildColor2());
 
-		const string msgName = "GUILD:CREATE";
+		const char *msgName = "GUILD:CREATE";
 		NLMISC::CBitMemStream out;
 		if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 		{

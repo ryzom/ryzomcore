@@ -18,8 +18,11 @@
 #define NLMISC_UTF_STRING_VIEW_H
 
 #include <nel/misc/types_nl.h>
-#include <nel/misc/ucstring.h>
+
 #include <string>
+
+#include <nel/misc/string_view.h>
+#include <nel/misc/ucstring.h>
 
 namespace NLMISC {
 
@@ -40,6 +43,9 @@ public:
 	{
 		nlassert(len <= strlen(utf8Str));
 	}
+
+	inline CUtfStringView(CStringView utf8Str) : m_Str(utf8Str.data()), m_Size(utf8Str.size()), m_Iterator(utf8Iterator) {}
+
 #if defined(NL_OS_WINDOWS)
 	inline CUtfStringView(const wchar_t *utf16Str) : m_Str(utf16Str), m_Size(wcslen(utf16Str)), m_Iterator(utf16Iterator) {}
 	inline CUtfStringView(const wchar_t *utf16Str, size_t len): m_Str(utf16Str), m_Size(len), m_Iterator(utf16Iterator)
@@ -166,6 +172,6 @@ private:
 
 } /* namespace NLMISC */
 
-#endif /* #ifndef NLMISC_STREAMED_PACKAGE_PROVIDER_H */
+#endif /* #ifndef NLMISC_UTF_STRING_VIEW_H */
 
 /* end of file */

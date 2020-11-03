@@ -1706,7 +1706,7 @@ public:
 		string sCharSumPath = getParam(Params, "charsum");
 		SCharacter3DSetup::setupCharacterSummaryFromDB(CS, sCharSumPath);
 		CS.Mainland = MainlandSelected;
-		CS.Name = sFirstName;
+		CS.Name = ucstring::makeFromUtf8(sFirstName); // FIXME: UTF-8 (serial)
 		//CS.Surname = sSurName;
 
 		// Create the message to send to the server from the character summary
