@@ -514,7 +514,7 @@ bool connection (const string &cookie, const string &fsaddr)
 	Actions.enable(false);
 	EditActions.enable(false);
 
-	resetTextContext("noto_sans.ttf", true);
+	resetTextContext("uiFontSans", true);
 
 	if (InterfaceState == GOGOGO_IN_THE_GAME)
 	{
@@ -655,7 +655,7 @@ bool reconnection()
 	Actions.enable(false);
 	EditActions.enable(false);
 
-	resetTextContext("noto_sans.ttf", true);
+	resetTextContext("uiFontSans", true);
 
 	if (InterfaceState == GOGOGO_IN_THE_GAME)
 	{

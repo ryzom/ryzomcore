@@ -71,7 +71,7 @@ namespace GUIEditor
 		NLMISC::CPath::remapExtension( "png", "tga", true );
 
 		w->init();
-		w->createTextContext("noto_sans.ttf");
+		w->createTextContext("uiFontSans");
 
 		NLGUI::CAHManager::setEditorMode( true );
 		NLGUI::CLuaManager::setEditorMode( true );
