@@ -1010,13 +1010,13 @@ void CFarTP::hookNextFarTPForEditor()
  */
 void CFarTP::requestReturnToPreviousSession(TSessionId rejectedSessionId)
 {
-	const string msgName = "CONNECTION:RET_MAINLAND";
+	const char *msgName = "CONNECTION:RET_MAINLAND";
 	CBitMemStream out;
 	nlverify(GenericMsgHeaderMngr.pushNameToStream(msgName, out));
 	out.serial(PlayerSelectedSlot);
 	out.serial(rejectedSessionId);
 	NetMngr.push(out);
-	nlinfo("%s sent", msgName.c_str());
+	nlinfo("%s sent", msgName);
 }
 
 /*

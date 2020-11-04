@@ -46,6 +46,7 @@ class CStringManagerClient
 public:
 	// Singleton pattern implementation
 	static CStringManagerClient	*instance();
+	static bool hasInstance() { return _Instance; }
 	static void	release(bool mustReleaseStaticArrays);
 
 	/** Prepare the string manager to use a persistent string cache.
@@ -385,7 +386,8 @@ public:
 	virtual ~IStringWaiterRemover()
 	{
 		// signal the string manager that this waiter is destroyed
-		CStringManagerClient::instance()->removeStringWaiter(this);
+		if (CStringManagerClient::hasInstance())
+			CStringManagerClient::instance()->removeStringWaiter(this);
 	}
 };
 
@@ -403,7 +405,8 @@ public:
 	virtual ~IStringWaitCallback()
 	{
 		// signal the string manager that this waiter is destroyed
-		CStringManagerClient::instance()->removeStringWaiter(this);
+		if (CStringManagerClient::hasInstance())
+			CStringManagerClient::instance()->removeStringWaiter(this);
 	}
 
 };

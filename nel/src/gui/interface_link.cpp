@@ -117,18 +117,18 @@ namespace NLGUI
 					return false;
 				}
 			break;
+#ifdef RYZOM_LUA_UCSTRING
 			case CReflectedProperty::UCString:
 			case CReflectedProperty::UCStringRef:
-#ifdef RYZOM_LUA_UCSTRING
 				if (valueToAffect.toString())
 				{
 					(destElem.*(property.SetMethod.SetUCString))(ucstring::makeFromUtf8(valueToAffect.getString()));
 				}
 				else
-#endif
 				{
 					return false;
 				}
+#endif
 			break;
 			case CReflectedProperty::RGBA:
 				if (valueToAffect.toRGBA())

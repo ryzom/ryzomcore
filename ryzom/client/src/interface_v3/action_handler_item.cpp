@@ -407,10 +407,10 @@ void CInterfaceItemEdition::CItemEditionWindow::validate()
 			if (textValid)
 			{
 				CBitMemStream out;
-				const string msgName = "EVENT:SET_ITEM_CUSTOM_TEXT";
+				const char *msgName = "EVENT:SET_ITEM_CUSTOM_TEXT";
 				if (!GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 				{
-					nlwarning ("don't know message name %s", msgName.c_str());
+					nlwarning ("don't know message name %s", msgName);
 				}
 				else
 				{
@@ -446,7 +446,7 @@ static void validateStackItem(CDBCtrlSheet *src, CDBCtrlSheet *dest, sint32 quan
 static void sendSwapItemMsg(const CDBCtrlSheet *pCSSrc, const CDBCtrlSheet *pCSDst, sint32 quantitySrc)
 {
 	CBitMemStream out;
-	const string sMsg = "ITEM:SWAP";
+	const char *sMsg = "ITEM:SWAP";
 	if(GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 	{
 		// Swap all the Src (quantity= quantitySrc) to dest
@@ -479,7 +479,7 @@ static void sendSwapItemMsg(const CDBCtrlSheet *pCSSrc, const CDBCtrlSheet *pCSD
 		//nlinfo("impulseCallBack : %s %d %d %d %d %d sent", sMsg.c_str(), srcInvId, srcSlotId, dstInvId, dstSlotId, quantity);
 	}
 	else
-		nlwarning(" unknown message name '%s'",sMsg.c_str());
+		nlwarning(" unknown message name '%s'",sMsg);
 }
 
 /** Display the popup to ask item quantity
@@ -557,7 +557,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 		CBitMemStream out;
-		const string sMsg = "EXCHANGE:ADD";
+		const char *sMsg = "EXCHANGE:ADD";
 		if(GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 		{
 			// Swap all the Src (quantity= quantitySrc) to dest
@@ -570,7 +570,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 			//nlinfo("impulseCallBack : %s %d %d %d sent", sMsg.c_str(), srcSlotIndex, destSlotIndex, quantitySrc);
 		}
 		else
-			nlwarning(" unknown message name '%s'",sMsg.c_str());
+			nlwarning(" unknown message name '%s'",sMsg);
 	}
 
 //=====================================================================================================================
@@ -626,8 +626,8 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 
 		// send msg to server
 		CBitMemStream out;
-		const string sMsg = "EXCHANGE:REMOVE";
-		if(GenericMsgHeaderMngr.pushNameToStream(sMsg.c_str(), out))
+		const char *sMsg = "EXCHANGE:REMOVE";
+		if(GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 		{
 			// Swap all the Src (quantity= quantitySrc) to dest
 			uint16	slotIndex =	(uint16) exchangeSlot->getIndexInDB();
@@ -637,7 +637,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 			//nlinfo("impulseCallBack : %s %d sent", sMsg.c_str(), slotIndex);
 		}
 		else
-			nlwarning(" unknown message name '%s'",sMsg.c_str());
+			nlwarning(" unknown message name '%s'",sMsg);
 	}
 
 
@@ -1648,7 +1648,7 @@ REGISTER_ACTION_HANDLER( CHandlerDragNDrop, "drag_n_drop" );
 static void sendToServerEnchantMessage(uint8 invent, uint16 slot)
 {
 	CBitMemStream out;
-	const string sMsg = "ITEM:ENCHANT";
+	const char *sMsg = "ITEM:ENCHANT";
 
 	if(GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 	{
@@ -1657,7 +1657,7 @@ static void sendToServerEnchantMessage(uint8 invent, uint16 slot)
 		NetMngr.push(out);
 	}
 	else
-		nlinfo("unknown message %s", sMsg.c_str());
+		nlinfo("unknown message %s", sMsg);
 }
 
 // **********************************************************************************************************
@@ -2157,7 +2157,7 @@ static void sendMsgUseItem(uint16 slot)
 	if(!ClientCfg.Local)
 	{
 		CBitMemStream out;
-		const string sMsg = "ITEM:USE_ITEM";
+		const char *sMsg = "ITEM:USE_ITEM";
 
 		if(GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 		{
@@ -2165,7 +2165,7 @@ static void sendMsgUseItem(uint16 slot)
 			NetMngr.push(out);
 		}
 		else
-			nlinfo("unknown message %s", sMsg.c_str());
+			nlinfo("unknown message %s", sMsg);
 	}
 }
 
@@ -2175,7 +2175,7 @@ static void sendMsgStopUseXpCat( bool isRingCatalyser )
 	if(!ClientCfg.Local)
 	{
 		CBitMemStream out;
-		const string sMsg = "ITEM:STOP_USE_XP_CAT";
+		const char *sMsg = "ITEM:STOP_USE_XP_CAT";
 
 		if(GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 		{
@@ -2183,7 +2183,7 @@ static void sendMsgStopUseXpCat( bool isRingCatalyser )
 			NetMngr.push(out);
 		}
 		else
-			nlinfo("unknown message %s", sMsg.c_str());
+			nlinfo("unknown message %s", sMsg);
 	}
 }
 

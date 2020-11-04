@@ -3706,17 +3706,17 @@ public:
 			sint n = PeopleInterraction.TeamList.getIndexFromName(selection->getEntityName());
 			if (n >= 0)
 			{
-				const string msgName = "TEAM:KICK";
+				const char *msgName = "TEAM:KICK";
 				CBitMemStream out;
 				if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 				{
 					uint8 teamMember = (uint8)n;
 					out.serialEnum(teamMember);
 					NetMngr.push(out);
-					//nlinfo("impulseCallBack : %s %d sent", msgName.c_str(), teamMember);
+					//nlinfo("impulseCallBack : %s %d sent", msgName, teamMember);
 				}
 				else
-					nlwarning("unknown message named '%s'.", msgName.c_str());
+					nlwarning("unknown message named '%s'.", msgName);
 			}
 		}
 	}

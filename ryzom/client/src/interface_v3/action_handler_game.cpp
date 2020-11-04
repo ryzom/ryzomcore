@@ -1166,7 +1166,7 @@ public:
 			game_exit_request = true;
 			ryzom_exit_request = true;
 
-			const string msgName = "CONNECTION:CLIENT_QUIT_REQUEST";
+			const char *msgName = "CONNECTION:CLIENT_QUIT_REQUEST";
 			CBitMemStream out;
 			nlverify(GenericMsgHeaderMngr.pushNameToStream(msgName, out));
 			bool bypassDisconnectionTimer = FarTP.isFastDisconnectGranted() && (!IsInRingSession); // no need on a ring shard, as it's very short
@@ -1489,7 +1489,7 @@ void beastOrder (const std::string &orderStr, const std::string &beastIndexStr, 
 	else
 	{
 		// execute the order.
-		const string msgName = "ANIMALS:BEAST";
+		const char *msgName = "ANIMALS:BEAST";
 		CBitMemStream out;
 		if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 		{
@@ -1500,7 +1500,7 @@ void beastOrder (const std::string &orderStr, const std::string &beastIndexStr, 
 			NetMngr.push(out);
 		}
 		else
-			nlwarning("<beastOrder> : unknown message name : '%s'.", msgName.c_str());
+			nlwarning("<beastOrder> : unknown message name : '%s'.", msgName);
 	}
 }
 
@@ -4518,7 +4518,7 @@ public:
 		if( sCustomPhrase.empty() )
 		{
 			// Create the message and send.
-			static const string msgName = "COMMAND:EMOTE";
+			static const char *msgName = "COMMAND:EMOTE";
 			CBitMemStream out;
 			if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 			{
@@ -4528,12 +4528,12 @@ public:
 				//nlinfo("impulseCallBack : %s %d %d sent", msgName.c_str(), (uint32)behavToSend, phraseNbToSend);
 			}
 			else
-				nlwarning("command 'emote': unknown message named '%s'.", msgName.c_str());
+				nlwarning("command 'emote': unknown message named '%s'.", msgName);
 		}
 		else
 		{
 			// Create the message and send.
-			static const string msgName = "COMMAND:CUSTOM_EMOTE";
+			static const char *msgName = "COMMAND:CUSTOM_EMOTE";
 			CBitMemStream out;
 			if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 			{
@@ -4563,7 +4563,7 @@ public:
 				//nlinfo("impulseCallBack : %s %d %s sent", msgName.c_str(), (uint32)behavToSend, sCustomPhrase.c_str());
 			}
 			else
-				nlwarning("command 'emote': unknown message named '%s'.", msgName.c_str());
+				nlwarning("command 'emote': unknown message named '%s'.", msgName);
 		}
 	}
 };

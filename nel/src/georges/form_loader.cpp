@@ -241,7 +241,7 @@ UForm *CFormLoader::loadForm (const std::string &filename)
 			name += ".dfn";
 
 			// Load the dfn
-			CFormDfn	*dfn = loadFormDfn (name, false);
+			CSmartPtr<CFormDfn> dfn = loadFormDfn (name, false);
 			if (dfn)
 			{
 				// Open the file

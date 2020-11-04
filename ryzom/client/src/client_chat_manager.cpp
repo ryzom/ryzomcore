@@ -329,7 +329,7 @@ void CClientChatManager::tell( const string& receiverIn, const string& strIn )
 
 	// *** send str
 	CBitMemStream bms;
-	string msgType = "STRING:TELL";
+	const char *msgType = "STRING:TELL";
 	if( GenericMsgHeaderMngr.pushNameToStream(msgType,bms) )
 	{
 		bms.serial( receiver );
@@ -385,7 +385,7 @@ void CClientChatManager::tell( const string& receiverIn, const string& strIn )
 void CClientChatManager::filter( uint8 filter )
 {
 	CBitMemStream bms;
-	string msgType = "STRING:FILTER";
+	const char *msgType = "STRING:FILTER";
 	if( GenericMsgHeaderMngr.pushNameToStream(msgType,bms) )
 	{
 		bms.serial( filter );
@@ -417,7 +417,7 @@ void CClientChatManager::setChatMode(CChatGroup::TGroupType group, TChanID dynam
 	if (group != CChatGroup::team)
 	{
 		CBitMemStream bms;
-		string msgType = "STRING:CHAT_MODE";
+		const char *msgType = "STRING:CHAT_MODE";
 		if( GenericMsgHeaderMngr.pushNameToStream(msgType,bms) )
 		{
 			bms.serial( mode );

@@ -181,14 +181,14 @@ NLMISC_COMMAND(where, "Ask information on the position", "")
 	// Check parameters.
 	if(args.empty())
 	{	// Create the message and send.
-		const string msgName = "COMMAND:WHERE";
+		const char *msgName = "COMMAND:WHERE";
 		CBitMemStream out;
 		if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 		{
 			NetMngr.push(out);
 		}
 		else
-			nlwarning("command 'where': unknown message named '%s'", msgName.c_str());
+			nlwarning("command 'where': unknown message named '%s'", msgName);
 		return true;
 	}
 	return false;
@@ -1803,14 +1803,14 @@ NLMISC_COMMAND(usePreprogCombat, "use the specified combat preprog sentence", "<
 NLMISC_COMMAND(engage, "engage target in combat", "")
 {
 	// Create the message for the server to execute a phrase.
-	const string msgName = "COMBAT:ENGAGE";
+	const char *msgName = "COMBAT:ENGAGE";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
 		NetMngr.push(out);
 	}
 	else
-		nlwarning("mainLoop : unknown message name : '%s'", msgName.c_str());
+		nlwarning("mainLoop : unknown message name : '%s'", msgName);
 
 	return true;
 }
@@ -1836,14 +1836,14 @@ NLMISC_COMMAND(disengage, "disengage from combat", "")
 NLMISC_COMMAND(leaveTeam, "leave team", "")
 {
 	// Create the message for the server to execute a phrase.
-	const string msgName = "TEAM:LEAVE";
+	const char *msgName = "TEAM:LEAVE";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
 		NetMngr.push(out);
 	}
 	else
-		nlwarning("mainLoop : unknown message name : '%s'", msgName.c_str());
+		nlwarning("mainLoop : unknown message name : '%s'", msgName);
 
 	return true;
 }
@@ -1851,14 +1851,14 @@ NLMISC_COMMAND(leaveTeam, "leave team", "")
 NLMISC_COMMAND(joinTeam, "join the specified team", "")
 {
 	// Create the message for the server to execute a phrase.
-	const string msgName = "TEAM:JOIN";
+	const char *msgName = "TEAM:JOIN";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
 		NetMngr.push(out);
 	}
 	else
-		nlwarning("mainLoop : unknown message name : '%s'", msgName.c_str());
+		nlwarning("mainLoop : unknown message name : '%s'", msgName);
 
 	return true;
 }
@@ -1866,14 +1866,14 @@ NLMISC_COMMAND(joinTeam, "join the specified team", "")
 NLMISC_COMMAND(joinTeamProposal, "propose to current target to join the team", "")
 {
 	// Create the message for the server to execute a phrase.
-	const string msgName = "TEAM:JOIN_PROPOSAL";
+	const char *msgName = "TEAM:JOIN_PROPOSAL";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
 		NetMngr.push(out);
 	}
 	else
-		nlwarning("mainLoop : unknown message name : '%s'", msgName.c_str());
+		nlwarning("mainLoop : unknown message name : '%s'", msgName);
 
 	return true;
 }
@@ -1881,14 +1881,14 @@ NLMISC_COMMAND(joinTeamProposal, "propose to current target to join the team", "
 NLMISC_COMMAND(joinTeamDecline, "decline a join team proposal", "")
 {
 	// Create the message for the server to execute a phrase.
-	const string msgName = "TEAM:JOIN_PROPOSAL_DECLINE";
+	const char *msgName = "TEAM:JOIN_PROPOSAL_DECLINE";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
 		NetMngr.push(out);
 	}
 	else
-		nlwarning("mainLoop : unknown message name : '%s'", msgName.c_str());
+		nlwarning("mainLoop : unknown message name : '%s'", msgName);
 
 	return true;
 }
@@ -1896,14 +1896,14 @@ NLMISC_COMMAND(joinTeamDecline, "decline a join team proposal", "")
 NLMISC_COMMAND(kickTeammate, "kick someone from your team", "")
 {
 	// Create the message for the server to execute a phrase.
-	const string msgName = "TEAM:KICK";
+	const char *msgName = "TEAM:KICK";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
 		NetMngr.push(out);
 	}
 	else
-		nlwarning("mainLoop : unknown message name : '%s'", msgName.c_str());
+		nlwarning("mainLoop : unknown message name : '%s'", msgName);
 
 	return true;
 }
@@ -1913,14 +1913,14 @@ NLMISC_COMMAND(cancelCurrentSentence, "cancel the sentence being executed", "")
 	// no parameter needed
 
 	// Create the message for the server to cancel the phrase being executed
-	const string msgName = "SENTENCE:CANCEL_CURRENT";
+	const char *msgName = "SENTENCE:CANCEL_CURRENT";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
 		NetMngr.push(out);
 	}
 	else
-		nlwarning("command : unknown message name : '%s'", msgName.c_str());
+		nlwarning("command : unknown message name : '%s'", msgName);
 
 	return true;
 }
@@ -1952,7 +1952,7 @@ NLMISC_COMMAND(drop,"drop an item to the ground","<id>")
 	sint32 z = (sint32)UserEntity->pos().z * 1000;
 
 	CBitMemStream bms;
-	string msgType = "ITEM:DROP";
+	const char *msgType = "ITEM:DROP";
 	if( GenericMsgHeaderMngr.pushNameToStream(msgType,bms) )
 	{
 		bms.serial( itemId );
@@ -3769,7 +3769,7 @@ NLMISC_COMMAND( createPerso, "create a new character", "Parameters:\n-Character 
 	fromString(args[4], level);
 
 	CBitMemStream bms;
-	string msgType = "CHEAT:CREATE_CHARACTER";
+	const char *msgType = "CHEAT:CREATE_CHARACTER";
 	if( GenericMsgHeaderMngr.pushNameToStream(msgType,bms) )
 	{
 		bms.serial( characterName );
@@ -3800,7 +3800,7 @@ NLMISC_COMMAND( add_role, "add role to character", "<Role( MeleeFighter, RangeFi
 	fromString(args[1], level);
 
 	CBitMemStream bms;
-	string msgType = "CHEAT:ADD_ROLE";
+	const char *msgType = "CHEAT:ADD_ROLE";
 	if( GenericMsgHeaderMngr.pushNameToStream(msgType,bms) )
 	{
 		bms.serialEnum( role );
@@ -4130,11 +4130,11 @@ NLMISC_COMMAND(browseRingAdmin, "Browse a HTML document with the ring web browse
 NLMISC_COMMAND(GUCreate, "create a guild", "<guild name>")
 {
 	if (args.size() != 1) return false;
-	const string msgName = "GUILD:CREATE";
+	const char *msgName = "GUILD:CREATE";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
-		string buf = args[0];
+		ucstring buf = ucstring::makeFromUtf8(args[0]); // FIXME: UTF-8 (serial)
 		out.serial( buf );
 		NetMngr.push(out);
 	}
@@ -4144,7 +4144,7 @@ NLMISC_COMMAND(GUCreate, "create a guild", "<guild name>")
 NLMISC_COMMAND(GUQuit, "quit a guild", "")
 {
 	if (args.size() != 0) return false;
-	const string msgName = "GUILD:QUIT";
+	const char *msgName = "GUILD:QUIT";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
@@ -4156,7 +4156,7 @@ NLMISC_COMMAND(GUQuit, "quit a guild", "")
 NLMISC_COMMAND(GULeaveLeadership, "abandon leadership of a guild", "")
 {
 	if (args.size() != 0) return false;
-	const string msgName = "GUILD:ABANDON_LEADERSHIP";
+	const char *msgName = "GUILD:ABANDON_LEADERSHIP";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
@@ -4167,7 +4167,7 @@ NLMISC_COMMAND(GULeaveLeadership, "abandon leadership of a guild", "")
 NLMISC_COMMAND(GULeaveOfficerTitle, "abandon officer title", "")
 {
 	if (args.size() != 0) return false;
-	const string msgName = "GUILD:ABANDON_OFFICER_TITLE";
+	const char *msgName = "GUILD:ABANDON_OFFICER_TITLE";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
@@ -4179,7 +4179,7 @@ NLMISC_COMMAND(GULeaveOfficerTitle, "abandon officer title", "")
 NLMISC_COMMAND(GUNameOfficer, "name an officer", "<player name>")
 {
 	if (args.size() != 1) return false;
-	const string msgName = "GUILD:NAME_OFFICER";
+	const char *msgName = "GUILD:NAME_OFFICER";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
@@ -4193,7 +4193,7 @@ NLMISC_COMMAND(GUNameOfficer, "name an officer", "<player name>")
 NLMISC_COMMAND(GUDismissOfficer, "dismiss an officer", "<player name>")
 {
 	if (args.size() != 1) return false;
-	const string msgName = "GUILD:DISMISS_OFFICER";
+	const char *msgName = "GUILD:DISMISS_OFFICER";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
@@ -4207,7 +4207,7 @@ NLMISC_COMMAND(GUDismissOfficer, "dismiss an officer", "<player name>")
 NLMISC_COMMAND(GUKick, "kick a member", "<player name>")
 {
 	if (args.size() != 1) return false;
-	const string msgName = "GUILD:KICK_MEMBER";
+	const char *msgName = "GUILD:KICK_MEMBER";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
@@ -4234,7 +4234,7 @@ NLMISC_COMMAND(GURefuse, "refuse an invitation", "")
 NLMISC_COMMAND(GUFriend, "invite a player to become a friend of the guild", "<player name>")
 {
 	if (args.size() != 1) return false;
-	const string msgName = "GUILD:FRIEND_INVITATION";
+	const char *msgName = "GUILD:FRIEND_INVITATION";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
@@ -4248,7 +4248,7 @@ NLMISC_COMMAND(GUFriend, "invite a player to become a friend of the guild", "<pl
 NLMISC_COMMAND(GUFriendAccept, "accept to be a friend of a guild that invited you", "")
 {
 	if (args.size() != 0) return false;
-	const string msgName = "GUILD:ACCEPT_FRIEND_INVITATION";
+	const char *msgName = "GUILD:ACCEPT_FRIEND_INVITATION";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
@@ -4260,7 +4260,7 @@ NLMISC_COMMAND(GUFriendAccept, "accept to be a friend of a guild that invited yo
 NLMISC_COMMAND(GUFriendRefuse, "refuse to be a friend of a guild that invited you", "")
 {
 	if (args.size() != 0) return false;
-	const string msgName = "GUILD:REFUSE_FRIEND_INVITATION";
+	const char *msgName = "GUILD:REFUSE_FRIEND_INVITATION";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
@@ -4272,7 +4272,7 @@ NLMISC_COMMAND(GUFriendRefuse, "refuse to be a friend of a guild that invited yo
 NLMISC_COMMAND(GUSetSuccessor, "set the successor of the guild leader", "<player name>")
 {
 	if (args.size() != 1) return false;
-	const string msgName = "GUILD:SET_SUCCESSOR";
+	const char *msgName = "GUILD:SET_SUCCESSOR";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
@@ -4286,7 +4286,7 @@ NLMISC_COMMAND(GUSetSuccessor, "set the successor of the guild leader", "<player
 NLMISC_COMMAND(GUInfos, "get information on a guild", "<guild name>")
 {
 	if (args.size() != 1) return false;
-	const string msgName = "GUILD:GET_INFOS";
+	const char *msgName = "GUILD:GET_INFOS";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
@@ -4300,7 +4300,7 @@ NLMISC_COMMAND(GUInfos, "get information on a guild", "<guild name>")
 NLMISC_COMMAND(GUJournal, "get the guild journal", "")
 {
 	if (args.size() != 0) return false;
-	const string msgName = "GUILD:GET_LOG";
+	const char *msgName = "GUILD:GET_LOG";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
@@ -4314,7 +4314,7 @@ NLMISC_COMMAND(buildingTeleport, "teleport to a building", "building index")
 	if (args.size() != 1) return false;
 	uint16 index;
 	fromString(args[0], index);
-	const string msgName = "GUILD:TELEPORT";
+	const char *msgName = "GUILD:TELEPORT";
 	CBitMemStream out;
 	if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 	{
