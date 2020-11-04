@@ -131,7 +131,8 @@ public:
 	inline bool empty() const { return !m_Size; }
 	const void *ptr() const { return m_Str; }
 
-	size_t count() const; // Slow count of UTF-32 characters
+	size_t count() const; //< Slow count of UTF-32 codepoints
+	ptrdiff_t offset(ptrdiff_t i); const //< Get byte offset by utf-32 codepoint index
 
 	inline CUtfStringView substr(const iterator &begin, const iterator &end) const
 	{
