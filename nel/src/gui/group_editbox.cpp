@@ -54,6 +54,36 @@ namespace NLGUI
 	CGroupEditBox *CGroupEditBox::_MenuFather = NULL;
 	CGroupEditBox::IComboKeyHandler* CGroupEditBox::comboKeyHandler = NULL;
 
+	// For now, just trim unsupported codepoints to make emoji fallback to text form
+	static bool supportedCodepoint(u32char c)
+	{
+		if (c >= 0xFE00 && c < 0xFE10)
+			return false; // Variation Selectors
+		else if (c >= 0xE0100 && c < 0xE01F0)
+			return false; // Variation Selectors Supplement
+		else if (c >= 0x200B && c < 0x2010)
+			return false; // ZERO WIDTH JOINER, etcetera
+		else if (c >= 0x2028 && c < 0x202F)
+			return false; // PARAGRAPH SEPARATOR, etcetera
+		else if (c >= 0x2060 && c < 0x2070)
+			return false; // WORD JOINER, etcetera
+		else if (c == 0xFEFF)
+			return false; // BOM
+		return true;
+	}
+
+	// For now, just trim unsupported codepoints to make emoji fallback to text form
+	static ::u32string trimUnsupported(const ::u32string str)
+	{
+		::u32string res;
+		res.reserve(str.size());
+		for (::u32string::const_iterator it(str.begin()), end(str.end()); it != end; ++it)
+		{
+			if (supportedCodepoint(*it))
+				res.push_back(*it);
+		}
+		return res;
+	}
 
 	// ----------------------------------------------------------------------------
 	NLMISC_REGISTER_OBJECT(CViewBase, CGroupEditBox, std::string, "edit_box");
@@ -850,7 +880,8 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupEditBox::writeString(const std::string &str16, bool replace, bool atEnd)
 	{
-		::u32string str = CUtfStringView(str16).toUtf32();
+		// For now, just trim unsupported codepoints to make emoji fallback to text form
+		::u32string str = trimUnsupported(CUtfStringView(str16).toUtf32());
 		sint length = (sint)str.length();
 
 		::u32string toAppend;
@@ -1111,6 +1142,7 @@ namespace NLGUI
 
 						u32char c = isKeyRETURN ? '\n' : rEDK.getChar();
 						if (isFiltered(c)) return;
+						if (!supportedCodepoint(c)) return; // For now, just trim unsupported codepoints to make emoji fallback to text form
 						switch(_EntryType)
 						{
 							case Integer:
