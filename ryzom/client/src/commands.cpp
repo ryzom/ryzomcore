@@ -222,6 +222,7 @@ GROUP COMMANDS
 ***********************************************************************/
 
 
+#ifdef RYZOM_FORGE
 NLMISC_COMMAND(listGroup, "list all available group", "")
 {
 	CItemGroupManager::getInstance()->listGroup();
@@ -361,6 +362,8 @@ NLMISC_COMMAND(deleteGroup, "delete group <name>", "name")
 		return false;
 	}
 }
+#endif
+
 
 NLMISC_COMMAND(naked, "get naked !", "")
 {

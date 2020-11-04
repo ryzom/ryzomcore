@@ -134,7 +134,9 @@ void CEventsListener::operator()(const CEvent& event)
 	{
 		// Interface saving
 		CInterfaceManager::getInstance()->uninitInGame0();
+#ifdef RYZOM_FORGE
 		CItemGroupManager::getInstance()->uninit();
+#endif
 
 
 		/* YOYO:

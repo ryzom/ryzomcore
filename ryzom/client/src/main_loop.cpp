@@ -2589,7 +2589,9 @@ bool mainLoop()
 
 		// Interface saving
 		CInterfaceManager::getInstance()->uninitInGame0();
+#ifdef RYZOM_FORGE
 		CItemGroupManager::getInstance()->uninit();
+#endif
 
 		/////////////////////////////////
 		// Display the end background. //

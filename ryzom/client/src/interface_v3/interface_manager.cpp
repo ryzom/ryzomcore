@@ -1611,7 +1611,9 @@ void CInterfaceManager::updateFrameEvents()
 	CBGDownloaderAccess::getInstance().update();
 #endif
 
+#ifdef RYZOM_FORGE
 	CItemGroupManager::getInstance()->update();
+#endif
 
 }
 

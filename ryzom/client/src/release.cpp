@@ -237,7 +237,9 @@ void	releaseMainLoopReselect()
 
 	// save keys loaded and interface cfg (not done in releaseMainLoop() because done at end of mainLoop()...)
 	pIM->uninitInGame0();
+#ifdef RYZOM_FORGE
 	CItemGroupManager::getInstance()->uninit();
+#endif
 
 	// alredy called from farTPMainLoop()
 	// --R2::getEditor().autoConfigRelease(IsInRingSession);

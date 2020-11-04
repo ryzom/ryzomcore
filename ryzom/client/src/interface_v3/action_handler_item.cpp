@@ -2025,6 +2025,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 		}
 
 		//Item GROUP logic
+#ifdef RYZOM_FORGE
 		CGroupMenu   *pGroupRootMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:item_menu_in_bag:item_group_menu"));
 		if(pGroupRootMenu)
 		{
@@ -2096,6 +2097,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			}
 
 		}
+#endif
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerItemMenuCheck, "item_menu_check" );
@@ -2329,6 +2331,7 @@ class CHandlerRingXpCatalyserStopUse : public IActionHandler
 REGISTER_ACTION_HANDLER( CHandlerRingXpCatalyserStopUse, "ring_xp_catalyser_stop_use" );
 
 
+#ifdef RYZOM_FORGE
 // ***************************************************************************
 // item groups
 class CHandlerItemGroupMove : public IActionHandler
@@ -2365,3 +2368,4 @@ class CHandlerItemGroupEquip : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerItemGroupEquip, "item_group_equip");
+#endif
