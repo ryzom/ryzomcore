@@ -249,11 +249,14 @@ void appendToLower(std::string &res, const char *str, ptrdiff_t &i);
 void appendToLower(std::string &res, const std::string &str, ptrdiff_t &i);
 void appendToUpper(std::string &res, const char *str, ptrdiff_t &i);
 void appendToUpper(std::string &res, const std::string &str, ptrdiff_t &i);
+void appendToTitle(std::string &res, const char *str, ptrdiff_t &i);
+void appendToTitle(std::string &res, const std::string &str, ptrdiff_t &i);
 
 /** UTF-8 case insensitive compare */
 int compareCaseInsensitive(const char *a, const char *b);
 int compareCaseInsensitive(const char *a, size_t lenA, const char *b, size_t lenB);
 inline int compareCaseInsensitive(const std::string &a, const std::string &b) { return compareCaseInsensitive(&a[0], a.size(), &b[0], b.size()); }
+inline bool ltCaseInsensitive(const std::string &a, const std::string &b) { return compareCaseInsensitive(&a[0], a.size(), &b[0], b.size()) < 0; }
 
 /** ASCII to lowercase. Useful for internal identifiers.
 * Characters outside of the 7-bit ASCII space, and control characters, are replaced.
