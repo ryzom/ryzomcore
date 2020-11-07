@@ -135,14 +135,17 @@ namespace STRING_MANAGER
 
 				nlinfo("SM : Try to open the string cache : %s", _CacheFilename.c_str());
 
-				if (CFile::fileExists(_CacheFilename))
+				if (CFile::fileExists(_CacheFilename) && CFile::getFileSize(_CacheFilename))
 				{
 					// there is a cache file, check date reset it if needed
 					{
 						NLMISC::CIFile file(_CacheFilename);
 						file.setVersionException(false, false);
 						file.serialVersion(currentVersion);
-						file.serial(_Timestamp);
+						if (file.getPos() + sizeof(_Timestamp) > file.getFileSize())
+							_Timestamp = ~timestamp;
+						else
+							file.serial(_Timestamp);
 					}
 
 					if (_Timestamp != timestamp)

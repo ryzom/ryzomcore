@@ -55,21 +55,25 @@ namespace NLGUI
 	CGroupEditBox::IComboKeyHandler* CGroupEditBox::comboKeyHandler = NULL;
 
 	// For now, just trim unsupported codepoints to make emoji fallback to text form
-	static bool supportedCodepoint(u32char c)
+	static u32char supportedCodepoint(u32char c)
 	{
 		if (c >= 0xFE00 && c < 0xFE10)
-			return false; // Variation Selectors
+			return 0; // Variation Selectors, unsupported
 		else if (c >= 0xE0100 && c < 0xE01F0)
-			return false; // Variation Selectors Supplement
+			return 0; // Variation Selectors Supplement, unsupported
 		else if (c >= 0x200B && c < 0x2010)
-			return false; // ZERO WIDTH JOINER, etcetera
+			return 0; // ZERO WIDTH JOINER, etcetera, unsupported
 		else if (c >= 0x2028 && c < 0x202F)
-			return false; // PARAGRAPH SEPARATOR, etcetera
+			return 0; // PARAGRAPH SEPARATOR, etcetera, unsupported
 		else if (c >= 0x2060 && c < 0x2070)
-			return false; // WORD JOINER, etcetera
+			return 0; // WORD JOINER, etcetera, unsupported
 		else if (c == 0xFEFF)
-			return false; // BOM
-		return true;
+			return 0; // BOM, unsupported
+		else if ((c & 0xFC00) == 0xD800)
+			return 0xFFFD; // UTF-16 surrogate, unmatched pair, invalid, set to replacement character
+		else if ((c & 0xFC00) == 0xDC00)
+			return 0xFFFD; // UTF-16 surrogate, unmatched pair, invalid, set to replacement character
+		return c;
 	}
 
 	// For now, just trim unsupported codepoints to make emoji fallback to text form
@@ -79,8 +83,9 @@ namespace NLGUI
 		res.reserve(str.size());
 		for (::u32string::const_iterator it(str.begin()), end(str.end()); it != end; ++it)
 		{
-			if (supportedCodepoint(*it))
-				res.push_back(*it);
+			u32char c = supportedCodepoint(*it);
+			if (c) // This also trims NUL
+				res.push_back(c);
 		}
 		return res;
 	}
@@ -1142,7 +1147,8 @@ namespace NLGUI
 
 						u32char c = isKeyRETURN ? '\n' : rEDK.getChar();
 						if (isFiltered(c)) return;
-						if (!supportedCodepoint(c)) return; // For now, just trim unsupported codepoints to make emoji fallback to text form
+						c = supportedCodepoint(c);
+						if (!c) return; // For now, just trim unsupported codepoints to make emoji fallback to text form
 						switch(_EntryType)
 						{
 							case Integer:

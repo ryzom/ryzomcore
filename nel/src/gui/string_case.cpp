@@ -68,7 +68,7 @@ namespace NLGUI
 				if (!isSeparator(c))
 				{
 					if (newString)
-						NLMISC::appendToUpper(res, str, i);
+						NLMISC::appendToTitle(res, str, i);
 					else
 						NLMISC::appendToLower(res, str, i);
 					newString = false;
@@ -99,7 +99,7 @@ namespace NLGUI
 				else
 				{
 					if (newSentence)
-						NLMISC::appendToUpper(res, str, i);
+						NLMISC::appendToTitle(res, str, i);
 					else
 						NLMISC::appendToLower(res, str, i);
 
@@ -128,7 +128,7 @@ namespace NLGUI
 				else
 				{
 					if (newWord)
-						NLMISC::appendToUpper(res, str, i);
+						NLMISC::appendToTitle(res, str, i);
 					else
 						NLMISC::appendToLower(res, str, i);
 
