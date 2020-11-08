@@ -219,13 +219,13 @@
 <template name="tinv_animal" id="" bag_entry="" info_entry="" icon_db="">
 	<group id="#id" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0">
 		<instance template="tinv_nbslots_bulk_weight" id="ibw" x="0" inv_branch_nb="%max_animal_invslot" inv_branch="#bag_entry" inv_bulk_max="#info_entry:BULK_MAX" />
-		<instance template="tinv_item_list" id="iil" y="-16" sizeref="wh" h="-16" inv_branch_nb="%max_animal_invslot" inv_branch="#bag_entry" inv_type="#icon_db" animal_status="#info_entry:STATUS" />
+		<instance template="tinv_item_list" id="iil" y="-18" sizeref="wh" h="-16" inv_branch_nb="%max_animal_invslot" inv_branch="#bag_entry" inv_type="#icon_db" animal_status="#info_entry:STATUS" />
 		<view type="text" id="disable_txt" posref="BL BL" x="2" y="2" color="255 255 255 255" shadow="true" fontsize="10" />
 		<link expr="getAnimalInventoryStateText(@#info_entry:STATUS)" target="disable_txt:hardtext" />
 	</group>
 </template>
 <!-- FAKE SOLUTION -->
-<group type="container" id="inventory" header_active="false" resizer="true" pop_min_w="350" pop_min_h="240" pop_max_w="920" pop_max_h="1600" w="400" h="400" movable="true" active="false" opened="true" openable="false" global_color="false" global_color_over="true" on_active="set" on_active_params="dblink=UI:VARIABLES:ISACTIVE:INVENTORY|value=1" on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:INVENTORY|value=0" resizer_top_size="5">
+<group type="container" id="inventory" header_active="false" resizer="true" pop_min_w="430" pop_min_h="240" pop_max_w="920" pop_max_h="1600" w="400" h="400" movable="true" active="false" opened="true" openable="false" global_color="false" global_color_over="true" on_active="set" on_active_params="dblink=UI:VARIABLES:ISACTIVE:INVENTORY|value=1" on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:INVENTORY|value=0" resizer_top_size="5">
 	<group id="header_opened" x="0" y="0" w="100" h="28" posref="TL TL" group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color">
 
 		<group type="tab" id="inv_select" child_resize_w="true" h="24" posref="TL TL" x="0" y="-4">
@@ -262,7 +262,7 @@
 		<group id="bag" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0">
 			<instance template="tinv_nbslots_bulk_weight" id="ibw" x="0" inv_branch="%bag" inv_bulk_max="%bag_bulk_max" />
 			<instance template="tinv_item_list" id="iil" inv_branch_nb="%max_bag_invslot" y="-18" sizeref="wh" h="-16" inv_branch="%bag" inv_type="INV_BAG" />
-			<instance template="argent" id="money" posref="BL BL" x="4" y="2" value="%money" />
+			<instance template="argent" id="money" posref="BL BL" x="4" y="0" value="%money" />
 		</group>
 		<!-- pa0 -->
 		<instance template="tinv_animal" id="pa0" info_entry="%pa_beast0" bag_entry="%pa_bag0" icon_db="INV_PA0" />
@@ -275,16 +275,16 @@
 		<!-- guild -->
 		<group id="guild" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0">
 			<instance template="tinv_nbslots_bulk_weight" id="ibw" x="0" inv_branch="%guild_inv_dbentry" inv_bulk_max="%guild_inv_bulk_max" />
-			<instance template="tinv_item_list" id="iil" inv_branch_nb="%max_guild_invslot" y="-16" sizeref="wh" h="-16" inv_branch="%guild_inv_dbentry" inv_type="INV_GUILD" />
-			<instance template="argent" id="money" posref="BL BL" x="4" y="2" value="%guild_inv_money" />
+			<instance template="tinv_item_list" id="iil" inv_branch_nb="%max_guild_invslot" y="-18" sizeref="wh" h="-16" inv_branch="%guild_inv_dbentry" inv_type="INV_GUILD" />
+			<instance template="argent" id="money" posref="BL BL" x="4" y="0" value="%guild_inv_money" />
 			<ctrl style="new_element_header" id="getmoney_but" posref="MR ML" posparent="money" x="4" wmargin="8" hardtext="uittGetMoney" onclick_l="proc" params_l="guild_get_money" />
 			<ctrl style="new_element_header" id="putmoney_but" posref="MR ML" posparent="getmoney_but" x="4" wmargin="8" hardtext="uittPutMoney" onclick_l="proc" params_l="guild_put_money" />
 		</group>
 		<!-- room -->
 		<group id="room" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0">
 			<instance template="tinv_nbslots_bulk_weight" id="ibw" x="-4" inv_branch="%room_inv_dbentry" inv_bulk_max="%room_inv_bulk_max" />
-			<instance template="tinv_item_list" id="iil" inv_branch_nb="%max_room_invslot" y="-16" sizeref="wh" h="-16" inv_branch="%room_inv_dbentry" inv_type="INV_ROOM" />
-			<instance template="argent" id="money" posref="BL BL" x="4" y="2" value="%room_inv_money" />
+			<instance template="tinv_item_list" id="iil" inv_branch_nb="%max_room_invslot" y="-18" sizeref="wh" h="-16" inv_branch="%room_inv_dbentry" inv_type="INV_ROOM" />
+			<instance template="argent" id="money" posref="BL BL" x="4" y="0" value="%room_inv_money" />
 		</group>
 	</group>
 </group>
