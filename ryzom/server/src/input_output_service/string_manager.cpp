@@ -768,6 +768,8 @@ void CStringManager::requestString(uint32 userId, uint32 stringId)
 	msgout.serialBufferWithSize((uint8*)bmsOut.buffer(), bmsOut.length());
 	NLNET::CUnifiedNetwork::getInstance()->send( frontendId, msgout );
 	nldebug( "IOSSM: Sent IMPULSION_UID to %hu (STRING_RESP)", frontendId.get() );
+
+	// TODO: if (strUtf8.empty() && stringId) ban user
 }
 
 
@@ -829,7 +831,7 @@ const std::string		&CStringManager::getLanguageCodeString(TLanguages language)
 		return _LanguageCode[language];
 
 	nlwarning("Language number %u is out of range, returning english", language);
-	nlassert(english < NB_LANGUAGES);	// just to avoid oopsie
+	nlctassert(english < NB_LANGUAGES);	// just to avoid oopsie
 	return _LanguageCode[english];
 }
 
@@ -848,6 +850,11 @@ uint32	CStringManager::storeString(const ucstring &str)
 	}
 	else
 	{
+		// occasionally create a blank entry, 
+		// this lets us find out if someone is scanning the string cache
+		if ((rand() & 7) == 0)
+			_StringBase.push_back(ucstring());
+
 		// create a new entry
 		std::pair<TMappedUStringContainer::iterator, bool> ret;
 		ret = _StringIdx.insert(std::make_pair(str, (uint32)_StringBase.size()));
