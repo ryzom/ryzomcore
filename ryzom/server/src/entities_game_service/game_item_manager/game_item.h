@@ -680,11 +680,6 @@ public :
 	/// set required skill level
 	inline void setRequiredSkillLevel2( uint16 l ) { _RequiredSkillLevel2 = l; }
 
-	/// get Required Faction
-	inline const std::string & getRequiredFaction() const { return _RequiredFaction;}
-	/// set Required Faction
-	inline void setRequiredFaction(const std::string & str){ _RequiredFaction = str;}
-
 	inline bool getLockedByOwner() const { return _LockedByOwner; }
 	void setLockedByOwner(bool value);
 
@@ -957,7 +952,6 @@ private:
 
 	// required skill
 	bool				_UseNewSystemRequirement;
-	std::string			_RequiredFaction;
 	SKILLS::ESkills		_RequiredSkill;
 	uint16				_RequiredSkillLevel;
 	SKILLS::ESkills		_RequiredSkill2;
