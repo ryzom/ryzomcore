@@ -102,8 +102,8 @@ void	CContinentContainer::loadContinent(string name, string file, sint index, bo
 
 	for (its=_SheetMap.begin(); its!=_SheetMap.end(); ++its)
 	{
-		if (NLMISC::toLower((*its).second.Name) == NLMISC::toLower(name+".continent") ||
-			NLMISC::toLower((*its).second.PacsRBank) == NLMISC::toLower(name+".rbank"))
+		if (NLMISC::toLowerAscii((*its).second.Name) == NLMISC::toLowerAscii(name+".continent") ||
+			NLMISC::toLowerAscii((*its).second.PacsRBank) == NLMISC::toLowerAscii(name+".rbank"))
 		{
 			if (found == _SheetMap.end())
 			{
@@ -281,14 +281,14 @@ void	CContinentContainer::initPacsPrim(const string &path)
 	for(k=0; k<fileNames.size(); ++k)
 	{
 		// check extension
-		if (NLMISC::toLower(CFile::getExtension(fileNames[k])) != "pacs_prim")
+		if (NLMISC::toLowerAscii(CFile::getExtension(fileNames[k])) != "pacs_prim")
 		{
 			// not a pacs primitive, skip it..			
 			continue;
 		}
 		try
 		{		
-			string	ppName = NLMISC::toLower(CFile::getFilenameWithoutExtension(fileNames[k]));
+			string	ppName = NLMISC::toLowerAscii(CFile::getFilenameWithoutExtension(fileNames[k]));
 
 			if (_PacsPrimMap.find(ppName) != _PacsPrimMap.end())
 				continue;
@@ -365,8 +365,8 @@ void	CContinentContainer::loadPacsPrims(const CSheet &sheet, NLPACS::UMoveContai
 			{
 				TPacsPrimMap::iterator pbIt;
 
-				string	shapeName = NLMISC::toLower(CFile::getFilenameWithoutExtension(igLoader.getShapeName(k)));
-				string	instanceName = NLMISC::toLower(CFile::getFilenameWithoutExtension(igLoader.getInstanceName(k)));
+				string	shapeName = NLMISC::toLowerAscii(CFile::getFilenameWithoutExtension(igLoader.getShapeName(k)));
+				string	instanceName = NLMISC::toLowerAscii(CFile::getFilenameWithoutExtension(igLoader.getInstanceName(k)));
 
 				bool	isTrigger = false;
 				bool	isZC = false;

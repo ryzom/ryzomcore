@@ -1244,7 +1244,7 @@ void CScreenshotIslands::loadIslands()
 						for (map<string, CVector2f>::iterator it(zonePosMap.begin()), end(zonePosMap.end()); it != end; ++it)
 							if (it->second.x >= zonelXMin && it->second.x <= zonelXMax
 								&& it->second.y >= zonelYMin && it->second.y <= zonelYMax)
-								island.Zones.push_back(NLMISC::toUpper(it->first));
+								island.Zones.push_back(NLMISC::toUpperAscii(it->first));
 					}
 					break;
 				}
