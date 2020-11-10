@@ -2740,4 +2740,114 @@ int compareCaseInsensitive(const char *a, size_t lenA, const char *b, size_t len
 
 // ***************************************************************************
 
+NL_FORCE_INLINE void appendToCaseInsensitiveAsUtf8(std::string &res, const char *str, ptrdiff_t &i)
+{
+	unsigned char c = str[i];
+	unsigned char d, e, f;
+	if (c < 0x80)
+	{
+		if (c >= 'A' && c <= 'Z')
+		{
+			// 1-byte UTF-8
+			c += 'a' - 'A';
+		}
+	}
+	else if (c < 0xC0)
+	{
+		// non-starting byte
+	}
+	else if (c < 0xE0)
+	{
+		// 2-byte UTF-8
+		if (((d = str[i + 1]) & 0xC0) == 0x80)
+		{
+			const char *table = s_StringToCaseInsensitiveMap[c & 0x1F];
+			if (table)
+			{
+				unsigned char idx = (d & 0x3F) << 2;
+				if (table[idx])
+				{
+					res += &table[idx];
+					i += 2;
+					return;
+				}
+			}
+		}
+	}
+	else if (c < 0xF0)
+	{
+		// 3-byte UTF-8
+		if (((d = str[i + 1]) & 0xC0) == 0x80 && ((e = str[i + 2]) & 0xC0) == 0x80)
+		{
+			const char **map = s_StringToCaseInsensitiveMapMap[c & 0x0F];
+			if (map)
+			{
+				const char *table = map[d & 0x3F];
+				if (table)
+				{
+					unsigned char idx = (e & 0x3F) << 2;
+					if (table[idx])
+					{
+						res += &table[idx];
+						i += 3;
+						return;
+					}
+				}
+			}
+		}
+	}
+	else if (c < 0xF8)
+	{
+		// 4-byte UTF-8
+		if (((d = str[i + 1]) & 0xC0) == 0x80 && ((e = str[i + 2]) & 0xC0) == 0x80 && ((f = str[i + 3]) & 0xC0) == 0x80)
+		{
+			const char ***mapMap = s_StringToCaseInsensitiveMapMapMap[c & 0x07];
+			if (mapMap)
+			{
+				const char **map = mapMap[d & 0x3F];
+				if (map)
+				{
+					const char *table = map[e & 0x3F];
+					if (table)
+					{
+						unsigned char idx = (f & 0x3F) << 2;
+						if (table[idx])
+						{
+							res += &table[idx];
+							i += 4;
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+	res += c;
+	++i;
+}
+
+// ***************************************************************************
+
+std::string toCaseInsensitive(const char *str)
+{
+	// UTF-8 toCaseInsensitive
+	std::string res;
+	for (ptrdiff_t i = 0; str[i];)
+		appendToCaseInsensitiveAsUtf8(res, str, i);
+	return res;
+}
+
+// ***************************************************************************
+
+std::string	toCaseInsensitive(const std::string &str)
+{
+	// UTF-8 toCaseInsensitive
+	std::string res;
+	res.reserve(str.size() + (str.size() >> 2));
+	const char *cstr = &str[0];
+	for (ptrdiff_t i = 0; i < (ptrdiff_t)str.size();)
+		appendToCaseInsensitiveAsUtf8(res, cstr, i);
+	return res;
+}
+
 } // NLMISC
