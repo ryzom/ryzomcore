@@ -2967,7 +2967,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 				PatchSizeProgress += rFTP.PatcheSizes[j];
 				currentPatchedSize += rFTP.PatcheSizes[j];
 			}
-
+		}
 			if (tmpSourceName != DestinationName)
 			{
 				pPM->deleteFile(SourceName, false, false); // File can exists if bad BNP loading
@@ -2981,7 +2981,6 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 					pPM->renameFile(tmpSourceName, DestinationName);
 				}
 			}
-		}
 	}
 	else
 	{
