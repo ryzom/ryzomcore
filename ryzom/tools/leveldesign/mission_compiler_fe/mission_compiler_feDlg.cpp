@@ -239,8 +239,8 @@ BOOL CMissionCompilerFeDlg::OnInitDialog()
 			{
 				// We found the same filename : check the path
 				string srcPath = it->second;
-				srcPath  = toUpper(CPath::standardizeDosPath(srcPath));
-				files[i] = toUpper(CPath::standardizeDosPath(files[i]));
+				srcPath  = toUpperAscii(CPath::standardizeDosPath(srcPath));
+				files[i] = toUpperAscii(CPath::standardizeDosPath(files[i]));
 				if (srcPath != files[i])
 				{
 					::MessageBox(NULL, _T("Primitive path and working directory are not the same !"),

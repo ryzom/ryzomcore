@@ -628,7 +628,7 @@ void CData_mirrorDlg::buildSourceFiles ()
 	{
 		// Get the filename
 		string &str = fileSource[i];
-		str = toLower(str.substr (MainDirectory.size (), str.size ()));
+		str = toLowerAscii(str.substr (MainDirectory.size (), str.size ()));
 
 		// In the ignore list ?
 		if (IgnoreFiles.find (str) == IgnoreFiles.end () && (str != "ignore_list.txt"))
@@ -716,7 +716,7 @@ void CData_mirrorDlg::buildSourceFiles ()
 	{
 		// Get the filename
 		string &str = fileSource[i];
-		str = toLower(str.substr (MirrorDirectory.size (), str.size ()));
+		str = toLowerAscii(str.substr (MirrorDirectory.size (), str.size ()));
 
 		// In the ignore list ?
 		if (IgnoreFiles.find (str) == IgnoreFiles.end () && (str != "ignore_list.txt"))

@@ -134,7 +134,7 @@ void	makeAnimByRace(const std::string &animSetFile, const std::vector<string> &a
 		// get the possible anim file name (lowered)
 		static vector<string>	raceAnimNames;
 		raceAnimNames.clear();
-		buildRaceAnimNames(raceAnimNames, toLower(CFile::getFilename(animList[i])));
+		buildRaceAnimNames(raceAnimNames, toLowerAscii(CFile::getFilename(animList[i])));
 
 		// For each line of the animSet
 		uint	lastStructLine= 0;
@@ -142,7 +142,7 @@ void	makeAnimByRace(const std::string &animSetFile, const std::vector<string> &a
 		for(uint j=0;j<animSetText.size();)
 		{
 			string	line= animSetText[j];
-			string	lineLwr= toLower(line);
+			string	lineLwr= toLowerAscii(line);
 
 			// Find <LOG> TAg? => stop
 			if(line.find("<LOG>")!=string::npos)

@@ -327,10 +327,10 @@ int main(int argc, char **argv)
 
 	if (args.haveArg("a"))
 	{
-		std::string strAlgo = args.getArg("a").front();
+		std::string strAlgo = toLowerAscii(args.getArg("a").front());
 
 		if (strAlgo == "1")					OptAlgo = DXT1;
-		else if (toLower(strAlgo) == "1a") 	OptAlgo = DXT1A;
+		else if (strAlgo == "1a") 			OptAlgo = DXT1A;
 		else if (strAlgo == "3")			OptAlgo = DXT3;
 		else if (strAlgo == "5") 			OptAlgo = DXT5;
 		else if (strAlgo == "tga8")			OptAlgo = TGA8;

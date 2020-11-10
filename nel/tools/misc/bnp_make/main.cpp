@@ -56,7 +56,7 @@ bool keepFile (const std::string &fileName)
 	uint i;
 	bool ifPresent = false;
 	bool ifTrue = false;
-	string file = toLower(CFile::getFilename (fileName));
+	string file = toLowerAscii(CFile::getFilename (fileName));
 	for (i=0; i<WildCards.size(); i++)
 	{
 		if (WildCards[i].Not)
@@ -100,7 +100,7 @@ bool packSubRecurse(const std::string &srcDirectory)
 	// check for files with same name
 	for(uint i = 1, len = pathContent.size(); i < len; ++i)
 	{
-		if (toLower(CFile::getFilename(pathContent[i-1])) == toLower(CFile::getFilename(pathContent[i])))
+		if (toLowerAscii(CFile::getFilename(pathContent[i-1])) == toLowerAscii(CFile::getFilename(pathContent[i])))
 		{
 			nlwarning("File %s is not unique in BNP!", CFile::getFilename(pathContent[i]).c_str());
 			return false;
@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 		for (uint i = 0; i < filters.size(); ++i)
 		{
 			CWildCard card;
-			card.Expression = toLower(filters[i]);
+			card.Expression = toLowerAscii(filters[i]);
 			card.Not = false;
 			WildCards.push_back(card);
 		}
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
 		for (uint i = 0; i < filters.size(); ++i)
 		{
 			CWildCard card;
-			card.Expression = toLower(filters[i]);
+			card.Expression = toLowerAscii(filters[i]);
 			card.Not = true;
 			WildCards.push_back(card);
 		}
