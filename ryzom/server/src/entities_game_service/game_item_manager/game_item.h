@@ -960,8 +960,9 @@ private:
 	/// min required stat level and required stat
 	CHARACTERISTICS::TCharacteristics	_RequiredCharac;
 	uint16				_RequiredCharacLevel;
+	/// whether the item has any skill requirements
 	bool				_HasPrerequisit;
-	// skill modifiers against given ennemy types
+	/// skill modifiers against given ennemy types
 	std::vector<CTypeSkillMod>	_TypeSkillMods;
 
 	ucstring			_CustomText;
