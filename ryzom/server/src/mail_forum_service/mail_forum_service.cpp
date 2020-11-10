@@ -207,7 +207,7 @@ void	CMailForumService::checkFile(const std::string& file)
 
 string	getUserDirectory(uint32 shardid, const string& userName)
 {
-	string	un = toLower(CMailForumValidator::nameToFile(userName));
+	string	un = toCaseInsensitive(CMailForumValidator::nameToFile(userName));
 
 	string	dir = CPath::standardizePath(WebRootDirectory)+toString(shardid)+"/"+un.substr(0, 2)+"/"+un+"/";
 
@@ -222,7 +222,7 @@ string	getUserDirectory(uint32 shardid, const string& userName)
 
 string getGuildDirectory(uint32 shardid, const string &guildName)
 {
-	string	un = toLower(CMailForumValidator::nameToFile(guildName));
+	string	un = toCaseInsensitive(CMailForumValidator::nameToFile(guildName));
 
 	string	dir = CPath::standardizePath(WebRootDirectory)+toString(shardid)+"/"+un.substr(0, 2)+"/"+un+"/";
 

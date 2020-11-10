@@ -98,7 +98,7 @@ void CHoFGenerator::serviceUpdate()
 			{
 				const string & fileName = files[i];
 
-				if (toLower(CFile::getExtension(fileName)) == "hdt")
+				if (toLowerAscii(CFile::getExtension(fileName)) == "hdt")
 				{
 					_HDTFiles.push_back(fileName);
 				}

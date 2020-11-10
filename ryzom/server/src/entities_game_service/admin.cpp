@@ -38,6 +38,7 @@
 #include "nel/misc/algo.h"
 #include "nel/misc/sstring.h"
 #include "nel/misc/i18n.h"
+#include "nel/misc/string_view.h"
 
 #include "nel/net/admin.h"
 #include "nel/net/service.h"
@@ -4493,24 +4494,25 @@ NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <chan
 	CPVPManager2 *inst = CPVPManager2::getInstance();
 
 	string pass;
-	string name = toLower(args[1]);
-	TChanID channel = inst->getUserDynChannel(name);
+	string name = args[1];
+	string nameLwr = toCaseInsensitive(args[1]);
+	TChanID channel = inst->getUserDynChannel(nameLwr);
 
 	if (args.size() < 3)
-		pass = toLower(name);
+		pass = nameLwr;
 	else
 		pass = args[2];
 
-	if ( (channel == DYN_CHAT_INVALID_CHAN) && (pass != string("*")) && (pass != string("***")) )
-		channel = inst->createUserChannel(name, pass);
+	if ( (channel == DYN_CHAT_INVALID_CHAN) && (pass != nlstr("*")) && (pass != nlstr("***")) )
+		channel = inst->createUserChannel(nameLwr, pass);
 
 	if (channel != DYN_CHAT_INVALID_CHAN)
 	{
 		string channelPass = inst->getPassUserChannel(channel);
 
-		if ( (channel != DYN_CHAT_INVALID_CHAN) && (pass == string("***")) && (c->havePriv(":DEV:") || c->havePriv(":SGM:") || c->havePriv(":GM:") || c->havePriv(":EM:")))
+		if ( (channel != DYN_CHAT_INVALID_CHAN) && (pass == nlstr("***")) && (c->havePriv(":DEV:") || c->havePriv(":SGM:") || c->havePriv(":GM:") || c->havePriv(":EM:")))
 		{
-			inst->deleteUserChannel(name);
+			inst->deleteUserChannel(nameLwr);
 		}
 		else if (channelPass == pass)
 		{
@@ -4521,7 +4523,7 @@ NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <chan
 			}
 			inst->addFactionChannelToCharacter(channel, c, true, true);
 		}
-		else if (pass == string("*"))
+		else if (pass == nlstr("*"))
 		{
 			inst->removeFactionChannelForCharacter(channel, c, true);
 		}
@@ -4529,7 +4531,7 @@ NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <chan
 		{
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
 			params[0].Literal = name;
-			CCharacter::sendDynamicSystemMessage( eid, "EGS_CHANNEL_NO_RIGHTS", params );
+			CCharacter::sendDynamicSystemMessage( eid, nlstr("EGS_CHANNEL_NO_RIGHTS"), params );
 		}
 
 		return true;
@@ -4537,7 +4539,7 @@ NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <chan
 
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
 	params[0].Literal = name;
-	CCharacter::sendDynamicSystemMessage( eid, "EGS_CHANNEL_INVALID_NAME", params );
+	CCharacter::sendDynamicSystemMessage( eid, nlstr("EGS_CHANNEL_INVALID_NAME"), params );
 	return false;
 
 }
@@ -6704,9 +6706,9 @@ ENTITY_VARIABLE (FullPVP, "Full Pvp Mode")
 	}
 	else
 	{
-		if (value=="1" || value=="on" || toLower(value)=="pvp" || toLower(value)=="true" )
+		if (value=="1" || value=="on" || toLowerAscii(value)=="pvp" || toLowerAscii(value)=="true" )
 			c->setFullPVP(true);
-		else if (value=="0" || value=="off" || toLower(value)=="false" )
+		else if (value=="0" || value=="off" || toLowerAscii(value)=="false" )
 			c->setFullPVP(false);
 //		c->setPVPRecentActionFlag();
 		CPVPManager2::getInstance()->setPVPModeInMirror(c);

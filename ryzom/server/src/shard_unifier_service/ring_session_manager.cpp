@@ -584,7 +584,7 @@ namespace RSMGR
 			for (uint i=0; i<userAccessPriv.size(); ++i)
 			{
 				string access("ds_");
-				access += toLower(userAccessPriv[i]);
+				access += toLowerAscii(userAccessPriv[i]);
 
 				if (accessLevel.toString() == access)
 					return true;
@@ -1983,7 +1983,7 @@ endOfWelcomeUserResult:
 							// check the permission of the player
 							for (uint i=0; i<userAccessPriv.size(); ++i)
 							{
-								if (_DontUsePerm || string("ds_")+toLower(userAccessPriv[i]) == shard->getRequiredState().toString())
+								if (_DontUsePerm || string("ds_")+toLowerAscii(userAccessPriv[i]) == shard->getRequiredState().toString())
 								{
 									// ok, this one is accessible
 									// this server is better (i.e had less player in it)
@@ -4323,7 +4323,7 @@ endOfWelcomeUserResult:
 				}
 			}
 
-			TAccessLevel al = string("ds_")+toLower(args[1]);
+			TAccessLevel al = string("ds_")+toLowerAscii(args[1]);
 			if (al == TAccessLevel::invalid_val)
 			{
 				log.displayNL("Invalid access state '%s'", args[1].c_str());

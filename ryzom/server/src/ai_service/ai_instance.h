@@ -187,7 +187,7 @@ public:
 	/// Store mapping 'name:variant' -> squad to be used later by getSquadByVariantName()
 	void registerSquadVariant(const std::string& nameAndVariant, CGroupDesc<COutpostSquadFamily> *squad )
 	{
-		if ( ! _SquadVariantNameToGroupDesc.insert( std::make_pair( NLMISC::toLower( nameAndVariant ), squad ) ).second )
+		if ( ! _SquadVariantNameToGroupDesc.insert( std::make_pair( NLMISC::toLowerAscii( nameAndVariant ), squad ) ).second )
 			nlwarning( "Duplicate squad template / squad variant '%s'", nameAndVariant.c_str() );
 	}
 
@@ -200,7 +200,7 @@ public:
 	/// Get a squad by name:variant (works only during primitive parsing), or NULL if not found. Not case-sensitive.
 	CGroupDesc<COutpostSquadFamily> *getSquadByVariantName(const std::string& nameAndVariant)
 	{
-		std::map<std::string, NLMISC::CSmartPtr< CGroupDesc<COutpostSquadFamily> > >::iterator it = _SquadVariantNameToGroupDesc.find( NLMISC::toLower( nameAndVariant ) );
+		std::map<std::string, NLMISC::CSmartPtr< CGroupDesc<COutpostSquadFamily> > >::iterator it = _SquadVariantNameToGroupDesc.find( NLMISC::toLowerAscii( nameAndVariant ) );
 		if ( it != _SquadVariantNameToGroupDesc.end() )
 			return (*it).second;
 		else

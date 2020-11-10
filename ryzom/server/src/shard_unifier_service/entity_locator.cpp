@@ -115,7 +115,7 @@ namespace ENTITYLOC
 		struct TCharInfo
 		{
 			TShardId	ShardId;
-			ucstring	CharName;
+			std::string	CharName;
 		};
 
 		typedef map<TModuleProxyPtr, TShardId>	TLocatorClient;
@@ -134,7 +134,7 @@ namespace ENTITYLOC
 		// current connected character
 		TCharMap			_ConnectedChars;
 
-		typedef CHashMap<ucstring, TCharId, CUCStringHashMapTraits>	TCharNameMap;
+		typedef CHashMap<std::string, TCharId>	TCharNameMap;
 		// Index of connected character by name
 		TCharNameMap		_ConnectedCharsByName;
 
@@ -285,7 +285,7 @@ namespace ENTITYLOC
 							TCharMap::iterator next = first;
 							++next;
 							// erase the name mapping
-							_ConnectedCharsByName.erase(toLower(first->second.CharName));
+							_ConnectedCharsByName.erase(toCaseInsensitive(first->second.CharName));
 							// erase the connected char info
 							_ConnectedChars.erase(first);
 							// add it to the (dis)connection event list
@@ -394,7 +394,7 @@ namespace ENTITYLOC
 
 		NLNET::IModuleProxy *getLocatorModuleForChar(const ucstring &charName)
 		{
-			TCharNameMap::iterator it(_ConnectedCharsByName.find(toLower(charName)));
+			TCharNameMap::iterator it(_ConnectedCharsByName.find(toCaseInsensitive(charName.toUtf8()))); // FIXME: UTF-8
 			if (it == _ConnectedCharsByName.end())
 			{
 				// not online
@@ -411,7 +411,7 @@ namespace ENTITYLOC
 
 		uint32 getShardIdForChar(const ucstring &charName)
 		{
-			TCharNameMap::iterator it(_ConnectedCharsByName.find(toLower(charName)));
+			TCharNameMap::iterator it(_ConnectedCharsByName.find(toCaseInsensitive(charName.toUtf8()))); // FIXME: UTF-8
 			if (it == _ConnectedCharsByName.end())
 			{
 				// not online
@@ -447,7 +447,7 @@ namespace ENTITYLOC
 		void onCharacterNameUpdated(uint32 charId, const std::string &oldName, const std::string &newName)
 		{
 			// lookup this char in online players map
-			TCharNameMap::iterator it(_ConnectedCharsByName.find(toLower(oldName)));
+			TCharNameMap::iterator it(_ConnectedCharsByName.find(toCaseInsensitive(oldName)));
 
 			if (it != _ConnectedCharsByName.end())
 			{
@@ -455,7 +455,7 @@ namespace ENTITYLOC
 				nlassert(charId == it->second);
 
 				_ConnectedCharsByName.erase(it);
-				_ConnectedCharsByName.insert(make_pair(toLower(newName), charId));
+				_ConnectedCharsByName.insert(make_pair(toCaseInsensitive(newName), charId));
 			}
 		}
 
@@ -617,7 +617,7 @@ namespace ENTITYLOC
 				_ConnectedChars.insert(make_pair(charId, ci));
 
 				// store char by name info
-				_ConnectedCharsByName.insert(make_pair(toLower(ci.CharName), charId));
+				_ConnectedCharsByName.insert(make_pair(toCaseInsensitive(ci.CharName), charId));
 			}
 
 			// load the nel user to read privileges
@@ -683,7 +683,7 @@ namespace ENTITYLOC
 			else
 			{
 				// erase the information
-				_ConnectedCharsByName.erase(toLower(it->second.CharName));
+				_ConnectedCharsByName.erase(toCaseInsensitive(it->second.CharName));
 				_ConnectedChars.erase(it);
 			}
 
@@ -887,7 +887,7 @@ namespace ENTITYLOC
 			{
 				log.displayNL("  Character %u '%s' [%u:%u] connected on shard %u", 
 					first->first, 
-					first->second.CharName.toUtf8().c_str(),
+					first->second.CharName.c_str(),
 					first->first>>4, 
 					first->first&0xf, 
 					first->second.ShardId);

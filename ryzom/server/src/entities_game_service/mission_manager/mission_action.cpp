@@ -2726,8 +2726,8 @@ class CMissionActionFailMissionCat : public IMissionAction
 			MISLOGSYNTAXERROR("<mission_category>");
 			return false;
 		}
-		_MissionCategory = NLMISC::toLower(CMissionParser::getNoBlankString(script[1]));
-		if (NLMISC::toLower(missionData.Template->MissionCategory) == _MissionCategory)
+		_MissionCategory = NLMISC::toLowerAscii(CMissionParser::getNoBlankString(script[1]));
+		if (NLMISC::toLowerAscii(missionData.Template->MissionCategory) == _MissionCategory)
 		{
 			MISLOGERROR1("a mission cannot make fail its own category '%s'", _MissionCategory.c_str());
 			return false;
@@ -2762,7 +2762,7 @@ class CMissionActionFailMissionCat : public IMissionAction
 				pMissTemplate = pMM->getTemplate(pMiss->getTemplateId());
 				if (pMissTemplate != NULL)
 				{
-					if (NLMISC::toLower(pMissTemplate->MissionCategory) == _MissionCategory)
+					if (NLMISC::toLowerAscii(pMissTemplate->MissionCategory) == _MissionCategory)
 					{
 						pMiss->onFailure(true, false);
 						bFailed = true;
@@ -2775,7 +2775,7 @@ class CMissionActionFailMissionCat : public IMissionAction
 					pMissTemplate = pMM->getTemplate(pMiss->getMainMissionTemplateId());
 					if (pMissTemplate != NULL)
 					{
-						if (NLMISC::toLower(pMissTemplate->MissionCategory) == _MissionCategory)
+						if (NLMISC::toLowerAscii(pMissTemplate->MissionCategory) == _MissionCategory)
 							pMiss->onFailure(true, false);
 					}
 				}
