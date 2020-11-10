@@ -632,12 +632,6 @@ public :
 	 */
 	void dumpGameItemStats( const std::string& fileName ="");
 
-	/// set the client inventory position
-	inline void setClientInventoryPosition(sint16 pos) { _ClientInventoryPosition = pos; }
-
-	/// get the client inventory position
-	inline sint16 getClientInventoryPosition() const { return _ClientInventoryPosition; }
-
 	/// get Vector of CSheetId used for craft item
 //	const std::vector< NLMISC::CSheetId >& getRmUsedForCraft() const { return _RmUsedForCraft; }
 

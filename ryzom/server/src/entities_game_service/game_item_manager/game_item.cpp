@@ -1355,7 +1355,6 @@ void CGameItem::clear()
 	_Inventory = NULL;
 	_InventorySlot = INVENTORIES::INVALID_INVENTORY_SLOT;
 	_Form = NULL;
-	_ClientInventoryPosition = -1;
 	_HP = 0;
 	_CurrentWornState = ITEM_WORN_STATE::Unspoiled;
 	_LostHPremains = 0.0f;
