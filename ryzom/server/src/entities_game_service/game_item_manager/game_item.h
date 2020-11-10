@@ -719,9 +719,10 @@ public :
 	uint8 getPetIndex() const { return _PetIndex; }
 	void setPetIndex(uint8 val) { _PetIndex = val; }
 
+#ifdef RYZOM_FORGE_PET_NAME
 	ucstring getCustomName() const { return _CustomName; }
 	void setCustomName(ucstring val) { _CustomName = val; }
-
+#endif
 
 protected:
 	friend class CFaberPhrase;
@@ -968,7 +969,9 @@ private:
 	bool                _UnMovable;
 	bool                _Movable;
 	uint8               _PetIndex;
+#ifdef RYZOM_FORGE_PET_NAME
 	ucstring            _CustomName;
+#endif
 };
 
 /**

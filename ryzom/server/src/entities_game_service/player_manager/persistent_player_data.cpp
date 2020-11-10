@@ -1329,6 +1329,12 @@ private:
 	}\
 	postApply((INVENTORIES::TInventory) RefInventoryId, applyArgs.Owner);\
 
+#ifdef RYZOM_FORGE_PET_NAME
+#define PD_CUSTOM_NAME_PROP2() PROP2(_CustomName,					ucstring,	_CustomName,				_CustomName=val)
+#else
+#define PD_CUSTOM_NAME_PROP2()
+#endif
+
 #define PERSISTENT_DATA\
 	FLAG0(CLEAR,clear())\
 	PROP2(_ItemId,						uint64,		_ItemId.getRawId(),			_ItemId = INVENTORIES::TItemId(val))\
@@ -1358,7 +1364,7 @@ private:
 	STRUCT_VECT(_TypeSkillMods)\
 	LPROP_VECT(CSheetId, _Enchantment, VECT_LOGIC(_Enchantment) if (_Enchantment[i]!=CSheetId::Unknown))\
 	PROP2(_CustomText,					ucstring,	_CustomText,				_CustomText=val)\
-	PROP2(_CustomName,					ucstring,	_CustomName,				_CustomName=val)\
+	PD_CUSTOM_NAME_PROP2()\
 	PROP(bool, _Movable)\
 	PROP(bool, _UnMovable)\
 	PROP(bool, _LockedByOwner)\
