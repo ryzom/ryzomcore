@@ -17,7 +17,7 @@
 #ifndef GAME_ITEM_PTR_H
 #define GAME_ITEM_PTR_H
 
-#define ITEM_DEBUG
+// #define ITEM_DEBUG
 
 
 class CGameItem;
