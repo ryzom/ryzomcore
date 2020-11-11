@@ -2624,7 +2624,7 @@ static const char ***s_StringToUpperMapMapMap[8] = {
 
 std::string toUpper(const char *str)
 {
-	// UTF-8 toLower, tables generated from UTF-16 tables
+	// UTF-8 toLower
 	std::string res;
 	for (ptrdiff_t i = 0; str[i];)
 		appendToUpperAsUtf8(res, str, i);
@@ -2635,7 +2635,7 @@ std::string toUpper(const char *str)
 
 std::string	toUpper(const std::string &str)
 {
-	// UTF-8 toLower, tables generated from UTF-16 tables
+	// UTF-8 toLower
 	std::string res;
 	res.reserve(str.size() + (str.size() >> 2));
 	const char *cstr = &str[0];

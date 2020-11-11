@@ -2530,7 +2530,7 @@ NL_FORCE_INLINE void appendToLowerAsUtf8(std::string &res, const char *str, ptrd
 
 std::string toLower(const char *str)
 {
-	// UTF-8 toLower, tables generated from UTF-16 tables
+	// UTF-8 toLower
 	std::string res;
 	for (ptrdiff_t i = 0; str[i];)
 		appendToLowerAsUtf8(res, str, i);
@@ -2541,7 +2541,7 @@ std::string toLower(const char *str)
 
 std::string	toLower(const std::string &str)
 {
-	// UTF-8 toLower, tables generated from UTF-16 tables
+	// UTF-8 toLower
 	std::string res;
 	res.reserve(str.size() + (str.size() >> 2));
 	const char *cstr = &str[0];
