@@ -227,7 +227,7 @@ public:
 		else
 		{
 			STOP(NLMISC::toString("Failed to fit item loaded from input into inventory! (sheet=%s)",itm->getSheetId().toString().c_str()));
-			itm.deleteItem();
+			itm.deleteItem(); // FIXME: Log
 		}
 	}
 
