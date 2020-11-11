@@ -782,7 +782,6 @@ void CGameItem::ctor()
 //void CGameItem::ctor( const CEntityId& id, const CSheetId& sheetId, uint32 recommended, sint16 slotCount, bool destroyable, bool dropable )
 void CGameItem::ctor( const CSheetId& sheetId, uint32 recommended, bool destroyable, bool dropable )
 {
-	_CraftParameters = 0;
 	ctor();
 //	_ItemId = id;
 	_SheetId = sheetId;
@@ -1174,10 +1173,6 @@ CGameItemPtr CGameItem::getItemCopy()
 	CGameItemPtrArray old;
 	old= *item;
 	*item = *this;
-	if( this->_CraftParameters != 0 )
-	{
-		item->_CraftParameters = new CItemCraftParameters(*this->_CraftParameters);
-	}
 	*(CGameItemPtrArray*)item=old;
 
 	// generate a new item id
@@ -1219,8 +1214,8 @@ uint32 CGameItem::sendNameId(CCharacter * user)
 	nlassert( _Form != 0 );
 	if( _Form->Family != ITEMFAMILY::SCROLL_R2 )
 	{
-		if ( ! _PhraseId.empty() )
-			return STRING_MANAGER::sendStringToClient( user->getEntityRowId(), _PhraseId, TVectorParamCheck() );
+		if (_PhraseId && !_PhraseId->empty())
+			return STRING_MANAGER::sendStringToClient(user->getEntityRowId(), *_PhraseId, TVectorParamCheck());
 	}
 	else
 	{
@@ -1333,12 +1328,7 @@ void CGameItem::clear()
 	_Enchantment.clear();
 	contReset( _Enchantment );
 
-	if( _CraftParameters )
-	{
-		_CraftParameters->clear();
-		delete _CraftParameters;
-		_CraftParameters = 0;
-	}
+	_CraftParameters = NULL;
 
 	_StackSize = 1;
 //	_IsOnTheGround = false;
@@ -1375,8 +1365,8 @@ void CGameItem::clear()
 	_UnMovable = false;
 
 	_TypeSkillMods.clear();
-	_PhraseId.clear();
-	_CustomText.clear();
+	_PhraseId = NULL;
+	_CustomText = NULL;
 }
 
 void CGameItem::setStackSize(uint32 size)
@@ -2705,9 +2695,10 @@ void CGameItem::addHp( double hpGain )
 //-----------------------------------------------
 // changes the custom text of an item
 //-----------------------------------------------
-void CGameItem::setCustomText(const ucstring &val)
+void CGameItem::setCustomText(const std::string &val)
 {
-	_CustomText = val;
+	if (!_CustomText) _CustomText = new std::string();
+	*_CustomText = val;
 //	getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_custom_text));
 }
 
@@ -4360,7 +4351,7 @@ bool CGameItem::getStats(const std::string &stats, std::string &final )
 		else if (part == "Fo")
 			final += NLMISC::toString("%s|", _Form->Name.c_str());
 		else if (part == "Ct")
-			final += NLMISC::toString("%s|", getCustomText().toString().c_str());
+			final += NLMISC::toString("%s|", getCustomText().c_str());
 		else if (part == "Bu")
 			final += NLMISC::toString("%u|", _Form->Bulk);
 		else if (part == "We")
@@ -4607,11 +4598,7 @@ void CGameItem::postApply(INVENTORIES::TInventory refInventoryId, CCharacter * o
 			break;
 			// non craftable-> release craft parameters structure
 		default:
-			if (_CraftParameters != NULL)
-			{
-				delete _CraftParameters;
-				_CraftParameters = NULL;
-			}
+			_CraftParameters = NULL;
 		}
 	}
 

@@ -8394,7 +8394,7 @@ NLMISC_COMMAND(eventResetItemCustomText, "set an item custom text, which replace
 	}
 
 	CGameItemPtr item = invent->getItem(slot);
-	item->setCustomText(ucstring());
+	item->setCustomText(std::string());
 	// Following line was commented out by trap, reason unknown
 	c->incSlotVersion(INVENTORIES::bag, slot);
 	log.displayNL("item in slot %u has now its default text displayed", slot);

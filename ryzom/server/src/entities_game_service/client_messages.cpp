@@ -3162,7 +3162,7 @@ sint32 clientEventSetItemCustomText(CCharacter* character, INVENTORIES::TInvento
 	}
 
 	CGameItemPtr item = invent->getItem(slot);
-	item->setCustomText(text);
+	item->setCustomText(text.toUtf8());
 	// Following line was commented out by trap, reason unknown
 	character->incSlotVersion(inventory, slot);
 

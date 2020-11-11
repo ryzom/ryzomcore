@@ -23,6 +23,7 @@
 #include "nel/misc/log.h"
 #include "nel/misc/variable.h"
 #include "nel/misc/enum_bitset.h"
+#include "nel/misc/deep_ptr.h"
 
 // game share
 #include "game_share/ryzom_entity_id.h"
@@ -230,7 +231,7 @@ struct CItemCraftParameters
 	 * \return the current version of the class. Useful for managing old versions of saved players
 	 * WARNING : the version number should be incremented when the serial method is modified
 	 */
-	static inline uint32 getCurrentVersion() { return 4; }
+	static inline uint32 getCurrentVersion() { return 5; }
 
 	/// serial validated point for a character
 	void serial(NLMISC::IStream &f);
@@ -303,6 +304,23 @@ public:
 	{
 		// do nothing
 	}
+
+	CGameItemPtrArray &operator=(const CGameItemPtrArray &)
+	{
+		// do nothing
+	}
+
+#ifdef NL_CPP14
+	CGameItemPtrArray(CGameItemPtrArray &&)
+	{
+		// do nothing
+	}
+
+	CGameItemPtrArray &operator=(CGameItemPtrArray &&) noexcept
+	{
+		// do nothing
+	}
+#endif
 
 protected:
 	/// keep pointers pointing this item
@@ -501,8 +519,8 @@ public :
 	float getDefensiveAfflictionPowerFactor() const;
 
 	/// accessors to the item phrase
-	const std::string & getPhraseId() const { return _PhraseId;}
-	void setPhraseId(const std::string & str){ _PhraseId = str;}
+	const std::string &getPhraseId() const { static const std::string empty; return _PhraseId ? *_PhraseId : empty; }
+	void setPhraseId(const std::string &str) { if (!_PhraseId) _PhraseId = new std::string(); *_PhraseId = str; }
 
 	// return the enchantment value to be displayed in the client
 	uint16 getClientEnchantValue() const;
@@ -703,12 +721,12 @@ public :
 	inline void setTypeSkillMods(const std::vector<CTypeSkillMod> &mods) { _TypeSkillMods = mods; }
 
 	/// get craft parameters
-	const CItemCraftParameters * getCraftParameters() const { return _CraftParameters; }
+	const CItemCraftParameters *getCraftParameters() const { return _CraftParameters.ptr(); }
 
 	/// get custom string (for scroll-like items)
-	const ucstring& getCustomText() const { return _CustomText; }
+	const std::string &getCustomText() const { static const std::string empty; return _CustomText ? *_CustomText : empty; }
 	/// set custom string (for scroll-like items)
-	void setCustomText(const ucstring &val);
+	void setCustomText(const std::string &val);
 
 	uint8 getPetIndex() const { return _PetIndex; }
 	void setPetIndex(uint8 val) { _PetIndex = val; }
@@ -816,7 +834,6 @@ public:	// I've had to make these public for now 'cos I can't work out how to ma
 		: 	_InventorySlot(INVENTORIES::INVALID_INVENTORY_SLOT),
 			_RefInventorySlot(INVENTORIES::INVALID_INVENTORY_SLOT)
 	{
-		_CraftParameters= 0;
 	}
 
 	/**
@@ -825,6 +842,13 @@ public:	// I've had to make these public for now 'cos I can't work out how to ma
 	~CGameItem()
 	{
 	}
+
+#ifdef NL_CPP14
+	CGameItem(const CGameItem &) = default;
+	CGameItem &operator=(const CGameItem &) = default;
+	CGameItem(CGameItem &&) = default;
+	CGameItem &operator=(CGameItem &&) noexcept = default;
+#endif
 
 private:
 	//--------------------------------------------------------------------
@@ -922,7 +946,7 @@ private:
 	/// current sap load
 	uint32				_SapLoad;
 	/// all craft parameters
-	CItemCraftParameters * _CraftParameters;
+	NLMISC::CDeepPtr<CItemCraftParameters> _CraftParameters;
 	/// entityId of the character who has created the Item via faber (if applicable, for item not created by playres, Creator = CEntityId::Unknown)
 
 	NLMISC::CEntityId	_CreatorId;
@@ -938,7 +962,7 @@ private:
 	/// pointer on the associated static form
 	const CStaticItem*	_Form;
 	/// string associated with this item
-	std::string			_PhraseId;
+	NLMISC::CDeepPtr<std::string> _PhraseId;
 	/// tick when the proc will be available again
 	NLMISC::TGameCycle	_LatencyEndDate;
 	/// image of the item in bag / equipment
@@ -959,7 +983,7 @@ private:
 	/// skill modifiers against given ennemy types
 	std::vector<CTypeSkillMod>	_TypeSkillMods;
 
-	ucstring			_CustomText;
+	NLMISC::CDeepPtr<std::string> _CustomText;
 	bool                _LockedByOwner;
 	bool                _UnMovable;
 	bool                _Movable;
@@ -1093,7 +1117,6 @@ inline CGameItemPtr::~CGameItemPtr()
 inline CGameItem *CGameItemPtr::newItem(bool destroyable,bool dropable)
 {
 	CGameItem *item=CGameItem::newItem();
-	item->_CraftParameters = 0;
 	item->ctor();
 	item->_Destroyable=destroyable;
 	item->_Dropable = dropable;

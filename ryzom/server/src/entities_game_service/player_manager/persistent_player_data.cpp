@@ -1344,7 +1344,7 @@ private:
 	PROP2(_HP,							uint32,		_HP,						_HP=val)\
 	PROP2(_Recommended,					uint32,		_Recommended,				_Recommended=val)\
 	PROP2(_CreatorId,					CEntityId,	_CreatorId,					_CreatorId=val)\
-	PROP2(_PhraseId,					string,		_PhraseId,					_PhraseId=val)\
+	PROP2(_PhraseId,					string,		getPhraseId(),					setPhraseId(val))\
 	LSTRUCT2(_CraftParameters,						if (_CraftParameters != NULL),	_CraftParameters->store(pdr),	_CraftParameters = new CItemCraftParameters; _CraftParameters->apply(pdr))\
 	LPROP2(_SlotImage,					uint16,		if (0),		0xffff,				slotImage=val)\
 	LPROP2(_SapLoad,					uint32,		if (_SapLoad!=0),			_SapLoad,							_SapLoad=val)\
@@ -1362,7 +1362,7 @@ private:
 	LPROP2(_RequiredCharacLevel,		uint16,		if (_RequiredCharacLevel!=0),_RequiredCharacLevel,				_RequiredCharacLevel=val)\
 	STRUCT_VECT(_TypeSkillMods)\
 	LPROP_VECT(CSheetId, _Enchantment, VECT_LOGIC(_Enchantment) if (_Enchantment[i]!=CSheetId::Unknown))\
-	PROP2(_CustomText,					ucstring,	_CustomText,				_CustomText=val)\
+	PROP2(_CustomText,					ucstring,	ucstring::makeFromUtf8(getCustomText()),				setCustomText(val.toUtf8())) /* TODO: UTF-8 (file serial) */ \
 	PD_CUSTOM_NAME_PROP2()\
 	PROP(bool, _Movable)\
 	PROP(bool, _UnMovable)\
