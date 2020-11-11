@@ -1191,7 +1191,6 @@ CGameItemPtr CGameItem::getItemCopy()
 	item->_AllocatorData = alloc;
 	// reset dynamic elements. ( we do it this way because people who add gameplay data properties will probably forget to update this method. So it is safe this way
 	item->_StackSize = _StackSize;
-//	item->_IsOnTheGround	= false;
 	item->_Looter		= CEntityId::Unknown;
 //	item->_Id			= itemId;
 	item->_AllocatorData = alloc;
@@ -1204,12 +1203,11 @@ CGameItemPtr CGameItem::getItemCopy()
 	item->_CreatorId = _CreatorId;
 	item->_LockCount = 0;
 	item->_HP = item->maxDurability();
-
-	item->_LatencyEndDate = _LatencyEndDate;
-	item->_Enchantment = _Enchantment;
-	item->_SapLoad = _SapLoad;
 	item->_LostHPremains = 0.0f;
-	item->_PhraseId = _PhraseId;
+
+	// item->_Enchantment.clear();
+	// item->_SapLoad = 0.0f;
+
 	item->computeItemWornState();
 
 	log_Item_Create(item->getItemId(), item->getSheetId(), item->getStackSize(), item->quality());
