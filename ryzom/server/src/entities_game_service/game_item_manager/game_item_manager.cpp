@@ -125,8 +125,8 @@ CGameItemManager::CGameItemManager()
 //CGameItemPtr CGameItemManager::getNewItem( CEntityId& id, CSheetId& sheetId, uint16 quality, bool destroyable , bool dropable)
 CGameItemPtr CGameItemManager::getNewItem( const CSheetId& sheetId, uint16 quality, bool destroyable , bool dropable)
 {
-	CAllStaticItems::iterator itForm = CSheets::getItemMapFormNoConst().find( sheetId );
-	if( itForm != CSheets::getItemMapFormNoConst().end() )
+	CAllStaticItems::const_iterator itForm = CSheets::getItemMapForm().find( sheetId );
+	if( itForm != CSheets::getItemMapForm().end() )
 	{
 		// get the slot count
 //		sint16 slotCount = 0;
