@@ -749,7 +749,9 @@ void CGameItemPtr::deleteItem()
 	// call dtor now to unlink all children
 	item->dtor();
 	// check no one else is referencing us
+#ifdef GAME_PTR_DEBUG
 	nlassert(item->_Ptrs.empty());
+#endif
 
 	CGameItem::deleteItem(item);
 #if 0
@@ -1174,10 +1176,14 @@ CGameItemPtr CGameItem::getItemCopy()
 
 	// use the default copy ctor to init it
 	CGameItem* item = *ret;
-	CGameItemPtrArray old;
-	old= *item;
+#ifdef GAME_PTR_DEBUG
+	std::vector<CGameItemPtr*> old;
+	old= item->_Ptrs;
+#endif
 	*item = *this;
-	*(CGameItemPtrArray*)item=old;
+#ifdef GAME_PTR_DEBUG
+	*(CGameItemPtrArray*)item->_Ptrs=old;
+#endif
 
 	// generate a new item id
 	item->_ItemId = INVENTORIES::TItemId();

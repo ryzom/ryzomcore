@@ -293,6 +293,7 @@ private:
 };
 
 
+#ifdef GAME_PTR_DEBUG
 class CGameItemPtrArray
 {
 public:
@@ -326,7 +327,7 @@ protected:
 	/// keep pointers pointing this item
 	std::vector<CGameItemPtr*>	_Ptrs;
 };
-
+#endif
 
 /**
  * CGameItem
@@ -335,8 +336,10 @@ protected:
  * \author Nevrax France
  * \date 2002
  */
-class CGameItem :
-	public CGameItemPtrArray
+class CGameItem 
+#ifdef GAME_PTR_DEBUG
+	: public CGameItemPtrArray
+#endif
 {
 	NLMISC_COMMAND_FRIEND(testParanoidItemSystem);
 
