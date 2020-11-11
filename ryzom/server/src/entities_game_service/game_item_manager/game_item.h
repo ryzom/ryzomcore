@@ -805,22 +805,28 @@ private:
 	float getMagicProtectionCraftParateters( PROTECTION_TYPE::TProtectionType protection ) const;
 
 private:
+#if 0
 	// singleton counter
 	static uint32 _BugTestCounter;
 
 	// instance debug data
 	uint32 _BugTestChecksum;
 	uint32 _BugTestUpdate;
+#endif
 
 public:
+#if 0
 	// run through the items looking for bugs
 	static void testItemsForBugs();
 //	static void testPlayerInventoryForBugs(const std::vector<CGameItemPtr>& inventory);
+#endif
 
 	static std::string showItemsStats();
 
+#if 0
 	// check a single item for bugs...
 	void checkItemForBugs();
+#endif
 
 public:	// I've had to make these public for now 'cos I can't work out how to make the vector class a friend :o(
 //private :
@@ -1121,7 +1127,9 @@ inline CGameItem *CGameItemPtr::newItem(bool destroyable,bool dropable)
 	item->_Destroyable=destroyable;
 	item->_Dropable = dropable;
 	*this=item;
+#if 0
 	item->_BugTestUpdate=CGameItem::_BugTestCounter;
+#endif
 	return item;
 }
 
@@ -1142,7 +1150,9 @@ inline CGameItem *CGameItemPtr::newItem( const NLMISC::CSheetId& sheetId, uint32
 //	item->ctor(id,sheetId,recommended,slotCount,destroyable,dropable);
 	item->ctor(sheetId, recommended, destroyable, dropable);
 	*this=item;
+#if 0
 	item->_BugTestUpdate = CGameItem::_BugTestCounter;
+#endif
 	return item;
 }
 
@@ -1289,7 +1299,9 @@ inline CGameItem * CGameItemPtr::operator*()	const
 
 	BOMB_IF(item==0, "Attempting to access an item an item that is not allocated or has been freed", return 0);
 
+#if 0
 	item->_BugTestUpdate=CGameItem::_BugTestCounter;
+#endif
 	return item;
 }
 
@@ -1310,7 +1322,9 @@ inline CGameItem *CGameItemPtr::operator->() const
 
 	BOMB_IF(item==0, "Attempting to access an item an item that is not allocated or has been freed", return 0);
 
+#if 0
 	item->_BugTestUpdate=CGameItem::_BugTestCounter;
+#endif
 	return item;
 }
 

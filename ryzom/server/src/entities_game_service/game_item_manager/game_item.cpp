@@ -48,7 +48,9 @@ NL_INSTANCE_COUNTER_IMPL(CGameItem);
 
 CGameItemVector CGameItem::_Items;
 uint32 CGameItem::_FirstFreeItem;
+#if 0
 uint32 CGameItem::_BugTestCounter;
+#endif
 
 #if defined(ITEM_DEBUG) || defined(SAFE_ITEMS)
 	sint32 CGameItem::_NextAllocatorDataValue;
@@ -750,7 +752,9 @@ void CGameItemPtr::deleteItem()
 	nlassert(item->_Ptrs.empty());
 
 	CGameItem::deleteItem(item);
+#if 0
 	item->_BugTestUpdate=CGameItem::_BugTestCounter;
+#endif
 }
 
 //-----------------------------------------------
@@ -4625,6 +4629,7 @@ void CGameItem::postApply(INVENTORIES::TInventory refInventoryId, CCharacter * o
 	}
 }
 
+#if 0
 //-----------------------------------------------
 // variable used for debugging..
 //-----------------------------------------------
@@ -4724,6 +4729,7 @@ void CGameItem::testItemsForBugs()
 	nlassert(count==freeItemCount);
 	++_BugTestCounter;
 }
+#endif
 
 
 //-----------------------------------------------
@@ -4799,6 +4805,7 @@ void CGameItem::testItemsForBugs()
 //	}
 //}
 
+#if 0
 //-----------------------------------------------
 // testItemsForBugs
 //-----------------------------------------------
@@ -4853,7 +4860,9 @@ void CGameItem::checkItemForBugs()
 ////		nlassert(getRmUsedForCraft().size()<50);
 //	}
 }
+#endif
 
+#if 0
 //-----------------------------------------------
 // COMMAND: testParanoidItemSystem
 //-----------------------------------------------
@@ -4918,6 +4927,7 @@ NLMISC_COMMAND(testParanoidItemSystem,"run some test code that should provoke a 
 //
 //#undef TEST
 }
+#endif
 
 //-----------------------------------------------
 // testItemsForBugs
@@ -5002,6 +5012,7 @@ std::string CGameItem::showItemsStats()
 //		freeItemCount,rootItemCount,attachedStackCount,detachedStackCount,stackChildrenCount,attachedItemCount,detachedItemCount, _Items.size(), sizeof(CGameItem) * _Items.size());
 }
 
+#if 0
 //-----------------------------------------------
 // COMMAND: launch item tests
 //-----------------------------------------------
@@ -5010,6 +5021,7 @@ NLMISC_COMMAND(testItemSystem,"call CGameItem::testItemsForBugs()","")
 	CGameItem::testItemsForBugs();
 	return true;
 }
+#endif
 
 //-----------------------------------------------
 // COMMAND: items stats
