@@ -169,7 +169,7 @@ sint main(int argc, char **argv)
 			if (filenames[i].find(".max") == std::string::npos)
 				continue;
 
-			std::string baseFilename = toLower(CFile::getFilenameWithoutExtension(filenames[i]));
+			std::string baseFilename = toLowerAscii(CFile::getFilenameWithoutExtension(filenames[i]));
 
 			// compute the md5 of .max file
 			std::string md5 = getNewMD5(filenames[i]).toString();

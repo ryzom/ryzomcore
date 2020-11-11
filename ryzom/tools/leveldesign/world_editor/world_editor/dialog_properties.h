@@ -60,7 +60,7 @@ public:
 	bool						loaded;
 
 private:
-	std::string					_LastString;
+	std::wstring				_LastString;
 	sint64						_LastStrokeTime;
 	std::vector<std::string>	_data;
 	void						reloadData();

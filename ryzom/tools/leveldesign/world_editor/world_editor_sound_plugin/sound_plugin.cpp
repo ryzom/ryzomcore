@@ -169,7 +169,7 @@ void CSoundPlugin::ReInit()
 	bool	fmodDriver = false;
 	try
 	{
-		fmodDriver = toLower(cf.getVar("DriverSound").asString())=="fmod";
+		fmodDriver = toLowerAscii(cf.getVar("DriverSound").asString())=="fmod"; // FIXME: Support all drivers
 	}
 	catch(...)
 	{

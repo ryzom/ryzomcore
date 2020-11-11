@@ -3696,7 +3696,7 @@ void		CObjectViewer::shootScene()
 			string extension = NLMISC::CFile::getExtension (tStrToUtf8(fileDlg.GetPathName()));
 
 			// The file name without extension
-			bool jpeg = toLower (extension) == "jpg";
+			bool jpeg = toLowerAscii (extension) == "jpg";
 
 			// Activate the driver
  			CNELU::Driver->activate ();

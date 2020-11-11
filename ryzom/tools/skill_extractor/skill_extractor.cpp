@@ -311,10 +311,10 @@ sint main( sint argc, char ** argv )
 				}
 				break;
 			case 1: // code
-				skill.Code = toUpper(string( ptr ));
+				skill.Code = toUpperAscii(string( ptr ));
 				break;		
 			case 2: // parent skill
-				skill.ParentSkill = toUpper(string( ptr ));
+				skill.ParentSkill = toUpperAscii(string( ptr ));
 				break;
 			case 3: // max skill value
 				NLMISC::fromString(std::string(ptr), skill.MaxValue);

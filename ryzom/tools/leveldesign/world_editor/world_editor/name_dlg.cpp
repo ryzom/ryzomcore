@@ -167,7 +167,7 @@ void CNameDlg::updateSearchList()
 			m_nameFilter.UnlockBuffer();
 
 			// filter
-			if (NLMISC::toLower(ig).find(NLMISC::toLower(filter)) != std::string::npos)
+			if (NLMISC::toLowerAscii(ig).find(NLMISC::toLowerAscii(filter)) != std::string::npos)
 			{
 				m_listToName.insert(std::make_pair(j, i));
 				m_searchList.InsertString(j++, nlUtf8ToTStr(s));
