@@ -107,6 +107,7 @@ private:
 	uint	_NumBlockPerChunk;
 	//
 	uint	_NumAlloc;
+	uint8	*_SpareMem;
 };
 
 } // NLMISC
