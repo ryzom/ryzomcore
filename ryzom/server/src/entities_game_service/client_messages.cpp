@@ -3620,13 +3620,16 @@ TUnifiedCallbackItem CbClientArray[]=
 	{ "CLIENT:DUEL:REFUSE",						cbClientDuelRefuse },
 	{ "CLIENT:DUEL:ABANDON",					cbClientDuelAbandon },
 
-	// TODO_RYZOMCLASSIC: Revert this, add additional client messages for 'League'. -Kaetemi
-	// { "CLIENT:PVP_CHALLENGE:ASK",				cbClientPVPChallengeAsked },
-	// { "CLIENT:PVP_CHALLENGE:ACCEPT",			cbClientPVPChallengeAccept },
-	// { "CLIENT:PVP_CHALLENGE:REFUSE",			cbClientPVPChallengeRefuse },
+#ifdef RYZOM_FORGE
+	// FIXME
 	{ "CLIENT:PVP_CHALLENGE:ASK",				cbClientLeagueJoinProposal },
 	{ "CLIENT:PVP_CHALLENGE:ACCEPT",			cbClientLeagueJoin },
 	{ "CLIENT:PVP_CHALLENGE:REFUSE",			cbClientLeagueJoinProposalDecline },
+#else
+	{ "CLIENT:PVP_CHALLENGE:ASK",				cbClientPVPChallengeAsked },
+	{ "CLIENT:PVP_CHALLENGE:ACCEPT",			cbClientPVPChallengeAccept },
+	{ "CLIENT:PVP_CHALLENGE:REFUSE",			cbClientPVPChallengeRefuse },
+#endif
 	{ "CLIENT:PVP_CHALLENGE:ABANDON",			cbClientPVPChallengeAbandon },
 
 //	{ "CLIENT:PVP_VERSUS:CLAN",					cbClientPvpChooseClan },
