@@ -41,13 +41,15 @@ using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
+#if 0
 NL_INSTANCE_COUNTER_IMPL(CGameItem);
+#endif
 
 //--------------------------------------------------------------------
 // singleton data
 
 CGameItemVector CGameItem::_Items;
-uint32 CGameItem::_FirstFreeItem;
+uint32 CGameItem::_FirstFreeItem = 1; // Item 0 is invalid!
 #if 0
 uint32 CGameItem::_BugTestCounter;
 #endif
@@ -732,31 +734,26 @@ void CGameItem::callItemChanged(INVENTORIES::TItemChangeFlags changeFlags)
 
 void CGameItemPtr::deleteItem()
 {
-	CGameItem *item=**this;
+	CGameItem *item = **this;
 
-	BOMB_IF( item == NULL, "Attempt to delete an item that is not allocated or has been freed", return );
+	BOMB_IF(item == NULL, "Attempt to delete an item that is not allocated or has been freed", return);
 
 	if (item->_Inventory != NULL)
 		item->_Inventory->removeItem(item->getInventorySlot());
 
-	// only unlink if the pointer 'this' is not the same as the inventory ptr for the item
-	// after the unlink this == NULL
-//	if (! ( item->_Parent!=NULL && 
-//			item->Loc.Slot<item->_Parent->getChildren().size() && 
-//			&(item->_Parent->getChildren()[item->Loc.Slot])==this ) )
-	unlinkFromItem();
+	// FIXME: Item delete can occur outside of context... (character log out)
+	//        This does not match with newItem behaviour.
+	//        Function decRef automatically deletes the real item, so deleteItem does not have to be called for automatic deletes!
+	log_Item_Delete(item->getItemId(), item->getSheetId(), item->getStackSize(), item->quality());
 
-	// call dtor now to unlink all children
-	item->dtor();
-	// check no one else is referencing us
-#ifdef GAME_PTR_DEBUG
-	nlassert(item->_Ptrs.empty());
-#endif
+	decRef();
 
-	CGameItem::deleteItem(item);
-#if 0
-	item->_BugTestUpdate=CGameItem::_BugTestCounter;
-#endif
+	if (static_cast<CGameItemEntry *>(item)->PtrRefCount > 0)
+	{
+		nlwarning("Game item deleted, but still referenced");
+	}
+
+	m_Idx = 0;
 }
 
 //-----------------------------------------------
@@ -771,14 +768,10 @@ void CGameItemPtr::deleteItem()
 //-----------------------------------------------
 void CGameItem::ctor()
 {
-	// if we have children already we need to get rid of them cleanly!
-//	if (!_Children.empty())
-//		dtor();
+	clear();
 
 	// Generate a new Item id
 	_ItemId = INVENTORIES::TItemId();
-
-	clear();
 };
 
 //-----------------------------------------------
@@ -789,6 +782,7 @@ void CGameItem::ctor()
 void CGameItem::ctor( const CSheetId& sheetId, uint32 recommended, bool destroyable, bool dropable )
 {
 	ctor();
+
 //	_ItemId = id;
 	_SheetId = sheetId;
 	_Destroyable = destroyable;
@@ -1166,47 +1160,47 @@ void CGameItem::setLockedByOwner(bool value)
 //-----------------------------------------------
 CGameItemPtr CGameItem::getItemCopy()
 {
+	// used for 
+	// - NPC item sales
+	// - stack splitting
+	// - creating named items
+
 	// create a new item
 	CGameItemPtr ret;
-	ret.newItem(true);
+	ret.newItem();
 
 	// backup id and allocation data
-//	CEntityId itemId(RYZOMID::object, GameItemManager.getFreeItemIndice() );
-	sint32 alloc = ret->_AllocatorData;
+	// CEntityId itemId(RYZOMID::object, GameItemManager.getFreeItemIndice() );
 
 	// use the default copy ctor to init it
-	CGameItem* item = *ret;
-#ifdef GAME_PTR_DEBUG
-	std::vector<CGameItemPtr*> old;
-	old= item->_Ptrs;
-#endif
+	CGameItem *item = *ret;
 	*item = *this;
-#ifdef GAME_PTR_DEBUG
-	*(CGameItemPtrArray*)item->_Ptrs=old;
-#endif
 
 	// generate a new item id
 	item->_ItemId = INVENTORIES::TItemId();
-	// reset allocator
-	item->_AllocatorData = alloc;
+
 	// reset dynamic elements. ( we do it this way because people who add gameplay data properties will probably forget to update this method. So it is safe this way
-	item->_StackSize = _StackSize;
-	item->_Looter		= CEntityId::Unknown;
-//	item->_Id			= itemId;
-	item->_AllocatorData = alloc;
-//	item->_IsOnTheGround = false;
-//	item->_Parent = NULL;
+	item->_Looter = CEntityId::Unknown;
 	item->_Inventory = NULL;
 	item->_InventorySlot = INVENTORIES::INVALID_INVENTORY_SLOT;
 	item->_RefInventory = NULL;
 	item->_RefInventorySlot = INVENTORIES::INVALID_INVENTORY_SLOT;
-	item->_CreatorId = _CreatorId;
 	item->_LockCount = 0;
 	item->_HP = item->maxDurability();
 	item->_LostHPremains = 0.0f;
 
+	item->_LockedByOwner = false;
+	item->_Movable = false;
+	item->_UnMovable = false;
+
+	// item->_StackSize = 1;
+	// item->_CreatorId = CEntityId::Unknown;
 	// item->_Enchantment.clear();
 	// item->_SapLoad = 0.0f;
+
+	// item->_Id			= itemId;
+	// item->_IsOnTheGround = false;
+	// item->_Parent = NULL;
 
 	item->computeItemWornState();
 
@@ -1214,6 +1208,7 @@ CGameItemPtr CGameItem::getItemCopy()
 
 	return ret;
 }
+
 //-----------------------------------------------
 // sendNameId :
 //-----------------------------------------------
@@ -1241,100 +1236,14 @@ uint32 CGameItem::sendNameId(CCharacter * user)
 }
 
 //-----------------------------------------------
-// ~CGameItem :
-//-----------------------------------------------
-void CGameItem::dtor()
-{
-	// detach from parent
-//	detachFromParent();
-//	detachFromInventory();
-
-	if (getInventory() != NULL)
-	{
-		getInventory()->removeItem(getInventorySlot());
-	}
-
-	// destroy children. As they call detachFromParent() when destroyed and _Children vector may be resized 
-	// we must make a copy of _children ptrs before
-	// so we now work on a safe copy of _Children vector
-//	vector<CGameItemPtr> children = _Children;
-//	const sint size = children.size();
-//	for (sint i = size-1 ; i >= 0 ; --i)
-//	{
-//		if(children[i] != NULL && children[i] != this)
-//		{
-//			// debug level 2 loop
-//			for(uint j = 0; j  < children[i]->_Children.size(); j++) 
-//				if(children[i]->_Children[j] == this) goto failed;
-//				
-//				detachChild(i);
-//				children[i].deleteItem();
-//		}
-//	}
-//	if( _CraftParameters != NULL )
-//	{
-//		delete _CraftParameters;
-//		_CraftParameters = 0;
-//	}
-//	failed:
-//	_Children.clear();
-//	GameItemManager.removeFromMap( _Id );
-
-//	CGameItemPtr item(this);
-//	GameItemManager.removeFromMap(item);
-}
-
-//void CGameItem::copyItem(const CGameItemPtr &model)
-//{
-//	// Copy all parameter for the item
-//	// Inventory info, lock state and looter are not copied
-//	_StackSize			= model->_StackSize;
-//	//_Looter
-//	_SheetId			= model->_SheetId;
-//	_Destroyable		= model->_Destroyable;
-//	_Dropable			= model->_Dropable;
-//	_Recommended		= model->_Recommended;
-//	_HP					= model->_HP;
-//	_LostHPremains		= model->_LostHPremains;
-//	_CurrentWornState	= model->_CurrentWornState;
-//	_SapLoad			= model->_SapLoad;
-//	_CraftParameters	= model->_CraftParameters;
-//	_CreatorId			= model->_CreatorId;
-//	//_LockCount
-//	_Enchantment		= model->_Enchantment;
-//	_Form				= model->_Form;
-//	_PhraseId			= model->_PhraseId;
-//	_LatencyEndDate		= model->_LatencyEndDate;
-//	_TotalSaleCycle		= model->_TotalSaleCycle;
-//
-//	computeRequirementFromForm();
-//
-//	_TypeSkillMods		= model->_TypeSkillMods;
-//}
-//
-
-//-----------------------------------------------
 // clear :
 //
 //-----------------------------------------------
 void CGameItem::clear()
 {
-	// remove all of the item's children
-//	for (uint32 i=0;i<_Children.size();++i)
-//		if (_Children[i]!=NULL)
-//			_Children[i].deleteItem();
-
-	// if the item was a stack then resize the children vector back down to 0
-//	if (_SheetId==NLMISC::CSheetId("stack.sitem"))
-//	{
-//		// TODO : remove when no more trace of stack.sitem
-//		nlassert(false);
-//		_Children.clear();
-//	}
-
 	// clear the enchantment
 	_Enchantment.clear();
-	contReset( _Enchantment );
+	contReset(_Enchantment);
 
 	_CraftParameters = NULL;
 
@@ -1797,8 +1706,9 @@ uint32 CGameItem::getMaxStackSize() const
 //-----------------------------------------------
 CGameItem * CGameItem::getItem(uint idx)
 {	
-	BOMB_IF( idx>=_Items.size(), "Attempt to access an item beyond end of item vector", return 0 );
-	BOMB_IF( _Items[idx]._AllocatorData>=0, NLMISC::toString("Attempt to access an item that is not allocated or has been freed (idx: %d)",idx), return 0 );
+	BOMB_IF( !idx, "Attempt to access a null item pointer", return &_Items[0] );
+	BOMB_IF( idx>=_Items.size(), "Attempt to access an item beyond end of item vector", return &_Items[0] );
+	BOMB_IF( _Items[idx].AllocatorNext>=0, NLMISC::toString("Attempt to access an item that is not allocated or has been freed (idx: %d)",idx), return &_Items[0] );
 	return &_Items[idx];
 }
 
@@ -1810,49 +1720,22 @@ CGameItem *CGameItem::newItem()
 {
 	// NOTE
 	// the following assert is very important as the rest of this algorithm depends on this condition being met
-	nlassert(_FirstFreeItem<=_Items.size());
+	nlassert(_FirstFreeItem <= _Items.size());
 
 	// see whether there are any deleted items awaiting re-allocation
-	if (_FirstFreeItem==_Items.size())
+	if (_FirstFreeItem == _Items.size())
 	{
 		// no unallocated items found so allocate a bit more RAM
-//			uint sizeIncrement=65536; //16; //65536;	// use 16 for testing - likely 64k for exploitation
-//			egs_giinfo("Increased item vector size to %d items",(_Items.size()+1)*sizeIncrement);
-//			for (uint i=0;i<sizeIncrement;++i)
-//				_Items[_FirstFreeItem+i]._AllocatorData=_FirstFreeItem+i+1;
 		_Items.extend();
 	}
 
 	// get the first free item
-	uint32 idx=_FirstFreeItem;
-	_FirstFreeItem=_Items[idx]._AllocatorData;
+	uint32 idx = _FirstFreeItem;
+	CGameItemEntry &item = _Items[idx];
+	_FirstFreeItem = item.AllocatorNext;
+	item.AllocatorNext = 0;
 
-	#ifdef ITEM_DEBUG
-		// make sure the new _FirstFreeItem is valid
-		nlassert(_FirstFreeItem<=_Items.size());
-		// make sure this record is not already allocated
-		nlassert(_Items[idx]._AllocatorData>=0);
-		// overwrite the _AllocatorData with a unique(ish) negative value
-		if (--_NextAllocatorDataValue>=0)
-			_NextAllocatorDataValue=-1;
-		_Items[idx]._AllocatorData=_NextAllocatorDataValue;
-
-		#ifdef NL_DEBUG
-			// make sure the linked list of free blocks is intact
-			uint i,j,k;
-			for(i=0, j=0; i<_Items.size(); ++i)
-				if (_Items[i]._AllocatorData>=0)
-					++j;
-			for(i=_FirstFreeItem, k=0; i<_Items.size(); i=_Items[i]._AllocatorData)
-				++k;
-			nlassert(j==k);
-		#endif
-
-		// TODO: replace this egs_giinfo() with a LOG()
-//			egs_giinfo("newItem(): %5d (free: %d/%d)",idx,j,_Items.size());
-	#endif
-
-	return &_Items[idx];
+	return static_cast<CGameItem *>(&item);
 }
 
 //-----------------------------------------------
@@ -1861,694 +1744,22 @@ CGameItem *CGameItem::newItem()
 //-----------------------------------------------
 void CGameItem::deleteItem(CGameItem *item)
 {
-
 	uint32 idx=_Items.getUniqueIndex(*item);
-	BOMB_IF( idx == ~0u, "Delete item failed because getIndex failed", return);
+
+	BOMB_IF( idx == 0, "Delete item failed because getIndex failed", return);
 	BOMB_IF( item->_Inventory != NULL, "Item still in an inventory while deleting", item->_Inventory->removeItem(item->getInventorySlot()););
 	BOMB_IF( item->_RefInventory != NULL, "Item still in a ref inventory while deleting", item->_RefInventory->removeItem(item->getRefInventorySlot()););
-
-	log_Item_Delete(item->getItemId(), item->getSheetId(), item->getStackSize(), item->quality());
 
 	// this test would only have value if the implementation of std::vector<> doesn't guarantee a 
 	// continuous memory address space for the vector's data
 	// It's not in the #IFDEF DEBUG because it may only be triggered in very obscure conditions
-	nlassert(&_Items[idx]==item);
-
-	#ifdef ITEM_DEBUG
-		// make sure idx is within the _Items vector
-		nlassert(idx<_Items.size());
-		// make sure the item hasn't already been liberated
-
-		nlassert(_Items[idx]._AllocatorData<0);
-
-		#ifdef NL_DEBUG
-			// make sure the linked list of free blocks is intact
-			uint i,j,k;
-			for(i=0, j=0; i<_Items.size(); ++i)
-				if (_Items[i]._AllocatorData>=0)
-					++j;
-			for(i=_FirstFreeItem, k=0; i<_Items.size() && k<_Items.size(); i=_Items[i]._AllocatorData)
-				++k;
-			nlassert(j==k);
-		#endif
-			
-		// TODO: replace this egs_giinfo() with a LOG()
-//			egs_giinfo("deleteItem(): %5d (free: %d/%d)",idx,j,_Items.size());
-	#endif
-
-	_Items[idx]._AllocatorData=_FirstFreeItem;
-	_FirstFreeItem=idx;
+	nlassert(&_Items[idx] == item);
+	CGameItemEntry *entry = static_cast<CGameItemEntry *>(item);
+	nlassert(idx == entry->VectorIdx);
+	nlassert(!entry->AllocatorNext);
+	entry->AllocatorNext = _FirstFreeItem;
+	_FirstFreeItem = idx;
 }
-
-//void CGameItem::save( NLMISC::IStream &f )
-//{
-//	//NLMEMORY::CheckHeap (true);
-//	
-//	if ( _IsOnTheGround )
-//			nlwarning("<CGameItem load> saving an object on the ground should never happen sheet: %s, id: %s ",_SheetId.toString().c_str(), _Id.toString().c_str() );
-//	// save item infos
-//	f.serial( _SlotImage );
-//	f.serial( _SheetId );
-//	f.serial( Owner );
-//	if( Owner != CEntityId::Unknown )
-//	{
-//		f.serial(Loc.Slot);
-//	}
-//	else
-//	{
-//		f.serial( Loc.Pos.X );
-//		f.serial( Loc.Pos.Y );
-//		f.serial( Loc.Pos.Z );
-//	}
-//
-//	//NLMEMORY::CheckHeap (true);
-//
-//	f.serial( TimeOnTheGround );
-//	f.serial( SlotCount );
-//	f.serial( _CarrionSheetId );
-//	f.serial( _Destroyable );
-//	f.serial( _Dropable);
-//
-//	f.serial( _CreatorId );
-//
-//	f.serial( _HP );
-//	f.serial( _Recommended );
-//	f.serialPtr( _CraftParameters );
-//	f.serial( _LostHPremains );
-//
-//	//NLMEMORY::CheckHeap (true);
-//	
-//	// serial rm used for craft item
-////	f.serialCont( _RmUsedForCraft );
-//	std::vector<CSheetId> RmUsedCraft;
-//	f.serialCont( RmUsedCraft );
-//
-//	//NLMEMORY::CheckHeap (true);
-//	
-//	// serial position in bag inventory
-//	f.serial(_ClientInventoryPosition);
-//
-//	
-//	f.serial( _SapLoad );
-//	f.serialCont( _Enchantment );
-//
-//	//NLMEMORY::CheckHeap (true);
-//	
-//	// save children count
-//	uint32 childrenCount = _Children.size(); 
-//	f.serial( childrenCount );
-//
-//	// save non null children count
-//	uint32 nonNullChildrenCount = 0;
-//	uint32 i;
-//	for( i = 0; i < childrenCount; ++i )
-//	{
-//		if( _Children[i]!=NULL && _Children[i] != this ) 
-//			++nonNullChildrenCount;
-//	}
-//	f.serial( nonNullChildrenCount );
-//
-//	//NLMEMORY::CheckHeap (true);
-//
-//	string sheetName = _SheetId.toString();
-//	
-//	// for each non null child
-//	for( i = 0; i < childrenCount; ++i )
-//	{
-//		if( _Children[i]!=NULL && _Children[i] != this )
-//		{
-//			// save child index
-//			f.serial( i );
-//
-//			// save child
-//			(*_Children[i])->save( f );
-//
-//			if (getSheetId() == CSheetId("stack.sitem"))
-//				break;
-//
-//		}
-//	}
-//	//NLMEMORY::CheckHeap (true);
-//} // save //
-
-
-//-----------------------------------------------
-// load :
-//
-//-----------------------------------------------
-//void CGameItem::legacyLoad( NLMISC::IStream &f, uint16 characterSerialVersion, CCharacter *ownerPtr )
-//{
-//	_LatencyEndDate = 0;
-//	uint16 slotImage;
-//	NLMISC::CEntityId owner;
-//	uint8 slot = 0;
-//	sint32 coord = 0;
-//	NLMISC::TGameCycle timeOnGround = 0;
-//	sint16 slotCount = 0;
-//	uint32 carrionSheetId = 0;
-//
-//	//NLMEMORY::CheckHeap (true);
-////	try
-////	{
-//		if ( characterSerialVersion >= 32 )
-//		{
-////			f.serial(_SlotImage);
-//			f.serial(slotImage);
-//		}
-//
-//		if( characterSerialVersion >= 17 )
-//		{
-//			// load item infos
-//			f.serial( _SheetId );
-//
-//
-///***/		string sheetString = _SheetId.toString();
-//
-////			f.serial( Owner );
-//			f.serial(owner);
-////			if( Owner != CEntityId::Unknown )
-//			if( owner != CEntityId::Unknown )
-//			{
-////				f.serial(Loc.Slot);
-//				f.serial(slot);
-//			}
-//			else
-//			{
-////				f.serial( Loc.Pos.X );
-////				f.serial( Loc.Pos.Y );
-////				f.serial( Loc.Pos.Z );
-//				f.serial(coord);
-//				f.serial(coord);
-//				f.serial(coord);
-//			}
-//			
-//			//NLMEMORY::CheckHeap (true);
-//
-////			f.serial( TimeOnTheGround );
-//			f.serial(timeOnGround);
-////			f.serial( SlotCount );
-//			f.serial(slotCount);
-////			f.serial( _CarrionSheetId );
-//			f.serial(carrionSheetId);
-//
-//			f.serial( _Destroyable );
-//			if ( characterSerialVersion >= 19 )
-//				f.serial(_Dropable);
-//			
-//			f.serial( _CreatorId );
-//			
-//			f.serial( _HP );
-//			f.serial( _Recommended );
-//
-//			if (_CraftParameters == NULL)
-//				_CraftParameters = new CItemCraftParameters();
-//			f.serial( *_CraftParameters );
-//
-//			if ( characterSerialVersion >= 55 )
-//				f.serial(_LostHPremains);
-//
-//			//NLMEMORY::CheckHeap (true);
-//			
-//			// serial rm used for craft item
-////			f.serialCont( _RmUsedForCraft );
-//			std::vector<CSheetId> RmUsedCraft;
-//			f.serialCont( RmUsedCraft );
-//
-//			// ANTIBUG : huge rm vector serialized !!!!
-////			if ( f.isReading() && _RmUsedForCraft.size() >= 1000 )
-////				_RmUsedForCraft.clear();
-//			
-//			//NLMEMORY::CheckHeap (true);
-//
-//			f.serial(_ClientInventoryPosition);
-//
-//			if( characterSerialVersion >= 20 )
-//			{
-//				f.serial( _SapLoad );
-//				f.serialCont( _Enchantment );
-//			}
-//
-//			// load children count
-//			uint32 childrenCount = 0; 
-//			f.serial( childrenCount );
-////			
-////			// load non null children count
-//			uint32 nonNullChildrenCount = 0;
-//			f.serial( nonNullChildrenCount );
-////
-////			//NLMEMORY::CheckHeap (true);
-////			
-//			bool isStack = false;
-//			if ( _SheetId == CSheetId("stack.sitem") )
-//			{
-//				// stack do not have NULL items
-//				isStack = true;
-//				if ( nonNullChildrenCount != childrenCount )
-//				{
-////					nlwarning("<CGameItem::load>char %s a stack contains NULL items! children: '%d' non null children: '%d'", Idc.toString().c_str(),childrenCount,nonNullChildrenCount);
-//					nlwarning("<CGameItem::load> A stack contains NULL items! children: '%d' non null children: '%d'", 
-//						childrenCount,
-//						nonNullChildrenCount);
-//				}
-//			}
-//			else
-//			{
-//				nlassertex(childrenCount == 0, ("Can't read old inventory item as item, must be read as inventory"));
-////				_Children.resize( childrenCount, NULL );
-//			}
-////			
-////			//NLMEMORY::CheckHeap (true);
-////
-//			uint32 i;
-//			for( i = 0; i < nonNullChildrenCount; ++i )
-//			{
-////				// load child index
-////				//NLMEMORY::CheckHeap (true);
-////
-//				uint32 index;
-//				f.serial( index );
-////				
-////				//NLMEMORY::CheckHeap (true);
-////
-////				// load child
-//				CGameItemPtr  item;
-//				item.newItem();
-////
-////				//NLMEMORY::CheckHeap (true);
-////				CEntityId id( RYZOMID::object, GameItemManager.getFreeItemIndice() );
-////				item->_Id = id;
-////				//NLMEMORY::CheckHeap (true);
-//				if( item!=NULL )
-//				{
-////					//NLMEMORY::CheckHeap (true);
-////					(*item)->load(f, Idc, characterSerialVersion);
-//					item->legacyLoad(f, characterSerialVersion, ownerPtr);
-////					//NLMEMORY::CheckHeap (true);
-//				}
-//				else
-//				{
-////					nlwarning("<CGameItem::load>char %s Can't allocate child item %d",Idc.toString().c_str(),i);
-//					nlwarning("<CGameItem::load>Can't allocate child item %d", i);
-//					return;
-//				}
-//
-//				if (i == 0)
-//				{
-//					// replace the current item with the first stacked item
-//					copyItem(item);
-//				}
-////				
-//				// delete this garbage item
-//				item.deleteItem();
-//
-////				//NLMEMORY::CheckHeap (true);
-////
-////				// add child in children
-////				if (isStack)
-////					_Children.push_back(item);
-////				else
-////				{
-////					if( index == ((uint32)-1) || (index >= _Children.size()) )
-////					{
-////						nlwarning("<CGameItem::load> load children item with bad index = %d (item number slots %d ), skip it...", index, _Children.size() );
-////						
-////						for( index = 0; index < _Children.size(); ++index )
-////						{
-////							if(_Children[index] == 0 ) break;
-////						}
-////					}
-////					if( index < _Children.size() )
-////					{
-////						_Children[index] = item;
-////					}
-////					else
-////					{
-////						nlwarning("<CGameItem::load> load children item with bad index = %d (item number slots %d ), skip it...", index, _Children.size() );
-////					}
-////				}
-////				
-////				//NLMEMORY::CheckHeap (true);
-////
-////				// set the parent
-////				(*item)->setParent( this );
-////				
-////				//NLMEMORY::CheckHeap (true);
-////
-////				// add item in manager
-////				GameItemManager.insertItem( item );
-////
-////
-////				if (getSheetId() == CSheetId("stack.sitem") && characterSerialVersion>=43 )
-////				{
-////					for (uint32 j=1;j<nonNullChildrenCount;++j)
-////					{
-////						CGameItemPtr copy =	_Children[0]->getCopy();
-////						if ( copy != NULL )
-////						{
-////							//_Children.push_back( copy );
-////							addChild(copy);
-////						}
-////					}
-////					break;
-////				}
-////
-////				//NLMEMORY::CheckHeap (true);
-//			}
-//
-//			// Set the stack size
-//			if (nonNullChildrenCount == 0)
-//				nonNullChildrenCount = 1; // ANTI-BUG: repair empty stacks... is it a good solution?
-//
-//			setStackSize(nonNullChildrenCount);
-//
-///*			// not sure about version number
-//			if( characterSerialVersion < 17 && characterSerialVersion > 13 )
-//			{
-//				f.serial(_ClientInventoryPosition);
-//			}
-//			//NLMEMORY::CheckHeap (true);
-//*/		}
-//		else // load old item format
-//		{
-//			//NLMEMORY::CheckHeap (true);
-//
-//			float dummy_f;
-//			uint16 dummy_uint16;
-//			uint32 dummy_uint32;
-//			bool dummy_bool;
-//
-//			//NLMEMORY::CheckHeap (true);
-//
-//			// load item infos
-//			f.serial( _SheetId );
-////			f.serial( Owner );
-//			f.serial( owner );
-////			if( Owner != CEntityId::Unknown )
-//			if( owner != CEntityId::Unknown )
-//			{
-////				f.serial(Loc.Slot);
-//				f.serial(slot);
-//			}
-//			else
-//			{
-////				f.serial( Loc.Pos.X );
-////				f.serial( Loc.Pos.Y );
-////				f.serial( Loc.Pos.Z );
-//				f.serial(coord);
-//				f.serial(coord);
-//				f.serial(coord);
-//			}
-//
-//			//NLMEMORY::CheckHeap (true);
-//
-//			if( characterSerialVersion >= 8 )
-//			{
-//				f.serial( dummy_f );
-//				f.serial( dummy_f );
-//				f.serial( dummy_f );
-//			}
-//
-//			//NLMEMORY::CheckHeap (true);
-//
-//			f.serial( dummy_uint16 ); //uint16
-//			_Recommended = dummy_uint16;
-//
-//			f.serial( _HP ); //uint32
-//		
-//			if( characterSerialVersion < 7 )
-//			{
-//				f.serial( dummy_uint16 );
-//			}
-//			else if( characterSerialVersion == 7 )
-//			{
-//				f.serial( dummy_f );
-//			}
-//			
-//			//NLMEMORY::CheckHeap (true);
-//
-//			if( characterSerialVersion < 8 )
-//			{
-//				f.serial( dummy_f );
-//			}
-//			f.serial( dummy_f );
-//
-//			//NLMEMORY::CheckHeap (true);
-//
-//			f.serial( dummy_uint16 );
-//			f.serial( dummy_uint16 );
-//			
-//			//NLMEMORY::CheckHeap (true);
-//
-//			if( characterSerialVersion < 8 )
-//			{
-//				f.serial( dummy_f );
-//			}
-//			f.serial( dummy_uint16 );
-//			
-//			f.serial( dummy_uint32 );
-//			f.serial( dummy_uint16 );
-//			f.serial( dummy_uint32 );
-//			f.serial( dummy_uint16 );
-//			f.serial( dummy_uint16 );
-//			f.serial( dummy_bool );
-//
-//			//NLMEMORY::CheckHeap (true);
-//
-//			vector< SProtection > dummy_protection;
-//			f.serialCont(dummy_protection);
-//			
-//			//NLMEMORY::CheckHeap (true);
-//
-//			f.serial( timeOnGround );
-//			f.serial( slotCount );
-//			uint8 col;
-//			f.serial( col );
-//			if( _CraftParameters )
-//				_CraftParameters->Color = col;
-//
-//			f.serial( carrionSheetId );
-//
-//			f.serial( _Destroyable );
-//
-//			f.serial( _CreatorId );
-//
-//			// load children count
-//			uint32 childrenCount = 0; 
-//			f.serial( childrenCount );
-//
-//			// load non null children count
-//			uint32 nonNullChildrenCount = 0;
-//			f.serial( nonNullChildrenCount );
-//
-//			//NLMEMORY::CheckHeap (true);
-//
-//			bool isStack = false;
-//			if ( _SheetId == CSheetId("stack.sitem") )
-//			{
-////				// stack do not have NULL items
-//				isStack = true;
-//				if ( nonNullChildrenCount != childrenCount )
-//				{
-////					nlwarning("<CGameItem::load>char %s a stack contains NULL items! children: '%d' non null children: '%d'",Idc.toString().c_str(),childrenCount,nonNullChildrenCount);
-//					nlwarning("<CGameItem::load> A stack contains NULL items! children: '%d' non null children: '%d'",
-//						childrenCount,
-//						nonNullChildrenCount);
-//				}
-//			}
-//			else
-//			{
-//				nlassertex(childrenCount == 0, ("Can't read old inventory item as item, must be read as inventory"));
-////				_Children.resize( childrenCount, NULL );
-//			}
-//
-//			//NLMEMORY::CheckHeap (true);
-//
-//			uint32 i;
-//			for( i = 0; i < nonNullChildrenCount; ++i )
-//			{
-//				// load child index
-//				uint32 index;
-//				f.serial( index );
-////
-////				//NLMEMORY::CheckHeap (true);
-////
-//				// load child
-//				CGameItemPtr  item;
-////
-////				//NLMEMORY::CheckHeap (true);
-////
-//				item.newItem();
-////				
-////				//NLMEMORY::CheckHeap (true);
-////				
-////				CEntityId id( RYZOMID::object, GameItemManager.getFreeItemIndice() );
-////				
-////				item->_Id = id;
-////				
-////				//NLMEMORY::CheckHeap (true);
-//				if( item!=NULL )
-//				{
-//					//NLMEMORY::CheckHeap (true);
-////					item->load(f, Idc, characterSerialVersion);
-//					item->legacyLoad(f, characterSerialVersion, ownerPtr);
-////					//NLMEMORY::CheckHeap (true);
-//				}
-//				else
-//				{
-////					nlwarning("<CGameItem::load>char %s Can't allocate child item %d",Idc.toString().c_str(),i);
-//					nlwarning("<CGameItem::load> Can't allocate child item %d", i);
-//					return;
-//				}
-////
-////				//NLMEMORY::CheckHeap (true);
-////
-//				if (i==0)
-//				{
-//					// copy first item into current item
-//					copyItem(item);
-//				}
-//
-//				item.deleteItem();
-////				// add child in children
-////				if (isStack)
-////					_Children.push_back(item);
-////				else
-////					_Children[index] = item;
-////
-////				//NLMEMORY::CheckHeap (true);
-////
-////				// set the parent
-////				(*item)->setParent( this );
-////
-////				//NLMEMORY::CheckHeap (true);
-////
-////				// add item in manager
-////				GameItemManager.insertItem( item );
-////
-////				if (getSheetId() == CSheetId("stack.sitem") && characterSerialVersion>=43 )
-////				{
-////					for (uint32 j=1;j<nonNullChildrenCount;++j)
-////					{
-////						CGameItemPtr copy =	_Children[0]->getCopy();
-////						if ( copy != NULL )
-////							_Children.push_back( copy );
-////					}
-////					break;
-////				}
-////				
-////			
-////				//NLMEMORY::CheckHeap (true);
-//			}
-//
-//			if (nonNullChildrenCount == 0)
-//				nonNullChildrenCount = 1; // ANTI-BUG: repair empty stacks... is it a good solution?
-//
-//			setStackSize(nonNullChildrenCount);
-//
-//			// the client position has been added with Character version 4, for older item, just init it wiht -1
-//			// we do this to keep compatibility with previous character backup version
-//			if (characterSerialVersion >= 4)
-//				f.serial(_ClientInventoryPosition);
-//			else
-//				_ClientInventoryPosition = -1;
-//
-//			//NLMEMORY::CheckHeap (true);
-//
-//			// serialize raw material used for craft item
-//			if( characterSerialVersion >= 10 )
-//			{
-////				f.serialCont( _RmUsedForCraft );
-//				std::vector<CSheetId> RmUsedCraft;
-//				f.serialCont( RmUsedCraft );
-//
-////				if ( f.isReading() && _RmUsedForCraft.size() >= 20 )
-////					_RmUsedForCraft.clear();
-//			}
-//			//NLMEMORY::CheckHeap (true);
-//		}
-////	}
-////	catch(const Exception &e)
-////	{
-////		nlwarning("<CGameItem::load> %s",e.what());
-////	}
-//
-//	// init form
-//	_Form = CSheets::getForm( _SheetId );
-//
-//	// patch tool HP for old saves
-//	if ( characterSerialVersion < 68 && _Form)
-//	{
-//		if ( _Form->Family == ITEMFAMILY::CRAFTING_TOOL	|| _Form->Family == ITEMFAMILY::HARVEST_TOOL )
-//			_HP = maxDurability();
-//	}
-//
-//
-//	// memory optimization for non craftable items
-//	if (_Form != NULL)
-//	{
-//		switch(_Form->Family) 
-//		{
-//			//craftable families, do nothing
-//		case ITEMFAMILY::ARMOR:
-//		case ITEMFAMILY::MELEE_WEAPON:
-//		case ITEMFAMILY::RANGE_WEAPON:
-//		case ITEMFAMILY::AMMO:
-//		case ITEMFAMILY::SHIELD:
-//		case ITEMFAMILY::JEWELRY:
-//		case ITEMFAMILY::CRAFTING_TOOL:
-//		case ITEMFAMILY::HARVEST_TOOL:
-//			break;
-//			// non craftable-> release craft parameters structure
-//		default:
-//			if (_CraftParameters != NULL)
-//			{
-//				delete _CraftParameters;
-//				_CraftParameters = NULL;
-//			}
-//		}
-//	}
-//
-//	// compute item worn state
-//	computeItemWornState();
-//
-//	// adapt the old slotimage method to new ref method and auto equip item if needed
-//	if ( f.isReading() && slotImage != 0xFFFF && ownerPtr != NULL)
-//	{
-//		INVENTORIES::TInventory refInventoryId;
-//		if ( slotImage < 2 )
-//		{
-//			refInventoryId = INVENTORIES::handling;
-//			_RefInventorySlot = slotImage;
-//			nlinfo("Convert item %s, had slot image %u, is now in HAND, slot %u", _SheetId.toString().c_str(),slotImage,_RefInventorySlot);
-//		}
-//		else
-//		{
-//			refInventoryId = INVENTORIES::equipment;
-//			_RefInventorySlot = slotImage - 2;
-//			nlinfo("Convert item %s, had slot image %u, is now in EQUIPMENT, slot %u", _SheetId.toString().c_str(),slotImage,_RefInventorySlot);
-//		}
-//
-//		const uint32 slot = _RefInventorySlot;
-//		_RefInventorySlot = CInventoryBase::INVALID_INVENTORY_SLOT;
-//		const CInventoryPtr inv = ownerPtr->getInventory(refInventoryId);
-//		if (inv)
-//		{
-//			CGameItemPtr itemPtr(this);
-//			inv->insertItem(itemPtr, slot);
-//		}
-//		else
-//			_RefInventorySlot = CInventoryBase::INVALID_INVENTORY_SLOT;
-//			
-//		//ownerPtr->equipCharacter(refInventoryId, slot, getInventorySlot());
-//	}
-//	else
-//		_RefInventorySlot = CInventoryBase::INVALID_INVENTORY_SLOT;
-//
-////	if ( _IsOnTheGround )
-////		nlwarning("<CGameItem load> loading an object on the ground should never happen sheet: %s, id: %s ",_SheetId.toString().c_str(), _ItemId.toString().c_str() );
-//
-//	//NLMEMORY::CheckHeap (true);
-//} // load //
 
 
 //-----------------------------------------------
