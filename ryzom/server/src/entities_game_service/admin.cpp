@@ -4924,18 +4924,14 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 
 		if (new_item != NULL) // When the item is stacked, it's deleted by addItemToInventory. Need be checked again to prevent crash of egs
 		{
-			ucstring customValue;
-
 			if (command_args.size() >= 6 && command_args[5] != "*")
 			{
-				customValue.fromUtf8(command_args[5]);
-				new_item->setCustomName(customValue);
+				new_item->setPhraseId(command_args[5], true);
 			}
 
 			if (command_args.size() >= 7 && command_args[6] != "*")
 			{
-				customValue.fromUtf8(command_args[6]);
-				new_item->setCustomText(customValue);
+				new_item->setPhraseId(command_args[6], true);
 			}
 
 			if (command_args.size() >= 8)

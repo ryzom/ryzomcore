@@ -672,6 +672,12 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 			stableAlias = stablePlace->getAlias();\
 	}\
 
+#ifdef RYZOM_FORGE
+#define PROP_PET_ANIMAL_CUSTOM_NAME() PROP2(CustomName, string, CustomName, CustomName = val)
+#else
+#define PROP_PET_ANIMAL_CUSTOM_NAME()
+#endif
+
 #define PERSISTENT_DATA\
 	FLAG0(CLEAR,clear())\
 	PROP2(TicketPetSheetId,CSheetId,TicketPetSheetId,\
@@ -700,7 +706,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	LPROP(bool,IsMounted,if(IsMounted))\
 	PROP(bool,IsTpAllowed)\
 	PROP(TSatiety,Satiety)\
-	/*PROP2(CustomName, ucstring, CustomName, CustomName = val)*/\
+	PROP_PET_ANIMAL_CUSTOM_NAME()\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
@@ -1329,24 +1335,18 @@ private:
 	}\
 	postApply((INVENTORIES::TInventory) RefInventoryId, applyArgs.Owner);\
 
-#ifdef RYZOM_FORGE_PET_NAME
-#define PD_CUSTOM_NAME_PROP2() PROP2(_CustomName,					ucstring,	_CustomName,				_CustomName=val)
-#else
-#define PD_CUSTOM_NAME_PROP2()
-#endif
-
 #define PERSISTENT_DATA\
 	FLAG0(CLEAR,clear())\
 	PROP2(_ItemId,						uint64,		_ItemId.getRawId(),			_ItemId = INVENTORIES::TItemId(val))\
 	PROP2(_SheetId,						CSheetId,	_SheetId,					_SheetId=val)\
-/*	PROP2(_LocSlot,						uint32,		_InventorySlot,				_InventorySlot=val)*/\
 	PROP2(_LocSlot,						uint32,		_InventorySlot,				applyArgs.InventorySlot=val)\
 	PROP2(_HP,							uint32,		_HP,						_HP=val)\
 	PROP2(_Recommended,					uint32,		_Recommended,				_Recommended=val)\
 	PROP2(_CreatorId,					CEntityId,	_CreatorId,					_CreatorId=val)\
 	PROP2(_PhraseId,					string,		getPhraseId(),					setPhraseId(val))\
+	LPROP2(_PhraseLiteral,				bool,		if (_PhraseLiteral),			_PhraseLiteral,					_PhraseLiteral=val)\
 	LSTRUCT2(_CraftParameters,						if (_CraftParameters != NULL),	_CraftParameters->store(pdr),	_CraftParameters = new CItemCraftParameters; _CraftParameters->apply(pdr))\
-	LPROP2(_SlotImage,					uint16,		if (0),		0xffff,				slotImage=val)\
+	LPROP2(_SlotImage,					uint16,		if (0),						0xffff,								slotImage=val) /* Very old version compatibility */ \
 	LPROP2(_SapLoad,					uint32,		if (_SapLoad!=0),			_SapLoad,							_SapLoad=val)\
 	LPROP2(_Dropable,					bool,		if (!_Dropable),			_Dropable,							_Dropable=val)\
 	LPROP2(_Destroyable,				bool,		if (!_Destroyable),			_Destroyable,						_Destroyable=val)\
@@ -1362,11 +1362,11 @@ private:
 	LPROP2(_RequiredCharacLevel,		uint16,		if (_RequiredCharacLevel!=0),_RequiredCharacLevel,				_RequiredCharacLevel=val)\
 	STRUCT_VECT(_TypeSkillMods)\
 	LPROP_VECT(CSheetId, _Enchantment, VECT_LOGIC(_Enchantment) if (_Enchantment[i]!=CSheetId::Unknown))\
-	PROP2(_CustomText,					ucstring,	ucstring::makeFromUtf8(getCustomText()),				setCustomText(val.toUtf8())) /* TODO: UTF-8 (file serial) */ \
-	PD_CUSTOM_NAME_PROP2()\
+	PROP2(_CustomText,					string,									getCustomText(),					setCustomText(val))\
+	LPROP2(_CustomName,					string,		if (false),					string(),							setPhraseId(val, true)) /* Ryzom Forge compatibility, replaced by _PhraseLiteral */ \
 	PROP(bool, _Movable)\
 	PROP(bool, _UnMovable)\
-	PROP(bool, _LockedByOwner)\
+	PROP(bool, _LockedByOwner) /* Ryzom Forge compatibility */\
 	
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

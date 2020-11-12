@@ -790,7 +790,7 @@ void CGameItem::ctor( const CSheetId& sheetId, uint32 recommended, bool destroya
 //	SlotCount = slotCount;
 	_Recommended = recommended;
 	_TotalSaleCycle = 0;
-	_PetIndex = MAX_INVENTORY_ANIMAL;
+	_PetIndex = ~0;
 
 	_Form = CSheets::getForm( sheetId );
 	if (_Form)
@@ -1214,11 +1214,22 @@ CGameItemPtr CGameItem::getItemCopy()
 //-----------------------------------------------
 uint32 CGameItem::sendNameId(CCharacter * user)
 {
-	nlassert( _Form != 0 );
-	if( _Form->Family != ITEMFAMILY::SCROLL_R2 )
+	nlassert(_Form != 0);
+	if (_Form->Family != ITEMFAMILY::SCROLL_R2)
 	{
 		if (_PhraseId && !_PhraseId->empty())
-			return STRING_MANAGER::sendStringToClient(user->getEntityRowId(), *_PhraseId, TVectorParamCheck());
+		{
+			if (_PhraseLiteral)
+			{
+				SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+				params[0].Literal = *_PhraseId;
+				return STRING_MANAGER::sendStringToClient(user->getEntityRowId(), "LITERAL", params);
+			}
+			else
+			{
+				return STRING_MANAGER::sendStringToClient(user->getEntityRowId(), *_PhraseId, TVectorParamCheck());
+			}
+		}
 	}
 	else
 	{
@@ -1248,17 +1259,14 @@ void CGameItem::clear()
 	_CraftParameters = NULL;
 
 	_StackSize = 1;
-//	_IsOnTheGround = false;
+	// _IsOnTheGround = false;
 	_LockCount = 0;
 
 	_CreatorId = NLMISC::CEntityId::Unknown;
-//	TimeOnTheGround = 0;
-//	SlotCount = 0;
 	_Destroyable = true;
 	_Dropable = true;
-//	_SlotImage = 0xFFFF;
+	// _SlotImage = 0xFFFF;
 	_LatencyEndDate = 0;
-//	_Parent = NULL;
 	_Inventory = NULL;
 	_InventorySlot = INVENTORIES::INVALID_INVENTORY_SLOT;
 	_Form = NULL;
@@ -1284,6 +1292,7 @@ void CGameItem::clear()
 	_TypeSkillMods.clear();
 	_PhraseId = NULL;
 	_CustomText = NULL;
+	_PhraseLiteral = false;
 }
 
 void CGameItem::setStackSize(uint32 size)

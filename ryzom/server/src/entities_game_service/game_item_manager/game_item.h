@@ -371,7 +371,7 @@ public :
 	void clear();
 
 	/// send the item name Id to the specified player, and return the associated text id. Return 0 if the item has no text id
-	uint32 sendNameId(CCharacter * user);
+	uint32 sendNameId(CCharacter *user);
 
 	/// Delete an item in the sub item list
 //	void deleteChildItem(uint index);
@@ -484,7 +484,8 @@ public :
 
 	/// accessors to the item phrase
 	const std::string &getPhraseId() const { static const std::string empty; return _PhraseId ? *_PhraseId : empty; }
-	void setPhraseId(const std::string &str) { if (!_PhraseId) _PhraseId = new std::string(); *_PhraseId = str; }
+	bool isPhraseLiteral() const { return _PhraseLiteral; }
+	void setPhraseId(const std::string &str, bool literal = false) { if (!_PhraseId) _PhraseId = new std::string(); *_PhraseId = str; _PhraseLiteral = literal; }
 
 	// return the enchantment value to be displayed in the client
 	uint16 getClientEnchantValue() const;
@@ -695,11 +696,6 @@ public :
 	uint8 getPetIndex() const { return _PetIndex; }
 	void setPetIndex(uint8 val) { _PetIndex = val; }
 
-#ifdef RYZOM_FORGE_PET_NAME
-	ucstring getCustomName() const { return _CustomName; }
-	void setCustomName(ucstring val) { _CustomName = val; }
-#endif
-
 protected:
 	friend class CFaberPhrase;
 	// set Default Color (for craft only)
@@ -710,15 +706,6 @@ protected:
 
 	/// set link information between item and reference inventory (used by CRefInventory)
 	void setRefInventory(const CInventoryPtr &inv, uint32 slot);
-
-	/// The inventory that contains this item (NULL if none)
-	CInventoryPtr	_Inventory;
-	/// The inventory that reference this item (NULL if none)
-	CInventoryPtr	_RefInventory;
-	/// The slot inside the inventory
-	uint32			_InventorySlot;
-	/// The slot inside the reference inventory
-	uint32			_RefInventorySlot;
 
 private:
 
@@ -805,14 +792,6 @@ private:
 //	void ctor( const NLMISC::CEntityId& id, const NLMISC::CSheetId& sheetId, uint32 recommended, sint16 slotCount, bool destroyable , bool dropable);
 	void ctor( const NLMISC::CSheetId& sheetId, uint32 recommended, bool destroyable , bool dropable);
 
-	/**
-	 * pseudo Destructor
-	 */
-	//void dtor();
-
-	/// Copy all the item info and parameters from model into this
-//	void copyItem(const CGameItemPtr &model);
-
 	// Compute required level (skills and charac) for wearing item
 	void computeRequiredLevel();
 
@@ -825,48 +804,25 @@ private:
 	// Recompute the Requirement from Old System (old values for old items)
 	void computeRequirementFromOldSystem();
 
-public:
-	/// owner id (an item or the entity and the inventory id if root item (Parent=NULL))
-//	NLMISC::CEntityId Owner;
-
-//	union TLocation
-//	{
-//		uint32 Slot;
-//		struct CItemPos
-//		{
-//			sint32 X;
-//			sint32 Y;
-//			sint32 Z;
-//		};
-//		CItemPos Pos;
-//	};
-//	/// time elapsed since the item is on the ground
-//	NLMISC::TGameCycle TimeOnTheGround;
-
-	/// max slot count
-//	sint16 SlotCount;
-
-	/// location
-//	TLocation Loc;
+protected:
+	/// The inventory that contains this item (NULL if none)
+	CInventoryPtr	_Inventory;
+	/// The inventory that reference this item (NULL if none)
+	CInventoryPtr	_RefInventory;
+	/// The slot inside the inventory
+	uint32			_InventorySlot;
+	/// The slot inside the reference inventory
+	uint32			_RefInventorySlot;
 
 private:
 	/// Item unique id
 	INVENTORIES::TItemId	_ItemId;
-	/// item id
-//	NLMISC::CEntityId	_ItemId;
 	/// looter id of the character currently looting this item (for items on the ground only)
 	NLMISC::CEntityId	_Looter;
 	/// sheet ref
 	NLMISC::CSheetId	_SheetId;
 	/// Item stack size
 	uint32				_StackSize;
-	/// carrion sheet ref
-//	uint32				_CarrionSheetId;
-	/// children
-//	std::vector<CGameItemPtr> _Children;
-	/// pointer on the parent item (NULL if no parent)
-//	CGameItemPtr 		_Parent;
-//	CInventoryPtr		_Inventory;
 
 	/// Recommended skill for use
 	uint32				_Recommended;
@@ -889,7 +845,7 @@ private:
 	/// Vector of CSheetId used for craft this item
 //	std::vector< NLMISC::CSheetId > _RmUsedForCraft;
 	/// vector of sheetId of CStaticBrick define spell of enchanted item
-	std::vector< NLMISC::CSheetId > _Enchantment;
+	std::vector<NLMISC::CSheetId> _Enchantment;
 
 	/// pointer on the associated static form
 	const CStaticItem*	_Form;
@@ -900,10 +856,6 @@ private:
 	std::vector<CTypeSkillMod>	_TypeSkillMods;
 
 	NLMISC::CDeepPtr<std::string> _CustomText;
-#ifdef RYZOM_FORGE_PET_NAME
-	// FIXME: Reuse _PhraseId string and add a m_Literal flag
-	ucstring            _CustomName;
-#endif
 
 	/// tick when the proc will be available again
 	NLMISC::TGameCycle	_LatencyEndDate;
@@ -924,6 +876,9 @@ private:
 	/// whether the item has any skill requirements
 	bool				_HasPrerequisit;
 	bool				_UseNewSystemRequirement;
+
+	/// phrase id is a literal, not a phrase
+	bool				_PhraseLiteral;
 
 	bool                _LockedByOwner;
 	bool                _UnMovable;
