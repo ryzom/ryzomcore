@@ -1039,7 +1039,7 @@ inline CGameItemPtr::CGameItemPtr(const CGameItemPtr &other) : m_Idx(other.m_Idx
 }
 
 // ctor	- initialise from a CGameItem*
-inline CGameItemPtr::CGameItemPtr(const CGameItem *item) : m_Idx(static_cast<const CGameItemEntry *>(item)->VectorIdx)
+inline CGameItemPtr::CGameItemPtr(const CGameItem *item) : m_Idx(item ? static_cast<const CGameItemEntry *>(item)->VectorIdx : 0)
 {
 	incRef();
 }

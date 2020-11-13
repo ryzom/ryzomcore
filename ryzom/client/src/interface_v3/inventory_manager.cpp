@@ -3148,13 +3148,7 @@ class CHandlerLockInvItem : public IActionHandler
 			return;
 		}
 
-		string lock = "1";
-		if (item->getLockedByOwner())
-		{
-			lock = "0";
-		}
-
-		uint32 slot = item->getIndexInDB();
+		uint16 slot = (uint16)item->getIndexInDB();
 		uint32 inv = item->getInventoryIndex();
 		INVENTORIES::TInventory inventory = INVENTORIES::UNDEFINED;
 		inventory = (INVENTORIES::TInventory)(inv);
@@ -3162,7 +3156,22 @@ class CHandlerLockInvItem : public IActionHandler
 		{
 			return;
 		}
-		NLMISC::ICommand::execute("a lockItem " + INVENTORIES::toString(inventory) + " " + toString(slot) + " " + lock, g_log);
+
+		bool lock = !item->getLockedByOwner();
+		if (lock) item->setItemResaleFlag(BOTCHATTYPE::ResaleKOLockedByOwner);
+		// else wait for proper state
+
+		CBitMemStream out;
+		if(GenericMsgHeaderMngr.pushNameToStream("ITEM:LOCK", out))
+		{
+			out.serialShortEnum(inventory);
+			out.serial(slot);
+			out.serial(lock);
+
+			NetMngr.push(out);
+		}
+		else
+			nlwarning("mainLoop : unknown message name : '%s'", "ITEM:RENAME");
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerLockInvItem, "lock_inv_item" );

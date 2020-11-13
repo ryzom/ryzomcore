@@ -49,7 +49,7 @@ NL_INSTANCE_COUNTER_IMPL(CGameItem);
 // singleton data
 
 CGameItemVector CGameItem::_Items;
-uint32 CGameItem::_FirstFreeItem = 1; // Item 0 is invalid!
+uint32 CGameItem::_FirstFreeItem;
 #if 0
 uint32 CGameItem::_BugTestCounter;
 #endif
@@ -1210,6 +1210,7 @@ CGameItemPtr CGameItem::getItemCopy()
 	item->_LockedByOwner = false;
 	item->_Movable = false;
 	item->_UnMovable = false;
+	item->_AccessGrade = DefaultAccessGrade;
 
 	// item->_StackSize = 1;
 	// item->_CreatorId = CEntityId::Unknown;
@@ -1240,7 +1241,7 @@ uint32 CGameItem::sendNameId(CCharacter * user)
 			if (_PhraseLiteral)
 			{
 				SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
-				params[0].Literal = *_PhraseId;
+				params[0].Literal = ucstring::makeFromUtf8(*_PhraseId); // FIXME: UTF-8 (serial)
 				return STRING_MANAGER::sendStringToClient(user->getEntityRowId(), "LITERAL", params);
 			}
 			else
@@ -1306,6 +1307,8 @@ void CGameItem::clear()
 	_LockedByOwner = false;
 	_Movable = false;
 	_UnMovable = false;
+
+	_AccessGrade = DefaultAccessGrade;
 
 	_TypeSkillMods.clear();
 	_PhraseId = NULL;
@@ -1735,7 +1738,7 @@ CGameItem * CGameItem::getItem(uint idx)
 {	
 	BOMB_IF( !idx, "Attempt to access a null item pointer", return &_Items[0] );
 	BOMB_IF( idx>=_Items.size(), "Attempt to access an item beyond end of item vector", return &_Items[0] );
-	BOMB_IF( _Items[idx].AllocatorNext>=0, NLMISC::toString("Attempt to access an item that is not allocated or has been freed (idx: %d)",idx), return &_Items[0] );
+	BOMB_IF( _Items[idx].AllocatorNext > 0, NLMISC::toString("Attempt to access an item that is not allocated or has been freed (idx: %d)",idx), return &_Items[0] );
 	return &_Items[idx];
 }
 
@@ -1745,6 +1748,17 @@ CGameItem * CGameItem::getItem(uint idx)
 //-----------------------------------------------
 CGameItem *CGameItem::newItem()
 {
+	if (!_FirstFreeItem)
+	{
+		// item 0 is the null item
+		nlassert(!_Items.size());
+		_Items.extend();
+		CGameItemEntry &nullItem = _Items[0];
+		nlassert(nullItem.AllocatorNext == 1);
+		_FirstFreeItem = 1;
+		nullItem.AllocatorNext = 0;
+	}
+
 	// NOTE
 	// the following assert is very important as the rest of this algorithm depends on this condition being met
 	nlassert(_FirstFreeItem <= _Items.size());

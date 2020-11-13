@@ -167,8 +167,8 @@
     <leaf name="USE_ITEM" sendto="EGS" format="u16" description="client wants to use teleport in the specified bag slot or consume an item to trigger its effect" />
     <leaf name="STOP_USE_XP_CAT" sendto="EGS" format="b" description="client wants to stop using xp catalyser" />
     <leaf name="LOCK" sendto="EGS" format="u8 u16 b" description="lock or unlock an item. inventory, slot, lock" />
-    <leaf name="RENAME" sendot="EGS" format="u8 u16 b s" description="change an item name to a phrase or literal. inventory, slot, literal, name" />
-    <leaf name="WRITE" sendot="EGS" format="u8 u16 s" description="wrrite a crafter's message. inventory, slot, text" />
+    <leaf name="RENAME" sendto="EGS" format="u8 u16 b s" description="change an item name to a phrase or literal. inventory, slot, literal, name" />
+    <leaf name="WRITE" sendto="EGS" format="u8 u16 s" description="wrrite a crafter's message. inventory, slot, text" />
   </branch>
   <branch name="TP">
     <leaf name="RESPAWN" sendto="EGS" format="" description="teleport the player to his respawn point" />

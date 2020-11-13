@@ -1364,10 +1364,10 @@ private:
 	LPROP_VECT(CSheetId, _Enchantment, VECT_LOGIC(_Enchantment) if (_Enchantment[i]!=CSheetId::Unknown))\
 	PROP2(_CustomText,					string,									getCustomText(),					setCustomText(val))\
 	LPROP2(_CustomName,					string,		if (false),					string(),							setPhraseIdInternal(val, true)) /* Ryzom Forge compatibility, replaced by _PhraseLiteral */ \
-	PROP(bool, _Movable)\
-	PROP(bool, _UnMovable)\
-	PROP(bool, _LockedByOwner)\
-	LPROP2(_AccessGrade,				string,		if (_AccessGrade != DefaultAccessGrade), CGuildGrade::toString(_AccessGrade), _AccessGrade = CGuildGrade::fromString(val))\
+	LPROP(bool, _Movable, if (!_Movable))\
+	LPROP(bool, _UnMovable, if (!_UnMovable))\
+	LPROP(bool, _LockedByOwner, if (!_LockedByOwner))\
+	LPROP2(_AccessGrade,				string,		if (_AccessGrade != DefaultAccessGrade), CGuildGrade::toString(_AccessGrade), _AccessGrade = CGuildGrade::fromString(val); if (_AccessGrade == CGuildGrade::Unknown) _AccessGrade = DefaultAccessGrade)\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
