@@ -26,6 +26,9 @@ namespace ITEM_TYPE
 	// Mode
 	// nb : sell filter uses two 64b database values to build a bitfield, so the item type limit is 128 for now
 	enum TItemType
+#ifdef NL_CPP14
+		: uint8
+#endif
 	{
 		DAGGER,
 		SWORD,

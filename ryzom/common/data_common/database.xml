@@ -216,7 +216,8 @@
     <leaf name="ENCHANT"              type="I10" />
     <leaf name="RM_CLASS_TYPE"        type="I3" />
     <leaf name="RM_FABER_STAT_TYPE"   type="I5" />
-    <leaf name="PREREQUISIT_VALID"    type="I11" />
+    <leaf name="PREREQUISIT_VALID"    type="I1" />
+    <leaf name="PRICE"                type="I32" />
     <leaf name="RESALE_FLAG"          type="I2" />
     <leaf name="WORNED"               type="I1" />
     <leaf name="INFO_VERSION"         type="I8" />
@@ -241,13 +242,14 @@
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
         <!-- <leaf name="LOCKED"               type="I10" /> -->
-        <!-- <leaf name="ACCESS"               type="I2" /> -->
+        <!-- <leaf name="ACCESS"               type="I2" /> --> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
         <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
         <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
         <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
         <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
         <leaf name="PREREQUISIT_VALID"    type="I1" />
+        <!-- <leaf name="PRICE"                type="I32" /> -->
         <!-- <leaf name="RESALE_FLAG"          type="I2" /> --> <!-- TBotChatResaleFlag -->
         <leaf name="WORNED"               type="I1" /> <!-- true if item is worned (show a red cross) -->
         <leaf name="INFO_VERSION"         type="I8" />
@@ -261,13 +263,14 @@
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
         <!-- <leaf name="LOCKED"               type="I10" /> -->
-        <!-- <leaf name="ACCESS"               type="I2" /> -->
+        <!-- <leaf name="ACCESS"               type="I2" /> --> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
         <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
         <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
         <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
         <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
         <leaf name="PREREQUISIT_VALID"    type="I1" />
+        <!-- <leaf name="PRICE"                type="I32" /> -->
         <!-- <leaf name="RESALE_FLAG"          type="I2" /> --> <!-- TBotChatResaleFlag -->
         <leaf name="WORNED"               type="I1" /> <!-- true if item is worned (show a red cross) -->
         <leaf name="INFO_VERSION"         type="I8" />
@@ -293,13 +296,14 @@
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
         <leaf name="LOCKED"               type="I10" />
-        <leaf name="ACCESS"               type="I2" />
+        <leaf name="ACCESS"               type="I2" /> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
         <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
         <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
         <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
         <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
         <leaf name="PREREQUISIT_VALID"    type="I1" />
+        <leaf name="PRICE"                type="I32" />
         <leaf name="RESALE_FLAG"          type="I2" /> <!-- TBotChatResaleFlag -->
         <leaf name="WORNED"               type="I1" /> <!-- true if item is worned (show a red cross) -->
         <leaf name="INFO_VERSION"         type="I8" />
@@ -314,13 +318,14 @@
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
         <leaf name="LOCKED"               type="I10" />
-        <leaf name="ACCESS"               type="I2" />
+        <leaf name="ACCESS"               type="I2" /> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
         <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
         <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
         <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
         <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
         <leaf name="PREREQUISIT_VALID"    type="I1" />
+        <leaf name="PRICE"                type="I32" />
         <leaf name="RESALE_FLAG"          type="I2" /> <!-- TBotChatResaleFlag -->
         <leaf name="WORNED"               type="I1" /> <!-- true if item is worned (show a red cross) -->
         <leaf name="INFO_VERSION"         type="I8" />
@@ -345,13 +350,14 @@
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
         <!-- <leaf name="LOCKED"               type="I10" /> -->
-        <!-- <leaf name="ACCESS"               type="I2" /> -->
+        <!-- <leaf name="ACCESS"               type="I2" /> --> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
         <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
         <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
         <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
         <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
         <leaf name="PREREQUISIT_VALID"    type="I1" />
+        <!-- <leaf name="PRICE"                type="I32" /> -->
         <!-- <leaf name="RESALE_FLAG"          type="I2" /> --> <!-- TBotChatResaleFlag -->
         <leaf name="WORNED"               type="I1" /> <!-- true if item is worned (show a red cross) -->
         <leaf name="INFO_VERSION"         type="I8" />
@@ -371,13 +377,14 @@
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
         <!-- <leaf name="LOCKED"               type="I10" /> -->
-        <!-- <leaf name="ACCESS"               type="I2" /> -->
+        <!-- <leaf name="ACCESS"               type="I2" /> --> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
         <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
         <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
         <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
         <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
         <leaf name="PREREQUISIT_VALID"    type="I1" />
+        <!-- <leaf name="PRICE"                type="I32" /> -->
         <!-- <leaf name="RESALE_FLAG"          type="I2" /> --> <!-- TBotChatResaleFlag -->
         <!-- <leaf name="WORNED"               type="I1" /> --> <!-- true if item is worned (show a red cross) -->
         <leaf name="INFO_VERSION"         type="I8" />
@@ -407,14 +414,15 @@
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
         <leaf name="LOCKED"               type="I10" />
-        <leaf name="ACCESS"               type="I2" />
+        <leaf name="ACCESS"               type="I2" /> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
         <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
         <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
         <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
         <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
         <leaf name="PREREQUISIT_VALID"    type="I1" />
-        <leaf name="RESALE_FLAG"          type="I2" /> <!-- TBotChatResaleFlag -->
+        <!-- <leaf name="PRICE"                type="I32" /> -->
+        <!-- <leaf name="RESALE_FLAG"          type="I2" /> --> <!-- TBotChatResaleFlag -->
         <leaf name="WORNED"               type="I1" /> <!-- true if item is worned (show a red cross) -->
         <leaf name="INFO_VERSION"         type="I8" />
       </branch>
@@ -538,13 +546,14 @@
       <leaf name="QUANTITY"             type="I10" />
       <leaf name="USER_COLOR"           type="I3" />
       <!-- <leaf name="LOCKED"               type="I10" /> -->
-      <!-- <leaf name="ACCESS"               type="I2" /> -->
+      <!-- <leaf name="ACCESS"               type="I2" /> --> <!-- TGuildGrade access grade -->
       <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
       <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
       <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
       <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
       <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
       <leaf name="PREREQUISIT_VALID"    type="I1" />
+      <!-- <leaf name="PRICE"                type="I32" /> -->
       <!-- <leaf name="RESALE_FLAG"          type="I2" /> --> <!-- TBotChatResaleFlag -->
       <!-- <leaf name="WORNED"               type="I1" /> --> <!-- true if item is worned (show a red cross) -->
       <leaf name="INFO_VERSION"         type="I8" />
@@ -713,14 +722,15 @@
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
         <leaf name="LOCKED"               type="I10" />
-        <leaf name="ACCESS"               type="I2" />
+        <leaf name="ACCESS"               type="I2" /> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
         <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
         <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
         <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
         <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
         <leaf name="PREREQUISIT_VALID"    type="I1" />
-        <leaf name="RESALE_FLAG"          type="I2" /> <!-- TBotChatResaleFlag -->
+        <!-- <leaf name="PRICE"                type="I32" /> -->
+        <!-- <leaf name="RESALE_FLAG"          type="I2" /> --> <!-- TBotChatResaleFlag -->
         <leaf name="WORNED"               type="I1" /> <!-- true if item is worned (show a red cross) -->
         <leaf name="INFO_VERSION"         type="I8" />
       </branch>

@@ -34,6 +34,7 @@
 #include "game_share/type_skill_mod.h"
 #include "game_share/resistance_type.h"
 #include "game_share/skills.h"
+#include "game_share/guild_grade.h"
 
 #include "egs_log_filter.h"
 #include "player_inventory.h"
@@ -442,7 +443,7 @@ public :
 	// get maximum piercing protection
 	uint32 maxPiercingProtection() const;
 	// get color
-	uint8 color() const { return _CraftParameters == 0 ? 1 : _CraftParameters->Color; }
+	uint8 color() const { return _CraftParameters == 0 ? DefaultColor : _CraftParameters->Color; }
 
 	// get one of the three possible protection, legal protection number are 1,2 or 3
 	void magicProtection(uint32 protectionNumber, PROTECTION_TYPE::TProtectionType& protectionType, uint32& protectionValue) const;
@@ -659,6 +660,8 @@ public :
 
 	inline bool getLockedByOwner() const { return _LockedByOwner; }
 	void setLockedByOwner(bool value);
+	inline EGSPD::CGuildGrade::TGuildGrade getAccessGrade() const { return _AccessGrade; }
+	void setAccessGrade(EGSPD::CGuildGrade::TGuildGrade value);
 
 	inline bool getMovable() const { return _Movable; }
 	inline void setMovable(bool value) { _Movable = value; }
@@ -699,7 +702,7 @@ public :
 protected:
 	friend class CFaberPhrase;
 	// set Default Color (for craft only)
-	void setDefaultColor() { if( _CraftParameters ) _CraftParameters->Color = 1; }
+	void setDefaultColor() { if( _CraftParameters ) _CraftParameters->Color = DefaultColor; }
 
 	/// set link information between item and container inventory (used by CInventoryBase)
 	void setInventory(const CInventoryPtr &inv, uint32 slot);
@@ -866,13 +869,15 @@ private:
 	uint32				_LockCount;
 
 	// required skill
-	SKILLS::ESkills		_RequiredSkill;
-	SKILLS::ESkills		_RequiredSkill2;
-	CHARACTERISTICS::TCharacteristics	_RequiredCharac;
 	uint16				_RequiredSkillLevel;
 	uint16				_RequiredSkillLevel2;
 	/// min required stat level and required stat
 	uint16				_RequiredCharacLevel;
+	// required skill
+	SKILLS::ESkills		_RequiredSkill;
+	SKILLS::ESkills		_RequiredSkill2;
+	/// min required stat level and required stat
+	CHARACTERISTICS::TCharacteristics	_RequiredCharac;
 	/// whether the item has any skill requirements
 	bool				_HasPrerequisit;
 	bool				_UseNewSystemRequirement;
@@ -881,6 +886,8 @@ private:
 	bool				_PhraseLiteral;
 
 	bool                _LockedByOwner;
+	EGSPD::CGuildGrade::TGuildGrade _AccessGrade;
+
 	bool                _UnMovable;
 	bool                _Movable;
 	uint8               _PetIndex;
@@ -891,6 +898,10 @@ private:
 	bool				_Dropable;
 	// true if the item is on the ground
 	//	bool				_IsOnTheGround;
+
+public:
+	static const EGSPD::CGuildGrade::TGuildGrade DefaultAccessGrade = EGSPD::CGuildGrade::HighOfficer;
+	static const uint8 DefaultColor = 1;
 
 };
 

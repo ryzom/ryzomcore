@@ -1071,6 +1071,14 @@ void CCharacterInvView::updateClientSlot(uint32 slot, const CGameItemPtr item)
 		{
 			resaleFlag = BOTCHATTYPE::ResaleKOLockedByOwner;
 		}
+		else if (item->durability() == item->maxDurability())
+		{
+			resaleFlag = BOTCHATTYPE::ResaleOk;
+		}
+		else
+		{
+			resaleFlag = BOTCHATTYPE::ResaleKOBroken;
+		}
 
 		const INVENTORIES::TItemId &itemId = item->getItemId();
 
@@ -1079,9 +1087,8 @@ void CCharacterInvView::updateClientSlot(uint32 slot, const CGameItemPtr item)
 		itemSlot.setItemProp( INVENTORIES::Quality, item->quality() );
 		itemSlot.setItemProp( INVENTORIES::Quantity, item->getStackSize() );
 		itemSlot.setItemProp( INVENTORIES::UserColor, item->color() );
-		itemSlot.setItemProp( INVENTORIES::CreateTime, itemId.getCreateTime() );
-		itemSlot.setItemProp( INVENTORIES::Serial, itemId.getSerialNumber() );
 		itemSlot.setItemProp( INVENTORIES::Locked, item->getLockCount() );
+		itemSlot.setItemProp( INVENTORIES::Access, item->getAccessGrade() );
 		itemSlot.setItemProp( INVENTORIES::Weight, item->weight() / 10 );
 		itemSlot.setItemProp( INVENTORIES::NameId, item->sendNameId(getCharacter()) );
 		itemSlot.setItemProp( INVENTORIES::Enchant, item->getClientEnchantValue() );

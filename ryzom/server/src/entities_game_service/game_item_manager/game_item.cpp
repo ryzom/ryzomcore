@@ -1155,6 +1155,15 @@ void CGameItem::setLockedByOwner(bool value)
 	}
 }
 
+void CGameItem::setAccessGrade(EGSPD::CGuildGrade::TGuildGrade value)
+{ 
+	if (value != _AccessGrade)
+	{
+		_AccessGrade = value;
+		callItemChanged(INVENTORIES::TItemChangeFlags(INVENTORIES::itc_lock_state));
+	}
+}
+
 //-----------------------------------------------
 // getCopy :
 //-----------------------------------------------

@@ -138,14 +138,15 @@ void CGuildInventoryView::updateClientSlot(uint32 slot)
 	itemSlot.setItemProp( INVENTORIES::Quantity, item->getStackSize() );
 	itemSlot.setItemProp( INVENTORIES::UserColor, item->color() );
 	itemSlot.setItemProp( INVENTORIES::Locked, 0 );
+	itemSlot.setItemProp( INVENTORIES::Access, item->getAccessGrade() );
 	itemSlot.setItemProp( INVENTORIES::Weight, item->weight() / 10 );
 	itemSlot.setItemProp( INVENTORIES::NameId, 0 ); // TODO: name of guild (item->sendNameId())
 	itemSlot.setItemProp( INVENTORIES::Enchant, item->getClientEnchantValue() );
-	itemSlot.setItemProp( INVENTORIES::Price, 0 );
-	itemSlot.setItemProp( INVENTORIES::ResaleFlag, 0 );
 	itemSlot.setItemProp( INVENTORIES::ItemClass, item->getItemClass() );
 	itemSlot.setItemProp( INVENTORIES::ItemBestStat, item->getCraftParameters() == 0 ? RM_FABER_STAT_TYPE::Unknown : item->getCraftParameters()->getBestItemStat() );
-	itemSlot.setItemProp( INVENTORIES::PrerequisitValid, 1 );
+	itemSlot.setItemProp( INVENTORIES::PrerequisitValid, 1 ); // TODO: per user prereq
+	itemSlot.setItemProp( INVENTORIES::Price, 0 );
+	itemSlot.setItemProp( INVENTORIES::ResaleFlag, 0 );
 	_GuildInvUpdater.setItemProps( INVENTORIES::CInventoryCategoryForGuild::GuildInvId, itemSlot );
 }
 

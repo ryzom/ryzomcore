@@ -26,6 +26,9 @@
 namespace CHARACTERISTICS
 {
 	enum TCharacteristics
+#ifdef NL_CPP14
+		: uint8
+#endif
 	{
 		constitution = 0, //HP max
 		metabolism, //Hp Regen

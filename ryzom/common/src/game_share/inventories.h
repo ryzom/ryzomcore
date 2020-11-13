@@ -263,22 +263,21 @@ namespace INVENTORIES
 	enum TItemPropId
 	{
 		Sheet,
-			Quality,
-			Quantity,
-			UserColor,
-			CreateTime,
-			Serial,
-			Locked,
-			Weight,
-			NameId,
-			Enchant,
-			ItemClass,
-			ItemBestStat,
-			Price,
-			ResaleFlag,
-			PrerequisitValid,
-			Worned,
-			NbItemPropId
+		Quality,
+		Quantity,
+		UserColor,
+		Locked,
+		Access,
+		Weight,
+		NameId,
+		Enchant,
+		ItemClass,
+		ItemBestStat,
+		PrerequisitValid,
+		Price,
+		ResaleFlag,
+		Worned,
+		NbItemPropId
 	};
 
 	const uint NbBitsForItemPropId = 4; // TODO: replace this constant by an inline function using NbItemPropId

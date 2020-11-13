@@ -27,6 +27,9 @@
 namespace SKILLS
 {
 	enum ESkills
+#ifdef NL_CPP14
+		: uint8
+#endif
 	{
 		SC = 0,
 		SCA,

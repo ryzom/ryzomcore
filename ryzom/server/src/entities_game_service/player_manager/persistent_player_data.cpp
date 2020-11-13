@@ -1366,8 +1366,9 @@ private:
 	LPROP2(_CustomName,					string,		if (false),					string(),							setPhraseId(val, true)) /* Ryzom Forge compatibility, replaced by _PhraseLiteral */ \
 	PROP(bool, _Movable)\
 	PROP(bool, _UnMovable)\
-	PROP(bool, _LockedByOwner) /* Ryzom Forge compatibility */\
-	
+	PROP(bool, _LockedByOwner)\
+	LPROP2(_AccessGrade,				string,		if (_AccessGrade != DefaultAccessGrade), CGuildGrade::toString(_AccessGrade), _AccessGrade = CGuildGrade::fromString(val))\
+
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
@@ -1402,7 +1403,7 @@ private:
 	LPROP(float,MaxSlashingProtection,if (MaxSlashingProtection!=0.0f))\
 	LPROP(float,MaxBluntProtection,if (MaxBluntProtection!=0.0f))\
 	LPROP(float,MaxPiercingProtection,if (MaxPiercingProtection!=0.0f))\
-	LPROP(uint8,Color,if (Color!=1))\
+	LPROP(uint8,Color,if (Color!=CGameItem::DefaultColor))\
 	LPROP(sint32,HpBuff,if (HpBuff!=0))\
 	LPROP(sint32,SapBuff,if (SapBuff!=0))\
 	LPROP(sint32,StaBuff,if (StaBuff!=0))\
