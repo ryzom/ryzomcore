@@ -8317,7 +8317,7 @@ NLMISC_COMMAND(eventSetBotSheet, "Change the sheet of a bot", "<bot eid> <sheet 
 }
 
 //----------------------------------------------------------------------------
-extern sint32 clientEventSetItemCustomText(CCharacter* character, INVENTORIES::TInventory inventory, uint32 slot, ucstring const& text);
+extern sint32 clientItemWrite(CCharacter* character, INVENTORIES::TInventory inventory, uint32 slot, ucstring const& text);
 
 NLMISC_COMMAND(eventSetItemCustomText, "set an item custom text, which replaces help text", "<eId> <inventory> <slot in inventory> <text>")
 {
@@ -8337,7 +8337,7 @@ NLMISC_COMMAND(eventSetItemCustomText, "set an item custom text, which replaces 
 	NLMISC::fromString(args[2], slot);
 	text.fromUtf8(args[3]);
 
-	sint32 ret = clientEventSetItemCustomText(c, inventory, slot, text);
+	sint32 ret = clientItemWrite(c, inventory, slot, text);
 
 	switch (ret)
 	{

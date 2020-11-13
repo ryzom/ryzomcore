@@ -165,9 +165,9 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 						display->setTextFormatTaged(localDesc);
 					else
 					{
-						string text = itemInfo.CustomText.toUtf8();
+						string text = itemInfo.CustomText;
 						string::size_type delimiter = text.find(' ');
-						if(text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
+						if (NLMISC::startsWith(text, "@WEB"))
 						{
 							CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 							if (pGH)

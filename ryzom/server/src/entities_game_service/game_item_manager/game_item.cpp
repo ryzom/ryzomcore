@@ -1164,7 +1164,7 @@ void CGameItem::setAccessGrade(EGSPD::CGuildGrade::TGuildGrade value)
 	}
 }
 
-void CGameItem::setPhraseId(const std::string &str, bool literal = false)
+void CGameItem::setPhraseId(const std::string &str, bool literal)
 {
 	if (literal != _PhraseLiteral || _PhraseId != str)
 	{

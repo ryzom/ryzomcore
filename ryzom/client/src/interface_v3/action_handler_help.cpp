@@ -2088,8 +2088,10 @@ void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 		break;
 	case ITEMFAMILY::PET_ANIMAL_TICKET:
 		{
+#ifdef RYZOM_FORGE
 			string nr = (itemInfo.PetNumber > 0) ? toString(itemInfo.PetNumber) : "(slot)" + toString(item->getIndexInDB());
 			strFindReplace(itemText, "%petnumber", nr);
+#endif
 		}
 		break;
 	default:

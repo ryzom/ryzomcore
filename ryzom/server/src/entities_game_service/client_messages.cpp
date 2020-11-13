@@ -427,7 +427,7 @@ void cbClientItemRename(NLNET::CMessage &msgin, const std::string &serviceName, 
 /// -1: Invalid inventory
 /// -2: Invalid slot
 /// -3: Empty slot
-sint32 cbClientItemWrite(CCharacter* character, INVENTORIES::TInventory inventory, uint32 slot, ucstring const& text)
+sint32 clientItemWrite(CCharacter* character, INVENTORIES::TInventory inventory, uint32 slot, ucstring const& text)
 {
 	if (inventory==INVENTORIES::UNDEFINED)
 	{
@@ -504,8 +504,8 @@ void cbClientItemWrite( NLNET::CMessage& msgin, const std::string & serviceName,
 		}
 
 		// prevent use of @WEB at begin
-		if (text.size() >= 4 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
-			text = text.substr(4, text.size() - 4);
+		if (NLMISC::startsWith(text, "@WEB"))
+			text = text.substr(4);
 
 		// force that the begin of the text for non admin is %mfc
 		if(!text.empty() && text.substr(0, 4) != string("%mfc"))
@@ -514,7 +514,7 @@ void cbClientItemWrite( NLNET::CMessage& msgin, const std::string & serviceName,
 		}
 	}
 
-	cbClientItemWrite(character, inventory, slot, text);
+	clientItemWrite(character, inventory, slot, text);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
