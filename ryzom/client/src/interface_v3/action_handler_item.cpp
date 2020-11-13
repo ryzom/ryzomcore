@@ -130,7 +130,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 				{
 					if ( pIS->Family == ITEMFAMILY::SCROLL)
 					{
-						editBoxLarge->setInputString(itemInfo.CustomText.toUtf8()); // TODO: UTF-8 (serial)
+						editBoxLarge->setInputString(itemInfo.CustomText); // TODO: UTF-8 (serial)
 						editLarge->setActive(true);
 						editBoxLarge->setActive(true);
 
@@ -144,7 +144,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 						string customText;
 						if (!itemInfo.CustomText.empty())
 						{
-							customText = itemInfo.CustomText.toUtf8(); // TODO: UTF-8 (serial)
+							customText = itemInfo.CustomText; // TODO: UTF-8 (serial)
 							strFindReplace(customText, "%mfc", string());
 						}
 
@@ -244,7 +244,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 						// If we already have item info
 						if ( pIS->Family == ITEMFAMILY::SCROLL)
 						{
-							editBoxLarge->setInputString(itemInfo.CustomText.toUtf8()); // TODO: UTF-8 (serial)
+							editBoxLarge->setInputString(itemInfo.CustomText); // TODO: UTF-8 (serial)
 							editLarge->setActive(true);
 							editBoxLarge->setActive(true);
 
@@ -259,7 +259,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 							string customText;
 							if (!itemInfo.CustomText.empty())
 							{
-								customText = itemInfo.CustomText.toUtf8();
+								customText = itemInfo.CustomText;
 								strFindReplace(customText, "%mfc", string());
 							}
 
@@ -304,7 +304,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 							display->setTextFormatTaged(localDesc);
 						else
 						{
-							string text = itemInfo.CustomText.toUtf8();
+							string text = itemInfo.CustomText;
 							string::size_type delimiter = text.find(' ');
 							if(text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
 							{
@@ -407,19 +407,18 @@ void CInterfaceItemEdition::CItemEditionWindow::validate()
 			if (textValid)
 			{
 				CBitMemStream out;
-				const char *msgName = "EVENT:SET_ITEM_CUSTOM_TEXT";
+				const char *msgName = "ITEM:WRITE";
 				if (!GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 				{
 					nlwarning ("don't know message name %s", msgName);
 				}
 				else
 				{
-					uint32 uiInventory = (uint32)pCSItem->getInventoryIndex();
-					out.serial(uiInventory);
-					uint32 uiSlot = (uint32)pCSItem->getIndexInDB();
-					out.serial(uiSlot);
-					ucstring ucText = ucstring::makeFromUtf8(text); // TODO: UTF-8 (serial)
-					out.serial(ucText);
+					INVENTORIES::TInventory inventory = (INVENTORIES::TInventory)pCSItem->getInventoryIndex();
+					out.serialShortEnum(inventory);
+					uint16 slot = (uint16)pCSItem->getIndexInDB();
+					out.serial(slot);
+					out.serial(text);
 					NetMngr.push(out);
 					//nlinfo("impulseCallBack : %s %s %d \"%s\" sent", msgName.c_str(), INVENTORIES::toString((INVENTORIES::TInventory)pCSItem->getInventoryIndex()).c_str(), pCSItem->getIndexInDB(), text.toUtf8().c_str());
 				}

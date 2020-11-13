@@ -166,9 +166,9 @@
     <leaf name="CLOSE_ROOM_INVENTORY" sendto="" description="EGS wants to close the user inventory" />
     <leaf name="USE_ITEM" sendto="EGS" format="u16" description="client wants to use teleport in the specified bag slot or consume an item to trigger its effect" />
     <leaf name="STOP_USE_XP_CAT" sendto="EGS" format="b" description="client wants to stop using xp catalyser" />
-    <leaf name="LOCK" sendto="EGS" format="u16 u16 b" description="lock or unlock an item. inventory, slot, lock" />
-    <leav name="RENAME" sendot="EGS" format="u16 u16 b s" description="change an item name to a phrase or literal. inventory, slot, literal, name" />
-    <leav name="WRITE" sendot="EGS" format="u16 u16 s" description="wrrite a crafter's message. inventory, slot, lock" />
+    <leaf name="LOCK" sendto="EGS" format="u8 u16 b" description="lock or unlock an item. inventory, slot, lock" />
+    <leaf name="RENAME" sendot="EGS" format="u8 u16 b s" description="change an item name to a phrase or literal. inventory, slot, literal, name" />
+    <leaf name="WRITE" sendot="EGS" format="u8 u16 s" description="wrrite a crafter's message. inventory, slot, lock" />
   </branch>
   <branch name="TP">
     <leaf name="RESPAWN" sendto="EGS" format="" description="teleport the player to his respawn point" />
@@ -349,6 +349,7 @@
     <leaf name="TAKE_MONEY" sendto="EGS" format="u64 u16" description="take money from guild warehouse" />
     <leaf name="OPEN_INVENTORY" sendto="" format="" description="open the guild inventory" />
     <leaf name="CLOSE_INVENTORY" sendto="" format="" description="close the guild inventory" />
+    <leaf name="ITEM_ACCESS" sendto="EGS" format="u16 u8" description="grant a guild access grade to an item in the guild inventory. slot, grade" />
   </branch>
   <branch name="OUTPOST">
     <leaf name="GIVEUP_OUTPOST" sendto="EGS" format="u32" description="Give up an outpost (outpostSHEET)" />
@@ -462,10 +463,12 @@
     <leaf name="BARS" format="u8 s16 s16 s16 s16" description="server update the players Bars (fast message) $msgNumber $hp $sap $sta $focus" />
     <leaf name="POPUP" format="u32 u32" description="server display an important info message on the client (u32 titleDynString u32 textDynString)" />
   </branch>
+  <!--
   <branch name="EVENT">
     <leaf name="SET_ITEM_CUSTOM_TEXT" sendto="EGS" format="u32 u32 uc" description="set the cursom of the item in inventory $inventory in slot $slot to $text" />
     <leaf name="DUMMY" description="stupid server....." />
   </branch>
+  -->
   <branch name="TOTEM">
     <leaf name="BUILD" sendto="EGS" format="" description="client has built a totem" />
     <leaf name="DUMMY" description="stupid server....." />

@@ -1907,8 +1907,8 @@ void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 	const	CClientItemInfo	&itemInfo = getInventory().getItemInfo(getInventory().getItemSlotId(item) );
 	if (!itemInfo.CustomText.empty())
 	{
-		strFindReplace(itemText, "%custom_text", "\n@{FFFF}" + itemInfo.CustomText.toUtf8() + "\n");
-		string itemMFC = CI18N::get("uiItemTextMessageFromCrafter");
+		strFindReplace(itemText, "%custom_text", "\n@{FFFF}" + itemInfo.CustomText + "\n");
+		const string &itemMFC = CI18N::get("uiItemTextMessageFromCrafter");
 		strFindReplace(itemText, "%mfc", itemMFC);
 	}
 	else

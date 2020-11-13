@@ -2785,6 +2785,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_QUALITY;
 		ICDBStructNode	*_QUANTITY;
 		ICDBStructNode	*_USER_COLOR;
+		ICDBStructNode	*_CHARAC_BUFFS;
 		ICDBStructNode	*_WEIGHT;
 		ICDBStructNode	*_NAMEID;
 		ICDBStructNode	*_ENCHANT;
@@ -2892,6 +2893,26 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getUSER_COLORCDBNode()
 		{
 			return _USER_COLOR;
+		}
+	
+		void setCHARAC_BUFFS(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _CHARAC_BUFFS, value, forceSending);
+		}
+
+		uint8 getCHARAC_BUFFS(const CCDBSynchronised &dbGroup)
+		{
+			uint8 value;
+			_getProp(dbGroup, _CHARAC_BUFFS, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getCHARAC_BUFFSCDBNode()
+		{
+			return _CHARAC_BUFFS;
 		}
 	
 		void setWEIGHT(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
@@ -3105,6 +3126,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_QUALITY;
 		ICDBStructNode	*_QUANTITY;
 		ICDBStructNode	*_USER_COLOR;
+		ICDBStructNode	*_CHARAC_BUFFS;
 		ICDBStructNode	*_WEIGHT;
 		ICDBStructNode	*_NAMEID;
 		ICDBStructNode	*_ENCHANT;
@@ -3212,6 +3234,26 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getUSER_COLORCDBNode()
 		{
 			return _USER_COLOR;
+		}
+	
+		void setCHARAC_BUFFS(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _CHARAC_BUFFS, value, forceSending);
+		}
+
+		uint8 getCHARAC_BUFFS(const CCDBSynchronised &dbGroup)
+		{
+			uint8 value;
+			_getProp(dbGroup, _CHARAC_BUFFS, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getCHARAC_BUFFSCDBNode()
+		{
+			return _CHARAC_BUFFS;
 		}
 	
 		void setWEIGHT(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
@@ -3758,6 +3800,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_QUALITY;
 		ICDBStructNode	*_QUANTITY;
 		ICDBStructNode	*_USER_COLOR;
+		ICDBStructNode	*_CHARAC_BUFFS;
 		ICDBStructNode	*_WEIGHT;
 		ICDBStructNode	*_NAMEID;
 		ICDBStructNode	*_ENCHANT;
@@ -3865,6 +3908,26 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getUSER_COLORCDBNode()
 		{
 			return _USER_COLOR;
+		}
+	
+		void setCHARAC_BUFFS(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _CHARAC_BUFFS, value, forceSending);
+		}
+
+		uint8 getCHARAC_BUFFS(const CCDBSynchronised &dbGroup)
+		{
+			uint8 value;
+			_getProp(dbGroup, _CHARAC_BUFFS, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getCHARAC_BUFFSCDBNode()
+		{
+			return _CHARAC_BUFFS;
 		}
 	
 		void setWEIGHT(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
@@ -4120,6 +4183,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_QUALITY;
 		ICDBStructNode	*_QUANTITY;
 		ICDBStructNode	*_USER_COLOR;
+		ICDBStructNode	*_CHARAC_BUFFS;
 		ICDBStructNode	*_WEIGHT;
 		ICDBStructNode	*_NAMEID;
 		ICDBStructNode	*_ENCHANT;
@@ -4229,6 +4293,26 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getUSER_COLORCDBNode()
 		{
 			return _USER_COLOR;
+		}
+	
+		void setCHARAC_BUFFS(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _CHARAC_BUFFS, value, forceSending);
+		}
+
+		uint8 getCHARAC_BUFFS(const CCDBSynchronised &dbGroup)
+		{
+			uint8 value;
+			_getProp(dbGroup, _CHARAC_BUFFS, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getCHARAC_BUFFSCDBNode()
+		{
+			return _CHARAC_BUFFS;
 		}
 	
 		void setWEIGHT(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
@@ -5763,6 +5847,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_QUALITY;
 		ICDBStructNode	*_QUANTITY;
 		ICDBStructNode	*_USER_COLOR;
+		ICDBStructNode	*_CHARAC_BUFFS;
 		ICDBStructNode	*_WEIGHT;
 		ICDBStructNode	*_NAMEID;
 		ICDBStructNode	*_ENCHANT;
@@ -5881,6 +5966,26 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode *getUSER_COLORCDBNode()
 		{
 			return _USER_COLOR;
+		}
+	
+		void setCHARAC_BUFFS(CCDBSynchronised &dbGroup, uint8 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup, _CHARAC_BUFFS, value, forceSending);
+		}
+
+		uint8 getCHARAC_BUFFS(const CCDBSynchronised &dbGroup)
+		{
+			uint8 value;
+			_getProp(dbGroup, _CHARAC_BUFFS, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getCHARAC_BUFFSCDBNode()
+		{
+			return _CHARAC_BUFFS;
 		}
 	
 		void setWEIGHT(CCDBSynchronised &dbGroup, uint16 value, bool forceSending = false)
