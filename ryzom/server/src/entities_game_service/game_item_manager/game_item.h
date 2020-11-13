@@ -489,7 +489,8 @@ public :
 	/// accessors to the item phrase
 	const std::string &getPhraseId() const { static const std::string empty; return _PhraseId ? *_PhraseId : empty; }
 	bool isPhraseLiteral() const { return _PhraseLiteral; }
-	void setPhraseId(const std::string &str, bool literal = false) { if (!_PhraseId) _PhraseId = new std::string(); *_PhraseId = str; _PhraseLiteral = literal; }
+	void setPhraseIdInternal(const std::string &str, bool literal = false) { if (!_PhraseId) _PhraseId = new std::string(); *_PhraseId = str; _PhraseLiteral = literal; }
+	void setPhraseId(const std::string &str, bool literal = false);
 
 	// return the enchantment value to be displayed in the client
 	uint16 getClientEnchantValue() const;

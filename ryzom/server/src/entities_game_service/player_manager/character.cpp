@@ -18765,7 +18765,7 @@ uint32 CPetAnimal::initLinkAnimalToTicket( CCharacter * c, uint8 index )
 //			Slot = ItemPtr->getLocSlot();
 			ItemPtr->setPetIndex(index);
 #ifdef RYZOM_FORGE_PET_NAME
-			ItemPtr->setPhraseId(CustomName, true);
+			ItemPtr->setPhraseIdInternal(CustomName, true);
 #endif
 			Slot = ItemPtr->getInventorySlot();
 			return Slot;
@@ -18781,7 +18781,7 @@ uint32 CPetAnimal::initLinkAnimalToTicket( CCharacter * c, uint8 index )
 				Slot = ItemPtr->getInventorySlot();
 				ItemPtr->setPetIndex(index);
 #ifdef RYZOM_FORGE_PET_NAME
-				ItemPtr->setPhraseId(CustomName, true);
+				ItemPtr->setPhraseIdInternal(CustomName, true);
 #endif
 				return Slot;
 			}

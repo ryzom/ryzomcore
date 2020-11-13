@@ -1343,7 +1343,7 @@ private:
 	PROP2(_HP,							uint32,		_HP,						_HP=val)\
 	PROP2(_Recommended,					uint32,		_Recommended,				_Recommended=val)\
 	PROP2(_CreatorId,					CEntityId,	_CreatorId,					_CreatorId=val)\
-	PROP2(_PhraseId,					string,		getPhraseId(),				setPhraseId(val))\
+	PROP2(_PhraseId,					string,		getPhraseId(),				setPhraseIdInternal(val))\
 	LPROP2(_PhraseLiteral,				bool,		if (_PhraseLiteral),		_PhraseLiteral,						_PhraseLiteral=val)\
 	LSTRUCT2(_CraftParameters,						if (_CraftParameters),		_CraftParameters->store(pdr),		_CraftParameters = new CItemCraftParameters; _CraftParameters->apply(pdr))\
 	LPROP2(_SlotImage,					uint16,		if (0),						0xffff,								slotImage=val) /* Very old version compatibility */ \
@@ -1363,7 +1363,7 @@ private:
 	STRUCT_VECT(_TypeSkillMods)\
 	LPROP_VECT(CSheetId, _Enchantment, VECT_LOGIC(_Enchantment) if (_Enchantment[i]!=CSheetId::Unknown))\
 	PROP2(_CustomText,					string,									getCustomText(),					setCustomText(val))\
-	LPROP2(_CustomName,					string,		if (false),					string(),							setPhraseId(val, true)) /* Ryzom Forge compatibility, replaced by _PhraseLiteral */ \
+	LPROP2(_CustomName,					string,		if (false),					string(),							setPhraseIdInternal(val, true)) /* Ryzom Forge compatibility, replaced by _PhraseLiteral */ \
 	PROP(bool, _Movable)\
 	PROP(bool, _UnMovable)\
 	PROP(bool, _LockedByOwner)\

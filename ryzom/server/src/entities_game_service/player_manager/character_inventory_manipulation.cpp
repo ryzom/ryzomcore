@@ -1637,7 +1637,7 @@ CGameItemPtr CCharacter::createItem(uint16 obtainedQuality, uint32 quantity, con
 				item = sellingItem->getItemCopy();
 				item->quality(obtainedQuality);
 				if (phraseId)
-					item->setPhraseId(*phraseId);
+					item->setPhraseIdInternal(*phraseId);
 			}
 			else if (obtainedItem == preorderSheetId)
 			{
@@ -2441,8 +2441,6 @@ void CCharacter::sendItemInfos( uint16 slotId )
 		infos.RequiredCharacLevel = item->getRequiredCharacLevel();
 
 		infos.TypeSkillMods = item->getTypeSkillMods();
-
-		infos.AccessGrade = item->getAccessGrade();
 
 		infos.CustomText = item->getCustomText();
 

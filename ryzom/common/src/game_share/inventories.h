@@ -482,6 +482,9 @@ enum TItemChange
 	itc_lock_state		= 1<<6,
 	itc_info_version	= 1<<7,
 	itc_worned			= 1<<8,
+	itc_owner_locked    = itc_lock_state,
+	itc_access_grade    = itc_lock_state,
+	itc_name            = itc_lock_state,
 };
 
 typedef NLMISC::CEnumBitset<TItemChange>	TItemChangeFlags;

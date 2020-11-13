@@ -466,7 +466,7 @@ CGameItemPtr CGameItemManager::createInGameItem( uint16 quality, uint32 quantity
 				item = sellingItem->getItemCopy();
 				item->quality( quality );
 				if ( phraseId )
-					item->setPhraseId(*phraseId);
+					item->setPhraseIdInternal(*phraseId);
 			}
 			else if (sheet == preorderSheetId)
 			{
