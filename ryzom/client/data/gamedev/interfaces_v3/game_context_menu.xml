@@ -80,8 +80,8 @@
 	<action id="attack"					name="uimGcmAttack"				handler="context_attack"				params="" />
 	<action id="duel"					name="uimGcmDuel"				handler="context_duel"					params="" />
 	<action id="unduel"					name="uimGcmUnDuel"				handler="context_unduel"				params="" />
-	<!-- <action id="pvp_challenge"			name="uimGcmPvpChallenge"		handler="context_pvp_challenge"			params="" /> -->
-	<!-- <action id="unpvp_challenge"		name="uimGcmUnPvpChanllenge"	handler="context_unpvp_challenge"		params="" /> -->
+	<action id="pvp_challenge"			name="uimGcmPvpChallenge"		handler="context_pvp_challenge"			params="" />
+	<action id="unpvp_challenge"		name="uimGcmUnPvpChanllenge"	handler="context_unpvp_challenge"		params="" />
 	<action id="disengage"				name="uimGcmDisengage"			handler="context_disengage"				params="" />
 	<!-- friendly -->
 	<action id="assist"					name="uimAssist"				handler="assist_target"					params="" />
