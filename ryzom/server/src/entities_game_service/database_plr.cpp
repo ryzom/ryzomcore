@@ -1200,14 +1200,6 @@ void CBankAccessor_PLR::TEXCHANGE::TGIVE::TArray::init(ICDBStructNode *parent, u
 	nlassert(node != NULL);
 	_QUANTITY = node;
 	
-	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
-	nlassert(node != NULL);
-	_CREATE_TIME = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
-	nlassert(node != NULL);
-	_SERIAL = node;
-	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
 	_USER_COLOR = node;
@@ -1219,10 +1211,6 @@ void CBankAccessor_PLR::TEXCHANGE::TGIVE::TArray::init(ICDBStructNode *parent, u
 	node  = parent->getNode( ICDBStructNode::CTextId("NAMEID"), false );
 	nlassert(node != NULL);
 	_NAMEID = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
-	nlassert(node != NULL);
-	_INFO_VERSION = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("ENCHANT"), false );
 	nlassert(node != NULL);
@@ -1239,6 +1227,14 @@ void CBankAccessor_PLR::TEXCHANGE::TGIVE::TArray::init(ICDBStructNode *parent, u
 	node  = parent->getNode( ICDBStructNode::CTextId("PREREQUISIT_VALID"), false );
 	nlassert(node != NULL);
 	_PREREQUISIT_VALID = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("WORNED"), false );
+	nlassert(node != NULL);
+	_WORNED = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
+	nlassert(node != NULL);
+	_INFO_VERSION = node;
 	
 
 	// branch init
@@ -1287,14 +1283,6 @@ void CBankAccessor_PLR::TEXCHANGE::TRECEIVE::TArray::init(ICDBStructNode *parent
 	nlassert(node != NULL);
 	_QUANTITY = node;
 	
-	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
-	nlassert(node != NULL);
-	_CREATE_TIME = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
-	nlassert(node != NULL);
-	_SERIAL = node;
-	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
 	_USER_COLOR = node;
@@ -1306,10 +1294,6 @@ void CBankAccessor_PLR::TEXCHANGE::TRECEIVE::TArray::init(ICDBStructNode *parent
 	node  = parent->getNode( ICDBStructNode::CTextId("NAMEID"), false );
 	nlassert(node != NULL);
 	_NAMEID = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
-	nlassert(node != NULL);
-	_INFO_VERSION = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("ENCHANT"), false );
 	nlassert(node != NULL);
@@ -1326,6 +1310,14 @@ void CBankAccessor_PLR::TEXCHANGE::TRECEIVE::TArray::init(ICDBStructNode *parent
 	node  = parent->getNode( ICDBStructNode::CTextId("PREREQUISIT_VALID"), false );
 	nlassert(node != NULL);
 	_PREREQUISIT_VALID = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("WORNED"), false );
+	nlassert(node != NULL);
+	_WORNED = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
+	nlassert(node != NULL);
+	_INFO_VERSION = node;
 	
 
 	// branch init
@@ -1502,14 +1494,6 @@ void CBankAccessor_PLR::TINVENTORY::TTEMP::TArray::init(ICDBStructNode *parent, 
 	nlassert(node != NULL);
 	_QUANTITY = node;
 	
-	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
-	nlassert(node != NULL);
-	_CREATE_TIME = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
-	nlassert(node != NULL);
-	_SERIAL = node;
-	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
 	_USER_COLOR = node;
@@ -1521,10 +1505,6 @@ void CBankAccessor_PLR::TINVENTORY::TTEMP::TArray::init(ICDBStructNode *parent, 
 	node  = parent->getNode( ICDBStructNode::CTextId("NAMEID"), false );
 	nlassert(node != NULL);
 	_NAMEID = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
-	nlassert(node != NULL);
-	_INFO_VERSION = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("ENCHANT"), false );
 	nlassert(node != NULL);
@@ -1541,6 +1521,14 @@ void CBankAccessor_PLR::TINVENTORY::TTEMP::TArray::init(ICDBStructNode *parent, 
 	node  = parent->getNode( ICDBStructNode::CTextId("PREREQUISIT_VALID"), false );
 	nlassert(node != NULL);
 	_PREREQUISIT_VALID = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("WORNED"), false );
+	nlassert(node != NULL);
+	_WORNED = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
+	nlassert(node != NULL);
+	_INFO_VERSION = node;
 	
 
 	// branch init
@@ -1600,14 +1588,6 @@ void CBankAccessor_PLR::TINVENTORY::TSHARE::TArray::init(ICDBStructNode *parent,
 	nlassert(node != NULL);
 	_QUANTITY = node;
 	
-	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
-	nlassert(node != NULL);
-	_CREATE_TIME = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
-	nlassert(node != NULL);
-	_SERIAL = node;
-	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
 	_USER_COLOR = node;
@@ -1619,10 +1599,6 @@ void CBankAccessor_PLR::TINVENTORY::TSHARE::TArray::init(ICDBStructNode *parent,
 	node  = parent->getNode( ICDBStructNode::CTextId("NAMEID"), false );
 	nlassert(node != NULL);
 	_NAMEID = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
-	nlassert(node != NULL);
-	_INFO_VERSION = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("ENCHANT"), false );
 	nlassert(node != NULL);
@@ -1639,6 +1615,10 @@ void CBankAccessor_PLR::TINVENTORY::TSHARE::TArray::init(ICDBStructNode *parent,
 	node  = parent->getNode( ICDBStructNode::CTextId("PREREQUISIT_VALID"), false );
 	nlassert(node != NULL);
 	_PREREQUISIT_VALID = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
+	nlassert(node != NULL);
+	_INFO_VERSION = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("NB_MEMBER"), false );
 	nlassert(node != NULL);
@@ -2160,14 +2140,6 @@ void CBankAccessor_PLR::TTRADING::TArray::init(ICDBStructNode *parent, uint inde
 	nlassert(node != NULL);
 	_QUANTITY = node;
 	
-	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
-	nlassert(node != NULL);
-	_CREATE_TIME = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
-	nlassert(node != NULL);
-	_SERIAL = node;
-	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
 	_USER_COLOR = node;
@@ -2179,10 +2151,6 @@ void CBankAccessor_PLR::TTRADING::TArray::init(ICDBStructNode *parent, uint inde
 	node  = parent->getNode( ICDBStructNode::CTextId("NAMEID"), false );
 	nlassert(node != NULL);
 	_NAMEID = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
-	nlassert(node != NULL);
-	_INFO_VERSION = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("ENCHANT"), false );
 	nlassert(node != NULL);
@@ -2199,6 +2167,10 @@ void CBankAccessor_PLR::TTRADING::TArray::init(ICDBStructNode *parent, uint inde
 	node  = parent->getNode( ICDBStructNode::CTextId("PREREQUISIT_VALID"), false );
 	nlassert(node != NULL);
 	_PREREQUISIT_VALID = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("INFO_VERSION"), false );
+	nlassert(node != NULL);
+	_INFO_VERSION = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("CURRENCY"), false );
 	nlassert(node != NULL);
@@ -2597,10 +2569,6 @@ void CBankAccessor_PLR::TEXECUTE_PHRASE::TLINK::TArray::init(ICDBStructNode *par
 	nlassert(node != NULL);
 	_PHRASE = node;
 	
-	node  = parent->getNode( ICDBStructNode::CTextId("COUNTER"), false );
-	nlassert(node != NULL);
-	_COUNTER = node;
-	
 	node  = parent->getNode( ICDBStructNode::CTextId("HP_COST"), false );
 	nlassert(node != NULL);
 	_HP_COST = node;
@@ -2628,6 +2596,10 @@ void CBankAccessor_PLR::TEXECUTE_PHRASE::TLINK::TArray::init(ICDBStructNode *par
 	node  = parent->getNode( ICDBStructNode::CTextId("TARGET_STA"), false );
 	nlassert(node != NULL);
 	_TARGET_STA = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("COUNTER"), false );
+	nlassert(node != NULL);
+	_COUNTER = node;
 	
 
 	// branch init
