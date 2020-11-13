@@ -462,6 +462,9 @@ public :
 	// get Hit points buff
 	sint32 focusBuff() const { return _CraftParameters == 0 ? 0 : _CraftParameters->FocusBuff; }
 
+	// get craft buffs as flags
+	uint8 buffFlags();
+
 	/// get the Hit points buff provided by armors
 	/// it must be added to hpBuff() which does not include this bonus
 	sint32 armorHpBuff() const;

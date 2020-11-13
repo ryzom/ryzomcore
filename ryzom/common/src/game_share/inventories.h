@@ -266,6 +266,7 @@ namespace INVENTORIES
 		Quality,
 		Quantity,
 		UserColor,
+		Buffs,
 		Locked,
 		Access,
 		Weight,

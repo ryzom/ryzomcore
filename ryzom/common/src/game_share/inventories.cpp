@@ -122,6 +122,6 @@ namespace INVENTORIES
 	const char *InfoVersionStr = "INFO_VERSION";
 
 	const char *CItemSlot::ItemPropStr [NbItemPropId] =
-	{ "SHEET", "QUALITY", "QUANTITY", "USER_COLOR", "LOCKED", "ACCESS", "WEIGHT", "NAMEID", "ENCHANT", "RM_CLASS_TYPE", "RM_FABER_STAT_TYPE", "PREREQUISIT_VALID", "PRICE", "RESALE_FLAG", "WORNED" };
+	{ "SHEET", "QUALITY", "QUANTITY", "USER_COLOR", "BUFFS", "LOCKED", "ACCESS", "WEIGHT", "NAMEID", "ENCHANT", "RM_CLASS_TYPE", "RM_FABER_STAT_TYPE", "PREREQUISIT_VALID", "PRICE", "RESALE_FLAG", "WORNED" };
 	const uint CItemSlot::DataBitSize [NbItemPropId]  =
-	{ 32,      10,        10,         3,            10,       2,		16,       32,       10,        3,               5,                    1,                   32,      2,             1,       };
+	{ 32,      10,        10,         3,            8,       10,       2,        16,       32,       10,        3,               5,                    1,                   32,      2,             1,       };

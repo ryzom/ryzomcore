@@ -209,6 +209,7 @@
     <leaf name="QUALITY"              type="I10" />
     <leaf name="QUANTITY"             type="I10" />
     <leaf name="USER_COLOR"           type="I3" />
+    <leaf name="CHARAC_BUFFS"         type="I8" />
     <leaf name="LOCKED"               type="I10" />
     <leaf name="ACCESS"               type="I2" />
     <leaf name="WEIGHT"               type="I16" />
@@ -241,6 +242,7 @@
         <leaf name="QUALITY"              type="I10" />
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
+        <leaf name="CHARAC_BUFFS"         type="I8" /> <!-- flags based on TCharacteristics -->
         <!-- <leaf name="LOCKED"               type="I10" /> -->
         <!-- <leaf name="ACCESS"               type="I2" /> --> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
@@ -262,6 +264,7 @@
         <leaf name="QUALITY"              type="I10" />
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
+        <leaf name="CHARAC_BUFFS"         type="I8" /> <!-- flags based on TCharacteristics -->
         <!-- <leaf name="LOCKED"               type="I10" /> -->
         <!-- <leaf name="ACCESS"               type="I2" /> --> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
@@ -295,6 +298,7 @@
         <leaf name="QUALITY"              type="I10" />
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
+        <leaf name="CHARAC_BUFFS"         type="I8" /> <!-- flags based on TCharacteristics -->
         <leaf name="LOCKED"               type="I10" />
         <leaf name="ACCESS"               type="I2" /> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
@@ -317,6 +321,7 @@
         <leaf name="QUALITY"              type="I10" />
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
+        <leaf name="CHARAC_BUFFS"         type="I8" /> <!-- flags based on TCharacteristics -->
         <leaf name="LOCKED"               type="I10" />
         <leaf name="ACCESS"               type="I2" /> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
@@ -349,6 +354,7 @@
         <leaf name="QUALITY"              type="I10" />
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
+        <leaf name="CHARAC_BUFFS"         type="I8" /> <!-- flags based on TCharacteristics -->
         <!-- <leaf name="LOCKED"               type="I10" /> -->
         <!-- <leaf name="ACCESS"               type="I2" /> --> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
@@ -376,6 +382,7 @@
         <leaf name="QUALITY"              type="I10" />
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
+        <leaf name="CHARAC_BUFFS"         type="I8" /> <!-- flags based on TCharacteristics -->
         <!-- <leaf name="LOCKED"               type="I10" /> -->
         <!-- <leaf name="ACCESS"               type="I2" /> --> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
@@ -413,6 +420,7 @@
         <leaf name="QUALITY"              type="I10" />
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
+        <leaf name="CHARAC_BUFFS"         type="I8" /> <!-- flags based on TCharacteristics -->
         <leaf name="LOCKED"               type="I10" />
         <leaf name="ACCESS"               type="I2" /> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
@@ -545,6 +553,7 @@
       <leaf name="QUALITY"              type="I10" />
       <leaf name="QUANTITY"             type="I10" />
       <leaf name="USER_COLOR"           type="I3" />
+      <leaf name="CHARAC_BUFFS"         type="I8" /> <!-- flags based on TCharacteristics -->
       <!-- <leaf name="LOCKED"               type="I10" /> -->
       <!-- <leaf name="ACCESS"               type="I2" /> --> <!-- TGuildGrade access grade -->
       <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
@@ -721,6 +730,7 @@
         <leaf name="QUALITY"              type="I10" />
         <leaf name="QUANTITY"             type="I10" />
         <leaf name="USER_COLOR"           type="I3" />
+        <leaf name="CHARAC_BUFFS"         type="I8" /> <!-- flags based on TCharacteristics -->
         <leaf name="LOCKED"               type="I10" />
         <leaf name="ACCESS"               type="I2" /> <!-- TGuildGrade access grade -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->

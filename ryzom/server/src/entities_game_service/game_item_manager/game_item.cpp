@@ -3171,6 +3171,26 @@ uint32 CGameItem::magicResistance(RESISTANCE_TYPE::TResistanceType resistanceTyp
 	}
 }
 
+// get craft buffs as flags
+uint8 CGameItem::buffFlags()
+{
+	if (_CraftParameters)
+	{
+		uint8_t res = 0;
+		if (_CraftParameters->HpBuff)
+			res |= (1 << CHARACTERISTICS::constitution);
+		if (_CraftParameters->SapBuff)
+			res |= (1 << CHARACTERISTICS::intelligence);
+		if (_CraftParameters->StaBuff)
+			res |= (1 << CHARACTERISTICS::strength);
+		if (_CraftParameters->FocusBuff)
+			res |= (1 << CHARACTERISTICS::dexterity);
+		// space is reserved for regen buffs
+		return res;
+	}
+	return 0;
+}
+
 //-----------------------------------------------
 // armorHpBuff
 //-----------------------------------------------

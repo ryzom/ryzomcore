@@ -1087,6 +1087,7 @@ void CCharacterInvView::updateClientSlot(uint32 slot, const CGameItemPtr item)
 		itemSlot.setItemProp( INVENTORIES::Quality, item->quality() );
 		itemSlot.setItemProp( INVENTORIES::Quantity, item->getStackSize() );
 		itemSlot.setItemProp( INVENTORIES::UserColor, item->color() );
+		itemSlot.setItemProp( INVENTORIES::Buffs, item->buffFlags() );
 		itemSlot.setItemProp( INVENTORIES::Locked, item->getLockCount() );
 		itemSlot.setItemProp( INVENTORIES::Access, item->getAccessGrade() );
 		itemSlot.setItemProp( INVENTORIES::Weight, item->weight() / 10 );
