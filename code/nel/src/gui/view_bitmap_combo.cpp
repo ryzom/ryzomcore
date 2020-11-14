@@ -25,6 +25,10 @@
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -411,7 +415,7 @@ namespace NLGUI
 			}
 		}
 
-		if (_TexsId.size() == 0)
+		if (_TexsId.empty())
 		{
 			for (i = 0; i < _Texs.size(); ++i)
 				_TexsId.push_back(rVR.getTextureIdFromName(_Texs[i]));

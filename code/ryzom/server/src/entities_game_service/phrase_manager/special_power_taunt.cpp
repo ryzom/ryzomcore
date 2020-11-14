@@ -66,7 +66,7 @@ bool CSpecialPowerTaunt::validate(std::string &errorCode)
 	}
 
 	TGameCycle endDate;
-	if (!actor->canUsePower(_PowerType, (uint16)~0, endDate))
+	if (!actor->canUsePower(_PowerType, std::numeric_limits<uint16>::max(), endDate))
 	{
 		uint16 seconds = uint16( (endDate - CTickEventHandler::getGameCycle())*CTickEventHandler::getGameTimeStep() );
 		uint8 minutes = uint8(seconds/60);

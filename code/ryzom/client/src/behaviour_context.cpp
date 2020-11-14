@@ -19,6 +19,10 @@
 #include "stdpch.h"
 #include "behaviour_context.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 CBehaviourContext::CBehaviourContext()
 {
 }

@@ -176,7 +176,7 @@ void CSimpleSource::play()
 		
 		// and play the sound
 		bool play = pSource->play();		
-		
+
 #ifdef NL_DEBUG
 		nlassert(play);
 #else

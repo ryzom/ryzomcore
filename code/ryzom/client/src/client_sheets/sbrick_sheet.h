@@ -76,7 +76,7 @@ public:
 			Value2=0.f;
 		}
 
-		void	serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		void	serial(NLMISC::IStream &f)
 		{
 			f.serial(Text);
 		}
@@ -104,7 +104,7 @@ public:
 				Quantity = 0;
 			}
 
-			void serial (NLMISC::IStream &s) throw(NLMISC::EStream)
+			void serial (NLMISC::IStream &s)
 			{
 				s.serialEnum(FaberTypeFilter);
 				s.serial(Quantity);
@@ -117,7 +117,7 @@ public:
 		{
 			NLMISC::CSheetId			ItemRequired;
 			uint32						Quantity;
-			void serial (NLMISC::IStream &s) throw(NLMISC::EStream)
+			void serial (NLMISC::IStream &s)
 			{
 				s.serial(ItemRequired);
 				s.serial(Quantity);
@@ -137,7 +137,7 @@ public:
 		uint32							NbItemBuilt;
 
 
-		void serial (NLMISC::IStream &s) throw(NLMISC::EStream)
+		void serial (NLMISC::IStream &s)
 		{
 			s.serial(ItemBuilt);
 			s.serialCont(ItemPartMps);
@@ -344,7 +344,7 @@ public:
 	// Georges Std build implementation
 	virtual void build (const NLGEORGES::UFormElm &root);
 
-	virtual void serial (NLMISC::IStream &s) throw(NLMISC::EStream)
+	virtual void serial (NLMISC::IStream &s)
 	{
 		std::string sTmp;
 		s.serialCont(UsedSkills);

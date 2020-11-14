@@ -21,6 +21,9 @@
 #include "buffer_fmod.h"
 #include "listener_fmod.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLMISC;
 using namespace std;
@@ -419,7 +422,7 @@ void CSourceFMod::setMinMaxDistances( float mindist, float maxdist, bool /* defe
 		nlwarning("SOUND_DEV (FMod): Ridiculously high max distance set on source");
 		maxdist = maxSqrt;
 	}
-	
+
 	_MinDist= mindist;
 	_MaxDist= maxdist;
 	if(_FModChannel!=-1)

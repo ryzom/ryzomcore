@@ -24,6 +24,9 @@ using namespace std;
 using namespace NL3D;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 NLMISC_REGISTER_OBJECT(CViewBase, CDBViewNumber, std::string, "text_number");
 
@@ -121,7 +124,7 @@ namespace NLGUI
 		{
 			sint64 i;
 			if( fromString( value, i ) )
-				_Divisor = i;
+				_Modulo = i;
 			return;
 		}
 		else
@@ -247,6 +250,17 @@ namespace NLGUI
 
 	void CDBViewNumber::forceLink()
 	{
+	}
+
+	sint64 CDBViewNumber::getVal()
+	{
+		if( !_Number.hasValue() )
+			return 0;
+
+		if( _Modulo == 0 )
+			return _Number.getSInt64() / _Divisor;
+		else
+			return ( _Number.getSInt64() / _Divisor ) % _Modulo;
 	}
 
 }

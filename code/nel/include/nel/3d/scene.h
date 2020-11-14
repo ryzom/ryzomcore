@@ -157,7 +157,7 @@ public:
 	 * \param doHrcPass set it to false to indicate that the CHrcTrav have not to be traversed. Useful to optimize if
 	 * you know that NONE of your models have moved (a good example is a shoot of the scene from different cameras).
 	 */
-	void			render(bool	doHrcPass=true);
+	void			render(bool	doHrcPass = true);
 
 	/** Begin Part Rendering
 	 *	During beginPartRender()/endPartRender(), you can ask other scene to render their part, but you should
@@ -171,10 +171,10 @@ public:
 	 *	WARNING: always must begin rendering with at least UScene::RenderOpaque, else shadows won't work
 	 *	WARNING: assert-crash if a part in 'rp' has already been rendered since the last beginPartRender()
 	 */
-	void			renderPart(UScene::TRenderPart rp, bool doHrcPass=true);
+	void			renderPart(UScene::TRenderPart rp, bool doHrcPass = true, bool doTrav = true, bool keepTrav = false);
 	/** End Part Rendering (commit model creation and deletion that were asked during rendering)
 	 */
-	void			endPartRender();
+	void			endPartRender(bool keepTrav = false);
 
 	//@}
 

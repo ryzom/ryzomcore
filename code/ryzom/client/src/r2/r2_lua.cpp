@@ -21,6 +21,10 @@
 #include "stdpch.h"
 #include "r2_lua.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // stupid function to remove VC6 warnings
 #ifdef NL_COMP_VC6
 void foo_r2_lua_cpp() {}

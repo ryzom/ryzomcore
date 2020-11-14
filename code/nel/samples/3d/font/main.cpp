@@ -79,16 +79,16 @@ int main(int argc, char **argv)
 	// 4th is the size of the font. 5th is a pointer to the video driver.
 	// 6th is the resulting computed string.
 	CComputedString csRotation;
-	fontManager.computeString ("cs Rotation", tc.getFontGenerator(), CRGBA(255,255,255), 70, CNELU::Driver, csRotation);
+	fontManager.computeString ("cs Rotation", tc.getFontGenerator(), CRGBA(255,255,255), 70, false, false, CNELU::Driver, csRotation);
 
 	CComputedString cs3d;
-	fontManager.computeString ("cs 3d", tc.getFontGenerator(), CRGBA(255,127,0), 75, CNELU::Driver, cs3d);
+	fontManager.computeString ("cs 3d", tc.getFontGenerator(), CRGBA(255,127,0), 75, false, false, CNELU::Driver, cs3d);
 
 	// generate an Unicode string.
 	ucstring ucs("cs Unicode String");
 
 	CComputedString csUnicode;
-	fontManager.computeString (ucs, tc.getFontGenerator(), CRGBA(32,64,127), 75, CNELU::Driver, csUnicode);
+	fontManager.computeString (ucs, tc.getFontGenerator(), CRGBA(32,64,127), 75, false, false, CNELU::Driver, csUnicode);
 
 	// look at event example
 	CNELU::EventServer.addEmitter(CNELU::Driver->getEventEmitter());

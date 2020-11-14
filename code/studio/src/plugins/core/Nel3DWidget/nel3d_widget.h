@@ -18,9 +18,21 @@
 #ifndef NEL3D_WIDGET_H
 #define NEL3D_WIDGET_H
 
-#include <QWidget>
 #include "nel/misc/types_nl.h"
 #include <string>
+
+#ifdef NEL3DWIDGET
+#undef NEL3DWIDGET
+#endif
+
+#ifdef NL_OS_WINDOWS
+#include <QWidget>
+#define NEL3DWIDGET QWidget
+#else
+#include <QGLWidget>
+#define NEL3DWIDGET QGLWidget
+#endif
+
 
 #include "../core_global.h"
 
@@ -31,7 +43,7 @@ namespace NL3D
 }
 
 /// Nel 3D interface to Qt
-class CORE_EXPORT Nel3DWidget : public QWidget
+class CORE_EXPORT Nel3DWidget : public NEL3DWIDGET
 {
 	Q_OBJECT
 public:

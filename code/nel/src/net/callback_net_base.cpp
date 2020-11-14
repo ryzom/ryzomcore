@@ -114,7 +114,7 @@ void *CCallbackNetBase::getUserData()
  */
 void CCallbackNetBase::addCallbackArray (const TCallbackItem *callbackarray, sint arraysize)
 {
-	if (arraysize == 1 && callbackarray[0].Callback == NULL && string("") == callbackarray[0].Key)
+	if (arraysize == 1 && callbackarray[0].Callback == NULL && strlen(callbackarray[0].Key) == 0)
 	{
 		// it's an empty array, ignore it
 		return;

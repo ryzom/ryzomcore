@@ -88,12 +88,12 @@ public:
 	/**
 	 *	load file
 	 */
-	virtual void loadFile( const char * fileName );
+	virtual void loadFile( const TCHAR * fileName );
 
 	/**
 	 * create a default file
 	 */
-	virtual void createDefaultFile( const char * filename = "logic.logic ");
+	virtual void createDefaultFile( const TCHAR * filename = _T("logic.logic "));
 	
 
 	/**

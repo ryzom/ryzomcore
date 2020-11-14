@@ -1,0 +1,9 @@
+<expression>
+<category>Logical</category>
+<name>or</name>
+<variable>true</variable>
+<slots>
+<slot>A</slot>
+<slot>B</slot>
+</slots>
+</expression>

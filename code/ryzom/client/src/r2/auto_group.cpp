@@ -21,6 +21,10 @@
 //
 #include "nel/misc/i18n.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLMISC;
 
 
@@ -120,9 +124,9 @@ CInstance *CAutoGroup::getGroupingCandidate()
 	{
 		CObject *obj = NULL;
 		if(k<components->getSize())
-			obj = components->getValue(k);
+			obj = components->getValueAtPos(k);
 		else
-			obj = baseComponents->getValue(k - components->getSize());
+			obj = baseComponents->getValueAtPos(k - components->getSize());
 		CInstance *inst = getEditor().getInstanceFromObject(obj);
 		if (!inst)
 		{
@@ -148,9 +152,9 @@ CInstance *CAutoGroup::getGroupingCandidate()
 	{
 		CObject *obj = NULL;
 		if(k<features->getSize())
-			obj = features->getValue(k);
+			obj = features->getValueAtPos(k);
 		else
-			obj = baseFeatures->getValue(k - features->getSize());
+			obj = baseFeatures->getValueAtPos(k - features->getSize());
 		CInstance *inst = getEditor().getInstanceFromObject(obj);
 		CDisplayerVisual *dv = inst->getDisplayerVisual();
 		if (!dv) continue;
@@ -264,7 +268,7 @@ void CAutoGroup::group(CObject *newEntityDesc, const NLMISC::CVectorD &createPos
 	else
 	{
 		// other is a standalone entity -> create a new group
-		std::auto_ptr<CObject> newGroup(getEditor().getDMC().newComponent("NpcGrpFeature"));
+		CUniquePtr<CObject> newGroup(getEditor().getDMC().newComponent("NpcGrpFeature"));
 		if (!newGroup.get())
 		{
 			nlwarning("Syntax error in r2_features_npc_group.lua.");

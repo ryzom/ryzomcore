@@ -28,6 +28,9 @@
 #include "displayer_visual.h"
 
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLMISC;
 

@@ -25,8 +25,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include <nel/misc/types_nl.h>
-#include <nel/3d/stereo_display.h>
+#include "std3d.h"
+#include "nel/3d/stereo_display.h"
 
 // STL includes
 
@@ -34,12 +34,17 @@
 // #include <nel/misc/debug.h>
 
 // Project includes
-#include <nel/3d/stereo_ovr.h>
-#include <nel/3d/stereo_libvr.h>
-#include <nel/3d/stereo_debugger.h>
+#include "nel/3d/stereo_ovr.h"
+#include "nel/3d/stereo_ovr_04.h"
+#include "nel/3d/stereo_libvr.h"
+#include "nel/3d/stereo_debugger.h"
 
 using namespace std;
 // using namespace NLMISC;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D {
 

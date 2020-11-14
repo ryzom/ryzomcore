@@ -1,8 +1,6 @@
 #ifndef ITEMS_EDITDLG_H
 #define ITEMS_EDITDLG_H
 
-#include <QtGui/QtGui>
-#include <QtGui/QDialog>
 #include "ui_items_edit_qt.h"
 
 class CItems_edit_dlg : public QDialog

@@ -207,13 +207,13 @@ public:
 	void						setSelectionLocked (bool lock);
 
 	// Delete selected primitives
-	void						deletePrimitive (bool subDelete, const char *actionName);
+	void						deletePrimitive (bool subDelete, const std::string &actionName);
 
 	// Create a context menu for selection
 	void						createContextMenu (CWnd *parent, const CPoint &point, bool transformMode);
 
 	// Display info in the status bar
-	void						displayInfo (const char *info);
+	void						displayInfo (const std::string &info);
 
 	// Disactive / enable interaction
 	void						interaction (bool enable);
@@ -258,8 +258,8 @@ public:
 	/// The controled position
 	NLMISC::CVector		_PositionControl;
 
-	void setExeDir (const char* str);
-	void setDataDir (const char* str);
+	void setExeDir (const std::string &str);
+	void setDataDir (const std::string &str);
 	void uninitTools();
 	void initTools();
 	void invalidateLandscape ();
@@ -293,7 +293,7 @@ public:
 	void startPositionControl(IPluginCallback *plugin, const NLMISC::CVector &initPos);
 	void stopPositionControl(IPluginCallback *plugin);
 	// functions to create/remove the Root Primitive for server actions
-	virtual NLLIGO::IPrimitive *createRootPluginPrimitive (const char *name);
+	virtual NLLIGO::IPrimitive *createRootPluginPrimitive (const std::string &name);
 	virtual void deleteRootPluginPrimitive (void);
 	virtual void getAllRootPluginPrimitive (std::vector<NLLIGO::IPrimitive*> &prims);
 	/*
@@ -302,8 +302,8 @@ public:
 	 */
 	// Create a plugin primitive
 	const NLLIGO::IPrimitive *createPluginPrimitive (
-		const char *className, 
-		const char *primName, 
+		const std::string &className,
+		const std::string &primName,
 		const NLMISC::CVector &initPos, 
 		float deltaPos, 
 		const std::vector<NLLIGO::CPrimitiveClass::CInitParameters> &initParameters,

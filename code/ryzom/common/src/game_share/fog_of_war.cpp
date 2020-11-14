@@ -61,7 +61,7 @@ void IFogOfWar::explore(float worldPosX, float worldPosY)
 }
 
 // ****************************************************************************
-void IFogOfWar::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void IFogOfWar::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(0);
 

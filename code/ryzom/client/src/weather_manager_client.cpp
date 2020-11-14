@@ -31,6 +31,10 @@
 #include "sound_manager.h"
 #include "client_cfg.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 H_AUTO_DECL(RZ_WeatherManagerClient)
 
 using namespace NLMISC;
@@ -132,7 +136,7 @@ void CWeatherManagerClient::update(uint64 day, float hour, const CWeatherContext
 	// build current weather state
 	EGSPD::CSeason::TSeason season = CRyzomTime::getSeasonByDay((uint32)day);
 	//
-	manualUpdate(day, hour, wc, weatherValue, season);
+	manualUpdateImpl(day, hour, wc, weatherValue, season);
 	_LastEvalHour = hour;
 	_LastEvalDay  = day;
 }
@@ -144,28 +148,39 @@ void CWeatherManagerClient::update(uint64 day, float hour, const CWeatherContext
 	// get the weather value for the current date
 	nlassert(wc.WFP);
 	float weatherValue = ::getBlendedWeather(day, hour, *(wc.WFP), wc.WF);
+
+	// calculate next weather cycle and ingame hour for it
+	uint64 cycle = ((day * wc.WFP->DayLength) + (uint) hour) / wc.WFP->CycleLength;
+	uint64 cycleDay = ((cycle + 1) * wc.WFP->CycleLength) / wc.WFP->DayLength;
+	_NextWeatherHour = ((cycle + 1) * wc.WFP->CycleLength) % wc.WFP->DayLength;
+	_NextWeatherValue = ::getBlendedWeather(cycleDay, _NextWeatherHour, *(wc.WFP), wc.WF);
+
 	// build current weather state
 	EGSPD::CSeason::TSeason season = CRyzomTime::getSeasonByDay((uint32)day);
 	//
-	manualUpdate(day, hour, wc, weatherValue, season, camMat, continent);
+	manualUpdateImpl(day, hour, wc, weatherValue, season, camMat, continent);
 	_LastEvalHour = hour;
 	_LastEvalDay  = day;
 }
 
-
-
 //================================================================================================
 void CWeatherManagerClient::manualUpdate(uint64 day, float hour, const CWeatherContext &wc, float weatherValue, EGSPD::CSeason::TSeason season, const NLMISC::CMatrix &camMat, const CContinent &continent)
 {
+	manualUpdateImpl(day, hour, wc, weatherValue, season, camMat, continent);
+	_LastEvalHour = hour;
+	_LastEvalDay = day;
+}
+
+//================================================================================================
+void CWeatherManagerClient::manualUpdateImpl(uint64 day, float hour, const CWeatherContext &wc, float weatherValue, EGSPD::CSeason::TSeason season, const NLMISC::CMatrix &camMat, const CContinent &continent)
+{
 	H_AUTO_USE(RZ_WeatherManagerClient)
 	if (!wc.WF) return;
-	manualUpdate(day, hour, wc, weatherValue, season);
+	manualUpdateImpl(day, hour, wc, weatherValue, season);
 	setupFXs(camMat, wc.GR, continent);
 	setupWind(&(wc.WF[season]));
 	float scaledWeatherValue = weatherValue * (wc.WF[season].getNumWeatherSetups() - 1);
 	updateThunder(day, hour, wc, true, scaledWeatherValue, season);
-	_LastEvalHour = hour;
-	_LastEvalDay  = day;
 
 	// Sound stuff
 	if (SoundMngr != 0)
@@ -250,9 +265,16 @@ void CWeatherManagerClient::manualUpdate(uint64 day, float hour, const CWeatherC
 	}
 }
 
-
 //================================================================================================
 void CWeatherManagerClient::manualUpdate(uint64 day, float hour, const CWeatherContext &wc, float weatherValue, EGSPD::CSeason::TSeason season)
+{
+	manualUpdateImpl(day, hour, wc, weatherValue, season);
+	_LastEvalHour = hour;
+	_LastEvalDay = day;
+}
+
+//================================================================================================
+void CWeatherManagerClient::manualUpdateImpl(uint64 day, float hour, const CWeatherContext &wc, float weatherValue, EGSPD::CSeason::TSeason season)
 {
 	H_AUTO_USE(RZ_WeatherManagerClient)
 	if (!wc.WF) return;
@@ -269,10 +291,7 @@ void CWeatherManagerClient::manualUpdate(uint64 day, float hour, const CWeatherC
 		// blend client specific part
 		CWeatherStateClient::blend(_CurrWeatherStateClient, safe_cast<const CWeatherSetupClient *>(floorSetup)->WeatherStateClient, safe_cast<const CWeatherSetupClient *>(ceilSetup)->WeatherStateClient, blendFactor);
 	}
-	_LastEvalHour = hour;
-	_LastEvalDay  = day;
 }
-
 
 //================================================================================================
 void CWeatherManagerClient::setupWind(const CWeatherFunction *wf)

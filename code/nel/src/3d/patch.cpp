@@ -38,6 +38,10 @@ using	namespace	NLMISC;
 // Define this to remove user color (debug)
 // #define NEL_FORCE_NO_USER_COLOR
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
@@ -604,7 +608,8 @@ void			CPatch::addRefTessBlocks()
 	uint	i;
 
 	TessBlockRefCount++;
-	if(TessBlocks.size()==0)
+
+	if (TessBlocks.empty())
 	{
 		// Allocate the tessblocks.
 		//==========
@@ -1629,7 +1634,7 @@ void			CPatch::serial(NLMISC::IStream &f)
 
 			// then just copy to TileColors.
 			TileColors.resize(tmpArray.size());
-			if(TileColors.size()>0)
+			if(!TileColors.empty())
 			{
 				memcpy(&TileColors[0], &tmpArray[0], TileColors.size()*sizeof(CTileColor));
 			}

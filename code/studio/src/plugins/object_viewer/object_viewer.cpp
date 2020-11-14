@@ -120,7 +120,7 @@ void CObjectViewer::init( NL3D::UDriver *driver )
 
 	NL3D::CBloomEffect::instance().setDriver(_Driver);
 	NL3D::CBloomEffect::instance().setScene(_Scene);
-	NL3D::CBloomEffect::instance().init(!_Direct3D);
+	NL3D::CBloomEffect::instance().init();
 	NL3D::CBloomEffect::instance().setDensityBloom(uint8(_BloomDensity));
 	NL3D::CBloomEffect::instance().setSquareBloom(_BloomSquare);
 
@@ -172,7 +172,7 @@ void CObjectViewer::renderDriver()
 	// Render the scene.
 	if((NL3D::CBloomEffect::instance().getDriver() != 0) && (_BloomEffect))
 	{
-		NL3D::CBloomEffect::instance().initBloom();
+		NL3D::CBloomEffect::instance().init();
 	}
 	_Driver->clearBuffers(_BackgroundColor);
 }
@@ -184,8 +184,7 @@ void CObjectViewer::renderScene()
 
 	if((NL3D::CBloomEffect::instance().getDriver() != 0) && (_BloomEffect))
 	{
-		NL3D::CBloomEffect::instance().endBloom();
-		NL3D::CBloomEffect::instance().endInterfacesDisplayBloom();
+		NL3D::CBloomEffect::instance().applyBloom();
 	}
 }
 

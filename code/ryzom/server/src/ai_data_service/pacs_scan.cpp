@@ -18,6 +18,7 @@
 #include "nel/misc/command.h"
 #include "nel/misc/variable.h"
 
+#include "nel/misc/common.h"
 #include "nel/misc/aabbox.h"
 #include "nel/misc/vector.h"
 #include "nel/misc/vectord.h"
@@ -48,7 +49,7 @@
 
 
 // Server share
-#include "server_share/bmp4image.h"
+#include "game_share/bmp4image.h"
 #include "server_share/continent_container.h"
 
 
@@ -1346,12 +1347,14 @@ public:
 				CComputeCell	*cell =	_WorldMap.getComputeCell(scanline);
 
 				{
-					uint	i;
-					for (i=0; i<16*16; ++i)
+					for (uint i = 0; i < 16; ++i)
 					{
-						toposGridList[0][i].topos[0]	=
-						toposGridList[0][i].topos[1]	=
-						toposGridList[0][i].topos[2]	=	-1;
+						for (uint j = 0; j < 16; ++j)
+						{
+							toposGridList[i][j].topos[0]	=
+							toposGridList[i][j].topos[1]	=
+							toposGridList[i][j].topos[2]	=	-1;
+						}
 					}
 				}
 
@@ -1651,7 +1654,7 @@ public:
 									first.flags = (topNode.isInWater() ? 1 : 0) + (topNode.isInNogo() ? 2 : 0);
 
 									// push first position
-									stacks[first.flags].insert(make_pair<sint, CWorldPosition>(first.flags, stwp));
+									stacks[first.flags].insert(std::pair<sint, CWorldPosition>(first.flags, stwp));
 
 									while (true)
 									{
@@ -1750,11 +1753,11 @@ public:
 													}
 													if (tmp.getTopologyNode().Id == topNode.Id)
 													{
-														stacks[0].insert(make_pair<sint, CWorldPosition>(ndist, tmp));
+														stacks[0].insert(std::pair<sint, CWorldPosition>(ndist, tmp));
 													}
 													else
 													{
-														stacks[tmpflags+1].insert(make_pair<sint, CWorldPosition>(ndist, tmp));
+														stacks[tmpflags + 1].insert(std::pair<sint, CWorldPosition>(ndist, tmp));
 													}
 												}										
 											}
@@ -1977,7 +1980,7 @@ public:
 		CBMP4Image<2,2>::SHdr		imageHdr(imageWidth, imageHeight);
 		CBMP4Image<2,2>::SPalette	imagePalette;
 
-		FILE	*outf = fopen((OutputPath+name+".bmp").c_str(),"wb");
+		FILE	*outf = nlfopen(OutputPath+name+".bmp", "wb");
 
 		if (outf == NULL)
 			return;
@@ -2068,7 +2071,7 @@ public:
 
 		_WorldMap.clear();
 		string	ext = CFile::getExtension(name);
-		if (ext == "")
+		if (ext.empty())
 			ext = "cwmap2";
 		CIFile	f(OutputPath+CFile::getFilenameWithoutExtension(name)+"."+ext);
 		f.serial(_WorldMap);
@@ -2093,8 +2096,8 @@ public:
 		CBMP4Image<2,2>::SHdr		imageHdr(imageWidth, imageHeight);
 		CBMP4Image<2,2>::SPalette	imagePalette;
 
-		FILE	*outf = fopen((OutputPath+name+".bmp").c_str(),"wb");
-		FILE	*outfh = fopen((OutputPath+name+"_hm.bmp").c_str(),"wb");
+		FILE	*outf = nlfopen(OutputPath+name+".bmp", "wb");
+		FILE	*outfh = nlfopen(OutputPath+name+"_hm.bmp", "wb");
 
 		if (outf == NULL)
 			return;
@@ -2210,7 +2213,7 @@ public:
 
 		_WorldMap.clear();
 		string	ext = CFile::getExtension(name);
-		if (ext == "")
+		if (ext.empty())
 			ext = "cw_map2";
 		
 		CIFile	f(CFile::getPath(name) +  CFile::getFilenameWithoutExtension(name)+"."+ext);
@@ -2465,9 +2468,17 @@ NLMISC_COMMAND(setDefaultStart,"Set the default start point for all continents",
 
 	CVectorD	startPoint;
 
-	startPoint.x = atof(args[0].c_str());
-	startPoint.y = atof(args[1].c_str());
-	startPoint.z = (args.size() < 3 ? 0.0 : atof(args[2].c_str()));
+	NLMISC::fromString(args[0], startPoint.x);
+	NLMISC::fromString(args[1], startPoint.y);
+
+	if (args.size() > 2)
+	{
+		NLMISC::fromString(args[2], startPoint.z);
+	}
+	else
+	{
+		startPoint.z = 0.0;
+	}
 
 	DefaultStartPoint = startPoint;
 
@@ -2921,13 +2932,15 @@ NLMISC_COMMAND(testPacsMove, "test a pacs move", "<continent> <x> <y> <dx> <dy>"
 	if (args.size() != 5)
 		return false;
 
-	CPacsCruncher	pc;
+	CPacsCruncher pc;
 
-	string		name = args[0];
-	double		x = atof(args[1].c_str());
-	double		y = atof(args[2].c_str());
-	double		dx = atof(args[3].c_str());
-	double		dy = atof(args[4].c_str());
+	string name = args[0];
+
+	double x, y, dx, dy;
+	NLMISC::fromString(args[1], x);
+	NLMISC::fromString(args[2], y);
+	NLMISC::fromString(args[3], dx);
+	NLMISC::fromString(args[4], dy);
 
 	pc.init(name);
 

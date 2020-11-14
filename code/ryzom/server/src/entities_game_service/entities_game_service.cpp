@@ -1223,25 +1223,29 @@ void CPlayerService::initConfigFileVars()
 		MaxNbGuilds = 1000;
 
 	CConfigFile::CVar *varMaxNbObjects = ConfigFile.getVarPtr("NbObjectsLimit");
-	if ( varMaxNbPlayers )
-		MaxNbObjects= varMaxNbPlayers->asInt();
+	if ( varMaxNbObjects )
+		MaxNbObjects = varMaxNbObjects->asInt();
 	else
 		MaxNbObjects = 1000;
+
 	CConfigFile::CVar *varMaxNbNpcSpawnedByEGS = ConfigFile.getVarPtr("NbNpcSpawnedByEGSLimit");
-	if ( varMaxNbPlayers )
-		MaxNbNpcSpawnedByEGS = varMaxNbPlayers->asInt();
+	if ( varMaxNbNpcSpawnedByEGS )
+		MaxNbNpcSpawnedByEGS = varMaxNbNpcSpawnedByEGS->asInt();
 	else
 		MaxNbNpcSpawnedByEGS = 50;
+
 	CConfigFile::CVar *varMaxNbForageSources = ConfigFile.getVarPtr("NbForageSourcesLimit");
 	if ( varMaxNbForageSources )
 		MaxNbForageSources = varMaxNbForageSources->asInt();
 	else
 		MaxNbForageSources = 2000;
+
 	CConfigFile::CVar *varMaxNbToxicClouds = ConfigFile.getVarPtr("NbToxicCloudsLimit");
 	if ( varMaxNbToxicClouds )
 		MaxNbToxicClouds = varMaxNbToxicClouds->asInt();
 	else
 		MaxNbToxicClouds = 1000;
+
 	nlinfo( "NbPlayersLimit=%u NbObjectsLimit=%u NbNpcSpawnedByEGSLimit=%u NbForageSourcesLimit=%u NbToxicCloudsLimit=%u NbGuildLimit=%u", MaxNbPlayers, MaxNbObjects, MaxNbNpcSpawnedByEGS, MaxNbForageSources, MaxNbToxicClouds, MaxNbGuilds );
 
 	CConfigFile::CVar *varExportDepositContents = ConfigFile.getVarPtr("ExportDepositContents");
@@ -1614,7 +1618,7 @@ nlassert(nodeLeaf->getType() == ICDBStructNode::TEXT);
 // {
 // 	if( args.size() == 0 )
 // 		return false;
-// 
+//
 // 	NLMEMORY::StatisticsReport( args[0].c_str(), args.size() > 1 );
 // 	return true;
 //}
@@ -1720,7 +1724,7 @@ NLMISC_COMMAND(loadCharacterNames,"load all character save games and extract nam
 		pdr.clear();
 		{
 			H_AUTO(LoadCharacterNamesLoadFile);
-			pdr.readFromFile((*it).second.FileName.c_str());
+			pdr.readFromFile((*it).second.FileName);
 		}
 		CCharacterNameExtraction nameExtractor;
 		{
@@ -1760,25 +1764,25 @@ NLMISC_COMMAND(loadCharacterNames,"load all character save games and extract nam
 //				// std read tst
 //				static CPersistentDataRecord pdrRead("");
 //				pdrRead.clear();
-//				pdrRead.readFromBinFile(files[i].c_str());
-//				pdrRead.writeToTxtFile((saveDir + "test/txt_read/" + CFile::getFilenameWithoutExtension(file) + ".txt").c_str(), CPersistentDataRecord::LINES_STRING);
+//				pdrRead.readFromBinFile(files[i]);
+//				pdrRead.writeToTxtFile(saveDir + "test/txt_read/" + CFile::getFilenameWithoutExtension(file) + ".txt", CPersistentDataRecord::LINES_STRING);
 //
 //				// read write tst (even with a bad used RyzomStore class)
 //				static CPersistentDataRecordRyzomStore pdr;
 //				pdr.clear();
-//				pdr.readFromBinFile(files[i].c_str());
+//				pdr.readFromBinFile(files[i]);
 //				TTime	t0= CTime::getLocalTime();
-//				pdr.writeToBinFile((saveDir + "test/bin_new/" + file).c_str());
+//				pdr.writeToBinFile(saveDir + "test/bin_new/" + file);
 //				TTime	t1= CTime::getLocalTime();
 //				nlinfo("resaved %s in %d ms", file.c_str(), uint32(t1-t0));
-//				pdr.writeToTxtFile((saveDir + "test/txt_before/" + CFile::getFilenameWithoutExtension(file) + ".txt").c_str(), CPersistentDataRecord::LINES_STRING);
+//				pdr.writeToTxtFile(saveDir + "test/txt_before/" + CFile::getFilenameWithoutExtension(file) + ".txt", CPersistentDataRecord::LINES_STRING);
 //			}
 //			// ReLoad
 //			{
 //				static CPersistentDataRecordRyzomStore pdr;
 //				pdr.clear();
-//				pdr.readFromBinFile((saveDir + "test/bin_new/" + file).c_str());
-//				pdr.writeToTxtFile((saveDir + "test/txt_after/" + CFile::getFilenameWithoutExtension(file) + ".txt").c_str(), CPersistentDataRecord::LINES_STRING);
+//				pdr.readFromBinFile(saveDir + "test/bin_new/" + file);
+//				pdr.writeToTxtFile(saveDir + "test/txt_after/" + CFile::getFilenameWithoutExtension(file) + ".txt", CPersistentDataRecord::LINES_STRING);
 //			}
 //		}
 //	}
@@ -1813,10 +1817,10 @@ NLMISC_COMMAND(loadCharacterNames,"load all character save games and extract nam
 //				{
 //					static CPersistentDataRecord pdr;
 //					pdr.clear();
-//					pdr.readFromFile(files[i].c_str());
+//					pdr.readFromFile(files[i]);
 //					string txtFile= files[i];
 //					strFindReplace(txtFile, ".bin", ".txt");
-//					pdr.writeToTxtFile(txtFile.c_str(), CPersistentDataRecord::LINES_STRING);
+//					pdr.writeToTxtFile(txtFile, CPersistentDataRecord::LINES_STRING);
 //				}
 //			}
 //		}
@@ -1894,7 +1898,7 @@ void CPlayerService::release()
 //---------------------------------------------------
 void cbConnection( const std::string &serviceName, NLNET::TServiceId serviceId, void *arg )
 {
-	// inform player about the service event that occured
+	// inform player about the service event that occurred
 #if !FINAL_VERSION
 	PlayerManager.broadcastMessage( 1, 0, 0, string("System event : Service UP : ")+serviceName);
 #endif
@@ -2233,9 +2237,11 @@ NLMISC_COMMAND(create_obj,"create a new object","<type>")
 	if( args.size() > 0 )
 	{
 		CWorldObjectLocation loc;
+		uint32 type;
 		uint16 quality = 0;
 		uint32 hp = 0;
-		WorldObjectManager.createObject(NLMISC::fromString(args[2].c_str()),loc,quality,hp);
+		NLMISC::fromString(args[0], type);
+		WorldObjectManager.createObject(type,loc,quality,hp);
 		return true;
 	}
 	return false;
@@ -3244,8 +3250,8 @@ NLMISC_COMMAND(moveCharAndOfflineCmdToHashTable, "Move all character and offline
 				CFile::createDirectory(PlayerManager.getCharacterPath(userId, false));
 				// move the file
 				CFile::moveFile(
-					(PlayerManager.getCharacterPath(userId, false)+CFile::getFilename(allChars[i])).c_str(),
-					allChars[i].c_str()
+					PlayerManager.getCharacterPath(userId, false)+CFile::getFilename(allChars[i]),
+					allChars[i]
 					);
 			}
 		}
@@ -3271,8 +3277,8 @@ NLMISC_COMMAND(moveCharAndOfflineCmdToHashTable, "Move all character and offline
 				CFile::createDirectory(PlayerManager.getOfflineCommandPath(userId, false));
 				// move the file
 				CFile::moveFile(
-					(PlayerManager.getOfflineCommandPath(userId, false)+CFile::getFilename(allCommands[i])).c_str(),
-					allCommands[i].c_str()
+					PlayerManager.getOfflineCommandPath(userId, false)+CFile::getFilename(allCommands[i]),
+					allCommands[i]
 					);
 			}
 		}
@@ -3858,7 +3864,7 @@ NLMISC_COMMAND(displayDatabaseEntry," display a database entry value","<entity i
 			try
 			{
 				sint64 value = e->_PropertyDatabase.x_getProp(entry);
-				log.displayNL("For player %s, buffer %s : value %"NL_I64"d", id.toString().c_str(), entry.c_str(), value );
+				log.displayNL("For player %s, buffer %s : value %" NL_I64 "d", id.toString().c_str(), entry.c_str(), value );
 			}
 			catch (const CCDBSynchronised::ECDBNotFound &)
 			{
@@ -3867,7 +3873,7 @@ NLMISC_COMMAND(displayDatabaseEntry," display a database entry value","<entity i
 		}
 		else
 		{
-			log.displayNL("Unknown entity %s ",id.toString().c_str());
+			log.displayNL("Unknown entity %s ", id.toString().c_str());
 		}
 		return true;
 	}
@@ -3898,7 +3904,7 @@ NLMISC_COMMAND( db, "Display or set the value of a property in the database", "<
 			try
 			{
 				sint64 value = e->_PropertyDatabase.x_getProp( entry );
-				log.displayNL( "%"NL_I64"d", value );
+				log.displayNL( "%" NL_I64 "d", value );
 				res = true;
 			}
 			catch (const CCDBSynchronised::ECDBNotFound& )
@@ -3910,7 +3916,8 @@ NLMISC_COMMAND( db, "Display or set the value of a property in the database", "<
 		{
 			// Set
 			sint64 value;
-			sscanf( args[2].c_str(), "%"NL_I64"d", &value );
+			fromString(args[2], value);
+
 			if ( (args.size() > 3) && (args[3]!="0") )
 			{
 				res = e->_PropertyDatabase.x_setPropButDontSend( entry, value );
@@ -3999,7 +4006,7 @@ NLMISC_COMMAND(displayMoney," display_seed","<entity id(id:type:crea:dyn)>")
 		CCharacter *e = PlayerManager.getChar(id);
 		if( e )
 		{
-			log.displayNL("displayMoney: %"NL_I64"%u", e->getMoney() );
+			log.displayNL("displayMoney: %" NL_I64 "%u", e->getMoney() );
 		}
 		else
 		{

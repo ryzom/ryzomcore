@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (inputfile == "")
+	if (inputfile.empty())
 	{
 		nlwarning("Error: missing input file(s)");
 		exit(EXIT_FAILURE);

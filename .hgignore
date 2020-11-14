@@ -124,6 +124,9 @@ aes_state.txt
 *.kdev4
 .kdev4
 
+# intellij project folder
+.idea/
+
 # Python cache
 *.pyd
 *.pyc
@@ -139,8 +142,6 @@ moc_*.cpp
 *.cache
 *.patch
 *.7z
-external
-external_stlport
 3rdParty
 .svn
 thumbs.db
@@ -241,6 +242,9 @@ external_stlport
 nel_tools*
 ryzom_tools*
 
+#personal projects
+personal/
+
 #Dumps
 *.dmp
 
@@ -260,3 +264,5 @@ code/web/public_php/role_support
 code/web/public_php/role_domain
 code/web/public_php/db_version_ring
 code/web/public_php/config_user.php
+code/nel/tools/build_gamedata/processes/pz/build_world_packed_col.cfg
+code/nel/tools/build_gamedata/processes/cartographer/island_screenshots.cfg

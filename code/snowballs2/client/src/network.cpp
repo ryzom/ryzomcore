@@ -379,7 +379,7 @@ void	updateNetwork()
 		TextContext->setHotSpot (UTextContext::MiddleTop);
 		TextContext->setColor (CRGBA(255, 255, 255, 255));
 		TextContext->setFontSize (14);
-		TextContext->printfAt (0.5f, 0.99f, "d:%"NL_I64"u u:%"NL_I64"u / d:%"NL_I64"u u:%"NL_I64"u / d:%"NL_I64"u u:%"NL_I64"u",
+		TextContext->printfAt (0.5f, 0.99f, "d:%" NL_I64 "u u:%" NL_I64 "u / d:%" NL_I64 "u u:%" NL_I64 "u / d:%" NL_I64 "u u:%" NL_I64 "u",
 			Connection->bytesDownloaded (), Connection->bytesUploaded (),
 			Connection->getBytesReceived (),Connection->getBytesSent (),
 			newBytesDownloaded, newBytesUploaded);

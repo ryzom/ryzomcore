@@ -22,6 +22,10 @@
 #include "ext_al.h"
 #include "effect_al.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 
@@ -197,7 +201,7 @@ CSoundDriverAL::~CSoundDriverAL()
 	
 	// Remove the allocated (but not exported) source and buffer names-
 	// Release internal resources of all remaining ISource instances
-	if (_Sources.size())
+	if (!_Sources.empty())
 	{
 		nlwarning("AL: _Sources.size(): '%u'", (uint32)_Sources.size());
 		set<CSourceAL *>::iterator it(_Sources.begin()), end(_Sources.end());
@@ -206,7 +210,7 @@ CSoundDriverAL::~CSoundDriverAL()
 	}
 	if (!_Buffers.empty()) alDeleteBuffers(compactAliveNames(_Buffers, alIsBuffer), &*_Buffers.begin());	
 	// Release internal resources of all remaining IEffect instances
-	if (_Effects.size())
+	if (!_Effects.empty())
 	{
 		nlwarning("AL: _Effects.size(): '%u'", (uint32)_Effects.size());
 		set<CEffectAL *>::iterator it(_Effects.begin()), end(_Effects.end());
@@ -630,7 +634,11 @@ void CSoundDriverAL::commit3DChanges()
 /// Write information about the driver to the output stream.
 void CSoundDriverAL::writeProfile(std::string& out)
 {
-	// TODO
+	out = toString("OpenAL\n");
+	out += toString("Source size: %u\n", (uint32)_Sources.size());
+	out += toString("Effects size: %u\n", (uint32)_Effects.size());
+
+	// TODO: write other useful information like OpenAL version and supported extensions
 }
 
 // Does not create a sound loader .. what does it do then?

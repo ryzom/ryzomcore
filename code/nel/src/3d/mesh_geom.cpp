@@ -19,6 +19,9 @@
 #include "nel/3d/mesh_geom.h"
 #include "nel/3d/mesh_block_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

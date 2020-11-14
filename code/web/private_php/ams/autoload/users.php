@@ -252,8 +252,8 @@ class Users{
      * @param $length the length of the SALT which is by default 2
      * @return a random salt of 2 chars
      */
-     public static function generateSALT( $length = 2 )
-    {
+     public static function generateSALT( $length = 16 )
+     {
          // start with a blank salt
         $salt = "";
          // define possible characters - any character in this string can be
@@ -282,6 +282,10 @@ class Users{
                  }
              }
          // done!
+        if ($length > 2)
+        {
+             $salt = '$6$'.$salt;
+        }
         return $salt;
      }
 
@@ -332,16 +336,31 @@ class Users{
      public static function createPermissions($pvalues) {
 
           try {
-               $values = array('username' =>  $pvalues[0]);
+               // bind to the shard database (guess so :p)
                $dbs = new DBLayer("shard");
-               $sth = $dbs->selectWithParameter("UId", "user", $values, "Login= :username");
-               $result = $sth->fetchAll();
-               /*foreach ($result as $UId) {
-                   $ins_values = array('UId' => $UId['UId'], 'clientApplication' => 'r2', 'AccessPrivilege' => 'OPEN');
-                   $dbs->insert("permission", $ins_values);
-                   $ins_values['clientApplication'] = 'ryzom_open';
-                   $dbs->insert("permission", $ins_values);
-               }*/ // FIXME: GARBAGE
+
+               // retrieve the user UId
+               $values = array('username' =>  $pvalues[0]);
+               $statement = $dbs->selectWithParameter("UId", "user", $values, "Login= :username");
+               $result = $statement->fetchAll();
+               $UId = $result['0']['UId'];
+
+               // retrieve the default access privileges (don't understand what exactly is done)
+               $dbl = new DBLayer("lib");
+               $statement = $dbl->execute("SELECT Value FROM `settings` WHERE `Setting` = :setting", Array('setting' => 'Domain_Auto_Add'));
+               //$statement = $dbl->execute("SELECT * FROM `settings` WHERE `Setting` = :setting", Array('setting' => 'Domain_Auto_Add'));
+               $json = $statement->fetch();
+               $accessPriv = $json['Value'];
+               //$accessPriv = json_decode($json['Value'],true);
+
+                // get all shardIds and domain_ids
+                $statement = $dbs -> executeWithoutParams( "SELECT ShardId, domain_id FROM shard" );
+                $shardIds = $statement -> fetchAll();
+                
+                foreach($shardIds as $shardId) { // add default access privileges to the user for each shard
+                  $ins_values = array('UId' => $UId, 'DomainId' => $shardId['domain_id'], 'ShardId' => $shardId['ShardId'], 'AccessPrivilege' => $accessPriv);
+                  $dbs->insert("permission", $ins_values);
+                }
           }
           catch (PDOException $e) {
                //oh noooz, the shard is offline! Put it in query queue at ams_lib db!

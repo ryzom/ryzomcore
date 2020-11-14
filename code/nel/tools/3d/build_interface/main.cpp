@@ -24,8 +24,7 @@
 #include "nel/misc/log.h"
 #include "nel/misc/path.h"
 #include "nel/misc/uv.h"
-
-//#include "windows.h"
+#include "nel/misc/cmd_args.h"
 
 #include <vector>
 #include <string>
@@ -36,21 +35,9 @@ using namespace std;
 using namespace NLMISC;
 
 // ***************************************************************************
-//char sExeDir[MAX_PATH];
-std::string sExeDir;
-NLMISC::CApplicationContext _ApplicationContext;
-
-void outString (const string &sText)
+void outString(const string &sText)
 {
-	std::string sCurDir = CPath::getCurrentPath();
-	CPath::setCurrentPath(sExeDir.c_str());
-	//char sCurDir[MAX_PATH];
-	//GetCurrentDirectory (MAX_PATH, sCurDir);
-	//SetCurrentDirectory (sExeDir);
-	NLMISC::createDebug ();
-	NLMISC::InfoLog->displayRaw(sText.c_str());
-	//SetCurrentDirectory (sCurDir);
-	CPath::setCurrentPath(sCurDir.c_str());
+	printf("%s\n", sText.c_str());
 }
 
 // ***************************************************************************
@@ -59,7 +46,7 @@ const	uint32	posStep= 4;
 
 // ***************************************************************************
 // Try all position to put pSrc in pDst
-bool tryAllPos (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 &x, sint32 &y)
+bool tryAllPos(NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 &x, sint32 &y)
 {
 	uint32 i, j;
 	CObjectVector<uint8> &rSrcPix = pSrc->getPixels();
@@ -99,7 +86,7 @@ bool tryAllPos (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 &x, sint32 
 }
 
 // ***************************************************************************
-void	putPixel(uint8 *dst, uint8 *src, bool alphaTransfert)
+void putPixel(uint8 *dst, uint8 *src, bool alphaTransfert)
 {
 	dst[0] = src[0];
 	dst[1] = src[1];
@@ -111,7 +98,7 @@ void	putPixel(uint8 *dst, uint8 *src, bool alphaTransfert)
 }
 
 // ***************************************************************************
-bool putIn (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 x, sint32 y, bool alphaTransfert=true)
+bool putIn(NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 x, sint32 y, bool alphaTransfert=true)
 {
 	uint8 *rSrcPix = &pSrc->getPixels()[0];
 	uint8 *rDstPix = &pDst->getPixels()[0];
@@ -158,18 +145,17 @@ bool putIn (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 x, sint32 y, bo
 }
 
 // ***************************************************************************
-string getBaseName (const string &fullname)
+string getBaseName(const string &fullname)
 {
-	string sTmp2;
+	string basename;
 	string::size_type pos = fullname.rfind('_');
-	if (pos != string::npos)
-		sTmp2 = fullname.substr(0, pos+1);
-	return sTmp2;
+	if (pos != string::npos) basename = fullname.substr(0, pos+1);
+	return basename;
 }
 
 // ***************************************************************************
 // resize the bitmap to the next power of 2 and preserve content
-void enlargeCanvas (NLMISC::CBitmap &b)
+void enlargeCanvas(NLMISC::CBitmap &b)
 {
 	sint32 nNewWidth = b.getWidth(), nNewHeight = b.getHeight();
 	if (nNewWidth > nNewHeight)
@@ -188,65 +174,217 @@ void enlargeCanvas (NLMISC::CBitmap &b)
 	b = b2;
 }
 
+bool writeFileDependingOnFilename(const std::string &filename, CBitmap &bitmap)
+{
+	NLMISC::COFile out;
+
+	if (out.open(filename))
+	{
+		if (toLower(filename).find(".png") != string::npos)
+		{
+			bitmap.writePNG(out, 32);
+		}
+		else
+		{
+			bitmap.writeTGA(out, 32);
+		}
+
+		out.close();
+
+		return true;
+	}
+
+	return false;
+}
+
+
 // ***************************************************************************
 // main
 // ***************************************************************************
-int main(int nNbArg, char **ppArgs)
+int main(int argc, char **argv)
 {
-	//GetCurrentDirectory (MAX_PATH, sExeDir);
-	sExeDir = CPath::getCurrentPath();
+	CApplicationContext applicationContext;
 
-	if (nNbArg < 3)
-	{
-		outString ("ERROR : Wrong number of arguments\n");
-		outString ("USAGE : build_interface [-s<existing_uv_txt_name>] <out_tga_name> <path_maps1> [path_maps2] [path_maps3] ....\n");
-		outString ("   -s : build a subset of an existing interface definition while preserving the existing texture ids,");
-		outString (" to support freeing up VRAM by switching to the subset without rebuilding the entire interface\n");
-		return -1;
-	}
-	
+	// Parse Command Line.
+	NLMISC::CCmdArgs args;
+
+	args.setDescription("Build a huge interface texture from several small elements to optimize video memory usage.");
+	args.addArg("f", "format", "format", "Output format (png or tga)");
+	args.addArg("s", "subset", "existing_uv_txt_name", "Build a subset of an existing interface definition while preserving the existing texture ids, to support freeing up VRAM by switching to the subset without rebuilding the entire interface.");
+	args.addArg("x", "extract", "", "Extract all interface elements from <output_filename> to <input_path>.");
+	args.addAdditionalArg("output_filename", "PNG or TGA file to generate", true);
+	args.addAdditionalArg("input_path", "Path that containts interfaces elements", false);
+	args.addArg("", "no-border", "", "Disable border duplication. Enabled by default");
+
+	if (!args.parse(argc, argv)) return 1;
+
 	// build as a subset of existing interface
 	bool buildSubset = false;
 	string existingUVfilename;
-	list<string> inputDirs;
-	for ( uint i=1; (sint)i<nNbArg; ++i )
+
+	if (args.haveArg("s"))
 	{
-		if ( ppArgs[i][0] == '-' )
-		{
-			switch ( ppArgs[i][1] )
-			{
-			case 'S':
-			case 's':
-				buildSubset = true;
-				existingUVfilename = string( ppArgs[i]+2 );
-				break;
-			default:
-				break;
-			}
-		}
-		else
-			inputDirs.push_back(ppArgs[i]);
+		buildSubset = true;
+		existingUVfilename = args.getArg("s").front();
 	}
 
-	string fmtName;
-	uint iNumDirs =  (uint)inputDirs.size(); 
-	if( iNumDirs )
+	//
+	uint borderSize = 1;
+	if (args.haveLongArg("no-border"))
 	{
-		fmtName = inputDirs.front();
-		inputDirs.pop_front();
-		--iNumDirs;
+		borderSize = 0;
 	}
+
+	// extract all interface elements
+	bool extractElements = args.haveArg("x");
+
+	// output format
+	std::string outputFormat;
+
+	if (args.haveArg("f"))
+	{
+		outputFormat = args.getArg("f").front();
+
+		if (outputFormat != "png" && outputFormat != "tga")
+		{
+			outString(toString("ERROR: Format %s not supported, only png and tga formats are", outputFormat.c_str()));
+			return -1;
+		}
+	}
+
+	std::vector<std::string> inputDirs = args.getAdditionalArg("input_path");
+
+	string fmtName = args.getAdditionalArg("output_filename").front();
+
+	// append PNG extension if no one provided
+	if (fmtName.rfind('.') == string::npos) fmtName += "." + (outputFormat.empty() ? "png":outputFormat);
+
+	if (extractElements)
+	{
+		if (inputDirs.empty())
+		{
+			outString(toString("ERROR: No input directories specified"));
+			return -1;
+		}
+
+		// name of UV file
+		existingUVfilename = fmtName.substr(0, fmtName.rfind('.'));
+		existingUVfilename += ".txt";
+
+		// Load existing UV file
+		CIFile iFile;
+		string filename = CPath::lookup(existingUVfilename, false);
+
+		if (filename.empty() || !iFile.open(filename))
+		{
+			outString(toString("ERROR: Unable to open %s", existingUVfilename.c_str()));
+			return -1;
+		}
+
+		// Load existing bitmap file
+		CIFile bitmapFile;
+
+		if (!bitmapFile.open(fmtName))
+		{
+			outString(toString("ERROR: Unable to open %s", fmtName.c_str()));
+			return -1;
+		}
+
+		// load bitmap
+		CBitmap textureBitmap;
+		uint8 colors = textureBitmap.load(bitmapFile);
+
+		// file already loaded in memory, close it
+		bitmapFile.close();
+
+		if (colors != 32)
+		{
+			outString(toString("ERROR: %s is not a RGBA bitmap", existingUVfilename.c_str()));
+			return -1;
+		}
+
+		// make sure transparent pixels are black
+		textureBitmap.makeTransparentPixelsBlack();
+
+		float textureWidth = (float)textureBitmap.getWidth();
+		float textureHeight = (float)textureBitmap.getHeight();
+
+		char bufTmp[256], tgaName[256];
+		string sTGAname;
+		float uvMinU, uvMinV, uvMaxU, uvMaxV;
+		while (!iFile.eof())
+		{
+			iFile.getline(bufTmp, 256);
+
+			if (sscanf(bufTmp, "%s %f %f %f %f", tgaName, &uvMinU, &uvMinV, &uvMaxU, &uvMaxV) != 5)
+			{
+				nlwarning("Can't parse %s", bufTmp);
+				continue;
+			}
+
+			float xf = uvMinU * textureWidth;
+			float yf = uvMinV * textureHeight;
+			float widthf = (uvMaxU - uvMinU) * textureWidth;
+			float heightf = (uvMaxV - uvMinV) * textureHeight;
+
+			uint x = (uint)xf;
+			uint y = (uint)yf;
+			uint width = (uint)widthf;
+			uint height = (uint)heightf;
+
+			if ((float)x != xf || (float)y != yf || (float)width != widthf || (float)height != heightf)
+			{
+				nlwarning("Wrong round");
+			}
+
+			if (width && height)
+			{
+				// create bitmap
+				CBitmap bitmap;
+				bitmap.resize(width, height);
+				bitmap.blit(textureBitmap, x, y, width, height, 0, 0);
+
+				sTGAname = inputDirs.front() + "/" + tgaName;
+
+				// force specific format instead of using original one
+				if (!outputFormat.empty())
+				{
+					sTGAname = sTGAname.substr(0, sTGAname.rfind('.'));
+					sTGAname += "." + outputFormat;
+				}
+
+				// write the file
+				if (writeFileDependingOnFilename(sTGAname, bitmap))
+				{
+					outString(toString("Writing file %s", sTGAname.c_str()));
+				}
+				else
+				{
+					outString(toString("Unable to writing file %s", sTGAname.c_str()));
+				}
+			}
+			else
+			{
+				outString(toString("Bitmap with wrong size"));
+			}
+		}
+
+		return 0;
+	}
+
 	vector<string> AllMapNames;
-	list<string>::iterator it = inputDirs.begin();
-	list<string>::iterator itEnd = inputDirs.end();
+	vector<string>::iterator it = inputDirs.begin(), itEnd = inputDirs.end();
+
 	while( it != itEnd )
 	{
 		string sDir = *it++;
+
 		if( !CFile::isDirectory(sDir) )
 		{
-			outString (string("ERROR : directory ") + sDir + " does not exist\n");
+			outString(toString("ERROR: directory %s does not exist", sDir.c_str()));
 			return -1;
 		}
+
 		CPath::getPathContent(sDir, false, false, true, AllMapNames);
 	}
 
@@ -264,11 +402,39 @@ int main(int nNbArg, char **ppArgs)
 		{
 			pBtmp = new NLMISC::CBitmap;
 			NLMISC::CIFile inFile;
-			if (!inFile.open( AllMapNames[i] )) throw NLMISC::Exception("Unable to open " + AllMapNames[i]);
+
+			if (!inFile.open(AllMapNames[i])) throw NLMISC::Exception(toString("Unable to open %s", AllMapNames[i].c_str()));
 
 			uint8 colors = pBtmp->load(inFile);
 
-			if (colors != 32) throw NLMISC::Exception(AllMapNames[i] + " is using " + toString(colors) + " bits colors, only 32 bit supported!");
+			if (!colors) throw NLMISC::Exception(toString("%s is not a bitmap", AllMapNames[i].c_str()));
+
+			if (pBtmp->getPixelFormat() != CBitmap::RGBA)
+			{
+				outString(toString("Converting %s to RGBA (32 bits), originally using %u bits...", AllMapNames[i].c_str(), (uint)colors));
+				pBtmp->convertToType(CBitmap::RGBA);
+			}
+
+			// duplicate icon border
+			if (borderSize > 0)
+			{
+				NLMISC::CBitmap *tmp = new NLMISC::CBitmap;
+				tmp->resize(pBtmp->getWidth(), pBtmp->getHeight());
+				tmp->blit(pBtmp, 0, 0);
+				// corners
+				tmp->resample(tmp->getWidth() + borderSize * 2, tmp->getHeight() + borderSize * 2);
+				// top, bottom
+				tmp->blit(pBtmp, borderSize, 0);
+				tmp->blit(pBtmp, borderSize, borderSize*2);
+				// left, right
+				tmp->blit(pBtmp, 0, borderSize);
+				tmp->blit(pBtmp, borderSize*2, borderSize);
+				// center
+				tmp->blit(pBtmp, borderSize, borderSize);
+
+				delete pBtmp;
+				pBtmp = tmp;
+			}
 
 			AllMaps[i] = pBtmp;
 		}
@@ -276,7 +442,7 @@ int main(int nNbArg, char **ppArgs)
 		{
 			if (pBtmp) delete pBtmp;
 
-			outString (string("ERROR :") + e.what());
+			outString(toString("ERROR : %s", e.what()));
 			return -1;
 		}
 	}
@@ -310,6 +476,7 @@ int main(int nNbArg, char **ppArgs)
 	vector<NLMISC::CUV> UVMin, UVMax;
 	UVMin.resize (mapSize, NLMISC::CUV(0.0f, 0.0f));
 	UVMax.resize (mapSize, NLMISC::CUV(0.0f, 0.0f));
+
 	for (sint i = 0; i < mapSize; ++i)
 	{
 		sint32 x, y;
@@ -319,40 +486,20 @@ int main(int nNbArg, char **ppArgs)
 			enlargeCanvas (GlobalTexture);
 			enlargeCanvas (GlobalMask);
 		}
+
 		putIn (AllMaps[i], &GlobalTexture, x, y);
 		putIn (AllMaps[i], &GlobalMask, x, y, false);
-		UVMin[i].U = (float)x;
-		UVMin[i].V = (float)y;
-		UVMax[i].U = (float)x+AllMaps[i]->getWidth();
-		UVMax[i].V = (float)y+AllMaps[i]->getHeight();
 
-		/* // Do not remove this is useful for debugging
-		{
-			NLMISC::COFile outTga;
-			string fmtName = ppArgs[1];
-			if (fmtName.rfind('.') == string::npos)
-				fmtName += ".tga";
-			if (outTga.open(fmtName))
-			{
-				GlobalTexture.writeTGA (outTga, 32);
-				outTga.close();
-			}
-		}
-		{
-			NLMISC::COFile outTga;
-			string fmtName = ppArgs[1];
-			if (fmtName.rfind('.') == string::npos)
-				fmtName += "_msk.tga";
-			else
-				fmtName = fmtName.substr(0,fmtName.rfind('.')) + "_msk.tga";
-			if (outTga.open(fmtName))
-			{
-				GlobalMask.writeTGA (outTga, 32);
-				outTga.close();
-			}
-		}*/
+		UVMin[i].U = (float)x + borderSize;
+		UVMin[i].V = (float)y + borderSize;
+		UVMax[i].U = (float)x + AllMaps[i]->getWidth() - borderSize;
+		UVMax[i].V = (float)y + AllMaps[i]->getHeight() - borderSize;
 
-
+#if 0
+		// Do not remove this is useful for debugging
+		writeFileDependingOnFilename(fmtName.substr(0, fmtName.rfind('.')) + "_txt.png", GlobalTexture);
+		writeFileDependingOnFilename(fmtName.substr(0, fmtName.rfind('.')) + "_msk.png", GlobalMask);
+#endif
 	}
 
 	// Convert UV from pixel to ratio
@@ -364,33 +511,17 @@ int main(int nNbArg, char **ppArgs)
 		UVMax[i].V = UVMax[i].V / (float)GlobalTexture.getHeight();
 	}
 
+	// make sure transparent pixels are black
+	GlobalTexture.makeTransparentPixelsBlack();
+
 	// Write global texture file
-	//SetCurrentDirectory (sExeDir);
-	CPath::setCurrentPath(sExeDir.c_str());
-
-	NLMISC::COFile outTga;
-	if (fmtName.rfind('.') == string::npos)
-		fmtName += ".tga";
-	if (outTga.open(fmtName))
+	if (writeFileDependingOnFilename(fmtName, GlobalTexture))
 	{
-		std::string ext;
-		if (toLower(fmtName).find(".png") != string::npos)
-		{
-			ext = "png";
-			GlobalTexture.writePNG (outTga, 32);
-		}
-		else
-		{
-			ext = "tga";
-			GlobalTexture.writeTGA (outTga, 32);
-		}
-
-		outTga.close();
-		outString (toString("Writing %s file : %s\n", ext.c_str(), fmtName.c_str()));
+		outString(toString("Writing %s", fmtName.c_str()));
 	}
 	else
 	{
-		outString (string("ERROR: Cannot write tga file : ") + fmtName + "\n");
+		outString(toString("ERROR: Unable to write %s", fmtName.c_str()));
 	}
 
 	// Write UV text file
@@ -398,22 +529,23 @@ int main(int nNbArg, char **ppArgs)
 	{
 		fmtName = fmtName.substr(0, fmtName.rfind('.'));
 		fmtName += ".txt";
-		FILE *f = fopen (fmtName.c_str(), "wt");
+		FILE *f = nlfopen(fmtName, "wb");
 		if (f != NULL)
 		{
 			for (sint i = 0; i < mapSize; ++i)
 			{
 				// get the string whitout path
-				string fileName= CFile::getFilename(AllMapNames[i]);
-				fprintf (f, "%s %.12f %.12f %.12f %.12f\n", fileName.c_str(), UVMin[i].U, UVMin[i].V, 
-												UVMax[i].U, UVMax[i].V);
+				string fileName = CFile::getFilename(AllMapNames[i]);
+				fprintf (f, "%s %.12f %.12f %.12f %.12f\n", fileName.c_str(), UVMin[i].U, UVMin[i].V, UVMax[i].U, UVMax[i].V);
 			}
+
 			fclose (f);
-			outString (string("Writing UV file : ") + fmtName + "\n");
+
+			outString(toString("Writing UV file %s", fmtName.c_str()));
 		}
 		else
 		{
-			outString (string("ERROR: Cannot write UV file : ") + fmtName + "\n");
+			outString(toString("ERROR: Cannot write UV file %s", fmtName.c_str()));
 		}
 	}
 	else // build as a subset
@@ -421,20 +553,21 @@ int main(int nNbArg, char **ppArgs)
 		// Load existing uv file
 		CIFile iFile;
 		string filename = CPath::lookup (existingUVfilename, false);
-		if( (filename == "") || (!iFile.open(filename)) )
+
+		if( filename.empty() || !iFile.open(filename) )
 		{
-			outString (string("ERROR : could not open file ") + existingUVfilename + "\n");
+			outString(toString("ERROR: Unable to open %s", existingUVfilename.c_str()));
 			return -1;
 		}
 		
 		// Write subset UV text file
 		fmtName = fmtName.substr(0, fmtName.rfind('.'));
 		fmtName += ".txt";
-		FILE *f = fopen (fmtName.c_str(), "wt");
+		FILE *f = nlfopen(fmtName, "wb");
+
 		if (f == NULL)
 		{
-			outString (string("ERROR: Cannot write UV file : ") + fmtName + "\n");
-//			fclose (iFile);
+			outString(toString("ERROR: Unable to write UV file %s", fmtName.c_str()));
 			return -1;
 		}
 
@@ -450,17 +583,27 @@ int main(int nNbArg, char **ppArgs)
 				continue;
 			}
 
+			sTGAname = toLower(string(tgaName));
+
+			// search position of extension
+			std::string tgaExt = CFile::getExtension(sTGAname);
+
+			// remove extension
+			sTGAname = CFile::getFilenameWithoutExtension(sTGAname);
+
 			sint i;
 			
-			sTGAname = toLower(string(tgaName));
 			string findTGAName;
 			for (i = 0; i < mapSize; ++i)
 			{
 				// get the string whitout path
-				findTGAName = toLower(CFile::getFilename(AllMapNames[i]));
+				findTGAName = toLower(CFile::getFilenameWithoutExtension(AllMapNames[i]));
 				if( findTGAName == sTGAname )
 					break;
 			}
+
+			// append extension
+			sTGAname += "." + tgaExt;
 			
 			if( i == mapSize )
 			{
@@ -470,13 +613,11 @@ int main(int nNbArg, char **ppArgs)
 			else
 			{
 				// present in subset: use new uv's
-				fprintf (f, "%s %.12f %.12f %.12f %.12f\n", sTGAname.c_str(), UVMin[i].U, UVMin[i].V, 
-					UVMax[i].U, UVMax[i].V);
+				fprintf (f, "%s %.12f %.12f %.12f %.12f\n", sTGAname.c_str(), UVMin[i].U, UVMin[i].V, UVMax[i].U, UVMax[i].V);
 			}
 		}	
-//		fclose (iFile);
 		fclose (f);
-		outString (string("Writing UV file : ") + fmtName + "\n");
+		outString(toString("Writing UV file: %s", fmtName.c_str()));
 	}
 	
 	return 0;

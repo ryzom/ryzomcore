@@ -2,6 +2,7 @@
     <header>
         <name>GroupMenu</name>
         <guiname>CGroupMenu</guiname>
+		<classname>menu</classname>
         <ancestor>GroupModal</ancestor>
         <description></description>
         <abstract>false</abstract>

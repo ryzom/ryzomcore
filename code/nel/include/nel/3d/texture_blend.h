@@ -74,7 +74,7 @@ public:
 	virtual void release();
 
 	// serial this texture datas
-	virtual void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void	serial(NLMISC::IStream &f);
 
 private:
 	uint16						_BlendFactor;

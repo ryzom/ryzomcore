@@ -1,0 +1,8 @@
+<expression>
+<category>Color</category>
+<name>getAlpha</name>
+<variable>false</variable>
+<slots>
+<slot>Color</slot>
+</slots>
+</expression>

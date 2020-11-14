@@ -59,7 +59,7 @@ namespace GUIEditor
 		void clear();
 
 	public Q_SLOTS:
-		void onSelectionChanged( std::string &id );
+		void onSelectionChanged();
 
 	private Q_SLOTS:
 		void onPropertyChanged( QtProperty *prop, const QVariant &v );

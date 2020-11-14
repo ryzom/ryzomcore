@@ -53,7 +53,7 @@ public:
 	 * change a variable name (all it's occurence)
 	 * \param CString old the old name of the var (not a reference because we may delete the string when deleting the variable !!)
 	 * \param CString &newName the new name of the var
-	 * \return BOOL TRUE if the change has been made, FALSE if an error occured
+	 * \return BOOL TRUE if the change has been made, FALSE if an error occurred
 	 */
 	BOOL changeVarName( CString old, const CString &newName);
 
@@ -67,7 +67,7 @@ public:
 	 * change a counter name (all it's occurence)
 	 * \param CString old the old name of the counter
 	 * \param CString &newName the new name of the counter
-	 * \return BOOL TRUE if the change has been made, FALSE if an error occured
+	 * \return BOOL TRUE if the change has been made, FALSE if an error occurred
 	 */
 	BOOL changeCounterName( CString old, const CString &newName);
 
@@ -82,7 +82,7 @@ public:
 	 * change a condition name (all it's occurence)
 	 * \param CString old the old name of the condition
 	 * \param CString &newName the new name of the condition
-	 * \return BOOL TRUE if the change has been made, FALSE if an error occured
+	 * \return BOOL TRUE if the change has been made, FALSE if an error occurred
 	 */
 	BOOL changeConditionName( CString old, const CString &newName);
 
@@ -97,7 +97,7 @@ public:
 	 * change a state name (all it's occurence)
 	 * \param CString old the old name of the state
 	 * \param CString &newName the new name of the state
-	 * \return BOOL TRUE if the change has been made, FALSE if an error occured
+	 * \return BOOL TRUE if the change has been made, FALSE if an error occurred
 	 */
 	BOOL changeStateName( CString old, const CString &newName);
 

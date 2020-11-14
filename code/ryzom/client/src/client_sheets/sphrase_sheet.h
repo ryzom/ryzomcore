@@ -56,7 +56,7 @@ public:
 
 	virtual void build (const NLGEORGES::UFormElm &root);
 
-	virtual void serial (NLMISC::IStream &s) throw(NLMISC::EStream)
+	virtual void serial (NLMISC::IStream &s)
 	{
 		s.serialCont (Bricks);
 		s.serial(Castable);

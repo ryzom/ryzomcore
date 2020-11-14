@@ -62,7 +62,7 @@ void CLightCycle::build(const NLGEORGES::UFormElm &item)
 	for(uint k = 0; k < EGSPD::CSeason::Invalid; ++k)
 	{
 		const NLGEORGES::UFormElm *seasonsItem;
-		if (item.getNodeByName(&seasonsItem, EGSPD::CSeason::toString( (EGSPD::CSeason::TSeason) k).c_str()) && seasonsItem)
+		if (item.getNodeByName(&seasonsItem, EGSPD::CSeason::toString( (EGSPD::CSeason::TSeason) k)) && seasonsItem)
 		{
 			SeasonLightCycle[k].build(*seasonsItem);
 		}

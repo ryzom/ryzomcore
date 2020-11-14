@@ -36,7 +36,7 @@ public:
 	/**
 	 *	load a logic state machine
 	 */
-	void load( const char * fileName );
+	void load( const TCHAR *fileName );
 
 #ifdef _DEBUG
 	virtual void AssertValid() const;

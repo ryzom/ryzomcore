@@ -269,7 +269,7 @@ void CHoFGenerator::processGenerationStep()
 		if (HoFVerbose.get())
 			nlwarning("script generation from '%s' failed for shard %u", getCurrentHDTFile().c_str(), getCurrentSDBReader().getShardId());
 
-		// skip the SDB reader if an error occured
+		// skip the SDB reader if an error occurred
 		setNextSDBReader();
 		return;
 	}

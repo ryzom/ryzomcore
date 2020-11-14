@@ -168,11 +168,11 @@ public:
 	// - This method adds the new object to the top of the CFollowPath singleton's context stack
 	// parameters:
 	// - contextName	: an arbitrary string naming the context
-	// - maxSearchDepth	: the value that the path finder search depth should be limitted to (default to ~0u meaning no limit)
+	// - maxSearchDepth	: the value that the path finder search depth should be limitted to (default to std::numeric_limits<uint32>::max() meaning no limit)
 	// - forceMaxDepth	: set this flag true to override previous limit with larger value
 	// example:
-	// - ... Before we begin ... CFollowPath::_MaxSearchDepth = ~0u
-	// - CFollowPathContext context1("tata")			: CFollowPath::_MaxSearchDepth => ~0u
+	// - ... Before we begin ... CFollowPath::_MaxSearchDepth = std::numeric_limits<uint32>::max()
+	// - CFollowPathContext context1("tata")			: CFollowPath::_MaxSearchDepth => std::numeric_limits<uint32>::max()
 	// - CFollowPathContext context2("tete",456)		: CFollowPath::_MaxSearchDepth => 456
 	// - CFollowPathContext context3("titi",123)		: CFollowPath::_MaxSearchDepth => 123
 	// - CFollowPathContext context4("toto",456)		: CFollowPath::_MaxSearchDepth => 123
@@ -182,9 +182,9 @@ public:
 	// - CFollowPathContext context5.~CFollowPathContext()	: CFollowPath::_MaxSearchDepth => 123
 	// - CFollowPathContext context4.~CFollowPathContext()	: CFollowPath::_MaxSearchDepth => 123
 	// - CFollowPathContext context3.~CFollowPathContext()	: CFollowPath::_MaxSearchDepth => 456
-	// - CFollowPathContext context2.~CFollowPathContext()	: CFollowPath::_MaxSearchDepth => ~0u
-	// - CFollowPathContext context1.~CFollowPathContext()	: CFollowPath::_MaxSearchDepth => ~0u
-	CFollowPathContext(const char* contextName, uint32 maxSearchDepth=~0u, bool forceMaxDepth=false);
+	// - CFollowPathContext context2.~CFollowPathContext()	: CFollowPath::_MaxSearchDepth => std::numeric_limits<uint32>::max()
+	// - CFollowPathContext context1.~CFollowPathContext()	: CFollowPath::_MaxSearchDepth => std::numeric_limits<uint32>::max()
+	CFollowPathContext(const char* contextName, uint32 maxSearchDepth=std::numeric_limits<uint32>::max(), bool forceMaxDepth=false);
 
 	// dtor
 	// - This method removes the destroyed object from the CFollowPath singleton's context stack
@@ -270,7 +270,7 @@ private:
 	friend class CFollowPathContext;
 	CFollowPathContext* _TopFollowPathContext;
 public:
-	uint32 getMaxSearchDepth() const { return (_TopFollowPathContext==NULL)? ~0u: _TopFollowPathContext->getMaxSearchDepth(); }
+	uint32 getMaxSearchDepth() const { return (_TopFollowPathContext==NULL)? std::numeric_limits<uint32>::max(): _TopFollowPathContext->getMaxSearchDepth(); }
 	const char* getContextName() const;
 };
 

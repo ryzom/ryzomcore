@@ -12,6 +12,7 @@
 		<div class="alert alert-info">
 			 {$welcome_message}
 		</div>
+		{if $userRegistration == '0'|| $userRegistration == '2'}
 		<form id="signup" class="form-vertical" method="post" action="index.php">
 			<legend>{$title}</legend>
 			
@@ -111,6 +112,9 @@
 			</p>
 	
 		</form>
+		{else}
+			Registration Disabled!
+		{/if}
 
 
 	</div><!--/span-->

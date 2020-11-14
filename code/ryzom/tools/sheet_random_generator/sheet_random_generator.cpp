@@ -20,6 +20,7 @@
 #include "srg_utilities.h"
 #include "game_share/protection_type.h"
 #include "nel/misc/string_conversion.h"
+#include "nel/misc/common.h"
 
 /*
  * V3
@@ -2449,8 +2450,8 @@ void generateRawMaterials()
 	MainStat.init();
 	FILE *nameOutputFile;
 	if ( OutputNameList )
-		nameOutputFile = fopen( "rm_names_output.csv", "wt" );
-	GraphFile = fopen( "rm_output_graph.csv", "wt" );
+		nameOutputFile = nlfopen( "rm_names_output.csv", "wt" );
+	GraphFile = nlfopen( "rm_output_graph.csv", "wt" );
 	fprintf( GraphFile, "Graph type: Line with markers displayed at each data value, columns B to E. For deposits, sort by column B\n" );
 	fprintf( GraphFile, "Ecosystem specialization: 100=Desert, 104=Forest, 108=Lake, 112=Jungle, 116=All\n" );
 	fprintf( GraphFile, "RM code;Zone;Energy;Originality;Eco. spec.;\n\n" );

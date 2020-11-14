@@ -24,6 +24,9 @@ using namespace std;
 using namespace NL3D;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 NLMISC_REGISTER_OBJECT(CViewBase, CDBViewQuantity, std::string, "text_quantity");
 
@@ -157,14 +160,17 @@ namespace NLGUI
 	// ***************************************************************************
 	void CDBViewQuantity::draw ()
 	{
-		// change text
-		sint32	val= _Number.getSInt32();
-		sint32	valMax= _NumberMax.getSInt32();
-		if(_Cache!=val || _CacheMax!=valMax)
+		if( _Number.hasValue() && _NumberMax.hasValue() )
 		{
-			_Cache= val;
-			_CacheMax=valMax;
-			buildTextFromCache();
+			// change text
+			sint32	val= _Number.getSInt32();
+			sint32	valMax= _NumberMax.getSInt32();
+			if(_Cache!=val || _CacheMax!=valMax)
+			{
+				_Cache= val;
+				_CacheMax=valMax;
+				buildTextFromCache();
+			}
 		}
 
 		// parent call

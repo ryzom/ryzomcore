@@ -91,6 +91,9 @@ public:
 	/// For Faber.
 	TOOL_TYPE::TCraftingToolType		getPhraseFaberPlanToolType(const std::vector<NLMISC::CSheetId> &phraseBricks) const;
 
+	//// For Display, if ecosystem is in use, then return it
+	BRICK_FAMILIES::TBrickFamily		getPhraseForageFamily(const std::vector<NLMISC::CSheetId> &phraseBricks) const;
+
 	/// For Display. Return the brick (should be in phrase) used to display the phrase as icon
 	NLMISC::CSheetId	getPhraseBestDisplayBrick(const std::vector<NLMISC::CSheetId> &phraseBricks) const;
 

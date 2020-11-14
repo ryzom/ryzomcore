@@ -23,6 +23,7 @@
 #include "CompilDialog.h"
 
 #include "nel/misc/path.h"
+#include "nel/misc/common.h"
 #include "nel/ligo/primitive.h"
 #include "../mission_compiler_lib/mission_compiler.h"
 #include "nel/misc/config_file.h"
@@ -201,7 +202,7 @@ BOOL CMissionCompilerFeDlg::OnInitDialog()
 
 	if (NLMISC::CFile::fileExists(tmpPath))
 	{
-		FILE *f = fopen(tmpPath, "r");
+		FILE *f = nlfopen(tmpPath, "r");
 		if (f == NULL)
 		{
 			nlinfo("Can't open the file for reading !\n%s", tmpPath);
@@ -369,7 +370,7 @@ bool CMissionCompilerFeDlg::readConfigFile()
 	{
 		if ((pathsPrim->size() != names->size()) || (pathsText->size() != names->size()))
 		{
-			AfxMessageBox("Config file : ServerPathPrim, ServerPathText and ServerName are different in size !", MB_OK);
+			AfxMessageBox(_T("Config file : ServerPathPrim, ServerPathText and ServerName are different in size !"), MB_OK);
 			PostQuitMessage(-1);
 			return false;
 		}
@@ -478,7 +479,7 @@ void CMissionCompilerFeDlg::compile(BOOL publish)
 				mc.publishFiles(ServerPathPrim[i], ServerPathText[i], LocalTextPath);
 			}
 		}
-		catch(EParseException e)
+		catch(const EParseException &e)
 		{
 			string msg;
 			msg + "\r\n";
@@ -694,11 +695,11 @@ void CMissionCompilerFeDlg::OnSpecialRuncompilertest()
 
 		system((string("\"C:\\Program Files\\Beyond Compare 2\\bc2.exe\" ")+string(tmp)+"/compiled_mission.script "+ReferenceScript).c_str());
 	}
-	catch(EParseException e)
+	catch(const EParseException &e)
 	{
 		string msg = "In primitive ";
-		msg += buildPrimPath(e.Primitive) +" : "+e.Why;
-		AfxMessageBox(msg.c_str());
+		msg += buildPrimPath(e.Primitive) + ": " + e.Why;
+		AfxMessageBox(utf8ToTStr(msg));
 	}
 	
 }
@@ -762,7 +763,7 @@ void CValidationFile::saveMissionValidationFile(string filename)
 		nlwarning("Can't find index file '%s' in search path, no mission will be valid", filename.c_str());
 		return;
 	}
-	FILE* file = fopen(pathName.c_str(), "w");
+	FILE* file = nlfopen(pathName, "w");
 	nlassert(file!=NULL);
 	
 	// AuthorizedStates

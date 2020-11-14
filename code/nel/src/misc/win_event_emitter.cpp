@@ -22,10 +22,6 @@
 #include "nel/misc/event_server.h"
 
 #ifdef NL_OS_WINDOWS
-#ifndef NL_COMP_MINGW
-#define NOMINMAX
-#endif
-#include <windows.h>
 #include <windowsx.h>
 
 /**
@@ -55,14 +51,6 @@ void CWinEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 	// Dispatch sent messages
 	_InternalServer.setServer (&server);
 	_InternalServer.pump (allWindows);
-}
-
-/*------------------------------------------------------------------*\
-							emulateMouseRawMode()
-\*------------------------------------------------------------------*/
-void CWinEventEmitter::emulateMouseRawMode(bool enable)
-{
-	nlerror("no raw mode emulation on windows, the CDIMouse has a real raw mode");
 }
 
 /*------------------------------------------------------------------*\
@@ -320,7 +308,7 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 	case WM_INPUTLANGCHANGE:
 		if ( _IMEEventsEnabled )
 		{
-			// wParam = Specifies the character set of the new locale. 
+			// wParam = Specifies the character set of the new locale.
 			// lParam = Input locale identifier.
 			server->postEvent( new CEventIME( msg, (uint32)wParam, (uint32)lParam, this ) );
 			return true; // trap message

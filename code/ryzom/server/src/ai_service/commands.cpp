@@ -229,8 +229,9 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<aiInstanceId>
 		return true;
 	}
 	
-	double x = atof(args[3].c_str());
-	double y = atof(args[4].c_str());
+	double x, y;
+	NLMISC::fromString(args[3], x);
+	NLMISC::fromString(args[4], y);
 
 	double dispersionRadius = 10.;
 	if (args.size()>5)
@@ -577,7 +578,7 @@ NLMISC_COMMAND(createStaticAIInstance, "Create a new static AIInstance for a giv
 	CUsedContinent &uc = CUsedContinent::instance();
 
 	const	uint32 in = uc.getInstanceForContinent(args[0]);
-	if (in == ~0)
+	if (in == std::numeric_limits<uint32>::max())
 	{
 		nlwarning("The continent '%s' is unknow or not active. Can't create instance, FATAL", args[0].c_str());
 		nlassert(in != ~0);
@@ -1664,6 +1665,37 @@ bool execScriptGroupByName(CStringWriter& stringWriter, TCommand const& args)
 	return true;
 }
 
+NLMISC_COMMAND(getDatasetId,"get datasetid of bots with name matchiong the given filter", "<groupFilter>")
+{
+	if (args.size()!=1)
+		return false;
+
+	string const& botName = args[0];
+	string DatasetIds;
+
+	vector<CBot*> bots;
+	/// try to find the bot name
+	buildFilteredBotList(bots, botName);
+	if (bots.empty())
+	{
+		log.displayNL("ERR: No bot correspond to name %s", botName.c_str());
+		return false;
+	}
+	else
+	{
+		FOREACH(itBot, vector<CBot*>, bots)
+		{
+			CBot* bot = *itBot;
+			CSpawnBot* spawnBot = bot->getSpawnObj();
+			if (spawnBot!=NULL)
+				DatasetIds += spawnBot->dataSetRow().toString()+"|";
+
+		}
+	}
+	log.displayNL("%s", DatasetIds.c_str());
+	return true;
+}
+
 NLMISC_COMMAND(script,"execute a script for groups matching the given filter [buffered]","<groupFilter> <code>")
 {
 	clearBufferedRetStrings();
@@ -1969,9 +2001,13 @@ NLMISC_COMMAND(displayVision3x3,"display 3x3 cell vision centred on a given coor
 		}
 	}
 
+	double dx, dy;
+	NLMISC::fromString(args[1], dx);
+	NLMISC::fromString(args[2], dy);
+
 	CAICoord x, y;
-	x=atof(args[1].c_str());
-	y=atof(args[2].c_str());
+	x = dx;
+	y = dy;
 	log.displayNL("3x3 Vision around (%.3f,%.3f)", x.asDouble(), y.asDouble());
 
 	uint32 botCount=0;
@@ -3086,8 +3122,8 @@ static void setRyzomDebugDate(CRyzomDate &rd)
 NLMISC_COMMAND(setDebugHour, "set the current debug hour", "<hour>")
 {
 	if (args.size() != 1) return false;	
-	int hour;
-	if (sscanf(args[0].c_str(), "%d", &hour) != 1) return false;
+	sint hour;
+	if (!fromString(args[0], hour)) return false;
 	CRyzomDate rd;
 	getRyzomDebugDate(rd);
 	rd.Time = fmodf(rd.Time, 1.f) + (float) hour;
@@ -3098,8 +3134,8 @@ NLMISC_COMMAND(setDebugHour, "set the current debug hour", "<hour>")
 NLMISC_COMMAND(setDebugDayOfYear, "set the current debug day of year (first day has index 1)", "<day>")
 {
 	if (args.size() != 1) return false;	
-	int day;
-	if (sscanf(args[0].c_str(), "%d", &day) != 1) return false;
+	sint day;
+	if (!fromString(args[0], day)) return false;
 	CRyzomDate rd;	
 	getRyzomDebugDate(rd);
 	rd.Day = day - 1; // for the user, days start at '1'

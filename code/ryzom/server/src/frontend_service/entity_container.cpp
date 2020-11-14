@@ -425,7 +425,7 @@ void CEntity::displayProperties( const TEntityIndex& entityIndex, NLMISC::CLog *
 		lsSheet = histohasvalue ? toString( "%u", (uint32)lastsent_value ) : "NOT SENT YET";
 		dispDist(lsSheet,THRESHOLD_SHEET);
 		lastsent_value = history->getPropertyEntry( optClientId, optSlot, PROPERTY_BEHAVIOUR, histohasvalue ).LastSent;
-		lsBehav = histohasvalue ? toString( "%"NL_I64"u", (uint64)lastsent_value ) : "NOT SENT YET";
+		lsBehav = histohasvalue ? toString( "%" NL_I64 "u", (uint64)lastsent_value ) : "NOT SENT YET";
 		dispDist(lsBehav,THRESHOLD_BEHAVIOUR);
 		lastsent_value = history->getPropertyEntry( optClientId, optSlot, PROPERTY_NAME_STRING_ID, histohasvalue ).LastSent;
 		lsName = histohasvalue ? toString( "%u", (uint32)lastsent_value ) : "NOT SENT YET";
@@ -437,13 +437,13 @@ void CEntity::displayProperties( const TEntityIndex& entityIndex, NLMISC::CLog *
 		lsMode = histohasvalue ? toString( "%hu", (uint32)lastsent_value ) : "NOT SENT YET";
 		dispDist(lsMode,THRESHOLD_MODE);
 		lastsent_value = history->getPropertyEntry( optClientId, optSlot, PROPERTY_VPA, histohasvalue ).LastSent;
-		lsVPA = histohasvalue ? toString( "%"NL_I64"u", lastsent_value ) : "NOT SENT YET";
+		lsVPA = histohasvalue ? toString( "%" NL_I64 "u", lastsent_value ) : "NOT SENT YET";
 		dispDist(lsVPA,THRESHOLD_VPA);
 		lastsent_value = history->getPropertyEntry( optClientId, optSlot, PROPERTY_VPB, histohasvalue ).LastSent;
-		lsVPB = histohasvalue ? toString( "%"NL_I64"u", lastsent_value ) : "NOT SENT YET";
+		lsVPB = histohasvalue ? toString( "%" NL_I64 "u", lastsent_value ) : "NOT SENT YET";
 		dispDist(lsVPB,THRESHOLD_VPB);
 		lastsent_value = history->getPropertyEntry( optClientId, optSlot, PROPERTY_VPC, histohasvalue ).LastSent;
-		lsVPC = histohasvalue ? toString( "%"NL_I64"u", lastsent_value ) : "NOT SENT YET";
+		lsVPC = histohasvalue ? toString( "%" NL_I64 "u", lastsent_value ) : "NOT SENT YET";
 		dispDist(lsVPC,THRESHOLD_VPC);
 		lastsent_value = history->getPropertyEntry( optClientId, optSlot, PROPERTY_ENTITY_MOUNTED_ID, histohasvalue ).LastSent;
 		lsMount = histohasvalue ? toString( "%d", (uint32)lastsent_value ) : "NOT SENT YET";
@@ -486,9 +486,9 @@ void CEntity::displayProperties( const TEntityIndex& entityIndex, NLMISC::CLog *
 	TDataSetIndex target = (TDataSetIndex)PV(PROPERTY_TARGET_ID), mount = (TDataSetIndex)PV(PROPERTY_ENTITY_MOUNTED_ID), rider = (TDataSetIndex)PV(PROPERTY_RIDER_ENTITY_ID);
 	log->displayNL( "| Target %d \t %s", target, lsTarget.c_str() );
 	log->displayNL( "| Mode %hu \t %s", (uint8)PV(PROPERTY_MODE), lsMode.c_str() );
-	log->displayNL( "| VPA %"NL_I64"u \t %s", PV(PROPERTY_VPA), lsVPA.c_str() );
-	log->displayNL( "| VPB %"NL_I64"u \t %s", PV(PROPERTY_VPB), lsVPB.c_str() );
-	log->displayNL( "| VPC %"NL_I64"u \t %s", PV(PROPERTY_VPC), lsVPC.c_str() );
+	log->displayNL( "| VPA %" NL_I64 "u \t %s", PV(PROPERTY_VPA), lsVPA.c_str() );
+	log->displayNL( "| VPB %" NL_I64 "u \t %s", PV(PROPERTY_VPB), lsVPB.c_str() );
+	log->displayNL( "| VPC %" NL_I64 "u \t %s", PV(PROPERTY_VPC), lsVPC.c_str() );
 	log->displayNL( "| Mount %d \t %s", mount, lsMount.c_str() );
 	log->displayNL( "| Rider %d \t \t %s", rider, lsRider.c_str() );
 	log->displayNL( "| Contextual %hu \t %s", (uint16)PV(PROPERTY_CONTEXTUAL), lsContextual.c_str() );

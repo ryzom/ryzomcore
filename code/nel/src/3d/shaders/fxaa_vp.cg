@@ -1,0 +1,20 @@
+
+void fxaa_vp(
+	// Per vertex parameters
+	float3 position : POSITION, 
+	float2 texCoord0 : TEXCOORD0, 
+	
+	// Vertex program constants
+	uniform float4x4 modelViewProjection,
+	uniform float4 fxaaConsolePosPos,
+	
+	// Output position
+	out float4 oPosition : POSITION, 
+	out float2 oTexCoord0 : TEXCOORD0, 
+	out float4 oTexCoord1 : TEXCOORD1
+)
+{
+	oPosition = mul(modelViewProjection, float4(position, 0.0));
+	oTexCoord0 = texCoord0;
+	oTexCoord1 = texCoord0.xyxy + fxaaConsolePosPos;
+}

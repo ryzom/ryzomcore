@@ -17,6 +17,16 @@ NEL3D_APPDATA_IGNAME = 1423062564			-- string : name of the Instance Group
 
 tagThisFile = true
 
+-- Unhide layers
+fn unhidelayers = 
+(
+	for i = 0 to (LayerManager.count - 1) do
+	(
+		layer = (LayerManager.getLayer i)
+		layer.ishidden = false
+	)
+)
+
 -- Unhide category
 fn unhidecategory =
 (
@@ -307,6 +317,10 @@ fn buildTransitionMatrixObj mt transitionZone cellSize =
 -- Export instance groups from the current loaded zone
 fn exportInstanceGroupFromZone inputFile outputPath igName transitionZone cellSize = 
 (
+	-- Unhide category
+	unhidelayers()
+	unhidecategory()
+
 	-- Unhide
 	max unhide all
 
@@ -501,6 +515,7 @@ try
 				objXRefMgr.UpdateAllRecords()
 
 				-- Unhide category
+				unhidelayers()
 				unhidecategory()
 
 				DeleteDebugMarkersFn ()
@@ -648,6 +663,7 @@ try
 				objXRefMgr.UpdateAllRecords()
 				
 				-- Unhide category
+				unhidelayers()
 				unhidecategory()
 				
 				DeleteDebugMarkersFn ()
@@ -863,6 +879,7 @@ try
 				objXRefMgr.UpdateAllRecords()
 
 				-- Unhide category
+				unhidelayers()
 				unhidecategory()
 
 				DeleteDebugMarkersFn ()

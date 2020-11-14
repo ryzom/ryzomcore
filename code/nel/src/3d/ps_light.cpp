@@ -25,6 +25,10 @@
 #include "nel/misc/matrix.h"
 #include "nel/misc/vector.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
@@ -68,7 +72,7 @@ CPSLight::~CPSLight()
 }
 
 // ***************************************************************************************************************
-void CPSLight::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSLight::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSLight_serial)
 	CPSLocatedBindable::serial(f);

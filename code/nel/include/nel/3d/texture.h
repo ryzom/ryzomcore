@@ -359,7 +359,7 @@ public:
 	virtual bool allowDegradation() const { return false; }
 
 	/// serial ITexture basic infos (clamp ...).
-	virtual void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void	serial(NLMISC::IStream &f);
 
 	/** Select a texture among several other (if this texture is a set of texture such as CTextureMultiFile)
 	  * The default does nothing

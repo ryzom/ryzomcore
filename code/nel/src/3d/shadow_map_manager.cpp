@@ -31,6 +31,10 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 
@@ -244,7 +248,7 @@ void			CShadowMapManager::addShadowReceiver(CTransform *model)
 void			CShadowMapManager::renderGenerate(CScene *scene)
 {
 	H_AUTO( NL3D_ShadowManager_Generate );
-	
+
 	// Each frame, do a small garbage collector for unused free textures.
 	garbageShadowTextures(scene);
 
@@ -705,7 +709,7 @@ void			CShadowMapManager::renderProject(CScene *scene)
 	}
 	driver->activeVertexBuffer (CopyQuads);
 
-	if (_ShadowCasters.size()>0)
+	if (!_ShadowCasters.empty())
 	{
 		// get the transform to compute shadow map.
 		CTransform	*sc= _ShadowCasters[0];

@@ -128,7 +128,7 @@ class CPSPlaneBasisFollowSpeed : public CPSAttribMaker<CPlaneBasis>
 		NLMISC_DECLARE_CLASS(CPSPlaneBasisFollowSpeed);
 
 		/// serialization
-		virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		virtual void serial(NLMISC::IStream &f)
 		{
 			// version 2 : added projection plane
 			// version 1 : nothing to save here
@@ -192,7 +192,7 @@ public:
 	/// get the number of samples for the rotation
 	uint32 getNumSamples(void) const;
 	/// serial this object
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 protected:
 	CPSVector<CPlaneBasis>::V   _PBTab;
 	uint32						_NbSamples;

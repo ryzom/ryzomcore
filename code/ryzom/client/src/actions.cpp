@@ -22,6 +22,10 @@
 #include "events_listener.h"
 #include "interface_v3/interface_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 
@@ -148,9 +152,16 @@ void CActionsManager::removeCombo (const CCombo &combo)
 		while ((ite != _KeyAction.end ()) && (ite->first == combo.Key))
 		{
 			TKeyActionMap::iterator copyToDelete = ite;
-			ite++;
+#ifdef NL_ISO_CPP0X_AVAILABLE
+			if (copyToDelete->second == oldName)
+				ite = _KeyAction.erase (copyToDelete);
+			else
+				++ite;
+#else
+			++ite;
 			if (copyToDelete->second == oldName)
 				_KeyAction.erase (copyToDelete);
+#endif
 		}
 
 		// Remove the action
@@ -320,7 +331,7 @@ void CActionsManager::keyReleased (const CEventKeyUp &keyUp)
 		TKeyActionMap::iterator iteWatchedAction = _WatchedActions.begin ();
 		while (iteWatchedAction != _WatchedActions.end ())
 		{
-			TKeyActionMap::iterator iteToDelete = iteWatchedAction++;
+			TKeyActionMap::iterator iteToDelete = iteWatchedAction;
 
 			// Get the combo for this action
 			TActionComboMap::iterator iteCombo = _ActionCombo.find (iteToDelete->second);
@@ -334,7 +345,15 @@ void CActionsManager::keyReleased (const CEventKeyUp &keyUp)
 				nlassert (iteAction != _Actions.end());
 
 				// Remove this action from watching
+#ifdef NL_ISO_CPP0X_AVAILABLE
+				// C++11 return the next item
+				iteWatchedAction = _WatchedActions.erase (iteToDelete);
+#else
+				// remember the next iterator only if not using C++11
+				++iteWatchedAction;
+
 				_WatchedActions.erase (iteToDelete);
+#endif
 
 				// Invalidate the action
 				bool LastValid = iteAction->second.Valide;
@@ -348,6 +367,10 @@ void CActionsManager::keyReleased (const CEventKeyUp &keyUp)
 						iteAction->second.runAction ();
 					}
 				}
+			}
+			else
+			{
+				++iteWatchedAction;
 			}
 		}
 	}

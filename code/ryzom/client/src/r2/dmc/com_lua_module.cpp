@@ -58,6 +58,9 @@ using namespace NLGUI;
 using namespace NLMISC;
 using namespace R2;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 std::map<lua_State*, CComLuaModule*> CComLuaModule::_Instance;
@@ -238,7 +241,15 @@ void CComLuaModule::initLuaLib()
 	};
 	int initialStackSize = lua_gettop(_LuaState);
 #if LUA_VERSION_NUM >= 502
-	luaL_newlib(_LuaState, methods);
+	// luaL_newlib(_LuaState, methods);
+	// lua_setglobal(_LuaState, R2_LUA_PATH);
+	lua_getglobal(_LuaState, R2_LUA_PATH);
+	if (lua_isnil(_LuaState, -1))
+	{
+	  lua_pop(_LuaState, 1);
+	  lua_newtable(_LuaState);
+	}
+	luaL_setfuncs(_LuaState, methods, 0);
 	lua_setglobal(_LuaState, R2_LUA_PATH);
 #else
 	luaL_openlib(_LuaState, R2_LUA_PATH, methods, 0);
@@ -395,10 +406,10 @@ sint CComLuaModule::luaSaveUserComponentFile(lua_State* state)
 	luaL_checktype(state, 1, LUA_TSTRING);
 	luaL_checktype(state, 2, LUA_TNUMBER);
 	std::string filename( lua_tostring(state, 1) );
-	double mustCompress( lua_tonumber(state, 2) );
+	bool mustCompress(lua_tointeger(state, 2) != 0);
 
 	CComLuaModule* this2 = getInstance(state);
-	this2->_Client->getEditionModule().saveUserComponentFile(filename, mustCompress != 0);
+	this2->_Client->getEditionModule().saveUserComponentFile(filename, mustCompress);
 	return 0;
 }
 
@@ -417,7 +428,7 @@ sint CComLuaModule::luaUpdateUserComponentsInfo(lua_State* state)
 	std::string filename( lua_tostring(state, 1) );
 	std::string name( lua_tostring(state, 2) );
 	std::string description( lua_tostring(state, 3) );
-	uint32 timestamp( static_cast<uint32>(lua_tonumber(state, 3) ));
+	uint32 timestamp( static_cast<uint32>(lua_tointeger(state, 3) ));
 	std::string md5Id( lua_tostring(state, 3) );
 
 	CComLuaModule* this2 = getInstance(state);
@@ -433,7 +444,7 @@ sint CComLuaModule::luaGetSheetIdName(lua_State* state)
 
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
-	uint32 sheetIdValue = static_cast<uint32>( lua_tonumber(state, 1) );
+	uint32 sheetIdValue = static_cast<uint32>( lua_tointeger(state, 1) );
 
 	NLMISC::CSheetId sheetId(sheetIdValue);
 	if(sheetId != NLMISC::CSheetId::Unknown)
@@ -530,7 +541,7 @@ sint CComLuaModule::luaRequestSetWeather(lua_State* state)
 {
 	//H_AUTO(R2_CComLuaModule_luaRequestSetWeather)
 	luaL_checktype(state, 1, LUA_TNUMBER);
-	uint16 weatherValue = (uint16) lua_tonumber(state, 1);
+	uint16 weatherValue = (uint16) lua_tointeger(state, 1);
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
 	this2->_Client->getEditionModule().requestSetWeather(weatherValue);
@@ -542,7 +553,7 @@ sint CComLuaModule::luaRequestSetSeason(lua_State* state)
 {
 	//H_AUTO(R2_CComLuaModule_luaRequestSetSeason)
 	luaL_checktype(state, 1, LUA_TNUMBER);
-	uint8 season = (uint8) lua_tonumber(state, 1);
+	uint8 season = (uint8) lua_tointeger(state, 1);
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
 	this2->_Client->getEditionModule().requestSetSeason(season);
@@ -564,7 +575,7 @@ sint CComLuaModule::luaRequestStartAct(lua_State* state)
 {
 	//H_AUTO(R2_CComLuaModule_luaRequestStartAct)
 	luaL_checktype(state, 1, LUA_TNUMBER);
-	uint32 actId(static_cast<uint32>(lua_tonumber(state, 1)));
+	uint32 actId(static_cast<uint32>(lua_tointeger(state, 1)));
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
 	this2->_Client->getEditionModule().requestStartAct(actId);
@@ -704,7 +715,7 @@ sint CComLuaModule::luaRequestMapConnection(lua_State* state)
 	CHECK_LUA_ARG_COUNT(1, "requestMapConnection");
 	luaL_checktype(state, 1, LUA_TNUMBER);
 
-	uint32 adventureId = static_cast<uint32>( lua_tonumber(state, 1) );
+	uint32 adventureId = static_cast<uint32>( lua_tointeger(state, 1) );
 
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
@@ -743,7 +754,7 @@ sint CComLuaModule::requestInsertNode(lua_State* state, bool isGhost)
 
 	std::string instanceId(lua_tostring(state, 1));
 	std::string attrName(lua_tostring(state, 2));
-	sint position(static_cast<sint>(lua_tonumber(state, 3)));
+	sint position(static_cast<sint>(lua_tointeger(state, 3)));
 	std::string key(lua_tostring(state, 4));
 	CObject* value = getObjectFromLua(state, 5);
 	value->setGhost(isGhost);
@@ -826,10 +837,10 @@ sint CComLuaModule::luaRequestEraseNode(lua_State* state)
 	if (args>2) { luaL_checknumber(state, 3); }
 
 	std::string instanceId(lua_tostring(state, 1));
-	std::string attrName = "";
+	std::string attrName;
 	sint position = -1;
 	if (args>1){ attrName = lua_tostring(state, 2);}
-	if (args>2){ position = static_cast<sint>(lua_tonumber(state, 3));}
+	if (args>2){ position = static_cast<sint>(lua_tointeger(state, 3));}
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
 	this2->_Client->requestEraseNode(	instanceId, attrName, position);
@@ -855,11 +866,11 @@ sint CComLuaModule::luaRequestMoveNode(lua_State* state)
 
 	std::string instanceId(lua_tostring(state, 1));
 	std::string attrName(lua_tostring(state, 2));
-	sint position = static_cast<sint>(lua_tonumber(state, 3));
+	sint position = static_cast<sint>(lua_tointeger(state, 3));
 
 	std::string instanceId2(lua_tostring(state, 4));
 	std::string attrName2(lua_tostring(state, 5));
-	sint position2 = static_cast<sint>(lua_tonumber(state, 6));
+	sint position2 = static_cast<sint>(lua_tointeger(state, 6));
 
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
@@ -959,7 +970,7 @@ sint CComLuaModule::luaRequestNewMultiAction(lua_State* state)
 	sint args = lua_gettop(state);
 	CHECK_LUA_ARG_COUNT(2, funcName);
 	luaL_checktype(state, 2, LUA_TNUMBER);
-	uint count = (uint) lua_tonumber(state, 2);
+	uint count = (uint) lua_tointeger(state, 2);
 	lua_pop(state, 1);
 	return luaRequestNewAction(state, false, count);
 }
@@ -971,7 +982,7 @@ sint CComLuaModule::luaRequestNewPendingMultiAction(lua_State* state)
 	sint args = lua_gettop(state);
 	CHECK_LUA_ARG_COUNT(2, funcName);
 	luaL_checktype(state, 2, LUA_TNUMBER);
-	uint count = (uint) lua_tonumber(state, 2);
+	uint count = (uint) lua_tointeger(state, 2);
 	lua_pop(state, 1);
 	return luaRequestNewAction(state, true, count);
 }
@@ -1041,6 +1052,13 @@ void CComLuaModule::setObjectToLua(lua_State* state, CObject* object)
 		lua_pushnil(state);
 		return;
 	}
+
+	if ( object->isInteger() )
+	{
+		lua_pushinteger(state, object->toInteger());
+		return;
+	}
+
 	if ( object->isNumber() )
 	{
 		lua_pushnumber(state, object->toNumber());
@@ -1099,7 +1117,7 @@ void CComLuaModule::setObjectToLua(lua_State* state, CObject* object)
 		for (first=0 ; first != last; ++first)
 		{
 			std::string key = object->getKey(first);
-			CObject *value =  object->getValue(first);
+			CObject *value =  object->getValueAtPos(first);
 			if (!key.empty())
 			{
 				lua_pushstring(state, key.c_str());
@@ -1218,9 +1236,20 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 	{
 		case LUA_TNUMBER:
 		{
-			double value = lua_tonumber(state, -1);
-			lua_pop(state, 1);
-			return new CObjectNumber(value);
+#if LUA_VERSION_NUM >= 503
+			if (lua_isinteger(state, -1) != 0)
+			{
+				sint64 value = lua_tointeger(state, -1);
+				lua_pop(state, 1);
+				return new CObjectInteger(value);
+			}
+			else
+#endif
+			{
+				double value = lua_tonumber(state, -1);
+				lua_pop(state, 1);
+				return new CObjectNumber(value);
+			}
 		}
 		break;
 
@@ -1247,7 +1276,7 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 			lua_pushnil(state);
 			while (lua_next(state, -2) != 0)
 			{
-				std::string key = "";
+				std::string key;
 				if ( lua_type(state, -2) == LUA_TSTRING)
 				{
 					key = lua_tostring(state, -2);
@@ -1277,7 +1306,7 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 CObject* CComLuaModule::loadLocal(const std::string& filename, const CScenarioValidator::TValues& values)
 {
 	CScenarioValidator::TValues::const_iterator first(values.begin()), last(values.end());
-	std::string name = "";
+	std::string name;
 	for (; first != last; ++first)
 	{
 		if (first->first == "Name" ) { name = first->second; }
@@ -1339,7 +1368,7 @@ bool CComLuaModule::loadUserComponent(const std::string& filename)
 CObject* CComLuaModule::loadFromBuffer(const std::string& data, const std::string& filename, const CScenarioValidator::TValues& values)
 {
 	CScenarioValidator::TValues::const_iterator first(values.begin()), last(values.end());
-	std::string name = "";
+	std::string name;
 	for (; first != last; ++first)
 	{
 		if (first->first == "Name" ) { name = first->second; }
@@ -1730,8 +1759,8 @@ sint CComLuaModule::luaTriggerUserTrigger(lua_State* state)
 	//H_AUTO(R2_CComLuaModule_luaTriggerUserTrigger)
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
-	uint32 actId( static_cast<uint32>(lua_tonumber(state, 1) ) );
-	uint32 id( static_cast<uint32>(lua_tonumber(state, 2) ));
+	uint32 actId( static_cast<uint32>(lua_tointeger(state, 1) ) );
+	uint32 id( static_cast<uint32>(lua_tointeger(state, 2) ));
 	this2->_Client->getEditionModule().requestTriggerUserTrigger(actId, id);
 
 	return 0;
@@ -1861,7 +1890,7 @@ sint CComLuaModule::luaReserveIdRange(lua_State* state)
 	CHECK_LUA_ARG_COUNT(1, "reserveIdRange");
 	luaL_checktype(state, 1, LUA_TNUMBER);
 
-	uint32 range=static_cast<uint32>( lua_tonumber(state, 1) );
+	uint32 range=static_cast<uint32>( lua_tointeger(state, 1) );
 
 	this2->_Client->getEditionModule().reserveIdRange(range);
 
@@ -1889,7 +1918,7 @@ sint CComLuaModule::luaRequestTpToEntryPoint(lua_State* state)
 	CHECK_LUA_ARG_COUNT(1, "requestTpToEntryPoint");
 	luaL_checktype(state, 1, LUA_TNUMBER);
 
-	uint32 actIndex = static_cast<uint32>( lua_tonumber(state, 1) );
+	uint32 actIndex = static_cast<uint32>( lua_tointeger(state, 1) );
 	this2->_Client->getEditionModule().requestTpToEntryPoint(actIndex);
 
 	return 0;
@@ -1906,7 +1935,7 @@ sint CComLuaModule::luaRequestSetStartingAct(lua_State* state)
 	CHECK_LUA_ARG_COUNT(1, "requestSetStartingAct");
 	luaL_checktype(state, 1, LUA_TNUMBER);
 
-	uint32 actIndex = static_cast<uint32>( lua_tonumber(state, 1) );
+	uint32 actIndex = static_cast<uint32>( lua_tointeger(state, 1) );
 	this2->_Client->getEditionModule().requestSetStartingAct(actIndex);
 
 	return 0;
@@ -1985,7 +2014,7 @@ sint CComLuaModule::luaSetDisplayInfo(lua_State* state)
 
 
 	std::string formName( lua_tostring(state, 1) );
-	bool displayInfo = static_cast<bool>(lua_tonumber(state, 2) == 0);
+	bool displayInfo = lua_tointeger(state, 2) != 0;
 
 	//this2->_Client->getEditionModule().reserveIdRange(range);
 	this2->_Client->getEditionModule().setDisplayInfo(formName, displayInfo);
@@ -2016,7 +2045,7 @@ sint CComLuaModule::luaSetStartingActIndex(lua_State* state)
 	sint args = lua_gettop(state);
 	CHECK_LUA_ARG_COUNT(1, "setStartingActIndex");
 	luaL_checktype(state, 1, LUA_TNUMBER);
-	this2->_Client->getEditionModule().setStartingActIndex( static_cast<uint32>(lua_tonumber(state, 1)) );
+	this2->_Client->getEditionModule().setStartingActIndex( static_cast<uint32>(lua_tointeger(state, 1)) );
 	return 0;
 }
 
@@ -2220,13 +2249,13 @@ sint CComLuaModule::luaUpdateScenarioAck(lua_State* state)
 		for(uint i = 0; i < size;  ++i)
 		{
 			std::string key = object->getKey(i);
-			CObject* value = object->getValue(i);
-			if (value->isNumber())
+			CObject* value = object->getValueAtPos(i);
+			if (value->isInteger())
 			{
 
 				if (key.size() == 1)
 				{
-					level[key] = static_cast<int>(value->toNumber());
+					level[key] = static_cast<int>(value->toInteger());
 				}
 			}
 		}

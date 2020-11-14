@@ -79,7 +79,7 @@ struct SCharacteristicsAndScores
 	float						KeepRegenerateDecimal;
 	
 	// Serial
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 	
 	// Constructor
 	SCharacteristicsAndScores();
@@ -119,7 +119,7 @@ struct CPhysicalCharacteristics
 	/**
 	 * Serial
 	 */
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	/**
 	 * getCharacteristicStruct
@@ -165,7 +165,7 @@ struct CPhysicalScores
 	/**
 	 * Serial
 	 */
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	std::vector< SCharacteristicsAndScores > _PhysicalScores;
 };
@@ -209,7 +209,7 @@ struct SSkill
 	/**
 	 * Serial
 	 */
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial( Base );
 		f.serial( Modifier );
@@ -254,7 +254,7 @@ struct CSkills
 	/**
 	 * Serial
 	 */
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	void clear();
 

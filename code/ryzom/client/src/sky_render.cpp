@@ -32,6 +32,9 @@
 #include "light_cycle_manager.h"
 #include "global.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 H_AUTO_DECL(RZ_SkyRender)
 

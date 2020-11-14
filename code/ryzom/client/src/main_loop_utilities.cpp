@@ -19,6 +19,8 @@
 
 #include <nel/3d/u_driver.h>
 #include <nel/3d/u_cloud_scape.h>
+#include <nel/3d/fxaa.h>
+#include <nel/3d/stereo_display.h>
 
 #include "game_share/scenario_entry_points.h"
 
@@ -34,6 +36,7 @@
 #include "input.h"
 #include "sound_manager.h"
 #include "camera.h"
+#include "interface_v3/interface_manager.h"
 
 using namespace NLMISC;
 using namespace NL3D;
@@ -57,8 +60,22 @@ void updateFromClientCfg()
 			)))
 	{
 		nldebug("Apply VR device change");
+		// detach display mode
+		if (StereoDisplay && StereoDisplayAttached)
+			StereoDisplay->detachFromDisplay();
+		StereoDisplayAttached = false;
+		// re-init
 		releaseStereoDisplayDevice();
 		initStereoDisplayDevice();
+		// try attach display mode
+		if (StereoDisplay)
+			StereoDisplayAttached = StereoDisplay->attachToDisplay();
+		// set latest config display mode if not attached
+		if (!StereoDisplayAttached)
+			setVideoMode(UDriver::CMode(ClientCfg.Width, ClientCfg.Height, (uint8)ClientCfg.Depth,
+				ClientCfg.Windowed, ClientCfg.Frequency));
+		// force software cursor when attached
+		InitMouseWithCursor(ClientCfg.HardwareCursor && !StereoDisplayAttached);
 	}
 
 	// GRAPHICS - GENERAL
@@ -69,8 +86,11 @@ void updateFromClientCfg()
 		(ClientCfg.Depth != LastClientCfg.Depth)		||
 		(ClientCfg.Frequency != LastClientCfg.Frequency))
 	{
-		setVideoMode(UDriver::CMode(ClientCfg.Width, ClientCfg.Height, (uint8)ClientCfg.Depth,
-									ClientCfg.Windowed, ClientCfg.Frequency));
+		if (!StereoDisplayAttached)
+		{
+			setVideoMode(UDriver::CMode(ClientCfg.Width, ClientCfg.Height, (uint8)ClientCfg.Depth,
+				ClientCfg.Windowed, ClientCfg.Frequency));
+		}
 	}
 
 	if (ClientCfg.DivideTextureSizeBy2 != LastClientCfg.DivideTextureSizeBy2)
@@ -80,6 +100,12 @@ void updateFromClientCfg()
 		else
 			Driver->forceTextureResize(1);
 	}
+
+	if (ClientCfg.InterfaceScale != LastClientCfg.InterfaceScale)
+		CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
+
+	if (ClientCfg.BilinearUI != LastClientCfg.BilinearUI)
+		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
 
 	//---------------------------------------------------
 	if (ClientCfg.WaitVBL != LastClientCfg.WaitVBL)
@@ -218,6 +244,28 @@ void updateFromClientCfg()
 		}
 	}
 
+	//---------------------------------------------------
+	if (ClientCfg.AnisotropicFilter != LastClientCfg.AnisotropicFilter)
+	{
+		Driver->setAnisotropicFilter(ClientCfg.AnisotropicFilter);
+	}
+
+	//---------------------------------------------------
+	if (ClientCfg.FXAA != LastClientCfg.FXAA)
+	{
+		if (ClientCfg.FXAA)
+		{
+			nlassert(!FXAA);
+			FXAA = new NL3D::CFXAA(Driver);
+		}
+		else
+		{
+			nlassert(FXAA);
+			delete FXAA;
+			FXAA = NULL;
+		}
+	}
+
 	// GRAPHICS - CHARACTERS
 	//---------------------------------------------------
 	if (ClientCfg.SkinNbMaxPoly != LastClientCfg.SkinNbMaxPoly)
@@ -259,7 +307,7 @@ void updateFromClientCfg()
 	{
 		if (ClientCfg.HardwareCursor != IsMouseCursorHardware())
 		{
-			InitMouseWithCursor (ClientCfg.HardwareCursor);
+			InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached);
 		}
 	}
 
@@ -288,7 +336,8 @@ void updateFromClientCfg()
 			catch(const Exception &e)
 			{
 				nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
-				SoundMngr = 0;
+				delete SoundMngr;
+				SoundMngr = NULL;
 			}
 
 			// re-init with good SFX/Music Volume

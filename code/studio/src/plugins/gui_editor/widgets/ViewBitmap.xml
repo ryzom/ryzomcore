@@ -2,6 +2,7 @@
     <header>
         <name>ViewBitmap</name>
         <guiname>CViewBitmap</guiname>
+		<classname>bitmap</classname>
         <ancestor>CtrlBase</ancestor>
         <description></description>
         <abstract>false</abstract>
@@ -36,7 +37,7 @@
         <property>
             <name>texture</name>
             <type>texture</type>
-            <default></default>
+            <default>log_kami.tga</default>
         </property>
         <property>
             <name>scale</name>

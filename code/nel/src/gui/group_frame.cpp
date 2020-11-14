@@ -26,6 +26,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -145,7 +149,7 @@ namespace NLGUI
 		}
 
 		// The first type in display type struct is the default display type
-		if (_DispTypes.size() == 0)
+		if (_DispTypes.empty())
 		{
 			SDisplayType dt;
 			dt.Name = "default";

@@ -74,10 +74,10 @@ CGeorgesEditApp::CGeorgesEditApp() : MemStream (false, false, 1024*1024)
 	ExeStandalone = false;
 	StartExpanded = true;
 
-	FormClipBoardFormatStruct = RegisterClipboardFormat ("GeorgesFormStruct");
-	FormClipBoardFormatVirtualStruct = RegisterClipboardFormat ("GeorgesFormVirtualStruct");
-	FormClipBoardFormatArray = RegisterClipboardFormat ("GeorgesFormArray");
-	FormClipBoardFormatType = RegisterClipboardFormat ("GeorgesFormType");
+	FormClipBoardFormatStruct = RegisterClipboardFormat (_T("GeorgesFormStruct"));
+	FormClipBoardFormatVirtualStruct = RegisterClipboardFormat (_T("GeorgesFormVirtualStruct"));
+	FormClipBoardFormatArray = RegisterClipboardFormat (_T("GeorgesFormArray"));
+	FormClipBoardFormatType = RegisterClipboardFormat (_T("GeorgesFormType"));
 	nlassert (FormClipBoardFormatStruct);
 	nlassert (FormClipBoardFormatVirtualStruct);
 	nlassert (FormClipBoardFormatArray);
@@ -159,7 +159,7 @@ BOOL CGeorgesEditApp::initInstance (int nCmdShow, bool exeStandalone, int x, int
 	if (!isInitialized && exeStandalone)
 	{
 		m_nCmdShow = nCmdShow;
-		ExePath = GetCommandLine ();
+		ExePath = tStrToUtf8(GetCommandLine ());
 		if (ExePath.size()>0)
 		{
 			if (ExePath[0] == '\"')
@@ -477,20 +477,15 @@ void CGeorgesEditApp::OnAppAbout()
 void CGeorgesEditApp::outputError (const char* message)
 {
 	if (m_pMainWnd)
-		m_pMainWnd->MessageBox (message, "Georges Edit", MB_OK|MB_ICONEXCLAMATION);
+		m_pMainWnd->MessageBox (utf8ToTStr(message), _T("Georges Edit"), MB_OK|MB_ICONEXCLAMATION);
 	else
-		MessageBox (NULL, message, "Georges Edit", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (NULL, utf8ToTStr(message), _T("Georges Edit"), MB_OK|MB_ICONEXCLAMATION);
 }
 
 void CGeorgesEditApp::getConfigFilePath (std::string &output)
 {
 	// Get the config file path
-	char sDrive[MAX_PATH];
-	char sDir[MAX_PATH];
-	char sPath[MAX_PATH];
-	_splitpath (theApp.ExePath.c_str (), sDrive, sDir, NULL, NULL);
-	_makepath (sPath, sDrive, sDir, "georges", ".cfg");
-	output = sPath;
+	output = NLMISC::CFile::getPath(theApp.ExePath) + "georges.cfg";
 }
 
 bool CGeorgesEditApp::loadCfg ()
@@ -586,7 +581,7 @@ bool CGeorgesEditApp::loadCfg ()
 		if (superuser)
 			Superuser = superuser->asInt () != 0;
 	}
-	catch (Exception &)
+	catch (const Exception &)
 	{
 		char message[512];
 		smprintf (message, 512, "Can't load georges.cfg config file.");
@@ -647,14 +642,14 @@ bool CGeorgesEditApp::saveCfg ()
 		{
 			cf.save ();
 		}
-		catch (Exception &)
+		catch (const Exception &)
 		{
 			char message[512];
 			smprintf (message, 512, "Can't save georges.cfg config file.");
 			outputError (message);
 		}
 	}
-	catch (Exception &)
+	catch (const Exception &)
 	{
 		char message[512];
 		smprintf (message, 512, "Can't load georges.cfg config file.");
@@ -678,11 +673,11 @@ bool CGeorgesEditApp::getColor (NLMISC::CRGBA &color)
 	// Get custom colors
 	COLORREF arrayColor[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	HKEY hKey;
-	if (RegOpenKeyEx(HKEY_CURRENT_USER, GEORGES_EDIT_BASE_REG_KEY"\\Custom Colors", 0, KEY_READ, &hKey)==ERROR_SUCCESS)
+	if (RegOpenKeyEx(HKEY_CURRENT_USER, _T(GEORGES_EDIT_BASE_REG_KEY "\\Custom Colors"), 0, KEY_READ, &hKey)==ERROR_SUCCESS)
 	{
 		DWORD len=sizeof(arrayColor);
 		DWORD type;
-		RegQueryValueEx (hKey, "", 0, &type, (LPBYTE)(arrayColor), &len);
+		RegQueryValueEx (hKey, _T(""), 0, &type, (LPBYTE)(arrayColor), &len);
 		RegCloseKey (hKey);
 	}
 
@@ -703,9 +698,9 @@ bool CGeorgesEditApp::getColor (NLMISC::CRGBA &color)
 
 		// Save the custom colors
 		HKEY hKey;
-		if (RegCreateKey(HKEY_CURRENT_USER, GEORGES_EDIT_BASE_REG_KEY"\\Custom Colors", &hKey)==ERROR_SUCCESS)
+		if (RegCreateKey(HKEY_CURRENT_USER, _T(GEORGES_EDIT_BASE_REG_KEY "\\Custom Colors"), &hKey)==ERROR_SUCCESS)
 		{
-			RegSetValueEx (hKey, "", 0, REG_BINARY, (LPBYTE)(arrayColor), sizeof(arrayColor));
+			RegSetValueEx (hKey, _T(""), 0, REG_BINARY, (LPBYTE)(arrayColor), sizeof(arrayColor));
 			RegCloseKey (hKey);
 		}
 		return true;
@@ -716,9 +711,9 @@ bool CGeorgesEditApp::getColor (NLMISC::CRGBA &color)
 bool CGeorgesEditApp::yesNo (const char* message)
 {
 	if (m_pMainWnd)
-		return m_pMainWnd->MessageBox (message, "Georges Edit", MB_YESNO|MB_ICONQUESTION) != IDNO;
+		return m_pMainWnd->MessageBox (message, _T("Georges Edit"), MB_YESNO|MB_ICONQUESTION) != IDNO;
 	else
-		return MessageBox (NULL, message, "Georges Edit", MB_YESNO|MB_ICONQUESTION)  != IDNO;
+		return MessageBox (NULL, message, _T("Georges Edit"), MB_YESNO|MB_ICONQUESTION)  != IDNO;
 }
 
 void CGeorgesEditApp::loadPlugins ()
@@ -727,7 +722,7 @@ void CGeorgesEditApp::loadPlugins ()
 	for (i=0; i<PluginsNames.size (); i++)
 	{
 		// Load the dll
-		HINSTANCE hModule = AfxLoadLibrary (PluginsNames[i].c_str ());
+		HINSTANCE hModule = AfxLoadLibrary (utf8ToTStr(PluginsNames[i]));
 		if (hModule)
 		{
 			// Get the proc adrdess
@@ -925,49 +920,12 @@ LONG GetRegKey(HKEY key, LPCTSTR subkey, LPTSTR retdata)
 
 void CGeorgesEditApp::gotoURL (LPCTSTR url)
 {
-    char key[MAX_PATH + MAX_PATH];
-
-    // First try ShellExecute()
-    HINSTANCE result = ShellExecute(NULL, "open", url, NULL,NULL, SW_SHOW);
-
-    // If it failed, get the .htm regkey and lookup the program
-    if ((UINT)result <= HINSTANCE_ERROR) {
-
-        if (GetRegKey(HKEY_CLASSES_ROOT, ".htm", key) == ERROR_SUCCESS) 
-		{
-            lstrcat(key, "\\shell\\open\\command");
-
-            if (GetRegKey(HKEY_CLASSES_ROOT,key,key) == ERROR_SUCCESS) 
-			{
-                char *pos;
-                pos = strstr(key, "\"%1\"");
-                if (pos == NULL) 
-				{                     // No quotes found
-                    pos = strstr(key, "%1");       // Check for %1, without quotes 
-                    if (pos == NULL)                   // No parameter at all...
-                        pos = key+lstrlen(key)-1;
-                    else
-                        *pos = '\0';                   // Remove the parameter
-                }
-                else
-                    *pos = '\0';                       // Remove the parameter
-
-                lstrcat(pos, " ");
-                lstrcat(pos, url);
-                result = (HINSTANCE) WinExec(key, SW_SHOW);
-            }
-        }
-    }
+	NLMISC::openURL(tStrToUtf8(url));
 }
 
 void CGeorgesEditApp::WinHelp(DWORD dwData, UINT nCmd) 
 {
-	char drive[512];
-	char dir[512];
-	char path[512];
-	_splitpath (ExePath.c_str (), drive, dir, NULL, NULL);
-	_makepath (path, drive, dir, "georges_edit", ".html");
-	gotoURL (path);
+	gotoURL(utf8ToTStr(NLMISC::CFile::getPath(ExePath) + "georges_edit.html"));
 }
 
 void CGeorgesEditApp::OnViewRefresh() 
@@ -981,7 +939,7 @@ void CGeorgesEditApp::OnViewRefresh()
 void CGeorgesEditApp::saveWindowState (const CWnd *wnd, const char *name, bool controlBar)
 {
 	HKEY hKey;
-	nlverify (RegCreateKey (HKEY_CURRENT_USER, GEORGES_EDIT_BASE_REG_KEY"\\Windows states", &hKey) == ERROR_SUCCESS);
+	nlverify (RegCreateKey (HKEY_CURRENT_USER, _T(GEORGES_EDIT_BASE_REG_KEY "\\Windows states"), &hKey) == ERROR_SUCCESS);
 
 	// Get the position
 	WINDOWPLACEMENT wndpl;
@@ -997,7 +955,7 @@ void CGeorgesEditApp::saveWindowState (const CWnd *wnd, const char *name, bool c
 void CGeorgesEditApp::loadWindowState (CWnd *wnd, const char *name, bool mdiChildWnd, bool controlBar)
 {
 	HKEY hKey;
-	if (RegOpenKey (HKEY_CURRENT_USER, GEORGES_EDIT_BASE_REG_KEY"\\Windows states", &hKey) == ERROR_SUCCESS)
+	if (RegOpenKey (HKEY_CURRENT_USER, _T(GEORGES_EDIT_BASE_REG_KEY "\\Windows states"), &hKey) == ERROR_SUCCESS)
 	{
 		// Get the value
 		WINDOWPLACEMENT wndpl;
@@ -1067,7 +1025,7 @@ void CGeorgesEditApp::OnUpdateFileSaveAll(CCmdUI* pCmdUI)
 	pCmdUI->Enable (getActiveDocument () != NULL);
 }
 
-bool CGeorgesEditApp::SerialIntoMemStream (const char *formName, CGeorgesEditDoc *doc, uint slot, bool copyToClipboard)
+bool CGeorgesEditApp::SerialIntoMemStream (const std::string &formName, CGeorgesEditDoc *doc, uint slot, bool copyToClipboard)
 {
 	// Ok, get the node
 	const CFormDfn *parentDfn;
@@ -1197,7 +1155,7 @@ bool CGeorgesEditApp::SerialIntoMemStream (const char *formName, CGeorgesEditDoc
 		// Ok
 		return true;
 	}
-	catch (Exception &)
+	catch (const Exception &)
 	{
 		nlstop;
 	}
@@ -1270,7 +1228,7 @@ bool CGeorgesEditApp::FillMemStreamWithClipboard (const char *formName, CGeorges
 		return false;
 }
 
-bool CGeorgesEditApp::SerialFromMemStream (const char *formName, CGeorgesEditDoc *doc, uint slot)
+bool CGeorgesEditApp::SerialFromMemStream (const std::string &formName, CGeorgesEditDoc *doc, uint slot)
 {
 	// The form pointer
 	CForm *form = doc->getFormPtr ();
@@ -1454,7 +1412,7 @@ bool CGeorgesEditApp::SerialFromMemStream (const char *formName, CGeorgesEditDoc
 			return true;
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("Error while paste: %s", e.what());
 	}
@@ -1478,9 +1436,8 @@ BOOL CGeorgesEditApp::OnDDECommand(LPTSTR lpszCommand)
 		name = name.substr (6, name.size ()-8);
 
 		// Get the extension
-		char ext[MAX_PATH];
-		_splitpath (name.c_str (), NULL, NULL, NULL, ext);
-		string dfnName = string (ext+1) + ".dfn";
+		std::string ext = NLMISC::CFile::getExtension(name);
+		string dfnName = ext + ".dfn";
 
 		// Get the doc template
 		CMultiDocTemplate *docTemplate = getFormDocTemplate (dfnName.c_str ());
@@ -1541,18 +1498,15 @@ BOOL CGeorgesEditApp::OnDDECommand(LPTSTR lpszCommand)
 		name = name.substr (8, name.size ()-10);
 
 		// Get the extension
-		char ext[MAX_PATH];
-		_splitpath (name.c_str (), NULL, NULL, NULL, ext);
-		string dfnName = string (ext+1) + ".dfn";
+		std::string ext = NLMISC::CFile::getExtension(name);
+		string dfnName = ext + ".dfn";
 
 		// Create a document
 		CGeorgesEditDocForm *doc = (CGeorgesEditDocForm*)createDocument (dfnName.c_str (), "");
 		if (doc)
 		{
-			char nameFile[MAX_PATH];
-			char extFile[MAX_PATH];
-			_splitpath (name.c_str (), NULL, NULL, nameFile, extFile);
-			doc->addParent ((string (nameFile) + extFile).c_str ());
+			std::string nameFile = NLMISC::CFile::getFilename(name);
+			doc->addParent (nameFile.c_str());
 			doc->updateDocumentStructure ();
 			doc->UpdateAllViews (NULL);
 		}
@@ -1570,11 +1524,7 @@ BOOL CGeorgesEditApp::OnDDECommand(LPTSTR lpszCommand)
 		name = name.substr (10, name.size ()-12);
 
 		// Get the extension
-		char name2[MAX_PATH];
-		char ext[MAX_PATH];
-		_splitpath (name.c_str (), NULL, NULL, name2, ext);
-		string dfnName = name2;
-		dfnName += ext;
+		std::string dfnName = NLMISC::CFile::getFilename(name);
 
 		// Create a document
 		CGeorgesEditDocForm *doc = (CGeorgesEditDocForm*)createDocument (dfnName.c_str (), "");

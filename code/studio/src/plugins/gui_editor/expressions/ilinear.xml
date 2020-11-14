@@ -1,0 +1,10 @@
+<expression>
+<category>Mathematical</category>
+<name>ilinear</name>
+<variable>false</variable>
+<slots>
+<slot>Interpolant</slot>
+<slot>Start</slot>
+<slot>End</slot>
+</slots>
+</expression>

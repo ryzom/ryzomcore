@@ -66,7 +66,7 @@ public:
 	float			computeArea() const;
 
 	/// Serial this polygon
-	void			serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void			serial(NLMISC::IStream &f);
 
 	/**
 	  * Convert a concave polygon into a list of convex polygons using a 2d projection.
@@ -156,7 +156,7 @@ public:
 	void		getBestTriplet(uint &index0, uint &index1, uint &index2);
 
 	/// Serial this polygon
-	void		serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void		serial(NLMISC::IStream &f);
 
 	typedef std::pair<sint, sint> TRaster;
 	typedef std::vector<TRaster>  TRasterVect;

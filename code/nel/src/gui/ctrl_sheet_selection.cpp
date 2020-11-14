@@ -23,6 +23,10 @@
 #include "nel/gui/ctrl_sheet_selection.h"
 #include "nel/gui/view_renderer.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 

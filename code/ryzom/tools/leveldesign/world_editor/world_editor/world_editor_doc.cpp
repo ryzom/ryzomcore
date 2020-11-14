@@ -96,8 +96,8 @@ bool CWorldEditorDoc::newDocument ()
 
 	PropertiesDialogs.clear();
 
-	_DataDir = "";
-	_Context = "";
+	_DataDir.clear();
+	_Context.clear();
 	
 	// Erase all editable root primitive
 	CDatabaseList::iterator ite = _DataHierarchy.begin();
@@ -172,7 +172,7 @@ BOOL CWorldEditorDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 	// Result 
 	newDocument ();
-	bool res = loadDocument (lpszPathName) ? TRUE : FALSE;
+	bool res = loadDocument (tStrToUtf8(lpszPathName)) ? TRUE : FALSE;
 
 	// Timer enabled ?
 	getMainFrame ()->TimerEnabled = true;
@@ -182,7 +182,7 @@ BOOL CWorldEditorDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 // ***************************************************************************
 
-bool CWorldEditorDoc::loadDocument (const char *filename)
+bool CWorldEditorDoc::loadDocument (const std::string &filename)
 {
 	bool result = true;
 
@@ -346,7 +346,7 @@ bool CWorldEditorDoc::loadDocument (const char *filename)
 						// Not modified
 						_DataHierarchy[i].Modified = false;
 
-						getMainFrame()->launchLoadingDialog(toString("loading %s", _DataHierarchy[i].Filename.c_str()).c_str());
+						getMainFrame()->launchLoadingDialog("loading " + _DataHierarchy[i].Filename);
 						getMainFrame()->progressLoadingDialog(float(i+0.0001f)/_DataHierarchy.size());
 						// Landscape ?
 						if (_DataHierarchy[i].Type == CDatabaseElement::Landscape)
@@ -372,7 +372,7 @@ bool CWorldEditorDoc::loadDocument (const char *filename)
 									}
 								}
 							}
-							catch (Exception& e)
+							catch (const Exception& e)
 							{
 								theApp.errorMessage ("Error reading file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 							}
@@ -415,7 +415,7 @@ bool CWorldEditorDoc::loadDocument (const char *filename)
 									}
 								}
 							}
-							catch (Exception& e)
+							catch (const Exception& e)
 							{
 								theApp.errorMessage ("Error reading file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 							}
@@ -436,7 +436,7 @@ bool CWorldEditorDoc::loadDocument (const char *filename)
 				clearModifications ();
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			theApp.errorMessage ("Error reading file %s : %s", filename, e.what ());
 		
@@ -504,7 +504,7 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	BOOL result = TRUE;
 
 	// Get path name
-	string path = NLMISC::CFile::getPath (lpszPathName);
+	string path = NLMISC::CFile::getPath (tStrToUtf8(lpszPathName));
 
 	// Backup current path
 	string backupPath = CPath::getCurrentPath ();
@@ -522,7 +522,7 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 		{
 			// Make path relative
 			string relativeFileName = _DataHierarchy[i].Filename;
-			CPath::makePathRelative (NLMISC::CFile::getPath (lpszPathName).c_str (), relativeFileName);
+			CPath::makePathRelative (NLMISC::CFile::getPath (tStrToUtf8(lpszPathName)), relativeFileName);
 			if (relativeFileName != _DataHierarchy[i].Filename)
 			{
 				_DataHierarchy[i].Filename = relativeFileName;
@@ -541,10 +541,10 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 						// Got a filename ?
 						if (_DataHierarchy[i].Filename.empty ())
 						{
-							CFileDialogEx dialog (BASE_REGISTRY_KEY, "land", FALSE, "land", NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, "NeL Ligo Landscape Files (*.land)|*.land|All Files (*.*)|*.*||", getMainFrame ());
+							CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("land"), FALSE, _T("land"), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, _T("NeL Ligo Landscape Files (*.land)|*.land|All Files (*.*)|*.*||"), getMainFrame ());
 							if (dialog.DoModal() == IDOK)
 							{
-								_DataHierarchy[i].Filename = dialog.GetPathName();
+								_DataHierarchy[i].Filename = tStrToUtf8(dialog.GetPathName());
 							}
 							else
 							{
@@ -578,7 +578,7 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 
 						_DataHierarchy[i].LastModifedTime = NLMISC::CFile::getFileModificationDate (_DataHierarchy[i].Filename);
 					}
-					catch (Exception& e)
+					catch (const Exception& e)
 					{
 						theApp.errorMessage ("Error writing file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 					}
@@ -594,10 +594,10 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 						// Got a filename ?
 						if (_DataHierarchy[i].Filename.empty ())
 						{
-							CFileDialogEx dialog (BASE_REGISTRY_KEY, "primitive", FALSE, "primitive", NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, "NeL Ligo Primitive Files (*.primitive)|*.primitive|All Files (*.*)|*.*||", getMainFrame ());
+							CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("primitive"), FALSE, _T("primitive"), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, _T("NeL Ligo Primitive Files (*.primitive)|*.primitive|All Files (*.*)|*.*||"), getMainFrame ());
 							if (dialog.DoModal() == IDOK)
 							{
-								string pathFromDialog = dialog.GetPathName();
+								string pathFromDialog = tStrToUtf8(dialog.GetPathName());
 
 								// Remove uppercase in filename
 								string::size_type pos = pathFromDialog.rfind ("\\", 0);
@@ -646,7 +646,7 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 
 						_DataHierarchy[i].LastModifedTime = NLMISC::CFile::getFileModificationDate (_DataHierarchy[i].Filename);
 					}
-					catch (Exception& e)
+					catch (const Exception& e)
 					{
 						theApp.errorMessage ("Error writing file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 					}
@@ -665,7 +665,7 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	{
 		// Save the document
 		COFile file;
-		if (file.open (lpszPathName, false, false, true))
+		if (file.open (tStrToUtf8(lpszPathName), false, false, true))
 		{
 			try
 			{
@@ -708,7 +708,7 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 							if (landscape)
 							{
 								node = xmlNewChild ( node, NULL, (const xmlChar*)"PRIMITIVES", NULL);
-								_DataHierarchy[i].Primitives.write (node, lpszPathName);
+								_DataHierarchy[i].Primitives.write (node, tStrToUtf8(lpszPathName));
 							}
 						}
 					}
@@ -720,7 +720,7 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 				// Last time
 				file.close ();
 			}
-			catch (Exception &e)
+			catch (const Exception &e)
 			{
 				theApp.errorMessage ("Error writing file %s : %s", lpszPathName, e.what ());
 
@@ -732,7 +732,7 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 			result = FALSE;
 		}
 
-		_LastModifedTime = NLMISC::CFile::getFileModificationDate (lpszPathName);
+		_LastModifedTime = NLMISC::CFile::getFileModificationDate (tStrToUtf8(lpszPathName));
 	}
 
 	// No modification is for this level of undo
@@ -826,11 +826,11 @@ void CWorldEditorDoc::updateModifiedState ()
 	}
 	else
 	{
-		string title = (const char*)GetTitle ();
+		string title = tStrToUtf8(GetTitle ());
 		if ( (title.size ()>=2) && (title[title.size()-1] == '*') && (title[title.size()-2] == ' ') )
 		{
 			title.resize (title.size () - 2);
-			SetTitle (title.c_str());
+			SetTitle (utf8ToTStr(title));
 		}
 	}
 }
@@ -912,12 +912,12 @@ const string &CWorldEditorDoc::getDataDir () const
 void CWorldEditorDoc::getFilePath(uint primIndex,string & relativeFileName)
 {	
 	relativeFileName=_DataHierarchy[primIndex].Filename;
-	CPath::makePathRelative ((NLMISC::CFile::getPath ((LPCTSTR)CWorldEditorDoc::GetPathName())).c_str(), relativeFileName);
+	CPath::makePathRelative (NLMISC::CFile::getPath (tStrToUtf8(CWorldEditorDoc::GetPathName())), relativeFileName);
 }
 
 // ***************************************************************************
 
-void CWorldEditorDoc::setDataDir (const char *dir)
+void CWorldEditorDoc::setDataDir (const std::string &dir)
 {
 	_DataDir = dir;
 	
@@ -1423,7 +1423,7 @@ void CWorldEditorDoc::initPrimitiveParameters (const CPrimitiveClass &primClass,
 								}
 								else
 								{
-									str->StringArray[i] = "";
+									str->StringArray[i].clear();
 								}
 							}
 							primitive.addPropertyByName (parameter.Name.c_str (), str);
@@ -1444,7 +1444,7 @@ void CWorldEditorDoc::initPrimitiveParameters (const CPrimitiveClass &primClass,
 
 // ***************************************************************************
 
-const NLLIGO::IPrimitive *CWorldEditorDoc::createPrimitive (const CDatabaseLocator &locator, const char *className, const char *primName, 
+const NLLIGO::IPrimitive *CWorldEditorDoc::createPrimitive (const CDatabaseLocator &locator, const std::string &className, const std::string &primName, 
 															const CVector &initPos, float deltaPos, 
 															const std::vector<CPrimitiveClass::CInitParameters> &initParameters)
 {
@@ -1532,12 +1532,12 @@ const NLLIGO::IPrimitive *CWorldEditorDoc::createPrimitive (const CDatabaseLocat
 		if (primClass->Type == CPrimitiveClass::Bitmap)
 		{
 			// Create a dialog file
-			CFileDialogEx dialog (BASE_REGISTRY_KEY, "image", TRUE, primClass->FileExtension.c_str (), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, 
-				(primClass->FileType+" (*."+primClass->FileExtension+")|*."+primClass->FileExtension+"|All Files (*.*)|*.*||").c_str (), getMainFrame ());
+			CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("image"), TRUE, utf8ToTStr(primClass->FileExtension), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,
+				utf8ToTStr(toString("%s (*.%s)|*.%s|All Files (*.*)|*.*||", primClass->FileType.c_str(), primClass->FileExtension.c_str(), primClass->FileExtension.c_str())), getMainFrame ());
 			if (dialog.DoModal() == IDOK)
 			{
 				// Save filename
-				static_cast<CPrimBitmap*>(primitive)->init (dialog.GetPathName ());
+				static_cast<CPrimBitmap*>(primitive)->init (tStrToUtf8(dialog.GetPathName ()));
 			}
 		}
 
@@ -1674,7 +1674,7 @@ void CWorldEditorDoc::updateFiles ()
 						// Last time
 						_DataHierarchy[i].LastModifedTime = NLMISC::CFile::getFileModificationDate (_DataHierarchy[i].Filename);
 					}
-					catch (Exception& e)
+					catch (const Exception& e)
 					{
 						theApp.errorMessage ("Error reading file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 					}
@@ -1710,7 +1710,7 @@ void CWorldEditorDoc::updateFiles ()
 							theApp.errorMessage ("Can't open file %s for reading.", _DataHierarchy[i].Filename.c_str ());
 						}
 					}
-					catch (Exception& e)
+					catch (const Exception& e)
 					{
 						theApp.errorMessage ("Error reading file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 					}
@@ -1728,25 +1728,25 @@ void CWorldEditorDoc::updateFiles ()
 	}
 	
 	// Check date
-	if (!checkFileDate (GetPathName (), _LastModifedTime))
+	if (!checkFileDate (tStrToUtf8(GetPathName ()), _LastModifedTime))
 	{
 		// Ask for reloading
-		if (theApp.yesNoMessage ("The file \"%s\" has been modified.\nReload it ?", (const char*)GetPathName ()))
+		if (theApp.yesNoMessage ("The file \"%s\" has been modified.\nReload it ?", tStrToUtf8(GetPathName ()).c_str()))
 		{
 			newDocument ();
-			loadDocument (GetPathName ());
+			loadDocument (tStrToUtf8(GetPathName ()));
 		}
 		else
 		{
 			// Get the new date
-			_LastModifedTime = NLMISC::CFile::getFileModificationDate ((const char*)GetPathName ());
+			_LastModifedTime = NLMISC::CFile::getFileModificationDate (tStrToUtf8(GetPathName()));
 		}
 	}
 }
 
 // ***************************************************************************
 
-bool CWorldEditorDoc::checkFileDate (const char *filename, uint32 date)
+bool CWorldEditorDoc::checkFileDate (const std::string &filename, uint32 date)
 {
 	// File exist ?
 	if (!NLMISC::CFile::fileExists (filename))
@@ -2149,7 +2149,7 @@ bool CWorldEditorDoc::updateDefaultValuesInternal (NLLIGO::IPrimitive &primitive
 							primitive.removePropertyByName (_class->Parameters[i].Name.c_str ());
 
 							// Set the value
-							result[j] = "";
+							result[j].clear();
 
 							// Add the new property array
 							primitive.addPropertyByName (_class->Parameters[i].Name.c_str (), new CPropertyStringArray (result));

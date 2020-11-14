@@ -210,7 +210,7 @@ class CFamilyBehavior
 
 	void	spawnBoss(NLMISC::TStringId outpostName);
 
-	uint32	energyScale	(uint32 levelIndex=~0)	const;
+	uint32	energyScale	(uint32 levelIndex=std::numeric_limits<uint32>::max())	const;
 
 	void	setModifier	(const	float	&value, const	uint32	&index)
 	{

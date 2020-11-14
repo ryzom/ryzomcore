@@ -29,7 +29,7 @@ struct CHashKey
 
 	CHashKey (const unsigned char Message_Digest[20])
 	{
-		HashKeyString = "";
+		HashKeyString.clear();
 		for(sint i = 0; i < 20 ; ++i)
 		{
 			HashKeyString += Message_Digest[i];
@@ -45,7 +45,7 @@ struct CHashKey
 		}
 		else if (str.size() == 40)
 		{
-			HashKeyString = "";
+			HashKeyString.clear();
 			for(uint i = 0; i < str.size(); i+=2)
 			{
 				uint8 val;

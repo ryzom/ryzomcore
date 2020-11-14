@@ -421,7 +421,7 @@ public:
 	// get table for registry in lua environment
 	CLuaObject       &getRegistry()       { return _Registry; }
 	// get lua classes (the r2.Classes table)
-	CLuaObject		 getClasses() throw(ELuaError);
+	CLuaObject		 getClasses();
 	// get R2 environment (the 'r2' table into lua global environment)
 	CLuaObject       &getEnv();
 	// get the config table (that is the 'r2.Config' table)
@@ -527,8 +527,8 @@ public:
 	CInstance *getInstanceUnderPos(float x, float y, float distSelection, bool &isPlayerUnderCursor);
 	// helper : test intersection between an entity and a ray
 	static float preciseEntityIntersectionTest(CEntityCL &entity, const NLMISC::CVector &worldRayStart, const NLMISC::CVector &worldRayDir);
-	// Tmp show the connexion window and display a msg in it. An empty msg will close the window
-	static void connexionMsg(const std::string &stringId);
+	// Tmp show the connection window and display a msg in it. An empty msg will close the window
+	static void connectionMsg(const std::string &stringId);
 	TEntityCustomSelectBoxMap &getEntityCustomSelectBoxMap() { return _EntityCustomSelectBoxMap; }
 	// from a pointer on an entity, retrieve its local selection bbox (possibly redefined in r2_ui_custom_boxes_data.lua
 	const NLMISC::CAABBox &getLocalSelectBox(CEntityCL &entity) const;
@@ -893,6 +893,7 @@ public:
 	static NLMISC::CCDBNodeLeaf	   *getPlotItemSheetDBLeaf(uint index);
 	static bool				getIsStartingScenario() { return _IsStartingScenario; }
 	bool				isClearingContent() const { return _ClearingContent; }
+	void			   registerLuaFunc();
 
 private:
 	void				initPlotItems();
@@ -925,7 +926,7 @@ private:
 	void			   initObjectProjectionMetatable();
 	void               registerDisplayers();
 	void               registerTools();
-	void			   registerLuaFunc();
+
 	// add a C++ method in the environement
 	void			   registerEnvMethod(const char *name, TLuaWrappedFunction func);
 	void			   registerEnvFunction(const char *name, TLuaWrappedFunction func);
@@ -955,7 +956,7 @@ private:
 
 	bool _ClearingContent;
 
-	std::string _ConnexionMsg;
+	std::string _ConnectionMsg;
 	static std::string _ScenarioToLoadWhenEntreringIntoAnimation;
 	static bool _IsStartingScenario; // the scenario is an animation scenario launch from the ring access point
 

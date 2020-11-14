@@ -24,12 +24,16 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
 
 // ***************************************************************************
-void	CSkeletonShape::CLod::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CSkeletonShape::CLod::serial(NLMISC::IStream &f)
 {
 	(void)f.serialVersion(0);
 
@@ -171,7 +175,7 @@ CTransformShape		*CSkeletonShape::createInstance(CScene &scene)
 }
 
 // ***************************************************************************
-void			CSkeletonShape::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void			CSkeletonShape::serial(NLMISC::IStream &f)
 {
 	/*
 	Version 1:

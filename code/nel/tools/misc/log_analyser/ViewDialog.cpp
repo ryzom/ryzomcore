@@ -301,14 +301,14 @@ void		CViewDialog::reload()
 {
 	SessionDatePassed = false;
 	CWaitCursor wc;
-	if ( LogSessionStartDate.IsEmpty() || (LogSessionStartDate == "Beginning") )
+	if ( LogSessionStartDate.IsEmpty() || (LogSessionStartDate == _T("Beginning")) )
 	{
 		SessionDatePassed = true;
 	}
 
 	((CButton*)GetDlgItem( IDC_BUTTON1 ))->ShowWindow( SW_SHOW );
 	((CButton*)GetDlgItem( IDC_BUTTON2 ))->ShowWindow( SW_SHOW );
-	m_Caption.Format( "%s (%u file%s) %u+ %u- (%s)", Seriesname, Filenames.size(), Filenames.size()>1?"s":"", PosFilter.size(), NegFilter.size(), LogSessionStartDate.IsEmpty()?"all":CString("session ")+LogSessionStartDate );
+	m_Caption.Format( _T("%s (%u file%s) %u+ %u- (%s)"), Seriesname, Filenames.size(), Filenames.size()>1?"s":"", PosFilter.size(), NegFilter.size(), LogSessionStartDate.IsEmpty()?"all":CString("session ")+LogSessionStartDate );
 	UpdateData( false );
 	clear();
 	setRedraw( false );
@@ -356,17 +356,21 @@ void		CViewDialog::getBookmarksAbsoluteLines( vector<int>& bookmarksAbsoluteLine
 	for ( unsigned int i=0; i!=Filenames.size(); ++i )
 	{
 		CString& filename = Filenames[i];
-		ifstream ifs( filename );
-		if ( ! ifs.fail() )
+
+		NLMISC::CIFile ifs;
+
+		if (ifs.open(tStrToUtf8(filename)))
 		{
 			char line [1024];
-			while ( ! ifs.eof() )
+
+			while (!ifs.eof())
 			{
-				ifs.getline( line, 1024 );
+				ifs.getline(line, 1024);
+
 				if ( SessionDatePassed )
 				{
 					// Stop if the session is finished
-					if ( (! LogSessionStartDate.IsEmpty()) && (strstr( line, LogDateString )) )
+					if ( (! LogSessionStartDate.IsEmpty()) && (strstr( line, tStrToUtf8(LogDateString).c_str())) )
 					{
 						return;
 					}
@@ -390,7 +394,7 @@ void		CViewDialog::getBookmarksAbsoluteLines( vector<int>& bookmarksAbsoluteLine
 				else
 				{
 					// Look for the session beginning
-					if ( strstr( line, LogSessionStartDate ) != NULL )
+					if ( strstr( line, tStrToUtf8(LogSessionStartDate).c_str()) != NULL )
 					{
 						SessionDatePassed = true;
 					}
@@ -457,15 +461,12 @@ std::string		CViewDialog::corruptedLinesString( const std::vector<unsigned int>&
 	string res;
 	if ( ! corruptedLines.empty() )
 	{
-		CString s;
-		s.Format( "%u", corruptedLines.size() );
-		res = " -> " + string(s) + " corrupted lines:";
+		res = NLMISC::toString(" -> %u corrupted lines:", (uint)corruptedLines.size());
 
 		vector<unsigned int>::const_iterator ivc;
 		for ( ivc=corruptedLines.begin(); ivc!=corruptedLines.end(); ++ivc )
 		{
-			s.Format( "%u", *ivc );
-			res += "\r\n   line " + string(s) + " : " + string(Buffer[*ivc].Left(20)) + "...";
+			res += NLMISC::toString("\r\n   line %u : %s...", *ivc, tStrToUtf8(Buffer[*ivc].Left(20)).c_str());
 		}
 		HasCorruptedLines = true;
 	}
@@ -483,7 +484,7 @@ void		CViewDialog::loadFileOrSeries( const vector<int>& bookmarksAbsoluteLines )
 	if ( LogSessionStartDate.IsEmpty() )
 		actualFilenames += ":\r\n";
 	else
-		actualFilenames += " for Session of " + LogSessionStartDate + ":\r\n";
+		actualFilenames += " for Session of " + tStrToUtf8(LogSessionStartDate) + ":\r\n";
 	bool corruptionDetectionEnabled = (((CButton*)(((CLog_analyserDlg*)GetParent())->GetDlgItem( IDC_DetectCorruptedLines )))->GetCheck() == 1);
 	HasCorruptedLines = false;
 	vector<unsigned int> corruptedLines;

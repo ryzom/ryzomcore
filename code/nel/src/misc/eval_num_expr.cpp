@@ -632,6 +632,9 @@ CEvalNumExpr::TReturnState CEvalNumExpr::evalExpression (double &finalResult, TT
 		TOperator resultUnaryOp[InternalOperator];
 		vector<TOperator> resultUnaryOpSup;
 
+		// init table
+		for (uint i = 0; i < (uint)InternalOperator; ++i) resultUnaryOp[i] = NotOperator;
+
 		// Current value
 		double value;
 
@@ -945,7 +948,7 @@ CEvalNumExpr::TReturnState CEvalNumExpr::evalExpression (double &finalResult, TT
 				value = (double)(uint)((floor (value+0.5)==0.0));
 				break;
 			case Tilde:
-				value = (double)~((uint)floor (value+0.5));
+				value = (double)(~((uint)floor (value+0.5)) & std::numeric_limits<uint>::max());
 				break;
 			case Minus:
 				value = -value;

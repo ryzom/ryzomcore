@@ -77,7 +77,7 @@ public:
 	/// TextureNear are system. Do not need to serialize them...
 	// default ctor is required for compilation with NLMISC_DECLARE_CLASS, but never called...
 	CTextureNear() {nlstop;}
-	virtual void	serial(NLMISC::IStream &/* f */) throw(NLMISC::EStream) {nlstop;}
+	virtual void	serial(NLMISC::IStream &/* f */) {nlstop;}
 	NLMISC_DECLARE_CLASS(CTextureNear);
 
 private:

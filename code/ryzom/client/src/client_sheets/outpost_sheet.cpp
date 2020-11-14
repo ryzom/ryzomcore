@@ -41,7 +41,7 @@ void COutpostSheet::build(const NLGEORGES::UFormElm &root)
 }
 
 // ****************************************************************************
-void COutpostSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void COutpostSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(NbMaxSpawnedSquad);
 	f.serial(NbMaxSpawnedMercenarySquad);

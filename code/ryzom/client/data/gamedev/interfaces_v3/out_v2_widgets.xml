@@ -83,7 +83,7 @@
 		tx_normal="qh_off" tx_pushed="qh_on" tx_over="qh_off" wmin="80" wmargin="40"
 		global_color_normal="false" global_color_over="false" global_color_pushed="false" 
 		color="255 255 255 255" col_over="255 255 255 0" col_pushed="255 255 255 255"
-		text_y="-1" fontsize="13" shadow="true"
+		text_y="1" fontsize="13" shadow="true"
 		text_color_normal="222 201 182 255" 
 	    text_color_pushed="222 201 182 255" 
 	    text_color_over="255 255 255 255" 

@@ -21,9 +21,13 @@
 #include "nel/3d/driver.h"
 #include "nel/3d/ps_iterator.h"
 #include "nel/3d/particle_system.h"
+#include "nel/3d/debug_vb.h"
+
 #include "nel/misc/quat.h"
 
-
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -226,7 +230,7 @@ void CPSFace::step(TPSProcessPass pass)
 	else if (pass == PSMotion)
 	{
 
-		if (_PrecompBasis.size()) // do we use precomputed basis ?
+		if (!_PrecompBasis.empty()) // do we use precomputed basis ?
 		{
 			// rotate all precomputed basis
 			for (CPSVector< CPlaneBasisPair >::V::iterator it = _PrecompBasis.begin(); it != _PrecompBasis.end(); ++it)
@@ -289,7 +293,7 @@ void CPSFace::step(TPSProcessPass pass)
 
 
 ///======================================================================================
-void CPSFace::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSFace::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSFace_IStream )
 	f.serialVersion(1);
@@ -394,7 +398,7 @@ void CPSFace::deleteElement(uint32 index)
 	NL_PS_FUNC(CPSFace_deleteElement)
 	CPSQuad::deleteElement(index);
 	deletePlaneBasisElement(index);
-	if (_PrecompBasis.size()) // do we use precomputed basis ?
+	if (!_PrecompBasis.empty()) // do we use precomputed basis ?
 	{
 		// replace ourself by the last element...
 		_IndexInPrecompBasis[index] = _IndexInPrecompBasis[_Owner->getSize() - 1];
@@ -407,7 +411,7 @@ void CPSFace::resize(uint32 size)
 	NL_PS_FUNC(CPSFace_resize)
 	nlassert(size < (1 << 16));
 	resizePlaneBasis(size);
-	if (_PrecompBasis.size()) // do we use precomputed basis ?
+	if (!_PrecompBasis.empty()) // do we use precomputed basis ?
 	{
 		_IndexInPrecompBasis.resize(size);
 	}

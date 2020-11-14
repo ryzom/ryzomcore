@@ -42,11 +42,7 @@ class CGtkDisplayer : public NLMISC::CWindowDisplayer
 {
 public:
 
-	CGtkDisplayer (const char *displayerName = "") : CWindowDisplayer(displayerName)
-	{
-		needSlashR = false;
-		createLabel ("@Clear|CLEAR");
-	}
+	CGtkDisplayer (const char *displayerName = "");
 
 	virtual ~CGtkDisplayer ();
 

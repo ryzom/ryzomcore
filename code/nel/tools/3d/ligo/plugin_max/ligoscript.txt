@@ -46,7 +46,7 @@ NeLLigoGetErrorZoneTemplate code_array vertex_id_array message_array error_index
 Get the export errors after a call to NeLLigoExportZoneTemplate.
 
 code_array is an integer array with the error code. (2 for OpenedEdge, 4 for InvalidVertexList, 5 for NotInserted)
-vertex_id_array is an integer array with the id of the vertex where an error occured.
+vertex_id_array is an integer array with the id of the vertex where an error occurred.
 message_array is a string array with the error message for the vertices
 error_index is the id of the error buffer (1 ~ 9)
 

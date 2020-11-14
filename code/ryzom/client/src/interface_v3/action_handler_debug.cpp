@@ -42,6 +42,7 @@ extern bool					Render;
 extern bool					WantProfiling;			// Do we want a CPU profile?
 extern bool					WantProfilingVBLock;			// Do we want a VBLock profile?
 extern bool					PACSBorders;
+extern bool					ARKPACSBorders;
 extern bool					DebugClusters;
 extern bool					SoundBox;
 extern uint8				ShowInfos;
@@ -91,6 +92,21 @@ REGISTER_ACTION_HANDLER (CAHDisplayInfos, "display_infos");
 *										move player handlers  actions									  *
 *																										  *
 ***********************************************************************************************************/
+
+// ------------------------------------------------------------------------------------------------
+class CAHToggleARKPACSBorders : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	{
+		if (!getParam(Params, "on").empty())
+			ARKPACSBorders = true;
+		else if (!getParam(Params, "off").empty())
+			ARKPACSBorders = false;
+		else ARKPACSBorders = !ARKPACSBorders;
+
+	}
+};
+REGISTER_ACTION_HANDLER (CAHToggleARKPACSBorders, "ark_pacs_borders");
 
 #if !FINAL_VERSION
 // ------------------------------------------------------------------------------------------------

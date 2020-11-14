@@ -17,6 +17,10 @@
 #include "stdmisc.h"
 #include "nel/misc/cdb_bank_handler.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLMISC{
 	CCDBBankHandler::CCDBBankHandler(uint maxbanks) :
 _CDBBankToUnifiedIndexMapping( maxbanks, std::vector< uint >() ),

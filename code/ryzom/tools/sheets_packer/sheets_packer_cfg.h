@@ -51,8 +51,11 @@ struct CClientConfig
 	/// Path where to create lmconts.packed
 	std::string			OutputDataPath;
 
+	// File containing LIGO primitives
+	std::string			LigoPrimitiveClass;
 
-	std::string		LigoPrimitiveClass;
+	// Whether dump visual slots index or not
+	bool				DumpVisualSlotsIndex;
 
 public:
 	/// Constructor.
@@ -61,7 +64,7 @@ public:
 	friend void setValues ();
 
 	/// Serialize CFG.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 	/// End process
 	void release ();

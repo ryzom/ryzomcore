@@ -132,6 +132,17 @@ private:
 	uint32		_RadarPos;
 
 	NLMISC::CVector2f getNorthPos(const NLMISC::CVector2f &userPos) const;
+
+	class CDBUseCameraObs : public NLMISC::ICDBNode::IPropertyObserver
+	{
+	public:
+		CDBUseCameraObs():_useCamera(false),_changed(false)
+		{ }
+		virtual void update( NLMISC::ICDBNode *node);
+		bool _useCamera;
+		bool _changed;
+	};
+	CDBUseCameraObs _UseCameraObs;
 };
 
 /**

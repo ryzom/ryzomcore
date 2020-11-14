@@ -145,7 +145,7 @@ struct CCombatParams
 	}
 
 	/// Serial
-	void serial(class NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f);
 
 	/// read params from georges
 	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
@@ -207,7 +207,7 @@ struct CSpellParams
 	}
 
 	/// Serial
-	void serial(class NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f);
 
 	/// read params from georges
 	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
@@ -253,7 +253,7 @@ struct COTSpellParams : public CSpellParams
 	}
 
 	/// Serial
-	void serial(class NLMISC::IStream &f)
+	void serial(NLMISC::IStream &f)
 	{
 		CSpellParams::serial(f);
 		f.serial(UpdateFrequency);
@@ -300,7 +300,7 @@ struct CEffectSpellParams : public CSpellParams
 	}
 
 	/// Serial
-	void serial(class NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f);
 
 	/// read params from georges
 	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
@@ -329,7 +329,7 @@ struct COTEffectSpellParams : public COTSpellParams
 	}
 
 	/// Serial
-	void serial(class NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f);
 
 	/// read params from georges
 	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
@@ -362,7 +362,7 @@ struct TAiArea
 	{}
 
 	/// Serial
-	void serial(class NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f);
 	
 	/// read params from georges
 	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
@@ -408,7 +408,7 @@ public:
 	inline static uint getVersion () { return 21; }
 
 	/// Serial
-	void serial(class NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f);
 
 	/// Removed
 	void removed() {}

@@ -143,6 +143,8 @@ void ContextManager::currentTabChanged(int index)
 	if (index >= 0)
 	{
 		IContext *context = d->m_contexts.at(index);
+        context->onActivated();
+
 		Q_EMIT currentContextChanged(context);
 	}
 }

@@ -396,7 +396,7 @@ NLMISC_COMMAND( guildDB, "Display or set the value of a property in the guild da
 		}
 //		sint64 val = guild->getClientDBProp( args[1] );
 		sint64 val = guild->_DbGroup.Database.x_getProp(args[1]);
-		log.displayNL( "property value is '%"NL_I64"d'", val );
+		log.displayNL( "property value is '%" NL_I64 "d'", val );
 	}
 	catch (const CCDBSynchronised::ECDBNotFound &e)
 	{
@@ -510,7 +510,7 @@ NLMISC_COMMAND( importGuildFile, "Import a guild file into the server", "<filena
 		if ( id > 0)
 		{
 			// this is a guild file. We can load it
-			pdr.readFromBinFile(args[0].c_str());
+			pdr.readFromBinFile(args[0]);
 
 			guildId = id;
 		}
@@ -540,7 +540,7 @@ NLMISC_COMMAND( importGuildFile, "Import a guild file into the server", "<filena
 			if ( id > 0)
 			{
 				// this is a guild file. We can load it
-				pdr.readFromTxtFile(args[0].c_str());
+				pdr.readFromTxtFile(args[0]);
 				guildId = id;
 			}
 			else

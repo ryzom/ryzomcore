@@ -53,7 +53,8 @@ namespace NLQT {
 	{	
 		// load config
 		QFile file(NLQT_CONFIG_FILE);
-		if (!file.exists()) {
+		if (!file.exists())
+		{
 			file.open( QIODevice::WriteOnly | QIODevice::Text );
 			file.write("GraphicsDrivers = { \"OpenGL\", \"Direct3D\" };");
 			file.write("\nSearchPaths = {\"\"};");
@@ -64,9 +65,12 @@ namespace NLQT {
 			file.close();
 		}
 
-		try {
+		try
+		{
 			ConfigFile.load(NLQT_CONFIG_FILE);
-		} catch(...) {
+		}
+		catch(...)
+		{
 		}
 
 		addLeveldesignPath();
@@ -213,16 +217,17 @@ namespace NLQT {
 		uint listsize = tmpList->size();
 		for (uint i = 0; i < listsize; ++i) 
 		{
-			if(_progressCB) {
-			_progressCB->DisplayString = tmpList->at(i);
-			CPath::addSearchPath(tmpList->at(i), true, false, _progressCB);
+			if(_progressCB)
+			{
+				_progressCB->DisplayString = tmpList->at(i);
+				CPath::addSearchPath(tmpList->at(i), true, false, _progressCB);
 			}
 			else
 			{
-			CProgressDialog pcb;
-			pcb.DisplayString = tmpList->at(i);
-			pcb.show();
-			CPath::addSearchPath(tmpList->at(i), true, false, &pcb);
+				CProgressDialog pcb;
+				pcb.DisplayString = tmpList->at(i);
+				pcb.show();
+				CPath::addSearchPath(tmpList->at(i), true, false, &pcb);
 			}
 		}
 		if (!list)

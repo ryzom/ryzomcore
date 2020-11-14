@@ -203,7 +203,7 @@ void CFXSheet::build(const NLGEORGES::UFormElm &item)
 // serial :
 // Serialize FX sheet into binary data file.
 //-----------------------------------------------
-void CFXSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CFXSheet::serial(NLMISC::IStream &f)
 {
 	f.serialCont(TrailList);
 	f.serialCont(PSList);

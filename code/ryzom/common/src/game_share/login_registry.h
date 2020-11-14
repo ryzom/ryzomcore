@@ -19,8 +19,6 @@
 
 struct CLoginRegistry
 {
-	// key for the login registry infos
-	static const char *AppRegEntry;
 	// Utility function to get a unique install id from the registry
 	static std::string getProductInstallId();
 	// retrieve login step from the registry (0 if no step yet)

@@ -562,8 +562,13 @@ SOURCE_GROUP(Fx\\Particles\\lights FILES
         ps_light.cpp
         ../../include/nel/3d/ps_light.h)
 SOURCE_GROUP(Fx\\2d FILES
+        render_target_manager.cpp
+        ../../include/nel/3d/render_target_manager.h
         bloom_effect.cpp
         ../../include/nel/3d/bloom_effect.h
+        fxaa.cpp
+        fxaa_program.h
+        ../../include/nel/3d/fxaa.h
         deform_2d.cpp
         ../../include/nel/3d/deform_2d.h
         heat_haze.cpp
@@ -700,6 +705,9 @@ SOURCE_GROUP(Stereo FILES
 		stereo_ovr.cpp
 		stereo_ovr_fp.cpp
         ../../include/nel/3d/stereo_ovr.h
+		stereo_ovr_04.cpp
+		stereo_ovr_04_program.h
+        ../../include/nel/3d/stereo_ovr_04.h
 		stereo_libvr.cpp
         ../../include/nel/3d/stereo_libvr.h
 		stereo_debugger.cpp
@@ -707,29 +715,27 @@ SOURCE_GROUP(Stereo FILES
 
 NL_TARGET_LIB(nel3d ${HEADERS} ${SRC})
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} ${LIBOVR_INCLUDE_DIR} ${LIBVR_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${FREETYPE_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${LIBVR_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(nel3d nelmisc ${FREETYPE_LIBRARIES} ${LIBOVR_LIBRARIES} ${LIBVR_LIBRARY})
-SET_TARGET_PROPERTIES(nel3d PROPERTIES LINK_INTERFACE_LIBRARIES "")
 NL_DEFAULT_PROPS(nel3d "NeL, Library: NeL 3D")
 NL_ADD_RUNTIME_FLAGS(nel3d)
 NL_ADD_STATIC_VID_DRIVERS(nel3d)
 
 NL_ADD_LIB_SUFFIX(nel3d)
 
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
-
 ADD_DEFINITIONS(${LIBOVR_DEFINITIONS})
 ADD_DEFINITIONS(${LIBVR_DEFINITIONS})
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(nel3d ${CMAKE_CURRENT_SOURCE_DIR}/std3d.h ${CMAKE_CURRENT_SOURCE_DIR}/std3d.cpp)
-ENDIF(WITH_PCH)
+ENDIF()
 
 NL_GEN_PC(nel-3d.pc)
 
 IF((WITH_INSTALL_LIBRARIES AND WITH_STATIC) OR NOT WITH_STATIC)
   INSTALL(TARGETS nel3d LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)
-ENDIF((WITH_INSTALL_LIBRARIES AND WITH_STATIC) OR NOT WITH_STATIC)
+ENDIF()
 
 ADD_SUBDIRECTORY(driver)

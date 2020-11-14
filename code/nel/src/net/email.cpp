@@ -196,15 +196,8 @@ bool sendEmail (const string &smtpServer, const string &from, const string &to, 
 		// we must skip the first line
 		formatedBody = "\r\n";
 
-		// replace \n with \r\n
-		for (i = 0; i < body.size(); i++)
-		{
-			if (body[i] == '\n' && i > 0 && body[i-1] != '\r')
-			{
-				formatedBody += '\r';
-			}
-			formatedBody += body[i];
-		}
+		// replace \n by \r\n
+		formatedBody += addSlashR(body);
 
 		// add attachment if any
 		if (!attachedFile.empty())
@@ -271,7 +264,7 @@ bool sendEmail (const string &smtpServer, const string &from, const string &to, 
 			char dst_buf[dst_buf_size + 1];
 			size_t size;
 
-			FILE *src_stream = fopen (attachedFile.c_str(), "rb");
+			FILE *src_stream = nlfopen (attachedFile, "rb");
 			if (src_stream == NULL)
 			{
 				nlwarning ("EMAIL: Can't attach file '%s' to the email because the file can't be open", attachedFile.c_str());
@@ -299,7 +292,7 @@ bool sendEmail (const string &smtpServer, const string &from, const string &to, 
 		}
 
 		// debug, display what we send into a file
-		//	{	FILE *fp = fopen (CFile::findNewFile(getLogDirectory() + "mail.txt").c_str(), "wb");
+		//	{	FILE *fp = nlfopen (CFile::findNewFile(getLogDirectory() + "mail.txt"), "wb");
 		//	fwrite (formatedBody.c_str(), 1, formatedBody.size(), fp);
 		//	fclose (fp); }
 

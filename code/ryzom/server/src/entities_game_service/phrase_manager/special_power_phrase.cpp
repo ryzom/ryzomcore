@@ -61,7 +61,7 @@ CSpecialPowerPhrase::CSpecialPowerPhrase()
 	_IsStatic = false;
 	_AddRecastTime = 0;
 	_PhraseType = BRICK_TYPE::SPECIAL_POWER;
-	_ConsumableFamilyId = (uint16)~0;
+	_ConsumableFamilyId = std::numeric_limits<uint16>::max();
 }
 
 //-----------------------------------------------
@@ -758,7 +758,7 @@ bool CSpecialPowerPhrase::launch()
 //-----------------------------------------------
 void CSpecialPowerPhrase::apply()
 {
-	_LatencyEndDate = 0;
+	_LatencyEndDate = 0.0;
 
 	// TODO
 	// apply effect

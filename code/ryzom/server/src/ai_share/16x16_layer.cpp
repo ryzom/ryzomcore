@@ -100,7 +100,7 @@ I16x16Layer		*I16x16Layer::compress(I16x16Layer *layer, sint32 blank)
 
 		map<sint32, uint>::iterator	it = count.find(val);
 		if (it == count.end())
-			count.insert(make_pair<sint32, uint>(val, 1));
+			count.insert(std::pair<sint32, uint>(val, 1));
 		else
 			++((*it).second);
 	}

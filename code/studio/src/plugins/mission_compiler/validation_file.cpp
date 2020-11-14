@@ -1,6 +1,7 @@
 #include "validation_file.h"
 
 #include <nel/misc/config_file.h>
+#include <nel/misc/common.h>
 #include <nel/misc/path.h>
 
 void CValidationFile::loadMissionValidationFile(std::string filename)
@@ -53,7 +54,7 @@ void CValidationFile::saveMissionValidationFile(std::string filename)
 		nlwarning("Can't find index file '%s' in search path, no mission will be valid", filename.c_str());
 		return;
 	}
-	FILE* file = fopen(pathName.c_str(), "w");
+	FILE* file = nlfopen(pathName, "w");
 	nlassert(file!=NULL);
 	
 	// AuthorizedStates

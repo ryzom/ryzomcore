@@ -293,41 +293,41 @@ void CMainFrame::registerValue (bool read)
 			DWORD len=sizeof (BOOL);
 			DWORD type;
 			NLMISC::CRGBA bgCol ;
-			RegQueryValueEx (hKey, "ViewAnimation", 0, &type, (LPBYTE)&AnimationWindow, &len);
+			RegQueryValueEx (hKey, _T("ViewAnimation"), 0, &type, (LPBYTE)&AnimationWindow, &len);
 			len=sizeof (BOOL);
-			RegQueryValueEx (hKey, "ViewAnimationSet", 0, &type, (LPBYTE)&AnimationSetWindow, &len);
+			RegQueryValueEx (hKey, _T("ViewAnimationSet"), 0, &type, (LPBYTE)&AnimationSetWindow, &len);
 			len=sizeof (BOOL);
-			RegQueryValueEx (hKey, "ViewSlots", 0, &type, (LPBYTE)&MixerSlotsWindow, &len);
+			RegQueryValueEx (hKey, _T("ViewSlots"), 0, &type, (LPBYTE)&MixerSlotsWindow, &len);
 			len=sizeof (BOOL);
-			RegQueryValueEx (hKey, "ViewParticles", 0, &type, (LPBYTE)&ParticlesWindow, &len);
+			RegQueryValueEx (hKey, _T("ViewParticles"), 0, &type, (LPBYTE)&ParticlesWindow, &len);
 			len=sizeof (BOOL);
-			RegQueryValueEx (hKey, "ViewDayNight", 0, &type, (LPBYTE)&DayNightWindow, &len);
+			RegQueryValueEx (hKey, _T("ViewDayNight"), 0, &type, (LPBYTE)&DayNightWindow, &len);
 			len=sizeof (BOOL);
-			RegQueryValueEx (hKey, "ViewWaterPool", 0, &type, (LPBYTE)&WaterPoolWindow, &len);
+			RegQueryValueEx (hKey, _T("ViewWaterPool"), 0, &type, (LPBYTE)&WaterPoolWindow, &len);
 			len=sizeof (BOOL);
-			RegQueryValueEx (hKey, "ViewVegetable", 0, &type, (LPBYTE)&VegetableWindow, &len);
+			RegQueryValueEx (hKey, _T("ViewVegetable"), 0, &type, (LPBYTE)&VegetableWindow, &len);
 			len=sizeof (BOOL);
-			RegQueryValueEx (hKey, "ViewGlobalWind", 0, &type, (LPBYTE)&GlobalWindWindow, &len);
+			RegQueryValueEx (hKey, _T("ViewGlobalWind"), 0, &type, (LPBYTE)&GlobalWindWindow, &len);
 			len=sizeof (BOOL);
-			RegQueryValueEx (hKey, "ViewSoundAnimWind", 0, &type, (LPBYTE)&GlobalWindWindow, &len);
+			RegQueryValueEx (hKey, _T("ViewSoundAnimWind"), 0, &type, (LPBYTE)&GlobalWindWindow, &len);
 			len=sizeof (float);
-			RegQueryValueEx (hKey, "MoveSpeed", 0, &type, (LPBYTE)&MoveSpeed, &len);
+			RegQueryValueEx (hKey, _T("MoveSpeed"), 0, &type, (LPBYTE)&MoveSpeed, &len);
 			len=sizeof (uint);
-			RegQueryValueEx (hKey, "ObjectMode", 0, &type, (LPBYTE)&MoveMode, &len);
+			RegQueryValueEx (hKey, _T("ObjectMode"), 0, &type, (LPBYTE)&MoveMode, &len);
 			len=sizeof(NLMISC::CRGBA) ;
-			RegQueryValueEx (hKey, "BackGroundColor", 0, &type, (LPBYTE)&BgColor, &len);
+			RegQueryValueEx (hKey, _T("BackGroundColor"), 0, &type, (LPBYTE)&BgColor, &len);
 			len=sizeof (float);
-			RegQueryValueEx (hKey, "GlobalWindPower", 0, &type, (LPBYTE)&GlobalWindPower, &len);
+			RegQueryValueEx (hKey, _T("GlobalWindPower"), 0, &type, (LPBYTE)&GlobalWindPower, &len);
 			len=sizeof (BOOL);
-			RegQueryValueEx (hKey, "ViewChooseFrameDelay", 0, &type, (LPBYTE)&ChooseFrameDelayWindow, &len);
+			RegQueryValueEx (hKey, _T("ViewChooseFrameDelay"), 0, &type, (LPBYTE)&ChooseFrameDelayWindow, &len);
 			len=sizeof (BOOL);
-			RegQueryValueEx (hKey, "ViewChooseBGColor", 0, &type, (LPBYTE)&ChooseBGColorWindow, &len);
+			RegQueryValueEx (hKey, _T("ViewChooseBGColor"), 0, &type, (LPBYTE)&ChooseBGColorWindow, &len);
 			len=sizeof (BOOL);
-			RegQueryValueEx (hKey, "ViewChooseSunColor", 0, &type, (LPBYTE)&ChooseSunColorWindow, &len);
+			RegQueryValueEx (hKey, _T("ViewChooseSunColor"), 0, &type, (LPBYTE)&ChooseSunColorWindow, &len);
 			len=sizeof (BOOL);
-			RegQueryValueEx (hKey, "ViewSkeletonScaleWindow", 0, &type, (LPBYTE)&SkeletonScaleWindow, &len);
+			RegQueryValueEx (hKey, _T("ViewSkeletonScaleWindow"), 0, &type, (LPBYTE)&SkeletonScaleWindow, &len);
 			len=sizeof (BOOL);
-			RegQueryValueEx (hKey, "ViewTuneMRMWindow", 0, &type, (LPBYTE)&TuneMRMWindow, &len);
+			RegQueryValueEx (hKey, _T("ViewTuneMRMWindow"), 0, &type, (LPBYTE)&TuneMRMWindow, &len);
 		}
 	}
 	else
@@ -335,26 +335,26 @@ void CMainFrame::registerValue (bool read)
 		HKEY hKey;
 		if (RegCreateKey(HKEY_CURRENT_USER, REGKEY_OBJ_VIEW_SCENE_DLG, &hKey)==ERROR_SUCCESS)
 		{
-			RegSetValueEx(hKey, "ViewAnimation", 0, REG_BINARY, (LPBYTE)&AnimationWindow, sizeof(bool));
-			RegSetValueEx(hKey, "ViewAnimationSet", 0, REG_BINARY, (LPBYTE)&AnimationSetWindow, sizeof(bool));
-			RegSetValueEx(hKey, "ViewSlots", 0, REG_BINARY, (LPBYTE)&MixerSlotsWindow, sizeof(bool));
-			RegSetValueEx(hKey, "ViewParticles", 0, REG_BINARY, (LPBYTE)&ParticlesWindow, sizeof(bool));
-			RegSetValueEx(hKey, "ViewDayNight", 0, REG_BINARY, (LPBYTE)&DayNightWindow, sizeof(bool));
-			RegSetValueEx(hKey, "ViewWaterPool", 0, REG_BINARY, (LPBYTE)&WaterPoolWindow, sizeof(bool));
-			RegSetValueEx(hKey, "ViewDayNight", 0, REG_BINARY, (LPBYTE)&DayNightWindow, sizeof(bool));
-			RegSetValueEx(hKey, "ViewVegetable", 0, REG_BINARY, (LPBYTE)&VegetableWindow, sizeof(bool));
-			RegSetValueEx(hKey, "ViewGlobalWind", 0, REG_BINARY, (LPBYTE)&GlobalWindWindow, sizeof(bool));
-			RegSetValueEx(hKey, "ViewSoundAnimWind", 0, REG_BINARY, (LPBYTE)&SoundAnimWindow, sizeof(bool));
-			RegSetValueEx(hKey, "ViewLightGroupWind", 0, REG_BINARY, (LPBYTE)&LightGroupWindow, sizeof(bool));
-			RegSetValueEx(hKey, "ViewChooseFrameDelay", 0, REG_BINARY, (LPBYTE)&ChooseFrameDelayWindow, sizeof(bool));
-			RegSetValueEx(hKey, "ViewChooseBGColor", 0, REG_BINARY, (LPBYTE)&ChooseBGColorWindow, sizeof(bool));
-			RegSetValueEx(hKey, "ViewChooseSunColor", 0, REG_BINARY, (LPBYTE)&ChooseSunColorWindow, sizeof(bool));
-			RegSetValueEx(hKey, "MoveSpeed", 0, REG_BINARY, (LPBYTE)&MoveSpeed, sizeof(float));
-			RegSetValueEx(hKey, "ObjectMode", 0, REG_BINARY, (LPBYTE)&MoveMode, sizeof(uint));
-			RegSetValueEx(hKey, "BackGroundColor", 0, REG_BINARY, (LPBYTE)&BgColor, sizeof(NLMISC::CRGBA));
-			RegSetValueEx(hKey, "GlobalWindPower", 0, REG_BINARY, (LPBYTE)&GlobalWindPower, sizeof(float));
-			RegSetValueEx(hKey, "ViewSkeletonScaleWindow", 0, REG_BINARY, (LPBYTE)&SkeletonScaleWindow, sizeof(bool));
-			RegSetValueEx(hKey, "ViewTuneMRMWindow", 0, REG_BINARY, (LPBYTE)&TuneMRMWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("ViewAnimation"), 0, REG_BINARY, (LPBYTE)&AnimationWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("ViewAnimationSet"), 0, REG_BINARY, (LPBYTE)&AnimationSetWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("ViewSlots"), 0, REG_BINARY, (LPBYTE)&MixerSlotsWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("ViewParticles"), 0, REG_BINARY, (LPBYTE)&ParticlesWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("ViewDayNight"), 0, REG_BINARY, (LPBYTE)&DayNightWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("ViewWaterPool"), 0, REG_BINARY, (LPBYTE)&WaterPoolWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("ViewDayNight"), 0, REG_BINARY, (LPBYTE)&DayNightWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("ViewVegetable"), 0, REG_BINARY, (LPBYTE)&VegetableWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("ViewGlobalWind"), 0, REG_BINARY, (LPBYTE)&GlobalWindWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("ViewSoundAnimWind"), 0, REG_BINARY, (LPBYTE)&SoundAnimWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("ViewLightGroupWind"), 0, REG_BINARY, (LPBYTE)&LightGroupWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("ViewChooseFrameDelay"), 0, REG_BINARY, (LPBYTE)&ChooseFrameDelayWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("ViewChooseBGColor"), 0, REG_BINARY, (LPBYTE)&ChooseBGColorWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("ViewChooseSunColor"), 0, REG_BINARY, (LPBYTE)&ChooseSunColorWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("MoveSpeed"), 0, REG_BINARY, (LPBYTE)&MoveSpeed, sizeof(float));
+			RegSetValueEx(hKey, _T("ObjectMode"), 0, REG_BINARY, (LPBYTE)&MoveMode, sizeof(uint));
+			RegSetValueEx(hKey, _T("BackGroundColor"), 0, REG_BINARY, (LPBYTE)&BgColor, sizeof(NLMISC::CRGBA));
+			RegSetValueEx(hKey, _T("GlobalWindPower"), 0, REG_BINARY, (LPBYTE)&GlobalWindPower, sizeof(float));
+			RegSetValueEx(hKey, _T("ViewSkeletonScaleWindow"), 0, REG_BINARY, (LPBYTE)&SkeletonScaleWindow, sizeof(bool));
+			RegSetValueEx(hKey, _T("ViewTuneMRMWindow"), 0, REG_BINARY, (LPBYTE)&TuneMRMWindow, sizeof(bool));
 		}
 	}
 }
@@ -568,13 +568,13 @@ void CMainFrame::OnFileLoadconfig()
 	update ();
 
 	// Create a dialog
-	static char BASED_CODE szFilter[] = "NeL Object viewer config (*.ovcgf)|*.ovcgf|All Files (*.*)|*.*||";
-	CFileDialog fileDlg( TRUE, ".ovcgf", "*.ovcgf", OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
+	static TCHAR BASED_CODE szFilter[] = _T("NeL Object viewer config (*.ovcgf)|*.ovcgf|All Files (*.*)|*.*||");
+	CFileDialog fileDlg( TRUE, _T(".ovcgf"), _T("*.ovcgf"), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
 	if (fileDlg.DoModal()==IDOK)
 	{
 		// Open the file
 		CIFile file;
-		if (file.open ((const char*)fileDlg.GetPathName()))
+		if (file.open(tStrToUtf8(fileDlg.GetPathName())))
 		{
 			try
 			{
@@ -590,17 +590,17 @@ void CMainFrame::OnFileLoadconfig()
 					}
 				}
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
-				MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 		else
 		{
 			// Create a message
-			char msg[512];
-			_snprintf (msg, 512, "Can't open the file %s for reading.", (const char*)fileDlg.GetPathName());
-			MessageBox (msg, "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+			CString msg;
+			msg.Format(_T("Can't open the file %s for reading."), (LPCTSTR)fileDlg.GetPathName());
+			MessageBox (msg, _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 		}
 	}
 }
@@ -613,15 +613,15 @@ void CMainFrame::OnFileOpen()
 	update ();
 
 	// Create a dialog
-	static char BASED_CODE szFilter[] = 
-		"All NeL Files (*.shape;*.ps;*.ig)\0*.shape;*.ps;*.ig\0"
-		"NeL Shape Files (*.shape)\0*.shape\0"
-		"NeL Particule System Files (*.ps)\0*.ps\0"
-		"NeL Instance Group Files (*.ig)\0*.ig\0"
-		"All Files (*.*)\0*.*\0\0";
+	static TCHAR BASED_CODE szFilter[] = 
+		_T("All NeL Files (*.shape;*.ps;*.ig)\0*.shape;*.ps;*.ig\0")
+		_T("NeL Shape Files (*.shape)\0*.shape\0")
+		_T("NeL Particule System Files (*.ps)\0*.ps\0")
+		_T("NeL Instance Group Files (*.ig)\0*.ig\0")
+		_T("All Files (*.*)\0*.*\0\0");
 
 	// Filename buffer
-	char buffer[65535];
+	TCHAR buffer[65535];
 	buffer[0]=0;
 
 	OPENFILENAME openFile;
@@ -633,7 +633,7 @@ void CMainFrame::OnFileOpen()
     openFile.lpstrFile = buffer;
     openFile.nMaxFile = 65535;
     openFile.Flags = OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_ALLOWMULTISELECT|OFN_ENABLESIZING|OFN_EXPLORER;
-    openFile.lpstrDefExt = "*.shape;*.ig;*.ps";
+    openFile.lpstrDefExt = _T("*.shape;*.ig;*.ps");
 	
 
 	if (GetOpenFileName(&openFile))
@@ -642,7 +642,7 @@ void CMainFrame::OnFileOpen()
 		std::vector<std::string> meshFilename;
 
 		// Filename pointer
-		char *c=buffer;
+		TCHAR *c=buffer;
 
 		// Read the path
 		CString path = buffer;
@@ -652,7 +652,7 @@ void CMainFrame::OnFileOpen()
 			c[path.GetLength()+1]=0;
 
 			// Path is empty
-			path = "";
+			path.Empty();
 		}
 		else
 		{
@@ -682,10 +682,10 @@ void CMainFrame::OnFileOpen()
 			CString name = path + filename;
 
 			// file is an ig ?
-			if (name.Find(".ig") != -1)
+			if (name.Find(_T(".ig")) != -1)
 			{
 				// Load the instance group
-				if (ObjView->loadInstanceGroup (name))
+				if (ObjView->loadInstanceGroup (tStrToUtf8(name)))
 				{
 					// Reset the camera
 					OnResetCamera();
@@ -697,7 +697,7 @@ void CMainFrame::OnFileOpen()
 			else
 			{
 				// Add it in the array
-				meshFilename.push_back ((const char*)name);
+				meshFilename.push_back (tStrToUtf8(name));
 			}
 		}
 
@@ -705,12 +705,12 @@ void CMainFrame::OnFileOpen()
 		if ( !meshFilename.empty() )
 		{	
 			// Create a dialog for the skel
-			static char BASED_CODE szFilter2[] = "NeL Skeleton Files (*.skel)|*.skel|All Files (*.*)|*.*||";
-			CFileDialog fileDlg2 ( TRUE, ".skel", "*.skel", OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter2);
+			static TCHAR BASED_CODE szFilter2[] = _T("NeL Skeleton Files (*.skel)|*.skel|All Files (*.*)|*.*||");
+			CFileDialog fileDlg2 ( TRUE, _T(".skel"), _T("*.skel"), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter2);
 			if (fileDlg2.DoModal()==IDOK)
 			{
 				// Load the shape with a skeleton
-				if (ObjView->loadMesh (meshFilename, fileDlg2.GetPathName()))
+				if (ObjView->loadMesh (meshFilename, tStrToUtf8(fileDlg2.GetPathName())))
 				{
 					// Reset the camera
 					OnResetCamera();
@@ -741,11 +741,11 @@ void CMainFrame::OnFileSaveconfig()
 	update ();
 
 	// Create a dialog
-	static char BASED_CODE szFilter[] = "NeL Object viewer config (*.ovcgf)|*.ovcgf|All Files (*.*)|*.*||";
-	CFileDialog fileDlg( FALSE, ".ovcgf", "*.ovcgf", OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
+	static TCHAR BASED_CODE szFilter[] = _T("NeL Object viewer config (*.ovcgf)|*.ovcgf|All Files (*.*)|*.*||");
+	CFileDialog fileDlg( FALSE, _T(".ovcgf"), _T("*.ovcgf"), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
 	if (fileDlg.DoModal()==IDOK)
 	{		
-		ObjView->ParticleWorkspaceFilename = "";
+		ObjView->ParticleWorkspaceFilename.clear();
 		CParticleWorkspace *pw = ObjView->getParticleDialog()->getParticleWorkspace();
 		if (pw && pw->getNumNode() != 0)
 		{
@@ -756,23 +756,23 @@ void CMainFrame::OnFileSaveconfig()
 		}
 		// Open the file
 		COFile file;
-		if (file.open ((const char*)fileDlg.GetPathName()))
+		if (file.open (tStrToUtf8(fileDlg.GetPathName())))
 		{
 			try
 			{
 				ObjView->serial(file);
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
-				MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 		else
 		{
 			// Create a message
-			char msg[512];
-			_snprintf (msg, 512, "Can't open the file %s for writing", (const char*)fileDlg.GetPathName());
-			MessageBox (msg, "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+			CString msg;
+			msg.Format(_T("Can't open the file %s for writing"), (LPCTSTR)fileDlg.GetPathName());
+			MessageBox (msg, _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 		}
 	}
 }
@@ -832,7 +832,7 @@ void CMainFrame::OnViewSetmovespeed()
 	if (valueDlg.DoModal ()==IDOK)
 	{
 		// Get deflaut value
-		sscanf ((const char*)valueDlg.Value, "%f", &MoveSpeed);
+		NLMISC::fromString(tStrToUtf8(valueDlg.Value), MoveSpeed);
 	}
 }
 
@@ -1154,7 +1154,7 @@ void CMainFrame::OnHelpAboutobjectviewer()
 ///===========================================================================================
 void CMainFrame::OnRemoveAllInstancesFromScene()
 {
-	if (MessageBox("Delete all instances from scene ?", "Object Viewer", MB_YESNO) == IDYES)
+	if (MessageBox(_T("Delete all instances from scene ?"), _T("Object Viewer"), MB_YESNO) == IDYES)
 	{
 		ObjView->removeAllInstancesFromScene();
 		
@@ -1392,9 +1392,10 @@ void CMainFrame::OnViewSetSceneRotation()
 	if (sceneRotDlg.DoModal() == IDOK)
 	{
 		// read value.
-		_LastSceneRotX= (float)atof(sceneRotDlg.RotX);
-		_LastSceneRotY= (float)atof(sceneRotDlg.RotY);
-		_LastSceneRotZ= (float)atof(sceneRotDlg.RotZ);
+		NLMISC::fromString(tStrToUtf8(sceneRotDlg.RotX), _LastSceneRotX);
+		NLMISC::fromString(tStrToUtf8(sceneRotDlg.RotY), _LastSceneRotY);
+		NLMISC::fromString(tStrToUtf8(sceneRotDlg.RotZ), _LastSceneRotZ);
+
 		float	rotx= degToRad(_LastSceneRotX);
 		float	roty= degToRad(_LastSceneRotY);
 		float	rotz= degToRad(_LastSceneRotZ);
@@ -1441,11 +1442,12 @@ void CMainFrame::OnUpdateSceneCamera(CCmdUI* pCmdUI)
 	{
 		CInstanceInfo *instance = ObjView->getInstance (ObjView->getCameraInstance (pCmdUI->m_nID - ID_SCENE_CAMERA_FIRST));
 		nlassert (instance->Camera);
-		pCmdUI->SetText (("Camera "+instance->Saved.ShapeFilename).c_str ());
+		std::string text = NLMISC::toString("Camera %s", instance->Saved.ShapeFilename.c_str());
+		pCmdUI->SetText(utf8ToTStr(text));
 	}
 	else
 	{
-		pCmdUI->SetText ("No camera");
+		pCmdUI->SetText (_T("No camera"));
 	}
 }
 

@@ -23,6 +23,10 @@
 #include "nel/gui/lua_ihm.h"
 #include "nel/gui/interface_element.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace R2
 {
 

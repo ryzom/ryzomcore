@@ -195,7 +195,7 @@ void CStaticGameBrick::readGeorges( const CSmartPtr<UForm> &form, const CSheetId
 // serial CStaticGameBrick
 //
 //-----------------------------------------------
-void CStaticGameBrick::serial( NLMISC::IStream &f ) throw(NLMISC::EStream)
+void CStaticGameBrick::serial( NLMISC::IStream &f )
 {
 	f.serial( FamilyId );
 	f.serial( IndexInFamily );
@@ -325,7 +325,7 @@ void CStaticXpStagesTable::readGeorges( const CSmartPtr<UForm> &form, const CShe
 }
 
 // Serial SXpStage structure
-void CStaticXpStagesTable::SXpStage::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CStaticXpStagesTable::SXpStage::serial(NLMISC::IStream &f)
 {
 	f.serial( SkillLevel );
 	f.serial( XpForPointSkill );
@@ -333,13 +333,13 @@ void CStaticXpStagesTable::SXpStage::serial(class NLMISC::IStream &f) throw(NLMI
 }
 
 // Serial SStageTable structure
-void CStaticXpStagesTable::SStageTable::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CStaticXpStagesTable::SStageTable::serial(NLMISC::IStream &f)
 {
 	f.serialCont( StageTable );
 }
 
 // Serial XpStagesTables structure
-void CStaticXpStagesTable::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CStaticXpStagesTable::serial(NLMISC::IStream &f)
 {
 	f.serialCont( XpStagesTables );
 }
@@ -688,7 +688,7 @@ void CStaticCreatures::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 		for( i = 0; i < SLOT_EQUIPMENT::NB_SLOT_EQUIPMENT; ++i )
 		{
 			root.getValueByName( sheetName, (string("Basics.Equipment.") + SLOT_EQUIPMENT::toString( (SLOT_EQUIPMENT::TSlotEquipment) i ) + string(".Item" )).c_str() );
-			if( sheetName != string("") && sheetName.find(".item") != std::string::npos )
+			if( !sheetName.empty() && sheetName.find(".item") != std::string::npos )
 			{
 				sheet = CSheetId( sheetName );
 				_Items[ i ].IdSheet = sheet.asInt();
@@ -910,7 +910,7 @@ uint CStaticCreatures::getVersion()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-void CStaticCreatures::serial(class NLMISC::IStream &f) throw(NLMISC::EStream) 
+void CStaticCreatures::serial(NLMISC::IStream &f) 
 {
 	CStaticHarvestable::serial(f);
 	
@@ -1770,12 +1770,12 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 
 		for( i = 0; i < SLOT_EQUIPMENT::NB_SLOT_EQUIPMENT; ++i )
 		{
-			root.getValueByName( sheetName, (string("Basics.Equipment.") + SLOT_EQUIPMENT::toString( (SLOT_EQUIPMENT::TSlotEquipment) i ) + string(".Item" )).c_str() );
-			if( sheetName != string("") )
+			root.getValueByName( sheetName, "Basics.Equipment." + SLOT_EQUIPMENT::toString( (SLOT_EQUIPMENT::TSlotEquipment) i ) + ".Item" );
+			if (!sheetName.empty())
 			{
 				sheet = CSheetId( sheetName );
 				Items[ i ].IdSheet = sheet.asInt();
-				root.getValueByName( Items[ i ].Quality, (string("Basics.Equipment.") + SLOT_EQUIPMENT::toString( (SLOT_EQUIPMENT::TSlotEquipment) i ) + string(".Quality")).c_str() );
+				root.getValueByName( Items[ i ].Quality, "Basics.Equipment." + SLOT_EQUIPMENT::toString( (SLOT_EQUIPMENT::TSlotEquipment) i ) + ".Quality" );
 			}
 			else
 			{
@@ -1789,12 +1789,12 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 		///////////////////////////////////////////////////////
 /*		for( i = 0; i < NB_SHEATH; ++i )
 		{
-			root.getValueByName( sheetName, (string("Basics.Equipment.Sheath") + toString( i ) + string("LeftHand.Item" )).c_str() );
-			if( sheetName != string("") )
+			root.getValueByName( sheetName, "Basics.Equipment.Sheath" + toString( i ) + "LeftHand.Item" );
+			if( !sheetName.empty() )
 			{
 				sheet = CSheetId( sheetName );
 				Sheaths[ i ].Left.IdSheet = sheet.asInt();
-				root.getValueByName( Sheaths[ i ].Left.Quality, (string("Basics.Equipment.Sheath") + toString( i ) + string("LeftHand.Quality")).c_str() );
+				root.getValueByName( Sheaths[ i ].Left.Quality, "Basics.Equipment.Sheath" + toString( i ) + "LeftHand.Quality" );
 			}
 			else
 			{
@@ -1802,12 +1802,12 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 				Sheaths[ i ].Left.Quality = 0;
 			}
 
-			root.getValueByName( sheetName, (string("Basics.Equipment.Sheath") + toString( i ) + string("RightHand.Item" )).c_str() );
-			if( sheetName != string("") )
+			root.getValueByName( sheetName, "Basics.Equipment.Sheath" + toString( i ) + "RightHand.Item" );
+			if( !sheetName.empty() )
 			{
 				sheet = CSheetId( sheetName );
 				Sheaths[ i ].Right.IdSheet = sheet.asInt();
-				root.getValueByName( Sheaths[ i ].Right.Quality, (string("Basics.Equipment.Sheath") + toString( i ) + string("RightHand.Quality")).c_str() );
+				root.getValueByName( Sheaths[ i ].Right.Quality, "Basics.Equipment.Sheath" + toString( i ) + "RightHand.Quality" );
 			}
 			else
 			{
@@ -1815,12 +1815,12 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 				Sheaths[ i ].Right.Quality = 0;
 			}
 		
-			root.getValueByName( sheetName, (string("Basics.Equipment.Sheath") + toString( i ) + string("Ammo0.Item" )).c_str() );
-			if( sheetName != string("") )
+			root.getValueByName( sheetName, "Basics.Equipment.Sheath" + toString( i ) + "Ammo0.Item" );
+			if( !sheetName.empty() )
 			{
 				sheet = CSheetId( sheetName );
 				Sheaths[ i ].Ammo0.IdSheet = sheet.asInt();
-				root.getValueByName( Sheaths[ i ].Ammo0.Quality, (string("Basics.Equipment.Sheath") + toString( i ) + string("Ammo0.Quality")).c_str() );
+				root.getValueByName( Sheaths[ i ].Ammo0.Quality, "Basics.Equipment.Sheath" + toString( i ) + "Ammo0.Quality" );
 			}
 			else
 			{
@@ -1828,12 +1828,12 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 				Sheaths[ i ].Ammo0.Quality = 0;
 			}
 		
-			root.getValueByName( sheetName, (string("Basics.Equipment.Sheath") + toString( i ) + string("Ammo1.Item" )).c_str() );
-			if( sheetName != string("") )
+			root.getValueByName( sheetName, "Basics.Equipment.Sheath" + toString( i ) + "Ammo1.Item" );
+			if( !sheetName.empty() )
 			{
 				sheet = CSheetId( sheetName );
 				Sheaths[ i ].Ammo1.IdSheet = sheet.asInt();
-				root.getValueByName( Sheaths[ i ].Ammo1.Quality, (string("Basics.Equipment.Sheath") + toString( i ) + string("Ammo1.Quality")).c_str() );
+				root.getValueByName( Sheaths[ i ].Ammo1.Quality, "Basics.Equipment.Sheath" + toString( i ) + "Ammo1.Quality" );
 			}
 			else
 			{
@@ -1841,12 +1841,12 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 				Sheaths[ i ].Ammo1.Quality = 0;
 			}
 		
-			root.getValueByName( sheetName, (string("Basics.Equipment.Sheath") + toString( i ) + string("Ammo2.Item" )).c_str() );
-			if( sheetName != string("") )
+			root.getValueByName( sheetName, "Basics.Equipment.Sheath" + toString( i ) + "Ammo2.Item" );
+			if( !sheetName.empty() )
 			{
 				sheet = CSheetId( sheetName );
 				Sheaths[ i ].Ammo2.IdSheet = sheet.asInt();
-				root.getValueByName( Sheaths[ i ].Ammo2.Quality, (string("Basics.Equipment.Sheath") + toString( i ) + string("Ammo2.Quality")).c_str() );
+				root.getValueByName( Sheaths[ i ].Ammo2.Quality, "Basics.Equipment.Sheath" + toString( i ) + "Ammo2.Quality" );
 			}
 			else
 			{
@@ -2202,7 +2202,7 @@ void CStaticRaceStats::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 		int i;
 		for( i = 0; i < CHARACTERISTICS::NUM_CHARACTERISTICS; ++i )
 		{
-			root.getValueByName( Characteristics[ (CHARACTERISTICS::TCharacteristics)i ], ( string("Characteristics.") + CHARACTERISTICS::toString( (CHARACTERISTICS::TCharacteristics)i ) ).c_str() );
+			root.getValueByName( Characteristics[ (CHARACTERISTICS::TCharacteristics)i ], "Characteristics." + CHARACTERISTICS::toString( (CHARACTERISTICS::TCharacteristics)i ) );
 		}
 
 		///////////////////////////////////////////////////////
@@ -2210,7 +2210,7 @@ void CStaticRaceStats::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 		///////////////////////////////////////////////////////
 		for( i = 0; i < SCORES::NUM_SCORES; ++i )
 		{
-			root.getValueByName( Scores[ i ], ( string("Scores.") + SCORES::toString( i ) ).c_str(), UFormElm::Formula );
+			root.getValueByName( Scores[ i ], "Scores." + SCORES::toString( i ), UFormElm::Formula );
 		}
 
 		///////////////////////////////////////////////////////
@@ -2306,7 +2306,7 @@ void CStaticRole::readGeorgesSentenceAndEquipment( UFormElm& root, const NLMISC:
 {
 	string value;
 	const UFormElm *sentenceArray = NULL;
-	if (root.getNodeByName (&sentenceArray, SentenceString.c_str()) && sentenceArray)
+	if (root.getNodeByName (&sentenceArray, SentenceString) && sentenceArray)
 	{
 		// Get array size
 		uint size;
@@ -2352,12 +2352,12 @@ void CStaticRole::readGeorgesSentenceAndEquipment( UFormElm& root, const NLMISC:
 
 	for( int i = 0; i < SLOT_EQUIPMENT::NB_SLOT_EQUIPMENT; ++i )
 	{
-		root.getValueByName( sheetName, ( EquipmentString + string(".") + SLOT_EQUIPMENT::toString( (SLOT_EQUIPMENT::TSlotEquipment) i ) + string(".Item" )).c_str() );
-		if( sheetName != string("") )
+		root.getValueByName( sheetName, EquipmentString + "." + SLOT_EQUIPMENT::toString( (SLOT_EQUIPMENT::TSlotEquipment) i ) + ".Item" );
+		if (!sheetName.empty())
 		{
 			sheet = CSheetId( sheetName );
 			Items[ i ].IdSheet = sheet.asInt();
-			root.getValueByName( Items[ i ].Quality, ( EquipmentString + string(".") + SLOT_EQUIPMENT::toString( (SLOT_EQUIPMENT::TSlotEquipment) i ) + string(".Quality")).c_str() );
+			root.getValueByName( Items[ i ].Quality, EquipmentString + "." + SLOT_EQUIPMENT::toString( (SLOT_EQUIPMENT::TSlotEquipment) i ) + ".Quality" );
 		}
 		else
 		{

@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "common.h"
 #include "tile_rotation_dlg.h"
 
 CTile_rotation_dlg::CTile_rotation_dlg(QWidget *parent, Qt::WindowFlags flags)

@@ -129,7 +129,7 @@ public:
 
 	void				display(NLMISC::CLog* log = NLMISC::InfoLog)
 	{
-		log->displayNL("%d messages, %d submessages, %"NL_I64"d message bytes, %"NL_I64"d header bytes", NumMessages, NumSubMessages, TotalMessagesSize, TotalHeaderSize);
+		log->displayNL("%d messages, %d submessages, %" NL_I64 "d message bytes, %" NL_I64 "d header bytes", NumMessages, NumSubMessages, TotalMessagesSize, TotalHeaderSize);
 		log->displayNL("%.1f bytes avg per submessage, %.1f bytes avg per submessage header", (double)TotalMessagesSize/(double)NumSubMessages, (double)TotalHeaderSize/(double)NumSubMessages);
 		log->displayNL("%d updates, %d values updated, %d column updated, %d row updated", NumUpdateSubMessages, UpdateRowMap.size(), UpdateMap.size(), UpdateTableRowMap.size());
 	}

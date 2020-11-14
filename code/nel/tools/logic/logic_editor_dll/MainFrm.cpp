@@ -114,7 +114,7 @@ void CMainFrame::OnClose()
 //	load
 //
 //-----------------------------------------------
-void CMainFrame::load( const char * fileName )
+void CMainFrame::load( const TCHAR * fileName )
 {
 	// child frame
 	CChildFrame *pChild = (CChildFrame *) GetActiveFrame();

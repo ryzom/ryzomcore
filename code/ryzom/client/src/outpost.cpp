@@ -99,7 +99,7 @@ void COutpost::initOutpost ()
 		for (i=0; i<RZ_MAX_BUILDING_PER_OUTPOST; i++)
 		{
 			// Put the ZC pacs_prim
-			TPacsPrimMap::iterator pbIt = PacsPrims.find(NLMISC::strlwr(NLMISC::CFile::getFilenameWithoutExtension(ClientCfg.ZCPacsPrim)));
+			TPacsPrimMap::iterator pbIt = PacsPrims.find(NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(ClientCfg.ZCPacsPrim)));
 			if (pbIt != PacsPrims.end())
 			{
 				// Build the building matrix

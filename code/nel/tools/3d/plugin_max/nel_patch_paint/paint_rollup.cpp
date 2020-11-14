@@ -28,13 +28,13 @@ extern void LoadImages();
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void PaintPatchMod::SetOpsDlgEnables() 
+void PaintPatchMod::SetOpsDlgEnables()
 {
 	if (!hOpsPanel)
 		return;
-	
+
 	nlassert(ip);
-	
+
 	ICustButton *but;
 
 	but = GetICustButton(GetDlgItem(hOpsPanel, IDC_PAINT));
@@ -52,12 +52,12 @@ INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 
 	switch (message)
 	{
-		case WM_INITDIALOG: 
+		case WM_INITDIALOG:
 		{
 		 	ep =(PaintPatchMod *)lParam;
 		 	ep->hOpsPanel = hDlg;
 
-			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);		 	
+			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);
 
 			CheckDlgButton(hDlg, IDC_INCLUDE_MESHES, ep->includeMeshes);
 			CheckDlgButton(hDlg, IDC_PRELOAD_TILES, ep->preloadTiles);
@@ -65,15 +65,9 @@ INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			return TRUE;
 		}
 
-		case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_MOUSEMOVE:   			
-   			ep->ip->RollupMouseMessage(hDlg, message, wParam, lParam);
-			return FALSE;		
-		
-		case WM_COMMAND:			
+		case WM_COMMAND:
 			switch (LOWORD(wParam))
-			{				
+			{
 				case IDC_INCLUDE_MESHES:
 					{
 						BOOL bCheck=(IsDlgButtonChecked(hDlg, IDC_INCLUDE_MESHES)==BST_CHECKED);
@@ -92,7 +86,7 @@ INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			}
 			break;
 		}
-	
+
 	return FALSE;
 }
 

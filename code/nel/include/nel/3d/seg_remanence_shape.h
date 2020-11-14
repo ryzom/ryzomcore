@@ -22,7 +22,7 @@
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/vector.h"
 #include "nel/misc/aabbox.h"
-
+#include "nel/misc/class_id.h"
 
 #include "nel/3d/texture.h"
 #include "nel/3d/shape.h"
@@ -70,7 +70,7 @@ public:
 		// assignement
 		CSegRemanenceShape &operator = (const CSegRemanenceShape &other);
 
-		virtual void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		virtual void	serial(NLMISC::IStream &f);
 		NLMISC_DECLARE_CLASS(CSegRemanenceShape);
 	//@}
 

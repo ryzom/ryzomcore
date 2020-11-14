@@ -15,12 +15,16 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdligo.h"
-#include "ligo_material.h"
+#include "nel/ligo/ligo_material.h"
 
 // Ligo include
-#include "ligo_error.h"
+#include "nel/ligo/ligo_error.h"
 
 //using namespace NL3D;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NLLIGO
 {

@@ -144,9 +144,9 @@ typedef CConfigVar<double> CConfigVarDouble;
 inline std::string getConfigVarTypename(const sint32 &/* dummy */) { return "sint32"; }
 inline bool getConfigVarValue(CLuaObject &luaValue, sint32 &dest)
 {
-	if (luaValue.isNumber())
+	if (luaValue.isInteger())
 	{
-		dest = (sint32) luaValue.toNumber();
+		dest = (sint32) luaValue.toInteger();
 		return true;
 	}
 	return false;

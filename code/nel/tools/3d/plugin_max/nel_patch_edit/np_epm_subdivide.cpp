@@ -1237,7 +1237,7 @@ void EditPatchMod::DoEdgeSubdivide()
 		{
 			altered = holdNeeded = 1;
 			if (theHold.Holding())
-				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "DoEdgeSubdivide"));
+				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("DoEdgeSubdivide")));
 			// Call the patch add function
 			SubdividePatch(SUBDIV_EDGES, propagate, patch, rpatch);
 			patchData->UpdateChanges(patch, rpatch);
@@ -1304,7 +1304,7 @@ void EditPatchMod::DoPatchSubdivide()
 		{
 			altered = holdNeeded = 1;
 			if (theHold.Holding())
-				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "DoPatchSubdivide"));
+				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("DoPatchSubdivide")));
 			// Call the patch add function
 			SubdividePatch(SUBDIV_PATCHES, propagate, patch, rpatch);
 			patchData->UpdateChanges(patch, rpatch);
@@ -1441,7 +1441,7 @@ void EditPatchMod::DoPatchTurn(bool ccw)
 		{
 			altered = holdNeeded = 1;
 			if (theHold.Holding())
-				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "DoTurnPatch"));
+				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("DoTurnPatch")));
 			
 			// Call the patch add function
 			TurnPatch (patch, rpatch, ccw);

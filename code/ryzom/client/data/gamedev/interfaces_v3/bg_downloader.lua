@@ -32,7 +32,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 function bgdownloader:setIcon(icon)	
-	local bm = self:getProgressGroup():find("bm");
+	local bm = self:getProgressGroup():find("bm")
 	if icon == "" then
 		bm.active = false
 	else

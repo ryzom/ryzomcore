@@ -8,9 +8,18 @@
   <variable entry="UI:SAVE:RADARZOOM"
             type="sint64"
             value="1" />
-  <variable entry="UI:TEMP:VOLUME"
+  <variable entry="UI:SAVE:MP3_VOLUME"
             type="sint64"
             value="255" />
+  <variable entry="UI:SAVE:MP3_REPEAT"
+            type="sint32"
+            value="1" />
+  <variable entry="UI:SAVE:MP3_SHUFFLE"
+            type="sint32"
+            value="0" />
+  <variable entry="UI:TEMP:MP3_PLAYING"
+            type="sint32"
+            value="0" />
   <!--******************-->
   <!--*   MP3 PLAYER   *-->
   <!--******************-->
@@ -25,23 +34,55 @@
   <group type="menu"
          id="mp3_player_menu"
          extends="base_menu_with_color"></group>
+
+  <template name="playlist_song" keep="true" id="" posparent="parent" posref="TL TL" w="206" h="20" line_maxw="160" index="0">
+    <group id="#id" w="#w" child_resize_h="true" posparent="#posparent" posref="#posref" group_onclick_r="" group_params_r="">
+        <ctrl type="button" id="btn" button_type="toggle_button" sizeref="wh" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" scale="true"
+          color="255 255 255 0" col_pushed="255 255 255 0" col_over="255 255 255 90"
+          global_color_normal="true" global_color_pushed="true" global_color_over="true"
+          ondblclick_l="music_player" params_dblclick_l="song=#index" />
+
+        <view type="bitmap" id="bg" posref="MM MM" sizeref="wh" color="200 200 200 50" texture="blank.tga" scale="true" active="false" />
+        <view type="text" id="title" posref="ML ML" x="0" line_maxw="#line_maxw" fontsize="8" shadow="true" multi_line="true" multi_line_space="0" />
+        <view type="text" id="duration" posref="MR MR" x="0" fontsize="8" shadow="true" color="255 255 255 150" />
+    </group>
+  </template>
+
+  <proc id="proc_mp3_toggle_shuffle">
+      <action handler="set" params="dblink=UI:SAVE:MP3_SHUFFLE|value=not(@UI:SAVE:MP3_SHUFFLE)" />
+      <action handler="music_player" params="update_playlist" />
+  </proc>
+
+  <proc id="proc_mp3_update_tooltip">
+      <action handler="lua" params="getUI('ui:interface:mp3_player:controls:but_play').tooltip = i18n.get('uiMP3Play')"  cond="eq(@UI:TEMP:MP3_PLAYING,0)" />
+      <action handler="lua" params="getUI('ui:interface:mp3_player:controls:but_play').tooltip = i18n.get('uiMP3Pause')" cond="eq(@UI:TEMP:MP3_PLAYING,1)" />
+  </proc>
+
+  <proc id="proc_mp3_but_play">
+      <action handler="set" params="dblink=UI:TEMP:MP3_PLAYING|value=not(@UI:TEMP:MP3_PLAYING)" />
+      <action handler="music_player" params="play"  cond="eq(@UI:TEMP:MP3_PLAYING,1)" />
+      <action handler="music_player" params="pause" cond="eq(@UI:TEMP:MP3_PLAYING,0)" />
+  </proc>
+
   <group type="modal"
          id="playlist"
          posparent="mp3_player"
          posref="BM TM"
          w="234"
-         h="256"
+         max_h="250"
+         child_resize_h="true"
+         child_resize_hmargin="10"
          options="layer0"
          mouse_pos="false"
-         escapable="false"
-         exit_click_out="false"
+         escapable="true"
+         exit_click_out="true"
          on_active=""
          on_active_params="">
     <view type="text"
           id="title"
           posref="TL TL"
-          x="4"
-          y="-4"
+          x="8"
+          y="-8"
           hardtext="uiPlaylistTitle"
           shadow="true"
           color="255 255 255 255"
@@ -50,17 +91,60 @@
           id="close"
           button_type="push_button"
           posref="TR TR"
-          x="-4"
-          y="-4"
+          x="-8"
+          y="-8"
           tx_normal="w_win_close.tga"
           tx_pushed="w_win_close.tga"
           tx_over="W_button_14_over.tga"
           onclick_l="leave_modal"
           params_l="" />
+    <ctrl style="text_button_header"
+          button_type="push_button"
+          id="refresh"
+          posparent="close"
+          posref="ML MR"
+          x="-4"
+          y="0"
+          hardtext="uiPlaylistRefresh"
+          onclick_l="music_player"
+          params_l="play_songs" />
+    <ctrl style="text_button_header"
+          button_type="toggle_button"
+          id="shuffle"
+          posparent="refresh"
+          posref="ML MR"
+          x="-4"
+          y="0"
+          hardtext="S"
+          onclick_l="proc"
+          params_l="proc_mp3_toggle_shuffle" />
+    <ctrl style="text_button_header"
+          button_type="toggle_button"
+          id="repeat"
+          posparent="shuffle"
+          posref="ML MR"
+          x="-4"
+          y="0"
+          hardtext="R"
+          onclick_l="set"
+          params_l="dblink=UI:SAVE:MP3_REPEAT|value=not(@UI:SAVE:MP3_REPEAT)" />
+
+    <!-- change button state when variable chaanged -->
+    <link expr="@UI:SAVE:MP3_REPEAT" target="repeat:pushed" />
+    <link expr="@UI:SAVE:MP3_SHUFFLE" target="shuffle:pushed" />
+
+    <group id="content" x="8" y="-24" over="true" sizeref="w" posref="TL TL" child_resize_h="true" child_resize_hmargin="4">
+      <group id="songs" x="10" y="0" sizeref="w" posref="TL TL" child_resize_h="true" max_h="215">
+        <group id="list" type="list" x="0" y="0" posref="TL TL" />
+      </group>
+      <ctrl style="skin_scroll" id="sv" posref="TL TL" target="songs" />
+    </group>
   </group>
-  <link expr="@UI:TEMP:VOLUME"
+  <tree node="playlist" />
+
+  <link expr="@UI:SAVE:MP3_VOLUME"
         action="music_player"
-        params="volume=@UI:TEMP:VOLUME" />
+        params="volume=@UI:SAVE:MP3_VOLUME" />
   <group id="mp3_player"
          type="container_windows"
          w="206"
@@ -133,26 +217,30 @@
             tooltip="uiMP3Prev" />
       <ctrl type="button"
             id="but_play"
-            button_type="push_button"
+            button_type="toggle_button"
             posref="MM MM"
             posparent="slot2"
             tx_normal="mp3_button_play.tga"
-            tx_pushed="mp3_button_play.tga"
+            tx_pushed="mp3_button_pause.tga"
             tx_over="mp3_button_over.tga"
-            onclick_l="music_player"
-            params_l="play"
+            onclick_l="proc"
+            params_l="proc_mp3_but_play"
             tooltip="uiMP3Play" />
+      <!-- TODO: but_stop is using placeholder texture -->
       <ctrl type="button"
-            id="but_pause"
+            id="but_stop"
             button_type="push_button"
             posref="MM MM"
             posparent="slot3"
-            tx_normal="mp3_button_pause.tga"
-            tx_pushed="mp3_button_pause.tga"
+            tx_normal="w_button_10_choice.tga"
+            tx_pushed="w_button_10_choice.tga"
             tx_over="mp3_button_over.tga"
+            scale="true"
+            w="20"
+            h="16"
             onclick_l="music_player"
-            params_l="pause"
-            tooltip="uiMP3Pause" />
+            params_l="stop"
+            tooltip="uiMP3Stop" />
       <ctrl type="button"
             id="but_next"
             button_type="push_button"
@@ -199,7 +287,7 @@
               min="0"
               max="255"
               tracksize="8"
-              value="UI:TEMP:VOLUME"
+              value="UI:SAVE:MP3_VOLUME"
               tx_topright="w_scroll_R.tga"
               tx_middle="w_scroll_l123_m.tga"
               tx_bottomleft="w_scroll_L.tga"
@@ -223,12 +311,12 @@
             button_type="push_button"
             posref="MM MM"
             posparent="slot5"
-            tx_normal="mp3_button_open.tga"
-            tx_pushed="mp3_button_open.tga"
+            tx_normal="mp3_button_list.tga"
+            tx_pushed="mp3_button_list.tga"
             tx_over="mp3_button_over.tga"
-            onclick_l="music_player"
-            params_l="play_songs"
-            tooltip="uiMP3Open" />
+            onclick_l="enter_modal"
+            params_l="group=ui:interface:playlist"
+            tooltip="uiMP3Playlist" />
       <!--
                 <ctrl type="button" id="but_list" button_type="push_button" posref="MM MM" posparent="slot6"
       tx_normal="mp3_button_list.tga" tx_pushed="mp3_button_list.tga" tx_over="mp3_button_over.tga"
@@ -242,6 +330,8 @@
             posref="TL TL"
             w="48"
             h="20" />
+
+      <link expr="@UI:TEMP:MP3_PLAYING" target="but_play:pushed" action="proc" params="proc_mp3_update_tooltip" />
     </group>
     <!-- SCREEN -->
     <group id="screen"
@@ -265,7 +355,7 @@
             fontsize="10"
             line_maxw="182"
             shadow="true"
-            hardtext="No File..." />
+            hardtext="uiNoFiles" />
     </group>
   </group>
   <tree node="mp3_player" />
@@ -567,7 +657,7 @@
     <!-- compass clock -->
     <group id="clock"
            posref="TL TL"
-           w="50"
+           w="70"
            h="16"
            x="4"
            y="-4">
@@ -645,7 +735,7 @@
           id="dist"
           posref="BM BM"
           x="0"
-          y="0"
+          y="2"
           hardtext="uiRadarZoom0"
           shadow="true"
           color="255 255 255 255"
@@ -694,7 +784,7 @@
             id="range"
             posref="BM MM"
             x="0"
-            y="16"
+            y="20"
             hardtext="uiRadarZoom0"
             shadow="true"
             color="255 255 255 255"
@@ -748,8 +838,8 @@
           posref="BM BM"
           x="0"
           y="26"
-          w="44"
-          h="18" />
+          w="46"
+          h="25" />
   </group>
   <tree node="compass" />
   <link expr="switch(@UI:SAVE:RADARZOOM, 'uiRadarZoom0', 'uiRadarZoom1', 'uiRadarZoom2', 'uiRadarZoom3')"
@@ -811,7 +901,7 @@
             id="upload"
             posref="TL TL"
             x="0"
-            y="-20"
+            y="-18"
             color="255 255 255 255"
             shadow="true"
             fontsize="10"
@@ -823,7 +913,7 @@
             posref="BL TL"
             posparent="upload"
             x="0"
-            y="-2"
+            y="0"
             color="255 255 255 255"
             shadow="true"
             fontsize="10"
@@ -835,7 +925,7 @@
             posref="BL TL"
             posparent="download"
             x="0"
-            y="-2"
+            y="0"
             color="255 255 255 255"
             shadow="true"
             fontsize="10"
@@ -847,7 +937,7 @@
             posref="BL TL"
             posparent="ping"
             x="0"
-            y="-2"
+            y="0"
             color="255 255 255 255"
             shadow="true"
             fontsize="10"
@@ -870,7 +960,7 @@
             id="up_title"
             posref="TL TL"
             x="0"
-            y="-4"
+            y="-2"
             color="255 255 255 255"
             fontsize="11"
             shadow="true"
@@ -879,7 +969,7 @@
             id="down_title"
             posref="TL TL"
             x="0"
-            y="-20"
+            y="-18"
             color="255 255 255 255"
             fontsize="11"
             shadow="true"
@@ -888,7 +978,7 @@
             id="ping_title"
             posref="TL TL"
             x="0"
-            y="-36"
+            y="-34"
             color="255 255 255 255"
             fontsize="11"
             shadow="true"
@@ -897,7 +987,7 @@
             id="packet_title"
             posref="TL TL"
             x="0"
-            y="-52"
+            y="-50"
             color="255 255 255 255"
             fontsize="11"
             shadow="true"
@@ -906,7 +996,7 @@
             id="server_title"
             posref="TL TL"
             x="0"
-            y="-68"
+            y="-66"
             color="255 255 255 255"
             fontsize="11"
             shadow="true"
@@ -915,7 +1005,7 @@
             id="upload"
             posref="TR TR"
             x="0"
-            y="-4"
+            y="-2"
             color="255 255 255 255"
             shadow="true"
             fontsize="11"
@@ -926,7 +1016,7 @@
             id="download"
             posref="TR TR"
             x="0"
-            y="-20"
+            y="-18"
             color="255 255 255 255"
             shadow="true"
             fontsize="11"
@@ -937,7 +1027,7 @@
             id="ping"
             posref="TR TR"
             x="0"
-            y="-36"
+            y="-34"
             color="255 255 255 255"
             shadow="true"
             fontsize="11"
@@ -948,7 +1038,7 @@
             id="packet"
             posref="TR TR"
             x="0"
-            y="-52"
+            y="-50"
             color="255 255 255 255"
             shadow="true"
             fontsize="11"
@@ -959,7 +1049,7 @@
             id="server0"
             posref="TR TR"
             x="0"
-            y="-68"
+            y="-66"
             color="255 255 255 255"
             fontsize="11"
             shadow="true"
@@ -969,7 +1059,7 @@
             id="server1"
             posref="TR TR"
             x="0"
-            y="-68"
+            y="-66"
             color="255 255 255 255"
             fontsize="11"
             shadow="true"
@@ -979,7 +1069,7 @@
             id="server2"
             posref="TR TR"
             x="0"
-            y="-68"
+            y="-66"
             color="255 255 255 255"
             fontsize="11"
             shadow="true"
@@ -989,7 +1079,7 @@
             id="server3"
             posref="TR TR"
             x="0"
-            y="-68"
+            y="-66"
             color="255 255 255 255"
             fontsize="11"
             shadow="true"
@@ -999,7 +1089,7 @@
             id="server4"
             posref="TR TR"
             x="0"
-            y="-68"
+            y="-66"
             color="255 255 255 255"
             fontsize="11"
             shadow="true"
@@ -1009,7 +1099,7 @@
             id="server5"
             posref="TR TR"
             x="0"
-            y="-68"
+            y="-66"
             color="255 255 255 255"
             fontsize="11"
             shadow="true"
@@ -1019,7 +1109,7 @@
             id="server6"
             posref="TR TR"
             x="0"
-            y="-68"
+            y="-66"
             color="255 255 255 255"
             fontsize="11"
             shadow="true"
@@ -1029,7 +1119,7 @@
             id="server7"
             posref="TR TR"
             x="0"
-            y="-68"
+            y="-66"
             color="255 255 255 255"
             fontsize="11"
             shadow="true"
@@ -1039,7 +1129,7 @@
             id="server8"
             posref="TR TR"
             x="0"
-            y="-68"
+            y="-66"
             color="255 255 255 255"
             fontsize="11"
             shadow="true"
@@ -1049,7 +1139,7 @@
             id="server9"
             posref="TR TR"
             x="0"
-            y="-68"
+            y="-66"
             color="255 255 255 255"
             fontsize="11"
             shadow="true"

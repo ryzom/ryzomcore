@@ -145,7 +145,7 @@ void CVariablePage::OnButtonVarDelete()
 	}
 	else
 	{
-		AfxMessageBox( "No variable selected ! Choose a variable first" );
+		AfxMessageBox(_T("No variable selected ! Choose a variable first"));
 	}
 	
 }
@@ -178,7 +178,7 @@ void CVariablePage::OnButtonVarApply()
 	}
 	else
 	{
-		AfxMessageBox( "No variable selected ! Choose a variable first" );
+		AfxMessageBox(_T("No variable selected ! Choose a variable first"));
 	}
 	
 }

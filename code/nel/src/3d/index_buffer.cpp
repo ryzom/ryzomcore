@@ -23,6 +23,10 @@
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 // ***************************************************************************
@@ -106,7 +110,7 @@ CIndexBuffer::~CIndexBuffer()
 
 	// Single value
 	if (DrvInfos)
-		DrvInfos->IndexBufferPtr = NULL;	// Tell the driver info to not restaure memory when it will die
+		DrvInfos->IndexBufferPtr = NULL;	// Tell the driver info to not restore memory when it will die
 
 	// Must kill the drv mirror of this VB.
 	DrvInfos.kill();
@@ -144,7 +148,7 @@ void CIndexBuffer::setPreferredMemory (TPreferredMemory preferredMemory, bool ke
 		_KeepLocalMemory = keepLocalMemory;
 
 		// Force non resident
-		restaureNonResidentMemory();
+		restoreNonResidentMemory();
 	}
 }
 
@@ -159,7 +163,7 @@ void CIndexBuffer::reserve(uint32 n)
 		_NbIndexes=std::min (_NbIndexes,_Capacity);
 
 		// Force non resident
-		restaureNonResidentMemory();
+		restoreNonResidentMemory();
 	}
 }
 
@@ -206,7 +210,7 @@ void CIndexBuffer::deleteAllIndexes()
 		}
 
 		// Force non resident
-		restaureNonResidentMemory();
+		restoreNonResidentMemory();
 
 		// Delete driver info
 		nlassert (DrvInfos == NULL);
@@ -276,12 +280,12 @@ void CIndexBuffer::setLocation (TLocation newLocation)
 
 // ***************************************************************************
 
-void CIndexBuffer::restaureNonResidentMemory()
+void CIndexBuffer::restoreNonResidentMemory()
 {
 	setLocation (NotResident);
 
 	if (DrvInfos)
-		DrvInfos->IndexBufferPtr = NULL;	// Tell the driver info to not restaure memory when it will die
+		DrvInfos->IndexBufferPtr = NULL;	// Tell the driver info to not restore memory when it will die
 
 	// Must kill the drv mirror of this VB.
 	DrvInfos.kill();
@@ -407,7 +411,7 @@ void CIndexBuffer::serial(NLMISC::IStream &f)
 	if (f.isReading())
 	{
 		// Force non resident
-		restaureNonResidentMemory();
+		restoreNonResidentMemory();
 	}
 }
 

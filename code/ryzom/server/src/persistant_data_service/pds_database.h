@@ -74,7 +74,7 @@ public:
 	/**
 	 * Destructor
 	 */
-	~CDatabase();
+	virtual ~CDatabase();
 
 
 	/**

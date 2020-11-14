@@ -43,7 +43,7 @@ public:
 
 	std::vector<uint32>	VertRefs;	// Array of vertices reference
 
-	void serial (NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial (NLMISC::IStream &f);
 };
 
 // ***************************************************************************
@@ -90,7 +90,7 @@ public:
 						NLMISC::CObjectVector<CRawSkinVertex*, false>	&vertexRemap,
 						std::vector<CAnimatedMorph> *pBSFactor);
 
-	void serial (NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial (NLMISC::IStream &f);
 
 private:
 

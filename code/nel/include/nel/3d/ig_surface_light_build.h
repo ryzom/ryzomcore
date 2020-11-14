@@ -26,6 +26,7 @@
 namespace NL3D
 {
 
+	class CInstanceGroup;
 
 // ***************************************************************************
 /**
@@ -106,14 +107,14 @@ public:
 public:
 
 	/// Debug: build a colored Grid mesh of SunContribution.
-	void			buildSunDebugMesh(CMesh::CMeshBuild &meshBuild, CMeshBase::CMeshBaseBuild &meshBaseBuild, const CVector &deltaPos=CVector::Null);
+	void			buildSunDebugMesh(CMesh::CMeshBuild &meshBuild, CMeshBase::CMeshBaseBuild &meshBaseBuild, const NLMISC::CVector &deltaPos= NLMISC::CVector::Null);
 
 	/// Debug: build a colored Grid mesh of PointLight. R= pointLight1 id. G= PointLight2 id. B= The multiplier used to show Ids.
-	void			buildPLDebugMesh(CMesh::CMeshBuild &meshBuild, CMeshBase::CMeshBaseBuild &meshBaseBuild, const CVector &deltaPos, const CInstanceGroup &igOut);
+	void			buildPLDebugMesh(CMesh::CMeshBuild &meshBuild, CMeshBase::CMeshBaseBuild &meshBaseBuild, const NLMISC::CVector &deltaPos, const CInstanceGroup &igOut);
 
 private:
 	void			addDebugMeshFaces(CMesh::CMeshBuild &meshBuild, CSurface &surface, uint vId0,
-		const std::vector<CRGBA>	&colors);
+		const std::vector<NLMISC::CRGBA>	&colors);
 
 };
 

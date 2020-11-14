@@ -26,6 +26,9 @@
 #include "nel/3d/water_height_map.h"
 #include <memory>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D {
 
@@ -125,23 +128,23 @@ CVertexProgramWaterVPNoWave::CVertexProgramWaterVPNoWave(bool diffuse)
 void CVertexProgramWaterVPNoWave::buildInfo()
 {
 	m_Idx.BumpMap0Scale = getUniformIndex("bumpMap0Scale");
-	nlassert(m_Idx.BumpMap0Scale != ~0);
+	nlassert(m_Idx.BumpMap0Scale != std::numeric_limits<uint>::max());
 	m_Idx.BumpMap0Offset = getUniformIndex("bumpMap0Offset");
-	nlassert(m_Idx.BumpMap0Offset != ~0);
+	nlassert(m_Idx.BumpMap0Offset != std::numeric_limits<uint>::max());
 	m_Idx.BumpMap1Scale = getUniformIndex("bumpMap1Scale");
-	nlassert(m_Idx.BumpMap1Scale != ~0);
+	nlassert(m_Idx.BumpMap1Scale != std::numeric_limits<uint>::max());
 	m_Idx.BumpMap1Offset = getUniformIndex("bumpMap1Offset");
-	nlassert(m_Idx.BumpMap1Offset != ~0);
+	nlassert(m_Idx.BumpMap1Offset != std::numeric_limits<uint>::max());
 	m_Idx.ObserverHeight = getUniformIndex("observerHeight");
-	nlassert(m_Idx.ObserverHeight != ~0);
+	nlassert(m_Idx.ObserverHeight != std::numeric_limits<uint>::max());
 	m_Idx.ScaleReflectedRay = getUniformIndex("scaleReflectedRay");
-	nlassert(m_Idx.ScaleReflectedRay != ~0);
+	nlassert(m_Idx.ScaleReflectedRay != std::numeric_limits<uint>::max());
 	if (m_Diffuse)
 	{
 		m_Idx.DiffuseMapVector0 = getUniformIndex("diffuseMapVector0");
-		nlassert(m_Idx.DiffuseMapVector0 != ~0);
+		nlassert(m_Idx.DiffuseMapVector0 != std::numeric_limits<uint>::max());
 		m_Idx.DiffuseMapVector1 = getUniformIndex("diffuseMapVector1");
-		nlassert(m_Idx.DiffuseMapVector1 != ~0);
+		nlassert(m_Idx.DiffuseMapVector1 != std::numeric_limits<uint>::max());
 	}
 }
 
@@ -520,7 +523,7 @@ const ITexture		*CWaterShape::getHeightMap(uint k) const
 }
 
 //============================================
-void CWaterShape::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CWaterShape::serial(NLMISC::IStream &f)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance
@@ -760,7 +763,7 @@ CWaveMakerShape::~CWaveMakerShape()
 }
 
 //============================================
-void CWaveMakerShape::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CWaveMakerShape::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(0);
 	f.serial(_Period, _Radius, _Intensity, _PoolID, _ImpulsionMode);

@@ -279,7 +279,6 @@ struct CCreatureTakenDamage
 		{
 			if ( PlayerInflictedDamage[i].TotalDamage > maxDmg )
 			{
-				nlinfo("set damage by player");
 				maxDmg = PlayerInflictedDamage[i].TotalDamage;
 				index = (sint16)i;
 			}

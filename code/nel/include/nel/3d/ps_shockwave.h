@@ -54,7 +54,7 @@ public:
 	float getRadiusCut(void) const { return _RadiusCut; }
 
 	/// serialisation. Derivers must override this, and call their parent version
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 	NLMISC_DECLARE_CLASS(CPSShockWave);
 

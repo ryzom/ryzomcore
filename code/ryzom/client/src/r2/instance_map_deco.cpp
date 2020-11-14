@@ -29,6 +29,10 @@
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace R2
 {
 
@@ -258,7 +262,6 @@ void CInstanceMapDeco::onPreRender(CGroupMap &groupMap)
 		{
 			_Orient->setActive(true);
 			_Orient->setColorRGBA(CRGBA(255, 255, 255, (uint8) (255 * _OrientBlendFactor)));
-			CVector2f worldPos = getWorldPos();
 			sint32 x;
 			sint32 y;
 			groupMap.worldToWindowSnapped(x, y, getWorldPos());
@@ -386,7 +389,7 @@ void CInstanceMapDeco::onUpdate(CGroupMap &groupMap)
 			}
 			float size = CV_MapEntityFarArrowSize.get();
 			// TMP TMP
-			size = size;
+//			size = size;
 			float bias = 1.f;
 			dir.normalize();
 			CVector2f winInter;

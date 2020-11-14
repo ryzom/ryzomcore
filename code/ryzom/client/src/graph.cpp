@@ -134,6 +134,7 @@ void CGraph::renderGraph ()
 	if (TextContext != NULL)
 	{
 		TextContext->setShaded (false);
+		TextContext->setShadeOutline(false);
 		TextContext->setHotSpot (UTextContext::MiddleLeft);
 		TextContext->setColor (frontCol);
 		TextContext->setFontSize (10);

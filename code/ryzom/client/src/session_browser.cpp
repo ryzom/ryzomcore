@@ -20,6 +20,10 @@
 
 #include "game_share/r2_share_itf.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
@@ -119,6 +123,7 @@ CSessionBrowser::~CSessionBrowser()
 	_CommThread->wait();
 
 	// ok, we can leave
+	delete _CommThread;
 }
 
 /** Set auth info */

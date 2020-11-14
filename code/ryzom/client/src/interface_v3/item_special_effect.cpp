@@ -60,7 +60,7 @@ void CItemSpecialEffectHelper::registerItemSpecialEffect(const string &name)
 	// %r : real
 	// %s : string
 	p = s.splitTo('%', true);
-	while (p.size() > 0 && s.size() > 0)
+	while (!p.empty() && !s.empty())
 	{
 		if (s[0] == 'p' || s[0] == 'n' || s[0] == 'r' || s[0] == 's')
 		{

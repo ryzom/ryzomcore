@@ -133,7 +133,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	if (chat)
 	{
 		CChatWindowDesc chatDesc = *chat;
-		chatDesc.FatherContainer = "";
+		chatDesc.FatherContainer.clear();
 		_ChatWindow = getChatWndMgr().createChatWindow(chatDesc);
 		if (!_ChatWindow)
 		{
@@ -155,10 +155,10 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 //==================================================================
 sint CPeopleList::getIndexFromName(const ucstring &name) const
 {
-	string sNameIn = strlwr(name.toString());
+	string sNameIn = toLower(name.toString());
 	for(uint k = 0; k < _Peoples.size(); ++k)
 	{
-		string sPeopleName = strlwr(_Peoples[k].getName().toString());
+		string sPeopleName = toLower(_Peoples[k].getName().toString());
 		if (sPeopleName == sNameIn) return k;
 	}
 	return -1;
@@ -478,7 +478,7 @@ void CPeopleList::displayLocalPlayerTell(const ucstring &receiver, uint index, c
 	strFindReplace(s, "%name", receiver);
 	strFindReplace(finalMsg, CI18N::get("youTell"), s);
 	gl->addChild(getChatTextMngr().createMsgText(finalMsg, prop.getRGBA()));
-	CInterfaceManager::getInstance()->log(finalMsg);
+	CInterfaceManager::getInstance()->log(finalMsg, CChatGroup::groupTypeToString(CChatGroup::tell));
 
 	// if the group is closed, make it blink
 	if (!gc->isOpen())
@@ -871,7 +871,7 @@ class CHandlerContactEntry : public IActionHandler
 		if (pEB == NULL) return;
 		ucstring text = pEB->getInputString();
 		// If the line is empty, do nothing
-		if(text.size() == 0)
+		if(text.empty())
 			return;
 
 		// Parse any tokens in the text
@@ -895,7 +895,7 @@ class CHandlerContactEntry : public IActionHandler
 		// it is simpler to keep it as it and to just use this action handler to manage user input.
 		if (!pCaller || !pCaller->getParent()) return;
 		CGroupContainer *gc = static_cast< CGroupContainer* >( pCaller->getParent()->getEnclosingContainer() );
-		
+
 		// title gives the name of the player
 		ucstring playerName = gc->getUCTitle();
 
@@ -946,7 +946,7 @@ class CHandlerContactEntry : public IActionHandler
 				ucstring s = CI18N::get("youTellPlayer");
 				strFindReplace(s, "%name", pWin->getFreeTellerName(str));
 				strFindReplace(final, CI18N::get("youTell"), s);
-				CInterfaceManager::getInstance()->log(final);
+				CInterfaceManager::getInstance()->log(final, CChatGroup::groupTypeToString(CChatGroup::tell));
 			}
 		}
 	}

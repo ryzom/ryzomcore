@@ -2,6 +2,7 @@
     <header>
         <name>ViewBitmapCombo</name>
         <guiname>CViewBitmapCombo</guiname>
+		<classname>bitmap_combo</classname>
         <ancestor>CtrlBase</ancestor>
         <description></description>
         <abstract>false</abstract>

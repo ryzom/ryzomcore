@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "../stdopengl.h"
 #include "cocoa_event_emitter.h"
 
 namespace NLMISC
@@ -152,9 +153,9 @@ bool CCocoaEventEmitter::pasteTextFromClipboard(ucstring &text)
 	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
 	NSArray *classArray = [NSArray arrayWithObject:[NSString class]];
 	NSDictionary *options = [NSDictionary dictionary];
-	
+
 	BOOL ok = [pasteboard canReadObjectForClasses:classArray options:options];
-	if (ok) 
+	if (ok)
 	{
 		NSArray *objectsToPaste = [pasteboard readObjectsForClasses:classArray options:options];
 		NSString *nstext = [objectsToPaste objectAtIndex:0];
@@ -263,35 +264,21 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	mousePos.y /= (float)viewRect.size.height;
 
 	// if the mouse event was placed outside the view, don't tell NeL :)
-	if((mousePos.x < 0.0 || mousePos.x > 1.0 || 
-		mousePos.y < 0.0 || mousePos.y > 1.0) && 
+	if((mousePos.x < 0.0 || mousePos.x > 1.0 ||
+		mousePos.y < 0.0 || mousePos.y > 1.0) &&
 		event.type != NSKeyDown && event.type != NSKeyUp)
 	{
 		return false;
 	}
 
-	// first event about mouse movement after setting to emulateRawMode
-	if(_setToEmulateRawMode &&
-		(event.type == NSMouseMoved || 
-		event.type == NSLeftMouseDragged || 
-		event.type == NSRightMouseDragged))
-	{
-		// do not report because it reflects wrapping pointer to 0.5/0.5 
-		_setToEmulateRawMode = false;
-		return false;
-	}
-
 	// convert the modifiers for nel to pass them with the events
-	NLMISC::TKeyButton modifiers =
-		modifierFlagsToNelKeyButton([event modifierFlags]);
+	NLMISC::TKeyButton modifiers = modifierFlagsToNelKeyButton([event modifierFlags]);
 
 	switch(event.type)
 	{
 	case NSLeftMouseDown:
 	{
-		server->postEvent(new NLMISC::CEventMouseDown(
-			mousePos.x, mousePos.y,
-			(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this));
+		server->postEvent(new NLMISC::CEventMouseDown(mousePos.x, mousePos.y, (NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this));
 	}
 	break;
 	case NSLeftMouseUp:
@@ -319,15 +306,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	{
 		NLMISC::CEvent* nelEvent;
 
-		// when emulating raw mode, send the delta in a CGDMouseMove event
-		if(_emulateRawMode)
-			nelEvent = new NLMISC::CGDMouseMove(
-				this, NULL /* no mouse device */, event.deltaX, -event.deltaY);
-
-		// normally send position in a CEventMouseMove
-		else
-			nelEvent = new NLMISC::CEventMouseMove(
-				mousePos.x, mousePos.y, (NLMISC::TMouseButton)modifiers, this);
+		nelEvent = new NLMISC::CEventMouseMove(mousePos.x, mousePos.y, (NLMISC::TMouseButton)modifiers, this);
 
 		server->postEvent(nelEvent);
 		break;
@@ -336,15 +315,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	{
 		NLMISC::CEvent* nelEvent;
 
-		// when emulating raw mode, send the delta in a CGDMouseMove event
-		if(_emulateRawMode)
-			nelEvent = new NLMISC::CGDMouseMove(
-				this, NULL /* no mouse device */, event.deltaX, -event.deltaY);
-
-		// normally send position in a CEventMouseMove
-		else
-			nelEvent = new NLMISC::CEventMouseMove(mousePos.x, mousePos.y,
-				(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this);
+		nelEvent = new NLMISC::CEventMouseMove(mousePos.x, mousePos.y, (NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this);
 
 		server->postEvent(nelEvent);
 		break;
@@ -353,15 +324,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	{
 		NLMISC::CEvent* nelEvent;
 
-		// when emulating raw mode, send the delta in a CGDMouseMove event
-		if(_emulateRawMode)
-			nelEvent = new NLMISC::CGDMouseMove(
-				this, NULL /* no mouse device */, event.deltaX, -event.deltaY);
-
-		// normally send position in a CEventMouseMove
-		else
-			nelEvent = new NLMISC::CEventMouseMove(mousePos.x, mousePos.y,
-				(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), this);
+		nelEvent = new NLMISC::CEventMouseMove(mousePos.x, mousePos.y, (NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), this);
 
 		server->postEvent(nelEvent);
 		break;
@@ -418,7 +381,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	case NSOtherMouseDown:break;
 	case NSOtherMouseUp:break;
 	case NSOtherMouseDragged:break;
-#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#ifdef NL_MAC_VERSION_10_6_UP
 	case NSEventTypeGesture:break;
 	case NSEventTypeMagnify:break;
 	case NSEventTypeSwipe:break;
@@ -432,12 +395,6 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 		NSLog(@"%@", event);
 		break;
 	}
-	}
-
-	if(_emulateRawMode && _driver && (event.type == NSMouseMoved || 
-		event.type == NSLeftMouseDragged || event.type == NSRightMouseDragged)) 
-	{
-		_driver->setMousePos(0.5, 0.5);
 	}
 
 	return true;
@@ -458,7 +415,7 @@ typedef bool (*cocoaProc)(NL3D::IDriver*, const void* e);
 
 void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)
 {
-	// break if there was no event to handle 
+	// break if there was no event to handle
 	// if running embedded in e.g. qt, _eventLoop will be false
 	while(_eventLoop)
 	{
@@ -485,24 +442,18 @@ void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)
 			processMessage(event, &server);
 		}
 
-		// forward the event to the cocoa application
-		[NSApp sendEvent:event];
+		@try
+		{
+			// forward the event to the cocoa application
+			[NSApp sendEvent:event];
+		}
+		@catch(NSException *e)
+		{
+			nlwarning("Exception when sending event: %s", [[e reason] UTF8String]);
+		}
 	}
 
 	_server = &server;
-}
-
-void CCocoaEventEmitter::emulateMouseRawMode(bool enable)
-{
-	_emulateRawMode = enable;
-	
-	if(_emulateRawMode)
-	{
-		_setToEmulateRawMode = true;
-		
-		if(_driver)
-			_driver->setMousePos(0.5, 0.5);
-	}
 }
 
 }

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if ! getent group ryzom ; then
+	addgroup --system ryzom
+fi
+
+chgrp -R ryzom /var/cache/ryzom/data
+chmod -R g+wrxs /var/cache/ryzom/data
+
+#DEBHELPER#

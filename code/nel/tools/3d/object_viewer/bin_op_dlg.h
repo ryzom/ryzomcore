@@ -98,14 +98,14 @@ public:
 		}
 
 		// init the operator list box
-		static const char *ops[] = { "selectArg1", "selectArg2", "modulate", "add", "subtract" } ;
+		static const TCHAR *ops[] = { _T("selectArg1"), _T("selectArg2"), _T("modulate"), _T("add"), _T("subtract") };
 		for (k = 0 ; k < (uint) NL3D::CPSBinOp::last ; ++k)
 		{
 			// SchemeWrapper[k].S reference the atriobute maker being edited
 			if 	(_EditedScheme->supportOp( (NL3D::CPSBinOp::BinOp) k))
 			{
-				sint index = m_BinOp.AddString(ops[k]) ;
-				m_BinOp.SetItemData(index, k) ;
+				sint index = m_BinOp.AddString(ops[k]);
+				m_BinOp.SetItemData(index, k);
 				if ((uint) _EditedScheme->getOp() == k)
 				{
 					m_BinOp.SetCurSel(k) ;

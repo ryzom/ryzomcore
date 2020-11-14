@@ -206,11 +206,10 @@ namespace NLGUI
 			invalidateContent();
 		}
 
-		// Set the HTML group used for links
-		void	setBrowseGroup (CInterfaceElement	*group)
-		{
-			_BrowseGroup = group;
-		}
+		/// temporarily enable mouse over effect
+		//  will be automatically disabled when mouse leaves element
+		void	enableTempOver() { _TempOver = true; }
+		void	disableTempOver() { _TempOver = false; }
 
 		/// \from CInterfaceElement
 		void onInvalidateContent();
@@ -239,6 +238,8 @@ namespace NLGUI
 
 		// Do we have a color under the element pointed by the mouse
 		bool _Over;
+		// Temporarily force mouse over effect. Deactivated when mouse moves away
+		bool _TempOver;
 
 		// If over is true so we have a color
 		NLMISC::CRGBA _OverColor;
@@ -292,9 +293,6 @@ namespace NLGUI
 
 		// The links
 		std::vector<CLink>	_Links;
-
-		// The HTML group used
-		CInterfaceElement	*_BrowseGroup;
 
 	private:
 		std::string _HardText;

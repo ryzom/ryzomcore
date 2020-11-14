@@ -1,0 +1,8 @@
+<expression>
+<category>Localization</category>
+<name>localize</name>
+<variable>false</variable>
+<slots>
+<slot>String</slot>
+</slots>
+</expression>

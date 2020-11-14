@@ -61,15 +61,15 @@ END_MESSAGE_MAP()
 void CChooseVegetSet::OnBrowse() 
 {
 	// Select a veget set
-	static char BASED_CODE szFilter[] = "NeL VegetSet Files (*.vegetset)|*.vegetset|All Files (*.*)|*.*||";
+	static TCHAR BASED_CODE szFilter[] = _T("NeL VegetSet Files (*.vegetset)|*.vegetset|All Files (*.*)|*.*||");
 
 	// Create a file dialog
- 	CFileDialog dialog ( TRUE, "*.vegetset", "*.vegetset", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter, (CWnd*)Parent);
+ 	CFileDialog dialog ( TRUE, _T("*.vegetset"), _T("*.vegetset"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter, (CWnd*)Parent);
 	if (dialog.DoModal() == IDOK)
 	{
 		// Get the file name
-		FileName = dialog.GetFileName ();
-		Name.SetWindowText (FileName.c_str());
+		FileName = tStrToUtf8(dialog.GetFileName ());
+		Name.SetWindowText (utf8ToTStr(FileName));
 	}
 }
 
@@ -77,10 +77,10 @@ BOOL CChooseVegetSet::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	
-	if (FileName != "")
-		Name.SetWindowText (FileName.c_str());
+	if (!FileName.empty())
+		Name.SetWindowText (utf8ToTStr(FileName));
 	else
-		Name.SetWindowText ("Browse...");
+		Name.SetWindowText (_T("Browse..."));
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -88,6 +88,6 @@ BOOL CChooseVegetSet::OnInitDialog()
 
 void CChooseVegetSet::OnReset() 
 {
-	FileName = "";
-	Name.SetWindowText ("Browse...");
+	FileName.clear();
+	Name.SetWindowText (_T("Browse..."));
 }

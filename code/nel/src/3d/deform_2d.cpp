@@ -27,6 +27,10 @@
 #include "nel/3d/dru.h"
 #include "nel/3d/material.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 

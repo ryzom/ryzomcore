@@ -119,6 +119,11 @@ public:
 		}
 
 		float successFactor = rollSuccessFactor( c, phrase, deltaLvl );
+
+		ITEMFAMILY::EItemFamily family	= phrase->getCraftedItemStaticForm()->Family;			
+		if( family==ITEMFAMILY::CRAFTING_TOOL || family==ITEMFAMILY::HARVEST_TOOL )
+			successFactor = 1.0f;
+
 		if( successFactor == 0.0f )
 		{
 			//Failure
@@ -281,7 +286,7 @@ public:
 						}
 						else
 						{
-							c->wearRightHandItem(phrase->getMps().size()/10);
+							c->wearRightHandItem((double)phrase->getMps().size()/10);
 
 							// report Xp Gain unless used tool is worned
 							PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->actionReport( report, true, false );
@@ -388,7 +393,7 @@ protected:
 			// compute success factor
 			sint deltaLvl;
 			float successFactor = CFaberActionCommon::getSuccessFactor( character, phrase, deltaLvl );
-			
+
 			// final item quality, depending of recommended skill of action used and lower quality of raw materials used and success factor of action
 			uint16 finalItemQuality = max( (uint16)1, (uint16) (min(phrase->getLowerRmQuality(),(uint16)phrase->getRecommendedSkill()) * successFactor) );
 			

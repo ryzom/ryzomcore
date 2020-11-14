@@ -26,10 +26,10 @@ SET(CPACK_SOURCE_PACKAGE_FILE_NAME "snowballs-${SB_VERSION}")
 IF(WIN32)
   SET(CPACK_GENERATOR "NSIS")
   SET(CPACK_SOURCE_GENERATOR "ZIP")
-ELSE(WIN32)
+ELSE()
   SET(CPACK_GENERATOR "TGZ")
   SET(CPACK_SOURCE_GENERATOR "TGZ")
-ENDIF(WIN32)
+ENDIF()
 set(CPACK_SOURCE_IGNORE_FILES
         "~$"
         "\\\\.cvsignore$"
@@ -42,10 +42,10 @@ IF(WIN32)
     # Install "Debug" specific stuff here.
     SET(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
     message(status "install debug libraries.")
-  ELSE(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+  ELSE()
     # Install "Release" Specific stuff here.
     SET(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
-  ENDIF(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+  ENDIF()
 
   IF(BUILD_CLIENT)
         # Needed to find dependencies for nel_launcher_qt.
@@ -64,7 +64,7 @@ IF(WIN32)
 
      # Install the sound/video drivers
      INSTALL(FILES ${NELDRVOPENGL_DLL} ${NELDRVDIRECT3D_DLL} DESTINATION bin COMPONENT snowballsclient)
-  ENDIF(BUILD_CLIENT)
+  ENDIF()
 
   IF(BUILD_SERVER)
     INSTALL(FILES
@@ -76,10 +76,10 @@ IF(WIN32)
                 ${NELNS_WELCOME_SERVICE_CFG}
                 DESTINATION sbin
                 COMPONENT services)
-  ENDIF(BUILD_SERVER)
+  ENDIF()
 
   INCLUDE(InstallRequiredSystemLibraries)
-ENDIF(WIN32)
+ENDIF()
 
 INCLUDE(CPack)
 

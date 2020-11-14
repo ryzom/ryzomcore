@@ -37,7 +37,7 @@ CTaskManager::CTaskManager() : _RunningTask (""), _TaskQueue (""), _DoneTaskQueu
 	_IsTaskRunning = false;
 	_ThreadRunning = true;
 	CSynchronized<string>::CAccessor currentTask(&_RunningTask);
-	currentTask.value () = "";
+	currentTask.value ().clear();
 	_Thread = IThread::create(this);
 	_Thread->start();
 	_ChangePriorityCallback = NULL;
@@ -111,7 +111,7 @@ void CTaskManager::run(void)
 				CSynchronized<string>::CAccessor currentTask(&_RunningTask);
 				CSynchronized<deque<string> >::CAccessor doneTask(&_DoneTaskQueue);
 				doneTask.value().push_front (currentTask.value ());
-				currentTask.value () = "";
+				currentTask.value ().clear();
 				if (doneTask.value().size () > NLMISC_DONE_TASK_SIZE)
 					doneTask.value().resize (NLMISC_DONE_TASK_SIZE);
 			}

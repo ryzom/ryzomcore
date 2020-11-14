@@ -30,6 +30,10 @@ H_AUTO_DECL( NL3D_Transform_Set_Cluster_System )
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 

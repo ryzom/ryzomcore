@@ -508,7 +508,7 @@ class ComponentTest extends CakeTestCase {
 		$Controller->constructClasses();
 		$Controller->Component->initialize($Controller);
 		$expected = array('setting' => array('itemx'), 'colour' => 'blood orange');
-		$this->assertEqual($Controller->Orange->settings, $expected, 'Params duplication has occured %s');
+		$this->assertEqual($Controller->Orange->settings, $expected, 'Params duplication has occurred %s');
 	}
 
 /**

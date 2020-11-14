@@ -84,7 +84,7 @@ public:
 	void		setTextureFile (const char* file);
 
 	/**
-	  * Add a coarse mesh in the manager. If an error occured, it returns CantAddCoarseMesh.
+	  * Add a coarse mesh in the manager. If an error occurred, it returns CantAddCoarseMesh.
 	  *	\param vBuffer the VertexBuffer pre-transformed / Colored. Size MUST be numVertices*NL3D_COARSEMESH_VERTEX_FORMAT_MGR
 	  *	\param indexBuffer containing triangles that will be inserted.
 	  *	\return false if the mesh can't be added to this pass BECAUSE OF TOO MANY VERTICES or TOO MANY PRIMITIVES reason

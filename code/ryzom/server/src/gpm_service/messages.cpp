@@ -493,7 +493,9 @@ void cbEntityTeleportation( CMessage& msgin, const string &serviceName, NLNET::T
 
 	id.serial( msgin );
 	TDataSetRow	index = CWorldPositionManager::getEntityIndex(id);
-	BOMB_IF(IsRingShard && !index.isValid(),"Ignoring request to TP entity withe invalid data set row: "<<id.toString(),return);
+	
+	if (!index.isValid())
+		return;
 
 	// if no position provided, teleport entity to nowhere
 	if (msgin.getPos() == (sint32)msgin.length())
@@ -544,6 +546,10 @@ void cbEntityTeleportation( CMessage& msgin, const string &serviceName, NLNET::T
 		cell = 0;
 	}
 
+	uint8 move_to_new_cell = 0;
+	if (msgin.getPos() != (sint32)msgin.length())
+		msgin.serial(move_to_new_cell);
+
 	if (IsRingShard)
 	{
 		// update the ring vision universe position
@@ -560,14 +566,22 @@ void cbEntityTeleportation( CMessage& msgin, const string &serviceName, NLNET::T
 	}
 	else
 	{
-		CWorldPositionManager::teleport(index, x, y, z, t, continent, cell, tick);
+		if (move_to_new_cell == 1)
+		{
+			nlinfo("MSG: Sliding entity %d to cell %d) at tick: %d",index.getIndex(),cell,tick);
+			CWorldPositionManager::updateEntityPosition(CWorldPositionManager::getEntityPtr(index), cell);
+		}
+		else
+		{
+			nlinfo("MSG: Teleporting entity %d to continent %d cell %d (%d, %d, %d) at tick: %d",index.getIndex(),continent,cell,x,y,z,tick);
+			CWorldPositionManager::teleport(index, x, y, z, t, continent, cell, tick);
+		}
 	}
 
 
 	// lock entity after a real teleport
 	CWorldPositionManager::lock(index, 10);
 
-	nlinfo("MSG: Teleporting entity %d to continent %d (%d, %d, %d) at tick: %d",index.getIndex(),continent,x,y,z,tick);
 } // cbEntityTeleportation //
 
 

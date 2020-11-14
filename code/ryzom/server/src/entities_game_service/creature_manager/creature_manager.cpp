@@ -268,10 +268,6 @@ void CCreatureSetUrlImp::callback(const string &, NLNET::TServiceId sid)
 			uint32 program = c->getBotChatProgram();
 			if(!(program & (1<<BOTCHATTYPE::WebPageFlag)))
 			{
-				if(program != 0)
-				{
-					return;
-				}
 				program |= 1 << BOTCHATTYPE::WebPageFlag;
 				c->setBotChatProgram(program);
 			}

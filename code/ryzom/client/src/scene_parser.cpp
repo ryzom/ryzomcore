@@ -123,7 +123,7 @@ void CSceneParser::load(const string &filename)
 
 				char *ptr = strtok(tmpBuff, delimiter);
 				if(ptr != NULL)
-					_FrameRate = atof(ptr);
+					NLMISC::fromString(ptr, _FrameRate);
 			}
 
 			// Close the speed file.
@@ -1693,7 +1693,7 @@ void CSceneParser::loadScene(const string &filename)
 				ptr = strtok(NULL, delimiter);
 				if(ptr != NULL)
 				{
-					seq.second = atof(ptr);
+					NLMISC::fromString(ptr, seq.second);
 					_Scene.push_back(seq);
 				}
 			}

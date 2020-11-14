@@ -22,6 +22,10 @@
 #include "nel/3d/dru.h"
 #include "nel/3d/particle_system.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 
@@ -1901,9 +1905,9 @@ void CPSEmitter::resize(uint32 size)
 }
 
 ///==========================================================================
-void CPSEmitter::bounceOccured(uint32 index, TAnimationTime timeToNextSimStep)
+void CPSEmitter::bounceOccurred(uint32 index, TAnimationTime timeToNextSimStep)
 {
-	NL_PS_FUNC(CPSEmitter_bounceOccured)
+	NL_PS_FUNC(CPSEmitter_bounceOccurred)
 	// TODO : avoid duplication with deleteElement
 	if (_EmittedType && _EmissionType == CPSEmitter::onBounce)
 	{
@@ -1913,7 +1917,7 @@ void CPSEmitter::bounceOccured(uint32 index, TAnimationTime timeToNextSimStep)
 }
 
 ///==========================================================================
-void CPSEmitter::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSEmitter::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSEmitter_serial)
 	/// version 6  : the flag _EmitDirBasis no longer exist, it has been replaced by _UserMatrixModeForEmissionDirection
@@ -2180,7 +2184,7 @@ bool CPSEmitter::testEmitForever() const
 // implementation of CPSModulatedEmitter  //
 ////////////////////////////////////////////
 
-void CPSModulatedEmitter::serialEmitteeSpeedScheme(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSModulatedEmitter::serialEmitteeSpeedScheme(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSModulatedEmitter_IStream )
 	bool useScheme;
@@ -2224,7 +2228,7 @@ void CPSEmitterOmni::emit(const NLMISC::CVector &srcPos, uint32 index, CVector &
 }
 
 ///==========================================================================
-void CPSEmitterOmni::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSEmitterOmni::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSEmitterOmni_serial)
 	f.serialVersion(1);
@@ -2328,7 +2332,7 @@ void CPSEmitterDirectionnal::resize(uint32 capacity)
 }
 
 ///==========================================================================
-void CPSEmitterDirectionnal::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSEmitterDirectionnal::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSEmitterDirectionnal_IStream )
 	f.serialVersion(1);
@@ -2342,7 +2346,7 @@ void CPSEmitterDirectionnal::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 ////////////////////////////////////////////
 
 ///==========================================================================
-void CPSEmitterRectangle::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSEmitterRectangle::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSEmitterRectangle_IStream )
 	f.serialVersion(1);
@@ -2502,7 +2506,7 @@ void CPSEmitterRectangle::showTool(void)
 ////////////////////////////////////
 
 ///==========================================================================
-void CPSEmitterConic::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSEmitterConic::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSEmitterConic_serial)
 	f.serialVersion(1);
@@ -2607,7 +2611,7 @@ CMatrix CPSSphericalEmitter::getMatrix(uint32 index) const
 }
 
 ///==========================================================================
-void CPSSphericalEmitter::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSSphericalEmitter::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSSphericalEmitter_serial)
 	f.serialVersion(1);
@@ -2664,7 +2668,7 @@ void CPSSphericalEmitter::resize(uint32 size)
 /////////////////////////////////////
 
 ///==========================================================================
-void CPSRadialEmitter::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSRadialEmitter::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSRadialEmitter_serial)
 	f.serialVersion(1);
@@ -2797,7 +2801,7 @@ void CPSEmitter::doEmitOnce(uint firstInstanceIndex)
 					startPos = _Owner->getParametricInfos()[k].Pos;
 				}
 				float currTime = _Owner->getTime()[k];
-				_Owner->getTime()[k] = 0.f; // when emit occured, time was 0
+				_Owner->getTime()[k] = 0.f; // when emit occurred, time was 0
 				sint32 nbToGenerate = (sint32) (emitLOD * *numToEmitPtr);
 				if (nbToGenerate > 0)
 				{
@@ -2830,7 +2834,7 @@ void CPSEmitter::doEmitOnce(uint firstInstanceIndex)
 				startPos = _Owner->getParametricInfos()[k].Pos;
 			}
 			float currTime = _Owner->getTime()[k];
-			_Owner->getTime()[k] = 0.f; // when emit occured, time was 0
+			_Owner->getTime()[k] = 0.f; // when emit occurred, time was 0
 			processEmitConsistent(startPos, k, nbToGenerate, _Owner->getAgeInSeconds(k) / CParticleSystem::RealEllapsedTimeRatio);
 			// restore time & pos
 			_Owner->getTime()[k] = currTime;

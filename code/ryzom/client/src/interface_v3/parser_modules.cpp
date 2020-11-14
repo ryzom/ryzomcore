@@ -24,12 +24,15 @@
 #include "../commands.h"
 #include "interface_3d_scene.h"
 #include "nel/misc/i_xml.h"
+#include "../continent_manager.h"
 
 using namespace NLMISC;
 
 #ifdef FINAL_VERSION
 #include "../client_cfg.h"
 #endif
+
+extern CContinentManager ContinentMngr;
 
 CIF3DSceneParser::CIF3DSceneParser()
 {
@@ -353,7 +356,7 @@ bool CCommandParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup 
 	if (ptrName)
 	{
 		// Does the action exist ?
-		std::string name = ptrName;
+		std::string name = ptrName.str();
 		if (!ICommand::exists (name) || (CUserCommand::CommandMap.find(name) != CUserCommand::CommandMap.end()))
 		{
 			// Get the action
@@ -369,7 +372,7 @@ bool CCommandParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup 
 					// if prop "ctrlchar" is declared with false, then disable ctrlchar for this command
 					CXMLAutoPtr prop((const char*) xmlGetProp( cur, (xmlChar*)"ctrlchar" ));
 					if( (const char*)prop && (CInterfaceElement::convertBool((const char*)prop)==false) )
-						ICommand::enableControlCharForCommand(ptrName, false);
+						ICommand::enableControlCharForCommand(ptrName.str(), false);
 
 					// Done
 					ret = true;
@@ -526,6 +529,24 @@ bool CMacroParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup )
 		CMacroCmdManager::getInstance()->addMacro(cmd);
 	else
 		return false;
+	return true;
+}
+
+CLandmarkParser::CLandmarkParser()
+{
+	parsingStage |= Unresolved;
+}
+
+CLandmarkParser::~CLandmarkParser()
+{
+}
+
+bool CLandmarkParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup )
+{
+	H_AUTO(parseLandmark)
+
+	ContinentMngr.readFrom(cur);
+
 	return true;
 }
 

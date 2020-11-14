@@ -31,6 +31,7 @@
 #include "game_share/string_manager_sender.h"
 #include "mission_manager/ai_alias_translator.h"
 #include "deposit.h"
+#include "game_share/backup_service_interface.h"
 
 class CCharacter;
 extern NLMISC::CRandom RandomGenerator;
@@ -39,6 +40,7 @@ static const uint16 InvalidSpawnZoneId = 0xFFFF;
 static const uint16 InvalidPlaceId = 0xFFFF;
 
 
+static const std::string DepositStateFileName = "deposits_state";
 /**
  * A teleport destination zone
  * \author Nicolas Brigand
@@ -155,6 +157,7 @@ public:
 	bool isGooActive() const { return _GooActive; }
 	bool isMainPlace() const { return _MainPlace; }
 	TAIAlias getAlias()const{ return _Alias; }
+	PLACE_TYPE::TPlaceType getPlaceType() const { return _PlaceType; }
 
 	const std::vector<uint16> & getRespawnPoints() const { return _RespawnPoints; }
 
@@ -178,6 +181,8 @@ private:
 	std::vector<uint16> _RespawnPoints;
 	/// persistant alias
 	TAIAlias	_Alias;
+	/// place type: capital, village etc
+	PLACE_TYPE::TPlaceType	_PlaceType;
 };
 
 /**
@@ -536,6 +541,11 @@ public:
 	 */
 	void clearEcotypes();
 
+	// Save deposit to primitive file, if needed
+	void saveDeposits();
+	/// Callback for deposit state
+	void receivedDepositState(CFileDescription const &fileDescription, NLMISC::IStream &dataStream);
+
 private:
 
 	/**
@@ -637,6 +647,24 @@ private:
 
 	/// The ecotype zones
 	static CEcotypeZones			_EcotypeZones;
+
+	/// Next cycle where we'll save deposits
+	NLMISC::TGameCycle _NextDepositSave;
+};
+
+class CDepositCallback : public IBackupFileReceiveCallback
+{
+public:
+	CDepositCallback() : processed(false)	{}
+	bool processed;
+	void				callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	{
+		if (!processed)
+		{
+			CZoneManager::getInstance().receivedDepositState(fileDescription, dataStream);
+			processed = true;
+		}
+	}
 };
 
 

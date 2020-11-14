@@ -42,18 +42,18 @@ class CFormLoader : public UFormLoader
 public:
 	virtual ~CFormLoader();
 	// From UFormLoader
-	UForm		*loadForm (const char *filename);
-	UFormDfn	*loadFormDfn (const char *filename);
-	UType		*loadFormType (const char *filename);
+	UForm		*loadForm (const std::string &filename);
+	UFormDfn	*loadFormDfn (const std::string &filename);
+	UType		*loadFormType (const std::string &filename);
 
 	// Load type and formDfn
-	CType		*loadType (const char *filename);
-	CFormDfn	*loadFormDfn (const char *filename, bool forceLoad);
+	CType		*loadType (const std::string &filename);
+	CFormDfn	*loadFormDfn (const std::string &filename, bool forceLoad);
 
 private:
 
 	// Error handling
-	virtual void		warning (bool exception, const char *function, const char *format, ... ) const;
+	virtual void		warning (bool exception, const std::string &function, const char *format, ... ) const;
 
 	typedef std::map<std::string, NLMISC::CRefPtr<CType> >		TTypeMap;
 	typedef std::map<std::string, NLMISC::CRefPtr<CFormDfn> >	TFormDfnMap;

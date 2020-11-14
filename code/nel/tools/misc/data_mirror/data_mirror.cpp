@@ -198,7 +198,7 @@ BOOL CData_mirrorApp::InitInstance()
 			}
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		MessageBox (NULL, e.what (), "NeL Data Mirror", MB_OK|MB_ICONEXCLAMATION);
 	}

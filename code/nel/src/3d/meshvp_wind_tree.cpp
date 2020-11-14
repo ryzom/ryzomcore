@@ -28,6 +28,9 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -191,7 +194,7 @@ CMeshVPWindTree::~CMeshVPWindTree()
 
 
 // ***************************************************************************
-void	CMeshVPWindTree::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMeshVPWindTree::serial(NLMISC::IStream &f)
 {
 	(void)f.serialVersion(0);
 
@@ -223,7 +226,8 @@ void CMeshVPWindTree::initVertexPrograms()
 		{
 			// setup of the VPLight fragment
 			uint	numPls= i/4;
-			bool	normalize= (i&1)!=0;
+			// FIXME: normalize=true makes trees dance, workaround for issue #160
+			bool	normalize= false; //(i&1)!=0;
 			bool	specular= (i&2)!=0;
 
 			// combine
@@ -392,7 +396,6 @@ bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *m
 	sint	numPls= renderTrav->getNumVPLights()-1;
 	clamp(numPls, 0, CRenderTrav::MaxVPLight-1);
 
-
 	// Enable normalize only if requested by user. Because lighting don't manage correct "scale lighting"
 	uint	idVP= (SpecularLighting?2:0) + (driver->isForceNormalize()?1:0) ;
 	// correct VP id for correct unmber of pls.
@@ -523,7 +526,7 @@ void	CMeshVPWindTree::beginMBRInstance(IDriver *driver, CScene *scene, CMeshBase
 	idVP = numPls*4 + idVP;
 
 	// re-activate VP if idVP different from last setup
-	if(idVP != _LastMBRIdVP)
+	if (idVP != _LastMBRIdVP)
 	{
 		_LastMBRIdVP= idVP;
 		driver->activeVertexProgram(_VertexProgram[_LastMBRIdVP]);

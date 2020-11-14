@@ -321,7 +321,7 @@ void CLogicEditor::go()
 //	loadFile
 //
 //---------------------------------------------
-void CLogicEditor::loadFile( const char * fileName )
+void CLogicEditor::loadFile( const TCHAR * fileName )
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -337,7 +337,7 @@ void CLogicEditor::loadFile( const char * fileName )
 //	create a default file
 //
 //---------------------------------------------
-void CLogicEditor::createDefaultFile( const char * fileName )
+void CLogicEditor::createDefaultFile( const TCHAR * fileName )
 {
 	// create an empty doc
 	CLogic_editorDoc * pDoc = CLogic_editorDoc::getNewDoc();
@@ -402,7 +402,7 @@ ILogicEditor * ILogicEditor::getInterface( int version )
 	// Check version number
 	if( version != LOGIC_EDITOR_VERSION )
 	{
-		MessageBox( NULL, "Bad version of logic_editor.dll.", "Logic Editor", MB_ICONEXCLAMATION|MB_OK);
+		MessageBox( NULL, _T("Bad version of logic_editor.dll."), _T("Logic Editor"), MB_ICONEXCLAMATION|MB_OK);
 		return NULL;
 	}
 	else

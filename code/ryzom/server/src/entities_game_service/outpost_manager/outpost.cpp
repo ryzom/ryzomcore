@@ -1510,7 +1510,7 @@ PVP_RELATION::TPVPRelation COutpost::getPVPRelation( CCharacter * user, CEntityB
 		}
 	}
 
-	return PVP_RELATION::NeutralPVP;
+	return PVP_RELATION::Neutral;
 
 } // getPVPRelation //
 

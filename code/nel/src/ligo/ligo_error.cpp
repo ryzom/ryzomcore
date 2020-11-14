@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdligo.h"
-#include "ligo_error.h"
+#include "nel/ligo/ligo_error.h"
 
 namespace NLLIGO
 {

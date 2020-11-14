@@ -3,6 +3,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/app_context.h"
 #include "nel/misc/path.h"
+#include "nel/misc/common.h"
 #include "nel/misc/sstring.h"
 #include "nel/misc/algo.h"
 
@@ -212,8 +213,8 @@ int main(int argc, char *argv[])
 				if (needRepack)
 				{
 					// open the pack file
-					//				FILE *fp = fopen(filename.c_str(), "wt");
-					FILE *fp = fopen(packFileName.c_str(), "wt");
+					//				FILE *fp = nlfopen(filename, "wt");
+					FILE *fp = nlfopen(packFileName, "wt");
 					
 					fprintf(fp, "<packed_xml>\n");
 					
@@ -224,7 +225,7 @@ int main(int argc, char *argv[])
 						printf("Adding file '%s'...\n", CFile::getFilename(subFileName).c_str());
 						fprintf(fp, "	<xml_file name=\"%s\">\n", CFile::getFilename(subFileName).c_str());
 						
-						FILE *subFp = fopen(subFileName.c_str(), "rt");
+						FILE *subFp = nlfopen(subFileName, "rt");
 						nlassert(subFp != NULL);
 						char buffer[MaxLineSize];
 						char *result;
@@ -262,8 +263,8 @@ int main(int argc, char *argv[])
 			{
 				printf("Unpacking directory '%s'...\n", dirName.c_str());
 				// open the pack file
-//				FILE *fp = fopen((dirName+"/tmp."+DefaultExt).c_str(), "rt");
-				FILE *fp = fopen(filename.c_str(), "rt");
+//				FILE *fp = nlfopen(dirName+"/tmp."+DefaultExt, "rt");
+				FILE *fp = nlfopen(filename, "rt");
 				nlassert(fp != NULL);
 				uint linecount = 0;
 				
@@ -303,7 +304,7 @@ int main(int argc, char *argv[])
 					
 					printf("Extracting file '%s'...\n", CFile::getFilename(subFileName).c_str());
 					// open the output file 
-					FILE *output = fopen (subFileName.c_str(), "wt");
+					FILE *output = nlfopen(subFileName, "wt");
 					if (output == NULL)
 					{
 						printf ("Error : can not open output file '%s' from pack file '%s'", subFileName.c_str(), filename.c_str());

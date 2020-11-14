@@ -26,13 +26,6 @@
 #include "utils.h"
 #include "file_description_container.h"
 
-#ifdef NL_OS_WINDOWS
-#include <time.h>
-#include <sys/types.h>
-//#include <sys/stat.h>
-#include <stdio.h>
-#endif
-
 
 //-------------------------------------------------------------------------------------------------
 // namespaces
@@ -110,23 +103,10 @@ void CFileDescriptionContainer::addFile(const string& fileName, uint32 timeStamp
 
 void CFileDescriptionContainer::addFile(const string& fileName)
 {
-//#ifdef NL_OS_WINDOWS
-//
-//	struct _stat buffer;
-//	uint32 result= _stat(fileName.c_str(),&buffer);
-//	if (result==0)
-//	{
-//		addFile(fileName, uint32(buffer.st_mtime), buffer.st_size);
-//	}
-//
-//#else
-
 	if (CFile::fileExists(fileName))
 	{
 		addFile(fileName,CFile::getFileModificationDate(fileName),CFile::getFileSize(fileName));
 	}
-
-//#endif
 }
 
 void CFileDescriptionContainer::addFileSpec(const string& fileSpec,bool recurse)

@@ -18,7 +18,6 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <libxml/parser.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdio.h>

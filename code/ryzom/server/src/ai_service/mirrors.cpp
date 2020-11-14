@@ -289,7 +289,7 @@ void	CMirrors::processMirrorUpdates()
 				}
 				else
 				{
-					if (askedInstance!=~0)
+					if (askedInstance!=std::numeric_limits<uint32>::max())
 					{
 						// no need to warn for ai number instance not in this AIS !
 //						nlwarning("AIInstance %u not found on AIInstance changement for player %s", askedInstance, entityId.toString().c_str());

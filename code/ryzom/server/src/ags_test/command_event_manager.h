@@ -70,7 +70,7 @@ public:
 		/// Set the value of a var
 		const std::string	&set(const std::string &var, const std::string &value)
 		{
-			std::pair<TVarMap::iterator, bool>	res = _Map.insert(std::make_pair<std::string, std::string>(var, value));
+			std::pair<TVarMap::iterator, bool>	res = _Map.insert(std::make_pair(var, value));
 			if (!res.second)
 				(*(res.first)).second = value;
 			return (*(res.first)).second;

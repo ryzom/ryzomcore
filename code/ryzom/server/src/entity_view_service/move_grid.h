@@ -227,7 +227,7 @@ CMoveGrid<T, CELLS, CSIZE>::~CMoveGrid()
 			while ((node = list.getHead()) != NULL)
 			{
 				list.remove(node);
-				_NodeAllocator.free(node);
+				_NodeAllocator.freeBlock(node);
 			}
 		}
 	}
@@ -282,7 +282,7 @@ void	CMoveGrid<T, CELLS, CSIZE>::remove(CIterator &it)
 
 	it._Node = NULL;
 
-	_NodeAllocator.free(node);
+	_NodeAllocator.freeBlock(node);
 }
 
 

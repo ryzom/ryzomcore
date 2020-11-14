@@ -68,7 +68,7 @@ struct TChangeTrackerHeader
 };
 
 
-const uint16 LOCAL_TRACKER_SERVICE_ID = (uint16)~0;
+const uint16 LOCAL_TRACKER_SERVICE_ID = std::numeric_limits<uint16>::max();
 
 /**
  * Item in a tracker

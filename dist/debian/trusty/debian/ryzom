@@ -1,0 +1,116 @@
+#!/bin/sh
+
+P7ZIP=/usr/bin/7z
+RSYNC=/usr/bin/rsync
+WGET=/usr/bin/wget
+RYZOM_CLIENT=/usr/games/ryzom_client
+RYZOM_CONFIG_DEFAULT=/etc/ryzom/client_default.cfg
+RYZOM_CONFIG=~/.ryzom/client.cfg
+
+RYZOM_DIR=~/.ryzom
+DATA_DIR=$RYZOM_DIR/data
+
+mkdir -p $RYZOM_DIR
+
+if [ ! -d "$DATA_DIR" ]
+then
+  # symlink user's data dir to ryzom data cache
+  ln -s /var/cache/ryzom/data $DATA_DIR
+fi
+
+# Check if a directory contains Ryzom data
+ryzom_data_found()
+{
+  # Check for directory, gamedev.bnp and ryzom.ttf
+  COUNT=0
+
+  if [ -d $1 ]
+  then
+    # If there are a least 220 bnp files, we could use this directory
+    # There are 226 bnp files in last version
+    COUNT=$(find -L $1 -name *.bnp | wc -l)
+  fi
+
+  echo $COUNT
+}
+
+COUNT=$(ryzom_data_found $DATA_DIR)
+
+echo "Found $COUNT BNP files in $DATA_DIR"
+
+if [ $COUNT -lt 220 ] && [ -f $WGET ] && [ -f $P7ZIP ]
+then
+  mkdir -p "$DATA_DIR/tmp"
+
+  # Check free diskspace
+  echo "Checking for free disk space..."
+  DISKSPACE=$(df "$DATA_DIR/tmp" | grep "/dev" | awk '{print $4}')
+  if [ $? -ne 0 ]
+  then
+    exit 1
+  fi
+  if [ "$DISKSPACE" -lt "8000000" ]
+  then
+    echo "You don't have enough free space to download and uncompress Ryzom client data."
+    exit 1
+  fi
+
+  # Download
+  echo "Downloading ryzom_client.7z from sourceforge..."
+  # wget
+  $WGET -c http://sourceforge.net/projects/ryzom/files/ryzom_client.7z -O "$DATA_DIR/tmp/ryzom_client.7z"
+  if [ $? -ne 0 ]
+  then
+    exit 1
+  fi
+
+  # Extract data
+  echo "Extracting data from ryzom_client.7z..."
+  cd "$DATA_DIR/tmp"
+  # 7z
+  $P7ZIP x ryzom_client.7z
+  if [ $? -ne 0 ]
+  then
+    exit 1
+  fi
+  cd ..
+  mv -uf tmp/ryzom/data/* .
+  # Delete temporary downloaded files
+  rm -rf tmp
+fi
+
+if [ -f $RYZOM_CONFIG ]
+then
+  echo "Updating $RYZOM_CONFIG..."
+
+  # Escape path for sed using bash find and replace
+  RYZOM_CONFIG_DEFAULT_ESCAPED=$(echo $RYZOM_CONFIG_DEFAULT | sed 's/\//\\\//g')
+
+  # Update RootConfigFilename to be sure it's using the right default config
+  sed -i 's/RootConfigFilename.*/RootConfigFilename   = \"'$RYZOM_CONFIG_DEFAULT_ESCAPED'\"/g' $RYZOM_CONFIG
+fi
+
+if [ -f $RSYNC ]
+then
+  echo "Patching Ryzom data..."
+
+  # Rsync
+  $RSYNC -rOtzv --progress --stats www.ryzom.com::ryzom/data/ $DATA_DIR
+  if [ $? -ne 0 ]
+  then
+    exit 1
+  fi
+fi
+
+# Launch Ryzom client if it exists
+if [ -f $RYZOM_CLIENT ]
+then
+  echo "Launching Ryzom..."
+
+  nohup $RYZOM_CLIENT $1 $2 $3 2> /dev/null &
+fi
+
+# Wait until all previous commands are executed and displayed before exiting
+sync
+
+exit 0

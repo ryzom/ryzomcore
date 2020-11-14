@@ -32,6 +32,10 @@ using namespace NLMISC;
 #define	NL3D_DEFAULT_LOADBALANCING_VALUE_SMOOTHER	50
 #define	NL3D_LOADBALANCING_SMOOTHER_MAX_RATIO		1.1f
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 

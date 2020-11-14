@@ -64,8 +64,8 @@ void GetVal::OnOK()
 	CString rString;
 	EditStr->GetWindowText( rString );
 	int size = rString.GetLength();
-	name = new char[size+1];
-	strcpy (name, rString);
+	name = new TCHAR[size+1];
+	_tcscpy(name, rString);
 	/**((short*)name)=size;
 	EditStr->GetLine(0,name,size);
 	for (int i=0;i<size;i++)

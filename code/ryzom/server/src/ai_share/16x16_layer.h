@@ -77,6 +77,7 @@ typedef	CFastBitField<uint16, 16>	T1BitField;
 class	I16x16Layer
 {
 public:
+	virtual ~I16x16Layer() {}
 
 	/**
 	 * Get uncompressed value at i, j where i is y-like and j is x-like

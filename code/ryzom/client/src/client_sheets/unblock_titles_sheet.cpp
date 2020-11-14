@@ -44,7 +44,7 @@ static void tokenize (const string &zeString, vector<string> &tokens)
 		if ((nextseppos1 == string::npos) && (nextseppos2 == string::npos))
 		{
 			tokens.push_back(sTmp);
-			sTmp = "";
+			sTmp.clear();
 		}
 		else
 		{

@@ -25,6 +25,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -144,7 +147,7 @@ void	CTextureCube::release()
 }
 
 // ***************************************************************************
-void	CTextureCube::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CTextureCube::serial(NLMISC::IStream &f)
 {
 	sint	ver= f.serialVersion(2);
 
@@ -193,7 +196,7 @@ bool CTextureCube::isSelectable() const
 ITexture *CTextureCube::buildNonSelectableVersion(uint index)
 {
 	if (!isSelectable()) return this;
-	std::auto_ptr<CTextureCube> tc(new CTextureCube);
+	CUniquePtr<CTextureCube> tc(new CTextureCube);
 
 	// copy basic texture parameters
 	(ITexture &) *tc.get() = (ITexture &) *this; // invoke ITexture = op for basics parameters

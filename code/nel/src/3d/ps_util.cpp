@@ -39,6 +39,9 @@
 #include "nel/3d/particle_system_shape.h"
 
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D {
 
@@ -271,12 +274,13 @@ void CPSUtil::displayBasis(IDriver *driver, const CMatrix &modelMat, const NLMIS
 void CPSUtil::print(IDriver *driver, const std::string &text, CFontGenerator &fg, CFontManager &fm, const CVector &pos, float size, NLMISC::CRGBA col /*= NLMISC::CRGBA::White*/)
 {
 	NL_PS_FUNC(CPSUtil_print)
-	nlassert((&fg) && (&fm));
 	CComputedString cptedString;
 	fm.computeString ( text,
 						&fg,
 						col,
 						16,
+						false,
+						false,
 						driver,
 						cptedString);
 

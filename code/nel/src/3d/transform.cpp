@@ -29,6 +29,10 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace	NL3D
 {
 
@@ -113,7 +117,7 @@ CTransform::CTransform()
 	_StateFlags= IsOpaque | IsUserLightable;
 
 	// By default, always allow rendering of Transform Models.
-	_RenderFilterType= std::numeric_limits<uint32>::max();
+	_RenderFilterType = std::numeric_limits<uint32>::max();
 
 	// By default, don't suport fast intersection detection
 	_SupportFastIntersect= false;

@@ -472,7 +472,7 @@ void				CRangeList::acquireFirstRow()
  */
 bool				CRangeList::acquireRange( NLNET::TServiceId ownerServiceId, NLNET::TServiceId mirrorServiceId, sint32 nbRows, TDataSetIndex *first, TDataSetIndex *last )
 {
-	TDataSetIndex prevlast(~0);
+	TDataSetIndex prevlast(std::numeric_limits<uint32>::max());
 	TRangeList::iterator irl = _RangeList.begin();
 
 	// Find a compatible range

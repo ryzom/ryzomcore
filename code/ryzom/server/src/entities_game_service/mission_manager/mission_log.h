@@ -61,11 +61,11 @@ extern CMissionLog	MissionLog;
 #define MISDBG if ( !VerboseMissions ){} else MISLOG
 
 // Syntax error logged to egs_mission.log
-#define MISLOGSYNTAXERROR(_PHRASE_)				MISLOG("sline:%u SYNTAX ERROR %s : "_PHRASE_, line, script[0].c_str());
-#define MISLOGSYNTAXERROR1(_PHRASE_,_PARAM_)	MISLOG("sline:%u SYNTAX ERROR %s : "_PHRASE_, line, script[0].c_str(), _PARAM_);
-#define MISLOGERROR(_PHRASE_)						MISLOG("sline:%u ERROR %s : "_PHRASE_, line, script[0].c_str());
-#define MISLOGERROR1(_PHRASE_,_PARAM_)				MISLOG("sline:%u ERROR %s : "_PHRASE_, line, script[0].c_str(), _PARAM_);
-#define MISLOGERROR2(_PHRASE_,_PARAM1_,_PARAM2_)	MISLOG("sline:%u ERROR %s : "_PHRASE_, line, script[0].c_str(), _PARAM1_, _PARAM2_);
+#define MISLOGSYNTAXERROR(_PHRASE_)				MISLOG("sline:%u SYNTAX ERROR %s : " _PHRASE_, line, script[0].c_str());
+#define MISLOGSYNTAXERROR1(_PHRASE_, _PARAM_)	MISLOG("sline:%u SYNTAX ERROR %s : " _PHRASE_, line, script[0].c_str(), _PARAM_);
+#define MISLOGERROR(_PHRASE_)						MISLOG("sline:%u ERROR %s : " _PHRASE_, line, script[0].c_str());
+#define MISLOGERROR1(_PHRASE_, _PARAM_)				MISLOG("sline:%u ERROR %s : " _PHRASE_, line, script[0].c_str(), _PARAM_);
+#define MISLOGERROR2(_PHRASE_, _PARAM1_, _PARAM2_)	MISLOG("sline:%u ERROR %s : " _PHRASE_, line, script[0].c_str(), _PARAM1_, _PARAM2_);
 
 
 

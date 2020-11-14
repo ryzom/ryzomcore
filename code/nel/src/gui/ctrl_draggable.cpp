@@ -18,6 +18,10 @@
 #include "stdpch.h"
 #include "nel/gui/ctrl_draggable.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 

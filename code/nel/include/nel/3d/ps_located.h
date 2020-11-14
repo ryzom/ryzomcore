@@ -66,14 +66,14 @@ class CParticleSystem;
 
 
 /// This structure helps to perform the collision step, by telling which collisionner is the nearest if there are several candidate
-/// a distance of -1 indicates that no collisions occured
+/// a distance of -1 indicates that no collisions occurred
 struct CPSCollisionInfo
 {
 	CPSCollisionInfo *Next;
-	float			  Dist;			  // Distance to the nearest collider, or -1 if not collision occured
+	float			  Dist;			  // Distance to the nearest collider, or -1 if not collision occurred
 	NLMISC::CVector   NewPos;
-	NLMISC::CVector   NewSpeed;	      // The speed of particle after a collision occured. After the updated of collision it is swapped with the post-collision speed
-	CPSZone			  *CollisionZone; // The zone on which the bounce occured, can be useful to check the behaviour in case of collision
+	NLMISC::CVector   NewSpeed;	      // The speed of particle after a collision occurred. After the updated of collision it is swapped with the post-collision speed
+	CPSZone			  *CollisionZone; // The zone on which the bounce occurred, can be useful to check the behaviour in case of collision
 	uint32			  Index;
 	CPSCollisionInfo()
 	{
@@ -356,7 +356,7 @@ public:
 	void resize(uint32 newSize);
 
 	/// serialization
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	/// Shortcut to get an instance of the 3d driver
 	IDriver *getDriver() const;
@@ -449,14 +449,14 @@ public:
 	void setName(const std::string &name) { _Name = name; }
 
 	/// get the located bindable name (edition purpose)
-	std::string getName(void) const { return _Name; }
+	std::string getName() const { return _Name; }
 
 
 	/// tells whether there are alive entities / particles in the system
-	virtual bool hasParticles(void) const;
+	virtual bool hasParticles() const;
 
 	/// tells whether there are alive emitters / particles in the system
-	virtual bool hasEmitters(void) const;
+	virtual bool hasEmitters() const;
 
 	/** Enable the to force LOD degradation. This will suppress instances immediately, (during the motion pass)  so that
 	  * there won't be more than maxNbInstance * dist / maxDist instances. This may not be desirable
@@ -468,7 +468,7 @@ public:
 	/** Test whether LOD degradation was activated
 	  * \see forceLODDegradation()
 	  */
-	bool hasLODDegradation(void) const { return _LODDegradation; }
+	bool hasLODDegradation() const { return _LODDegradation; }
 
 
 	/// for the CPSLocated to reevaluate the max number of faces it may need
@@ -730,7 +730,7 @@ public:
 		/// ctor
 		CPSLocatedBindable();
 		/// serialization
-		virtual void		serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		virtual void		serial(NLMISC::IStream &f);
 		/** this should be called before to delete any bindable inserted in a system, but this is done
 		  * by the system, so you should never need calling it. This has been introduced because calls in dtor are not polymorphic
 		  * to derived class (which are already destroyed anyway), and some infos are needed in some dtor. The default behaviour does nothing
@@ -853,11 +853,11 @@ public:
 	  */
 	void					setLOD(TPSLod lod) { _LOD = lod; }
 	/// get the valid lods for that object
-	TPSLod					getLOD(void) const { return _LOD; }
+	TPSLod					getLOD() const { return _LOD; }
 	/// tells whether there are alive entities / particles
-	virtual bool			hasParticles(void) const { return false; }
+	virtual bool			hasParticles() const { return false; }
 	/// tells whether there are alive emitters
-	virtual bool			hasEmitters(void) const { return false; }
+	virtual bool			hasEmitters() const { return false; }
 	/** set the extern ID of this located bindable. 0 means no extern access. The map of ID-locatedBindable. Is in th
 	  * particle system, so this located bindable must have been attached to a particle system, otherwise an assertion is raised
 	  */
@@ -906,10 +906,10 @@ protected:
 	 */
 	virtual void resize(uint32 size) = 0;
 
-	/** a bounce occured, so some action could be done. The default behaviour does nothing
+	/** a bounce occurred, so some action could be done. The default behaviour does nothing
 	 *  \param index the index of the element that bounced
 	 */
-	virtual void bounceOccured(uint32 /* index */, TAnimationTime /* timeToNextsimStep */) {}
+	virtual void bounceOccurred(uint32 /* index */, TAnimationTime /* timeToNextsimStep */) {}
 
 	/** show an drawing to represent the object, and in red if it is selected
 	 *  \param tab : a table of 2 * nbSeg vector. only the x and y coordinates are used
@@ -1010,7 +1010,7 @@ public:
 	 */
 	virtual void		releaseTargetRsc(CPSLocated * /* target */) {}
 	/// Seralization, must be called by derivers
-	void				serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void				serial(NLMISC::IStream &f);
 	/// Finalize this object : the default is to call releaseTargetRsc on targets
 	virtual void		finalize(void);
 	virtual				~CPSTargetLocatedBindable();

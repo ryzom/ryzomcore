@@ -49,7 +49,7 @@ public:
 		std::vector<uint8>	ActiveBones;
 
 	public:
-		void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void	serial(NLMISC::IStream &f);
 	};
 
 public:
@@ -94,7 +94,7 @@ public:
 	virtual float	getNumTriangles (float distance);
 
 	/// serial this skeletonshape.
-	virtual void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void	serial(NLMISC::IStream &f);
 	NLMISC_DECLARE_CLASS(CSkeletonShape);
 
 	/// flush textures used by this shape.

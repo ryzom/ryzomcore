@@ -33,6 +33,10 @@
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/u_form_loader.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 ///////////
 // USING //
 ///////////

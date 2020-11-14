@@ -543,14 +543,14 @@ ColorPickerPopup::ColorPickerPopup(int width, bool withColorDialog,
     setMouseTracking(true);
     cols = width;
 
-    if (withColorDialog)
+	if (withColorDialog)
 	{
 		moreButton = new ColorPickerButton(this);
 		moreButton->setFixedWidth(24);
 		moreButton->setFixedHeight(21);
 		moreButton->setFrameRect(QRect(2, 2, 20, 17));
 		connect(moreButton, SIGNAL(clicked()), SLOT(getColorFromDialog()));
-    }
+	}
 	else
 	{
 		moreButton = 0;

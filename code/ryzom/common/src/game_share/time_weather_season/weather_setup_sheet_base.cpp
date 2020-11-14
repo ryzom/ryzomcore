@@ -85,7 +85,7 @@ void CWeatherStateSheet::build(const NLGEORGES::UFormElm &item)
 	GetWeatherFormValue(item, fxName, "FXName");
 	if (!fxName.empty())
 	{
-		fxName = NLMISC::strlwr(NLMISC::CFile::getFilenameWithoutExtension(fxName));
+		fxName = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(fxName));
 		if (!fxName.empty())
 		{
 			FXInfos.resize(1);
@@ -108,7 +108,7 @@ void CWeatherStateSheet::build(const NLGEORGES::UFormElm &item)
 
 
 //==================================================================================
-void CWeatherStateSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CWeatherStateSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(BestSetupName);
 	f.serial(FogRatio);
@@ -163,7 +163,7 @@ void CCloudStateSheet::build(const NLGEORGES::UFormElm &item)
 }
 
 //==================================================================================
-void CCloudStateSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CCloudStateSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(AmbientDay);
 	f.serial(DiffuseDay);
@@ -192,18 +192,18 @@ void CWeatherSetupSheetBase::build(const NLGEORGES::UFormElm &item)
 	CloudState.build(item);
 	std::string setupName;
 	GetWeatherFormValue(item, setupName, "SetupName");
-	SetupName = NLMISC::CStringMapper::map(NLMISC::strlwr(setupName));
+	SetupName = NLMISC::CStringMapper::map(NLMISC::toLower(setupName));
 }
 
 //==================================================================================
-void CWeatherSetupSheetBase::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CWeatherSetupSheetBase::serial(NLMISC::IStream &f)
 {
 	f.serial(WeatherState, CloudState);
 	if (f.isReading())
 	{
 		std::string setupName;
 		f.serial(setupName);
-		SetupName = NLMISC::CStringMapper::map(NLMISC::strlwr(setupName));
+		SetupName = NLMISC::CStringMapper::map(NLMISC::toLower(setupName));
 	}
 	else
 	{

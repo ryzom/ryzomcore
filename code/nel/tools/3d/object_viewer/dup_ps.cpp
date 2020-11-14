@@ -40,7 +40,7 @@ using namespace NL3D;
   * TODO maybe this could be used elsewhere ?    
   */
 template <class TSerializePolicy, typename T>
-static T	*DupSerializable(const T *in) throw(NLMISC::EStream)
+static T	*DupSerializable(const T *in)
 {
 	NLMISC::CMemStream ms;	
 	nlassert(!ms.isReading());
@@ -62,12 +62,12 @@ static T	*DupSerializable(const T *in) throw(NLMISC::EStream)
 struct CDupObjPolicy
 {
 	template <typename T>
-	static void serial(T *&obj, NLMISC::IStream &dest)  throw(NLMISC::EStream)
+	static void serial(T *&obj, NLMISC::IStream &dest)
 	{ 	
 		dest.serialPtr(obj);
 		/*if (dest.isReading())
 		{
-			std::auto_ptr<T> newObj(new T);
+			CUniquePtr<T> newObj(new T);
 			newObj->serialPtr(dest);
 			delete obj;
 			obj = newObj.release();
@@ -84,7 +84,7 @@ struct CDupObjPolicy
 struct CDupPolymorphicObjPolicy
 {
 	template <typename T>
-	static void serial(T *&obj, NLMISC::IStream &dest)  throw(NLMISC::EStream)
+	static void serial(T *&obj, NLMISC::IStream &dest)
 	{ 	
 		dest.serialPolyPtr(obj);		
 	}
@@ -112,13 +112,13 @@ NL3D::CParticleSystemProcess	*DupPSLocated(const CParticleSystemProcess *in)
 			/** Duplicate the system, and detach.
 			  * We can't duplicate the object direclty (it may be referencing other objects in the system, so these objects will be copied too...)
 			  */
-			 std::auto_ptr<CParticleSystem> newPS(DupSerializable<CDupObjPolicy>(in->getOwner()));	
+			 CUniquePtr<CParticleSystem> newPS(DupSerializable<CDupObjPolicy>(in->getOwner()));
 			 // scene pointer is not serialised, but 'detach' may need the scene to be specified
 			 newPS->setScene(in->getOwner()->getScene());
 			return newPS->detach(index);			
 		}
 	}
-	catch (NLMISC::EStream &e)
+	catch (const NLMISC::EStream &e)
 	{
 		nlwarning (e.what());
 		return NULL;
@@ -142,7 +142,7 @@ NL3D::CPSLocatedBindable	*DupPSLocatedBindable(CPSLocatedBindable *in)
 		else
 		{
 			CParticleSystem *srcPS = in->getOwner()->getOwner();
-			std::auto_ptr<CParticleSystem> newPS(DupSerializable<CDupObjPolicy>(srcPS));	
+			CUniquePtr<CParticleSystem> newPS(DupSerializable<CDupObjPolicy>(srcPS));
 			// scene pointer is not serialised, but 'detach' may need the scene to be specified
 			newPS->setScene(in->getOwner()->getOwner()->getScene());
 			//
@@ -154,7 +154,7 @@ NL3D::CPSLocatedBindable	*DupPSLocatedBindable(CPSLocatedBindable *in)
 			return loc->unbind(subIndex);
 		}
 	}
-	catch (NLMISC::EStream &e)
+	catch (const NLMISC::EStream &e)
 	{
 		nlwarning (e.what());
 		return NULL;

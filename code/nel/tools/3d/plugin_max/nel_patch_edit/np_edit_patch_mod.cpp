@@ -338,8 +338,7 @@ static INT_PTR CALLBACK PickSetDlgProc(
 			Tab<TSTR*> &names = *((Tab < TSTR*>*)lParam);
 			for (int i = 0; i < names.Count(); i++)
 			{
-				int pos  = SendDlgItemMessage(hWnd, IDC_NS_LIST, LB_ADDSTRING, 0,
-					(LPARAM)(TCHAR*)*names[i]);
+				int pos  = SendDlgItemMessage(hWnd, IDC_NS_LIST, LB_ADDSTRING, 0, (LPARAM)(TCHAR*)*names[i]->ToMCHAR());
 				SendDlgItemMessage(hWnd, IDC_NS_LIST, LB_SETITEMDATA, pos, i);
 			}
 			break;
@@ -688,7 +687,7 @@ if (!TestAFlag(A_HELD))
 	patchData->vdelta.SetSize(*patch, FALSE);
 	if (theHold.Holding())
 	{
-		theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "XFormHandles"));
+		theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("XFormHandles")));
 	}
 	patchData->vdelta.Zero();		// Reset all deltas
 	patchData->ClearHandleFlag();
@@ -946,7 +945,7 @@ for (int i = 0; i < mcList.Count(); i++)
 		if (theHold.Holding())
 		{
 			// Hulud: here, i pass a NULL pointer because rpatch are not modified by xform
-			theHold.Put(new PatchRestore(patchData, this, patch, NULL, "XFormVerts")); 
+			theHold.Put(new PatchRestore(patchData, this, patch, NULL, _T("XFormVerts")));
 		}
 		patchData->vdelta.Zero();		// Reset all deltas
 		patchData->ClearHandleFlag();

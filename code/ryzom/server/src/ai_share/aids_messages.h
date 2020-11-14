@@ -97,16 +97,16 @@ class CMsgAIFeedback : public NLNET::CTransportClass
 public:
 	std::string Message;
 
-	CMsgAIFeedback() 
+	CMsgAIFeedback()
 	{
 	}
 	
-	CMsgAIFeedback(std::string message) 
+	CMsgAIFeedback(const std::string &message)
 	{
 		Message=message;
 	}
 
-	CMsgAIFeedback(char *msgStr) 
+	CMsgAIFeedback(const char *msgStr)
 	{
 		Message=std::string(msgStr);
 	}
@@ -119,7 +119,6 @@ public:
 
 	virtual void callback (const std::string &name, NLNET::TServiceId id);
 };
-
 
 #endif
 

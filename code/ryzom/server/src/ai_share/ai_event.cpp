@@ -36,7 +36,7 @@ NL_INSTANCE_COUNTER_IMPL(CAIStunEndEvent);
 //--------------------------------------------------------------
 //						CAIStunEvent::serial()  
 //--------------------------------------------------------------
-void CAIStunEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAIStunEvent::serial(NLMISC::IStream &f)
 {
 	if (f.isReading() )
 	{
@@ -81,7 +81,7 @@ void CAIStunEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 //--------------------------------------------------------------
 //						CAIAggroEvent::serial()  
 //--------------------------------------------------------------
-void CAIAggroEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAIAggroEvent::serial(NLMISC::IStream &f)
 {
 	if (f.isReading() )
 	{
@@ -133,7 +133,7 @@ void CAIAggroEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 //--------------------------------------------------------------
 //						CAIStunEndEvent::serial()  
 //--------------------------------------------------------------
-void CAIStunEndEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAIStunEndEvent::serial(NLMISC::IStream &f)
 {
 	if (f.isReading() )
 	{
@@ -179,7 +179,7 @@ void CAIStunEndEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 //--------------------------------------------------------------
 //						CAISurvivalInstinctEvent::serial()  
 //--------------------------------------------------------------
-void CAISurvivalInstinctEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAISurvivalInstinctEvent::serial(NLMISC::IStream &f)
 {
 	if (f.isReading() )
 	{
@@ -231,7 +231,7 @@ void CAISurvivalInstinctEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 //--------------------------------------------------------------
 //						CAIFearEvent::serial()  
 //--------------------------------------------------------------
-void CAIFearEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAIFearEvent::serial(NLMISC::IStream &f)
 {
 	if (f.isReading() )
 	{
@@ -278,7 +278,7 @@ void CAIFearEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 //--------------------------------------------------------------
 //						CAIFearEndEvent::serial()  
 //--------------------------------------------------------------
-void CAIFearEndEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAIFearEndEvent::serial(NLMISC::IStream &f)
 {
 	if (f.isReading() )
 	{
@@ -326,7 +326,7 @@ void CAIFearEndEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 //--------------------------------------------------------------
 //						CAIHungerEvent::serial()  
 //--------------------------------------------------------------
-void CAIHungerEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAIHungerEvent::serial(NLMISC::IStream &f)
 {
 	if (f.isReading() )
 	{

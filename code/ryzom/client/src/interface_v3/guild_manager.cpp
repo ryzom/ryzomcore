@@ -278,7 +278,7 @@ void CGuildManager::update()
 		// Guild stuff
 		uint32 oldName = _Guild.NameID;
 		_Guild.NameID = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:NAME")->getValue32();
-		_Guild.Name = "";
+		_Guild.Name.clear();
 		_InGuild = (_Guild.NameID != 0);
 		if (!_InGuild)
 			closeAllInterfaces();
@@ -378,13 +378,13 @@ void CGuildManager::update()
 							// Online status not changed for this member
 							continue;
 						}
-						
+
 						if ( (*it).second.Online != ccs_offline && _GuildMembers[i].Online != ccs_offline)
 						{
 							// Not from offline, or to offline, so don't show anything
 							continue;
 						}
-						
+
 						ucstring msg = (_GuildMembers[i].Online != ccs_offline) ? onlineMessage : offlineMessage;
 						strFindReplace(msg, "%s", _GuildMembers[i].Name);
 						string cat = getStringCategory(msg, msg);
@@ -398,7 +398,6 @@ void CGuildManager::update()
 						bool dummy;
 						PeopleInterraction.ChatInput.Guild.displayMessage(msg, col, 2, &dummy);
 						break;
-
 					}
 				}
 
@@ -410,7 +409,7 @@ void CGuildManager::update()
 			}
 
 			// Search for UserEntity to find our own grade
-			if ((UserEntity != NULL) && (_GuildMembers.size() > 0))
+			if ((UserEntity != NULL) && (!_GuildMembers.empty()))
 			{
 				uint i;
 				_Grade = EGSPD::CGuildGrade::Member;
@@ -730,7 +729,7 @@ bool CDBGroupListAscensor::CSheetChildAscensor::isInvalidated(CDBGroupListSheetT
 			{
 
 				LIFT_ICONS::TLiftIcon li = (LIFT_ICONS::TLiftIcon)(icon & UINT64_CONSTANT(0x7FFFFFFFFFFFFFFF));
-				string str = strlwr(LIFT_ICONS::toString(li));
+				string str = toLower(LIFT_ICONS::toString(li));
 				Ctrl->setType(CCtrlSheetInfo::SheetType_Teleport_Location);
 				Ctrl->setSlot("asc_"+str+".tga");
 			}

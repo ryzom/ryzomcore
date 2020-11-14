@@ -66,7 +66,7 @@ struct CPlaneBasis
 	}
 
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial(X, Y) ;
 	}

@@ -23,6 +23,10 @@
 #include <windows.h>
 #include <mmsystem.h>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLMISC;
 using namespace std;
 

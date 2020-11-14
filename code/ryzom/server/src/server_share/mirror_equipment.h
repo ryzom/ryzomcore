@@ -68,7 +68,7 @@ public:
 		return ( IdSheet != e.IdSheet || Quality != e.Quality);
 	}
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial( IdSheet );
 		f.serial( Quality );

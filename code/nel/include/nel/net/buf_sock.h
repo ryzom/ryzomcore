@@ -84,7 +84,7 @@ protected:
 	///@name Sending data
 	//@{
 
-	/// Update the network sending (call this method evenly). Returns false if an error occured.
+	/// Update the network sending (call this method evenly). Returns false if an error occurred.
 	bool	update();
 
 	/** Sets the time flush trigger (in millisecond). When this time is elapsed,
@@ -101,7 +101,7 @@ protected:
 	 * (see CNonBlockingBufSock), if all the data could not be sent immediately,
 	 * the returned nbBytesRemaining value is non-zero.
 	 * \param nbBytesRemaining If the pointer is not NULL, the method sets the number of bytes still pending after the flush attempt.
-	 * \returns False if an error has occured (e.g. the remote host is disconnected).
+	 * \returns False if an error has occurred (e.g. the remote host is disconnected).
 	 * To retrieve the reason of the error, call CSock::getLastError() and/or CSock::errorString()
 	 */
 	bool	flush( uint *nbBytesRemaining=NULL );
@@ -170,7 +170,7 @@ protected:
 	}
 
 	/** Pushes a buffer to the send queue and update,
-	 * or returns false if the socket is not physically connected the or an error occured during sending
+	 * or returns false if the socket is not physically connected the or an error occurred during sending
 	 */
 	bool pushBuffer( const NLMISC::CMemStream& buffer )
 	{

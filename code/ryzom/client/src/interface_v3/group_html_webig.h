@@ -20,6 +20,9 @@
 #include "nel/misc/types_nl.h"
 #include "nel/gui/group_html.h"
 
+void startWebIgNotificationThread();
+void stopWebIgNotificationThread();
+
 /**
 * Auth HTML group
 */
@@ -33,7 +36,7 @@ public:
 
 	// From CGroupHTML
 	virtual void addHTTPGetParams (std::string &url, bool trustedDomain);
-	virtual void addHTTPPostParams (HTAssocList *formfields, bool trustedDomain);
+	virtual void addHTTPPostParams (SFormFields &formfields, bool trustedDomain);
 	virtual std::string	home();
 	virtual void handle ();
 
@@ -55,7 +58,7 @@ public:
 
 	/// From CGroupHTMLAuth
 	virtual void addHTTPGetParams (std::string &url, bool trustedDomain);
-	virtual void addHTTPPostParams (HTAssocList *formfields, bool trustedDomain);
+	virtual void addHTTPPostParams (SFormFields &formfields, bool trustedDomain);
 	virtual std::string	home();
 	virtual void handle ();
 

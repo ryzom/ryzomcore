@@ -25,6 +25,10 @@
 
 using namespace NLLIGO;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // ***************************************************************************
 // CPrimitiveConfigurationDlg dialog
 // ***************************************************************************
@@ -102,7 +106,7 @@ BOOL CPrimitiveConfigurationDlg::OnInitDialog()
 	ListView_SetExtendedListViewStyle (ListCtrl, LVS_EX_CHECKBOXES);
 
 	// Add the list column
-	ListCtrl.InsertColumn (0, "Configuration name");
+	ListCtrl.InsertColumn (0, _T("Configuration name"));
 	ListCtrl.SetColumnWidth (0, 350);
 
 	// Add configurations
@@ -110,7 +114,7 @@ BOOL CPrimitiveConfigurationDlg::OnInitDialog()
 	uint i;
 	for (i=0; i<configurations.size(); i++)
 	{
-		ListCtrl.InsertItem (i, configurations[i].Name.c_str());
+		ListCtrl.InsertItem (i, utf8ToTStr(configurations[i].Name));
 		// setItemTextUTF8 (List, nItem, subString++, entry.Strings[CEntryFile::OldSize].c_str ());
 	}
 

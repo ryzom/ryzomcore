@@ -131,7 +131,7 @@ void CStatesView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 	m_tree.DeleteAllItems();
 	m_mapItemToEvent.RemoveAll();
 
-	m_tree.InsertItem( "States");
+	m_tree.InsertItem(_T("States"));
 
 	// get the states map
 	CState *pState;

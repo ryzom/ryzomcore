@@ -3,18 +3,256 @@
 
 ------------------------------------------------------------------------------------------------------------
 -- create the game namespace without reseting if already created in an other file.
-if (outgame==nil) then
-	outgame= {};
+if (outgame == nil) then
+	outgame = {}
 end
 
+
+
+------------------------------------------------------------------------------------------------------------
+-- Name generator.
+
+--nb noms:
+-- matis: male 621 - female 621 - FirstName 621
+-- fyros: given name 14269, FirstName 841
+-- zorai: given name one 318, given name two 644, FirstName 1287
+-- tryker: given name 4500, FirstName 4335
+
+-- Fyros
+function outgame:getFyrosFirstName()
+	local nbFyrosFirstNames = #fyrosFirstNames
+
+	return fyrosFirstNames[math.random(nbFyrosFirstNames)]
+end
+
+function outgame:getFyrosLastName()
+	local nbFyrosLastNames = #fyrosLastNames
+
+	return fyrosLastNames[math.random(nbFyrosLastNames)]
+end
+
+-- Matis
+function outgame:getMatisFirstName(sex)
+	-- 1 = male, 2 = female
+	local dbNameSex = getDbProp("UI:TEMP:NAME_SEX")
+
+	if sex ~= nil then
+		dbNameSex = sex
+	end
+
+	local FirstName = ""
+	if tonumber(dbNameSex) == 1 then
+		local nbMatisMaleFirstNames = #matisMaleFirstNames
+		FirstName = matisMaleFirstNames[math.random(nbMatisMaleFirstNames)]
+	else
+		local nbMatisFemaleFirstNames = #matisFemaleFirstNames
+		FirstName = matisFemaleFirstNames[math.random(nbMatisFemaleFirstNames)]
+	end
+
+	return FirstName
+end
+
+function outgame:getMatisLastName()
+	local nbMatisLastNames = #matisLastNames
+
+	return matisLastNames[math.random(nbMatisLastNames)]
+end
+
+-- Tryker
+function outgame:getTrykerFirstName()
+	local nbTrykerFirstNames = #trykerFirstNames
+
+	return trykerFirstNames[math.random(nbTrykerFirstNames)]
+end
+
+function outgame:getTrykerLastName()
+	local nbTrykerLastNames = #trykerLastNames
+
+	return trykerLastNames[math.random(nbTrykerLastNames)]
+end
+
+-- Zoraï
+function outgame:getZoraiFirstName()
+	local nbFirstNamesOne = #zoraiFirstNamesOne
+	local FirstNameOne = zoraiFirstNamesOne[math.random(nbFirstNamesOne)]
+
+	local nbFirstNamesTwo = #zoraiFirstNamesTwo
+	local FirstNameTwo = zoraiFirstNamesTwo[math.random(nbFirstNamesTwo)]
+
+	return FirstNameOne .. "-" .. FirstNameTwo
+end
+
+function outgame:getZoraiLastName()
+	local nbLastNames = #zoraiLastNames
+
+	return zoraiLastNames[math.random(nbLastNames)]
+end
+
+function outgame:procGenerateName()
+	local uiNameFull = getUI("ui:outgame:appear_name:name_full")
+	local uiGenText = getUI("ui:outgame:appear_name:eb")
+	local dbNameRace = getDbProp("UI:TEMP:NAME_RACE")
+	local dbNameSubRaceFirstName = getDbProp("UI:TEMP:NAME_SUB_RACE_FIRST_NAME")
+	local dbNameSubRaceLastName = getDbProp("UI:TEMP:NAME_SUB_RACE_LAST_NAME")
+
+	local nameResult = ""
+	local fullnameResult = ""
+
+	-- Look at outgame:procUpdateNameRaceLabel() for the "race" list.
+	-- fy ma try zo -->
+	local firstName = "test2"
+	local lastName = "test"
+
+	-- Fyros and Matis are using "first name, last name" order
+	-- Trykers and Zoraïs are using "last name, first name" order
+	if  tonumber(dbNameRace) == 1 then
+	-- Fyros
+		firstName = self:getFyrosFirstName()
+		lastName = self:getFyrosLastName()
+		fullnameResult = firstName .. " " .. lastName
+	elseif  tonumber(dbNameRace) == 2 then
+	-- Matis
+		firstName = self:getMatisFirstName()
+		lastName = self:getMatisLastName()
+		fullnameResult = firstName .. " " .. lastName
+	elseif  tonumber(dbNameRace) == 3 then
+	-- Tryker
+		firstName = self:getTrykerFirstName()
+		lastName = self:getTrykerLastName()
+		fullnameResult = lastName .. " " .. firstName
+	elseif  tonumber(dbNameRace) == 4 then
+	-- Zorai
+		firstName = self:getZoraiFirstName()
+		lastName = self:getZoraiLastName()
+		fullnameResult = lastName .. " " .. firstName
+	elseif  tonumber(dbNameRace) == 5 then
+	-- Maraudeurs
+
+		-- firstName
+		if tonumber(dbNameSubRaceFirstName) == 1 then
+		-- Fyros
+			firstName = self:getFyrosFirstName()
+		elseif  tonumber(dbNameSubRaceFirstName) == 2 then
+		-- Matis M
+			firstName = self:getMatisFirstName(1)
+		elseif  tonumber(dbNameSubRaceFirstName) == 3 then
+		-- Matis F
+			firstName = self:getMatisFirstName(2)
+		elseif  tonumber(dbNameSubRaceFirstName) == 4 then
+		-- Tryker
+			firstName = self:getTrykerFirstName()
+		elseif  tonumber(dbNameSubRaceFirstName) == 5 then
+		-- Zorai
+			firstName = self:getZoraiFirstName()
+		end
+
+		-- lastName
+		if tonumber(dbNameSubRaceLastName) == 1 then
+		-- Fyros
+			lastName = self:getFyrosLastName()
+		elseif  tonumber(dbNameSubRaceLastName) == 2 then
+		-- Matis
+			lastName = self:getMatisLastName()
+		elseif  tonumber(dbNameSubRaceLastName) == 3 then
+		-- Tryker
+			lastName = self:getTrykerLastName()
+		elseif  tonumber(dbNameSubRaceLastName) == 4  then
+		-- Zorai
+			lastName = self:getZoraiLastName()
+		end
+
+		fullnameResult = firstName .. " " .. lastName
+	end
+
+	-- always use first name for character name
+	nameResult = firstName
+
+	uiNameFull.hardtext = fullnameResult
+
+	nameResult = string.gsub(nameResult, "'", "")
+	nameResult = string.gsub(nameResult, " ", "")
+	nameResult = string.gsub(nameResult, "-", "")
+	nameResult = string.lower(nameResult)
+	nameResult = nameResult:gsub("^%l", string.upper)
+	uiGenText.input_string = nameResult
+end
+
+-- Name sex slider update.
+function outgame:procUpdateNameSexLabel()
+	local nameSexType = { "uiCP_Sex_Male", "uiCP_Sex_Female" }
+	local uiNameSexText = getUI("ui:outgame:appear_name:name_sex_slider:name_sex")
+	local uiNameSex = getDbProp("UI:TEMP:NAME_SEX")
+
+	tempstr = tostring(i18n.get(nameSexType[tonumber(uiNameSex)]))
+	tempstr = string.lower(tempstr)
+	tempstr = (tempstr:gsub("^%l", string.upper))
+
+	uiNameSexText.hardtext = tempstr
+end
+
+-- Name race slider update.
+function outgame:procUpdateNameRaceLabel()
+	local nameRaceType = { "Fyros", "Matis", "Tryker", "Zoraï", "uiCP_Maraudeur" }
+
+	local uiNameRaceText = getUI("ui:outgame:appear_name:name_race_slider:name_race")
+	local dbNameRace = getDbProp("UI:TEMP:NAME_RACE")
+
+	local uiNameSexSlider = getUI("ui:outgame:appear_name:name_sex_slider")
+
+	local uiNameSubRaceFirstNameSlider = getUI("ui:outgame:appear_name:name_sub_race_first_name_slider")
+	local uiNameSubRaceLastNameSlider = getUI("ui:outgame:appear_name:name_sub_race_last_name_slider")
+
+	local uiNameGenerate = getUI("ui:outgame:appear_name:generate")
+	-- Show/Hide sex slider
+
+	uiNameGenerate.y = "-50"
+	if tonumber(dbNameRace) == 2 then
+		uiNameSexSlider.active = true
+		uiNameGenerate.y = "-65"
+	else
+		uiNameSexSlider.active = false
+	end
+
+	-- Show/Hide sub race slider
+	if tonumber(dbNameRace) == 5 then
+		uiNameSubRaceFirstNameSlider.active = true
+		uiNameSubRaceLastNameSlider.active = true
+		uiNameGenerate.y = "-105"
+	else
+		uiNameSubRaceFirstNameSlider.active = false
+		uiNameSubRaceLastNameSlider.active = false
+	end
+
+	uiNameRaceText.hardtext = tostring(nameRaceType[tonumber(dbNameRace)])
+end
+
+
+local matisF = "Matis " .. (string.lower(tostring(i18n.get("uiCP_Sex_Female")) )):gsub("^%l", string.upper)
+local matisM = "Matis " .. (string.lower(tostring(i18n.get("uiCP_Sex_Male")) )):gsub("^%l", string.upper)
+
+function outgame:procUpdateNameSubRaceFirstNameLabel()
+	local nameSubRaceFirstNameType = { "Fyros", matisM, matisF, "Tryker", "Zoraï" }
+	local uiNameSubRaceFirstNameText = getUI("ui:outgame:appear_name:name_sub_race_first_name_slider:name_race")
+	local dbNameSubRaceFirstName = getDbProp("UI:TEMP:NAME_SUB_RACE_FIRST_NAME")
+
+	uiNameSubRaceFirstNameText.hardtext= tostring(nameSubRaceFirstNameType[tonumber(dbNameSubRaceFirstName)])
+end
+
+function outgame:procUpdateNameSubRaceLastNameLabel()
+	local nameSubRaceLastNameType = { "Fyros", "Matis", "Tryker", "Zoraï" }
+	local uiNameSubRaceLastNameText = getUI("ui:outgame:appear_name:name_sub_race_last_name_slider:name_race")
+	local dbNameSubRaceLastName = getDbProp("UI:TEMP:NAME_SUB_RACE_LAST_NAME")
+
+	uiNameSubRaceLastNameText.hardtext= tostring(nameSubRaceLastNameType[tonumber(dbNameSubRaceLastName)])
+end
 
 ------------------------------------------------------------------------------------------------------------
 -- called to construct icons
 function outgame:activePackElement(id, icon)
-	local uiDesc = getUI("ui:outgame:appear:job_options:options:desc");
-	uiDesc['ico' .. tostring(id)].active= true;
-	uiDesc['ico' .. tostring(id)].texture= icon;
-	uiDesc['ico' .. tostring(id) .. 'txt'].active= true;
+	local uiDesc = getUI("ui:outgame:appear:job_options:options:desc")
+	uiDesc['ico' .. tostring(id)].active = true
+	uiDesc['ico' .. tostring(id)].texture = icon
+	uiDesc['ico' .. tostring(id) .. 'txt'].active = true
 end
 
 
@@ -22,13 +260,13 @@ end
 -- called to construct pack text
 function outgame:setPackJobText(id, spec)
 	-- Set Pack content
-	local uiPackText = getUI("ui:outgame:appear:job_options:options:desc:pack_" .. id);
-	uiPackText.hardtext= "uiCP_Job_" .. id .. tostring(spec);
+	local uiPackText = getUI("ui:outgame:appear:job_options:options:desc:pack_" .. id)
+	uiPackText.hardtext= "uiCP_Job_" .. id .. tostring(spec)
 
 	-- Set specialization text
-	local uiResText = getUI("ui:outgame:appear:job_options:options:result:res");
+	local uiResText = getUI("ui:outgame:appear:job_options:options:result:res")
 	if(spec==2) then
-		uiResText.hardtext= "uiCP_Res_" .. id;
+		uiResText.hardtext= "uiCP_Res_" .. id
 	end
 end
 
@@ -36,65 +274,65 @@ end
 -- called to construct pack
 function outgame:buildActionPack()
 
-	local uiDesc = getUI("ui:outgame:appear:job_options:options:desc");
+	local uiDesc = getUI("ui:outgame:appear:job_options:options:desc")
 	if (uiDesc==nil) then
-		return;
+		return
 	end
 
 	-- Reset All
 	for i = 1,20 do
-		uiDesc['ico' .. tostring(i)].active= false;
-		uiDesc['ico' .. tostring(i) .. 'txt'].active= false;
+		uiDesc['ico' .. tostring(i)].active = false
+		uiDesc['ico' .. tostring(i) .. 'txt'].active = false
 	end
 
 	-- Build Default Combat
-	self:activePackElement(1, 'f1.tga');		-- Dagger
-	self:activePackElement(2, 'f2.tga');		-- Accurate Attack
-	
+	self:activePackElement(1, 'f1.tga')		-- Dagger
+	self:activePackElement(2, 'f2.tga')		-- Accurate Attack
+
 	-- Build Default Magic
-	self:activePackElement(6, 'm2.tga');		-- Gloves
-	self:activePackElement(7, 'm1.tga');		-- Acid
-	
+	self:activePackElement(6, 'm2.tga')		-- Gloves
+	self:activePackElement(7, 'm1.tga')		-- Acid
+
 	-- Build Default Forage
-	self:activePackElement(11, 'g1.tga');	-- Forage Tool
-	self:activePackElement(12, 'g2.tga');	-- Basic Extract
-	
+	self:activePackElement(11, 'g1.tga')	-- Forage Tool
+	self:activePackElement(12, 'g2.tga')	-- Basic Extract
+
 	-- Build Default Craft
-	self:activePackElement(16, 'c2.tga');	-- Craft Tool
-	self:activePackElement(17, 'c1.tga');	-- 50 raw mat
-	self:activePackElement(18, 'c3.tga');	-- Craft Root
-	self:activePackElement(19, 'c4.tga');	-- Boots Plan
+	self:activePackElement(16, 'c2.tga')	-- Craft Tool
+	self:activePackElement(17, 'c1.tga')	-- 50 raw mat
+	self:activePackElement(18, 'c3.tga')	-- Craft Root
+	self:activePackElement(19, 'c4.tga')	-- Boots Plan
 
 	-- Build Option
 	if (getDbProp('UI:TEMP:JOB_FIGHT') == 2) then
-		self:activePackElement(3, 'f3.tga');		-- Increase damage
+		self:activePackElement(3, 'f3.tga')		-- Increase damage
 	elseif (getDbProp('UI:TEMP:JOB_MAGIC') == 2) then
-		self:activePackElement(8, 'm5.tga');		-- Fear
+		self:activePackElement(8, 'm5.tga')		-- Fear
 	elseif (getDbProp('UI:TEMP:JOB_FORAGE') == 2) then
-		self:activePackElement(13, 'g3.tga');	-- Basic Prospection
+		self:activePackElement(13, 'g3.tga')	-- Basic Prospection
 	elseif (getDbProp('UI:TEMP:JOB_CRAFT') == 2) then
-		self:activePackElement(20, 'c6.tga');	-- Gloves Plan
-		self:activePackElement(17, 'c5.tga');	-- Replace 17, with 100x RawMat
+		self:activePackElement(20, 'c6.tga')	-- Gloves Plan
+		self:activePackElement(17, 'c5.tga')	-- Replace 17, with 100x RawMat
 	end
 
 
 	-- Reset Text
-	self:setPackJobText('F', 1);
-	self:setPackJobText('M', 1);
-	self:setPackJobText('G', 1);
-	self:setPackJobText('C', 1);
-	
-	-- Set correct text for specalized version		
+	self:setPackJobText('F', 1)
+	self:setPackJobText('M', 1)
+	self:setPackJobText('G', 1)
+	self:setPackJobText('C', 1)
+
+	-- Set correct text for specalized version
 	if (getDbProp('UI:TEMP:JOB_FIGHT') == 2) then
-		self:setPackJobText('F', 2);
+		self:setPackJobText('F', 2)
 	elseif (getDbProp('UI:TEMP:JOB_MAGIC') == 2) then
-		self:setPackJobText('M', 2);
+		self:setPackJobText('M', 2)
 	elseif (getDbProp('UI:TEMP:JOB_FORAGE') == 2) then
-		self:setPackJobText('G', 2);
+		self:setPackJobText('G', 2)
 	elseif (getDbProp('UI:TEMP:JOB_CRAFT') == 2) then
-		self:setPackJobText('C', 2);
+		self:setPackJobText('C', 2)
 	end
-	
+
 end
 
 
@@ -135,8 +373,8 @@ end
 --function outgame:setPatchProgress(progress)
 --	--debugInfo("*** 3 ***")
 --	local progressPercentText = string.format("%d%%", 100 * progress)
---	local progressPostfix = math.fmod(os.time(), 3)	
---	--debugInfo("Patch in progress : " .. tostring(progress))		
+--	local progressPostfix = math.fmod(os.time(), 3)
+--	--debugInfo("Patch in progress : " .. tostring(progress))
 --	local progressDate = nltime.getLocalTime() / 500
 --	local colValue = math.floor(230 + 24 * math.sin(progressDate))
 --	local color = string.format("%d %d 	%d %d", colValue, colValue, colValue, 255)
@@ -152,7 +390,7 @@ end
 --
 --function outgame:setPatchError()
 --	--debugInfo("*** 5 ***")
---	--debugInfo("Patch error")	
+--	--debugInfo("Patch error")
 --	self:setProgressText(i18n.get("uiBGD_PatchError"), "255 0 0 255", 0)
 --end
 --
@@ -168,9 +406,9 @@ end
 function outgame:launchGame()
 	if not isPlayerSlotNewbieLand(getPlayerSelectedSlot()) then
 		if not isFullyPatched() then
-			messageBoxWithHelp(i18n.get("uiBGD_MainlandCharFullPatchNeeded"), "ui:outgame")		
+			messageBoxWithHelp(i18n.get("uiBGD_MainlandCharFullPatchNeeded"), "ui:outgame")
 			return
 		end
-	end		
+	end
 	runAH(getUICaller(), "proc", "proc_charsel_play")
 end

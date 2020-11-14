@@ -288,14 +288,6 @@ void CChatTargetFilter::setChat(CChatWindow *w)
 //=============================================================================================================
 void CChatTargetFilter::msgEntered(const ucstring &msg, CChatWindow *chatWindow)
 {
-	// Special case for yubo chat
-	if(_TargetGroup==CChatGroup::yubo_chat)
-	{
-		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		pIM->sendStringToYuboChat(msg);
-		return;
-	}
-
 	// Common Target case
 	if (ClientCfg.Local)
 	{

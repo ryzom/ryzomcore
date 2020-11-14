@@ -54,9 +54,9 @@ public:
 	void build(std::vector<TPackedZoneBaseSPtr> &packesZones);
 	bool raytrace(const NLMISC::CVector &start, const NLMISC::CVector &end, NLMISC::CVector &inter, std::vector<NLMISC::CTriangle> *testedTriangles = NULL, NLMISC::CVector *normal = NULL);
 	void getZones(std::vector<TPackedZoneBaseSPtr> &zones);
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 	// just serialize the header, containing name of the zones this CPackedWorld was built from
-	void serialZoneNames(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serialZoneNames(NLMISC::IStream &f);
 	/** Roughly select triangles that are within a convex 2D polygon (world coordinates)
 	  * Selection is not exact, because limited to the resolution of the grid into which is packed each zone.
 	  * Triangle that are within are guaranteed to be selected, however.
@@ -68,7 +68,7 @@ private:
 	public:
 		TPackedZoneBaseSPtr Zone;
 		uint32				RaytraceCounter;
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serialVersion(1);
 			CPackedZoneBase *pz = Zone;
@@ -81,7 +81,7 @@ private:
 	{
 	public:
 		std::vector<uint32> IDs; // make a class from this vector just for serialization
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serialCont(IDs);
 		}

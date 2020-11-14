@@ -377,7 +377,8 @@ namespace NLQT
 		nlinfo("CGeorgesTreeViewDialog::filterRows");
 		CGeorgesFormProxyModel * mp = dynamic_cast<CGeorgesFormProxyModel *>(_ui.treeView->model());
 		CGeorgesFormModel *m = dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
-		if (m) {
+		if (m)
+		{
 			m->setShowParents(_ui.checkBoxParent->isChecked());
 			m->setShowDefaults(_ui.checkBoxDefaults->isChecked());
 		}

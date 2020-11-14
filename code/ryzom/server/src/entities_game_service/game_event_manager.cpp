@@ -59,14 +59,14 @@ CGameEventManager::CGameEventManager()
 // ----------------------------------------------------------------------------
 void CGameEventManager::init()
 {
-	string sFilename = GameEventFile;
+	string sFilename = GameEventFile.get();
 	sFilename = CPath::standardizePath(IService::getInstance()->WriteFilesDirectory) + sFilename;
 
 	if (CFile::fileExists(sFilename))
 	{
-		static CPersistentDataRecord	pdr;
+		static CPersistentDataRecord pdr;
 		pdr.clear();
-		pdr.readFromTxtFile(sFilename.c_str());
+		pdr.readFromTxtFile(sFilename);
 		apply(pdr);
 		createEventChannel();
 	}
@@ -302,13 +302,13 @@ void CGameEventManager::saveGameEventFile()
 {
 	if( _InitOk )
 	{
-		string sFilename = GameEventFile;
+		string sFilename = GameEventFile.get();
 		sFilename = CPath::standardizePath(IService::getInstance()->WriteFilesDirectory) + sFilename;
 		
 		static CPersistentDataRecordRyzomStore	pdr;
 		pdr.clear();
 		store(pdr);
-		pdr.writeToTxtFile(sFilename.c_str());
+		pdr.writeToTxtFile(sFilename);
 	}
 }
 

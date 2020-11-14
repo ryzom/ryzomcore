@@ -47,7 +47,7 @@ public:
 public:
 
 	/// Serial
-	void serial (NLMISC::IStream& f) throw (NLMISC::EStream)
+	void serial (NLMISC::IStream& f)
 	{
 		// Version number
 		(void)f.serialVersion (0);
@@ -83,7 +83,7 @@ class CKeyTCB : public CKey<T>
 public:
 
 	/// Serial
-	void serial (NLMISC::IStream& f) throw (NLMISC::EStream)
+	void serial (NLMISC::IStream& f)
 	{
 		// Version number
 		(void)f.serialVersion (0);
@@ -130,7 +130,7 @@ class CKeyBezier : public CKey<T>
 public:
 
 	/// Serial
-	void serial (NLMISC::IStream& f) throw (NLMISC::EStream)
+	void serial (NLMISC::IStream& f)
 	{
 		// Version number
 		(void)f.serialVersion (0);
@@ -180,7 +180,7 @@ template<> class	CKeyTCB<NLMISC::CAngleAxis> : public CKey<NLMISC::CAngleAxis>
 public:
 
 	/// Serial
-	void serial (NLMISC::IStream& f) throw (NLMISC::EStream)
+	void serial (NLMISC::IStream& f)
 	{
 		// Version number
 		(void)f.serialVersion (0);
@@ -228,7 +228,7 @@ template<> class	CKeyBezier<NLMISC::CQuat> : public CKey<NLMISC::CQuat>
 public:
 
 	/// Serial
-	void serial (NLMISC::IStream& f) throw (NLMISC::EStream)
+	void serial (NLMISC::IStream& f)
 	{
 		// Version number
 		(void)f.serialVersion (0);

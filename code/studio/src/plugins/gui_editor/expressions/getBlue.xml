@@ -1,0 +1,8 @@
+<expression>
+<category>Color</category>
+<name>getBlue</name>
+<variable>false</variable>
+<slots>
+<slot>Color</slot>
+</slots>
+</expression>

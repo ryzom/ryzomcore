@@ -61,11 +61,11 @@ END_MESSAGE_MAP()
 void	CGlobalWindDlg::updateView()
 {
 	float	a;
-	char	str[256];
+	TCHAR	str[256];
 
 	// update Power.
 	a= _ObjViewer->getGlobalWindPower();
-	sprintf(str, "%.2f", a);
+	_stprintf(str, _T("%.2f"), a);
 	StaticPower.SetWindowText(str);
 	NLMISC::clamp(a, 0.f, 1.f);
 	SliderPower.SetPos((sint)(a*NL_GLOBAL_WIND_SLIDER_RANGE));
@@ -113,11 +113,11 @@ void CGlobalWindDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	if( sliderCtrl==&SliderPower && nSBCode==SB_THUMBPOSITION || nSBCode==SB_THUMBTRACK)
 	{
 		float	a;
-		char	str[256];
+		TCHAR	str[256];
 
 		a= (float)nPos / NL_GLOBAL_WIND_SLIDER_RANGE;
 		_ObjViewer->setGlobalWindPower(a);
-		sprintf(str, "%.2f", a);
+		_stprintf(str, _T("%.2f"), a);
 		StaticPower.SetWindowText(str);
 	}
 	else

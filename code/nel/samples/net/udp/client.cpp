@@ -21,6 +21,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/debug.h"
+#include "nel/misc/common.h"
 #include "nel/misc/mem_stream.h"
 #include "nel/misc/time_nl.h"
 #include "nel/misc/config_file.h"
@@ -112,7 +113,7 @@ void exit (const string &reason)
 
 void createConfigFile()
 {
-	FILE *fp = fopen ("client.cfg", "wt");
+	FILE *fp = nlfopen ("client.cfg", "wt");
 	if (fp == NULL)
 	{
 		InfoLog->displayRawNL ("Can't create client.cfg");
@@ -159,7 +160,7 @@ void checkConnectionName ()
 
 void loadConfigFile ()
 {
-	FILE *fp = fopen ("client.cfg", "rt");
+	FILE *fp = nlfopen ("client.cfg", "rt");
 	if (fp == NULL)
 	{
 		createConfigFile();

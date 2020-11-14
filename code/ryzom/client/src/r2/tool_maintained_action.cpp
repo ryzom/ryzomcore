@@ -20,6 +20,10 @@
 #include "editor.h"
 #include "../interface_v3/interface_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace R2
 {
 

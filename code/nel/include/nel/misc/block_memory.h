@@ -132,7 +132,7 @@ public:
 	}
 
 	/// delete an element allocated with this manager. dtor is called. NULL is tested.
-	void			free(T* ptr)
+	void			freeBlock(T* ptr)
 	{
 		if(!ptr)
 			return;

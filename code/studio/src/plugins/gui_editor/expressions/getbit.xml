@@ -1,0 +1,9 @@
+<expression>
+<category>Bits</category>
+<name>getbit</name>
+<variable>false</variable>
+<slots>
+<slot>Integer</slot>
+<slot>Bit</slot>
+</slots>
+</expression>

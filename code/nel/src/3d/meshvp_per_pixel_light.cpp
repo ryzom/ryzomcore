@@ -29,6 +29,9 @@
 #include <string>
 
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -461,17 +464,17 @@ void CVertexProgramPerPixelLight::buildInfo()
 		}
 		else
 		{
-			m_Idx.ViewerPos = ~0;
+			m_Idx.ViewerPos = std::numeric_limits<uint>::max();
 		}
 	}
 	else
 	{
 		// TODO_VP_GLSL
 	}
-	nlassert(m_Idx.StrongestLight != ~0);
+	nlassert(m_Idx.StrongestLight != std::numeric_limits<uint>::max());
 	if (m_FeaturesLighted.SupportSpecular)
 	{
-		nlassert(m_Idx.ViewerPos != ~0);
+		nlassert(m_Idx.ViewerPos !=std::numeric_limits<uint>::max());
 	}
 }
 
@@ -570,7 +573,7 @@ void	CMeshVPPerPixelLight::end(IDriver *drv)
 
 
 //=================================================================================
-void	CMeshVPPerPixelLight::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMeshVPPerPixelLight::serial(NLMISC::IStream &f)
 {
 	(void)f.serialVersion(0);
 	f.serial(SpecularLighting);

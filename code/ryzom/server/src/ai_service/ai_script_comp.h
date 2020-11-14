@@ -51,14 +51,12 @@ public:
 	{}
 	virtual ~CFightScriptCompReader()
 	{}
-	virtual	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException) = 0;
+	virtual	CFightScriptComp	*create	(const	std::string	&inStr) = 0;
 	virtual	std::string	getName	()	const =0;
 
-	static	CFightScriptCompReader	*getScriptReader	(const std::string &str) throw (ReadFightActionException);
+	static	CFightScriptCompReader	*getScriptReader	(const std::string &str);
 	
-	static	CFightScriptComp	*createScriptComp	(const std::string &str)	throw	(ReadFightActionException);
-protected:
-private:
+	static	CFightScriptComp	*createScriptComp(const std::string &str);
 };
 
 
@@ -74,8 +72,6 @@ public:
 	typedef	CHashMap<std::string, NLMISC::CSmartPtr<CFightScriptCompReader> >	TFightScriptMap;
 
 	static	TFightScriptMap	_ScriptCompList;
-protected:	
-private:
 };
 
 
@@ -116,7 +112,7 @@ public:
 	CFightSelectFilterReader()			{}
 	virtual ~CFightSelectFilterReader()	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException);
+	CFightScriptComp	*create(const	std::string	&inStr);
 	std::string	getName	()	const
 	{
 		return	std::string("SELECT");

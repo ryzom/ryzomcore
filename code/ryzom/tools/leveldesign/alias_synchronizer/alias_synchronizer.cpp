@@ -302,7 +302,7 @@ struct TSetLastFolder
 		if (!folders.empty())
 			str = folders.back();
 		else
-			str = "";
+			str.clear();
 	}
 };
 
@@ -390,7 +390,7 @@ int main()
 	// add the search paths
 	for (uint i=0; i<paths.size(); ++i)
 	{
-		CPath::addSearchPath(paths.asString(i), true, false);
+		CPath::addSearchPath(NLMISC::expandEnvironmentVariables(paths.asString(i)), true, false);
 	}
 
 	// init ligo

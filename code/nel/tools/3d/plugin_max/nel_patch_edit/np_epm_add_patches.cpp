@@ -24,7 +24,7 @@ static void AddPatches(int type, PatchMesh *patch, RPatchMesh *rpatch, BOOL post
 	int edges = patch->getNumEdges();
 
 	if (type==PATCH_TRI)
-		MessageBox (NULL, "Rykol tools", "C'est pas cool les tripatches...", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (NULL, _T("Rykol tools"), _T("C'est pas cool les tripatches..."), MB_OK|MB_ICONEXCLAMATION);
 
 	// Add a patch of the desired type to each selected edge that doesn't have two patches atatched!
 	for (int i = 0; i < edges; ++i)
@@ -393,7 +393,7 @@ void EditPatchMod::DoPatchAdd(int type)
 		{
 			altered = holdNeeded = 1;
 			if (theHold.Holding())
-				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "DoPatchAdd"));
+				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("DoPatchAdd")));
 			// Call the patch add function
 			AddPatches(type, patch, rpatch, TRUE);
 			patchData->UpdateChanges(patch, rpatch);

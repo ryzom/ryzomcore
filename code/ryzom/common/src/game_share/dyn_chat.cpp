@@ -17,6 +17,10 @@
 #include "stdpch.h"
 #include "dyn_chat.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLMISC;
 
 NL_INSTANCE_COUNTER_IMPL(CDynChatSession);

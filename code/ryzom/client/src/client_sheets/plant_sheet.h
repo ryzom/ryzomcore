@@ -86,7 +86,7 @@ public:
 	/// Build the sheet from an external script.
 	virtual void build(const NLGEORGES::UFormElm &item, NLMISC::CSheetId parentId, const std::string &prefix);
 	/// Serialize sheet into binary data file.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 };
 
 /**
@@ -105,7 +105,7 @@ public:
 		/// Build the sheet from an external script.
 		virtual void build(const NLGEORGES::UFormElm &item);
 		/// Serialize plant sheet into binary data file.
-		virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+		virtual void serial(NLMISC::IStream &f);
 	//@}
 
 	// Get the shape name of this plant

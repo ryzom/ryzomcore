@@ -278,6 +278,7 @@
   <key name="KeyB" action="show_hide" params="phrase_book" /> 
   <key name="N/A" action="show_hide" params="gestionsets" /> 
   <key name="KeyP" shift="1" action="show_hide" params="animal_global" /> 
+  <key name="N/A" action="inv_temp_all" params="" />
   
   
   <!--  Map

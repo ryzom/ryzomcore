@@ -20,6 +20,10 @@
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -57,7 +61,7 @@ namespace NLGUI
 			{
 				if( editorMode )
 				{
-					CWidgetManager::getInstance()->setCurrentEditorSelection( getId() );
+					CWidgetManager::getInstance()->selectWidget( getId() );
 					return true;
 				}
 			}

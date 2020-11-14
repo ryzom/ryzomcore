@@ -133,7 +133,7 @@ void EditPatchMod::DoPatchDetach(int copy, int reorient)
 			// Save the unmodified info.
 			if (theHold.Holding())
 			{
-				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "DoPatchDetach"));
+				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("DoPatchDetach")));
 				}
 			PatchMesh wpatch = *patch;
 			RPatchMesh wrpatch = *rpatch;

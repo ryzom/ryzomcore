@@ -55,7 +55,7 @@ namespace NL3D
 void	CMeshMRMGeom::applySkin(CLod &lod, const CSkeletonModel *skeleton)
 {
 	nlassert(_Skinned);
-	if(_SkinWeights.size()==0)
+	if(_SkinWeights.empty())
 		return;
 
 	// get vertexPtr.

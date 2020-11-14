@@ -28,6 +28,8 @@
 #include "nel/3d/shadow_map_manager.h"
 #include "nel/3d/u_scene.h"
 #include "nel/3d/vertex_program.h"
+#include "nel/3d/transform.h"
+
 #include <vector>
 
 
@@ -139,7 +141,7 @@ public:
 	 * \param renderPart : The part of the scene that must be rendered
 	 * \param newRender true If scene render is beginning. Otherwise other parts of the scene have already been rendered.
 	 */
-	void				traverse(UScene::TRenderPart renderPart, bool newRender);
+	void				traverse(UScene::TRenderPart renderPart, bool newRender, bool generateShadows);
 	//@}
 
 	/// \name RenderList.

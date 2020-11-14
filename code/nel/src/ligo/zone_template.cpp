@@ -15,8 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdligo.h"
-#include "zone_template.h"
-#include "ligo_error.h"
+#include "nel/ligo/zone_template.h"
+#include "nel/ligo/ligo_error.h"
 #include "nel/ligo/ligo_config.h"
 
 #include "nel/misc/stream.h"

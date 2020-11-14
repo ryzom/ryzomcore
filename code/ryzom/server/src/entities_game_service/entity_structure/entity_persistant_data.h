@@ -57,8 +57,8 @@ public:
 	static inline uint16 getCurrentVersion(){ return 6; }
 
 	// serial: reading off-mirror, writing from mirror
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
-	void serialXml(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
+	void serialXml(NLMISC::IStream &f);
 	
 
 	// Entity state ( X, Y, Z,T )

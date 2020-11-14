@@ -460,6 +460,7 @@ void CPlayerManager::addClientCallback()
 		{ "SET_PLAYER_SEASON",					cbSetPlayerSeason		}, // from DSS
 
 		{ "TELEPORT_PLAYER",					cbTeleportPlayer		}, // from AIS
+		{ "TRIGGER_WEBIG",						cbTriggerWebig			}, // from AIS
 		
 		{ "SET_CHAR_AIINSTANCE",			cbSetCharacterAIInstance},
 
@@ -846,7 +847,7 @@ void CPlayerManager::savePlayerCharRecurs( uint32 userId, sint32 idx, std::set<C
 				}
 				{
 					H_AUTO(SavePlayerPDRSave);
-					pdr.writeToFile(pdrPathFileName.c_str());
+					pdr.writeToFile(pdrPathFileName);
 				}
 			}
 			catch(const Exception &)
@@ -2380,7 +2381,7 @@ void CPlayerManager::broadcastMessageUpdate()
 		else if( _Stall == true )
 		{
 			forceDisconnectUserWithoutPrivileges();
-			broadcastMessage( 2, 0, 5, "Technical problem occured on the server,");
+			broadcastMessage( 2, 0, 5, "Technical problem occurred on the server,");
 			broadcastMessage( 2, 0, 5, "All non administrator accounts are disconnected immediately.");
 			broadcastMessage( 2, 0, 5, "Customer Support is already working on it.");
 			broadcastMessage( 2, 0, 5, "Sorry for any inconveniences.");

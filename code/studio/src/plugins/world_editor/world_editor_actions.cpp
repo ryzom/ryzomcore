@@ -41,6 +41,10 @@
 #include <QGraphicsView>
 #include <QPersistentModelIndex>
 
+// libxml
+#include <libxml/xmlstring.h>
+#include <libxml/tree.h>
+
 namespace WorldEditor
 {
 

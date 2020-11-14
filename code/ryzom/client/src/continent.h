@@ -126,15 +126,12 @@ public:
 	/// Get user landmark color
 	NLMISC::CRGBA	getColor () const;
 
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial(Pos, Title, Type);
 	}
 
 };
-
-const uint	STANDARD_NUM_USER_LANDMARKS = 256; // not counting bonus landmarks
-
 
 /**
  * Class to manage the fog of war over a continent

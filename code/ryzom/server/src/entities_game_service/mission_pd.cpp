@@ -328,7 +328,7 @@ void							CActiveStepPD::pds__fetch(RY_PDS::CPData &data)
 		if (rowIndex == RY_PDS::INVALID_ROW_INDEX || tableIndex == RY_PDS::INVALID_TABLE_INDEX)	break;
 		uint32	__k;
 		data.serial(__k);
-		_States.insert(std::make_pair<uint32,CActiveStepStatePD>(__k, CActiveStepStatePD()));
+		_States.insert(std::pair<uint32,CActiveStepStatePD>(__k, CActiveStepStatePD()));
 		CActiveStepStatePD*	__o = &(_States[__k]);
 		PDSLib.setRowIndex(rowIndex, __o);
 		__o->pds__fetch(data);
@@ -2353,7 +2353,7 @@ void							CMissionPD::pds__fetch(RY_PDS::CPData &data)
 		if (rowIndex == RY_PDS::INVALID_ROW_INDEX || tableIndex == RY_PDS::INVALID_TABLE_INDEX)	break;
 		uint32	__k;
 		data.serial(__k);
-		_Steps.insert(std::make_pair<uint32,CActiveStepPD>(__k, CActiveStepPD()));
+		_Steps.insert(std::pair<uint32,CActiveStepPD>(__k, CActiveStepPD()));
 		CActiveStepPD*	__o = &(_Steps[__k]);
 		PDSLib.setRowIndex(rowIndex, __o);
 		__o->pds__fetch(data);
@@ -2367,7 +2367,7 @@ void							CMissionPD::pds__fetch(RY_PDS::CPData &data)
 		if (rowIndex == RY_PDS::INVALID_ROW_INDEX || tableIndex == RY_PDS::INVALID_TABLE_INDEX)	break;
 		uint32	__k;
 		data.serial(__k);
-		_Compass.insert(std::make_pair<uint32,CMissionCompassPD>(__k, CMissionCompassPD()));
+		_Compass.insert(std::pair<uint32,CMissionCompassPD>(__k, CMissionCompassPD()));
 		CMissionCompassPD*	__o = &(_Compass[__k]);
 		PDSLib.setRowIndex(rowIndex, __o);
 		__o->pds__fetch(data);
@@ -2381,7 +2381,7 @@ void							CMissionPD::pds__fetch(RY_PDS::CPData &data)
 		if (rowIndex == RY_PDS::INVALID_ROW_INDEX || tableIndex == RY_PDS::INVALID_TABLE_INDEX)	break;
 		uint32	__k;
 		data.serial(__k);
-		_StepsDone.insert(std::make_pair<uint32,CDoneStepPD>(__k, CDoneStepPD()));
+		_StepsDone.insert(std::pair<uint32,CDoneStepPD>(__k, CDoneStepPD()));
 		CDoneStepPD*	__o = &(_StepsDone[__k]);
 		PDSLib.setRowIndex(rowIndex, __o);
 		__o->pds__fetch(data);
@@ -2395,7 +2395,7 @@ void							CMissionPD::pds__fetch(RY_PDS::CPData &data)
 		if (rowIndex == RY_PDS::INVALID_ROW_INDEX || tableIndex == RY_PDS::INVALID_TABLE_INDEX)	break;
 		uint32	__k;
 		data.serial(__k);
-		_Teleports.insert(std::make_pair<uint32,CMissionTeleportPD>(__k, CMissionTeleportPD()));
+		_Teleports.insert(std::pair<uint32,CMissionTeleportPD>(__k, CMissionTeleportPD()));
 		CMissionTeleportPD*	__o = &(_Teleports[__k]);
 		PDSLib.setRowIndex(rowIndex, __o);
 		__o->pds__fetch(data);
@@ -2409,7 +2409,7 @@ void							CMissionPD::pds__fetch(RY_PDS::CPData &data)
 		if (rowIndex == RY_PDS::INVALID_ROW_INDEX || tableIndex == RY_PDS::INVALID_TABLE_INDEX)	break;
 		uint32	__k;
 		data.serial(__k);
-		_InsidePlaces.insert(std::make_pair<uint32,CMissionInsidePlacePD>(__k, CMissionInsidePlacePD()));
+		_InsidePlaces.insert(std::pair<uint32,CMissionInsidePlacePD>(__k, CMissionInsidePlacePD()));
 		CMissionInsidePlacePD*	__o = &(_InsidePlaces[__k]);
 		PDSLib.setRowIndex(rowIndex, __o);
 		__o->pds__fetch(data);
@@ -2423,7 +2423,7 @@ void							CMissionPD::pds__fetch(RY_PDS::CPData &data)
 		if (rowIndex == RY_PDS::INVALID_ROW_INDEX || tableIndex == RY_PDS::INVALID_TABLE_INDEX)	break;
 		uint32	__k;
 		data.serial(__k);
-		_OutsidePlaces.insert(std::make_pair<uint32,CMissionOutsidePlacePD>(__k, CMissionOutsidePlacePD()));
+		_OutsidePlaces.insert(std::pair<uint32,CMissionOutsidePlacePD>(__k, CMissionOutsidePlacePD()));
 		CMissionOutsidePlacePD*	__o = &(_OutsidePlaces[__k]);
 		PDSLib.setRowIndex(rowIndex, __o);
 		__o->pds__fetch(data);
@@ -2437,7 +2437,7 @@ void							CMissionPD::pds__fetch(RY_PDS::CPData &data)
 		if (rowIndex == RY_PDS::INVALID_ROW_INDEX || tableIndex == RY_PDS::INVALID_TABLE_INDEX)	break;
 		uint32	__k;
 		data.serial(__k);
-		_HandledAIGroups.insert(std::make_pair<uint32,CHandledAIGroupPD>(__k, CHandledAIGroupPD()));
+		_HandledAIGroups.insert(std::pair<uint32,CHandledAIGroupPD>(__k, CHandledAIGroupPD()));
 		CHandledAIGroupPD*	__o = &(_HandledAIGroups[__k]);
 		PDSLib.setRowIndex(rowIndex, __o);
 		__o->pds__fetch(data);
@@ -3276,7 +3276,7 @@ void							CMissionContainerPD::pds__fetch(RY_PDS::CPData &data)
 		uint32	__k;
 		data.serial(__k);
 		CMissionPD*	__o = static_cast<CMissionPD*>(PDSLib.create(tableIndex));
-		_Missions.insert(std::make_pair<uint32,CMissionPD*>(__k, __o));
+		_Missions.insert(std::pair<uint32,CMissionPD*>(__k, __o));
 		PDSLib.setRowIndex(rowIndex, __o);
 		__o->pds__fetch(data);
 		__o->pds__setParentUnnotified(this);

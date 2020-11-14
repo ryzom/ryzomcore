@@ -39,6 +39,16 @@ namespace NLGUI
 	class CGroupParagraph;
 
 	/**
+	 * Interface for UI scale change event
+	 */
+	class IInterfaceScaleWatcher
+	{
+		public:
+			virtual ~IInterfaceScaleWatcher(){}
+			virtual void onInterfaceScaleChanged()=0;
+	};
+
+	/**
 	 * A visitor to walk a tree of interface elements and apply a teartment on them.
 	 *
 	 * For each vsited element, visitElement() is called
@@ -66,7 +76,7 @@ namespace NLGUI
 	 * \author Nevrax France
 	 * \date 2002
 	 */
-	class CInterfaceElement : public CReflectableRefPtrTarget, public NLMISC::IStreamable
+	class CInterfaceElement : public IInterfaceScaleWatcher, public CReflectableRefPtrTarget, public NLMISC::IStreamable
 	{
 	public:
 
@@ -74,9 +84,9 @@ namespace NLGUI
 		class IDeletionWatcher
 		{
 		public:
-			IDeletionWatcher(){}
-			virtual ~IDeletionWatcher(){}
-			virtual void onDeleted( const std::string &name ){}
+			IDeletionWatcher() {}
+			virtual ~IDeletionWatcher() {}
+			virtual void onDeleted( const std::string &/* name */) {}
 		};
 
 		enum EStrech
@@ -94,6 +104,7 @@ namespace NLGUI
 			_XReal = _YReal = _WReal = _HReal = 0;
 			_X = _Y = _W = _H = 0;
 			//_Snap = 1;
+			_MarginLeft = 0;
 
 			_PosRef = Hotspot_BL;
 			_ParentPosRef = Hotspot_BL;
@@ -117,6 +128,7 @@ namespace NLGUI
 			editorSelected = false;
 
 			serializable = true;
+			_EditorSelectable = true;
 		}
 
 		// dtor
@@ -177,6 +189,12 @@ namespace NLGUI
 		sint32 getH() const { return (_Active?_H:0); }
 		sint32 getH(bool bTestActive) const { return (bTestActive?(_Active?_H:0):_H); }
 
+		void   setMarginLeft(sint32 m) { _MarginLeft = m; }
+		sint32 getMarginLeft() const { return _MarginLeft; }
+
+		// Return inner width for child elements
+		virtual sint32 getInnerWidth() const;
+
 		/**
 		  * Get the max width used by the window.
 		  *
@@ -232,6 +250,9 @@ namespace NLGUI
 		void setParentSize (CInterfaceElement *pIG) { _ParentSize = pIG; }
 
 		virtual void setActive (bool state);
+
+		void setXReal( sint32 x ){ _XReal = x; }
+		void setYReal( sint32 y ){ _YReal = y; }
 
 		void setX (sint32 x) { _X = x; }
 		void setXAndInvalidateCoords (sint32 x) { _X = x; invalidateCoords(); }
@@ -398,6 +419,10 @@ namespace NLGUI
 		 */
 		virtual void	onInvalidateContent() {}
 
+		/* Element UI scale change event callback
+		 */
+		virtual void	onInterfaceScaleChanged() {}
+
 		// called by interfaceManager for master window only
 		void			resetInvalidCoords();
 
@@ -488,8 +513,12 @@ namespace NLGUI
 		void setEditorSelected( bool b ){ editorSelected = b; }
 		bool isEditorSelected() const{ return editorSelected; }
 
+		void parsePosParent( const std::string &id );
 		void setPosParent( const std::string &id );
+		void getPosParent( std::string &id ) const;
+		void parseSizeParent( const std::string &id );
 		void setSizeParent( const std::string &id );
+		void getSizeParent( std::string &id ) const;
 		
 		void setSerializable( bool b ){ serializable = b; }
 		bool IsSerializable() const{ return serializable; }
@@ -505,11 +534,35 @@ namespace NLGUI
 
 		/// Called when the widget is deleted,
 		/// so other widgets in the group can check if it belongs to them
-		virtual void onWidgetDeleted( CInterfaceElement *e ){}
+		virtual void onWidgetDeleted( CInterfaceElement *e );
+
+		/// Move the element by x in the X direction and y in the Y direction
+		//  Uses real coordinates
+		virtual void moveBy( sint32 x, sint32 y )
+		{
+			_XReal += x;
+			_YReal += y;
+		}
+
+		/// Retrieves the coordinates of the specified hotspot
+		void getHSCoords( const THotSpot &hs, sint32 &x, sint32 &y ) const;
+
+		/// Tells which hotspot is the closest to the specified element
+		void getClosestHotSpot( const CInterfaceElement *other, THotSpot &hs );
+
+		/// Aligns the element to the other element specified
+		void alignTo( CInterfaceElement *other );
+
+		/// Specifies if the widget can be selected in the editor
+		void setEditorSelectable( bool b ){ _EditorSelectable = b; }
+
+		/// Tells if the widget can be selected in the editor
+		bool isEditorSelectable() const{ return _EditorSelectable; }
 
 	protected:
 
 		bool editorSelected;
+		bool _EditorSelectable;
 
 		static bool editorMode;
 
@@ -535,6 +588,8 @@ namespace NLGUI
 		sint32 _Y;
 		sint32 _W;
 		sint32 _H;
+
+		sint32 _MarginLeft;
 
 		//sint32 _Snap;
 

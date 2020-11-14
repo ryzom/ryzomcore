@@ -70,26 +70,22 @@ END_MESSAGE_MAP()
 void	CVegetableWindDlg::updateView()
 {
 	float	a;
-	char	str[256];
 
 	// update Power.
 	a= _ObjViewer->getVegetableWindPower();
-	sprintf(str, "%.2f", a);
-	StaticPower.SetWindowText(str);
+	StaticPower.SetWindowText(utf8ToTStr(NLMISC::toString("%.2f", a)));
 	NLMISC::clamp(a, 0, NL_VEGETABLE_EDIT_WIND_MAX_POWER);
 	SliderPower.SetPos((sint)(a*NL_VEGETABLE_EDIT_WIND_SLIDER_RANGE / NL_VEGETABLE_EDIT_WIND_MAX_POWER));
 
 	// update BendStart.
 	a= _ObjViewer->getVegetableWindBendStart();
-	sprintf(str, "%.2f", a);
-	StaticBendStart.SetWindowText(str);
+	StaticBendStart.SetWindowText(utf8ToTStr(NLMISC::toString("%.2f", a)));
 	NLMISC::clamp(a, 0, NL_VEGETABLE_EDIT_WIND_MAX_BENDSTART);
 	SliderBendStart.SetPos((sint)(a*NL_VEGETABLE_EDIT_WIND_SLIDER_RANGE / NL_VEGETABLE_EDIT_WIND_MAX_BENDSTART));
 
 	// update Frequency.
 	a= _ObjViewer->getVegetableWindFrequency();
-	sprintf(str, "%.2f", a);
-	StaticFrequency.SetWindowText(str);
+	StaticFrequency.SetWindowText(utf8ToTStr(NLMISC::toString("%.2f", a)));
 	NLMISC::clamp(a, 0, NL_VEGETABLE_EDIT_WIND_MAX_FREQUENCY);
 	SliderFrequency.SetPos((sint)(a*NL_VEGETABLE_EDIT_WIND_SLIDER_RANGE / NL_VEGETABLE_EDIT_WIND_MAX_FREQUENCY));
 
@@ -129,28 +125,24 @@ void CVegetableWindDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 		&& nSBCode==SB_THUMBPOSITION || nSBCode==SB_THUMBTRACK)
 	{
 		float	a;
-		char	str[256];
 		if(sliderCtrl == &SliderPower)
 		{
 			a= (float)nPos * NL_VEGETABLE_EDIT_WIND_MAX_POWER / NL_VEGETABLE_EDIT_WIND_SLIDER_RANGE;
 			_ObjViewer->setVegetableWindPower(a);
-			sprintf(str, "%.2f", a);
-			StaticPower.SetWindowText(str);
+			StaticPower.SetWindowText(utf8ToTStr(NLMISC::toString("%.2f", a)));
 		}
 		else if(sliderCtrl == &SliderBendStart)
 		{
 			a= (float)nPos * NL_VEGETABLE_EDIT_WIND_MAX_BENDSTART / NL_VEGETABLE_EDIT_WIND_SLIDER_RANGE;
 			_ObjViewer->setVegetableWindBendStart(a);
-			sprintf(str, "%.2f", a);
-			StaticBendStart.SetWindowText(str);
+			StaticBendStart.SetWindowText(utf8ToTStr(NLMISC::toString("%.2f", a)));
 		}
 		else if(sliderCtrl == &SliderFrequency)
 		{
 		
 			a= (float)nPos * NL_VEGETABLE_EDIT_WIND_MAX_FREQUENCY / NL_VEGETABLE_EDIT_WIND_SLIDER_RANGE;
 			_ObjViewer->setVegetableWindFrequency(a);
-			sprintf(str, "%.2f", a);
-			StaticFrequency.SetWindowText(str);
+			StaticFrequency.SetWindowText(utf8ToTStr(NLMISC::toString("%.2f", a)));
 		}
 	}
 	else

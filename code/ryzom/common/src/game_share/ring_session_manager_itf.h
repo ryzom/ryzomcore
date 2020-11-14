@@ -1666,12 +1666,11 @@ namespace RSMGR
 			sf_shard28 = 1<<28,
 			sf_shard29 = 1<<29,
 			sf_shard30 = 1<<30,
-			sf_shard31 = 1<<31,
 
 			invalid_val,
 
 			/// Number of enumerated values
-			nb_enum_items = 32
+			nb_enum_items = 31
 		};
 
 
@@ -1709,7 +1708,6 @@ namespace RSMGR
 				NL_STRING_CONVERSION_TABLE_ENTRY(sf_shard28)
 				NL_STRING_CONVERSION_TABLE_ENTRY(sf_shard29)
 				NL_STRING_CONVERSION_TABLE_ENTRY(sf_shard30)
-				NL_STRING_CONVERSION_TABLE_ENTRY(sf_shard31)
 				NL_STRING_CONVERSION_TABLE_ENTRY(invalid_val)
 			};
 			static NLMISC::CStringConversion<TValues>
@@ -2395,7 +2393,7 @@ namespace RSMGR
 	protected:
 
 		/// the callback server adaptor
-		std::auto_ptr<ICallbackServerAdaptor>	_CallbackServer;
+		CUniquePtr<ICallbackServerAdaptor>	_CallbackServer;
 
 		void getCallbakArray(NLNET::TCallbackItem *&arrayPtr, uint32 &arraySize)
 		{
@@ -2466,12 +2464,12 @@ namespace RSMGR
 			if (replacementAdaptor == NULL)
 			{
 				// use default callback server
-				_CallbackServer = std::auto_ptr<ICallbackServerAdaptor>(new CNelCallbackServerAdaptor(this));
+				_CallbackServer = CUniquePtr<ICallbackServerAdaptor>(new CNelCallbackServerAdaptor(this));
 			}
 			else
 			{
 				// use the replacement one
-				_CallbackServer = std::auto_ptr<ICallbackServerAdaptor>(replacementAdaptor);
+				_CallbackServer = CUniquePtr<ICallbackServerAdaptor>(replacementAdaptor);
 			}
 		}
 
@@ -3860,7 +3858,7 @@ namespace RSMGR
 	protected:
 
 		/// the callback client adaptor
-		std::auto_ptr < ICallbackClientAdaptor >	_CallbackClient;
+		CUniquePtr < ICallbackClientAdaptor >	_CallbackClient;
 
 
 		void getCallbakArray(NLNET::TCallbackItem *&arrayPtr, uint32 &arraySize)
@@ -3924,12 +3922,12 @@ namespace RSMGR
 			if (adaptorReplacement == NULL)
 			{
 				// use the default Nel adaptor
-				_CallbackClient = std::auto_ptr < ICallbackClientAdaptor >(new CNelCallbackClientAdaptor(this));
+				_CallbackClient = CUniquePtr < ICallbackClientAdaptor >(new CNelCallbackClientAdaptor(this));
 			}
 			else
 			{
 				// use the replacement one
-				_CallbackClient = std::auto_ptr < ICallbackClientAdaptor >(adaptorReplacement);
+				_CallbackClient = CUniquePtr < ICallbackClientAdaptor >(adaptorReplacement);
 			}
 		}
 

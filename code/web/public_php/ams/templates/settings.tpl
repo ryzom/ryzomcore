@@ -323,6 +323,57 @@
 			</div>
 			</div>
 		</div><!--/span-->
+		
+		{if $permission == '3'}
+		<div class="col-sm-4 js-masonry-item">
+		<div class="panel panel-default">
+			<div class="panel-heading" data-original-title="">
+				<span class="icon-th"></span> User Registration
+			</div>
+			<div class="panel-body">
+				<div class="row-fluid">
+					<form id="userRegistration" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
+						<legend>User Registration</legend>
+
+						<div class="control-group gender-list">
+							<div class="controls">
+								<label class="radio">
+								      <div id="uniform-optionsRadios2" class="radio"><span class="{if isset($userRegistration) and $userRegistration eq 0}checked{/if}"><input name="userRegistration" id="optionsRadios0" value="0" {if isset($userRegistration) and $userRegistration eq 0}checked=""{/if} type="radio"></span></div>
+								      In-Game and Web Registration
+								</label>
+								<div style="clear:both"></div>
+								<label class="radio">
+									<div id="uniform-optionsRadios1" class="radio"><span class="{if isset($userRegistration) and $userRegistration eq 1}checked{/if}"><input name="userRegistration" id="optionsRadios1" value="1" {if isset($userRegistration) and $userRegistration eq 1}checked=""{/if} type="radio"></span></div>
+									In-Game Registration Only
+								</label>
+								<div style="clear:both"></div>
+								<label class="radio">
+								      <div id="uniform-optionsRadios2" class="radio"><span class="{if isset($userRegistration) and $userRegistration eq 2}checked{/if}"><input name="userRegistration" id="optionsRadios2" value="2" {if isset($userRegistration) and $userRegistration eq 2}checked=""{/if} type="radio"></span></div>
+								      Web Registration Only
+								</label>
+								<div style="clear:both"></div>
+								<label class="radio">
+								      <div id="uniform-optionsRadios2" class="radio"><span class="{if isset($userRegistration) and $userRegistration eq 3}checked{/if}"><input name="userRegistration" id="optionsRadios2" value="3" {if isset($userRegistration) and $userRegistration eq 3}checked=""{/if} type="radio"></span></div>
+								      No Registration
+								</label>
+							</div>
+						</div>
+
+						<input type="hidden" name="function" value="userRegistration">
+						<input type="hidden" name="target_id" value="{$target_id}">
+						<div class="control-group">
+							<label class="control-label"></label>
+							<div class="controls">
+								<button type="submit" class="btn btn-primary" style="margin-left:5px;">Change Setting</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+			</div>
+		</div><!--/span-->
+		{/if}
+		
 	</div><!--/row-->
 
 	<script src="js/masonry.pkgd.min.js"></script>

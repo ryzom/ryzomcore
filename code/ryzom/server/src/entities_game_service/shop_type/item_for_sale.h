@@ -83,7 +83,7 @@ public:
 	virtual void setContinent( CONTINENT::TContinent continent ) = 0;
 
 //	// serial
-//	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream ) = 0;
+//	virtual void serial(NLMISC::IStream &f) = 0;
 
 	// set item for sale
 	virtual void itemForSale( uint32 price, uint32 retirePrice, CGameItemPtr item, uint32 quantity, const NLMISC::CEntityId& id, CONTINENT::TContinent continent, uint32 identifier ) = 0;
@@ -190,7 +190,7 @@ public:
 	void itemForSale( uint32 price, uint32 retirePrice, CGameItemPtr item, uint32 quantity, const NLMISC::CEntityId& id, CONTINENT::TContinent continent, uint32 identifier );
 
 	// serial
-//	void serial(NLMISC::IStream &f) throw(NLMISC::EStream );
+//	void serial(NLMISC::IStream &f);
 
 	// cast operator
 //	const IItemTrade * operator = ( CItemForSale * i ) const { return (IItemTrade *) i; }
@@ -312,7 +312,7 @@ public:
 	void setContinent( CONTINENT::TContinent ) {}
 	
 	// serial
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream ) {}
+	void serial(NLMISC::IStream &f) {}
 
 	// set item for sale
 	void itemForSale( uint32 price, uint32 retirePrice, CGameItemPtr item, uint32 quantity, const NLMISC::CEntityId& id, CONTINENT::TContinent continent, uint32 identifier ) {}

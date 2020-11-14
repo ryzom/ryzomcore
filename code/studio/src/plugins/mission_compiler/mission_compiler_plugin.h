@@ -83,6 +83,12 @@ public:
     virtual void open() {}
 
 
+    void onActivated()
+    {
+        m_missionCompilerMainWindow->onActivated();
+    }
+
+
 	MissionCompilerMainWindow *m_missionCompilerMainWindow;
 };
 

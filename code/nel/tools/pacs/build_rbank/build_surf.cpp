@@ -201,8 +201,7 @@ template<class A>
 class CHashPtr
 {
 public:
-	static const size_t bucket_size = 4;
-	static const size_t min_buckets = 8;
+	enum { bucket_size = 4, min_buckets = 8, };
 
 	typedef	A	*ptrA;
 	size_t	operator() (const ptrA &a) const
@@ -672,7 +671,7 @@ bool	NLPACS::CComputableSurface::checkConsistency()
 		CComputableSurfaceBorder&	border = (*BorderKeeper)[BorderIds[i]];
 		
 		for (j=0; j+1<border.Vertices.size(); ++j)
-			edges.push_back(std::make_pair<NLMISC::CVectorD, NLMISC::CVectorD>(border.Vertices[j], border.Vertices[j+1]));
+			edges.push_back(std::make_pair(border.Vertices[j], border.Vertices[j+1]));
 	}
 
 	for (i=0; i+1<edges.size(); ++i)
@@ -1421,7 +1420,7 @@ void	NLPACS::CZoneTessellation::compile()
 
 				bool	force = false;
 
-				if (surf.Area < 30.0f && surf.Elements.size() > 0)
+				if (surf.Area < 30.0f && !surf.Elements.empty())
 				{
 					uint		i;
 					CAABBox		aabbox;
@@ -1689,7 +1688,7 @@ CAABBox	NLPACS::CZoneTessellation::computeBBox() const
 	bool		set = false;
 	uint		i;
 
-	if (_Vertices.size() == 0)
+	if (_Vertices.empty())
 		return zbox;
 
 	zbox.setCenter(_Vertices[0]);

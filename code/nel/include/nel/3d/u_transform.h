@@ -32,6 +32,7 @@ using NLMISC::CQuat;
 
 class	ILogicInfo;
 class	CCluster;
+class ITransformable;
 
 // ***************************************************************************
 /**

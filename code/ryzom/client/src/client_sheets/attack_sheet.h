@@ -57,7 +57,7 @@ public:
 	// ctor
 	CAttackSheet();
 	virtual void build(const NLGEORGES::UFormElm &item, const std::string &prefix);
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 };
 
 

@@ -71,5 +71,6 @@ namespace std
 #endif
 
 #include "nel/misc/bsphere.h"
+#include "nel/misc/path.h"
 
 #endif

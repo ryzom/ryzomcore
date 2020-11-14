@@ -103,7 +103,7 @@ UPrimitiveBlock *UPrimitiveBlock::createPrimitiveBlock(NLMISC::IStream &src)
 {
 
 	nlassert(src.isReading());
-	std::auto_ptr<CPrimitiveBlock> pb(new CPrimitiveBlock);
+	CUniquePtr<CPrimitiveBlock> pb(new CPrimitiveBlock);
 	pb->serial(src);
 	return pb.release();
 }

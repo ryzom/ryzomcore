@@ -57,7 +57,7 @@ public:
 	void		setSInt(sint value);
 	void		setUInt(uint value);
 	void		setFloat(float value);
-	void	    setString(const char *value);
+	void	    setString(const TCHAR *value);
 
 
 // Overrides

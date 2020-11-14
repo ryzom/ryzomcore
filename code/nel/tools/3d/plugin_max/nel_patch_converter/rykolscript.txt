@@ -261,6 +261,6 @@ If file0 doesn't exist the function return true
 If date (file0) <= date (file1) the function return true
 If date (file0) > date (file1) the function return false
 If file1 doesn't exist the function return undefined
-If an error occured, the function return undefined
+If an error occurred, the function return undefined
 
 **********************************************

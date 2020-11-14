@@ -33,7 +33,7 @@ bool CGroundFXSheet::build(const NLGEORGES::UFormElm &item)
 }
 
 // ***************************************************************************
-void CGroundFXSheet::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CGroundFXSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(GroundID);
 	ClientSheetsStrings.serial(f, IdFXName);

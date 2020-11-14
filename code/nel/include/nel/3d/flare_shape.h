@@ -55,7 +55,7 @@ public:
 		CFlareShape();
 
 		/// serial this shape
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serial(NLMISC::IStream &f);
 		//@}
 
 

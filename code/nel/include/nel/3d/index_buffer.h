@@ -429,7 +429,7 @@ private:
 	void		resetTouchFlags() {_InternalFlags &= (uint16)(~TouchedAll);}
 
 	// Force non resident memory
-	void		restaureNonResidentMemory();
+	void		restoreNonResidentMemory();
 
 	// Convert current index to a serializable vector
 	void buildSerialVector(std::vector<uint32> &dest) const;

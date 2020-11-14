@@ -47,7 +47,7 @@ public:
 	const ITexture		*getHeightMap() const { return _HeightMap; };
 
 	// serial this texture datas
-	virtual void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void	serial(NLMISC::IStream &f);
 
 	virtual bool			supportSharing() const;
 

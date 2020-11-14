@@ -35,6 +35,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -670,33 +673,33 @@ public:
 	virtual void buildInfo()
 	{
 		m_Idx.ProgramConstants0 = getUniformIndex("programConstants0");
-		nlassert(m_Idx.ProgramConstants0 != ~0);
+		nlassert(m_Idx.ProgramConstants0 != std::numeric_limits<uint>::max());
 		m_Idx.DirectionalLight = getUniformIndex("directionalLight");
-		nlassert(m_Idx.DirectionalLight != ~0);
+		nlassert(m_Idx.DirectionalLight != std::numeric_limits<uint>::max());
 		m_Idx.ViewCenter = getUniformIndex("viewCenter");
-		nlassert(m_Idx.ViewCenter != ~0);
+		nlassert(m_Idx.ViewCenter != std::numeric_limits<uint>::max());
 		m_Idx.NegInvTransDist = getUniformIndex("negInvTransDist");
-		nlassert(m_Idx.NegInvTransDist != ~0);
+		nlassert(m_Idx.NegInvTransDist != std::numeric_limits<uint>::max());
 		m_Idx.AngleAxis = getUniformIndex("angleAxis");
-		nlassert(m_Idx.AngleAxis != ~0);
+		nlassert(m_Idx.AngleAxis != std::numeric_limits<uint>::max());
 		m_Idx.Wind = getUniformIndex("wind");
-		nlassert(m_Idx.Wind != ~0);
+		nlassert(m_Idx.Wind != std::numeric_limits<uint>::max());
 		m_Idx.CosCoeff0 = getUniformIndex("cosCoeff0");
-		nlassert(m_Idx.CosCoeff0 != ~0);
+		nlassert(m_Idx.CosCoeff0 != std::numeric_limits<uint>::max());
 		m_Idx.CosCoeff1 = getUniformIndex("cosCoeff1");
-		nlassert(m_Idx.CosCoeff1 != ~0);
+		nlassert(m_Idx.CosCoeff1 != std::numeric_limits<uint>::max());
 		m_Idx.CosCoeff2 = getUniformIndex("cosCoeff2");
-		nlassert(m_Idx.CosCoeff2 != ~0);
+		nlassert(m_Idx.CosCoeff2 != std::numeric_limits<uint>::max());
 		m_Idx.QuatConstants = getUniformIndex("quatConstants");
-		nlassert(m_Idx.QuatConstants != ~0);
+		nlassert(m_Idx.QuatConstants != std::numeric_limits<uint>::max());
 		m_Idx.PiConstants = getUniformIndex("piConstants");
-		nlassert(m_Idx.PiConstants != ~0);
+		nlassert(m_Idx.PiConstants != std::numeric_limits<uint>::max());
 		m_Idx.LUTSize = getUniformIndex("lutSize");
-		nlassert(m_Idx.LUTSize != ~0);
+		nlassert(m_Idx.LUTSize != std::numeric_limits<uint>::max());
 		for (uint i = 0; i < NL3D_VEGETABLE_VP_LUT_SIZE; ++i)
 		{
 			m_Idx.LUT[i] = getUniformIndex(NLMISC::toString("lut[%i]", i));
-			nlassert(m_Idx.LUT[i] != ~0);
+			nlassert(m_Idx.LUT[i] != std::numeric_limits<uint>::max());
 		}
 	}
 	const CIdx &idx() const { return m_Idx; }
@@ -747,7 +750,7 @@ void						CVegetableManager::deleteClipBlock(CVegetableClipBlock *clipBlock)
 	_EmptyClipBlockList.remove(clipBlock);
 
 	// delete
-	_ClipBlockMemory.free(clipBlock);
+	_ClipBlockMemory.freeBlock(clipBlock);
 }
 
 
@@ -782,7 +785,7 @@ void						CVegetableManager::deleteSortBlock(CVegetableSortBlock *sortBlock)
 	sortBlock->_Owner->_SortBlockList.remove(sortBlock);
 
 	// delete
-	_SortBlockMemory.free(sortBlock);
+	_SortBlockMemory.freeBlock(sortBlock);
 }
 
 
@@ -878,7 +881,7 @@ void						CVegetableManager::deleteIg(CVegetableInstanceGroup *ig)
 
 	// unlink from sortBlock, and delete.
 	sortBlock->_InstanceGroupList.remove(ig);
-	_InstanceGroupMemory.free(ig);
+	_InstanceGroupMemory.freeBlock(ig);
 
 
 	// decRef the clipBlock
@@ -1019,12 +1022,12 @@ void			CVegetableManager::reserveIgCompile(CVegetableInstanceGroup *ig, const CV
 	{
 		CVegetableInstanceGroup::CVegetableRdrPass	&vegetRdrPass= ig->_RdrPass[rdrPass];
 		nlassert(vegetRdrPass.TriangleIndices.getNumIndexes()==0);
-		nlassert(vegetRdrPass.TriangleLocalIndices.size()==0);
-		nlassert(vegetRdrPass.Vertices.size()==0);
-		nlassert(vegetRdrPass.LightedInstances.size()==0);
+		nlassert(vegetRdrPass.TriangleLocalIndices.empty());
+		nlassert(vegetRdrPass.Vertices.empty());
+		nlassert(vegetRdrPass.LightedInstances.empty());
 	}
 	// Do the same for all quadrants of the zsort rdrPass.
-	nlassert(ig->_TriangleQuadrantOrderArray.size()==0);
+	nlassert(ig->_TriangleQuadrantOrderArray.empty());
 	nlassert(ig->_TriangleQuadrantOrderNumTriangles==0);
 
 
@@ -2553,7 +2556,7 @@ bool		CVegetableManager::updateLightingIGPart()
 		}
 		CVegetableInstanceGroup::CVegetableRdrPass	&vegetRdrPass= _ULRootIg->_RdrPass[_ULCurrentIgRdrPass];
 
-		// if all instances are processed for this pass (especially if size()==0 !!)
+		// if all instances are processed for this pass (especially if empty() !!)
 		if(_ULCurrentIgInstance>= vegetRdrPass.LightedInstances.size())
 		{
 			// skip to the next rdrPass.

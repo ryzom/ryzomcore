@@ -17,17 +17,11 @@
 #include "stdmisc.h"
 
 #include "nel/misc/i_xml.h"
-#include "nel/misc/sstring.h"
 
 #ifndef NL_DONT_USE_EXTERNAL_CODE
 
 // Include from libxml2
 #include <libxml/xmlerror.h>
-
-#if defined(NL_OS_WINDOWS) && defined(NL_COMP_VC_VERSION) && NL_COMP_VC_VERSION >= 80
-#define USE_LOCALE_ATOF
-#include <locale.h>
-#endif
 
 using namespace std;
 
@@ -44,28 +38,16 @@ namespace NLMISC
 
 const char SEPARATOR = ' ';
 
+std::string CIXml::_ErrorString;
+
+bool CIXml::_LibXmlIntialized = false;
+
 // ***************************************************************************
 
-#define readnumber(dest,thetype,digits,convfunc) \
+#define readnumber(dest,digits) \
 	string number_as_string; \
 	serialSeparatedBufferIn( number_as_string ); \
-	dest = (thetype)convfunc( number_as_string.c_str() );
-
-#ifdef USE_LOCALE_ATOF
-
-#define readnumberlocale(dest,thetype,digits,convfunc) \
-	string number_as_string; \
-	serialSeparatedBufferIn( number_as_string ); \
-	dest = (thetype)convfunc( number_as_string.c_str(), (_locale_t)_Locale );
-
-#define nl_atof _atof_l
-
-#else
-
-#define readnumberlocale(dest,thetype,digits,convfunc) readnumber(dest,thetype,digits,convfunc)
-#define nl_atof atof
-
-#endif
+	NLMISC::fromString(number_as_string, dest);
 
 // ***************************************************************************
 
@@ -88,16 +70,8 @@ CIXml::CIXml () : IStream (true /* Input mode */)
 	_CurrentNode = NULL;
 	_PushBegin = false;
 	_AttribPresent = false;
-	_ErrorString = "";
 	_TryBinaryMode = false;
 	_BinaryStream = NULL;
-
-#ifdef USE_LOCALE_ATOF
-	// create C numeric locale
-	_Locale = _create_locale(LC_NUMERIC, "C");
-#else
-	_Locale = NULL;
-#endif
 }
 
 // ***************************************************************************
@@ -110,16 +84,8 @@ CIXml::CIXml (bool tryBinaryMode) : IStream (true /* Input mode */)
 	_CurrentNode = NULL;
 	_PushBegin = false;
 	_AttribPresent = false;
-	_ErrorString = "";
 	_TryBinaryMode = tryBinaryMode;
 	_BinaryStream = NULL;
-
-#ifdef USE_LOCALE_ATOF
-	// create C numeric locale
-	_Locale = _create_locale(LC_NUMERIC, "C");
-#else
-	_Locale = NULL;
-#endif
 }
 
 // ***************************************************************************
@@ -128,10 +94,6 @@ CIXml::~CIXml ()
 {
 	// Release
 	release ();
-
-#ifdef USE_LOCALE_ATOF
-	if (_Locale) _free_locale((_locale_t)_Locale);
-#endif
 }
 
 // ***************************************************************************
@@ -144,18 +106,16 @@ void CIXml::release ()
 		// Free it
 		xmlClearParserCtxt (_Parser);
 		xmlFreeParserCtxt (_Parser);
-		// commented due to the bug #857 xmlCleanupParser ();
 
 		_Parser = NULL;
 	}
 
 	// Not initialized
-	_Parser = NULL;
 	_CurrentElement = NULL;
 	_CurrentNode = NULL;
 	_PushBegin = false;
 	_AttribPresent = false;
-	_ErrorString = "";
+	_ErrorString.clear();
 
 	resetPtrTable();
 }
@@ -167,7 +127,7 @@ void xmlGenericErrorFuncRead (void *ctx, const char *msg, ...)
 	// Get the error string
 	string str;
 	NLMISC_CONVERT_VARGS (str, msg, NLMISC::MaxCStringSize);
-	((CIXml*)ctx)->_ErrorString += str;
+	CIXml::_ErrorString += str;
 }
 
 // ***************************************************************************
@@ -177,7 +137,7 @@ bool CIXml::init (IStream &stream)
 	// Release
 	release ();
 
-	xmlInitParser();
+	initLibXml();
 
 	// Default : XML mode
 	_BinaryStream = NULL;
@@ -233,12 +193,7 @@ bool CIXml::init (IStream &stream)
 			}
 		}
 
-		// Set error handler
-		_ErrorString = "";
-		xmlSetGenericErrorFunc	(this, xmlGenericErrorFuncRead);
-
-		// Ask to get debug info
-		xmlLineNumbersDefault(1);
+		_ErrorString.clear();
 
 		// The parser context
         _Parser = xmlCreatePushParserCtxt(NULL, NULL, buffer, 4, NULL);
@@ -358,7 +313,7 @@ void CIXml::serialSeparatedBufferIn ( string &value, bool checkSeparator )
 						// If no more node, empty string
 						if (_CurrentNode == NULL)
 						{
-							value = "";
+							value.clear();
 							_ContentStringIndex = 0;
 							_ContentString.erase ();
 							return;
@@ -468,7 +423,7 @@ void CIXml::serial(uint8 &b)
 	else
 	{
 		// Read the number
-		readnumber( b, uint8, 3, atoi );
+		readnumber( b, 3 );
 	}
 }
 
@@ -482,7 +437,7 @@ void CIXml::serial(sint8 &b)
 	}
 	else
 	{
-		readnumber( b, sint8, 4, atoi );
+		readnumber( b, 4 );
 	}
 }
 
@@ -496,7 +451,7 @@ void CIXml::serial(uint16 &b)
 	}
 	else
 	{
-		readnumber( b, uint16, 5, atoi );
+		readnumber( b, 5 );
 	}
 }
 
@@ -510,7 +465,7 @@ void CIXml::serial(sint16 &b)
 	}
 	else
 	{
-		readnumber( b, sint16, 6, atoi );
+		readnumber( b, 6 );
 	}
 }
 
@@ -529,7 +484,7 @@ void CIXml::serial(uint32 &b)
 	}
 	else
 	{
-		readnumber( b, uint32, 10, atoui );
+		readnumber( b, 10 );
 	}
 }
 
@@ -543,7 +498,7 @@ void CIXml::serial(sint32 &b)
 	}
 	else
 	{
-		readnumber( b, sint32, 11, atoi );
+		readnumber( b, 11 );
 	}
 }
 
@@ -557,7 +512,7 @@ void CIXml::serial(uint64 &b)
 	}
 	else
 	{
-		readnumber( b, uint64, 20, atoiInt64 );
+		readnumber( b, 20 );
 	}
 }
 
@@ -571,7 +526,7 @@ void CIXml::serial(sint64 &b)
 	}
 	else
 	{
-		readnumber( b, sint64, 20, atoiInt64 );
+		readnumber( b, 20 );
 	}
 }
 
@@ -585,7 +540,7 @@ void CIXml::serial(float &b)
 	}
 	else
 	{
-		readnumberlocale( b, float, 128, nl_atof );
+		readnumber( b, 128 );
 	}
 }
 
@@ -599,7 +554,7 @@ void CIXml::serial(double &b)
 	}
 	else
 	{
-		readnumberlocale( b, double, 128, nl_atof );
+		readnumber( b, 128 );
 	}
 }
 
@@ -758,7 +713,7 @@ void CIXml::serialBuffer(uint8 *buf, uint len)
 
 // ***************************************************************************
 
-bool CIXml::xmlPushBeginInternal (const char *nodeName)
+bool CIXml::xmlPushBeginInternal (const std::string &nodeName)
 {
 	nlassert( isReading() );
 
@@ -787,12 +742,12 @@ bool CIXml::xmlPushBeginInternal (const char *nodeName)
 						nlassert (_CurrentNode->name);
 
 						// Node element with the good name ?
-						if ( (_CurrentNode->type != XML_ELEMENT_NODE) || ( (const char*)_CurrentNode->name != string(nodeName)) )
+						if ( (_CurrentNode->type != XML_ELEMENT_NODE) || ( (const char*)_CurrentNode->name != nodeName) )
 						{
 							// Make an error message
 							char tmp[512];
 							smprintf (tmp, 512, "NeL XML Syntax error : root node has the wrong name : \"%s\" should have \"%s\"",
-								_CurrentNode->name, nodeName);
+								_CurrentNode->name, nodeName.c_str());
 							throw EXmlParsingError (tmp);
 						}
 					}
@@ -812,7 +767,7 @@ bool CIXml::xmlPushBeginInternal (const char *nodeName)
 					nlassert (_CurrentNode->name);
 
 					// Node with the good name
-					if ( (_CurrentNode->type == XML_ELEMENT_NODE) && ( (const char*)_CurrentNode->name == string(nodeName)) )
+					if ( (_CurrentNode->type == XML_ELEMENT_NODE) && ( (const char*)_CurrentNode->name == nodeName) )
 					{
 						// Save current element
 						_CurrentElement = _CurrentNode;
@@ -832,7 +787,7 @@ bool CIXml::xmlPushBeginInternal (const char *nodeName)
 					// Make an error message
 					char tmp[512];
 					smprintf (tmp, 512, "NeL XML Syntax error in block line %d \nCan't open the node named %s in node named %s",
-						(int)_CurrentElement->line, nodeName, _CurrentElement->name);
+						(int)_CurrentElement->line, nodeName.c_str(), _CurrentElement->name);
 					throw EXmlParsingError (tmp);
 				}
 
@@ -945,7 +900,7 @@ bool CIXml::xmlPopInternal ()
 
 // ***************************************************************************
 
-bool CIXml::xmlSetAttribInternal (const char *attribName)
+bool CIXml::xmlSetAttribInternal (const std::string &attribName)
 {
 	nlassert( isReading() );
 
@@ -994,7 +949,7 @@ bool CIXml::xmlBreakLineInternal ()
 
 // ***************************************************************************
 
-bool CIXml::xmlCommentInternal (const char * /* comment */)
+bool CIXml::xmlCommentInternal (const std::string &/* comment */)
 {
 	// Ok
 	return true;
@@ -1002,12 +957,12 @@ bool CIXml::xmlCommentInternal (const char * /* comment */)
 
 // ***************************************************************************
 
-xmlNodePtr CIXml::getFirstChildNode (xmlNodePtr parent, const char *childName)
+xmlNodePtr CIXml::getFirstChildNode (xmlNodePtr parent, const std::string &childName)
 {
 	xmlNodePtr child = parent->children;
 	while (child)
 	{
-		if (strcmp ((const char*)child->name, childName) == 0)
+		if (childName == (const char*)child->name)
 			return child;
 		child = child->next;
 	}
@@ -1016,12 +971,12 @@ xmlNodePtr CIXml::getFirstChildNode (xmlNodePtr parent, const char *childName)
 
 // ***************************************************************************
 
-xmlNodePtr CIXml::getNextChildNode (xmlNodePtr last, const char *childName)
+xmlNodePtr CIXml::getNextChildNode (xmlNodePtr last, const std::string &childName)
 {
 	last = last->next;
 	while (last)
 	{
-		if (strcmp ((const char*)last->name, childName) == 0)
+		if (childName == (const char*)last->name)
 			return last;
 		last = last->next;
 	}
@@ -1030,12 +985,12 @@ xmlNodePtr CIXml::getNextChildNode (xmlNodePtr last, const char *childName)
 
 // ***************************************************************************
 
-xmlNodePtr CIXml::getFirstChildNode (xmlNodePtr parent, xmlElementType type)
+xmlNodePtr CIXml::getFirstChildNode (xmlNodePtr parent, sint /* xmlElementType */ type)
 {
 	xmlNodePtr child = parent->children;
 	while (child)
 	{
-		if (child->type == type)
+		if (child->type == (xmlElementType)type)
 			return child;
 		child = child->next;
 	}
@@ -1044,12 +999,12 @@ xmlNodePtr CIXml::getFirstChildNode (xmlNodePtr parent, xmlElementType type)
 
 // ***************************************************************************
 
-xmlNodePtr CIXml::getNextChildNode (xmlNodePtr last, xmlElementType type)
+xmlNodePtr CIXml::getNextChildNode (xmlNodePtr last, sint /* xmlElementType */ type)
 {
 	last = last->next;
 	while (last)
 	{
-		if (last->type == type)
+		if (last->type == (xmlElementType)type)
 			return last;
 		last = last->next;
 	}
@@ -1058,7 +1013,7 @@ xmlNodePtr CIXml::getNextChildNode (xmlNodePtr last, xmlElementType type)
 
 // ***************************************************************************
 
-uint CIXml::countChildren (xmlNodePtr node, const char *childName)
+uint CIXml::countChildren (xmlNodePtr node, const std::string &childName)
 {
 	uint count=0;
 	xmlNodePtr child = getFirstChildNode (node, childName);
@@ -1072,7 +1027,7 @@ uint CIXml::countChildren (xmlNodePtr node, const char *childName)
 
 // ***************************************************************************
 
-uint CIXml::countChildren (xmlNodePtr node, xmlElementType type)
+uint CIXml::countChildren (xmlNodePtr node, sint /* xmlElementType */ type)
 {
 	uint count=0;
 	xmlNodePtr child = getFirstChildNode (node, type);
@@ -1096,10 +1051,10 @@ xmlNodePtr CIXml::getRootNode () const
 
 // ***************************************************************************
 
-bool CIXml::getPropertyString (std::string &result, xmlNodePtr node, const char *property)
+bool CIXml::getPropertyString (std::string &result, xmlNodePtr node, const std::string &property)
 {
 	// Get the value
-	const char *value = (const char*)xmlGetProp (node, (xmlChar*)property);
+	const char *value = (const char*)xmlGetProp (node, (xmlChar*)property.c_str());
 	if (value)
 	{
 		// Active value
@@ -1111,25 +1066,29 @@ bool CIXml::getPropertyString (std::string &result, xmlNodePtr node, const char 
 		// Found
 		return true;
 	}
+
 	return false;
 }
 
 // ***************************************************************************
 
-int CIXml::getIntProperty(xmlNodePtr node, const char *property, int defaultValue)
+int CIXml::getIntProperty(xmlNodePtr node, const std::string &property, int defaultValue)
 {
-	CSString s;
-	bool b;
+	std::string s;
 
-	b=getPropertyString(s,node,property);
-	if (b==false)
+	bool b = getPropertyString(s, node, property);
+
+	if (!b)
 		return defaultValue;
 
-	s=s.strip();
-	sint val=s.atoi();
-	if (val==0 && s!="0")
+	// remove leading and trailing spaces
+	s = trim(s);
+
+	sint val;
+	
+	if (!fromString(s, val) || (val == 0 && s != "0"))
 	{
-		nlwarning("bad integer value: %s",s.c_str());
+		nlwarning("Bad integer value: %s",s.c_str());
 		return defaultValue;
 	}
 
@@ -1138,27 +1097,38 @@ int CIXml::getIntProperty(xmlNodePtr node, const char *property, int defaultValu
 
 // ***************************************************************************
 
-double CIXml::getFloatProperty(xmlNodePtr node, const char *property, float defaultValue)
+double CIXml::getFloatProperty(xmlNodePtr node, const std::string &property, float defaultValue)
 {
-	CSString s;
-	bool b;
+	std::string s;
 
-	b=getPropertyString(s,node,property);
-	if (b==false)
+	bool b = getPropertyString(s, node, property);
+
+	if (!b)
 		return defaultValue;
 
-	return s.strip().atof();
+	// remove leading and trailing spaces
+	s = trim(s);
+
+	float val;
+
+	if (!fromString(s, val))
+	{
+		nlwarning("Bad float value: %s", s.c_str());
+		return defaultValue;
+	}
+
+	return val;
 }
 
 // ***************************************************************************
 
-std::string CIXml::getStringProperty(xmlNodePtr node, const char *property, const std::string& defaultValue)
+std::string CIXml::getStringProperty(xmlNodePtr node, const std::string &property, const std::string& defaultValue)
 {
 	std::string s;
-	bool b;
 
-	b=getPropertyString(s,node,property);
-	if (b==false)
+	bool b = getPropertyString(s, node, property);
+
+	if (!b)
 		return defaultValue;
 
 	return s;
@@ -1183,6 +1153,45 @@ bool CIXml::getContentString (std::string &result, xmlNodePtr node)
 }
 
 // ***************************************************************************
+
+void CIXml::initLibXml()
+{
+	if (_LibXmlIntialized) return;
+
+	_ErrorString.clear();
+	
+	// Set error handler
+	xmlSetGenericErrorFunc	(NULL, xmlGenericErrorFuncRead);
+
+	LIBXML_TEST_VERSION
+	
+	// an error occured during initialization
+	if (!_ErrorString.empty())
+	{
+		throw EXmlParsingError (_ErrorString);
+	}
+
+	// Ask to get debug info
+	xmlLineNumbersDefault(1);
+
+	_LibXmlIntialized = true;
+}
+
+// ***************************************************************************
+
+void CIXml::releaseLibXml()
+{
+	if (!_LibXmlIntialized) return;
+
+	xmlCleanupParser();
+
+	_LibXmlIntialized = false;
+}
+
+std::string CIXml::getErrorString()
+{
+	return _ErrorString;
+}
 
 } // NLMISC
 

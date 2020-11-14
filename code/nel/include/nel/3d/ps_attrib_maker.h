@@ -60,7 +60,7 @@ struct CPSInputType
 		uint32 UserParamNum;
 	};
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serialEnum(InputType);
 		switch(InputType)
@@ -124,7 +124,7 @@ public:
 		}
 
 		/// serialisation of the object. Derivers MUST call this, (if they use the attribute of this class at least)
-		virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		virtual void serial(NLMISC::IStream &f)
 		{
 			f.serialVersion(1);
 			f.serial(_NbCycles);

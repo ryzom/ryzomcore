@@ -981,7 +981,7 @@ void		fillSHEET( TOutBox& outbox, TPropIndex )
 	TDataSetIndex compressedRow = TVPNodeServer::PrioContext.EntityIndex.getCompressedIndex();
 	uint64 value = (uint64)sheetValue | (((uint64)compressedRow) << 32);
 	ap->setValue64( value );
-	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu SHEET at bitpos %d - value %"NL_I64"u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_SHEET, outbox.getPosInBit(), ap->getValue() );
+	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu SHEET at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_SHEET, outbox.getPosInBit(), ap->getValue() );
 
 	// Add row into the action
 	ap->packFast( outbox );
@@ -1026,7 +1026,7 @@ void		fillBEHAVIOUR( TOutBox& outbox, TPropIndex )
 	//CActionSint64 *ap = (CActionSint64*)CActionFactory::getInstance()->createByPropIndex( TVPNodeServer::PrioContext.Slot, PROPERTY_BEHAVIOUR );
 	DECLARE_AP(BEHAVIOUR);
 	caseFillAction( BEHAVIOUR )
-	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu BEHAVIOUR at bitpos %d - value %"NL_I64"u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_BEHAVIOUR, outbox.getPosInBit(), ap->getValue() );
+	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu BEHAVIOUR at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_BEHAVIOUR, outbox.getPosInBit(), ap->getValue() );
 	ap->packFast( outbox );
 	CFrontEndService::instance()->history()->store( TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.ClientHost->sendNumber(), ap );
 	//CActionFactory::getInstance()->remove( (CAction*&)ap );
@@ -1045,7 +1045,7 @@ void		fillNAME_STRING_ID( TOutBox& outbox, TPropIndex )
 	//CActionSint64 *ap = (CActionSint64*)CActionFactory::getInstance()->createByPropIndex( TVPNodeServer::PrioContext.Slot, PROPERTY_NAME_STRING_ID );
 	DECLARE_AP(NAME_STRING_ID);
 	caseFillAction( NAME_STRING_ID )
-	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu NAME_STRING_ID at bitpos %d - value %"NL_I64"u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_NAME_STRING_ID, outbox.getPosInBit(), ap->getValue() );
+	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu NAME_STRING_ID at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_NAME_STRING_ID, outbox.getPosInBit(), ap->getValue() );
 	ap->packFast( outbox );
 	CFrontEndService::instance()->history()->store( TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.ClientHost->sendNumber(), ap );
 	//CActionFactory::getInstance()->remove( (CAction*&)ap );
@@ -1166,7 +1166,7 @@ void		fillBARS( TOutBox& outbox, TPropIndex )
 	//CActionSint64 *ap = (CActionSint64*)CActionFactory::getInstance()->createByPropIndex( TVPNodeServer::PrioContext.Slot, PROPERTY_BARS );
 	DECLARE_AP(BARS);
 	caseFillAction( BARS )
-	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu BARS at bitpos %d - value %"NL_I64"u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_BARS, outbox.getPosInBit(), ap->getValue() );
+	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu BARS at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_BARS, outbox.getPosInBit(), ap->getValue() );
 	ap->packFast( outbox );
 	CFrontEndService::instance()->history()->store( TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.ClientHost->sendNumber(), ap );
 	//CActionFactory::getInstance()->remove( (CAction*&)ap );
@@ -1189,7 +1189,7 @@ void		fillVisualPropertyABC( TOutBox& outbox, TPropIndex propIndex )
 	DECLARE_AP_INDEX(propIndex);
 	CMirrorPropValueRO<TYPE_VPA> prop( TheDataset, TVPNodeServer::PrioContext.EntityIndex, propIndex-PROPERTY_VPA+DSPropertyVPA ); \
 	ap->setValue64( prop() );
-	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu %s at bitpos %d - value %"NL_I64"u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, propIndex, CLFECOMMON::getPropText( propIndex ), outbox.getPosInBit(), ap->getValue() );
+	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu %s at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, propIndex, CLFECOMMON::getPropText( propIndex ), outbox.getPosInBit(), ap->getValue() );
 	ap->packFast( outbox );
 	CFrontEndService::instance()->history()->store( TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.ClientHost->sendNumber(), ap );
 	//CActionFactory::getInstance()->remove( (CAction*&)ap );
@@ -1208,7 +1208,7 @@ void		fillCONTEXTUAL( TOutBox& outbox, TPropIndex propIndex )
 	//CActionSint64 *ap = (CActionSint64*)CActionFactory::getInstance()->createByPropIndex( TVPNodeServer::PrioContext.Slot, PROPERTY_CONTEXTUAL );
 	DECLARE_AP(CONTEXTUAL);
 	caseFillAction( CONTEXTUAL )
-	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu CONTEXTUAL at bitpos %d - value %"NL_I64"u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_CONTEXTUAL, outbox.getPosInBit(), ap->getValue() );
+	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu CONTEXTUAL at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_CONTEXTUAL, outbox.getPosInBit(), ap->getValue() );
 	ap->packFast( outbox );
 	CFrontEndService::instance()->history()->store( TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.ClientHost->sendNumber(), ap );
 	//CActionFactory::getInstance()->remove( (CAction*&)ap );
@@ -1226,7 +1226,7 @@ void		fillVISUAL_FX( TOutBox& outbox, TPropIndex propIndex )
 	//CActionSint64 *ap = (CActionSint64*)CActionFactory::getInstance()->createByPropIndex( TVPNodeServer::PrioContext.Slot, PROPERTY_VISUAL_FX );
 	DECLARE_AP(VISUAL_FX);
 	caseFillAction( VISUAL_FX )
-	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu VISUAL_FX at bitpos %d - value %"NL_I64"u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_VISUAL_FX, outbox.getPosInBit(), ap->getValue() );
+	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu VISUAL_FX at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_VISUAL_FX, outbox.getPosInBit(), ap->getValue() );
 	ap->packFast( outbox );
 	CFrontEndService::instance()->history()->store( TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.ClientHost->sendNumber(), ap );
 	//CActionFactory::getInstance()->remove( (CAction*&)ap );
@@ -1310,7 +1310,7 @@ void		fillGUILD_NAME_ID( TOutBox& outbox, TPropIndex )
 	//CActionSint64 *ap = (CActionSint64*)CActionFactory::getInstance()->createByPropIndex( TVPNodeServer::PrioContext.Slot, PROPERTY_GUILD_NAME_ID );
 	DECLARE_AP(GUILD_NAME_ID);
 	caseFillAction( GUILD_NAME_ID )
-	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu GUILD_NAME_ID at bitpos %d - value %"NL_I64"u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_GUILD_NAME_ID, outbox.getPosInBit(), ap->getValue() );
+	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu GUILD_NAME_ID at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_GUILD_NAME_ID, outbox.getPosInBit(), ap->getValue() );
 	ap->packFast( outbox );
 	CFrontEndService::instance()->history()->store( TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.ClientHost->sendNumber(), ap );
 	//CActionFactory::getInstance()->remove( (CAction*&)ap );
@@ -1328,7 +1328,7 @@ void		fillGUILD_SYMBOL( TOutBox& outbox, TPropIndex )
 	//CActionSint64 *ap = (CActionSint64*)CActionFactory::getInstance()->createByPropIndex( TVPNodeServer::PrioContext.Slot, PROPERTY_GUILD_SYMBOL );
 	DECLARE_AP(GUILD_SYMBOL);
 	caseFillAction( GUILD_SYMBOL )
-	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu GUILD_SYMBOL at bitpos %d - value %"NL_I64"u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_GUILD_SYMBOL, outbox.getPosInBit(), ap->getValue() );
+	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu GUILD_SYMBOL at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_GUILD_SYMBOL, outbox.getPosInBit(), ap->getValue() );
 	ap->packFast( outbox );
 	CFrontEndService::instance()->history()->store( TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.ClientHost->sendNumber(), ap );
 	//CActionFactory::getInstance()->remove( (CAction*&)ap );
@@ -1347,7 +1347,7 @@ void		fillEVENT_FACTION_ID( TOutBox& outbox, TPropIndex )
 	//CActionSint64 *ap = (CActionSint64*)CActionFactory::getInstance()->createByPropIndex( TVPNodeServer::PrioContext.Slot, PROPERTY_EVENT_FACTION_ID );
 	DECLARE_AP(EVENT_FACTION_ID);
 	caseFillAction( EVENT_FACTION_ID )
-	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu EVENT_FACTION_ID at bitpos %d - value %"NL_I64"u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_EVENT_FACTION_ID, outbox.getPosInBit(), ap->getValue() );
+	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu EVENT_FACTION_ID at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_EVENT_FACTION_ID, outbox.getPosInBit(), ap->getValue() );
 	ap->packFast( outbox );
 	CFrontEndService::instance()->history()->store( TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.ClientHost->sendNumber(), ap );
 	//CActionFactory::getInstance()->remove( (CAction*&)ap );
@@ -1366,7 +1366,7 @@ void		fillPVP_MODE( TOutBox& outbox, TPropIndex )
 	//CActionSint64 *ap = (CActionSint64*)CActionFactory::getInstance()->createByPropIndex( TVPNodeServer::PrioContext.Slot, PROPERTY_PVP_MODE );
 	DECLARE_AP(PVP_MODE);
 	caseFillAction( PVP_MODE )
-	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu PVP_MODE at bitpos %d - value %"NL_I64"u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_PVP_MODE, outbox.getPosInBit(), ap->getValue() );
+	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu PVP_MODE at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_PVP_MODE, outbox.getPosInBit(), ap->getValue() );
 	ap->packFast( outbox );
 	CFrontEndService::instance()->history()->store( TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.ClientHost->sendNumber(), ap );
 	//CActionFactory::getInstance()->remove( (CAction*&)ap );
@@ -1385,7 +1385,7 @@ void		fillPVP_CLAN( TOutBox& outbox, TPropIndex )
 	//CActionSint64 *ap = (CActionSint64*)CActionFactory::getInstance()->createByPropIndex( TVPNodeServer::PrioContext.Slot, PROPERTY_PVP_CLAN );
 	DECLARE_AP(PVP_CLAN);
 	caseFillAction( PVP_CLAN )
-	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu PVP_CLAN at bitpos %d - value %"NL_I64"u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_PVP_CLAN, outbox.getPosInBit(), ap->getValue() );
+	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu PVP_CLAN at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_PVP_CLAN, outbox.getPosInBit(), ap->getValue() );
 	ap->packFast( outbox );
 	CFrontEndService::instance()->history()->store( TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.ClientHost->sendNumber(), ap );
 	//CActionFactory::getInstance()->remove( (CAction*&)ap );
@@ -1403,7 +1403,7 @@ void		fillOWNER_PEOPLE( TOutBox& outbox, TPropIndex )
 	outbox.serialBitAndLog( payloadBit );
 	DECLARE_AP(OWNER_PEOPLE);
 	caseFillAction( OWNER_PEOPLE )
-	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu OWNER_PEOPLE at bitpos %d - value %"NL_I64"u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_OWNER_PEOPLE, outbox.getPosInBit(), ap->getValue() );
+	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu OWNER_PEOPLE at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_OWNER_PEOPLE, outbox.getPosInBit(), ap->getValue() );
 	ap->packFast( outbox );
 	CFrontEndService::instance()->history()->store( TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.ClientHost->sendNumber(), ap );
 	REMOVE_AP();
@@ -1420,7 +1420,7 @@ void		fillOUTPOST_INFOS( TOutBox& outbox, TPropIndex )
 	outbox.serialBitAndLog( payloadBit );
 	DECLARE_AP(OUTPOST_INFOS);
 	caseFillAction( OUTPOST_INFOS )
-	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu OUTPOST_INFOS at bitpos %d - value %"NL_I64"u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_OUTPOST_INFOS, outbox.getPosInBit(), ap->getValue() );
+	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu OUTPOST_INFOS at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_OUTPOST_INFOS, outbox.getPosInBit(), ap->getValue() );
 	ap->packFast( outbox );
 	CFrontEndService::instance()->history()->store( TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.ClientHost->sendNumber(), ap );
 	REMOVE_AP();

@@ -1,6 +1,6 @@
 <?php
 /**
-* This function is beign used to load info that's needed for the login page.
+* This function is being used to load info that's needed for the login page.
 * it will try to auto-login, this can only be used while ingame, the web browser sends additional cookie information that's also stored in the open_ring db.
 * We will compare the values and if they match, the user will be automatically logged in!
 * @author Daan Janssens, mentored by Matthew Lagoe

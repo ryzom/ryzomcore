@@ -71,7 +71,7 @@ public:
 	// For clipTrav. cleared at beginning of CClipTrav::traverse
 	void				clearVisibleList();
 
-	// For ClipTrav only. NB: list is cleared at begininng of traverse(). NB: only CTransform are supported
+	// For ClipTrav only. NB: list is cleared at beginning of traverse(). NB: only CTransform are supported
 	void				addVisibleModel(CTransform *model)
 	{
 		_VisibleList[_CurrentNumVisibleModels]= model;

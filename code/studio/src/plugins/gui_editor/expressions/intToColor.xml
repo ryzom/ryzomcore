@@ -1,0 +1,8 @@
+<expression>
+<category>Color</category>
+<name>intToColor</name>
+<variable>false</variable>
+<slots>
+<slot>Integer</slot>
+</slots>
+</expression>

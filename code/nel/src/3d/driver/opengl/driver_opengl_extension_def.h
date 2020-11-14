@@ -40,6 +40,24 @@ extern "C" {
 #define GL_ADD_SIGNED_EXT GL_ADD_SIGNED
 #define GL_INTERPOLATE_EXT GL_INTERPOLATE
 #define GL_BUMP_ENVMAP_ATI GL_INTERPOLATE
+#define GL_FRAMEBUFFER_EXT GL_FRAMEBUFFER_OES
+#define GL_RENDERBUFFER_EXT GL_RENDERBUFFER_OES
+#define GL_DEPTH24_STENCIL8_EXT GL_DEPTH24_STENCIL8_OES
+#define GL_DEPTH_COMPONENT24 GL_DEPTH_COMPONENT24_OES
+#define GL_COLOR_ATTACHMENT0_EXT GL_COLOR_ATTACHMENT0_OES
+#define GL_DEPTH_ATTACHMENT_EXT GL_DEPTH_ATTACHMENT_OES
+#define GL_STENCIL_ATTACHMENT_EXT GL_STENCIL_ATTACHMENT_OES
+#define GL_ARRAY_BUFFER_ARB GL_ARRAY_BUFFER
+#define GL_TEXTURE0_ARB GL_TEXTURE0
+
+#define GL_ALPHA8 GL_ALPHA
+#define GL_LUMINANCE8_ALPHA8 GL_LUMINANCE_ALPHA
+#define GL_LUMINANCE8 GL_LUMINANCE
+#define GL_RGBA8 GL_RGBA
+#define GL_RGB8 GL_RGB
+
+#define GL_STATIC_DRAW_ARB GL_STATIC_DRAW
+#define GL_DYNAMIC_DRAW_ARB GL_DYNAMIC_DRAW
 
 #define GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB GL_TEXTURE_CUBE_MAP_POSITIVE_X_OES
 #define GL_TEXTURE_CUBE_MAP_NEGATIVE_X_ARB GL_TEXTURE_CUBE_MAP_NEGATIVE_X_OES
@@ -47,6 +65,31 @@ extern "C" {
 #define GL_TEXTURE_CUBE_MAP_POSITIVE_Z_ARB GL_TEXTURE_CUBE_MAP_POSITIVE_Z_OES
 #define GL_TEXTURE_CUBE_MAP_POSITIVE_Y_ARB GL_TEXTURE_CUBE_MAP_POSITIVE_Y_OES
 #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_ARB GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_OES
+
+#define nglGenRenderbuffersEXT nglGenRenderbuffersOES
+#define nglBindRenderbufferEXT nglBindRenderbufferOES
+#define nglDeleteRenderbuffersEXT nglDeleteRenderbuffersOES
+#define nglRenderbufferStorageEXT nglRenderbufferStorageOES
+#define nglGenFramebuffersEXT nglGenFramebuffersOES
+#define nglBindFramebufferEXT nglBindFramebufferOES
+#define nglFramebufferTexture2DEXT nglFramebufferTexture2DOES
+#define nglFramebufferRenderbufferEXT nglFramebufferRenderbufferOES
+#define nglCheckFramebufferStatusEXT nglCheckFramebufferStatusOES
+#define nglDeleteBuffersARB glDeleteBuffers
+#define nglIsBufferARB glIsBuffer
+#define nglDeleteRenderbuffersEXT nglDeleteRenderbuffersOES
+#define nglBindFramebufferEXT nglBindFramebufferOES
+#define nglDeleteFramebuffersEXT nglDeleteFramebuffersOES
+#define nglUnmapBufferARB nglUnmapBufferOES
+#define nglActiveTextureARB glActiveTexture
+#define nglClientActiveTextureARB glClientActiveTexture
+#define nglBindBufferARB glBindBuffer
+#define nglGenBuffersARB glGenBuffers
+#define nglBufferDataARB glBufferData
+
+#define glFrustum glFrustumf
+#define glOrtho glOrthof
+#define glDepthRange glDepthRangef
 
 #else
 

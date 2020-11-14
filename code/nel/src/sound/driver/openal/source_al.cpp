@@ -22,6 +22,10 @@
 #include "source_al.h"
 #include "ext_al.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // #define NLSOUND_DEBUG_GAIN
 
 using namespace std;
@@ -117,6 +121,11 @@ void CSourceAL::setStreaming(bool streaming)
 	alTestError();
 	_Buffer = NULL;
 	_IsStreaming = streaming;
+	if (_IsStreaming)
+	{
+		// make sure looping is disabled on OpenAL side
+		setLooping(false);
+	}
 }
 
 /* Set the buffer that will be played (no streaming)
@@ -190,7 +199,11 @@ uint CSourceAL::countStreamingBuffers() const
 	// a bit ugly here, but makes a much easier/simpler implementation on both drivers
 	ALint buffersProcessed;
 	alGetSourcei(_Source, AL_BUFFERS_PROCESSED, &buffersProcessed);
-	while (buffersProcessed)
+	if (buffersProcessed && _QueuedBuffers.empty())
+	{
+		nlwarning("AL: QueuedBuffers is empty, but OpenAL buffers processed > 0");
+	}
+	while (buffersProcessed && !_QueuedBuffers.empty())
 	{
 		ALuint bufferName = _QueuedBuffers.front()->bufferName();
 		alSourceUnqueueBuffers(_Source, 1, &bufferName);
@@ -254,7 +267,7 @@ bool CSourceAL::play()
 		if (!_IsPlaying) // set start time if not playing yet
 			_StartTime = CTime::getLocalTime();
 		_IsPlaying = true; // this play always virtually succeed but may not actually be playing
-		if (_QueuedBuffers.size()) // ensure buffers have actually queued
+		if (!_QueuedBuffers.empty()) // ensure buffers have actually queued
 		{
 			alSourcePlay(_Source);
 			if (alGetError() != AL_NO_ERROR)
@@ -306,7 +319,7 @@ void CSourceAL::stop()
 		alSourceStop(_Source);
 		alTestError();
 		// unqueue buffers
-		while (_QueuedBuffers.size())
+		while (!_QueuedBuffers.empty())
 		{
 			ALuint bufferName = _QueuedBuffers.front()->bufferName();
 			alSourceUnqueueBuffers(_Source, 1, &bufferName);

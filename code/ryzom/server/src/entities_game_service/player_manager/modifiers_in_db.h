@@ -45,7 +45,7 @@ struct CModifierInDB
 
 	void init();
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };
 
 /// struct for disabled modifiers
@@ -66,7 +66,7 @@ struct CModifiersInDB
 
 	void clear();
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	// write disabled effects in DB, used only in initDatabase
 	void writeInDatabase(CCDBSynchronised &database);

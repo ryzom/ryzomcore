@@ -18,6 +18,10 @@
 
 #include "nel/misc/types_nl.h"
 
+#ifndef NL_OS_WINDOWS
+#	define IsDebuggerPresent() false
+#endif
+
 #ifdef NL_OS_WINDOWS
 #	include <io.h>
 #	include <fcntl.h>
@@ -34,19 +38,6 @@
 #include "nel/misc/variable.h"
 
 #include "nel/misc/debug.h"
-
-#ifdef NL_OS_WINDOWS
-// these defines is for IsDebuggerPresent(). it'll not compile on windows 95
-// just comment this and the IsDebuggerPresent to compile on windows 95
-#	define _WIN32_WINDOWS	0x0410
-#	ifndef NL_COMP_MINGW
-#		define WINVER			0x0400
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
-#else
-#	define IsDebuggerPresent() false
-#endif
 
 #include "nel/misc/displayer.h"
 
@@ -225,7 +216,7 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 	static bool consoleModeTest = false;
 	if (!consoleModeTest)
 	{
-		HANDLE handle = CreateFile ("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
+		HANDLE handle = CreateFileA ("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
 		consoleMode = handle != INVALID_HANDLE_VALUE;
 		if (consoleMode)
 			CloseHandle (handle);
@@ -295,20 +286,14 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 			// WARNING: READ THIS !!!!!!!!!!!!!!!! ///////////////////////////
 			// If at the release time, it freezes here, it's a microsoft bug:
 			// http://support.microsoft.com/support/kb/articles/q173/2/60.asp
-			OutputDebugStringW((LPCWSTR)ucstring::makeFromUtf8(str2).c_str());
+			OutputDebugStringW(utf8ToWide(str2));
 		}
 		else
 		{
-			/*OutputDebugString(ss2.str().c_str());
-			OutputDebugString("\n\t\t\t");
-			OutputDebugString("message end: ");
-			OutputDebugString(&message[strlen(message) - 1024]);
-			OutputDebugString("\n");*/
-
 			sint count = 0;
 			uint n = (uint)strlen(message);
 			std::string s(&str2.c_str()[0], (str2.size() - n));
-			OutputDebugStringW((LPCWSTR)ucstring::makeFromUtf8(s).c_str());
+			OutputDebugStringW(utf8ToWide(s));
 
 			for(;;)
 			{
@@ -316,15 +301,15 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 				if((n - count) < maxOutString )
 				{
 					s = std::string(&message[count], (n - count));
-					OutputDebugStringW((LPCWSTR)ucstring::makeFromUtf8(s).c_str());
-					OutputDebugStringW((LPCWSTR)ucstring::makeFromUtf8("\n").c_str());
+					OutputDebugStringW(utf8ToWide(s));
+					OutputDebugStringW(L"\n");
 					break;
 				}
 				else
 				{
 					s = std::string(&message[count] , count + maxOutString);
-					OutputDebugStringW((LPCWSTR)ucstring::makeFromUtf8(s).c_str());
-					OutputDebugStringW((LPCWSTR)ucstring::makeFromUtf8("\n\t\t\t").c_str());
+					OutputDebugStringW(utf8ToWide(s));
+					OutputDebugStringW(L"\n\t\t\t");
 					count += maxOutString;
 				}
 			}
@@ -338,13 +323,13 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 			if (pos+1000 < args.CallstackAndLog.size ())
 			{
 				splited = args.CallstackAndLog.substr (pos, 1000);
-				OutputDebugStringW((LPCWSTR)ucstring::makeFromUtf8(splited).c_str());
+				OutputDebugStringW(utf8ToWide(splited));
 				pos += 1000;
 			}
 			else
 			{
 				splited = args.CallstackAndLog.substr (pos);
-				OutputDebugStringW((LPCWSTR)ucstring::makeFromUtf8(splited).c_str());
+				OutputDebugStringW(utf8ToWide(splited));
 				break;
 			}
 		}
@@ -500,7 +485,7 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 
 	if (_FilePointer == (FILE*)1)
 	{
-		_FilePointer = fopen (_FileName.c_str(), "at");
+		_FilePointer = nlfopen (_FileName, "at");
 		if (_FilePointer == NULL)
 			printf ("Can't open log file '%s': %s\n", _FileName.c_str(), strerror (errno));
 	}
@@ -510,15 +495,30 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 		if (_NeedHeader)
 		{
 			const char *hs = HeaderString();
-			fwrite (hs, strlen (hs), 1, _FilePointer);
+
+			if (fwrite(hs, strlen(hs), 1, _FilePointer) != 1)
+			{
+				printf("Unable to write header: %s\n", hs);
+			}
+
 			_NeedHeader = false;
 		}
 
-		if(!str.empty())
-			fwrite (str.c_str(), str.size(), 1, _FilePointer);
+		if (!str.empty())
+		{
+			if (fwrite(str.c_str(), str.size(), 1, _FilePointer) != 1)
+			{
+				printf("Unable to write string: %s\n", str.c_str());
+			}
+		}
 
-		if(!args.CallstackAndLog.empty())
-			fwrite (args.CallstackAndLog.c_str(), args.CallstackAndLog.size (), 1, _FilePointer);
+		if (!args.CallstackAndLog.empty())
+		{
+			if (fwrite(args.CallstackAndLog.c_str(), args.CallstackAndLog.size(), 1, _FilePointer) != 1)
+			{
+				printf("Unable to write call stack: %s\n", args.CallstackAndLog.c_str());
+			}
+		}
 
 		fflush (_FilePointer);
 	}
@@ -529,10 +529,7 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 //                           in release "<Msg>"
 void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *message)
 {
-#ifdef NL_OS_WINDOWS
-
 	bool needSpace = false;
-//	stringstream ss;
 	string str;
 
 	// create the string for the clipboard
@@ -545,7 +542,6 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 	if (args.LogType != CLog::LOG_NO)
 	{
-		//if (needSpace) { ss << " "; needSpace = false; }
 		if (needSpace) { str += " "; needSpace = false; }
 		str += logTypeToString(args.LogType);
 		needSpace = true;
@@ -553,7 +549,6 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 	if (!args.ProcessName.empty())
 	{
-		//if (needSpace) { ss << " "; needSpace = false; }
 		if (needSpace) { str += " "; needSpace = false; }
 		str += args.ProcessName;
 		needSpace = true;
@@ -561,7 +556,6 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 	if (args.FileName != NULL)
 	{
-		//if (needSpace) { ss << " "; needSpace = false; }
 		if (needSpace) { str += " "; needSpace = false; }
 		str += CFile::getFilename(args.FileName);
 		needSpace = true;
@@ -569,7 +563,6 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 	if (args.Line != -1)
 	{
-		//if (needSpace) { ss << " "; needSpace = false; }
 		if (needSpace) { str += " "; needSpace = false; }
 		str += NLMISC::toString(args.Line);
 		needSpace = true;
@@ -577,7 +570,6 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 	if (args.FuncName != NULL)
 	{
-		//if (needSpace) { ss << " "; needSpace = false; }
 		if (needSpace) { str += " "; needSpace = false; }
 		str += args.FuncName;
 		needSpace = true;
@@ -591,7 +583,6 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 	// create the string on the screen
 	needSpace = false;
-//	stringstream ss2;
 	string str2;
 
 #ifdef NL_DEBUG
@@ -688,93 +679,36 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 			// yoyo: allow only to send the crash report once. Because users usually click ignore,
 			// which create noise into list of bugs (once a player crash, it will surely continues to do it).
 			std::string filename = getLogDirectory() + NL_CRASH_DUMP_FILE;
+			
+			TReportResult reportResult = report(args.ProcessName + " NeL " + toString(logTypeToString(args.LogType, true)),
+				subject, body, filename, NL_REPORT_SYNCHRONOUS, !isCrashAlreadyReported(), NL_REPORT_DEFAULT);
 
-			if  (ReportDebug == report (args.ProcessName + " NeL " + toString(logTypeToString(args.LogType, true)), "", subject, body, true, 2, true, 1, !isCrashAlreadyReported(), IgnoreNextTime, filename.c_str()))
+			switch (reportResult)
 			{
+			case ReportAlwaysIgnore:
+				IgnoreNextTime = true;
+				break;
+			case ReportBreak:
 				INelContext::getInstance().setDebugNeedAssert(true);
+				break;
+			case ReportAbort:
+#		ifdef NL_OS_WINDOWS
+#		ifndef NL_COMP_MINGW
+				// disable the Windows popup telling that the application aborted and disable the dr watson report.
+				_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+#		endif
+#		endif
+				abort();
+				break;
+
+			default:
+				break;
 			}
 
 			// no more sent mail for crash
 			setCrashAlreadyReported(true);
 		}
-
-/*		// Check the envvar NEL_IGNORE_ASSERT
-		if (getenv ("NEL_IGNORE_ASSERT") == NULL)
-		{
-			// Ask the user to continue, debug or ignore
-			int result = MessageBox (NULL, ss2.str().c_str (), logTypeToString(args.LogType, true), MB_ABORTRETRYIGNORE | MB_ICONSTOP);
-			if (result == IDABORT)
-			{
-				// Exit the program now
-				exit (EXIT_FAILURE);
-			}
-			else if (result == IDRETRY)
-			{
-				// Give the debugger a try
-				DebugNeedAssert = true;
- 			}
-			else if (result == IDIGNORE)
-			{
-				// Continue, do nothing
-			}
-		}
-*/	}
-
-#endif
-}
-
-
-
-/***************************************************************/
-/******************* THE FOLLOWING CODE IS COMMENTED OUT *******/
-/***************************************************************
-void CStdDisplayer::display (const std::string& str)
-{
-//	printf("%s", str.c_str ());
-	cout << str;
-
-#ifdef NL_OS_WINDOWS
-	// display the string in the debugger is the application is started with the debugger
-	if (IsDebuggerPresent ())
-		OutputDebugString(str.c_str ());
-#endif
-}
-
-
-void CFileDisplayer::display (const std::string& str)
-{
-	if (_FileName.size () == 0) return;
-
-	ofstream ofs (_FileName.c_str (), ios::out | ios::app);
-	if (ofs.is_open ())
-	{
-		ofs << str;
-		ofs.close();
 	}
-
-
-//	FILE *fp = fopen (_FileName.c_str (), "a");
-//	if (fp == NULL) return;
-
-//	fprintf (fp, "%s", str.c_str ());
-
-//	fclose (fp);
 }
-
-
-
-void CMsgBoxDisplayer::display (const std::string& str)
-{
-#ifdef NL_OS_WINDOWS
-
-	CSystemUtils::copyTextToClipboard(str);
-
-	string strf = str;
-	strf += "\n\n(this message was copied in the clipboard)";
-	MessageBox (NULL, strf.c_str (), "", MB_OK | MB_ICONEXCLAMATION);
-#endif
-}
-**************************************************************************/
-
 
 } // NLMISC

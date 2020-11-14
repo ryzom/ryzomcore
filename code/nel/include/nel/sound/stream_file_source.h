@@ -98,8 +98,9 @@ private:
 	NLMISC::IThread *m_Thread;
 
 	IAudioDecoder *m_AudioDecoder;
-	
+
 	bool m_Paused;
+	bool m_DecodingEnded;
 
 }; /* class CStreamFileSource */
 

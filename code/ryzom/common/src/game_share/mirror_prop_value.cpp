@@ -19,6 +19,9 @@
 #include "stdpch.h"
 #include "mirror_prop_value.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 sint32 NbAllocdListCells = 0;
 sint32 MaxNbAllocdListCells = 0;

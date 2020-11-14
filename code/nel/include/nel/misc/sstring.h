@@ -937,21 +937,13 @@ inline CSString operator+(const CSString& s0,const CSString& s1)
 */
 inline CSString operator+(char s0,const CSString& s1)
 {
-	return CSString(s0)+s1;
+	return CSString(s0) + s1.c_str();
 }
 
 inline CSString operator+(const char* s0,const CSString& s1)
 {
-	return CSString(s0)+s1;
+	return CSString(s0) + s1.c_str();
 }
-
-#ifndef NL_COMP_VC10
-// TODO: check if it can be disabled for other compilers too
-inline CSString operator+(const std::string& s0,const CSString& s1)
-{
-	return s0+static_cast<const std::string&>(s1);
-}
-#endif // NL_COMP_VC10
 
 } // NLMISC
 

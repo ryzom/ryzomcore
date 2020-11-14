@@ -28,6 +28,9 @@
 #include "actions_client.h"
 #include "interface_v3/input_handler_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ///////////
 // USING //

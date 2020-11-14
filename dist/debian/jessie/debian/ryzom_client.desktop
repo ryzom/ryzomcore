@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=Ryzom
+Name[ru]=Ризом
+Type=Application
+GenericName=ryzom_client
+Exec=/usr/games/ryzom
+Icon=ryzom_client
+Terminal=true
+Hidden=false
+Categories=Game;RolePlaying;

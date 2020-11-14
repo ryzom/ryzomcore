@@ -1095,14 +1095,19 @@ class CMissionStepKillPlayer : public IMissionStepTemplate
 				return false;
 			}
 //			missionData.ChatParams.push_back( make_pair( args[0], STRING_MANAGER::clan ) );
-			subStep.MinLevel = atoi( args[1].c_str() ) * kFameMultipler;
-			subStep.MaxLevel = atoi( args[2].c_str() ) * kFameMultipler;
+			NLMISC::fromString(args[1], subStep.MinLevel);
+			NLMISC::fromString(args[2], subStep.MaxLevel);
+
+			subStep.MinLevel *= kFameMultipler;
+			subStep.MaxLevel *= kFameMultipler;
+
 			if ( subStep.MinLevel >= subStep.MaxLevel )
 			{
 				MISLOGERROR("min_level >= max_level");
 				return false;
 			}
-			subStep.Quantity = (uint16) atoi( args[3].c_str() );
+			NLMISC::fromString(args[3], subStep.Quantity);
+
 			if ( subStep.Quantity == 0 )
 			{
 				MISLOGERROR("invalid quantity 0");

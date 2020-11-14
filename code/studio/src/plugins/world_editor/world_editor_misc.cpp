@@ -26,8 +26,7 @@
 #include <nel/ligo/primitive_utils.h>
 #include <nel/ligo/ligo_config.h>
 
-
-// Qt includes
+#include <libxml/tree.h>
 
 namespace WorldEditor
 {
@@ -58,6 +57,8 @@ bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList
 	bool result = false;
 
 	lastError = "";
+
+	std::string p = NLMISC::CFile::getPath( fileName );
 
 	// Load the document
 	NLMISC::CIFile file;
@@ -122,6 +123,8 @@ bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList
 								{
 									std::string dataDir;
 									NLMISC::CIXml::getPropertyString(dataDir, node, "VALUE");
+
+									dataDir = NLMISC::CPath::makePathAbsolute( dataDir, p );
 									worldEditList.push_back(WorldEditItem(DataDirectoryType, dataDir));
 								}
 
@@ -149,6 +152,9 @@ bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList
 											std::string filenameChild;
 											if ( NLMISC::CIXml::getPropertyString(filenameChild, node, "FILENAME"))
 											{
+
+												filenameChild = NLMISC::CPath::makePathAbsolute( filenameChild, p );
+
 												// Is it a landscape ?
 												if (type == "landscape")
 												{

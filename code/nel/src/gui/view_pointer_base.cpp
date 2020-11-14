@@ -18,6 +18,10 @@
 #include "stdpch.h"
 #include "nel/gui/view_pointer_base.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -76,14 +80,37 @@ namespace NLGUI
 	{
 		_PointerDown = pd;
 
-		if (_PointerDown == true)
+		if (_PointerDown)
 		{
 			_PointerDownX = _PointerX;
 			_PointerDownY = _PointerY;
 		}
-
-		if (_PointerDown == false)
+		else
 			_PointerDrag = false;
+	}
+
+	// --------------------------------------------------------------------------------------------------------------------
+	void CViewPointerBase::setPointerMiddleDown (bool pd)
+	{
+		_PointerMiddleDown = pd;
+
+		if (_PointerMiddleDown)
+		{
+			_PointerMiddleDownX = _PointerX;
+			_PointerMiddleDownY = _PointerY;
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------------------------------
+	void CViewPointerBase::setPointerRightDown (bool pd)
+	{
+		_PointerRightDown = pd;
+
+		if (_PointerRightDown)
+		{
+			_PointerRightDownX = _PointerX;
+			_PointerRightDownY = _PointerY;
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------------------------------
@@ -116,16 +143,30 @@ namespace NLGUI
 	}
 
 	// --------------------------------------------------------------------------------------------------------------------
-	void CViewPointerBase::getPointerDownPos (sint32 &x, sint32 &y)
+	bool CViewPointerBase::getPointerDown (sint32 &x, sint32 &y)
 	{
 		x = _PointerDownX;
 		y = _PointerDownY;
+
+		return _PointerDown;
 	}
 
 	// --------------------------------------------------------------------------------------------------------------------
-	bool CViewPointerBase::getPointerDown ()
+	bool CViewPointerBase::getPointerMiddleDown (sint32 &x, sint32 &y)
 	{
-		return _PointerDown;
+		x = _PointerMiddleDownX;
+		y = _PointerMiddleDownY;
+
+		return _PointerMiddleDown;
+	}
+
+	// --------------------------------------------------------------------------------------------------------------------
+	bool CViewPointerBase::getPointerRightDown (sint32 &x, sint32 &y)
+	{
+		x = _PointerRightDownX;
+		y = _PointerRightDownY;
+
+		return _PointerRightDown;
 	}
 
 	// --------------------------------------------------------------------------------------------------------------------

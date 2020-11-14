@@ -20,6 +20,10 @@
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/misc/i18n.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 NLMISC_REGISTER_OBJECT(CViewBase, CViewTextFormated, std::string, "text_formated");
 
 namespace NLGUI

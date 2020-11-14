@@ -495,7 +495,7 @@ uint32 CAliasCont<TChld>::getChildIndexByAlias(uint32 alias) const
 		if (child!=NULL && child->getAlias()==alias)
 			return (uint32)i;
 	}
-	return ~0;
+	return std::numeric_limits<uint32>::max();
 }
 
 template <class TChld>

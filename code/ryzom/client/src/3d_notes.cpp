@@ -57,9 +57,10 @@ void cbNotesChanged()
 			Notes.Notes.clear();
 			return;
 		}
-		pos.x = (float)atof(posstr[0].c_str());
-		pos.y = (float)atof(posstr[1].c_str());
-		pos.z = (float)atof(posstr[2].c_str());
+
+		NLMISC::fromString(posstr[0], pos.x);
+		NLMISC::fromString(posstr[1], pos.y);
+		NLMISC::fromString(posstr[2], pos.z);
 
 		string note(var.asString(i+2));
 		if(note.empty())
@@ -279,11 +280,11 @@ NLMISC_COMMAND(gotoNote, "go to a note", "<id>|<text>")
 			if(i != 0) tok += " ";
 			tok += args[i];
 		}
-		tok = strlwr(tok);
+		tok = toLower(tok);
 		list<C3DNotes::CNote>::iterator it;
 		for(it = Notes.Notes.begin(); it != Notes.Notes.end(); it++)
 		{
-			string note = strlwr((*it).Note);
+			string note = toLower((*it).Note);
 			if(note.find(tok) != string::npos)
 			{
 				pos = (*it).Position;

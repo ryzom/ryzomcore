@@ -14,6 +14,8 @@
 **.font = native
 **.scheme = native
 
+**.tpl = native
+
 **.xsd = native
 **.dox = native
 

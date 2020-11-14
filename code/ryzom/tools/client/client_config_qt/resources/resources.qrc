@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/resources">
+        <file>card_icon.png</file>
+        <file>display_config_icon.png</file>
+        <file>display_icon.png</file>
+        <file>display_properties_icon.png</file>
+        <file>general_icon.png</file>
+        <file>left_bitmap_0.png</file>
+        <file>network_icon.png</file>
+        <file>sound_icon.png</file>
+        <file>splash_screen.png</file>
+        <file>top_right.png</file>
+        <file>update_icon.png</file>
+        <file>welcome_icon.png</file>
+    </qresource>
+</RCC>

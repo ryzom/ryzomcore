@@ -65,7 +65,7 @@ public:
 							  const NLMISC::CMatrix &invertedModelMat,
 							  const NLMISC::CVector &viewerPos);
 		virtual	void	end(IDriver *drv);
-		virtual void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		virtual void	serial(NLMISC::IStream &f);
 		virtual void	setupForMaterial(const CMaterial &mat,
 										 IDriver *drv,
 										 CScene *scene,

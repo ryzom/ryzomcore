@@ -1,0 +1,11 @@
+<expression>
+<category>Color</category>
+<name>makeRGB</name>
+<variable>false</variable>
+<slots>
+<slot>R</slot>
+<slot>G</slot>
+<slot>B</slot>
+<slot>A</slot>
+</slots>
+</expression>

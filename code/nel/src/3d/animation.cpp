@@ -30,6 +30,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -315,7 +318,7 @@ UAnimation* UAnimation::createAnimation (const char* sPath)
 	NL3D_HAUTO_UI_ANIMATION;
 
 	// Allocate an animation
-	std::auto_ptr<CAnimation> anim (new CAnimation);
+	CUniquePtr<CAnimation> anim (new CAnimation);
 
 	// Read it
 	NLMISC::CIFile file;

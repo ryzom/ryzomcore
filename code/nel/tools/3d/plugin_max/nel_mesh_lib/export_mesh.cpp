@@ -116,7 +116,7 @@ CMesh::CMeshBuild*	CExportNel::createMeshBuild(INode& node, TimeValue tvTime, CM
 		}
 	}
 
-	// Return the shape pointer or NULL if an error occured.
+	// Return the shape pointer or NULL if an error occurred.
 	return pMeshBuild;
 }
 
@@ -266,7 +266,7 @@ NL3D::IShape *CExportNel::buildShape (INode& node, TimeValue time, const TInodeP
 							std::string nodeName=getScriptAppData (&node, NEL3D_APPDATA_LOD_NAME+lod, "");
 
 							// Get the node
-							INode *lodNode=_Ip->GetINodeByName(nodeName.c_str());
+							INode *lodNode=_Ip->GetINodeByName(utf8ToTStr(nodeName));
 							if (lodNode)
 							{
 								// Index of the lod in the build structure
@@ -467,7 +467,7 @@ NL3D::IShape *CExportNel::buildShape (INode& node, TimeValue time, const TInodeP
 		retShape->setDistMax (distmax);
 	}
 
-	// Return the shape pointer or NULL if an error occured.
+	// Return the shape pointer or NULL if an error occurred.
 	return retShape;
 }
 
@@ -611,7 +611,7 @@ void CExportNel::buildBaseMeshInterface (NL3D::CMeshBase::CMeshBaseBuild& buildM
 			continue;
 		// get factor here !
 		buildMesh.DefaultBSFactors.push_back(0.0f);
-		std::string sTemp = pNode->GetName();
+		std::string sTemp = tStrToUtf8(pNode->GetName());
 		buildMesh.BSNames.push_back (sTemp);
 	}
 
@@ -1063,9 +1063,8 @@ void CExportNel::buildMeshInterface (TriObject &tri, CMesh::CMeshBuild& buildMes
 		// Error code ?
 		if (error!=NoError)
 		{
-			char msg[512];
-			sprintf (msg, "%s skin: %s", getName (node).c_str(), ErrorMessage[error]);
-			MessageBox (NULL, msg, "NeL export", MB_OK|MB_ICONEXCLAMATION);
+			std::string msg = toString("%s skin: %s", getName (node).c_str(), ErrorMessage[error]);
+			MessageBoxW (NULL, utf8ToTStr(msg), L"NeL export", MB_OK|MB_ICONEXCLAMATION);
 		}
 		else
 		{
@@ -1181,7 +1180,7 @@ void CExportNel::getBSMeshBuild (std::vector<CMesh::CMeshBuild*> &bsList, INode 
 			convertMatrix(finalSpace, node.GetNodeTM(time));
 
 	CMeshBase::CMeshBaseBuild *dummyMBB = NULL;		
-	std::auto_ptr<CMesh::CMeshBuild> baseMB(createMeshBuild (node, time, dummyMBB, finalSpace));
+	CUniquePtr<CMesh::CMeshBuild> baseMB(createMeshBuild (node, time, dummyMBB, finalSpace));
 	delete dummyMBB;
 	dummyMBB = NULL;
 	if (baseMB.get() == NULL) return;
@@ -1421,7 +1420,7 @@ IMeshGeom *CExportNel::buildMeshGeom (INode& node, TimeValue time, const TInodeP
 	if (InfoLog)
 		InfoLog->display("End of %s \n", node.GetName());
 
-	// Return the shape pointer or NULL if an error occured.
+	// Return the shape pointer or NULL if an error occurred.
 	return meshGeom;
 }
 
@@ -1493,7 +1492,7 @@ void CExportNel::buildMeshMorph (CMesh::CMeshBuild& buildMesh, INode &node, Time
 			continue;
 		}
 
-		bs.Name = pNode->GetName();
+		bs.Name = tStrToUtf8(pNode->GetName());
 
 		bool bIsDeltaPos = false;
 		bs.deltaPos.resize (nNbVertVB, CVector::Null);

@@ -23,7 +23,7 @@
 // ViewColumn.h : header file
 //
 
-extern char *WndRegKeys[4][5];
+extern TCHAR *WndRegKeys[4][5];
 
 #include "View.h"
 

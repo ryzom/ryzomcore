@@ -310,7 +310,7 @@ void CAnimationSheet::build(const NLGEORGES::UFormElm &item)
 //-----------------------------------------------
 // serial
 //-----------------------------------------------
-void CAnimationSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAnimationSheet::serial(NLMISC::IStream &f)
 {
 	// serialize the animation name to be able to compute the animation when loading.
 	AnimNames.serial(f, IdAnim);
@@ -474,7 +474,7 @@ void CAnimationStateSheet::build(const NLGEORGES::UFormElm &item)
 //-----------------------------------------------
 // serial
 //-----------------------------------------------
-void CAnimationStateSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAnimationStateSheet::serial(NLMISC::IStream &f)
 {
 	// Vector of animation.
 	f.serialCont(Animations);
@@ -541,7 +541,7 @@ void CAnimationSetSheet::build(const NLGEORGES::UFormElm &rootElmt)
 					nlinfo("%2d state '%s' :", i, stateName.c_str());
 
 			const UFormElm *elmt = 0;
-			if(rootElmt.getNodeByName(&elmt, stateName.c_str()))
+			if(rootElmt.getNodeByName(&elmt, stateName))
 			{
 				bool animPresent = false;
 				if(elmt)
@@ -600,7 +600,7 @@ void CAnimationSetSheet::build(const NLGEORGES::UFormElm &rootElmt)
 // serial :
 // serialize to disk or from disk the content of this class
 //-----------------------------------------------
-void CAnimationSetSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAnimationSetSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(Name);
 	f.serialCont(AnimationStates);
@@ -723,7 +723,7 @@ void CAnimationSetListSheet::build(const NLGEORGES::UFormElm &item)
 // serial :
 // serialize to disk or from disk the content of this class
 //-----------------------------------------------
-void CAnimationSetListSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAnimationSetListSheet::serial(NLMISC::IStream &f)
 {
 	f.serialCont(AnimSetList);
 }// serial //

@@ -74,6 +74,10 @@ public:
 
 	void setFontSize (uint32 fontSize)	{ _FontSize = fontSize; }
 
+	void setEmbolden (bool b) { _Embolden = b; }
+
+	void setOblique (bool b) { _Oblique = b; }
+
 	void setHotSpot (CComputedString::THotSpot hotSpot)	{ _HotSpot = hotSpot; }
 
 	void setScaleX (float scaleX) { _ScaleX = scaleX; }
@@ -82,7 +86,9 @@ public:
 
 	void setShaded (bool b) { _Shaded = b; }
 
-	void setShadeExtent (float shext) { _ShadeExtent = shext; }
+	void setShadeOutline (bool b) { _ShadeOutline = b; }
+
+	void setShadeExtent (float x, float y) { _ShadeExtentX = x; _ShadeExtentY = y; }
 
 	/// The alpha of the shade is multiplied at each draw with the alpha of the color. Default: (0,0,0,255)
 	void setShadeColor (NLMISC::CRGBA color) { _ShadeColor = color; }
@@ -99,6 +105,10 @@ public:
 
 	uint32						getFontSize () const { return _FontSize; }
 
+	bool						getEmbolden () const { return _Embolden; }
+
+	bool						getOblique () const { return _Oblique; }
+
 	CComputedString::THotSpot	getHotSpot() const { return _HotSpot; }
 
 	float						getScaleX() const { return _ScaleX; }
@@ -106,6 +116,8 @@ public:
 	float						getScaleZ() const { return _ScaleZ; }
 
 	bool						getShaded() const  { return _Shaded; }
+
+	bool						getShadeOutline() const  { return _ShadeOutline; }
 
 	bool						getKeep800x600Ratio() const {return _Keep800x600Ratio;}
 
@@ -138,15 +150,35 @@ public:
 	{
 		nlassert (index < _CacheStrings.size());
 		CComputedString &rCS = _CacheStrings[index];
-		if(_Shaded)
+		if (rCS.CacheVersion != _FontManager->getCacheVersion())
 		{
-			CRGBA	bkup = rCS.Color;
+			computeString(rCS.Text, rCS);
+		}
+		if (_Shaded)
+		{
+			CRGBA bkup = rCS.Color;
 			rCS.Color = _ShadeColor;
 			rCS.Color.A = (uint8)((uint(bkup.A) * uint(_ShadeColor.A)+1)>>8);
-			rCS.render2D (*_Driver, x+_ShadeExtent, z-_ShadeExtent, _HotSpot, _ScaleX, _ScaleZ);
+			if (_ShadeOutline)
+			{
+				float rextX = _ShadeExtentX * 0.7071f;
+				float rextY = _ShadeExtentY * 0.7071f;
+				rCS.render2D(*_Driver, x+rextX, z-rextY, _HotSpot, _ScaleX, _ScaleZ);
+				rCS.render2D(*_Driver, x-rextX, z-rextY, _HotSpot, _ScaleX, _ScaleZ);
+				rCS.render2D(*_Driver, x-rextX, z+rextY, _HotSpot, _ScaleX, _ScaleZ);
+				rCS.render2D(*_Driver, x+rextX, z+rextY, _HotSpot, _ScaleX, _ScaleZ);
+				rCS.render2D(*_Driver, x+_ShadeExtentX, z, _HotSpot, _ScaleX, _ScaleZ);
+				rCS.render2D(*_Driver, x-_ShadeExtentX, z, _HotSpot, _ScaleX, _ScaleZ);
+				rCS.render2D(*_Driver, x, z-_ShadeExtentY, _HotSpot, _ScaleX, _ScaleZ);
+				rCS.render2D(*_Driver, x, z-_ShadeExtentY, _HotSpot, _ScaleX, _ScaleZ);
+			}
+			else
+			{
+				rCS.render2D(*_Driver, x+_ShadeExtentX, z-_ShadeExtentY, _HotSpot, _ScaleX, _ScaleZ);
+			}
 			rCS.Color= bkup;
 		}
-		rCS.render2D (*_Driver, x, z, _HotSpot, _ScaleX, _ScaleZ);
+		rCS.render2D(*_Driver, x, z, _HotSpot, _ScaleX, _ScaleZ);
 	}
 
 	/** Clip and print a string that is in the cache (it leaves the string in the cache)
@@ -156,12 +188,32 @@ public:
 	{
 		nlassert (index < _CacheStrings.size());
 		CComputedString &rCS = _CacheStrings[index];
+		if (rCS.CacheVersion != _FontManager->getCacheVersion())
+		{
+			computeString(rCS.Text, rCS);
+		}
 		if(_Shaded)
 		{
 			CRGBA	bkup = rCS.Color;
 			rCS.Color= _ShadeColor;
 			rCS.Color.A = (uint8)((uint(bkup.A) * uint(_ShadeColor.A)+1)>>8);
-			rCS.render2DClip(*_Driver, rdrBuffer, x+_ShadeExtent, z-_ShadeExtent, xmin, ymin, xmax, ymax);
+			if (_ShadeOutline)
+			{
+				float rextX = _ShadeExtentX * 0.7071f;
+				float rextY = _ShadeExtentY * 0.7071f;
+				rCS.render2DClip(*_Driver, rdrBuffer, x+rextX, z-rextY, xmin, ymin, xmax, ymax);
+				rCS.render2DClip(*_Driver, rdrBuffer, x-rextX, z-rextY, xmin, ymin, xmax, ymax);
+				rCS.render2DClip(*_Driver, rdrBuffer, x-rextX, z+rextY, xmin, ymin, xmax, ymax);
+				rCS.render2DClip(*_Driver, rdrBuffer, x+rextX, z+rextY, xmin, ymin, xmax, ymax);
+				rCS.render2DClip(*_Driver, rdrBuffer, x+_ShadeExtentX, z, xmin, ymin, xmax, ymax);
+				rCS.render2DClip(*_Driver, rdrBuffer, x-_ShadeExtentX, z, xmin, ymin, xmax, ymax);
+				rCS.render2DClip(*_Driver, rdrBuffer, x, z+_ShadeExtentY, xmin, ymin, xmax, ymax);
+				rCS.render2DClip(*_Driver, rdrBuffer, x, z-_ShadeExtentY, xmin, ymin, xmax, ymax);
+			}
+			else
+			{
+				rCS.render2DClip(*_Driver, rdrBuffer, x+_ShadeExtentX, z-_ShadeExtentY, xmin, ymin, xmax, ymax);
+			}
 			rCS.Color= bkup;
 		}
 		rCS.render2DClip (*_Driver, rdrBuffer, x, z, xmin, ymin, xmax, ymax);
@@ -174,12 +226,33 @@ public:
 	{
 		nlassert (index < _CacheStrings.size());
 		CComputedString &rCS = _CacheStrings[index];
-		if(_Shaded)
+		if (rCS.CacheVersion != _FontManager->getCacheVersion())
+		{
+			computeString(rCS.Text, rCS);
+		}
+
+		if (_Shaded)
 		{
 			CRGBA	bkup = rCS.Color;
 			rCS.Color= _ShadeColor;
 			rCS.Color.A = (uint8)((uint(bkup.A) * uint(_ShadeColor.A)+1)>>8);
-			rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x+_ShadeExtent, y-_ShadeExtent, depth, xmin, ymin, xmax, ymax);
+			if (_ShadeOutline)
+			{
+				float rextX = _ShadeExtentX * 0.7071f;
+				float rextY = _ShadeExtentY * 0.7071f;
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x+rextX, y-rextY, depth, xmin, ymin, xmax, ymax);
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x-rextX, y-rextY, depth, xmin, ymin, xmax, ymax);
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x-rextX, y+rextY, depth, xmin, ymin, xmax, ymax);
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x+rextX, y+rextY, depth, xmin, ymin, xmax, ymax);
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x+_ShadeExtentX, y, depth, xmin, ymin, xmax, ymax);
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x-_ShadeExtentX, y, depth, xmin, ymin, xmax, ymax);
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x, y+_ShadeExtentY, depth, xmin, ymin, xmax, ymax);
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x, y-_ShadeExtentY, depth, xmin, ymin, xmax, ymax);
+			}
+			else
+			{
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x+_ShadeExtentX, y-_ShadeExtentY, depth, xmin, ymin, xmax, ymax);
+			}
 			rCS.Color= bkup;
 		}
 		rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x, y, depth, xmin, ymin, xmax, ymax);
@@ -191,20 +264,36 @@ public:
 		nlassert(_FontGen);
 
 		// compute the string just one time
-		_FontManager->computeString (ucstr, _FontGen, _Color, _FontSize, _Driver, _TempString, _Keep800x600Ratio);
+		_FontManager->computeString (ucstr, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, _TempString, _Keep800x600Ratio);
 
 		// draw shaded
-		if(_Shaded)
+		if (_Shaded)
 		{
 			CRGBA	bkup = _TempString.Color;
-			_TempString.Color= _ShadeColor;
+			_TempString.Color = _ShadeColor;
 			_TempString.Color.A = (uint8)((uint(bkup.A) * uint(_ShadeColor.A)+1)>>8);
-			_TempString.render2D (*_Driver,x+_ShadeExtent,z-_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
-			_TempString.Color= bkup;
+			if (_ShadeOutline)
+			{
+				float rextX = _ShadeExtentX * 0.7071f;
+				float rextY = _ShadeExtentY * 0.7071f;
+				_TempString.render2D(*_Driver,x+rextX,z-rextY,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x-rextX,z-rextY,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x-rextX,z+rextY,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x+rextX,z+rextY,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x+_ShadeExtentX,z,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x-_ShadeExtentX,z,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x,z+_ShadeExtentY,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x,z-_ShadeExtentY,_HotSpot,_ScaleX,_ScaleZ);
+			}
+			else
+			{
+				_TempString.render2D(*_Driver, x+_ShadeExtentX, z-_ShadeExtentY, _HotSpot, _ScaleX, _ScaleZ);
+			}
+			_TempString.Color = bkup;
 		}
 
 		// draw
-		_TempString.render2D (*_Driver, x, z, _HotSpot, _ScaleX, _ScaleZ);
+		_TempString.render2D(*_Driver, x, z, _HotSpot, _ScaleX, _ScaleZ);
 	}
 
 	/// Directly print a string
@@ -215,20 +304,36 @@ public:
 		// compute the string just one time
 		char *str;
 		NLMISC_CONVERT_VARGS (str, format, NLMISC::MaxCStringSize);
-		_FontManager->computeString (str, _FontGen, _Color, _FontSize, _Driver, _TempString, _Keep800x600Ratio);
+		_FontManager->computeString (str, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, _TempString, _Keep800x600Ratio);
 
 		// draw shaded
-		if(_Shaded)
+		if (_Shaded)
 		{
 			CRGBA	bkup = _TempString.Color;
 			_TempString.Color = _ShadeColor;
 			_TempString.Color.A = (uint8)((uint(bkup.A) * uint(_ShadeColor.A)+1)>>8);
-			_TempString.render2D (*_Driver,x+_ShadeExtent,z-_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
-			_TempString.Color= bkup;
+			if (_ShadeOutline)
+			{
+				float rextX = _ShadeExtentX * 0.7071f;
+				float rextY = _ShadeExtentY * 0.7071f;
+				_TempString.render2D(*_Driver,x+rextX,z-rextY,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x-rextX,z-rextY,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x-rextX,z+rextY,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x+rextX,z+rextY,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x+_ShadeExtentX,z,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x-_ShadeExtentX,z,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x,z+_ShadeExtentY,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x,z-_ShadeExtentY,_HotSpot,_ScaleX,_ScaleZ);
+			}
+			else
+			{
+				_TempString.render2D(*_Driver, x+_ShadeExtentX, z-_ShadeExtentY, _HotSpot, _ScaleX, _ScaleZ);
+			}
+			_TempString.Color = bkup;
 		}
 
 		// draw
-		_TempString.render2D (*_Driver, x, z, _HotSpot, _ScaleX, _ScaleZ);
+		_TempString.render2D(*_Driver, x, z, _HotSpot, _ScaleX, _ScaleZ);
 	}
 
 	/// Get computed string from index
@@ -255,7 +360,7 @@ public:
 	 */
 	void computeString (const std::string& s, CComputedString& output)
 	{
-		_FontManager->computeString (s, _FontGen, _Color, _FontSize, _Driver, output, _Keep800x600Ratio);
+		_FontManager->computeString (s, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, output, _Keep800x600Ratio);
 	}
 
 	/**
@@ -266,12 +371,12 @@ public:
 	 */
 	void computeString (const ucstring& s, CComputedString& output)
 	{
-		_FontManager->computeString (s, _FontGen, _Color, _FontSize, _Driver, output, _Keep800x600Ratio);
+		_FontManager->computeString (s, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, output, _Keep800x600Ratio);
 	}
 
 	void computeStringInfo (const ucstring& s, CComputedString& output)
 	{
-		_FontManager->computeStringInfo (s, _FontGen, _Color, _FontSize, _Driver, output, _Keep800x600Ratio);
+		_FontManager->computeStringInfo (s, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, output, _Keep800x600Ratio);
 	}
 
 	/// Debug : write to the disk the texture cache
@@ -302,6 +407,10 @@ private:
 	/// Font size;
 	uint32						_FontSize;
 
+	bool						_Embolden;
+
+	bool						_Oblique;
+
 	/// Current text color
 	NLMISC::CRGBA				_Color;
 
@@ -317,8 +426,12 @@ private:
 	/// true if text is shaded
 	bool						_Shaded;
 
+	/// true if shade appears as an outline
+	bool						_ShadeOutline;
+
 	/// shade's extent (shadow size)
-	float						_ShadeExtent;
+	float						_ShadeExtentX;
+	float						_ShadeExtentY;
 
 	/// Shade color (default is black)
 	NLMISC::CRGBA				_ShadeColor;

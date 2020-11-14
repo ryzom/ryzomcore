@@ -382,7 +382,7 @@ void CCombatPhrase::init()
 	_CriticalHit					= false;
 	
 	_ExecutionEndDate				= 0;
-	_LatencyEndDate					= 0;
+	_LatencyEndDate					= 0.0;
 
 	_SabrinaCost					= 0;
 	_SabrinaRelativeCost			= 1.0f;
@@ -892,7 +892,7 @@ bool CCombatPhrase::evaluate()
 	_NotEnoughStaminaMsg = false;
 	_NotEnoughHpMsg		= false;
 	_DisengageOnEnd		= false;
-	_LatencyEndDate		= 0;
+	_LatencyEndDate		= 0.0;
 	_ExecutionEndDate	= 0;
 
 	return true;
@@ -1136,10 +1136,25 @@ bool CCombatPhrase::validate()
 		if(_MeleeCombat)
 		{
 			// check combat float mode
+			uint32 range;
+			if (!combatDefender || !combatDefender->getEntity())
+				return false;
+
 			CCharacter *character = PlayerManager.getChar(_Attacker->getEntityRowId());
-			if (character && !character->meleeCombatIsValid())
+			CCharacter *cdefender = PlayerManager.getChar(defender->getEntityRowId());
+			if ( defender->getId().getType() == RYZOMID::player )
 			{
-				if (!_TargetTooFarMsg)
+				if (character && character->hasMoved() && cdefender && cdefender->hasMoved())
+					range = 10000;
+				else
+					range = 3000;
+			}
+			else
+				range = 6000;
+				
+			if ((character && !character->meleeCombatIsValid()) ||  ! PHRASE_UTILITIES::testRange(*actingEntity, *defender, range ))
+			{
+				if (!_TargetTooFarMsg && (character && !character->meleeCombatIsValid()))
 				{
 					PHRASE_UTILITIES::sendSimpleMessage( _Attacker->getEntityRowId(), "BS_TARGET_TOO_FAR_OR");
 					_TargetTooFarMsg = true;
@@ -1488,11 +1503,26 @@ bool  CCombatPhrase::update()
 				if (_MeleeCombat )
 				{
 					debugStep = 18;
+					if (!combatDefender || !combatDefender->getEntity())
+						return false;
+					uint32 range;
+
 					CCharacter *character = dynamic_cast<CCharacter *> (actor);
-					if (character && !character->meleeCombatIsValid())
+					CCharacter *defender = dynamic_cast<CCharacter *> (combatDefender->getEntity());
+					if ( combatDefender->getEntity()->getId().getType() == RYZOMID::player )
+					{
+						if (character && character->hasMoved() && defender && defender->hasMoved() )
+							range = 10000;
+						else
+							range = 3000;
+					}
+					else
+						range = 6000;
+					
+					if ((character && !character->meleeCombatIsValid()) || !PHRASE_UTILITIES::testRange(*actor, *combatDefender->getEntity(), range))
 					{
 						debugStep = 19;
-						if (!_TargetTooFarMsg && !_Idle)
+						if (!_TargetTooFarMsg && !_Idle && (character && !character->meleeCombatIsValid()))
 						{
 							PHRASE_UTILITIES::sendSimpleMessage( actor->getId(), "BS_TARGET_TOO_FAR_OR");
 							_TargetTooFarMsg = true;
@@ -1672,7 +1702,7 @@ bool CCombatPhrase::launch()
 {
 	H_AUTO(CCombatPhrase_launch);
 	
-	_LatencyEndDate = 0;
+	_LatencyEndDate = 0.0;
 	_ApplyDate = 0;
 
 	if ( !_Attacker ) 
@@ -1813,14 +1843,14 @@ bool CCombatPhrase::launch()
 	}
 	
 	// get weapon latency
-	float latency;
+	double latency;
 	if(_LeftWeapon.LatencyInTicks != 0)
 	{
-		latency = float(_HitRateModifier + std::max( MinTwoWeaponsLatency.get(), std::max(_RightWeapon.LatencyInTicks, _LeftWeapon.LatencyInTicks)) + _Ammo.LatencyInTicks);
+		latency = double(_HitRateModifier + std::max( double(MinTwoWeaponsLatency.get()), std::max(_RightWeapon.LatencyInTicks, _LeftWeapon.LatencyInTicks)) + _Ammo.LatencyInTicks);
 	}
 	else
 	{
-		latency = float(_HitRateModifier + std::max(_RightWeapon.LatencyInTicks, _LeftWeapon.LatencyInTicks) + _Ammo.LatencyInTicks);
+		latency = double(_HitRateModifier + std::max(_RightWeapon.LatencyInTicks, _LeftWeapon.LatencyInTicks) + _Ammo.LatencyInTicks);
 	}
 
 	// check for madness effect
@@ -2147,8 +2177,14 @@ bool CCombatPhrase::launch()
 	
 	// set latency end date
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	_LatencyEndDate = time + (NLMISC::TGameCycle)latency;
-
+	if (_LatencyEndDate > 0) 
+	{
+		_LatencyEndDate += latency;
+	}
+	else
+	{
+		_LatencyEndDate = (double)time + latency;
+	}
 	// compute the apply date
 	if (_Targets[0].Target!=NULL && actingEntity->getEntityRowId() == _Targets[0].Target->getEntityRowId())
 	{
@@ -2292,8 +2328,8 @@ bool CCombatPhrase::launchAttack(CEntityBase * actingEntity, bool rightHand, boo
 			// now we use the weapon speed factor as a divisor of wear per action 
 			// (a weapon twice as fast will wear twice as slow)
 			nlassert(ReferenceWeaponLatencyForWear > 0);
-			const uint16 latency = (rightHand ? _RightWeapon.LatencyInTicks : _LeftWeapon.LatencyInTicks);
-			const float wearFactor = (float)latency / (float)ReferenceWeaponLatencyForWear;
+			const float latency = (rightHand ? _RightWeapon.LatencyInTicks : _LeftWeapon.LatencyInTicks);
+			const float wearFactor = latency / (float)ReferenceWeaponLatencyForWear;
 			
 			if (rightHand)
 			{
@@ -3335,7 +3371,7 @@ void CCombatPhrase::stop()
 		CCharacter *character = PlayerManager.getChar(_Attacker->getEntityRowId());
 		if (character)
 		{
-			character->dateOfNextAllowedAction( _LatencyEndDate );
+			character->dateOfNextAllowedAction((NLMISC::TGameCycle)_LatencyEndDate );
 		}
 	}
 

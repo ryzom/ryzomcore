@@ -126,7 +126,7 @@ retry:
 
 		// now the user is on the database
 
-		uid = atoi(row[0]);
+		NLMISC::fromString(row[0], uid);
 
 		if(cpassword != row[2])
 		{

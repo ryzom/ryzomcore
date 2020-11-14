@@ -508,7 +508,7 @@ void COutputFile::generateOutput() const
 	}
 
 	outbuff+="#endif\n\n";
-	
+
 	// read in the previous version of the output file
 	char *inbuff=NULL;
 	FILE *inf=fopen(_FileName.c_str(),"rb");

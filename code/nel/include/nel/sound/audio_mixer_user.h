@@ -332,7 +332,7 @@ public:
 	virtual bool	isMusicEnded();
 	virtual void	setMusicVolume(float gain);
 	virtual float	getMusicLength();
-	virtual bool	getSongTitle(const std::string &filename, std::string &result);
+	virtual bool	getSongTitle(const std::string &filename, std::string &result, float &length);
 	virtual void	enableBackgroundMusic(bool enable);
 	virtual void	enableBackgroundMusicTimeConstraint(bool enable);
 	CMusicSoundManager *getBackgroundMusicManager() const {return _BackgroundMusicManager;}

@@ -324,7 +324,7 @@ void CNel_launcherApp::LoadVersion()
 	else
 	{
 		nlinfo("Launcher' version %s", csVersion);
-		m_dVersion	= atof(csVersion);
+		NLMISC::fromString(csVersion, m_dVersion);
 	}
 }
 

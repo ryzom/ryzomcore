@@ -21,20 +21,11 @@
 // INCLUDES //
 //////////////
 #include "stdpch.h"
-// Misc.
-#include "nel/misc/types_nl.h"
-#include "nel/misc/debug.h"
 
-#if defined(NL_OS_WINDOWS)
-#include <windows.h>
-#include <shellapi.h>
-#endif
-
-// game share
-#include "game_share/ryzom_version.h"
-
-// Client
-#include "sheets_packer_init.h"
+// Application
+#include "sheets_packer_cfg.h"
+#include "sheet_manager.h"
+#include "continent_manager_build.h"
 
 
 ///////////
@@ -46,7 +37,7 @@ using namespace NLMISC;
 /////////////
 // GLOBALS //
 /////////////
-static uint32 Version = 1;	// Client Version.
+NLLIGO::CLigoConfig LigoConfig;
 
 
 ///////////////
@@ -60,13 +51,61 @@ static uint32 Version = 1;	// Client Version.
 //---------------------------------------------------
 int main(int argc, char **argv)
 {
+	CApplicationContext applicationContext;
+
+	// Parse Command Line.
+	NLMISC::CCmdArgs args;
+
+	args.setDescription("Pack all sheets needed by client. All parameters must be defined in sheets_packer.cfg and there is no parameters from command-line.");
+
+	if (!args.parse(argc, argv)) return 1;
+
+	CFileDisplayer  *fd = NULL;
+
 	/////////////////////////////////
 	// Initialize the application. //
 	try
 	{
-		// If the init fail -> return Failure.
-		if(!init())
-			return EXIT_FAILURE;
+		// Add a displayer for Debug Infos, disable log.log.
+		createDebug(NULL, false);
+
+		CLog::setProcessName("sheets_packer");
+
+		fd = new CFileDisplayer(getLogDirectory() + "sheets_packer.log", true, "SHEETS_PACKER.LOG");
+
+		// register ligo 'standard' class
+		NLLIGO::Register();
+
+		DebugLog->addDisplayer(fd);
+		InfoLog->addDisplayer(fd);
+		WarningLog->addDisplayer(fd);
+		ErrorLog->addDisplayer(fd);
+		AssertLog->addDisplayer(fd);
+
+		// Load the application configuration.
+		nlinfo("Loading config file...");
+		AppCfg.init(ConfigFileName);
+
+		// Define the root path that contains all data needed for the application.
+		nlinfo("Adding search paths...");
+		for (uint i = 0; i < AppCfg.DataPath.size(); i++)
+			CPath::addSearchPath(NLMISC::expandEnvironmentVariables(AppCfg.DataPath[i]), true, false);
+
+		// Initialize Sheet IDs.
+		nlinfo("Init SheetId...");
+		CSheetId::init(true);
+
+		// load packed sheets	
+		nlinfo("Loading sheets...");
+		IProgressCallback callback;
+		SheetMngr.setOutputDataPath(NLMISC::expandEnvironmentVariables(AppCfg.OutputDataPath));
+		SheetMngr.load(callback, true, true, AppCfg.DumpVisualSlotsIndex);
+
+		// Make the lmconts.packed file
+		if (!LigoConfig.readPrimitiveClass(AppCfg.LigoPrimitiveClass.c_str(), false))
+			nlwarning("Can't load primitive class file %s", AppCfg.LigoPrimitiveClass.c_str());
+		NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
+		buildLMConts(AppCfg.WorldSheet, NLMISC::expandEnvironmentVariables(AppCfg.PrimitivesPath), NLMISC::expandEnvironmentVariables(AppCfg.OutputDataPath));
 	}
 	catch(const EFatalError &) { return EXIT_FAILURE; /* nothing to do */ }
 	catch(const Exception &e)
@@ -88,7 +127,14 @@ int main(int argc, char **argv)
 	// Release all the memory. //
 	try
 	{
-		release();
+		DebugLog->removeDisplayer("SHEETS_PACKER.LOG");
+		InfoLog->removeDisplayer("SHEETS_PACKER.LOG");
+		WarningLog->removeDisplayer("SHEETS_PACKER.LOG");
+		ErrorLog->removeDisplayer("SHEETS_PACKER.LOG");
+		AssertLog->removeDisplayer("SHEETS_PACKER.LOG");
+
+		if (fd) delete fd;
+		fd = NULL;
 	}
 	catch(const EFatalError &) { return EXIT_FAILURE; /* nothing to do */ }
 	catch(const Exception &e)

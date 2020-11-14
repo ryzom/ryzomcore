@@ -46,7 +46,7 @@ public:
 	NLMISC_DECLARE_CLASS(CPSDot);
 
 	///serialisation
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	/// return true if there are transparent faces in the object
 	virtual bool hasTransparentFaces(void);

@@ -70,7 +70,7 @@ public:
 	/// Generate the current selected texture, looking in CPath if necessary.
 	virtual void			doGenerate(bool async = false);
 	/// Serial this object
-	virtual void			serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void			serial(NLMISC::IStream &f);
 	NLMISC_DECLARE_CLASS(CTextureMultiFile);
 
 private:

@@ -83,21 +83,21 @@ sint	main(sint argc, char **argv)
 	{
 		if (string(argv[i]) == string("-"))
 		{
-			if (cmd != "")
+			if (!cmd.empty())
 			{
 				commands.push_back(cmd);
-				cmd = "";
+				cmd.clear();
 			}
 		}
 		else
 		{
-			if (cmd != "")
+			if (!cmd.empty())
 				cmd += ' ';
 			cmd += argv[i];
 		}
 	}
 
-	if (cmd != "")
+	if (!cmd.empty())
 		commands.push_back(cmd);
 
 	NLMISC::createDebug ();

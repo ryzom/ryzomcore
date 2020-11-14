@@ -574,7 +574,7 @@ class ModelValidationTest extends BaseModelTest {
 
 		$Something->create();
 		$result = $Something->save($data);
-		$this->assertFalse($result, 'Save occured even when with models failed. %s');
+		$this->assertFalse($result, 'Save occurred even when with models failed. %s');
 		$this->assertEqual($JoinThing->validationErrors, $expectedError);
 		$count = $Something->find('count', array('conditions' => array('Something.id' => $data['Something']['id'])));
 		$this->assertIdentical($count, 0);
@@ -593,7 +593,7 @@ class ModelValidationTest extends BaseModelTest {
 		);
 		$Something->create();
 		$result = $Something->save($data);
-		$this->assertFalse($result, 'Save occured even when with models failed. %s');
+		$this->assertFalse($result, 'Save occurred even when with models failed. %s');
 
 		$joinRecords = $JoinThing->find('count', array(
 			'conditions' => array('JoinThing.something_id' => $data['Something']['id'])

@@ -292,7 +292,7 @@ sint main(int argc, char **argv)
 			}
 			else
 			{
-				// an error occured, try to delete directory
+				// an error occurred, try to delete directory
 				nlwarning("can't export shape");
 				CFile::deleteDirectory(output_path);
 			}

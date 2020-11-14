@@ -160,24 +160,21 @@ void EditPatchMod::BeginEditParams(IObjParam *ip, ULONG flags, Animatable *prev)
 	*/
 	if (selLevel == EP_PATCH)
 	{
-		hSurfPanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_SURF),
-			PatchSurfDlgProc, GetString(IDS_TH_SURFACEPROPERTIES), (LPARAM) this, rsSurf ? 0 : APPENDROLL_CLOSED);
+		hSurfPanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_SURF), PatchSurfDlgProc, GetString(IDS_TH_SURFACEPROPERTIES), (LPARAM) this, rsSurf ? 0 : APPENDROLL_CLOSED);
 	}
 	else
 		hSurfPanel = NULL;
 
 	if (selLevel == EP_TILE)
 	{
-		hTilePanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_TILE),
-			PatchTileDlgProc, "Tile Properties", (LPARAM) this, rsTile ? 0 : APPENDROLL_CLOSED);
+		hTilePanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_TILE), PatchTileDlgProc, _M("Tile Properties"), (LPARAM) this, rsTile ? 0 : APPENDROLL_CLOSED);
 	}
 	else
 		hTilePanel = NULL;
 	
 	if (selLevel == EP_EDGE)
 	{
-		hEdgePanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_EDGE),
-			PatchEdgeDlgProc, "Edge Properties", (LPARAM) this, rsEdge ? 0 : APPENDROLL_CLOSED);
+		hEdgePanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_EDGE), PatchEdgeDlgProc, _M("Edge Properties"), (LPARAM) this, rsEdge ? 0 : APPENDROLL_CLOSED);
 	}
 	else
 		hEdgePanel = NULL;
@@ -329,7 +326,7 @@ ISubObjType *EditPatchMod::GetSubObjType(int i)
 		SOT_Vertex.SetName(GetString(IDS_TH_VERTEX));
 		SOT_Edge.SetName(GetString(IDS_TH_EDGE));
 		SOT_Patch.SetName(GetString(IDS_TH_PATCH));
-		SOT_Tile.SetName("Tile");
+		SOT_Tile.SetName(_M("Tile"));
 		// SOT_Element.SetName(GetString(IDS_TH_ELEMENT));
 		// SOT_Handle.SetName(GetString(IDS_TH_HANDLE));
 	}

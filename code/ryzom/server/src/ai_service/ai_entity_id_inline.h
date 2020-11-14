@@ -39,7 +39,7 @@
 	fauna:	<10 bit manager id> <12 bit group id><8 bit bot id>
 	others:	<10 bit manager id> ... the remaining 20 bits TBD ...
 
-    for ais as a rule ~0 is used as a reserved value
+	for ais as a rule std::numeric_limits<uint>::max() is used as a reserved value
 	managers are:		01 <10 bit manager id>  1111 1111 1111 1111 1111
 	fauna groups are:	01 <10 bit manager id> <12 bit grp id> 1111 1111
 */
@@ -57,7 +57,7 @@
 #define PLR_ID_BITS ( 32 - PLR_HDR_BITS )
 #define PLR_ID_BIT_MASK ( ( 1<< PLR_ID_BITS ) -1 )
 #define PLR_HDR_BIT_SHIFT PLR_ID_BITS
-#define PLR_HDR_BIT_MASK (~0u<<PLR_HDR_BIT_SHIFT)
+#define PLR_HDR_BIT_MASK (std::numeric_limits<uint>::max()<<PLR_HDR_BIT_SHIFT)
 #define PLR_HDR  0x20000000	//(1<<PLR_HDR_BIT_SHIFT)
 
 #define BOT_BITS 4 //8
@@ -378,7 +378,7 @@ inline bool CAIEntityId::setGrpId(uint32 id)
 inline bool CAIEntityId::setMgrId(uint32 id)
 {
 	uint32 mask=((1<<MGR_BITS)-1);
-	if (id>=mask && id!=~0u) return false;	// Test for bit count overflow
+	if (id>=mask && id!=std::numeric_limits<uint>::max()) return false;	// Test for bit count overflow
 	//if (id==~0u) id=mask;
 	id&=mask;		//	Special case ~0u
 	mask<<=BOT_BITS+GRP_BITS;

@@ -152,7 +152,7 @@ private:
 	struct CTextureLodToSort
 	{
 		CTextureLod		*Lod;
-		CVector			Position;
+		NLMISC::CVector	Position;
 		bool			operator<(const CTextureLodToSort &other) const
 		{
 			return Lod->Weight<other.Lod->Weight;

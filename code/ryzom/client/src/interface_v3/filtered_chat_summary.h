@@ -36,7 +36,7 @@ public:
 	// output
 	CChatGroup::TGroupType Target;
 public:
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };
 
 // class for serialisation of user dyn chat (filtered chat) info
@@ -48,7 +48,7 @@ public:
 	// output
 	CChatGroup::TGroupType Target;
 public:
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };
 
 

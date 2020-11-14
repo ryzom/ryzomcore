@@ -50,7 +50,7 @@ struct CCreatureRawMaterial
 	/**
 	 * Serial
 	 */
-	inline void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	inline void serial(NLMISC::IStream &f)
 	{
 		f.serial( MpCommon );
 		f.serial( Quantity );
@@ -88,7 +88,7 @@ public:
 	/**
 	 * Serial
 	 */
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serialCont( _Mps );
 		f.serialEnum( _HarvestSkill );
@@ -188,7 +188,7 @@ protected:
 	/// the harvestable Mps (4 per entity)
 	std::vector< CCreatureRawMaterial>	_Mps;
 
-	/// pointer on the harverting character
+	/// pointer on the harvesting character
 	TDataSetRow					_HarvesterRowId;
 
 	/// skill used to harvest this creature

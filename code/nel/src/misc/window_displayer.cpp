@@ -116,26 +116,20 @@ void CWindowDisplayer::create (string windowNameEx, bool iconified, sint x, sint
 	_Thread->start ();
 }
 
-void CWindowDisplayer::doDisplay (const NLMISC::CLog::TDisplayInfo &args, const char *message)
+std::string CWindowDisplayer::stringifyMessage(const NLMISC::CLog::TDisplayInfo &args, const char *message, bool needSlashR)
 {
 	bool needSpace = false;
 	//stringstream ss;
 	string str;
 
-	uint32 color = 0xFF000000;
-
 	if (args.LogType != CLog::LOG_NO)
 	{
-		str += logTypeToString(args.LogType);
-		if (args.LogType == CLog::LOG_ERROR || args.LogType == CLog::LOG_ASSERT) color = 0x00FF0000;
-		else if (args.LogType == CLog::LOG_WARNING) color = 0x00800000;
-		else if (args.LogType == CLog::LOG_DEBUG) color = 0x00808080;
-		else color = 0;
+		str += CWindowDisplayer::logTypeToString(args.LogType);
 		needSpace = true;
 	}
 
 	// Write thread identifier
-	if ( args.ThreadId != 0 )
+	if (args.ThreadId != 0)
 	{
 		if (needSpace) { str += " "; needSpace = false; }
 #ifdef NL_OS_WINDOWS
@@ -173,7 +167,7 @@ void CWindowDisplayer::doDisplay (const NLMISC::CLog::TDisplayInfo &args, const 
 	uint nbl = 1;
 
 	char *npos, *pos = const_cast<char *>(message);
-	while ((npos = strchr (pos, '\n')))
+	while ((npos = strchr(pos, '\n')))
 	{
 		*npos = '\0';
 		str += pos;
@@ -181,13 +175,13 @@ void CWindowDisplayer::doDisplay (const NLMISC::CLog::TDisplayInfo &args, const 
 			str += "\r";
 		str += "\n";
 		*npos = '\n';
-		pos = npos+1;
+		pos = npos + 1;
 		nbl++;
 	}
 	str += pos;
 
 	pos = const_cast<char *>(args.CallstackAndLog.c_str());
-	while ((npos = strchr (pos, '\n')))
+	while ((npos = strchr(pos, '\n')))
 	{
 		*npos = '\0';
 		str += pos;
@@ -195,10 +189,27 @@ void CWindowDisplayer::doDisplay (const NLMISC::CLog::TDisplayInfo &args, const 
 			str += "\r";
 		str += "\n";
 		*npos = '\n';
-		pos = npos+1;
+		pos = npos + 1;
 		nbl++;
 	}
 	str += pos;
+
+	return str;
+}
+
+void CWindowDisplayer::doDisplay (const NLMISC::CLog::TDisplayInfo &args, const char *message)
+{
+	uint32 color = 0xFF000000;
+
+	if (args.LogType != CLog::LOG_NO)
+	{
+		if (args.LogType == CLog::LOG_ERROR || args.LogType == CLog::LOG_ASSERT) color = 0x00FF0000;
+		else if (args.LogType == CLog::LOG_WARNING) color = 0x00800000;
+		else if (args.LogType == CLog::LOG_DEBUG) color = 0x00808080;
+		else color = 0;
+	}
+
+	std::string str = stringifyMessage(args, message, needSlashR);
 
 	{
 		CSynchronized<std::list<std::pair<uint32, std::string> > >::CAccessor access (&_Buffer);

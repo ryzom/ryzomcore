@@ -168,9 +168,9 @@ public:
 	void			clear();
 
 	/// Verify the binding of patchs of all zones. throw EBadBind if error.
-	void			checkBinds() throw(EBadBind);
+	void			checkBinds();
 	/// Verify the binding of patchs of one zone. throw EBadBind if error. nop if zone not loaded.
-	void			checkBinds(uint16 zoneId) throw(EBadBind);
+	void			checkBinds(uint16 zoneId);
 
 	/**
 	  *  Build tileBank. Call this after loading the near and far tile banks.
@@ -716,7 +716,7 @@ private:
 	bool			_RefineMode;
 	float			_FarTransition;
 	uint			_TileMaxSubdivision;
-	// For VertexProgram. true if change has occured in threshold since the last render().
+	// For VertexProgram. true if change has occurred in threshold since the last render().
 	float			_VPThresholdChange;
 
 	/// \name VertexBuffer mgt.

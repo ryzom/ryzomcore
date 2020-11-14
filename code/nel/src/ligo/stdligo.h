@@ -14,7 +14,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "nel/misc/types_nl.h"
+#ifndef STDLIGO_H
+#define STDLIGO_H
+
+#if defined(_MSC_VER) && defined(_DEBUG)
+	#define _CRTDBG_MAP_ALLOC
+	#include <stdlib.h>
+	#include <crtdbg.h>
+	#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
 
 #include <algorithm>
 #include <cmath>
@@ -27,7 +35,6 @@
 #include <ctime>
 #include <deque>
 #include <exception>
-#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -45,6 +52,7 @@
 // Include from libxml2
 #include <libxml/parser.h>
 
+#include "nel/misc/types_nl.h"
 #include "nel/misc/debug.h"
 #include "nel/misc/common.h"
 #include "nel/misc/fast_mem.h"
@@ -67,4 +75,6 @@
 		#define NOMINMAX
 	#endif
 	#include <windows.h>
+#endif
+
 #endif

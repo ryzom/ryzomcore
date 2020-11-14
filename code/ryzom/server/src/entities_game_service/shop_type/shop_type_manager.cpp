@@ -1375,7 +1375,7 @@ uint32 CShopTypeManager::computeBasePrice( const CSheetId& sheet, uint16 level, 
 	const CStaticBrick * brick = CSheets::getSBrickForm( itemForm->CraftPlan );
 	if( !brick )
 	{
-		nlwarning("<CShopTypeManager> Can't find craft plan sheet '%s' in item form '%s'", itemForm->CraftPlan.toString().c_str(), sheet.toString().c_str() );
+		//nlwarning("<CShopTypeManager> Can't find craft plan sheet '%s' in item form '%s'", itemForm->CraftPlan.toString().c_str(), sheet.toString().c_str() );
 		return 0;
 	}
 	const CFaber* faber = brick->Faber;

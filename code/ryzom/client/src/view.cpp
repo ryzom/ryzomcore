@@ -37,6 +37,10 @@
 #include "motion/user_controls.h"
 
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using NL3D::UVisualCollisionManager;
 extern UVisualCollisionManager				*CollisionManager;
 

@@ -20,7 +20,7 @@
 #include "filtered_chat_summary.h"
 
 //===================================================================================
-void CFilteredChatSummary::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CFilteredChatSummary::serial(NLMISC::IStream &f)
 {
 	sint ver= f.serialVersion(2);
 	f.serialCheck(NELID("USHC"));
@@ -39,7 +39,7 @@ void CFilteredChatSummary::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 }
 
 //===================================================================================
-void CFilteredDynChatSummary::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CFilteredDynChatSummary::serial(NLMISC::IStream &f)
 {
 	sint ver = f.serialVersion(0);
 	f.serialCheck(NELID("USHC"));

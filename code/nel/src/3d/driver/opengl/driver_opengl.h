@@ -147,6 +147,23 @@ public:
 };
 
 // ***************************************************************************
+class CDepthStencilFBO : public NLMISC::CRefCount
+{
+public:
+	CDepthStencilFBO(CDriverGL *driver, uint width, uint height);
+	~CDepthStencilFBO();
+
+	uint					Width;
+	uint					Height;
+
+	GLuint					DepthFBOId;
+	GLuint					StencilFBOId;
+
+private:
+	CDriverGL				*m_Driver;
+};
+
+// ***************************************************************************
 class CTextureDrvInfosGL : public ITextureDrvInfos
 {
 public:
@@ -173,12 +190,9 @@ public:
 	GLuint					FBOId;
 
 	// depth stencil FBO id
-	GLuint					DepthFBOId;
-	GLuint					StencilFBOId;
-
-	bool					InitFBO;
 	bool					AttachDepthStencil;
-	bool					UsePackedDepthStencil;
+	NLMISC::CSmartPtr<CDepthStencilFBO>	DepthStencilFBO;
+	bool					InitFBO;
 
 	// The current wrap modes assigned to the texture.
 	ITexture::TWrapMode		WrapS;
@@ -311,7 +325,7 @@ public:
 	virtual void			disableHardwareVertexArrayAGP();
 	virtual void			disableHardwareTextureShader();
 
-	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay);
+	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable);
 	virtual bool			setMode(const GfxMode& mode);
 	virtual bool			getModes(std::vector<GfxMode> &modes);
 	virtual bool			getCurrentScreenMode(GfxMode &mode);
@@ -367,6 +381,8 @@ public:
 
 	virtual void			forceDXTCCompression(bool dxtcComp);
 	virtual void			setAnisotropicFilter(sint filter);
+	virtual uint			getAnisotropicFilter() const;
+	virtual uint			getAnisotropicFilterMaximum() const;
 
 	virtual void			forceTextureResize(uint divisor);
 
@@ -504,6 +520,8 @@ public:
 
 	virtual const char*		getVideocardInformation ();
 
+	virtual sint			getTotalVideoMemory() const;
+
 	virtual bool			isActive ();
 
 	virtual uint8			getBitPerPixel ();
@@ -526,14 +544,6 @@ public:
 
 	// Change default scale for all cursors
 	virtual void			setCursorScale(float scale);
-
-	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
-
-	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable);
-
-	virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager();
-
-	virtual uint							 getDoubleClickDelay(bool hardwareMouse);
 
 	virtual void			getWindowSize (uint32 &width, uint32 &height);
 
@@ -565,6 +575,8 @@ public:
 
 	virtual bool			copyTargetToTexture (ITexture *tex, uint32 offsetx, uint32 offsety, uint32 x, uint32 y,
 													uint32 width, uint32 height, uint32 mipmapLevel);
+
+	virtual bool			textureCoordinateAlternativeMode() const { return false; };
 
 	virtual bool			getRenderTargetSize (uint32 &width, uint32 &height);
 
@@ -693,6 +705,7 @@ private:
 	friend class					CTextureDrvInfosGL;
 	friend class					CVertexProgamDrvInfosGL;
 	friend class					CPixelProgamDrvInfosGL;
+	friend class					CDepthStencilFBO;
 
 private:
 	// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
@@ -888,8 +901,11 @@ private:
 	// viewport before call to setRenderTarget, if BFO extension is supported
 	CViewport				_OldViewport;
 
+	// Current FBO render target
 	CSmartPtr<ITexture>		_RenderTargetFBO;
 
+	// Share the same backbuffer for FBO render targets with window size
+	std::vector<CDepthStencilFBO *>	_DepthStencilFBOs;
 
 	// Num lights return by GL_MAX_LIGHTS
 	uint						_MaxDriverLight;
@@ -1546,7 +1562,7 @@ private:
 
 
 	// Monitor color parameters backup
-	bool							_NeedToRestaureGammaRamp;
+	bool							_NeedToRestoreGammaRamp;
 	uint16							_GammaRampBackuped[3*256];
 
 
@@ -1655,7 +1671,7 @@ public:
 	{ 
 		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
 		if (it != ParamIndices.end()) return it->second; 
-		return ~0;
+		return std::numeric_limits<uint>::max();
 	};
 
 	std::map<std::string, uint> ParamIndices;
@@ -1675,7 +1691,7 @@ public:
 	{ 
 		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
 		if (it != ParamIndices.end()) return it->second; 
-		return ~0;
+		return std::numeric_limits<uint>::max();
 	};
 
 	std::map<std::string, uint> ParamIndices;

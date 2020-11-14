@@ -107,7 +107,7 @@ void	CPropertyDecoder::receive(TPacketNumber /* packetNumber */, CAction *action
 
 		property.LastReceived = act->getValue();
 
-		nldebug("CLPROPD: Received (Id=%d,Act=%d)=(%"NL_I64"d)(Pck=%d)", act->Slot, act->Code, property.LastReceived, packetNumber);
+		nldebug("CLPROPD: Received (Id=%d,Act=%d)=(%" NL_I64 "d)(Pck=%d)", act->Slot, act->Code, property.LastReceived, packetNumber);
 	}
 */
 }

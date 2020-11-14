@@ -538,9 +538,9 @@ void CBufFIFO::displayStats (CLog *log)
 
 	log->displayNL ("%p BiggestBlock: %d, SmallestBlock: %d", this, _BiggestBlock, _SmallestBlock);
 	log->displayNL ("%p BiggestBuffer: %d, SmallestBuffer: %d", this, _BiggestBuffer, _SmallestBuffer);
-	log->displayNL ("%p Pushed: %d, PushedTime: total %"NL_I64"d ticks, mean %f ticks", this, _Pushed, _PushedTime, (_Pushed>0?(double)(sint64)_PushedTime / (double)_Pushed:0.0));
-	log->displayNL ("%p Fronted: %d, FrontedTime: total %"NL_I64"d ticks, mean %f ticks", this, _Fronted, _FrontedTime, (_Fronted>0?(double)(sint64)_FrontedTime / (double)_Fronted:0.0));
-	log->displayNL ("%p Resized: %d, ResizedTime: total %"NL_I64"d ticks, mean %f ticks", this, _Resized, _ResizedTime, (_Resized>0?(double)(sint64)_ResizedTime / (double)_Resized:0.0));
+	log->displayNL ("%p Pushed: %d, PushedTime: total %" NL_I64 "d ticks, mean %f ticks", this, _Pushed, _PushedTime, (_Pushed>0?(double)(sint64)_PushedTime / (double)_Pushed:0.0));
+	log->displayNL ("%p Fronted: %d, FrontedTime: total %" NL_I64 "d ticks, mean %f ticks", this, _Fronted, _FrontedTime, (_Fronted>0?(double)(sint64)_FrontedTime / (double)_Fronted:0.0));
+	log->displayNL ("%p Resized: %d, ResizedTime: total %" NL_I64 "d ticks, mean %f ticks", this, _Resized, _ResizedTime, (_Resized>0?(double)(sint64)_ResizedTime / (double)_Resized:0.0));
 }
 
 void CBufFIFO::display ()

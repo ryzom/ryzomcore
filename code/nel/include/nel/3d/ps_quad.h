@@ -114,7 +114,7 @@ protected:
 	void updateVbColNUVForRender(CVertexBuffer &vb, uint32 startIndex, uint32 numQuad, uint32 srcStep, IDriver &drv);
 
 	/// DERIVERS MUST CALL this
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 	virtual CPSLocated *getColorOwner(void) { return _Owner; }
 	virtual CPSLocated *getSizeOwner(void) { return _Owner; }
 	virtual CPSLocated *getTextureIndexOwner(void) { return _Owner; }

@@ -338,7 +338,8 @@ namespace NLQT
 		_aboutQtAction->setStatusTip(tr("Show the Qt library's About box"));
 		connect(_aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
-		for (int i = 0; i < MaxRecentFiles; ++i) {
+		for (int i = 0; i < MaxRecentFiles; ++i)
+		{
 			recentFileActs[i] = new QAction(this);
 			recentFileActs[i]->setVisible(false);
 			connect(recentFileActs[i], SIGNAL(triggered()),

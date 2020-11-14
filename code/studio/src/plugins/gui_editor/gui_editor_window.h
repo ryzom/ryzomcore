@@ -25,10 +25,7 @@
 #include "property_browser_ctrl.h"
 
 class QtTreePropertyBrowser;
-
 class QMenu;
-
-class TextureChooser;
 
 namespace GUIEditor
 {
@@ -67,14 +64,13 @@ private Q_SLOTS:
 		void onGUILoaded();
 		void onAddWidgetClicked();
 		void onTreeChanged();
-		void onTCClicked();
-
 
 protected:
 		void hideEvent( QHideEvent *evnt );
 		void showEvent( QShowEvent *evnt );
 
 private:
+		void reset();
 		void createMenus();
 		void removeMenus();
 
@@ -101,8 +97,6 @@ private:
 		QString currentProjectFile;
 
 		QMenu *menu;
-
-		TextureChooser *tc;
 	};
 
 }

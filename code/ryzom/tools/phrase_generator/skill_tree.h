@@ -55,7 +55,7 @@ public :
 		SKILLS::ESkills	ParentSkill;
 		std::vector<SKILLS::ESkills> ChildSkills;
 
-		void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serialEnum( Skill );
 			f.serial( SkillCode );
@@ -92,7 +92,7 @@ public :
 	static uint getVersion () { return 1 + ( SKILLS::NUM_SKILLS << 16 ); }
 
 	/// serialize
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream) { f.serialCont( SkillsTree ); }
+	void serial(NLMISC::IStream &f) { f.serialCont( SkillsTree ); }
 
 	/// destructor
 	virtual ~CStaticSkillsTree() {}

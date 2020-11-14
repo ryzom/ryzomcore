@@ -148,7 +148,7 @@ void CAISActions::execute(uint64 action,const std::vector <CAIActions::CArg> &ar
 	uint64 id=action;
 	for (uint j=0;j<8 && ((char*)&id)[j]!=0;++j)
 		txt+=((char*)&id)[j];
-	nlwarning("Failed to execute action: %16"NL_I64"x: %s",action,txt.c_str());
+	nlwarning("Failed to execute action: %16" NL_I64 "x: %s",action,txt.c_str());
 }
 
 

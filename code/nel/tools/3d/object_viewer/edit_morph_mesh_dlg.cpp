@@ -81,27 +81,15 @@ void CEditMorphMeshDlg::init(CWnd *pParent)
 //====================================================================
 bool CEditMorphMeshDlg::getShapeNameFromDlg(std::string &name)
 {
-	CFileDialog fd(TRUE, ".shape", "*.shape", 0, NULL, this);
+	CFileDialog fd(TRUE, _T(".shape"), _T("*.shape"), 0, NULL, this);
 	if (fd.DoModal() == IDOK)
 	{
-		// Add to the path
-		/*
-		char drive[256];
-		char dir[256];
-		char path[256];
-		char fname[256];
-		char ext[256];
-		*/
-
-
 		// Add search path for the texture
 		/*
-		_splitpath (fd.GetPathName(), drive, dir, fname, ext);
-		_makepath (path, drive, dir, NULL, NULL);
-		NLMISC::CPath::addSearchPath (path);
+		NLMISC::CPath::addSearchPath (NLMISC::CFile::getPath(tStrToUtf8(fd.GetPathName()));
 		*/
 
-		name = fd.GetPathName();
+		name = tStrToUtf8(fd.GetPathName());
 		
 		return true;
 	}
@@ -135,7 +123,7 @@ void CEditMorphMeshDlg::OnAdd()
 		_CM->setShapes(&shapeNames[0], (uint)shapeNames.size());
 		std::vector<sint> numVerts;
 		_CM->getShapeNumVerts(numVerts);		
-		m_MeshList.AddString(getShapeDescStr(index, numVerts[index]).c_str());
+		m_MeshList.AddString(utf8ToTStr(getShapeDescStr(index, numVerts[index])));
 		GetDlgItem(IDC_REMOVE)->EnableWindow(TRUE);
 	}
 	touchPSState();
@@ -265,7 +253,7 @@ void CEditMorphMeshDlg::updateMeshList()
 	m_MeshList.ResetContent();
 	for (uint k = 0; k < _CM->getNumShapes(); ++k)
 	{	
-		m_MeshList.AddString(getShapeDescStr(k, numVerts[k]).c_str());		
+		m_MeshList.AddString(utf8ToTStr(getShapeDescStr(k, numVerts[k])));
 	}
 	m_MeshList.SetCurSel(0);
 	updateValidFlag();
@@ -322,12 +310,12 @@ std::string CEditMorphMeshDlg::getShapeDescStr(uint shapeIndex, sint numVerts) c
 	{	
 		CString verts;
 		verts.LoadString(IDS_VERTICES);
-		std::string msg = _CM->getShape(shapeIndex) + " (" + NLMISC::toString(numVerts) + " " + (LPCTSTR) verts + ")";
+		std::string msg = _CM->getShape(shapeIndex) + " (" + NLMISC::toString(numVerts) + " " + tStrToUtf8(verts) + ")";
 		return msg;
 	}
 	else
 	{		
-		std::string result =  _CM->getShape(shapeIndex) + " (" + (LPCTSTR) CMeshDlg::getShapeErrorString(numVerts) + ")";
+		std::string result =  _CM->getShape(shapeIndex) + " (" + tStrToUtf8(CMeshDlg::getShapeErrorString(numVerts)) + ")";
 		return result;
 	}
 }

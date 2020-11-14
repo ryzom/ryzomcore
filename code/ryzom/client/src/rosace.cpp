@@ -493,7 +493,7 @@ CRosace::~CRosace()
 void CRosace::init()
 {
 	_Mode = CRosacePage::CursorAngleMode;
-	_Selected = "";
+	_Selected.clear();
 }// init //
 
 //-----------------------------------------------
@@ -503,7 +503,7 @@ void CRosace::init()
 void CRosace::add(const string &name, const CRosaceContext &context)
 {
 	// If the name is not empty.
-	if(name != "")
+	if(!name.empty())
 		_Contexts.insert(TContexts::value_type (name, context));
 }// add //
 

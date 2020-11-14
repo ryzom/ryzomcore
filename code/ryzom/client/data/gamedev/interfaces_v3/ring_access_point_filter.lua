@@ -109,7 +109,7 @@ function game.RingAccessPointFilter:validate()
    if config.Local == 1 then
 			ucUrl = ucstring(NicoMagicURL) -- for test in local mode				
    else
-         ucUrl = getDynString(game.NpcWebPage.UrlTextId);
+         ucUrl = getDynString(game.NpcWebPage.UrlTextId)
    end	
    debugInfo(tostring(ucUrl))
 	local utf8Url = ucUrl:toUtf8()	

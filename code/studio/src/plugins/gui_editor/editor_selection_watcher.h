@@ -27,10 +27,10 @@ namespace GUIEditor
 	public:
 		CEditorSelectionWatcher() : QObject( NULL ){}
 
-		void selectionChanged( std::string &newSelection );
+		void selectionChanged();
 
 	Q_SIGNALS:
-		void sgnSelectionChanged( std::string &id );
+		void sgnSelectionChanged();
 	};
 }
 

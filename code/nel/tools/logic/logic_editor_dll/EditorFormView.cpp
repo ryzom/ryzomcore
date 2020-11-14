@@ -76,7 +76,7 @@ void CEditorFormView::OnInitialUpdate()
 
 	CRect rectPlaceholder; 
 	GetWindowRect(rectPlaceholder);	
-	m_pPropertySheet = new CEditorPropertySheet("",this); 
+	m_pPropertySheet = new CEditorPropertySheet(_T(""),this); 
 	
 	if (!m_pPropertySheet->Create(this,WS_CHILD | WS_VISIBLE, 0) ) 
 	{

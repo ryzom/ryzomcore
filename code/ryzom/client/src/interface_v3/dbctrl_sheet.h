@@ -514,6 +514,18 @@ public:
 	// set item RESALE_FLAG
 	void setItemResaleFlag(sint32 rf);
 
+	//get item CREATE_TIME. 0 if no DB
+	sint32 getItemCreateTime() const;
+	NLMISC::CCDBNodeLeaf *getItemCreateTimePtr() const;
+	// set item CREATE_TIME
+	void setItemCreateTime(sint32 ct);
+
+	//get item SERIAL. 0 if no DB
+	sint32 getItemSerial() const;
+	NLMISC::CCDBNodeLeaf *getItemSerialPtr() const;
+	// set item CREATE_TIME
+	void setItemSerial(sint32 serial);
+
 	// get item locked by owner
 	bool getLockedByOwner() const;
 

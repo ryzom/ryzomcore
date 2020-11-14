@@ -304,7 +304,7 @@ void CScriptVM::interpretCode(
 				case CScriptStack::EString:
 					{
 						string	&str=stack.top();
-						f=(float)atof(str.c_str());
+						NLMISC::fromString(str, f);
 					}
 					break;
 				case CScriptStack::EFloat:
@@ -406,7 +406,7 @@ void CScriptVM::interpretCode(
 				case CScriptStack::EString:
 					{
 						string& str = stack.top();
-						f = (float)atof(str.c_str());
+						NLMISC::fromString(str, f);
 					}
 					break;
 				case CScriptStack::EFloat:
@@ -601,7 +601,7 @@ void CScriptVM::interpretCode(
 				case CScriptStack::EString:
 					{
 						string& str = stack.top();
-						f = (float)atof(str.c_str());
+						NLMISC::fromString(str, f);
 					}
 					break;
 				case CScriptStack::EFloat:

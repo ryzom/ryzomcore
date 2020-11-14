@@ -49,7 +49,7 @@ namespace R2
 
 		TR2TpInfos():UseTpMessage(false){}
 
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 
 			f.serial(UseTpMessage);
@@ -69,7 +69,7 @@ namespace R2
 		ucstring			Comment;
 
 		/// serial
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serial( SheetId );
 			f.serial( Name );
@@ -84,7 +84,7 @@ namespace R2
 		uint32				Quantity;
 
 		/// serial
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serial( SheetId );
 			f.serial( Quantity );
@@ -203,7 +203,7 @@ namespace R2
 		uint32 LocationId;
 
 		/// serial
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serial( Name );
 			f.serial( Island );
@@ -229,7 +229,7 @@ namespace R2
 		uint32 Act;
 		uint32 Id;
 
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serial( Name );
 			f.serial( Act);
@@ -354,7 +354,7 @@ namespace R2
 		typedef std::vector< std::pair< std::string ,std::string > >  TValueType;
 	public:
 		TScenarioHeaderSerializer(TValueType value = TValueType() ):Value(value) {}
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			uint32 size = 0;
 			if (!f.isReading() )

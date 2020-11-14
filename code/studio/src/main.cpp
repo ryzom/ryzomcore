@@ -41,7 +41,7 @@
 #include <QtGui/QFileDialog>
 #include <QtGui/QInputDialog>
 
-#include "settings_dialog.h"
+#include "startup_settings_dlg.h"
 #include "splash_screen.h"
 #include "pm_watcher.h"
 
@@ -120,6 +120,7 @@ int main(int argc, char **argv)
 	{
 		// use log.log if NEL_LOG_IN_FILE and NLQT_USE_LOG_LOG defined as 1
 		NLMISC::createDebug(NULL, NLQT_USE_LOG_LOG, false);
+		NLMISC::INelContext::getInstance().setWindowedApplication(true);
 #if NLQT_USE_LOG
 		// create NLQT_LOG_FILE
 		// filedisplayer only deletes the 001 etc
@@ -160,7 +161,7 @@ int main(int argc, char **argv)
 	{
 		settings->setValue( "FirstRun", false );
 		
-		SettingsDialog sd;
+		StartupSettingsDlg sd;
 		sd.setSettings( settings );
 		sd.load();
 		sd.exec();

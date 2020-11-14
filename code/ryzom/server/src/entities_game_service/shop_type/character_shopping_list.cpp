@@ -460,9 +460,9 @@ void CCharacterShoppingList::initPageToUpdate( uint32 nbSlotPerPage )
 void CCharacterShoppingList::fillTradePage( uint16 session )
 {
 /*
-- Ajout de TRADING:*:PRICE_RETIRE (utile que si SELLER_TYPE == User ou ResaleAndUser). Note: Prix UNITAIRE (si MP, Ammo etc..)
-- Si SELLER_TYPE==User seulement: Si PRICE==-1, alors cela veut dire " Item Sold "  (pour afficher la liste des items vendus les plus récents)
-- Note: TRADING:*:PRICE reste un Prix UNITAIRE (si MP, Ammo etc..) (cela devait déja être le cas)
+- Added TRADING:*:PRICE_RETIRE (only useful if SELLER_TYPE == User or ResaleAndUser). Note: UNIT price (if Raw Mats, Ammo, etc..)
+- If SELLER_TYPE==User only: if PRICE==-1, then it means " Item Sold "  (to display list of more recent sold items)
+- Note: TRADING:*:PRICE is wtill a UNIT price (if Raw Mats, Ammo, etc..) (it should already be the case)
 */
 
 	// get page to update if any

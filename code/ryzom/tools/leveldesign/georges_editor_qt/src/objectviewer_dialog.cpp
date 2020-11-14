@@ -77,7 +77,8 @@ namespace NLQT
 		}
 	}
 
-	void CObjectViewerDialog::topLevelChanged ( bool topLevel ) {
+	void CObjectViewerDialog::topLevelChanged ( bool topLevel )
+	{
 		//nldebug("topLevel:%d",topLevel);
 		//_georges->init();
 	}
@@ -100,7 +101,8 @@ namespace NLQT
 	{
 		//nldebug("%d %d",_nlw->width(), _nlw->height());
 		QDockWidget::resizeEvent(resizeEvent);
-		if (Modules::objViewInt()) {
+		if (Modules::objViewInt())
+		{
 			if (Modules::objViewInt()->getDriver())
 				Modules::objViewInt()->setSizeViewport(resizeEvent->size().width(), resizeEvent->size().height());
 		}

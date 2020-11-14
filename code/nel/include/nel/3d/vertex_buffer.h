@@ -653,7 +653,7 @@ private:
 	void		resetTouchFlags() {_InternalFlags &= (uint16)(~TouchedAll);}
 
 	// Force non resident memory
-	void		restaureNonResidentMemory();
+	void		restoreNonResidentMemory();
 
 private:
 

@@ -19,6 +19,8 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/bit_set.h"
+#include "nel/misc/smart_ptr.h"
+
 #include <string>
 #include <vector>
 #include <map>

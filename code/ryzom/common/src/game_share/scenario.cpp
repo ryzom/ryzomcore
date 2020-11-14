@@ -31,6 +31,10 @@
 #include "nel/misc/file.h"
 #include "nel/misc/algo.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace R2;
 //----------------------------------------------------------------
 namespace R2
@@ -122,7 +126,7 @@ CObject *CScenario::find(const std::string& instanceId, const std::string & attr
 	}
 	if (position != -1)
 	{
-		CObject *subObj = src->getValue(position);
+		CObject *subObj = src->getValueAtPos(position);
 		if (!subObj)
 		{
 			nlwarning("Can't find attribute %s[%d] inside object with InstanceId =  %s", attrName.c_str(), (int) position, instanceId.c_str());
@@ -388,7 +392,7 @@ void CInstanceMap::add(CObject* root)
 		sint32 first = 0;
 		for (first = 0 ; first != size ; ++first)
 		{
-			CObject* value = root->getValue(first);
+			CObject* value = root->getValueAtPos(first);
 			add(value);
 		}
 
@@ -416,7 +420,7 @@ void CInstanceMap::remove(CObject* root)
 		sint32 first = 0;
 		for (first = 0 ; first != size ; ++first)
 		{
-			CObject* value = root->getValue(first);
+			CObject* value = root->getValueAtPos(first);
 			remove(value);
 		}
 
@@ -853,8 +857,8 @@ bool CScenarioValidator::setScenarioToLoad( const std::string& filename, CScenar
 		// Scenario without header
 		if (_ScenarioBody.size() < headerLen ||_ScenarioBody.substr(0, headerLen) != header )
 		{
-			md5 = "";
-			signature = "";
+			md5.clear();
+			signature.clear();
 			inf.close();
 			return true;
 		}
@@ -1108,8 +1112,8 @@ bool CUserComponentValidator::setUserComponentToLoad( const std::string& filenam
 		// Scenario without header
 		if (_UserComponentBody.size() < headerLen ||_UserComponentBody.substr(0, headerLen) != header )
 		{
-			md5 = "";
-			signature = "";
+			md5.clear();
+			signature.clear();
 			inf.close();
 			return true;
 		}

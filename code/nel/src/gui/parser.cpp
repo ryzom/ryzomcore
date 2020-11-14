@@ -21,6 +21,10 @@
 #include "nel/gui/interface_group.h"
 #include "nel/gui/interface_parser.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	IParser::IParser()

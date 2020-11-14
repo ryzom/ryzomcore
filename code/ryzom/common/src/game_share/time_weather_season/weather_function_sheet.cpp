@@ -103,7 +103,7 @@ void CWeatherFunctionSheet::build(const NLGEORGES::UFormElm &item)
 
 
 //=============================================================================
-void CWeatherFunctionSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CWeatherFunctionSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(VegetableMinBendIntensity);
 	f.serial(VegetableMaxBendIntensity);

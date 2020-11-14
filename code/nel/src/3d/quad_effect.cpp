@@ -20,6 +20,10 @@
 #include <algorithm>
 #include <deque>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
@@ -56,18 +60,16 @@ void CQuadEffect::makeRasters(const TPoint2DVect &poly
 {
 
 	dest.clear();
-    const float epsilon = 10E-5f;
+	startY = 0.f;
 
 	sint size = (sint)poly.size();
+
+	if (!size) return;
+
+    const float epsilon = 10E-5f;
 	uint aelSize = 0; // size of active edge list
 
 	sint k; // loop counter
-
-
-
-	dest.clear();
-
-	if (!size) return;
 
 	static TEdgeList lel, ael; // the left edge list, and the active edge list
 	float highest = poly[0].y;
@@ -217,7 +219,8 @@ void CQuadEffect::makeRasters(const TPoint2DVect &poly
 
 		currY += quadHeight;
 
-	} while (size || aelSize);
+	}
+	while (size || aelSize);
 }
 
 //**
@@ -230,7 +233,7 @@ void CQuadEffect::processPoly(const TPoint2DVect &poly
 	static TRasters rDest;
 	float currY;
 	makeRasters(poly, quadWidth, quadHeight, rDest, currY);
-	if (dest.size())
+	if (!dest.empty())
 	{
 		TRasters::const_iterator it, endIt = rDest.end();
 		for (it = rDest.begin(); it != endIt; ++it)

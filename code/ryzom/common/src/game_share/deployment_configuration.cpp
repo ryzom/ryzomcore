@@ -313,13 +313,13 @@ namespace DEPCFG
 
 	void CInfoBlock::addUseEntry(const NLMISC::CSString& entry,const NLMISC::CSString& context,uint32& errors)
 	{
-		DROP_IF(_UseEntries.find(entry)!=_UseEntries.end(),context+"Ignoring duplicate refference to 'use' clause: "+entry,return);
+		DROP_IF(_UseEntries.find(entry) != _UseEntries.end(), context + "Ignoring duplicate refference to 'use' clause: " + entry.c_str(), return);
 		_UseEntries.insert(entry);
 	}
 
 	void CInfoBlock::addDataEntry(const NLMISC::CSString& entry,const NLMISC::CSString& context,uint32& errors)
 	{
-		DROP_IF(_DataEntries.find(entry)!=_DataEntries.end(),context+"Ignoring duplicate refference to 'data' clause: "+entry,return);
+		DROP_IF(_DataEntries.find(entry) != _DataEntries.end(), context + "Ignoring duplicate refference to 'data' clause: " + entry.c_str(), return);
 		_DataEntries.insert(entry);
 	}
 
@@ -406,10 +406,10 @@ namespace DEPCFG
 			
 			// try to get a pointer to the refferenced info block...
 			CInfoBlock* infoBlockPtr= container->getInfoBlock(theEntry);
-			DROP_IF(infoBlockPtr==NULL,"Failed to find block named '"+theEntry+"' while fixing up children of block: "+_Name, ++errors;continue);
+			DROP_IF(infoBlockPtr == NULL, "Failed to find block named '" + theEntry + "' while fixing up children of block: " + _Name.c_str(), ++errors; continue);
 
 			// make sure that this block doesn't figure amongst the children of the refferenced info block (to avoid circular refs)
-			DROP_IF(_haveCircularRef(infoBlockPtr),"Circular dependency found between definitions of '"+_Name+"' and '"+theEntry+"'", ++errors;continue);
+			DROP_IF(_haveCircularRef(infoBlockPtr), "Circular dependency found between definitions of '" + _Name + "' and '" + theEntry.c_str() + "'", ++errors; continue);
 
 			// add the info block to our children
 			_Children.push_back(infoBlockPtr);
@@ -431,7 +431,7 @@ namespace DEPCFG
 		DROP_IF(!_ShardName.empty() && !theExe.ShardName.empty(),	"more than one shard found in: "+theExe.FullName,	++errors );
 		DROP_IF(!_CmdLine.empty() && !theExe.CmdLine.empty(),		"more than one cmdLine found in: "+theExe.FullName,		++errors );
 		DROP_IF(!_Host.empty() && !theExe.Host.empty(),				"more than one host found in: "+theExe.FullName,	++errors );
-		WARN_IF(!_UniqueName.empty() && !theExe.UniqueName.empty(),	"replacing name '"+theExe.UniqueName+"' with '"+_UniqueName+"' in: "+theExe.FullName);
+		WARN_IF(!_UniqueName.empty() && !theExe.UniqueName.empty(), "replacing name '" + theExe.UniqueName + "' with '" + _UniqueName.c_str() + "' in: " + theExe.FullName.c_str());
 
 		// fill our own data into the exe record
 		if (!_DomainName.empty())	theExe.DomainName =	_DomainName;
@@ -645,22 +645,22 @@ namespace DEPCFG
 			// try to treat the keyword
 			if (keyword=="include")
 			{
-				DROP_IF(args.empty(),context+"No file name found following 'include': "+line, ++errors;continue);
-				DROP_IF(fileNameSet.find(args)!=fileNameSet.end(),context+"Warning: Duplicate 'include' block ignored: "+line, continue);
+				DROP_IF(args.empty(), context + "No file name found following 'include': " + line.c_str(), ++errors; continue);
+				DROP_IF(fileNameSet.find(args) != fileNameSet.end(), context + "Warning: Duplicate 'include' block ignored: " + line.c_str(), continue);
 				fileNameSet.insert(args);
 				_readFile(args.unquoteIfQuoted(),errors,fileNameSet);
 			}
 			else if (keyword=="define")
 			{
-				DROP_IF(args.empty(),context+"No block name found following 'define': "+line, ++errors;continue);
-				DROP_IF(_InfoBlocks.find(args)!=_InfoBlocks.end(),context+"Duplicate 'define' block found: "+line, ++errors;continue);
+				DROP_IF(args.empty(), context + "No block name found following 'define': " + line.c_str(), ++errors; continue);
+				DROP_IF(_InfoBlocks.find(args) != _InfoBlocks.end(), context + "Duplicate 'define' block found: " + line.c_str(), ++errors; continue);
 				// create a new info block and push it into our infoblock set
 				_CurrentInfoBlock= new CInfoBlock(args);
 				_InfoBlocks[args]= _CurrentInfoBlock;
 			}
 			else
 			{
-				DROP_IF(_CurrentInfoBlock==NULL,context+"Expecting 'define <block_name>' but found: "+line, ++errors;continue);
+				DROP_IF(_CurrentInfoBlock == NULL, context + "Expecting 'define <block_name>' but found: " + line.c_str(), ++errors; continue);
 
 				if		(keyword=="domain")			{ _CurrentInfoBlock->setDomainName(args,context,errors); }
 				else if	(keyword=="shard")			{ _CurrentInfoBlock->setShardName(args,context,errors); }
@@ -674,7 +674,7 @@ namespace DEPCFG
 				else if	(keyword=="cfgAfter")		{ _CurrentInfoBlock->addCfgEntryPost(rawArgs,context,errors); }
 				else if	(keyword=="cfgFile")		{ _CurrentInfoBlock->addCfgFile(args,context,errors); }
 				else if	(keyword=="cfgFileAfter")	{ _CurrentInfoBlock->addCfgFilePost(args,context,errors); }
-				else								{ DROP(context+"Unrecognised keyword: "+line, ++errors;continue); }
+				else								{ DROP(context + "Unrecognised keyword: " + line.c_str(), ++errors; continue); }
 			}
 		}
 	}
@@ -725,7 +725,7 @@ namespace DEPCFG
 				// yell if the name already looks like a 'fixed up' name
 				DROP_IF(name.right(3).left(1)=="_" && (name.right(2)=="00" || name.right(2).atoui()!=0),"Appending '_' to name ending in '_00' style format as this can clash with auto renumbering => "+name+'_',name+='_')
 				// compose a second version of the name with the shard name added
-				NLMISC::CSString name_with_shard= name+'_'+it2->ShardName;
+				NLMISC::CSString name_with_shard = name + '_' + it2->ShardName.c_str();
 				// insert both versions of the name into the unique name counter
 				++nameCounts[name];
 				++nameCounts[name_with_shard];
@@ -1123,7 +1123,7 @@ namespace DEPCFG
 			result.CfgFile= 
 				"// Auto generated config file\n"
 				"// Use with commandline: "+theApp.CmdLine+"\n"
-				"AESAliasName= \""+appName+"\";\n"
+				"AESAliasName= \"" + appName.c_str() + "\";\n"
 				"\n";
 
 			// copy the cfg set to the result record (the cfgAfter set should have been merged in already)

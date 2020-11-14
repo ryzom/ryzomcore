@@ -75,7 +75,7 @@ void COutpostBuildingSheet::build(const NLGEORGES::UFormElm &root)
 			// Get Mps sheets
 			const UFormElm *pMp;
 			uint32 i = 0;
-			while (pDriller->getNodeByName(&pMp, ("mp" + NLMISC::toString(i)).c_str()) && pMp)
+			while (pDriller->getNodeByName(&pMp, "mp" + NLMISC::toString(i)) && pMp)
 			{
 				string sTmp;
 				pMp->getValueByName(sTmp, "name");
@@ -110,33 +110,33 @@ void COutpostBuildingSheet::build(const NLGEORGES::UFormElm &root)
 	string IconMain;
 	if(!root.getValueByName (IconMain, "icon"))
 		debug("key 'icon' not found.");
-	IconMain = strlwr (IconMain);
+	IconMain = toLower(IconMain);
 	IdIconMain = ClientSheetsStrings.add(IconMain);
 
 	// Get the icon associated.
 	string IconBack;
 	if(!root.getValueByName (IconBack, "icon background"))
 		debug("key 'icon background' not found.");
-	IconBack = strlwr (IconBack);
+	IconBack = toLower(IconBack);
 	IdIconBack = ClientSheetsStrings.add(IconBack);
 
 	// Get the icon associated.
 	string IconOver;
 	if(!root.getValueByName (IconOver, "icon overlay"))
 		debug("key 'icon overlay' not found.");
-	IconOver = strlwr (IconOver);
+	IconOver = toLower(IconOver);
 	IdIconOver = ClientSheetsStrings.add(IconOver);
 
 	// Get the icon text associated.
 	string IconText;
 	if(!root.getValueByName (IconText, "text overlay"))
 		debug("key 'text overlay' not found.");
-	IconText = strlwr (IconText);
+	IconText = toLower(IconText);
 	IdIconText = ClientSheetsStrings.add(IconText);
 }
 
 // ****************************************************************************
-void COutpostBuildingSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void COutpostBuildingSheet::serial(NLMISC::IStream &f)
 {
 	f.serialEnum(OBType);
 	f.serial(CostDapper);

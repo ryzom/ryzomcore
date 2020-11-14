@@ -66,7 +66,7 @@ struct CSuccessXpLine
 	uint8	PartialSuccessMaxDraw;
 	float	XpGain;
 	
-	void serial(class NLMISC::IStream &f)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial(RelativeLevel);
 		f.serial(SuccessProbability);
@@ -85,7 +85,7 @@ class CStaticSuccessTable
 {
 public:	
 	/// Serialisation
-	virtual void serial(class NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f);
 	
 	/// read georges sheet
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);

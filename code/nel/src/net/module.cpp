@@ -24,6 +24,10 @@
 #include "nel/net/module_gateway.h"
 #include "nel/net/module_socket.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
@@ -393,7 +397,7 @@ namespace NLNET
 	}
 
 
-	void CModuleBase::plugModule(IModuleSocket *moduleSocket) throw (EModuleAlreadyPluggedHere)
+	void CModuleBase::plugModule(IModuleSocket *moduleSocket)
 	{
 		CModuleSocket *sock = dynamic_cast<CModuleSocket*>(moduleSocket);
 		nlassert(sock != NULL);
@@ -411,7 +415,7 @@ namespace NLNET
 		_ModuleSockets.insert(moduleSocket);
 	}
 
-	void CModuleBase::unplugModule(IModuleSocket *moduleSocket)  throw (EModuleNotPluggedHere)
+	void CModuleBase::unplugModule(IModuleSocket *moduleSocket)
 	{
 		CModuleSocket *sock = dynamic_cast<CModuleSocket*>(moduleSocket);
 		nlassert(sock != NULL);
@@ -439,7 +443,7 @@ namespace NLNET
 	 *	The call is blocking until receptions of the operation
 	 *	result message (or a module down)
 	 */
-	void CModuleBase::invokeModuleOperation(IModuleProxy *destModule, const NLNET::CMessage &opMsg, NLNET::CMessage &resultMsg) throw (EInvokeFailed)
+	void CModuleBase::invokeModuleOperation(IModuleProxy *destModule, const NLNET::CMessage &opMsg, NLNET::CMessage &resultMsg)
 	{
 		H_AUTO(CModuleBase_invokeModuleOperation);
 
@@ -863,7 +867,6 @@ namespace NLNET
 	}
 
 	void		CModuleProxy::sendModuleMessage(IModule *senderModule, const NLNET::CMessage &message)
-		throw (EModuleNotReachable)
 	{
 		H_AUTO(CModuleProxy_sendModuleMessage);
 
@@ -879,7 +882,7 @@ namespace NLNET
 			throw EModuleNotReachable();
 		}
 
-		_Gateway->sendModuleMessage(senderProx, this, message);
+		_Gateway->sendModuleProxyMessage(senderProx, this, message);
 	}
 
 	const TSecurityData *CModuleProxy::findSecurityData(uint8 dataTag) const

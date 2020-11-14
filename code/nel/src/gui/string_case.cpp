@@ -17,6 +17,10 @@
 #include "stdpch.h"
 #include "nel/gui/string_case.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	inline bool isSeparator (ucchar c)

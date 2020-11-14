@@ -27,7 +27,7 @@ using namespace std;
 namespace NLMISC
 {
 
-string addSlashR (string str)
+string addSlashR (const string &str)
 {
 	string formatedStr;
 	// replace \n with \r\n
@@ -42,10 +42,10 @@ string addSlashR (string str)
 	return formatedStr;
 }
 
-string removeSlashR (string str)
+string removeSlashR (const string &str)
 {
 	string formatedStr;
-	// replace \n with \r\n
+	// remove \r
 	for (uint i = 0; i < str.size(); i++)
 	{
 		if (str[i] != '\r')

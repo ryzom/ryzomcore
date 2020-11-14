@@ -17,7 +17,7 @@
 #include "stdpch.h"
 #include "character_summary.h"
 
-void CCharacterSummary::serial(class NLMISC::IStream &f) throw (NLMISC::EStream)
+void CCharacterSummary::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(0);
 	f.serial		(Mainland);

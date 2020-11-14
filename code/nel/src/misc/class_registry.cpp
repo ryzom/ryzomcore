@@ -49,7 +49,7 @@ void		CClassRegistry::release()
 }
 
 // ======================================================================================================
-IClassable	*CClassRegistry::create(const string &className)  throw(ERegistry)
+IClassable	*CClassRegistry::create(const string &className)
 {
 	init();
 
@@ -72,7 +72,7 @@ IClassable	*CClassRegistry::create(const string &className)  throw(ERegistry)
 }
 
 // ======================================================================================================
-void		CClassRegistry::registerClass(const string &className, IClassable* (*creator)(), const string &typeidCheck)  throw(ERegistry)
+void		CClassRegistry::registerClass(const string &className, IClassable* (*creator)(), const string &typeidCheck)
 {
 	init();
 

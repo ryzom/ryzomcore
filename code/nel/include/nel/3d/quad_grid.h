@@ -654,7 +654,7 @@ template<class T>	typename CQuadGrid<T>::CIterator	CQuadGrid<T>::erase(typename 
 	if(!ptr->Selected)
 		next= NULL;
 	// delete the object.
-	_NodeBlockMemory.free(ptr);
+	_NodeBlockMemory.freeBlock(ptr);
 
 
 	return CIterator((CNode*)next);

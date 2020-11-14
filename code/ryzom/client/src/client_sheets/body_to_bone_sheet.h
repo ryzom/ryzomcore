@@ -52,7 +52,7 @@ public:
 	CBodyToBoneSheet();
 	// build that an external script
 	void build(const NLGEORGES::UFormElm &item, const std::string &prefix);
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 	/** From a body part and a side, retrieves bone name (or NULL if none).
 	  * The side is meaningless for part such as 'chest'
 	  */

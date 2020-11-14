@@ -28,6 +28,7 @@
 #include <string>
 #include <list>
 #include <map>
+#include <limits>
 
 namespace NLNET
 {
@@ -46,7 +47,7 @@ class CRangeList
 public:
 
 	/// Default constructor
-	CRangeList() : _TotalMaxRows(~0) { acquireFirstRow(); }
+	CRangeList() : _TotalMaxRows(std::numeric_limits<sint32>::max()) { acquireFirstRow(); }
 
 	/// Constructor
 	CRangeList( sint32 totalMaxRows ) : _TotalMaxRows( totalMaxRows ) { acquireFirstRow(); }

@@ -27,6 +27,7 @@
 #endif
 
 #include "nel/misc/debug.h"
+#include "nel/misc/common.h"
 #include "nel/misc/path.h"
 #include "nel/misc/thread.h"
 
@@ -586,7 +587,7 @@ private:
 		string dest = filename.substr(0, filename.size ()-4);
 		setRWAccess(dest);
 		if(VerboseLog) nlinfo("Calling fopen('%s','wb')", dest.c_str());
-		FILE *fp = fopen (dest.c_str(), "wb");
+		FILE *fp = nlfopen (dest, "wb");
 		if (fp == NULL)
 		{
 			string err = toString("Can't open file '%s' : code=%d %s, (error code 32)", dest.c_str(), errno, strerror(errno));

@@ -27,6 +27,15 @@
     <!-- Yoyo: prefer show an empty list when clicking -->
     <!-- <action handler="leave_modal" cond="eq(getprop('ui:interface:bag_choose:list:nbelt'),0)" /> -->
   </proc>
+  <proc id="select_special_items">
+      <action handler="set" params="target_property=ui:interface:inventory:content:bag:iil:active|value=0" />
+      <action handler="set" params="target_property=ui:interface:inventory:content:bag:webitems:active|value=1" />
+      <action handler="browse_home" params="name=ui:interface:inventory:content:bag:webitems:html" />
+  </proc>
+  <proc id="select_bag_items">
+      <action handler="set" params="target_property=ui:interface:inventory:content:bag:iil:active|value=1" />
+      <action handler="set" params="target_property=ui:interface:inventory:content:bag:webitems:active|value=0" />
+  </proc>
   <!-- ************* -->
   <!-- * EQUIPMENT * -->
   <!-- ************* -->
@@ -44,6 +53,83 @@
          onclick_l="proc"
          params_l="inv_left_click_on_slot"
          auto_grayed="false" />
+
+  <template name="img_button"
+            id="image_button"
+            ok_text="uittOK"
+            tx_over="blank.tga"
+            cancel_text="uittCancel"
+            posparent="parent"
+            posref="BM TM"
+            onclick_ok=""
+            onclick_ok_param=""
+            x="0"
+            y="0"
+            keep="true"
+            tooltip_ok=""
+            avoid_resize_parent="false">
+    <group id="#id"
+           posparent="#posparent"
+           posref="#posref"
+           child_resize_w="true"
+           child_resize_h="true"
+           x="#x"
+           y="#y"
+           avoid_resize_parent="#avoid_resize_parent">
+      <ctrl style="button_ok"
+            id="bb"
+            x="0"
+            y="0"
+            posref="TL TL"
+            text_y="-2"
+            onclick_l="#onclick_ok"
+            params_l="#onclick_ok_param"
+            hardtext="#ok_text"
+            tooltip="#tooltip_ok" />
+      <ctrl type="button"
+            id="button"
+            button_type="push_button"
+            posref="TL TL"
+            x="0"
+            y="0"
+            scale="false"
+            tx_over="#tx_over"
+            color="255 255 255 255"
+            col_pushed="255 255 255 255"
+            col_over="255 255 255 0"
+            onclick_l="#onclick_ok"
+            params_l="#onclick_ok_param" />
+    </group>
+  </template>
+
+  <template name="image_button"
+      tx_over="blank.tga"
+      onclick_l=""
+      params_l=""  >
+    <group id="#id"
+           posref="TL TL"
+           x="0"
+           y="0"
+           sizeref="wh"
+           w="0"
+           h="0">
+      <ctrl type="button"
+            id=""
+            button_type="push_button"
+            posref=""
+            posparent=""
+            x=""
+            y=""
+            scale="false"
+            tx_over="#tx_over"
+            color="255 255 255 255"
+            col_pushed="255 255 255 255"
+            col_over="255 255 255 0"
+            onclick_l="#onclick_l"
+            params_l="#params_l" />
+    </group>
+  </template>
+
   <!-- For the moment we use a template because we have to make the fake container -->
   <template name="tinv_equip">
     <group id="equip"
@@ -159,6 +245,7 @@
             posparent="jewelry"
             hardtext="uiJewelryTitle"
             fontsize="10"
+            y="2"
             shadow="true" />
       <!-- Armor -->
       <group id="armors"
@@ -234,6 +321,7 @@
             posparent="armors"
             hardtext="uiArmorTitle"
             fontsize="10"
+            y="2"
             shadow="true" />
       <!--
                 <group id="hands" posparent="armors" x="8" y="0" w="86" h="42" posref="TR TL" >
@@ -334,6 +422,7 @@
       <instance template="tinv_nbslots_bulk_weight"
                 id="ibw"
                 x="-16"
+                y="2"
                 inv_branch="%bag"
                 inv_bulk_max="%bag_bulk_max" />
     </group>
@@ -460,7 +549,7 @@
          pop_min_h="240"
          pop_max_w="920"
          pop_max_h="1600"
-         w="300"
+         w="400"
          h="400"
          movable="true"
          active="false"
@@ -481,6 +570,7 @@
            posref="TL TL"
            group_onclick_r="active_menu"
            group_params_r="menu=ui:interface:base_menu_with_color">
+
       <group type="tab"
              id="inv_select"
              child_resize_w="true"
@@ -624,6 +714,99 @@
              sizeref="wh"
              w="0"
              h="0">
+        <!-- Special Items -->
+        <ctrl style="text_button_16"
+          id="bag_items"
+          posref="TL TL"
+          y="-2"
+          x="10"
+          wmargin="8"
+          hardtext="uitabInvBag"
+          tooltip="uitabInvBag"
+          onclick_l="proc"
+          params_l="select_bag_items" />
+        <ctrl style="text_button_16"
+          id="special_items"
+          posref="TR TL"
+          posparent="bag_items"
+          y="0"
+          x="2"
+          wmargin="8"
+          hardtext="uiSpecialLabo"
+          tooltip="uiSpecialLabo"
+          onclick_l="proc"
+          params_l="select_special_items" />
+        <!-- Keys 
+        <ctrl style="text_button_16"
+          id="keys"
+          posref="TR TL"
+          posparent="special_items"
+          y="0"
+          x="2"
+          wmargin="8"
+          hardtext="Keys"
+          tooltip="uiSpecialLabo"
+          onclick_l="open_title_help"
+          params_l="from=user" />-->
+
+        <group id="webitems" posref="TL TL" sizeref="wh" h="-45" w="0" x="-10" y="-25" active="0">
+          <group type="webig_html"
+             id="html"
+             url="http://app.ryzom.com/app_arcc/index.php?action=mItem_DisplayUserItems"
+             title_prefix=""
+             sizeref="wh"
+             x="10"
+             y="0"
+             w="0"
+             h="0"
+             background_color="0 0 0 255"
+             error_color="255 240 48 255"
+             link_color="240 155 100 255"
+             text_color="210 210 210 255"
+             h1_color="255 255 255 255"
+             h2_color="255 255 255 255"
+             h3_color="255 255 255 255"
+             h4_color="255 255 255 255"
+             h5_color="255 255 255 255"
+             h6_color="100 255 100 255"
+             text_font_size="10"
+             h1_font_size="20"
+             h2_font_size="18"
+             h3_font_size="16"
+             h4_font_size="14"
+             h5_font_size="12"
+             h6_font_size="10"
+             paragraph_begin_space="1"
+             multi_line_space_factor="0.25"
+             td_begin_space="16"
+             li_begin_space="4"
+             ul_begin_space="12"
+             li_indent="0"
+             ul_indent="30"
+             checkbox_bitmap_normal="w_slot_on.tga"
+             checkbox_bitmap_pushed="w_opacity_on.tga"
+             checkbox_bitmap_over=""
+             background_bitmap_view="black2"
+             home="http://app.ryzom.com/app_arcc/index.php?action=mItem_DisplayUserItems"
+             browse_next_time="true"
+             form_text_area_group="edit_box_widget_multiline">
+          <group type="list"
+                 id="text_list"
+                 fontsize="9"
+                 posref="TL TL"
+                 posparent="black"
+                 x="9"
+                 y="-2"
+                 space="0"
+                 sizeref="hw"
+                 w="-4"
+                 h="-4"
+                 maxelements="2000" />
+          <ctrl style="skin_scroll"
+                id="scroll_bar" />
+         </group>
+       </group>
+
         <instance template="tinv_nbslots_bulk_weight"
                   id="ibw"
                   x="0"
@@ -632,7 +815,7 @@
         <instance template="tinv_item_list"
                   id="iil"
                   inv_branch_nb="%max_bag_invslot"
-                  y="-16"
+                  y="-18"
                   sizeref="wh"
                   h="-16"
                   inv_branch="%bag"
@@ -841,7 +1024,7 @@
                xitem="2"
                yitem="-2"
                xtext="46"
-               ytext="-2"
+               ytext="0"
                hspace="2"
                array="false"
                maxitem="%max_temp_invslot"
@@ -1314,6 +1497,188 @@
           params="value=add(@UI:PHRASE:SELECT_MEMORY,-1)" />
   </group>
   <tree node="gestionsets" />
+
+  <!-- second hands bar -->
+  <define id="gestionsets_h" value="1" />
+  <define id="gestionsets_v" value="2" />
+
+  <variable entry="UI:SAVE:GESTIONSETS2_MODE" type="sint32" value="0" />
+
+  <proc id="gestionsets2_proc_active">
+    <action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:SETS2|value=1"/>
+    <action handler="proc" params="gestionsets2_proc_mode" />
+  </proc>
+
+  <proc id="gestionsets2_proc_set">
+    <action handler="set" params="dblink=UI:SAVE:GESTIONSETS2_MODE|value=@0"/>
+    <action handler="proc" params="gestionsets2_proc_mode" />
+  </proc>
+
+  <proc id="gestionsets2_proc_mode">
+    <action handler="proc" cond="eq(@UI:SAVE:GESTIONSETS2_MODE,%gestionsets_h)" params="gestionsets2_proc_horiz"/>
+    <action handler="proc" cond="ne(@UI:SAVE:GESTIONSETS2_MODE,%gestionsets_h)" params="gestionsets2_proc_vert"/>
+  </proc>
+
+  <proc id="gestionsets2_proc_vert">
+    <action handler="set" params="target='ui:interface:gestionsets2_menu:horiz:active'|value=1"/>
+    <action handler="set" params="target='ui:interface:gestionsets2_menu:vert:active'|value=0"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:w'|value=68"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:h'|value=300"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:select_memory:active'|value=1"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:select_memory_h:active'|value=0"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:w'|value=68"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:h'|value=300"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:w'|value=68"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:h'|value=300"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s0:x'|value=0"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s0:y'|value=0"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s1:x'|value=0"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s1:y'|value=-28"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s2:x'|value=0"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s2:y'|value=-56"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s3:x'|value=0"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s3:y'|value=-84"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s4:x'|value=0"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s4:y'|value=-112"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s5:x'|value=0"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s5:y'|value=-140"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s6:x'|value=0"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s6:y'|value=-168"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s7:x'|value=0"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s7:y'|value=-196"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s8:x'|value=0"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s8:y'|value=-224"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s9:x'|value=0"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s9:y'|value=-252"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s10:x'|value=26"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s10:y'|value=0"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s11:x'|value=26"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s11:y'|value=-28"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s12:x'|value=26"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s12:y'|value=-56"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s13:x'|value=26"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s13:y'|value=-84"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s14:x'|value=26"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s14:y'|value=-112"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s15:x'|value=26"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s15:y'|value=-140"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s16:x'|value=26"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s16:y'|value=-168"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s17:x'|value=26"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s17:y'|value=-196"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s18:x'|value=26"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s18:y'|value=-224"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s19:x'|value=26"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s19:y'|value=-252"/>
+  </proc>
+
+  <proc id="gestionsets2_proc_horiz">
+    <action handler="set" params="target='ui:interface:gestionsets2_menu:horiz:active'|value=0"/>
+    <action handler="set" params="target='ui:interface:gestionsets2_menu:vert:active'|value=1"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:w'|value=315"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:h'|value=52"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:select_memory:active'|value=0"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:select_memory_h:active'|value=1"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:w'|value=315"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:h'|value=52"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:w'|value=315"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:h'|value=52"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s0:x'|value=0"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s0:y'|value=0"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s1:x'|value=28"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s1:y'|value=0"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s2:x'|value=56"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s2:y'|value=0"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s3:x'|value=84"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s3:y'|value=0"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s4:x'|value=112"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s4:y'|value=0"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s5:x'|value=140"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s5:y'|value=0"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s6:x'|value=168"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s6:y'|value=0"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s7:x'|value=196"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s7:y'|value=0"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s8:x'|value=224"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s8:y'|value=0"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s9:x'|value=252"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s9:y'|value=0"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s10:x'|value=0"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s10:y'|value=-26"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s11:x'|value=28"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s11:y'|value=-26"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s12:x'|value=56"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s12:y'|value=-26"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s13:x'|value=84"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s13:y'|value=-26"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s14:x'|value=112"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s14:y'|value=-26"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s15:x'|value=140"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s15:y'|value=-26"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s16:x'|value=168"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s16:y'|value=-26"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s17:x'|value=196"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s17:y'|value=-26"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s18:x'|value=224"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s18:y'|value=-26"/>
+
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s19:x'|value=252"/>
+    <action handler="set" params="target='ui:interface:gestionsets2:header_closed:shortcuts:s19:y'|value=-26"/>
+  </proc>
+
+  <group type="menu" id="gestionsets2_menu" extends="base_menu_with_color">
+    <action id="horiz" name="uiHorizontal" handler="proc" params="gestionsets2_proc_set|%gestionsets_h"/>
+    <action id="vert" name="uiVertical" handler="proc" params="gestionsets2_proc_set|%gestionsets_v"/>
+    <separator />
+  </group>
+
   <group type="container"
          id="gestionsets2"
          w="68"
@@ -1322,7 +1687,7 @@
          header_active="false"
          right_button="false"
          group_onclick_r="active_menu"
-         group_params_r="menu=ui:interface:base_menu_with_color"
+         group_params_r="menu=ui:interface:gestionsets2_menu"
          movable="true"
          active="true"
          opened="false"
@@ -1330,8 +1695,8 @@
          global_color="false"
          header_color="UI:SAVE:WIN:COLORS:INV"
          locked="true"
-         on_active="set"
-         on_active_params="dblink=UI:VARIABLES:ISACTIVE:SETS2|value=1"
+         on_active="proc"
+         on_active_params="gestionsets2_proc_active"
          on_deactive="set"
          on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:SETS2|value=0"
          help_page="interf_action_bar.html">
@@ -1501,9 +1866,66 @@
               tooltip="uittHandSet"
               tooltip_parent="win" />
       </group>
+      <group type="select_number"
+             id="select_memory_h"
+             value="UI:PHRASE:SELECT_MEMORY_2"
+             loop="true"
+             min="1"
+             max="10"
+             x="0"
+             y="0"
+             w="300"
+             h="52"
+             active="false"
+             posparent="shortcuts"
+             posref="MM MM"
+             delta="1">
+        <view type="bitmap"
+              id="slot_number"
+              posref="MR MR"
+              texture="W_slot_number.tga" />
+        <view type="text"
+              id="number"
+              posparent="slot_number"
+              posref="MM MM"
+              x="0"
+              y="0"
+              color="255 255 255 255"
+              fontsize="12"
+              shadow="true"
+              hardtext="0"
+              global_color="false" />
+        <ctrl type="button"
+              id="arrow_up"
+              button_type="push_button"
+              posref="TM BM"
+              posparent="slot_number"
+              x="0"
+              y="0"
+              tx_normal="W_arrow_up_1.tga"
+              tx_pushed="W_arrow_up_1.tga"
+              tx_over="W_button_12_over.tga"
+              tooltip="uittHandSet"
+              tooltip_parent="win" />
+        <ctrl type="button"
+              id="arrow_down"
+              button_type="push_button"
+              posref="BM TM"
+              posparent="slot_number"
+              x="0"
+              y="0"
+              tx_normal="W_arrow_down_1.tga"
+              tx_pushed="W_arrow_down_1.tga"
+              tx_over="W_button_12_over.tga"
+              tooltip="uittHandSet"
+              tooltip_parent="win" />
+      </group>
       <link expr="@UI:PHRASE:SELECT_MEMORY_2"
             action="phrase_select_memory_2"
             params="value=add(@UI:PHRASE:SELECT_MEMORY_2,-1)" />
+      <link expr="depends(@UI:SAVE:GESTIONSETS2_MODE)"
+            action="proc"
+            params="gestionsets_proc_mode" />
   </group>
   <tree node="gestionsets2" />
   <!-- hands -->

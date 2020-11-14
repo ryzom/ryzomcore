@@ -47,6 +47,15 @@ namespace NLGUI
 			_VolatileValue = NULL;
 		}
 
+		/// Tells if this property has a value
+		bool hasValue() const
+		{
+			if( _VolatileValue != NULL )
+				return true;
+			else
+				return false;
+		}
+
 		NLMISC::CCDBNodeLeaf* getNodePtr() const
 		{
 			return _VolatileValue;
@@ -63,8 +72,8 @@ namespace NLGUI
 		bool link( NLMISC::CCDBNodeBranch *dbNode, const std::string &leafId, NLMISC::CCDBNodeLeaf *defaultLeaf = NULL  );
 
 		/// float operations
-		void setDouble (double value) {setSInt64((sint64&) value);}
-		double getDouble () const {sint64 i = getSInt64(); return (double &) i;	}
+		void setDouble(double value);
+		double getDouble() const;
 		void readDouble (const char* value, const std::string& id);
 
 		/// sint32 operations

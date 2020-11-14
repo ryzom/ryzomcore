@@ -96,7 +96,7 @@ public:
 	/**
 	 * Add a recipient.
 	 * - recipient must be ready for writing (e.g. at state 1 of above tutorial), because it will
-	 * be filled immediately with the modifications that occured before its arrival.
+	 * be filled immediately with the modifications that occurred before its arrival.
 	 * //Obsolete:
 	 * //- recipient must neither move in memory nor be removed between calls of addRecipient() and
 	 * //removeRecipient(). Beware with vectors and reallocation.

@@ -644,7 +644,7 @@ int main(int nNbArg, char **ppArgs)
 			}
 		}
 		
-		if (AllLightmapNames.size() == 0)
+		if (AllLightmapNames.empty())
 			continue;
 		
 		// Load all the lightmaps
@@ -920,6 +920,14 @@ int main(int nNbArg, char **ppArgs)
 								const CMeshGeom *pMG = dynamic_cast<const CMeshGeom*>(&pMeshML->getMeshGeom(m));
 								pVB = const_cast<CVertexBuffer*>(&pMG->getVertexBuffer());
 							}
+							else
+							{
+								pVB = NULL;
+							}
+
+							// to avoid a possible crash
+							if (!pVB) continue;
+
 							CVertexBufferReadWrite vba; 
 							pVB->lock (vba);
 
@@ -990,7 +998,8 @@ int main(int nNbArg, char **ppArgs)
 		ChDir (sExeDir);
 
 		// out a text file, with list of
-		FILE	*out= fopen(ppArgs[4], "wt");
+		FILE *out = NLMISC::nlfopen(ppArgs[4], "wt");
+
 		if(!out)
 		{
 			outString(string("ERROR: cannot save ")+ppArgs[4]);

@@ -41,7 +41,7 @@ struct CSeasonLightCycle
 	// build from a Georges form
 	void  build(const NLGEORGES::UFormElm &item);
 	// serial in a stream
-	void  serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+	void  serial(NLMISC::IStream &f)
 	{
 		f.serial(DayHour, DayToDuskHour, DuskToNightHour, NightHour, NightToDayHour);
 	}
@@ -64,7 +64,7 @@ struct CLightCycle
 	// Build from a sheet file
 	void  build(const char *sheetName);
 	//
-	void  serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+	void  serial(NLMISC::IStream &f)
 	{
 		f.serial(RealDayLength, NumHours, MaxNumColorSteps);
 		for(uint k = 0; k < EGSPD::CSeason::Invalid; ++k)

@@ -8,7 +8,7 @@ ADD_DEFINITIONS(-DUDP_DIR="\\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_udp/\\"")
 
 IF(WITH_3D)
   ADD_DEFINITIONS(-DUSE_3D)
-ENDIF(WITH_3D)
+ENDIF()
 
 TARGET_LINK_LIBRARIES(nl_sample_udpclient nelmisc nelnet nel3d)
 TARGET_LINK_LIBRARIES(nl_sample_udpserver nelmisc nelnet)
@@ -22,4 +22,4 @@ INSTALL(FILES bench_service.cfg client.cfg readme.txt DESTINATION ${NL_SHARE_PRE
 
 IF(WITH_3D)
   INSTALL(FILES n019003l.pfb DESTINATION ${NL_SHARE_PREFIX}/nl_sample_udp COMPONENT samplesnet)
-ENDIF(WITH_3D)
+ENDIF()

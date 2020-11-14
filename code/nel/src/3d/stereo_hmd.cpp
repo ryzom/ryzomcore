@@ -25,8 +25,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include <nel/misc/types_nl.h>
-#include <nel/3d/stereo_hmd.h>
+#include "std3d.h"
+#include "nel/3d/stereo_hmd.h"
 
 // STL includes
 
@@ -37,6 +37,10 @@
 
 using namespace std;
 // using namespace NLMISC;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D {
 

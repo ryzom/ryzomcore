@@ -115,7 +115,7 @@ public:
 	virtual float	getNumTriangles (float distance);
 
 	/// serial this meshGeom.
-	virtual void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void	serial(NLMISC::IStream &f);
 	NLMISC_DECLARE_CLASS(CMeshMRMGeom);
 
 	/// Scene profile
@@ -579,11 +579,11 @@ private:
 
 
 	/// load the header of this mesh. return the version of the header.
-	sint		loadHeader(NLMISC::IStream &f) throw(NLMISC::EStream);
+	sint		loadHeader(NLMISC::IStream &f);
 	/// load this mesh.
-	void		load(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void		load(NLMISC::IStream &f);
 	/// save the entire mesh.
-	void		save(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void		save(NLMISC::IStream &f);
 
 	// Build bone Usage information for serialized mesh <= version 2.
 	void		buildBoneUsageVer2 ();
@@ -702,7 +702,7 @@ public:
 	virtual float	getNumTriangles (float distance);
 
 	/// serial this mesh.
-	virtual void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void	serial(NLMISC::IStream &f);
 	NLMISC_DECLARE_CLASS(CMeshMRM);
 
 	/// Get bbox.

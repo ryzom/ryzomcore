@@ -61,7 +61,7 @@ void CBodyToBoneSheet::build(const NLGEORGES::UFormElm &item, const std::string 
 }
 
 // *********************************************************************************************
-void CBodyToBoneSheet::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CBodyToBoneSheet::serial(NLMISC::IStream &f)
 {
 	ClientSheetsStrings.serial(f, Head);
 	ClientSheetsStrings.serial(f, Chest);

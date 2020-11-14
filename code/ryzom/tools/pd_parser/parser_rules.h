@@ -161,7 +161,7 @@ CParseNode	*parse##nodename(CTokenizer &tokenizer)	\
 			PARSE_FAIL	\
 		CTokenizer::CToken	t2 = tokenizer.currentToken();	\
 		tokenizer.next();	\
-		main->savein.push_back(std::make_pair<std::string, std::string>(tokenizer.get(t1), tokenizer.get(t2)));	\
+		main->savein.push_back(std::make_pair(tokenizer.get(t1), tokenizer.get(t2)));	\
 	}
 
 /*

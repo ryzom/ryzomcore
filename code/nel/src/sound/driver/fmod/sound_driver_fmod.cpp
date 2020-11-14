@@ -26,6 +26,10 @@
 #include <Windows.h>
 #endif
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 
@@ -496,7 +500,7 @@ bool getTag (std::string &result, const char *tag, FSOUND_STREAM *stream)
  *  \param artist returns the song artist (empty if not available)
  *  \param title returns the title (empty if not available)
  */
-bool CSoundDriverFMod::getMusicInfo(const std::string &filepath, std::string &artist, std::string &title)
+bool CSoundDriverFMod::getMusicInfo(const std::string &filepath, std::string &artist, std::string &title, float &length)
 {
 	/* Open a stream, get the tag if it exists, close the stream */
 	string pathName = CPath::lookup(filepath, false);
@@ -526,6 +530,8 @@ bool CSoundDriverFMod::getMusicInfo(const std::string &filepath, std::string &ar
 	{
 		getTag(artist, "ARTIST", stream);
 		getTag(title, "TITLE", stream);
+		// get length of the music in seconds
+		length = (float)FSOUND_Stream_GetLengthMs(stream) / 1000.f;
 		FSOUND_Stream_Close(stream);
 		return true;
 	}

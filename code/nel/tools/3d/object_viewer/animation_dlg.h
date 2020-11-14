@@ -46,7 +46,7 @@ public:
 	CButton	StopCtrl;
 	float	End;
 	float	Speed;
-	float	Start;	
+	float	Start;
 	BOOL	Loop;
 	int		UICurrentFrame;
 	BOOL	Inplace;

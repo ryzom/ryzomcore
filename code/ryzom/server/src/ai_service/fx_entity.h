@@ -32,7 +32,7 @@ public:
 	NLMISC::CEntityId const& id() const;
 	bool spawn();
 	void despawn();
-	bool update() { }
+	bool update() { return false; }
 	void set(std::string const& prop, std::string const& value, bool reportChange=false) { }
 	std::string get(std::string const& prop);
 	std::string getIndexString() const { return _EntityId.toString(); }

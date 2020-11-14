@@ -54,6 +54,12 @@ public:
 		return _Data->Building;
 	}
 
+	/// set the destination where the room physically is
+	void setBuilding(CBuildingPhysicalPlayer  * building)
+	{
+		_Data->Building = building;
+	}
+
 	/// init the room. Should be called when a user buys it
 	void init(CCharacter * owner, CBuildingPhysicalPlayer * building);
 

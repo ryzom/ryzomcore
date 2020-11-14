@@ -248,9 +248,9 @@ public:
 	// From IPrimitive
 	virtual NLLIGO::IPrimitive *copy () const;
 	// Read the primitive, to post call the CPrimitiveEditor load method
-	virtual bool read (xmlNodePtr xmlNode, const char *filename, uint version, NLLIGO::CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, NLLIGO::CLigoConfig &config);
 	// Write the primitive, to pre call the CPrimitiveEditor load method
-	virtual void write (xmlNodePtr xmlNode, const char *filename) const;
+	virtual void write (xmlNodePtr xmlNode, const  std::string &filename) const;
 	// Callback called when the primitive is updated, giving a chance to track the primitive's modifications during the loading
 	virtual void onModifyPrimitive (NLLIGO::CPrimitives &primitives) const;
 
@@ -293,9 +293,9 @@ public:
 	// From IClassable
 	virtual NLLIGO::IPrimitive *copy () const;
 	// Read the primitive, to post call the CPrimitiveEditor load method
-	virtual bool read (xmlNodePtr xmlNode, const char *filename, uint version, NLLIGO::CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, NLLIGO::CLigoConfig &config);
 	// Write the primitive, to pre call the CPrimitiveEditor load method
-	virtual void write (xmlNodePtr xmlNode, const char *filename) const;
+	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const;
 	// Callback called when the primitive is updated, giving a chance to track the primitive's modifications during the loading
 	virtual void onModifyPrimitive (NLLIGO::CPrimitives &primitives) const;
 
@@ -338,9 +338,9 @@ public:
 	// From IPrimitive
 	virtual NLLIGO::IPrimitive *copy () const;
 	// Read the primitive, to post call the CPrimitiveEditor load method
-	virtual bool read (xmlNodePtr xmlNode, const char *filename, uint version, NLLIGO::CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, NLLIGO::CLigoConfig &config);
 	// Write the primitive, to pre call the CPrimitiveEditor load method
-	virtual void write (xmlNodePtr xmlNode, const char *filename) const;
+	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const;
 	// Callback called when the primitive is updated, giving a chance to track the primitive's modifications during the loading
 	virtual void onModifyPrimitive (NLLIGO::CPrimitives &primitives) const;
 
@@ -385,9 +385,9 @@ public:
 	// From IPrimitive
 	virtual NLLIGO::IPrimitive *copy () const;
 	// Read the primitive, to post call the CPrimitiveEditor load method
-	virtual bool read (xmlNodePtr xmlNode, const char *filename, uint version, NLLIGO::CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, NLLIGO::CLigoConfig &config);
 	// Write the primitive, to pre call the CPrimitiveEditor load method
-	virtual void write (xmlNodePtr xmlNode, const char *filename) const;
+	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const;
 	// Callback called when the primitive is updated, giving a chance to track the primitive's modifications during the loading
 	virtual void onModifyPrimitive (NLLIGO::CPrimitives &primitives) const;
 
@@ -430,9 +430,9 @@ public:
 	// From IPrimitive
 	virtual NLLIGO::IPrimitive *copy () const;
 	// Read the primitive, to post call the CPrimitiveEditor load method
-	virtual bool read (xmlNodePtr xmlNode, const char *filename, uint version, NLLIGO::CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, NLLIGO::CLigoConfig &config);
 	// Write the primitive, to pre call the CPrimitiveEditor load method
-	virtual void write (xmlNodePtr xmlNode, const char *filename) const;
+	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const;
 	// Callback called when the primitive is updated, giving a chance to track the primitive's modifications during the loading
 	virtual void onModifyPrimitive (NLLIGO::CPrimitives &primitives) const;
 
@@ -452,7 +452,7 @@ public:
 	CPrimBitmap ();
 
 	// Init
-	void			init (const char *filename);
+	void			init (const std::string &filename);
 
 	// \name From IClassable
 	NLMISC_DECLARE_CLASS (CPrimBitmap)

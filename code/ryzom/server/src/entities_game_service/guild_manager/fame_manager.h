@@ -143,7 +143,7 @@ public:
 	// Fame system
 	//  These take clans as parameters, restricted by call.
 	//  These return the proper fame values, or NO_FAME if there's an error.
-	// - GgtStartFame: playerClan must be a Civilization, targetClan must be any non-neutral clan
+	// - getStartFame: playerClan must be a Civilization, targetClan must be any non-neutral clan
 	sint32 getStartFame(PVP_CLAN::TPVPClan playerClan, PVP_CLAN::TPVPClan targetClan);
 	// - getMaxFameByClan: playerClan must be Neutral or the same type (Cult or Clan) as targetClan,
 	//   targetClan must be any non-neutral clan.

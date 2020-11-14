@@ -57,7 +57,7 @@ struct CStaticCreatureRawMaterial
 	/**
 	 * Serial
 	 */
-	inline void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	inline void serial(NLMISC::IStream &f)
 	{
 		f.serial( MpCommon );
 		f.serial( UsageAndQuantity );
@@ -129,7 +129,7 @@ public:
 	/**
 	 * Serial
 	 */
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serialEnum( _HarvestSkill );
 		f.serialCont( _Mps );

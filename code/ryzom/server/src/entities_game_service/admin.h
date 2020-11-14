@@ -46,10 +46,30 @@ void initCommandsPrivileges(const std::string & fileName);
 void initPositionFlags(const std::string & fileName);
 void initSalt();
 const std::string &getSalt();
+void getUCstringFromHash(const std::string & hash, ucstring & finaltext);
+std::string getStringFromHash(const std::string &hash);
 
 CAdminCommand * findAdminCommand(const std::string & name);
 
 extern void GET_CHARACTER_Helper(std::string& command, const NLMISC::CEntityId& id, const std::string& adminCommand);
+
+#define GET_ENTITY \
+	if (args.size() < 1) { nlwarning ("Missing argument number 0 that should be the eid"); return false; } \
+	CEntityId eid(args[0]); \
+	if (eid == CEntityId::Unknown) \
+		return true; \
+	TLogContext_Character_AdminCommand commandContext(eid); \
+	CEntityBase *e = CEntityBaseManager::getEntityBasePtr(eid); \
+	if(e == 0) \
+	{ \
+		nlwarning ("Unknown entity '%s'", eid.toString().c_str()); \
+		return true; \
+	} \
+	if(!TheDataset.isAccessible(e->getEntityRowId())) \
+	{ \
+		nlwarning ("'%s' is not valid in mirror", eid.toString().c_str()); \
+		return true; \
+	}
 
 #define GET_CHARACTER \
 	if (args.size() < 1) { nlwarning ("Missing argument number 0 that should be the eid"); return false; } \
@@ -87,6 +107,29 @@ extern void GET_CHARACTER_Helper(std::string& command, const NLMISC::CEntityId& 
 		return true; \
 	} \
 	end: 
+
+#define GET_ACTIVE_CHARACTER \
+	if (args.size() < 1) { nlwarning ("ERR: Missing argument number 0 that should be the uid"); return false; } \
+	uint32 uid; \
+	NLMISC::fromString(args[0], uid); \
+	CCharacter *c = CPlayerManager::getInstance().getActiveChar(uid); \
+	if(c == 0) \
+	{ \
+		log.displayNL ("ERR: Unknown player '%u' (%s)", uid, args[0].c_str()); \
+		return false; \
+	} \
+	CEntityId eid = c->getId(); \
+	TLogContext_Character_AdminCommand commandContext(eid); \
+	if(!c->getEnterFlag()) \
+	{ \
+		log.displayNL ("ERR: '%s' is not entered", eid.toString().c_str()); \
+		return false; \
+	} \
+	if(!TheDataset.isAccessible(c->getEntityRowId())) \
+	{ \
+		log.displayNL ("ERR: '%s' is not valid in mirror", eid.toString().c_str()); \
+		return false; \
+	} \
 
 //#define GET_CHARACTER1 \
 //	if (args.size() < 2) { nlwarning ("Missing argument number 1 that should be the eid"); return false; } \

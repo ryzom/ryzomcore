@@ -666,7 +666,7 @@ NLMISC_CATEGORISED_COMMAND(nel,help,"display help on a specific variable/command
 	CCommandRegistry &cr = CCommandRegistry::getInstance();
 
 	// treat the case where we have no parameters
-	if (args.size() == 0)
+	if (args.empty())
 	{
 		// display a list of all command categories
 		log.displayNL("Help commands:");

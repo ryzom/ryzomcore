@@ -103,9 +103,9 @@ void CPageSimple::onDocChanged()
 	if (!valid)
 	{
 		// This is not a valid simple sound...
-		_AudioFormat = "";
-		_Filename = "";
-		_Filesize = "";
+		_AudioFormat.Empty();
+		_Filename.Empty();
+		_Filesize.Empty();
 		UpdateData(FALSE);
 	}
 }

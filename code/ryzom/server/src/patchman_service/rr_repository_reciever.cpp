@@ -409,7 +409,7 @@ void CRepositoryReceiver::fileList(NLNET::IModuleProxy *sender, uint32 version, 
 // 	_CurrentFileExpected= fileSize;
 // 	
 // 	// open the temp file
-// 	_CurrentFileHandle= fopen(rrTempFileName(_TargetDirectories.patchDirectoryName(),_EmitterName).c_str(),"wb");
+// 	_CurrentFileHandle= nlfopen(rrTempFileName(_TargetDirectories.patchDirectoryName(),_EmitterName), "wb");
 // 	BOMB_IF(_CurrentFileHandle==NULL,"Failed to open temporary file for writing: "+rrTempFileName(_TargetDirectories.patchDirectoryName(),_EmitterName),return);
 // }
 // 
@@ -493,7 +493,7 @@ void CRepositoryReceiver::fileList(NLNET::IModuleProxy *sender, uint32 version, 
 // 
 // 	// rename the temp file
 // 	// note that the _receiveBeginFile() method will have removed any file that could be in the way...
-// 	bool renameOk= NLMISC::CFile::moveFile((_TargetDirectories.patchDirectoryName()+awaitedFileName).c_str(),rrTempFileName(_TargetDirectories.patchDirectoryName(),_EmitterName).c_str());
+// 	bool renameOk= NLMISC::CFile::moveFile(_TargetDirectories.patchDirectoryName()+awaitedFileName, rrTempFileName(_TargetDirectories.patchDirectoryName(),_EmitterName));
 // 	DROP_IF(!renameOk,"Failed to move tmp file ('"+rrTempFileName(_TargetDirectories.patchDirectoryName(),_EmitterName)+"') to : '"+fileNameRec+"'",return);
 // 
 // 	// If we're all done then we need to set the new version number

@@ -24,7 +24,7 @@
 namespace BGDownloader
 {
 
-const char *DownloaderMutexName = "RyzomBgDownloader";
+const wchar_t *DownloaderMutexName = L"RyzomBgDownloader";
 
 ucstring getWrittenSize(uint32 nSize)
 {

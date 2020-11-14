@@ -24,7 +24,7 @@
 #include "header.h"
 #include "type.h"
 
-bool convertDfnFile (const char *oldFileName, const char *newFileName);
+bool convertDfnFile (const std::string &oldFileName, const std::string &newFileName);
 
 namespace NLGEORGES
 {
@@ -41,7 +41,7 @@ class CFormDfn : public UFormDfn
 	friend class CFormElm;
 	friend class CFormLoader;
 	friend class CFormElmStruct;
-	friend bool convertDfnFile (const char *oldFileName, const char *newFileName);
+	friend bool convertDfnFile (const std::string &oldFileName, const std::string &newFileName);
 public:
 
 	// Default cstr
@@ -60,7 +60,7 @@ public:
 		friend class CFormElm;
 		friend class CFormDfn;
 		friend class CFormElmStruct;
-		friend bool convertDfnFile (const char *oldFileName, const char *newFileName);
+		friend bool convertDfnFile (const std::string &oldFileName, const std::string &newFileName);
 	public:
 
 		CEntry ()
@@ -85,12 +85,12 @@ public:
 		TEntryType					getType () const;
 
 		// Set as a type
-		void						setType (CFormLoader &loader, const char *filename);
+		void						setType (CFormLoader &loader, const std::string &filename);
 
 		void						setType (TEntryType type);
 
 		// Set as a dfn
-		void						setDfn (CFormLoader &loader, const char *filename);
+		void						setDfn (CFormLoader &loader, const std::string &filename);
 
 		// Set as a dfn pointer
 		void						setDfnPointer ();
@@ -99,7 +99,7 @@ public:
 		const std::string			&getName () const;
 
 		// Set element Name
-		void						setName (const char *name);
+		void						setName (const std::string &name);
 
 		// Get the filename
 		const std::string			&getFilename() const;
@@ -108,16 +108,16 @@ public:
 		const std::string			&getFilenameExt() const;
 
 		// Set the filename
-		void						setFilename (const char *def);
+		void						setFilename (const std::string &def);
 
 		// Set the filename extension
-		void						setFilenameExt (const char *ext);
+		void						setFilenameExt (const std::string &ext);
 
 		// Get default value
 		const std::string			&getDefault () const;
 
 		// Set default value
-		void						setDefault (const char *def);
+		void						setDefault (const std::string &def);
 
 		// Set array flag
 		void						setArrayFlag (bool flag);
@@ -167,7 +167,7 @@ public:
 	void							removeEntry( uint idx );
 
 	// ** IO functions
-	void							write (xmlDocPtr root, const char *filename);
+	void							write (xmlDocPtr root, const std::string &filename);
 
 	// Count parent DFN
 	uint							countParentDfn (uint32 round=0) const;
@@ -185,7 +185,7 @@ public:
 	void							setNumParent (uint size);
 
 	// Set a parent
-	void							setParent (uint parent, CFormLoader &loader, const char *filename);
+	void							setParent (uint parent, CFormLoader &loader, const std::string &filename);
 
 	// Get a parent
 	CFormDfn						*getParent (uint parent) const;
@@ -232,7 +232,7 @@ public:
 	CFileHeader						Header;
 
 	// Error handling
-	void							warning (bool exception, const char *function, const char *format, ... ) const;
+	void							warning (bool exception, const std::string &function, const char *format, ... ) const;
 
 private:
 	// The parents array
@@ -249,7 +249,7 @@ private:
 
 private:
 	// Read method called by the form loader
-	void							read (xmlNodePtr doc, CFormLoader &loader, bool forceLoad, const char *filename);
+	void							read (xmlNodePtr doc, CFormLoader &loader, bool forceLoad, const std::string &filename);
 };
 
 } // NLGEORGES

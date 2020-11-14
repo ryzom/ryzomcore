@@ -22,7 +22,7 @@
 #include "../../../../common/src/game_share/mode_and_behaviour.h"
 
 
-#define REGKEY_BASE_PATH "Software\\Nevrax\\nel\\world_editor_shard_monitor_plugin"
+#define REGKEY_BASE_PATH _T("Software\\Nevrax\\nel\\world_editor_shard_monitor_plugin")
 
 // 
 struct CServerParams

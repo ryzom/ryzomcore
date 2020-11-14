@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
 			outputFileName += outExt;
 		}
 
-		static CPersistentDataRecord	pdr;
+		static CPersistentDataRecord pdr;
 		pdr.clear();
 
 		switch(mode)
@@ -258,25 +258,25 @@ int main(int argc, char *argv[])
 			}
 			else
 				printf("Converting '%s' (XML) to '%s' (BINARY)\n", fileName.c_str(), outputFileName.c_str() );
-			if (!pdr.readFromTxtFile(fileName.c_str()))
+			if (!pdr.readFromTxtFile(fileName))
 				goto failureRead;
-			if (!pdr.writeToBinFile(outputFileName.c_str()))
+			if (!pdr.writeToBinFile(outputFileName))
 				goto failureWrite;
 			break;
 
 		case cm_to_xml:
 			printf("Converting '%s' (BINARY) to '%s' (XML)\n", fileName.c_str(), outputFileName.c_str() );
-			if (!pdr.readFromBinFile(fileName.c_str()))
+			if (!pdr.readFromBinFile(fileName))
 				goto failureRead;
-			if (!pdr.writeToTxtFile(outputFileName.c_str(), CPersistentDataRecord::XML_STRING))
+			if (!pdr.writeToTxtFile(outputFileName, CPersistentDataRecord::XML_STRING))
 				goto failureWrite;
 			break;
 
 		case cm_to_txt:
 			printf("Converting '%s' (BINARY) to '%s' (TXT)\n", fileName.c_str(), outputFileName.c_str() );
-			if (!pdr.readFromBinFile(fileName.c_str()))
+			if (!pdr.readFromBinFile(fileName))
 				goto failureRead;
-			if (!pdr.writeToTxtFile(outputFileName.c_str(), CPersistentDataRecord::LINES_STRING))
+			if (!pdr.writeToTxtFile(outputFileName, CPersistentDataRecord::LINES_STRING))
 				goto failureWrite;
 			break;
 		default:

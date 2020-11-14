@@ -29,7 +29,7 @@ using namespace NLGEORGES;
 //--------------------------------------------------------------
 // serial
 //--------------------------------------------------------------
-void CStaticXpFactorTable::serial(class NLMISC::IStream &f)
+void CStaticXpFactorTable::serial(NLMISC::IStream &f)
 {
 	f.serialCont(_XpFactorTable);
 } // serial //

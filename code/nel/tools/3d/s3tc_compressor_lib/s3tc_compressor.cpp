@@ -43,6 +43,7 @@ static void		compressMipMap(uint8 *pixSrc, sint width, sint height, vector<uint8
 		case DXT1A:
 			flags |= squish::kDxt1;
 			dest.ddpf.dwFourCC = MAKEFOURCC('D', 'X', 'T', '1');
+			// TODO: add special headers flags for DXTC1a
 			break;
 		case DXT3:
 			flags |= squish::kDxt3;
@@ -179,6 +180,8 @@ void		CS3TCCompressor::compress(const NLMISC::CBitmap &bmpSrc, bool optMipMap, u
 	DDS_HEADER			dest;
 	NLMISC::CBitmap		picSrc= bmpSrc;
 
+	// initialize DDS_HEADER
+	memset(&dest, 0, sizeof(dest));
 
 	// For all mipmaps, compress.
 	if(optMipMap)

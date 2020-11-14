@@ -1,0 +1,257 @@
+<?xml version="1.0"?>
+<interface_config>
+  <root id="interface"
+        x="0"
+        y="0"
+        w="800"
+        h="600"
+        active="true" />
+
+  <!-- default: active, h_bar -->
+  <variable entry="UI:VARIABLES:ISACTIVE:APPZONE"
+            type="sint32"
+            value="1" />
+  <variable entry="UI:SAVE:APPZONE:MODE"
+            type="sint32"
+            value="1" />
+
+  <!-- load lua after variable are setup -->
+  <lua file="appzone.lua" />
+  <lua file="webbrowser.lua" />
+
+  <proc id="appzone_proc_active">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:APPZONE|value=1" />
+    <action handler="proc"
+            params="appzone_proc_mode" />
+  </proc>
+
+  <proc id="appzone_proc_deactive">
+    <action handler="set"
+            params="dblink=UI:VARIABLES:ISACTIVE:APPZONE|value=0" />
+  </proc>
+
+  <proc id="appzone_proc_mode_set">
+    <action handler="set"
+            params="dblink=UI:SAVE:APPZONE:MODE|value=@0" />
+    <action handler="proc"
+            params="appzone_proc_mode" />
+  </proc>
+
+  <proc id="appzone_proc_mode_inc">
+    <action handler="set"
+            params="dblink=UI:SAVE:APPZONE:MODE|value=add(@UI:SAVE:APPZONE:MODE,1)" />
+    <action handler="proc"
+            params="appzone_proc_mode" />
+  </proc>
+
+  <proc id="appzone_proc_mode">
+    <action handler="set"
+            cond="le(@UI:SAVE:APPZONE:MODE,0)"
+            params="dblink=UI:SAVE:APPZONE:MODE|value=1" />
+    <action handler="set"
+            cond="ge(@UI:SAVE:APPZONE:MODE,5)"
+            params="dblink=UI:SAVE:APPZONE:MODE|value=1" />
+
+    <action handler="lua"
+            cond="eq(@UI:SAVE:APPZONE:MODE,1)"
+            params="AppZone:setMode('h_bar')" />
+    <action handler="lua"
+            cond="eq(@UI:SAVE:APPZONE:MODE,2)"
+            params="AppZone:setMode('h_box')" />
+    <action handler="lua"
+            cond="eq(@UI:SAVE:APPZONE:MODE,3)"
+            params="AppZone:setMode('v_bar')" />
+    <action handler="lua"
+            cond="eq(@UI:SAVE:APPZONE:MODE,4)"
+            params="AppZone:setMode('v_box')" />
+  </proc>
+
+  <group type="menu"
+         id="appzone_menu"
+         extends="base_menu_with_color">
+    <action id="settings"
+            name="uiBrowseHome"
+            handler="lua"
+            params="AppZone:onButtonHome()" />
+    <action id="reload"
+            name="uiBrowseRefresh"
+            handler="lua"
+            params="AppZone:reload()" />
+    <action id="hide"
+            name="uiHide"
+            handler="lua"
+            params="AppZone:setActive(false)" />
+    <separator />
+  </group>
+
+  <group id="appzone"
+         type="container"
+         x="0"
+         y="0"
+         w="200"
+         h="26"
+         posref="MM MM"
+         min_w="26"
+         min_h="26"
+         max_w="1600"
+         max_h="1600"
+         pop_max_w="1600"
+         pop_max_h="1600"
+         title=""
+         global_color="true"
+         global_color_over="true"
+         header_active="false"
+         right_button="false"
+         options="layer0_pad"
+         movable="true"
+         active="true"
+         opened="true"
+         openable="false"
+         resizer="false"
+         on_active="proc"
+         on_active_params="appzone_proc_active"
+         on_deactive="proc"
+         on_deactive_params="appzone_proc_deactive"
+         group_onclick_r="active_menu"
+         group_params_r="menu=ui:interface:appzone_menu">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           w="0"
+           h="0"
+           posref="TL TL" />
+    <group id="header_opened"
+           x="0"
+           y="0"
+           w="0"
+           h="0"
+           wmin="5"
+           sizeref="w"
+           posref="TL TL" />
+    <group id="content"
+           x="0"
+           y="0"
+           w="0"
+           h="26"
+           posref="TL TL">
+      <ctrl type="button"
+            style="text_button_header"
+            button_type="toggle_button"
+            id="toggle_mode"
+            posref="BL BL"
+            x="2"
+            y="0"
+            tx_normal="tb_mode.tga"
+            tx_pushed="tb_mode.tga"
+            tooltip="uiMk_mode"
+            onclick_l="proc"
+            params_l="appzone_proc_mode_inc" />
+      <ctrl type="button"
+            style="text_button_header"
+            button_type="toggle_button"
+            id="browse_home"
+            posref="BR BR"
+            x="0"
+            y="-3"
+            tx_normal="r2_palette_components.tga"
+            tx_pushed="r2_palette_components.tga"
+            tooltip="uittBrowseHome"
+            onclick_l="lua"
+            params_l="AppZone:onButtonHome()" />
+      <ctrl type="button"
+            style="text_button_header"
+            button_type="toggle_button"
+            id="browse_reload"
+            posref="TL BL"
+            posparent="browse_home"
+            x="0"
+            y="-4"
+            tx_normal="r2ed_icon_rotate.tga"
+            tx_pushed="r2ed_icon_rotate.tga"
+            tooltip="uiBrowseRefresh"
+            onclick_l="lua"
+            params_l="AppZone:reload()" />
+      <group id="html"
+             type="webig_html"
+             posref="TL TL"
+             url=""
+             title_prefix=""
+             sizeref="wh"
+             x="15"
+             y="0"
+             w="0"
+             h="0"
+             background_color="0 0 0 0"
+             error_color="255 240 48 255"
+             link_color="240 155 100 255"
+             text_color="210 210 210 255"
+             h1_color="255 255 255 255"
+             h2_color="255 255 255 255"
+             h3_color="255 255 255 255"
+             h4_color="255 255 255 255"
+             h5_color="255 255 255 255"
+             h6_color="255 255 255 255"
+             text_font_size="10"
+             h1_font_size="16"
+             h2_font_size="14"
+             h3_font_size="13"
+             h4_font_size="12"
+             h5_font_size="11"
+             h6_font_size="11"
+             paragraph_begin_space="12"
+             multi_line_space_factor="0.25"
+             td_begin_space="0"
+             li_begin_space="4"
+             ul_begin_space="12"
+             li_indent="-10"
+             ul_indent="30"
+             checkbox_bitmap_normal="patch_off.tga"
+             checkbox_bitmap_pushed="patch_on.tga"
+             checkbox_bitmap_over=""
+             background_bitmap_view=""
+             home=""
+             browse_next_time="false"
+             form_text_area_group="edit_box_widget_multiline">
+        <group id="black"
+               posref="BR BR"
+               sizeref="hw"
+               w="0"
+               h="0"
+               inherit_gc_alpha="true" />
+        <view type="bitmap"
+              id="black2"
+              posparent="black"
+              posref="MM MM"
+              sizeref="wh"
+              w="0"
+              h="0"
+              inherit_gc_alpha="true"
+              scale="true"
+              texture="blank.tga"
+              global_color="false" />
+        <group type="list"
+               id="text_list"
+               fontsize="9"
+               posref="TL TL"
+               posparent="black"
+               x="0"
+               y="0"
+               space="0"
+               sizeref="hw"
+               w="-4"
+               h="0"
+               maxelements="2000" />
+        <ctrl style="skin_scroll"
+              id="scroll_bar" />
+      </group>
+    </group>
+  </group>
+
+  <tree node="appzone" />
+
+  <command name="appzone"
+           action="lua"
+           params="AppZone:handle('$')" />
+
+</interface_config>

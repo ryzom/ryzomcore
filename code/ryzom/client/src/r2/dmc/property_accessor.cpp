@@ -21,6 +21,11 @@
 #include "game_share/object.h"
 
 #include <assert.h>
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace R2;
 
 
@@ -44,6 +49,14 @@ double CPropertyAccessor::getValueAsNumber(CObject* component, const std::string
 	const CObject* object=getPropertyValue((const CObject *) component, attrName);
 	if (!object || !object->isNumber()) { return 0; }
 	return object->toNumber();
+}
+
+sint64 CPropertyAccessor::getValueAsInteger(CObject* component, const std::string& attrName) const
+{
+	//H_AUTO(R2_CPropertyAccessor_getValueAsInteger)
+	const CObject* object=getPropertyValue((const CObject *) component, attrName);
+	if (!object || !object->isInteger()) { return 0; }
+	return object->toInteger();
 }
 
 bool CPropertyAccessor::hasValueInBase(CObject *component, const std::string& attrName)
@@ -117,7 +130,7 @@ const CObject *CPropertyAccessor::getPropertyValue(const CObject* componentParam
 			std::string str = propClass->toString();
 
 
-			while (!toRet && str != "")
+			while (!toRet && !str.empty())
 			{
 				CObjectGenerator* generator = _Factory->getGenerator(str);
 
@@ -133,7 +146,7 @@ const CObject *CPropertyAccessor::getPropertyValue(const CObject* componentParam
 				}
 				else
 				{
-					str ="";
+					str.clear();
 				}
 
 			}

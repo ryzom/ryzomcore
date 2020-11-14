@@ -84,6 +84,8 @@ class CClientIdLookup;
 	// Hash function: ClientId * 256 + CeId
 	struct CHash
 	{
+		static const size_t bucket_size = 4;
+		static const size_t min_buckets = 8;
 		size_t		operator() ( TPairClientSlot pair ) const { return (pair.ClientId << 8) + pair.Slot; }
 	};
 

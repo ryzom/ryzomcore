@@ -4,6 +4,8 @@
 <interface_config>
 	<root id="interface" x="0" y="0" w="800" h="600" active="true" />
 	<lua file="webig.lua" />
+	<lua file="json.lua" />
+	<lua file="sceneedit.lua" />
 
 <!-- //////////// STYLE : webigchat_desc /////////// -->
 	<style style="webigchat_desc" type="text" fontsize="12" justification="dont_clip_word" color="0 0 0 255" global_color="false" multi_line="true" multi_line_space="0" line_maxw="320" multi_line_maxw_only="true" />

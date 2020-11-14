@@ -26,7 +26,7 @@ define exe_set_mini_ring
 define exe_set_mini_mainland
 	use raes
 	use ms_mini_mainland
-	use ais_newbyland
+	use ais_newbieland
 	use egs_mainland
 	use gpms_mainland
 	use ios_mainland
@@ -100,7 +100,7 @@ define exe_set_std_mainland_be03
 define exe_set_std_mainland_be03_basics
 //	use ais_matis
 //	use ais_tryker
-	use ais_newbyland
+	use ais_newbieland
 
 // unifier and co ------------------
 
@@ -170,12 +170,14 @@ define ais_ring
 	cmdLine ai_service -C. -L. --nobreak --writepid -mCommon:Ring
 	use ais
 	data data_r2_desert
-	data data_r2_forest
-	data data_r2_jungle
-	data data_r2_lakes
-	data data_r2_roots
+	// data data_r2_forest
+	// data data_r2_jungle
+	// data data_r2_lakes
+	// data data_r2_roots
 
 define ais_mainland
+	name ais
+	cmdLine ai_service -C. -L. --nobreak --writepid -mCommon:Indoors:Newbieland:Post
 	use ais
 	data data_mainland_common_primitives
 	data data_newbieland_primitives
@@ -188,8 +190,8 @@ define ais_mini_mainland
 	cmdLine ai_service -C. -L. --nobreak --writepid -mCommon:Indoors:Newbieland:Post
 	use ais_mainland
 
-define ais_newbyland
-	name ais_newbyland
+define ais_newbieland
+	name ais_newbieland
 	cmdLine ai_service -C. -L. --nobreak --writepid -mCommon:Indoors:Newbieland:Post
 	use ais
 	data data_mainland_common_primitives
@@ -213,36 +215,40 @@ define bms_master
 	use bms
 	cmdLine backup_service -C. -L. --nobreak --writepid -P49990
 	//cfg #include "../live/cfg/backup_module_service_master.cfg"
+	cfg #include "../live/service_backup_service/backup_service.cfg"
 	cfgAfter ListeningPort = 49990;
 	cfgAfter L3ListeningPort = 49950;
 	cfgAfter WebPort = 49970;
 	cfgAfter BSReadState = 1;
-	cfgAfter SaveShardRoot = "../save_shard/";
+	cfgAfter SaveShardRoot = "../save_shard_bs/";
 
 define bms_master2
 	use bms
 	cmdLine backup_service -C. -L. --nobreak --writepid -P49994
 	//cfg #include "../live/cfg/backup_module_service_master.cfg"
+	cfg #include "../live/service_backup_service/backup_service.cfg"
 	cfgAfter ListeningPort = 49994;
 	cfgAfter L3ListeningPort = 49954;
 	cfgAfter WebPort = 49974;
 	cfgAfter BSReadState = 1;
-	cfgAfter SaveShardRoot = "../save_shard/";
+	cfgAfter SaveShardRoot = "../save_shard_bs/";
 
 define bms_slave
 	use bms
 	cmdLine backup_service -C. -L. --nobreak --writepid -P49991
-	cfg #include "../live/cfg/backup_module_service_slave.cfg"
+	//cfg #include "../live/cfg/backup_module_service_slave.cfg"
+	cfg #include "../live/service_backup_service/backup_service.cfg"
 	cfgAfter ListeningPort = 49991;
 	cfgAfter L3ListeningPort = 49951;
 	cfgAfter WebPort = 49971;
 	cfgAfter BSReadState = 0;
-	cfgAfter SaveShardRoot = "../save_shard/";
+	cfgAfter SaveShardRoot = "../save_shard_bs/";
 
 define bms_pd_master
 	use bms
 	cmdLine backup_service -C. -L. --nobreak --writepid -P49992
 	//cfg #include "../live/cfg/backup_module_service_master.cfg"
+	cfg #include "../live/service_backup_service/backup_service.cfg"
 	cfgAfter ListeningPort = 49992;
 	cfgAfter L3ListeningPort = 49952;
 	cfgAfter WebPort = 49972;
@@ -252,7 +258,8 @@ define bms_pd_master
 define bms_pd_slave
 	use bms
 	cmdLine backup_service -C. -L. --nobreak --writepid -P49993
-	cfg #include "../live/cfg/backup_module_service_slave.cfg"
+	//cfg #include "../live/cfg/backup_module_service_slave.cfg"
+	cfg #include "../live/service_backup_service/backup_service.cfg"
 	cfgAfter ListeningPort = 49993;
 	cfgAfter L3ListeningPort = 49953;
 	cfgAfter WebPort = 49973;
@@ -263,6 +270,7 @@ define backup_lgs
 	use bms
 	cmdLine backup_service -C. -L. --nobreak --writepid -P49994
 	//cfg #include "../live/cfg/backup_module_service_master.cfg"
+	cfg #include "../live/service_backup_service/backup_service.cfg"
 	cfgAfter ListeningPort = 49994;
 	cfgAfter L3ListeningPort = 49995;
 	cfgAfter WebPort = 49972;
@@ -320,7 +328,7 @@ define dss
 
 define dss_ring
 	use dss
-	cfg #include "../live/cfg/dynamic_scenario_service_ring.cfg"
+	// cfg #include "../live/cfg/dynamic_scenario_service_ring.cfg"
 
 
 // egs -----------------------------
@@ -374,17 +382,17 @@ define egs_mainland
 define egs_ring
 	use egs
 	data data_mainland_common_primitives
-	data data_newbieland_primitives
-	data data_newbieland
-	data data_indoors
-	cfg #include "../live/cfg/entities_game_service_ring.cfg"
+	// data data_newbieland_primitives
+	// data data_newbieland
+	// data data_indoors
+	//cfg #include "../live/cfg/entities_game_service_ring.cfg" // care
 	cfg UsedContinents = 
 	cfg {
 	cfg	"r2_desert", "10000",
-	cfg	"r2_forest", "10001",
-	cfg	"r2_jungle", "10002",
-	cfg	"r2_lakes",  "10003",
-	cfg	"r2_roots",  "10004",
+	// cfg	"r2_forest", "10001",
+	// cfg	"r2_jungle", "10002",
+	// cfg	"r2_lakes",  "10003",
+	// cfg	"r2_roots",  "10004",
 	cfg };
 	cfgAfter MaxXPGainPerPlayer = 30.0;
 	cfgAfter DeathXPFactor = 0.0;
@@ -460,16 +468,16 @@ define gpms_mainland
 	use gpms
 	data data_newbieland
 	data data_indoors
-	cfg #include "../live/cfg/gpm_service_mainland.cfg"
+	//cfg #include "../live/cfg/gpm_service_mainland.cfg"
 
 define gpms_ring
 	use gpms
 	data data_r2_desert
-	data data_r2_forest
-	data data_r2_jungle
-	data data_r2_lakes
-	data data_r2_roots
-	cfg #include "../live/cfg/gpm_service_ring.cfg"
+	// data data_r2_forest
+	// data data_r2_jungle
+	// data data_r2_lakes
+	// data data_r2_roots
+	//cfg #include "../live/cfg/gpm_service_ring.cfg"
 
 
 // pdss ----------------------------
@@ -534,7 +542,7 @@ define ios_mainland
 
 define ios_ring
 	use ios
-	cfg #include "../live/cfg/input_output_service_ring.cfg"
+	//cfg #include "../live/cfg/input_output_service_ring.cfg"
 
 
 // las -----------------------------

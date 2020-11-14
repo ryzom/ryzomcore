@@ -456,7 +456,15 @@ void CPhraseManager::updatePhrases()
 		}
 		
 		// update this phrase
-		updateEntityCurrentAction( (*it).first, entityPhrases);
+		CSPhrase::TPhraseState old_state;
+		do
+		{
+			old_state = phrase->state();
+			updateEntityCurrentAction( (*it).first, entityPhrases);
+			phrase = entityPhrases.getCurrentAction();
+			//Every time we get the next action, th phrase might be deleted (if the action is invalid or finished for non-cyclic actions like digging / crafting), always check !
+		}
+		while(phrase != NULL && old_state != phrase->state());
 		
 		// get next entity sentences
 		++it;
@@ -466,7 +474,7 @@ void CPhraseManager::updatePhrases()
 	sendEventReports();
 	//
 	sendAIEvents();
-}
+} // updatePhrases()
 
 //--------------------------------------------------------------
 //						updateEntityCurrentAction()  
@@ -703,7 +711,7 @@ afterPhraseProcessing:
 		// go to next action for this entity
 		entityPhrases.goToNextAction();
 	}
-} // updatePhrases //
+} // updateEntityCurrentAction //
 
 
 //-----------------------------------------------

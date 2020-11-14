@@ -69,6 +69,8 @@ public:
 	virtual void newDocument(){}
 
 	virtual void close(){}
+
+    virtual void onActivated(){}
 };
 
 } // namespace Core

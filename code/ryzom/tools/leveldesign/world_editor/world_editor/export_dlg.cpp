@@ -163,20 +163,20 @@ int CALLBACK expBrowseCallbackProc (HWND hwnd,UINT uMsg,LPARAM lp, LPARAM pData)
 bool CExportDlg::callChoosePathDlg(CString &dest) const
 {
 	BROWSEINFO	bi;
-	char		str[MAX_PATH];
+	TCHAR		str[MAX_PATH];
 	ITEMIDLIST*	pidl;
-	char sTemp[1024];
+	TCHAR sTemp[1024];
 
 	bi.hwndOwner = this->m_hWnd;
 	bi.pidlRoot = NULL;
 	bi.pidlRoot = NULL;
 	bi.pszDisplayName = sTemp;;
-	bi.lpszTitle = "Choose the path";
+	bi.lpszTitle = _T("Choose the path");
 	bi.ulFlags = 0;
 	bi.lpfn = expBrowseCallbackProc;
 
-	char sDir[512];
-	strcpy(sDir, (LPCSTR)RefZoneDir);
+	TCHAR sDir[512];
+	_tcscpy_s(sDir, 512, (LPCTSTR)RefZoneDir);
 	bi.lParam = (LPARAM)sDir;
 
 	bi.iImage = 0;
@@ -218,7 +218,7 @@ void CExportDlg::OnButtonOutIGdir()
 // ---------------------------------------------------------------------------
 void CExportDlg::OnButtonTilebankfile()
 {
-	CFileDialogEx dialog (BASE_REGISTRY_KEY, "bank", true, "smallbank", NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, "SmallBank (*.smallbank)|*.smallbank||", this);
+	CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("bank"), true, _T("smallbank"), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, _T("SmallBank (*.smallbank)|*.smallbank||"), this);
 	if (dialog.DoModal() == IDOK)
 	{
 		TileBankFile = dialog.GetPathName ();
@@ -229,7 +229,7 @@ void CExportDlg::OnButtonTilebankfile()
 // ---------------------------------------------------------------------------
 void CExportDlg::OnButtonColormapfile()
 {
-	CFileDialogEx dialog (BASE_REGISTRY_KEY, "image", true, "tga", NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, "Tga Files (*.tga)|*.tga|All Files (*.*)|*.*||", this);
+	CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("image"), true, _T("tga"), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, _T("Tga Files (*.tga)|*.tga|All Files (*.*)|*.*||"), this);
 	if (dialog.DoModal() == IDOK)
 	{
 		ColorMapFile = dialog.GetPathName ();
@@ -240,7 +240,7 @@ void CExportDlg::OnButtonColormapfile()
 // ---------------------------------------------------------------------------
 void CExportDlg::OnButtonHeightmapfile()
 {
-	CFileDialogEx dialog (BASE_REGISTRY_KEY, "image", true, "tga", NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, "Grayscale Tga (*.tga)|*.tga||", this);
+	CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("image"), true, _T("tga"), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, _T("Grayscale Tga (*.tga)|*.tga||"), this);
 	if (dialog.DoModal() == IDOK)
 	{
 		HeightMapFile = dialog.GetPathName ();
@@ -251,7 +251,7 @@ void CExportDlg::OnButtonHeightmapfile()
 // ---------------------------------------------------------------------------
 void CExportDlg::OnButtonHeightmapfile2()
 {
-	CFileDialogEx dialog (BASE_REGISTRY_KEY, "image", true, "tga", NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, "Grayscale Tga (*.tga)|*.tga||", this);
+	CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("image"), true, _T("tga"), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, _T("Grayscale Tga (*.tga)|*.tga||"), this);
 	if (dialog.DoModal() == IDOK)
 	{
 		HeightMapFile2 = dialog.GetPathName ();
@@ -299,7 +299,7 @@ void CExportDlg::OnButtonContinentsDir()
 // ---------------------------------------------------------------------------
 void CExportDlg::OnButtonContinentFile()
 {
-	CFileDialogEx dialog (BASE_REGISTRY_KEY, "continent", true, "continent", NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, "Continent file (*.continent)|*.continent||", this);
+	CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("continent"), true, _T("continent"), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, _T("Continent file (*.continent)|*.continent||"), this);
 	if (dialog.DoModal() == IDOK)
 	{
 		ContinentFile = dialog.GetPathName ();

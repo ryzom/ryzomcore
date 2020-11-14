@@ -48,7 +48,7 @@ public:
 
 		CFXInfos() { Ratio = 0.0f; }
 
-		void		serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+		void		serial(NLMISC::IStream &f)
 		{
 			f.serial(Name, Ratio);
 		}
@@ -86,7 +86,7 @@ public:
 	  */
 	void				 build(const NLGEORGES::UFormElm &item);
 	//
-	void				 serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void				 serial(NLMISC::IStream &f);
 };
 
 // state of weather, including clouds
@@ -106,7 +106,7 @@ public:
 	// Build from a georges sheet
 	void				 build(const NLGEORGES::UFormElm &item);
 	//
-	void				serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void				serial(NLMISC::IStream &f);
 };
 
 
@@ -127,7 +127,7 @@ public:
 	CWeatherSetupSheetBase();
 	// build from an external sheet
 	void build(const NLGEORGES::UFormElm &item);
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 	//
 	void readGeorges (const NLGEORGES::UForm *form, const NLMISC::CSheetId &sheetId);

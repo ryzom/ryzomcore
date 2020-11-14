@@ -21,6 +21,12 @@
 #include "nel/3d/u_ps_sound_interface.h"
 #include "nel/3d/ps_attrib_maker.h"
 
+using namespace NLMISC;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
@@ -255,7 +261,7 @@ void	CPSSound::setPitchScheme(CPSAttribMaker<float> *pitch)
 }
 
 // ***************************************************************************************************
-void			CPSSound::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void			CPSSound::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSSound_serial)
 	CPSLocatedBindable::serial(f);

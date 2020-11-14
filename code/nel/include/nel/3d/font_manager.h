@@ -59,6 +59,9 @@ class CFontManager
 	CSmartPtr<CMaterial> _MatFont;
 	CSmartPtr<CTextureFont>	_TexFont;
 
+	// Keep track number of textures created to properly report cache version
+	uint32 _TexCacheNr;
+
 public:
 
 	/**
@@ -71,6 +74,7 @@ public:
 		_NbChar = 0;
 		_MatFont = NULL;
 		_TexFont = NULL;
+		_TexCacheNr = 0;
 	}
 
 
@@ -94,7 +98,6 @@ public:
 	 */
 	CMaterial* getFontMaterial();
 
-
 	/**
 	 * Compute primitive blocks and materials of each character of
 	 * the string.
@@ -102,6 +105,8 @@ public:
 	 * \param fontGen font generator
 	 * \param color primitive blocks color
 	 * \param fontSize font size
+	 * \param embolden font style bold
+	 * \param oblique font style slanted (italic)
 	 * \param desc display descriptor (screen size, font ratio)
 	 * \param output computed string
 	 * \param keep800x600Ratio true if you want that CFontManager look at Driver window size, and resize fontSize so it keeps same size...
@@ -110,6 +115,8 @@ public:
 						CFontGenerator *fontGen,
 						const NLMISC::CRGBA &color,
 						uint32 fontSize,
+						bool embolden,
+						bool oblique,
 					    IDriver *driver,
 						CComputedString& output,
 						bool	keep800x600Ratio= true);
@@ -121,6 +128,8 @@ public:
 						CFontGenerator *fontGen,
 						const NLMISC::CRGBA &color,
 						uint32 fontSize,
+						bool embolden,
+						bool oblique,
 					    IDriver *driver,
 						CComputedString &output,
 						bool	keep800x600Ratio= true);
@@ -132,6 +141,8 @@ public:
 							CFontGenerator *fontGen,
 							const NLMISC::CRGBA &color,
 							uint32 fontSize,
+							bool embolden,
+							bool oblique,
 							IDriver *driver,
 							CComputedString &output,
 							bool keep800x600Ratio= true);
@@ -144,13 +155,23 @@ public:
 
 	void	dumpCache (const char *filename)
 	{
-		_TexFont->dumpTextureFont (filename);
+		if (_TexFont)
+			_TexFont->dumpTextureFont (filename);
 	}
 
 	/**
 	* invalidate the texture when the text context has been modified
 	*/
 	void invalidate();
+
+	// get font atlas rebuild count
+	uint32 getCacheVersion() const
+	{
+		if (_TexFont)
+			return (_TexFont->getCacheVersion() << 16) + _TexCacheNr;
+
+		return 0;
+	}
 
 };
 

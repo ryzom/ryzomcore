@@ -629,7 +629,7 @@ void addPointPrimitive (CLandscape &landscape, const char *primFilename, uint32 
 							string scaleText;
 							float scale = 1;
 							if (point->getPropertyByName ("scale", scaleText))
-								scale = (float) atof (scaleText.c_str ());
+								NLMISC::fromString(scaleText, scale);
 
 							// Get zone coordinates
 							sint x = (sint)floor (position.x / options.CellSize);
@@ -654,7 +654,7 @@ void addPointPrimitive (CLandscape &landscape, const char *primFilename, uint32 
 
 								// Get height
 								if (!snap && point->getPropertyByName ("height", text))
-									position.z = (float)atof(text.c_str());
+									NLMISC::fromString(text, position.z);
 
 								// *** Add the instance
 								
@@ -1115,7 +1115,7 @@ int main (int argc, char**argv)
 							outString ("REMOVE " + CFile::getFilename (igFilename) + "                                              \n");
 
 							// Remove it
-							if (remove (igFilename.c_str ()) != 0)
+							if (!CFile::deleteFile(igFilename))
 							{
 								// Error in the log
 								nlwarning ("Error : Can't remove the file (%s)", igFilename.c_str ());

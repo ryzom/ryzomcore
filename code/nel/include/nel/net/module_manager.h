@@ -70,7 +70,7 @@ namespace NLNET
 		 *
 		 *	The library name is the base name that will be 'decorated'
 		 *	with the nel naming standard according to compilation mode
-		 *	and platform specific file extension (.dll or .so).
+		 *	and platform specific file extension (.dll, .dylib or .so).
 		 *
 		 *	A module library can only be loaded once. If the library
 		 *	is already loaded, the call is ingored.

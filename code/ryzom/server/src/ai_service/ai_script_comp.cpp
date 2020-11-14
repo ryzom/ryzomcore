@@ -83,7 +83,7 @@ std::string	CFightSelectFilter::toString() const
 
 
 
-CFightScriptComp	*CFightSelectFilterReader::create	(const	std::string	&inStr)	throw	(ReadFightActionException)
+CFightScriptComp	*CFightSelectFilterReader::create	(const	std::string	&inStr)
 {
 	std::vector<std::string>	params;
 	explodeSubStrings(inStr, params, -1);
@@ -151,7 +151,7 @@ public:
 	CFightOnceReader()			{}
 	virtual ~CFightOnceReader()	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException)
+	CFightScriptComp	*create	(const	std::string	&inStr)
 	{
 		vector<string>	params;
 		explodeSubStrings(inStr, params, -1);
@@ -229,7 +229,7 @@ public:
 	CFightTimedFilterReader()			{}
 	virtual ~CFightTimedFilterReader()	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException)
+	CFightScriptComp	*create	(const	std::string	&inStr)
 	{
 		vector<string>	params;
 		explodeSubStrings(inStr, params, -1);
@@ -302,7 +302,7 @@ public:
 	CFightHPLessFilterReader()			{}
 	virtual ~CFightHPLessFilterReader()	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException)
+	CFightScriptComp	*create	(const	std::string	&inStr)
 	{
 		vector<string>	params;
 		explodeSubStrings(inStr, params, -1);
@@ -372,7 +372,7 @@ public:
 	CFightHPMoreFilterReader()			{}
 	virtual ~CFightHPMoreFilterReader()	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException)
+	CFightScriptComp	*create	(const	std::string	&inStr)
 	{
 		vector<string>	params;
 		explodeSubStrings(inStr, params, -1);
@@ -443,7 +443,7 @@ public:
 	CFightRandomFilterReader()			{}
 	virtual ~CFightRandomFilterReader()	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException)
+	CFightScriptComp	*create	(const	std::string	&inStr)
 	{
 		vector<string>	params;
 		explodeSubStrings(inStr, params, -1);
@@ -523,7 +523,7 @@ public:
 	CFightSendActionReader()			{}
 	virtual ~CFightSendActionReader()	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException)
+	CFightScriptComp	*create	(const	std::string	&inStr)
 	{
 		vector<string>	strings;
 		explodeSubStrings(inStr, strings, -1);
@@ -588,7 +588,7 @@ public:
 	CFightSendSelfActionReader()			{}
 	virtual ~CFightSendSelfActionReader()	{}
 	
-	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException)
+	CFightScriptComp	*create	(const	std::string	&inStr)
 	{
 		vector<string>	strings;
 		explodeSubStrings(inStr, strings, -1);
@@ -647,7 +647,7 @@ public:
 	CFightAggroBlockReader()			{}
 	virtual ~CFightAggroBlockReader()	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException)
+	CFightScriptComp	*create	(const	std::string	&inStr)
 	{
 		vector<string>	strings;
 		explodeSubStrings(inStr, strings, -1);
@@ -705,7 +705,7 @@ public:
 	CFightAggroChangeReader()			{}
 	virtual ~CFightAggroChangeReader()	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException)
+	CFightScriptComp	*create	(const	std::string	&inStr)
 	{
 		return	new	CFightAggroChange();
 	}
@@ -751,7 +751,7 @@ public:
 	CFightDamageCoefReader()			{}
 	virtual ~CFightDamageCoefReader()	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException)
+	CFightScriptComp	*create	(const	std::string	&inStr)
 	{
 		vector<string>	strings;
 		explodeSubStrings(inStr, strings, -1);
@@ -818,7 +818,7 @@ public:
 	CFightGroupDamageCoefReader()			{}
 	virtual ~CFightGroupDamageCoefReader()	{}
 	
-	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException)
+	CFightScriptComp	*create	(const	std::string	&inStr)
 	{
 		vector<string>	strings;
 		explodeSubStrings(inStr, strings, -1);
@@ -871,7 +871,7 @@ public:
 	CFightDamageSpeedCoefReader()			{}
 	virtual ~CFightDamageSpeedCoefReader()	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException)
+	CFightScriptComp	*create	(const	std::string	&inStr)
 	{
 		vector<string>	strings;
 		explodeSubStrings(inStr, strings, -1);
@@ -933,7 +933,7 @@ public:
 	CFightSetRandomTargetReader()			{}
 	virtual ~CFightSetRandomTargetReader()	{}
 	
-	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException)
+	CFightScriptComp	*create	(const	std::string	&inStr)
 	{
 		vector<string>	strings;
 		explodeSubStrings(inStr, strings, -1);
@@ -1003,7 +1003,7 @@ public:
 	CFightMultReader()			{}
 	virtual ~CFightMultReader()	{}
 	
-	CFightScriptComp	*create	(const	std::string	&inStr)	throw	(ReadFightActionException)
+	CFightScriptComp	*create	(const	std::string	&inStr)
 	{
 		vector<string>	params;
 		explodeSubStrings(inStr, params, -1);
@@ -1066,7 +1066,7 @@ void	CFightScript::add(CFightScriptCompReader	*reader)
 }
 
 
-CFightScriptCompReader	*CFightScriptCompReader::getScriptReader	(const string &str) throw (ReadFightActionException)
+CFightScriptCompReader	*CFightScriptCompReader::getScriptReader	(const string &str)
 {
 	CFightScript::TFightScriptMap::iterator	it=CFightScript::_ScriptCompList.find(str);
 	if	(it==CFightScript::_ScriptCompList.end())
@@ -1075,7 +1075,7 @@ CFightScriptCompReader	*CFightScriptCompReader::getScriptReader	(const string &s
 	return	&(*(it->second));
 }
 
-CFightScriptComp	*CFightScriptCompReader::createScriptComp	(const string &str)	throw	(ReadFightActionException)
+CFightScriptComp	*CFightScriptCompReader::createScriptComp	(const string &str)
 {
 	string	scriptCompName;
 	{

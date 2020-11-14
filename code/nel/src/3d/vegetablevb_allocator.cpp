@@ -19,10 +19,15 @@
 
 #include "nel/3d/vegetablevb_allocator.h"
 #include "nel/3d/vegetable_def.h"
+#include "nel/3d/debug_vb.h"
 
 
 using namespace std;
 using namespace NLMISC;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -186,7 +191,7 @@ bool			CVegetableVBAllocator::exceedMaxVertexInBufferHard(uint numAddVerts) cons
 uint			CVegetableVBAllocator::allocateVertex()
 {
 	// if no more free, allocate.
-	if( _VertexFreeMemory.size()==0 )
+	if( _VertexFreeMemory.empty() )
 	{
 		// enlarge capacity.
 		uint	newResize;

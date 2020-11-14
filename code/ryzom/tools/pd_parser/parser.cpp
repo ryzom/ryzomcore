@@ -366,13 +366,13 @@ bool	CDbNode::epilog()
 
 	readyDb.init("ready");
 	readyDb.IsInline = false;
-	readyDb.Proto = "";
+	readyDb.Proto.clear();
 	readyDb.Type = "bool";
 	readyDb.Description = "Tells if database engine is ready to work.\nEngine may not be ready because PDS is down, not yet ready\nor message queue to PDS is full.";
 
 	updateDb.init("update");
 	updateDb.IsInline = false;
-	updateDb.Proto = "";
+	updateDb.Proto.clear();
 	updateDb.Type = "void";
 	updateDb.Description = "Update the database engine.\nCall this method once per tick, only if engine is ready (see also ready() above).";
 
@@ -390,7 +390,7 @@ bool	CDbNode::epilog()
 
 	releaseDb.init("release");
 	releaseDb.IsInline = false;
-	releaseDb.Proto = "";
+	releaseDb.Proto.clear();
 	releaseDb.Type = "void";
 	releaseDb.Description = "Release the whole database engine.\nCall this function at service release.";
 
@@ -1189,7 +1189,7 @@ bool	CEnumSimpleValueNode::prolog()
 	uint	i;
 	for (i=0; i<Names.size(); ++i)
 	{
-		CurrentEnumNode->Values.push_back(make_pair<string, uint32>(Names[i], CurrentValue));
+		CurrentEnumNode->Values.push_back(std::pair<string, uint32>(Names[i], CurrentValue));
 	}
 	if (parent != NULL)
 		++(parent->CurrentValue);
@@ -1214,7 +1214,7 @@ bool	CEnumRangeNode::prolog()
 		CurrentValue = 0;
 	}
 
-	CurrentEnumNode->Values.push_back(make_pair<string, uint32>(Name, CurrentValue));
+	CurrentEnumNode->Values.push_back(std::pair<string, uint32>(Name, CurrentValue));
 
 	return true;
 }
@@ -1238,7 +1238,7 @@ bool	CEnumRangeNode::epilog()
 
 	if (!EndRange.empty())
 	{
-		CurrentEnumNode->Values.push_back(make_pair<string, uint32>(EndRange, CurrentValue));
+		CurrentEnumNode->Values.push_back(std::pair<string, uint32>(EndRange, CurrentValue));
 	}
 
 	return true;
@@ -2350,7 +2350,7 @@ bool	CClassNode::generateContent()
 
 		UnregisterId.add(unregisterAttributesFunction + "();");
 
-		oeid = "";
+		oeid.clear();
 		if (useEntityId())
 		{
 			oeid = ", "+getClassKey()->cppName();
@@ -4512,11 +4512,11 @@ void	CDeclarationNode::generateSetContent(CCallContext *context)
 	if (useReference)
 	{
 		FetchId.add(Type+"*\t"+objectVariable+" = static_cast<"+Type+"*>("+pdslibFunc("create")+"(tableIndex));");
-		FetchId.add(cppName()+".insert(std::make_pair<"+keyType->getName()+","+Type+"*>("+keyVariable+", "+objectVariable+"));");
+		FetchId.add(cppName()+".insert(std::make_pair("+keyVariable+", "+objectVariable+"));");
 	}
 	else
 	{
-		FetchId.add(cppName()+".insert(std::make_pair<"+keyType->getName()+","+Type+">("+keyVariable+", "+Type+"()));");
+		FetchId.add(cppName()+".insert(std::make_pair("+keyVariable+", "+Type+"()));");
 		FetchId.add(Type+"*\t"+objectVariable+" = &("+cppName()+"["+keyVariable+"]);");
 	}
 	FetchId.add(pdslibFunc("setRowIndex")+"(rowIndex, "+objectVariable+");");
@@ -4709,7 +4709,7 @@ void	CLogMsgNode::generateContent()
 		CClassNode	*cnd;
 		if ( (tnd = getTypeNode(type, false)) )
 		{
-			pair<map<string, CParseNode*>::iterator, bool>	res = params.insert(make_pair<string, CParseNode*>(name, tnd));
+			pair<map<string, CParseNode*>::iterator, bool>	res = params.insert(std::pair<string, CParseNode*>(name, tnd));
 			if (!res.second)
 				error("log parameter '"+name+"' already defined");
 
@@ -4723,7 +4723,7 @@ void	CLogMsgNode::generateContent()
 		}
 		else if ( (cnd = getClassNode(type, false)) )
 		{
-			pair<map<string, CParseNode*>::iterator, bool>	res = params.insert(make_pair<string, CParseNode*>(name, cnd));
+			pair<map<string, CParseNode*>::iterator, bool>	res = params.insert(std::pair<string, CParseNode*>(name, cnd));
 			if (!res.second)
 				error("log parameter '"+name+"' already defined");
 
@@ -4739,7 +4739,7 @@ void	CLogMsgNode::generateContent()
 		{
 			CExtLogTypeNode*	extnd = new CExtLogTypeNode();
 			extnd->ExtLogType = "string";
-			pair<map<string, CParseNode*>::iterator, bool>	res = params.insert(make_pair<string, CParseNode*>(name, extnd));
+			pair<map<string, CParseNode*>::iterator, bool>	res = params.insert(std::pair<string, CParseNode*>(name, extnd));
 			if (!res.second)
 				error("log parameter '"+name+"' already defined");
 

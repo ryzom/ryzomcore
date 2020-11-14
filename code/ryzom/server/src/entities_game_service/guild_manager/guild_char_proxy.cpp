@@ -67,6 +67,12 @@ CModuleParent & CGuildCharProxy::getModuleParent()
 }
 
 //----------------------------------------------------------------------------
+void CGuildCharProxy::sendSystemMessage( const std::string &  msg)
+{
+	CCharacter::sendDynamicSystemMessage(_ModuleCore->getEntityRowId(), msg);
+}
+
+//----------------------------------------------------------------------------
 void CGuildCharProxy::sendSystemMessage( const std::string &  msg, const TVectorParamCheck & params)
 {
 	CCharacter::sendDynamicSystemMessage( _ModuleCore->getEntityRowId(),msg,params );

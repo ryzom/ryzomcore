@@ -6,7 +6,7 @@
 # 
 # \file 1_export.py
 # \brief Export swt
-# \date 2011-09-28-07-42-GMT
+# \date 2015-01-06-16-31-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Export swt

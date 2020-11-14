@@ -19,6 +19,10 @@
 #include "nel/3d/texture_blend.h"
 #include "nel/misc/common.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 
@@ -108,7 +112,7 @@ void CTextureBlend::doGenerate(bool async)
 
 
 // ************************************************************************
-void	CTextureBlend::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CTextureBlend::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(0);
 	ITexture::serial(f);

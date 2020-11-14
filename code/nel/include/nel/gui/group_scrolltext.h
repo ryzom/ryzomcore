@@ -66,6 +66,8 @@ namespace NLGUI
 		// from CCtrlBase
 		virtual	void		elementCaptured(CCtrlBase *capturedElement);
 
+		// setup vertical scrolling event
+		void	smoothScrollY (sint32 dy);
 
 		REFLECT_EXPORT_START(CGroupScrollText, CInterfaceGroup)
 		REFLECT_EXPORT_END
@@ -78,6 +80,9 @@ namespace NLGUI
 		bool            _Settuped;
 		bool			_InvertScrollBar;
 		sint32          _ListHeight;
+		bool			_Scrolling;
+		float			_ScrollDistance;
+		bool			_ClockMsgEventRegistered;
 	protected:
 		void    setup();
 		void    updateScrollBar();

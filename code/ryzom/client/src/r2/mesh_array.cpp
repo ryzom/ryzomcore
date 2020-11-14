@@ -21,6 +21,9 @@
 #include "../global.h"
 #include "../misc.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLMISC;
 using namespace NL3D;

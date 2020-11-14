@@ -63,7 +63,6 @@ private Q_SLOTS:
 	void setBackgroundColor();
 
 	void submitEvents(NLMISC::CEventServer &server, bool allWindows) { }
-	void emulateMouseRawMode(bool) { }
 
 	void onResize( int width, int height );
 

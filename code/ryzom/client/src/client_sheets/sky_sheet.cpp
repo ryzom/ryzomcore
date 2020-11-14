@@ -56,7 +56,7 @@ void CSkySheet::build(const NLGEORGES::UFormElm &item, const std::string &prefix
 }
 
 // *****************************************************************************************************
-void CSkySheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CSkySheet::serial(NLMISC::IStream &f)
 {
 	f.serial(InstanceGroupName);
 	f.serial(AnimationName);

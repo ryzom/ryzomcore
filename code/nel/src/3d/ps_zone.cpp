@@ -32,6 +32,10 @@
 #include <cmath>
 #include <limits>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 
@@ -43,7 +47,7 @@ CPSZone::CPSZone() : _BounceFactor(1.f), _CollisionBehaviour(bounce)
 	NL_PS_FUNC(CPSZone_CPSZone)
 }
 
-void CPSZone::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSZone::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSZone_serial)
 	f.serialVersion(1);
@@ -276,7 +280,7 @@ void CPSZonePlane::setNormal(uint32 index, CVector n)
 
 
 
-void CPSZonePlane::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSZonePlane::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSZonePlane_serial)
 	f.serialVersion(1);
@@ -416,7 +420,7 @@ CVector CPSZoneSphere::getScale(uint32 k) const
 }
 
 
-void CPSZoneSphere::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSZoneSphere::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSZoneSphere_serial)
 	f.serialVersion(1);
@@ -596,7 +600,7 @@ CVector CPSZoneDisc::getScale(uint32 k) const
 }
 
 
-void CPSZoneDisc::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSZoneDisc::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSZoneDisc_serial)
 	f.serialVersion(1);
@@ -1085,7 +1089,7 @@ void CPSZoneCylinder::setScale(uint32 index, const CVector &s)
 }
 
 
-void CPSZoneCylinder::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSZoneCylinder::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSZoneCylinder_serial)
 	f.serialVersion(1);
@@ -1265,7 +1269,7 @@ CVector CPSZoneRectangle::getScale(uint32 index) const
 
 
 
-void CPSZoneRectangle::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSZoneRectangle::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSZoneRectangle_IStream )
 	f.serialVersion(1);

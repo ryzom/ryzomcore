@@ -75,6 +75,10 @@ namespace GUIEditor
 			// copy the properties to the child, since they inherit them
 			for( std::vector< SPropEntry >::const_iterator itr = this->info.props.begin(); itr != this->info.props.end(); ++itr )
 			{
+				// Don't add property if already exists, since it's an override.
+				if( node->hasProperty( itr->propName ) )
+					continue;
+
 				node->addProperty( *itr );
 			}
 		}

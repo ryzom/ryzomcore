@@ -33,6 +33,9 @@
 
 #include "nel/net/transport_class.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 //
 // Namespace

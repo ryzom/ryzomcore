@@ -136,7 +136,7 @@ else:
 				needUpdateBnp = needUpdateDirNoSubdirFile(log, sourcePath, targetBnp)
 			if (needUpdateBnp):
 				printLog(log, "BNP " + targetBnp)
-				subprocess.call([ BnpMake, "/p", sourcePath, targetPath ] + package[1])
+				subprocess.call([ BnpMake, "-p", sourcePath, "-o", targetBnp ] + package[1][1:])
 			else:
 				printLog(log, "SKIP " + targetBnp)
 	printLog(log, "")

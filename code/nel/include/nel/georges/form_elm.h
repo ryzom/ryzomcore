@@ -62,30 +62,30 @@ public:
 	virtual void	getFormName (std::string &result, const CFormElm *child=NULL) const = 0;
 
 	// From UFormElm
-	virtual bool	getNodeByName (const UFormElm **result, const char *name, TWhereIsNode *where, bool verbose, uint32 round=0) const;
-	virtual bool	getNodeByName (UFormElm **result, const char *name, TWhereIsNode *where, bool verbose, uint32 round=0);
-	virtual bool	getValueByName (std::string &result, const char *name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (sint8 &result, const char *name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (uint8 &result, const char *name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (sint16 &result, const char *name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (uint16 &result, const char *name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (sint32 &result, const char *name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (uint32 &result, const char *name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (float &result, const char *name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (double &result, const char *name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (bool &result, const char *name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (NLMISC::CRGBA &result, const char *name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	setValueByName (const char *value, const char *name, bool *created);
-	virtual bool	setValueByName (sint8 value, const char *name, bool *created);
-	virtual bool	setValueByName (uint8 value, const char *name, bool *created);
-	virtual bool	setValueByName (sint16 value, const char *name, bool *created);
-	virtual bool	setValueByName (uint16 value, const char *name, bool *created);
-	virtual bool	setValueByName (sint32 value, const char *name, bool *created);
-	virtual bool	setValueByName (uint32 value, const char *name, bool *created);
-	virtual bool	setValueByName (float value, const char *name, bool *created);
-	virtual bool	setValueByName (double value, const char *name, bool *created);
-	virtual bool	setValueByName (bool value, const char *name, bool *created);
-	virtual bool	setValueByName (NLMISC::CRGBA value, const char *name, bool *created);
+	virtual bool	getNodeByName (const UFormElm **result, const std::string &name, TWhereIsNode *where, bool verbose, uint32 round=0) const;
+	virtual bool	getNodeByName (UFormElm **result, const std::string &name, TWhereIsNode *where, bool verbose, uint32 round=0);
+	virtual bool	getValueByName (std::string &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
+	virtual bool	getValueByName (sint8 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
+	virtual bool	getValueByName (uint8 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
+	virtual bool	getValueByName (sint16 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
+	virtual bool	getValueByName (uint16 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
+	virtual bool	getValueByName (sint32 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
+	virtual bool	getValueByName (uint32 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
+	virtual bool	getValueByName (float &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
+	virtual bool	getValueByName (double &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
+	virtual bool	getValueByName (bool &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
+	virtual bool	getValueByName (NLMISC::CRGBA &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
+	virtual bool	setValueByName (const std::string &value, const std::string &name, bool *created);
+	virtual bool	setValueByName (sint8 value, const std::string &name, bool *created);
+	virtual bool	setValueByName (uint8 value, const std::string &name, bool *created);
+	virtual bool	setValueByName (sint16 value, const std::string &name, bool *created);
+	virtual bool	setValueByName (uint16 value, const std::string &name, bool *created);
+	virtual bool	setValueByName (sint32 value, const std::string &name, bool *created);
+	virtual bool	setValueByName (uint32 value, const std::string &name, bool *created);
+	virtual bool	setValueByName (float value, const std::string &name, bool *created);
+	virtual bool	setValueByName (double value, const std::string &name, bool *created);
+	virtual bool	setValueByName (bool value, const std::string &name, bool *created);
+	virtual bool	setValueByName (NLMISC::CRGBA value, const std::string &name, bool *created);
 	virtual UFormElm	*getParent () const;
 	virtual const CType *getType ();
 	virtual bool	isArray () const;
@@ -127,16 +127,16 @@ public:
 
 	// ** Convert functions
 
-	inline bool		convertValue (sint8 &result, const char *value) const;
-	inline bool		convertValue (uint8 &result, const char *value) const;
-	inline bool		convertValue (sint16 &result,	const char *value) const;
-	inline bool		convertValue (uint16 &result,	const char *value) const;
-	inline bool		convertValue (sint32 &result,	const char *value) const;
-	inline bool		convertValue (uint32 &result,	const char *value) const;
-	inline bool		convertValue (float &result, const char *value) const;
-	inline bool		convertValue (double &result, const char *value) const;
-	inline bool		convertValue (bool &result, const char *value) const;
-	inline bool		convertValue (NLMISC::CRGBA &result, const char *value) const;
+	inline bool		convertValue (sint8 &result, const std::string &value) const;
+	inline bool		convertValue (uint8 &result, const std::string &value) const;
+	inline bool		convertValue (sint16 &result, const std::string &value) const;
+	inline bool		convertValue (uint16 &result, const std::string &value) const;
+	inline bool		convertValue (sint32 &result, const std::string &value) const;
+	inline bool		convertValue (uint32 &result, const std::string &value) const;
+	inline bool		convertValue (float &result, const std::string &value) const;
+	inline bool		convertValue (double &result, const std::string &value) const;
+	inline bool		convertValue (bool &result, const std::string &value) const;
+	inline bool		convertValue (NLMISC::CRGBA &result, const std::string &value) const;
 
 	// ** Get dependencies
 	virtual void	getDependencies (std::set<std::string> &dependencies) const = 0;
@@ -144,7 +144,7 @@ public:
 	// ** Internal node access
 
 	// Create a node by name. If the node already exists, return it
-	bool	createNodeByName (const char *name, const CFormDfn **parentDfn, uint &indexDfn,
+	bool	createNodeByName (const std::string &, const CFormDfn **parentDfn, uint &indexDfn,
 										const CFormDfn **nodeDfn, const CType **nodeType,
 										CFormElm **node, UFormDfn::TEntryType &type,
 										bool &array, bool &created);
@@ -153,13 +153,13 @@ public:
 	  * Delete a node by name. If the node already exists, return it
 	  *Delete its parent if not used
 	  */
-	bool	deleteNodeByName (const char *name, const CFormDfn **parentDfn, uint &indexDfn,
+	bool	deleteNodeByName (const std::string &name, const CFormDfn **parentDfn, uint &indexDfn,
 										const CFormDfn **nodeDfn, const CType **nodeType,
 										CFormElm **node, UFormDfn::TEntryType &type,
 										bool &array);
 
 	// Search for a node by name
-	bool	getNodeByName (const char *name, const CFormDfn **parentDfn, uint &indexDfn,
+	bool	getNodeByName (const std::string &name, const CFormDfn **parentDfn, uint &indexDfn,
 										const CFormDfn **nodeDfn, const CType **nodeType,
 										CFormElm **node, UFormDfn::TEntryType &type,
 										bool &array, bool &parentVDfnArray, bool verbose, uint32 round) const;
@@ -168,7 +168,7 @@ public:
 	  * Insert an array node by name
 	  * The index asked must be < the size of the array.
 	  */
-	bool	arrayInsertNodeByName (const char *name, const CFormDfn **parentDfn, uint &indexDfn,
+	bool	arrayInsertNodeByName (const std::string &name, const CFormDfn **parentDfn, uint &indexDfn,
 										const CFormDfn **nodeDfn, const CType **nodeType,
 										CFormElm **node, UFormDfn::TEntryType &type,
 										bool &array, bool verbose, uint arrayIndex) const;
@@ -177,7 +177,7 @@ public:
 	  * Delete an array node by name
 	  * The index asked must be < the size of the array.
 	  */
-	bool	arrayDeleteNodeByName (const char *name, const CFormDfn **parentDfn, uint &indexDfn,
+	bool	arrayDeleteNodeByName (const std::string &name, const CFormDfn **parentDfn, uint &indexDfn,
 										const CFormDfn **nodeDfn, const CType **nodeType,
 										CFormElm **node, UFormDfn::TEntryType &type,
 										bool &array, bool verbose, uint arrayIndex) const;
@@ -199,7 +199,7 @@ protected:
 	  * Then, else (*parentDfn / indexDfn ) or *node must be defined.
 	  * Other values are for result only.
 	  */
-	static bool	getInternalNodeByName (CForm *form, const char *name, const CFormDfn **parentDfn, uint &indexDfn,
+	static bool	getInternalNodeByName (CForm *form, const std::string &name, const CFormDfn **parentDfn, uint &indexDfn,
 										const CFormDfn **nodeDfn, const CType **nodeType,
 										CFormElm **node, UFormDfn::TEntryType &type,
 										bool &array, TNodeAction action, bool &created, bool &parentVDfnArray, bool verbose, uint32 round);
@@ -215,7 +215,7 @@ public:
 	static const char* tokenize (const char *name, std::string &str, uint &errorIndex, uint &code);
 
 	// ** IO functions
-	virtual xmlNodePtr	write (xmlNodePtr node, const CForm *form, const char *structName = NULL, bool forceWrite = false) const = 0;
+	virtual xmlNodePtr	write (xmlNodePtr node, const CForm *form, const std::string &structName = "", bool forceWrite = false) const = 0;
 
 protected:
 
@@ -235,8 +235,8 @@ protected:
 	uint32				Round;
 
 	// Error handling
-	static void			warning (bool exception, const char *formName, const char *formFileName, const char *function, const char *format, ... );
-	virtual void		warning (bool exception, const char *function, const char *format, ... ) const;
+	static void			warning (bool exception, const std::string &formName, const std::string &formFileName, const std::string &function, const char *format, ... );
+	virtual void		warning (bool exception, const std::string &function, const char *format, ... ) const;
 
 private:
 	// Tokens
@@ -298,7 +298,7 @@ public:
 
 	// From CFormElm
 	bool				isUsed (const CForm *form) const;
-	xmlNodePtr			write (xmlNodePtr node, const CForm *form, const char *structName, bool forceWrite = false) const;
+	xmlNodePtr			write (xmlNodePtr node, const CForm *form, const std::string &structName, bool forceWrite = false) const;
 	void				unlink (CFormElm *child);
 	void				getFormName (std::string &result, const CFormElm *child) const;
 	void				getDependencies (std::set<std::string> &dependencies) const;
@@ -310,7 +310,7 @@ public:
 	std::vector<CFormElmStructElm>		Elements;
 
 	// Error handling
-	virtual void		warning (bool exception, const char *function, const char *format, ... ) const;
+	virtual void		warning (bool exception, const std::string &function, const char *format, ... ) const;
 };
 
 /**
@@ -332,13 +332,13 @@ public:
 
 	// From CFormElm
 	bool				isUsed (const CForm *form) const;
-	xmlNodePtr			write (xmlNodePtr node, const CForm *form, const char *structName, bool forceWrite = false) const;
+	xmlNodePtr			write (xmlNodePtr node, const CForm *form, const std::string &structName, bool forceWrite = false) const;
 
 	// Call by CFormLoader
 	void				read (xmlNodePtr node, CFormLoader &loader, CForm *form);
 
 	// Error handling
-	virtual void		warning (bool exception, const char *function, const char *format, ... ) const;
+	virtual void		warning (bool exception, const std::string &function, const char *format, ... ) const;
 };
 
 /**
@@ -377,7 +377,7 @@ public:
 	bool				getArrayValue (NLMISC::CRGBA &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
 
 	// From CFormElm
-	xmlNodePtr			write (xmlNodePtr node, const CForm *form, const char *structName, bool forceWrite = false) const;
+	xmlNodePtr			write (xmlNodePtr node, const CForm *form, const std::string &structName, bool forceWrite = false) const;
 	bool				setParent (CFormElm *parent);
 	void				unlink (CFormElm *child);
 	bool				isUsed (const CForm *form) const;
@@ -406,7 +406,7 @@ public:
 	std::vector<CElement>		Elements;
 
 	// Error handling
-	virtual void		warning (bool exception, const char *function, const char *format, ... ) const;
+	virtual void		warning (bool exception, const std::string &function, const char *format, ... ) const;
 };
 
 /**
@@ -429,7 +429,7 @@ public:
 	const CType					*Type;
 
 	// From CFormElm
-	xmlNodePtr					write (xmlNodePtr node, const CForm *form, const char *structName, bool forceWrite = false) const;
+	xmlNodePtr					write (xmlNodePtr node, const CForm *form, const std::string &structName, bool forceWrite = false) const;
 	bool						setParent (CFormElm *parent);
 	void						getFormName (std::string &result, const CFormElm *child) const;
 	void						getDependencies (std::set<std::string> &dependencies) const;
@@ -453,7 +453,7 @@ public:
 	bool						getValue (NLMISC::CRGBA &result, TEval evaluate) const;
 
 	// Set the value, the elt been used
-	void						setValue (const char *value);
+	void						setValue (const std::string &value);
 
 	// Get the raw value. Does not care about any parent or default values
 	void						getValue (std::string &result) const;
@@ -463,14 +463,14 @@ private:
 	std::string					Value;
 
 	// Error handling
-	virtual void		warning (bool exception, const char *function, const char *format, ... ) const;
+	virtual void		warning (bool exception, const std::string &function, const char *format, ... ) const;
 };
 
 // ***************************************************************************
 // CFormElm inlines
 // ***************************************************************************
 
-inline bool CFormElm::convertValue (sint8 &result, const char *value) const
+inline bool CFormElm::convertValue (sint8 &result, const std::string &value) const
 {
 	float tmp;
 	if (NLMISC::fromString(value, tmp))
@@ -482,14 +482,14 @@ inline bool CFormElm::convertValue (sint8 &result, const char *value) const
 	else
 	{
 		// Error message
-		warning (false, "convertValue", "Can't convert the string \"%s\" in sint8.", value);
+		warning (false, "convertValue", "Can't convert the string \"%s\" in sint8.", value.c_str());
 	}
 	return false;
 }
 
 // ***************************************************************************
 
-inline bool CFormElm::convertValue (uint8 &result, const char *value) const
+inline bool CFormElm::convertValue (uint8 &result, const std::string &value) const
 {
 	float tmp;
 	if (NLMISC::fromString(value, tmp))
@@ -501,14 +501,14 @@ inline bool CFormElm::convertValue (uint8 &result, const char *value) const
 	else
 	{
 		// Error message
-		warning (false, "convertValue", "Can't convert the string \"%s\" in uint8.", value);
+		warning (false, "convertValue", "Can't convert the string \"%s\" in uint8.", value.c_str());
 	}
 	return false;
 }
 
 // ***************************************************************************
 
-inline bool CFormElm::convertValue (sint16 &result,	const char *value) const
+inline bool CFormElm::convertValue (sint16 &result,	const std::string &value) const
 {
 	float tmp;
 	if (NLMISC::fromString(value, tmp))
@@ -520,14 +520,14 @@ inline bool CFormElm::convertValue (sint16 &result,	const char *value) const
 	else
 	{
 		// Error message
-		warning (false, "convertValue", "Can't convert the string \"%s\" in sint16.", value);
+		warning (false, "convertValue", "Can't convert the string \"%s\" in sint16.", value.c_str());
 	}
 	return false;
 }
 
 // ***************************************************************************
 
-inline bool CFormElm::convertValue (uint16 &result,	const char *value) const
+inline bool CFormElm::convertValue (uint16 &result,	const std::string &value) const
 {
 	float tmp;
 	if (NLMISC::fromString(value, tmp))
@@ -539,14 +539,14 @@ inline bool CFormElm::convertValue (uint16 &result,	const char *value) const
 	else
 	{
 		// Error message
-		warning (false, "convertValue", "Can't convert the string \"%s\" in uint16.", value);
+		warning (false, "convertValue", "Can't convert the string \"%s\" in uint16.", value.c_str());
 	}
 	return false;
 }
 
 // ***************************************************************************
 
-inline bool CFormElm::convertValue (sint32 &result,	const char *value) const
+inline bool CFormElm::convertValue (sint32 &result,	const std::string &value) const
 {
 	float tmp;
 	if (NLMISC::fromString(value, tmp))
@@ -558,14 +558,14 @@ inline bool CFormElm::convertValue (sint32 &result,	const char *value) const
 	else
 	{
 		// Error message
-		warning (false, "convertValue", "Can't convert the string \"%s\" in sint32.", value);
+		warning (false, "convertValue", "Can't convert the string \"%s\" in sint32.", value.c_str());
 	}
 	return false;
 }
 
 // ***************************************************************************
 
-inline bool CFormElm::convertValue (uint32 &result,	const char *value) const
+inline bool CFormElm::convertValue (uint32 &result,	const std::string &value) const
 {
 	float tmp;
 	if (NLMISC::fromString(value, tmp))
@@ -577,14 +577,14 @@ inline bool CFormElm::convertValue (uint32 &result,	const char *value) const
 	else
 	{
 		// Error message
-		warning (false, "convertValue", "Can't convert the string \"%s\" in uint32.", value);
+		warning (false, "convertValue", "Can't convert the string \"%s\" in uint32.", value.c_str());
 	}
 	return false;
 }
 
 // ***************************************************************************
 
-inline bool CFormElm::convertValue (float &result, const char *value) const
+inline bool CFormElm::convertValue (float &result, const std::string &value) const
 {
 	if (NLMISC::fromString(value, result))
 	{
@@ -593,16 +593,16 @@ inline bool CFormElm::convertValue (float &result, const char *value) const
 	else
 	{
 		// Error message
-		warning (false, "convertValue", "Can't convert the string \"%s\" in float.", value);
+		warning (false, "convertValue", "Can't convert the string \"%s\" in float.", value.c_str());
 	}
 	return false;
 }
 
 // ***************************************************************************
 
-inline bool CFormElm::convertValue (double &result, const char *value) const
+inline bool CFormElm::convertValue (double &result, const std::string &value) const
 {
-	float tmp;
+	double tmp;
 	if (NLMISC::fromString(value, tmp))
 	{
 		result = tmp;
@@ -611,14 +611,14 @@ inline bool CFormElm::convertValue (double &result, const char *value) const
 	else
 	{
 		// Error message
-		warning (false, "convertValue", "Can't convert the string \"%s\" in double.", value);
+		warning (false, "convertValue", "Can't convert the string \"%s\" in double.", value.c_str());
 	}
 	return false;
 }
 
 // ***************************************************************************
 
-inline bool CFormElm::convertValue (bool &result, const char *value) const
+inline bool CFormElm::convertValue (bool &result, const std::string &value) const
 {
 	int tmp;
 	if (NLMISC::fromString(value, tmp))
@@ -628,7 +628,7 @@ inline bool CFormElm::convertValue (bool &result, const char *value) const
 	}
 	else
 	{
-		std::string temp = NLMISC::toLower(std::string(value));
+		std::string temp = NLMISC::toLower(value);
 		if (strcmp (temp.c_str (), "true") == 0)
 		{
 			result  = true;
@@ -642,17 +642,17 @@ inline bool CFormElm::convertValue (bool &result, const char *value) const
 	}
 
 	// Error message
-	warning (false, "convertValue", "Can't convert the string \"%s\" in boolean.", value);
+	warning (false, "convertValue", "Can't convert the string \"%s\" in boolean.", value.c_str());
 
 	return false;
 }
 
 // ***************************************************************************
 
-inline bool CFormElm::convertValue (NLMISC::CRGBA &result, const char *value) const
+inline bool CFormElm::convertValue (NLMISC::CRGBA &result, const std::string &value) const
 {
 	float r, g, b;
-	if (sscanf (value, "%f,%f,%f", &r, &g, &b) == 3)
+	if (sscanf (value.c_str(), "%f,%f,%f", &r, &g, &b) == 3)
 	{
 		NLMISC::clamp (r, 0.f, 255.f);
 		NLMISC::clamp (g, 0.f, 255.f);
@@ -664,7 +664,7 @@ inline bool CFormElm::convertValue (NLMISC::CRGBA &result, const char *value) co
 	}
 
 	// Error message
-	warning (false, "convertValue", "Can't convert the string \"%s\" in RGB color.", value);
+	warning (false, "convertValue", "Can't convert the string \"%s\" in RGB color.", value.c_str());
 
 	return false;
 }

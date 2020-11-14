@@ -57,6 +57,8 @@ public:
 	inline const CTPDestination* getExit( uint8 idx )const;
 	/// return the default exit spawn zone
 	inline uint16 getDefaultExitSpawn() const;
+	/// return the Cell of roomIdx and ownerId
+	inline sint32 getRoomCell( uint16 roomIdx, uint16 ownerIdx );
 	//@}
 	
 	/// get the cell id of a physical room of this building. Return true if no error. 
@@ -184,6 +186,8 @@ public:
 	inline void resetRoomCell( uint16 roomIdx,const NLMISC::CEntityId & userId );
 	/// get an owner player
 	inline const NLMISC::CEntityId & getPlayer(uint idx);
+	/// get the index of a owner player
+	inline uint16 getOwnerIdx( const NLMISC::CEntityId & userId );
 	
 	virtual void getClientDescription(uint16 roomIdx, uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const;
 	virtual void onPlayerDeletion( const NLMISC::CEntityId & userId );

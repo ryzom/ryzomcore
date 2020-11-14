@@ -40,6 +40,7 @@ int _getch()
 
 #include "nel/misc/path.h"
 #include "nel/misc/sheet_id.h"
+#include "nel/misc/common.h"
 #include <vector>
 
 
@@ -86,7 +87,7 @@ int		main(int argc, const char *argv[])
 	sort(sheets.begin(), sheets.end(), Pred);
 
 	// display.
-	FILE	*out= fopen("sheetid.txt", "wb");
+	FILE	*out= nlfopen("sheetid.txt", "wb");
 	if(out)
 	{
 		for(uint i=0;i<sheets.size();i++)

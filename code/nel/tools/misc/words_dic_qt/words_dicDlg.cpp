@@ -1,10 +1,12 @@
+#include "words_dicDlg.h"
+
 #include <QtGui>
 #include <QString>
 #include <QListWidgetItem>
 #include <QMessageBox>
 #include <QtAlgorithms>
+#include <QSplashScreen>
 #include <nel/misc/words_dictionary.h>
-#include "words_dicDlg.h"
 
 using namespace std;
 using namespace NLMISC;

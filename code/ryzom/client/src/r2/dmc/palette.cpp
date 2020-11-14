@@ -21,6 +21,10 @@
 
 #include <assert.h>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace R2;
 
 namespace R2

@@ -31,8 +31,7 @@ static void windowDidMove(NSWindow* window, CDriverGL* driver)
 	driver->_WindowX = windowRect.origin.x;
 
 	// map y from cocoa to NeL coordinates before setting in driver
-	driver->_WindowY = 
-		screenRect.size.height - windowRect.size.height - windowRect.origin.y;
+	driver->_WindowY = screenRect.size.height - windowRect.size.height - windowRect.origin.y;
 }
 
 @implementation CocoaWindowDelegate

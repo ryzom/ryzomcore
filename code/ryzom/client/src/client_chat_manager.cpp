@@ -969,8 +969,6 @@ void CClientChatManager::buildTellSentence(const ucstring &sender, const ucstrin
 					name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(name), bWoman);
 				}
 			}
-
-
 		}
 		else
 		{
@@ -1052,8 +1050,6 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 					senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(senderName), bWoman);
 				}
 			}
-
-
 		}
 
 		switch(type)
@@ -1208,7 +1204,7 @@ class CHandlerTell : public IActionHandler
 		ucstring s = CI18N::get("youTellPlayer");
 		strFindReplace(s, "%name", receiver);
 		strFindReplace(finalMsg, CI18N::get("youTell"), s);
-		CInterfaceManager::getInstance()->log(finalMsg);
+		CInterfaceManager::getInstance()->log(finalMsg, CChatGroup::groupTypeToString(CChatGroup::tell));
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerTell, "tell");
@@ -1304,7 +1300,6 @@ void CClientChatManager::updateChatModeAndButton(uint mode, uint32 dynamicChanne
 							pUserBut->setHardText(title.toUtf8());
 						}
 						break;
-					// NB: user chat cannot have yubo_chat target
 				}
 
 				pUserBut->setActive(true);
@@ -1375,13 +1370,29 @@ class CHandlerTalk : public IActionHandler
 				else
 				{
 					CInterfaceManager *im = CInterfaceManager::getInstance();
-					im->displaySystemInfo (ucstring(cmd+": ")+CI18N::get ("uiCommandNotExists"));
+					im->displaySystemInfo (ucstring::makeFromUtf8(cmd) + ": " + CI18N::get ("uiCommandNotExists"));
 				}
 			}
 			else
 			{
-				ChatMngr.setChatMode((CChatGroup::TGroupType)mode);
-				ChatMngr.chat(text, mode == CChatGroup::team);
+				if (mode == CChatGroup::dyn_chat)
+				{
+					uint channel;
+					fromString(getParam (sParams, "channel"), channel);
+					if (channel < CChatGroup::MaxDynChanPerPlayer)
+					{
+						PeopleInterraction.talkInDynamicChannel(channel, text);
+					}
+					else
+					{
+						nlwarning("/ah talk: invalid dyn_chat channel %d\n", channel);
+					}
+				}
+				else
+				{
+					ChatMngr.setChatMode((CChatGroup::TGroupType)mode);
+					ChatMngr.chat(text, mode == CChatGroup::team);
+				}
 			}
 		}
 	}
@@ -1396,9 +1407,21 @@ class CHandlerEnterTalk : public IActionHandler
 	{
 		// Param
 		uint mode;
+		uint channel = 0;
+
 		fromString(getParam (sParams, "mode"), mode);
 
-		ChatMngr.updateChatModeAndButton(mode);
+		if (mode == CChatGroup::dyn_chat)
+		{
+			fromString(getParam(sParams, "channel"), channel);
+
+			if (channel >= CChatGroup::MaxDynChanPerPlayer)
+			{
+				channel = 0;
+			}
+		}
+
+		ChatMngr.updateChatModeAndButton(mode, channel);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerEnterTalk, "enter_talk");

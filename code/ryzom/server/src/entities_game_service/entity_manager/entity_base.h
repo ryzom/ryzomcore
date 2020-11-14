@@ -98,7 +98,7 @@ struct CEquipmentSlots
 	/**
 	 * Serial
 	 */
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };
 
 
@@ -353,7 +353,7 @@ public:
 	 *	Set the value of a var
 	 * \param var is the name of the variable
 	 * \param value is the new value for the variable
-	 * \return true if the value has been set, false if an error occured
+	 * \return true if the value has been set, false if an error occurred
 	 */
 	bool setValue( const std::string& var, const std::string& value );
 
@@ -361,7 +361,7 @@ public:
 	 *	Modify the value of a var
 	 * \param var is the name of the variable
 	 * \param value is the modification value
-	 * \return true if the value has been changed, false if an error occured
+	 * \return true if the value has been changed, false if an error occurred
 	 */
 	bool modifyValue( const std::string& var, const std::string& value );
 
@@ -387,7 +387,7 @@ public:
 	/**
 	 * Serial: reading off-mirror, writing from mirror
 	 */
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	/**
 	 * Load George Sheet
@@ -500,6 +500,9 @@ public:
 	// Set entity mounted
 	void setEntityMounted( const TDataSetRow& entityRowId ) { _EntityMounted = entityRowId; }
 
+	// Set speed factor
+	inline void setSpeedVariationModifier( sint32 speed ) { _PhysScores.SpeedVariationModifier = speed; }
+
 	// get entity mounted
 	const TDataSetRow& getEntityMounted() const { return _EntityMounted(); }
 
@@ -518,36 +521,36 @@ public:
 	 * \param var is the name of the variable
 	 * \return ref on the stat value
 	 */
-	sint32& lookupStat( const std::string& stat ) throw (EInvalidStat);
+	sint32& lookupStat( const std::string& stat);
 
 	/**
 	 *	get a reference on a characterristics value
 	 * \param c is enum of characteristic, st is enum of subtype of characterisitics (like max, current..)
 	 * \return ref on the stat value
 	 */
-	sint32& lookupStat( CHARACTERISTICS::TCharacteristics c, SCharacteristicsAndScores::TCharacteristicsAndScoreSubType st ) throw (CEntityBase::EInvalidStat);
+	sint32& lookupStat( CHARACTERISTICS::TCharacteristics c, SCharacteristicsAndScores::TCharacteristicsAndScoreSubType st);
 
 	/**
 	 *	get a reference on a scores value
 	 * \param score is enum of score, st is enum of subtype of score (like max, current..)
 	 * \return ref on the stat value
 	 */
-	sint32& lookupStat( SCORES::TScores score, SCharacteristicsAndScores::TCharacteristicsAndScoreSubType st ) throw (CEntityBase::EInvalidStat);
+	sint32& lookupStat( SCORES::TScores score, SCharacteristicsAndScores::TCharacteristicsAndScoreSubType st);
 
 	/**
 	 *	get a reference on a skill value
 	 * \param skill is enum of Skills, st is enum of subtype of skill (like base, current..)
 	 * \return ref on the stat value
 	 */
-	sint32& lookupStat( SKILLS::ESkills skill, SSkill::ESkillSubType st ) throw (CEntityBase::EInvalidStat);
+	sint32& lookupStat( SKILLS::ESkills skill, SSkill::ESkillSubType st);
 
 	/**
 	 *	get a reference on a SpecialModifiers value
 	 * \param sm is enum of SpecialModifiers
 	 * \return ref on the stat value
 	 */
-	sint32& lookupStat( CSpecialModifiers::ESpecialModifiers sm ) throw (CEntityBase::EInvalidStat);
-	const sint32& lookupStat( CSpecialModifiers::ESpecialModifiers sm ) const throw (CEntityBase::EInvalidStat);
+	sint32& lookupStat( CSpecialModifiers::ESpecialModifiers sm);
+	const sint32& lookupStat( CSpecialModifiers::ESpecialModifiers sm) const;
 
 	/// accessors on hp (read only)
 	inline sint32 currentHp() const { return _PhysScores._PhysicalScores[SCORES::hit_points].Current;}

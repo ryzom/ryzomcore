@@ -21,13 +21,15 @@
 #include "nel/3d/index_buffer.h"
 #include "nel/3d/texture_bump.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/mouse_device.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
 #include "nel/3d/u_driver.h"
 
 #include "driver_direct3d.h"
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace std;
 using namespace NLMISC;
@@ -570,7 +572,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 							if (_PixelProgram)
 							{
 								#ifdef NL_DEBUG_D3D
-									// Check, should not occured
+									// Check, should not occur
 									nlassertex (_PixelShader, ("STOP : no pixel shader available. Can't render this material."));
 								#endif // NL_DEBUG_D3D
 
@@ -648,7 +650,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 		// Must separate texture setup and texture activation in 2 "for"...
 		// because setupTexture() may disable all stage.
 
-		if (matShader == CMaterial::Normal 
+		if (matShader == CMaterial::Normal
 			|| ((matShader == CMaterial::Program) && (_PixelProgramUser->features().MaterialFlags & CProgramFeatures::TextureStages))
 			)
 		{
@@ -670,7 +672,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 	// Don't do it also for Specular because the EnvFunction and the TexGen may be special.
 	{
 		H_AUTO_D3D(CDriverD3D_setupMaterial_normalShaderActivateTextures)
-		if (matShader == CMaterial::Normal 
+		if (matShader == CMaterial::Normal
 			|| ((matShader == CMaterial::Program) && (_PixelProgramUser->features().MaterialFlags & CProgramFeatures::TextureStages))
 			)
 		{
@@ -820,7 +822,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 	if (_CurrentMaterial != &mat)
 	{
 		// Material has changed ?
-		// Restaure fog state to its current value
+		// Restore fog state to its current value
 		{
 			H_AUTO_D3D(CDriverD3D_setupMaterial_updateFog)
 			setRenderState (D3DRS_FOGENABLE, _FogEnabled?TRUE:FALSE);

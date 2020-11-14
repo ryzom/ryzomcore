@@ -64,7 +64,7 @@ void	CPDStringMapper::setMapping(const std::string& str, uint32 id)
 		return;
 	}
 
-	its = _StringMap.insert(std::make_pair<std::string, uint32>(lowMapStr, id)).first;
+	its = _StringMap.insert(std::pair<std::string, uint32>(lowMapStr, id)).first;
 	_IdMap[id] = its;
 }
 

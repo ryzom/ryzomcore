@@ -140,7 +140,7 @@ namespace R2_VISION
 		// ctor
 		SViewedEntity()
 		{
-			VisionSlot=~0u;
+			VisionSlot=std::numeric_limits<uint32>::max();
 		}
 	};
 
@@ -196,15 +196,15 @@ namespace R2_VISION
 	struct SUniverseEntity
 	{
 		TDataSetRow DataSetRow;						// the complete data set row for the entity
-		uint32 AIInstance;							// the id of the instance that we're currently in (~0u by default)
+		uint32 AIInstance;							// the id of the instance that we're currently in (std::numeric_limits<uint32>::max() by default)
 		mutable uint32 InstanceIndex;				// the index within the instance's _Entities vector
 		NLMISC::CSmartPtr<CViewer> ViewerRecord;	// pointer to the CViewer record for viewers (or NULL)
 
 		// ctor
 		SUniverseEntity()
 		{
-			AIInstance=~0u;
-			InstanceIndex=~0u;
+			AIInstance=std::numeric_limits<uint32>::max();
+			InstanceIndex=std::numeric_limits<uint32>::max();
 		}
 	};
 

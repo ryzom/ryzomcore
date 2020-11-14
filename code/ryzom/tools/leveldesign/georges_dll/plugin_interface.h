@@ -128,7 +128,7 @@ public:
 	  *
 	  * \param dfnName is the name of the DFN. Can't be NULL.
 	  * \param pathName is the file name of the created document. Can be NULL.
-	  * \return the document pointer or NULL if a problem occured.
+	  * \return the document pointer or NULL if a problem occurred.
 	*/
 	virtual IEditDocument	*createDocument (const char *dfnName, const char *pathName) = 0;
 

@@ -77,6 +77,11 @@ public:
 
 	/// Get desktop current color depth without using UDriver.
 	static uint getCurrentColorDepth();
+
+	/// Detect whether the current process is a windowed application. Return true if definitely yes, false if unknown
+	static bool detectWindowedApplication();
+
+	static sint getTotalVideoMemory();
 };
 
 } // NLMISC

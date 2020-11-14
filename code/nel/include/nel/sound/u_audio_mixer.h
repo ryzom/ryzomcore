@@ -432,7 +432,7 @@ public:
 	/** Get the song title. Returns false if the song is not found or the function is not implemented.
 	 * If the song as no name, result is filled with the filename.
 	 */
-	virtual bool	getSongTitle(const std::string &filename, std::string &result) =0;
+	virtual bool	getSongTitle(const std::string &filename, std::string &result, float &length) =0;
 	/** enable or disable the background music system. disable it when you want to play your own mp3 for instance
 	 */
 	virtual void	enableBackgroundMusic(bool enable) =0;

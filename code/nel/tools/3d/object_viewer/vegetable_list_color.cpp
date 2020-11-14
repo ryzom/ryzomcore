@@ -134,7 +134,7 @@ void	CVegetableListColor::clear()
 void	CVegetableListColor::addValue(CRGBA color)
 {
 	// Append a dummy string to the list box.
-	AddString(" ");
+	AddString(_T(" "));
 
 	// append a color to the array.
 	_Colors.push_back(color);
@@ -149,7 +149,7 @@ void	CVegetableListColor::insertValueBeforeCurSel(CRGBA color)
 	else
 	{
 		// insert a dummy string to the list box.
-		InsertString(id, " ");
+		InsertString(id, _T(" "));
 
 		// insert a color to the array.
 		_Colors.insert(_Colors.begin()+id, color);

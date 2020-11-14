@@ -22,6 +22,7 @@
 #include "nel/3d/material.h"
 #include "nel/3d/frustum.h"
 #include "nel/3d/viewport.h"
+#include "nel/3d/debug_vb.h"
 
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/debug.h"
@@ -30,6 +31,10 @@
 #include "nel/misc/fast_mem.h"
 
 using namespace std;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D {
 

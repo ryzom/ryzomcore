@@ -365,7 +365,7 @@ namespace CHARSYNC
 				for (; first != last; ++first)
 				{
 					// default to no limit
-					uint32 limit=~0u;
+					uint32 limit=std::numeric_limits<uint32>::max();
 
 					// if there's a limit in the limis map then use it instead...
 					if (limitsMap.find(first->first)!=limitsMap.end())
@@ -1307,7 +1307,7 @@ namespace CHARSYNC
 					query << " AND session_type = 'st_edit'";
 					if (_RingDB.query(query) )
 					{
-						std::auto_ptr<CStoreResult> result = auto_ptr<CStoreResult>(_RingDB.storeResult());
+						CUniquePtr<CStoreResult> result(_RingDB.storeResult());
 
 						bool sessionClosed = false;
 						if (!result->getNumRows() == 0)
@@ -1389,7 +1389,7 @@ namespace CHARSYNC
 //					return true;
 //				}
 //
-//				std::auto_ptr<CStoreResult> result = std::auto_ptr<CStoreResult>(_RingDB.storeResult());
+//				CUniquePtr<CStoreResult> result(_RingDB.storeResult());
 //
 //				result->fetchRow();
 //				result->getField(0, dstUserId);

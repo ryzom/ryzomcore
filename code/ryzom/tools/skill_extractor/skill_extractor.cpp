@@ -542,7 +542,6 @@ sint main( sint argc, char ** argv )
 	
 
 	// output begin skill.h file
-	//if( ! fo.open( string( "r:/code/ryzom/src_v2/game_share/skills.h" ) ) )
 	if( ! fo.open( srcDir + string( "skills.h" ) ) )
 	{
 		nlwarning(" Can't open file %s for writing", "skills.h" );
@@ -648,7 +647,6 @@ sint main( sint argc, char ** argv )
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// begin output skill.cpp file
-//	if( ! fo.open( string( "r:/code/ryzom/src_v2/game_share/skills.cpp" ) ) )
 	if( ! fo.open( srcDir + string( "skills.cpp" ) ) )
 	{
 		nlwarning(" Can't open file skills.cpp for writing");

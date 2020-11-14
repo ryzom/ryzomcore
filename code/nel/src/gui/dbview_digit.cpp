@@ -24,6 +24,10 @@ using namespace std;
 using namespace NL3D;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 NLMISC_REGISTER_OBJECT(CViewBase, CDBViewDigit, std::string, "digit");
 
 namespace NLGUI

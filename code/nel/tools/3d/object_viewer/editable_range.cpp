@@ -159,7 +159,7 @@ void CEditableRange::OnUpdateValue()
 
 void CEditableRange::emptyDialog(void)
 {
-	m_Value = CString("");
+	m_Value.Empty();
 	m_SliderPos = 0;
 	UpdateData(FALSE);
 }
@@ -185,12 +185,12 @@ static	void concatEdit2Lines(CEdit &edit)
 	const	uint lineLen= 1000;
 	uint	n;
 	// retrieve the 2 lines.
-	char	tmp0[2*lineLen];
-	char	tmp1[lineLen];
+	TCHAR	tmp0[2*lineLen];
+	TCHAR	tmp1[lineLen];
 	n= edit.GetLine(0, tmp0, lineLen);	tmp0[n]= 0;
 	n= edit.GetLine(1, tmp1, lineLen);	tmp1[n]= 0;
 	// concat and update the CEdit.
-	edit.SetWindowText(strcat(tmp0, tmp1));
+	edit.SetWindowText(_tcscat(tmp0, tmp1));
 }
 
 

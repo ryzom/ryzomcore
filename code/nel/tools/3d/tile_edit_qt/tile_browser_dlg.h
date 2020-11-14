@@ -17,13 +17,9 @@
 #ifndef TILE_BROWSERDLG_H
 #define TILE_BROWSERDLG_H
 
-#include <QtGui/QtGui>
-#include <QtGui/QDialog>
-#include <QtGui/QButtonGroup>
 #include "ui_tile_browser_qt.h"
 #include "tiles_model.h"
 #include "browser_model.h"
-
 
 class CTile_browser_dlg : public QDialog
 {

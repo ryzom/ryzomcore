@@ -26,6 +26,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -127,8 +131,7 @@ namespace NLGUI
 	// ***************************************************************************
 	const CInterfaceOptionValue	 &CInterfaceOptions::getValue(const string &sParamName) const
 	{
-		string sLwrParamName = strlwr (sParamName);
-		std::map<std::string, CInterfaceOptionValue>::const_iterator it = _ParamValue.find (sLwrParamName);
+		std::map<std::string, CInterfaceOptionValue>::const_iterator it = _ParamValue.find (toLower(sParamName));
 		if (it != _ParamValue.end())
 			return it->second;
 		else
@@ -271,16 +274,25 @@ namespace NLGUI
 		//
 
 		TxId_TL_HighLight = rVR.getTextureIdFromName (getValStr("tx_tl_highlight"));
+		rVR.getTextureSizeFromId(TxId_TL_HighLight, W_TL_HighLight, H_TL_HighLight);
 		TxId_T_HighLight  = rVR.getTextureIdFromName (getValStr("tx_t_highlight"));
+		rVR.getTextureSizeFromId(TxId_T_HighLight, W_T_HighLight, H_T_HighLight);
 		TxId_TR_HighLight = rVR.getTextureIdFromName (getValStr("tx_tr_highlight"));
+		rVR.getTextureSizeFromId(TxId_TR_HighLight, W_TR_HighLight, H_TR_HighLight);
 		TxId_L_HighLight  = rVR.getTextureIdFromName (getValStr("tx_l_highlight"));
+		rVR.getTextureSizeFromId(TxId_L_HighLight, W_L_HighLight, H_L_HighLight);
 		TxId_R_HighLight  = rVR.getTextureIdFromName (getValStr("tx_r_highlight"));
+		rVR.getTextureSizeFromId(TxId_R_HighLight, W_R_HighLight, H_R_HighLight);
 		TxId_BL_HighLight = rVR.getTextureIdFromName (getValStr("tx_bl_highlight"));
+		rVR.getTextureSizeFromId(TxId_BL_HighLight, W_BL_HighLight, H_BL_HighLight);
 		TxId_B_HighLight  = rVR.getTextureIdFromName (getValStr("tx_b_highlight"));
+		rVR.getTextureSizeFromId(TxId_B_HighLight, W_B_HighLight, H_B_HighLight);
 		TxId_BR_HighLight = rVR.getTextureIdFromName (getValStr("tx_br_highlight"));
+		rVR.getTextureSizeFromId(TxId_BR_HighLight, W_BR_HighLight, H_BR_HighLight);
 
 		//
 		HeaderH = getValSInt32("header_h");
+		InsetT = getValSInt32("inset_t");
 
 		return true;
 	}

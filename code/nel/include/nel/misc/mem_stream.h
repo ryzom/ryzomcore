@@ -197,7 +197,7 @@ public:
 	 * \return true if seek sucessfull.
 	 * \see ESeekNotSupported SeekOrigin getPos
 	 */
-	virtual bool	seek (sint32 offset, TSeekOrigin origin) const throw(EStream);
+	virtual bool	seek (sint32 offset, TSeekOrigin origin) const;
 
 	/**
 	 * Get the location of the stream pointer.
@@ -210,7 +210,7 @@ public:
 	 * \return the new offset regarding from the origin.
 	 * \see ESeekNotSupported SeekOrigin seek
 	 */
-	virtual sint32	getPos () const throw(EStream)
+	virtual sint32	getPos () const
 	{
 		return sint32(_Buffer.Pos);
 	}
@@ -728,7 +728,7 @@ inline	void		CMemStream::serial(uint64 &b)
 		}
 		else
 		{
-			writenumber( b, "%"NL_I64"u", 20 );
+			writenumber( b, "%" NL_I64 "u", 20 );
 		}
 	}
 	else
@@ -748,7 +748,7 @@ inline	void		CMemStream::serial(sint64 &b)
 		}
 		else
 		{
-			writenumber( b, "%"NL_I64"d", 20 );
+			writenumber( b, "%" NL_I64 "d", 20 );
 		}
 	}
 	else

@@ -65,7 +65,7 @@ public:
 	bool build(const NLGEORGES::UFormElm &item, const std::string &prefix = "");
 
 	/// Save and Load
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };
 
 #endif

@@ -110,7 +110,7 @@ void EditPatchMod::DoPatchDelete()
 		{
 			altered = holdNeeded = 1;
 			if (theHold.Holding())
-				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "DoPatchDelete"));
+				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("DoPatchDelete")));
 			// Call the patch delete function
 			DeleteSelPatches(patch, rpatch);
 			patchData->UpdateChanges(patch, rpatch);
@@ -211,7 +211,7 @@ void EditPatchMod::DoVertDelete()
 		{
 			altered = holdNeeded = 1;
 			if (theHold.Holding())
-				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "DoVertDelete"));
+				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("DoVertDelete")));
 			// Call the vertex delete function
 			DeleteSelVerts(patch, rpatch);
 			patchData->UpdateChanges(patch, rpatch);
@@ -279,7 +279,7 @@ void EditPatchMod::DoEdgeDelete()
 		{
 			altered = holdNeeded = 1;
 			if (theHold.Holding())
-				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "DoEdgeDelete"));
+				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("DoEdgeDelete")));
 			int edges = patch->getNumEdges();
 			int patches = patch->getNumPatches();
 			int verts = patch->getNumVerts();

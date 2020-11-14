@@ -21,6 +21,10 @@
 #include "nel/3d/texture_bump.h"
 #include "nel/3d/material.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 #ifdef NL_STATIC
@@ -403,7 +407,7 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 	// Must setup textures each frame. (need to test if touched).
 	// Must separate texture setup and texture activation in 2 "for"...
 	// because setupTexture() may disable all stage.
-	if (matShader != CMaterial::Water 
+	if (matShader != CMaterial::Water
 		&& ((matShader != CMaterial::Program) || (_LastSetuppedPP->features().MaterialFlags & CProgramFeatures::TextureStages))
 		)
 	{
@@ -532,7 +536,7 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		}
 		else
 		{
-			// Restaure fog state to its current value
+			// Restore fog state to its current value
 			_DriverGLStates.enableFog(_FogEnabled);
 		}
 
@@ -1421,6 +1425,11 @@ void			CDriverGL::setupSpecularPass(uint pass)
 		}
 		else
 		{
+// Disabled because of Intel GPU texture bug (issue 310)
+// CMake options to debug
+// -DDEBUG_OGL_SPECULAR_FALLBACK=ON enables this
+// -DDEBUG_OGL_COMBINE43_DISABLE=ON disables GL_NV_texture_env_combine4/GL_ATI_texture_env_combine3
+#ifdef DEBUG_OGL_SPECULAR_FALLBACK
 			// Multiply texture1 by alpha_texture0 and display with add
 			_DriverGLStates.enableBlend(true);
 			_DriverGLStates.blendFunc(GL_ONE, GL_ONE);
@@ -1453,6 +1462,7 @@ void			CDriverGL::setupSpecularPass(uint pass)
 			}
 
 			activateTexEnvMode(1, env);
+#endif // DEBUG_OGL_SPECULAR_FALLBACK
 		}
 	}
 }
@@ -2087,14 +2097,16 @@ void		CDriverGL::setupCloudPass (uint /* pass */)
 			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND3_ALPHA_NV, GL_SRC_ALPHA);
 			activateTexEnvColor (1, mat.getColor());
 		}
-		else
+		else if (ATICloudShaderHandle)
 		{
 			// TODO : for now the state is not cached in _CurrentTexEnvSpecial
 			nglBindFragmentShaderATI(ATICloudShaderHandle);
 			glEnable(GL_FRAGMENT_SHADER_ATI);
 			float cst[4] = { 0.f, 0.f, 0.f, mat.getColor().A / 255.f };
 			nglSetFragmentShaderConstantATI(GL_CON_0_ATI, cst);
-			/*
+		}
+		else
+		{
 			_DriverGLStates.activeTextureARB(0);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
 			// Operator.
@@ -2130,7 +2142,6 @@ void		CDriverGL::setupCloudPass (uint /* pass */)
 			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_EXT, GL_SRC_COLOR);
 			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_CONSTANT_EXT );
 			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA_EXT, GL_SRC_ALPHA);
-			*/
 		}
 #endif
 	}

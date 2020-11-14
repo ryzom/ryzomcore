@@ -14,7 +14,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "nel/misc/types_nl.h"
+#ifndef STDOPENAL_H
+#define STDOPENAL_H
+
+#if defined(_MSC_VER) && defined(_DEBUG)
+	#define _CRTDBG_MAP_ALLOC
+	#include <stdlib.h>
+	#include <crtdbg.h>
+	#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -34,6 +42,8 @@
 #include <cfloat>
 #include <algorithm>
 #include <limits>
+
+#include "nel/misc/types_nl.h"
 
 #ifdef NL_OS_MAC
 #	include <al.h>
@@ -59,4 +69,5 @@
 #include "nel/sound/driver/listener.h"
 #include "nel/sound/driver/effect.h"
 
+#endif
 /* end of file */

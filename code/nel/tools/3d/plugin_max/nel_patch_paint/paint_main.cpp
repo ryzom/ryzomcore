@@ -47,8 +47,7 @@ void PaintPatchMod::BeginEditParams(IObjParam *ip, ULONG flags, Animatable *prev
 	
 	CreatePatchDataTempData();
 
-	hOpsPanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_OPS),
-		PatchOpsDlgProc, "Geometry", (LPARAM) this, rsOps ? 0 : APPENDROLL_CLOSED);
+	hOpsPanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_OPS), PatchOpsDlgProc, _M("Geometry"), (LPARAM) this, rsOps ? 0 : APPENDROLL_CLOSED);
 
 	// Create sub object editing modes.
 	paintMode		= new EPM_PaintCMode(this, ip);

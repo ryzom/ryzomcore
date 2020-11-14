@@ -35,6 +35,9 @@
 #include "client_cfg.h"
 #include "entity_animation_manager.h"	// \todo GUIGUI : added to recompile animations at loading (to do better ?).
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ///////////
 // USING //

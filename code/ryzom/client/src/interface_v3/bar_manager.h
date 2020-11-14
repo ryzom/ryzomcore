@@ -173,7 +173,7 @@ private:
 	class CBarDataUID
 	{
 	public:
-		/* What connexion are valid. empty() in each case if not, else the index in the array of entries
+		/* What connection are valid. empty() in each case if not, else the index in the array of entries
 		 *	NB: this is a set because some time, a bar data may be connected to multiple entries of same type
 		 *	This typically happens when you dismiss the team member 0 'Paul' while you have a team member 1 'Pierre':
 		 *	because of the server array shift,	there will be a short time where TeamMember0= TeamMember1= Pierre
@@ -207,7 +207,7 @@ private:
 	TUIDToDatas							_UIDBars;
 
 
-	// *** Data sorted by connexion Id (duplication for faster access...)
+	// *** Data sorted by connection Id (duplication for faster access...)
 	class CBarDataEntry
 	{
 	public:

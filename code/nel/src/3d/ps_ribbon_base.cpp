@@ -20,6 +20,12 @@
 #include "nel/3d/ps_ribbon_base.h"
 #include "nel/3d/particle_system.h"
 
+using namespace NLMISC;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
@@ -744,7 +750,7 @@ void CPSRibbonBase::initDateVect()
 
 
 //=======================================================
-void CPSRibbonBase::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSRibbonBase::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSRibbonBase_serial)
 	CPSParticle::serial(f);

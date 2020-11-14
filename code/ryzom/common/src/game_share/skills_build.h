@@ -37,7 +37,7 @@ struct CSkillSummary
 	CSkillSummary(uint16 id, uint16 value) : ID(id), Value(value) {}
 	uint16 ID; /* see enum ESkills in skills.h */
 	uint16 Value;
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		f.serial(ID, Value);
 	}

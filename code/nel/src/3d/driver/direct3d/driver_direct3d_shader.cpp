@@ -20,6 +20,10 @@
 #include "nel/misc/path.h"
 #include "nel/misc/file.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 
@@ -62,7 +66,7 @@ void CD3DShaderFX::setName (const char *name)
 
 bool CD3DShaderFX::loadShaderFile (const char *filename)
 {
-	_Text = "";
+	_Text.clear();
 	// Lookup
 	string _filename = NLMISC::CPath::lookup(filename, false, true, true);
 	if (!_filename.empty())

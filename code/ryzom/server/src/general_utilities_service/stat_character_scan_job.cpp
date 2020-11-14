@@ -286,7 +286,7 @@ bool CCharacterScanJob::runForFile(const std::string& fileName)
 	// load the file into a pdr record
 	static CPersistentDataRecord	pdr;
 	pdr.clear();
-	pdr.readFromFile(fileName.c_str());
+	pdr.readFromFile(fileName);
 
 	// create a character representation and apply the pdr
 	CStatsScanCharacter c;

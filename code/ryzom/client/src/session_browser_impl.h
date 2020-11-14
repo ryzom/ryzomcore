@@ -21,7 +21,6 @@
 #include "session_browser.h"
 #include "game_share/ring_session_manager_itf.h"
 #include "nel/gui/lua_helper.h"
-using namespace NLGUI;
 #include "far_tp.h"
 
 class CSessionBrowserImpl : public CSessionBrowser,
@@ -37,7 +36,7 @@ public:
 	  *              - RingAccessPoint:onConnectionClosed()
 	  *              - RingAccessPoint:onConnectionFailed()
 	  */
-	void init(CLuaState *ls);
+	void init(NLGUI::CLuaState *ls);
 	// from CSessionBrowser
 	virtual void on_connectionFailed();
 	virtual void on_connectionClosed();
@@ -99,17 +98,17 @@ public:
 
 	static const std::string &getFrontEndAddress();
 private:
-	CLuaState::TRefPtr _Lua;
-	static int luaGetRingSessionList(CLuaState &ls);
-	static int luaGetRingCharList(CLuaState &ls);
-	static int luaJoinRingSession(CLuaState &ls);
-	static int luaCheckRingAccess(CLuaState &ls);
-	static int luaGetFileHeader(CLuaState &ls);
-	static int luaGetRingStats(CLuaState &ls);
-	static int luaGetScenarioScores(CLuaState &ls);
-	static int luaUpdateScenarioScores(CLuaState &ls);
-	static int luaGetSessionAverageScores(CLuaState &ls);
-	static int luaGetScenarioAverageScores(CLuaState &ls);
+	NLGUI::CLuaState::TRefPtr _Lua;
+	static int luaGetRingSessionList(NLGUI::CLuaState &ls);
+	static int luaGetRingCharList(NLGUI::CLuaState &ls);
+	static int luaJoinRingSession(NLGUI::CLuaState &ls);
+	static int luaCheckRingAccess(NLGUI::CLuaState &ls);
+	static int luaGetFileHeader(NLGUI::CLuaState &ls);
+	static int luaGetRingStats(NLGUI::CLuaState &ls);
+	static int luaGetScenarioScores(NLGUI::CLuaState &ls);
+	static int luaUpdateScenarioScores(NLGUI::CLuaState &ls);
+	static int luaGetSessionAverageScores(NLGUI::CLuaState &ls);
+	static int luaGetScenarioAverageScores(NLGUI::CLuaState &ls);
 	// Call a method inside the 'RingAccessPoint' lua table
 	void callRingAccessPointMethod(const char *name, int numArg, int numResult);
 	void callRingCharTrackingMethod(const char *name, int numArg, int numResult);

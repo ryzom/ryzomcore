@@ -37,7 +37,15 @@ namespace SBCLIENT {
 void CConfiguration::setAndCallback(const std::string &varName, void (*cb)(CConfigFile::CVar &var))
 {
 	ConfigFile->setCallback(varName, cb);
-	cb(*ConfigFile->getVarPtr(varName));
+	CConfigFile::CVar *varPtr = ConfigFile->getVarPtr(varName);
+	if (!varPtr)
+	{
+		nlwarning("Missing config variable '%s'", varName.c_str());
+	}
+	else
+	{
+		cb(*varPtr);
+	}
 }
 
 void CConfiguration::dropCallback(const std::string &varName)

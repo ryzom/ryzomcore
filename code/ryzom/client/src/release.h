@@ -22,7 +22,8 @@
 #include "nel/misc/types_nl.h"
 
 
-
+// Saving ingame resolution when in windowed mode
+void saveIngameResolution();
 // called from farTP at reselection
 void releaseMainLoopReselect();
 // Release InGame Data

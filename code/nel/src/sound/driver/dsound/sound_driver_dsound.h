@@ -115,7 +115,7 @@ public:
 	 *  \param artist returns the song artist (empty if not available)
 	 *  \param title returns the title (empty if not available)
 	 */
-	virtual bool getMusicInfo(const std::string & /* filepath */, std::string &artist, std::string &title) { artist.clear(); title.clear(); return false; }
+	virtual bool getMusicInfo(const std::string & /* filepath */, std::string &artist, std::string &title, float &length) { artist.clear(); title.clear(); length = 0.f; return false; }
 
 private:
 

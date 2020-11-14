@@ -86,10 +86,10 @@ public:
 	static void			release();
 
 	///	Register your class for future Instanciation.
-	static	void		registerClass(const std::string &className, IClassable* (*creator)(), const std::string &typeidCheck) throw(ERegistry);
+	static	void		registerClass(const std::string &className, IClassable* (*creator)(), const std::string &typeidCheck);
 
 	/// Create an object from his class name.
-	static	IClassable	*create(const std::string &className) throw(ERegistry);
+	static	IClassable	*create(const std::string &className);
 
 	/// check if the object has been correctly registered. Must be used for debug only, and Must compile with RTTI.
 	static	bool		checkObject(IClassable* obj);

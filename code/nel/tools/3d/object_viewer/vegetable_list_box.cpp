@@ -216,8 +216,7 @@ void CVegetableListBox::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				dc.SetTextColor(::GetSysColor(COLOR_GRAYTEXT) );
 			}
 
-			dc.DrawText(
-				(const char*)str,
+			dc.DrawText(str,
 				str.GetLength(),
 				&lpDrawItemStruct->rcItem,
 				DT_LEFT|DT_SINGLELINE|DT_VCENTER);

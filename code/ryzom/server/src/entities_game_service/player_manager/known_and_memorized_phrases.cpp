@@ -55,7 +55,7 @@ void CKnownPhrase::clear()
 //-----------------------------------------------
 // CKnownPhrase::serial
 //-----------------------------------------------
-void CKnownPhrase::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CKnownPhrase::serial(NLMISC::IStream &f)
 {
 	f.serial(PhraseDesc);
 	f.serial(PhraseSheetId);
@@ -89,7 +89,7 @@ void CMemorizedPhrase::clear()
 //-----------------------------------------------
 // CMemorizedPhrase::serial
 //-----------------------------------------------
-void CMemorizedPhrase::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CMemorizedPhrase::serial(NLMISC::IStream &f)
 {
 	f.serialCont(Bricks);
 	f.serial(PhraseId);
@@ -347,7 +347,7 @@ void CMemorizationSet::forgetAll()
 //-----------------------------------------------
 // CMemorizationSet::serial
 //-----------------------------------------------
-void CMemorizationSet::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CMemorizationSet::serial(NLMISC::IStream &f)
 {
 	f.serialContPtr(Phrases);
 }
@@ -511,7 +511,7 @@ void CPlayerPhraseMemory::forgetAll()
 //-----------------------------------------------
 // CPlayerPhraseMemory::serial
 //-----------------------------------------------
-void CPlayerPhraseMemory::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPlayerPhraseMemory::serial(NLMISC::IStream &f)
 {
 	f.serialContPtr(_MemSets);
 }

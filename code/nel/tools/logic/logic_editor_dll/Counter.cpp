@@ -45,7 +45,7 @@ CCounter::~CCounter()
 void cCounterToCLogicCounter( CCounter& counter, CLogicCounter& logicCounter )
 {
 	// counter name
-	logicCounter.setName( string((LPCSTR)counter.m_sName) );
+	logicCounter.setName(tStrToUtf8(counter.m_sName));
 	
 	// running mode
 	if( counter.m_sMode == "Shuttle" )

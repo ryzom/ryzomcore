@@ -42,7 +42,7 @@ public:
 	// build that sheet from a form
 	bool build(const NLGEORGES::UFormElm &item);
 	// serial this sheet
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };
 
 // operator < sort ground fx by ground type

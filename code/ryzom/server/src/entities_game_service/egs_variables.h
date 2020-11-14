@@ -280,6 +280,9 @@ extern NLMISC::CVariable<float>					ForageQuantityXPDeltaLevelBonusRate;
 extern NLMISC::CVariable<float>					ForageExtractionTimeMinGC;
 extern NLMISC::CVariable<float>					ForageExtractionTimeSlopeGC;
 
+extern NLMISC::CVariable<bool>					RefillDepositOnStartup;
+extern NLMISC::CVariable<uint32>				DepositSaveInterval;
+extern NLMISC::CVariable<bool>					DepositStateUseXml;
 
 // QUARTERING
 extern NLMISC::CVariable<float>					QuarteringQuantityAverageForCraftHerbivore;

@@ -1,6 +1,6 @@
 ADD_SUBDIRECTORY(3rdparty)
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${LIBXML2_INCLUDE_DIR} ${NEL_INCLUDE_DIR} ${QT_INCLUDES})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${NEL_INCLUDE_DIR} ${QT_INCLUDES})
 INCLUDE( ${QT_USE_FILE} )
 
 CONFIGURE_FILE(translations/translations.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc COPYONLY)
@@ -11,7 +11,7 @@ FILE(GLOB STUDIO_SRC extension_system/*.h
 
 SET(STUDIO_HDR   extension_system/iplugin_manager.h 
 						extension_system/plugin_manager.h
-						settings_dialog.h
+						startup_settings_dlg.h
 						splash_screen.h
 						pm_watcher.h )
 
@@ -22,14 +22,14 @@ SET(STUDIO_TS    translations/object_viewer_qt_en.ts
 						translations/object_viewer_qt_de.ts
 						translations/object_viewer_qt_ru.ts)
 						
-SET(STUDIO_PLUGIN_UIS settings_dialog.ui )
+SET(STUDIO_PLUGIN_UIS startup_settings_dlg.ui )
 
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
 
 IF(WIN32)
   SET(STUDIO_RC studio.rc)
-ENDIF(WIN32)
+ENDIF()
 
 QT4_ADD_TRANSLATION(STUDIO_QM ${STUDIO_TS})
 QT4_ADD_RESOURCES( STUDIO_RC_SRCS ${STUDIO_RCS})
@@ -51,7 +51,7 @@ TARGET_LINK_LIBRARIES(studio
 		${QT_LIBRARIES}
 		${QT_QTMAIN_LIBRARY})
 
-ADD_DEFINITIONS(-DQT_NO_KEYWORDS ${LIBXML2_DEFINITIONS} ${QT_DEFINITIONS})
+ADD_DEFINITIONS(-DQT_NO_KEYWORDS ${QT_DEFINITIONS})
 NL_DEFAULT_PROPS(studio "Tools: Studio")
 NL_ADD_RUNTIME_FLAGS(studio)
 

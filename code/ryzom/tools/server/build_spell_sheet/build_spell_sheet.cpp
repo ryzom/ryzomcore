@@ -65,7 +65,7 @@ public:
 		return true;
 	}
 public:	
-	void serial(IStream &f) throw(EStream)
+	void serial(IStream &f)
 	{
 		for(uint k = 0; k < NumUserParams; ++k)
 		{		
@@ -87,7 +87,7 @@ public:
 	{
 		return PSName.empty() && UserParams.empty();
 	}
-	void serial(IStream &f) throw(EStream)
+	void serial(IStream &f)
 	{
 		if (!PSName.empty()) writeAtom(f, "PSName", PSName);
 		UserParams.serial(f);
@@ -111,7 +111,7 @@ public:
 		}
 		return true;
 	}
-	void serial(IStream &f) throw(EStream)
+	void serial(IStream &f)
 	{
 		for(uint k = 0; k < NumFX; ++k)
 		{

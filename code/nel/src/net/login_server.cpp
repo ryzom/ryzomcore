@@ -157,7 +157,7 @@ void cbWSChooseShard (CMessage &msgin, const std::string &/* serviceName */, TSe
 		// add it to the awaiting client
 		nlinfo ("LS: New cookie %s (name '%s' priv '%s' extended '%s' instance %u slot %u) inserted in the pending user list (awaiting new client)", cookie.toString().c_str(), userName.c_str(), userPriv.c_str(), userExtended.c_str(), instanceId, charSlot);
 		PendingUsers.push_back (CPendingUser (cookie, userName, userPriv, userExtended, instanceId, charSlot));
-		reason = "";
+		reason.clear();
 
 		// callback if needed
 		if (NewCookieCallback != NULL)
@@ -233,7 +233,7 @@ void cbShardValidation (CMessage &msgin, TSockId from, CCallbackNetBase &netbase
 	// if the cookie is not valid and we accept them, clear the error
 	if(AcceptInvalidCookie && !reason.empty())
 	{
-		reason = "";
+		reason.clear();
 		cookie.set (rand(), rand(), rand());
 	}
 
@@ -425,7 +425,8 @@ void CLoginServer::addNewCookieCallback(TNewCookieCallback newCookieCb)
 
 string CLoginServer::isValidCookie (const CLoginCookie &lc, string &userName, string &userPriv, string &userExtended, uint32 &instanceId, uint32 &charSlot)
 {
-	userName = userPriv = "";
+	userName.clear();
+	userPriv.clear();
 
 	if (!AcceptInvalidCookie && !lc.isValid())
 		return "The cookie is invalid";

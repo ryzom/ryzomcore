@@ -289,7 +289,7 @@ public:
 	static const CCycleDef cycles[];
 	static const uint32 nbCycle;
 	
-	void setAutoSpawn(bool autoSpawn) { CGroup::setAutoSpawn(autoSpawn); if (!isAutoSpawn()) _CurrentCycle=-1; }
+	void setAutoSpawn(bool autoSpawn) { CGroup::setAutoSpawn(autoSpawn); if (!isAutoSpawn()) _CurrentCycle=std::numeric_limits<uint32>::max(); }
 	
 	/// @name CChild implementation
 	//@{
@@ -335,7 +335,7 @@ protected:
 	double					_MotivationHarvestSap;		// Motivation for the sap harvest.
 	
 	std::vector<Cycle>		_Cycles;	//	Cycles List.
-	sint32					_CurrentCycle;			//	current Cycle.
+	uint32					_CurrentCycle;			//	current Cycle.
 	sint32					_CurrentCycleIndex;		// the pop index in the cycle
 	
 	AITYPES::CPropertySet	_Faction;

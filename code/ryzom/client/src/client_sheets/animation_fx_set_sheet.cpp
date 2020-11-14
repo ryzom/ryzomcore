@@ -56,7 +56,7 @@ void CAnimationFXSetSheet::buildWithPrefix(const NLGEORGES::UFormElm &item, cons
 }
 
 // ****************************************************************************************************
-void CAnimationFXSetSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAnimationFXSetSheet::serial(NLMISC::IStream &f)
 {
 	f.serialCont(FX);
 	for(uint k = 0; k < MaxNumFX; ++k)

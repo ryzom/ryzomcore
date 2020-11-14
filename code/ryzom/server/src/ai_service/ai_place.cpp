@@ -77,7 +77,7 @@ void CAIPlaceFastXYR::display(CStringWriter& stringWriter) const
 uint CFaunaGenericPlace::setupFromOldName(const std::string &name)
 {
 	uint32 stayTime;
-	uint placeIndex = ~0;
+	uint placeIndex = std::numeric_limits<uint>::max();
 	// depending on place name setup eat/ rest/ sleep pointers
 	if (NLMISC::nlstricmp(name,"spawn")==0)
 	{

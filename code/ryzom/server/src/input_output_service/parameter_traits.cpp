@@ -584,18 +584,16 @@ public:
 		std::string op1;
 		if (cond.Property == "name")
 		{
-			op1 = si.SheetName;
+			op1 = NLMISC::toLower(si.SheetName);
 		}
 		else if (cond.Property == "gender")
 		{
-			op1 = si.Gender;
+			op1 = NLMISC::toLower(GSGENDER::toString(si.Gender));
 		}
 		else
 		{
 			return CParameterTraitsEntity::eval(lang,charInfo, cond);
 		}
-
-		NLMISC::strlwr(op1);
 
 		LOG("SM : (creature) eval condition for property %s [%s] %s [%s]", cond.Property.c_str(), op1.c_str(), OperatorNames[cond.Operator], cond.ReferenceStr.c_str());
 
@@ -987,7 +985,7 @@ public:
 				return false;
 			}
 			const CStringManager::TSheetInfo &si = SM->getSheetInfo(sheetId);
-			op1 = si.SheetName;
+			op1 = NLMISC::toLower(si.SheetName);
 		}
 		else if (cond.Property == "gender")
 		{
@@ -997,14 +995,12 @@ public:
 				nlwarning("Could not find character info for EId %s to check property %s", EId.toString().c_str(), cond.Property.c_str());
 				return false;
 			}
-			op1 = GSGENDER::toString(charInfo->getGender());
+			op1 = NLMISC::toLower(GSGENDER::toString(charInfo->getGender()));
 		}
 		else
 		{
 			return CParameterTraitsEntity::eval(lang,charInfo, cond);
 		}
-
-		NLMISC::strlwr(op1);
 
 		LOG("SM : (player) eval condition for property %s [%s] %s [%s]", cond.Property.c_str(), op1.c_str(), OperatorNames[cond.Operator], cond.ReferenceStr.c_str());
 
@@ -1085,14 +1081,14 @@ public:
 		}
 		else if (cond.Property == "role")
 		{
-			op1 = si.ChatProfile;
+			op1 = NLMISC::toLower(si.ChatProfile);
 		}
 		else if (cond.Property == "title")
 		{
 			// we need to retrieve the charInfo
 			CCharacterInfos	*ci = IOS->getCharInfos(EId);
 			if (ci != NULL)
-				op1 = ci->Title;
+				op1 = NLMISC::toLower(ci->Title);
 			else
 			{
 				nlwarning("No character info for bot %s, can't test property 'title' !", EId.toString().c_str());
@@ -1103,8 +1099,6 @@ public:
 		{
 			return CParameterTraitsEntity::eval(lang, charInfo, cond);
 		}
-
-		NLMISC::strlwr(op1);
 
 		LOG("SM : (bot) eval condition for property %s [%s] %s [%s]", cond.Property.c_str(), op1.c_str(), OperatorNames[cond.Operator], cond.ReferenceStr.c_str());
 
@@ -1460,18 +1454,17 @@ public:
 		// check if checked property is gender or name
 		if (cond.Property == "gender")
 		{
-			value = GSGENDER::toString(charInfo->getGender());
+			value = NLMISC::toLower(GSGENDER::toString(charInfo->getGender()));
 		}
 		else if (cond.Property == "name")
 		{
-			value = charInfo->ShortName.toString();
+			value = NLMISC::toLower(charInfo->ShortName.toString());
 		}
 		else
 		{
 			return CParameterTraitsEntity::eval(lang,charInfo, cond);
 		}
 
-		NLMISC::strlwr(value);
 		LOG("SM : (self) eval condition for property %s [%s] %s [%s]", cond.Property.c_str(), value.c_str(), OperatorNames[cond.Operator], cond.ReferenceStr.c_str());
 
 		switch(cond.Operator)

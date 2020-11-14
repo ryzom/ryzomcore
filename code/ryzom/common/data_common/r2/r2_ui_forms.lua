@@ -328,7 +328,7 @@ end
 
 local function saveScenarioOnChange(formInstance)
 	r2.print(formInstance.Name)
-	local name = string.gsub(formInstance.Name,  "[\\\/\:\*\?\"\<\>\|]", "_")
+	local name = string.gsub(formInstance.Name,  "[\\/:*?\"<>|]", "_")
 	if name ~= formInstance.Name then
 		fromInstance.Name = name
 		formInstance.Modified = true

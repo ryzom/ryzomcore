@@ -32,6 +32,10 @@
 using namespace std;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 #define IG_UNIQUE_ID(this) ((void*)&((this)->_GroupSizeRef)) // NB nico : use some pointer *inside* CInterfaceGroup as a unique id for lua registry (any field but
 														     // the first), instead of using 'this'. 'this' is already used by
 		                                                     //  CLuaIHM::pushReflectableOnStack as unique id to CInterfaceElement's ref pointers
@@ -312,8 +316,7 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"max_sizeparent" );
 		if (ptr)
 		{
-			string idparent = ptr;
-			idparent = NLMISC::strlwr(idparent);
+			string idparent = NLMISC::toLower(ptr.str());
 			if (idparent != "parent")
 			{
 				if (parentGroup)
@@ -912,6 +915,31 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	void CInterfaceGroup::addElement (CInterfaceElement *child, sint eltOrder /*= -1*/)
+	{
+		if (!child)
+		{
+			nlwarning("<CInterfaceGroup::addView> : tried to add a NULL view");
+			return;
+		}
+
+		if( child->isGroup() )
+		{
+			addGroup( static_cast< CInterfaceGroup* >( child ), eltOrder );
+		}
+		else
+		if( child->isCtrl() )
+		{
+			addCtrl( static_cast< CCtrlBase* >( child ), eltOrder );
+		}
+		else
+		if( child->isView() )
+		{
+			addView( static_cast< CViewBase* >( child ), eltOrder );
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	void CInterfaceGroup::addView (CViewBase *child, sint eltOrder /*= -1*/)
 	{
 		if (!child)
@@ -975,7 +1003,7 @@ namespace NLGUI
 	{
 		string idTmp = id, lidTmp = lid;
 	//	bool isFound = true;
-		while (idTmp.size() > 0)
+		while (!idTmp.empty())
 		{
 			string tokid, toklid;
 
@@ -1007,12 +1035,12 @@ namespace NLGUI
 			if (posid > 0)
 				idTmp = idTmp.substr (0, posid);
 			else
-				idTmp = "";
+				idTmp.clear();
 
 			if (poslid > 0)
 				lidTmp = lidTmp.substr (0, poslid);
 			else
-				lidTmp = "";
+				lidTmp.clear();
 		}
 		return true;
 	}
@@ -1149,7 +1177,7 @@ namespace NLGUI
 	int CInterfaceGroup::luaGetNumGroups(CLuaState &ls)
 	{
 		CLuaIHM::checkArgCount(ls, "CInterfaceGroup::getNumGroups", 0);
-		ls.push((double) _ChildrenGroups.size());
+		ls.push((uint)_ChildrenGroups.size());
 		return 1;
 	}
 
@@ -1159,7 +1187,7 @@ namespace NLGUI
 		const char *funcName = "CInterfaceGroup::getGroup";
 		CLuaIHM::checkArgCount(ls, "CInterfaceGroup::getGroup", 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		uint index = (uint) ls.toNumber(1);
+		uint index = (uint) ls.toInteger(1);
 		if (index >= _ChildrenGroups.size())
 		{
 			CLuaIHM::fails(ls, "getGroup : try to index group %s, but there are only %d son groups", ls.toString(1), (int) _ChildrenGroups.size());
@@ -1277,7 +1305,7 @@ namespace NLGUI
 					CInterfaceGroup *currParent = _Parent;
 					while (currParent)
 					{
-						if (currParent->moveSBTrackY (this, eventDesc.getWheel()*12))
+						if (currParent->moveSBTargetY (this, -(eventDesc.getWheel()*12)))
 							return true;
 						currParent = currParent->getParent();
 					}
@@ -1312,6 +1340,11 @@ namespace NLGUI
 			for (ite = _EltOrder.begin() ; ite != _EltOrder.end(); ite++)
 			{
 				CViewBase *pVB = *ite;
+				if( pVB->getName() == "=MARKED=" )
+				{
+					nlinfo( "=MARKED=" );
+				}
+
 				if (pVB->getActive())
 					pVB->draw();
 			}
@@ -1365,8 +1398,18 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	sint32 CInterfaceGroup::getInnerWidth() const
+	{
+		sint width = CInterfaceElement::getInnerWidth();
+		return std::min(width, _MaxWReal - _MarginLeft);
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	void CInterfaceGroup::checkCoords()
 	{
+		// Make XReal same as in updateCoords() as some elements (CViewText) depends on it
+		_XReal += _MarginLeft;
+
 		//update all children elements
 		vector<CViewBase*>::const_iterator ite;
 		for (ite = _EltOrder.begin() ; ite != _EltOrder.end(); ite++)
@@ -1375,7 +1418,9 @@ namespace NLGUI
 			if(pIE->getActive())
 				pIE->checkCoords();
 		}
-		executeLuaScriptOnDraw();	
+
+		_XReal -= _MarginLeft;
+		executeLuaScriptOnDraw();
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -1424,7 +1469,7 @@ namespace NLGUI
 		}
 
 		CViewBase::updateCoords();
-		_XReal += _OffsetX;
+		_XReal += _OffsetX + _MarginLeft;
 		_YReal += _OffsetY;
 
 		//update all children elements
@@ -1435,7 +1480,7 @@ namespace NLGUI
 			pIE->updateCoords();
 		}
 
-		_XReal -= _OffsetX;
+		_XReal -= (_OffsetX + _MarginLeft);
 		_YReal -= _OffsetY;
 	}
 
@@ -1639,6 +1684,32 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	CInterfaceElement* CInterfaceGroup::takeElement( CInterfaceElement *e )
+	{
+		bool ok = false;
+
+		if( e->isGroup() )
+		{
+			ok = delGroup( static_cast< CInterfaceGroup* >( e ), true );
+		}
+		else
+		if( e->isCtrl() )
+		{
+			ok = delCtrl( static_cast< CCtrlBase* >( e ), true );
+		}
+		else
+		if( e->isView() )
+		{
+			ok = delView( static_cast< CViewBase* >( e ), true );
+		}
+
+		if( ok )
+			return e;
+		else
+			return NULL;
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	bool CInterfaceGroup::isWindowUnder (sint32 x, sint32 y)
 	{
 		return ((x >= _XReal) &&
@@ -1723,7 +1794,7 @@ namespace NLGUI
 			{
 	//		bool bUnder = 
 				pChild->getViewsUnder (x, y, clipX, clipY, clipW, clipH, vVB);
-	//			if (bUnder && (vICL.size() > 0))
+	//			if (bUnder && !vICL.empty())
 	//				return true;
 			}
 		}
@@ -1778,7 +1849,7 @@ namespace NLGUI
 			{
 	//		bool bUnder = 
 				pChild->getCtrlsUnder (x, y, clipX, clipY, clipW, clipH, vICL);
-	//			if (bUnder && (vICL.size() > 0))
+	//			if (bUnder && !vICL.empty())
 	//				return true;
 			}
 		}
@@ -1834,7 +1905,7 @@ namespace NLGUI
 			{
 	//		bool bUnder = 
 				pChild->getGroupsUnder (x, y, clipX, clipY, clipW, clipH, vIGL);
-	//			if (bUnder && (vICL.size() > 0))
+	//			if (bUnder && !vICL.empty())
 	//				return true;
 			}
 		}
@@ -1899,9 +1970,11 @@ namespace NLGUI
 			newSciH = newSciH - ((newSciY+newSciH)-(oldSciY+oldSciH));
 		}
 
-		newSciXDest = newSciX;
+		// Don't apply margins because HTML list marker is drawn outside group paragraph inner content.
+		// Should not be an issue because horizontal scolling not used.
+		newSciXDest = newSciX/* + _MarginLeft*/;
 		newSciYDest = newSciY;
-		newSciWDest = newSciW;
+		newSciWDest = newSciW/* - _MarginLeft*/;
 		newSciHDest = newSciH;
 
 	}
@@ -2084,7 +2157,8 @@ namespace NLGUI
 			std::string typeName = "???";
 			if (_ChildrenGroups[k])
 			{
-				const type_info &ti = typeid(*_ChildrenGroups[k]);
+				NLGUI::CInterfaceGroup *group = _ChildrenGroups[k];
+				const type_info &ti = typeid(*group);
 				typeName = ti.name();
 			}
 			nlinfo("Group %d, name = %s, type=%s", k,  _ChildrenGroups[k] ? _ChildrenGroups[k]->getId().c_str() : "???", typeName.c_str());
@@ -2100,7 +2174,8 @@ namespace NLGUI
 			std::string typeName = "???";
 			if (_ChildrenGroups[k])
 			{
-				const type_info &ti = typeid(*_EltOrder[k]);
+				NLGUI::CViewBase *view = _EltOrder[k];
+				const type_info &ti = typeid(*view);
 				typeName = ti.name();
 			}
 			CInterfaceElement *el = _EltOrder[k];
@@ -2488,5 +2563,101 @@ namespace NLGUI
 		for( std::vector< CInterfaceGroup* >::iterator itr = _ChildrenGroups.begin(); itr != _ChildrenGroups.end(); ++itr )
 			(*itr)->onWidgetDeleted( e );
 	}
+
+	void CInterfaceGroup::moveBy(sint32 x, sint32 y)
+	{
+		CInterfaceElement::moveBy(x, y);
+
+		for(uint i = 0; i < _EltOrder.size(); ++i)
+		{
+			CViewBase *v = _EltOrder[i];
+			v->updateCoords();
+		}
+	}
+
+	bool CInterfaceGroup::explode()
+	{
+		CInterfaceGroup *p = getParent();
+		if( p == NULL )
+			return false;
+
+		std::string oldId;
+
+		// Reparent children
+		for(uint i = 0; i < _EltOrder.size(); ++i)
+		{
+			CInterfaceElement *e = _EltOrder[i];
+
+			oldId = e->getId();
+
+			e->setW(e->getWReal());
+			e->setH(e->getHReal());
+			e->setSizeRef("");
+
+			e->setParent(p);
+			
+			e->setParentPos(p);
+			e->setParentSize(p);
+			e->alignTo(p);
+
+			p->addElement(e);
+			e->setIdRecurse(e->getShortId());
+
+			CWidgetManager::getInstance()->onWidgetMoved(oldId, e->getId());
+		}
+
+		_EltOrder.clear();
+		_Views.clear();
+		_Controls.clear();
+		_ChildrenGroups.clear();
+
+		return true;
+	}
+
+	void CInterfaceGroup::spanElements()
+	{
+		sint32 minx = std::numeric_limits< sint32 >::max();
+		sint32 miny = std::numeric_limits< sint32 >::max();
+		sint32 maxx = std::numeric_limits< sint32 >::min();
+		sint32 maxy = std::numeric_limits< sint32 >::min();
+
+		sint32 tlx, tly, brx, bry;
+
+		// Find the min and max coordinates of the elements
+		for(uint i = 0; i < _EltOrder.size(); ++i)
+		{
+			CViewBase *v = _EltOrder[i];
+
+			v->getHSCoords(Hotspot_TL, tlx, tly);
+			v->getHSCoords(Hotspot_BR, brx, bry);
+
+			if (tlx < minx)
+				minx = tlx;
+			if (brx > maxx)
+				maxx = brx;
+			if (bry < miny)
+				miny = bry;
+			if (tly > maxy)
+				maxy = tly;
+		}
+
+		// Set the position and the width and height based on these coords
+		setW(maxx - minx);
+		setH(maxy - miny);
+		_WReal = getW();
+		_HReal = getH();
+		_XReal = minx;
+		_YReal = miny;
+	}
+
+	void CInterfaceGroup::alignElements()
+	{
+		for(uint i = 0; i < _EltOrder.size(); ++i)
+		{
+			CViewBase *v = _EltOrder[i];
+			v->alignTo(this);
+		}
+	}
+
 }
 

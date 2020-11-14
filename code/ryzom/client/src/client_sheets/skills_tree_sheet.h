@@ -44,7 +44,7 @@ public :
 			MaxSkillValue = StageType = 0;
 		}
 
-		void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serialEnum (Skill);
 			f.serial (SkillCode);
@@ -87,7 +87,7 @@ public:
 	virtual void build(const NLGEORGES::UFormElm &item);
 
 	/// serialize
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		f.serialCont( SkillsTree );
 	}

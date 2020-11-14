@@ -94,8 +94,6 @@ public:
 	CChatInputFilter Tell;
 
 	CChatInputFilter DebugInfo;
-	// YuboChat (special telnet chat for Game Masters, same channel as the Yubo Klient)
-	CChatInputFilter YuboChat;
 
 	// Dynamic Chat. A fixed number of chat that can be assign
 	CChatInputFilter DynamicChat[CChatGroup::MaxDynChanPerPlayer];
@@ -111,7 +109,6 @@ public:
 		Guild.FilterType = CChatGroup::guild;
 		SystemInfo.FilterType = CChatGroup::system;
 		Tell.FilterType = CChatGroup::tell;
-		YuboChat.FilterType = CChatGroup::yubo_chat;
 		Universe.FilterType = CChatGroup::universe;
 		for(uint i=0;i<CChatGroup::MaxDynChanPerPlayer;i++)
 		{
@@ -142,8 +139,6 @@ public:
 	CChatWindow					*SystemInfo;
 	CChatWindow					*TellWindow;
 	CChatWindow					*DebugInfo;
-	// (special telnet chat for Game Masters, same channel as the Yubo Klient)
-	CChatWindow					*YuboChat;
 	// Special dynamic chat
 	CChatWindow					*DynamicChat[CChatGroup::MaxDynChanPerPlayer];
 
@@ -279,7 +274,6 @@ private:
 	void createDebugInfo();
 	void createChatGroup(); // Create chat group containing all other chat
 	void createTheUserChat();
-	void createYuboChat();	// (special telnet chat for Game Masters, same channel as the Yubo Klient)
 	void createDynamicChats();
 	//
 	void initStdInputs();

@@ -108,7 +108,7 @@ void CMeshCameraColManager::instanceGroupAdded(NL3D::UInstanceGroup *ig)
 					bool	avoidCollisionInside= ig->dontCastShadowForInterior(i);
 					bool	avoidCollisionOutside= ig->dontCastShadowForExterior(i);
 					// very special patch for the matis serre (grrrrrrrrrrrrr)
-					avoidCollisionOutside= avoidCollisionOutside || strlwr(shapeName)== "ma_serre_interieur.shape";
+					avoidCollisionOutside= avoidCollisionOutside || toLower(shapeName)== "ma_serre_interieur.shape";
 
 					// then send the result to the collision manager, and keep the mesh col id if succeed
 					uint32	meshId= CollisionManager->addMeshInstanceCollision(colMesh, mat, avoidCollisionInside, avoidCollisionOutside);

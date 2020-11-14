@@ -59,7 +59,6 @@ protected:
 	NLMISC::CLibraryContext *m_libContext;
 
 private:
-	NLLIGO::CLigoConfig m_ligoConfig;
 	ExtensionSystem::IPluginManager *m_plugMan;
 	QList<QObject *> m_autoReleaseObjects;
 };
@@ -88,9 +87,14 @@ public:
 
 	virtual QUndoStack *undoStack();
 
+    void onActivated();
+
 	virtual QWidget *widget();
 
 	WorldEditorWindow *m_worldEditorWindow;
+
+private:
+    NLLIGO::CLigoConfig m_ligoConfig;
 };
 
 } // namespace WorldEditor

@@ -17,9 +17,9 @@
 #ifndef TILE_EDITDLG_H
 #define TILE_EDITDLG_H
 
-#include <QtGui/QtGui>
-#include <QtGui/QMainWindow>
 #include "ui_tile_edit_qt.h"
+
+#include <QtCore/QtCore>
 
 class QCheckBox;
 class QPushButton;

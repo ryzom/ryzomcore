@@ -121,7 +121,7 @@ public:
 	/// Releases the network engine
 	static void			releaseNetwork();
 
-	/** Returns the code of the last error that has occured.
+	/** Returns the code of the last error that has occurred.
 	 * Note: This code is platform-dependant. On Unix, it is errno; on Windows it is the Winsock error code.
 	 * See also errorString()
 	 */

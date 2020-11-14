@@ -23,9 +23,13 @@
 #include "nel/3d/landscape_profile.h"
 #include "nel/3d/landscape.h"
 #include "nel/3d/patchdlm_context.h"
+
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -2530,7 +2534,7 @@ void		CTessFace::refreshTesselationGeometry()
 // ***************************************************************************
 bool		CTessFace::updateBindEdge(CTessFace	*&edgeFace, bool &splitWanted)
 {
-	// Return true, when the bind should be Ok, or if a split has occured.
+	// Return true, when the bind should be Ok, or if a split has occurred.
 	// Return false only if pointers are updated, without splits.
 
 	if(edgeFace==NULL)

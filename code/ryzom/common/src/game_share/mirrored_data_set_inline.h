@@ -22,6 +22,7 @@
 #include <nel/misc/types_nl.h>
 //#include <sstream>
 
+#include <limits>
 
 const uint MAX_NB_DATASETS = 4;
 extern bool VerboseWarnWhenMirrorReturningUnknownEntityId;
@@ -204,7 +205,7 @@ inline bool			CMirroredDataSet::propIsList( TPropertyIndex propIndex ) const
  * Display the values of one property for all entities
  */
 template <class T, class CPropLocationClass>
-inline void			CMirroredDataSet::displayPropValues( TPropertyIndex propIndex, T* pt, NLMISC::CLog& log ) const
+inline void			CMirroredDataSet::displayPropValues( TPropertyIndex propIndex, T* /* pt */, NLMISC::CLog& log ) const
 {
 //	std::stringstream ss;
 //	ss << "Mirror property " << propIndex << ":" << endl;
@@ -260,7 +261,7 @@ inline uint16 datasetToBitIndex( CMirroredDataSet *dataSet )
 		if ( DataSetQuickArray[i] == dataSet )
 			return (uint16)i;
 	}
-	return (uint16)~0;
+	return std::numeric_limits<uint16>::max();
 }
 
 

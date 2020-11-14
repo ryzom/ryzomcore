@@ -16,6 +16,16 @@ nlErrorStream = openFile nlErrorFilename mode:"a"
 if nlErrorStream == undefined then
 	nlErrorStream = createFile nlErrorFilename
 
+-- Unhide layers
+fn unhidelayers = 
+(
+	for i = 0 to (LayerManager.count - 1) do
+	(
+		layer = (LayerManager.getLayer i)
+		layer.ishidden = false
+	)
+)
+
 -- Unhide category
 fn unhidecategory =
 (
@@ -217,7 +227,7 @@ catch
 (
 	-- Error
 	nlerror("ERROR Fatal error exporting 'cmb' in folder %MaxSourceDirectory%")
-	nlerror("FAIL Fatal error occured")
+	nlerror("FAIL Fatal error occurred")
 	NelForceQuitRightNow()
 	removeRunningTag = false
 )
@@ -242,7 +252,7 @@ if (removeRunningTag) then
 )
 else
 (
-	nlerror("FAIL One or more issues occured")
+	nlerror("FAIL One or more issues occurred")
 	NelForceQuitRightNow()
 )
 

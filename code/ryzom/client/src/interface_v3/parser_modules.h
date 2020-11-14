@@ -76,4 +76,13 @@ public:
 	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup );
 };
 
+class CLandmarkParser : public CInterfaceParser::IParserModule
+{
+public:
+	CLandmarkParser();
+	~CLandmarkParser();
+
+	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup );
+};
+
 #endif

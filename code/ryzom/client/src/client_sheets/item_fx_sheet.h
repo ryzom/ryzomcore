@@ -42,7 +42,7 @@ public:
 	CItemFXSheet();
 	// build that an external script
 	void build(const NLGEORGES::UFormElm &item, const std::string &prefix);
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 	// access to string ids values
 	const char *getTrail() const;
 	const char *getAdvantageFX() const;
@@ -64,7 +64,7 @@ private:
 		{
 		}
 		void build(const NLGEORGES::UFormElm &item);
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serial(NLMISC::IStream &f);
 	};
 	NLMISC::TSStringId  _Trail;			    // a trail that is displayed when the item is used to attack
 	NLMISC::TSStringId	_AdvantageFX;		// fx to played on some items when the player master it

@@ -1,4 +1,3 @@
-
 #ifndef WORDS_DICDLG_H
 #define WORDS_DICDLG_H
 

@@ -63,7 +63,7 @@
 </template>
 
 
-<template name="edit_box_log" posref="TL TL" text_x="0" text_y="-1" text_ref="BL BL" multi_line="false" x="0" y="0" w="0" h="0" 
+<template name="edit_box_log" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" multi_line="false" x="0" y="0" w="0" h="0" 
  id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true" on_focus="" on_focus_params=""
  enter_loose_focus="true" prompt="&gt;" 
  enter_recover_focus="true"
@@ -75,6 +75,11 @@
  keep="true" 
  max_historic="0"
  fontsize="10" 
+ shadow="true"
+ shadow_x="1"
+ shadow_y="1"
+ shadow_color="0 0 0 255"
+ shadow_outline="false"
  backup_father_container_pos="false" 
  want_return="false"
  color="255 255 255 255"
@@ -93,14 +98,14 @@
 		<view type="bitmap" id="r"  texture="log_eb_r.tga"  posref="MR MR" scale="true" sizeref="h" h="-16" w="8" />
 		
 		<group type="edit_box" sizeref="wh" w="-8" h="-8" id="eb" posref="MM MM" on_focus="#on_focus" on_focus_params="#on_focus_params" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type"  reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" backup_father_container_pos="#backup_father_container_pos">
-			<view id="edit_text" type="text" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="#color" shadow="true" hardtext="" global_color="false"/>
+			<view id="edit_text" type="text" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="#color" shadow="#shadow" shadow_x="#shadow_x" shadow_y="#shadow_y" shadow_color="#shadow_color" shadow_outline="#shadow_outline" hardtext="" global_color="false"/>
 		</group>
 	
 	</group>
 </template>
 
 
-<template name="edit_box_widget_multiline" posref="TL TL" text_x="0" text_y="-1" text_ref="BL BL" child_resize_h="true" multi_line="true" x="0" y="0" w="0" h="0" 
+<template name="edit_box_widget_multiline" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" multi_line="true" x="0" y="0" w="0" h="0" 
  sizeref="" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true"
  enter_loose_focus="true" prompt="&gt;" 
  enter_recover_focus="true"
@@ -111,17 +116,25 @@
  entry_type="text"
  keep="true" 
  max_historic="40"
- fontsize="10" 
+ fontsize="10"
+ fontweight=""
+ fontstyle=""
+ shadow="true"
+ shadow_x="1"
+ shadow_y="1"
+ shadow_color="0 0 0 255"
+ shadow_outline="false"
  backup_father_container_pos="false" 
  want_return="false"
  color="255 255 255 255"
  sizeref_eb="w"
  render_layer="0"
+ multi_min_line="0"
 >
 	<group id="#id" posref="#posref" x="#x" y="#y" posparent="#posparent" child_resize_h="#child_resize_h" sizeref="#sizeref" w="#w" h="#h" render_layer="#render_layer">
 		<group type="edit_box" sizeref="#sizeref_eb" w="-16" id="eb" posref="TL TL" x="8" y="-8" child_resize_h="#child_resize_h" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type"  reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" backup_father_container_pos="#backup_father_container_pos" render_layer="#render_layer">
 			<view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="log_eb_m.tga" inherit_gc_alpha="false" render_layer="#render_layer"/>
-			<view id="edit_text" type="text" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="#color" shadow="true" hardtext="" global_color="false" render_layer="#render_layer"/>
+			<view id="edit_text" type="text" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" multi_min_line="#multi_min_line" fontsize="#fontsize" color="#color" fontweight="#fontweight" fontstyle="#fontstyle" shadow="#shadow" shadow_x="#shadow_x" shadow_y="#shadow_y" shadow_color="#shadow_color" shadow_outline="#shadow_outline" hardtext="" global_color="false" render_layer="#render_layer"/>
 		</group>
 	
 		<!-- border around the list -->
@@ -138,7 +151,7 @@
 
 
 <!-- Alternate look for multi line input -->
-<template name="edit_box_widget_multiline_2" posref="TL TL" text_x="0" text_y="-1" text_ref="BL BL" child_resize_h="true" multi_line="true" x="0" y="0" w="0" h="0" 
+<template name="edit_box_widget_multiline_2" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" multi_line="true" x="0" y="0" w="0" h="0" 
  sizeref="" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true"
  enter_loose_focus="true" prompt="&gt;" 
  enter_recover_focus="true"
@@ -150,6 +163,11 @@
  keep="true" 
  max_historic="40"
  fontsize="10" 
+ shadow="true"
+ shadow_x="1"
+ shadow_y="1"
+ shadow_color="0 0 0 255"
+ shadow_outline="false"
  backup_father_container_pos="false" 
  want_return="false"
  color="255 255 255 255"
@@ -159,7 +177,7 @@
 	<group id="#id" posref="#posref" x="#x" y="#y" posparent="#posparent" child_resize_h="#child_resize_h" sizeref="#sizeref" w="#w" h="#h" render_layer="#render_layer">
 		<group type="edit_box" sizeref="#sizeref_eb" w="-8" id="eb" posref="TL TL" x="4" y="-4" child_resize_h="#child_resize_h" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type"  reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" backup_father_container_pos="#backup_father_container_pos" render_layer="#render_layer">
 			<view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="W_box_blank.tga" inherit_gc_alpha="true" render_layer="#render_layer"/>
-			<view id="edit_text" type="text" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="#color" shadow="true" hardtext="" global_color="false" render_layer="#render_layer"/>
+			<view id="edit_text" type="text" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="#color" shadow="#shadow" shadow_x="#shadow_x" shadow_y="#shadow_y" shadow_color="#shadow_color" shadow_outline="#shadow_outline" hardtext="" global_color="false" render_layer="#render_layer"/>
 		</group>
 	
 		<!-- border around the list -->
@@ -179,7 +197,7 @@
 <style style="log_button" type="text_button" button_type="push_button" 
 		tx_normal="log_but" tx_pushed="log_but_over" tx_over="log_but_over" wmargin="48"
 		color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255"
-		text_y="-3" fontsize="10" shadow="true"
+		text_y="0" fontsize="10" shadow="true"
 		text_color_normal="255 255 255 160" 
 	    text_color_pushed="255 255 255 255" 
 	    text_color_over="255 255 255 255" 
@@ -192,7 +210,7 @@
 <style style="log_std_but" type="text_button" button_type="push_button" 
 		tx_normal="but" tx_pushed="but" tx_over="but_over" wmargin="16" 
 		color="255 255 255 160" col_over="255 255 255 255" col_pushed="255 255 255 255"
-		text_y="-3" fontsize="10" shadow="true"
+		text_y="-1" fontsize="10" shadow="true"
 		text_color_normal="135 243 28 160" 
 	    text_color_pushed="135 243 28 255" 
 	    text_color_over="135 243 28 255" 
@@ -229,7 +247,7 @@
 <style style="text_button_16" type="text_button" button_type="push_button"
 		tx_normal="w_text_button_normal" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over"
 		global_color_normal="true" global_color_over="true" global_color_pushed="true" 
-		text_y="-2" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
+		text_y="0" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
 		text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255" />
 
 
@@ -382,7 +400,7 @@
 <!-- *	EDIT BOX WIDGET  * -->
 <!-- ********************* -->
 
-<template name="edit_box_widget" posref="TL TL" text_x="0" text_y="-1" text_ref="BL BL" child_resize_h="true" multi_line="false" x="0" y="0" w="0" h="0" 
+<template name="edit_box_widget" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" multi_line="false" x="0" y="0" w="0" h="0" 
  sizeref="" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true"
  enter_loose_focus="true" prompt="&gt;" 
  enter_recover_focus="true"
@@ -394,6 +412,11 @@
  keep="true" 
  max_historic="40"
  fontsize="10" 
+ shadow="true"
+ shadow_x="1"
+ shadow_y="1"
+ shadow_color="0 0 0 255"
+ shadow_outline="false"
  backup_father_container_pos="false" 
  want_return="false"
  color="255 255 255 255"
@@ -404,7 +427,7 @@
 		<group type="edit_box" sizeref="#sizeref_eb" w="-16" id="eb" posref="TL TL" x="8" y="-8" child_resize_h="#child_resize_h" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type"  reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" backup_father_container_pos="#backup_father_container_pos" render_layer="#render_layer">
 			<view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="log_eb_m.tga" inherit_gc_alpha="false" render_layer="#render_layer"/>
 			
-			<view id="edit_text" type="text" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="#color" shadow="true" hardtext="" global_color="false"  render_layer="#render_layer"/>
+			<view id="edit_text" type="text" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="#color" shadow="#shadow" shadow_x="#shadow_x" shadow_y="#shadow_y" shadow_color="#shadow_color" shadow_outline="#shadow_outline" hardtext="" global_color="false"  render_layer="#render_layer"/>
 		</group>
 	
 		<!-- border around the list -->
@@ -420,7 +443,7 @@
 </template>
 
 <!-- alternate look for edit box -->
-<template name="edit_box_widget_2" posref="TL TL" text_x="0" text_y="-1" text_ref="BL BL" child_resize_h="true" multi_line="false" x="0" y="0" w="0" h="0" 
+<template name="edit_box_widget_2" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" multi_line="false" x="0" y="0" w="0" h="0" 
  sizeref="" id="eb" posparent="parent" onenter="chat_box_entry" params="" reset_focus_on_hide="true"
  enter_loose_focus="true" prompt="&gt;" 
  enter_recover_focus="true"
@@ -432,6 +455,11 @@
  keep="true" 
  max_historic="40"
  fontsize="10" 
+ shadow="true"
+ shadow_x="1"
+ shadow_y="1"
+ shadow_color="0 0 0 255"
+ shadow_outline="false"
  backup_father_container_pos="false" 
  want_return="false"
  color="255 255 255 255"
@@ -441,7 +469,7 @@
 			
 			<view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="blank.tga" color="255 255 255 0" />
 			
-			<view id="edit_text" type="text" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="#color" shadow="true" hardtext="" global_color="false"/>
+			<view id="edit_text" type="text" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="#color" shadow="#shadow" shadow_x="#shadow_x" shadow_y="#shadow_y" shadow_color="#shadow_color" shadow_outline="#shadow_outline" hardtext="" global_color="false"/>
 		</group>
 	
 		<!-- border around the list -->
@@ -595,8 +623,8 @@
 <template name="button_ok_cancel" id="ok_cancel" ok_text="uittOK" cancel_text="uittCancel" posparent="parent" posref="BM TM" 
 	onclick_ok="" onclick_ok_param="" onclick_cancel="" onclick_cancel_param="" x="0" y="0" keep="true" >
 	<group id="#id" posparent="#posparent" posref="#posref" child_resize_w="true" child_resize_h="true" x="#x" y="#y">
-		<ctrl style="button_ok" x="0" y="0" posref="TL TL" text_y="-2" onclick_l="#onclick_ok" params_l="#onclick_ok_param" hardtext="#ok_text" />
-		<ctrl style="button_cancel" x="4" posparent="ok" text_y="-2" posref ="TR TL" onclick_l="#onclick_cancel" params_l="#onclick_cancel_param" hardtext="#cancel_text" />
+		<ctrl style="button_ok" x="0" y="0" posref="TL TL" text_y="0" onclick_l="#onclick_ok" params_l="#onclick_ok_param" hardtext="#ok_text" />
+		<ctrl style="button_cancel" x="4" posparent="ok" text_y="0" posref ="TR TL" onclick_l="#onclick_cancel" params_l="#onclick_cancel_param" hardtext="#cancel_text" />
 	</group>
 </template>
 
@@ -611,7 +639,7 @@
 <template name="html_text_button" id="" text="" posparent="parent" posref="TL TL"
 	onclick="" onclick_param="" x="0" y="0" keep="true" active="true" wmin="0">
 	<group type="html_input_offset" y_offset="-8" id="#id" posparent="#posparent" posref="#posref" child_resize_w="true" child_resize_h="true" x="#x" y="#y" active="#active">
-		<ctrl style="log_spe_but" id="button" wmin="#wmin" x="0" y="0" posref="TL TL" text_y="-2" onclick_l="#onclick" params_l="#onclick_param" hardtext="#text" color="255 255 255 200"/>
+		<ctrl style="log_spe_but" id="button" wmin="#wmin" x="0" y="0" posref="TL TL" text_y="0" onclick_l="#onclick" params_l="#onclick_param" hardtext="#text" color="255 255 255 200"/>
 	</group>
 </template>
 
@@ -620,7 +648,7 @@
 <template name="html_text_button_look2" id="" text="" posparent="parent" posref="TL TL"
 	onclick="" onclick_param="" x="0" y="0" keep="true" >
 	<group type="html_input_offset" y_offset="-8" id="#id" posparent="#posparent" posref="#posref" child_resize_w="true" child_resize_h="true" x="#x" y="#y">
-		<ctrl style="log_button" id="button" wmin="0" x="0" y="0" posref="TL TL" text_y="-2" onclick_l="#onclick" params_l="#onclick_param" hardtext="#text" color="255 255 255 200"/>
+		<ctrl style="log_button" id="button" wmin="0" x="0" y="0" posref="TL TL" text_y="0" onclick_l="#onclick" params_l="#onclick_param" hardtext="#text" color="255 255 255 200"/>
 	</group>
 </template>
 
@@ -629,7 +657,7 @@
 <template name="html_text_button_look3" id="" text="" posparent="parent" posref="TL TL"
 	onclick="" onclick_param="" x="0" y="0" keep="true" >
 	<group type="html_input_offset" y_offset="-8" id="#id" posparent="#posparent" posref="#posref" child_resize_w="true" child_resize_h="true" x="#x" y="#y">
-		<ctrl style="server_note" id="button" wmin="0" x="0" y="0" posref="TL TL" text_y="-2" onclick_l="#onclick" params_l="#onclick_param" hardtext="#text" color="255 255 255 200"/>
+		<ctrl style="server_note" id="button" wmin="0" x="0" y="0" posref="TL TL" text_y="0" onclick_l="#onclick" params_l="#onclick_param" hardtext="#text" color="255 255 255 200"/>
 	</group>
 </template>
 
@@ -955,6 +983,46 @@
  highlight_over="255 255 255 128"
  force_inside_screen="true"
 />
+	<!-- html <hr> element -->
+	<template name="html_hr"
+			  keep="true">
+		<group id="sep_gr"
+			   posref="ML ML"
+			   sizeref="w"
+			   w="0"
+			   h="0"
+			   child_resize_h="true"
+			   child_resize_hmargin="12">
+			<view type="bitmap"
+				  id="hr"
+				  posref="MM MM"
+				  sizeref="w"
+				  w="-2"
+				  h="2"
+				  inherit_gc_alpha="true"
+				  scale="true"
+				  texture="blank.tga"
+				  global_color="false" />
+		</group>
+	</template>
 
+	<template name="html_form_select_box_menu_widget"
+              keep="true"
+              id="sb">
+      <group type="menu"
+          id="#id"
+          posref="BL TL"
+          x="0"
+		  y="0"
+          mouse_pos="false"
+          space="2"
+          shadow="false"
+		  color="255 255 255 128"
+		  color_over="255 255 255 255"
+		  color_grayed="0 0 0 255"
+          fontsize="12"
+          highlight_over="255 255 255 128"
+          force_inside_screen="false"></group>
+	</template>
 
 </interface_config>

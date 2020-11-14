@@ -36,7 +36,7 @@ NLMISC::CVariable<std::string>	BSFileSubst("backup", "BSFileSubst", "file read/w
 NLMISC::CVariable<bool>	VerboseLog("backup", "VerboseLog", "Activate verbose logging of BS activity", false);
 NLMISC::CVariable<bool>	UseTempFile("backup", "UseTempFile", "Flag the use of temporary file for safe write or append operation", true, true);
 
-extern NLMISC::CVariable<std::string> SaveShardRoot;
+extern NLMISC::CVariable<std::string> SaveShardRootGameShare;
 
 bool	bsstrincmp(const char* s1, const char* s2, int n)
 {
@@ -48,7 +48,7 @@ bool	bsstrincmp(const char* s1, const char* s2, int n)
 
 std::string	getBackupFileName(const std::string& filename)
 {
-	return SaveShardRoot.get() + filename;
+	return SaveShardRootGameShare.get() + filename;
 	/* // BSFilePrefix and BSFileSubst are deprecated
 	if (BSFilePrefix.get().empty())
 		return filename;
@@ -478,7 +478,7 @@ IFileAccess::TReturnCode	CDeleteFile::execute(CFileAccessManager& manager)
 			}
 			while (i <= 10000 && NLMISC::CFile::fileExists(backup));
 
-			fileBackuped = (i <= 10000 && NLMISC::CFile::moveFile(backup.c_str(), (getBackupFileName(Filename)).c_str()));
+			fileBackuped = (i <= 10000 && NLMISC::CFile::moveFile(backup, getBackupFileName(Filename)));
 		}
 		catch (...)
 		{

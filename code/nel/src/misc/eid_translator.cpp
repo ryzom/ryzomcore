@@ -445,7 +445,7 @@ void cbInvalidEntityNamesFilename(const std::string &invalidEntityNamesFilename)
 		return;
 	}
 
-	FILE *fp = fopen (fn.c_str(), "r");
+	FILE *fp = nlfopen (fn, "r");
 	if (fp == NULL)
 	{
 		nlwarning ("EIT: Can't load filename '%s' for invalid entity names filename", fn.c_str());
@@ -587,10 +587,10 @@ void CEntityIdTranslator::getEntityIdInfo (const CEntityId &eid, ucstring &entit
 	if (it == RegisteredEntities.end ())
 	{
 		nlwarning ("EIT: %s is not registered in CEntityIdTranslator", reid.toString().c_str());
-		entityName = "";
+		entityName.clear();
 		entitySlot = -1;
 		uid = std::numeric_limits<uint32>::max();
-		userName = "";
+		userName.clear();
 		online = false;
 	}
 	else

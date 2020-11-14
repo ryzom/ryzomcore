@@ -116,7 +116,7 @@ void CUdpSimSock::sendUDP (const uint8 *buffer, uint32& len, const CInetAddress 
 			CBufferizedOutPacket *bp = new CBufferizedOutPacket (&UdpSock, buffer, len, lag, addr);
 
 			// duplicate the packet
-			if ((float)rand()/(float)(RAND_MAX)*100.0f < _OutPacketDisordering && _BufferizedOutPackets.size() > 0)
+			if ((float)rand()/(float)(RAND_MAX)*100.0f < _OutPacketDisordering && !_BufferizedOutPackets.empty())
 			{
 				CBufferizedOutPacket *bp2 = _BufferizedOutPackets.back();
 

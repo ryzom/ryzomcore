@@ -704,7 +704,9 @@ void CComplexSource::checkup()
 	for (; first != last; ++first)
 	{
 		USource *source = *first;
-		if (source != NULL && source->getSound()->getLooping() && !source->isPlaying())
+		if (source == NULL)
+			continue;
+		if (source->getSound()->getLooping() && !source->isPlaying())
 			source->play();
 		if (source->getSound()->getSoundType() != CSound::SOUND_SIMPLE)
 			static_cast<CSourceCommon*>(source)->checkup();

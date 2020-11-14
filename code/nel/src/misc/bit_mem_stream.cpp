@@ -836,7 +836,7 @@ std::string		CBitMemStream::getSerialItem( const TBMSSerialInfo& serialItem )
 			{
 				uint64 u;
 				serial( u, serialItem.BitSize );
-				s = NLMISC::toString( "%"NL_I64"u", u );
+				s = NLMISC::toString( "%" NL_I64 "u", u );
 				break;
 			}
 		case TBMSSerialInfo::F: // what about double?

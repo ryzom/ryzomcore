@@ -1,0 +1,3 @@
+usr/lib/*/libnel*.so.*
+usr/lib/*/nel/libnel_drv_openal.so
+usr/lib/*/nel/libnel_drv_opengl.so

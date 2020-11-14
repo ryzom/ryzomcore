@@ -163,7 +163,7 @@ public:
 	/** There is (OrderS/2+1) * (OrderT/2+1) tiles light influence.
 	 *	It indicates which static pointLight influence each corner of a TessBlock (block of 2*2 tiles).
 	 *
-	 *	If size()==0, suppose no light influence. but CZone::retrieve() always return a
+	 *	If empty(), suppose no light influence. but CZone::retrieve() always return a
 	 *	size() == (OrderS/2+1) * (OrderT/2+1).
 	 *
 	 * They are stored in line first order, from S=0 to 1, and T=0 to 1.

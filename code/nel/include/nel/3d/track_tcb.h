@@ -218,7 +218,7 @@ protected:
 			date*= previous->OODeltaTime;
 			NLMISC::clamp(date, 0,1);
 
-			date = this->ease(previous, date);
+			date = this->ease(previous, (float)date);
 
 			float hb[4];
 			this->computeHermiteBasis(date, hb);

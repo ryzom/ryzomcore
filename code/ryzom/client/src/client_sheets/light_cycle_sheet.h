@@ -38,7 +38,7 @@ public:
 	CLightCycleSheet();
 	// from CEntitySheet
 	virtual void build(const NLGEORGES::UFormElm &item);
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 };
 

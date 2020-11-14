@@ -19,6 +19,9 @@
 #include "nel/3d/u_camera.h"
 #include "nel/3d/camera.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

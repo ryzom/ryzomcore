@@ -161,21 +161,20 @@ void LoadSceneScript (const char *ScriptName, CScene* pScene, vector<SDispCS> &D
 		{
 			if (nLastNbPlus >= nNbPlus)
 			for (int i = 0; i < ((nLastNbPlus-nNbPlus)+1); ++i)
-				if (pile.size() > 0)
+				if (!pile.empty())
 					pile.pop_back();
 		
 			nLastNbPlus = nNbPlus;
 
 			CInstanceGroup *father = pScene->getGlobalInstanceGroup();
 			
-			if (pile.size() > 0)
+			if (!pile.empty())
 				father = pile.back();
 		
 			CInstanceGroup *ITemp = LoadInstanceGroup (nameIG);
 			if (ITemp != NULL)
 			{
 				SDispCS dcsTemp;
-				dcsTemp.Name = "";
 				for (sint32 i = 0; i < (1+nNbPlus); ++i)
 					dcsTemp.Name += "   ";
 				dcsTemp.Name += nameIG;
@@ -339,7 +338,7 @@ int main(int argc, char **argv)
 					}
 					++itAcc;
 				}
-				if ((vCluster.size() == 0) && (DispCS[0].pIG == pCurIG))
+				if (vCluster.empty() && (DispCS[0].pIG == pCurIG))
 				{
 					vCluster.push_back (pClipTrav->RootCluster);
 				}

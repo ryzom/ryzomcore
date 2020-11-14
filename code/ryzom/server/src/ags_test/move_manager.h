@@ -95,7 +95,7 @@ public:
 	{
 		if (PrimZoneMap.find(primZone.getName()) == PrimZoneMap.end())
 		{
-			PrimZoneMap.insert(std::make_pair<std::string, NLLIGO::CPrimZone>(primZone.getName(), primZone));
+			PrimZoneMap.insert(std::make_pair(primZone.getName(), primZone));
 			nlinfo("Using PrimZone '%s'", primZone.getName().c_str());
 		}
 		else

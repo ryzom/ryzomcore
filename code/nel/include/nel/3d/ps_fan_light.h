@@ -47,7 +47,7 @@ public:
 	CPSFanLight(uint32 nbFans = 7);
 	/// Dtor
 	~CPSFanLight();
-	void				serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void				serial(NLMISC::IStream &f);
 	//@}
 
 	// Set the number of fans used for drawing (minimum is 3, maximum is 128)

@@ -55,9 +55,7 @@ namespace NLGUI
 		static void forceLink();
 
 	protected:
-
-		sint64 getVal() { if (_Modulo == 0) return (_Number.getSInt64() / _Divisor);
-									else	return (_Number.getSInt64() / _Divisor)%_Modulo; }
+		sint64 getVal();
 
 	protected:
 

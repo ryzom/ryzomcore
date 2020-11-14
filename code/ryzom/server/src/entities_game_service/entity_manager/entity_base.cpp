@@ -120,7 +120,7 @@ CEquipmentSlots::CEquipmentSlots()
 // serial CEquipmentSlots properties:
 //
 //-----------------------------------------------
-void CEquipmentSlots::serial( NLMISC::IStream &f ) throw(NLMISC::EStream)
+void CEquipmentSlots::serial( NLMISC::IStream &f )
 {
 	f.serial( Headdress );
 	f.serial( Head );
@@ -394,7 +394,7 @@ void CEntityBase::setTarget( const NLMISC::CEntityId& targetId, bool sendMessage
 // lookupStat :
 //
 //---------------------------------------------------
-sint32& CEntityBase::lookupStat( const string& var ) throw (CEntityBase::EInvalidStat)
+sint32& CEntityBase::lookupStat( const string& var)
 {
 	// TODO Alain: optimize this...
 	uint i;
@@ -562,7 +562,7 @@ sint32& CEntityBase::lookupStat( const string& var ) throw (CEntityBase::EInvali
 // lookupStat for Characteristics:
 //
 //---------------------------------------------------
-sint32& CEntityBase::lookupStat( CHARACTERISTICS::TCharacteristics c, SCharacteristicsAndScores::TCharacteristicsAndScoreSubType st ) throw (CEntityBase::EInvalidStat)
+sint32& CEntityBase::lookupStat( CHARACTERISTICS::TCharacteristics c, SCharacteristicsAndScores::TCharacteristicsAndScoreSubType st)
 {
 	if( c < CHARACTERISTICS::NUM_CHARACTERISTICS )
 	{
@@ -601,7 +601,7 @@ sint32& CEntityBase::lookupStat( CHARACTERISTICS::TCharacteristics c, SCharacter
 // lookupStat for Scores:
 //
 //---------------------------------------------------
-sint32& CEntityBase::lookupStat( SCORES::TScores score, SCharacteristicsAndScores::TCharacteristicsAndScoreSubType st ) throw (CEntityBase::EInvalidStat)
+sint32& CEntityBase::lookupStat( SCORES::TScores score, SCharacteristicsAndScores::TCharacteristicsAndScoreSubType st)
 {
 	if( score < SCORES::NUM_SCORES )
 	{
@@ -640,7 +640,7 @@ sint32& CEntityBase::lookupStat( SCORES::TScores score, SCharacteristicsAndScore
 // lookupStat for Skills:
 //
 //---------------------------------------------------
-sint32& CEntityBase::lookupStat( SKILLS::ESkills skill, SSkill::ESkillSubType st ) throw (CEntityBase::EInvalidStat)
+sint32& CEntityBase::lookupStat( SKILLS::ESkills skill, SSkill::ESkillSubType st)
 {
 /*	enum ESkillSubType 
 	{ 
@@ -675,7 +675,7 @@ sint32& CEntityBase::lookupStat( SKILLS::ESkills skill, SSkill::ESkillSubType st
 // lookupStat for SpecialModifiers:
 //
 //---------------------------------------------------
-sint32& CEntityBase::lookupStat( CSpecialModifiers::ESpecialModifiers sm ) throw (CEntityBase::EInvalidStat)
+sint32& CEntityBase::lookupStat( CSpecialModifiers::ESpecialModifiers sm)
 {
 	switch( sm )
 	{
@@ -738,7 +738,7 @@ sint32& CEntityBase::lookupStat( CSpecialModifiers::ESpecialModifiers sm ) throw
 	throw CEntityBase::EInvalidStat() ;
 } // lookupStat //
 
-const sint32& CEntityBase::lookupStat( CSpecialModifiers::ESpecialModifiers sm ) const throw (CEntityBase::EInvalidStat)
+const sint32& CEntityBase::lookupStat( CSpecialModifiers::ESpecialModifiers sm) const
 {
 	return const_cast<CEntityBase*>(this)->lookupStat(sm);
 }
@@ -1450,7 +1450,7 @@ void CEntityBase::setBehaviour( MBEHAV::CBehaviour behaviour, bool forceUpdate )
 //---------------------------------------------------
 // serial: reading off-mirror, writing from mirror
 //---------------------------------------------------
-void CEntityBase::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CEntityBase::serial(NLMISC::IStream &f)
 {
 	f.xmlPush("CEntityBasePart");
 	f.xmlPush("CEntityBasePartVersion");

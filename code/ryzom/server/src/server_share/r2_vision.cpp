@@ -147,8 +147,8 @@ namespace R2_VISION
 
 	void CUniverse::createInstance(uint32 aiInstance, uint32 groupId)
 	{
-		// just ignore attempts to create the ~0u instance
-		if (aiInstance==~0u)
+		// just ignore attempts to create the std::numeric_limits<uint32>::max() instance
+		if (aiInstance==std::numeric_limits<uint32>::max())
 		{
 			return;
 		}
@@ -172,8 +172,8 @@ namespace R2_VISION
 
 	void CUniverse::removeInstance(uint32 aiInstance)
 	{
-		// just ignore attempts to remove the ~0u instance
-		if (aiInstance==~0u)
+		// just ignore attempts to remove the std::numeric_limits<uint32>::max() instance
+		if (aiInstance==std::numeric_limits<uint32>::max())
 		{
 			return;
 		}
@@ -227,7 +227,7 @@ namespace R2_VISION
 		SUniverseEntity& theEntity= _Entities[row];
 
 		// if the entity was already allocated then remove it
-		if (theEntity.AIInstance == ~0u) { return; }
+		if (theEntity.AIInstance == std::numeric_limits<uint32>::max()) { return; }
 
 		if ( theEntity.ViewerRecord)
 		{
@@ -325,8 +325,8 @@ namespace R2_VISION
 		BOMB_IF(row>=_Entities.size(),NLMISC::toString("Ignoring attempt to set entity position with invalid row value: %d",row),return);
 
 		// ensure that the new AIInstance exists
-		BOMB_IF(aiInstance!=~0u && (aiInstance>=_Instances.size() || _Instances[aiInstance]==NULL),
-			NLMISC::toString("ERROR: Failed to add entity %d to un-initialised instance: %d",row,aiInstance),aiInstance=~0u);
+		BOMB_IF(aiInstance!=std::numeric_limits<uint32>::max() && (aiInstance>=_Instances.size() || _Instances[aiInstance]==NULL),
+			NLMISC::toString("ERROR: Failed to add entity %d to un-initialised instance: %d",row,aiInstance),aiInstance=std::numeric_limits<uint32>::max());
 
 		// delegate to workhorse routine (converting y coordinate to +ve axis)
 		_teleportEntity(dataSetRow,aiInstance,x,-y,invisibilityLevel);
@@ -429,7 +429,7 @@ namespace R2_VISION
 		SUniverseEntity& theEntity= _Entities[row];
 
 		// if the entity was already allocated then remove it
-		if (theEntity.AIInstance!=~0u)
+		if (theEntity.AIInstance!=std::numeric_limits<uint32>::max())
 		{
 			_removeEntity(dataSetRow);
 		}
@@ -455,7 +455,7 @@ namespace R2_VISION
 		{
 			// detach the entity from the instance it's currently in
 			_Instances[theEntity.AIInstance]->removeEntity(theEntity);
-			theEntity.AIInstance= ~0u;
+			theEntity.AIInstance= std::numeric_limits<uint32>::max();
 			theEntity.ViewerRecord= NULL;
 		}
 	}
@@ -466,8 +466,8 @@ namespace R2_VISION
 		SUniverseEntity& theEntity= _Entities[dataSetRow.getIndex()];
 
 		#ifdef NL_DEBUG
-		nlassert(theEntity.AIInstance==~0u || theEntity.AIInstance<_Instances.size());
-		nlassert(theEntity.AIInstance==~0u || _Instances[theEntity.AIInstance]!=NULL);
+		nlassert(theEntity.AIInstance==std::numeric_limits<uint32>::max() || theEntity.AIInstance<_Instances.size());
+		nlassert(theEntity.AIInstance==std::numeric_limits<uint32>::max() || _Instances[theEntity.AIInstance]!=NULL);
 		#endif
 
 		// if the entity is a viewer then move the view coordinates
@@ -477,7 +477,7 @@ namespace R2_VISION
 		}
 
 		// if the entity is not currently in an AIInstance then stop here
-		if (theEntity.AIInstance==~0u)
+		if (theEntity.AIInstance==std::numeric_limits<uint32>::max())
 			return;
 		
 		// set the instance entity record position
@@ -498,10 +498,10 @@ namespace R2_VISION
 		// set the new AIInstance value for the entity
 		theEntity.AIInstance= aiInstance; 
 
-		// if the aiInstance is set to ~0u (a reserved value) then we stop here
-		if (aiInstance==~0u)
+		// if the aiInstance is set to std::numeric_limits<uint32>::max() (a reserved value) then we stop here
+		if (aiInstance==std::numeric_limits<uint32>::max())
 		{
-			// clear out the vision for an entity in aiInstance ~0u
+			// clear out the vision for an entity in aiInstance std::numeric_limits<uint32>::max()
 			if (getEntity(dataSetRow)->ViewerRecord!=NULL)
 			{
 				TVision emptyVision(2);
@@ -785,7 +785,7 @@ namespace R2_VISION
 			// locate the old vision group (the one we're allocated to before isolation)
 			uint32 visionId= viewerRecord->VisionId;
 			NLMISC::CSmartPtr<CVisionGroup>& oldVisionGroup= _VisionGroups[visionId];
-			BOMB_IF(visionId>=_VisionGroups.size() ||oldVisionGroup==NULL,"Trying to remove entity from vision group with unknown vision id",viewerRecord->VisionId=~0u;return);
+			BOMB_IF(visionId>=_VisionGroups.size() ||oldVisionGroup==NULL,"Trying to remove entity from vision group with unknown vision id",viewerRecord->VisionId=std::numeric_limits<uint32>::max();return);
 
 			// if we're the only viewer then already isolated so just return
 			if (oldVisionGroup->numViewers()==1)
@@ -830,7 +830,7 @@ namespace R2_VISION
 		if (viewerRecord!=NULL)
 		{
 			uint32 visionId= viewerRecord->VisionId;
-			BOMB_IF(visionId>=_VisionGroups.size() ||_VisionGroups[visionId]==NULL,"Trying to remove entity with unknown vision id",viewerRecord->VisionId=~0u;return);
+			BOMB_IF(visionId>=_VisionGroups.size() ||_VisionGroups[visionId]==NULL,"Trying to remove entity with unknown vision id",viewerRecord->VisionId=std::numeric_limits<uint32>::max();return);
 			_VisionGroups[visionId]->removeViewer(viewerRecord);
 		}
 
@@ -847,8 +847,8 @@ namespace R2_VISION
 		_Entities.pop_back();
 
 		// invalidate the InstanceIndex value for the entity we just removed
-		entity.InstanceIndex=~0u;
-		entity.AIInstance=~0u;
+		entity.InstanceIndex=std::numeric_limits<uint32>::max();
+		entity.AIInstance=std::numeric_limits<uint32>::max();
 	}
 
 	void CInstance::release()
@@ -899,11 +899,11 @@ namespace R2_VISION
 
 	CVisionGroup::CVisionGroup()
 	{
-		_XMin=~0u;
+		_XMin=std::numeric_limits<uint32>::max();
 		_XMax=0;
-		_YMin=~0u;
+		_YMin=std::numeric_limits<uint32>::max();
 		_YMax=0;
-		_VisionId=~0u;
+		_VisionId=std::numeric_limits<uint32>::max();
 		// setup the dummy entry in the vision buffer
 		_Vision.reserve(AllocatedVisionVectorSize);
 		vectAppend(_Vision).DataSetRow= ZeroDataSetRow;
@@ -923,8 +923,8 @@ namespace R2_VISION
 		// ensure that the viewer wasn't aleady attached to another vision group
 		#ifdef NL_DEBUG
 		nlassert(viewer!=NULL);
-		nlassert(viewer->VisionId==~0u);
-		nlassert(viewer->VisionIndex==~0u);
+		nlassert(viewer->VisionId==std::numeric_limits<uint32>::max());
+		nlassert(viewer->VisionIndex==std::numeric_limits<uint32>::max());
 		#endif
 		TEST(("add viewer %d to grp %d",viewer->getViewerId().getIndex(),_VisionId));
 
@@ -961,8 +961,8 @@ namespace R2_VISION
 
 		// pop the back entry off the vector and flag oursleves as unused
 		_Viewers.pop_back();
-		viewer->VisionId= ~0u;
-		viewer->VisionIndex= ~0u;
+		viewer->VisionId= std::numeric_limits<uint32>::max();
+		viewer->VisionIndex= std::numeric_limits<uint32>::max();
 
 		// NOTE: after this the boundary may be out of date - this will be recalculated at the next
 		// vision update so we don't take time to do it here
@@ -1171,8 +1171,8 @@ namespace R2_VISION
 			return;
 
 		// calculate the bouding box for our viewers
-		uint32 xmin= ~0u;
-		uint32 ymin= ~0u;
+		uint32 xmin= std::numeric_limits<uint32>::max();
+		uint32 ymin= std::numeric_limits<uint32>::max();
 		uint32 xmax= 0;
 		uint32 ymax= 0;
 		for (uint32 i=(uint32)_Viewers.size();i--;)
@@ -1247,7 +1247,7 @@ namespace R2_VISION
 		// reset the vision vector and add in the dummy entry with DataSetRow=0
 		_Vision.resize(AllocatedVisionVectorSize);
 		_Vision[0].DataSetRow= ZeroDataSetRow;
-		_Vision[0].VisionSlot= ~0u; 
+		_Vision[0].VisionSlot= std::numeric_limits<uint32>::max(); 
 
 		// setup a vision slot iterator for filling in the vision buffer (=1 to skip passed the dummy entry)
 		uint32 nextVisionSlot=1;
@@ -1380,8 +1380,8 @@ namespace R2_VISION
 	
 	CViewer::CViewer()
 	{
-		VisionId=~0u;
-		VisionIndex=~0u;
+		VisionId=std::numeric_limits<uint32>::max();
+		VisionIndex=std::numeric_limits<uint32>::max();
 		_VisionResetCount= 0;
 	}
 
@@ -1399,7 +1399,7 @@ namespace R2_VISION
 
 		// setup the dummy entry with DataSetRow=0
 		_Vision[0].DataSetRow= ZeroDataSetRow;
-		_Vision[0].VisionSlot= ~0u; 
+		_Vision[0].VisionSlot= std::numeric_limits<uint32>::max(); 
 
 		// setup the vision slots in reverse order from 254..0 (because they're popped from the back)
 		_FreeVisionSlots.clear();

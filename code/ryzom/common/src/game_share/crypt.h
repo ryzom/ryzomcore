@@ -32,7 +32,7 @@ class CCrypt
 public:
 
 	/// Crypts password using salt
-	static std::string	crypt(const std::string& password, const std::string& salt);
+	static std::string crypt(const std::string& password, const std::string& salt);
 
 };
 

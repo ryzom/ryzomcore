@@ -85,8 +85,7 @@ namespace NLNET
 		_PluggedModules.removeWithB(pluggedModule);
 	}
 
-	void CModuleSocket::sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message )
-			throw (EModuleNotPluggedHere)
+	void CModuleSocket::sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message)
 	{
 		TPluggedModules::TBToAMap::const_iterator it(_PluggedModules.getBToAMap().find(senderModule));
 		if (it == _PluggedModules.getBToAMap().end())
@@ -100,7 +99,6 @@ namespace NLNET
 	}
 
 	void CModuleSocket::broadcastModuleMessage(IModule *senderModule, const NLNET::CMessage &message)
-			throw (EModuleNotPluggedHere)
 	{
 		TPluggedModules::TBToAMap::const_iterator it(_PluggedModules.getBToAMap().find(senderModule));
 		if (it == _PluggedModules.getBToAMap().end())

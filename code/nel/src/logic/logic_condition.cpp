@@ -15,11 +15,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "nel/misc/o_xml.h"
-
+#include "stdlogic.h"
 #include "nel/logic/logic_condition.h"
+
 #include "nel/logic/logic_variable.h"
 #include "nel/logic/logic_state_machine.h"
+
+#include "nel/misc/o_xml.h"
 
 using namespace NLMISC;
 using namespace std;
@@ -335,7 +337,7 @@ bool CLogicConditionNode::testLogic()
 	}
 
 	// if there's no subtree we assess the subtree is true
-	if( _Nodes.size() == 0 )
+	if( _Nodes.empty() )
 	{
 		return true;
 	}

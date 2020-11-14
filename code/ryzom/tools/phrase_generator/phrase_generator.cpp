@@ -33,6 +33,7 @@
 #include "nel/misc/file.h"
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/command.h"
+#include "nel/misc/common.h"
 #include "nel/misc/path.h"
 #include <nel/misc/sstring.h>
 #include <nel/misc/diff_tool.h>
@@ -275,7 +276,7 @@ void	loadCSVFile( const char *filename, TDeliveryCallback deliveryCallback )
 	vector<string> args;
 	vector<string>::iterator iarg;
 
-	if ( (file = fopen( filename, "r" )) == NULL )
+	if ( (file = nlfopen( filename, "r" )) == NULL )
 	{
 		nlwarning( "Can't find file %s", filename );
 	}
@@ -1282,7 +1283,7 @@ void	usage(char *argv0, FILE *out)
 //-----------------------------------------------
 void makeIndexFile()
 {
-	FILE * indexFile = fopen( ("_" + DocFileNameRoot + "_INDEX.html").c_str(), "wt" );
+	FILE * indexFile = nlfopen( "_" + DocFileNameRoot + "_INDEX.html", "wt" );
 	if( indexFile )
 	{
 		fprintf( indexFile, ("<html><head>\n<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n<title>Summary of " + DocFileNameRoot + "</title>\n</head><body>\n").c_str() );
@@ -1295,7 +1296,7 @@ void makeIndexFile()
 			for ( uint l=0; l!=26; ++l )
 			{
 				string filename = toString( "%s_%c.html", DocFileName.c_str(), 'a'+l );
-				PhraseDocFiles[l] = fopen( filename.c_str(), "wt" );
+				PhraseDocFiles[l] = nlfopen( filename, "wt" );
 				fprintf( PhraseDocFiles[l], ("<html><head>\n<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n<title>" + DocFileName + toString( " - %c", (char)('A'+l) ) + "</title>\n</head><body>\n").c_str() );
 				fprintf( indexFile, ("<A HREF=\"" + filename + "\">" + (char)('A'+l) + "</A> ").c_str() );
 			}
@@ -1304,7 +1305,7 @@ void makeIndexFile()
 		{
 			// One single HTML file
 			fprintf( indexFile, ("<A HREF=\"" + DocFileName + ".html\">Go to action details</A>").c_str() );
-			PhraseDocFiles[0] = fopen( (DocFileName + ".html").c_str(), "wt" );
+			PhraseDocFiles[0] = nlfopen( DocFileName + ".html", "wt" );
 			fprintf( PhraseDocFiles[0], ("<html><head>\n<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n<title>" + DocFileName + "</title>\n</head><body>\n").c_str() );
 			for ( uint l=1; l!=26; ++l )
 			{
@@ -1393,7 +1394,7 @@ void makeIndexFile()
 void makeActionsBySkillGroupFile()
 {
 	// progression by skill
-	FILE * actionsBySkillGroupFile = fopen( (DocFileName + "__by_skill.html").c_str(), "wt" );
+	FILE * actionsBySkillGroupFile = nlfopen( DocFileName + "__by_skill.html", "wt" );
 	if( actionsBySkillGroupFile )
 	{
 		fprintf( actionsBySkillGroupFile, ("<html><head>\n<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n<title>Progression of " + DocFileName + "</title>\n</head><body>\n").c_str() );
@@ -1489,7 +1490,7 @@ void makeActionsBySkillValueFile()
 //-----------------------------------------------
 void makeActionsBySkillValueDetailFile()
 {
-	FILE * actionsBySkillValueDetailFile = fopen( (DocFileName + "__by_skill_value_detail.html").c_str(), "wt" );
+	FILE * actionsBySkillValueDetailFile = nlfopen( DocFileName + "__by_skill_value_detail.html", "wt" );
 	if( actionsBySkillValueDetailFile )
 	{
 		fprintf( actionsBySkillValueDetailFile, ("<html><head>\n<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n<title>Progression of " + DocFileName + "</title>\n</head><body>\n").c_str() );
@@ -1627,9 +1628,9 @@ void makeSkillTreeFile( char filter, string skillFamily, bool withTraduction )
 	string filenameWithTraduction = skillFamily + "_skill_tree_detailed.html";
 	FILE * skillTreeFile;
 	if( withTraduction )
-		skillTreeFile = fopen( filenameWithTraduction.c_str(), "wt" );
+		skillTreeFile = nlfopen( filenameWithTraduction, "wt" );
 	else
-		skillTreeFile = fopen( filename.c_str(), "wt" );
+		skillTreeFile = nlfopen( filename, "wt" );
 	fprintf( skillTreeFile,"<html><head>\n");
 	fprintf( skillTreeFile,"<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n");
 	fprintf( skillTreeFile,"<title>SKILL TREE ( %s )</title>\n",skillFamily.c_str());
@@ -1980,7 +1981,7 @@ int main(int argc, char* argv[])
 		// write header and title bar
 		string filename;
 		filename = DocFileNameRoot + "_m.html";
-		FILE * brickPhraseDocFile_m = fopen( filename.c_str(), "wt" );
+		FILE * brickPhraseDocFile_m = nlfopen( filename, "wt" );
 		fprintf( brickPhraseDocFile_m,"<html><head>\n");
 		fprintf( brickPhraseDocFile_m,"<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n");
 		fprintf( brickPhraseDocFile_m,"<title>Brick phrases</title>\n");
@@ -1988,7 +1989,7 @@ int main(int argc, char* argv[])
 		fprintf( brickPhraseDocFile_m,"<table cellpadding=\"0\" cellspacing=\"1\" border=\"0\" style=\"text-align: left;\"><tbody>\n");
 
 		filename = DocFileNameRoot + "_c.html";
-		FILE * brickPhraseDocFile_c = fopen( filename.c_str(), "wt" );
+		FILE * brickPhraseDocFile_c = nlfopen( filename, "wt" );
 		fprintf( brickPhraseDocFile_c,"<html><head>\n");
 		fprintf( brickPhraseDocFile_c,"<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n");
 		fprintf( brickPhraseDocFile_c,"<title>Brick phrases</title>\n");
@@ -1996,7 +1997,7 @@ int main(int argc, char* argv[])
 		fprintf( brickPhraseDocFile_c,"<table cellpadding=\"0\" cellspacing=\"1\" border=\"0\" style=\"text-align: left;\"><tbody>\n");
 
 		filename = DocFileNameRoot + "_o.html";
-		FILE * brickPhraseDocFile_o = fopen( filename.c_str(), "wt" );
+		FILE * brickPhraseDocFile_o = nlfopen( filename, "wt" );
 		fprintf( brickPhraseDocFile_o,"<html><head>\n");
 		fprintf( brickPhraseDocFile_o,"<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n");
 		fprintf( brickPhraseDocFile_o,"<title>Brick phrases</title>\n");
@@ -2004,7 +2005,7 @@ int main(int argc, char* argv[])
 		fprintf( brickPhraseDocFile_o,"<table cellpadding=\"0\" cellspacing=\"1\" border=\"0\" style=\"text-align: left;\"><tbody>\n");
 
 		filename = DocFileNameRoot + "_p.html";
-		FILE * brickPhraseDocFile_p = fopen( filename.c_str(), "wt" );
+		FILE * brickPhraseDocFile_p = nlfopen( filename, "wt" );
 		fprintf( brickPhraseDocFile_p,"<html><head>\n");
 		fprintf( brickPhraseDocFile_p,"<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n");
 		fprintf( brickPhraseDocFile_p,"<title>Brick phrases</title>\n");
@@ -2012,7 +2013,7 @@ int main(int argc, char* argv[])
 		fprintf( brickPhraseDocFile_p,"<table cellpadding=\"0\" cellspacing=\"1\" border=\"0\" style=\"text-align: left;\"><tbody>\n");
 
 		filename = DocFileNameRoot + "_e.html";
-		FILE * brickPhraseDocFile_e = fopen( filename.c_str(), "wt" );
+		FILE * brickPhraseDocFile_e = nlfopen( filename, "wt" );
 		fprintf( brickPhraseDocFile_e,"<html><head>\n");
 		fprintf( brickPhraseDocFile_e,"<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n");
 		fprintf( brickPhraseDocFile_e,"<title>Brick phrases</title>\n");
@@ -2082,7 +2083,7 @@ int main(int argc, char* argv[])
 
 		// write header and title bar
 		filename = DocFileNameRoot + ".html";
-		FILE * brickDocFile = fopen( filename.c_str(), "wt" );
+		FILE * brickDocFile = nlfopen( filename, "wt" );
 		fprintf( brickDocFile,"<html><head>\n");
 		fprintf( brickDocFile,"<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n");
 		fprintf( brickDocFile,"<title>Bricks infos</title>\n");
@@ -2197,7 +2198,7 @@ int main(int argc, char* argv[])
 
 		// write header and title bar
 		filename = DocFileNameRoot + "_name.html";
-		FILE * brickNameDocFile = fopen( filename.c_str(), "wt" );
+		FILE * brickNameDocFile = nlfopen( filename, "wt" );
 		fprintf( brickNameDocFile,"<html><head>\n");
 		fprintf( brickNameDocFile,"<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n");
 		fprintf( brickNameDocFile,"<title>Bricks infos</title>\n");
@@ -2332,7 +2333,7 @@ int main(int argc, char* argv[])
 
 		// write header and title bar
 		filename = DocFileNameRoot + "_family.html";
-		FILE * brickFamilyDocFile = fopen( filename.c_str(), "wt" );
+		FILE * brickFamilyDocFile = nlfopen( filename, "wt" );
 		fprintf( brickFamilyDocFile,"<html><head>\n");
 		fprintf( brickFamilyDocFile,"<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n");
 		fprintf( brickFamilyDocFile,"<title>Bricks infos</title>\n");
@@ -2464,7 +2465,7 @@ int main(int argc, char* argv[])
 
 		// write header and title bar
 		filename = DocFileNameRoot + "_required_skill_value.html";
-		FILE * brickRequiredDocFile = fopen( filename.c_str(), "wt" );
+		FILE * brickRequiredDocFile = nlfopen( filename, "wt" );
 		fprintf( brickRequiredDocFile,"<html><head>\n");
 		fprintf( brickRequiredDocFile,"<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n");
 		fprintf( brickRequiredDocFile,"<title>Bricks infos</title>\n");
@@ -2607,7 +2608,7 @@ int main(int argc, char* argv[])
 
 		// write header and title bar
 		filename = DocFileNameRoot + "_learn_skill_value.html";
-		FILE * brickLearnDocFile = fopen( filename.c_str(), "wt" );
+		FILE * brickLearnDocFile = nlfopen( filename, "wt" );
 		fprintf( brickLearnDocFile,"<html><head>\n");
 		fprintf( brickLearnDocFile,"<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n");
 		fprintf( brickLearnDocFile,"<title>Bricks infos</title>\n");

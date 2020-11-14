@@ -157,7 +157,7 @@ void CMemoryComboBox::pushString (const std::string &str)
 	if (RegCreateKey (HKEY_CURRENT_USER, RegisterAdress.c_str (), &hKey) == ERROR_SUCCESS)
 	{
 		// Set the value
-		RegSetValue (hKey, "0", REG_SZ, str.c_str (), str.size ());
+		RegSetValue (hKey, _T("0"), REG_SZ, str.c_str (), str.size ());
 
 		// Close
 		RegCloseKey (hKey);
@@ -366,14 +366,14 @@ void CMemoryComboBox::pushString ()
 {
 	CString str;
 	GetWindowText (str);
-	if (str != "")
+	if (!str.IsEmpty())
 	{
 		// Look for an existing static 
 		uint i;
 		for (i=0; i<StaticStrings.size(); i++)
 		{
 			// Get the value
-			if (StaticStrings[i] == (const char*)str)
+			if (StaticStrings[i] == tStrToUtf8(str))
 				break;
 		}
 
@@ -388,7 +388,7 @@ void CMemoryComboBox::pushString ()
 				std::string value;
 				if (getMemory (i, value))
 				{
-					if (value == (const char*)str)
+					if (value == tStrToUtf8(str))
 					{
 						i++;
 						break;
@@ -401,7 +401,7 @@ void CMemoryComboBox::pushString ()
 			{
 				// String found ?
 				scrollDown (0, i);
-				pushString ((const char*)str);
+				pushString (tStrToUtf8(str));
 			}
 
 			// Look for an existing value
@@ -413,7 +413,7 @@ void CMemoryComboBox::pushString ()
 				if(_ComboBox.GetLBTextLen(i)>0)
 				{
 					_ComboBox.GetLBText( i, value);
-					if (value == (const char*)str)
+					if (value == str)
 						break;
 				}
 			}
@@ -443,7 +443,7 @@ void CMemoryComboBox::refreshStrings ()
 	int count = Commands.size();
 	for (i=0; i<StaticStrings.size(); i++)
 	{
-		_ComboBox.InsertString (count, StaticStrings[i].c_str ());
+		_ComboBox.InsertString (count, utf8ToTStr(StaticStrings[i]));
 		count++;
 	}
 
@@ -452,7 +452,7 @@ void CMemoryComboBox::refreshStrings ()
 		std::string ret;
 		if (getMemory (i, ret))
 		{
-			_ComboBox.InsertString (count, ret.c_str ());
+			_ComboBox.InsertString (count, utf8ToTStr(ret));
 			count++;
 		}
 	}
@@ -460,7 +460,7 @@ void CMemoryComboBox::refreshStrings ()
 
 // ***************************************************************************
 
-void CMemoryComboBox::setRegisterAdress (const char *registerAdress)
+void CMemoryComboBox::setRegisterAdress(const std::string &registerAdress)
 {
 	RegisterAdress = registerAdress;
 	refreshStrings ();
@@ -468,7 +468,7 @@ void CMemoryComboBox::setRegisterAdress (const char *registerAdress)
 
 // ***************************************************************************
 
-void CMemoryComboBox::addCommand (const char* commandLabel, uint commandId)
+void CMemoryComboBox::addCommand (const std::string &commandLabel, uint commandId)
 {
 	Commands.push_back (CCommand ());
 	Commands[Commands.size()-1].Label = commandLabel;
@@ -491,7 +491,7 @@ void CMemoryComboBox::clearCommand ()
 
 void CMemoryComboBox::addLabelCommands (uint i)
 {
-	_ComboBox.InsertString (i, Commands[i].Label.c_str ());
+	_ComboBox.InsertString (i, utf8ToTStr(Commands[i].Label));
 }
 
 // ***************************************************************************
@@ -576,12 +576,12 @@ LRESULT CMemoryComboBox::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 			int curSel = _ComboBox.GetCurSel ();
 			if ((curSel == -1) || ((uint)curSel<Commands.size()))
 			{
-				_ComboBox.GetWindowText ((char*)lParam, wParam);
+				_ComboBox.GetWindowText ((TCHAR*)lParam, wParam);
 				return _ComboBox.GetWindowTextLength ();
 			}
 			else
 			{
-				_ComboBox.GetLBText (curSel, (char*)lParam);
+				_ComboBox.GetLBText (curSel, (TCHAR*)lParam);
 				return _ComboBox.GetLBTextLen (curSel);
 			}
 		}
@@ -678,11 +678,12 @@ BOOL CMemoryComboBox::PreTranslateMessage(MSG* pMsg)
 					{
 						CString str;
 						_ComboBox.GetWindowText (str);
-						string str2 = str;
-						if ((!str2.empty ()) && (str2.find ('.') == string::npos))
+
+						if ((!str.IsEmpty()) && (str.Find('.') == -1))
 						{
-							str2 += "." + _Extension;
-							_ComboBox.SetWindowText (str2.c_str ());
+							str += _T(".");
+							str += utf8ToTStr(_Extension);
+							_ComboBox.SetWindowText (str);
 						}
 					}
 

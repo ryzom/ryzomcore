@@ -1,7 +1,6 @@
 #ifndef TILE_WIDGET_H
 #define TILE_WIDGET_H
 
-#include <QtGui/QWidget>
 #include "tiles_model.h"
 #include "ui_tile_widget_qt.h"
 

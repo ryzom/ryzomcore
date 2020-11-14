@@ -146,7 +146,7 @@ public:
 		return _LengthR;
 	}
 
-	virtual sint32	getPos () const throw(NLMISC::EStream)
+	virtual sint32	getPos() const
 	{
 //		return (_BufPos - _Buffer.getPtr()) - _SubMessagePosR;
 		return _Buffer.Pos - _SubMessagePosR;

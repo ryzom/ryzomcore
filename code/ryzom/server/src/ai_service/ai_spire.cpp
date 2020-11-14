@@ -1308,7 +1308,7 @@ NLMISC_COMMAND(displaySpires, "list the available spire", "")
 	if (args.size() > 0)
 		return false;
 	
-	uint32 instanceNumber = ~0;
+	uint32 instanceNumber = std::numeric_limits<uint32>::max();
 	for (uint i=0; i<CAIS::instance().AIList().size(); ++i)
 	{
 		CAIInstance	*const	aii = CAIS::instance().AIList()[i];
@@ -1410,7 +1410,7 @@ NLMISC_COMMAND(spireSpawnSquad, "Spawns a squad in an spire", "<instance_number>
 	if (args.size() != 6)
 		return false;
 	
-	uint32 instanceNumber = ~0;
+	uint32 instanceNumber = std::numeric_limits<uint32>::max();
 	fromString(args[0], instanceNumber);
 	string continentName = args[1];
 	string spireName = args[2];

@@ -18,6 +18,9 @@
 #include "palette_node.h"
 #include "editor.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 namespace R2

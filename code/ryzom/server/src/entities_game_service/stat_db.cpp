@@ -728,7 +728,7 @@ void  CStatDB::valueLeaveFileCallback(const CFileDescription& fileDescription, N
 		CStatDBValueLeavesPD valueLeavesPD;
 
 		pdr.fromBuffer(dataStream);
-//		pdr.readFromFile(sFilePath.c_str());
+//		pdr.readFromFile(sFilePath);
 		valueLeavesPD.apply(pdr);
 		nTotalLoaded += fileDescription.FileSize;
 
@@ -791,7 +791,7 @@ void  CStatDB::tableLeaveFileCallback(const CFileDescription& fileDescription, N
 		CStatDBTableLeafPD tableLeafPD;
 
 		pdr.fromBuffer(dataStream);
-//		pdr.readFromFile(fileName.c_str());
+//		pdr.readFromFile(fileName);
 		tableLeafPD.apply(pdr);
 		nTotalLoaded += CFile::getFileSize(fileName);
 
@@ -854,7 +854,7 @@ void CStatDB::load()
 //			pdr.clear();
 //			CStatDBValueLeavesPD valueLeavesPD;
 //
-//			pdr.readFromFile(sFilePath.c_str());
+//			pdr.readFromFile(sFilePath);
 //			valueLeavesPD.apply(pdr);
 //			nTotalLoaded += CFile::getFileSize(sFilePath);
 //
@@ -910,7 +910,7 @@ void CStatDB::load()
 //			pdr.clear();
 //			CStatDBTableLeafPD tableLeafPD;
 //
-//			pdr.readFromFile(fileName.c_str());
+//			pdr.readFromFile(fileName);
 //			tableLeafPD.apply(pdr);
 //			nTotalLoaded += CFile::getFileSize(fileName);
 //

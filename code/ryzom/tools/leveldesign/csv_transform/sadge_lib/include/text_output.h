@@ -236,7 +236,7 @@ private:
 			break;
 
 		default:
-			fprintf(stderr,"\n"__FILE__":%d: BUG: invlid special code in CTextOutput object: %d\n",__LINE__,(int)code);
+			fprintf(stderr,"\n" __FILE__ ":%d: BUG: invlid special code in CTextOutput object: %d\n",__LINE__,(int)code);
 		}
 	}
 

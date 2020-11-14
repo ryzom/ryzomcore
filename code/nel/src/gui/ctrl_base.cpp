@@ -19,12 +19,17 @@
 #include "libxml/globals.h"
 #include "nel/misc/debug.h"
 #include "nel/misc/xml_auto_ptr.h"
+#include "nel/gui/lua_ihm.h"
 #include "nel/gui/ctrl_base.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
 #include "nel/misc/i18n.h"
 
 using namespace NLMISC;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NLGUI
 {
@@ -556,5 +561,17 @@ namespace NLGUI
 			return itr2->second;
 	}
 
+	// ***************************************************************************
+	int CCtrlBase::luaSetTooltipUtf8(CLuaState &ls)
+	{
+		const char *funcName = "setTooltipUtf8";
+		CLuaIHM::checkArgCount(ls, funcName, 1);
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		std::string tooltip = ls.toString(1);
+
+		setDefaultContextHelp(ucstring::makeFromUtf8(tooltip));
+
+		return 0;
+	}
 }
 

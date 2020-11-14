@@ -3,8 +3,8 @@
 CFGFILENAME=patchman_service.${SERVER_TYPE}.cfg
 echo cfg file: $CFGFILENAME
 
-AESCFGFILENAME=admin_executor_service_default.${SERVER_TYPE}.cfg
-echo aes cfg file: $AESCFGFILENAME
+#AESCFGFILENAME=admin_executor_service_default.${SERVER_TYPE}.cfg
+#echo aes cfg file: $AESCFGFILENAME
 
 cd /srv/core/patchman
 if [ -e $CFGFILENAME ]
@@ -15,8 +15,8 @@ if [ -e $CFGFILENAME ]
 	cp $CFGFILENAME patchman_service.cfg
 
 	# setup the config file for the admin executor service
-	echo Using aes configuration file: $AESCFGFILENAME
-	if [ -e $AESCFGFILENAME ] ; then cp $AESCFGFILENAME admin_executor_service_default.cfg ; fi
+	#echo Using aes configuration file: $AESCFGFILENAME
+	#if [ -e $AESCFGFILENAME ] ; then cp $AESCFGFILENAME admin_executor_service_default.cfg ; fi
 
 	# start the patchman service
 	echo Launching patchman...

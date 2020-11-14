@@ -59,8 +59,7 @@ bool CViewBitmapFaberMp::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_noitem" );
 	if (prop)
 	{
-		_TextureNoItemName = (const char *) prop;
-		_TextureNoItemName = strlwr (_TextureNoItemName);
+		_TextureNoItemName = toLower((const char *) prop);
 		_TextureNoItemId = -2;
 	}
 
@@ -129,7 +128,7 @@ void CViewBitmapFaberMp::draw ()
 	{
 		CItemSheet *pIS = (CItemSheet*)pES;
 
-		if (pIS->getIconBack() != "")
+		if (!pIS->getIconBack().empty())
 		{
 			if (_AccIconBackString != pIS->getIconBack())
 			{
@@ -141,7 +140,7 @@ void CViewBitmapFaberMp::draw ()
 							_AccIconBackId);
 		}
 
-		if (pIS->getIconMain() != "")
+		if (!pIS->getIconMain().empty())
 		{
 			if (_AccIconMainString != pIS->getIconMain())
 			{
@@ -153,7 +152,7 @@ void CViewBitmapFaberMp::draw ()
 							_AccIconMainId);
 		}
 
-		if (pIS->getIconOver() != "")
+		if (!pIS->getIconOver().empty())
 		{
 			if (_AccIconOverString != pIS->getIconOver())
 			{

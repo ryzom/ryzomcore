@@ -76,7 +76,7 @@ inline ucstring capitalize(const ucstring & s)
 #define MACRO_CONCAT2(a,b) CONCAT(a,b)
 #define MACRO_TOTXT(a) #a
 #define MACRO_TOTXT2(a) TOTXT(a)
-#define __FILE_LINE__ __FILE__ ":"TOTXT2(__LINE__)":"
+#define __FILE_LINE__ __FILE__ ":" TOTXT2(__LINE__) ":"
 
 
 //-------------------------------------------------------------------------------------------------
@@ -320,7 +320,7 @@ inline ucstring capitalize(const ucstring & s)
 	public:\
 		virtual void displayEntry(NLMISC::CLog& log) const\
 		{\
-			log.displayNL(">>"__FILE__":%d",__LINE__);\
+			log.displayNL(">>" __FILE__ ":%d", __LINE__);\
 		}\
 	}\
 	__callStackEntry##__LINE__;
@@ -331,7 +331,7 @@ inline ucstring capitalize(const ucstring & s)
 	public:\
 		virtual void displayEntry(NLMISC::CLog& log) const\
 		{\
-			log.displayNL(">>"__FILE__":%d: %s",__LINE__,msg);\
+			log.displayNL(">>" __FILE__ ":%d: %s", __LINE__,msg);\
 		}\
 	}\
 	__callStackEntry##__LINE__;
@@ -345,7 +345,7 @@ inline ucstring capitalize(const ucstring & s)
 		}\
 		virtual void displayEntry(NLMISC::CLog& log) const\
 		{\
-			log.displayNL(">>"__FILE__":%d: %s=[%s]",__LINE__,#var,NLMISC::toString(_Val).c_str());\
+			log.displayNL(">>" __FILE__ ":%d: %s=[%s]", __LINE__, #var, NLMISC::toString(_Val).c_str());\
 		}\
 		const type _Val;\
 	}\
@@ -360,7 +360,7 @@ inline ucstring capitalize(const ucstring & s)
 		}\
 		virtual void displayEntry(NLMISC::CLog& log) const\
 		{\
-			log.displayNL(">>"__FILE__":%d: %s=>[%s]",__LINE__,#var,NLMISC::toString(_Var).c_str());\
+			log.displayNL(">>" __FILE__ ":%d: %s=>[%s]", __LINE__, #var, NLMISC::toString(_Var).c_str());\
 		}\
 		const type& _Var;\
 	}\
@@ -425,7 +425,8 @@ inline void CCallStackSingleton::setTopStackEntry(ICallStackEntry* newEntry)
 inline void CCallStackSingleton::display(NLMISC::CLog *log)
 {
 	nlassert(log!=NULL);
-	getTopStackEntry()->displayStack(*log);
+	ICallStackEntry *entry = getTopStackEntry();
+	if (entry) entry->displayStack(*log);
 	log->displayNL("");
 }
 
@@ -468,15 +469,13 @@ inline ICallStackEntry::~ICallStackEntry()
 inline void ICallStackEntry::displayStack(NLMISC::CLog& log) const
 {
 	// stop recursing when we reach a NULL object
-	// (this is implemented in this way in order to ximplify call code)
-	if (this==NULL)
-		return;
+	// (this is implemented in this way in order to simplify call code)
 
 	// display this entry
 	displayEntry(log);
 
 	// recurse through call stack
-	_Next->displayStack(log);
+	if (_Next) _Next->displayStack(log);
 }
 
 
@@ -672,14 +671,6 @@ struct TTypeLimits<uint32>
 	};
 	static uint32	floor(uint32 value)	{	return value;		}
 };
-/*
-#ifdef NL_OS_WINDOWS
-template <>
-struct TTypeLimits<unsigned int> : public TTypeLimits<uint32>
-{
-};
-#endif
-*/
 template <>
 struct TTypeLimits<uint64>
 {
@@ -729,12 +720,7 @@ struct TTypeLimits<sint32>
 	};
 	static sint32	floor(sint32 value)	{	return value;		}
 };
-/*#ifdef NL_OS_WINDOWS
-template <>
-struct TTypeLimits<int> : public TTypeLimits<sint32>
-{
-};
-#endif*/
+
 template <>
 struct TTypeLimits<sint64>
 {

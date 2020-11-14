@@ -60,12 +60,12 @@ public:
 	bool	isContinentUsed(const std::string &continentName) const;
 
 	/** Return the static instance number associated with a continent name.
-	*	If the continent name is unknow, return ~0
+	*	If the continent name is unknow, return std::numeric_limits<uint32>::max()
 	*/
 	uint32	getInstanceForContinent(const std::string &continentName) const;
 
 	/** Return the static instance number associated with a continent enum value
-	 *	If the continent name is unknow, return ~0
+	 *	If the continent name is unknow, return std::numeric_limits<uint32>::max()
 	 */
 	uint32	getInstanceForContinent(CONTINENT::TContinent continentEnum) const;
 

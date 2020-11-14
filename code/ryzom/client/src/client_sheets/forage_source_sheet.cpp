@@ -63,7 +63,7 @@ void CForageSourceSheet::build(const NLGEORGES::UFormElm &item)
 /*
  * Serialize character sheet into binary data file.
  */
-void CForageSourceSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CForageSourceSheet::serial(NLMISC::IStream &f)
 {
 	f.serial( FxFilename );
 	f.serial( FxSafeFilename );

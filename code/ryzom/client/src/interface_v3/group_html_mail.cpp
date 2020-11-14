@@ -62,13 +62,13 @@ void CGroupHTMLMail::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 
 // ***************************************************************************
 
-void CGroupHTMLMail::addHTTPPostParams (HTAssocList *formfields, bool /*trustedDomain*/)
+void CGroupHTMLMail::addHTTPPostParams (SFormFields &formfields, bool /*trustedDomain*/)
 {
 	ucstring user_name = UserEntity->getLoginName ();
-	HTParseFormInput(formfields, ("shard="+toString(CharacterHomeSessionId)).c_str());
-	HTParseFormInput(formfields, ("user_login="+user_name.toString()).c_str());
-	HTParseFormInput(formfields, ("session_cookie="+NetMngr.getLoginCookie().toString()).c_str());
-	HTParseFormInput(formfields, ("lang="+CI18N::getCurrentLanguageCode()).c_str());
+	formfields.add("shard", toString(CharacterHomeSessionId));
+	formfields.add("user_login", user_name.toString());
+	formfields.add("session_cookie", NetMngr.getLoginCookie().toString());
+	formfields.add("lang", CI18N::getCurrentLanguageCode());
 }
 
 // ***************************************************************************

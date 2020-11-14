@@ -22,6 +22,10 @@
 #include "nel/3d/u_instance_material.h"
 #include "sky_material_setup.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NL3D;
 
 H_AUTO_DECL(RZ_SkyMaterialSetup)

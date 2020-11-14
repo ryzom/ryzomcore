@@ -165,9 +165,8 @@ BOOL CWaterPoolEditor::OnInitDialog()
 
 int CWaterPoolEditor::addPool(uint32 ID)
 {
-	char poolId[128];
-	sprintf(poolId, "%d (%s)", ID, _Wpm->getPoolByID(ID).getName().c_str());
-	int index = m_PoolList.AddString(poolId);
+	std::string poolId = NLMISC::toString("%d (%s)", ID, _Wpm->getPoolByID(ID).getName().c_str());
+	int index = m_PoolList.AddString(utf8ToTStr(poolId));
 	nlassert(index != LB_ERR);
 	m_PoolList.SetItemData(index, ID);
 	return index;
@@ -304,7 +303,7 @@ void CWaterPoolEditor::OnAddPool()
 	{
 		if (_Wpm->hasPool(cpi.PoolID) )
 		{
-			MessageBox("Pool already exists", "error");
+			MessageBox(_T("Pool already exists"), _T("error"));
 		}
 		else
 		{
@@ -324,7 +323,7 @@ void CWaterPoolEditor::OnDeletePool()
 	UpdateData();
 	if (m_PoolList.GetCount() == 1)
 	{
-		MessageBox("Must have at least one water pool", "error");
+		MessageBox(_T("Must have at least one water pool"), _T("error"));
 	}
 	else
 	{
@@ -350,15 +349,15 @@ void CWaterPoolEditor::OnSelchangeMapSize()
 
 void CWaterPoolEditor::OnLoadPool() 
 {	
-	static char BASED_CODE szFilter[] = "NeL Water Pool Files (*.wpf)|*.wpf||";
-	CFileDialog fileDlg( TRUE, ".wpf", "*.wpf", OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
+	static TCHAR BASED_CODE szFilter[] = _T("NeL Water Pool Files (*.wpf)|*.wpf||");
+	CFileDialog fileDlg( TRUE, _T(".wpf"), _T("*.wpf"), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
 	if (fileDlg.DoModal()==IDOK)
 	{				
 		try
 		{
 			NLMISC::CIXml iXml;
 			NLMISC::CIFile iF;
-			if (iF.open((LPCTSTR) fileDlg.GetPathName()))
+			if (iF.open(tStrToUtf8(fileDlg.GetPathName())))
 			{
 				if (iXml.init (iF))
 				{
@@ -370,17 +369,17 @@ void CWaterPoolEditor::OnLoadPool()
 				else
 				{
 					iF.close();
-					MessageBox (("Unable to init xml stream from file : " + std::string((LPCTSTR) fileDlg.GetPathName())).c_str(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);	
+					MessageBox (utf8ToTStr(NLMISC::toString("Unable to init xml stream from file: %s", tStrToUtf8(fileDlg.GetPathName()).c_str())), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 			else
 			{
-				MessageBox (("Unable to open file : " + std::string((LPCTSTR) fileDlg.GetPathName())).c_str(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (utf8ToTStr(NLMISC::toString("Unable to open file: %s", tStrToUtf8(fileDlg.GetPathName()).c_str())), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
-		catch (NLMISC::Exception& e)
+		catch (const NLMISC::Exception& e)
 		{
-			MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+			MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 		}
 	}	
 }
@@ -388,15 +387,15 @@ void CWaterPoolEditor::OnLoadPool()
 
 void CWaterPoolEditor::OnSavePool() 
 {
-	static char BASED_CODE szFilter[] = "NeL Water Pool Files (*.wpf)|*.wpf||";
-	CFileDialog fileDlg( TRUE, ".wpf", "*.wpf", OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
+	static TCHAR BASED_CODE szFilter[] = _T("NeL Water Pool Files (*.wpf)|*.wpf||");
+	CFileDialog fileDlg( TRUE, _T(".wpf"), _T("*.wpf"), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
 	if (fileDlg.DoModal()==IDOK)
 	{				
 		try
 		{
 			NLMISC::COXml oXml;
 			NLMISC::COFile oF;
-			if (oF.open((LPCTSTR) fileDlg.GetPathName()))
+			if (oF.open(tStrToUtf8(fileDlg.GetPathName())))
 			{
 				if (oXml.init (&oF))
 				{
@@ -407,17 +406,17 @@ void CWaterPoolEditor::OnSavePool()
 				else
 				{
 					oF.close();
-					MessageBox (("Unable to init xml stream from file : " + std::string((LPCTSTR) fileDlg.GetPathName())).c_str(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);	
+					MessageBox (utf8ToTStr(NLMISC::toString("Unable to init xml stream from file: %s", tStrToUtf8(fileDlg.GetPathName()).c_str())), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 			else
 			{
-				MessageBox (("Unable to open file : " + std::string((LPCTSTR) fileDlg.GetPathName())).c_str(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (utf8ToTStr(NLMISC::toString("Unable to open file: %s", tStrToUtf8(fileDlg.GetPathName()).c_str())), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
-		catch (NLMISC::Exception& e)
+		catch (const NLMISC::Exception& e)
 		{
-			MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+			MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 		}
 	}
 	

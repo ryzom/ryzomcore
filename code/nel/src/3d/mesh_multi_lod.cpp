@@ -35,6 +35,9 @@ using namespace std;
 
 
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -285,7 +288,7 @@ void CMeshMultiLod::render(IDriver *drv, CTransformShape *trans, bool passOpaque
 
 // ***************************************************************************
 
-void CMeshMultiLod::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CMeshMultiLod::serial(NLMISC::IStream &f)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance
@@ -402,7 +405,7 @@ void CMeshMultiLod::clear ()
 
 // ***************************************************************************
 
-void CMeshMultiLod::CMeshSlot::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CMeshMultiLod::CMeshSlot::serial(NLMISC::IStream &f)
 {
 	// Check version
 	(void)f.serialVersion (0);

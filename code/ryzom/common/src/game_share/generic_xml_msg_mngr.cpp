@@ -22,6 +22,10 @@
 #include "nel/misc/file.h"
 #include "nel/misc/xml_auto_ptr.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 

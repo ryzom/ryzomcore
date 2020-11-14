@@ -1,0 +1,91 @@
+
+#define FXAA_PC 1
+#define FXAA_HLSL_3 1
+#define FXAA_QUALITY__PRESET 12
+#define FXAA_EARLY_EXIT 0
+#define FXAA_GREEN_AS_LUMA 1
+
+#define h4tex2Dlod tex2Dlod
+#define half4 float4
+#define half3 float3
+#define half2 float2
+#define half float
+
+#include "fxaa3_11.h"
+
+void fxaa_pp(
+	// Per fragment parameters
+	float2 pos : TEXCOORD0, 
+#if (FXAA_PS3 == 1)
+	float4 fxaaConsolePosPos : TEXCOORD1, 
+#endif
+	
+	// Fragment program constants
+#if (FXAA_PC == 1)
+	uniform float2 fxaaQualityRcpFrame,
+	uniform float fxaaQualitySubpix,
+	uniform float fxaaQualityEdgeThreshold,
+	uniform float fxaaQualityEdgeThresholdMin,
+#else
+	uniform float4 fxaaConsoleRcpFrameOpt,
+	uniform float4 fxaaConsoleRcpFrameOpt2,
+#endif
+	uniform sampler2D nlTex0 : TEX0, 
+	
+	// Output color
+	out float4 oCol : COLOR
+)
+{
+#if (FXAA_PC == 1)
+	oCol = FxaaPixelShader(
+		pos, 
+		nlTex0,
+		fxaaQualityRcpFrame,
+		fxaaQualitySubpix,
+		fxaaQualityEdgeThreshold,
+		fxaaQualityEdgeThresholdMin
+		);
+#else
+	oCol = FxaaPixelShader(
+		pos, 
+		fxaaConsolePosPos, 
+		nlTex0,
+		fxaaConsoleRcpFrameOpt,
+		fxaaConsoleRcpFrameOpt2
+		);
+#endif
+}
+
+/*
+Have FXAA vertex shader run as a full screen triangle,
+and output "pos" and "fxaaConsolePosPos"
+such that inputs in the pixel shader provide,
+ 
+// {xy} = center of pixel
+FxaaFloat2 pos,
+ 
+// {xy__} = upper left of pixel
+// {__zw} = lower right of pixel
+FxaaFloat4 fxaaConsolePosPos,
+*/
+
+// fxaaConsoleRcpFrameOpt:
+// Only used on FXAA Console.
+// This must be from a constant/uniform.
+// This effects sub-pixel AA quality and inversely sharpness.
+// Where N ranges between,
+// N = 0.50 (default)
+// N = 0.33 (sharper)
+// {x___} = -N/screenWidthInPixels
+// {_y__} = -N/screenHeightInPixels
+// {__z_} = N/screenWidthInPixels
+// {___w} = N/screenHeightInPixels
+
+// fxaaConsoleRcpFrameOpt2:
+// Only used on FXAA Console.
+// Not used on 360, but used on PS3 and PC.
+// This must be from a constant/uniform.
+// {x___} = -2.0/screenWidthInPixels
+// {_y__} = -2.0/screenHeightInPixels
+// {__z_} = 2.0/screenWidthInPixels
+// {___w} = 2.0/screenHeightInPixels

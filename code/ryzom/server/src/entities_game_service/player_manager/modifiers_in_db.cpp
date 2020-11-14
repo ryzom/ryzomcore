@@ -43,7 +43,7 @@ void CModifierInDB::init()
 	clear();
 }
 
-void CModifierInDB::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CModifierInDB::serial(NLMISC::IStream &f)
 {
 	f.serial(Disabled);
 	if(Disabled) 
@@ -70,7 +70,7 @@ void CModifiersInDB::clear()
 		Malus[i].clear();
 }	
 
-void CModifiersInDB::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CModifiersInDB::serial(NLMISC::IStream &f)
 {
 	f.serialCont(Bonus);
 	f.serialCont(Malus);

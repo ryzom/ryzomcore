@@ -257,7 +257,7 @@ sint main( sint argc, char ** argv )
 
 	// TEST
 	/*printf("Writing debug text file...\n");
-	FILE * outputTest = fopen("chat_static_base_test.log","wt");
+	FILE * outputTest = nlfopen("chat_static_base_test.log","wt");
 	for( itBase = base.begin(); itBase != base.end(); ++itBase )
 	{
 		fprintf(outputTest,"id: %s  str: %s  occ: %d\n",(*itBase).second.Id.c_str(),(*itBase).second.Str.c_str(), (*itBase).second.Occurence );

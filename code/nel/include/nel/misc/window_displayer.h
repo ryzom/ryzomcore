@@ -64,6 +64,8 @@ public:
 
 	virtual void	getWindowPos (uint32 &x, uint32 &y, uint32 &w, uint32 &h) { x=y=w=h=0; }
 
+	static std::string stringifyMessage(const NLMISC::CLog::TDisplayInfo &args, const char *message, bool needSlashR = false);
+
 protected:
 
 	// display a string (MT)

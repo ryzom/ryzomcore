@@ -50,7 +50,7 @@ public:
 		// Build from an external script
 		void build(const NLGEORGES::UFormElm &item, const std::string &prefix);
 		/// Serialize sheet into binary data file.
-		void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serial(NLMISC::IStream &f);
 	};
 	////////////////////////////////////////////////////////////////////////////////
 	// tells how a color gradient is computed in the shape (-> sky dome gradient) //
@@ -71,7 +71,7 @@ public:
 		// Build from an external script
 		void build(const NLGEORGES::UFormElm &item, const std::string &prefix);
 		/// Serialize sheet into binary data file.
-		void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serial(NLMISC::IStream &f);
 	};
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// A version of a sky object. If materials are too complex, a fallback version may be used instead (on gpu with 2 stages) //
@@ -105,7 +105,7 @@ public:
 		// Build from an external script
 		void build(const NLGEORGES::UFormElm &item, const std::string &prefix);
 		/// Serialize sheet into binary data file.
-		void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serial(NLMISC::IStream &f);
 	};
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	CVersionSheet	Std;			 // standard version of the object
@@ -118,7 +118,7 @@ public:
 	// Build from an external script
 	void build(const NLGEORGES::UFormElm &item, const std::string &prefix);
 	/// Serialize sheet into binary data file.
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };
 
 #endif

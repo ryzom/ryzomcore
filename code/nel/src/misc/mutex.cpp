@@ -41,15 +41,6 @@ using namespace std;
 
 #ifdef NL_OS_WINDOWS
 
-// these defines are for IsDebuggerPresent(). It'll not compile on windows 95
-// just comment this and the IsDebuggerPresent to compile on windows 95
-#define _WIN32_WINDOWS	0x0410
-#ifndef NL_COMP_MINGW
-#	define WINVER			0x0400
-#	define NOMINMAX
-#endif
-#include <windows.h>
-
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
 #endif
@@ -90,11 +81,7 @@ inline void LeaveMutex( void *handle )
 {
 	if (ReleaseMutex(handle) == 0)
 	{
-		//LPVOID lpMsgBuf;
-		//FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		//				 NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &lpMsgBuf, 0, NULL );*/
 		nlerror ("error while releasing the mutex (0x%x %d), %p", GetLastError(), GetLastError(), handle);
-		//LocalFree( lpMsgBuf );
 	}
 }
 
@@ -172,7 +159,7 @@ bool	CSharedMutex::createByName( const char *objectName )
 #ifdef NL_DEBUG
 	nlassert( _Mutex == NULL );
 #endif
-	_Mutex = (void *) CreateMutex( NULL, FALSE, objectName );
+	_Mutex = (void *) CreateMutexA( NULL, FALSE, objectName );
 	//nldebug( "Creating mutex %s: handle %p", objectName, _Mutex );
 	return ( _Mutex != NULL );
 }
@@ -406,13 +393,21 @@ void CUnfairMutex::leave()
  */
 CFairMutex::CFairMutex()
 {
+#ifdef NL_OS_MAC
+	_Sem = dispatch_semaphore_create(1);
+#else
 	sem_init( const_cast<sem_t*>(&_Sem), 0, 1 );
+#endif
 }
 
 
 CFairMutex::CFairMutex(	const std::string &name )
 {
+#ifdef NL_OS_MAC
+	_Sem = dispatch_semaphore_create(1);
+#else
 	sem_init( const_cast<sem_t*>(&_Sem), 0, 1 );
+#endif
 }
 
 
@@ -421,7 +416,11 @@ CFairMutex::CFairMutex(	const std::string &name )
  */
 CFairMutex::~CFairMutex()
 {
+#ifdef NL_OS_MAC
+	dispatch_release(_Sem);
+#else
 	sem_destroy( const_cast<sem_t*>(&_Sem) ); // needs that no thread is waiting on the semaphore
+#endif
 }
 
 
@@ -430,7 +429,11 @@ CFairMutex::~CFairMutex()
  */
 void CFairMutex::enter()
 {
+#ifdef NL_OS_MAC
+	dispatch_semaphore_wait(_Sem, DISPATCH_TIME_FOREVER);
+#else
 	sem_wait( const_cast<sem_t*>(&_Sem) );
+#endif
 }
 
 
@@ -439,7 +442,11 @@ void CFairMutex::enter()
  */
 void CFairMutex::leave()
 {
+#ifdef NL_OS_MAC
+	dispatch_semaphore_signal(_Sem);
+#else
 	sem_post( const_cast<sem_t*>(&_Sem) );
+#endif
 }
 
 
@@ -666,7 +673,7 @@ void CFairMutex::debugEndEnter()
 	if (_Mutex == (void*)0x88)
 	{
 		OutputDebugString (str);
-		if (entered) __asm int 3;
+		if (entered) __debugbreak();
 		entered = true;
 	}
 */
@@ -693,7 +700,7 @@ void CFairMutex::debugLeave()
 	if (_Mutex == (void*)0x88)
 	{
 		OutputDebugString (str);
-		if (!entered) __asm int 3;
+		if (!entered) __debugbreak();
 		entered = false;
 	}
 */

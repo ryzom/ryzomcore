@@ -103,10 +103,8 @@ void CImageListEx::addResourceIcon (const char *filename)
 			index = ImageList.Replace( index, handle);
 		
 			// Add in the map
-			char name[MAX_PATH];
-			_splitpath (filename, NULL, NULL, name, NULL);
-			string llwr = strlwr (string (name));
-			_IconMapString.insert (std::map<string, int>::value_type (llwr, index));
+			std::string name = NLMISC::CFile::getFilenameWithoutExtension(filename);
+			_IconMapString.insert (std::map<string, int>::value_type (toLower(name), index));
 
 			// Release the icon
 			DestroyIcon (handle);
@@ -131,10 +129,8 @@ int CImageListEx::getImage (int resource) const
 
 int CImageListEx::getImage (const char *filename) const
 {
-	char name[MAX_PATH];
-	_splitpath (filename, NULL, NULL, name, NULL);
-	string llwr = strlwr (string (name));
-	std::map<string, int>::const_iterator ite = _IconMapString.find (llwr);
+	std::string name = toLower(NLMISC::CFile::getFilenameWithoutExtension(filename));
+	std::map<string, int>::const_iterator ite = _IconMapString.find (name);
 	if (ite == _IconMapString.end())
 		return -1;
 	else

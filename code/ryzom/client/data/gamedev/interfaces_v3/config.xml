@@ -583,11 +583,11 @@
     <param name="title_offset_x"
            value="8" />
     <param name="title_offset_y"
-           value="-10" />
+           value="-7" />
     <param name="title_offset_openable_x"
            value="20" />
     <param name="title_offset_openable_y"
-           value="-10" />
+           value="-7" />
     <param name="scrollbar_offset_x"
            value="6" />
     <param name="scrollbar_size_w"
@@ -732,11 +732,11 @@
     <param name="title_offset_x"
            value="56" />
     <param name="title_offset_y"
-           value="-26" />
+           value="-23" />
     <param name="title_offset_openable_x"
            value="20" />
     <param name="title_offset_openable_y"
-           value="-10" />
+           value="-7" />
     <param name="scrollbar_offset_x"
            value="6" />
     <param name="scrollbar_size_w"
@@ -873,11 +873,11 @@
     <param name="title_offset_x"
            value="28" />
     <param name="title_offset_y"
-           value="-10" />
+           value="-7" />
     <param name="title_offset_openable_x"
            value="20" />
     <param name="title_offset_openable_y"
-           value="-10" />
+           value="-7" />
     <param name="scrollbar_offset_x"
            value="6" />
     <param name="scrollbar_size_w"
@@ -1014,11 +1014,11 @@
     <param name="title_offset_x"
            value="8" />
     <param name="title_offset_y"
-           value="-6" />
+           value="-4" />
     <param name="title_offset_openable_x"
            value="18" />
     <param name="title_offset_openable_y"
-           value="-6" />
+           value="-4" />
     <param name="header_h"
            value="14" />
     <param name="open_state_tx_opened"
@@ -1109,11 +1109,11 @@
     <param name="title_offset_x"
            value="8" />
     <param name="title_offset_y"
-           value="-5" />
+           value="-3" />
     <param name="title_offset_openable_x"
            value="20" />
     <param name="title_offset_openable_y"
-           value="-5" />
+           value="-3" />
     <param name="header_h"
            value="12" />
     <param name="open_state_tx_opened"
@@ -1202,11 +1202,11 @@
     <param name="title_offset_x"
            value="8" />
     <param name="title_offset_y"
-           value="-5" />
+           value="-3" />
     <param name="title_offset_openable_x"
            value="22" />
     <param name="title_offset_openable_y"
-           value="-5" />
+           value="-3" />
     <param name="header_h"
            value="10" />
     <param name="open_state_tx_opened"
@@ -1295,11 +1295,11 @@
     <param name="title_offset_x"
            value="18" />
     <param name="title_offset_y"
-           value="-5" />
+           value="-3" />
     <param name="title_offset_openable_x"
            value="24" />
     <param name="title_offset_openable_y"
-           value="-5" />
+           value="-3" />
     <param name="header_h"
            value="10" />
     <param name="open_state_tx_opened"
@@ -1599,11 +1599,11 @@
     <param name="title_offset_x"
            value="8" />
     <param name="title_offset_y"
-           value="-6" />
+           value="-4" />
     <param name="title_offset_openable_x"
            value="18" />
     <param name="title_offset_openable_y"
-           value="-6" />
+           value="-4" />
     <param name="header_h"
            value="14" />
     <!-- View state opened/closed (defined TL TL) -->
@@ -1698,11 +1698,11 @@
     <param name="title_offset_x"
            value="8" />
     <param name="title_offset_y"
-           value="-2" />
+           value="0" />
     <param name="title_offset_openable_x"
            value="40" />
     <param name="title_offset_openable_y"
-           value="-2" />
+           value="0" />
     <param name="header_h"
            value="12" />
     <!-- View state opened/closed (defined TL TL) -->
@@ -1916,6 +1916,8 @@ This MUST follow the Enum MISSION_DESC::TIconId
            value="basic.ttf" /> -->
     <param name="font"
            value="ryzom.ttf" />
+    <param name="monospace_font"
+           value="ryzom_monospace.ttf" />
     <param name="add_coef_font"
            value="1" />
     <param name="mul_coef_anim"
@@ -2765,6 +2767,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:SHOW_CLOCK"
             type="bool"
             value="false" />
+  <variable entry="UI:SAVE:SHOW_CLOCK_12H"
+            type="bool"
+            value="false" />
   <variable entry="UI:SAVE:SHOW_RETICLE"
             type="bool"
             value="true" />
@@ -3318,9 +3323,6 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:ISDETACHED:REGION_CHAT"
             type="sint32"
             value="0" />
-  <variable entry="UI:SAVE:ISDETACHED:YUBO_CHAT"
-            type="sint32"
-            value="0" />
   <variable entry="UI:SAVE:ISENABLED:AROUND_ME"
             type="sint32"
             value="1" />
@@ -3337,9 +3339,6 @@ This MUST follow the Enum MISSION_DESC::TIconId
             type="sint32"
             value="1" />
   <variable entry="UI:SAVE:ISENABLED:SYSTEM_INFO"
-            type="sint32"
-            value="1" />
-  <variable entry="UI:SAVE:ISENABLED:YUBO_CHAT"
             type="sint32"
             value="1" />
   <!-- List Menu 5 -->
@@ -3702,27 +3701,13 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <define id="item_type_to_item_sheet_JOB_ELEMENT"
           value="rpjob_elementary.sitem" />
   <!-- ************************ -->
-  <!-- *          YUBO CHAT               * -->
-  <!-- ************************ -->
-  <!--
-        The Yubo Chat is a special telnet chat for Game Masters, same channel as the Yubo Klient
--->
-  <variable entry="UI:VARIABLES:ISACTIVE:YUBO_CHAT"
-            type="sint32"
-            value="0" />
-  <variable entry="UI:VARIABLES:YUBO_CHAT_PRESENT"
-            type="sint32"
-            value="0" />
-  <define id="is_yubo_chat_present"
-          value="ne(@UI:VARIABLES:YUBO_CHAT_PRESENT,0)" />
-  <!-- ************************ -->
   <!-- *          DYNAMIC CHAT    * -->
   <!-- ************************ -->
   <define id="max_dyn_chan_per_player"
           value_from_code="getMaxDynChanPerPlayer()" />
   <variable entry="UI:SAVE:ISDETACHED:DYNAMIC_CHAT$i"
             type="sint32"
-            value="1"
+            value="0"
             size="%max_dyn_chan_per_player" />
   <variable entry="UI:SAVE:ISENABLED:DYNAMIC_CHAT$i"
             type="sint32"

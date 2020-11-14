@@ -99,14 +99,14 @@ then
 		for f in $DOMAIN_LIST
 		do
 			# see if we're setup to run this domain
-			if [ -e /srv/core/${f}.screen.rc ] && [ -e /srv/core/bin/${f} ]
+			if [ -e /srv/core/${f}.screen.rc ] && [ -e /srv/core/bin/domain_${f} ]
 			then
 				# see whether the domain is alredy running
-				if [ $( screen -list | grep \( | cut  -f2 | cut -d. -f2| grep \^$f\$ | wc -l) == 0 ]
+				if [ $( screen -list | grep \\\.${f} | wc -w ) = 0 ]
 				then
 					# the domain isn't running yet so start it
 					echo '****' starting domain: $f '****'
-					/srv/core/bin/$f batchstart
+					/srv/core/bin/domain_$f batchstart
 				else
 					echo '****' Domain is already running: $f '****'
 				fi

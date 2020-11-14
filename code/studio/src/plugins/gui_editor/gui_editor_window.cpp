@@ -44,7 +44,7 @@
 #include "editor_selection_watcher.h"
 #include "editor_message_processor.h"
 #include "add_widget_widget.h"
-#include "texture_chooser.h"
+#include "new_gui_dlg.h"
 
 namespace GUIEditor
 {
@@ -70,8 +70,6 @@ namespace GUIEditor
 		setCentralWidget( GUICtrl->getViewPort() );
 
 		widgetInfoTree = new CWidgetInfoTree;
-
-		tc = new TextureChooser();
 
 		createMenus();
 		readSettings();
@@ -117,9 +115,6 @@ namespace GUIEditor
 		writeSettings();
 
 		removeMenus();
-
-		delete tc;
-		tc = NULL;
 
 		delete messageProcessor;
 		messageProcessor = NULL;
@@ -187,6 +182,8 @@ namespace GUIEditor
 		currentProject = projectFiles.projectName.c_str();
 		currentProjectFile = fileName;
 		projectWindow->setupFiles( projectFiles );
+		GUICtrl->setWorkDir( _lastDir );
+
 		if( GUICtrl->parse( projectFiles ) )
 		{
 			hierarchyView->buildHierarchy( projectFiles.masterGroup );
@@ -203,6 +200,85 @@ namespace GUIEditor
 
 	void GUIEditorWindow::newDocument()
 	{
+		NewGUIDlg d;
+		int result = d.exec();
+		
+		if( result == QDialog::Rejected )
+			return;
+
+		close();
+
+		std::string proj = d.getProjectName().toUtf8().constData();
+		std::string wnd = d.getWindowName().toUtf8().constData();
+		std::string mg = std::string( "ui:" ) + proj;
+		std::string dir = d.getProjectDirectory().toUtf8().constData();
+		_lastDir = dir.c_str();
+		std::string uiFile = "ui_" + proj + ".xml";
+
+		QList< QString > mapList;
+		d.getMapList( mapList );
+
+		bool b = GUICtrl->createNewGUI( proj, wnd );
+		if( !b )
+		{
+			QMessageBox::information( this,
+										tr( "Creating new GUI project" ),
+										tr( "Failed to create new GUI project :(" ) );
+			reset();
+			return;
+		}
+
+		hierarchyView->buildHierarchy( mg );
+
+		projectFiles.projectName = proj;
+		projectFiles.masterGroup = mg;
+		projectFiles.activeGroup = std::string( "ui:" ) + proj + ":" + wnd;
+		projectFiles.version = SProjectFiles::NEW;
+		projectFiles.guiFiles.push_back( uiFile );
+
+		for( int i = 0; i < mapList.size(); i++ )
+		{
+			projectFiles.mapFiles.push_back( mapList[ i ].toUtf8().constData() );
+		}
+
+		b = GUICtrl->loadMapFiles( projectFiles.mapFiles );
+		if( !b )
+		{
+			QMessageBox::information( this,
+										tr( "Creating new GUI project" ),
+										tr( "Failed to create new GUI project: Couldn't load map files. " ) );
+			reset();
+			return;
+		}
+		
+		projectWindow->setupFiles( projectFiles );
+
+		currentProject = proj.c_str();
+		currentProjectFile = std::string( dir + "/" + proj + ".xml" ).c_str();
+
+
+		// Save the project file
+		CProjectFileSerializer serializer;
+		serializer.setFile( currentProjectFile.toUtf8().constData() );
+		if( !serializer.serialize( projectFiles ) )
+		{
+			QMessageBox::critical( this,
+							tr( "Failed to save project" ),
+							tr( "There was an error while trying to save the project." ) );
+			return;
+		}
+
+		// Save the GUI file
+		WidgetSerializer widgetSerializer;
+		widgetSerializer.setFile( dir + "/" + uiFile );
+		widgetSerializer.setActiveGroup( projectFiles.activeGroup );
+		if( !widgetSerializer.serialize( projectFiles.masterGroup ) )
+		{
+			QMessageBox::critical( this,
+							tr( "Failed to save project" ),
+							tr( "There was an error while trying to save the project." ) );
+			return;
+		}
 	}
 
 	void GUIEditorWindow::save()
@@ -223,8 +299,23 @@ namespace GUIEditor
 		// Can't save old projects any further, since the widgets are in multiple files in them
 		// using templates, styles and whatnot. There's no way to restore the original XML structure
 		// after it's loaded
-		if( projectParser.getProjectVersion() == OLD )
+		if( projectFiles.version == SProjectFiles::OLD )
 			return;
+
+		std::string f = _lastDir.toUtf8().constData();
+		f += "/";
+		f += projectFiles.guiFiles[ 0 ];
+
+		WidgetSerializer widgetSerializer;
+		widgetSerializer.setFile( f );
+		widgetSerializer.setActiveGroup( projectFiles.activeGroup );
+		if( !widgetSerializer.serialize( projectFiles.masterGroup ) )
+		{
+			QMessageBox::critical( this,
+							tr( "Failed to save project" ),
+							tr( "There was an error while trying to save the project." ) );
+			return;
+		}
 	}
 
 	void GUIEditorWindow::saveAs()
@@ -237,42 +328,36 @@ namespace GUIEditor
 
 		if( dir.isEmpty() )
 			return;
+		_lastDir = dir;
 
-		projectFiles.guiFiles.clear();
-		projectFiles.guiFiles.push_back( "ui_" + projectFiles.projectName + ".xml"  );
-		projectFiles.version = NEW;
-
-		QString newFile =
-			dir + "/" + projectFiles.projectName.c_str() + ".xml";
-
-		CProjectFileSerializer serializer;
-		serializer.setFile( newFile.toUtf8().constData() );
-		if( !serializer.serialize( projectFiles ) )
+		if( projectFiles.version == SProjectFiles::OLD )
 		{
-			QMessageBox::critical( this,
-							tr( "Failed to save project" ),
-							tr( "There was an error while trying to save the project." ) );
-			return;
+			projectFiles.guiFiles.clear();
+			projectFiles.guiFiles.push_back( "ui_" + projectFiles.projectName + ".xml"  );
+			projectFiles.version = SProjectFiles::NEW;
+
 		}
 
-		std::string guiFile =
-			std::string( dir.toUtf8().constData() ) + "/" + "ui_" + projectFiles.projectName + ".xml";
+		currentProjectFile = _lastDir;
+		currentProjectFile += "/";
+		currentProjectFile += projectFiles.projectName.c_str();
+		currentProjectFile += ".xml";
 
-		WidgetSerializer widgetSerializer;
-		widgetSerializer.setFile( guiFile );
-		widgetSerializer.setActiveGroup( projectFiles.activeGroup );
-		if( !widgetSerializer.serialize( projectFiles.masterGroup ) )
-		{
-			QMessageBox::critical( this,
-							tr( "Failed to save project" ),
-							tr( "There was an error while trying to save the project." ) );
-			return;
-		}
+		save();
+	}
 
-		QMessageBox::information( this,
-						tr( "Save successful" ),
-						tr( "Project saved successfully!" ) );
-
+	void GUIEditorWindow::reset()
+	{
+		projectFiles.clearAll();
+		projectWindow->clear();
+		hierarchyView->clearHierarchy();
+		GUICtrl->reset();
+		browserCtrl.clear();
+		linkList->clear();
+		procList->clear();
+		currentProject = "";
+		currentProjectFile = "";
+		projectParser.clear();
 	}
 
 	bool GUIEditorWindow::close()
@@ -289,19 +374,10 @@ namespace GUIEditor
 
 
 		CEditorSelectionWatcher *w = GUICtrl->getWatcher();
-		disconnect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), hierarchyView, SLOT( onSelectionChanged( std::string& ) ) );
-		disconnect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), &browserCtrl, SLOT( onSelectionChanged( std::string& ) ) );
+		disconnect( w, SIGNAL( sgnSelectionChanged() ), hierarchyView, SLOT( onSelectionChanged() ) );
+		disconnect( w, SIGNAL( sgnSelectionChanged() ), &browserCtrl, SLOT( onSelectionChanged() ) );
 
-		projectFiles.clearAll();
-		projectWindow->clear();
-		hierarchyView->clearHierarchy();
-		GUICtrl->reset();
-		browserCtrl.clear();
-		linkList->clear();
-		procList->clear();
-		currentProject = "";
-		currentProjectFile = "";
-		projectParser.clear();
+		reset();
 
 		return true;
 	}
@@ -328,8 +404,8 @@ namespace GUIEditor
 		linkList->onGUILoaded();
 
 		CEditorSelectionWatcher *w = GUICtrl->getWatcher();
-		connect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), hierarchyView, SLOT( onSelectionChanged( std::string& ) ) );
-		connect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), &browserCtrl, SLOT( onSelectionChanged( std::string& ) ) );
+		connect( w, SIGNAL( sgnSelectionChanged() ), hierarchyView, SLOT( onSelectionChanged() ) );
+		connect( w, SIGNAL( sgnSelectionChanged() ), &browserCtrl, SLOT( onSelectionChanged() ) );
 	}
 
 	void GUIEditorWindow::onAddWidgetClicked()
@@ -359,23 +435,17 @@ namespace GUIEditor
 		GUICtrl->show();
 	}
 
-	void GUIEditorWindow::onTCClicked()
-	{
-		tc->load();
-		tc->exec();
-	}
-
 	void GUIEditorWindow::createMenus()
 	{
 		Core::MenuManager *mm = Core::ICore::instance()->menuManager();
-		//QAction *newAction = mm->action( Core::Constants::NEW );
+		QAction *newAction = mm->action( Core::Constants::NEW );
 		QAction *saveAction = mm->action( Core::Constants::SAVE );
 		QAction *saveAsAction = mm->action( Core::Constants::SAVE_AS );
 		QAction *closeAction = mm->action( Core::Constants::CLOSE );
 		QAction *delAction = mm->action( Core::Constants::DEL );
 
-		//if( newAction != NULL )
-		//	newAction->setEnabled( true );
+		if( newAction != NULL )
+			newAction->setEnabled( true );
 		if( saveAction != NULL )
 			saveAction->setEnabled( true );
 		if( saveAsAction != NULL )
@@ -411,8 +481,28 @@ namespace GUIEditor
 			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onAddWidgetClicked() ) );
 			m->addAction( a );
 
-			a = new QAction( "Texture Chooser", this );
-			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onTCClicked() ) );
+			a = new QAction( "Group", this );
+			connect( a, SIGNAL( triggered() ), messageProcessor, SLOT( onGroup() ) );
+			m->addAction( a );
+
+			a = new QAction( "Ungroup", this );
+			connect( a, SIGNAL( triggered() ), messageProcessor, SLOT( onUngroup() ) );
+			m->addAction( a );
+
+			
+			// ----------------------------------------------------------------------------------			
+			m->addSeparator();
+
+			a = new QAction( "Select groups", this );
+			a->setCheckable( true );
+			a->setChecked( false );
+			connect( a, SIGNAL( triggered( bool ) ), messageProcessor, SLOT( onSetGroupSelection( bool ) ) );
+			m->addAction( a );
+
+			a = new QAction( "Multiselect", this );
+			a->setCheckable( true );
+			a->setChecked( false );
+			connect( a, SIGNAL( triggered( bool ) ), messageProcessor, SLOT( onSetMultiSelection( bool ) ) );
 			m->addAction( a );
 
 			menu = m;

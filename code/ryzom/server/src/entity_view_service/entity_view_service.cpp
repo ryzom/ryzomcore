@@ -1104,7 +1104,7 @@ NLMISC_COMMAND(follow, "follow an entity", "entityId")
 	uint		creatorId;
 	uint		dynamicId;
 
-	if (sscanf(args[0].c_str(), "(%"NL_I64"x:%x:%x:%x)", &id, &type, &creatorId, &dynamicId) != 4)
+	if (sscanf(args[0].c_str(), "(%" NL_I64 "x:%x:%x:%x)", &id, &type, &creatorId, &dynamicId) != 4)
 		return false;
 
 	sid.setShortId( id );

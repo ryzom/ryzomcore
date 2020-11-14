@@ -130,7 +130,7 @@ step()
 	fi
 }
 
-# call verify_steps() when you want to stop if error(s) occured in previous steps
+# call verify_steps() when you want to stop if error(s) occurred in previous steps
 verify_steps()
 {
     if [ $STEPS_FAILURES -eq 0 ]

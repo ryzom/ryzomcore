@@ -7,6 +7,8 @@
     {$welcome_message}
   </div>
 
+  {if $userRegistration == '0'|| $userRegistration == '1'}
+  
   <form name="Page1"
         method="post"
         >
@@ -89,6 +91,8 @@
     </div>
 
   </form>
+  
+  {/if}
 
   <div id="signupTooltip"
        class="c2"

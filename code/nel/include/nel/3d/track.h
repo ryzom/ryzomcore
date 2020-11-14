@@ -166,7 +166,7 @@ public:
 
 
 	/// Serial the template
-	virtual void serial (NLMISC::IStream& f) throw (NLMISC::EStream)
+	virtual void serial (NLMISC::IStream& f)
 	{
 		// Serial version
 		(void)f.serialVersion (0);
@@ -217,7 +217,7 @@ public:
 
 
 	/// Serial the template
-	virtual void serial (NLMISC::IStream& f) throw (NLMISC::EStream)
+	virtual void serial (NLMISC::IStream& f)
 	{
 		// Serial version
 		(void)f.serialVersion (0);

@@ -82,13 +82,13 @@ namespace NLGUI
 		// Get the header color draw. NB: depends if grayed, and if active.
 		virtual NLMISC::CRGBA getDrawnHeaderColor () const{ return NLMISC::CRGBA(); };
 
-		uint8 getCurrentContainerAlpha() const{ return _CurrentContainerAlpha; }
-		uint8 getCurrentContentAlpha() const{ return _CurrentContentAlpha; }
+		uint8 getCurrentContainerAlpha() const { return _CurrentContainerAlpha; }
+		uint8 getCurrentContentAlpha() const { return _CurrentContentAlpha; }
 
-		virtual bool isGrayed() const{ return false; }
-		virtual bool getTouchFlag(bool clearFlag) const{ return false; }
-		virtual void backupPosition(){}
-		virtual void restorePosition(){}
+		virtual bool isGrayed() const { return false; }
+		virtual bool getTouchFlag(bool /* clearFlag */) const { return false; }
+		virtual void backupPosition() {}
+		virtual void restorePosition() {}
 
 	protected:
 		void triggerAlphaSettingsChangedAH();

@@ -298,7 +298,7 @@ void							CGuildContainerPD::pds__fetch(RY_PDS::CPData &data)
 		TGuildId	__k;
 		data.serial(__k);
 		CGuildPD*	__o = static_cast<CGuildPD*>(PDSLib.create(tableIndex));
-		_Guilds.insert(std::make_pair<TGuildId,CGuildPD*>(__k, __o));
+		_Guilds.insert(std::pair<TGuildId,CGuildPD*>(__k, __o));
 		PDSLib.setRowIndex(rowIndex, __o);
 		__o->pds__fetch(data);
 		__o->pds__setParentUnnotified(this);

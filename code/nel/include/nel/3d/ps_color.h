@@ -66,7 +66,7 @@ public:
 	{
 		CPSValueBlendFunc<NLMISC::CRGBA>::setValues(convertVBColor(startValue, _ColorType), convertVBColor(endValue, _ColorType));
 	}
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		setColorType(CVertexBuffer::TRGBA);
 		CPSValueBlendFunc<NLMISC::CRGBA>::serial(f);
@@ -100,7 +100,7 @@ public:
 	{
 		CPSValueBlendSampleFunc<NLMISC::CRGBA, RGBA_BLENDER_NUM_VALUES>::setValues(convertVBColor(startValue, _ColorType), convertVBColor(endValue, _ColorType));
 	}
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		setColorType(CVertexBuffer::TRGBA);
 		CPSValueBlendSampleFunc<NLMISC::CRGBA, RGBA_BLENDER_NUM_VALUES>::serial(f);
@@ -124,7 +124,7 @@ public:
 	NLMISC::CRGBA getValue(uint index)	const;
 	void setValues(const NLMISC::CRGBA *valueTab, uint32 numValues, uint32 nbStages);
 	void setValuesUnpacked(const NLMISC::CRGBA *valueTab, uint32 numValues, uint32 nbStages);
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		setColorType(CVertexBuffer::TRGBA);
 		CPSValueGradientFunc<NLMISC::CRGBA>::serial(f);
@@ -153,7 +153,7 @@ public:
 		this->_F.setColorType(colorType);
 	}
 	// serialisation should always be done in RGBA mode, so enforce that
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		setColorType(CVertexBuffer::TRGBA);
 		CPSAttribMakerT<NLMISC::CRGBA, F>::serial(f);
@@ -229,7 +229,7 @@ public:
 	virtual void setColorType(CVertexBuffer::TVertexColorType colorType);
 	virtual void setDefaultValue(NLMISC::CRGBA defaultValue);
 	virtual NLMISC::CRGBA getDefaultValue(void) const;
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 protected:
 	CVertexBuffer::TVertexColorType _ColorType;
 };
@@ -244,7 +244,7 @@ public:
 	NLMISC_DECLARE_CLASS(CPSColorBinOp);
 	CPSAttribMakerBase *clone() const { return new CPSColorBinOp(*this); }
 	virtual void setColorType(CVertexBuffer::TVertexColorType colorType);
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 };
 
 

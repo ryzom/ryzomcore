@@ -31,28 +31,22 @@
 #include "player_manager/cdb_branch.h"
 #include "player_manager/cdb_leaf.h"
 #include "nel/misc/xml_auto_ptr.h"
-#include <libxml/parser.h>
-
-////////////////
-// Namespaces //
-////////////////
-using namespace NLMISC;
-using namespace std;
-
-
 #include "nel/misc/i_xml.h"
 #include "nel/misc/progress_callback.h"
 
 #include <libxml/parser.h>
+
 //#include <io.h>
 #include <fcntl.h>
 #include <string.h>
 
 #include <string>
 
-
-using namespace std;
+////////////////
+// Namespaces //
+////////////////
 using namespace NLMISC;
+using namespace std;
 
 
 NL_INSTANCE_COUNTER_IMPL(CCDBStructNodeBranch);
@@ -284,7 +278,7 @@ void CCDBStructNodeBranch::init( xmlNodePtr node, NLMISC::IProgressCallback &pro
 		{
 			// dealing with an array of entries
 			uint countAsInt;
-			NLMISC::fromString(count, countAsInt);
+			NLMISC::fromString(count.str(), countAsInt);
 			nlassert((const char *) count != NULL);
 
 			for (uint i=0;i<countAsInt;i++)
@@ -347,7 +341,7 @@ void CCDBStructNodeBranch::init( xmlNodePtr node, NLMISC::IProgressCallback &pro
 		{
 			// dealing with an array of entries
 			uint countAsInt;
-			NLMISC::fromString(count, countAsInt);
+			NLMISC::fromString(count.str(), countAsInt);
 			nlassert((const char *) count != NULL);
 
 			for (uint i=0;i<countAsInt;i++)

@@ -55,7 +55,7 @@ void CWeatherFunctionParamsSheetBase::build(const NLGEORGES::UFormElm &item)
 }
 
 //=======================================================================
-void CWeatherFunctionParamsSheetBase::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CWeatherFunctionParamsSheetBase::serial(NLMISC::IStream &f)
 {
 	f.serial(DayLength);
 	f.serial(CycleLength);

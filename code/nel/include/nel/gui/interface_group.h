@@ -57,6 +57,7 @@ namespace NLGUI
 		CInterfaceElement* findFromShortId(const std::string &id);
 
 		/// Dynamic creation
+		virtual void addElement (CInterfaceElement *child, sint eltOrder = -1 );
 		virtual void addView  (CViewBase *child , sint eltOrder = -1);
 		virtual void addCtrl  (CCtrlBase *child, sint eltOrder = -1);
 		virtual void addGroup (CInterfaceGroup *child, sint eltOrder = -1);
@@ -78,6 +79,9 @@ namespace NLGUI
 		// Delete unknow type by name or ptr. NB: additionaly, if it's a group, unmakeWindow() is called as necessary
 		bool delElement (const std::string &id, bool noWarning=false);
 		bool delElement (CInterfaceElement *pIE, bool noWarning=false);
+
+		// Take the element from the group, but don't delete it!
+		CInterfaceElement* takeElement( CInterfaceElement *e );
 
 		uint getNumGroup() const { return (uint)_ChildrenGroups.size(); }
 		CInterfaceGroup *getGroup(uint index) const;
@@ -160,6 +164,7 @@ namespace NLGUI
 		sint32 getMaxH () const { return _MaxH; }
 		sint32 getMaxWReal () const { return _Active ? _MaxWReal : 0; }
 		sint32 getMaxHReal () const { return _Active ? _MaxHReal : 0; }
+		sint32 getInnerWidth () const;
 		sint32 getOfsX () const { return _OffsetX; }
 		sint32 getOfsY () const { return _OffsetY; }
 		bool   getResizeFromChildW() const { return _ResizeFromChildW; }
@@ -323,6 +328,17 @@ namespace NLGUI
 		float getDepthForZSort() const { return _DepthForZSort; }
 
 		void onWidgetDeleted( CInterfaceElement *e );
+
+		void moveBy( sint32 x, sint32 y );
+
+		// Blows up the group, moves it's children to it's parent
+		bool explode();
+
+		/// Adjusts the group's size so that all elements are fully inside the borders
+		void spanElements();
+
+		/// Aligns the elements - used for forming groups
+		void alignElements();
 
 	protected:
 

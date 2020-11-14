@@ -308,9 +308,9 @@ NLMISC_CATEGORISED_COMMAND(Stats,listCharNames,"display the names of the charact
 	std::sort(files.begin(),files.end());
 	for (uint32 i=0;i<files.size();++i)
 	{
-		static CPersistentDataRecord	pdr;
+		static CPersistentDataRecord pdr;
 		pdr.clear();
-		pdr.readFromFile(files[i].c_str());
+		pdr.readFromFile(files[i]);
 
 		CStatsScanCharacter c;
 		c.apply(pdr);

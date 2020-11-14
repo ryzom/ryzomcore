@@ -17,6 +17,7 @@
 
 #include "nel/misc/file.h"
 #include "nel/misc/path.h"
+#include "nel/misc/common.h"
 #include "nel/3d/scene_group.h"
 #include "nel/3d/zone.h"
 #include "nel/3d/skeleton_shape.h"
@@ -660,9 +661,7 @@ int		main(int argc, const char *argv[])
 		options.insert (argv[i]);
 
 	// Open log
-	FILE	*logStream;
-	logStream= fopen(std::string(getLogDirectory() + "file_info.log").c_str(), "wt");
-
+	FILE *logStream = nlfopen(getLogDirectory() + "file_info.log", "wt");
 
 	// parse dir or file ??
 	const char *fileName= argv[1];

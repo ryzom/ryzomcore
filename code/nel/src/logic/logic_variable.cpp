@@ -15,8 +15,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "nel/logic/logic_state_machine.h"
+#include "stdlogic.h"
 #include "nel/logic/logic_variable.h"
+
+#include "nel/logic/logic_state_machine.h"
 
 using namespace std;
 using namespace NLMISC;

@@ -41,7 +41,7 @@ public:
 		MAGICFX::TMagicFx   ID;
 	public:
 		void build(const NLGEORGES::UFormElm &item, const std::string &prefix);
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serial(NLMISC::IStream &f);
 	};
 public:
 	TType				  Type;
@@ -54,7 +54,7 @@ public:
 	};
 public:
 	virtual void build(const NLGEORGES::UFormElm &item, const std::string &prefix);
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 };
 
 // compares spell infos

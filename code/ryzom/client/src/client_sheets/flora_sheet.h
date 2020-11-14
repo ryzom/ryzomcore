@@ -32,7 +32,7 @@ public:
 	uint64      CumulatedWeight; // for sorting by weights
 public:
 	virtual void build(const NLGEORGES::UFormElm &item);
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 };
 inline bool operator < (const CPlantInfo &lhs, const CPlantInfo &rhs)
 {
@@ -53,7 +53,7 @@ public:
 	/// Build the sheet from an external script.
 	virtual void build(const NLGEORGES::UFormElm &item);
 	/// Serialize plant sheet into binary data file.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 	// Get total weight of plant infos
 	uint64		 getPlantInfoTotalWeight() const { return _TotalWeight; }
 	/** Get plant info from weighted index

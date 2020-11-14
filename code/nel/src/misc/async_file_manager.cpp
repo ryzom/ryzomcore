@@ -207,16 +207,11 @@ CAsyncFileManager::CFileLoad::CFileLoad (const std::string& sFileName, uint8 **p
 // ***************************************************************************
 void CAsyncFileManager::CFileLoad::run (void)
 {
-	FILE *f = fopen (_FileName.c_str(), "rb");
+	FILE *f = nlfopen (_FileName, "rb");
 	if (f != NULL)
 	{
-		uint8 *ptr;
-		long filesize=CFile::getFileSize (f);
-		//fseek (f, 0, SEEK_END);
-		//long filesize = ftell (f);
-		//nlSleep(5);
-		//fseek (f, 0, SEEK_SET);
-		ptr = new uint8[filesize];
+		uint32 filesize=CFile::getFileSize (f);
+		uint8 *ptr = new uint8[filesize];
 		if (fread (ptr, filesize, 1, f) != 1)
 			nlwarning("AFM: Couldn't read '%s'", _FileName.c_str());
 		fclose (f);
@@ -253,16 +248,11 @@ void CAsyncFileManager::CMultipleFileLoad::run (void)
 {
 	for (uint32 i = 0; i < _FileNames.size(); ++i)
 	{
-		FILE *f = fopen (_FileNames[i].c_str(), "rb");
+		FILE *f = nlfopen (_FileNames[i], "rb");
 		if (f != NULL)
 		{
-			uint8 *ptr;
-			long filesize=CFile::getFileSize (f);
-			//fseek (f, 0, SEEK_END);
-			//long filesize = ftell (f);
-			//nlSleep(5);
-			//fseek (f, 0, SEEK_SET);
-			ptr = new uint8[filesize];
+			uint32 filesize=CFile::getFileSize (f);
+			uint8 *ptr = new uint8[filesize];
 			if (fread (ptr, filesize, 1, f) != 1)
 				nlwarning("AFM: Couldn't read '%s'", _FileNames[i].c_str());
 			fclose (f);

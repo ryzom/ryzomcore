@@ -766,7 +766,7 @@ bool CProductDescriptionForClient::load(const std::string& filePath)
 	clear();
 	static CPersistentDataRecord pdr;
 	pdr.clear();
-	pdr.readFromBinFile(filePath.c_str());
+	pdr.readFromBinFile(filePath);
 	apply(pdr);
 
 	return true;

@@ -31,6 +31,10 @@
 
 #include "nel/misc/win_thread.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace BGDownloader;
 using namespace NLMISC;
 
@@ -213,7 +217,7 @@ void CBGDownloaderAccess::resumeBackgroundDownload()
 //=====================================================
 void CBGDownloaderAccess::CDownloadCoTask::run()
 {
-	Parent->_ErrorMsg = "";
+	Parent->_ErrorMsg.clear();
 	try
 	{
 		// don't restart downloader before
@@ -385,7 +389,7 @@ bool CBGDownloaderAccess::CDownloadCoTask::isDownloaderProcessRunning()
 {
 	// the downloader creates a system-wide mutex, so if present, assume that the downloader is running
 	//
-	HANDLE mutex = CreateMutex (NULL, FALSE, BGDownloader::DownloaderMutexName);
+	HANDLE mutex = CreateMutexW (NULL, FALSE, BGDownloader::DownloaderMutexName);
 	if (mutex)
 	{
 		if (GetLastError() == ERROR_ALREADY_EXISTS)

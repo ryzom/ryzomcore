@@ -18,6 +18,9 @@
 #include "stdpch.h"
 #include "nel/gui/group_wheel.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 NLMISC_REGISTER_OBJECT(CViewBase, CInterfaceGroupWheel, std::string, "group_wheel");
 

@@ -52,24 +52,25 @@ INT_PTR CALLBACK CalculatingDialogCallback (
 
 		case WM_PAINT:
 		{
-			char temp[256];
+			TCHAR temp[256];
 			SendMessage( GetDlgItem( hwndDlg, IDC_PROGRESS1 ), PBM_SETPOS, (int)(pClass->rRatioCalculated*100), 0 );
 
 			if( pClass->rRatioCalculated > 0.0 )
 			{
 				double TimeLeft = (TimeCurrent - pClass->rTimeBegin) * (1.0-pClass->rRatioCalculated);
-				sprintf( temp, "Time remaining : %02d h %02d m %02d s", ((uint32)TimeLeft)/3600,
+				_stprintf( temp, _T("Time remaining : %02d h %02d m %02d s"), ((uint32)TimeLeft)/3600,
 																		(((uint32)TimeLeft)/60)%60,
 																		(((uint32)TimeLeft))%60 );
 				if (pClass->bCancelCalculation)
-					strcpy (temp, "INTERRUPTED - Finishing current object...");
-				SendMessage (GetDlgItem (hwndDlg, IDC_STATICTIMELEFT), WM_SETTEXT, 0, (long)temp);
+					_tcscpy_s (temp, 256, _T("INTERRUPTED - Finishing current object..."));
+
+				SendMessage (GetDlgItem (hwndDlg, IDC_STATICTIMELEFT), WM_SETTEXT, 0, (LPARAM)temp);
 				SendMessage (GetDlgItem (hwndDlg, IDC_BUTTONCANCEL), WM_PAINT, 0, 0);
 			}
-			string all = "";
+			string all;
 			for (uint32 i = 0; i < 14; ++i)
 				all += pClass->sInfoProgress[i] + "\n";
-			SendMessage (GetDlgItem (hwndDlg, IDC_STATICINFO), WM_SETTEXT, 0, (long)all.c_str());
+			SendMessage (GetDlgItem (hwndDlg, IDC_STATICINFO), WM_SETTEXT, 0, (LPARAM)utf8ToTStr(all));
 		}
 		break;
 
@@ -119,7 +120,7 @@ void CProgressBar::initProgressBar( sint32 nNbMesh, Interface &ip)
 										MAKEINTRESOURCE(IDD_CALCULATING),
 										NULL,//ip.GetMAXHWnd(), 
 										CalculatingDialogCallback,
-										(long)this );
+										(LPARAM)this );
 }
 
 // -----------------------------------------------------------------------------------------------

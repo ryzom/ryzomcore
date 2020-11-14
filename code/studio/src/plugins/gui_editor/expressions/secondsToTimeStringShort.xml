@@ -1,0 +1,8 @@
+<expression>
+<category>Time</category>
+<name>secondsToTimeStringShort</name>
+<variable>false</variable>
+<slots>
+<slot>A</slot>
+</slots>
+</expression>

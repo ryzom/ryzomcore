@@ -728,7 +728,6 @@ void CDBGroupListSheetTrade::sort()
 	}
 }
 
-
 bool CDBGroupListSheetTrade::needCheckAllItems()
 {
 	if (_LastFamePriceFactor != _FamePriceFactorLeaf->getValue16())

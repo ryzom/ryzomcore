@@ -194,7 +194,7 @@ void CCounterPage::OnButtonCounterRemove()
 	}
 	else
 	{
-		AfxMessageBox( "No counter selected ! Choose a counter first");
+		AfxMessageBox(_T("No counter selected ! Choose a counter first"));
 	}
 	
 }
@@ -237,7 +237,7 @@ void CCounterPage::OnButtonCounterApply()
 	}	
 	else
 	{
-		AfxMessageBox( "No counter selected ! Choose a counter first");
+		AfxMessageBox(_T("No counter selected ! Choose a counter first"));
 	}
 }
 

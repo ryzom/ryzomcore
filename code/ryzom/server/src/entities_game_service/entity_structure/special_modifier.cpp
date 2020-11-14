@@ -85,7 +85,7 @@ void CSpecialModifiers::init()
 //-----------------------------------------------
 // CSpecialModifiers::serial
 //-----------------------------------------------
-void CSpecialModifiers::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CSpecialModifiers::serial(NLMISC::IStream &f)
 {
 	f.serial( MeleeAttackModifierOnEnemy );
 	f.serial( MeleeAttackModifierOnSelf );

@@ -242,8 +242,6 @@ public:
 	{
 		T v;
 		bool ret = NLMISC::fromString(val, v);
-//		std::stringstream ss (val);
-//		ss >> v;
 		set (v);
 		return ret;
 	}
@@ -251,9 +249,6 @@ public:
 	virtual std::string toString (bool /* human */) const
 	{
 		return NLMISC::toString(_Value);
-//		std::stringstream ss;
-//		ss << _Value;
-//		return ss.str();
 	}
 
 	CVariable<T> &operator= (const T &val)

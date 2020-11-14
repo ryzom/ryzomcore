@@ -88,6 +88,8 @@ namespace NLMISC
 		virtual void setNoAssert(bool noAssert) =0;
 		virtual bool getAlreadyCreateSharedAmongThreads() =0;
 		virtual void setAlreadyCreateSharedAmongThreads(bool b) =0;
+		virtual bool isWindowedApplication() = 0;
+		virtual void setWindowedApplication(bool b = true) = 0;
 		//@}
 	protected:
 		/// Called by derived class to finalize initialisation of context
@@ -106,6 +108,7 @@ namespace NLMISC
 	{
 	public:
 		CApplicationContext();
+		virtual ~CApplicationContext();
 
 		virtual void *getSingletonPointer(const std::string &singletonName);
 		virtual void setSingletonPointer(const std::string &singletonName, void *ptr);
@@ -131,6 +134,8 @@ namespace NLMISC
 		virtual void setNoAssert(bool noAssert);
 		virtual bool getAlreadyCreateSharedAmongThreads();
 		virtual void setAlreadyCreateSharedAmongThreads(bool b);
+		virtual bool isWindowedApplication();
+		virtual void setWindowedApplication(bool b);
 
 	private:
 		/// Singleton registry
@@ -147,6 +152,7 @@ namespace NLMISC
 		bool DebugNeedAssert;
 		bool NoAssert;
 		bool AlreadyCreateSharedAmongThreads;
+		bool WindowedApplication;
 	};
 
 	/** This class implements the context interface for the a library module.
@@ -183,6 +189,8 @@ namespace NLMISC
 		virtual void setNoAssert(bool noAssert);
 		virtual bool getAlreadyCreateSharedAmongThreads();
 		virtual void setAlreadyCreateSharedAmongThreads(bool b);
+		virtual bool isWindowedApplication();
+		virtual void setWindowedApplication(bool b);
 
 	private:
 		/// Pointer to the application context.

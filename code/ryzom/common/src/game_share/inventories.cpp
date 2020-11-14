@@ -98,7 +98,7 @@ namespace INVENTORIES
 			"",				// player_room
 			""				// unknown
 	};
-
+	
 
 	//
 	const char *CInventoryCategoryForCharacter::InventoryStr [CInventoryCategoryForCharacter::NbInventoryIds] =
@@ -122,7 +122,7 @@ namespace INVENTORIES
 	const char *InfoVersionStr = "INFO_VERSION";
 
 	const char *CItemSlot::ItemPropStr [NbItemPropId] =
-	{ "SHEET", "QUALITY", "QUANTITY", "USER_COLOR", "LOCKED", "WEIGHT", "NAMEID", "ENCHANT", "RM_CLASS_TYPE", "RM_FABER_STAT_TYPE", "PRICE", "RESALE_FLAG", "PREREQUISIT_VALID", "WORNED" };
+	{ "SHEET", "QUALITY", "QUANTITY", "USER_COLOR", "CREATE_TIME", "SERIAL", "LOCKED", "WEIGHT", "NAMEID", "ENCHANT", "RM_CLASS_TYPE", "RM_FABER_STAT_TYPE", "PRICE", "RESALE_FLAG", "PREREQUISIT_VALID", "WORNED" };
 	const uint CItemSlot::DataBitSize [NbItemPropId]  =
-	{ 32,      10,        10,         3,            10,        16,       32,       10,        3,				  5,				     32,      2,			1,					1 };
+	{ 32,      10,        10,         3,            32,            32,       10,        16,       32,       10,        3,              5,                    32,      2,             1,                   1 };
 }

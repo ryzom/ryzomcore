@@ -21,8 +21,13 @@
 #include "nel/3d/driver.h"
 #include "nel/3d/ps_iterator.h"
 #include "nel/3d/particle_system.h"
+#include "nel/3d/debug_vb.h"
+
 #include "nel/misc/fast_floor.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -991,7 +996,7 @@ void CPSFaceLookAt::resize(uint32 capacity)
 
 
 ///===========================================================================================
-void CPSFaceLookAt::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSFaceLookAt::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSFaceLookAt_serial)
 	// version 4 : added 'align on z-axis' flag

@@ -20,13 +20,17 @@
 #include "nel/gui/interface_property.h"
 #include "nel/gui/interface_common.h"
 #include "nel/gui/db_manager.h"
+#include "nel/misc/common.h"
 
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
-
 	bool CInterfaceProperty::link( CCDBNodeLeaf *dbNode )
 	{
 		_VolatileValue = dbNode;
@@ -66,6 +70,20 @@ namespace NLGUI
 	}
 
 
+	void CInterfaceProperty::setDouble(double value)
+	{
+		C64BitsParts parts;
+		parts.d[0] = value;
+		setSInt64(parts.i64[0]);
+	}
+
+	double CInterfaceProperty::getDouble() const
+	{
+		C64BitsParts parts;
+		parts.i64[0] = getSInt64();
+		return parts.d[0];
+	}
+
 	// *****************
 	// sint64 operations
 	// *****************
@@ -104,10 +122,9 @@ namespace NLGUI
 		if ( isdigit(*ptr) || *ptr=='-')
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(id);
-			double buf;
-			fromString(ptr, buf);
-			sint64 i = *(sint64*)&buf;
-			_VolatileValue->setValue64( i );
+			C64BitsParts buf;
+			fromString(ptr, buf.d[0]);
+			_VolatileValue->setValue64(buf.i64[0]);
 		}
 		else
 		{

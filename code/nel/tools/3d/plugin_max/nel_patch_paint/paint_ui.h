@@ -122,6 +122,7 @@ enum PainterKeysType
 	ZoomIn,
 	ZoomOut,
 	GetState,
+	ResetPatch,
 	KeyCounter
 };
 

@@ -211,6 +211,14 @@ bool		strFindReplace(T &str, const char *strFind, const U &strReplace)
 	return strFindReplace(str, tempStr, strReplace);
 }
 
+template<class T>
+T strFindReplaceAll(const T &str, const T &search, const T &replace)
+{
+	T ret = str;
+	while (strFindReplace(ret, search, replace));
+	return ret;
+}
+
 // set flags in a bit set
 template <class T, class U>
 inline void setFlags(T &dest, U mask, bool on)

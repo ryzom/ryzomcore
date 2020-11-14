@@ -21,6 +21,7 @@
 
 #include "nel/misc/variable.h"
 #include "nel/misc/path.h"
+#include "nel/misc/common.h"
 
 #include "game_share/persistent_data.h"
 
@@ -52,7 +53,7 @@ CCharacterScanJob::CCharacterScanJob()
 
 	// open the output file for the character table
 	std::string filename= "char_tbl.csv";
-	_CharTblFile=fopen(filename.c_str(),"wb");
+	_CharTblFile = NLMISC::nlfopen(filename, "wb");
 	if (_CharTblFile==NULL)
 	{
 		nlwarning("Failed to open output file: %s",filename.c_str());
@@ -73,7 +74,7 @@ CCharacterScanJob::~CCharacterScanJob()
 	{
 		// create the output file name and open the file for writing
 		std::string filename="char_stats_"+(*it).first+".csv";
-		FILE* f=fopen(filename.c_str(),"wb");
+		FILE* f = NLMISC::nlfopen(filename, "wb");
 		if (f==NULL)
 		{
 			nlwarning("Failed to open output file: %s",filename.c_str());
@@ -97,9 +98,9 @@ void CCharacterScanJob::update()
 		return;
 
 	// load the file into a pdr record
-	static CPersistentDataRecord	pdr;
+	static CPersistentDataRecord pdr;
 	pdr.clear();
-	pdr.readFromFile(_Files[_NextFile].c_str());
+	pdr.readFromFile(_Files[_NextFile]);
 	++_NextFile;
 
 	// create a character representation and apply the pdr

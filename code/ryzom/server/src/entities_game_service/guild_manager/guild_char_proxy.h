@@ -51,7 +51,8 @@ public:
 	void cancelAFK();
 	CCreature * getInterlocutor();
 	CModuleParent & getModuleParent();
-	void sendSystemMessage( const std::string &  msg, const TVectorParamCheck & params  =  TVectorParamCheck() );
+	void sendSystemMessage( const std::string &  msg, const TVectorParamCheck & params);
+	void sendSystemMessage( const std::string &  msg);
 	void sendDynamicMessageToChatGroup( const std::string &  msg, CChatGroup::TGroupType type, const TVectorParamCheck & params  =  TVectorParamCheck() );
 	uint64 getMoney();
 	void spendMoney(uint64 money);

@@ -25,7 +25,7 @@ struct CVillageIG
 {
 	std::string IgName;
 	std::string ParentName;
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial(IgName, ParentName);
 	}
@@ -63,7 +63,7 @@ struct CVillageSheet
 	void build(const NLGEORGES::UFormElm &item);
 
 	/// Serialize character sheet into binary data file.
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 };
 

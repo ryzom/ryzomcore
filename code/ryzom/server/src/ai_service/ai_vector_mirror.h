@@ -95,7 +95,7 @@ public:		// Methods.
 	inline	double	distTo(const CAIVectorMirror &dest)  const;
 	inline	double	distSqTo(const CAIVectorMirror &dest)  const;
 	inline	double	quickDistTo(const CAIVectorMirror &dest) const;
-	
+
 protected:
 	inline void	setX(const CAICoord &x)	{ _x=x;	}
 	inline void	setY(const CAICoord &y)	{ _y=y;	}

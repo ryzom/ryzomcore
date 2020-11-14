@@ -133,7 +133,7 @@ const uint RYZOM_PID_SHM_ID = 0x6b833f31;
 
 // name of the background downloader system-wide mutex
 
-extern const char *DownloaderMutexName;
+extern const wchar_t *DownloaderMutexName;
 
 
 // get patch written size in megabytes

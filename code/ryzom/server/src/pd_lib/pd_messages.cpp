@@ -247,7 +247,7 @@ void	CDbMessage::getHRContent(const CDBDescriptionParser& description, std::stri
 			if (getTable() >= db.Tables.size())
 				return;
 			const CTableNode&	table = db.Tables[getTable()];
-			result = NLMISC::toString("%-12s: %s %"NL_I64"X %s", "LoadRow", table.Name.c_str(), asUint64(), asEntityId().toString().c_str());
+			result = NLMISC::toString("%-12s: %s %" NL_I64 "X %s", "LoadRow", table.Name.c_str(), asUint64(), asEntityId().toString().c_str());
 		}
 		break;
 
@@ -504,7 +504,7 @@ bool	CUpdateLog::selectMessages(const CDBDescriptionParser& description, const N
 
 		if (message.getType() == CDbMessage::PushContext)
 		{
-			contextsStart.push_back(std::make_pair<uint, bool>(msg, false));
+			contextsStart.push_back(std::pair<uint, bool>(msg, false));
 		}
 		else if (message.getType() == CDbMessage::PopContext)
 		{
@@ -561,7 +561,7 @@ bool	CUpdateLog::selectMessages(const CDBDescriptionParser& description, const s
 
 		if (message.getType() == CDbMessage::PushContext)
 		{
-			contextsStart.push_back(std::make_pair<uint, bool>(msg, false));
+			contextsStart.push_back(std::pair<uint, bool>(msg, false));
 		}
 		else if (message.getType() == CDbMessage::PopContext)
 		{
@@ -644,7 +644,7 @@ bool	CUpdateLog::selectMessages(const CDBDescriptionParser& description, const N
 
 		if (message.getType() == CDbMessage::PushContext)
 		{
-			contextsStart.push_back(std::make_pair<uint, bool>(msg, false));
+			contextsStart.push_back(std::pair<uint, bool>(msg, false));
 		}
 		else if (message.getType() == CDbMessage::PopContext)
 		{

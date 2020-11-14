@@ -92,7 +92,7 @@ void CAnimationFXSheet::build(const NLGEORGES::UFormElm &item)
 //-----------------------------------------------
 // serial
 //-----------------------------------------------
-void CAnimationFXSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAnimationFXSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(PSName);
 	f.serial(StickMode);

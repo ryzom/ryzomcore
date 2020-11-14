@@ -23,9 +23,14 @@
 #include "nel/gui/db_manager.h"
 #include "nel/gui/interface_link.h"
 #include "nel/gui/widget_manager.h"
+#include "nel/gui/view_renderer.h"
 
 using namespace std;
 using namespace NLMISC;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NLGUI
 {
@@ -65,7 +70,7 @@ namespace NLGUI
 		string allparam = Params;
 		skipBlankAtStart (allparam);
 		string param = toLower (ParamName);
-		while (allparam.size() > 0)
+		while (!allparam.empty())
 		{
 			std::string::size_type e = allparam.find('=');
 			if (e == std::string::npos || e == 0) break;
@@ -91,7 +96,7 @@ namespace NLGUI
 	{
 		string allparam = Params;
 		skipBlankAtStart (allparam);
-		while (allparam.size() > 0)
+		while (!allparam.empty())
 		{
 			std::string::size_type e = allparam.find('=');
 			if (e == std::string::npos || e == 0) break;
@@ -738,4 +743,18 @@ namespace NLGUI
 	};
 	REGISTER_ACTION_HANDLER (CAHUnlockAllContainer, "unlock_all_container");
 
+	// ------------------------------------------------------------------------------------------------
+	class CAHCopyToClipboard : public IActionHandler
+	{
+		virtual void execute (CCtrlBase *pCaller, const std::string &params)
+		{
+			ucstring s;
+			s.fromUtf8(params);
+			if (!CViewRenderer::getInstance()->getDriver()->copyTextToClipboard(s))
+			{
+				nlwarning("Copy to clipboard failed: '%s'", params.c_str());
+			}
+		}
+	};
+	REGISTER_ACTION_HANDLER(CAHCopyToClipboard, "copy_to_clipboard");
 }

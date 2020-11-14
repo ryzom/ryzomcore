@@ -25,14 +25,16 @@
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/mouse_device.h"
 #include "nel/misc/dynloadlib.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
 #include "nel/3d/u_driver.h"
 
 #include "driver_direct3d.h"
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace std;
 using namespace NLMISC;
@@ -1245,29 +1247,29 @@ bool CDriverD3D::init (uintptr_t windowIcon, emptyProc exitFunc)
 
 	createCursors();
 
+	_WindowClass = "NLD3D" + toString(windowIcon);
+
 	// Register a window class
-	WNDCLASSW		wc;
+	WNDCLASSA		wc;
 
 	memset(&wc,0,sizeof(wc));
 	wc.style			= 0; // CS_HREDRAW | CS_VREDRAW ;//| CS_DBLCLKS;
 	wc.lpfnWndProc		= (WNDPROC)WndProc;
 	wc.cbClsExtra		= 0;
 	wc.cbWndExtra		= 0;
-	wc.hInstance		= GetModuleHandleW(NULL);
+	wc.hInstance		= GetModuleHandleA(NULL);
 	wc.hIcon			= (HICON)windowIcon;
 	wc.hCursor			= _DefaultCursor;
 	wc.hbrBackground	= WHITE_BRUSH;
-	_WindowClass = "NLD3D" + toString(windowIcon);
-	ucstring us = _WindowClass;
-	wc.lpszClassName	= (LPCWSTR)us.c_str();
+	wc.lpszClassName	= _WindowClass.c_str();
 	wc.lpszMenuName		= NULL;
-	if (!RegisterClassW(&wc))
+	if (!RegisterClassA(&wc))
 	{
 		DWORD error = GetLastError();
 		if (error != ERROR_CLASS_ALREADY_EXISTS)
 		{
 			nlwarning("CDriverD3D::init: Can't register window class %s (error code %i)", _WindowClass.c_str(), (sint)error);
-			_WindowClass = "";
+			_WindowClass.clear();
 			return false;
 		}
 	}
@@ -1326,9 +1328,13 @@ const D3DFORMAT FinalPixelFormat[ITexture::UploadFormatCount][CDriverD3D::FinalP
 
 // ***************************************************************************
 
-bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay)
+bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable)
 {
 	H_AUTO_D3D(CDriver3D_setDisplay);
+
+	if (!mode.OffScreen)
+		NLMISC::INelContext::getInstance().setWindowedApplication(true);
+
 	if (!_D3D)
 		return false;
 #ifndef NL_NO_ASM
@@ -1478,7 +1484,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 			D3DADAPTER_IDENTIFIER9 Identifier;
 			HRESULT Res;
 			Res = _D3D->GetAdapterIdentifier(gAdapter,0,&Identifier);
-			
+
 			if (strstr(Identifier.Description,"PerfHUD") != 0)
 			{
 				nlinfo ("Setting up with PerfHUD");
@@ -1510,8 +1516,6 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 			}
 		}
 	}
-
-//	_D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
 
 	// Check some caps
 	D3DCAPS9 caps;
@@ -1636,20 +1640,6 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 
 	// Setup the event emitter, and try to retrieve a direct input interface
 	_EventEmitter.addEmitter(we, true /*must delete*/); // the main emitter
-
-	// Try to get direct input
-	try
-	{
-		NLMISC::CDIEventEmitter *diee = NLMISC::CDIEventEmitter::create(GetModuleHandle(NULL), _HWnd, we);
-		if (diee)
-		{
-			_EventEmitter.addEmitter(diee, true);
-		}
-	}
-	catch(const EDirectInput &e)
-	{
-		nlinfo(e.what());
-	}
 
 	// Init some variables
 	_ForceDXTCCompression = false;
@@ -1820,7 +1810,7 @@ emptyProc CDriverD3D::getWindowProc()
 
 IDriver::TMessageBoxId CDriverD3D::systemMessageBox (const char* message, const char* title, TMessageBoxType type, TMessageBoxIcon icon)
 {
-	switch (::MessageBox (_HWnd, message, title, ((type==retryCancelType)?MB_RETRYCANCEL:
+	switch (::MessageBoxW (_HWnd, utf8ToWide(message), utf8ToWide(title), ((type==retryCancelType)?MB_RETRYCANCEL:
 		(type==yesNoCancelType)?MB_YESNOCANCEL:
 		(type==okCancelType)?MB_OKCANCEL:
 		(type==abortRetryIgnoreType)?MB_ABORTRETRYIGNORE:
@@ -1926,7 +1916,7 @@ bool CDriverD3D::clear2D(CRGBA rgba)
 
 	bool result = _DeviceInterface->Clear( 0, NULL, D3DCLEAR_TARGET, NL_D3DCOLOR_RGBA(rgba), 1.0f, 0 ) == D3D_OK;
 
-	// Restaure the old viewport
+	// Restore the old viewport
 	setupViewport (oldViewport);
 	return result;
 }
@@ -1945,7 +1935,7 @@ bool CDriverD3D::clearZBuffer(float zval)
 
 	bool result = _DeviceInterface->Clear( 0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_ARGB(0,0,0,0), zval, 0 ) == D3D_OK;
 
-	// Restaure the old viewport
+	// Restore the old viewport
 	setupViewport (oldViewport);
 
 	// NVidia driver 56.72 needs to reset the vertex buffer after a clear Z
@@ -1968,7 +1958,7 @@ bool CDriverD3D::clearStencilBuffer(float stencilval)
 
 	bool result = _DeviceInterface->Clear( 0, NULL, D3DCLEAR_STENCIL, D3DCOLOR_ARGB(0,0,0,0), 1.0f, (unsigned long)stencilval ) == D3D_OK;
 
-	// Restaure the old viewport
+	// Restore the old viewport
 	setupViewport (oldViewport);
 
 	return result;
@@ -2009,13 +1999,6 @@ bool CDriverD3D::swapBuffers()
 
 	// todo hulud volatile
 	//_DeviceInterface->SetStreamSource(0, _VolatileVertexBufferRAM[1]->VertexBuffer, 0, 12);
-
-	// Is direct input running ?
-	if (_EventEmitter.getNumEmitters() > 1)
-	{
-		// flush direct input messages if any
-		NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1))->poll();
-	}
 
 	// End now
 	if (!endScene())
@@ -2120,6 +2103,24 @@ void CDriverD3D::setAnisotropicFilter(sint filter)
 	{
 		_AnisotropicFilter = filter;
 	}
+}
+
+// ***************************************************************************
+
+uint CDriverD3D::getAnisotropicFilter() const
+{
+	H_AUTO_D3D(CDriverD3D_getAnisotropicFilter);
+
+	return _AnisotropicFilter;
+}
+
+// ***************************************************************************
+
+uint CDriverD3D::getAnisotropicFilterMaximum() const
+{
+	H_AUTO_D3D(CDriverD3D_getAnisotropicFilterMaximum);
+
+	return _MaxAnisotropy;
 }
 
 // ***************************************************************************
@@ -2270,7 +2271,10 @@ bool CDriverD3D::getCurrentScreenMode(GfxMode &gfxMode)
 // ***************************************************************************
 void CDriverD3D::setWindowTitle(const ucstring &title)
 {
-	SetWindowTextW(_HWnd,(WCHAR*)title.c_str());
+	if (!SetWindowTextW(_HWnd, (WCHAR*)title.c_str()))
+	{
+		nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+	}
 }
 
 // ***************************************************************************
@@ -2330,13 +2334,13 @@ void CDriverD3D::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 
 	if (winIconBig)
 	{
-		SendMessage(_HWnd, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
-		SendMessage(_HWnd, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconBig);
+		SendMessageA(_HWnd, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
+		SendMessageA(_HWnd, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconBig);
 	}
 	else
 	{
-		SendMessage(_HWnd, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
-		SendMessage(_HWnd, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconSmall);
+		SendMessageA(_HWnd, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
+		SendMessageA(_HWnd, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconSmall);
 	}
 }
 
@@ -2384,6 +2388,7 @@ bool CDriverD3D::getAdapter(uint adapter, IDriver::CAdapter &desc) const
 			desc.Revision = identifier.Revision;
 			desc.SubSysId = identifier.SubSysId;
 			desc.VendorId = identifier.VendorId;
+			desc.VideoMemory = _Adapter == _adapter ? getTotalVideoMemory():-1;
 			return true;
 		}
 	}
@@ -2547,7 +2552,7 @@ bool CDriverD3D::reset (const GfxMode& mode)
 	_CurrentMaterial = NULL;
 	_CurrentMaterialInfo = NULL;
 
-	// Restaure non managed vertex buffer in system memory
+	// Restore non managed vertex buffer in system memory
 	ItVBDrvInfoPtrList iteVb = _VBDrvInfos.begin();
 	while (iteVb != _VBDrvInfos.end())
 	{
@@ -2873,6 +2878,17 @@ const char *CDriverD3D::getVideocardInformation ()
 	}
 	else
 		return "Can't get video card information";
+}
+
+// ***************************************************************************
+
+sint CDriverD3D::getTotalVideoMemory () const
+{
+	H_AUTO_D3D(CDriverD3D_getTotalVideoMemory);
+
+	// Can't use _DeviceInterface->GetAvailableTextureMem() because it's not reliable
+	// Returns 4 GiB instead of 2 with my GPU
+	return -1;
 }
 
 // ***************************************************************************

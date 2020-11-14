@@ -21,9 +21,13 @@
 #include "nel/misc/path.h"
 #include "nel/misc/debug.h"
 #include "nel/misc/hierarchical_timer.h"
+
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -236,7 +240,7 @@ void CTextureFile::doGenerate(bool async)
 
 
 // ***************************************************************************
-void	CTextureFile::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CTextureFile::serial(NLMISC::IStream &f)
 {
 	/*
 	Version 1:

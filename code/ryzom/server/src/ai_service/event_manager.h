@@ -17,6 +17,8 @@
 #ifndef RYAI_EVENT_MANAGER_H
 #define RYAI_EVENT_MANAGER_H
 
+#include <functional>
+
 #include "event_reaction.h"
 #include "states.h"
 

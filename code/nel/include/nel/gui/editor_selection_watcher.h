@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <string>
+#include <vector>
 
 namespace NLGUI
 {
@@ -24,7 +25,7 @@ namespace NLGUI
 	public:
 
 		/// Notifies the watcher about the change
-		virtual void selectionChanged( std::string &newSelection ) = 0;
+		virtual void selectionChanged() = 0;
 	};
 }
 

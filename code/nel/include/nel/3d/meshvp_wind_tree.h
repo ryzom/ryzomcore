@@ -90,7 +90,7 @@ public:
 	virtual float	getMaxVertexMove();
 
 	// Serial.
-	virtual void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void	serial(NLMISC::IStream &f);
 	NLMISC_DECLARE_CLASS(CMeshVPWindTree);
 
 	// @}
@@ -124,7 +124,7 @@ private:
 	double		_LastSceneTime;
 
 	// maximum amplitude vector for each level. Stored in mesh because same for all instances.
-	CVector		_MaxDeltaPos[HrcDepth];
+	NLMISC::CVector		_MaxDeltaPos[HrcDepth];
 	float		_MaxVertexMove;
 
 	// MBR Cache

@@ -24,6 +24,9 @@
 
 #pragma optimize("", off )
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {

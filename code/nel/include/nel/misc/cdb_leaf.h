@@ -40,20 +40,20 @@ public:
 
 
 	/// Return the value of the property.
-	inline sint64 getValue64() { return _Property; }
+	inline sint64 getValue64() const { return _Property; }
 
 	/// Set the value of the property (set '_Changed' flag with 'true').
 	void setValue64 (sint64 prop);
 
-	inline sint32 getValue32() { return *((sint32*)&_Property); }
+	inline sint32 getValue32() const { return (sint32)(_Property & 0xffffffff); }
 	void setValue32 (sint32 prop);
-	inline sint16 getValue16() { return *((sint16*)&_Property); }
+	inline sint16 getValue16() const { return (sint16)(_Property & 0xffff); }
 	void setValue16 (sint16 prop);
-	inline sint8 getValue8() { return *((sint8*)&_Property); }
+	inline sint8 getValue8() const { return (sint8)(_Property & 0xff); }
 	void setValue8 (sint8 prop);
-	inline bool getValueBool() { return (_Property!=(sint64)0 ); }
+	inline bool getValueBool() const { return (_Property!=(sint64)0 ); }
 	void setValueBool (bool prop);
-	inline CRGBA getValueRGBA()
+	inline CRGBA getValueRGBA() const
 	{
 		CRGBA col;
 		col.R = (uint8)(_Property&0xff);
@@ -65,11 +65,11 @@ public:
 	void setValueRGBA (const CRGBA &color);
 
 	/// Return the value of the property before the database change
-	inline sint64 getOldValue64() { return _oldProperty; }
-	inline sint32 getOldValue32() { return *((sint32*)&_oldProperty); }
-	inline sint16 getOldValue16() { return *((sint16*)&_oldProperty); }
-	inline sint8 getOldValue8() { return *((sint8*)&_oldProperty); }
-	inline bool getOldValueBool() { return (_oldProperty!=(sint64)0 ); }
+	inline sint64 getOldValue64() const { return _oldProperty; }
+	inline sint32 getOldValue32() const { return (sint32)(_oldProperty & 0xffffffff); }
+	inline sint16 getOldValue16() const { return (sint16)(_oldProperty & 0xffff); }
+	inline sint8 getOldValue8() const { return (sint8)(_oldProperty & 0xff); }
+	inline bool getOldValueBool() const { return (_oldProperty!=(sint64)0 ); }
 
 
 	/// Return the type of the property.

@@ -26,6 +26,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 NLMISC_REGISTER_OBJECT(CViewBase, CGroupTab, std::string, "tab");
 
 namespace NLGUI
@@ -262,7 +266,7 @@ namespace NLGUI
 		{
 			tabB->setId(string("tab") + NLMISC::toString(_Buttons.size()));
 
-			if(_Buttons.size()==0)
+			if(_Buttons.empty())
 			{
 				tabB->setParentPos(NULL);
 				tabB->setParentPosRef(Hotspot_TL);
@@ -316,7 +320,7 @@ namespace NLGUI
 		if (tabB)
 		{
 			// don't use addTab to avoid selection of new tab
-			addTab(tabB, (sint) ls.toNumber(2));
+			addTab(tabB, (sint) ls.toInteger(2));
 		}
 		return 0;
 	}
@@ -395,7 +399,7 @@ namespace NLGUI
 		const char *funcName = "removeTab";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		removeTab((uint) ls.toNumber(1));
+		removeTab((uint) ls.toInteger(1));
 		return 0;
 	}
 
@@ -441,7 +445,7 @@ namespace NLGUI
 		const char *funcName = "getTabButton";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		CCtrlTabButton* tab = getTabButton((uint) ls.toNumber(1));
+		CCtrlTabButton* tab = getTabButton((uint) ls.toInteger(1));
 		if(tab != NULL)
 		{
 			CLuaIHM::pushUIOnStack(ls, tab);
@@ -453,7 +457,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupTab::updateFirstTabButton()
 	{
-		if(!_HideOutTabs || (_Selection<0) || (_Buttons.size()==0) || (_Parent->getWReal()<0)
+		if(!_HideOutTabs || (_Selection<0) || _Buttons.empty() || (_Parent->getWReal()<0)
 			|| _FirstTabIndex>=(sint)_Buttons.size())
 			return;
 
@@ -562,7 +566,7 @@ namespace NLGUI
 		const char *funcName = "showTabButton";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		sint showTab = (sint)ls.toNumber(1);
+		sint showTab = (sint)ls.toInteger(1);
 
 		if(showTab>=0 && showTab<(sint)_Buttons.size())
 		{
@@ -770,7 +774,7 @@ namespace NLGUI
 		const char *funcName = "getGroup";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		CInterfaceGroup* group = getGroup((uint) ls.toNumber(1));
+		CInterfaceGroup* group = getGroup((uint) ls.toInteger(1));
 		if(group != NULL)
 		{
 			CLuaIHM::pushUIOnStack(ls, group);

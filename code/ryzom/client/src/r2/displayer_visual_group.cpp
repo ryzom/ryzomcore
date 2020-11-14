@@ -38,6 +38,10 @@
 #include "../time_client.h"
 //
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 class CGroupMap;
 
 using namespace R2;
@@ -54,7 +58,7 @@ namespace R2
 class CCtrlPolygonSelectable : public CCtrlPolygon, public IDisplayerUIHandle
 {
 public:
-	CCtrlPolygonSelectable( CViewBase::TCtorParam &param, CInstance &instance) : Instance(instance), CCtrlPolygon( param ) {}
+	CCtrlPolygonSelectable( CViewBase::TCtorParam &param, CInstance &instance) : CCtrlPolygon(param), Instance(instance) {}
 	// from IDisplayerUIHandle
 	virtual CInstance &getDisplayedInstance() { return Instance; }
 	// from IDisplayerUIHandle
@@ -99,7 +103,7 @@ protected:
 class CCtrlQuadSelectable : public CCtrlQuad, public IDisplayerUIHandle
 {
 public:
-	CCtrlQuadSelectable( CViewBase::TCtorParam &param, CInstance &instance, uint edgeIndex) : Instance(instance), EdgeIndex(edgeIndex), CCtrlQuad( param ){}
+	CCtrlQuadSelectable( CViewBase::TCtorParam &param, CInstance &instance, uint edgeIndex) : CCtrlQuad(param), Instance(instance), EdgeIndex(edgeIndex) {}
 	// from IDisplayerUIHandle
 	virtual CInstance &getDisplayedInstance() { return Instance; }
 	// from IDisplayerUIHandle
@@ -755,7 +759,7 @@ void CDisplayerVisualGroup::updateInstanceList() const
 	_Instances.resize(sons->getSize());
 	for(uint k = 0; k < sons->getSize(); ++k)
 	{
-		CInstance *inst = getEditor().getInstanceFromObject(sons->getValue(k));
+		CInstance *inst = getEditor().getInstanceFromObject(sons->getValueAtPos(k));
 		if (inst)
 		{
 			_Instances[k] = inst->getDisplayerVisual();

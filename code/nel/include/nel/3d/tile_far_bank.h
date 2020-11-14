@@ -94,7 +94,7 @@ public:
 		}
 
 		/// Serial this tile
-		void				serial (class NLMISC::IStream &f) throw(NLMISC::EStream);
+		void				serial (NLMISC::IStream &f);
 
 	private:
 		/// RGBA Pixels vector
@@ -141,7 +141,7 @@ public:
 	}
 
 	/// Serial this bank
-	void    serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void    serial(NLMISC::IStream &f);
 
 	/// The far tile vector
 	std::vector<CTileFar>	_TileVector;

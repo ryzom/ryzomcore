@@ -13,13 +13,16 @@
 IF(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
    SET(MYSQL_FOUND TRUE)
 
-ELSE(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
+ELSE()
 
   FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
       PATH_SUFFIXES mysql
+      PATHS
       /usr/include/mysql
       /usr/local/include/mysql
       /opt/local/include/mysql5/mysql
+      /opt/local/include/mysql55/mysql
+      /opt/local/include/mysql51/mysql
       $ENV{ProgramFiles}/MySQL/*/include
       $ENV{SystemDrive}/MySQL/*/include)
 
@@ -33,7 +36,7 @@ ELSE(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
       PATHS
       $ENV{ProgramFiles}/MySQL/*/lib/opt
       $ENV{SystemDrive}/MySQL/*/lib/opt)
-  ELSE(WIN32 AND MSVC)
+  ELSE()
     FIND_LIBRARY(MYSQL_LIBRARY_RELEASE NAMES mysqlclient
       PATHS
       /usr/lib
@@ -41,6 +44,8 @@ ELSE(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
       /usr/lib/mysql
       /usr/local/lib/mysql
       /opt/local/lib/mysql5/mysql
+      /opt/local/lib/mysql55/mysql
+      /opt/local/lib/mysql51/mysql
       )
 
     FIND_LIBRARY(MYSQL_LIBRARY_DEBUG NAMES mysqlclientd
@@ -50,32 +55,36 @@ ELSE(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
       /usr/lib/mysql
       /usr/local/lib/mysql
       /opt/local/lib/mysql5/mysql
+      /opt/local/lib/mysql55/mysql
+      /opt/local/lib/mysql51/mysql
       )
-  ENDIF(WIN32 AND MSVC)
+  ENDIF()
 
   IF(MYSQL_INCLUDE_DIR)
     IF(MYSQL_LIBRARY_RELEASE)
-      SET(MYSQL_LIBRARIES optimized ${MYSQL_LIBRARY_RELEASE})
       IF(MYSQL_LIBRARY_DEBUG)
-        SET(MYSQL_LIBRARIES ${MYSQL_LIBRARIES} debug ${MYSQL_LIBRARY_DEBUG})
-      ELSE(MYSQL_LIBRARY_DEBUG)
-	    SET(MYSQL_LIBRARIES ${MYSQL_LIBRARIES} debug ${MYSQL_LIBRARY_RELEASE})
-      ENDIF(MYSQL_LIBRARY_DEBUG)
+        SET(MYSQL_LIBRARIES optimized ${MYSQL_LIBRARY_RELEASE} debug ${MYSQL_LIBRARY_DEBUG})
+      ELSE()
+	    SET(MYSQL_LIBRARIES ${MYSQL_LIBRARY_RELEASE})
+      ENDIF()
       FIND_PACKAGE(OpenSSL)
       IF(OPENSSL_FOUND)
+        IF(WIN32)
+          SET(OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} Crypt32.lib)
+        ENDIF()
         SET(MYSQL_LIBRARIES ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES})
-      ENDIF(OPENSSL_FOUND)
-    ENDIF(MYSQL_LIBRARY_RELEASE)
-  ENDIF(MYSQL_INCLUDE_DIR)
+      ENDIF()
+    ENDIF()
+  ENDIF()
 
   IF(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
     SET(MYSQL_FOUND TRUE)
     MESSAGE(STATUS "Found MySQL: ${MYSQL_INCLUDE_DIR}, ${MYSQL_LIBRARIES}")
-  ELSE(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
+  ELSE()
     SET(MYSQL_FOUND FALSE)
     MESSAGE(STATUS "MySQL not found.")
-  ENDIF(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
+  ENDIF()
 
   MARK_AS_ADVANCED(MYSQL_LIBRARY_RELEASE MYSQL_LIBRARY_DEBUG)
 
-ENDIF(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
+ENDIF()

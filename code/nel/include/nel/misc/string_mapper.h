@@ -39,8 +39,7 @@ typedef	const std::string *TStringId;
 // Traits for hash_map using CStringId
 struct CStringIdHashMapTraits
 {
-	static const size_t bucket_size = 4;
-	static const size_t min_buckets = 8;
+	enum { bucket_size = 4, min_buckets = 8 };
 	CStringIdHashMapTraits() { }
 	size_t operator() (const NLMISC::TStringId &stringId) const
 	{
@@ -178,10 +177,10 @@ public:
 	uint32 getCount() { return _IdCounter; }
 
 	// helper serialize a string id as a string
-	void				serial(NLMISC::IStream &f, TSStringId &strId) throw(EStream);
+	void				serial(NLMISC::IStream &f, TSStringId &strId);
 
 	// helper serialize a string id vector
-	void				serial(NLMISC::IStream &f, std::vector<TSStringId> &strIdVect) throw(EStream);
+	void				serial(NLMISC::IStream &f, std::vector<TSStringId> &strIdVect);
 
 };
 

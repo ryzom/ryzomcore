@@ -97,6 +97,7 @@ namespace NLGUI
 			void addChildSortedByBitmap(SNode *pNode);
 			void setParentTree(CGroupTree *parent);
 			void setFather(SNode *father);
+			void openAll();
 			void closeAll();
 			void makeOrphan();
 			bool parse (xmlNodePtr cur, CGroupTree *parentGroup);

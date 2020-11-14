@@ -151,8 +151,8 @@ void	setCrashAlreadyReported(bool state);
  *  Note 2 : To show a warning under GCC, use #warning "Your warning here",
  *           see nel/net/net_manager.h for an example on how to use these correctly.
  */
-#define NL_LOC_MSG __FILE__"("NL_MACRO_TO_STR(__LINE__)") : Message: "
-#define NL_LOC_WRN __FILE__"("NL_MACRO_TO_STR(__LINE__)") : Warning Msg: "
+#define NL_LOC_MSG __FILE__ "(" NL_MACRO_TO_STR(__LINE__) ") : Message: "
+#define NL_LOC_WRN __FILE__ "(" NL_MACRO_TO_STR(__LINE__) ") : Warning Msg: "
 
 
 /**
@@ -229,7 +229,7 @@ void	setCrashAlreadyReported(bool state);
  *\code
 	void function(char *filename)
 	{
-		FILE *fp = fopen (filename, "r");
+		FILE *fp = nlfopen (filename, "r");
 		if (fp==NULL)
 		{
 			nlerror("file not found");
@@ -350,8 +350,10 @@ void	setCrashAlreadyReported(bool state);
  */
 
 // removed because we always check assert (even in release mode) #if defined (NL_OS_WINDOWS) && defined (NL_DEBUG)
-#if defined (NL_OS_WINDOWS)
-#define NLMISC_BREAKPOINT __debugbreak();
+#if defined(NL_OS_WINDOWS)
+#define NLMISC_BREAKPOINT __debugbreak()
+#elif defined(NL_OS_UNIX) && defined(NL_COMP_GCC)
+#define NLMISC_BREAKPOINT __builtin_trap()
 #else
 #define NLMISC_BREAKPOINT abort()
 #endif

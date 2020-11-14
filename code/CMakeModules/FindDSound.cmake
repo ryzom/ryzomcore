@@ -8,7 +8,7 @@
 if(DSOUND_INCLUDE_DIR)
     # Already in cache, be silent
     set(DSOUND_FIND_QUIETLY TRUE)
-endif(DSOUND_INCLUDE_DIR)
+ENDIF()
 
 find_path(DSOUND_INCLUDE_DIR dsound.h 
   "$ENV{DXSDK_DIR}" 
@@ -29,8 +29,8 @@ find_package_handle_standard_args(DSOUND DEFAULT_MSG
 
 if(DSOUND_FOUND)
     set(DSOUND_LIBRARIES ${DSOUND_LIBRARY})
-else(DSOUND_FOUND)
+ELSE()
     set(DSOUND_LIBRARIES)
-endif(DSOUND_FOUND)
+ENDIF()
 
 mark_as_advanced(DSOUND_INCLUDE_DIR DSOUND_LIBRARY)

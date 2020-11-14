@@ -1,0 +1,1 @@
+ALTER TABLE `user` MODIFY `Password` VARCHAR(106);

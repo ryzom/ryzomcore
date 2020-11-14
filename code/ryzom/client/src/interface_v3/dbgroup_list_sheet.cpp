@@ -115,7 +115,7 @@ bool CDBGroupListSheet::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	if (prop)
 	{
 		// get a branch in the database.
-		CCDBNodeBranch *branch= NLGUI::CDBManager::getInstance()->getDbBranch(prop);
+		CCDBNodeBranch *branch = NLGUI::CDBManager::getInstance()->getDbBranch(prop.str());
 		if(!branch)
 		{
 			nlinfo ("Branch not found in the database %s", (const char*)prop);

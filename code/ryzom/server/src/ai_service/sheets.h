@@ -703,7 +703,7 @@ public:
 	IAIActionCPtr		lookupAction	(NLMISC::CSheetId const& id);
 	IRaceStatsCPtr		lookupRaceStats	(NLMISC::CSheetId const& id);
 	
-	uint32	getGroupPropertiesIndex(std::string	groupIndexName);
+	uint32	getGroupPropertiesIndex(const std::string &groupIndexName);
 	
 	uint32 playerGroupIndex() { return _PlayerGroupIndex; }
 	

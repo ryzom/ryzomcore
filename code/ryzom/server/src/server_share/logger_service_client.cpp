@@ -238,8 +238,8 @@ namespace LGS
 				// create the log context closing
 				_LogInfos.push_back(TLogInfo());
 				_LogInfos.back().setLogName(contextName);
-				// tag as 'closing' with ~0
-				_LogInfos.back().setTimeStamp(~0);
+				// tag as 'closing' with std::numeric_limits<uint32>::max()
+				_LogInfos.back().setTimeStamp(std::numeric_limits<uint32>::max());
 			}
 			--_NbOpenContext;
 			if (VerboseLogger)

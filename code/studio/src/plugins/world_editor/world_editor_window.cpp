@@ -436,6 +436,7 @@ void WorldEditorWindow::writeSettings()
 	settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
 	settings->setValue(Constants::WORLD_WINDOW_STATE, saveState());
 	settings->setValue(Constants::WORLD_WINDOW_GEOMETRY, saveGeometry());
+	settings->setValue(Constants::WORLD_EDITOR_USE_OPENGL, settings->value(Constants::WORLD_EDITOR_USE_OPENGL));
 	settings->endGroup();
 	settings->sync();
 }

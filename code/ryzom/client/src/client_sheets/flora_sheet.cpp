@@ -56,7 +56,7 @@ void CFloraSheet::build(const NLGEORGES::UFormElm &item)
 }
 
 // ***************************************************************************************************
-void CFloraSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CFloraSheet::serial(NLMISC::IStream &f)
 {
 	f.serialCont(_Plants);
 	f.serial(MicroLifeThreshold);
@@ -75,7 +75,7 @@ void CPlantInfo::build(const NLGEORGES::UFormElm &item)
 }
 
 // ***************************************************************************************************
-void CPlantInfo::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPlantInfo::serial(NLMISC::IStream &f)
 {
 	f.serial(SheetName);
 	f.serial(CumulatedWeight);

@@ -23,6 +23,8 @@
 
 #include "property_allocator.h"
 
+#include <limits>
+
 namespace NLNET
 {
 	class CMessage;
@@ -40,7 +42,7 @@ class CPropertyAllocatorClient : public CPropertyAllocator
 public:
 
 	/// Constructor
-	CPropertyAllocatorClient() : _LocalMSId((uint16)~0) {}
+	CPropertyAllocatorClient() : _LocalMSId(std::numeric_limits<uint16>::max()) {}
 
 	/** Ask to allocate, if not done yet, a segment for the specified property.
 	 * The pointer will be soon returned by getPropertySegment(), but not always

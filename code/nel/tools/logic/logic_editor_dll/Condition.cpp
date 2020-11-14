@@ -80,7 +80,7 @@ const CString & CConditionNode::getNodeAsString() const
 		m_sNodeString = m_sConditionName;
 	else // comparison
 	{
-		m_sNodeString.Format("%s %s %g",LPCTSTR(m_sVariableName),LPCTSTR(m_sOperator), m_dComparand );
+		m_sNodeString.Format(_T("%s %s %g"),LPCTSTR(m_sVariableName),LPCTSTR(m_sOperator), m_dComparand );
 	}
 
 	return m_sNodeString;
@@ -260,8 +260,8 @@ void cConditionNodeToCLogicConditionNode(CConditionNode * conditionNode, CLogicC
 			{
 				logicConditionNode->LogicBlock.Type = CLogicConditionLogicBlock::COMPARISON;
 				
-				logicConditionNode->LogicBlock.ComparisonBlock.VariableName = string( (LPCSTR)conditionNode->m_sVariableName );
-				logicConditionNode->LogicBlock.ComparisonBlock.Operator = string( (LPCSTR)conditionNode->m_sOperator );
+				logicConditionNode->LogicBlock.ComparisonBlock.VariableName = tStrToUtf8(conditionNode->m_sVariableName);
+				logicConditionNode->LogicBlock.ComparisonBlock.Operator = tStrToUtf8(conditionNode->m_sOperator);
 				logicConditionNode->LogicBlock.ComparisonBlock.Comparand = (sint64)conditionNode->m_dComparand;
 			}
 			break;
@@ -270,7 +270,7 @@ void cConditionNodeToCLogicConditionNode(CConditionNode * conditionNode, CLogicC
 			{
 				logicConditionNode->LogicBlock.Type = CLogicConditionLogicBlock::SUB_CONDITION;
 				
-				logicConditionNode->LogicBlock.SubCondition = string( (LPCSTR)conditionNode->m_sConditionName );
+				logicConditionNode->LogicBlock.SubCondition = tStrToUtf8(conditionNode->m_sConditionName);
 			}
 			break;
 		}
@@ -298,7 +298,7 @@ void cConditionNodeToCLogicConditionNode(CConditionNode * conditionNode, CLogicC
 void cConditionToCLogicCondition( CCondition& condition, CLogicCondition& logicCondition )
 {
 	// condition name
-	logicCondition.setName( string( (LPCSTR)condition.m_sName ) );
+	logicCondition.setName(tStrToUtf8(condition.m_sName));
 
 	// nodes
 	POSITION pos;

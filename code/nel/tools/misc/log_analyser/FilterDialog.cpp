@@ -71,7 +71,7 @@ BOOL CFilterDialog::OnInitDialog()
 	
 	if ( Trace )
 	{
-		GetDlgItem( IDC_PosFilterCap )->SetWindowText( "Service code" );
+		GetDlgItem( IDC_PosFilterCap )->SetWindowText(_T("Service code"));
 		GetDlgItem( IDC_NegFilterCap )->ShowWindow( SW_HIDE );
 		GetDlgItem( IDC_SepCap )->ShowWindow( SW_HIDE );
 		GetDlgItem( IDC_NegFilter )->ShowWindow( SW_HIDE );
@@ -79,11 +79,11 @@ BOOL CFilterDialog::OnInitDialog()
 	}
 	else
 	{
-		GetDlgItem( IDC_PosFilterCap )->SetWindowText( "Positive filters (all lines must contain one of these substrings)" );
+		GetDlgItem( IDC_PosFilterCap )->SetWindowText(_T("Positive filters (all lines must contain one of these substrings)"));
 		GetDlgItem( IDC_NegFilterCap )->ShowWindow( SW_SHOW );
 		GetDlgItem( IDC_SepCap )->ShowWindow( SW_SHOW );
 		GetDlgItem( IDC_NegFilter )->ShowWindow( SW_SHOW );
-		GetDlgItem( IDC_Sep )->SetWindowText( ";" );
+		GetDlgItem( IDC_Sep )->SetWindowText(_T(";"));
 		GetDlgItem( IDC_Sep )->ShowWindow( SW_SHOW );
 	}
 
@@ -98,12 +98,12 @@ std::vector<CString>	buildVectorFromString( const CString& str, const CString& s
 {
 	std::vector<CString> vec;
 	CString str2 = str;
-	char *token;
-	token = strtok( str2.GetBuffer( str2.GetLength() ), sep );
+	TCHAR *token;
+	token = _tcstok( str2.GetBuffer( str2.GetLength() ), sep );
 	while ( token != NULL )
 	{
 		vec.push_back( CString(token) );
-		token = strtok( NULL, sep );
+		token = _tcstok( NULL, sep );
 	}
 	str2.ReleaseBuffer();
 	return vec;

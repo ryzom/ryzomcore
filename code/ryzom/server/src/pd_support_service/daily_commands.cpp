@@ -19,6 +19,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/file.h"
 #include "nel/misc/path.h"
+#include "nel/misc/common.h"
 #include "nel/misc/sstring.h"
 #include "nel/net/service.h"
 #include "game_share/utils.h"
@@ -101,7 +102,7 @@ public:
 		ptm = gmtime(&endTime);
 
 		// write to the log file
-		FILE* fileHandle= fopen(DailyActivityLogFileName,"ab");
+		FILE* fileHandle= nlfopen(DailyActivityLogFileName,"ab");
 		nlassert(fileHandle!=NULL);
 		fprintf(fileHandle,"%02u/%02u/%u CDailyTaskScheduler: Started: %02u:%02u, Finished: %02u:%02u, Executed %u commands Started %u Jobs\n",
 			ptm->tm_mday, ptm->tm_mon+1, ptm->tm_year+1900, (uint)startTime/3600%24, (uint)startTime/60%60, (uint)endTime/3600%24, (uint)endTime/60%60, commandsVar==NULL?0:commandsVar->size(), jobsRemaining );

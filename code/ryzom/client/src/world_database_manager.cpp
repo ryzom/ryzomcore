@@ -25,6 +25,9 @@
 #include "world_database_manager.h"
 #include "continent_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 /////////////
 // GLOBALS //

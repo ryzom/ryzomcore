@@ -23,6 +23,9 @@
 
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 bool getPosFromZoneName(const std::string &name,NLMISC::CVector2f &dest)
 {

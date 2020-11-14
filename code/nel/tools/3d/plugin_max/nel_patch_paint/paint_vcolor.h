@@ -81,7 +81,7 @@ public:
 	}
 
 	// Load a brush
-	bool loadBrush (const char *brushFileName);
+	bool loadBrush (const std::string &brushFileName);
 
 private:
 

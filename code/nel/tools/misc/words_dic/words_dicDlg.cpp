@@ -87,12 +87,12 @@ BOOL CWords_dicDlg::OnInitDialog()
 	SplashScreen->Create( IDD_SplashScreen, NULL );
 	SplashScreen->ShowWindow( SW_SHOW );
 	SplashScreen->SetWindowPos( &wndTop, 400, 300, 0,0, SWP_NOSIZE );
-	SplashScreen->GetDlgItem( IDC_SplashText )->SetWindowText( "Please wait while loading dictionary..." );
+	SplashScreen->GetDlgItem( IDC_SplashText )->SetWindowText( _T("Please wait while loading dictionary...") );
 	if ( ! Dico.init() )
-		AfxMessageBox( "Can't init dictionary, see reason in log.log" );
+		AfxMessageBox( _T("Can't init dictionary, see reason in log.log") );
 	SplashScreen->DestroyWindow();
 	delete SplashScreen;
-	GetDlgItem( IDC_Status )->SetWindowText( "Tip: ^ and $ can be used to represent the start and the end of string" );
+	GetDlgItem( IDC_Status )->SetWindowText( _T("Tip: ^ and $ can be used to represent the start and the end of string") );
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -157,13 +157,13 @@ void CWords_dicDlg::lookUp( const CString& inputStr )
 {
 	// Look up
 	CVectorSString resultVec;
-	Dico.lookup( CSString(inputStr), resultVec );
+	Dico.lookup( tStrToUtf8(inputStr), resultVec );
 
 	// Display results
 	clear();
 	if ( resultVec.empty() )
 	{
-		m_Results.AddString( "<no result>" );
+		m_Results.AddString(_T("<no result>"));
 		return;
 	}
 	else
@@ -176,14 +176,14 @@ void CWords_dicDlg::lookUp( const CString& inputStr )
 			const CSString& res = (*ivs);
 			if ( showAll || (res.find( "lvl" ) == string::npos) )
 			{
-				m_Results.AddString( res.c_str() );
+				m_Results.AddString( utf8ToTStr(res) );
 			}
 			else
 				lvlRemoved = true;
 		}
 		m_Results.SetRedraw( true );
 		CString s;
-		s.Format( "%u results found for \"%s\".%s", resultVec.size(), inputStr, lvlRemoved?" Results containing \"lvl\" not shown":"" );
+		s.Format(_T("%u results found for \"%s\".%s"), resultVec.size(), inputStr, lvlRemoved? _T(" Results containing \"lvl\" not shown"): _T("") );
 		GetDlgItem( IDC_Status )->SetWindowText( s );
 	}
 }
@@ -204,7 +204,7 @@ void CWords_dicDlg::OnBtnFind()
  */
 void CWords_dicDlg::clear()
 {
-	GetDlgItem( IDC_Status )->SetWindowText( "" );
+	GetDlgItem( IDC_Status )->SetWindowText(_T(""));
 	m_Results.ResetContent();
 }
 
@@ -213,7 +213,7 @@ void CWords_dicDlg::clear()
  */
 void CWords_dicDlg::OnBtnClear() 
 {
-	m_LookUp.SetWindowText( "" );
+	m_LookUp.SetWindowText(_T(""));
 	clear();
 }
 
@@ -234,7 +234,7 @@ void CWords_dicDlg::OnFileList()
 	const vector<string>& fileList = Dico.getFileList();
 	for ( vector<string>::const_iterator ifl=fileList.begin(); ifl!=fileList.end(); ++ifl )
 	{
-		m_Results.AddString( (*ifl).c_str() );
+		m_Results.AddString( utf8ToTStr(*ifl) );
 	}
 }
 
@@ -253,7 +253,7 @@ void CWords_dicDlg::OnSelchangeResultList()
 	// Get selection
 	CString resStr;
 	m_Results.GetText( m_Results.GetCurSel(), resStr );
-	CSString key = Dico.getWordsKey( CSString(resStr) );
+	CSString key = Dico.getWordsKey( tStrToUtf8(resStr) );
 
 	// Copy the selection into the clipboard
 	if ( OpenClipboard() )
@@ -271,13 +271,13 @@ void CWords_dicDlg::OnSelchangeResultList()
 		if ( mem )
 		{
 			CString s;
-			s.Format( "\"%s\" copied into the clipboard", key.c_str() );
+			s.Format(_T("\"%s\" copied into the clipboard"), utf8ToTStr(key) );
 			GetDlgItem( IDC_Status )->SetWindowText( s );
 		}
 	}
 	else
 	{
-		GetDlgItem( IDC_Status )->SetWindowText( "Cannot access the clipboard" );
+		GetDlgItem( IDC_Status )->SetWindowText(_T("Cannot access the clipboard"));
 	}	
 }
 

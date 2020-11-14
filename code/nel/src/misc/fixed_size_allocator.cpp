@@ -73,7 +73,7 @@ void *CFixedSizeAllocator::alloc()
 #define aligned_offsetof(s, m) ((offsetof(s, m) + (NL_DEFAULT_MEMORY_ALIGNMENT - 1)) & ~(NL_DEFAULT_MEMORY_ALIGNMENT - 1))
 
 // *****************************************************************************************************************
-void CFixedSizeAllocator::free(void *block)
+void CFixedSizeAllocator::freeBlock(void *block)
 {
 	if (!block) return;
 	/// get the node from the object

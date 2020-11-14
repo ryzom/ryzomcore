@@ -146,7 +146,7 @@ void CSeasonFXSheet::build(const NLGEORGES::UFormElm &item, NLMISC::CSheetId par
 }
 
 //=======================================================
-void CSeasonFXSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CSeasonFXSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(FXName);
 	f.serialEnum(Mode);
@@ -226,7 +226,7 @@ void CPlantSheet::build(const NLGEORGES::UFormElm &item)
 }
 
 //=======================================================
-void CPlantSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPlantSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(_ShapeName, _MaxDist, _CoarseMeshDist);
 	for(uint k = 0; k < EGSPD::CSeason::Invalid; ++k)

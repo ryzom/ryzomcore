@@ -18,6 +18,8 @@
 #define PRIMITIVE_PLUGIN_H
 
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
+#define NOMINMAX
+#define _WIN32_WINNT 0x0501
 
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions

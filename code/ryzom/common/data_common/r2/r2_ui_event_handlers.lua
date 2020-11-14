@@ -832,7 +832,7 @@ function r2:onActChanged(previousAct, currentAct)
 	-- update the select bar
 	r2.SelectBar:touch()
 
-	if r2:isScenarioUpdating() == 1 then
+	if r2:isScenarioUpdating() then
 		return
 	end
 
@@ -1030,6 +1030,7 @@ end
 --------------------
 --------------------
 function r2:updateAnimBarActions(...)
+	local arg = {...}
 	-- forward to the real anim bar
 	r2.ui.AnimBar:updateActions(arg)
 end

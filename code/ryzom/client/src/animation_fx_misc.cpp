@@ -20,4 +20,8 @@
 #include "animation_fx_misc.h"
 #include "animation_fx_id_array.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 CAnimationFXIDArray AnimFXMisc;

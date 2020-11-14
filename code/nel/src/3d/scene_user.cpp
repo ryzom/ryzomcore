@@ -34,6 +34,10 @@
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
@@ -517,7 +521,7 @@ void			CSceneUser::beginPartRender()
 }
 
 // ***************************************************************************
-void			CSceneUser::renderPart(TRenderPart rp)
+void			CSceneUser::renderPart(TRenderPart rp, bool doHrcPass, bool doTrav, bool keepTrav)
 {
 
 	// render the scene.
@@ -526,18 +530,18 @@ void			CSceneUser::renderPart(TRenderPart rp)
 
 		if(_Scene.getCam() == NULL)
 			nlerror("render(): try to render with no camera linked (may have been deleted)");
-		_Scene.renderPart(rp, true);
+		_Scene.renderPart(rp, doHrcPass, doTrav, keepTrav);
 	}
 }
 
 // ***************************************************************************
-void			CSceneUser::endPartRender(bool updateWaitingInstancesFlag, bool restoreMatrixContextAfterRender)
+void			CSceneUser::endPartRender(bool updateWaitingInstancesFlag, bool restoreMatrixContextAfterRender, bool keepTrav)
 {
 
 	// render the scene.
 	{
 		NL3D_HAUTO_RENDER_SCENE_END
-		_Scene.endPartRender();
+		_Scene.endPartRender(keepTrav);
 	}
 
 	if (updateWaitingInstancesFlag) updateWaitingInstances();

@@ -138,7 +138,7 @@ bool finalisePatch(const NLMISC::CSString& installDir,const NLMISC::CSString& fi
 
 	// rename the final patched file
 	nldebug("SPA RENAME: %s => %s",srcFile.c_str(),destFile.c_str());
-	NLMISC::CFile::moveFile(destFile.c_str(),srcFile.c_str());
+	NLMISC::CFile::moveFile(destFile, srcFile);
 
 	// delete the temp file used in patch generation (if there was one)
 	if (NLMISC::CFile::fileExists(oldFile))

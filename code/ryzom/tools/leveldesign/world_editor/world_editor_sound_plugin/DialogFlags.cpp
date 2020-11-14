@@ -118,7 +118,7 @@ void CDialogFlags::init(CSoundPlugin *plugin)
 	for (uint i =0; i<NLSOUND::UAudioMixer::TBackgroundFlags::NB_BACKGROUND_FLAGS; ++i)
 	{
 		static_cast<CButton*>(GetDlgItem(BG_FLAG_ID[i]))->SetCheck(flags.Flags[i] ? 1 : 0);
-		GetDlgItem(BG_FLAG_ID[i])->SetWindowText(_Mixer->getBackgroundFlagName(i).c_str());
+		GetDlgItem(BG_FLAG_ID[i])->SetWindowText(utf8ToTStr(_Mixer->getBackgroundFlagName(i)));
 	}
 
 
@@ -127,14 +127,14 @@ void CDialogFlags::init(CSoundPlugin *plugin)
 	col.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT;
 	col.fmt = LVCFMT_LEFT;
 	col.cx = 140;
-	col.pszText = "bank names";
-	col.cchTextMax = sizeof("bank names");
+	col.pszText = _T("bank names");
+	col.cchTextMax = _tcslen(col.pszText)+1;
 	_SbList.InsertColumn(0, &col);
 
 	col.fmt = LVCFMT_RIGHT;
 	col.cx = 50;
-	col.pszText = "size";
-	col.cchTextMax = sizeof("size");
+	col.pszText = _T("size");
+	col.cchTextMax = _tcslen(col.pszText)+1;
 	_SbList.InsertColumn(1, &col);
 
 }
@@ -225,18 +225,23 @@ void CDialogFlags::OnTimer(UINT_PTR nIDEvent)
 	c = _SbList.GetItemCount();
 	for (i=0; i<SampleBanks.size(); ++i)
 	{
+		TCHAR temp[1024];
+		_stprintf(temp, _T("%6.2f"), SampleBanks[i].second / (1024.0f*1024.0f));
+
+		TCHAR bankName[1024];
+		_tcscpy_s(bankName, 1024, utf8ToTStr(SampleBanks[i].first));
+
 		if (i < c)
 		{
 			// update the item
-			char temp[1024];
-			sprintf(temp, "%6.2f", SampleBanks[i].second / (1024.0f*1024.0f));
+			TCHAR temp2[1024];
 
-			char temp2[1024];
 			_SbList.GetItemText(i, 0, temp2, 1024);
-			if (strcmp(SampleBanks[i].first.c_str(), temp2) != 0)
-				_SbList.SetItemText(i, 0, SampleBanks[i].first.c_str());
+			if (_tcscmp(bankName, temp2) != 0)
+				_SbList.SetItemText(i, 0, bankName);
+
 			_SbList.GetItemText(i, 1, temp2, 1024);
-			if (strcmp(temp, temp2) != 0)
+			if (_tcscmp(temp, temp2) != 0)
 				_SbList.SetItemText(i, 1, temp);
 		}
 		else
@@ -246,13 +251,11 @@ void CDialogFlags::OnTimer(UINT_PTR nIDEvent)
 			lvi.mask =  LVIF_TEXT;
 			lvi.iItem = i;
 			lvi.iSubItem = 0;
-			lvi.pszText = (char*) SampleBanks[i].first.c_str();
+			lvi.pszText = bankName;
 			_SbList.InsertItem(&lvi);
 
 			lvi.iItem = i;
 			lvi.iSubItem = 1;
-			char temp[1024];
-			sprintf(temp, "%6.2f", SampleBanks[i].second / (1024.0f*1024.0f));
 			lvi.pszText = temp;
 			_SbList.InsertItem(&lvi);
 		}

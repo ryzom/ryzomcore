@@ -70,7 +70,7 @@ public:
 	  * \param it if a max interface
 	  * \param dialog is true to see the message in a dilog, false to see it in the script window.
 	  */
-	static void errorMessage (const char *msg, const char *title, Interface& it, bool dialog);
+	static void errorMessage (const std::string &msg, const std::string &title, Interface& it, bool dialog);
 };
 
 }

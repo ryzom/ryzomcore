@@ -174,7 +174,8 @@ public:
 
 	/** Build a NeL standard library name according to platform and compilation mode setting.
 	 *	aka : adding decoration one base lib name.
-	 *	e.g : 'mylib' become	'mylib_rd.dll' on Windows ReleaseDebug mode or
+	 *	e.g : 'mylib' become	'mylib_rd.dll' on Windows ReleaseDebug mode,
+	 *							'libmylib.dylib' under OS X or
 	 *							'libmylib.so' on unix system.
 	 */
 	static std::string makeLibName(const std::string &baseName);

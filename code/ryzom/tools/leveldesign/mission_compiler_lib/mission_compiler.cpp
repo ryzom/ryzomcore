@@ -17,6 +17,7 @@
 #include "mission_compiler.h"
 #include "step.h"
 #include "nel/misc/i18n.h"
+#include "nel/misc/common.h"
 #include "nel/ligo/primitive_utils.h"
 
 using namespace std;
@@ -277,7 +278,7 @@ bool GenderExtractor::parseMarkup(const std::string& literal, const std::string 
 	bool changed = false;
 	std::string oldPhrase = literal;
 	
-	newPhrase = "";
+	newPhrase.clear();
 	do 
 	{
 		std::string before;
@@ -874,17 +875,26 @@ bool CMissionCompiler::publishFiles(const std::string &serverPathPrim, const std
 	return true;
 }
 
-bool CMissionCompiler::includeText(const std::string filename, const std::string text)
+bool CMissionCompiler::includeText(const std::string &filename, const std::string &text)
 {
-	FILE *f = fopen(filename.c_str(), "r+");
+	FILE *f = nlfopen(filename, "r+");
 	if (f == NULL)
+	{
+		nlwarning("Unable to open %s", filename.c_str());
 		return false;
+	}
 
 	bool isIn = false;
 	char buffer[1024];
 
 	// Check for UTF8 format
-	fread(buffer, 1, 3, f);
+	if (fread(buffer, 1, 3, f) != 3)
+	{
+		fclose(f);
+		nlwarning("Unable to read 3 bytes from %s", filename.c_str());
+		return false;
+	}
+
 	if (buffer[0] != -17 || buffer[1] != -69 || buffer[2] != -65)
 		fseek(f, 0, SEEK_SET);
 
@@ -1348,7 +1358,7 @@ retry:
 		vector<string> parts;
 		NLMISC::explode(*first, string("@"), parts, false);
 		
-		if (parts.size() > 0)
+		if (!parts.empty())
 			name = parts[0];
 		if (parts.size() > 1)
 			param = parts[1];
@@ -1579,6 +1589,14 @@ string CMissionData::genPreRequisites()
 				ret +="; ";
 			ret += NL;
 		}
+	}
+	if (!_ReqCharacterAge.empty())
+	{
+		ret += "req_character_age : "+_ReqCharacterAge+NL;
+	}
+	if (!_ReqMaxPlayerID.empty())
+	{
+		ret += "req_max_player_id : "+_ReqMaxPlayerID+NL;
 	}
 	if (!_ReqSeason.empty())
 	{
@@ -2019,6 +2037,10 @@ void CMissionData::parsePrerequisites(NLLIGO::IPrimitive *prim)
 	_ReqGrade = getProperty(prim, "require_guild_grade", true, false);
 	// team size
 	_ReqTeamSize = getProperty(prim, "require_team_size", true, false);
+	// character minimum age
+	_ReqCharacterAge = getProperty(prim, "require_character_age", true, false);
+	// maximum player ID
+	_ReqMaxPlayerID = getProperty(prim, "require_max_player_id", true, false);
 	// brick
 	vs = getPropertyArray(prim, "require_brick_knowledge", true, false);
 	for (uint i=0; i<vs.size(); ++i)

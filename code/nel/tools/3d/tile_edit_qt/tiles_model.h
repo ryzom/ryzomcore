@@ -1,14 +1,8 @@
 #ifndef TILESMODEL_H
 #define TILESMODEL_H
 
-#include <QtCore/QAbstractListModel>
-#include <QtCore/QList>
-#include <QtGui/QPixmap>
-#include <QtCore/QPoint>
-#include <QtCore/QStringList>
-#include <QtCore/QVariant>
-#include <QtGui/QStackedWidget>
-#include <QtGui/QLabel>
+#include <QtCore/QtCore>
+#include <QtGui/QtGui>
 
 class TileModel
 {

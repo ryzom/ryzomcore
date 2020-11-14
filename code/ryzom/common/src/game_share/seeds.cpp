@@ -30,7 +30,7 @@ typedef CSeeds::TBigUInt TBigUInt;
 static inline void addAndCheckOverFlow(TUInt &dest, TUInt src, TUInt &overflow)
 {
 	TBigUInt newValue = (TBigUInt) src + (TBigUInt) dest;
-	if (newValue > (TBigUInt) CSeeds::MaxUIntValue) // has an overflow occured ?
+	if (newValue > (TBigUInt) CSeeds::MaxUIntValue) // has an overflow occurred ?
 	{
 		dest= (TUInt) (newValue - (TBigUInt) CSeeds::MaxUIntValue);
 		overflow = (TUInt) CSeeds::MaxUIntValue;

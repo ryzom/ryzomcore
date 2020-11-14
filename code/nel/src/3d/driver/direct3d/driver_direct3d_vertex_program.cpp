@@ -18,6 +18,10 @@
 
 #include "driver_direct3d.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 
@@ -109,7 +113,7 @@ void dumpWriteMask(uint mask, std::string &out)
 	H_AUTO_D3D(dumpWriteMask)
 	if (mask == 0xf)
 	{
-		out = "";
+		out.clear();
 		return;
 	}
 	out = ".";
@@ -126,7 +130,7 @@ void dumpSwizzle(const CVPSwizzle &swz, std::string &out)
 	H_AUTO_D3D(dumpSwizzle)
 	if (swz.isIdentity())
 	{
-		out = "";
+		out.clear();
 		return;
 	}
 	out = ".";

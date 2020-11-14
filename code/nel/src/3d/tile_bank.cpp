@@ -29,6 +29,10 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace	NL3D
 {
 
@@ -43,7 +47,7 @@ namespace	NL3D
 // ***************************************************************************
 const sint CTileLand::_Version=0;
 // ***************************************************************************
-void CTileLand::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTileLand::serial(NLMISC::IStream &f)
 {
 	(void)f.serialVersion(_Version);
 
@@ -87,7 +91,7 @@ CTileBank::CTileBank ()
 	_DisplacementMap[0].setEmpty ();
 }
 // ***************************************************************************
-void    CTileBank::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void    CTileBank::serial(NLMISC::IStream &f)
 {
 	f.serialCheck (std::string ("BANK"));
 
@@ -108,7 +112,7 @@ void    CTileBank::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 		if (f.isReading())
 		{
 			// Checks
-			nlassert (_DisplacementMap.size()>0);
+			nlassert (!_DisplacementMap.empty());
 
 			// Set first empty
 			_DisplacementMap[0].setEmpty ();
@@ -134,7 +138,7 @@ void    CTileBank::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 		nlassert (f.isReading());
 
 		// Reset _AbsPath
-		_AbsPath="";
+		_AbsPath.clear();
 
 		// Remove diffuse and additive in transition
 		uint tileCount=(uint)getTileCount ();
@@ -243,7 +247,7 @@ void CTileBank::freeTile (int tileIndex)
 	nlassert (tileIndex<(sint)_TileVector.size());
 
 	// Free
-	_TileVector[tileIndex].free();
+	_TileVector[tileIndex].freeBlock();
 
 	// Resize tile table
 	int i;
@@ -264,7 +268,7 @@ sint CTileBank::getNumBitmap (CTile::TBitmap bitmap) const
 		if (!_TileVector[i].isFree())
 		{
 			const std::string &str=_TileVector[i].getRelativeFileName (bitmap);
-			if (str!="")
+			if (!str.empty())
 			{
 				std::vector<char> vect (str.length()+1);
 				memcpy (&*vect.begin(), str.c_str(), str.length()+1);
@@ -437,7 +441,7 @@ void CTileBank::cleanUnusedData ()
 // ***************************************************************************
 CTileNoiseMap *CTileBank::getTileNoiseMap (uint tileNumber, uint tileSubNoise)
 {
-	if (_DisplacementMap.size() == 0)
+	if (_DisplacementMap.empty())
 	{
 		// it happens when serial a tile bank with version < 4
 		return NULL;
@@ -543,7 +547,7 @@ CTileNoiseMap *CTileBank::getTileNoiseMap (uint tileNumber, uint tileSubNoise)
 		}
 	}
 
-	if (_DisplacementMap.size()==0 || _DisplacementMap[0]._TileNoiseMap)
+	if (_DisplacementMap.empty() || _DisplacementMap[0]._TileNoiseMap)
 		return NULL;
 
 	// Checks
@@ -583,7 +587,7 @@ void CTileBank::removeDisplacementMap (uint mapId)
 			if (mapId==_DisplacementMap.size()-1)
 			{
 				// Resize the array ?
-				while ((mapId>0)&&(_DisplacementMap[mapId]._FileName==""))
+				while ((mapId>0)&&(_DisplacementMap[mapId]._FileName.empty()))
 					_DisplacementMap.resize (mapId--);
 			}
 		}
@@ -608,7 +612,7 @@ uint CTileBank::getDisplacementMap (const string &fileName)
 	for (noiseTile=0; noiseTile<_DisplacementMap.size(); noiseTile++)
 	{
 		// Same name ?
-		if (_DisplacementMap[noiseTile]._FileName=="")
+		if (_DisplacementMap[noiseTile]._FileName.empty())
 			break;
 	}
 	if (noiseTile==_DisplacementMap.size())
@@ -749,7 +753,7 @@ void	CTileBank::postfixTileVegetableDesc (const char *postfix)
 // ***************************************************************************
 const sint CTile::_Version=4;
 // ***************************************************************************
-void CTile::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTile::serial(NLMISC::IStream &f)
 {
 	sint streamver = f.serialVersion(_Version);
 
@@ -782,7 +786,7 @@ void CTile::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 		_Flags=0;
 
 		// Initialize alpha name
-		_BitmapName[alpha]="";
+		_BitmapName[alpha].clear();
 
 		// Read free flag
 		f.serial (tmp);
@@ -804,7 +808,7 @@ void CTile::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 // ***************************************************************************
 void CTile::clearTile (CTile::TBitmap type)
 {
-	_BitmapName[type]="";
+	_BitmapName[type].clear();
 }
 
 
@@ -912,7 +916,7 @@ const std::string& CTileSet::getName () const
 	return _Name;
 }
 // ***************************************************************************
-void CTileSet::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTileSet::serial(NLMISC::IStream &f)
 {
 	sint streamver = f.serialVersion(_Version);
 
@@ -1433,7 +1437,7 @@ void CTileSet::deleteBordersIfLast (const CTileBank& bank, CTile::TBitmap type)
 	while (ite!=_Tile128.end())
 	{
 		// If the file name is valid
-		if (bank.getTile (*ite)->getRelativeFileName(type)!="")
+		if (!bank.getTile (*ite)->getRelativeFileName(type).empty())
 		{
 			// Don't delete,
 			bDelete=false;
@@ -1450,7 +1454,7 @@ void CTileSet::deleteBordersIfLast (const CTileBank& bank, CTile::TBitmap type)
 	while (ite!=_Tile256.end())
 	{
 		// If the file name is valid
-		if (bank.getTile (*ite)->getRelativeFileName(type)!="")
+		if (!bank.getTile (*ite)->getRelativeFileName(type).empty())
 		{
 			// Don't delete,
 			bDelete=false;
@@ -1474,7 +1478,7 @@ void CTileSet::deleteBordersIfLast (const CTileBank& bank, CTile::TBitmap type)
 		if (nTile!=-1)
 		{
 			// If the file name is valid
-			if (bank.getTile (nTile)->getRelativeFileName(type)!="")
+			if (!bank.getTile (nTile)->getRelativeFileName(type).empty())
 			{
 				// Don't delete,
 				bDelete=false;
@@ -1521,7 +1525,7 @@ void CTileSet::setDisplacement (TDisplacement displacement, const std::string& f
 // ***************************************************************************
 void CTileSet::cleanUnusedData ()
 {
-	_Name="";
+	_Name.clear();
 	_ChildName.clear();
 	_Border128[0].reset ();
 	_Border128[1].reset ();
@@ -1564,7 +1568,7 @@ const CTileVegetableDesc	&CTileSet::getTileVegetableDesc() const
 // ***************************************************************************
 void CTileSet::loadTileVegetableDesc()
 {
-	if(_TileVegetableDescFileName!="")
+	if(!_TileVegetableDescFileName.empty())
 	{
 		try
 		{
@@ -1591,7 +1595,7 @@ void CTileSet::loadTileVegetableDesc()
 // ***************************************************************************
 const sint CTileBorder::_Version=0;
 // ***************************************************************************
-void CTileBorder::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTileBorder::serial(NLMISC::IStream &f)
 {
 	(void)f.serialVersion(_Version);
 
@@ -1820,7 +1824,7 @@ void CTileBorder::rotate()
 // ***************************************************************************
 const sint CTileSetTransition::_Version=1;
 // ***************************************************************************
-void CTileSetTransition::serial(class NLMISC::IStream &f) throw(EStream)
+void CTileSetTransition::serial(NLMISC::IStream &f)
 {
 	sint streamver = f.serialVersion(_Version);
 
@@ -1853,14 +1857,12 @@ CTileNoise::CTileNoise ()
 {
 	// Not loaded
 	_TileNoiseMap=NULL;
-	_FileName="";
 }
 // ***************************************************************************
 CTileNoise::CTileNoise (const CTileNoise &src)
 {
 	// Default ctor
 	_TileNoiseMap=NULL;
-	_FileName="";
 
 	// Copy
 	*this=src;
@@ -1932,7 +1934,7 @@ void CTileNoise::reset()
 	}
 
 	// Erase filename
-	_FileName="";
+	_FileName.clear();
 }
 // ***************************************************************************
 

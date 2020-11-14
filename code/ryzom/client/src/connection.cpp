@@ -31,6 +31,7 @@
 // 3D Interface.
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_text_context.h"
+#include "nel/3d/stereo_display.h"
 // Game Share
 //#include "game_share/gd_time.h"		// \todo GUIGUI : TO DELETE/CHANGE
 #include "game_share/gender.h"
@@ -102,7 +103,6 @@ extern uint32			Version;	// Client Version.
 extern UDriver			*Driver;
 extern UTextContext		*TextContext;
 extern bool				game_exit;
-extern CMsgBoxDisplayer MsgBoxError;
 
 extern CSoundManager	*SoundMngr;
 
@@ -115,6 +115,8 @@ extern void replayMovieShooting();
 extern void saveMovieShooting();
 extern void	displaySpecialTextProgress(const char *text);
 extern bool InitMouseWithCursor(bool hardware);
+
+extern bool SetMousePosFirstTime;
 
 /////////////
 // Globals // initialization occurs in the function : connection
@@ -185,7 +187,7 @@ bool hasPrivilegeEG() { return (UserPrivileges.find(":EG:") != std::string::npos
 
 
 // Restore the video mode (fullscreen for example) after the connection (done in a window)
-void connectionRestaureVideoMode ()
+void connectionRestoreVideoMode ()
 {
 	// Setup full screen if we have to
 	UDriver::CMode mode;
@@ -199,28 +201,35 @@ void connectionRestaureVideoMode ()
 		mode.Height = height;
 	}
 
-	// don't allow sizes smaller than 800x600
-	if (ClientCfg.Width < 800) ClientCfg.Width = 800;
-	if (ClientCfg.Height < 600) ClientCfg.Height = 600;
+	// don't allow sizes smaller than 1024x768
+	if (ClientCfg.Width < 1024) ClientCfg.Width = 1024;
+	if (ClientCfg.Height < 768) ClientCfg.Height = 768;
 
-	if ((ClientCfg.Windowed != mode.Windowed) ||
+	if (StereoDisplay)
+		StereoDisplayAttached = StereoDisplay->attachToDisplay();
+
+	if (!StereoDisplayAttached && (
+		(ClientCfg.Windowed != mode.Windowed) ||
 		(ClientCfg.Width != mode.Width) ||
-		(ClientCfg.Height != mode.Height))
+		(ClientCfg.Height != mode.Height)))
 	{
-		mode.Windowed = ClientCfg.Windowed;
-		mode.Depth    = uint8(ClientCfg.Depth);
-		mode.Width    = ClientCfg.Width;
-		mode.Height   = ClientCfg.Height;
-		mode.Frequency= ClientCfg.Frequency;
+		mode.Windowed	= ClientCfg.Windowed;
+		mode.Depth		= uint8(ClientCfg.Depth);
+		mode.Width		= ClientCfg.Width;
+		mode.Height		= ClientCfg.Height;
+		mode.Frequency	= ClientCfg.Frequency;
 		setVideoMode(mode);
 	}
 
 	// And setup hardware mouse if we have to
-	InitMouseWithCursor (ClientCfg.HardwareCursor);
+	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached);
 	SetMouseFreeLook ();
 	SetMouseCursor ();
 	SetMouseSpeed (ClientCfg.CursorSpeed);
 	SetMouseAcceleration (ClientCfg.CursorAcceleration);
+
+	// Restore user UI scaling
+	CViewRenderer::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
 }
 
 
@@ -247,37 +256,17 @@ REGISTER_ACTION_HANDLER (CAHOnReloadTestPage, "on_reload_test_page");
 // ------------------------------------------------------------------------------------------------
 void	setOutGameFullScreen()
 {
-	// Setup full screen (special 1024x768 for outgame) if we have to.
-	// NB: don't setup fullscreen if player wants to play in window
 	if (!ClientCfg.Local && ClientCfg.SelectCharacter == -1)
 	{
-		UDriver::CMode currMode;
-		Driver->getCurrentScreenMode(currMode);
-		UDriver::CMode wantedMode;
-		wantedMode.Windowed = true;
-		wantedMode.Width = 1024;
-		wantedMode.Height = 768;
-		wantedMode.Depth = uint8(ClientCfg.Depth);
-		wantedMode.Frequency = ClientCfg.Frequency;
+		if (StereoDisplayAttached)
+			StereoDisplay->detachFromDisplay();
+		StereoDisplayAttached = false;
 
-		// change mode only if necessary
-		if ((wantedMode.Windowed != currMode.Windowed) ||
-			(wantedMode.Width != currMode.Width) ||
-			(wantedMode.Height != currMode.Height))
-		{
-			setVideoMode(wantedMode);
-		}
-		/*
-		InitMouseWithCursor (true);
-		Driver->showCursor(false);
-		Driver->showCursor(true);
-		Driver->clearBuffers(CRGBA::Black);
-		Driver->swapBuffers();
-		Driver->showCursor(false);
-		Driver->showCursor(true);
-		*/
+		InitMouseWithCursor(ClientCfg.HardwareCursor && !StereoDisplayAttached);
 	}
 
+	// Enable auto scaling in login window
+	CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
 }
 
 
@@ -295,8 +284,8 @@ bool connection (const string &cookie, const string &fsaddr)
 
 	game_exit = false;
 
-	// Setup full screen (special 1024x768 for outgame) if we have to.
-	setOutGameFullScreen();
+	// set resolution from cfg after login
+	connectionRestoreVideoMode ();
 
 	// Preload continents
 	{
@@ -330,13 +319,14 @@ bool connection (const string &cookie, const string &fsaddr)
 		// init the string manager cache.
 		STRING_MANAGER::CStringManagerClient::instance()->initCache("", ClientCfg.LanguageCode);	// VOIR BORIS
 #endif
-		connectionRestaureVideoMode ();
 		return true;
 	}
 
 	ProgressBar.setFontFactor(1.0f);
 
 	// Init out game
+	setOutGameFullScreen();
+
 	ucstring nmsg("Initializing outgame...");
 	ProgressBar.newMessage (ClientCfg.buildLoadingString(nmsg) );
 	pIM->initOutGame();
@@ -385,7 +375,7 @@ bool connection (const string &cookie, const string &fsaddr)
 		// not initialized at login and remain hardware until here ...
 
 		// Re-initialise the mouse (will be now in hardware mode, if required)
-		//InitMouseWithCursor (ClientCfg.HardwareCursor); // the return value of enableLowLevelMouse() has already been tested at startup
+		//InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached); // the return value of enableLowLevelMouse() has already been tested at startup
 
 		// no ui init if character selection is automatic
 		//SetMouseFreeLook ();
@@ -442,6 +432,9 @@ bool connection (const string &cookie, const string &fsaddr)
 
 	firstConnection = false;
 
+	// Restore user UI scaling
+	CViewRenderer::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
+
 	// Disable inputs
 	Actions.enable(false);
 	EditActions.enable(false);
@@ -472,7 +465,6 @@ bool reconnection()
 
 	game_exit = false;
 
-	// Setup full screen (special 1024x768 for outgame) if we have to.
 	setOutGameFullScreen();
 
 	// Preload continents
@@ -501,7 +493,7 @@ bool reconnection()
 		// init the string manager cache.
 		STRING_MANAGER::CStringManagerClient::instance()->initCache("", ClientCfg.LanguageCode);	// VOIR BORIS
 #endif
-		connectionRestaureVideoMode ();
+		connectionRestoreVideoMode ();
 		return true;
 	}
 */
@@ -544,7 +536,8 @@ bool reconnection()
 	if (ClientCfg.SelectCharacter == -1)
 	{
 		// Re-initialise the mouse (will be now in hardware mode, if required)
-		InitMouseWithCursor (ClientCfg.HardwareCursor); // the return value of enableLowLevelMouse() has already been tested at startup
+		SetMousePosFirstTime = true;
+		InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached); // the return value of enableLowLevelMouse() has already been tested at startup
 
 		// no ui init if character selection is automatic
 		SetMouseFreeLook ();
@@ -572,6 +565,9 @@ bool reconnection()
 		}
 		InterfaceState = globalMenu();
 	}
+
+	// Restore user UI scaling
+	CViewRenderer::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
 
 	// Disable inputs
 	Actions.enable(false);
@@ -889,7 +885,7 @@ void updateBGDownloaderUI()
 	}
 	if (prevSuccess != LuaBGDSuccessFlag)
 	{
-		nlwarning("Some scipt error occured");
+		nlwarning("Some scipt error occurred");
 	}
 }
 
@@ -1253,10 +1249,20 @@ TInterfaceState globalMenu()
 	}
 
 
-	// Restaure video mode
+	// Restore video mode
 	if (ClientCfg.SelectCharacter == -1)
 	{
-		connectionRestaureVideoMode ();
+		if (ClientCfg.Windowed)
+		{
+			// if used changed window resolution in char select
+			// if we don't update ClientCfg, then UI from icfg is restored wrong
+			uint32 width, height;
+			Driver->getWindowSize(width, height);
+			ClientCfg.Width = width;
+			ClientCfg.Height = height;
+		}
+
+		connectionRestoreVideoMode ();
 	}
 
 	// Skip intro next time
@@ -1963,7 +1969,7 @@ public:
 					}
 				}
 
-				NewKeysCharNameValidated = "";
+				NewKeysCharNameValidated.clear();
 
 				NetMngr.push(out);
 				NetMngr.send(NetMngr.getCurrentServerTick());
@@ -2109,7 +2115,7 @@ public:
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
 		if (pList == NULL)
 		{
-			nlwarning("element "GROUP_LIST_MAINLAND" not found probably bad outgame.xml");
+			nlwarning("element " GROUP_LIST_MAINLAND " not found probably bad outgame.xml");
 			return;
 		}
 
@@ -2291,8 +2297,8 @@ public:
 
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		NewKeysCharNameWanted = "";
-		NewKeysCharNameValidated = "";
+		NewKeysCharNameWanted.clear();
+		NewKeysCharNameValidated.clear();
 		GameKeySet = "keys.xml";
 		RingEditorKeySet = "keys_r2ed.xml";
 		First = true;
@@ -2302,7 +2308,7 @@ public:
 		List = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
 		if (List == NULL)
 		{
-			nlwarning("element "GROUP_LIST_KEYSET" not found probably bad outgame.xml");
+			nlwarning("element " GROUP_LIST_KEYSET " not found probably bad outgame.xml");
 			return;
 		}
 
@@ -2669,7 +2675,7 @@ class CAHScenarioControl : public IActionHandler
 		// init current scenario name and parameters
 		if(!R2::getEditor().isInitialized())
 		{
-			ScenarioFileName = string("");
+			ScenarioFileName.clear();
 
 			// empty scenario
 			CInterfaceElement *result = scenarioWnd->findFromShortId(string("scenario_value_text"));
@@ -2785,7 +2791,7 @@ class CAHScenarioControl : public IActionHandler
 
 				// description
 				string description = sessionBrowser._LastDescription;
-				if(description!="")
+				if(!description.empty())
 				{
 					result = scenarioWnd->findFromShortId(string("edit_small_description"));
 					if(result)
@@ -2937,7 +2943,7 @@ class CAHLoadScenario : public IActionHandler
 		}
 
 		// description
-		string description = string("");
+		string description;
 		result = scenarioWnd->findFromShortId(string("edit_small_description"));
 		if(result)
 		{
@@ -3108,10 +3114,10 @@ class CAHLoadScenario : public IActionHandler
 			launchScenarioFromRingAccessPoint = true;
 		}
 
-		string rules="", level="", title="";
-		string initialIsland="", initialEntryPoint="", initialSeason = "";
-		std::string lang="", scenarioType="";
-		std::string otherCharAccess="";
+		string rules, level, title;
+		string initialIsland, initialEntryPoint, initialSeason;
+		std::string lang, scenarioType;
+		std::string otherCharAccess;
 		std::string nevraxScenario = "0";
 		std::string trialAllowed = "0";
 		for(uint i=0; i<values.size(); i++)

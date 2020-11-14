@@ -1808,7 +1808,6 @@ void	CBotChatPageTrade::giveFocusToMaxEBChangeBuyFilterDialog()
 	setFocusOnEditBox(ig->getGroup("edit_max:eb"));
 }
 
-
 // ***************************************************************************
 void		CBotChatPageTrade::startChangeBuyFilterMPDialog()
 {
@@ -1821,7 +1820,6 @@ void		CBotChatPageTrade::startChangeBuyFilterMPDialog()
 	// go
 	CWidgetManager::getInstance()->enableModalWindow(NULL, ig);
 }
-
 
 // ***************************************************************************
 void		CBotChatPageTrade::confirmChangeBuyFilterMPDialog(uint ft)
@@ -1839,7 +1837,6 @@ void		CBotChatPageTrade::confirmChangeBuyFilterMPDialog(uint ft)
 	// and leave modal
 	CWidgetManager::getInstance()->disableModalWindow();
 }
-
 
 // ***************************************************************************
 void	CBotChatPageTrade::resetItemPartAndTypeFilters()

@@ -36,7 +36,7 @@
 #include "user_entity.h"
 #include "view.h"
 #include "login.h"
-#include "game_share/ryzom_version.h"
+#include "user_agent.h"
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/sphrase_manager.h"
 #include "entities.h"
@@ -154,15 +154,15 @@ void flushDebugStack(const std::string &title)
 			strTmp = toString("\n");
 			DebugFile.serialBuffer((uint8*)strTmp.c_str(), (uint)strTmp.size());
 		}
-		// No Output File -> nlwarning
-		else
+		// No Output File -> nldebug only if DisableNLDebug not set to true
+		else if (!DisableNLDebug)
 		{
-			nlwarning("%s", title.c_str());
+			nldebug("%s", title.c_str());
 			for(uint i=0; i<DebugStack.size(); ++i)
-				nlwarning("  %s", DebugStack[i].c_str());
+				nldebug("  %s", DebugStack[i].c_str());
 
 			// Empty line separator
-			nlwarning("");
+			nldebug("");
 		}
 	}
 
@@ -345,6 +345,7 @@ void displayStreamingDebug ()
 		//----------------//
 		// Create a shadow when displaying a text.
 		TextContext->setShaded(true);
+		TextContext->setShadeOutline(false);
 		// Set the font size.
 		TextContext->setFontSize(ClientCfg.DebugFontSize);
 		// Set the text color
@@ -390,6 +391,7 @@ void displayStreamingDebug ()
 
 		// No more shadow when displaying a text.
 		TextContext->setShaded(false);
+		TextContext->setShadeOutline(false);
 	}
 }
 
@@ -524,7 +526,7 @@ string getDebugInformation()
 	str += toString("ConnectState: %s\n", NetMngr.getConnectionStateCStr());
 	str += toString("LocalAddress: %s\n", NetMngr.getAddress().asString().c_str());
 	str += toString("Language: %s\n", CI18N::getCurrentLanguageName().toString().c_str());
-	str += toString("ClientVersion: "RYZOM_VERSION"\n");
+	str += toString("ClientVersion: %s\n", getDebugVersion().c_str());
 	if (ClientCfg.R2Mode)
 	{
 		str += toString("PatchVersion: %s\n", R2ServerVersion.c_str());
@@ -567,6 +569,7 @@ void displayNetDebug ()
 	//----------------//
 	// Create a shadow when displaying a text.
 	TextContext->setShaded(true);
+	TextContext->setShadeOutline(false);
 	// Set the font size.
 	TextContext->setFontSize(ClientCfg.DebugFontSize);
 	// Set the text color

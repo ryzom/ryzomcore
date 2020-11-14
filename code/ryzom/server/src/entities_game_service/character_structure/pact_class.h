@@ -57,7 +57,7 @@ struct CPact
 
 	DECLARE_PERSISTENCE_METHODS
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial( PactNature );
 		f.serial( PactType );

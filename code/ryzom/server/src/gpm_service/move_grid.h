@@ -381,10 +381,10 @@ void	CMoveGrid<T, CELLS, CSIZE>::clear()
 				while ((node = cellNode->NodeList.getHead()) != NULL)
 				{
 					cellNode->NodeList.remove(node);
-					_NodeAllocator.free(node);
+					_NodeAllocator.freeBlock(node);
 				}
 				list.remove(cellNode);
-				_CellNodeAllocator.free(cellNode);
+				_CellNodeAllocator.freeBlock(cellNode);
 			}
 		}
 	}
@@ -482,7 +482,7 @@ void	CMoveGrid<T, CELLS, CSIZE>::remove(CIterator &it)
 	removeNode(it);
 	it._Node = NULL;
 
-	_NodeAllocator.free(node);
+	_NodeAllocator.freeBlock(node);
 }
 
 

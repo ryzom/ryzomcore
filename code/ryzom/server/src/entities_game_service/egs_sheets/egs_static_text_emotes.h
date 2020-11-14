@@ -69,7 +69,7 @@ public:
 		/// true if this emote can be launched from client UI
 		bool UsableFromClientUI;
 		
-		void serial(class NLMISC::IStream &f)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serial( EmoteId );
 			f.serial( TargetCrowd );
@@ -92,7 +92,7 @@ public:
 	/// Return the version of this class, increments this value when the content of this class has changed
 	inline static uint getVersion () { return 2; }
 	/// Serial
-	void serial(class NLMISC::IStream &f)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serialCont( _Phrases );
 		if (f.isReading())
@@ -117,7 +117,7 @@ public:
 		std::map<std::string, size_t>::const_iterator it = _EmoteIdMap.find(emoteId);
 		if (it!=_EmoteIdMap.end())
 			return (uint16)it->second;
-		return (uint16)~0;
+		return std::numeric_limits<uint16>::max();
 	}
 	MBEHAV::EBehaviour getEmoteBehav(const std::string& emoteId) const;
 	

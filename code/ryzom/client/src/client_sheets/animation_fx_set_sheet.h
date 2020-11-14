@@ -46,7 +46,7 @@ public:
 	// from CEntitySheet
 	void build(const NLGEORGES::UFormElm &item);
 	/// Serialize sheet into binary data file.
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };
 
 

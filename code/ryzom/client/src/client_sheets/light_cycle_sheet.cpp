@@ -31,7 +31,7 @@ void CLightCycleSheet::build(const NLGEORGES::UFormElm &item)
 	LightCycle.build(item);
 }
 
-void CLightCycleSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CLightCycleSheet::serial(NLMISC::IStream &f)
 {
 	LightCycle.serial(f);
 }

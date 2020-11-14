@@ -26,6 +26,10 @@ using namespace std;
 using namespace NL3D;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	NLMISC_REGISTER_OBJECT(CViewBase, CDBViewBar3, std::string, "bar3");

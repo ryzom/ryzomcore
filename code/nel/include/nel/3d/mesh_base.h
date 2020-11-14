@@ -146,7 +146,7 @@ public:
 		CMeshBaseBuild();
 
 		// Serialization is not used
-		//void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		//void serial(NLMISC::IStream &f);
 	};
 	//@}
 
@@ -201,7 +201,7 @@ public:
 	// @}
 
 	/// serial the base Part of this mesh.
-	void	serialMeshBase(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void	serialMeshBase(NLMISC::IStream &f);
 
 	/// Flush textures
 	void	flushTextures (IDriver &driver, uint selectedTexture);

@@ -67,7 +67,7 @@ static void usage()
 	exit(0);
 }
 
-static auto_ptr<Test::Output> cmdline(int argc, char* argv[])
+static CUniquePtr<Test::Output> cmdline(int argc, char* argv[])
 {
 	if (argc > 2)
 		usage(); // will not return
@@ -102,7 +102,7 @@ static auto_ptr<Test::Output> cmdline(int argc, char* argv[])
 		}
 	}
 
-	return auto_ptr<Test::Output>(output);
+	return CUniquePtr<Test::Output>(output);
 }
 
 // Main test program
@@ -114,25 +114,39 @@ int main(int argc, char *argv[])
 	// init Nel context
 	new NLMISC::CApplicationContext;
 
+	// disable nldebug messages in logs in Release
+#ifdef NL_RELEASE
+	NLMISC::DisableNLDebug = true;
+#endif
+
+	NLMISC::createDebug(NULL);
+
+#ifndef NL_DEBUG
+	NLMISC::INelContext::getInstance().getDebugLog()->removeDisplayer("DEFAULT_SD");
+	NLMISC::INelContext::getInstance().getInfoLog()->removeDisplayer("DEFAULT_SD");
+	NLMISC::INelContext::getInstance().getWarningLog()->removeDisplayer("DEFAULT_SD");
+	NLMISC::INelContext::getInstance().getErrorLog()->removeDisplayer("DEFAULT_SD");
+#endif // NL_DEBUG
+
 	bool noerrors = false;
 
 	try
 	{
 		Test::Suite ts;
 
-		ts.add(auto_ptr<Test::Suite>(new CUTMisc));
-		ts.add(auto_ptr<Test::Suite>(new CUTNet));
-		ts.add(auto_ptr<Test::Suite>(new CUTLigo));
+		ts.add(std::auto_ptr<Test::Suite>(new CUTMisc));
+		ts.add(std::auto_ptr<Test::Suite>(new CUTNet));
+		ts.add(std::auto_ptr<Test::Suite>(new CUTLigo));
 		// Add a line here when adding a new test MODULE
 
-		auto_ptr<Test::Output> output(cmdline(argc, argv));
+		CUniquePtr<Test::Output> output(cmdline(argc, argv));
 		noerrors = ts.run(*output);
 
 		Test::HtmlOutput* const html = dynamic_cast<Test::HtmlOutput*>(output.get());
 		if (html)
 		{
 			std::ofstream fout(outputFileName);
-			html->generate(fout, true, "NeLTest");
+			html->generate(fout, true, "NeL");
 		}
 	}
 	catch (...)

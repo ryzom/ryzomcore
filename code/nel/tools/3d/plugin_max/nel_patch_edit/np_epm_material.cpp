@@ -89,7 +89,7 @@ void EditPatchMod::SetSelMatIndex(int index)
 		// Start a restore object...
 		if (theHold.Holding())
 		{
-			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "SetSelMatIndex"));
+			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("SetSelMatIndex")));
 			}
 
 		for (int j = 0; j < patch->getNumPatches(); j++)
@@ -254,7 +254,7 @@ void EditPatchMod::SetSelTess(int nU, int nV)
 		// Start a restore object...
 		if (theHold.Holding())
 		{
-			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "SetSelTess"));
+			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("SetSelTess")));
 		}
 
 		for (int j = 0; j < patch->getNumPatches(); j++)
@@ -276,7 +276,7 @@ void EditPatchMod::SetSelTess(int nU, int nV)
 	}	
 	
 	if (holdNeeded)
-		theHold.Accept("Tile count in U and V change");
+		theHold.Accept(_M("Tile count in U and V change"));
 	else 
 	{
 		ip->DisplayTempPrompt(GetString(IDS_TH_NOPATCHESSEL), PROMPT_TIME);
@@ -391,7 +391,7 @@ void EditPatchMod::setSmoothFlags (bool smooth)
 		// Start a restore object...
 		if (theHold.Holding())
 		{
-			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "SetSmoothFlags"));
+			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("SetSmoothFlags")));
 		}
 
 		// For each edges
@@ -453,7 +453,7 @@ void EditPatchMod::setSmoothFlags (bool smooth)
 	}	
 	
 	if (holdNeeded)
-		theHold.Accept("Tile count in U and V change");
+		theHold.Accept(_M("Tile count in U and V change"));
 	else 
 	{
 		ip->DisplayTempPrompt(GetString(IDS_TH_NOPATCHESSEL), PROMPT_TIME);
@@ -539,7 +539,7 @@ void EditPatchMod::BalanceSelPatch ()
 		// Start a restore object...
 		if (theHold.Holding())
 		{
-			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "SetSelTess"));
+			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("SetSelTess")));
 		}
 
 		std::set<int> visitedU;
@@ -589,7 +589,7 @@ void EditPatchMod::BalanceSelPatch ()
 	}	
 	
 	if (holdNeeded)
-		theHold.Accept("Balance tile");
+		theHold.Accept(_M("Balance tile"));
 	else 
 	{
 		ip->DisplayTempPrompt(GetString(IDS_TH_NOPATCHESSEL), PROMPT_TIME);

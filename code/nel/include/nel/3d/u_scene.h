@@ -134,14 +134,17 @@ public:
 	/** Render a part (see render() for what it does)
 	 *	beginPartRender() must have been called
 	 * \param renderPart a combination of UScene::TRenderPart flags, allow to choose which part of the scene must be rendered
+	 * \param doHrcPass set it to false to indicate that the CHrcTrav have not to be traversed. Useful to optimize if
+	 * you know that NONE of your models have moved (a good example is a shoot of the scene from different cameras).
+	 * \param doTrav set to false when processing a second frame for stereo rending to avoid unnecessary traversals.
 	 *	WARNING: always must begin rendering with at least UScene::RenderOpaque, else shadows won't work
 	 *	WARNING: assert-crash if a part in 'rp' has already been rendered since the last beginPartRender()
 	 */
-	virtual void			renderPart(UScene::TRenderPart rp) =0;
+	virtual void			renderPart(UScene::TRenderPart rp, bool doHrcPass = true, bool doTrav = true, bool keepTrav = false) =0;
 
 	/** End Part Rendering (commit model creation and deletion that were asked during rendering)
 	 */
-	virtual void			endPartRender(bool updateWaitingInstances = true, bool restoreMatrixContextAfterRender = true) =0;
+	virtual void			endPartRender(bool updateWaitingInstances = true, bool restoreMatrixContextAfterRender = true, bool keepTrav = false) =0;
 
 
 	/** Update waiting instances and igs that are loaded asynchronously

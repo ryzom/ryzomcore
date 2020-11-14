@@ -17,6 +17,7 @@
 
 #include <nel/misc/types_nl.h>
 #include <nel/misc/ucstring.h>
+#include <nel/misc/common.h>
 #include <nel/misc/sstring.h>
 #include <nel/misc/i18n.h>
 
@@ -73,7 +74,7 @@ int main(int argc, char *argv[])
 	}
 
 	ucstring	str;
-	CI18N::readTextFile(inputFile, str, false, false, false);
+	CI18N::readTextFile(inputFile, str, false, false);
 
 	if (outMode == ASCII)
 	{
@@ -121,7 +122,7 @@ int main(int argc, char *argv[])
 	case ASCII:
 		{
 			string s = str.toString();
-			FILE *fp = fopen(outputFile.c_str(), "wt");
+			FILE *fp = nlfopen(outputFile, "wt");
 			fwrite(s.data(), s.size(), 1, fp);
 			fclose(fp);
 		}

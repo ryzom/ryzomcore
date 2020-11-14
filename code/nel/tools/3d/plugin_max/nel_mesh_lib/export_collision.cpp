@@ -73,7 +73,7 @@ CCollisionMeshBuild*	CExportNel::createCollisionMeshBuild(std::vector<INode *> &
 				{
 					// get the mesh name
 					uint	meshId = rootMeshNames.size();
-					rootMeshNames.push_back(nodes[node]->GetName());
+					rootMeshNames.push_back(tStrToUtf8(nodes[node]->GetName()));
 					bool	collision = getScriptAppData (nodes[node], NEL3D_APPDATA_COLLISION, 0) != 0;
 					bool	exterior = getScriptAppData (nodes[node], NEL3D_APPDATA_COLLISION_EXTERIOR, 0) != 0;
 
@@ -263,7 +263,7 @@ CCollisionMeshBuild*	CExportNel::createCollisionMeshBuild(std::vector<INode *> &
 	// report warnings
 	if (!warnings.empty())
 	{
-		string	message = "Warning(s) occured during collision export\n(defective links may result) error";
+		string	message = "Warning(s) occurred during collision export\n(defective links may result) error";
 		for (i=0; i<warnings.size(); ++i)
 			message += string("\n")+warnings[i];
 
@@ -290,7 +290,7 @@ CCollisionMeshBuild*	CExportNel::createCollisionMeshBuild(std::vector<INode *> &
 	// report warnings
 	if (!errors.empty())
 	{
-		string	message = "Error(s) occured during collision export\n(edge issues)";
+		string	message = "Error(s) occurred during collision export\n(edge issues)";
 		for (i=0; i<errors.size(); ++i)
 			message += string("\nERROR: ")+errors[i];
 
@@ -314,7 +314,7 @@ CCollisionMeshBuild*	CExportNel::createCollisionMeshBuild(std::vector<INode *> &
 		pCollisionMeshBuild = NULL;
 	}
 
-	// Return the shape pointer or NULL if an error occured.
+	// Return the shape pointer or NULL if an error occurred.
 	return pCollisionMeshBuild;
 }
 
@@ -391,7 +391,7 @@ void	CExportNel::computeCollisionRetrieverFromScene(TimeValue time,
 	// Default: empty retrieverBank/globalRetriever
 	retrieverBank= NULL;
 	globalRetriever= NULL;
-	retIgName= "";
+	retIgName.clear();
 
 	// get list of nodes from scene
 	std::vector<INode*>	nodes;

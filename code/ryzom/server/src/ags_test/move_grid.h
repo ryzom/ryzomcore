@@ -282,10 +282,10 @@ CMoveGrid<T, CELLS, CSIZE>::~CMoveGrid()
 				while ((node = cellNode->NodeList.getHead()) != NULL)
 				{
 					cellNode->NodeList.remove(node);
-					_NodeAllocator.free(node);
+					_NodeAllocator.freeBlock(node);
 				}
 				list.remove(cellNode);
-				_CellNodeAllocator.free(cellNode);
+				_CellNodeAllocator.freeBlock(cellNode);
 			}
 		}
 	}

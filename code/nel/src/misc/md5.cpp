@@ -119,31 +119,6 @@ CHashKeyMD5 getMD5(const uint8 *buffer, uint32 size)
 }
 
 // ****************************************************************************
-// Helper
-// ****************************************************************************
-static bool fromHex(char c, uint8 &x)
-{
-	if (c >= '0' && c <= '9')
-	{
-		x = c - '0';
-		return true;
-	}
-	else if (c >= 'A' && c <= 'F')
-	{
-		x = c - 'A' + 10;
-		return true;
-	}
-	else if (c >= 'a' && c <= 'f')
-	{
-		x = c - 'a' + 10;
-		return true;
-	}
-
-	nlwarning("cannot convert to hexa");
-	return false;
-}
-
-// ****************************************************************************
 // ****************************************************************************
 // CHashKeyMD5
 // ****************************************************************************
@@ -159,10 +134,7 @@ void CHashKeyMD5::clear()
 // ****************************************************************************
 string CHashKeyMD5::toString() const
 {
-	string sTmp;
-	for (uint32 i = 0; i < 16; ++i)
-		sTmp += NLMISC::toString("%02x", Data[i]);
-	return sTmp;
+	return toHexa(Data, 16);
 }
 
 // ****************************************************************************
@@ -174,16 +146,7 @@ bool CHashKeyMD5::fromString(const std::string &in)
 		return false;
 	}
 
-	for (uint32 i = 0; i < 16; ++i)
-	{
-		char c1 = in[2*i];
-		char c2 = in[2*i+1];
-		uint8 x1, x2;
-		if (!fromHex(c1, x1)) return false;
-		if (!fromHex(c2, x2)) return false;
-		Data[i] = (x1 << 4) | x2;
-	}
-	return true;
+	return fromHexa(in, Data);
 }
 
 // ****************************************************************************

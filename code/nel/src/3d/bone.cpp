@@ -20,6 +20,9 @@
 #include "nel/3d/anim_ctrl.h"
 #include "nel/misc/hierarchical_timer.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

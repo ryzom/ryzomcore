@@ -42,7 +42,7 @@ public:
 	~CPSLight();
 	NLMISC_DECLARE_CLASS(CPSLight);
 	/// Serialisation. Derivers must override this, and call their parent version
-	virtual void			serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void			serial(NLMISC::IStream &f);
 	//@}
 	virtual uint32			getType(void) const;
 	virtual uint32			getPriority(void) const { return 600; }

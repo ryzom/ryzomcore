@@ -1,20 +1,19 @@
-/* 7zAlloc.h */
+/* 7zAlloc.h -- Allocation functions
+2017-04-03 : Igor Pavlov : Public domain */
 
 #ifndef __7Z_ALLOC_H
 #define __7Z_ALLOC_H
 
-#include <stddef.h>
+#include "7zTypes.h"
 
-typedef struct _ISzAlloc
-{
-  void *(*Alloc)(size_t size);
-  void (*Free)(void *address); /* address can be 0 */
-} ISzAlloc;
+EXTERN_C_BEGIN
 
-void *SzAlloc(size_t size);
-void SzFree(void *address);
+void *SzAlloc(ISzAllocPtr p, size_t size);
+void SzFree(ISzAllocPtr p, void *address);
 
-void *SzAllocTemp(size_t size);
-void SzFreeTemp(void *address);
+void *SzAllocTemp(ISzAllocPtr p, size_t size);
+void SzFreeTemp(ISzAllocPtr p, void *address);
+
+EXTERN_C_END
 
 #endif

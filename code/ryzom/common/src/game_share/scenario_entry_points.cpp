@@ -372,7 +372,7 @@ void CScenarioEntryPoints::loadFromXMLFile()
 
 			//entry points and package
 			TShortEntryPoints entryPoints;
-			std::string package = std::string("");
+			std::string package;
 			for(uint e=0; e<_EntryPoints.size(); e++)
 			{
 				const CEntryPoint & entryPoint = _EntryPoints[e];
@@ -385,7 +385,7 @@ void CScenarioEntryPoints::loadFromXMLFile()
 					shortEntryPoint.Y = entryPoint.Y;
 					entryPoints.push_back(shortEntryPoint);
 
-					if(package=="")
+					if(package.empty())
 						package=entryPoint.Package;
 					else if(package!=entryPoint.Package)
 						nlinfo("Different packages for island '%s' in file %s", island, _EntryPointsFilename.c_str());
@@ -425,7 +425,7 @@ void CScenarioEntryPoints::loadFromXMLFile()
 			}
 
 
-			if(entryPoints.size()>0)
+			if(!entryPoints.empty())
 			{
 				completeIsland.EntryPoints = entryPoints;
 				_CompleteIslands.push_back(completeIsland);

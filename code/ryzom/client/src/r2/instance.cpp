@@ -30,6 +30,9 @@
 //
 #include "displayer_visual_entity.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLMISC;
 
@@ -650,9 +653,9 @@ sint CInstance::getSelectedSequence() const
 	//H_AUTO(R2_CInstance_getSelectedSequence)
 	CLuaObject selected = const_cast<CInstance *>(this)->getLuaProjection()["User"]["SelectedSequence"];
 	sint index = 0;
-	if (selected.isNumber())
+	if (selected.isInteger())
 	{
-		index = (sint) selected.toNumber();
+		index = (sint) selected.toInteger();
 	}
 	return index;
 }
@@ -754,7 +757,7 @@ const CInstance *CInstance::getParentGroupLeader() const
 	{
 		return NULL;
 	}
-	return getEditor().getInstanceFromObject(components->getValue(0));
+	return getEditor().getInstanceFromObject(components->getValueAtPos(0));
 }
 
 // *********************************************************************************************************
@@ -776,7 +779,7 @@ CObject *CInstance::getGroupSelectedSequence() const
 				{
 					if (selectedSequence >= 0 && selectedSequence < (sint) activities->getSize())
 					{
-						return activities->getValue((sint32) selectedSequence);
+						return activities->getValueAtPos((sint32) selectedSequence);
 					}
 				}
 			}

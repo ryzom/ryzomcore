@@ -21,6 +21,10 @@
 #include "time_client.h"
 #include "nel/misc/time_nl.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // *************************************************************************************************
 CScalableTime::CScalableTime()
 {

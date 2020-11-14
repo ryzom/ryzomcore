@@ -74,7 +74,7 @@ void CVillageSheet::build(const NLGEORGES::UFormElm &item)
 	}
 }
 //=======================================================================
-void CVillageSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CVillageSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(Zone);
 	f.serial(Altitude);

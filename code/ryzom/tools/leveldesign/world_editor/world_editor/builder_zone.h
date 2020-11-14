@@ -176,8 +176,8 @@ public:
 	void				unload (uint32 i);
 	void				move (sint32 x, sint32 y);
 	uint32				countZones ();
-	void				snapshot (const char *fileName, uint sizeSource, bool grayscale);
-	void				snapshotCustom (const char *fileName, uint width, uint height, bool keepRatio, uint sizeSource, bool grayscale);
+	void				snapshot (const std::string &fileName, uint sizeSource, bool grayscale);
+	void				snapshotCustom(const std::string &fileName, uint width, uint height, bool keepRatio, uint sizeSource, bool grayscale);
 
 	void				add (const NLMISC::CVector &worldPos);
 	void				addTransition (const NLMISC::CVector &worldPos);

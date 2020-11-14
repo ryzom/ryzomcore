@@ -1,0 +1,9 @@
+<expression>
+<category>Bits</category>
+<name>bor</name>
+<variable>true</variable>
+<slots>
+<slot>A</slot>
+<slot>B</slot>
+</slots>
+</expression>

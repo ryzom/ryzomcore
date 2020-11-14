@@ -27,6 +27,10 @@ using namespace std;
 using namespace NL3D;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 
@@ -55,8 +59,7 @@ namespace NLGUI
 		if (ptr) _Dynamic = CInterfaceElement::convertBool (ptr);
 
 		ptr = xmlGetProp (cur, (xmlChar*)"type");
-		string sTmp = ptr;
-		sTmp = strlwr(sTmp);
+		string sTmp = toLower(ptr.str());
 		if (sTmp == "linear")
 			_Type = Track_Linear;
 		else if (sTmp == "bezier")
@@ -74,7 +77,7 @@ namespace NLGUI
 		}
 
 		//
-		if (!CInterfaceLink::splitLinkTargets (ptr, parentGroup, _Targets))
+		if (!CInterfaceLink::splitLinkTargets (ptr.str(), parentGroup, _Targets))
 		{
 			nlwarning ("no target for track");
 			return false;
@@ -194,7 +197,7 @@ namespace NLGUI
 				fromString((const char*)time, fAnimTime);
 				TAnimationTime animTime = fAnimTime * CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionMulCoefAnim).getValFloat();
 				double animValue;
-				fromString(value, animValue);
+				fromString(value.str(), animValue);
 
 				// Depending on the type of the track add the key
 				switch(_Type)

@@ -60,7 +60,7 @@ public:
 	/// Build the fx from an external script.
 	void build(const NLGEORGES::UFormElm &item, const std::string &prefix);
 	/// Serialize a CAnimationFX.
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };
 
 

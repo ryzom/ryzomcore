@@ -353,7 +353,7 @@ void CPlugin::postRender(CDisplay &display)
 		// TODO nico This code is duplicated with world_editor_shard_monitor
 		static bool createFailed = false;
 		if (createFailed) return;
-		HRSRC rsc = FindResource(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_FLAG_ICONS_TGA), "TGA");
+		HRSRC rsc = FindResource(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_FLAG_ICONS_TGA), _T("TGA"));
 		if (rsc == NULL)
 		{
 			DWORD lastError = GetLastError();

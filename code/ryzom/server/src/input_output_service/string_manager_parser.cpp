@@ -620,7 +620,7 @@ bool CStringManager::parseBlock(const ucstring &block, CPhrase &phrase)
 					TParamId *pparamId;
 					if (!findParam(phrase, rep[k].ParamName, pparamId))
 					{
-						nlwarning("Text in clause %d use parameter [%s] that is unkown in block", count, rep[k].ParamName.c_str());
+						nlwarning("Text in clause %d use parameter [%s] that is unknown in block", count, rep[k].ParamName.c_str());
 						return false;
 					}
 				}
@@ -650,7 +650,7 @@ bool CStringManager::parseBlock(const ucstring &block, CPhrase &phrase)
 					&& (first - clause.String.begin()) == (sint) clause.Replacements[repCount].InsertPlace)
 				{
 					// check parameter type
-					char *subst;
+					const char *subst;
 					uint paramIndex = clause.Replacements[repCount].ParamIndex;
 
 					TParamId &paramId = phrase.Params[paramIndex]->ParamId;
@@ -1356,7 +1356,7 @@ void	CStringManager::mergeEntityWords(CEntityWords& dest, const CEntityWords& so
 	std::map<std::string, uint32>::const_iterator	iti;
 	for (iti=source._ColumnInfo.begin(); iti!=source._ColumnInfo.end(); ++iti)
 		if (dest._ColumnInfo.find((*iti).first) == dest._ColumnInfo.end())
-			extraColumns.push_back(std::make_pair<std::string, uint32>((*iti).first, osz+(uint32)extraColumns.size()));
+			extraColumns.push_back(std::pair<std::string, uint32>((*iti).first, osz + (uint32)extraColumns.size()));
 
 	for (iti=source._RowInfo.begin(); iti!=source._RowInfo.end(); ++iti)
 		if (dest._RowInfo.find((*iti).first) == dest._RowInfo.end())
@@ -1864,7 +1864,6 @@ void CStringManager::init(NLMISC::CLog *log)
 	
 	if (_SheetInfo.empty())
 	{
-		// std::map<std::string, TSheetInfo> container;
 		// Load the sheet
 		std::vector<std::string> exts;
 		exts.push_back("creature");

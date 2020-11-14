@@ -88,7 +88,7 @@ void CCombatActionSimpleEffect::applyOnEntity( CEntityBase *entity, float succes
 	TGameCycle endDate;
 	if ( _UsePhraseLatencyAsDuration == true && _CombatPhrase != 0)
 	{
-		endDate = _CombatPhrase->latencyEndDate();
+		endDate = (TGameCycle)_CombatPhrase->latencyEndDate();
 	}
 	else
 	{

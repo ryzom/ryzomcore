@@ -86,7 +86,7 @@ public:
 	// Optimize a quantity of money so that the number of seeds is minimum
 	void	 optimize();
 	// serial
-	void serial(NLMISC::IStream	&f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream	&f)
 	{
 		f.serial( _LS, _MS, _BS, _VBS);
 	}

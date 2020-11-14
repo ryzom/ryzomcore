@@ -181,6 +181,19 @@ public:
 	/// @name AI objects hierarchy access
 	//@{
 	CAIInstance* getAIInstance() const;
+
+	AISHEETS::ICreatureCPtr getClientCSheet() const
+	{
+		if (_ClientSheet != NLMISC::CSheetId::Unknown && _ClientCSheet)
+			return _ClientCSheet; 
+		return _Sheet;
+	}
+
+	NLMISC::CSheetId getClientSheet() const
+	{
+		return _ClientSheet; 
+	}
+
 	CGroup& getGroup() { return *getOwner(); }
 	CAliasTreeOwner const* getAliasTreeOwner() const { return this; }
 	CSpawnBot* getSpawnObj() const;
@@ -270,6 +283,7 @@ protected:
 	
 private:
 	AISHEETS::ICreatureCPtr _Sheet;
+	AISHEETS::ICreatureCPtr _ClientCSheet;
 	NLMISC::CSheetId		_ClientSheet;
 	bool _Stuck;
 	bool _IgnoreOffensiveActions;

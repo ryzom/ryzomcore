@@ -19,11 +19,7 @@
 #include "nel/misc/log.h"
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
 #	include <process.h>
-#	include <windows.h>
 #else
 #	include <unistd.h>
 #endif
@@ -63,9 +59,9 @@ void CLog::setDefaultProcessName ()
 #ifdef NL_OS_WINDOWS
 	if ((*_ProcessName).empty())
 	{
-		char name[1024];
-		GetModuleFileName (NULL, name, 1023);
-		(*_ProcessName) = CFile::getFilename(name);
+		wchar_t name[1024];
+		GetModuleFileNameW(NULL, name, 1023);
+		(*_ProcessName) = CFile::getFilename(wideToUtf8(name));
 	}
 #else
 	if ((*_ProcessName).empty())
@@ -87,7 +83,8 @@ void CLog::setProcessName (const std::string &processName)
 		}
 	}
 
-	*_ProcessName = processName;
+	// keep only filename without path
+	*_ProcessName = CFile::getFilename(processName);
 }
 
 void CLog::setPosition (sint line, const char *fileName, const char *funcName)
@@ -263,7 +260,7 @@ void CLog::displayString (const char *str)
 			TempArgs.FileName = _FileName;
 			TempArgs.Line = _Line;
 			TempArgs.FuncName = _FuncName;
-			TempArgs.CallstackAndLog = "";
+			TempArgs.CallstackAndLog.clear();
 
 			TempString = str;
 		}
@@ -284,7 +281,7 @@ void CLog::displayString (const char *str)
 			localargs.FileName = _FileName;
 			localargs.Line = _Line;
 			localargs.FuncName = _FuncName;
-			localargs.CallstackAndLog = "";
+			localargs.CallstackAndLog.clear();
 
 			disp = str;
 			args = &localargs;
@@ -317,7 +314,7 @@ void CLog::displayString (const char *str)
 			(*idi)->display( *args, disp );
 		}
 	}
-	TempString = "";
+	TempString.clear();
 	unsetPosition();
 }
 
@@ -380,11 +377,11 @@ void CLog::displayRawString (const char *str)
 		{
 			localargs.Date = 0;
 			localargs.LogType = CLog::LOG_NO;
-			localargs.ProcessName = "";
+			localargs.ProcessName.clear();
 			localargs.ThreadId = 0;
 			localargs.FileName = NULL;
 			localargs.Line = -1;
-			localargs.CallstackAndLog = "";
+			localargs.CallstackAndLog.clear();
 
 			TempString = str;
 		}
@@ -400,11 +397,11 @@ void CLog::displayRawString (const char *str)
 		{
 			localargs.Date = 0;
 			localargs.LogType = CLog::LOG_NO;
-			localargs.ProcessName = "";
+			localargs.ProcessName.clear();
 			localargs.ThreadId = 0;
 			localargs.FileName = NULL;
 			localargs.Line = -1;
-			localargs.CallstackAndLog = "";
+			localargs.CallstackAndLog.clear();
 
 			disp = str;
 			args = &localargs;
@@ -618,8 +615,12 @@ void CLog::releaseProcessName()
 	{
 		INelContext::getInstance().releaseSingletonPointer("NLMISC::CLog::_ProcessName", _ProcessName);
 	}
-	delete _ProcessName;
-	_ProcessName = NULL;
+
+	if (_ProcessName)
+	{
+		delete _ProcessName;
+		_ProcessName = NULL;
+	}
 }
 
 } // NLMISC

@@ -313,7 +313,7 @@ public:
 	{ 
 		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
 		if (it != ParamIndices.end()) return it->second; 
-		return ~0;
+		return std::numeric_limits<uint>::max();
 	};
 
 	std::map<std::string, uint> ParamIndices;
@@ -335,7 +335,7 @@ public:
 	{ 
 		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
 		if (it != ParamIndices.end()) return it->second; 
-		return ~0;
+		return std::numeric_limits<uint>::max();
 	};
 
 	std::map<std::string, uint> ParamIndices;
@@ -480,11 +480,20 @@ public:
 	virtual ~CStateRecord() {}
 	// use STL allocator for fast alloc. this works because objects are small ( < 128 bytes)
 	void *operator new(size_t size) { return CStateRecord::Allocator.allocate(size); }
+	void *operator new(size_t size, int /* blockUse */, char const * /* fileName */, int /* lineNumber */)
+	{
+		// TODO: add memory leaks detector
+		return CStateRecord::Allocator.allocate(size);
+	}
 	void operator delete(void *block) { CStateRecord::Allocator.deallocate((uint8 *) block, 1); }
+	void operator delete(void *block, int /* blockUse */, char const* /* fileName */, int /* lineNumber */)
+	{
+		// TODO: add memory leaks detector
+		CStateRecord::Allocator.deallocate((uint8 *)block, 1);
+	}
 
 	static std::allocator<uint8> Allocator;
 };
-
 
 // record of a single .fx pass
 class CFXPassRecord
@@ -840,7 +849,7 @@ public:
 
 	// Mode initialisation, requests
 	virtual bool			init (uintptr_t windowIcon = 0, emptyProc exitFunc = 0);
-	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay);
+	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable);
 	virtual bool			release();
 	virtual bool			setMode(const GfxMode& mode);
 	virtual bool			getModes(std::vector<GfxMode> &modes);
@@ -879,6 +888,8 @@ public:
 	virtual void			disableHardwareTextureShader();
 	virtual void			forceDXTCCompression(bool dxtcComp);
 	virtual void			setAnisotropicFilter(sint filter);
+	virtual uint			getAnisotropicFilter() const;
+	virtual uint			getAnisotropicFilterMaximum() const;
 	virtual void			forceTextureResize(uint divisor);
 
 	// Driver information
@@ -898,6 +909,7 @@ public:
 	virtual uint32			getImplementationVersion () const;
 	virtual const char*		getDriverInformation ();
 	virtual const char*		getVideocardInformation ();
+	virtual sint			getTotalVideoMemory () const;
 	virtual CVertexBuffer::TVertexColorType getVertexColorFormat() const;
 
 	// Textures
@@ -944,6 +956,7 @@ public:
 	virtual ITexture		*getRenderTarget() const;
 	virtual bool			copyTargetToTexture (ITexture *tex, uint32 offsetx, uint32 offsety, uint32 x, uint32 y, uint32 width,
 													uint32 height, uint32 mipmapLevel);
+	virtual bool			textureCoordinateAlternativeMode() const { return true; };
 	virtual bool			getRenderTargetSize (uint32 &width, uint32 &height);
 	virtual bool			fillBuffer (CBitmap &bitmap);
 
@@ -1032,11 +1045,6 @@ public:
 
 	// Change default scale for all cursors
 	virtual void			setCursorScale(float scale);
-
-	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
-	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable);
-	virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager();
-	virtual uint							 getDoubleClickDelay(bool hardwareMouse);
 
 	// Lights
 	virtual uint			getMaxLight () const;

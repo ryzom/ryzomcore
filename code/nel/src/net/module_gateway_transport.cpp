@@ -27,6 +27,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 namespace NLNET
@@ -69,7 +72,7 @@ namespace NLNET
 		friend class CL3ServerRoute;
 	public:
 		/// The callback server that receive connection and dispatch message
-		auto_ptr<CCallbackServer>			_CallbackServer;
+		CUniquePtr<CCallbackServer>			_CallbackServer;
 
 		/// A static mapper to retrieve transport from the CCallbackServer pointer
 		typedef map<CCallbackNetBase*, CGatewayL3ServerTransport*>	TDispatcherIndex;
@@ -181,13 +184,13 @@ namespace NLNET
 			}
 		}
 
-		void onCommand(const CMessage &/* command */) throw (EInvalidCommand)
+		void onCommand(const CMessage &/* command */)
 		{
 			// nothing done for now
 			throw EInvalidCommand();
 		}
 		/// The gateway send a textual command to the transport
-		bool onCommand(const TParsedCommandLine &command) throw (EInvalidCommand)
+		bool onCommand(const TParsedCommandLine &command)
 		{
 			if (command.SubParams.size() < 1)
 				throw  EInvalidCommand();
@@ -215,13 +218,13 @@ namespace NLNET
 		}
 
 		/// Open the server by starting listing for incoming connection on the specified port
-		void openServer(uint16 port) throw (ETransportError)
+		void openServer(uint16 port)
 		{
 			if (_CallbackServer.get() != NULL)
 				throw ETransportError("openServer : The server is already open");
 
 			// create a new callback server
-			auto_ptr<CCallbackServer> cbs = auto_ptr<CCallbackServer> (new CCallbackServer());
+			CUniquePtr<CCallbackServer> cbs(new CCallbackServer());
 
 			// register the callbacks
 			cbs->setConnectionCallback(cbConnection, static_cast<IGatewayTransport*>(this));
@@ -231,7 +234,7 @@ namespace NLNET
 			// open the server
 			cbs->init(port);
 
-			_CallbackServer = cbs;
+			_CallbackServer = CUniquePtrMove(cbs);
 
 			// register it in the dispatcher
 			_DispatcherIndex.insert(make_pair(_CallbackServer.get(), this));
@@ -604,13 +607,13 @@ namespace NLNET
 			}
 		}
 
-		void onCommand(const CMessage &/* command */) throw (EInvalidCommand)
+		void onCommand(const CMessage &/* command */)
 		{
 			// nothing done for now
 			throw EInvalidCommand();
 		}
 		/// The gateway send a textual command to the transport
-		bool onCommand(const TParsedCommandLine &command) throw (EInvalidCommand)
+		bool onCommand(const TParsedCommandLine &command)
 		{
 			if (command.SubParams.size() < 1)
 				throw  EInvalidCommand();
@@ -670,7 +673,7 @@ namespace NLNET
 				_FreeRoutesIds.pop_back();
 			}
 
-			auto_ptr<CL3ClientRoute> route = auto_ptr<CL3ClientRoute>(new CL3ClientRoute(this, addr, connId));
+			CUniquePtr<CL3ClientRoute> route(new CL3ClientRoute(this, addr, connId));
 
 			// set the callbacks
 			route->CallbackClient.setDisconnectionCallback(cbDisconnection, static_cast<IGatewayTransport*>(this));

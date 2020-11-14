@@ -111,7 +111,7 @@ TTemplatizerToken	getToken(CTemplatizerParser& t, bool skipspc, std::string* val
 		TTemplatizerToken	retToken = Identifier;
 		
 		if (value != NULL)
-			*value = "";
+			value->clear();
 		do
 		{
 			while (isalpha(*t))
@@ -480,7 +480,7 @@ CTemplatizerParser	ITemplatizerBloc::parseInternal(CTemplatizerParser ptr)
  */
 CTemplatizerParser	CTemplatizerTextBloc::parseInternal(CTemplatizerParser ptr)
 {
-	Text = "";
+	Text.clear();
 
 	ptr = skipSpace(ptr);
 

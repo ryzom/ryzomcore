@@ -57,7 +57,7 @@ public:
 	/// allocate a vertex array space. false if error. client must free before re-allocate.
 	virtual	bool					allocate(uint32 size, CVertexBuffer::TPreferredMemory vbType)= 0;
 	/// free this space.
-	virtual	void					free()= 0;
+	virtual	void					freeBlock()= 0;
 	/// create a IVertexBufferHardGL
 	virtual	IVertexBufferHardGL		*createVBHardGL(uint size, CVertexBuffer *vb) =0;
 	/// return the size allocated. 0 if not allocated or failure
@@ -141,7 +141,7 @@ public:
 	/// allocate a vertex array sapce. false if error. must free before re-allocate.
 	virtual	bool					allocate(uint32 size, CVertexBuffer::TPreferredMemory vbType);
 	/// free this space.
-	virtual	void					free();
+	virtual	void					freeBlock();
 	/// create a IVertexBufferHardGL
 	virtual	IVertexBufferHardGL		*createVBHardGL(uint size, CVertexBuffer *vb);
 	/// return the size allocated. 0 if not allocated or failure
@@ -258,7 +258,7 @@ public:
 	/// allocate a vertex array sapce. false if error. must free before re-allocate.
 	virtual	bool					allocate(uint32 size, CVertexBuffer::TPreferredMemory vbType);
 	/// free this space.
-	virtual	void					free();
+	virtual	void					freeBlock();
 	/// create a IVertexBufferHardGL
 	virtual	IVertexBufferHardGL		*createVBHardGL(uint size, CVertexBuffer *vb);
 	/// return the size allocated. 0 if not allocated or failure
@@ -367,7 +367,7 @@ public:
 	  */
 	virtual	bool					allocate(uint32 size, CVertexBuffer::TPreferredMemory vbType);
 	/// free this space.
-	virtual	void					free();
+	virtual	void					freeBlock();
 	/// create a IVertexBufferHardGL
 	virtual	IVertexBufferHardGL		*createVBHardGL(uint size, CVertexBuffer *vb);
 	/// return the size allocated. 0 if not allocated or failure
@@ -480,7 +480,7 @@ public:
 	  */
 	virtual	bool					allocate(uint32 size, CVertexBuffer::TPreferredMemory vbType);
 	/// free this space.
-	virtual	void					free();
+	virtual	void					freeBlock();
 	/// create a IVertexBufferHardGL
 	virtual	IVertexBufferHardGL		*createVBHardGL(uint size, CVertexBuffer *vb);
 	/// return the size allocated. 0 if not allocated or failure

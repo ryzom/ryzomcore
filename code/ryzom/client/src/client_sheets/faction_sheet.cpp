@@ -39,7 +39,7 @@ void CFactionSheet::build(const NLGEORGES::UFormElm &item)
 	GetFactionFormValue(item, Icon, "Icon");
 }
 //=======================================================================
-void CFactionSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CFactionSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(Icon);
 }

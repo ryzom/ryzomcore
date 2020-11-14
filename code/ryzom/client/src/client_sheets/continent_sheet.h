@@ -39,7 +39,7 @@ public:
 	std::string       TitleTextID; // should be converted with CI18N to get the actual title in ucstring
 public:
 	void build(const NLGEORGES::UFormElm &item);
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };*/
 
 // Parameters common to continent image in the client and to its sheet
@@ -141,7 +141,7 @@ public:
 		float		LoadDist;
 		float		UnloadDist;
 		bool		EnableRuins;		// Allow the display of shape of ruins (else building shape displayed through bot objects)
-		void serial (class NLMISC::IStream &f) throw (NLMISC::EStream);
+		void serial (NLMISC::IStream &f);
 
 		CZC()
 		{
@@ -186,7 +186,7 @@ public:
 
 
 	void build(const NLGEORGES::UFormElm &item);
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 private:
 
@@ -206,7 +206,7 @@ public:
 	CContinentSheet();
 	// from CEntitySheet
 	virtual void build(const NLGEORGES::UFormElm &item);
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 };
 
 #endif

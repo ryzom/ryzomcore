@@ -107,7 +107,7 @@ public:
 	virtual uint32 getNumWantedTris() const = 0;
 
 	/// serialisation. Derivers must override this, and call their parent version
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	virtual void serial(NLMISC::IStream &f)
 	{
 		/// version 3 : global color lighting
 		/// version 2 : auto-lod saved
@@ -210,7 +210,7 @@ class CPSColoredParticle
 		virtual ~CPSColoredParticle();
 
 		/// serialization.
-		void serialColorScheme(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serialColorScheme(NLMISC::IStream &f);
 
 	protected:
 
@@ -273,7 +273,7 @@ class CPSSizedParticle
 		virtual ~CPSSizedParticle();
 
 		/// serialization. We choose a different name because of multiple-inheritance
-		void serialSizeScheme(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serialSizeScheme(NLMISC::IStream &f);
 
 	protected:
 
@@ -335,7 +335,7 @@ class CPSRotated2DParticle
 		virtual ~CPSRotated2DParticle();
 
 		/// serialization. We choose a different name because of multiple-inheritance
-		void serialAngle2DScheme(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serialAngle2DScheme(NLMISC::IStream &f);
 
 
 
@@ -453,7 +453,7 @@ class CPSTexturedParticle
 		virtual ~CPSTexturedParticle();
 
 		/// serialization. We choose a different name because of multiple-inheritance
-		void serialTextureScheme(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serialTextureScheme(NLMISC::IStream &f);
 
 		void			enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> > &dest);
 
@@ -576,7 +576,7 @@ public:
 	}
 
 	/// serial this object
-	void serialMultiTex(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serialMultiTex(NLMISC::IStream &f);
 
 	/** setup a material from this object and a primary texture
 	  * drv is used to check the device caps.
@@ -683,7 +683,7 @@ class CPSRotated3DPlaneParticle
 		virtual ~CPSRotated3DPlaneParticle();
 
 		/// serialization. We choose a different name because of multiple-inheritance
-		void serialPlaneBasisScheme(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serialPlaneBasisScheme(NLMISC::IStream &f);
 
 	protected:
 		/// if this is false, constant size will be used instead of a scheme
@@ -806,7 +806,7 @@ public:
 	enum TBlendingMode { add, modulate, alphaBlend, alphaTest };
 
 	/// serialization (not named 'serial' because it will be used via multiple-inheritance)
-	void serialMaterial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serialMaterial(NLMISC::IStream &f);
 
 	/// set the blending mode. The default is ass
 	void setBlendingMode(CPSMaterial::TBlendingMode mode);

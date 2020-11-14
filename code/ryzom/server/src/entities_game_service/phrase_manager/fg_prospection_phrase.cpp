@@ -716,7 +716,7 @@ void CFgProspectionPhrase::apply()
 	MBEHAV::CBehaviour behav = player->getBehaviour(); // keep arguments
 	behav.Behaviour = MBEHAV::PROSPECTING_END;
 	PHRASE_UTILITIES::sendUpdateBehaviour( _ActorRowId, behav );
-	_LatencyEndDate = ForageSourceSpawnDelay.get(); // wait a short time before spawning the source(s) (to let animation/fx time)
+	_LatencyEndDate = (double)ForageSourceSpawnDelay.get(); // wait a short time before spawning the source(s) (to let animation/fx time)
 }
 
 
@@ -1509,7 +1509,7 @@ NLMISC_DYNVARIABLE( uint32, RyzomSeason, "Get season number (0=Spring)" )
 
 #ifdef DEPOSIT_MAP_GENERATION
 
-#include "server_share/bmp4image.h"
+#include "game_share/bmp4image.h"
 #include <nel/misc/words_dictionary.h>
 
 typedef std::map< std::string, pair< pair< float, float >, uint > > CSUMap;
@@ -1884,13 +1884,13 @@ void CDepositMapsBatchTask::run()
 	if ( ! CFile::isExists( pathName ) )
 		CFile::createDirectory( pathName );
 	pathName += "/";
-	FILE *outputF = fopen( (pathName + "deposit_maps.html").c_str(), "w" );
+	FILE *outputF = nlfopen(pathName + "deposit_maps.html", "w");
 	if ( ! outputF )
 	{
 		nlwarning( "Can't create file %sdeposit_maps.html", pathName.c_str() );
 		return;
 	}
-	FILE *inputF = fopen( _InputFilename.c_str(), "r" );
+	FILE *inputF = nlfopen(_InputFilename, "r");
 	if ( ! inputF )
 	{
 		fprintf( outputF, "File %s not found", _InputFilename.c_str() );

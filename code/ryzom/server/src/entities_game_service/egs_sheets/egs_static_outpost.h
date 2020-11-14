@@ -117,7 +117,7 @@ public:
 	/// Read georges sheet
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 	/// Serial
-	void serial(class NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f);
 	/// Return the version of this class, increments this value when the content of this class has changed
 	static uint getVersion ();
 	
@@ -151,7 +151,7 @@ public:
 	/// Read georges sheet
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 	/// Serial
-	void serial(class NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f);
 	/// Return the version of this class, increments this value when the content of this class has changed
 	static uint getVersion ();
 	

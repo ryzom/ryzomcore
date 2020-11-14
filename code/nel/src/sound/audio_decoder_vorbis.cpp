@@ -117,7 +117,7 @@ CAudioDecoderVorbis::~CAudioDecoderVorbis()
 }
 
 /// Get information on a music file (only artist and title at the moment).
-bool CAudioDecoderVorbis::getInfo(NLMISC::IStream *stream, std::string &artist, std::string &title)
+bool CAudioDecoderVorbis::getInfo(NLMISC::IStream *stream, std::string &artist, std::string &title, float &length)
 {
 	CAudioDecoderVorbis mbv(stream, false); // just opens and closes the oggvorbisfile thing :)
 	vorbis_comment *vc = ov_comment(&mbv._OggVorbisFile, -1);
@@ -125,6 +125,7 @@ bool CAudioDecoderVorbis::getInfo(NLMISC::IStream *stream, std::string &artist, 
 	if (title_c) title = title_c; else title.clear();
 	char *artist_c = vorbis_comment_query(vc, "artist", 0);
 	if (artist_c) artist = artist_c; else artist.clear();
+	length = (float)ov_time_total(&mbv._OggVorbisFile, -1);
 	return true;
 }
 
@@ -195,13 +196,17 @@ uint32 CAudioDecoderVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 m
 uint8 CAudioDecoderVorbis::getChannels()
 {
 	vorbis_info *vi = ov_info(&_OggVorbisFile, -1);
-	return (uint8)vi->channels;
+	if (vi) return (uint8)vi->channels;
+	nlwarning("ov_info returned NULL");
+	return 0;
 }
 
 uint CAudioDecoderVorbis::getSamplesPerSec()
 {
 	vorbis_info *vi = ov_info(&_OggVorbisFile, -1);
-	return (uint)vi->rate;
+	if (vi) return (uint)vi->rate;
+	nlwarning("ov_info returned NULL");
+	return 0;
 }
 
 uint8 CAudioDecoderVorbis::getBitsPerSample()

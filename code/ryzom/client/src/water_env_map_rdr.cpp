@@ -27,6 +27,10 @@
 #include "nel/misc/matrix.h"
 #include "nel/misc/vectord.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NL3D;
 using namespace NLMISC;
 

@@ -19,6 +19,9 @@
 
 #include "nel/3d/mrm_level_detail.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

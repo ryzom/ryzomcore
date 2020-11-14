@@ -19,6 +19,9 @@
 #include "nel/3d/tile_element.h"
 #include "nel/misc/debug.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

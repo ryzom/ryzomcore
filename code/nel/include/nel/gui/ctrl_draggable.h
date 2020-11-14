@@ -29,7 +29,7 @@ namespace NLGUI
 		DECLARE_UI_CLASS( CCtrlDraggable )
 
 		CCtrlDraggable( const TCtorParam &param );
-		virtual ~CCtrlDraggable(){};
+		virtual ~CCtrlDraggable(){}
 
 		static CCtrlDraggable *getDraggedSheet(){ return _LastDraggedSheet; }
 		bool isDragged() const{ return dragged; }

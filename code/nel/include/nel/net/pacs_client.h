@@ -48,7 +48,7 @@ public:
 	/// Constructor
 	CPacsClient()
 	{
-		// No connexion
+		// No connection
 		_Server=NULL;
 	}
 
@@ -553,7 +553,7 @@ static void cbPacsAnswer (CMessage &msgin, TSockId from, CCallbackNetBase &netba
 			client->getPositionSpeedCallback (id, position, speed);
 		}
 		else
-			NLMISC::nlError ("Pacs client: unkown sub message string");
+			NLMISC::nlError ("Pacs client: unknown sub message string");
 
 		// Next message ?
 		msgin.serial (again);
@@ -567,7 +567,7 @@ static TCallbackItem PacsCallbackArray[] =
 
 inline 	bool CPacsClient::connect ()
 {
-	// Create a connexion
+	// Create a connection
 	_Server = new CCallbackClient;
 
 	// Look up for PACS service

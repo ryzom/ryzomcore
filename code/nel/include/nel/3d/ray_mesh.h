@@ -53,7 +53,7 @@ public:
 
 public:
 	// Simple Definition of a mesh used to test against Ray
-	std::vector<CVector>		Vertices;
+	std::vector<NLMISC::CVector>		Vertices;
 	std::vector<uint32>			Triangles;
 
 	/// Empty?

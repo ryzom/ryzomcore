@@ -19,6 +19,9 @@
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
 
+#include <libxml/xmlstring.h>
+#include <libxml/tree.h>
+
 namespace GUIEditor
 {
 	bool WidgetSerializer::serialize( const std::string &masterGroup )
@@ -93,8 +96,6 @@ namespace GUIEditor
 			return false;
 		}
 
-		ag->setActive( false );
-
 		if( mg->serializeSubGroups( root ) == NULL )
 		{
 			ag->setActive( true );
@@ -102,8 +103,6 @@ namespace GUIEditor
 			out.close();
 			return false;
 		}
-
-		ag->setActive( true );
 
 		if( !mg->serializeLinks( root ) )
 		{

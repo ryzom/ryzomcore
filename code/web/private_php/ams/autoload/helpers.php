@@ -18,12 +18,14 @@ class Helpers {
      */
     public static function loadTemplate( $template, $vars = array (), $returnHTML = false )
      {
+     //error_log(print_r($_GET,true));
+     //error_log(print_r($_POST,true));
         global $AMS_LIB;
          global $SITEBASE;
          global $AMS_TRANS;
          global $INGAME_LAYOUT;
          global $AMS_CACHEDIR;
-	global $AMS_PLUGINS;
+        global $AMS_PLUGINS;
 
          // define('SMARTY_SPL_AUTOLOAD',1);
         require_once $AMS_LIB . '/smarty/libs/Smarty.class.php';
@@ -89,6 +91,14 @@ class Helpers {
              
         $id = session_id();    
         $smarty -> assign( "sessionid", $id );
+        
+        $dbl = new DBLayer("lib");
+        $statement = $dbl->executeWithoutParams("SELECT * FROM settings");
+        $rows = $statement->fetchAll();
+            
+        foreach ($rows as &$value) {
+            $smarty -> assign( $value['Setting'], $value['Value'] );
+        }
 
         // smarty inheritance for loading the matching wrapper layout (with the matching menu bar)
         if ( isset( $vars['permission'] ) && $vars['permission'] == 3 ) {

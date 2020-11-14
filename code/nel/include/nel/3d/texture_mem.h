@@ -160,7 +160,7 @@ public:
 	void			setAllowDegradation(bool allow);
 
 	/// Todo: serialize a mem texture.
-	virtual void	serial(NLMISC::IStream &/* f */) throw(NLMISC::EStream) {nlstop;}
+	virtual void	serial(NLMISC::IStream &/* f */) {nlstop;}
 	NLMISC_DECLARE_CLASS(CTextureMem);
 
 	/** This create a white square texture of 1x1

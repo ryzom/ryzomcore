@@ -46,7 +46,7 @@ struct CShard
 	std::string EmergencyPatchURL;
 };
 
-extern std::string LoginLogin, LoginPassword;
+extern std::string LoginLogin, LoginPassword, LoginCustomParameters;
 extern uint32 LoginShardId;
 
 
@@ -54,7 +54,7 @@ extern uint32 AvailablePatchs;
 
 
 
-std::string checkLogin(const std::string &login, const std::string &password, const std::string &clientApp);
+std::string checkLogin(const std::string &login, const std::string &password, const std::string &clientApp, const std::string &customParameters = "");
 std::string selectShard(uint32 shardId, std::string &cookie, std::string &addr);
 std::string getBGDownloaderCommandLine();
 

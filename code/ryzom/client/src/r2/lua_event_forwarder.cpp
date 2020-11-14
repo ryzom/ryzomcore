@@ -18,6 +18,9 @@
 #include "lua_event_forwarder.h"
 #include "nel/gui/lua_object.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace R2
 {

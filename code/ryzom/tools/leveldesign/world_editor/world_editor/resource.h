@@ -65,7 +65,7 @@
 #define IDI_LINE_HIDE                   149
 #define IDC_INSERT_POINT                149
 #define IDI_ZONE_HIDE                   150
-#define IDC_HAND                        150
+#define IDC_HAND1                       150
 #define IDI_ZONE                        151
 #define IDI_ZONE_OPENED                 151
 #define IDD_LOADING                     152

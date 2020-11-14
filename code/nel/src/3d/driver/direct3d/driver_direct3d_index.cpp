@@ -19,13 +19,15 @@
 #include "nel/3d/index_buffer.h"
 #include "nel/3d/light.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/mouse_device.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
 #include "nel/3d/u_driver.h"
 
 #include "driver_direct3d.h"
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace std;
 using namespace NLMISC;
@@ -51,7 +53,7 @@ uint indexCount=0;
 CIBDrvInfosD3D::~CIBDrvInfosD3D()
 {
 	H_AUTO_D3D(CIBDrvInfosD3D_CIBDrvInfosD3DDtor);
-	// Restaure non resident memory
+	// Restore non resident memory
 	if (IndexBufferPtr)
 	{
 		IndexBufferPtr->setLocation(CIndexBuffer::NotResident);

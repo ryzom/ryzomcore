@@ -55,7 +55,7 @@ namespace RY_PDS
  * 0 is remapped to the new object value that appears in stream and so on (reallocations are done
  * circularly through key values). Mask value is for test purposes only, not to be changed!
  */
-template<typename Key, typename Object, int Mask = 0xffffffff, typename TBackMap = std::map<Object, Key> >
+template<typename Key, typename Object, uint32 Mask = 0xffffffff, typename TBackMap = std::map<Object, Key> >
 class CObjCircMapper
 {
 public:
@@ -578,8 +578,8 @@ public:
 	sint16						asSint16() const			{ return (sint16)_Value1[0]; }
 	sint32						asSint32() const			{ return (sint32)_Value2[0]; }
 	sint64						asSint64() const			{ return (sint64)_Value3[0]; }
-	float						asFloat() const				{ return *(float*)(&_Value2[0]); }
-	double						asDouble() const			{ return *(double*)(&_Value3[0]); }
+	float						asFloat() const				{ return (float)_ValueFloat[0]; }
+	double						asDouble() const			{ return (double)_ValueDouble[0]; }
 	const NLMISC::CSheetId&		asSheetId() const			{ return *(NLMISC::CSheetId*)(&_Value2[0]); }
 	const NLMISC::CEntityId&	asEntityId() const			{ return *(NLMISC::CEntityId*)(&_Value3[0]); }
 
@@ -668,6 +668,8 @@ private:
 		uint16				_Value1[4];
 		uint32				_Value2[2];
 		uint64				_Value3[1];
+		float				_ValueFloat[2];
+		double				_ValueDouble[1];
 	};
 
 	bool					_ObjectIdPresent;

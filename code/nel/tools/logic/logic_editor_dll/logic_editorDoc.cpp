@@ -488,7 +488,7 @@ BOOL CLogic_editorDoc::OnSaveDocument( LPCTSTR fileName )
 	{
 		variable = m_variables.GetNext( pos );
 		CLogicVariable logicVariable;
-		logicVariable.setName( string((LPCSTR)variable) );
+		logicVariable.setName(tStrToUtf8(variable));
 		logicStateMachine.addVariable( logicVariable );
 	}
 
@@ -502,7 +502,7 @@ BOOL CLogic_editorDoc::OnSaveDocument( LPCTSTR fileName )
 		CLogicCounter logicCounter;
 		cCounterToCLogicCounter( *pCounter, logicCounter );
 		// set the logic counter name
-		logicCounter.setName( (LPCSTR)eltName );
+		logicCounter.setName(tStrToUtf8(eltName));
 		// add the logic counter
 		logicStateMachine.addCounter( logicCounter );
 	}
@@ -517,7 +517,7 @@ BOOL CLogic_editorDoc::OnSaveDocument( LPCTSTR fileName )
 		CLogicCondition logicCondition;
 		cConditionToCLogicCondition( *pCondition, logicCondition );
 		// set the logic condition name
-		logicCondition.setName( (LPCSTR)eltName );
+		logicCondition.setName(tStrToUtf8(eltName));
 		// add the logic condition
 		logicStateMachine.addCondition( logicCondition );
 	}
@@ -532,7 +532,7 @@ BOOL CLogic_editorDoc::OnSaveDocument( LPCTSTR fileName )
 		CLogicState logicState;
 		cStateToCLogicState( *pState, logicState );
 		// set the logic state's name
-		logicState.setName( (LPCSTR)eltName );
+		logicState.setName(tStrToUtf8(eltName));
 		// add the logic state
 		logicStateMachine.addState( logicState );
 	}
@@ -542,14 +542,14 @@ BOOL CLogic_editorDoc::OnSaveDocument( LPCTSTR fileName )
 	if(pos != NULL)
 	{
 		m_states.GetNextAssoc( pos, eltName, (void*&)pState );
-		logicStateMachine.setCurrentState( string((LPCSTR)eltName) );
+		logicStateMachine.setCurrentState(tStrToUtf8(eltName));
 	}
 	else
 	{
-		logicStateMachine.setCurrentState( string("") );
+		logicStateMachine.setCurrentState("");
 	}
 	// set the name of the state machine
-	logicStateMachine.setName( string(fileName) );
+	logicStateMachine.setName(tStrToUtf8(fileName));
 
 
 	// Check exceptions
@@ -559,7 +559,7 @@ BOOL CLogic_editorDoc::OnSaveDocument( LPCTSTR fileName )
 		COFile file;
 
 		// Open the file
-		file.open (fileName);
+		file.open (tStrToUtf8(fileName));
 
 		// Create the XML stream
 		COXml output;
@@ -578,7 +578,7 @@ BOOL CLogic_editorDoc::OnSaveDocument( LPCTSTR fileName )
 		// Close the file
 		file.close ();
 	}
- 	catch (Exception &)
+ 	catch (const Exception &)
 	{
 	}
 
@@ -625,7 +625,7 @@ BOOL CLogic_editorDoc::load( LPCTSTR fileName )
 		CIFile file;
 
 		// Open the file
-		file.open (fileName);
+		file.open (tStrToUtf8(fileName));
 
 		// Create the XML stream
 		CIXml xmlfileIn;
@@ -646,7 +646,7 @@ BOOL CLogic_editorDoc::load( LPCTSTR fileName )
 		// Close the file
 		file.close ();
 	}
- 	catch (Exception &)
+ 	catch (const Exception &)
 	{
 	}
 	

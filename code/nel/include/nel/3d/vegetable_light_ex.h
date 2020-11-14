@@ -48,7 +48,7 @@ public:
 	/// PointLights. Used at CVegetableManager::updateLighting() to get current colors of pointLights.
 	CPointLightNamed	*PointLight[MaxNumLight];
 	/// Direction of the light. the direction to the instance should be precomputed.
-	CVector				Direction[MaxNumLight];
+	NLMISC::CVector		Direction[MaxNumLight];
 	/// Factor to be multiplied by color of the light. Actually it is the attenuation factor.
 	uint				PointLightFactor[MaxNumLight];
 

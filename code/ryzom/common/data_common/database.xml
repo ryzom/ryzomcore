@@ -358,6 +358,8 @@
                 <leaf name="SHEET"                      type="I32"/>
                 <leaf name="QUALITY"            type="I10"/>
                 <leaf name="QUANTITY"           type="I10"/>
+                <leaf name="CREATE_TIME"                 type="I32" />
+                <leaf name="SERIAL"                      type="I32" />
                 <leaf name="USER_COLOR"         type="I3"/>
                 <leaf name="LOCKED"                     type="I10"/>
                 <leaf name="WEIGHT"                     type="I16"/>
@@ -400,6 +402,10 @@
               type="I10" />
         <leaf name="QUANTITY"
               type="I10" />
+        <leaf name="CREATE_TIME"
+              type="I32" />
+        <leaf name="SERIAL"
+              type="I32" />
         <leaf name="USER_COLOR"
               type="I3" />
         <!-- <leaf name="LOCKED"                        type="I10"/> No longer needed -->
@@ -434,6 +440,10 @@
               type="I10" />
         <leaf name="QUANTITY"
               type="I10" />
+        <leaf name="CREATE_TIME"
+              type="I32" />
+        <leaf name="SERIAL"
+              type="I32" />
         <leaf name="USER_COLOR"
               type="I3" />
         <!-- <leaf name="LOCKED"                        type="I10"/> No longer needed -->
@@ -485,6 +495,10 @@
               type="I10" />
         <leaf name="QUANTITY"
               type="I10" />
+        <leaf name="CREATE_TIME"
+              type="I32" />
+        <leaf name="SERIAL"
+              type="I32" />
         <leaf name="USER_COLOR"
               type="I3" />
         <leaf name="LOCKED"
@@ -530,6 +544,10 @@
               type="I10" />
         <leaf name="QUANTITY"
               type="I10" />
+        <leaf name="CREATE_TIME"
+              type="I32" />
+        <leaf name="SERIAL"
+              type="I32" />
         <leaf name="USER_COLOR"
               type="I3" />
         <leaf name="LOCKED"
@@ -584,6 +602,10 @@
         <!-- for forage progress, max QL409 x10 -->
         <leaf name="QUANTITY"
               type="I12" />
+        <leaf name="CREATE_TIME"
+              type="I32" />
+        <leaf name="SERIAL"
+              type="I32" />
         <!-- for forage progress, max x409 x10 -->
         <leaf name="USER_COLOR"
               type="I3" />
@@ -627,6 +649,10 @@
               type="I10" />
         <leaf name="QUANTITY"
               type="I10" />
+        <leaf name="CREATE_TIME"
+              type="I32" />
+        <leaf name="SERIAL"
+              type="I32" />
         <leaf name="USER_COLOR"
               type="I3" />
         <leaf name="WEIGHT"
@@ -685,6 +711,10 @@
               type="I10" />
         <leaf name="QUANTITY"
               type="I10" />
+        <leaf name="CREATE_TIME"
+              type="I32" />
+        <leaf name="SERIAL"
+              type="I32" />
         <leaf name="USER_COLOR"
               type="I3" />
         <leaf name="LOCKED"
@@ -912,6 +942,10 @@
       <leaf name="QUANTITY"
             type="I10" />
       <!-- No LOCKED state -->
+      <leaf name="CREATE_TIME"
+              type="I32" />
+      <leaf name="SERIAL"
+              type="I32" />
       <leaf name="USER_COLOR"
             type="I3" />
       <leaf name="WEIGHT"
@@ -1196,6 +1230,10 @@
               type="I10" />
         <leaf name="QUANTITY"
               type="I10" />
+        <leaf name="CREATE_TIME"
+              type="I32" />
+        <leaf name="SERIAL"
+              type="I32" />
         <leaf name="USER_COLOR"
               type="I3" />
         <leaf name="LOCKED"
@@ -1581,7 +1619,8 @@
             type="I7" />
       <leaf name="NAME"
             type="I32"
-            nullable="1" />
+            nullable="1"
+            is_true="1" />
     </branch>
   </branch>
   <branch name="DEBUG_INFO"

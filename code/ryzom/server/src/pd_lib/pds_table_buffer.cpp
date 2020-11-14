@@ -789,11 +789,11 @@ bool	CTableBuffer::processRow(CAccessor& accessor)
 		// already mapped
 		if (!RY_PDS::ResolveDoubleMappedRows)
 		{
-			PDS_WARNING("processRow(): key '%016"NL_I64"X' already mapped to '%s', failed", header->getKey(), prevMap.toString().c_str());
+			PDS_WARNING("processRow(): key '%016" NL_I64 "X' already mapped to '%s', failed", header->getKey(), prevMap.toString().c_str());
 			return false;
 		}
 
-		PDS_WARNING("processRow(): key '%016"NL_I64"X' already mapped to '%s'", header->getKey(), prevMap.toString().c_str());
+		PDS_WARNING("processRow(): key '%016" NL_I64 "X' already mapped to '%s'", header->getKey(), prevMap.toString().c_str());
 
 		if (RY_PDS::ResolveDoubleMappedKeepOlder)
 		{
@@ -932,7 +932,7 @@ bool	CTableBuffer::mapRow(const RY_PDS::CObjectIndex &index, uint64 key)
 
 	if (!_RowMapper.map(key, index))
 	{
-		PDS_WARNING("mapRow(): failed to map row '%d' to key '%016"NL_I64"X'", index.row(), key);
+		PDS_WARNING("mapRow(): failed to map row '%d' to key '%016" NL_I64 "X'", index.row(), key);
 		return false;
 	}
 
@@ -971,7 +971,7 @@ bool	CTableBuffer::unmapRow(const RY_PDS::CObjectIndex &index, uint64 key)
 
 	if (!_RowMapper.unmap(key))
 	{
-		PDS_WARNING("unmapRow(): failed to unmap row '%d' from key '%016"NL_I64"X", index.row(), key);
+		PDS_WARNING("unmapRow(): failed to unmap row '%d' from key '%016" NL_I64 "X", index.row(), key);
 		return false;
 	}
 
@@ -980,7 +980,7 @@ bool	CTableBuffer::unmapRow(const RY_PDS::CObjectIndex &index, uint64 key)
 
 	if (header->getKey() != key)
 	{
-		PDS_WARNING("unmapRow(): row '%d' is mapped to '%016"NL_I64"X', unmap row anyway, system may not recover object", index.row(), key);
+		PDS_WARNING("unmapRow(): row '%d' is mapped to '%016" NL_I64 "X', unmap row anyway, system may not recover object", index.row(), key);
 	}
 
 	header->setKey(0);

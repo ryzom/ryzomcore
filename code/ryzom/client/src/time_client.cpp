@@ -34,6 +34,9 @@
 #include "weather.h"
 #include "game_share/light_cycle.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ///////////
 // USING //

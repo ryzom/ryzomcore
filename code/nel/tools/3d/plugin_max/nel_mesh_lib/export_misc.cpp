@@ -95,9 +95,9 @@ Matrix3 CExportNel::viewMatrix2CameraMatrix (const Matrix3& viewMatrix)
 // ConvertMatrix a 3dsmax vector in NeL matrix
 void CExportNel::convertVector (CVector& nelVector, const Point3& maxVector)
 {
-	nelVector.x = maxVector.x;	
-	nelVector.y = maxVector.y;	
-	nelVector.z = maxVector.z;	
+	nelVector.x = maxVector.x;
+	nelVector.y = maxVector.y;
+	nelVector.z = maxVector.z;
 }
 
 
@@ -223,7 +223,7 @@ Animatable*	CExportNel::getSubAnimByName (Animatable& node, const char* sName)
 		TSTR sSubName=node.SubAnimName(nSub);
 
 		// Good name?
-		if (strcmp (sSubName, sName)==0)
+		if (strcmp (sSubName.ToUTF8(), sName)==0)
 		{
 			// ok, return this subanim
 			return node.SubAnim(nSub);
@@ -265,7 +265,7 @@ Control* CExportNel::getControlerByName (Animatable& node, const char* sName)
 			ParamDef& paramDef=param->GetParamDef(id);
 
 			// Good name?
-			if (strcmp (paramDef.int_name, sName)==0)
+			if (strcmp (tStrToUtf8(paramDef.int_name).c_str(), sName)==0)
 			{
 				// ok, return this subanim
 #if MAX_VERSION_MAJOR >= 14
@@ -288,7 +288,7 @@ Control* CExportNel::getControlerByName (Animatable& node, const char* sName)
 		{
 			// Sub anim name
 			TSTR name=node.SubAnimName (s);
-			if (strcmp (name, sName)==0)
+			if (strcmp (name.ToUTF8(), sName)==0)
 			{
 				// Get the controller pointer of this sub anim
 				Control* c=GetControlInterface (node.SubAnim(s));
@@ -332,7 +332,7 @@ bool getValueByNameUsingParamBlock2Internal (Animatable& node, const char* sName
 			ParamDef& paramDef=param->GetParamDef(id);
 
 			// Good name?
-			if (strcmp (paramDef.int_name, sName)==0)
+			if (strcmp (tStrToUtf8(paramDef.int_name).c_str(), sName)==0)
 			{
 				// Check this value is good type
 				ParamType2 paramType = param->GetParameterType(id);
@@ -372,7 +372,7 @@ bool getValueByNameUsingParamBlock2Internal (Animatable& node, const char* sName
 						break;
 						case TYPE_FILENAME:
 						case TYPE_STRING:
-							*(std::string*)pValue = param->GetStr (id, tvTime);
+							*(std::string*)pValue = tStrToUtf8(param->GetStr (id, tvTime));
 							bRes = TRUE;
 						break;
 						case TYPE_FILENAME_TAB:
@@ -382,7 +382,7 @@ bool getValueByNameUsingParamBlock2Internal (Animatable& node, const char* sName
 							uint total = param->Count (id);
 							rTab.resize(total);
 							for( uint i = 0; i < total; ++i )
-								rTab[i] = param->GetStr (id, tvTime, i);
+								rTab[i] = tStrToUtf8(param->GetStr (id, tvTime, i));
 							bRes = TRUE;
 						}
 						break;
@@ -409,7 +409,7 @@ bool getValueByNameUsingParamBlock2Internal (Animatable& node, const char* sName
 				}
 				else
 				{
-					nlwarning("Invalid type specified for pblock2 value with name '%s', given type '%u', found '%u'", 
+					nlwarning("Invalid type specified for pblock2 value with name '%s', given type '%u', found '%u'",
 						sName, (uint32)type, (uint32)paramType);
 				}
 			}
@@ -476,12 +476,12 @@ Modifier* CExportNel::getModifier (INode* pNode, Class_ID modCID)
 		int m;
 		int nNumMods = pDObj->NumModifiers();
 		// Step through all modififers and verify the class id
-		for (m=0; m<nNumMods; ++m) 
+		for (m=0; m<nNumMods; ++m)
 		{
 			Modifier* pMod = pDObj->GetModifier(m);
-			if (pMod) 
+			if (pMod)
 			{
-				if (pMod->ClassID() == modCID) 
+				if (pMod->ClassID() == modCID)
 				{
 					// Match! Return it
 					return pMod;
@@ -502,7 +502,7 @@ std::string	CExportNel::getName (MtlBase& mtl)
 	// Return its name
 	TSTR name;
 	name=mtl.GetName();
-	return std::string (name);
+	return std::string((const char*)name.ToUTF8());
 }
 
 // --------------------------------------------------
@@ -511,8 +511,8 @@ std::string	CExportNel::getName (MtlBase& mtl)
 std::string	CExportNel::getName(INode& node)
 {
 	// Return its name
-	MCHAR* name = node.GetName();
-	return std::string(name);
+	const MCHAR* name = node.GetName();
+	return tStrToUtf8(name);
 }
 
 // --------------------------------------------------
@@ -528,28 +528,28 @@ std::string		CExportNel::getNelObjectName (INode& node)
 	if (obj)
 	{
 		Class_ID  clid = obj->ClassID();
-		// is the object a particle system ? (we do this defore meshs, because for now there is a mesh in max scenes to say where a particle system is...)		
+		// is the object a particle system ? (we do this defore meshs, because for now there is a mesh in max scenes to say where a particle system is...)
 		if (clid.PartA() == NEL_PARTICLE_SYSTEM_CLASS_ID)
 		{
 			std::string shapeName;
 			if (CExportNel::getValueByNameUsingParamBlock2(node, "ps_file_name", (ParamType2) TYPE_STRING, &shapeName, 0))
 			{
 				return NLMISC::CFile::getFilename(shapeName);
-			}			
+			}
 		}
 	}
-	// Try to get an APPDATA for the name of the object			
+	// Try to get an APPDATA for the name of the object
 	AppDataChunk *ad = node.GetAppDataChunk (MAXSCRIPT_UTILITY_CLASS_ID, UTILITY_CLASS_ID, NEL3D_APPDATA_INSTANCE_SHAPE);
 	if (ad&&ad->data)
 	{
 		if (::strlen((const char *) ad->data) != 0)
-		{		
+		{
 			// Get the name of the object in the APP data
 			return (const char*)ad->data;
 		}
 		else
 		{
-			return node.GetName();
+			return tStrToUtf8(node.GetName());
 		}
 	}
 	else
@@ -561,36 +561,33 @@ std::string		CExportNel::getNelObjectName (INode& node)
 			ad = obj->GetAppDataChunk (MAXSCRIPT_UTILITY_CLASS_ID, UTILITY_CLASS_ID, NEL3D_APPDATA_INSTANCE_SHAPE);
 			if (ad&&ad->data)
 			{
-				if (::strlen((const char *) ad->data) != 0)
-				{				
+				if (_tcslen((const TCHAR *) ad->data) != 0)
+				{
 					// get file name only
-					char fName[_MAX_FNAME];
-					char ext[_MAX_FNAME];
-					::_splitpath((const char*)ad->data, NULL, NULL, fName, ext) ;						
-					return std::string(fName + std::string(ext));
+					return NLMISC::CFile::getFilename(tStrToUtf8((const TCHAR*)ad->data));
 				}
 				else
 				{
-					return node.GetName();
+					return tStrToUtf8(node.GetName());
 				}
 			}
 			else
 			{
 				// Extract the node name
-				return node.GetName();
+				return tStrToUtf8(node.GetName());
 			}
 		}
 		else
-		{		
+		{
 			// Extract the node name
-			return node.GetName();
+			return tStrToUtf8(node.GetName());
 		}
 	}
 }
 
 // --------------------------------------------------
 
-void CExportNel::decompMatrix (NLMISC::CVector& nelScale, NLMISC::CQuat& nelRot, NLMISC::CVector& nelPos, 
+void CExportNel::decompMatrix (NLMISC::CVector& nelScale, NLMISC::CQuat& nelRot, NLMISC::CVector& nelPos,
 								const Matrix3& maxMatrix)
 {
 	// Use decomp part of the max SDK
@@ -604,7 +601,7 @@ void CExportNel::decompMatrix (NLMISC::CVector& nelScale, NLMISC::CQuat& nelRot,
 	parts.q.MakeMatrix(rtm);
 	parts.u.MakeMatrix(srtm);
 	stm = ScaleMatrix(parts.k);
-	ftm = ScaleMatrix(Point3(parts.f,parts.f,parts.f)); 
+	ftm = ScaleMatrix(Point3(parts.f,parts.f,parts.f));
 	Matrix3 mat = Inverse(srtm) * stm * srtm * rtm * ftm * ptm;
 
 	// Set the translation
@@ -763,32 +760,32 @@ bool CExportNel::hasLightMap (INode& node, TimeValue time)
 
 // --------------------------------------------------
 
-void CExportNel::outputErrorMessage (const char *message)
+void CExportNel::outputErrorMessage(const std::string &message)
 {
 	if (_ErrorInDialog)
 	{
-		MessageBox (_Ip->GetMAXHWnd(), message, _ErrorTitle.c_str(), MB_OK|MB_ICONEXCLAMATION);
+		MessageBoxW (_Ip->GetMAXHWnd(), utf8ToTStr(message), utf8ToTStr(_ErrorTitle), MB_OK|MB_ICONEXCLAMATION);
 	}
-	mprintf (message);
-	mprintf ("\n");
+	mprintf (utf8ToTStr(message));
+	mprintf (_T("\n"));
 
 	nlwarning ("Error in max file %s : ", _Ip->GetCurFilePath());
-	nlwarning (message);
+	nlwarning (message.c_str());
 }
 
 // --------------------------------------------------
 
-void CExportNel::outputWarningMessage (const char *message)
+void CExportNel::outputWarningMessage (const std::string &message)
 {
 	if (_ErrorInDialog)
 	{
-		MessageBox (_Ip->GetMAXHWnd(), message, _ErrorTitle.c_str(), MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (_Ip->GetMAXHWnd(), utf8ToTStr(message), utf8ToTStr(_ErrorTitle), MB_OK|MB_ICONEXCLAMATION);
 	}
-	mprintf (message);
-	mprintf ("\n");
+	mprintf (utf8ToTStr(message));
+	mprintf (_M("\n"));
 
 	nlwarning ("Warning in max file %s : ", _Ip->GetCurFilePath());
-	nlwarning (message);
+	nlwarning (message.c_str());
 }
 
 // --------------------------------------------------
@@ -822,7 +819,7 @@ void CExportNel::addChildLodNode (std::set<INode*> &lodListToExclude, INode *cur
 		if (lodName != "")
 		{
 			// Get the lod by name
-			INode *lodNode = _Ip->GetINodeByName (lodName.c_str());
+			INode *lodNode = _Ip->GetINodeByName (utf8ToTStr(lodName));
 			if (lodNode)
 			{
 				// Insert it in the set
@@ -844,7 +841,7 @@ void CExportNel::addParentLodNode (INode &child, std::set<INode*> &lodListToExcl
 	if (parent == NULL)
 		parent = _Ip->GetRootNode();
 
-	// Get its child lod 
+	// Get its child lod
 	uint lodCount = getScriptAppData (parent, NEL3D_APPDATA_LOD_NAME_COUNT, 0);
 	for (uint lod=0; lod<lodCount; lod++)
 	{
@@ -853,7 +850,7 @@ void CExportNel::addParentLodNode (INode &child, std::set<INode*> &lodListToExcl
 		if (lodName != "")
 		{
 			// Get the lod by name
-			INode *lodNode = _Ip->GetINodeByName (lodName.c_str());
+			INode *lodNode = _Ip->GetINodeByName (utf8ToTStr(lodName));
 			if (lodNode == &child)
 			{
 				// Insert it in the set
@@ -897,13 +894,13 @@ void CExportNel::uvMatrix2NelUVMatrix (const Matrix3& maxMatrix, NLMISC::CMatrix
 	dest.identity();
 
 	// Set the rotation part
-	dest.setRot(I, J, K); 
+	dest.setRot(I, J, K);
 
 	// Set the position part
-	dest.setPos(P);	
+	dest.setPos(P);
 
 	// transfo matrix
-	
+
 	CMatrix convert;
 	convert.setRot(CVector::I, -CVector::J, CVector::K);
 	convert.setPos(CVector::J);
@@ -946,11 +943,11 @@ std::string		CExportNel::getAnimatedLight (INode *node)
 {
 	std::string		ret = CExportNel::getScriptAppData (node, NEL3D_APPDATA_LM_ANIMATED_LIGHT, NEL3D_APPDATA_LM_ANIMATED_LIGHT_DEFAULT);
 	if (ret == "Sun")
-		ret = "";
+		ret.clear();
 	if (ret == "GlobalLight")
-		ret = "";
+		ret.clear();
 	if (ret == "(Use NelLight Modifier)")
-		ret = "";
+		ret.clear();
 
 	return ret;
 }
@@ -970,7 +967,7 @@ struct CMaxMeshSeg
 	uint V0, V1;
 	// for map insertion
 	bool operator<(const CMaxMeshSeg &other) const
-	{ 
+	{
 		uint lv0 = std::min(V0, V1);
 		uint lv1 = std::max(V0, V1);
 
@@ -986,8 +983,8 @@ struct CMaxMeshSeg
 		return !(*this < other) && !(other < *this);
 	}
 	CMaxMeshSeg(uint v0, uint v1) : V0(v0),
-							 V1(v1)				
-	{			
+							 V1(v1)
+	{
 	}
 };
 
@@ -996,7 +993,7 @@ struct CPredNextSegOf
 {
 	uint Prev;
 	CPredNextSegOf(uint prev) : Prev(prev) {}
-	bool operator()(const CMaxMeshSeg &value) const { return value.V0 == Prev || value.V1 == Prev; }		
+	bool operator()(const CMaxMeshSeg &value) const { return value.V0 == Prev || value.V1 == Prev; }
 };
 
 /// Get normal of a max triangle in nel format
@@ -1012,7 +1009,7 @@ static NLMISC::CVector getMaxFaceNormal(const Mesh &m, const NLMISC::CMatrix &ba
 	normal.normalize();
 	return normal;
 }
-  
+
 
 
 
@@ -1020,11 +1017,11 @@ static NLMISC::CVector getMaxFaceNormal(const Mesh &m, const NLMISC::CMatrix &ba
 // This convert a polygon expressed as a max mesh into a list of ordered vectors
 void CExportNel::maxPolygonMeshToOrderedPoly(Mesh &mesh, std::vector<NLMISC::CVector> &dest, const NLMISC::CMatrix &basis, NLMISC::CVector &avgNormal)
 {
-	/// We use a very simple (but slow) algo : examine for each segment how many tris share it. If it is one then it is a border seg	 
+	/// We use a very simple (but slow) algo : examine for each segment how many tris share it. If it is one then it is a border seg
 	/// Then, just order segments
-	
-	typedef std::map<CMaxMeshSeg, uint> TSegMap;		
-		
+
+	typedef std::map<CMaxMeshSeg, uint> TSegMap;
+
 	avgNormal.set(0, 0, 0);
 
 	/////////////////////////////////////////////////////////////
@@ -1059,15 +1056,15 @@ void CExportNel::maxPolygonMeshToOrderedPoly(Mesh &mesh, std::vector<NLMISC::CVe
 	// keep segments for which nbref is 1 //
 	////////////////////////////////////////
 
-	typedef std::list<CMaxMeshSeg> TSegList;	
-	TSegList borderSegs;	
+	typedef std::list<CMaxMeshSeg> TSegList;
+	TSegList borderSegs;
 	for(TSegMap::const_iterator it = segs.begin(); it != segs.end(); ++it)
 	{
 		if (it->second == 1) borderSegs.push_back(it->first);
 	}
 
 
-	
+
 	dest.clear();
 	if (borderSegs.empty()) return;
 
@@ -1084,9 +1081,9 @@ void CExportNel::maxPolygonMeshToOrderedPoly(Mesh &mesh, std::vector<NLMISC::CVe
 	for(;;)
 	{
 		TSegList::iterator nextSeg = std::find_if(borderSegs.begin(), borderSegs.end(), CPredNextSegOf(nextToFind));
-		if (nextSeg == borderSegs.end()) return;					
+		if (nextSeg == borderSegs.end()) return;
 		CExportNel::convertVector(pos, mesh.verts[nextSeg->V0 == nextToFind ? nextSeg->V0 : nextSeg->V1]);
-		dest.push_back(basis * pos);	
+		dest.push_back(basis * pos);
 		nextToFind = (nextSeg->V0 == nextToFind) ? nextSeg->V1 : nextSeg->V0;
 		borderSegs.erase(nextSeg);
 	}
@@ -1099,28 +1096,39 @@ void CExportNel::maxPolygonMeshToOrderedPoly(Mesh &mesh, std::vector<NLMISC::CVe
 static std::string OldDecimalSeparatorLocale;
 
 static void setDecimalSeparatorAsPoint()
-{				
+{
 	OldDecimalSeparatorLocale = ::setlocale(LC_NUMERIC, NULL);
-	::setlocale(LC_NUMERIC, "English");	
+	::setlocale(LC_NUMERIC, "C");
 }
 
 static void restoreDecimalSeparator()
-{	
-	::setlocale(LC_NUMERIC, OldDecimalSeparatorLocale.c_str());		
+{
+	::setlocale(LC_NUMERIC, OldDecimalSeparatorLocale.c_str());
 }
 
 
 ///=======================================================================
-float toFloatMax(const char *src)
+float toFloatMax(const TCHAR *src)
+{
+	float result = 0.f;
+	if (toFloatMax(tStrToUtf8(src), result)) return result;
+	return 0.f;
+}
+
+float toFloatMax(const std::string &src)
 {
 	float result = 0.f;
 	if (toFloatMax(src, result)) return result;
 	return 0.f;
 }
 
+bool toFloatMax(const TCHAR *src, float &dest)
+{
+	return toFloatMax(tStrToUtf8(src), dest);
+}
 
-bool		toFloatMax(const char *src, float &dest)
-{	
+bool toFloatMax(const std::string &src, float &dest)
+{
 	setDecimalSeparatorAsPoint();
 	std::string str(src);
 	std::string::size_type pointPos = str.find_first_of(",");
@@ -1150,17 +1158,17 @@ bool		toFloatMax(const char *src, float &dest)
 		result += (float) (*src - '0');
 		++src;
 	}
-	if (!(*src == '.' || *src == ',')) 
-	{	
+	if (!(*src == '.' || *src == ','))
+	{
 		if (numberFound)
-		{		
+		{
 			dest = sgn * result;
 			return true;
 		}
 		else
 			return false;
 	}
-	++src;		
+	++src;
 	if (!::isdigit(*src))
 	{
 		if (!numberFound)
@@ -1168,9 +1176,9 @@ bool		toFloatMax(const char *src, float &dest)
 			return false;
 		}
 	}
-	float addValue = 0.1f;	
+	float addValue = 0.1f;
 	while (::isdigit(*src))
-	{	
+	{
 		result += addValue * (float) (*src - '0');
 		addValue *= 0.1f;
 		++ src;
@@ -1209,15 +1217,15 @@ std::string toStringMax(float value)
 	do
 	{
 		value *= 10.f;
-		frac = (float) ::modf((double) value, &intPart);		
-		result += toString((int) intPart % 10);		
+		frac = (float) ::modf((double) value, &intPart);
+		result += toString((int) intPart % 10);
 	}
 	while (frac != 0.f);
 	return positive ? result : "-" + result;*/
 }
 ///=======================================================================
 std::string toStringMax(int value)
-{	
+{
 	char result[256];
 	setDecimalSeparatorAsPoint();
 	::sprintf(result, "%d", value);
@@ -1225,7 +1233,7 @@ std::string toStringMax(int value)
 	return result;
 
 	/*char str[256];
-	::sprintf(str, "%d", value);	
+	::sprintf(str, "%d", value);
 	return str;*/
 }
 ///=======================================================================

@@ -38,6 +38,10 @@
 using namespace std;
 using namespace NLMISC;
  
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 	
@@ -122,7 +126,7 @@ bool CDriverGL::compilePixelProgram(NL3D::CPixelProgram *program)
 		{
 			delete drvInfo;
 			program->m_DrvInfo = NULL;
-			_GPUPrgDrvInfos.erase(it);
+			//_GPUPrgDrvInfos.erase(it); // not needed as ~IProgramDrvInfos() already does it
 			return false;
 		}
 	}

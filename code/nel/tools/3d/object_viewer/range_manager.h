@@ -62,7 +62,7 @@ public:
 	}
 
 	/// serialization
-	static void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	static void serial(NLMISC::IStream &f)
 	{
 		uint32 size;		
 		if (!f.isReading())

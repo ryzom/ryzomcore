@@ -103,7 +103,7 @@ public:
 									   uint32 srcStep = (1 << 16)
 									  ) const;
 
-		virtual void    serial		  (NLMISC::IStream &f) throw(NLMISC::EStream);
+		virtual void    serial		  (NLMISC::IStream &f);
 		virtual void    deleteElement (uint32 index);
 		virtual void    newElement	  (const CPSEmitterInfo &info);
 		virtual void	resize		  (uint32 capacity, uint32 nbPresentElements);

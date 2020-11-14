@@ -81,7 +81,7 @@ public:
 				}
 				//nldebug("active, leave sleep, test assert");
 
-				// If this assert occured, it means that a checked part of the code was
+				// If this assert occurred, it means that a checked part of the code was
 				// to slow and then I decided to assert to display the problem.
 				nlassert(!(_Control==ACTIVE && _Counter==lastCounter));
 			}

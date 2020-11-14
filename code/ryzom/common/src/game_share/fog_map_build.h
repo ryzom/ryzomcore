@@ -33,7 +33,7 @@ public:
 	std::string ZoneMin;
 	std::string ZoneMax;
 public:
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };
 
 #endif

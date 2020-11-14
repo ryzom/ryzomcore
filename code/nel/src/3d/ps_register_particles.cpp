@@ -22,6 +22,9 @@
 #include "nel/3d/ps_particle2.h"
 #include "nel/3d/ps_mesh.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

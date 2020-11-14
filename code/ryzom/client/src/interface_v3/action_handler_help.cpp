@@ -284,7 +284,6 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 
 	// If some free window possible, search which to take
 	sint	newIndexWindow= -1;
-	bool	mustPlace= true;
 	bool	mustAddToActiveWindows= true;
 	// if an active window is not in KeepMode, get it.
 	for(i=0;i<_ActiveWindows.size();i++)
@@ -293,7 +292,6 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 		if(!_InfoWindows[_ActiveWindows[i]].KeepMode && forceKeepWindow!=(sint)_ActiveWindows[i])
 		{
 			newIndexWindow= _ActiveWindows[i];
-			mustPlace= false;
 			mustAddToActiveWindows= false;
 			break;
 		}
@@ -782,7 +780,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 		if (pTU != NULL)
 		{
 			sSkillsNeeded = CI18N::get("uiTitleSkillHeader");
-			if (pTU->SkillsNeeded.size() == 0 || reservedTitle)
+			if (pTU->SkillsNeeded.empty() || reservedTitle)
 			{
 				sSkillsNeeded += CI18N::get("uiTitleSkillNoNeed");
 			}
@@ -823,7 +821,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 		if (pTU != NULL)
 		{
 			sBricksNeeded = CI18N::get("uiTitleBrickHeader");
-			if (pTU->BricksNeeded.size() == 0 || reservedTitle)
+			if (pTU->BricksNeeded.empty() || reservedTitle)
 			{
 				sBricksNeeded += CI18N::get("uiTitleBrickNoNeed");
 			}
@@ -1117,6 +1115,11 @@ class CHandlerHTMLSubmitForm : public IActionHandler
 		fromString(getParam (sParams, "form"), form);
 
 		string submit_button = getParam (sParams, "submit_button");
+		string type = getParam (sParams, "submit_button_type");
+		string value = getParam (sParams, "submit_button_value");
+
+		sint32 x = pCaller->getEventX();
+		sint32 y = pCaller->getEventY();
 
 		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId(container);
 		{
@@ -1125,7 +1128,7 @@ class CHandlerHTMLSubmitForm : public IActionHandler
 			if (groupHtml)
 			{
 				// Submit the form the url
-				groupHtml->submitForm (form, submit_button.c_str ());
+				groupHtml->submitForm (form, type.c_str(), submit_button.c_str(), value.c_str(), x, y);
 			}
 		}
 	}
@@ -1599,7 +1602,7 @@ void	getMagicBonus(CDBCtrlSheet *item, ucstring &itemText)
 	}
 
 	// append a \n before
-	if(mbInfo.size())
+	if(!mbInfo.empty())
 	{
 		// add spell level header
 		ucstring	spellRuleFmt= CI18N::get("uihelpItemMagicBonusHeader");
@@ -3613,7 +3616,7 @@ public:
 		uint8 index;
 		fromString(Params, index);
 		--index; // Param is 1-based so subtract 1
-		if ( index >= MAX_INVENTORY_ANIMAL)
+		if (index >= MAX_INVENTORY_ANIMAL)
 		{
 			return;
 		}
@@ -3932,13 +3935,15 @@ public:
 		s += getSystemInformation();
 
 		string progname;
-		char name[1024] = "";
+		std::string moduleName;
 #ifdef NL_OS_WINDOWS
-		GetModuleFileName (NULL, name, 1023);
+		wchar_t name[1024];
+		GetModuleFileNameW(NULL, name, 1023);
+		moduleName = wideToUtf8(name);
 #else
 		// TODO for Linux
 #endif
-		progname = CFile::getFilename(name);
+		progname = CFile::getFilename(moduleName);
 		progname += " ";
 		progname += "Statistic Report";
 

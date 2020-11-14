@@ -1116,7 +1116,7 @@ function userComponentManager:export(list, refX, refY, refZ)
 				messageBox(i18n.get("uiR2EDInvalidName"))
 				return
 			end		
-			if  string.find(form.ComponentFileName, '\.lua', -4) == nil then
+			if  string.find(form.ComponentFileName, '.lua', -4) == nil then
 				form.ComponentFileName = form.ComponentFileName .. ".lua"
 			end
 			local refPosition = form.RefPosition

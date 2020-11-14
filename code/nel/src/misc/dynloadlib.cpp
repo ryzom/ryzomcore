@@ -32,7 +32,7 @@ NL_LIB_HANDLE nlLoadLibrary(const std::string &libName)
 {
 	NL_LIB_HANDLE res = 0;
 #ifdef NL_OS_WINDOWS
-	res = LoadLibrary(libName.c_str());
+	res = LoadLibraryW(utf8ToWide(libName));
 #elif defined(NL_OS_UNIX)
 	res = dlopen(libName.c_str(), RTLD_NOW);
 #else
@@ -71,6 +71,9 @@ void *nlGetSymbolAddress(NL_LIB_HANDLE libHandle, const std::string &procName)
 #ifdef NL_OS_WINDOWS
   const string	nlLibPrefix;	// empty
   const string	nlLibExt(".dll");
+#elif defined(NL_OS_MAC)
+  const string	nlLibPrefix("lib");
+  const string	nlLibExt(".dylib");
 #elif defined(NL_OS_UNIX)
   const string	nlLibPrefix("lib");
   const string	nlLibExt(".so");
@@ -252,7 +255,7 @@ void CLibrary::freeLibrary()
 		_PureNelLibrary = NULL;
 		_LibHandle = NULL;
 		_Ownership = false;
-		_LibFileName = "";
+		_LibFileName.clear();
 	}
 }
 

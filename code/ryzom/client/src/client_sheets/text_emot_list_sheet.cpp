@@ -108,7 +108,7 @@ void CTextEmotListSheet::build(const NLGEORGES::UFormElm &item)
 // serial :
 // Serialize a CAutomatonStateSheet.
 //-----------------------------------------------
-void CTextEmotListSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTextEmotListSheet::serial(NLMISC::IStream &f)
 {
 	f.serialCont(TextEmotList);
 

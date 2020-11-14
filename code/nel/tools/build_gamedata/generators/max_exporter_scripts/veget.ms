@@ -39,6 +39,7 @@ fn runNelMaxExport inputMaxFile =
 	tagThisFile = true
 	
 	-- Unhide category
+	unhidelayers()
 	unhidecategory()
 	
 	-- Unhide

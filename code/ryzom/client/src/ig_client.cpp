@@ -71,7 +71,7 @@ void initIG()
 {
 	// Initialize lightmaps colors for the fireworks.
 
-	// Fireworks is group 3
+	// Fireworks is group 5
 	Scene->setLightGroupColor (LightGroupFireworks, CRGBA(0,0,0));
 
 }// initIG //

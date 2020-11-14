@@ -1938,6 +1938,10 @@ char *yytext;
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 /* Constantes */
 
 // WARNING!!!! DEBUG_PRINTF are commented using // so IT MUST HAVE NO INSTRUCTION AFTER A DEBUG_PRINTF OR THEY LL BE COMMENTED
@@ -2337,7 +2341,7 @@ YY_RULE_SETUP
 				if (!cf_Ignore)
 				{
 					cflval.Val.Type = T_REAL;
-					cflval.Val.Real = atof (yytext);
+					NLMISC::fromString(yytext, cflval.Val.Real);
 					DEBUG_PRINTF("lex: real '%s' '%f\n", yytext, cflval.Val.Real);
 					return REAL;
 				}
@@ -2773,7 +2777,7 @@ static int input()
 
 		else
 			{ /* need more input */
-			int offset = yy_c_buf_p - yytext_ptr;
+			int offset = (int)(yy_c_buf_p - yytext_ptr);
 			++yy_c_buf_p;
 
 			switch ( yy_get_next_buffer() )

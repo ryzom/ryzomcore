@@ -23,6 +23,9 @@
 #include "../interface_v3/interface_manager.h"
 #include "nel/gui/view_renderer.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLMISC;
 
@@ -124,7 +127,7 @@ void CDisplayerVisualActivitySequence::update()
 	for(uint k = 0; k < activities->getSize(); ++k)
 	{
 		// search next zone of activity
-		CObjectTable *activity = activities->getValue(k)->toTable();
+		CObjectTable *activity = activities->getValueAtPos(k)->toTable();
 		if (!activity) continue;
 		std::string activityStr = getString(activity, "Activity");
 		if (activityStr == "Stand Still" || activityStr == "Inactive") continue;
@@ -369,7 +372,7 @@ void CDisplayerVisualActivitySequence::onPostRender()
 	for(uint k = 0; k < activities->getSize(); ++k)
 	{
 		// search next zone of activity
-		CObjectTable *activity = activities->getValue(k)->toTable();
+		CObjectTable *activity = activities->getValueAtPos(k)->toTable();
 		if (!activity) continue;
 		std::string zoneId = getString(activity, "ActivityZoneId");
 		if (zoneId.empty()) continue;

@@ -1,0 +1,9 @@
+<expression>
+<category>Mathematical</category>
+<name>sub</name>
+<variable>false</variable>
+<slots>
+<slot>A</slot>
+<slot>B</slot>
+</slots>
+</expression>

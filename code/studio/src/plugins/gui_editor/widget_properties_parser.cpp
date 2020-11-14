@@ -20,6 +20,7 @@
 #include <QStringList>
 #include "nel/misc/debug.h"
 #include "widget_info_tree.h"
+#include "gui_editor_config.h"
 
 using namespace NLMISC;
 
@@ -36,7 +37,7 @@ namespace GUIEditor
 
 	void CWidgetPropParser::parseGUIWidgets()
 	{
-		QDir d( "widgets" );
+        QDir d( WIDGETS_DIR );
 		if( !d.exists() )
 		{
 			nlwarning( "GUI widgets directory doesn't exist!" );
@@ -55,7 +56,7 @@ namespace GUIEditor
 
 		QStringListIterator itr( files );
 		while( itr.hasNext() )
-			parseGUIWidget( "widgets/" + itr.next() );
+            parseGUIWidget( QString( WIDGETS_DIR ) + QString( "/" ) + itr.next() );
 
 		buildWidgetInfoTree();
 

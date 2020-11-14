@@ -165,30 +165,30 @@ void CMultiTexDlg::readValues(bool alternate)
 	char buf[128];
 	if (!alternate)
 	{
-		sprintf(buf, "%.3f", _MTP->getScrollSpeed(0).x); GetDlgItem(IDC_U_SPEED_1)->SetWindowText(buf);
-		sprintf(buf, "%.3f", _MTP->getScrollSpeed(0).y); GetDlgItem(IDC_V_SPEED_1)->SetWindowText(buf);
-		sprintf(buf, "%.3f", _MTP->getScrollSpeed(1).x); GetDlgItem(IDC_U_SPEED_2)->SetWindowText(buf);
-		sprintf(buf, "%.3f", _MTP->getScrollSpeed(1).y); GetDlgItem(IDC_V_SPEED_2)->SetWindowText(buf);
+		GetDlgItem(IDC_U_SPEED_1)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getScrollSpeed(0).x)));
+		GetDlgItem(IDC_V_SPEED_1)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getScrollSpeed(0).y)));
+		GetDlgItem(IDC_U_SPEED_2)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getScrollSpeed(1).x)));
+		GetDlgItem(IDC_V_SPEED_2)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getScrollSpeed(1).y)));
 	}
 	else
 	{
 		if (_MTP->isAlternateTexEnabled())
 		{
-			sprintf(buf, "%.3f", _MTP->getAlternateScrollSpeed(0).x); GetDlgItem(IDC_U_SPEED_1_ALTERNATE)->SetWindowText(buf);
-			sprintf(buf, "%.3f", _MTP->getAlternateScrollSpeed(0).y); GetDlgItem(IDC_V_SPEED_1_ALTERNATE)->SetWindowText(buf);
-			sprintf(buf, "%.3f", _MTP->getAlternateScrollSpeed(1).x); GetDlgItem(IDC_U_SPEED_2_ALTERNATE)->SetWindowText(buf);
-			sprintf(buf, "%.3f", _MTP->getAlternateScrollSpeed(1).y); GetDlgItem(IDC_V_SPEED_2_ALTERNATE)->SetWindowText(buf);
+			GetDlgItem(IDC_U_SPEED_1_ALTERNATE)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getAlternateScrollSpeed(0).x)));
+			GetDlgItem(IDC_V_SPEED_1_ALTERNATE)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getAlternateScrollSpeed(0).y)));
+			GetDlgItem(IDC_U_SPEED_2_ALTERNATE)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getAlternateScrollSpeed(1).x)));
+			GetDlgItem(IDC_V_SPEED_2_ALTERNATE)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getAlternateScrollSpeed(1).y)));
 		}
 		else
 		{
-			GetDlgItem(IDC_U_SPEED_1_ALTERNATE)->SetWindowText("");
-			GetDlgItem(IDC_V_SPEED_1_ALTERNATE)->SetWindowText("");
-			GetDlgItem(IDC_U_SPEED_2_ALTERNATE)->SetWindowText("");
-			GetDlgItem(IDC_V_SPEED_2_ALTERNATE)->SetWindowText("");
+			GetDlgItem(IDC_U_SPEED_1_ALTERNATE)->SetWindowText(_T(""));
+			GetDlgItem(IDC_V_SPEED_1_ALTERNATE)->SetWindowText(_T(""));
+			GetDlgItem(IDC_U_SPEED_2_ALTERNATE)->SetWindowText(_T(""));
+			GetDlgItem(IDC_V_SPEED_2_ALTERNATE)->SetWindowText(_T(""));
 		}
 	}
-	sprintf(buf, "%.3f", _MTP->getBumpFactor()); GetDlgItem(IDC_BUMP_FACTOR)->SetWindowText(buf);
 
+	GetDlgItem(IDC_BUMP_FACTOR)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getBumpFactor())));
 }
 
 
@@ -204,9 +204,8 @@ void	CMultiTexDlg::updateBumpFactorEnabled()
 //======================================================
 void CMultiTexDlg::writeValues(bool alternate)
 {
-	char u1[10], u2[10], v1[10], v2[10];
+	TCHAR u1[10], u2[10], v1[10], v2[10];
 	NLMISC::CVector2f vs1, vs2;
-
 
 	if (!alternate)
 	{
@@ -215,10 +214,10 @@ void CMultiTexDlg::writeValues(bool alternate)
 		GetDlgItem(IDC_U_SPEED_2)->GetWindowText(u2, 10);
 		GetDlgItem(IDC_V_SPEED_2)->GetWindowText(v2, 10);
 
-		if (sscanf(u1, "%f", &vs1.x) == 1 &&
-			sscanf(v1, "%f", &vs1.y) == 1 &&
-			sscanf(u2, "%f", &vs2.x) == 1 &&
-			sscanf(v2, "%f", &vs2.y) == 1)
+		if (_stscanf(u1, _T("%f"), &vs1.x) == 1 &&
+			_stscanf(v1, _T("%f"), &vs1.y) == 1 &&
+			_stscanf(u2, _T("%f"), &vs2.x) == 1 &&
+			_stscanf(v2, _T("%f"), &vs2.y) == 1)
 		{
 			_MTP->setScrollSpeed(0, vs1);	
 			_MTP->setScrollSpeed(1, vs2);	
@@ -226,7 +225,7 @@ void CMultiTexDlg::writeValues(bool alternate)
 		}
 		else
 		{
-			MessageBox("Invalid value(s)", "Error", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(_T("Invalid value(s)"), _T("Error"), MB_OK | MB_ICONEXCLAMATION);
 		}
 	}
 	else
@@ -237,10 +236,10 @@ void CMultiTexDlg::writeValues(bool alternate)
 			GetDlgItem(IDC_V_SPEED_1_ALTERNATE)->GetWindowText(v1, 10);
 			GetDlgItem(IDC_U_SPEED_2_ALTERNATE)->GetWindowText(u2, 10);
 			GetDlgItem(IDC_V_SPEED_2_ALTERNATE)->GetWindowText(v2, 10);	
-			if (sscanf(u1, "%f", &vs1.x) == 1 &&
-			sscanf(v1, "%f", &vs1.y) == 1 &&
-			sscanf(u2, "%f", &vs2.x) == 1 &&
-			sscanf(v2, "%f", &vs2.y) == 1)
+			if (_stscanf(u1, _T("%f"), &vs1.x) == 1 &&
+				_stscanf(v1, _T("%f"), &vs1.y) == 1 &&
+				_stscanf(u2, _T("%f"), &vs2.x) == 1 &&
+				_stscanf(v2, _T("%f"), &vs2.y) == 1)
 			{
 				_MTP->setAlternateScrollSpeed(0, vs1);	
 				_MTP->setAlternateScrollSpeed(1, vs2);	
@@ -249,10 +248,10 @@ void CMultiTexDlg::writeValues(bool alternate)
 		}
 	}
 
-	char bumpFactorTxt[10];
+	TCHAR bumpFactorTxt[10];
 	float bumpFactor; 
 	GetDlgItem(IDC_BUMP_FACTOR)->GetWindowText(bumpFactorTxt, 10);
-	if (sscanf(bumpFactorTxt, "%f", &bumpFactor) == 1)
+	if (_stscanf(bumpFactorTxt, _T("%f"), &bumpFactor) == 1)
 	{
 		_MTP->setBumpFactor(bumpFactor);
 		updateModifiedFlag();

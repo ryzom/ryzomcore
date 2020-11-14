@@ -128,6 +128,7 @@ void	initCamera()
 					StereoHMD->setScale(3.0f); // snowballs is about 4 units per meter
 				}
 				StereoDisplay->setDriver(Driver); // move after driver creation, move stereodisplay before driver creation
+				StereoDisplay->attachToDisplay();
 			}
 		}
 	}

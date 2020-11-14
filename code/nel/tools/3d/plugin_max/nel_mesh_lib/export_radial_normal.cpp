@@ -56,13 +56,13 @@ void CRadialVertices::init (INode *node, Mesh *mesh, TimeValue time, Interface &
 		string pivotName = CExportNel::getScriptAppData (_NodePtr, NEL3D_APPDATA_RADIAL_NORMAL_SM+app-NEL3D_RADIAL_FIRST_SM, "");
 
 		// Active ?
-		if (pivotName != "")
+		if (!pivotName.empty())
 		{
 			// Add the mask
 			_SmoothingGroupMask |= (1<<app);
 
 			// Get the node by name
-			INode *pivotNode = ip.GetINodeByName(pivotName.c_str());
+			INode *pivotNode = ip.GetINodeByName(utf8ToTStr(pivotName));
 			if (pivotNode)
 			{
 				// Get the world Pivot point
@@ -79,7 +79,7 @@ void CRadialVertices::init (INode *node, Mesh *mesh, TimeValue time, Interface &
 			{
 				// Output error message
 				char msg[512];
-				smprintf (msg, 512, "Can't find pivot node named %s", pivotName);
+				smprintf (msg, 512, "Can't find pivot node named '%s' of length %u", pivotName.c_str(), (uint)pivotName.length());
 				nelExport.outputErrorMessage (msg);
 			}
 		}

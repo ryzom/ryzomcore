@@ -315,14 +315,14 @@ public:
 
 		/**
 		 * Get data as a Set
-		 * Return an accessor on a set, which is valid only if not issue occured
+		 * Return an accessor on a set, which is valid only if not issue occurred
 		 * Thus, you are able to modify the list own your own, add/remove items...
 		 */
 		RY_PDS::CSetMap::CAccessor	getSet();
 
 		/**
 		 * Get data as a Set
-		 * Return an accessor on a set, which is valid only if not issue occured
+		 * Return an accessor on a set, which is valid only if not issue occurred
 		 */
 		const RY_PDS::CSetMap::CAccessor	getSet() const;
 

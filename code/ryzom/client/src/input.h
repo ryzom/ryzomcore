@@ -44,9 +44,6 @@ bool	InitMouseWithCursor (bool hardware);
 // Is mouse cursor hardware ?
 bool	IsMouseCursorHardware ();
 
-// Set the mouse mode. Call this method once per frame to update window size
-void	UpdateMouse ();
-
 // Use this method to toggle the mouse (freelook <- cursor)
 void	SetMouseFreeLook ();
 

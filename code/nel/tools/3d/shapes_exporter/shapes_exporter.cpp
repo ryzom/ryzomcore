@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <nel/misc/path.h>
+#include <nel/misc/common.h>
 #include <nel/misc/file.h>
 #include <nel/misc/config_file.h>
 #include <nel/3d/u_light.h>
@@ -851,7 +852,7 @@ bool ShapesExporter::renderPS(UInstance &entity, const string &output_path, doub
 	{
 		if(step > 0)
 		{
-			FILE *fp = fopen(string(CPath::standardizePath(output_path)+"nb_steps.txt").c_str(), "w");
+			FILE *fp = nlfopen(CPath::standardizePath(output_path)+"nb_steps.txt", "w");
 			if(fp) { fprintf(fp, "%d", step); fclose(fp); }
 		}
 		nlinfo("PS duration %f after %f with nothing with %d steps, dt %f", duration, startTime, step, deltaTime);
@@ -873,7 +874,7 @@ bool ShapesExporter::createThumbnail(const string &filename, const string &path)
 	uint selectedFrame = 0;
 	if(CFile::getExtension(filename) == "ps")
 	{
-		FILE *fp = fopen(string(CPath::standardizePath(output_path)+"nb_steps.txt").c_str(), "r");
+		FILE *fp = nlfopen(CPath::standardizePath(output_path)+"nb_steps.txt", "r");
 		if(fp)
 		{
 			char str[100];

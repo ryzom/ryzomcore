@@ -14,6 +14,19 @@
 	include_once('../ring/join_shard.php');
 
 
+    function get_salt($password)
+    {
+        if ($password[0] == '$')
+        {
+            $salt = substr($password, 0, 19);
+        }
+        else
+        {
+            $salt = substr($password, 0, 2);
+        }
+        return $salt;
+    }
+
 	// see errorMsg
 	function errorMsgBlock($errNum=GENERIC_ERROR_NUM) // $mixedArgs
 	{
@@ -132,6 +145,7 @@
 	{
 		$logFile = new CWwwLog();
 		$logFile->logStr("PHP ERROR/$errno $errmsg ($filename:$linenum)");
+		$logFile->logStr("PHP CALLSTACK/" . print_r(debug_backtrace(), TRUE));
 		// Never die after an error
 	}
 
@@ -331,7 +345,7 @@
 		else
 		{
 			$row = mysqli_fetch_assoc ($result);
-			$salt = substr($row["Password"],0,2);
+			$salt = get_salt($row["Password"]);
 			if (($cp && $row["Password"] == $password) || (!$cp && $row["Password"] == crypt($password, $salt)))
 			{
 				// Store the real login (with correct case)
@@ -488,7 +502,7 @@
 		else
 		{
 			$res_array = mysqli_fetch_assoc($result);
-			$salt = substr($res_array['Password'], 0, 2);
+			$salt = get_salt($res_array['Password']);
 		}
 
 		echo "1:".$salt;

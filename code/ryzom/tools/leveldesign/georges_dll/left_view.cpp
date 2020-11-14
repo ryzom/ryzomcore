@@ -289,7 +289,7 @@ BOOL CLeftView::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 								bool parentVDfnArray;
 								CForm *form=doc->getFormPtr ();
 								CFormElm *elm = (CFormElm *)doc->getRootNode (subObject->getSlot ());
-								nlverify ( elm->getNodeByName (parent->getFormName ().c_str (), &parentDfn, indexDfn, 
+								nlverify ( elm->getNodeByName (parent->getFormName (), &parentDfn, indexDfn, 
 									&nodeDfn, &nodeType, &parentNode, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 								// Is a non empty array ?
@@ -343,7 +343,7 @@ BOOL CLeftView::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 								bool parentVDfnArray;
 								CForm *form=doc->getFormPtr ();
 								CFormElm *elm = (CFormElm *)doc->getRootNode (subObject->getSlot ());
-								nlverify ( elm->getNodeByName (parent->getFormName ().c_str (), &parentDfn, indexDfn, 
+								nlverify ( elm->getNodeByName (parent->getFormName (), &parentDfn, indexDfn, 
 									&nodeDfn, &nodeType, &parentNode, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 								// Is a non empty array ?
@@ -430,7 +430,7 @@ BOOL CLeftView::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 								bool parentVDfnArray;
 								CForm *form=doc->getFormPtr ();
 								CFormElm *elm = (CFormElm *)doc->getRootNode (subObject->getSlot ());
-								nlverify ( elm->getNodeByName (parent->getFormName ().c_str (), &parentDfn, indexDfn, 
+								nlverify ( elm->getNodeByName (parent->getFormName (), &parentDfn, indexDfn, 
 									&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 								// Is the parent array ?
@@ -849,7 +849,7 @@ void CLeftView::OnInsert()
 						bool parentVDfnArray;
 						CForm *form=doc->getFormPtr ();
 						CFormElm *elm = (CFormElm *)doc->getRootNode (subObject->getSlot ());
-						nlverify ( elm->getNodeByName (parent->getFormName ().c_str (), &parentDfn, indexDfn, 
+						nlverify ( elm->getNodeByName (parent->getFormName (), &parentDfn, indexDfn, 
 							&nodeDfn, &nodeType, &parentNode, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 						// Is a non empty array ?
@@ -911,7 +911,7 @@ void CLeftView::OnDelete()
 							bool parentVDfnArray;
 							CForm *form=doc->getFormPtr ();
 							CFormElm *elm = (CFormElm *)doc->getRootNode (subObject->getSlot ());
-							nlverify ( elm->getNodeByName (parent->getFormName ().c_str (), &parentDfn, indexDfn, 
+							nlverify ( elm->getNodeByName (parent->getFormName (), &parentDfn, indexDfn, 
 								&nodeDfn, &nodeType, &parentNode, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 							// Is a non empty array ?

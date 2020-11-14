@@ -2,6 +2,7 @@
     <header>
         <name>DBViewBar3</name>
         <guiname>CDBViewBar3</guiname>
+		<classname>bar3</classname>
         <ancestor>ViewBitmap</ancestor>
         <description></description>
         <abstract>false</abstract>

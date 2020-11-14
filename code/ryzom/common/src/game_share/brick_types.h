@@ -43,7 +43,7 @@ namespace BRICK_TYPE
 		TIMED_ACTION,
 		BRICK_TYPE_COUNT,
 		BONUS,
-		UNKNOWN
+		UNKNOWN // Warning: Shouldn't exceed 32
 	};
 
 

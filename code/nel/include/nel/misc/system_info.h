@@ -72,9 +72,9 @@ public:
 	  */
 	static bool isNT();
 
-	/** Returns the space left on the hard drive that contains the filename
+	/** Returns the space left on the hard drive that contains the filename in bytes
 	  */
-	static std::string availableHDSpace (const std::string &filename);
+	static uint64 availableHDSpace (const std::string &filename);
 
 	/** Returns all the physical memory available on the computer (in bytes)
 	  */

@@ -18,6 +18,10 @@
 #include "listener_al.h"
 #include "sound_driver_al.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLMISC;
 
 namespace NLSOUND {

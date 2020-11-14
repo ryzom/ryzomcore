@@ -106,10 +106,21 @@ private:
 	static int getCompleteIslands(CLuaState &ls);
 	static int getIslandId(CLuaState &ls);//TEMP
 
+	static int addShape(CLuaState &ls);
+	static int moveShape(CLuaState &ls);
+	static int rotateShape(CLuaState &ls);
+	static int getShapePos(CLuaState &ls);
+	static int getShapeScale(CLuaState &ls);
+	static int getShapeRot(CLuaState &ls);
+	static int getShapeColPos(CLuaState &ls);
+	static int getShapeColScale(CLuaState &ls);
+	static int getShapeColOrient(CLuaState &ls);
+	static int deleteShape(CLuaState &ls);
 
 	///////////////////////////// Standard Lua stuff ends here //////////////////////////////////////////////
 
 	static sint32 getDbProp(const std::string &dbProp); // return 0 if not found.
+	static sint64 getDbProp64(const std::string &dbProp); // return 0 if not found.
 	static void	setDbProp(const std::string &dbProp, sint32 value);		// Nb: the db prop is not created if not present.
 	static void	addDbProp(const std::string &dbProp, sint32 value);		// Nb: the db prop is created if not present.
 	static void	delDbProp(const std::string &dbProp);
@@ -136,7 +147,7 @@ private:
 	static void	rawDebugInfo(const std::string &dbg);
 	// Dump callstack in the console
 	// Additionnally, if ClientCfg.LuaDebugInfoGotoButtonEnabled is set, then
-	// buttons will be created in fonr of eahc line to allow to goto the lua line that issued the message
+	// buttons will be created in front of each line to allow to go to the lua line that issued the message
 	// by using an external editor
 
 	static void	getCallStackAsString(int startStackLevel, std::string &result);
@@ -159,6 +170,7 @@ private:
 	static void	unpauseBGDownloader();
 	static void	requestBGDownloaderPriority(uint priority);
 	static sint	getBGDownloaderPriority();
+	static void	loadBackground(const std::string &bg);
 	static ucstring	getPatchLastErrorMessage();
 	static bool	isInGame();
 	static uint32 getPlayerSelectedSlot();
@@ -186,6 +198,7 @@ private:
 	static std::string getClientCfg(const std::string &varName);
 	static void	sendMsgToServer(const std::string &msgName);
 	static void	sendMsgToServerPvpTag(bool pvpTag);
+	static void	sendMsgToServerUseItem(sint32 slot);
 	static bool	isGuildQuitAvailable();
 	static void	sortGuildMembers();
 	static sint32 getNbGuildMembers();
@@ -201,6 +214,15 @@ private:
 	static sint getCharacterSheetRegionForce(const std::string &sheet);
 	static sint	getCharacterSheetRegionLevel(const std::string &sheet);
 	static std::string getRegionByAlias(uint32 alias);
+	static sint getGroundZ(uint32 x, sint32 y);
+	static int getGroundAtMouse(CLuaState &ls);
+	static int getMousePos(CLuaState &ls);
+	static int getMouseDown(CLuaState &ls);
+	static int getMouseMiddleDown(CLuaState &ls);
+	static int getMouseRightDown(CLuaState &ls);
+	static int getShapeIdAt(CLuaState &ls);
+	static int setupShape(CLuaState &ls);
+	static void setMouseCursor(const std::string &texture);
 	// open the window to do a tell to 'player', if 'msg' is not empty, then the message will be sent immediatly
     // else, current command of the chat window will be replaced with tell 'player'
 	static void	tell(const ucstring &player, const ucstring &msg);

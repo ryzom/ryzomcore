@@ -1,3 +1,18 @@
+// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /////////////////////////////////////////////////////////////////
 // WARNING : this is a generated file, don't change it !
@@ -1177,6 +1192,14 @@ void CBankAccessor_PLR::TEXCHANGE::TGIVE::TArray::init(ICDBStructNode *parent, u
 	nlassert(node != NULL);
 	_QUANTITY = node;
 	
+	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
+	nlassert(node != NULL);
+	_CREATE_TIME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
+	nlassert(node != NULL);
+	_SERIAL = node;
+	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
 	_USER_COLOR = node;
@@ -1255,6 +1278,14 @@ void CBankAccessor_PLR::TEXCHANGE::TRECEIVE::TArray::init(ICDBStructNode *parent
 	node  = parent->getNode( ICDBStructNode::CTextId("QUANTITY"), false );
 	nlassert(node != NULL);
 	_QUANTITY = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
+	nlassert(node != NULL);
+	_CREATE_TIME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
+	nlassert(node != NULL);
+	_SERIAL = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
@@ -1463,6 +1494,14 @@ void CBankAccessor_PLR::TINVENTORY::TTEMP::TArray::init(ICDBStructNode *parent, 
 	nlassert(node != NULL);
 	_QUANTITY = node;
 	
+	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
+	nlassert(node != NULL);
+	_CREATE_TIME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
+	nlassert(node != NULL);
+	_SERIAL = node;
+	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
 	_USER_COLOR = node;
@@ -1552,6 +1591,14 @@ void CBankAccessor_PLR::TINVENTORY::TSHARE::TArray::init(ICDBStructNode *parent,
 	node  = parent->getNode( ICDBStructNode::CTextId("QUANTITY"), false );
 	nlassert(node != NULL);
 	_QUANTITY = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
+	nlassert(node != NULL);
+	_CREATE_TIME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
+	nlassert(node != NULL);
+	_SERIAL = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
@@ -2104,6 +2151,14 @@ void CBankAccessor_PLR::TTRADING::TArray::init(ICDBStructNode *parent, uint inde
 	node  = parent->getNode( ICDBStructNode::CTextId("QUANTITY"), false );
 	nlassert(node != NULL);
 	_QUANTITY = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("CREATE_TIME"), false );
+	nlassert(node != NULL);
+	_CREATE_TIME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("SERIAL"), false );
+	nlassert(node != NULL);
+	_SERIAL = node;
 	
 	node  = parent->getNode( ICDBStructNode::CTextId("USER_COLOR"), false );
 	nlassert(node != NULL);
@@ -3080,7 +3135,7 @@ void CBankAccessor_PLR::TPACK_ANIMAL::TBEAST::init(ICDBStructNode *parent, uint 
 	nlassert(node != NULL);
 	_DESPAWN = node;
 	
-	node  = parent->getNode( ICDBStructNode::CTextId("NAME"), false );
+	node  = parent->getNode( ICDBStructNode::CTextId("NAME"), true );
 	nlassert(node != NULL);
 	_NAME = node;
 	

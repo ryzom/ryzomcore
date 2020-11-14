@@ -24,11 +24,17 @@
 #include "nel/3d/landscape.h"
 #include "nel/3d/landscape_profile.h"
 #include "nel/3d/patchdlm_context.h"
+#include "nel/3d/debug_vb.h"
+
 #include "nel/misc/vector.h"
 #include "nel/misc/common.h"
+
 using	namespace	std;
 using	namespace	NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -1452,7 +1458,7 @@ void		CPatch::computeSoftwareGeomorphAndAlpha()
 	// Need only to fill CTessVertex, so do it only for FarVertices
 	// Hence Geomorph is done twice on edges of patches!!.
 	// If not too near for precise, fast compute of geomorph.
-	if( TessBlocks.size()==0 )
+	if( TessBlocks.empty() )
 	{
 		// Just update all vertices of master block.
 		computeGeomorphVertexList(MasterBlock.FarVertexList);

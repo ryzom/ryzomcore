@@ -84,7 +84,7 @@ rm -v */*.*launch_ctrl *.*launch_ctrl 2> /dev/null
 # initialise the state files for the new services to "xxxxx" and remove directories that are no longer of interest
 for D in $(ls */log.log | sed "s%/.*%%" | sort -u)
 do
-  if [ $(grep \"$D\" admin_executor_service.cfg | wc -l) == 1 ]
+  if [ $(grep \"$D\" admin_executor_service.cfg | wc -l) = 1 ]
   then
 	  printf "xxxxx" > $D/$D.state
   else
@@ -97,7 +97,7 @@ done
 printf "1" > ./global.launch_ctrl
 
 # create a script for accessing the screen for this shard
-SCRIPT_FILE=/srv/core/bin/${DOMAIN}
+SCRIPT_FILE=/srv/core/bin/domain_${DOMAIN}
 echo "#!/bin/sh" > $SCRIPT_FILE
 echo "cd "$(pwd) >> $SCRIPT_FILE
 echo '/bin/sh /srv/core/bin/ryzom_domain_screen_wrapper.sh $*' >> $SCRIPT_FILE

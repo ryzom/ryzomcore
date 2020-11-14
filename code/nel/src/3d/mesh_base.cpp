@@ -25,6 +25,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -136,7 +139,7 @@ CMeshBase::CMeshBaseBuild::CMeshBaseBuild()
 
 // ***************************************************************************
 #if 0
-void	CMeshBase::CMeshBaseBuild::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMeshBase::CMeshBaseBuild::serial(NLMISC::IStream &f)
 {
 	/*
 	Version 1:
@@ -161,7 +164,7 @@ void	CMeshBase::CMeshBaseBuild::serial(NLMISC::IStream &f) throw(NLMISC::EStream
 #endif
 
 // ***************************************************************************
-void	CMeshBase::serialMeshBase(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMeshBase::serialMeshBase(NLMISC::IStream &f)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance

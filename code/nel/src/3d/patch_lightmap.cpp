@@ -30,9 +30,13 @@
 #include "nel/misc/fast_floor.h"
 #include "nel/3d/light_influence_interpolator.h"
 #include "nel/3d/patchdlm_context.h"
+
 using	namespace	std;
 using	namespace	NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

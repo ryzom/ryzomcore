@@ -29,7 +29,7 @@ const uint NUM_MISSION_OPTIONS = 8;
 bool mainLoop();
 
 // render all
-void renderScene();
+void doRenderScene(bool wantTraversals, bool keepTraversals);
 void renderScene(bool forceFullDetail, bool bloom);
 void setDefaultChatWindow(CChatWindow *defaultChatWindow);
 
@@ -59,30 +59,9 @@ void displayDebugUIUnderMouse();
 void inGamePatchUncompleteWarning();
 
 
-// active/desactive bloom config interface
+// enable/disable bloom config interface
 void initBloomConfigUI();
 
 #endif // CL_MAIN_LOOP_H
 
 /* End of main_loop.h */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

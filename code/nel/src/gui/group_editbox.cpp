@@ -27,12 +27,15 @@
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/view_renderer.h"
 #include "nel/gui/db_manager.h"
-#include <limits>
+#include "nel/gui/interface_factory.h"
 
 using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NLGUI
 {
@@ -74,6 +77,7 @@ namespace NLGUI
 									_ResetFocusOnHide(false),
 									_BackupFatherContainerPos(false),
 									_WantReturn(false),
+									_ClearOnEscape(false),
 									_Savable(true),
 									_DefaultInputString(false),
 									_Frozen(false),
@@ -234,6 +238,11 @@ namespace NLGUI
 		if( name == "want_return" )
 		{
 			return toString( _WantReturn );
+		}
+		else
+		if( name == "clear_on_escape" )
+		{
+			return toString( _ClearOnEscape );
 		}
 		else
 		if( name == "savable" )
@@ -410,6 +419,14 @@ namespace NLGUI
 			return;
 		}
 		else
+		if( name == "clear_on_escape" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_ClearOnEscape = b;
+			return;
+		}
+		else
 		if( name == "savable" )
 		{
 			bool b;
@@ -511,6 +528,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "backup_father_container_pos",
 			BAD_CAST toString( _BackupFatherContainerPos ).c_str() );
 		xmlSetProp( node, BAD_CAST "want_return", BAD_CAST toString( _WantReturn ).c_str() );
+		xmlSetProp( node, BAD_CAST "clear_on_escape", BAD_CAST toString( _ClearOnEscape ).c_str() );
 		xmlSetProp( node, BAD_CAST "savable", BAD_CAST toString( _Savable ).c_str() );
 		xmlSetProp( node, BAD_CAST "max_float_prec", BAD_CAST toString( _MaxFloatPrec ).c_str() );
 
@@ -606,11 +624,7 @@ namespace NLGUI
 		}
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r" );
-		if (prop)
-		{
-			string tmp = (const char *) prop;
-			_ListMenuRight = strlwr(tmp);
-		}
+		if (prop) _ListMenuRight = toLower((const char *) prop);
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"max_historic" );
 		if (prop) fromString((const char*)prop, _MaxHistoric);
@@ -620,6 +634,9 @@ namespace NLGUI
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"want_return" );
 		if (prop) _WantReturn = convertBool(prop);
+
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"clear_on_escape" );
+		if (prop) _ClearOnEscape = convertBool(prop);
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"savable" );
 		if (prop) _Savable = convertBool(prop);
@@ -685,9 +702,9 @@ namespace NLGUI
 			sint32	maxPos= max(_CursorPos, _SelectCursorPos) + (sint32)_Prompt.length();
 
 			// get its position on screen
-			sint cxMinPos, cyMinPos;
-			sint cxMaxPos, cyMaxPos;
-			sint height;
+			float cxMinPos, cyMinPos;
+			float cxMaxPos, cyMaxPos;
+			float height;
 			_ViewText->getCharacterPositionFromIndex(minPos, false, cxMinPos, cyMinPos, height);
 			_ViewText->getCharacterPositionFromIndex(maxPos, false, cxMaxPos, cyMaxPos, height);
 
@@ -738,8 +755,8 @@ namespace NLGUI
 			if (_BlinkState) // is the cursor shown ?
 			{
 				// get its position on screen
-				sint cx, cy;
-				sint height;
+				float cx, cy;
+				float height;
 				_ViewText->getCharacterPositionFromIndex(_CursorPos + (sint)_Prompt.length(), _CursorAtPreviousLineEnd, cx, cy, height);
 				// display the cursor
 				// get the texture for the cursor
@@ -957,7 +974,6 @@ namespace NLGUI
 			maxPos = _CursorPos;
 		}
 
-		nlinfo("%d, %d", minPos, maxPos);
 		if (replace)
 		{
 			_InputString = _InputString.substr(0, minPos) + toAdd + _InputString.substr(maxPos);
@@ -989,17 +1005,23 @@ namespace NLGUI
 		{
 			case KeyESCAPE:
 				_CurrentHistoricIndex= -1;
-				CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
 				// stop selection
 				_CurrSelection = NULL;
 				_CursorAtPreviousLineEnd = false;
+				if (_ClearOnEscape)
+				{
+					setInputString(ucstring(""));
+					triggerOnChangeAH();
+				}
+				CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
 			break;
 			case KeyTAB:
 				makeTopWindow();
 			break;
 			// OTHER
 			default:
-				if ((rEDK.getChar() == KeyRETURN) && !_WantReturn)
+				bool isKeyRETURN = !rEDK.getKeyCtrl() && rEDK.getChar() == KeyRETURN;
+				if (isKeyRETURN && !_WantReturn)
 				{
 					// update historic.
 					if(_MaxHistoric)
@@ -1030,9 +1052,9 @@ namespace NLGUI
 					// If the char is not alphanumeric -> return.
 					//		if(!isalnum(ec.Char))
 					//			return
-					if( (rEDK.getChar()>=32) || (rEDK.getChar() == KeyRETURN) )
+					if( (rEDK.getChar()>=32) || isKeyRETURN )
 					{
-						if (rEDK.getChar() == KeyRETURN)
+						if (isKeyRETURN)
 						{
 							ucstring	copyStr= _InputString;
 							if ((uint) std::count(copyStr.begin(), copyStr.end(), '\n') >= _MaxNumReturn)
@@ -1049,7 +1071,7 @@ namespace NLGUI
 							cutSelection();
 						}
 
-						ucchar c = (rEDK.getChar() == KeyRETURN)?'\n':rEDK.getChar();
+						ucchar c = isKeyRETURN ? '\n' : rEDK.getChar();
 						if (isFiltered(c)) return;
 						switch(_EntryType)
 						{
@@ -1128,7 +1150,7 @@ namespace NLGUI
 							++ _CursorPos;
 							triggerOnChangeAH();
 						}
-						if (rEDK.getChar() == KeyRETURN)
+						if (isKeyRETURN)
 						{
 							CAHManager::getInstance()->runActionHandler(_AHOnEnter, this, _AHOnEnterParams);
 						}
@@ -1320,15 +1342,31 @@ namespace NLGUI
 				}
 			}
 
+			// if click, and not frozen, then get the focus
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup && !_Frozen)
+			{
+				_SelectingText = false;
+				if (_SelectCursorPos == _CursorPos)
+					_CurrSelection = NULL;
+				
+				return true;
+			}
+
 			if (!isIn(eventDesc.getX(), eventDesc.getY()))
 				return false;
 
 			// if click, and not frozen, then get the focus
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown && !_Frozen)
 			{
+				if( getEditorMode() )
+				{
+					return CViewBase::handleEvent( event );
+				}
+
 				_SelectingText = true;
 				stopParentBlink();
 				CWidgetManager::getInstance()->setCaptureKeyboard (this);
+				CWidgetManager::getInstance()->setCapturePointerLeft (this);
 				// set the right cursor position
 				uint newCurPos;
 				bool cursorAtPreviousLineEnd;
@@ -1353,16 +1391,6 @@ namespace NLGUI
 				_SelectCursorPos = newCurPos;
 				_SelectCursorPos -= (sint32)_Prompt.length();
 				_SelectCursorPos = std::max(_SelectCursorPos, sint32(0));
-				return true;
-			}
-
-			// if click, and not frozen, then get the focus
-			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup && !_Frozen)
-			{
-				_SelectingText = false;
-				if (_SelectCursorPos == _CursorPos)
-					_CurrSelection = NULL;
-				
 				return true;
 			}
 
@@ -1454,7 +1482,7 @@ namespace NLGUI
 			if (_ViewText->getWReal() > _WReal)
 			{
 				// Check if cursor visible
-				sint xCursVT, xCurs, yTmp, hTmp;
+				float xCursVT, xCurs, yTmp, hTmp;
 				// Get the cursor pos from the BL of the viewtext
 				_ViewText->getCharacterPositionFromIndex(_CursorPos+(sint)_Prompt.size(), false, xCursVT, yTmp, hTmp);
 				// Get the cursor pos from the BL of the edit box
@@ -1531,35 +1559,44 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
+
+	void CGroupEditBox::createViewText()
+	{
+		nlwarning("Interface: CGroupEditBox: text 'edit_text' missing or bad type");
+		nlwarning( "Trying to create a new 'edit_text' for %s", getId().c_str() );
+		_ViewText = dynamic_cast< CViewText* >( CInterfaceFactory::createClass( "text" ) );
+		if( _ViewText == NULL )
+		{
+			nlwarning( "Failed to create new 'edit_text' for %s", getId().c_str() );
+			return;
+		}
+
+		_ViewText->setParent( this );
+		_ViewText->setIdRecurse( "edit_text" );
+		_ViewText->setHardText( "" );
+		_ViewText->setPosRef( Hotspot_ML );
+		_ViewText->setParentPosRef( Hotspot_ML );
+		addView( _ViewText );
+
+		sint32 w,h;
+		w = std::max( sint32( _ViewText->getFontWidth() * _ViewText->getText().size() ), getW() );
+		h = std::max( sint32(  _ViewText->getFontHeight() ), getH() );
+					
+		setH( h );
+		setW( w );
+	}
+
+	// ----------------------------------------------------------------------------
 	void CGroupEditBox::setup()
 	{
 		// bind to the controls
-		_ViewText = dynamic_cast<CViewText *>(CInterfaceGroup::getView("edit_text"));
+		if( _ViewText == NULL )
+			_ViewText = dynamic_cast<CViewText *>(CInterfaceGroup::getView("edit_text"));
 
 		if(_ViewText == NULL)
-		{
-			nlwarning("Interface: CGroupEditBox: text 'edit_text' missing or bad type");
-			if( editorMode )
-			{
-				nlwarning( "Trying to create a new 'edit_text' for %s", getId().c_str() );
-				_ViewText = dynamic_cast< CViewText* >( CWidgetManager::getInstance()->getParser()->createClass( "text" ) );
-				if( _ViewText != NULL )
-				{
-					_ViewText->setParent( this );
-					_ViewText->setIdRecurse( "edit_text" );
-					_ViewText->setHardText( "sometext" );
-					_ViewText->setPosRef( Hotspot_TL );
-					_ViewText->setParentPosRef( Hotspot_TL );
-					addView( _ViewText );
-					
-					setH( _ViewText->getFontHeight() );
-					setW( _ViewText->getFontWidth() * _ViewText->getText().size() );
-					
-				}
-				else
-					nlwarning( "Failed to create new 'edit_text' for %s", getId().c_str() );
-			}
-		}
+			createViewText();
+
+		_ViewText->setEditorSelectable( false );
 
 		// For MultiLine editbox, clip the end space, else weird when edit space at end of line (nothing happens)
 		if(_ViewText)
@@ -1757,7 +1794,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupEditBox::clearAllEditBox()
 	{
-		_InputString = "";
+		_InputString.clear();
 		_CursorPos = 0;
 		_CursorAtPreviousLineEnd = false;
 		if (!_ViewText) return;

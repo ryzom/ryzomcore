@@ -21,6 +21,7 @@
 // nel
 #include "nel/misc/variable.h"
 #include "nel/misc/file.h"
+#include "nel/misc/common.h"
 
 // game share
 #include "game_share/utils.h"
@@ -599,7 +600,7 @@ namespace PATCHMAN
 //			nldebug("- Reading file data @offset: %d (%d bytes)",newFileEntry.StartOffset,fileSize);
 
 			// read in the file
-			FILE* inf= fopen(fileName.c_str(),"rb");
+			FILE* inf = nlfopen(fileName, "rb");
 			BOMB_IF(inf==NULL,"Failed to open input file for reading: "+fileName,return false);
 			uint32 bytesRead=(uint32)fread(&_CacheBuffer[newFileEntry.StartOffset],1,fileSize,inf);
 			fclose(inf);
@@ -677,7 +678,7 @@ namespace PATCHMAN
 		}
 
 		// write succeeded so rename the tmp file to the correct file name
-		bool ok= NLMISC::CFile::moveFile(fileName.c_str(),tmpFileName.c_str());
+		bool ok= NLMISC::CFile::moveFile(fileName, tmpFileName);
 		DROP_IF(!ok,"Failed to save file '"+fileName+"' because failed to rename tmp file: '"+tmpFileName+"'",return false);
 
 		return true;

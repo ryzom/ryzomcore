@@ -147,7 +147,7 @@
             id="real_txt"
             posref="ML ML"
             x="26"
-            y="-2"
+            y="0"
             fontsize="12"
             shadow="true"
             hardtext="uimGcmTradePact"
@@ -202,7 +202,7 @@
             id="real_txt"
             posref="ML ML"
             x="26"
-            y="-2"
+            y="0"
             fontsize="12"
             shadow="true"
             hardtext="uimGcmTradePact"
@@ -230,7 +230,7 @@
            win_priority="%win_priority_world_space"
            posref="BL BM"
            use_cursor="false">
- 
+
       <group id="right"
              child_resize_w="true"
 			 child_resize_h="true"
@@ -347,7 +347,7 @@
             render_layer="1"
             texture=""
             global_color="false" />
-			
+
         <view type="bitmap"
               id="win_top"
 			  posparent="info2"
@@ -455,7 +455,7 @@
               color="128 128 128 255"
               global_color="false" />
       </group>
-      
+
 	  <ctrl type="sheet"
             id="guild_logo"
             posref="TL TR"
@@ -484,7 +484,7 @@
             render_layer="2"
             texture=""
             global_color="false" />
-   
+
         <group id="right_pvp"
                posref="TR TL"
                posparent="right"
@@ -746,7 +746,7 @@
            opened="true"
            child_resize_w="true"
            child_resize_h="true"
-   
+
            win_priority="%win_priority_world_space"
            posref="BL BM"
            use_cursor="true">
@@ -1028,9 +1028,9 @@
   <!-- NOT USED FOR THE MOMENT !!!
 <template name="3dbulle_R" id="" >
         <group id="#id" type="container" header_active="false" options="no_bordure" openable="false" savable="false" resizer="true" movable="false" right_button="false" opened="true" child_resize_w="true" w="0" max_w="256" min_w="48" h="48" >
-        
-                <group id="header_opened" x="0" y="0" child_resize_w="true" w="0" child_resize_h="true" h="0" max_w="256" min_w="48" max_h="256" min_h="48" posref="TL TL" >
-                                                                
+
+                <group id="header_opened" x="0" y="0" child_resize_w="true" w="0" child_resize_h="true" h="0" max_w="256" min_w="48" max_h="512" min_h="48" posref="TL TL" >
+
                         <group id="window" x="0" y="0" child_resize_w="true" w="0" child_resize_h="true" h="0" posref="TL TL" >
                                 <view type="bitmap" id="win_M" posref="MM MM" scale="true" sizeref="wh" w="-10" h="-10" texture="Bulle_M.tga" global_color="false"/>
                                 <view type="bitmap" id="win_T" posparent="win_M" posref="TL BL" scale="true" sizeref="w" w="0" h="5" texture="Bulle_T.tga" global_color="false"/>
@@ -1041,19 +1041,19 @@
                                 <view type="bitmap" id="win_TR" posref="TR TR" texture="Bulle_TR.tga" global_color="false"/>
                                 <view type="bitmap" id="win_BL" posref="BL BL" texture="Bulle_BL.tga" global_color="false"/>
                                 <view type="bitmap" id="win_BR" posref="BR BR" texture="Bulle_BR.tga" global_color="false"/>
-                                
-                                <view type="text" id="text" posref="TL TL" x="5" y="-5" hardtext="#hardtext" 
-                                        fontsize="12" justification="justified" color="0 0 0 255" global_color="false" 
+
+                                <view type="text" id="text" posref="TL TL" x="5" y="-5" hardtext="#hardtext"
+                                        fontsize="12" justification="justified" color="0 0 0 255" global_color="false"
                                         multi_line="true" multi_line_space="0" line_maxw="160" multi_line_maxw_only="true" />
                                 <! - Yoyo: Fake to have minimum bubble size - >
                                 <group id="min_w" posparent="text" posref="TL TL" x="0" y="0" w="48" h="14" />
-                                
+
                         </group>
-                        
+
                         <view type="bitmap" id="win_talk" posref="BL TL" x="24" y="2" posparent="window" texture="Bulle_Say_R.tga" global_color="false"/>
-                
+
                 </group>
-                
+
         </group>
 </template>
 -->
@@ -1090,7 +1090,7 @@
              h="0"
              max_w="512"
              min_w="48"
-             max_h="256"
+             max_h="512"
              min_h="48"
              posref="TL TL">
         <group id="window"
@@ -1249,7 +1249,7 @@
       </group>
     </group>
   </template>
-  <!-- *  Bulle de dialogue dynamique a gauche du perso 
+  <!-- *  Bulle de dialogue dynamique a gauche du perso
                 textid of the views are updated by code * -->
   <style style="dynchat_desc"
          type="text"
@@ -1314,7 +1314,7 @@
              h="0"
              max_w="512"
              min_w="48"
-             max_h="256"
+             max_h="512"
              min_h="48"
              posref="TL TL">
         <group id="window"
@@ -1702,7 +1702,7 @@
          color_grayed="255 255 255 64"
          shadow_color_grayed="0 0 0 255"
          highlight_over="255 255 255 150"
-         case_mode="%case_first_word_letter_up"></group>
+         case_mode="%case_normal"></group>
   <group type="menu"
          id="base_menu_with_color"
          extends="base_menu">
@@ -1767,7 +1767,7 @@
             name="uiOpen"
             handler="item_text_display"
             params="ui:interface:edit_custom" />
-   <separator />
+    <separator />
     <!-- Move to an Animal -->
     <action id="move"
             name="uimMoveTo">
@@ -1819,6 +1819,14 @@
             name="uimItemTextEdit"
             handler="item_text_edition"
             params="ui:interface:edit_custom" />
+    <action id="item_group"
+            name="uimGroup" />
+	<!-- Will be activated and populated in code -->
+	<group type="menu"
+	                id="item_group_menu"
+			extends="base_menu">
+	</group>
+
   </group>
   <!-- MAX_INVENTORY_ANIMAL -->
   <link expr="switch(@%pa_beast0:TYPE, 'uimMtPaMount0', 'uimMtPaMount0', 'uimMtPaPacker0', 'uimMtPaDemon0')"
@@ -1938,13 +1946,13 @@
 <proc id="test_can_drop"> -->
   <!-- If the item is from the inventory, can drop if it is an item -->
   <!--
-        <action handler="isitem"        params="@0" cond="eq(getSheetSelectionGroup(getDraggedSheet()), 'inventory_selection')"/>       
+        <action handler="isitem"        params="@0" cond="eq(getSheetSelectionGroup(getDraggedSheet()), 'inventory_selection')"/>
         -->
   <!-- If the items comes from a bot inventory, can drop on an empty slot only. The source must also be an item -->
   <!--
         <action handler="itemtoemptyslottest"  params="@0" cond="eq(getSheetSelectionGroup(getDraggedSheet()), 'buy_selection')"/>
         -->
-  <!--    
+  <!--
 </proc>
 -->
   <proc id="test_can_drop">
@@ -1991,7 +1999,7 @@
             posparent="box1"
             posref="MR MR"
             x="-3"
-            y="-2"
+            y="0"
             color="135 243 28 255"
             shadow="true"
             fontsize="10"
@@ -2004,7 +2012,7 @@
             posparent="box1"
             posref="MR MR"
             x="-3"
-            y="-3"
+            y="0"
             color="192 192 192 255"
             shadow="true"
             fontsize="10"
@@ -2414,7 +2422,7 @@
   <!-- ********** -->
   <!-- *  SETS  * -->
   <!-- ********** -->
-  <!-- test if drop can be done depending on the mode 
+  <!-- test if drop can be done depending on the mode
         Param 0 is src=... (filled by code)
 -->
   <proc id="slot_can_drop">
@@ -2426,7 +2434,7 @@
             params="@0|test_empty=true" />
   </proc>
   <!-- Exemple of ifthenelse function
-        <view type="text" id="notabene" posparent="handr" posref="MM MM" color="255 255 255 255" fontsize="12" shadow="true" hardtext="0" /> 
+        <view type="text" id="notabene" posparent="handr" posref="MM MM" color="255 255 255 255" fontsize="12" shadow="true" hardtext="0" />
         <link expr="ifthenelse(isRangeWeapon (@%set_base:#setnumber:%set_r),str('RW'),str('.'))" target="notabene:hardtext" />
 -->
   <!-- template for border inside of a group -->
@@ -2617,9 +2625,10 @@
   <!-- *  EDIT BOX WIDGET  * -->
   <!-- ********************* -->
   <template name="edit_box_widget"
+            active="true"
             posref="TL TL"
             text_x="0"
-            text_y="-1"
+            text_y="0"
             text_ref="BL BL"
             child_resize_h="true"
             child_resize_hmargin="0"
@@ -2645,8 +2654,14 @@
             keep="true"
             max_historic="40"
             fontsize="10"
+            shadow="true"
+            shadow_x="1"
+            shadow_y="1"
+            shadow_color="0 0 0 255"
+            shadow_outline="false"
             backup_father_container_pos="false"
             want_return="false"
+            clear_on_escape="false"
             color="255 255 255 255"
             continuous_text_update="false"
             bg_texture="W_box_blank.tga"
@@ -2655,8 +2670,10 @@
             max_float_prec="5"
             tooltip=""
             tooltip_parent=""
-            negative_filter="">
+            negative_filter=""
+            render_layer="0">
     <group id="#id"
+           active="#active"
            posref="#posref"
            x="#x"
            y="#y"
@@ -2665,7 +2682,8 @@
            child_resize_hmargin="#child_resize_hmargin"
            sizeref="#sizeref"
            w="#w"
-           h="#h">
+           h="#h"
+           render_layer="#render_layer">
       <group type="edit_box"
              sizeref="w"
              w="-8"
@@ -2687,13 +2705,15 @@
              menu_r="#menu_r"
              max_historic="#max_historic"
              want_return="#want_return"
+             clear_on_escape="#clear_on_escape"
              backup_father_container_pos="#backup_father_container_pos"
              on_focus_lost="#on_focus_lost"
              on_focus_lost_params="#on_focus_lost_params"
              max_float_prec="#max_float_prec"
              tooltip="#tooltip"
              tooltip_parent="#tooltip_parent"
-             negative_filter="#negative_filter">
+             negative_filter="#negative_filter"
+             render_layer="#render_layer">
         <view type="bitmap"
               id="bg"
               scale="true"
@@ -2701,7 +2721,8 @@
               h="0"
               w="0"
               texture="#bg_texture"
-              inherit_gc_alpha="true" />
+              inherit_gc_alpha="true" 
+              render_layer="#render_layer" />
         <view id="edit_text"
               type="text"
               continuous_update="#continuous_text_update"
@@ -2712,9 +2733,14 @@
               multi_line_space="0"
               fontsize="#fontsize"
               color="#color"
-              shadow="true"
+              shadow="#shadow"
+              shadow_x="#shadow_x"
+              shadow_y="#shadow_y"
+              shadow_color="#shadow_color"
+              shadow_outline="#shadow_outline"
               hardtext=""
-              global_color="false" />
+              global_color="false"
+              render_layer="#render_layer" />
       </group>
       <!-- border around the list -->
       <view type="bitmap"
@@ -2722,25 +2748,29 @@
             texture="W_box_top_left.tga"
             posparent="eb"
             posref="TL BR"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
       <view type="bitmap"
             id="trb"
             texture="W_box_top_right.tga"
             posparent="eb"
             posref="TR BL"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
       <view type="bitmap"
             id="brb"
             texture="W_box_bot_right.tga"
             posparent="eb"
             posref="BR TL"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
       <view type="bitmap"
             id="blb"
             texture="W_box_bot_left.tga"
             posparent="eb"
             posref="BL TR"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
       <view type="bitmap"
             id="tb"
             texture="W_box_top.tga"
@@ -2750,7 +2780,8 @@
             sizeref="w"
             w="0"
             h="4"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
       <view type="bitmap"
             id="bb"
             texture="W_box_bot.tga"
@@ -2760,7 +2791,8 @@
             sizeref="w"
             w="0"
             h="4"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
       <view type="bitmap"
             id="lb"
             texture="W_box_left.tga"
@@ -2770,7 +2802,8 @@
             sizeref="h"
             h="0"
             w="4"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
       <view type="bitmap"
             id="rb"
             texture="W_box_right.tga"
@@ -2780,7 +2813,8 @@
             sizeref="h"
             h="0"
             w="4"
-            inherit_gc_alpha="true" />
+            inherit_gc_alpha="true"
+            render_layer="#render_layer" />
     </group>
   </template>
   <!-- ******************************* -->
@@ -2789,10 +2823,11 @@
   <template name="edit_box_widget_multiline"
             posref="TL TL"
             text_x="0"
-            text_y="-1"
+            text_y="0"
             text_ref="BL BL"
             child_resize_h="true"
             multi_line="true"
+            multi_min_line="0"
             x="0"
             y="0"
             w="0"
@@ -2815,6 +2850,11 @@
             keep="true"
             max_historic="40"
             fontsize="10"
+            shadow="true"
+            shadow_x="1"
+            shadow_y="1"
+            shadow_color="0 0 0 255"
+            shadow_outline="false"
             backup_father_container_pos="false"
             want_return="false"
             color="255 255 255 255"
@@ -2872,9 +2912,14 @@
               posref="#text_ref"
               multi_line="#multi_line"
               multi_line_space="0"
+              multi_min_line="#multi_min_line"
               fontsize="#fontsize"
               color="#color"
-              shadow="true"
+              shadow="#shadow"
+              shadow_x="#shadow_x"
+              shadow_y="#shadow_y"
+              shadow_color="#shadow_color"
+              shadow_outline="#shadow_outline"
               hardtext=""
               global_color="false"
               render_layer="#render_layer" />
@@ -3034,7 +3079,7 @@
               id="edit"
               entry_type="positive_integer"
               text_ref="TR TR"
-              text_y="-1"
+              text_y="0"
               fontsize="12"
               posparent="sheet"
               posref="MR ML"
@@ -4110,7 +4155,7 @@
           texture="ico_heal.tga"
           global_color="false"
           posref="BL TL"
-          posparent="text" 
+          posparent="text"
           active="true"/>
     <view type="bitmap"
           id="sta_buff"
@@ -4280,7 +4325,7 @@
           posparent="text"
           xcost="230"
           line_maxw="185"
-          multi_line_maxw_only="true" 
+          multi_line_maxw_only="true"
           param_deltax="13"
           sizeref="none"
           child_resize_w="true"
@@ -4288,7 +4333,7 @@
           global_color="false"/>
 
   </group>
-  
+
   <!-- Over Text used for SingleLine TextView that are clamped (group_tree, keys interface....) -->
   <group id="over_extend_view_text"
          child_resize_w="true"
@@ -4321,7 +4366,7 @@
           id="text"
           posref="BL BL"
           x="2"
-          y="1"
+          y="0"
           color="255 255 255 255"
           fontsize="12"
           shadow="true"
@@ -4518,7 +4563,7 @@
               entry_type="positive_integer"
               id="edit"
               text_ref="TR TR"
-              text_y="-1"
+              text_y="0"
               fontsize="12"
               posparent="sheet"
               posref="MR ML"
@@ -4652,7 +4697,7 @@
             params="dblink=%inventory_open_value|value=isOpen('ui:interface:inventory')" />
     <!-- force to open the inventory -->
     <!-- <action handler="set_open" cond="le(1,@%bag_nb)" params="target=ui:interface:userbags|open='true'"/>
-        <action handler="set_open" cond="le(1,@%bag_nb)" params="target=ui:interface:userbag1|open='true'"/>    
+        <action handler="set_open" cond="le(1,@%bag_nb)" params="target=ui:interface:userbag1|open='true'"/>
         <action handler="set_open" cond="le(2,@%bag_nb)" params="target=ui:interface:userbag2|open='true'"/>
         <action handler="set_open" cond="le(3,@%bag_nb)" params="target=ui:interface:userbag3|open='true'"/>
         <action handler="set_open" cond="le(4,@%bag_nb)" params="target=ui:interface:userbag4|open='true'"/>
@@ -4676,7 +4721,7 @@
         <action handler="set_open" cond="and(eq(@%bag2_touched, 0), le(2,@%bag_nb))" params="target=ui:interface:userbag2|open=@@%bag2_open_value"/>
         <action handler="set_open" cond="and(eq(@%bag3_touched, 0), le(3,@%bag_nb))" params="target=ui:interface:userbag3|open=@@%bag3_open_value"/>
         <action handler="set_open" cond="and(eq(@%bag4_touched, 0), le(4,@%bag_nb))" params="target=ui:interface:userbag4|open=@@%bag4_open_value"/>
-        <action handler="set_open" cond="and(eq(@%bags_touched, 0), le(1,@%bag_nb))" params="target=ui:interface:userbags|open=@@%bags_open_value"/>    
+        <action handler="set_open" cond="and(eq(@%bags_touched, 0), le(1,@%bag_nb))" params="target=ui:interface:userbags|open=@@%bags_open_value"/>
         <action handler="set_open" cond="eq(@%player_touched, 0)" params="target=ui:interface:player|open=@@%player_open_value"/>
         <action handler="set_open" cond="eq(@%money_touched, 0)" params="target=ui:interface:usermoney|open=@@%money_open_value"/>-->
     <action handler="set_open"
@@ -4820,7 +4865,7 @@
   <!-- ******************* -->
   <!-- *    STYLES       * -->
   <!-- ******************* -->
-  <!-- Common Style of a Modal Container. user should define 
+  <!-- Common Style of a Modal Container. user should define
         - the "modal_parent" window
         - and the "on_enter" ActionHandler to support all "Modal Container"     aspects.
 -->
@@ -4848,7 +4893,7 @@
          global_color_normal="true"
          global_color_over="true"
          global_color_pushed="true"
-         text_y="-2"
+         text_y="0"
          fontsize="10"
          shadow="true"
          case_mode="%case_upper"
@@ -4866,7 +4911,7 @@
          global_color_normal="true"
          global_color_over="true"
          global_color_pushed="true"
-         text_y="-2"
+         text_y="0"
          fontsize="10"
          shadow="true"
          case_mode="%case_upper"
@@ -4900,7 +4945,7 @@
             x="0"
             y="0"
             posref="TL TL"
-            text_y="-2"
+            text_y="0"
             onclick_l="#onclick_ok"
             params_l="#onclick_ok_param"
             hardtext="#ok_text"
@@ -4908,7 +4953,7 @@
       <ctrl style="button_cancel"
             x="4"
             posparent="ok"
-            text_y="-2"
+            text_y="0"
             posref="TR TL"
             onclick_l="#onclick_cancel"
             params_l="#onclick_cancel_param"
@@ -4944,7 +4989,7 @@
          global_color_normal="true"
          global_color_over="true"
          global_color_pushed="true"
-         text_y="-2"
+         text_y="0"
          fontsize="10"
          shadow="true"
          case_mode="%case_upper"
@@ -4958,7 +5003,7 @@
          tx_normal="w_text_button_normal"
          tx_pushed="w_text_button_pushed"
          tx_over="w_text_button_over"
-         text_y="-2"
+         text_y="0"
          fontsize="10"
          shadow="true"
          case_mode="%case_upper"
@@ -4982,7 +5027,7 @@
          global_color_normal="true"
          global_color_over="true"
          global_color_pushed="true"
-         text_y="-2"
+         text_y="0"
          fontsize="10"
          shadow="true"
          case_mode="%case_upper"
@@ -5000,7 +5045,7 @@
          tx_normal="w_text_button_normal"
          tx_pushed="w_text_button_pushed"
          tx_over="w_text_button_over"
-         text_y="-2"
+         text_y="0"
          fontsize="10"
          shadow="true"
          case_mode="%case_upper"
@@ -5028,7 +5073,7 @@
          color="255 255 255 128"
          col_over="255 255 255 0"
          col_pushed="255 128 0 192"
-         text_y="-2"
+         text_y="0"
          fontsize="12"
          shadow="true"
          text_color_normal="255 255 255 255"
@@ -5054,7 +5099,7 @@
          color="255 255 255 128"
          col_over="255 255 255 0"
          col_pushed="255 190 0 192"
-         text_y="-3"
+         text_y="0"
          fontsize="12"
          shadow="true"
          text_color_normal="255 255 255 160"
@@ -5091,7 +5136,7 @@
          color="255 255 255 255"
          col_over="255 255 255 255"
          col_pushed="255 255 255 255"
-         text_y="-3"
+         text_y="0"
          fontsize="14"
          shadow="true"
          text_color_pushed="255 255 255 255"
@@ -5119,7 +5164,7 @@
          global_color_normal="true"
          global_color_over="true"
          global_color_pushed="true"
-         text_y="-2"
+         text_y="0"
          fontsize="10"
          shadow="true"
          case_mode="%case_upper"
@@ -5141,7 +5186,7 @@
          color="255 255 255 255"
          col_over="255 255 255 255"
          col_pushed="255 255 255 255"
-         text_y="-4"
+         text_y="0"
          fontsize="10"
          shadow="true"
          case_mode="%case_upper"
@@ -5624,7 +5669,7 @@
             child_resize_w="false"
             child_resize_wmargin="0"
             line_maxw="170"
-            multi_line_maxw_only="false" 
+            multi_line_maxw_only="false"
             xcost="215"
             auto_grayed="false"
             global_color="true">
@@ -5833,7 +5878,7 @@
               tooltip="uittKeepInfo"
               onclick_l="help_keep"
               params_l="#index" />
-        <!--            
+        <!--
                         <ctrl style="text_button_16" button_type="toggle_button" id="keep" posref="MR MR" x="-16" y="1" wmargin="8" hardtext="uiKeepInfoButton" tooltip="uittKeepInfo" onclick_l="help_keep" params_l="#index" />
                         -->
       </group>
@@ -6009,9 +6054,9 @@
                        far="4.0" />
               </scene3d>
             </group>
-            
+
             <!-- Item preview 3D window -->
-            
+
             <group id="item_preview"
                    posref="TL TL"
                    sizeref="w"
@@ -6019,12 +6064,12 @@
                    h="300"
                    x="0"
                    y="-60">
-              
-              <scene3d id="scene_item_preview" 
+
+              <scene3d id="scene_item_preview"
                        sizeref="wh"
                        w="-2"
                        h="-2"
-                       posref="TL TL" 
+                       posref="TL TL"
                        x="1"
                        curcam="cam_item_preview"
                        user_interaction="true"
@@ -6046,19 +6091,19 @@
                              rot="0.0 0.0 -60.0"
                              anim="1" />
                 <camera id="cam_item_preview"
-                        fov="5" 
+                        fov="5"
                         pos="0.0 -40.0 0.0"
-                        target="0.0 0.0 -0.85" 
+                        target="0.0 0.0 -0.85"
                         roll="0" />
 
                 <light id="back" pos="0.0 28.2 1.6" color="96 64 32" near="1.0" far="4.0" />
                 <light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="1.0" far="4.0" />
 
               </scene3d>
-              
+
             </group>
-            
-          </group>          
+
+          </group>
           <ctrl style="skin_scroll"
                 id="sv"
                 posref="TL TL"
@@ -6307,6 +6352,7 @@
             x="0"
             y="0"
             posref="BL BL"
+            posparent=""
             dblink=""
             texture=""
             tooltip=""
@@ -6315,6 +6361,7 @@
           id="but_#id"
           button_type="toggle_button"
           posref="#posref"
+          posparent="but_#posparent"
           x="#x"
           y="#y"
           tx_normal="w_button_filter_off.tga"
@@ -6341,6 +6388,7 @@
             x="0"
             y="0"
             posref="BL BL"
+            posparent=""
             dblink=""
             texture=""
             tooltip=""
@@ -6349,6 +6397,7 @@
           id="but_#id"
           button_type="toggle_button"
           posref="#posref"
+          posparent="but_#posparent"
           x="#x"
           y="#y"
           tx_normal="w_button_filter_off.tga"
@@ -6523,71 +6572,109 @@
             texture="W_line_hor.tga" />
       <link expr="eq(@UI:SAVE:#inv_type:ICON_LIST, 0)"
             target="bag_list:active,sep2:active" />
+      <!-- details -->
+      <instance template="tinv_item_list_icon_swap"
+                id="detail"
+                x="-2"
+                y="10"
+                posref="BR MR"
+                dblink="UI:SAVE:#inv_type:ICON_LIST"
+                texture="details_on.tga"
+                tooltip="uittDetail" />
+      <link expr="ifthenelse(@UI:SAVE:#inv_type:ICON_LIST, 'details_off.tga', 'details_on.tga')"
+            target="bit_detail:texture" />
+      <!-- filter -->
       <instance template="tinv_item_list_filter"
                 id="filter_tp"
-                x="-35"
-                y="1"
-                posref="BR BR"
+                x="-8"
+                posref="ML MR"
+                posparent="detail"
                 inv_type="#inv_type"
                 dblink="UI:SAVE:#inv_type:FILTER_TP"
                 texture="filter_tp.tga"
                 tooltip="uittFilterTP" />
       <instance template="tinv_item_list_filter"
                 id="filter_missmp"
-                x="-60"
-                y="1"
-                posref="BR BR"
+                x="-2"
+                posref="ML MR"
+                posparent="filter_tp"
                 inv_type="#inv_type"
                 dblink="UI:SAVE:#inv_type:FILTER_MISSMP"
                 texture="filter_mission.tga"
                 tooltip="uittFilterMissMP" />
       <instance template="tinv_item_list_filter"
                 id="filter_mp"
-                x="-85"
-                y="1"
-                posref="BR BR"
+                x="-2"
+                posref="ML MR"
+                posparent="filter_missmp"
                 inv_type="#inv_type"
                 dblink="UI:SAVE:#inv_type:FILTER_MP"
                 texture="filter_mps.tga"
                 tooltip="uittFilterMP" />
       <instance template="tinv_item_list_filter"
                 id="filter_tool"
-                x="-110"
-                y="1"
-                posref="BR BR"
+                x="-2"
+                posref="ML MR"
+                posparent="filter_mp"
                 inv_type="#inv_type"
                 dblink="UI:SAVE:#inv_type:FILTER_TOOL"
                 texture="filter_tools.tga"
                 tooltip="uittFilterTool" />
       <instance template="tinv_item_list_filter"
                 id="filter_weapon"
-                x="-135"
-                y="1"
-                posref="BR BR"
+                x="-2"
+                posref="ML MR"
+                posparent="filter_tool"
                 inv_type="#inv_type"
                 dblink="UI:SAVE:#inv_type:FILTER_WEAPON"
                 texture="filter_weapon.tga"
                 tooltip="uittFilterWeapon" />
       <instance template="tinv_item_list_filter"
                 id="filter_armor"
-                x="-160"
-                y="1"
-                posref="BR BR"
+                x="-2"
+                posref="ML MR"
+                posparent="filter_weapon"
                 inv_type="#inv_type"
                 dblink="UI:SAVE:#inv_type:FILTER_ARMOR"
                 texture="filter_armor.tga"
                 tooltip="uittFilterArmor" />
-      <!-- details -->
-      <instance template="tinv_item_list_icon_swap"
-                id="detail"
-                x="-4"
-                y="1"
-                posref="BR BR"
-                dblink="UI:SAVE:#inv_type:ICON_LIST"
-                texture="details_on.tga"
-                tooltip="uittDetail" />
-      <link expr="ifthenelse(@UI:SAVE:#inv_type:ICON_LIST, 'details_off.tga', 'details_on.tga')"
-            target="bit_detail:texture" />
+      <!-- search -->
+      <ctrl type="button"
+            id="but_inv_search"
+            button_type="toggle_button"
+            x="-2"
+            posref="ML MR"
+            posparent="but_filter_armor"
+            tx_normal="w_button_filter_off.tga"
+            tx_pushed="w_button_filter_on.tga"
+            tx_over=""
+            tooltip="uittInventorySearch"
+            onclick_l="inv_search_button"
+            params_l="inv_query_eb" />
+      <view type="bitmap"
+            id="bit_inv_search"
+            posref="MM MM"
+            posparent="but_inv_search"
+            texture="w_help_1.tga"
+            global_color="false"
+            color="255 255 255 150" />
+      <instance template="edit_box_widget"
+                id="inv_query_eb"
+                active="false"
+                posref="TR BR"
+                posparent="but_detail"
+                x="0"
+                y="8"
+                w="100"
+                render_layer="9"
+                clear_on_escape="true"
+                enter_recover_focus="false"
+                max_num_chars="20"
+                max_historic="0"
+                onenter="inv_set_search"
+                onchange="inv_set_search"
+                on_focus_lost="inv_search_unfocus"
+                on_focus_lost_params="but_inv_search" />
     </group>
   </template>
   <!-- Link to trig brick action message. don't play when 0 (avoid flying text at startup) -->
@@ -6650,7 +6737,7 @@
             posparent="button"
             posref="MR ML"
             x="4"
-            y="-3"
+            y="0"
             color="255 255 255 255"
             fontsize="#fontsize"
             shadow="true"
@@ -6842,7 +6929,7 @@
           posref="MR MR"
           x="-4"
           texture="W_arrow_down_2.tga" />
-    <!-- SYSTEM 
+    <!-- SYSTEM
         <view type="text" id="text" posref="ML ML" x="2" />-->
     <group id="text_group"
            posparent="parent"
@@ -6927,4 +7014,242 @@
       </group>
     </group>
   </template>
+
+  <!-- html browsing context -->
+  <template name="webig_html"
+            keep="true"
+            home=""
+            browse_redo=""
+            browse_undo=""
+            browse_refresh="">
+    <group id="html"
+           type="webig_html"
+           posref="TL TL"
+           home="#home"
+           title_prefix=""
+           sizeref="wh"
+           x="0"
+           y="0"
+           w="0"
+           h="0"
+           background_color="0 0 0 255"
+           error_color="255 240 48 255"
+           link_color="240 155 100 255"
+           text_color="210 210 210 255"
+           h1_color="255 255 255 255"
+           h2_color="255 255 255 255"
+           h3_color="255 255 255 255"
+           h4_color="255 255 255 255"
+           h5_color="255 255 255 255"
+           h6_color="255 255 255 255"
+           text_font_size="10"
+           h1_font_size="20"
+           h2_font_size="18"
+           h3_font_size="16"
+           h4_font_size="14"
+           h5_font_size="12"
+           h6_font_size="12"
+           paragraph_begin_space="12"
+           multi_line_space_factor="0.25"
+           td_begin_space="0"
+           li_begin_space="4"
+           ul_begin_space="12"
+           li_indent="-10"
+           ul_indent="30"
+           checkbox_bitmap_normal="w_slot_on.tga"
+           checkbox_bitmap_pushed="w_opacity_on.tga"
+           checkbox_bitmap_over=""
+           background_bitmap_view="background_bitmap"
+           browse_next_time="false"
+           form_text_area_group="edit_box_widget_multiline"
+           browse_refresh="#browse_refresh"
+           browse_undo="#browse_undo"
+           browse_redo="#browse_redo">
+      <group id="black"
+             posref="BR BR"
+             sizeref="hw"
+             w="-10"
+             h="-12"
+             inherit_gc_alpha="true" />
+      <instance template="inner_thin_border"
+                posparent="black"
+                inherit_gc_alpha="true " />
+      <view id="background_bitmap"
+            type="bitmap"
+            posparent="black"
+            posref="MM MM"
+            sizeref="wh"
+            w="-2"
+            h="-2"
+            inherit_gc_alpha="true"
+            scale="true"
+            texture="blank.tga"
+            global_color="false" />
+      <group id="text_list"
+             type="list"
+             fontsize="9"
+             posref="TL TL"
+             posparent="black"
+             x="2"
+             y="-2"
+             space="0"
+             sizeref="hw"
+             w="-4"
+             h="-4"
+             maxelements="2000" />
+      <ctrl id="scroll_bar"
+            style="skin_scroll" />
+    </group>
+  </template>
+
+  <!-- html browser window -->
+  <template name="webig_browser"
+            keep="true"
+            home=""
+            w="480"
+            h="400"
+            browse_redo=""
+            browse_undo=""
+            browse_refresh="">
+    <group id="browser"
+           type="container"
+           w="#w"
+           h="#h"
+           x="0"
+           y="0"
+           pop_max_w="2000"
+           pop_max_h="2000"
+           pop_min_w="64"
+           pop_min_h="32"
+           header_color="UI:SAVE:WIN:COLORS:COM"
+           posref="TL TL"
+           title=""
+           global_color="true"
+           global_color_over="true"
+           right_button="true"
+           movable="true"
+           lockable="true"
+           active="true"
+           openable="true"
+           opened="true"
+           resizer="true"
+           on_active="lua"
+           on_active_params="WebBrowser:onActive()">
+      <group id="header_closed"
+             w="64"
+             h="16"
+             posref="TL TL"
+             on_active="lua"
+             on_active_params="WebBrowser:onClickHeaderClose()" />
+      <group id="header_opened"
+             h="16"
+             w="480"
+             posref="TL TL"
+             on_active="lua"
+             on_active_params="WebBrowser:onClickHeaderOpen()">
+        <ctrl style="text_button_header"
+              id="browse_redo"
+              button_type="push_button"
+              posref="MR MR"
+              x="-16"
+              y="0"
+              hardtext="uiBrowseRedoButton"
+              tooltip="uittBrowseRedo"
+              onclick_l="lua"
+              params_l="WebBrowser:onClickRedo()"
+              frozen="true" />
+        <ctrl style="text_button_header"
+              id="browse_undo"
+              button_type="push_button"
+              posparent="browse_redo"
+              posref="ML MR"
+              x="-4"
+              y="0"
+              hardtext="uiBrowseUndoButton"
+              tooltip="uittBrowseUndo"
+              onclick_l="lua"
+              params_l="WebBrowser:onClickUndo()"
+              frozen="true" />
+        <ctrl style="text_button_header"
+              id="browse_refresh"
+              button_type="push_button"
+              posparent="browse_undo"
+              posref="ML MR"
+              x="-4"
+              y="0"
+              hardtext="uiBrowseRefresh"
+              tooltip="uittBrowseRefresh"
+              onclick_l="lua"
+              params_l="WebBrowser:onClickRefresh()"
+              frozen="true" />
+        <ctrl style="text_button_header"
+              id="browse_home"
+              button_type="push_button"
+              posparent="browse_refresh"
+              posref="ML MR"
+              x="-4"
+              y="0"
+              hardtext="uiBrowseHome"
+              tooltip="uittBrowseHome"
+              onclick_l="lua"
+              params_l="WebBrowser:onClickHome()" />
+      </group>
+
+      <group id="content"
+             x="0"
+             y="0"
+             w="0"
+             h="0"
+             posref="TL TL">
+        <instance template="webig_html"
+                  home="#home"
+                  browse_redo="#browse_redo"
+                  browse_undo="#browse_undo"
+                  browse_refresh="#browse_refresh" />
+      </group>
+    </group>
+  </template>
+
+  <!-- html <hr> element -->
+  <template name="html_hr"
+            keep="true">
+    <group id="sep_gr"
+           posref="ML ML"
+           sizeref="w"
+           w="0"
+           h="0"
+           child_resize_h="true"
+           child_resize_hmargin="12">
+      <view type="bitmap"
+            id="hr"
+            posref="MM MM"
+            sizeref="w"
+            w="-2"
+            h="2"
+            inherit_gc_alpha="true"
+            scale="true"
+            texture="blank.tga"
+            global_color="false" />
+    </group>
+  </template>
+
+  <template name="html_form_select_box_menu_widget"
+            keep="true"
+            id="sb">
+    <group type="menu"
+        id="#id"
+        posref="BL TL"
+        x="0"
+        y="0"
+        mouse_pos="false"
+        space="2"
+        shadow="false"
+        color="255 255 255 128"
+        color_over="255 255 255 255"
+        color_grayed="0 0 0 255"
+        fontsize="12"
+        highlight_over="255 255 255 128"
+        force_inside_screen="false"></group>
+    </template>
+
 </interface_config>

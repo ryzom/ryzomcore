@@ -28,8 +28,6 @@
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/mouse_device.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/dynloadlib.h"
 #include "driver_opengl_vertex_buffer_hard.h"
@@ -38,6 +36,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 
@@ -198,18 +199,6 @@ CDriverGL::CDriverGL()
 	_backBufferHeight   = 0;
 	_backBufferWidth    = 0;
 
-	// autorelease pool for memory management
-	_autoreleasePool = [[NSAutoreleasePool alloc] init];
-
-	// init the application object
-	[NSApplication sharedApplication];
-
-	// create the menu in the top screen bar
-	setupApplicationMenu();
-
-	// finish the application launching
-	[NSApp finishLaunching];
-
 #elif defined (NL_OS_UNIX)
 
 	_dpy = 0;
@@ -236,7 +225,7 @@ CDriverGL::CDriverGL()
 	_CursorScale = 1.f;
 	_MouseCaptured = false;
 
-	_NeedToRestaureGammaRamp = false;
+	_NeedToRestoreGammaRamp = false;
 
 	_win = EmptyWindow;
 	_WindowX = 0;
@@ -375,10 +364,6 @@ CDriverGL::~CDriverGL()
 {
 	H_AUTO_OGL(CDriverGL_CDriverGLDtor)
 	release();
-
-#if defined(NL_OS_MAC)
-	[_autoreleasePool release];
-#endif
 }
 
 // --------------------------------------------------
@@ -437,11 +422,7 @@ bool CDriverGL::setupDisplay()
 	glViewport(0,0,_CurrentMode.Width,_CurrentMode.Height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-#ifdef USE_OPENGLES
-	glOrthof(0.f,_CurrentMode.Width,_CurrentMode.Height,0.f,-1.0f,1.0f);
-#else
 	glOrtho(0,_CurrentMode.Width,_CurrentMode.Height,0,-1.0f,1.0f);
-#endif
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 #ifndef USE_OPENGLES
@@ -483,7 +464,7 @@ bool CDriverGL::setupDisplay()
 		glLightModeli((GLenum)GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
 #endif
 	}
-	
+
 	if (_Extensions.ARBFragmentShader)
 	{
 		_ForceNativeFragmentPrograms = false;
@@ -644,7 +625,7 @@ bool CDriverGL::setupDisplay()
 	checkForPerPixelLightingSupport();
 
 #ifndef USE_OPENGLES
-	// if EXTVertexShader is used, bind  the standard GL arrays, and allocate constant
+	// if EXTVertexShader is used, bind the standard GL arrays, and allocate constant
 	if (!_Extensions.NVVertexProgram && !_Extensions.ARBVertexProgram && _Extensions.EXTVertexShader)
 	{
 		_EVSPositionHandle	= nglBindParameterEXT(GL_CURRENT_VERTEX_EXT);
@@ -682,8 +663,8 @@ bool CDriverGL::setupDisplay()
 	}
 #endif
 
-	// Reset the vbl interval
-	setSwapVBLInterval(_Interval);
+	// Get initial VBL interval
+	_Interval = getSwapVBLInterval();
 
 	return true;
 }
@@ -727,11 +708,7 @@ bool CDriverGL::activeFrameBufferObject(ITexture * tex)
 		}
 		else
 		{
-#ifdef USE_OPENGLES
-			nglBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
-#else
 			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-#endif
 			return true;
 		}
 	}
@@ -936,14 +913,6 @@ bool CDriverGL::swapBuffers()
 	}
 #endif
 
-#ifdef NL_OS_WINDOWS
-	if (_EventEmitter.getNumEmitters() > 1) // is direct input running ?
-	{
-		// flush direct input messages if any
-		NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1))->poll();
-	}
-#endif
-
 	if (!_WndActive)
 	{
 		if (_AGPVertexArrayRange) _AGPVertexArrayRange->updateLostBuffers();
@@ -959,13 +928,6 @@ bool CDriverGL::swapBuffers()
 	SwapBuffers(_hDC);
 
 #elif defined(NL_OS_MAC)
-
-	// TODO: maybe do this somewhere else?
-	if(_DestroyWindow)
-	{
-		[_autoreleasePool release];
-		_autoreleasePool = [[NSAutoreleasePool alloc] init];
-	}
 
 	[_ctx flushBuffer];
 
@@ -1042,6 +1004,8 @@ bool CDriverGL::release()
 	// Call IDriver::release() before, to destroy textures, shaders and VBs...
 	IDriver::release();
 
+	nlassert(_DepthStencilFBOs.empty());
+
 	_SwapBufferCounter = 0;
 
 	// delete querries
@@ -1085,7 +1049,7 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 
 	// Setup gl viewport
 	uint32 clientWidth, clientHeight;
-	getWindowSize(clientWidth, clientHeight);
+	getRenderTargetSize(clientWidth, clientHeight);
 
 	// Backup the viewport
 	_CurrViewport = viewport;
@@ -1140,7 +1104,7 @@ void CDriverGL::setupScissor (const class CScissor& scissor)
 
 	// Setup gl viewport
 	uint32 clientWidth, clientHeight;
-	getWindowSize(clientWidth, clientHeight);
+	getRenderTargetSize(clientWidth, clientHeight);
 
 	// Backup the scissor
 	_CurrScissor= scissor;
@@ -1215,6 +1179,121 @@ const char *CDriverGL::getVideocardInformation ()
 	return name;
 }
 
+sint CDriverGL::getTotalVideoMemory() const
+{
+	H_AUTO_OGL(CDriverGL_getTotalVideoMemory);
+
+#ifndef USE_OPENGLES
+	if (_Extensions.NVXGPUMemoryInfo)
+	{
+		GLint memoryInKiB = 0;
+		glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &memoryInKiB);
+
+		nlinfo("3D: GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX returned %d KiB", memoryInKiB);
+		return memoryInKiB;
+	}
+
+	if (_Extensions.ATIMeminfo)
+	{
+		GLint params[4];
+		glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, params);
+
+		nlinfo("3D: GL_TEXTURE_FREE_MEMORY_ATI returned %d KiB", params[0]);
+		return params[0];
+	}
+
+#if defined(NL_OS_WINDOWS)
+	if (_Extensions.WGLAMDGPUAssociation)
+	{
+		GLuint uNoOfGPUs = nwglGetGPUIDsAMD(0, 0);
+		GLuint *uGPUIDs = new GLuint[uNoOfGPUs];
+		nwglGetGPUIDsAMD(uNoOfGPUs, uGPUIDs);
+
+		GLuint memoryInMiB = 0;
+		nwglGetGPUInfoAMD(uGPUIDs[0], WGL_GPU_RAM_AMD, GL_UNSIGNED_INT, sizeof(GLuint), &memoryInMiB);
+
+		delete [] uGPUIDs;
+
+		nlinfo("3D: WGL_GPU_RAM_AMD returned %d MiB", memoryInMiB);
+		return memoryInMiB * 1024;
+	}
+#elif defined(NL_OS_MAC)
+	GLint rendererID;
+
+	// get current renderer ID
+	CGLError error = CGLGetParameter([_ctx CGLContextObj], kCGLCPCurrentRendererID, &rendererID);
+
+	if (error == kCGLNoError)
+	{
+		GLint nrend = 0;
+		CGLRendererInfoObj rend;
+
+		// get renderer info for all renderers
+		error = CGLQueryRendererInfo(0xffffffff, &rend, &nrend);
+
+		if (error == kCGLNoError)
+		{
+			for (GLint i = 0; i < nrend; ++i)
+			{
+				GLint thisRendererID;
+				error = CGLDescribeRenderer(rend, i, kCGLRPRendererID, &thisRendererID);
+
+				if (error == kCGLNoError)
+				{
+					// see if this is the one we want
+					if (thisRendererID == rendererID)
+					{
+						GLint memoryInMiB = 0;
+						CGLError error = CGLDescribeRenderer(rend, i, kCGLRPVideoMemoryMegabytes, &memoryInMiB);
+
+						if (error == kCGLNoError)
+						{
+							// convert in KiB
+							return memoryInMiB * 1024;
+						}
+						else
+						{
+							nlwarning("3D: Unable to get video memory (%s)", CGLErrorString(error));
+						}
+					}
+				}
+				else
+				{
+					nlwarning("3D: Unable to get renderer ID (%s)", CGLErrorString(error));
+				}
+			}
+ 
+			CGLDestroyRendererInfo(rend);
+		}
+		else
+		{
+			nlwarning("3D: Unable to get renderers info (%s)", CGLErrorString(error));
+		}
+	}
+	else
+	{
+		nlerror("3D: Unable to get current renderer ID (%s)", CGLErrorString(error));
+	}
+#else
+	if (_Extensions.GLXMESAQueryRenderer)
+	{
+		uint32 memoryInMiB = 0;
+
+		if (nglXQueryCurrentRendererIntegerMESA(GLX_RENDERER_VIDEO_MEMORY_MESA, &memoryInMiB))
+		{
+			nlinfo("3D: GLX_RENDERER_VIDEO_MEMORY_MESA returned %u MiB", memoryInMiB);
+			return memoryInMiB * 1024;
+		}
+	}
+#endif
+
+#else
+	// TODO: implement for OpenGL ES
+#endif
+
+	return -1;
+}
+
 bool CDriverGL::clipRect(NLMISC::CRect &rect)
 {
 	H_AUTO_OGL(CDriverGL_clipRect)
@@ -1258,9 +1337,9 @@ void CDriverGL::getZBufferPart (std::vector<float>  &zbuffer, NLMISC::CRect &rec
 #ifdef USE_OPENGLES
 		glReadPixels (rect.X, rect.Y, rect.Width, rect.Height, GL_DEPTH_COMPONENT16_OES, GL_FLOAT, &(zbuffer[0]));
 #else
-		glPixelTransferf(GL_DEPTH_SCALE, 1.0f) ;
-		glPixelTransferf(GL_DEPTH_BIAS, 0.f) ;
-		glReadPixels (rect.X, rect.Y, rect.Width, rect.Height, GL_DEPTH_COMPONENT , GL_FLOAT, &(zbuffer[0]));
+		glPixelTransferf(GL_DEPTH_SCALE, 1.0f);
+		glPixelTransferf(GL_DEPTH_BIAS, 0.f);
+		glReadPixels(rect.X, rect.Y, rect.Width, rect.Height, GL_DEPTH_COMPONENT , GL_FLOAT, &(zbuffer[0]));
 #endif
 	}
 }
@@ -1509,7 +1588,7 @@ void			CDriverGL::enableUsedTextureMemorySum (bool enable)
 	H_AUTO_OGL(CDriverGL_enableUsedTextureMemorySum )
 
 	if (enable)
-	{	
+	{
 		nlinfo ("3D: PERFORMANCE INFO: enableUsedTextureMemorySum has been set to true in CDriverGL");
 		_TextureUsed.reserve(512);
 	}
@@ -2186,19 +2265,25 @@ void CDriverGL::flush()
 // ***************************************************************************
 void	CDriverGL::setSwapVBLInterval(uint interval)
 {
-	H_AUTO_OGL(CDriverGL_setSwapVBLInterval)
+	H_AUTO_OGL(CDriverGL_setSwapVBLInterval);
 
 	if (!_Initialized)
+	{
+		nlwarning("OpenGL driver not initialized when calling setSwapVBLInterval");
 		return;
+	}
 
 	bool res = true;
 
+	// don't try to change VBL if interval didn't change
+	if (_Interval == interval) return;
+
 #ifdef USE_OPENGLES
-	res = eglSwapInterval(_EglDisplay, _Interval) == EGL_TRUE;
+	res = eglSwapInterval(_EglDisplay, interval) == EGL_TRUE;
 #elif defined(NL_OS_WINDOWS)
 	if(_Extensions.WGLEXTSwapControl)
 	{
-		res = nwglSwapIntervalEXT(_Interval) == TRUE;
+		res = nwglSwapIntervalEXT(interval) == TRUE;
 	}
 #elif defined(NL_OS_MAC)
 	[_ctx setValues:(GLint*)&interval forParameter:NSOpenGLCPSwapInterval];
@@ -2433,7 +2518,7 @@ void CDriverGL::retrieveATIDriverVersion()
 	// get from the registry
 	HKEY parentKey;
 	// open key about current video card
-	LONG result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Class\\{4D36E968-E325-11CE-BFC1-08002BE10318}", 0, KEY_READ, &parentKey);
+	LONG result = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Class\\{4D36E968-E325-11CE-BFC1-08002BE10318}", 0, KEY_READ, &parentKey);
 	if (result == ERROR_SUCCESS)
 	{
 		// find last config
@@ -2447,7 +2532,7 @@ void CDriverGL::retrieveATIDriverVersion()
 		for(;;)
 		{
 			nameBufferSize = sizeof(subKeyName) / sizeof(subKeyName[0]);
-			result = RegEnumKeyEx(parentKey, keyIndex, subKeyName, &nameBufferSize, NULL, NULL, NULL, &lastWriteTime);
+			result = RegEnumKeyExA(parentKey, keyIndex, subKeyName, &nameBufferSize, NULL, NULL, NULL, &lastWriteTime);
 			if (result == ERROR_NO_MORE_ITEMS) break;
 			if (result == ERROR_SUCCESS)
 			{
@@ -2483,14 +2568,14 @@ void CDriverGL::retrieveATIDriverVersion()
 		if (configFound)
 		{
 			HKEY subKey;
-			result = RegOpenKeyEx(parentKey, latestSubKeyName, 0, KEY_READ, &subKey);
+			result = RegOpenKeyExA(parentKey, latestSubKeyName, 0, KEY_READ, &subKey);
 			if (result == ERROR_SUCCESS)
 			{
 				// see if it is a radeon card
 				DWORD valueType;
 				char driverDesc[256];
 				DWORD driverDescBufSize = sizeof(driverDesc) / sizeof(driverDesc[0]);
-				result = RegQueryValueEx(subKey, "DriverDesc", NULL, &valueType, (unsigned char *) driverDesc, &driverDescBufSize);
+				result = RegQueryValueExA(subKey, "DriverDesc", NULL, &valueType, (unsigned char *) driverDesc, &driverDescBufSize);
 				if (result == ERROR_SUCCESS && valueType == REG_SZ)
 				{
 					toLower(driverDesc);
@@ -2498,7 +2583,7 @@ void CDriverGL::retrieveATIDriverVersion()
 					{
 						char driverVersion[256];
 						DWORD driverVersionBufSize = sizeof(driverVersion) / sizeof(driverVersion[0]);
-						result = RegQueryValueEx(subKey, "DriverVersion", NULL, &valueType, (unsigned char *) driverVersion, &driverVersionBufSize);
+						result = RegQueryValueExA(subKey, "DriverVersion", NULL, &valueType, (unsigned char *) driverVersion, &driverVersionBufSize);
 						if (result == ERROR_SUCCESS && valueType == REG_SZ)
 						{
 							int subVersionNumber[4];
@@ -2562,6 +2647,7 @@ bool CDriverGL::getAdapter(uint adapter, CAdapter &desc) const
 		desc.Revision = 0;
 		desc.SubSysId = 0;
 		desc.VendorId = 0;
+		desc.VideoMemory = getTotalVideoMemory();
 		return true;
 	}
 	return false;

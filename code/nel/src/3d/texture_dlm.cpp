@@ -24,6 +24,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -119,7 +122,7 @@ bool			CTextureDLM::canCreateLightMap(uint w, uint h)
 		return true;
 
 	// If empty, test if there is an empty block.
-	return _EmptyBlocks.size()>0;
+	return !_EmptyBlocks.empty();
 }
 
 
@@ -166,7 +169,7 @@ bool			CTextureDLM::createLightMap(uint w, uint h, uint &x, uint &y)
 	if(_FreeBlocks[lMapType]==NULL)
 	{
 		// list is empty => allocate a block from _EmptyBlocks.
-		nlassert(_EmptyBlocks.size()>0);
+		nlassert(!_EmptyBlocks.empty());
 
 		// pop a block from empty list
 		CBlock	*block= &_Blocks[_EmptyBlocks.back()];
@@ -385,7 +388,7 @@ void			CTextureDLM::releaseLightMap(uint x, uint y)
 
 	// Free this bit in the block.
 	nlassert(block->FreeSpace & mask);
-	block->FreeSpace&= ~mask;
+	block->FreeSpace&= (~mask & std::numeric_limits<uint>::max());
 
 
 	// Free the block if necessary.

@@ -96,7 +96,7 @@ NLMISC::CSmartPtr< IItemTrade > CItemsForSale::removeItem( uint32 identifier, ui
 }
 
 //-----------------------------------------------------------------------------
-void CItemsForSale::serial(NLMISC::IStream &f) throw(NLMISC::EStream )
+void CItemsForSale::serial(NLMISC::IStream &f)
 {
 	// YOYO: we should not be here. OLD serial was very buggy.
 	// AlainS ensure me this code is no more called (no write, use PDS instead, and old version

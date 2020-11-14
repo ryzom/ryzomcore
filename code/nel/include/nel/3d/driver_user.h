@@ -34,7 +34,7 @@
 #include "nel/3d/vertex_stream_manager.h"
 #include "nel/3d/async_texture_manager.h"
 #include "nel/3d/lod_character_manager.h"
-
+#include "nel/3d/render_target_manager.h"
 
 namespace NL3D
 {
@@ -71,6 +71,7 @@ protected:
 	bool					_WindowInit;
 	CMatrixContext			_CurrentMatrixContext;
 	CFontManager			_FontManager;
+	CRenderTargetManager	_RenderTargetManager;
 	// Components List.
 	typedef	CPtrSet<CTextureUser>		TTextureSet;
 	typedef	CPtrSet<CTextContextUser>	TTextContextSet;
@@ -108,6 +109,11 @@ protected:
 	CMaterial				_MatTextInternal;
 	CMaterial				_MatTextStretchInternal;
 
+	// Default render target for effect pipeline
+	CTextureUser			*_EffectRenderTarget;
+	UMaterial				_MatRenderTarget;
+	CMaterial				_MatRenderTargetInt;
+	NLMISC::CQuadUV			_RenderTargetQuad;
 
 	// StaticInit
 	static	bool			_StaticInit;
@@ -239,6 +245,16 @@ public:
 	/// Delete a AnimationSet.
 	virtual	void			deleteAnimationSet(UAnimationSet *animationSet);
 	// @}
+
+
+	/// Get the render target manager
+	virtual CRenderTargetManager	&getRenderTargetManager() { return _RenderTargetManager; }
+
+	/// Set a texture the size of the window as render target
+	virtual void					beginDefaultRenderTarget(uint32 width = 0, uint32 height = 0);
+
+	/// Draw the render target to the back buffer
+	virtual void					endDefaultRenderTarget(UScene *scene);
 
 
 	/// \name Components gestion for Interface 2D/3D.
@@ -396,6 +412,7 @@ public:
 	virtual uint32			getImplementationVersion () const;
 	virtual const char*		getDriverInformation ();
 	virtual const char*		getVideocardInformation ();
+	virtual sint			getTotalVideoMemory () const;
 	virtual	uint			getNbTextureStages();
 	virtual void			getWindowSize (uint32 &width, uint32 &height);
 	virtual uint			getWindowWidth ();
@@ -409,21 +426,6 @@ public:
 	virtual void			getZBufferPart (std::vector<float>  &zbuffer, NLMISC::CRect &rect);
 	virtual bool			fillBuffer (CBitmap &bitmap);
 	// @}
-
-
-	/// \name Mouse / Keyboards / Game devices
-	// @{
-	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
-	//
-	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable);
-	virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager();
-
-	/**
-	 * wrapper for IEventEmitter::emulateMouseRawMode()
-	 */
-	virtual void emulateMouseRawMode(bool enable);
-
-	virtual uint	getDoubleClickDelay(bool hardwareMouse);
 
 	/// show cursor if b is true, or hide it if b is false
 	virtual void			showCursor (bool b);
@@ -473,6 +475,8 @@ public:
 	virtual TPolygonMode 	getPolygonMode ();
 	virtual void			forceDXTCCompression(bool dxtcComp);
 	virtual void			setAnisotropicFilter(sint filter);
+	virtual uint			getAnisotropicFilter() const;
+	virtual uint			getAnisotropicFilterMaximum() const;
 	virtual void			forceTextureResize(uint divisor);
 	virtual bool			setMonitorColorProperties (const CMonitorColorProperties &properties);
 	// @}

@@ -93,7 +93,7 @@ namespace NLMISC
 		TXMLPackInfo &packInfo = _XMLPacks[packId];
 
 		// open the xml pack for later access
-//		packInfo.FileHandler = fopen(xmlPackFileName.c_str(), "rb");
+//		packInfo.FileHandler = nlfopen(xmlPackFileName, "rb");
 
 		// open the xml pack for parsing
 		CIFile packFile;
@@ -182,7 +182,7 @@ namespace NLMISC
 			fileInfo.FileName = CStringMapper::map(subFileName);
 			fileInfo.FileOffset = (uint32)(beginOfFile - buffer.begin());
 			fileInfo.FileSize = (uint32)(endOfFile - beginOfFile);
-//			fileInfo.FileHandler = fopen(xmlPackFileName.c_str(), "rb");
+//			fileInfo.FileHandler = nlfopen(xmlPackFileName, "rb");
 			packInfo._XMLFiles.insert(make_pair(fileInfo.FileName, fileInfo));
 
 			// advance to next line
@@ -264,7 +264,7 @@ namespace NLMISC
 		rFileOffset = fileInfo.FileOffset;
 		rCacheFileOnOpen = false;
 		rAlwaysOpened = false;
-		FILE *fp = fopen(parts[0].c_str(), "rb");
+		FILE *fp = nlfopen(parts[0], "rb");
 		return fp;
 	}
 

@@ -52,7 +52,7 @@ public:
 	static const char		*getStringUniTime (NLMISC::TTime ut);
 
 
-	/** You need to call this function before calling getUniTime or an assert will occured.
+	/** You need to call this function before calling getUniTime or an assert will occurred.
 	 * This function will connect to the time service and synchronize your computer.
 	 * This function assumes that all services run on server that are time synchronized with NTP for example.
 	 * If addr is NULL, the function will connect to the Time Service via the Naming Service. In this case,
@@ -87,11 +87,11 @@ public:
 	 */
 	static void				simulate() { nlstop; _Simulate = true; }
 
-	static bool				Sync;				// true if the synchronization occured
+	static bool				Sync;				// true if the synchronization occurred
 private:
 
 	static NLMISC::TTime	_SyncUniTime;		// time in millisecond when the universal time received
-	static NLMISC::TTime	_SyncLocalTime;		// time in millisecond when the syncro with universal time occured
+	static NLMISC::TTime	_SyncLocalTime;		// time in millisecond when the syncro with universal time occurred
 
 	// If true, do not synchronize
 	static bool				_Simulate;

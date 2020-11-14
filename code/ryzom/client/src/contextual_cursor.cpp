@@ -170,5 +170,5 @@ bool CContextualCursor::context(const std::string &contextName, float dist, cons
 void CContextualCursor::release()
 {
 	_Contexts.clear ();
-	_Context = "";
+	_Context.clear();
 }

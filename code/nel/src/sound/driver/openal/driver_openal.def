@@ -1,4 +1,3 @@
-LIBRARY nel_drv_openal_win_r
 EXPORTS
 	NLSOUND_createISoundDriverInstance
 	NLSOUND_interfaceVersion

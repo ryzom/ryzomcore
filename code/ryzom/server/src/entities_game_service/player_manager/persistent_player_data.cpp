@@ -507,6 +507,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	STRUCT_VECT(_Pact)\
 	STRUCT_VECT(_KnownPhrases)\
 	STRUCT_MAP(TAIAlias,	TMissionHistory,	_MissionHistories)\
+	PROP_MAP(string,	string,	_CustomMissionsParams)\
 	LSTRUCT(_WelcomeMissionDesc, if (_WelcomeMissionDesc.isValid()))\
 	STRUCT_ARRAY(_PlayerPets,_PlayerPets.size())\
 \
@@ -1339,6 +1340,7 @@ private:
 	PROP2(_Recommended,					uint32,		_Recommended,				_Recommended=val)\
 	PROP2(_CreatorId,					CEntityId,	_CreatorId,					_CreatorId=val)\
 	PROP2(_PhraseId,					string,		_PhraseId,					_PhraseId=val)\
+	PROP2(_RequiredFaction,				string,		_RequiredFaction,			_RequiredFaction=val)\
 	LSTRUCT2(_CraftParameters,						if (_CraftParameters != NULL),	_CraftParameters->store(pdr),	_CraftParameters = new CItemCraftParameters; _CraftParameters->apply(pdr))\
 	LPROP2(_SlotImage,					uint16,		if (0),		0xffff,				slotImage=val)\
 	LPROP2(_SapLoad,					uint32,		if (_SapLoad!=0),			_SapLoad,							_SapLoad=val)\
@@ -1357,6 +1359,9 @@ private:
 	STRUCT_VECT(_TypeSkillMods)\
 	LPROP_VECT(CSheetId, _Enchantment, VECT_LOGIC(_Enchantment) if (_Enchantment[i]!=CSheetId::Unknown))\
 	PROP2(_CustomText,					ucstring,	_CustomText,				_CustomText=val)\
+	PROP2(_CustomName,					ucstring,	_CustomName,				_CustomName=val)\
+	PROP(bool, _Movable)\
+	PROP(bool, _UnMovable)\
 	PROP(bool, _LockedByOwner)\
 	
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )

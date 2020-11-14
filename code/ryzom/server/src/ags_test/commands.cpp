@@ -586,7 +586,10 @@ NLMISC_COMMAND(actorSetOrientation,"Add one or more static actors","<direction> 
 	if (i<(sizeof(angleNames)/sizeof(angleNames[0])))
 		theta=3.14159265359f*2.0f*(float)i/(float)(sizeof(angleNames)/sizeof(angleNames[0]));
 	else
-		theta=(float)atof(args[0].c_str())/360.0f*2.0f*3.14159265359f;
+	{
+		NLMISC::fromString(args[0], theta);
+		theta = theta / 360.0f*2.0f*3.14159265359f;
+	}
 
 	if (args.size()==1)
 	{
@@ -620,11 +623,13 @@ NLMISC_COMMAND(actorSetMagnetRange,"Set the magnet properties for wandering beha
 	if(args.size() <1) return false;
 	COMMAND_MACRO_RECORD_TEST
 
-	float range=(float)atof(args[0].c_str());
+	float range;
+	NLMISC::fromString(args[0], range);
 	if (range<=0.0f) return false;
 
 	unsigned start;
-	float decay=(float)atof(args[0].c_str());
+	float decay;
+	NLMISC::fromString(args[0], decay);
 	if (decay<0.0f) return false;
 	if (decay==0.0f) 
 	{
@@ -664,7 +669,8 @@ NLMISC_COMMAND(actorSetAttackDistance,"set actor attack distance","<distance> [<
 	if(args.size() <1) return false;
 	COMMAND_MACRO_RECORD_TEST
 
-	float distance=(float)atof(args[0].c_str());
+	float distance;
+	NLMISC::fromString(args[0], distance);
 //	if (distance<=0.0f) return false;
 
 	if (args.size()<2)
@@ -781,11 +787,13 @@ NLMISC_COMMAND(actorSetRespawnDelay,"set actor respawn delay","<min time> [<max 
 	if(args.size() <1) return false;
 	COMMAND_MACRO_RECORD_TEST
 
-	float min=(float)atof(args[0].c_str());
+	float min;
+	NLMISC::fromString(args[0], min);
 	if (min<=0.0f) return false;
 
 	unsigned start;
-	float max=(float)atof(args[0].c_str());
+	float max;
+	NLMISC::fromString(args[0], max);
 	if (max==0.0f) 
 	{
 		max=min;
@@ -1144,10 +1152,14 @@ NLMISC_COMMAND(generateScript, "Generate a sript that spawn a given type of crea
 		return false;
 
 	const string				&scriptName = args[0];
-	double						spawnX = atof(args[1].c_str());
-	double						spawnY = atof(args[2].c_str());
-	double						spacing = atof(args[3].c_str());
-	uint						width = atoi(args[4].c_str());
+	double						spawnX;
+	NLMISC::fromString(args[1], spawnX);
+	double						spawnY;
+	NLMISC::fromString(args[2], spawnY);
+	double						spacing;
+	NLMISC::fromString(args[3], spacing);
+	uint						width;
+	NLMISC::fromString(args[4], width);
 	const string				&extension = args[5];
 	vector<string>				filters;
 

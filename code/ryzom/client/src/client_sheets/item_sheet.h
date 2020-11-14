@@ -401,7 +401,7 @@ public:
 	virtual void build(const NLGEORGES::UFormElm &item);
 
 	/// Serialize character sheet into binary data file.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 	/// true if the item can put in the slot e
 	bool		hasSlot(SLOTTYPE::TSlotType e) const {return (SlotBF&(SINT64_CONSTANT(1)<<e))!=0;}

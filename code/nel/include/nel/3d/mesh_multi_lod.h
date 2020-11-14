@@ -125,7 +125,7 @@ public:
 	virtual void	getAABBox(NLMISC::CAABBox &bbox) const;
 
 	/// serial this mesh.
-	virtual void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void	serial(NLMISC::IStream &f);
 
 	/// Declare name of the shape
 	NLMISC_DECLARE_CLASS(CMeshMultiLod);
@@ -238,7 +238,7 @@ private:
 		std::vector<TCoarseMeshIndexType>	CoarseTriangles;
 
 		/// Serial
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serial(NLMISC::IStream &f);
 
 		///  Is Opaque ?
 		bool isOpaque() { return (Flags&IsOpaque)!=0; }

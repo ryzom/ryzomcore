@@ -333,7 +333,8 @@ namespace NLQT
 		return -1;
 	}
 
-	void CGeorgesNewDialog::validateParentCombo() {
+	void CGeorgesNewDialog::validateParentCombo()
+	{
 		// TODO: clear if no valid text
 		//if (!_filelist.contains(_ui.parentLineEdit->text()))
 		//	_ui.parentLineEdit->clear();

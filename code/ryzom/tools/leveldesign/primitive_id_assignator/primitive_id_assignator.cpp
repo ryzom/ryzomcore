@@ -19,6 +19,7 @@
 #include "nel/misc/config_file.h"
 #include "nel/misc/path.h"
 #include "nel/misc/file.h"
+#include "nel/misc/common.h"
 
 
 using namespace std;
@@ -57,7 +58,7 @@ int main(int argc, char *argv[])
 	{
 		// build a default config file
 		string fileName = vif.asString();
-		FILE *fp = fopen(fileName.c_str(), "wt");
+		FILE *fp = nlfopen(fileName.c_str(), "wt");
 		if (fp == NULL)
 		{
 			nlwarning("Can't open file '%s' for writing",

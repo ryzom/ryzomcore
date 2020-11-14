@@ -124,7 +124,7 @@ int APIENTRY WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 	scn->setArgs (lpCmdLine); \
 	createDebug(NULL,!scn->haveLongArg("nolog"));\
 	scn->setCallbackArray (__ServiceCallbackArray, sizeof(__ServiceCallbackArray)/sizeof(__ServiceCallbackArray[0])); \
-    sint retval = scn->main (__ServiceShortName, __ServiceLongName, __ServicePort, __ConfigDir, __LogDir, __DATE__" "__TIME__); \
+    sint retval = scn->main (__ServiceShortName, __ServiceLongName, __ServicePort, __ConfigDir, __LogDir, __DATE__ " " __TIME__); \
 	delete scn; \
 	return retval; \
 }
@@ -139,7 +139,7 @@ int main(int argc, const char **argv) \
 	scn->setArgs (argc, argv); \
 	createDebug(NULL,!scn->haveLongArg("nolog"));\
 	scn->setCallbackArray (__ServiceCallbackArray, sizeof(__ServiceCallbackArray)/sizeof(__ServiceCallbackArray[0])); \
-	sint retval = scn->main (__ServiceShortName, __ServiceLongName, __ServicePort, __ConfigDir, __LogDir, __DATE__" "__TIME__); \
+	sint retval = scn->main (__ServiceShortName, __ServiceLongName, __ServicePort, __ConfigDir, __LogDir, __DATE__ " " __TIME__); \
 	delete scn; \
 	return retval; \
 }
@@ -218,13 +218,13 @@ public:
 	static bool						isServiceInitialized() { return _Instance != NULL; }
 
 	/// Returns the current service short name (ie: TS)
-	const std::string				&getServiceShortName () const { return _ShortName; };
+	const std::string				&getServiceShortName () const { return _ShortName; }
 
 	/// Returns the current service long name (ie: test_serivce)
-	const std::string				&getServiceLongName () const { return _LongName; };
+	const std::string				&getServiceLongName () const { return _LongName; }
 
 	/// Returns the current service alias name setted by AES
-	const std::string				&getServiceAliasName () const { return _AliasName; };
+	const std::string				&getServiceAliasName () const { return _AliasName; }
 
 	/// Returns the current service unified name that is   alias/short-id or short-id if alias is empty
 	std::string						getServiceUnifiedName () const;
@@ -242,10 +242,10 @@ public:
 	uint32							getLaunchingDate () const;
 
 	/// Return true if this service don't use the NS (naming service)
-	bool							getDontUseNS() const { return _DontUseNS; };
+	bool							getDontUseNS() const { return _DontUseNS; }
 
 	/// Return true if this service don't use the AES (admin executor service)
-	bool							getDontUseAES() const { return _DontUseAES; };
+	bool							getDontUseAES() const { return _DontUseAES; }
 
 	/// Returns arguments of the program pass from the user to the program using parameters (ie: "myprog param1 param2")
 	const NLMISC::CVectorSString	&getArgs () const { return _Args; }

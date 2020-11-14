@@ -677,7 +677,6 @@ public:
 		SenderNameId = 0;
 		ChatMode = 0;
 		PhraseId = 0;
-		CustomTxt = "";
 	}
 
 	void serial(NLMISC::CBitMemStream &f)

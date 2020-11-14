@@ -24,6 +24,10 @@
 #include "nel/3d/particle_system.h"
 #include "nel/3d/ps_iterator.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 
@@ -378,7 +382,7 @@ void CPSQuad::updateMatAndVbForColor(void)
 }
 
 //==============================================================
-void CPSQuad::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSQuad::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSQuad_serial)
 	sint ver = f.serialVersion(2);

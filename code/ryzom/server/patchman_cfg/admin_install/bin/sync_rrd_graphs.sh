@@ -4,7 +4,7 @@ echo Launched: $(date)
 while true
 do
   # retrieve ATS files from ATS admin tool machine
-  rsync -t ep1.std01.ryzomcore.org:ats/graph_datas/* /srv/core/mini01/rrd_graphs/
+  rsync -t ep1.std01.ryzomcore.local:ats/graph_datas/* /srv/core/mini01/rrd_graphs/
 
   # deal with live files - duplicate files that correspond to unique services to aid with graphing of su & co
   cd /srv/core/std01/rrd_graphs/

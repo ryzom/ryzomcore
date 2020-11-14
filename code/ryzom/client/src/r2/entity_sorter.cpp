@@ -20,6 +20,10 @@
 #include "../user_entity.h"
 #include "../time_client.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLMISC;
 
 namespace R2

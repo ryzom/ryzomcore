@@ -418,7 +418,7 @@ void CTickService::checkTockReceived()
 			_TickSendTime = oldTime + dt;
 		}
 
-		//nlinfo( " %"NL_I64"u  %"NL_I64"u", (TTime)((_TickSendTime-oldTime)*1000), (TTime)((d2-oldTime)*1000) );		
+		//nlinfo( " %" NL_I64 "u  %" NL_I64 "u", (TTime)((_TickSendTime-oldTime)*1000), (TTime)((d2-oldTime)*1000) );		
 
 		// broadcast the tick
 		broadcastTick();
@@ -825,7 +825,7 @@ bool CTickService::loadGameCycle()
 /*
  *
  */
-CTickServiceGameCycleTimeMeasure::CTickServiceGameCycleTimeMeasure() : HistoryMain( CTickService::getInstance()->getServiceId(), NLNET::TServiceId(~0), false ) {}
+CTickServiceGameCycleTimeMeasure::CTickServiceGameCycleTimeMeasure() : HistoryMain( CTickService::getInstance()->getServiceId(), NLNET::TServiceId(std::numeric_limits<uint16>::max()), false ) {}
 
 
 /*
@@ -904,7 +904,7 @@ void CTickServiceGameCycleTimeMeasure::displayStat( NLMISC::CLog *log, TTimeMeas
 	uint divideBy = (HistoryMain.NbMeasures==0) ? 0 : ((stat==MHTSum) ? HistoryMain.NbMeasures : 1);
 	HistoryMain.Stats[stat].displayStat( log, TickServiceTimeMeasureTypeToCString, divideBy );
 	{
-		CMirrorTimeMeasure gatheredStats [NbTimeMeasureHistoryStats] = { 0, ~0, 0 };
+		CMirrorTimeMeasure gatheredStats [NbTimeMeasureHistoryStats] = { 0, std::numeric_limits<uint16>::max(), 0 };
 		for ( std::vector<CMirrorTimeMeasureHistory>::const_iterator ihm=HistoryByMirror.begin(); ihm!=HistoryByMirror.end(); ++ihm )
 		{
 			log->displayRawNL( "\tMS-%hu, %u measures:", (*ihm).ServiceId.get(), (*ihm).NbMeasures );
@@ -921,7 +921,7 @@ void CTickServiceGameCycleTimeMeasure::displayStat( NLMISC::CLog *log, TTimeMeas
 		}
 	}
 	{
-		CServiceTimeMeasure gatheredStats [NbTimeMeasureHistoryStats] = { 0, ~0, 0 };
+		CServiceTimeMeasure gatheredStats [NbTimeMeasureHistoryStats] = { 0, std::numeric_limits<uint16>::max(), 0 };
 		for ( std::vector<CServiceTimeMeasureHistory>::const_iterator ihs=HistoryByService.begin(); ihs!=HistoryByService.end(); ++ihs )
 		{
 			log->displayRawNL( "\t%s (on MS-%hu), %u measures:", CUnifiedNetwork::getInstance()->getServiceUnifiedName( (*ihs).ServiceId ).c_str(), (*ihs).ParentServiceId.get(), (*ihs).NbMeasures );

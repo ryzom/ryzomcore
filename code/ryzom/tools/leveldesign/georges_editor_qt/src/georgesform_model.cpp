@@ -352,7 +352,8 @@ namespace NLQT
 
 	/******************************************************************************/
 
-	void CGeorgesFormModel::loadFormData(UFormElm *root, CFormItem *parent) {
+	void CGeorgesFormModel::loadFormData(UFormElm *root, CFormItem *parent)
+	{
 
 		if (!root) 
 			return;
@@ -390,7 +391,8 @@ namespace NLQT
 								elmtType = "Array";						
 							if (elmt->isStruct())
 								elmtType = "Struct";
-							if (elmt->isAtom()) {
+							if (elmt->isAtom())
+							{
 								elmtType = "Atom";
 								uint numDefinitions = 0;
 								const UType *type = elmt->getType();
@@ -433,7 +435,8 @@ namespace NLQT
 										tmpValue = v.c_str();
 										if (type->getType() == UType::SignedInt) 
 										{
-											if (QString("%1").arg(value.c_str()).toDouble() == tmpValue.toDouble()) {
+											if (QString("%1").arg(value.c_str()).toDouble() == tmpValue.toDouble())
+											{
 												value = l;
 												break;
 											}
@@ -482,7 +485,8 @@ namespace NLQT
 							}
 							columnData << QString(elmName.c_str()) << QString(value.c_str()) << "" << elmtType;
 							parent->appendChild(new CFormItem(elmt, columnData, parent, *whereV, *whereN));
-							//if (parents.last()->childCount() > 0) {
+							//if (parents.last()->childCount() > 0)
+							//{
 							//	parents << parents.last()->child(parents.last()->childCount()-1);
 							//}
 							loadFormData(elmt, parent->child(parent->childCount()-1));
@@ -549,7 +553,8 @@ namespace NLQT
 					{
 						if (elmt->isArray())
 							elmtType = "Array";
-						if (elmt->isStruct()) {
+						if (elmt->isStruct())
+						{
 							elmtType = "Struct";
 						}
 						if (elmt->isAtom()) 
@@ -593,28 +598,35 @@ namespace NLQT
 		CFormItem *fi_dep = new CFormItem(_rootElm, QList<QVariant>() << "dependencies", _rootItem);
 		_rootItem->appendChild(fi_dep);
 
-		if (!dfns.isEmpty()) {
-		CFormItem *fi_dfn = new CFormItem(_rootElm, QList<QVariant>() << "dfn", fi_dep);
-		fi_dep->appendChild(fi_dfn);
-		foreach(QString str, dfns) {
-		fi_dfn->appendChild(new CFormItem(_rootElm, QList<QVariant>() << str, fi_dfn));
+		if (!dfns.isEmpty())
+		{
+			CFormItem *fi_dfn = new CFormItem(_rootElm, QList<QVariant>() << "dfn", fi_dep);
+			fi_dep->appendChild(fi_dfn);
+			foreach(QString str, dfns)
+			{
+				fi_dfn->appendChild(new CFormItem(_rootElm, QList<QVariant>() << str, fi_dfn));
+			}
 		}
+		if (!typs.isEmpty())
+		{
+			CFormItem *fi_typ = new CFormItem(_rootElm, QList<QVariant>() << "typ", fi_dep);
+			fi_dep->appendChild(fi_typ);
+			foreach(QString str, typs)
+			{
+				fi_typ->appendChild(new CFormItem(_rootElm, QList<QVariant>() << str, fi_typ));
+			}
 		}
-		if (!typs.isEmpty()) {
-		CFormItem *fi_typ = new CFormItem(_rootElm, QList<QVariant>() << "typ", fi_dep);
-		fi_dep->appendChild(fi_typ);
-		foreach(QString str, typs) {
-		fi_typ->appendChild(new CFormItem(_rootElm, QList<QVariant>() << str, fi_typ));
-		}
-		}
-		if (!_dependencies.isEmpty()) {
-		CFormItem *fi_other = new CFormItem(_rootElm, QList<QVariant>() << "other", fi_dep);
-		fi_dep->appendChild(fi_other);
-		foreach(QStringList list, _dependencies) {
-		foreach(QString str, list) {
-		fi_other->appendChild(new CFormItem(_rootElm, QList<QVariant>() << str, fi_other));
-		}
-		}
+		if (!_dependencies.isEmpty())
+		{
+			CFormItem *fi_other = new CFormItem(_rootElm, QList<QVariant>() << "other", fi_dep);
+			fi_dep->appendChild(fi_other);
+			foreach(QStringList list, _dependencies)
+			{
+				foreach(QString str, list)
+				{
+					fi_other->appendChild(new CFormItem(_rootElm, QList<QVariant>() << str, fi_other));
+				}
+			}
 		}*/
 	}
 

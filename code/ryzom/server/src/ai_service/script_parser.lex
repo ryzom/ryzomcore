@@ -118,7 +118,8 @@ onchildren	{ return TOKEN_ONCHILDREN; }
 
 
 {double}	{				
-				const float f=(float)atof(yytext);
+				float f;
+				NLMISC::fromString(yytext, f);
 				INIT(*((size_t*)&f));
 				return TOKEN_NUMBER;
 			}

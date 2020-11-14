@@ -12,6 +12,7 @@
 		<div class="alert alert-info">
 			{$login_info}
 		</div>
+		
 		<form method="post" action="index.php{if isset($getstring)}{$getstring}{/if}" class="form-horizontal">
 			<fieldset>
 				<div data-rel="tooltip" class="input-prepend" data-original-title="Username/Email">
@@ -42,9 +43,13 @@
 			<strong>{$login_error_message}</strong>
 		</div>
 		{/if}
+		
+		
 		<div class="alert alert-info">
-		<a href="?page=register">{$login_register_message}</a>.<br><a href="?page=forgot_password">{$login_forgot_password_message}</a>
+		{if $userRegistration == '0'|| $userRegistration == '2'}<a href="?page=register">{$login_register_message}</a>.<br>{/if}<a href="?page=forgot_password">{$login_forgot_password_message}</a>
 		</div>
+		
+		
 	</div><!--/span-->
 </div>
 {/block}

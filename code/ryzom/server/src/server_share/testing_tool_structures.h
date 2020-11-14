@@ -47,7 +47,7 @@ struct SActorBeginTest
 	std::vector< NLMISC::CSheetId > Sentence2;
 	std::vector< NLMISC::CSheetId > Sentence3;
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 //		f.serial( Role );
 //		f.serial( Level );
@@ -90,7 +90,7 @@ struct SLogReport
 	uint32	StaminaLeft; //
 	uint32	SapLeft;
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serialCont( UsedBrick );
 		f.serial( Stop );

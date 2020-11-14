@@ -26,9 +26,6 @@
 #include "nel/misc/file.h"
 #include "nel/misc/hierarchical_timer.h"
 
-// std.
-#include <fstream>
-
 
 using namespace NLMISC;
 using namespace std;
@@ -38,6 +35,10 @@ H_AUTO_DECL ( NL3D_Unload_Zone_IG )
 
 #define	NL3D_HAUTO_LAND_MNGR_LOAD_ZONEIG	H_AUTO_USE( NL3D_Load_Zone_IG )
 #define	NL3D_HAUTO_LAND_MNGR_UNLOAD_ZONEIG	H_AUTO_USE( NL3D_Unload_Zone_IG )
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -84,8 +85,6 @@ void	CLandscapeIGManager::initIG(UScene *scene, const std::string &igDesc, UDriv
 		return;
 
 	string igFile = CPath::lookup(igDesc);
-
-	//ifstream file(igFile.c_str(), ios::in);
 
 	CIFile file;
 
@@ -179,7 +178,7 @@ UInstanceGroup *CLandscapeIGManager::loadZoneIG(const std::string &name)
 {
 	NL3D_HAUTO_LAND_MNGR_LOAD_ZONEIG
 
-	if(name=="")
+	if(name.empty())
 		return NULL;
 
 	// try to find this InstanceGroup.
@@ -237,7 +236,7 @@ void	CLandscapeIGManager::unloadArrayZoneIG(const std::vector<std::string> &name
 void	CLandscapeIGManager::unloadZoneIG(const std::string &name)
 {
 	NL3D_HAUTO_LAND_MNGR_UNLOAD_ZONEIG
-	if(name=="")
+	if(name.empty())
 		return;
 
 	// try to find this InstanceGroup.
@@ -260,7 +259,7 @@ void	CLandscapeIGManager::unloadZoneIG(const std::string &name)
 // ***************************************************************************
 bool	CLandscapeIGManager::isIGAddedToScene(const std::string &name) const
 {
-	if(name=="")
+	if(name.empty())
 		return false;
 
 	// try to find this InstanceGroup.
@@ -277,7 +276,7 @@ bool	CLandscapeIGManager::isIGAddedToScene(const std::string &name) const
 // ***************************************************************************
 UInstanceGroup	*CLandscapeIGManager::getIG(const std::string &name) const
 {
-	if(name=="")
+	if(name.empty())
 		return NULL;
 
 	// try to find this InstanceGroup.

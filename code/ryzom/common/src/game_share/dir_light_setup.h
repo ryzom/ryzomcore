@@ -54,7 +54,7 @@ struct CDirLightSetup
 	  */
 	bool build(const NLGEORGES::UFormElm &elm);
 	//
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial(Ambiant, Diffuse, Specular, Direction);
 	}

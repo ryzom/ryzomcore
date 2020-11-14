@@ -38,6 +38,10 @@ namespace GUIEditor
 	public Q_SLOTS:
 		void onDelete();
 		void onAdd( const QString &parentGroup, const QString &widgetType, const QString &name );
+		void onSetGroupSelection( bool b );
+		void onGroup();
+		void onUngroup();
+		void onSetMultiSelection( bool b );
 
 	private:
 		CWidgetInfoTree *tree;

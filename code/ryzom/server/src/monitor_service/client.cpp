@@ -273,7 +273,7 @@ void CMonitorClient::update ()
 		TYPE_NAME_STRING_ID id = Str[i];
 		std::map<TYPE_NAME_STRING_ID, std::string>::iterator ite = StringMap.find (id);
 		nlassert (ite != StringMap.end());
-		strToSend.push_back( make_pair<TYPE_NAME_STRING_ID, string*>(id, &((*ite).second)) );
+		strToSend.push_back(std::pair<TYPE_NAME_STRING_ID, string*>(id, &((*ite).second)));
 		strTotalSize += 4+4+(uint)(*ite).second.size();
 	}
 

@@ -42,9 +42,6 @@
 namespace NLMISC
 {
 class IEventEmitter;
-struct IMouseDevice;
-struct IKeyboardDevice;
-struct IInputDeviceManager;
 class CRect;
 class CLog;
 }
@@ -75,6 +72,7 @@ struct IOcclusionQuery;
 /// A Graphic Mode descriptor.
 struct GfxMode
 {
+	std::string			DisplayDevice;
 	bool				OffScreen;
 	bool				Windowed;
 	uint16				Width;
@@ -93,7 +91,7 @@ struct GfxMode
 		Frequency = 0;
 		AntiAlias = -1;
 	}
-	GfxMode(uint16 w, uint16 h, uint8 d, bool windowed = true, bool offscreen = false, uint frequency = 0, sint8 aa = -1);
+	GfxMode(uint16 w, uint16 h, uint8 d, bool windowed = true, bool offscreen = false, uint frequency = 0, sint8 aa = -1, const std::string &displayDevice = std::string());
 };
 
 // ****************************************************************************
@@ -226,7 +224,7 @@ public:
 	// @{
 	// first param is the associated window.
 	// Must be a HWND for Windows (WIN32).
-	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show = true, bool resizeable = true) throw(EBadDisplay) = 0;
+	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show = true, bool resizeable = true) = 0;
 	// Must be called after a setDisplay that initialize the mode
 	virtual bool			setMode(const GfxMode &mode) = 0;
 	virtual bool			getModes(std::vector<GfxMode> &modes) = 0;
@@ -259,7 +257,7 @@ public:
 	virtual emptyProc		getWindowProc() = 0;
 
 	virtual NLMISC::IEventEmitter *getEventEmitter() = 0;
-		
+
 	/// Copy a string to system clipboard.
 	virtual bool			copyTextToClipboard(const ucstring &text) = 0;
 
@@ -362,7 +360,7 @@ public:
 	virtual	void			getDepthRange(float &znear, float &zfar) const = 0;
 	// @}
 
-	
+
 
 	/// \name Textures
 	// @{
@@ -417,6 +415,16 @@ public:
 	 */
 	virtual void			setAnisotropicFilter(sint filter) = 0;
 
+	/**
+	 * Get current anisotropic filter value
+	 */
+	virtual uint			getAnisotropicFilter() const = 0;
+
+	/**
+	 * Get maximum anisotropic filter value
+	 */
+	virtual uint			getAnisotropicFilterMaximum() const = 0;
+
 	/** if !=1, force mostly all the textures (but TextureFonts lightmaps, interfaces  etc..)
 	 *	to be divided by Divisor (2, 4, 8...)
 	 *	Default is 1.
@@ -434,7 +442,7 @@ public:
 	  * Under OpenGL this simply returns the maximum number of texture stages (getNbTextureStages) in both return values.
 	  */
 	virtual void			getNumPerStageConstant(uint &lightedMaterial, uint &unlightedMaterial) const = 0;
-	
+
 	// [DEPRECATED] Return if this texture is a rectangle texture that requires RECT sampler (OpenGL specific pre-NPOT functionality)
 	virtual bool			isTextureRectangle(ITexture *tex) const = 0;
 
@@ -442,7 +450,7 @@ public:
 	virtual	bool			supportNonPowerOfTwoTextures() const = 0;
 	// @}
 
-	
+
 
 	/// \name Texture operations
 	// @{
@@ -495,7 +503,7 @@ public:
 	 *
 	 * NB: you must setupViewMatrix() BEFORE setupModelMatrix(), or else undefined results.
 	 */
-	virtual void			setupViewMatrix(const CMatrix &mtx)=0;
+	virtual void			setupViewMatrix(const CMatrix &mtx) = 0;
 
 	/** setup the view matrix (inverse of camera matrix).
 	 *	Extended: give a cameraPos (mtx.Pos() is not taken into account but for getViewMatrix()),
@@ -536,7 +544,7 @@ public:
 	virtual	bool			isForceNormalize() const = 0;
 	// @}
 
-	
+
 
 	/// \name Vertex Buffer Hard: Features
 	// @{
@@ -737,7 +745,7 @@ public:
 	virtual uint			getSwapVBLInterval() = 0;
 	// @}
 
-	
+
 
 
 
@@ -857,6 +865,12 @@ public:
 	  * get the official name of the driver
 	  */
 	virtual const char		*getVideocardInformation () = 0;
+
+	/**
+	  * Get total video memory.
+	  * get the amount of video memory of current adapter, result is in KiB, -1 if unable to determine
+	  */
+	virtual sint			getTotalVideoMemory () const = 0;
 	// @}
 
 
@@ -868,29 +882,6 @@ public:
 
 	/// x and y must be between 0.0 and 1.0
 	virtual void			setMousePos(float x, float y) = 0;
-
-	/** Enable / disable  low level mouse. This allow to take advantage of some options (speed of the mouse, automatic wrapping)
-	  * It returns a interface to these parameters when it is supported, or NULL otherwise
-	  * The interface pointer is valid as long as the low level mouse is enabled.
-	  * A call to disable the mouse returns NULL, and restore the default mouse behavior
-	  * NB : - In this mode the mouse cursor isn't drawn.
-      *      - Calls to showCursor have no effects
-	  *      - Calls to setCapture have no effects
-	  */
-	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive) = 0;
-
-	/** Enable / disable  a low level keyboard.
-	  * Such a keyboard can only send KeyDown and KeyUp event. It just consider the keyboard as a
-	  * gamepad with lots of buttons...
-	  * This returns a interface to some parameters when it is supported, or NULL otherwise.
-	  * The interface pointer is valid as long as the low level keyboard is enabled.
-	  * A call to disable the keyboard returns NULL, and restore the default keyboard behavior
-	  */
-	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable) = 0;
-
-	/** Get the delay in ms for mouse double clicks.
-	  */
-	virtual uint			getDoubleClickDelay(bool hardwareMouse) = 0;
 
 	/** If true, capture the mouse to force it to stay under the window.
 	  * NB : this has no effects if a low level mouse is used
@@ -908,11 +899,6 @@ public:
 
 	// Change default scale for all cursors
 	virtual void			setCursorScale(float scale) = 0;
-
-	/** Check whether there is a low level device manager available, and get its interface. Return NULL if not available
-	  * From this interface you can deal with mouse and keyboard as above, but you can also manage game device (joysticks, joypads ...)
-	  */
-	virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager() = 0;
 	// @}
 
 
@@ -1004,6 +990,9 @@ public:
 		                                            uint32 mipmapLevel = 0
 													) = 0;
 	// @}
+
+	/// Hack for bloom
+	virtual bool			textureCoordinateAlternativeMode() const = 0;
 
 
 
@@ -1106,7 +1095,7 @@ public:
 	virtual bool			supportVertexProgram(CVertexProgram::TProfile profile) const = 0;
 
 	/** Compile the given vertex program, return if successful.
-	  * If a vertex program was set active before compilation, 
+	  * If a vertex program was set active before compilation,
 	  * the state of the active vertex program is undefined behaviour afterwards.
 	  */
 	virtual bool			compileVertexProgram(CVertexProgram *program) = 0;
@@ -1133,7 +1122,7 @@ public:
 	virtual bool			supportPixelProgram(CPixelProgram::TProfile profile) const = 0;
 
 	/** Compile the given pixel program, return if successful.
-	  * If a pixel program was set active before compilation, 
+	  * If a pixel program was set active before compilation,
 	  * the state of the active pixel program is undefined behaviour afterwards.
 	  */
 	virtual bool			compilePixelProgram(CPixelProgram *program) = 0;
@@ -1160,7 +1149,7 @@ public:
 	virtual bool			supportGeometryProgram(CGeometryProgram::TProfile profile) const = 0;
 
 	/** Compile the given pixel program, return if successful.
-	  * If a pixel program was set active before compilation, 
+	  * If a pixel program was set active before compilation,
 	  * the state of the active pixel program is undefined behaviour afterwards.
 	  */
 	virtual bool			compileGeometryProgram(CGeometryProgram *program) = 0;
@@ -1359,6 +1348,7 @@ public:
 		uint32				DeviceId;
 		uint32				SubSysId;
 		uint32				Revision;
+		sint32				VideoMemory; // video memory in KiB, -1 if unable to determine
 	};
 
 	// Get the number of hardware renderer available on the client platform.
@@ -1449,7 +1439,6 @@ protected:
 
 private:
 	bool					_StaticMemoryToVRAM;
-
 };
 
 // --------------------------------------------------

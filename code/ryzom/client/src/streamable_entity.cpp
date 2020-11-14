@@ -19,6 +19,9 @@
 #include "stdpch.h"
 #include "streamable_entity.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 H_AUTO_DECL(RZ_StreamableEntity)
 

@@ -383,10 +383,10 @@ class CAHEditPreviousLine : public CAHEdit
 				// .. so do nothing
 				return;
 			}
-			sint cx, cy;
-			sint height;
+			float cx, cy;
+			float height;
 			_GroupEdit->getViewText()->getCharacterPositionFromIndex(cursorPosInText, _GroupEdit->isCursorAtPreviousLineEnd(), cx, cy, height);
-			cy += height + _GroupEdit->getViewText()->getMultiLineSpace();
+			cy += _GroupEdit->getViewText()->getLineHeight();
 			uint newCharIndex;
 			bool newLineEnd;
 			_GroupEdit->getViewText()->getCharacterIndexFromPosition(cx, cy, newCharIndex, newLineEnd);
@@ -401,8 +401,8 @@ class CAHEditPreviousLine : public CAHEdit
 			}
 			_GroupEdit->setCursorAtPreviousLineEnd(false);
 			// takes character whose X is closer to the current X
-			sint cx0, cx1;
-			sint cy0, cy1;
+			float cx0, cx1;
+			float cy0, cy1;
 			_GroupEdit->getViewText()->getCharacterPositionFromIndex(newCharIndex, _GroupEdit->isCursorAtPreviousLineEnd(), cx0, cy0, height);
 			_GroupEdit->getViewText()->getCharacterPositionFromIndex(newCharIndex + 1, _GroupEdit->isCursorAtPreviousLineEnd(), cx1, cy1, height);
 			if (abs(cx0 - cx) < abs(cx1 - cx) || cy0 != cy1)
@@ -446,8 +446,8 @@ class CAHEditNextLine : public CAHEdit
 		}
 		else if (_GroupEdit->getViewText()->getMultiLine())
 		{
-			sint cx, cy;
-			sint height;
+			float cx, cy;
+			float height;
 			_GroupEdit->getViewText()->getCharacterPositionFromIndex(_GroupEdit->getCursorPos() + (sint)_GroupEdit->getPrompt().length(), _GroupEdit->isCursorAtPreviousLineEnd(), cx, cy, height);
 			if (cy != 0)
 			{
@@ -466,8 +466,8 @@ class CAHEditNextLine : public CAHEdit
 				}
 				_GroupEdit->setCursorAtPreviousLineEnd(false);
 				// takes character whose X is closer to the current X
-				sint cx0, cx1;
-				sint cy0, cy1;
+				float cx0, cx1;
+				float cy0, cy1;
 				_GroupEdit->getViewText()->getCharacterPositionFromIndex(newCharIndex, _GroupEdit->isCursorAtPreviousLineEnd(), cx0, cy0, height);
 				_GroupEdit->getViewText()->getCharacterPositionFromIndex(newCharIndex + 1, _GroupEdit->isCursorAtPreviousLineEnd(), cx1, cy1, height);
 				if (abs(cx0 - cx) < abs(cx1 - cx) || cy0 != cy1)

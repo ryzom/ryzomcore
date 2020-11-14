@@ -169,12 +169,19 @@ namespace NLGUI
 		/*
 		 * getScreenSize : get the screen window size changed (at last checkNewScreenSize called)
 		 */
-		void getScreenSize (uint32 &w, uint32 &h);
+		void getScreenSize(uint32 &w, uint32 &h);
 
 		/*
 		 * get OOW / OOH
 		 */
 		void getScreenOOSize (float &oow, float &ooh);
+
+		/*
+		 * UI scaling
+		 */
+		void setInterfaceScale(float scale, sint32 width = 0, sint32 height = 0);
+		float getInterfaceScale() const { return _InterfaceScale; }
+		void setBilinearFiltering(bool b) { _Bilinear = b; }
 
 		/*
 		 * is the Screen minimized?
@@ -185,7 +192,7 @@ namespace NLGUI
 		 * drawBitmap : this is the interface with all the views
 		 *
 		 */
-		void drawRotFlipBitmap (sint layerId, sint32 x, sint32 y, sint32 width, sint32 height, uint8 rot, bool flipv,
+		void drawRotFlipBitmap (sint layerId, float x, float y, float width, float height, uint8 rot, bool flipv,
 						sint32 nTxId, const NLMISC::CRGBA &col = NLMISC::CRGBA(255,255,255,255));
 
 		/*
@@ -526,6 +533,14 @@ namespace NLGUI
 		float		_OneOverScreenW, _OneOverScreenH;
 		bool		_IsMinimized;
 
+		// UI scaling
+		float		_InterfaceScale;
+		float		_InterfaceUserScale;
+		sint32		_InterfaceBaseW, _InterfaceBaseH;
+		sint32		_EffectiveScreenW, _EffectiveScreenH;
+		bool		_Bilinear;
+
+		void updateInterfaceScale();
 
 		//map linking a uint to a bitmap. Used to display figurs
 		std::vector<sint32> _IndexesToTextureIds;
@@ -586,13 +601,16 @@ namespace NLGUI
 		static NL3D::UDriver *driver;
 		static NL3D::UTextContext *textcontext;
 
+		typedef CHashMap< std::string, NL3D::UTextContext* > TFontsList;
+		static TFontsList fonts;
+
 	public:
-		static NL3D::UTextContext* getTextContext(){ return textcontext; }
+		static NL3D::UTextContext* getTextContext(const std::string &name="");
+		static bool registerFont(const std::string &name, const std::string &font);
 
 		/// Set of hw cursor images
 		static std::set< std::string > *hwCursors;
 		static float hwCursorScale;
-
 	};
 
 

@@ -179,7 +179,7 @@ int main( int argc, char ** argv )
 		sint i;
 		for( i = 0; i< (sint)cvSheetPaths.size(); ++i)
 		{
-			sheetPaths.push_back( cvSheetPaths.asString(i) );
+			sheetPaths.push_back(NLMISC::expandEnvironmentVariables(cvSheetPaths.asString(i)));
 		}
 	}
 	catch(const EUnknownVar &) 
