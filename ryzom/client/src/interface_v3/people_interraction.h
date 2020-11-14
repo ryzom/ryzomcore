@@ -156,12 +156,12 @@ public:
 	CFilteredChat			    UserChat[MaxNumUserChats];
 	CFilteredChat			    TheUserChat;
 	// Id of last people who talked
-	ucstring					LastSenderName;
+	std::string					LastSenderName;
 
 	// system message
 	struct CSysMsg
 	{
-		ucstring Str;
+		std::string Str;
 		std::string Cat;
 	};
 	// system message buffer
@@ -195,31 +195,31 @@ public:
 	  */
 	CFilteredChat		*getFilteredChatFromChatWindow(CChatWindow *cw);
 
-	bool				testValidPartyChatName(const ucstring &name);
+	bool				testValidPartyChatName(const std::string &name);
 	bool				removePartyChat(CChatWindow *window);
 	void				removeAllPartyChat();
 	/**
 	  * create a named party chat.
 	  */
-	bool				createNewPartyChat(const ucstring &title);
+	bool				createNewPartyChat(const std::string &title);
 
 	static void			assignPartyChatMenu(CChatWindow *partyChat);
 
 	/// \name CONTACT LIST
 	// @{
 	// ask the server to add/move/remove a contact
-	void askAddContact(const ucstring &contactName, CPeopleList *pl);
+	void askAddContact(const std::string &contactName, CPeopleList *pl);
 	void askMoveContact(uint peopleIndexInSrc, CPeopleList *plSRC, CPeopleList *plDST);
 	void askRemoveContact(uint peopleIndex, CPeopleList *pl);
 
 	// init contact list (from server typically)
 	void initContactLists(	const std::vector<uint32> &vFriendListName,
 							const std::vector<TCharConnectionState> &vFriendListOnline,
-							const std::vector<ucstring> &vIgnoreListName	);
+							const std::vector<ucstring> &vIgnoreListName	); // TODO: UTF-8 (serial)
 	// Friend list == 0 // Ignore list == 1
 	void addContactInList(uint32 contactId, uint32 nameID, TCharConnectionState Online, uint8 nList);
-	void addContactInList(uint32 contactId, const ucstring &name, TCharConnectionState Online, uint8 nList);
-	bool isContactInList(const ucstring &name, uint8 nList) const;
+	void addContactInList(uint32 contactId, const std::string &name, TCharConnectionState Online, uint8 nList);
+	bool isContactInList(const std::string &name, uint8 nList) const;
 	// Called each frame to receive name from IOS
 	void updateWaitingContacts();
 	// server decide to remove a contact (if it does not exists anymore)
@@ -250,14 +250,14 @@ public:
 	// Test if the given chat is a user chat (this includes the main chat)
 	bool				isUserChat(CChatWindow *cw) const;
 
-	void				talkInDynamicChannel(uint32 channelNb,ucstring sentence);
+	void				talkInDynamicChannel(uint32 channelNb,std::string sentence);
 
 	CChatGroupWindow	*getChatGroupWindow() const;
 
 	void updateAllFreeTellerHeaders();
 	void removeAllFreeTellers();
 
-	static void displayTellInMainChat(const ucstring &playerName);
+	static void displayTellInMainChat(const std::string &playerName);
 private:
 	// create various chat & people lists
 	void createTeamChat();

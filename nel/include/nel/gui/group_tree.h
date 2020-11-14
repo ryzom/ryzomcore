@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -60,7 +61,7 @@ namespace NLGUI
 			bool				Show;			// If false, the node is not displayed (true default, Root ignored)
 			sint32				YDecal;
 			// Text
-			ucstring			Text;			// Internationalized displayed text
+			std::string			Text;			// Internationalized displayed text
 			sint32				FontSize;		// If -1 (default), then take the groupTree one
 			NLMISC::CRGBA		Color;
 			// Template
@@ -112,8 +113,12 @@ namespace NLGUI
 			std::string getBitmap() const { return Bitmap; }
 			void setOpened(bool opened) { Opened = opened; }
 			bool getOpened() const { return Opened; }
-			void setText(const ucstring &text) { Text = text; }
-			const ucstring& getText() const { return Text; }
+			void setText(const std::string &text) { Text = text; }
+			const std::string& getText() const { return Text; }
+#ifdef RYZOM_LUA_UCSTRING
+			void setTextAsUtf16(const ucstring &text) { Text = text.toUtf8(); } // Compatibility
+			ucstring getTextAsUtf16() const { return ucstring::makeFromUtf8(Text); } // Compatibility
+#endif
 			sint32 getFontSize() const { return FontSize; }
 			void setFontSize(sint32 value) { FontSize = value; }
 			sint32 getYDecal() const { return YDecal; }
@@ -181,7 +186,11 @@ namespace NLGUI
 				REFLECT_STRING("AHParamsClose", getAHParamsClose, setAHParamsClose);
 				REFLECT_BOOL("Opened", getOpened, setOpened);
 				REFLECT_BOOL("Show", getShow, setShow);
-				REFLECT_UCSTRING_REF("Text", getText, setText);
+#ifdef RYZOM_LUA_UCSTRING
+				REFLECT_UCSTRING("Text", getTextAsUtf16, setTextAsUtf16); // Compatibility
+#else
+				REFLECT_STRING_REF("Text", getText, setText);
+#endif
 				// lua
 				REFLECT_LUA_METHOD("getNumChildren", luaGetNumChildren);
 				REFLECT_LUA_METHOD("getChild", luaGetChild);

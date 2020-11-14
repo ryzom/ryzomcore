@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -50,7 +53,7 @@ void xmlCheckNodeName (xmlNodePtr &node, const char *nodeName)
 		// Make an error message
 		char tmp[512];
 		smprintf (tmp, 512, "LogicStateMachine STATE_MACHINE XML Syntax error in block line %d, node %s should be %s",
-			node ? (int)node->line:-1, node->name, nodeName);
+			node ? (int)node->line:-1, node ? (const char *)node->name : "NULL", nodeName);
 
 		nlinfo (tmp);
 		nlstop;

@@ -106,7 +106,7 @@ inline const std::string&	CPDStringMapper::getString(uint32 id) const
  */
 inline uint32				CPDStringMapper::getId(const std::string& str) const
 {
-	std::string					lowMapStr = NLMISC::toLower(str);
+	std::string					lowMapStr = NLMISC::toLowerAscii(str);
 	TStringMap::const_iterator	it = _StringMap.find(lowMapStr);
 
 	return (it == _StringMap.end()) ? UnknownString : (*it).second;

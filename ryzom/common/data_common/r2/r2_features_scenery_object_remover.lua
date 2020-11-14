@@ -344,7 +344,7 @@ component.createComponent = function(x, y, tvalue)
 	assert(comp)
 
 	comp.Base = r2.Translator.getDebugBase("palette.entities.botobjects.user_event")
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EDRollout_SceneryObjectRemover")):toUtf8()			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EDRollout_SceneryObjectRemover"))			
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -412,33 +412,33 @@ end
 
 function component:registerMenu(logicEntityMenu)
 	local name = i18n.get("uiR2EDRollout_SceneryObjectRemover")
-	logicEntityMenu:addLine(ucstring(name), "lua", "", "SceneryObject")
+	logicEntityMenu:addLine(name, "lua", "", "SceneryObject")
 end
 
 
 function component:getLogicTranslations()
 	local logicTranslations = {
 		["ApplicableActions"] = {
-			["activate"]		= { menu=i18n.get( "uiR2AA0Activate"			):toUtf8(),
-									text=i18n.get( "uiR2AA1Activate"			):toUtf8()},
-			["deactivate"]		= { menu=i18n.get( "uiR2AA0Deactivate"			):toUtf8(),
-									text=i18n.get( "uiR2AA1Deactivate"			):toUtf8()},
-			["remove objects"]		= { menu=i18n.get( "uiR2AA0RemoveObject"			):toUtf8(),
-									text=i18n.get( "uiR2AA1RemoveObject"			):toUtf8()},
+			["activate"]		= { menu=i18n.get( "uiR2AA0Activate"			),
+									text=i18n.get( "uiR2AA1Activate"			)},
+			["deactivate"]		= { menu=i18n.get( "uiR2AA0Deactivate"			),
+									text=i18n.get( "uiR2AA1Deactivate"			)},
+			["remove objects"]		= { menu=i18n.get( "uiR2AA0RemoveObject"			),
+									text=i18n.get( "uiR2AA1RemoveObject"			)},
 		},
 		["Events"] = {
-			["removed objects"]				= { menu=i18n.get( "uiR2Event0RemovedObjects"			):toUtf8(), 
-											text=i18n.get( "uiR2Event1RemovedObjects"			):toUtf8()},									
+			["removed objects"]				= { menu=i18n.get( "uiR2Event0RemovedObjects"			), 
+											text=i18n.get( "uiR2Event1RemovedObjects"			)},									
 		},
 		["Conditions"] = {
-			["is active"]		= { menu=i18n.get( "uiR2Test0Active"		):toUtf8(),
-									text=i18n.get( "uiR2Test1Active"		):toUtf8()},
-			["is inactive"]		= { menu=i18n.get( "uiR2Test0Inactive"		):toUtf8(),
-									text=i18n.get( "uiR2Test1Inactive"		):toUtf8()},
-			["has removed objects"]		= { menu=i18n.get( "uiR2Test0HasRemoved"		):toUtf8(),
-									text=i18n.get( "uiR2Test1HasRemoved"		):toUtf8()},
-			["has not removed objects"]		= { menu=i18n.get( "uiR2Test0HasNotRemoved"		):toUtf8(),
-									text=i18n.get( "uiR2Test1HasNotRemoved"		):toUtf8()}
+			["is active"]		= { menu=i18n.get( "uiR2Test0Active"		),
+									text=i18n.get( "uiR2Test1Active"		)},
+			["is inactive"]		= { menu=i18n.get( "uiR2Test0Inactive"		),
+									text=i18n.get( "uiR2Test1Inactive"		)},
+			["has removed objects"]		= { menu=i18n.get( "uiR2Test0HasRemoved"		),
+									text=i18n.get( "uiR2Test1HasRemoved"		)},
+			["has not removed objects"]		= { menu=i18n.get( "uiR2Test0HasNotRemoved"		),
+									text=i18n.get( "uiR2Test1HasNotRemoved"		)}
 		}
 	}
 	return logicTranslations

@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -53,7 +56,7 @@ public:
 	static void releaseInstance();
 
 public:
-	typedef struct
+	typedef struct TElement
 	{
 		uint32				Index;
 		NLMISC::CSheetId	SheetId;
@@ -66,7 +69,7 @@ public:
 		}
 	} TElement;
 
-	typedef struct
+	typedef struct TElementList
 	{
 		// elements list for a visual slot.
 		std::vector<TElement> Element;

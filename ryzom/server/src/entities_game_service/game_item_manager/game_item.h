@@ -23,6 +23,7 @@
 #include "nel/misc/log.h"
 #include "nel/misc/variable.h"
 #include "nel/misc/enum_bitset.h"
+#include "nel/misc/deep_ptr.h"
 
 // game share
 #include "game_share/ryzom_entity_id.h"
@@ -33,6 +34,7 @@
 #include "game_share/type_skill_mod.h"
 #include "game_share/resistance_type.h"
 #include "game_share/skills.h"
+#include "game_share/guild_grade.h"
 
 #include "egs_log_filter.h"
 #include "player_inventory.h"
@@ -230,7 +232,7 @@ struct CItemCraftParameters
 	 * \return the current version of the class. Useful for managing old versions of saved players
 	 * WARNING : the version number should be incremented when the serial method is modified
 	 */
-	static inline uint32 getCurrentVersion() { return 4; }
+	static inline uint32 getCurrentVersion() { return 5; }
 
 	/// serial validated point for a character
 	void serial(NLMISC::IStream &f);
@@ -255,15 +257,11 @@ private:
 	void keepTheThreeBestResistance( const CCraftParameters& p );
 };
 
-
-
 //------------------------------------------------------------------------
 // advance declaration of classes with circular references
 class CGameItem;
+class CGameItemEntry;
 //class CGameItemManager;
-
-
-
 
 /**
  * CGameItemVector
@@ -277,7 +275,7 @@ class CGameItemVector
 {
 public:
 	uint32 size() const;
-	CGameItem& operator[](uint32 idx);
+	CGameItemEntry& operator[](uint32 idx);
 	void extend();
 	uint32 getUniqueIndex(const CGameItem& item);
 	virtual ~CGameItemVector();
@@ -288,27 +286,9 @@ private:
 	CGameItemVector();
 
 private:
-	std::vector< CGameItem* > _Data;
+	std::vector<CGameItemEntry *> m_Data;
+
 };
-
-
-class CGameItemPtrArray
-{
-public:
-	CGameItemPtrArray()
-	{
-	}
-
-	CGameItemPtrArray(const CGameItemPtrArray&)
-	{
-		// do nothing
-	}
-
-protected:
-	/// keep pointers pointing this item
-	std::vector<CGameItemPtr*>	_Ptrs;
-};
-
 
 /**
  * CGameItem
@@ -317,15 +297,18 @@ protected:
  * \author Nevrax France
  * \date 2002
  */
-class CGameItem :
-	public CGameItemPtrArray
+class CGameItem
 {
+#if 0
 	NLMISC_COMMAND_FRIEND(testParanoidItemSystem);
+#endif
 
 	friend class CInventoryBase;
 	friend class CRefInventory;
 
+#if 0
 	NL_INSTANCE_COUNTER_DECL(CGameItem);
+#endif
 public:
 
 	/// returns true if the two param items are stackable
@@ -389,7 +372,7 @@ public :
 	void clear();
 
 	/// send the item name Id to the specified player, and return the associated text id. Return 0 if the item has no text id
-	uint32 sendNameId(CCharacter * user);
+	uint32 sendNameId(CCharacter *user);
 
 	/// Delete an item in the sub item list
 //	void deleteChildItem(uint index);
@@ -460,7 +443,7 @@ public :
 	// get maximum piercing protection
 	uint32 maxPiercingProtection() const;
 	// get color
-	uint8 color() const { return _CraftParameters == 0 ? 1 : _CraftParameters->Color; }
+	uint8 color() const { return _CraftParameters == 0 ? DefaultColor : _CraftParameters->Color; }
 
 	// get one of the three possible protection, legal protection number are 1,2 or 3
 	void magicProtection(uint32 protectionNumber, PROTECTION_TYPE::TProtectionType& protectionType, uint32& protectionValue) const;
@@ -478,6 +461,9 @@ public :
 	sint32 staBuff() const { return _CraftParameters == 0 ? 0 : _CraftParameters->StaBuff; }
 	// get Hit points buff
 	sint32 focusBuff() const { return _CraftParameters == 0 ? 0 : _CraftParameters->FocusBuff; }
+
+	// get craft buffs as flags
+	uint8 buffFlags();
 
 	/// get the Hit points buff provided by armors
 	/// it must be added to hpBuff() which does not include this bonus
@@ -501,8 +487,10 @@ public :
 	float getDefensiveAfflictionPowerFactor() const;
 
 	/// accessors to the item phrase
-	const std::string & getPhraseId() const { return _PhraseId;}
-	void setPhraseId(const std::string & str){ _PhraseId = str;}
+	const std::string &getPhraseId() const { static const std::string empty; return _PhraseId ? *_PhraseId : empty; }
+	bool isPhraseLiteral() const { return _PhraseLiteral; }
+	void setPhraseIdInternal(const std::string &str, bool literal = false) { if (!_PhraseId) _PhraseId = new std::string(); *_PhraseId = str; _PhraseLiteral = literal; }
+	void setPhraseId(const std::string &str, bool literal = false);
 
 	// return the enchantment value to be displayed in the client
 	uint16 getClientEnchantValue() const;
@@ -632,12 +620,6 @@ public :
 	 */
 	void dumpGameItemStats( const std::string& fileName ="");
 
-	/// set the client inventory position
-	inline void setClientInventoryPosition(sint16 pos) { _ClientInventoryPosition = pos; }
-
-	/// get the client inventory position
-	inline sint16 getClientInventoryPosition() const { return _ClientInventoryPosition; }
-
 	/// get Vector of CSheetId used for craft item
 //	const std::vector< NLMISC::CSheetId >& getRmUsedForCraft() const { return _RmUsedForCraft; }
 
@@ -651,9 +633,9 @@ public :
 	bool getStats(const std::string &stats, std::string &final );
 
 	/// accessors to the action latency end date
-	inline double getLatencyEndDate(){ return _LatencyEndDate; }
+	inline NLMISC::TGameCycle getLatencyEndDate(){ return _LatencyEndDate; }
 
-	inline void setLatencyEndDate( double latencyEndDate ){ _LatencyEndDate = latencyEndDate; }
+	inline void setLatencyEndDate( NLMISC::TGameCycle latencyEndDate ){ _LatencyEndDate = latencyEndDate; }
 
 	/// set the max sap load craft parameter
 	inline void setMaxSapLoad(float value)
@@ -680,13 +662,10 @@ public :
 	/// set required skill level
 	inline void setRequiredSkillLevel2( uint16 l ) { _RequiredSkillLevel2 = l; }
 
-	/// get Required Faction
-	inline const std::string & getRequiredFaction() const { return _RequiredFaction;}
-	/// set Required Faction
-	inline void setRequiredFaction(const std::string & str){ _RequiredFaction = str;}
-
 	inline bool getLockedByOwner() const { return _LockedByOwner; }
 	void setLockedByOwner(bool value);
+	inline EGSPD::CGuildGrade::TGuildGrade getAccessGrade() const { return _AccessGrade; }
+	void setAccessGrade(EGSPD::CGuildGrade::TGuildGrade value);
 
 	inline bool getMovable() const { return _Movable; }
 	inline void setMovable(bool value) { _Movable = value; }
@@ -714,39 +693,26 @@ public :
 	inline void setTypeSkillMods(const std::vector<CTypeSkillMod> &mods) { _TypeSkillMods = mods; }
 
 	/// get craft parameters
-	const CItemCraftParameters * getCraftParameters() const { return _CraftParameters; }
+	const CItemCraftParameters *getCraftParameters() const { return _CraftParameters.ptr(); }
 
 	/// get custom string (for scroll-like items)
-	const ucstring& getCustomText() const { return _CustomText; }
+	const std::string &getCustomText() const { static const std::string empty; return _CustomText ? *_CustomText : empty; }
 	/// set custom string (for scroll-like items)
-	void setCustomText(const ucstring &val);
+	void setCustomText(const std::string &val);
 
 	uint8 getPetIndex() const { return _PetIndex; }
 	void setPetIndex(uint8 val) { _PetIndex = val; }
 
-	ucstring getCustomName() const { return _CustomName; }
-	void setCustomName(ucstring val) { _CustomName = val; }
-
-
 protected:
 	friend class CFaberPhrase;
 	// set Default Color (for craft only)
-	void setDefaultColor() { if( _CraftParameters ) _CraftParameters->Color = 1; }
+	void setDefaultColor() { if( _CraftParameters ) _CraftParameters->Color = DefaultColor; }
 
 	/// set link information between item and container inventory (used by CInventoryBase)
 	void setInventory(const CInventoryPtr &inv, uint32 slot);
 
 	/// set link information between item and reference inventory (used by CRefInventory)
 	void setRefInventory(const CInventoryPtr &inv, uint32 slot);
-
-	/// The inventory that contains this item (NULL if none)
-	CInventoryPtr	_Inventory;
-	/// The slot inside the inventory
-	uint32			_InventorySlot;
-	/// The inventory that reference this item (NULL if none)
-	CInventoryPtr	_RefInventory;
-	/// The slot inside the reference inventory
-	uint32			_RefInventorySlot;
 
 private:
 
@@ -762,20 +728,12 @@ private:
 	static CGameItemVector	_Items;
 	static uint32			_FirstFreeItem;
 
-	#ifdef ITEM_DEBUG
-		static sint32		_NextAllocatorDataValue;
-	#endif
-
-	//--------------------------------------------------------------------
-	// instance data for singleton's allocator algorithms
-
-	sint32	_AllocatorData;
-
 private:
 	//--------------------------------------------------------------------
 	// singleton interface used by the CGameItemPtr class
 
 	// make CGameItemPtr a friend to give it decent access
+	friend class CGameItemEntry;
 	friend class CGameItemPtr;
 	friend class CInventoryProxy;
 	friend class COldGuildInventoryLoader;
@@ -796,26 +754,10 @@ private:
 	// return the CWeaponCraftParameters variable corresponding to protection type
 	float getMagicProtectionCraftParateters( PROTECTION_TYPE::TProtectionType protection ) const;
 
-private:
-	// singleton counter
-	static uint32 _BugTestCounter;
-
-	// instance debug data
-	uint32 _BugTestChecksum;
-	uint32 _BugTestUpdate;
-
 public:
-	// run through the items looking for bugs
-	static void testItemsForBugs();
-//	static void testPlayerInventoryForBugs(const std::vector<CGameItemPtr>& inventory);
-
 	static std::string showItemsStats();
 
-	// check a single item for bugs...
-	void checkItemForBugs();
-
-public:	// I've had to make these public for now 'cos I can't work out how to make the vector class a friend :o(
-//private :
+private :
 	//--------------------------------------------------------------------
 	// ctors and dtors are now private for better control over allocation etc
 
@@ -826,7 +768,6 @@ public:	// I've had to make these public for now 'cos I can't work out how to ma
 		: 	_InventorySlot(INVENTORIES::INVALID_INVENTORY_SLOT),
 			_RefInventorySlot(INVENTORIES::INVALID_INVENTORY_SLOT)
 	{
-		_CraftParameters= 0;
 	}
 
 	/**
@@ -835,6 +776,13 @@ public:	// I've had to make these public for now 'cos I can't work out how to ma
 	~CGameItem()
 	{
 	}
+
+#ifdef NL_CPP14
+	CGameItem(const CGameItem &) = default;
+	CGameItem &operator=(const CGameItem &) = default;
+	CGameItem(CGameItem &&) = default;
+	CGameItem &operator=(CGameItem &&) noexcept = default;
+#endif
 
 private:
 	//--------------------------------------------------------------------
@@ -851,14 +799,6 @@ private:
 //	void ctor( const NLMISC::CEntityId& id, const NLMISC::CSheetId& sheetId, uint32 recommended, sint16 slotCount, bool destroyable , bool dropable);
 	void ctor( const NLMISC::CSheetId& sheetId, uint32 recommended, bool destroyable , bool dropable);
 
-	/**
-	 * pseudo Destructor
-	 */
-	void dtor();
-
-	/// Copy all the item info and parameters from model into this
-//	void copyItem(const CGameItemPtr &model);
-
 	// Compute required level (skills and charac) for wearing item
 	void computeRequiredLevel();
 
@@ -871,54 +811,25 @@ private:
 	// Recompute the Requirement from Old System (old values for old items)
 	void computeRequirementFromOldSystem();
 
-public:
-	/// owner id (an item or the entity and the inventory id if root item (Parent=NULL))
-//	NLMISC::CEntityId Owner;
-
-//	union TLocation
-//	{
-//		uint32 Slot;
-//		struct CItemPos
-//		{
-//			sint32 X;
-//			sint32 Y;
-//			sint32 Z;
-//		};
-//		CItemPos Pos;
-//	};
-//	/// time elapsed since the item is on the ground
-//	NLMISC::TGameCycle TimeOnTheGround;
-
-	/// max slot count
-//	sint16 SlotCount;
-
-	/// location
-//	TLocation Loc;
+protected:
+	/// The inventory that contains this item (NULL if none)
+	CInventoryPtr	_Inventory;
+	/// The inventory that reference this item (NULL if none)
+	CInventoryPtr	_RefInventory;
+	/// The slot inside the inventory
+	uint32			_InventorySlot;
+	/// The slot inside the reference inventory
+	uint32			_RefInventorySlot;
 
 private:
 	/// Item unique id
 	INVENTORIES::TItemId	_ItemId;
-	/// Item stack size
-	uint32				_StackSize;
-	// true if the item is on the ground
-//	bool				_IsOnTheGround;
-	/// item id
-//	NLMISC::CEntityId	_ItemId;
 	/// looter id of the character currently looting this item (for items on the ground only)
 	NLMISC::CEntityId	_Looter;
 	/// sheet ref
 	NLMISC::CSheetId	_SheetId;
-	/// carrion sheet ref
-//	uint32				_CarrionSheetId;
-	/// true if the object is destroyable
-	bool				_Destroyable;
-	/// true if the object is dropable
-	bool				_Dropable;
-	/// children
-//	std::vector<CGameItemPtr> _Children;
-	/// pointer on the parent item (NULL if no parent)
-//	CGameItemPtr 		_Parent;
-//	CInventoryPtr		_Inventory;
+	/// Item stack size
+	uint32				_StackSize;
 
 	/// Recommended skill for use
 	uint32				_Recommended;
@@ -931,50 +842,71 @@ private:
 
 	/// current sap load
 	uint32				_SapLoad;
+
 	/// all craft parameters
-	CItemCraftParameters * _CraftParameters;
+	NLMISC::CDeepPtr<CItemCraftParameters> _CraftParameters;
 	/// entityId of the character who has created the Item via faber (if applicable, for item not created by playres, Creator = CEntityId::Unknown)
 
 	NLMISC::CEntityId	_CreatorId;
-	/// number of item locked
-	uint32				_LockCount;
 	/// Position in the client inventory interface if item is owned by a player (sint16 juste because we need an "invalid" position (-1) for version compatibility)
-	// TODO : a virer
-	sint16				_ClientInventoryPosition;
 	/// Vector of CSheetId used for craft this item
 //	std::vector< NLMISC::CSheetId > _RmUsedForCraft;
 	/// vector of sheetId of CStaticBrick define spell of enchanted item
-	std::vector< NLMISC::CSheetId > _Enchantment;
+	std::vector<NLMISC::CSheetId> _Enchantment;
+
 	/// pointer on the associated static form
 	const CStaticItem*	_Form;
 	/// string associated with this item
-	std::string			_PhraseId;
+	NLMISC::CDeepPtr<std::string> _PhraseId;
+
+	/// skill modifiers against given ennemy types
+	std::vector<CTypeSkillMod>	_TypeSkillMods;
+
+	NLMISC::CDeepPtr<std::string> _CustomText;
+
 	/// tick when the proc will be available again
-	double	_LatencyEndDate;
+	NLMISC::TGameCycle	_LatencyEndDate;
 	/// image of the item in bag / equipment
 //	uint16				_SlotImage;
 	NLMISC::TGameCycle	_TotalSaleCycle;
+	/// number of item locked
+	uint32				_LockCount;
 
 	// required skill
-	bool				_UseNewSystemRequirement;
-	std::string			_RequiredFaction;
-	SKILLS::ESkills		_RequiredSkill;
 	uint16				_RequiredSkillLevel;
-	SKILLS::ESkills		_RequiredSkill2;
 	uint16				_RequiredSkillLevel2;
 	/// min required stat level and required stat
-	CHARACTERISTICS::TCharacteristics	_RequiredCharac;
 	uint16				_RequiredCharacLevel;
+	// required skill
+	SKILLS::ESkills		_RequiredSkill;
+	SKILLS::ESkills		_RequiredSkill2;
+	/// min required stat level and required stat
+	CHARACTERISTICS::TCharacteristics	_RequiredCharac;
+	/// whether the item has any skill requirements
 	bool				_HasPrerequisit;
-	// skill modifiers against given ennemy types
-	std::vector<CTypeSkillMod>	_TypeSkillMods;
+	bool				_UseNewSystemRequirement;
 
-	ucstring			_CustomText;
+	/// phrase id is a literal, not a phrase
+	bool				_PhraseLiteral;
+
 	bool                _LockedByOwner;
+	EGSPD::CGuildGrade::TGuildGrade _AccessGrade;
+
 	bool                _UnMovable;
 	bool                _Movable;
 	uint8               _PetIndex;
-	ucstring            _CustomName;
+
+	/// true if the object is destroyable
+	bool				_Destroyable;
+	/// true if the object is dropable
+	bool				_Dropable;
+	// true if the item is on the ground
+	//	bool				_IsOnTheGround;
+
+public:
+	static const EGSPD::CGuildGrade::TGuildGrade DefaultAccessGrade = EGSPD::CGuildGrade::HighOfficer;
+	static const uint8 DefaultColor = 1;
+
 };
 
 /**
@@ -1004,109 +936,128 @@ private:
 #define QUANTUM (1<<LOG_QUANTUM)
 #define QUANTUM_MASK (QUANTUM-1)
 
+class CGameItemEntry : public CGameItem
+{
+public:
+	CGameItemEntry()
+	{
+		PtrRefCount = 0;
+	}
+	~CGameItemEntry()
+	{
+
+	}
+
+	uint32 AllocatorNext;
+	uint32 VectorIdx;
+	sint PtrRefCount;
+
+};
+
 inline CGameItemVector::CGameItemVector()
 {
 }
 
 inline CGameItemVector::~CGameItemVector()
 {
-	for (uint32 i=0;i<_Data.size();++i)
-		delete [] _Data[i];
+	for (uint32 i = 0; i < m_Data.size(); ++i)
+		delete[] m_Data[i];
 }
 
 inline uint32 CGameItemVector::size() const
 {
-	return (uint32)_Data.size()<<LOG_QUANTUM;
+	return (uint32)m_Data.size() << LOG_QUANTUM;
 }
 
-inline CGameItem& CGameItemVector::operator[](uint32 idx)
+inline CGameItemEntry &CGameItemVector::operator[](uint32 idx)
 {
-	return _Data[idx>>LOG_QUANTUM][idx&QUANTUM_MASK];
+	return m_Data[idx >> LOG_QUANTUM][idx & QUANTUM_MASK];
 }
 
 inline void CGameItemVector::extend()
 {
-	_Data.push_back(new CGameItem[QUANTUM]);
-	nlassert(_Data.back()!=NULL);
-	for (uint32 i=0;i<QUANTUM;++i)
-		_Data.back()[i]._AllocatorData=size()-QUANTUM+i+1;
-	egs_giinfo("Increased item vector size to %u items (%u bytes)",size(),size()*sizeof(CGameItem));
+	uint32 baseIdx = size();
+	CGameItemEntry *items = new CGameItemEntry[QUANTUM];
+	nlassert(items);
+	m_Data.push_back(items);
+	for (uint32 i = 0; i < QUANTUM; ++i)
+	{
+		items[i].AllocatorNext = baseIdx + i + 1;
+		items[i].VectorIdx = baseIdx + i;
+	}
+	egs_giinfo("Increased item vector size to %u items (%u bytes)", size(), size() * sizeof(CGameItem));
 }
 
 inline uint32 CGameItemVector::getUniqueIndex(const CGameItem& item)
 {
-	for (uint32 i=0;i<_Data.size();++i)
-	{
-		uint32 lowidx= (uint32)(&item-_Data[i]);
-		if (lowidx<QUANTUM)
-		{
-			uint32 idx= lowidx+(i<<LOG_QUANTUM);
-			#ifdef ITEM_DEBUG
-				BOMB_IF(&(_Data[i][lowidx])!=&item, NLMISC::toString("Invalid item pointer (1): %p",&item), return ~0u );
-				BOMB_IF(&((*this)[idx])!=&item, NLMISC::toString("Code bug or Invalid item pointer (2): %p",&item), return ~0u );
-			#endif
-			return idx;
-		}
-	}
-	STOP(NLMISC::toString("invalid item pointer (3): %p",&item));
-	return ~0u;
+	return static_cast<const CGameItemEntry &>(item).VectorIdx;
 }
 
 #undef LOG_QUANTUM
 #undef QUANTUM
 #undef QUANTUM_MASK
 
-
 //------------------------------------------------------------------------
 // ptr class added by sadge
 // inline implementations
 
-// ctor	- default
-inline CGameItemPtr::CGameItemPtr()
+// link ptr to game item
+inline void CGameItemPtr::incRef()
 {
-	reset();
+	if (!m_Idx)
+		return;
+
+	++CGameItem::_Items[m_Idx].PtrRefCount;
 }
 
-inline void CGameItemPtr::reset()
+// unlink ptr from item
+inline void CGameItemPtr::decRef()
 {
-	_idx = ~0u;
+	// cannot unlink a pointer pointing on nothing
+	if (!m_Idx)
+		return;
 
-	#ifdef ITEM_DEBUG
-		_debugPtr= NULL;
-		_debug=0;
-	#endif
+	CGameItemEntry *entry = &CGameItem::_Items[m_Idx];
+	sint count = --CGameItem::_Items[m_Idx].PtrRefCount;
+	if (!count)
+	{
+		CGameItem::deleteItem(static_cast<CGameItem *>(entry));
+	}
+	nlassert(count >= 0);
+}
+
+// ctor	- default
+inline CGameItemPtr::CGameItemPtr() : m_Idx(0)
+{
+	
 }
 
 // ctor	- copy
-inline CGameItemPtr::CGameItemPtr(const CGameItemPtr &other)
+inline CGameItemPtr::CGameItemPtr(const CGameItemPtr &other) : m_Idx(other.m_Idx)
 {
-	reset();
-	*this=other;
+	incRef();
 }
 
 // ctor	- initialise from a CGameItem*
-inline CGameItemPtr::CGameItemPtr(const CGameItem *item)
+inline CGameItemPtr::CGameItemPtr(const CGameItem *item) : m_Idx(item ? static_cast<const CGameItemEntry *>(item)->VectorIdx : 0)
 {
-	reset();
-	*this=item;
+	incRef();
 }
 
 // dtor
 inline CGameItemPtr::~CGameItemPtr()
 {
-	unlinkFromItem();
+	decRef();
 }
 
 // equivalent to: new CGameItem
 inline CGameItem *CGameItemPtr::newItem(bool destroyable,bool dropable)
 {
-	CGameItem *item=CGameItem::newItem();
-	item->_CraftParameters = 0;
+	CGameItem *item = CGameItem::newItem();
 	item->ctor();
 	item->_Destroyable=destroyable;
 	item->_Dropable = dropable;
 	*this=item;
-	item->_BugTestUpdate=CGameItem::_BugTestCounter;
 	return item;
 }
 
@@ -1127,91 +1078,17 @@ inline CGameItem *CGameItemPtr::newItem( const NLMISC::CSheetId& sheetId, uint32
 //	item->ctor(id,sheetId,recommended,slotCount,destroyable,dropable);
 	item->ctor(sheetId, recommended, destroyable, dropable);
 	*this=item;
-	item->_BugTestUpdate = CGameItem::_BugTestCounter;
 	return item;
-}
-
-
-// equivalent to: delete (for a CGameItem*)
-//inline void CGameItemPtr::deleteItem()
-//{
-//	CGameItem *item=**this;
-//
-//	BOMB_IF( item == NULL, "Attempt to delete an item that is not allocated or has been freed", return );
-//
-//	// only unlink if the pointer 'this' is not the same as the inventory ptr for the item
-//	// after the unlink this == NULL
-//	if (! ( item->_Parent!=NULL &&
-//			item->Loc.Slot<item->_Parent->getChildren().size() &&
-//			&(item->_Parent->getChildren()[item->Loc.Slot])==this ) )
-//		unlinkFromItem();
-//
-//	// call dtor now to unlink all children
-//	item->dtor();
-//	// check no one else is referencing us
-//	nlassert(item->_Ptrs.empty());
-//
-//	CGameItem::deleteItem(item);
-//	item->_BugTestUpdate=CGameItem::_BugTestCounter;
-//}
-
-// link ptr to game item
-inline void CGameItemPtr::linkToItem()
-{
-#ifdef GAME_PTR_DEBUG
-	if (_idx == ~0u)
-		return;
-
-	CGameItem *item=**this;
-
-	for (uint i = 0 ; i < item->_Ptrs.size() ; ++i)
-	{
-		nlassert(item->_Ptrs[i] != this);
-	}
-
-	item->_Ptrs.push_back(this);
-#endif
-}
-
-// unlink ptr from item
-inline void CGameItemPtr::unlinkFromItem()
-{
-	// cannot unlink a pointer pointing on nothing
-	if (_idx == ~0u)
-		return;
-
-#ifdef GAME_PTR_DEBUG
-	CGameItem *item=**this;
-
-	uint j=~0u;
-	for (uint i = 0 ; i < item->_Ptrs.size() ; ++i)
-	{
-		if (item->_Ptrs[i] == this)
-		{
-			nlassert(j==~0u);
-			j=i;
-		}
-	}
-	nlassert(j!=~0u);
-	item->_Ptrs.erase(item->_Ptrs.begin()+j);
-#endif
-
-	// set the GameItemPtr to NULL
-	reset();
 }
 
 // = operator - for copying another CGameItemPtr
 inline const CGameItemPtr &CGameItemPtr::operator=(const CGameItemPtr &other)
 {
-	unlinkFromItem();
+	decRef();
 
-	_idx=other._idx;
-	#ifdef ITEM_DEBUG
-		_debug=other._debug;
-		_debugPtr=other._debugPtr;
-	#endif
+	m_Idx = other.m_Idx;
 
-	linkToItem();
+	incRef();
 
 	return *this;
 }
@@ -1219,131 +1096,76 @@ inline const CGameItemPtr &CGameItemPtr::operator=(const CGameItemPtr &other)
 // = operator - for assignment of CGameItemPtr directly to a CGameItem
 inline const CGameItemPtr &CGameItemPtr::operator=(const CGameItem *item)
 {
-	unlinkFromItem();
+	decRef();
 
-	if (item==NULL)
-		_idx=~0u;
+	if (!item)
+	{
+		m_Idx = 0;
+	}
 	else
 	{
-		_idx=CGameItem::_Items.getUniqueIndex(*item);
+		m_Idx = static_cast<const CGameItemEntry *>(item)->VectorIdx;
+		nlassert(CGameItem::getItem(m_Idx) == item);
 
-		// this test would only have value if the implementation of std::vector<> doesn't guarantee a
-		// continuous memory address space for the vector's data
-		// It's not in the #IFDEF DEBUG because it may only be triggered in very obscure conditions
-		if (CGameItem::getItem(_idx)!=item)
-		{
-			nlwarning("**** BIG BAD NASTY BUG - BEGINS ****");
-			nlwarning("item: %p",item);
-			nlwarning("_idx: %i",_idx);
-			nlwarning("**** BIG BAD NASTY BUG - ENDS ****");
-		}
-		// nlassert(&CGameItem::getItem(_idx)==item);
+		incRef();
 	}
-
-	#ifdef ITEM_DEBUG
-		_debugPtr= (CGameItem *)item;
-		if (item==NULL)
-			_debug=0;
-		else
-		{
-			CGameItem * item = CGameItem::getItem(_idx);
-			if( item )
-				_debug=item->_AllocatorData;
-		}
-	#endif
-
-	linkToItem();
 
 	return *this;
 }
 
 // * operator - returning the item referenced by this pointer
-inline CGameItem * CGameItemPtr::operator*()	const
+inline CGameItem *CGameItemPtr::operator*()	const
 {
-	if (_idx == ~0u)
-		return NULL;
-
-	CGameItem* item= CGameItem::getItem(_idx);
-
-	#ifdef ITEM_DEBUG
-		BOMB_IF( CGameItem::getItem(_idx) !=_debugPtr, "CGameItemPtr do not reference the good item", return 0 );
-		BOMB_IF( _idx == ~0u, "Attempting to derefence a NULL pointer", return 0 );
-		if( item )
-			BOMB_IF( _debug!=CGameItem::getItem(_idx)->_AllocatorData, "Attempting to access an item that has been re-allocated", return 0 );
-	#endif
-
-	BOMB_IF(item==0, "Attempting to access an item an item that is not allocated or has been freed", return 0);
-
-	item->_BugTestUpdate=CGameItem::_BugTestCounter;
-	return item;
+	CGameItemEntry *entry = static_cast<CGameItemEntry *>(CGameItem::getItem(m_Idx));
+	BOMB_IF(!entry->VectorIdx, "Attempting to access an item an item that is not allocated or has been freed", return 0);
+	return static_cast<CGameItem *>(entry);
 }
 
 // -> operator - returning the item referenced by this pointer
 inline CGameItem *CGameItemPtr::operator->() const
 {
-	if (_idx == ~0u)
-		return NULL;
-
-	CGameItem* item= CGameItem::getItem(_idx);
-
-	#ifdef ITEM_DEBUG
-		BOMB_IF( CGameItem::getItem(_idx) !=_debugPtr, "CGameItemPtr do not reference the good item", return 0 );
-		BOMB_IF( _idx == ~0u, "Attempting to derefence a NULL pointer", return 0 );
-		if( item )
-			BOMB_IF( _debug!=CGameItem::getItem(_idx)->_AllocatorData, "Attempting to access an item that has been re-allocated", return 0 );
-	#endif
-
-	BOMB_IF(item==0, "Attempting to access an item an item that is not allocated or has been freed", return 0);
-
-	item->_BugTestUpdate=CGameItem::_BugTestCounter;
-	return item;
+	// this is crash-safe even when m_Idx is wrong, it'll return item 0
+	return CGameItem::getItem(m_Idx);
 }
 
 // () operator - returning the item referenced by this pointer
 inline CGameItem *CGameItemPtr::operator()() const
 {
-	return operator->();
+	CGameItemEntry *entry = static_cast<CGameItemEntry *>(CGameItem::getItem(m_Idx));
+	BOMB_IF(!entry->VectorIdx, "Attempting to access an item an item that is not allocated or has been freed", return 0);
+	return static_cast<CGameItem *>(entry);
 }
 
 // == operator - compare 2 CGameItemPtrs
 inline bool CGameItemPtr::operator==(const CGameItemPtr &other) const
 {
-	#ifdef ITEM_DEBUG
-		//nlassert(CGameItem::getItem(_idx)==_debugPtr);
-		if(_idx==other._idx)
-			nlassert(_debug==other._debug);
-	#endif
-
-	return (_idx==other._idx);
+	return (m_Idx == other.m_Idx);
 }
 
 // == operator - compare CGameItemPtrs to CGameItem*
 inline bool CGameItemPtr::operator==(const CGameItem *item) const
 {
-	if (item==NULL)
-		return operator*()==NULL;
+	if (!item)
+		return m_Idx == 0;
 
-	return *this==CGameItemPtr(item);
+	return CGameItem::getItem(m_Idx) == item;
 }
 
 // != operator - compare 2 CGameItemPtrs
 inline bool CGameItemPtr::operator!=(const CGameItemPtr &other) const
 {
-	return !(*this==other);
+	return !(*this == other);
 }
 
 // != operator - compare CGameItemPtrs to CGameItem*
 inline bool CGameItemPtr::operator!=(const CGameItem *item) const
 {
-	if (item==NULL)
-		return operator*()!=NULL;
-
-	return !(*this==item);
+	return !(*this == item);
 }
 
 inline bool CGameItemPtr::operator < (const CGameItemPtr &other) const
 {
-	return _idx < other._idx;
+	return m_Idx < other.m_Idx;
 }
 
 #endif // GAME_ITEM_H

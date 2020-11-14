@@ -58,12 +58,8 @@ public:
 	static CFactory &instance()
 	{
 		// Singleton instance pointer.
-		static CFactory	*instance = NULL;
-		if (!instance)
-		{
-			instance = new CFactory();
-		}
-		return *instance;
+		static CFactory	instance;
+		return instance;
 	}
 
 	/** Register a factorable object in the factory.
@@ -182,12 +178,8 @@ public:
 	/// Get the singleton instance reference.
 	static CFactoryIndirect &instance()
 	{
-		static CFactoryIndirect	*instance = NULL;
-		if (!instance)
-		{
-			instance = new CFactoryIndirect();
-		}
-		return *instance;
+		static CFactoryIndirect	instance;
+		return instance;
 	}
 
 	void registerClass(const KeyType &key, IFactoryIndirectRegister<BaseFactoryClass> *factoryRegister)

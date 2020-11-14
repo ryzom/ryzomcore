@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -245,11 +246,11 @@ static DECLARE_INTERFACE_USER_FCT(getSkillBaseText)
 
 	if(skillValue!=skillBase)
 	{
-		result.setUCString( toString("(%d)", skillBase) );
+		result.setString( toString("(%d)", skillBase) );
 	}
 	else
 	{
-		result.setUCString( ucstring() );
+		result.setString( std::string() );
 	}
 
 	return true;
@@ -335,7 +336,7 @@ void CGroupSkills::createAllTreeNodes()
 
 	// local variable (avoid realloc in loop)
 	vector< pair<string, string> > tempVec(2);
-	ucstring	sSkillName;
+	const char *sSkillName;
 
 	while ((!bQuit) && (nCounter < 32)) // Counter is used to not infinitly loop
 	{

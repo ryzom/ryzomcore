@@ -2,7 +2,7 @@
 // Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2011  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2011-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
@@ -73,7 +73,7 @@ public:
 		: IItemInfoWaiter(), Requesting(false)
 	{ }
 public:
-	ucstring infoValidated() const;
+	std::string infoValidated() const;
 	void sendRequest();
 	virtual void infoReceived();
 };
@@ -393,9 +393,9 @@ public:
 	NLMISC::CRGBA			getSheetColor() const {return _SheetColor;}
 
 	/// Special ContextHelp for ctrl sheet.
-	virtual void			getContextHelp(ucstring &help) const;
+	virtual void			getContextHelp(std::string &help) const;
 
-	virtual void			getContextHelpToolTip(ucstring &help) const;
+	virtual void			getContextHelpToolTip(std::string &help) const;
 
 
 	/** true if an item of another ctrlSheet can be dropped on this slot.
@@ -582,7 +582,7 @@ public:
 	void	setItemColor(sint32 val) {if(_UserColor) _UserColor->setValue32(val);}
 
 	// Get the Actual item name. Localized version of SheetId, or given by server through NAMEID.
-	ucstring getItemActualName() const;
+	std::string getItemActualName() const;
 
 	/// true if support drag copy (with CTRL). action handler has to check control.
 	bool	canDragCopy() const {return _DragCopy;}
@@ -626,7 +626,7 @@ protected:
 	// optSheet is for special faber
 	void setupDisplayAsSBrick(sint32 sheet, sint32 optSheet= 0);
 	// setup icon from phrases
-	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const ucstring &phraseName);
+	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const std::string &phraseName);
 
 	// draw a number and returns the width of the drawn number
 	sint32 drawNumber(sint32 x, sint32 y, sint32 wSheet, sint32 hSheet, NLMISC::CRGBA color, sint32 value, bool rightAlign=true);

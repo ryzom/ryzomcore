@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,7 @@
 
 #include "nel/misc/string_common.h"
 #include "nel/misc/sstring.h"
+#include "nel/misc/utf_string_view.h"
 
 using namespace std;
 
@@ -89,7 +90,7 @@ bool fromString(const std::string &str, bool &val)
 	}
 	else
 	{
-		std::string strl = toLower(str);
+		std::string strl = toLowerAscii(str);
 		if (strl == "true" || strl == "yes")
 		{
 			val = true;
@@ -228,8 +229,7 @@ std::string wideToUtf8(const wchar_t *str, size_t len)
 #if defined(NL_OS_WINDOWS)
 	return winWideToCp(str, len, CP_UTF8);
 #else
-	// TODO: UTF-32 to UTF-8
-	nlassert(false);
+	return CUtfStringView(str, len).toUtf8();
 #endif
 }
 
@@ -242,10 +242,9 @@ std::string wideToUtf8(const std::wstring &str)
 std::wstring utf8ToWide(const char *str, size_t len)
 {
 #if defined(NL_OS_WINDOWS)
-	return winCpToWide(str, len, CP_UTF8);
+	return winCpToWide(str, len, CP_UTF8); // UTF-16
 #else
-	// TODO: UTF-32 to UTF-8
-	nlassert(false);
+	return CUtfStringView(str, len).toWide(); // UTF-32
 #endif
 }
 

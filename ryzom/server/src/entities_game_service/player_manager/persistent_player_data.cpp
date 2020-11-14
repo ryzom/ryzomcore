@@ -227,7 +227,7 @@ public:
 		else
 		{
 			STOP(NLMISC::toString("Failed to fit item loaded from input into inventory! (sheet=%s)",itm->getSheetId().toString().c_str()));
-			itm.deleteItem();
+			itm.deleteItem(); // FIXME: Log
 		}
 	}
 
@@ -672,6 +672,12 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 			stableAlias = stablePlace->getAlias();\
 	}\
 
+#ifdef RYZOM_FORGE
+#define PROP_PET_ANIMAL_CUSTOM_NAME() PROP2(CustomName, string, CustomName, CustomName = val)
+#else
+#define PROP_PET_ANIMAL_CUSTOM_NAME()
+#endif
+
 #define PERSISTENT_DATA\
 	FLAG0(CLEAR,clear())\
 	PROP2(TicketPetSheetId,CSheetId,TicketPetSheetId,\
@@ -700,7 +706,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	LPROP(bool,IsMounted,if(IsMounted))\
 	PROP(bool,IsTpAllowed)\
 	PROP(TSatiety,Satiety)\
-	/*PROP2(CustomName, ucstring, CustomName, CustomName = val)*/\
+	PROP_PET_ANIMAL_CUSTOM_NAME()\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
@@ -1333,16 +1339,14 @@ private:
 	FLAG0(CLEAR,clear())\
 	PROP2(_ItemId,						uint64,		_ItemId.getRawId(),			_ItemId = INVENTORIES::TItemId(val))\
 	PROP2(_SheetId,						CSheetId,	_SheetId,					_SheetId=val)\
-/*	PROP2(_LocSlot,						uint32,		_InventorySlot,				_InventorySlot=val)*/\
 	PROP2(_LocSlot,						uint32,		_InventorySlot,				applyArgs.InventorySlot=val)\
-	/*PROP2(_ClientInventoryPosition,	sint16,		_ClientInventoryPosition,	_ClientInventoryPosition=val)*/\
 	PROP2(_HP,							uint32,		_HP,						_HP=val)\
 	PROP2(_Recommended,					uint32,		_Recommended,				_Recommended=val)\
 	PROP2(_CreatorId,					CEntityId,	_CreatorId,					_CreatorId=val)\
-	PROP2(_PhraseId,					string,		_PhraseId,					_PhraseId=val)\
-	PROP2(_RequiredFaction,				string,		_RequiredFaction,			_RequiredFaction=val)\
-	LSTRUCT2(_CraftParameters,						if (_CraftParameters != NULL),	_CraftParameters->store(pdr),	_CraftParameters = new CItemCraftParameters; _CraftParameters->apply(pdr))\
-	LPROP2(_SlotImage,					uint16,		if (0),		0xffff,				slotImage=val)\
+	PROP2(_PhraseId,					string,		getPhraseId(),				setPhraseIdInternal(val))\
+	LPROP2(_PhraseLiteral,				bool,		if (_PhraseLiteral),		_PhraseLiteral,						_PhraseLiteral=val)\
+	LSTRUCT2(_CraftParameters,						if (_CraftParameters),		_CraftParameters->store(pdr),		_CraftParameters = new CItemCraftParameters; _CraftParameters->apply(pdr))\
+	LPROP2(_SlotImage,					uint16,		if (0),						0xffff,								slotImage=val) /* Very old version compatibility */ \
 	LPROP2(_SapLoad,					uint32,		if (_SapLoad!=0),			_SapLoad,							_SapLoad=val)\
 	LPROP2(_Dropable,					bool,		if (!_Dropable),			_Dropable,							_Dropable=val)\
 	LPROP2(_Destroyable,				bool,		if (!_Destroyable),			_Destroyable,						_Destroyable=val)\
@@ -1358,12 +1362,13 @@ private:
 	LPROP2(_RequiredCharacLevel,		uint16,		if (_RequiredCharacLevel!=0),_RequiredCharacLevel,				_RequiredCharacLevel=val)\
 	STRUCT_VECT(_TypeSkillMods)\
 	LPROP_VECT(CSheetId, _Enchantment, VECT_LOGIC(_Enchantment) if (_Enchantment[i]!=CSheetId::Unknown))\
-	PROP2(_CustomText,					ucstring,	_CustomText,				_CustomText=val)\
-	PROP2(_CustomName,					ucstring,	_CustomName,				_CustomName=val)\
-	PROP(bool, _Movable)\
-	PROP(bool, _UnMovable)\
-	PROP(bool, _LockedByOwner)\
-	
+	PROP2(_CustomText,					string,									getCustomText(),					setCustomText(val))\
+	LPROP2(_CustomName,					string,		if (false),					string(),							setPhraseIdInternal(val, true)) /* Ryzom Forge compatibility, replaced by _PhraseLiteral */ \
+	LPROP(bool, _Movable, if (!_Movable))\
+	LPROP(bool, _UnMovable, if (!_UnMovable))\
+	LPROP(bool, _LockedByOwner, if (!_LockedByOwner))\
+	LPROP2(_AccessGrade,				string,		if (_AccessGrade != DefaultAccessGrade), CGuildGrade::toString(_AccessGrade), _AccessGrade = CGuildGrade::fromString(val); if (_AccessGrade == CGuildGrade::Unknown) _AccessGrade = DefaultAccessGrade)\
+
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
@@ -1398,7 +1403,7 @@ private:
 	LPROP(float,MaxSlashingProtection,if (MaxSlashingProtection!=0.0f))\
 	LPROP(float,MaxBluntProtection,if (MaxBluntProtection!=0.0f))\
 	LPROP(float,MaxPiercingProtection,if (MaxPiercingProtection!=0.0f))\
-	LPROP(uint8,Color,if (Color!=1))\
+	LPROP(uint8,Color,if (Color!=CGameItem::DefaultColor))\
 	LPROP(sint32,HpBuff,if (HpBuff!=0))\
 	LPROP(sint32,SapBuff,if (SapBuff!=0))\
 	LPROP(sint32,StaBuff,if (StaBuff!=0))\

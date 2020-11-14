@@ -289,7 +289,7 @@ void	CAnimationSet::preloadSSSShapes(IDriver &drv, CShapeBank &shapeBank)
 	std::set<std::string>::iterator		it;
 	for(it=_SSSShapes.begin();it!=_SSSShapes.end();it++)
 	{
-		string	fileName= toLower(*it);
+		string	fileName= toLowerAscii(*it);
 
 		// link the shape to the shapeCache
 		shapeBank.linkShapeToShapeCache(fileName, shapeCacheName);

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -2678,6 +2681,8 @@ void		CTessFace::updateBindAndSplit()
 	}
 	else
 	{
+		nlassert(f0);
+		nlassert(f1);
 		// multipatch face case are detected when face->Patch==NULL !!!
 		if(f0->FLeft && f0->FLeft->Patch==NULL)
 		{
@@ -2710,6 +2715,8 @@ void		CTessFace::updateBindAndSplit()
 	}
 	else
 	{
+		nlassert(f0);
+		nlassert(f1);
 		if(f0->FLeft)
 		{
 			while(f0->FLeft->isLeaf())
@@ -2781,6 +2788,8 @@ void		CTessFace::updateBindAndSplit()
 	{
 		CTessFace	*f;
 		sint		i;
+		nlassert(f0);
+		nlassert(f1);
 
 		// Same reasoning for rectangular patchs, as above.
 		for(i=0;i<2;i++)

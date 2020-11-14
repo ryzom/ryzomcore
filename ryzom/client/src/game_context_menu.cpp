@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -706,7 +707,7 @@ void CGameContextMenu::updateContextMenuMissionsOptions( bool forceHide )
 				uint32 textID = (uint32) _MissionOption[k]->getValue32();
 				if (textID)
 				{
-					ucstring result;
+					string result;
 					bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(textID, result);
 					if (!res)
 					{
@@ -717,13 +718,13 @@ void CGameContextMenu::updateContextMenuMissionsOptions( bool forceHide )
 				}
 				else
 				{
-					pVTM->setText(ucstring(""));
+					pVTM->setText("");
 					pVTM->setActive(false);
 				}
 			}
 			else
 			{
-				pVTM->setText(ucstring(""));
+				pVTM->setText("");
 				pVTM->setActive(false);
 			}
 		}
@@ -747,7 +748,7 @@ void CGameContextMenu::updateContextMenuWebPage(uint options)
 			uint32 textID = (uint32) _WebPageTitle->getValue32();
 			if (textID)
 			{
-				ucstring result;
+				string result;
 				bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(textID, result);
 				if (!res)
 				{
@@ -757,12 +758,12 @@ void CGameContextMenu::updateContextMenuWebPage(uint options)
 			}
 			else
 			{
-				pVTM->setText(ucstring(""));
+				pVTM->setText("");
 			}
 		}
 		else
 		{
-			pVTM->setText(ucstring(""));
+			pVTM->setText("");
 		}
 	}
 
@@ -791,7 +792,7 @@ void CGameContextMenu::updateContextMenuOutpostState(uint options)
 	{
 		CViewTextMenu *pVTM = _TextOutpostState;
 		if (pVTM)
-			pVTM->setText(ucstring(STRING_MANAGER::CStringManagerClient::getOutpostLocalizedName(outpostSheet)));
+			pVTM->setText(STRING_MANAGER::CStringManagerClient::getOutpostLocalizedName(outpostSheet));
 	}
 
 	// apply the active
@@ -827,7 +828,7 @@ void CGameContextMenu::updateContextMenuMissionRing()
 			// if the textId is ok and Flag is set.
 			if ( textId )
 			{
-				ucstring result;
+				string result;
 				bool res = STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, result);
 				if (!res)
 				{
@@ -838,7 +839,7 @@ void CGameContextMenu::updateContextMenuMissionRing()
 			}
 			else
 			{
-				pVTM->setText(ucstring(""));
+				pVTM->setText("");
 				pVTM->setActive(false);
 			}
 		}

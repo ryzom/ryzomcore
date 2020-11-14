@@ -10,10 +10,10 @@ r2.SelectBar =
    LastMenuHideTrigger = nil, -- last element that triggered the disparition of the select bar menu   
    InstancesType = "",
    InstancesTypes = {
-						{["type"]=i18n.get("uiR2EDScene"):toUtf8(),				["icon"]="r2_palette_entities.tga" },
-						{["type"]=i18n.get("uiR2EDMacroComponents"):toUtf8(),	["icon"]="r2_palette_components.tga" },
-						{["type"]=i18n.get("uiR2EDbotObjects"):toUtf8(),		["icon"]="r2_palette_objets.tga" },
-						{["type"]=i18n.get("uiR2EDPlotItems"):toUtf8(),			["icon"]="ICO_mission_purse.tga" }
+						{["type"]=i18n.get("uiR2EDScene"),				["icon"]="r2_palette_entities.tga" },
+						{["type"]=i18n.get("uiR2EDMacroComponents"),	["icon"]="r2_palette_components.tga" },
+						{["type"]=i18n.get("uiR2EDbotObjects"),		["icon"]="r2_palette_objets.tga" },
+						{["type"]=i18n.get("uiR2EDPlotItems"),			["icon"]="ICO_mission_purse.tga" }
 					},
 }
 
@@ -143,7 +143,7 @@ function r2.SelectBar:update()
 	
 	local function setupButtonWithIconAndText(butt, text, icon, buttIndex)
 		butt.active = true      
-		butt.b.uc_hardtext = text
+		butt.b.text = text
 		local icon = icon
 		if icon ~= "" and icon ~= nil then
 			butt.icon.texture = icon
@@ -176,7 +176,7 @@ function r2.SelectBar:update()
 				break
 			end
 		end
-		setupButtonWithIconAndText(butt, ucstring(type), icon, buttIndex)
+		setupButtonWithIconAndText(butt, type, icon, buttIndex)
 		butt.Env.Types = true
 	end
    
@@ -250,9 +250,7 @@ function r2.SelectBar:update()
 
 						if self.InstancesType~="" then
 							-- special button for different types
-							local ucname = ucstring()
-							ucname:fromUtf8(self.InstancesType)
-							setupButtonType(self:getButton(buttIndex), ucname, buttIndex)
+							setupButtonType(self:getButton(buttIndex), self.InstancesType, buttIndex)
 							self.Content[buttIndex] = currElem
 							buttIndex = buttIndex - 1
 						end     
@@ -305,7 +303,7 @@ function r2.SelectBar:update()
 	if buttIndex <= self:getMaxNumEntries() then
 		local butt = self:getButton(buttIndex)
 		butt.active = true      
-		butt.b.uc_hardtext = i18n.get("uiR2EDSelectSubObject")
+		butt.b.text = i18n.get("uiR2EDSelectSubObject")
 		butt.icon.active = false
 		butt.b.text_x = 12
 		butt.b.wmargin = 12						
@@ -511,9 +509,7 @@ function r2.SelectBar:popMenu(index)
 	-- special case for act
 	if index==2 then
 		for k, v in pairs(self.InstancesTypes) do
-			local ucname = ucstring()
-			ucname:fromUtf8(v.type)
-			r2:addMenuLine(rm, ucname, "lua", "r2.SelectBar:openInstancesOfType('".. v.type .."','" .. v.icon .."')", v.type, v.icon, 14)
+			r2:addMenuLine(rm, v.type, "lua", "r2.SelectBar:openInstancesOfType('".. v.type .."','" .. v.icon .."')", v.type, v.icon, 14)
 		end
 	else
 		for k, v in pairs(sons) do
@@ -528,7 +524,7 @@ function r2.SelectBar:popMenu(index)
 	if self.Content[index] and self.Content[index].InstanceId == r2:getSelectedInstance().InstanceId then
 		if r2:getSelectedInstance().BuildPropertySheet then
 			rm:addSeparator()
-			r2:addMenuLine(rm, concatUCString(i18n.get("uiRE2DPropertiesOf"), r2:getSelectedInstance():getDisplayName()), "lua", "r2:showProperties(r2:getSelectedInstance())", "prop", "r2_icon_properties.tga", 14)
+			r2:addMenuLine(rm, concatString(i18n.get("uiRE2DPropertiesOf"), r2:getSelectedInstance():getDisplayName()), "lua", "r2:showProperties(r2:getSelectedInstance())", "prop", "r2_icon_properties.tga", 14)
 		end
 	end
 	et = os.clock()
@@ -562,9 +558,7 @@ function r2.SelectBar:browseSequences()
 	r2:clearMenu(rm)
 	for s = 0, activitySequences.Size - 1 do
 		local sequence = activitySequences[s]
-		local uc_sequ = ucstring()
-		uc_sequ:fromUtf8(sequence:getName())
-		rm:addLine(uc_sequ, "lua", "r2.activities:triggerSelectSequence('".. sequence.InstanceId .. "')", sequence.InstanceId)
+		rm:addLine(sequence:getName(), "lua", "r2.activities:triggerSelectSequence('".. sequence.InstanceId .. "')", sequence.InstanceId)
 	end
 	rm:addSeparator()
 	r2:addMenuLine(rm, i18n.get("uiR2EDNewSequence"), "lua", "r2.activities:newSequenceInst()", "new_sequence", "r2_icon_create.tga", 14)	

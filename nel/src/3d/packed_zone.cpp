@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -662,7 +665,7 @@ void CPackedZone32::build(std::vector<const CTessFace*> &leaves,
 		{
 			CMatrix instanceMatrix;
 			igs[k]->getInstanceMatrix(l, instanceMatrix);
-			if (NLMISC::toLower(NLMISC::CFile::getExtension(igs[k]->getShapeName(l))) == "pacs_prim") continue;
+			if (NLMISC::toLowerAscii(NLMISC::CFile::getExtension(igs[k]->getShapeName(l))) == "pacs_prim") continue;
 			std::string stdShapeName = standardizeShapeName(igs[k]->getShapeName(l));
 			TShapeCache::const_iterator it = shapeCache.find(stdShapeName);
 			if (it != shapeCache.end())

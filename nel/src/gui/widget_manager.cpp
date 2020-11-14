@@ -2,8 +2,8 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1210,6 +1210,7 @@ namespace NLGUI
 					sint32 backupX = groupOver->getX();
 
 					// Copy all aspects to the view
+					vtDst->setLocalized (vtSrc->isLocalized());
 					vtDst->setText (vtSrc->getText());
 					vtDst->setFontSize (vtSrc->getFontSize());
 					vtDst->setColor (vtSrc->getColor());
@@ -2311,7 +2312,7 @@ namespace NLGUI
 		// Hide menu if the key is pushed
 //		if ((eventDesc.getKeyEventType() == CEventDescriptorKey::keydown) && !_ModalStack.empty() && !eventDesc.getKeyAlt() && !eventDesc.getKeyCtrl() && !eventDesc.getKeyShift())
 		// Hide menu (or popup menu) is ESCAPE pressed
-		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == NLMISC::KeyESCAPE )
+		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keydown && eventDesc.getKey() == NLMISC::KeyESCAPE )
 		{
 			if( hasModal() )
 			{
@@ -2322,7 +2323,7 @@ namespace NLGUI
 		}
 
 		// Manage "quit window" If the Key is ESCAPE, no captureKeyboard
-		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == NLMISC::KeyESCAPE )
+		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keydown && eventDesc.getKey() == NLMISC::KeyESCAPE )
 		{
 			// Get the last escapable active top window. NB: this is ergonomically better.
 			CInterfaceGroup	*win= getLastEscapableTopWindow();

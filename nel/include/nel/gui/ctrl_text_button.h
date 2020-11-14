@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -96,8 +97,14 @@ namespace NLGUI
 		bool			getTextModulateGlobalColorOver() const {return _TextModulateGlobalColorOver;}
 		void			setTextModulateGlobalColorOver(bool v) {_TextModulateGlobalColorOver= v;}
 		// Set text (noop if text id)
-		void			setText (const ucstring &text);
-		ucstring		getText () const;
+		void			setText (const std::string &text);
+		std::string		getText () const;
+#ifdef RYZOM_LUA_UCSTRING
+		void			setTextAsUtf16 (const ucstring &text); // Compatibility
+		ucstring		getTextAsUtf16 () const; // Compatibility
+#endif
+		void			setLocalize (bool localize);
+		bool			isLocalized () const;
 
 		void			setHardText (const std::string &text);
 		std::string		getHardText () const;
@@ -130,8 +137,12 @@ namespace NLGUI
 		int luaGetViewText(CLuaState &ls);
 
 		REFLECT_EXPORT_START(CCtrlTextButton, CCtrlBaseButton)
-			REFLECT_UCSTRING("uc_hardtext", getText, setText);
+#ifdef RYZOM_LUA_UCSTRING
+			REFLECT_UCSTRING("uc_hardtext", getTextAsUtf16, setTextAsUtf16); // Compatibility
+#endif
+			REFLECT_BOOL("localize", isLocalized, setLocalize);
 			REFLECT_STRING("hardtext", getHardText, setHardText);
+			REFLECT_STRING("text", getText, setText);
 			REFLECT_SINT32("text_x", getTextX, setTextX)
 			REFLECT_SINT32("wmargin", getWMargin, setWMargin)
 			REFLECT_SINT32("wmin", getWMin, setWMin)

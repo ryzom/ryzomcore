@@ -107,7 +107,7 @@ void CImageListEx::addResourceIcon (const char *filename)
 		
 			// Add in the map
 			std::string name = NLMISC::CFile::getFilenameWithoutExtension(filename);
-			_IconMapString.insert (std::map<string, int>::value_type (toLower(name), index));
+			_IconMapString.insert (std::map<string, int>::value_type (toLowerAscii(name), index));
 
 			// Release the icon
 			DestroyIcon (handle);
@@ -132,7 +132,7 @@ int CImageListEx::getImage (int resource) const
 
 int CImageListEx::getImage (const char *filename) const
 {
-	std::string name = toLower(NLMISC::CFile::getFilenameWithoutExtension(filename));
+	std::string name = toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(filename));
 	std::map<string, int>::const_iterator ite = _IconMapString.find (name);
 	if (ite == _IconMapString.end())
 		return -1;

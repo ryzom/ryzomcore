@@ -125,8 +125,8 @@ CGameItemManager::CGameItemManager()
 //CGameItemPtr CGameItemManager::getNewItem( CEntityId& id, CSheetId& sheetId, uint16 quality, bool destroyable , bool dropable)
 CGameItemPtr CGameItemManager::getNewItem( const CSheetId& sheetId, uint16 quality, bool destroyable , bool dropable)
 {
-	CAllStaticItems::iterator itForm = CSheets::getItemMapFormNoConst().find( sheetId );
-	if( itForm != CSheets::getItemMapFormNoConst().end() )
+	CAllStaticItems::const_iterator itForm = CSheets::getItemMapForm().find( sheetId );
+	if( itForm != CSheets::getItemMapForm().end() )
 	{
 		// get the slot count
 //		sint16 slotCount = 0;
@@ -466,7 +466,7 @@ CGameItemPtr CGameItemManager::createInGameItem( uint16 quality, uint32 quantity
 				item = sellingItem->getItemCopy();
 				item->quality( quality );
 				if ( phraseId )
-					item->setPhraseId(*phraseId);
+					item->setPhraseIdInternal(*phraseId);
 			}
 			else if (sheet == preorderSheetId)
 			{

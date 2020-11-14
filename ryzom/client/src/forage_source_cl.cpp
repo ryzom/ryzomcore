@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -101,7 +102,7 @@ bool CForageSourceCL::build( const CEntitySheet *sheet )
 	const CForageSourceSheet *forageSourceSheet = dynamic_cast<const CForageSourceSheet*>(sheet);
 	if ( ! forageSourceSheet )
 	{
-		nlwarning( "Bad sheet %s for forage source", sheet->Id.toString().c_str() );
+		nlwarning( "Bad sheet %s for forage source", sheet ? sheet->Id.toString().c_str() : "NULL" );
 		return false;
 	}
 	if ( ! setFx( forageSourceSheet->FxFilename ) )
@@ -507,9 +508,9 @@ void CForageSourceCL::updateVisualPropertyVisualFX(const NLMISC::TGameCycle &/* 
 			CEntityCL *prospector = EntitiesMngr.entities()[_ProspectorSlot];
 			if (prospector != NULL)
 			{
-				ucstring prospectorName = prospector->getDisplayName();
+				string prospectorName = prospector->getDisplayName();
 				if ( ! prospectorName.empty() )
-					_EntityName += ucstring(" [") + prospectorName + ucstring("]");
+					_EntityName += " [" + prospectorName + "]";
 			}
 		}
 
@@ -535,7 +536,7 @@ void CForageSourceCL::updateVisualPropertyVisualFX(const NLMISC::TGameCycle &/* 
 void CForageSourceCL::updateVisualPropertyName(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {
 	CSheetId rmSheetId( (const uint32&)prop );
-	const ucchar *name = STRING_MANAGER::CStringManagerClient::getItemLocalizedName( rmSheetId );
+	const char *name = STRING_MANAGER::CStringManagerClient::getItemLocalizedName( rmSheetId );
 	if ( name )
 	{
 		_EntityName = name;
@@ -544,9 +545,9 @@ void CForageSourceCL::updateVisualPropertyName(const NLMISC::TGameCycle &/* game
 			CEntityCL *prospector = EntitiesMngr.entities()[_ProspectorSlot];
 			if (prospector != NULL)
 			{
-				ucstring prospectorName = prospector->getDisplayName();
+				std::string prospectorName = prospector->getDisplayName();
 				if ( ! prospectorName.empty() )
-					_EntityName += ucstring(" [") + prospectorName + ucstring("]");
+					_EntityName += " [" + prospectorName + "]";
 			}
 		}
 		// Rebuild inscene interface
@@ -567,9 +568,9 @@ void CForageSourceCL::updateVisualPropertyTarget(const NLMISC::TGameCycle &/* ga
 		CEntityCL *prospector = EntitiesMngr.entities()[_ProspectorSlot]; // NULL if entity not received
 		if (prospector != NULL)
 		{
-			ucstring prospectorName = prospector->getDisplayName();
+			std::string prospectorName = prospector->getDisplayName();
 			if ( ! prospectorName.empty() )
-				_EntityName = _EntityName + ucstring(" [") + prospectorName + ucstring("]");
+				_EntityName = _EntityName + " [" + prospectorName + "]";
 		}
 
 		// Rebuild inscene interface
@@ -622,7 +623,7 @@ void CForageSourceCL::displayModifiers()
 		{
 			uint16 qttyDelta = ((uint16)mod.Value) & 0xFF;
 			uint16 qlty = ((uint16)mod.Value) >> 8;
-			ucstring hpModifier = ucstring(toString("%u ", qttyDelta) + CI18N::get("uittQualityAbbrev") + toString(" %u", qlty));
+			string hpModifier = toString("%u ", qttyDelta) + CI18N::get("uittQualityAbbrev") + toString(" %u", qlty);
 			double t = TimeInSec-mod.Time;
 			// Compute the position for the Modifier.
 			CVector		pos= namePos + CVector(0.0f, 0.0f, 0.3f+(float)t*1.0f/totalDuration);

@@ -66,7 +66,7 @@ static string getWebAuthKey()
 	// authkey = <sharid><name><cid><cookie>
 	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
 	string rawKey = toString(CharacterHomeSessionId) +
-		UserEntity->getLoginName().toString() +
+		UserEntity->getLoginName() +
 		toString(cid) +
 		NetMngr.getLoginCookie().toString();
 	string key = getMD5((const uint8*)rawKey.c_str(), (uint32)rawKey.size()).toString();
@@ -85,7 +85,7 @@ void addWebIGParams (string &url, bool trustedDomain)
 	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
 	url += ((url.find('?') != string::npos) ? "&" : "?") +
 		string("shardid=") + toString(CharacterHomeSessionId) +
-		string("&name=") + UserEntity->getLoginName().toUtf8() +
+		string("&name=") + UserEntity->getLoginName() + // FIXME: UrlEncode
 		string("&lang=") + CI18N::getCurrentLanguageCode() +
 		string("&datasetid=") + toString(UserEntity->dataSetId()) +
 		string("&ig=1");
@@ -97,7 +97,7 @@ void addWebIGParams (string &url, bool trustedDomain)
 		if (url.find('$') != string::npos)
 		{
 			strFindReplace(url, "$gender$", GSGENDER::toString(UserEntity->getGender()));
-			strFindReplace(url, "$displayName$", UserEntity->getDisplayName().toString());
+			strFindReplace(url, "$displayName$", UserEntity->getDisplayName()); // FIXME: UrlEncode...
 			strFindReplace(url, "$posx$", toString(UserEntity->pos().x));
 			strFindReplace(url, "$posy$", toString(UserEntity->pos().y));
 			strFindReplace(url, "$posz$", toString(UserEntity->pos().z));
@@ -113,7 +113,7 @@ void addWebIGParams (string &url, bool trustedDomain)
 				if (target)
 				{
 					strFindReplace(url, "$tdatasetid$", toString(target->dataSetId()));
-					strFindReplace(url, "$tdisplayName$", target->getDisplayName().toString());
+					strFindReplace(url, "$tdisplayName$", target->getDisplayName()); // FIXME: UrlEncode...
 					strFindReplace(url, "$tposx$", toString(target->pos().x));
 					strFindReplace(url, "$tposy$", toString(target->pos().y));
 					strFindReplace(url, "$tposz$", toString(target->pos().z));
@@ -384,7 +384,7 @@ void CGroupHTMLAuth::addHTTPPostParams (SFormFields &formfields, bool trustedDom
 
 	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
 	formfields.add("shardid", toString(CharacterHomeSessionId));
-	formfields.add("name", UserEntity->getLoginName().toUtf8());
+	formfields.add("name", UserEntity->getLoginName());
 	formfields.add("lang", CI18N::getCurrentLanguageCode());
 	formfields.add("ig", "1");
 	if (trustedDomain)

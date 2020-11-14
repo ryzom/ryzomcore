@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -99,7 +100,7 @@ namespace NLGUI
 
 	CCtrlBase::TToolTipParentType CCtrlBase::stringToToolTipParent( const std::string &str )
 	{
-		std::string s = toLower( str );
+		std::string s = toLowerAscii( str );
 
 		if( s == "mouse" )
 			return TTMouse;
@@ -122,32 +123,26 @@ namespace NLGUI
 		CXMLAutoPtr prop;
 
 		// get static toolTip
-		prop = (char*) xmlGetProp( cur, (xmlChar*)"tooltip" );
-		if (prop)
+		prop = (char *)xmlGetProp(cur, (xmlChar *)"tooltip_i18n");
+		if ((bool)prop && strlen((const char *)prop) > 0)
 		{
-			const char *propPtr = prop;
-#ifdef RYZOM_FORGE
-			if (strlen(propPtr) > 2 && propPtr[0] == 'u' && propPtr[1] == ':')
-				_ContextHelp = ucstring::makeFromUtf8(std::string(propPtr).substr(2));
+			// Force I18N tooltip
+			if (!editorMode)
+				_ContextHelp = CI18N::get((const char *)prop);
 			else
-#endif
-				_ContextHelp = ucstring(propPtr);
-			
-
-			if( !editorMode && ( strlen(propPtr) > 2 ) )
-			{
-				if ((propPtr[0] == 'u') && (propPtr[1] == 'i'))
-					_ContextHelp = CI18N::get ((const char *) prop);
-			}
+				_ContextHelp = (const char *)prop;
 		}
-		// Force I18N tooltip
-		prop = (char*) xmlGetProp( cur, (xmlChar*)"tooltip_i18n" );
-		if ((bool)prop && strlen((const char*)prop)>0)
+		else
 		{
-			if( !editorMode )
-				_ContextHelp = CI18N::get ((const char *) prop);
-			else
-				_ContextHelp = (const char*)prop;
+			// get static toolTip
+			prop = (char *)xmlGetProp(cur, (xmlChar *)"tooltip");
+			if (prop)
+			{
+				if (!editorMode && NLMISC::startsWith((const char *)prop, "ui"))
+					_ContextHelp = CI18N::get((const char *)prop);
+				else
+					_ContextHelp = (const char *)prop;
+			}
 		}
 
 		// get dynamic toolTip ActionHandler
@@ -175,7 +170,7 @@ namespace NLGUI
 		_ToolTipSpecialParent= CStringShared();
 		if(prop)
 		{
-			_ToolTipSpecialParent= std::string((const char*)prop);
+			_ToolTipSpecialParent= (const char*)prop;
 		}
 
 		// Tooltip posref
@@ -203,12 +198,12 @@ namespace NLGUI
 	{
 		if( name == "tooltip" )
 		{
-			return _ContextHelp.toString();
+			return _ContextHelp;
 		}
 		else
 		if( name == "tooltip_i18n" )
 		{
-			return _ContextHelp.toString();
+			return _ContextHelp;
 		}
 		else
 		if( name == "on_tooltip" )
@@ -264,13 +259,19 @@ namespace NLGUI
 	{
 		if( name == "tooltip" )
 		{
-			_ContextHelp = ucstring::makeFromUtf8(value);
+			if (!editorMode && NLMISC::startsWith(value, "ui"))
+				_ContextHelp = CI18N::get(value);
+			else
+				_ContextHelp = value;
 			return;
 		}
 		else
 		if( name == "tooltip_i18n" )
 		{
-			_ContextHelp = value;
+			if (!editorMode)
+				_ContextHelp = CI18N::get(value);
+			else
+				_ContextHelp = value;
 			return;
 		}
 		else
@@ -382,8 +383,8 @@ namespace NLGUI
 		if( node == NULL )
 			return NULL;
 
-		xmlNewProp( node, BAD_CAST "tooltip", BAD_CAST _ContextHelp.toString().c_str() );
-		xmlNewProp( node, BAD_CAST "tooltip_i18n", BAD_CAST _ContextHelp.toString().c_str() );
+		xmlNewProp( node, BAD_CAST "tooltip", BAD_CAST _ContextHelp.c_str() );
+		xmlNewProp( node, BAD_CAST "tooltip_i18n", BAD_CAST _ContextHelp.c_str() );
 		xmlNewProp( node, BAD_CAST "on_tooltip", BAD_CAST _OnContextHelp.toString().c_str() );
 		xmlNewProp( node, BAD_CAST "on_tooltip_params", BAD_CAST _OnContextHelpParams.toString().c_str() );
 		xmlNewProp( node, BAD_CAST "tooltip_parent", BAD_CAST tooltipParentToString( _ToolTipParent ).c_str() );
@@ -476,7 +477,7 @@ namespace NLGUI
 	// ***************************************************************************
 	bool CCtrlBase::emptyContextHelp() const
 	{
-		ucstring help;
+		std::string help;
 		getContextHelp(help);
 		std::string sTmp = _OnContextHelp;
 		return help.empty() && sTmp.empty();
@@ -494,12 +495,15 @@ namespace NLGUI
 	void CCtrlBase::serial(NLMISC::IStream &f)
 	{
 		CViewBase::serial(f);
+
+		uint version = f.serialVersion(1);
+		nlassert(version);
+
 		f.serial(_ContextHelp);
 		f.serial(_OnContextHelp);
 		f.serial(_OnContextHelpParams);
 		f.serial(_ToolTipSpecialParent);
 		f.serialEnum(_ToolTipParent);
-		//
 
 		THotSpot tmpToolTipParentPosRef = _ToolTipParentPosRef;
 		THotSpot tmpToolTipPosRef = _ToolTipPosRef;
@@ -515,7 +519,7 @@ namespace NLGUI
 		_ToolTipPosRef = tmpToolTipPosRef;
 		_ToolTipParentPosRefAlt = tmpToolTipParentPosRefAlt;
 		_ToolTipPosRefAlt = tmpToolTipPosRefAlt;	
-		//
+		
 		nlSerialBitBool(f, _ToolTipInstant);	
 	}
 
@@ -569,6 +573,7 @@ namespace NLGUI
 			return itr2->second;
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	int CCtrlBase::luaSetTooltipUtf8(CLuaState &ls)
 	{
@@ -577,9 +582,10 @@ namespace NLGUI
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 		std::string tooltip = ls.toString(1);
 
-		setDefaultContextHelp(ucstring::makeFromUtf8(tooltip));
+		setDefaultContextHelp(tooltip);
 
 		return 0;
 	}
+#endif
 }
 

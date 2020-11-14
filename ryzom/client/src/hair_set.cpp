@@ -50,7 +50,7 @@ void CHairSet::init (NLMISC::IProgressCallback &progress)
 			if (item->getShape().find("cheveux", 0) != std::string::npos)
 			{
 				// get race
-				std::string itemName = NLMISC::toLower(item->getShape());
+				std::string itemName = NLMISC::toLowerAscii(item->getShape());
 
 				// fortunately, first character of each race is distinct
 				switch(itemName[0])

@@ -456,8 +456,8 @@
 <proc id="respawn_map_activated">
 	<action handler="exit_free_look" />
 	<action handler="set" params="dblink=UI:VARIABLES:RESPAWN:MSG_SENT|value=0" />
-<!-- <action handler="add_link" params="id=respawn_timer_link|expr=secondsToTimeString(div(mul(div(sub(%player_percent_max,abs(@%player_hp_percent)),%player_percent_max),%time_before_auto_respawn),10))|target=ui:interface:respawn_map:content:map_content:timer:t:uc_hardtext" /> -->
-	<action handler="add_link" params="id=respawn_timer_link|expr=secondsToTimeString(mul(div(sub(%player_percent_max,abs(@%player_hp_percent)),%player_percent_max),%time_before_auto_respawn))|target=ui:interface:respawn_map:content:map_content:timer:t:uc_hardtext" />
+<!-- <action handler="add_link" params="id=respawn_timer_link|expr=secondsToTimeString(div(mul(div(sub(%player_percent_max,abs(@%player_hp_percent)),%player_percent_max),%time_before_auto_respawn),10))|target=ui:interface:respawn_map:content:map_content:timer:t:hardtext" /> -->
+	<action handler="add_link" params="id=respawn_timer_link|expr=secondsToTimeString(mul(div(sub(%player_percent_max,abs(@%player_hp_percent)),%player_percent_max),%time_before_auto_respawn))|target=ui:interface:respawn_map:content:map_content:timer:t:hardtext" />
 	<action handler="add_link" params="id=respawn_acttimer_link|expr=depends(@%player_hp_percent)|action=respawn_map_valid|params=map=ui:interface:respawn_map:content:map_content:actual_map|cond=and(eq(abs(@%player_hp_percent), %player_percent_max), and(lt(@%player_hp_percent,0), eq(@UI:VARIABLES:CDB_INIT_IN_PROGRESS, 0)) ,ne(@UI:VARIABLES:RESPAWN:MSG_SENT,1)) " />
 	<action handler="add_link" params="id=respawn_showtimer_link|expr=lt(abs(@%player_hp_percent), %player_percent_max)|target=ui:interface:respawn_map:content:map_content:timer:active" />
 </proc>

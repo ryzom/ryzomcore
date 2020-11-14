@@ -101,7 +101,7 @@ public:
 	void		log(const char *prefix) const;
 
 	// For SPhrase Info
-	void		getInfoText(ucstring &info) const;
+	void		getInfoText(std::string &info) const;
 
 	// return true if the requirement formula completes regarding the actual player state (through CSkillMananger). return true if empty()
 	bool		evaluate() const;

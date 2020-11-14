@@ -584,18 +584,18 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_l" );
 		if (prop)
 		{
-			_ListMenuLeft = NLMISC::toLower(std::string((const char *) prop));
+			_ListMenuLeft = NLMISC::toLowerAscii(std::string((const char *) prop));
 		}
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r" );
 		if (prop)
 		{
-			_ListMenuRight = NLMISC::toLower(std::string((const char *) prop));
+			_ListMenuRight = NLMISC::toLowerAscii(std::string((const char *) prop));
 		}
 		// list menu on both clicks
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_b" );
 		if (prop)
 		{
-			setListMenuBoth(NLMISC::toLower(std::string((const char *) prop)));
+			setListMenuBoth(NLMISC::toLowerAscii(std::string((const char *) prop)));
 		}
 
 		prop= (char*) xmlGetProp (cur, (xmlChar*)"frozen");

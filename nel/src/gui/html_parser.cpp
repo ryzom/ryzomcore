@@ -89,7 +89,7 @@ namespace NLGUI
 					}
 				}
 
-				parent.Children.push_back(CHtmlElement(CHtmlElement::ELEMENT_NODE, toLower((const char*)node->name)));
+				parent.Children.push_back(CHtmlElement(CHtmlElement::ELEMENT_NODE, toLowerAscii((const char*)node->name)));
 				CHtmlElement &elm = parent.Children.back();
 				elm.ID = element_number;
 				elm.parent = &parent;
@@ -109,7 +109,7 @@ namespace NLGUI
 				elm.Attributes.clear();
 
 				for (xmlAttr *cur_attr = node->properties; cur_attr; cur_attr = cur_attr->next) {
-					std::string key(toLower((const char *)(cur_attr->name)));
+					std::string key(toLowerAscii((const char *)(cur_attr->name)));
 					std::string value;
 					if (cur_attr->children)
 					{
@@ -124,7 +124,7 @@ namespace NLGUI
 					NLMISC::splitString(elm.getAttribute("class"), " ", parts);
 					for(uint i = 0; i<parts.size();++i)
 					{
-						elm.ClassNames.insert(toLower(trim(parts[i])));
+						elm.ClassNames.insert(toLowerAscii(trim(parts[i])));
 					}
 				}
 
@@ -136,7 +136,7 @@ namespace NLGUI
 					bool useStyle = true;
 					if (elm.hasAttribute("media"))
 					{
-						std::string media = trim(toLower(elm.Attributes["media"]));
+						std::string media = trim(toLowerAscii(elm.Attributes["media"]));
 						useStyle = media.empty() || media.find("all") != std::string::npos || media.find("screen") != std::string::npos;
 
 						// <style media="ryzom"> for ingame browser
@@ -154,7 +154,7 @@ namespace NLGUI
 					bool useStyle = true;
 					if (elm.hasAttribute("media"))
 					{
-						std::string media = trim(toLower(elm.Attributes["media"]));
+						std::string media = trim(toLowerAscii(elm.Attributes["media"]));
 						useStyle = media.empty() || media.find("all") != std::string::npos || media.find("screen") != std::string::npos;
 
 						// <style media="ryzom"> for ingame browser

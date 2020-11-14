@@ -503,18 +503,26 @@ void CStateInstance::processStateEvent(CAIEvent const& stateEvent, CAIState cons
 		if	(!reaction.testCompatibility(this,state))
 			continue;
 
-		getDebugHistory()->addHistory("STATE: '%s' EVENT: '%s' REACTION: '%s'",	state->getAliasNode()->fullName().c_str(),
-			stateEvent.getName().c_str(),	reaction.getAliasNode()->fullName().c_str());
+		if (getDebugHistory()->isRecording())
+		{
+			nldebug("Reaction for event"); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
+			nldebug("STATE: '%s' EVENT: '%s' REACTION: '%s'", state->getAliasNode()->fullName().c_str(),
+				stateEvent.getName().c_str(), reaction.getAliasNode()->fullName().c_str()); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
+			getDebugHistory()->addHistory("STATE: '%s' EVENT: '%s' REACTION: '%s'", state->getAliasNode()->fullName().c_str(),
+				stateEvent.getName().c_str(), reaction.getAliasNode()->fullName().c_str());
+		}
 
 		foundReaction=true;
 
 		if (!reaction.getAction())
 		{
+			nldebug("Failed to find action for event"); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
 			nlwarning("Failed to find action for event: %s",reaction.getAliasNode()->fullName().c_str());
 			continue;
 		}
 		if (!reaction.getAction()->executeAction(this, NULL))
 		{
+			nldebug("Failed to execute action for event"); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
 			nlwarning("Failed to execute action for event '%s': for stateInstance:'%s' in state:'%s'",	stateEvent.getName().c_str(),
 				aliasTreeOwner()->getAliasNode()->fullName().c_str(),	state->getAliasNode()->fullName().c_str());
 			continue;
@@ -523,8 +531,14 @@ void CStateInstance::processStateEvent(CAIEvent const& stateEvent, CAIState cons
 	}
 	if (!foundReaction)
 	{
-		getDebugHistory()->addHistory("STATE: '%s' EVENT: '%s' NO REACTION",	state->getAliasNode()->fullName().c_str(),
-			stateEvent.getName().c_str());
+		if (getDebugHistory()->isRecording())
+		{
+			nldebug("No reaction for event"); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
+			nldebug("STATE: '%s' EVENT: '%s' NO REACTION", state->getAliasNode()->fullName().c_str(),
+				stateEvent.getName().c_str()); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
+			getDebugHistory()->addHistory("STATE: '%s' EVENT: '%s' NO REACTION", state->getAliasNode()->fullName().c_str(),
+				stateEvent.getName().c_str());
+		}
 	}
 
 }

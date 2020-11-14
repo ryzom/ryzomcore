@@ -856,7 +856,7 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 	/// end current bot chat
 	proxy.endBotChat();
 	proxy.updateTarget();
-	_ExistingGuildNames.insert( NLMISC::toLower( guild->getName().toString() ) );
+	_ExistingGuildNames.insert( NLMISC::toCaseInsensitive( guild->getName().toUtf8() ) );
 
 	// ask the client to open it's guild interface
 	PlayerManager.sendImpulseToClient( proxy.getId(),"GUILD:OPEN_GUILD_WINDOW" );
@@ -903,7 +903,7 @@ void CGuildManager::deleteGuild(uint32 id)
 		CStatDB::getInstance()->removeGuild(id);
 	}
 
-	_ExistingGuildNames.erase( NLMISC::toLower( guild->getName().toString() ) );
+	_ExistingGuildNames.erase( NLMISC::toCaseInsensitive( guild->getName().toUtf8() ) );
 	guild->unregisterGuild();
 
 	if (!guild->isProxy())
@@ -1423,7 +1423,7 @@ void CGuildManager::registerGuildAfterLoading(CGuild *guildToRegister)
 //			_GuildsAwaitingString.insert( make_pair( str, guildToRegister->getId() ) );
 //		}
 
-		_ExistingGuildNames.insert( NLMISC::toLower( guildToRegister->getName().toString() ) );
+		_ExistingGuildNames.insert( NLMISC::toCaseInsensitive( guildToRegister->getName().toUtf8() ) );
 	}
 }
 
@@ -1477,7 +1477,7 @@ bool CGuildManager::checkGuildStrings(CGuildCharProxy & proxy,const ucstring & n
 		return false;
 	}
 	// check if name already exists in the guild list
-	if ( _ExistingGuildNames.find( NLMISC::toLower( name.toString() ) ) != _ExistingGuildNames.end() )
+	if ( _ExistingGuildNames.find( NLMISC::toCaseInsensitive( name.toUtf8() ) ) != _ExistingGuildNames.end() )
 	{
 		proxy.sendSystemMessage("GUILD_NAME_ALREADY_EXISTS");
 		return false;
@@ -1491,6 +1491,7 @@ bool CGuildManager::checkGuildStrings(CGuildCharProxy & proxy,const ucstring & n
 		return false;
 	}
 
+	// FIXME: Allow unicode guild names https://github.com/kaetemi/ryzomclassic/issues/187
 	if ( !isalpha(name[0]) || !isalpha(name[name.size()-1]) )
 	{
 		proxy.sendSystemMessage("GUILD_NAME_BAD_CHAR");
@@ -1512,6 +1513,7 @@ bool CGuildManager::checkGuildStrings(CGuildCharProxy & proxy,const ucstring & n
 		else
 		{
 			prevBlank = false;
+			// FIXME: Allow unicode guild names https://github.com/kaetemi/ryzomclassic/issues/187
 			if (!isalpha (name[i]))
 			{
 				proxy.sendSystemMessage("GUILD_NAME_BAD_CHAR");

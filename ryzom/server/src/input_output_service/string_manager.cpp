@@ -768,6 +768,8 @@ void CStringManager::requestString(uint32 userId, uint32 stringId)
 	msgout.serialBufferWithSize((uint8*)bmsOut.buffer(), bmsOut.length());
 	NLNET::CUnifiedNetwork::getInstance()->send( frontendId, msgout );
 	nldebug( "IOSSM: Sent IMPULSION_UID to %hu (STRING_RESP)", frontendId.get() );
+
+	// TODO: if (strUtf8.empty() && stringId) ban user
 }
 
 
@@ -829,7 +831,7 @@ const std::string		&CStringManager::getLanguageCodeString(TLanguages language)
 		return _LanguageCode[language];
 
 	nlwarning("Language number %u is out of range, returning english", language);
-	nlassert(english < NB_LANGUAGES);	// just to avoid oopsie
+	nlctassert(english < NB_LANGUAGES);	// just to avoid oopsie
 	return _LanguageCode[english];
 }
 
@@ -848,6 +850,11 @@ uint32	CStringManager::storeString(const ucstring &str)
 	}
 	else
 	{
+		// occasionally create a blank entry, 
+		// this lets us find out if someone is scanning the string cache
+		if ((rand() & 7) == 0)
+			_StringBase.push_back(ucstring());
+
 		// create a new entry
 		std::pair<TMappedUStringContainer::iterator, bool> ret;
 		ret = _StringIdx.insert(std::make_pair(str, (uint32)_StringBase.size()));
@@ -912,7 +919,7 @@ uint32	CStringManager::translateTitle(const std::string  &title, TLanguages lang
 {
 	const std::string colName("name");
 	const CStringManager::CEntityWords &ew = getEntityWords(language, STRING_MANAGER::title);
-	std::string rowName = NLMISC::toLower(title);
+	std::string rowName = NLMISC::toLowerAscii(title);
 	uint32 stringId;
 	stringId = ew.getStringId(rowName, colName);
 
@@ -1198,7 +1205,7 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, mergeWordFile, "Merge a word file into
 		return false;
 
 	std::string	lang = args[0];
-	std::string	word = toLower(args[1]);
+	std::string	word = toLowerAscii(args[1]);
 	std::string	file = args[2];
 
 	// get language
@@ -1215,7 +1222,7 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, mergeWordFile, "Merge a word file into
 	uint	i;
 	for (i=0; i<typeNames.size(); ++i)
 	{
-		if (toLower(typeNames[i].second) == word)
+		if (toLowerAscii(typeNames[i].second) == word)
 		{
 			wordType = typeNames[i].first;
 			break;
@@ -1260,7 +1267,7 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, displayEntityWords, "display entity wo
 		return false;
 
 	std::string	lang = args[0];
-	std::string	word = toLower(args[1]);
+	std::string	word = toLowerAscii(args[1]);
 	std::string	wc;
 
 	if (args.size() == 3)
@@ -1280,7 +1287,7 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, displayEntityWords, "display entity wo
 	uint	i;
 	for (i=0; i<typeNames.size(); ++i)
 	{
-		if (toLower(typeNames[i].second) == word)
+		if (toLowerAscii(typeNames[i].second) == word)
 		{
 			wordType = typeNames[i].first;
 			break;

@@ -87,7 +87,7 @@ void CAnimCombatState::build(const string &line)
 void	makeAnimMeleeImpact(const std::string &animSetFile, const set<CAnimCombatSet> &combatAnimSets)
 {
 	// look if this animSetFile is in the combat list to patch
-	string	shortName= NLMISC::toLower(CFile::getFilenameWithoutExtension(animSetFile));
+	string	shortName= NLMISC::toLowerAscii(CFile::getFilenameWithoutExtension(animSetFile));
 	CAnimCombatSet	key;
 	key.Name= shortName;
 	set<CAnimCombatSet>::const_iterator	it= combatAnimSets.find(key);
@@ -125,7 +125,7 @@ void	makeAnimMeleeImpact(const std::string &animSetFile, const set<CAnimCombatSe
 		for(uint j=0;j<animSetText.size();j++)
 		{
 			string	line= animSetText[j];
-			string	lineLwr= toLower(line);
+			string	lineLwr= toLowerAscii(line);
 
 			// Find <LOG> TAg? => stop
 			if(line.find("<LOG>")!=string::npos)
@@ -405,7 +405,7 @@ To generate the anim.txt file, this code has to be inserted in the client, in
 						if(anim && anim3d)
 						{
 							// name
-							string	name= NLMISC::toLower(_AnimationSet->getAnimationName(anim->id()));
+							string	name= NLMISC::toLowerAscii(_AnimationSet->getAnimationName(anim->id()));
 							if(animName.empty())
 								animName= name;
 							else if(!extended)

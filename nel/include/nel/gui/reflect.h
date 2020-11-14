@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -41,9 +42,13 @@ namespace NLGUI
 					 UInt32,
 					 Float,
 					 String,
+#ifdef RYZOM_LUA_UCSTRING
 					 UCString,
+#endif
 					 StringRef,
+#ifdef RYZOM_LUA_UCSTRING
 					 UCStringRef,
+#endif
 					 RGBA,
 					 LuaMethod
 					}; // other types will be added when needed
@@ -78,9 +83,13 @@ namespace NLGUI
 			TGetUInt32		GetUInt32;
 			TGetFloat		GetFloat;
 			TGetString		GetString;
+#ifdef RYZOM_LUA_UCSTRING
 			TGetUCString	GetUCString;
+#endif
 			TGetStringRef	GetStringRef;
+#ifdef RYZOM_LUA_UCSTRING
 			TGetUCStringRef	GetUCStringRef;
+#endif
 			TGetRGBA		GetRGBA;
 			TLuaMethod		GetLuaMethod; // lua method can only be obtained, not written ...
 		} GetMethod;
@@ -91,7 +100,9 @@ namespace NLGUI
 			TSetUInt32		SetUInt32;
 			TSetFloat		SetFloat;
 			TSetString		SetString;
+#ifdef RYZOM_LUA_UCSTRING
 			TSetUCString	SetUCString;
+#endif
 			TSetRGBA		SetRGBA;
 		} SetMethod;
 		// name of the property
@@ -297,6 +308,7 @@ namespace NLGUI
 		props.push_back(prop);                                                         \
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// export a unicode string value, by giving the name of the get and the set method
 	#define REFLECT_UCSTRING(exportName, getMethod, setMethod)                         \
 	{                                                                                  \
@@ -307,6 +319,7 @@ namespace NLGUI
 		prop.SetMethod.SetUCString = (CReflectedProperty::TSetUCString) static_cast<TSetUCStringa>(&A::setMethod); \
 		props.push_back(prop);                                                         \
 	}
+#endif
 
 	// export a string value, by giving the name of the get and the set method
 	#define REFLECT_STRING_REF(exportName, getMethod, setMethod)                           \
@@ -319,6 +332,7 @@ namespace NLGUI
 		props.push_back(prop);                                                         \
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// export a unicode string value, by giving the name of the get and the set method
 	#define REFLECT_UCSTRING_REF(exportName, getMethod, setMethod)                         \
 	{                                                                                  \
@@ -329,7 +343,7 @@ namespace NLGUI
 		prop.SetMethod.SetUCString = (CReflectedProperty::TSetUCString) static_cast<TSetUCStringa>(&A::setMethod); \
 		props.push_back(prop);                                                         \
 	}
-
+#endif
 
 	// export a color value, by giving the name of the get and the set method
 	#define REFLECT_RGBA(exportName, getMethod, setMethod)							   \

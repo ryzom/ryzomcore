@@ -134,7 +134,9 @@ void CEventsListener::operator()(const CEvent& event)
 	{
 		// Interface saving
 		CInterfaceManager::getInstance()->uninitInGame0();
+#ifdef RYZOM_FORGE
 		CItemGroupManager::getInstance()->uninit();
+#endif
 
 
 		/* YOYO:
@@ -172,16 +174,12 @@ void CEventsListener::operator()(const CEvent& event)
 			// Get in pixel space, centered
 			uint32 drW, drH;
 			Driver->getWindowSize(drW, drH);
-			float fX = mouseEvent->X; // from 0 to 1.0
-			float fY = (ClientCfg.FreeLookInverted ? -mouseEvent->Y : mouseEvent->Y);
-			sint scX = (sint32)(fX * (float)drW) - ((sint32)drW >> 1); // in pixels, centered
-			sint scY = (sint32)(fY * (float)drH) - ((sint32)drH >> 1);
+			sint scX = (sint32)(mouseEvent->X * (float)drW) - ((sint32)drW >> 1); // in pixels, centered
+			sint scY = (sint32)(mouseEvent->Y * (float)drH) - ((sint32)drH >> 1);
 			if (!s_MouseFreeLookReady)
 			{
-				float pfX = _MouseX;
-				float pfY = (ClientCfg.FreeLookInverted ? -_MouseY : _MouseY);
-				sint pscX = (sint32)(pfX * (float)drW) - ((sint32)drW >> 1); // in pixels, centered
-				sint pscY = (sint32)(pfY * (float)drH) - ((sint32)drH >> 1);
+				sint pscX = (sint32)(_MouseX * (float)drW) - ((sint32)drW >> 1); // in pixels, centered
+				sint pscY = (sint32)(_MouseY * (float)drH) - ((sint32)drH >> 1);
 				s_MouseFreeLookReady = true;
 				s_MouseFreeLookLastX = pscX;
 				s_MouseFreeLookLastY = pscY;
@@ -199,13 +197,12 @@ void CEventsListener::operator()(const CEvent& event)
 			}
 
 			// Get delta since last center
-			sint scXd = scX - s_MouseFreeLookLastX;
-			sint scYd = scY - s_MouseFreeLookLastY;
+			s_MouseFreeLookFrameX += (scX - s_MouseFreeLookLastX);
+			s_MouseFreeLookFrameY += (scY - s_MouseFreeLookLastY) * (ClientCfg.FreeLookInverted ? -1 : 1);
+
 			s_MouseFreeLookLastX = scX;
 			s_MouseFreeLookLastY = scY;
 
-			s_MouseFreeLookFrameX += scXd;
-			s_MouseFreeLookFrameY += scYd;
 			// updateFreeLookPos is called in updateMouseSmoothing per frame
 
 			// Center cursor

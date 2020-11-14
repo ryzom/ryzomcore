@@ -602,7 +602,7 @@ NLMISC_CATEGORISED_COMMAND(pd_log, displayTableDescription,
 		useFile = logpath + args[2];
 	}
 
-	std::string	tableName = toLower(args[1]);
+	std::string	tableName = toLowerAscii(args[1]);
 
 	CDBDescriptionParser	desc;
 	if (!desc.loadDescriptionFile(logpath + useFile))
@@ -612,7 +612,7 @@ NLMISC_CATEGORISED_COMMAND(pd_log, displayTableDescription,
 
 	uint	i;
 	for (i=0; i<db.Tables.size(); ++i)
-		if (toLower(db.Tables[i].Name) == tableName)
+		if (toLowerAscii(db.Tables[i].Name) == tableName)
 			break;
 
 	if (i == db.Tables.size())

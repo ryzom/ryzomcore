@@ -1637,7 +1637,7 @@ CGameItemPtr CCharacter::createItem(uint16 obtainedQuality, uint32 quantity, con
 				item = sellingItem->getItemCopy();
 				item->quality(obtainedQuality);
 				if (phraseId)
-					item->setPhraseId(*phraseId);
+					item->setPhraseIdInternal(*phraseId);
 			}
 			else if (obtainedItem == preorderSheetId)
 			{
@@ -2385,8 +2385,8 @@ void CCharacter::sendItemInfos( uint16 slotId )
 				const R2::TMissionItem * itemDesc = CR2MissionItem::getInstance().getR2ItemDefinition( currentSessionId(), item->getSheetId() );
 				if( itemDesc != 0 )
 				{
-					infos.R2ItemDescription = itemDesc->Description;
-					infos.R2ItemComment = itemDesc->Comment;
+					infos.R2ItemDescription = itemDesc->Description.toUtf8();
+					infos.R2ItemComment = itemDesc->Comment.toUtf8();
 				}
 			}
 		}

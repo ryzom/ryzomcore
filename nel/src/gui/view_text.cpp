@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -111,6 +111,8 @@ namespace NLGUI
 		_ClampRight = true; // clamp on the right of the text
 		_OverflowText = "...";
 
+		_Localized = true;
+
 		_LetterColors = NULL;
 		_Setuped= false;
 		_AutoClampOffset = 0;
@@ -118,9 +120,10 @@ namespace NLGUI
 		// Letter size
 		// - "_" that should be the character with the lowest part
 		// - A with an accent for the highest part
-		_FontSizingChars.fromUtf8("_\xc3\x84");
+		// https://www.compart.com/en/unicode/U+00C4
+		_FontSizingChars = "_\xC3\x84q";
 		// fallback if SizingChars are not supported by font
-		_FontSizingFallback.fromUtf8("|");
+		_FontSizingFallback = "|XO";
 		computeFontSize ();
 	}
 
@@ -150,7 +153,7 @@ namespace NLGUI
 		_Color = Color;
 		_Shadow = Shadow;
 		_ShadowOutline = ShadowOutline;
-		setText(Text);
+		setHardText(Text);
 		computeFontSize ();
 
 		CWidgetManager::getInstance()->registerInterfaceScaleWatcher(this);
@@ -210,7 +213,7 @@ namespace NLGUI
 		_Index = 0xFFFFFFFF;
 
 		_ModulateGlobalColor= vt._ModulateGlobalColor;
-
+		_Localized = vt._Localized;
 
 		// remove previous lines
 		clearLines();
@@ -229,12 +232,12 @@ namespace NLGUI
 		else
 		if( name == "hardtext" )
 		{
-			return _Text.toString();
+			return getHardText();
 		}
 		else
 		if( name == "hardtext_format" )
 		{
-			return _HardtextFormat;
+			return _HardTextFormat;
 		}
 		else
 			return CViewBase::getProperty( name );
@@ -243,6 +246,11 @@ namespace NLGUI
 
 	std::string CViewText::getTextProperty( const std::string &name ) const
 	{
+		if( name == "localize" )
+		{
+			return toString(_Localized);
+		}
+		else
 		if( name == "color" )
 		{
 			return toString( _Color );
@@ -396,12 +404,12 @@ namespace NLGUI
 		else
 		if ( name == "sizing_chars" )
 		{
-			return _FontSizingChars.toUtf8();
+			return _FontSizingChars;
 		}
 		else
 		if ( name == "sizing_fallback" )
 		{
-			return _FontSizingFallback.toUtf8();
+			return _FontSizingFallback;
 		}
 		else
 			return "";
@@ -417,6 +425,18 @@ namespace NLGUI
 
 	bool CViewText::setTextProperty( const std::string &name, const std::string &value )
 	{
+		if( name == "localize" )
+		{
+			bool b;
+			if (fromString(value, b))
+			{
+				_Localized = b;
+				setTextLocalized(_HardText.empty() ? _Text : _HardText); // FIXME: setCase?
+				_TextLength = 0;
+			}
+			return true;
+		}
+		else
 		if( name == "color" )
 		{
 			CRGBA c;
@@ -648,35 +668,44 @@ namespace NLGUI
 			return true;
 		}
 		else
+		if( name == "text" )
+		{
+			setTextLocalized(value); // FIXME: setCase?
+			_TextLength = 0;
+			invalidateContent();
+			return true;
+		}
+		else
 		if( name == "hardtext" )
 		{
-			_Text = value;
-			setCase( _Text, _CaseMode );
+			_Localized = true;
+			setTextLocalized(value); // FIXME: setCase?
+			_TextLength = 0;
 			invalidateContent();
 			return true;
 		}
 		else
 		if( name == "hardtext_format" )
 		{
-			_HardtextFormat = value;
+			_HardTextFormat = value;
 
 			if( _MultiLine )
-				setTextFormatTaged( _HardtextFormat );
+				setTextFormatTaged( _HardTextFormat );
 			else
-				setSingleLineTextFormatTaged( _HardtextFormat );
+				setSingleLineTextFormatTaged( _HardTextFormat );
 
 			return true;
 		}
 		else
 		if( name == "sizing_chars" )
 		{
-			_FontSizingChars.fromUtf8(value);
+			_FontSizingChars = value;
 			return true;
 		}
 		else
 		if( name == "sizing_fallback" )
 		{
-			_FontSizingFallback.fromUtf8(value);
+			_FontSizingFallback = value;
 			return true;
 		}
 		else
@@ -686,6 +715,8 @@ namespace NLGUI
 
 	bool CViewText::serializeTextOptions( xmlNodePtr node ) const
 	{
+		xmlSetProp( node, BAD_CAST "localize", BAD_CAST toString( _Localized ).c_str() );
+
 		xmlSetProp( node, BAD_CAST "color", BAD_CAST toString( _Color ).c_str() );
 		xmlSetProp( node, BAD_CAST "global_color", BAD_CAST toString( _ModulateGlobalColor ).c_str() );
 
@@ -748,8 +779,8 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "clamp_right", BAD_CAST toString( _ClampRight ).c_str() );
 		xmlSetProp( node, BAD_CAST "auto_clamp_offset", BAD_CAST toString( _AutoClampOffset ).c_str() );
 		xmlSetProp( node, BAD_CAST "continuous_update", BAD_CAST toString( _ContinuousUpdate ).c_str() );
-		xmlSetProp( node, BAD_CAST "sizing_chars", BAD_CAST _FontSizingChars.toUtf8().c_str() );
-		xmlSetProp( node, BAD_CAST "sizing_fallback", BAD_CAST _FontSizingFallback.toUtf8().c_str() );
+		xmlSetProp( node, BAD_CAST "sizing_chars", BAD_CAST _FontSizingChars.c_str() );
+		xmlSetProp( node, BAD_CAST "sizing_fallback", BAD_CAST _FontSizingFallback.c_str() );
 
 		return true;
 	}
@@ -764,11 +795,9 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text" );
 
 		serializeTextOptions( node );
-		
-		std::string hs = _Text.toString();
 
-		xmlSetProp( node, BAD_CAST "hardtext", BAD_CAST hs.c_str() );
-		xmlSetProp( node, BAD_CAST "hardtext_format", BAD_CAST _HardtextFormat.c_str() );
+		xmlSetProp( node, BAD_CAST "text", BAD_CAST (_HardText.empty() ? _Text.c_str() : _HardText.c_str()) );
+		xmlSetProp( node, BAD_CAST "hardtext_format", BAD_CAST _HardTextFormat.c_str() );
 
 		return node;
 	}
@@ -777,6 +806,9 @@ namespace NLGUI
 	void CViewText::parseTextOptions (xmlNodePtr cur)
 	{
 		CXMLAutoPtr prop;
+
+		prop = xmlGetProp (cur, (xmlChar*)"localize");
+		if (prop) _Localized = convertBool((const char*)prop);
 
 		prop= (char*) xmlGetProp( cur, (xmlChar*)"color" );
 		_Color = CRGBA(255,255,255,255);
@@ -937,16 +969,18 @@ namespace NLGUI
 		}
 
 		// "_Ä" lowest/highest chars (underscore, A+diaeresis)
-		_FontSizingChars.fromUtf8("_\xc3\x84");
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"sizing_chars" );
 		if (prop)
-			_FontSizingChars.fromUtf8((const char*)prop);
+			_FontSizingChars = (const char*)prop;
+		else
+			_FontSizingChars = "_\xC3\x84q";
 
 		// fallback if SizingChars are not supported by font
-		_FontSizingFallback.fromUtf8("|");
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"sizing_fallback" );
 		if (prop)
-			_FontSizingFallback.fromUtf8((const char*)prop);
+			_FontSizingFallback = (const char *)prop;
+		else
+			_FontSizingFallback = "|XO";
 
 		computeFontSize ();
 	}
@@ -962,7 +996,6 @@ namespace NLGUI
 	bool CViewText::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
 
-	//	const ucstring* tmp;
 		CXMLAutoPtr prop;
 		//try to get props that can be inherited from groups
 		//if a property is not defined, try to find it in the parent group.
@@ -982,18 +1015,17 @@ namespace NLGUI
 		if (prop)
 		{
 			const char *propPtr = prop;
-			_Text = ucstring(propPtr);
-
-			if ((strlen(propPtr)>2) && (propPtr[0] == 'u') && (propPtr[1] == 'i'))
-				_Text = CI18N::get (propPtr);
-			setCase (_Text, _CaseMode);
+			_Localized = true;
+			setTextLocalized(propPtr);
+			setCase(_Text, _CaseMode);
+			_TextLength = 0;
 		}
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"hardtext_format" );
 		if (prop)
 		{
 			const char *propPtr = prop;
-			_HardtextFormat = propPtr;
+			_HardTextFormat = propPtr;
 
 			if (_MultiLine)
 			{
@@ -1185,7 +1217,7 @@ namespace NLGUI
 						CWord &currWord = currLine.getWord(k);
 						charIndex += currWord.NumSpaces;
 						sint	cStart= max(charIndex, (sint)_TextSelectionStart);
-						sint	cEnd= min(charIndex+(sint)currWord.Text.length(), (sint)_TextSelectionEnd);
+						sint	cEnd= min(charIndex+(sint)currWord.Info.StringLength, (sint)_TextSelectionEnd);
 
 						// range must be valid
 						if(cStart<cEnd)
@@ -1200,7 +1232,7 @@ namespace NLGUI
 						}
 
 						// next word
-						charIndex+= (sint)currWord.Text.length();
+						charIndex+= (sint)currWord.Info.StringLength;
 					}
 					charIndex += currLine.getEndSpaces() + (currLine.getLF() ? 1 : 0);
 				}
@@ -1390,53 +1422,123 @@ namespace NLGUI
 		}
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
-	void CViewText::setText(const ucstring & text)
+	void CViewText::setTextAsUtf16(const ucstring &text)
 	{
-		// common case: no special format, no case mode => easy cache test
-		if (_FormatTags.empty() && _CaseMode==CaseNormal)
+		setText(text.toUtf8());
+	}
+#endif
+
+	// ***************************************************************************
+	void CViewText::setTextLocalized(const std::string &text, bool localized)
+	{
+		if (localized != _Localized)
 		{
-			if (text != _Text)
-			{
-				_Text = text;
-				// no need to call  "setCase (_Text, _CaseMode);"  since CaseNormal:
-				invalidateContent ();
-			}
+			_Localized = localized;
+
+			// Always recompute if localization and text changed
+			setTextLocalized(text);
+			setCase(_Text, _CaseMode);
+			_TextLength = 0;
+			invalidateContent();
 		}
 		else
 		{
-			// if the view text had some format before, no choice, must recompute all
-			if(!_FormatTags.empty())
+			setText(text);
+		}
+	}
+
+	// ***************************************************************************
+	void CViewText::setLocalized(bool localized)
+	{
+		if (localized != _Localized)
+		{
+			const std::string &text = _HardText.empty() ? _Text : _HardText;
+			_Localized = localized;
+			if (!text.empty() && NLMISC::startsWith(text, "ui"))
 			{
-				_Text = text;
-				setCase (_Text, _CaseMode);
-				invalidateContent ();
-			}
-			// else test if after the case change the cache succeed
-			else
-			{
-				// compute the temp cased text
-				ucstring	tempText= text;
-				setCase(tempText, _CaseMode);
-				if(tempText!=_Text)
-				{
-					_Text = tempText;
-					invalidateContent ();
-				}
+				setTextLocalized(text);
+				setCase(_Text, _CaseMode);
+				_TextLength = 0;
+				invalidateContent();
 			}
 		}
 
-		// clear format tags if any
-		_FormatTags.clear();
+		nlassert(_Text.empty() || ((_Localized && (NLMISC::startsWith(getText(), "ui"))) == (_HardText.empty() == _Text.empty())));
 	}
+
+	// ***************************************************************************
+	void CViewText::setTextLocalized(const std::string &text)
+	{
+		if (_Localized && NLMISC::startsWith(text, "ui"))
+		{
+			_HardText = text;
+			_Text = CI18N::get(text);
+		}
+		else
+		{
+			_Text = text;
+			_HardText.clear();
+		}
+	}
+
+	// ***************************************************************************
+    void CViewText::setText(const std::string &text)
+    {
+	    // common case: no special format, no case mode => easy cache test
+	    if (_FormatTags.empty() && _CaseMode == CaseNormal)
+	    {
+		    if (_HardText.empty() ? text != _Text : text != _HardText)
+		    {
+			    setTextLocalized(text);
+			    _TextLength = 0;
+			    // no need to call  "setCase (_Text, _CaseMode);"  since CaseNormal:
+			    invalidateContent();
+		    }
+	    }
+	    else
+	    {
+		    // if the view text had some format before, no choice, must recompute all
+		    if (!_FormatTags.empty())
+		    {
+			    setTextLocalized(text);
+			    setCase(_Text, _CaseMode);
+			    _TextLength = 0;
+			    invalidateContent();
+		    }
+		    // else test if after the case change the cache succeed
+		    else
+		    {
+			    // compute the temp cased text
+			    std::string holdText, holdHardText;
+			    holdText.swap(_Text);
+			    holdHardText.swap(_HardText);
+			    setTextLocalized(text);
+			    setCase(_Text, _CaseMode);
+			    if (holdText != _Text)
+			    {
+				    _TextLength = 0;
+				    invalidateContent();
+			    }
+			    else
+			    {
+				    holdText.swap(_Text);
+			    }
+		    }
+	    }
+
+		nlassert(_Text.empty() || ((_Localized && (NLMISC::startsWith(text, "ui"))) == (_HardText.empty() == _Text.empty())));
+
+	    // clear format tags if any
+	    _FormatTags.clear();
+    }
 
 	// ***************************************************************************
 	void CViewText::setFontSizing(const std::string &chars, const std::string &fallback)
 	{
-		_FontSizingChars.clear();
-		_FontSizingChars.fromUtf8(chars);
-		_FontSizingFallback.clear();
-		_FontSizingFallback.fromUtf8(fallback);
+		_FontSizingChars = chars;
+		_FontSizingFallback = fallback;
 	}
 
 	// ***************************************************************************
@@ -1615,7 +1717,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::flushWordInLine(ucstring &ucCurrentWord, bool &linePushed, const CFormatInfo &wordFormat)
+	void CViewText::flushWordInLine(std::string &ucCurrentWord, bool &linePushed, const CFormatInfo &wordFormat)
 	{
 		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		// create a new line?
@@ -1634,20 +1736,23 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::updateTextContextMultiLine(float nMaxWidth)
 	{
-		ucchar ucLetter;
+		// ucchar ucLetter;
 		UTextContext::CStringInfo si;
-		uint i;
+		uint i = 0;
 		// word state
-		ucstring ucCurrentWord;
+		std::string ucCurrentWord;
 		CFormatInfo		wordFormat;
 		// line state
 		float	rWidthCurrentLine = 0;
 		bool	linePushed= false;
 		// for all the text
-		uint	textSize= (uint)_Text.size();
+		// uint	textSize= (uint)_Text.size();
 		uint	formatTagIndex= 0;
 		nMaxWidth *= _Scale;
-		for (i = 0; i < textSize; ++i)
+		//for (i = 0; i < textSize; ++i)
+		CUtfStringView sv(_Text);
+		::u32string ucStrLetter(1, ' ');
+		for (CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it, ++i)
 		{
 			if(isFormatTagChange(i, formatTagIndex))
 			{
@@ -1666,8 +1771,7 @@ namespace NLGUI
 
 			// Parse the letter
 			{
-				ucLetter = _Text[i];
-				if (ucLetter == ucchar('\n'))
+				if (*it == '\n')
 				{
 					flushWordInLine(ucCurrentWord, linePushed, wordFormat);
 					// reset line state
@@ -1676,8 +1780,7 @@ namespace NLGUI
 				}
 				else
 				{
-					ucstring ucStrLetter;
-					ucStrLetter= ucLetter;
+					ucStrLetter[0] = *it;
 					si = TextContext->getStringInfo (ucStrLetter);
 					if ((rWidthCurrentLine + si.StringWidth) > nMaxWidth)
 					{
@@ -1686,12 +1789,13 @@ namespace NLGUI
 						// reset line state, and begin with the cut letter
 						linePushed= false;
 						rWidthCurrentLine = si.StringWidth;
-						ucCurrentWord = ucLetter;
+						ucCurrentWord.clear();
+						CUtfStringView::append(ucCurrentWord, *it);
 					}
 					else
 					{
 						// Grow the current word
-						ucCurrentWord += ucLetter;
+						CUtfStringView::append(ucCurrentWord, *it);
 						rWidthCurrentLine += si.StringWidth;
 					}
 				}
@@ -1715,7 +1819,7 @@ namespace NLGUI
 		if (!currLine.empty())
 		{
 			CFormatInfo	lineWordFormat= currLine[0].Format;
-			ucstring	lineWord;
+			std::string	lineWord;
 			for(uint i=0;i<currLine.size();i++)
 			{
 				// If different from last, flush
@@ -1730,8 +1834,7 @@ namespace NLGUI
 				}
 
 				// Append the word with space to the lineWord.
-				ucstring blank;
-				blank.resize(currLine[i].NumSpaces, (ucchar) ' ');
+				std::string blank(currLine[i].NumSpaces, ' ');
 				lineWord += blank;
 				lineWord += currLine[i].Text;
 			}
@@ -1752,7 +1855,6 @@ namespace NLGUI
 		//
 		TCharPos currPos = 0;
 		//
-		static const ucstring spaceStr(" ");
 		// precLineWidth valid only id precedent line is part of same paragraph.
 		float precLineWidth= 0;
 		float lineWidth = (float)_FirstLineX; // width of the current line
@@ -1762,7 +1864,7 @@ namespace NLGUI
 		bool  breakLine;
 		//
 		vector<CWord>	currLine; // if spaces are not expanded, all words of a line are inserted here (NB: index and stringInfo not filled)
-		ucstring	wordValue;
+		std::string	wordValue;
 		CFormatInfo	wordFormat;
 		uint		formatTagIndex= 0;
 		//
@@ -1775,7 +1877,7 @@ namespace NLGUI
 			float newLineWidth = 0;
 			breakLine = false;
 			//
-			if (_Text[currPos] == (ucchar) '\n')
+			if (_Text[currPos] == '\n')
 			{
 				lineFeed = true;
 			}
@@ -1783,7 +1885,7 @@ namespace NLGUI
 			{
 				lineFeed = false;
 				// Skip spaces and count them
-				spaceEnd = _Text.find_first_not_of(spaceStr, currPos);
+				spaceEnd = _Text.find_first_not_of(" ", currPos);
 				if (spaceEnd == std::string::npos)
 				{
 					spaceEnd = _Text.length();
@@ -1829,7 +1931,7 @@ namespace NLGUI
 				uint	i;
 				for(i= (uint)spaceEnd;i<(uint)_Text.length();i++)
 				{
-					ucchar	c= _Text[i];
+					char	c= _Text[i];
 					if(c==' ' || c=='\n')
 						break;
 					// If change of color tag, stop the word, but don't take the new color now.
@@ -1899,7 +2001,7 @@ namespace NLGUI
 					{
 						uint maxNumSpaces = std::max(1U, (uint) (nMaxWidth / _SpaceWidth));
 						CWord spaceWord; // a word with only spaces in it
-						spaceWord.build (ucstring (""), *TextContext, maxNumSpaces);
+						spaceWord.build ("", *TextContext, maxNumSpaces);
 						spaceWord.Format= wordFormat;
 						_Lines.push_back(TLineSPtr(new CLine));
 						_Lines.back()->addWord(spaceWord, _FontWidth);
@@ -1916,16 +2018,17 @@ namespace NLGUI
 					else
 					{
 						float px = numSpaces * _SpaceWidth;
-						uint currChar = 0;
-						ucstring oneChar(" ");
-						for(currChar = 0; currChar < wordValue.length(); ++currChar)
+						::u32string oneChar(1, ' ');
+						CUtfStringView wsv(wordValue);
+						CUtfStringView::iterator wit(wsv.begin()), wend(wsv.end());
+						for (; wit != wend; ++wit)
 						{
-							oneChar = wordValue[currChar];
+							oneChar[0] = *wit;
 							si = TextContext->getStringInfo(oneChar);
 							if ((uint) (px + si.StringWidth) > nMaxWidth) break;
 							px += si.StringWidth;
 						}
-						currChar = std::max((uint) 1, currChar); // must fit at least one character otherwise there's an infinite loop
+						ptrdiff_t currChar = std::max((ptrdiff_t)1, (ptrdiff_t)wit.ptr() - (ptrdiff_t)wsv.ptr()); // must fit at least one character otherwise there's an infinite loop
 						wordValue = _Text.substr(spaceEnd, currChar);
 						CWord word;
 						word.build(wordValue, *TextContext, numSpaces);
@@ -2030,7 +2133,7 @@ namespace NLGUI
 		}
 
 		// if the text ends with \n, must insert the last line ourself
-		if (!_Text.empty() && _Text[_Text.length() - 1] == (ucchar) '\n')
+		if (!_Text.empty() && _Text[_Text.length() - 1] == '\n')
 		{
 			_Lines.push_back(TLineSPtr(new CLine));
 		}
@@ -2143,16 +2246,16 @@ namespace NLGUI
 			{
 				TextContext->erase (_Index);
 
-				ucchar ucLetter;
+				// char ucLetter;
 				UTextContext::CStringInfo si;
-				ucstring	ucCurrentLine;
+				std::string	ucCurrentLine;
 				ucCurrentLine.reserve(_Text.size());
 
 				// Append ... to the end of line
 				float dotWidth = 0.f;
 				if (_OverflowText.size() > 0)
 				{
-					si = TextContext->getStringInfo (ucstring(_OverflowText));
+					si = TextContext->getStringInfo(_OverflowText);
 					dotWidth = si.StringWidth;
 				}
 
@@ -2162,11 +2265,11 @@ namespace NLGUI
 				// for all the text
 				if (_ClampRight)
 				{
-					for (uint i = 0; i < _Text.size(); ++i)
+					CUtfStringView sv(_Text);
+					::u32string ucStrLetter = ::u32string(1, (u32char)' ');
+					for (CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it)
 					{
-						ucLetter= _Text[i];
-						ucstring ucStrLetter;
-						ucStrLetter= ucLetter;
+						ucStrLetter[0] = *it;
 						si = TextContext->getStringInfo (ucStrLetter);
 						if ((rWidthCurrentLine + si.StringWidth + dotWidth) > fLineMaxW)
 						{
@@ -2175,7 +2278,7 @@ namespace NLGUI
 						else
 						{
 							// Grow the current line
-							ucCurrentLine += ucLetter;
+							CUtfStringView::append(ucCurrentLine, *it);
 							rWidthCurrentLine += si.StringWidth;
 						}
 					}
@@ -2188,11 +2291,12 @@ namespace NLGUI
 				}
 				else
 				{
-					for (sint i = (sint)_Text.size() - 1; i >= 0; --i)
+					// FIXME: Optimize reverse UTF iteration
+					::u32string uctext = CUtfStringView(_Text).toUtf32();
+					::u32string ucStrLetter = ::u32string(1, (u32char)' ');
+					for (sint i = (sint)uctext.size() - 1; i >= 0; --i)
 					{
-						ucLetter= _Text[i];
-						ucstring ucStrLetter;
-						ucStrLetter= ucLetter;
+						ucStrLetter[0] = uctext[i];
 						si = TextContext->getStringInfo (ucStrLetter);
 						if ((rWidthCurrentLine + si.StringWidth + dotWidth) > fLineMaxW)
 						{
@@ -2201,7 +2305,9 @@ namespace NLGUI
 						else
 						{
 							// Grow the current line
-							ucCurrentLine = ucLetter + ucCurrentLine;
+							std::string tmp;
+							CUtfStringView::append(tmp, uctext[i]);
+							ucCurrentLine = tmp + ucCurrentLine;
 							rWidthCurrentLine += si.StringWidth;
 						}
 					}
@@ -2300,7 +2406,8 @@ namespace NLGUI
 				}
 				charIndex = newCharIndex;
 			}
-			return (sint)_Lines.size() - 1;
+			// return (sint)_Lines.size() - 1;
+			return -1;
 		}
 		else
 		{
@@ -2319,7 +2426,7 @@ namespace NLGUI
 			charIndex += currLine.getNumChars() + currLine.getEndSpaces() + (currLine.getLF() ? 1 : 0);
 		}
 		// skip all spaces at start of line (unless there are only spaces in the line)
-		std::string::size_type nextPos = _Text.find_first_not_of((ucchar) ' ', charIndex);
+		std::string::size_type nextPos = _Text.find_first_not_of(' ', charIndex);
 		if (nextPos != std::string::npos)
 		{
 			if (getLineFromIndex(charIndex) == (sint) line)
@@ -2344,17 +2451,38 @@ namespace NLGUI
 		endOfPreviousLine = !_Lines[line]->getLF();
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
+	// ***************************************************************************
+	void CViewText::setHardTextAsUtf16(const ucstring &ht)
+	{
+		setHardText(ht.toUtf8());
+	}
+#endif
+
 	// ***************************************************************************
 	void CViewText::setHardText (const std::string &ht)
 	{
-	//	ucstring Text = ucstring(ht);
-		ucstring Text;
-		if ((ht.size()>2) && (ht[0] == 'u') && (ht[1] == 'i'))
-			Text = CI18N::get (ht);
-		else
-			Text.fromUtf8(ht);
-		setText(Text);
+		if (!_Localized)
+		{
+			setText(std::string());
+			_Localized = true;
+		}
+		setText(ht);
 	}
+
+#ifdef RYZOM_LUA_UCSTRING
+	// ***************************************************************************
+	ucstring CViewText::getTextAsUtf16() const
+	{
+		return CUtfStringView(getText()).toUtf16();
+	}
+
+	// ***************************************************************************
+	ucstring CViewText::getHardTextAsUtf16() const
+	{
+		return CUtfStringView(getHardText()).toUtf16();
+	}
+#endif
 
 	// ***************************************************************************
 	string CViewText::getColorAsString() const
@@ -2383,7 +2511,9 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::getCharacterPositionFromIndex(sint index, bool cursorAtPreviousLineEnd, float &x, float &y, float &height) const
 	{
-		NLMISC::clamp(index, 0, (sint) _Text.length());
+		if (!_TextLength && _Text.size())
+			_TextLength = CUtfStringView(_Text).count();
+		NLMISC::clamp(index, 0, (sint)_TextLength);
 		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
@@ -2401,7 +2531,7 @@ namespace NLGUI
 
 			uint charIndex = 0;
 			// special case for end of text
-			if (index == (sint) _Text.length())
+			if (index >= (sint)_TextLength)
 			{
 				fy = dy;
 				if (_Lines.empty())
@@ -2456,16 +2586,15 @@ namespace NLGUI
 					for(uint k = 0; k < currLine.getNumWords(); ++k)
 					{
 						CWord &currWord = currLine.getWord(k);
-						if ((sint) (charIndex + currWord.NumSpaces + currWord.Text.length()) >= index)
+						if ((sint) (charIndex + currWord.NumSpaces + currWord.Info.StringLength) >= index)
 						{
 							// character is in currWord or the in spaces preceding it
 							// check if the character is in the word
 							if ((uint) (index - charIndex) > currWord.NumSpaces)
 							{
 								// get the x position
-								ucstring subStr = currWord.Text.substr(0, index - charIndex - currWord.NumSpaces);
 								// compute the size
-								UTextContext::CStringInfo si = TextContext->getStringInfo(subStr);
+								UTextContext::CStringInfo si = TextContext->getStringInfo(currWord.Text, (ptrdiff_t)index - charIndex - currWord.NumSpaces);
 								fx = px + si.StringWidth + currWord.NumSpaces * currLine.getSpaceWidth();
 
 								x = fx / _Scale;
@@ -2482,7 +2611,7 @@ namespace NLGUI
 								return;
 							}
 						}
-						charIndex += (uint)currWord.Text.length() + currWord.NumSpaces;
+						charIndex += (uint)currWord.Info.StringLength + currWord.NumSpaces;
 						px += currWord.NumSpaces * currLine.getSpaceWidth() + currWord.Info.StringWidth;
 					}
 				}
@@ -2493,9 +2622,8 @@ namespace NLGUI
 		else
 		{
 			// get the x position
-			ucstring subStr = _Text.substr(0, index);
 			// compute the size
-			UTextContext::CStringInfo si = TextContext->getStringInfo(subStr);
+			UTextContext::CStringInfo si = TextContext->getStringInfo(_Text, index);
 			y = 0;
 			x = (sint) ceilf(si.StringWidth / _Scale);
 		}
@@ -2503,17 +2631,18 @@ namespace NLGUI
 
 	// ***************************************************************************
 	// Tool fct : From a word and a x coordinate (font scale), give the matching character index
-	static uint getCharacterIndex(const ucstring &textValue, float x, NL3D::UTextContext &textContext)
+	static uint getCharacterIndex(const std::string &textValue, float x, NL3D::UTextContext &textContext)
 	{
 		float px = 0.f;
 
 		UTextContext::CStringInfo si;
-		ucstring singleChar(" ");
-		uint i;
-		for (i = 0; i < textValue.length(); ++i)
+		::u32string singleChar(1, ' ');
+		uint i = 0;
+		NLMISC::CUtfStringView sv(textValue);
+		for (NLMISC::CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it, ++i)
 		{
 			// get character width
-			singleChar[0] = textValue[i];
+			singleChar[0] = *it;
 			si = textContext.getStringInfo(singleChar);
 			px += si.StringWidth;
 			 // the character is at the i - 1 position
@@ -2532,6 +2661,9 @@ namespace NLGUI
 	void CViewText::getCharacterIndexFromPosition(float x, float y, uint &index, bool &cursorAtPreviousLineEnd) const
 	{
 		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
+
+		if (!_TextLength && _Text.size())
+			_TextLength = CUtfStringView(_Text).count();
 
 		x *= _Scale;
 		y = roundf(y * _Scale);
@@ -2553,7 +2685,7 @@ namespace NLGUI
 			float py = 0.f;
 			if (py > y)
 			{
-				index = (uint)_Text.length();
+				index = (uint)_TextLength;
 				cursorAtPreviousLineEnd = false;
 				return;
 			}
@@ -2620,7 +2752,7 @@ namespace NLGUI
 					}
 				}
 				px = newPx;
-				charPos += (uint)currWord.Text.length() + currWord.NumSpaces;
+				charPos += (uint)currWord.Info.StringLength + currWord.NumSpaces;
 			}
 			index =  charPos;
 			return;
@@ -2630,7 +2762,7 @@ namespace NLGUI
 			cursorAtPreviousLineEnd = false;
 			if (y < 0)
 			{
-				index = (uint)_Text.length();
+				index = (uint)_TextLength;
 				return;
 			}
 			if (y > (sint) _FontHeight)
@@ -2660,23 +2792,25 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::setStringSelectionSkipingSpace(uint stringId, const ucstring &text, sint charStart, sint charEnd)
+	void CViewText::setStringSelectionSkipingSpace(uint stringId, const std::string &text, sint charStart, sint charEnd)
 	{
 		sint	quadStart= charStart;
 		sint	quadSize= charEnd-charStart;
 		sint j;
-		for(j=0;j<charStart;j++)
+		CUtfStringView sv(text);
+		CUtfStringView::iterator it(sv.begin()), end(sv.end());
+		for (j = 0; it != end && j < charStart; ++j, ++it)
 		{
-			if(text[j]==' ')
+			if(*it == (u32char)' ')
 				quadStart--;
 		}
-		for(j=charStart;j<charEnd;j++)
+		for (j = charStart; it != end && j < charEnd; ++j, ++it)
 		{
-			if(text[j]==' ')
+			if(*it == (u32char)' ')
 				quadSize--;
 		}
 		// select what quad to skip
-		CViewRenderer::getTextContext(_FontName)->setStringSelection(stringId, quadStart, quadSize);
+		CViewRenderer::getTextContext(_FontName)->setStringSelection(stringId, quadStart, quadSize); // FIXME: This assumes spaces are the only empty glyphs!
 	}
 
 	// ***************************************************************************
@@ -2739,7 +2873,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::CLine::addWord(const ucstring &text, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext)
+	void CViewText::CLine::addWord(const std::string &text, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext)
 	{
 		CWord word;
 		word.build(text, textContext, numSpaces);
@@ -2751,7 +2885,7 @@ namespace NLGUI
 	void CViewText::CLine::addWord(const CWord &word, float fontWidth)
 	{
 		_Words.push_back(word);
-		_NumChars += word.NumSpaces + uint(word.Text.length());
+		_NumChars += word.NumSpaces + uint(word.Info.StringLength);
 		_NumSpaces += word.NumSpaces;
 		if (fabsf(word.Info.StringLine) > fabsf(_StringLine))
 		{
@@ -2786,12 +2920,13 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::CWord::build(const ucstring &text, NL3D::UTextContext &textContext, uint numSpaces)
+	void CViewText::CWord::build(const std::string &text, NL3D::UTextContext &textContext, uint numSpaces)
 	{
 		Text = text;
 		NumSpaces = numSpaces;
 		Index = textContext.textPush(text);
 		Info = textContext.getStringInfo(Index);
+		nlassert(Info.StringLength == CUtfStringView(text).count());
 	}
 
 	// ***************************************************************************
@@ -2808,8 +2943,8 @@ namespace NLGUI
 	// ***************************************************************************
 	sint32 CViewText::getMaxUsedW() const
 	{
-		static const ucstring spaceStr(" \t");
-		static const ucstring lineFeedStr("\n");
+		static const char *spaceStr(" \t");
+		static const char *lineFeedStr("\n");
 		float maxWidth = 0;
 
 		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
@@ -2826,13 +2961,13 @@ namespace NLGUI
 			// Get the end of the line
 			float lineWidth = 0;
 			TCharPos lineEnd;
-			lineEnd = _Text.find_first_of(lineFeedStr, linePos);
+			lineEnd = _Text.find_first_of("\n", linePos);
 			if (lineEnd == std::string::npos)
 			{
 				lineEnd = _Text.length();
 			}
 
-			ucstring lineValue;
+			std::string lineValue;
 			lineValue = _Text.substr(linePos, lineEnd - linePos);
 
 			TCharPos currPos = 0;
@@ -2857,7 +2992,7 @@ namespace NLGUI
 					wordEnd = lineValue.length();
 				}
 
-				ucstring wordValue;
+				std::string wordValue;
 				wordValue = lineValue.substr(spaceEnd, wordEnd - spaceEnd);
 
 				// compute width of word
@@ -2883,7 +3018,7 @@ namespace NLGUI
 	// ***************************************************************************
 	sint32 CViewText::getMinUsedW() const
 	{
-		static const ucstring spaceOrLineFeedStr(" \n\t");
+		static const char *spaceOrLineFeedStr(" \n\t");
 		float maxWidth = 0.0f;
 
 		// Not multi line ? Same size than min
@@ -2912,7 +3047,7 @@ namespace NLGUI
 			while (currPos < _Text.length())
 			{
 				// Current word
-				ucstring wordValue;
+				std::string wordValue;
 				UTextContext::CStringInfo si;
 				TCharPos wordEnd;
 
@@ -2975,6 +3110,44 @@ namespace NLGUI
 		TextContext->setEmbolden (_Embolden);
 		TextContext->setOblique (_Oblique);
 
+#if 1
+
+		UTextContext::CStringInfo si = TextContext->getStringInfo("XO");
+		float xoHeight = si.StringHeight;
+
+		si = TextContext->getStringInfo("XO\xC3\x81\xC3\x83");
+		float upHeight = si.StringHeight;
+
+		si = TextContext->getStringInfo("XOgq");
+		float downHeight = si.StringHeight;
+		float legHeight = si.StringLine;
+
+		nlassert(upHeight >= xoHeight);
+		nlassert(downHeight >= xoHeight);
+		float diff;
+		if (downHeight > upHeight)
+		{
+			diff = downHeight - xoHeight;
+		}
+		else
+		{
+			diff = upHeight - xoHeight;
+			legHeight += upHeight - downHeight;
+		}
+
+		_FontHeight = xoHeight + diff + diff;
+		_FontLegHeight = legHeight;
+
+		// Space width
+		si = TextContext->getStringInfo(" ");
+		_SpaceWidth = si.StringWidth;
+
+		// Font Width (used for <tab>)
+		si = TextContext->getStringInfo("O");
+		_FontWidth = si.StringWidth;
+
+#else
+
 		// Letter size
 		UTextContext::CStringInfo si = TextContext->getStringInfo(_FontSizingChars);
 
@@ -2989,17 +3162,19 @@ namespace NLGUI
 		_FontLegHeight = si.StringLine;
 
 		// Space width
-		si = TextContext->getStringInfo(ucstring(" "));
+		si = TextContext->getStringInfo(" ");
 		_SpaceWidth = si.StringWidth;
 
 		// Font Width (used for <tab>)
-		si = TextContext->getStringInfo(ucstring("_"));
+		si = TextContext->getStringInfo("_");
 		_FontWidth = si.StringWidth;
+
+#endif
 	}
 
 
 	// ***************************************************************************
-	static inline bool	isColorTag(const ucstring &s, uint index, uint textSize)
+	static inline bool	isColorTag(const std::string &s, uint index, uint textSize)
 	{
 		// Format is @{RGBA}
 		if(s[index]=='@')
@@ -3023,7 +3198,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 	// isColorTag must be ok.
-	static inline CRGBA	getColorTag(const ucstring &s, uint &index)
+	static inline CRGBA	getColorTag(const std::string &s, uint &index)
 	{
 		// extract the color string: "FABC"
 		char	tmpCol[5];
@@ -3050,7 +3225,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 	const	uint	MaxTabDigit= 3;
-	static inline bool	isTabTag(const ucstring &s, uint index, uint textSize)
+	static inline bool	isTabTag(const std::string &s, uint index, uint textSize)
 	{
 		// Format is @{Tvalue}, where value ,1,2,3 digit.
 		if(s[index]=='@')
@@ -3076,7 +3251,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 	// isTabTag must be ok.
-	static inline sint	getTabTag(const ucstring &s, uint &index)
+	static inline sint	getTabTag(const std::string &s, uint &index)
 	{
 		// extract the tab min X value
 		char	tmpTab[MaxTabDigit+1];
@@ -3099,7 +3274,7 @@ namespace NLGUI
 
 
 	// ***************************************************************************
-	static inline bool	isTooltipTag(const ucstring &s, uint index, uint textSize)
+	static inline bool	isTooltipTag(const std::string &s, uint index, uint textSize)
 	{
 		// Format is @{Huitt*}
 		if(s[index]=='@')
@@ -3123,9 +3298,9 @@ namespace NLGUI
 
 	// ***************************************************************************
 	// isTooltipTag must be ok.
-	static inline ucstring	getTooltipTag(const ucstring &s, uint &index)
+	static inline std::string	getTooltipTag(const std::string &s, uint &index)
 	{
-		ucstring result;
+		std::string result;
 		uint i = 3;
 		while (s[index+i] != '}')
 		{
@@ -3141,7 +3316,7 @@ namespace NLGUI
 
 
 	// ***************************************************************************
-	void		CViewText::buildFormatTagText(const ucstring &text, ucstring &textBuild, std::vector<CViewText::CFormatTag> &formatTags, std::vector<ucstring> &tooltips)
+	void		CViewText::buildFormatTagText(const std::string &text, std::string &textBuild, std::vector<CViewText::CFormatTag> &formatTags, std::vector<std::string> &tooltips)
 	{
 		formatTags.clear();
 		tooltips.clear();
@@ -3177,7 +3352,7 @@ namespace NLGUI
 				// get old tag.
 				CViewText::CFormatTag ct= precTag;
 				// get new Tab and skip tag.
-				ucstring uitt = getTooltipTag(text, i);
+				string uitt = getTooltipTag(text, i);
 				if (uitt.empty())
 				{
 					ct.IndexTt= -1;
@@ -3214,18 +3389,25 @@ namespace NLGUI
 		}
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
+	// ***************************************************************************
+	void	CViewText::setTextFormatTagedAsUtf16(const ucstring &text)
+	{
+		setTextFormatTaged(text.toUtf8());
+	}
+#endif
 
 	// ***************************************************************************
-	void	CViewText::setTextFormatTaged(const ucstring &text)
+	void	CViewText::setTextFormatTaged(const std::string &text)
 	{
 		if( text.empty() )
 			return;
 
 		// to allow cache (avoid infinite recurse in updateCoords() in some case), compute in temp
-		ucstring					tempText;
+		std::string							tempText;
 		// static to avoid reallocation
 		static std::vector<CFormatTag>		tempFormatTags;
-		static std::vector<ucstring>		tempTooltips;
+		static std::vector<std::string>		tempTooltips;
 		buildFormatTagText(text, tempText, tempFormatTags, tempTooltips);
 		setCase (tempText, _CaseMode);
 
@@ -3251,7 +3433,9 @@ namespace NLGUI
 			_FormatTags= tempFormatTags;
 			// Copy to Text (preserve Memory)
 			contReset(_Text);
-			_Text= tempText;
+			_Text = tempText;
+			_HardText.clear();
+			_TextLength = 0;
 
 			CInterfaceGroup *parent = getParent();
 
@@ -3272,8 +3456,9 @@ namespace NLGUI
 				pTooltip->setId(_Id+"_tt"+toString(i));
 				pTooltip->setAvoidResizeParent(avoidResizeParent());
 				pTooltip->setRenderLayer(getRenderLayer());
-				bool isI18N = tempTooltips[i].size() >= 2 && tempTooltips[i][0] == 'u' && tempTooltips[i][1] == 'i';
-				pTooltip->setDefaultContextHelp(isI18N ? CI18N::get(tempTooltips[i].toString()) : tempTooltips[i]);
+				std::string tempTooltipStr = tempTooltips[i];
+				bool isI18N = NLMISC::startsWith(tempTooltipStr, "ui");
+				pTooltip->setDefaultContextHelp(isI18N ? CI18N::get(tempTooltipStr) : tempTooltipStr);
 				pTooltip->setParentPos(this);
 				pTooltip->setParentPosRef(Hotspot_BR);
 				pTooltip->setPosRef(Hotspot_BR);
@@ -3301,19 +3486,25 @@ namespace NLGUI
 
 		// color format is available only if multilined
 		if (!_MultiLine)
-			nlwarning( toString("ViewText isn't multilined : uc_hardtext_format will not act as wanted !\n%s", text.toString().c_str()).c_str() );
+			nlwarning("ViewText isn't multilined : uc_hardtext_format will not act as wanted !\n%s", text.c_str());
 	}
 
+#ifdef RYZOM_LUA_UCSTRING
+	void CViewText::setSingleLineTextFormatTagedAsUtf16(const ucstring &text)
+	{
+		setSingleLineTextFormatTaged(text.toUtf8());
+	}
+#endif
 
-	void CViewText::setSingleLineTextFormatTaged(const ucstring &text)
+	void CViewText::setSingleLineTextFormatTaged(const std::string &text)
 	{
 		if( text.empty() )
 			return;
 
 		// to allow cache (avoid infinite recurse in updateCoords() in some case), compute in temp
-		ucstring					tempText;
+		std::string							tempText;
 		static std::vector<CFormatTag>		tempLetterColors;
-		static std::vector<ucstring>		tempTooltips;
+		static std::vector<std::string>		tempTooltips;
 
 		// parse text
 		buildFormatTagText(text, tempText, tempLetterColors, tempTooltips);
@@ -3328,7 +3519,7 @@ namespace NLGUI
 
 			while(textIndex<formatTag.Index)
 			{
-				if(tempText[textIndex] == ucchar(' '))
+				if(tempText[textIndex] == ' ')
 					spacesNb++;
 
 				textIndex++;
@@ -3355,13 +3546,15 @@ namespace NLGUI
 
 			// Copy to Text (preserve Memory)
 			contReset(_Text);
-			_Text= tempText;
+			_Text = tempText;
+			_HardText.clear();
+			_TextLength = 0;
 			invalidateContent ();
 		}
 
 		// this color format is available only if not multilined
 		if (_MultiLine)
-			nlwarning( toString("ViewText is multilined : uc_hardtext_single_line_format will not act as wanted !\n%s", text.toString().c_str()).c_str() );
+			nlwarning("ViewText is multilined : uc_hardtext_single_line_format will not act as wanted !\n%s", text.c_str());
 	}
 
 
@@ -3396,6 +3589,7 @@ namespace NLGUI
 	{
 		_CaseMode = caseMode;
 		setCase (_Text, _CaseMode);
+		_TextLength = 0;
 	}
 
 	// ***************************************************************************
@@ -3437,6 +3631,11 @@ namespace NLGUI
 		#define SERIAL_UINT(val) { uint32 tmp = (uint32) val; f.serial(tmp); val = (uint) tmp; }
 		#define SERIAL_SINT(val) { sint32 tmp = (sint32) val; f.serial(tmp); val = (sint) tmp; }
 		CViewBase::serial(f);
+
+		int version = f.serialVersion(101);
+		nlassert(version >= 100);
+
+		f.serial(_Localized);
 		SERIAL_SINT(_FontSize);
 		SERIAL_UINT(_FontWidth);
 		SERIAL_UINT(_FontHeight);
@@ -3468,21 +3667,22 @@ namespace NLGUI
 			{
 				if (_MultiLine)
 				{
-					setTextFormatTaged(text);
+					setTextFormatTaged(text.toUtf8());
 				}
 				else
 				{
-					setSingleLineTextFormatTaged(text);
+					setSingleLineTextFormatTaged(text.toUtf8());
 				}
 			}
 			else
 			{
-				setText(text);
+				setText(text.toUtf8());
 			}
 		}
 		else
 		{
-			f.serial(_Text);
+			ucstring text = CUtfStringView(_Text).toUtf16();
+			f.serial(text);
 		}
 
 		#undef SERIAL_UINT

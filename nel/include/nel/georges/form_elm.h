@@ -282,6 +282,10 @@ public:
 		{
 			Element = NULL;
 		}
+		~CFormElmStructElm()
+		{
+			nlassert(!Element);
+		}
 
 		std::string		Name;
 		CFormElm*		Element;
@@ -399,6 +403,10 @@ public:
 		CElement ()
 		{
 			Element = NULL;
+		}
+		~CElement ()
+		{
+			nlassert(!Element);
 		}
 
 		std::string		Name;
@@ -631,7 +639,7 @@ inline bool CFormElm::convertValue (bool &result, const std::string &value) cons
 	}
 	else
 	{
-		std::string temp = NLMISC::toLower(value);
+		std::string temp = NLMISC::toLowerAscii(value);
 		if (strcmp (temp.c_str (), "true") == 0)
 		{
 			result  = true;

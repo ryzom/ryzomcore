@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
-// Copyright (C) 2010-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2011-2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
@@ -721,7 +721,7 @@ CClientConfig::CClientConfig()
 
 	R2EDLoadDynamicFeatures	= 0;
 
-	CheckR2ScenarioMD5 = true;
+	CheckR2ScenarioMD5 = false;
 
 	DisplayTPReason = false;
 
@@ -1440,7 +1440,7 @@ void CClientConfig::setValues()
 				else if (stricmp(mode, "centeraround") == 0)	p.Mode = SSysInfoParam::CenterAround;
 				else if (stricmp(mode, "around") == 0)	p.Mode = SSysInfoParam::Around;
 
-				ClientCfg.SystemInfoParams[toLower(sic->asString(2 * k))] = p;
+				ClientCfg.SystemInfoParams[toLowerAscii(sic->asString(2 * k))] = p;
 			}
 		}
 	}
@@ -1863,7 +1863,7 @@ void CClientConfig::setValues()
 		ClientCfg.HardwareCursors.clear ();
 		int iSz = pcvHardwareCursors->size();
 		for (int i = 0; i < iSz; i++)
-			ClientCfg.HardwareCursors.insert(toLower(pcvHardwareCursors->asString(i)));
+			ClientCfg.HardwareCursors.insert(toLowerAscii(pcvHardwareCursors->asString(i)));
 	}
 	else
 	{
@@ -2030,7 +2030,7 @@ void CClientConfig::init(const string &configFileName)
 	}
 
 	// read the exising config file (don't parse it yet!)
-	ucstring content;
+	ucstring content; // UTF-16 and UTF-8 textfile support
 	NLMISC::CI18N::readTextFile(configFileName, content);
 	std::string contentUtf8 = content.toUtf8();
 
@@ -2275,14 +2275,13 @@ string	CClientConfig::getHtmlLanguageCode() const
 }
 
 // ***************************************************************************
-ucstring CClientConfig::buildLoadingString( const ucstring& ucstr ) const
+string CClientConfig::buildLoadingString( const string& ucstr ) const
 {
 	if( LoadingStringCount > 0 )
 	{
 		uint index = rand()%LoadingStringCount;
-		string tipId = "uiLoadingString"+toString(index);
-		ucstring randomUCStr = CI18N::get(tipId);
-		return randomUCStr;
+		string tipId = "uiLoadingString" + toString(index);
+		return CI18N::get(tipId);
 	}
 	else
 		return ucstr;

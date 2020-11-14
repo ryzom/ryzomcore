@@ -263,22 +263,22 @@ namespace INVENTORIES
 	enum TItemPropId
 	{
 		Sheet,
-			Quality,
-			Quantity,
-			UserColor,
-			CreateTime,
-			Serial,
-			Locked,
-			Weight,
-			NameId,
-			Enchant,
-			ItemClass,
-			ItemBestStat,
-			Price,
-			ResaleFlag,
-			PrerequisitValid,
-			Worned,
-			NbItemPropId
+		Quality,
+		Quantity,
+		UserColor,
+		Buffs,
+		Locked,
+		Access,
+		Weight,
+		NameId,
+		Enchant,
+		ItemClass,
+		ItemBestStat,
+		PrerequisitValid,
+		Price,
+		ResaleFlag,
+		Worned,
+		NbItemPropId
 	};
 
 	const uint NbBitsForItemPropId = 4; // TODO: replace this constant by an inline function using NbItemPropId
@@ -367,8 +367,8 @@ namespace INVENTORIES
 			bms.serial( _SlotIndex, CInventoryCategoryTemplate::SlotBitSize );
 
 			uint i;
-			// SHEET, QUALITY, QUANTITY, USER_COLOR, CREATE_TIME and SERIAL never require compression
-			for (i = 0; i < 6; ++i)
+			// SHEET, QUALITY, QUANTITY, and USER_COLOR never require compression
+			for (i = 0; i < 4; ++i)
 				bms.serial((uint32&)_ItemProp[i], DataBitSize[i]);
 
 			// For all other the compression is simple the first bit indicates if the value is zero
@@ -376,22 +376,38 @@ namespace INVENTORIES
 			{
 				for (; i < NbItemPropId; ++i)
 				{
-					bool b;
-					bms.serialBit(b);
-					if (b)
-						_ItemProp[i] = 0;
-					else
+					if (DataBitSize[i] < 3)
+					{
+						// Don't compress 1 or 2 bits either
 						bms.serial((uint32&)_ItemProp[i], DataBitSize[i]);
+					}
+					else
+					{
+						bool b;
+						bms.serialBit(b);
+						if (b)
+							_ItemProp[i] = 0;
+						else
+							bms.serial((uint32 &)_ItemProp[i], DataBitSize[i]);
+					}
 				}
 			}
 			else
 			{
 				for (; i != NbItemPropId; ++i)
 				{
-					bool b = (_ItemProp[i] == 0);
-					bms.serialBit(b);
-					if (!b)
+					if (DataBitSize[i] < 3)
+					{
+						// Don't compress 1 or 2 bits either
 						bms.serial((uint32&)_ItemProp[i], DataBitSize[i]);
+					}
+					else
+					{
+						bool b = (_ItemProp[i] == 0);
+						bms.serialBit(b);
+						if (!b)
+							bms.serial((uint32 &)_ItemProp[i], DataBitSize[i]);
+					}
 				}
 			}
 		}
@@ -482,6 +498,9 @@ enum TItemChange
 	itc_lock_state		= 1<<6,
 	itc_info_version	= 1<<7,
 	itc_worned			= 1<<8,
+	itc_owner_locked    = itc_lock_state,
+	itc_access_grade    = itc_lock_state,
+	itc_name            = itc_lock_state,
 };
 
 typedef NLMISC::CEnumBitset<TItemChange>	TItemChangeFlags;

@@ -17,17 +17,17 @@ eltTemplateParams =	{
 						multiMaxLine="3"
 					},
 elementEditorTemplate = "template_edit_chat",
-elementInitialName=i18n.get("uiR2EdChat"):toUtf8(),
-sequenceInitialName=i18n.get("uiR2EDDialog"):toUtf8(),
+elementInitialName=i18n.get("uiR2EdChat"),
+sequenceInitialName=i18n.get("uiR2EDDialog"),
 
 keepOpenedEditor = false,
 
 currentEltUIID = nil, -- initialisé quand l'editeur est ouvert ou fermé
 
 whoToWhoTranslation =	{
-							["_DM"] = i18n.get("uiR2EdDonjonMaster"):toUtf8(),
-							["_System"] = i18n.get("uiR2EdSystem"):toUtf8(),
-							["_Nobody"] = i18n.get("uiR2EdNobody"):toUtf8(),
+							["_DM"] = i18n.get("uiR2EdDonjonMaster"),
+							["_System"] = i18n.get("uiR2EdSystem"),
+							["_Nobody"] = i18n.get("uiR2EdNobody"),
 						},
 
 maxVisibleLine = 10,
@@ -154,7 +154,7 @@ function r2.dialogs:openEditor()
 			sequenceUI.active = false	
 			local dialogName = dialogUI:find("dialogMenu"):find("menu"):find("text")
 			assert(dialogName)
-			dialogName.uc_hardtext = i18n.get("uiR2EdNoSelelection")
+			dialogName.text = i18n.get("uiR2EdNoSelelection")
 		end
 
 		-- active editor
@@ -180,7 +180,7 @@ function r2.dialogs:newSequenceInst(x, y, z)
 	assert(dialog)
 	
 	dialog.Base = r2.Translator.getDebugBase("palette.entities.botobjects.dialog")
-	dialog.Name = r2:genInstanceName(i18n.get("uiR2EDDialog")):toUtf8()	
+	dialog.Name = r2:genInstanceName(i18n.get("uiR2EDDialog"))	
 	dialog.Position.x = x
 	dialog.Position.y = y
 	dialog.Position.z = r2:snapZToGround(x, y)
@@ -245,10 +245,8 @@ function r2.dialogs:initDialogsMenu()
 	local allDialogs = {}
 	r2:getCurrentAct():appendInstancesByType(allDialogs, "ChatSequence")
 
-	local uc_dialog = ucstring()
 	for k, dialog in pairs(allDialogs) do
-		uc_dialog:fromUtf8(dialog.Name)
-		dialogMenu:addLine(uc_dialog, "lua", "r2:setSelectedInstanceId('" .. dialog.InstanceId .."')", dialog.InstanceId)
+		dialogMenu:addLine(dialog.Name, "lua", "r2:setSelectedInstanceId('" .. dialog.InstanceId .."')", dialog.InstanceId)
 	end
 
 	dialogMenu:setMaxVisibleLine(self.maxVisibleLine)
@@ -308,15 +306,12 @@ function r2.dialogs:selectSequence(dialogId)
 	repeatButton.pushed = (sequenceInst.Repeating == 0)
 
 	-- dialog editor title
-	local uc_dialog = ucstring()
-	uc_dialog:fromUtf8(i18n.get("uiR2EDChatSequenceEditor"):toUtf8() .. sequenceInst.Name)
-	ui.uc_title = uc_dialog 
+	ui.title = i18n.get("uiR2EDChatSequenceEditor")..sequenceInst.Name
 
 	-- dialog name in menu box
 	local dialogName = ui:find("dialogMenu"):find("menu"):find("text")
 	assert(dialogName)
-	uc_dialog:fromUtf8(sequenceInst.Name)
-	dialogName.uc_hardtext = uc_dialog
+	dialogName.text = sequenceInst.Name
 
 	-- initialize maximize/minimize
 	local maxElts = sequenceUI:find("maximize_elements")
@@ -386,49 +381,47 @@ function r2.dialogs:updateElementEditor()
 
 	if instanceChat then
 
-		local uc_chat = ucstring()
+		local chat = ""
 		
 		local index = r2.logicComponents:searchElementIndex(instanceChat)
 		if index~= nil then
-			uc_chat:fromUtf8(self.elementInitialName.." "..index.." : ")
+			chat = self.elementInitialName.." "..index.." : "
 		else
-			uc_chat:fromUtf8(self.elementInitialName.." : ")
+			chat = self.elementInitialName.." : "
 		end
-		chatName.uc_hardtext = uc_chat
+		chatName.text = uc_chat
 
 		-- after value
 		local time = instanceChat.Time
 		assert(time)
 		local minNb, secNb = self:calculMinSec(time)
 
-		minutesText.uc_hardtext = tostring(minNb)
-		secondsText.uc_hardtext = tostring(secNb)
+		minutesText.text = tostring(minNb)
+		secondsText.text = tostring(secNb)
 			
 		-- who
 		local whoInst = r2:getInstanceFromId(tostring(instanceChat.Actions[0].Who))
 		local hideToWhoAndEmote = false
 		if whoInst then
-			uc_chat:fromUtf8(whoInst.Name)
+			chat = whoInst.Name
 		elseif instanceChat.Actions[0].WhoNoEntity=="_System" then
-			uc_chat = i18n.get("uiR2EdSystem")
+			chat = i18n.get("uiR2EdSystem")
 			hideToWhoAndEmote = true
 		elseif instanceChat.Actions[0].WhoNoEntity=="_DM" then
-			uc_chat = i18n.get("uiR2EdDonjonMaster")
+			chat = i18n.get("uiR2EdDonjonMaster")
 			hideToWhoAndEmote = true
 		else
-			uc_chat = ucstring("")
+			chat = ""
 		end
-		whoMenuText.uc_hardtext = uc_chat
+		whoMenuText.text = chat
 		
 		-- says what
 		editBox:cancelFocusOnText()
 		local textID = instanceChat.Actions[0].Says
 		if textID ~= "" and r2:getInstanceFromId(textID) then
-			local uc_says_what = ucstring()
-			uc_says_what:fromUtf8(r2:getInstanceFromId(textID).Text)
-			editBox.uc_input_string = uc_says_what
+			editBox.input_string = r2:getInstanceFromId(textID).Text
 		else
-			editBox.uc_input_string = ""
+			editBox.input_string = ""
 		end
 
 		local breakAtEnd = 0
@@ -449,35 +442,33 @@ function r2.dialogs:updateElementEditor()
 		-- to who
 		local toWhoInst = r2:getInstanceFromId(tostring(instanceChat.Actions[0].Facing))
 		if toWhoInst then
-			uc_chat:fromUtf8(toWhoInst.Name)
+			chat = toWhoInst.Name
 		else
-			uc_chat = i18n.get("uiR2EdNobody")
+			chat = i18n.get("uiR2EdNobody")
 		end
-		toWhoMenuText.uc_hardtext = uc_chat
+		toWhoMenuText.text = chat
 
 		-- emote
 		local emoteName = self.fromEmoteIdToName[instanceChat.Actions[0].Emote]
 		if emoteName then
-			uc_chat:fromUtf8(emoteName)
+			chat = emoteName
 		else
-			uc_chat = i18n.get("uiR2EdNoElt")
+			chat = i18n.get("uiR2EdNoElt")
 		end
-		emoteButtonText.uc_hardtext = uc_chat
+		emoteButtonText.text = chat
 
 	else
-		local uc_chat = ucstring()
-		uc_chat:fromUtf8(self.elementInitialName.." : ")
-		chatName.uc_hardtext = uc_chat
+		chatName.text = self.elementInitialName.." : "
 
-		minutesText.uc_hardtext = tostring(0)
-		secondsText.uc_hardtext = tostring(0)
+		minutesText.text = "0"
+		secondsText.text = "0"
 
-		whoMenuText.uc_hardtext = ""
+		whoMenuText.text = ""
 
-		editBox.uc_input_string = ""
+		editBox.input_string = ""
 
-		toWhoMenuText.uc_hardtext = ""
-		emoteButtonText.uc_hardtext = i18n.get("uiR2EdNoElt")
+		toWhoMenuText.text = ""
+		emoteButtonText.text = i18n.get("uiR2EdNoElt")
 	end
 end
 
@@ -575,14 +566,12 @@ function r2.dialogs:updateSequenceUI(sequenceInst)
 	repeatButton.pushed = (sequenceInst.Repeating == 0)
 
 	-- dialog editor title
-	local uc_title = ucstring()
-	uc_title:fromUtf8(i18n.get("uiR2EDChatSequenceEditor"):toUtf8() .. sequenceInst.Name)
-	ui.uc_title = uc_title
+	ui.title = i18n.get("uiR2EDChatSequenceEditor")..sequenceInst.Name
 
 	-- dialog name in menu box
 	local dialogName = ui:find("dialogMenu"):find("menu"):find("text")
 	assert(dialogName)
-	dialogName.uc_hardtext = sequenceInst.Name
+	dialogName.text = sequenceInst.Name
 end
 
 ------ UP ELEMENT INST -------------------------------------------
@@ -644,7 +633,7 @@ function r2.dialogs:updateElementUI(elementUI)
 		-- Add a white line that indicate that the dialog pause at end (ChatStep) in reduced view
 		chatText:addColoredTextChild(text, 220, 140, 100, 255)
 		if chatStep.BreakAtEnd and chatStep.BreakAtEnd == 1 then
-			chatText:addColoredTextChild("\n"..i18n.get("uiR2EDThenPause"):toUtf8(), 255, 255, 255, 255)
+			chatText:addColoredTextChild("\n"..i18n.get("uiR2EDThenPause"), 255, 255, 255, 255)
 		end
 
 		local sep = elementUI:find("sep")
@@ -672,17 +661,17 @@ function r2.dialogs:initTimeMenu(timeFunction, isHours)
 	timeMenu:reset()
 
 	for i=0,9 do
-		timeMenu:addLine(ucstring(tostring(i)), "lua", timeFunction .. "(" .. tostring(i) .. ")", tostring(i))
+		timeMenu:addLine(tostring(i), "lua", timeFunction .. "(" .. tostring(i) .. ")", tostring(i))
 	end
 
 	if isHours then
-		timeMenu:addLine(ucstring(tostring(10)), "lua", timeFunction .. "(" .. tostring(10) .. ")", tostring(10))
+		timeMenu:addLine(tostring(10), "lua", timeFunction .. "(" .. tostring(10) .. ")", tostring(10))
 	else
 
 		local lineNb = 9
 		for i=10, 50, 10 do
 			local lineStr = tostring(i).."/"..tostring(i+9)
-			timeMenu:addLine(ucstring(lineStr), "", "", tostring(i))
+			timeMenu:addLine(lineStr, "", "", tostring(i))
 			lineNb = lineNb+1
 
 			timeMenu:addSubMenu(lineNb)
@@ -690,7 +679,7 @@ function r2.dialogs:initTimeMenu(timeFunction, isHours)
 
 			for s=0,9 do
 				lineStr = tostring(i+s) 
-				subMenu:addLine(ucstring(lineStr), "lua", timeFunction .. "(" .. tostring(i+s) .. ")", lineStr)
+				subMenu:addLine(lineStr, "lua", timeFunction .. "(" .. tostring(i+s) .. ")", lineStr)
 			end
 
 			timeMenu:setMaxVisibleLine(self.maxVisibleLine)
@@ -766,13 +755,12 @@ function r2.dialogs:initWhoMenu(whoFunction, towho)
 	local npcTable = r2.Scenario:getAllInstancesByType("Npc")
 
 	if towho == true then
-		whoMenu:addLine(i18n.get("uiR2EdNobody"), "lua", whoFunction.."('" ..i18n.get("uiR2EdNobody"):toUtf8().. "')", "Nobody")
+		whoMenu:addLine(i18n.get("uiR2EdNobody"), "lua", whoFunction.."('" ..i18n.get("uiR2EdNobody").. "')", "Nobody")
 	else
 		whoMenu:addLine(i18n.get("uiR2EdSystem"), "lua", whoFunction.."('_System')", "System")
 		whoMenu:addLine(i18n.get("uiR2EdDonjonMaster"), "lua", whoFunction.."('_DM')", "DonjonMaster")	
 	end
 	
-	local uc_who = ucstring()
 	for key, npc in pairs(npcTable) do
 		local addLine = true
 
@@ -787,8 +775,7 @@ function r2.dialogs:initWhoMenu(whoFunction, towho)
 				end
 			end
 			if addLine then
-				uc_who:fromUtf8(npc.Name)
-				whoMenu:addLine(uc_who, "lua", whoFunction.."('" ..npc.InstanceId.. "')", npc.InstanceId)	
+				whoMenu:addLine(npc.Name, "lua", whoFunction.."('" ..npc.InstanceId.. "')", npc.InstanceId)	
 			end
 		end
 	end
@@ -806,7 +793,7 @@ function r2.dialogs:updateSaysWhat()
 	if sequenceUI then
 		local chatEditor = sequenceUI:find("edit_element")
 		if chatEditor then
-			local saysWhat = chatEditor:find("says"):find("edit_box_group").uc_input_string:toUtf8()
+			local saysWhat = chatEditor:find("says"):find("edit_box_group").input_string
 			self:setSaysWhat(saysWhat)
 		end
 	end
@@ -828,7 +815,7 @@ function r2.dialogs:setWho(who)
 		r2.requestSetNode(chatStep.Actions[0].InstanceId, "WhoNoEntity", "")
 
 		if who == chatStep.Actions[0].Facing then
-			self:setToWho(i18n.get("uiR2EdNobody"):toUtf8())
+			self:setToWho(i18n.get("uiR2EdNobody"))
 		end
 	else
 		r2.requestSetNode(chatStep.Actions[0].InstanceId, "Who", r2.RefId(""))
@@ -849,7 +836,7 @@ function r2.dialogs:setToWho(toWho)
 	local chatStep = self:currentEltInst()
 	assert(chatStep)
 
-	if toWho == i18n.get("uiR2EdNobody"):toUtf8() then toWho="" end
+	if toWho == i18n.get("uiR2EdNobody") then toWho="" end
 	r2.requestSetNode(chatStep.Actions[0].InstanceId, "Facing", r2.RefId(toWho))
 end
 
@@ -857,7 +844,7 @@ end
 function r2.dialogs:setSaysWhat(whatText)
 
 	if whatText == nil then
-		whatText = getUICaller().uc_input_string:toUtf8()
+		whatText = getUICaller().input_string
 	end
 
 	r2.requestNewAction(i18n.get("uiR2EDChatSetSayWhatAction"))

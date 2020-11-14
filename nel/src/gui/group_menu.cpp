@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -275,7 +275,7 @@ namespace NLGUI
 			if (stricmp((char*)cur->name, "action") == 0)
 			{
 				string		strId,  strAh,  strParams,  strCond, strTexture;
-				ucstring	ucstrName;
+				string	ucstrName;
 
 				if (id)		strId = (const char*)id;
 				CXMLAutoPtr name((const char*) xmlGetProp (cur,  (xmlChar*)"name"));
@@ -283,9 +283,10 @@ namespace NLGUI
 				if (name)
 				{
 					const char *ptrName = (const char*)name;
-					ucstrName = ucstring(ptrName);
-					if ((strlen(ptrName)>2) && (ptrName[0] == 'u') && (ptrName[1] == 'i'))
-						ucstrName = CI18N::get (ptrName);
+					if (NLMISC::startsWith(ptrName, "ui"))
+						ucstrName = CI18N::get(ptrName);
+					else
+						ucstrName = ptrName;
 				}
 
 				CXMLAutoPtr ah((const char*) xmlGetProp (cur,  (xmlChar*)"handler"));
@@ -1214,7 +1215,7 @@ namespace NLGUI
 
 
 	// ------------------------------------------------------------------------------------------------
-	CViewTextMenu* CGroupSubMenu::addLine (const ucstring &name,  const std::string &ah,
+	CViewTextMenu* CGroupSubMenu::addLine (const std::string &name,  const std::string &ah,
 										   const std::string &params,  const std::string &id,
 										   const std::string &cond, const std::string &texture,
 										   bool checkable /*= false*/,  bool checked /*= false*/, bool formatted /*= false */
@@ -1295,7 +1296,7 @@ namespace NLGUI
 		return pV;
 	}
 
-	CViewTextMenu* CGroupSubMenu::addLineAtIndex(uint index,  const ucstring &name,  const std::string &ah,
+	CViewTextMenu* CGroupSubMenu::addLineAtIndex(uint index,  const std::string &name,  const std::string &ah,
 												 const std::string &params,  const std::string &id /*=""*/,
 												 const std::string &cond /*=std::string()*/, const std::string &texture,
 												 bool checkable /*= false*/,  bool checked /*= false*/, bool formatted /*= false */
@@ -1822,8 +1823,13 @@ namespace NLGUI
 		const char *funcName = "getLineId";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		std::string id = getLineId((uint) ls.toInteger(1));
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring id = getLineId((uint) ls.toInteger(1)); // Compatibility
 		CLuaIHM::push(ls, id);
+#else
+		std::string id = getLineId((uint)ls.toInteger(1));
+		ls.push(id);
+#endif
 		return 1;
 	}
 
@@ -1852,13 +1858,21 @@ namespace NLGUI
 	{
 		const char *funcName = "addLine";
 		CLuaIHM::checkArgCount(ls, funcName, 4);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 1);
+#else
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+#endif
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 4, LUA_TSTRING);
-		ucstring arg1;
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring arg1; // Compatibility
 		nlverify(CLuaIHM::getUCStringOnStack(ls, 1, arg1));
-		addLine(arg1, ls.toString(2), ls.toString(3), ls.toString(4));
+		addLine(arg1.toUtf8(), ls.toString(2), ls.toString(3), ls.toString(4));
+#else
+		addLine(ls.toString(1), ls.toString(2), ls.toString(3), ls.toString(4));
+#endif
 		return 0;
 	}
 
@@ -1867,14 +1881,22 @@ namespace NLGUI
 	{
 		const char *funcName = "addIconLine";
 		CLuaIHM::checkArgCount(ls, funcName, 5);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 1);
+#else
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+#endif
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 4, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 5, LUA_TSTRING);
-		ucstring arg1;
+#ifdef RYZOM_LUA_UCSTRING
+		ucstring arg1; // Compatibility
 		nlverify(CLuaIHM::getUCStringOnStack(ls, 1, arg1));
-		addLine(arg1, ls.toString(2), ls.toString(3), ls.toString(4), string(), ls.toString(5));
+		addLine(arg1.toUtf8(), ls.toString(2), ls.toString(3), ls.toString(4), string(), ls.toString(5));
+#else
+		addLine(ls.toString(1), ls.toString(2), ls.toString(3), ls.toString(4), string(), ls.toString(5));
+#endif
 		return 0;
 	}
 
@@ -1884,13 +1906,21 @@ namespace NLGUI
 		const char *funcName = "addLineAtIndex";
 		CLuaIHM::checkArgCount(ls, funcName, 5);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+#ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
+#else
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+#endif
 		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 4, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 5, LUA_TSTRING);
+#ifdef RYZOM_LUA_UCSTRING
 		ucstring arg2;
 		nlverify(CLuaIHM::getUCStringOnStack(ls, 2, arg2));
-		addLineAtIndex((uint) ls.toInteger(1), arg2, ls.toString(3), ls.toString(4), ls.toString(5));
+		addLineAtIndex((uint) ls.toInteger(1), arg2.toUtf8(), ls.toString(3), ls.toString(4), ls.toString(5));
+#else
+		addLineAtIndex((uint)ls.toInteger(1), ls.toString(2), ls.toString(3), ls.toString(4), ls.toString(5));
+#endif
 		return 0;
 	}
 
@@ -2531,25 +2561,7 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CGroupMenu::addLine (const string &name,  const string &ah,  const string &params,
-							  const std::string &id/*=std::string()*/,
-							  const std::string &cond /*= std::string()*/, const std::string &texture,
-							  bool checkable /*= false*/,  bool checked /*= false*/
-							 )
-	{
-		if (_RootMenu == NULL)
-		{
-			_RootMenu = new CGroupSubMenu(CViewText::TCtorParam());
-			_RootMenu->_GroupMenu = this;
-			_RootMenu->setSerializable( false );
-			addGroup (_RootMenu);
-		}
-
-		_RootMenu->addLine (name,  ah,  params,  id,  cond,  texture,  checkable,  checked, _Formatted);
-	}
-
-	// ------------------------------------------------------------------------------------------------
-	void CGroupMenu::addLine(const ucstring &name,  const std::string &ah,  const std::string &params,
+	void CGroupMenu::addLine(const std::string &name,  const std::string &ah,  const std::string &params,
 							 const std::string &id /* = std::string()*/,
 							 const std::string &cond /*= std::string()*/, const std::string &texture,
 							 bool checkable /*= false*/,  bool checked /*= false*/
@@ -2565,7 +2577,7 @@ namespace NLGUI
 		_RootMenu->addLine (name,  ah,  params,  id,  cond,  texture,  checkable,  checked, _Formatted);
 	}
 	// ------------------------------------------------------------------------------------------------
-	void CGroupMenu::addLineAtIndex(uint index, const ucstring &name, const std::string &ah,
+	void CGroupMenu::addLineAtIndex(uint index, const std::string &name, const std::string &ah,
 									const std::string &params, const std::string &id /*=std::string()*/,
 									const std::string &cond /*=std::string()*/, const std::string &texture,
 									bool checkable /*=false*/, bool checked /*=false*/)

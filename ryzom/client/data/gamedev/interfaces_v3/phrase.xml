@@ -730,7 +730,7 @@
 			<!-- NAME. Get the Name spell -->
 			<view type="text" id="spell_name" posref="TL TL" y="-1" w="120" h="10" shadow="true" fontsize="10"
 				global_color="false" />
-			<link expr="getSPhraseName(@SERVER:EXECUTE_PHRASE:LINK:#index:PHRASE)" target="spell_name:uc_hardtext" />
+			<link expr="getSPhraseName(@SERVER:EXECUTE_PHRASE:LINK:#index:PHRASE)" target="spell_name:hardtext" />
 
 			<!-- COSTS (HP, SAP, STA) -->
 			<!--

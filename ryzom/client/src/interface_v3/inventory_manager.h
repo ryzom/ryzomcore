@@ -513,7 +513,7 @@ struct SSortStruct
 {
 	CDBGroupListSheetText::CSheetChild	*SheetText;
 	CDBGroupListSheet::CSheetChild		*SheetIcon;
-	ucstring Pos;
+	std::string Pos;
 	bool operator < (const SSortStruct &o) const { return Pos < o.Pos; }
 };
 
@@ -551,7 +551,7 @@ struct SBagOptions
 	bool SearchFilterChanged;
 	uint16 SearchQualityMin;
 	uint16 SearchQualityMax;
-	std::vector<ucstring> SearchFilter;
+	std::vector<std::string> SearchFilter;
 
 	// -----------------------
 	SBagOptions()
@@ -569,7 +569,7 @@ struct SBagOptions
 	bool isSomethingChanged(); // From last call ?
 
 	bool isSearchFilterChanged() const { return SearchFilterChanged; }
-	void setSearchFilter(const ucstring &s);
+	void setSearchFilter(const std::string &s);
 
 	bool getFilterArmor() const
 	{
@@ -667,7 +667,7 @@ public:
 	// Return true if the sheet can be displayed due to filters
 	bool canDisplay(CDBCtrlSheet *pCS) { return _BO.canDisplay(pCS); }
 
-	void setSearchFilter(const ucstring &s) { _BO.setSearchFilter(s); }
+	void setSearchFilter(const std::string &s) { _BO.setSearchFilter(s); }
 
 private:
 
@@ -700,7 +700,7 @@ public:
 	// Return true if the sheet can be displayed due to filters
 	bool canDisplay(CDBCtrlSheet *pCS) const { return _BO.canDisplay(pCS); }
 
-	void setSearchFilter(const ucstring &s) { _BO.setSearchFilter(s); }
+	void setSearchFilter(const std::string &s) { _BO.setSearchFilter(s); }
 
 	//////////////////////////////////////////////////////////////////////////
 

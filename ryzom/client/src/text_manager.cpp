@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
+#if 0
 #include "stdpch.h"
 
 
@@ -55,14 +55,14 @@ CTextManager::CTextManager()
 //-----------------------------------------------
 /// Return the text according to the Id.
 //-----------------------------------------------
-ucstring CTextManager::text(uint textId)
+ucstring CTextManager::text(uint textId) // OLD
 {
-	map<uint, ucstring>::iterator it = _Texts.find(textId);
+	map<uint, ucstring>::iterator it = _Texts.find(textId); // OLD
 	if(it != _Texts.end())
 		return (*it).second;
 
 	// Return an empty string.
-	return ucstring();
+	return ucstring(); // OLD
 }
 
 //-----------------------------------------------
@@ -70,13 +70,14 @@ ucstring CTextManager::text(uint textId)
 //-----------------------------------------------
 void CTextManager::text(uint textId, const std::string &str)
 {
-	_Texts.insert(make_pair(textId, ucstring(str)));
+	_Texts.insert(make_pair(textId, ucstring(str))); // OLD
 }
 
 //-----------------------------------------------
 /// Set the text for 'textId'.
 //-----------------------------------------------
-void CTextManager::text(uint textId, const ucstring &str)
+void CTextManager::text(uint textId, const ucstring &str) // OLD
 {
 	_Texts.insert(make_pair(textId, str));
 }
+#endif

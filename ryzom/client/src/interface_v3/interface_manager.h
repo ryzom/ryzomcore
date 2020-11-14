@@ -2,8 +2,8 @@
 // Copyright (C) 2010-2018  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -241,7 +241,7 @@ public:
 	// Log system (all chat/tell
 	void setLogState(bool state) { _LogState = state; }
 	bool getLogState() const { return _LogState; }
-	void log(const ucstring &str, const std::string &cat = "");
+	void log(const std::string &str, const std::string &cat = "");
 
 	/// Text from here and from server
 
@@ -249,7 +249,7 @@ public:
 	{
 	public:
 		virtual ~IStringProcess() { }
-		virtual bool cbIDStringReceived(ucstring &inOut) = 0; // called when string or id is received (return true if valid the change)
+		virtual bool cbIDStringReceived(std::string &inOut) = 0; // called when string or id is received (return true if valid the change)
 	};
 
 	void addServerString (const std::string &sTarget, uint32 id, IStringProcess *cb = NULL);
@@ -292,12 +292,12 @@ public:
 	void drawViews (NL3D::UCamera camera);
 
 	// display a debug info
-	void		  displayDebugInfo(const ucstring &str, TSystemInfoMode mode = InfoMsg);
+	void		  displayDebugInfo(const std::string &str, TSystemInfoMode mode = InfoMsg);
 	// get the color associated with the given system info mode
 	NLMISC::CRGBA getDebugInfoColor(TSystemInfoMode mode);
 
 	// display a system info string
-	void		  displaySystemInfo(const ucstring &str, const std::string &Category = "SYS");
+	void		  displaySystemInfo(const std::string &str, const std::string &Category = "SYS");
 	NLMISC::CRGBA getSystemInfoColor(const std::string &Category = "SYS");
 
 	void setupOptions();
@@ -305,12 +305,12 @@ public:
 	/** Open a MessageBox. this is a simple ModalWindow with a Ok button
 	 *	ui:interface:message_box must be defined in xml, with a "text" ViewText son
 	 */
-	void	messageBox(const ucstring &text, const std::string &masterGroup="ui:interface", TCaseMode caseMode = CaseFirstSentenceLetterUp);
+	void	messageBox(const std::string &text, const std::string &masterGroup="ui:interface", TCaseMode caseMode = CaseFirstSentenceLetterUp);
 	/** Open a MessageBox. this is a simple ModalWindow with a Ok and a HELP button.
 	 *  The help button with open a browser on ryzom.com faq
 	 *	ui:interface:message_box_with_help must be defined in xml, with a "text" ViewText son
 	 */
-	void	messageBoxWithHelp(const ucstring &text, const std::string &masterGroup="ui:interface",
+	void	messageBoxWithHelp(const std::string &text, const std::string &masterGroup="ui:interface",
 							   const std::string &ahOnOk = std::string(), const std::string &paramsOnOk= std::string(),
 							   TCaseMode caseMode = CaseFirstSentenceLetterUp);
 
@@ -321,7 +321,7 @@ public:
 	 *	\param ahOnCancel => the action handler to call if cancel is pressed. NB: you don't have to call leave_modal in this ah (auto done).
 	 *	\param paramsOnCancel => params passed to ahOnCancel.
 	 */
-	void	validMessageBox(TValidMessageIcon icon, const ucstring &text, const std::string &ahOnOk, const std::string &paramsOnOk= std::string(),
+	void	validMessageBox(TValidMessageIcon icon, const std::string &text, const std::string &ahOnOk, const std::string &paramsOnOk= std::string(),
 		const std::string &ahOnCancel= std::string(), const std::string &paramsOnCancel= std::string(), const std::string &masterGroup="ui:interface");
 
 	/** Get the current running validMessageBox OnOk action. empty if no validMessageBox currently opened
@@ -446,9 +446,9 @@ public:
 	 */
 	static char* getTimestampHuman(const char* format = "[%H:%M:%S] ");
 
-	/** Parses any tokens in the ucstring like $t$ or $g()$
+	/** Parses any tokens in the utf-8 string like $t$ or $g()$
 	 */
-	static bool parseTokens(ucstring& ucstr);
+	static bool parseTokens(std::string& ucstr);
 
 // ------------------------------------------------------------------------------------------------
 private:
@@ -672,7 +672,7 @@ private:
 	CServerToLocalAutoCopy ServerToLocalAutoCopyDMGift;
 
 	// Pop a new message box. If the message box was found, returns a pointer on it
-	void messageBoxInternal(const std::string &msgBoxGroup, const ucstring &text, const std::string &masterGroup, TCaseMode caseMode);
+	void messageBoxInternal(const std::string &msgBoxGroup, const std::string &text, const std::string &masterGroup, TCaseMode caseMode);
 
 	CInterfaceLink::CInterfaceLinkUpdater *interfaceLinkUpdater;
 };

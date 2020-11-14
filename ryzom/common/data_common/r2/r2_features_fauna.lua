@@ -60,7 +60,7 @@ local function reinit(form, creature)
 					r2.RingAccess.testAccess(paletteElt.RingAccess) then
 
 				if paletteElt.Ecosystem == "Desert" and paletteElt.Level >= 1 and paletteElt.Level <= 50 then 
-					creatureEnum:addText(ucstring(i18n.get(v.Translation)))
+					creatureEnum:addText(i18n.get(v.Translation))
 				end
 			end
 		end
@@ -87,7 +87,7 @@ local function getBase(creature, form)
 
 	local k, v = next(creaturePalette, nil)
 	while k do
-		local name = i18n.get(v.Translation):toUtf8()
+		local name = i18n.get(v.Translation)
 		if name == race then
 			return v.Id, name
 		end
@@ -138,7 +138,7 @@ end
 				if paletteElt and paletteElt.RingAccess and 
 					r2.RingAccess.testAccess(paletteElt.RingAccess) then
 					if paletteElt.Ecosystem == currentEco and paletteElt.Level >= levelMin and paletteElt.Level <= levelMax then 
-						creatureEnum:addText(ucstring(i18n.get(v.Translation)))
+						creatureEnum:addText(i18n.get(v.Translation))
 					end
 				end
 			end
@@ -459,7 +459,7 @@ component.createGhostComponents= function(this, act)
 	
 	if act then 
 		comp.User._Herd = herd.InstanceId
-		--herd.Name = r2:genInstanceName(i18n.get("uiR2EdFaunaFeature")):toUtf8()
+		--herd.Name = r2:genInstanceName(i18n.get("uiR2EdFaunaFeature"))
 		herd.InheritPos = 0
 		herd.Position.x = comp.Position.x
 		herd.Position.y = comp.Position.y
@@ -478,7 +478,7 @@ component.createComponent = function(x, y, nbcritters, raceBase, raceName,
 	--comp.Base = "palette.entities.botobjects.user_event" 
 	comp.Base = r2.Translator.getDebugBase("palette.entities.botobjects.user_event")
 	
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EdCreatureComponent")):toUtf8()			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EdCreatureComponent"))			
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -688,7 +688,7 @@ component.createComponent = function(x, y, carnCount, carnivoreBase, carnivoresN
 	--TODO: replace this milestone base by some default feature base
 	comp.Base = "palette.entities.botobjects.user_event" 
 
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EdFaunaFeature")):toUtf8()			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EdFaunaFeature"))			
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -715,7 +715,7 @@ component.createComponent = function(x, y, carnCount, carnivoreBase, carnivoresN
 	zoneSleep1.Position.y = comp.Position.y + FaunaRegionOffsets[1].y
 	zoneSleep1.Position.z = comp.Position.z
 	zoneSleep1.InheritPos = 0 
-	zoneSleep1.Name = r2:genInstanceName(i18n.get("uiR2EDNameSleepRegion")):toUtf8()			
+	zoneSleep1.Name = r2:genInstanceName(i18n.get("uiR2EDNameSleepRegion"))			
 	table.insert(comp.Components, zoneSleep1)	
 	
 	-- Carnivore sleep zone
@@ -726,7 +726,7 @@ component.createComponent = function(x, y, carnCount, carnivoreBase, carnivoresN
 	zoneSleep2.Position.y = comp.Position.y + FaunaRegionOffsets[2].y
 	zoneSleep2.Position.z = comp.Position.z
 	zoneSleep2.InheritPos = 0 
-	zoneSleep2.Name = r2:genInstanceName(i18n.get("uiR2EDNameSleepRegion")):toUtf8()			
+	zoneSleep2.Name = r2:genInstanceName(i18n.get("uiR2EDNameSleepRegion"))			
 	table.insert(comp.Components, zoneSleep2)				
 	
 	--Herbivore sleep zone
@@ -737,13 +737,13 @@ component.createComponent = function(x, y, carnCount, carnivoreBase, carnivoresN
 	zoneFood.Position.y = comp.Position.y + FaunaRegionOffsets[3].y
 	zoneFood.Position.z = comp.Position.z
 	zoneFood.InheritPos = 0
-	zoneFood.Name = r2:genInstanceName(i18n.get("uiR2EDNameFoodRegion")):toUtf8()			
+	zoneFood.Name = r2:genInstanceName(i18n.get("uiR2EDNameFoodRegion"))			
 	table.insert(comp.Components, zoneFood)	
 	
 	-- Herd of herbivores
 	local herbivores = feature.Components.Creature.createComponent(zoneSleep1.Position.x, zoneSleep1.Position.y, herbCount, herbivoreBase,
 		herbivoresName, zoneSleep1.InstanceId, zoneFood.InstanceId)
-	herbivores.Name = i18n.get("uiR2EdHerbivores"):toUtf8()
+	herbivores.Name = i18n.get("uiR2EdHerbivores")
 	--herbivores.Position.x = zoneSleep1.Position.x--comp.Position.x + 10
 	--herbivores.Position.y = zoneSleep1.Position.y--comp.Position.y + 10
 	herbivores.InheritPos = 0
@@ -755,7 +755,7 @@ component.createComponent = function(x, y, carnCount, carnivoreBase, carnivoresN
 	-- Pack of carnivores
 	local carnivores = feature.Components.Creature.createComponent(zoneSleep2.Position.x, zoneSleep2.Position.y, carnCount, carnivoreBase,
 		carnivoresName, zoneSleep2.InstanceId, zoneSleep1.InstanceId)
-	carnivores.Name = i18n.get("uiR2EdCarnivores"):toUtf8()
+	carnivores.Name = i18n.get("uiR2EdCarnivores")
 	carnivores.InheritPos = 0
 	carnivores.ManagerId = comp.InstanceId
 	table.insert(comp.Components, carnivores)
@@ -833,7 +833,7 @@ end
 
 function component:registerMenu(logicEntityMenu)
 	local name = i18n.get("uiR2EdFaunaFeature")
-	logicEntityMenu:addLine(ucstring(name), "lua", "", "FaunaFeature")
+	logicEntityMenu:addLine(name, "lua", "", "FaunaFeature")
 end
 
 r2.Features["FaunaFeature"] =  feature

@@ -601,11 +601,9 @@ r2.ActUIDisplayer.LastSelfCreatedActInstanceId = nil -- id of the last act creat
 
 					local actTitle = act:getName()	
 					if act==r2.Scenario:getCurrentAct() then
-						actTitle = actTitle .. "  [" .. i18n.get("uiR2EDCurrentActComboBox"):toUtf8() .."]"	
+						actTitle = actTitle .. "  [" .. i18n.get("uiR2EDCurrentActComboBox") .."]"	
 					end
-					local text = ucstring()
-					text:fromUtf8(actTitle)
-					comboBox:setText(index - 1, text)
+					comboBox:setText(index - 1, actTitle)
 					return
 				end
 			end 
@@ -636,16 +634,13 @@ r2.ActUIDisplayer.LastSelfCreatedActInstanceId = nil -- id of the last act creat
 		local comboBox = self:getActComboBox() 
 
 		local tree, macroTree 
-		if not act:isBaseAct() then	
-			local text = ucstring()	
+		if not act:isBaseAct() then
 			local index = r2.logicComponents:searchElementIndex(act)-2
 			local actTitle = act:getName()
 			if type(actTitle) ~= "string" then
-				text:fromUtf8("bad type for title : " .. type(actTitle))
-				comboBox:insertText(index, text)
+				comboBox:insertText("index, bad type for title : " .. type(actTitle))
 			else		
-				text:fromUtf8(actTitle)
-				comboBox:insertText(index, text)
+				comboBox:insertText(index, actTitle)
 			end
 
 			tree = self:findFreeTreeCtrl()	

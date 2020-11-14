@@ -351,6 +351,171 @@ void cbClientItemStopUseXpCat( CMessage& msgin, const std::string &serviceName, 
 	character->stopUseItem( isRingCatalyser );
 }
 
+void cbClientItemLock(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	CEntityId eid;
+	INVENTORIES::TInventory inventory;
+	uint16 slot;
+	bool lock;
+	msgin.serial(eid);
+	msgin.serialShortEnum(inventory);
+	msgin.serial(slot);
+	msgin.serial(lock);
+
+	CCharacter *character = PlayerManager.getChar(eid);
+	DROP_IF(!character, "Character not found", return);
+	DROP_IF(inventory == INVENTORIES::UNDEFINED, "Inventory is undefined", return);
+
+	CInventoryPtr invent = character->getInventory(inventory);
+	DROP_IF(slot >= invent->getSlotCount(), "Invalid slot specified", return);
+	CGameItemPtr item = invent->getItem(slot);
+	DROP_IF(item == NULL, "Item does not exist", return);
+
+	item->setLockedByOwner(lock);
+}
+
+void cbClientItemRename(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	CEntityId eid;
+	INVENTORIES::TInventory inventory;
+	uint16 slot;
+	bool literal;
+	string text;
+	msgin.serial(eid);
+	msgin.serialShortEnum(inventory);
+	msgin.serial(slot);
+	msgin.serial(literal);
+	msgin.serial(text);
+
+	CCharacter *character = PlayerManager.getChar(eid);
+	DROP_IF(!character, "Character not found", return);
+	DROP_IF(inventory == INVENTORIES::UNDEFINED, "Inventory is undefined", return);
+
+	CInventoryPtr invent = character->getInventory(inventory);
+	DROP_IF(slot >= invent->getSlotCount(), "Invalid slot specified", return);
+	CGameItemPtr item = invent->getItem(slot);
+	DROP_IF(item == NULL, "Item does not exist", return);
+
+	if (!character->havePriv(":DEV:SGM:GM:EM:"))
+	{
+		// TODO: Some special rights to name items :)
+		const NLMISC::CEntityId &crafterEId = item->getCreator();
+		const NLMISC::CEntityId &userEId = character->getId();
+		DROP_IF(crafterEId != userEId, "Item name can only be set by the crafter", return);
+	}
+
+	/*
+	const CStaticItem *form = item->getStaticForm();
+	DROP_IF(!form, "Item does not have a static form", return);
+	ITEMFAMILY::EItemFamily family = form->Family;
+	DROP_IF(!ITEMFAMILY::isTextCustomizable(family), "Item text cannot be changed", return);
+	*/
+
+	if (literal)
+	{
+		text = capitalizeFirst(text); // Require first character to be capitalized
+
+		if (text.size() >= 255) // Limit literal text length
+			text = text.substr(0, 255);
+	}
+
+	item->setPhraseId(text, literal);
+
+}
+
+/// returns 0 on success, anything else is error:
+/// -1: Invalid inventory
+/// -2: Invalid slot
+/// -3: Empty slot
+sint32 clientItemWrite(CCharacter* character, INVENTORIES::TInventory inventory, uint32 slot, ucstring const& text)
+{
+	if (inventory==INVENTORIES::UNDEFINED)
+	{
+		return -1;
+	}
+	CInventoryPtr invent = character->getInventory(inventory);
+	if (slot >= invent->getSlotCount())
+	{
+		return -2;
+	}
+	if (invent->getItem(slot) == NULL)
+	{
+		return -3;
+	}
+
+	CGameItemPtr item = invent->getItem(slot);
+	item->setCustomText(text.toUtf8());
+	// Following line was commented out by trap, reason unknown
+	character->incSlotVersion(inventory, slot); // this ensures re-fetch of info window, unusual case
+
+	return 0;
+}
+
+void cbClientItemWrite( NLNET::CMessage& msgin, const std::string & serviceName, NLNET::TServiceId serviceId )
+{
+	CEntityId eid;
+	INVENTORIES::TInventory inventory;
+	uint16 slot;
+	string text;
+	msgin.serial(eid);
+	msgin.serialShortEnum(inventory);
+	msgin.serial(slot);
+	msgin.serial(text);
+
+	CCharacter* character = PlayerManager.getChar(eid);
+	if(!character) return;
+
+	if (!character->havePriv(":DEV:SGM:GM:EM:"))
+	{
+		// it should be the crafter of the item, check
+		if (inventory==INVENTORIES::UNDEFINED) return;
+		CInventoryPtr invent = character->getInventory(inventory);
+		if (slot >= invent->getSlotCount()) return;
+		if (invent->getItem(slot) == NULL) return;
+		CGameItemPtr item = invent->getItem(slot);
+
+		const NLMISC::CEntityId &crafterEId = item->getCreator();
+		const NLMISC::CEntityId &userEId = character->getId();
+
+		if(crafterEId != userEId)
+		{
+			string name = CEntityIdTranslator::getInstance()->getByEntity(userEId).toString();
+			nlwarning("HACK: %s %s tries to set custom text on an item he didn't crafted", userEId.toString().c_str(), name.c_str());
+			return;
+		}
+
+		// text must not be too big
+		if(text.size() > 256)
+		{
+			string name = CEntityIdTranslator::getInstance()->getByEntity(userEId).toString();
+			nlwarning("HACK: %s %s tries to set custom text of a size > 256 (%d)", userEId.toString().c_str(), name.c_str(), text.size());
+			return;
+		}
+
+		// the item must have the good family
+		const CStaticItem * form = item->getStaticForm();
+		if (!form) return;
+		ITEMFAMILY::EItemFamily family = form->Family;
+		if (!ITEMFAMILY::isTextCustomizable(family))
+		{
+			string name = CEntityIdTranslator::getInstance()->getByEntity(userEId).toString();
+			nlwarning("HACK: %s %s tries to set custom text on a item that is not text customizable (%s)", userEId.toString().c_str(), name.c_str(), ITEMFAMILY::toString(family).c_str());
+			return;
+		}
+
+		// prevent use of @WEB at begin
+		if (NLMISC::startsWith(text, "@WEB"))
+			text = text.substr(4);
+
+		// force that the begin of the text for non admin is %mfc
+		if(!text.empty() && text.substr(0, 4) != string("%mfc"))
+		{
+			text = string("%mfc") + text;
+		}
+	}
+
+	clientItemWrite(character, inventory, slot, text);
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2647,6 +2812,7 @@ void cbClientGuildQuit( NLNET::CMessage& msgin, const std::string & serviceName,
 void cbClientGuildPutMoney( NLNET::CMessage& msgin, const std::string & serviceName, NLNET::TServiceId serviceId );
 /// money : guild to bag
 void cbClientGuildTakeMoney( NLNET::CMessage& msgin, const std::string & serviceName, NLNET::TServiceId serviceId );
+void cbClientGuildItemAccess( NLNET::CMessage& msgin, const std::string & serviceName, NLNET::TServiceId serviceId );
 
 /// outpost callbacks (implemented in guild_client_callbacks.cpp)
 void cbClientOutpostSetSquad(NLNET::CMessage & msgin, const std::string & serviceName, NLNET::TServiceId serviceId);
@@ -3137,110 +3303,6 @@ void cbClientReturnToMainland( NLNET::CMessage& msgin, const std::string & servi
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-//		CLIENT:EVENT
-///////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-/// returns 0 on success, anything else is error:
-/// -1: Invalid inventory
-/// -2: Invalid slot
-/// -3: Empty slot
-sint32 clientEventSetItemCustomText(CCharacter* character, INVENTORIES::TInventory inventory, uint32 slot, ucstring const& text)
-{
-	if (inventory==INVENTORIES::UNDEFINED)
-	{
-		return -1;
-	}
-	CInventoryPtr invent = character->getInventory(inventory);
-	if (slot >= invent->getSlotCount())
-	{
-		return -2;
-	}
-	if (invent->getItem(slot) == NULL)
-	{
-		return -3;
-	}
-
-	CGameItemPtr item = invent->getItem(slot);
-	item->setCustomText(text);
-	// Following line was commented out by trap, reason unknown
-	character->incSlotVersion(inventory, slot);
-
-	return 0;
-}
-
-void cbClientEventSetItemCustomText( NLNET::CMessage& msgin, const std::string & serviceName, NLNET::TServiceId serviceId )
-{
-	CEntityId eid;
-	INVENTORIES::TInventory inventory;
-	uint32 uiInventory;
-	uint32 slot;
-	ucstring text;
-	msgin.serial(eid);
-	msgin.serial(uiInventory);
-	inventory = (INVENTORIES::TInventory)uiInventory;
-	msgin.serial(slot);
-	msgin.serial(text);
-
-	CCharacter* character = PlayerManager.getChar(eid);
-	if(!character) return;
-
-	if (!character->havePriv(":DEV:SGM:GM:EM:"))
-	{
-		// it should be the crafter of the item, check
-		if (inventory==INVENTORIES::UNDEFINED) return;
-		CInventoryPtr invent = character->getInventory(inventory);
-		if (slot >= invent->getSlotCount()) return;
-		if (invent->getItem(slot) == NULL) return;
-		CGameItemPtr item = invent->getItem(slot);
-
-		const NLMISC::CEntityId &crafterEId = item->getCreator();
-		const NLMISC::CEntityId &userEId = character->getId();
-
-		if(crafterEId != userEId)
-		{
-			string name = CEntityIdTranslator::getInstance()->getByEntity(userEId).toString();
-			nlwarning("HACK: %s %s tries to set custom text on an item he didn't crafted", userEId.toString().c_str(), name.c_str());
-			return;
-		}
-
-		// text must not be too big
-		if(text.size() > 256)
-		{
-			string name = CEntityIdTranslator::getInstance()->getByEntity(userEId).toString();
-			nlwarning("HACK: %s %s tries to set custom text of a size > 256 (%d)", userEId.toString().c_str(), name.c_str(), text.size());
-			return;
-		}
-
-		// the item must have the good family
-		const CStaticItem * form = item->getStaticForm();
-		if (!form) return;
-		ITEMFAMILY::EItemFamily family = form->Family;
-		if (!ITEMFAMILY::isTextCustomizable(family))
-		{
-			string name = CEntityIdTranslator::getInstance()->getByEntity(userEId).toString();
-			nlwarning("HACK: %s %s tries to set custom text on a item that is not text customizable (%s)", userEId.toString().c_str(), name.c_str(), ITEMFAMILY::toString(family).c_str());
-			return;
-		}
-
-		// prevent use of @WEB at begin
-		if (text.size() >= 4 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
-			text = text.substr(4, text.size() - 4);
-
-		// force that the begin of the text for non admin is %mfc
-		if(!text.empty() && text.substr(0, 4) != ucstring("%mfc"))
-		{
-			text = ucstring("%mfc") + text;
-		}
-	}
-
-	clientEventSetItemCustomText(character, inventory, slot, text);
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////
 //		CLIENT:TOTEM
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3420,6 +3482,9 @@ TUnifiedCallbackItem CbClientArray[]=
 	{ "CLIENT:ITEM:ENCHANT",				cbClientItemEnchant },
 	{ "CLIENT:ITEM:USE_ITEM",				cbClientItemUseItem },
 	{ "CLIENT:ITEM:STOP_USE_XP_CAT",		cbClientItemStopUseXpCat },
+	{ "CLIENT:ITEM:LOCK",                   cbClientItemLock },
+	{ "CLIENT:ITEM:RENAME",                 cbClientItemRename },
+	{ "CLIENT:ITEM:WRITE",                  cbClientItemWrite },
 
 
 	{ "CLIENT:ITEM_INFO:GET",				cbClientItemInfos },
@@ -3589,6 +3654,7 @@ TUnifiedCallbackItem CbClientArray[]=
 	//{ "CLIENT:GUILD:GUILD_TO_BAG",			cbClientGuildToBag },
 	{ "CLIENT:GUILD:PUT_MONEY",					cbClientGuildPutMoney },
 	{ "CLIENT:GUILD:TAKE_MONEY",				cbClientGuildTakeMoney },
+	{ "CLIENT:GUILD:ITEM_ACCESS",               cbClientGuildItemAccess },
 
 	// outpost related messages
 	{ "CLIENT:OUTPOST:SET_SQUAD",				cbClientOutpostSetSquad },
@@ -3620,13 +3686,16 @@ TUnifiedCallbackItem CbClientArray[]=
 	{ "CLIENT:DUEL:REFUSE",						cbClientDuelRefuse },
 	{ "CLIENT:DUEL:ABANDON",					cbClientDuelAbandon },
 
-	// TODO_RYZOMCLASSIC: Revert this, add additional client messages for 'League'. -Kaetemi
-	// { "CLIENT:PVP_CHALLENGE:ASK",				cbClientPVPChallengeAsked },
-	// { "CLIENT:PVP_CHALLENGE:ACCEPT",			cbClientPVPChallengeAccept },
-	// { "CLIENT:PVP_CHALLENGE:REFUSE",			cbClientPVPChallengeRefuse },
+#ifdef RYZOM_FORGE
+	// FIXME
 	{ "CLIENT:PVP_CHALLENGE:ASK",				cbClientLeagueJoinProposal },
 	{ "CLIENT:PVP_CHALLENGE:ACCEPT",			cbClientLeagueJoin },
 	{ "CLIENT:PVP_CHALLENGE:REFUSE",			cbClientLeagueJoinProposalDecline },
+#else
+	{ "CLIENT:PVP_CHALLENGE:ASK",				cbClientPVPChallengeAsked },
+	{ "CLIENT:PVP_CHALLENGE:ACCEPT",			cbClientPVPChallengeAccept },
+	{ "CLIENT:PVP_CHALLENGE:REFUSE",			cbClientPVPChallengeRefuse },
+#endif
 	{ "CLIENT:PVP_CHALLENGE:ABANDON",			cbClientPVPChallengeAbandon },
 
 //	{ "CLIENT:PVP_VERSUS:CLAN",					cbClientPvpChooseClan },
@@ -3638,7 +3707,7 @@ TUnifiedCallbackItem CbClientArray[]=
 	{ "CLIENT:MISSION:WAKE",					cbClientMissionWake },
 	{ "CLIENT:MISSION:GROUP_WAKE",				cbClientMissionGroupWake },
 
-	{ "CLIENT:EVENT:SET_ITEM_CUSTOM_TEXT",		cbClientEventSetItemCustomText },
+	// { "CLIENT:EVENT:SET_ITEM_CUSTOM_TEXT",		cbClientEventSetItemCustomText },
 
 	{ "CLIENT:TOTEM:BUILD",						cbTotemBuild },
 

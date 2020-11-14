@@ -27,7 +27,7 @@
 #include "characteristics.h"
 #include "sphrase_com.h"
 #include "type_skill_mod.h"
-
+#include "guild_grade.h"
 
 ///\structure defining the protection of an item
 struct SProtection
@@ -136,10 +136,10 @@ public:
 	CSPhraseCom	Enchantment;
 	float  WearEquipmentMalus; // Malus for wearing this equipment (malus is used when execute an magic, forage action, craft action...), malus is only applicable for weapon and armor pieces
 
-	ucstring	CustomText;
-	ucstring	R2ItemDescription;
-	ucstring	R2ItemComment;
-	uint8		PetNumber; // 1 based pet index
+	std::string	CustomText;
+	std::string	R2ItemDescription;
+	std::string	R2ItemComment;
+
 	//@}
 };
 

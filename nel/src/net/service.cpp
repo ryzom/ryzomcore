@@ -708,7 +708,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			// we create the log with service name filename ("test_service_ALIAS.log" for example)
 			string logname = LogDirectory.toString() + _LongName;
 			if (haveArg('N'))
-				logname += "_" + toLower(getArg('N'));
+				logname += "_" + toLowerAscii(getArg('N'));
 			logname += ".log";
 			fd.setParam (logname, false);
 
@@ -956,7 +956,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		// Load the recording state from the config file
 		if ((var = ConfigFile.getVarPtr ("Rec")) != NULL)
 		{
-			string srecstate = toUpper(var->asString());
+			string srecstate = toUpperAscii(var->asString());
 			if ( srecstate == "RECORD" )
 			{
 				_RecordingState = CCallbackNetBase::Record;

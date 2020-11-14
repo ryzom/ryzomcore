@@ -4,6 +4,7 @@
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -57,9 +58,9 @@ CGroupHTMLForum::~CGroupHTMLForum()
 
 void CGroupHTMLForum::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 {
- 	ucstring user_name = UserEntity->getLoginName ();
+ 	string user_name = UserEntity->getLoginName ();
 	const SGuild &guild = CGuildManager::getInstance()->getGuild();
-	string	gname = guild.Name.toUtf8();
+	string	gname = guild.Name;
 
 	if (!gname.empty())
 	{
@@ -75,7 +76,7 @@ void CGroupHTMLForum::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 
 		url += ((url.find('?') != string::npos) ? "&" : "?") +
 		string("shard=") + toString(CharacterHomeSessionId) +
-		string("&user_login=") + user_name.toString() +
+		string("&user_login=") + user_name +
 		string("&forum=") + gname +
 		string("&session_cookie=") + NetMngr.getLoginCookie().toString();
 	}
@@ -89,14 +90,14 @@ void CGroupHTMLForum::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 
 void CGroupHTMLForum::addHTTPPostParams (SFormFields &formfields, bool /*trustedDomain*/)
 {
-	ucstring user_name = UserEntity->getLoginName ();
+	string user_name = UserEntity->getLoginName ();
 	const SGuild &guild = CGuildManager::getInstance()->getGuild();
-	string	gname = guild.Name.toUtf8();
+	string	gname = guild.Name;
 
 	if (!gname.empty())
 	{
 		formfields.add("shard", toString(CharacterHomeSessionId));
-		formfields.add("user_login", user_name.toString());
+		formfields.add("user_login", user_name);
 		formfields.add("forum", gname);
 		formfields.add("session_cookie", NetMngr.getLoginCookie().toString());
 	}

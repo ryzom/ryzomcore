@@ -30,6 +30,7 @@
 #include "nel/misc/async_file_manager.h"
 #include "nel/misc/system_utils.h"
 #include "nel/misc/streamed_package_manager.h"
+#include "nel/web/http_package_provider.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
 #include "nel/3d/fxaa.h"
@@ -42,6 +43,7 @@
 #include "nel/3d/u_visual_collision_manager.h"
 #include "nel/3d/u_shape_bank.h"
 #include "nel/3d/stereo_hmd.h"
+#include "nel/3d/async_file_manager_3d.h"
 // Client
 #include "global.h"
 #include "release.h"
@@ -235,7 +237,9 @@ void	releaseMainLoopReselect()
 
 	// save keys loaded and interface cfg (not done in releaseMainLoop() because done at end of mainLoop()...)
 	pIM->uninitInGame0();
+#ifdef RYZOM_FORGE
 	CItemGroupManager::getInstance()->uninit();
+#endif
 
 	// alredy called from farTPMainLoop()
 	// --R2::getEditor().autoConfigRelease(IsInRingSession);
@@ -488,7 +492,9 @@ void releaseMainLoop(bool closeConnection)
 // Called when Quit from OutGame
 void releaseOutGame()
 {
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().release();
+#endif
 
 	ProgressBar.release();
 
@@ -569,8 +575,12 @@ void release()
 	{
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_GameExit, "login_step_game_exit&play_time=" + toString((NLMISC::CTime::getLocalTime() - StartPlayTime) / 1000)));
 	}
+	
+	setCrashCallback(NULL);
 
+#ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().release();
+#endif
 
 	ProgressBar.release();
 
@@ -623,6 +633,9 @@ void release()
 		// Release effects
 		delete FXAA; FXAA = NULL;
 		CBloomEffect::releaseInstance();
+
+		// Release texture
+		endLoading();
 
 		// Release Scene, textcontexts, materials, ...
 		Driver->release();
@@ -696,6 +709,7 @@ void release()
 	CIXml::releaseLibXml();
 	CHttpCache::release();
 	CStrictTransportSecurity::release();
+	CAsyncFileManager3D::releaseInstance();
 
 #if FINAL_VERSION
 	// openURL ("http://ryzom.com/exit/");

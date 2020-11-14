@@ -88,7 +88,7 @@ public:
 class CCheckNameMsg
 {
 public:
-	ucstring	Name;
+	ucstring	Name; // TODO: UTF-8 (serial)
 	TSessionId	HomeSessionId;
 
 	void serialBitMemStream(NLMISC::CBitMemStream &f)
@@ -633,7 +633,7 @@ public:
 	uint8			ChatMode;
 //	uint32			DynChatChanID;
 	NLMISC::CEntityId	DynChatChanID;
-	ucstring		Content;
+	ucstring		Content; // FIXME: UTF-8 (serial)
 
 	CChatMsg()
 	{
@@ -650,7 +650,7 @@ public:
 		f.serial( ChatMode );
 		if(ChatMode==CChatGroup::dyn_chat)
 			f.serial(DynChatChanID);
-		f.serial( Content );
+		f.serial( Content ); // FIXME: UTF-8 (serial)
 	}
 };
 
@@ -669,7 +669,7 @@ public:
 	uint32			SenderNameId;
 	uint8			ChatMode;
 	uint32			PhraseId;
-	ucstring		CustomTxt;
+	ucstring		CustomTxt; // FIXME: UTF-8 (serial)
 
 	CChatMsg2()
 	{
@@ -685,7 +685,7 @@ public:
 		f.serial( SenderNameId );
 		f.serial( ChatMode );
 		f.serial( PhraseId );
-		f.serial( CustomTxt );
+		f.serial( CustomTxt ); // FIXME: UTF-8 (serial)
 	}
 };
 
@@ -700,8 +700,8 @@ public:
 class CFarTellMsg
 {
 public:
-	ucstring		SenderName;
-	ucstring		Text;
+	ucstring		SenderName; // FIXME: UTF-8 (serial)
+	ucstring		Text; // FIXME: UTF-8 (serial)
 
 	void serial(NLMISC::CBitMemStream &f)
 	{

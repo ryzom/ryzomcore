@@ -198,7 +198,7 @@ component.createComponent = function(x, y)
 	assert(comp)
 	assert(comp.Position)
 	
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EdHiddenChest")):toUtf8()
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EdHiddenChest"))
 	comp.Base = "palette.entities.botobjects.chest_wisdom_std_sel"	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -209,7 +209,7 @@ component.createComponent = function(x, y)
 	comp.ItemNumber = 0
 
 	local zoneTrigger = r2.Features["ZoneTrigger"].Components.ZoneTrigger.createComponent(x + 3, y + 3)
-	zoneTrigger.Name = comp.Name.." "..i18n.get("uiR2EdZoneTrigger"):toUtf8()--r2:genInstanceName(i18n.get("uiR2EdZoneTrigger")):toUtf8()
+	zoneTrigger.Name = comp.Name.." "..i18n.get("uiR2EdZoneTrigger")--r2:genInstanceName(i18n.get("uiR2EdZoneTrigger"))
 	zoneTrigger.InheritPos = 0
 	zoneTrigger.Deletable = false
 	table.insert(comp.Components, zoneTrigger)
@@ -243,9 +243,7 @@ component.initLogicEntitiesInstancesMenu = function(this, subMenu, calledFunctio
 			
 	local entitiesTable = r2.Scenario:getAllInstancesByType(this.Name)
 	for key, entity in pairs(entitiesTable) do
-		local uc_name = ucstring()
-		uc_name:fromUtf8(entity.Name)
-		subMenu:addLine(uc_name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+		subMenu:addLine(entity.Name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
 	end
 
 	if table.getn(entitiesTable)==0 then
@@ -259,26 +257,26 @@ function component:getLogicTranslations()
 	-- register trad
 	local logicTranslations = {
 		["ApplicableActions"] = {	
-			["activate"]		= { menu=i18n.get( "uiR2AA0Activate"		):toUtf8(),
-									text=i18n.get( "uiR2AA1Activate"		):toUtf8()},
-			["deactivate"]		= { menu=i18n.get( "uiR2AA0Deactivate"		):toUtf8(),
-									text=i18n.get( "uiR2AA1Deactivate"		):toUtf8()},
-			["trigger"]				= { menu=i18n.get( "uiR2AA0Trigger"			):toUtf8(), 
-										text=i18n.get( "uiR2AA1Trigger"			):toUtf8()},
+			["activate"]		= { menu=i18n.get( "uiR2AA0Activate"		),
+									text=i18n.get( "uiR2AA1Activate"		)},
+			["deactivate"]		= { menu=i18n.get( "uiR2AA0Deactivate"		),
+									text=i18n.get( "uiR2AA1Deactivate"		)},
+			["trigger"]				= { menu=i18n.get( "uiR2AA0Trigger"			), 
+										text=i18n.get( "uiR2AA1Trigger"			)},
 		},
 		["Events"] = {
-			["activation"]		= { menu=i18n.get( "uiR2Event0Activation"		):toUtf8(), 
-									text=i18n.get( "uiR2Event1Activation"		):toUtf8()},
-			["deactivation"]	= { menu=i18n.get( "uiR2Event0Deactivation"		):toUtf8(), 
-									text=i18n.get( "uiR2Event1Deactivation"		):toUtf8()},			
-			["trigger"]				= { menu=i18n.get( "uiR2Event0Trigger"		):toUtf8(), 
-										text=i18n.get( "uiR2Event1Trigger"		):toUtf8()},
+			["activation"]		= { menu=i18n.get( "uiR2Event0Activation"		), 
+									text=i18n.get( "uiR2Event1Activation"		)},
+			["deactivation"]	= { menu=i18n.get( "uiR2Event0Deactivation"		), 
+									text=i18n.get( "uiR2Event1Deactivation"		)},			
+			["trigger"]				= { menu=i18n.get( "uiR2Event0Trigger"		), 
+										text=i18n.get( "uiR2Event1Trigger"		)},
 		},
 		["Conditions"] = {
-			["is active"]		= { menu=i18n.get( "uiR2Test0Active"		):toUtf8(),
-									text=i18n.get( "uiR2Test1Active"		):toUtf8()},
-			["is inactive"]		= { menu=i18n.get( "uiR2Test0Inactive"		):toUtf8(),
-									text=i18n.get( "uiR2Test1Inactive"		):toUtf8()}
+			["is active"]		= { menu=i18n.get( "uiR2Test0Active"		),
+									text=i18n.get( "uiR2Test1Active"		)},
+			["is inactive"]		= { menu=i18n.get( "uiR2Test0Inactive"		),
+									text=i18n.get( "uiR2Test1Inactive"		)}
 		}
 	}
 

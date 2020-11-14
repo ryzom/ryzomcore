@@ -1394,7 +1394,7 @@ void CServerEditionModule::connectChar(TSessionId sessionId, TCharId charId, TUs
 		CMessage msg("HELLO");
 		clientEditionProxy->sendModuleMessage(this->getAnimationModule()->getModule(), msg);
 	}
-	_PioneersInfo[charId].RingAccess = CSString(ringAccess).toLower();
+	_PioneersInfo[charId].RingAccess = toLowerAscii(ringAccess);
 	_PioneersInfo[charId].Newcomer = newcomer;
 
 	if (_SessionManager)
@@ -1434,7 +1434,7 @@ void CServerEditionModule::connectChar(TSessionId sessionId, TCharId charId, TUs
 				if ( first->size() >= length && first->substr(0, length) == r2a)
 				{
 
-					std::string ra = CSString(first->substr(length) ).replace("_", ":").toLower();
+					std::string ra = toLowerAscii(CSString(first->substr(length) ).replace("_", ":"));
 					_PioneersInfo[charId].RingAccess = ra;
 					break;
 				}
@@ -2943,7 +2943,7 @@ void CServerEditionModule::addCharacterInSession(NLNET::IModuleProxy *sender, TS
 	}
 
 
-	std::string upgradedRingAccess = CRingAccess::getInstance().upgradeRingAccess(CSString(DefaultCharRingAccess.get()).toLower(), CSString(ringAccess).toLower()) ;
+	std::string upgradedRingAccess = CRingAccess::getInstance().upgradeRingAccess(toLowerAscii(DefaultCharRingAccess.get()), toLowerAscii(ringAccess)) ;
 
 
 	// TODO use security info for overdoing ring access

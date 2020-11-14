@@ -415,7 +415,7 @@ void CInstanceLighter::light (const CInstanceGroup &igIn, CInstanceGroup &igOut,
 		string name= _Instances[i].Name;
 		bool	shapeFound= true;
 
-		if (toLower (CFile::getExtension (name)) == "pacs_prim")
+		if (toLowerAscii (CFile::getExtension (name)) == "pacs_prim")
 		{
 			nlwarning("EXPORT BUG: Can't read %s (not a shape), should not be part of .ig!", name.c_str());
 			continue;

@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2015-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1992,11 +1992,11 @@ void CTempInvManager::updateForageQQ( uint whichOne )
 			break;
 		default:;
 		}
-		ucstring title = CI18N::get( WIN_TEMPINV_TITLE_FORAGING );
+		string title = CI18N::get( WIN_TEMPINV_TITLE_FORAGING );
 		strFindReplace( title, "%qt", toString( "%.1f", qt ) );
 		strFindReplace( title, "%ql", toString( "%.1f", ql ) );
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_TEMPINV));
-		pGC->setUCTitle( title );
+		pGC->setTitle( title );
 	}
 
 	isInUpdateForageQQ = false;
@@ -2170,7 +2170,7 @@ bool SBagOptions::parse(xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 }
 
 // ***************************************************************************
-void SBagOptions::setSearchFilter(const ucstring &s)
+void SBagOptions::setSearchFilter(const string &s)
 {
 	SearchQualityMin = 0;
 	SearchQualityMax = 999;
@@ -2179,13 +2179,13 @@ void SBagOptions::setSearchFilter(const ucstring &s)
 
 	if (!s.empty())
 	{
-		std::vector<ucstring> words;
-		splitUCString(toLower(s), ucstring(" "), words);
+		std::vector<string> words;
+		splitString(toLower(s), string(" "), words);
 
 		size_t pos;
 		for(int i = 0; i<words.size(); ++i)
 		{
-			std::string kw = words[i].toUtf8();
+			std::string kw = words[i];
 
 			pos = kw.find("-");
 			if (pos != std::string::npos)
@@ -2289,17 +2289,17 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 		if (SearchFilter.size() > 0)
 		{
 			bool match = true;
-			ucstring lcName = toLower(pCS->getItemActualName());
+			string lcName = toLower(pCS->getItemActualName());
 
 			// add item quality as a keyword to match
 			if (pCS->getQuality() > 1)
 			{
-				lcName += ucstring(" " + toString(pCS->getQuality()));
+				lcName += string(" " + toString(pCS->getQuality()));
 			}
 
 			for (uint i = 0; i< SearchFilter.size(); ++i)
 			{
-				if (lcName.find(SearchFilter[i]) == ucstring::npos)
+				if (lcName.find(SearchFilter[i]) == string::npos)
 				{
 					return false;
 				}
@@ -2712,7 +2712,7 @@ class CHandlerInvSearchButton : public IActionHandler
 			return;
 		}
 
-		ucstring filter;
+		string filter;
 		std::string id = btn->getParent()->getId() + ":" + sParams + ":eb";
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(id));
 		if (!eb)
@@ -3148,13 +3148,7 @@ class CHandlerLockInvItem : public IActionHandler
 			return;
 		}
 
-		string lock = "1";
-		if (item->getLockedByOwner())
-		{
-			lock = "0";
-		}
-
-		uint32 slot = item->getIndexInDB();
+		uint16 slot = (uint16)item->getIndexInDB();
 		uint32 inv = item->getInventoryIndex();
 		INVENTORIES::TInventory inventory = INVENTORIES::UNDEFINED;
 		inventory = (INVENTORIES::TInventory)(inv);
@@ -3162,7 +3156,22 @@ class CHandlerLockInvItem : public IActionHandler
 		{
 			return;
 		}
-		NLMISC::ICommand::execute("a lockItem " + INVENTORIES::toString(inventory) + " " + toString(slot) + " " + lock, g_log);
+
+		bool lock = !item->getLockedByOwner();
+		if (lock) item->setItemResaleFlag(BOTCHATTYPE::ResaleKOLockedByOwner);
+		// else wait for proper state
+
+		CBitMemStream out;
+		if(GenericMsgHeaderMngr.pushNameToStream("ITEM:LOCK", out))
+		{
+			out.serialShortEnum(inventory);
+			out.serial(slot);
+			out.serial(lock);
+
+			NetMngr.push(out);
+		}
+		else
+			nlwarning("mainLoop : unknown message name : '%s'", "ITEM:RENAME");
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerLockInvItem, "lock_inv_item" );
@@ -3194,7 +3203,7 @@ class CHandlerInvTempToBag : public IActionHandler
 		// If we cant find place display a message and dont send the request to the server
 		if (!getInventory().isSpaceInAllBagsForItem(pCSDst))
 		{
-			ucstring msg = CI18N::get("msgCantPutItemInBag");
+			string msg = CI18N::get("msgCantPutItemInBag");
 			string cat = getStringCategory(msg, msg);
 			pIM->displaySystemInfo(msg, cat);
 			return;
@@ -3274,7 +3283,7 @@ class CHandlerInvTempAll : public IActionHandler
 
 		if (!bPlaceFound)
 		{
-			ucstring msg = CI18N::get("msgCantPutItemInBag");
+			string msg = CI18N::get("msgCantPutItemInBag");
 			string cat = getStringCategory(msg, msg);
 			CInterfaceManager::getInstance()->displaySystemInfo(msg, cat);
 			return;
@@ -3949,7 +3958,7 @@ const CItemImage *CInventoryManager::getServerItem(uint slotId) const
 // ***************************************************************************
 CInventoryManager::TInvType CInventoryManager::invTypeFromString(const string &str)
 {
-	string sTmp = toLower(str);
+	string sTmp = toLowerAscii(str);
 	if (sTmp == "inv_bag")		return InvBag;
 	if (sTmp == "inv_pa0")		return InvPA0;
 	if (sTmp == "inv_pa1")		return InvPA1;

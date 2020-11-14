@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -135,7 +136,7 @@ void				CDBGroupListSheetIconPhrase::setSectionGroupId(CInterfaceGroup	*pIG, uin
 	CViewText *name = dynamic_cast<CViewText*>(pIG->getView("name"));
 	if (name != NULL)
 	{
-		ucstring	sectionText= CI18N::get("uiPhraseSectionFmt");
+		string	sectionText= CI18N::get("uiPhraseSectionFmt");
 		uint32	minLevel, maxLevel;
 		CSPhraseManager		*pPM= CSPhraseManager::getInstance();
 		pPM->getPhraseLevelFromSection(sectionId, minLevel, maxLevel);

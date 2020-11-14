@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1249,7 +1250,7 @@ const	IPrimitive	*IPrimitive::getPrimitive	(const	std::string	&absoluteOrRelativ
 			childName=path.substr(0,indexStr);
 			path.erase(0, indexStr);
 		}
-		childName=toUpper(childName);
+		childName=toUpperAscii(childName);
 		const	IPrimitive*child=NULL;
 		uint	childIndex;
 		for	(childIndex=0;childIndex<cursor->getNumChildren();childIndex++)
@@ -1258,7 +1259,7 @@ const	IPrimitive	*IPrimitive::getPrimitive	(const	std::string	&absoluteOrRelativ
 			nlassert(child);
 			string	name;
 			if	(	child->getPropertyByName("class", name)
-				&&	toUpper(name)==childName	)
+				&&	toUpperAscii(name)==childName	)
 				break;
 		}
 		if	(childIndex>=cursor->getNumChildren())

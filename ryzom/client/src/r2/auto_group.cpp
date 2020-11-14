@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -276,12 +279,12 @@ void CAutoGroup::group(CObject *newEntityDesc, const NLMISC::CVectorD &createPos
 			getEditor().getDMC().flushActions();
 			return;
 		}
-		ucstring readableName;
+		string readableName;
 		CLuaState &ls = getEditor().getLua();
 		R2::getEditor().getEnv()["PaletteIdToGroupTranslation"][newEntityDesc->getAttr("Base")->toString()].push();
 		if (ls.isString(-1))
-			readableName.fromUtf8(ls.toString(-1));
-		ucstring ucGroupName = ucstring(readableName + " " + CI18N::get("uiR2EDNameGroup").toUtf8());
+			readableName = ls.toString(-1);
+		string ucGroupName = readableName + " " + CI18N::get("uiR2EDNameGroup");
 
 		newGroup->set("Name", getEditor().genInstanceName(ucGroupName).toUtf8());
 		getEditor().getDMC().requestInsertNode(destGroup->getParentAct()->getId(),

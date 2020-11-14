@@ -19,7 +19,7 @@ eltTemplateParams =	{
 					},
 
 elementEditorTemplate = "template_edit_events",
-elementInitialName=i18n.get("uiR2EdAction"):toUtf8(),
+elementInitialName=i18n.get("uiR2EdAction"),
 
 currentEltUIID = nil, -- initialisé quand l'editeur est ouvert ou fermé
 
@@ -158,10 +158,10 @@ end
 ------------------ TRANSLATION IN MENU ------------------------
 function r2.events:getTranslationMenu(eventCategory, eventType)
 	if self.logicTranslations[eventCategory][eventType] then
-		return ucstring(self.logicTranslations[eventCategory][eventType].menu)
+		return self.logicTranslations[eventCategory][eventType].menu
 	else
 		debugInfo(eventType .. " is not translated")
-		return ucstring(eventType)
+		return eventType
 	end			
 end
 
@@ -305,7 +305,7 @@ function r2.events:updateSequenceUI()
 	local logicEntity = r2:getInstanceFromId(self.filteredLogicEntityId)
 	assert(logicEntity)
 
-	filterMenuText.uc_hardtext = logicEntity:getDisplayName()
+	filterMenuText.text = logicEntity:getDisplayName()
 
 	local currentSequ = self:currentSequUI()
 	assert(currentSequ)
@@ -365,7 +365,7 @@ function r2.events:filterEvents(logicEntityId)
 		-- update filter text
 		local filterMenuText = ui:find("filterMenu"):find("menu"):find("text")
 		assert(filterMenuText)
-		filterMenuText.uc_hardtext = logicEntity:getDisplayName()
+		filterMenuText.text = logicEntity:getDisplayName()
 
 		self.filteredLogicEntityId = logicEntityId
 
@@ -561,10 +561,8 @@ function r2.events:updateElementEditor()
 		eventType = eventType .. " '" .. instanceEvent.Event.ValueString .. "'"
 	end
 
-	local uc_when_text = ucstring()	
-	uc_when_text:fromUtf8(eventType)
-	whenMenuText.uc_hardtext_single_line_format = uc_when_text 
-	editorTitleText.uc_hardtext = whenMenuText.hardtext .. " ..."
+	whenMenuText.text_single_line_format = eventType
+	editorTitleText.text = whenMenuText.hardtext .. " ..."
 
 	-- actions
 	local actionsList = eventEditor:find("actions_list")
@@ -619,9 +617,7 @@ function r2.events:updateElementEditor()
 					end
 				end
 
-				local uc_action_text = ucstring()
-				uc_action_text:fromUtf8(actionType)
-				actionMenuText.uc_hardtext_single_line_format = uc_action_text 
+				actionMenuText.text_single_line_format = actionType 
 			end
 		end
 	else
@@ -666,9 +662,7 @@ function r2.events:updateElementEditor()
 				conditionType = conditionType .. " '" .. instance:getShortName() .."'"
 			end
 
-			local uc_condition_text = ucstring()
-			uc_condition_text:fromUtf8(conditionType)
-			conditionMenuText.uc_hardtext_single_line_format = uc_condition_text
+			conditionMenuText.text_single_line_format = conditionType
 		end
 	end
 	
@@ -858,9 +852,7 @@ function r2.events:updateValiditySymbol(elementUI, eventInst)
 	invalidEvent.active = (logicAct==nil)
 	validEvent.active = (logicAct~=nil and logicAct~=r2:getCurrentAct())
 	if validEvent.active then
-		local uc_other_act = ucstring()
-		uc_other_act:fromUtf8(i18n.get("uiR2EDEventNotInCurrentAct"):toUtf8() .. "'" .. logicAct.Name .. "'")
-		validEvent.tooltip = uc_other_act
+		validEvent.tooltip = i18n.get("uiR2EDEventNotInCurrentAct").."'"..logicAct.Name.."'"
 	end
 end
 
@@ -970,9 +962,7 @@ function r2.events:initEventMenu(categoryEvent)
 	if logicEntity then
 
 		firstLine = 2
-		local uc_name = ucstring()
-		uc_name:fromUtf8(logicEntity.Name)
-		logicEntityMenu:addLine(uc_name, "lua", "r2.events:setLogicEntity('".. logicEntity.InstanceId .."')", logicEntity.InstanceId)
+		logicEntityMenu:addLine(logicEntity.Name, "lua", "r2.events:setLogicEntity('".. logicEntity.InstanceId .."')", logicEntity.InstanceId)
 		logicEntityMenu:addSeparator()
 	
 		logicEntityMenu:addSubMenu(0)

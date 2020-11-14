@@ -69,7 +69,7 @@ namespace NLGUI
 
 		static CAHManager* getInstance()
 		{
-			if (_GlobalInstance == NULL)
+			if (_GlobalInstance == NULL && !s_Deleted)
 				_GlobalInstance = new CAHManager;
 			return _GlobalInstance;
 		}
@@ -133,6 +133,19 @@ namespace NLGUI
 		CAHManager(){}
 		static CAHManager *_GlobalInstance;
 		static bool editorMode;
+
+		class CDeleter
+		{
+		public:
+			~CDeleter()
+			{
+				delete _GlobalInstance;
+				_GlobalInstance = NULL;
+				s_Deleted = true;
+			}
+		};
+		static CDeleter s_Deleter;
+		static bool s_Deleted;
 
 	};
 

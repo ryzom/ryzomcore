@@ -586,7 +586,7 @@ void CGroupNpc::addParameter(std::string const& parameter)
 	std::string key, tail;
 	
 	// force lowercase
-	std::string p = NLMISC::toLower(parameter);
+	std::string p = NLMISC::toLowerAscii(parameter);
 	AI_SHARE::stringToKeywordAndTail(p, key, tail);
 	
 	breakable

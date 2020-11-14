@@ -40,7 +40,7 @@ void							CGuildGrade::init()
 	for (i=0; i<4; ++i)
 	{
 		_StrTable[TGuildGradeConvert[i].Value] = TGuildGradeConvert[i].Name;
-		_ValueMap[NLMISC::toLower(std::string(TGuildGradeConvert[i].Name))] = TGuildGradeConvert[i].Value;
+		_ValueMap[NLMISC::toLowerAscii(std::string(TGuildGradeConvert[i].Name))] = TGuildGradeConvert[i].Value;
 	}
 	_Initialised = true;
 }

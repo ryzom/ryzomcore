@@ -465,7 +465,7 @@ local generatePreCode = function(fName)
 	.."local comp = r2.newComponent('UserComponentHolder')\n\t"
 	.."assert(comp)\n\n\t"
 	.."comp.Base = \"palette.entities.botobjects.user_event\"\n\t"
-	.."comp.Name = r2:genInstanceName(ucstring('"..featureName.."')):toUtf8()\n\t"	
+	.."comp.Name = r2:genInstanceName('"..featureName.."')\n\t"	
 	.."comp.Position.x = x\n\t"
 	.."comp.Position.y = y\n\t"
 	.."comp.Position.z = r2:snapZToGround(x, y)\n\n\t"

@@ -121,7 +121,7 @@ function game:displayMagicProtect(dbVal)
 	local	uiText= ui.val;
 
 	-- set the text (percentage)
-	uiText.uc_hardtext= tostring(val) .. "%";
+	uiText.text= tostring(val) .. "%";
 
 	-- set color and global color according to maximum reached or not
 	if(val >= vMax) then
@@ -215,7 +215,7 @@ function game:displayMagicResist(dbVal)
 	local	uiText= ui.val;
 
 	-- set the text (final value)
-	uiText.uc_hardtext= tostring(val);
+	uiText.text= tostring(val);
 
 	-- set color and global color according to maximum reached or not
 	if(val >= vMax) then
@@ -273,14 +273,14 @@ function game:onDrawNpcWebPage()
 		if(available) then
 			local	ucUrl
 			if config.Local == 1 then
-				ucUrl = ucstring(NicoMagicURL) -- for test in local mode
+				ucUrl = NicoMagicURL -- for test in local mode
 			else
 				ucUrl = getDynString(self.NpcWebPage.UrlTextId);
 			end
 			-- browse
 			local	uiStr= getUIId(getUICaller());
 			-- if the url
-			local utf8Url = ucUrl:toUtf8()
+			local utf8Url = ucUrl
 			local isRing = string.find(utf8Url, "ring_access_point=1") ~= nil
 			if isRing then
 				-- when in ring mode, add the parameters ourselves. 60 sec timeout because of zope...
@@ -585,30 +585,30 @@ function game:getPvpEffects()
 				fmt = i18n.get('uiPvPEffect_' .. getRegionByAlias(id) .. '_Bonus');
 				fmt = replacePvpEffectParam(fmt, param);
 				if (textBonus ~= '') then
-					textBonus = concatUCString(textBonus, '\n\n');
+					textBonus = concatString(textBonus, '\n\n');
 				end
-				textBonus = concatUCString(textBonus, fmt);
+				textBonus = concatString(textBonus, fmt);
 			else
 				hasMalus = true;
 				fmt = i18n.get('uiPvPEffect_' .. getRegionByAlias(id) .. '_Malus');
 				fmt = replacePvpEffectParam(fmt, param);
 				if (textMalus ~= '') then
-					textMalus = concatUCString(textMalus, '\n\n');
+					textMalus = concatString(textMalus, '\n\n');
 				end
-				textMalus = concatUCString(textMalus, fmt);
+				textMalus = concatString(textMalus, fmt);
 			end;
 		end
 	end
 
 	if (hasBonus) then
-		uiGroup.pvpEffectsBonusMalusInfo.uc_hardtext_format 	= i18n.get('uiPvpEffectBonus');
-		uiGroup.pvpEffectsBonusMalus.uc_hardtext_format 		= textBonus;
+		uiGroup.pvpEffectsBonusMalusInfo.text_format 	= i18n.get('uiPvpEffectBonus');
+		uiGroup.pvpEffectsBonusMalus.text_format 		= textBonus;
 	elseif (hasMalus) then
-		uiGroup.pvpEffectsBonusMalusInfo.uc_hardtext_format 	= i18n.get('uiPvpEffectMalus');
-		uiGroup.pvpEffectsBonusMalus.uc_hardtext_format 		= textMalus;
+		uiGroup.pvpEffectsBonusMalusInfo.text_format 	= i18n.get('uiPvpEffectMalus');
+		uiGroup.pvpEffectsBonusMalus.text_format 		= textMalus;
 	else
-		uiGroup.pvpEffectsBonusMalusInfo.uc_hardtext_format 	= '';
-		uiGroup.pvpEffectsBonusMalus.uc_hardtext_format 		= '';
+		uiGroup.pvpEffectsBonusMalusInfo.text_format 	= '';
+		uiGroup.pvpEffectsBonusMalus.text_format 		= '';
 	end
 
 end
@@ -651,7 +651,7 @@ function game:getAllegiancePoints()
 		text = findReplaceAll(text, '%faction', self:getFactionName(civ));
 		text = findReplaceAll(text, '%points', tostring(civPoints));
 	end
-	uiGroup.civ_allegiance_pts.uc_hardtext_format = text;
+	uiGroup.civ_allegiance_pts.text_format = text;
 
 	-- cult allegiance
 	if (cult == self.TPVPClan.None or cult == self.TPVPClan.Neutral) then
@@ -661,7 +661,7 @@ function game:getAllegiancePoints()
 		text = findReplaceAll(text, '%faction', self:getFactionName(cult));
 		text = findReplaceAll(text, '%points', tostring(cultPoints));
 	end
-	uiGroup.cult_allegiance_pts.uc_hardtext_format = text;
+	uiGroup.cult_allegiance_pts.text_format = text;
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -669,7 +669,7 @@ function game:updateAllegiance(path, uiText)
 	local	alleg = getDbProp(path);
 
 	local text = i18n.get('uiFameAllegiance' .. tostring(alleg) );
-	getUICaller()[uiText].uc_hardtext= text;
+	getUICaller()[uiText].text= text;
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -708,28 +708,28 @@ function game:tooltipDeltaValue(base, max)
 
 	local text;
 	if (val == 0) then
-		text = concatUCString('@{FFFF}', tostring(max));
+		text = concatString('@{FFFF}', tostring(max));
 	else
 		if (val > 0) then
 			-- bonus
-			text = concatUCString('@{FFFF}', tostring(max));
-			text = concatUCString(text, ' (');
-			text = concatUCString(text, tostring(base));
-			text = concatUCString(text, '@{0F0F}');
-			text = concatUCString(text, ' + ');
-			text = concatUCString(text, tostring(val));
-			text = concatUCString(text, '@{FFFF}');
-			text = concatUCString(text, ')');
+			text = concatString('@{FFFF}', tostring(max));
+			text = concatString(text, ' (');
+			text = concatString(text, tostring(base));
+			text = concatString(text, '@{0F0F}');
+			text = concatString(text, ' + ');
+			text = concatString(text, tostring(val));
+			text = concatString(text, '@{FFFF}');
+			text = concatString(text, ')');
 		else
 			-- malus
-			text = concatUCString('@{FFFF}', tostring(max));
-			text = concatUCString(text, ' (');
-			text = concatUCString(text, tostring(base));
-			text = concatUCString(text, '@{E42F}');
-			text = concatUCString(text, ' - ');
-			text = concatUCString(text, tostring(math.abs(val)));
-			text = concatUCString(text, '@{FFFF}');
-			text = concatUCString(text, ')');
+			text = concatString('@{FFFF}', tostring(max));
+			text = concatString(text, ' (');
+			text = concatString(text, tostring(base));
+			text = concatString(text, '@{E42F}');
+			text = concatString(text, ' - ');
+			text = concatString(text, tostring(math.abs(val)));
+			text = concatString(text, '@{FFFF}');
+			text = concatString(text, ')');
 		end
 	end
 
@@ -958,7 +958,7 @@ function RingPlayerInfo:updateRRPSLevel(dbVal, tooltip)
 	local	uiText= ui.val;
 
 	-- set the text
-	uiText.uc_hardtext= tostring(val)
+	uiText.text= tostring(val)
 
 	self:tooltipRRPs(dbVal, tooltip)
 end
@@ -1299,10 +1299,10 @@ function game:updateMissionJournalHeader()
 	win.header_active = headerActive
 	win.right_button_enabled = headerActive
 	if headerActive then
-		win.uc_title_opened = i18n.get("uiJournalTitle")
+		win.title_opened = i18n.get("uiJournalTitle")
 		win.content_y_offset = 0
 	else
-		win.uc_title_opened = ucstring("")
+		win.title_opened = ""
 		win.content_y_offset = win.header_opened.h_real + 3
 	end
 end
@@ -1336,8 +1336,8 @@ function game:updateMissionJournalFixedEntry()
 			id = id .. "_Mainland_" .. getUserRace()
 		end
 	end
-	fixedEntryMain.uc_hardtext = i18n.get(id)
-	fixedEntryRing.uc_hardtext = i18n.get(id)
+	fixedEntryMain.text = i18n.get(id)
+	fixedEntryRing.text = i18n.get(id)
 
 	self:updateMissionWindowLayout()
 end

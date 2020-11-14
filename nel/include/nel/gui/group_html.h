@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -320,16 +321,16 @@ namespace NLGUI
 		void clearContext();
 
 		// Translate a char
-		bool translateChar(ucchar &output, ucchar input, ucchar lastChar) const;
+		bool translateChar(u32char &output, u32char input, u32char lastChar) const;
 
 		// Add a string in the current paragraph
-		void addString(const ucstring &str);
+		void addString(const std::string &str);
 
 		// Add an image in the current paragraph
 		void addImage(const std::string &id, const std::string &img, bool reloadImg=false, const CStyleParams &style = CStyleParams());
 
 		// Add a text area in the current paragraph
-		CInterfaceGroup *addTextArea (const std::string &templateName, const char *name, uint rows, uint cols, bool multiLine, const ucstring &content, uint maxlength);
+		CInterfaceGroup *addTextArea (const std::string &templateName, const char *name, uint rows, uint cols, bool multiLine, const std::string &content, uint maxlength);
 
 		// Add a combo box in the current paragraph
 		CDBGroupComboBox *addComboBox(const std::string &templateName, const char *name);
@@ -350,9 +351,9 @@ namespace NLGUI
 		void flushString();
 
 		// Set the title
-		void setTitle (const ucstring &title);
 		void setTitle (const std::string &title);
 		std::string getTitle() const;
+		void setContainerTitle (const std::string &title);
 
 		// Lookup a url in local file system
 		bool lookupLocalFile (std::string &result, const char *url, bool isUrl);
@@ -392,10 +393,10 @@ namespace NLGUI
 		bool			_TrustedDomain;
 
 		// Title prefix
-		ucstring		_TitlePrefix;
+		std::string		_TitlePrefix;
 
 		// Title string
-		ucstring		_TitleString;
+		std::string		_TitleString;
 
 		// Need to browse next update coords..
 		bool			_BrowseNextTime;
@@ -644,7 +645,7 @@ namespace NLGUI
 				std::string		Name;
 
 				// Variable value
-				ucstring		Value;
+				std::string		Value;
 
 				// Text area group
 				CInterfaceGroup *TextArea;
@@ -747,7 +748,7 @@ namespace NLGUI
 		// Current node is a text area
 		bool			_TextArea;
 		std::string		_TextAreaTemplate;
-		ucstring		_TextAreaContent;
+		std::string		_TextAreaContent;
 		std::string		_TextAreaName;
 		uint			_TextAreaRow;
 		uint			_TextAreaCols;
@@ -755,7 +756,7 @@ namespace NLGUI
 
 		// current mode is in select option
 		bool			_SelectOption;
-		ucstring		_SelectOptionStr;
+		std::string		_SelectOptionStr;
 
 		// Current node is a object
 		std::string		_ObjectType;
@@ -765,7 +766,7 @@ namespace NLGUI
 		std::string		_TextAreaScript;
 
 		// Get last char
-		ucchar getLastChar() const;
+		u32char getLastChar() const;
 
 		// Current link view
 		class CViewLink			*_CurrentViewLink;
@@ -826,7 +827,7 @@ namespace NLGUI
 		void spliceFragment(std::list<CHtmlElement>::iterator src);
 
 		// decode all HTML entities
-		static ucstring decodeHTMLEntities(const ucstring &str);
+		static std::string decodeHTMLEntities(const std::string &str);
 
 		struct CDataImageDownload
 		{

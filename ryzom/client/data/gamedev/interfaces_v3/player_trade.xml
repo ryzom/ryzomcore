@@ -208,7 +208,7 @@
 
 <!-- link to connect the activation of this dialog to the database entry that given the signal to start -->
 <link expr="@%exchange_begun" action="player_trade_start" target="player_trade:active" />
-<link expr="depends(@%exchange_text)" action="set_server_string" params="value=@%exchange_text|target=ui:interface:player_trade:uc_title" />
+<link expr="depends(@%exchange_text)" action="set_server_string" params="value=@%exchange_text|target=ui:interface:player_trade:title" />
 
 
 <!-- ************************************* -->
@@ -291,7 +291,7 @@
 <!-- init the trade invitation modal box -->
 <proc id="init_invitation_box">
 	<!-- set the name of the player that propose the invitation -->
-	<action handler="set_server_string" params="value=@@%other_player_name_id|target=other_player_name:uc_hardtext" />
+	<action handler="set_server_string" params="value=@@%other_player_name_id|target=other_player_name:hardtext" />
 </proc>
 
 

@@ -1369,7 +1369,7 @@ namespace NLGUI
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 		if (!ptr) return false;
 
-		string stmp2 = toLower(string((const char*)ptr));
+		string stmp2 = toLowerAscii(string((const char*)ptr));
 
 		CInterfaceElement *pEltFound = NULL;
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
@@ -1379,7 +1379,7 @@ namespace NLGUI
 			for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 			{
 				CInterfaceGroup *pIG = rMG.Group->getGroups()[j];
-				string stmp = toLower(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
+				string stmp = toLowerAscii(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
 
 				if (stmp == stmp2)
 				{
@@ -1421,7 +1421,7 @@ namespace NLGUI
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 		if (!ptr) return false;
 
-		string stmp2 = toLower(string((const char*)ptr));
+		string stmp2 = toLowerAscii(string((const char*)ptr));
 
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 		CInterfaceElement *pEltFound = NULL;
@@ -1431,7 +1431,7 @@ namespace NLGUI
 			for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 			{
 				CInterfaceGroup *pIG = rMG.Group->getGroups()[j];
-				string stmp = toLower(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
+				string stmp = toLowerAscii(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
 				if (stmp == stmp2)
 				{
 					pEltFound = pIG;
@@ -1615,7 +1615,7 @@ namespace NLGUI
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 		if (!ptr) return false;
 
-		string stmp2 = toLower(string((const char*)ptr));
+		string stmp2 = toLowerAscii(string((const char*)ptr));
 
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 		CInterfaceElement *pEltFound = NULL;
@@ -1625,7 +1625,7 @@ namespace NLGUI
 			for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 			{
 				CInterfaceGroup *pIG = rMG.Group->getGroups()[j];
-				string stmp = toLower(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
+				string stmp = toLowerAscii(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
 
 				if (stmp == stmp2)
 				{
@@ -1693,8 +1693,8 @@ namespace NLGUI
 			for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 			{
 				CInterfaceGroup *pIG = rMG.Group->getGroups()[j];
-				string stmp = NLMISC::toLower(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
-				string stmp2 = NLMISC::toLower(string((const char*)ptr));
+				string stmp = NLMISC::toLowerAscii(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
+				string stmp2 = NLMISC::toLowerAscii(string((const char*)ptr));
 				if (stmp == stmp2)
 				{
 					pEltFound = pIG;

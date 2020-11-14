@@ -2,8 +2,8 @@
 // Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -192,9 +192,9 @@ public:
 		CEntityCL *selection = EntitiesMngr.entity(UserEntity->selection());
 		if (selection && selection->Type == CEntityCL::Player)
 		{
-			ucstring name = CEntityCL::removeTitleAndShardFromName(selection->getEntityName());
+			string name = CEntityCL::removeTitleAndShardFromName(selection->getEntityName());
 			if (name.empty()) return;
-			CAHManager::getInstance()->runActionHandler("enter_tell", pCaller, "player=" + name.toString());
+			CAHManager::getInstance()->runActionHandler("enter_tell", pCaller, "player=" + name);
 		}
 	}
 protected:
@@ -732,7 +732,7 @@ public:
 			CEntityCL *entity = EntitiesMngr.entity(trader);
 			if (entity)
 			{
-				ucstring playerName = entity->getEntityName();
+				string playerName = entity->getEntityName();
 				if (!playerName.empty())
 				{
 					PeopleInterraction.askAddContact(playerName, &PeopleInterraction.FriendList);
@@ -1166,7 +1166,7 @@ public:
 			game_exit_request = true;
 			ryzom_exit_request = true;
 
-			const string msgName = "CONNECTION:CLIENT_QUIT_REQUEST";
+			const char *msgName = "CONNECTION:CLIENT_QUIT_REQUEST";
 			CBitMemStream out;
 			nlverify(GenericMsgHeaderMngr.pushNameToStream(msgName, out));
 			bool bypassDisconnectionTimer = FarTP.isFastDisconnectGranted() && (!IsInRingSession); // no need on a ring shard, as it's very short
@@ -1334,7 +1334,7 @@ class CSelectItemSheet : public IActionHandler
 		// check if user has the level to use the item (applies to item & plans)
 		if (ctrlSheet->getSheetCategory() == CDBCtrlSheet::Item)
 		{
-			if (csg->getName() == "buy_selection")
+			if (csg && csg->getName() == "buy_selection")
 			{
 				const CItemSheet *is = ctrlSheet->asItemSheet();
 				if (is)
@@ -1358,19 +1358,19 @@ class CSelectItemSheet : public IActionHandler
 					// display msg in the system infos
 					if (!canUse)
 					{
-						ucstring msg = CI18N::get("msgCantUseItem");
+						string msg = CI18N::get("msgCantUseItem");
 						string cat = getStringCategory(msg, msg);
 						im->displaySystemInfo(msg, cat);
 					}
 					if (!canBuild)
 					{
-						ucstring msg = CI18N::get("msgCantBuild");
+						string msg = CI18N::get("msgCantBuild");
 						string cat = getStringCategory(msg, msg);
 						im->displaySystemInfo(msg, cat);
 					}
 					if (!canUseBuiltItem)
 					{
-						ucstring msg = CI18N::get("msgCantUseBuiltItem");
+						string msg = CI18N::get("msgCantUseBuiltItem");
 						string cat = getStringCategory(msg, msg);
 						im->displaySystemInfo(msg, cat);
 					}
@@ -1489,7 +1489,7 @@ void beastOrder (const std::string &orderStr, const std::string &beastIndexStr, 
 	else
 	{
 		// execute the order.
-		const string msgName = "ANIMALS:BEAST";
+		const char *msgName = "ANIMALS:BEAST";
 		CBitMemStream out;
 		if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 		{
@@ -1500,7 +1500,7 @@ void beastOrder (const std::string &orderStr, const std::string &beastIndexStr, 
 			NetMngr.push(out);
 		}
 		else
-			nlwarning("<beastOrder> : unknown message name : '%s'.", msgName.c_str());
+			nlwarning("<beastOrder> : unknown message name : '%s'.", msgName);
 	}
 }
 
@@ -1941,13 +1941,13 @@ public:
 
 	sint32 Slot;
 
-	bool cbIDStringReceived(ucstring &inout)
+	bool cbIDStringReceived(string &inout)
 	{
 		if (UserEntity != NULL)
 		{
 			if (UserEntity->selection() == Slot)
 			{
-				ucstring copyInout = inout;
+				string copyInout = inout;
 				CStringPostProcessRemoveTitle::cbIDStringReceived(inout);
 				if (inout.empty())
 				{
@@ -1957,11 +1957,11 @@ public:
 					if (pChar != NULL)
 						womanTitle = pChar->getGender() == GSGENDER::female;
 					
-					STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(copyInout), womanTitle);
+					copyInout = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(copyInout), womanTitle);
 
 					// Sometimes translation contains another title
-					ucstring::size_type pos = copyInout.find('$');
-					if (pos != ucstring::npos)
+					string::size_type pos = copyInout.find('$');
+					if (pos != string::npos)
 					{
 						copyInout = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(copyInout), womanTitle);
 					}
@@ -1985,7 +1985,7 @@ public:
 
 	sint32 Slot;
 
-	bool cbIDStringReceived(ucstring &inout)
+	bool cbIDStringReceived(string &inout)
 	{
 		if (UserEntity != NULL)
 		{
@@ -2036,8 +2036,8 @@ class CActionHandlerSetTargetName : public IActionHandler
 		{
 			sint32 nSlot = (sint32)evValue.getInteger();
 
-			ucstring TargetName;
-			ucstring TargetTitle;
+			string TargetName;
+			string TargetTitle;
 
 			// Get from nSlot
 			if (nSlot > -1)
@@ -2071,9 +2071,9 @@ class CActionHandlerSetTargetName : public IActionHandler
 			}
 			// Set to target
 			CInterfaceExprValue evUCStr;
-			evUCStr.setUCString(TargetName);
+			evUCStr.setString(TargetName);
 			CInterfaceLink::setTargetProperty(sNameTarget, evUCStr);
-			evUCStr.setUCString(TargetTitle);
+			evUCStr.setString(TargetTitle);
 			CInterfaceLink::setTargetProperty(sTitleTarget, evUCStr);
 		}
 	}
@@ -2113,7 +2113,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 			pVBR->setColor(CRGBA(0,0,0,0));
 
 			if (pTooltip)
-				pTooltip->setDefaultContextHelp(ucstring(""));
+				pTooltip->setDefaultContextHelp(std::string());
 
 			return;
 		}
@@ -2166,7 +2166,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 				pVBR->setColor(CRGBA(0,0,0,0));
 
 				if (pTooltip)
-					pTooltip->setDefaultContextHelp(ucstring(""));
+					pTooltip->setDefaultContextHelp(std::string());
 
 				return;
 			}
@@ -2191,7 +2191,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 		CCtrlBase *tooltip = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:target:header_opened:force"));
 		if (tooltip)
 		{
-			ucstring str;
+			string str;
 
 			if (nForceRegion == 1)
 				nForceRegion = 2;
@@ -2421,28 +2421,27 @@ class CAHTarget : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
-		ucstring entityName;
-		entityName.fromUtf8(getParam(Params, "entity"));
+		string entityName = getParam(Params, "entity");
 		if (entityName.empty()) return;
 
 		string completeMatch = getParam(Params, "prefer_complete_match");
 		bool quiet = (getParam (Params, "quiet") == "true");
 
-		vector<ucstring> keywords;
-		NLMISC::splitUCString(entityName, ucstring(" "), keywords);
-		if (!keywords.empty() && keywords[0].size() > 0 && keywords[0][0] == (ucchar)'"')
+		vector<string> keywords;
+		NLMISC::splitString(entityName, " ", keywords);
+		if (!keywords.empty() && keywords[0].size() > 0 && keywords[0][0] == '"')
 		{
 			// entity name is in quotes, do old style match with 'starts with' filter
 			// search for optional second parameter from old command for prefer_complete_match param
 			keywords.clear();
 
-			ucstring::size_type lastOf = entityName.rfind(ucstring("\""));
+			string::size_type lastOf = entityName.rfind("\"");
 			if (lastOf == 0)
-				lastOf = ucstring::npos;
+				lastOf = string::npos;
 
 			// override the value only when there is no 'prefer_complete_match' parameter set
 			if (completeMatch.empty() && lastOf < entityName.size())
-				completeMatch = trim(entityName.substr(lastOf+1).toUtf8());
+				completeMatch = trim(entityName.substr(lastOf+1));
 
 			entityName = entityName.substr(1, lastOf-1);
 		}
@@ -2471,7 +2470,7 @@ class CAHTarget : public IActionHandler
 		if (entity == NULL)
 		{
 			//Get the entity with a sheetName
-			entity = EntitiesMngr.getEntityBySheetName(entityName.toUtf8());
+			entity = EntitiesMngr.getEntityBySheetName(entityName);
 		}
 
 		if (entity && entity->properties().selectable() && !entity->getDisplayName().empty())
@@ -2755,8 +2754,7 @@ class CAHAssist : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		// Get the entity name to target
-		ucstring entityName;
-		entityName.fromUtf8 (getParam (Params, "entity"));
+		string entityName = getParam (Params, "entity");
 		if (!entityName.empty())
 		{
 			// Get the entity
@@ -3010,7 +3008,7 @@ void updateVRDevicesComboUI(bool enable)
 			{
 				std::stringstream displayname;
 				displayname << std::string("[") << VRDeviceCache[i].first << "] [" << VRDeviceCache[i].second << "]";
-				pCB->addText(ucstring(displayname.str()));
+				pCB->addText(displayname.str());
 				if (ClientCfg.VRDisplayDevice == VRDeviceCache[i].first)
 				{
 					if (selectedDevice == -1 || ClientCfg.VRDisplayDeviceId == VRDeviceCache[i].second)
@@ -3024,7 +3022,7 @@ void updateVRDevicesComboUI(bool enable)
 				// configured device not found, add a dummy
 				std::stringstream displayname;
 				displayname << std::string("[") << ClientCfg.VRDisplayDevice << "] [" << ClientCfg.VRDisplayDeviceId<< "] [DEVICE NOT FOUND]";
-				pCB->addText(ucstring(displayname.str()));
+				pCB->addText(displayname.str());
 				selectedDevice = VRDeviceCache.size();
 			}
 			NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_VR_DEVICE_DB)->setValue32(-1);
@@ -3059,7 +3057,7 @@ public:
 		{
 			pCB->resetTexts();
 			for (sint j = 0; j < (sint)stringModeList.size(); j++)
-				pCB->addText(ucstring(stringModeList[j]));
+				pCB->addText(stringModeList[j]);
 		}
 
 		// frequencies
@@ -3068,7 +3066,7 @@ public:
 		{
 			pCB->resetTexts();
 			for (sint j = 0; j < (sint)stringFreqList.size(); j++)
-				pCB->addText(ucstring(stringFreqList[j]));
+				pCB->addText(stringFreqList[j]);
 		}
 
 		// -1 is important to indicate we set this value in edit mode
@@ -3114,7 +3112,7 @@ public:
 
 			while (anisotropic <= maxAnisotropic)
 			{
-				pCB->addText(ucstring(NLMISC::toString("%dx", anisotropic)));
+				pCB->addText(NLMISC::toString("%dx", anisotropic));
 
 				if (ClientCfg.AnisotropicFilter == anisotropic)
 					nAnisotropic = i;
@@ -3219,7 +3217,7 @@ class CHandlerGameConfigMode : public IActionHandler
 		// Get W, H
 		sint w,h;
 		{
-			string vidModeStr = pCB->getText(nVideModeNb).toString();
+			string vidModeStr = pCB->getText(nVideModeNb);
 			string tmp = vidModeStr.substr(0,vidModeStr.find('x')-1);
 			fromString(tmp, w);
 			tmp = vidModeStr.substr(vidModeStr.find('x')+2,vidModeStr.size());
@@ -3259,7 +3257,7 @@ class CHandlerGameConfigMode : public IActionHandler
 		{
 			pCB->resetTexts();
 			for (j = 0; j < (sint)stringFreqList.size(); j++)
-				pCB->addText(ucstring(stringFreqList[j]) + " Hz");
+				pCB->addText(stringFreqList[j] + " Hz");
 		}
 		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->setValue32(nFoundFreq);
 
@@ -3461,7 +3459,7 @@ class CHandlerGameConfigApply : public IActionHandler
 					CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
 					if( pCB != NULL )
 					{
-						string vidModeStr = pCB->getText(nVideModeNb).toString();
+						string vidModeStr = pCB->getText(nVideModeNb);
 						string tmp = vidModeStr.substr(0,vidModeStr.find('x')-1);
 						fromString(tmp, w);
 						tmp = vidModeStr.substr(vidModeStr.find('x')+2,vidModeStr.size());
@@ -3475,7 +3473,7 @@ class CHandlerGameConfigApply : public IActionHandler
 					CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
 					if( pCB != NULL )
 					{
-						string vidFreqStr = pCB->getText(nVideoFreqNb).toString();
+						string vidFreqStr = pCB->getText(nVideoFreqNb);
 						fromString(vidFreqStr, freq);
 					}
 				}
@@ -3785,7 +3783,7 @@ class CHandlerSetInterfaceScale : public IActionHandler
 			}
 		}
 
-		ucstring help("/setuiscale "+toString("%.1f .. %.1f", ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max));
+		string help = "/setuiscale "+toString("%.1f .. %.1f", ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max);
 		CInterfaceManager::getInstance()->displaySystemInfo(help);
 	}
 };
@@ -3969,7 +3967,7 @@ public:
 
 		// display parry mode msg
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		ucstring msg = CI18N::get("msgUserModeParry");
+		string msg = CI18N::get("msgUserModeParry");
 		string cat = getStringCategory(msg, msg);
 		pIM->displaySystemInfo(msg, cat);
 	}
@@ -3986,7 +3984,7 @@ public:
 
 		// display dodge mode msg
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		ucstring msg = CI18N::get("msgUserModeDodge");
+		string msg = CI18N::get("msgUserModeDodge");
 		string cat = getStringCategory(msg, msg);
 		pIM->displaySystemInfo(msg, cat);
 	}
@@ -4013,8 +4011,7 @@ REGISTER_ACTION_HANDLER(CHandlerSelectProtectedSlot, "select_protected_slot");
 
 // ***************************************************************************
 // Common code
-//static	void	fillPlayerBarText(ucstring &str, const string &dbScore, const string &dbScoreMax, const string &ttFormat)
-static	void	fillPlayerBarText(ucstring &str, const string &dbScore, SCORES::TScores score, const string &ttFormat)
+static	void	fillPlayerBarText(std::string &str, const string &dbScore, SCORES::TScores score, const string &ttFormat)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CCDBNodeLeaf		*node;
@@ -4044,7 +4041,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-		ucstring	str;
+		string	str;
 		fillPlayerBarText(str, "HP", SCORES::hit_points, "uittPlayerLifeFormat");
 
 		CWidgetManager::getInstance()->setContextHelpText(str);
@@ -4061,7 +4058,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-		ucstring	str;
+		string	str;
 		fillPlayerBarText(str, "STA", SCORES::stamina, "uittPlayerStaminaFormat");
 
 		CWidgetManager::getInstance()->setContextHelpText(str);
@@ -4078,7 +4075,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-		ucstring	str;
+		string	str;
 		fillPlayerBarText(str, "SAP", SCORES::sap, "uittPlayerSapFormat");
 
 		CWidgetManager::getInstance()->setContextHelpText(str);
@@ -4095,7 +4092,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-		ucstring	str;
+		string	str;
 		fillPlayerBarText(str, "FOCUS", SCORES::focus, "uittPlayerFocusFormat");
 
 		CWidgetManager::getInstance()->setContextHelpText(str);
@@ -4125,7 +4122,7 @@ public:
 			maxVal= node->getValue32();
 
 		// Replace in the formated text
-		ucstring	str= CI18N::get("uittBulkFormat");
+		string	str= CI18N::get("uittBulkFormat");
 		strFindReplace(str, "%v", toString("%.2f", val) );
 		strFindReplace(str, "%m", toString(maxVal) );
 		CWidgetManager::getInstance()->setContextHelpText(str);
@@ -4521,7 +4518,7 @@ public:
 		if( sCustomPhrase.empty() )
 		{
 			// Create the message and send.
-			const string msgName = "COMMAND:EMOTE";
+			static const char *msgName = "COMMAND:EMOTE";
 			CBitMemStream out;
 			if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 			{
@@ -4531,16 +4528,16 @@ public:
 				//nlinfo("impulseCallBack : %s %d %d sent", msgName.c_str(), (uint32)behavToSend, phraseNbToSend);
 			}
 			else
-				nlwarning("command 'emote': unknown message named '%s'.", msgName.c_str());
+				nlwarning("command 'emote': unknown message named '%s'.", msgName);
 		}
 		else
 		{
 			// Create the message and send.
-			const string msgName = "COMMAND:CUSTOM_EMOTE";
+			static const char *msgName = "COMMAND:CUSTOM_EMOTE";
 			CBitMemStream out;
 			if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 			{
-				ucstring ucstr;
+				ucstring ucstr; // FIXME: UTF-8 (serial)
 				ucstr.fromUtf8(sCustomPhrase);
 
 				if( sCustomPhrase == "none" )
@@ -4549,7 +4546,7 @@ public:
 					{
 						// display "no animation for emote"
 						CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-						ucstring msg = CI18N::get("msgCustomizedEmoteNoAnim");
+						string msg = CI18N::get("msgCustomizedEmoteNoAnim");
 						string cat = getStringCategory(msg, msg);
 						pIM->displaySystemInfo(msg, cat);
 						return;
@@ -4557,16 +4554,16 @@ public:
 				}
 				else
 				{
-					ucstr = ucstring("&EMT&") + UserEntity->getDisplayName() + ucstring(" ") + ucstr;
+					ucstr = ucstring("&EMT&") + UserEntity->getDisplayName() + ucstring(" ") + ucstr; // FIXME: UTF-8 (serial)
 				}
 
 				out.serialEnum(behavToSend);
-				out.serial(ucstr);
+				out.serial(ucstr); // FIXME: UTF-8 (serial)
 				NetMngr.push(out);
 				//nlinfo("impulseCallBack : %s %d %s sent", msgName.c_str(), (uint32)behavToSend, sCustomPhrase.c_str());
 			}
 			else
-				nlwarning("command 'emote': unknown message named '%s'.", msgName.c_str());
+				nlwarning("command 'emote': unknown message named '%s'.", msgName);
 		}
 	}
 };
@@ -4594,7 +4591,7 @@ public:
 				CViewText *pVT = dynamic_cast<CViewText *>(pIG->getView("t"));
 				if (!pVT) break;
 
-				names.push_back(toUpper(pVT->getText().toUtf8()));
+				names.push_back(toUpper(pVT->getText()));
 			}
 
 			if (names.size() != nbChilds)
@@ -4604,7 +4601,7 @@ public:
 			}
 
 			std::locale loc("");
-			const std::collate<char>& coll = std::use_facet<std::collate<char> >(loc);
+			const std::collate<char>& coll = std::use_facet<std::collate<char> >(loc); // FIXME: Probably does not work
 
 			for(uint i = 0; i < nbChilds - 1; ++i)
 			{

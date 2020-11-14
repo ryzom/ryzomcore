@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1338,19 +1338,19 @@ namespace NLGUI
 		if( name == "title" )
 		{
 			if( _TitleTextOpened == _TitleTextClosed )
-				return _TitleTextOpened.toString();
+				return _TitleTextOpened;
 			else
 				return "";
 		}
 		else
 		if( name == "title_opened" )
 		{
-			return _TitleTextOpened.toString();
+			return _TitleTextOpened;
 		}
 		else
 		if( name == "title_closed" )
 		{
-			return _TitleTextClosed.toString();
+			return _TitleTextClosed;
 		}
 		else
 		if( name == "header_active" )
@@ -1997,12 +1997,12 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "content_y_offset", BAD_CAST toString( _ContentYOffset ).c_str() );
 		
 		if( _TitleTextOpened == _TitleTextClosed )
-			xmlSetProp( node, BAD_CAST "title", BAD_CAST _TitleTextOpened.toString().c_str() );
+			xmlSetProp( node, BAD_CAST "title", BAD_CAST _TitleTextOpened.c_str() );
 		else
 			xmlSetProp( node, BAD_CAST "title", BAD_CAST "" );
 
-		xmlSetProp( node, BAD_CAST "title_opened", BAD_CAST _TitleTextOpened.toString().c_str() );
-		xmlSetProp( node, BAD_CAST "title_closed", BAD_CAST _TitleTextClosed.toString().c_str() );
+		xmlSetProp( node, BAD_CAST "title_opened", BAD_CAST _TitleTextOpened.c_str() );
+		xmlSetProp( node, BAD_CAST "title_closed", BAD_CAST _TitleTextClosed.c_str() );
 		xmlSetProp( node, BAD_CAST "header_active", BAD_CAST toString( _HeaderActive ).c_str() );
 
 		if( _HeaderColor.getNodePtr() != NULL )
@@ -2144,24 +2144,20 @@ namespace NLGUI
 		ptr = xmlGetProp (cur, (xmlChar*)"title");
 		if (ptr)
 		{
-			if (_Localize)	_TitleTextOpened = CI18N::get(string((const char*)ptr));
-			else			_TitleTextOpened = string((const char*)ptr);
-			if (_Localize)	_TitleTextClosed = CI18N::get(string((const char*)ptr));
-			else			_TitleTextClosed = string((const char*)ptr);
+			_TitleTextOpened = (const char *)ptr;
+			_TitleTextClosed = (const char *)ptr;
 		}
 
 		ptr = xmlGetProp (cur, (xmlChar*)"title_opened");
 		if (ptr)
 		{
-			if (_Localize)	_TitleTextOpened = CI18N::get(string((const char*)ptr));
-			else			_TitleTextOpened = string((const char*)ptr);
+			_TitleTextOpened = (const char*)ptr;
 		}
 
 		ptr = xmlGetProp (cur, (xmlChar*)"title_closed");
 		if (ptr)
 		{
-			if (_Localize)	_TitleTextClosed = CI18N::get(string((const char*)ptr));
-			else			_TitleTextClosed = string((const char*)ptr);
+			_TitleTextClosed = (const char *)ptr;
 		}
 
 		ptr = xmlGetProp (cur, (xmlChar*)"header_active");
@@ -3712,7 +3708,7 @@ namespace NLGUI
 					{
 						CViewTextID	*vti= new CViewTextID(CViewBase::TCtorParam());
 						// the title here is actually the DB path
-						vti->setDBTextID(_TitleTextOpened.toString());
+						vti->setDBTextID(_TitleTextOpened);
 						vti->setDynamicString(_TitleClass==TitleTextDynString);
 						_TitleOpened = vti;
 					}
@@ -3744,7 +3740,7 @@ namespace NLGUI
 			_TitleOpened->setY (pLayer->getValSInt32 ("title_offset_y"));
 		}
 		_TitleOpened->setFontSize (pLayer->getValSInt32 ("title_font_size"));
-		if (_TitleClass==TitleText) _TitleOpened->setText (_TitleTextOpened);
+		if (_TitleClass == TitleText) setTitledOpenedViewText();
 		_TitleOpened->setActive (_Opened);
 
 		// Title when the container is closed
@@ -3764,7 +3760,7 @@ namespace NLGUI
 					{
 						CViewTextID	*vti= new CViewTextID(CViewBase::TCtorParam());
 						// the title here is actually the DB path
-						vti->setDBTextID(_TitleTextClosed.toString());
+						vti->setDBTextID(_TitleTextClosed);
 						vti->setDynamicString(_TitleClass==TitleTextDynString);
 						_TitleClosed = vti;
 					}
@@ -3796,7 +3792,7 @@ namespace NLGUI
 			_TitleClosed->setY (pLayer->getValSInt32 ("title_offset_y"));
 		}
 		_TitleClosed->setFontSize (pLayer->getValSInt32 ("title_font_size"));
-		if (_TitleClass==TitleText) _TitleClosed->setText (_TitleTextClosed);
+		if (_TitleClass == TitleText) setTitledClosedViewText();
 		_TitleClosed->setActive(!_Opened);
 
 
@@ -3947,86 +3943,116 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CGroupContainer::setLocalize(bool localize) 
+	{ 
+		_Localize = localize; 
+		if (_TitleOpened)
+		{
+			_TitleOpened->setLocalized(localize);
+		}
+		if (_TitleClosed)
+		{
+			_TitleClosed->setLocalized(localize);
+		}
+		invalidateCoords();
+	}
+
+	// ***************************************************************************
 	std::string		CGroupContainer::getTitle () const
-	{
-		return _TitleTextOpened.toString();
-	}
-
-	// ***************************************************************************
-	void			CGroupContainer::setTitle (const std::string &title)
-	{
-		if (_Localize)	setUCTitle (CI18N::get(title));
-		else			setUCTitle (title);
-	}
-
-	// ***************************************************************************
-	std::string		CGroupContainer::getTitleOpened () const
-	{
-		return _TitleTextOpened.toString();
-	}
-
-	// ***************************************************************************
-	void			CGroupContainer::setTitleOpened (const std::string &title)
-	{
-		if (_Localize)	setUCTitleOpened (CI18N::get(title));
-		else			setUCTitleOpened (title);
-	}
-
-	// ***************************************************************************
-	std::string		CGroupContainer::getTitleClosed () const
-	{
-		return _TitleTextClosed.toString();
-	}
-
-	// ***************************************************************************
-	void			CGroupContainer::setTitleClosed (const std::string &title)
-	{
-		if (_Localize)	setUCTitleClosed (CI18N::get(title));
-		else			setUCTitleClosed (title);
-	}
-
-	// ***************************************************************************
-	void CGroupContainer::setUCTitleOpened(const ucstring &title)
-	{
-		_TitleTextOpened = title;
-		if (_TitleOpened != NULL)
-			_TitleOpened->setText (title);
-		invalidateCoords();
-	}
-
-	// ***************************************************************************
-	void CGroupContainer::setUCTitleClosed(const ucstring &title)
-	{
-		_TitleTextClosed = title;
-		if (_TitleClosed != NULL)
-			_TitleClosed->setText (_TitleTextClosed);
-		invalidateCoords();
-	}
-
-	// ***************************************************************************
-	void CGroupContainer::setUCTitle(const ucstring &title)
-	{
-		setUCTitleOpened(title);
-		setUCTitleClosed(title);
-	}
-
-	// ***************************************************************************
-	ucstring CGroupContainer::getUCTitle () const
-	{
-		return getUCTitleOpened();
-	}
-
-	// ***************************************************************************
-	ucstring CGroupContainer::getUCTitleOpened () const
 	{
 		return _TitleTextOpened;
 	}
 
 	// ***************************************************************************
-	ucstring CGroupContainer::getUCTitleClosed () const
+	void			CGroupContainer::setTitle (const std::string &title)
+	{
+		setTitleOpened(title);
+		setTitleClosed(title);
+	}
+
+	// ***************************************************************************
+	std::string		CGroupContainer::getTitleOpened () const
+	{
+		return _TitleTextOpened;
+	}
+
+	// ***************************************************************************
+	void			CGroupContainer::setTitleOpened (const std::string &title)
+	{
+		_TitleTextOpened = title;
+		setTitledOpenedViewText();
+		invalidateCoords();
+	}
+
+	// ***************************************************************************
+	std::string		CGroupContainer::getTitleClosed () const
 	{
 		return _TitleTextClosed;
 	}
+
+	// ***************************************************************************
+	void			CGroupContainer::setTitleClosed (const std::string &title)
+	{
+		_TitleTextClosed = title;
+		setTitledClosedViewText();
+		invalidateCoords();
+	}
+
+	// ***************************************************************************
+	void CGroupContainer::setTitledOpenedViewText()
+	{
+		if (_TitleOpened != NULL)
+		{
+			_TitleOpened->setTextLocalized(_TitleTextOpened, _Localize);
+		}
+	}
+
+	// ***************************************************************************
+	void CGroupContainer::setTitledClosedViewText()
+	{
+		if (_TitleClosed != NULL)
+		{
+			_TitleClosed->setTextLocalized(_TitleTextClosed, _Localize);
+		}
+	}
+
+#ifdef RYZOM_LUA_UCSTRING
+	// ***************************************************************************
+	void CGroupContainer::setUCTitleOpened(const ucstring &title)
+	{
+		setTitleOpened(title.toUtf8());
+	}
+
+	// ***************************************************************************
+	void CGroupContainer::setUCTitleClosed(const ucstring &title)
+	{
+		setTitleClosed(title.toUtf8());
+	}
+
+	// ***************************************************************************
+	void CGroupContainer::setUCTitle(const ucstring &title)
+	{
+		setTitle(title.toUtf8());
+	}
+
+	// ***************************************************************************
+	ucstring CGroupContainer::getUCTitle () const
+	{
+		return ucstring::makeFromUtf8(getTitle());
+	}
+
+	// ***************************************************************************
+	ucstring CGroupContainer::getUCTitleOpened () const
+	{
+		return ucstring::makeFromUtf8(getTitleOpened());
+	}
+
+	// ***************************************************************************
+	ucstring CGroupContainer::getUCTitleClosed () const
+	{
+		return ucstring::makeFromUtf8(getTitleClosed());
+	}
+#endif
 
 	// ***************************************************************************
 	void	CGroupContainer::launch ()

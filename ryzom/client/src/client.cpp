@@ -302,7 +302,7 @@ int main(int argc, char **argv)
 		uint i;
 		for (i=0; i<files.size(); i++)
 		{
-			if (toLower(CFile::getExtension (files[i])) == "ttf")
+			if (toLowerAscii(CFile::getExtension (files[i])) == "ttf")
 				CFile::deleteFile (files[i]);
 		}
 	}
@@ -451,6 +451,7 @@ int main(int argc, char **argv)
 	// delete all logs and displayers when we're not using logs macros anymore
 	destroyDebug();
 	CLog::releaseProcessName();
+	// CCoTask::releaseInstance();
 
 	// delete the Nel context
 	delete appContext;

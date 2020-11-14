@@ -4,6 +4,7 @@
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -74,12 +75,21 @@ void CCompassTarget::serial(NLMISC::IStream &f)
 		}
 	}
 	f.serialCheck(NELID("CTAR"));
-	f.serialVersion(0);
+	sint version = f.serialVersion(1);
 	f.serial(Pos);
 	// for the name, try to save a string identifier if possible, because language may be changed between
 	// save & reload
-	f.serial(Name);
-	std::string language = toLower(ClientCfg.LanguageCode);
+	if (version < 1)
+	{
+		ucstring name; // Serial old version
+		f.serial(name);
+		Name = name.toUtf8();
+	}
+	else
+	{
+		f.serial(Name);
+	}
+	std::string language = toLowerAscii(ClientCfg.LanguageCode);
 	f.serial(language);
 	f.serialEnum(_Type);
 	if (_Type == PosTracker)
@@ -105,7 +115,7 @@ void CCompassTarget::serial(NLMISC::IStream &f)
 	// reset the compass to north to avoid incoherency
 	if (f.isReading())
 	{
-		if (toLower(ClientCfg.LanguageCode) != language)
+		if (toLowerAscii(ClientCfg.LanguageCode) != language)
 		{
 			*this = CCompassTarget();
 		}
@@ -393,18 +403,18 @@ void CGroupCompas::draw()
 
 				// The text
 				char message[50];
-				ucstring  distText;
+				string  distText;
 				if (displayedTarget.getType() != CCompassTarget::North)
 				{
 					if (dist > 999.0f)
 					{
 						smprintf (message, 50, "%.1f ", dist/1000.0f);
-						distText = ucstring (message) + CI18N::get("uiKilometerUnit");
+						distText = message + CI18N::get("uiKilometerUnit");
 					}
 					else
 					{
 						smprintf (message, 50, "%.0f ", dist);
-						distText = ucstring (message) + CI18N::get("uiMeterUnit");
+						distText = message + CI18N::get("uiMeterUnit");
 					}
 					distText = distText + " - " + displayedTarget.Name;
 				}
@@ -424,11 +434,10 @@ void CGroupCompas::draw()
 	CCtrlBase *toolTip = getCtrl("tt");
 	if (toolTip)
 	{
-		ucstring text;
 		if (displayedTarget.getType() != CCompassTarget::North)
 			toolTip->setDefaultContextHelp(CI18N::get("uittCompassDistance"));
 		else
-			toolTip->setDefaultContextHelp(text);
+			toolTip->setDefaultContextHelp(std::string());
 	}
 
 	if (displayedTarget.Name != _CurrTargetName)
@@ -558,7 +567,7 @@ bool	buildCompassTargetFromTeamMember(CCompassTarget &ct, uint teamMemberId)
 		ct.setPositionState(tracker);
 
 		CStringManagerClient *pSMC = CStringManagerClient::instance();
-		ucstring name;
+		string name;
 		if (pSMC->getString(nameNode->getValue32(), name))
 			ct.Name = CEntityCL::removeTitleAndShardFromName(name); // TODO : dynamic support for name
 		else
@@ -741,8 +750,8 @@ void CGroupCompasMenu::setActive (bool state)
 				/*CEntityCL *entity = EntitiesMngr.entity(UserEntity->selection());
 				if (entity != NULL)
 				{*/
-					//ucstring targetName = CI18N::get("uiTargetTwoPoint") + entity->removeTitleAndShardFromName(entity->getEntityName());
-					ucstring targetName = CI18N::get("uiTarget");
+					//string targetName = CI18N::get("uiTargetTwoPoint") + entity->removeTitleAndShardFromName(entity->getEntityName());
+					string targetName = CI18N::get("uiTarget");
 					ct.setType(CCompassTarget::Selection);
 					ct.Name = targetName;
 					Targets.push_back(ct);
@@ -777,7 +786,7 @@ void CGroupCompasMenu::setActive (bool state)
 						CCDBNodeLeaf *textIDLeaf = NLGUI::CDBManager::getInstance()->getDbProp(baseDbPath + toString(":%d:TARGET%d:TITLE", (int) k, (int) l), false);
 						if (textIDLeaf)
 						{
-							ucstring name;
+							string name;
 							if (CStringManagerClient::instance()->getDynString(textIDLeaf->getValue32(), name))
 							{
 								CCDBNodeLeaf *leafPosX= NLGUI::CDBManager::getInstance()->getDbProp(baseDbPath +  toString(":%d:TARGET%d:X", (int) k, (int) l), false);
@@ -868,7 +877,7 @@ void CGroupCompasMenu::setActive (bool state)
 						CCompassTarget ct;
 						ct.setType(CCompassTarget::UserLandMark);
 						ct.Pos = sortedLandmarks[k].Pos;
-						ct.Name = sortedLandmarks[k].Title;
+						ct.Name = sortedLandmarks[k].Title.toUtf8();
 						Targets.push_back(ct);
 						landMarkSubMenus[sortedLandmarks[k].Type]->addLine(ct.Name, "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 						selectable= true;
@@ -1047,12 +1056,12 @@ REGISTER_ACTION_HANDLER( CHandlerSetCompassNorth, "set_compass_north");
 
 class CCompassDialogsStringCallback : public IStringWaitCallback
 {
-	virtual void onDynStringAvailable(uint /* stringId */, const ucstring &value)
+	virtual void onDynStringAvailable(uint /* stringId */, const std::string &value)
 	{
 		uint size = (uint)CCompassDialogsManager::getInstance()._Entries.size();
 		for ( uint i = 0; i < size; i++)
 		{
-			ucstring name;
+			std::string name;
 			if ( CStringManagerClient::instance()->getDynString(CCompassDialogsManager::getInstance()._Entries[i].Text, name) )
 			{
 				if ( value == name )

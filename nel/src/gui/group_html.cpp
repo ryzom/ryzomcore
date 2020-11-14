@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -27,6 +27,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/rgba.h"
 #include "nel/misc/algo.h"
+#include "nel/misc/utf_string_view.h"
 #include "nel/gui/libwww.h"
 #include "nel/gui/group_html.h"
 #include "nel/gui/group_list.h"
@@ -88,7 +89,7 @@ namespace NLGUI
 	// Return URL with https is host is in HSTS list
 	static std::string upgradeInsecureUrl(const std::string &url)
 	{
-		if (toLower(url.substr(0, 7)) != "http://") {
+		if (toLowerAscii(url.substr(0, 7)) != "http://") {
 			return url;
 		}
 
@@ -135,7 +136,7 @@ namespace NLGUI
 				if (pos == std::string::npos)
 					return;
 
-				std::string key = toLower(header.substr(0, pos));
+				std::string key = toLowerAscii(header.substr(0, pos));
 				if (pos != std::string::npos)
 				{
 					HeadersRecv[key] = header.substr(pos + 2);
@@ -184,7 +185,7 @@ namespace NLGUI
 			bool hasHSTSHeader()
 			{
 				// ignore header if not secure connection
-				if (toLower(Url.substr(0, 8)) != "https://")
+				if (toLowerAscii(Url.substr(0, 8)) != "https://")
 				{
 					return false;
 				}
@@ -551,7 +552,7 @@ namespace NLGUI
 		LOG_DL("curl easy handle %p created for '%s'", curl, download.url.c_str());
 
 		// https://
-		if (toLower(download.url.substr(0, 8)) == "https://")
+		if (toLowerAscii(download.url.substr(0, 8)) == "https://")
 		{
 			// if supported, use custom SSL context function to load certificates
 			NLWEB::CCurlCertificates::useCertificates(curl);
@@ -1033,7 +1034,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::addText (const char * buf, int len)
+	void CGroupHTML::addText (const char *buf, int len)
 	{
 		if (_Browsing)
 		{
@@ -1041,44 +1042,43 @@ namespace NLGUI
 				return;
 
 			// Build a UTF8 string
-			string inputString(buf, buf+len);
-
 			if (_ParsingLua && _TrustedDomain)
 			{
 				// we are parsing a lua script
-				_LuaScript += inputString;
+				_LuaScript += string(buf, buf + len);
 				// no more to do
 				return;
 			}
 
 			// Build a unicode string
-			ucstring inputUCString;
-			inputUCString.fromUtf8(inputString);
+			CUtfStringView inputStringView(buf, len);
 
 			// Build the final unicode string
-			ucstring tmp;
+			string tmp;
 			tmp.reserve(len);
-			uint ucLen = (uint)inputUCString.size();
-			for (uint i=0; i<ucLen; i++)
+			u32char lastChar = 0;
+			u32char inputStringView0 = *inputStringView.begin();
+			for (CUtfStringView::iterator it(inputStringView.begin()), end(inputStringView.end()); it != end; ++it)
 			{
-				ucchar output;
+				u32char output;
 				bool keep;
 				// special treatment for 'nbsp' (which is returned as a discreet space)
-				if (inputString.size() == 1 && inputString[0] == 32)
+				if (len == 1 && inputStringView0 == 32)
 				{
 					// this is a nbsp entity
-					output = inputUCString[i];
+					output = *it;
 					keep = true;
 				}
 				else
 				{
 					// not nbsp, use normal white space removal routine
-					keep = translateChar (output, inputUCString[i], (tmp.empty())?0:tmp[tmp.size()-1]);
+					keep = translateChar (output, *it, lastChar);
 				}
 
 				if (keep)
 				{
-					tmp.push_back(output);
+					CUtfStringView::append(tmp, output);
+					lastChar = output;
 				}
 			}
 
@@ -1266,13 +1266,12 @@ namespace NLGUI
 
 		// TODO: 'content' should already be tokenized in css parser as it has all the functions for that
 		std::string content = trim(_Style.getStyle("content"));
-		if (toLower(content) == "none" || toLower(content) == "normal")
+		if (toLowerAscii(content) == "none" || toLowerAscii(content) == "normal")
 		{
 			_Style.popStyle();
 			return;
 		}
 
-		// TODO: use ucstring / ucchar as content is utf8 chars
 		std::string::size_type pos = 0;
 		while(pos < content.size())
 		{
@@ -1292,12 +1291,12 @@ namespace NLGUI
 					pos++;
 				}
 				token = content.substr(start, pos - start);
-				addString(ucstring::makeFromUtf8(token));
+				addString(token);
 
 				// skip closing quote
 				pos++;
 			}
-			else if (content[pos] == 'u' && pos < content.size() - 6 && toLower(content.substr(pos, 4)) == "url(")
+			else if (content[pos] == 'u' && pos < content.size() - 6 && toLowerAscii(content.substr(pos, 4)) == "url(")
 			{
 				// url(/path-to/image.jpg) / "Alt!"
 				// url("/path to/image.jpg") / "Alt!"
@@ -1375,7 +1374,7 @@ namespace NLGUI
 
 				if (elm.hasAttribute(token))
 				{
-					addString(ucstring::makeFromUtf8(elm.getAttribute(token)));
+					addString(elm.getAttribute(token));
 				}
 			}
 			else
@@ -1561,7 +1560,7 @@ namespace NLGUI
 		else
 		if( name == "title_prefix" )
 		{
-			return _TitlePrefix.toString();
+			return _TitlePrefix;
 		}
 		else
 		if( name == "background_color" )
@@ -2223,7 +2222,7 @@ namespace NLGUI
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "html" );
 		xmlSetProp( node, BAD_CAST "url", BAD_CAST _URL.c_str() );
-		xmlSetProp( node, BAD_CAST "title_prefix", BAD_CAST _TitlePrefix.toString().c_str() );
+		xmlSetProp( node, BAD_CAST "title_prefix", BAD_CAST _TitlePrefix.c_str() );
 		xmlSetProp( node, BAD_CAST "background_color", BAD_CAST toString( BgColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "error_color", BAD_CAST toString( ErrorColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "link_color", BAD_CAST toString( LinkColor ).c_str() );
@@ -2668,7 +2667,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	bool CGroupHTML::translateChar(ucchar &output, ucchar input, ucchar lastCharParam) const
+	bool CGroupHTML::translateChar(u32char &output, u32char input, u32char lastCharParam) const
 	{
 		// Keep this char ?
 		bool keep = true;
@@ -2690,13 +2689,13 @@ namespace NLGUI
 				else
 				{
 					// Get the last char
-					ucchar lastChar = lastCharParam;
+					u32char lastChar = lastCharParam;
 					if (lastChar == 0)
 						lastChar = getLastChar();
-					keep = ((lastChar != (ucchar)' ') &&
+					keep = ((lastChar != (u32char)' ') &&
 							(lastChar != 0)) || getPRE() || (_CurrentViewImage && (lastChar == 0));
 					if(!getPRE())
-						input = ' ';
+						input = (u32char)' ';
 				}
 			}
 			break;
@@ -2709,11 +2708,11 @@ namespace NLGUI
 				else
 				{
 					// Get the last char
-					ucchar lastChar = lastCharParam;
+					u32char lastChar = lastCharParam;
 					if (lastChar == 0)
 						lastChar = getLastChar();
-					keep = ((lastChar != (ucchar)' ') &&
-							(lastChar != (ucchar)'\n') &&
+					keep = ((lastChar != (u32char)' ') &&
+							(lastChar != (u32char)'\n') &&
 							(lastChar != 0)) || getPRE() || (_CurrentViewImage && (lastChar == 0));
 				}
 			}
@@ -2752,13 +2751,13 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::addString(const ucstring &str)
+	void CGroupHTML::addString(const std::string &str)
 	{
-		ucstring tmpStr = str;
+		string tmpStr = str;
 
 		if (_Localize)
 		{
-			string	_str = tmpStr.toString();
+			string	_str = tmpStr;
 			string::size_type	p = _str.find('#');
 			if (p == string::npos)
 			{
@@ -2799,7 +2798,7 @@ namespace NLGUI
 		}
 		else if (_Object)
 		{
-			_ObjectScript += tmpStr.toString();
+			_ObjectScript += tmpStr;
 		}
 		else if (_SelectOption)
 		{
@@ -2829,7 +2828,7 @@ namespace NLGUI
 			// Number of child in this paragraph
 			if (_CurrentViewLink)
 			{
-				bool skipLine = !_CurrentViewLink->getText().empty() && *(_CurrentViewLink->getText().rbegin()) == (ucchar) '\n';
+				bool skipLine = !_CurrentViewLink->getText().empty() && *(_CurrentViewLink->getText().rbegin()) == '\n';
 				bool sameShadow = style.TextShadow.Enabled && _CurrentViewLink->getShadow();
 				if (sameShadow && style.TextShadow.Enabled)
 				{
@@ -2887,7 +2886,7 @@ namespace NLGUI
 							ctrlButton->setModulateGlobalColorAll (false);
 
 							// Translate the tooltip
-							ctrlButton->setDefaultContextHelp(ucstring::makeFromUtf8(getLinkTitle()));
+							ctrlButton->setDefaultContextHelp(getLinkTitle());
 							ctrlButton->setText(tmpStr);
 							// empty url / button disabled
 							bool disabled = string(getLink()).empty();
@@ -2967,7 +2966,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	CInterfaceGroup *CGroupHTML::addTextArea(const std::string &templateName, const char *name, uint rows, uint cols, bool multiLine, const ucstring &content, uint maxlength)
+	CInterfaceGroup *CGroupHTML::addTextArea(const std::string &templateName, const char *name, uint rows, uint cols, bool multiLine, const std::string &content, uint maxlength)
 	{
 		// In a paragraph ?
 		if (!_Paragraph)
@@ -3233,7 +3232,7 @@ namespace NLGUI
 			}
 			else
 			{
-				ctrlButton->setDefaultContextHelp(ucstring::makeFromUtf8(tooltip));
+				ctrlButton->setDefaultContextHelp(tooltip);
 				//ctrlButton->setOnContextHelp(string(tooltip));
 			}
 
@@ -3305,11 +3304,11 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	ucchar CGroupHTML::getLastChar() const
+	u32char CGroupHTML::getLastChar() const
 	{
 		if (_CurrentViewLink)
 		{
-			const ucstring &str = _CurrentViewLink->getText();
+			::u32string str = CUtfStringView(_CurrentViewLink->getText()).toUtf32(); // FIXME: Optimize reverse UTF iteration
 			if (!str.empty())
 				return str[str.length()-1];
 		}
@@ -3401,7 +3400,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::setTitle (const ucstring &title)
+	void CGroupHTML::setContainerTitle (const std::string &title)
 	{
 		CInterfaceElement *parent = getParent();
 		if (parent)
@@ -3411,7 +3410,7 @@ namespace NLGUI
 				CGroupContainer *container = dynamic_cast<CGroupContainer*>(parent);
 				if (container)
 				{
-					container->setUCTitle (title);
+					container->setTitle(title);
 				}
 			}
 		}
@@ -3419,21 +3418,18 @@ namespace NLGUI
 
 	void CGroupHTML::setTitle(const std::string &title)
 	{
-		ucstring uctitle;
-		uctitle.fromUtf8(title);
-
 		_TitleString.clear();
 		if(!_TitlePrefix.empty())
 		{
 			_TitleString = _TitlePrefix + " - ";
 		}
-		_TitleString += uctitle;
+		_TitleString += title;
 
-		setTitle(_TitleString);
+		setContainerTitle(_TitleString);
 	}
 
 	std::string CGroupHTML::getTitle() const {
-		return _TitleString.toUtf8();
+		return _TitleString;
 	};
 
 	// ***************************************************************************
@@ -3443,7 +3439,7 @@ namespace NLGUI
 		result = url;
 		string tmp;
 
-		if (toLower(result).find("file:") == 0 && result.size() > 5)
+		if (toLowerAscii(result).find("file:") == 0 && result.size() > 5)
 		{
 			result = result.substr(5, result.size()-5);
 		}
@@ -3464,7 +3460,7 @@ namespace NLGUI
 		{
 			// Normalize the path
 			if (isUrl)
-				//result = "file:"+toLower(CPath::standardizePath (CPath::getFullPath (CFile::getPath(result)))+CFile::getFilename(result));*/
+				//result = "file:"+toLowerAscii(CPath::standardizePath (CPath::getFullPath (CFile::getPath(result)))+CFile::getFilename(result));*/
 				result = "file:/"+tmp;
 			else
 				result = tmp;
@@ -3698,7 +3694,7 @@ namespace NLGUI
 		{
 			// Text area ?
 			bool addEntry = false;
-			ucstring entryData;
+			string entryData;
 			if (form.Entries[i].TextArea)
 			{
 				// Get the edit box view
@@ -3726,7 +3722,7 @@ namespace NLGUI
 			else if (form.Entries[i].ComboBox)
 			{
 				CDBGroupComboBox *cb = form.Entries[i].ComboBox;
-				entryData.fromUtf8(form.Entries[i].SelectValues[cb->getSelection()]);
+				entryData = form.Entries[i].SelectValues[cb->getSelection()];
 				addEntry = true;
 			}
 			else if (form.Entries[i].SelectBox)
@@ -3757,7 +3753,7 @@ namespace NLGUI
 			// Add this entry
 			if (addEntry)
 			{
-				formfields.add(form.Entries[i].Name, CI18N::encodeUTF8(entryData));
+				formfields.add(form.Entries[i].Name, entryData);
 			}
 		}
 
@@ -3789,7 +3785,7 @@ namespace NLGUI
 		updateRefreshButton();
 
 		std::string filename;
-		if (toLower(uri).find("file:/") == 0)
+		if (toLowerAscii(uri).find("file:/") == 0)
 		{
 			filename = uri.substr(6, uri.size() - 6);
 		}
@@ -3859,7 +3855,7 @@ namespace NLGUI
 		}
 
 		// https://
-		if (toLower(url.substr(0, 8)) == "https://")
+		if (toLowerAscii(url.substr(0, 8)) == "https://")
 		{
 			// if supported, use custom SSL context function to load certificates
 			NLWEB::CCurlCertificates::useCertificates(curl);
@@ -4180,7 +4176,8 @@ namespace NLGUI
 		}
 		else
 		{
-			renderHtmlString(content);
+			// Sanitize downloaded HTML UTF-8 encoding, and render
+			renderHtmlString(CUtfStringView(content).toUtf8(true));
 		}
 	}
 
@@ -4684,9 +4681,7 @@ namespace NLGUI
 		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TBOOLEAN);
 
 		string name = ls.toString(1);
-
-		ucstring text;
-		text.fromUtf8(ls.toString(2));
+		string text = ls.toString(2);
 
 		if (!_Forms.empty())
 		{
@@ -4716,7 +4711,7 @@ namespace NLGUI
 		const char *funcName = "addString";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
-		addString(ucstring(ls.toString(1)));
+		addString(ls.toString(1));
 		return 0;
 	}
 
@@ -4944,7 +4939,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	inline bool isDigit(ucchar c, uint base = 16)
+	inline bool isDigit(char c, uint base = 16)
 	{
 		if (c>='0' && c<='9') return true;
 		if (base != 16) return false;
@@ -4954,7 +4949,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	inline ucchar convertHexDigit(ucchar c)
+	inline char convertHexDigit(char c)
 	{
 		if (c>='0' && c<='9') return c-'0';
 		if (c>='A' && c<='F') return c-'A'+10;
@@ -4963,9 +4958,10 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	ucstring CGroupHTML::decodeHTMLEntities(const ucstring &str)
+	std::string CGroupHTML::decodeHTMLEntities(const std::string &str)
 	{
-		ucstring result;
+		std::string result;
+		result.reserve(str.size() + (str.size() >> 2));
 		uint last, pos;
 
 		for (uint i=0; i<str.length(); ++i)
@@ -5001,13 +4997,13 @@ namespace NLGUI
 						continue;
 					}
 
-					ucchar c = 0;
+					u32char c = 0;
 
 					// convert digits to unicode character
-					while (pos<last) c = convertHexDigit(str[pos++]) + c*ucchar(base);
+					while (pos < last) c = convertHexDigit(str[pos++]) + (c * u32char(base));
 
 					// append our new character to the result string
-					result += c;
+					CUtfStringView::append(result, c);
 
 					// move 'i' forward to point at the ';' .. the for(...) will increment i to point to next char
 					i = last;
@@ -5016,10 +5012,10 @@ namespace NLGUI
 				}
 
 				// special xml characters
-				if (str.substr(i+1,5)==ucstring("quot;"))	{ i+=5; result+='\"'; continue; }
-				if (str.substr(i+1,4)==ucstring("amp;"))	{ i+=4; result+='&'; continue; }
-				if (str.substr(i+1,3)==ucstring("lt;"))	{ i+=3; result+='<'; continue; }
-				if (str.substr(i+1,3)==ucstring("gt;"))	{ i+=3; result+='>'; continue; }
+				if (str.substr(i+1,5)=="quot;")	{ i+=5; result+='\"'; continue; }
+				if (str.substr(i+1,4)=="amp;")	{ i+=4; result+='&'; continue; }
+				if (str.substr(i+1,3)=="lt;")	{ i+=3; result+='<'; continue; }
+				if (str.substr(i+1,3)=="gt;")	{ i+=3; result+='>'; continue; }
 			}
 
 			// all the special cases are catered for... treat this as a normal character
@@ -5350,7 +5346,7 @@ namespace NLGUI
 			if (_Style.hasStyle("text-align"))
 				align = _Style.Current.TextAlign;
 			else if (elm.hasNonEmptyAttribute("align"))
-				align = toLower(elm.getAttribute("align"));
+				align = toLowerAscii(elm.getAttribute("align"));
 
 			if (align == "left")
 				cellParams.Align = CGroupCell::Left;
@@ -5365,7 +5361,7 @@ namespace NLGUI
 			if (_Style.hasStyle("vertical-align"))
 				valign = _Style.Current.VerticalAlign;
 			else if (elm.hasNonEmptyAttribute("valign"))
-				valign = toLower(elm.getAttribute("valign"));
+				valign = toLowerAscii(elm.getAttribute("valign"));
 
 			if (valign == "top")
 				cellParams.VAlign = CGroupCell::Top;
@@ -5470,11 +5466,11 @@ namespace NLGUI
 					}
 					else
 					{
-						ctrlButton->setDefaultContextHelp(ucstring(tooltip));
+						ctrlButton->setDefaultContextHelp(tooltip);
 					}
 				}
 
-				ctrlButton->setText(ucstring::makeFromUtf8(value));
+				ctrlButton->setText(value);
 
 				setTextButtonStyle(ctrlButton, _Style.Current);
 			}
@@ -5562,8 +5558,7 @@ namespace NLGUI
 	{
 		if (!_Paragraph || _Paragraph->getNumChildren() == 0)
 		{
-			ucstring tmp("\n");
-			addString(tmp);
+			addString("\n");
 		}
 		else
 		{
@@ -5863,7 +5858,7 @@ namespace NLGUI
 		// Build the form
 		CGroupHTML::CForm form;
 		// id check is case sensitive and auto id's are uppercase
-		form.id = toLower(trim(elm.getAttribute("id")));
+		form.id = toLowerAscii(trim(elm.getAttribute("id")));
 		if (form.id.empty())
 		{
 			form.id = toString("FORM%d", _Forms.size());
@@ -6085,8 +6080,7 @@ namespace NLGUI
 		{
 			// Get the string name
 			string name = elm.getAttribute("name");
-			ucstring ucValue;
-			ucValue.fromUtf8(elm.getAttribute("value"));
+			string ucValue = elm.getAttribute("value");
 
 			uint size = 20;
 			uint maxlength = 1024;
@@ -6120,12 +6114,12 @@ namespace NLGUI
 			string normal = elm.getAttribute("src");
 			string pushed;
 			string over;
-			ucstring ucValue = ucstring("on");
+			string ucValue = "on";
 			bool checked = elm.hasAttribute("checked");
 
 			// TODO: unknown if empty attribute should override or not
 			if (elm.hasNonEmptyAttribute("value"))
-				ucValue.fromUtf8(elm.getAttribute("value"));
+				ucValue = elm.getAttribute("value");
 
 			if (type == "radio")
 			{
@@ -6190,8 +6184,7 @@ namespace NLGUI
 				string name = elm.getAttribute("name");
 
 				// Get the value
-				ucstring ucValue;
-				ucValue.fromUtf8(elm.getAttribute("value"));
+				string ucValue = elm.getAttribute("value");
 
 				// Add an entry
 				CGroupHTML::CForm::CEntry entry;
@@ -6223,8 +6216,7 @@ namespace NLGUI
 		if (elm.hasNonEmptyAttribute("value"))
 			fromString(elm.getAttribute("value"), _UL.back().Value);
 
-		ucstring str;
-		str.fromUtf8(_UL.back().getListMarkerText());
+		string str = _UL.back().getListMarkerText();
 		addString (str);
 
 		// list-style-type: outside
@@ -6294,7 +6286,7 @@ namespace NLGUI
 			{
 				fromString(httpContent.substr(0, pos), _NextRefreshTime);
 
-				pos = toLower(httpContent).find("url=");
+				pos = toLowerAscii(httpContent).find("url=");
 				if (pos != string::npos)
 					_RefreshUrl = getAbsoluteUrl(httpContent.substr(pos + 4));
 			}
@@ -6428,7 +6420,7 @@ namespace NLGUI
 		// use option text as value
 		if (!elm.hasAttribute("value"))
 		{
-			_Forms.back().Entries.back().SelectValues.back() = _SelectOptionStr.toUtf8();
+			_Forms.back().Entries.back().SelectValues.back() = _SelectOptionStr;
 		}
 
 		// insert the parsed text into the select control

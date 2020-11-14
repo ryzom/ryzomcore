@@ -436,7 +436,7 @@ CStringManager::CEntityWords CStringManager::parseEntityWords(const ucstring &st
 	for (i=1; i<ws.size(); ++i)
 	{
 		// on the first col, we uncapitalize the id
-		ws.setData(i, 0, ucstring(NLMISC::toLower(ws.getData(i, 0).toString())));
+		ws.setData(i, 0, ucstring(NLMISC::toLowerAscii(ws.getData(i, 0).toString())));
 
 		ew._RowInfo.insert(make_pair(ws.getData(i, 0).toString(), i-1));
 		for (uint j=0; j<ws.ColCount; ++j)
@@ -810,7 +810,7 @@ bool CStringManager::parseTag(const CPhrase &phrase, const ucstring &tag, TRepla
 			nlwarning("Error reading tag property in the tag [%s]", tag.toString().c_str());
 			return false;
 		}
-		spec = NLMISC::toLower(spec);
+		spec = NLMISC::toLowerAscii(spec);
 	}
 	else
 		spec = "name";
@@ -1106,7 +1106,7 @@ bool CStringManager::parseParamList(ucstring::const_iterator &it, ucstring::cons
 				nlwarning("Error parsing parameter %u type in param list", count);
 				return false;
 			}
-			type = NLMISC::toLower(type);
+			type = NLMISC::toLowerAscii(type);
 
 			NLMISC::CI18N::skipWhiteSpace(it, last);
 			if (!NLMISC::CI18N::parseLabel(it, last, name))
@@ -1543,12 +1543,12 @@ void	CStringManager::setEntityWord(const std::string& path, const ucstring& valu
 
 	if ((end = path.find('.', start)) == string::npos)
 		return;
-	string	lang = toLower(path.substr(start, end-start));
+	string	lang = toLowerAscii(path.substr(start, end-start));
 	start = end+1;
 
 	if ((end = path.find('.', start)) == string::npos)
 		return;
-	string	wordentity = toLower(path.substr(start, end-start));
+	string	wordentity = toLowerAscii(path.substr(start, end-start));
 	start = end+1;
 
 	if ((end = path.find('.', start)) == string::npos)
@@ -1559,14 +1559,14 @@ void	CStringManager::setEntityWord(const std::string& path, const ucstring& valu
 	string	det = path.substr(start);
 
 	TLanguages	language = checkLanguageCode(lang);
-	if (toLower(getLanguageCodeString(language)) != lang)
+	if (toLowerAscii(getLanguageCodeString(language)) != lang)
 		return;
 
 	TParameterTraitList	typeNames = CParameterTraits::getParameterTraitsNames();
 
 	uint	i;
 	for (i=0; i<typeNames.size(); ++i)
-		if (toLower(typeNames[i].second) == wordentity)
+		if (toLowerAscii(typeNames[i].second) == wordentity)
 			break;
 
 	if (i >= typeNames.size())

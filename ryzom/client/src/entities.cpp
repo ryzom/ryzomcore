@@ -178,7 +178,7 @@ public :
 				CCompassTarget ct = pGC->getTarget();
 
 				STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-				ucstring oldName;
+				string oldName;
 				if (!pSMC->getDynString(leaf->getOldValue32(), oldName))
 				{
 					nlwarning("Can't get compass target name");
@@ -201,7 +201,7 @@ public :
 			{
 				// TODO : maybe the following code could be include in CGroupMap::checkCoords, but it is not called when the map is not visible...
 				STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
-				ucstring name;
+				string name;
 				if (pSMC->getDynString((*tmpIt)->getValue32(), name))
 				{
 //					if (_AlreadyReceived.count(name) == 0)
@@ -246,7 +246,7 @@ public :
 	}
 private:
 	std::list<CCDBNodeLeaf *> _PendingMissionTitle;
-//	std::set<ucstring> _AlreadyReceived;
+//	std::set<std::string> _AlreadyReceived;
 };
 
 //-----------------------------------------------
@@ -2245,7 +2245,7 @@ void CEntityManager::dumpXML(class NLMISC::IStream &f)
 					f.xmlPushBegin("Name");
 					// Set a property name
 					f.xmlSetAttrib ("string");
-					ucstring n = _Entities[i]->getEntityName();
+					string n = _Entities[i]->getEntityName();
 					f.serial(n);
 					// Close the new node header
 					f.xmlPushEnd();
@@ -2338,11 +2338,11 @@ CEntityCL *CEntityManager::getEntityByName (uint32 stringId) const
 }
 
 //-----------------------------------------------
-CEntityCL *CEntityManager::getEntityByKeywords (const std::vector<ucstring> &keywords, bool onlySelectable) const
+CEntityCL *CEntityManager::getEntityByKeywords (const std::vector<string> &keywords, bool onlySelectable) const
 {
 	if (keywords.empty()) return NULL;
 
-	std::vector<ucstring> lcKeywords;
+	std::vector<string> lcKeywords;
 	lcKeywords.resize(keywords.size());
 	for(uint k = 0; k < keywords.size(); k++)
 	{
@@ -2359,14 +2359,13 @@ CEntityCL *CEntityManager::getEntityByKeywords (const std::vector<ucstring> &key
 
 		if (onlySelectable && !_Entities[i]->properties().selectable()) continue;
 
-		ucstring lcName;
-		lcName = toLower(_Entities[i]->getDisplayName());
+		string lcName = toLower(_Entities[i]->getDisplayName());
 		if (lcName.empty()) continue;
 
 		bool match = true;
 		for (uint k = 0; k < lcKeywords.size(); ++k)
 		{
-			if (lcName.find(lcKeywords[k]) == ucstring::npos)
+			if (lcName.find(lcKeywords[k]) == string::npos)
 			{
 				match = false;
 				break;
@@ -2395,16 +2394,10 @@ CEntityCL *CEntityManager::getEntityByKeywords (const std::vector<ucstring> &key
 }
 
 //-----------------------------------------------
-CEntityCL *CEntityManager::getEntityByName (const ucstring &name, bool caseSensitive, bool complete) const
+CEntityCL *CEntityManager::getEntityByName (const string &name, bool caseSensitive, bool complete) const
 {
-	ucstring source = name;
-	const uint size = (uint)source.size();
-	if (!caseSensitive)
-	{
-		uint j;
-		for (j=0; j<size; j++)
-			source[j] = tolower (source[j]);
-	}
+	string source;
+	source = caseSensitive ? name : toLower(name); // TODO: toLowerInsensitive
 
 	uint i;
 	const uint count = (uint)_Entities.size();
@@ -2415,15 +2408,8 @@ CEntityCL *CEntityManager::getEntityByName (const ucstring &name, bool caseSensi
 	{
 		if(_Entities[i])
 		{
-			ucstring value = _Entities[i]->getDisplayName();
+			string value = caseSensitive ? _Entities[i]->getDisplayName() : toLower(_Entities[i]->getDisplayName()); // TODO: toLowerInsensitive
 			bool foundEntity = false;
-
-			uint j;
-			if (!caseSensitive)
-			{
-				for (j=0; j<value.size(); j++)
-					value[j] = tolower (value[j]);
-			}
 
 			// Complete test ?
 			if (complete)
@@ -2433,11 +2419,8 @@ CEntityCL *CEntityManager::getEntityByName (const ucstring &name, bool caseSensi
 			}
 			else
 			{
-				if (value.size() >= size)
-				{
-					if (std::operator==(source, value.substr (0, size)))
-						foundEntity = true;
-				}
+				if (NLMISC::startsWith(value, source))
+					foundEntity = true;
 			}
 
 			if (foundEntity)

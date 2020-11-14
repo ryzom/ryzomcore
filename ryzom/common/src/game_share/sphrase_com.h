@@ -63,7 +63,7 @@ public:
 	std::vector<NLMISC::CSheetId>	Bricks;
 
 	// Name Of the Phrase. Saved on server, read on client.
-	ucstring						Name;
+	ucstring						Name; // FIXME: UTF-8 (serial)
 
 	/// The comparison is made only on Bricks
 	bool	operator==(const CSPhraseCom &p) const;

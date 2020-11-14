@@ -1227,7 +1227,7 @@
 					</group>
 					<instance template="edit_box_widget" id="mission_tag_eb" posref="MR ML" x="0" posparent="mission_tag_label" w="200"
 					 onenter="lua" 
-					 negative_filter = '"{}[]'
+					 negative_filter = ''
 					 fontsize="12"
 					 params="r2.ScenarioWindow:onScenarioMissionTagChanged()"
 					 on_focus_lost="lua"
@@ -1390,7 +1390,7 @@
 	<group id="content" x="0" y="0" sizeref="wh" w="0" h="0" posref="TL TL" >		
 		<group id="enclosing" sizeref="wh" w="-16" h="0" posref="TL TL">
 			<instance template="edit_box_widget" text_y="-1" posref="TL TL" sizeref="w" w="-8" fontsize="14" x="0" reset_focus_on_hide="true"
-			 negative_filter = '"{}[]'
+			 negative_filter = ''
 			 child_resize_hmargin="4"
 			 max_historic="0"
 			 y="-2"
@@ -1809,7 +1809,7 @@ text_y="-2"
 		<group type="edit_box" id="edit_box_group" sizeref="w" posparent="label" posref="BL TL" x="0" y="-2" 
 		 onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params"
 		 on_focus_lost="#on_focus_lost" on_focus_lost_params="#on_focus_lost_params" 
-		 negative_filter = '"{}[]'
+		 negative_filter = ''
 		 max_num_chars="#max_num_chars" prompt="" enter_loose_focus="true" entry_type="#entry_type"  reset_focus_on_hide="true" menu_r="" >
 									
 			<instance template="box_widget" id="back_edit_box" posref="TL TL" sizeref="w" h="20" />
@@ -3019,7 +3019,7 @@ text_y="-2"
 </proc>
 
 <group type="container" id="feature_help" w="370" pop_min_w="370" pop_max_w="370" h="550" pop_min_h="550" pop_max_h="550"
- title="" global_color="false" header_color="UI:SAVE:WIN:COLORS:R2_FEATURE_HELP" uc_title=""
+ title="" global_color="false" header_color="UI:SAVE:WIN:COLORS:R2_FEATURE_HELP"
  title_bar_open="false" open_button="false" force_open_out="true" right_button="false"
  lockable="true" openable="false" opened="true" movable="true" active="false" savable="true" >	
 
@@ -3064,13 +3064,13 @@ text_y="-2"
 		<!--<view type="text" id="help_text" posref="TL TL" posparent="parent" x="0" y="-14" color="255 255 255 255" fontsize="12" shadow="true"
 			global_color="true" hardtext="" multi_line="true" multi_line_space="0" />
 		-->
-		<ctrl type="button" id="custom_bbox_enabled" button_type="toggle_button" posref="BL BL" posparent="tb_enclosing" x="0" y="-14"
+		<ctrl type="button" id="show_again" button_type="toggle_button" posref="BL BL" posparent="tb_enclosing" x="0" y="-14"
 				tx_normal="w_slot_on.tga" tx_pushed="w_opacity_on.tga" tx_over="w_slot_on.tga" pushed="true"
 				color="255 255 255 255"	col_pushed="255 255 255 255" col_over="255 255 255 0" 
 				onclick_l="lua" 
 				params_l="r2.CustomBBox:updateFromUI()"
 		/>
-		<view type="text" id="text_custom" posparent="custom_bbox_enabled" posref="MR ML" x="4" y="-3" global_color="true" fontsize="12" shadow="true" hardtext="uiR2showMessageAgain" auto_clamp="true"/>
+		<view type="text" id="show_again_label" posparent="show_again" posref="MR ML" x="4" y="-3" global_color="true" fontsize="12" shadow="true" hardtext="uiR2showMessageAgain" auto_clamp="true"/>
 
 		<ctrl style="button_ok" x="0" y="6" posref="BM BM" text_y="0"
 			onclick_l="proc" params_l="help_close" hardtext="uittOK" /> 

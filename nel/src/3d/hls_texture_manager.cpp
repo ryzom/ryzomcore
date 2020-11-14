@@ -76,7 +76,7 @@ sint			CHLSTextureManager::findTexture(const std::string &name) const
 		return -1;
 
 	// Build a valid key.
-	string	nameLwr= toLower(name);
+	string	nameLwr= toLowerAscii(name);
 	CHLSTextureBank::CTextureInstance		textKey;
 	CHLSTextureBank::CTextureInstanceHandle	textKeyHandle;
 	textKey.buildAsKey(nameLwr.c_str());

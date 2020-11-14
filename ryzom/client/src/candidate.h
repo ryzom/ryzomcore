@@ -14,8 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// FIXME: Lost code
 
-
+#if 0
 #ifndef CL_CANDIDATE_H
 #define CL_CANDIDATE_H
 
@@ -33,9 +34,10 @@ struct Candidate
 	NLMISC::CEntityId	id;
 	std::string			name;
 	std::string			surname;
-	std::list<ucstring>	program;
+	std::list<std::string>	program;
 	uint32				nbVotes;
 };
 
 
 #endif // CL_CANDIDATE_H
+#endif

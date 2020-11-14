@@ -52,8 +52,8 @@ function r2:buildPaletteUI()
 						subNode.Text = i18n.get(instValue.Translation)						
 					end
 
-					r2.PaletteIdToTranslation[instValue.Id] = subNode.Text:toUtf8()
-					r2.PaletteIdToGroupTranslation[instValue.Id] = newNode.Text:toUtf8()
+					r2.PaletteIdToTranslation[instValue.Id] = subNode.Text
+					r2.PaletteIdToGroupTranslation[instValue.Id] = newNode.Text
 					r2.PaletteIdToType[instValue.Id] = v
 
 					subNode.Id = tostring(shortElementId)

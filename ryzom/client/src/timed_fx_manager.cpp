@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -204,7 +204,7 @@ CTimedFXManager::TFXGroupHandle CTimedFXManager::add(const std::vector<CTimedFX>
 		//sint32 debugDay;
 		if (!(fi.FXSheet && fi.FXSheet->Mode == CSeasonFXSheet::AlwaysStarted))
 		{
-			if (fi.FXSheet->Mode == CSeasonFXSheet::Spawn)
+			if (fi.FXSheet && fi.FXSheet->Mode == CSeasonFXSheet::Spawn)
 			{
 				// compute next spawn date
 				float cycleLength = fi.FXSheet ? fi.FXSheet->CycleDuration : _DayLength;

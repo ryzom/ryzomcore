@@ -466,7 +466,7 @@ component.createComponent = function(x, y)
 	assert(comp)
 
 	comp.Base = r2.Translator.getDebugBase("palette.entities.botobjects.user_event")
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EdBossSpawner")):toUtf8()			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EdBossSpawner"))			
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -542,7 +542,7 @@ component.create = function()
 
 function component:registerMenu(logicEntityMenu)
 	local name = i18n.get("uiR2EdBossSpawner")
-	logicEntityMenu:addLine(ucstring(name), "lua", "", "BossSpawner")
+	logicEntityMenu:addLine(name, "lua", "", "BossSpawner")
 end
 
 

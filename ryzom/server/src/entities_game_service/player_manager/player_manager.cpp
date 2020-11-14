@@ -2489,8 +2489,7 @@ static void	mailNotification(const std::string& to, const std::string& from)
 		return;
 
 	// first, build a valid character (upper case first, then lower case);
-	ucstring	ucCharname = toLower(to);	// lower case
-	ucCharname[0] = toUpper(ucCharname[0]);	// first upper case
+	ucstring ucCharname = ucstring::makeFromUtf8(capitalize(to));
 
 	// second, get char id that matches the name
 	CEntityId	charId = NLMISC::CEntityIdTranslator::getInstance()->getByEntity(ucCharname);

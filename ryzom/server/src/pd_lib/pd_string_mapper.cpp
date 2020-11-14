@@ -35,7 +35,7 @@ CPDStringMapper::CPDStringMapper()
  */
 void	CPDStringMapper::setMapping(const std::string& str, uint32 id)
 {
-	std::string				lowMapStr = NLMISC::toLower(str);
+	std::string				lowMapStr = NLMISC::toLowerAscii(str);
 	TStringMap::iterator	its;
 
 	TIdMap::iterator		iti = _IdMap.find(id);

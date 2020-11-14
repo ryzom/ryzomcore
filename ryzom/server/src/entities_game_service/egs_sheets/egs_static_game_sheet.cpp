@@ -1134,14 +1134,14 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 		splitString(scriptData[i], " ", scriptLine);
 		
 		if (scriptLine.size() < 2
-			|| toLower(scriptLine[0]) == "protect" && scriptLine.size() < 3)
+			|| toLowerAscii(scriptLine[0]) == "protect" && scriptLine.size() < 3)
 		{
 			nlwarning("<CStaticCreatures::applyUserModel> error while reading a script line (uncommented line %i), ignoring it.", i);
 			errors = true;
 			continue;
 		}
 
-		switch (attributeMap.find(toLower(scriptLine[0])))
+		switch (attributeMap.find(toLowerAscii(scriptLine[0])))
 		{
 
 			//FIXME: test attributes value before applying, if error set to default value and errors=true

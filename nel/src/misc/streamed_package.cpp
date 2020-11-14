@@ -55,7 +55,7 @@ void CStreamedPackage::CEntry::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 
 void CStreamedPackage::makePath(std::string &result, const CHashKey &hash)
 {
-	std::string lowerHash = NLMISC::toLower(hash.toString());
+	std::string lowerHash = NLMISC::toLowerAscii(hash.toString());
 	result = std::string("/") + lowerHash.substr(0, 2)
 		+ "/" + lowerHash.substr(2, 2)
 		+ "/" + lowerHash.substr(4);

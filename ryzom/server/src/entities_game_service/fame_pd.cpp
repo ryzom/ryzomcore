@@ -39,7 +39,7 @@ void							CFameTrend::init()
 	for (i=0; i<3; ++i)
 	{
 		_StrTable[TFameTrendConvert[i].Value] = TFameTrendConvert[i].Name;
-		_ValueMap[NLMISC::toLower(std::string(TFameTrendConvert[i].Name))] = TFameTrendConvert[i].Value;
+		_ValueMap[NLMISC::toLowerAscii(std::string(TFameTrendConvert[i].Name))] = TFameTrendConvert[i].Value;
 	}
 	_Initialised = true;
 }

@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -229,18 +229,18 @@ struct CStatThread : public NLMISC::IRunnable
 	string cookie()
 	{
 		string name;
-		if(UserEntity && !UserEntity->getEntityName().toString().empty())
-			name = UserEntity->getEntityName().toString();
+		if(UserEntity && !UserEntity->getEntityName().empty())
+			name = UserEntity->getEntityName();
 
 		std::string userid = toString("u%d", NetMngr.getUserId())+name;
-		return toUpper(getMD5((const uint8 *)userid.c_str(), (uint32)userid.size()).toString());
+		return toUpperAscii(getMD5((const uint8 *)userid.c_str(), (uint32)userid.size()).toString());
 	}
 
 	// return true if we sent the connect because we have all information
 	bool connect()
 	{
 		//nlinfo("connect");
-		if(!UserEntity || UserEntity->getEntityName().toString().empty())
+		if(!UserEntity || UserEntity->getEntityName().empty())
 			return false;
 
 		referer = ContinentMngr.getCurrentContinentSelectName();
@@ -248,7 +248,7 @@ struct CStatThread : public NLMISC::IRunnable
 		std::string params;
 		addParam(params, "ra", randomString());
 		std::string session = toString("%d%d", NetMngr.getUserId(), CTime::getSecondsSince1970());
-		addParam(params, "sessioncookie", toUpper(getMD5((const uint8 *)session.c_str(), (uint32)session.size()).toString()));
+		addParam(params, "sessioncookie", toUpperAscii(getMD5((const uint8 *)session.c_str(), (uint32)session.size()).toString()));
 		addParam(params, "cookie", cookie());
 		addParam(params, "browsertoken", "X");
 		addParam(params, "platformtoken", "Win32");
@@ -268,7 +268,7 @@ struct CStatThread : public NLMISC::IRunnable
 		timeinfo = localtime ( &rawtime );
 		strftime (buffer,80,"%H%%3A%M", timeinfo);
 		addParam(params, "localtime", buffer);
-		addParam(params, "cv_name", UserEntity->getEntityName().toUtf8());
+		addParam(params, "cv_name", UserEntity->getEntityName());
 		//addParam(params, "cv_email", "");
 		//addParam(params, "cv_avatar", "");
 		addParam(params, "cv_Userid", toString(NetMngr.getUserId()));
@@ -481,7 +481,7 @@ void initMainLoop()
 
 	// Progress bar for init_main_loop()
 	ProgressBar.reset (BAR_STEP_INIT_MAIN_LOOP);
-	ucstring nmsg;
+	string nmsg;
 
 	FPU_CHECKER_ONCE
 
@@ -739,7 +739,9 @@ void initMainLoop()
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		//nlinfo("****** InGame Interface Parsing and Init START ******");
 		pIM->initInGame(); // must be called after waitForUserCharReceived() because Ring information is used by initInGame()
+#ifdef RYZOM_FORGE
 		CItemGroupManager::getInstance()->init(); // Init at the same time keys.xml is loaded
+#endif
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
 		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing ingame", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
@@ -1029,7 +1031,7 @@ void initMainLoop()
 	// PreLoad Fauna and Characters
 	if (!ClientCfg.Light && ClientCfg.PreCacheShapes)
 	{
-		ucstring nmsg("Loading character shapes ...");
+		string nmsg("Loading character shapes ...");
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 
 
@@ -1714,6 +1716,6 @@ void initBloomConfigUI()
 	else
 	{
 		if(group)
-			group->setDefaultContextHelp(ucstring(""));
+			group->setDefaultContextHelp(std::string());
 	}
 }

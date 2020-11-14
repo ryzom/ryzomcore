@@ -184,7 +184,7 @@ bool CGeorgesEditDocForm::initDocument (const char *dfnName, bool newElement)
 	}
 
 	// Set file name and title
-	std::string name2 = toLower(NLMISC::CFile::getFilenameWithoutExtension(dfnName));
+	std::string name2 = toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(dfnName));
 	SetPathName(nlUtf8ToTStr("*." + name2), FALSE);
 	SetTitle(nlUtf8ToTStr("New " + name2 + " form"));
 
@@ -547,7 +547,7 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		{
 			// Check form
 			std::string ext = NLMISC::CFile::getExtension(tStrToUtf8(lpszPathName));
-			string extLower = toLower(ext);
+			string extLower = toLowerAscii(ext);
 
 			if (!extLower.empty ())
 			{

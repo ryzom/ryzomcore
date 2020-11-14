@@ -46,7 +46,7 @@ class CCompassTarget
 public:
 	enum TType	{ North = 0, Selection, Home, Respawn, ContinentLandMark, UserLandMark, PosTracker, NumTypes };
 	NLMISC::CVector2f		Pos;		// Used for static target (ie not the current selection, a team member ...)
-	ucstring				Name;
+	std::string					Name;
 	CCompassTarget();
 	TType					 getType() const { return _Type; }
 	void                     setType(TType type) { if (type == _Type) return; setPositionState(NULL); _Type = type; }
@@ -124,11 +124,11 @@ private:
 
 	bool	_Blinking;
 	double  _StartBlinkTime;
-	ucstring _CurrTargetName;
+	std::string _CurrTargetName;
 
 	// The dist text
 	CViewText	*_DistView;
-	ucstring	_DistViewText;
+	std::string	_DistViewText;
 
 	CViewRadar	*_RadarView;
 	CViewText	*_RadarRangeView;

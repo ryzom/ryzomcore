@@ -131,9 +131,12 @@ public:
 		nlassert(randVal<=_weights[i]);	// "BUG: Random value outside random range!"
 #endif
 
-		entity->getDebugHistory()->addHistory("GRP State Change: %s => %s",
-			entity->getState()->getAliasNode()->fullName().c_str(),
-			_states[i]->getAliasNode()->fullName().c_str());
+		if (entity->getDebugHistory()->isRecording())
+		{
+			entity->getDebugHistory()->addHistory("GRP State Change: %s => %s",
+				entity->getState()->getAliasNode()->fullName().c_str(),
+				_states[i]->getAliasNode()->fullName().c_str());
+		}
 
 		entity->setNextState(_states[i]);
 		return true;
@@ -198,9 +201,12 @@ public:
 		}
 		uint i=CAIS::rand16((uint32)_states.size());
 
-		entity->getDebugHistory()->addHistory("GRP State Change: %s => %s",
-			entity->getState()->getAliasNode()->fullName().c_str(),
-			_states[i]->getAliasNode()->fullName().c_str());
+		if (entity->getDebugHistory()->isRecording())
+		{
+			entity->getDebugHistory()->addHistory("GRP State Change: %s => %s",
+				entity->getState()->getAliasNode()->fullName().c_str(),
+				_states[i]->getAliasNode()->fullName().c_str());
+		}
 		
 		entity->setNextState(_states[i]);
 		return true;
@@ -514,9 +520,12 @@ public:
 			nlwarning("begin_punctual_state failed because state list is empty");
 			return false;
 		}
-		entity->setNextPunctualState(_states[CAIS::rand16((uint32)_states.size())]);
-		entity->getDebugHistory()->addHistory("GRP BeginPunctual State: %s",
-					entity->getNextPunctualState()->getAliasNode()->fullName().c_str());
+		entity->setNextPunctualState(_states[CAIS::rand16((uint32)_states.size())]); 
+		if (entity->getDebugHistory()->isRecording())
+		{
+			entity->getDebugHistory()->addHistory("GRP BeginPunctual State: %s",
+				entity->getNextPunctualState()->getAliasNode()->fullName().c_str());
+		}
 		return true;
 	}
 
@@ -548,8 +557,11 @@ public:
 	// depending on the whim of the level designers
 	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
 	{
-		entity->getDebugHistory()->addHistory("GRP End Punctual State: %s",
-						entity->getPunctualState()->getAliasNode()->fullName().c_str());
+		if (entity->getDebugHistory()->isRecording())
+		{
+			entity->getDebugHistory()->addHistory("GRP End Punctual State: %s",
+				entity->getPunctualState()->getAliasNode()->fullName().c_str());
+		}
 		
 		entity->cancelPunctualState();
 		return true;

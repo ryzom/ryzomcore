@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -60,22 +60,23 @@ CObjectArenaAllocator::~CObjectArenaAllocator()
 void *CObjectArenaAllocator::alloc(uint size)
 {
 	#ifdef NL_DEBUG
-		if (_WantBreakOnAlloc)
+	if (_WantBreakOnAlloc)
+	{
+		if (_AllocID == _BreakAllocID)
 		{
-			if (_AllocID == _BreakAllocID)
-			{
-				nlassert(0);
-			}
+			nlassert(0);
 		}
+	}
 	#endif
 	if (size >= _MaxAllocSize)
 	{
 		// use standard allocator
 		nlctassert(NL_DEFAULT_MEMORY_ALIGNMENT >= sizeof(uint));
-		uint8 *block = (uint8 *)aligned_malloc(NL_DEFAULT_MEMORY_ALIGNMENT + size, NL_DEFAULT_MEMORY_ALIGNMENT); //new uint8[size + sizeof(uint)]; // an additionnal uint is needed to store size of block
-		if (!block) return NULL;
+		uint8 *block = (uint8 *)aligned_malloc(NL_DEFAULT_MEMORY_ALIGNMENT + (ptrdiff_t)size, NL_DEFAULT_MEMORY_ALIGNMENT); //new uint8[size + sizeof(uint)]; // an additionnal uint is needed to store size of block
+		if (!block) throw std::bad_alloc();
 		#ifdef NL_DEBUG
-			_MemBlockToAllocID[block] = _AllocID;
+		_MemBlockToAllocID[block] = _AllocID;
+		++_AllocID;
 		#endif
 		*(uint *) block = size;
 		return block + NL_DEFAULT_MEMORY_ALIGNMENT;
@@ -87,16 +88,14 @@ void *CObjectArenaAllocator::alloc(uint size)
 		_ObjectSizeToAllocator[entry] = new CFixedSizeAllocator(entry * _Granularity + NL_DEFAULT_MEMORY_ALIGNMENT, _MaxAllocSize / size); // an additionnal uint is needed to store size of block
 	}
 	void *block = _ObjectSizeToAllocator[entry]->alloc();
+	if (!block) throw std::bad_alloc();
 	nlassert(((uintptr_t)block % NL_DEFAULT_MEMORY_ALIGNMENT) == 0);
 	#ifdef NL_DEBUG
-		if (block)
-		{
-			_MemBlockToAllocID[block] = _AllocID;
-		}
-		++_AllocID;
+	_MemBlockToAllocID[block] = _AllocID;
+	++_AllocID;
 	#endif
-	*(uint *) block = size;
-	return (void *) ((uint8 *) block + NL_DEFAULT_MEMORY_ALIGNMENT);
+	*(uint *)block = size;
+	return (void *)((uint8 *)block + NL_DEFAULT_MEMORY_ALIGNMENT);
 }
 
 // *****************************************************************************************************************

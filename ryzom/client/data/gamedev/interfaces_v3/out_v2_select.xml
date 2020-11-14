@@ -3,8 +3,9 @@
 <root id="outgame" x="0" y="0" w="800" h="600" active="false" />
 
 <lua file="out_v2_select.lua" />
+<!--
 <lua file="bg_downloader.lua" />
-
+-->
 <!-- *********************** -->
 <!-- * CHARACTER SELECTION * -->
 <!-- *********************** -->
@@ -145,7 +146,7 @@
 	<action handler="set" params="target_property=ui:outgame:charsel:slot@0:cam:posz|value=add(0.06,getprop('ui:outgame:charsel:slot@0:char:headz'))" />
 	<action handler="set" params="target_property=ui:outgame:charsel:slot@0:cam:tgtz|value=add(0.06,getprop('ui:outgame:charsel:slot@0:char:headz'))" />
 
-	<action handler="get_slot" cond="not(isCharSelSlotEmpty(@0))" params="prop=name|target=ui:outgame:charsel:but_slot@0:uc_hardtext|slot=@0" />
+	<action handler="get_slot" cond="not(isCharSelSlotEmpty(@0))" params="prop=name|target=ui:outgame:charsel:but_slot@0:hardtext|slot=@0" />
 </proc>
 
 <proc id="proc_charsel_initslot_empty">
@@ -542,7 +543,8 @@
 			onover="play_sound" params_over="name=specie_but_over"
 			onclick_l="proc" params_l="proc_charsel_clickslot|4" />
 
-
+<!-- UI 'commented out' for future purpose -->
+<!--
 	<group id="bgd_progress" posref="BM BM" w="430" h="75" x="85" y="65" active="true">		
 		<instance template="outgame_black_back" id="border"/>		
 		<view type="text" id="text"	active="true" y="-10" posref="TM TM"	hardtext="" fontsize="13" color="255 255 255 255"/>
@@ -562,8 +564,9 @@
 			<combo_text name="uiBGD_LowPriority" />
 			<combo_text name="uiBGD_NormalPriority" />			
 		</group>
-	</group>
 
+	</group>
+-->
 
 	<!--***************-->
 	<!-- BOTTOM BUTTON -->
@@ -781,22 +784,22 @@
 
 <options name="menu_back">
 
-	<param name="tx_tl"			value="CM_TL.tga" />
-	<param name="tx_t"			value="CM_T.tga" />
-	<param name="tx_tr"			value="CM_TR.tga" />
-	<param name="tx_l"			value="CM_L.tga" />
-	<param name="tx_r"			value="CM_R.tga" />
-	<param name="tx_blank"		value="CM_M.tga" />
-	<param name="tx_bl"			value="CM_BL.tga" />
-	<param name="tx_b"			value="CM_B.tga" />
-	<param name="tx_br"			value="CM_BR.tga" />
+	<param name="tx_tl"			value="w_modal_tl.tga" />
+	<param name="tx_t"			value="w_modal_t.tga" />
+	<param name="tx_tr"			value="w_modal_tr.tga" />
+	<param name="tx_l"			value="w_modal_l.tga" />
+	<param name="tx_r"			value="w_modal_r.tga" />
+	<param name="tx_blank"		value="w_modal_blank.tga" />
+	<param name="tx_bl"			value="w_modal_bl.tga" />
+	<param name="tx_b"			value="w_modal_b.tga" />
+	<param name="tx_br"			value="w_modal_br.tga" />
 
 </options>
 
 
 <group type="menu" id="r2ed_editor_menu"
 	options="menu_back"  
-	text_y="-2"
+	space="0"
 	color="255 255 255 255"
 	fontsize="16"
 	shadow="true"

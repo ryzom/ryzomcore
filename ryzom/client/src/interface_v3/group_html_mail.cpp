@@ -4,6 +4,7 @@
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -56,10 +57,10 @@ CGroupHTMLMail::~CGroupHTMLMail()
 
 void CGroupHTMLMail::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 {
-	ucstring user_name = UserEntity->getLoginName ();
+	string user_name = UserEntity->getLoginName ();
 	url += ((url.find('?') != string::npos) ? "&" : "?") +
 		string("shard=") + toString(CharacterHomeSessionId) +
-		string("&user_login=") + user_name.toString() +
+		string("&user_login=") + user_name + // FIXME: UrlEncode
 		string("&session_cookie=") + NetMngr.getLoginCookie().toString() + 
 		string("&lang=") + CI18N::getCurrentLanguageCode();
 }
@@ -68,9 +69,9 @@ void CGroupHTMLMail::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 
 void CGroupHTMLMail::addHTTPPostParams (SFormFields &formfields, bool /*trustedDomain*/)
 {
-	ucstring user_name = UserEntity->getLoginName ();
+	string user_name = UserEntity->getLoginName ();
 	formfields.add("shard", toString(CharacterHomeSessionId));
-	formfields.add("user_login", user_name.toString());
+	formfields.add("user_login", user_name); // FIXME: UrlEncode
 	formfields.add("session_cookie", NetMngr.getLoginCookie().toString());
 	formfields.add("lang", CI18N::getCurrentLanguageCode());
 }

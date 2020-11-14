@@ -4,6 +4,7 @@
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -248,7 +249,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::update(CDBGroupListSheetText *pFa
 void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetText *pFather)
 {
 	H_AUTO(CDBGroupListSheetTrade_updateViewText);
-	ucstring text;
+	std::string text;
 	Ctrl->getContextHelp(text);
 	// Append first the type of the sheet to select
 	switch ( Ctrl->getSheetCategory() )
@@ -280,7 +281,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 	if(Ctrl->getSheetCategory() == CDBCtrlSheet::Phrase)
 	{
 		// For combat action, Append weapon restriction
-		ucstring	weaponRestriction;
+		string	weaponRestriction;
 		CSPhraseManager	*pPM= CSPhraseManager::getInstance();
 		bool melee,range;
 		pPM->getCombatWeaponRestriction(weaponRestriction, Ctrl->getSheetId(),melee,range);
@@ -293,7 +294,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 	}
 
 	// Get the Text color
-	ucstring colorTag("@{FFFF}");
+	std::string colorTag("@{FFFF}");
 	if(Ctrl->getType() == CCtrlSheetInfo::SheetType_Item)
 	{
 		if(!Ctrl->checkItemRequirement())
@@ -309,7 +310,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 			// Add craft info for MP
 			if(pIS->Family==ITEMFAMILY::RAW_MATERIAL)
 			{
-				ucstring	ipList;
+				string	ipList;
 				pIS->getItemPartListAsText(ipList);
 				if(ipList.empty())
 				{
@@ -412,7 +413,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 							else
 								text+= CI18N::get("uiBotChatRetirePrice") + NLMISC::formatThousands(toString(factor * LastPriceRetire));
 							// set resale time left
-							ucstring	fmt= CI18N::get("uiBotChatResaleTimeLeft");
+							std::string	fmt= CI18N::get("uiBotChatResaleTimeLeft");
 							strFindReplace(fmt, "%d", toString(LastResaleTimeLeft/RYZOM_DAY_IN_HOUR));
 							strFindReplace(fmt, "%h", toString(LastResaleTimeLeft%RYZOM_DAY_IN_HOUR));
 							text+= "\n" + fmt;
@@ -475,7 +476,7 @@ bool CDBGroupListSheetTrade::CSheetChildTrade::isSheetValid(CDBGroupListSheetTex
 		if ((pIS != NULL) && (!pIS->DropOrSell))
 			return false;
 		// test if this whole family of items can be sold
-		if( !ITEMFAMILY::isSellableByPlayer(pIS->Family) )
+		if((pIS != NULL) && !ITEMFAMILY::isSellableByPlayer(pIS->Family) )
 			return false;
 	}
 
@@ -653,7 +654,7 @@ bool CDBGroupListSheetTrade::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup
 	prop= (char*) xmlGetProp( cur, (xmlChar*)"filter_seller_type" );
 	if(prop)
 	{
-		string	lwrFilter= toLower(std::string((const char *)prop));
+		string	lwrFilter= toLowerAscii(std::string((const char *)prop));
 		if(lwrFilter=="npc")
 			_SellerTypeFilter= NPC;
 		else if(lwrFilter=="resale")
@@ -688,7 +689,7 @@ void CDBGroupListSheetTrade::checkCoords ()
 	{
 		CSheetChildTrade * cst = (*it);
 		// String result
-		ucstring result;
+		string result;
 		if( pSMC->getString ( cst->LastVendorNameId, result) )
 		{
 			cst->VendorNameString = CEntityCL::removeShardFromName(result);

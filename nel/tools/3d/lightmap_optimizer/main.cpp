@@ -481,7 +481,7 @@ int main(int nNbArg, char **ppArgs)
 					CTextureFile *pTF = dynamic_cast<CTextureFile*>(pIT);
 					if (pTF != NULL)
 					{
-						string sTexName = NLMISC::toLower(pTF->getFileName());
+						string sTexName = NLMISC::toLowerAscii(pTF->getFileName());
 						if(pTF->getUploadFormat()==ITexture::Luminance)
 							setLM8Bit.insert(sTexName);
 					}
@@ -530,7 +530,7 @@ int main(int nNbArg, char **ppArgs)
 		tmpLMs.clear();
 		for (i = 0; i < (sint32)AllLightmapNames.size(); ++i)
 		{
-			bool	lm8Bit= setLM8Bit.find( NLMISC::toLower(AllLightmapNames[i]) ) !=setLM8Bit.end();
+			bool	lm8Bit= setLM8Bit.find( NLMISC::toLowerAscii(AllLightmapNames[i]) ) !=setLM8Bit.end();
 			// if same mode
 			if( lm8Bit == (lmc8bitMode==1) )
 			{
@@ -824,13 +824,13 @@ int main(int nNbArg, char **ppArgs)
 									CTextureFile *pTF = dynamic_cast<CTextureFile*>(pIT);
 									if (pTF != NULL)
 									{
-										string sTexName = NLMISC::toLower(getBaseName(pTF->getFileName()));
-										string sTexNameMoved = NLMISC::toLower(getBaseName(AllLightmapNames[i]));
+										string sTexName = NLMISC::toLowerAscii(getBaseName(pTF->getFileName()));
+										string sTexNameMoved = NLMISC::toLowerAscii(getBaseName(AllLightmapNames[i]));
 										if (sTexName == sTexNameMoved)
 										{
 											// We must remap the name and indicate to remap uvs
 											bMustRemapUV = true;
-											//string sNewTexName = NLMISC::toLower(getBaseName(AllLightmapNames[j]));
+											//string sNewTexName = NLMISC::toLowerAscii(getBaseName(AllLightmapNames[j]));
 											//sNewTexName += NLMISC::toString(getLayerNb(pTF->getFileName())) + ".tga";
 											//pTF->setFileName (sNewTexName);
 										}
@@ -891,11 +891,11 @@ int main(int nNbArg, char **ppArgs)
 									CTextureFile *pTF = dynamic_cast<CTextureFile*>(pIT);
 									if (pTF != NULL)
 									{
-										string sTexName = NLMISC::toLower(getBaseName(pTF->getFileName()));
-										string sTexNameMoved = NLMISC::toLower(getBaseName(AllLightmapNames[i]));
+										string sTexName = NLMISC::toLowerAscii(getBaseName(pTF->getFileName()));
+										string sTexNameMoved = NLMISC::toLowerAscii(getBaseName(AllLightmapNames[i]));
 										if (sTexName == sTexNameMoved)
 										{
-											string sNewTexName = NLMISC::toLower(getBaseName(AllLightmapNames[j]));
+											string sNewTexName = NLMISC::toLowerAscii(getBaseName(AllLightmapNames[j]));
 											sNewTexName += NLMISC::toString(getLayerNb(pTF->getFileName())) + ".tga";
 											pTF->setFileName (sNewTexName);
 										}

@@ -187,7 +187,7 @@ void CContinentManager::preloadSheets()
 	for (i = 0; i < ws->ContLocs.size(); ++i)
 	{
 		const SContLoc &clTmp = ws->ContLocs[i];
-		std::string continentSheetName = NLMISC::toLower(clTmp.ContinentName);
+		std::string continentSheetName = NLMISC::toLowerAscii(clTmp.ContinentName);
 		if (continentSheetName.find(".continent") == std::string::npos)
 		{
 			continentSheetName += ".continent";
@@ -564,7 +564,7 @@ void CContinentManager::readFrom(xmlNodePtr node)
 		nlwarning("Ignore landmarks group without 'type' attribute.");
 		return;
 	}
-	lmtype = toLower((const char*)prop);
+	lmtype = toLowerAscii((const char*)prop);
 	if (lmtype != "user")
 	{
 		nlwarning("Ignore landmarks group with type '%s', expected 'user'.", lmtype.c_str());

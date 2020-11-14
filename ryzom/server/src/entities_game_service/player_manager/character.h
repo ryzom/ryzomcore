@@ -299,7 +299,7 @@ struct CPetAnimal
 	bool				IsTpAllowed;
 	bool				spawnFlag;
 #ifdef RYZOM_FORGE_PET_NAME
-	ucstring			CustomName;
+	std::string			CustomName;
 #endif
 	
 	// ctor
@@ -315,7 +315,7 @@ struct CPetAnimal
 	uint32 getAnimalMaxBulk();
 
 #ifdef RYZOM_FORGE_PET_NAME
-	void setCustomName(const ucstring& customName) { CustomName = customName; }
+	void setCustomName(const std::string &customName) { CustomName = customName; }
 #endif
 };
 

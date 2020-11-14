@@ -191,9 +191,9 @@ end
 -------------------------------------------------------------------------------------------------
 -- enclose a string by double quotes
 function strifyXml(str)
-	local strxml = string.gsub(tostring(str), ">", "&gt;")
+	local strxml = string.gsub(tostring(str), "&", "&amp;")
 	strxml = string.gsub(strxml, "<", "&lt;")
-	strxml = string.gsub(strxml, "&", "&amp;")
+	strxml = string.gsub(strxml, ">", "&gt;")
 	strxml = string.gsub(strxml, "'", "&apos;")
 	strxml = string.gsub(strxml, '"', "&quot;")
 	return [["]] .. strxml .. [["]]

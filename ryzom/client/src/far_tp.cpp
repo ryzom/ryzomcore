@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -422,11 +422,13 @@ void CLoginStateMachine::run()
 
 			bool mustReboot = false;
 
+#ifdef RYZOM_BG_DOWNLOADER
 			if (isBGDownloadEnabled())
 			{
 				mustReboot = CBGDownloaderAccess::getInstance().mustLaunchBatFile();
 			}
 			else
+#endif
 			{
 				mustReboot = CPatchManager::getInstance()->mustLaunchBatFile();
 			}
@@ -470,11 +472,13 @@ void CLoginStateMachine::run()
 			}
 			initPatchCheck();
 			SM_BEGIN_EVENT_TABLE
+#ifdef RYZOM_BG_DOWNLOADER
 				if (isBGDownloadEnabled())
 				{
 					SM_EVENT(ev_patch_needed, st_patch); // no choice for patch content when background downloader is used
 				}
 				else
+#endif
 				{
 					SM_EVENT(ev_patch_needed, st_display_cat);
 				}
@@ -600,7 +604,9 @@ void CLoginStateMachine::run()
 			break;
 		case st_enter_far_tp_main_loop:
 			// if bgdownloader is used, then pause it
+#ifdef RYZOM_BG_DOWNLOADER
 			pauseBGDownloader();
+#endif
 
 
 			// Far TP part 1.2: let the main loop finish the current frame.
@@ -927,7 +933,7 @@ retryJoinEdit:
 			}
 		}
 		pIM->messageBoxWithHelp(
-			CI18N::get(requestRetToMainland ? "uiSessionVanishedFarTP" : "uiSessionUnreachable") + ucstring(errorMsg),
+			CI18N::get(requestRetToMainland ? "uiSessionVanishedFarTP" : "uiSessionUnreachable") + errorMsg,
 			letReturnToCharSelect ? "ui:outgame:charsel" : "ui:interface");
 
 		// Info in the log
@@ -1004,13 +1010,13 @@ void CFarTP::hookNextFarTPForEditor()
  */
 void CFarTP::requestReturnToPreviousSession(TSessionId rejectedSessionId)
 {
-	const string msgName = "CONNECTION:RET_MAINLAND";
+	const char *msgName = "CONNECTION:RET_MAINLAND";
 	CBitMemStream out;
 	nlverify(GenericMsgHeaderMngr.pushNameToStream(msgName, out));
 	out.serial(PlayerSelectedSlot);
 	out.serial(rejectedSessionId);
 	NetMngr.push(out);
-	nlinfo("%s sent", msgName.c_str());
+	nlinfo("%s sent", msgName);
 }
 
 /*
@@ -1117,7 +1123,7 @@ void CFarTP::disconnectFromPreviousShard()
 
 		// Start progress bar and display background
 		ProgressBar.reset (BAR_STEP_TP);
-		ucstring nmsg("Loading...");
+		string nmsg("Loading...");
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		ProgressBar.progress(0);
 
@@ -1300,7 +1306,9 @@ void CFarTP::sendReady()
 			// Instead of doing it in disconnectFromPreviousShard(), we do it here, only when it's needed
 			ClientCfg.R2EDEnabled = ! ClientCfg.R2EDEnabled;
 			pIM->uninitInGame0();
+#ifdef RYZOM_FORGE
 			CItemGroupManager::getInstance()->uninit();
+#endif
 
 			ClientCfg.R2EDEnabled = ! ClientCfg.R2EDEnabled;
 			ActionsContext.removeAllCombos();

@@ -180,7 +180,7 @@ bool writeFileDependingOnFilename(const std::string &filename, CBitmap &bitmap)
 
 	if (out.open(filename))
 	{
-		if (toLower(filename).find(".png") != string::npos)
+		if (toLowerAscii(filename).find(".png") != string::npos)
 		{
 			bitmap.writePNG(out, 32);
 		}
@@ -583,7 +583,7 @@ int main(int argc, char **argv)
 				continue;
 			}
 
-			sTGAname = toLower(string(tgaName));
+			sTGAname = toLowerAscii(string(tgaName));
 
 			// search position of extension
 			std::string tgaExt = CFile::getExtension(sTGAname);
@@ -597,7 +597,7 @@ int main(int argc, char **argv)
 			for (i = 0; i < mapSize; ++i)
 			{
 				// get the string whitout path
-				findTGAName = toLower(CFile::getFilenameWithoutExtension(AllMapNames[i]));
+				findTGAName = toLowerAscii(CFile::getFilenameWithoutExtension(AllMapNames[i]));
 				if( findTGAName == sTGAname )
 					break;
 			}

@@ -145,7 +145,7 @@
 	<link expr="and(ne(@SERVER:GUILD:OUTPOST:O#index:SHEET,0), 
 					eq(@SERVER:GUILD:OUTPOST:O#index:OWNED,#owned))" target="#id:active" />
 	<!-- name of the outpost -->
-	<link expr="getOutpostName(@SERVER:GUILD:OUTPOST:O#index:SHEET)" target="#id:name:uc_hardtext" />
+	<link expr="getOutpostName(@SERVER:GUILD:OUTPOST:O#index:SHEET)" target="#id:name:hardtext" />
 
 	<!-- if the player has the rights to modify outposts let him destroy an outpost -->
 	<!-- the outpost must also be owned by the guild, and the guild must be able to delete the oupost -->
@@ -338,13 +338,13 @@
 		<group id="global_state" sizeref="w" w="0" child_resize_h="true" posparent="sep_gs" posref="BL TL" x="0" y="-10" >
 			<!-- NAME -->
 			<view type="text" id="outpost_name" posref="TM TM" x="0" y="0" global_color="false" fontsize="12" shadow="true" />
-			<link expr="getOutpostName(@#outpost_db:SHEET)" target="outpost_name:uc_hardtext" />
+			<link expr="getOutpostName(@#outpost_db:SHEET)" target="outpost_name:hardtext" />
 
 			<!-- LEVEL -->
 			<view style="outpost_title" id="title_level" posparent="parent" posref="TL TL" x="0" y="-20" hardtext="uiOutpostLevel" />
 			<instance template="text_tt" posparent="title_level" tooltip="uittOutpostLevel" />
 			<view style="outpost_value_R" id="outpost_level" posparent="title_level" />
-			<link expr="@#outpost_db:LEVEL" target="outpost_level:uc_hardtext" />
+			<link expr="@#outpost_db:LEVEL" target="outpost_level:hardtext" />
 
 			<!-- OWNER: GUILD/TRIBE -->
 			<view style="outpost_title" id="title_owner" posparent="title_level" hardtext="uiOutpostOwner" />
@@ -443,14 +443,14 @@
 			<instance template="text_tt" posparent="title_att_period" tooltip="uittOutpostAttPeriod" />
 			<view style="outpost_value_RC2" id="outpost_att_period" posparent="title_att_period" />
 			<link expr="getOutpostPeriod(@#outpost_db:TIME_RANGE_ATT, @#outpost_db:TIME_RANGE_LENGTH, @UI:SAVE:OUTPOST:TIME_ZONE, @#outpost_db:STATUS, 1)"
-				target="outpost_att_period:uc_hardtext" />
+				target="outpost_att_period:hardtext" />
 
 			<!-- ACTUAL DEFENDER PERIOD -->
 			<view style="outpost_title" id="title_def_period" posparent="title_att_period" hardtext="uiOutpostDefPeriod" case_mode="%case_normal" />
 			<instance template="text_tt" posparent="title_def_period" tooltip="uittOutpostDefPeriod" />
 			<view style="outpost_value_RC2" id="outpost_def_period" posparent="title_def_period" />
 			<link expr="getOutpostPeriod(@#outpost_db:TIME_RANGE_DEF, @#outpost_db:TIME_RANGE_LENGTH, @UI:SAVE:OUTPOST:TIME_ZONE, @#outpost_db:STATUS, 0)"
-				target="outpost_def_period:uc_hardtext" />
+				target="outpost_def_period:hardtext" />
 
 			<!-- TIME ZONE SELECTION -->
 			<instance template="t_outpost_time_zone_selector" id="time_zone_selector" posparent="title_def_period" />
@@ -500,9 +500,9 @@
 	<!-- active the line if the squad slot is here -->
 	<link expr="ne(@%outpost_selected:SQUADS:SP#index:SHEET, 0)" target="#id:active" />
 	<!-- name of the squad -->
-	<link expr="getSquadName(@%outpost_selected:SQUADS:SP#index:SHEET)" target="#id:name:uc_hardtext" />
+	<link expr="getSquadName(@%outpost_selected:SQUADS:SP#index:SHEET)" target="#id:name:hardtext" />
 	<!-- squad cost -->
-	<link expr="getSquadCost(@%outpost_selected:SQUADS:SP#index:SHEET)" target="#id:cost:uc_hardtext" />
+	<link expr="getSquadCost(@%outpost_selected:SQUADS:SP#index:SHEET)" target="#id:cost:hardtext" />
 
 </template>
 
@@ -530,14 +530,14 @@
 	<!-- active the line if the squad slot is here -->
 	<link expr="ne(@%outpost_selected:SQUADS:T#index:SHEET, 0)" target="#id:active" />
 	<!-- name of the squad -->
-	<link expr="getSquadName(@%outpost_selected:SQUADS:T#index:SHEET)" target="#id:name:uc_hardtext" />
+	<link expr="getSquadName(@%outpost_selected:SQUADS:T#index:SHEET)" target="#id:name:hardtext" />
 	<!-- squad cost -->
-	<link expr="getSquadCost(@%outpost_selected:SQUADS:T#index:SHEET)" target="#id:cost:uc_hardtext" />
+	<link expr="getSquadCost(@%outpost_selected:SQUADS:T#index:SHEET)" target="#id:cost:hardtext" />
 	<!-- clickable only if allowed rights -->
 	<link expr="ne(@SERVER:USER:OUTPOST_ADMIN,0)" target="#id:select:active" />
 	<link expr="eq(@SERVER:USER:OUTPOST_ADMIN,0)" target="#id:spawn:frozen" />
 	<!-- spawn pos button -->
-	<link expr="add(@%outpost_selected:SQUADS:T#index:SPAWN,1)" target="#id:spawn:uc_hardtext" />
+	<link expr="add(@%outpost_selected:SQUADS:T#index:SPAWN,1)" target="#id:spawn:hardtext" />
 
 </template>
 
@@ -572,8 +572,8 @@
 		<view type="text" id="building_name" posparent="building_sheet" posref="TR TL" x="5" y="-4" color="255 255 255 255" fontsize="10" shadow="true" hardtext="" multi_line="true" multi_line_space="0" />
 		<view type="text" id="building_desc" posparent="building_name" posref="BL TL" x="0" y="-4"  color="255 255 255 255" fontsize="10" shadow="true" hardtext="" multi_line="true" multi_line_space="0" />
 		
-		<link expr="getOutpostBuildingName(@%outpost_selected:BUILDINGS:#index:SHEET)" target="building_name:uc_hardtext" />
-		<link expr="getOutpostBuildingDesc(@%outpost_selected:BUILDINGS:#index:SHEET)" target="building_desc:uc_hardtext" />
+		<link expr="getOutpostBuildingName(@%outpost_selected:BUILDINGS:#index:SHEET)" target="building_name:hardtext" />
+		<link expr="getOutpostBuildingDesc(@%outpost_selected:BUILDINGS:#index:SHEET)" target="building_desc:hardtext" />
 		<link expr="@UI:TEMP:OUTPOST:SELECTION" action="lua:game:outpostUpdateBuildingSheet(#index)" />
 		
 	</group>
@@ -631,7 +631,7 @@
 			<view type="text" id="explain_edit" posparent="sep_doc" posref="BL TL" x="0" y="-10" global_color="true" shadow="true" hardtext="" fontsize="10" multi_line="true" multi_line_space="0" />
 			<!-- Different Doc wether attacking or defending -->
 			<link expr="localize(ifthenelse(@%outpost_selected:OWNED, 'uiOutpostSquadEditDef', 'uiOutpostSquadEditAtt'))" 
-				target="explain_edit:uc_hardtext_format" />
+				target="explain_edit:hardtext_format" />
 
 			<!-- Current Round -->
 			<view type="bitmap" id="sep_cur" posparent="explain_edit" posref="BL TL" scale="true" sizeref="w" w="0" h="2" x="0" y="-8" texture="W_line_hor.tga" sizeparent="parent" />
@@ -665,7 +665,7 @@
 				<ctrl style="text_button_16" id="cap_but" posparent="cap_text" posref="MR ML" x="8" y="1" 
 					hardtext="0" onclick_l="lua:game:outpostSelectSquadCapitalOpen()" 
 					text_color_normal="255 255 255 255" text_color_over="255 255 255 255" text_color_pushed="255 255 255 255" />
-				<link expr="@%outpost_selected:SQUAD_CAPITAL" target="cap_but:uc_hardtext" />
+				<link expr="@%outpost_selected:SQUAD_CAPITAL" target="cap_but:hardtext" />
 				<link expr="eq(@SERVER:USER:OUTPOST_ADMIN,0)" target="cap_but:frozen" />
 				<link expr="ifthenelse(eq(@SERVER:USER:OUTPOST_ADMIN,0), 
 								localize('uiOutpostCapitalEditKO'),
@@ -680,7 +680,7 @@
 		
 			<view type="bitmap" id="sep_building" posref="TL TL" scale="true" sizeref="w" w="0" h="2" x="0" y="0" texture="W_line_hor.tga" />
 			<view type="text" id="outpost_name" posref="TM TM" x="0" y="-12" global_color="false" fontsize="12" shadow="true" />
-			<link expr="getOutpostName(@%outpost_selected:SHEET)" target="outpost_name:uc_hardtext" />
+			<link expr="getOutpostName(@%outpost_selected:SHEET)" target="outpost_name:hardtext" />
 			<view type="text" id="building_info" posparent="parent" posref="TL TL" x="0" y="-50" global_color="false" fontsize="12" shadow="true" hardtext="uiOutpostBuildingInfoNotOwned" />
 			
 			<instance template="t_outpost_building" id="building1" index="0"	posparent="parent" 		posref="TL TL" y="-64" />
@@ -689,7 +689,7 @@
 			<instance template="t_outpost_building" id="building4" index="3"	posparent="building3" 	posref="BL TL"/>
 			
 			<link expr="ifthenelse(eq(@%outpost_selected:OWNED,0), localize('uiOutpostBuildingInfoNotOwned'), localize('uiOutpostBuildingInfoOwned'))" 
-				  target="building_info:uc_hardtext" />
+				  target="building_info:hardtext" />
 				  
 			<link expr="ifthenelse(eq(@%outpost_selected:OWNED,0), 0, 1)" target="building1:active" />
 			<link expr="ifthenelse(eq(@%outpost_selected:OWNED,0), 0, 1)" target="building2:active" />
@@ -773,12 +773,12 @@
 	<group id="content" x="0" y="0" w="0" h="0" child_resize_h="true" child_resize_hmargin="8" posref="TL TL" >
 		<!-- NAME -->
 		<view type="text" id="outpost_name" posref="TM TM" x="0" y="-8" global_color="false" fontsize="12" shadow="true" />
-		<link expr="getOutpostName(@SERVER:OUTPOST_SELECTED:SHEET)" target="outpost_name:uc_hardtext" />
+		<link expr="getOutpostName(@SERVER:OUTPOST_SELECTED:SHEET)" target="outpost_name:hardtext" />
 
 		<!-- WAR COST -->
 		<view style="outpost_title" id="title_war_cost" posparent="parent" posref="TL TL" x="0" y="-30" hardtext="uiOutpostWarCost" />
 		<view style="outpost_value_R" id="outpost_war_cost" posparent="title_war_cost" />
-		<link expr="@SERVER:OUTPOST_SELECTED:WARCOST" target="outpost_war_cost:uc_hardtext" />
+		<link expr="@SERVER:OUTPOST_SELECTED:WARCOST" target="outpost_war_cost:hardtext" />
 		<view style="outpost_value_B" id="outpost_war_cost_desc" posparent="title_war_cost" hardtext="uiOutpostWarCostDesc" fontsize="10" />
 
 		<!-- TIME SETUP -->
@@ -804,7 +804,7 @@
 			<view style="outpost_value_B" id="outpost_att_period" posparent="title_att_period" />
 			<!-- NB: emulate war for this text (don't want to display N/A) -->
 			<link expr="getOutpostPeriod(@UI:TEMP:OUTPOST:DECLARE_WAR_ACK_TIME_RANGE_ATT, @SERVER:OUTPOST_SELECTED:TIME_RANGE_LENGTH, @UI:SAVE:OUTPOST:TIME_ZONE, %outpost_status_WarDeclaration, 1)"
-				target="outpost_att_period:uc_hardtext" />
+				target="outpost_att_period:hardtext" />
 			<!-- Relevant only if ACK received -->
 			<link expr="@UI:TEMP:OUTPOST:DECLARE_WAR_ACK_RECEIVED" target="outpost_att_period:active" />
 
@@ -966,9 +966,9 @@
 	<!-- active the line if the squad slot is here -->
 	<link expr="ne(@%outpost_selected:SQUAD_SHOP:#index:SHEET, 0)" target="#id:active,#id_select:active" />
 	<!-- squad name -->
-	<link expr="getSquadName(@%outpost_selected:SQUAD_SHOP:#index:SHEET)" target="#id:name:uc_hardtext" />
+	<link expr="getSquadName(@%outpost_selected:SQUAD_SHOP:#index:SHEET)" target="#id:name:hardtext" />
 	<!-- squad cost -->
-	<link expr="getSquadCost(@%outpost_selected:SQUAD_SHOP:#index:SHEET)" target="#id:cost:uc_hardtext" />
+	<link expr="getSquadCost(@%outpost_selected:SQUAD_SHOP:#index:SHEET)" target="#id:cost:hardtext" />
 	
 </template>
 
@@ -1005,7 +1005,7 @@
 			<view type="text" id="squad_desc" posref="TL TL" x="300" y="-26" multi_line="true" multi_line_space="0" line_maxw="200" fontsize="10" />
 			<link expr="ifthenelse(eq(@UI:TEMP:OUTPOST:SQUAD_TO_BUY,-1), 
 						'', 
-						getSquadDesc(@%outpost_selected:SQUAD_SHOP:[UI:TEMP:OUTPOST:SQUAD_TO_BUY]:SHEET))" target="squad_desc:uc_hardtext" />
+						getSquadDesc(@%outpost_selected:SQUAD_SHOP:[UI:TEMP:OUTPOST:SQUAD_TO_BUY]:SHEET))" target="squad_desc:hardtext" />
 
 			<!-- SET / CANCEL -->
 			<instance template="button_ok_cancel" posref="BR BR" x="-8" y="4" 
