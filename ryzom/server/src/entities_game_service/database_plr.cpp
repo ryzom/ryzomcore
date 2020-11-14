@@ -43,7 +43,6 @@ CBankAccessor_PLR::TASCENSOR	CBankAccessor_PLR::_ASCENSOR;
 CBankAccessor_PLR::TCHOOSE_MISSIONS	CBankAccessor_PLR::_CHOOSE_MISSIONS;
 CBankAccessor_PLR::TTRADING	CBankAccessor_PLR::_TRADING;
 CBankAccessor_PLR::TBRICK_FAMILY	CBankAccessor_PLR::_BRICK_FAMILY;
-CBankAccessor_PLR::TFABER_PLANS	CBankAccessor_PLR::_FABER_PLANS;
 CBankAccessor_PLR::TMISSIONS	CBankAccessor_PLR::_MISSIONS;
 CBankAccessor_PLR::TEXECUTE_PHRASE	CBankAccessor_PLR::_EXECUTE_PHRASE;
 CBankAccessor_PLR::TCHARACTER_INFO	CBankAccessor_PLR::_CHARACTER_INFO;
@@ -154,11 +153,6 @@ void CBankAccessor_PLR::init()
 		nlassert(node != NULL);
 		// call sub branch init
 		_BRICK_FAMILY.init(node);
-		
-		node  = bank->getICDBStructNodeFromName( BankTag, "FABER_PLANS" );
-		nlassert(node != NULL);
-		// call sub branch init
-		_FABER_PLANS.init(node);
 		
 		node  = bank->getICDBStructNodeFromName( BankTag, "MISSIONS" );
 		nlassert(node != NULL);
@@ -2278,45 +2272,6 @@ void CBankAccessor_PLR::TBRICK_FAMILY::TArray::init(ICDBStructNode *parent, uint
 	node  = parent->getNode( ICDBStructNode::CTextId("BRICKS"), false );
 	nlassert(node != NULL);
 	_BRICKS = node;
-	
-
-	// branch init
-	
-}
-
-
-void CBankAccessor_PLR::TFABER_PLANS::init(ICDBStructNode *parent)
-{
-	ICDBStructNode *node = parent;
-
-	_BranchNode = node;
-
-	// leaf init
-	
-
-	// branch init
-	
-	for (uint i=0; i<64; ++i)
-	{
-		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("%u", i)), false );
-		nlassert(node != NULL);
-		_Array[i].init(node, i);
-	}
-	
-}
-
-
-void CBankAccessor_PLR::TFABER_PLANS::TArray::init(ICDBStructNode *parent, uint index)
-{
-	ICDBStructNode *node = parent;
-
-	_BranchNode = node;
-
-	// leaf init
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("KNOWN"), false );
-	nlassert(node != NULL);
-	_KNOWN = node;
 	
 
 	// branch init

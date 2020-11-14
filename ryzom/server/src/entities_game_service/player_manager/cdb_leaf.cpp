@@ -45,6 +45,18 @@ using namespace std;
 //-----------------------------------------------
 void CCDBStructNodeLeaf::init( xmlNodePtr node, NLMISC::IProgressCallback &progressCallBack ) 
 {
+	// Read nullable
+	CXMLAutoPtr nullable((const char*)xmlGetProp (node, (xmlChar*)"nullable"));
+	if ((const char *) nullable != NULL)
+	{
+		_Nullable = (nullable.getDatas()[0] == '1');
+	}
+	else
+	{
+		_Nullable = false;
+	}
+
+	// Read type
 	CXMLAutoPtr type((const char*)xmlGetProp (node, (xmlChar*)"type"));
 	nlassert((const char *) type != NULL);
 
@@ -79,6 +91,9 @@ void CCDBStructNodeLeaf::init( xmlNodePtr node, NLMISC::IProgressCallback &progr
 		// IF it is a TEXT.
 		if(!strcmp(type, "TEXT"))
 			_Type = ICDBStructNode::TEXT;
+		// IF it is a PACKED.
+		else if(!strcmp(type, "PACKED"))
+			_Type = ICDBStructNode::PACKED;
 		// ELSE type unknown.
 		else
 		{

@@ -516,6 +516,55 @@ bool	CCDBSynchronised::writePermanentDelta( NLMISC::CBitMemStream& s )
 	return true;
 }
 
+inline void pushPackedValue( CBitMemStream& s, uint64 value, uint32& bitsize, uint &bits )
+{
+	// fast count of max bit
+	uint32 next = (uint32)(value >> 32);
+	uint32 test;
+	bits = 0;
+	if (next) // 64bit
+	{
+		bits += 32;
+		test = next; // 32 msb
+	}
+	else
+	{
+		test = (uint32)(value & 0xFFFFFFFF); // 32 lsb
+	}
+	next = (test >> 16);
+	if (next)
+	{
+		bits += 16;
+		test = next; // 16 msb
+	}
+	else
+	{
+		test = (test & 0xFFFF); // 16 lsb
+	}
+	next = (test >> 8);
+	if (next)
+	{
+		bits += 8;
+		test = next; // 8 msb
+	}
+	else
+	{
+		test = (test & 0xFF); // 8 lsb
+	}
+	next = (test >> 4);
+	if (next)
+	{
+		bits += 8;
+	}
+	else if (test & 0xF)
+	{
+		bits += 4;
+	}
+	uint64 nibbleCount = (bits >> 2);
+	s.serialAndLog2( nibbleCount, 4 );
+	s.serialAndLog2( value, bits );
+	bitsize += (4 + bits);
+}
 
 /*
  * Push one change to the stream
@@ -532,19 +581,42 @@ void	CCDBSynchronised::pushDelta( CBitMemStream& s, CCDBStructNodeLeaf *node, ui
 		value = (uint64)_DataContainer.getValue64( index );
 		//_DataContainer.archiveCurrentValue( index );
 
-		if ( node->type() == ICDBStructNode::TEXT )
+		if ( node->nullable() && value == 0 )
 		{
-			s.serialAndLog2( value, 32 );
-			bitsize += 32;
-			if ( VerboseDatabase )
-				nldebug( "CDB: Pushing value %" NL_I64 "d (TEXT-32) for index %d prop %s", (sint64)value, index, node->buildTextId().toString().c_str() );
+			uint64 isNull = 1;
+			s.serialAndLog2( isNull, 1 );
+			bitsize += 1;
 		}
 		else
 		{
-			s.serialAndLog2( value, (uint)node->type() );
-			bitsize += (uint32)node->type();
-			if ( VerboseDatabase )
-				nldebug( "CDB: Pushing value %" NL_I64 "d (%u bits) for index %d prop %s", (sint64)value, (uint32)node->type(), index, node->buildTextId().toString().c_str() );
+			if ( node->nullable() )
+			{
+				uint64 isNull = 0;
+				s.serialAndLog2( isNull, 1 );
+				bitsize += 1;
+			}
+
+			if ( node->type() == ICDBStructNode::TEXT )
+			{
+				s.serialAndLog2( value, 32 );
+				bitsize += 32;
+				if ( VerboseDatabase )
+					nldebug( "CDB: Pushing value %" NL_I64 "d (TEXT-32) for index %d prop %s", (sint64)value, index, node->buildTextId().toString().c_str() );
+			}
+			else if ( node->type() == ICDBStructNode::PACKED )
+			{
+				uint bits;
+				pushPackedValue( s, value, bitsize, bits );
+				if ( VerboseDatabase )
+					nldebug( "CDB: Pushing value %" NL_I64 "d (PACKED %u bits) for index %d prop %s", (sint64)value, bits, index, node->buildTextId().toString().c_str() );
+			}
+			else
+			{
+				s.serialAndLog2( value, (uint)node->type() );
+				bitsize += (uint32)node->type();
+				if ( VerboseDatabase )
+					nldebug( "CDB: Pushing value %" NL_I64 "d (%u bits) for index %d prop %s", (sint64)value, (uint32)node->type(), index, node->buildTextId().toString().c_str() );
+			}
 		}
 	}
 	else
@@ -572,6 +644,13 @@ void	CCDBSynchronised::pushDeltaPermanent( NLMISC::CBitMemStream& s, CCDBStructN
 			bitsize += 32;
 			if ( VerboseDatabase )
 				nldebug( "CDB: Pushing permanent value %" NL_I64 "d (TEXT-32) for index %d prop %s", (sint64)value, index, node->buildTextId().toString().c_str() );
+		}
+		else if ( node->type() == ICDBStructNode::PACKED )
+		{
+			uint bits;
+			pushPackedValue( s, value, bitsize, bits );
+			if ( VerboseDatabase )
+				nldebug( "CDB: Pushing permanent value %"NL_I64"d (PACKED %u bits) for index %d prop %s", (sint64)value, bits, index, node->buildTextId().toString().c_str() );
 		}
 		else
 		{

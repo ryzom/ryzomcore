@@ -51,6 +51,18 @@ namespace NLMISC{
 //-----------------------------------------------
 void CCDBNodeLeaf::init(  xmlNodePtr node, IProgressCallback &/* progressCallBack */, bool /* mapBanks */, CCDBBankHandler * /* bankHandler */ )
 {
+	// Read nullable
+	CXMLAutoPtr nullable((const char*)xmlGetProp (node, (xmlChar*)"nullable"));
+	if ((const char *) nullable != NULL)
+	{
+		_Nullable = (nullable.getDatas()[0] == '1');
+	}
+	else
+	{
+		_Nullable = false;
+	}
+
+	// Read type
 	CXMLAutoPtr type((const char*)xmlGetProp (node, (xmlChar*)"type"));
 	nlassert((const char *) type != NULL);
 
@@ -87,6 +99,9 @@ void CCDBNodeLeaf::init(  xmlNodePtr node, IProgressCallback &/* progressCallBac
 		// IF it is a TEXT.
 		if(!strcmp(type, "TEXT"))
 			_Type = ICDBNode::TEXT;
+		// IF it is a PACKED.
+		else if (!strcmp(type, "PACKED"))
+			_Type = ICDBNode::PACKED;
 		// ELSE type unknown.
 		else
 		{
@@ -131,6 +146,15 @@ void CCDBNodeLeaf::write( CTextId& id, FILE * f)
 	fprintf(f,"%" NL_I64 "d\t%s\n",_Property,id.toString().c_str());
 } // write //
 
+inline uint readPackedBitCount(CBitMemStream & f)
+{
+	uint64 nibbleCount;
+	f.serial(nibbleCount, 4);
+	uint bits = (nibbleCount << 2);
+	// nlinfo("PACKED: %u bits", (uint32)(bits));
+	return bits;
+}
+
 //-----------------------------------------------
 //	readDelta
 //-----------------------------------------------
@@ -141,15 +165,26 @@ void CCDBNodeLeaf::readDelta(TGameCycle gc, CBitMemStream & f )
 	{
 		// Read the Property Value according to the Property Type.
 		uint64 recvd = 0;
-		uint bits;
-		if (_Type == TEXT)
-			bits = 32;
-		else if (_Type <= I64)
-			bits = _Type;
-		else
-			bits = _Type - 64;
-		f.serial(recvd, bits);
 
+		uint64 isNull = 0;
+		if (_Nullable)
+		{
+			f.serial(isNull, 1);
+		}
+
+		uint bits;
+		if (!isNull)
+		{
+			if (_Type == TEXT)
+				bits = 32;
+			else if (_Type == PACKED)
+				bits = readPackedBitCount(f);
+			else if (_Type <= I64)
+				bits = _Type;
+			else
+				bits = _Type - 64;
+			f.serial(recvd, bits);
+		}
 
 		// if the DB update is older than last DB update, abort (but after the read!!)
 		if(gc<_LastChangeGC)
@@ -162,18 +197,24 @@ void CCDBNodeLeaf::readDelta(TGameCycle gc, CBitMemStream & f )
 		_Property = (sint64)recvd;
 
 		// if signed
-		if (! ((_Type == TEXT) || (_Type <= I64)))
+		if (! ((_Type == TEXT) || (_Type == PACKED) || (_Type <= I64)))
 		{
-			// extend bit sign
-			sint64 mask = (((sint64)1)<<bits)-(sint64)1;
-			if( (_Property >> (bits-1))==1 )
+			if (!isNull)
 			{
-				_Property |= ~mask;
+				// extend bit sign
+				sint64 mask = (((sint64)1)<<bits)-(sint64)1;
+				if( (_Property >> (bits-1))==1 )
+				{
+					_Property |= ~mask;
+				}
 			}
 		}
 		if ( verboseDatabase )
 		{
-			nlinfo( "CDB: Read value (%u bits) %" NL_I64 "d", bits, _Property );
+			if (!isNull)
+				nlinfo( "CDB: Read value (%u bits) %" NL_I64 "d", bits, _Property );
+			else
+				nlinfo( "CDB: Read null value %" NL_I64 "d", _Property );
 		}
 
 		// bkup the date of change

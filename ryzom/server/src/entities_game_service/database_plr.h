@@ -6723,77 +6723,6 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		
 	};
 		
-	class TFABER_PLANS
-	{
-	public:
-		
-	class TArray
-	{
-	public:
-		
-
-	private:
-		ICDBStructNode	*_BranchNode;
-
-		ICDBStructNode	*_KNOWN;
-		
-
-	public:
-		void init(ICDBStructNode *parent, uint index);
-
-		// accessor to branch node
-		ICDBStructNode *getCDBNode()
-		{
-			return _BranchNode;
-		}
-
-		
-		void setKNOWN(CCDBSynchronised &dbGroup, uint64 value, bool forceSending = false)
-		{
-			
-
-			_setProp(dbGroup, _KNOWN, value, forceSending);
-		}
-
-		uint64 getKNOWN(const CCDBSynchronised &dbGroup)
-		{
-			uint64 value;
-			_getProp(dbGroup, _KNOWN, value);
-
-			return value;
-		}
-		
-		ICDBStructNode *getKNOWNCDBNode()
-		{
-			return _KNOWN;
-		}
-	
-	};
-		
-
-	private:
-		ICDBStructNode	*_BranchNode;
-
-		TArray _Array[64];
-		
-
-	public:
-		void init(ICDBStructNode *parent);
-
-		// accessor to branch node
-		ICDBStructNode *getCDBNode()
-		{
-			return _BranchNode;
-		}
-
-		TArray &getArray(uint32 index)
-		{
-			nlassert(index < 64);
-			return _Array[index];
-		}
-		
-	};
-		
 	class TMISSIONS
 	{
 	public:
@@ -10507,8 +10436,6 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 
 		static TBRICK_FAMILY	_BRICK_FAMILY;
 
-		static TFABER_PLANS	_FABER_PLANS;
-
 		static TMISSIONS	_MISSIONS;
 
 		static TEXECUTE_PHRASE	_EXECUTE_PHRASE;
@@ -10616,10 +10543,6 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		static TBRICK_FAMILY &getBRICK_FAMILY()
 		{
 			return _BRICK_FAMILY;
-		}
-		static TFABER_PLANS &getFABER_PLANS()
-		{
-			return _FABER_PLANS;
 		}
 		static TMISSIONS &getMISSIONS()
 		{
