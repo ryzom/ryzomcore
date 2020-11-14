@@ -30,7 +30,7 @@ addons:
 before_script:
     - mkdir build
     - cmake --version
-    - cmake -Hcode -Bbuild $CMAKE_CONFIGURE_OPTIONS
+    - cmake -H. -Bbuild $CMAKE_CONFIGURE_OPTIONS
     - cat build/CMakeCache.txt
 
 script:
